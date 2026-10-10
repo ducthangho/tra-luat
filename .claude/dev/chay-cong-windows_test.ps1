@@ -59,6 +59,8 @@
 #                                                 tên trong chuỗi lạ); ci.yml đổi ở kênh bộ so không thấy ⇒ chỉ dấu vân bắt; chú thích / dòng trống / CRLF ⇒ dấu vân KHÔNG đổi
 #   t35 guong-co-mat-khong-do-chay                script CHẠY đủ các cổng trên kho giả — ba lượt: MẶC ĐỊNH (không `-Muc`) · `nhanh` · `day-du` —: tên cổng in ra khớp bảng ghim `$CongDayDu` (t32 chỉ thấy VĂN BẢN);
 #                                                 bộ so của t35 (`Tim-CongLech`) có hàng đột biến SCRIPT riêng: `if ($false)`, cổng rơi khỏi `nhanh`, đổi tên, cổng thừa, đổi mức mặc định
+#   t36 dist-symlink-ra-ngoai-kho (Codex #602)    `dist` hoặc `dist/cong-windows` CHƯA theo dõi là symlink/junction tới thư mục NGOÀI kho ⇒ rc=2
+#                                                 trước mọi lần ghi; thư mục đích giữ nguyên (`a.zip`, `b.zip`, không `cong-windows/`)
 # Bộ này KÍN với config git của máy chạy, với biến git trỏ kho khác (khối ngay dưới `$script:Rac`), với code page của
 # console (`Doc-Utf8`), với dấu thập phân của locale (t18 nhận `5,1s`) và với `<TEMP>/actionlint` của máy (t7, t21 tự đặt TEMP).
 # ĐỘT BIẾN để đo răng (đo trên pwsh 7.4.6/Linux, bộ 28 ca, TMPDIR sạch): `-Script` trỏ f2392df ⇒ 2/28 (đạt t17 — bản ấy đã so băm —
@@ -713,7 +715,8 @@ Ca 't25 dist/actionlint chua thu installer khong sinh ra => rc=2' {
         -not (Test-Path -LiteralPath (Join-Path $k2 (Join-Path 'dist' (Join-Path 'actionlint' 'python'))))) {
         throw 'KHONG DO DUOC: kho gia khong dung duoc symlink dist CHUA theo doi tro toi actionlint/python' }
     $b = Chay $k2
-    if ($b.rc -ne 2 -or $b.ra -notmatch 'installer không sinh ra') { throw "symlink dist tro sang thu muc co python ma khong bi tu choi (rc=$($b.rc))" }
+    # Từ lượt Codex 5479765901 chốt reparse-point (t36) chặn TRƯỚC danh sách CHO PHÉP: symlink `dist` chưa theo dõi bị từ chối dù đích có gì.
+    if ($b.rc -ne 2 -or $b.ra -notmatch 'symlink/junction') { throw "symlink dist tro sang thu muc co python ma khong bi tu choi (rc=$($b.rc))" }
 }
 
 # `-FilePath` của Start-Process là MẪU: đường dẫn công cụ chứa `[ ]` làm nó chạy tệp KHÁC tệp đã kiểm (đo trên 623864e: đã kiểm
@@ -1479,6 +1482,27 @@ Ca 't35 script CHAY du cac cong (ten cong in ra khop bang ghim, khong chi co mat
         $r = Tim-CongLech $tep $luot[$h.Luot].Doi $luot[$h.Luot].Bang
         $dung = $(if ($h['Thieu']) { $r.thieu -ccontains $h['Thieu'] } else { $true }) -and $(if ($h['Thua']) { $r.thua -ccontains $h['Thua'] } else { $true })
         if (-not $dung) { throw "bo so cua t35 MU: dot bien '$ten' khong ra dung hieu so (thieu=[$($r.thieu -join ' | ')]; thua=[$($r.thua -join ' | ')])" }
+    }
+}
+
+# `dist` CHƯA theo dõi là symlink/junction tới thư mục NGOÀI kho, đích KHÔNG có `actionlint/` (nên danh sách CHO PHÉP qua) và có sẵn
+# `a.zip`/`b.zip`. Trước bản vá (16522a9): script đi tiếp, `cong-windows/` mọc ra ở đích (và `-Muc day-du` xoá hai zip ở đó). Sau: rc=2
+# TRƯỚC mọi lần ghi — đích không có `cong-windows/`, hai zip còn nguyên. Ca `dist/cong-windows` là symlink: cùng chốt, mục con.
+Ca 't36 dist chua theo doi la symlink ra ngoai kho => rc=2, khong ghi/xoa gi o dich' {
+    foreach ($kieu in 'dist', 'dist/cong-windows') {
+        $k = Dung-Kho
+        $ngoai = Join-Path (Split-Path -Parent $k) 'ngoai-kho'
+        New-Item -ItemType Directory -Force -Path $ngoai | Out-Null
+        foreach ($z in 'a.zip', 'b.zip') { Set-Content -LiteralPath (Join-Path $ngoai $z) -Value 'giu' -Encoding utf8NoBOM }
+        $lk = Join-Path $k $kieu
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $lk) | Out-Null
+        if ($IsWindows) { New-Item -ItemType Junction -Path $lk -Target $ngoai | Out-Null } else { & ln -s $ngoai $lk }
+        if (@(& git -C $k ls-files -- 'dist').Count -ne 0 -or -not ((Get-Item -LiteralPath $lk -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "KHONG DO DUOC: kho gia khong dung duoc $kieu la symlink CHUA theo doi" }
+        $a = Chay $k
+        if ($a.rc -ne 2 -or $a.ra -notmatch 'symlink/junction') { throw "$kieu symlink ra ngoai kho ma khong bi tu choi (rc=$($a.rc))" }
+        $moc = @(Get-ChildItem -LiteralPath $ngoai -Force | ForEach-Object Name | Sort-Object)
+        if (($moc -join ',') -cne 'a.zip,b.zip') { throw "${kieu}: script da ghi/xoa o thu muc ngoai kho (con: $($moc -join ', '))" }
     }
 }
 

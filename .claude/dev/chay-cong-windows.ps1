@@ -322,6 +322,21 @@ if ($LASTEXITCODE -ne 0 -or $alTheoDoi.Count -gt 0) {
     Loi "dist có mục THEO DÕI ($($alTheoDoi -join ', ')) hoặc không hỏi được git — dist/actionlint lên đầu PATH nên không dùng dữ liệu của nhánh."
     exit 2
 }
+# `dist` CHƯA theo dõi mà là symlink/junction (hoặc không phải thư mục) thì mọi thứ script ghi "vào dist" — nhật ký `dist/cong-windows`,
+# installer `dist/actionlint`, hai zip của bước bundle — rơi vào thư mục mà `dist` trỏ tới, có thể NGOÀI kho; và bước bundle `-Muc day-du`
+# XOÁ `a.zip`/`b.zip` ở đó trước khi build (Codex PR #602, review 5479765901). Chốt `ls-files` ở trên không thấy (chưa theo dõi), danh sách
+# CHO PHÉP chỉ nhìn `dist/actionlint` nên qua khi đích không có thư mục ấy. Đo trên 16522a9: symlink `dist` ⇒ thư mục ngoài kho có
+# `cong-windows/` mọc ra, script đi tiếp (t36). Từ chối ở cả ba mục script ghi vào, TRƯỚC mọi lần ghi; `Get-Item -Force` vì thiếu `-Force`
+# thì PowerShell bỏ qua mục ẩn, và "có mà không đọc được" cũng là từ chối.
+foreach ($dd in @('dist', (Join-Path 'dist' 'actionlint'), (Join-Path 'dist' 'cong-windows'))) {
+    $q = Join-Path $Goc $dd
+    if (-not (Test-Path -LiteralPath $q)) { continue }
+    try { $it = Get-Item -LiteralPath $q -Force -ErrorAction Stop } catch { $it = $null }
+    if ($null -eq $it -or -not $it.PSIsContainer -or ($it.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        Loi "$dd là symlink/junction hoặc không phải thư mục thường — script ghi và xoá tệp dưới nó (nhật ký, công cụ, zip), có thể NGOÀI kho. Xoá mục ấy rồi chạy lại."
+        exit 2
+    }
+}
 if ($CaiCongCu) {
     Tieu 'cài công cụ bản ghim'
     & $PyTen @PyDau -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0 ruff==0.15.15

@@ -60,7 +60,14 @@ if __name__ == "__main__":
     if lenh == "ping":
         print('{"ok": true, "version": "offline"}')
     elif lenh == "nlm-auth-stage":
-        sys.exit(_trang_thai()["stage_rc"])
+        st = _trang_thai()
+        day = st.get("stage_seq")          # chuỗi mã theo thứ tự gọi (vd. 5 rồi 0) — trạng thái, không kịch bản
+        if day:
+            st["stage_seq"] = day[1:] or day
+            with open(_ST, "w", encoding="utf-8") as f:
+                json.dump(st, f)
+            sys.exit(day[0])
+        sys.exit(st["stage_rc"])
     elif lenh == "nlm-auth-load":
         sys.exit(_trang_thai().get("load_rc", 0))
     elif lenh == "doctor":                  # dạng dòng THẬT của doctor: nhãn — chi tiết (chi tiết có thể mang lỗi thô)
@@ -169,20 +176,28 @@ def _ca(bash, kho):
         def chay(script, args, canary, stage_rc, **them):
             return _chay(bash, kho, tam, goc, bin_, script, args, {"canary": canary, "stage_rc": stage_rc, **them})
 
-        # nlm-auto-refresh.sh — phán quyết = mã của nlm-auth-stage
-        for ten, stage_rc, ma in (("tu_dong_song", 0, 0), ("tu_dong_chet", 4, 3), ("tu_dong_ha_tang", 5, 2)):
-            rc, out, calls = chay("nlm-auto-refresh.sh", [], None, stage_rc)
+        # nlm-auto-refresh.sh — phán quyết = mã của nlm-auth-stage; rc 4 hỏi lại canary: chỉ ÂM mới là chết (3),
+        # không kết luận / lệch nhau là 2 (GitHub review #730, P2)
+        for ten, canary, stage_rc, ma in (("tu_dong_song", None, 0, 0), ("tu_dong_chet", False, 4, 3),
+                                          ("tu_dong_khong_ro", None, 4, 2), ("tu_dong_lech", True, 4, 2),
+                                          ("tu_dong_ha_tang", False, 5, 2)):
+            rc, out, calls = chay("nlm-auto-refresh.sh", [], canary, stage_rc)
             n_stage = sum(1 for c in calls if c == "tl nlm-auth-stage")
-            kq[ten] = rc == ma and n_stage == 1 and _sach(out, calls)
+            kq[ten] = rc == ma and n_stage == 1 and ("NLM CHẾT" in out) == (ma == 3) and _sach(out, calls)
 
         # nlm-auto-refresh.sh — có export MỚI: import (canary + stage) rồi KHÔNG stage lần hai; chỉ xoá plaintext
         # khi import+stage thành công (lượt review 1, F2)
-        for ten, canary, stage_rc, ma, can_stage, can_xoa in (("tu_dong_export_song", True, 0, 0, 1, 1),
-                                                              ("tu_dong_export_stage_loi", True, 4, 3, 2, 0)):
-            rc, out, calls = chay("nlm-auto-refresh.sh", [], canary, stage_rc, export=True)
+        # Import hỏng ⇒ thoát 2, KHÔNG stage lần hai, KHÔNG xoá, không báo sống — kể cả stage 5 rồi 0 (review #730, P1)
+        for ten, canary, stage, ma, can_stage, can_xoa in (("tu_dong_export_song", True, 0, 0, 1, 1),
+                                                           ("tu_dong_export_stage_loi", True, 4, 2, 1, 0),
+                                                           ("tu_dong_export_5_roi_0", True, [5, 0], 2, 1, 0),
+                                                           ("tu_dong_export_chet", False, 0, 2, 0, 0)):
+            them = {"stage_seq": stage} if isinstance(stage, list) else {}
+            rc, out, calls = chay("nlm-auto-refresh.sh", [], canary, 0 if them else stage, export=True, **them)
             n_stage = sum(1 for c in calls if c == "tl nlm-auth-stage")
             n_xoa = sum(1 for c in calls if c.startswith("gws drive files delete"))
-            kq[ten] = rc == ma and n_stage == can_stage and n_xoa == can_xoa and _sach(out, calls)
+            kq[ten] = (rc == ma and n_stage == can_stage and n_xoa == can_xoa and ("bundle tươi)" in out) == (ma == 0)
+                       and _sach(out, calls))
 
         # env-reimport.sh — nlm-auth-load lỗi: chỉ báo mã, không in đầu ra lệnh (lượt review 1, F3)
         rc, out, calls = chay("env-reimport.sh", [], True, 0, load_rc=5)

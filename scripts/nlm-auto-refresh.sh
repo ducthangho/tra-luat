@@ -6,7 +6,8 @@
 #       → import (nlm-auth-import.sh) → stage vào bundle mã hoá → XOÁ plaintext khỏi Drive (bảo mật).
 #   · Không có file mới                                 ⇒ keep-warm: nạp bundle, probe, stage lại nếu sống.
 #   · Bước cuối = `tl nlm-auth-stage` (tự chạy canary LIVE trước khi đọc jar, WP710) quyết định rc:
-#     0 sống + bundle tươi · 3 chết (canary không dương, cần re-harvest) · 2 gws/hạ tầng hỏng hoặc không kết luận.
+#     0 sống + bundle tươi · 3 chết (canary ÂM, cần re-harvest) · 2 gws/hạ tầng hỏng, không kết luận, hoặc export
+#     tươi không vào được bundle (plaintext giữ trên Drive để soi tay).
 #
 # Dành cho Routine phiên-mới: chỉ cần TL_TOKEN (môi trường inject). KHÔNG commit/push/sửa code.
 set -uo pipefail
@@ -83,6 +84,26 @@ if [ "$REFRESHED" = 1 ]; then
   echo "  ✓ NLM SỐNG (canary dương, bundle tươi) — vừa refresh từ export mới"
   exit 0
 fi
+if [ -n "$NEW_ID" ] && [ "${NEW_EP:-0}" -gt "${BUNDLE_EP:-0}" ]; then
+  # Export tươi mà import/stage KHÔNG cùng thành công ⇒ DỪNG, không rơi xuống keep-warm: stage lại ngay có thể
+  # chồng lên một lần ghi dở và báo "sống" trong khi plaintext vẫn nằm trên Drive (GitHub review #730, P1).
+  echo "  ✗ export tươi chưa vào được bundle — plaintext '$NEW_NAME' GIỮ trên Drive; soi tay (kiểm Drive) rồi chạy lại"
+  exit 2
+fi
+_canary_song() {  # 0 sống · 3 chết · 2 không kết luận — cùng probe đòi THÂN notebook như cổng stage; chỉ dùng mã thoát.
+  "$PY" - >/dev/null 2>&1 <<'PY'
+import sys
+sys.path.insert(0, "scripts")
+try:
+    import tl
+    tg = tl._imp("tl_gws")
+    tg.bind(tl)
+    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)
+except Exception:
+    alive = None
+sys.exit(0 if alive is True else 3 if alive is False else 2)
+PY
+}
 $PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1
 STAGE_RC=$?
 if [ "$STAGE_RC" = 0 ]; then
@@ -91,6 +112,13 @@ if [ "$STAGE_RC" = 0 ]; then
 fi
 if [ "$STAGE_RC" != 4 ]; then
   echo "  ✗ nlm-auth-stage rc=$STAGE_RC — hạ tầng/không kết luận; có thể đã ghi một phần, kiểm Drive trước khi thử lại"
+  exit 2
+fi
+# rc 4 của stage gộp canary ÂM với KHÔNG KẾT LUẬN (mạng/thiếu nlm/thân lạ) ⇒ hỏi lại riêng; chỉ ÂM mới là "chết"
+# (GitHub review #730, P2) — không kết luận mà bảo re-harvest là chẩn đoán sai.
+_canary_song; CANARY_RC=$?
+if [ "$CANARY_RC" != 3 ]; then
+  echo "  ✗ stage từ chối (canary không dương) nhưng probe lại KHÔNG xác nhận chết (rc=$CANARY_RC) — không kết luận; chạy lại sau"
   exit 2
 fi
 echo "  🔴 NLM CHẾT (canary không dương, 0 upload) — cần re-harvest cookie:"

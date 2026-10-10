@@ -28,6 +28,9 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 os.environ.setdefault("PYTHONUTF8", "1")
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+# Bo do KHONG duoc de .pyc trong cay duoc do: muc 3 import ops/lease_publish.py TRONG tien trinh nay (ghi ops/__pycache__ vao cay), ma
+# muc 0 va ket luan doi cay phai SACH; .gitignore cua ung vien cu co the khong loai __pycache__ (xem CAY_SACH).
+sys.dont_write_bytecode = True
 # CONG_CU_GIT la bien DIEU KHIEN cua CHINH ma duoc do: _git_windows (buoc 1) doc os.environ khi KHONG duoc truyen cong_cu_git,
 # ma rig doi chung + probe N9-N11 (muc 3, chay TRONG tien trinh nay) va cac ca N1-N3/N9-N11 cua bo test (qua chay(), von chi bo
 # GIT_*/PYTHON*) deu khong truyen. CI KHONG dat bien nay. Do tren 2026-09-30j, 0ea95de, CONG_CU_GIT tro mot git.exe hop le: bo
@@ -79,7 +82,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01g"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01h"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -660,6 +663,25 @@ rc_r, refs, _ = git(goc, "for-each-ref", "--points-at", head or "HEAD",
 dsr = [x for x in refs.splitlines() if x.strip() and x.strip() != "do-tam"]
 ghi("ref_tro_toi_head", dsr)
 inn(f"  ref tro toi HEAD: {', '.join(dsr) if dsr else '(khong ref nao - HEAD roi tu do)'}")
+# Cay duoc do PHAI la cay cua HEAD. Bo test, probe (muc 3), ban sao N7 va dot bien N8-N12 doc TEP tren dia, con N7' dem tren COMMIT
+# HEAD, ma log tu khai `HEAD=<sha>`: cay co tep tracked bi sua hay tep chua theo doi thi cac con so duoi do mang sha cua mot thu KHAC
+# cay dang do. Do tren 2026-10-10, 0ea95de: sua mot dong ops/lease_publish.py (chua commit) => `--chi-probe` rc=1 `TRUOT N8` duoi
+# "HEAD=0ea95deb", trong khi N7' van `DAT 2 tep / +397` (hai nua cua mot ket luan do hai thu khac nhau). `reset --hard` cua ps1 chi
+# don tep TRACKED, khong don tep chua theo doi, ma bo test duyet ops/leases va ops/reviews. --chi-kich-thuoc chi dem COMMIT (khong doc
+# tep) nen khong doi cay sach. `-c core.excludesFile=`: ignore CA NHAN cua nguoi do (~/.config/git/ignore `*.yaml`) che tep chua
+# theo doi khoi `git status` thuong (do: 0 muc, co -c: 1) ma bo test van duyet ops/leases/*.yaml; .gitignore TRONG cay thuoc commit.
+CAY_SACH = "--chi-kich-thuoc" not in sys.argv
+if CAY_SACH:
+    rc_st, st0, er_st = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
+    ghi("cay_sach_luc_dau", (not rc_st) and not st0.strip())
+    if rc_st:
+        loi.append(f"khong doc duoc `git status` cua cay do ({_an_userinfo(er_st)[:70]}): khong chung minh duoc cay trung HEAD")
+    elif st0.strip():
+        loi.append(f"cay do KHONG trung HEAD: {len(st0.splitlines())} muc chua commit/chua theo doi "
+                   f"(vd {st0.splitlines()[0][:60]!r}) -"
+                   " bo test/probe do TEP, N7' do COMMIT; commit hoac don (git stash -u) roi do lai")
+    else:
+        inn("  cay lam viec : SACH (== HEAD)")
 
 if loi:
     inn(""); inn("KHONG DO DUOC: nen do sai, KHONG in ket luan nao.")
@@ -998,6 +1020,18 @@ if not CHI_PROBE:
                     else ("DO nhung KHONG dung ly do -> tin dung gia" if m165 == "DO" else "khong doc duoc t165"))
 
 # ---------------- KET LUAN ----------------
+# Cay co the doi TRONG LUC do: bo test 20-45 phut, N7 them mot luot nua, ma ps1 dung chung MOT clone mac dinh cho moi lan chay (mot lan
+# chay thu hai voi -Nhanh khac, hoac mot lan sua tay, doi tep duoi chan luot dang chay). Do lai HEAD va cay sau cung de log khong gan
+# sha cho mot thu da bi doi giua chung.
+if CAY_SACH:
+    rc_h2, head2, _ = git(goc, "rev-parse", "HEAD")
+    rc_s2, st2, _ = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
+    doi = bool(rc_h2 or rc_s2 or head2 != head or st2 != st0)
+    ghi("cay_khong_doi_trong_luc_do", not doi)
+    if doi:
+        ket("Cay do KHONG doi trong luc do", KDD,
+            f"HEAD {head[:8]} -> {(head2 or '?')[:8]}; muc chua commit/chua theo doi "
+            f"{len(st0.splitlines())} -> {len(st2.splitlines())}" + (f"; git rc={rc_h2 or rc_s2}" if rc_h2 or rc_s2 else ""))
 inn(""); inn("=" * 78)
 inn(f"THE HE DO DUOC: {the_he}   HEAD={head[:12]}")
 # Khoi dan cho reviewer bat dau o dong tren, nen CHE DO phai nam NGAY duoi no: khong co dong nay

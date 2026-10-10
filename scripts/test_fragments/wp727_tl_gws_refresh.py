@@ -16,6 +16,7 @@ import math
 import os
 from pathlib import Path
 import subprocess
+from unittest import mock
 
 
 TEST_ID = "wp727_tl_gws_refresh"
@@ -37,16 +38,8 @@ class _Ket:
         self.stderr = "SENTINEL-COOKIE-wp727-err"
 
 
-@contextlib.contextmanager
 def _va(module, **thay):
-    cu = {k: getattr(module, k) for k in thay}
-    try:
-        for k, v in thay.items():
-            setattr(module, k, v)
-        yield
-    finally:
-        for k, v in cu.items():
-            setattr(module, k, v)
+    return mock.patch.multiple(module, **thay)      # thay thuộc tính tạm, tự trả lại kể cả khi lỗi
 
 
 def _goi_refresh(tg, hanh_vi):
@@ -55,7 +48,6 @@ def _goi_refresh(tg, hanh_vi):
     def run(argv, **kw):
         nhat_ky.append((list(argv), kw))
         return hanh_vi(argv, kw)
-
     import shutil
     ra, loi = io.StringIO(), io.StringIO()
     with _va(subprocess, run=run), _va(shutil, which=lambda name: "/fake/bin/nlm"), \
@@ -82,10 +74,8 @@ def _n1_n3(tg):
 
     def treo(a, k):
         raise subprocess.TimeoutExpired(a, k.get("timeout"))
-
     def hong(a, k):
         raise OSError("no exec")
-
     return _goi_refresh(tg, treo)[0] is False and _goi_refresh(tg, hong)[0] is False
 
 
@@ -98,29 +88,20 @@ def _stage(tg, canary, refresh_rc=0, ket_qua_ra=None):
     def run(argv, **kw):
         su_kien.append("refresh")
         return _Ket(refresh_rc)
-
     def alive(nb, **kw):
         su_kien.append("canary")
         return canary, "OFFLINE"
-
     import shutil
     ns = argparse.Namespace(refresh=True, force=True, folder=None, cred_file_id="OFFLINE", new=False,
                             config=None, profile=None)
-    env_cu = os.environ.get("TL_TOKEN")
-    os.environ["TL_TOKEN"] = "offline-test-token"
-    try:
-        with _va(subprocess, run=run), _va(shutil, which=lambda name: "/fake/bin/nlm"), \
-                _va(tg, _nlm_auth_alive=alive,
-                    _nlm_auth_files=lambda: (su_kien.append("jar") or {"auth.json": "offline-jar"}),
-                    _stage_enc_upload=lambda *a, **k: (upload.append(1) or ("OFFLINE", True)),
-                    _nlm_auth_age_days=lambda _nlm: 20.0), \
-                contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
-            rc = tg.cmd_nlm_auth_stage(ns)
-    finally:
-        if env_cu is None:
-            os.environ.pop("TL_TOKEN", None)
-        else:
-            os.environ["TL_TOKEN"] = env_cu
+    with mock.patch.dict(os.environ, {"TL_TOKEN": "offline-test-token"}), _va(subprocess, run=run), \
+            _va(shutil, which=lambda name: "/fake/bin/nlm"), \
+            _va(tg, _nlm_auth_alive=alive,
+                _nlm_auth_files=lambda: (su_kien.append("jar") or {"auth.json": "offline-jar"}),
+                _stage_enc_upload=lambda *a, **k: (upload.append(1) or ("OFFLINE", True)),
+                _nlm_auth_age_days=lambda _nlm: 20.0), \
+            contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
+        rc = tg.cmd_nlm_auth_stage(ns)
     if ket_qua_ra is not None:
         ket_qua_ra.append(ra.getvalue() + loi.getvalue())
     return rc, len(upload), su_kien
@@ -143,19 +124,10 @@ def _n2(tg):
 
 def _n4(van_ban):
     """Mọi dòng nhắc `login --check` phải BẰNG NGUYÊN VĂN một dòng cho phép, mỗi dòng cho phép đúng một lần."""
-    dung = {neo: 0 for neo in _CHO_PHEP}
-    for dong in van_ban.splitlines():
-        if "login --check" not in dong:
-            continue
-        neo = dong.strip()
-        if neo not in dung:
-            return False
-        dung[neo] += 1
-    return all(n == 1 for n in dung.values())
+    return sorted(d.strip() for d in van_ban.splitlines() if "login --check" in d) == sorted(_CHO_PHEP)
 
 
-# sha256 của TOÀN VĂN mỗi chuỗi Python (sau khi ghép literal liền nhau; f-string: phần hằng + "{}") được phép chứa
-# `login --check` — chặn cả gợi ý dương viết tách thành nhiều literal (cross-review lượt 2, F2b).
+# sha256 TOÀN VĂN mỗi chuỗi Python được phép chứa `login --check` (sau ghép literal / f-string / `+`; lượt 2, F2b).
 _CHUOI_CHO_PHEP = frozenset({
     "a4b85ff4f950bfb6229494d8dd99fbfdb412490ad5b2a190971e5cef343a7e05",   # docstring _nlm_auth_alive (M1)
     "73818ecbc71850b0fd01b94be79d0eefb95ca7e78fd9adf941b4ae778bba6264",   # docstring _refresh_nlm_auth (WP727)
@@ -183,9 +155,7 @@ def _van_tinh(n):
         return "".join(_phan_f(v) for v in n.values)
     if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add):
         trai, phai = _van_tinh(n.left), _van_tinh(n.right)
-        if trai is not None and phai is not None:
-            return trai + phai
-        return trai if phai is None and trai is not None else phai
+        return trai + phai if None not in (trai, phai) else (phai if trai is None else trai)
     return None
 
 
@@ -216,29 +186,16 @@ _CANH = "SENTINEL-COOKIE-wp727"
 def _vi_pham_dau_ra(van_ban, phai_co):
     """Đầu ra/thông báo THẬT của một nhánh gợi ý: không gợi ý `login --check`, không lộ cookie, và có dấu nhánh
     (`phai_co`) — thiếu dấu nghĩa là nhánh không được đi tới, tức phép đo không đo gì."""
-    loi = []
-    if "login --check" in van_ban.replace(_PHU_DINH, ""):
-        loi.append("gợi ý login --check")
-    if _CANH in van_ban:
-        loi.append("lộ chuỗi canh cookie")
-    loi.extend(f"thiếu dấu nhánh {d!r}" for d in phai_co if d not in van_ban)
-    return loi
+    return ((["gợi ý login --check"] if "login --check" in van_ban.replace(_PHU_DINH, "") else [])
+            + (["lộ chuỗi canh cookie"] if _CANH in van_ban else [])
+            + [f"thiếu dấu nhánh {d!r}" for d in phai_co if d not in van_ban])
 
 
 @contextlib.contextmanager
 def _home_tam():
     import tempfile
-    cu = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
-    with tempfile.TemporaryDirectory() as d:
-        try:
-            os.environ["HOME"] = os.environ["USERPROFILE"] = d
-            yield d
-        finally:
-            for k, v in cu.items():
-                if v is None:
-                    os.environ.pop(k, None)
-                else:
-                    os.environ[k] = v
+    with tempfile.TemporaryDirectory() as d, mock.patch.dict(os.environ, {"HOME": d, "USERPROFILE": d}):
+        yield d
 
 
 def _nhanh_goi_y(tg):
@@ -285,28 +242,19 @@ def _n5(tg):
     if any(_vi_pham_dau_ra(van_ban, dau) for _ten, van_ban, dau in nhanh):
         return False
     # Phản chứng cho chính bộ kiểm: gợi ý dương kiểu cũ, lộ cookie, hoặc nhánh không được đi tới đều phải bị bắt.
-    return (bool(_vi_pham_dau_ra("Kiểm: nlm login --check.", ()))
-            and bool(_vi_pham_dau_ra(_PHU_DINH + "; Kiểm: nlm login --check", ()))
-            and bool(_vi_pham_dau_ra("ok " + _CANH, ()))
-            and bool(_vi_pham_dau_ra("", ("HẠ CẤP",))))
+    return all(_vi_pham_dau_ra(x, d) for x, d in (("Kiểm: nlm login --check.", ()), ("ok " + _CANH, ()),
+                                                   (_PHU_DINH + "; Kiểm: nlm login --check", ()), ("", ("HẠ CẤP",))))
 
 
 def run(tl_module):
     tg = tl_module._imp("tl_gws")
     tg.bind(tl_module)      # như tl.build_parser: nạp tên trần (_imp, load_creds…) mà các lệnh stage cần
     van_ban = Path(tg.__file__).read_text(encoding="utf-8")
-    if not _n4(van_ban):
-        return False
-    if _n4(van_ban + "    print('Kiểm: nlm login --check')\n"):     # phản chứng: dòng kiểu cũ phải bị bắt
-        return False
-    if _n4(van_ban.replace("[nguồn {src}]. Kiểm bằng probe", "[nguồn {src}]. Kiểm: nlm login --check. Kiểm bằng probe", 1)):
-        return False            # phản chứng: gợi ý dương chen vào CHÍNH dòng được phép cũng phải bị bắt
-    if not _n4_ast(van_ban):
-        return False
-    if _n4_ast(van_ban + '\nprint("Kiểm: nlm " "login --check")\n'):
-        return False            # phản chứng: gợi ý dương tách thành hai literal liền nhau phải bị bắt
-    if _n4_ast(van_ban + '\nprint(f"x{1}" + " Kiểm: nlm log" + "in --check")\n'):
-        return False            # phản chứng: gợi ý dương nối bằng `+` phải bị bắt (cross-review lượt 3, F2c)
-    if _n4_ast(van_ban + "\nx = f\"Kiểm: nlm {'login'} --check\"\n"):
-        return False            # phản chứng: `{hằng}` trong f-string phải được thay giá trị (cross-review lượt 4, F2d)
-    return _n1_n3(tg) and _n2(tg) and _n5(tg)
+    phan_chung_dong = (van_ban + "    print('Kiểm: nlm login --check')\n",        # dòng kiểu cũ
+                       van_ban.replace("[nguồn {src}]. Kiểm bằng probe",           # chen vào CHÍNH dòng được phép
+                                       "[nguồn {src}]. Kiểm: nlm login --check. Kiểm bằng probe", 1))
+    phan_chung_ast = (van_ban + '\nprint("Kiểm: nlm " "login --check")\n',         # hai literal liền nhau (F2b)
+                      van_ban + '\nprint(f"x{1}" + " Kiểm: nlm log" + "in --check")\n',   # nối `+` (lượt 3, F2c)
+                      van_ban + "\nx = f\"Kiểm: nlm {'login'} --check\"\n")             # `{hằng}` (lượt 4, F2d)
+    return (_n4(van_ban) and not any(map(_n4, phan_chung_dong)) and _n4_ast(van_ban)
+            and not any(map(_n4_ast, phan_chung_ast)) and _n1_n3(tg) and _n2(tg) and _n5(tg))

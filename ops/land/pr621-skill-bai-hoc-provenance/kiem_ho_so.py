@@ -6,6 +6,8 @@ KHONG DO DUOC (khong duoc doc thanh DAT). Chi doc tep; --repo thi goi them `git 
 Che do `--tu-kiem --repo <kho>`: doi tung cum chu so cua tung la `measured` trong BAN SAO (thu muc tam) roi chay lai bo kiem. Thoat 0 =
 ban sao KHONG dot bien DAT, so la thu == LA_MEASURED_DU_KIEN, va MOI dot bien bi mot chot ban `TONG: TRUOT`; 1 = nen khong DAT, hoac co
 la song sot, hoac co dot bien chet vi LOI (traceback / --repo hong: khong phai chot nen KHONG tinh la "bi giet"; PROTOCOL §10.2.3).
+`--tu-kiem` con chay PHAN CHUNG AM cua chot `landed` (moi ca = mot ban sao hien vat/ho so bi pha DUNG MOT dieu kien, chay het bo kiem that qua dung day noi that;
+phai ra `TONG: TRUOT` kem DUNG ly do) — de mot dot bien lam LONG day noi `sai_landed_cua(...)` hay chot 7b van bi bat (chi chay `landed: true`, ho so that).
 KHONG la bang chung luot goc: no chi kiem rang moi loi khai `measured` trong ho so tro toi mot hien vat co that, co dau
 duong, va cac moc thoi gian/run/digest khop nhau.
 """
@@ -111,12 +113,16 @@ if "--tu-kiem" in sys.argv:
     if not repo_tk or repo_tk.startswith("--") or not Path(repo_tk).is_dir():
         sys.exit("TRUOT TU-KIEM can --repo <kho day du> la thu muc that (thieu/rong/bat dau bang `--`: tien trinh con chet vi ly do khac se bi dem nham la 'bi giet')")
 
-    def chay_con(o):
+    def chay_con(o, sua=None):
         with tempfile.TemporaryDirectory() as t:
             d = Path(t) / "ops" / "land"
             d.mkdir(parents=True)
             shutil.copytree(P, d / P.name)
             (d / HO_SO.name).write_text(yaml.safe_dump(o, allow_unicode=True, sort_keys=False, width=100000), encoding="utf-8")
+            if sua:   # phan chung am: sua hien vat TRONG BAN SAO roi BAM LAI manifest (neu khong chot sha256 giet nham thay cho chot dang thu)
+                sua(d / P.name)
+                (d / P.name / "SHA256SUMS.txt").write_text("".join(f"{hashlib.sha256(f.read_bytes()).hexdigest()}  {f.name}\n"
+                                                                    for f in sorted((d / P.name).iterdir()) if f.name != "SHA256SUMS.txt"), encoding="utf-8")
             return subprocess.run([sys.executable, "-I", str(d / P.name / Path(__file__).name), "--repo", repo_tk],
                                   capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
 
@@ -141,6 +147,53 @@ if "--tu-kiem" in sys.argv:
                 giet += 1
             else:
                 chet_loi.append(".".join(map(str, p)) + " [" + ten + "]: " + ((r.stdout + r.stderr).strip().splitlines() or [""])[-1][:100])
+    # PHAN CHUNG AM cua chot `landed` (U06 luot 7 #723: day noi `sai_landed_cua(...)` chi bi bat o chieu CHAT vi ho so that la dau vao HOP LE; `--tu-kiem` chi doi chu so cua la `measured`
+    # nen khong cham khoi `quyet_dinh_chu_kho`, readback, `pr-723.json`). Moi ca: ban sao bi pha DUNG MOT dieu kien, chay het bo kiem THAT (qua dung day noi that) => phai ra `TONG: TRUOT`
+    # va in DUNG ly do. Dot bien lam LONG mot day noi (`landed_ly_do`->"", tap tep, approver, merged, pham_vi, hay go mot menh de 7b) lam ca tuong ung ra DAT => ca do thanh LOT.
+    def _j(ten, f):
+        def sua(pd):
+            j_ = json.loads((pd / ten).read_text(encoding="utf-8"))
+            f(j_)
+            (pd / ten).write_text(json.dumps(j_, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        return sua
+    CMT, P723 = "comment-6098298825.json", "pr-723.json"
+    qd_ = lambda o: o["quyet_dinh_chu_kho"]
+    PHAN_CHUNG_LANDED = [
+        ("tac gia != approver", None, _j(CMT, lambda j_: j_["user"].update(login="khac")), "readback: tac gia != approver"),
+        ("author_association != OWNER", None, _j(CMT, lambda j_: j_.update(author_association="MEMBER")), "readback: author_association != OWNER"),
+        ("qua app", None, _j(CMT, lambda j_: j_.update(performed_via_github_app={"slug": "claude"})), "readback: dang qua app"),
+        ("created_at khong SAU merge #621", None, _j(CMT, lambda j_: j_.update(created_at="2026-10-09T14:14:00Z", updated_at="2026-10-09T14:14:00Z")), "readback: created_at khong SAU merge"),
+        ("comment da sua", None, _j(CMT, lambda j_: j_.update(updated_at="2026-10-10T14:04:23Z")), "readback: comment da bi sua"),
+        ("issue_url sang PR khac", None, _j(CMT, lambda j_: j_.update(issue_url=j_["issue_url"][:-3] + "621")), "readback: issue_url khong tro toi PR #723"),
+        ("id lech neo_ben", None, _j(CMT, lambda j_: j_.update(id=j_["id"] + 1)), "readback: html_url/id != neo_ben"),
+        ("than: mot diem tu_choi", None, _j(CMT, lambda j_: j_.update(body=j_["body"].replace("CHECKOUT-IDENTITY: chap_nhan", "CHECKOUT-IDENTITY: tu_choi"))), "khong phai dong mau"),
+        ("than: Reviewed commit lech", None, _j(CMT, lambda j_: j_.update(body=j_["body"].replace("Reviewed commit: 18", "Reviewed commit: 00"))), "Reviewed commit != quyet_dinh_chu_kho.reviewed_sha"),
+        ("than: thieu mot run", None, _j(CMT, lambda j_: j_.update(body=j_["body"].replace(",37942714195", ""))), "tap run cua"),
+        ("YAML: assurance_dat != chap_nhan", lambda o: qd_(o).update(assurance_dat="tu_choi"), None, "quyet_dinh_chu_kho.assurance_dat != chap_nhan"),
+        ("YAML: pham_vi_run thieu mot run", lambda o: qd_(o).update(pham_vi_run=qd_(o)["pham_vi_run"][:3]), None, "quyet_dinh_chu_kho.pham_vi_run != pham_vi_run"),
+        ("YAML: readback ngoai provenance", lambda o: qd_(o).update(readback="khong-co.json"), None, "readback thieu / khong la ten tep trong provenance"),
+        ("YAML: landed_ly_do con CON THIEU", lambda o: o["trang_thai_packet"].update(landed_ly_do=o["trang_thai_packet"]["landed_ly_do"] + " CON THIEU"), None, "landed_ly_do con `CON THIEU`"),
+        ("YAML: bookkeeping[0] con mo", lambda o: o["bookkeeping"][0].update(trang_thai="mo — chua merge"), None, "bookkeeping[0]"),
+        ("pr-723: head.sha lech chu ky", None, _j(P723, lambda j_: j_["head"].update(sha="0" * 40)), "pr-723.json: head.sha != quyet_dinh_chu_kho.reviewed_sha"),
+        ("pr-723: chua merge", None, _j(P723, lambda j_: j_.update(merged=False)), "pr-723.json: chua merge"),
+        ("pr-723: base khong phai master", None, _j(P723, lambda j_: j_["base"].update(ref="khac")), "pr-723.json: base !="),
+        ("pr-723: merge_commit_sha vang", None, _j(P723, lambda j_: j_.pop("merge_commit_sha")), "pr-723.json: merge_commit_sha thieu"),
+        ("pr-723: merge_commit_sha == head", None, _j(P723, lambda j_: j_.update(merge_commit_sha=j_["head"]["sha"])), "pr-723.json: merge_commit_sha thieu"),
+        ("pr-723: merge_commit_sha = merge commit THAT cua PR khac (3fc0932), van xuoi khop: chi git bat", lambda o: o["bookkeeping"][0].update(trang_thai=o["bookkeeping"][0]["trang_thai"].replace("5be55e7", "3fc0932")),
+         _j(P723, lambda j_: j_.update(merge_commit_sha="3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7")), "merge (git) #723: merge_commit_sha la MERGE COMMIT that"),
+        ("pr-723: merge_commit_sha la commit khac co 7 ky tu trong landed_ly_do", None, _j(P723, lambda j_: j_.update(merge_commit_sha="3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7")), "bookkeeping[0]"),
+    ]
+    am_loi = []
+    for ten_, sua_y, sua_f, mong in PHAN_CHUNG_LANDED:
+        o = copy.deepcopy(goc)
+        if sua_y:
+            sua_y(o)
+        r = chay_con(o, sua_f)
+        if not (r.returncode == 1 and "\nTONG: TRUOT" in "\n" + r.stdout and mong in r.stdout):
+            am_loi.append(f"{ten_}: rc={r.returncode}, " + ("co" if mong in r.stdout else "THIEU") + f" ly do `{mong}`")
+    for p in am_loi:
+        print("LOT-AM  " + p)
+    print(f"PHAN CHUNG AM landed: {len(PHAN_CHUNG_LANDED)} ca, {len(PHAN_CHUNG_LANDED) - len(am_loi)} bi giet DUNG ly do · {len(am_loi)} khong (day noi/chot long hoac sai ly do)")
     for p in song_sot:
         print("LOT  " + p)
     for p in chet_loi:
@@ -150,7 +203,7 @@ if "--tu-kiem" in sys.argv:
           f"{giet} bi MOT CHOT ban TRUOT · {len(song_sot)} song sot · {len(chet_loi)} chet vi loi (khong phai chot)"
           + ("" if dung else " · SO LA LECH du kien (nhan bi doi ten/ha cap?)")
           + (" => day la loi khai, khong phai phep do" if song_sot or chet_loi else ""))
-    sys.exit(0 if dung and not song_sot and not chet_loi else 1)
+    sys.exit(0 if dung and not song_sot and not chet_loi and not am_loi else 1)
 
 
 def doc(ten, nhi_phan=False):
@@ -501,7 +554,7 @@ def landed_hop_le(qd_, tep, doc_, approver, merged_, pham_vi_):
     """N04 + L3 + L5 + L6 — `landed: true` can quyet dinh chu kho co NEO doc duoc VA THAN comment DOC DUOC la CHAP NHAN: URL comment tren PR_GHI_SO + readback trong provenance
     (id/URL/issue_url khop, tac gia == approver, OWNER, khong qua app, tao SAU merge, chua sua) + than comment theo MAU (than_sai). Tra ve DANH SACH ly do khong hop le
     (rong = hop le) de chot `landed` chi dung dong/dieu kien sai. HAM THUAN (L6): moi dau vao la doi so (quyet dinh, ten tep co trong provenance, ham doc tep, tac gia, gio merge,
-    pham_vi) de `_ca_landed` chay no o MOI lan chay bo kiem — khi `landed: false` ham nay khong bao gio duoc goi voi ho so that. (L3 do 10-10-2026: comment THAT 6084105994 — quyet
+    pham_vi) de `_ca_landed` chay no o MOI lan chay bo kiem — tu PR ghi so land #621 (`landed: true`) ham nay chay THAT o moi lan chay bo kiem; truoc do (`landed: false`) khong bao gio duoc goi voi ho so that. (L3 do 10-10-2026: comment THAT 6084105994 — quyet
     dinh CU tren 06fc9a8, chi 2 diem, chi 1 run — lot ban truoc khi buoc than; L4: ban chi doi SU CO MAT cua id/run; L5: ban doc theo dong nhung mo hinh Markdown con ho.) Khong do
     duoc offline: comment ky tren DUNG head hien hanh cua PR ghi so; KHONG doc van xuoi: mot cau tu choi viet bang loi khong phai dong mau thi khong bi bat."""
     nb = str(qd_.get("neo_ben", ""))
@@ -528,8 +581,61 @@ def sai_landed_cua(landed, ly_do, *args):
     return [] if landed is False else landed_hop_le(*args) + (["landed_ly_do con `CON THIEU`"] if "CON THIEU" in ly_do else [])
 
 
+def sai_pr_ghi_so(p723_, qd_, ly_do, bk):
+    """7b — PR ghi so goc (#723) THAT SU da merge vao `ducthangho/tra-luat:master` bang MERGE COMMIT, va chu ky chu kho nam tren CHINH head da merge. Tra DANH SACH ly do sai (rong = hop le).
+    MOI khoa phai CO MAT va dung dang: khoa vang / rong / null la SAI (ban dau `str(p723.get("merge_commit_sha", ""))[:7] in landed_ly_do` doc khoa vang thanh chuoi rong, ma `"" in s` luon dung).
+    `merge_commit_sha` phai la 40 hex, KHAC head.sha (squash/rebase cho merge_commit_sha != head nhung khong co cha thu hai = head; xem chot git duoi), va 7 ky tu dau cua no phai co trong CA
+    `landed_ly_do` LAN dong bookkeeping cua ho so goc (cung gio `merged_at`, cung head 7 ky tu); dong bookkeeping cua quyet dinh phai nhac DUNG id comment + head 7 ky tu."""
+    h40 = lambda x: isinstance(x, str) and re.fullmatch(r"[0-9a-f]{40}", x) is not None
+    base, head, mc = p723_.get("base") or {}, (p723_.get("head") or {}).get("sha"), p723_.get("merge_commit_sha")
+    dong = lambda tien_to: next((str(x.get("trang_thai", "")) for x in bk if isinstance(x, dict) and str(x.get("muc", "")).startswith(tien_to)), "")
+    b0, b1 = dong("Ho so land"), dong("Quyet dinh chu kho")
+    m_id = re.search(r"issuecomment-(\d+)$", str(qd_.get("neo_ben", "")))
+    dk = [(p723_.get("number") == PR_GHI_SO and p723_.get("html_url") == f"https://github.com/ducthangho/tra-luat/pull/{PR_GHI_SO}", "pr-723.json: number/html_url != PR ghi so"),
+          (p723_.get("merged") is True and p723_.get("state") == "closed" and bool(p723_.get("merged_at")), "pr-723.json: chua merge (merged/state/merged_at)"),
+          (base.get("ref") == "master" and (base.get("repo") or {}).get("full_name") == "ducthangho/tra-luat", "pr-723.json: base != ducthangho/tra-luat:master"),
+          (h40(head) and head == qd_.get("reviewed_sha"), "pr-723.json: head.sha != quyet_dinh_chu_kho.reviewed_sha (chu ky tren head cu)"),
+          (h40(mc) and mc != head, "pr-723.json: merge_commit_sha thieu / khong phai 40 hex / bang head.sha"),
+          (h40(mc) and mc[:7] in ly_do, "landed_ly_do khong nhac merge_commit_sha[:7]"),
+          (h40(mc) and h40(head) and b0.startswith("xong") and mc[:7] in b0 and head[:7] in b0 and str(p723_.get("merged_at")) in b0,
+           "bookkeeping[0] (ho so goc) khong khop pr-723.json (xong + merge commit[:7] + head[:7] + merged_at)"),
+          (m_id is not None and h40(head) and b1.startswith("xong") and m_id.group(1) in b1 and head[:7] in b1, "bookkeeping[1] (quyet dinh chu kho) khong khop (xong + id comment + head[:7])")]
+    return [m for ok, m in dk if not ok]
+
+
+def _ca_pr_ghi_so():
+    """7b — phan chung CHAY DUOC cho sai_pr_ghi_so, o MOI lan chay (du lieu CO DINH, khong doc tu ho so). Mot readback hop le phai ra rong; moi khoa/dieu kien bi pha RIENG phai ra DUNG ly do."""
+    sha_, mc_, t_ = "0123456789abcdef" * 2 + "01234567", "fedcba9876543210" * 2 + "fedcba98", "2026-10-10T14:05:20Z"
+    p0 = {"number": PR_GHI_SO, "html_url": f"https://github.com/ducthangho/tra-luat/pull/{PR_GHI_SO}", "merged": True, "state": "closed", "merged_at": t_,
+          "base": {"ref": "master", "repo": {"full_name": "ducthangho/tra-luat"}}, "head": {"sha": sha_}, "merge_commit_sha": mc_}
+    q0 = {"reviewed_sha": sha_, "neo_ben": f"https://github.com/ducthangho/tra-luat/pull/{PR_GHI_SO}#issuecomment-4242"}
+    b0 = [{"muc": "Ho so land + provenance (PR #723)", "trang_thai": f"xong — merge commit {mc_[:7]} (cha thu hai {sha_[:7]}), {t_}; readback pr-723.json"},
+          {"muc": "Quyet dinh chu kho cho cac diem", "trang_thai": f"xong — comment 4242 tren head {sha_[:7]} cua PR #{PR_GHI_SO}"}]
+
+    def chay(mut=lambda p, q, b: None, ly=f"merge commit {mc_[:7]}"):
+        p, q, b = (json.loads(json.dumps(x)) for x in (p0, q0, b0))
+        mut(p, q, b)
+        return sai_pr_ghi_so(p, q, ly, b)
+    bad = {"number != 723": (lambda p, q, b: p.update(number=724), "number/html_url"), "html_url sang PR khac": (lambda p, q, b: p.update(html_url=p["html_url"][:-3] + "724"), "number/html_url"),
+           "merged false": (lambda p, q, b: p.update(merged=False), "chua merge"), "merged vang": (lambda p, q, b: p.pop("merged"), "chua merge"),
+           "state open": (lambda p, q, b: p.update(state="open"), "chua merge"), "merged_at null": (lambda p, q, b: p.update(merged_at=None), "chua merge"),
+           "base.ref khac master": (lambda p, q, b: p["base"].update(ref="khac"), "base !="), "base.repo khac": (lambda p, q, b: p["base"]["repo"].update(full_name="evil/x"), "base !="),
+           "head lech chu ky": (lambda p, q, b: q.update(reviewed_sha="0" * 40), "head.sha != quyet_dinh"), "head vang": (lambda p, q, b: p.pop("head"), "head.sha != quyet_dinh"),
+           "merge_commit_sha vang": (lambda p, q, b: p.pop("merge_commit_sha"), "merge_commit_sha thieu"), "merge_commit_sha rong": (lambda p, q, b: p.update(merge_commit_sha=""), "merge_commit_sha thieu"),
+           "merge_commit_sha null": (lambda p, q, b: p.update(merge_commit_sha=None), "merge_commit_sha thieu"), "merge_commit_sha 7 ky tu": (lambda p, q, b: p.update(merge_commit_sha=mc_[:7]), "merge_commit_sha thieu"),
+           "merge_commit_sha == head": (lambda p, q, b: p.update(merge_commit_sha=sha_), "merge_commit_sha thieu"),
+           "landed_ly_do khong nhac merge commit": (lambda p, q, b: None, "landed_ly_do khong nhac", {"ly": "khong"}),
+           "bookkeeping[0] vang": (lambda p, q, b: b.pop(0), "bookkeeping[0]"), "bookkeeping[0] mo": (lambda p, q, b: b[0].update(trang_thai="mo — chua merge"), "bookkeeping[0]"),
+           "bookkeeping[0] sai merge commit": (lambda p, q, b: b[0].update(trang_thai=b[0]["trang_thai"].replace(mc_[:7], "aaaaaaa")), "bookkeeping[0]"),
+           "bookkeeping[0] sai gio merge": (lambda p, q, b: b[0].update(trang_thai=b[0]["trang_thai"].replace(t_, "2026-10-10T14:05:21Z")), "bookkeeping[0]"),
+           "bookkeeping[1] sai id comment": (lambda p, q, b: b[1].update(trang_thai=b[1]["trang_thai"].replace("4242", "9999")), "bookkeeping[1]"),
+           "bookkeeping[1] sai head": (lambda p, q, b: b[1].update(trang_thai=b[1]["trang_thai"].replace(sha_[:7], "aaaaaaa")), "bookkeeping[1]")}
+    return ([f"hop le bi tu choi: {chay()}"] if chay() else []) + [f"`{k}` khong ra ly do `{sub_}`: {chay(m, **(kw[0] if kw else {}))}" for k, (m, sub_, *kw) in bad.items()
+                                                                if not any(sub_ in r for r in chay(m, **(kw[0] if kw else {})))], 1, len(bad)
+
+
 def _ca_landed():
-    """L6 — phan chung CHAY DUOC cho landed_hop_le, o MOI lan chay (landed: false thi ho so that khong goi no: thay no bang `return []` van ra DAT — do 10-10-2026, 15/15 dot bien
+    """L6 — phan chung CHAY DUOC cho landed_hop_le, o MOI lan chay (truoc khi `landed: true`, ho so that khong goi no: thay no bang `return []` van ra DAT — do 10-10-2026, 15/15 dot bien
     cua readback + keo noi song sot). Du lieu CO DINH. Mot readback hop le phai ra rong; moi dieu kien readback/quyet dinh bi pha rieng le phai ra DUNG ly do cua no."""
     sha_, rs, merged_ = "0123456789abcdef" * 2 + "01234567", "11111111111,22222222222,33333333333,44444444444", "2026-10-09T14:14:34Z"
     run, neo = {c: {11111111111, 22222222222, 33333333333, 44444444444} for c in can}, "https://github.com/ducthangho/tra-luat/pull/723#issuecomment-1"
@@ -563,6 +669,8 @@ def _ca_landed():
 
 _loi_landed, _n_hop_l, _n_bad_l = _ca_landed()
 chot(not _loi_landed, f"landed_hop_le (L6): {_n_hop_l} readback hop le DAT, {_n_bad_l} bi tu choi voi DUNG ly do (du lieu co dinh, khong doc tu ho so)" + "".join(f"\n      -> {x}" for x in _loi_landed))
+_loi_p723, _n_hop_p, _n_bad_p = _ca_pr_ghi_so()
+chot(not _loi_p723, f"sai_pr_ghi_so (7b): {_n_hop_p} readback hop le DAT, {_n_bad_p} bi tu choi voi DUNG ly do (du lieu co dinh, khong doc tu ho so)" + "".join(f"\n      -> {x}" for x in _loi_p723))
 sai_landed = sai_landed_cua(tp["landed"], tp["landed_ly_do"], qd, {x.name for x in P.iterdir() if x.is_file()}, doc, h["approver"], merged, pham_vi)
 chot(not sai_landed,
      "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment THEO MAU (dong `Reviewed commit: <40 hex>` == reviewed_sha; moi diem `<ID>: chap_nhan <4 run id cach nhau dau phay>`; dong `assurance_dat: chap_nhan`; than CHI gom dong mau va dong trong, toan ASCII in duoc - moi dong/ky tu khac bi TU CHOI) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`"
@@ -571,10 +679,12 @@ chot(not sai_landed,
 # 7b. PR ghi so goc (#723) da merge, va chu ky nam tren CHINH head da merge: head.sha cua pr-723.json == quyet_dinh_chu_kho.reviewed_sha
 #     (chu ky tren mot head cu thi da het hieu luc khi head doi), merge_commit_sha neu trong landed_ly_do. Chi doi khi `landed: true`.
 p723 = json.loads(doc("pr-723.json"))
-chot(tp["landed"] is False or (p723.get("number") == PR_GHI_SO and p723.get("merged") is True
-                               and p723.get("head", {}).get("sha") == str(qd.get("reviewed_sha", ""))
-                               and str(p723.get("merge_commit_sha", ""))[:7] in tp["landed_ly_do"]),
-     "PR ghi so goc #723: merged, head da merge == quyet_dinh_chu_kho.reviewed_sha, merge commit neu trong landed_ly_do")
+if tp["landed"] is False:
+    print("BO QUA PR ghi so goc #723 (7b): chi doi khi `landed: true` (khong in DAT cho chot chua duoc danh gia)")
+else:
+    sai_p723 = sai_pr_ghi_so(p723, qd, tp["landed_ly_do"], h["bookkeeping"])
+    chot(not sai_p723, "PR ghi so goc #723 (7b): da merge vao master, head da merge == quyet_dinh_chu_kho.reviewed_sha, merge_commit_sha 40 hex != head va co mat DUNG trong landed_ly_do + bookkeeping"
+         + "".join(f"\n      -> {x}" for x in sai_p723))
 
 # 8. Review connector sach (Codex PR #723, comment 4232431571): actor, commit, trang thai cuoi, luc; hai danh sach rong.
 cx = json.loads(doc("comment-6082682461-codex.json"))
@@ -712,6 +822,15 @@ else:
     chot(ds == tm["kiem_tra"]["diff_stat"] and f"=> {ds['tep']} tep, +{ds['them']}" in tm["kiem_tra"]["ket_qua"],
          f"merge (git): diff --shortstat {ns!r} == khai")
     chot(sorted(g("diff", *_AN, "--name-only", tm["cha"][0], h["merge_commit"]).splitlines()) == sorted(h["write_set"]), "merge (git): tep doi 8b59185..3fc0932 == write_set YAML")
+
+    # 7b-git. `pr-723.json` KHONG chua cha cua merge commit, nen "merge commit that, cha thu hai = head da ky, chi do duoc bang git (clone phai co merge commit cua #723).
+    if tp["landed"] is True:
+        def rp_hay(x):
+            r_ = subprocess.run(["git", "-C", repo, "rev-parse", "--verify", "-q", x], capture_output=True, text=True, env=_GIT_ENV)
+            return r_.stdout.strip() if r_.returncode == 0 else ""
+        mc723, hd723 = str(p723.get("merge_commit_sha", "")), str((p723.get("head") or {}).get("sha", ""))
+        chot(bool(mc723) and [rp_hay(f"{mc723}^{{commit}}"), rp_hay(f"{mc723}^2")] == [mc723, hd723],
+             "merge (git) #723: merge_commit_sha la MERGE COMMIT that, cha thu hai == head.sha da ky (khong phai squash/rebase)")
 
 if LOI:
     print(f"TONG: TRUOT {len(LOI)}")

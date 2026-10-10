@@ -51,7 +51,9 @@ recorded_by: claude-dispatcher-session
 recorder_is_executor: true
 recorder_is_executor_ghi_chu: chu kho tra loi Doi executor sang Claude (toi) trong phien dieu phoi, nen phien ghi lease nay CUNG la executor (cung phien, khong chi cung ho). Tu luc cap, phien ay chi giu vai executor tren wp685 (PROTOCOL muc 1.8) - khong dispatch, khong dung sandbox, khong soan assignment rieng cho reviewer cua chinh ung vien minh, khong ghi event review hay bien nhan; chi dien copyable_prompt theo mau reviewer cua docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md roi dung; reviewer Codex do chu kho hay phien khac goi (PROTOCOL muc 7, executor khong tu tao review co tham quyen). Theo #686 6091630409 chu kho dong y: Codex review chay trong mot phien Claude Code cloud RIENG (create_session) - phien nay chi tao phien ay va gui dung copyable_prompt D0, khong dung sandbox, khong viet assignment rieng, khong cham checkout cua reviewer.
 leased_at_utc: '2026-10-10T00:38:00Z'
-lease_expires_at_utc: '2026-10-11T00:38:00Z'
+lease_expires_at_utc: '2026-10-10T17:30:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-11T00:38:00Z. RUT NGAN ve 2026-10-10T17:30:00Z — xem thu_hoi_bang_rut_han.
 run_minutes: 90
 heartbeat_minutes: 30
 attempts_used: 0
@@ -70,3 +72,22 @@ same_failure_limit_basis: chu kho duyet MCR-686-08 (#686 6091630409) - chi gener
 evidence_ref: refs/heads/agent/wp685-r28-g5-claude (chu kho chi dinh trong #686 6091630409; phien executor duoc day len do)
 mission_event_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091708046
 mission_projection_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6091711162
+lease_sua_lan_cuoi: '2026-10-10T16:45Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-11T00:38:00Z'
+  han_moi_utc: '2026-10-10T17:30:00Z'
+  chi_thi: >-
+    Uy quyen land cua chu kho, PR #732 comment 6099610473 (ducthangho, OWNER), muc "Thao tac sau merge duoc phep":
+    rut han lease wp685-r28-g5-claude-20261009 tren ops/wp685-r28-g5-lease.
+  ly_do: >-
+    Packet #685 da MERGE: PR #732 (agent/wp685-r28-g5-claude) merge bang merge commit
+    77fb0288dca8483f28209cae42c38d4cb97397d9 (cha bc6630a + 3089b54). Lease khong tu chet khi land (CLAUDE.md);
+    de nguyen thi giu hai duong dan write set toi 2026-10-11T00:38Z.
+  vi_sao_khong_dung_so: >-
+    Theo tien le #710 g5 (e870d7a), #678 g1 (62962c7), #705 g3 (c5881a0): rut han dung co che da cai. Han moi dat
+    SAU luc push de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc 20-09). Khong bia mo:
+    khong co lease ke nhiem.
+  nguoi_rut: 'land operator, phien Claude Code session_014N46zU47UjPmRbH4UNrEf5'
+  nghiem_thu: 'ai-dang-giu cho hai duong dan write set sau 17:30Z phai ra NGUOI_GIU 0 — do o PR ghi so.'

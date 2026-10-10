@@ -1,0 +1,61 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 735
+packet_id: manifest-725-727
+lease_id: manifest-725-727-g1-claude-20261010
+generation: 1
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+write_set:
+- RELEASE_MANIFEST.json
+- scripts/tl_selftest.py
+effective_write_set:
+- RELEASE_MANIFEST.json
+- scripts/tl_selftest.py
+write_set_hash_ghi_chu: 'sha256 cua json.dumps(sorted(write_set))'
+write_set_hash: c6e675b266023f5af8927385c39e5586fc8b478eac18892876f6cba95b47cfed
+branch: claude/tai-sinh-manifest-725-727
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 77fb0288dca8483f28209cae42c38d4cb97397d9
+start_from_sha: 77fb0288dca8483f28209cae42c38d4cb97397d9
+reviewed_sha_required: 77fb0288dca8483f28209cae42c38d4cb97397d9
+granted_by: ducthangho
+granted_on_instruction: https://claude.ai/code/session_014N46zU47UjPmRbH4UNrEf5
+granted_on_instruction_note: >-
+  Chu kho chi thi trong phien (khong phai comment GitHub): "Tạo phiên PR riêng tái sinh RELEASE_MANIFEST.json tren
+  master, cấp lease và xử lý nhanh luôn". Loi khai co neo; dau vet ben la comment xac nhan cua chu kho tren Issue #735
+  hoac PR cua packet (cho).
+recorded_by: claude-session session_014N46zU47UjPmRbH4UNrEf5
+recorder_is_executor: true
+recorder_is_executor_ghi_chu: >-
+  Cung phien ghi lease va thuc thi (giong tien le wp685 g5). Reviewer la Codex CLI chay doc lap, read-only.
+leased_at_utc: '2026-10-10T18:40:00Z'
+lease_expires_at_utc: '2026-10-11T06:40:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 3
+requires_live: false
+ci_policy: full_ci_on_pr
+push_policy: push_tu_do_tren_nhanh_packet
+thay_the_cho: []
+pham_vi: >-
+  Tai sinh RELEASE_MANIFEST.json bang `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json`
+  (183 -> 186: them changelog.d/wp-725.md, wp-726.md, wp-727.md) va cap nhat hai chot ratchet dem goi trong
+  scripts/tl_selftest.py (r291_docs_ngoai_goi, r357_agents_ngoai_goi) kem ke khai slot, theo tien le 888c0d9.
+cam: [sua tep ngoai write set, deploy, day Package, sua golden]

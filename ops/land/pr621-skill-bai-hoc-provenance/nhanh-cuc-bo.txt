@@ -32,9 +32,11 @@ claude/bookkeeping-678-bien-nhan-7-12
 claude/bookkeeping-678-land
 claude/bookkeeping-678-landed
 claude/bookkeeping-678-spec-land
+claude/bookkeeping-685-land
 claude/bookkeeping-705-landed
 claude/bookkeeping-705-pr707
 claude/bookkeeping-710-land
+claude/bookkeeping-725-727-land
 claude/cap-lease-704-g2
 claude/cham-dot-bien-mien-nhiem-lease-suite
 claude/ci-bang-phu-thuoc-1
@@ -132,6 +134,7 @@ claude/spec-wp538-r4-20260916
 claude/spec-wp540-r2-20260916
 claude/spec-wp678-r7
 claude/spec-wp698
+claude/tai-sinh-manifest-725-727
 claude/tra-luat-deployment-d1-d2-otcxau
 claude/vong-8-va-4-khe-ho-launcher
 claude/wp-f3-03-release-nested
@@ -419,6 +422,7 @@ ops/lease-slice-b-c
 ops/lease-x5-exec-r4
 ops/lease-x5-review-2
 ops/lease-x5-review-3
+ops/manifest-725-727-lease
 ops/master-ac19-evidence-block
 ops/master-ac19-viet-lai
 ops/moi-truong-review-1-verdict
@@ -491,6 +495,8 @@ ops/wp685-r23-g4-metadata
 ops/wp685-r28-g5-bang-chung
 ops/wp685-r28-g5-lease
 ops/wp685-r28-g5-review-1
+ops/wp685-r28-g5-review-2
+ops/wp685-r28-g5-su-kien-review-1
 ops/wp698-r10-g1-lease
 ops/wp698-r14-g2-lease
 ops/wp710-g5-hien-vat-review

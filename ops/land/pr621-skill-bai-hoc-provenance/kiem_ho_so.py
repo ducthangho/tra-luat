@@ -568,6 +568,14 @@ chot(not sai_landed,
      "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment THEO MAU (dong `Reviewed commit: <40 hex>` == reviewed_sha; moi diem `<ID>: chap_nhan <4 run id cach nhau dau phay>`; dong `assurance_dat: chap_nhan`; than CHI gom dong mau va dong trong, toan ASCII in duoc - moi dong/ky tu khac bi TU CHOI) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`"
      + "".join(f"\n      -> {x}" for x in sai_landed))
 
+# 7b. PR ghi so goc (#723) da merge, va chu ky nam tren CHINH head da merge: head.sha cua pr-723.json == quyet_dinh_chu_kho.reviewed_sha
+#     (chu ky tren mot head cu thi da het hieu luc khi head doi), merge_commit_sha neu trong landed_ly_do. Chi doi khi `landed: true`.
+p723 = json.loads(doc("pr-723.json"))
+chot(tp["landed"] is False or (p723.get("number") == PR_GHI_SO and p723.get("merged") is True
+                               and p723.get("head", {}).get("sha") == str(qd.get("reviewed_sha", ""))
+                               and str(p723.get("merge_commit_sha", ""))[:7] in tp["landed_ly_do"]),
+     "PR ghi so goc #723: merged, head da merge == quyet_dinh_chu_kho.reviewed_sha, merge commit neu trong landed_ly_do")
+
 # 8. Review connector sach (Codex PR #723, comment 4232431571): actor, commit, trang thai cuoi, luc; hai danh sach rong.
 cx = json.loads(doc("comment-6082682461-codex.json"))
 md = h["review_tai_head_da_merge"]["codex_connector"]["may_doc"]

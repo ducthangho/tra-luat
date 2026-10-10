@@ -1,0 +1,24 @@
+{
+  "name": "ruff-candidate",
+  "command": "ruff check --no-cache --select F --target-version py311 /home/user/wp685-r28-g5-review/cay-kho/.claude/dev/launcher.py /home/user/wp685-r28-g5-review/cay-kho/.claude/dev/launcher_test.py",
+  "cwd": "/home/user/wp685-r28-g5-review/cay-kho",
+  "started_utc": "2026-10-10T06:32:59.536664+00:00",
+  "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec",
+  "base": "ab457c651eb4428705f0492163080b661c858b72",
+  "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+  "uname": [
+    "Linux",
+    "vm",
+    "6.18.44-fc-v114",
+    "#1 SMP PREEMPT_DYNAMIC @0",
+    "x86_64",
+    "x86_64"
+  ],
+  "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "python": "ruff 0.16.8",
+  "rc": 1,
+  "duration_seconds": 0.164,
+  "ended_utc": "2026-10-10T06:33:00.262285+00:00",
+  "output_sha256": "4d6073fe3e9aa1a03b69d55365afb3be62d4d3ed8f1f81840ab08c04b14c44a1"
+}

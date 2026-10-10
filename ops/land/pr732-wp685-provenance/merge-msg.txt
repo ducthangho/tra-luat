@@ -1,0 +1,10 @@
+wp685 r28 g5: launcher con song ESRCH (packet #685, Mission #686)
+
+Uy quyen land: PR #732 comment 6099610473 (ducthangho, exact 3089b54455a44b8cfcf2fd27b01894bc2a5d764d, merge commit).
+No P2 py314-path-exists-nuot-oserror duoc chu kho chap nhan: comment 6099799597.
+Review: Codex luot 2 approve 0/0/0 (#685 6099270804); human audit approve (#685 6099534056).
+
+Master drift (PROTOCOL 5.1): BASE ab457c651eb4, DRIFT ab457c6..bc6630a = 275 tep; doi chieu sau kich hoat:
+trung 3 (manifest/golden), 5 (ci_dang_ky_test.py tham chieu launcher_test.py), 6 (ci.yml) => gate chay
+lai: gate PR run 38066871069 tren merge ref (master 47c9ba4) xanh; gate hau merge tren master se doc lai.
+Khong trung 1 (merge sach) va 2 (DRIFT khong giao write set).

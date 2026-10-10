@@ -1,0 +1,72 @@
+schema_version: 1
+mission_id: gh-686
+revision: 4
+status: running
+supersedes_revision: 3
+change_request: mcr-686-03
+base_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
+objective: Sửa race ProcessLookupError trong launcher _con_song theo Packet wp685, giữ đúng phân biệt ESRCH với lỗi khác và hoàn tất nghiệm thu, review, land.
+acceptance_criteria:
+- wp709 installs first-class Google Antigravity provider support under its six-path effective write set.
+- wp685 repairs the launcher race under its two-path effective write set and frozen generation.
+- Both packets have independent exact-SHA review and positive required checks before land; wp685 uses a separate Codex same-provider reviewer session and an exact-SHA human audit.
+- Human audits and authorizes land; launcher-windows.yml is read after merge before wp685 closure.
+risk: sensitive
+requires_live: false
+envelope:
+  max_packets: 2
+  max_successor_depth: 1
+  max_attempts_per_packet: 3
+  max_run_minutes: 90
+  same_failure_limit: 2
+  max_parallel_workers: 1
+  max_agent_invocations: 30
+  max_cloud_minutes: 360
+  max_inbox_backlog: 100
+  provider_budgets: {}
+packet_plan:
+- packet_id: wp709
+  packet_issue: 709
+  dependency_issues: []
+  executor: codex
+  environment: local
+  review_class: sensitive
+  write_set:
+  - docs/PROTOCOL_DA_PHIEN.md
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+  - docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md
+  target_spec_revision: 1
+  packet_generation: 1
+  spec_hash: f569b613cf7369b70845728972d4f1f0227dcdf96df2ff7508ffb815f21d005c
+- packet_id: wp685
+  packet_issue: 685
+  dependency_issues:
+  - 668
+  - 709
+  executor: codex
+  model: gpt-6-astra
+  effort: medium
+  execution_surface: codex_desktop
+  transport: machine/local
+  environment: local
+  review_class: sensitive
+  write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+  target_spec_revision: 19
+  packet_generation: 2
+  environment_gate: Linux Python 3.11 and 3.12 required before executor lease
+  reviewer: codex_independent_session
+  review_assurance: same_provider_approved_plus_human_audited
+  spec_hash: 40a14a6e0a82e65b1ec3b4a13d7aa62b01507dcd8a50c208d42e9ff12cdc604f
+provenance:
+  prepared_on: '2026-10-07'
+  source_mission_issue: https://github.com/ducthangho/tra-luat/issues/686
+  approved_decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6027925595
+  prior_plan_hash: 38b2b3ef9d4a410e2a6a00fdc1861611fd39295b7652062d2988ebc3513feb8a
+  status: approved_pending_event_readback
+  plan_hash_formula: sha256(canonical JSON of parsed YAML excluding plan_hash; sort_keys=True, separators=(comma,colon), ensure_ascii=False)
+plan_hash: afc910e9a9076282126d4b2e39723145d15abcad8b5f0c9f0382d4b1c362b27e

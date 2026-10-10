@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "mission_issue": 686,
+  "packet_issue": 685,
+  "packet_id": "wp685",
+  "revision": 28,
+  "generation": 5,
+  "spec_hash": "8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156",
+  "provider": "codex",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "role": "reviewer",
+  "session_id": "01a1247f-c379-7e31-9ef7-89b531e3fa72",
+  "base_sha": "ab457c651eb4428705f0492163080b661c858b72",
+  "head_sha": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "branch": "agent/wp685-r28-g5-claude",
+  "pr": null,
+  "status": "needs_followup",
+  "changed_paths": [],
+  "gate_tier": "T3",
+  "selector_policy_sha": "8d65413c3b3cb0d087e283f1d50847785b8e8d96d7d90ac30845619beaf3997f",
+  "selected_groups": [
+    "launcher-targeted-adversarial",
+    "launcher-full",
+    "launcher-mutation",
+    "linux-full-selftest",
+    "linux-release-gates"
+  ],
+  "tests": [
+    "targeted 12/12; A/W 55/55 x2; E 118/118 x2; static r12 rc0",
+    "D adversarial contract failed; 65 rows/64 keys accepted; extra observation accepted",
+    "launcher full baseline/candidate rc1/1 x2; delta0; 9 skipped each",
+    "mutation baseline176/176 candidate230/230 x2; one not_measured; new54 OK",
+    "Ruff rc1/1 existing5 F841 delta0",
+    "Linux full status=fail rc=1; validator rc=3",
+    "Linux full baseline/candidate same1712/1715 same3fail; release gates pass, bundle parity true",
+    "Windows and Python3.13 not_run; CI not_run; B7 not_run"
+  ],
+  "full_evidence": {
+    "workflow_run": null,
+    "artifact": null,
+    "output_sha256": "cdfa037e759cf87498458fbf61de0d27f1def14a855728821d0d44a9143a74eb",
+    "positive_match": null,
+    "validated_identity": false
+  },
+  "findings_closed": [
+    "E118-w0-311-evidence-incomplete"
+  ],
+  "remaining_work": [
+    "publish completed verdict to Packet685; POST blocked by approval policy never",
+    "D65-control-catalog-not-validated",
+    "ED-immutable-artifact-missing",
+    "exact-head-gates-incomplete",
+    "finish required runtime/CI matrix in adequate environment; preserve failed/skipped/not_measured",
+    "independent cross_approved and owner human_audited on same exact SHA before land"
+  ],
+  "next_role": "executor",
+  "manual_next_action": "coordinator publishes this completed verdict to Packet685, then opens a fresh authorized Executor rework session",
+  "superseded_identity": null,
+  "stop_conditions": [
+    "head/tree/spec/revision/generation drift; stop without rebase or selecting another head",
+    "no fresh attempt authority or lease expired; stop before executing rework",
+    "write-set or role conflict; no source edits by Reviewer and no self approval",
+    "same-failure/review-round limit reached; report to coordinator"
+  ]
+}

@@ -4640,7 +4640,7 @@ def run() -> int:
     # ═══ v1.33.39 (log Cowork: stage cookie 'mới' [extracted_at tiến] mà NLM từ chối MỌI endpoint — cookie hết
     # hạn NHANH, chết cả local; stage cookie chết = Cowork kẹt vòng lặp) — r50_* ═══
     # cmd_nlm_auth_stage VERIFY LIVE (canary notebook_get, KHÔNG tin nlm login --check) TRƯỚC stage:
-    # dead+không-force → rc=4 TỪ CHỐI (KHÔNG upload); dead+--force → bỏ qua cổng, upload chạy; alive → stage.
+    # Every negative or uncertain canary blocks upload, including --force.
     _tg50 = _need_base("tl_gws")
     _o_files50, _o_alive50, _o_up50 = _tg50._nlm_auth_files, _tg50._nlm_auth_alive, _tg50._stage_enc_upload
     _o_tok50 = _os38.environ.get("TL_TOKEN")
@@ -4651,15 +4651,23 @@ def run() -> int:
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_uploaded50.append(fid) or (fid, True))
         _mkns50 = lambda force: argparse.Namespace(config=None, profile=None, refresh=False, folder=None,
                                                    cred_file_id="F50", new=False, force=force)
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (False, "AUTH_EXPIRED (test)")
+        _blocked50 = []
+        for _result50, _force50 in [((False, "AUTH_EXPIRED"), False),
+                                      ((False, "AUTH_EXPIRED"), True),
+                                      ((None, "NETWORK_FAILURE"), False),
+                                      ((None, "TIMEOUT"), False),
+                                      ((None, "INCONCLUSIVE"), False)]:
+            _tg50._nlm_auth_alive = lambda nb, timeout=30, result=_result50, **_kw50: result
+            with _hush():
+                _rc50 = _tg50.cmd_nlm_auth_stage(_mkns50(_force50))
+            _blocked50.append(_rc50 == 4 and len(_uploaded50) == 0)
+        def _raise50(nb, timeout=30, **_kw50):
+            raise TimeoutError("test")
+        _tg50._nlm_auth_alive = _raise50
         with _hush():
-            _rc50_dead = _tg50.cmd_nlm_auth_stage(_mkns50(False))
-        _refused = (_rc50_dead == 4 and _uploaded50 == [])
-        with _hush():
-            _rc50_force = _tg50.cmd_nlm_auth_stage(_mkns50(True))
-        _forced = (_rc50_force == 0 and _uploaded50 == ["F50"])
-        _uploaded50.clear()
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (True, "LIVE OK (test)")
+            _rc50_exception = _tg50.cmd_nlm_auth_stage(_mkns50(True))
+        _blocked50.append(_rc50_exception == 4 and len(_uploaded50) == 0)
+        _tg50._nlm_auth_alive = lambda nb, timeout=30, **_kw50: (True, "LIVE OK (test)")
         with _hush():
             _rc50_alive = _tg50.cmd_nlm_auth_stage(_mkns50(False))
         _allowed = (_rc50_alive == 0 and _uploaded50 == ["F50"])
@@ -4669,7 +4677,598 @@ def run() -> int:
             _os38.environ.pop("TL_TOKEN", None)
         else:
             _os38.environ["TL_TOKEN"] = _o_tok50
-    cases.append(("r50_nlm_stage_refuses_dead_cookie", _refused and _forced and _allowed))
+    cases.append(("wp710_nlm_stage_true_only_upload_count", all(_blocked50) and _allowed))
+
+    # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+    # `secrets-set --nlm` (nlm_cred.enc public + bundle) va `secrets-stage` (bundle co nlm_auth) la DUONG stage cung artefact:
+    # canary chet / khong ket luan -> KHONG duoc dua nlm credential len Drive; canary song -> van stage (doi chung duong).
+    # Chi `nlm_cli._run` (subprocess) bi thay, canary THAT chay.
+    import argparse as _ap50
+    _tg50c = _tg50
+    import time as _tm50c
+    _nc50c = _tg50._imp("nlm_cli")      # đúng module mà `_nlm_auth_alive` gọi
+    _names50c = ("_master_key", "_secrets_fetch", "_secrets_upload", "_refresh_nlm_auth", "_nlm_auth_files",
+                 "_stage_enc_upload", "_gws_export_cred", "load_creds")
+    _o50c = {k: getattr(_tg50c, k) for k in _names50c}
+    _o50c_nc = (_nc50c._run, _nc50c.nlm_available, _tm50c.sleep)
+    _o_env50c = {k: _os38.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_TOKEN")}
+    _store50c = _tg50c._imp("gws_cred_store")
+    _log50c = {"stage": [], "bundle": []}
+    _res50c = {}
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = "NB-WP710-CANARY-0001"
+        _os38.environ["TL_TOKEN"] = _o_env50c["TL_TOKEN"] or "selftest-token"
+        _tg50c._master_key = lambda: "mk50c"
+        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c"), "file")
+        _tg50c._secrets_upload = lambda blob, folder, fid: (
+            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c").decode())) or (fid, True))
+        _tg50c._refresh_nlm_auth = lambda: True
+        _tg50c._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50c._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_log50c["stage"].append(name) or (fid, True))
+        _tg50c._gws_export_cred = lambda: None
+        _tg50c.load_creds = lambda *a, **k: None
+        _nc50c.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None          # `_nlm_auth_alive` backoff 1.5s/3s: khong ngu that trong test
+        for _lab50c, _run50c, _want50c in [
+                ("chet", (1, "", "Error: Authentication expired"), False),
+                ("khong_ket_luan", (1, "", "Error: network connection failed"), False),
+                ("body_sai", (0, "{}", ""), False),
+                ("song", (0, json.dumps({"id": "NB-WP710-CANARY-0001", "title": "Canary", "sources": []}), ""), True)]:
+            _nc50c._run = lambda args, timeout=120, r=_run50c: r
+            for _cmd50c in ("secrets-set", "secrets-stage"):
+                _log50c["stage"].clear(); _log50c["bundle"].clear()
+                with _hush():
+                    if _cmd50c == "secrets-set":
+                        _tg50c.cmd_secrets_set(_ap50.Namespace(
+                            secrets_id="S50C", nlm=True, gas_token=None, webapp=None, gws=False, no_public=False,
+                            folder=None, config=None, profile=None, secrets_file=None, env=None))
+                    else:
+                        _tg50c.cmd_secrets_stage(_ap50.Namespace(
+                            config=None, profile=None, no_gws=True, no_nlm=False, folder=None, secrets_id=None))
+                _staged50c = ("nlm_cred.enc" in _log50c["stage"]) or any("nlm_auth" in b for b in _log50c["bundle"])
+                _res50c[(_lab50c, _cmd50c)] = (_staged50c == _want50c)
+    finally:
+        for _k50c, _v50c in _o50c.items():
+            setattr(_tg50c, _k50c, _v50c)
+        _nc50c._run, _nc50c.nlm_available, _tm50c.sleep = _o50c_nc
+        for _k50c, _v50c in _o_env50c.items():
+            if _v50c is None:
+                _os38.environ.pop(_k50c, None)
+            else:
+                _os38.environ[_k50c] = _v50c
+    cases.append(("wp710_nlm_secrets_set_stage_can_canary", bool(_res50c) and all(_res50c.values())))
+
+    # lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+    _store50d = _tg50._imp("gws_cred_store")
+    _o714a = {k: getattr(_tg50, k) for k in (
+        "_master_key", "load_creds", "_secrets_fetch", "_secrets_upload", "_nlm_auth_alive",
+        "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred")}
+    _env714a = dict(_os38.environ)
+    _up714a, _probe714a, _res714a = [], [], []
+    _bundle714a = {"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "old-offline-jar"}}
+    def _alive714a(*a, **k):
+        _probe714a.append(True)
+        return None, "OFFLINE_INCONCLUSIVE"
+    try:
+        import tempfile as _tf714a
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "offline-test-master"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._nlm_auth_alive = _alive714a
+        _tg50._nlm_auth_files = lambda: {}
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(
+            json.dumps(_bundle714a).encode(), "offline-test-master"), "file")
+        _tg50._secrets_upload = lambda blob, *a, **k: (_up714a.append(json.loads(
+            _store50d.decrypt(blob, "offline-test-master").decode())) or ("OFFLINE", True))
+        with _tf714a.TemporaryDirectory() as _td714a:
+            _cfg714a = _os38.path.join(_td714a, "config.json")
+            with open(_cfg714a, "w", encoding="utf-8") as _f714a:
+                json.dump(_bundle714a, _f714a)
+            for _route714a in ("preserved_remote", "config_nojar", "config_no_nlm", "default_nojar"):
+                _up714a.clear(); _probe714a.clear()
+                with _hush():
+                    if _route714a == "preserved_remote":
+                        _rc714a = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None,
+                            secrets_id="OFFLINE", nlm=False, gas_token=None, webapp="offline-new", gws=False,
+                            no_public=True, folder=None, secrets_file=None, env=None))
+                    else:
+                        _rc714a = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                            config=None if _route714a == "default_nojar" else _cfg714a, profile=None,
+                            no_gws=True, no_nlm=(_route714a == "config_no_nlm"), folder=None, secrets_id="OFFLINE"))
+                # --no-nlm may upload only after actually removing nlm_auth from the payload.
+                if _route714a == "config_no_nlm":
+                    _res714a.append(not any("nlm_auth" in b for b in _up714a) or bool(_probe714a))
+                else:
+                    _res714a.append(_rc714a != 0 and not _up714a)
+    finally:
+        for _k714a, _v714a in _o714a.items(): setattr(_tg50, _k714a, _v714a)
+        _os38.environ.clear(); _os38.environ.update(_env714a)
+    cases.append(("wp714_nlm_bundle_payload_has_no_unguarded_route", all(_res714a) and len(_res714a) == 4))
+
+    # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-canary-true-khi-than-rong-hoac-sai-id
+    # Canary THAT: `_nlm_auth_alive` + `nlm_cli.notebook_get` + `_run_json` chay NGUYEN BAN; chi lop subprocess `nlm_cli._run`
+    # bi thay. rc=0 nhung than khong-JSON / rong / sai-ID / khong tieu de KHONG duoc stage (Spec r4 #2); than dung -> stage 1 lan.
+    _nc50b = _tg50._imp("nlm_cli")
+    _o50b = (_nc50b._run, _nc50b.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload)
+    _o_env50b = {k: _os38.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_TOKEN")}
+    _up50b, _res50b = [], {}
+    _NB50B = "NB-WP710-CANARY-0001"
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = _NB50B
+        _os38.environ["TL_TOKEN"] = _o_env50b["TL_TOKEN"] or "selftest-token"
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_up50b.append(fid) or (fid, True))
+        _nc50b.nlm_available = lambda: True
+        for _n50b, _out50b, _want50b in [
+                ("body_dung", json.dumps({"id": _NB50B, "title": "Canary", "sources": []}), 1),
+                ("mang_nhieu_notebook", json.dumps([
+                    {"id": _NB50B, "title": "Canary"}, {"id": "NB-OTHER-9999", "title": "Other"}]), 0),
+                ("mang_hai_notebook_dung", json.dumps([
+                    {"id": _NB50B, "title": "Canary"}, {"id": _NB50B, "title": "Canary"}]), 0),
+                ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB50B, "title": "Other"}), 0),
+                ("khong_phai_json", "not json at all", 0),
+                ("obj_rong", "{}", 0),
+                ("list_rong", "[]", 0),
+                ("stdout_rong", "", 0),
+                ("sai_id", json.dumps({"id": "NB-OTHER-9999", "title": "Other", "sources": []}), 0),
+                ("khong_tieu_de", json.dumps({"id": _NB50B}), 0)]:
+            _up50b.clear()
+            _nc50b._run = lambda args, timeout=120, out=_out50b: (0, out, "")
+            with _hush():
+                _rc50b = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(
+                    config=None, profile=None, refresh=False, folder=None, cred_file_id="F50B", new=False, force=False))
+            _res50b[_n50b] = (len(_up50b) == _want50b and (_rc50b == 0) == bool(_want50b))
+    finally:
+        _nc50b._run, _nc50b.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload = _o50b
+        for _k50b, _v50b in _o_env50b.items():
+            if _v50b is None:
+                _os38.environ.pop(_k50b, None)
+            else:
+                _os38.environ[_k50b] = _v50b
+    cases.append(("wp710_nlm_stage_canary_doi_chieu_id_va_than", bool(_res50b) and all(_res50b.values())))
+
+    # lop: stage-error-output-leaks-credential
+    _store50d = _tg50._imp("gws_cred_store")
+    _nc714b = _tg50._imp("nlm_cli")
+    _o714b = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_refresh_nlm_auth", "_master_key", "_stage_enc_upload", "_secrets_upload", "_secrets_fetch")}
+    _saved714b = (_nc714b._run, _nc714b.nlm_available, _tm50c.sleep)
+    _env714b = dict(_os38.environ)
+    _res714b, _up714b = [], []
+    _sentinel714b = "OFFLINE" + "_SECRET_SENTINEL_714"
+    try:
+        import contextlib as _cx714b, io as _io714b
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._master_key = lambda: "offline-test-master"
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master"), "file")
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._stage_enc_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
+        _tg50._secrets_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
+        _nc714b.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None
+        for _error714b in ("network connection failed ", "unknown error "):
+            _nc714b._run = lambda *a, e=_error714b, **k: (1, "", e + _sentinel714b)
+            for _fn714b in (_tg50.cmd_nlm_auth_stage, _tg50.cmd_secrets_set, _tg50.cmd_secrets_stage):
+                _up714b.clear(); _cap714b = _io714b.StringIO()
+                _ns714b = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None,
+                    cred_file_id="OFFLINE", new=False, force=True, secrets_id="OFFLINE", nlm=True,
+                    gas_token=None, webapp=None, gws=False, no_public=False, no_gws=True, no_nlm=False,
+                    secrets_file=None, env=None)
+                with _cx714b.redirect_stdout(_cap714b), _cx714b.redirect_stderr(_cap714b):
+                    _rc714b = _fn714b(_ns714b)
+                _res714b.append(_rc714b == 4 and not _up714b and _sentinel714b not in _cap714b.getvalue())
+    finally:
+        for _k714b, _v714b in _o714b.items(): setattr(_tg50, _k714b, _v714b)
+        _nc714b._run, _nc714b.nlm_available, _tm50c.sleep = _saved714b
+        _os38.environ.clear(); _os38.environ.update(_env714b)
+    cases.append(("wp714_nlm_stage_refusal_does_not_print_child_secret", len(_res714b) == 6 and all(_res714b)))
+
+    # WP710 r4/g3 (cross-review PR #713, lớp P3 `ban-chup-credential-doc-truoc-canary`): ở 52f32db jar được đọc
+    # TRƯỚC canary nên bytes đem stage là trạng thái CHƯA được xác nhận. Ca này cho canary "ghi lại" jar (v2) rồi
+    # đòi bytes đã upload — giải mã ngược — ĐÚNG là v2, ở CẢ BA đường stage; kèm: cổng phải xin thân notebook
+    # (`require_notebook_body=True`) ở cả ba, không chỉ rc. Đột biến đọc-trước-canary hoặc bỏ cờ ⇒ ĐỎ.
+    _store50d = _tg50._imp("gws_cred_store")
+    _names50d = ("_nlm_auth_alive", "_nlm_auth_files", "_stage_enc_upload", "_master_key", "_secrets_fetch",
+                 "_secrets_upload", "_refresh_nlm_auth", "_gws_export_cred", "load_creds")
+    _o50d = {k: getattr(_tg50, k) for k in _names50d}
+    _o_env50d = {k: _os38.environ.get(k) for k in ("TL_TOKEN",)}
+    _st50d = {"jar": "v1-truoc-canary", "kw": [], "up": []}
+    _res50d = {}
+
+    def _alive50d(nb, timeout=30, **kw):
+        _st50d["kw"].append(kw.get("require_notebook_body") is True)
+        _st50d["jar"] = "v2-sau-canary"
+        return True, "LIVE OK (test)"
+    try:
+        _os38.environ["TL_TOKEN"] = "tok50d"
+        _tg50._nlm_auth_alive = _alive50d
+        _tg50._nlm_auth_files = lambda: {"auth.json": _st50d["jar"]}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "tok50d").decode())) or (fid, True))
+        _tg50._master_key = lambda: "mk50d"
+        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d"), "file")
+        _tg50._secrets_upload = lambda blob, folder, fid: (
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d").decode()).get("nlm_auth")) or (fid, True))
+        _tg50._refresh_nlm_auth = lambda: True
+        _tg50._gws_export_cred = lambda: None
+        _tg50.load_creds = lambda *a, **k: None
+        for _cmd50d in ("nlm-auth-stage", "secrets-set", "secrets-stage"):
+            _st50d.update(jar="v1-truoc-canary", kw=[], up=[])
+            with _hush():
+                if _cmd50d == "nlm-auth-stage":
+                    _rc50d = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(
+                        config=None, profile=None, refresh=False, folder=None, cred_file_id="F50D", new=False, force=True))
+                elif _cmd50d == "secrets-set":
+                    _rc50d = _tg50.cmd_secrets_set(_ap50.Namespace(
+                        secrets_id="S50D", nlm=True, gas_token=None, webapp=None, gws=False, no_public=False,
+                        folder=None, config=None, profile=None, secrets_file=None, env=None))
+                else:
+                    _rc50d = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                        config=None, profile=None, no_gws=True, no_nlm=False, folder=None, secrets_id="S50D"))
+            _res50d[_cmd50d] = (_rc50d == 0 and _st50d["kw"] == [True] and bool(_st50d["up"])
+                                and all(u == {"auth.json": "v2-sau-canary"} for u in _st50d["up"]))
+    finally:
+        for _k50d, _v50d in _o50d.items():
+            setattr(_tg50, _k50d, _v50d)
+        for _k50d, _v50d in _o_env50d.items():
+            if _v50d is None:
+                _os38.environ.pop(_k50d, None)
+            else:
+                _os38.environ[_k50d] = _v50d
+    cases.append(("wp710_nlm_stage_doc_credential_sau_canary_ca_ba_duong",
+                  len(_res50d) == 3 and all(_res50d.values())))
+
+    # lop: trusted-notebook-overwritten-by-stage-config
+    _o714c = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
+    _nc714c = _tg50._imp("nlm_cli")
+    _saved714c = (_nc714c._run, _nc714c.nlm_available)
+    _env714c = dict(_os38.environ)
+    _seen714c, _up714c = [], []
+    _trusted714c = "NB-PINNED-WRAPPER-0001"
+    def _run714c(argv, timeout=120):
+        _seen714c.append(argv[2])
+        return 0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""
+    try:
+        with _tf714a.TemporaryDirectory() as _td714c:
+            _cfg714c = _os38.path.join(_td714c, "tl-config.json")
+            with open(_cfg714c, "w", encoding="utf-8") as _f714c:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token",
+                    "profiles": {"vbqppl": {"notebookId": "NB-CONFIG-OTHER-0001"}}}, _f714c)
+            for _key714c in ("TL_TOKEN", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY"):
+                _os38.environ.pop(_key714c, None)
+            _os38.environ["TL_NOTEBOOK_ID"] = _trusted714c
+            _tg50.load_creds = _o714c["load_creds"]      # loader THAT (khong stub), tranh F821 cua _TL_MODULE
+            _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+            _tg50._stage_enc_upload = lambda *a, **k: (_up714c.append(True) or ("OFFLINE", True))
+            _nc714c._run = _run714c; _nc714c.nlm_available = lambda: True
+            with _hush():
+                _rc714c = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714c, profile=None,
+                    refresh=False, folder=None, cred_file_id="OFFLINE", new=False, force=False))
+            _ok714c = (_rc714c != 0 and not _up714c) or (_seen714c == [_trusted714c] and len(_up714c) == 1)
+    finally:
+        for _k714c, _v714c in _o714c.items(): setattr(_tg50, _k714c, _v714c)
+        _nc714c._run, _nc714c.nlm_available = _saved714c
+        _os38.environ.clear(); _os38.environ.update(_env714c)
+    cases.append(("wp714_nlm_stage_keeps_wrapper_notebook_with_config_token", _ok714c))
+
+    # WP714 (cross-review PR #714 vòng 1, executor Claude): các ca dưới đây khoá TỪNG chốt mới bằng một ca riêng,
+    # kèm ĐỐI CHỨNG DƯƠNG (allow-list không được biến thành "chặn tất cả"). Canary THẬT — chỉ subprocess
+    # `nlm_cli._run` và các sink Drive bị thay; không chạm mạng/Drive.
+    # (1) lớp `stage-canary-true-khi-than-rong-hoac-sai-id`: ĐÚNG MỘT đối tượng notebook, phán xét trên stdout THÔ.
+    _nc714d = _tg50._imp("nlm_cli")
+    _o714d = (_nc714d._run, _nc714d.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload, _tm50c.sleep)
+    _env714d = dict(_os38.environ)
+    _NB714d = "NB-WP714-CANARY-0001"
+    _good714d = {"id": _NB714d, "title": "Canary"}
+    _other714d = {"id": "NB-OTHER-9999", "title": "Other"}
+    _mat714d = [
+        ("mot_doi_tuong", json.dumps(_good714d), 1), ("bọc_data", json.dumps({"data": _good714d}), 1),
+        ("mang_mot", json.dumps([_good714d]), 1), ("name_notebook_id", json.dumps({"notebook_id": _NB714d, "name": "C"}), 1),
+        ("tieu_de_dang_ngay", json.dumps({"id": _NB714d, "title": "2026-01-01T00:00:00"}), 1),
+        ("mang_dung_sai", json.dumps([_good714d, _other714d]), 0), ("mang_sai_dung", json.dumps([_other714d, _good714d]), 0),
+        ("mang_dung_rong", json.dumps([_good714d, {}]), 0), ("mang_dung_dung", json.dumps([_good714d, _good714d]), 0),
+        ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB714d, "title": "C"}), 0),
+        ("khoa_trung", '{"id":"NB-OTHER-9999","id":"' + _NB714d + '","title":"C"}', 0),
+        ("khoa_khac_hoa", json.dumps({"id": _NB714d, "ID": "NB-OTHER-9999", "title": "C"}), 0),
+        ("ok_false", json.dumps(dict(_good714d, ok=False)), 0), ("error_co", json.dumps(dict(_good714d, error="x")), 0),
+        ("error_so_0", json.dumps(dict(_good714d, error=0)), 0),
+        ("title_bool", json.dumps({"id": _NB714d, "title": True}), 0), ("title_mang", json.dumps({"id": _NB714d, "title": ["C"]}), 0),
+        ("title_trang", json.dumps({"id": _NB714d, "title": "  "}), 0),
+        ("title_dung_name_rong", json.dumps({"id": _NB714d, "title": "C", "name": ""}), 0),
+        ("id_mang", json.dumps({"id": [_NB714d], "title": "C"}), 0), ("data_mang", json.dumps({"data": [_good714d]}), 0),
+        ("null", "null", 0), ("so", "42", 0), ("chuoi", '"x"', 0), ("mang_null", "[null]", 0), ("rong", "", 0),
+        # WP714 review: Python json.loads accepts these non-JSON constants by default.
+        ("json_nan", '{"id":"' + _NB714d + '","title":"C","source_count":NaN}', 0),
+        ("json_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":Infinity}', 0),
+        ("json_negative_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":-Infinity}', 0),
+        # WP714 vòng 3 (executor Claude): cùng cơ chế "bộ đọc Python nhận thứ bộ đọc PS từ chối" — đo song song
+        # cùng đầu vào trên pwsh 7.4.6. Số TRÀN double (Python ra inf/int khổng lồ, PS ra ±∞), surrogate LẺ dạng
+        # thoát (PS ném khi đọc chuỗi/tên khoá), lồng > 64 mức (PS ném). Kèm ĐỐI CHỨNG DƯƠNG ngay biên.
+        ("so_tran_double", '{"id":"' + _NB714d + '","title":"C","n":1e400}', 0),
+        ("so_tran_am", '{"id":"' + _NB714d + '","title":"C","n":-1e400}', 0),
+        ("so_nguyen_400_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 400 + '}', 0),
+        ("surrogate_le_gia_tri", '{"id":"' + _NB714d + '","title":"C","n":"\\ud800"}', 0),
+        ("surrogate_le_khoa", '{"id":"' + _NB714d + '","title":"C","\\udc00":1}', 0),
+        ("long_65_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 64 + "]" * 64 + '}', 0),
+        ("bom_dau", "\ufeff" + json.dumps(_good714d), 0), ("phay_thua", json.dumps(_good714d)[:-1] + ",}", 0),
+        ("chu_thich", json.dumps(_good714d)[:-1] + "/*x*/}", 0),
+        ("dc_so_nguyen_300_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 300 + '}', 1),
+        ("dc_cap_surrogate_hop_le", '{"id":"' + _NB714d + '","title":"\\ud83d\\ude00"}', 1),
+        ("dc_long_64_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 63 + "]" * 63 + '}', 1),
+        # WP714 vòng 4 (Codex lượt 3, cùng lớp): "trắng" theo MỘT bảng tường minh (`_NLM_CANARY_BLANK_CODEPOINTS`),
+        # không theo `strip()` — U+001C–U+001F từng Python=âm/PS=dương; ký tự độ rộng 0 nay cũng là trắng. Kèm đối
+        # chứng dương: ký tự trong bảng nằm GIỮA chữ thật vẫn là tên.
+        *[("title_trang_%04x" % _cp714d, json.dumps({"id": _NB714d, "title": chr(_cp714d)}), 0)
+          for _cp714d in (0x1C, 0x1D, 0x1E, 0x1F, 0x85, 0xA0, 0x180E, 0x200B, 0x2060, 0x3000, 0xFEFF)],
+        *[("name_trang_%04x" % _cp714d, json.dumps({"notebook_id": _NB714d, "name": " " + chr(_cp714d) + "\t"}), 0)
+          for _cp714d in (0x1C, 0x1F, 0x200B, 0xFEFF)],
+        ("dc_title_co_chu_giua_trang", json.dumps({"id": _NB714d, "title": "\u200bC\u001c"}), 1),
+    ]
+    _res714d = {}
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = _NB714d
+        _os38.environ.pop("TL_CANARY_NOTEBOOK_ID", None)
+        _os38.environ["TL_TOKEN"] = _env714d.get("TL_TOKEN") or "selftest-token"
+        _up714d = []
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_up714d.append(fid) or (fid, True))
+        _nc714d.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None
+        for _n714d, _out714d, _want714d in _mat714d:
+            _nc714d._run = lambda args, timeout=120, out=_out714d: (0, out, "")
+            for _f714d in (False, True):
+                _up714d.clear()
+                with _hush():
+                    _rc714d = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=None, profile=None, refresh=False,
+                        folder=None, cred_file_id="F714D", new=False, force=_f714d))
+                _res714d[(_n714d, _f714d)] = (len(_up714d) == _want714d and (_rc714d == 0) == bool(_want714d))
+    finally:
+        _nc714d._run, _nc714d.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload, _tm50c.sleep = _o714d
+        _os38.environ.clear(); _os38.environ.update(_env714d)
+    cases.append(("wp714_nlm_canary_dung_mot_doi_tuong_notebook",
+                  len(_res714d) == 2 * len(_mat714d) and all(_res714d.values())))
+
+    # (2) lớp `stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary` — phần payload: mỗi chốt một vế, có đối chứng dương.
+    #   a. secrets-stage --no-nlm, config mang nlm_auth ⇒ rc0, ĐÚNG 1 upload, bundle KHÔNG còn nlm_auth, 0 probe.
+    #   b. secrets-stage thiếu jar, config KHÔNG có nlm_auth ⇒ rc3, 0 upload (không âm thầm xoá NLM trên Drive).
+    #   c. secrets-set không --nlm, bundle Drive mang nlm_auth ⇒ rc4, 0 upload (không gửi lại credential chưa canary).
+    #   d. secrets-set --nlm, bundle Drive mang nlm_auth CŨ, canary sống ⇒ rc0, bundle mang jar MỚI (guard không chặn oan).
+    #   e. guard trực tiếp: nlm_auth bằng NỘI DUNG nhưng KHÁC đối tượng với bản đã canary ⇒ 4; đúng đối tượng ⇒ 0.
+    _o714e = {k: getattr(_tg50, k) for k in ("_master_key", "load_creds", "_secrets_fetch", "_secrets_upload",
+              "_nlm_auth_alive", "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred", "_stage_enc_upload")}
+    _env714e = dict(_os38.environ)
+    _st714e = {"up": [], "probe": 0, "remote": {}}
+    _res714e = {}
+
+    def _alive714e(nb, timeout=30, **kw):
+        _st714e["probe"] += 1
+        return True, "LIVE OK (test)"
+    try:
+        import tempfile as _tf714e
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "mk714e"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._nlm_auth_alive = _alive714e
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_st714e["up"].append(name) or (fid, True))
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e"), "file")
+        _tg50._secrets_upload = lambda blob, *a, **k: (_st714e["up"].append(json.loads(
+            _store50d.decrypt(blob, "mk714e").decode())) or ("S714E", True))
+        with _tf714e.TemporaryDirectory() as _td714e:
+            _cfg714e = _os38.path.join(_td714e, "cfg.json")
+            with open(_cfg714e, "w", encoding="utf-8") as _fh714e:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "cu"}}, _fh714e)
+            _cfg714e_sach = _os38.path.join(_td714e, "cfg-sach.json")
+            with open(_cfg714e_sach, "w", encoding="utf-8") as _fh714e:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token"}, _fh714e)
+            for _v714e in "abcd":
+                _st714e.update(up=[], probe=0)
+                _tg50._nlm_auth_files = (lambda: {}) if _v714e == "b" else (lambda: {"auth.json": "moi"})
+                _st714e["remote"] = {"token": "offline-test-token", "nlm_auth": {"auth.json": "cu"}}
+                with _hush():
+                    if _v714e in "ab":
+                        _rc714e = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                            config=_cfg714e if _v714e == "a" else _cfg714e_sach, profile=None, no_gws=True,
+                            no_nlm=(_v714e == "a"), folder=None, secrets_id="S714E"))
+                    else:
+                        _rc714e = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None, secrets_id="S714E",
+                            nlm=(_v714e == "d"), gas_token=None, webapp="offline-new", gws=False, no_public=True,
+                            folder=None, secrets_file=None, env=None))
+                _b714e = [u for u in _st714e["up"] if isinstance(u, dict)]
+                if _v714e == "a":
+                    _res714e[_v714e] = (_rc714e == 0 and len(_st714e["up"]) == 1 and len(_b714e) == 1
+                                        and "nlm_auth" not in _b714e[0] and _st714e["probe"] == 0)
+                elif _v714e in "bc":
+                    _res714e[_v714e] = (_rc714e == (3 if _v714e == "b" else 4) and not _st714e["up"])
+                else:
+                    _res714e[_v714e] = (_rc714e == 0 and _st714e["probe"] == 1 and len(_b714e) == 1
+                                        and _b714e[0].get("nlm_auth") == {"auth.json": "moi"})
+        _ok714e = {"auth.json": "x"}
+        with _hush():
+            _res714e["e"] = (_tg50._nlm_bundle_guard("t", {"nlm_auth": dict(_ok714e)}, _ok714e) == 4
+                             and _tg50._nlm_bundle_guard("t", {"nlm_auth": _ok714e}, _ok714e) == 0
+                             and _tg50._nlm_bundle_guard("t", {"nlm_auth": _ok714e}, None) == 4
+                             and _tg50._nlm_bundle_guard("t", {"token": "x"}, None) == 0)
+    finally:
+        for _k714e, _v714e in _o714e.items():
+            setattr(_tg50, _k714e, _v714e)
+        _os38.environ.clear(); _os38.environ.update(_env714e)
+    cases.append(("wp714_nlm_bundle_moi_chot_mot_ve", len(_res714e) == 5 and all(_res714e.values())))
+
+    # (3) lớp `stage-error-output-leaks-credential` — các nhánh lỗi NGOÀI canary: lỗi upload (cả ba lệnh, rc5),
+    #     lỗi đồng bộ public (secrets-set, giữ rc0 cảnh báo), lỗi giải mã, lỗi trong `_stage_enc_upload` (gws + gcloud),
+    #     ngoại lệ ném từ chính probe. Mọi output không được chứa sentinel.
+    _o714f = {k: getattr(_tg50, k) for k in ("_master_key", "load_creds", "_secrets_fetch", "_secrets_upload",
+              "_nlm_auth_alive", "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred", "_stage_enc_upload",
+              "_gcloud_access_token", "_gcloud_drive_update")}
+    _env714f = dict(_os38.environ)
+    _sen714f = "OFFLINE" + "_SENTINEL_714F"
+    _res714f = {}
+
+    def _boom714f(*a, **k):
+        raise RuntimeError(_sen714f)
+    try:
+        import contextlib as _cx714f, io as _io714f
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "mk714f"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._nlm_auth_alive = lambda nb, timeout=30, **kw: (True, "LIVE OK (test)")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f"), "file")
+
+        def _run714f(fn, ns):
+            _cap = _io714f.StringIO()
+            with _cx714f.redirect_stdout(_cap), _cx714f.redirect_stderr(_cap):
+                try:
+                    _rc = fn(ns)
+                except Exception:   # noqa: BLE001 — một ngoại lệ thoát ra là ca ĐỎ (tl.main sẽ in traceback)
+                    _rc = "exc"
+            return _rc, _sen714f in _cap.getvalue()
+        _ns714f = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None, cred_file_id="OFFLINE",
+            new=False, force=False, secrets_id="OFFLINE", nlm=True, gas_token=None, webapp=None, gws=False,
+            no_public=False, no_gws=True, no_nlm=False, secrets_file=None, env=None)
+        _tg50._stage_enc_upload, _tg50._secrets_upload = _boom714f, _boom714f
+        for _nm714f, _fn714f in (("nlm-auth-stage", _tg50.cmd_nlm_auth_stage), ("secrets-set", _tg50.cmd_secrets_set),
+                                 ("secrets-stage", _tg50.cmd_secrets_stage)):
+            _rc714f, _leak714f = _run714f(_fn714f, _ns714f)
+            _res714f["upload:" + _nm714f] = (_rc714f == 5 and not _leak714f)
+        _tg50._secrets_upload = lambda *a, **k: ("OFFLINE", True)       # bundle ok, chỉ public lỗi ⇒ cảnh báo rc0
+        _rc714f, _leak714f = _run714f(_tg50.cmd_secrets_set, _ns714f)
+        _res714f["public"] = (_rc714f == 0 and not _leak714f)
+        _dec714f = _store50d.decrypt                                       # lỗi giải mã MANG sentinel trong thông điệp
+        _store50d.decrypt = _boom714f
+        try:
+            _rc714f, _leak714f = _run714f(_tg50.cmd_secrets_set, _ns714f)
+        finally:
+            _store50d.decrypt = _dec714f
+        _res714f["giai_ma"] = (_rc714f == 3 and not _leak714f)
+        _tg50._nlm_auth_alive = _boom714f
+        _rc714f, _leak714f = _run714f(_tg50.cmd_nlm_auth_stage, _ns714f)
+        _res714f["probe_exc"] = (_rc714f == 4 and not _leak714f)
+        _tg50._stage_enc_upload = _o714f["_stage_enc_upload"]               # helper THẬT, chỉ gws/gcloud giả
+        _g714f = type("G714F", (), {"update_content": staticmethod(_boom714f)})()
+        for _mode714f in ("khong_gcloud", "gcloud_loi"):
+            _tg50._gcloud_access_token = ((lambda: (None, _sen714f)) if _mode714f == "khong_gcloud"
+                                          else (lambda: ("tok", None)))
+            _tg50._gcloud_drive_update = lambda *a, **k: {"ok": False, "error": _sen714f, "fix": _sen714f}
+            _cap714f = _io714f.StringIO()
+            with _cx714f.redirect_stdout(_cap714f), _cx714f.redirect_stderr(_cap714f):
+                try:
+                    _tg50._stage_enc_upload("nlm_cred.enc", b"x", "F", "FID", False, g=_g714f)
+                    _msg714f = "khong_nem"
+                except RuntimeError as _e714f:
+                    _msg714f = str(_e714f) + repr(_e714f.__cause__) + repr(_e714f.__context__ if not _e714f.__suppress_context__ else None)
+            _res714f["stage_enc:" + _mode714f] = (_msg714f != "khong_nem" and _sen714f not in _msg714f
+                                                  and _sen714f not in _cap714f.getvalue())
+    finally:
+        for _k714f, _v714f in _o714f.items():
+            setattr(_tg50, _k714f, _v714f)
+        _os38.environ.clear(); _os38.environ.update(_env714f)
+    cases.append(("wp714_nlm_stage_moi_nhanh_loi_khong_ro_chuoi_tho", len(_res714f) == 8 and all(_res714f.values())))
+
+    # (4) lớp `trusted-notebook-overwritten-by-stage-config` — thứ tự tin cậy: TL_CANARY_NOTEBOOK_ID > TL_NOTEBOOK_ID ở
+    #     lối vào > nền. Đo bằng HAI profile thật trong config (loader THẬT): --profile khác + token chỉ ở config, và
+    #     đường `tl.main` đã overlay TL_NOTEBOOK_ID trước khi vào lệnh (giả lập: env đã mang ID của config).
+    _o714g = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
+    _nc714g = _tg50._imp("nlm_cli")
+    _saved714g = (_nc714g._run, _nc714g.nlm_available)
+    _env714g = dict(_os38.environ)
+    _seen714g, _res714g = [], {}
+    _PIN714g = "NB-PINNED-WRAPPER-0714"
+    try:
+        import tempfile as _tf714g
+        _nc714g._run = lambda argv, timeout=120: (_seen714g.append(argv[2]) or
+                                                  (0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""))
+        _nc714g.nlm_available = lambda: True
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda *a, **k: ("OFFLINE", True)
+        _tg50.load_creds = _o714g["load_creds"]
+        with _tf714g.TemporaryDirectory() as _td714g:
+            _cfg714g = _os38.path.join(_td714g, "tl-config.json")
+            with open(_cfg714g, "w", encoding="utf-8") as _fh714g:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token", "profiles": {
+                    "vbqppl": {"notebookId": "NB-CONFIG-BASE-0714"},
+                    "duan714": {"notebookId": "NB-CONFIG-DUAN-0714"}}}, _fh714g)
+            for _lab714g, _envset714g, _prof714g, _want714g in (
+                    ("profile_khac_token_config", {"TL_NOTEBOOK_ID": _PIN714g}, "duan714", _PIN714g),
+                    ("pin_thang_overlay", {"TL_NOTEBOOK_ID": "NB-CONFIG-DUAN-0714", "TL_CANARY_NOTEBOOK_ID": _PIN714g},
+                     "duan714", _PIN714g),
+                    ("khong_ghim_theo_profile", {}, "duan714", "NB-CONFIG-DUAN-0714")):
+                _os38.environ.clear(); _os38.environ.update(_env714g)
+                for _k714g in ("TL_TOKEN", "TL_WEBAPP", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY", "TL_NOTEBOOK_ID",
+                               "TL_CANARY_NOTEBOOK_ID"):
+                    _os38.environ.pop(_k714g, None)
+                _os38.environ.update(_envset714g)
+                _seen714g.clear()
+                with _hush():
+                    _rc714g = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714g, profile=_prof714g, refresh=False,
+                        folder=None, cred_file_id="OFFLINE", new=False, force=False))
+                _res714g[_lab714g] = (_rc714g == 0 and _seen714g == [_want714g])
+    finally:
+        for _k714g, _v714g in _o714g.items():
+            setattr(_tg50, _k714g, _v714g)
+        _nc714g._run, _nc714g.nlm_available = _saved714g
+        _os38.environ.clear(); _os38.environ.update(_env714g)
+    cases.append(("wp714_nlm_canary_ghim_notebook_qua_hai_profile", len(_res714g) == 3 and all(_res714g.values())))
+
+    # (6) WP714 vòng 3 (Codex lượt 2, lớp P3 `khai-rong-hon-phep-do-trong-changelog-runbook`): chốt payload làm
+    # `secrets-set` thiếu `--nlm` trả mã 4 khi bundle mang nlm_auth, nên MỌI lệnh mẫu xoay token/webapp/GWS (một
+    # đoạn trong dấu backtick) ở RUNBOOK và trong tl_gws (lời khắc phục GWS in ra) phải mang `--nlm` NGAY TRONG lệnh
+    # — chỉ dẫn cũ đưa người vận hành thẳng vào mã 4. Đếm số lệnh mẫu để ca không xanh rỗng khi chuỗi đổi dạng.
+    import re as _re714h
+    _pat714h = _re714h.compile(r"`[^`\n]*secrets-set --(?:gas-token|webapp|gws)[^`\n]*`")
+    _dir714h = _os38.path.dirname(_os38.path.dirname(_os38.path.abspath(_tg50.__file__)))
+    _cmd714h = {}
+    for _rel714h in (("references", "RUNBOOK.md"), ("scripts", "tl_gws.py")):
+        with open(_os38.path.join(_dir714h, *_rel714h), encoding="utf-8") as _f714h:
+            _cmd714h[_rel714h[-1]] = _pat714h.findall(_f714h.read())
+    cases.append(("wp714_huong_dan_secrets_set_kem_nlm",
+                  len(_cmd714h["RUNBOOK.md"]) >= 3 and len(_cmd714h["tl_gws.py"]) >= 4
+                  and all("--nlm" in _c for _v in _cmd714h.values() for _c in _v)))
+
+    # (7) WP714 vòng 4 (Codex lượt 3, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): wrapper PS và lệnh stage
+    # Python phải phán xét CÙNG một văn bản bằng CÙNG một luật. CI không có pwsh, nên ở đây khoá các BẢNG mà wrapper
+    # chép lại — đọc thẳng từ tệp .ps1, so với nguồn Python — để sửa một bên mà quên bên kia thì ĐỎ:
+    #   a. bảng ký tự "trắng": `$CanaryBlankCodePoints` == `_NLM_CANARY_BLANK_CODEPOINTS`, và Test-CanaryBody không
+    #      còn dùng `IsNullOrWhiteSpace` (tập .NET khác tập Python ở U+001C–U+001F, đo);
+    #   b. lớp ký tự ngắt dòng của `ConvertTo-StageText` (+ `\r`, đã đổi trước) == tập ký tự `str.splitlines` ngắt
+    #      (đo trên BMP) — `nlm_cli._strip_keyring` cắt dòng bằng `splitlines`;
+    #   c. mẫu nhiễu keyring của wrapper, biên dịch bằng `re` KHÔNG cờ, trả CÙNG kết quả `search` với
+    #      `nlm_cli._KEYRING_NOISE_RE` trên một bộ dòng thay từng ký tự bằng mọi biến thể hoa/thường Python nhận
+    #      (gồm U+017F, U+212A, U+0130, U+0131) và mọi ký tự `isspace`. Đếm số dòng để ca không xanh rỗng.
+    _ps714j = open(_os38.path.join(_dir714h, "scripts", "nlm-credential-refresh.ps1"), encoding="utf-8").read()
+    _m714j = _re714h.search(r"\$CanaryBlankCodePoints = @\(([^)]*)\)", _ps714j)
+    _blank714j = [int(_x, 16) for _x in _re714h.findall(r"0x[0-9A-Fa-f]+", _m714j.group(1))] if _m714j else []
+    _body714j = _ps714j.split("function Test-CanaryBody", 1)[-1].split("function Classify", 1)[0]
+    cases.append(("wp714_canary_bang_trang_khop_ps",
+                  _blank714j == list(_tg50._NLM_CANARY_BLANK_CODEPOINTS) and len(_blank714j) >= 30
+                  and "Test-CanaryBlank" in _body714j and "IsNullOrWhiteSpace" not in _body714j))
+    _nc714j = _tg50._imp("nlm_cli")
+    _split714j = _re714h.search(r"\[regex\]::Split\(\$text, '(\[[^']*\])'\)", _ps714j)
+    _want714j = {_c for _c in range(0x10000) if len(("a" + chr(_c) + "b").splitlines()) == 2}
+    _got714j = ({_c for _c in range(0x10000) if _re714h.fullmatch(_split714j.group(1), chr(_c))} | {0x0D}) if _split714j else set()
+    _kr714j = _re714h.search(r"\$KeyringNoise = '([^']*)' -f '([^']*)'", _ps714j)
+    _same714j, _n714j = False, 0
+    if _kr714j:
+        _psre714j = _re714h.compile(_kr714j.group(1).replace("{0}", _kr714j.group(2)))
+        _cand714j = ([chr(_c) for _c in range(0x21, 0x7F)] + ["\u017f", "\u212a", "\u0130", "\u0131", "\u00e9"]
+                     + [chr(_c) for _c in range(0x10000) if chr(_c).isspace()])
+        _same714j = True
+        for _base714j in ("using keyring backend", "keyring.backends", "keyring.backend", "no recommended backend"):
+            for _i714j in range(len(_base714j)):
+                for _ch714j in _cand714j:
+                    _line714j = "x " + _base714j[:_i714j] + _ch714j + _base714j[_i714j + 1:] + " y"
+                    _n714j += 1
+                    if bool(_psre714j.search(_line714j)) != bool(_nc714j._KEYRING_NOISE_RE.search(_line714j)):
+                        _same714j = False
+    cases.append(("wp714_canary_van_chuyen_khop_nlm_cli",
+                  bool(_want714j) and _got714j == _want714j and _same714j and _n714j > 5000))
 
     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══
@@ -21011,15 +21610,12 @@ def run() -> int:
         #
         # r308 (T0-F/GATE-05): ca này TỪNG dựng package-set bằng `rglob` trên ĐĨA — sai nguồn. Cây dev
         # rộng hơn gói, nên con trỏ tới tệp CÓ-trên-đĩa-nhưng-NGOÀI-gói lọt test mà ĐỎ ở `release-verify`
-        # (đúng thứ guard sinh ra để chặn). Nay đọc `RELEASE_MANIFEST.json` như khuôn r289, và doc-set
-        # lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
+        # (đúng thứ guard sinh ra để chặn). Dựng manifest tạm của cây ứng viên bằng helper release,
+        # rồi lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
         # FALSIFY được: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật, đã bịt.
         root = _ROOT209
-        mf = root / "RELEASE_MANIFEST.json"
-        if not mf.exists():
-            return True
         paths = sorted(str(x.get("path") or "") for x in
-                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+                       (_rel209._build_release_manifest(root).get("files") or []))
         pset = set(paths)
         docs = {}
         for rel in sorted(p for p in paths if p.lower().endswith(".md")):
@@ -21333,7 +21929,22 @@ def run() -> int:
         # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
         # trong cùng packet, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
         # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 75 = **255**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 255
+        # KÊ KHAI SLOT (WP710 — land PR #714, Spec r4 mục 7 đã nêu ứng viên 183 tệp): gói 180 → **183**.
+        # Thêm đúng BA tệp vào gói, không tệp `docs/` nào đổi (vẫn 75):
+        #   + `scripts/nlm-credential-refresh.ps1`       — wrapper refresh → canary → stage (RUNTIME trên máy giữ hồ sơ gốc;
+        #     `references/RUNBOOK.md` trỏ tới nó nên nó PHẢI có trong gói, nếu không `release-verify --strict` đỏ).
+        #   + `scripts/nlm-credential-refresh.Tests.ps1` — bộ test hành vi của wrapper.
+        #   + `changelog.d/wp-710.md`                    — mảnh changelog của packet.
+        # Hai tệp sau là dev-side theo nghĩa hẹp; chúng vào gói vì bộ lọc gói hiện không loại chúng, không vì runtime
+        # cần. Cây thật = 183 + 75 = **258**; trần Package 200 còn 17 khe.
+        # KÊ KHAI SLOT (bookkeeping land WP725/WP726/WP727 — PR #729/#730/#731): gói 183 → **186**. Thêm đúng BA
+        # mảnh changelog, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới:
+        #   + `changelog.d/wp-725.md` · `changelog.d/wp-726.md` · `changelog.d/wp-727.md`
+        # Fragment `scripts/test_fragments/wp72{5,6,7}_*.py` KHÔNG vào gói (bộ lọc loại đúng tiền tố); bundle
+        # `scripts/tl_test_fragments_bundled.py` đã có sẵn trong gói, chỉ đổi băm. Ba PR worker được merge riêng
+        # lẻ nên master đỏ `release-verify --strict` giữa chừng — đúng lý do protocol §9 để manifest cho phiên land.
+        # Cây thật = 186 + 75 = **261**; trần Package 200 còn 14 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 261
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 75
@@ -21377,8 +21988,10 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 180. Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 180
+            # RATCHET: goi giu 186 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # changelog.d — ke khai slot day du o r291_docs_ngoai_goi).
+            # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 186
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

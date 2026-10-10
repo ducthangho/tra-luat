@@ -5,7 +5,9 @@
 #   · Có file 'nlm-auth' MỚI HƠN bundle nlm_cred.enc  ⇒ export tươi user vừa thả vào Drive
 #       → import (nlm-auth-import.sh) → stage vào bundle mã hoá → XOÁ plaintext khỏi Drive (bảo mật).
 #   · Không có file mới                                 ⇒ keep-warm: nạp bundle, probe, stage lại nếu sống.
-#   · Probe cuối quyết định rc: 0 sống · 3 chết (cần re-harvest) · 2 gws/hạ tầng hỏng.
+#   · Bước cuối = `tl nlm-auth-stage` (tự chạy canary LIVE trước khi đọc jar, WP710) quyết định rc:
+#     0 sống + bundle tươi · 3 chết (canary ÂM, cần re-harvest) · 2 gws/hạ tầng hỏng, không kết luận, hoặc export
+#     tươi không vào được bundle (plaintext giữ trên Drive để soi tay).
 #
 # Dành cho Routine phiên-mới: chỉ cần TL_TOKEN (môi trường inject). KHÔNG commit/push/sửa code.
 set -uo pipefail
@@ -71,16 +73,56 @@ else
   $PY scripts/tl.py nlm-auth-load >/dev/null 2>&1 || true
 fi
 
-# ── 3. probe LIVE quyết định trạng thái ──
-say "3. probe LIVE"
-if CHK="$(nlm login --check 2>&1)" && printf '%s' "$CHK" | grep -qi valid; then
-  NB="$(printf '%s' "$CHK" | grep -oE 'Notebooks found: *[0-9]+' | grep -oE '[0-9]+' | head -1)"
-  $PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1 || true   # luôn làm tươi bundle (idempotent)
-  echo "  ✓ NLM SỐNG (${NB:-?} notebook)$([ "$REFRESHED" = 1 ] && echo ' — vừa refresh từ export mới' || echo ' — keep-warm')"
+# ── 3. canary LIVE + stage quyết định trạng thái (WP726) ──
+# KHÔNG dùng `nlm login --check` (false-green). Phán quyết = mã thoát của `nlm-auth-stage`: lệnh ấy tự chạy canary
+# LIVE trên đúng notebook TRƯỚC khi đọc jar và chỉ upload khi canary dương (WP710). Không in đầu ra của lệnh
+# (chỉ mã) và KHÔNG nuốt mã thoát.
+say "3. canary LIVE + stage"
+if [ "$REFRESHED" = 1 ]; then
+  # Import vừa xong đã qua canary VÀ đã stage thành công (nlm-auth-import thoát khác 0 nếu một trong hai hỏng)
+  # ⇒ không stage lần hai (WP726 lượt review 1, F2).
+  echo "  ✓ NLM SỐNG (canary dương, bundle tươi) — vừa refresh từ export mới"
   exit 0
 fi
-echo "  🔴 NLM CHẾT — cần re-harvest cookie:"
+if [ -n "$NEW_ID" ] && [ "${NEW_EP:-0}" -gt "${BUNDLE_EP:-0}" ]; then
+  # Export tươi mà import/stage KHÔNG cùng thành công ⇒ DỪNG, không rơi xuống keep-warm: stage lại ngay có thể
+  # chồng lên một lần ghi dở và báo "sống" trong khi plaintext vẫn nằm trên Drive (GitHub review #730, P1).
+  echo "  ✗ export tươi chưa vào được bundle — plaintext '$NEW_NAME' GIỮ trên Drive; soi tay (kiểm Drive) rồi chạy lại"
+  exit 2
+fi
+_canary_song() {  # 0 sống · 3 chết · 2 không kết luận — cùng probe đòi THÂN notebook như cổng stage; chỉ dùng mã thoát.
+  "$PY" - >/dev/null 2>&1 <<'PY'
+import sys
+sys.path.insert(0, "scripts")
+try:
+    import tl
+    tg = tl._imp("tl_gws")
+    tg.bind(tl)
+    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)
+except Exception:
+    alive = None
+sys.exit(0 if alive is True else 3 if alive is False else 2)
+PY
+}
+$PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1
+STAGE_RC=$?
+if [ "$STAGE_RC" = 0 ]; then
+  echo "  ✓ NLM SỐNG (canary dương, bundle tươi) — keep-warm"
+  exit 0
+fi
+if [ "$STAGE_RC" != 4 ]; then
+  echo "  ✗ nlm-auth-stage rc=$STAGE_RC — hạ tầng/không kết luận; có thể đã ghi một phần, kiểm Drive trước khi thử lại"
+  exit 2
+fi
+# rc 4 của stage gộp canary ÂM với KHÔNG KẾT LUẬN (mạng/thiếu nlm/thân lạ) ⇒ hỏi lại riêng; chỉ ÂM mới là "chết"
+# (GitHub review #730, P2) — không kết luận mà bảo re-harvest là chẩn đoán sai.
+_canary_song; CANARY_RC=$?
+if [ "$CANARY_RC" != 3 ]; then
+  echo "  ✗ stage từ chối (canary không dương) nhưng probe lại KHÔNG xác nhận chết (rc=$CANARY_RC) — không kết luận; chạy lại sau"
+  exit 2
+fi
+echo "  🔴 NLM CHẾT (canary không dương, 0 upload) — cần re-harvest cookie:"
 echo "     điện thoại: Firefox + Cookie Quick Manager → export toàn bộ cookie google → Drive"
 echo "     (tài khoản ducthangho@gmail.com, tên có 'nlm-auth'); Routine sau tự import."
-echo "     hoặc máy Code: nlm login && python scripts/tl.py nlm-auth-stage"
+echo "     hoặc máy giữ hồ sơ trình duyệt gốc: đăng nhập lại nếu cần, rồi pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>"
 exit 3

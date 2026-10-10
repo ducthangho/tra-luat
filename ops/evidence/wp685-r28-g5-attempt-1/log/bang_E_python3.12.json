@@ -1,0 +1,2244 @@
+[
+ {
+  "ten": "d0_EACCES_thoat",
+  "ten_muc6": "d0_EACCES_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 13:\n                raise\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "EACCES",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "d0_EIO_sai",
+  "ten_muc6": "d0_EIO_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 5:\n                return True\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "EIO",
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_EIO_thoat",
+  "ten_muc6": "d0_EIO_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 5:\n                raise\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "EIO",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "d0_EPERM_sai",
+  "ten_muc6": "d0_EPERM_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 1:\n                return True\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "EPERM",
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_EPERM_thoat",
+  "ten_muc6": "d0_EPERM_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 1:\n                raise\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "EPERM",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "d0_ESRCH_sai",
+  "ten_muc6": "d0_ESRCH_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ProcessLookupError:\n            return True\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "ESRCH",
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_ESRCH_thoat",
+  "ten_muc6": "d0_ESRCH_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ProcessLookupError:\n            raise\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "ESRCH",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "d0_decode_sai",
+  "ten_muc6": "d0_decode_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except UnicodeDecodeError:\n            return True\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "p4",
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_decode_thoat",
+  "ten_muc6": "d0_decode_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except UnicodeDecodeError:\n            raise\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "p4",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "d0_doc_hai_lan",
+  "ten_muc6": "d0_doc_hai_lan",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "song",
+   "read count"
+  ]
+ },
+ {
+  "ten": "d0_exception_bat",
+  "ten_muc6": "d0_exception_bat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False\n        except Exception:\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "exception",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "d0_exception_boc",
+  "ten_muc6": "d0_exception_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False\n        except Exception as e:\n            raise RuntimeError(\"boc\") from e"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "exception",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "d0_exception_thaythe",
+  "ten_muc6": "d0_exception_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False\n        except Exception:\n            raise RuntimeError(\"thay\")"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "exception",
+   null
+  ]
+ },
+ {
+  "ten": "d0_giai_ma_lai_utf8",
+  "ten_muc6": "d0_giai_ma_lai_utf8",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            noi_dung = noi_dung.encode(\"latin-1\").decode(\"utf-8\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "utf8-hong-that",
+   "result False"
+  ]
+ },
+ {
+  "ten": "d0_giai_ma_long",
+  "ten_muc6": "d0_giai_ma_long",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\", errors=\"replace\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "song",
+   "read args"
+  ]
+ },
+ {
+  "ten": "d0_index_sai",
+  "ten_muc6": "d0_index_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except IndexError:\n            return True\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "p3",
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_index_thoat",
+  "ten_muc6": "d0_index_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "p3",
+   "parse error escaped"
+  ]
+ },
+ {
+  "ten": "d0_ok_Z_sai",
+  "ten_muc6": "d0_ok_Z_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\" or True\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B3-zombie",
+   null,
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_ok_khongZ_sai",
+  "ten_muc6": "d0_ok_khongZ_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] == \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "song",
+   "result False"
+  ]
+ },
+ {
+  "ten": "d0_tach_ngoac_dau",
+  "ten_muc6": "d0_tach_ngoac_dau",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.index(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B3-zombie",
+   null,
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_them_kill",
+  "ten_muc6": "d0_them_kill",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            os.kill(pid, 0)\n        except OSError:\n            pass\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "song",
+   "kill count"
+  ]
+ },
+ {
+  "ten": "d0_tin-hieu_boc",
+  "ten_muc6": "d0_tin-hieu_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False\n        except KeyboardInterrupt as e:\n            raise RuntimeError(\"boc\") from e"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "tin-hieu",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "d0_tin-hieu_thaythe",
+  "ten_muc6": "d0_tin-hieu_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False\n        except KeyboardInterrupt:\n            raise RuntimeError(\"thay\")"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "tin-hieu",
+   null
+  ]
+ },
+ {
+  "ten": "d0_value_sai",
+  "ten_muc6": "d0_value_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            return True\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "p1",
+   "result True"
+  ]
+ },
+ {
+  "ten": "d0_value_thoat",
+  "ten_muc6": "d0_value_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "p1",
+   "parse error escaped"
+  ]
+ },
+ {
+  "ten": "d_doc_lai_khi_EPERM",
+  "ten_muc6": "d_doc_lai_khi_EPERM",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 1:\n                try:\n                    trang_thai.read_text(encoding=\"latin-1\")\n                except OSError:\n                    pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-doc-hong",
+   "EPERM",
+   "read count"
+  ]
+ },
+ {
+  "ten": "d_exception_boc",
+  "ten_muc6": "d_exception_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass\n        except Exception as e:\n            raise RuntimeError(\"boc\") from e"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-exception",
+   "doc",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "d_exception_thaythe",
+  "ten_muc6": "d_exception_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass\n        except Exception:\n            raise RuntimeError(\"thay\")"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-exception",
+   "doc",
+   null
+  ]
+ },
+ {
+  "ten": "d_giai_ma_lai_utf8",
+  "ten_muc6": "d_giai_ma_lai_utf8",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            noi_dung = noi_dung.encode(\"latin-1\").decode(\"utf-8\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-dem-doc",
+   "4",
+   "kill count"
+  ]
+ },
+ {
+  "ten": "d_giai_ma_long",
+  "ten_muc6": "d_giai_ma_long",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\", errors=\"replace\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-eacces",
+   null,
+   "read args"
+  ]
+ },
+ {
+  "ten": "d_hoi_lai_khac_EACCES",
+  "ten_muc6": "d_hoi_lai_khac_EACCES",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError as e:\n        if e.errno != 13:\n            try:\n                trang_thai.exists()\n            except OSError:\n                pass\n        co_tep = None   # KHÔNG kết luận"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-eio",
+   null,
+   "stat count"
+  ]
+ },
+ {
+  "ten": "d_ok_Z_sai",
+  "ten_muc6": "d_ok_Z_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\" or True\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B3-zombie",
+   null,
+   "result True"
+  ]
+ },
+ {
+  "ten": "d_ok_khongZ_sai",
+  "ten_muc6": "d_ok_khongZ_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] == \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-eacces",
+   null,
+   "result False"
+  ]
+ },
+ {
+  "ten": "d_tin-hieu_boc",
+  "ten_muc6": "d_tin-hieu_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass\n        except KeyboardInterrupt as e:\n            raise RuntimeError(\"boc\") from e"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "doc",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "d_tin-hieu_thaythe",
+  "ten_muc6": "d_tin-hieu_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass\n        except KeyboardInterrupt:\n            raise RuntimeError(\"thay\")"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "doc",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp",
+  "ten_muc6": "dc_fp",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            raise ValueError(\"substring not found\")\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp2",
+  "ten_muc6": "dc_fp2",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            int(\"khong-phai-so\")\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp3",
+  "ten_muc6": "dc_fp3",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            \"\".rindex(\")\")\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp4",
+  "ten_muc6": "dc_fp4",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            str(noi_dung).rindex(\")\")\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp5",
+  "ten_muc6": "dc_fp5",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            \"x\".index(\")\")\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp6",
+  "ten_muc6": "dc_fp6",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            for _s in (\"\",):\n                _s[_s.rindex(\")\") + 2:]\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_fp6b",
+  "ten_muc6": "dc_fp6b",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            for _s in (\"\", \"\"):\n                _s[_s.rindex(\")\") + 2:].split()[0]\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_j1_sai_doi_so",
+  "ten_muc6": "dc_j1_sai_doi_so",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            trang_thai.read_text(encoding=\"khong-co-ma-nay\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-dem-doc",
+   "1",
+   null
+  ]
+ },
+ {
+  "ten": "dc_khac_doi_so",
+  "ten_muc6": "dc_khac_doi_so",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except ValueError:\n            raise ValueError(\"khac doi so\")\n        except (OSError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-parse",
+   "p1",
+   null
+  ]
+ },
+ {
+  "ten": "g_chup",
+  "ten_muc6": "g_chup",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "ảnh chụp\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "ảnh chụp\n                nd = (p / \"stat\").read_text()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "124 noi doi"
+    ],
+    [
+     "t161",
+     "khong giet duoc"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_chup_errors",
+  "ten_muc6": "g_chup_errors",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "ảnh chụp\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "ảnh chụp\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\", errors=\"surrogateescape\")"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_chup_open",
+  "ten_muc6": "g_chup_open",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "ảnh chụp\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "ảnh chụp\n                nd = open(p / \"stat\", encoding=\"latin-1\").read()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_d",
+  "ten_muc6": "g_d",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text()\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-eacces",
+   null,
+   "read args"
+  ]
+ },
+ {
+  "ten": "g_d0",
+  "ten_muc6": "g_d0",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text()\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "gop",
+   [
+    [
+     "giet",
+     "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+     "B2-nhanh-cu",
+     "song",
+     "read args"
+    ]
+   ],
+   [
+    [
+     "t160",
+     "124 noi doi"
+    ],
+    [
+     "t161",
+     "124 noi doi"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_d0_open",
+  "ten_muc6": "g_d0_open",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = open(trang_thai, encoding=\"latin-1\").read()\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "gop",
+   [
+    [
+     "giet",
+     "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+     "B2-nhanh-cu",
+     "song",
+     "read count"
+    ]
+   ],
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_d_open",
+  "ten_muc6": "g_d_open",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = open(trang_thai, encoding=\"latin-1\").read()\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-eacces",
+   null,
+   "read count"
+  ]
+ },
+ {
+  "ten": "g_khoa",
+  "ten_muc6": "g_khoa",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text(encoding=\"latin-1\")",
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t159",
+     "qua han khong giet duoc"
+    ],
+    [
+     "t160",
+     "124 noi doi"
+    ],
+    [
+     "t161",
+     "124 noi doi"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_khoa_errors",
+  "ten_muc6": "g_khoa_errors",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text(encoding=\"latin-1\")",
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text(encoding=\"latin-1\", errors=\"surrogateescape\")"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_khoa_open",
+  "ten_muc6": "g_khoa_open",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text(encoding=\"latin-1\")",
+    "            noi_dung = open(f\"/proc/{pid}/stat\", encoding=\"latin-1\").read()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_nhom",
+  "ten_muc6": "g_nhom",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "124 noi doi"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_nhom_errors",
+  "ten_muc6": "g_nhom_errors",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\", errors=\"surrogateescape\")"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_nhom_open",
+  "ten_muc6": "g_nhom_open",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "\"biến mất\"\n                nd = open(p / \"stat\", encoding=\"latin-1\").read()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "read args"
+    ],
+    [
+     "t161",
+     "read args"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_to_hop_dinh_dang_khoa",
+  "ten_muc6": "g_to_hop_dinh_dang_khoa",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "return f\"linux:{sau[19]}\"",
+    "return f\"linux:{sau[19]!r}\""
+   ],
+   [
+    "f\"linux:{sau[19]}\")",
+    "f\"linux:{sau[19]!r}\")"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "khong giet duoc"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "g_to_hop_khoa_nhom",
+  "ten_muc6": "g_to_hop_khoa_nhom",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text(encoding=\"latin-1\")",
+    "            noi_dung = Path(f\"/proc/{pid}/stat\").read_text()"
+   ],
+   [
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")",
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text()"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t158",
+     "124 noi doi"
+    ],
+    [
+     "t159",
+     "qua han khong giet duoc"
+    ],
+    [
+     "t160",
+     "124 noi doi"
+    ],
+    [
+     "t161",
+     "124 noi doi"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "h_co_bo_doc",
+  "ten_muc6": "h_co_bo_doc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    if co_tep:\n",
+    "    if False:\n"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "song",
+   "read count"
+  ]
+ },
+ {
+  "ten": "h_decode_boc",
+  "ten_muc6": "h_decode_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except UnicodeDecodeError as e:\n        raise RuntimeError(\"boc\") from e  #"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "hoi-decode",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "h_decode_thaythe",
+  "ten_muc6": "h_decode_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except UnicodeDecodeError:\n        raise RuntimeError(\"thay\")  #"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "hoi-decode",
+   null
+  ]
+ },
+ {
+  "ten": "h_exception_thaythe",
+  "ten_muc6": "h_exception_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except Exception:\n        raise RuntimeError(\"thay\")  #"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-exception",
+   "hoi",
+   null
+  ]
+ },
+ {
+  "ten": "h_index_boc",
+  "ten_muc6": "h_index_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except IndexError as e:\n        raise RuntimeError(\"boc\") from e  #"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "hoi-index",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "h_index_thaythe",
+  "ten_muc6": "h_index_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except IndexError:\n        raise RuntimeError(\"thay\")  #"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "hoi-index",
+   null
+  ]
+ },
+ {
+  "ten": "h_thoat_hoi_lai",
+  "ten_muc6": "h_thoat_hoi_lai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except BaseException:\n        try:\n            trang_thai.exists()\n        except BaseException:\n            pass\n        raise  #"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "hoi",
+   "stat count"
+  ]
+ },
+ {
+  "ten": "h_tin-hieu_boc",
+  "ten_muc6": "h_tin-hieu_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except KeyboardInterrupt as e:\n        raise RuntimeError(\"boc\") from e  #"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "hoi",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "h_tin-hieu_thaythe",
+  "ten_muc6": "h_tin-hieu_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except KeyboardInterrupt:\n        raise RuntimeError(\"thay\")  #"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "hoi",
+   null
+  ]
+ },
+ {
+  "ten": "h_value_boc",
+  "ten_muc6": "h_value_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except ValueError as e:\n        raise RuntimeError(\"boc\") from e  #"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "hoi-value",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "h_value_thaythe",
+  "ten_muc6": "h_value_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError:\n        co_tep = None\n    except ValueError:\n        raise RuntimeError(\"thay\")  #"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "hoi-value",
+   null
+  ]
+ },
+ {
+  "ten": "k0_EIO_sai",
+  "ten_muc6": "k0_EIO_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return True\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-eio",
+   "result True"
+  ]
+ },
+ {
+  "ten": "k0_EIO_thoat",
+  "ten_muc6": "k0_EIO_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        raise\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-eio",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "k0_EPERM_sai",
+  "ten_muc6": "k0_EPERM_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except PermissionError:\n        return True  # tồn tại nhưng khác chủ\n",
+    "    except PermissionError:\n        return False\n"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-eperm",
+   "result False"
+  ]
+ },
+ {
+  "ten": "k0_EPERM_thoat",
+  "ten_muc6": "k0_EPERM_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except PermissionError:\n        return True  # tồn tại nhưng khác chủ\n",
+    "    except PermissionError:\n        raise\n"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-eperm",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "k0_ESRCH_sai",
+  "ten_muc6": "k0_ESRCH_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except ProcessLookupError:\n        return False\n    except PermissionError:",
+    "    except ProcessLookupError:\n        return True\n    except PermissionError:"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-da-wait",
+   "result True"
+  ]
+ },
+ {
+  "ten": "k0_ESRCH_thoat",
+  "ten_muc6": "k0_ESRCH_thoat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except ProcessLookupError:\n        return False\n    except PermissionError:",
+    "    except ProcessLookupError:\n        raise\n    except PermissionError:"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-da-wait",
+   "seam escaped"
+  ]
+ },
+ {
+  "ten": "k0_decode_bat",
+  "ten_muc6": "k0_decode_bat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except UnicodeDecodeError:\n        return True\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-decode",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "k0_decode_boc",
+  "ten_muc6": "k0_decode_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except UnicodeDecodeError as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-decode",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k0_decode_thaythe",
+  "ten_muc6": "k0_decode_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except UnicodeDecodeError:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-decode",
+   null
+  ]
+ },
+ {
+  "ten": "k0_exception_bat",
+  "ten_muc6": "k0_exception_bat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except Exception:\n        return True\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-exception",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "k0_exception_boc",
+  "ten_muc6": "k0_exception_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except Exception as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-exception",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k0_exception_thaythe",
+  "ten_muc6": "k0_exception_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except Exception:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-exception",
+   null
+  ]
+ },
+ {
+  "ten": "k0_hoi_hai_lan",
+  "ten_muc6": "k0_hoi_hai_lan",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    if co_tep is None:\n        # wp685 (zombie",
+    "    if co_tep is False:\n        trang_thai.exists()\n    if co_tep is None:\n        # wp685 (zombie"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang",
+   "stat count"
+  ]
+ },
+ {
+  "ten": "k0_index_bat",
+  "ten_muc6": "k0_index_bat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except IndexError:\n        return True\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-index",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "k0_index_boc",
+  "ten_muc6": "k0_index_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except IndexError as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-index",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k0_index_thaythe",
+  "ten_muc6": "k0_index_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except IndexError:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-index",
+   null
+  ]
+ },
+ {
+  "ten": "k0_kill_hai_lan",
+  "ten_muc6": "k0_kill_hai_lan",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    if co_tep is None:\n        # wp685 (zombie",
+    "    if co_tep is False:\n        try:\n            os.kill(pid, 0)\n        except OSError:\n            pass\n    if co_tep is None:\n        # wp685 (zombie"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang",
+   "kill count"
+  ]
+ },
+ {
+  "ten": "k0_ok_sai",
+  "ten_muc6": "k0_ok_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    return True\n\n\nclass KetGiet",
+    "    return False\n\n\nclass KetGiet"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang",
+   "result False"
+  ]
+ },
+ {
+  "ten": "k0_them_doc",
+  "ten_muc6": "k0_them_doc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    if co_tep is None:\n        # wp685 (zombie",
+    "    if co_tep is False:\n        try:\n            trang_thai.read_text(encoding=\"latin-1\")\n        except OSError:\n            pass\n    if co_tep is None:\n        # wp685 (zombie"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang",
+   "read count"
+  ]
+ },
+ {
+  "ten": "k0_tin-hieu_bat",
+  "ten_muc6": "k0_tin-hieu_bat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except BaseException:\n        return True\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-tin-hieu",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "k0_tin-hieu_boc",
+  "ten_muc6": "k0_tin-hieu_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except KeyboardInterrupt as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-tin-hieu",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k0_tin-hieu_thaythe",
+  "ten_muc6": "k0_tin-hieu_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except KeyboardInterrupt:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-tin-hieu",
+   null
+  ]
+ },
+ {
+  "ten": "k0_value_bat",
+  "ten_muc6": "k0_value_bat",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except ValueError:\n        return True\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-value",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "k0_value_boc",
+  "ten_muc6": "k0_value_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except ValueError as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-value",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k0_value_thaythe",
+  "ten_muc6": "k0_value_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except ValueError:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang-value",
+   null
+  ]
+ },
+ {
+  "ten": "k_decode_boc",
+  "ten_muc6": "k_decode_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except UnicodeDecodeError as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "kill-decode",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k_decode_thaythe",
+  "ten_muc6": "k_decode_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except UnicodeDecodeError:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "kill-decode",
+   null
+  ]
+ },
+ {
+  "ten": "k_exception_boc",
+  "ten_muc6": "k_exception_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except Exception as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-exception",
+   "kill",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k_exception_thaythe",
+  "ten_muc6": "k_exception_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except Exception:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-exception",
+   "kill",
+   null
+  ]
+ },
+ {
+  "ten": "k_hoi_hai_lan",
+  "ten_muc6": "k_hoi_hai_lan",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            try:\n                trang_thai.exists()\n            except OSError:\n                pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-doc-hong",
+   "EACCES",
+   "stat count"
+  ]
+ },
+ {
+  "ten": "k_index_boc",
+  "ten_muc6": "k_index_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except IndexError as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "kill-index",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k_index_thaythe",
+  "ten_muc6": "k_index_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except IndexError:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "kill-index",
+   null
+  ]
+ },
+ {
+  "ten": "k_kill_lai_khi_doc_EPERM",
+  "ten_muc6": "k_kill_lai_khi_doc_EPERM",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError) as e:\n            if getattr(e, 'errno', None) == 1:\n                try:\n                    os.kill(pid, 0)\n                except OSError:\n                    pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-doc-hong",
+   "EPERM",
+   "kill count"
+  ]
+ },
+ {
+  "ten": "k_ok_sai",
+  "ten_muc6": "k_ok_sai",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    return True\n\n\nclass KetGiet",
+    "    return False\n\n\nclass KetGiet"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-doc-hong",
+   "EACCES",
+   "result False"
+  ]
+ },
+ {
+  "ten": "k_tin-hieu_boc",
+  "ten_muc6": "k_tin-hieu_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except KeyboardInterrupt as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "kill",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k_tin-hieu_thaythe",
+  "ten_muc6": "k_tin-hieu_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except KeyboardInterrupt:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-tin-hieu",
+   "kill",
+   null
+  ]
+ },
+ {
+  "ten": "k_value_boc",
+  "ten_muc6": "k_value_boc",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except ValueError as e:\n        raise RuntimeError(\"boc\") from e\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "kill-value",
+   "seam wrapped"
+  ]
+ },
+ {
+  "ten": "k_value_thaythe",
+  "ten_muc6": "k_value_thaythe",
+  "nhom": "DS-E-HANG-MUC",
+  "cap": [
+   [
+    "    except OSError:\n        return False\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps",
+    "    except OSError:\n        return False\n    except ValueError:\n        raise RuntimeError(\"thay\")\n    if platform.system() == \"Darwin\":  # không có /proc: hỏi ps"
+   ]
+  ],
+  "ky_vong": [
+   "vo_can",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-thoat-parse",
+   "kill-value",
+   null
+  ]
+ },
+ {
+  "ten": "luot6_m1",
+  "ten_muc6": "luot6_m1",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            pass"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "EACCES",
+   "result True"
+  ]
+ },
+ {
+  "ten": "luot6_m2",
+  "ten_muc6": "luot6_m2",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False",
+    "comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n        except (OSError, ValueError, IndexError):\n            return False\n        except BaseException:\n            return False"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "tin-hieu",
+   "sentinel identity"
+  ]
+ },
+ {
+  "ten": "luot6_m3",
+  "ten_muc6": "luot6_m3",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "    if co_tep is None:\n",
+    "    if co_tep is False:\n        return False\n    if co_tep is None:\n"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B2-nhanh-cu",
+   "vang",
+   "result False"
+  ]
+ },
+ {
+  "ten": "luot6_m4",
+  "ten_muc6": "luot6_m4",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None",
+    "    except ProcessLookupError:\n        try:\n            trang_thai.exists()\n        except OSError:\n            pass\n        return False\n    except OSError:\n        co_tep = None"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B1",
+   null,
+   "stat count"
+  ]
+ },
+ {
+  "ten": "luot6_m5",
+  "ten_muc6": "luot6_m5",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.rindex(\")\") + 2:].split()[0] != \"Z\"\n",
+    "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding=\"latin-1\")\n            return noi_dung[noi_dung.index(\")\") + 2:].split()[0] != \"Z\"\n"
+   ]
+  ],
+  "ky_vong": [
+   "giet",
+   "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan",
+   "B3-zombie",
+   null,
+   "result True"
+  ]
+ },
+ {
+  "ten": "s_chup_tach_ngoac_dau",
+  "ten_muc6": "s_chup_tach_ngoac_dau",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "ảnh chụp\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")\n                sau = nd[nd.rindex",
+    "ảnh chụp\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")\n                sau = nd[nd.index"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "124 noi doi"
+    ],
+    [
+     "t161",
+     "khong giet duoc"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "s_khoa_tach_ngoac_dau",
+  "ten_muc6": "s_khoa_tach_ngoac_dau",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "            sau = noi_dung[noi_dung.rindex(\")\") + 2:].split()\n            return f\"linux:",
+    "            sau = noi_dung[noi_dung.index(\")\") + 2:].split()\n            return f\"linux:"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t160",
+     "124 noi doi"
+    ],
+    [
+     "t161",
+     "124 noi doi"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "s_nhom_tach_ngoac_dau",
+  "ten_muc6": "s_nhom_tach_ngoac_dau",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")\n                sau = nd[nd.rindex",
+    "\"biến mất\"\n                nd = (p / \"stat\").read_text(encoding=\"latin-1\")\n                sau = nd[nd.index"
+   ]
+  ],
+  "ky_vong": [
+   "b8",
+   [
+    [
+     "t161",
+     "124 noi doi"
+    ]
+   ]
+  ]
+ },
+ {
+  "ten": "song_K0_tach_rieng",
+  "ten_muc6": "song_K0_tach_rieng",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "    if co_tep is None:\n        # wp685 (zombie",
+    "    if co_tep is False and platform.system() == \"Linux\":\n        try:\n            os.kill(pid, 0)\n        except ProcessLookupError:\n            return False\n        except PermissionError:\n            return True\n        except OSError:\n            return False\n        return True\n    if co_tep is None:\n        # wp685 (zombie"
+   ]
+  ],
+  "ky_vong": [
+   "song"
+  ]
+ },
+ {
+  "ten": "song_ba_errno",
+  "ten_muc6": "song_ba_errno",
+  "nhom": "DS-E-KHAC",
+  "cap": [
+   [
+    "    except OSError:\n        co_tep = None   # KHÔNG kết luận",
+    "    except OSError as e:\n        if e.errno not in (13, 1, 5):\n            raise\n        co_tep = None   # KHÔNG kết luận"
+   ]
+  ],
+  "ky_vong": [
+   "song"
+  ]
+ }
+]

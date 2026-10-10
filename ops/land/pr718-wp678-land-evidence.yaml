@@ -2,10 +2,11 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr707 #705, pr703 #674, pr701 #687, pr679 #678).
 #
-# TRANG THAI: merged (a671920). `landed: false` — gate hau-merge a671920 XANH 14/14 check run (run 37800746634 success
-# 15:45:52Z, moi required context success), nhung con moc chua co nguoi co tham quyen quyet (exact_commit_oid workflow,
-# rc ngoai job gate) va thu hoi lease chua nghiem thu — land operator KHONG tu dong thay chu kho. Xem
-# trang_thai_packet.con_thieu_de_goi_landed.
+# TRANG THAI: merged (a671920). `landed: true` CO HIEU LUC tu merge commit cua PR ghi so KE TIEP (sau #719) dua dong nay
+# vao master. Gate hau-merge a671920 XANH 14/14 (run 37800746634); hai diem mo (exact_commit_oid workflow, rc ngoai job
+# gate/gate-registry) DONG THEO QUYET DINH CHU KHO (pull/719#issuecomment-6064357019, chu kho tu dang, VERDICT: approve),
+# KHONG phai do du. PR ghi so #719 merge bang merge commit 4beb9d0; lease g1 het han 19:00Z, ai-dang-giu 19:09Z
+# NGUOI_GIU 0. Xem trang_thai_packet.
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4). `landed` trong tep nay, neu co luc nao la true, chi co hieu
 # luc tu merge commit cua PR ghi so dua tep nay vao master (tien le).
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = chi co loi khai cua phien agent, co neo;
@@ -44,11 +45,16 @@ role: land_operator
 session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
 recorded_by: claude-session (subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT)
 do_luc: '2026-10-08T15:27Z..15:5xZ (worktree claude/bookkeeping-678-land tu origin/master a671920; core.abbrev 7; kho quet scratch bk678/kq cho ai-dang-giu)'
+do_luc_ghi_so_landed: '2026-10-08T19:09Z..19:2xZ (worktree claude/bookkeeping-678-landed tu origin/master 4beb9d0; core.abbrev 7; clone quet scratch quet-678-bk cho ai-dang-giu)'
 
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-718.json: merged true, merged_at 2026-10-08T15:26:08Z, merge_commit_sha a671920b6caa32337831e453b37ea8477e6ceef5'
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so KE TIEP (sau #719) dua tep nay — voi `landed: true` — vao master (tep o 4beb9d0 van ghi
+    `landed: false`; dong nay chi co tren master sau thoi diem ay). Chu ky chu kho nam tren PR #719 (da merge o 4beb9d0)
+    la NEO cua quyet dinh, khong phai moc hieu luc: lay 4beb9d0 lam moc thi master tai 4beb9d0 tu mau thuan voi chinh no.
   landed_ly_do: >-
     PROTOCOL §10.2.4: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping Packet xong;
     §13.1: khong goi landed khi thieu bang chung tuong ung; §2: tham quyen khong chuyen qua output cua agent. DA CO
@@ -58,33 +64,71 @@ trang_thai_packet:
     moi required context success. (3) Hau-merge: run push 37800746634 tren a671920 completed success, 14/14 check run
     success. CON THIEU: xem con_thieu_de_goi_landed. Land operator KHONG tu dong diem nao; `landed` chi len true khi chu
     kho quyet VA PR ghi so nay merge bang merge commit.
+    CA HAI DIEU KIEN DA CO (ghi 2026-10-08T19:1xZ): chu kho quyet (quyet_dinh_chu_kho_hai_diem) va PR ghi so #719 merge
+    bang merge commit 4beb9d0 (BOOKKEEPING-PR-GHI-SO).
+  quyet_dinh_chu_kho_hai_diem:
+    trang_thai: measured
+    lenh_nguyen_van: >-
+      "landed: true theo quyết định của tôi, chấp nhận hai điểm hồ sơ để mở, chỉ áp cho run 37800746634 / a671920:
+      chấp nhận job success thay commit nguồn workflow không đo được; chấp nhận job success thay mã thoát số ở các job
+      ngoài gate và gate-registry." (ba dong lien tiep cua than comment, xuong dong thay bang mot dau cach; ban day du:
+      readback-comment-6064357019.json)
+    luc: '2026-10-08T16:26:15Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/719#issuecomment-6064357019
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6064357019.json, `gh api repos/ducthangho/tra-luat/issues/comments/6064357019`, doc
+      2026-10-08T19:09:18Z): user ducthangho, author_association OWNER, performed_via_github_app null, created_at =
+      updated_at 2026-10-08T16:26:15Z, than 2700 byte sha256 6f55d7a73020b3acd5bcf34c09107a47e8815794628eb3cf9ddae8e03cee133f
+      (bam do tren ban DA DEN qua proxy phien; doctrine: duong doc co the chuan hoa thuc the HTML — ban nay 0 "&#", 0
+      "&amp;", 0 backtick), LF x19, khong LF cuoi. Dong dau "VERDICT — human_audited · approve"; "Reviewed commit:
+      14a4bba35f2e…" (= cha thu hai cua 4beb9d0); dong "dang_boi: chu_kho_tu_dang"; dong cuoi "VERDICT: approve".
+      performed_via_github_app null chi loai tru Claude GitHub App; author_association OWNER khong tach chu kho khoi phien
+      agent dung token chu kho (#566) — than tu khai chu_kho_tu_dang.
+    pham_vi: 'Ca hai diem CHI cho run 37800746634 / SHA a671920 (nguyen van chu ky).'
+    no_ke_nhiem_chu_kho_ghi: >-
+      "A8 động (Remediation Slice §11 r17); đóng #678 và cập nhật #677 về tương tác A2 (land_obligations)." (= no_ke_nhiem
+      duoi va DONG-ISSUE-678-VA-CAP-NHAT-677).
+    chu_kho_ghi_them: >-
+      Than comment ghi "Nghiệm thu thu hồi lease (ai-dang-giu sau 19:00Z kỳ vọng NGƯỜI_GIỮ 0) chưa đo lúc ký" — nay da do
+      (THU-HOI-LEASE-G1), khong phai mot diem chu kho dong bang quyet dinh.
+    khong_tai_su_dung: 'Khong ap cho run, SHA hay land nao khac.'
+    khong_viet_lai: 'Moi nhan not_measured giu nguyen; dong theo QUYET DINH, khong phai vi do du.'
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-A671920
       trang_thai: measured
       mo_ta: 'Run push 37800746634 completed success 15:45:52Z, 14/14 check run success (readback 15:4xZ). Diem nay DAT.'
     - id: MOC-WORKFLOW-DEFINITION
-      trang_thai: not_measured
+      trang_thai: 'dong_theo_quyet_dinh_chu_kho (not_measured giu nguyen)'
       mo_ta: >-
         Commit nguon chinh xac cua ci.yml cho run hau-merge: GraphQL khong goi (tien le #674/#705); ho so nay KHONG thu.
         Nguon thay the: .github/workflows/ci.yml khong nam trong diff 6195fe7..57bb4b3 hay ab457c6..6195fe7 (write set chi 2
         tep ops/), nen ci.yml tai a671920 = ci.yml tai 8de47bc (cha thu nhat).
       can: 'Quyet dinh chu kho cho RIENG run hau-merge / SHA a671920 (tien le #674/#687/#705: moi lan quyet dinh rieng).'
     - id: RC-SO-CHI-CO-STEP-CONCLUSION
-      trang_thai: not_measured
+      trang_thai: 'dong_theo_quyet_dinh_chu_kho (not_measured giu nguyen)'
       mo_ta: 'Ho so nay KHONG tai log job; rc so cua moi job: not_measured, chi conclusion/step conclusion qua REST.'
       can: 'Quyet dinh chu kho (tien le).'
     - id: BOOKKEEPING-PR-GHI-SO
-      trang_thai: con_mo
+      trang_thai: 'dong — PR #719 merge bang merge commit 4beb9d0 (measured)'
       mo_ta: >-
-        Nhanh claude/bookkeeping-678-land va nhanh rut han bk678-rut-han-g1 chi o CUC BO luc ghi; chua push, chua PR.
-        Issue #678 open (readback-issue-678.json).
+        Ban dau: nhanh claude/bookkeeping-678-land va nhanh rut han bk678-rut-han-g1 chi o CUC BO luc ghi; Issue #678 open
+        (readback-issue-678.json). Sau: PR #719 (head 14a4bba, base a671920) merged, merged_at 2026-10-08T16:26:33Z,
+        merged_by ducthangho, merge_commit_sha 4beb9d0e018e0c6708882e2608f36464b45e76fb, 65 tep +26314/-0, 17 commit
+        (readback-pr-719.json, doc 19:09:19Z). `git log -1 --format='%H %P' 4beb9d0` = 4beb9d0e018e… a671920b6caa…
+        14a4bba35f2e… (HAI cha => merge commit, khong squash/rebase). `git merge-base --is-ancestor 9e5da35 4beb9d0` rc 0 =>
+        commit ban sao ma 10 bien nhan v2 neo evidence_url nam tren master. Nhanh rut han: 62962c7 la to tien cua 4beb9d0
+        (rc 0); origin/ops/wp678-r17-g1-lease = 62962c7 (ai-dang-giu-1909/ton-kho.txt).
+        Trang thai Issue #678 sau merge: KHONG doc lai trong lan ghi nay (not_measured).
       can: >-
         Push bk678-rut-han-g1 thanh ops/wp678-r17-g1-lease (fast-forward tu ee55165) TRUOC ~18:50Z, hoac doi han_moi_utc;
         push nguyen ven claude/bookkeeping-678-land (khong rebase/squash); merge PR ghi so bang MERGE commit (evidence_url
         cua 10 bien nhan v2 neo commit ban sao 9e5da35).
     - id: THU-HOI-LEASE-G1
-      trang_thai: not_measured
-      mo_ta: 'Rut han g1 ve 19:00Z o commit cuc bo 62962c7; nghiem thu (ai-dang-giu sau 19:00Z NGUOI_GIU 0) chua do.'
+      trang_thai: measured
+      mo_ta: >-
+        Rut han g1 ve 19:00Z o 62962c7 (nay tren master; lease g1 tai 4beb9d0 lease_expires_at_utc '2026-10-08T19:00:00Z').
+        Nghiem thu sau 19:00Z: xem lease.nghiem_thu_sau_19 — ca 2 duong dan rc 0 "NGƯỜI_GIỮ 0: không có", g1 phan loai
+        HẾT_HẠN (ai-dang-giu-1909/).
     - id: DONG-ISSUE-678-VA-CAP-NHAT-677
       trang_thai: con_mo
       mo_ta: 'land_obligations cua lease: dong #678; cap nhat #677 ve tuong tac A2. Chua lam (ngoai pham vi ghi so; chu kho/phien chinh).'
@@ -265,7 +309,29 @@ lease:
     ket_qua: >-
       ai-dang-giu ops/lease_publish.py va ops/lease_publish_test.py: rc 11, "NGƯỜI_GIỮ 1: wp678-r17-g1-claude" CÒN_HẠN tai
       refs/heads/ops/wp678-r17-g1-lease — DUNG KY VONG (rut han chua push, va du push thi van giu toi 19:00Z).
-  nghiem_thu_sau_19: 'not_measured — can ai-dang-giu sau push + sau 19:00Z cho NGUOI_GIU 0.'
+  nghiem_thu_sau_19:
+    trang_thai: measured
+    do_luc: '2026-10-08T19:09:58Z..19:10:33Z (ton kho ref 19:09:48Z; sau han moi 19:00Z va sau merge #719 16:26:33Z)'
+    ton_kho_ref: >-
+      Clone moi scratch quet-678-bk (`git clone --no-checkout --reference <clone chinh> <origin>` + `git fetch --prune origin
+      '+refs/heads/*:refs/remotes/origin/*'` rc 0, khong shallow, checkout --detach origin/master 4beb9d0). So TAP TEN (khong
+      so wc): `git ls-remote --heads origin` 486 = refs/remotes/origin 486 (bo HEAD); comm -23 ten 0 (khong mu), comm -13
+      ten 0; lech cap (ten, SHA) 0. origin/ops/wp678-r17-g1-lease = 62962c7, origin/master = 4beb9d0
+      (ai-dang-giu-1909/ton-kho.txt).
+    lenh: >-
+      `python3 -B ops/lease_publish.py ai-dang-giu --root . <p>` tu checkout origin/master cua clone quet, cho p thuoc write
+      set lease g1: ops/lease_publish.py, ops/lease_publish_test.py (ai-dang-giu-1909/lenh.txt).
+    ket_qua: >-
+      Ca 2 duong dan rc 0, "NGƯỜI_GIỮ 0: không có"; dong "HẾT_HẠN wp678-r17-g1-claude
+      refs/heads/master:ops/leases/wp678-r17-g1-claude.yaml" co mat o ca 2 (76 / 124 dong HẾT_HẠN, 0 dong CÒN_HẠN). Dau ra
+      nguyen van: ai-dang-giu-1909/adg-*.txt, rc.txt, luc.txt.
+    doi_chung_phien_dieu_phoi: >-
+      thuat_lai — phien dieu phoi do 19:06:52Z tren clone $SP/quet-678 cung cach: 486 = 486, thieu 0; ca 2 duong dan rc 0
+      "NGƯỜI_GIỮ 0: không có", cung dong HẾT_HẠN. Khop phep do tren.
+    phan_chung_biet_truoc_dap_an: >-
+      Cung lenh, cung 2 duong dan luc 15:51Z (truoc han) ra rc 11 "NGƯỜI_GIỮ 1: wp678-r17-g1-claude" CÒN_HẠN
+      (ai-dang-giu-1550/) — bo quet DA tung bao g1 la nguoi giu; nay khong con.
+    pham_vi: 'Quet refs/heads/* cua may chu (qua refs/remotes/origin cua clone quet) luc 19:09:48Z; khong quet tag.'
 
 lech_protocol_khai:
   - id: CI-BUDGET-VUOT-MOT-LAN
@@ -296,7 +362,9 @@ khong_do_duoc:
   - 'rc so cua moi job (khong tai log).'
   - 'Nguoi/phien bam merge PR #718.'
   - 'Model/effort thuc chay cua executor va reviewer (khong run.json).'
-  - 'Nghiem thu rut han g1 (sau push + sau 19:00Z).'
+  - 'Danh tinh nguoi/phien dang comment quyet dinh 6064357019 ngoai tu khai "chu_kho_tu_dang" (OWNER + app null khong tach chu kho khoi token chu kho, #566).'
+  - 'Trang thai Issue #678 sau merge #719 (khong doc lai lan nay).'
+  - 'CI tren merge commit ghi so 4beb9d0 (khong doc; khong phai dieu kien chu kho dat ra).'
   - 'Xac minh chu ky commit (khong co allowedSignersFile).'
   - 'Reaction +1 cua bot Codex tren PR #718 (khong doc reactions).'
 
@@ -305,4 +373,5 @@ provenance:
   cach_tao: >-
     Readback REST luu than phan hoi cua `gh api` (khong dinh dang lai). ai-dang-giu-1550/: dau ra lenh tung tep + ton kho
     ref. Khong tai log job.
+    Lan ghi so landed (19:1xZ) them: readback-comment-6064357019.json, readback-pr-719.json, ai-dang-giu-1909/.
   kiem: 'cd ops/land/pr718-wp678-provenance && sha256sum -c SHA256SUMS.txt'

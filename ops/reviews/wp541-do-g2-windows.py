@@ -82,7 +82,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01h"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01i"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -670,16 +670,31 @@ inn(f"  ref tro toi HEAD: {', '.join(dsr) if dsr else '(khong ref nao - HEAD roi
 # don tep TRACKED, khong don tep chua theo doi, ma bo test duyet ops/leases va ops/reviews. --chi-kich-thuoc chi dem COMMIT (khong doc
 # tep) nen khong doi cay sach. `-c core.excludesFile=`: ignore CA NHAN cua nguoi do (~/.config/git/ignore `*.yaml`) che tep chua
 # theo doi khoi `git status` thuong (do: 0 muc, co -c: 1) ma bo test van duyet ops/leases/*.yaml; .gitignore TRONG cay thuoc commit.
+def _trang_thai_cay(goc):
+    # `git status` MU voi CHI MUC: tep tracked da sua + `--skip-worktree` (the `S` cua `ls-files -v`) hoac `--assume-unchanged`
+    # (the chu thuong) => status RONG ma bo test/probe van doc tep da sua. Do tren 2026-10-10, 0ea95de: commit DO (N8 hong) +
+    # khoi phuc tep tot chua commit + moi co ay => `--chi-probe` rc=0 `DAT 7 | TRUOT 0` duoi HEAD cua commit DO (cay sach:
+    # rc=1 `TRUOT N8`; khong co: rc=3). `ls-files -v` gan the `H` cho tep binh thuong: moi the khac => cay KHAC commit. Gop
+    # vao MOT chuoi de chot DAU va chot CUOI so cung mot thu. Go co bang HAI lenh rieng (`--no-assume-unchanged -- <tep>` roi
+    # `--no-skip-worktree -- <tep>`): gop vao mot lenh thi git 2.43 KHONG go duoc skip-worktree. Gioi han da biet (do cung ngay):
+    # `.git/info/exclude` va `.gitignore` CHUA THEO DOI chua `*` van che tep chua theo doi khoi `status`.
+    rc, st, er = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
+    rc2, lv, er2 = git(goc, "ls-files", "-v")
+    co = ["chi-muc:" + x for x in lv.splitlines() if x and x[0] != "H"]
+    return (rc or rc2), "\n".join(x for x in [st] + co if x), (er or er2)
+
 CAY_SACH = "--chi-kich-thuoc" not in sys.argv
 if CAY_SACH:
-    rc_st, st0, er_st = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
+    rc_st, st0, er_st = _trang_thai_cay(goc)
     ghi("cay_sach_luc_dau", (not rc_st) and not st0.strip())
     if rc_st:
-        loi.append(f"khong doc duoc `git status` cua cay do ({_an_userinfo(er_st)[:70]}): khong chung minh duoc cay trung HEAD")
+        loi.append(f"khong doc duoc `git status`/`ls-files` cua cay do ({_an_userinfo(er_st)[:70]}):"
+                   " khong chung minh duoc cay trung HEAD")
     elif st0.strip():
-        loi.append(f"cay do KHONG trung HEAD: {len(st0.splitlines())} muc chua commit/chua theo doi "
+        loi.append(f"cay do KHONG trung HEAD: {len(st0.splitlines())} muc chua commit/chua theo doi/co chi muc "
                    f"(vd {st0.splitlines()[0][:60]!r}) -"
-                   " bo test/probe do TEP, N7' do COMMIT; commit hoac don (git stash -u) roi do lai")
+                   " bo test/probe do TEP, N7' do COMMIT; commit hoac don (git stash -u) roi do lai;"
+                   " chi muc: git update-index --no-assume-unchanged -- <tep> roi --no-skip-worktree -- <tep>")
     else:
         inn("  cay lam viec : SACH (== HEAD)")
 
@@ -1025,7 +1040,7 @@ if not CHI_PROBE:
 # sha cho mot thu da bi doi giua chung.
 if CAY_SACH:
     rc_h2, head2, _ = git(goc, "rev-parse", "HEAD")
-    rc_s2, st2, _ = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
+    rc_s2, st2, _ = _trang_thai_cay(goc)
     doi = bool(rc_h2 or rc_s2 or head2 != head or st2 != st0)
     ghi("cay_khong_doi_trong_luc_do", not doi)
     if doi:

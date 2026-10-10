@@ -88,9 +88,11 @@ def _n1_n3(tg):
     return _goi_refresh(tg, treo)[0] is False and _goi_refresh(tg, hong)[0] is False
 
 
-def _stage(tg, canary, refresh_rc=0):
-    """Chạy `nlm-auth-stage --refresh --force` với nlm giả; trả (rc, số upload, thứ tự sự kiện)."""
+def _stage(tg, canary, refresh_rc=0, ket_qua_ra=None):
+    """Chạy `nlm-auth-stage --refresh --force` với nlm giả, cookie GIÀ (20 ngày ⇒ có in ghi chú tuổi);
+    trả (rc, số upload, thứ tự sự kiện). `ket_qua_ra` (list) nhận stdout+stderr của lệnh."""
     su_kien, upload = [], []
+    ra, loi = io.StringIO(), io.StringIO()
 
     def run(argv, **kw):
         su_kien.append("refresh")
@@ -109,14 +111,17 @@ def _stage(tg, canary, refresh_rc=0):
         with _va(subprocess, run=run), _va(shutil, which=lambda name: "/fake/bin/nlm"), \
                 _va(tg, _nlm_auth_alive=alive,
                     _nlm_auth_files=lambda: (su_kien.append("jar") or {"auth.json": "offline-jar"}),
-                    _stage_enc_upload=lambda *a, **k: (upload.append(1) or ("OFFLINE", True))), \
-                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    _stage_enc_upload=lambda *a, **k: (upload.append(1) or ("OFFLINE", True)),
+                    _nlm_auth_age_days=lambda _nlm: 20.0), \
+                contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
             rc = tg.cmd_nlm_auth_stage(ns)
     finally:
         if env_cu is None:
             os.environ.pop("TL_TOKEN", None)
         else:
             os.environ["TL_TOKEN"] = env_cu
+    if ket_qua_ra is not None:
+        ket_qua_ra.append(ra.getvalue() + loi.getvalue())
     return rc, len(upload), su_kien
 
 
@@ -126,8 +131,13 @@ def _n2(tg):
             rc, n_up, su_kien = _stage(tg, canary, refresh_rc)
             if rc != 4 or n_up != 0 or su_kien[:1] != ["refresh"] or "canary" not in su_kien:
                 return False
-    rc, n_up, su_kien = _stage(tg, True, 0)
-    return rc == 0 and n_up == 1 and su_kien.index("refresh") < su_kien.index("canary")
+    dau_ra = []
+    rc, n_up, su_kien = _stage(tg, True, 0, dau_ra)
+    # ĐO ĐẦU RA THẬT (lượt 3, F2c): cookie già ⇒ lệnh in ghi chú tuổi; mọi cách dựng chuỗi (literal, `+`, %, format…)
+    # đều hiện ra ở đây — không được có `login --check`, không được lộ chuỗi canh của tiến trình con.
+    ra = dau_ra[0]
+    return (rc == 0 and n_up == 1 and su_kien.index("refresh") < su_kien.index("canary")
+            and "NGÀY tuổi" in ra and "login --check" not in ra and "SENTINEL-COOKIE" not in ra)
 
 
 def _n4(van_ban):
@@ -153,21 +163,37 @@ _CHUOI_CHO_PHEP = frozenset({
 })
 
 
+def _van_tinh(n):
+    """Giá trị chuỗi TĨNH của một biểu thức (không eval): hằng, f-string (phần biến thành "{}"), và phép `+` của chúng."""
+    if isinstance(n, ast.Constant) and isinstance(n.value, str):
+        return n.value
+    if isinstance(n, ast.JoinedStr):
+        return "".join(v.value if isinstance(v, ast.Constant) else "{}" for v in n.values)
+    if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add):
+        trai, phai = _van_tinh(n.left), _van_tinh(n.right)
+        if trai is not None and phai is not None:
+            return trai + phai
+        return trai if phai is None and trai is not None else phai
+    return None
+
+
 def _n4_ast(van_ban):
-    """Mọi chuỗi Python chứa `login --check` phải là một chuỗi cho phép, mỗi chuỗi đúng một lần."""
+    """Mọi chuỗi Python (kể cả ghép literal và nối `+`) chứa `login --check` phải là một chuỗi cho phép."""
     cay = ast.parse(van_ban)
     con_cua_f = {id(v) for n in ast.walk(cay) if isinstance(n, ast.JoinedStr) for v in n.values}
-    gap = []
+    gap = set()
     for n in ast.walk(cay):
-        if isinstance(n, ast.JoinedStr):
-            chuoi = "".join(v.value if isinstance(v, ast.Constant) else "{}" for v in n.values)
-        elif isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in con_cua_f:
-            chuoi = n.value
-        else:
+        if id(n) in con_cua_f:
             continue
-        if "login --check" in chuoi:
-            gap.append(hashlib.sha256(chuoi.encode("utf-8")).hexdigest())
-    return sorted(gap) == sorted(_CHUOI_CHO_PHEP)
+        chuoi = _van_tinh(n)
+        if chuoi is not None and "login --check" in chuoi and not isinstance(n, ast.BinOp):
+            gap.add(hashlib.sha256(chuoi.encode("utf-8")).hexdigest())
+        elif chuoi is not None and "login --check" in chuoi:
+            # phép `+` chỉ được phép nếu một vế của nó đã là chuỗi cho phép (thông báo pull: f-string + ghi chú tuổi)
+            vế = [_van_tinh(n.left), _van_tinh(n.right)]
+            if not any(v and hashlib.sha256(v.encode("utf-8")).hexdigest() in _CHUOI_CHO_PHEP for v in vế):
+                return False
+    return gap == set(_CHUOI_CHO_PHEP)
 
 
 def run(tl_module):
@@ -184,4 +210,6 @@ def run(tl_module):
         return False
     if _n4_ast(van_ban + '\nprint("Kiểm: nlm " "login --check")\n'):
         return False            # phản chứng: gợi ý dương tách thành hai literal liền nhau phải bị bắt
+    if _n4_ast(van_ban + '\nprint(f"x{1}" + " Kiểm: nlm log" + "in --check")\n'):
+        return False            # phản chứng: gợi ý dương nối bằng `+` phải bị bắt (cross-review lượt 3, F2c)
     return _n1_n3(tg) and _n2(tg)

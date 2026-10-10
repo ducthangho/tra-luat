@@ -21937,7 +21937,11 @@ def run() -> int:
         #   + `changelog.d/wp-710.md`                    — mảnh changelog của packet.
         # Hai tệp sau là dev-side theo nghĩa hẹp; chúng vào gói vì bộ lọc gói hiện không loại chúng, không vì runtime
         # cần. Cây thật = 183 + 75 = **258**; trần Package 200 còn 17 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 258
+        # KÊ KHAI SLOT (Packet #735 MANIFEST-TAI-SINH-725-727): gói 183 → **186**. Ba mảnh changelog do #729, #730,
+        # #731 thêm vào cây mà không tái sinh manifest (master đỏ `release-verify --strict`, extra_files):
+        #   + `changelog.d/wp-725.md` · `changelog.d/wp-726.md` · `changelog.d/wp-727.md`
+        # Không tệp `docs/` nào đổi (vẫn 75). Cây thật = 186 + 75 = **261**; trần Package 200 còn 14 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 261
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 75
@@ -21981,9 +21985,10 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 183 (WP710, land PR #714: 180 -> 183, ke khai slot day du o r291_docs_ngoai_goi).
+            # RATCHET: goi giu 186 (Packet #735: 183 -> 186, ba manh changelog.d wp-725/726/727; ke khai slot
+            # day du o r291_docs_ngoai_goi). Truoc do 180 -> 183 (WP710, land PR #714).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 183
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 186
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

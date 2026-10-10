@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 183,
-  "total_bytes": 8710991,
-  "package_hash": "097ce1d72e1aceed187cfb7f3f03f16e1d67b58ba8b7d406043d64099c603691",
-  "content_hash": "097ce1d72e1aceed187cfb7f3f03f16e1d67b58ba8b7d406043d64099c603691",
+  "file_count": 186,
+  "total_bytes": 8760643,
+  "package_hash": "20173e690c6a2ca1dc8bd4dad7a063d2c8288f9b79b6413ef401406cffa134f8",
+  "content_hash": "20173e690c6a2ca1dc8bd4dad7a063d2c8288f9b79b6413ef401406cffa134f8",
   "required_missing": [],
   "files": [
     {
@@ -62,6 +62,21 @@
       "sha256": "1efc3dbee8f3549e53bf73656914cfa80a55c4a452aeff19a6d7b381cdfa8cf8"
     },
     {
+      "path": "changelog.d/wp-725.md",
+      "size": 1954,
+      "sha256": "141f4a2c1ffa73ea0ae29583f4f9431896f161b6ecdddb805a9a98efc4ee4ebe"
+    },
+    {
+      "path": "changelog.d/wp-726.md",
+      "size": 3103,
+      "sha256": "5e50a98d1d70a79265a861a5c8dd69f24a577299530af19aff9d82d035af8869"
+    },
+    {
+      "path": "changelog.d/wp-727.md",
+      "size": 1037,
+      "sha256": "b662efcc3b0e807507a4021ae29d474d2563033435267f55a37b5b8b161b2b45"
+    },
+    {
       "path": "references/API_CONTRACT.md",
       "size": 30737,
       "sha256": "4a20e73edd51df81c3792db6cbf635943155ca31140402d034fb04a810382793"
@@ -93,8 +108,8 @@
     },
     {
       "path": "references/COWORK_PROJECT.md",
-      "size": 7356,
-      "sha256": "bc6c9cfdd187b089b3d87438c5ebd9614166f72a599ac9b3274a20fd3372f163"
+      "size": 8024,
+      "sha256": "4fb7c036637891803f9d7fc6c453d9d5778336750c134fc903aafb3b302f102e"
     },
     {
       "path": "references/Code.2.21.2o.gs",
@@ -183,8 +198,8 @@
     },
     {
       "path": "references/RUNBOOK.md",
-      "size": 86083,
-      "sha256": "0b8ab800dd222425f702ed89d40fe0b9e4403abeaa7ea2a25c445c8b7de47588"
+      "size": 86217,
+      "sha256": "6bb3c7650aee1189aad1b143b42b4cf9f248e8892587accd492e4837d3d6bbfa"
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",
@@ -319,7 +334,7 @@
     {
       "path": "references/golden/parser_surface.json",
       "size": 16882,
-      "sha256": "9c5ea696c980d459830f25efff9d32cb02ae52490e4f039e515851ca1e8c036d"
+      "sha256": "a84fcb4803af84bfb4dcb747787ce8b107f4276a9ab8b87cf6dbca904da091ae"
     },
     {
       "path": "references/golden/route_task_ingest_zip.json",
@@ -573,8 +588,8 @@
     },
     {
       "path": "scripts/env-reimport.sh",
-      "size": 7892,
-      "sha256": "cefdd69673bd491b92b20e5777ad7374c75c6239c68e34b85861f6d7f107fd05"
+      "size": 9859,
+      "sha256": "8c479822cf1598dcbe6aa2b795fce1c4758dca93874b31fc5df2a56e1273239b"
     },
     {
       "path": "scripts/gas.py",
@@ -623,13 +638,13 @@
     },
     {
       "path": "scripts/nlm-auth-import.sh",
-      "size": 12837,
-      "sha256": "c9cdb10ed5eb50f0eacf8f0f1262759f22da0a79a636b255fee5fe70b468b0b7"
+      "size": 14354,
+      "sha256": "0a5b43e773bc55057640a1a8993fa56386d4f1e53c3d568a31fe6677d785d4c7"
     },
     {
       "path": "scripts/nlm-auto-refresh.sh",
-      "size": 4870,
-      "sha256": "bc0b55184ab7949d123f9c35c90b3d26f194d2fb67de4a591c6884a50e7f16d9"
+      "size": 7263,
+      "sha256": "06b40a1bd4b76b34279a65e6357803df027075bf9077e5a2d4fa054cdda1c687"
     },
     {
       "path": "scripts/nlm-credential-refresh.Tests.ps1",
@@ -723,8 +738,8 @@
     },
     {
       "path": "scripts/tl_core/cli.py",
-      "size": 52271,
-      "sha256": "d35ebe744c211275d1431a4eefe4f8e2d653e5d67aa8782f2a5ec99fff9e7779"
+      "size": 52373,
+      "sha256": "5cf1d31bed3061bf9b41b59dfa61422a896e3082b7c464e1379c30104a633906"
     },
     {
       "path": "scripts/tl_core/command_registry.py",
@@ -868,18 +883,18 @@
     },
     {
       "path": "scripts/tl_gws.py",
-      "size": 138855,
-      "sha256": "040195dede584ed4be4fcd7b566dca2170c225d34cd80f30fe5d7381aca30173"
+      "size": 140097,
+      "sha256": "327f64a8873cdce325dd8d52b2ffc8c5a0a0b56588a4dd47ee1d49b976b0ff6c"
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2220467,
-      "sha256": "816745e09f4059e7c020f0c2ba4954efc6648b919b339a103843a40df7a9bdb3"
+      "size": 2221003,
+      "sha256": "c002916d267c594b8c5137ca811842ba88e699808a423378a0a4fcbf8fba0eaf"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 16464,
-      "sha256": "eb4d36e75e81c244c31814859fc1ce237436cc866cc9fae1e494d23c5347fa13"
+      "size": 51463,
+      "sha256": "af0bc88ecdd3e85aa2af1c75958c377a02a9eea5eacb13667194eeaec773387d"
     },
     {
       "path": "scripts/tra_cuu.py",

@@ -15,6 +15,12 @@ from pathlib import Path
 
 import yaml
 
+# L3 — console khong ma hoa duoc "—" / "·" (cp437/cp1252 qua ong; `python -I` vo hieu PYTHONUTF8/PYTHONIOENCODING nen nguoi dung khong tu chua duoc):
+# print() nem UnicodeEncodeError GIUA chung, rc=1 truoc dong TONG (do 10-10-2026, PYTHONIOENCODING=ascii:strict, kho 1191865..d1dec7f). Ep UTF-8 TRUOC khi in.
+for _s in (sys.stdout, sys.stderr):
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="replace")
+
 P = Path(__file__).resolve().parent
 HO_SO = P.parent / "pr621-skill-bai-hoc-land-evidence.yaml"
 LOI = []
@@ -55,7 +61,9 @@ h = yaml.load(HO_SO.read_text(encoding="utf-8"), Loader=_Nghiem)
 DA_DOC = set()
 
 
-# Khoa tuong thuat/tro-toi: khong phai loi khai co the doi gia tri (lenh = cach tai lap, readback = ten tep, ...).
+# Khoa tuong thuat/tro-toi: khong phai loi khai co the doi gia tri (lenh = cach tai lap, readback = ten tep, ...). CHU Y: ca khoa nay, la khong chu so,
+# chuoi khong mo dau bang `measured` (landed_ly_do, khong_do_duoc[*].mo_ta...) va khoi khong gan nhan KHONG duoc --tu-kiem thu; su that mang quyet dinh land
+# trong do chi co chot rieng o muc 4/6/7 (L3), con lai la van xuoi.
 _TUONG_THUAT = {"dinh_chinh", "ghi_chu", "lenh", "mo_ta", "kiem_bang_may", "checkout", "pham_vi", "nguon", "readback", "vai_tro", "hien_vat"}
 
 
@@ -108,7 +116,7 @@ if "--tu-kiem" in sys.argv:
             shutil.copytree(P, d / P.name)
             (d / HO_SO.name).write_text(yaml.safe_dump(o, allow_unicode=True, sort_keys=False, width=100000), encoding="utf-8")
             return subprocess.run([sys.executable, "-I", str(d / P.name / Path(__file__).name), "--repo", repo_tk],
-                                  capture_output=True, text=True, timeout=600, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
 
     goc = yaml.safe_load(HO_SO.read_text(encoding="utf-8"))
     r0 = chay_con(goc)
@@ -368,6 +376,11 @@ ha = h["review_tai_head_da_merge"]["human_audit"]
 chot(ha["assurance"] == "human_audited" and ha["verdict"] == "approve" and dong_au[0].startswith("Human audit — approve ")
      and str(ha.get("assurance_dat", "")).startswith("KHAI, CHUA DAT"),
      "human_audit: assurance/verdict khop dong dau than comment; assurance_dat con khai thieu hut (nhan khong duoc lat manh hon bang chung)")
+ad = str(ha.get("assurance_dat", ""))
+chot(f"luot {h['review_ai_truoc_drift']['luot']} (stale)" in ad and f"lượt {h['review_ai_truoc_drift']['luot']}" in au["body"] and "'CI 15/15'" in ad and "15/15 success" in au["body"]
+     and f"do duoc {len(bang['658bd0c'])} ({dem(bang['658bd0c'])['success']}+{dem(bang['658bd0c'])['skipped']})" in ad
+     and "khong co dong `Reviewed commit:`" in ad and not any(x.startswith("Reviewed commit:") for x in dong_au),
+     "human_audit.assurance_dat: su that (luot stale, 'CI 15/15', 17 = 16+1, khong co Reviewed commit) khop than comment va dem check run (L3)")
 chot(h["merge_method"] == "merge" and dong_au.count(
     f"- Uỷ quyền: merge đúng SHA {sha[:7]} bằng merge commit (không squash), rồi chạy hậu-merge gate và bookkeeping. "
     "Head đổi thêm thì uỷ quyền này hết hiệu lực.") == 1, "uy quyen: dong uy quyen merge commit dung nguyen van, mot lan")
@@ -404,26 +417,39 @@ chot(pr["merged_by"]["login"] == h["approver"] and f"merged_by trong pr-621.json
 chot(pr["merged"] is True and pr["html_url"] == f"https://github.com/ducthangho/tra-luat/pull/{h['pr']}" and pr["number"] == h["pr"] and pr["base"]["ref"] == "master", "pr: merged, dung so, base master")
 tp = h["trang_thai_packet"]
 chot(tp["merged"] is pr["merged"] and isinstance(tp["landed"], bool), "trang_thai_packet: merged == pr-621.json, landed la bool")
+# L3 — landed_ly_do va mo_ta cua khong_do_duoc la CHINH van ban chu kho doc de quyet dinh; khong nam trong nut `measured` nen --tu-kiem khong thu (do 10-10-2026: 20/20
+# cum chu so cua landed_ly_do, 18/18 cua khong_do_duoc[2].mo_ta song sot). Buoc cac su that co the do: tap run id, dem hau merge, SHA, OID merge ref.
+chot({int(x) for x in re.findall(r"(?<!\d)\d{11}(?!\d)", tp["landed_ly_do"])} == khong_skip and f"{n3}/{n3}" in tp["landed_ly_do"]
+     and h["merge_commit"][:7] in tp["landed_ly_do"] and sha[:7] in tp["landed_ly_do"],
+     "trang_thai_packet.landed_ly_do: tap run id == run khong skipped (pham_vi_run), dem hau merge, SHA merge/ung vien khop hien vat")
+m_mr = re.search(r"refs/pull/621/merge = ([0-9a-f]{7})(?![0-9a-f])", next(k for k in h["khong_do_duoc"] if k["id"] == "CHECKOUT-IDENTITY")["mo_ta"])
+chot(bool(m_mr) and a_truoc.get("refs/pull/621/merge", "")[:7] == m_mr.group(1), "khong_do_duoc CHECKOUT-IDENTITY.mo_ta: OID merge ref == anh ls-remote truoc merge")
 qd = h.get("quyet_dinh_chu_kho") or {}
+PR_GHI_SO = 723   # quyet dinh chu kho phai nam tren CHINH PR mang ho so nay (bookkeeping: "chu ky moi tren head hien hanh cua PR #723")
 
 
 def landed_hop_le():
-    """N04 — `landed: true` can quyet dinh chu kho co NEO doc duoc, khong chi mot chuoi bat ky: URL comment cua kho nay + readback trong provenance
-    (id/URL khop, tac gia == approver, OWNER, khong qua app, tao SAU merge) + pham_vi_run == pham_vi ba diem + chap nhan assurance_dat ro rang.
-    Khong do duoc offline: comment ky tren DUNG head hien hanh cua PR ghi so (thoi diem commit cuoi) — do khi merge, khong do trong tep nay."""
+    """N04 + L3 — `landed: true` can quyet dinh chu kho co NEO doc duoc VA THAN comment noi dung dieu duoc khai: URL comment tren PR_GHI_SO + readback trong
+    provenance (id/URL/issue_url khop, tac gia == approver, OWNER, khong qua app, tao SAU merge, chua sua) + than comment: MOT dong `Reviewed commit: <40 hex>` ==
+    quyet_dinh_chu_kho.reviewed_sha, moi run trong pham_vi_run, ca ba id khong_do_duoc va chu `assurance_dat` deu xuat hien (do 10-10-2026: comment THAT 6084105994 —
+    quyet dinh CU tren 06fc9a8, chi 2 diem, chi 1 run — da lot ban truoc khi buoc than). Khong do duoc offline: comment ky tren DUNG head hien hanh cua PR ghi so."""
     nb = str(qd.get("neo_ben", ""))
-    m_nb = re.fullmatch(r"https://github\.com/ducthangho/tra-luat/pull/\d+#issuecomment-(\d+)", nb)
+    m_nb = re.fullmatch(rf"https://github\.com/ducthangho/tra-luat/pull/{PR_GHI_SO}#issuecomment-(\d+)", nb)
     ten = str(qd.get("readback", ""))
     if not m_nb or not ten or "/" in ten or not (P / ten).is_file():
         return False
     rb = json.loads(doc(ten))
+    cua = rb.get("body") or ""
     return (rb.get("html_url") == nb and str(rb.get("id")) == m_nb.group(1) and (rb.get("user") or {}).get("login") == h["approver"]
             and rb.get("author_association") == "OWNER" and rb.get("performed_via_github_app") is None and ts(rb["created_at"]) > ts(merged)
-            and all(set(qd.get("pham_vi_run", [])) == pham_vi[c] for c in can) and qd.get("assurance_dat") == "chap_nhan")
+            and rb.get("updated_at") == rb.get("created_at") and str(rb.get("issue_url", "")).endswith(f"/repos/ducthangho/tra-luat/issues/{PR_GHI_SO}")
+            and all(set(qd.get("pham_vi_run", [])) == pham_vi[c] for c in can) and qd.get("assurance_dat") == "chap_nhan"
+            and re.findall(r"^Reviewed commit: ([0-9a-f]{40})$", cua, re.M) == [str(qd.get("reviewed_sha", ""))]
+            and all(str(r) in cua for r in sorted(khong_skip)) and all(c in cua for c in can) and "assurance_dat" in cua)
 
 
-chot(tp["landed"] is False or landed_hop_le(),
-     "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL) + readback (OWNER, khong app, SAU merge) + pham_vi_run == pham_vi + assurance_dat: chap_nhan")
+chot(tp["landed"] is False or (landed_hop_le() and "CON THIEU" not in tp["landed_ly_do"]),
+     "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment (Reviewed commit == reviewed_sha, du 4 run, 3 id, assurance_dat) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`")
 
 # 8. Review connector sach (Codex PR #723, comment 4232431571): actor, commit, trang thai cuoi, luc; hai danh sach rong.
 cx = json.loads(doc("comment-6082682461-codex.json"))
@@ -506,16 +532,19 @@ else:
     if not repo or not Path(repo).is_dir():
         raise SystemExit("TRUOT --repo rong hoac khong phai thu muc (git -C '' la khong lam gi: do kho cua thu muc hien tai)")
     # N05 — GIT_CONFIG_GLOBAL=devnull bo luon `safe.directory` cua nguoi dung: kho do uid khac / thu muc chia se => git tu choi ("dubious
-    # ownership"), va dong duoi doc loi do thanh "nong hoac khong phai kho git". Bo kiem chi chay git DOC (rev-parse/rev-list/diff, khong hook,
-    # --no-ext-diff --no-textconv) tren kho nguoi dung CHI DINH bang --repo => tin tuong tuong minh qua bien moi truong (cung pham vi "protected").
+    # ownership"), va dong duoi doc loi do thanh "nong hoac khong phai kho git". Bo kiem chi chay git DOC tren kho nguoi dung CHI DINH bang --repo
+    # => tin tuong tuong minh qua bien moi truong (cung pham vi "protected"). Tin tuong do CHI an toan khi MOI lenh `diff` mang --no-ext-diff
+    # --no-textconv (qua _AN): do 10-10-2026, thieu hai co nay o d40 thi `diff.external` / `diff.<drv>.textconv` trong .git/config cua kho do
+    # uid khac CHAY lenh tuy y va bo kiem van ra `TONG: DAT`.
     _GIT_ENV.update(GIT_CONFIG_COUNT="1", GIT_CONFIG_KEY_0="safe.directory", GIT_CONFIG_VALUE_0="*")
     if subprocess.run(["git", "-C", repo, "rev-parse", "--is-shallow-repository"], capture_output=True, text=True, env=_GIT_ENV).stdout.strip() != "false":
         raise SystemExit("TRUOT repo: nong hoac khong phai kho git (digest va dem commit tren kho nong la sai)")
 
+    _AN = ("--no-ext-diff", "--no-textconv")
+    _DIFF = ["--no-color", *_AN, "--src-prefix=a/", "--dst-prefix=b/", "-U3", "--diff-algorithm=myers", "--indent-heuristic", "-M"]
+
     def d(a, b):
-        out = subprocess.run(["git", "-C", repo, "-c", "core.abbrev=7", "diff", "--no-color", "--no-ext-diff", "--no-textconv", "--src-prefix=a/",
-                              "--dst-prefix=b/", "-U3", "--diff-algorithm=myers", "--indent-heuristic", "-M", a, b],
-                             capture_output=True, check=True, env=_GIT_ENV).stdout
+        out = subprocess.run(["git", "-C", repo, "-c", "core.abbrev=7", "diff", *_DIFF, a, b], capture_output=True, check=True, env=_GIT_ENV).stdout
         return hashlib.sha256(out).hexdigest()
 
     chot(d("6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab", "675895db34e9a7c1357f8d8ad8925bf8f01ad21c") == DG, "diff truoc drift (OID ghim)")
@@ -523,7 +552,7 @@ else:
     chot(d("3fc0932a3d1617c4352e5a7982f2e6e4208ca3f7", "658bd0cdc56bbd3445f489dcfc571e22eee7d675") != DG, "ref SAU merge cho digest KHAC")
 
     def d40(a, b):
-        return hashlib.sha256(subprocess.run(["git", "-C", repo, "-c", "core.abbrev=40", "diff", a, b], capture_output=True, check=True, env=_GIT_ENV).stdout).hexdigest()
+        return hashlib.sha256(subprocess.run(["git", "-C", repo, "-c", "core.abbrev=40", "diff", *_DIFF, a, b], capture_output=True, check=True, env=_GIT_ENV).stdout).hexdigest()
 
     hd = h["ung_vien"]["head_drift"]
     dg40, rong = d40("6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab", "675895db34e9a7c1357f8d8ad8925bf8f01ad21c"), hashlib.sha256(b"").hexdigest()
@@ -552,12 +581,12 @@ else:
     chot(so == dc["so"] and f"=> {so['base_den_master']};" in dc["lenh"] and f"=> {so['rieng_nhanh']} {so['rieng_master']}." in dc["lenh"]
          and f"di truoc {so['base_den_master']} commit" in h["ung_vien"]["head_drift"]["mo_ta"], f"drift (git): {so} == khai")
     # diff --stat merge (Codex 4232647622)
-    ns = g("diff", "--shortstat", tm["cha"][0], h["merge_commit"])
+    ns = g("diff", *_AN, "--shortstat", tm["cha"][0], h["merge_commit"])
     m_ns = re.fullmatch(r"(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?", ns)
     ds = {"tep": int(m_ns.group(1)), "them": int(m_ns.group(2) or 0), "xoa": int(m_ns.group(3) or 0)} if m_ns else None
     chot(ds == tm["kiem_tra"]["diff_stat"] and f"=> {ds['tep']} tep, +{ds['them']}" in tm["kiem_tra"]["ket_qua"],
          f"merge (git): diff --shortstat {ns!r} == khai")
-    chot(sorted(g("diff", "--name-only", tm["cha"][0], h["merge_commit"]).splitlines()) == sorted(h["write_set"]), "merge (git): tep doi 8b59185..3fc0932 == write_set YAML")
+    chot(sorted(g("diff", *_AN, "--name-only", tm["cha"][0], h["merge_commit"]).splitlines()) == sorted(h["write_set"]), "merge (git): tep doi 8b59185..3fc0932 == write_set YAML")
 
 if LOI:
     print(f"TONG: TRUOT {len(LOI)}")

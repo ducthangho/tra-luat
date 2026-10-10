@@ -6,9 +6,11 @@
 # theo tien le, `landed: true` chi co hieu luc tu merge commit cua PR ghi so KE TIEP, sau khi chu kho quyet cac diem
 # not_measured duoi day. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem) VA `kiem_ho_so.py --repo <clone> --tu-kiem` doi TUNG cum chu so cua la do ma bo kiem DO
-# bang MOT CHOT (khong do vi traceback). Pham vi tu-kiem: la co chu so trong nut `trang_thai: measured` hoac chuoi mo dau `measured`; khoa tuong thuat
-# (lenh, mo_ta, pham_vi, ghi_chu, dinh_chinh, nguon, readback, checkout, vai_tro, hien_vat) va la KHONG co chu so khong bi thu (xem _TUONG_THUAT);
-# pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} (moc: measured) co chot rieng nhung KHONG nam trong pham vi tu-kiem.
+# bang MOT CHOT (khong do vi traceback). Pham vi tu-kiem: la co chu so trong nut `trang_thai: measured` hoac chuoi mo dau `measured`. NGOAI pham vi:
+# khoa tuong thuat (lenh, mo_ta, pham_vi, ghi_chu, dinh_chinh, nguon, readback, checkout, vai_tro, hien_vat, kiem_bang_may — xem _TUONG_THUAT); la KHONG co chu so;
+# chuoi khong mo dau bang `measured` (vd trang_thai_packet.landed_ly_do, khong_do_duoc[*].mo_ta, pre_merge_checks[0..2].moc); khoi khong gan nhan (bookkeeping,
+# uy_quyen.*, human_audit.assurance_dat/ghi_chu). Cac khoi nay chi co chot rieng cho MOT SO su that (kiem_ho_so.py), KHONG duoc --tu-kiem chung minh. Toan tu
+# tu-kiem chi doi CHU SO: doi TU (success/OWNER/push/ci.yml) trong la measured KHONG bi thu. pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} co chot rieng.
 # thuat_lai = so lieu cua luot review, khong tai chay;
 # not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr621-skill-bai-hoc-provenance/ (SHA256SUMS.txt). Kiem nhat quan ho so <-> hien vat:

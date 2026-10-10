@@ -6897,7 +6897,19 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     bang(not sai16, f"gom phải KẾT LUẬN đủ mọi bản ghi, cộng ĐỦ lỗi, in ĐỦ bảng — trực tiếp và qua CLI thật "
                     f"([rc/lỗi, số ok, số ĐỎ, SỐ LIỆU(, dòng đầu)], mong {f16}): {sai16}")
     # #698 M2b T4/T5: bộ ghi THẬT trên mọi ô (> 60: 60 đường + khúc tên tệp) — tập mục, hai dòng in, HOME rỗng.
-    bang(kq["ghi698"][0] > 60 and kq["ghi698"][1:] == [[], 0], f"bộ ghi #698 [số ô, ô lệch đầu, tổng lệch]: {kq['ghi698']}")
+    # PR #721: trên Windows khối không chạy (tên Windows cấm) ⇒ đúng [0, [], 0].
+    bang(kq["ghi698"] == [0, [], 0] if os.name == "nt" else kq["ghi698"][0] > 60 and kq["ghi698"][1:] == [[], 0],
+         f"bộ ghi #698 [số ô, ô lệch đầu, tổng lệch]: {kq['ghi698']}")
+    # Chốt nền của khối, đo không cần Windows: `ten_nen="nt"` ⇒ KHÔNG lời gọi bộ ghi nào mang ký tự Windows cấm.
+    goi, g = [], globals()
+    cu, g["_ket_thuc_manh"] = g["_ket_thuc_manh"], lambda *a: (goi.append(a[2]), [["x"], 0])[1]
+    try:
+        with tempfile.TemporaryDirectory(prefix="t52nt_") as d:
+            ra_nt = _ghi698(Path(d), 3, {}, list(DOT_BIEN)[:1], ten_nen="nt")
+    finally:
+        g["_ket_thuc_manh"] = cu
+    cam = [ascii(p)[:40] for p in goi if any(ord(c) < 32 or c in '"*:?|<>' + chr(92) for c in p)]
+    bang(ra_nt == [0, [], 0] and not cam, f"khối #698 M2b trên `nt` gọi bộ ghi với tên Windows cấm: {ra_nt} {cam[:3]}")
 
 
 @ca
@@ -7709,6 +7721,42 @@ _TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f
 _TEN_SL_FALSE = ("f37_dk_luon_dung", "f40_false_khong", "f41_bo_f40_khong", "f41_f40_luon_ra_ngoai")   # F40: đăng ký CHỈ ở nền KHÔNG symlink
 
 
+def _ghi698(d, n, vt, t1, ten_nen=os.name):
+    # #698 M2b T4/T5 (dò x_wr_ra_*, x3_wr*, x4_t4/t5_*, y4_t4_*, x6_t4_ra): bộ ghi THẬT trên 60 đường của `_duong698` cộng khúc
+    # tên tệp phủ D698 ∪ N698 (bỏ NUL và "/", khúc 50 ký tự mở bằng "k"); gọi HAI lần (lần hai gặp tệp cũ ⇒ nhánh gỡ chạy),
+    # `cwd` riêng từng ô, HOME rỗng. Kỳ vọng ĐỘC LẬP (không gọi bộ ghi): tập mục = `Path(p)` và các cha, ghép `cwd`, giải `..`;
+    # dòng in của mỗi lần dựng từ `Path(p)`. Mọi BaseException của bộ ghi là DỮ LIỆU (M6). Chỉ đo POSIX (nợ Windows, Q8).
+    # PR #721 (Codex P1): tên ô chứa U+0001–U+001F, chéo ngược và `"*:?|<>` — Windows cấm ⇒ bộ ghi ném, ô lệch. Nên trên
+    # `nt` KHÔNG chạy, trả [0, [], 0]; `t52` đòi đúng giá trị ấy trên `nt` và đo chốt bằng `ten_nen="nt"` (không cần Windows).
+    if ten_nen == "nt":
+        return [0, [], 0]
+    nha, cu_cwd, cu_nha, lech = d / "nha698", os.getcwd(), {x: os.environ.get(x) for x in ("HOME", "USERPROFILE")}, []
+    nha.mkdir()
+    tv = [c for c in sorted(set(_d698() + list(_N698))) if c not in (0, 47)]
+    cac_p = _duong698()[:60] + ["k" + "".join(map(chr, tv[i:i + 50])) for i in range(0, len(tv), 50)]
+    os.environ.update(HOME=str(nha), USERPROFILE=str(nha))
+    try:
+        for j, p in enumerate(cac_p):
+            o = d / "o698" / str(j)
+            o.mkdir(parents=True)
+            os.chdir(o)
+            try:
+                thay = [None, [_ket_thuc_manh(0, n, p, t1, {t1[0]: _ban_ghi_du_gia(t1[0])}, None, vt)[0][-1] for _ in "12"]]
+                thay[0] = sorted(str(x.relative_to(o)) for x in o.rglob("*"))
+            except BaseException as ex:  # noqa: BLE001
+                thay = ["NEM:" + type(ex).__name__]
+            q = Path(p)
+            mong = [sorted({os.path.relpath(os.path.normpath(o / x), o) for x in (q, *q.parents)} - {"."}),
+                    [f"MẢNH 0/{n}: 1/1 đột biến bán kính 1 · ghi {q}"] * 2]
+            if thay != mong or any(nha.iterdir()):
+                lech.append([j, ascii(p)[:60], str(thay)[:160]])
+    finally:
+        os.chdir(cu_cwd)
+        for x, v in cu_nha.items():
+            os.environ.pop(x, None) if v is None else os.environ.update({x: v})
+    return [len(cac_p), lech[:10], len(lech)]
+
+
 def _in_tu_kiem_gom():
     """Cửa tiến trình con cho `t52`: dựng bộ mảnh bằng CHÍNH `_ket_thuc_manh`, làm hỏng từng cách, gom, in `KQ`."""
     n = 3
@@ -7960,35 +8008,7 @@ def _in_tu_kiem_gom():
             kq["ghi_duong"] = [p.is_file(), p.is_file() and p.read_text(encoding="utf-8").startswith("MANH ")]
         except Exception as ex:  # noqa: BLE001
             kq["ghi_duong"] = [f"NEM:{type(ex).__name__}"]
-        # #698 M2b T4/T5 (dò x_wr_ra_*, x3_wr*, x4_t4/t5_*, y4_t4_*, x6_t4_ra): bộ ghi THẬT trên 60 đường của `_duong698` cộng khúc
-        # tên tệp phủ D698 ∪ N698 (bỏ NUL và "/", khúc 50 ký tự mở bằng "k"); gọi HAI lần (lần hai gặp tệp cũ ⇒ nhánh gỡ chạy),
-        # `cwd` riêng từng ô, HOME rỗng. Kỳ vọng ĐỘC LẬP (không gọi bộ ghi): tập mục = `Path(p)` và các cha, ghép `cwd`, giải `..`;
-        # dòng in của mỗi lần dựng từ `Path(p)`. Mọi BaseException của bộ ghi là DỮ LIỆU (M6). Chỉ đo POSIX (nợ Windows, Q8).
-        nha, cu_cwd, cu_nha, lech = d / "nha698", os.getcwd(), {x: os.environ.get(x) for x in ("HOME", "USERPROFILE")}, []
-        nha.mkdir()
-        tv = [c for c in sorted(set(_d698() + list(_N698))) if c not in (0, 47)]
-        cac_p, t1 = _duong698()[:60] + ["k" + "".join(map(chr, tv[i:i + 50])) for i in range(0, len(tv), 50)], cac[:1]
-        os.environ.update(HOME=str(nha), USERPROFILE=str(nha))
-        try:
-            for j, p in enumerate(cac_p):
-                o = d / "o698" / str(j)
-                o.mkdir(parents=True)
-                os.chdir(o)
-                try:
-                    thay = [None, [_ket_thuc_manh(0, n, p, t1, {t1[0]: _ban_ghi_du_gia(t1[0])}, None, vt)[0][-1] for _ in "12"]]
-                    thay[0] = sorted(str(x.relative_to(o)) for x in o.rglob("*"))
-                except BaseException as ex:  # noqa: BLE001
-                    thay = ["NEM:" + type(ex).__name__]
-                q = Path(p)
-                mong = [sorted({os.path.relpath(os.path.normpath(o / x), o) for x in (q, *q.parents)} - {"."}),
-                        [f"MẢNH 0/{n}: 1/1 đột biến bán kính 1 · ghi {q}"] * 2]
-                if thay != mong or any(nha.iterdir()):
-                    lech.append([j, ascii(p)[:60], str(thay)[:160]])
-        finally:
-            os.chdir(cu_cwd)
-            for x, v in cu_nha.items():
-                os.environ.pop(x, None) if v is None else os.environ.update({x: v})
-        kq["ghi698"] = [len(cac_p), lech[:10], len(lech)]
+        kq["ghi698"] = _ghi698(d, n, vt, cac[:1])
         if _CO_SYMLINK:
             gay = ghi / "gay.txt"
             os.symlink(ghi / "khong-co", gay)

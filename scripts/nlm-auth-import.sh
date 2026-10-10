@@ -32,8 +32,10 @@
 #   · JSON dict  {"SID":"...","__Secure-1PSID":"..."}
 #   · header     SID=...; __Secure-1PSID=...; ...
 #
-# rc: 0 = nạp + probe LIVE xanh · 1 = sai tham số/thiếu điều kiện · 2 = file cookie không hợp lệ
-#     3 = nlm từ chối cookie · 4 = nạp được nhưng probe LIVE vẫn đỏ
+# rc: 0 = nạp + canary LIVE dương (+ stage xong nếu có stage) · 1 = sai tham số/thiếu điều kiện
+#     2 = file cookie không hợp lệ · 3 = nlm từ chối cookie · 4 = nạp được nhưng canary LIVE ÂM (jar cũ khôi phục)
+#     5 = stage lỗi (rc 4 của stage = canary của lệnh stage từ chối, 0 upload; khác = có thể đã ghi một phần)
+#     6 = canary KHÔNG KẾT LUẬN (mạng/lỗi probe) — giữ jar vừa nạp, không stage (WP726)
 set -uo pipefail
 
 ROOT="${TL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -62,6 +64,24 @@ warn() { printf '  \033[33m[WARN]\033[0m %s\n' "$*"; }
 say()  { printf '\n\033[1m== %s ==\033[0m\n' "$*"; }
 
 command -v nlm >/dev/null 2>&1 || { bad "chưa có nlm — chạy ./scripts/env-reimport.sh trước"; exit 1; }
+
+_canary_song() {  # WP726: 0 sống · 3 chết · 2 không kết luận. Cùng cổng `nlm-auth-stage` của WP710: thân trả về
+  # phải ĐÚNG notebook (`require_notebook_body=True`); rc 0 hay số notebook KHÔNG đủ. KHÔNG in gì của probe
+  # (thông điệp có thể mang stderr thô của nlm) — chỉ dùng mã thoát.
+  "$PY" - >/dev/null 2>&1 <<'PY'
+import sys
+sys.path.insert(0, "scripts")
+try:
+    import tl
+    tg = tl._imp("tl_gws")
+    tg.bind(tl)
+    alive, _ = tg._nlm_auth_alive(tg._nlm_canary_notebook(None), require_notebook_body=True)
+except Exception:
+    alive = None
+sys.exit(0 if alive is True else 3 if alive is False else 2)
+PY
+}
+
 
 # TMP có quyền 700; luôn xoá kể cả khi lỗi — file này là SESSION GOOGLE ĐẦY ĐỦ.
 TMP="$(mktemp -d)"; chmod 700 "$TMP"; trap 'rm -rf "$TMP"' EXIT
@@ -190,12 +210,16 @@ if [ "$CONV_RC" != 0 ]; then
 fi
 ok "đã ghi jar (nlm sẽ tự mint *PSIDTS qua RotateCookies khi probe)"
 
-# ── 4. PHÁN QUYẾT = probe LIVE (không tin bước 3 báo thành công) ──
-say "4. Probe LIVE"
-if CHK="$(nlm login --check 2>&1)" && printf '%s' "$CHK" | grep -qi "valid"; then
-  ok "NLM SỐNG — $(printf '%s' "$CHK" | grep -iE 'notebooks found|account' | tr '\n' ' ' | sed 's/  */ /g')"
+# ── 4. PHÁN QUYẾT = canary LIVE trên đúng notebook (WP726: KHÔNG dùng `nlm login --check` — false-green) ──
+say "4. Canary LIVE"
+_canary_song; CANARY_RC=$?
+if [ "$CANARY_RC" = 0 ]; then
+  ok "NLM SỐNG — canary dương trên đúng notebook"
+elif [ "$CANARY_RC" = 2 ]; then
+  bad "canary KHÔNG KẾT LUẬN được (mạng/lỗi probe) — giữ jar vừa nạp, KHÔNG stage; chạy lại sau."
+  exit 6
 else
-  bad "nạp xong nhưng probe LIVE vẫn ĐỎ:"; printf '%s\n' "$CHK" | sed 's/^/       /'
+  bad "nạp xong nhưng canary LIVE vẫn ÂM (cookie không đọc được đúng notebook)."
   [ -d "$TMP/jar.bak" ] && { rm -rf "$JAR"; cp -a "$TMP/jar.bak" "$JAR"; warn "đã khôi phục jar cũ"; }
   exit 4
 fi
@@ -205,10 +229,19 @@ if [ "$DO_STAGE" = 1 ]; then
   say "5. Đẩy cookie tươi vào bundle Drive"
   if [ -z "${TL_TOKEN:-}" ]; then
     warn "thiếu TL_TOKEN — bỏ qua stage. Phiên sau sẽ phải nhập cookie lại."
-  elif $PY scripts/tl.py nlm-auth-stage 2>&1 | tail -2 | sed 's/^/     /'; then
-    ok "bundle Drive đã tươi — phiên sau chỉ cần: tl nlm-auth-load"
   else
-    warn "nlm-auth-stage lỗi — cookie ở ĐÂY vẫn dùng được, chỉ là chưa chia sẻ cho phiên khác"
+    # Chỉ dùng MÃ THOÁT (WP726): rc 4 = canary của chính lệnh stage không dương ⇒ 0 upload; rc khác 0 còn lại
+    # = lỗi stage, có thể đã ghi một phần. Không in đầu ra của lệnh.
+    $PY scripts/tl.py nlm-auth-stage >/dev/null 2>&1; STAGE_RC=$?
+    if [ "$STAGE_RC" = 0 ]; then
+      ok "bundle Drive đã tươi — phiên sau chỉ cần: tl nlm-auth-load"
+    elif [ "$STAGE_RC" = 4 ]; then
+      bad "nlm-auth-stage rc=4: canary của lệnh stage KHÔNG dương — KHÔNG upload gì."
+      exit 5
+    else
+      bad "nlm-auth-stage rc=$STAGE_RC: lỗi stage — có thể đã ghi một phần, kiểm Drive trước khi thử lại."
+      exit 5
+    fi
   fi
 else
   say "5. BỎ QUA stage (--no-stage)"

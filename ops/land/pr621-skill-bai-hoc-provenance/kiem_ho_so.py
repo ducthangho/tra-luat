@@ -26,7 +26,9 @@ HO_SO = P.parent / "pr621-skill-bai-hoc-land-evidence.yaml"
 LOI = []
 # H5 — moi lenh git cua bo kiem chay trong moi truong BIET TRUOC: bo GIT_* (GIT_DIR/GIT_WORK_TREE lam `-C` vo hieu: do 09-10-2026,
 # GIT_DIR=<kho day du> + `--repo <kho nong>` van ra DAT), khong doc cau hinh toan cuc/he thong (diff.noprefix hoac diff.algorithm
-# doi digest => TRUOT gia), khong ap `git replace`.
+# doi digest => TRUOT gia), khong ap `git replace`. GIOI HAN (do 10-10-2026, cross-review luot 4; deu TRUOT/crash gia, khong DAT gia): cau hinh CUC BO cua kho
+# (`.git/config`, `.git/info/attributes`, `.git/info/grafts`) va tep thuoc tinh toan cuc (`$HOME/.config/git/attributes`, `$XDG_CONFIG_HOME/git/attributes`) VAN
+# duoc doc: `diff.suppressBlankEmpty=true` -> TRUOT 3, `* -diff` -> TRUOT 4, `diff.orderFile` hong -> crash. Chay tren clone sach.
 _GIT_ENV = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
 _GIT_ENV.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_NO_REPLACE_OBJECTS="1")
 
@@ -428,28 +430,51 @@ qd = h.get("quyet_dinh_chu_kho") or {}
 PR_GHI_SO = 723   # quyet dinh chu kho phai nam tren CHINH PR mang ho so nay (bookkeeping: "chu ky moi tren head hien hanh cua PR #723")
 
 
+def _dong_than(cua):
+    """L4 — cac dong than comment, de doc CHAP NHAN theo tung dong: cat dau cach cuoi dong (ke ca CR cua CRLF — GitHub web UI tra CR+LF, `$` cua re.M
+    khong nuot CR), bo chu thich HTML `<!-- -->` (khong hien ra) va cac dong trong khoi rao ``` / ~~~ (mot doan tich dan khong phai quyet dinh), bo MOT dau
+    gach dau dong (`- `/`* `) cua danh sach. Dong tich dan `> ` KHONG duoc nhan."""
+    dong, rao = [], False
+    cua = re.sub(r"<!--.*?-->", "", cua, flags=re.S)
+    for d in cua.split("\n"):
+        if d.lstrip().startswith(("```", "~~~")):
+            rao = not rao
+        elif not rao:
+            dong.append(re.sub(r"^\s*(?:[-*]\s+)?", "", d.rstrip()))
+    return dong
+
+
 def landed_hop_le():
-    """N04 + L3 — `landed: true` can quyet dinh chu kho co NEO doc duoc VA THAN comment noi dung dieu duoc khai: URL comment tren PR_GHI_SO + readback trong
-    provenance (id/URL/issue_url khop, tac gia == approver, OWNER, khong qua app, tao SAU merge, chua sua) + than comment: MOT dong `Reviewed commit: <40 hex>` ==
-    quyet_dinh_chu_kho.reviewed_sha, moi run trong pham_vi_run, ca ba id khong_do_duoc va chu `assurance_dat` deu xuat hien (do 10-10-2026: comment THAT 6084105994 —
-    quyet dinh CU tren 06fc9a8, chi 2 diem, chi 1 run — da lot ban truoc khi buoc than). Khong do duoc offline: comment ky tren DUNG head hien hanh cua PR ghi so."""
+    """N04 + L3 + L4 — `landed: true` can quyet dinh chu kho co NEO doc duoc VA THAN comment DOC DUOC la CHAP NHAN: URL comment tren PR_GHI_SO + readback trong
+    provenance (id/URL/issue_url khop, tac gia == approver, OWNER, khong qua app, tao SAU merge, chua sua) + than comment theo MAU, moi muc MOT dong rieng:
+    `Reviewed commit: <40 hex>` (dung MOT dong) == quyet_dinh_chu_kho.reviewed_sha; moi diem khong_do_duoc: `<ID>: chap_nhan <run>,<run>,...` (dung MOT dong mo dau
+    `<ID>:`, dung tap run cua pham_vi_run); `assurance_dat: chap_nhan`. (L3 do 10-10-2026: comment THAT 6084105994 — quyet dinh CU tren 06fc9a8, chi 2 diem, chi 1 run —
+    lot ban truoc khi buoc than; L4: ban chi doi SU CO MAT cua id/run nen mot than TU CHOI hay chap nhan MOT PHAN van qua.) Khong do duoc offline: comment ky tren
+    DUNG head hien hanh cua PR ghi so."""
     nb = str(qd.get("neo_ben", ""))
     m_nb = re.fullmatch(rf"https://github\.com/ducthangho/tra-luat/pull/{PR_GHI_SO}#issuecomment-(\d+)", nb)
     ten = str(qd.get("readback", ""))
     if not m_nb or not ten or "/" in ten or not (P / ten).is_file():
         return False
     rb = json.loads(doc(ten))
-    cua = rb.get("body") or ""
+    dong = _dong_than(rb.get("body") or "")
+    rc = [m.group(1) for m in (re.fullmatch(r"Reviewed commit: ([0-9a-f]{40})", d) for d in dong) if m]
+
+    def diem(c):
+        ds = [d for d in dong if d.startswith(c + ":")]
+        m = len(ds) == 1 and re.fullmatch(re.escape(c) + r": chap_nhan ([0-9]{11}(?:,\s*[0-9]{11})*)", ds[0])
+        return bool(m) and sorted(map(int, m.group(1).split(","))) == sorted(pham_vi[c])
+
     return (rb.get("html_url") == nb and str(rb.get("id")) == m_nb.group(1) and (rb.get("user") or {}).get("login") == h["approver"]
             and rb.get("author_association") == "OWNER" and rb.get("performed_via_github_app") is None and ts(rb["created_at"]) > ts(merged)
             and rb.get("updated_at") == rb.get("created_at") and str(rb.get("issue_url", "")).endswith(f"/repos/ducthangho/tra-luat/issues/{PR_GHI_SO}")
             and all(set(qd.get("pham_vi_run", [])) == pham_vi[c] for c in can) and qd.get("assurance_dat") == "chap_nhan"
-            and re.findall(r"^Reviewed commit: ([0-9a-f]{40})$", cua, re.M) == [str(qd.get("reviewed_sha", ""))]
-            and all(str(r) in cua for r in sorted(khong_skip)) and all(c in cua for c in can) and "assurance_dat" in cua)
+            and rc == [str(qd.get("reviewed_sha", ""))] and all(diem(c) for c in can)
+            and [d for d in dong if d.startswith("assurance_dat:")] == ["assurance_dat: chap_nhan"])
 
 
 chot(tp["landed"] is False or (landed_hop_le() and "CON THIEU" not in tp["landed_ly_do"]),
-     "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment (Reviewed commit == reviewed_sha, du 4 run, 3 id, assurance_dat) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`")
+     "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment THEO MAU (dong `Reviewed commit: <40 hex>` == reviewed_sha; moi diem `<ID>: chap_nhan <4 run id cach nhau dau phay>`; dong `assurance_dat: chap_nhan`; CRLF va khoi rao bi bo) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`")
 
 # 8. Review connector sach (Codex PR #723, comment 4232431571): actor, commit, trang thai cuoi, luc; hai danh sach rong.
 cx = json.loads(doc("comment-6082682461-codex.json"))

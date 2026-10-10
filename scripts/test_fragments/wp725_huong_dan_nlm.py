@@ -40,6 +40,29 @@ def _vi_pham_tai_lieu(van_ban_theo_tep):
     return loi
 
 
+_KEO_CU = ("- **Drive → Cowork (kéo):** đầu phiên `bootstrap` đã ghi cookie; giữa phiên cần mới hơn thì\n"
+           "  `python scripts/tl.py nlm-auth-pull --secrets-file ./tl_secrets.enc` (hoặc bỏ `--secrets-file` để direct-media\n"
+           "  kéo bản mới nhất trên Drive). Cowork KHÔNG tự chạy browser được nên KHÔNG tự refresh — refresh thật ở Code.\n")
+
+
+def _vi_pham_duong_keo(cowork):
+    """Bước 3: bản wrapper đẩy ở NLM_CRED_FILEID ⇒ đường kéo mặc định phải là `nlm-auth-load`, không phải
+    `nlm-auth-pull` (đọc bundle `secrets`, cũ hơn) — reviewer lượt 1 đo được pull nhận bản CŨ, rc 0."""
+    try:
+        buoc3 = cowork.split("## Bước 3", 1)[1].split("\n## ", 1)[0]
+        keo = buoc3.split("- **Drive → Cowork (kéo):**", 1)[1].split("\n\n", 1)[0].split("\n- **", 1)[0]
+    except IndexError:
+        return ["thiếu Bước 3 / mục kéo"]
+    loi = []
+    if "nlm-auth-load" not in keo:
+        loi.append("mục kéo không nêu nlm-auth-load")
+    elif "nlm-auth-pull" in keo and keo.index("nlm-auth-pull") < keo.index("nlm-auth-load"):
+        loi.append("nlm-auth-pull đứng trước nlm-auth-load")
+    if "nlm-auth-pull --secrets-file" in keo:
+        loi.append("mục kéo còn dạy nlm-auth-pull --secrets-file làm đường mặc định")
+    return loi
+
+
 def _help_nlm_auth_stage(tl_module):
     parser = tl_module.build_parser()
     sub = next(a for a in parser._actions if isinstance(a, argparse._SubParsersAction))
@@ -79,6 +102,12 @@ def run(tl_module):
     ban_ban["references/COWORK_PROJECT.md"] += "\nĐịnh kỳ chạy `tl secrets-set --nlm` (tự `nlm login --check` refresh).\n"
     if not _vi_pham_tai_lieu(ban_ban):
         return False
+    cowork = tai_lieu["references/COWORK_PROJECT.md"]
+    if _vi_pham_duong_keo(cowork):
+        return False
+    keo_moi = cowork.split("- **Drive → Cowork (kéo):**", 1)[1].split("\n\n", 1)[0]
+    if not _vi_pham_duong_keo(cowork.replace("- **Drive → Cowork (kéo):**" + keo_moi + "\n", _KEO_CU, 1)):
+        return False            # phản chứng: trả mục kéo về bản cũ (pull bundle) phải bị bắt
     lenh_help, co = _help_nlm_auth_stage(tl_module)
     if _vi_pham_help(lenh_help, co):
         return False

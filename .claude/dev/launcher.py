@@ -356,7 +356,10 @@ def _khoa_danh_tinh(pid: int) -> str | None:
     he = platform.system()
     try:
         if he == "Linux":
-            noi_dung = Path(f"/proc/{pid}/stat").read_text()
+            # wp685 (Q-A.7; quyết định chủ kho, PR #688 comment 5905670017) — comm bị kernel cắt
+            # 15 byte nên tên tiếng Việt thành UTF-8 hỏng; read_text() theo locale ném UnicodeDecodeError
+            # và hàm trả None cho tiến trình CÒN SỐNG. latin-1 là song ánh byte↔ký tự: không bao giờ ném.
+            noi_dung = Path(f"/proc/{pid}/stat").read_text(encoding="latin-1")
             # comm có thể chứa khoảng trắng và dấu ')' -> cắt từ ')' CUỐI CÙNG
             sau = noi_dung[noi_dung.rindex(")") + 2:].split()
             return f"linux:{sau[19]}"  # trường 22 tính từ 1 = starttime
@@ -433,7 +436,8 @@ def _thanh_vien_nhom(pgid: int) -> list[int] | None:
         ra = []
         for p in ds:
             try:
-                nd = (p / "stat").read_text()
+                # wp685 (Q-A.7): giải mã latin-1, comm hỏng không được làm tiến trình sống "biến mất"
+                nd = (p / "stat").read_text(encoding="latin-1")
                 sau = nd[nd.rindex(")") + 2:].split()
                 if sau[0] == "Z":          # zombie = đã chết, chờ thu hồi
                     continue
@@ -487,7 +491,8 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
         tt = {}
         for p in ds:
             try:
-                nd = (p / "stat").read_text()
+                # wp685 (Q-A.7): giải mã latin-1, comm hỏng không được làm cháu vắng khỏi ảnh chụp
+                nd = (p / "stat").read_text(encoding="latin-1")
                 sau = nd[nd.rindex(")") + 2:].split()
                 if sau[0] == "Z":                     # zombie = đã chết
                     continue
@@ -648,12 +653,35 @@ def _con_song(pid: int, khoa: str | None = None) -> bool:
             return False
         return khoa is None or hien == khoa
     trang_thai = Path(f"/proc/{pid}/stat")
-    if trang_thai.exists():
+    # wp685 (ESRCH: PR #679, job 109303373142) — tiến trình biến mất giữa chừng làm exists()
+    # NÉM ProcessLookupError thay vì trả False, và ngoại lệ ấy thoát khỏi _con_song. Phép hỏi
+    # chạy ĐÚNG MỘT lần, không thử lại (cross-review lượt 2, lượt 6 trên PR #688).
+    # Chỉ bắt họ OSError ở đây: nhóm phân tích, Exception, BaseException thoát nguyên
+    # (cross-review lượt 3, lượt 5).
+    try:
+        co_tep = trang_thai.exists()
+    except ProcessLookupError:
+        return False
+    except OSError:
+        co_tep = None   # KHÔNG kết luận: không stat được chưa có nghĩa là không đọc được
+    if co_tep:
+        # Nhánh tệp có giữ nguyên xi (Q-A.3), trừ cách giải mã (Q-A.7: latin-1, PR #688
+        # comment 5905670017; cross-review lượt 7, lượt 8).
         try:
-            noi_dung = trang_thai.read_text()
+            noi_dung = trang_thai.read_text(encoding="latin-1")
             return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
         except (OSError, ValueError, IndexError):
             return False
+    if co_tep is None:
+        # wp685 (zombie: cross-review lượt 1 trên PR #688) — thử đọc nội dung ĐÚNG MỘT lần,
+        # zombie vẫn phải tính là đã chết. Đọc lỗi hay nội dung hỏng ⇒ KHÔNG trả False mà rơi
+        # về os.kill(pid, 0) bên dưới (cross-review lượt 2, lượt 4: bước kill phải THỰC SỰ được
+        # gọi và quyết định). Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.
+        try:
+            noi_dung = trang_thai.read_text(encoding="latin-1")
+            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
+        except (OSError, ValueError, IndexError):
+            pass
     try:
         os.kill(pid, 0)
     except ProcessLookupError:

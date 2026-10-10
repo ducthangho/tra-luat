@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import ast
 import contextlib
+import errno
 import hashlib
 import hmac
 import importlib.util
@@ -162,8 +163,9 @@ def _con_song_that(pid: int) -> bool:
     st = Path(f"/proc/{pid}/stat")
     if st.exists():
         try:
-            nd = st.read_text()
-            return nd[nd.rindex(")") + 2:].split()[0] != "Z"
+            # wp685 (Q-A.7, §6 mục 3): đọc BYTES — read_text() báo "đã chết" cho tiến trình sống có comm hỏng
+            nd = st.read_bytes()
+            return nd[nd.rindex(b")") + 2:].split()[0] != b"Z"
         except (OSError, ValueError, IndexError):
             return False
     try:
@@ -7010,6 +7012,881 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
 
 # ------------------------------------------------------ tự đột biến: có răng không
 
+# ---------------------------------------------------------------------------------------------
+# wp685 (LAUNCHER-CON-SONG-ESRCH, đặc tả r28 §7 B1–B4) — helper theo NHÃN cho t156/t157.
+# Nguồn: PR #679 job 109303373142 (ESRCH thoát khỏi `_con_song`); cross-review lượt 1–12 trên
+# PR #688 (bảng không gian mở rộng, quy ước đếm, payload theo dõi, `read args`).
+# Mỗi `bang` mở đầu bằng NHÃN (rồi tiểu nhãn nếu có) rồi LOẠI assertion. Helper nhận hai tham số
+# tuỳ chọn `chay` (tập nhãn CHẠY; mặc định: mọi nhãn) và `noi` (tập nhãn NỚI; mặc định: rỗng) —
+# ca đăng ký KHÔNG truyền chúng; chỉ tập lệnh bằng chứng (A/W, D) gọi thẳng.
+# ---------------------------------------------------------------------------------------------
+CS_NHAN_T156 = ("B1", "B2-eacces", "B2-eio", "B2-eperm-hoi", "B2-doc-hong", "B2-tin-hieu", "B2-dem-lan",
+                "B2-exception", "B2-thoat-parse", "B2-parse", "B2-dem-doc", "B2-pid-du-phong", "B2-nhanh-cu",
+                "B3-song", "B3-da-wait", "B3-zombie")
+CS_NHAN_T157 = ("B3b-giet-cay",)
+_CS_COMM_ZOMBIE = b"x) R (y" + b"\xe1\xba"     # trục S: chỉ tách theo `)` CUỐI mới đọc ra `Z`; đuôi UTF-8 hỏng
+
+
+class _CsChuoi(str):
+    """PAYLOAD THEO DÕI (B2-parse, r9): các phép tách của nền trả đối tượng theo dõi; hỏng thì ném
+    ĐÚNG đối tượng lỗi do seam tạo sẵn (nhận bằng danh tính, không bằng kiểu hay đối số)."""
+
+    def _loi(self, loai):
+        return self.__dict__.get("loi_" + loai)
+
+    def _boc(self, v):
+        if isinstance(v, str) and not isinstance(v, _CsChuoi):
+            v = _CsChuoi(v)
+            v.__dict__.update({k: x for k, x in self.__dict__.items() if k.startswith("loi_")})
+        return v
+
+    def rindex(self, *a):
+        try:
+            return str.rindex(self, *a)
+        except ValueError:
+            raise self._loi("value") from None
+
+    def index(self, *a):
+        try:
+            return str.index(self, *a)
+        except ValueError:
+            raise self._loi("value") from None
+
+    def __getitem__(self, k):
+        return self._boc(str.__getitem__(self, k))
+
+    def split(self, *a, **kw):
+        ds = _CsDanhSach(self._boc(x) for x in str.split(self, *a, **kw))
+        ds.loi_index = self._loi("index")
+        return ds
+
+
+class _CsDanhSach(list):
+    loi_index = None
+
+    def __getitem__(self, k):
+        try:
+            return list.__getitem__(self, k)
+        except IndexError:
+            raise self.loi_index from None
+
+
+def _cs_payload(s: str, loi_value, loi_index):
+    p = _CsChuoi(s)
+    p.__dict__.update(loi_value=loi_value, loi_index=loi_index)
+    return p
+
+
+class _CsSeam:
+    """Seam `Path.stat` / `Path.exists` / phép đọc theo DANG_DOC_QA7 / observer `os.kill(pid, 0)`, mỗi cái khoá theo
+    ĐÚNG `/proc/<pid>/stat` (hay cặp (pid, 0)) của các PID đang xét, có bộ đếm. Không giao lỗi ⇒ chỉ đếm rồi chuyển
+    tiếp thật; lời gọi thật ném thì không ghi gì (vô can) — TRỪ observer `kill`: nó ghi CHÍNH đối tượng thật rồi ném
+    lại (loại ghi nhận (2))."""
+
+    def __init__(self, pids, stat=None, exists=None, doc=None, kill=None, kill_dem=False):
+        self.duong = {f"/proc/{p}/stat" for p in pids}
+        self.pids = set(pids)
+        self.stat, self.exists, self.doc, self.kill = stat, exists, doc, kill
+        self.kill_dem = kill_dem or kill is not None
+        self.n_stat = self.n_exists = self.n_doc = self.n_kill = 0
+        self.doc_args = []
+        self.kill_that = []
+        self.tao = []          # mọi đối tượng lỗi do seam TẠO (kể cả qua hàm theo lần chạm) — loại ghi nhận (1)
+        self.goc = {}
+
+    def _lay(self, gt, n):
+        v = gt(n) if callable(gt) and not isinstance(gt, BaseException) else gt
+        if isinstance(v, BaseException):
+            self.tao.append(v)
+        return v
+
+    def __enter__(self):
+        seam = self
+        ten_doc = DANG_DOC_QA7[0]
+        for t in ("stat", "exists", ten_doc):
+            self.goc[t] = (t in Path.__dict__, getattr(Path, t))
+        g_stat, g_exists, g_doc = self.goc["stat"][1], self.goc["exists"][1], self.goc[ten_doc][1]
+
+        def f_stat(p, *a, **k):
+            if str(p) not in seam.duong:
+                return g_stat(p, *a, **k)
+            seam.n_stat += 1
+            v = seam._lay(seam.stat, seam.n_stat)
+            if isinstance(v, BaseException):
+                raise v
+            return g_stat(p, *a, **k)
+
+        def f_exists(p, *a, **k):
+            if str(p) not in seam.duong or seam.exists is None:
+                return g_exists(p, *a, **k)
+            seam.n_exists += 1
+            raise seam.exists
+
+        def f_doc(p, *a, **k):
+            if str(p) not in seam.duong:
+                return g_doc(p, *a, **k)
+            seam.n_doc += 1
+            seam.doc_args.append((ten_doc, a, k))
+            v = seam._lay(seam.doc, seam.n_doc)
+            if isinstance(v, BaseException):
+                raise v
+            if v is not None:
+                return v
+            return g_doc(p, *a, **k)
+
+        self.g_kill = os.kill
+
+        def f_kill(pid, sig):
+            if pid not in seam.pids or sig != 0 or not seam.kill_dem:
+                return seam.g_kill(pid, sig)
+            seam.n_kill += 1
+            if seam.kill is not None:
+                raise seam.kill
+            try:
+                return seam.g_kill(pid, sig)
+            except BaseException as e:
+                seam.kill_that.append(e)
+                raise
+        Path.stat, Path.exists = f_stat, f_exists
+        setattr(Path, ten_doc, f_doc)
+        os.kill = f_kill
+        return self
+
+    def __exit__(self, *a):
+        os.kill = self.g_kill
+        for t, (co, g) in self.goc.items():
+            if co:
+                setattr(Path, t, g)
+            else:
+                delattr(Path, t)
+        return False
+
+
+class _CsNhan:
+    """Một nhãn: kiểm (qua `bang`, tra lúc gọi để phép D bọc được) trừ khi nhãn bị NỚI."""
+
+    def __init__(self, nhan, noi):
+        self.nhan, self.noi = nhan, (nhan in noi)
+
+    def kiem(self, dk, tieu, loai):
+        if not self.noi:
+            bang(dk, f"{self.nhan}{' ' + tieu if tieu else ''} {loai}")
+
+    def goi(self, tieu, fn, seam, mong=(), parse=()):
+        """Gọi `fn()`; trả (kết quả, có_ngoại_lệ_mong_đợi). Phân hạng ngoại lệ THOÁT theo bốn loại của quy ước chung;
+        loại khác giữ hạng vô can (ném lại nguyên). `mong`: sentinel PHẢI thoát (so `is`)."""
+        try:
+            return fn(), None
+        except BaseException as e:   # noqa: BLE001 — phân hạng rồi ném lại mọi thứ ngoài bốn loại ghi nhận
+            if any(e is s for s in mong):
+                return None, e
+            ghi = [x for x in (seam.stat, seam.exists, seam.doc, seam.kill) if isinstance(x, BaseException)]
+            ghi += seam.tao + seam.kill_that
+            loai = None
+            if any(e is x for x in ghi):
+                loai = "seam escaped"
+            elif any(e is x for x in parse):
+                loai = "parse error escaped"
+            else:
+                c = e.__cause__
+                while c is not None and loai is None:
+                    if any(c is x for x in ghi) or any(c is x for x in mong):
+                        loai = "seam wrapped"
+                    elif any(c is x for x in parse):
+                        loai = "parse error wrapped"
+                    c = c.__cause__
+            if loai is None:
+                raise
+            if self.noi:
+                return None, None
+            bang(False, f"{self.nhan}{' ' + tieu if tieu else ''} {loai} ({type(e).__name__}: {e})")
+            raise AssertionError("khong toi duoc")   # bang(False) luôn ném
+
+    def dem(self, tieu, seam, hoi=None, doc=None, kill=None, hoi_exists=False):
+        if hoi is not None:
+            n = seam.n_exists if hoi_exists else seam.n_stat
+            self.kiem(n == hoi, tieu, f"{'exists' if hoi_exists else 'stat'} count {n}")
+        if doc is not None:
+            if doc == "<=1":
+                self.kiem(seam.n_doc <= 1, tieu, f"read count {seam.n_doc}")
+            else:
+                self.kiem(seam.n_doc == doc, tieu, f"read count {seam.n_doc}")
+            lech = sorted({repr(x) for x in seam.doc_args if x != DANG_DOC_QA7})
+            self.kiem(not lech, tieu, f"read args {lech[:3]}")
+        if kill is not None:
+            self.kiem(seam.n_kill == kill, tieu, f"kill count {seam.n_kill}")
+
+
+def _cs_con_cho(ma: str):
+    """Con THẬT, session riêng; trả Popen. Dọn bằng PID tường minh (`_cs_don`)."""
+    return subprocess.Popen([PY, "-c", ma], start_new_session=True, stdin=subprocess.DEVNULL,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _cs_don(p):
+    if p is None:
+        return
+    with contextlib.suppress(OSError):
+        os.kill(p.pid, signal.SIGKILL)
+    with contextlib.suppress(Exception):
+        p.wait(timeout=10)
+
+
+def _cs_doc_bytes(pid):
+    with open(f"/proc/{pid}/stat", "rb") as f:
+        return f.read()
+
+
+def _cs_con_da_wait():
+    p = _cs_con_cho("import time; time.sleep(60)")
+    p.kill()
+    p.wait(timeout=10)
+    return p.pid
+
+
+def _cs_con_comm(comm: bytes, tep: Path):
+    """Con đặt `comm` bằng prctl (dạng BYTES, không phụ thuộc locale) rồi ghi tệp sẵn sàng; điều kiện dựng kiểm bằng
+    phép đọc bytes độc lập. Không đạt ⇒ lỗi thường (KHÔNG `bang`)."""
+    ma = (f"import ctypes, time\nctypes.CDLL(None).prctl(15, bytes.fromhex({comm.hex()!r}), 0, 0, 0)\n"
+          f"open({str(tep)!r}, 'w').write('1')\ntime.sleep(60)\n")
+    p = _cs_con_cho(ma)
+    try:
+        het = time.time() + 10
+        while not (tep.exists() and tep.stat().st_size):
+            if time.time() > het:
+                raise RuntimeError("dieu kien dung: con chua san sang")
+            time.sleep(0.02)
+        nd = _cs_doc_bytes(p.pid)
+        if nd[nd.index(b"(") + 1:nd.rindex(b")")] != comm:
+            raise RuntimeError(f"dieu kien dung: comm chua doi: {nd[:60]!r}")
+    except BaseException:
+        _cs_don(p)
+        raise
+    return p
+
+
+def _cs_con_utf8_hong(tep: Path):
+    """Đầu vào nội dung THẬT (`B2-dem-doc 4`, `B2-nhanh-cu utf8-hong-that`): comm = 15 byte UTF-8 hỏng, và NGOÀI cửa
+    sổ đếm `read_text()` thật không đối số phải ném UnicodeDecodeError (chứng tỏ đầu vào có răng với cách đọc nền)."""
+    p = _cs_con_comm(_K124_COMM, tep)
+    try:
+        Path(f"/proc/{p.pid}/stat").read_text()
+    except UnicodeDecodeError:
+        return p
+    except BaseException:
+        _cs_don(p)
+        raise
+    _cs_don(p)
+    raise RuntimeError("dieu kien dung: read_text() khong doi so giai ma duoc comm hong (locale)")
+
+
+def _cs_chay_t156(m, chay=None, noi=()):   # noqa: C901 — một đơn vị mỗi nhãn, đúng thứ tự cố định của §7
+    chay = CS_NHAN_T156 if chay is None else tuple(chay)
+    noi = frozenset(noi)
+    me = os.getpid()
+    E = errno
+
+    def loi(cls, so):
+        return cls(so, os.strerror(so))
+
+    def don_vi(nhan):
+        return _CsNhan(nhan, noi)
+
+    for nhan in CS_NHAN_T156:
+        if nhan not in chay:
+            continue
+        L = don_vi(nhan)
+        if nhan == "B1":
+            chet = _cs_con_da_wait()
+            khoa = m._khoa_danh_tinh(me)
+            with _CsSeam([me, chet], stat=loi(ProcessLookupError, E.ESRCH)) as s:
+                kq, _ = L.goi("", lambda: m._con_song(me), s)
+                L.kiem(kq is False, "", f"result {kq}")
+                L.dem("", s, hoi=1)
+                kq, _ = L.goi("", lambda: m._con_song_dung_khoa(me, khoa), s)
+                L.kiem(kq is False, "", f"result {kq}")
+                L.dem("", s, hoi=2)
+                L.goi("", lambda: m._giet_rieng({chet: "k"}, 0), s)
+                L.dem("", s, hoi=3)
+        elif nhan in ("B2-eacces", "B2-eio", "B2-eperm-hoi"):
+            o = {"B2-eacces": loi(PermissionError, E.EACCES), "B2-eio": loi(OSError, E.EIO),
+                 "B2-eperm-hoi": loi(PermissionError, E.EPERM)}[nhan]
+            with _CsSeam([me], stat=o) as s:
+                kq, _ = L.goi("", lambda: m._con_song(me), s)
+                L.kiem(kq is True, "", f"result {kq}")
+                L.dem("", s, hoi=1, doc=1)
+        elif nhan == "B2-doc-hong":
+            for tieu, o in (("EACCES", loi(PermissionError, E.EACCES)), ("EIO", loi(OSError, E.EIO)),
+                            ("ESRCH", loi(ProcessLookupError, E.ESRCH)), ("EPERM", loi(PermissionError, E.EPERM))):
+                with _CsSeam([me], stat=loi(PermissionError, E.EACCES), doc=o, kill_dem=True) as s:
+                    kq, _ = L.goi(tieu, lambda: m._con_song(me), s)
+                    L.kiem(kq is True, tieu, f"result {kq}")
+                    L.dem(tieu, s, hoi=1, doc=1, kill=1)
+        elif nhan in ("B2-tin-hieu", "B2-exception"):
+            cls = KeyboardInterrupt if nhan == "B2-tin-hieu" else RuntimeError
+            for tieu in ("hoi", "doc", "kill"):
+                sen = cls(f"sentinel {nhan} {tieu}")
+                kw = {"hoi": dict(stat=sen),
+                      "doc": dict(stat=loi(PermissionError, E.EACCES), doc=sen),
+                      "kill": dict(stat=loi(PermissionError, E.EACCES), doc=loi(PermissionError, E.EACCES),
+                                   kill=sen)}[tieu]
+                with _CsSeam([me], **kw) as s:
+                    _kq, ra = L.goi(tieu, lambda: m._con_song(me), s, mong=(sen,))
+                    L.kiem(ra is sen, tieu, "sentinel identity")
+                    L.dem(tieu, s, hoi=1, doc=None if tieu == "hoi" else 1, kill=1 if tieu == "kill" else None)
+        elif nhan == "B2-dem-lan":
+            with _CsSeam([me], stat=lambda n: None if n == 1 else loi(ProcessLookupError, E.ESRCH), doc=None) as s:
+                kq, _ = L.goi("", lambda: m._con_song(me), s)
+                L.kiem(kq is True, "", f"result {kq}")
+                L.dem("", s, hoi=1, doc="<=1")
+        elif nhan == "B2-thoat-parse":
+            for tieu, cls in (("hoi-index", IndexError), ("hoi-value", ValueError),
+                              ("hoi-decode", UnicodeDecodeError), ("kill-index", IndexError),
+                              ("kill-value", ValueError), ("kill-decode", UnicodeDecodeError)):
+                sen = (UnicodeDecodeError("utf8", bytes([255]), 0, 1, "x") if cls is UnicodeDecodeError
+                       else cls(f"sentinel {tieu}"))
+                if tieu.startswith("hoi"):
+                    kw = dict(exists=sen)
+                else:
+                    kw = dict(stat=loi(PermissionError, E.EACCES), doc=loi(PermissionError, E.EACCES), kill=sen)
+                with _CsSeam([me], **kw) as s:
+                    _kq, ra = L.goi(tieu, lambda: m._con_song(me), s, mong=(sen,))
+                    if tieu.startswith("hoi") and s.n_exists == 0:
+                        raise RuntimeError(f"{nhan} {tieu}: seam Path.exists khong cham - doi seam sang ham ung vien goi")
+                    L.kiem(ra is sen, tieu, "sentinel identity")
+                    if tieu.startswith("hoi"):
+                        L.dem(tieu, s, hoi=1, hoi_exists=True)
+                    else:
+                        L.dem(tieu, s, hoi=1, doc=1, kill=1)
+        elif nhan == "B2-parse":
+            for tieu, noi_dung in (("p1", [""]), ("p2", [f"{me} x S 1"]), ("p3", [f"{me} (x)", f"{me} (x) "]),
+                                   ("p4", [None])):
+                for nd in noi_dung:
+                    lv, li = ValueError("substring not found"), IndexError("list index out of range")
+                    doc = (UnicodeDecodeError("utf-8", b"\xe1\xba", 0, 2, "unexpected end of data") if nd is None
+                           else _cs_payload(nd, lv, li))
+                    with _CsSeam([me], stat=loi(PermissionError, E.EACCES), doc=doc, kill_dem=True) as s:
+                        kq, _ = L.goi(tieu, lambda: m._con_song(me), s, parse=(lv, li))
+                        L.kiem(kq is True, tieu, f"result {kq}")
+                        L.dem(tieu, s, hoi=1, doc=1, kill=1)
+        elif nhan == "B2-dem-doc":
+            for tieu in ("1", "2", "3", "4"):
+                con = None
+                try:
+                    if tieu == "4":
+                        with San() as sd:
+                            con = _cs_con_utf8_hong(sd / "san")
+                        pid = con.pid
+                    else:
+                        pid = me
+                    st = loi(OSError, E.EIO) if tieu == "2" else loi(PermissionError, E.EACCES)
+                    doc = loi(PermissionError, E.EACCES) if tieu == "3" else None
+                    with _CsSeam([pid], stat=st, doc=doc, kill_dem=tieu in ("3", "4")) as s:
+                        kq, _ = L.goi(tieu, lambda: m._con_song(pid), s)
+                        L.kiem(kq is True, tieu, f"result {kq}")
+                        L.dem(tieu, s, hoi=1, doc=1, kill={"3": 1, "4": 0}.get(tieu))
+                finally:
+                    _cs_don(con)
+        elif nhan == "B2-pid-du-phong":
+            chet = _cs_con_da_wait()
+            for tieu in ("song", "da-wait", "eperm", "eio"):
+                pid = chet if tieu == "da-wait" else me
+                mong_kq = tieu in ("song", "eperm")
+                for doc_tieu in ("EACCES", "EIO", "ESRCH", "p1", "p2", "p3", "p3s", "p4"):
+                    lv, li = ValueError("substring not found"), IndexError("list index out of range")
+                    doc = {"EACCES": loi(PermissionError, E.EACCES), "EIO": loi(OSError, E.EIO),
+                           "ESRCH": loi(ProcessLookupError, E.ESRCH), "p1": _cs_payload("", lv, li),
+                           "p2": _cs_payload(f"{pid} x S 1", lv, li), "p3": _cs_payload(f"{pid} (x)", lv, li),
+                           "p3s": _cs_payload(f"{pid} (x) ", lv, li),
+                           "p4": UnicodeDecodeError("utf-8", b"\xe1\xba", 0, 2, "unexpected end of data")}[doc_tieu]
+                    kill = {"eperm": loi(PermissionError, E.EPERM), "eio": loi(OSError, E.EIO)}.get(tieu)
+                    with _CsSeam([pid], stat=loi(PermissionError, E.EACCES), doc=doc, kill=kill, kill_dem=True) as s:
+                        kq, _ = L.goi(tieu, lambda: m._con_song(pid), s,
+                                      parse=(lv, li) if doc_tieu in ("p1", "p2", "p3", "p3s") else ())
+                        L.dem(tieu, s, kill=1)
+                        L.kiem(kq is mong_kq, tieu, f"result {kq}")
+                        L.dem(tieu, s, hoi=1, doc=1)
+        elif nhan == "B2-nhanh-cu":
+            chet = _cs_con_da_wait()
+            for tieu in ("song", "EACCES", "EIO", "ESRCH", "EPERM", "p1", "p3", "p4", "utf8-hong-that", "tin-hieu",
+                         "exception"):
+                con = None
+                try:
+                    pid = me
+                    if tieu == "utf8-hong-that":
+                        with San() as sd:
+                            con = _cs_con_utf8_hong(sd / "san")
+                        pid = con.pid
+                    lv, li = ValueError("substring not found"), IndexError("list index out of range")
+                    doc = {"EACCES": loi(PermissionError, E.EACCES), "EIO": loi(OSError, E.EIO),
+                           "ESRCH": loi(ProcessLookupError, E.ESRCH), "EPERM": loi(PermissionError, E.EPERM),
+                           "p1": _cs_payload("", lv, li), "p3": _cs_payload(f"{pid} (x)", lv, li),
+                           "p4": UnicodeDecodeError("utf-8", b"\xe1\xba", 0, 2, "unexpected end of data"),
+                           "tin-hieu": KeyboardInterrupt("sentinel B2-nhanh-cu tin-hieu"),
+                           "exception": RuntimeError("sentinel B2-nhanh-cu exception")}.get(tieu)
+                    sen = (doc,) if tieu in ("tin-hieu", "exception") else ()
+                    with _CsSeam([pid], doc=doc, kill_dem=True) as s:
+                        kq, ra = L.goi(tieu, lambda: m._con_song(pid), s, mong=sen,
+                                       parse=(lv, li) if tieu in ("p1", "p3") else ())
+                        if sen:
+                            L.kiem(ra is doc, tieu, "sentinel identity")
+                        else:
+                            mong_kq = tieu in ("song", "utf8-hong-that")
+                            L.kiem(kq is mong_kq, tieu, f"result {kq}")
+                        L.dem(tieu, s, hoi=1, doc=1, kill=0)
+                finally:
+                    _cs_don(con)
+            for tieu in ("vang", "vang-da-wait", "vang-eperm", "vang-eio", "vang-tin-hieu", "vang-exception",
+                         "vang-index", "vang-value", "vang-decode"):
+                pid = chet if tieu == "vang-da-wait" else me
+                st = None if tieu == "vang-da-wait" else loi(FileNotFoundError, E.ENOENT)
+                kill = {"vang-eperm": loi(PermissionError, E.EPERM), "vang-eio": loi(OSError, E.EIO),
+                        "vang-tin-hieu": KeyboardInterrupt("sentinel vang-tin-hieu"),
+                        "vang-exception": RuntimeError("sentinel vang-exception"),
+                        "vang-index": IndexError("sentinel vang-index"),
+                        "vang-value": ValueError("sentinel vang-value"),
+                        "vang-decode": UnicodeDecodeError("utf8", bytes([255]), 0, 1, "x")}.get(tieu)
+                sen = (kill,) if tieu in ("vang-tin-hieu", "vang-exception", "vang-index", "vang-value",
+                                          "vang-decode") else ()
+                with _CsSeam([pid], stat=st, kill=kill, kill_dem=True) as s:
+                    kq, ra = L.goi(tieu, lambda: m._con_song(pid), s, mong=sen)
+                    if sen:
+                        L.kiem(ra is kill, tieu, "sentinel identity")
+                    else:
+                        mong_kq = tieu in ("vang", "vang-eperm")
+                        L.kiem(kq is mong_kq, tieu, f"result {kq}")
+                    L.dem(tieu, s, hoi=1, doc=0, kill=1)
+        elif nhan == "B3-song":
+            kq = m._con_song(me)
+            L.kiem(kq is True, "", f"result {kq}")
+        elif nhan == "B3-da-wait":
+            kq = m._con_song(_cs_con_da_wait())
+            L.kiem(kq is False, "", f"result {kq}")
+        elif nhan == "B3-zombie":
+            con = None
+            try:
+                with San() as sd:
+                    con = _cs_con_comm(_CS_COMM_ZOMBIE, sd / "san")
+                khoa = m._khoa_danh_tinh(con.pid)
+                os.kill(con.pid, signal.SIGTERM)
+                het = time.time() + 10
+                while True:
+                    nd = _cs_doc_bytes(con.pid)
+                    if nd[nd.rindex(b")") + 2:].split()[0] == b"Z":
+                        break
+                    if time.time() > het:
+                        raise RuntimeError("dieu kien dung: con khong chuyen sang Z")
+                    time.sleep(0.02)
+                if b"(" + _CS_COMM_ZOMBIE + b")" not in nd:
+                    raise RuntimeError(f"dieu kien dung: comm zombie khong dung: {nd[:60]!r}")
+                pid = con.pid
+                with _CsSeam([pid], stat=loi(PermissionError, E.EACCES)) as s:
+                    kq, _ = L.goi("", lambda: m._con_song(pid), s)
+                    L.kiem(kq is False, "", f"result {kq}")
+                    L.dem("", s, hoi=1, doc=1)
+                    kq, _ = L.goi("", lambda: m._con_song_dung_khoa(pid, khoa), s)
+                    L.kiem(kq is False, "", f"result {kq}")
+                    L.dem("", s, hoi=2, doc=2)
+                with _CsSeam([pid], kill_dem=True) as s:
+                    kq, _ = L.goi("", lambda: m._con_song(pid), s)
+                    L.kiem(kq is False, "", f"result {kq}")
+                    L.dem("", s, hoi=1, doc=1, kill=0)
+            finally:
+                _cs_don(con)
+
+
+def _cs_chay_t157(m, chay=None, noi=()):
+    chay = CS_NHAN_T157 if chay is None else tuple(chay)
+    if "B3b-giet-cay" not in chay:
+        return
+    L = _CsNhan("B3b-giet-cay", frozenset(noi))
+    con = _cs_con_cho("import time; time.sleep(60)")
+    try:
+        khoa = m._khoa_danh_tinh(con.pid)
+        if khoa is None:
+            raise RuntimeError("dieu kien dung: khong lay duoc khoa cua con")
+        with _CsSeam([con.pid], stat=PermissionError(errno.EACCES, os.strerror(errno.EACCES))) as s:
+            kg, _ = L.goi("", lambda: m._giet_cay(con.pid, khoa), s)
+            if s.n_stat == 0 and not L.noi:
+                raise RuntimeError("B3b-giet-cay: seam Path.stat khong cham")
+            L.kiem(kg is not None and kg.tron_ven, "", f"result {getattr(kg, 'tron_ven', None)} "
+                                                       f"({getattr(kg, 'mo_ta', '')})")
+    finally:
+        _cs_don(con)
+
+
+@ca
+def t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan():
+    """wp685 B1–B4: `_con_song` không để OSError của phép hỏi `/proc/<pid>/stat` thoát; ESRCH ⇒ chết; lỗi khác
+    không kết luận, đọc nội dung rồi rơi về `kill(pid, 0)`; phạm vi bắt và số lần theo bảng không gian mở rộng."""
+    if platform.system() != "Linux":
+        return "bo qua: nhanh /proc chi co tren Linux"
+    _cs_chay_t156(_tai_launcher_thu())
+
+
+@ca
+def t157_giet_cay_khi_stat_EACCES_van_tron_ven():
+    """wp685 B3b: `_giet_cay` với `Path.stat` EACCES trên con phải biến nó thành zombie và báo `tron_ven=True`."""
+    if platform.system() != "Linux":
+        return "bo qua: nhanh /proc chi co tren Linux"
+    _cs_chay_t157(_tai_launcher_thu())
+
+
+# ---------------------------------------------------------------------------------------------
+# B8 — ca khoá lớp `sua-124-trong-packet` (MÃ TEST THUẦN của đặc tả r12; executor tự dẫn xuất lại,
+# tự đo). Bất biến: "124 ⇔ cả cây ĐÃ CHẾT" và "stop rc=0 ⇔ cây đã sạch" không phụ thuộc cách giải
+# mã `comm`. Kích hoạt THẬT: kernel cắt `comm` ở 15 byte, nên tên tiếng Việt thành UTF-8 hỏng.
+# ---------------------------------------------------------------------------------------------
+_K124_COMM = bytes.fromhex("6b69e1bb836d5f7472615f7469e1ba")   # 'kiểm_tra_tiến_trình'.encode()[:15]
+# Cháu của t160/t161 (r11): comm có `) ` (tên thật kiểu `tep (1).sh`) + đuôi UTF-8 hỏng — phủ trục S ở ba hàm ngoài:
+# phép tách theo `)` ĐẦU (index/partition/split) lệch trường ở _khoa_danh_tinh, _thanh_vien_nhom, _chup_cay.
+_K124_COMM_CHAU = b"tep (1) " + _K124_COMM[8:]                 # 15 byte: 'tep (1) ra_ti' + e1 ba
+_NL = chr(10)
+
+# Dạng đọc /proc/<pid>/stat theo Q-A.7 mà ứng viên KHAI (một chỗ, helper t156/t157 và B8 dùng chung):
+# (tên phương thức Path, args, kwargs) — ví dụ ("read_bytes", (), {}) nếu chọn đọc bytes.
+DANG_DOC_QA7 = ("read_text", (), {"encoding": "latin-1"})
+
+
+def _k124_song(pid: int) -> bool:
+    """Sống THẬT theo /proc đọc BYTES — không giải mã `comm`; zombie = đã chết."""
+    try:
+        with open(f"/proc/{pid}/stat", "rb") as f:
+            nd = f.read()
+    except (FileNotFoundError, ProcessLookupError):
+        return False
+    return nd[nd.rindex(b")") + 2:].split()[0] != b"Z"
+
+
+def _k124_locale_giai_ma_duoc() -> bool:
+    """`read_text()` không đối số giải mã theo mã hoá này; giải mã được 15 byte hỏng thì lỗi 124 KHÔNG tái hiện được."""
+    import locale
+    try:
+        _K124_COMM.decode(locale.getpreferredencoding(False))
+    except (UnicodeDecodeError, LookupError):
+        return False
+    return True
+
+
+def _k124_don_con(tn):
+    """Dọn con B8 bằng PID do CHÍNH con ghi (không tin PID launcher-đang-thử báo), chỉ khi cmdline mang đường nhịp."""
+    tp = Path(str(tn) + ".pid")
+    _k124_cho_tep(tp, 2.0)
+    try:
+        pid = int(tp.read_text())
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            cua_ta = str(tn).encode() in f.read()
+    except (OSError, ValueError):
+        return
+    if cua_ta:
+        with contextlib.suppress(OSError):
+            os.kill(pid, signal.SIGKILL)
+
+
+_K124_MO = {"cai": False, "bat": False, "trong": 0, "ngoai": []}
+
+
+def _k124_audit(ev, args):
+    """Cửa sổ B8: mọi sự kiện audit `open` trên `/proc/…`, trên đường tương đối (`dir_fd`) hay trên fd số phải nằm
+    TRONG một lời đọc Path đã ghi — danh sách cho phép ở tầng API (`open()`, `Path.open()`, `os.open`, đường
+    `/proc/<pid>/task/…`, và ống PIPE mà `subprocess` bọc bằng `io.open` trên fd số, đều là `open` NGOÀI). Thước đo
+    này KHÔNG thấy đường tuyệt đối ngoài `/proc` (`//proc/…`, tệp tạm) hay ống `os.pipe` đọc bằng `os.read` (đo) —
+    phần ấy do chốt tĩnh và seam đếm đọc giữ. Đường tuyệt đối ngoài `/proc` không tính vì máy nạp module mở `.pyc`
+    của codec một cách lười, ngay trong cửa sổ (đo)."""
+    if _K124_MO["bat"] and ev == "open" and not _K124_MO["trong"]:
+        p = args[0] if isinstance(args[0], int) else os.fsdecode(args[0])
+        if isinstance(p, int) or not p.startswith("/") or p.startswith("/proc/"):
+            _K124_MO["ngoai"].append(p)
+
+
+@contextlib.contextmanager
+def _k124_ghi_doc():
+    """Ghi (phương thức, args, kwargs) của MỌI lời đọc Path trên /proc/<số>/stat trong cửa sổ, và ghi mọi sự kiện
+    audit `open` xảy ra NGOÀI các lời đọc ấy: lời đọc Path đã ghi là đường mở tệp DUY NHẤT được phép."""
+    if not _K124_MO["cai"]:
+        sys.addaudithook(_k124_audit)          # không gỡ được; ngoài cửa sổ hook không làm gì
+        _K124_MO["cai"] = True
+    ghi = []
+    goc = {t: (t in Path.__dict__, getattr(Path, t)) for t in ("read_text", "read_bytes")}
+
+    def boc(ten, g):
+        def f(self, *a, **k):
+            p = str(self)
+            if not (p.startswith("/proc/") and p.endswith("/stat") and p[6:-5].isdigit()):
+                return g(self, *a, **k)
+            ghi.append((ten, a, k))
+            _K124_MO["trong"] += 1
+            try:
+                return g(self, *a, **k)
+            finally:
+                _K124_MO["trong"] -= 1
+        return f
+    for t, (_co, g) in goc.items():
+        setattr(Path, t, boc(t, g))
+    _K124_MO.update(bat=True, trong=0, ngoai=[])
+    try:
+        yield ghi
+    finally:
+        _K124_MO["bat"] = False
+        for t, (co, g) in goc.items():
+            if co:
+                setattr(Path, t, g)
+            else:
+                delattr(Path, t)
+
+
+def _k124_ma_con(tep_comm, tep_nhip, cho: float, doi_comm: bool) -> str:
+    """Con: ghi PID của chính nó, (tuỳ chọn) chờ `cho` giây rồi đổi comm thành 15 byte hỏng, ghi comm THẬT
+    (bytes) ra tệp, rồi ghi nhịp mỗi 0,1 s — tối đa 1200 nhịp (khoảng 120 s) rồi tự thoát: hạn sống. Mọi lối
+    thoát KHÔNG do tín hiệu ghi `<tệp nhịp>.tu_thoat` (`han_song` / `ngoai_le`) — ca không phải cha của con."""
+    dong = ["import ctypes, os, time",
+            f"open({str(tep_nhip) + '.pid'!r}, 'w').write(str(os.getpid()))",
+            "ly_do = 'ngoai_le'",
+            "try:",
+            f"    time.sleep({cho})"]
+    if doi_comm:
+        dong.append(f"    ctypes.CDLL(None).prctl(15, bytes.fromhex({_K124_COMM.hex()!r}), 0, 0, 0)")
+    dong += ["    nd = open('/proc/%d/stat' % os.getpid(), 'rb').read()",
+             f"    open({str(tep_comm)!r}, 'wb').write(nd[nd.index(b'(') + 1:nd.rindex(b')')])",
+             f"    f = open({str(tep_nhip)!r}, 'a')",
+             "    for _ in range(1200):",
+             "        f.write('.'); f.flush(); time.sleep(0.1)",
+             "    ly_do = 'han_song'",
+             "finally:",
+             f"    open({str(tep_nhip) + '.tu_thoat'!r}, 'w').write(ly_do)"]
+    return _NL.join(dong) + _NL
+
+
+def _k124_tu_thoat(tep):
+    """Dấu TỰ THOÁT mà chính tiến trình ghi ở `finally`: `han_song`, `ngoai_le`; None = không tự thoát (tín hiệu
+    giết nó, hay nó còn sống). Tín hiệu mặc định giết tiến trình KHÔNG chạy `finally`, nên dấu phân biệt được hai
+    đường mà "đã chết" gộp làm một."""
+    try:
+        return Path(str(tep) + ".tu_thoat").read_text()
+    except FileNotFoundError:
+        return None
+
+
+def _k124_tu_thoat_vo_can(ten, tu):
+    if tu not in (None, "han_song"):
+        raise RuntimeError(f"dieu kien dung: {ten} tien trinh do ca sinh chet vi {tu} - khong bi giet, khong het han")
+
+
+def _k124_cho_tep(p, han=10.0):
+    het = time.time() + han
+    while time.time() < het:
+        if p.exists() and p.stat().st_size:
+            return True
+        time.sleep(0.05)
+    return False
+
+
+def _k124_run(s, lenh):
+    """`launcher.py run --deadline-utc` thật (hạn 3 s); trả (rc, sổ run.json dạng --json)."""
+    repo = tao_repo(s)
+    r = chay("run", "--workspace", str(repo), "--run-root", str(s / "runs"), "--json",
+             "--deadline-utc", mai_sau(3), "--", *lenh)
+    so = {}
+    dong = [d for d in r.stdout.splitlines() if d.startswith("{")]
+    if dong:
+        so = json.loads(dong[-1])
+    if not so.get("pid") or r.returncode not in (MA_QUA_HAN, 125, MA_DANH_TINH):
+        raise RuntimeError(f"dieu kien dung: launcher khong ket thuc bang ma han chot 124/125/10 kem so JSON: "
+                           f"rc={r.returncode}, stderr={r.stderr[-160:]!r}")
+    return r.returncode, so
+
+
+def _k124_ket_luan(ten, rc, pid, tn):
+    """Hai assertion, đúng thứ tự: (1) 124 KHÔNG đi cùng cây còn sống; (2) quá hạn phải GIẾT — con TỰ THOÁT ở hạn
+    sống là KHÔNG bị giết (ĐỎ); con chết vì ngoại lệ là lỗi điều kiện dựng (không phải TinHieuChotCa)."""
+    n1 = tn.stat().st_size if tn.exists() else 0
+    time.sleep(1.0)
+    n2 = tn.stat().st_size if tn.exists() else 0
+    tu = _k124_tu_thoat(tn)
+    _k124_tu_thoat_vo_can(ten, tu)
+    song = bool(pid) and _k124_song(pid)
+    bang(not (rc == MA_QUA_HAN and (song or n2 != n1)),
+         f"{ten} 124 noi doi: rc={rc}, con {pid} song={song}, nhip {n1}->{n2}")
+    bang(rc == MA_QUA_HAN and not song and n2 == n1 and tu is None,
+         f"{ten} qua han khong giet duoc: rc={rc}, con {pid} song={song}, nhip {n1}->{n2}, tu thoat={tu}")
+
+
+def _k124_dang_doc(ten, ghi):
+    """(3) `read args`: mọi lời đọc /proc/<pid>/stat trong cửa sổ đúng DANG_DOC_QA7, và không `open` nào ngoài chúng."""
+    if not ghi:
+        raise RuntimeError(f"dieu kien dung: {ten} khong co loi doc /proc/<pid>/stat nao")
+    lech = sorted({repr(x) for x in ghi if x != DANG_DOC_QA7})
+    if _K124_MO["ngoai"]:                      # mở tệp ngoài lời đọc Path đã ghi: danh sách cho phép đóng ở MỌI API
+        lech.insert(0, f"open ngoai loi doc Path: {len(_K124_MO['ngoai'])} su kien, vd {_K124_MO['ngoai'][:2]}")
+    bang(not lech, f"{ten} read args {lech[:3]}")
+
+
+def _k124_khoa_that(pid: int) -> str:
+    """Khoá theo ĐỊNH DẠNG NỀN `linux:<starttime>` (trường 22), đọc BYTES độc lập — neo định dạng khoá của Q-A.7."""
+    bat, _K124_MO["bat"] = _K124_MO["bat"], False      # lời đọc của CHÍNH ca: không đếm vào `open` của cửa sổ
+    try:
+        with open(f"/proc/{pid}/stat", "rb") as f:
+            nd = f.read()
+    finally:
+        _K124_MO["bat"] = bat
+    return "linux:" + nd[nd.rindex(b")") + 2:].split()[19].decode("ascii")
+
+
+@ca
+def t158_comm_hong_SAU_luc_sinh_qua_han_khong_duoc_124_khi_con_song():
+    """`run --deadline-utc`: con đổi comm thành UTF-8 hỏng SAU khi launcher lấy khoá (nền 89fc4fa:
+    rc=124, `giet_tron_ven=True`, con vẫn sống)."""
+    if platform.system() != "Linux":
+        return "bo qua: comm/prctl/proc chi co tren Linux"
+    if _k124_locale_giai_ma_duoc():
+        return "bo qua: locale hien hanh giai ma duoc 15 byte comm hong - loi 124 khong tai hien duoc o day"
+    with San() as s:
+        tc, tn = s / "comm.bin", s / "nhip.txt"
+        try:
+            rc, so = _k124_run(s, [PY, "-c", _k124_ma_con(tc, tn, 0.5, True)])
+            pid = so.get("pid")
+            if not (_k124_cho_tep(tc, 1) and tc.read_bytes() == _K124_COMM):
+                raise RuntimeError("dieu kien dung: con chua doi comm thanh 15 byte hong")
+            if not so.get("khoa_danh_tinh"):
+                raise RuntimeError("dieu kien dung: comm hong TRUOC luc lay khoa (ca nay can SAU)")
+            _k124_ket_luan("B8-sau-sinh", rc, pid, tn)
+        finally:
+            _k124_don_con(tn)
+
+
+@ca
+def t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc():
+    """Tên chương trình tiếng Việt ⇒ comm hỏng NGAY LÚC SINH (kernel cắt 15 byte), không cần prctl
+    (nền 89fc4fa: `khoa=None`, rc=10, con vẫn sống)."""
+    if platform.system() != "Linux":
+        return "bo qua: comm/proc chi co tren Linux"
+    if _k124_locale_giai_ma_duoc():
+        return "bo qua: locale hien hanh giai ma duoc 15 byte comm hong - loi 124 khong tai hien duoc o day"
+    with San() as s:
+        ten = s / "kiểm_tra_tiến_trình"
+        try:
+            os.symlink(PY, ten)
+        except (OSError, UnicodeEncodeError) as e:
+            raise RuntimeError(f"dieu kien dung: khong tao duoc ten tieng Viet: {e}")
+        tc, tn = s / "comm.bin", s / "nhip.txt"
+        try:
+            rc, so = _k124_run(s, [str(ten), "-c", _k124_ma_con(tc, tn, 0.0, False)])
+            pid = so.get("pid")
+            if not (_k124_cho_tep(tc, 1) and tc.read_bytes() == _K124_COMM):
+                raise RuntimeError("dieu kien dung: comm luc sinh khong phai 15 byte hong")
+            _k124_ket_luan("B8-luc-sinh", rc, pid, tn)
+        finally:
+            _k124_don_con(tn)
+
+
+_K124_MA_CHAU = _NL.join([
+    "import ctypes, os, signal, sys, time",
+    "signal.signal(signal.SIGTERM, signal.SIG_IGN)",
+    "ly_do = 'ngoai_le'",
+    "try:",
+    "    ctypes.CDLL(None).prctl(15, bytes.fromhex(sys.argv[2]), 0, 0, 0)",
+    "    open(sys.argv[1], 'w').write(str(os.getpid()))",
+    "    time.sleep(120)",
+    "    ly_do = 'han_song'",
+    "finally:",
+    "    open(sys.argv[1] + '.tu_thoat', 'w').write(ly_do)"]) + _NL
+_K124_MA_ME = _NL.join([
+    "import subprocess, sys, time",
+    "subprocess.Popen([sys.executable, '-c', sys.argv[5], sys.argv[2], sys.argv[3]],",
+    "                 start_new_session=(sys.argv[1] == '1'))",
+    "if sys.argv[4] == 'thoat':",
+    "    sys.stdin.readline()",
+    "    sys.exit(0)",
+    "time.sleep(120)"]) + _NL
+
+
+def _k124_me_chau(s, setsid: bool, me_thoat: bool):
+    tp = s / "chau.pid"
+    me = subprocess.Popen([PY, "-c", _K124_MA_ME, "1" if setsid else "0", str(tp), _K124_COMM_CHAU.hex(),
+                           "thoat" if me_thoat else "o_lai", _K124_MA_CHAU],
+                          start_new_session=True, stdin=subprocess.PIPE)
+    chau = None
+    try:
+        if not _k124_cho_tep(tp):
+            raise RuntimeError("dieu kien dung: chau chua ghi pid")
+        chau = int(tp.read_text())
+        with open(f"/proc/{chau}/stat", "rb") as f:
+            nd = f.read()
+        if nd[nd.index(b"(") + 1:nd.rindex(b")")] != _K124_COMM_CHAU:
+            raise RuntimeError("dieu kien dung: comm cua chau chua doi")
+    except BaseException:
+        if chau:
+            with contextlib.suppress(OSError):
+                os.kill(chau, signal.SIGKILL)
+        with contextlib.suppress(OSError):
+            me.kill()
+        me.wait()
+        raise
+    return me, chau
+
+
+@ca
+def t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM():
+    """Cháu `setsid()` (killpg không với tới), comm hỏng, phớt lờ SIGTERM: chỉ ẢNH CHỤP + kiểm
+    sống/khoá từng pid giết được nó. Phủ `_chup_cay`, `_con_song` nhánh tệp có, `_khoa_danh_tinh`."""
+    if platform.system() != "Linux":
+        return "bo qua: setsid/proc chi co tren Linux"
+    m = _tai_launcher_thu()
+    with San() as s:
+        me, chau = _k124_me_chau(s, True, False)
+        try:
+            with _k124_ghi_doc() as ghi:
+                khoa = _k124_khoa_that(me.pid)
+                kg = m._giet_cay(me.pid, khoa)
+            song = _k124_song(chau)
+            me_rc = me.poll()   # mẹ là con TRỰC TIẾP của ca: None = còn sống; < 0 = tín hiệu giết; >= 0 = tự thoát
+            tu = _k124_tu_thoat(s / "chau.pid")
+            _k124_tu_thoat_vo_can("B8-setsid", tu)
+            bang(not (kg.tron_ven and (song or me_rc is None)),
+                 f"B8-setsid 124 noi doi: {kg.mo_ta}; chau {chau} song={song}, me rc={me_rc}")
+            bang(kg.tron_ven and not song and tu is None and me_rc is not None and me_rc < 0,
+                 f"B8-setsid khong giet duoc: tron_ven={kg.tron_ven}, chau song={song}, chau tu thoat={tu}, "
+                 f"me rc={me_rc}, {kg.mo_ta}")
+            _k124_dang_doc("B8-setsid", ghi)
+        finally:
+            with contextlib.suppress(OSError):
+                os.kill(chau, signal.SIGKILL)
+            with contextlib.suppress(OSError):
+                me.kill()
+            me.wait()
+
+
+@ca
+def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
+    """Mẹ đã thoát, cháu CÙNG NHÓM comm hỏng còn sống: `_khoa_danh_tinh(me)` = None là ĐÚNG (mẹ đã
+    biến mất) và chỉ phép quét nhóm còn thấy cháu. Phủ `_thanh_vien_nhom` (và `_chup_cay` theo nhóm)."""
+    if platform.system() != "Linux":
+        return "bo qua: nhom tien trinh/proc chi co tren Linux"
+    m = _tai_launcher_thu()
+    with San() as s:
+        me, chau = _k124_me_chau(s, False, True)
+        try:
+            with _k124_ghi_doc() as ghi:
+                khoa = _k124_khoa_that(me.pid)
+                me.stdin.write(b"x" + _NL.encode())
+                me.stdin.close()
+                me.wait(timeout=10)
+                kg = m._giet_cay(me.pid, khoa)
+            song = _k124_song(chau)
+            tu = _k124_tu_thoat(s / "chau.pid")
+            _k124_tu_thoat_vo_can("B8-me-thoat", tu)
+            bang(not (kg.tron_ven and song), f"B8-me-thoat 124 noi doi: {kg.mo_ta}; chau {chau} song")
+            bang(kg.tron_ven and not song and tu is None, f"B8-me-thoat khong giet duoc: tron_ven={kg.tron_ven}, "
+                                                          f"chau song={song}, chau tu thoat={tu}, {kg.mo_ta}")
+            _k124_dang_doc("B8-me-thoat", ghi)
+        finally:
+            with contextlib.suppress(OSError):
+                os.kill(chau, signal.SIGKILL)
+            with contextlib.suppress(OSError):
+                me.kill()
+            me.wait()
+
+
 DOT_BIEN = [
     ("m1_xoa_actionlint_khoi_cong_cu",
      ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
@@ -7925,6 +8802,223 @@ DOT_BIEN = [
      ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
       '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "antigravity"}'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # ---- wp685 (đặc tả r28 §7 B5): 54 dòng (a)–(m), mỗi dòng MỘT vị trí; (c) hai ca đích ⇒ 55 cặp.
+    ('wp685_a_go_ban_va',
+     ('    try:\n        co_tep = trang_thai.exists()\n    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None   # KHÔNG kết luận: không stat được chưa có nghĩa là không đọc được\n    if co_tep:\n        # Nhánh tệp có giữ nguyên xi (Q-A.3), trừ cách giải mã (Q-A.7: latin-1, PR #688\n        # comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False\n    if co_tep is None:\n        # wp685 (zombie: cross-review lượt 1 trên PR #688) — thử đọc nội dung ĐÚNG MỘT lần,\n        # zombie vẫn phải tính là đã chết. Đọc lỗi hay nội dung hỏng ⇒ KHÔNG trả False mà rơi\n        # về os.kill(pid, 0) bên dưới (cross-review lượt 2, lượt 4: bước kill phải THỰC SỰ được\n        # gọi và quyết định). Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass\n',
+      '    if trang_thai.exists():\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False\n'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_b_ban_rong',
+     ('    except OSError:\n        co_tep = None',
+      '    except OSError:\n        return False'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_c_bo_doc_duong_moi',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      "Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.\n        pass"),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan', 't157_giet_cay_khi_stat_EACCES_van_tron_ven']),
+    ('wp685_d1_hoi_chi_PermissionError',
+     ('    except OSError:\n        co_tep = None',
+      '    except PermissionError:\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_d2_doc_chi_PermissionError',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (PermissionError, ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_e1_hoi_nuot_BaseException',
+     ('    except OSError:\n        co_tep = None',
+      '    except BaseException:\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_e2_doc_nuot_KeyboardInterrupt',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except KeyboardInterrupt:\n            pass\n        except (OSError, ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_f_hoi_exists_lan_hai',
+     ('        co_tep = trang_thai.exists()\n',
+      '        co_tep = trang_thai.exists() and trang_thai.exists()\n'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_g1_doc_loi_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except OSError:\n            return False\n        except (ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_g2_doc_ESRCH_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except ProcessLookupError:\n            return False\n        except (OSError, ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_h1_hoi_bat_Exception',
+     ('    except OSError:\n        co_tep = None',
+      '    except Exception:\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_h2_doc_bat_Exception',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except Exception:\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_i_noi_dung_hong_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except OSError:\n            pass\n        except (ValueError, IndexError):\n            return False'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_j1_doc_lan_hai_sau_thanh_cong',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_j2_doc_lan_hai_khi_doc_loi',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            try:\n                trang_thai.read_text(encoding="latin-1")\n            except OSError:\n                pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_k1_tra_True_khong_hoi_pid',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return True'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_k2_hoi_pid_bo_ket_qua',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            try:\n                os.kill(pid, 0)\n            except OSError:\n                pass\n            return True'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_k3_tu_kill_PermissionError_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            try:\n                os.kill(pid, 0)\n            except OSError:\n                return False\n            return True'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_k4_tu_kill_OSError_khac_True',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            try:\n                os.kill(pid, 0)\n            except ProcessLookupError:\n                return False\n            except OSError:\n                return True\n            return True'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_k5_hoi_pid_hai_lan',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            try:\n                os.kill(pid, 0)\n            except OSError:\n                pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l1_hoi_chi_ProcessLookupError',
+     ('    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None',
+      '    except ProcessLookupError:\n        return False'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l2_hoi_ESRCH_chung_nhanh',
+     ('    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None',
+      '    except OSError:\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l3_hoi_OSError_khac_False',
+     ('    except OSError:\n        co_tep = None',
+      '    except PermissionError:\n        co_tep = None\n    except OSError:\n        return False'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l4_hoi_errno_trang_EACCES_EIO',
+     ('    except OSError:\n        co_tep = None',
+      '    except OSError as e:\n        if e.errno not in (13, 5):\n            raise\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l5_hoi_EPERM_False',
+     ('    except OSError:\n        co_tep = None',
+      '    except OSError as e:\n        if e.errno == 1:\n            return False\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l6_hoi_them_IndexError',
+     ('    except OSError:\n        co_tep = None',
+      '    except (OSError, IndexError):\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l7_hoi_them_ValueError',
+     ('    except OSError:\n        co_tep = None',
+      '    except (OSError, ValueError):\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l8_hoi_them_UnicodeDecodeError',
+     ('    except OSError:\n        co_tep = None',
+      '    except (OSError, UnicodeDecodeError):\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l9_hoi_boc_Exception',
+     ('    except OSError:\n        co_tep = None',
+      '    except OSError:\n        co_tep = None\n    except Exception as e:\n        raise RuntimeError("boc") from e'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l10_doc_chi_bat_phan_tich',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l11_doc_errno_EACCES_EIO',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError) as e:\n            if isinstance(e, OSError) and e.errno not in (13, 5):\n                raise'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l12_doc_errno_EACCES_EIO_ESRCH',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError) as e:\n            if isinstance(e, OSError) and e.errno not in (13, 5, 3):\n                raise'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l13_doc_EPERM_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError) as e:\n            if isinstance(e, OSError) and e.errno == 1:\n                return False'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l14_doc_OSError_khac_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except PermissionError:\n            pass\n        except OSError:\n            return False\n        except (ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l15_doc_khong_bat_ValueError',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l16_doc_kiem_chuoi_rong',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            if noi_dung:\n                return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l17_doc_khong_bat_IndexError',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l18_doc_IndexError_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except IndexError:\n            return False\n        except (OSError, ValueError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l19_doc_chi_OSError_tach_rieng',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n        except OSError:\n            noi_dung = ""\n        try:\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l20_doc_UnicodeDecodeError_False',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except UnicodeDecodeError:\n            return False\n        except (OSError, ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l21_doc_boc_ValueError',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except ValueError as e:\n            raise RuntimeError("boc") from e\n        except (OSError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l22_kill_chi_PermissionError',
+     ('    except ProcessLookupError:\n        return False\n    except PermissionError:\n        return True  # tồn tại nhưng khác chủ\n    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except PermissionError:\n        return True  # tồn tại nhưng khác chủ\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l23_kill_chi_ProcessLookupError',
+     ('    except ProcessLookupError:\n        return False\n    except PermissionError:\n        return True  # tồn tại nhưng khác chủ\n    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except ProcessLookupError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l24_kill_bo_OSError',
+     ('    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l25_kill_them_BaseException',
+     ('    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except OSError:\n        return False\n    except BaseException:\n        return True\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l26_kill_them_Exception',
+     ('    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except OSError:\n        return False\n    except Exception:\n        return True\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l27_kill_them_IndexError',
+     ('    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except OSError:\n        return False\n    except IndexError:\n        return True\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l28_kill_them_ValueError',
+     ('    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except OSError:\n        return False\n    except ValueError:\n        return True\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_l29_kill_them_UnicodeDecodeError',
+     ('    except OSError:\n        return False\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps',
+      '    except OSError:\n        return False\n    except UnicodeDecodeError:\n        return True\n    if platform.system() == "Darwin":  # không có /proc: hỏi ps'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_m1_nhanh_cu_hop_nhat_ve_kill',
+     ('comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False',
+      'comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_m2_nhanh_cu_bat_BaseException',
+     ('comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False',
+      'comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False\n        except BaseException:\n            return False'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_m3_tep_vang_False',
+     ('    if co_tep is None:\n',
+      '    if co_tep is False:\n        return False\n    if co_tep is None:\n'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_m4_ESRCH_hoi_lai',
+     ('    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None',
+      '    except ProcessLookupError:\n        try:\n            trang_thai.exists()\n        except OSError:\n            pass\n        return False\n    except OSError:\n        co_tep = None'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    ('wp685_m5_duong_moi_tach_ngoac_dau',
+     ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n',
+      'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.index(")") + 2:].split()[0] != "Z"\n'),
+     ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
 ]
 
 

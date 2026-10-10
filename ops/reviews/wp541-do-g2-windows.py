@@ -82,7 +82,7 @@ SHA_G1   = "2f70869a0537843e9cae78618ee7ae8c261d972d"
 # do that 18-09 tren ban va g2 cua agy cho 5 tep / +812, trong khi viec cua agy la 2 tep / +353.
 # Mot chot nhu the se bao "vuot tran" cho mot ban va KHONG vuot. Base dung la MERGE-BASE.
 SHA_BASE_SPEC = "d705623162b75b7340ee7cca54ac2d2abbddbb6f"
-BAN_BO_DO = "2026-10-01j"              # doi MOI khi sua bo do - log tu khai ban nao
+BAN_BO_DO = "2026-10-01k"              # doi MOI khi sua bo do - log tu khai ban nao
 TRAN_TEP, TRAN_DONG = 2, 400          # N7' cua spec r3
 AL_SAN = (1, 7, 7)                    # san actionlint = ban ghim CI: AL_VER cua ci.yml = ban_ghim cua ops/cong_cu.yaml
 GIT_SAN = (2, 36, 0)                  # san git: ung vien goi `git worktree list --porcelain -z` (co `-z` tu 2.36); ban_ghim git = null
@@ -682,11 +682,14 @@ def _trang_thai_cay(goc):
     # Tep BI IGNORE (`.gitignore` cua kho, `.git/info/exclude`, ignore ca nhan) khong hien o `status` du da bo excludesFile ca nhan,
     # ma bo test duyet THU MUC ops/leases va ops/reviews bang glob (vd ops/lease_publish_test.py:1302, :1660) nen mot lease/verdict an
     # o do lam ket qua khac HEAD da ghi (Codex PR #569, review 5479887784). `ls-files --others --ignored --exclude-standard` liet ke
-    # chung; pham vi CHI hai thu muc bo test duyet (tep ignore noi khac, vd `dist/`, khong do duoc tac dong - de ngoai), bo qua
+    # chung; pham vi CHI cac thu muc bo test DOC (`ops`, `.github`; tep ignore noi khac, vd `dist/`, khong do duoc tac dong - de ngoai), bo qua
     # `__pycache__` vi bo test sinh bytecode trong luc chay va chot CUOI so cung ham nay.
+    # `ops/leases ops/reviews` KHONG du: `ops` la cwd/sys.path[0] cua bo test, `.github/workflows` duyet bang glob/iterdir o nhieu ca
+    # (0ea95de: 4 cho + cac ca doc tep co dinh). Do tren 0ea95de: `.github/workflows/zz.yml` an qua `.git/info/exclude` => cong
+    # bao `SACH (== HEAD)` ma t24 DO (nhet dau bo-qua-CI vao commit): ket qua khac HEAD da ghi.
     rc, st, er = git(goc, "-c", "core.excludesFile=", "status", "--porcelain", "--untracked-files=all")
     rc2, lv, er2 = git(goc, "ls-files", "-v")
-    rc3, ig, er3 = git(goc, "ls-files", "--others", "--ignored", "--exclude-standard", "--", "ops/leases", "ops/reviews")
+    rc3, ig, er3 = git(goc, "ls-files", "--others", "--ignored", "--exclude-standard", "--", "ops", ".github")
     co = ["chi-muc:" + x for x in lv.splitlines() if x and x[0] != "H"]
     co += ["bi-ignore:" + x for x in ig.splitlines() if x and "/__pycache__/" not in "/" + x]
     return (rc or rc2 or rc3), "\n".join(x for x in [st] + co if x), (er or er2 or er3)
@@ -702,6 +705,7 @@ if CAY_SACH:
         loi.append(f"cay do KHONG trung HEAD: {len(st0.splitlines())} muc chua commit/chua theo doi/co chi muc/bi ignore "
                    f"(vd {st0.splitlines()[0][:60]!r}) -"
                    " bo test/probe do TEP, N7' do COMMIT; commit hoac don (git stash -u) roi do lai;"
+                   " tep bi ignore: xoa tep do hoac git clean -fdX -- ops .github (git stash -u KHONG don tep ignore);"
                    " chi muc: git update-index --no-assume-unchanged -- <tep> roi --no-skip-worktree -- <tep>")
     else:
         inn("  cay lam viec : SACH (== HEAD)")

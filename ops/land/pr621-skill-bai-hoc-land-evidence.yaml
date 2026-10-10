@@ -11,9 +11,13 @@
 # chuoi khong mo dau bang `measured` (vd trang_thai_packet.landed_ly_do, khong_do_duoc[*].mo_ta, pre_merge_checks[0..2].moc); khoi khong gan nhan (bookkeeping,
 # uy_quyen.*, human_audit.assurance_dat/ghi_chu). Cac khoi nay chi co chot rieng cho MOT SO su that (kiem_ho_so.py), KHONG duoc --tu-kiem chung minh. Toan tu
 # tu-kiem chi doi CHU SO: doi TU (success/OWNER/push/ci.yml) trong la measured KHONG bi thu. pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} co chot rieng.
-# MAU THAN comment quyet dinh chu kho (kiem_ho_so.py landed_hop_le; moi muc MOT dong rieng; CRLF, dau cach cuoi dong va dau gach dau dong duoc chap nhan; khoi rao ```/~~~ va chu thich HTML bi bo; dong tich dan `> ` khong duoc nhan): `Reviewed commit: <40 hex head cua PR ghi so>`;
+# MAU THAN comment quyet dinh chu kho (kiem_ho_so.py than_sai; moi muc MOT dong rieng, KHONG kem dau backtick): `Reviewed commit: <40 hex head cua PR ghi so>`;
 # ba dong `MOC-WORKFLOW-DEFINITION: chap_nhan <4 run id cach nhau dau phay>`, `RC-SO-CHI-CO-STEP-CONCLUSION: chap_nhan <...>`, `CHECKOUT-IDENTITY: chap_nhan <...>`;
-# mot dong `assurance_dat: chap_nhan`. Comment phai do CHINH chu kho dang (khong qua app), khong sua sau khi dang.
+# mot dong `assurance_dat: chap_nhan`. DUOC: CRLF, dau cach cuoi dong, MOT dau danh sach (`-` `*` `+` hoac `1.`) truoc dong mau, van xuoi khong bat dau bang tu khoa cua mau;
+# khoi rao ```/~~~ dong khop va khoi trich dan `>` ket thuc bang dong trong bi BO QUA. TU CHOI CA THAN (bo kiem khong mo hinh hoa, khong co gang bo phan do): the/chu thich HTML,
+# thut >= 4 dau cach hay tab, khoi rao/trich dan thut vao hoac nam sau dau danh sach, dong ngay sau `>`, khoi rao khong dong, ngat dong la (CR don, U+2028), dong BAT DAU bang tu
+# khoa cua mau (ke ca in dam/viet thuong) ma sai mau. KHONG doc van xuoi: mot cau tu choi viet bang loi khong phai dong mau thi khong bi bat. Comment phai do CHINH chu kho dang
+# (khong qua app), khong sua sau khi dang.
 # thuat_lai = so lieu cua luot review, khong tai chay;
 # not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr621-skill-bai-hoc-provenance/ (SHA256SUMS.txt). Kiem nhat quan ho so <-> hien vat:

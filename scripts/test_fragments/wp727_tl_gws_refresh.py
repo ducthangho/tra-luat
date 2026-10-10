@@ -7,7 +7,9 @@ nằm ở các dòng thuộc danh sách CHO PHÉP.
 """
 
 import argparse
+import ast
 import contextlib
+import hashlib
 import io
 import math
 import os
@@ -31,7 +33,7 @@ class _Ket:
     def __init__(self, rc):
         self.returncode = rc
         self.stdout = "SENTINEL-COOKIE-wp727"
-        self.stderr = ""
+        self.stderr = "SENTINEL-COOKIE-wp727-err"
 
 
 @contextlib.contextmanager
@@ -141,6 +143,33 @@ def _n4(van_ban):
     return all(n == 1 for n in dung.values())
 
 
+# sha256 của TOÀN VĂN mỗi chuỗi Python (sau khi ghép literal liền nhau; f-string: phần hằng + "{}") được phép chứa
+# `login --check` — chặn cả gợi ý dương viết tách thành nhiều literal (cross-review lượt 2, F2b).
+_CHUOI_CHO_PHEP = frozenset({
+    "a4b85ff4f950bfb6229494d8dd99fbfdb412490ad5b2a190971e5cef343a7e05",   # docstring _nlm_auth_alive (M1)
+    "73818ecbc71850b0fd01b94be79d0eefb95ca7e78fd9adf941b4ae778bba6264",   # docstring _refresh_nlm_auth (WP727)
+    "bdb136eb46706b57fcf701c877904c9f27c0d1f9b7f0b3ed0ca0ee78d02eb0a9",   # thông báo nlm-auth-pull
+    "a2e363f715ec74d607f55eb2f4a3821d0f6eda93e0be5e654d8831fc9985d6b5",   # thông báo nlm-auth-load
+})
+
+
+def _n4_ast(van_ban):
+    """Mọi chuỗi Python chứa `login --check` phải là một chuỗi cho phép, mỗi chuỗi đúng một lần."""
+    cay = ast.parse(van_ban)
+    con_cua_f = {id(v) for n in ast.walk(cay) if isinstance(n, ast.JoinedStr) for v in n.values}
+    gap = []
+    for n in ast.walk(cay):
+        if isinstance(n, ast.JoinedStr):
+            chuoi = "".join(v.value if isinstance(v, ast.Constant) else "{}" for v in n.values)
+        elif isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in con_cua_f:
+            chuoi = n.value
+        else:
+            continue
+        if "login --check" in chuoi:
+            gap.append(hashlib.sha256(chuoi.encode("utf-8")).hexdigest())
+    return sorted(gap) == sorted(_CHUOI_CHO_PHEP)
+
+
 def run(tl_module):
     tg = tl_module._imp("tl_gws")
     tg.bind(tl_module)      # như tl.build_parser: nạp tên trần (_imp, load_creds…) mà các lệnh stage cần
@@ -151,4 +180,8 @@ def run(tl_module):
         return False
     if _n4(van_ban.replace("[nguồn {src}]. Kiểm bằng probe", "[nguồn {src}]. Kiểm: nlm login --check. Kiểm bằng probe", 1)):
         return False            # phản chứng: gợi ý dương chen vào CHÍNH dòng được phép cũng phải bị bắt
+    if not _n4_ast(van_ban):
+        return False
+    if _n4_ast(van_ban + '\nprint("Kiểm: nlm " "login --check")\n'):
+        return False            # phản chứng: gợi ý dương tách thành hai literal liền nhau phải bị bắt
     return _n1_n3(tg) and _n2(tg)

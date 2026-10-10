@@ -6,8 +6,12 @@ agent/wp122-g1-codex
 agent/wp125-g1-claude
 agent/wp125-g2-claude
 agent/wp430-g1-codex
+agent/wp685-r28-g5-claude
 agent/wp710-g1-codex
 agent/wp710-g2-codex
+agent/wp725-g1-claude
+agent/wp726-g1-claude
+agent/wp727-g1-claude
 agent/wp77-g1-claude
 agent/wp77-g2-claude
 agent/wp77-g3-claude
@@ -138,6 +142,7 @@ claude/wp60-g2-f3-01-github-schema
 claude/wp671-windows-bash-nen-escape-g1
 claude/wp678-r17-g1
 claude/wp685-r22-de-xuat
+claude/wp685-r24-doi-executor
 claude/wp698-r10-g1
 claude/wp710-g3
 claude/wp86-cloud-linux-migration-ix5keq
@@ -483,7 +488,11 @@ ops/wp685-r19-g2-metadata
 ops/wp685-r20-g3-metadata
 ops/wp685-r23-g4-lease
 ops/wp685-r23-g4-metadata
+ops/wp685-r28-g5-bang-chung
+ops/wp685-r28-g5-lease
+ops/wp685-r28-g5-review-1
 ops/wp698-r10-g1-lease
+ops/wp698-r14-g2-lease
 ops/wp710-g5-hien-vat-review
 ops/wp710-r4-g3-lease
 ops/wp710-r4-g4-lease

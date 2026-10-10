@@ -123,7 +123,7 @@ environment: cloud
 operating_system: linux
 role: land_operator
 session_id: https://claude.ai/code/session_01Fd7YEcw3odAk7QKkydKycE
-do_luc: '2026-10-09T12:0xZ..17:1xZ (core.abbrev 7; 12:0x-14:4x = phien land; 17:11Z = cong tai cho, 17:13Z = ai-dang-giu: hai hien vat do ghi so con luu)'
+do_luc: '2026-10-09T12:0xZ..2026-10-10T11:29Z (core.abbrev 7; 09-10 12:0x-14:4x = phien land; 09-10 17:11Z = cong tai cho; ai-dang-giu do lai tren head cuoi 2026-10-10T11:29Z: hai hien vat do ghi so con luu)'
 
 ung_vien:
   head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675
@@ -310,10 +310,10 @@ gate_hau_merge:
 lease_tren_duong_ghi_so:
   trang_thai: measured
   lenh: >-
-    clone quet day du (tap ten ls-remote --heads == for-each-ref refs/remotes/origin: 493/493, thieu 0 thua 0; hai tap luu kem: nhanh-may-chu.txt, nhanh-cuc-bo.txt), checkout
-    origin/master (353da6b luc do lan 4 va lan 6; nhanh master cuc bo dua ve khop origin truoc khi do, vi ai-dang-giu chan
+    clone quet day du (tap ten ls-remote --heads == for-each-ref refs/remotes/origin: 502/502, thieu 0 thua 0; hai tap luu kem: nhanh-may-chu.txt, nhanh-cuc-bo.txt), checkout
+    origin/master (353da6b luc do lan 4, lan 6 va lan cuoi; nhanh master cuc bo dua ve khop origin truoc khi do, vi ai-dang-giu chan
     rc=12 khi nhanh cuc bo tut sau); ops/lease_publish.py ai-dang-giu --root . <p> cho TUNG duong dan p trong write set
-    PR #723 (27 duong dan: tep ho so + moi tep provenance, ke ca chinh bang ket qua; do lai sau vong vá lan 6, 17:13Z).
+    PR #723 (27 duong dan: tep ho so + moi tep provenance, ke ca chinh bang ket qua; do lai lan cuoi tren head cuoi truoc khi chu kho ky, 2026-10-10 11:29Z; lan truoc 2026-10-09 17:13Z, 493/493).
   ket_qua: '27/27 rc=0, NGUOI_GIU 0 (readback ai-dang-giu-write-set.txt; rc la ma thoat cua chinh lenh ai-dang-giu).'
   dinh_chinh: 'Ban dau chi kiem MOT duong dan (tep ho so) — Codex PR #723, comment 4231975378 bat duoc.'
 

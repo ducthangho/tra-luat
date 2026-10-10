@@ -1,0 +1,38 @@
+# UTC 2026-10-10T07:02:02Z
+$ uname -s
+Linux
+# rc=0
+$ uname -r
+6.18.44-fc-v114
+# rc=0
+$ uname -m
+x86_64
+# rc=0
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+# rc=0
+$ python3.11 -V
+Python 3.11.17
+# rc=0
+$ python3.12 -V
+Python 3.12.3
+# rc=0
+$ uname -a
+Linux vm 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# rc=0
+{"name": "linux-full-evidence-validate", "command": "python3.12 -B /home/user/wp685-r28-g5-review/goi/scratch/candidate/.claude/dev/gate_lifecycle.py validate --evidence /home/user/wp685-r28-g5-review/goi/evidence/reviewer/tl-selftest-Linux.json --output /home/user/wp685-r28-g5-review/goi/evidence/reviewer/tl-selftest-Linux.out --repo /home/user/wp685-r28-g5-review/goi/scratch/candidate --expected-head 3089b54455a44b8cfcf2fd27b01894bc2a5d764d --expected-tree 952d7c3092e02886150bb9c936dec7b5fc779aec --expected-base-sha ab457c651eb4428705f0492163080b661c858b72 --expected-name tl-selftest --expected-system Linux --expected-system-release 6.18.44-fc-v114 --expected-machine x86_64 --expected-python-implementation CPython --expected-python 3.12.3 --expected-selected-test full-selftest --expected-command-json '[\"python3.12\", \"-B\", \"scripts/tl.py\", \"--selftest\"]' --expected-positive-regex '(?m)^.*\\b([1-9][0-9]*)/\\1\\b[^\\r\\n]*\\r?\\n?\\Z' --require-current-runner", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate", "started_utc": "2026-10-10T07:02:02.353887+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3"}
+{"mismatches": ["first_failure", "positive_match", "positive_verified", "returncode", "status"], "reusable": false}
+
+{"name": "linux-full-evidence-validate", "command": "python3.12 -B /home/user/wp685-r28-g5-review/goi/scratch/candidate/.claude/dev/gate_lifecycle.py validate --evidence /home/user/wp685-r28-g5-review/goi/evidence/reviewer/tl-selftest-Linux.json --output /home/user/wp685-r28-g5-review/goi/evidence/reviewer/tl-selftest-Linux.out --repo /home/user/wp685-r28-g5-review/goi/scratch/candidate --expected-head 3089b54455a44b8cfcf2fd27b01894bc2a5d764d --expected-tree 952d7c3092e02886150bb9c936dec7b5fc779aec --expected-base-sha ab457c651eb4428705f0492163080b661c858b72 --expected-name tl-selftest --expected-system Linux --expected-system-release 6.18.44-fc-v114 --expected-machine x86_64 --expected-python-implementation CPython --expected-python 3.12.3 --expected-selected-test full-selftest --expected-command-json '[\"python3.12\", \"-B\", \"scripts/tl.py\", \"--selftest\"]' --expected-positive-regex '(?m)^.*\\b([1-9][0-9]*)/\\1\\b[^\\r\\n]*\\r?\\n?\\Z' --require-current-runner", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate", "started_utc": "2026-10-10T07:02:02.353887+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3", "rc": 3, "duration_seconds": 0.265, "ended_utc": "2026-10-10T07:02:02.641304+00:00"}

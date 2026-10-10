@@ -1,0 +1,27 @@
+schema_version: 1
+change_request_id: mcr-686-06
+mission_issue: 686
+requested_by: claude-dispatcher-session
+reason: wp685 r20 had cross-provider review findings (environment acceptance, unanchored reused evidence, lease closure claims, receipt transport, stale self-references); r23 closes them and was approved 0/0/0 by Codex (gpt-6.1-sol) on r22 and on the r22->r23 diff. Owner chose generation 4 with no attempt cap.
+proposed_changes:
+- Install wp685 spec revision 23 (ops/specs/launcher-con-song-esrch-r23.md, sha256 96387f833a0f102742b5f9c86948f2b3f0597d3032dd1817ce732557ae2af939, commit 063c59dc63a8637e70cf1036e263d09fdabb1c5c) as target spec for generation 4.
+- Close generation 3 (r20). Lease wp685-r20-g3-codex-20261007 is superseded (two-way tombstone only if still unexpired at grant time); attempt 3 history (event 6031263612) is preserved as data and not re-judged under r23.
+- Generation 4 has NO attempt cap (owner decision); same-failure history from g2/g3 is kept as data.
+- Executor, review class (sensitive), effective write set (.claude/dev/launcher.py, .claude/dev/launcher_test.py), required checks and land obligations as written in r23 (executor cell unchanged from r20).
+- Reused evidence only per r23 four-anchor rule (bytes, candidate, runtime, environment); otherwise re-measure.
+- 'Grant a new lease anchored to r23 only after: owner exact-hash decision, Mission event/readback, holder preflight (ai-dang-giu on both paths), base check.'
+- Install Mission revision 6 with wp685 target_spec_revision 23 / packet_generation 4 and a new exact plan hash.
+affected_packets:
+- wp685
+landed_work_impact: none
+risk_change: none
+decision: approved
+decision_source: human
+approved_by: ducthangho
+decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6039700009
+supersedes_revision: 5
+supersedes_change_request: mcr-686-05 (for wp685 target spec/generation only)
+proposal_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6039664770
+proposal_body_sha256: 99448b964e9316890363b9b0a51e93509b4af82f8d1618c403644dea019e9e42
+decision_body_sha256: 8d40923d515b474142620679f2bcb49825a4b3cd0a301c8707704d959f6e2f31
+audit_note: Owner approved exact r23 SHA256 96387f833a0f102742b5f9c86948f2b3f0597d3032dd1817ce732557ae2af939 (commit 063c59dc63a8637e70cf1036e263d09fdabb1c5c) as target spec for generation 4; generation 3 (r20) closed, lease wp685-r20-g3-codex-20261007 superseded, attempt 3 record kept as data without retroactive r23 judgement; generation 4 has no attempt cap. Body hashes are sha256 of the UTF-8 comment body as returned by GitHub REST GET (decision body contains no HTML-escapable characters). Not a human code audit; no merge, land or LIVE authority.

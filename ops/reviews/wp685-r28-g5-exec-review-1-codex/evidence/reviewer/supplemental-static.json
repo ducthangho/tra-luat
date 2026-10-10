@@ -1,0 +1,13 @@
+{
+  "b8": [
+    {
+      "sha256": "60ee8d5f6087cd7e7862f91bd27690d2d18bfef2f2cb03f06fcad522673d75ff",
+      "lines": 353,
+      "literal_containment": true
+    }
+  ],
+  "diff_check": 0,
+  "commit_message": "fix(launcher): _con_song khong de OSError thoat; ESRCH = da chet; 5 cho doc /proc/<pid>/stat (wp685 r28 g5 attempt 1)\n\nThi hanh dac ta ops/specs/launcher-con-song-esrch-r28.md (sha256 8007edf4...e156) duoi lease\nwp685-r28-g5-claude-20261009 (#686 6093540100), attempt 1 (event 6093645600). Write set chi\n.claude/dev/launcher.py (+33/-5) va .claude/dev/launcher_test.py (+1096/-2): _con_song theo Q-A\n(exists mot lan; ProcessLookupError => False; OSError khac doc noi dung mot lan, hong thi roi ve\nos.kill(pid,0)), Q-A.7 latin-1 o nam cho doc, t156-t161, 54 muc DOT_BIEN moi.\nNghiem thu cuc bo B1-B6, B8 dat tren 3.11/3.12 (bang chung o nhanh nay, khong phai approval);\nruff F delta = rong. Chua review.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT\n\n",
+  "policy_sha256": "8d65413c3b3cb0d087e283f1d50847785b8e8d96d7d90ac30845619beaf3997f",
+  "gate_runner_sha256": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810"
+}

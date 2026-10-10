@@ -1,0 +1,10 @@
+moi truong: pid=4336 pgid=4335 sid=4327 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=4336)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+  HONG r09_run_json_giu_ba_trang_thai_probe: run.json khong giu ba trang thai: {'DAT', 'KHONG_DO_DUOC', 'DO'}
+  HONG r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh: luot 0 rc=1: 
+  HONG r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: khong co chi thi ma cung khong dat moc — hook se chay pip moi luot
+  HONG t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan: B1 result True
+  HONG t157_giet_cay_khi_stat_EACCES_van_tron_ven: RuntimeError: B3b-giet-cay: seam Path.stat khong cham
+
+189/194 ca DA CHAY QUA (tong 195, bo qua 1, hong 5) - KHONG DU: 1 ca BO QUA, chua do gi

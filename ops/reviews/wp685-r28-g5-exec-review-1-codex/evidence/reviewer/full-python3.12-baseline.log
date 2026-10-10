@@ -1,0 +1,51 @@
+# UTC 2026-10-10T06:49:08Z
+$ uname -s
+Linux
+# rc=0
+$ uname -r
+6.18.44-fc-v114
+# rc=0
+$ uname -m
+x86_64
+# rc=0
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+# rc=0
+$ python3.11 -V
+Python 3.11.17
+# rc=0
+$ python3.12 -V
+Python 3.12.3
+# rc=0
+$ uname -a
+Linux vm 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# rc=0
+{"name": "full-python3.12-baseline", "command": "python3.12 -B .claude/dev/launcher_test.py", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/baseline", "started_utc": "2026-10-10T06:49:08.682157+00:00", "head": "ab457c651eb4428705f0492163080b661c858b72", "tree": "8649be372de2c824268682c3f80fa086ee750ef7", "base": "8c98afacb9285aa71e5200739236284f7a190d4f", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3"}
+moi truong: pid=6424 pgid=1 sid=1 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026532321] init=codex
+nhom tien trinh: da tach sang session moi (pgid=6424)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+  BO QUA r345_chan_socket_that_ma_than_hook_van_chay_dung: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_cac_phep_do_cuc_bo_van_dung: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_lop_tham_import_van_co_rang: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r347_tham_import_van_song_tren_python_truoc_310: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r348_dot_bien_bo_isidentifier_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  HONG r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: khong co chi thi ma cung khong dat moc — hook se chay pip moi luot
+
+179/180 ca DA CHAY QUA (tong 189, bo qua 9, hong 1) - KHONG DU: 9 ca BO QUA, chua do gi
+
+{"name": "full-python3.12-baseline", "command": "python3.12 -B .claude/dev/launcher_test.py", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/baseline", "started_utc": "2026-10-10T06:49:08.682157+00:00", "head": "ab457c651eb4428705f0492163080b661c858b72", "tree": "8649be372de2c824268682c3f80fa086ee750ef7", "base": "8c98afacb9285aa71e5200739236284f7a190d4f", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3", "rc": 1, "duration_seconds": 201.891, "ended_utc": "2026-10-10T06:52:30.592724+00:00"}

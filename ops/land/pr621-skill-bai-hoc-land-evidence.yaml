@@ -13,10 +13,9 @@
 # tu-kiem chi doi CHU SO: doi TU (success/OWNER/push/ci.yml) trong la measured KHONG bi thu. pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} co chot rieng.
 # MAU THAN comment quyet dinh chu kho (kiem_ho_so.py than_sai; moi muc MOT dong rieng, KHONG kem dau backtick): `Reviewed commit: <40 hex head cua PR ghi so>`;
 # ba dong `MOC-WORKFLOW-DEFINITION: chap_nhan <4 run id cach nhau dau phay>`, `RC-SO-CHI-CO-STEP-CONCLUSION: chap_nhan <...>`, `CHECKOUT-IDENTITY: chap_nhan <...>`;
-# mot dong `assurance_dat: chap_nhan`. DUOC: CRLF, dau cach cuoi dong, MOT dau danh sach (`-` `*` `+` hoac `1.`) truoc dong mau, van xuoi khong bat dau bang tu khoa cua mau;
-# khoi rao ```/~~~ dong khop va khoi trich dan `>` ket thuc bang dong trong bi BO QUA. TU CHOI CA THAN (bo kiem khong mo hinh hoa, khong co gang bo phan do): the/chu thich HTML,
-# thut >= 4 dau cach hay tab, khoi rao/trich dan thut vao hoac nam sau dau danh sach, dong ngay sau `>`, khoi rao khong dong, ngat dong la (CR don, U+2028), dong BAT DAU bang tu
-# khoa cua mau (ke ca in dam/viet thuong) ma sai mau. KHONG doc van xuoi: mot cau tu choi viet bang loi khong phai dong mau thi khong bi bat. Comment phai do CHINH chu kho dang
+# mot dong `assurance_dat: chap_nhan`. THAN CHI GOM cac dong mau do (bat dau o cot 0) va dong trong; DUOC: CRLF, dau cach cuoi dong, thu tu dong bat ky, run cach `,` hoac `, `.
+# TU CHOI CA THAN moi dong khac (van xuoi, dau danh sach, thut, khoi rao, trich dan, HTML, in dam, lien ket...) va moi ky tu ngoai ASCII in duoc (BOM, NBSP, tab, CR don,
+# U+2028, chu co dau, ky tu vo hinh): y kien viet bang loi dat o MOT COMMENT KHAC. Comment phai do CHINH chu kho dang
 # (khong qua app), khong sua sau khi dang.
 # thuat_lai = so lieu cua luot review, khong tai chay;
 # not_measured = khong do duoc, ghi ly do.

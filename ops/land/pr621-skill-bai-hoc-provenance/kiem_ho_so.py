@@ -430,58 +430,34 @@ qd = h.get("quyet_dinh_chu_kho") or {}
 PR_GHI_SO = 723   # quyet dinh chu kho phai nam tren CHINH PR mang ho so nay (bookkeeping: "chu ky moi tren head hien hanh cua PR #723")
 
 
-# L5 — bo kiem DOC DONG, KHONG dung lai Markdown. L3, L4 va L5 moi vong deu tim them mot cach de GitHub hien mot dong la trich dan/code/an ma bo kiem van dem la quyet
-# dinh: khoi rao khac loai hay khac do dai (``` chua ~~~), chu thich HTML chua dong hoac nam trong code, thut >= 4 dau cach, trich dan lazy (dong ngay sau `>` khong
-# co dong trong), CR don, mot dong `Reviewed commit:` thu hai sai dang. Danh sach CAM ("bo khoi rao, bo chu thich...") khong bao gio du => DAO thanh danh sach CHO
-# PHEP: chi hai cau truc duoc BO QUA vi da mo hinh hoa dung (khoi rao CommonMark khop ky tu va do dai; khoi trich dan `>` ket thuc bang dong trong); cau truc nao khac
-# ma bo kiem khong hieu thi TU CHOI CA THAN thay vi co "bo" phan do.
+# L7 — THAN = DUNG CAC DONG MAU, KHONG GI KHAC. L3..L6 moi vong deu tim them mot cach de GitHub hien mot dong mau la trich dan/code/thuoc tinh HTML/an ma bo kiem
+# van dem la quyet dinh (khoi rao khac loai, chu thich HTML, thut 4, trich dan lazy, CR don, NBSP, dau cach roi tab, lien ket/anh nhieu dong, BOM...). Bon vong cung MOT
+# hinh dang loi => sai o QUYET DINH GOC: co doc mot than Markdown TU DO roi doan dong nao HIEN THUONG. Bo quyet dinh do: than chi duoc gom cac dong mau (bat dau o cot 0,
+# toan ASCII in duoc) va dong trong. Mot dong bat dau bang chu cai, khong co ky tu dac biet cua Markdown dau dong, chi co the la doan van thuong => khong con cau truc nao
+# phai mo hinh hoa. Doi lai: chu kho KHONG viet them loi trong comment ky (y kien viet o comment khac).
 _MAU = {"Reviewed commit": r"Reviewed commit: ([0-9a-f]{40})", "assurance_dat": r"assurance_dat: (chap_nhan)",
-        **{c: re.escape(c) + r": chap_nhan ([0-9]{11}(?:,\s*[0-9]{11})*)" for c in can}}
-_BAT_DAU = re.compile(r"(?:[\W_]|\d+(?=[.)])|[xX](?=\]))*(" + "|".join(map(re.escape, _MAU)) + r")(?![\w-])", re.I)
-_DAU_DS = r"(?:[-*+]|\d{1,9}[.)])"   # MOT dau danh sach (gach/sao/cong/so thu tu) truoc dong mau
-_CANON = {k.lower(): k for k in _MAU}
+        **{c: re.escape(c) + r": chap_nhan ([0-9]{11}(?:, ?[0-9]{11})*)" for c in can}}
 
 
 def than_sai(cua, reviewed_sha, run_cua):
-    """L5 — DANH SACH ly do than comment KHONG doc duoc la CHAP NHAN (rong = hop le), moi ly do neu so dong. Mau, moi muc MOT dong rieng: `Reviewed commit: <40 hex>` ==
-    reviewed_sha; moi diem `<ID>: chap_nhan <run>,<run>,...` (dung tap run cua pham_vi_run); `assurance_dat: chap_nhan`. Cat CR/dau cach cuoi dong, cho MOT dau gach dau
-    dong. BO QUA: khoi rao CommonMark (``` hay ~~~, dong dong khop ky tu va do dai) va khoi trich dan `>` ket thuc bang dong trong. TU CHOI CA THAN: the/chu thich HTML, thut
-    >= 4 dau cach/tab, dong ngay sau `>`, ngat dong la (CR don, U+2028...), khoi rao khong dong, dong BAT DAU bang tu khoa cua mau (ke ca in dam/viet thuong) ma sai mau."""
+    """L7 — DANH SACH ly do than comment KHONG doc duoc la CHAP NHAN (rong = hop le), moi ly do gan voi mot dong neu so dong. Than chi gom: `Reviewed commit: <40 hex>`
+    == reviewed_sha; moi diem `<ID>: chap_nhan <run>,<run>,...` (dung tap run cua pham_vi_run, cach bang `,` hoac `, `); `assurance_dat: chap_nhan`; va dong trong.
+    Duoc: CRLF, dau cach cuoi dong. Moi dong khac (van xuoi, dau danh sach, thut, rao, trich dan, HTML, in dam...) va moi ky tu ngoai ASCII in duoc (BOM, NBSP, tab,
+    CR don, U+2028, ky tu vo hinh) => TU CHOI CA THAN."""
     cua = cua.replace("\r\n", "\n")
-    if re.search("[\r\x0b\x0c\x1c-\x1e\x85\N{LINE SEPARATOR}\N{PARAGRAPH SEPARATOR}]", cua):
-        return ["than co ngat dong la (CR don, VT, FF, NEL, U+2028/2029): GitHub va bo kiem tach dong khac nhau"]
-    sai, thay, rao, trich = [], {k: [] for k in _MAU}, None, False
+    bad = sorted({f"U+{ord(x):04X}" for x in cua if x != "\n" and not " " <= x <= "~"})
+    if bad:
+        return [f"than co ky tu ngoai ASCII in duoc ({', '.join(bad[:5])}): BOM, NBSP, tab, CR don, U+2028... - than ky chi duoc co dong mau"]
+    sai, thay = [], {k: [] for k in _MAU}
     for i, d in enumerate(cua.split("\n"), 1):
-        d = d.rstrip()
-        if rao:
-            if re.fullmatch(rf" {{0,3}}{re.escape(rao[0])}{{{rao[1]},}}", d):
-                rao = None
+        d = d.rstrip(" ")
+        if not d:
             continue
-        if d.startswith(">"):
-            trich = True
-            continue
-        if trich and d:
-            sai.append(f"dong {i}: ngay sau dong trich dan `>` ma khong co dong trong (trich dan lazy) - bo kiem khong biet dong nay thuoc trich dan hay khong")
-            continue
-        trich = False
-        m = re.fullmatch(r"(`{3,}|~{3,})(.*)", d)
-        if m and not (m.group(1)[0] == "`" and "`" in m.group(2)):
-            rao = (m.group(1)[0], len(m.group(1)))
-            continue
-        u = re.sub(rf"^(?:\s*{_DAU_DS}(?:\s+|$))+", "", d)
-        if re.search(r"<[A-Za-z/!?]", d) or re.match(r" {4}|\t| {1,3}(?:```|~~~|>)", d) or u.startswith(("```", "~~~", ">")):
-            sai.append(f"dong {i}: the/chu thich HTML, thut >= 4 dau cach/tab, hoac khoi rao/trich dan thut vao hay nam sau dau danh sach - bo kiem khong mo hinh hoa, hay bo di")
-            continue
-        t = re.sub(rf"^\s*(?:{_DAU_DS}(?: {{1,4}}|\t))?", "", d)   # sau dau danh sach 1-4 dau cach; >= 5 la code
-        k = next((k for k, p in _MAU.items() if re.fullmatch(p, t)), None)
-        if k:
-            thay[k].append((i, re.fullmatch(_MAU[k], t).group(1)))
+        km = [(k, m) for k, m in ((k, re.fullmatch(p, d)) for k, p in _MAU.items()) if m]   # khop MOT lan, dung chinh ket qua do
+        if km:
+            thay[km[0][0]].append((i, km[0][1].group(1)))
         else:
-            m = _BAT_DAU.match(d)
-            if m:
-                sai.append(f"dong {i}: bat dau bang `{_CANON[m.group(1).lower()]}` nhung khong dung mau")
-    if rao:
-        sai.append("khoi rao ``` / ~~~ mo ma khong dong")
+            sai.append(f"dong {i}: khong phai dong mau - than ky chi duoc co dong mau (bat dau o cot 0) va dong trong")
     for k, v in thay.items():
         if len(v) != 1:
             sai.append(f"`{k}`: can DUNG MOT dong theo mau, co {len(v)}" + (f" (dong {', '.join(str(i) for i, _ in v)})" if v else ""))
@@ -494,58 +470,103 @@ def than_sai(cua, reviewed_sha, run_cua):
 
 
 def _ca_than():
-    """L5 — phan chung CHAY DUOC cho than_sai, o MOI lan chay bo kiem (landed: false thi landed_hop_le khong bao gio chay, nen khong co no thi doan tren khong co ca nao do
-    duoc). Du lieu CO DINH, khong doc tu ho so: --tu-kiem doi chu so cua ho so se khong lam lech bang nay. Than hop le phai ra rong; than bi tu choi phai ra DUNG ly do."""
+    """L5/L7 — phan chung CHAY DUOC cho than_sai, o MOI lan chay bo kiem. Du lieu CO DINH, khong doc tu ho so: --tu-kiem doi chu so cua ho so khong lam lech bang nay.
+    Than hop le phai ra rong; than bi tu choi phai ra DUNG ly do. Cac ca tu choi giu lai MOI hinh dang da lot o L3..L6 (rao, HTML, thut, trich dan, NBSP, BOM, `[`...)."""
     rs, sha_, run = "11111111111,22222222222,33333333333,44444444444", "0123456789abcdef" * 2 + "01234567", {c: {11111111111, 22222222222, 33333333333, 44444444444} for c in can}
     L = [f"Reviewed commit: {sha_}", *(f"{c}: chap_nhan {rs}" for c in can), "assurance_dat: chap_nhan"]
     sua, nl = (lambda i, s: L[:i] + [s] + L[i + 1:]), "\n".join
-    hop = {"LF": nl(L), "CRLF": "\r\n".join(L), "gach+cach cuoi dong": nl("- " + x + "  " for x in L), "run cach ', '": nl(L).replace(",", ", "), "so thu tu `1.`": nl(f"{i + 1}. " + x for i, x in enumerate(L)), "gach + 4 dau cach": nl("-    " + x for x in L),
-           "viet xen giua": nl(["Toi quyet:", "", *L, "", "Ky ten"]), "trich dan + dong trong": nl(["> y kien cu", "", *L]), "rao dong khop": nl(["```", "CHECKOUT-IDENTITY: tu_choi", "```", *L])}
-    bad = {"diem tu_choi": (nl(sua(3, f"CHECKOUT-IDENTITY: tu_choi {rs}")), "dong 4: bat dau bang `CHECKOUT-IDENTITY`"), "thieu diem": (nl(L[:3] + L[4:]), "`CHECKOUT-IDENTITY`: can DUNG MOT dong"),
+    hop = {"LF": nl(L), "CRLF": "\r\n".join(L), "dau cach cuoi dong": nl(x + "  " for x in L), "run cach ', '": nl(L).replace(",", ", "),
+           "dong trong xen giua, dau, cuoi": nl(["", *[y for x in L for y in (x, "")], ""]), "thu tu dong dao": nl(L[::-1])}
+    ngoai, khac = "than co ky tu ngoai ASCII", "dong 1: khong phai dong mau"
+    bad = {"diem tu_choi": (nl(sua(3, f"CHECKOUT-IDENTITY: tu_choi {rs}")), "dong 4: khong phai dong mau"), "thieu diem": (nl(L[:3] + L[4:]), "`CHECKOUT-IDENTITY`: can DUNG MOT dong"),
            "diem lap": (nl(L + [L[3]]), "co 2"), "thieu 1 run": (nl(sua(3, "CHECKOUT-IDENTITY: chap_nhan 11111111111,22222222222,33333333333")), "tap run cua `CHECKOUT-IDENTITY`"),
-           "commit lap sai dang": (nl(L + ["Reviewed commit: abcdef0"]), "dong 6: bat dau bang `Reviewed commit`"), "commit lech": (nl(sua(0, "Reviewed commit: " + "0" * 40)), "!= quyet_dinh_chu_kho.reviewed_sha"),
-           "thieu assurance": (nl(L[:4]), "`assurance_dat`: can DUNG MOT dong"), "assurance hau to": (nl(sua(4, "assurance_dat: chap_nhan (chua dat)")), "dong 5: bat dau bang `assurance_dat`"),
-           "rao khac loai": (nl(["```", "~~~", *L, "```"]), "`Reviewed commit`: can DUNG MOT dong"), "rao khong dong": (nl(["```", *L]), "mo ma khong dong"),
-           "rao 4 chua 3": (nl(["````", "```", *L, "````"]), "`Reviewed commit`: can DUNG MOT dong"), "chu thich HTML": (nl(["<!--", *L, "-->"]), "dong 1: the/chu thich HTML"),
-           "chu thich chua dong": (nl(["<!--", *L]), "dong 1: the/chu thich HTML"), "thut 4": (nl("    " + x for x in L), "dong 1: the/chu thich HTML, thut"), "thut tab": (nl("\t" + x for x in L), "dong 1: the/chu thich HTML, thut"),
-           "trich dan lazy": (nl(["> y kien cu", *L]), "dong 2: ngay sau dong trich dan"), "CR don": ("\r".join(L), "ngat dong la"), "rao sau dau danh sach": (nl(["- ```", *L]), "dong 1: the/chu thich HTML, thut"), "the HTML giua dong": (nl(["Toi <u>x", *L]), "dong 1: the/chu thich HTML, thut"), "danh sach `[x]` sai dang": (nl(L + ["- [x] CHECKOUT-IDENTITY: tu_choi"]), "dong 6: bat dau bang `CHECKOUT-IDENTITY`"), "so thu tu sai dang": (nl(L + ["2. checkout-identity: tu_choi"]), "dong 6: bat dau bang `CHECKOUT-IDENTITY`"), "gach + 5 dau cach (code)": (nl("-     " + x for x in L), "`Reviewed commit`: can DUNG MOT dong"), "trich dan thut 1": (nl([" > y kien cu", "", *L]), "dong 1: the/chu thich HTML, thut"), "in dam": (nl("**" + x + "**" for x in L), "dong 1: bat dau bang `Reviewed commit`"),
-           "van xuoi": (f"Toi chap nhan ca ba, Reviewed commit: {sha_}, {rs}", "can DUNG MOT dong"), "rong": ("", "can DUNG MOT dong")}
+           "commit lap sai dang": (nl(L + ["Reviewed commit: abcdef0"]), "dong 6: khong phai dong mau"), "commit lech": (nl(sua(0, "Reviewed commit: " + "0" * 40)), "!= quyet_dinh_chu_kho.reviewed_sha"),
+           "thieu assurance": (nl(L[:4]), "`assurance_dat`: can DUNG MOT dong"), "assurance hau to": (nl(sua(4, "assurance_dat: chap_nhan (chua dat)")), "dong 5: khong phai dong mau"),
+           "van xuoi xen giua": (nl(["Toi quyet:", "", *L]), khac), "rao": (nl(["```", *L, "```"]), khac), "trich dan": (nl(["> y kien cu", "", *L]), khac),
+           "chu thich HTML": (nl(["<!--", *L, "-->"]), khac), "gach dau dong": (nl("- " + x for x in L), khac), "so thu tu": (nl(f"{i + 1}. " + x for i, x in enumerate(L)), khac),
+           "thut 1 dau cach": (nl(" " + x for x in L), khac), "thut 4": (nl("    " + x for x in L), khac), "in dam": (nl("**" + x + "**" for x in L), khac),
+           "viet thuong": (nl(sua(0, L[0].lower())), khac), "lien ket mo nhieu dong": (nl(['[a]: /u "', *L, '"']), khac), "anh alt nhieu dong": (nl(["![", *L, "](/x.png)"]), khac),
+           "tab": (nl("\t" + x for x in L), ngoai), "dau cach roi tab": (nl(" \t" + x for x in L), ngoai), "NBSP sau trich dan": (nl(["> y", " ", *L]), ngoai),
+           "BOM": ("﻿" + nl(L), ngoai), "CR don": ("\r".join(L), ngoai), "U+2028": (" ".join(L), ngoai), "tieng Viet": (nl(L + ["Ky tên"]), ngoai),
+           "ky tu vo hinh": (nl(sua(4, "assurance_dat: chap_nhan​")), ngoai), "rong": ("", "can DUNG MOT dong")}
     return ([f"hop le `{k}` bi tu choi: {than_sai(b, sha_, run)}" for k, b in hop.items() if than_sai(b, sha_, run)]
             + [f"`{k}` khong ra ly do `{s}`: {than_sai(b, sha_, run)}" for k, (b, s) in bad.items() if not any(s in r for r in than_sai(b, sha_, run))], len(hop), len(bad))
 
 
 _loi_than, _n_hop, _n_bad = _ca_than()
-chot(not _loi_than, f"than_sai (L5): {_n_hop} than hop le DAT, {_n_bad} than bi tu choi voi DUNG ly do (du lieu co dinh, khong doc tu ho so)" + "".join(f"\n      -> {s}" for s in _loi_than))
+chot(not _loi_than, f"than_sai (L7): {_n_hop} than hop le DAT, {_n_bad} than bi tu choi voi DUNG ly do (du lieu co dinh, khong doc tu ho so)" + "".join(f"\n      -> {s}" for s in _loi_than))
 
 
-def landed_hop_le():
-    """N04 + L3 + L5 — `landed: true` can quyet dinh chu kho co NEO doc duoc VA THAN comment DOC DUOC la CHAP NHAN: URL comment tren PR_GHI_SO + readback trong provenance
+def landed_hop_le(qd_, tep, doc_, approver, merged_, pham_vi_):
+    """N04 + L3 + L5 + L6 — `landed: true` can quyet dinh chu kho co NEO doc duoc VA THAN comment DOC DUOC la CHAP NHAN: URL comment tren PR_GHI_SO + readback trong provenance
     (id/URL/issue_url khop, tac gia == approver, OWNER, khong qua app, tao SAU merge, chua sua) + than comment theo MAU (than_sai). Tra ve DANH SACH ly do khong hop le
-    (rong = hop le) de chot `landed` chi dung dong/dieu kien sai. (L3 do 10-10-2026: comment THAT 6084105994 — quyet dinh CU tren 06fc9a8, chi 2 diem, chi 1 run — lot ban
-    truoc khi buoc than; L4: ban chi doi SU CO MAT cua id/run; L5: ban doc theo dong nhung mo hinh Markdown con ho.) Khong do duoc offline: comment ky tren DUNG head hien
-    hanh cua PR ghi so; KHONG doc van xuoi: mot cau tu choi viet bang loi khong phai dong mau thi khong bi bat."""
-    nb = str(qd.get("neo_ben", ""))
+    (rong = hop le) de chot `landed` chi dung dong/dieu kien sai. HAM THUAN (L6): moi dau vao la doi so (quyet dinh, ten tep co trong provenance, ham doc tep, tac gia, gio merge,
+    pham_vi) de `_ca_landed` chay no o MOI lan chay bo kiem — khi `landed: false` ham nay khong bao gio duoc goi voi ho so that. (L3 do 10-10-2026: comment THAT 6084105994 — quyet
+    dinh CU tren 06fc9a8, chi 2 diem, chi 1 run — lot ban truoc khi buoc than; L4: ban chi doi SU CO MAT cua id/run; L5: ban doc theo dong nhung mo hinh Markdown con ho.) Khong do
+    duoc offline: comment ky tren DUNG head hien hanh cua PR ghi so; KHONG doc van xuoi: mot cau tu choi viet bang loi khong phai dong mau thi khong bi bat."""
+    nb = str(qd_.get("neo_ben", ""))
     m_nb = re.fullmatch(rf"https://github\.com/ducthangho/tra-luat/pull/{PR_GHI_SO}#issuecomment-(\d+)", nb)
-    ten = str(qd.get("readback", ""))
-    if not m_nb or not ten or "/" in ten or not (P / ten).is_file():
+    ten = str(qd_.get("readback", ""))
+    if not m_nb or not ten or "/" in ten or ten not in tep:
         return ["neo_ben khong phai URL comment tren PR ghi so, hoac readback thieu / khong la ten tep trong provenance"]
-    rb = json.loads(doc(ten))
+    rb = json.loads(doc_(ten))
     dk = [(rb.get("html_url") == nb and str(rb.get("id")) == m_nb.group(1), "readback: html_url/id != neo_ben"),
-          ((rb.get("user") or {}).get("login") == h["approver"], f"readback: tac gia != approver {h['approver']}"),
+          ((rb.get("user") or {}).get("login") == approver, f"readback: tac gia != approver {approver}"),
           (rb.get("author_association") == "OWNER", "readback: author_association != OWNER"),
           ("performed_via_github_app" in rb and rb["performed_via_github_app"] is None, "readback: dang qua app, hoac THIEU khoa performed_via_github_app"),
-          (ts(rb["created_at"]) > ts(merged), "readback: created_at khong SAU merge"),
+          (ts(rb["created_at"]) > ts(merged_), "readback: created_at khong SAU merge"),
           (rb.get("updated_at") == rb.get("created_at"), "readback: comment da bi sua (updated_at != created_at)"),
           (str(rb.get("issue_url", "")).endswith(f"/repos/ducthangho/tra-luat/issues/{PR_GHI_SO}"), f"readback: issue_url khong tro toi PR #{PR_GHI_SO}"),
-          (all(set(qd.get("pham_vi_run", [])) == pham_vi[c] for c in can), "quyet_dinh_chu_kho.pham_vi_run != pham_vi_run cua tung diem"),
-          (qd.get("assurance_dat") == "chap_nhan", "quyet_dinh_chu_kho.assurance_dat != chap_nhan")]
-    return [s for ok, s in dk if not ok] + than_sai(rb.get("body") or "", str(qd.get("reviewed_sha", "")), pham_vi)
+          (all(set(qd_.get("pham_vi_run", [])) == pham_vi_[c] for c in can), "quyet_dinh_chu_kho.pham_vi_run != pham_vi_run cua tung diem"),
+          (qd_.get("assurance_dat") == "chap_nhan", "quyet_dinh_chu_kho.assurance_dat != chap_nhan")]
+    return [s for ok, s in dk if not ok] + than_sai(rb.get("body") or "", str(qd_.get("reviewed_sha", "")), pham_vi_)
 
 
-sai_landed = [] if tp["landed"] is False else landed_hop_le() + (["landed_ly_do con `CON THIEU`"] if "CON THIEU" in tp["landed_ly_do"] else [])
+def sai_landed_cua(landed, ly_do, *args):
+    """L6 — chot `landed`: false => khong doc quyet dinh (rong); true => landed_hop_le + `landed_ly_do` het `CON THIEU`. Tach thanh ham de `_ca_landed` chay duoc nhanh `landed is False`
+    va `CON THIEU` (dot bien `[] if True` hay bo `CON THIEU` khong con song sot)."""
+    return [] if landed is False else landed_hop_le(*args) + (["landed_ly_do con `CON THIEU`"] if "CON THIEU" in ly_do else [])
+
+
+def _ca_landed():
+    """L6 — phan chung CHAY DUOC cho landed_hop_le, o MOI lan chay (landed: false thi ho so that khong goi no: thay no bang `return []` van ra DAT — do 10-10-2026, 15/15 dot bien
+    cua readback + keo noi song sot). Du lieu CO DINH. Mot readback hop le phai ra rong; moi dieu kien readback/quyet dinh bi pha rieng le phai ra DUNG ly do cua no."""
+    sha_, rs, merged_ = "0123456789abcdef" * 2 + "01234567", "11111111111,22222222222,33333333333,44444444444", "2026-10-09T14:14:34Z"
+    run, neo = {c: {11111111111, 22222222222, 33333333333, 44444444444} for c in can}, "https://github.com/ducthangho/tra-luat/pull/723#issuecomment-1"
+    body = "\n".join([f"Reviewed commit: {sha_}", *(f"{c}: chap_nhan {rs}" for c in can), "assurance_dat: chap_nhan"])
+    rb0 = {"html_url": neo, "id": 1, "user": {"login": "chu-kho"}, "author_association": "OWNER", "performed_via_github_app": None, "created_at": "2026-10-09T15:00:00Z",
+           "updated_at": "2026-10-09T15:00:00Z", "issue_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/723", "body": body}
+    qd0 = {"neo_ben": neo, "readback": "rb.json", "reviewed_sha": sha_, "pham_vi_run": sorted(run[can[0]]), "assurance_dat": "chap_nhan"}
+
+    def chay(mut, landed=True, ly_do="xong"):
+        rb, q, tep = json.loads(json.dumps(rb0)), json.loads(json.dumps(qd0)), {"rb.json"}
+        mut(rb, q, tep)
+        return sai_landed_cua(landed, ly_do, q, tep, lambda ten: json.dumps(rb), "chu-kho", merged_, run)
+    hop = {"nguyen ban": (lambda rb, q, t: None, {}), "landed false: khong doc quyet dinh (than sai van ra rong)": (lambda rb, q, t: rb.update(body="x"), {"landed": False}),
+           "than CRLF": (lambda rb, q, t: rb.update(body=body.replace("\n", "\r\n")), {})}
+    bad = {"tac gia khac approver": (lambda rb, q, t: rb["user"].update(login="khac"), "tac gia != approver"), "author_association != OWNER": (lambda rb, q, t: rb.update(author_association="MEMBER"), "!= OWNER"),
+           "qua app": (lambda rb, q, t: rb.update(performed_via_github_app={"slug": "claude"}), "dang qua app"), "THIEU khoa performed_via_github_app": (lambda rb, q, t: rb.pop("performed_via_github_app"), "THIEU khoa"),
+           "created_at TRUOC merge": (lambda rb, q, t: rb.update(created_at="2026-10-09T14:14:00Z", updated_at="2026-10-09T14:14:00Z"), "khong SAU merge"),
+           "created_at BANG merge": (lambda rb, q, t: rb.update(created_at=merged_, updated_at=merged_), "khong SAU merge"), "da sua": (lambda rb, q, t: rb.update(updated_at="2026-10-09T16:00:00Z"), "da bi sua"),
+           "issue_url sang PR khac": (lambda rb, q, t: rb.update(issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/621"), "issue_url khong tro toi PR #723"),
+           "id lech neo_ben": (lambda rb, q, t: rb.update(id=2), "html_url/id != neo_ben"), "pham_vi_run thieu mot run": (lambda rb, q, t: q.update(pham_vi_run=q["pham_vi_run"][:3]), "pham_vi_run != pham_vi_run"),
+           "assurance_dat != chap_nhan": (lambda rb, q, t: q.update(assurance_dat="tu_choi"), "assurance_dat != chap_nhan"),
+           "neo_ben sang PR khac": (lambda rb, q, t: q.update(neo_ben=neo.replace("pull/723", "pull/621")), "neo_ben khong phai URL comment tren PR ghi so"),
+           "readback co dau /": (lambda rb, q, t: (q.update(readback="../rb.json"), t.add("../rb.json")), "neo_ben khong phai URL"), "readback khong co trong provenance": (lambda rb, q, t: t.clear(), "neo_ben khong phai URL"),
+           "reviewed_sha lech than": (lambda rb, q, t: q.update(reviewed_sha="0" * 40), "Reviewed commit != quyet_dinh_chu_kho.reviewed_sha"),
+           "than tu_choi mot diem": (lambda rb, q, t: rb.update(body=body.replace("CHECKOUT-IDENTITY: chap_nhan", "CHECKOUT-IDENTITY: tu_choi")), "dong 4: khong phai dong mau"),
+           "than null": (lambda rb, q, t: rb.update(body=None), "can DUNG MOT dong"),
+           "landed_ly_do con CON THIEU": (lambda rb, q, t: None, "landed_ly_do con `CON THIEU`", {"ly_do": "CON THIEU"})}
+    return ([f"hop le `{k}` bi tu choi: {chay(m, **kw)}" for k, (m, kw) in hop.items() if chay(m, **kw)]
+            + [f"`{k}` khong ra ly do `{sub_}`: {chay(m, **(kw[0] if kw else {}))}" for k, (m, sub_, *kw) in bad.items() if not any(sub_ in r for r in chay(m, **(kw[0] if kw else {})))], len(hop), len(bad))
+
+
+_loi_landed, _n_hop_l, _n_bad_l = _ca_landed()
+chot(not _loi_landed, f"landed_hop_le (L6): {_n_hop_l} readback hop le DAT, {_n_bad_l} bi tu choi voi DUNG ly do (du lieu co dinh, khong doc tu ho so)" + "".join(f"\n      -> {x}" for x in _loi_landed))
+sai_landed = sai_landed_cua(tp["landed"], tp["landed_ly_do"], qd, {x.name for x in P.iterdir() if x.is_file()}, doc, h["approver"], merged, pham_vi)
 chot(not sai_landed,
-     "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment THEO MAU (dong `Reviewed commit: <40 hex>` == reviewed_sha; moi diem `<ID>: chap_nhan <4 run id cach nhau dau phay>`; dong `assurance_dat: chap_nhan`; khoi rao/trich dan dong trong bi bo, chu thich HTML/thut >= 4/ngat dong la bi TU CHOI) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`"
-     + "".join(f"\n      -> {s}" for s in sai_landed))
+     "landed: true chi khi quyet_dinh_chu_kho co neo_ben (URL tren PR ghi so) + readback (OWNER, khong app, SAU merge, chua sua) + THAN comment THEO MAU (dong `Reviewed commit: <40 hex>` == reviewed_sha; moi diem `<ID>: chap_nhan <4 run id cach nhau dau phay>`; dong `assurance_dat: chap_nhan`; than CHI gom dong mau va dong trong, toan ASCII in duoc - moi dong/ky tu khac bi TU CHOI) + pham_vi_run + assurance_dat: chap_nhan; landed_ly_do het `CON THIEU`"
+     + "".join(f"\n      -> {x}" for x in sai_landed))
 
 # 8. Review connector sach (Codex PR #723, comment 4232431571): actor, commit, trang thai cuoi, luc; hai danh sach rong.
 cx = json.loads(doc("comment-6082682461-codex.json"))

@@ -48,6 +48,7 @@ trang_thai_packet:
     tree: 76ba29b170f5b685663296beba650c86565127bf
     nguon: "measured — `git show -s --format='%H %P %T' 77fb028`; `git diff --stat bc6630a 77fb028` = 2 tep +1129/-7 (dung write set)."
   landed: true
+  landed_quyet_dinh: 'chu kho #685 comment 6103888794 (2026-10-11T00:45:59Z); gate push tren 11cf185 (run 38076548735) success'
   landed_hieu_luc_tu: >-
     merge commit cua PR ghi so #739 dua dong nay vao master (cac commit truoc tren nhanh ghi so va PR #734 van ghi
     `landed: false`). Comment 6103749546 la NEO cua quyet dinh, khong phai moc hieu luc (tien le #710 / PR #722).

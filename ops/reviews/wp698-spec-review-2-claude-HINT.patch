@@ -1,0 +1,193 @@
+# lop: phu-luc-c-dem-209-lech-221
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -1270,3 +1270,3 @@
+ 
+-Tập dò đóng của r2 (209 dò). Cách dùng: `PYTHONDONTWRITEBYTECODE=1 TMPDIR=<scratch> python3 do_dot_bien_r2.py <gốc bản sao>
++Tập dò đóng của r2 (221 dò: 209 dò đo từ 22:39:52Z 30-09 cộng 12 dò nhóm ngoài `D698` đo từ 00:53:07Z 01-10, §1.8.4). Cách dùng: `PYTHONDONTWRITEBYTECODE=1 TMPDIR=<scratch> python3 do_dot_bien_r2.py <gốc bản sao>
+ <ra.jsonl> <tên dò>…`; `liet_ke` in tên, `ho` in tên kèm họ. Lượt ở §1.8 chia tên theo chỉ số mod 4 cho 4 tiến trình
+# lop: s1-8-8-nhan-tag-sai
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -488,3 +488,3 @@
+ (10.982 trên 63.488 điểm mã BMP không phải surrogate). Phần ngoài BMP là thứ IMP-SWEEP thiếu và, theo verdict lượt 1,
+-làm `m_cf_tag_bk` sống ở đó (r2 không đo lại IMP-SWEEP); trong 8.606 điểm mã ấy có 120 Cf (TAG), 886 Mn, 782 Ll và 704 Lu (chữ toán
++làm `m_cf_tag_bk` sống ở đó (r2 không đo lại IMP-SWEEP); trong 8.606 điểm mã ấy có 120 Cf (97 TAG ở U+E0001 và U+E0020…U+E007F, 23 Cf khác ở U+110BD, U+110CD, U+13430…U+13438, U+1BCA0…U+1BCA3, U+1D173…U+1D17A), 886 Mn, 782 Ll và 704 Lu (chữ toán
+ học có NFKC về ASCII), 3.874 So. **Vét cạn cho các dò tập con NFKC** (cả hai bản Python, cùng kết quả): với mỗi điểm mã `c` của tập
+# lop: tran-vong-so-10-hai-cho
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -41,3 +41,3 @@
+ 
+-Khối này chỉ nâng trần **trục VÒNG**. Hai trục kia của ADR-0043 (LỜI GỌI `codex_review_calls_used`, ATTEMPT) không bị nâng. Số 2 trong khối `nang_tran` của tiền lệ `wp461-be-mat-thu-hai-cua-codex-exec-1g9-claude-20260925` là trần **LỜI GỌI** (khối ấy khai `truc: loi_goi`), không phải trần vòng; tiền lệ cùng họ `…-1g7-…` ghi rõ `truc_vong_ghi_chu: 'Truc VONG theo ADR-0048 = 10 cho spec dong bang tu 2026-09-12; khong doi, khong nang o day.'` (đo lại lúc soạn r2 bằng `grep -n`). Khối **không** gỡ checkpoint theo lớp của protocol §12 (xem S6). Đo lúc soạn r2: `grep -c nang_tran` trong `ops/lease_publish.py` và `.claude/dev/packet_loop.py` ra 0 và 0. Tức không có cổng máy nào đọc khối này; ADR-0048 tự khai đúng điều đó và sửa lời khai ngược của ADR-0043 ("thiếu khối thì cổng đăng lease từ chối"). Khối này là hồ sơ thẩm quyền, không phải chốt máy; người cấp lease và reviewer kiểm nó **bằng tay**.
++Khối này chỉ nâng trần **trục VÒNG**. Hai trục kia của ADR-0043 (LỜI GỌI `codex_review_calls_used`, ATTEMPT) không bị nâng. Số 2 trong khối `nang_tran` của tiền lệ `wp461-be-mat-thu-hai-cua-codex-exec-1g9-claude-20260925` là trần **LỜI GỌI** (khối ấy khai `truc: loi_goi`), không phải trần vòng; tiền lệ cùng họ `…-1g7-…` ghi trong trường `truc_vong_ghi_chu` rằng trục VÒNG theo ADR-0048 áp cho spec đóng băng từ 2026-09-12 và không bị nâng ở đó (con số chỉ nằm ở ADR-0048 và ở `tran_cu` trên; không chép lại trong câu trích này; đo lại lúc soạn r2 bằng `grep -n`). Khối **không** gỡ checkpoint theo lớp của protocol §12 (xem S6). Đo lúc soạn r2: `grep -c nang_tran` trong `ops/lease_publish.py` và `.claude/dev/packet_loop.py` ra 0 và 0. Tức không có cổng máy nào đọc khối này; ADR-0048 tự khai đúng điều đó và sửa lời khai ngược của ADR-0043 ("thiếu khối thì cổng đăng lease từ chối"). Khối này là hồ sơ thẩm quyền, không phải chốt máy; người cấp lease và reviewer kiểm nó **bằng tay**.
+ 
+# lop: s6-chep-thieu-quy-tac-dung
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -858,5 +858,7 @@
+   đúng: (1) **tín hiệu không hội tụ** — với chuyển tiếp từ lượt r sang r+1, tỷ lệ = |F|/|U| (U là
+-  tập slug lớp còn mở cuối lượt r, F là phần của U được lượt r+1 xác minh ĐÃ VÁ THẬT); hai chuyển
+-  tiếp **liên tiếp** có tỷ lệ < 50% thì dừng vòng vá và đưa bằng chứng tới Review Rescue
+-  Checkpoint; (2) **checkpoint theo lớp** — một lớp xuất hiện ở **ba lượt review khác nhau** đòi xem
++  tập slug lớp còn mở cuối lượt r, F là phần của U được lượt r+1 xác minh ĐÃ VÁ THẬT theo §8.3; nhiều finding cùng
++  lớp chỉ tính một lần); U rỗng thì tỷ lệ là `N/A` — không phải 0% hay 100% — và không ghép hai tỷ lệ thấp
++  qua một chuyển tiếp `N/A`; hai chuyển tiếp **liên tiếp** có tỷ lệ < 50% thì dừng vòng vá và đưa bằng
++  chứng tới Review Rescue Checkpoint; lớp mới ở lượt r+1, lớp tái mở và phần chưa đo báo riêng, không
++  vào tử số F; (2) **checkpoint theo lớp** — một lớp xuất hiện ở **ba lượt review khác nhau** đòi xem
+   lại cách làm tại checkpoint; ba biểu hiện của lớp trong cùng một lượt chỉ là một lần xuất hiện;
+@@ -864,5 +866,6 @@
+   đã quá ngưỡng trước packet này (hai lớp trong phạm vi: `doc-che-do-van-tay`, `main-luc-luong-gia-tri`); mỗi lần một lớp kế thừa xuất hiện lại trong review của packet
+-  (kể cả review đặc tả), phiên điều phối báo chủ kho kèm bảng lớp trước khi soạn revision hay vá
+-  tiếp. Review lượt 1 của r1 là một lần như thế (§9); comment Q10 xác nhận closure của r2 là chỗ
+-  chủ kho ghi rằng đã thấy bảng ấy.
++  (kể cả review đặc tả), phiên điều phối báo chủ kho kèm bảng lớp **trước** khi soạn revision hay vá
++  tiếp. Review lượt 1 của r1 là một lần như thế (§9). Comment Q10 xác nhận closure của r2 chỉ ghi
++  nhận rằng chủ kho đã thấy bảng ấy; nó không thay việc báo trước, và đặc tả này không có bằng chứng
++  việc báo trước đã diễn ra (KHÔNG ĐO ĐƯỢC từ tệp này).
+ - **S7:** `gate-registry (ubuntu-latest)` đỏ. Nếu đỏ đúng định nghĩa tác nghiệp "đỏ vì hết trần" ở
+# lop: thu-hoi-do-khong-co-diem-dung
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -869,3 +869,6 @@
+   `required_checks` (c) thì làm theo Q9: (c) được coi là đạt khi (a) và (b) xanh, ghi nợ có neo;
+-  (d) vẫn bắt buộc. Đỏ vì lý do khác ⇒ DỪNG.
++  (d) vẫn bắt buộc. Job `thu-hoi` đỏ vì bất kỳ lý do nào (ví dụ `CHAN [12]` ở lượt PR #696,
++  `ops/land/pr696-wp668-provenance/trich-log.txt` dòng 765–767) ⇒ DỪNG, hỏi chủ kho: job này chưa là
++  required check (`SO_THU_HOI_KICH_HOAT = False` trong `ops/lease_publish.py`), nên phải nói thẳng vì sao
++  nó vẫn là điều kiện. Đỏ vì lý do khác ⇒ DỪNG.
+ - **S8:** lease hết hạn ⇒ ngừng sửa, handoff (§7).
+# lop: t53-thoi-gian-khong-co-tieu-chi-do
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -785,2 +785,9 @@
+     chưa theo dõi do phép đo sinh ra.
++  - (g) **Thời gian**, đo trong cùng lệnh với nền, cùng phiên bản Python: `t53` không quá nền + 8 s và
++    `t54` không quá nền + 4 s (nền Python 3.12.3: 0,47 s và 1,89 s; ứng viên tham chiếu +4,06 s và
++    +0,55 s). Vì CI chỉ chạy MỘT lần (Q7) và `gate-cong-cu` có trần 30 phút, một bản thi công đúng chữ M1
++    mà chậm không có lượt thứ hai để sửa. Đo thật (reviewer lượt 2, Python 3.12.3, máy rảnh): cửa con
++    `--tu-kiem-che-do` mất 4,2–4,7 s khi `TEP_TEST` trỏ vào một tệp nhỏ trong phạm vi phép quét `head`, và
++    63,0–65,5 s khi gọi `_van_tay()` thật cho 122.148 ô (mỗi lời gọi băm lại 600 KB của `TEP_TEST`, ≈0,5 ms/ô).
++    Mẫu trỏ `TEP_TEST` sang tệp tạm đã có ở khối `kq["byte"]` của cửa con.
+ - **A5 (bán kính trọn).** Chạy 8 lượt `CONG_CU_TEST_MANH=k/8` với `CONG_CU_TEST_MANH_RA=<thư mục
+# lop: m5-ngoai-le-chi-ba-kieu
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -674,2 +674,9 @@
+    Không đổi thân `_van_tay` (A4-d). Muốn `_van_tay` bắt thêm kiểu nào là đổi mã, ngoài phạm vi (S1).
++   **M5b — đóng miền, đừng chọn tay ba kiểu.** Ba ô trên chỉ chặn việc mở rộng tập bắt sang chính ba kiểu ấy và
++   tổ tiên của chúng. Đo trên một ứng viên làm đúng chữ M5 (reviewer lượt 2, Python 3.12.3): mở rộng tập bắt thêm
++   `TypeError`, `AttributeError`, `KeyError`, `LookupError`, `AssertionError`, `ImportError`, `EOFError`,
++   `UnicodeEncodeError`, `NotImplementedError`, `IndexError`, `ZeroDivisionError` hoặc `MemoryError` đều SỐNG 12/12
++   (đích `t53`, không ca nào chết). Đó là *"danh sách CẤM không bao giờ đủ"* áp lên tập ngoại lệ. Hướng sửa: dẫn
++   xuất ô từ thuộc tính — mọi lớp con cụ thể của `Exception` trong `builtins` không thuộc họ `OSError`, kỳ vọng
++   `NEM:<tên lớp>`, giữ ba ô thu hẹp sẵn có; A8 thêm: mở rộng tập bắt bằng MỘT kiểu bất kỳ thuộc miền ấy phải GIẾT `t53_…`.
+ 
+# lop: ra-ha-nguon-main-bo-ghi-chua-co-o
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -648,2 +648,9 @@
+    vọng nguyên văn từ `_mong_che_do`. `HOME` ghim như M1.
++   **M2b — cùng giá trị `ra` ở hai tầng hạ nguồn.** `ra` đi tiếp từ `_doc_che_do` vào `main` (`k, n, ra = tham_so`,
++   hai lời gọi `_ket_thuc_manh`) rồi vào bộ ghi (`tep = Path(ra)`). Lưới hiện có của các tầng ấy (`_luoi_noi_main`: `x`,
++   ` space `, `Mixed.TXT`, `dir/Sub Dir/Mảnh.TXT`, hai dấu cách, `d con/manh 3.txt`; kịch bản `ghi_duong` của `t52`)
++   không đổi dưới `normpath`, `expanduser`, NFKC, bỏ Cf, bỏ TAB, bỏ Zs ngoài ASCII. Đo (reviewer lượt 2, Python
++   3.12.3): 12 dò `x_main_ra_*` (đích `t54`) và `x_wr_ra_*` (đích `t52`) SỐNG 12/12 trên ứng viên làm đúng chữ M2.
++   Hướng sửa: thêm vào `_luoi_noi_main` các đường ra có cấu trúc của M2 (mỗi phép một đường, `HOME` ghim) và vào kịch
++   bản bộ ghi một đường tương tự; đưa các dò ấy vào tập đóng (T-C, A2) và canh tương ứng.
+ 3. **M3 (lớp D — trục trọn cộng tích biên).** Kịch bản mảnh của `t54`:
+# lop: head-nhieu-dong-chi-tach-lf-chua-co-o
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -641,2 +641,9 @@
+      hợp đồng đếm ở trên.
++   - **M1b — `head` nhận một PHẦN của stdout.** Ô một-ký-tự không dựng được đầu vào mà đột biến "lấy dòng cuối/đầu
++     của stdout" nhận khác nền: `strip()` của nền đã che ký tự tách ở hai đầu, nên cần ít nhất hai ký tự (một ký tự
++     nhiễu cộng một ký tự tách) trước hoặc sau mã băm. Đo (reviewer lượt 2, Python 3.12.3): `strip().split(LF)[-1]`,
++     `[0]`, `rsplit(LF, 1)[-1]` và `split(CR LF)[-1]` SỐNG 4/4 trên ứng viên; các biến thể `splitlines()` chỉ chết nhờ ĐÚNG hai ô
++     tình cờ, đều là U+000B (đại diện Cc trong `R698`) ở `head` 64 ký tự (chỉ số 23/24 hoặc 40; 64 = 40 + 24).
++     Hướng sửa: ô nhiễu = một chuỗi không-hex ngắn + MỖI ký tự tách dòng của Unicode (LF, CR, CRLF, VT, FF, FS, GS,
++     RS, NEL, LS, PS) + mã băm hợp lệ, cả hai thứ tự, kỳ vọng `None` từ `_mong_git`.
+ 2. **M2 (lớp C — phép đường dẫn và chuỗi trên `ra`).** Miền M1 đã phủ các phép một ký tự trên
+# lop: head-moi-vi-tri-moi-thanh-vien-qua-loi
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -12,3 +12,5 @@
+ | `nguon_cap_viec` | Chỉ thị chủ kho, nguyên văn: *"#668: mở packet tiếp nối cho F48–F50"*, neo ở #668 comment `5911957306` và thân #698. Nguồn phát hiện: verdict cross-review **lượt 22** của phiên `session_01VYtkBy…`, #668 comment `5911284002` (12:27:04Z 30-09). Verdict này mang nhãn `advisory_review`, kết luận `changes_requested` với 0 P1 · 2 P2 · 1 P3, `reviewed_sha` là `8d7faef`, và commit ấy **chưa được đẩy** lên GitHub. Executor và reviewer: #698 comment `5912199805`, nguyên văn *"Chọn opus 5.5 executor. Reviewer để sonnet 5.5 xem"*. **Quyết định chủ kho cho r1:** #698 comment `5914438647`, tạo 2026-09-30T15:30:26Z, gồm hai lượt trả lời trong phiên lúc 15:28:25Z và 15:30:09Z (§11). **r2:** phiên điều phối giao soạn revision 2 theo verdict lượt 1; những chỗ r2 tự quyết thay cho chủ kho được liệt ở §11.1 và chỉ có hiệu lực khi comment Q10 xác nhận closure của r2. |
+-| `objective` | Đóng các khe đo trong `ops/cong_cu_test.py` mà phép đo trên nền `fc852ff` tái hiện được (§1). **(B)** Bốn bộ đọc giá trị ngoài của lớp B — `bk`, `mh`, `ra` của `_doc_che_do` và `head` của `_van_tay` — không có ô bắt các phép chuẩn hoá trước khi nhận: NFKC, bỏ Cf, bỏ TAB, bỏ Zs ngoài ASCII, bỏ Cc, bỏ dấu kết hợp, theo **mọi vị trí** và **mọi thành viên** của từng họ ký tự. r2 đổi cách làm từ "chọn ô tay" sang **miền dẫn xuất** (§5 M1): mỗi giá trị hợp lệ chuẩn, chèn hoặc thay đúng một ký tự của tập điểm mã `D698` (định nghĩa bằng thuộc tính Unicode, không liệt kê), so với oracle độc lập. **(C)** `ra` không có ô cho các phép đường dẫn (`normpath`, `expanduser`, `expandvars`, bỏ `./` đầu, bỏ `/` cuối…) (M2). **(D)** Nhánh mảnh của `main` không có điểm lực lượng cho vị từ đếm một biến lẫn nhiều biến: r2 quét trọn ba trục và thêm lưới **tích biên** (M3). **(E)** Tập ngoại lệ mà `_van_tay` bắt không có ô nào ngoài tập bắt, nên mở rộng tập bắt không bị đo (M5). Mỗi họ đường vào có ít nhất một đột biến canh trong `DOT_BIEN`, chỉ đúng ca đích giết nó bằng `TinHieuChotCa`, bán kính 1; và **mọi** dò của tập dò đóng ở Phụ lục C thuộc A1–A3, A8 phải bị giết khi nghiệm thu, trừ đối chứng và dò tương đương khai đích danh ở §2. Lớp (A), tức registry năng lực ngoài cửa sổ (F48), **không** thuộc packet: nợ `registry-nang-luc-ngoai-cua-so` (Q1). Hai bộ đọc ngoài lớp B (đầu tệp mảnh của `_gom_manh`, `CONG_CU_TEST_TIEN_TRINH`) được đo và ghi nợ, không vào mục tiêu (§2, §11.1). |
++| `objective` | Đóng các khe đo trong `ops/cong_cu_test.py` mà phép đo trên nền `fc852ff` tái hiện được (§1). **(B)** Bốn bộ đọc giá trị ngoài của lớp B — `bk`, `mh`, `ra` của `_doc_che_do` và `head` của `_van_tay` — không có ô bắt các phép chuẩn hoá trước khi nhận: NFKC, bỏ Cf, bỏ TAB, bỏ Zs ngoài ASCII, bỏ Cc, bỏ dấu kết hợp, theo **mọi vị trí** của bộ đọc ngắn (`bk`, `mh`, `ra`) và **mọi thành viên** của từng họ ký tự; riêng `head` là ba vị trí neo cộng
++  đại diện `R698`/`N698` ở mọi vị trí (tổ hợp thành viên ngoài `R698` × vị trí ngoài ba neo KHÔNG được đo: `x_head_cf2063_at17`,
++  `x_head_cfk_mid_only`, `x_head_sm_mid_only` SỐNG). r2 đổi cách làm từ "chọn ô tay" sang **miền dẫn xuất** (§5 M1): mỗi giá trị hợp lệ chuẩn, chèn hoặc thay đúng một ký tự của tập điểm mã `D698` (định nghĩa bằng thuộc tính Unicode, không liệt kê), so với oracle độc lập. **(C)** `ra` không có ô cho các phép đường dẫn (`normpath`, `expanduser`, `expandvars`, bỏ `./` đầu, bỏ `/` cuối…) (M2). **(D)** Nhánh mảnh của `main` không có điểm lực lượng cho vị từ đếm một biến lẫn nhiều biến: r2 quét trọn ba trục và thêm lưới **tích biên** (M3). **(E)** Tập ngoại lệ mà `_van_tay` bắt không có ô nào ngoài tập bắt, nên mở rộng tập bắt không bị đo (M5). Mỗi họ đường vào có ít nhất một đột biến canh trong `DOT_BIEN`, chỉ đúng ca đích giết nó bằng `TinHieuChotCa`, bán kính 1; và **mọi** dò của tập dò đóng ở Phụ lục C thuộc A1–A3, A8 phải bị giết khi nghiệm thu, trừ đối chứng và dò tương đương khai đích danh ở §2. Lớp (A), tức registry năng lực ngoài cửa sổ (F48), **không** thuộc packet: nợ `registry-nang-luc-ngoai-cua-so` (Q1). Hai bộ đọc ngoài lớp B (đầu tệp mảnh của `_gom_manh`, `CONG_CU_TEST_TIEN_TRINH`) được đo và ghi nợ, không vào mục tiêu (§2, §11.1). |
+ | `review_class` | **`sensitive`**: bộ test gate G5 có vòng đột biến tự kiểm, cùng lớp với #668. Fail-closed theo protocol §8. |
+# lop: a5-canh-khong-kiem-bang-do
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -791,3 +791,5 @@
+   **ĐỎ KHI** có lượt rc ≠ 0, có dòng không `ok`, số lệch, một bộ cũ đổi hay mất, hoặc tập tên thêm
+-  khác bảng nối (đếm thôi không đủ: thay một đột biến cũ bằng một dò thừa vẫn ra cùng số).
++  khác bảng nối (đếm thôi không đủ: thay một đột biến cũ bằng một dò thừa vẫn ra cùng số). **VÀ** (vi) bộ (mỏ neo,
++  phép thay) của từng mục trong 43 mục bằng từng byte bộ cùng tên dò trong Phụ lục A/C (nạp hai phụ lục rồi so); A5 hiện chỉ so
++  TÊN, nên một mục canh cùng tên mà phép thay yếu hơn dò vẫn ra 459 và `ok`.
+ - **A6 (review).** Reviewer Claude Sonnet 5.5 chạy bằng subagent, đưa verdict trên exact head, lặp
+# lop: bac-hai-trung-so-hieu-va-khong-co-nhom-chuan
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -749,3 +749,9 @@
+   r2 — đó là răng của lớp `a1-khong-do-vi-tri-thanh-vien`.
+-  **Bậc hai** (A1-ii), đo trên ứng viên bằng cách gỡ riêng một phần miền: (1) giữ nguyên từ r1 —
++  **Bậc hai** (A1-b2 — không phải mục (ii) ở trên), đo trên MỘT BẢN ĐO RIÊNG của ứng viên (hằng gỡ nhóm không nằm trong
++  bản giao, §11.1 điểm 8) bằng cách gỡ riêng một phần miền; định nghĩa nhóm (tập điểm mã của `cf`, `tab`, `cc`, `zs`, `dau`, `nfkc`) và
++  công cụ gỡ do handoff đính kèm — đặc tả không đính công cụ nào (khác Phụ lục E) và không có chốt máy, nên bảng đo thiếu là lý do
++  reviewer đỏ A1. Định nghĩa nhóm phải do ĐẶC TẢ chốt, vì kết quả phụ thuộc vào nó (đo trên ứng viên độc lập của reviewer lượt 2,
++  nhóm = mọi điểm mã có thuộc tính, Python 3.12.3): gỡ `nfkc` làm SỐNG lại thêm `s_bk_drop_zs` và `s_mh_drop_zs` (U+00A0, U+2003,
++  U+3000 thuộc cả Zs lẫn NFKC); gỡ `cc` làm SỐNG lại thêm năm canh TAB (U+0009 thuộc Cc); `cf`, `tab`, `zs`, `dau` và `N698` khớp bảng.
++  Cách đo: (1) giữ nguyên từ r1 —
+   gỡ nhóm điểm mã của **một** phép (NFKC | Cf | TAB) thì đúng 3 canh r1 của phép ấy SỐNG lại, còn
+# lop: doc-bang-205-vs-211
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -558,6 +558,6 @@
+ 
+-- **Nền** (`fc852ff`): 205 dò sống, tức mọi họ đều có đường sống trước bản vá — tiêu chí
+-  không thể xanh trên nền.
++- **Nền** (`fc852ff`): 205 dò sống ngoài hai hàng Z (211 kể cả Z, khớp hàng tổng), tức mọi họ đều có đường sống
++  trước bản vá — tiêu chí không thể xanh trên nền.
+ - **IMP-MIN, IMP-GEN** (hai ứng viên "thoả chữ r1" của reviewer lượt 1): 184 và 138
+-  dò sống. Tiêu chí r1 xanh trên cả hai (reviewer lượt 1 đo: 16/16 dò mục tiêu của r1 bị giết đúng
++  dò sống ngoài hai hàng Z (190 và 144 kể cả Z). Tiêu chí r1 xanh trên cả hai (reviewer lượt 1 đo: 16/16 dò mục tiêu của r1 bị giết đúng
+   ca đích trên cả hai); tiêu chí r2 đỏ trên cả hai.
+# lop: s11-1-thieu-cach-doc-q4-q9-q13
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -1024,3 +1024,9 @@
+ 
+-Ngoài tám điểm trên, **không còn câu hỏi mở nào**.
++Ngoài tám điểm trên còn ba cách đọc của r2 chưa được liệt kê ở đây, cũng chỉ có hiệu lực khi comment Q10 xác nhận:
++(9) Q4 chủ kho viết "quét trọn miền `0…len(CA)`"; r2 đọc "miền" là trục `0…len(CA)` cộng tích biên, không phải tích đầy đủ
++6.612 kịch bản; hậu quả đo được (reviewer lượt 2, Python 3.12.3): hai biến thể vị từ gắn một hằng giữa (ba) của số ca bị bỏ qua với tọa độ
++tiền kiểm hoặc tọa độ hỏng SỐNG 2/2 trên ứng viên đúng chữ r2, còn lỗ F50 gốc (vị từ thêm đẳng thức trên số ca bị bỏ qua, hằng
++2 hoặc 7) đóng. (10) Q9 chủ kho viết "coi các context bắt buộc xanh là đủ"; `thu-hoi` chưa là required check
++(`SO_THU_HOI_KICH_HOAT = False`), nên bắt thêm (b) và (d) là chặt hơn lời chủ kho. (11) Q13 chủ kho viết "không chặn r1";
++r2 đọc "không chặn packet". Ngoài mười một điểm này, **không còn câu hỏi mở nào**.
+ 
+# lop: a4-d-khong-co-phep-do-may
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -779,3 +779,4 @@
+     thân** `_doc_che_do`, `_van_tay`, `main`, `_so_tien_trinh_ban_kinh`, `_ket_luan_ban_kinh`,
+-    `_chay_1_ca`.
++    `_chay_1_ca`. Đo bằng máy, không bằng mắt: giao khoảng dòng (phía nền) của từng hunk `git diff -U0` với khoảng
++    `[lineno, end_lineno]` của sáu hàm ấy do `ast` trả trên nền; giao khác rỗng ⇒ ĐỎ (spec đính script như Phụ lục E).
+   - (e) Chạy Phụ lục E: số chỗ ghi `DOT_BIEN` **sau** dòng `_TEN_NANG_LUC = …` vẫn **= 0** (nền: 0).
+# lop: a1-tap-dong-thieu-do-theo-nhom-unicode
+--- ops/specs/ci-g5-cong-cu-va-tiep-r2.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r2.md
+@@ -744,3 +744,7 @@
+   `t53_…` (kể cả sáu đối chứng, vốn đã GIẾT trên nền); (iii) hợp đồng đếm của M1 khớp công thức (ca `t53` tự kiểm điều này; A4-a xanh là
+-  bằng chứng); (iv) phép đo ký tự nguồn của M1 bằng nền.
++  bằng chứng); (iv) phép đo ký tự nguồn của M1 bằng nền; (v) mỗi giá trị `unicodedata.category` có mặt trong `D698` có
++  MỘT dò xoá-cả-nhóm trên `bk` (dẫn xuất từ `unicodedata`, không chọn tay) và dò ấy GIẾT `t53_…`. Đo (reviewer lượt 2, Python
++  3.12.3): tập đóng chỉ có dò riêng cho Cc, Cf, Zs, Mn, Lo, Co, Cn, dấu và các tập con NFKC; một phép quét dùng DANH SÁCH nhóm
++  (Cc, Cf, Zs, Zl, Zp cộng NFKC khác chính nó) thay cho luật `D698` cho hạng GIỐNG HỆT ứng viên trên cả 196 dò T-B và T-C,
++  và 4/18 dò xoá-nhóm mới (Mc, Me, Pf, Pi) SỐNG trên bản ấy. Nên tiêu chí hiện không phân biệt luật với danh sách.
+   **PHẢI ĐỎ Ở** (bằng chứng tiêu chí có răng, đo ở §1.8): nền `fc852ff` (T-B còn 149 dò

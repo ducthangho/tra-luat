@@ -1,0 +1,159 @@
+# lop: canh-x3-wr5-nfkc-tu-va-cham-mo-neo
+--- ops/specs/ci-g5-cong-cu-va-tiep-r3.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r3.md
+@@ -1205,6 +1205,15 @@
+ `tên dò ↔ tên mục DOT_BIEN` đủ 54 dòng, đúng định dạng Phụ lục F đọc (A5). r3 thêm đúng một canh cho mỗi
+ đường vào mới đo được ở §1.9 — mỗi tầng `ra`, mỗi loại ký tự tách của `head`, mỗi loại lớp ngoại lệ — để một
+ bản vá gỡ riêng một đường thì đúng canh của đường ấy ĐỎ.
++
++**Mỏ neo phải xuất hiện đúng MỘT lần trong tệp ứng viên SAU khi bảng canh đã được ghi** (review lượt 3). Bảng nằm
++trong chính `ops/cong_cu_test.py` và `_dung_cay_dot_bien` chỉ thay lần xuất hiện ĐẦU, nên một mỏ neo viết nguyên
++văn trong literal của bảng tự có mặt thêm một lần ngay trong bảng: đột biến rơi vào literal thay vì chỗ ghi, tệp
++tạm lỗi cú pháp và canh ra KHÁC (`tin_dung_gia`) thay vì GIẾT ca đích. Trong 54 canh chỉ mỏ neo của `x3_wr5_nfkc`
++(`    tep.write_bytes((`, không chứa dấu xuống dòng nên `repr` của nó giữ nguyên chuỗi) thuộc loại này khi ghi bảng
++bằng literal `repr`; ghi mỏ neo nhiều dòng bằng chuỗi ba nháy nguyên văn thì cả 54 canh tự va chạm. Đo trên một
++ứng viên độc lập: `count` = 2, dò `x3_wr5_nfkc` ra KHÁC ở 9 ca; dựng literal bằng nối chuỗi (`count` = 1 ở 54/54)
++thì GIẾT đúng `t52`. Dựng literal của mọi canh sao cho chuỗi mỏ neo không xuất hiện nguyên văn ngoài chỗ ghi.
+ 
+ | họ | dò (phụ lục) | ca đích | số |
+ |---|---|---|---|
+@@ -1362,7 +1371,10 @@
+   **= 470** (416 + 54), **và** chạy **Phụ lục F** với bảng nối 54 dòng ra mã thoát 0 — tức: bộ sáu trường của cả
+   416 tên cũ y nguyên; tập tên thêm đúng bằng cột phải của bảng nối; và **bộ** (mỏ neo, phép thay, ca đích) của
+   từng mục bằng từng byte bộ của dò cùng tên trong Phụ lục A hoặc bản ghép Phụ lục C + H (không chỉ so tên).
+-  **ĐỎ KHI** có lượt rc ≠ 0, có dòng không `ok`, số lệch, hoặc Phụ lục F ra mã 1. Phản chứng của Phụ lục F đã chạy
++  **và** (vii) mỗi mục trong 54 mục có mỏ neo xuất hiện đúng **một** lần trong `ops/cong_cu_test.py` của ứng viên
++  (`tệp.count(mỏ_neo) == 1`). Phụ lục F chỉ so bộ (mỏ neo, phép thay, ca đích) theo giá trị nên không bắt lỗi tự va
++  chạm (đo ở review lượt 3: `so_loi = 0` trên cả cây có `count` = 2 lẫn cây có `count` = 1).
++  **ĐỎ KHI** có lượt rc ≠ 0, có dòng không `ok`, số lệch, Phụ lục F ra mã 1, hoặc một mục có `count` ≠ 1. Phản chứng của Phụ lục F đã chạy
+   lúc soạn r3 (§1.9.10): một canh cùng tên mà phép thay yếu hơn dò ⇒ `lech-bo`; một bộ cũ bị đổi ⇒ `bo-cu`; bảng
+   nối thiếu một dòng ⇒ `tap-ten` — đúng ca mà chữ A5 của r2 ("so TÊN") để lọt.
+ - **A6 (review).** Reviewer Claude Sonnet 5.5 chạy bằng subagent, đưa verdict trên exact head, lặp
+# lop: ra-ha-nguon-main-bo-ghi-chua-co-o
+--- ops/specs/ci-g5-cong-cu-va-tiep-r3.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r3.md
+@@ -1109,7 +1109,7 @@
+    | T3a | :8232 | `main`, nhánh nền đỏ: `_ket_thuc_manh(k, n, ra, ten, None, …)` | kịch bản `_luoi_noi_main` chế độ `nen` (`t54`) |
+    | T3b | :8245 | `main`, nhánh thường: `_ket_thuc_manh(k, n, ra, ten, …)` | kịch bản `_luoi_noi_main` chế độ `manh` (`t54`) |
+    | T4 | :7514 | bộ ghi: `tep = Path(ra)` | ô bộ ghi THẬT trong cửa `--tu-kiem-gom` (`t52`) |
+-   | T5 | :7515–:7533 | bộ ghi dùng `tep`: `exists`/`is_symlink`/`unlink`, `parent.mkdir`, `write_bytes`, dòng in | cùng ô bộ ghi của T4 (`t52`) |
++   | T5 | :7515–:7533 | bộ ghi dùng `tep`: `exists`/`is_symlink`/`unlink`, `parent.mkdir`, `write_bytes`, dòng in | `write_bytes`, `parent.mkdir`, `exists`: cùng ô bộ ghi của T4 (`t52`); `unlink` và dòng in: CHƯA có ô (đo lượt 3: 3/3 đột biến SỐNG) — thêm ô tệp cũ tại `tep` và so dòng in, hoặc ghi vào §10 |
+ 
+    - **Tầng `main` (T2, T3a, T3b).** Thêm vào `_luoi_noi_main`, cho **cả hai** chế độ `manh` (phủ T2 và T3b) và
+      `nen` (phủ T2 và T3a), mỗi đường ra sau một kịch bản: (i) 12 đường cấu trúc của M2; (ii) mỗi điểm mã của
+@@ -1310,6 +1310,10 @@
+   lại, còn canh T1 vẫn GIẾT (đo trên `v3_go_ra2`: `x_main_ra_normpath`, `x3_m3a_ra_nfkc`, `x3_m3b_ra_cf`, `x_wr_ra_nfkc`
+   SỐNG lại, `s_ra_cf` vẫn GIẾT; canh T5 `x3_wr5_nfkc` SỐNG lại ở một lượt riêng trên cùng cây gỡ, và GIẾT `t52_…`
+   trên `v3_ra`; §1.9.8).
++  **Răng với thành viên hạ nguồn** (review lượt 3): T-C chưa có dò THÀNH VIÊN ngoài `R698` ở T2, T3a, T3b, T4 nên một
++  ứng viên bỏ ô "mọi `D698`" ở tầng `main` và các khúc tên tệp ở bộ ghi vẫn qua T-C (đo: 10/10 dò T-C GIẾT trên cây
++  thiếu; 8/8 dò thành viên U+2063, TAG SPACE U+E0020, `ａ` fullwidth SỐNG, và GIẾT 8/8 trên cây đủ ô). Thêm vào T-C các
++  dò thành viên ấy cho T2, T3a, T3b và T4, dẫn xuất từ bảng tầng M2b.
+ - **A3 (M3).** **ĐẠT KHI:** 5 canh D của r1 và 4 canh D tích của r2 GIẾT `t54_…` trong A5; mọi dò của T-D trừ đối
+   chứng GIẾT trên ứng viên (r3 thêm bốn dò `x_f50_*` của reviewer lượt 2 vào T-D; hai dò hằng giữa vào KHAI).
+   **PHẢI ĐỎ Ở:** nền (phần Phụ lục C 11 dò SỐNG; `x_f50_*` của Phụ lục H 2/4 SỐNG — `x_f50_or_bq_eq2`, `x_f50_or_bq_eq7`, đúng lỗ F50 gốc —, hai dò còn lại
+# lop: bac-hai-trung-so-hieu-va-khong-co-nhom-chuan
+--- ops/specs/ci-g5-cong-cu-va-tiep-r3.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r3.md
+@@ -789,7 +789,7 @@
+ 
+   | cây (gỡ nhóm) | dò SỐNG lại | dò vẫn GIẾT | đọc |
+   |---|---|---|---|
+-  | `v3_go_exc` (gỡ miền `E698` của M5b) | `x_exc_typeerror`, `x3_exc_kbint`, `x3_exc_re_error` | `z_exc_all`, `z_exc_them_valueerror` | ba canh E của r3 chết vì đúng miền M5b; hai canh E của r2 chết vì ba ô của r2 |
++  | `v3_go_exc` (gỡ miền `E698` của M5b) | `x_exc_typeerror`, `x3_exc_kbint`, `x3_exc_re_error` | `z_exc_all`, `z_exc_them_valueerror` | ba canh E của r3 chết vì đúng miền M5b; hai canh E của r2 chết vì ba ô của r2 (gỡ riêng ba ô thì chúng vẫn GIẾT vì miền `E698`; chỉ gỡ cả hai mới SỐNG) |
+   | `v3_go_tach` (gỡ ô nhiều thẻ của M1b) | `x_head_nl_last`, `x3_head_emsp_last`, `x3_head_us_last`, `x3_head_nel_last` | `x3_head_tab_last`, `x_head_lastline` | hai dò vẫn GIẾT chỉ nhờ ô `R698` tình cờ — nên canh "khoảng trắng không tách dòng" là `x3_head_emsp_last`, **không** phải `x3_head_tab_last` |
+   | `v3_go_ra2` (gỡ ô tầng `main` và ô bộ ghi của M2b) | `x_main_ra_normpath`, `x3_m3a_ra_nfkc`, `x3_m3b_ra_cf`, `x_wr_ra_nfkc`, `x3_wr5_nfkc` | `s_ra_cf` (canh T1 của r2) | năm canh T2–T5 của r3 chết vì đúng các ô M2b; canh T5 `x3_wr5_nfkc` đo ở lượt riêng (11:35Z–11:37Z, hai cây cùng lúc): trên cây gỡ chỉ `t2_c` ở `bo_qua` (SỐNG lại), trên `v3_ra` GIẾT `t52_…` bán kính 1/56; `x3_wr5_normpath` SỐNG ở cả `v3_ra`, `v3_all` lẫn cây gỡ — tương đương |
+ 
+@@ -1380,7 +1380,7 @@
+   và hợp đồng con–cha của M5b đạt (tổng lệch 0, danh sách không dựng được rỗng, khoá đã đo ⊇ `B698`). **PHẢI ĐỎ Ở:**
+   nền (28/30 SỐNG), `cand` — đúng chữ M5 của r2 (22/30 SỐNG), `tv_exc` — đúng hướng HINT lượt 2 (7/30 SỐNG: năm lớp
+   gốc ngoài `Exception`, `ExceptionGroup`, `re.error`, `json.JSONDecodeError`; §1.9.3). **Bậc hai:** gỡ riêng ba ô
+-  ngoại lệ của r2 ⇒ hai canh E của r2 SỐNG lại (đo trên IMP-R2-GO: 2/2); gỡ riêng miền `E698` của M5b ⇒ ba canh E
++  ngoại lệ của r2 VÀ miền `E698` cùng lúc ⇒ hai canh E của r2 SỐNG lại (trên IMP-R2-GO, không có `E698`, gỡ ba ô là đủ: 2/2; trên ứng viên r3 gỡ riêng ba ô vẫn GIẾT 5/5, chỉ gỡ cả hai mới SỐNG); gỡ riêng miền `E698` của M5b ⇒ ba canh E
+   của r3 SỐNG lại, hai canh E của r2 vẫn GIẾT (đo trên `v3_go_exc`: `x_exc_typeerror`, `x3_exc_kbint`,
+   `x3_exc_re_error` SỐNG lại; `z_exc_all`, `z_exc_them_valueerror` vẫn GIẾT; §1.9.8).
+ 
+# lop: m2b-o-bo-ghi-de-ngoai-le-thoat-thanh-tin-dung-gia
+--- ops/specs/ci-g5-cong-cu-va-tiep-r3.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r3.md
+@@ -1134,6 +1134,11 @@
+      **tương đương** theo cấu tạo; `normpath` ở T4 chỉ lộ qua ô có `..`, `expanduser` chỉ qua ô mở đầu bằng `~`. Ở T5,
+      `normpath` đặt tại chỗ ghi là **tương đương** trên mọi đường không có symlink, vì `tep.parent.mkdir` đã tạo cha
+      trước khi ghi nên hệ điều hành giải `x/..` đúng như `normpath` (đo: `x3_wr5_normpath` SỐNG trên `v3_ra`, §1.9.5).
++   - **Ô bộ ghi phải bắt ngoại lệ do bộ ghi đột biến ném** (review lượt 3). Một đột biến chuẩn hoá `ra` bằng NFKC mở rộng
++     khúc tên 50 ký tự (vd `㈀` → `(가)`) vượt `NAME_MAX` và `_ket_thuc_manh` ném `OSError: File name too long`; nếu ô không
++     bắt, ngoại lệ thoát khỏi cửa `--tu-kiem-gom`, con chết và `t52` ra `tin_dung_gia` thay vì `giet_that` (đo: dò
++     `x_wr_ra_nfkc` trên ứng viên làm đúng từng chữ). Ô phải bắt mọi ngoại lệ do bộ ghi ném và so nó như một kết quả
++     với kỳ vọng dựng độc lập.
+    - Tên tệp trên Windows cấm thêm ký tự (`<>:"|?*`, U+0001…U+001F; chéo ngược là dấu tách), nên ô bộ ghi của r3
+      chỉ được đo trên POSIX; nhánh Windows là nợ `windows-chua-do-o-moi-wp698` (Q8). Thêm `cwd` và ghim `HOME`
+      trong cửa con thì phải khôi phục trong `finally`.
+# lop: r3-khai-ve-hint-va-ten-canh-khong-khop-hien-vat
+--- ops/specs/ci-g5-cong-cu-va-tiep-r3.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r3.md
+@@ -126,7 +126,7 @@
+ 4. **`ra-ha-nguon-main-bo-ghi-chua-co-o`** — "thêm vào `_luoi_noi_main` … và vào kịch bản bộ ghi một đường tương tự"
+    không tách hai lời gọi bộ ghi của `main` (T3a/T3b), không nói tới T5, và một đường ở bộ ghi không phủ thành viên.
+    r3: bảng tầng T1–T5 cùng ô cho từng tầng (§5 M2b).
+-5. **`t53-thoi-gian-khong-co-tieu-chi-do`** — ba ngưỡng đồng hồ riêng lẻ của HINT không ràng buộc `t52` và nếu cùng
++5. **`t53-thoi-gian-khong-co-tieu-chi-do`** — hai ngưỡng đồng hồ riêng lẻ của HINT (`t53` + 8 s, `t54` + 4 s) không ràng buộc `t52`; thêm một ngưỡng `t52` + 4 s mà HINT không đề nghị và nếu cùng
+    chạm trần thì vượt trần 30 phút của job; số nền dẫn là của r2. Chỉ thị giao việc ưu tiên "đếm lời gọi `_van_tay`";
+    đo cho thấy đếm lời gọi **không** phân biệt bản nhanh với bản chậm (cùng 122.230). r3: đếm lời gọi băm tệp > 4 KiB
+    (tất định) cộng tổng Δ đồng hồ ≤ 10 s suy từ trần (Phụ lục I).
+@@ -524,6 +524,10 @@
+ **Bậc hai trên IMP-R2-GO** (mỗi dòng gỡ một nhóm bằng `GO698`, chạy các canh liệt kê bằng
+ `do_reg.py` của reviewer — script chạy đúng tên đã đăng ký trong `DOT_BIEN`):
+ 
++Tên canh trong bảng dưới là tên r1 (`f49_*`, `f50_*`); trong Phụ lục A chúng là: `f49_nfkc_*` ↔ `e49_nfkc_*`, `f49_cf_*` ↔
++`e49_cf_*`, `f49_tab_*` ↔ `x46_tab_*`, `f49_ra_*` ↔ `e49_ra_*`, `f50_bang_2` ↔ `e50_bang_2`, `f50_tu_2` ↔ `e50_tu_2`,
++`f50_bang_n_tru_1` ↔ `x50_bang_n_tru_1`, `f50_hong_bang_1` ↔ `x47_hong_bang_1`, `f50_tk_bang_1` ↔ `x47_tk_bang_1`.
++
+ | gỡ (`GO698`) | canh SỐNG lại | canh vẫn GIẾT (đối chứng chéo, hoặc còn ô khác giết) |
+ |---|---|---|
+ | `cf` | 9/9 canh Cf: `f49_cf_bk` `f49_cf_mh` `f49_cf_head` (r1) · `q_cf_lead_bk` `q_cf_mid_head` `p_cf_head_17` `m_cf_tag_bk` `m_cf_061c_bk` `s_ra_cf`; trên IMP-R2G-GO thêm `q_cf_mid_ra` `m_cf_tag_ra` | `f49_nfkc_bk`, `f49_tab_bk` |
+@@ -847,7 +851,7 @@
+   (`PHẢN CHỨNG: 1025/1025 đỏ đúng`, `TỔNG: ĐẠT`, rc=0, ≈ 8 s); Phụ lục E ⇒ `sau_moc: []`; Phụ lục G ⇒ giao rỗng.
+ - **Ước mảnh CI** (mô hình tỷ lệ của r2, §7; ƯỚC, không đo trên runner): mảnh dài nhất ≈ 18,2 × (số đột biến/416)
+   × (29,8 + Δ)/29,8 phút. Với Δ = 7,04 s của `v3_all`: 470 đột biến ⇒ ≈ 25,4 phút; đăng ký trọn 350 dò (766 đột
+-  biến) ⇒ ≈ 41,4 phút. Ngưỡng A4-g Δ = 10 s ⇒ ≈ 27,5 phút với 470. Ba ngưỡng riêng lẻ của `HINT.patch` lượt 2 cùng
++  biến) ⇒ ≈ 41,4 phút. Ngưỡng A4-g Δ = 10 s ⇒ ≈ 27,5 phút với 470. Hai ngưỡng riêng lẻ của `HINT.patch` lượt 2 (Δ = 12 s ⇒ ≈ 28,8 phút) cộng một ngưỡng `t52` + 4 s mà HINT không đề nghị, cùng
+   chạm trần (Δ = 16 s) ⇒ ≈ 31,6 phút, vượt trần 30 phút.
+ 
+ #### 1.9.10 Số liệu tĩnh của các lớp P3 và phản chứng của script mới
+@@ -1352,9 +1356,9 @@
+     vòng xen kẽ nền và ứng viên, lấy min mỗi ca; Δ = tổng qua ba ca của (min ứng viên − min nền) **≤ 10 s**. Ngưỡng
+     suy từ trần 30 phút của job mảnh theo đúng mô hình tỷ lệ của §7: mảnh dài nhất ≈ 18,2 phút × (470/416) ×
+     (T₀ + Δ)/T₀ với T₀ ≈ 29,8 s (một lượt 56 ca trên nền, lô nhẹ tải nhất của §1.9; T₀ nhỏ cho tỷ lệ lớn, tức ước
+-    thận trọng); Δ = 10 s cho ≈ 27,5 phút, giữ ≈ 2,5 phút biên. Ba ngưỡng riêng lẻ mà `HINT.patch` lượt 2 đề nghị
++    thận trọng); Δ = 10 s cho ≈ 27,5 phút, giữ ≈ 2,5 phút biên. Hai ngưỡng riêng lẻ mà `HINT.patch` lượt 2 đề nghị
+     (`t53` + 8 s, `t54` + 4 s) không ràng buộc `t52` — tầng mà M2b làm chậm — và nếu cùng chạm trần (thêm `t52` + 4 s
+-    như HINT đề nghị cho `t54`) thì Δ = 16 s cho ≈ 31,6 phút, vượt trần. Vì CI chỉ chạy MỘT lần (Q7), một bản thi công
++    theo mẫu `t54`; HINT không đề nghị ngưỡng này) thì Δ = 16 s cho ≈ 31,6 phút, vượt trần. Vì CI chỉ chạy MỘT lần (Q7), một bản thi công
+     đúng chữ mà chậm không có lượt thứ hai để sửa.
+ - **A5 (bán kính trọn).** Chạy 8 lượt `CONG_CU_TEST_MANH=k/8` với `CONG_CU_TEST_MANH_RA=<thư mục
+   ngoài cây>/manh-k.txt` (k = 0…7), rồi `python ops/cong_cu_test.py --gop <thư mục ấy>`.
+@@ -1694,7 +1698,7 @@
+     với ô ghi tệp THẬT phủ `D698`; lý do đo ở §1.9.5. Ô bộ ghi làm `t52` chậm thêm (§7).
+ 12. **A4-g — tiêu chí chi phí**: đếm tất định (lời gọi `_van_tay` băm tệp > 4 KiB không quá 2 × nền) cộng đồng hồ
+     (min ba vòng, xen kẽ nền và ứng viên; Δ = tổng qua `t52`, `t53`, `t54` của chênh min không quá 10 s). Ngưỡng do r3
+-    chọn, suy từ trần 30 phút theo mô hình tỷ lệ §7, thay cho ba ngưỡng riêng lẻ mà HINT lượt 2 đề nghị (§0 điểm 5);
++    chọn, suy từ trần 30 phút theo mô hình tỷ lệ §7, thay cho hai ngưỡng riêng lẻ mà HINT lượt 2 đề nghị (§0 điểm 5);
+     đo: `v3_all` Δ = 7,04 s, `cand` 4,94 s (§1.9.9).
+ 13. **A1-b2 — định nghĩa nhóm bậc hai** chốt trong đặc tả (§6 A1), là định nghĩa mà bảng §1.8.7 của r2 đã dùng
+     mà không ghi ra (đo lại ở §1.9.8).
+# lop: t53-thoi-gian-khong-co-tieu-chi-do
+--- ops/specs/ci-g5-cong-cu-va-tiep-r3.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r3.md
+@@ -1429,6 +1429,12 @@
+ × (470/416) × (T₀ + Δ)/T₀ ≈ 25,4 phút với Δ của `v3_all` — dưới trần 30 phút của job. Ngưỡng A4-g (Δ ≤ 10 s) cho ≈ 27,5 phút. Đăng ký trọn
+ 350 dò thuộc A1–A3, A8 của tập đóng r3 thay cho 54 canh (766 đột biến) cho ≈ 18,2 × (766/416) × (T₀ + Δ)/T₀ ≈ 41,4 phút (cùng Δ),
+ **vượt** trần — lý do định lượng của việc chỉ đăng ký canh.
++    **Đo lại ở review lượt 3** (ứng viên độc lập; container 4 lõi dùng chung với một phiên khác). Δ tường của Phụ lục I trên MỘT
++    ứng viên đúng chữ: 5,9–6,5 s lúc rảnh, 6,8–7,0 s với hai tiến trình ăn CPU, 8,0–8,1 s với bốn tiến trình đo chạy song song,
++    9,0–11,7 s với bốn tiến trình ăn CPU (11,7 s ⇒ ĐỎ giả); Δ CPU (tự thân + con) của cùng ba ca: 6,2–6,5 s ở mọi tải. Một mảnh A5 thật:
++    nền 522,9 s cho 52 đột biến, ứng viên 669,6 s cho 59 đột biến (mỗi đột biến: tường ×1,129, CPU ×1,295), nên dự báo mảnh dài nhất
++    ở Δ = 10 s nằm trong dải 24,8–30,3 phút tuỳ runner bão hoà CPU hay không (KHÔNG ĐO ĐƯỢC trên runner): ≈ 27,5 phút là điểm giữa
++    của dải, biên 2,5 phút không chứng minh được. Revision sau: ghi điều kiện đo, đo thêm Δ CPU, thay lời khai biên bằng dải đo.
+ 
+ ## 8. Điều kiện dừng
+ 

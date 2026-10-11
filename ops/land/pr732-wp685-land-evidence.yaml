@@ -2,9 +2,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1. Duong dan ops/land/*-land-evidence.yaml la quy uoc thuc te
 # (tien le pr714 #710, pr718 #678, pr707 #705).
 #
-# TRANG THAI: merged (77fb028). Gate hau merge XANH tren 11cf185 (run 38076548735, 14/14) — master dau tien chua
-# 77fb028 va manifest da tai sinh (PR #733). `landed` CHO quyet dinh chu kho tai PR ghi so lan hai (uy quyen
-# 6099610473: "`landed` chỉ do tôi quyết ở PR ghi sổ"). Lan ghi so thu nhat: PR #734 (404ecbb), landed false.
+# TRANG THAI: merged (77fb028), `landed: true` THEO QUYET DINH CHU KHO (pull/739#issuecomment-6103749546,
+# 2026-10-11T00:27:22Z), CO HIEU LUC tu merge commit cua PR ghi so #739. Gate hau merge XANH tren 11cf185 (run
+# 38076548735, 14/14). Lan ghi so thu nhat: PR #734 (404ecbb), landed false.
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu
 # cua luot review/phien khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
@@ -47,7 +47,20 @@ trang_thai_packet:
     parents: [bc6630afacf378b8f69c31fe467b53e64f5d9e4d, 3089b54455a44b8cfcf2fd27b01894bc2a5d764d]
     tree: 76ba29b170f5b685663296beba650c86565127bf
     nguon: "measured — `git show -s --format='%H %P %T' 77fb028`; `git diff --stat bc6630a 77fb028` = 2 tep +1129/-7 (dung write set)."
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #739 dua dong nay vao master (cac commit truoc tren nhanh ghi so va PR #734 van ghi
+    `landed: false`). Comment 6103749546 la NEO cua quyet dinh, khong phai moc hieu luc (tien le #710 / PR #722).
+  quyet_dinh_chu_kho:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** WP685 / #685 **landed** tại `77fb028`. `landed` có hiệu lực từ merge commit của PR ghi sổ #739."'
+    luc: '2026-10-11T00:27:22Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/739#issuecomment-6103749546
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6103749546.json): user ducthangho, author_association OWNER, performed_via_github_app
+      null, than 1050 byte sha256 65d8b1e011415f045c3d959ff102380a469d6f63aef2fb81ad25d5dab01057af. Gia han land operator
+      toi 2026-10-11T12:00:00Z chi de ghi dong nay va merge PR #739 bang merge commit khi CI bat buoc xanh. Than comment
+      do phien nay SOAN, chu kho dang (OWNER + app null khong tach chu kho khoi token chu kho, #566 — tu khai).
   landed_ly_do: >-
     PROTOCOL §10.2.4: landed = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping xong. Uy quyen
     6099610473 ghi: "gate tren master sau merge phai xanh moi duoc goi la landed". Xem con_thieu_de_goi_landed.
@@ -73,7 +86,7 @@ trang_thai_packet:
         PR rieng tai sinh RELEASE_MANIFEST.json: PR #733 (phien khac) merge 11cf185. Packet trung viec cua phien nay
         (#735, PR #736) da dong not_planned; lease manifest-725-727-g1 rut han 19:00Z, HẾT_HẠN, NGƯỜI_GIỮ 0.
     - id: QUYET-DINH-LANDED-CHU-KHO
-      trang_thai: 'con_mo — cho comment quyet dinh cua chu kho tren PR ghi so lan hai'
+      trang_thai: 'DA DONG — pull/739#issuecomment-6103749546 (2026-10-11T00:27:22Z)'
       mo_ta: 'Chu kho quyet landed tai PR ghi so nay (uy quyen 6099610473: "`landed` chi do tôi quyết ở PR ghi sổ").'
     - id: NGHIEM-THU-RUT-HAN-LEASE
       trang_thai: 'DA DONG — measured 2026-10-10T17:31:18Z'

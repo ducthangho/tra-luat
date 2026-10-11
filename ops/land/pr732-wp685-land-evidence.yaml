@@ -2,9 +2,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1. Duong dan ops/land/*-land-evidence.yaml la quy uoc thuc te
 # (tien le pr714 #710, pr718 #678, pr707 #705).
 #
-# TRANG THAI: merged (77fb028). `landed: false` — CHUA du dieu kien: gate hau merge tren master phai xanh (dieu kien
-# trong uy quyen 6099610473), ma master da DO SAN o `release-verify strict` truoc PR nay (xem
-# con_thieu_de_goi_landed). `landed` chi do chu kho quyet tai PR ghi so nay (uy quyen 6099610473).
+# TRANG THAI: merged (77fb028), `landed: true` THEO QUYET DINH CHU KHO (pull/739#issuecomment-6103749546,
+# 2026-10-11T00:27:22Z), CO HIEU LUC tu merge commit cua PR ghi so #739. Gate hau merge XANH tren 11cf185 (run
+# 38076548735, 14/14). Lan ghi so thu nhat: PR #734 (404ecbb), landed false.
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu
 # cua luot review/phien khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
@@ -47,13 +47,34 @@ trang_thai_packet:
     parents: [bc6630afacf378b8f69c31fe467b53e64f5d9e4d, 3089b54455a44b8cfcf2fd27b01894bc2a5d764d]
     tree: 76ba29b170f5b685663296beba650c86565127bf
     nguon: "measured — `git show -s --format='%H %P %T' 77fb028`; `git diff --stat bc6630a 77fb028` = 2 tep +1129/-7 (dung write set)."
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #739 dua dong nay vao master (cac commit truoc tren nhanh ghi so va PR #734 van ghi
+    `landed: false`). Comment 6103749546 la NEO cua quyet dinh, khong phai moc hieu luc (tien le #710 / PR #722).
+  quyet_dinh_chu_kho:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** WP685 / #685 **landed** tại `77fb028`. `landed` có hiệu lực từ merge commit của PR ghi sổ #739."'
+    luc: '2026-10-11T00:27:22Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/739#issuecomment-6103749546
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6103749546.json): user ducthangho, author_association OWNER, performed_via_github_app
+      null, than 1050 byte sha256 65d8b1e011415f045c3d959ff102380a469d6f63aef2fb81ad25d5dab01057af. Gia han land operator
+      toi 2026-10-11T12:00:00Z chi de ghi dong nay va merge PR #739 bang merge commit khi CI bat buoc xanh. Than comment
+      do phien nay SOAN, chu kho dang (OWNER + app null khong tach chu kho khoi token chu kho, #566 — tu khai).
   landed_ly_do: >-
     PROTOCOL §10.2.4: landed = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping xong. Uy quyen
     6099610473 ghi: "gate tren master sau merge phai xanh moi duoc goi la landed". Xem con_thieu_de_goi_landed.
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-77FB028
-      trang_thai: 'con_mo — DO SAN tren master, delta cua PR = 0 (measured)'
+      trang_thai: 'DA DONG — measured: gate push 38076548735 tren 11cf185 success 14/14 (2026-10-10T20:12:37Z)'
+      dong_bang: >-
+        11cf1857a80d0da48e7f1ce8922baad9d1be47b5 (merge PR #733 cua phien khac: tai sinh RELEASE_MANIFEST.json 183 -> 186
+        + ratchet goi) la commit master dau tien sau 77fb028 co gate push chay tron. 77fb028 la to tien cua 11cf185
+        (`git merge-base --is-ancestor` rc 0). Run 38076548735: event push, run_attempt 1, 14 job deu success, trong do
+        `gate (ubuntu-latest)` gom buoc release-verify strict (readback-run-38076548735.json, readback-jobs-38076548735.json,
+        readback-check-runs-11cf185.json). Gate cua 404ecbb (merge #734, run 38077773440) bi HUY khi con cho (0 job) vi
+        concurrency master chi giu mot luot cho; khong dung no lam bang chung.
+        Lich su cua muc nay (truoc khi dong):
       mo_ta: >-
         Run push 38068681967 tren 77fb028: 13/14 job success, `gate (ubuntu-latest)` failure dung mot buoc
         `release-verify strict (lane LAND — manifest committed)`. Master truoc PR (47c9ba4, run 38065934579): cung 13/14,
@@ -61,11 +82,11 @@ trang_thai_packet:
         [changelog.d/wp-725.md, changelog.d/wp-726.md]; 77fb028 = [.., changelog.d/wp-727.md] (them tu PR #731).
         Khong tep nao cua PR #732 (.claude/dev/** nam ngoai manifest). launcher (Windows that) push 38068682069 tren
         77fb028: success.
-      can: >-
-        Mot PR rieng tai sinh RELEASE_MANIFEST.json tren master (ngoai uy quyen land nay), HOAC chu kho quyet landed
-        voi do san da phan loai. Uy quyen 6099610473 doi gate hau merge xanh nen land operator KHONG tu goi landed.
+      can_da_lam: >-
+        PR rieng tai sinh RELEASE_MANIFEST.json: PR #733 (phien khac) merge 11cf185. Packet trung viec cua phien nay
+        (#735, PR #736) da dong not_planned; lease manifest-725-727-g1 rut han 19:00Z, HẾT_HẠN, NGƯỜI_GIỮ 0.
     - id: QUYET-DINH-LANDED-CHU-KHO
-      trang_thai: con_mo
+      trang_thai: 'DA DONG — pull/739#issuecomment-6103749546 (2026-10-11T00:27:22Z)'
       mo_ta: 'Chu kho quyet landed tai PR ghi so nay (uy quyen 6099610473: "`landed` chi do tôi quyết ở PR ghi sổ").'
     - id: NGHIEM-THU-RUT-HAN-LEASE
       trang_thai: 'DA DONG — measured 2026-10-10T17:31:18Z'
@@ -200,6 +221,10 @@ master_drift:
     delta: 'measured — chi HEAD + refs/heads/master bc6630a -> 77fb028 va mat refs/pull/732/merge 7984638.'
 
 post_merge_checks:
+  gate_push_dong_bang:
+    run: 38076548735
+    head_sha: 11cf1857a80d0da48e7f1ce8922baad9d1be47b5
+    ket_qua: 'measured — completed/success, 14/14 job success, run_attempt 1, updated_at 2026-10-10T20:12:37Z.'
   gate_push:
     run: 38068681967
     head_sha: 77fb0288dca8483f28209cae42c38d4cb97397d9
@@ -211,3 +236,12 @@ post_merge_checks:
     run: 38068733276
     head_sha: 0f1b0089fa6ab40ccda0a35f6b24013fc111502a
     ket_qua: 'measured — ops — đăng lease bằng git, job dang success.'
+
+ghi_chu_sau_ghi_so_lan_1:
+  mission_event: >-
+    Mission #686 comment 6100869080 (18:36:58Z, packet_integrated, phien dieu phoi) ghi wp685 integrated chua landed,
+    no P2 trong accepted_debt, va dinh chinh event 6099897976 (readback-comment-6100869080.json).
+  human_audit_mau_rong: >-
+    Issue #685 comment 6099867854 (16:47:54Z, ducthangho, app null) la MAU human audit con nguyen o trong
+    ("[đạt / không]", "Verdict: [approve | changes_requested]") — KHONG mang verdict. Human audit co hieu luc van la
+    6099534056 (readback-comment-6099867854.json).

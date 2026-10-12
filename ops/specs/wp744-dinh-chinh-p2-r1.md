@@ -34,4 +34,3 @@ Không sửa r1, script runtime, lease, CI, manifest, credential hoặc hiện v
 ## Dừng
 
 Dừng nếu head/base đổi, lease hết hạn, holder scan không xác định, cần ghi ngoài bốn tệp, hoặc reviewer tìm P1/P2 chưa được gom theo lớp. Không coi review advisory trước lease là `cross_approved`.
-

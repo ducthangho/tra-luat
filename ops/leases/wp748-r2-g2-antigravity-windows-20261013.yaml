@@ -6,6 +6,11 @@ mission_issue: 748
 revision: 2
 generation: 2
 lease_id: wp748-r2-g2-antigravity-windows-20261013
+da_bi_thay_the: wp748-r3-g3-antigravity-windows-20261014
+ly_do_thu_hoi: >-
+  WP748 r2/g2 het han khi cho bat Windows Developer Mode. Candidate duoc
+  checkpoint cuc bo tai 6a9fabe4; chua push va chua co gate Windows xanh.
+  Chu kho chi thi cap lai lease va tiep tuc ngay 2026-10-14.
 thay_the_cho: wp748-r1-g1-antigravity-windows-20261013
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6139285921

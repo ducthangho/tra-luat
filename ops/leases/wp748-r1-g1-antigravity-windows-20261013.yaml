@@ -6,6 +6,11 @@ mission_issue: 748
 revision: 1
 generation: 1
 lease_id: wp748-r1-g1-antigravity-windows-20261013
+da_bi_thay_the: wp748-r2-g2-antigravity-windows-20261013
+ly_do_thu_hoi: >-
+  WP748 r1/g1 dung theo stop condition vi doc_receipt_thu_hoi_test.py nam ngoai
+  write set cu. Chu kho dong y revision 2 generation 2 trong phien Codex 2026-10-13;
+  quyet dinh duoc ghi ho tai issue #748 comment 6139285921.
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6136077872
 authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6136077872

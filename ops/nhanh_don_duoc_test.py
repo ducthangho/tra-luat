@@ -3880,7 +3880,7 @@ def r547_mien_tru_phai_co_rang_ma_khong_nuot_loi_khac(d: Path):
         ok.append(bool(vang) and all(Path(e.filename) in proof for e in vang)
                   and not any(e is x for e in so.loi for x in vang))                    # (4)
         with _vang_co_chu_y(m) as bat:
-            m.run(["true"], d, check=False, env={TU_KIEM_FILE_ENV: str(d / "p.json")})
+            m.run([sys.executable, "-c", "pass"], d, check=False, env={TU_KIEM_FILE_ENV: str(d / "p.json")})
             for ten in ("p.json", "khac.json"):      # dung duong proof VA mot tep khac: chi cai dau
                 with contextlib.suppress(FileNotFoundError):
                     (d / ten).read_text()

@@ -12929,7 +12929,9 @@ def t217_a9_object_store_blob_sai_bam_la_2():
 def t217_a9_object_store_thieu_blob_la_2():
     with San() as s:
         kho, _, _, bx, _ = _a9_hai_commit(s)
-        _a9_tep_object(kho, bx).unlink()
+        tep = _a9_tep_object(kho, bx)
+        tep.chmod(0o644)
+        tep.unlink()
         _a9_chot("thiếu blob", _a9_cli(kho), 2)
 
 

@@ -2177,6 +2177,8 @@ IF_BUOC_CHUAN = {
         'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)': "runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
         'gate lifecycle selftest (nen khong co cgroup)': "runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh'",
     },
+    'gate-nhanh-manh': {},
+    'gate-nhanh-gop': {},
     'gate-registry': {
     },
     'gate-packet-loop': {
@@ -2196,7 +2198,9 @@ KHUNG_JOB = {
     'gate-cong-cu': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 45, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-cong-cu-gop': {'needs': ['chuan-bi', 'gate-cong-cu'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 10, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-ops': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
-    'gate-registry': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 105, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-nhanh-manh': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 90, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-nhanh-gop': {'needs': ['chuan-bi', 'gate-nhanh-manh'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 10, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-registry': {'needs': ['chuan-bi', 'gate-nhanh-gop'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 105, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-packet-loop': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
 }
 KHUNG_BUOC = {
@@ -2276,6 +2280,20 @@ KHUNG_BUOC = {
         ('bo ca gate chay TRONG cgroup duoc uy quyen (Linux)', {'if': "${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
         ('gate lifecycle selftest (nen khong co cgroup)', {'if': "${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"}),
     ],
+    'gate-nhanh-manh': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('chạy mảnh nhanh_don_duoc', {'env': {'NHANH_DON_DUOC_MANH': '${{ matrix.manh }}/8', 'NHANH_DON_DUOC_MANH_RA': 'manh/manh-${{ matrix.manh }}.json'}}),
+        ('actions/upload-artifact@v4', {'uses': 'actions/upload-artifact@v4', 'with': {'name': 'gate-nhanh-${{ matrix.os }}-${{ matrix.manh }}', 'path': 'manh/manh-${{ matrix.manh }}.json', 'if-no-files-found': 'error'}}),
+    ],
+    'gate-nhanh-gop': [
+        ('Force LF checkout (hash parity với manifest)', {}),
+        ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
+        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('actions/download-artifact@v4', {'uses': 'actions/download-artifact@v4', 'with': {'pattern': 'gate-nhanh-${{ matrix.os }}-*', 'path': 'manh', 'merge-multiple': True}}),
+        ('gộp mảnh nhanh_don_duoc', {}),
+    ],
     'gate-registry': [
         ('Force LF checkout (hash parity với manifest)', {}),
         ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
@@ -2286,7 +2304,7 @@ KHUNG_BUOC = {
         ('cài rg cho G5 (cài xong đo lại)', {'shell': 'bash'}),
         ('G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6', {'shell': 'bash'}),
         ('cài Ruff 0.15.15 và in probe dương', {}),
-        ('test registry (phạm vi + các bộ chưa được nối)', {'env': {'CI_DANG_KY_WORKERS': '2', 'CI_DANG_KY_SU_KIEN': '${{ github.event_name }}', 'CI_DANG_KY_GOC': '${{ github.event.pull_request.base.sha || github.event.before }}', 'CI_DANG_KY_DAU': '${{ github.event.pull_request.head.sha || github.sha }}'}}),
+        ('test registry (phạm vi + các bộ chưa được nối)', {'env': {'CI_DANG_KY_WORKERS': '2', 'CI_DANG_KY_SU_KIEN': '${{ github.event_name }}', 'CI_DANG_KY_GOC': '${{ github.event.pull_request.base.sha || github.event.before }}', 'CI_DANG_KY_DAU': '${{ github.event.pull_request.head.sha || github.sha }}', 'CI_DANG_KY_DOT_BIEN_MANH': 'ops/nhanh_don_duoc_test.py', 'CI_DANG_KY_GOP_KQ': '${{ needs.gate-nhanh-gop.result }}'}}),
     ],
     'gate-packet-loop': [
         ('Force LF checkout (hash parity với manifest)', {}),
@@ -2308,7 +2326,7 @@ KHUNG_BUOC = {
 # (tich hop g4, master 20ec8d5): `gate-cong-cu-gop` can `!cancelled()` de manh DO thi gom van chay va DO vi thieu manh —
 # `needs` mac dinh se cho no `skipped`, ma `skipped` doc nhu xanh (ngu nghia GitHub Actions theo tai lieu, chua tu do).
 # Doi bieu thuc (vd `always()`), bo no, hay them `if:` cap job vao job KHAC (ke ca cung bieu thuc) deu phai DO. `ci_dang_ky_test.loi_g5_workflow` canh cung khoa ay tu phia #668.
-JOB_CO_IF_CHO_PHEP = {"gate-cong-cu-gop": "!cancelled()"}
+JOB_CO_IF_CHO_PHEP = {"gate-cong-cu-gop": "!cancelled()", "gate-nhanh-gop": "!cancelled()", "gate-registry": "!cancelled()"}
 
 
 @ca

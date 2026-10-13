@@ -537,9 +537,14 @@ def loi_ruff_ci(source=None):
     steps = {jn: [s for s in j.get("steps", []) if isinstance(s, dict)] for jn, j in jobs.items()}
     parsed = {jn: [_doc_buoc_ruff(data, jobs[jn], s) for s in bs] for jn, bs in steps.items()}
     kinds = {jn: [p[0] for p in ps] for jn, ps in parsed.items()}
+    def _job_if_duoc_phep(jn):
+        j = jobs[jn]
+        return (jn == "gate-registry" and j.get("if") == "${{ !cancelled() }}"
+                and j.get("needs") == ["chuan-bi", "gate-nhanh-gop"])
     for jn, ks in kinds.items():
         for i, kind in enumerate(ks):
-            if kind != "KHONG" and (_buoc_co_dieu_kien(steps[jn][i]) or jobs[jn].get("if") is not None):
+            if kind != "KHONG" and (_buoc_co_dieu_kien(steps[jn][i])
+                                     or (jobs[jn].get("if") is not None and not _job_if_duoc_phep(jn))):
                 ks[i] = "KHONG_PHAN_TICH_DUOC"
     installs = [jn for jn, ks in kinds.items() if any(k != "KHONG" for k in ks)]
     bad_pin = [jn for jn in installs if "GHIM" not in kinds[jn] or any(k not in ("KHONG", "GHIM") for k in kinds[jn])]
@@ -558,7 +563,7 @@ def loi_ruff_ci(source=None):
         jn = callers[0]; gi = registry[jn].index(1)
         ri = next((i for i, k in enumerate(kinds[jn]) if k == "GHIM"), -1)
         before = (0 <= ri < gi and not _buoc_co_dieu_kien(steps[jn][gi])
-                  and jobs[jn].get("if") is None)
+                  and (jobs[jn].get("if") is None or _job_if_duoc_phep(jn)))
     outside = [f"{jn}/bước {i + 1}" for jn, ks in kinds.items() for i, k in enumerate(ks) if k == "KHONG_PHAN_TICH_DUOC"]
     reason = f"; ngoài miền cú pháp: {outside}" if outside else ""
     checks = [
@@ -739,7 +744,8 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
-BAM_GATE_REGISTRY = "9dd2c23db45fd97c4ce44a98ff0abe74e21b4b2c64a97dab318addb92d3458d9"
+BAM_GATE_REGISTRY = "e2726e28ae7ecc869cd9df6c975e58f71c3c656594a509c9c2e4b9047c47bb4d"
+BAM_GATE_NHANH = "326b60b36421a7e1c71f25fac19ddba361091b0b5381b58c16708bc8f496a58a"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -748,7 +754,15 @@ def _cham_vung(x, vung):
 DAY_DU, CHE_DO_NHE, BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "day_du", "nhe", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"
 ENV_REGISTRY = {BIEN_WORKERS: "2", BIEN_SU_KIEN: "${{ github.event_name }}",
                 BIEN_GOC: "${{ github.event.pull_request.base.sha || github.event.before }}",
-                BIEN_DAU: "${{ github.event.pull_request.head.sha || github.sha }}"}
+                BIEN_DAU: "${{ github.event.pull_request.head.sha || github.sha }}",
+                "CI_DANG_KY_DOT_BIEN_MANH": "ops/nhanh_don_duoc_test.py",
+                "CI_DANG_KY_GOP_KQ": "${{ needs.gate-nhanh-gop.result }}"}
+
+
+def doc_ket_qua_gop(env=os.environ):
+    """Vắng ngoài ci.yml (lượt tuần/local); khi CI ghim biến thì chỉ success là đạt."""
+    raw = env.get("CI_DANG_KY_GOP_KQ")
+    return None if raw is None else raw == "success"
 
 
 def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
@@ -804,6 +818,21 @@ def bam_gate_registry(data):
     d = data or {}
     goi = {"job": (d.get("jobs") or {}).get("gate-registry"), "env": d.get("env"), "defaults": d.get("defaults")}
     return hashlib.sha256(json.dumps(goi, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def bam_gate_nhanh(data):
+    """Ghim trọn hai job mảnh/gom chịu trách nhiệm cho cờ nhẹ của registry."""
+    jobs = (data or {}).get("jobs") or {}
+    goi = {k: jobs.get(k) for k in ("gate-nhanh-manh", "gate-nhanh-gop")}
+    return hashlib.sha256(json.dumps(goi, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def loi_gate_nhanh(data):
+    jobs = (data or {}).get("jobs") or {}
+    loi = [] if bam_gate_nhanh(data) == BAM_GATE_NHANH else ["hai job mảnh/gom nhanh_don_duoc lệch cấu hình ghim"]
+    if (jobs.get("gate-registry") or {}).get("needs") != ["chuan-bi", "gate-nhanh-gop"]:
+        loi.append("gate-registry không phụ thuộc phép gom đủ mảnh")
+    return loi
 
 
 def loi_vung_thiet_lap(data):
@@ -1107,8 +1136,9 @@ G5_OS = "${{ fromJson(needs.chuan-bi.outputs.os) }}"
 
 def _loi_thuc_thi_g5(j, v, buoc):
     """Lỗi ngữ nghĩa thực thi của job G5 `j` trên các bước `buoc` (từ đầu tới HẾT bước G5; job mới: mọi bước)."""
-    loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - ({'if'} if j == JOB_G5_GOP else set()))}"] \
-        if set(v) - G5_KHOA_JOB - ({"if"} if j == JOB_G5_GOP else set()) else []
+    _if_duoc = {"if"} if j in (JOB_G5_GOP, "gate-registry") else set()
+    loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - _if_duoc)}"] \
+        if set(v) - G5_KHOA_JOB - _if_duoc else []
     st = v.get("strategy") or {}
     if v.get("env") != G5_JOB_ENV or v.get("runs-on") != "${{ matrix.os }}" or set(st) != {"fail-fast", "matrix"} \
             or st.get("fail-fast") is not False or (st.get("matrix") or {}).get("os") != G5_OS:
@@ -1167,7 +1197,9 @@ def loi_g5_workflow(data):
         # thoát của lệnh CUỐI, nên probe đỏ + selftest xanh có thể thành bước xanh. Bước G5 phải KHAI RÕ `shell: bash`.
         elif buoc[cham[0]].get("shell") != "bash":
             loi.append(f"{j}: bước G5 phải khai rõ `shell: bash` (thấy {buoc[cham[0]].get('shell')!r})")
-        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"} if j == JOB_G5_GOP else set(v))):
+        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"}
+              if j == JOB_G5_GOP or (j == "gate-registry" and v.get("if") == "${{ !cancelled() }}"
+                                         and v.get("needs") == ["chuan-bi", "gate-nhanh-gop"]) else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
         elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
                  for b in buoc[:cham[0]]):
@@ -2173,7 +2205,26 @@ def phan_chung():
         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
         _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))
     _them("p643-A4-thua-khoa", _hong_env(lambda b, w: b["env"].update(X="1")))
-    _them("p661-M4-ci-yml-co-bien-manh-do", _hong_env(lambda b, w: b["env"].update({BIEN_MANH: BO_MANH})))
+    _them("p748-M4-ci-yml-bo-bien-manh-do", _hong_env(lambda b, w: b["env"].pop(BIEN_MANH)))
+    _them("p748-gop-ket-qua-vang-ngoai-ci", doc_ket_qua_gop({}) is None)
+    _them("p748-gop-ket-qua-success", doc_ket_qua_gop({"CI_DANG_KY_GOP_KQ": "success"}) is True)
+    for _kq in ("", "failure", "skipped", "cancelled"):
+        _them("p748-gop-ket-qua-" + (_kq or "rong") + "-do",
+              doc_ket_qua_gop({"CI_DANG_KY_GOP_KQ": _kq}) is False)
+    _them("p748-manh-gop-cau-hinh-that-dat", not loi_gate_nhanh(_wf0))
+    for ten, sua in (
+        ("thieu-manh", lambda w: w["jobs"].pop("gate-nhanh-manh")),
+        ("thieu-gop", lambda w: w["jobs"].pop("gate-nhanh-gop")),
+        ("thieu-phan-hoach", lambda w: w["jobs"]["gate-nhanh-manh"]["strategy"]["matrix"].update(manh=[0, 1, 2, 3, 4, 5, 6])),
+        ("bo-bien-manh", lambda w: w["jobs"]["gate-nhanh-manh"]["steps"][3]["env"].pop("NHANH_DON_DUOC_MANH")),
+        ("bo-gop-khoi-needs", lambda w: w["jobs"]["gate-registry"].update(needs="chuan-bi")),
+    ):
+        w = json.loads(json.dumps(_wf0))
+        try:
+            sua(w)
+            _them("p748-manh-gop-" + ten, bool(loi_gate_nhanh(w)))
+        except (KeyError, IndexError, TypeError):
+            _them("p748-manh-gop-" + ten, False)
     _them("p643-A4-N-1", _hong_env(lambda b, w: b["env"].update({BIEN_WORKERS: "1"})))
     _them("p643-A4-bo-env", _hong_env(lambda b, w: b.pop("env")))
     _them("p643-A4-hai-buoc-registry", _hong_env(lambda b, w: w["jobs"]["gate"]["steps"].append(dict(b))))
@@ -2196,6 +2247,10 @@ def main():
         except ValueError as e:
             print("ĐỎ:", e); print("TỔNG: ĐỎ")
             return 2
+        if doc_ket_qua_gop() is False:
+            print("ĐỎ: job gom mảnh nhanh_don_duoc chưa success")
+            print("TỔNG: ĐỎ")
+            return 2
     if ns.mutant:
         killed = giet_windows_311_launcher_workflow(LAUNCHER_WORKFLOW.read_text(encoding="utf-8"))
         print(f"MUTANT {ns.mutant}: {'GIẾT' if killed else 'SỐNG'}")
@@ -2207,7 +2262,8 @@ def main():
     loi += ruff_loi
     wf = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
     loi += ["G5 (M6): " + x for x in loi_g5_workflow(wf)] + ["ENV registry (#643 M4): " + x for x in loi_env_registry(wf)] \
-        + ["VÙNG thiết lập (#643): " + x for x in loi_vung_thiet_lap(wf)]
+        + ["VÙNG thiết lập (#643): " + x for x in loi_vung_thiet_lap(wf)] \
+        + ["NHANH mảnh/gom (#748): " + x for x in loi_gate_nhanh(wf)]
     try:  # tệp rỗng ⇒ None ⇒ chốt vẫn chạy và ĐỎ; chỉ lỗi đọc/phân tích mới đi nhánh này
         loi_du = loi_workflow_dot_bien_du(yaml.safe_load(WF_DOT_BIEN_DU.read_text(encoding="utf-8")), wf)
     except (OSError, yaml.YAMLError) as e:

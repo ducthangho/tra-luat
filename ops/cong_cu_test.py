@@ -6012,6 +6012,26 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
     BAN = 'import shutil\nb = shutil.which("bash")\n'
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
+
+        def _cay_nhet_blob(kho, ten_bytes, noi_dung):
+            p_hash = subprocess.run(
+                ["git", "-C", str(kho), "hash-object", "-w", "--stdin"],
+                input=noi_dung if isinstance(noi_dung, bytes) else noi_dung.encode("utf-8"),
+                capture_output=True, check=True, timeout=60,
+            )
+            oid = p_hash.stdout.strip()
+            muc = b"100644 blob " + oid + b"\t" + ten_bytes + b"\0"
+            subprocess.run(
+                ["git", "-C", str(kho), "update-index", "-z", "--index-info"],
+                input=muc, capture_output=True, check=True, timeout=60,
+            )
+            ls = subprocess.run(
+                ["git", "-C", str(kho), "ls-files", "-z"],
+                capture_output=True, check=True, timeout=60,
+            )
+            dung(ten_bytes in ls.stdout.split(b"\0"),
+                 f"chưa nhét được {ten_bytes!r} vào index của {kho}")
+
         bq = _bash_nen_voi_chua_chuyen(tmp, {})
 
         # (2) đường mang byte xấu ⇒ JSON vẫn đọc được bằng UTF-8 nghiêm. Chiều ngược: đường
@@ -6023,7 +6043,9 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         except OSError as e:
             raise BoQuaMoiTruong(f"nền này không đặt được tên tệp có byte thô: {e}") from e
         (d / "ops" / "bình_thường.py").write_text(BAN, encoding="utf-8")
-        _g(d, "add", "-A")
+        p_add = _g(d, "add", "ops/bình_thường.py")
+        dung(p_add.returncode == 0, f"không stage được đường Unicode thường: {p_add.stderr}")
+        _cay_nhet_blob(d, b"ops/xau_\xff.py", BAN)
         pc = subprocess.run([sys.executable, str(bq), "quet", "--root", str(d), "--json"],
                             capture_output=True, timeout=180)
         try:
@@ -6058,7 +6080,7 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         d_loi = _kho(tmp, "loi")
         (d_loi / "ops" / b"hong_\xff.py".decode("utf-8", "surrogateescape")).write_text(
             "def f(:\n", encoding="utf-8")
-        _g(d_loi, "add", "-A")
+        _cay_nhet_blob(d_loi, b"ops/hong_\xff.py", "def f(:\n")
         mq = runpy.run_path(str(bq))
         _, bao_ok = mq["quet"](d)              # cây đường XẤU, cú pháp LÀNH  ⇒ lối thành công
         rc_l, bao_l = mq["quet"](d_loi)        # cây đường XẤU, cú pháp HỎNG ⇒ lối fail-close
@@ -6097,16 +6119,27 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
         #      hạn ngạch đếm sai — một vi phạm tàng hình, đúng lớp `t48` đã gặp với `\r`/`\n`.
         d_va = _kho(tmp, "vacham")
         hai = [b"ops/va_\xff.py".decode("utf-8", "surrogateescape"), "ops/va_\\xff.py"]
-        try:
-            for ten in hai:
-                (d_va / ten).write_text(BAN, encoding="utf-8")
-        except OSError as e:
-            raise BoQuaMoiTruong(f"nền này không đặt được hai tên ấy cạnh nhau: {e}") from e
-        _g(d_va, "add", "-A")
         mv = runpy.run_path(str(bq))
+        if sys.platform == "win32":
+            # Windows coi dấu backslash trong tên literal là dấu phân cách; Git for Windows
+            # cũng từ chối đưa tên ấy vào index. Giữ phép đo qua quet() thật, thay riêng
+            # danh sách và nội dung đầu vào bằng hai đường khác nhau đã định danh rõ.
+            g_quet = mv["quet"].__globals__
+            g_quet["_liet_ke_py"] = lambda _goc: (
+                [(hai[0], "100644", "0" * 40), (hai[1], "100644", "1" * 40)], "git")
+            g_quet["_doc_noi_dung"] = lambda _goc, _muc, _nguon: (
+                {hai[0]: BAN, hai[1]: BAN}, [])
+        else:
+            try:
+                for ten in hai:
+                    (d_va / ten).write_text(BAN, encoding="utf-8")
+            except OSError as e:
+                raise BoQuaMoiTruong(f"nền này không đặt được hai tên ấy cạnh nhau: {e}") from e
+            p_add = _g(d_va, "add", "-A")
+            dung(p_add.returncode == 0, f"không stage được hai đường: {p_add.stderr}")
         _, bao_va = mv["quet"](d_va)
         khoa = bao_va.get("co_loi_goi_tran") or {}
-        bang(len(khoa) == 2,
+        bang(set(khoa) == set(hai),
              f"(2d) HAI đường khác nhau về byte chỉ còn MỘT khoá trong báo cáo: "
              f"{sorted(map(repr, khoa))} — phép hiển thị không đơn ánh mà lại được dùng làm "
              f"khoá, nên một tệp ĐÈ tệp kia và hạn ngạch đếm hụt. Khoá phải giữ đường NGUYÊN "

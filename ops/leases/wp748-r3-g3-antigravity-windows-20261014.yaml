@@ -1,0 +1,75 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 3
+generation: 3
+lease_id: wp748-r3-g3-antigravity-windows-20261014
+thay_the_cho: wp748-r2-g2-antigravity-windows-20261013
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6156623741
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6156623741
+recorded_by: codex_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-10-13T22:32:53Z'
+heartbeat_at: '2026-10-13T22:32:53Z'
+lease_until: '2026-10-14T10:17:53Z'
+lease_expires_at_utc: '2026-10-14T10:17:53Z'
+role: executor
+provider: google_antigravity
+executor: google_antigravity
+model: gemini-3.8-flash-high
+model_family: gemini
+execution_surface: antigravity
+transport: machine/local
+environment: local
+operating_system: Windows
+shell: pwsh
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head
+spec_path: ops/specs/wp748-windows-gates-r3.md
+spec_ref: ops/wp748-r3-g3-lease
+spec_commit: 1e3454dd6f52cbfe503bb8370823766d1049b756
+spec_hash: 04a4f9048c3abc566ada28ed5601041aba6668bdbbd20ba8489914e0a412fa18
+spec_sha256: 04a4f9048c3abc566ada28ed5601041aba6668bdbbd20ba8489914e0a412fa18
+branch: agent/wp748-g3-antigravity
+branch_ownership: exclusive
+target_branch_neu_land: mission/748/integration
+base_sha: 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9
+start_from_sha: 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9
+reviewed_sha_required: 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9
+write_set:
+  - ops/bash_nen.py
+  - ops/cong_cu_test.py
+  - ops/lease_publish_test.py
+  - .claude/dev/ci_dang_ky_test.py
+  - ops/nhanh_don_duoc_test.py
+  - .github/workflows/ci.yml
+  - .github/workflows/ci-dot-bien-du.yml
+  - ops/ci_duong_nhanh_test.py
+  - .claude/dev/doc_receipt_thu_hoi_test.py
+write_set_hash: 3cd3f09c2bca4f39c88174f3a12dcbc07bc03b8c9b8f93b2174e22b87c8e634d
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: dispatcher-fenced nine paths; any additional dependency requires revision
+coordination_paths:
+  - ops/leases/wp748-r3-g3-antigravity-windows-20261014.yaml
+run_minutes: 720
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+  - LIVE
+  - stage_credential_to_Drive
+  - edit_real_credential
+  - self_review
+  - self_approve
+  - merge
+  - land
+  - write_outside_effective_write_set
+land_authority_note: separate exact candidate approval required before merge or land

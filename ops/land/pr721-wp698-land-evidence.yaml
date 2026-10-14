@@ -29,7 +29,8 @@ execution_surface: claude_code
 transport: machine/local
 environment: cloud
 operating_system: linux
-role: land_operator (ghi so)
+role: land_operator
+role_ghi_chu: 'vai land_operator o buoc GHI SO (PR #749), khong phai merge ma (PR #721).'
 session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
 recorded_by: claude-session (phien dieu phoi wp698; ho so nay do subagent ghi so soan, phien dieu phoi push)
 mat_quan_sat_duoc_the_nao: >-

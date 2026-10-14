@@ -99,7 +99,8 @@ verdict_usage_caveats:
   - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
     muc: P2
     mo_ta: >-
-      Reviewer Claude Sonnet 5.5 chay trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT (theo Q6), CUNG ho Claude voi
+      Reviewer Claude Sonnet 5.5 (CAU HINH yeu cau theo Q6: subagent trong phien dieu phoi); be mat chay that
+      (subagent hay phien rieng, phien nao) KHONG_DO_DUOC tu tep (xem che_do_nguon). CUNG ho Claude voi
       phien soan dac ta; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay
       thanh cross_approved hay same_provider_approved.
 nguon_co_tham_quyen: >-

@@ -40,6 +40,7 @@ import os
 import re
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import tempfile
@@ -1046,7 +1047,9 @@ def t20v_kiem_re_gitlink_ho_so_do():
     `not is_file()` la DA XOA (ke ca ten `.yaml`); `--check` khong co noi dung, numstat dem duoc dong (khong ra `-`).
     Chot: mode TRONG GIT."""
     m = nap_module()
-    for duong in ("ops/land/zz.yaml", "ops/specs/con"):
+    # WP748 r6/g6: ten khong duoi tung la `con` — ten THIET BI danh rieng tren Windows, git tu choi (`Invalid path`) => fixture
+    # HONG o ha tang; doi ten khac van giu dung dieu do (ten khong duoi `.yaml` duoi allowlist).
+    for duong in ("ops/land/zz.yaml", "ops/specs/conl"):
         with kho_that(nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
             dau2 = _commit_gitlink(kho, goc, duong)
             bang(git(kho, "ls-tree", dau2, "--", duong).stdout.decode().startswith("160000 commit "),
@@ -1101,6 +1104,8 @@ def t20y_kiem_re_mode_755_va_tep_thanh_thu_muc_dat():
     with kho_that(nen={"README.md": "x\n", "ops/land/a.md": "a\n"}, nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
         (kho / "ops/land/a.md").chmod(0o755)
         git(kho, "add", "-A")
+        # WP748 r6/g6: Windows `core.filemode` tat => `chmod` khong vao index; dat bit thuc thi THANG trong index (moi nen).
+        git(kho, "update-index", "--chmod=+x", "ops/land/a.md")
         git(kho, "commit", "-q", "-m", "755")
         dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         bang(git(kho, "ls-tree", dau2, "--", "ops/land/a.md").stdout.decode().startswith("100755 "), "fixture vo hieu: phai la 100755")
@@ -1210,10 +1215,25 @@ def t20zd_kiem_mode_git_dia_la_symlink_do():
 @ca
 def t20ze_kiem_re_ten_tep_khong_utf8_dat():
     """Cross-review luot 12: bo phan loai giai ma `-z` bang `surrogateescape` nen ten tep KHONG phai UTF-8 duoi allowlist di
-    duong nhanh; `_doc_raw` phai giai ma CUNG cach, khong thi `kiem_mode_git` nem UnicodeDecodeError (traceback, DO oan)."""
+    duong nhanh; `_doc_raw` phai giai ma CUNG cach, khong thi `kiem_mode_git` nem UnicodeDecodeError (traceback, DO oan).
+    Windows (WP748 r6/g6): `os.fsdecode` o do giai ma CHAT nen khong dung duoc ten qua cay lam viec; commit dung bang plumbing
+    (`update-index -z --index-info` nhan BYTE ten tu stdin) va tep dia mang dung ten `surrogateescape` ma san pham se hoi."""
     m = nap_module()
-    ten = os.fsdecode(b"ops/specs/t\xff.md")
-    with kho_that(nhanh_pr={ten: "# s\n"}) as (kho, goc, dau):
+    ten_b = b"ops/specs/t\xff.md"
+    ten = ten_b.decode("utf-8", "surrogateescape")   # = os.fsdecode tren posix
+    with kho_that(nhanh_pr=None if os.name == "nt" else {ten: "# s\n"}) as (kho, goc, dau):
+        if os.name == "nt":
+            def vao(du_lieu, *doi):
+                r = subprocess.run(["git", "-c", "commit.gpgsign=false", *doi], cwd=kho, input=du_lieu, capture_output=True,
+                                   env=_env_git())
+                if r.returncode:
+                    raise RuntimeError(f"ha tang: git {' '.join(doi)} rc={r.returncode}: {r.stderr[:300]!r}")
+                return r.stdout.strip()
+            blob = vao(b"# s\n", "hash-object", "-w", "--stdin")
+            vao(b"100644 " + blob + b"\t" + ten_b + b"\0", "update-index", "-z", "--index-info")
+            git(kho, "commit", "-q", "-m", "ten khong utf8")
+            dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+            viet(kho, ten, "# s\n")
         raw = git(kho, "diff", "--raw", "-z", "--no-abbrev", f"{goc}...{dau}").stdout
         bang(b"t\xff.md" in raw, f"fixture vo hieu: ten tep phai giu byte khong UTF-8: {raw!r}")
         try:
@@ -1273,6 +1293,8 @@ def t20zg_kiem_re_o_chap_nhan_con_lai_dat():
         (kho / "ops" / "specs" / "moi.md").write_text("# m\n", encoding="utf-8")
         (kho / "ops" / "specs" / "moi.md").chmod(0o755)
         git(kho, "add", "-A")
+        # WP748 r6/g6: nhu t20y — Windows `core.filemode` tat, dat bit thuc thi THANG trong index (moi nen).
+        git(kho, "update-index", "--chmod=+x", "ops/specs/y.md", "ops/specs/moi.md")
         git(kho, "commit", "-q", "-m", "ba o chap nhan")
         dau = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         raw = git(kho, "diff", "--raw", "--no-abbrev", "--no-renames", f"{goc}...{dau}").stdout.decode()
@@ -1393,11 +1415,22 @@ def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
         git(kho, "checkout", "-q", "main")
         for duong, dich in SYMLINK_GOC.items():
             _symlink(kho / duong, dich, target_is_directory=(duong == "docs/tm"))
+        # WP748 r6/g6 (do tai 397fc2a tren Windows native): Windows giai `..` trong dich symlink theo TU VUNG nen E4 o tren
+        # khong phan biet duoc nhan voi tu vung, dot bien `symlink_treo_doc_tu_vung` SONG SOT. Nen chung chung cho moi nen:
+        # symlink TUONG DOI `ops/land/sub/l -> ../Y.md` HOP LE, toi qua bi danh thu muc `ops/specs/bd -> ../land/sub`. Nhan
+        # giai dich theo thu muc VAT LY cua symlink (land) => ton tai; ghep tu vung theo duong bi danh (specs) => khong ton tai
+        # => ban tu vung DO OAN o doi chung.
+        _symlink(kho / "ops" / "land" / "sub" / "l", "../Y.md")
+        viet(kho, "ops/land/Y.md", "y\n")
+        _symlink(kho / "ops" / "specs" / "bd", "../land/sub", target_is_directory=True)
         git(kho, "add", "-A")
         git(kho, "commit", "-q", "-m", "PR day du: symlink hop le")
         goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         bang(all((kho / d).is_symlink() and (kho / d).exists() for d in SYMLINK_GOC),
              "fixture vo hieu: moi symlink tren goc phai HOP LE (khong thi ca nay do mot cay da hong san)")
+        qua_bd = kho / "ops" / "specs" / "bd" / "l"
+        bang(os.path.exists(qua_bd) and not os.path.exists(os.path.normpath(os.path.join(qua_bd.parent, os.readlink(qua_bd)))),
+             "fixture vo hieu: symlink qua bi danh phai HOP LE theo nhan nhung TREO theo ghep tu vung")
         git(kho, "checkout", "-q", "-b", "doi-chung", goc)
         viet(kho, "ops/specs/E.md", "# e2\n")
         git(kho, "commit", "-q", "-am", "PR ho so sua tep khac")
@@ -1673,12 +1706,43 @@ def _tao_socket(thu_muc, ten):
         os.chdir(cu)
 
 
+# WP748 r6/g6 (Windows native, do 14-10-2026 tai 397fc2a: `os.mkfifo` va `socket.AF_UNIX` KHONG ton tai => t20zo HONG
+# AttributeError) — fix: FIFO tren Windows la symlink toi mot named pipe `\\.\pipe\...` dang mo. Do tai cho: `os.stat` theo
+# symlink tra S_IFIFO, `os.path.isfile` False. Moi lan stat MO mot dau client va tieu mot instance (het instance => loi "All
+# pipe instances are busy" => `exists` False => doc nham thanh TREO), nen giu SO_INSTANCE_ONG du rong cho mot nhanh.
+# Ong PIPE_ACCESS_INBOUND (khach chi GHI): `copy2` cua t82 thu CopyFile2 => ERROR_ACCESS_DENIED => lui ve `copyfile` =>
+# stat S_IFIFO => `SpecialFileError` "is a named pipe" — VAP DUNG ly do loai tep nhu posix (do 14-10-2026 tai 397fc2a, ca ba
+# hinh dang FIFO, 64 instance: VAP "named pipe" ca lan 1 lan lan 2; chot ra `LA`). Ong DUPLEX thi CopyFile2 CHEP DUOC.
+# Duoi ~8 instance (do 14-10-2026 tai 397fc2a) thi VAP doi sang "All pipe instances are busy" (sai ly do) va chot doc thanh TREO.
+SO_INSTANCE_ONG = 64
+
+
+def _tao_fifo(duong, don):
+    """La FIFO THAT tai `duong`: posix `mkfifo`; Windows symlink toi named pipe, handle server dong khi `don` (ExitStack) dong."""
+    if hasattr(os, "mkfifo"):
+        os.mkfifo(duong)
+        return
+    import _winapi
+    import uuid
+    ong = "\\\\.\\pipe\\cdn-t20zo-" + uuid.uuid4().hex
+    for _ in range(SO_INSTANCE_ONG):
+        h = _winapi.CreateNamedPipe(ong, _winapi.PIPE_ACCESS_INBOUND, 0, _winapi.PIPE_UNLIMITED_INSTANCES, 0, 0, 0, _winapi.NULL)
+        don.callback(_winapi.CloseHandle, h)
+    os.symlink(ong, duong)
+
+
 @ca
 def t20zo_la_khong_phai_tep_thuong_do():
     """Duong vao LA: `t82` MO va DOC tung tep (copy2) — FIFO nem `SpecialFileError`, socket nem `OSError` — nen moi la ma no
     toi duoc, sau khi theo symlink, phai la TEP THUONG (danh sach CHO PHEP). Nhanh, moi nhanh mot dong LA dung duong dan:
     FIFO · socket · symlink toi FIFO nam trong thu muc ten bi bo qua (doc la THEO symlink) · FIFO chi voi toi qua bi danh thu
-    muc. Doi chung: tep thuong va symlink toi tep thuong => DAT."""
+    muc. Doi chung: tep thuong va symlink toi tep thuong => DAT.
+    Windows (khong mkfifo/AF_UNIX): FIFO = named pipe INBOUND THAT (`_tao_fifo`); tien de "t82 phai vap" GIU NGUYEN, vap vi
+    "is a named pipe" (xem SO_INSTANCE_ONG). Socket: socket AF_UNIX THAT tren Windows (WinSock family 1 do tai 397fc2a, bind qua
+    ws2_32; do 14-10-2026) la reparse point 0x80000023 ma `os.stat` tra S_IFREG, `isfile` True, `copytree` CHEP DUOC: tien de
+    "t82 vap" KHONG dung duoc bang socket that. Nhanh socket Windows duoi day theo ngoai le chu kho
+    duyet (comment 6171400658): ong THAT de t82 vap + GIA `os.stat` S_IFSOCK CHI cho dung leaf `sk`, tuc do LOGIC danh sach cho
+    phep cua bo kiem, KHONG phai bang chung tao hay tu choi socket THAT tren Windows; posix van dung FIFO va socket AF_UNIX THAT."""
     m = nap_module()
     with _cay_tam(NEN_DIA) as kho:
         (kho / "ops" / "land" / "sx").symlink_to("x.yaml")
@@ -1686,28 +1750,45 @@ def t20zo_la_khong_phai_tep_thuong_do():
         loi = m.kiem_symlink_treo_ca_cay(kho)
         bang(loi == [], f"doi chung: tep thuong va symlink toi tep thuong phai DAT: {loi}")
 
-    def fifo(land):
-        os.mkfifo(land / "p")
+    def fifo(land, don):
+        _tao_fifo(land / "p", don)
+        return land / "p", None
 
-    def sock(land):
-        _tao_socket(land, "sk")
+    def sock(land, don):
+        if hasattr(socket, "AF_UNIX"):
+            _tao_socket(land, "sk")
+            return land / "sk", None
+        _tao_fifo(land / "sk", don)
+        return land / "sk", land / "sk"
 
-    def symlink_toi_fifo(land):
+    def symlink_toi_fifo(land, don):
         (land / "kho.pyc").mkdir()
-        os.mkfifo(land / "kho.pyc" / "p")
-        (land / "sp").symlink_to("kho.pyc/p")
+        _tao_fifo(land / "kho.pyc" / "p", don)
+        _symlink(land / "sp", "kho.pyc/p")
+        return land / "sp", None
 
-    def fifo_qua_bi_danh(land):
+    def fifo_qua_bi_danh(land, don):
         (land / "kho.pyc").mkdir()
-        os.mkfifo(land / "kho.pyc" / "p")
-        (land / "bd").symlink_to("kho.pyc")
+        _tao_fifo(land / "kho.pyc" / "p", don)
+        _symlink(land / "bd", "kho.pyc", target_is_directory=True)
+        return land / "bd" / "p", None
     for nhan, tao, mong in (("FIFO", fifo, "ops/land/p"), ("socket", sock, "ops/land/sk"),
                             ("symlink toi FIFO", symlink_toi_fifo, "ops/land/sp"),
                             ("FIFO qua bi danh", fifo_qua_bi_danh, "ops/land/bd/p")):
-        with _cay_tam(NEN_DIA) as kho:
-            tao(kho / "ops" / "land")
+        with _cay_tam(NEN_DIA) as kho, contextlib.ExitStack() as don:
+            la, gia_sock = tao(kho / "ops" / "land", don)
             bang(chep_nhu_t82(kho) == "VAP", f"fixture vo hieu ({nhan}): t82 phai vap")
-            loi = m.kiem_symlink_treo_ca_cay(kho)
+            if gia_sock is None:
+                loi = m.kiem_symlink_treo_ca_cay(kho)
+            else:
+                dich_gia, that = os.path.normcase(os.fspath(gia_sock)), os.stat
+
+                def stat_sock(p, *a, **k):
+                    if os.path.normcase(os.path.abspath(os.fspath(p))) == dich_gia:
+                        return os.stat_result((stat.S_IFSOCK | 0o644, 0, 0, 1, 0, 0, 0, 0, 0, 0))
+                    return that(p, *a, **k)
+                with mock.patch.object(os, "stat", stat_sock):
+                    loi = m.kiem_symlink_treo_ca_cay(kho)
             bang(phan_dong(loi) == [("LA", mong)], f"{nhan}: la khong phai tep thuong phai DO, dung mot dong: {loi}")
 
 

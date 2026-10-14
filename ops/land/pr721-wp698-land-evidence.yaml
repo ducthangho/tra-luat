@@ -2,8 +2,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1. Duong dan ops/land/*-land-evidence.yaml la quy uoc thuc te
 # (tien le pr714 #710, pr718 #678, pr732 #685).
 #
-# TRANG THAI: merged (4c7ff0f), `landed: false`. Gate hau merge XANH tren chinh 4c7ff0f (run 38099612244, 14/14) va
-# tren master ke tiep 8aebf14 (run 38156658717, 14/14). Con thieu: QUYET-DINH-LANDED-CHU-KHO (chu kho quyet o PR ghi so).
+# TRANG THAI: merged (4c7ff0f), `landed: true` THEO QUYET DINH CHU KHO (pull/749#issuecomment-6164873005,
+# 2026-10-14T09:07:51Z), CO HIEU LUC tu merge commit cua PR ghi so #749. Gate hau merge XANH tren chinh 4c7ff0f
+# (run 38099612244, 14/14) va tren master ke tiep 8aebf14 (run 38156658717, 14/14).
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu
 # cua luot review/phien khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
@@ -51,7 +52,20 @@ trang_thai_packet:
       measured — `git show -s --format='%H %P %T' 4c7ff0f`; `git diff --stat 52a101d 4c7ff0f` = 3 tep +269/-16, dung
       write set (`git diff --numstat`: ops/cong_cu_test.py +267/-14, .github/workflows/ci.yml +1/-1, ops/ci_duong_nhanh_test.py +1/-1).
       `git merge-base --is-ancestor 4c7ff0f 8aebf14` rc 0.
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #749 dua dong nay vao master (cac commit truoc tren nhanh ghi so van ghi
+    `landed: false`). Comment 6164873005 la NEO cua quyet dinh, khong phai moc hieu luc (tien le #685 / PR #739).
+  quyet_dinh_chu_kho:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** WP698 / #698 **landed** tại `4c7ff0f` (merge PR #721, head `754ea4d`). `landed` có hiệu lực từ merge commit của PR ghi sổ #749."'
+    luc: '2026-10-14T09:07:51Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/749#issuecomment-6164873005
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6164873005.json): user ducthangho, author_association OWNER, performed_via_github_app
+      null, than 496 byte sha256 b3de0d09592e6c9278c53ad7e270cdb517337b8ffee75506860cd25dd0eb1710. Dang SAU khi CI
+      PR #749 tren fd652d9 xanh 15/15 (mo skipped). Than comment do phien dieu phoi SOAN, chu kho dang (OWNER + app
+      null khong tach chu kho khoi token chu kho, #566 — tu khai).
   landed_ly_do: >-
     PROTOCOL §10.2.4: landed = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping xong.
     Gate hau merge da xanh (GATE-HAU-MERGE-4C7FF0F dong); quyet dinh `landed` la cua chu kho o PR ghi so (cung mau
@@ -70,7 +84,7 @@ trang_thai_packet:
         not_measured — run 38099612244 chi chay ubuntu; KHONG co lan do Windows that cua ma wp698 tren master trong ho
         so nay (no windows-chua-do-o-moi-wp698, Q8; human audit 6103886840 tu khai "Windows thật chưa chạy").
     - id: QUYET-DINH-LANDED-CHU-KHO
-      trang_thai: MO
+      trang_thai: 'DA DONG — pull/749#issuecomment-6164873005 (2026-10-14T09:07:51Z)'
       mo_ta: 'Chu kho quyet `landed` tai PR ghi so (tien le #685: pull/739#issuecomment-6103749546). Ho so nay KHONG tu goi landed.'
 
 input_packet_generations:

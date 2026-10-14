@@ -6,6 +6,11 @@ mission_issue: 748
 revision: 3
 generation: 3
 lease_id: wp748-r3-g3-antigravity-windows-20261014
+da_bi_thay_the: wp748-r4-g4-antigravity-windows-20261014
+ly_do_thu_hoi: >-
+  WP748 r3/g3 het han 2026-10-14T10:17:53Z. Candidate local sach
+  397fc2a10c8391e530c5ed8230812422b1d39eff chua push/PR. Chu kho chi thi
+  cap lease moi va do lai gate con thieu tai Issue #748 comment 6166710787.
 thay_the_cho: wp748-r2-g2-antigravity-windows-20261013
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6156623741

@@ -74,3 +74,4 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r7-g7-claude-windows-20261014

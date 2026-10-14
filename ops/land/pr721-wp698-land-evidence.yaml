@@ -93,6 +93,34 @@ trang_thai_packet:
         readback-check-runs-4c7ff0f.json: 14 check run github-actions deu success. Master ke tiep 8aebf14 (merge PR
         #737): gate push 38156658717 success 14/14, run_attempt 1, updated_at 2026-10-11T17:37:18Z
         (readback-run-38156658717.json, readback-jobs-38156658717.json).
+      bang_chung_duong:
+        trang_thai: measured
+        lam_gi: >-
+          Tra loi P1 Codex discussion_r4270352912 (ket luan REST co the den tu workflow cu/no-op). Do 2026-10-14 tu
+          phien ghi so: log tho CA 14 job cua run 38099612244 attempt 1 (tai qua get_job_logs -> blob URL, khong sua),
+          luu gzip -n -9 o run-38099612244-logs/; bang tom tat run-38099612244-tom-tat.json (log_sha256 cua ban THO).
+        workflow_dinh_nghia: >-
+          run.path .github/workflows/ci.yml, workflow_id 309682866, head_sha 4c7ff0f. Blob ci.yml TAI CHINH 4c7ff0f
+          (KHONG lay ban o HEAD hien tai): 2e3095bb4cadf77aa020f682dfd8e4125943ca5e, luu nguyen byte run-38099612244-ci.yml-tai-4c7ff0f.yml,
+          sha256 226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0.
+        checkout: >-
+          13/14 log chua dong `git log` sau checkout = 4c7ff0f71697f13719dcb4a2b82e9fc3514110df (truong
+          checkout_dung_head); job chuan-bi khong checkout (job dieu phoi, 3526 byte). Khong log nao co `##[error]`.
+        dau_hieu_duong: >-
+          gate (ubuntu-latest): "== tl selftest 1731/1731 ==", "== gen_instructions selftest 44/44 ==",
+          "== transport selftest 12/12 ==", "TỔNG: ĐẠT", buoc release-verify strict success. gate-cong-cu manh 0..7:
+          moi manh "cong_cu_test: 56/56 đạt; ... bỏ qua=0" va "MẢNH k/8: 58|59/58|59 đột biến bán kính 1".
+          gate-cong-cu-gop: "GOM MẢNH 8/8". gate-packet-loop: "nền: 293/293 đạt", "TỔNG: ĐẠT". Day du tung job (lenh,
+          ket qua tung buoc, dong dau hieu) trong run-38099612244-tom-tat.json.
+        artifacts: >-
+          9/9 artifact cua run luu nguyen zip o run-38099612244-artifacts/, sha256 khop truong digest REST.
+          gate-evidence-ubuntu-latest-1: tl-selftest-Linux.json ghi lenh ["python","scripts/tl.py","--selftest"],
+          returncode 0, kem .out. gate-cong-cu-manh-ubuntu-latest-0..7: manh-k.txt, dong dau MANH ghi
+          head 4c7ff0f71697f13719dcb4a2b82e9fc3514110df va sha256_test a9c2a836…f8cf = sha256 `git show 4c7ff0f:ops/cong_cu_test.py` (do lai, khop) — neo checkout
+          nam trong chinh hien vat.
+        gioi_han: >-
+          Log va artifact la ban GitHub luu; khong viet them bo kiem tu dong cho cac truc dinh danh (pham vi PR ghi so,
+          chu kho chon). Windows: xem khong_do.
       khong_do: >-
         not_measured — run 38099612244 chi chay ubuntu; KHONG co lan do Windows that cua ma wp698 tren master trong ho
         so nay (no windows-chua-do-o-moi-wp698, Q8; human audit 6103886840 tu khai "Windows thật chưa chạy").

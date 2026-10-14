@@ -70,6 +70,19 @@ trang_thai_packet:
     PROTOCOL §10.2.4: landed = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping xong.
     Gate hau merge da xanh (GATE-HAU-MERGE-4C7FF0F dong); quyet dinh `landed` la cua chu kho o PR ghi so (cung mau
     #685/PR #739). Xem con_thieu_de_goi_landed.
+  mien_tru_land_obligations_muc_2:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** tôi miễn trừ mục 2 cho riêng sáu lượt ấy. Thay cho tệp gốc, tôi chấp nhận bản chiếu tóm tắt đã đăng trên #698"'
+    luc: '2026-10-14T10:42:54Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/749#issuecomment-6166530594
+    pham_vi: >-
+      Chi sau luot thieu tep goc: review dac ta luot 1, 8, 9, 10, 11 va review thi hanh g1. Thay the bang ban chieu
+      tren #698: 5920362746, 6057875286, 6058955007, 6060153828, 6079843708, 6071557569 (readback-comments-698-p1.json).
+      Cac luot nay van ghi not_measured. Dac ta luot 2-7, 12-14 va thi hanh g2 luot 1-2 giu du verdict + bien nhan.
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6166530594.json): user ducthangho, author_association OWNER, performed_via_github_app
+      null, than 928 byte sha256 1f64687c7b7b26f4eb1213fd17cf2f0101b596cad5a79b3b44ad7a8dcff7629a. Dap lai P1 Codex
+      tren #749 (discussion_r4269104547). Than comment do phien dieu phoi SOAN, chu kho dang (#566 — tu khai).
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-4C7FF0F
       trang_thai: 'DA DONG — measured: gate push 38099612244 tren 4c7ff0f success 14/14 (run_attempt 1, updated_at 2026-10-11T02:09:21Z)'

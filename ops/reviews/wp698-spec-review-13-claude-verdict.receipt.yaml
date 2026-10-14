@@ -80,11 +80,10 @@ model_reviewer_identity:
     Khong co session_run_id/run.json: luot khong qua launcher.py. Model thuc chay, effort, thoi luong, ma thoat va
     tinh doc lap cua reviewer so voi phien soan KHONG tai kiem duoc.
 
-github_submitter_identity:
-  actor: khong_co
-  actor_nguon: 'khong co comment chua bam'
-  ghi_chu: >-
-    ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen. OWNER + app khong tach chu kho khoi token chu kho (#566).
+github_submitter_identity: null
+github_submitter_identity_ghi_chu: >-
+  null vi luot nay KHONG duoc dang (khong comment nao tren #698/#721 chua bam verdict — readback-comments-698-p1.json,
+  readback-comments-721-p1.json). ADR-0040: truong nay chi ghi AI VAN CHUYEN, khong cap tham quyen.
 
 anchor:
   loai: canonical_ancestry

@@ -288,7 +288,7 @@ post_merge_checks:
       nhu do, khong sua gi.
 
 no_con_mo:
-  nguon: 'so no P3 cua phien dieu phoi (cac muc wp698 1, 2, 7, 8, 9, 10); nguong chu kho 6094652521: P3 khong chan, xu ly o packet rieng.'
+  nguon: 'spec r14 land_obligations muc 7 (no co ten bat buoc) + so no P3 cua phien dieu phoi (cac muc wp698 1, 2, 7, 8, 9, 10); nguong chu kho 6094652521: P3 khong chan, xu ly o packet rieng.'
   muc:
     - id: S2-SPEC-HASH-CUA-R11
       neo: 'grant 6091633467 ("Chữ S2 của r14 vẫn ghi spec_hash của r11"); chu kho doc theo depends_on (4) — neo r14.'
@@ -304,3 +304,20 @@ no_con_mo:
       neo: 'VERDICT thi hanh g2 luot 2 7b896e60…f244 (P3).'
     - id: windows-chua-do-o-moi-wp698
       neo: 'spec r14 Q8 + human audit 6103886840 ("Windows thật chưa chạy") — no khai, khong phai P3 cua review.'
+    # Bay no co ten duoi day do spec r14 land_obligations muc 7 BAT BUOC ghi (cung windows-chua-do-o-moi-wp698 o tren).
+    # gate-registry-het-tran-wp698 KHONG ghi: dieu kien "nếu xảy ra" (Q9) khong xay ra — gate-registry success o run
+    # 38099612244 (readback-jobs-38099612244.json).
+    - id: registry-nang-luc-ngoai-cua-so
+      neo: 'spec r14 land_obligations muc 7 (Q1).'
+    - id: so-tien-trinh-nhan-fullwidth
+      neo: 'spec r14 land_obligations muc 7 (Q2; gom ca khe muc do t_cf, t_tab cua §1.8.6).'
+    - id: gom-dau-manh-chuan-hoa-wp698
+      neo: 'spec r14 land_obligations muc 7 (§2, §11.1).'
+    - id: doc-argv-chua-co-o-wp698
+      neo: 'spec r14 land_obligations muc 7 (r3: thu muc --gop va cua argv[1], §1.9.6, §11.1).'
+    - id: j-chua-co-canh-wp698
+      neo: 'spec r14 land_obligations muc 7 (r4-r6: duong cua Phu luc J, K, L chi do o nghiem thu, khong canh thuong truc; §10, §11.1 (D)(E)(F)).'
+    - id: o-khong-do-nem-wp698
+      neo: 'spec r14 land_obligations muc 7 (r6: o bk/mh cua M1, o head BMP cua M1, M1b, M3, M2 thuan ASCII khong co do nem lop ngoai Exception; §5 M6, §10).'
+    - id: tran-gate-cong-cu-uoc-tu-may-khac-wp698
+      neo: 'spec r14 land_obligations muc 7 (r11: A9 la uoc tu may do, khong phai phep do tren runner; Windows chua do; §10).'

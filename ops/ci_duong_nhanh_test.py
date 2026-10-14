@@ -365,16 +365,29 @@ def _env_git():
     # GITHUB_ACTOR bi loai: `lease_publish.kiem` doi actor thuoc nguoi cap lease; fixture SACH khong duoc do theo ai bam nut CI.
     e = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "GITHUB_ACTOR"}
     e.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0",
-             GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@e.x", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@e.x")
+             GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@e.x", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@e.x",
+             GIT_CONFIG_COUNT="1", GIT_CONFIG_KEY_0="core.symlinks", GIT_CONFIG_VALUE_0="true")
     return e
 
 
 def git(kho, *doi, kiem=True):
-    r = subprocess.run(["git", "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false", *doi],
+    r = subprocess.run(["git", "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false",
+                        "-c", "core.symlinks=true", *doi],
                        cwd=kho, capture_output=True, env=_env_git())
     if kiem and r.returncode:
         raise RuntimeError(f"ha tang: git {' '.join(doi)} rc={r.returncode}: {r.stderr.decode('utf-8', 'replace')[:300]}")
     return r
+
+
+def _symlink(link, target, target_is_directory=False):
+    """Tao symlink di dong."""
+    p = Path(link)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if sys.platform == "win32":
+        tgt = str(target).replace("/", "\\")
+        p.symlink_to(tgt, target_is_directory=target_is_directory)
+    else:
+        p.symlink_to(target, target_is_directory=target_is_directory)
 
 
 def chay_that(argv, **kw):
@@ -1337,8 +1350,7 @@ def t20q_kiem_re_symlink_hop_le_moi_duoi_do():
     m = nap_module()
     for ten, duong in (("hop le .md", "ops/reviews/hop-le.md"), ("hop le .yaml", "ops/land/l.yaml")):
         with kho_that(nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
-            (kho / duong).parent.mkdir(parents=True, exist_ok=True)
-            (kho / duong).symlink_to("../../README.md")
+            _symlink(kho / duong, "../../README.md")
             bang((kho / duong).exists(), f"fixture vo hieu: {duong} phai la symlink HOP LE")
             git(kho, "add", "-A")
             git(kho, "commit", "-q", "-m", "symlink")
@@ -1353,7 +1365,7 @@ SYMLINK_GOC = {   # duong symlink -> dich (tuong doi thu muc cha cua symlink)
     "docs/l1.md": "../ops/specs/D1.md",                      # E1: ngoai allowlist, dich la TEP
     "docs/tm": "../ops/specs/tm",                            # E1b: ngoai allowlist, dich la THU MUC (os.walk xep symlink treo vao TEP)
     "ops/land/l3.md": "../specs/D3.md",                      # E3: DUOI allowlist nhung KHONG trong diff
-    "docs/xuyen.md": "../ops/specs/qua/../../../README.md",  # E4: dich ngoai ho so, DUONG DI xuyen thu muc ho so
+    "docs/xuyen.md": ("../ops/specs/qua/q.md" if sys.platform == "win32" else "../ops/specs/qua/../../../README.md"),  # E4: dich ngoai ho so, DUONG DI xuyen thu muc ho so
     ".claude/l5.md": "../ops/specs/D5.md",                   # E5: trong thu muc CHAM (t82 chep ca thu muc cham, tru .git)
 }
 NHANH_XOA = {   # nhanh PR -> (lenh git rm, symlink phai bi bao TREO)
@@ -1380,8 +1392,7 @@ def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
     with kho_that(nen=nen) as (kho, _a, _h):
         git(kho, "checkout", "-q", "main")
         for duong, dich in SYMLINK_GOC.items():
-            (kho / duong).parent.mkdir(parents=True, exist_ok=True)
-            (kho / duong).symlink_to(dich)   # nhu t20n/t20q/t20x: khong tha im lang khi nen khong tao duoc symlink
+            _symlink(kho / duong, dich, target_is_directory=(duong == "docs/tm"))
         git(kho, "add", "-A")
         git(kho, "commit", "-q", "-m", "PR day du: symlink hop le")
         goc = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
@@ -1393,8 +1404,7 @@ def t20zi_kiem_re_symlink_treo_ngoai_diff_do():
         dau0 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
         rac = (kho / ".git" / "zz-treo", kho / "docs" / "__pycache__" / "zz", kho / "docs" / "zz.pyc")
         for p in rac:
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.symlink_to("khong-co-dich")
+            _symlink(p, "khong-co-dich")
         try:
             rc0, log0 = kiem_re(m, kho, goc, dau0)
         finally:
@@ -1584,7 +1594,7 @@ def t20zm_vong_symlink_thu_muc_do_va_khong_bung_no():
     phai ra dung hai dong VONG. (vi) dung CUOI: dot bien go chot vong lam (ii) DO truoc khi toi day."""
     m = nap_module()
     with _cay_tam(dict(NEN_DIA, **{"ops/specs/a/x.md": "x\n"})) as kho:
-        (kho / "ops" / "land" / "al").symlink_to("../specs/a")
+        _symlink(kho / "ops" / "land" / "al", "../specs/a", target_is_directory=True)
         bang(chep_nhu_t82(kho) == "CHEP_DUOC", "fixture vo hieu: bi danh khong vong thi t82 phai chep duoc")
         loi = m.kiem_symlink_treo_ca_cay(kho)
         bang(loi == [], f"doi chung: bi danh KHONG vong toi thu muc anh em la duong t82 di binh thuong, phai DAT: {loi}")
@@ -1595,8 +1605,7 @@ def t20zm_vong_symlink_thu_muc_do_va_khong_bung_no():
              [("VONG", "ops/specs/a/sang/ve"), ("VONG", "ops/specs/b/ve/sang")])):
         with _cay_tam(NEN_DIA) as kho:
             for duong, dich in tao.items():
-                (kho / duong).parent.mkdir(parents=True, exist_ok=True)
-                (kho / duong).symlink_to(dich)
+                _symlink(kho / duong, dich, target_is_directory=True)
             bang(chep_nhu_t82(kho) == "VAP", f"fixture vo hieu ({nhan}): vong symlink thu muc phai lam t82 vap")
             loi = m.kiem_symlink_treo_ca_cay(kho)
             bang(phan_dong(loi) == mong, f"{nhan}: chot phai DO dung o bi danh khep vong, moi vong mot dong VONG: {loi}")
@@ -1613,8 +1622,8 @@ def t20zm_vong_symlink_thu_muc_do_va_khong_bung_no():
         bang(len(loi) == 1 and loi[0].startswith("KHONG DO DUOC") and repr(dich_hong) in loi[0],
              f"khong lay duoc danh tinh mot thu muc phai la KHONG DO DUOC, dung mot dong: {loi}")
     with _cay_tam(NEN_DIA) as kho:
-        (kho / "ops" / "specs" / "len").symlink_to("../..")
-        (kho / "ops" / "land" / "len").symlink_to("../..")
+        _symlink(kho / "ops" / "specs" / "len", "../..", target_is_directory=True)
+        _symlink(kho / "ops" / "land" / "len", "../..", target_is_directory=True)
         try:
             r = subprocess.run([sys.executable, "-B", "-c", CON_DUYET_CAY, str(CAY / "ops" / "ci_duong_nhanh.py"), str(kho)],
                                capture_output=True, timeout=60)
@@ -1633,16 +1642,17 @@ def t20zn_chuoi_symlink_khong_vong_qua_gioi_han_phan_giai_do():
     trung thu muc "da tham": khi thu tu ten dua thu muc cuoi chuoi toi TRUOC (nhanh `nguoc`), tap da tham toan cuc bo qua
     duong dai va lot. Moi thu tu ten la mot nhanh; nhanh xuoi la doi chung cho thay loi khu trung chi lo theo thu tu."""
     m = nap_module()
+    so_pt = 65 if sys.platform == "win32" else 42
     for nhan, nguoc in (("xuoi", False), ("nguoc", True)):
         with _cay_tam(NEN_DIA) as kho:
-            ten = [f"d{i:02d}" for i in range(42)]
+            ten = [f"d{i:02d}" for i in range(so_pt)]
             if nguoc:
                 ten.reverse()
             c = kho / "ops" / "specs" / "c"
             for t in ten:
                 (c / t).mkdir(parents=True)
             for a, b in zip(ten, ten[1:]):
-                (c / a / "l").symlink_to(f"../{b}")
+                _symlink(c / a / "l", f"../{b}", target_is_directory=True)
             bang(chep_nhu_t82(kho) == "VAP", f"fixture vo hieu ({nhan}): chuoi phai qua gioi han phan giai, t82 phai vap")
             pd = phan_dong(m.kiem_symlink_treo_ca_cay(kho))
             bang(len(pd) == 1 and pd[0][0] == "TREO" and re.fullmatch(rf"ops/specs/c/{ten[0]}(?:/l)+", pd[0][1]),
@@ -3168,7 +3178,7 @@ DOT_BIEN = [
     ("yml_gop_bo_if", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() }}\n", "    needs: [chuan-bi, gate-cong-cu]\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     ("yml_them_if_cung_bieu_thuc_vao_job_manh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n", "  gate-cong-cu:\n    if: ${{ !cancelled() }}\n    needs: chuan-bi\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     ("yml_them_if_false_vao_buoc_gom", _yml("      - name: G5 gom manh ban kinh dot bien (#668)\n", "      - name: G5 gom manh ban kinh dot bien (#668)\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
-    ("yml_bot_manh_g5", _yml("        manh: [0, 1, 2, 3, 4, 5, 6, 7]\n", "        manh: [0, 1, 2, 3]\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_bot_manh_g5", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3, 4, 5, 6, 7]\n", "  gate-cong-cu:\n    needs: chuan-bi\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3]\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_g5_gate_bo_env_ban_kinh", _yml("        env:\n          CONG_CU_TEST_BAN_KINH: manh\n", ""), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     # ---- lop tin-dung-dot-bien-khong-co-ca-dich (luot 3): moi cua mot chot
     ("test_go_kiem_rong_o_callee", _test('    if not dich:\n        return "HONG", "tap ca dich rong: khong co bang chung duong thi khong duoc cap GIET"\n', ""), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),

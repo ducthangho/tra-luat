@@ -84,6 +84,15 @@ trang_thai_packet:
       measured (readback-comment-6166530594.json): user ducthangho, author_association OWNER, performed_via_github_app
       null, than 928 byte sha256 1f64687c7b7b26f4eb1213fd17cf2f0101b596cad5a79b3b44ad7a8dcff7629a. Dap lai P1 Codex
       tren #749 (discussion_r4269104547). Than comment do phien dieu phoi SOAN, chu kho dang (#566 — tu khai).
+  uy_quyen_head_cuoi:
+    trang_thai: cho_chu_kho
+    quy_tac: >-
+      Dap P1 Codex discussion_r4270352892. Mien tru 6166530594 va quyet dinh landed 6164873005 duoc chu kho XAC NHAN LAI
+      bang mot comment tren PR #749 dang SAU commit cuoi cua nhanh ghi so, ghi day du SHA head cuoi (40 hex). Uy quyen
+      ay chi hop le cho DUNG head do: bat ky commit nao den sau comment lam no het hieu luc va phai dang lai. Readback cua
+      comment ay KHONG duoc commit vao cay (commit them lam head troi khoi SHA da ghi); nguoi merge doi chieu SHA head
+      voi comment ngay truoc khi merge. Ho so nay vi the KHONG chua neo cua comment uy quyen cuoi — dung doc su vang mat
+      ay thanh thieu uy quyen.
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-4C7FF0F
       trang_thai: 'DA DONG — measured: gate push 38099612244 tren 4c7ff0f success 14/14 (run_attempt 1, updated_at 2026-10-11T02:09:21Z)'
@@ -126,6 +135,16 @@ trang_thai_packet:
       khong_do: >-
         not_measured — run 38099612244 chi chay ubuntu; KHONG co lan do Windows that cua ma wp698 tren master trong ho
         so nay (no windows-chua-do-o-moi-wp698, Q8; human audit 6103886840 tu khai "Windows thật chưa chạy").
+    - id: NGHIA-VU-6-DONG-698-NOI-668
+      trang_thai: 'DA DONG — measured 2026-10-15: #698 closed/completed 03:22:52Z; comment noi #668 6183627099 (03:19:55Z)'
+      mo_ta: >-
+        Spec r14 land_obligations muc 6 ("Đóng #698 và đăng comment nối trên #668"). Dap P1 Codex discussion_r4270352903.
+        readback-issue-698.json: state closed, state_reason completed, closed_at 2026-10-15T03:22:52Z, closed_by
+        ducthangho. readback-events-698.json: su kien closed id 33292966662, actor ducthangho, commit_id null (dong tay,
+        khong qua commit). readback-comment-6183627099.json: issues/668#issuecomment-6183627099, ducthangho, OWNER,
+        performed_via_github_app null, than 628 byte sha256 2f6ed8c1a1d6ceae5d209331b4b3e012933007483fd46c6bdd968f5a63646cda,
+        neo merge 4c7ff0f, human audit 6103886840, gate 38099612244, PR ghi so #749, quyet dinh 6164873005, mien tru
+        6166530594. Than comment do phien dieu phoi SOAN, chu kho dang (#566 — tu khai).
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: 'DA DONG — pull/749#issuecomment-6164873005 (2026-10-14T09:07:51Z)'
       mo_ta: 'Chu kho quyet `landed` tai PR ghi so (tien le #685: pull/739#issuecomment-6103749546). Ho so nay KHONG tu goi landed.'

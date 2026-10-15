@@ -1,0 +1,109 @@
+# BIEN NHAN GIAO HANG — review THI HANH g2 luot 1 cua wp698 r14 (Issue #698, PR #721, merge 4c7ff0f), CUNG HO
+# (Claude Sonnet 5.5, subagent) tren 3b3d644. `approve` — 0 P1 / 0 P2 / 0 P3 theo lop. Pham vi: toan bo ban thi hanh g2 (3b3d644 = g1 bfb4ca3 + merge master 19a2d96 + g2).
+# GHI SO HAU KY boi subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT (CUNG phien da dieu phoi luot
+# review nay). Khong co run.json. Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-11 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp698-exec-review-g2-1-claude-b7ab727a
+kind: review_delivery_receipt
+packet_id: wp698
+packet_slug: CI-G5-CONG-CU-VA-TIEP
+packet_issue: 698
+mission_issue: null
+target_pull_request: 721
+land_merge_commit: 4c7ff0f71697f13719dcb4a2b82e9fc3514110df
+revision: 14
+generation: 2
+lease_id: wp698-r14-g2-claude
+spec_path: ops/specs/ci-g5-cong-cu-va-tiep-r14.md
+spec_hash: ed027f410aac7eeedd60335459ba8cfef521a34730fea68c1255533bb56f1a21
+spec_ghi_chu: '(a) sha256 blob spec r14 tai d17ec09 = spec_hash lease g2 = dong 3 tep verdict.'
+lease_gan_theo: >-
+  (a) Lease g2 ops/leases/wp698-r14-g2-claude.yaml (sha256 a8c9cd16…79af, ref origin/ops/wp698-r14-g2-lease @ 5caad65):
+  cua so [2026-10-09T20:20:00Z, 2026-10-10T20:20:00Z). Comment quyet dinh 6096574305 (2026-10-10T10:29:32Z) trong cua so.
+  Lease DA HET HAN luc ghi so; khong bia mo, khong rut han (land_obligations 5, bai hoc 20-09).
+luot: 1
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: 'lease g2 (a, doc tep): provider anthropic_claude, surface claude_code, model claude-opus-5-5, effort tu_khai — TU KHAI.'
+cross_provider: false
+review_class: sensitive
+assurance: review_deferred
+assurance_ghi_chu: >-
+  Lease g2 reviewer_ghi_chu (Q6): subagent Claude Sonnet 5.5 trong phien dieu phoi, muc review_deferred; cung ho voi
+  executor. Cong land la human_audited cua chu kho (pull/721#issuecomment-6103886840 tren 754ea4d), khong phai luot nay.
+verdict: approve
+verdict_nguon: '(a) dong 1 tep `verdict: approve`; tep co DUNG 1 dong bat dau bang `verdict:`'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: lop
+so_dem_nguon: '(a) dong KET LUAN tep verdict; khop comment quyet dinh 6096574305'
+verdict_path: ops/reviews/wp698-exec-review-g2-1-claude-verdict.md
+verdict_sha256: b7ab727a8eeb8b19b040fb8b1879335a15dbfe357709b4cec0fc4bd974060548
+verdict_bytes: 33960
+verdict_ban_goc: 'tep goc cr698-g2x1/goi/VERDICT.md trong scratchpad phien dieu phoi (cp, do lai sha256 tren blob 2de112e)'
+hint_patch_sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+hint_patch_bytes: 0
+hint_ghi_chu: '(a) cr698-g2x1/goi/HINT.patch RONG (0 byte) — verdict approve 0/0/0; khong chep tep rong vao kho.'
+reviewed_sha: 3b3d64422adb9a6200071244bfe2a14e42d0dd4a
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git merge-base --is-ancestor 3b3d644 4c7ff0f` rc 0 (to tien cua master)'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/2de112ef60b1a2d72375b5286616236fd8a7dd2e/ops/reviews/wp698-exec-review-g2-1-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land — commit CHI mang ban sao; bien nhan
+  di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven.
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/698#issuecomment-6096574305
+evidence_ban_chieu_created_at: '2026-10-10T10:29:32Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET repos/ducthangho/tra-luat/issues/698/comments (gh api, 2026-10-11, readback-comments-698-p1.json
+  trong ops/land/pr721-wp698-provenance/): user ducthangho, app None, author_association
+  OWNER, than 627 byte, sha256 0bdf2ee7d6e23bc5a8404658866979d4c3d459cd9cdc0910a03763703c010d1e. verdict_sha256 co mat
+  NGUYEN 64 hex trong than. Comment la comment QUYET DINH cua chu kho (neo bam), khong phai ban chieu nguyen van.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  che_do: 'subagent review-sonnet-max (Claude Sonnet 5.5) trong phien dieu phoi, khong qua launcher.py'
+  che_do_nguon: '(a) dong 4-7 tep verdict: execution_surface claude_code_subagent, che_do subagent_trong_phien_dieu_phoi'
+  model_yeu_cau: claude-sonnet-5-5
+  effort_yeu_cau: max
+  model_tu_khai: '(a) dong 5 tep verdict: claude-sonnet-5-5 (subagent review-sonnet-max, tu khai)'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien. Model thuc chay, effort, thoi luong, ma thoat va
+    tinh doc lap KHONG tai kiem duoc.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 6096574305 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment quyet dinh tu khai chu kho; ADR-0040: chi ghi AI VAN CHUYEN. OWNER + app null khong tach chu kho khoi token
+    chu kho (#566).
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim o commit ban sao 2de112e cua nhanh claude/bookkeeping-698-land; to tien cua HEAD nhanh ay; CHUA la
+    to tien cua master luc ghi so (va CHUA day).
+  gioi_han: >-
+    Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward;
+    SQUASH/rebase pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+    muc: P2
+    mo_ta: >-
+      Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude
+      voi executor; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay thanh
+      cross_approved hay same_provider_approved.
+  - id: N1-DOT-BIEN-SONG
+    muc: P3
+    mo_ta: >-
+      Muc N1 cua verdict: 3 dot bien ban va M8 SONG (tinh chat co san cua t54) — so no P3 muc 7. Head duoc review 3b3d644
+      KHONG phai head da merge 754ea4d (them 5d889ba, xem luot 2, va merge master 404ecbb).
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #698 chi neo bam. Hai ban lech thi tin blob.

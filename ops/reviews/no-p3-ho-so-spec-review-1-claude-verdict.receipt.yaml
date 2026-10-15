@@ -1,0 +1,107 @@
+# BIEN NHAN GIAO HANG — review LUOT 1 dac ta no-p3-ho-so NO-P3-HO-SO (Issue #750, P3-a), CUNG HO (Claude Sonnet 5.5, subagent).
+# Doi tuong review: DAC TA ops/specs/no-p3-ho-so-r1.md tai 55bd0d2 tren nhanh claude/spec-no-p3 (khong phai ma).
+# GHI SO HAU KY trong bookkeeping land #750 / PR #759 boi subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT
+# (CUNG phien da dieu phoi luot review nay). Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-15 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: no-p3-ho-so-spec-review-1-claude-32cb9187
+kind: review_delivery_receipt
+packet_id: no-p3-ho-so
+packet_slug: NO-P3-HO-SO
+packet_issue: 750
+mission_issue: null
+mission_issue_ghi_chu: 'Packet no P3 tach tu so no phien dieu phoi; khong thuoc Mission nao (lease no-p3-ho-so-r2-g1-claude).'
+target_pull_request: 759
+land_merge_commit: c7daa8cf6ef3e3a118d525536587e6e87985ed56
+revision_reviewed: 1
+spec_path: ops/specs/no-p3-ho-so-r1.md
+spec_sha256: 694f8435201e0cae1aa2c63619c03d6090d57bbece66ecab929e467343ddaa67
+spec_ghi_chu: >-
+  (a) `git show 55bd0d2:ops/specs/no-p3-ho-so-r1.md | sha256sum` = spec_sha256 = dong 3 tep verdict. Dac ta r1/r2 vao
+  master cung PR bookkeeping nay (merge nhanh claude/spec-no-p3 @ a9ef33c o commit 207250f cuc bo luc ghi so).
+lease_id: khong-co-lease
+lease_ghi_chu: >-
+  Luot review DAC TA r1. Lease duy nhat cua packet (no-p3-ho-so-r2-g1-claude) neo r2; r1 chua tung duoc neo vao lease
+  nao (lease thay_the_cho_ghi_chu).
+luot: 1
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: '(a) commit 55bd0d2 tren nhanh claude/spec-no-p3; phien soan: phien dieu phoi session_01CSM7GN (Claude Opus 5.5) — TU KHAI.'
+cross_provider: false
+review_class: standard
+review_class_ghi_chu: >-
+  (a) CHEP dung gia tri dac ta r1 dong 9 khai (`standard`). Gia tri nay NGOAI enum routine/systemic/sensitive cua
+  PROTOCOL — chinh la lop P2 `review-class-standard-ngoai-enum` cua luot nay; r2 sua thanh `sensitive`. Ghi nguyen
+  loi khai cua doi tuong duoc review, khong phai lop hieu luc.
+assurance: review_deferred
+assurance_ghi_chu: >-
+  Dac ta r1 hang executor/reviewer: subagent Claude Sonnet cung ho => review_deferred. Cong land la human_audited cua
+  chu kho (pull/759#issuecomment-6190971474), khong phai luot nay.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 tep `verdict: changes_requested`; tep co DUNG 1 dong bat dau bang `verdict:`'
+so_p0: 0
+so_p1: 0
+so_p2: 6
+so_p3: 7
+so_dem_theo: lop
+so_dem_nguon: '(a) dong 7 tep verdict "so lop: 0 P1 · 6 P2 · 7 P3 (13 lop)"; P0 khong co hang rieng trong tep => 0. Khop lease spec_review "Luot 1 (r1): changes_requested 0/6/7".'
+verdict_path: ops/reviews/no-p3-ho-so-spec-review-1-claude-verdict.md
+verdict_sha256: 32cb9187370ca03bdf1d01b1e27a8e31db6e6c6a3ca2a160987ec9bd758a6be1
+verdict_bytes: 44325
+verdict_ban_goc: 'tep goc cr-no-p3-ho-so-l1/goi/VERDICT.md trong scratchpad phien dieu phoi (cp; `cmp` khop; sha256sum + wc -c do tren tep trong kho)'
+hint_path: ops/reviews/no-p3-ho-so-spec-review-1-claude-HINT.patch
+hint_patch_sha256: 14be78ac84b3c05643b87515fcba35d63505fdeaf9cc98e1a91fb2631c29cf9c
+hint_patch_bytes: 21073
+hint_ghi_chu: '(a) HINT chep NGUYEN BYTE tu cr-no-p3-ho-so-l1/goi/HINT.patch (17 hunk theo tu khai VERDICT); chi sua VAN BAN dac ta.'
+reviewed_sha: 55bd0d24d299d20ff32a8b2dd42deb200295462e
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git merge-base --is-ancestor 55bd0d2 HEAD` rc 0 tren nhanh bookkeeping (qua merge 207250f)'
+reviewed_sha_trang_thai: 'tren nhanh claude/spec-no-p3 (da day, ls-remote a9ef33c); `--is-ancestor 55bd0d2 origin/master` rc 1 luc ghi so; vao master khi PR bookkeeping land bang merge commit'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574/ops/reviews/no-p3-ho-so-spec-review-1-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 75fa4ff cua nhanh claude/bookkeeping-p3a-land; commit ay CHI mang ban sao verdict/HINT, bien
+  nhan di o commit sau. Link chi song khi nhanh duoc push nguyen ven (khong rebase/squash).
+evidence_ban_chieu: KHONG_CO
+evidence_ban_chieu_doi_chieu: >-
+  (a) gh api GET issues/750/comments, issues/753/comments, issues/759/comments (2026-10-15 ~16:28Z, readback-comments-750.json,
+  readback-comments-753.json, readback-comments-759.json trong ops/land/pr759-no-p3-ho-so-provenance/): KHONG comment nao
+  chua tien to 8 hex cua verdict_sha256 (32cb9187) hay hint_patch_sha256 (14be78ac). Luot nay KHONG duoc chieu len GitHub.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  che_do: 'subagent review-sonnet-max (Claude Sonnet 5.5) trong phien dieu phoi, khong qua launcher.py'
+  che_do_nguon: '(a) dong 6 tep verdict `execution_surface: claude_code_subagent`'
+  model_yeu_cau: claude-sonnet-5-5
+  effort_yeu_cau: max
+  model_tu_khai: '(a) dong 5 va 8 tep verdict: claude-sonnet-5-5 (subagent review-sonnet-max, tu khai), effort max'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien, khong qua launcher.py. Model thuc chay, effort, thoi
+    luong, ma thoat va tinh doc lap cua reviewer so voi phien soan KHONG tai kiem duoc.
+
+github_submitter_identity: null
+github_submitter_identity_ghi_chu: >-
+  null vi verdict luot nay KHONG duoc dang nguyen van hay tom tat len GitHub (xem evidence_ban_chieu_doi_chieu). ADR-0040:
+  truong nay chi ghi AI VAN CHUYEN, khong cap tham quyen.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim o commit (75fa4ff7cf2acd57981eb878a7d64cb5d4fe8574) cua nhanh claude/bookkeeping-p3a-land; to tien cua HEAD nhanh ay; CHUA la to
+    tien cua master luc ghi so.
+  gioi_han: >-
+    Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward;
+    SQUASH/rebase pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+    muc: P2
+    mo_ta: >-
+      Reviewer Claude Sonnet 5.5 chay bang SUBAGENT trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT, CUNG ho Claude
+      voi phien soan dac ta; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred: dung doc luot nay
+      thanh cross_approved hay same_provider_approved.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Khong co ban chieu tren GitHub.

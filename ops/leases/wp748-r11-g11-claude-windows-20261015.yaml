@@ -1,0 +1,79 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 11
+generation: 11
+lease_id: wp748-r11-g11-claude-windows-20261015
+thay_the_cho: wp748-r10-g10-claude-windows-20261015
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6196889990
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6196889990
+recorded_by: codex_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-10-15T16:27:21Z'
+heartbeat_at: '2026-10-15T16:27:21Z'
+lease_until: '2026-10-16T04:27:21Z'
+lease_expires_at_utc: '2026-10-16T04:27:21Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+operating_system: Windows
+shell: pwsh
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head
+spec_path: ops/specs/wp748-windows-gates-r11.md
+spec_ref: ops/wp748-r11-g11-lease
+spec_commit: 568c546d14d0c79a990b7ea9cdf137a27f29cb98
+spec_hash: 8f374b101fc1a1226206affaaf068b35786d5518322a20fe09324607a70be464
+spec_sha256: 8f374b101fc1a1226206affaaf068b35786d5518322a20fe09324607a70be464
+branch: agent/wp748-g11-claude
+branch_ownership: exclusive
+target_branch_neu_land: mission/748/integration
+base_sha: 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9
+start_from_sha: 0daeb47f31fef51d6242fc204c003b6431c6d465
+reviewed_sha_required: 0daeb47f31fef51d6242fc204c003b6431c6d465
+write_set:
+- ops/bash_nen.py
+- ops/cong_cu_test.py
+- ops/lease_publish_test.py
+- .claude/dev/ci_dang_ky_test.py
+- ops/nhanh_don_duoc_test.py
+- .github/workflows/ci.yml
+- .github/workflows/ci-dot-bien-du.yml
+- ops/ci_duong_nhanh_test.py
+- .claude/dev/doc_receipt_thu_hoi_test.py
+- .claude/skills/work-packet/SKILL.md
+- .agents/skills/work-packet/SKILL.md
+write_set_hash: add5a5491a653484d89377f6a2711bf152c5e24fe40107d2fb286746f4658024
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: dispatcher-fenced eleven paths; r11 retains two skill adapters; any additional dependency requires revision
+coordination_paths:
+- ops/leases/wp748-r9-g9-claude-windows-20261015.yaml
+- ops/leases/wp748-r10-g10-claude-windows-20261015.yaml
+- ops/leases/wp748-r11-g11-claude-windows-20261015.yaml
+run_minutes: 720
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: separate exact candidate approval required before merge or land

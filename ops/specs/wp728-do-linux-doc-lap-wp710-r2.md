@@ -107,9 +107,16 @@ phối dựng ba tệp dưới đây TRƯỚC khi phát lượt; reviewer chỉ 
   - mỗi khoảng chỉ lấy mẫu sau khi đọc được sự kiện `staged` của chu kỳ trước và xong trước nửa khoảng (≤ 5 s);
   - **thu danh tính fixture TRƯỚC khi có thể bị reap, tách khỏi bước lấy mẫu** (cross-review #755 F03): fixture ghi pid
     vào `WP714_CHILD_PID_FILE` rồi còn sống ~0,5 s (`Tests.ps1:77–79`), và tệp ấy bị ghi ĐÈ mỗi chu kỳ. Rig theo dõi tệp
-    ấy liên tục (chu kỳ đọc ≤ 50 ms); mỗi lần nội dung đổi, đọc ngay `/proc/<pid>/stat` khi con còn tồn tại để lấy cặp
-    (pid, starttime trường 22) và thêm vào một **sổ đăng ký tích lũy theo chu kỳ** (chu kỳ → cặp). Không lấy được cặp
-    trước khi con biến mất ⇒ chu kỳ ấy **KHÔNG ĐO ĐƯỢC** (không suy "đã reap" từ việc vắng `/proc`);
+    ấy liên tục, chu kỳ poll danh nghĩa 50 ms. Ở **MỌI** lần poll (KHÔNG chỉ khi nội dung tệp đổi — tệp chỉ chứa số pid,
+    hai thế hệ có thể trùng pid: cross-review #755 F03 lượt 3) rig đọc pid rồi đọc `/proc/<pid>/stat` lấy cặp (pid,
+    starttime trường 22). Khoá của sổ là CẶP (pid, starttime), không phải pid: cặp chưa có thì đăng ký kèm thời điểm thu
+    và chu kỳ đang chạy (suy từ số sự kiện `staged` đã đọc), nên cùng pid mà starttime mới là một thế hệ MỚI. Lần đọc
+    trúng khe tệp rỗng/đang ghi (truncate) hoặc pid chưa có `/proc` bị BỎ QUA như nhiễu, không bao giờ suy là "đã reap".
+    Rig ghi khoảng cách thực giữa hai lần poll và báo `max_gap`.
+    **Đủ thế hệ theo chu kỳ:** mỗi chu kỳ dự kiến (5) phải có ĐÚNG một cặp mới được đăng ký trong chu kỳ ấy, với
+    starttime lớn hơn cặp của chu kỳ trước. Thiếu cặp ở một chu kỳ, hai cặp trong cùng chu kỳ, hoặc `max_gap` > 250 ms
+    (một nửa tuổi sống danh nghĩa ~0,5 s của fixture) ⇒ lượt ấy **KHÔNG ĐO ĐƯỢC**. Đây là cấu hình sleep của fixture, không
+    phải phép đo tuổi sống thật; `max_gap` mới là thứ chứng minh độ phủ;
   - mỗi mẫu khoảng nghỉ ghi: số thứ tự khoảng, thời điểm, pid + starttime của wrapper (đọc `/proc/<pid>/stat`, trường
     22) và việc wrapper còn sống; với TỪNG cặp trong sổ (mọi chu kỳ đã qua, không chỉ con mới nhất): trạng thái hiện tại
     — `Z` (zombie fixture), còn sống, hay `ENOENT` (đã reap — chỉ hợp lệ vì danh tính đã được xác minh trước đó); pid có
@@ -119,9 +126,15 @@ phối dựng ba tệp dưới đây TRƯỚC khi phát lượt; reviewer chỉ 
   Bất kỳ điều nào sau đây ⇒ lượt ấy là **KHÔNG ĐO ĐƯỢC** (không phải đạt): thiếu mẫu của một khoảng, mẫu rơi sang chu kỳ
   kế, wrapper thoát sớm hoặc đổi starttime (pid tái dùng), fixture không sinh con, không thu được danh tính một con
   trước khi nó biến mất, `/proc` đọc lỗi (trừ `ENOENT` sau khi danh tính đã xác minh), quá thời hạn.
-  Rig kèm **ca tự kiểm** chạy trên dữ liệu `/proc` giả (không điều khiển tiến trình thật), mỗi ca phải cho đúng nhãn:
-  zombie fixture CŨ còn lại trong khi con mới nhất đã reap ⇒ đếm 1; pid trùng nhưng starttime khác ⇒ 0 zombie fixture;
-  không thu được danh tính ⇒ KHÔNG ĐO ĐƯỢC; `EACCES` ⇒ KHÔNG ĐO ĐƯỢC.
+  Rig kèm **ca tự kiểm** chạy trên chuỗi dữ liệu poll giả (tệp pid + `/proc` giả theo thời gian; không điều khiển tiến
+  trình thật). Mỗi ca kiểm CẢ số đếm LẪN trạng thái toàn lượt:
+  (1) zombie fixture CŨ còn lại trong khi con mới nhất đã reap ⇒ đếm 1;
+  (2) pid trùng nhưng starttime khác ở mẫu khoảng nghỉ ⇒ 0 zombie fixture (pid tái dùng), và tự nó KHÔNG làm N2 đạt;
+  (3) hai chu kỳ liền ghi CÙNG pid với starttime khác ⇒ hai bản ghi đúng hai chu kỳ;
+  (4) bỏ lỡ một thế hệ (bị ghi đè trước khi thu) ⇒ KHÔNG ĐO ĐƯỢC;
+  (5) khe tệp rỗng/truncate giữa hai lần ghi ⇒ bỏ qua, không đếm là reap;
+  (6) poll bị trì hoãn khiến `max_gap` > 250 ms ⇒ KHÔNG ĐO ĐƯỢC;
+  (7) không thu được danh tính ⇒ KHÔNG ĐO ĐƯỢC; (8) `EACCES` ⇒ KHÔNG ĐO ĐƯỢC.
   Chỉ đường dẫn TƯƠNG ĐỐI hoặc `$TMPDIR`; không đọc biến môi trường ngoài danh sách cho phép (`PATH`, `TMPDIR`,
   `HOME` tạm, `WP714_*` của fixture); không ghi đường dẫn máy vào đầu ra.
 - `ops/reviews/wp728-do-linux/rig/mutate.py` — bộ sinh đột biến TẤT ĐỊNH: đọc wrapper, đòi dòng
@@ -184,7 +197,8 @@ ba packet đã land ấy được trả lời riêng trên PR #724).
   hoặc đường dẫn bị đổi tên ⇒ KHÔNG ĐO ĐƯỢC; (iii) tarball lệch một byte; (iv) `PATH` đặt một `pwsh` khác lên trước.
 - **N1 — M1.** `failed=0` VÀ `passed` = số ca thực chạy trên Linux (đếm ca đã thực thi, không tin con số 34 của
   Executor — con số ấy cũng không có thời điểm đo gốc). ĐỎ khi bất kỳ ca nào fail, hoặc `passed` < số ca thực thi.
-- **N2 — M2 có răng.** Nền: cả 4 khoảng nghỉ có mẫu hợp lệ theo hợp đồng quan sát VÀ 0 zombie fixture ở mọi khoảng.
+- **N2 — M2 có răng.** Nền: 8/8 ca tự kiểm của rig cho đúng nhãn, đủ 5 thế hệ fixture (mỗi chu kỳ đúng một), `max_gap`
+  ≤ 250 ms, cả 4 khoảng nghỉ có mẫu hợp lệ theo hợp đồng quan sát VÀ 0 zombie fixture ở mọi khoảng.
   Đột biến M2': số zombie fixture TÍCH LŨY (theo sổ đăng ký) TĂNG qua các khoảng. ĐỎ khi nền có ≥ 1 zombie fixture ở một khoảng bất kỳ. Thiếu mẫu /
   wrapper thoát sớm / pid tái dùng / fixture không sinh con / `/proc` lỗi ⇒ **KHÔNG ĐO ĐƯỢC**. M2' KHÔNG tăng ⇒ rig không
   có răng ⇒ M2 = **KHÔNG ĐO ĐƯỢC** (không phải đạt).

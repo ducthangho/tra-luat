@@ -76,3 +76,7 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r11-g11-claude-windows-20261015
+da_bi_thay_the_ly_do: >-
+  Protocol §3.6: hon 30 phut khong co tien trien sau Claude Code API ECONNREFUSED;
+  owner thu hoi g10 va cho phep r11/g11 tai Issue #748 comment 6196889990.

@@ -253,3 +253,26 @@ gh api repos/ducthangho/tra-luat/actions/jobs/<id>/logs
 
 Identity/attempt/provenance và fallback endpoint: protocol §10.2.2–§10.2.3; cú pháp truy vấn
 `WorkflowRun.file` nằm trong `.claude/skills/cross-review/SKILL.md`, mục “Provenance CI”.
+
+## Ca symlink Windows native
+
+**Đã đo** (WP748 g11, Windows 11, Python 3.13.1, head `0daeb47`, 15-10-2026): 12 ca `t20n`
+`t20x` `t20zd` `t20zf` `t20q` `t20zi` `t20zj` `t20zk` `t20zl` `t20zm` `t20zn` `t20zo` của
+`ops/ci_duong_nhanh_test.py`, mỗi ca một lệnh `--mot-ca`, cả 12 `rc=0`, không `WinError 1455`.
+Đó là bằng chứng TARGETED trên đúng head ấy, không phải full suite.
+
+**Hướng dẫn** (luật đọc, không phải kết quả đo). Mỗi ca một lệnh, lấy rc ngay sau lệnh:
+
+```bash
+python -B -c 'import yaml'   # thiếu PyYAML thì module chết lúc nạp, không phải lỗi ca
+python -B ops/ci_duong_nhanh_test.py --mot-ca t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do
+echo "t20zk rc=$?"           # 0 = đạt (không in gì); 3 = DO; 4 = HONG
+```
+
+- Fixture dựng symlink THẬT (`Path.symlink_to`, tệp hay thư mục khai bằng `target_is_directory`;
+  trên Windows đích đổi `/` thành `\`). Không có nhánh bỏ qua: không tạo được symlink ⇒ `HONG`.
+- `WinError 1455` ném từ `subprocess.Popen` lúc fixture chạy `git init`, trước assertion, là lỗi
+  MÔI TRƯỜNG: ghi lại, đo bộ nhớ/pagefile, dừng gate nặng song song.
+- Targeted không thay full suite (`CA: N/N`, `DOT BIEN: M/M`, `TONG: DAT`) trên đúng head.
+- Ngoại lệ named pipe/socket của `t20zo` (FIFO = symlink tới named pipe thật; socket = `os.stat`
+  giả cho leaf `sk`, comment 6171400658) đo logic danh sách cho phép, tách khỏi bằng chứng symlink.

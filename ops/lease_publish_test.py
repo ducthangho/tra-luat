@@ -4862,7 +4862,115 @@ def _nap_launcher_thu_hoi():
     return mod
 
 
-def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
+def _giu_hau_due_windows(p):
+    """Mở HANDLE tới mọi hậu duệ của `p` TRƯỚC khi giết. Trả (k32, [(pid, handle)], dòng nhật ký).
+
+    WP748 r8/g8 (t154 ĐỎ một lần ngoài sandbox 2026-10-14T18:37:33Z: `taskkill rc=0`, con rc=1, mà nhịp
+    cháu 4->5 trong cửa sổ 1 s; chạy lại 18:38:04Z XANH) — `taskkill /T /F` chỉ GỌI `TerminateProcess`,
+    mà hàm ấy BẤT ĐỒNG BỘ: trả về khi kết liễu mới được KHỞI ĐỘNG, chưa xong. Nhánh Windows cũ chỉ chờ
+    CON (`p.wait`), không chờ CHÁU ⇒ một lần ghi đang dở của cháu hạ cánh sau mốc đo `a`. Cháu thật sự
+    còn sống thì cửa sổ 1 s thấy ~20 nhịp, không phải 1. Chữa bằng BẰNG CHỨNG chứ không bằng ngủ: giữ
+    handle (PID không bị tái dùng khi còn handle), rồi `WaitForSingleObject` tới khi đối tượng tiến
+    trình được báo hiệu, tức mọi luồng đã thoát. `None` = KHÔNG ĐO ĐƯỢC, khai thẳng, không đọc thành rỗng.
+    Dòng nhật ký nêu PID giữ/bỏ để ca gọi (t154) ĐÒI cháu nằm trong tập giữ, không chỉ đếm.
+    Ngoại lệ SAU khi đã mở handle ⇒ đóng MỌI handle đang giữ rồi mới trả/ném (không rò handle).
+    """
+    k32, mo = None, []                             # `mo`: mọi (pid, handle) đã mở mà chưa đóng
+    try:
+        import ctypes
+        from ctypes import wintypes
+        thu_hoi = _nap_launcher_thu_hoi()
+        anh = thu_hoi._chup_cay(p.pid)              # Toolhelp32 + khoá danh tính, đã bỏ PID của ta
+        goc = (anh or {}).get(p.pid)
+        if not anh or not goc:
+            return None, None, f"hau_due: KHONG chup duoc cay (anh={anh!r}) - CHAU KHONG DO DUOC"
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        k32.OpenProcess.restype = wintypes.HANDLE
+        k32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+        k32.WaitForSingleObject.restype = wintypes.DWORD
+        k32.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+        k32.TerminateProcess.restype = wintypes.BOOL
+        k32.CloseHandle.argtypes = [wintypes.HANDLE]
+        k32.CloseHandle.restype = wintypes.BOOL
+        bo = []
+        for q, khoa in anh.items():
+            if q == p.pid:
+                continue                           # con: `p` đã giữ handle, `p.wait` đo nó
+            # Liên kết cha trong ảnh Toolhelp có thể trỏ tới PID ĐÃ tái dùng: hậu duệ thật sinh SAU gốc.
+            if not khoa or int(khoa[4:]) < int(goc[4:]):
+                bo.append(q)
+                continue
+            h = k32.OpenProcess(0x00100000 | 0x0001 | 0x1000, False, q)   # SYNCHRONIZE|TERMINATE|QUERY_LIMITED
+            if not h:
+                bo.append(q)                       # đã thoát giữa lúc chụp và lúc mở
+                continue
+            mo.append((q, h))                      # vào `mo` NGAY, trước mọi lời gọi có thể ném
+            if thu_hoi._khoa_danh_tinh(q) != khoa:  # handle đã giữ ⇒ phép so này không còn khe tái dùng
+                mo.pop()
+                k32.CloseHandle(h)
+                bo.append(q)
+                continue
+        giu, mo = mo, []                           # bàn giao: từ đây `_giet_ca_cay` chịu trách nhiệm đóng
+        return k32, giu, f"hau_due: giu {sorted(q for q, _ in giu)} bo {sorted(bo)}"
+    except BaseException as ex:
+        for _, h in mo:
+            try:
+                k32.CloseHandle(h)
+            except BaseException:
+                pass
+        mo = []
+        if isinstance(ex, (OSError, AttributeError, ValueError, ImportError)):
+            return None, None, f"hau_due: loi {type(ex).__name__} - CHAU KHONG DO DUOC"
+        raise
+
+
+def _cho_hau_due_windows(k32, giu, cho_giay: float):
+    """Chờ hậu duệ ĐÃ THOÁT thật, trong MỘT hạn đơn điệu `cho_giay` cho CẢ tập — không nhân theo số PID.
+
+    Nửa đầu hạn: chờ tự thoát (sau taskkill). Ai còn chưa báo hiệu ⇒ `TerminateProcess` qua chính handle
+    đã giữ, rồi chờ nốt tới CÙNG mốc hạn. Tổng thời gian ≤ `cho_giay` bất kể bao nhiêu hậu duệ.
+    `WAIT_FAILED`/mã lạ là KHÔNG ĐO ĐƯỢC (vào `hong`), không đọc thành quá hạn hay đã thoát.
+    Trả (dòng nhật ký, đã_thoát, còn_sống, hỏng) — ba tập PID để ca gọi đòi bằng chứng DƯƠNG.
+    """
+    import ctypes
+    WAIT_OBJECT_0, WAIT_TIMEOUT = 0x0, 0x102
+    het = time.monotonic() + cho_giay
+    moc_tu_nhien = het - cho_giay / 2
+
+    def cho(h, moc):
+        return k32.WaitForSingleObject(h, max(0, int((moc - time.monotonic()) * 1000)))
+
+    da_thoat, cho_ep, hong = [], [], []
+    for q, h in giu:
+        kq = cho(h, moc_tu_nhien)
+        if kq == WAIT_OBJECT_0:
+            da_thoat.append(q)
+        elif kq == WAIT_TIMEOUT:
+            cho_ep.append((q, h))
+        else:
+            hong.append((q, f"wait={kq:#x} err={ctypes.get_last_error()}"))
+    for _, h in cho_ep:
+        k32.TerminateProcess(h, 1)   # rc bị bỏ CÓ CHỦ ĐÍCH: có thể vừa tự thoát; phép chờ dưới mới quyết định
+    con_song = []
+    for q, h in cho_ep:
+        kq = cho(h, het)
+        if kq == WAIT_OBJECT_0:
+            da_thoat.append(q)
+        elif kq == WAIT_TIMEOUT:
+            con_song.append(q)
+        else:
+            hong.append((q, f"wait={kq:#x} err={ctypes.get_last_error()}"))
+    ep = sorted(q for q, _ in cho_ep)
+    if con_song or hong:
+        dong = f"hau_due CON SONG {sorted(con_song)} HONG {hong} (da ep {ep}) - CHAU KHONG DO DUOC"
+    else:
+        dong = (f"hau_due da thoat {sorted(da_thoat)} {len(da_thoat)}/{len(giu)} "
+                f"(WaitForSingleObject; ep TerminateProcess {ep})")
+    return dong, sorted(da_thoat), sorted(con_song), hong
+
+
+def _giet_ca_cay(p, cho_giay: float = 5.0, bang_chung: dict | None = None) -> str:
     """Giết con VÀ CHÁU. Trả một dòng ĐO ĐƯỢC về đường đã đi — kể cả đường KHÔNG làm được gì.
 
     Bốn chốt, mỗi chốt là một bài học đã trả giá:
@@ -4870,7 +4978,8 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
       KHÁC nhóm của tiến trình này; `start_new_session` hỏng âm thầm thì lùi về `p.kill()` chứ không
       giết cả runner ("test không được nhét PID của chính nó vào thứ mình đang thử giết").
     · `taskkill /T /F` KHÔNG đáng tin — trả `Access denied` ngay trên con do chính mình sinh. Gọi
-      xong phải KIỂM LẠI, còn sống thì `p.kill()`.
+      xong phải KIỂM LẠI, còn sống thì `p.kill()`. `rc=0` cũng chưa phải cháu đã thoát
+      (`TerminateProcess` bất đồng bộ) — nên giữ handle hậu duệ TRƯỚC và CHỜ chúng báo hiệu.
     · POSIX dùng lại launcher để chụp hậu duệ, giữ khoá danh tính và kiểm cả nhóm;
       ZOMBIE tính là ĐÃ CHẾT. `wait()` bên dưới thu hồi PID con trực tiếp.
     · "Đã gọi lệnh giết" ≠ "đã chết" — nên hàm này trả nhật ký từng bước, và ca gọi nó phải ĐO hành
@@ -4895,20 +5004,45 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
                         f"- chi giet PID, CHAU KHONG DO DUOC")
     else:
         import shutil
-        tk = shutil.which("taskkill")
-        if tk:
-            try:
-                r = subprocess.run([tk, "/T", "/F", "/PID", str(p.pid)],
-                                   capture_output=True, text=True, timeout=cho_giay)
-                buoc.append(f"taskkill rc={r.returncode} err={(r.stderr or '').strip()[:80]!r}")
-            except (OSError, subprocess.TimeoutExpired) as ex:
-                buoc.append(f"taskkill loi {type(ex).__name__}")
-            try:
-                p.wait(timeout=max(0.1, cho_giay / 2))
-            except subprocess.TimeoutExpired:
-                pass
-        else:
-            buoc.append("KHONG co taskkill")
+        k32, giu, ghi = _giu_hau_due_windows(p)    # TRƯỚC taskkill: sau đó cháu mồ côi không tìm lại được
+        buoc.append(ghi)
+        # Bằng chứng CÓ CẤU TRÚC cho ca gọi (t154): `do_duoc=False` cho tới khi phép chờ hậu duệ chạy xong.
+        bc = {"do_duoc": False, "giu": None, "song_truoc": None, "da_thoat": None, "con_song": None,
+              "hong": None}
+        if giu is not None:
+            bc["giu"] = sorted(q for q, _ in giu)
+            # WP748 r9/g9 — `OpenProcess` vẫn THÀNH CÔNG trên tiến trình ĐÃ THOÁT khi còn ai giữ handle
+            # (con giữ handle cháu qua `Popen`), nên "có trong `giu`" + "đã báo hiệu" KHÔNG chứng minh cháu
+            # còn SỐNG lúc dọn. Hỏi trạng thái đối tượng NGAY trên handle đã giữ, TRƯỚC taskkill:
+            # `WAIT_TIMEOUT` (0x102) với hạn 0 = chưa báo hiệu = còn sống. Mã khác ⇒ không vào tập sống.
+            bc["song_truoc"] = sorted(q for q, h in giu if k32.WaitForSingleObject(h, 0) == 0x102)
+            buoc.append(f"hau_due song truoc taskkill {bc['song_truoc']}")
+        if bang_chung is not None:
+            bang_chung.update(bc)
+            bc = bang_chung
+        try:
+            tk = shutil.which("taskkill")
+            if tk:
+                try:
+                    r = subprocess.run([tk, "/T", "/F", "/PID", str(p.pid)],
+                                       capture_output=True, text=True, timeout=cho_giay)
+                    buoc.append(f"taskkill rc={r.returncode} err={(r.stderr or '').strip()[:80]!r}")
+                except (OSError, subprocess.TimeoutExpired) as ex:
+                    buoc.append(f"taskkill loi {type(ex).__name__}")
+                try:
+                    p.wait(timeout=max(0.1, cho_giay / 2))
+                except subprocess.TimeoutExpired:
+                    pass
+            else:
+                buoc.append("KHONG co taskkill")
+            if giu is not None:
+                dong, da_thoat, con_song, hong = _cho_hau_due_windows(k32, giu, cho_giay)
+                buoc.append(dong)
+                bc.update(da_thoat=da_thoat, con_song=con_song, hong=hong,
+                          do_duoc=not con_song and not hong)
+        finally:
+            for _, h in giu or ():
+                k32.CloseHandle(h)
     if p.poll() is None:
         p.kill()
         buoc.append("p.kill()")
@@ -7020,11 +7154,35 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
         try:
             so2 = doc_pid(pid2, "fixture hỏng: cháu chiều 2")
             bang(doi_nhip(nhip2), "fixture hỏng: cháu chiều 2 không đập nhịp trong 15 s")
-            nhat_ky = _giet_ca_cay(p2)
+            # WP748 r9/g9 — "đã đập MỘT nhịp" chưa phải "còn sống ngay trước cú dọn". Đòi nhịp TĂNG trong
+            # cùng cửa sổ dùng để kết luận "im" bên dưới, để vế "im sau dọn" so được với vế "đập trước dọn".
+            dap0, a0, b0 = con_dap(nhip2)
+            bang(dap0, f"fixture hỏng: cháu chiều 2 không còn đập ngay trước cú dọn (nhịp {a0}->{b0})")
+            bc = {}
+            nhat_ky = _giet_ca_cay(p2, bang_chung=bc)
             bang(p2.poll() is not None, f"con chưa chết sau `_giet_ca_cay`: {nhat_ky}")
             dap, a, b = con_dap(nhip2)
             bang(not dap, f"`_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng {a}->{b}; "
                           f"nhật ký giết: {nhat_ky}")
+            if not (getattr(os, "killpg", None) and getattr(os, "getpgid", None)):
+                # WP748 r8/g8 — nhịp im CHƯA đủ trên Windows: taskkill may mắn thắng thì nhịp cũng im, kể cả
+                # khi `_giu_hau_due_windows` trả None. Đường giữ-handle phải tự có bằng chứng DƯƠNG: cháu
+                # (đã đập nhịp TRƯỚC cú giết, nên ảnh 0 hậu duệ là KHÔNG chấp nhận) nằm trong tập GIỮ và
+                # trong tập ĐÃ THOÁT theo `WaitForSingleObject`. Không đòi số PID > 1 (venv redirector
+                # có thể thêm/bớt tầng); chỉ đòi ĐÚNG PID cháu đo được.
+                bang("CHAU KHONG DO DUOC" not in nhat_ky, f"đường Windows KHÔNG ĐO ĐƯỢC cháu: {nhat_ky}")
+                bang(bc.get("giu") is not None and so2 in bc["giu"],
+                     f"ảnh hậu duệ thiếu CHÁU sống {so2} (mở/khoá danh tính hỏng?): giu={bc.get('giu')!r}; "
+                     f"nhật ký: {nhat_ky}")
+                bang(so2 in (bc.get("song_truoc") or ()),
+                     f"thiếu mốc CÒN SỐNG dương cho cháu {so2} trên handle đã giữ trước taskkill: "
+                     f"song_truoc={bc.get('song_truoc')!r}; nhật ký: {nhat_ky}")
+                bang(bc.get("do_duoc") is True and not bc.get("con_song") and not bc.get("hong"),
+                     f"phép chờ hậu duệ không xác nhận: con_song={bc.get('con_song')!r} "
+                     f"hong={bc.get('hong')!r}; nhật ký: {nhat_ky}")
+                bang(so2 in (bc.get("da_thoat") or ()) and set(bc["da_thoat"]) == set(bc["giu"]),
+                     f"thiếu mốc ĐÃ THOÁT dương cho cháu {so2}: da_thoat={bc.get('da_thoat')!r} "
+                     f"giu={bc.get('giu')!r}; nhật ký: {nhat_ky}")
         finally:
             if p2.poll() is None:
                 p2.kill(); p2.wait(timeout=5)

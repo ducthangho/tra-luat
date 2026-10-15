@@ -1,0 +1,25 @@
+chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# HINT.patch — review THI HÀNH no-p3-ho-so (#750) g1, lượt 1. CHỈ MÔ TẢ HƯỚNG SỬA: 0 hunk, không chép nội dung tệp authority.
+# reviewed_sha 6616026caff45771c417e61a1cf4a9b87eefcb95 · spec_sha256 c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410
+# reviewer: Claude Sonnet 5.5 (claude-sonnet-5-5, subagent review-sonnet-max, tự khai), KHÔNG phải codex.
+#
+# LỚP DUY NHẤT · P3 · neo-phu-nhan-chu-kho-thieu-chot-danh-tinh-566
+#   CHỖ: ops/land/pr732-wp685-land-evidence.yaml, khoá trang_thai_packet.quyet_dinh_chu_kho.neo_phu.ghi_chu
+#        (tại 6616026: dòng 72 là khoá, dòng 73–75 là thân; câu "comment quyết định landed của chủ kho" nằm ở dòng 73).
+#   VÌ SAO: thân ghi_chu gán comment cho "chủ kho" mà không kèm chốt danh tính, trong khi CHÍNH hồ sơ này (dòng 37 và dòng 63) ghi rằng
+#        OWNER + app null KHÔNG tách chủ kho khỏi phiên dùng token chủ kho (#566, tự khai). Phép đo (readback) chỉ cho: tài khoản
+#        ducthangho · OWNER · app null. "của chủ kho" là lời tự nhận trong thân comment (dòng 2 của body: dang_boi: chu_kho_tu_dang).
+#        Khối neo_phu có 0 chỗ nhắc "#566" (grep -c 566 trên dòng 64–75 = 0).
+#   HƯỚNG SỬA (mô tả; executor tự viết chữ): trong ĐÚNG khoá ghi_chu, thêm một mệnh đề theo mẫu của dòng 63 — người đăng đo được là
+#        tài khoản ducthangho (OWNER, app null); điều đó không tách chủ kho khỏi phiên dùng token chủ kho (#566, tự khai); việc comment là
+#        của chủ kho chỉ là lời trong thân comment. Hoặc thu hẹp cụm "của chủ kho" xuống đúng điều đo được. Không đụng tám khoá còn lại,
+#        không đụng dòng nào ngoài khối neo_phu, không đụng readback hay SHA256SUMS.txt (ghi_chu không nằm trong dây băm).
+#   PHÉP ĐO executor chạy sau sửa (sửa rồi phải COMMIT trước khi đo — phép so 6f121a3..HEAD không thấy cây chưa commit):
+#        (1) git diff --numstat 6f121a3..HEAD -- ops/land/pr732-wp685-land-evidence.yaml  ⇒ cột xoá vẫn 0 (cột thêm là 12 ở 6616026; số mới do executor đo, không phải số reviewer ước);
+#        (2) git diff -U0 cùng đường dẫn  ⇒ vẫn đúng MỘT hunk, dòng thêm đầu "    neo_phu:";
+#        (3) yaml.safe_load OK và ghi_chu vẫn chứa "pull/739#issuecomment-6103749546" (N3c); khoá landed_quyet_dinh vẫn vắng;
+#        (4) kiem-re với ĐỦ bốn biến CI trên merge tạm (merge-tree + commit-tree)  ⇒ "4 tep doi, 0 loi", rc 0;
+#        (5) grep -c 566 trên khối neo_phu  ⇒ ≥ 1.
+#   GIỚI HẠN: không đổi kết luận đo nào; không chặn merge; đây là lớp P3 (mỗi P3 còn mở cần quyết định ghi lại).
+#
+# KHÔNG CÓ HUNK ⇒ `patch` báo "Only garbage" (rc 2) và `git apply --check` báo "No valid patches" (rc 128; `--allow-empty` ⇒ rc 0) — theo thiết kế.

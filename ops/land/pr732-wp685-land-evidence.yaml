@@ -61,6 +61,18 @@ trang_thai_packet:
       null, than 1050 byte sha256 65d8b1e011415f045c3d959ff102380a469d6f63aef2fb81ad25d5dab01057af. Gia han land operator
       toi 2026-10-11T12:00:00Z chi de ghi dong nay va merge PR #739 bang merge commit khi CI bat buoc xanh. Than comment
       do phien nay SOAN, chu kho dang (OWNER + app null khong tach chu kho khoi token chu kho, #566 — tu khai).
+    neo_phu:
+      url: https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6103888794
+      luc: '2026-10-11T00:45:59Z (created_at = updated_at)'
+      nguoi_dang: ducthangho
+      author_association: OWNER
+      performed_via_github_app: null
+      so_byte: 631
+      sha256: cc38f7996531c5239f2e4e8ad760fcc20a2720a132f90de81251e65342e8f09b
+      ghi_chu: >-
+        Đây là neo PHỤ (packet no-p3-ho-so #750): comment quyết định landed của chủ kho trên #685, mọi giá trị đo
+        từ readback-comment-6103888794.json (gh api GET 2026-10-15 ~10:38Z). Neo chuẩn vẫn là neo_ben =
+        https://github.com/ducthangho/tra-luat/pull/739#issuecomment-6103749546; landed_hieu_luc_tu không đổi.
   landed_ly_do: >-
     PROTOCOL §10.2.4: landed = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping xong. Uy quyen
     6099610473 ghi: "gate tren master sau merge phai xanh moi duoc goi la landed". Xem con_thieu_de_goi_landed.

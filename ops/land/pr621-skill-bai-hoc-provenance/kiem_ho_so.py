@@ -488,7 +488,7 @@ PR_GHI_SO = 723   # quyet dinh chu kho phai nam tren CHINH PR mang ho so nay (bo
 # L7 — THAN = DUNG CAC DONG MAU, KHONG GI KHAC. L3..L6 moi vong deu tim them mot cach de GitHub hien mot dong mau la trich dan/code/thuoc tinh HTML/an ma bo kiem
 # van dem la quyet dinh (khoi rao khac loai, chu thich HTML, thut 4, trich dan lazy, CR don, NBSP, dau cach roi tab, lien ket/anh nhieu dong, BOM...). Bon vong cung MOT
 # hinh dang loi => sai o QUYET DINH GOC: co doc mot than Markdown TU DO roi doan dong nao HIEN THUONG. Bo quyet dinh do: than chi duoc gom cac dong mau (bat dau o cot 0,
-# toan ASCII in duoc) va dong trong. Ngon ngu chap nhan HUU HAN va DONG: 5 mau khop NGUYEN mot dong o cot 0, phan bien chi gom [A-Za-z0-9 _:,-]; moi cau truc an/bien
+# toan ASCII in duoc) va dong trong. Ngon ngu chap nhan DONG: chi 5 DANG dong co dinh khop NGUYEN mot dong o cot 0 (cong dong trong, khong gioi han so dong trong => tap THAN hop le la VO HAN, chi tap DANG dong la huu han; wp741 F03), phan bien chi gom [A-Za-z0-9 _:,-]; moi cau truc an/bien
 # dang dong (rao, HTML, trich dan, thut, lien ket, setext `===`, bang `|`) can mot dong hoac ky tu ngoai tap ay nen bi tu choi => khong con cau truc nao phai mo hinh hoa.
 # (wp741 M1, U01 #723 luot 7: ly le cu "dong bat dau bang chu cai chi co the la doan van thuong" SAI — dong dau cua setext, bang GFM, `Xem [muc](/u "` deu bat dau bang chu
 # cai; chung bi tu choi vi KHONG KHOP MAU, khong vi chu cai dau dong. Dung nap lai ly le cu de noi luat cho "dong van xuoi bat dau bang chu".)
@@ -616,7 +616,7 @@ def _ca_than():
         bad[f"trich dong {dong[:25]}"] = (nl(sua(4, dong)), f"dong: {dong[:60]!r}")
     for cp in (0xA0, 0xFEFF, 0x2028, 0x200B):
         bad[f"ma ky tu {cp}"] = (nl(sua(4, L[4] + chr(cp))), f"dong 5: than co ky tu ngoai ASCII in duoc (U+{cp:04X})")
-    # Cac phep bao toan ngu nghia duoc ap cho CA ca duong va ca am:
+    # Cac phep bao toan ngu nghia (tren TAP CA HIEN CO — khong phai dinh ly cho moi chuoi: vd than co CR don o CUOI se thanh CRLF hop le khi noi LF; codex luot 3 #741) duoc ap cho CA ca duong va ca am:
     # CRLF, dong trong/chi co space. Khong lay ket qua than_sai/_MAU lam oracle.
     for ten, b in list(hop.items()):
         for eol in ("\n", "\r\n"):

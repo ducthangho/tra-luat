@@ -122,5 +122,8 @@ ci_policy_ghi_chu: luot CI tu chay giua vong va thi huy; luot bi huy/bo qua KHON
 push_policy: push_nhanh_agent_va_pr_758_da_mo_theo_chu_kho
 thay_the_cho:
   - wp741-r2-g2-claude-20261015
+da_bi_thay_the: wp741-r3-g4-claude-20261015
+da_bi_thay_the_ghi_chu: >-
+  Codex luot 2 tren PR #761 (b9bf78b) F05 P2: required_checks chep thieu nghiem_thu r3; thay bang g4 (van neo r3).
 generation_truoc: wp741-r2-g2-claude-20261015
 generation_truoc_ghi_chu: g2 con han toi 2026-10-17T12:00:00Z => bia mo hai chieu. g2 khong duoc dung de thi cong (cho phe duyet ngoai le).

@@ -1,0 +1,93 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 741
+packet_id: wp741
+mission_issue: 738
+revision: 2
+generation: 2
+lease_id: wp741-r2-g2-claude-20261015
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [737]
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+assurance_ghi_chu: >-
+  Theo spec r2 muc review_class: assurance = verdict codex approve tren head cuoi (ho openai vs ho claude, bang chung
+  do_may qua launcher run.json). Uy quyen land cua chu kho la viec RIENG, khong phai human_audited.
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp741-r2.md
+spec_sha256_required: 9b16057b10cd9f6b1f042614faf98f59ce227c595acbb9e292df706ac0fed704
+spec_hash: 9b16057b10cd9f6b1f042614faf98f59ce227c595acbb9e292df706ac0fed704
+prompt_path: ops/specs/wp741-r2.md
+prompt_sha256_required: 9b16057b10cd9f6b1f042614faf98f59ce227c595acbb9e292df706ac0fed704
+write_set:
+- ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py
+- ops/land/pr621-skill-bai-hoc-provenance/SHA256SUMS.txt
+- ops/land/pr621-skill-bai-hoc-land-evidence.yaml
+write_set_hash: 66ac1741b14eae38217f77992d04af296b147457c5bb95011121b46bf78d0adc
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py
+- ops/land/pr621-skill-bai-hoc-provenance/SHA256SUMS.txt
+- ops/land/pr621-skill-bai-hoc-land-evidence.yaml
+effective_write_set_nguon: khai_bao_vi_policy_vang
+effective_write_set_ghi_chu: >-
+  .github/coordination/change-impact.v1.json KHONG co tren origin/master (git ls-tree, 15-10-2026) => closure KHONG DO
+  DUOC. Ngoai le ben theo spec r2 muc effective_write_set; chi hieu luc khi chu kho xac nhan trong comment cap lease g2.
+required_checks:
+- kiem_ho_so.py --repo TONG DAT rc=0 va khong --repo rc=2
+- kiem_ho_so.py --repo --tu-kiem 0 song sot 0 chet vi loi, PHAN CHUNG AM n/n
+- ci.yml gate XANH tren head cuoi truoc merge (khong tinh luot bi huy/bo qua)
+land_obligations: []
+branch: agent/wp741-r1-g1-claude
+branch_ghi_chu: g2 tiep quan dung nhanh g1 (PR #758); tien le cai-cong-cu-sigpipe r2-g2 giu ten nhanh g1.
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6f121a3810045af27bf65eb723edf36b29e387f2
+start_from_sha: a1e6b65bb58cfdfcca1d74c6213c185fe2ea82da
+reviewed_sha_required: a1e6b65bb58cfdfcca1d74c6213c185fe2ea82da
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/741
+granted_on_instruction_note: >-
+  Chu kho chi thi trong phien session_01Fd7YEcw3odAk7QKkydKycE (15-10-2026), nguyen van: "Xu ly cho toi cac P1, P2 cua
+  #754 truoc" (sau khi codex connector ra 6 P1 + 3 P2 tren PR #754). Ngoai le effective_write_set va dieu kien CI
+  tren head cuoi can chu kho xac nhan bang comment ben tren #741 truoc khi g2 duoc dung de merge.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-15T11:36:09Z'
+  so_nhanh: 'ls-remote 538 == cuc bo 538, thieu 0'
+  ket_qua: 'ai-dang-giu ca ba duong dan: NGUOI_GIU 1 = wp741-r1-g1-claude-20261015 (chinh lease duoc thay o day); khong co writer nao khac'
+leased_at_utc: '2026-10-15T11:40:00Z'
+heartbeat_at: '2026-10-15T11:40:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-17T12:00:00Z'
+lease_expires_at_utc: '2026-10-17T12:00:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: null
+review_rounds_limit: 10
+review_rounds_limit_basis: tran canon ADR-0048; khong co khoi nang_tran. Da dung tren #758 4 luot codex.
+requires_live: false
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+ci_policy_ghi_chu: luot CI tu chay giua vong va thi huy; luot bi huy/bo qua KHONG tinh la xanh (spec r2 nghiem_thu).
+push_policy: push_nhanh_agent_va_pr_758_da_mo_theo_chu_kho
+thay_the_cho:
+  - wp741-r1-g1-claude-20261015
+generation_truoc: wp741-r1-g1-claude-20261015
+generation_truoc_ghi_chu: g1 con han toi 2026-10-17T07:00:00Z => bia mo hai chieu (da_bi_thay_the dat tren chinh tep g1).

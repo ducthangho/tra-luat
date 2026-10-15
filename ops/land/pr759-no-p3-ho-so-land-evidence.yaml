@@ -3,8 +3,10 @@
 # (tien le pr721 #698, pr732 #685).
 #
 # TRANG THAI: merged (c7daa8c), `landed: false` — CHO CHU KHO quyet o PR ghi so (cung mau #698/PR #749, #685/PR #739).
-# Gate hau merge tren c7daa8c CON CHAY o hai lan doc (16:28Z, 16:33Z): xem con_thieu_de_goi_landed.
-# "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# Gate hau merge tren c7daa8c: run 38768655610 completed/success, 14/14 job success (lan doc 3, 16:57Z) — xem
+# post_merge_checks. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# Sua theo Codex PR #762: P2 4285859828 (them khoa land-evidence chuan muc goc) va P1 4285859815 (provenance gate
+# truoc/sau merge: readback run + jobs, blob ci.yml tai head, log tho moi job, bang tom tat) — do 16:57Z–17:05Z.
 # NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu
 # cua luot review/phien khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr759-no-p3-ho-so-provenance/ (SHA256SUMS.txt). Moi phep do REST: `gh api <duong dan>` (GET),
@@ -34,6 +36,20 @@ session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
 recorded_by: claude-session (subagent ghi so cua phien dieu phoi; phien chinh commit/push)
 mat_quan_sat_duoc_the_nao: >-
   Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
+
+# Khoa land-evidence chuan muc goc (PROTOCOL "Land evidence tach approval khoi thao tac"; tien le pr721).
+authorized_head_sha: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/759#issuecomment-6190971474
+land_operator: ducthangho
+land_operator_nguon: >-
+  measured — readback-pr-759.json merged_by ducthangho (nguoi bam merge PR #759). Khac `role: land_operator` o tren:
+  vai ay la cua phien GHI SO, khong phai cua thao tac merge.
+merge_method: merge
+merge_method_nguon: >-
+  measured — `git log --format='%H %P' -1 c7daa8c` = hai cha (0ed5b63, 39dbfbf) => merge commit, khong squash/rebase.
+merge_commit: c7daa8cf6ef3e3a118d525536587e6e87985ed56
+merge_commit_ghi_chu: 'Chi tiet (parents, tree, diff) o trang_thai_packet.merge_commit.'
 
 trang_thai_packet:
   merged: true
@@ -74,22 +90,29 @@ trang_thai_packet:
       nay vi the KHONG chua neo cua comment uy quyen cuoi — dung doc su vang mat ay thanh thieu uy quyen.
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-C7DAA8C
-      trang_thai: mo
+      trang_thai: da_dong
       mo_ta: >-
         measured — run 38768655610 (workflow gate, .github/workflows/ci.yml, event push, head_branch master, head_sha c7daa8c,
         run_attempt 1, created_at 16:23:57Z). Lan doc 1 (16:28Z, readback-run-38768655610.json + readback-jobs-38768655610.json):
         in_progress, 13 job: 2 success (chuan-bi, gate-registry), 11 in_progress. Lan doc 2 (16:33:44Z,
         readback-run-38768655610-lan2.json + readback-jobs-38768655610-lan2.json): in_progress, 13 job: 4 success (chuan-bi,
         gate-registry, gate-packet-loop, gate (ubuntu-latest)), 9 in_progress (gate-ops, gate-cong-cu 0..7); job
-        gate-cong-cu-gop chua sinh. KHONG doc lan ba (gioi han ghi so).
-      can_lam: 'Doc lai run 38768655610 va jobs; dong muc nay khi completed/success va moi job success.'
+        gate-cong-cu-gop chua sinh.
+      dong_bang: >-
+        measured — lan doc 3 (16:57Z, readback-run-38768655610-lan3.json + readback-jobs-38768655610-lan3.json): status
+        completed, conclusion success, updated_at 16:52:22Z, 14 job: 14 success / 0 failure / 0 skipped / 0 not_run (them
+        gate-cong-cu-gop 116551852435). Log tho ca 14 job + bang tom tat run-38768655610-tom-tat.json: 0 dong `##[error]`,
+        chay che do day_du (push). Chi tiet: post_merge_checks[0].
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: cho_chu_kho
       mo_ta: 'Chu kho quyet `landed` tai PR ghi so (uy_quyen_head_cuoi). Ho so nay KHONG tu goi landed.'
 
 input_packet_generations:
   - packet_issue: 750
+    packet_id: no-p3-ho-so
     revision: 2
+    generation: 1
+    lease_id: no-p3-ho-so-r2-g1-claude
     spec_path: ops/specs/no-p3-ho-so-r2.md
     spec_sha256: c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410
     write_set:
@@ -139,7 +162,8 @@ authorization:
     thu_tu_thoi_gian: >-
       measured — comment 11:27:56Z dang TRUOC khi CI tren 39dbfbf xong: check run cuoi gate-cong-cu-gop completed
       11:54:44Z (readback-check-runs-39dbfbf.json). Dong "CI xanh tren exact head" trong than vi the CHUA dung luc dang, va
-      THANH dung sau 11:54:44Z (16 success + 1 skipped). Merge 16:23:53Z SAU khi CI xanh va sau Codex (codex_connector).
+      THANH dung sau 11:54:44Z (gate run 38727265811 completed/success luc 11:54:45Z — pre_merge_checks[0]; luu y: luot
+      PR chay che do duong_nhanh, khong phai day du). Merge 16:23:53Z SAU khi CI xanh va sau Codex (codex_connector).
   codex_connector:
     do_duoc: >-
       measured — readback-reactions-pr-759.json: reaction +1 cua chatgpt-codex-connector[bot] 2026-10-15T11:32:47Z.
@@ -178,11 +202,167 @@ review:
 ci_truoc_merge:
   exact_head: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
   ket_qua: >-
-    measured — readback-check-runs-39dbfbf.json (`gh api repos/ducthangho/tra-luat/commits/39dbfbf…/check-runs?per_page=100`):
-    total_count 17, tat ca completed: 16 success + 1 skipped (`mo`, 11:25:44Z). Gom thu-hoi x2, chuan-bi, gate-registry,
-    gate-packet-loop, gate (ubuntu-latest), gate-ops, gate-cong-cu (ubuntu-latest, 0..7), gate-cong-cu-gop. Check run hoan
-    tat cuoi: gate-cong-cu-gop 11:54:44Z.
+    Bang chung chinh la pre_merge_checks (readback run + jobs, blob ci.yml tai head, log tho moi job, bang tom tat).
+    readback-check-runs-39dbfbf.json (`gh api repos/ducthangho/tra-luat/commits/39dbfbf…/check-runs?per_page=100`) chi la
+    ban tong hop: 17 check run = 14 job cua run gate 38727265811 + 2 job thu-hoi (run 38727261380, 38727537692) + 1 job `mo`
+    skipped (run 38727258461) — doi chieu tung run o pre_merge_checks[0] va pre_merge_checks_phu.
   khong_do: 'not_measured — CI chi ubuntu (lease ci_budget: khong workflow_dispatch, khong Windows); diff chi tep ho so.'
+
+pre_merge_checks:
+  - id: GATE-PR-39DBFBF
+    run_id: 38727265811
+    run_attempt: 1
+    run_url: https://github.com/ducthangho/tra-luat/actions/runs/38727265811
+    workflow_name: gate
+    workflow_path: .github/workflows/ci.yml
+    workflow_id: 309682866
+    workflow_blob: 2e3095bb4cadf77aa020f682dfd8e4125943ca5e
+    workflow_sha256: 226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0
+    workflow_tep: ops/land/pr759-no-p3-ho-so-provenance/run-38727265811-ci.yml-tai-39dbfbf.yml
+    workflow_nguon: "measured — `git rev-parse 39dbfbf:.github/workflows/ci.yml` + `git show 39dbfbf:.github/workflows/ci.yml | sha256sum`."
+    event: pull_request
+    head_branch: claude/no-p3-ho-so-g1
+    head_sha: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
+    tree: 00a7e5fdf505086ea1e06219ad1179aa8e14acd5
+    tree_nguon: "measured — `git rev-parse 39dbfbf^{tree}`."
+    checkout_thuc: >-
+      measured — log 14/14 job (moi job co checkout): `git checkout refs/remotes/pull/759/merge`, `git log -1 --format=%H`
+      = f45e23e9108039f98c865b618a4324961faf020b ("Merge 39dbfbf… into 0ed5b63…", ref merge tong hop cua pull_request).
+      readback-commit-f45e23e.json (`gh api repos/ducthangho/tra-luat/git/commits/f45e23e…`): tree 00a7e5fd…, cha
+      (0ed5b63, 39dbfbf) => tree checkout BANG tree 39dbfbf (truong checkout_tree_bang_tree_head = true o ca 14 job).
+    status: completed
+    conclusion: success
+    created_at: '2026-10-15T11:25:47Z'
+    updated_at: '2026-10-15T11:54:45Z'
+    jobs:
+      tong: 14
+      passed: 14
+      failed: 0
+      skipped: 0
+      not_run: 0
+    buoc_skipped_trong_job_passed: >-
+      measured (readback-jobs-38727265811.json) — chuan-bi 1 (nhanh che do push/dispatch); gate (ubuntu-latest) 7: tl selftest
+      x2, golden-test, determinism-audit strict, release-check full, release-verify strict (lane LAND), release-bundle x2;
+      gate-ops 3: lease-publish selftest, bo ca gate trong cgroup, gate lifecycle selftest; gate-packet-loop 1: packet-loop
+      selftest. Nguyen nhan: chuan-bi in `che_do=duong_nhanh` (log job 116396496603) — PR chi doi tep ho so, ci.yml bo buoc
+      nang bang `if:` muc buoc. Tuc gate TRUOC merge la gate DUONG NHANH, khong phai gate day du.
+    bang_chung_duong:
+      tom_tat: ops/land/pr759-no-p3-ho-so-provenance/run-38727265811-tom-tat.json
+      log_tho: ops/land/pr759-no-p3-ho-so-provenance/run-38727265811-logs/ (14 tep .log.gz.b64, log_sha256 cua ban THO)
+      readback_run: ops/land/pr759-no-p3-ho-so-provenance/readback-run-38727265811.json
+      readback_jobs: ops/land/pr759-no-p3-ho-so-provenance/readback-jobs-38727265811.json
+      dau_hieu: >-
+        gate-registry "ĐĂNG KÝ: 23/23", "PHẢN CHỨNG: 1025/1025 đỏ đúng", "TỔNG: ĐẠT"; gate-ops "CA: 104/104 dat",
+        "DOT BIEN: 383/383 bi giet dung ly do", "bien_nhan_v2_test: 68/68 ca đạt"; gate (ubuntu-latest) "cong_cu_test:
+        56/56 đạt", "nền: 13/13 đạt"; gate-cong-cu manh 0..7 moi manh "cong_cu_test: 56/56 đạt" + "MẢNH k/8: 58|59/58|59
+        đột biến bán kính 1"; gate-cong-cu-gop "GOM MẢNH 8/8". 0 dong `##[error]` o 14/14 log.
+    command: '.github/workflows/ci.yml (workflow gate), moi job cua run; lenh tung buoc = truong buoc trong tom tat va log tho.'
+    required_checks: >-
+      measured (readback-rules-branches-master.json, `gh api repos/ducthangho/tra-luat/rules/branches/master`): bat buoc
+      gate (ubuntu-latest), gate-packet-loop (ubuntu-latest), gate-ops (ubuntu-latest), gate-cong-cu-gop (ubuntu-latest)
+      — ca bon success o run nay. Branch protection kieu cu: not_measured (`.../branches/master/protection` 403).
+    provider: github-actions
+    execution_surface: github_hosted_runner
+    transport: github_actions
+    environment: >-
+      ubuntu-latest (nhan runner). Image theo dong "Included Software" cua log: 8 job ubuntu24/20261004.327, 6 job
+      ubuntu24/20261012.334 — hai image khac nhau trong cung run.
+    chua_do_duoc:
+      - 'Windows: not_run — chuan-bi.outputs.os chi them windows-latest khi workflow_dispatch hoac PR nhan `windows`; PR #759 khong co ca hai.'
+      - 'Buoc nang (tl selftest, golden, determinism, release-*, packet-loop selftest, lease-publish selftest): not_run o luot PR (duong_nhanh) — do o post_merge_checks.'
+      - 'Doc lap danh tinh runner/attestation: not_measured — chi co log va readback GitHub luu.'
+
+pre_merge_checks_phu:
+  - run_id: 38727261380
+    workflow_path: .github/workflows/ops-thu-hoi-admission.yml
+    event: pull_request_target
+    head_sha: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
+    ket_qua: 'measured (readback-run/jobs-38727261380.json) — completed/success, 1 job thu-hoi success, 11:25:45Z..11:26:08Z.'
+  - run_id: 38727537692
+    workflow_path: .github/workflows/ops-thu-hoi-admission.yml
+    event: pull_request_target
+    head_sha: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
+    ket_qua: 'measured (readback-run/jobs-38727537692.json) — completed/success, 1 job thu-hoi success, 11:28:07Z..11:28:26Z.'
+  - run_id: 38727258461
+    workflow_path: .github/workflows/ops-open-pr.yml
+    event: push
+    head_sha: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
+    ket_qua: >-
+      measured (readback-run/jobs-38727258461.json) — completed/skipped, 1 job `mo` skipped. `mo` la job mo PR tu dong khi
+      push nhanh claude/** | ops/** mang nhan [open-pr] (`git show 39dbfbf:.github/workflows/ops-open-pr.yml`: `if:
+      contains(github.event.head_commit.message, '[open-pr]')`); commit 39dbfbf khong mang nhan => skipped dung thiet ke.
+      KHONG phai required check (khong co trong readback-rules-branches-master.json). Gia thiet "job mo duong cho PR draft"
+      KHONG dung — do: dieu kien la nhan trong thong diep commit, khong lien quan draft.
+
+post_merge_checks:
+  - id: GATE-HAU-MERGE-C7DAA8C
+    run_id: 38768655610
+    run_attempt: 1
+    run_url: https://github.com/ducthangho/tra-luat/actions/runs/38768655610
+    workflow_name: gate
+    workflow_path: .github/workflows/ci.yml
+    workflow_id: 309682866
+    workflow_blob: 2e3095bb4cadf77aa020f682dfd8e4125943ca5e
+    workflow_sha256: 226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0
+    workflow_tep: ops/land/pr759-no-p3-ho-so-provenance/run-38768655610-ci.yml-tai-c7daa8c.yml
+    workflow_nguon: "measured — `git rev-parse c7daa8c:.github/workflows/ci.yml` (cung blob voi 39dbfbf)."
+    event: push
+    head_branch: master
+    head_sha: c7daa8cf6ef3e3a118d525536587e6e87985ed56
+    tree: 00a7e5fdf505086ea1e06219ad1179aa8e14acd5
+    tree_nguon: >-
+      measured — `git rev-parse c7daa8c^{tree}` = `git rev-parse 39dbfbf^{tree}` = 00a7e5fd… => gate sau merge do DUNG noi
+      dung da duyet (authorized_head_sha), va cung tree voi ref merge f45e23e cua luot PR.
+    checkout_thuc: >-
+      measured — 13/14 log co `git log -1 --format=%H` = c7daa8cf6ef3e3a118d525536587e6e87985ed56 (checkout_dung_head true);
+      chuan-bi khong checkout (buoc checkout skipped tren push).
+    status: completed
+    conclusion: success
+    created_at: '2026-10-15T16:23:57Z'
+    updated_at: '2026-10-15T16:52:22Z'
+    jobs:
+      tong: 14
+      passed: 14
+      failed: 0
+      skipped: 0
+      not_run: 0
+    buoc_skipped_trong_job_passed: >-
+      measured (readback-jobs-38768655610-lan3.json) — chi cac buoc rieng cua PR/duong nhanh: chuan-bi 2 (checkout, phan loai
+      diff chi pull_request); gate 4 (DUONG_NHANH liet ke, PR head EOL base, tl selftest luot PR, release-verify lane WORKER);
+      gate-packet-loop 1 (DUONG_NHANH liet ke); gate-ops 3 (DUONG_NHANH liet ke, DUONG_NHANH kiem re, gate lifecycle selftest
+      nen khong cgroup). Che do day_du (push): cac buoc nang bi bo o luot PR DA CHAY o day.
+    bang_chung_duong:
+      tom_tat: ops/land/pr759-no-p3-ho-so-provenance/run-38768655610-tom-tat.json
+      log_tho: ops/land/pr759-no-p3-ho-so-provenance/run-38768655610-logs/ (14 tep .log.gz.b64, log_sha256 cua ban THO)
+      readback_run: ops/land/pr759-no-p3-ho-so-provenance/readback-run-38768655610-lan3.json
+      readback_jobs: ops/land/pr759-no-p3-ho-so-provenance/readback-jobs-38768655610-lan3.json
+      dau_hieu: >-
+        gate (ubuntu-latest) "== tl selftest 1731/1731 ==" kem {"ok": true, "name": "tl-selftest", "returncode": 0},
+        "== gen_instructions selftest 44/44 ==", "== transport selftest 12/12 ==", "TỔNG: ĐẠT"; gate-packet-loop
+        "nền: 293/293 đạt · BỎ QUA: 1", "TỔNG: ĐẠT"; gate-ops "lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0",
+        "CA: 104/104 dat", "DOT BIEN: 383/383"; gate-registry "PHẢN CHỨNG: 1025/1025 đỏ đúng", "TỔNG: ĐẠT"; gate-cong-cu manh
+        0..7 "cong_cu_test: 56/56 đạt" + "MẢNH k/8"; gate-cong-cu-gop "GOM MẢNH 8/8". 0 dong `##[error]` o 14/14 log.
+    command: '.github/workflows/ci.yml (workflow gate), moi job cua run; lenh tung buoc = truong buoc trong tom tat va log tho.'
+    provider: github-actions
+    execution_surface: github_hosted_runner
+    transport: github_actions
+    environment: ubuntu-latest
+    chua_do_duoc:
+      - 'Windows: not_run — push master khong them windows-latest (chuan-bi.outputs.os chi them khi workflow_dispatch hoac PR nhan windows).'
+      - 'gate-packet-loop "BỎ QUA: 1" — mot ca tu bo qua theo nen; khong tach ca nao trong ho so nay (not_measured).'
+      - 'Doc lap danh tinh runner/attestation: not_measured — chi co log va readback GitHub luu.'
+
+bookkeeping:
+  - id: PR-GHI-SO-762
+    pr: https://github.com/ducthangho/tra-luat/pull/762
+    nhanh: claude/bookkeeping-p3a-land
+    noi_dung: >-
+      ho so land nay + ops/land/pr759-no-p3-ho-so-provenance/; 3 verdict + HINT + bien nhan review vao ops/reviews/;
+      merge lease (9cfe62e) va dac ta (a9ef33c) vao master.
+    trang_thai: mo
+  - id: DONG-ISSUE-750
+    trang_thai: cho_chu_kho
+    noi_dung: 'Dong #750 sau khi chu kho quyet landed (land_obligations muc 6).'
 
 land_obligations:
   nguon: 'lease no-p3-ho-so-r2-g1-claude truong land_obligations (6 muc).'

@@ -99,7 +99,7 @@ trang_thai_packet:
         lam_gi: >-
           Tra loi P1 Codex discussion_r4270352912 (ket luan REST co the den tu workflow cu/no-op). Do 2026-10-14 tu
           phien ghi so: log tho CA 14 job cua run 38099612244 attempt 1 (tai qua get_job_logs -> blob URL, khong sua),
-          luu gzip -n -9 o run-38099612244-logs/; bang tom tat run-38099612244-tom-tat.json (log_sha256 cua ban THO).
+          luu gzip -n -9 roi base64 (.log.gz.b64, vi kiem-re tu choi tep nhi phan) o run-38099612244-logs/; bang tom tat run-38099612244-tom-tat.json (log_sha256 cua ban THO).
         workflow_dinh_nghia: >-
           run.path .github/workflows/ci.yml, workflow_id 309682866, head_sha 4c7ff0f. Blob ci.yml TAI CHINH 4c7ff0f
           (KHONG lay ban o HEAD hien tai): 2e3095bb4cadf77aa020f682dfd8e4125943ca5e, luu nguyen byte run-38099612244-ci.yml-tai-4c7ff0f.yml,
@@ -114,7 +114,8 @@ trang_thai_packet:
           gate-cong-cu-gop: "GOM MẢNH 8/8". gate-packet-loop: "nền: 293/293 đạt", "TỔNG: ĐẠT". Day du tung job (lenh,
           ket qua tung buoc, dong dau hieu) trong run-38099612244-tom-tat.json.
         artifacts: >-
-          9/9 artifact cua run luu nguyen zip o run-38099612244-artifacts/, sha256 khop truong digest REST.
+          9/9 artifact cua run luu nguyen zip (dang base64 .zip.b64, giai `base64 -d`) o run-38099612244-artifacts/,
+          sha256 cua byte zip sau giai ma khop truong digest REST.
           gate-evidence-ubuntu-latest-1: tl-selftest-Linux.json ghi lenh ["python","scripts/tl.py","--selftest"],
           returncode 0, kem .out. gate-cong-cu-manh-ubuntu-latest-0..7: manh-k.txt, dong dau MANH ghi
           head 4c7ff0f71697f13719dcb4a2b82e9fc3514110df va sha256_test a9c2a836…f8cf = sha256 `git show 4c7ff0f:ops/cong_cu_test.py` (do lai, khop) — neo checkout

@@ -74,3 +74,7 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r10-g10-claude-windows-20261015
+da_bi_thay_the_ly_do: >-
+  Protocol §3.6: hon 30 phut khong co tien trien sau gate symlink bi ngat;
+  owner thu hoi g9 va cho phep r10/g10 tai Issue #748 comment 6184129511.

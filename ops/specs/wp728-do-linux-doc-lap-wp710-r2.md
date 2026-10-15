@@ -39,8 +39,14 @@ Sửa thêm một lời khai sai của r1: r1 trỏ `ops/reviews/wp710-g5-luot-9
 - **Assurance — đích, không phải lời khai đã đạt.** Nhãn đích là `cross_approved`, nhưng bằng chứng họ model hiện có KHÔNG
   đạt mức `do_may`: `run.json` của `.claude/dev/launcher.py` ghi provider/transport suy từ tên tệp chạy và băm log, không
   đọc model thực phục vụ lượt (cross-review #755 F04, đo trên `4c9981f`); lease WP710 cũng chỉ là lời khai Executor. Vì
-  vậy biên nhận phải ghi mức bằng chứng họ model đúng như có (`khai_co_audit` nếu chủ kho audit, ngược lại
-  `khong_do_duoc`) và KHÔNG tự nâng thành `do_may`. Chủ kho đòi `do_may` ⇒ đi đường human audit độc lập.
+  vậy biên nhận phải ghi mức bằng chứng họ model đúng như có và KHÔNG tự nâng thành `do_may`.
+  **Luật cứng theo bộ kiểm canonical** (`ops/bien_nhan_v2.py:727–750`, đo trên `6f121a3`; Codex Review PR #755
+  `discussion_r4282002998`): biên nhận khai `cross_approved` chỉ hợp lệ khi CẢ reviewer LẪN executor có mức bằng chứng họ
+  model `khai_co_audit` KÈM người audit được ghi tên (`nguoi_audit`/`audit_actor`, và `executor_nguoi_audit` cho
+  executor), hoặc `do_may` kèm tham chiếu đo; bộ kiểm TỪ CHỐI `cross_approved` khi một bên là `khong_do_duoc`. Vì vậy:
+  chủ kho audit và ghi tên cho cả hai danh tính ⇒ khai `cross_approved`/`khai_co_audit`; bất kỳ bên nào còn
+  `khong_do_duoc` ⇒ KHÔNG được khai `cross_approved` — lượt đo chuyển đường `human_audited` (người audit độc lập ghi
+  verdict bền neo exact SHA) trước khi dùng kết quả để đóng lớp. Biên nhận phải qua chính bộ kiểm ấy (rc 0) mới hợp lệ.
 
 ## Đích đo — neo theo NỘI DUNG, không theo nhánh
 
@@ -62,8 +68,13 @@ dung WP710, không sửa nó.
 (a) `git merge-base --is-ancestor 8b59185975a938504de5963d2310e574dd4858b2 <reviewed_sha>` rc 0;
 (b) `git rev-parse <reviewed_sha>:scripts/nlm-credential-refresh.ps1` = `24240a31…`;
 (c) `git rev-parse <reviewed_sha>:scripts/nlm-credential-refresh.Tests.ps1` = `4dc5994c…`.
-Ba trạng thái: đạt · không đạt · **KHÔNG ĐO ĐƯỢC** (lệnh git lỗi, ref không có cục bộ, đường dẫn không có trong tree) —
-hai trạng thái sau đều DỪNG lượt trước M1.
+**Đủ lịch sử TRƯỚC khi đọc rc của (a)** (`docs/PROTOCOL_DA_PHIEN.md:914–916`; Codex Review PR #755
+`discussion_r4282003005`): trong clone nông, `merge-base --is-ancestor` trả rc 1 cho một hậu duệ HỢP LỆ dù cả hai object có
+mặt. Nên trước (a) đòi `git rev-parse --is-shallow-repository` in `false` (clone nông thì `git fetch --unshallow` rồi đo
+lại); còn nông, hoặc lệnh lỗi ⇒ **KHÔNG ĐO ĐƯỢC**, KHÔNG được đọc rc 1 thành "không đạt". Chỉ khi lịch sử đủ: rc 0 = là
+tổ tiên, rc 1 = không phải, rc khác = KHÔNG ĐO ĐƯỢC.
+Ba trạng thái: đạt · không đạt · **KHÔNG ĐO ĐƯỢC** (lệnh git lỗi, ref không có cục bộ, đường dẫn không có trong tree, lịch
+sử nông) — hai trạng thái sau đều DỪNG lượt trước M1.
 
 **Byte THỰC THI phải là chính hai blob ấy** (cross-review #755 F01 — kiểm object Git không ràng buộc tệp được mở để chạy;
 smudge/attributes hay một bản sao lạc có thể khác blob). Quy trình bắt buộc: xuất bằng `git cat-file blob
@@ -144,7 +155,9 @@ phối dựng ba tệp dưới đây TRƯỚC khi phát lượt; reviewer chỉ 
 
 ## Phép đo
 
-- **M1 — suite.** `pwsh -NoProfile -File scripts/nlm-credential-refresh.Tests.ps1` trên Linux. Ghi
+- **M1 — suite.** `pwsh -NoProfile -File <SCRATCH>/nlm-credential-refresh.Tests.ps1` trên Linux, trong đó `<SCRATCH>`
+  là CHÍNH thư mục đã xuất hai blob bằng `git cat-file blob` và băm ở N0 — KHÔNG chạy bản trong checkout (Codex Review
+  PR #755 `discussion_r4282002995`: bản checkout có thể khác blob vì filter/sửa cục bộ). Ghi
   `$PSVersionTable.PSVersion`, `python --version`, `python3 --version`, `uname -r`, rc, dòng tổng kết nguyên văn.
 - **M2 — zombie nhiều chu kỳ.** Ca `v` (`Tests.ps1:991–1027`) chỉ kiểm sau chu kỳ đầu; lời khai "4 chu kỳ, 0 zombie"
   (Executor WP710; thời điểm đo gốc: KHÔNG ĐO ĐƯỢC) của
@@ -191,10 +204,11 @@ ba packet đã land ấy được trả lời riêng trên PR #724).
 
 ## nghiem_thu (mỗi tiêu chí kèm phép đo làm nó ĐỎ)
 
-- **N0 — preflight.** Đạt khi CẢ BỐN đúng: luật chấp nhận SHA (a)(b)(c); sha256 byte thô của hai tệp xuất bằng `git
+- **N0 — preflight.** Đạt khi CẢ BỐN đúng: lịch sử không nông VÀ luật chấp nhận SHA (a)(b)(c); sha256 byte thô của hai tệp xuất bằng `git
   cat-file blob` khớp bảng; sha256 tarball khớp; runtime `pwsh` resolve đúng thư mục giải nén và in `7.4.6`. ĐỎ (dừng
   TRƯỚC M1) với từng phản chứng: (i) `reviewed_sha` hợp lệ nhưng tệp đem chạy khác một byte; (ii) ref không có cục bộ
-  hoặc đường dẫn bị đổi tên ⇒ KHÔNG ĐO ĐƯỢC; (iii) tarball lệch một byte; (iv) `PATH` đặt một `pwsh` khác lên trước.
+  hoặc đường dẫn bị đổi tên ⇒ KHÔNG ĐO ĐƯỢC; (ii') clone `--depth 1` rồi fetch đúng OID cha ⇒ (a) phải ra KHÔNG ĐO
+  ĐƯỢC, không phải "không đạt"; (ii'') lệnh M1 trỏ bản checkout thay vì bản xuất ⇒ ĐỎ; (iii) tarball lệch một byte; (iv) `PATH` đặt một `pwsh` khác lên trước.
 - **N1 — M1.** `failed=0` VÀ `passed` = số ca thực chạy trên Linux (đếm ca đã thực thi, không tin con số 34 của
   Executor — con số ấy cũng không có thời điểm đo gốc). ĐỎ khi bất kỳ ca nào fail, hoặc `passed` < số ca thực thi.
 - **N2 — M2 có răng.** Nền: 8/8 ca tự kiểm của rig cho đúng nhãn, đủ 5 thế hệ fixture (mỗi chu kỳ đúng một), `max_gap`

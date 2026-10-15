@@ -70,9 +70,13 @@ dung WP710, không sửa nó.
 (c) `git rev-parse <reviewed_sha>:scripts/nlm-credential-refresh.Tests.ps1` = `4dc5994c…`.
 **Đủ lịch sử TRƯỚC khi đọc rc của (a)** (`docs/PROTOCOL_DA_PHIEN.md:914–916`; Codex Review PR #755
 `discussion_r4282003005`): trong clone nông, `merge-base --is-ancestor` trả rc 1 cho một hậu duệ HỢP LỆ dù cả hai object có
-mặt. Nên trước (a) đòi `git rev-parse --is-shallow-repository` in `false` (clone nông thì `git fetch --unshallow` rồi đo
-lại); còn nông, hoặc lệnh lỗi ⇒ **KHÔNG ĐO ĐƯỢC**, KHÔNG được đọc rc 1 thành "không đạt". Chỉ khi lịch sử đủ: rc 0 = là
-tổ tiên, rc 1 = không phải, rc khác = KHÔNG ĐO ĐƯỢC.
+mặt. Phân vai (protocol §8.1 `docs/PROTOCOL_DA_PHIEN.md:744–752`; cross-review #755 F09):
+- **Phiên điều phối (bootstrap), TRƯỚC mốc snapshot bàn giao:** dựng checkout đủ lịch sử (`git fetch --unshallow` từ
+  `origin` nếu cần), rồi ghi `git rev-parse --is-shallow-repository` vào biên nhận bàn giao. Mọi thao tác mạng/ghi Git
+  thuộc bước này, không thuộc lượt đo.
+- **Bên đo (read-only, offline):** chỉ ĐO tình trạng checkout ĐƯỢC BÀN GIAO, không phục hồi gì. `--is-shallow-repository`
+  phải in `false`; in `true` hoặc lệnh lỗi ⇒ **KHÔNG ĐO ĐƯỢC** và trả checkpoint cho phiên điều phối — KHÔNG `fetch`,
+  KHÔNG đọc rc 1 thành "không đạt". Chỉ khi lịch sử đủ: rc 0 = là tổ tiên, rc 1 = không phải, rc khác = KHÔNG ĐO ĐƯỢC.
 Ba trạng thái: đạt · không đạt · **KHÔNG ĐO ĐƯỢC** (lệnh git lỗi, ref không có cục bộ, đường dẫn không có trong tree, lịch
 sử nông) — hai trạng thái sau đều DỪNG lượt trước M1.
 
@@ -207,7 +211,7 @@ ba packet đã land ấy được trả lời riêng trên PR #724).
 - **N0 — preflight.** Đạt khi CẢ BỐN đúng: lịch sử không nông VÀ luật chấp nhận SHA (a)(b)(c); sha256 byte thô của hai tệp xuất bằng `git
   cat-file blob` khớp bảng; sha256 tarball khớp; runtime `pwsh` resolve đúng thư mục giải nén và in `7.4.6`. ĐỎ (dừng
   TRƯỚC M1) với từng phản chứng: (i) `reviewed_sha` hợp lệ nhưng tệp đem chạy khác một byte; (ii) ref không có cục bộ
-  hoặc đường dẫn bị đổi tên ⇒ KHÔNG ĐO ĐƯỢC; (ii') clone `--depth 1` rồi fetch đúng OID cha ⇒ (a) phải ra KHÔNG ĐO
+  hoặc đường dẫn bị đổi tên ⇒ KHÔNG ĐO ĐƯỢC; (ii') checkout ĐƯỢC BÀN GIAO là clone `--depth 1` rồi fetch đúng OID cha ⇒ bên đo không phục hồi, (a) phải ra KHÔNG ĐO
   ĐƯỢC, không phải "không đạt"; (ii'') lệnh M1 trỏ bản checkout thay vì bản xuất ⇒ ĐỎ; (iii) tarball lệch một byte; (iv) `PATH` đặt một `pwsh` khác lên trước.
 - **N1 — M1.** `failed=0` VÀ `passed` = số ca thực chạy trên Linux (đếm ca đã thực thi, không tin con số 34 của
   Executor — con số ấy cũng không có thời điểm đo gốc). ĐỎ khi bất kỳ ca nào fail, hoặc `passed` < số ca thực thi.

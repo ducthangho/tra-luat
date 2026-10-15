@@ -89,5 +89,8 @@ ci_policy_ghi_chu: luot CI tu chay giua vong va thi huy; luot bi huy/bo qua KHON
 push_policy: push_nhanh_agent_va_pr_758_da_mo_theo_chu_kho
 thay_the_cho:
   - wp741-r1-g1-claude-20261015
+da_bi_thay_the: wp741-r3-g3-claude-20261015
+da_bi_thay_the_ghi_chu: >-
+  Codex luot 1 tren PR #761 (6a051b3) ra P1=2 P2=1 voi r2/g2; thay bang spec r3 + lease g3 sau phe duyet 6197949500.
 generation_truoc: wp741-r1-g1-claude-20261015
 generation_truoc_ghi_chu: g1 con han toi 2026-10-17T07:00:00Z => bia mo hai chieu (da_bi_thay_the dat tren chinh tep g1).

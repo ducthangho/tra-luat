@@ -69,8 +69,11 @@ hai trạng thái sau đều DỪNG lượt trước M1.
 smudge/attributes hay một bản sao lạc có thể khác blob). Quy trình bắt buộc: xuất bằng `git cat-file blob
 <reviewed_sha>:<path>` (KHÔNG qua checkout/filter) vào MỘT thư mục scratch riêng, giữ đúng tên tệp cạnh nhau
 (`Tests.ps1` chỉ tham chiếu `$PSScriptRoot/nlm-credential-refresh.ps1`); băm sha256 byte thô của hai tệp xuất ra và so
-với cột sha256 ở bảng trên; M1, M2 và đầu vào của `mutate.py` đều dùng CHÍNH hai tệp đã băm ấy, không đường dẫn nào khác.
-Lệch ⇒ DỪNG trước M1. Một commit sau đổi một trong hai blob thì lượt đo KHÔNG được chạy trên commit ấy: phải ra r3. `reviewed_sha`
+với cột sha256 ở bảng trên; M1, M2 và đầu vào của `mutate.py` đều lấy NGUỒN từ CHÍNH hai tệp đã băm ấy. Phạm vi của
+câu này là hai tệp NGUỒN được neo, không phải mọi byte được thực thi: bộ test tự sinh tệp dẫn xuất từ nguồn ấy trong lúc
+chạy (vd. bản chiếu `projection/nlm-credential-refresh.ps1` ở `Tests.ps1:894–903`, đổi hai công tắc nền) — các tệp ấy
+được ràng buộc gián tiếp vì do chính `Tests.ps1` đã neo sinh ra từ wrapper đã neo, và KHÔNG được neo hay băm riêng
+(cross-review #755 F08). Lệch nguồn ⇒ DỪNG trước M1. Một commit sau đổi một trong hai blob thì lượt đo KHÔNG được chạy trên commit ấy: phải ra r3. `reviewed_sha`
 được ghi vào lease TRƯỚC khi phát lượt và lặp lại trong biên nhận.
 
 ## Môi trường
@@ -87,9 +90,9 @@ Lệch ⇒ DỪNG trước M1. Một commit sau đổi một trong hai blob thì
   dẫn đã resolve và phiên bản vào biên nhận và `REPLAY.md`.
 - Container cloud Linux (đo 09:09Z 15-10): không có `pwsh`; có `python3` 3.13.16; `codex-cli` 0.162.1. Shim `python`
   (vì `Tests.ps1:213` gọi `Get-Command python`) đặt trong thư mục PATH tạm và ghi vào biên nhận.
-- Tiền điều kiện credential: bản `CODEX_AUTH_JSON` trong container là ảnh chụp cũ **122,1 h** (`last_refresh`
-  2026-10-10T07:00:29Z, `doctor` đo 09:05Z 15-10, nhãn `SAP_HET_HAN`) — refresh token có thể đã bị vô hiệu. Làm mới
-  (`codex login --device-auth` hoặc chép lại base64 NGAY sau login) TRƯỚC khi phát lượt, rồi `doctor --kiem-song`.
+- Tiền điều kiện credential: lúc soạn (09:05Z 15-10) bản `CODEX_AUTH_JSON` là ảnh chụp cũ 122,1 h (`SAP_HET_HAN`);
+  phiên điều phối đã `codex login --device-auth` lúc 09:28Z 15-10 và `doctor --kiem-song` rc=0. Đo LẠI bằng
+  `doctor --kiem-song` ngay trước khi phát lượt (refresh token xoay vòng; container khác không kế thừa).
 - Không LIVE, không `nlm` thật, không credential thật, không Drive. Fake CLI của bộ test là đủ.
 
 ## Rig — do phiên điều phối dựng, LƯU vào kho, reviewer CHẠY LẠI
@@ -102,13 +105,23 @@ phối dựng ba tệp dưới đây TRƯỚC khi phát lượt; reviewer chỉ 
   (wrapper chỉ ngủ khi `cycle > 0`, `nlm-credential-refresh.ps1:1016`; không có khoảng sau chu kỳ cuối) — "khoảng" ở
   đây đếm KHOẢNG NGHỈ, không đếm dòng kết quả. Hợp đồng quan sát (cross-review #755 F03):
   - mỗi khoảng chỉ lấy mẫu sau khi đọc được sự kiện `staged` của chu kỳ trước và xong trước nửa khoảng (≤ 5 s);
-  - mỗi mẫu ghi: số thứ tự khoảng, thời điểm, pid + starttime của wrapper (đọc `/proc/<pid>/stat`, trường 22) và việc
-    wrapper còn sống; pid + starttime của con fixture lấy từ `WP714_CHILD_PID_FILE` (cùng cơ chế ca `v`,
-    `Tests.ps1:1011`); số tiến trình `Z` có ppid = pid wrapper VÀ starttime ≥ starttime wrapper; tách riêng số zombie
-    là con fixture với tổng con `Z`;
+  - **thu danh tính fixture TRƯỚC khi có thể bị reap, tách khỏi bước lấy mẫu** (cross-review #755 F03): fixture ghi pid
+    vào `WP714_CHILD_PID_FILE` rồi còn sống ~0,5 s (`Tests.ps1:77–79`), và tệp ấy bị ghi ĐÈ mỗi chu kỳ. Rig theo dõi tệp
+    ấy liên tục (chu kỳ đọc ≤ 50 ms); mỗi lần nội dung đổi, đọc ngay `/proc/<pid>/stat` khi con còn tồn tại để lấy cặp
+    (pid, starttime trường 22) và thêm vào một **sổ đăng ký tích lũy theo chu kỳ** (chu kỳ → cặp). Không lấy được cặp
+    trước khi con biến mất ⇒ chu kỳ ấy **KHÔNG ĐO ĐƯỢC** (không suy "đã reap" từ việc vắng `/proc`);
+  - mỗi mẫu khoảng nghỉ ghi: số thứ tự khoảng, thời điểm, pid + starttime của wrapper (đọc `/proc/<pid>/stat`, trường
+    22) và việc wrapper còn sống; với TỪNG cặp trong sổ (mọi chu kỳ đã qua, không chỉ con mới nhất): trạng thái hiện tại
+    — `Z` (zombie fixture), còn sống, hay `ENOENT` (đã reap — chỉ hợp lệ vì danh tính đã được xác minh trước đó); pid có
+    mặt nhưng starttime KHÁC ⇒ pid tái dùng, KHÔNG tính là fixture; `EACCES` hay lỗi đọc khác ⇒ KHÔNG ĐO ĐƯỢC. Đếm riêng
+    (a) số zombie fixture tích lũy và (b) tổng tiến trình `Z` có ppid = pid wrapper VÀ starttime ≥ starttime wrapper;
   - một dòng JSON mỗi khoảng và một dòng tổng kết; thời hạn cứng cho cả lượt.
   Bất kỳ điều nào sau đây ⇒ lượt ấy là **KHÔNG ĐO ĐƯỢC** (không phải đạt): thiếu mẫu của một khoảng, mẫu rơi sang chu kỳ
-  kế, wrapper thoát sớm hoặc đổi starttime (pid tái dùng), fixture không sinh con, `/proc` đọc lỗi, quá thời hạn.
+  kế, wrapper thoát sớm hoặc đổi starttime (pid tái dùng), fixture không sinh con, không thu được danh tính một con
+  trước khi nó biến mất, `/proc` đọc lỗi (trừ `ENOENT` sau khi danh tính đã xác minh), quá thời hạn.
+  Rig kèm **ca tự kiểm** chạy trên dữ liệu `/proc` giả (không điều khiển tiến trình thật), mỗi ca phải cho đúng nhãn:
+  zombie fixture CŨ còn lại trong khi con mới nhất đã reap ⇒ đếm 1; pid trùng nhưng starttime khác ⇒ 0 zombie fixture;
+  không thu được danh tính ⇒ KHÔNG ĐO ĐƯỢC; `EACCES` ⇒ KHÔNG ĐO ĐƯỢC.
   Chỉ đường dẫn TƯƠNG ĐỐI hoặc `$TMPDIR`; không đọc biến môi trường ngoài danh sách cho phép (`PATH`, `TMPDIR`,
   `HOME` tạm, `WP714_*` của fixture); không ghi đường dẫn máy vào đầu ra.
 - `ops/reviews/wp728-do-linux/rig/mutate.py` — bộ sinh đột biến TẤT ĐỊNH: đọc wrapper, đòi dòng
@@ -172,7 +185,7 @@ ba packet đã land ấy được trả lời riêng trên PR #724).
 - **N1 — M1.** `failed=0` VÀ `passed` = số ca thực chạy trên Linux (đếm ca đã thực thi, không tin con số 34 của
   Executor — con số ấy cũng không có thời điểm đo gốc). ĐỎ khi bất kỳ ca nào fail, hoặc `passed` < số ca thực thi.
 - **N2 — M2 có răng.** Nền: cả 4 khoảng nghỉ có mẫu hợp lệ theo hợp đồng quan sát VÀ 0 zombie fixture ở mọi khoảng.
-  Đột biến M2': số zombie fixture TĂNG qua các khoảng. ĐỎ khi nền có ≥ 1 zombie fixture ở một khoảng bất kỳ. Thiếu mẫu /
+  Đột biến M2': số zombie fixture TÍCH LŨY (theo sổ đăng ký) TĂNG qua các khoảng. ĐỎ khi nền có ≥ 1 zombie fixture ở một khoảng bất kỳ. Thiếu mẫu /
   wrapper thoát sớm / pid tái dùng / fixture không sinh con / `/proc` lỗi ⇒ **KHÔNG ĐO ĐƯỢC**. M2' KHÔNG tăng ⇒ rig không
   có răng ⇒ M2 = **KHÔNG ĐO ĐƯỢC** (không phải đạt).
 - **N3 — M3.** Có con số độ lệch đo trên CÙNG một PID, kèm công thức, đơn vị, nguồn đồng hồ, tuổi pwsh sống. Không

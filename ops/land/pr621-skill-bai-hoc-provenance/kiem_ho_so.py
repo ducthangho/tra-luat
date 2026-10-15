@@ -164,6 +164,7 @@ if "--tu-kiem" in sys.argv:
         ("qua app", None, _j(CMT, lambda j_: j_.update(performed_via_github_app={"slug": "claude"})), "readback: dang qua app"),
         ("created_at khong SAU merge #621", None, _j(CMT, lambda j_: j_.update(created_at="2026-10-09T14:14:00Z", updated_at="2026-10-09T14:14:00Z")), "readback: created_at thieu hoac khong SAU merge"),
         ("created_at vang (#737 F06, wp741 M6)", None, _j(CMT, lambda j_: j_.pop("created_at")), "readback: created_at thieu hoac khong SAU merge"),
+        ("created_at thieu mui gio", None, _j(CMT, lambda j_: j_.update(created_at="2026-10-10T15:00:00", updated_at="2026-10-10T15:00:00")), "readback: created_at thieu hoac khong SAU merge"),
         ("comment da sua", None, _j(CMT, lambda j_: j_.update(updated_at="2026-10-10T14:04:23Z")), "readback: comment da bi sua"),
         ("issue_url sang PR khac", None, _j(CMT, lambda j_: j_.update(issue_url=j_["issue_url"][:-3] + "621")), "readback: issue_url khong tro toi PR #723"),
         ("id lech neo_ben", None, _j(CMT, lambda j_: j_.update(id=j_["id"] + 1)), "readback: html_url/id != neo_ben"),
@@ -565,6 +566,36 @@ def _ca_than():
            "run lap (A24 so tap thay danh sach)": (nl(sua(1, L[1] + ",11111111111")), "dong 2: tap run cua"),
            "ASSURANCE_DAT viet hoa (A30 `(?i:)`)": (nl(sua(4, "ASSURANCE_DAT: CHAP_NHAN")), "dong 5: khong phai dong mau - khong mo dau bang khoa mau nao"),
            "ky tu vo hinh": (nl(sua(4, "assurance_dat: chap_nhan" + chr(0x200B))), "dong 5: than co ky tu ngoai ASCII"), "rong": ("", "can DUNG MOT dong")}
+    # Ma tran ngu phap: moi VI TRI tren moi khoa, khong chi mot vi du
+    # cho ca nhom. Moi dong chi pha mot thanh phan, cac dong con lai hop le.
+    for i, dong in enumerate(L):
+        khoa, gia_tri = dong.split(": ", 1)
+        bien_the = {"truoc hai cham": khoa + " : " + gia_tri,
+                    "khong cach sau hai cham": khoa + ":" + gia_tri,
+                    "hai cach sau hai cham": khoa + ":  " + gia_tri,
+                    "khoa doi hoa thuong": khoa.swapcase() + ": " + gia_tri,
+                    "tien to": "x" + dong, "hau to": dong + " OK"}
+        if i:
+            bien_the["gia tri doi hoa thuong"] = dong.replace("chap_nhan", "CHAP_NHAN")
+        if 0 < i < len(L) - 1:
+            bien_the.update({"khong cach sau chap_nhan": dong.replace("chap_nhan ", "chap_nhan"),
+                            "hai cach sau chap_nhan": dong.replace("chap_nhan ", "chap_nhan  "),
+                            "phay cuoi": dong + ","})
+            for vi_tri, m in enumerate(re.finditer(",", dong)):
+                for dau in (";", " ,", ",  ", " ", ""):
+                    bien_the[f"phan cach {vi_tri} {dau!r}"] = dong[:m.start()] + dau + dong[m.end():]
+            for vi_tri, m in enumerate(re.finditer(r"[0-9]{11}", dong)):
+                for so in ("0" + m.group(), m.group()[:-1], "+" + m.group(), m.group() + ".0"):
+                    bien_the[f"run {vi_tri} {so}"] = dong[:m.start()] + so + dong[m.end():]
+            for du in (",11111111111", ",55555555555"):
+                bad[f"{khoa} run lap/thua {du}"] = (nl(sua(i, dong + du)), f"dong {i + 1}: tap run cua")
+        for ten, moi in bien_the.items():
+            bad[f"{khoa}: {ten}"] = (nl(sua(i, moi)), f"dong {i + 1}: khong phai dong mau")
+    # Khoa PHAN LECH cua thong bao, khong chi tien to chung.
+    for dong in ("assurance_dat: sai", "khoa_la: sai", "assurance_dat: " + "x" * 80):
+        bad[f"trich dong {dong[:25]}"] = (nl(sua(4, dong)), f"dong: {dong[:60]!r}")
+    for cp in (0xA0, 0xFEFF, 0x2028, 0x200B):
+        bad[f"ma ky tu {cp}"] = (nl(sua(4, L[4] + chr(cp))), f"dong 5: than co ky tu ngoai ASCII in duoc (U+{cp:04X})")
     return ([f"hop le `{k}` bi tu choi: {than_sai(b, sha_, run)}" for k, b in hop.items() if than_sai(b, sha_, run)]
             + [f"`{k}` khong ra ly do `{s}`: {than_sai(b, sha_, run)}" for k, (b, s) in bad.items() if not any(s in r for r in than_sai(b, sha_, run))], len(hop), len(bad))
 
@@ -577,7 +608,7 @@ def _sau(t, moc):
     """wp741 M6 — `t` SAU `moc`; `t` vang / khong phai chuoi / sai dinh dang => False (ly do), khong ngoai le: mot readback thieu khoa phai ra dong TONG, khong traceback."""
     try:
         return isinstance(t, str) and ts(t) > ts(moc)
-    except ValueError:
+    except (TypeError, ValueError):
         return False
 
 
@@ -692,6 +723,8 @@ def _ca_landed():
            "issue_url sang PR khac": (lambda rb, q, t: rb.update(issue_url="https://api.github.com/repos/ducthangho/tra-luat/issues/621"), "issue_url khong tro toi PR #723"),
            "issue_url kho khac cung so (L14 `.endswith('/723')`)": (lambda rb, q, t: rb.update(issue_url="https://api.github.com/repos/evil/x/issues/723"), "issue_url khong tro toi PR #723"),   # wp741 M3
            "created_at vang (#737 F06)": (lambda rb, q, t: rb.pop("created_at"), "created_at thieu hoac khong SAU merge"),   # wp741 M6
+           "created_at chi co ngay": (lambda rb, q, t: rb.update(created_at="2026-10-10", updated_at="2026-10-10"), "created_at thieu hoac khong SAU merge"),
+           "created_at thieu mui gio": (lambda rb, q, t: rb.update(created_at="2026-10-10T15:00:00", updated_at="2026-10-10T15:00:00"), "created_at thieu hoac khong SAU merge"),
            "created_at sai dinh dang": (lambda rb, q, t: rb.update(created_at="hom qua", updated_at="hom qua"), "created_at thieu hoac khong SAU merge"),
            "id lech neo_ben": (lambda rb, q, t: rb.update(id=2), "html_url/id != neo_ben"), "pham_vi_run thieu mot run": (lambda rb, q, t: q.update(pham_vi_run=q["pham_vi_run"][:3]), "pham_vi_run != pham_vi_run"),
            "assurance_dat != chap_nhan": (lambda rb, q, t: q.update(assurance_dat="tu_choi"), "assurance_dat != chap_nhan"),

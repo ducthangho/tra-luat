@@ -1,0 +1,157 @@
+# LEASE — no-p3-ho-so (no P3 (a)) revision 2 / generation 1 — executor claude
+# SOAN SAN boi phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT; HIEU LUC chi khi chu kho dang comment tren #750
+# CAP QUYEN lease nay va CHAP NHAN ngoai le tran ADR-0044 (10 tep / 500 dong them), neo dung lease_id + spec_sha256.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 750
+packet_id: no-p3-ho-so
+packet_slug: NO-P3-HO-SO
+mission_issue: null
+mission_issue_ghi_chu: 'Packet no P3 tach tu so no phien dieu phoi; khong thuoc Mission nao.'
+revision: 2
+generation: 1
+lease_id: no-p3-ho-so-r2-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua packet; r1 chua tung duoc neo vao lease nao (dac ta r2 hang thay_the_cho).'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/750
+granted_on_instruction_nguyen_van: >-
+  Chu kho trong phien dieu phoi 15-10-2026: "Chap nhan ngoai le, soan lease P3-a. Cho nang tran len 10 va 500".
+authority_caveat: >-
+  Soan san; HIEU LUC KHI chu kho dang comment tren #750 (a) cap quyen lease nay, neo dung lease_id
+  no-p3-ho-so-r2-g1-claude va spec_sha256 c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410, va (b) chap
+  nhan ngoai le tran ADR-0044 cho packet nay: <= 10 tep va <= 500 dong them (dac ta r2 hang kich_thuoc dat dieu kien nay).
+  author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT soan va day len nhanh ops/no-p3-ho-so-r2-g1-lease.'
+
+leased_at_utc: '2026-10-15T10:30:00Z'
+lease_expires_at_utc: '2026-10-16T10:30:00Z'
+han_ghi_chu: '24 gio ke tu luc soan (UTC). Het han => ngung sua, handoff.'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+execution_surface: claude_code
+executor_execution_surface: >-
+  Phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT hoac subagent cua no tren BAN SAO (worktree/clone rieng); phien chinh
+  commit. Subagent khong ghi ngoai write set.
+transport: machine/local
+model: claude-opus-5-5
+effort: tu_khai
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: >-
+  Dac ta r2 hang executor/reviewer: reviewer subagent Claude Sonnet (cung ho) => review_deferred; lop sensitive nen land
+  doi human_audited cua chu kho (PROTOCOL §8 dong 724-726).
+reviewer: claude
+reviewer_execution_surface: claude_code
+reviewer_ghi_chu: 'Subagent review-sonnet-max (claude-sonnet-5-5), review_deferred. Nguong: 0 P1 / 0 P2 dat; P3 khong chan nhung moi P3 con mo co quyet dinh ghi lai.'
+access: read-write
+
+spec_path: ops/specs/no-p3-ho-so-r2.md
+spec_ref: refs/heads/claude/spec-no-p3
+spec_source_oid: a9ef33c24665dedc70f2c839e2357353bd4054af
+spec_blob: a7ba01e4f0d8022e301f784fa9dc150134cb0c7d
+spec_sha256: c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410
+spec_hash: c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410
+spec_hash_formula: 'sha256sum ops/specs/no-p3-ho-so-r2.md tai commit dong bang a9ef33c, khong loai dong nao'
+spec_review: >-
+  Luot 2: approve 0 P1 / 0 P2 / 5 P3, reviewed_sha a9ef33c24665dedc70f2c839e2357353bd4054af, spec_sha256 c5e3c45a...4410,
+  reviewer Claude Sonnet 5.5 (subagent review-sonnet-max, tu khai), review_deferred; VERDICT.md sha256
+  cb4b30e8ee4f269b74258355b7bc9af10c4f6e60f3125065bcf7cf4c8dc1b228, HINT.patch sha256
+  50221d51ceb93a662ad8ed4adbe539f58b9e2d468567343a232105b2401557f4 (5 hunk P3). Luot 1 (r1): changes_requested 0/6/7, 13/13
+  lop dong o r2. Tep VERDICT/HINT o scratchpad phien dieu phoi, chua vao kho.
+p3_con_mo: >-
+  5 P3 luot 2 KHONG va vao dac ta (va => doi bam => review lai). Executor ap dung khi thi hanh, KHONG noi tieu chi:
+  (1) N1 grep chu dung chay tren DUNG dong `chu dung:`; (2) khong cham ops/land/pr721-wp698-land-evidence.yaml (kiem bang
+  git diff --stat); (3) N3 kiem khoa landed_quyet_dinh VANG MAT; (4) N5 lay GOC = merge-base thuc cua nhanh voi master;
+  (5) Phu luc B tro dong 10 cua no-p3-lease-spec-hash-r2.md (khong phai dong 8 cua r1).
+prompt_path: ops/specs/no-p3-ho-so-r2.md
+prompt_sha256_required: c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410
+
+branch: claude/no-p3-ho-so-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6f121a3810045af27bf65eb723edf36b29e387f2
+start_from_sha: 6f121a3810045af27bf65eb723edf36b29e387f2
+reviewed_sha_required: 6f121a3810045af27bf65eb723edf36b29e387f2
+reviewed_sha_required_nghia: 'Nen nghiem thu cua dac ta r2 (hang base); moi verdict thi hanh neo exact head that cua nhanh thi cong.'
+
+write_set:
+  - ops/specs/dinh-chinh-p3-wp685-wp698.md
+  - ops/land/pr732-wp685-land-evidence.yaml
+  - ops/land/pr732-wp685-provenance/readback-comment-6103888794.json
+  - ops/land/pr732-wp685-provenance/SHA256SUMS.txt
+write_set_hash: a5d1c42c76cde5e2d7167b6e8f7e731721354b05da41be51c8d89494e60ef645
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_rang_buoc: >-
+  ops/land/pr732-wp685-land-evidence.yaml va SHA256SUMS.txt CHI THEM (dac ta r2 N3b, N4b: 0 dong xoa); hai tep spec goc
+  ci-g5-cong-cu-va-tiep-r14.md va launcher-con-song-esrch-r28.md KHONG doi (N2). Khong chep dong landed_quyet_dinh cua
+  nhanh ducthangho-patch-1 (2f30166), khong cherry-pick/merge/rebase len no (quyet dinh chu kho 15-10).
+
+do_dieu_kien_cap:
+  - dieu_kien: '(1) tap ten VA OID: git ls-remote --heads origin so voi git for-each-ref refs/remotes/origin (bo HEAD)'
+    ket_qua: 'clone day du, fetch +refs/heads/* --prune luc 2026-10-15T10:21Z; may chu 536, lech ten+OID 0. DAT.'
+  - dieu_kien: '(2) ai-dang-giu cho ca bon duong cua write set => NGUOI_GIU 0'
+    ket_qua: 'python3 -B ops/lease_publish.py ai-dang-giu <p> tren clone day du, HEAD = origin/master 6f121a3, 10:21Z: ca bon rc=0 "NGUOI_GIU 0: khong co". DAT.'
+  - dieu_kien: '(3) master chua doi so voi base cua dac ta'
+    ket_qua: 'origin/master = 6f121a3810045af27bf65eb723edf36b29e387f2 luc 10:21Z, trung base. DAT.'
+  - dieu_kien: '(4) chu kho cap quyen + chap nhan ngoai le tran ADR-0044 bang comment tren #750'
+    ket_qua: 'CHUA CO luc soan => lease o trang thai SOAN SAN (authority_caveat).'
+
+closure_descriptor: null
+change_policy_sha: null
+effective_write_set:
+  - type: exact
+    path: ops/specs/dinh-chinh-p3-wp685-wp698.md
+  - type: exact
+    path: ops/land/pr732-wp685-land-evidence.yaml
+  - type: exact
+    path: ops/land/pr732-wp685-provenance/readback-comment-6103888794.json
+  - type: exact
+    path: ops/land/pr732-wp685-provenance/SHA256SUMS.txt
+required_checks: 'Theo dac ta r2 muc Nghiem thu (N1-N5): CI PR xanh tai exact head; kiem-re DAT voi du bon bien moi truong CI; doctrine-scan rc 0.'
+land_obligations: >-
+  1. human_audited cua chu kho tren exact head + uy quyen merge ben. 2. Verdict cac luot review dac ta (r1 luot 1, r2 luot
+  2) va review thi hanh vao ops/reviews/ kem bien nhan v2 (review_deferred). 3. Ho so land vao ops/land/. 4. Dac ta r1, r2
+  va lease nay vao master bang PR bookkeeping. 5. Khong viet bia mo vao lease da het han. 6. Dong #750; ghi no P3 con mo vao
+  no_con_mo cua ho so land.
+
+nang_tran:
+  truc: kich_thuoc_packet
+  tran_cu: '<= 3 tep, <= 300 dong them (ADR-0044, packet sensitive cham authority)'
+  tran_moi: '<= 10 tep, <= 500 dong them'
+  ai_nang: ducthangho
+  can_cu: 'Chu kho trong phien dieu phoi 15-10-2026 ("Chap nhan ngoai le ... nang tran len 10 va 500"); hieu luc khi comment cap quyen tren #750 nhac lai.'
+  ghi_chu: 'Dac ta r2 uoc 4 tep, <= 200 dong them, 0 dong xoa. Tien le: 3 lease truoc chi nang tran dong; day la lan dau nang tran tep.'
+
+ci_budget:
+  gate_tu_dong: '1 luot ci.yml cho exact head khi mo PR (chi mo PR sau review thi hanh dat 0 P1/0 P2); luot them can chu kho duyet.'
+  phep_do_duoc_cap: 'khong workflow_dispatch, khong Windows'
+
+dieu_kien_dung:
+  - 'Can sua tep ngoai write set, hoac xoa/sua dong co san trong ho so pr732 hay SHA256SUMS => DUNG, handoff.'
+  - 'gh api GET comment 6103888794 khong goi duoc, hoac gia tri doc ve lech gia tri ghim trong dac ta (nguoi dang, OWNER, app null, thoi diem, 631 byte, sha256 cc38f799...f09b) => DUNG, hoi chu kho.'
+  - 'Vuot <= 10 tep hoac <= 500 dong them => DUNG, hoi chu kho.'
+  - 'Lease het han => ngung sua, handoff.'
+  - 'Review thi hanh con P1/P2 sau khi va => lap lai; chua dat thi khong mo PR.'
+
+cam_tuyet_doi:
+  - Khong sua hai dac ta dong bang r14/r28 va khong sua dac ta no-p3-ho-so
+  - Khong sua tep ngoai write set
+  - Khong chep dong landed_quyet_dinh cua nhanh ducthangho-patch-1
+  - Khong tu review / approve / merge / land; land chi sau human_audited cua chu kho
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky comment cap quyen: #566.'
+  - 'Cua so giua do (10:21Z) va luc cap khong nguyen tu; do lai luc chu kho cap quyen.'
+  - 'Effort thuc te cua executor va reviewer.'

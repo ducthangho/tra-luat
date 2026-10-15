@@ -591,12 +591,48 @@ def _ca_than():
                 bad[f"{khoa} run lap/thua {du}"] = (nl(sua(i, dong + du)), f"dong {i + 1}: tap run cua")
         for ten, moi in bien_the.items():
             bad[f"{khoa}: {ten}"] = (nl(sua(i, moi)), f"dong {i + 1}: khong phai dong mau")
+    # H2: dem dong la mot truc doc lap voi cu phap tung dong. Khoa ly do
+    # theo tung khoa, khong cho ly do cua khoa khac lam nhan chung thay.
+    for i, dong in enumerate(L):
+        khoa = dong.split(": ", 1)[0]
+        bad[f"thieu khoa {khoa}"] = (nl(L[:i] + L[i + 1:]), f"`{khoa}`: can DUNG MOT dong theo mau, co 0")
+        for vi_tri in range(len(L) + 1):
+            bad[f"lap khoa {khoa} o {vi_tri}"] = (nl(L[:vi_tri] + [dong] + L[vi_tri:]), f"`{khoa}`: can DUNG MOT dong theo mau, co 2")
+        # Tich hai thanh phan khoang trang; ca mot-thanh-phan khong chung
+        # minh rang mot nhanh regex chap nhan ca hai cung luc se bi giet.
+        khoa, gia_tri = dong.split(": ", 1)
+        for truoc in ("", " ", "  "):
+            for sau in ("", " ", "  "):
+                if (truoc, sau) != ("", " "):
+                    bad[f"hai cham {i} {truoc!r} {sau!r}"] = (nl(sua(i, khoa + truoc + ":" + sau + gia_tri)), f"dong {i + 1}: khong phai dong mau")
+        if 0 < i < len(L) - 1:
+            for cach in ("", "  "):
+                for vi_tri, m in enumerate(re.finditer(",", dong)):
+                    for dau in (";", " ,", ",  ", " ", ""):
+                        moi = (dong[:m.start()] + dau + dong[m.end():]).replace("chap_nhan ", "chap_nhan" + cach)
+                        bad[f"cap phan cach {i} {cach!r} {vi_tri} {dau!r}"] = (nl(sua(i, moi)), f"dong {i + 1}: khong phai dong mau")
     # Khoa PHAN LECH cua thong bao, khong chi tien to chung.
     for dong in ("assurance_dat: sai", "khoa_la: sai", "assurance_dat: " + "x" * 80):
         bad[f"trich dong {dong[:25]}"] = (nl(sua(4, dong)), f"dong: {dong[:60]!r}")
     for cp in (0xA0, 0xFEFF, 0x2028, 0x200B):
         bad[f"ma ky tu {cp}"] = (nl(sua(4, L[4] + chr(cp))), f"dong 5: than co ky tu ngoai ASCII in duoc (U+{cp:04X})")
-    return ([f"hop le `{k}` bi tu choi: {than_sai(b, sha_, run)}" for k, b in hop.items() if than_sai(b, sha_, run)]
+    # Cac phep bao toan ngu nghia duoc ap cho CA ca duong va ca am:
+    # CRLF, dong trong/chi co space. Khong lay ket qua than_sai/_MAU lam oracle.
+    for ten, b in list(hop.items()):
+        for eol in ("\n", "\r\n"):
+            hop[f"bao {ten} {eol!r}"] = " " + eol + b.replace("\r\n", "\n").replace("\n", eol) + eol + " "
+    for ten, (b, ly_do) in list(bad.items()):
+        for eol in ("\n", "\r\n"):
+            than = " \n" + b + "\n "
+            # Chi CRLF-hoa LF; giu nguyen CR don/ky tu cam trong ca am.
+            if eol == "\r\n":
+                than = than.replace("\n", eol)
+            mong = re.sub(r"^dong ([0-9]+):", lambda m: f"dong {int(m.group(1)) + 1}:", ly_do)
+            bad[f"bao {ten} {eol!r}"] = (than, mong)
+    # Neo kich thuoc doc lap voi vong sinh: bo mot nhanh sinh ca phai DO.
+    # Day la tap bien doi huu han da neu, khong phai bao dam moi regex.
+    phu = [] if (len(hop), len(bad)) == (18, 1059) else [f"bang ca L7 mat nhanh: {(len(hop), len(bad))} != (18, 1059)"]
+    return (phu + [f"hop le `{k}` bi tu choi: {than_sai(b, sha_, run)}" for k, b in hop.items() if than_sai(b, sha_, run)]
             + [f"`{k}` khong ra ly do `{s}`: {than_sai(b, sha_, run)}" for k, (b, s) in bad.items() if not any(s in r for r in than_sai(b, sha_, run))], len(hop), len(bad))
 
 

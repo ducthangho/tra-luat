@@ -26,16 +26,33 @@ lease_id: no-p3-ho-so-r2-g1-claude
 spec_path: ops/specs/no-p3-ho-so-r2.md
 spec_sha256: c5e3c45a99a567c36beb9f6e80067dade9afec124b429292d259f04ecea44410
 spec_sha256_nguon: "measured — `git show a9ef33c:ops/specs/no-p3-ho-so-r2.md | sha256sum` = spec_hash lease."
-provider: claude
-execution_surface: claude_code
-transport: machine/local
-environment: cloud
+# Danh tinh NGUOI THAO TAC LAND (merge PR #759) — dap Codex P2 discussion_r4286041883: tach khoi danh tinh ben ghi so.
+provider: human
+model_family: null
+model_family_ghi_chu: 'Nguoi thao tac la con nguoi (ducthangho), khong co ho model.'
+execution_surface: KHONG_DO_DUOC
+transport: KHONG_DO_DUOC
+operator_surface_ghi_chu: >-
+  measured chi toi muc merged_by ducthangho (readback-pr-759.json). Merge qua giao dien web hay API, tu may nao:
+  REST khong tra — not_measured.
+environment: KHONG_DO_DUOC
 role: land_operator
-role_ghi_chu: 'vai land_operator o buoc GHI SO; merge PR #759 do chu kho (merged_by ducthangho).'
-session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
-recorded_by: claude-session (subagent ghi so cua phien dieu phoi; phien chinh commit/push)
-mat_quan_sat_duoc_the_nao: >-
-  Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
+session_id: null
+session_id_ghi_chu: 'Thao tac merge cua con nguoi khong co session run id; neo ben la merge commit c7daa8c + merged_by.'
+
+# Danh tinh BEN GHI SO (khong phai nguoi land): soan ho so, verdict/bien nhan, PR #762.
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
+  recorded_by: claude-session (subagent ghi so cua phien dieu phoi; phien chinh commit/push)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua
+    chinh no. model_family tu khai.
 
 # Khoa land-evidence chuan muc goc (PROTOCOL "Land evidence tach approval khoi thao tac"; tien le pr721).
 authorized_head_sha: 39dbfbf29392ad2b64cbe92395fb53bc0c19635b
@@ -43,8 +60,8 @@ approver: ducthangho
 authorization_url: https://github.com/ducthangho/tra-luat/pull/759#issuecomment-6190971474
 land_operator: ducthangho
 land_operator_nguon: >-
-  measured — readback-pr-759.json merged_by ducthangho (nguoi bam merge PR #759). Khac `role: land_operator` o tren:
-  vai ay la cua phien GHI SO, khong phai cua thao tac merge.
+  measured — readback-pr-759.json merged_by ducthangho (nguoi bam merge PR #759). Khop khoi danh tinh nguoi thao tac
+  o tren (provider human); phien Claude chi GHI SO (khoi ghi_so).
 merge_method: merge
 merge_method_nguon: >-
   measured — `git log --format='%H %P' -1 c7daa8c` = hai cha (0ed5b63, 39dbfbf) => merge commit, khong squash/rebase.
@@ -387,6 +404,18 @@ land_obligations:
       trang_thai: 'no_con_mo: xong o duoi. Dong #750: CHO chu kho sau landed (readback-issue-750.json: open luc ghi so).'
 
 no_con_mo:
+  - id: SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE
+    muc: P2
+    nguon: >-
+      Codex PR #762: discussion_r4286041896 (no-p3-cong-cu-ho-so-r2, #752: 5 tep ~900 dong vuot tran sensitive ADR-0044
+      3 tep / 300 dong) va discussion_r4286041913 (no-p3-lease-spec-hash-r2, #751: kiem spec_path tai HEAD da commit
+      mau thuan runbook ops/README.md dong 33-44 "check roi moi commit").
+    trang_thai: mo
+    mo_ta: >-
+      Hai dac ta r2 cua #751/#752 vao master qua PR nay CHI DE LUU VET (dong bang, khong sua duoc). KHONG lease nao duoc
+      cap tren r2 cua hai packet nay: #752 r2 da changes_requested (luot 2), #751 r2 cho #748 land. r3 cua ca hai phai
+      xu ly hai finding tren (tach packet / ngoai le tran do chu kho duyet; dua runbook vao write set hoac doc spec tu
+      nguon co tham quyen truoc commit) truoc khi review lai va cap lease.
   - id: neo-phu-nhan-chu-kho-thieu-chot-danh-tinh-566
     muc: P3
     nguon: 'review thi hanh luot 1 (ops/reviews/no-p3-ho-so-exec-review-1-claude-verdict.md, lop duy nhat)'

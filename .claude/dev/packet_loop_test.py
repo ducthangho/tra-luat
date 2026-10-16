@@ -5260,6 +5260,138 @@ def case_codex_runtime_surface_transport(c: Ctx):
 
 CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_transport))
 
+
+# --- #770 `kiem-gate` (spec `ops/specs/wp770.md` r1, M1–M5) --------------------------
+#
+# Mỗi ca ĐỎ đòi CẢ mã 12 LẪN lý do (`_doi_ly_do`) — mã trần trùng nhau không chứng minh
+# chốt nào đã chạy. Mỗi chốt có đột biến riêng ở `MUTANTS.update` cuối khối.
+_KG_HEAD = "ab" * 20
+
+
+def _kg_run(i, name="gate", conclusion="success", status="completed", head=_KG_HEAD):
+    return {"id": i, "name": name, "head_sha": head, "status": status, "conclusion": conclusion}
+
+
+def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None):
+    f = c.tmp / f"cr{time.time_ns()}.json"
+    if du_lieu is not None or tho is not None:
+        f.write_text(tho if tho is not None else json.dumps(du_lieu), encoding="utf-8")
+    args = ["kiem-gate", "--check-runs", f] + (["--head", head] if head is not None else [])
+    for t in bat_buoc:
+        args += ["--bat-buoc", t]
+    return run(c.script, args)
+
+
+def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None):
+    def ca(c: Ctx):
+        rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho)
+        if expect == 0:
+            _doi(0, rc, e, "gate phải XANH")
+            for t in dict.fromkeys(bat_buoc):
+                if _txt(o).count(f"{t} id=") != 1:
+                    raise AssertionError(f"dòng xanh phải liệt kê {t!r} đúng MỘT lần: {_txt(o)!r}")
+        else:
+            _doi_ly_do(expect, rc, e, chua, "kiem-gate")
+    return ca
+
+
+_KG_1 = {"check_runs": [_kg_run(1)]}
+_KG_KDD = "KHÔNG ĐO ĐƯỢC"
+_KG_CA = {
+    # M1 — đối số
+    "kg_m1_thieu_head": _kg_ca(_KG_1, head=None, expect=2, chua="--head"),
+    "kg_m1_head_7_ky_tu": _kg_ca({"check_runs": [_kg_run(1, head="abababa")]},
+                                 head="abababa", expect=2, chua="SHA 40"),
+    "kg_m1_khong_bat_buoc": _kg_ca(_KG_1, bat_buoc=(), expect=2, chua="--bat-buoc"),
+    "kg_m1_bat_buoc_rong": _kg_ca(_KG_1, bat_buoc=("",), expect=2, chua="không được rỗng"),
+    "kg_m1_trung_ten_mot_dong": _kg_ca(_KG_1, bat_buoc=("gate", "gate"), expect=0),
+    # M2 — đọc đầu vào: mọi chỗ hỏng là KHÔNG ĐO ĐƯỢC + 12
+    "kg_m2_tep_vang": _kg_ca(None, chua=_KG_KDD),
+    "kg_m2_json_hong": _kg_ca(None, tho="{", chua=_KG_KDD),
+    "kg_m2_khong_co_check_runs": _kg_ca({"x": 1}, chua=_KG_KDD),
+    "kg_m2_check_runs_khong_phai_list": _kg_ca({"check_runs": {}}, chua=_KG_KDD),
+    "kg_m2_thieu_conclusion": _kg_ca(
+        {"check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
+        chua=_KG_KDD),
+    "kg_m2_id_bool": _kg_ca({"check_runs": [_kg_run(True)]}, chua=_KG_KDD),
+    "kg_m2_id_chuoi": _kg_ca({"check_runs": [_kg_run("5")]}, chua=_KG_KDD),
+    "kg_m2_thieu_trang": _kg_ca({"total_count": 3, "check_runs": [_kg_run(1)]}, chua="thiếu trang"),
+    "kg_m2_object_mot_trang": _kg_ca({"total_count": 1, "check_runs": [_kg_run(1)]}, expect=0),
+    "kg_m2_list_nhieu_trang": _kg_ca(
+        [{"total_count": 2, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+         {"total_count": 2, "check_runs": [_kg_run(2)]}], expect=0),
+    # M3 — luật xanh
+    "kg_m3_vang": _kg_ca({"check_runs": [_kg_run(1, name="khac")]}, chua="VẮNG"),
+    "kg_m3_huy_moi_nhat": _kg_ca(
+        {"check_runs": [_kg_run(1), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
+    "kg_m3_chay_lai_xanh": _kg_ca(
+        {"check_runs": [_kg_run(1, conclusion="cancelled"), _kg_run(2)]}, expect=0),
+    "kg_m3_in_progress": _kg_ca({"check_runs": [_kg_run(1, conclusion=None, status="in_progress")]},
+                                chua="'in_progress'"),
+    "kg_m3_head_khac": _kg_ca({"check_runs": [_kg_run(1, head="cd" * 20)]}, chua="cd" * 20),
+    "kg_m3_ten_tuyet_doi": _kg_ca(
+        {"check_runs": [_kg_run(1, name="gate (ubuntu-latest) extra"), _kg_run(2, name="gate")]},
+        bat_buoc=("gate (ubuntu-latest)",), chua="VẮNG"),
+    "kg_m3_ngoai_bo_qua": _kg_ca(
+        {"check_runs": [_kg_run(1), _kg_run(2, name="khac", conclusion="cancelled")]}, expect=0),
+    # Trùng `id` lớn nhất: MỌI bản ghi của id ấy phải xanh — không tự chọn bản thuận lợi.
+    "kg_m3_trung_id_moi_ban_phai_xanh": _kg_ca(
+        {"check_runs": [_kg_run(2), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
+}
+# M3-ket-luan — mỗi giá trị một ca: luật là danh sách CHO PHÉP `success`.
+_KG_KET_LUAN = ("skipped", "neutral", "failure", "timed_out", "action_required", "stale", None)
+for _kl in _KG_KET_LUAN:
+    _KG_CA[f"kg_m3_ket_luan_{_kl}"] = _kg_ca({"check_runs": [_kg_run(1, conclusion=_kl)]},
+                                            chua=f"conclusion={_kl!r}")
+
+
+def case_kg_m4_rc_gate_12(c: Ctx):
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, conclusion="cancelled")]}, "gate")
+    _doi(12, rc, e, "gate đỏ phải trả ĐÚNG 12")
+    nguon = c.script.read_text(encoding="utf-8")
+    if "\nRC_GATE = 12\n" not in nguon or not re.search(r"^\s+12\s+`kiem-gate`", nguon, re.M):
+        raise AssertionError("thiếu `RC_GATE = 12` hoặc dòng 12 trong bảng mã thoát docstring")
+    rc, o, e = run(c.script, ["kiem-gate", "--help"])
+    if rc != 0 or "12 gate không xanh" not in _txt(o).replace("\n", " "):
+        raise AssertionError(f"--help của kiem-gate thiếu mã 12: {_txt(o)!r}")
+
+
+CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12)]
+
+_KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
+MUTANTS.update({
+    "kg_bo_sha_re": ("    if not SHA_RE.fullmatch(a.head):\n", "    if False:\n",
+                     ["kg_m1_head_7_ky_tu"]),
+    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() for t in ten_bb):\n", "    if False:\n",
+                            ["kg_m1_bat_buoc_rong"]),
+    "kg_bo_qua_phan_tu_thieu_truong": ("            if sai:\n                hong(",
+                                       "            if sai:\n                continue\n                hong(",
+                                       ["kg_m2_thieu_conclusion"]),
+    "kg_bool_la_int": ("type(r.get(k, _VANG)) not in kieu]", "not isinstance(r.get(k, _VANG), kieu)]",
+                       ["kg_m2_id_bool"]),
+    "kg_bo_kiem_thieu_trang": ("    if so_id < tong_khai:\n", "    if False:\n", ["kg_m2_thieu_trang"]),
+    "kg_bo_kiem_vang": ('do.append(f"{ten!r}: VẮNG', 'xanh.append(f"{ten!r}: VẮNG',
+                        ["kg_m3_vang", "kg_m3_ten_tuyet_doi"]),
+    "kg_chon_success_bat_ky": ('id_max = max(r["id"] for r in cung)',
+                               'id_max = max((r["id"] for r in cung if r["conclusion"] == "success"), default=-1)',
+                               ["kg_m3_huy_moi_nhat"]),
+    "kg_chon_luot_cu_nhat": ('id_max = max(r["id"]', 'id_max = min(r["id"]',
+                             ["kg_m3_chay_lai_xanh", "kg_m2_list_nhieu_trang"]),
+    "kg_trung_id_chon_mot": ('for r in (r for r in cung if r["id"] == id_max):',
+                             'for r in [next(r for r in cung if r["id"] == id_max)]:',
+                             ["kg_m3_trung_id_moi_ban_phai_xanh"]),
+    "kg_danh_sach_cam": ('hop_le = (r["status"] == "completed" and r["conclusion"] == "success"',
+                         'hop_le = (r["conclusion"] not in ("cancelled", "failure")', _KG_CAM),
+    "kg_bo_so_head": ('"success"\n                      and r["head_sha"] == a.head)', '"success")',
+                      ["kg_m3_head_khac"]),
+    "kg_khop_tien_to": ('if r["name"] == ten]', 'if r["name"].startswith(ten)]',
+                        ["kg_m3_ten_tuyet_doi"]),
+    "kg_xet_moi_check": ('cung = [r for r in runs if r["name"] == ten]', "cung = list(runs)",
+                         ["kg_m3_ngoai_bo_qua"]),
+    "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
+})
+
+
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:

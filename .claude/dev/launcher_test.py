@@ -1911,11 +1911,38 @@ def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
     `_cac_pid_cha_windows` (Toolhelp32) và khoá danh tính hỏi RIÊNG từng PID qua
     `_khoa_danh_tinh`. Vì thế vế (b) mạnh hơn trước: PID mù ngoài cây không chỉ
     "không phá ảnh" mà còn KHÔNG ĐƯỢC HỎI — phạm vi giờ đo được, không chỉ suy ra.
+
+    wp766 (Codex review PR #765, tái hiện trên `9fddb1d` lẫn `80e0fac`) — PID giả
+    KHÔNG được ghi cứng: `_chup_cay` cố ý bỏ `os.getpid()` khỏi ảnh, nên lượt chạy
+    có PID trùng 10/11/12 (namespace PID mới) làm ca ĐỎ — getpid=11 hỏng vế (a),
+    getpid=12 hỏng vế (b). Fixture nay lấy PID từ `_pid_gia_khac_minh`; `r766`
+    khoá điều đó bằng cách ép `os.getpid` trùng từng PID cũ.
     """
+    _than_t81()
+
+
+def _pid_gia_khac_minh(n: int, tu: int = 10) -> list[int]:
+    """`n` PID giả liên tiếp từ `tu`, bỏ qua PID của CHÍNH lượt chạy và PID cha.
+
+    Đọc `os.getpid()` LÚC GỌI (không lúc nạp module) để ca ép `os.getpid` vẫn đo
+    được. Tránh cả `os.getppid()` là phòng thủ: launcher hiện không loại PID cha,
+    nên vế ấy không có đột biến riêng (nói thẳng, đừng đọc thành đã đo).
+    """
+    tranh = {os.getpid(), os.getppid()}
+    ra, p = [], tu
+    while len(ra) < n:
+        if p not in tranh:
+            ra.append(p)
+        p += 1
+    return ra
+
+
+def _than_t81():
     m = _tai_launcher_thu()
     m.platform.system = lambda: "Windows"
+    cha, goc, mu, con = _pid_gia_khac_minh(4)
     da_hoi = []
-    khoa = {10: "win:123", 11: None, 12: "win:456"}
+    khoa = {goc: "win:123", mu: None, con: "win:456"}
 
     def _khoa(pid):
         da_hoi.append(pid)
@@ -1923,15 +1950,39 @@ def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
 
     m._khoa_danh_tinh = _khoa
 
-    # (a) tien trinh mu la CON cua 10 => khong do duoc
-    m._cac_pid_cha_windows = lambda: {10: 1, 11: 10}
-    bang(m._chup_cay(10) is None, "hau due khong lay duoc khoa bi bo qua im lang")
-    # (b) tien trinh mu thuoc nhanh KHAC (cha = 1) => anh van dung duoc
+    # (a) tien trinh mu la CON cua goc => khong do duoc
+    m._cac_pid_cha_windows = lambda: {goc: cha, mu: goc}
+    bang(m._chup_cay(goc) is None, "hau due khong lay duoc khoa bi bo qua im lang")
+    # (b) tien trinh mu thuoc nhanh KHAC (cung cha voi goc) => anh van dung duoc
     da_hoi.clear()
-    m._cac_pid_cha_windows = lambda: {10: 1, 12: 10, 11: 1}
-    bang(m._chup_cay(10) == {10: "win:123", 12: "win:456"},
+    m._cac_pid_cha_windows = lambda: {goc: cha, con: goc, mu: cha}
+    bang(m._chup_cay(goc) == {goc: "win:123", con: "win:456"},
          "tien trinh mu NGOAI cay khong duoc lam hong ca anh")
-    bang(11 not in da_hoi, f"da hoi khoa cua PID ngoai cay: {da_hoi}")
+    bang(mu not in da_hoi, f"da hoi khoa cua PID ngoai cay: {da_hoi}")
+
+
+@ca
+def r766_t81_khong_phu_thuoc_pid_cua_luot_chay():
+    """t81 phải xanh BẤT KỂ PID của lượt chạy — kể cả khi nó trùng PID giả.
+
+    Đo trên `9fddb1d` (16-10-2026, Python 3.13.16) với fixture PID cứng 10/11/12:
+    ép getpid=11 ⇒ hỏng vế (a), getpid=12 ⇒ hỏng vế (b), getpid=99999 ⇒ qua.
+    Ca này ép `os.getpid` lần lượt về 1, các PID cứng cũ (10, 11, 12) và mọi PID
+    mà fixture sẽ chọn khi KHÔNG bị ép, rồi chạy lại thân t81. Đột biến harness
+    `pid_gia_quay_ve_ghi_cung` (bỏ phép tránh) phải làm ca này ĐỎ.
+    """
+    that = os.getpid
+    ep = sorted({1, 10, 11, 12, *_pid_gia_khac_minh(4)})
+    try:
+        for p in ep:
+            os.getpid = lambda p=p: p
+            try:
+                _than_t81()
+            except TinHieuChotCa as e:
+                raise TinHieuChotCa(f"getpid={p}: {e}") from None
+    finally:
+        os.getpid = that
+    bang(os.getpid is that, "khong hoan nguyen os.getpid")
 
 
 @ca
@@ -9116,6 +9167,12 @@ DOT_BIEN_HARNESS = [
       '    da_chay = tong'),
      ["t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua",
       "t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua"]),
+    # wp766: bo phep tranh PID cua luot chay => fixture t81 quay ve PID ghi cung, va
+    # luot chay co getpid trung mot PID gia lai do (Codex review PR #765).
+    ("pid_gia_quay_ve_ghi_cung",
+     ('    tranh = {os.getpid(), os.getppid()}',
+      '    tranh = set()'),
+     ["r766_t81_khong_phu_thuoc_pid_cua_luot_chay"]),
 ]
 
 

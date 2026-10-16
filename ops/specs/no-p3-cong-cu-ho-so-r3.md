@@ -35,7 +35,8 @@ theo `che_do`, và `pull_request:` (dòng 13) không lọc nhánh đích. Đo 23
 
 Chạy lại trên `9fddb1d` 23:38:54Z–23:39:09Z: đầu ra y hệt. Đơn vị của `ĐĂNG KÝ: a/b`: a = tệp test sống trên cây,
 b = mục trong sổ. Chỉ S2 xanh, nên câu "#752 land trước" của Issue #763, nếu hiểu là merge vào `master`, làm
-`gate-registry` của `master` đỏ giữa hai lần merge. Hai đường giữ được `master` xanh:
+`gate-registry` VÀ `gate-ops (ubuntu-latest)` của `master` đỏ giữa hai lần merge (cùng một nguyên nhân, B6 d).
+Hai đường giữ được `master` xanh:
 
 - **A (giữ quyết định tách — ĐÃ CHỌN):** #752 và #763 vẫn là hai packet, hai lease, hai lượt review, hai trần
   ADR-0044 tính riêng (cả hai `sensitive` theo cổng; #752 cần ngoại lệ trần đích danh, `depends_on` (4)). Lease #752
@@ -146,8 +147,12 @@ Không đổi so với r2, trừ L-5 bỏ vế "15/15 tệp có nhãn đều ch�
 
 ## Vá sau review lượt 4 (sửa tại chỗ, trước khi đóng băng)
 
-Review lượt 4 (`changes_requested`, 0 P1 · 1 P2 · 2 P3; VERDICT sha256 `bbd99a302dc6b7bfac5be07b6b658f68b88f876546f061f0e28f01c4263bbd75`,
-HINT sha256 `714de6e502954ae8b8c98e85393e02bf7f6b8475d734818d7652b97f7407c6b3`). Áp NGUYÊN VĂN cả 5 hunk của HINT
+Bản trước vá: commit `a2069ac49fdfadfa1b171cf75f146510f7c83058`, sha256
+`9d5715d4cc28319214791a5562ea9380c040a6e0221433b250077053febb5044`. Review lượt 4: reviewer Claude Sonnet 5.5
+(subagent `review-sonnet-max`, tự khai; KHÔNG phải Codex), `reviewed_sha` = commit ấy, `verdict: changes_requested`,
+**P1 0 · P2 1 · P3 2 = 3 lớp**; `VERDICT.md` sha256 `bbd99a302dc6b7bfac5be07b6b658f68b88f876546f061f0e28f01c4263bbd75`;
+`HINT.patch` (5 hunk) sha256 `714de6e502954ae8b8c98e85393e02bf7f6b8475d734818d7652b97f7407c6b3`. Lúc vá, hai tệp nằm ở
+thư mục tạm của phiên điều phối, chưa có bản trong kho; thứ định danh là băm. Áp NGUYÊN VĂN cả 5 hunk của HINT
 (`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT.
 
 | lớp | hạng | chỗ sửa |
@@ -155,6 +160,19 @@ HINT sha256 `714de6e502954ae8b8c98e85393e02bf7f6b8475d734818d7652b97f7407c6b3`).
 | `b6d-gate-ops-cung-do-o-dau-752-moi-job-khac-xanh-sai` | P2 | B6(d) và mục "Đường land" A: head riêng #752 đỏ có kiểm soát ở CẢ `gate-registry` LẪN `gate-ops` (`ci_duong_nhanh_test.py` 103/104, khớp C8 của #763) |
 | `r2-doc-chu-standard-dan-nham-nguon-r3-ban-dau` | P3 | hàng `review_class`: câu "trần thường" quy đúng về r3 bản đầu `11134f2` |
 | `b2b-song-sot-qua-b3-mau-thuan-len-tep-va-thieu-tiem-mien-tru` | P3 | B2b: vế `len(tep)` của B3 giết `*.yaml`; ghi phải tiêm miễn trừ `{}`; "Chưa đo được" thêm B2b, B3 |
+
+## Vá sau review lượt 5 (sửa tại chỗ, trước khi đóng băng)
+
+Bản trước vá: commit `b6ab45e`, sha256 `9901e8186c99d5977f5144b7d1691d4a5cc6f6be995478b3e88ce321f24743b3`. Review lượt 5
+(`approve`, 0 P1 · 0 P2 · 2 P3; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, `reviewed_sha`
+`b6ab45e56c41d6aa69bd067a46d8e064ae753c51`; VERDICT sha256 `4f281ba4d763e6395effc879a0ffb09ec212c8cd7fe8f5e88a548ed1bb4e5ef8`,
+HINT sha256 `c60a53e657fad36fcc9274f9671b59d1e6fcb578f3614bc15fb4262db955c62d`). Áp NGUYÊN VĂN 3 hunk của HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT. Chủ kho cho đúng MỘT vòng vá P3 này.
+
+| lớp | hạng | chỗ sửa |
+|---|---|---|
+| `gate-ops-vang-o-hai-cau-chi-nhac-gate-registry` | P3 | hai câu còn chỉ nhắc `gate-registry` nay nêu cả `gate-ops` |
+| `va-luot-4-thieu-ban-truoc-va-va-danh-tinh-reviewer` | P3 | mục "Vá sau review lượt 4" thêm bản trước vá, danh tính reviewer, `reviewed_sha` |
 
 ## Mục tiêu
 
@@ -304,8 +322,8 @@ bốn tệp `land-doc-receipt-thu-hoi-c1a1a/luot{4,5,6,8}-*`, `billing.diff`), c
   (4) của `depends_on`).
 - #748 land vào `master`: lúc đọc thân Issue #748 (23:27:59Z 15-10-2026) Issue còn `open`; đo lúc cấp (điều kiện (3)).
 - Danh sách required check của nhánh `master`: `gh api …/branches/master/protection/required_status_checks` trả HTTP
-  403 `Resource not accessible by integration` (thân lỗi của GitHub) — nên không biết `gate-registry` đỏ ở head #752
-  có chặn nút merge hay không; đường A không dựa vào điều ấy.
+  403 `Resource not accessible by integration` (thân lỗi của GitHub) — nên không biết `gate-registry` và
+  `gate-ops (ubuntu-latest)` (cùng đỏ ở head #752, B6 d) có chặn nút merge hay không; đường A không dựa vào điều ấy.
 - Hồ sơ land trên nhánh `ops/**` chưa vào `master`: công cụ chỉ quét cây được chỉ định.
 - CI thật (B6 d), `ci_dang_ky_test.py --chay` đầy đủ, và đường Windows: không chạy ở phiên soạn r3. Viết test không
   phụ thuộc nền: khoá miễn trừ so bằng `as_posix()`, fixture ghi `encoding="utf-8"` với `newline` ép về LF.

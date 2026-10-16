@@ -173,9 +173,15 @@ def c08_l4_khong_do_duoc_khong_bao_gio_dat():
         with cay(f"pre_merge_checks: [{hs}]\n", {"readback-pr-9001.json": rb}) as goc:   # đo CLI THẬT: rc + dòng cuối
             r = subprocess.run([sys.executable, "-B", str(MA), "--root", str(goc)], capture_output=True, text=True)
         bang(r.returncode == 2 and r.stdout.rstrip().endswith("TỔNG: KHÔNG ĐO ĐƯỢC"), f"ngày sai {hs} ⇒ rc=2: {r.returncode}")
-    for hs in ("x: 'measured — khong nguon'\nx: ok\n", "a: {x: 'measured — khong', x: ok}\n"):   # review F01
+    for hs in ("x: 'measured — khong nguon'\nx: ok\n", "a: {x: 'measured — khong', x: ok}\n",   # review F01 (lượt 1, 2)
+               "null: 'measured — khong'\n~: ok\n", "a: {null: 'measured — khong', null: ok}\n"):
         ky(hs, {"a.json": "{}"}, 2, f"khoá YAML trùng che lời khai {hs!r}", "khoá trùng")
     ky("a: &n {x: 1}\nb: {<<: *n, x: 2, y: 'measured — a.json'}\n", {"a.json": "{}"}, 0, "khoá merge `<<` KHÔNG phải khoá trùng")
+    for hs in ("x: !!set {'measured — khong': null}\n", "x: !!omap [{a: 'measured — khong'}]\n",   # review lượt 2 F05
+               "x: !!pairs [{a: 'measured — khong'}]\n", "x: !!binary bWVhc3VyZWQgLSBraG9uZw==\n"):
+        ky(hs, {"a.json": "{}"}, 2, f"kiểu YAML ngoài dict/list {hs!r}", "ngoài mô hình")
+    ky("pre_merge_checks: ['2026-10-16T02:00:00Z']\n", {"readback-pr-9001.json": RB_PR.replace('"2026-10-16T02:58:26Z"', "null")},
+       2, "readback CỦA CHÍNH PR có merged_at null", "merged_at")
     with tempfile.TemporaryDirectory() as rong:
         rc, ra = kiem(nap(), Path(rong))
     bang(rc == 2 and "tổng 0" in ra, f"không thấy hồ sơ nào ⇒ rc=2, không ĐẠT 0 tệp: rc={rc}")
@@ -241,8 +247,11 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L4_provenance_vang_van_kiem", "if (khai or co_pos) and not prov.is_dir():", "if False:", "c08"),
     ("L4_khong_do_duoc_thanh_dat", "rc = 1 if v else 2 if u else 0", "rc = 1 if v else 0", "c08"),
     ("L4_rong_thanh_dat", "    if not teps:\n        u += 1", "    if False:\n        u += 1", "c08"),
-    ("F01_bo_chot_khoa_trung", "if khoa is not None and khoa in da:", "if False:", "c08"),
-    ("F01_chan_ca_khoa_merge", 'if k.tag != "tag:yaml.org,2002:merge" else None', "", "c08"),
+    ("F01_bo_chot_khoa_trung", "if khoa in da:", "if False:", "c08"),
+    ("F01_chan_ca_khoa_merge", 'if k.tag == "tag:yaml.org,2002:merge":\n                continue', "if False:\n                pass", "c08"),
+    ("F01_null_lam_dau_bo_qua", "                if khoa in da:", "                if khoa is not None and khoa in da:", "c08"),
+    ("F05_bo_tu_choi_kieu_la", "if isinstance(nut, (set, frozenset, tuple, bytes, bytearray)):", "if False:", "c08"),
+    ("L3_readback_null_bo_qua", "is None and (not so or not t.exists()):", "is None:", "c08"),
     ("F02_bo_khoa_mapping", "[{k: v} for k, v in pmc.items()] if", "list(pmc.values()) if", "c06"),
     ("F02_khoa_khong_chuoi", "        if isinstance(nut, dict):\n            yield d", "        if isinstance(k, str):\n            yield d", "c06"),
     ("F03_glob_chi_can_ton_tai", '(x.is_dir() if token.endswith("/") else x.is_file())]', "x.exists()]", "c02"),

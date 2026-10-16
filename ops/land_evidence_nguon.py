@@ -119,7 +119,11 @@ def phan_giai(token, goc, prov):
 
 
 def duyet(nut, duong="$"):
-    """(đường dẫn YAML, nút) cho MỌI nút — dict, list, lá; khoá chuỗi cũng được trả như một lá `<khoa>`."""
+    """(đường dẫn YAML, nút) cho MỌI nút — dict, list, lá; khoá cũng được trả như một lá `<khoa>`. Kiểu khác mà SafeLoader
+    dựng được (`!!set` ⇒ set, `!!omap`/`!!pairs` ⇒ tuple, `!!binary` ⇒ bytes) ⇒ KhongDoDuoc: L2/L3 chỉ hiểu dict, nên
+    đi xuống chúng cho L1 vẫn để hai luật kia mù — từ chối là đóng cả ba luật một chỗ (review lượt 2 F05)."""
+    if isinstance(nut, (set, frozenset, tuple, bytes, bytearray)):
+        raise KhongDoDuoc(f"{duong}: kiểu YAML {type(nut).__name__} ngoài mô hình dict/list/vô hướng")
     yield duong, nut
     con = nut.items() if isinstance(nut, dict) else enumerate(nut) if isinstance(nut, list) else ()
     for k, v in con:
@@ -168,10 +172,12 @@ def nap_yaml(yaml, byte):
 
     def map_khong_trung(nap, nut, deep=False):
         da = set()
-        for k, _ in nut.value:
-            khoa = nap.construct_object(k, deep=True) if k.tag != "tag:yaml.org,2002:merge" else None
+        for k, _ in nut.value:   # khoá merge nhận ra bằng TAG, không bằng giá trị: khoá `null` là khoá thật (lượt 2 F01)
+            if k.tag == "tag:yaml.org,2002:merge":
+                continue
+            khoa = nap.construct_object(k, deep=True)
             try:
-                if khoa is not None and khoa in da:
+                if khoa in da:
                     raise yaml.constructor.ConstructorError(None, None, f"khoá trùng {khoa!r}", k.start_mark)
                 da.add(khoa)
             except TypeError:

@@ -12,7 +12,8 @@ Nó giữ state cục bộ và phát VĂN BẢN comment; phiên Claude mới là
 Mã thoát
     0  ok
     2  sai đối số — slug sai dạng, thiếu finding-id, lý do void ngoài allowlist
-    3  chạm trần — hết attempt, hoặc một finding-id lặp tới same-failure limit
+    3  chạm trần — hết attempt, finding-id lặp tới same-failure limit, hoặc trần
+       vòng review / lời gọi codex (Review Rescue Checkpoint, ADR-0037)
     4  vi phạm cross-provider
     5  dấu vết comment không hợp lệ — chưa đăng ký, sai transition, hoặc đã dùng
     6  doctrine-scan bắt được cụm từ bị cấm trong adapter
@@ -49,6 +50,15 @@ from launcher import ky_ban_ghi_luot
 # khi người gọi không khai; envelope của mission mới là nguồn.
 MAC_DINH_TRAN_ATTEMPT = 3
 MAC_DINH_TRAN_SAME_FAILURE = 2
+# #775: trần Review Rescue Checkpoint (ADR-0037) — vòng: ADR-0048, lời gọi codex: protocol §12.
+# Trục → (khoá đã dùng, khoá trần); một bảng cho `record-review`, `nang-tran`, `record-rescue`.
+MAC_DINH_TRAN_VONG_REVIEW = 10
+MAC_DINH_TRAN_CODEX = 2
+TRUC_TRAN = {"vong_review": ("review_rounds_used", "review_rounds_limit"),
+             "codex_review_calls": ("codex_review_calls_used", "codex_review_calls_limit")}
+CAN_CU_RE = re.compile(r"^https://github\.com/[^/]+/[^/]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+$")
+RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+CANH_BAO_V1 = "CẢNH BÁO: bộ đếm SUY RA từ state v1, có thể THẤP hơn thật"
 
 # --- Mã thoát ----------------------------------------------------------------
 RC_OK = 0
@@ -625,7 +635,32 @@ def _load(state_dir: Path, packet: int) -> dict:
     p = _state_path(state_dir, packet)
     if not p.exists():
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
-    return json.loads(p.read_text(encoding="utf-8"))
+    st = json.loads(p.read_text(encoding="utf-8"))
+    if st.get("schema_version") == 1:  # #775 M6: SUY bộ đếm (cận DƯỚI) — suy 0 là fail-open
+        st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_calls=[],
+                  codex_review_calls_used=_la_codex(st) * sum(
+                      r.get("provider") == st["reviewer"] for r in st["reviews"]),
+                  review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW, nang_tran=[],
+                  codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True)
+    # Bộ đọc NGHIÊM: schema lạ, bool thay int, trần không dương, sổ không phải list ⇒ CHẶN.
+    if st.get("schema_version") != 2 or not all(
+            type(st.get(u)) is int is type(st.get(t)) and st[u] >= 0 and st[t] > 0
+            for u, t in TRUC_TRAN.values()) or {type(st.get("codex_calls")), type(st.get("nang_tran"))} != {list}:
+        _die(RC_STATE, f"state hỏng ở schema_version/bộ đếm/trần — không đoán: {p}")
+    return st
+
+
+def _la_codex(st: dict) -> bool:  # #775: tên provider VÀ họ model — không vế nào đủ một mình
+    return st["reviewer"] == "codex" and (st.get("reviewer_identity") or {}).get("model_family") == "openai"
+
+
+def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
+    u, t = TRUC_TRAN[truc]
+    st.update(state="blocked", ly_do="rescue_required", truc=truc)
+    st["history"].append({"event": "blocked_rescue_required", "truc": truc, "used": st[u], "limit": st[t]})
+    _save(state_dir, st)
+    _die(RC_TRAN, f"{ngu_canh}: {truc} {st[u]}/{st[t]} — Review Rescue Checkpoint (ADR-0037): dừng, lập "
+                  f"biên bản, hỏi chủ kho" + (f"\n{CANH_BAO_V1}" if st.get("dem_tu_suy") else ""))
 
 
 def _save(state_dir: Path, st: dict) -> None:
@@ -691,6 +726,8 @@ def _tieu_thu_comment_id(st: dict, comment_id: str | None, cho: str) -> dict:
 
 
 def cmd_init(a, state_dir: Path) -> int:
+    if min(a.review_rounds_limit, a.codex_review_calls_limit) <= 0:  # #775 M1
+        _die(RC_ARG, "--review-rounds-limit/--codex-review-calls-limit phải là số nguyên DƯƠNG")
     executor_identity = _identity(a.executor, a.executor_model_family,
                                   a.executor_execution_surface, a.executor_transport)
     reviewer_identity = _identity(a.reviewer, a.reviewer_model_family,
@@ -716,7 +753,9 @@ def cmd_init(a, state_dir: Path) -> int:
             f"do bên điều phối cấp, với --state-dir mới.",
         )
     st = {
-        "schema_version": 1,
+        "schema_version": 2, "review_rounds_used": 0, "codex_review_calls_used": 0, "codex_calls": [],
+        "review_rounds_limit": a.review_rounds_limit, "nang_tran": [],
+        "codex_review_calls_limit": a.codex_review_calls_limit,
         "packet": a.packet,
         "mission": a.mission,
         "executor": a.executor,
@@ -1094,6 +1133,17 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"phải vào lại 'reviewing' với head mới.",
         )
 
+    # #775 M3: review codex phải trỏ ĐÚNG một lời gọi đã ghi, cùng head, chưa dùng.
+    goi = None
+    if _la_codex(st):
+        goi = next((g for g in st["codex_calls"] if g["run_id"] == a.codex_call), None)
+        if goi is None:
+            _die(RC_TRACE, f"--codex-call {a.codex_call!r} không trỏ lời gọi nào đã `record-codex-call`")
+        if goi["head"] != a.reviewed_sha:
+            _die(RC_TRACE, f"lời gọi {a.codex_call!r} chạy trên head {goi['head']}, không phải review này")
+        if goi["da_dung"]:
+            _die(RC_TRACE, f"lời gọi {a.codex_call!r} đã neo một review — mỗi lời gọi MỘT lần")
+
     ids = list(a.finding_id or [])
     if a.verdict == "changes_requested" and not ids:
         _die(RC_ARG, "verdict changes_requested phải có ít nhất một --finding-id SLUG")
@@ -1111,6 +1161,9 @@ def cmd_record_review(a, state_dir: Path) -> int:
     ids_duy_nhat = sorted(set(ids))
 
     st["attempt_open"] = False
+    st["review_rounds_used"] += 1
+    if goi is not None:
+        goi["da_dung"] = True
     st["reviews"].append(
         {
             "attempt": st["attempts_used"],
@@ -1141,6 +1194,11 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"— packet về blocked. Lặp lại nghĩa là bản vá không trúng gốc; "
             f"ghi failure evidence + handoff rồi dừng.",
         )
+
+    if a.verdict != "approve":  # approve KHÔNG BAO GIỜ kích rescue
+        for truc, (u, t) in TRUC_TRAN.items():
+            if st[u] >= st[t]:
+                _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
 
     st["state"] = {"approve": "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
     if a.verdict == "approve":
@@ -1198,6 +1256,63 @@ def cmd_transition(a, state_dir: Path) -> int:
     )
     _save(state_dir, st)
     print(f"đã chuyển {truoc} → {a.to}, neo vào comment {a.comment_id}")
+    return RC_OK
+
+
+def cmd_record_codex_call(a, state_dir: Path) -> int:
+    """#775 M2: ghi một lời gọi review codex đã bắt đầu (protocol §12); chặn TRƯỚC khi vượt trần."""
+    st = _load(state_dir, a.packet)
+    if st["state"] != "reviewing":
+        _die(RC_STATE, f"chỉ ghi lời gọi codex khi state 'reviewing' (đang {st['state']!r})")
+    if a.head != st["reviewing_head_sha"]:
+        _die(RC_TRACE, f"--head {a.head!r} KHÔNG khớp head đưa ra review ({st['reviewing_head_sha']})")
+    if not RUN_ID_RE.match(a.run_id) or any(g["run_id"] == a.run_id for g in st["codex_calls"]):
+        _die(RC_ARG, f"--run-id {a.run_id!r} sai dạng hoặc đã ghi")
+    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:
+        _vao_rescue(state_dir, st, "codex_review_calls", "lời gọi codex bị CHẶN TRƯỚC")
+    st["codex_review_calls_used"] += 1
+    st["codex_calls"].append({"run_id": a.run_id, "head": a.head, "da_dung": False})
+    _save(state_dir, st)
+    print(f"đã ghi lời gọi codex {a.run_id} — {st['codex_review_calls_used']}/{st['codex_review_calls_limit']}")
+    return RC_OK
+
+
+def cmd_nang_tran(a, state_dir: Path) -> int:
+    """#775 M4. LỜI KHAI, KHÔNG PHẢI BẰNG CHỨNG — chạy cục bộ, không đọc GitHub: `--can-cu` chỉ
+    được kiểm HÌNH DẠNG, `--ai-nang` chỉ chứng minh cái TÊN (xem `NGUOI_CO_THAM_QUYEN`)."""
+    st = _load(state_dir, a.packet)
+    if (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:
+        _die(RC_GUARD, f"--ai-nang {a.ai_nang!r} ngoài danh sách CHO PHÉP {NGUOI_CO_THAM_QUYEN}")
+    u, t = TRUC_TRAN[a.truc]
+    if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):
+        _die(RC_ARG, f"--tran-moi phải > trần {st[t]} và --can-cu phải là URL issuecomment GitHub")
+    st["nang_tran"].append({"truc": a.truc, "tu": st[t], "len": a.tran_moi, "ai_nang": a.ai_nang.strip(),
+                            "can_cu": a.can_cu, "la_loi_khai_khong_phai_bang_chung": True})
+    st[t] = a.tran_moi
+    _save(state_dir, st)
+    print(f"đã nâng trần {a.truc} lên {a.tran_moi} (đã dùng {st[u]}) — LỜI KHAI, không phải bằng chứng")
+    return RC_OK
+
+
+def cmd_record_rescue(a, state_dir: Path) -> int:
+    """#775 M5: cửa DUY NHẤT ra khỏi `blocked` vì rescue — `CHUYEN_HOP_LE` cố ý không đổi. Chỉ
+    `nang_tran` mở lại, khi trần trục đã chạm nay > số đã dùng; quyết định khác giữ blocked."""
+    st = _load(state_dir, a.packet)
+    if st["state"] != "blocked" or st.get("ly_do") != "rescue_required":
+        _die(RC_STATE, f"record-rescue chỉ cho blocked vì rescue_required (đang {st['state']!r})")
+    if not CAN_CU_RE.match(a.can_cu):
+        _die(RC_ARG, f"--can-cu {a.can_cu!r} phải là URL issuecomment GitHub")
+    nang = a.quyet_dinh == "nang_tran"
+    mo = nang and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]]
+    st["history"].append({"event": "record_rescue", "quyet_dinh": a.quyet_dinh, "truc": st.get("truc"),
+                          "can_cu": a.can_cu, "mo_lai": mo})
+    if mo:
+        st["state"] = "running"
+        del st["ly_do"], st["truc"]
+    _save(state_dir, st)
+    if nang and not mo:
+        _die(RC_STATE, f"trục {st['truc']} chưa được nâng quá số đã dùng — chạy `nang-tran` trước")
+    print(f"đã ghi rescue {a.quyet_dinh} — state {st['state']}")
     return RC_OK
 
 
@@ -2210,6 +2325,8 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
 def cmd_status(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
+    if st.get("dem_tu_suy"):
+        print(CANH_BAO_V1, file=sys.stderr)
     return RC_OK
 
 
@@ -2246,6 +2363,8 @@ def build_parser() -> argparse.ArgumentParser:
         q.add_argument(f"--{role}-transport")
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
     q.add_argument("--same-failure-limit", type=int, default=MAC_DINH_TRAN_SAME_FAILURE)
+    q.add_argument("--review-rounds-limit", type=int, default=MAC_DINH_TRAN_VONG_REVIEW)
+    q.add_argument("--codex-review-calls-limit", type=int, default=MAC_DINH_TRAN_CODEX)
     q.set_defaults(fn=cmd_init)
 
     q = sub.add_parser("record-lease",
@@ -2304,7 +2423,28 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         help="mô tả tự do, CHỈ để đọc — không tham gia phép đếm.",
     )
+    q.add_argument("--codex-call", help="run_id của record-codex-call (bắt buộc khi reviewer codex)")
     q.set_defaults(fn=cmd_record_review)
+
+    q = sub.add_parser("record-codex-call", help="ghi lời gọi review codex; chặn TRƯỚC khi vượt trần")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--head", required=True)
+    q.add_argument("--run-id", required=True)
+    q.set_defaults(fn=cmd_record_codex_call)
+
+    q = sub.add_parser("nang-tran", help="nâng trần một trục (LỜI KHAI, không phải bằng chứng)")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--truc", required=True, choices=tuple(TRUC_TRAN))
+    q.add_argument("--tran-moi", type=int, required=True)
+    q.add_argument("--ai-nang", required=True)
+    q.add_argument("--can-cu", required=True)
+    q.set_defaults(fn=cmd_nang_tran)
+
+    q = sub.add_parser("record-rescue", help="quyết định Review Rescue Checkpoint")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--quyet-dinh", required=True, choices=("nang_tran", "tach_stable_slice", "revision", "dung"))
+    q.add_argument("--can-cu", required=True)
+    q.set_defaults(fn=cmd_record_rescue)
 
     q = sub.add_parser("transition", help="chuyển state, đòi dấu vết comment bền")
     q.add_argument("--packet", type=int, required=True)

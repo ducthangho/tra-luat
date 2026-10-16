@@ -119,3 +119,5 @@ ci_cho_phep: 'mot luot ci.yml tren head cuoi truoc merge (chu kho 6211652069 muc
 push_policy: 'push nhanh agent/wp770-r1-g1-claude va mo PR draft (chu kho 6211652069 muc 4)'
 thay_the_cho: []
 thay_the_cho_ghi_chu: generation dau tien cua packet, khong thay lease nao.
+da_bi_thay_the: wp775-r1-g1-claude
+da_bi_thay_the_ghi_chu: 'Packet #770 da land (PR #777, merge 1022a33); lease nay con han nen thu hoi bang bia mo hai chieu khi cap wp775 (cung write set), chu kho issuecomment-6217700890 muc 2.'

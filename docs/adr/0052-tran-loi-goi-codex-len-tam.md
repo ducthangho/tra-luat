@@ -66,26 +66,30 @@ Người cấp lease và reviewer phải kiểm khối `nang_tran` và số lờ
 *"không có khối ấy thì cổng đăng lease từ chối"* của `ADR-0043`: `ADR-0048` đã đo nó sai, và phép đo
 trên cho thấy nó vẫn sai.
 
-## Hiệu lực theo THỜI ĐIỂM ĐÓNG BĂNG — không hồi tố
+## Hiệu lực — neo vào thứ BẤT BIẾN, không dò lịch sử git; không hồi tố
 
-Cùng hình dạng `ADR-0048`, nhưng mốc là một THỜI ĐIỂM đo được bằng git chứ không phải một NGÀY.
-Mốc theo ngày không phân xử được đặc tả đóng băng cùng ngày — đúng ca của chính packet thi hành ADR
-này (cross-review lượt 1, P2 `moc-hieu-luc-thieu-thu-tu-trong-ngay`).
+Hai bản trước của mục này dùng một mốc theo NGÀY (không phân xử được đặc tả đóng băng cùng ngày), rồi
+một mốc theo THỜI ĐIỂM COMMIT tìm bằng `git log --all --find-object` (cross-review lượt 2 tái hiện: cùng
+`spec_hash`, rebase/cherry-pick/squash rồi xoá ref gốc ⇒ đổi cũ → mới mà không có revision nào). Cả hai
+cùng một lớp: hỏi *"lúc nào"* bằng thứ phụ thuộc ref đang còn. Luật dưới đây chỉ đọc nội dung đã băm và
+OID — hai thứ không đổi khi ref bị dọn.
 
-- **MỐC** — thời điểm committer (UTC, tới giây) của commit đầu tiên trên nhánh mặc định có chứa tệp
-  này, tức commit land nó. Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, **không** phải mốc. Đo:
-  `git log --first-parent --diff-filter=A --format='%H %cI' master -- docs/adr/0052-*.md`.
-- **THỨ NEO** — `spec_hash` của packet xác định một blob đặc tả; thời điểm neo là thời điểm committer
-  của commit đầu tiên, trên bất kỳ ref nào của kho, đưa blob ấy vào. Đo:
-  `git log --all --reverse --format='%H %cI' --find-object="$(git hash-object <tệp đặc tả>)"`.
-  Không phải lúc packet chạy, lúc cấp lease hay ngày mở PR.
-- **Đọc ra:** neo **TRƯỚC** mốc ⇒ trần cũ (hai); neo **SAU** mốc ⇒ trần tám. Neo **trùng giây** với
-  mốc, hoặc **không đo được** neo hay mốc ⇒ trần cũ — tức trần chặt hơn, fail-closed.
+Trần **tám** áp cho một packet **khi và chỉ khi đủ CẢ HAI**:
 
-Ca của chính packet đọc ra đúng một câu trả lời: đặc tả `spec_hash 56a0bf28…` được commit `abc5486e`
-đưa vào lúc `2026-10-16T16:57:13Z`, và ADR này không thể land trước khi đặc tả của nó tồn tại, nên neo
-luôn trước mốc ⇒ PR của packet giữ trần **hai**. Packet nào muốn trần mới thì tạo revision mới theo §3.2 (*"Policy đổi làm closure thay đổi
-thì packet phải tạo revision và generation mới trước khi chạy tiếp"*).
+1. **Đặc tả tự khai.** Blob đặc tả mà `spec_hash` của lease trỏ tới chứa một dòng đúng nguyên văn
+   `tran_loi_goi_codex: ADR-0052`. Nội dung đã băm, nên rebase, cherry-pick hay squash không thêm được
+   dòng ấy; muốn thêm phải sửa đặc tả, tức tạo revision mới với `spec_hash` mới — đúng đường §3.2
+   (*"Policy đổi làm closure thay đổi thì packet phải tạo revision và generation mới trước khi chạy
+   tiếp"*).
+2. **Base đã mang ADR.** `base_sha` ghi trong lease chứa tệp này:
+   `git cat-file -e <base_sha>:docs/adr/0052-tran-loi-goi-codex-len-tam.md` ⇒ `rc=0`. OID là bất biến;
+   phép kiểm không đi qua ref nào.
+
+Thiếu một trong hai, hoặc **không đo được** (blob hay `base_sha` không đọc được) ⇒ trần cũ (**hai**),
+tức trần chặt hơn, fail-closed. Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, không tham gia phép đo.
+
+Ca của chính packet đọc ra đúng một câu trả lời, trên **cả hai** điều kiện: đặc tả `spec_hash 56a0bf28…`
+không có dòng khai, và `base_sha 653fef3f` không chứa tệp này ⇒ PR của packet giữ trần **hai**.
 
 Vì vậy ADR này **không** sửa `ADR-0036`, `ADR-0037`, `ADR-0038`, `ADR-0041` hay đặc tả đóng băng
 nào: sửa chúng là viết lại một lời khai vốn đúng tại thời điểm của nó.

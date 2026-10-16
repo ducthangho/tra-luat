@@ -1,0 +1,8 @@
+# do checkout review sau luot 5d4f7321 — 2026-10-16T06:50:55Z
+$ git -C <KHO=rv1> rev-parse HEAD
+701f41c686cef8456d43528ab9556a6b867cd7d6
+$ git -C <KHO> status --porcelain=v1 --untracked-files=all --ignored=matching | wc -l
+0
+$ git -C <KHO> status --porcelain=v1 --untracked-files=all --ignored=matching
+$ git -C <KHO> log --oneline 701f41c..HEAD | wc -l
+0

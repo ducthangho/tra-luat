@@ -1,0 +1,62 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 743
+packet_id: py314-path-exists-nuot-oserror
+mission_issue: 743
+revision: 1
+generation: 1
+lease_id: wp743-r1-g1-claude-20261016
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/py314-path-exists-nuot-oserror-r1.md
+spec_sha256_required: e2121dc07571edb24bf410badccf88d0d35a3d1ddba1f1a490ab378b607d8519
+spec_hash: e2121dc07571edb24bf410badccf88d0d35a3d1ddba1f1a490ab378b607d8519
+prompt_path: ops/specs/py314-path-exists-nuot-oserror-r1.md
+prompt_sha256_required: e2121dc07571edb24bf410badccf88d0d35a3d1ddba1f1a490ab378b607d8519
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+branch: agent/wp743-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 9fddb1d19e8e5b753bb687673846d484fb710182
+start_from_sha: 9fddb1d19e8e5b753bb687673846d484fb710182
+reviewed_sha_required: 9fddb1d19e8e5b753bb687673846d484fb710182
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/743#issuecomment-6206324264
+granted_on_instruction_note: >-
+  Chu kho ducthangho dang comment cap lease 6206324264 (OWNER, performed_via_github_app null, doc lai qua
+  API 16-10-2026) neo dung lease_id, spec_sha256 va base_sha nay, chap nhan Q1-Q4. Phien soan lease (claude)
+  CUNG la executor; no khong tu cap viec cho minh.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-16T02:00:00Z'
+lease_expires_at_utc: '2026-10-18T06:00:00Z'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Chi thi chu kho cho packet: review Codex doc lap toi khi P1=0, P2=0 tren dung head.
+ci_policy: ci_day_du_ke_ca_windows_qua_workflow_dispatch_sau_khi_mo_draft_pr
+ci_policy_note: >-
+  Day nhanh agent/wp743-g1-claude, mo draft PR (ci.yml chay ubuntu), goi launcher (Windows that) bang
+  workflow_dispatch tren ref do. Khong merge, khong land, khong deploy.
+push_policy: push_nhanh_agent_mo_draft_pr
+thay_the_cho: []
+xung_dot_write_set_do_luc: '2026-10-16T01:55Z ai-dang-giu: NGUOI_GIU 0 cho ca hai duong dan (542/542 nhanh, ls-remote = for-each-ref)'

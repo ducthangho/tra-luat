@@ -79,3 +79,10 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r15-g15-claude-windows-20261017
+da_bi_thay_the_ly_do: >-
+  Owner revoked g14 and authorized r15/g15 at Issue #748 comment 6220571943.
+  The g14 clone stayed clean at head 5dfb3ee79b4548c1ee4513bec89a74c5bd2fa59d
+  and tree 8743bb72ebcf02767456bb3398a1e6527b6bed36; no patch was applied,
+  product code edited, committed, pushed, or put in a PR. Preserve the g12 hook
+  patch SHA256 6d73f89a283d6a82d488209fe080b95c1f096ebf5bad94bc1f6866690b26359f.

@@ -35,11 +35,16 @@ pre_merge_checks:
   - {name: gate-ops (ubuntu-latest), sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
   - {name: gate-cong-cu-gop (ubuntu-latest), sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
   - {name: thu-hoi, sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
-  - {name: 'launcher (Windows that) dispatch windows-and-ubuntu', run_id: 38841991504, sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, positive: 'ubuntu 195/195 hong 0; windows 172/172 hong 0', nguon: readback-run-38841991504.json}
-  - {name: 'Codex connector review', sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: 'completed, has_any_findings false', luc: '2026-10-16T02:58:54Z — SAU merge 28s (xem review.codex_connector.lech_quy_trinh)', nguon: readback-codex-connector-765.json}
+  - {name: 'launcher (Windows that) dispatch windows-and-ubuntu', run_id: 38841991504, sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, luc_xong: '2026-10-16T02:49:19Z', positive: 'ubuntu 195/195 hong 0; windows 172/172 hong 0', nguon: readback-run-38841991504.json, nguon_positive: ['trich-log-job/run38841991504-job116783962513-launcher-ubuntu-latest.txt', 'trich-log-job/run38841991504-job116783962845-launcher-windows-latest.txt']}
 post_merge_checks:
   - {name: gate (ci.yml, push master), run_id: 38843154826, sha: e0273d31aba78b014aa89297f32ff86f9daf0277, conclusion: success, nguon: readback-run-38843154826.json}
-  - {name: 'launcher (Windows that) push master', run_id: 38843154835, sha: e0273d31aba78b014aa89297f32ff86f9daf0277, conclusion: success, positive: 'ubuntu 195/195 hong 0; windows 172/172 hong 0', nguon: readback-run-38843154835.json}
+  - {name: 'launcher (Windows that) push master', run_id: 38843154835, sha: e0273d31aba78b014aa89297f32ff86f9daf0277, conclusion: success, positive: 'ubuntu 195/195 hong 0; windows 172/172 hong 0', nguon: readback-run-38843154835.json, nguon_positive: ['trich-log-job/run38843154835-job116787604446-launcher-ubuntu-latest.txt', 'trich-log-job/run38843154835-job116787604308-launcher-windows-latest.txt']}
+  - {name: 'Codex connector review (KHONG phai dieu kien truoc merge)', sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: 'completed, has_any_findings false', luc: '2026-10-16T02:58:54Z — 28s SAU merged_at 02:58:26Z; lech quy trinh ghi o review.codex_connector.lech_quy_trinh', nguon: readback-codex-connector-765.json}
+pre_merge_checks_thu_tu_thoi_gian: >-
+  measured — moi muc pre_merge_checks hoan tat TRUOC merged_at 2026-10-16T02:58:26Z: check-run tren 80e0fac
+  completed_at muon nhat 02:57:23Z (readback-check-runs-80e0fac.json), run 38841991504 updated_at 02:49:19Z (readback-run-38841991504.json).
+  Lenh tai kiem (offline, tu thu muc provenance): python3 -c 'import json;m="2026-10-16T02:58:26Z";c=json.load(open("readback-check-runs-80e0fac.json"))["check_runs"];r=json.load(open("readback-run-38841991504.json"));print(all(x["completed_at"]<m for x in c if x["completed_at"]), r["updated_at"]<m)' — mong True True.
+  Trich log (nguon_positive) giu dong tong ket + sha256 log day du tai luc trich; log day du KHONG luu.
 bookkeeping:
   - {item: 'rut han lease wp743-r1-g1 ve 2026-10-16T04:00Z', commit: 7924919, nhanh: ops/wp743-r1-g1-lease}
   - {item: 'PR ghi so', pr: 771, nhanh: claude/bookkeeping-743-land}

@@ -1,0 +1,75 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 766
+packet_id: wp766
+mission_issue: 766
+revision: 1
+generation: 1
+lease_id: wp766-r1-g1-claude-20261016
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp766.md
+spec_sha256_required: da3095b47567dc8cb94137d0cc675d722eb256a77c8e06ddb90a216e7f148666
+spec_hash: da3095b47567dc8cb94137d0cc675d722eb256a77c8e06ddb90a216e7f148666
+prompt_path: ops/specs/wp766.md
+prompt_sha256_required: da3095b47567dc8cb94137d0cc675d722eb256a77c8e06ddb90a216e7f148666
+write_set:
+- .claude/dev/launcher_test.py
+- changelog.d/wp-766.md
+effective_write_set:
+- .claude/dev/launcher_test.py
+- changelog.d/wp-766.md
+depends_on:
+- 743
+depends_on_trang_thai: >-
+  Da thoa: PR #765 (packet #743) merge 2026-10-16T02:58:26Z, merge commit
+  e0273d31aba78b014aa89297f32ff86f9daf0277. Lease wp743-r1-g1-claude-20261016 da duoc land operator rut han ve
+  2026-10-16T04:00:00Z (ops/wp743-r1-g1-lease 79249197); lease nay chi dang SAU moc do.
+branch: agent/wp766-r1-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: e0273d31aba78b014aa89297f32ff86f9daf0277
+start_from_sha: e0273d31aba78b014aa89297f32ff86f9daf0277
+reviewed_sha_required: e0273d31aba78b014aa89297f32ff86f9daf0277
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/766#issuecomment-6206574281
+granted_on_instruction_note: >-
+  Chu kho chi thi trong phien session_014pXTWd1wrzGF1X4LdwzHdn (16-10-2026), nguyen van:
+  "Cap lease #766, doi #765 land truoc, theo khuyen nghi". "Theo khuyen nghi" = chap nhan ca nam muc khuyen nghi
+  trong comment xin lease neo tren: (1) #765 land truoc roi cap tren master sau land; (2) #765 land voi t81 chap
+  chon (do san); (3) review_class sensitive, reviewer codex, assurance human_audited; (4) khong doi CI Windows
+  truoc merge; (5) executor claude, cloud. Moi muc khuyen nghi (mui ten) cua spec deu duoc chot dung khuyen nghi nen khong can r2.
+  Phien ghi lease nay CUNG la executor; no khong tu cap viec cho minh.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-16T04:05:00Z'
+lease_expires_at_utc: '2026-10-18T06:00:00Z'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Theo tien le wp743 cung write set: review Codex doc lap toi khi P1=0, P2=0 tren dung head.
+ci_policy: ci_ubuntu_qua_draft_pr_khong_doi_windows
+ci_policy_note: >-
+  Day nhanh agent/wp766-r1-g1-claude, mo draft PR (ci.yml chay ubuntu). Chu kho chot khong doi lan Windows truoc
+  merge (spec, ngoai_pham_vi). Khong merge, khong land, khong deploy.
+push_policy: push_nhanh_agent_mo_draft_pr
+thay_the_cho: []
+thay_the_cho_note: >-
+  Khong bia mo: lease wp743-r1-g1-claude-20261016 (cung write set launcher_test.py) da rut han ve
+  2026-10-16T04:00:00Z truoc leased_at cua lease nay, tuc da HET HAN khi lease nay co hieu luc; viet bia mo vao
+  lease da chet chi them tep chet vao tap quet (rc=8) — bai hoc CLAUDE.md 20-09-2026.
+xung_dot_write_set_do_luc: '2026-10-16T03:13Z ai-dang-giu: launcher_test.py NGUOI_GIU 1 (wp743, het han 04:00Z), changelog.d/wp-766.md NGUOI_GIU 0; 547/547 nhanh, ls-remote = for-each-ref. DO LAI sau 04:00Z truoc khi day.'

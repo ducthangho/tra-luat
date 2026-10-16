@@ -65,4 +65,7 @@ ci_policy_note: >-
   vi PR se chay ci.yml.
 push_policy: push_nhanh_agent_de_ben_khong_mo_pr
 thay_the_cho: []
+da_bi_thay_the: wp741-r2-g2-claude-20261015
+da_bi_thay_the_ghi_chu: >-
+  Spec r1 + lease g1 co 6 P1 + 3 P2 theo codex connector tren PR #754 (11:20Z 15-10-2026); thay bang spec r2 + lease g2.
 xung_dot_write_set_do_luc: '2026-10-15T06:21Z ai-dang-giu: NGUOI_GIU 0 cho ca ba duong dan (534/534 nhanh)'

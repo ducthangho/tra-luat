@@ -40,6 +40,11 @@ lease:
     rut han ve 2026-10-16T04:00:00Z o commit 7924919 tren ops/wp743-r1-g1-lease (khoi thu_hoi_bang_rut_han), theo uy
     quyen land 6207001889. Luot `ops — dang lease bang git` 38843210947: success.
   write_set: ['.claude/dev/launcher.py', '.claude/dev/launcher_test.py']
+  nghiem_thu_nha: >-
+    measured — 2026-10-16T04:01Z, sau fetch +refs/heads/* (ls-remote 549 = for-each-ref 549, thieu 0): `ai-dang-giu`
+    cho ca hai duong dan write set rc=0, "NGƯỜI_GIỮ 0: không có"; wp743-r1-g1-claude-20261016 ra HẾT_HẠN. Lan do dau
+    rc=12 (NHÁNH_CỤC_BỘ_TỤT_SAU master, fail-close dung) — chua bang git branch -f master refs/remotes/origin/master roi
+    do lai. Tho: ops/land/pr765-wp743-provenance/ai-dang-giu-sau-04/.
 
 trang_thai_packet:
   merged: true

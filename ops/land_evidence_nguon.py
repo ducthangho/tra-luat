@@ -11,11 +11,13 @@ LUẬT:
       CÓ THẬT, NẰM TRONG gốc kho. Token nguồn = một dải tối đa `[A-Za-z0-9_./{}*-]+` (bỏ dấu `.` cuối câu) kết thúc
       bằng `.json|.txt|.log|.yaml|.yml|.md|.sh|.py|.patch` hoặc bằng `/` (khi ấy phải là thư mục). Thứ tự phân giải:
       `<hồ sơ>-provenance/`, `ops/land/`, gốc kho. Có `*` ⇒ glob, phải khớp ≥ 1 mục đúng LOẠI. Chặt hơn chữ đặc tả (Q3):
-      so `measured` không phân biệt hoa thường; token trỏ CHÍNH hồ sơ không tính là nguồn.
+      so `measured` không phân biệt hoa thường. CHÍNH hồ sơ đang kiểm, và thư mục CHỨA nó (`./`, `../`, `ops/land/`), KHÔNG là
+      nguồn — lời khai không tự chứng minh (connector P1 #778). Hồ sơ KHÁC vẫn là nguồn được: lời khai đo VỀ nó là hợp lệ.
   L2  Mapping có khoá `positive` phải có `nguon_positive` (chuỗi/danh sách) cùng cấp; mỗi tệp phải có; mọi token `N/M`
       và `hong N` của `positive` phải có NGUYÊN VĂN (biên chữ số) trong ≥ 1 tệp ấy.
   L3  Có `pre_merge_checks` và provenance có `readback-pr-*.json` mang `merged_at` ⇒ mọi mốc ISO-8601 đầy đủ trong
-      một phần tử `pre_merge_checks` phải `<` `merged_at`. Không có readback ⇒ ghi "L3 không áp dụng", không ĐẠT ngầm.
+      một phần tử `pre_merge_checks` phải `<` `merged_at`. Mốc nhận `Z`/`z`, độ lệch `±HH:MM`/`±HHMM`, `T`/`t`/dấu cách;
+      thiếu múi giờ ⇒ coi là UTC như YAML 1.1 (connector P2 #778: `+00:00` từng lọt). Không có readback ⇒ "L3 không áp dụng".
   L4  Ba trạng thái: ĐẠT · ĐỎ · KHÔNG ĐO ĐƯỢC. YAML hỏng, provenance vắng khi có lời khai đo/`positive`, đọc tệp lỗi,
       readback hỏng, KHOÁ YAML TRÙNG (parser giữ giá trị cuối ⇒ lời khai trước biến mất), ngày sai, nhiều `merged_at`
       khác nhau, không thấy hồ sơ nào ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ ĐẠT. Băm L5 và luật đo trên CÙNG một lần đọc.
@@ -82,7 +84,7 @@ _KT = r"A-Za-z0-9_./{}*-"
 RE_DAI = re.compile(rf"(?<![{_KT}])[{_KT}]+")
 RE_DUOI_NGUON = re.compile(r"\.(?:json|txt|log|yaml|yml|md|sh|py|patch)$")
 RE_SO_POS = re.compile(r"(?<!\d)\d+/\d+(?!\d)|(?<![A-Za-z0-9_])hong \d+(?!\d)")
-RE_MOC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?Z")
+RE_MOC = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:[Zz]|[+-]\d{2}:?\d{2})?(?![\d:])")
 
 
 class KhongDoDuoc(Exception):
@@ -103,17 +105,24 @@ def _trong_goc(p, goc):
         return False
 
 
-def phan_giai(token, goc, prov):
-    """Đường dẫn CÓ THẬT (trong gốc) cho token, hoặc None. Thứ tự: provenance, ops/land, gốc."""
+def _la_nguon(p, token, goc, tep):
+    if not ((p.is_dir() if token.endswith("/") else p.is_file()) and _trong_goc(p, goc)):
+        return False
+    r = p.resolve()
+    return r != tep.resolve() and not (r.is_dir() and _trong_goc(tep, r))
+
+
+def phan_giai(token, goc, prov, tep):
+    """Đường dẫn NGUỒN hợp lệ cho token (`_la_nguon`), hoặc None. Thứ tự: provenance, ops/land, gốc."""
     for nen in (prov, goc / THU_MUC, goc):
         if "*" in token:
             khop = [Path(x) for x in sorted(glob.glob(glob.escape(str(nen)) + "/" + token))]
-            khop = [x for x in khop if _trong_goc(x, goc) and (x.is_dir() if token.endswith("/") else x.is_file())]
+            khop = [x for x in khop if _la_nguon(x, token, goc, tep)]
             if khop:
                 return khop[0]
             continue
         p = nen / token
-        if (p.is_dir() if token.endswith("/") else p.is_file()) and _trong_goc(p, goc):
+        if _la_nguon(p, token, goc, tep):
             return p
     return None
 
@@ -137,7 +146,8 @@ def _thoi_diem(x):
     if isinstance(x, datetime.datetime):
         return x if x.tzinfo else x.replace(tzinfo=datetime.timezone.utc)
     try:
-        return datetime.datetime.fromisoformat(x.replace("Z", "+00:00"))
+        t = datetime.datetime.fromisoformat(x.upper().replace("Z", "+00:00"))
+        return t if t.tzinfo else t.replace(tzinfo=datetime.timezone.utc)
     except ValueError as e:   # regex chỉ kiểm HÌNH (2026-99-16 lọt) — ngày sai là đầu vào không đo được, không phải ĐỎ
         raise KhongDoDuoc(f"mốc {x!r} sai: {e}")
 
@@ -220,8 +230,7 @@ def kiem_ho_so(tep, byte, goc, yaml):
     vp, ghi = [], []
     for d, v in khai:   # L1
         tk = token_nguon(v)
-        thay = [p for p in (phan_giai(t, goc, prov) for t in tk) if p and p.resolve() != tep.resolve()]   # tự trỏ ≠ nguồn
-        if not thay:
+        if not any(phan_giai(t, goc, prov, tep) for t in tk):
             vp.append(f"L1 {d}: lời khai đo không có token nguồn phân giải được"
                       f" (token: {', '.join(tk) if tk else 'không có'}) — {v.strip()[:90]!r}")
     for d, m in maps:   # L2
@@ -232,7 +241,7 @@ def kiem_ho_so(tep, byte, goc, yaml):
         if not ds or not all(isinstance(x, str) and x for x in ds):
             vp.append(f"L2 {d}: có positive mà thiếu nguon_positive (chuỗi/danh sách)")
             continue
-        tep_ng = [(x, phan_giai(x, goc, prov)) for x in ds]
+        tep_ng = [(x, phan_giai(x, goc, prov, tep)) for x in ds]
         vp += [f"L2 {d}: nguon_positive {x!r} không có tệp" for x, p in tep_ng if p is None or not p.is_file()]
         if any(p is None or not p.is_file() for _, p in tep_ng):
             continue

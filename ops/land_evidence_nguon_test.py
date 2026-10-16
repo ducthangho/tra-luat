@@ -104,7 +104,9 @@ def c01_l1_luot1_mergeable_clean_khong_nguon():
     ky("x: 'measured — readback-pr-9001.json: mergeable_state unknown'\n", p, 0, "token nguồn CÓ THẬT")
     ky("x: 'measured — readback-pr-9999.json'\n", p, 1, "token trỏ tệp KHÔNG có", "L1")
     ky(f"x: 'measured: ops/land/{PROV}/readback-pr-9001.json'\n", p, 0, "token tương đối gốc kho")
-    ky(f"x: 'measured — {TEN}'\n", p, 1, "lời khai chỉ trỏ CHÍNH hồ sơ", "L1")
+    for tk in (TEN, "../", "ops/land/", "../ops/land/"):   # connector P1 #778: chính hồ sơ và thư mục CHỨA nó không là nguồn
+        ky(f"x: 'measured — {tk}'\n", p, 1, f"lời khai chỉ trỏ {tk!r} (tự chứng minh)", "L1")
+    ky("x: [{positive: '195/195 hong 0', nguon_positive: " + TEN + "}]\n", p, 1, "nguon_positive trỏ chính hồ sơ", "L2")
 
 
 @ca
@@ -161,6 +163,10 @@ def c06_l3_luot2_moc_sau_merged_at():
            p, mong, f"{khoa} {moc}")
     for pmc in ("{'2026-10-16T02:59:00Z': ok}", "{c: '2026-10-16T02:59:00Z'}", "{2026-10-16T02:59:00Z: ok}"):   # review F02
         ky(f"pre_merge_checks: {pmc}\n", p, 1, f"pre_merge_checks dạng mapping {pmc}", "L3")
+    for moc in ("+00:00", "+0000", "-00:00", "z", " naive"):   # connector P2 #778: mọi dạng múi giờ (thiếu ⇒ UTC) đều phải được so
+        hs = f"2026-10-16T03:00:00{moc}".replace(" naive", "")
+        ky(f"pre_merge_checks: ['{hs}', '{hs.replace('T', ' ').replace('03:00', '02:00')}']\n", p, 1, f"mốc {hs!r} sau merge", "L3")
+    ky("pre_merge_checks: ['2026-10-16 02:00:00+00:00', '2026-10-16t02:00:00Z']\n", p, 0, "mốc trước merge mọi dạng")
     ky("pre_merge_checks:\n  - {name: c, luc: '2026-10-16T03:00:00Z'}\n", {"a.json": "{}"}, 0, "không readback", "L3 không áp dụng")
 
 
@@ -273,10 +279,13 @@ def c12_dong_cuoi_dung_dinh_dang():
 
 # (tên, chuỗi gốc, chuỗi thay, ca đích). Mỗi chốt một đột biến; chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
-    ("L1_chi_can_co_token", "        if not thay:", "        if not tk:", "c01"),
-    ("L1_tu_tro_la_nguon", "if p and p.resolve() != tep.resolve()]", "if p]", "c01"),
+    ("L1_chi_can_co_token", "if not any(phan_giai(t, goc, prov, tep) for t in tk):", "if not tk:", "c01"),
+    ("P1_tu_tro_tep_la_nguon", "return r != tep.resolve() and not", "return not", "c01"),
+    ("P1_thu_muc_chua_ho_so_la_nguon", "and not (r.is_dir() and _trong_goc(tep, r))", "", "c01"),
+    ("P2_chi_nhan_Z", "(?:[Zz]|[+-]\\d{2}:?\\d{2})?(?![\\d:])", "Z", "c06"),
+    ("P2_thieu_mui_gio_khong_khop", "(?:[Zz]|[+-]\\d{2}:?\\d{2})?(?![\\d:])", "(?:[Zz]|[+-]\\d{2}:?\\d{2})(?![\\d:])", "c06"),
     ("L1_glob_rong_van_qua", "            if khop:\n                return khop[0]", "            return nen", "c02"),
-    ("L1_bo_chot_trong_goc", "else p.is_file()) and _trong_goc(p, goc):", "else p.is_file()):", "c03"),
+    ("L1_bo_chot_trong_goc", "else p.is_file()) and _trong_goc(p, goc)):", "else p.is_file())):", "c03"),
     ("L1_phan_biet_hoa_thuong", ", re.IGNORECASE)", ")", "c04"),
     ("L2_bo_doi_nguon", "            vp.append(f\"L2 {d}: có positive mà thiếu", "            continue  # (f\"L2 {d}: có positive", "c05"),
     ("L2_bo_bien_chu_so", 'else r"(?<![\\d/])" + re.escape(so) + r"(?![\\d/])")', "else re.escape(so))", "c05"),
@@ -297,7 +306,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L3_readback_null_bo_qua", "is None and (not so or not t.exists()):", "is None:", "c08"),
     ("F02_bo_khoa_mapping", "[{k: v} for k, v in pmc.items()] if", "list(pmc.values()) if", "c06"),
     ("F02_khoa_khong_chuoi", "        if isinstance(nut, dict):\n            yield d", "        if isinstance(k, str):\n            yield d", "c06"),
-    ("F03_glob_chi_can_ton_tai", '(x.is_dir() if token.endswith("/") else x.is_file())]', "x.exists()]", "c02"),
+    ("F03_glob_chi_can_ton_tai", "khop = [x for x in khop if _la_nguon(x, token, goc, tep)]", "khop = [x for x in khop if x.exists()]", "c02"),
     ("F04_ngay_sai_traceback", "    except ValueError as e:   # regex", "    except KeyError as e:   # regex", "c08"),
     ("L5_doc_tep_lan_hai", "du_lieu = nap_yaml(yaml, byte)", "du_lieu = nap_yaml(yaml, tep.read_bytes())", "c13"),
     ("F06_root_khong_resolve", "goc = Path(a.root).resolve()", "goc = Path(a.root)", "c14"),

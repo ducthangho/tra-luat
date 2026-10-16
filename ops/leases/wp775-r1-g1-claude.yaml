@@ -1,0 +1,126 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 775
+packet_id: wp775
+revision: 1
+generation: 1
+lease_id: wp775-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+assurance_ghi_chu: 'Theo spec wp775 r1 muc routing: assurance = verdict codex approve tren head cuoi (ho openai vs ho claude, bang chung do_may qua launcher run.json). Uy quyen land cua chu kho la viec RIENG, khong phai human_audited.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp775.md
+spec_sha256_required: 4b7530c265dddefbebd06ea209d7c0594210f57b391e0d0d353931171fd2b6d8
+spec_hash: 4b7530c265dddefbebd06ea209d7c0594210f57b391e0d0d353931171fd2b6d8
+prompt_path: ops/specs/wp775.md
+prompt_sha256_required: 4b7530c265dddefbebd06ea209d7c0594210f57b391e0d0d353931171fd2b6d8
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+write_set_hash: a7ec25392f536bb7467de62e4bb9b0da8689fe4c020031ed88fec36390ea96b3
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+effective_write_set_ghi_chu: 'Spec wp770 r1 khai dung hai duong dan; khong phai ngoai le closure.'
+required_checks:
+- {id: chung-1, kiem: 'packet_loop_test N/N hai so BANG NHAU', do: 'a/b a!=b, rc!=0, hoac rc=0 ma output rong'}
+- {id: chung-2, kiem: 'moi ca cu (gom kg_*) giu mau', do: 'ca cu doi mau'}
+- {id: M1, kiem: 'init tran vong/codex so nguyen duong, state schema_version 2 du 6 truong', do: 'dot bien bo kiem so duong lam ca 0 XANH'}
+- {id: M2-tran, kiem: 'loi goi codex vuot tran bi chan TRUOC, RC_TRAN, used khong tang', do: 'dot bien kiem sau khi ghi / > thay >= lam ca doi mau'}
+- {id: M2-head, kiem: 'record-codex-call head khac reviewing_head_sha => chan', do: 'dot bien bo so head lam ca XANH'}
+- {id: M2-trung, kiem: 'run_id trung => RC_ARG', do: 'dot bien bo kiem trung lam ca XANH'}
+- {id: M3-bat-buoc, kiem: 'record-review codex thieu --codex-call => RC_TRACE', do: 'dot bien coi tuy chon lam ca XANH'}
+- {id: M3-dung-lai, kiem: 'dung lai run_id => RC_TRACE', do: 'dot bien bo co da_dung lam ca XANH'}
+- {id: M3-head, kiem: 'loi goi head A, review head B => RC_TRACE', do: 'dot bien bo so head loi goi lam ca XANH'}
+- {id: M3-vong, kiem: 'review thu 10 changes_requested => blocked/rescue_required rc 3; approve => accepted', do: 'dot bien kich hoat ca khi approve / bo truc vong lam ca doi mau'}
+- {id: M3-codex, kiem: 'loi goi codex thu 2 + changes_requested => blocked/rescue_required', do: 'dot bien chi xet truc vong lam ca XANH'}
+- {id: M4, kiem: 'nang-tran ai_nang ngoai danh sach CHO PHEP => RC_GUARD; tran_moi <= tran => RC_ARG; can_cu khong issuecomment => RC_ARG', do: 'dot bien danh sach CAM lam ca ten gia XANH'}
+- {id: M5-cua, kiem: 'record-rescue nang_tran sau nang-tran hop le => running; thieu => RC_STATE', do: 'dot bien mo running khong can nang-tran lam ca XANH'}
+- {id: M5-khac, kiem: 'tach_stable_slice/revision/dung giu blocked', do: 'dot bien dua ve running lam ca DO'}
+- {id: M5-sai-ly-do, kiem: 'blocked vi same-failure + record-rescue => RC_STATE', do: 'dot bien bo kiem ly_do lam ca XANH'}
+- {id: M5-transition, kiem: 'transition blocked -> running van bi tu choi', do: 'dot bien them vao CHUYEN_HOP_LE lam ca DO'}
+- {id: M6, kiem: 'state v1 suy bo dem, dem_tu_suy true, canh bao, van chan khi vuot tran', do: 'dot bien suy used = 0 lam ca chan XANH'}
+- {id: kich-thuoc, kiem: 'git diff --numstat base...HEAD <= 3 tep, <= 300 dong them (sau khi cat theo cat_khi_vuot_tran)', do: 'vuot'}
+- {id: ruff, kiem: 'ruff F tren .claude/dev/packet_loop.py: DELTA so base = 0', do: 'delta > 0'}
+- {id: doctrine, kiem: 'doctrine-scan va adr-song rc nhu base', do: 'rc doi'}
+- {id: dot-bien, kiem: 'bang dot bien du moi o, moi ban sao mot tien trinh, -B, PYTHONDONTWRITEBYTECODE=1', do: 'thieu dot bien; o song khong ban va; traceback dem la giet'}
+merge_conditions:
+- {id: merge-1, dieu_kien: 'verdict codex approve tren head cuoi, P1=0 P2=0 (cross_approved)'}
+- {id: merge-2, dieu_kien: 'moi muc M1-M7 xep DA VA / KHONG VA co ly do (ke ca phan cat) hoac quyet dinh chu kho co link'}
+- {id: merge-3, dieu_kien: 'mot luot ci.yml XANH tren head cuoi, kiem bang packet_loop.py kiem-gate; luot huy/bo qua/vang KHONG tinh'}
+- {id: merge-4, dieu_kien: 'uy quyen merge cua chu kho neo dung head cuoi; connector codex tren dung head khong con P1/P2 mo'}
+- {id: merge-5, dieu_kien: 'head doi => merge-1, merge-3, merge-4 het hieu luc'}
+land_obligations: []
+land_obligations_ghi_chu: 'spec wp775 r1: khong co nghia vu ngoai gate canon'
+branch: agent/wp775-r1-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1022a333cadfafe847a7ae5010b9cd135e29d0f1
+start_from_sha: 1022a333cadfafe847a7ae5010b9cd135e29d0f1
+reviewed_sha_required: 1022a333cadfafe847a7ae5010b9cd135e29d0f1
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/775#issuecomment-6217700890
+granted_on_instruction_readback: 'GET issues/comments/6217700890: user ducthangho, author_association OWNER, performed_via_github_app null, created_at == updated_at 2026-10-16T14:29:46Z, body sha256 d4370709c92434d3998bddd6722336bbf72d657f44cae420d232da7ec38cfbaf; dich danh generation g1 lease_id wp775-r1-g1-claude, neo spec sha256 4b7530c2, co khoi cap_lease'
+granted_on_instruction_note: 'Chu kho cap g1 (6217700890): chi ghi lease khi ai-dang-giu <= 10 phut truoc leased_at khong con writer ngoai. lease_id dung NGUYEN VAN ten trong comment.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien dieu phoi chinh ghi lease; executor la phien cloud KHAC, khong phai phien ghi.'
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-16T14:30:27Z'
+  ref: refs/heads/agent/wp775-r1-g1-claude
+  trang_thai: vang
+  oid_do_duoc: null
+  oid_yeu_cau: 1022a333cadfafe847a7ae5010b9cd135e29d0f1
+  ghi_chu: 'nhanh chua ton tai luc cap (ls-remote rong); executor tao tu base_sha.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-16T14:30:27Z'
+  goc_quet: 'master 1022a333cadfafe847a7ae5010b9cd135e29d0f1, quet refs/heads/* sau fetch day du'
+  so_nhanh: 'ls-remote 560 == cuc bo 560'
+  ket_qua: 'ai-dang-giu ca hai duong dan rc=11 NGUOI_GIU 1 = wp770-r1-g1-claude (ref ops/wp770-spec, packet #770 da land) - duoc thay o day bang bia mo hai chieu; khong co writer ngoai'
+leased_at_utc: '2026-10-16T14:31:56Z'
+heartbeat_at: '2026-10-16T14:31:56Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-18T14:31:56Z'
+lease_expires_at_utc: '2026-10-18T14:31:56Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+attempts_basis: tran canon 3/packet (protocol envelope max_attempts_per_packet).
+review_rounds_limit: 10
+budget:
+  vong_review:
+    pr_wp775: {used: 0, reserved: 0, limit: 10}
+  codex_review_calls:
+    pr_wp775: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_775: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+  ghi_chu: 'pham vi pr_wp775 = PR cua packet nay (chua mo luc cap); khong nang tran (chu kho 6217700890 muc 3).'
+nang_tran: []
+requires_live: false
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+ci_cho_phep: 'mot luot ci.yml tren head cuoi truoc merge, kiem bang kiem-gate (chu kho 6217700890 muc 4); luot tu chay giua vong thi huy'
+push_policy: 'push nhanh agent/wp775-r1-g1-claude va mo PR draft (chu kho 6217700890 muc 4)'
+thay_the_cho:
+- wp770-r1-g1-claude
+thay_the_cho_ghi_chu: 'lease wp770 (packet #770 da land o 1022a33) con han toi 2026-10-18T08:48:27Z va giu dung write set => thu hoi bang bia mo hai chieu (chu kho 6217700890 muc 2). Bia mo dat tren ops/wp770-spec, ref duy nhat mang lease wp770.'

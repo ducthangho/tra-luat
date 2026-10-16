@@ -78,7 +78,11 @@ nang_tran:
     Luot 3 CHI de xac minh lop ay va lop moi do ban va sinh ra. Chi thi:
     https://github.com/ducthangho/tra-luat/issues/782 (comment nang_tran 16-10-2026).
   tran_cu: 2
-  tran_moi: 3
-lease_sua_lan_cuoi: '2026-10-16T17:50Z'
+  tran_moi: 4
+  lich_su: >-
+    2->3 (checkpoint sau luot 2), 3->4 (checkpoint sau luot 3, F02 lap lan 3; chu kho chon cach va
+    'trich OID land' va 'nang tran len 4').
+lease_sua_lan_cuoi: '2026-10-16T18:30Z'
 lease_sua_ghi_chu: >-
-  Lan 1: them khoi nang_tran theo lua chon cua chu kho. Khong doi write set, spec, branch, han.
+  Lan 1: them khoi nang_tran (2->3). Lan 2: nang tran_moi 3->4. Ca hai theo lua chon cua chu kho;
+  khong doi write set, spec, branch, han.

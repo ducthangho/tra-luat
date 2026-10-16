@@ -166,7 +166,10 @@ def c06_l3_luot2_moc_sau_merged_at():
     for moc in ("+00:00", "+0000", "-00:00", "z", " naive"):   # connector P2 #778: mọi dạng múi giờ (thiếu ⇒ UTC) đều phải được so
         hs = f"2026-10-16T03:00:00{moc}".replace(" naive", "")
         ky(f"pre_merge_checks: ['{hs}', '{hs.replace('T', ' ').replace('03:00', '02:00')}']\n", p, 1, f"mốc {hs!r} sau merge", "L3")
-    ky("pre_merge_checks: ['2026-10-16 02:00:00+00:00', '2026-10-16t02:00:00Z']\n", p, 0, "mốc trước merge mọi dạng")
+    ky("pre_merge_checks: ['2026-10-16 02:00:00+00:00', '2026-10-16t02:00:00Z', '2026-10-16T03:00:00+0100']\n", p, 0,
+       "mốc trước merge mọi dạng (03:00+0100 = 02:00Z: độ lệch phải được QUY ĐỔI)")
+    for moc in ("2026-10-16T02:00:00-01:00", "2026-10-16T02:00:00-0100"):   # lượt 8 F01: = 03:00Z, sau merge 02:58:26Z
+        ky(f"pre_merge_checks: ['{moc}']\n", p, 1, f"độ lệch âm {moc} phải quy đổi sang UTC", "L3")
     ky("pre_merge_checks:\n  - {name: c, luc: '2026-10-16T03:00:00Z'}\n", {"a.json": "{}"}, 0, "không readback", "L3 không áp dụng")
 
 
@@ -283,6 +286,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("P1_tu_tro_tep_la_nguon", "return r != tep.resolve() and not", "return not", "c01"),
     ("P1_thu_muc_chua_ho_so_la_nguon", "and not (r.is_dir() and _trong_goc(tep, r))", "", "c01"),
     ("P2_chi_nhan_Z", "(?:[Zz]|[+-]\\d{2}:?\\d{2})?(?![\\d:])", "Z", "c06"),
+    ("P2_bo_quy_doi_do_lech", "return t if t.tzinfo else t.replace(tzinfo=datetime.timezone.utc)",
+     "return t.replace(tzinfo=datetime.timezone.utc)", "c06"),
     ("P2_thieu_mui_gio_khong_khop", "(?:[Zz]|[+-]\\d{2}:?\\d{2})?(?![\\d:])", "(?:[Zz]|[+-]\\d{2}:?\\d{2})(?![\\d:])", "c06"),
     ("L1_glob_rong_van_qua", "            if khop:\n                return khop[0]", "            return nen", "c02"),
     ("L1_bo_chot_trong_goc", "else p.is_file()) and _trong_goc(p, goc)):", "else p.is_file())):", "c03"),

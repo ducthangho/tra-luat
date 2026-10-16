@@ -95,13 +95,14 @@ verdict_usage_caveats:
     mo_ta: >-
       VERDICT.md va ban dau ho so land ghi "read-only", nhung checkout review nam duoi /tmp ma sandbox codex
       workspace-write cho ghi /tmp (reviewer tu `cp -a` ra /tmp), va probe `ghi` cua launcher ghi-doc-xoa thanh cong tren
-      workspace. Read-only chi la CHI THI, khong cuong che. Do sau luot (a, 2026-10-16): HEAD van 80e0fac, `git status
-      --porcelain --ignored` 0 dong — nhung anh chup diem cuoi khong loai tru ghi-roi-hoan-nguyen. Lan sau: checkout
+      workspace. Read-only chi la CHI THI, khong cuong che. Do sau luot (a, 2026-10-16T05:21Z, output luu o
+      ops/land/pr765-wp743-provenance/do-checkout-review-sau-luot.txt): HEAD van 80e0fac, `git status --porcelain --ignored` 0 dong — nhung anh chup diem cuoi khong loai tru ghi-roi-hoan-nguyen. Lan sau: checkout
       ngoai vung ghi duoc cua sandbox, hoac sandbox read-only + thu muc ra rieng.
   - id: DRIVER-DO-DOC-CUNG-CAY-TAM
     muc: P3
     mo_ta: >-
       evidence/reviewer/{measure,semantics,pid_collision}.py doc cung /tmp/review743-{head,base}, khong co trong kho.
-      Dung lai bang TAI_LAP.sh cung thu muc. Do (a, 2026-10-16): sau TAI_LAP.sh, semantics.py (3.13) khop log reviewer;
-      measure.py (3.13) 61 KILL_CHOT, FAILURES 0, khop measure-3.13.log.
+      Dung lai bang TAI_LAP.sh cung thu muc. Do (a, 2026-10-16, log luu o wp743-r1-g1-exec-review-1-codex/tai-lap-*.log): sau TAI_LAP.sh,
+      semantics.py (3.13) khop log reviewer; measure.py (3.13) 61 KILL_CHOT, FAILURES 0, khop measure-3.13.log TRU mot PID
+      trong thong diep SIGKILL ([909] so voi [28]).
 nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256); comment 6206976422 chi la ban chieu.'

@@ -105,12 +105,15 @@ uy_quyen_land:
     su kien PR; ai bam merge: land operator (phien nay), loi_khai_co_neo bang session_id.
 
 dieu_kien_truoc_merge:
-  head_khong_doi: 'measured — readback-pr-765.json head.sha = 80e0fac0a4ab8c74486cf3bab1a73e1dec600994; merge goi kem sha= cung gia tri.'
+  head_khong_doi: >-
+    measured — readback-pr-765.json head.sha = 80e0fac0a4ab8c74486cf3bab1a73e1dec600994 va merge_commit_sha e0273d3 co cha thu
+    hai 80e0fac (git cat-file). loi_khai_co_neo — request `PUT /pulls/765/merge` kem `sha=80e0fac` KHONG luu; chi tu khai.
   check_bat_buoc: >-
     measured — readback-check-runs-80e0fac.json: gate, gate-packet-loop, gate-ops, gate-cong-cu-gop (ubuntu-latest)
     deu completed/success; gate-cong-cu 0..7, gate-registry, chuan-bi, thu-hoi success.
   launcher_windows_va_ubuntu: >-
-    measured — run 38841991504 (dispatch windows-and-ubuntu, head 80e0fac, readback-run-38841991504.json success). Dong
+    measured — run 38841991504 (dispatch windows-and-ubuntu, head 80e0fac, readback-run-38841991504.json success;
+    readback-jobs-38841991504.json: 2 job success, 4 buoc Probe `skipped` theo input). Trich: trich-log-job/run38841991504-*.txt. Dong
     tong ket doc tu log job: ubuntu-latest Python 3.11.17 "195/195 ca DA CHAY QUA (tong 196, bo qua 1, hong 0)",
     --dot-bien 150 OK / 0 SAI; windows-latest Python 3.13.16 "172/172 ... hong 0", dot bien 128 OK / 0 SAI. Log job
     KHONG luu trong ho so nay (xem khong_do_duoc).
@@ -125,7 +128,7 @@ review:
     reviewer: codex (Codex CLI, khac ho executor), chay qua launcher.py run. Read-only la CHI THI, KHONG cuong che — xem caveat CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY trong bien nhan
     hien_vat: ops/reviews/wp743-r1-g1-exec-review-1-codex/
     bien_nhan_v2: 'ops/reviews/wp743-r1-g1-exec-review-1-codex-verdict.receipt.yaml (bien_nhan_v2.py DAT)'
-    tai_lap_driver: 'ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh — da do: measure.py 61 KILL_CHOT, FAILURES 0'
+    tai_lap_driver: 'ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh — da do: measure.py 61 KILL_CHOT, FAILURES 0 (log tai-lap-measure-3.13.log; khop log reviewer tru mot PID)'
     verdict_sha256: 812ebb2254fa0df25a82529c1c27ffb9c64df074b3ac847cd0d78b28e763853e
     prompt_sha256: 2052f2a87b1d020257bdac2e7fe524f914056ebdc897567205d98efff57e3852
     reviewed_sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994
@@ -149,13 +152,19 @@ review:
 hau_merge_gate:
   sha: e0273d31aba78b014aa89297f32ff86f9daf0277
   launcher_windows: >-
-    measured — run 38843154835 (push master, readback-run-38843154835.json) success. Dong tong ket doc tu log job:
+    measured — run 38843154835 (push master, readback-run-38843154835.json, readback-jobs-38843154835.json: 2 job success,
+    4 buoc Probe `skipped` — chi chay khi goi tay) success. Dong tong ket o trich-log-job/run38843154835-*.txt:
     ubuntu-latest Python 3.11.17 "195/195 ca DA CHAY QUA (tong 196, bo qua 1, hong 0)", 0 dong SAI dot bien;
     windows-latest Python 3.13.16 "172/172 ... hong 0", 0 dong SAI.
   gate: >-
     measured — run 38843154826 (push master, attempt 1, readback-run-38843154826.json) success, hoan tat
-    2026-10-16T03:52:49Z; ca 14 job success (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu 0-7,
-    gate-cong-cu-gop). Xep hang sau gate master cua 1101cd2 (concurrency khong huy tren master) nen bat dau muon.
+    2026-10-16T03:52:49Z. Cap JOB: readback-jobs-38843154826.json — total_count 14, ca 14 conclusion success, head_sha
+    e0273d3 (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu 0-7, gate-cong-cu-gop). Cap BUOC: 10 buoc
+    `skipped` theo thiet ke, ten trong tep jobs — 'PR head contains required EOL base', 'phan loai diff (duong nhanh ho so -
+    chi pull_request)', 'tl selftest (luot PR — khong sinh bang chung)', 'release-verify strict (lane WORKER ...)', bon buoc
+    DUONG_NHANH, 'gate lifecycle selftest (nen khong co cgroup)', mot 'Run actions/checkout@v4' — deu la buoc chi chay o
+    lan PR/duong nhanh/nen khac, KHONG phai buoc bat buoc cua luot push master. Output tung buoc KHONG luu (khong_do_duoc).
+    readback-check-runs-e0273d3.json: 16 check-run, deu success. Xep hang sau gate master cua 1101cd2 nen bat dau muon.
   ket_luan: 'HAU-MERGE GATE XANH tren e0273d3.'
 
 dinh_chinh_spec:

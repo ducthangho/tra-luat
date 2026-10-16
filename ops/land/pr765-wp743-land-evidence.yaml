@@ -2,8 +2,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr732 #685, pr714 #710).
 #
-# TRANG THAI: merged (e0273d3). `landed: false` — `landed` chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge
-# bang merge commit (tien le #678 / #722). "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# TRANG THAI: merged (e0273d3), `landed: true` THEO QUYET DINH CHU KHO (pull/771#issuecomment-6210172646, 07:13:15Z), CO
+# HIEU LUC tu merge commit cua PR ghi so #771 dua dong nay vao master (tien le #678 / #722). Cac commit truoc tren nhanh
+# ghi so van ghi `landed: false`. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do trong phien land/ghi so (lenh ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua
 # luot review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr765-wp743-provenance/. Moi phep do REST: `gh api <duong dan>` (GET) qua proxy phien.
@@ -48,6 +49,7 @@ pre_merge_checks_thu_tu_thoi_gian: >-
 bookkeeping:
   - {item: 'rut han lease wp743-r1-g1 ve 2026-10-16T04:00Z', commit: 7924919, nhanh: ops/wp743-r1-g1-lease}
   - {item: 'PR ghi so', pr: 771, nhanh: claude/bookkeeping-743-land}
+  - {item: 'quyet dinh landed cua chu kho', url: 'https://github.com/ducthangho/tra-luat/pull/771#issuecomment-6210172646', nguon: readback-comment-6210172646.json}
   - {item: 'nghiem thu nha lease ai-dang-giu NGUOI_GIU 0', luc: '2026-10-16T04:01Z', nguon: ai-dang-giu-sau-04/}
   - {item: 'bien nhan v2 review luot 1', path: ops/reviews/wp743-r1-g1-exec-review-1-codex-verdict.receipt.yaml}
 # ---- het truong chuan
@@ -87,8 +89,22 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-765.json: merged true, merged_at 2026-10-16T02:58:26Z, merge_commit_sha
     e0273d31aba78b014aa89297f32ff86f9daf0277 (cha 1101cd2 + 80e0fac), merge commit (khong squash/rebase).
-  landed: false
-  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1).'
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #771 dua tep nay — voi `landed: true` — vao master. Comment 6210172646 la NEO cua quyet
+    dinh, khong phai moc hieu luc (tien le #678 / PR #720, #714 / PR #722).
+  quyet_dinh_chu_kho:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** Packet #743 **landed** tại `e0273d31aba78b014aa89297f32ff86f9daf0277`" (ban day du: readback-comment-6210172646.json)'
+    luc: '2026-10-16T07:13:15Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/771#issuecomment-6210172646
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6210172646.json, `gh api repos/ducthangho/tra-luat/issues/comments/6210172646`): user
+      ducthangho, author_association OWNER, performed_via_github_app null, than 1879 byte sha256
+      12972f1eb80418bd5993b9263e2c7e62cb48cde653ac2389d37b9f1eee5879a8. Than do phien land operator SOAN theo yeu cau chu
+      kho, chu kho dang. Chap nhan tuong minh ba lech: merge #765 truoc khi Codex connector xong; read-only khong cuong
+      che; readback mergeable_state truoc merge khong luu.
+  landed_ly_do: 'PROTOCOL §10.2.4 / §13.1: chu kho quyet tai PR ghi so; hau-merge gate xanh, lease da nha, bookkeeping xong.'
 
 uy_quyen_land:
   neo: https://github.com/ducthangho/tra-luat/pull/765#issuecomment-6207001889

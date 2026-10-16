@@ -142,6 +142,11 @@ ci_policy_ghi_chu: luot CI tu chay giua vong va thi huy; luot bi huy/bo qua KHON
 push_policy: push_nhanh_agent_va_pr_758_da_mo_theo_chu_kho
 thay_the_cho:
   - wp741-r3-g3-claude-20261015
+da_bi_thay_the: wp741-r3-g5-claude-20261016
+da_bi_thay_the_ghi_chu: >-
+  Codex connector PR #761 (887d99f) 4 P1: g4 do executor tu cap khong co tham quyen chu kho dich danh generation
+  (4289398907), thieu used/reserved/limit ca ba truc (4289398898), SHA checkpoint rut gon (4289398914), khong do dau
+  nhanh thi hanh (4289398919). Thay bang g5 do chu kho cap dich danh (issuecomment-6205615302).
 generation_truoc: wp741-r3-g3-claude-20261015
 generation_truoc_ghi_chu: >-
   g3 chep thieu required_checks (codex luot 2 #761 F05 P2). g4 VAN neo spec r3 + phe duyet 6197949500 vi phe duyet da

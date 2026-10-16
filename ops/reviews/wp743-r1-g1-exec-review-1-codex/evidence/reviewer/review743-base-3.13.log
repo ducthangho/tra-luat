@@ -1,0 +1,5 @@
+moi truong: pid=13 pgid=1 sid=1 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026532376] init=codex
+nhom tien trinh: da tach sang session moi (pgid=13)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+
+194/194 ca DA CHAY QUA (tong 195, bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi

@@ -635,8 +635,11 @@ def _load(state_dir: Path, packet: int) -> dict:
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
     try:  # #775 bộ đọc NGHIÊM: lệch hình dạng hay bất biến sổ/bộ đếm ⇒ RC_STATE, không traceback, không đoán
         st = json.loads(p.read_text(encoding="utf-8"))
+        identity = st.get("reviewer_identity")
+        if identity is not None and (type(identity) is not dict or st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
+            raise ValueError("reviewer_identity")
         can_duoi = _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
-        if st["schema_version"] == 1:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
+        if type(st["schema_version"]) is int and st["schema_version"] == 1:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
             st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_review_calls_used=can_duoi,
                       codex_calls=[], nang_tran=[], review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW,
                       codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True)
@@ -644,12 +647,14 @@ def _load(state_dir: Path, packet: int) -> dict:
         vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
             ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2),
             ("bo-dem", all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
-            ("so", type(goi) is list is type(st["nang_tran"]) and type(st.get("dem_tu_suy", False)) is bool),
+            ("so", all(type(st[k]) is list for k in ("codex_calls", "nang_tran", "reviews", "history"))
+                   and all(r.get("provider") == st["reviewer"] for r in st["reviews"])
+                   and all(type(h) is dict for h in st["history"]) and type(st.get("dem_tu_suy", False)) is bool),
             ("loi-goi", all(set(g) == {"run_id", "head", "da_dung"} and RUN_ID_RE.match(g["run_id"])
                             and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
-            ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi),
+            ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
-            ("truc", st.get("ly_do") != "rescue_required" or st["truc"] == next(  # mốc chạm trần MỚI NHẤT
+            ("truc", st.get("ly_do") != "rescue_required" or st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
         vi_pham = [f"{type(e).__name__}: {e}"]

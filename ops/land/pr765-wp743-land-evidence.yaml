@@ -103,8 +103,15 @@ review:
 
 hau_merge_gate:
   sha: e0273d31aba78b014aa89297f32ff86f9daf0277
-  launcher_windows: 'run 38843154835 (push master) — DIEN_SAU'
-  gate: 'run 38843154826 (push master) — DIEN_SAU'
+  launcher_windows: >-
+    measured — run 38843154835 (push master, readback-run-38843154835.json) success. Dong tong ket doc tu log job:
+    ubuntu-latest Python 3.11.17 "195/195 ca DA CHAY QUA (tong 196, bo qua 1, hong 0)", 0 dong SAI dot bien;
+    windows-latest Python 3.13.16 "172/172 ... hong 0", 0 dong SAI.
+  gate: >-
+    measured — run 38843154826 (push master, attempt 1, readback-run-38843154826.json) success, hoan tat
+    2026-10-16T03:52:49Z; ca 14 job success (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu 0-7,
+    gate-cong-cu-gop). Xep hang sau gate master cua 1101cd2 (concurrency khong huy tren master) nen bat dau muon.
+  ket_luan: 'HAU-MERGE GATE XANH tren e0273d3.'
 
 dinh_chinh_spec:
   - >-

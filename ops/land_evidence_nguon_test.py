@@ -143,10 +143,12 @@ def c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van():
     for log in (LOG.replace("195/195", "194/195"), LOG.replace("195/195", "195/1950"), LOG.replace("hong 0", "hong 01")):
         ky(hs.format(", nguon_positive: trich/u.txt"), {"trich/u.txt": log}, 1, f"đổi số trong nguồn {log!r}", "L2")
     ky(hs.format(", nguon_positive: trich/khong-co.txt"), p, 1, "nguon_positive vắng tệp", "không có tệp")
-    with cay(hs.format(", nguon_positive: r.txt"), {"r.txt": "1/1"}) as goc:   # review lượt 5 F07: thứ tự Q3, provenance
-        (goc / "r.txt").write_text(LOG, encoding="utf-8")   # TRƯỚC gốc kho: bản trùng tên ở gốc (số đúng) KHÔNG được dùng
-        rc, ra = kiem(nap(), goc)
-    bang(rc == 1 and "'195/195'" in ra, f"Q3: nguồn phải phân giải ở provenance trước gốc kho: rc={rc} {ra[-200:]}")
+    for cao, thap in ((f"ops/land/{PROV}", "ops/land"), ("ops/land", ".")):   # F07 (lượt 5, 6): Q3 TỪNG CẶP nền liền kề —
+        with cay(hs.format(", nguon_positive: r.txt"), {}) as goc:   # nền CAO mang số sai, nền THẤP số đúng ⇒ phải ĐỎ L2
+            (goc / cao / "r.txt").write_text("1/1", encoding="utf-8")
+            (goc / thap / "r.txt").write_text(LOG, encoding="utf-8")
+            rc, ra = kiem(nap(), goc)
+        bang(rc == 1 and "'195/195'" in ra, f"Q3: {cao} phải được phân giải trước {thap}: rc={rc} {ra[-200:]}")
 
 
 @ca
@@ -164,8 +166,7 @@ def c06_l3_luot2_moc_sau_merged_at():
 
 @ca
 def c07_l3_chi_doc_readback_cua_chinh_pr():
-    p = {"readback-pr-9001.json": RB_PR, "readback-pr-9002.json": RB_PR.replace("02:58:26", "01:00:00"),
-         "readback-pr-9001-commits.json": "[]"}
+    p = {"readback-pr-9001.json": RB_PR, "readback-pr-9002.json": RB_PR.replace("02:58:26", "01:00:00"), "readback-pr-9001-commits.json": "[]"}
     ky("pre_merge_checks:\n  - {name: c, luc: '2026-10-16T02:00:00Z'}\n", p, 0, "readback PR lân cận/-commits chen vào L3")
 
 
@@ -301,13 +302,13 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L5_doc_tep_lan_hai", "du_lieu = nap_yaml(yaml, byte)", "du_lieu = nap_yaml(yaml, tep.read_bytes())", "c13"),
     ("F06_root_khong_resolve", "goc = Path(a.root).resolve()", "goc = Path(a.root)", "c14"),
     ("L3_readback_mau_thuan_bo_qua", "    if len(gia_tri) > 1:", "    if False:", "c14"),
-    ("Q3_dao_thu_tu_phan_giai", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (goc, goc / THU_MUC, prov):", "c05"),
+    ("Q3_ops_land_truoc_prov", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (goc / THU_MUC, prov, goc):", "c05"),
+    ("Q3_goc_truoc_ops_land", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (prov, goc, goc / THU_MUC):", "c05"),
     ("L5_bo_so_bam", "if hashlib.sha256(byte).hexdigest() == bam:", "if bam:", "c09"),
     ("L5_noi_danh_sach", "MIEN_TRU_CUTOVER = {\n", "MIEN_TRU_CUTOVER = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c10"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
-    ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n",
-     "c01", "TIN_DUNG_GIA"),
+    ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", 'THU_MUC = "ops/land"\n', 'THU_MUC = "ops/land"  # vo hai\n', "c01", "SONG_SOT"),
 )
 

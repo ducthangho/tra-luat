@@ -26,7 +26,7 @@ r3 viết lại từ r2 (không áp `HINT.patch` máy móc: 3/11 hunk được v
 | B1 | lượt 2 · P3 | `a5b-chuoi-bia-mo-lech-muc-tieu-5` | Mục tiêu 5: chuỗi `đã bị thay thế — bia mộ — không kiểm băm`; A5b đo chuỗi con `bia mộ — không kiểm băm`. |
 | B2 | lượt 2 · P3 | `hermetic-thieu-cau-hinh-git-cuc-bo` | Mục tiêu 4 (cấu hình git cục bộ, cô lập cấu hình toàn cục, mọi `git clone` kèm `-c core.autocrlf=false`); lý do đo lại dưới thiết kế đĩa (bảng thứ hai, hàng c). |
 | B3 | lượt 2 · P3 | `dong-cuoi-bo-test-phai-la-N-tren-N-mot-minh` | Mục tiêu 4 (dòng `N/N` đứng một mình là dòng DUY NHẤT có dạng số/số, và là dòng cuối — hàng g); A7 (phép `chay_moi`). |
-| B4 | lượt 2 · P3 | `yeu-cau-muc-tieu-1-chua-co-tieu-chi-do` | Mỗi yêu cầu mà lượt 2 liệt kê (tám đột biến sống sót bộ A của r2) có một ca và một đột biến: A1 (dòng "ĐĂNG ĐƯỢC" và băm 12 ký tự); A2 (thông điệp lệch nêu trường · giá trị khai · giá trị đo; rc 13 KHÔNG kèm "ĐĂNG ĐƯỢC"; thông điệp tệp vắng); A2b (iii) và A4b (thông điệp "64 ký tự hex thường"); A4 (dòng bằng chứng write set; phần tử không phải chuỗi); A5 (ca 3, 4: `spec_path` không băm, `spec_hash: null`). Các yêu cầu khác của Mục tiêu 1–3, 5 CHƯA có ca nào: sáu do lượt 3 đo, năm nhóm do lượt 4 đo, năm nhóm do lượt 5 đo (mục Chưa đo được) — danh sách các nhóm ĐÃ ĐO THẤY, KHÔNG phải tập đóng. |
+| B4 | lượt 2 · P3 | `yeu-cau-muc-tieu-1-chua-co-tieu-chi-do` | Mỗi yêu cầu mà lượt 2 liệt kê (tám đột biến sống sót bộ A của r2) có một ca và một đột biến: A1 (dòng "ĐĂNG ĐƯỢC" và băm 12 ký tự); A2 (thông điệp lệch nêu trường · giá trị khai · giá trị đo; rc 13 KHÔNG kèm "ĐĂNG ĐƯỢC"; thông điệp tệp vắng); A2b (iii) và A4b (thông điệp "64 ký tự hex thường"); A4 (dòng bằng chứng write set; phần tử không phải chuỗi); A5 (ca 3, 4: `spec_path` không băm, `spec_hash: null`). Các yêu cầu khác của Mục tiêu 1–6 CHƯA có ca nào: sáu do lượt 3 đo, năm nhóm do lượt 4 đo, năm nhóm do lượt 5 đo (mục Chưa đo được) — danh sách các nhóm ĐÃ ĐO THẤY, KHÔNG phải tập đóng. |
 | B5 | lượt 2 · P3 | `kich-thuoc-viet-tay-15-ca-thieu-so-voi-26-ca` | Hàng `kich_thuoc` (đếm 40 ca của r3, đo bản thăm dò +54, buộc dạng bảng). |
 | B6 | lượt 2 · P3 | `a6-so-tuyet-doi-phu-thuoc-so-ref-cua-clone` | A6 (i): tiêu chí là TẬP lease đổi rc; số tuyệt đối đo lại trên `c522c17` kèm điều kiện ref (542 ref cục bộ). |
 | B7 | lượt 2 · P3 | `luat-hai-truong-chua-nhat-quan-fixture-va-dang-sai` | Mục tiêu 1 (kiểm DẠNG mọi trường băm có mặt TRƯỚC khi chọn trường quyết định); A2 (tiền đề fixture: lease CHỈ mang trường được sửa); A2b (iii) mới. |
@@ -290,7 +290,7 @@ trước, cho rc 0 sai; chạy lại với tên riêng mới ra rc 13 (23:52:28Z
 - Lượt Codex có chạy được không: đo 15-10 sáng (`SAP_HET_HAN`, ảnh chụp cũ ~185 h); lượt soạn r3 KHÔNG đo lại.
 - Đường dẫn comment của quyết định chủ kho 15-10 về sổ test sống và về đồng ý đi tiếp ở ngưỡng L4 (`depends_on` (5)).
 - VERDICT lượt 5 r28 `d3f1d9db…` và hai vế "đột biến D2, D3, D5, D6, D7 cho rc=0" (nguồn ngoài kho).
-- `VERDICT.md`, `HINT.patch` lượt 2, lượt 3 và lượt 4, bản thăm dò 40 ca cùng ma trận đột biến của lượt 3 (nguồn của 239 dòng, 296 (298), 40/40, `t191` 1/1 ở trên), của lượt 4 (nguồn của 257 = 59 + 197 + 1, dư 43, +1/−1 và +2/−1, 7 hunk, 40/40 của nhóm (7)–(11); các số lượt 4 đo thẳng trên kho — 161/248 ký tự, 174/270 byte, 2765 blob — tái lập được từ kho) và của lượt 5 (nguồn của nhóm (12)–(16)), và các kịch bản đo của lượt soạn r3 (`do_nguon.py` `af6eb7dd…`, `dung_tham_do.py` `6dd87cc0…`,
+- `VERDICT.md` và `HINT.patch` của mọi lượt review của packet này mà spec dẫn bằng băm (hàng `review của r2` và các mục `Vá sau review lượt N`), bản thăm dò 40 ca cùng ma trận đột biến của lượt 3 (nguồn của 239 dòng, 296 (298), 40/40, `t191` 1/1 ở trên), của lượt 4 (nguồn của 257 = 59 + 197 + 1, dư 43, +1/−1 và +2/−1, 7 hunk, 40/40 của nhóm (7)–(11); các số lượt 4 đo thẳng trên kho — 161/248 ký tự, 174/270 byte, 2765 blob — tái lập được từ kho) và của lượt 5 (nguồn của nhóm (12)–(16)), và các kịch bản đo của lượt soạn r3 (`do_nguon.py` `af6eb7dd…`, `dung_tham_do.py` `6dd87cc0…`,
   `do_a3.py` `56f1fbdc…`, `do_b2.py` `b27a6771…`, `do_dot_bien.py` `37bc0d71…`, `do_a6.py` `4b8b4ba6…` — sha256) KHÔNG có trong kho; bên thứ
   ba muốn tái lập phải dựng lại bản thăm dò từ chữ Mục tiêu 1–3, 5. Bản thăm dò không được giao (PROTOCOL §8 dòng 648).
 - A3b (ii) và các số "của reviewer" ở Nghiệm thu: không đo lại ở lượt soạn r3.
@@ -311,10 +311,10 @@ trước, cho rc 0 sai; chạy lại với tên riêng mới ra rc 13 (23:52:28Z
   52 đột biến, mỗi đột biến một bản sao: 31 bị giết, 21 sống 40/40, trong đó 14 thuộc các nhóm (1)–(5), (7)–(9), (11) đã khai — tái lập đúng — và 7 thuộc nhóm mới dưới đây):
   (12) `lenh_body` KHÔNG gọi `kiem_bam` (Mục tiêu 1 "Mã của `lenh_body` … không đổi", chú thích A6b) — cho `lenh_body` gọi `kiem_bam` vẫn 40/40, và `ops/lease_publish_test.py` cùng
   `ops/ci_duong_nhanh_test.py` có 0 chỗ nhắc `spec_path`, `spec_hash`, `spec_sha256_required`; (13) `kiem-github` không gọi `kiem_bam` ở đường lease CHƯA đăng — A3b (ii) chỉ đo đường đã đăng;
-  (14) kiểm write set độc lập với kiểm spec (Mục tiêu 2) — để `kiem_bam` thoát sớm khi lease không khai spec thì vẫn 40/40 nếu lease của A4 có `spec_path` + băm, và 36/40 nếu lease của A4 chỉ mang write set:
-  A4 không ghim fixture; (15) thông điệp chốt (i) nêu đúng tên trường — in cứng `spec_hash` cho lỗi dạng của `spec_sha256_required` vẫn 40/40 (A2b (iii) và A4b (2) đều làm hỏng `spec_hash`);
+  (14) kiểm write set độc lập với kiểm spec (Mục tiêu 2) — để `kiem_bam` thoát sớm khi lease không khai spec thì vẫn 40/40 nếu lease của A4 và của A5 (2) có `spec_path` + băm, và 36/40 nếu lease của cả hai chỉ mang write set:
+  A4 và A5 (2) không ghim fixture; (15) thông điệp chốt (i) nêu đúng tên trường — in cứng `spec_hash` cho lỗi dạng của `spec_sha256_required` vẫn 40/40 (A2b (iii) và A4b (2) đều làm hỏng `spec_hash`);
   (16) vị trí và hình dạng lời gọi trong `lenh_check` (Mục tiêu 1 "TRƯỚC mọi `print`", Mục tiêu 3 "`kiem_bam` TRẢ dòng, `lenh_check` in") — gọi giữa hai `print`, gọi sau khối `--du-bao`, hay để `kiem_bam`
-  tự `print` rồi trả `[]` đều 40/40. Danh sách (1)–(16) là các nhóm ĐÃ ĐO THẤY bởi hai bản thăm dò độc lập (lượt 4, lượt 5), KHÔNG phải tập đóng: mọi yêu cầu bằng chữ trong Mục tiêu 1–3, 5 mà Nghiệm thu
+  tự `print` rồi trả `[]` đều 40/40. Danh sách (1)–(16) là các nhóm ĐÃ ĐO THẤY, KHÔNG phải tập đóng: mọi yêu cầu bằng chữ trong Mục tiêu 1–6 mà Nghiệm thu
   không nêu đột biến làm đỏ đều thuộc diện "khai trong PR là kiểm bằng đọc mã", kể cả khi chưa có tên ở đây.
 
 ## Vá sau review lượt 3
@@ -340,6 +340,13 @@ rc 0); không sửa gì ngoài HINT, trừ chính mục này (đo lượt 5: b�
 
 Bản trước vá: commit `b055a2f`, sha256 `fb27457d6a10bd866e73d8d6724e71eb1d6fa20cce0366c8242ace23c44ab61f`. Review lượt 5 (reviewer Claude Sonnet 5.5 subagent
 `review-sonnet-max`, `reviewed_sha` `d6bc803e031dff0fe37a56f513282bf1472fc129`; VERDICT sha256 `15ca093e42d53215d9386d971f25bf4d90fd08c81f52590ad473835065fe641c`, HINT sha256 `1255f4f4acc4b13626087b6f8aed4bc5c2a2317e781af00552bbde8ec4a699e1`;
-hai tệp nằm ở scratchpad phiên điều phối, CHƯA vào kho). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`, rc 0); không sửa nội
+hai tệp KHÔNG có trong kho (đo lượt 6 ở `bedcf2f`: 0/3520 blob trên toàn cây mang hai băm trên); thứ định danh là băm). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`, rc 0); không sửa nội
 dung nào ngoài HINT và mục này. Lớp: `a7-f841-200-202-sai-phai-la-201-202` · `luot-4-tep-khong-co-trong-kho-va-muc-tu-than-lan-2` · `yeu-cau-chua-co-ca-nhom-12-16-tap-van-mo-lan-3`. Vòng vá P3 thêm thứ 1/2 chủ kho cho (16-10).
+
+## Vá sau review lượt 6
+
+Bản trước vá: commit `62924ff`, sha256 `1da6d190b97ed6cf41ddd961bdad6c2ee38fe498ef13760d2305b1f63dbd62cd`. Review lượt 6 (reviewer Claude Sonnet 5.5 subagent
+`review-sonnet-max`, `reviewed_sha` `bedcf2ff7ea53abe70c1c75b8af8b753e0b2e8ef`; VERDICT sha256 `8d572544b2478083ec736a605ac9aa2181cedbebcecc395d12e33e46e3a24971`, HINT sha256 `f6d4efb710256d0bea9a77c8664851916e46124ec7fa0706b82fc9d4ea0f8016`; hai tệp KHÔNG có trong kho
+(đo ở `62924ff`: 0/3520 blob trên toàn cây mang hai băm trên); thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa nội dung nào ngoài HINT và mục này. Lớp: `luot-5-tep-khong-co-trong-kho-va-muc-tu-than-lan-3` · `nhom-14-hai-so-40-40-va-36-40-gan-sai-fixture-thieu-a5-2` · `quy-tac-mo-pham-vi-1-3-5-thieu-muc-tieu-4-6-va-nguon-do-lech`.
 

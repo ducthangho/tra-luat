@@ -5,7 +5,7 @@
 | `packet_id` | `no-p3-lease-spec-hash` |
 | `packet_issue` | #751 (`gh api repos/ducthangho/tra-luat/issues/751` lúc 23:57:40Z 15-10-2026: `open`, `updated_at 2026-10-15T05:52:49Z`). |
 | `revision` | 3 |
-| `thay_the_cho` | **r2**: `ops/specs/no-p3-lease-spec-hash-r2.md`, sha256 `8f700b06b28e4c02c615b591b02a75a2fd901239746eb2a3fb8389dd9f549ec4`, blob `3a708be2867bab1e14e93dab07f0711479e8b867`, commit thêm `a9ef33c24665dedc70f2c839e2357353bd4054af`; vào `master` qua merge `207250f` của PR #762 CHỈ ĐỂ LƯU VẾT (nợ `SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE`, hàng dưới). r2 thay r1 (sha256 `17df1dccb4df520acb0d525cfc091dbee07fc8d878cf63f2fe2a4874a1a2fc6c`, commit `55bd0d24`). Thứ định danh r1, r2 là băm, không phải tên nhánh hay vị trí tệp. r3 không sửa byte nào của r1, r2 (đóng băng); mọi closure, lease và `spec_hash` từ nay neo **r3**. |
+| `thay_the_cho` | **r2**: `ops/specs/no-p3-lease-spec-hash-r2.md`, sha256 `8f700b06b28e4c02c615b591b02a75a2fd901239746eb2a3fb8389dd9f549ec4`, blob `3a708be2867bab1e14e93dab07f0711479e8b867`, commit thêm `a9ef33c24665dedc70f2c839e2357353bd4054af`; vào `master` qua PR #762 (merge vào `master` là `c522c17`; `207250f` là merge vào nhánh của PR, không nằm trên first-parent của `master`) CHỈ ĐỂ LƯU VẾT (nợ `SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE`, hàng dưới). r2 thay r1 (sha256 `17df1dccb4df520acb0d525cfc091dbee07fc8d878cf63f2fe2a4874a1a2fc6c`, commit `55bd0d24`). Thứ định danh r1, r2 là băm, không phải tên nhánh hay vị trí tệp. r3 không sửa byte nào của r1, r2 (đóng băng); mọi closure, lease và `spec_hash` từ nay neo **r3**. |
 | review của r2 | **Lượt 2** (hẹp), reviewer Claude Sonnet 5.5 chạy bằng subagent (tự khai): `verdict: approve`, `reviewed_sha` `a9ef33c24665dedc70f2c839e2357353bd4054af`, `spec_sha256` `8f700b06…549ec4`, **0 P1 · 0 P2 · 8 P3**; 11 lớp của lượt 1 ĐÃ ĐÓNG. `VERDICT.md` sha256 `fcb545136985a89e6711f37dd3f4e3c42121202f6d4c7d156b80b13604353102` (167 dòng); `HINT.patch` sha256 `f536ce126e5b1048d29f361534dd60a78c00c80d404535110f5e4126f4fab037` (11 hunk, mỗi hunk một dòng `# lop:`, chỉ văn bản đặc tả). Hai tệp KHÔNG có trong kho ở `c522c17` (`ls ops/reviews` lọc `spec-hash` ⇒ 0 dòng, 00:03:51Z 16-10); thứ định danh là băm. Cách r3 đóng từng lớp: mục **Thay đổi so với r2**. |
 | finding sau review | **P2 Codex trên PR #762**: comment review `4286041913` (`pull/762#discussion_r4286041913`), `chatgpt-codex-connector[bot]`, `created_at 2026-10-15T17:13:10Z`, neo r2 dòng 231 tại `4c550bc0fcdf63d92a709d217a3da22b33938a14`, tiêu đề "Keep the documented pre-commit lease check usable" (đọc lại bằng `gh api repos/ducthangho/tra-luat/pulls/comments/4286041913` ~23:30Z). Ý: r2 bắt `check` đọc `spec_path` CHỈ từ `HEAD` đã commit và trả 13 khi spec chưa commit (r2 dòng 89–95), trong khi runbook `ops/README.md` dòng 33–44 bảo soạn lease → `check` → rồi mới commit; r2 tự nhận runbook sẽ sai mà để README nguyên. Ghi sổ thành nợ `SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE` (P2, `trang_thai: mo`) ở `ops/land/pr759-no-p3-ho-so-land-evidence.yaml` dòng 407–418 tại `c522c17`: không lease nào được cấp trên r2; r3 phải xử lý finding trước khi review lại và cấp lease. r3 đóng phần #751 của nợ ấy (hàng C1); phần #752 (`discussion_r4286041896`) thuộc đặc tả khác. |
 | `nguon_cap_viec` | Sổ nợ P3 mục 4: review wp685 lượt 2–5 đo `lease_publish.py check` không đọc `spec_hash`, `spec_sha256_required`, `plan_hash`, `write_set_hash`, `spec_path` (VERDICT review lượt 5 r28 sha256 `d3f1d9db4896efe8c1b62112a3d0aa479b64c5dc110da1d323b3297d7e7c45fb`, M11: đột biến D2, D3, D5, D6, D7 cho rc=0 cả năm) — **KHÔNG ĐO ĐƯỢC từ kho**: đo lại 23:50:15Z–23:50:34Z 15-10 trên 540 ref (`refs/remotes/origin/*` của bản bare đủ ref, bỏ `claude/spec-no-p3`): 0/1102 blob trong lịch sử có tên tệp chứa `verdict` (không phân biệt hoa thường) khớp băm này; 831 blob như thế ở đầu nhánh, đều thuộc tập lịch sử ấy. "Sổ nợ P3" sống ở phiên điều phối, ngoài kho. Vế "`check` không đọc các trường ấy" đo lại: `grep -cE` năm tên trong `ops/lease_publish.py` tại `c522c17` = 0 dòng (00:03:51Z 16-10). Ngưỡng chủ kho #698 `6094652521`. Phạm vi do chủ kho chốt 15-10-2026 (Q7, Q8) và quyết định 15-10 cho r2 (test mới phải đăng ký vào sổ test sống) giữ nguyên. Issue #763 (`open`, `ducthangho`, `created_at 2026-10-15T23:26:04Z`, tiêu đề "Packet NO-P3-DANG-KY-CI: đăng ký hai bộ test của #752 vào ci_dang_ky_test.py") nhận phần đăng ký của #752; phần đăng ký bộ test của #751 vẫn thuộc #751 (Mục tiêu 6). |
@@ -69,7 +69,7 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
 - Trên toàn ref (bản bare, 540 ref bỏ `claude/spec-no-p3`; `m_both.py`, `m_unexp.py`, `m_lease_shapes.py`, 23:33:44Z–23:33:51Z): **619**
   blob lease khác nhau; **17** mang cả hai trường băm (15 bằng nhau; 2 khác nhau = `wp709-exec-g1/g2-codex`, `spec_hash f569b613…` ≠
   `spec_sha256_required f739b4aa…`); 7 blob chưa hết hạn lúc 23:33:51Z. Hình dạng: `spec_path` + `spec_hash` hex64 354 · `spec_path` không
-  băm 56 · `spec_path` + `spec_sha256_required` hex64 55 · `spec_path: null` 27 · cả hai trường 17 · `spec_hash` không `spec_path` 15 ·
+  băm 56 ("băm" = `spec_hash` hoặc `spec_sha256_required`; `spec_sha256` không tính, xem Mục tiêu 1) · `spec_path` + `spec_sha256_required` hex64 55 · `spec_path: null` 27 · cả hai trường 17 · `spec_hash` không `spec_path` 15 ·
   `spec_hash: null` 3 — **0** blob mang băm sai dạng.
 - **Nguồn đọc của `check`** (kịch bản `do_nguon.py`, kho tạm `git init` + cấu hình cục bộ, gọi `ops/lease_publish.py` của `c522c17` như
   tiến trình con, 23:34:49Z; lease có `prompt_path` + `prompt_sha256_required`): (1) lease + prompt CHƯA commit, khớp ⇒ rc 0; (2) đã commit,
@@ -77,10 +77,10 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
   SAI, đĩa đúng ⇒ rc 0; (5) thư mục không có `.git`, có `--root` ⇒ rc 0; (6) PATH trỏ thư mục rỗng (không có git) ⇒ rc 0. Kết luận đo
   được: trong `check`, tệp lease (`_doc_yaml(a.tep)`, dòng 2294) và `prompt_path` (`_kiem_neo_prompt`, đọc byte dưới `_goc_kho(tep, goc)`,
   dòng 985–1001) đều đọc từ ĐĨA, không cần git.
-- Người tiêu thụ `check` đều chạy trên cây checkout SẠCH của commit được xét, nên với họ đĩa = commit: `ops-publish-lease.yml`
+- Hai người tiêu thụ TỰ ĐỘNG của `check` đều chạy trên cây checkout SẠCH của commit được xét, nên với họ đĩa = commit: `ops-publish-lease.yml`
   (`actions/checkout@v4`, `fetch-depth: 0`, 0 dòng `sparse`; `check "$tep" --root .` dòng 216; bộ kiểm lấy từ worktree rời của nhánh mặc
   định, dòng 82–99) và `ops/ci_duong_nhanh.py::kiem_lease` (`check duong --root .` với `cwd=kho`, dòng 541; lease hết hạn đi
-  `MA_KIEM_HET_HAN` dòng 121, tức `kiem(bo_qua_han=True)`).
+  `MA_KIEM_HET_HAN` dòng 121, tức `kiem(bo_qua_han=True)`). Người tiêu thụ THỦ CÔNG (`ops/README.md` dòng 37–38) chạy `check` TRƯỚC khi commit, trên cây CHƯA sạch (đĩa ≠ commit) — đó là lý do `kiem_bam` đọc ĐĨA (luật nguồn, Mục tiêu 1).
 - `.gitattributes` dòng 8: `* text=auto eol=lf`. Đo 23:52:28Z trong kho tạm chép tệp ấy: spec CRLF trên đĩa, lease neo băm byte CRLF ⇒
   `check` trước commit rc 0; sau commit, blob là `73 70 65 63 20 41 0a` ⇒ clone sạch rc 13.
 - Bộ đo nền trên bản sao `c522c17`: `env -u GITHUB_ACTOR python3 -B ops/lease_publish_test.py` ⇒ `lease_publish: 265/265 đạt; đã chạy=265,
@@ -124,8 +124,8 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
    `spec_sha256_required` quyết định — khớp ⇒ qua bất kể GIÁ TRỊ `spec_hash`, lệch ⇒ 13 bất kể giá trị `spec_hash` (hình dạng wp709;
    PROTOCOL §3.2: `spec_hash` là băm của Packet Spec, không bắt buộc bằng băm byte của tệp). Lệch ⇒ 13, thông điệp nêu tên trường, giá trị
    khai, giá trị đo.
-   Thiếu `spec_path` (hoặc không phải chuỗi, rỗng, `null`) hoặc không có trường băm nào ⇒ **không kiểm, không đỏ** (lease cũ, kể cả 15/619
-   blob mang `spec_hash` mà không `spec_path`); dòng kết quả của `check` nói "spec: không khai — không kiểm".
+   Thiếu `spec_path` (hoặc không phải chuỗi, rỗng, `null`) hoặc không có `spec_hash` lẫn `spec_sha256_required` ⇒ **không kiểm, không đỏ** (lease cũ, kể cả 15/619
+   blob mang `spec_hash` mà không `spec_path`); dòng kết quả của `check` nói "spec: không khai — không kiểm" (nghĩa là không khai `spec_hash` lẫn `spec_sha256_required`; tên thứ ba `spec_sha256` KHÔNG được đọc — đo tại `c522c17`: 57/152 lease mang nó, 5/152 mang nó mà thiếu cả hai tên kia, đều thuộc họ `plat-m4-*`, băm khớp tệp, đều đã hết hạn — muộn nhất 2026-08-22T07:10:00Z).
    **Chú thích phải sửa (B8):** dòng 2313 ("Đi qua ĐÚNG bộ kiểm THUẦN của `check`") thành SAI sau packet — phải nói `body` KHÔNG chạy
    `kiem_bam` (đo bản thăm dò: spec lệch ⇒ `check` 13 · `body` 0). Workflow vẫn an toàn vì `check` đứng trước `body` và rc ≠ 0 thì
    `continue` (`ops-publish-lease.yml` dòng 220–223). Dòng 2295–2296 giữ nguyên vì vẫn ĐÚNG (bảng thứ hai, hàng b). Docstring của `t135`
@@ -217,7 +217,7 @@ ghi rõ là của reviewer. Executor phải tự đo lại trên bản dựng c�
   gỡ chốt dạng đường dẫn ⇒ (4)(5)(6) vẫn rc 13 nhưng sai thông điệp; gỡ `relative_to` ⇒ (7) rc 0; "vắng ⇒ không kiểm" ⇒ (8) rc 0; gộp 12
   vào 13 ⇒ (9) mã 13.
 - **A5 (lease cũ không đỏ):** (1) không `spec_path` ⇒ rc 0, "không khai — không kiểm"; (2) `write_set_hash` không scope ⇒ rc 0, "scope
-  không nhận ra"; (3) có `spec_path` mà KHÔNG trường băm nào (56/619 blob thật) ⇒ rc 0, "không khai — không kiểm"; (4) `spec_hash: null`
+  không nhận ra"; (3) có `spec_path` mà không có `spec_hash` lẫn `spec_sha256_required` (56/619 blob thật — số của lượt soạn r3; lease chỉ mang `spec_sha256`, 5 lease ở `c522c17`, cũng rơi vào dạng này vì cổng không đọc `spec_sha256`) ⇒ rc 0, "không khai — không kiểm"; (4) `spec_hash: null`
   cạnh `spec_sha256_required` đúng ⇒ rc 0. ĐỎ khi: coi thiếu trường là lỗi ⇒ (1)(2) ĐỎ; "có `spec_path` mà không băm ⇒ 13" ⇒ (3) ĐỎ;
   "`null` là băm sai dạng" ⇒ (4) ĐỎ (hai đột biến sau sống sót bộ A của r2, số reviewer lượt 2).
 - **A5b (bia mộ):** lease CÒN HẠN mang `da_bi_thay_the`, spec sửa tại chỗ sau khi cấp ⇒ `check` rc 0, stdout chứa `bia mộ — không kiểm
@@ -289,9 +289,9 @@ trước, cho rc 0 sai; chạy lại với tên riêng mới ra rc 13 (23:52:28Z
 - Hành vi trên Windows (đường dẫn, NFC trên NTFS, symlink, `gh` giả, PATH rỗng) — chỉ đo Linux; không trigger tự động nào đo thay.
 - Lượt Codex có chạy được không: đo 15-10 sáng (`SAP_HET_HAN`, ảnh chụp cũ ~185 h); lượt soạn r3 KHÔNG đo lại.
 - Đường dẫn comment của quyết định chủ kho 15-10 về sổ test sống và về đồng ý đi tiếp ở ngưỡng L4 (`depends_on` (5)).
-- VERDICT lượt 5 r28 `d3f1d9db…` và hai vế "đột biến D2, D3, D5, D6, D7 cho rc=0" (nguồn ngoài kho).
-- `VERDICT.md` và `HINT.patch` của mọi lượt review của packet này mà spec dẫn bằng băm (hàng `review của r2` và các mục `Vá sau review lượt N`), bản thăm dò 40 ca cùng ma trận đột biến của lượt 3 (nguồn của 239 dòng, 296 (298), 40/40, `t191` 1/1 ở trên), của lượt 4 (nguồn của 257 = 59 + 197 + 1, dư 43, +1/−1 và +2/−1, 7 hunk, 40/40 của nhóm (7)–(11); các số lượt 4 đo thẳng trên kho — 161/248 ký tự, 174/270 byte, 2765 blob — tái lập được từ kho) và của lượt 5 (nguồn của nhóm (12)–(16)), và các kịch bản đo của lượt soạn r3 (`do_nguon.py` `af6eb7dd…`, `dung_tham_do.py` `6dd87cc0…`,
-  `do_a3.py` `56f1fbdc…`, `do_b2.py` `b27a6771…`, `do_dot_bien.py` `37bc0d71…`, `do_a6.py` `4b8b4ba6…` — sha256) KHÔNG có trong kho; bên thứ
+- VERDICT lượt 5 r28 `d3f1d9db…` và hai vế "đột biến D2, D3, D5, D6, D7 cho rc=0" (nguồn ngoài kho: đo lượt 7 ở `0cfe253`, 0/3520 tệp khớp `d3f1d9db`).
+- `VERDICT.md` và `HINT.patch` của mọi lượt review của packet này mà spec dẫn bằng băm (hàng `review của r2` và các mục `Vá sau review lượt N`), bản thăm dò 40 ca cùng ma trận đột biến của lượt 3 (nguồn của 239 dòng, 296 (298), 40/40, `t191` 1/1 ở trên), của lượt 4 (nguồn của 257 = 59 + 197 + 1, dư 43, +1/−1 và +2/−1, 7 hunk, 40/40 của nhóm (7)–(11); các số lượt 4 đo thẳng trên kho — 161/248 ký tự, 174/270 byte, 2765 tệp (mục `git ls-tree -r`, không phải blob khác nhau) — tái lập được từ kho) và của lượt 5 (nguồn của nhóm (12)–(16)), và các kịch bản đo của lượt soạn r3 (`do_nguon.py` `af6eb7dd…`, `dung_tham_do.py` `6dd87cc0…`,
+  `do_a3.py` `56f1fbdc…`, `do_b2.py` `b27a6771…`, `do_dot_bien.py` `37bc0d71…`, `do_a6.py` `4b8b4ba6…` — sha256) KHÔNG có trong kho (đo lượt 7 ở `0cfe253`: 0/3520 tệp khớp sáu băm kịch bản và 0 tệp mang tên các kịch bản ấy; VERDICT/HINT: neo ở hàng `review của r2` và các mục `Vá sau review lượt N`); bên thứ
   ba muốn tái lập phải dựng lại bản thăm dò từ chữ Mục tiêu 1–3, 5. Bản thăm dò không được giao (PROTOCOL §8 dòng 648).
 - A3b (ii) và các số "của reviewer" ở Nghiệm thu: không đo lại ở lượt soạn r3.
 - `python .claude/dev/ci_dang_ky_test.py --chay` trọn bộ (bước CI, nặng) — chỉ chạy bản không `--chay` trên nền; việc sổ CHẠY được bộ mới
@@ -324,7 +324,7 @@ HINT sha256 `ca2315c867764b34c98602d2459281b729f2b09e9176bd5554f590898a4aa1d6`).
 (`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT, trừ chính mục này (9 dòng thêm tay, khi mục được thêm nó là mục cuối tệp; đo lượt 4 trên bản `00a97d3`: bản đã áp HINT lượt 3 khác bản ấy đúng 9 dòng). Sáu lớp: `a6b-t191-chi-thay-raise-chan-va-ten-kiem-doc` ·
 `yeu-cau-con-lai-chua-co-tieu-chi-do` · `kich-thuoc-40-ca-chua-co-so-do-giao-duoc` ·
 `docstring-dau-tep-check-body-cung-kiem-thuan` · `bia-mo-thu-tu-voi-chot-duong-dan-chua-ghim` ·
-`trich-dan-dong-bang-lop-va-quet-lease-lech` — chỗ sửa xem từng hunk (mỗi hunk mang dòng `# lop:` trong HINT). VERDICT.md và HINT.patch lượt 3 KHÔNG có trong kho (đo lượt 4 ở `00a97d3`: không blob nào ở `ops/reviews`, `ops/specs`, `ops/land`, `ops/prompts` mang hai băm trên, 2765 blob); thứ định danh là băm.
+`trich-dan-dong-bang-lop-va-quet-lease-lech` — chỗ sửa xem từng hunk (mỗi hunk mang dòng `# lop:` trong HINT). VERDICT.md và HINT.patch lượt 3 KHÔNG có trong kho (đo lượt 4 ở `00a97d3`: không tệp nào ở `ops/reviews`, `ops/specs`, `ops/land`, `ops/prompts` mang hai băm trên, 2765 tệp); thứ định danh là băm.
 
 ## Vá sau review lượt 4
 
@@ -332,7 +332,7 @@ Bản trước vá: commit `00a97d3`, sha256 `78acedd10016ee4bedc7f2b3de0764b470
 (`approve`, 0 P1 · 0 P2 · 4 P3; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, `reviewed_sha`
 `00a97d3a60820349df7245837433f166c0cdda55`; VERDICT sha256 `d018e8c404bbb68738a11212c95376429e988b5ecb876b94625e7635bfd9e3f9`,
 HINT sha256 `92d3a9142d5544d32c98d13f499833bda1d867d2e5f1e6f92b53bfe5ae28e21f`). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`,
-rc 0); không sửa gì ngoài HINT, trừ chính mục này (đo lượt 5: bản đã áp HINT lượt 4 khác `SPEC.md` ở `d6bc803` đúng 10 dòng thêm tay). VERDICT.md và HINT.patch lượt 4 KHÔNG có trong kho (đo lượt 5 ở `d6bc803`: 0/3513 blob trên toàn cây mang hai băm trên); thứ định danh là băm. Bốn lớp: `kich-thuoc-so-dem-thieu-docstring-va-don-vi-byte` ·
+rc 0); không sửa gì ngoài HINT, trừ chính mục này (đo lượt 5: bản đã áp HINT lượt 4 khác `SPEC.md` ở `d6bc803` đúng 10 dòng thêm tay). VERDICT.md và HINT.patch lượt 4 KHÔNG có trong kho (đo lượt 5 ở `d6bc803`: 0/3513 tệp trên toàn cây mang hai băm trên); thứ định danh là băm. Bốn lớp: `kich-thuoc-so-dem-thieu-docstring-va-don-vi-byte` ·
 `yeu-cau-chua-co-ca-vuot-sau-yeu-cau-da-liet-ke` · `trich-dan-bang-chung-xanh-616-619` ·
 `luot-3-tep-khong-co-trong-kho-va-muc-tu-than`. Vòng vá P3 thứ 2/2 chủ kho cho; P3 còn lại sau vòng này vào sổ nợ.
 
@@ -340,13 +340,22 @@ rc 0); không sửa gì ngoài HINT, trừ chính mục này (đo lượt 5: b�
 
 Bản trước vá: commit `b055a2f`, sha256 `fb27457d6a10bd866e73d8d6724e71eb1d6fa20cce0366c8242ace23c44ab61f`. Review lượt 5 (reviewer Claude Sonnet 5.5 subagent
 `review-sonnet-max`, `reviewed_sha` `d6bc803e031dff0fe37a56f513282bf1472fc129`; VERDICT sha256 `15ca093e42d53215d9386d971f25bf4d90fd08c81f52590ad473835065fe641c`, HINT sha256 `1255f4f4acc4b13626087b6f8aed4bc5c2a2317e781af00552bbde8ec4a699e1`;
-hai tệp KHÔNG có trong kho (đo lượt 6 ở `bedcf2f`: 0/3520 blob trên toàn cây mang hai băm trên); thứ định danh là băm). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`, rc 0); không sửa nội
+hai tệp KHÔNG có trong kho (đo lượt 6 ở `bedcf2f`: 0/3520 tệp trên toàn cây mang hai băm trên); thứ định danh là băm). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`, rc 0); không sửa nội
 dung nào ngoài HINT và mục này. Lớp: `a7-f841-200-202-sai-phai-la-201-202` · `luot-4-tep-khong-co-trong-kho-va-muc-tu-than-lan-2` · `yeu-cau-chua-co-ca-nhom-12-16-tap-van-mo-lan-3`. Vòng vá P3 thêm thứ 1/2 chủ kho cho (16-10).
 
 ## Vá sau review lượt 6
 
 Bản trước vá: commit `62924ff`, sha256 `1da6d190b97ed6cf41ddd961bdad6c2ee38fe498ef13760d2305b1f63dbd62cd`. Review lượt 6 (reviewer Claude Sonnet 5.5 subagent
 `review-sonnet-max`, `reviewed_sha` `bedcf2ff7ea53abe70c1c75b8af8b753e0b2e8ef`; VERDICT sha256 `8d572544b2478083ec736a605ac9aa2181cedbebcecc395d12e33e46e3a24971`, HINT sha256 `f6d4efb710256d0bea9a77c8664851916e46124ec7fa0706b82fc9d4ea0f8016`; hai tệp KHÔNG có trong kho
-(đo ở `62924ff`: 0/3520 blob trên toàn cây mang hai băm trên); thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(đo ở `62924ff`: 0/3520 tệp trên toàn cây mang hai băm trên); thứ định danh là băm). Áp NGUYÊN VĂN HINT
 (`patch -p0 --fuzz=0`, rc 0); không sửa nội dung nào ngoài HINT và mục này. Lớp: `luot-5-tep-khong-co-trong-kho-va-muc-tu-than-lan-3` · `nhom-14-hai-so-40-40-va-36-40-gan-sai-fixture-thieu-a5-2` · `quy-tac-mo-pham-vi-1-3-5-thieu-muc-tieu-4-6-va-nguon-do-lech`.
+
+## Vá sau review lượt 7
+
+Bản trước vá: commit `e5698ca`, sha256 `573d744d4118de9d4678fca5a2ff1e01458f2cb6dcce2daedb11a6825a080f5a` (`git show e5698ca:ops/specs/no-p3-lease-spec-hash-r3.md` ra đúng băm này).
+Review lượt 7 (`approve, 0 P1 · 0 P2 · 5 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `0cfe253a368c36c2c53c687d63930f1283d2f1d9`; VERDICT sha256 `e9f500f4ada50df60587b20d778f00d3abe538d151e87585bd866e7384152634`, HINT sha256 `e7c31a07b3ff5974ed24920ef1335a1be91d84cf6d4d928b0a83f1a9d8b25452`; hai tệp KHÔNG có trong kho — đo 2026-10-16 ở
+`e5698ca`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (8 dòng thêm tay). 5 lớp:
+`chua-do-duoc-tep-khong-co-trong-kho-khong-neo-commit-lan-4` · `don-vi-3520-blob-la-muc-cay-khong-phai-blob-khac-nhau` · `nguoi-tieu-thu-check-khong-deu-chay-tren-cay-sach` · `spec-sha256-ten-thu-ba-khong-doc-lam-sai-nhan-khong-bam-va-khong-khai` · `thay-the-cho-207250f-la-merge-trong-nhanh-pr-khong-phai-vao-master`.
 

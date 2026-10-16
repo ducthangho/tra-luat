@@ -21948,10 +21948,13 @@ def run() -> int:
         # changelog `changelog.d/wp-766.md`, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới. PR worker
         # thêm mảnh mà không kê manifest nên master đỏ `release-verify --strict` (gate 38861735146) — cùng hình dạng WP725-727.
         # Cây thật = 187 + 75 = **262**; trần Package 200 còn 13 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 262
+        # KÊ KHAI SLOT (PR #786 — research context-mode): `docs/` 75 → **76** Markdown. Thêm đúng MỘT tệp
+        # `docs/research/2026-10-16-y-tuong-tu-context-mode.md`, dev-side/ngoài gói (vế ok4 tự chứng minh).
+        # Gói giữ 187 (manifest chỉ đổi băm của CHÍNH TỆP NÀY); cây thật = 187 + 76 = **263**; trần 200 không đổi.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 76 == 263
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 75
+        ok4 = (len(tren_dia) == 76
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

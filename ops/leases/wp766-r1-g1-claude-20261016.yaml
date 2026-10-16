@@ -58,7 +58,9 @@ granted_on_instruction_note: >-
 recorded_by: claude-executor-session
 recorder_is_executor: true
 leased_at_utc: '2026-10-16T04:05:00Z'
-lease_expires_at_utc: '2026-10-18T06:00:00Z'
+lease_expires_at_utc: '2026-10-16T07:30:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-18T06:00:00Z. RUT NGAN ve 2026-10-16T07:30:00Z — xem thu_hoi_bang_rut_han.
 review_rounds_limit: null
 review_rounds_limit_basis: >-
   Theo tien le wp743 cung write set: review Codex doc lap toi khi P1=0, P2=0 tren dung head.
@@ -73,3 +75,21 @@ thay_the_cho_note: >-
   2026-10-16T04:00:00Z truoc leased_at cua lease nay, tuc da HET HAN khi lease nay co hieu luc; viet bia mo vao
   lease da chet chi them tep chet vao tap quet (rc=8) — bai hoc CLAUDE.md 20-09-2026.
 xung_dot_write_set_do_luc: '2026-10-16T03:13Z ai-dang-giu: launcher_test.py NGUOI_GIU 1 (wp743, het han 04:00Z), changelog.d/wp-766.md NGUOI_GIU 0; 547/547 nhanh, ls-remote = for-each-ref. DO LAI sau 04:00Z truoc khi day.'
+lease_sua_lan_cuoi: '2026-10-16T06:35Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-18T06:00:00Z'
+  han_moi_utc: '2026-10-16T07:30:00Z'
+  chi_thi: >-
+    Uy quyen land cua chu kho, PR #772 comment 6209427062 (ducthangho, OWNER), muc "Thao tac duoc phep":
+    rut han lease wp766-r1-g1-claude-20261016 tren ops/wp766-r1-g1-lease.
+  ly_do: >-
+    Packet #766 da MERGE: PR #772 (agent/wp766-r1-g1-claude) merge bang merge commit
+    e03d4bf76c3347b99133bfc0a08580def4a0b1a5 (cha e0273d3 + 701f41c) luc 2026-10-16T06:31Z. Lease khong tu chet
+    khi land (CLAUDE.md); de nguyen thi giu hai duong dan write set toi 2026-10-18T06:00Z.
+  vi_sao_khong_dung_bia_mo: >-
+    Theo tien le #743 g1 (79249197), #710 g5 (e870d7a): rut han dung co che da cai. Han moi dat SAU luc push de luot
+    dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9. Khong bia mo: khong co lease ke nhiem.
+  nguoi_rut: 'land operator, phien Claude Code session_014pXTWd1wrzGF1X4LdwzHdn (cung la executor)'
+  nghiem_thu: 'ai-dang-giu cho hai duong dan write set sau 07:30Z phai ra NGUOI_GIU 0 — do o PR ghi so.'

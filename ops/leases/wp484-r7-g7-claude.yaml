@@ -1,0 +1,111 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 484
+packet_id: wp484
+revision: 7
+generation: 7
+lease_id: wp484-r7-g7-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [775]
+depends_on_ghi_chu: 'chi cho DIEU KIEN MERGE M-4 (wp775 giu .claude/dev/packet_loop_test.py); khong chan thi cong.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; verdict codex approve tren head cuoi, bang chung do_may qua launcher run.json.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp484-r7.md
+spec_sha256_required: 35a81f47dbea985ed867147fbf952be485faf5c3106e9c8afed27a0b41a533e1
+spec_hash: 35a81f47dbea985ed867147fbf952be485faf5c3106e9c8afed27a0b41a533e1
+spec_ref: refs/heads/ops/wp484-r7-spec@41d52f03a8c3e429de99325f2857af3961bdf0d0
+prompt_path: ops/specs/wp484-r7.md
+prompt_sha256_required: 35a81f47dbea985ed867147fbf952be485faf5c3106e9c8afed27a0b41a533e1
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- .claude/dev/codex_cred.py
+- .claude/dev/codex_cred_test.py
+- .claude/hooks/session-start.sh
+- ops/handoff/wp484-g7-claude.md
+write_set_hash: 887238c433459b5350498a49c6f85b455f82e67b8bc77497f53c30ce17146ab8
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- .claude/dev/codex_cred.py
+- .claude/dev/codex_cred_test.py
+- .claude/hooks/session-start.sh
+- ops/handoff/wp484-g7-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge:
+- .claude/dev/packet_loop_test.py
+- .claude/dev/codex_env_policy.py
+- .claude/hooks/session_start.py
+- .github/workflows/launcher-windows.yml
+chi_doi_qua_merge_ghi_chu: 'tep trong diff #509 nhung KHONG sua tay; packet_loop_test.py do wp775-r1-g1-claude giu (M-4).'
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1; P2 mo phai co quyet dinh chu kho co link; toi da 2 loi goi codex'}
+- {id: M-2, dieu_kien: '4 thread P2 connector tren #509 deu duoc tra loi va resolve (va hoac thu hep + no co ten)'}
+- {id: M-3, dieu_kien: 'mot luot ci.yml XANH tren head cuoi doc bang check run + mot luot Windows; luot huy/bo qua khong tinh'}
+- {id: M-4, dieu_kien: 'wp775 da land hoac nha packet_loop_test.py; merge lai origin/master; M-1 M-3 tinh tren head moi'}
+- {id: M-5, dieu_kien: 'head doi => M-1, M-3 het hieu luc'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp484-g7-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 653fef3f52f3130dd6f597c1036430ffb807fef1
+start_from_sha: faaedff19af12063b9c1232e602e2e3fec479861
+start_from_ghi_chu: 'head #509 (codex/wp484-g6-integration); ke thua lich su bang merge thuong, khong cherry-pick, khong push len nhanh g6.'
+reviewed_sha_required: faaedff19af12063b9c1232e602e2e3fec479861
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/484#issuecomment-6222200389
+granted_on_instruction_readback: 'GET issues/comments/6222200389: user ducthangho, author_association OWNER, performed_via_github_app claude (GHI HO, khong phai chu kho tu tay), created_at == updated_at 2026-10-16T18:34:05Z, body sha256 c0ec174ba79dc159e67cc5ca0c639dceb65af0b96d485b9183334b7e2bfc767f; chua lease_id wp484-r7-g7-claude va spec sha256 35a81f47'
+granted_on_instruction_note: >-
+  Chu kho chi thi trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (16-10-2026), nguyen van: "Lam 1, 2" (muc 1 =
+  cap lease executor moi cho #484 de hoi sinh #509 toi khi du dieu kien merge), roi chon Q1 Claude thi cong +
+  Codex review + 3 luot, Q2 cap ngay va cho wp775 truoc khi du dieu kien, Q3 thu hep + no co ten, Q4 phien nay
+  ghi ho len #484. Comment ghi ho di qua GitHub App claude nen YEU HON comment chu kho tu tay; tien le cung dang:
+  lease tran-codex-va-sensitive-r1-g1 (#782 comment 6220550096). KHONG merge/land/deploy.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease CUNG la executor g7; khong tu cap viec: chu kho chi thi truc tiep trong phien.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-16T18:28:00Z'
+  goc_quet: 'master 653fef3f52f3130dd6f597c1036430ffb807fef1, quet refs/heads/* sau fetch day du (--prune)'
+  ket_qua: 'launcher.py launcher_test.py codex_cred.py codex_cred_test.py codex_env_policy.py session-start.sh session_start.py launcher-windows.yml: rc=0 NGUOI_GIU 0; packet_loop_test.py rc=11 NGUOI_GIU 1 = wp775-r1-g1-claude (khong thuoc write_set sua tay; M-4).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease g6 wp-codex-credential-refresh-exec-g6 da HET HAN 2026-09-11T11:10:20Z => khong viet bia mo vao lease da chet (CLAUDE.md bai hoc 20-09).'
+leased_at_utc: '2026-10-16T18:40:00Z'
+heartbeat_at: '2026-10-16T18:40:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-18T18:40:00Z'
+lease_expires_at_utc: '2026-10-18T18:40:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+attempts_basis: 'ngan sach moi chu kho cap cho r7 (Q1); ngan sach r6 5/5 giu nguyen lam lich su, khong hoan.'
+review_rounds_limit: 10
+budget:
+  codex_review_calls:
+    pr_wp484_g7: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_484_r7: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'push nhanh agent/wp484-g7-claude va mo PR draft thay #509'

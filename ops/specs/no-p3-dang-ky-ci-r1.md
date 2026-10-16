@@ -98,7 +98,7 @@ của `ĐĂNG KÝ` BẰNG NHAU mà cổng vẫn ĐỎ — một phép đo chỉ 
 - **C4b (điều kiện cấp (1) và nửa đầu (2) — phép đo RIÊNG, `ai-dang-giu` không thay được):** (1) `git merge-base --is-ancestor <SHA merge land #748> origin/master` ⇒ rc 0
   (SHA = `merge_commit_sha` của PR land #748 đọc bằng GET, hoặc `merge_commit` trong hồ sơ land `ops/land/*wp748*-land-evidence.yaml` khi đã ghi sổ); rc 1 ⇒ chưa land;
   rc ≥ 128 hoặc chưa có SHA ⇒ KHÔNG ĐO ĐƯỢC ⇒ không cấp. (2) `git merge-base --is-ancestor <SHA merge land #748> <base>` ⇒ rc 0 VÀ có verdict duyệt #752 neo `reviewed_sha` đúng SHA dùng làm
-  base (hoặc SHA ấy là tổ tiên của `<base>` trên nhánh tích hợp). Vì sao điều kiện (3) không thay được (1): `ai-dang-giu` chỉ biết HẠN (`_phan_loai_lease`: `HẾT_HẠN` khi `lease_expires_at_utc` đã qua) và bia mộ `da_bi_thay_the`,
+  base (hoặc SHA ấy là tổ tiên của `<base>` trên nhánh tích hợp). Lệnh cho vế sau: `git merge-base --is-ancestor <reviewed_sha> <base>` ⇒ rc 0. Nơi tra verdict: biên nhận `ops/reviews/*.receipt.yaml` (khoá `reviewed_sha`) VÀ dòng `Reviewed commit:` trong comment của connector Codex trên PR của #752 (CLAUDE.md, mục "HỎI CHỖ TIỆN TAY", ý (b)); rỗng ở MỘT chỗ KHÔNG là "chưa duyệt", không thấy ở cả hai ⇒ KHÔNG ĐO ĐƯỢC ⇒ không cấp. Mỗi lệnh `is-ancestor` ở (1) và (2) có ba trạng thái: rc 0 có · rc 1 không · rc ≥ 128 KHÔNG ĐO ĐƯỢC. Vì sao điều kiện (3) không thay được (1): `ai-dang-giu` chỉ biết HẠN (`_phan_loai_lease`: `HẾT_HẠN` khi `lease_expires_at_utc` đã qua) và bia mộ `da_bi_thay_the`,
   không biết packet đã land chưa — fixture đo 01:50Z 16-10-2026: lease trên nhánh CHƯA land vào `master`, đã hết hạn ⇒ `HẾT_HẠN`, `NGƯỜI_GIỮ 0: không có`, rc 0; cùng lease còn hạn ⇒ `NGƯỜI_GIỮ 1`, rc 11.
   Lease r11 của #748 hết hạn `2026-10-16T04:27:21Z` (ô `depends_on` (1)): sau mốc ấy (3) có thể ra rc 0 kể cả khi #748 chưa land. ĐỎ khi (1) hoặc (2) không rc 0.
 - **C5 (thứ tự land):** trên một base THIẾU hai tệp test ⇒ S3 (`23/25`, rc 1) — đây là phép đo chứng minh #763 không
@@ -167,6 +167,18 @@ chỗ, không tăng `revision`: chưa lease nào neo đặc tả này.
 | `l1-l5-don-vi-do-va-ngay-gio-do-con-thieu` | P3 | đoạn quy ước đơn vị và ngày, ngay sau định nghĩa `ĐĂNG KÝ: a/b` |
 
 Phiên vá đo lại hai P2 (02:07:22Z–02:08:54Z 16-10-2026, clone tạm `c522c17` dựng từ chính kho, chạy kịch bản của
-reviewer): lệnh C1b trên S0 / S2 / D / E ⇒ `False 9` / `True 11` / `False 9` / `False 11`; D và E vẫn qua C1–C3 (rc 0,
+reviewer; D = hai dòng `DANG_KY.add(...)` thay cho hai mục `MOI` (C1b a), E = hai mục `MOI` mang mẫu không neo `^`…`$` (C1b b)):
+lệnh C1b trên S0 / S2 / D / E ⇒ `False 9` / `True 11` / `False 9` / `False 11`; D và E vẫn qua C1–C3 (rc 0,
 `25/25`, `1025/1025`, numstat `2 0`); fixture `ai-dang-giu` trên nhánh chưa land: lease hết hạn ⇒ rc 0, `NGƯỜI_GIỮ 0`,
 còn hạn ⇒ rc 11; `git merge-base --is-ancestor`: tổ tiên rc 0, không phải tổ tiên rc 1, SHA không tồn tại rc 128.
+
+## Vá sau review lượt 2
+
+Review lượt 2 (`approve`, 0 P1 · 0 P2 · 2 P3; VERDICT sha256 `324ee24773ea529295203efc3d2017d76899e4f63abcc4b14b485fa4f177159c`,
+HINT sha256 `877791dfb5ca16536e720b8caa33c002a405beeccf4d08d625e24ee187f309f1`). Áp NGUYÊN VĂN 2 hunk của HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT.
+
+| lớp | hạng | chỗ sửa |
+|---|---|---|
+| `c4b-2-verdict-duyet-khong-co-noi-tra` | P3 | C4b (2): nêu lệnh, nơi tra verdict duyệt #752 và trạng thái khi không thấy |
+| `va-nhan-d-e-khong-dinh-nghia` | P3 | mục "Vá sau review lượt 1": định nghĩa nhãn D, E |

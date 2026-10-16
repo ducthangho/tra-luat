@@ -78,3 +78,10 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r13-g13-claude-windows-20261016
+da_bi_thay_the_ly_do: >-
+  Owner authorized the two-level mutant gate, revoked g12 and authorized
+  r13/g13 at Issue #748 comment 6213176296. Preserve unpushed g12 product
+  head 5dfb3ee79b4548c1ee4513bec89a74c5bd2fa59d and the exact
+  uncommitted hook patch SHA256
+  6d73f89a283d6a82d488209fe080b95c1f096ebf5bad94bc1f6866690b26359f.

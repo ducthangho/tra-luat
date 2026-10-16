@@ -100,7 +100,7 @@ của `ĐĂNG KÝ` BẰNG NHAU mà cổng vẫn ĐỎ — một phép đo chỉ 
   khoá `merge_commit` cấp 0 (chuỗi SHA; 25 trên 27 hồ sơ tại `c522c17`) hoặc `trang_thai_packet.merge_commit.sha` (2 trên 27:
   `pr721-wp698`, `pr732-wp685`; đo 03:26Z 16-10-2026)); rc 1 ⇒ chưa land;
   rc ≥ 128 hoặc chưa có SHA ⇒ KHÔNG ĐO ĐƯỢC ⇒ không cấp. (2) `git merge-base --is-ancestor <SHA merge land #748> <base>` ⇒ rc 0 VÀ có verdict duyệt #752 neo `reviewed_sha` đúng SHA dùng làm
-  base (hoặc SHA ấy là tổ tiên của `<base>` trên nhánh tích hợp). Lệnh cho vế sau: `git merge-base --is-ancestor <reviewed_sha> <base>` ⇒ rc 0. Nơi tra verdict: biên nhận `ops/reviews/*.receipt.yaml` (khoá `reviewed_sha`) VÀ dòng `Reviewed commit:` trong comment của connector Codex trên PR của #752 (CLAUDE.md, mục "HỎI CHỖ TIỆN TAY", ý (b)); rỗng ở MỘT chỗ KHÔNG là "chưa duyệt", không thấy ở cả hai ⇒ KHÔNG ĐO ĐƯỢC ⇒ không cấp. "Duyệt" là assurance mà lớp của #752 đòi — `cross_approved` hoặc `human_audited` (PROTOCOL dòng 530 và 724–726) — không phải mọi biên nhận `verdict: approve`: đo 03:41Z 16-10-2026 trên 276 biên nhận tại `c522c17`, 80 có verdict thuộc nhóm duyệt (`approve`, `approved`, `approve_with_findings`) mà chỉ 29 mang `assurance: cross_approved`, 5 mang `review_deferred` (gồm `ops/reviews/no-p3-ho-so-exec-review-1-claude-verdict.receipt.yaml`, cùng họ `no-p3`), 2 mang `same_provider_*`; biên nhận kiểm toán người không có khoá `assurance` (`role: auditor`). Hai nơi tra không cùng loại: chỉ biên nhận mang `assurance`; dòng `Reviewed commit:` của connector chỉ cho biết đã có lượt review sạch ở SHA ấy (CLAUDE.md, ý (b)), không neo họ model đã phục vụ lượt chạy mà `cross_approved` đòi (PROTOCOL dòng 606) — chỉ thấy ở connector mà biên nhận chưa có ⇒ assurance KHÔNG ĐO ĐƯỢC ⇒ không cấp. Mỗi lệnh `is-ancestor` ở (1) và (2) có ba trạng thái: rc 0 có · rc 1 không · rc ≥ 128 KHÔNG ĐO ĐƯỢC. Vì sao điều kiện (3) không thay được (1): `ai-dang-giu` chỉ biết HẠN (`_phan_loai_lease`: `HẾT_HẠN` khi `lease_expires_at_utc` đã qua) và bia mộ `da_bi_thay_the`,
+  base (hoặc SHA ấy là tổ tiên của `<base>` trên nhánh tích hợp). Lệnh cho vế sau: `git merge-base --is-ancestor <reviewed_sha> <base>` ⇒ rc 0. Nơi tra verdict: biên nhận `ops/reviews/*.receipt.yaml` (khoá `reviewed_sha`), quét trên MỌI ref của clone đủ ref ở (3) bằng `git grep -l -F -e <reviewed_sha> <ref> -- ops/reviews` cho từng ref rồi đọc khoá `reviewed_sha` của từng tệp trúng, không chỉ cây của `<base>` hay `origin/master`: biên nhận được ghi bằng commit SAU commit nó duyệt nên không nằm trong cây của chính `reviewed_sha` (đo 16-10-2026 tại `c522c17`: 0 trên 276 biên nhận có mặt trong cây của `reviewed_sha` của nó), và biên nhận ghi trên nhánh PR của #752 chưa ở `master` cho tới khi #752 land (C4b (1)); VÀ dòng `Reviewed commit:` trong comment của connector Codex trên PR của #752 (CLAUDE.md, mục "HỎI CHỖ TIỆN TAY", ý (b)); rỗng ở MỘT chỗ KHÔNG là "chưa duyệt", không thấy ở cả hai ⇒ KHÔNG ĐO ĐƯỢC ⇒ không cấp. "Duyệt" là assurance mà lớp của #752 đòi — `cross_approved` hoặc `human_audited` (PROTOCOL dòng 530 và 724–726) — không phải mọi biên nhận `verdict: approve`: đo 03:41Z 16-10-2026 trên 276 biên nhận tại `c522c17`, 80 có verdict thuộc nhóm duyệt (`approve`, `approved`, `approve_with_findings`) mà chỉ 29 mang `assurance: cross_approved`, 5 mang `review_deferred` (gồm `ops/reviews/no-p3-ho-so-exec-review-1-claude-verdict.receipt.yaml`, cùng họ `no-p3`), 2 mang `same_provider_*`; biên nhận kiểm toán người không mang khoá `assurance` mà mang `role: auditor` VÀ `assurance_dat: human_audited` (9 trên 9 biên nhận `role: auditor`; 0 trên 276 biên nhận mang `assurance: human_audited`; đo 16-10-2026 tại `c522c17`). Hai nơi tra không cùng loại: chỉ biên nhận mang `assurance`; dòng `Reviewed commit:` của connector chỉ cho biết đã có lượt review sạch ở SHA ấy (CLAUDE.md, ý (b)), không neo họ model đã phục vụ lượt chạy mà `cross_approved` đòi (PROTOCOL dòng 606) — chỉ thấy ở connector mà biên nhận chưa có ⇒ assurance KHÔNG ĐO ĐƯỢC ⇒ không cấp. Tra verdict có ba trạng thái, không hơn: thấy ít nhất một biên nhận có `verdict` thuộc nhóm duyệt và (`assurance: cross_approved`, hoặc `role: auditor` cùng `assurance_dat: human_audited`) ⇒ đạt; thấy biên nhận nhưng không biên nhận nào thoả điều kiện ấy (verdict ngoài nhóm duyệt hoặc assurance khác) ⇒ không đạt; không thấy biên nhận nào, kể cả khi connector có dòng `Reviewed commit:` ⇒ KHÔNG ĐO ĐƯỢC; hai trạng thái sau đều ⇒ không cấp. Mỗi lệnh `is-ancestor` ở (1) và (2) có ba trạng thái: rc 0 có · rc 1 không · rc ≥ 128 KHÔNG ĐO ĐƯỢC. Vì sao điều kiện (3) không thay được (1): `ai-dang-giu` chỉ biết HẠN (`_phan_loai_lease`: `HẾT_HẠN` khi `lease_expires_at_utc` đã qua) và bia mộ `da_bi_thay_the`,
   không biết packet đã land chưa — fixture đo 01:50Z 16-10-2026: lease trên nhánh CHƯA land vào `master`, đã hết hạn ⇒ `HẾT_HẠN`, `NGƯỜI_GIỮ 0: không có`, rc 0; cùng lease còn hạn ⇒ `NGƯỜI_GIỮ 1`, rc 11.
   Lease r11 của #748 hết hạn `2026-10-16T04:27:21Z` (ô `depends_on` (1)): sau mốc ấy (3) có thể ra rc 0 kể cả khi #748 chưa land. ĐỎ khi (1) hoặc (2) không rc 0.
 - **C5 (thứ tự land):** trên một base THIẾU hai tệp test ⇒ S3 (`23/25`, rc 1) — đây là phép đo chứng minh #763 không
@@ -186,7 +186,7 @@ còn hạn ⇒ rc 11; `git merge-base --is-ancestor`: tổ tiên rc 0, không ph
 
 Review lượt 2 (`approve`, 0 P1 · 0 P2 · 2 P3; VERDICT sha256 `324ee24773ea529295203efc3d2017d76899e4f63abcc4b14b485fa4f177159c`,
 HINT sha256 `877791dfb5ca16536e720b8caa33c002a405beeccf4d08d625e24ee187f309f1`). Áp NGUYÊN VĂN 2 hunk của HINT
-(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT.
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (11 dòng thêm tay).
 
 | lớp | hạng | chỗ sửa |
 |---|---|---|
@@ -195,11 +195,11 @@ HINT sha256 `877791dfb5ca16536e720b8caa33c002a405beeccf4d08d625e24ee187f309f1`).
 
 ## Vá sau review lượt 3
 
-Bản trước vá: commit `5bd6d03`, sha256 `b1e320a35a06d6d3d22febc432d64c1053f74193e24ef7074f2614595a2eb1b7` (diff tái lập từ kho bằng `git diff` giữa `5bd6d03` và commit mang bản này). Review lượt 3 (`approve`,
+Bản trước vá: commit `5bd6d03`, sha256 `b1e320a35a06d6d3d22febc432d64c1053f74193e24ef7074f2614595a2eb1b7` (diff của lượt 3 tái lập từ kho bằng `git diff --numstat 5bd6d03 64cad00 -- ops/specs/no-p3-dang-ky-ci-r1.md` = 27 dòng thêm · 6 dòng xoá, đo 16-10-2026; `64cad00` là commit thêm mục này). Review lượt 3 (`approve`,
 0 P1 · 0 P2 · 6 P3; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, `reviewed_sha`
 `5bd6d0358ab48baed41a9b9d05cbae9a863a74e7`; VERDICT sha256 `3fb414bfc05a5363ea6d4fbed9a3e827d11aa373e77280c670aba2086c558ffc`,
 HINT sha256 `e21941e2f1a05e699d18e1a20ce5867cedecdc58b1b61e66bd786a7a06baa508`). Áp NGUYÊN VĂN 5 hunk của HINT
-(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT. Sáu lớp: `c8-dan-b6d-r3-752-da-sua-o-b6ab45e` ·
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (11 dòng thêm tay). Sáu lớp: `c8-dan-b6d-r3-752-da-sua-o-b6ab45e` ·
 `base-chi-hai-tep-test-lech-head-da-duyet` · `depends-on-2-duong-a-thieu-xep-tang-adr-0044` ·
 `c4b-1-khoa-merge-commit-hai-hinh-dang` · `c4b-2-verdict-duyet-khong-neu-assurance` ·
 `c6-cong-xanh-toan-phan-752-giao-nhung-khong-do` — chỗ sửa xem từng hunk (dòng `# lop:` trong HINT).
@@ -208,6 +208,15 @@ HINT sha256 `e21941e2f1a05e699d18e1a20ce5867cedecdc58b1b61e66bd786a7a06baa508`).
 
 Bản trước vá: commit `bedcf2f`, sha256 `03defb2b5463ad1f60008500aa57c47cb6ec037776fcf6bd76576e272d71f0d8`. Review lượt 4 (reviewer Claude Sonnet 5.5 subagent
 `review-sonnet-max`, `reviewed_sha` `64cad009c42a7a5f5722caa162f7dc120dd9c6d4`; VERDICT sha256 `5e5b79d56ce08422f1ecd87fa9850c480683935d9825a3d65785ba0531d79bdc`, HINT sha256 `4e8bc86a9cf59eaf3690fca1ae19478f81a7654956e681938f0ef2004941b670`;
-hai tệp nằm ở scratchpad phiên điều phối, CHƯA vào kho). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`, rc 0); không sửa nội
-dung nào ngoài HINT và mục này. Lớp: `c4b-2-connector-mot-minh-khong-chung-minh-assurance` · `c4b-2-connector-mot-minh-khong-chung-minh-assurance,` · `so-tinh-tien-dieu-kien-actionlint-chua-neu` · `va-luot-3-dan-hien-vat-ngoai-kho-khong-bam`. Vòng vá P3 thêm thứ 1/2 chủ kho cho (16-10).
+hai tệp KHÔNG có trong kho — đo 16-10-2026 ở `62924ff`: 0 trên 3520 blob của cây có sha256 bằng một trong hai băm này, và chỉ chính đặc tả này nhắc tới chúng; thứ định danh là băm). Áp NGUYÊN VĂN HINT (`patch -p0 --fuzz=0`, rc 0); không sửa nội
+dung nào ngoài HINT và mục này. Ba lớp (`approve`, 0 P1 · 0 P2 · 3 P3): `so-tinh-tien-dieu-kien-actionlint-chua-neu` · `c4b-2-connector-mot-minh-khong-chung-minh-assurance` · `va-luot-3-dan-hien-vat-ngoai-kho-khong-bam`. Vòng vá P3 thêm thứ 1/2 chủ kho cho (16-10).
+
+## Vá sau review lượt 5
+
+Bản trước vá: commit `0cfe253`, sha256 `2a5b408cf8d6debee01df5a7626575fca146f25a04e1d94be8bd0f57a284d7b2` (`git show 0cfe253:ops/specs/no-p3-dang-ky-ci-r1.md` ra đúng băm này).
+Review lượt 5 (`approve, 0 P1 · 0 P2 · 3 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `62924ffa23cc2dfc2f0648dd002ba0abba3f11f6`; VERDICT sha256 `d1846914e0aaf46d38fec68ec7b7b6d3e0f6c75480af49a6692b20cdf91337ef`, HINT sha256 `d8692dd5eacc28da196f1c537fdf740651ef0509ef3aa1b7c3c607a99aeeb514`; hai tệp KHÔNG có trong kho — đo 2026-10-16 ở
+`0cfe253`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (8 dòng thêm tay). 3 lớp:
+`c4b-2-dong-lop-bang-chung-duong-va-pham-vi-quet` · `muc-va-dan-hien-vat-bang-vi-tri-va-phu-dinh-tong-quat` · `va-luot-4-danh-sach-lop-4-muc-cho-3-lop`.
 

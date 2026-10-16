@@ -2,25 +2,23 @@
 """Cổng NGUỒN cho lời khai trong `ops/land/*-land-evidence.yaml` — packet #773, đặc tả đóng băng
 `ops/specs/land-evidence-khai-phai-co-nguon-r1.md` (sha256 063ccaa6…).
 
-VÌ SAO CÓ. Ba lượt Codex connector liên tiếp trên PR ghi sổ #771 bắt cùng MỘT hình dạng lỗi — lời khai rộng hơn bằng
-chứng giữ lại (H1): `mergeable_state clean` dán `measured` khi readback lưu ghi `unknown`; `positive: '195/195 … hong 0'`
-trỏ tệp chỉ có metadata cấp run; review connector xong SAU `merged_at` mà nằm trong `pre_merge_checks`. Mỗi lượt vá tay
-đúng câu được chỉ; không cổng nào đo lớp lỗi này (`bien_nhan_v2` chỉ đọc `ops/reviews/*.receipt.yaml`).
+VÌ SAO CÓ. Ba lượt Codex connector trên PR ghi sổ #771 bắt cùng MỘT lỗi — lời khai rộng hơn bằng chứng giữ lại (H1) —
+mỗi lượt vá tay đúng câu được chỉ; không cổng nào đo lớp lỗi này (`bien_nhan_v2` chỉ đọc `ops/reviews/*.receipt.yaml`).
 
 LUẬT:
   L1  Mỗi LỜI KHAI ĐO — chuỗi YAML (khoá hoặc giá trị, mọi độ sâu) mà sau khi bỏ khoảng trắng đầu bắt đầu bằng token
       `measured` theo sau là khoảng trắng, `—`, `-` hoặc `:` — phải chứa ≥ 1 TOKEN NGUỒN phân giải được tới đường dẫn
       CÓ THẬT, NẰM TRONG gốc kho. Token nguồn = một dải tối đa `[A-Za-z0-9_./{}*-]+` (bỏ dấu `.` cuối câu) kết thúc
       bằng `.json|.txt|.log|.yaml|.yml|.md|.sh|.py|.patch` hoặc bằng `/` (khi ấy phải là thư mục). Thứ tự phân giải:
-      `<hồ sơ>-provenance/`, `ops/land/`, gốc kho. Có `*` ⇒ glob, phải khớp ≥ 1. So `measured` KHÔNG phân biệt hoa
-      thường — chặt hơn chữ của đặc tả (Q3), để `Measured —` không đi vòng được luật.
+      `<hồ sơ>-provenance/`, `ops/land/`, gốc kho. Có `*` ⇒ glob, phải khớp ≥ 1 mục đúng LOẠI. Chặt hơn chữ đặc tả (Q3):
+      so `measured` không phân biệt hoa thường; token trỏ CHÍNH hồ sơ không tính là nguồn.
   L2  Mapping có khoá `positive` phải có `nguon_positive` (chuỗi/danh sách) cùng cấp; mỗi tệp phải có; mọi token `N/M`
       và `hong N` của `positive` phải có NGUYÊN VĂN (biên chữ số) trong ≥ 1 tệp ấy.
   L3  Có `pre_merge_checks` và provenance có `readback-pr-*.json` mang `merged_at` ⇒ mọi mốc ISO-8601 đầy đủ trong
       một phần tử `pre_merge_checks` phải `<` `merged_at`. Không có readback ⇒ ghi "L3 không áp dụng", không ĐẠT ngầm.
   L4  Ba trạng thái: ĐẠT · ĐỎ · KHÔNG ĐO ĐƯỢC. YAML hỏng, provenance vắng khi có lời khai đo/`positive`, đọc tệp lỗi,
-      readback hỏng hay nhiều `merged_at` khác nhau ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ ĐẠT. Không thấy hồ sơ nào ⇒ KHÔNG
-      ĐO ĐƯỢC (thư mục rỗng/`--root` sai không được thành "ĐẠT 0 tệp").
+      readback hỏng, KHOÁ YAML TRÙNG (parser giữ giá trị cuối ⇒ lời khai trước biến mất), ngày sai, nhiều `merged_at`
+      khác nhau, không thấy hồ sơ nào ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ ĐẠT. Băm L5 và luật đo trên CÙNG một lần đọc.
   L5  `MIEN_TRU_CUTOVER` = {tên: sha256 byte} của MỌI hồ sơ trên `origin/master` lúc bắt đầu (`c73af7b`). Băm khớp ⇒
       bỏ qua có ghi nhận. Băm lệch ⇒ mất miễn trừ, kiểm đủ luật. Bản kỳ vọng CHÉP RIÊNG trong test: thêm tên ⇒ ĐỎ.
 
@@ -110,7 +108,7 @@ def phan_giai(token, goc, prov):
     for nen in (prov, goc / THU_MUC, goc):
         if "*" in token:
             khop = [Path(x) for x in sorted(glob.glob(glob.escape(str(nen)) + "/" + token))]
-            khop = [x for x in khop if _trong_goc(x, goc) and x.exists()]
+            khop = [x for x in khop if _trong_goc(x, goc) and (x.is_dir() if token.endswith("/") else x.is_file())]
             if khop:
                 return khop[0]
             continue
@@ -126,7 +124,7 @@ def duyet(nut, duong="$"):
     con = nut.items() if isinstance(nut, dict) else enumerate(nut) if isinstance(nut, list) else ()
     for k, v in con:
         d = f"{duong}.{k}" if isinstance(nut, dict) else f"{duong}[{k}]"
-        if isinstance(k, str):
+        if isinstance(nut, dict):
             yield d + "<khoa>", k
         yield from duyet(v, d)
 
@@ -134,7 +132,10 @@ def duyet(nut, duong="$"):
 def _thoi_diem(x):
     if isinstance(x, datetime.datetime):
         return x if x.tzinfo else x.replace(tzinfo=datetime.timezone.utc)
-    return datetime.datetime.fromisoformat(x.replace("Z", "+00:00"))
+    try:
+        return datetime.datetime.fromisoformat(x.replace("Z", "+00:00"))
+    except ValueError as e:   # regex chỉ kiểm HÌNH (2026-99-16 lọt) — ngày sai là đầu vào không đo được, không phải ĐỎ
+        raise KhongDoDuoc(f"mốc {x!r} sai: {e}")
 
 
 def merged_at(prov, goc_ten):
@@ -142,20 +143,15 @@ def merged_at(prov, goc_ten):
     cận và `-commits`, đo 16-10-2026). Tên khác ⇒ mọi `readback-pr-<số>.json` có `merged_at` khác null phải cùng một giá
     trị. None nếu không có readback áp dụng; KhongDoDuoc nếu hỏng, `merged_at` sai dạng, hoặc mâu thuẫn."""
     so = re.match(r"pr(\d+)-", goc_ten)
-    if not prov.is_dir():
-        return None
-    tep = [prov / f"readback-pr-{so.group(1)}.json"] if so else sorted(
+    tep = [] if not prov.is_dir() else [prov / f"readback-pr-{so.group(1)}.json"] if so else sorted(
         t for t in prov.glob("readback-pr-*.json") if re.fullmatch(r"readback-pr-\d+\.json", t.name))
     gia_tri = set()
     for t in tep:
-        if not t.exists():
-            continue
         try:
-            d = json.loads(t.read_text(encoding="utf-8"))
+            d = json.loads(t.read_text(encoding="utf-8")) if t.exists() else {}
         except (OSError, ValueError) as e:
             raise KhongDoDuoc(f"{t.name}: {type(e).__name__}: {e}")
-        v = d.get("merged_at") if isinstance(d, dict) else None
-        if v is None and not so:
+        if (v := d.get("merged_at") if isinstance(d, dict) else None) is None and (not so or not t.exists()):
             continue
         if not isinstance(v, str) or not RE_MOC.fullmatch(v):
             raise KhongDoDuoc(f"{t.name}: không có merged_at ISO-8601 (được {v!r})")
@@ -165,12 +161,32 @@ def merged_at(prov, goc_ten):
     return gia_tri.pop() if gia_tri else None
 
 
-def kiem_ho_so(tep, goc, yaml):
-    """(vi_pham: list[str], ghi_chu: list[str]). Ném KhongDoDuoc cho L4."""
+def nap_yaml(yaml, byte):
+    """`safe_load` nhưng KHOÁ TRÙNG trong một mapping ⇒ lỗi (bỏ qua khoá merge `<<`, khoá không băm được để parser báo)."""
+    class Nap(yaml.SafeLoader):
+        pass
+
+    def map_khong_trung(nap, nut, deep=False):
+        da = set()
+        for k, _ in nut.value:
+            khoa = nap.construct_object(k, deep=True) if k.tag != "tag:yaml.org,2002:merge" else None
+            try:
+                if khoa is not None and khoa in da:
+                    raise yaml.constructor.ConstructorError(None, None, f"khoá trùng {khoa!r}", k.start_mark)
+                da.add(khoa)
+            except TypeError:
+                pass
+        return yaml.SafeLoader.construct_mapping(nap, nut, deep)
+    Nap.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_khong_trung)
+    return yaml.load(byte, Loader=Nap)
+
+
+def kiem_ho_so(tep, byte, goc, yaml):
+    """(vi_pham, ghi_chu) trên `byte` — CHÍNH bản đã băm cho L5, không đọc tệp lần hai. Ném KhongDoDuoc cho L4."""
     try:
-        du_lieu = yaml.safe_load(tep.read_bytes())
-    except (OSError, yaml.YAMLError) as e:
-        raise KhongDoDuoc(f"đọc/parse YAML: {type(e).__name__}: {str(e).splitlines()[0] if str(e) else ''}")
+        du_lieu = nap_yaml(yaml, byte)
+    except yaml.YAMLError as e:
+        raise KhongDoDuoc(f"parse YAML: {type(e).__name__}: {str(e).splitlines()[0] if str(e) else ''}")
     goc_ten = tep.name[: -len(DUOI)] if tep.name.endswith(DUOI) else tep.stem
     prov = tep.parent / f"{goc_ten}-provenance"
     nut = list(duyet(du_lieu))
@@ -195,18 +211,14 @@ def kiem_ho_so(tep, goc, yaml):
         if not ds or not all(isinstance(x, str) and x for x in ds):
             vp.append(f"L2 {d}: có positive mà thiếu nguon_positive (chuỗi/danh sách)")
             continue
-        noi_dung = []
-        for x in ds:
-            p = phan_giai(x, goc, prov)
-            if p is None or not p.is_file():
-                vp.append(f"L2 {d}: nguon_positive {x!r} không có tệp")
-                continue
-            try:
-                noi_dung.append(p.read_bytes().decode("utf-8", "replace"))
-            except OSError as e:
-                raise KhongDoDuoc(f"đọc {x}: {e}")
-        if len(noi_dung) != len(ds):
+        tep_ng = [(x, phan_giai(x, goc, prov)) for x in ds]
+        vp += [f"L2 {d}: nguon_positive {x!r} không có tệp" for x, p in tep_ng if p is None or not p.is_file()]
+        if any(p is None or not p.is_file() for _, p in tep_ng):
             continue
+        try:
+            noi_dung = [p.read_bytes().decode("utf-8", "replace") for _, p in tep_ng]
+        except OSError as e:
+            raise KhongDoDuoc(f"đọc nguon_positive: {e}")
         for so in RE_SO_POS.findall(str(m["positive"])):
             mau = re.compile(r"(?<![A-Za-z0-9_])" + re.escape(so) + r"(?!\d)" if so.startswith("hong")
                              else r"(?<![\d/])" + re.escape(so) + r"(?![\d/])")
@@ -218,7 +230,7 @@ def kiem_ho_so(tep, goc, yaml):
         if moc_merge is None:
             ghi.append("L3 không áp dụng: provenance không có readback PR mang merged_at")
         else:
-            phan_tu = pmc if isinstance(pmc, list) else list(pmc.values()) if isinstance(pmc, dict) else [pmc]
+            phan_tu = pmc if isinstance(pmc, list) else [{k: v} for k, v in pmc.items()] if isinstance(pmc, dict) else [pmc]
             for i, pt in enumerate(phan_tu):
                 for d, v in duyet(pt, f"$.pre_merge_checks[{i}]"):
                     moc = [v] if isinstance(v, datetime.datetime) else RE_MOC.findall(v) if isinstance(v, str) else []
@@ -257,7 +269,7 @@ def main(argv=None):
                 continue
             print(f"MẤT MIỄN TRỪ {nhan}: băm lệch ảnh chụp cutover — kiểm đủ luật")
         try:
-            vp, ghi = kiem_ho_so(tep, goc, yaml)
+            vp, ghi = kiem_ho_so(tep, byte, goc, yaml)
         except KhongDoDuoc as e:
             u += 1
             print(f"KHÔNG ĐO ĐƯỢC {nhan}: {e}")

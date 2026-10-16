@@ -5557,14 +5557,20 @@ def case_pl_m6_state_v1(c: Ctx):
     st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
     (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER}] * 3}))
     rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status trên state v1 hợp lệ")
     t = json.loads(o.decode("utf-8"))
     if "SUY RA" not in _txt(e) or (t["codex_review_calls_used"], t["review_rounds_used"], t["dem_tu_suy"]) != (3, 3, True):
         raise AssertionError(f"v1 phải suy 3/3 kèm cảnh báo: {_txt(e)!r}")
     _pl(c, sd, _goi("g1", _H1, 3))
     _kiem(sd, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
-    for hong in ({"schema_version": 3}, {"codex_review_calls_used": True}, {"codex_calls": {}}):
-        (sd / "wp55.json").write_text(json.dumps({**_st(sd), **hong}))
-        _pl(c, sd, (8, "status"))
+    g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
+    for hong in ({}, {"schema_version": 3}, {"schema_version": 2.0}, {"codex_review_calls_limit": True},
+                 {"codex_calls": {}}, {"dem_tu_suy": "false"}, {"codex_calls": [dict(g, da_dung=0)]},
+                 {"codex_calls": [g, g]}, {"codex_calls": [dict(g, run_id=f"g{i}") for i in range(4)]},
+                 {"codex_review_calls_used": 2}, {"review_rounds_used": 2}, {"state": "blocked", "ly_do": "rescue_required",
+                 "truc": "vong_review", "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]}):
+        (sd / "wp55.json").write_text(json.dumps({**t, **hong}))
+        _pl(c, sd, (8 if hong else 0, "status"))
 
 
 CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_pl_m")]
@@ -5573,6 +5579,8 @@ _PL_CHAN = ('    if st["codex_review_calls_used"] >= st["codex_review_calls_limi
             '        _vao_rescue(state_dir, st, "codex_review_calls", "lời gọi codex bị CHẶN TRƯỚC")\n',
             '    st["codex_review_calls_used"] += 1\n')
 _M2, _M3 = ["pl_m2_loi_goi"], ["pl_m3_neo_loi_goi"]
+MUTANTS.update({f"pl_f01_bo_{ten}": (f'("{ten}", ', f'("{ten}", True or ', ["pl_m6_state_v1"])
+                for ten in ("schema", "bo-dem", "so", "loi-goi", "dem-goi", "dem-vong", "truc")})
 MUTANTS.update({
     "pl_m1_bo_kiem_so_duong": ("a.codex_review_calls_limit) <= 0:", "a.codex_review_calls_limit) < 0:", ["pl_m1_tran_so_duong"]),
     "pl_m2_kiem_sau_khi_ghi": ("".join(_PL_CHAN), _PL_CHAN[2] + _PL_CHAN[0].replace(">=", ">") + _PL_CHAN[1], _M2),

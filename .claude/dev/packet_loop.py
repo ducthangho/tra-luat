@@ -634,18 +634,29 @@ def _load(state_dir: Path, packet: int) -> dict:
     p = _state_path(state_dir, packet)
     if not p.exists():
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
-    st = json.loads(p.read_text(encoding="utf-8"))
-    if st.get("schema_version") == 1:  # #775 M6: SUY bộ đếm (cận DƯỚI) — suy 0 là fail-open
-        st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_calls=[],
-                  codex_review_calls_used=_la_codex(st) * sum(
-                      r.get("provider") == st["reviewer"] for r in st["reviews"]),
-                  review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW, nang_tran=[],
-                  codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True)
-    # Bộ đọc NGHIÊM: schema lạ, bool thay int, trần không dương, sổ không phải list ⇒ CHẶN.
-    if st.get("schema_version") != 2 or not all(
-            type(st.get(u)) is int is type(st.get(t)) and st[u] >= 0 and st[t] > 0
-            for u, t in TRUC_TRAN.values()) or {type(st.get("codex_calls")), type(st.get("nang_tran"))} != {list}:
-        _die(RC_STATE, f"state hỏng ở schema_version/bộ đếm/trần — không đoán: {p}")
+    try:  # #775 bộ đọc NGHIÊM: lệch hình dạng hay bất biến sổ/bộ đếm ⇒ RC_STATE, không traceback, không đoán
+        st = json.loads(p.read_text(encoding="utf-8"))
+        if st["schema_version"] == 1:  # M6: SUY bộ đếm (cận DƯỚI) — suy 0 là fail-open
+            st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_calls=[],
+                      codex_review_calls_used=_la_codex(st) * sum(
+                          r.get("provider") == st["reviewer"] for r in st["reviews"]),
+                      review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW, nang_tran=[],
+                      codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True)
+        goi, can_duoi = st["codex_calls"], _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
+        vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
+            ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2),
+            ("bo-dem", all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
+            ("so", type(goi) is list is type(st["nang_tran"]) and type(st.get("dem_tu_suy", False)) is bool),
+            ("loi-goi", all(set(g) == {"run_id", "head", "da_dung"} and RUN_ID_RE.match(g["run_id"])
+                            and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
+            ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi),
+            ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
+            ("truc", st.get("ly_do") != "rescue_required" or st["truc"] == next(  # mốc chạm trần MỚI NHẤT
+                h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
+    except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
+        vi_pham = [f"{type(e).__name__}: {e}"]
+    if vi_pham:
+        _die(RC_STATE, f"state hỏng ({', '.join(vi_pham)}) — không đoán: {p}")
     return st
 
 

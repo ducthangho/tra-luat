@@ -646,10 +646,11 @@ def _load(state_dir: Path, packet: int) -> dict:
         goi = st["codex_calls"]
         vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
             ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2),
-            ("bo-dem", all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
+            ("bo-dem", all(type(st[k]) is int for k in ("attempts_used", "attempts_limit", "same_failure_limit")) and st["attempts_used"] >= 0 and all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
             ("so", all(type(st[k]) is list for k in ("codex_calls", "nang_tran", "reviews", "history"))
-                   and all(r.get("provider") == st["reviewer"] for r in st["reviews"])
-                   and all(type(h) is dict for h in st["history"]) and type(st.get("dem_tu_suy", False)) is bool),
+                   and all(r.get("provider") == st["reviewer"] and type(r.get("attempt")) is int for r in st["reviews"])
+                   and all(type(h) is dict for h in st["history"]) and all(type(st.get(k, False)) is bool for k in ("dem_tu_suy", "attempt_open"))
+                   and type(st.get("finding_counts")) is dict and all(type(n) is int and n >= 0 for n in st["finding_counts"].values())),
             ("loi-goi", all(set(g) == {"run_id", "head", "da_dung"} and RUN_ID_RE.match(g["run_id"])
                             and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
@@ -1145,7 +1146,6 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"phải vào lại 'reviewing' với head mới.",
         )
 
-    # #775 M3: review codex phải trỏ ĐÚNG một lời gọi đã ghi, cùng head, chưa dùng.
     goi = None
     if _la_codex(st):
         goi = next((g for g in st["codex_calls"] if g["run_id"] == a.codex_call), None)
@@ -1272,7 +1272,6 @@ def cmd_transition(a, state_dir: Path) -> int:
 
 
 def cmd_record_codex_call(a, state_dir: Path) -> int:
-    """#775 M2: ghi một lời gọi review codex đã bắt đầu (protocol §12); chặn TRƯỚC khi vượt trần."""
     st = _load(state_dir, a.packet)
     if st["state"] != "reviewing":
         _die(RC_STATE, f"chỉ ghi lời gọi codex khi state 'reviewing' (đang {st['state']!r})")

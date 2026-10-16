@@ -5451,8 +5451,7 @@ _rescue = lambda rc, qd: (rc, "record-rescue", "--quyet-dinh", qd, "--can-cu", _
 _nang = lambda rc, ai="ducthangho", tran=3, can_cu=_URL: (
     rc, "nang-tran", "--truc", "codex_review_calls", "--tran-moi", tran, "--ai-nang", ai, "--can-cu", can_cu)
 _rv = lambda rc, verdict, goi, sha=_H1: (
-    rc, "record-review", "--provider", REVIEWER, "--verdict", verdict, "--reviewed-sha", sha,
-    *(["--codex-call", goi] if goi else []), *(["--finding-id", f"loi-{goi}"] if verdict != "approve" else []))
+    rc, "record-review", "--provider", REVIEWER, "--verdict", verdict, "--reviewed-sha", sha, *(["--codex-call", goi] if goi else []), *(["--finding-id", f"loi-{goi}"] if verdict != "approve" else []))
 
 def _reviewing(c, *extra, vao=True):
     sd = c.sd()
@@ -5539,7 +5538,7 @@ def case_pl_m5_rescue(c: Ctx):
 def case_pl_m6_state_v1(c: Ctx):
     sd = _reviewing(c)
     st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
-    (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER}] * 3}))
+    (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER, "attempt": n} for n in (1, 2, 3)]}))
     rc, o, e = run(c.script, ["status", "--packet", 55], sd)
     _doi(0, rc, e, "status trên state v1 hợp lệ")
     t = json.loads(o.decode("utf-8"))
@@ -5549,10 +5548,12 @@ def case_pl_m6_state_v1(c: Ctx):
     _kiem(sd, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
     for hong in ({}, {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
+                 *({k: v} for k, v in (("attempts_used", True), ("attempts_used", 0.5), ("attempts_used", "one"),
+                                      ("attempt_open", "false"), ("attempt_open", []), ("same_failure_limit", None), ("finding_counts", []))),
                  {"codex_review_calls_limit": True}, {"codex_calls": {}}, {"dem_tu_suy": "false"}, {"codex_calls": [dict(g, da_dung=1)]},
                  {"codex_calls": [g, g]}, {"codex_calls": [dict(g, run_id=f"g{i}") for i in range(4)]}, {"codex_review_calls_used": 2},
                  {"codex_calls": [g]}, {"review_rounds_used": 2}, {"reviews": {}, "review_rounds_used": 0}, {"history": None}, {"history": [None]},
-                 {"reviews": [{}], "review_rounds_used": 1}, {"reviewer_identity": {"model_family": None}}, {"reviewer_identity": []},
+                 {"reviews": [{}], "review_rounds_used": 1}, {"reviews": [{"provider": REVIEWER}], "review_rounds_used": 1}, {"reviewer_identity": {"model_family": None}}, {"reviewer_identity": []},
                  {"reviewer_identity": False}, {"state": "blocked", "ly_do": "rescue_required", "truc": "vong_review",
                                              "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]},
                  {"state": "blocked", "ly_do": "rescue_required", "truc": "unknown", "history": [{"event": "blocked_rescue_required", "truc": "unknown"}]}):

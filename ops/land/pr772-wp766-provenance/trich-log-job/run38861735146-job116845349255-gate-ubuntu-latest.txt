@@ -1,0 +1,9 @@
+# trich log job 116845349255 (run 38861735146, gate ubuntu-latest, push master e03d4bf) — 2026-10-16T07:35:27Z
+# log day du: 681440 byte, sha256 b7593cd799683863fd154a1cd64ca65434bf4570791013520df4315d155bb4e4 (gh api repos/ducthangho/tra-luat/actions/jobs/116845349255/logs); log day du KHONG luu
+# buoc do: release-verify strict (lane LAND — manifest committed)
+1562:{"ok": false, "error": "STUB_EARLY_EXIT"}
+9593:  "ok": false,
+9602:  "extra_files": [
+9603:    "changelog.d/wp-766.md"
+10564:  "note": "strict=true coi file thừa là lỗi; strict=false chỉ cảnh báo extra_files."
+10566:##[error]Process completed with exit code 2.

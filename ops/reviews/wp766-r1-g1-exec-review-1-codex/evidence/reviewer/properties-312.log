@@ -1,0 +1,4 @@
+CROSS_PRODUCT t81=544 r766=64 allocations_checked=973 failures=0
+GRAPHS [{"root": 13, "parents": {"13": 12, "14": 13}, "result": null}, {"root": 13, "parents": {"13": 12, "15": 13, "14": 12}, "result": {"13": "win:123", "15": "win:456"}}]
+RESTORATION [{"exception": "TinHieuChotCa", "calls": [1, 10], "restored": true, "message": "getpid=10: review sentinel at second iteration"}, {"exception": "RuntimeError", "calls": [1, 10], "restored": true, "message": "review sentinel at second iteration"}, {"exception": "SystemExit", "calls": [1, 10], "restored": true, "message": "review sentinel at second iteration"}, {"exception": "KeyboardInterrupt", "calls": [1, 10], "restored": true, "message": "review sentinel at second iteration"}]
+HARNESS_AFTER_FAILURE passed=1 skipped=0 failed=1 next_case=PASS

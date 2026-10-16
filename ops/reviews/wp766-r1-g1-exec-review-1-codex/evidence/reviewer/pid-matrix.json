@@ -1,0 +1,1082 @@
+[
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "that",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "that",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=4 pgid=4 sid=4 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "1",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "1",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=1 pgid=5 sid=5 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "10",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "10",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=10 pgid=6 sid=6 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "11",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "11",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=11 pgid=7 sid=7 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: hau due khong lay duoc khoa bi bo qua im lang\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "12",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "12",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=12 pgid=8 sid=8 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "13",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "13",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=9 sid=9 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "14",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "14",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=14 pgid=10 sid=10 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "15",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "15",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=15 pgid=11 sid=11 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "base",
+    "pid": "99999",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "99999",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=99999 pgid=12 sid=12 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "that",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "that",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=13 sid=13 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "1",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "1",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=1 pgid=14 sid=14 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "10",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "10",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=10 pgid=15 sid=15 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "11",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "11",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=11 pgid=16 sid=16 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "12",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "12",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=12 pgid=17 sid=17 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "13",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "13",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=18 sid=18 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "14",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "14",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=14 pgid=19 sid=19 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "15",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "15",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=15 pgid=20 sid=20 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "99999",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "99999",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=99999 pgid=21 sid=21 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "that",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "that",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=22 pgid=22 sid=22 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "1",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "1",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=1 pgid=23 sid=23 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "10",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "10",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=10 pgid=24 sid=24 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "11",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "11",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=11 pgid=25 sid=25 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "12",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "12",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=12 pgid=26 sid=26 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "13",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "13",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=27 sid=27 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "14",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "14",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=14 pgid=28 sid=28 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "15",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "15",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=15 pgid=29 sid=29 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.12",
+    "side": "head",
+    "pid": "99999",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "99999",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=99999 pgid=30 sid=30 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "that",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "that",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=31 pgid=31 sid=31 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "1",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "1",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=1 pgid=32 sid=32 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "10",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "10",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=10 pgid=33 sid=33 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "11",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "11",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=11 pgid=34 sid=34 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: hau due khong lay duoc khoa bi bo qua im lang\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "12",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "12",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=12 pgid=35 sid=35 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "13",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "13",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=36 sid=36 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "14",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "14",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=14 pgid=37 sid=37 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "15",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "15",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=15 pgid=38 sid=38 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "base",
+    "pid": "99999",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/base",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "99999",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=99999 pgid=39 sid=39 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "that",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "that",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=40 pgid=40 sid=40 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "1",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "1",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=1 pgid=41 sid=41 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "10",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "10",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=10 pgid=42 sid=42 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "11",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "11",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=11 pgid=43 sid=43 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "12",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "12",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=12 pgid=44 sid=44 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "13",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "13",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=45 sid=45 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "14",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "14",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=14 pgid=46 sid=46 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "15",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "15",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=15 pgid=47 sid=47 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "99999",
+    "case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "99999",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=99999 pgid=48 sid=48 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "that",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "that",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=49 pgid=49 sid=49 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "1",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "1",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=1 pgid=50 sid=50 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "10",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "10",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=10 pgid=51 sid=51 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "11",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "11",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=11 pgid=52 sid=52 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "12",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "12",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=12 pgid=53 sid=53 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "13",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "13",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=13 pgid=54 sid=54 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "14",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "14",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=14 pgid=55 sid=55 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "15",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "15",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=15 pgid=56 sid=56 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  },
+  {
+    "python": "3.13",
+    "side": "head",
+    "pid": "99999",
+    "case": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-py3.13-acqiixhk/head",
+    "argv": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/4db0e1e9-e429-5947-8704-a56b7bbfbbd7/scratchpad/rv1-out/ep_pid.py",
+      "99999",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 0,
+    "stdout": "moi truong: pid=99999 pgid=57 sid=57 truong_nhom=False chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532275] init=codex\nnhom tien trinh: KHONG tach duoc (PermissionError) - killpg co the giet vo shell\n  lan 1/1: qua\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 1/1 qua, 0 bo qua, 0 hong\n",
+    "stderr": ""
+  }
+]

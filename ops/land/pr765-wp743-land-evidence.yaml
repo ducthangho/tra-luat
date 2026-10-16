@@ -10,18 +10,49 @@
 
 schema_version: 1
 mission_id: gh-743
+# ---- TRUONG CHUAN PROTOCOL §7 "Land evidence tach approval khoi thao tac" (them theo finding P2 Codex connector PR #771,
+# comment 4291017968). Cac khoi tu do ben duoi chi la chi tiet bo sung; may doc cac truong nay.
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_017khPoiSXW9Yvefabg6MWaH
+input_packet_generations:
+  - {packet_issue: 743, packet_id: py314-path-exists-nuot-oserror, revision: 1, generation: 1, lease_id: wp743-r1-g1-claude-20261016}
+authorized_head_sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994
+authorized_head_tree: a8474ba1b581ed042f2c82cbc39e12f2526650c4
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/765#issuecomment-6207001889
+land_operator: 'claude (phien session_017khPoiSXW9Yvefabg6MWaH), merge bang token tai khoan ducthangho'
+merge_method: merge
+merge_commit: e0273d31aba78b014aa89297f32ff86f9daf0277
+merge_commit_tree: ea4c80d0ec9daba4ae6edbb59ea7b613f4f12d83
+merge_commit_parents: [1101cd240d8f43637db7878e8c0fd0b2f441dad7, 80e0fac0a4ab8c74486cf3bab1a73e1dec600994]
+pre_merge_checks:
+  - {name: gate (ubuntu-latest), sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
+  - {name: gate-packet-loop (ubuntu-latest), sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
+  - {name: gate-ops (ubuntu-latest), sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
+  - {name: gate-cong-cu-gop (ubuntu-latest), sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
+  - {name: thu-hoi, sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, nguon: readback-check-runs-80e0fac.json}
+  - {name: 'launcher (Windows that) dispatch windows-and-ubuntu', run_id: 38841991504, sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: success, positive: 'ubuntu 195/195 hong 0; windows 172/172 hong 0', nguon: readback-run-38841991504.json}
+  - {name: 'Codex connector review', sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994, conclusion: 'completed, has_any_findings false', luc: '2026-10-16T02:58:54Z — SAU merge 28s (xem review.codex_connector.lech_quy_trinh)', nguon: readback-codex-connector-765.json}
+post_merge_checks:
+  - {name: gate (ci.yml, push master), run_id: 38843154826, sha: e0273d31aba78b014aa89297f32ff86f9daf0277, conclusion: success, nguon: readback-run-38843154826.json}
+  - {name: 'launcher (Windows that) push master', run_id: 38843154835, sha: e0273d31aba78b014aa89297f32ff86f9daf0277, conclusion: success, positive: 'ubuntu 195/195 hong 0; windows 172/172 hong 0', nguon: readback-run-38843154835.json}
+bookkeeping:
+  - {item: 'rut han lease wp743-r1-g1 ve 2026-10-16T04:00Z', commit: 7924919, nhanh: ops/wp743-r1-g1-lease}
+  - {item: 'PR ghi so', pr: 771, nhanh: claude/bookkeeping-743-land}
+  - {item: 'nghiem thu nha lease ai-dang-giu NGUOI_GIU 0', luc: '2026-10-16T04:01Z', nguon: ai-dang-giu-sau-04/}
+  - {item: 'bien nhan v2 review luot 1', path: ops/reviews/wp743-r1-g1-exec-review-1-codex-verdict.receipt.yaml}
+# ---- het truong chuan
 packet_id: py314-path-exists-nuot-oserror
 packet_issue: 743
 generation: 1
 generation_nghia: Lan land THU NHAT cua ma packet #743 (lease g1 duy nhat).
 pham_vi_land: ma
-provider: claude
-execution_surface: claude_code
-transport: machine/local
 environment: cloud
 operating_system: linux
-role: land_operator
-session_id: https://claude.ai/code/session_017khPoiSXW9Yvefabg6MWaH
 recorded_by: >-
   claude-session — CUNG phien la executor cua packet (lease recorder_is_executor true) VA land operator do chu kho chi
   dinh (uy quyen 6207001889). Phien nay khong tu tinh thao tac land la approval.
@@ -79,13 +110,17 @@ dieu_kien_truoc_merge:
     --dot-bien 150 OK / 0 SAI; windows-latest Python 3.13.16 "172/172 ... hong 0", dot bien 128 OK / 0 SAI. Log job
     KHONG luu trong ho so nay (xem khong_do_duoc).
   khong_xung_dot: >-
-    measured — mergeable_state clean. Master troi 9fddb1d -> 1101cd2 (11 commit cua #741, chi cham ops/**; khong cham
+    loi_khai_co_neo — `mergeable_state: clean`, `mergeable: true` do phien nay doc qua REST ngay truoc merge
+    (02:57Z) nhung readback ay KHONG duoc luu; readback-pr-765.json luu SAU merge ghi `unknown`. Phan do duoc gian tiep:
+    lenh merge `PUT /pulls/765/merge` voi `sha=80e0fac` tra merged true (GitHub tu choi merge khi xung dot). Master troi 9fddb1d -> 1101cd2 (11 commit cua #741, chi cham ops/**; khong cham
     .claude/dev/** hay .github/workflows/**).
 
 review:
   luot_1:
-    reviewer: codex (Codex CLI, khac ho executor), read-only voi kho, chay qua launcher.py run
+    reviewer: codex (Codex CLI, khac ho executor), chay qua launcher.py run. Read-only la CHI THI, KHONG cuong che — xem caveat CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY trong bien nhan
     hien_vat: ops/reviews/wp743-r1-g1-exec-review-1-codex/
+    bien_nhan_v2: 'ops/reviews/wp743-r1-g1-exec-review-1-codex-verdict.receipt.yaml (bien_nhan_v2.py DAT)'
+    tai_lap_driver: 'ops/reviews/wp743-r1-g1-exec-review-1-codex/TAI_LAP.sh — da do: measure.py 61 KILL_CHOT, FAILURES 0'
     verdict_sha256: 812ebb2254fa0df25a82529c1c27ffb9c64df074b3ac847cd0d78b28e763853e
     prompt_sha256: 2052f2a87b1d020257bdac2e7fe524f914056ebdc897567205d98efff57e3852
     reviewed_sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994

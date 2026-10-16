@@ -68,16 +68,23 @@ trên cho thấy nó vẫn sai.
 
 ## Hiệu lực theo THỜI ĐIỂM ĐÓNG BĂNG — không hồi tố
 
-Luật phân xử, theo đúng hình dạng `ADR-0048`:
+Cùng hình dạng `ADR-0048`, nhưng mốc là một THỜI ĐIỂM đo được bằng git chứ không phải một NGÀY.
+Mốc theo ngày không phân xử được đặc tả đóng băng cùng ngày — đúng ca của chính packet thi hành ADR
+này (cross-review lượt 1, P2 `moc-hieu-luc-thieu-thu-tu-trong-ngay`).
 
-- **MỐC** — ngày ADR này được chấp nhận: **2026-10-16**.
-- **THỨ NEO** — `spec_hash` của packet, tức thời điểm đặc tả được ĐÓNG BĂNG; không phải lúc packet
-  chạy, lúc cấp lease hay ngày mở PR.
-- **Đọc ra:** đặc tả đóng băng **TRƯỚC** mốc ⇒ trần cũ (hai); đặc tả đóng băng **TỪ mốc trở đi** ⇒
-  trần tám.
+- **MỐC** — thời điểm committer (UTC, tới giây) của commit đầu tiên trên nhánh mặc định có chứa tệp
+  này, tức commit land nó. Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, **không** phải mốc. Đo:
+  `git log --first-parent --diff-filter=A --format='%H %cI' master -- docs/adr/0052-*.md`.
+- **THỨ NEO** — `spec_hash` của packet xác định một blob đặc tả; thời điểm neo là thời điểm committer
+  của commit đầu tiên, trên bất kỳ ref nào của kho, đưa blob ấy vào. Đo:
+  `git log --all --reverse --format='%H %cI' --find-object="$(git hash-object <tệp đặc tả>)"`.
+  Không phải lúc packet chạy, lúc cấp lease hay ngày mở PR.
+- **Đọc ra:** neo **TRƯỚC** mốc ⇒ trần cũ (hai); neo **SAU** mốc ⇒ trần tám. Neo **trùng giây** với
+  mốc, hoặc **không đo được** neo hay mốc ⇒ trần cũ — tức trần chặt hơn, fail-closed.
 
-Chính packet thi hành ADR này đóng băng đặc tả **trước** khi ADR được chấp nhận, nên PR của nó giữ trần
-**hai**. Packet nào muốn trần mới thì tạo revision mới theo §3.2 (*"Policy đổi làm closure thay đổi
+Ca của chính packet đọc ra đúng một câu trả lời: đặc tả `spec_hash 56a0bf28…` được commit `abc5486e`
+đưa vào lúc `2026-10-16T16:57:13Z`, và ADR này không thể land trước khi đặc tả của nó tồn tại, nên neo
+luôn trước mốc ⇒ PR của packet giữ trần **hai**. Packet nào muốn trần mới thì tạo revision mới theo §3.2 (*"Policy đổi làm closure thay đổi
 thì packet phải tạo revision và generation mới trước khi chạy tiếp"*).
 
 Vì vậy ADR này **không** sửa `ADR-0036`, `ADR-0037`, `ADR-0038`, `ADR-0041` hay đặc tả đóng băng
@@ -93,8 +100,11 @@ chép. Dòng §20 của ADR này cũng không mang con số.
 **Không bộ đếm, không cổng.** `codex_review_calls_used` không tồn tại trong mã (bảng trên), nên trần
 tám — như trần hai trước nó — chỉ được canh bằng kỷ luật đọc. Cùng họ nợ `SO-CANON-CHUA-TON-TAI`.
 
-**Không có số đo nào biện hộ con số tám.** `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:143` cho
-thấy bộ đếm này chỉ được ghi ở **2/57** biên nhận, nên kho không biết một PR thường dùng bao nhiêu lời
-gọi. Tám là **quyết định của chủ kho**; đừng khai mạnh hơn thế.
+**Không có số đo nào biện hộ con số tám.** `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:143` đếm
+**2/57** biên nhận có bộ đếm này, nhưng đó là số tệp **nhắc tên** trường: đo lại tại `c03a409`, cả 57
+tệp `ops/reviews/*.receipt.yaml` parse được và **0/57** có khoá `codex_review_calls_used` ở bất kỳ cấp
+nào — hai lần nhắc nằm trong chuỗi ghi chú `lease_ghi_chu` (cross-review lượt 1, P2
+`nham-ten-truong-voi-gia-tri-bo-dem`). Kho không có giá trị nào của bộ đếm, nên không biết một PR thường
+dùng bao nhiêu lời gọi. Tám là **quyết định của chủ kho**; đừng khai mạnh hơn thế.
 
 **Không có con trỏ tiến** từ `ADR-0036`/`0037`/`0038` tới đây; đường duy nhất là bảng §20.

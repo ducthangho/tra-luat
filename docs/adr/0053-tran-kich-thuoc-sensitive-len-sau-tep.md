@@ -29,22 +29,36 @@ xoá*. Thống nhất đơn vị nằm ngoài ADR này.
 đúng; nó chỉ cho thấy +721 dòng đã là quá lớn, và 450 nằm dưới mức ấy. Cặp số mới là **quyết định của
 chủ kho**; đừng đọc nó như một phép tối ưu.
 
-## Vượt trần vẫn phải khai lý do — và KHÔNG cổng nào canh
+## Vượt trần MỚI vẫn phải khai `nang_tran` — và KHÔNG cổng nào canh
 
-Cơ chế vượt trần của `ADR-0044` giữ nguyên: khai lý do trong spec, người giữ kho chấp nhận. `ADR-0044`
+Packet `sensitive` vượt ≤ 6 tệp hoặc ≤ 450 dòng thêm phải mang trong đặc tả (và chép vào lease) một
+khối `nang_tran` khai đủ bốn trường: `ai_nang` (chủ kho, theo thẩm quyền §2 của protocol), `can_cu`
+(vì sao không tách được, kèm số đo `git diff --numstat`), `tran_cu` (cặp trần của ADR này) và `tran_moi`
+(cặp trần xin cho packet ấy). Khối chỉ đòi khi VƯỢT; packet nằm trong trần không cần nó. Đây là cùng
+hợp đồng với trần LỜI GỌI ở `ADR-0052` và trần VÒNG ở `ADR-0048`.
+
+Hai đường của `ADR-0044` giữ nguyên bên cạnh khối ấy: dừng TRƯỚC review để revision thiết kế, hoặc khai
+lý do trong spec cho người giữ kho chấp nhận — khối `nang_tran` là hình thức của lời khai ấy. `ADR-0044`
 khai *"cổng write-set và `numstat` chạy TRƯỚC review"*, nhưng §20 ghi ADR ấy là **`0 cổng`**; ADR này
 cũng **không** có cổng nào canh ngưỡng mới. Người soạn spec, người cấp lease và reviewer phải đo
-`git diff --numstat` **bằng tay**. Ô *"trần `ADR-0044`"* trong thân PR là một lời khai về THẨM QUYỀN
+`git diff --numstat` và kiểm khối `nang_tran` **bằng tay**: đo 17:01Z 16-10-2026, khớp nguyên từ, cả
+bốn tên `nang_tran` `ai_nang` `tran_cu` `tran_moi` có **0** dòng trong `ops/lease_publish.py`. Ô *"trần `ADR-0044`"* trong thân PR là một lời khai về THẨM QUYỀN
 (`.claude/skills/soan-spec/SKILL.md` §2), nên đo lại trước mỗi lần công bố.
 
 ## Hiệu lực theo THỜI ĐIỂM ĐÓNG BĂNG — không hồi tố
 
-- **MỐC** — ngày ADR này được chấp nhận: **2026-10-16**.
-- **THỨ NEO** — `spec_hash` đóng băng của packet.
-- **Đọc ra:** đặc tả đóng băng **TRƯỚC** mốc ⇒ trần `sensitive` cũ (≤ 3 tệp / ≤ 300 dòng thêm); **TỪ
-  mốc trở đi** ⇒ trần của ADR này.
+Luật đọc **y hệt** `ADR-0052` — mốc là THỜI ĐIỂM, không phải NGÀY — chỉ thay tệp:
 
-Chính packet thi hành ADR này đóng băng đặc tả trước mốc, nên nó chịu trần cũ: write set **3** tệp.
+- **MỐC** — thời điểm committer (UTC, tới giây) của commit đầu tiên trên nhánh mặc định có chứa tệp
+  này. Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, **không** phải mốc. Đo:
+  `git log --first-parent --diff-filter=A --format='%H %cI' master -- docs/adr/0053-*.md`.
+- **THỨ NEO** — thời điểm committer của commit đầu tiên, trên bất kỳ ref nào, đưa blob đặc tả có
+  `spec_hash` của packet vào kho (`git log --all --reverse --format='%H %cI' --find-object=…`).
+- **Đọc ra:** neo **TRƯỚC** mốc ⇒ trần `sensitive` cũ (≤ 3 tệp / ≤ 300 dòng thêm); neo **SAU** mốc ⇒
+  trần của ADR này; trùng giây hoặc không đo được ⇒ trần cũ (chặt hơn, fail-closed).
+
+Chính packet thi hành ADR này có neo `abc5486e` lúc `2026-10-16T16:57:13Z`, luôn trước mốc vì ADR không
+thể land trước đặc tả của nó ⇒ trần cũ: write set **3** tệp.
 Đó là lý do nó **không** sửa `.claude/skills/soan-spec/SKILL.md`, nơi vẫn trỏ ngưỡng về `ADR-0044` —
 thêm tệp ấy là thành bốn tệp, vượt trần cũ. Đây không phải con trỏ chết (`ADR-0044` vẫn tồn tại và §20
 dẫn tới ADR này) mà là nợ, ghi dưới đây.

@@ -2120,13 +2120,29 @@ _TRUONG_CHECK_RUN = (("id", (int,)), ("name", (str,)), ("head_sha", (str,)),
 _VANG = object()
 
 
+def _cam_khoa_trung(cap: list) -> dict:
+    """Khoá trùng ở BẤT KỲ tầng nào: decoder mặc định giữ vế cuối, tức tự chọn một vế
+    của bằng chứng mâu thuẫn (`conclusion` cancelled rồi success ⇒ xanh). Cross-review #777 F01."""
+    d: dict = {}
+    for k, v in cap:
+        if k in d:
+            raise ValueError(f"khoá trùng {k!r} — bằng chứng mâu thuẫn")
+        d[k] = v
+    return d
+
+
+def _cam_hang_ngoai_json(ten: str):
+    raise ValueError(f"hằng {ten} không thuộc JSON chuẩn")
+
+
 def _doc_check_runs(duong: str) -> list[dict]:
     """Đọc tệp check-runs; mọi chỗ không chắc là `KHÔNG ĐO ĐƯỢC` + `RC_GATE`, không đoán."""
     def hong(ly_do: str) -> None:
         _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {duong}: {ly_do}")
 
     try:
-        d = json.loads(Path(duong).read_text(encoding="utf-8"))
+        d = json.loads(Path(duong).read_text(encoding="utf-8"),
+                       object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
     except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
         hong(f"không đọc được như JSON ({type(ex).__name__}: {ex})")
     trang = d if isinstance(d, list) else [d]

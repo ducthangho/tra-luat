@@ -5342,6 +5342,26 @@ _KG_CA = {
     "kg_m3_trung_id_moi_ban_phai_xanh": _kg_ca(
         {"check_runs": [_kg_run(2), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
 }
+# F01 — không để parser xoá bằng chứng mâu thuẫn hoặc nhận hằng ngoài JSON.
+for _k, _v in {"id": 2, "name": "khac", "head_sha": "cd" * 20,
+               "status": "in_progress", "conclusion": "cancelled"}.items():
+    _raw = "{" + json.dumps(_k) + ":" + json.dumps(_v) + "," + json.dumps(_kg_run(1))[1:]
+    for _slurp in (False, True):
+        _page = '{"check_runs":[' + _raw + "]}"
+        _KG_CA[f"kg_m2_khoa_trung_{_k}_{_slurp}"] = _kg_ca(
+            None, tho="[" + _page + "]" if _slurp else _page, chua=_KG_KDD)
+for _k, _v in {"check_runs": [_kg_run(2, conclusion="cancelled")], "total_count": 2}.items():
+    _page = "{" + json.dumps(_k) + ":" + json.dumps(_v) + ',"total_count":1,"check_runs":' + json.dumps([_kg_run(1)]) + "}"
+    _KG_CA[f"kg_m2_khoa_trung_{_k}"] = _kg_ca(None, tho=_page, chua=_KG_KDD)
+for _token in ("NaN", "Infinity", "-Infinity"):
+    for _nested in (False, True):
+        _value = '{"x":' + _token + "}" if _nested else _token
+        _raw = json.dumps(_KG_1)[:-1] + ',"extra":' + _value + "}"
+        _KG_CA[f"kg_m2_hang_ngoai_json_{_token}_{_nested}"] = _kg_ca(None, tho=_raw, chua=_KG_KDD)
+# F02 — một điều kiện sai, hai điều kiện kia đúng; bắt riêng luật status.
+_KG_CA["kg_m3_in_progress_success"] = _kg_ca(
+    {"check_runs": [_kg_run(1, status="in_progress")]}, chua="status='in_progress'")
+
 # M3-ket-luan — mỗi giá trị một ca: luật là danh sách CHO PHÉP `success`.
 _KG_KET_LUAN = ("skipped", "neutral", "failure", "timed_out", "action_required", "stale", None)
 for _kl in _KG_KET_LUAN:
@@ -5364,6 +5384,14 @@ CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12)]
 
 _KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
 MUTANTS.update({
+    "kg_bo_status_rieng": ('r["status"] == "completed" and r["conclusion"] == "success"',
+                           'r["conclusion"] == "success"', ["kg_m3_in_progress_success"]),
+    "kg_bo_conclusion_rieng": ('r["status"] == "completed" and r["conclusion"] == "success"',
+                               'r["status"] == "completed"', [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN]),
+    "kg_bo_hook_khoa_trung": ("object_pairs_hook=_cam_khoa_trung, ", "",
+                              [k for k in _KG_CA if k.startswith("kg_m2_khoa_trung_")]),
+    "kg_bo_hook_hang_ngoai_json": (", parse_constant=_cam_hang_ngoai_json", "",
+                                   [k for k in _KG_CA if k.startswith("kg_m2_hang_ngoai_json_")]),
     "kg_bo_sha_re": ("    if not SHA_RE.fullmatch(a.head):\n", "    if False:\n",
                      ["kg_m1_head_7_ky_tu"]),
     "kg_bo_kiem_ten_rong": ("    if any(not t.strip() for t in ten_bb):\n", "    if False:\n",

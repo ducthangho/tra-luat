@@ -70,3 +70,15 @@ thay_the_cho_note: Lease dau tien cua packet; khong co lease tien nhiem.
 xung_dot_write_set_do_luc: >-
   2026-10-16T16:5xZ ai-dang-giu: ca ba duong dan NGUOI_GIU 0 (docs/PROTOCOL_DA_PHIEN.md co 5 lease HET_HAN,
   khong lease song). DO LAI truoc khi day.
+nang_tran:
+  truc: loi_goi_codex
+  ai_nang: ducthangho
+  can_cu: >-
+    Review Rescue Checkpoint sau luot Codex 2/2; con 1 lop P2 (F02 moc-hieu-luc) da va cuc bo o 0c5e723.
+    Luot 3 CHI de xac minh lop ay va lop moi do ban va sinh ra. Chi thi:
+    https://github.com/ducthangho/tra-luat/issues/782 (comment nang_tran 16-10-2026).
+  tran_cu: 2
+  tran_moi: 3
+lease_sua_lan_cuoi: '2026-10-16T17:50Z'
+lease_sua_ghi_chu: >-
+  Lan 1: them khoi nang_tran theo lua chon cua chu kho. Khong doi write set, spec, branch, han.

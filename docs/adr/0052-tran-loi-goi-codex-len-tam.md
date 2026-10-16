@@ -66,30 +66,41 @@ Người cấp lease và reviewer phải kiểm khối `nang_tran` và số lờ
 *"không có khối ấy thì cổng đăng lease từ chối"* của `ADR-0043`: `ADR-0048` đã đo nó sai, và phép đo
 trên cho thấy nó vẫn sai.
 
-## Hiệu lực — neo vào thứ BẤT BIẾN, không dò lịch sử git; không hồi tố
+## Hiệu lực — đặc tả trích OID LAND của ADR; không hồi tố
 
-Hai bản trước của mục này dùng một mốc theo NGÀY (không phân xử được đặc tả đóng băng cùng ngày), rồi
-một mốc theo THỜI ĐIỂM COMMIT tìm bằng `git log --all --find-object` (cross-review lượt 2 tái hiện: cùng
-`spec_hash`, rebase/cherry-pick/squash rồi xoá ref gốc ⇒ đổi cũ → mới mà không có revision nào). Cả hai
-cùng một lớp: hỏi *"lúc nào"* bằng thứ phụ thuộc ref đang còn. Luật dưới đây chỉ đọc nội dung đã băm và
-OID — hai thứ không đổi khi ref bị dọn.
+Ba bản trước của mục này hỏng cùng một lớp (cross-review lượt 1–3, P2
+`moc-hieu-luc-thieu-thu-tu-trong-ngay`): mốc theo NGÀY không phân xử được đặc tả đóng băng cùng ngày;
+mốc theo THỜI ĐIỂM COMMIT dò bằng `git log --all` đổi kết quả khi ref bị dọn; điều kiện *"`base_sha`
+của lease chứa tệp ADR"* cấp trần mới từ một nhánh **chưa land**, và đổi `base_sha` là đổi trần của
+cùng một đặc tả. Gốc chung: suy *"ADR đã land chưa"* từ một thứ không chứng minh việc land. Luật dưới
+đây đòi chính bằng chứng land, và đặt lựa chọn vào nội dung đã băm của đặc tả.
 
-Trần **tám** áp cho một packet **khi và chỉ khi đủ CẢ HAI**:
+Trần **tám** áp cho một packet **khi và chỉ khi** blob đặc tả mà `spec_hash` của lease trỏ tới có
+**đúng một** dòng khớp `^tran_loi_goi_codex: ADR-0052@([0-9a-f]{40})$` (so trên byte gốc), và OID
+`<L>` bắt được thoả cả ba phép đo:
 
-1. **Đặc tả tự khai.** Blob đặc tả mà `spec_hash` của lease trỏ tới chứa một dòng đúng nguyên văn
-   `tran_loi_goi_codex: ADR-0052`. Nội dung đã băm, nên rebase, cherry-pick hay squash không thêm được
-   dòng ấy; muốn thêm phải sửa đặc tả, tức tạo revision mới với `spec_hash` mới — đúng đường §3.2
-   (*"Policy đổi làm closure thay đổi thì packet phải tạo revision và generation mới trước khi chạy
-   tiếp"*).
-2. **Base đã mang ADR.** `base_sha` ghi trong lease chứa tệp này:
-   `git cat-file -e <base_sha>:docs/adr/0052-tran-loi-goi-codex-len-tam.md` ⇒ `rc=0`. OID là bất biến;
-   phép kiểm không đi qua ref nào.
+1. `git cat-file -e <L>:docs/adr/0052-tran-loi-goi-codex-len-tam.md` ⇒ `rc=0` — `<L>` chứa ADR;
+2. `git cat-file -e <L>^1:docs/adr/0052-tran-loi-goi-codex-len-tam.md` ⇒ `rc≠0` — cha thứ nhất chưa
+   có, tức `<L>` là commit ĐƯA ADR vào;
+3. `<L>` nằm trên chuỗi first-parent của nhánh mặc định, đo trên clone **không shallow** có ref nhánh
+   mặc định vừa fetch: `git rev-list --first-parent origin/master | grep -qx <L>`.
 
-Thiếu một trong hai, hoặc **không đo được** (blob hay `base_sha` không đọc được) ⇒ trần cũ (**hai**),
-tức trần chặt hơn, fail-closed. Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, không tham gia phép đo.
+Ba phép đo cùng nhau nói: `<L>` là commit land ADR trên nhánh mặc định. PR của kho land bằng merge
+commit hoặc squash, nên OID ấy chỉ sinh ra **lúc** land — một đặc tả đóng băng trước đó không thể trích
+nó. Lựa chọn nằm trong `spec_hash`, nên `base_sha` của lease không tham gia, đổi lease không đổi trần;
+rebase hay xoá ref không đổi nội dung đã băm. Muốn đổi lựa chọn phải sửa đặc tả, tức revision mới theo
+§3.2.
 
-Ca của chính packet đọc ra đúng một câu trả lời, trên **cả hai** điều kiện: đặc tả `spec_hash 56a0bf28…`
-không có dòng khai, và `base_sha 653fef3f` không chứa tệp này ⇒ PR của packet giữ trần **hai**.
+Thiếu dòng, hai dòng trở lên, một phép đo `rc` sai, clone shallow, hoặc **không đo được** ⇒ trần cũ
+(**hai**), fail-closed. Phép đo 3 phụ thuộc ref nhánh mặc định — chấp nhận được vì nhánh ấy không bị
+viết lại lịch sử; nếu nó từng bị viết lại thì `<L>` rơi khỏi chuỗi và kết quả là trần cũ, tức chặt hơn.
+Giới hạn đã biết: land bằng **fast-forward** sẽ đưa chính commit của tác giả lên chuỗi first-parent, nên
+OID ấy có thể được biết trước; PR của kho không land kiểu ấy, nhưng nếu xảy ra thì người cấp lease phải
+kiểm tay.
+
+Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, không tham gia phép đo. Ca của chính packet đọc ra đúng
+một câu trả lời: đặc tả `spec_hash 56a0bf28…` không có dòng khai ⇒ trần mặc định **hai**. Lời gọi thực tế
+của PR ấy được nâng riêng bằng khối `nang_tran` của chủ kho (Issue #782), không phải bằng luật này.
 
 Vì vậy ADR này **không** sửa `ADR-0036`, `ADR-0037`, `ADR-0038`, `ADR-0041` hay đặc tả đóng băng
 nào: sửa chúng là viết lại một lời khai vốn đúng tại thời điểm của nó.

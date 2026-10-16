@@ -45,20 +45,20 @@ cũng **không** có cổng nào canh ngưỡng mới. Người soạn spec, ng�
 bốn tên `nang_tran` `ai_nang` `tran_cu` `tran_moi` có **0** dòng trong `ops/lease_publish.py`. Ô *"trần `ADR-0044`"* trong thân PR là một lời khai về THẨM QUYỀN
 (`.claude/skills/soan-spec/SKILL.md` §2), nên đo lại trước mỗi lần công bố.
 
-## Hiệu lực — neo vào thứ BẤT BIẾN, không hồi tố
+## Hiệu lực — đặc tả trích OID LAND của ADR; không hồi tố
 
-Luật **y hệt** `ADR-0052` (vì sao không dùng ngày hay thời điểm commit: xem mục cùng tên ở đó). Trần
-của ADR này áp cho một packet **khi và chỉ khi đủ CẢ HAI**:
+Luật **y hệt** `ADR-0052` (vì sao không dùng ngày, thời điểm commit hay `base_sha`: xem mục cùng tên ở
+đó), chỉ thay token và tệp. Trần của ADR này áp **khi và chỉ khi** blob đặc tả có **đúng một** dòng khớp
+`^tran_kich_thuoc_sensitive: ADR-0053@([0-9a-f]{40})$`, và OID `<L>` bắt được thoả cả ba:
 
-1. blob đặc tả mà `spec_hash` của lease trỏ tới chứa một dòng đúng nguyên văn
-   `tran_kich_thuoc_sensitive: ADR-0053`;
-2. `git cat-file -e <base_sha>:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md` ⇒ `rc=0`, với
-   `base_sha` lấy từ lease.
+1. `git cat-file -e <L>:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md` ⇒ `rc=0`;
+2. `git cat-file -e <L>^1:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md` ⇒ `rc≠0`;
+3. `git rev-list --first-parent origin/master | grep -qx <L>` trên clone không shallow, ref vừa fetch.
 
-Thiếu một trong hai, hoặc không đo được ⇒ trần `sensitive` cũ (≤ 3 tệp / ≤ 300 dòng thêm), fail-closed.
+Thiếu, trùng, sai một phép đo hoặc không đo được ⇒ trần `sensitive` cũ (≤ 3 tệp / ≤ 300 dòng thêm),
+fail-closed. Cùng giới hạn fast-forward như `ADR-0052`.
 
-Chính packet thi hành ADR này không thoả điều kiện nào (đặc tả `56a0bf28…` không có dòng khai; `base_sha
-653fef3f` không chứa tệp này) ⇒ trần cũ: write set **3** tệp.
+Chính packet thi hành ADR này không có dòng khai ⇒ trần cũ: write set **3** tệp.
 Đó là lý do nó **không** sửa `.claude/skills/soan-spec/SKILL.md`, nơi vẫn trỏ ngưỡng về `ADR-0044` —
 thêm tệp ấy là thành bốn tệp, vượt trần cũ. Đây không phải con trỏ chết (`ADR-0044` vẫn tồn tại và §20
 dẫn tới ADR này) mà là nợ, ghi dưới đây.

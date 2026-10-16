@@ -166,15 +166,15 @@ def merged_at(prov, goc_ten):
 
 
 def nap_yaml(yaml, byte):
-    """`safe_load` nhưng KHOÁ TRÙNG trong một mapping ⇒ lỗi (bỏ qua khoá merge `<<`, khoá không băm được để parser báo)."""
+    """`safe_load` có chốt, MỘT lần parse. Ở tầng NÚT, trước khi dựng, từ chối thứ làm dữ liệu dựng ra khác văn bản đọc được:
+    khoá merge `<<` (làm phẳng đi vòng kiểm trùng — review lượt 3) và anchor/alias (nút dùng lại: vòng, nổ kích thước).
+    Không hồ sơ nào trên master dùng chúng (đo 16-10-2026). Còn lại, khoá TRÙNG trong một mapping ⇒ lỗi (kể cả `null`)."""
     class Nap(yaml.SafeLoader):
         pass
 
     def map_khong_trung(nap, nut, deep=False):
         da = set()
-        for k, _ in nut.value:   # khoá merge nhận ra bằng TAG, không bằng giá trị: khoá `null` là khoá thật (lượt 2 F01)
-            if k.tag == "tag:yaml.org,2002:merge":
-                continue
+        for k, _ in nut.value:
             khoa = nap.construct_object(k, deep=True)
             try:
                 if khoa in da:
@@ -184,18 +184,33 @@ def nap_yaml(yaml, byte):
                 pass
         return yaml.SafeLoader.construct_mapping(nap, nut, deep)
     Nap.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_khong_trung)
-    return yaml.load(byte, Loader=Nap)
+    nap = Nap(byte)
+    try:
+        goc = nap.get_single_node()
+        da, ngan = set(), [goc] if goc is not None else []
+        while ngan:
+            n = ngan.pop()
+            if id(n) in da:
+                raise yaml.YAMLError("anchor/alias (nút dùng lại) ngoài mô hình")
+            da.add(id(n))
+            if isinstance(n, yaml.MappingNode) and any(k.tag == "tag:yaml.org,2002:merge" for k, _ in n.value):
+                raise yaml.YAMLError("khoá merge `<<` ngoài mô hình")
+            ngan += [x for kv in n.value for x in kv] if isinstance(n, yaml.MappingNode) else \
+                n.value if isinstance(n, yaml.SequenceNode) else []
+        return nap.construct_document(goc) if goc is not None else None
+    finally:
+        nap.dispose()
 
 
 def kiem_ho_so(tep, byte, goc, yaml):
     """(vi_pham, ghi_chu) trên `byte` — CHÍNH bản đã băm cho L5, không đọc tệp lần hai. Ném KhongDoDuoc cho L4."""
     try:
         du_lieu = nap_yaml(yaml, byte)
-    except yaml.YAMLError as e:
+    except (yaml.YAMLError, ValueError, TypeError, OverflowError, RecursionError) as e:   # ngày sai không nháy: ValueError
         raise KhongDoDuoc(f"parse YAML: {type(e).__name__}: {str(e).splitlines()[0] if str(e) else ''}")
     goc_ten = tep.name[: -len(DUOI)] if tep.name.endswith(DUOI) else tep.stem
     prov = tep.parent / f"{goc_ten}-provenance"
-    nut = list(duyet(du_lieu))
+    nut = list(duyet(du_lieu))   # độ sâu: loader ném RecursionError (~500 tầng) TRƯỚC bộ duyệt — đo 16-10-2026
     khai = [(d, v) for d, v in nut if isinstance(v, str) and RE_KHAI_DO.match(v)]
     maps = [(d, v) for d, v in nut if isinstance(v, dict)]
     co_pos = any("positive" in m for _, m in maps)

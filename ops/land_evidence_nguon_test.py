@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from unittest import mock
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -176,7 +177,21 @@ def c08_l4_khong_do_duoc_khong_bao_gio_dat():
     for hs in ("x: 'measured — khong nguon'\nx: ok\n", "a: {x: 'measured — khong', x: ok}\n",   # review F01 (lượt 1, 2)
                "null: 'measured — khong'\n~: ok\n", "a: {null: 'measured — khong', null: ok}\n"):
         ky(hs, {"a.json": "{}"}, 2, f"khoá YAML trùng che lời khai {hs!r}", "khoá trùng")
-    ky("a: &n {x: 1}\nb: {<<: *n, x: 2, y: 'measured — a.json'}\n", {"a.json": "{}"}, 0, "khoá merge `<<` KHÔNG phải khoá trùng")
+    for hs, ly in (("x: {<<: {a: 'measured — khong', a: ok}}\n", "merge"), ("x: {<<: {null: 'measured — k', null: ok}}\n", "merge"),
+                   ("a: &n {x: 1}\nb: {<<: *n, y: 'measured — a.json'}\n", "merge"),   # review lượt 3 F01: merge ngoài mô hình
+                   ("a: &n 'measured — khong'\nb: *n\n", "alias"), ("a: &n [*n]\n", "alias")):
+        ky(hs, {"a.json": "{}"}, 2, f"{ly} {hs!r}", "ngoài mô hình")
+    for hs in ("x: 2026-02-30\n", "pre_merge_checks: [2026-99-16T02:00:00Z]\n", "x: !!int abc\n",   # lượt 3 F04 + lồng sâu
+               "x: " + "[" * 1000 + "]" * 1000 + "\n"):
+        with cay(hs, {"readback-pr-9001.json": RB_PR}) as goc:   # đo CLI THẬT
+            r = subprocess.run([sys.executable, "-B", str(MA), "--root", str(goc)], capture_output=True, text=True)
+        bang(r.returncode == 2 and r.stdout.rstrip().endswith("TỔNG: KHÔNG ĐO ĐƯỢC"), f"YAML sai/lồng sâu {hs[:40]!r}: {r.returncode}")
+    hs = "x: [{positive: '1/1', nguon_positive: u.txt}]\n"   # lượt 3: lỗi ĐỌC nguồn L2 là KHÔNG ĐO ĐƯỢC
+    goc_doc = Path.read_bytes
+    with cay(hs, {"u.txt": "1/1"}) as goc, mock.patch.object(Path, "read_bytes", lambda self: (_ for _ in ()).throw(
+            OSError("gia")) if self.name == "u.txt" else goc_doc(self)):
+        rc, ra = kiem(nap(), goc)
+    bang(rc == 2 and "đọc nguon_positive" in ra, f"lỗi đọc nguồn L2 ⇒ rc=2: rc={rc} {ra[-200:]}")
     for hs in ("x: !!set {'measured — khong': null}\n", "x: !!omap [{a: 'measured — khong'}]\n",   # review lượt 2 F05
                "x: !!pairs [{a: 'measured — khong'}]\n", "x: !!binary bWVhc3VyZWQgLSBraG9uZw==\n"):
         ky(hs, {"a.json": "{}"}, 2, f"kiểu YAML ngoài dict/list {hs!r}", "ngoài mô hình")
@@ -248,8 +263,12 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L4_khong_do_duoc_thanh_dat", "rc = 1 if v else 2 if u else 0", "rc = 1 if v else 0", "c08"),
     ("L4_rong_thanh_dat", "    if not teps:\n        u += 1", "    if False:\n        u += 1", "c08"),
     ("F01_bo_chot_khoa_trung", "if khoa in da:", "if False:", "c08"),
-    ("F01_chan_ca_khoa_merge", 'if k.tag == "tag:yaml.org,2002:merge":\n                continue', "if False:\n                pass", "c08"),
     ("F01_null_lam_dau_bo_qua", "                if khoa in da:", "                if khoa is not None and khoa in da:", "c08"),
+    ("R3_cho_merge", 'isinstance(n, yaml.MappingNode) and any(k.tag ==', 'False and any(k.tag ==', "c08"),
+    ("R3_cho_alias", "            if id(n) in da:", "            if False:", "c08"),
+    ("R3_vo_huong_sai_traceback", "(yaml.YAMLError, ValueError, TypeError,", "(yaml.YAMLError, TypeError,", "c08"),
+    ("R3_long_sau_traceback", "TypeError, OverflowError, RecursionError)", "TypeError, OverflowError)", "c08"),
+    ("R3_loi_doc_nguon_thanh_dat", 'raise KhongDoDuoc(f"đọc nguon_positive: {e}")', "return [], []", "c08"),
     ("F05_bo_tu_choi_kieu_la", "if isinstance(nut, (set, frozenset, tuple, bytes, bytearray)):", "if False:", "c08"),
     ("L3_readback_null_bo_qua", "is None and (not so or not t.exists()):", "is None:", "c08"),
     ("F02_bo_khoa_mapping", "[{k: v} for k, v in pmc.items()] if", "list(pmc.values()) if", "c06"),

@@ -1704,6 +1704,9 @@ def _kich_ban_in(c: Ctx, codepage: str):
     # MỒ CÔI và lệnh trả rc=11, tức kịch bản codepage sẽ đo nhầm ĐƯỜNG THẤT BẠI (chỉ in stderr)
     # thay vì đường thành công. Chốt PHỦ ở cuối hàm bắt đúng chuyện này khi phép mồ côi vừa thêm.
     (r_bn / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
+    # #770: `kiem-gate` in "gate XANH trên …" lúc THÀNH CÔNG — chốt PHỦ dưới đã bắt nó.
+    cr = c.tmp / f"cp{codepage}-check-runs.json"
+    cr.write_text(json.dumps({"check_runs": [_kg_run(1, name="cổng-đủ")]}), encoding="utf-8")
 
     buoc = [
         (["where"], None),
@@ -1738,6 +1741,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
         (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
+        (["kiem-gate", "--head", _KG_HEAD, "--check-runs", cr, "--bat-buoc", "cổng-đủ"], None),
         # #338: cả hai lệnh in tiếng Việt CÓ DẤU lúc thành công. `ghi-uy-quyen` in "đã ghi
         # KHAI BÁO…", `doi-chieu-uy-quyen` in "CÓ khai báo"/"KHÔNG khai báo". Console máy
         # Việt là cp1258, nên thiếu phủ ở đây là để nguyên đúng cái bẫy mà chốt này sinh ra

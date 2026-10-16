@@ -7345,17 +7345,18 @@ def _cs_chay_t156(m, chay=None, noi=()):   # noqa: C901 — một đơn vị m�
                               ("kill-value", ValueError), ("kill-decode", UnicodeDecodeError)):
                 sen = (UnicodeDecodeError("utf8", bytes([255]), 0, 1, "x") if cls is UnicodeDecodeError
                        else cls(f"sentinel {tieu}"))
+                # #743: phép thăm dò là `Path.stat` (không còn `Path.exists`, vốn nuốt OSError từ 3.14).
                 if tieu.startswith("hoi"):
-                    kw = dict(exists=sen)
+                    kw = dict(stat=sen)
                 else:
                     kw = dict(stat=loi(PermissionError, E.EACCES), doc=loi(PermissionError, E.EACCES), kill=sen)
                 with _CsSeam([me], **kw) as s:
                     _kq, ra = L.goi(tieu, lambda: m._con_song(me), s, mong=(sen,))
-                    if tieu.startswith("hoi") and s.n_exists == 0:
-                        raise RuntimeError(f"{nhan} {tieu}: seam Path.exists khong cham - doi seam sang ham ung vien goi")
+                    if tieu.startswith("hoi") and s.n_stat == 0:
+                        raise RuntimeError(f"{nhan} {tieu}: seam Path.stat khong cham - doi seam sang ham ung vien goi")
                     L.kiem(ra is sen, tieu, "sentinel identity")
                     if tieu.startswith("hoi"):
-                        L.dem(tieu, s, hoi=1, hoi_exists=True)
+                        L.dem(tieu, s, hoi=1)
                     else:
                         L.dem(tieu, s, hoi=1, doc=1, kill=1)
         elif nhan == "B2-parse":
@@ -7530,6 +7531,57 @@ def t157_giet_cay_khi_stat_EACCES_van_tron_ven():
     if platform.system() != "Linux":
         return "bo qua: nhanh /proc chi co tren Linux"
     _cs_chay_t157(_tai_launcher_thu())
+
+
+@ca
+def r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban():
+    """#743 (py314-path-exists-nuot-oserror): `_con_song` thăm dò `/proc/<pid>/stat` bằng `Path.stat`, KHÔNG bằng
+    `Path.exists` — từ Python 3.14 `exists()` nuốt mọi OSError thành False và không qua `Path.stat`, nên t156/t157 đỏ.
+    Ca này ĐỘC LẬP phiên bản: seam `Path.exists` ném sentinel, nên gọi lại `exists()` thì ĐỎ ngay trên 3.12 của CI.
+    Phân loại errno theo đặc tả r1 Q2: ENOENT/ENOTDIR ⇒ không có tệp (không đọc, hỏi kill); ESRCH ⇒ False (không
+    đọc, không kill); OSError khác (EACCES, ELOOP, EBADF) ⇒ chưa kết luận (đọc đúng một lần)."""
+    if platform.system() != "Linux":
+        return "bo qua: nhanh /proc chi co tren Linux"
+    m = _tai_launcher_thu()
+    me = os.getpid()
+
+    def loi(cls, so):
+        return cls(so, os.strerror(so))
+
+    def goi(tieu, s, sen):
+        try:
+            return m._con_song(me)
+        except BaseException as e:   # noqa: BLE001 — sentinel của seam exists phải thành chốt, không thành traceback
+            if e is sen:
+                bang(False, f"{tieu}: _con_song cham Path.exists (sentinel thoat) - tham do phai la Path.stat")
+            raise
+
+    bang_ca = (
+        # tiểu nhãn, lỗi stat, kết quả, số lần đọc, số lần kill(pid, 0)
+        ("EACCES", loi(PermissionError, errno.EACCES), True, 1, 0),
+        ("ESRCH", loi(ProcessLookupError, errno.ESRCH), False, 0, 0),
+        ("ENOENT", loi(FileNotFoundError, errno.ENOENT), True, 0, 1),
+        ("ENOTDIR", loi(NotADirectoryError, errno.ENOTDIR), True, 0, 1),
+        ("ELOOP", loi(OSError, errno.ELOOP), True, 1, 0),
+        ("EBADF", loi(OSError, errno.EBADF), True, 1, 0),
+    )
+    for tieu, o, mong, n_doc, n_kill in bang_ca:
+        sen = RuntimeError(f"sentinel r743 exists {tieu}")
+        with _CsSeam([me], stat=o, exists=sen, kill_dem=True) as s:
+            kq = goi(tieu, s, sen)
+            bang(s.n_exists == 0, f"{tieu}: Path.exists bi goi {s.n_exists} lan")
+            bang(s.n_stat == 1, f"{tieu}: stat count {s.n_stat}")
+            bang(kq is mong, f"{tieu}: result {kq}, mong {mong}")
+            bang(s.n_doc == n_doc, f"{tieu}: read count {s.n_doc}, mong {n_doc}")
+            bang(s.n_kill == n_kill, f"{tieu}: kill count {s.n_kill}, mong {n_kill}")
+    # Tiến trình sống, không lỗi: tệp có ⇒ đọc một lần, không kill.
+    sen = RuntimeError("sentinel r743 exists song")
+    with _CsSeam([me], exists=sen, kill_dem=True) as s:
+        kq = goi("song", s, sen)
+        bang(s.n_exists == 0 and s.n_stat == 1 and s.n_doc == 1 and s.n_kill == 0 and kq is True,
+             f"song: result {kq} exists={s.n_exists} stat={s.n_stat} doc={s.n_doc} kill={s.n_kill}")
+    # Zombie THẬT + stat EACCES ⇒ đã chết (nhãn B3-zombie dùng chung với t156).
+    _cs_chay_t156(m, chay=("B3-zombie",))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -8804,7 +8856,7 @@ DOT_BIEN = [
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     # ---- wp685 (đặc tả r28 §7 B5): 54 dòng (a)–(m), mỗi dòng MỘT vị trí; (c) hai ca đích ⇒ 55 cặp.
     ('wp685_a_go_ban_va',
-     ('    try:\n        co_tep = trang_thai.exists()\n    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None   # KHÔNG kết luận: không stat được chưa có nghĩa là không đọc được\n    if co_tep:\n        # Nhánh tệp có giữ nguyên xi (Q-A.3), trừ cách giải mã (Q-A.7: latin-1, PR #688\n        # comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False\n    if co_tep is None:\n        # wp685 (zombie: cross-review lượt 1 trên PR #688) — thử đọc nội dung ĐÚNG MỘT lần,\n        # zombie vẫn phải tính là đã chết. Đọc lỗi hay nội dung hỏng ⇒ KHÔNG trả False mà rơi\n        # về os.kill(pid, 0) bên dưới (cross-review lượt 2, lượt 4: bước kill phải THỰC SỰ được\n        # gọi và quyết định). Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass\n',
+     ('    try:\n        trang_thai.stat()\n        co_tep = True\n    except (FileNotFoundError, NotADirectoryError):\n        co_tep = False\n    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None   # KHÔNG kết luận: không stat được chưa có nghĩa là không đọc được\n    if co_tep:\n        # Nhánh tệp có giữ nguyên xi (Q-A.3), trừ cách giải mã (Q-A.7: latin-1, PR #688\n        # comment 5905670017; cross-review lượt 7, lượt 8).\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False\n    if co_tep is None:\n        # wp685 (zombie: cross-review lượt 1 trên PR #688) — thử đọc nội dung ĐÚNG MỘT lần,\n        # zombie vẫn phải tính là đã chết. Đọc lỗi hay nội dung hỏng ⇒ KHÔNG trả False mà rơi\n        # về os.kill(pid, 0) bên dưới (cross-review lượt 2, lượt 4: bước kill phải THỰC SỰ được\n        # gọi và quyết định). Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass\n',
       '    if trang_thai.exists():\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            return False\n'),
      ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
     ('wp685_b_ban_rong',
@@ -8832,8 +8884,8 @@ DOT_BIEN = [
       'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except KeyboardInterrupt:\n            pass\n        except (OSError, ValueError, IndexError):\n            pass'),
      ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
     ('wp685_f_hoi_exists_lan_hai',
-     ('        co_tep = trang_thai.exists()\n',
-      '        co_tep = trang_thai.exists() and trang_thai.exists()\n'),
+     ('        trang_thai.stat()\n        co_tep = True\n',
+      '        trang_thai.stat()\n        trang_thai.stat()\n        co_tep = True\n'),
      ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
     ('wp685_g1_doc_loi_False',
      ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n        except (OSError, ValueError, IndexError):\n            pass',
@@ -9013,12 +9065,33 @@ DOT_BIEN = [
      ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
     ('wp685_m4_ESRCH_hoi_lai',
      ('    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None',
-      '    except ProcessLookupError:\n        try:\n            trang_thai.exists()\n        except OSError:\n            pass\n        return False\n    except OSError:\n        co_tep = None'),
+      '    except ProcessLookupError:\n        try:\n            trang_thai.stat()\n        except OSError:\n            pass\n        return False\n    except OSError:\n        co_tep = None'),
      ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
     ('wp685_m5_duong_moi_tach_ngoac_dau',
      ('Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"\n',
       'Khối bọc chỉ gồm phép đọc và biểu thức tách theo \')\' CUỐI.\n        try:\n            noi_dung = trang_thai.read_text(encoding="latin-1")\n            return noi_dung[noi_dung.index(")") + 2:].split()[0] != "Z"\n'),
      ['t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan']),
+    # ---- #743 (đặc tả py314-path-exists-nuot-oserror r1, Q2): mỗi chốt phân loại errno một đột biến.
+    ('r743_a_ve_lai_exists',
+     ('        trang_thai.stat()\n        co_tep = True\n',
+      '        co_tep = trang_thai.exists()\n'),
+     ['r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban']),
+    ('r743_b_ENOENT_chua_ket_luan',
+     ('    except (FileNotFoundError, NotADirectoryError):\n        co_tep = False\n',
+      ''),
+     ['r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban']),
+    ('r743_c_bo_ENOTDIR',
+     ('    except (FileNotFoundError, NotADirectoryError):',
+      '    except FileNotFoundError:'),
+     ['r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban']),
+    ('r743_d_OSError_khac_khong_tep',
+     ('    except OSError:\n        co_tep = None',
+      '    except OSError:\n        co_tep = False'),
+     ['r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban']),
+    ('r743_e_bo_nhanh_ESRCH',
+     ('    except ProcessLookupError:\n        return False\n    except OSError:\n        co_tep = None',
+      '    except OSError:\n        co_tep = None'),
+     ['r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban']),
 ]
 
 

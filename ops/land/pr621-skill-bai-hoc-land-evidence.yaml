@@ -10,7 +10,8 @@
 # bang MOT CHOT (khong do vi traceback). Pham vi tu-kiem: la co chu so trong nut `trang_thai: measured` hoac chuoi mo dau `measured`. NGOAI pham vi:
 # khoa tuong thuat (lenh, mo_ta, pham_vi, ghi_chu, dinh_chinh, nguon, readback, checkout, vai_tro, hien_vat, kiem_bang_may — xem _TUONG_THUAT); la KHONG co chu so;
 # chuoi khong mo dau bang `measured` (vd trang_thai_packet.landed_ly_do, khong_do_duoc[*].mo_ta, pre_merge_checks[0..2].moc); khoi khong gan nhan (bookkeeping,
-# uy_quyen.*, human_audit.assurance_dat/ghi_chu). Cac khoi nay chi co chot rieng cho MOT SO su that (kiem_ho_so.py), KHONG duoc --tu-kiem chung minh. Toan tu
+# uy_quyen.*, human_audit.assurance_dat/ghi_chu, quyet_dinh_chu_kho + hai readback comment-6098298825.json va pr-723.json — ba muc nay chi phu bang PHAN CHUNG AM CO DINH
+# cua --tu-kiem, khong bang doi chu so; wp741 M8). Cac khoi nay chi co chot rieng cho MOT SO su that (kiem_ho_so.py), KHONG duoc --tu-kiem chung minh. Toan tu
 # tu-kiem chi doi CHU SO: doi TU (success/OWNER/push/ci.yml) trong la measured KHONG bi thu. pre_merge_checks[0..2].{event,run_attempt,head_sha,workflow} co chot rieng.
 # MAU THAN comment quyet dinh chu kho (kiem_ho_so.py than_sai; moi muc MOT dong rieng, KHONG kem dau backtick): `Reviewed commit: <40 hex head cua PR ghi so>`;
 # ba dong `MOC-WORKFLOW-DEFINITION: chap_nhan <4 run id cach nhau dau phay>`, `RC-SO-CHI-CO-STEP-CONCLUSION: chap_nhan <...>`, `CHECKOUT-IDENTITY: chap_nhan <...>`;
@@ -124,7 +125,7 @@ environment: cloud
 operating_system: linux
 role: land_operator
 session_id: https://claude.ai/code/session_01Fd7YEcw3odAk7QKkydKycE
-do_luc: '2026-10-09T12:0xZ..2026-10-10T11:29Z (core.abbrev 7; 09-10 12:0x-14:4x = phien land; 09-10 17:11Z = cong tai cho; ai-dang-giu do lai tren head cuoi 2026-10-10T11:29Z: hai hien vat do ghi so con luu)'
+do_luc: '2026-10-09T12:0xZ..2026-10-10T19:17:51Z (core.abbrev 7; 09-10 12:0x-14:4x = phien land; 09-10 17:11Z = cong tai cho; ai-dang-giu do lai tren head cuoi #723 2026-10-10T11:29Z, roi cho PR ghi so #737 2026-10-10T19:17:51Z = lan do cuoi, xem ai-dang-giu-write-set.txt dong 1; wp741 M7 sua moc cu 11:29Z)'
 
 ung_vien:
   head_sha: 658bd0cdc56bbd3445f489dcfc571e22eee7d675

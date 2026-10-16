@@ -166,6 +166,25 @@ def c07_l3_chi_doc_readback_cua_chinh_pr():
 
 
 @ca
+def c14_cli_moi_to_hop_duong_dan():
+    """Review lượt 4 F06: root tương đối/tuyệt đối × tệp tương đối/tuyệt đối — CLI thật, cả bốn phải kiểm và ĐẠT."""
+    with cay("x: 'measured — a.json'\n", {"a.json": "{}"}) as goc:
+        rel, tuyet = f"ops/land/{TEN}", str(goc / "ops/land" / TEN)
+        for root, tep in ((".", rel), (".", tuyet), (str(goc), rel), (str(goc), tuyet)):
+            r = subprocess.run([sys.executable, "-B", str(MA), "--root", root, "--tep", tep], capture_output=True, text=True, cwd=goc)
+            bang(r.returncode == 0 and "1 ĐẠT" in r.stdout and r.stdout.rstrip().endswith("TỔNG: ĐẠT"),
+                 f"--root {root} --tep {tep}: rc={r.returncode} {(r.stdout + r.stderr)[-200:]}")
+    with cay("x: ok\n", {}) as goc:   # tên KHÔNG `pr<N>-` ⇒ mọi readback-pr-<số> mang merged_at phải cùng giá trị
+        for duong, nd in (("plat-y-land-evidence.yaml", "pre_merge_checks: ['2026-10-16T00:00:00Z']\n"),
+                          ("plat-y-provenance/readback-pr-1.json", RB_PR), ("plat-y-provenance/readback-pr-2.json",
+                                                                          RB_PR.replace("02:58:26", "01:00:00"))):
+            (goc / "ops/land" / duong).parent.mkdir(parents=True, exist_ok=True)
+            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8")
+        rc, ra = kiem(nap(), goc)
+    bang(rc == 2 and "merged_at khác nhau" in ra, f"readback mâu thuẫn ⇒ rc=2: rc={rc} {ra[-200:]}")
+
+
+@ca
 def c08_l4_khong_do_duoc_khong_bao_gio_dat():
     ky("x: [khong dong\n", {"a.json": "{}"}, 2, "YAML hỏng", "KHÔNG ĐO ĐƯỢC")
     ky("x: 'measured — readback-pr-9001.json'\n", None, 2, "provenance vắng khi có lời khai đo", "provenance")
@@ -276,6 +295,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F03_glob_chi_can_ton_tai", '(x.is_dir() if token.endswith("/") else x.is_file())]', "x.exists()]", "c02"),
     ("F04_ngay_sai_traceback", "    except ValueError as e:   # regex", "    except KeyError as e:   # regex", "c08"),
     ("L5_doc_tep_lan_hai", "du_lieu = nap_yaml(yaml, byte)", "du_lieu = nap_yaml(yaml, tep.read_bytes())", "c13"),
+    ("F06_root_khong_resolve", "goc = Path(a.root).resolve()", "goc = Path(a.root)", "c14"),
+    ("L3_readback_mau_thuan_bo_qua", "    if len(gia_tri) > 1:", "    if False:", "c14"),
     ("L5_bo_so_bam", "if hashlib.sha256(byte).hexdigest() == bam:", "if bam:", "c09"),
     ("L5_noi_danh_sach", "MIEN_TRU_CUTOVER = {\n", "MIEN_TRU_CUTOVER = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c10"),
 )

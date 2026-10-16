@@ -266,7 +266,7 @@ def main(argv=None):
     ap.add_argument("--root", default=str(ROOT))
     ap.add_argument("--tep", nargs="+", default=None, help="chỉ kiểm các tệp này (tương đối với --root hoặc tuyệt đối)")
     a = ap.parse_args(argv)
-    goc = Path(a.root)
+    goc = Path(a.root).resolve()   # MỘT hệ quy chiếu: `--root .` + `--tep /tuyệt/đối` từng ném ValueError (review lượt 4 F06)
     try:
         import yaml
     except ImportError as e:
@@ -275,7 +275,7 @@ def main(argv=None):
     teps = [goc / t for t in a.tep] if a.tep else sorted((goc / THU_MUC).glob("*" + DUOI))
     n = m = k = v = u = 0
     for tep in teps:
-        nhan = tep.relative_to(goc).as_posix() if _trong_goc(tep, goc) else str(tep)
+        nhan = tep.resolve().relative_to(goc).as_posix() if _trong_goc(tep, goc) else str(tep)
         try:
             byte = tep.read_bytes()
         except OSError as e:

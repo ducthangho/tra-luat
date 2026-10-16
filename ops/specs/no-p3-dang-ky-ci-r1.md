@@ -35,7 +35,7 @@ công cụ giả rỗng. Mục `MOI` chèn bằng cách chép NGUYÊN dòng 52 r
 a = tệp test sống trên cây, b = mục trong sổ.
 Quy ước đơn vị và ngày của tệp này: mọi mốc `hh:mm(:ss)Z` là UTC ngày 15-10-2026 trừ chỗ ghi ngày khác (đo 01:51Z 16-10-2026 trên bản tại `11134f2`: 27 trên 33 mốc không kèm ngày, tái lập ở review lượt 7 bằng quy tắc: không có `dd-mm-yyyy` hay `yyyy-mm-dd` trong 28 ký tự trước hoặc sau mốc); `do` = số mục `MOI`
 bị `chay_moi` chấm ĐỎ (giá trị hàm trả về; đơn vị: mục); `541/541/541` (ô `depends_on` (3)) = số nhánh trên máy chủ / `refs/heads/*` / `refs/remotes/origin/*` (đơn vị: nhánh);
-`MOI_WINDOWS` 1 và `CACH_LY` 0: đơn vị mục; `1025/1025`: đơn vị ca phản chứng của `phan_chung()`. `k dòng thêm tay` ở các mục "Vá sau review" = độ dài chính mục, từ dòng tiêu đề `## Vá sau review lượt N` đến dòng trống cuối mục, kể cả hai dòng ấy và mọi dòng trống ở giữa (đơn vị: dòng; bằng số dòng `>` của `diff` giữa bản trước vá đã áp HINT và bản sau; đo 16-10-2026 tại `5bcf9b0`: lượt 2 = 11, lượt 3 = 11, lượt 5 = 9, lượt 6 = 9; không kể dòng trống thì ra 8, 9, 7, 7).
+`MOI_WINDOWS` 1 và `CACH_LY` 0: đơn vị mục; `1025/1025`: đơn vị ca phản chứng của `phan_chung()`. `k dòng thêm tay` ở các mục "Vá sau review" = độ dài chính mục, từ dòng tiêu đề `## Vá sau review lượt N` đến dòng trống cuối mục, kể cả hai dòng ấy và mọi dòng trống ở giữa (đơn vị: dòng; bằng số dòng `>` của `diff` giữa bản trước vá đã áp HINT và bản sau; đo 16-10-2026 tại `5bcf9b0`: lượt 2 = 11, lượt 3 = 11, lượt 5 = 9, lượt 6 = 9; không kể dòng trống thì ra 8, 9, 7, 7). Quy tắc cho MỌI số đếm trong tệp này: có đủ ba phần — tập (kèm commit hoặc lệnh), quy tắc chọn, lệnh hoặc công thức; số đếm CHÍNH tệp này (số bản, số commit) hay một clone tạm của phiên review (số ref) KHÔNG ghi thành chữ số, vì đổi mỗi lần vá — chỉ ghi lệnh đo (`git log --format=%H -- <tệp>`, `git for-each-ref`); số nào không chống đỡ một quyết định hay một tiêu chí thì bỏ; số về hiện vật ngoài kho (VERDICT, HINT) đi kèm băm sha256 của hiện vật ấy. Câu "hai tệp KHÔNG có trong kho" ở các mục "Vá sau review" khẳng định đúng phạm vi phép đo ghi trong mục (các mục cây của commit nêu); đo rộng hơn — băm mọi blob của kho (`git cat-file --batch-all-objects --batch`) — ra 0 trùng cho mọi băm VERDICT và HINT lượt 1–7 ghi trong tệp này (đo 16-10-2026 tại `692c661`).
 
 | ID | trạng thái | giờ đo | kết quả |
 |---|---|---|---|
@@ -105,7 +105,7 @@ của `ĐĂNG KÝ` BẰNG NHAU mà cổng vẫn ĐỎ — một phép đo chỉ 
   Lease r11 của #748 hết hạn `2026-10-16T04:27:21Z` (ô `depends_on` (1)): sau mốc ấy (3) có thể ra rc 0 kể cả khi #748 chưa land. ĐỎ khi (1) hoặc (2) không rc 0.
 - **C5 (thứ tự land):** trên một base THIẾU hai tệp test ⇒ S3 (`23/25`, rc 1) — đây là phép đo chứng minh #763 không
   được vào trước #752. Tiêu chí lúc cấp và lúc land: `git cat-file -e <base>^{commit}` rc 0 (đo được), rồi `git cat-file -t <base>:<tệp test>` in `blob` cho cả hai tệp (rc 0 của
-  `git cat-file -e` chưa đủ: thư mục cũng rc 0); tệp vắng ⇒ rc 128 ⇒ ĐỎ; `<base>` không tồn tại cũng rc 128 (đo 01:51Z 16-10-2026: cùng dạng thông điệp "does not exist") ⇒ KHÔNG ĐO ĐƯỢC, không phải "vắng".
+  `git cat-file -e` chưa đủ: thư mục cũng rc 0); tệp vắng ⇒ rc 128 ⇒ ĐỎ; `<base>` không tồn tại cũng rc 128 (SHA đủ 40 hex không tồn tại ra cùng dạng thông điệp "does not exist" như tệp vắng; SHA rút gọn không tồn tại hoặc tên ref không tồn tại ra "invalid object name"; đo lại 16-10-2026 tại `c522c17`, cả ba đều rc 128 — nên chạy `git cat-file -e <base>^{commit}` TRƯỚC và đừng phân biệt "vắng" với "base không tồn tại" bằng thông điệp) ⇒ KHÔNG ĐO ĐƯỢC, không phải "vắng".
 - **C6 (CI thật):** `gate-registry` xanh trên head gộp (Ubuntu; thêm Windows nếu PR gắn nhãn `windows` hoặc
   `workflow_dispatch`): log bước `test registry` có `CI_DANG_KY ops/kiem_ho_so_land_test.py: ĐẠT`,
   `CI_DANG_KY ops/kiem_nhan_hint_test.py: ĐẠT`, `CI_DANG_KY_THOI_GIAN` có một mục cho mỗi khoá `MOI` (11 nếu base thật
@@ -154,12 +154,13 @@ của `ĐĂNG KÝ` BẰNG NHAU mà cổng vẫn ĐỎ — một phép đo chỉ 
 - Hình dạng tệp sổ sau khi #748 land (nhánh `0daeb47` mới là bản thi hành r9; lease r11 chưa có head thi hành nào trên
   máy chủ lúc 23:29:24Z) — `depends_on` (5) đo lại.
 - `gate-ops` (C8): phiên vá KHÔNG đo lại; số trong C8 là của review lượt 1.
-- Lời khai về quyết định chủ kho và về lease ngoài `cay-kho`: "chưa lease nào neo đặc tả này" (mục lượt 1; đo 16-10-2026: `git grep -l -F` bảy băm sha256 của các bản đặc tả này, `no-p3-dang-ky-ci`, `issues/763` và `#763` trong `ops/leases` của từng ref ra 0 trên 80 ref của `cay-kho`, trong đó 37 là `refs/remotes/origin/*`; máy chủ có 541 nhánh lúc 23:30:23Z 15-10 ⇒ phần còn lại KHÔNG ĐO ĐƯỢC),
-  "Vòng vá P3 thêm thứ 1/2 chủ kho cho (16-10)" (mục lượt 4) và "chủ kho đọc chặt: lời khai sai đo được là P2" (mục lượt 6): neo là phiên điều phối `session_01CSM7GNazhN6uGJb4v1TqBT` (lời khai trong phiên), chưa có id comment của chủ kho.
+- Lời khai về quyết định, phân hạng hay lời của chủ kho — MỌI câu có chữ "chủ kho" trong các mục "Vá sau review lượt N", kể cả mục chưa viết: neo là phiên điều phối `session_01CSM7GNazhN6uGJb4v1TqBT` (lời khai trong phiên), chưa có id comment của chủ kho.
+- Lời khai về Issue, lease và nhánh ngoài kho. (a) "chưa lease nào neo đặc tả này" (mục lượt 1): đo 16-10-2026, `git grep -l -F` băm sha256 của MỌI bản của tệp này tính đến `692c661` (`git log --format=%H 692c661 -- ops/specs/no-p3-dang-ky-ci-r1.md`; mỗi bản `git show <commit>:ops/specs/no-p3-dang-ky-ci-r1.md | sha256sum`), `no-p3-dang-ky-ci`, `issues/763` và `#763` trong `ops/leases` của từng ref ra 0 trên mọi ref (`git for-each-ref`) của MỘT clone cục bộ do phiên review dựng — số ref của clone khác sẽ khác nên không ghi ở đây; máy chủ có 541 nhánh lúc 23:30:23Z 15-10 ⇒ phần clone ấy chưa phủ KHÔNG ĐO ĐƯỢC; bản sau `692c661` (kể cả bản neo vào lease) đo lại lúc cấp lease.
+  (b) "`.github/workflows/ci.yml` và `ops/ci_duong_nhanh_test.py` thuộc write set #748" (mục "Ngoài phạm vi", C6, C8): đối chiếu một phần — bản thi hành r9 `0daeb47` đổi cả hai tệp (đo 16-10-2026: `git diff --name-only $(git merge-base c522c17 0daeb47) 0daeb47`); write set của lease r11 trên máy chủ KHÔNG ĐO ĐƯỢC.
 
 ## Vá sau review lượt 1
 
-Nguồn: verdict `changes_requested` lượt 1 (`reviewed_sha` `11134f2`, `spec_sha256` `9791add6…c031d`; 0 P1 · 2 P2 · 9 P3),
+Nguồn: verdict `changes_requested` lượt 1 (`reviewed_sha` `11134f2`, `spec_sha256` `9791add6…c031d`; 0 P1 · 2 P2 · 9 P3; VERDICT sha256 `864586fb0177ea1ba549ce6a40150928ad87b757cbea4fbb954de203051bfa5a`, HINT sha256 `db479a3beb2bfb75525732e1e571cce6119ff1fb9cee9236e3df0b9edd44fe78`; hai tệp KHÔNG có trong kho — thứ định danh là băm),
 kèm `HINT.patch` 11 hunk — áp bằng `patch -p0 --fuzz=0` (rc 0, 11/11 hunk), rồi chỉnh tay những chỗ ghi dưới. Lượt ấy do
 subagent Claude chạy (cùng nhà cung cấp với executor đề xuất) nên không thay review chéo mà lớp `sensitive` đòi. Sửa tại
 chỗ, không tăng `revision`: chưa lease nào neo đặc tả này.
@@ -239,4 +240,13 @@ Review lượt 7 (`approve, 0 P1 · 0 P2 · 2 P3; chủ kho xếp lớp so-dem-t
 `5bcf9b0`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
 (`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay). 2 lớp:
 `loi-khai-rong-hon-hoac-ngoai-phep-do` · `so-dem-thieu-quy-tac-dem`.
+
+## Vá sau review lượt 8
+
+Bản trước vá: commit `692c661`, sha256 `1646f2facc0166e53e274551c7b33b91f6b7547fc7a59d9685def069c03803b1` (`git show 692c661:ops/specs/no-p3-dang-ky-ci-r1.md` ra đúng băm này).
+Review lượt 8 (`changes_requested, 0 P1 · 1 P2 · 3 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `692c6610f9f732657da92e86c213384abca1c867`; VERDICT sha256 `1b23762704312e01b4e5e10842e50f9f32d193d82ad187a5f57504a7af099eba`, HINT sha256 `3643dd39d30bb65cdeca0d633fdbbaae539563c2e219c70a032cbaca20f2cdc5`; hai tệp KHÔNG có trong kho — đo 2026-10-16 ở
+`692c661`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay). 4 lớp:
+`c5-thong-diep-git-chi-dung-voi-sha-day-du` · `loi-khai-rong-hon-hoac-ngoai-phep-do` · `so-dem-thieu-quy-tac-dem` · `va-luot-1-hien-vat-ngoai-kho-khong-bam`.
 

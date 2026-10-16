@@ -1,0 +1,2 @@
+may_chu=549 cuc_bo=549 thieu=0 (ls-remote --heads vs for-each-ref, sau fetch +refs/heads/*)
+lan dau rc=12 NHANH_CUC_BO_TUT_SAU master -> chua: git branch -f master refs/remotes/origin/master

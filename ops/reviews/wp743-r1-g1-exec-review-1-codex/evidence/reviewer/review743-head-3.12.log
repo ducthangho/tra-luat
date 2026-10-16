@@ -1,0 +1,16 @@
+moi truong: pid=8 pgid=1 sid=1 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026532376] init=codex
+nhom tien trinh: da tach sang session moi (pgid=8)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+  BO QUA r345_chan_socket_that_ma_than_hook_van_chay_dung: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_cac_phep_do_cuc_bo_van_dung: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_lop_tham_import_van_co_rang: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r347_tham_import_van_song_tren_python_truoc_310: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r348_dot_bien_bo_isidentifier_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  HONG r09_run_json_giu_ba_trang_thai_probe: run.json khong giu ba trang thai: {'DO', 'DAT', 'KHONG_DO_DUOC'}
+  HONG r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh: luot 0 rc=1: 
+  HONG r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: khong co chi thi ma cung khong dat moc — hook se chay pip moi luot
+
+184/187 ca DA CHAY QUA (tong 196, bo qua 9, hong 3) - KHONG DU: 9 ca BO QUA, chua do gi

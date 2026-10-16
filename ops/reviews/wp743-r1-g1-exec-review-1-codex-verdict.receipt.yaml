@@ -1,0 +1,108 @@
+# BIEN NHAN GIAO HANG — review THI HANH luot 1 cua packet #743 (PY314-PATH-EXISTS-NUOT-OSERROR r1, lease g1), PR #765,
+# merge e0273d3. Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run 2b102bb7` tren 80e0fac. `approve`
+# 0/0/0. Tep verdict la BAN SAO NGUYEN BYTE cua ops/reviews/wp743-r1-g1-exec-review-1-codex/VERDICT.md (thu muc ay giu
+# run.json, PROMPT.md, evidence reviewer va TAI_LAP.sh). Ghi so boi CHINH phien executor/land operator
+# session_017khPoiSXW9Yvefabg6MWaH — phien ay KHONG viet verdict, chi dung sandbox va goi CLI.
+# Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-16 · (b) THUAT LAI · KHONG_DO_DUOC.
+# Lap ra de dong finding P2 cua Codex connector tren PR #771 (review 5543182528, comment 4291017972).
+
+schema_version: 2
+receipt_id: wp743-r1-g1-exec-review-1-codex-812ebb22
+kind: review_delivery_receipt
+packet_id: py314-path-exists-nuot-oserror
+packet_issue: 743
+mission_issue: 743
+target_pull_request: 765
+land_merge_commit: e0273d31aba78b014aa89297f32ff86f9daf0277
+revision: 1
+generation: 1
+lease_id: wp743-r1-g1-claude-20261016
+spec_path: ops/specs/py314-path-exists-nuot-oserror-r1.md
+spec_hash: e2121dc07571edb24bf410badccf88d0d35a3d1ddba1f1a490ab378b607d8519
+spec_ghi_chu: '(a) sha256 blob spec = spec_hash lease g1 = dong "Kiem bam" trong VERDICT.md (reviewer tu do).'
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho (codex CLI, executor Claude) va verdict `approve`, nhung KHONG khai cross_approved: (1) model thuc chay
+  KHONG_DO_DUOC — codex khong xuat modelUsage; (2) checkout duoc review KHONG bi cuong che read-only (caveat
+  CHECKOUT-GHI-DUOC). Assurance land cua packet la human_audited (uy quyen 6207001889), khong dua vao bien nhan nay.
+verdict: approve
+verdict_nguon: '(a) dong 3 tep `verdict: approve`; dong 4 `P1=0, P2=0, P3=0`'
+verdict_path: ops/reviews/wp743-r1-g1-exec-review-1-codex-verdict.md
+verdict_sha256: 812ebb2254fa0df25a82529c1c27ffb9c64df074b3ac847cd0d78b28e763853e
+verdict_bytes: 8628
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/wp743-r1-g1-exec-review-1-codex/VERDICT.md, chep nguyen byte tu thu muc ra cua reviewer
+  (cmp khop); tep phang nay la ban sao `cp` cua no, cmp khop, cung sha256.
+hint_ghi_chu: '(a) Khong co HINT.patch: verdict approve, 0 finding.'
+reviewed_sha: 80e0fac0a4ab8c74486cf3bab1a73e1dec600994
+reviewed_tree: a8474ba1b581ed042f2c82cbc39e12f2526650c4
+reviewed_sha_nguon: >-
+  (a) dong 1 tep verdict `Reviewed commit:`; `git rev-parse 80e0fac^{tree}` = reviewed_tree; `git merge-base
+  --is-ancestor 80e0fac origin/master` rc 0.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/43899d792e0ff7717a5792edadc14fd67aca9b62/ops/reviews/wp743-r1-g1-exec-review-1-codex-verdict.md
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/pull/765#issuecomment-6206976422
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim commit 43899d7 cua nhanh claude/bookkeeping-743-land — commit CHI mang ban phang verdict; bien
+  nhan di o commit sau. evidence_ban_chieu: ban chieu do phien executor dang bang `gh api` (performed_via_github_app = claude, readback trong
+  ops/land/pr765-wp743-provenance/readback-comment-6206976422.json). Than chua VERDICT.md nguyen van trong <details> va
+  sha256 cua no; readback khop byte phan da gui.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 4 tep verdict'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 2b102bb761ad4950bc5cdd1cbccbddc7
+  run_json: ops/reviews/wp743-r1-g1-exec-review-1-codex/run.json
+  run_json_ghi_chu: '(a) ma_thoat 0, thoi_luong_giay 406.363, trang_thai xong, head 80e0fac, prompt_sha256 2052f2a8…'
+  cli: 'codex-cli 0.163.0, `codex exec --skip-git-repo-check -s workspace-write -C <thu muc ra>` (a, truong lenh run.json)'
+  model_yeu_cau: KHONG_DO_DUOC
+  model_da_chay: KHONG_DO_DUOC
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login comment 6206976422; performed_via_github_app = claude (phien executor dang, khong phai chu kho tay)'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+
+independent_from_executor_session: true
+independent_ghi_chu: >-
+  Tien trinh codex rieng, context rieng (prompt tu chua, khong fork context executor); KHONG phai phien Claude Code rieng.
+review_axes: [spec, standards_security]
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) reviewed_sha 80e0fac la to tien master. Tep verdict/bien nhan nam tren nhanh claude/bookkeeping-743-land, CHUA
+    la to tien master luc ghi so; len trung_binh khi PR #771 merge bang merge commit.
+
+verdict_usage_caveats:
+  - id: CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY
+    muc: P2
+    mo_ta: >-
+      VERDICT.md va ban dau ho so land ghi "read-only", nhung checkout review nam duoi /tmp ma sandbox codex
+      workspace-write cho ghi /tmp (reviewer tu `cp -a` ra /tmp), va probe `ghi` cua launcher ghi-doc-xoa thanh cong tren
+      workspace. Read-only chi la CHI THI, khong cuong che. Do sau luot (a, 2026-10-16T05:21Z, output luu o
+      ops/land/pr765-wp743-provenance/do-checkout-review-sau-luot.txt): HEAD van 80e0fac, `git status --porcelain --ignored` 0 dong — nhung anh chup diem cuoi khong loai tru ghi-roi-hoan-nguyen. Lan sau: checkout
+      ngoai vung ghi duoc cua sandbox, hoac sandbox read-only + thu muc ra rieng.
+  - id: DRIVER-DO-DOC-CUNG-CAY-TAM
+    muc: P3
+    mo_ta: >-
+      evidence/reviewer/{measure,semantics,pid_collision}.py doc cung /tmp/review743-{head,base}, khong co trong kho.
+      Dung lai bang TAI_LAP.sh cung thu muc. Do (a, 2026-10-16, log luu o wp743-r1-g1-exec-review-1-codex/tai-lap-*.log): sau TAI_LAP.sh,
+      semantics.py (3.13) khop log reviewer; measure.py (3.13) 61 KILL_CHOT, FAILURES 0, khop measure-3.13.log TRU mot PID
+      trong thong diep SIGKILL ([909] so voi [28]).
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256); comment 6206976422 chi la ban chieu.'

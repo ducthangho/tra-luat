@@ -692,7 +692,7 @@ thấy. Cùng gốc với "danh sách CẤM không bao giờ đủ", ở dạng 
 
 - Reviewer vẫn không có quyền ghi vào nhánh packet, không push ref hint vào kho.
 - Đường ra khỏi `reviewing` vẫn chỉ là verdict của reviewer khai báo (packet_loop đã cưỡng chế — giữ nguyên).
-- Trần 2 lượt Codex/PR, các bộ đếm §12, và mức assurance theo class không đổi.
+- Trần lượt Codex/PR (con số ở `ADR-0052`), các bộ đếm §12, và mức assurance theo class không đổi.
 - `same_provider_approved` vẫn không thay `cross_approved` cho class `sensitive`.
 
 `model_reviewer_identity` và `github_submitter_identity` là hai trường độc lập. Actor chép hoặc đăng output không
@@ -710,9 +710,9 @@ Mặc định vận hành khi quota Codex hữu hạn: Claude Code `opus` với 
 dành ít nhất 70% ngân sách Executor dự kiến cho Claude và đặt trần Codex Executor ở 30%; đây là ceiling, không phải
 chỉ tiêu phải tiêu. Codex chỉ nhận Packet `routine`/`systemic` nhỏ, đóng và độc lập khi phần ngân sách review đã
 được reserve; tỷ lệ thực tế có thể là 0%. PR do Codex code phải được phiên Claude mới độc lập hoặc human review.
-Codex vẫn là Reviewer read-only trên exact PR head cho Packet giá trị hoặc rủi ro cao. Mỗi PR được dùng tối đa hai lượt Codex:
-một review đầu và một rereview sau khi Executor gom bản vá. Lượt hai chưa approve phải chuyển sang checkpoint
-tách phần đã ổn hoặc xem lại thiết kế, không tiếp tục gọi Codex theo quán tính. Packet thường có thể fallback
+Codex vẫn là Reviewer read-only trên exact PR head cho Packet giá trị hoặc rủi ro cao. Số lượt Codex tối đa mỗi PR
+và điều kiện cấp từng lượt sau lượt đầu ở `ADR-0052` (protocol không chép con số). Hết trần mà chưa approve thì
+chuyển sang checkpoint tách phần đã ổn hoặc xem lại thiết kế, không tiếp tục gọi Codex theo quán tính. Packet thường có thể fallback
 sang phiên Claude mới độc lập với nhãn `same_provider_approved` hoặc sang `human_audited`; phạm vi nhạy cảm vẫn
 phải chờ Codex cross-review hoặc human audit.
 
@@ -725,7 +725,8 @@ chỉ override bằng quyết định có audit.
   launcher hoặc gate lifecycle, migration dữ liệu và LIVE adapter. Phải có Codex `cross_approved` hoặc
   `human_audited`; hết quota mà chưa có human thì pause.
 - `systemic`: protocol/schema/harness dùng chung hoặc enabler ảnh hưởng ít nhất ba downstream Packet/consumer.
-  Dùng Codex cho review đầu; chỉ cấp lượt hai khi còn P0/P1, finding cắt ngang hoặc cần xác minh lại. Trường hợp
+  Dùng Codex cho review đầu; mỗi lượt sau lượt đầu chỉ cấp khi còn P0/P1, finding cắt ngang hoặc cần xác minh
+  lại (luật chung cho mọi class ở `ADR-0052`). Trường hợp
   khác fallback sang phiên Claude mới độc lập hoặc human audit đúng nhãn.
 - `routine`: thay đổi cô lập, docs hoặc test/report không đổi authority/security boundary. Mặc định dùng phiên
   Claude mới độc lập hoặc human; Codex chỉ dùng khi dispatcher/human nâng lớp có audit.
@@ -1120,13 +1121,13 @@ Human/dispatcher có thể reroute bằng generation mới nhưng không hồi s
 Packet Spec hoặc Mission Plan sai, phải đi qua Packet revision hoặc Mission Change Request; không thêm cờ nới bí
 mật. Việc mới phát hiện trong phiên chỉ được tiếp tục tại chỗ khi nó là substep cần thiết trong spec hiện hành.
 
-Hai lượt Codex review trên cùng PR là một stop condition riêng của review budget. Review Rescue Checkpoint được
+Trần lượt Codex review trên cùng PR (`ADR-0052`) là một stop condition riêng của review budget. Review Rescue Checkpoint được
 kích hoạt khi chạm trần này hoặc khi PR chạm trần vòng review canon của `ADR-0043` mà chưa approve. Chạm checkpoint
 không tự biến Packet thành thất bại nội dung và không cho phép gọi thêm bằng prompt/phiên khác để lách trần.
 
 State giữ riêng `codex_review_calls_used`, `codex_executor_calls_used` và `review_rounds_used`.
 `codex_review_calls_used` tăng khi launcher có bằng chứng lời gọi review đã bắt đầu sinh output/token, kể cả timeout
-hoặc output sai schema; tối đa hai trên một PR. Lỗi preflight, permission denial hoặc rate-limit trước khi model
+hoặc output sai schema; trần trên một PR theo `ADR-0052`. Lỗi preflight, permission denial hoặc rate-limit trước khi model
 sinh output không tăng bộ đếm này. `codex_executor_calls_used` thuộc executor ceiling 30% và không vay/hoàn review
 cap. `review_rounds_used` chỉ tăng khi verdict qua schema, exact-SHA và receipt validation. Output sai schema
 fail-closed và không tự gọi lại; human chỉ được lập receipt có audit từ raw output bất biến khi verdict và SHA
@@ -1484,21 +1485,23 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0033` | Durable inbox và reconciler | Accepted | có nhắc: `packet_loop.py`×3 |
 | `ADR-0034` | Change-control, review độc lập và thẩm quyền land | Accepted | có nhắc: `lease_publish.py`×10 · `packet_loop.py`×11 |
 | `ADR-0035` | Điều phối bền vững và selftest phân tầng | Accepted | chưa đo |
-| `ADR-0036` | Claude Executor mặc định, Codex review theo rủi ro | Superseded một phần bởi ADR-0041 | có nhắc: `packet_loop.py`×29 (`RC_PROVIDER`) |
-| `ADR-0037` | Review Rescue Checkpoint và tách Stable Slice | Accepted | **0 cổng** |
-| `ADR-0038` | Review Class fail-closed và phân bổ quota Codex | Accepted | **0 cổng** — `review_class` khai 10/49 lease |
+| `ADR-0036` | Claude Executor mặc định, Codex review theo rủi ro | Superseded một phần bởi ADR-0041; con số trục LỜI GỌI **đã bị thay** bởi `ADR-0052` (2026-10-16) | có nhắc: `packet_loop.py`×29 (`RC_PROVIDER`) |
+| `ADR-0037` | Review Rescue Checkpoint và tách Stable Slice | Accepted — con số lượt Codex của nó **đã bị thay** bởi `ADR-0052` (2026-10-16) | **0 cổng** |
+| `ADR-0038` | Review Class fail-closed và phân bổ quota Codex | Accepted — điều kiện cấp *"lượt hai"* của `systemic` **đã mở rộng** sang mọi lượt sau lượt đầu, mọi class, bởi `ADR-0052` (2026-10-16) | **0 cổng** — `review_class` khai 10/49 lease |
 | `ADR-0039` | Thin Orchestration và ngưỡng promote auto-dispatch | Accepted | **0 cổng** |
 | `ADR-0040` | Tách Model Reviewer Identity khỏi GitHub Submitter Identity | Accepted | **0 cổng** |
 | `ADR-0041` | Ngân sách Executor Claude tối thiểu 70%, Codex tối đa 30% | Accepted | có nhắc: `launcher.py`×22 |
 | `ADR-0042` | Deadline wall-clock và working-state evidence | Accepted | có nhắc: `launcher.py`×11 · `gate_lifecycle.py`×3 |
 | `ADR-0043` | Trần vòng review canon là HAI, và nó chỉ có một chỗ ở | Accepted — con số trục VÒNG **đã bị thay** bởi `ADR-0048` (2026-09-12); ba trục, trần độc lập, `nang_tran` và luật một-chỗ-ở vẫn hiệu lực | **0 cổng** — `so-canon` chưa tồn tại |
-| `ADR-0044` | Ngưỡng kích thước packet, neo từ số đo của chính kho | Accepted | **0 cổng** |
+| `ADR-0044` | Ngưỡng kích thước packet, neo từ số đo của chính kho | Accepted — cặp số class `sensitive` **đã bị thay** bởi `ADR-0053` (2026-10-16); trần packet thường vẫn hiệu lực | **0 cổng** |
 | `ADR-0045` | Đảo vai executor/reviewer là NGOẠI LỆ CÓ VẾT, không phải mặc định mới | Accepted | **0 cổng** |
 | `ADR-0046` | Tác giả xuyên suốt, reviewer mới mỗi lượt, cắt phiên ở biên packet | Proposed | **0 cổng vận hành**; `adr-song` chỉ canh đăng ký/trạng thái |
 | `ADR-0047` | Nguồn tin cậy cho cổng đọc lease: danh tính ghim, hồ sơ tiến trình, toàn vẹn object | Proposed | **0 cổng** (đo 08-09-2026, `origin/master` `585c7d5`: chưa có adapter/digest/băm object); `adr-song` chỉ canh đăng ký/trạng thái |
 | `ADR-0048` | Trần trục VÒNG nâng theo chỉ thị chủ kho 12-09-2026, thay số của `ADR-0043`; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — `so-canon` vẫn chưa tồn tại (nợ cùng tên) |
 | `ADR-0049` | Cổng hai nền trước phát hành, không phải mỗi lần land | Accepted | có nhắc: `ci.yml` · `deploy-package.*` |
 | `ADR-0050` | `cross_approved` neo vào họ model, không vào hãng công cụ; ba mức bằng chứng model | Accepted | `ops/bien_nhan_v2.py` (`_NEO_LUAT_CHEP_TAY` + chốt tách họ model) |
+| `ADR-0052` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 16-10-2026, thay số của `ADR-0036`/`0037`; lượt sau lượt đầu phải có lý do; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — `codex_review_calls_used` không có bộ đếm trong mã |
+| `ADR-0053` | Trần kích thước packet `sensitive` nâng theo chỉ thị chủ kho 16-10-2026, thay cặp số `sensitive` của `ADR-0044`; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

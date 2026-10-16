@@ -21944,7 +21944,11 @@ def run() -> int:
         # `scripts/tl_test_fragments_bundled.py` đã có sẵn trong gói, chỉ đổi băm. Ba PR worker được merge riêng
         # lẻ nên master đỏ `release-verify --strict` giữa chừng — đúng lý do protocol §9 để manifest cho phiên land.
         # Cây thật = 186 + 75 = **261**; trần Package 200 còn 14 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 261
+        # KÊ KHAI SLOT (bookkeeping land WP766 — PR #772, merge e03d4bf): gói 186 → **187**. Thêm đúng MỘT mảnh
+        # changelog `changelog.d/wp-766.md`, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới. PR worker
+        # thêm mảnh mà không kê manifest nên master đỏ `release-verify --strict` (gate 38861735146) — cùng hình dạng WP725-727.
+        # Cây thật = 187 + 75 = **262**; trần Package 200 còn 13 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 262
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 75
@@ -21988,10 +21992,11 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 186 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
-            # changelog.d — ke khai slot day du o r291_docs_ngoai_goi).
+            # RATCHET: goi giu 187 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
+            # r291_docs_ngoai_goi).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 186
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

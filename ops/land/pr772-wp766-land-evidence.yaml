@@ -1,0 +1,159 @@
+# HO SO LAND — packet #766 wp766 r1 (lease g1), ma qua PR #772. Khuon: ops/land/pr765-wp743-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (e03d4bf). `landed: false` — `landed` chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge
+# bang merge commit (tien le #678 / #722 / #765). "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# Gate push master tren e03d4bf DO (release-verify strict) — PR ghi so nay mang ban sua manifest theo uy quyen chu kho
+# (xem sua_gate_master). Gate master phai XANH sau khi PR nay merge thi moi duoc goi la landed.
+# NHAN: measured = do trong phien land/ghi so (lenh/tep ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu
+# cua luot review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr772-wp766-provenance/. Moi phep do REST: `gh api <duong dan>` (GET) qua proxy phien.
+
+schema_version: 1
+mission_id: gh-766
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_014pXTWd1wrzGF1X4LdwzHdn
+input_packet_generations:
+  - {packet_issue: 766, packet_id: wp766, revision: 1, generation: 1, lease_id: wp766-r1-g1-claude-20261016}
+authorized_head_sha: 701f41c686cef8456d43528ab9556a6b867cd7d6
+authorized_head_tree: 861df62ee0c17abf423908c5f41ba59b2604fdb4
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/772#issuecomment-6209427062
+land_operator: 'claude (phien session_014pXTWd1wrzGF1X4LdwzHdn), merge qua MCP merge_pull_request bang token tai khoan ducthangho'
+merge_method: merge
+merge_commit: e03d4bf76c3347b99133bfc0a08580def4a0b1a5
+merge_commit_tree: 861df62ee0c17abf423908c5f41ba59b2604fdb4
+merge_commit_parents: [e0273d31aba78b014aa89297f32ff86f9daf0277, 701f41c686cef8456d43528ab9556a6b867cd7d6]
+pre_merge_checks:
+  - {name: gate (ubuntu-latest), sha: 701f41c686cef8456d43528ab9556a6b867cd7d6, conclusion: success, nguon: readback-check-runs-701f41c.json}
+  - {name: gate-packet-loop (ubuntu-latest), sha: 701f41c686cef8456d43528ab9556a6b867cd7d6, conclusion: success, nguon: readback-check-runs-701f41c.json}
+  - {name: gate-ops (ubuntu-latest), sha: 701f41c686cef8456d43528ab9556a6b867cd7d6, conclusion: success, nguon: readback-check-runs-701f41c.json}
+  - {name: gate-cong-cu-gop (ubuntu-latest), sha: 701f41c686cef8456d43528ab9556a6b867cd7d6, conclusion: success, nguon: readback-check-runs-701f41c.json}
+  - {name: 'Codex connector review (DIEU KIEN truoc merge theo uy quyen)', sha: 701f41c686cef8456d43528ab9556a6b867cd7d6, conclusion: 'completed, has_any_findings false', luc: '2026-10-16T06:31:29Z (updated_at comment 6209432980) — 22s TRUOC merged_at 06:31:51Z', nguon: readback-codex-connector-772.json}
+post_merge_checks:
+  - {name: gate (ci.yml, push master), run_id: 38861735146, sha: e03d4bf76c3347b99133bfc0a08580def4a0b1a5, conclusion: failure, buoc_do: 'release-verify strict (lane LAND — manifest committed)', nguon: readback-run-38861735146.json, nguon_positive: ['trich-log-job/run38861735146-job116845349255-gate-ubuntu-latest.txt']}
+  - {name: 'launcher (Windows that) push master', run_id: 38861735202, sha: e03d4bf76c3347b99133bfc0a08580def4a0b1a5, conclusion: success, positive: 'ubuntu 196/196 hong 0, dot bien 236/236; windows 173/173 hong 0 (bo qua 24, khong co t81/r766), dot bien 167/167', nguon: readback-run-38861735202.json, nguon_positive: ['trich-log-job/run38861735202-job116845324739-launcher-ubuntu-latest.txt', 'trich-log-job/run38861735202-job116845325010-launcher-windows-latest.txt']}
+pre_merge_checks_thu_tu_thoi_gian: >-
+  measured — moi muc pre_merge_checks hoan tat TRUOC merged_at 2026-10-16T06:31:51Z: check-run tren 701f41c completed_at
+  muon nhat 06:21:13Z (thu-hoi), cac check bat buoc muon nhat 05:22:34Z; connector updated_at 06:31:29Z.
+  Lenh tai kiem (offline, tu thu muc provenance): python3 -c 'import json;m="2026-10-16T06:31:51Z";c=json.load(open("readback-check-runs-701f41c.json"))["check_runs"];x=json.load(open("readback-codex-connector-772.json"));print(all(r["completed_at"]<m for r in c if r["completed_at"]), x["updated_at"]<m)' — mong True True.
+  Trich log (nguon_positive) giu dong tong ket + sha256 log day du tai luc trich; log day du KHONG luu.
+bookkeeping:
+  - {item: 'rut han lease wp766-r1-g1 ve 2026-10-16T07:30Z', commit: cacf16b, nhanh: ops/wp766-r1-g1-lease, luot_dang_lease: '38862175150 success — CHAN [9] da co comment 6207945584, bo qua'}
+  - {item: 'nghiem thu nha lease ai-dang-giu NGUOI_GIU 0', luc: '2026-10-16T07:33Z', nguon: ai-dang-giu-sau-0730/}
+  - {item: 'bien nhan v2 review luot 1', path: ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml}
+  - {item: 'sua gate master: tai sinh RELEASE_MANIFEST.json + ratchet tl_selftest', nhanh: claude/bookkeeping-766-land, chi_tiet: sua_gate_master}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-766-land}
+# ---- het truong chuan
+packet_id: wp766
+packet_issue: 766
+generation: 1
+generation_nghia: Lan land THU NHAT cua ma packet #766 (lease g1 duy nhat).
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session — CUNG phien la executor cua packet (lease recorder_is_executor true) VA land operator do chu kho chi
+  dinh (uy quyen 6209427062). Phien nay khong tu tinh thao tac land la approval.
+
+spec:
+  path: ops/specs/wp766.md
+  sha256: da3095b47567dc8cb94137d0cc675d722eb256a77c8e06ddb90a216e7f148666
+  blob: 2176dd0c04e126beb6a57be645d315f51ebb2d23
+  nguon: 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay); PR #767 mang cung blob.'
+lease:
+  lease_id: wp766-r1-g1-claude-20261016
+  path: ops/leases/wp766-r1-g1-claude-20261016.yaml
+  cap_boi: >-
+    loi_khai_co_neo — chu kho chi thi trong phien session_014pXTWd1wrzGF1X4LdwzHdn: "Cap lease #766, doi #765 land truoc,
+    theo khuyen nghi" (chep nguyen van vao granted_on_instruction_note cua lease). Ban chieu lease do workflow dang:
+    Issue #766 comment 6207945584 (readback-comment-6207945584.json, github-actions[bot], run 38848986310 success).
+  thu_hoi: >-
+    rut han ve 2026-10-16T07:30:00Z o commit cacf16b tren ops/wp766-r1-g1-lease (khoi thu_hoi_bang_rut_han), theo uy
+    quyen land 6209427062. Luot `ops — dang lease bang git` 38862175150: success (rc=9 da dang — bo qua).
+  write_set: ['.claude/dev/launcher_test.py', 'changelog.d/wp-766.md']
+  nghiem_thu_nha: >-
+    measured — 2026-10-16T07:33Z, sau fetch +refs/heads/* (ls-remote 553 = for-each-ref 553, thieu 0) va dong bo master cuc
+    bo: `ai-dang-giu` cho ca hai duong dan write set rc=0, "NGƯỜI_GIỮ 0: không có"; wp766-r1-g1-claude-20261016 ra HẾT_HẠN.
+    Tho: ops/land/pr772-wp766-provenance/ai-dang-giu-sau-0730/.
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-772.json: merged true, merged_at 2026-10-16T06:31:51Z, merge_commit_sha
+    e03d4bf76c3347b99133bfc0a08580def4a0b1a5 (cha e0273d3 + 701f41c), merge commit (khong squash/rebase).
+  landed: false
+  landed_ly_do: >-
+    Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1). Dieu kien them: gate push master tren e03d4bf DO
+    (release-verify strict); phai xanh tren master sau khi PR ghi so nay merge.
+
+uy_quyen_land:
+  neo: https://github.com/ducthangho/tra-luat/pull/772#issuecomment-6209427062
+  do: >-
+    measured — readback-comment-6209427062.json: user ducthangho, OWNER, performed_via_github_app null, created_at
+    2026-10-16T06:20:30Z (= updated_at). Than comment do phien executor SOAN theo yeu cau cua chu kho, chu kho dang.
+  candidate_sha: 701f41c686cef8456d43528ab9556a6b867cd7d6
+  han: '2026-10-18T06:00:00Z'
+  ghi_chu_ve_app: >-
+    measured — comment verdict 6208523504 do PHIEN NAY dang qua MCP mang performed_via_github_app = claude; 6209427062
+    mang null. Su kien ready_for_review / merged trong readback-events-772.json deu mang null du DO PHIEN NAY thuc hien
+    (MCP update_pull_request, merge_pull_request) — truong ay KHONG phan biet duoc nguoi bam tren su kien PR.
+
+dieu_kien_truoc_merge:
+  head_khong_doi: >-
+    measured — readback-pr-772.json head.sha = 701f41c va merge_commit_sha e03d4bf co cha thu hai 701f41c (git log -1
+    --format=%P). loi_khai_co_neo — lenh merge MCP kem expectedHeadSha=701f41c (khong luu request; tu khai).
+  check_bat_buoc: 'measured — readback-check-runs-701f41c.json: gate, gate-packet-loop, gate-ops, gate-cong-cu-gop success.'
+  codex_connector: >-
+    measured — readback-codex-connector-772.json: chatgpt-codex-connector[bot], khoi codex-review-state:v1
+    code_review.commit_sha 701f41c, status completed, has_any_findings false, updated_at 06:31:29Z < merged_at 06:31:51Z.
+    Khac #765 (connector xong 28s SAU merge): lan nay doi dung dieu kien uy quyen.
+  khong_xung_dot: >-
+    measured gian tiep — merge_commit_tree e03d4bf = tree 701f41c (861df62); master khong troi (base e0273d3 = cha thu nhat).
+  windows: >-
+    Chu kho chot KHONG doi luot Windows truoc merge (spec wp766, uy quyen). Luot Windows dau tien cua ma nay: push master
+    run 38861735202 — xanh (post_merge_checks).
+
+sua_gate_master:
+  van_de: >-
+    measured — gate push master run 38861735146 tren e03d4bf: failure, chi buoc `release-verify strict (lane LAND —
+    manifest committed)` cua job gate (ubuntu-latest) 116845349255; trich log: `"ok": false`, `extra_files:
+    ["changelog.d/wp-766.md"]`, exit code 2. Tai hien tai cho (hai ve cung lenh, clone, core.abbrev 7):
+    release-verify-strict-e0273d3-tai-cho.json ok true; release-verify-strict-e03d4bf-tai-cho.json ok false, extra_files 1,
+    failed 0, package hash khop.
+  nguyen_nhan: >-
+    changelog.d/* nam trong RELEASE_MANIFEST.json; manh changelog.d/wp-766.md moi khong duoc ke. Lane PR khong bat duoc
+    (ci.yml release-verify strict chi chay tren master) — CLAUDE.md §Quy uoc deploy muc 5. Loi cua executor wp766: KHONG
+    chay lenh lane LAND truoc merge; spec wp766 cung khong ke RELEASE_MANIFEST.json vao write set.
+  uy_quyen: >-
+    loi_khai_co_neo — chu kho chi thi trong phien session_014pXTWd1wrzGF1X4LdwzHdn sau khi phien bao gate do (Issue #766
+    comment 6210515188 ghi van de + de xuat): "Uỷ quyền phương án 1, làm theo khuyến nghị" — phuong an 1 = sua kem PR ghi
+    so theo tien le 3fad559c (WP725-727), write set RELEASE_MANIFEST.json + scripts/tl_selftest.py.
+  thay_doi: >-
+    RELEASE_MANIFEST.json tai sinh bang `tl.py release-manifest --deterministic` SAU khi sua tl_selftest.py: file_count
+    186 -> 187, them dung changelog.d/wp-766.md, bot 0; scripts/tl_selftest.py: ratchet r291_docs_ngoai_goi (cay that
+    261 -> 262) va r357_agents_ngoai_goi (goi 186 -> 187), kem chu thich ke khai slot. Tran Package 200 con 13 khe.
+  do_sau_sua: 'measured — xem chu thich commit sua va than PR ghi so (release-verify strict, selftest, golden).'
+
+review:
+  luot_1:
+    reviewer: >-
+      codex (Codex CLI, khac ho executor), chay qua launcher.py run 5d4f7321. Read-only la CHI THI, KHONG cuong che — xem
+      caveat CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY trong bien nhan.
+    hien_vat: ops/reviews/wp766-r1-g1-exec-review-1-codex/
+    bien_nhan_v2: 'ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml (bien_nhan_v2.py DAT)'
+    ket_qua: 'thuat_lai — approve, P1=0 P2=0 P3=0 tren 701f41c'
+  codex_connector: 'measured — completed, khong finding, tren 701f41c (dieu_kien_truoc_merge.codex_connector).'
+  human_audit: 'measured — comment 6209427062 (uy_quyen_land).'
+
+khong_do_duoc:
+  - 'Log day du cua cac job CI KHONG luu; chi trich dong tong ket + sha256 log luc trich.'
+  - 'stderr.log cua luot review 5d4f7321 KHONG luu (tien le #743); model thuc chay KHONG_DO_DUOC.'
+  - >-
+    Loi luong doc nen cp1252 `Exception in thread … UnicodeDecodeError` o buoc dot bien launcher Windows: CO SAN (run
+    38843154835 va 38841991504 cua #765 moi run 1 dong), delta 0 — khong xu ly o packet nay.

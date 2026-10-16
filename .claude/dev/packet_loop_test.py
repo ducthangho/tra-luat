@@ -5554,7 +5554,7 @@ def case_pl_m5_rescue(c: Ctx):
 
 def case_pl_m6_state_v1(c: Ctx):
     sd = _reviewing(c)
-    st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "codex_", "nang"))}
+    st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
     (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER}] * 3}))
     rc, o, e = run(c.script, ["status", "--packet", 55], sd)
     t = json.loads(o.decode("utf-8"))
@@ -5594,6 +5594,7 @@ MUTANTS.update({
     "pl_m5_bo_kiem_ly_do": (' or st.get("ly_do") != "rescue_required":', ":", ["pl_m5_rescue"]),
     "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),
     "pl_m6_suy_used_0": ("used=_la_codex(st) * sum(", "used=0 * sum(", ["pl_m6_state_v1"]),
+    "pl_m6_state_cu_mat_ho": (' or PROVIDER_FAMILIES.get(st["reviewer"])  # state cũ', "", ["pl_m6_state_v1"]),
 })
 
 

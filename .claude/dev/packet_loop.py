@@ -50,8 +50,7 @@ from launcher import ky_ban_ghi_luot
 # khi người gọi không khai; envelope của mission mới là nguồn.
 MAC_DINH_TRAN_ATTEMPT = 3
 MAC_DINH_TRAN_SAME_FAILURE = 2
-# #775: trần Review Rescue Checkpoint (ADR-0037) — vòng: ADR-0048, lời gọi codex: protocol §12.
-# Trục → (khoá đã dùng, khoá trần); một bảng cho `record-review`, `nang-tran`, `record-rescue`.
+# #775 Review Rescue (ADR-0037): trần vòng (ADR-0048) + lời gọi codex (§12); trục → (khoá dùng, khoá trần).
 MAC_DINH_TRAN_VONG_REVIEW = 10
 MAC_DINH_TRAN_CODEX = 2
 TRUC_TRAN = {"vong_review": ("review_rounds_used", "review_rounds_limit"),
@@ -651,7 +650,8 @@ def _load(state_dir: Path, packet: int) -> dict:
 
 
 def _la_codex(st: dict) -> bool:  # #775: tên provider VÀ họ model — không vế nào đủ một mình
-    return st["reviewer"] == "codex" and (st.get("reviewer_identity") or {}).get("model_family") == "openai"
+    fam = (st.get("reviewer_identity") or {}).get("model_family") or PROVIDER_FAMILIES.get(st["reviewer"])  # state cũ
+    return st["reviewer"] == "codex" and fam == "openai"
 
 
 def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:

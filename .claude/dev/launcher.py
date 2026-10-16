@@ -653,13 +653,20 @@ def _con_song(pid: int, khoa: str | None = None) -> bool:
             return False
         return khoa is None or hien == khoa
     trang_thai = Path(f"/proc/{pid}/stat")
-    # wp685 (ESRCH: PR #679, job 109303373142) — tiến trình biến mất giữa chừng làm exists()
+    # wp685 (ESRCH: PR #679, job 109303373142) — tiến trình biến mất giữa chừng làm phép thăm dò
     # NÉM ProcessLookupError thay vì trả False, và ngoại lệ ấy thoát khỏi _con_song. Phép hỏi
     # chạy ĐÚNG MỘT lần, không thử lại (cross-review lượt 2, lượt 6 trên PR #688).
     # Chỉ bắt họ OSError ở đây: nhóm phân tích, Exception, BaseException thoát nguyên
     # (cross-review lượt 3, lượt 5).
+    # #743 (py314-path-exists-nuot-oserror; t156/t157 đỏ trên Python 3.14.6) — từ 3.14
+    # `Path.exists()` là `os.path.exists`, NUỐT mọi OSError thành False và không đi qua
+    # `Path.stat`, nên hai nhánh dưới chết câm. Thăm dò bằng `stat()` để GIỮ errno:
+    # ENOENT/ENOTDIR ⇒ không có tệp; ESRCH ⇒ chết; OSError khác ⇒ chưa kết luận.
     try:
-        co_tep = trang_thai.exists()
+        trang_thai.stat()
+        co_tep = True
+    except (FileNotFoundError, NotADirectoryError):
+        co_tep = False
     except ProcessLookupError:
         return False
     except OSError:

@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "python3.13",
+      "-B",
+      "evidence/regression.py",
+      "--mot-ca",
+      "r01_merge_duplicate"
+    ],
+    "LAND_EVIDENCE_NGUON_MA": "/home/user/rv773/ops/land_evidence_nguon.py",
+    "rc": 3,
+    "stdout": "DO:r01_merge_duplicate:mong rc=2 + tổng kết, được rc=0, stdout='ĐẠT ops/land/pr9001-thu-land-evidence.yaml\\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\\nTỔNG: ĐẠT\\n', stderr cuối=[]\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3.13",
+      "-B",
+      "evidence/regression.py",
+      "--mot-ca",
+      "r04_yaml_date"
+    ],
+    "LAND_EVIDENCE_NGUON_MA": "/home/user/rv773/ops/land_evidence_nguon.py",
+    "rc": 3,
+    "stdout": "DO:r04_yaml_date:mong rc=2 + tổng kết, được rc=1, stdout='', stderr cuối=['ValueError: day is out of range for month']\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3.13",
+      "-B",
+      "evidence/regression.py",
+      "--mot-ca",
+      "r04_yaml_date"
+    ],
+    "LAND_EVIDENCE_NGUON_MA": "/tmp/rv773-r3-date-fixed.py",
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

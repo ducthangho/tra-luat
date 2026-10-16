@@ -1,0 +1,6 @@
+argv=['/usr/bin/python3.13', '-B', PosixPath('/home/user/rv773/ops/land_evidence_nguon.py'), '--root', PosixPath('/tmp/len_cay_l3z9v5w7/kho')]
+rc=1
+ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L3 $.pre_merge_checks[0]: mốc 2026-10-16T02:58:26.1Z không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ

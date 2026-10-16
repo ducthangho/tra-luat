@@ -86,3 +86,7 @@ lease_sua_lan_cuoi: '2026-10-16T18:30Z'
 lease_sua_ghi_chu: >-
   Lan 1: them khoi nang_tran (2->3). Lan 2: nang tran_moi 3->4. Ca hai theo lua chon cua chu kho;
   khong doi write set, spec, branch, han.
+da_bi_thay_the: tran-codex-va-sensitive-r2-g2-claude-20261016
+da_bi_thay_the_ghi_chu: >-
+  Revision 2 (them hai tep vao write set sau CI do r291 tren PR #789), chi thi
+  https://github.com/ducthangho/tra-luat/issues/782#issuecomment-6222004106.

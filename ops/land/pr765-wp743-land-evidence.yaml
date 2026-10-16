@@ -89,6 +89,17 @@ review:
     ban_chieu: https://github.com/ducthangho/tra-luat/pull/765#issuecomment-6206976422
     model_thuc_chay: 'not_measured — codex khong xuat modelUsage'
   human_audit: 'loi_khai_co_neo — dong "human audit: toi da doc diff 9fddb1d..80e0fac va duyet" trong uy quyen 6207001889.'
+  codex_connector:
+    ket_qua: >-
+      measured — comment 6207008439 (chatgpt-codex-connector[bot]) codex-review-state: commit_sha 80e0fac, status
+      completed, has_any_findings false, has_unresolved_findings false, hoan tat 2026-10-16T02:58:54Z; reaction +1 tren PR;
+      0 review object, 0 review comment (readback-codex-connector-765.json).
+    lech_quy_trinh: >-
+      LAND OPERATOR MERGE TRUOC KHI CONNECTOR XONG. Chuyen ready_for_review luc 02:57:00Z KICH HOAT connector (02:57:09Z,
+      trigger "Draft marked ready"); merge luc 02:58:26Z; connector hoan tat 02:58:54Z — 28 giay SAU merge. Ket qua sach
+      nen khong co finding nao lot vao master, nhung do la MAY, khong phai quy trinh: dung bai hoc CLAUDE.md "Gate xanh
+      KHONG phai da duoc review" (#104/#105). Uy quyen 6207001889 khong liet ke connector la dieu kien, nhung land operator
+      le ra phai cho no xong vi chinh thao tac ready cua minh vua kich hoat no.
 
 hau_merge_gate:
   sha: e0273d31aba78b014aa89297f32ff86f9daf0277

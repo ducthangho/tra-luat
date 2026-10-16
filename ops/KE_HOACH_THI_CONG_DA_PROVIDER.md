@@ -30,10 +30,25 @@ Duy trì tiến độ phát triển khi một hoặc nhiều provider không kh�
 | Google Antigravity | `google_antigravity` | `antigravity` | machine/local |
 | ChatGPT Pro Web | `openai_chatgpt` | `chatgpt_web` | `human_mediated` |
 | Claude Code | `anthropic_claude` | `claude_code` | machine/local |
-| Codex | `openai_codex` | `codex_cli` hoặc Codex service | machine |
+| Codex CLI | `openai_codex` | `codex_cli` | machine |
+| Codex Desktop | `openai_codex` | `codex_desktop` | machine |
+| Codex service (GitHub App / cloud) | `openai_codex` | `codex_service` | machine |
 | Human Auditor | `human` | `manual_audit` | human |
 
 Tên công cụ không tự quyết định assurance.
+Codex Desktop không được khai thành CLI. Bề mặt Desktop không chứng minh model/effort
+đã phục vụ hoặc tính độc lập của session; khai giới hạn đo được và giữ mức advisory
+khi chưa đủ evidence theo protocol.
+
+Tên lịch sử “Codex service” có tên máy `codex_service` từ wp461 r3 (Mission
+[#470](https://github.com/ducthangho/tra-luat/issues/470) Q1; nợ mở ở
+[#461](https://github.com/ducthangho/tra-luat/issues/461) theo mục `no_khai_ra` của
+[biên nhận review #460 lượt 9](reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml)).
+`codex_service` là mọi đường chạy Codex không qua lệnh `codex` (CLI) và không qua Codex
+Desktop — gồm GitHub App `chatgpt-codex-connector[bot]` review trên PR và Codex cloud nói
+chung. Nó không chứng minh model/effort đã phục vụ hay tính độc lập của phiên; receipt phải
+khai `KHONG_do_duoc` cho phần không đo được. Các biên nhận lịch sử khai `codex_cli` giữ
+nguyên (Q2 #470): chúng đi qua `codex exec`, không được ánh xạ lại.
 
 ## 3. Vai trò ChatGPT Pro Web
 

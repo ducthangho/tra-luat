@@ -1,0 +1,53 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+(cross-review luot 10, reviewed e73b266; ap tu goc cay: patch -p0 --fuzz=0 < HINT.patch; chi tep TEST — phan san pham o HINT-sanpham.diff)
+
+diff --git ops/ci_duong_nhanh_test.py ops/ci_duong_nhanh_test.py
+index 8a5355fe..54ee6649 100644
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -968,6 +968,35 @@ def t20u_moi_loi_goi_git_doc_thuoc_tinh_tu_goc():
+          f"loi goi git ngoai hop dong (phai xep vao LOI_GOI_DOC_THUOC_TINH hoac khai mien): {con_lai}")
+ 
+ 
++@ca
++def t20v_kiem_re_gitlink_ho_so_do():
++    """Cross-review luot 10 (`kiem-re-cua-fail-close-chua-co-ca`, cua gitlink): tree entry mode 160000 duoi allowlist; actions/checkout
++    (khong submodule) dung THU MUC rong. `kiem_loai_tep` chi hoi symlink; `kiem_yaml`/`kiem_lease` coi `not is_file()` la DA XOA nen
++    bo qua (ke ca ten `.yaml`); `--check` khong co noi dung, numstat `1 0` (khong phai nhi phan). Master: 0 gitlink."""
++    m = nap_module()
++    for duong in ("ops/land/zz.yaml", "ops/specs/con"):
++        with kho_that(nhanh_pr={"ops/specs/S.md": "# s\n"}) as (kho, goc, dau):
++            git(kho, "update-index", "--add", "--cacheinfo", f"160000,{goc},{duong}")
++            git(kho, "commit", "-q", "-m", "gitlink")
++            dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++            (kho / duong).mkdir(parents=True, exist_ok=True)
++            bang(git(kho, "ls-tree", dau2, "--", duong).stdout.decode().startswith("160000 commit "),
++                 f"fixture vo hieu: {duong} phai la gitlink")
++            bang(m.kiem_yaml({duong}, kho) == [] and m.kiem_nhi_phan(env_pr(goc=goc, dau=dau2), chay_that, kho) == []
++                 and git(kho, f"--attr-source={goc}", "diff", "--check", f"{goc}...{dau2}", kiem=False).returncode == 0,
++                 f"fixture vo hieu ({duong}): kiem_yaml/nhi phan/--check phai cung KHONG thay gitlink (khong thi ca nay khong do gi)")
++            rc, log = kiem_re(m, kho, goc, dau2)
++            bang(rc == 1 and "khong phai tep thuong" in log and duong in log, f"{duong}: gitlink ho so phai DO kiem-re: rc={rc}: {log}")
++    # doi chung (khong chan oan): PR doi TEP ho so thanh THU MUC cung ten — tep con nam trong diff, day la tep thuong
++    with kho_that(nen={"README.md": "x\n", "ops/land/a.md": "a\n"}, nhanh_pr={"ops/land/a.md": None}) as (kho, goc, _d):
++        viet(kho, "ops/land/a.md/x.md", "x\n")
++        git(kho, "add", "-A")
++        git(kho, "commit", "-q", "-m", "tep thanh thu muc")
++        dau2 = git(kho, "rev-parse", "HEAD").stdout.decode().strip()
++        rc, log = kiem_re(m, kho, goc, dau2)
++        bang(rc == 0, f"doi chung: tep ho so doi thanh thu muc cung ten KHONG phai gitlink, phai DAT: rc={rc}: {log}")
++
++
+ @ca
+ def t20q_kiem_re_symlink_hop_le_moi_duoi_do():
+     """Cross-review luot 8: docstring khai chan MOI symlink "treo hay khong"; t20n chi co symlink TREO duoi `.md`."""
+@@ -2244,6 +2273,9 @@ DOT_BIEN = [
+     ("loai_tep_chi_md", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if (Path(kho) / duong).is_symlink() and duong.endswith('.md')]"), ("t20q_kiem_re_symlink_hop_le_moi_duoi_do",)),
+     ("diff_check_chi_md", _ma('diff", "--check", "--no-renames", f"{goc}...{dau}"]', 'diff", "--check", "--no-renames", f"{goc}...{dau}", "--", "*.md"]'), ("t20r_kiem_re_dau_xung_dot_moi_duoi_tep_do",)),
+     ("kiem_yaml_chi_tai_lieu_dau", _ma("list(yaml.safe_load_all(f))", "next(yaml.safe_load_all(f), None)"), ("t20o_kiem_re_yaml_nhieu_tai_lieu_hong_o_sau_do",)),
++    ("loai_tep_cho_gitlink_qua", _ma("and (Path(kho) / duong).is_dir()\n", "and False\n"), ("t20v_kiem_re_gitlink_ho_so_do",)),
++    ("loai_tep_gitlink_chi_yaml", _ma("and (Path(kho) / duong).is_dir()\n", "and (Path(kho) / duong).is_dir() and duong.endswith(('.yaml', '.yml'))\n"), ("t20v_kiem_re_gitlink_ho_so_do",)),
++    ("loai_tep_gitlink_chan_oan_thu_muc", _ma("               and not any(x.startswith(duong + \"/\") and (Path(kho) / x).is_file() for x in doi)])", "               and True])"), ("t20v_kiem_re_gitlink_ho_so_do",)),
+     ("loai_tep_cho_symlink_qua", _ma("for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]", "for duong in sorted(doi) if False]"), ("t20n_kiem_re_symlink_ho_so_do",)),
+ ]
+ TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]

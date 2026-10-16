@@ -1,0 +1,137 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+HINT luot 16 (reviewer Claude Opus 5.5, advisory_review) cho lop bang-do-thieu-neo-va-thieu-kiem-ke — CHI tep test; PHAI ap kem khoi diff san pham trong VERDICT (dot bien docstring_ti_le_D2_mat_neo da doi theo van ban moi cua san pham).
+--- ops/ci_duong_nhanh_test.py
++++ ops/ci_duong_nhanh_test.py
+@@ -852,7 +852,7 @@
+                 "diff", "--check", f"{goc}...{dau}", "--", tep, kiem=False)
+             bang(chi_loai.returncode != 0, f"fixture vo hieu: {tep} phai do DUNG loai {loai} khi chi loai ay bat")
+         rc, log = kiem_re(m, kho, goc, dau)
+-        bang(rc == 0, f"khoang trang cuoi dong / dong trong cuoi tep khong duoc chan oan (do 8/63 lan merge): rc={rc}: {log}")
++        bang(rc == 0, f"khoang trang cuoi dong / dong trong cuoi tep khong duoc chan oan (do 8/63 lan merge tai 1741e0a): rc={rc}: {log}")
+ 
+ 
+ @ca
+@@ -904,7 +904,8 @@
+ def t20p_kiem_re_gitattributes_trong_ho_so_khong_cau_hinh_duoc_diff_check():
+     """Cross-review luot 8 (`kiem-re-bi-cau-hinh-boi-du-lieu-ho-so`): `.gitattributes` do PR mang vao (moi do sau) voi
+     `conflict-marker-size` tat bao dau xung dot cua `diff --check` doc thuoc tinh tu cay lam viec. Chot: `--attr-source`
+-    = cay GOC. Doi chung: KHONG chan `.gitattributes` — master co ba tep `-whitespace` duoi `ops/reviews/` do PR ho so them."""
++    = cay GOC. Doi chung: KHONG chan `.gitattributes` — tai 3569472cb9 co 3 tep `-whitespace` duoi `ops/reviews/`, 2/3 do PR ho
++    so them (#667, #670), 1/3 di kem PR ma (#666)."""
+     m = nap_module()
+     xung_dot = "a\n<<<<<<< HEAD\nb\n=======\nc\n>>>>>>> nhanh\n"
+     for thu_muc in ("ops/land", "ops/reviews/a/b/c"):
+@@ -1681,7 +1682,7 @@
+          and env.get("CI_DUONG_NHANH_MERGE") == "${{ github.sha }}", f"env buoc phan loai sai: {env}")
+     bang(b.get("continue-on-error") is True,
+          "buoc phan loai phai co `continue-on-error: true`: phan loai loi phai roi ve day_du; chuan-bi DO thi context bat buoc "
+-         "`(ubuntu-latest)` KHONG duoc tao va PR bi CHAN (do 4 luot that, xem ci.yml)")
++         "`(ubuntu-latest)` KHONG duoc tao va PR bi CHAN (do 4 luot that, Issue #674 comment 5889459132)")
+     co = [x for x in buoc(wf, "chuan-bi") if str(x.get("uses", "")).startswith("actions/checkout")]
+     bang(len(co) == 1 and (co[0].get("with") or {}).get("fetch-depth") == 0, f"chuan-bi phai checkout fetch-depth 0: {co}")
+     bang(chuan_hoa_if(co[0].get("if")) == "github.event_name == 'pull_request'" and co[0].get("continue-on-error") is True,
+@@ -2364,6 +2365,13 @@
+ # Neo: SHA (bay toi bon muoi ky tu hex, co CA chu a-f LAN chu so) hoac dinh danh BEN cua nguon ngoai (run Actions, comment).
+ MAU_NEO_SO_DO = re.compile(r"(?<![0-9A-Za-z_])(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{7,40}(?![0-9A-Za-z_])"
+                            r"|\brun \d{6,}|\bcomment \d{6,}|\bissuecomment-\d{6,}")
++# So do ve KHO viet bang CHU (cross-review luot 16): tu-so dung NGAY truoc danh tu thuc the kho van la so do va phai co neo;
++# `ca`/`cả` dung truoc (`CA hai tep` = ca hai, dem cau truc) thi khong. Quy uoc khong doi: so do ve kho viet bang chu so.
++MAU_SO_CHU_KHO = re.compile(r"(?i)(?<!\bca )(?<!\bcả )(?<![\w-])(?:hai|ba|bốn|bon|năm|sáu|bảy|tám|chín|mười|mươi|muoi|trăm|tram)"
++                            r"\s+(?:tệp|tep|lease|merge|PR|ref|nhánh|nhanh)(?![\w-])")
++# So do trong THONG BAO `bang(...)` (cross-review luot 16): chi so dung NGAY sau dau hieu do viet thuong (`do `/`đo `); so cau
++# truc trong thong bao (gia tri `fetch-depth`, ma `rc`, kich thuoc bang) khong phai so do.
++MAU_SO_DO_THONG_BAO = re.compile(r"(?<![\w])(?:do|đo) (\d+(?:[.,/]\d+)*)(?![\w/])")
+ 
+ 
+ def cau_tai_lieu(nguon):
+@@ -2388,6 +2396,18 @@
+     return [(dong, loai, cau) for dong, loai, p in doan for cau in MAU_TACH_CAU.split(p) if cau.strip()]
+ 
+ 
++def cau_thong_bao(nguon):
++    """(dong, loai, cau) cho MOI cau cua phan TINH cua doi so thu hai cua MOI loi goi `bang(...)` (chuoi hoac f-string)."""
++    ra = []
++    for nut in ast.walk(ast.parse(nguon)):
++        if isinstance(nut, ast.Call) and isinstance(nut.func, ast.Name) and nut.func.id == "bang" and len(nut.args) >= 2:
++            a = nut.args[1]
++            phan = [a] if isinstance(a, ast.Constant) else list(a.values) if isinstance(a, ast.JoinedStr) else []
++            txt = " ".join(p.value for p in phan if isinstance(p, ast.Constant) and isinstance(p.value, str))
++            ra += [(nut.lineno, "thong bao", cau) for cau in MAU_TACH_CAU.split(txt) if cau.strip()]
++    return ra
++
++
+ def so_do_trong_cau(cau):
+     """Con so trong `cau` KHONG thuoc dang cho phep (dinh danh, ngay, so hieu, ma, mode git, danh so `(N)`/`[N]`)."""
+     ngay = [k.span() for k in MAU_NGAY.finditer(cau)]
+@@ -2401,14 +2421,15 @@
+                 or set(re.split(r"[/,]", k.group())) <= MODE_GIT_HOP_LE):
+             continue
+         so.append(k.group())
++    so += [k.group() for k in MAU_SO_CHU_KHO.finditer(cau)]
+     return so
+ 
+ 
+ def so_do_khong_neo(nguon):
+     """(so con so do tim thay, [(dong, loai, cac so, cau)] cua moi cau co so do ma KHONG co neo trong CHINH cau ay)."""
+     tong, thieu = 0, []
+-    for dong, loai, cau in cau_tai_lieu(nguon):
+-        so = so_do_trong_cau(cau)
++    for dong, loai, cau in cau_tai_lieu(nguon) + cau_thong_bao(nguon):
++        so = MAU_SO_DO_THONG_BAO.findall(cau) if loai == "thong bao" else so_do_trong_cau(cau)
+         tong += len(so)
+         if so and not MAU_NEO_SO_DO.search(cau):
+             thieu.append((dong, loai, so, " ".join(cau.split())[:120]))
+@@ -2424,10 +2445,11 @@
+ 
+     Duong vao, moi duong mot mau tu kiem va mot dot bien rieng: docstring MODULE · docstring HAM/CLASS · CHU THICH · neo o
+     CAU KHAC · so tran khong phai ti le (thoi gian, phan tram, so dem) · so thuan bi nham la neo · tep TEST (khong chi san
+-    pham). Dang KHONG phai so do (dinh danh, ngay, so hieu, ma thoat, mode git, danh so) la danh sach CHO PHEP
++    pham) · so viet bang CHU dung truoc danh tu thuc the kho · so dung sau dau hieu do trong THONG BAO `bang(...)` · neo phai
++    co CHU SO (tu hex toan chu khong phai neo) · `;` la ranh gioi CAU, gach dau dong la ranh gioi DOAN. Dang KHONG phai so do (dinh danh, ngay, so hieu, ma thoat, mode git, danh so) la danh sach CHO PHEP
+     `TRUOC_KHONG_PHAI_SO_DO`, khong phai danh sach don vi doan truoc.
+ 
+-    Gioi han, noi thang: (a) so viet bang CHU (ba, bon...) ca nay KHONG thay — quy uoc: so do ve KHO viet bang chu so, so dem
++    Gioi han, noi thang: (a) so viet bang CHU ngoai mau tu-so + danh tu kho (vd dem ca, buoc, lop) ca nay KHONG thay — quy uoc: so do ve KHO viet bang chu so, so dem
+     CAU TRUC viet bang chu thi do o ca so huu no (vd `t20zh`); (b) chot do su CO MAT cua neo, khong kiem SHA ton tai (clone
+     nong se do oan); (c) mot neo phu moi so trong cung cau."""
+     # (1) Tu kiem bo quet: moi DUONG VAO mot mau phai bi bao; mau co neo hoac toan dang cho phep thi khong.
+@@ -2440,6 +2462,14 @@
+         ('"""HEAD 6803012: chay 5 nhanh."""\n', True),                              # so thuan KHONG phai neo
+         ('"""Kho co 6/119 lease tai 3569472cb9, run 36518707072 mat 52 phut."""\n', False),
+         ('"""Luot 15, LAN THU 4, rc=3, rc=-9, N>0, mode 100644, #674, 01-10-2026, (1), CHAN [8], UTF-8, t20zh."""\n', False),
++        # cross-review luot 16: moi nhanh moi cua bo quet mot mau (go nhanh ay thi mau ay lech)
++        ('"""Kho co 119 lease (xem effaced)."""\n', True),                     # neo phai co CHU SO
++        ('"""Do tai 3569472cb9; kho co 119 lease."""\n', True),                # `;` la ranh gioi CAU
++        ('"""Do tai 3569472cb9:\n  · kho co 119 lease\n"""\n', True),          # gach dau dong la ranh gioi DOAN
++        ('"""Master co ba tep lease."""\n', True),                             # so do ve KHO viet bang CHU
++        ('"""Quet CA hai tep."""\n', False),                                   # `ca hai` la dem cau truc
++        ('bang(x, f"loi (do 8/63 lan merge): {y}")\n', True),                  # so do trong THONG BAO
++        ('bang(x, f"chuan-bi DO thi fetch-depth 0, rc={y}, 20 o")\n', False),  # so cau truc trong thong bao
+     )
+     lech = [(nguon, mong) for nguon, mong in mau if bool(so_do_khong_neo(nguon)[1]) is not mong]
+     bang(not lech, f"bo quet so do lech mau tu kiem (nguon, mong bi bao): {lech}")
+@@ -2654,7 +2684,7 @@
+     # ---- cross-review luot 15 (`bang-do-thieu-neo-va-thieu-kiem-ke`): MOI duong vao mot dot bien — tai lieu mat neo / chen so
+     # khong neo (D1, D2 la hai dot bien cua HINT), roi go TUNG chot cua bo quet (moi chot do mot mau tu kiem cua ca dich)
+     ("docstring_ti_le_D1_mat_neo", _ma("first-parent tính tới 1741e0a (lệnh", "first-parent tính tới HEAD (lệnh"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+-    ("docstring_ti_le_D2_mat_neo", _ma('Nên số tệp trượt là số CỦA PHẠM VI ref,\n    không phải của kho: reviewer lượt 1 đo tại 1741e0a (113 tệp lease) — clone chỉ-master 6/113 trượt\n    `kiem(bo_qua_han=True)`, bản sao đủ 552 ref 0/113. Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):\n    một ref (chỉ nhánh đang checkout) 6/119 trượt — đúng 6 tệp cũ, cùng `CHAN [8]` bia mộ — còn trên 529 ref cục bộ thì\n    0/119 (529 chưa đối chiếu `ls-remote`, nên không khẳng định là đủ).', 'Trên một\n    clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113\n    (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("docstring_ti_le_D2_mat_neo", _ma('Nên số tệp trượt là số CỦA PHẠM VI ref, không phải của kho: tại 1741e0a (113 tệp lease)\n    một clone chỉ-master cho 6/113 trượt `kiem(bo_qua_han=True)` (số của executor, cross-review lượt 16 tái lập bằng kho\n    đúng một ref), bản sao đủ 552 ref cho 0/113 (reviewer lượt 1 đo trên 1687c69, cây `ops/leases` trùng 1741e0a). Đo lại tại 3569472cb9 (119 tệp lease, sau merge master 20ec8d5):\n    một ref (chỉ nhánh đang checkout) 6/119 trượt — đúng 6 tệp cũ, cùng `CHAN [8]` bia mộ — còn trên 529 ref cục bộ thì\n    0/119 (529 chưa đối chiếu `ls-remote`, nên không khẳng định là đủ).', 'Trên một\n    clone chỉ-master 6/113 tệp lease trượt `kiem(bo_qua_han=True)`, còn trên bản sao đủ 552 ref thì 0/113\n    (đo bởi reviewer lượt 1): số 6 là số CỦA PHẠM VI clone-một-nhánh, không phải của kho.'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     ("docstring_ham_mat_neo_nhi_phan", _ma("Hồ sơ không cần nhị phân (tại 3569472cb9: 0/1991", "Hồ sơ không cần nhị phân (master: 0/1991"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     ("docstring_ham_mat_neo_thoi_gian", _ma("~7 giay (do tai 3569472cb9,", "~7 giay (do tren may dev,"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     ("chu_thich_san_pham_so_khong_neo", _ma("TOI_DA_TEN_IN = 5\n", "TOI_DA_TEN_IN = 5\n# Kho co 119 tep lease.\n"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+@@ -2665,6 +2695,15 @@
+     ("bo_quet_so_khong_tach_cau", _test("for cau in MAU_TACH_CAU." + "split(p)", "for cau in [p]"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     ("bo_quet_so_chi_ti_le", _test("MAU_SO_TRONG_VAN = " + "re.compile(", 'MAU_SO_TRONG_VAN = ' + 're.compile(r"\\d{1,4}/\\d{1,4}") or re.compile('), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     ("bo_quet_so_neo_nhan_so_thuan", _test("(?=[0-9a-f]*[a-f])" + "(?=[0-9a-f]*[0-9])", "(?=[0-9a-f]*[0-9])"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    # ---- cross-review luot 16 (`bang-do-thieu-neo-va-thieu-kiem-ke`): moi duong vao/nhanh moi cua bo quet mot dot bien
++    ("bo_quet_so_neo_khong_doi_chu_so", _test("(?=[0-9a-f]*[a-f])" + "(?=[0-9a-f]*[0-9])[0-9a-f]{7,40}", "(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("bo_quet_so_tach_cau_bo_cham_phay", _test('MAU_TACH_CAU = re.compile(r"(?<=[.' + ';!?])', 'MAU_TACH_CAU = re.compile(r"(?<=[.!?])'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("bo_quet_so_tach_doan_bo_gach", _test('|\\n[ \\t]*(?=' + '·\\s)")', '")'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("bo_quet_so_bo_so_chu", _test("    so += [k.group() for k in MAU_SO_CHU_KHO" + ".finditer(cau)]\n", ""), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("bo_quet_so_chu_bo_mien_ca", _test("(?i)(?<!\\bca )" + "(?<!\\bcả )", "(?i)"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("bo_quet_thong_diep_bang", _test("cau_tai_lieu(nguon) + " + "cau_thong_bao(nguon)", "cau_tai_lieu(nguon)"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("docstring_test_so_chu_khong_neo", _test("tai 3569472cb9 co 3 tep `-whitespace` duoi `ops/reviews/`, 2/3 do PR ho\n    so them " + "(#667, #670), 1/3 di kem PR ma (#666).", "master co ba tep `-whitespace` duoi `ops/reviews/`."), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
++    ("thong_diep_bang_mat_neo", _test("(do 8/63 lan merge tai " + "1741e0a)", "(do 8/63 lan merge)"), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     ("bo_quet_so_bo_tep_test", _test('CAY / "ops" / "ci_duong_nhanh.py", CAY / "ops" / ' + '"ci_duong_nhanh_test.py")', 'CAY / "ops" / "ci_duong_nhanh.py",)'), ("t98b_moi_so_do_trong_docstring_va_chu_thich_phai_co_neo",)),
+     # ---- lop dac-ta-bo-mat-kiem-du-lieu-ho-so (luot 2): thao tac GOI ca that
+     ("ca_du_lieu_khong_goi_ham", _ma("m[ten]()", "m[ten]"), ("t22b_ca_du_lieu_phai_thuc_thi_tung_ca",)),

@@ -1,0 +1,9 @@
+{
+ "_ghi_chu": "Du lieu doc lai qua MCP github boi EXECUTOR (Claude). Reviewer offline KHONG doc lai duoc — coi la loi khai co neo, khong phai phep do doc lap.",
+ "pr666": {"merged": true, "merge_commit": "f8a7829cc44f296c25faf1a6439b603ba840f70b", "merge_commit_date": "2026-09-28T13:35:57+07:00", "merge_api": {"method": "merge", "expectedHeadSha": "bf63bb1ec485bccf8eec34cc5604f949d70fc7d6"}},
+ "audit_comment_5864536112": {"created_at": "2026-09-28T06:17:39Z", "updated_at": "2026-09-28T06:35:21Z", "boxes_checked_in_final_body": 5, "webhook_issue_comment_edited_received": "2026-09-28T06:35:22Z"},
+ "ci_pr_bf63bb1": {"run_36379712476": {"workflow": "ci.yml", "event": "pull_request", "head_sha": "bf63bb1", "jobs": {"chuan-bi": [108792748557, "success"], "gate-registry": [108792765482, "success"], "gate-packet-loop": [108792765529, "success"], "gate-ops": [108792765497, "success"], "gate": [108792765498, "success"]}}, "thu_hoi_runs": {"36379710851": "success", "36379744361": "success"}, "skipped": {"launcher_run_36379712459": "skipped", "mo_run_36379709651": "skipped"}, "mergeable_state_before_merge": "clean"},
+ "ci_master_f8a7829": {"run_36387278453": {"workflow": "ci.yml", "event": "push", "conclusion": "success", "jobs": {"chuan-bi": 108815209536, "gate-ops": 108815233211, "gate-registry": 108815233275, "gate-packet-loop": 108815233290, "gate": 108815233339}}, "run_36387278424": {"workflow": "launcher-windows.yml", "event": "push", "conclusion": "success", "jobs": {"windows-latest": 108815209421, "ubuntu-latest": 108815209553}}},
+ "lease_publish_run_36387390312": {"branch": "ops/cap-lease-650", "head_sha": "4fe61ac338408fc0758c4aa67f04f11e03f300b9", "conclusion": "success"},
+ "codex_connector_667": {"luot1_a21b9be": "3 P1 + 2 P2", "luot2_876ad29": "4 P1 + 1 P2", "luot3_f23f802": "dang chay luc soan prompt"}
+}

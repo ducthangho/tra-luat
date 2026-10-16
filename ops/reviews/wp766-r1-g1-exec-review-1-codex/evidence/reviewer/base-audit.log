@@ -1,0 +1,24 @@
+moi truong: pid=3 pgid=1 sid=1 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026532538] init=codex
+nhom tien trinh: da tach sang session moi (pgid=3)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+OBSERVED {"case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed", "site": "_chup_cay", "pid": 10, "snapshot": {"10": "", "11": ""}, "real_pid": 3}
+OBSERVED {"case": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed", "site": "_chup_cay", "pid": 10, "snapshot": {"10": "", "12": ""}, "real_pid": 3}
+  BO QUA r345_chan_socket_that_ma_than_hook_van_chay_dung: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_cac_phep_do_cuc_bo_van_dung: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_lop_tham_import_van_co_rang: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r347_tham_import_van_song_tren_python_truoc_310: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+  BO QUA r348_dot_bien_bo_isidentifier_lam_ca_dich_DO: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)
+OBSERVED {"case": "t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan", "site": "_giet_rieng", "pid": 2371, "snapshot": {"2371": "k"}, "real_pid": 3}
+OBSERVED {"case": "t157_giet_cay_khi_stat_EACCES_van_tron_ven", "site": "_chup_cay", "pid": 2378, "snapshot": {"2378": "linux:114144"}, "real_pid": 3}
+OBSERVED {"case": "t157_giet_cay_khi_stat_EACCES_van_tron_ven", "site": "_giet_rieng", "pid": 2378, "snapshot": {"2378": "linux:114144"}, "real_pid": 3}
+OBSERVED {"case": "t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM", "site": "_chup_cay", "pid": 2406, "snapshot": {"2406": "linux:114998", "2407": "linux:115001"}, "real_pid": 3}
+OBSERVED {"case": "t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM", "site": "_giet_rieng", "pid": 2406, "snapshot": {"2406": "linux:114998", "2407": "linux:115001"}, "real_pid": 3}
+OBSERVED {"case": "t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM", "site": "_giet_rieng", "pid": 2407, "snapshot": {"2406": "linux:114998", "2407": "linux:115001"}, "real_pid": 3}
+OBSERVED {"case": "t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong", "site": "_chup_cay", "pid": 2408, "snapshot": {"2409": "linux:115247"}, "real_pid": 3}
+OBSERVED {"case": "t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong", "site": "_giet_rieng", "pid": 2409, "snapshot": {"2409": "linux:115247"}, "real_pid": 3}
+
+187/187 ca DA CHAY QUA (tong 196, bo qua 9, hong 0) - KHONG DU: 9 ca BO QUA, chua do gi
+AUDIT_CASES=t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan,t157_giet_cay_khi_stat_EACCES_van_tron_ven,t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM,t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong,t81_chup_cay_windows_thieu_creationdate_phai_fail_closed

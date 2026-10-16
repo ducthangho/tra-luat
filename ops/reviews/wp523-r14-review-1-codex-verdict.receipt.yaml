@@ -1,0 +1,66 @@
+schema_version: 2
+receipt_id: wp523-r14-review-1-codex
+kind: review_delivery_receipt
+packet_id: wp523
+revision: 14
+generation_reviewed: 14
+reviewed_sha: 15d1b103e8d4dec60f96049eb5ad9b16d436d63f
+reviewed_tree: 075b11fd72867138c429eb09f403fd0dd704781c
+verdict: approve
+assurance: advisory_review
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+verdict_path: ops/reviews/wp523-r14-review-1-codex-verdict.md
+verdict_sha256: d3078a606d9fa410042c9d02536e2d3b3a9bc52705651b0c76190c6da7bb8aec
+verdict_bytes: 13103
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e83726dc8f42ba45151d57d1ffb3cc459510b976/ops/reviews/wp523-r14-review-1-codex-verdict.md
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_desktop
+  transport: machine
+  session_run_id: /root/review_wp523_r14
+  model_yeu_cau: gpt-6-astra
+  effort_yeu_cau: max
+  model_da_chay: KHONG_DO_DUOC
+  effort_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: No independent serving telemetry; fresh subagent context/clone is
+    verified separately, not an OS sandbox or model identity attestation
+  subagent_cung_phien: true
+  neo_boi_launcher: false
+github_submitter_identity:
+  actor: ducthangho
+  role: agent recorder using GitHub CLI
+  model_identity_not_inferred_from_actor: true
+anchor:
+  loai: canonical_ancestry
+  cuong_do: candidate ancestry only; canonical inclusion pending
+  gioi_han: Anchor is ancestor of this evidence candidate, not yet canonical. No squash;
+    require merge preserving raw anchor. Validator checkout ancestry does not prove
+    canonical inclusion.
+comment_delivery:
+  url: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5792291427
+  readback_byte_equal: true
+budget:
+  known_585_review_calls_including_this: 3
+  historical_total_invocations: KHONG_DO_DUOC
+  reviewer_dispatched_ci: 0
+  product_ci_after_review:
+    pull_request_run: 35843089104
+    workflow_dispatch_run: 35843253242
+    status_at_receipt: in_progress; not passed
+    historical_total_spend: KHONG_DO_DUOC
+pending:
+- receipt validator does not yet recognize actual codex_desktop surface
+- M11 evidence independent review and canonical integration
+- product CI outcome and exact-H human audit
+- land/bookkeeping
+format_reissue:
+  raw_original_sha256: 340cfaecc3f3cb0ba72c001d669f9c6b7dbf288687d01ceb997ea218f9c57b8a
+  raw_original_bytes: 13208
+  transform: 105 CRLF to LF only; Unicode identical; reviewer issued separate LF transport
+    copy; no new review round
+  raw_original_comment: https://github.com/ducthangho/tra-luat/issues/523#issuecomment-5792291427
+  initial_receipt_erratum: Initial receipt2462684 used raw CRLF hash against LF Git
+    blob; detected by validator, corrected here; old commit retained as failed history

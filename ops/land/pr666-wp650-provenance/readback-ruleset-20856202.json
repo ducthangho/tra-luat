@@ -1,0 +1,78 @@
+{
+  "id": 20856202,
+  "name": "bao-ve-cong-dang-lease",
+  "target": "branch",
+  "source_type": "Repository",
+  "source": "ducthangho/tra-luat",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [
+
+      ],
+      "include": [
+        "~DEFAULT_BRANCH"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": true,
+        "required_reviewers": [
+
+        ],
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false,
+        "require_extra_approval_for_unattributed_changes": false,
+        "allowed_merge_methods": [
+          "merge",
+          "squash",
+          "rebase"
+        ]
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": false,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "gate (ubuntu-latest)",
+            "integration_id": 15368
+          },
+          {
+            "context": "gate-packet-loop (ubuntu-latest)",
+            "integration_id": 15368
+          },
+          {
+            "context": "gate-ops (ubuntu-latest)",
+            "integration_id": 15368
+          }
+        ]
+      }
+    }
+  ],
+  "node_id": "RRS_lACqUmVwb3NpdG9yec5M15GNzgE-PYo",
+  "created_at": "2026-08-14T22:10:13.170+07:00",
+  "updated_at": "2026-09-27T20:19:13.048+07:00",
+  "bypass_actors": [
+
+  ],
+  "current_user_can_bypass": "never",
+  "_links": {
+    "self": {
+      "href": "https://api.github.com/repos/ducthangho/tra-luat/rulesets/20856202"
+    },
+    "html": {
+      "href": "https://github.com/ducthangho/tra-luat/rules/20856202"
+    }
+  }
+}

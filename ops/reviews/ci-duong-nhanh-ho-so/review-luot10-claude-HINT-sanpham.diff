@@ -1,0 +1,24 @@
+chua chay tren cay that — executor tu ap, tu do, tu chiu trach nhiem commit
+(cross-review luot 10, phan SAN PHAM; ap tu goc cay: patch -p0 --fuzz=0 < HINT-sanpham.diff)
+
+diff --git ops/ci_duong_nhanh.py ops/ci_duong_nhanh.py
+index 784ed7b8..9f0fafcb 100644
+--- ops/ci_duong_nhanh.py
++++ ops/ci_duong_nhanh.py
+@@ -267,8 +267,15 @@ def kiem_loai_tep(doi, kho=ROOT) -> list[str]:
+     có `t82` `copytree` CẢ cây (kể cả ops/{land,leases,reviews,specs}/**): symlink treo dưới allowlist làm nó ĐỎ trên
+     master trong khi mọi kiểm khác của `kiem-re` vẫn DAT. Hồ sơ không cần symlink ⇒ chặn mọi symlink, treo hay không,
+     mọi đuôi tệp. (`.gitattributes` KHÔNG bị chặn ở đây — xem D1 và `kiem_diff_check`.)"""
+-    return [f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
++    return ([f"tep ho so la symlink (duong nhanh chi nhan tep thuong): {duong!r}"
+             for duong in sorted(doi) if (Path(kho) / duong).is_symlink()]
++            # Cross-review luot 10: gitlink (mode 160000) duoi allowlist checkout thanh THU MUC — kiem_yaml/kiem_lease coi
++            # `not is_file()` la DA XOA va bo qua, `--check`/`--numstat` khong co noi dung de kiem. Master: 0 gitlink.
++            # Mot duong dan trong diff la THU MUC ma khong co con nao con trong cay nam trong diff = gitlink; tep doi thanh
++            # thu muc cung ten thi cac tep con (con trong cay) nam trong diff => khong chan oan.
++            + [f"tep ho so khong phai tep thuong (gitlink/thu muc - kiem-re khong kiem duoc noi dung): {duong!r}"
++               for duong in sorted(doi) if not (Path(kho) / duong).is_symlink() and (Path(kho) / duong).is_dir()
++               and not any(x.startswith(duong + "/") and (Path(kho) / x).is_file() for x in doi)])
+ 
+ 
+ def kiem_diff_check(env=os.environ, chay=subprocess.run, kho=ROOT) -> list[str]:

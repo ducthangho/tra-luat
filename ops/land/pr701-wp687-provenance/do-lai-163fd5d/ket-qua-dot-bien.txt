@@ -1,0 +1,147 @@
+# {"runner_sha256": "87501797224e972c12cc175e4c77e80bc4d63ce0935998bbfaf41bc48c508526", "driver_sha256": "1e974b8e06b9c65b92b2b1afb00232de9cbfba6b12a8f04ee32175b0fd7c3e07", "test_sha256_nen": "09cf6c78fae10c695436f7fb9b0803cb9295f69786377212e0dd4ff1b516816c", "lease_publish_sha256_nen": "dd17b94cb880f27ba0291fa9a020c2ee3465dd55b13195f99424dfa10c834f83", "python": "3.11.15", "so_dot_bien": 118}
+NEN                                                  t70   kv=SONG         SONG         OK  |
+NEN                                                  t160  kv=SONG         SONG         OK  |
+NEN                                                  t178  kv=SONG         SONG         OK  |
+NEN                                                  t193  kv=SONG         SONG         OK  |
+NEN                                                  t194  kv=SONG         SONG         OK  |
+NEN                                                  t195  kv=SONG         SONG         OK  |
+NEN                                                  t196  kv=SONG         SONG         OK  |
+NEN                                                  t197  kv=SONG         SONG         OK  |
+NEN                                                  t198  kv=SONG         SONG         OK  |
+NEN                                                  t203  kv=SONG         SONG         OK  |
+s1:M1-bo-kiem-so                                     t193  kv=GIET         GIET         OK  | M3 t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO sổ THIẾU: rc=0, "_DO 0.016s BO_QUA\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO:
+s1:M2-bo-include                                     t193  kv=GIET         GIET         OK  | (c/d) include thêm windows: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:06Z\n<<< ra t5
+s1:M3-prefix                                         t193  kv=GIET         GIET         OK  | (c/d) ubuntu-not-a-runner: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:09Z\n<<< ra t51
+s1:M4a-so-tan-cong                                   t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t_ca_tan_cong'], lệch cặp=[]
+s1:M4b-so-t01                                        t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t01_lease_hop_le_thi_QUA'], lệch cặp=[]
+s1:M3a-bo-t196                                       t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua'], thừa=[], lệch cặp=[]
+s1:M3b-them-t199                                     t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai'], lệch cặp=[]
+s1:M3c-them-t201                                     t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai'], lệch cặp=[
+s1:M3d-t200-sai-job                                  t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=['t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung']
+s1:M8-bo-exclude                                     t193  kv=GIET         GIET         OK  | (c/d) exclude: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:18Z\n<<< ra t51_lease_giua_
+s1:M11-include-thieu-khoa                            t193  kv=GIET         GIET         OK  | (c/d) include sinh tổ hợp thiếu os: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:20Z\n<
+s1:R15-main-tin-so                                   t193  kv=GIET         GIET         OK  | (c/d) include thêm windows: phải ĐỎ vì bộ giải, được rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:21Z\n<<< ra t5
+s1:R20-absolute                                      t193  kv=GIET         GIET         OK  | A5 alias .. trỏ CÙNG tệp phải được miễn: rc=1, "o ('ops-publish-lease.yml', 'dang')\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua
+s1:P1-chi-tep                                        t193  kv=GIET         GIET         OK  | (b) cặp (/tmp/lp_o6rs7o91/hai.yml, ghi) khác sổ mà được miễn/đỏ sai lý do: rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-0
+s1:P2-chi-job                                        t193  kv=GIET         GIET         OK  | (b) cặp (/tmp/lp_ckd5gl6h/k/ops-publish-lease.yml, dang) khác sổ mà được miễn/đỏ sai lý do: rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_
+s1:Q-no-thi-mien                                     t193  kv=GIET         GIET         OK  | (c/d) job vắng: được rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:24Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_h
+s1:T1-strategy-kieu                                  t193  kv=GIET         GIET         OK  | (c/d) strategy sai kiểu: bộ giải phải trả None/nhãn ngoài danh sách, không ném: AttributeError("'str' object has no attribute 'get'")
+s1:T2-matrix-kieu                                    t193  kv=GIET         GIET         OK  | (c/d) matrix là biểu thức: bộ giải phải trả None/nhãn ngoài danh sách, không ném: AttributeError("'str' object has no attribute 'get'")
+s1:N5-include-kieu                                   t193  kv=GIET         GIET         OK  | (c/d) literal + include là chuỗi: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:27Z\n<<<
+s1:U1-literal-som                                    t193  kv=GIET         GIET         OK  | (c/d) fixed_exclude: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:30Z\n<<< ra t51_lease
+s1:U2-list-som                                       t193  kv=GIET         GIET         OK  | (c/d) list_exclude: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:31Z\n<<< ra t51_lease_
+s1:U3-truc-kieu                                      t193  kv=GIET         GIET         OK  | (c/d) bad_other_axis: phải ĐỎ vì bộ giải, được rc=0, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:31Z\n<<< ra t51_leas
+s1:M5-bo-goi-verifier                                t160  kv=GIET         GIET         OK  | t125 phải xác minh CẢ HAI vế, truyền rc, TRƯỚC khi so: []
+s1:M5-bo-goi-verifier                                t194  kv=GIET         GIET         OK  | nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None
+s1:R17-bo-kiem-rc                                    t194  kv=GIET         GIET         OK  | vế ĐỎ 'rc 7 mà không ca ĐỎ': chờ lý do chứa 'mã thoát 7', nhận []
+s1:R18-t125-bo-rc                                    t160  kv=GIET         GIET         OK  | t125 phải xác minh CẢ HAI vế, truyền rc, TRƯỚC khi so: [(False, None), (False, None)]
+s1:R18-t125-bo-rc                                    t194  kv=GIET         GIET         OK  | nối: hai con đủ ca, rc=7 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None
+s1:R16-bo-doichieu-BOQUA                             t194  kv=GIET         GIET         OK  | vế ĐỎ 'dòng BỎ QUA mà ra là QUA': chờ lý do chứa 'dòng BỎ QUA lệch', nhận []
+s1:N3-bo-doichieu-DO                                 t194  kv=GIET         GIET         OK  | vế ĐỎ 'ĐỎ thiếu dòng ĐỎ': chờ lý do chứa 'dòng ĐỎ lệch', nhận []
+s1:M6-chi-dem-marker                                 t194  kv=GIET         GIET         OK  | vế ĐỎ 'trùng tên, đủ số ca': chờ lý do chứa "trùng=['tb']", nhận []
+s1:M7-bo-tk-vs-dem                                   t194  kv=GIET         GIET         OK  | vế ĐỎ 'tổng kết lệch marker': chờ lý do chứa 'lệch marker', nhận []
+s1:M9-bo-BOQUA-trong-so                              t194  kv=GIET         GIET         OK  | vế ĐỎ 'bỏ qua ngoài sổ': chờ lý do chứa 'ngoài sổ', nhận []
+s1:M10-bo-dung-mot-tk                                t194  kv=GIET         GIET         OK  | vế ĐỎ 'hai dòng tổng kết': chờ lý do chứa 'ĐÚNG MỘT', nhận []
+s1:N1-bo-ca-trung                                    t194  kv=GIET         GIET         OK  | vế ĐỎ 'CA kỳ vọng trùng': chờ lý do chứa 'kỳ vọng TRÙNG', nhận []
+s1:N2-bo-ra-hop-le                                   t194  kv=GIET         GIET         OK  | vế ĐỎ 'trạng thái lạ': chờ lý do chứa 'hỏng trạng thái', nhận []
+s1:N7-regex-khong-CR                                 t194  kv=GIET         GIET         OK  | vế QUA 'CRLF + dòng chẩn đoán xen giữa marker' bị chặn oan
+s1:N4-t125-bo-chan                                   t160  kv=GIET         GIET         OK  | classifier chỉ nhận cặp ĐÃ xác minh, đúng tuple theo nhãn không-actor rồi có-actor: [call((0, '198', '198', frozenset(), frozenset()), (1, '198', '198
+s1:N4-t125-bo-chan                                   t194  kv=GIET         GIET         OK  | nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None
+s1:N6-ten-tu-transcript                              t194  kv=GIET         GIET         OK  | nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None
+s1:R21-nen-ghi-osname                                t193  kv=TIN_DUNG_GIA TIN_DUNG_GIA OK  | cannot instantiate 'WindowsPath' on your system
+s1:R21-nen-ghi-osname                                t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['os.name (nen=nt)', 'os.name (nen=nt)', 'os.name (nen=nt)']
+s1:R22-chon-ghi-CA                                   t193  kv=SONG         SONG         OK  |
+s1:R22-chon-ghi-CA                                   t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)']
+s1:R23-so-ghi-so-that                                t193  kv=GIET         GIET         OK  | (e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc=1, ">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:40Z\n<<< r
+s1:R23-so-ghi-so-that                                t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=nt)', 'SO_BO_QUA (nen=posix)']
+s2:R15p-tin-so-MAC-DINH                              t193  kv=GIET         TIN_DUNG_GIA LECH | (e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:42Z\n<<< r
+s2:R20p-symlink-only                                 t193  kv=GIET         GIET         OK  | A5 alias symlink trỏ CÙNG tệp phải được miễn: rc=1, " 'dang'), sổ cho ('ops-publish-lease.yml', 'dang')\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nh
+s2:V2-tk-khong-neo                                   t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+s2:V4-su-kien-khong-neo                              t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+s2:V5-ra-khong-neo                                   t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+s2:V6-do-khong-neo                                   t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+s2:V7-bo-kiem-thoi-luong                             t194  kv=GHI          TIN_DUNG_GIA OK  | vế ĐỎ 'bỏ qua ngoài sổ': chờ lý do chứa 'ngoài sổ', nhận ['dòng BỎ QUA lệch kết quả `<<< ra` (BỎ QUA=[])', "tổng kết lệch marker: dòng ghi ('2', '2',
+s2:V8-rc-chi-ca-do                                   t194  kv=GIET         GIET         OK  | vế ĐỎ 'rc 0 mà có ca ĐỎ': chờ lý do chứa 'mã thoát 0', nhận []
+s2:L4a-seam-ghi-environ                              t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ
+s2:L4b-seam-ghi-global-allow                         t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']
+s2:L4c-seam-chdir                                    t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']
+s2:L4d-seam-ghi-WORKFLOW_DANG                        t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']
+s2:L4e-seam-sua-NHAN-tren-sys.path                   t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)'
+s2:L4f-so-ghi-gia-tri-trong-sổ(in-place-doi-tuple)   t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=posix)']
+s2:L4g-chon-chen-vao-CA-roi-xoa-giu-doi-tuong        t203  kv=SONG         SONG         OK  |
+s2:L4h-seam-doi-stdout                               t203  kv=SONG         SONG         OK  |
+s5:R24-seam-ghi-argv                                 t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)'
+s5:R25-nen-dinh                                      t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, "2:49Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\n  BỎ
+s5:R26-chon-dinh                                     t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, '>>> vao <lambda> 2026-10-01T06:42:49Z\n<<< ra <lambda> 0.000s QUA\n\nlease_publish:
+s5:R27-so-dinh                                       t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=1, "o t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-
+s6:R25L-nen-dinh-LAST-wins                           t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, "2:49Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.017s BO_QUA\n  BỎ
+s6:R25F-nen-dinh-FIRST-wins                          t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, "2:49Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\n  BỎ
+sA:L1a-ind-1tang-chua-dky                            t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t999_gian_tiep_qua_helper'], thừa=[], lệch cặp=[]
+sA:L1a-ind-1tang-chua-dky                            t70   kv=SONG         SONG         OK  |
+sA:L1b-ind-3tang-chua-dky                            t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t999_gian_tiep_3tang'], thừa=[], lệch cặp=[]
+sA:L1b-ind-3tang-chua-dky                            t70   kv=SONG         SONG         OK  |
+sA:L1c-ind-1tang-da-dky                              t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=[]
+sA:L1c-ind-1tang-da-dky                              t70   kv=SONG         SONG         OK  |
+sA:L1d-ind-3tang-da-dky                              t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=[]
+sA:L1d-ind-3tang-da-dky                              t70   kv=SONG         SONG         OK  |
+sA:L1e-GO-chot-uv+1tang                              t193  kv=SONG         SONG         OK  |
+sA:L1e-GO-chot-uv+1tang                              t70   kv=SONG         SONG         OK  |
+sA:L1f-GO-chot-uv+3tang                              t193  kv=SONG         SONG         OK  |
+sA:L1f-GO-chot-uv+3tang                              t70   kv=SONG         SONG         OK  |
+sA:L1g-GO-vedonvi-uv                                 t193  kv=SONG         SONG         OK  |
+sA:L1h-vedonvi-tang3                                 t193  kv=GIET         GIET         OK  | ứng viên phải tính cả ca gọi helper BỌC `_chay_buoc_dang*` (gián tiếp, nhiều tầng), không tính ca không gọi
+sA:L1i-def-long-chua-dky                             t193  kv=SONG         SONG         OK  |
+sA:L1i-def-long-chua-dky                             t70   kv=SONG         SONG         OK  |
+sA:L2-V2                                             t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+sA:L2-GO-vey+V2                                      t194  kv=SONG         SONG         OK  |
+sA:L2-V4                                             t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+sA:L2-GO-vey+V4                                      t194  kv=SONG         SONG         OK  |
+sA:L2-V5                                             t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+sA:L2-GO-vey+V5                                      t194  kv=SONG         SONG         OK  |
+sA:L2-V6                                             t194  kv=GIET         GIET         OK  | vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan
+sA:L2-GO-vey+V6                                      t194  kv=SONG         SONG         OK  |
+sA:L3a-R25L                                          t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, "3:01Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\n  BỎ
+sA:L3a-GO-luot5+R25L                                 t203  kv=SONG         SONG         OK  |
+sA:L3b-R25F                                          t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, "3:02Z\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.010s BO_QUA\n  BỎ
+sA:L3c-environ                                       t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ
+sA:L3c-GO-anh+environ                                t203  kv=TIN_DUNG_GIA SONG         LECH |
+sA:L3d-environ-xoa                                   t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ
+sA:L3e-cwd                                           t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']
+sA:L3e-GO-anh+cwd                                    t203  kv=TIN_DUNG_GIA SONG         LECH |
+sA:L3f-syspath-insert                                t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)'
+sA:L3f-GO-anh+syspath                                t203  kv=TIN_DUNG_GIA SONG         LECH |
+sA:L3g-syspath-xoa                                   t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)'
+sA:L3h-global-rebind-allow                           t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']
+sA:L3h-GO-anh+global                                 t203  kv=TIN_DUNG_GIA SONG         LECH |
+sA:L3i-global-moi-ten                                t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']
+sA:L3j-global-xoa-ten                                t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']
+sA:L3k-global-inplace-dict                           t203  kv=SONG         SONG         OK  |
+sA:L3l-global-inplace-set                            t203  kv=SONG         SONG         OK  |
+sA:L3m-global-inplace-list                           t203  kv=SONG         SONG         OK  |
+sA:L3n-sys.modules                                   t203  kv=SONG         SONG         OK  |
+sA:L3o-umask                                         t203  kv=SONG         SONG         OK  |
+sA:R21                                               t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['os.name (nen=nt)', 'os.name (nen=nt)', 'os.name (nen=nt)']
+sA:R22                                               t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)']
+sA:R23                                               t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=nt)', 'SO_BO_QUA (nen=posix)']
+sA:R24                                               t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)'
+sA:R26                                               t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, '>>> vao <lambda> 2026-10-01T06:43:07Z\n<<< ra <lambda> 0.000s QUA\n\nlease_publish:
+sA:R27                                               t203  kv=GIET         GIET         OK  | lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=1, "o t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-
+sA:L4f                                               t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=posix)']
+sSOLO:SOLO-GO-os.environ+environ                     t203  kv=SONG         SONG         OK  |
+sSOLO:SOLO-GO-cwd+environ(doi-chung)                 t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ
+sSOLO:SOLO-GO-cwd+cwd                                t203  kv=SONG         SONG         OK  |
+sSOLO:SOLO-GO-sys.path+cwd(doi-chung)                t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']
+sSOLO:SOLO-GO-sys.path+syspath                       t203  kv=SONG         SONG         OK  |
+sSOLO:SOLO-GO-globals+syspath(doi-chung)             t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)'
+sSOLO:SOLO-GO-globals+global                         t203  kv=SONG         SONG         OK  |
+sSOLO:SOLO-GO-os.environ+global(doi-chung)           t203  kv=GIET         GIET         OK  | seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']
+moi:M4c-so-ten-la                                    t193  kv=GIET         GIET         OK  | sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t999_ten_la_khong_ton_tai'], lệch cặp=[]
+moi:L-677                                            t178  kv=GIET         TIN_DUNG_GIA LECH | `lease_id` là `None`: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng — và phép dò phải TRẢ VỀ, không được vỡ. Mã thoát của cổng tổng KHÔNG phân bi
+moi:L-677                                            t195  kv=GIET         GIET         OK  | M2 tập (i): nền phải rc=1, 0 lời gọi gh, 0 POST ở cả 14 ô (dãy lời gọi nền = rỗng); lệch: null/Issue/trống: rc=1 goi=[('GET', 'repos/o/r/issues/55/com
+moi:L-677                                            t196  kv=GIET         GIET         OK  | M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: true/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True; 1.5/PR/có d
+moi:L-677                                            t197  kv=GIET         GIET         OK  | M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: true/Issue/có dấu/hết hạn: rc=0 POST=0 bỏ_qua=True; 1.5/I
+moi:L-677                                            t198  kv=SONG         SONG         OK  |
+moi:DC1-TypeError-truoc-chot                         t193  kv=TIN_DUNG_GIA TIN_DUNG_GIA OK  | unsupported operand type(s) for |: 'set' and 'int'
+moi:DC2-bang-helper-chung                            t194  kv=TIN_DUNG_GIA TIN_DUNG_GIA OK  | DC2 helper chung
+moi:DC3-except-doi-thanh-chot                        t203  kv=TIN_DUNG_GIA TIN_DUNG_GIA OK  | seam của main() NÉM thay vì trả rc: ['nen=nt: RuntimeError', 'nen=posix: RuntimeError', 'nen=nt: RuntimeError', 'nen=posix: RuntimeError', 'nen=nt: Ru
+TONG: 135 cap (dot bien, ca dich) tren 118 dot bien | {'GIET': 95, 'TIN_DUNG_GIA': 7, 'SONG': 33} | lech ky vong: 6 | nen: [('t70', 'SONG'), ('t160', 'SONG'), ('t178', 'SONG'), ('t193', 'SONG'), ('t194', 'SONG'), ('t195', 'SONG'), ('t196', 'SONG'), ('t197', 'SONG'), ('t198', 'SONG'), ('t203', 'SONG')]

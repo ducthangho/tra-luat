@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 180,
-  "total_bytes": 8257416,
-  "package_hash": "fb00a25be64955c1afbf13fa0bfd34b3004558d750642cc8aa325ee0c10ac032",
-  "content_hash": "fb00a25be64955c1afbf13fa0bfd34b3004558d750642cc8aa325ee0c10ac032",
+  "file_count": 187,
+  "total_bytes": 8762760,
+  "package_hash": "8656dca8b9d7c53b65ab4cdeda5e0710326467783c8b78bb680c17b231be63f2",
+  "content_hash": "8656dca8b9d7c53b65ab4cdeda5e0710326467783c8b78bb680c17b231be63f2",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 963094,
-      "sha256": "08d1039d752f2854e11983abf58378dfd385f726c2687b9ea03e2338f1f5ae6a"
+      "size": 1111587,
+      "sha256": "738642fc9dcacfff3f9ade0aff6406c716ce0e3847619fb0598296b9c48cbeac"
     },
     {
       "path": "CONTEXT.md",
@@ -55,6 +55,31 @@
       "path": "agents/openai.yaml",
       "size": 224,
       "sha256": "37a33538a5cc2d9cf31089b74cb6f8a9f64b7ce08e9bc3880cf49ec3b8474843"
+    },
+    {
+      "path": "changelog.d/wp-710.md",
+      "size": 7560,
+      "sha256": "1efc3dbee8f3549e53bf73656914cfa80a55c4a452aeff19a6d7b381cdfa8cf8"
+    },
+    {
+      "path": "changelog.d/wp-725.md",
+      "size": 1954,
+      "sha256": "141f4a2c1ffa73ea0ae29583f4f9431896f161b6ecdddb805a9a98efc4ee4ebe"
+    },
+    {
+      "path": "changelog.d/wp-726.md",
+      "size": 3103,
+      "sha256": "5e50a98d1d70a79265a861a5c8dd69f24a577299530af19aff9d82d035af8869"
+    },
+    {
+      "path": "changelog.d/wp-727.md",
+      "size": 1037,
+      "sha256": "b662efcc3b0e807507a4021ae29d474d2563033435267f55a37b5b8b161b2b45"
+    },
+    {
+      "path": "changelog.d/wp-766.md",
+      "size": 1250,
+      "sha256": "e15e736659a6c9dd08bbf51693a35171530ab7023b28c6342151b2fcaaa91f28"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -88,8 +113,8 @@
     },
     {
       "path": "references/COWORK_PROJECT.md",
-      "size": 7356,
-      "sha256": "bc6c9cfdd187b089b3d87438c5ebd9614166f72a599ac9b3274a20fd3372f163"
+      "size": 8024,
+      "sha256": "4fb7c036637891803f9d7fc6c453d9d5778336750c134fc903aafb3b302f102e"
     },
     {
       "path": "references/Code.2.21.2o.gs",
@@ -178,8 +203,8 @@
     },
     {
       "path": "references/RUNBOOK.md",
-      "size": 59994,
-      "sha256": "4352da17253f9536527f11058ae42de6e3d7253a3aab0d1baabd636aabc5678e"
+      "size": 86217,
+      "sha256": "6bb3c7650aee1189aad1b143b42b4cf9f248e8892587accd492e4837d3d6bbfa"
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",
@@ -314,7 +339,7 @@
     {
       "path": "references/golden/parser_surface.json",
       "size": 16882,
-      "sha256": "9c5ea696c980d459830f25efff9d32cb02ae52490e4f039e515851ca1e8c036d"
+      "sha256": "a84fcb4803af84bfb4dcb747787ce8b107f4276a9ab8b87cf6dbca904da091ae"
     },
     {
       "path": "references/golden/route_task_ingest_zip.json",
@@ -498,8 +523,8 @@
     },
     {
       "path": "requirements.txt",
-      "size": 4257,
-      "sha256": "402c04d9b2f656b5ee6b5b11fdd88d908e64df10f83d7ab7a6730cda07df04e3"
+      "size": 4553,
+      "sha256": "97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657"
     },
     {
       "path": "scripts/_fallback/README.md",
@@ -568,8 +593,8 @@
     },
     {
       "path": "scripts/env-reimport.sh",
-      "size": 7892,
-      "sha256": "cefdd69673bd491b92b20e5777ad7374c75c6239c68e34b85861f6d7f107fd05"
+      "size": 9859,
+      "sha256": "8c479822cf1598dcbe6aa2b795fce1c4758dca93874b31fc5df2a56e1273239b"
     },
     {
       "path": "scripts/gas.py",
@@ -618,13 +643,23 @@
     },
     {
       "path": "scripts/nlm-auth-import.sh",
-      "size": 12837,
-      "sha256": "c9cdb10ed5eb50f0eacf8f0f1262759f22da0a79a636b255fee5fe70b468b0b7"
+      "size": 14354,
+      "sha256": "0a5b43e773bc55057640a1a8993fa56386d4f1e53c3d568a31fe6677d785d4c7"
     },
     {
       "path": "scripts/nlm-auto-refresh.sh",
-      "size": 4870,
-      "sha256": "bc0b55184ab7949d123f9c35c90b3d26f194d2fb67de4a591c6884a50e7f16d9"
+      "size": 7263,
+      "sha256": "06b40a1bd4b76b34279a65e6357803df027075bf9077e5a2d4fa054cdda1c687"
+    },
+    {
+      "path": "scripts/nlm-credential-refresh.Tests.ps1",
+      "size": 99335,
+      "sha256": "7f6e56362e2bea7a2033a8995aa779f12e0141ca4e2c950401a962863a46f1a8"
+    },
+    {
+      "path": "scripts/nlm-credential-refresh.ps1",
+      "size": 66861,
+      "sha256": "33d32769897f97644985def693a6c54c70d2dc4048aed242b557cf4df1e8da5d"
     },
     {
       "path": "scripts/nlm_auth_convert.py",
@@ -708,8 +743,8 @@
     },
     {
       "path": "scripts/tl_core/cli.py",
-      "size": 52271,
-      "sha256": "d35ebe744c211275d1431a4eefe4f8e2d653e5d67aa8782f2a5ec99fff9e7779"
+      "size": 52373,
+      "sha256": "5cf1d31bed3061bf9b41b59dfa61422a896e3082b7c464e1379c30104a633906"
     },
     {
       "path": "scripts/tl_core/command_registry.py",
@@ -808,8 +843,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 83336,
-      "sha256": "a76c2dfb98b436bc0466a6446c73c4c7c96959fdeb987bc464f4f14fff6bd354"
+      "size": 83993,
+      "sha256": "ef0e7ef8a5b68b93d5f4a7c9ebbf9156b7be72baa449f981e9d0073a4239640b"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -853,18 +888,18 @@
     },
     {
       "path": "scripts/tl_gws.py",
-      "size": 118055,
-      "sha256": "0887d7dbfbacbfb32b314c2a334c2cf1bb82cff8920f56e2a854ca315e0250fa"
+      "size": 140097,
+      "sha256": "327f64a8873cdce325dd8d52b2ffc8c5a0a0b56588a4dd47ee1d49b976b0ff6c"
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2136983,
-      "sha256": "869c2f0b239196d466ff5dad9f844901e68793ab4203be6fd5c1c29297ed4599"
+      "size": 2221870,
+      "sha256": "3ee38b4b85d242faea65b27153941a1da15cd44c044bd129850851980d3fcc8b"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 16464,
-      "sha256": "eb4d36e75e81c244c31814859fc1ce237436cc866cc9fae1e494d23c5347fa13"
+      "size": 51463,
+      "sha256": "af0bc88ecdd3e85aa2af1c75958c377a02a9eea5eacb13667194eeaec773387d"
     },
     {
       "path": "scripts/tra_cuu.py",

@@ -1,0 +1,163 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 3 của PR #526 (packet #522, TRAN-VONG-REVIEW-LEN-BON
+# revision 3), KHÁC NỀN (codex), theo LỚP, trên head `7bdd8ad`. approve 0/0/0, 0 thể hiện.
+# Đây là biên nhận ĐẦU TIÊN của packet #522: hai lượt trước không có biên nhận nào trong kho vì
+# `ops/reviews/` chưa nằm trong write set, và hai `VERDICT.md` của chúng đã chết theo container.
+
+schema_version: 2
+receipt_id: pr526-review-3-codex-20260912-f466d135
+kind: review_delivery_receipt
+packet_id: '522'
+packet_slug: 'TRAN-VONG-REVIEW-LEN-BON'
+# `packet_id` là SỐ HIỆU ISSUE vì đó là khoá `packet_loop.py bien-nhan --packet` tra, và `A10`
+# của đặc tả r3 (đã ĐÓNG BĂNG) khai đúng lời gọi `--packet 522`. Tiền lệ số trong kho: các biên
+# nhận mang `packet_id` '249', '298', '405'. Tên đọc được giữ ở `packet_slug`, đúng quy ước các
+# biên nhận đang dùng trường ấy (N5-LENH-HOOK-WINDOWS, T33-DOI-SHELLCHECK...), nên tra bằng
+# `--packet TRAN-VONG-REVIEW-LEN-BON` cũng khớp. Bộ đối sánh nhận HAI trường, so BẰNG tuyệt đối.
+lease_id: tran-vong-review-len-muoi-exec-3-claude-20260912
+phase_key: TRAN-VONG-REVIEW-LEN-MUOI-R3-GEN3-PHIEN-20260912
+luot: 3
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+verdict_path: ops/reviews/pr526-review-3-codex-verdict.md
+verdict_sha256: 3edee44df70479bb5cb3c2eb4c081eae13109285baef520a70ab1d86c92979d2
+verdict_bytes: 25283
+reviewed_sha: 7bdd8ad60ba257ea3a80848846ef82d85a17d870
+reviewed_base: bb7013c7669da19304a8769e5b25f8c1f8951e9c
+evidence_url: https://github.com/ducthangho/tra-luat/blob/b0a98a415953d756b98e9d62a5a421edb7b7bb85/ops/reviews/pr526-review-3-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `b0a98a4` — commit ĐẦU TIÊN chứa tệp verdict. Bản chiếu công khai trên PR #526 đăng
+  SAU commit này; bản chiếu nói thẳng rằng nguồn có thẩm quyền là tệp có băm, không phải comment.
+
+phan_loai_finding: theo_lop
+phan_loai_finding_ghi_chu: >-
+  `so_p1`/`so_p2`/`so_p3` đếm số LỚP (một lớp = một cơ chế sinh cùng hình dạng lỗi), `so_the_hien`
+  là tổng thể hiện, `findings_ids` là slug LỚP. Lượt này cả bốn số đều 0.
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_the_hien: 0
+findings_ids: []
+
+noi_dung_do_duoc_van_dung:
+  - 'ĐỐI CHIẾU LƯỢT TRƯỚC — cả BA lớp phán canonical ĐÃ VÁ THẬT, giữ NGUYÊN slug: `khai-cong-vuot-qua-ma` (ADR-0048:24–60 bỏ lời hứa cổng tự từ chối, nghĩa vụ khai `nang_tran` + bốn trường còn nguyên ở :19–20) · `a2-doan-cach-viet-so` (r3 bỏ yêu sách script đo được TÍNH CHẤT; reviewer tự phân loại 38 dòng ứng viên trong 8 tệp, không tìm thấy bản sao trần mới ngoài ADR-0048) · `so-do-zero-gop-ten-truong` (bảng :28–35 tách từng tên và khai đơn vị CẢ HAI cột; đo lại khớp cả sáu tên, cả ba đơn vị).'
+  - 'BẢNG SĂN 8 hướng ĐỘC LẬP (trần prompt là 6), mỗi hướng có lệnh + output thật. Bảy hướng đo được. Đáng chú ý: hướng 1 và 3 chạy hàm thật trên fixture MỚI (gỡ khoá `docs` ⇒ chỉ `r291` đỏ; gỡ khoá `.agents` ⇒ chỉ `r357` đỏ) nên hai ca phân biệt được, không cùng đỏ vì lý do sai; hướng 2 đo ca `docs`/gói đổi NGƯỢC CHIỀU mà tổng giữ 253 ⇒ `r291` `ok3` và `ok4` đều false, tức cổng không bị lừa bởi một tổng đúng; hướng 4 sửa nội dung GIỮ NGUYÊN kích thước trong một tệp gói khác `tl_selftest.py` ⇒ vẫn bị SHA bắt.'
+  - 'Hướng 8 trả KHÔNG ĐO ĐƯỢC và trả đúng như vậy: con số 13 vòng của `#508` chỉ xác minh được 5 receipt trong cây, và reviewer khai thẳng "5 receipt là cận dưới, KHÔNG chứng minh 13 sai" — không dùng quan hệ `13 > 4` để nhận con số. Riêng `#517` KHÔNG PHẢI LỖI: ba hiện vật phân biệt được và có byte khớp.'
+  - 'Hướng 5 tự tìm được tệp lease bền trong mirror (`git show origin/ops/cap-lease-522-523:ops/leases/tran-vong-review-len-muoi-exec-3-claude-20260912.yaml`) và xác nhận `revision=3`, `generation=3`, `spec_hash` khớp, `write_set` đủ 4 exact + `ops/reviews/`. Nó cũng tách được hai giai đoạn lifecycle: `S8` ghi "ADR-0048 SAU KHI LAND; trước đó ADR-0043 + khối nang_tran", nên nhánh trần 10 là kết quả luật MỚI khi có hiệu lực, KHÔNG phải quyền dùng bản PR chưa land làm luật cho bước land của chính nó.'
+  - 'Hướng 6 kiểm `ngoai_le_adr_0044` có che một mở rộng mã ngoài slot hay không: bốn tên khớp CHÍNH XÁC write_set 1–4, 167 ≤ 300, không chạm ca nào khác trong `tl_selftest.py`; `ops/reviews/` chưa có delta lúc review nên miễn trừ hiện vật không đang che một thay đổi sản phẩm.'
+  - 'Hướng 7 kiểm sản phẩm của phép merge (khác hướng 4 kiểm khả năng phát hiện): không có residue conflict, không có metadata tổng hợp từ phía sai, không cộng đôi trong artefact đang review.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: 'KHONG_KHAI — không truyền `-m`; một `--model` không tồn tại vẫn trả rc=0 nên truyền tên đoán là tự tạo lỗ'
+  model_da_chay: 'KHONG_DO_DUOC — `codex exec` không xuất `modelUsage`; reviewer TỰ KHAI "GPT-6 theo cấu hình phiên" trong VERDICT.md. Lời tự khai, không phải phép đo.'
+  effort: 'KHONG_KHAI'
+  session_run_id: f466d135
+  run_id_day_du: f466d135534244c1b888c9c0c44811b9
+  prompt_sha256: 23f9c943526a5270fa2cd763e944ba4e6af21d6b0238f387f251c52d7afd4ed6
+  bat_dau_utc: '2026-09-12T11:48:26.375899+00:00'
+  ket_thuc_utc: '2026-09-12T12:00:35.137093+00:00'
+  thoi_luong_giay: 728.761
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 307
+  stdout_sha256: 1d1b61a042bd6c7045e2d489bb11ddda33494844fa9d538b786555d43950e2fe
+  stderr_byte: 575920
+  stderr_sha256: 9f02fa56a31d3898fa6e2fd7cf64d4d3b3331ea735234f3e0fd4e90a2a480163
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với `run.json` (ngoài kho, `/tmp/claude-0/runs/f466d135/`): `run_id`/`short_id`,
+    `prompt_sha256` (khớp `--expected-prompt-sha256` mà launcher chốt TRƯỚC khi sinh con, và khớp
+    băm `PROMPT.md` đo độc lập), `bat_dau_utc`, `ket_thuc_utc`, `thoi_luong_giay`, `ma_thoat`,
+    `trang_thai`, `transport` (`machine`), `worktree_sach: true`, `head` (`7bdd8ad`), `commit_goc`
+    (`394e9346`), `remotes` (`github.com/ducthangho/tra-luat`), ba probe `workspace`/`ghi`/`spawn`
+    đều `DAT`. `stdout_byte`/`stderr_byte` + hai sha256 do launcher ghi. KHÔNG có khoá nào trong đó
+    chứng thực MODEL thực chạy.
+  vi_sao_ba_so_nay_duoc_ghi: >-
+    `trang_thai=xong` CHỈ nghĩa là con thoát mã 0, KHÔNG nghĩa việc đã làm — kho đã đo được một lượt
+    `xong`/`ma_thoat=0` mà agent dừng ngay bước đầu. Thứ tố cáo là THỜI LƯỢNG và KÍCH THƯỚC ĐẦU RA,
+    nên ghi thẳng: 728,761 s và 575 920 B stderr, khác hẳn ca no-op 43 giây.
+
+nang_luc_do_cua_goi:
+  mirror: >-
+    Mirror git ĐẦY ĐỦ trong sandbox: `kho.git` bare + `cay-kho` detached đúng `7bdd8ad`,
+    `is-shallow=false`, `core.abbrev 7` đã ghim, `origin` đã `remote set-url` về URL HTTPS thật
+    (clone từ đường dẫn cục bộ để lại `origin` là đường dẫn và `launcher.py` từ chối `rc=11`).
+    Tập ref mirror ↔ kho nguồn: `diff` RỖNG, khớp hoàn toàn.
+  so_hai_nguon_truoc_khi_clone: >-
+    Chạy TRÊN KHO NGUỒN, TRƯỚC bước clone (trong sandbox thì phép so ấy vô nghĩa vì không có mạng):
+    `ls-remote --heads` 355 ↔ `for-each-ref refs/remotes/origin` 356, `comm -23` = 0 dòng ⇒ KHÔNG MÙ.
+    So bằng TẬP TÊN, không bằng `wc -l`; một ref thừa cục bộ là nhánh chỉ định chưa push, vô hại —
+    chiều lệch mới là kết luận, không phải con số.
+  doi_chieu_cong_nen_sandbox: >-
+    Tại CÙNG MỘT COMMIT (nền dựng bằng `git worktree --detach` tại đúng `reviewed_sha`, sandbox là
+    clone — hai vế khác ĐÚNG MỘT biến): `doc-claims-check --strict` 0/0 · `release-verify --strict`
+    0/0 · `adr-song` 0/0 · `docs/**/*.md` 73/73. Hai mã thoát bằng nhau CHƯA chứng minh môi trường
+    tương đương; đã đối chiếu ĐÚNG ba cổng đó, không khái quát hơn.
+  chua_do_duoc: >-
+    Sandbox không có mạng. Mọi sự kiện GitHub (comment, CI, `thu-hoi`, merge), `ls-remote`, và byte
+    thật trên GitHub đều KHÔNG ĐO ĐƯỢC từ trong đó — chỉ có trong `EVIDENCE.md`, tức nguồn (b).
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: >-
+    Reviewer ghi `measurements/a2-inventory.txt` và `measurements/inventory.py` trong sandbox NGOÀI
+    kho; chúng sẽ chết theo container. Nội dung kết luận đã được gói vào chính `VERDICT.md`.
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: >-
+    `run.json` `worktree_sach: true`. Phiên điều phối đo ĐỘC LẬP sau khi lượt kết thúc, ở CẢ HAI
+    phía: `git -C cay-kho status --porcelain` RỖNG và `git -C cay-kho log --oneline 7bdd8ad..HEAD`
+    RỖNG; kho THẬT cũng `status --porcelain` RỖNG và head vẫn `7bdd8ad`. Reviewer tự khai không tra
+    mạng/GitHub, không đọc transcript phiên, không soạn payload tấn công hay đường thoát cây.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization. Bản chiếu
+    đăng bằng MCP GitHub với `GITHUB_PAT` của chủ kho nên nó KHÔNG mang trạng thái review chính thức
+    của GitHub; điều đó được ghi thẳng trong chính bản chiếu. Danh tính MODEL reviewer (codex/OpenAI)
+    tách khỏi danh tính người đăng — đừng suy identity từ tài khoản GitHub.
+  phien_van_chuyen: https://claude.ai/code/session_01HZNBRUZKM2mbeA8sVyjcKQ
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: vua
+  mo_ta: >-
+    Blob verdict ghim `b0a98a4`. Head đã review `7bdd8ad` là tổ tiên của `b0a98a4` (commit verdict
+    nằm ngay trên nó).
+  gioi_han: >-
+    `7bdd8ad` CHƯA vào master lúc viết biên nhận — PR #526 còn mở. Quan hệ tổ tiên tới canonical chỉ
+    thành lập sau khi land, và CHỈ vững khi land bằng merge commit hoặc fast-forward; squash phá quan
+    hệ ấy và làm `evidence_url` thành blob không tra được. Vì thế `cuong_do: vua`, không phải `cao`.
+
+khong_do_duoc:
+  - 'Model thật của `codex exec`: không có `modelUsage`, chỉ có lời tự khai trong VERDICT.md.'
+  - '`run.json`/`stdout.log`/`stderr.log`/`prompt.snapshot` KHÔNG vào kho (prompt.snapshot đã bị xoá theo mặc định vì nó chứa nội dung prompt) ⇒ mọi scalar runtime ở trên là ATTESTATION của phiên điều phối, đối chiếu được với run.json trong container này nhưng KHÔNG tái lập được sau khi container bị thu hồi.'
+  - 'Hai `VERDICT.md` của lượt 1 và 2 KHÔNG còn tra được — chúng sống trong sandbox của phiên trước và chết theo container. Chỉ còn sha256 trong bản chiếu trên PR (`db9be984…`, `6032ff98…`). Hai băm ấy KHÔNG ĐO ĐƯỢC từ nay và KHÔNG được khai là đã kiểm.'
+  - 'Sổ `packet_loop` của generation 1 KHÔNG tra được: `.claude/.packet_state/` nằm trong `.gitignore` nên nó chết theo container của phiên trước. Đừng đọc chỗ rỗng ấy thành "gen 1 chưa từng blocked".'
+  - 'Tổng 13 vòng của `#508` trong bảng biện hộ: chỉ xác minh được 5 receipt trong cây. 5 là CẬN DƯỚI, không chứng minh 13 sai.'
+
+codex_connector_cung_head:
+  kich_luc: 'KHÔNG — PR #526 vẫn ở trạng thái draft, connector chỉ kích khi bỏ draft'
+  hoan_tat_luc: KHONG_AP_DUNG
+  ket_qua: 'Không có review object của connector trên head này.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: null  # KHÔNG ĐO ĐƯỢC — git chỉ cho commit time, không đo giờ tạo/sửa receipt.
+receipt_khong_khai:
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai CI live xanh: `gate` trên `7bdd8ad` được ĐO RIÊNG, không suy từ approve này. Reviewer tự khai đúng điều đó trong VERDICT.md.'
+  - 'Không khai packet đã terminal: approve là điều kiện DỪNG của vòng vá→review, KHÔNG phải merge authorization.'
+  - 'Không khai hai nợ SO-CANON-CHUA-TON-TAI và R291-DAM-SO-CUNG đã được xoá — chúng còn nguyên đúng như spec r3 tự khai.'

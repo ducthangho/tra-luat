@@ -1,0 +1,168 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review HỒ SƠ LƯỢT 2 (LƯỢT CUỐI) của PR #511 (bookkeeping ADR-0034 r367 cho #510 / hồ sơ r366 của #505),
+# KHÁC NỀN (codex), trên head `6adb7ff` — head ĐÃ MERGE vào master (`05ba3f9`, merge commit, không squash).
+#
+# Verdict: approve — 0 P1 / 0 P2 / 0 P3; 5 P2 lượt 1 ĐÓNG; HINT 0 hunk. Đây là ĐIỀU KIỆN DỪNG của vòng vá→review theo
+# LUẬT CHUNG chủ kho đặt trong phiên chat ~14:4xZ 11-09-2026 ("tất cả PR chỉ được merge khi cross review approve … cái nào
+# [approve] rồi chưa land thì land luôn và báo tôi"), ghi lại ở PR #511 comment 5636504464 — KHÔNG phải merge authorization
+# riêng cho head này. Biên nhận viết SAU khi merge — trả nợ ADR-0034 cho chính PR hồ sơ (tiền lệ r364/r367).
+
+schema_version: 2
+receipt_id: pr511-review-2-codex-20260911-8873d98d
+kind: review_delivery_receipt
+packet_id: 'PR511-BOOKKEEPING-510'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PHIEN-20260911
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: approve
+verdict_path: ops/reviews/pr511-review-2-codex-verdict.md
+verdict_sha256: cfe618258d782354b84b9dbeb733bf2861adfc04d94edd4cc3fb85a6effe842e
+verdict_bytes: 112609
+reviewed_sha: 6adb7ffbb82507b936e1bd6a7b922c237d8f6f3c
+reviewed_base: b98531e256ea91e20f31b74ac6b9046e8fac8eed
+evidence_url: https://github.com/ducthangho/tra-luat/blob/120d47a076d61813921a293a3f667e04d0e715cf/ops/reviews/pr511-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `120d47a` — commit ĐẦU TIÊN chứa tệp verdict (`git log --all --diff-filter=A`, đúng 1 commit).
+  Bản chiếu công khai sớm hơn: PR #511 comment 5636504464 — bỏ `## Bảng đo lại` (dòng 27–459, 433 dòng) và danh sách
+  băm tệp trong frontmatter; kèm mục "Ghi chỉ thị merge (ADR-0040)" do executor viết thêm (KHÔNG thuộc verdict).
+so_p1: 0
+so_p2: 0
+so_p3: 0
+findings_ids: []
+hint_patch:
+  sha256: b5672fcbff5cf69bc55619a697b0481f8fd05234e861405eeb7acd3afc45bf48
+  bytes: 89
+  noi_dung: '0 hunk — một dòng ghi chú: approve, cả 5 P2 lượt 1 đã đóng, không có P1/P2 mới'
+
+noi_dung_do_duoc_van_dung:
+  - 'Áp lại HINT lượt 1 (patch --batch --fuzz=0 -p0) trên cây 51466e6: đủ 12 hunk / 5 tệp, cả năm tệp bằng byte HEAD, không văn bản thêm ngoài HINT; tệp thứ sáu là manifest, tái sinh (`tl.py release-manifest --deterministic`) nguyên byte; 2 verdict PR #510 nguyên byte.'
+  - '5 P2 lượt 1 ĐÓNG đúng chỗ (bảng đo lại): thời lượng có khoá, ba workflow ghim, 410 hàng hỗn hợp, 11/850 dòng, giới hạn `verdict_bytes`; số ref lịch sử đã chuyển sang thuật lại/KHÔNG ĐO ĐƯỢC.'
+  - 'Theo verdict, literal `modelUsage` xuất hiện 29/97 lần trong stderr của hai run PR #510 (`5c3209aa`/`b1f0d485`), là văn bản prompt/mã audit/trích dẫn, KHÔNG phải telemetry — giữ model thực KHÔNG ĐO ĐƯỢC là đúng.'
+  - '5 mutant cổng: verdict_sha256 → v2+t26 ĐỎ; xoá hàng cảnh báo → t27 ĐỎ; evidence_url sang commit không chứa tệp → v2 ĐỎ; `so_p2` 5→4 SỐNG 4/4; `verdict_bytes` 269934→269933 SỐNG 4/4 (giới hạn cổng, lặp lại lượt 1).'
+  - '3 lối land (commit-tree) lên b98531e: merge/ff giữ neo bb2a3e2 (anchor rc=0, v2 81 ĐẠT / 0 vi phạm); squash ⇒ anchor rc=1, v2 79 ĐẠT / 2 vi phạm.'
+  - 'Mục "M3 sâu chưa làm" của r367 so phép đo sau đó kể trong EVIDENCE: không tạo hai kết luận đối nghịch trong hồ sơ tại cay-kho.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: 'KHONG_DO_DUOC — codex exec không xuất modelUsage; reviewer tự khai `GPT-6 / Codex / OpenAI` trong model_tu_khai'
+  effort: xhigh
+  session_run_id: 8873d98d
+  run_id_day_du: 8873d98daf164d1cba9b37ced5e4e094
+  prompt_sha256: 23cc59ec34cb975d99657029e24479f1afcc24ad31d6c44f49342a28d3a97cd2
+  bat_dau_utc: '2026-09-11T14:50:49.463288+00:00'
+  ket_thuc_utc: '2026-09-11T15:07:08.955474+00:00'
+  thoi_luong_giay: 979.492
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 281
+  stdout_sha256: 5a8fb0265b0465636d5f5574bfa1395128d39a9a4cac3c0f634d7ea5175e8c16
+  stderr_byte: 516435
+  stderr_sha256: 709e7bcc3cce4bd922d16928feb344c8570c52d1028a93131fba26f4414a637a
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/8873d98d/`): run_id/short_id, prompt_sha256 (khớp
+    `prompt.snapshot`, 11 299 B), bat_dau_utc, ket_thuc_utc, ma_thoat, trang_thai, transport (`machine`), worktree_sach,
+    head; **run.json CÓ khoá `thoi_luong_giay` = 979.492** (hiệu hai timestamp 979.492186 s — khớp làm tròn 3 chữ số);
+    stdout/stderr byte + sha256 đo trực tiếp trên hai tệp log. Dòng cuối stdout `XONG VERDICT sha256=cfe61825…` khớp
+    băm tệp. model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối.
+
+nang_luc_do_cua_goi:
+  mirror: 'clone mới từ guong.git (sau push 6adb7ff), detached 6adb7ff, core.abbrev 7, không nông, 334 ref; nguon/ như lượt 1 + VERDICT.rvhs511-1.md + HINT.rvhs511-1.patch + runs/417a209c (run.json, stdout.log); EVIDENCE.md có mục "Lượt 2"'
+  chua_do_duoc: 'Không mạng; sự kiện GitHub (comment 5636291581, CI gate/thu-hoi trên 6adb7ff) chỉ có trong EVIDENCE — nguồn (b).'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'scratch/luot1/ của sandbox lượt 2 (hint_compare, 5 mutant cổng, 3 cây land, đếm modelUsage) ở ngoài kho.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'run.json worktree_sach: true; reviewer tự đo cuối lượt: HEAD 6adb7ff, git status --porcelain rỗng; 3 cây land dựng bằng commit-tree trong bản sao.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization; uỷ quyền merge là LUẬT CHUNG chủ kho đặt ~14:4xZ (approve khác nền ⇒ land), ghi lại ở PR #511 comment 5636504464; sổ local gen4 uy_quyen_merge.jsonl có dòng KHAI BÁO cho 6adb7ff (`la_loi_khai_khong_phai_bang_chung: true`).'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `120d47a`. Head đã review `6adb7ff` là cha thứ hai của merge commit master `05ba3f9` (hai cha b98531e + 6adb7ff).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: APPROVE-LUOT-2-THIEU-MUC-DOI-CHIEU-LUOT-TRUOC-assurance-ha-xuong-cross_reviewed
+    muc: P1
+    mo_ta: >-
+      Codex connector trên #516 head a41fc69 (review 19:52:04Z, P1 "Remove cross-approved assurance from the incomplete
+      rereview") — ĐÃ ĐO: verdict lượt 2 (tệp này trỏ tới, sha256 cfe61825…) KHÔNG có mục `## ĐỐI CHIẾU LƯỢT TRƯỚC`
+      mà PROTOCOL_DA_PHIEN §"Từ lượt review thứ HAI trở đi" và khung VERDICT của adapter cross-review đòi từ lượt 2
+      (mỗi finding lượt trước phải mang MỘT trong bốn trạng thái ĐÃ VÁ THẬT / VÁ HỜ / VÁ SINH LỖI MỚI / CHƯA VÁ).
+      Verdict chỉ có các hàng "Đóng P2 lượt1 …" trong `## Bảng đo lại` (dòng 355–359) với chữ "ĐÓNG". Nguyên nhân:
+      PROMPT lượt 2 do tác giả soạn KHÔNG đòi mục ấy. Vì thế `assurance` hạ từ `cross_approved` xuống
+      `cross_reviewed`: verdict vẫn là `approve` 0/0/0 của reviewer khác nền, nhưng hợp đồng tái-review chưa được
+      thực hiện đúng dạng — không được coi biên nhận này là đã thanh toán nợ review của #511 ở mức cross_approved.
+      Cùng khuyết tật ở receipt ĐÃ LAND `pr510-review-2-codex-verdict.receipt.yaml` (r367, verdict 41c3533c… không có
+      mục ấy, chỉ có bảng "Đóng từng finding lượt 1") — không sửa receipt đã land; ghi nợ ở CHANGELOG r369.
+    phai_lam_gi_khi_chay_lai: >-
+      Muốn mức cross_approved cho #511 thì cần một lượt tái-review độc lập có mục ĐỐI CHIẾU LƯỢT TRƯỚC đúng dạng trên
+      6adb7ff (đã merge — chỉ còn giá trị hồ sơ). Từ #516 lượt 2 trở đi PROMPT đã đòi mục này (verdict rvhs516-2 có).
+      Nợ cổng: bien_nhan_v2 chưa kiểm cấu trúc verdict lượt ≥ 2 — fixture chưa có, ghi ở CHANGELOG r369.
+  - id: APPROVE-HO-SO-la-dieu-kien-DUNG-merge-theo-LUAT-CHUNG-chu-kho-14-4xZ
+    muc: P2
+    mo_ta: >-
+      `approve` này là điều kiện DỪNG của vòng vá→review (khác nền, 0/0/0, HINT 0 hunk), KHÔNG phải merge
+      authorization riêng: chủ kho đặt LUẬT CHUNG trong phiên chat ~14:4xZ 11-09-2026 — mọi PR chỉ merge khi
+      cross-review approve, có approve thì land — ghi lại ở PR #511 comment 5636504464 trước khi bỏ draft và merge
+      (15:18:28Z). Lúc merge: `gate (ubuntu-latest)` success (job 103306092417, xong 15:13:54Z), `thu-hoi` success
+      (job 103306084492); không còn check `cong`. Codex connector kích khi bỏ draft, HOÀN TẤT 15:19:40Z — SAU merge.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng đọc `approve` này là "đã qua cổng tin cậy khác danh tính": chỉ có một tài khoản (`ducthangho`) trên #511.
+      Kết quả connector trên 6adb7ff: comment tổng kết 5636629713 (Completed), `get_reviews` rỗng, không comment finding
+      — đọc lúc viết biên nhận (19:0xZ), không đọc trước merge.
+  - id: VERDICT-BYTES-VA-SO-P-TRONG-BIEN-NHAN-KHONG-CO-CONG-NAO-CANH
+    muc: P2
+    mo_ta: >-
+      Hai lượt review hồ sơ xác nhận lại giới hạn đã ghi ở r367 (receipt PR #510 lượt 2 đã nêu cả
+      `verdict_bytes`): đổi `so_p2` (5→4) HOẶC đổi
+      `verdict_bytes` (269934→269933) của một receipt đều SỐNG qua `bien_nhan_v2`, t26, t27 và `release-verify` (4/4).
+      Cổng canh BĂM verdict (t26, v2 blob neo), cặp caveat↔README (t27) và neo evidence_url (v2); số finding và số byte
+      khai trong receipt là LỜI KHAI chỉ được reviewer khác nền đếm/đo lại.
+    phai_lam_gi_khi_chay_lai: >-
+      Muốn tin so_p*/verdict_bytes của một receipt thì đếm tiêu đề `### … [P1|P2|P3]` và `wc -c` trên CHÍNH tệp verdict,
+      đừng tin receipt hay README. Nợ cổng: ghi ở CHANGELOG r367/r369; chưa có packet là lời điều phối thuật lại.
+  - id: BANG-DO-LAI-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
+    muc: P3
+    mo_ta: >-
+      Bản chiếu lên PR #511 (comment 5636504464) bỏ `## Bảng đo lại` (dòng 27–459, 433 dòng) và danh sách băm tệp
+      trong frontmatter — vượt trần một comment GitHub nên không đăng.
+    phai_lam_gi_khi_chay_lai: 'Tra bảng trong CHÍNH tệp này (sha256 cfe61825…, 112 609 B), không tra comment.'
+
+khong_do_duoc:
+  - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'
+  - 'run.json/stdout.log/stderr.log/prompt.snapshot không vào kho ⇒ scalar runtime là attestation.'
+  - 'Sự kiện GitHub lúc reviewer đọc: sandbox không mạng.'
+
+codex_connector_cung_head:
+  kich_luc: '2026-09-11T15:18:2xZ — bỏ draft ngay trước merge (merge 15:18:28Z)'
+  hoan_tat_luc: '2026-09-11T15:19:40Z — SAU merge 72 giây'
+  ket_qua: 'Đọc 19:0xZ khi viết biên nhận: comment tổng kết connector 5636629713 ghi Code Review Completed trên 6adb7ff; `get_reviews` #511 rỗng; không comment finding; reaction 👍 trên PR KHÔNG ĐỌC. Không được đọc TRƯỚC merge.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-11T19:0xZ'
+receipt_khong_khai:
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai connector Codex đã ĐO gì trên 6adb7ff — chỉ thấy trạng thái Completed và vắng review object.'
+  - 'Không khai reviewer chạy lại mutant/probe của các lượt PR #505 — chỉ đo hiện vật hồ sơ r367.'

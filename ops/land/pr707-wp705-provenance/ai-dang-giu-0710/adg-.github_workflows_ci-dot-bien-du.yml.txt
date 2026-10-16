@@ -1,0 +1,8 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-dot-bien-chia-manh-r2-g1-claude	refs/heads/agent/wp710-g1-codex:ops/leases/ci-dot-bien-chia-manh-r2-g1-claude.yaml
+HẾT_HẠN	ci-registry-thu-hep-vung-r1-g1-claude	refs/heads/agent/wp710-g1-codex:ops/leases/ci-registry-thu-hep-vung-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r1-g1-claude	refs/heads/claude/bookkeeping-705-pr707:ops/leases/ci-registry-nang-tran-bo-day-du-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r2-g2-claude	refs/heads/claude/bookkeeping-705-pr707:ops/leases/ci-registry-nang-tran-bo-day-du-r2-g2-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r3-g3-claude	refs/heads/claude/bookkeeping-705-pr707:ops/leases/ci-registry-nang-tran-bo-day-du-r3-g3-claude.yaml
+HẾT_HẠN	ci-registry-thu-hep-vung-r1-g1-claude	refs/heads/ops/cap-lease-570-g33:ops/leases/ci-registry-thu-hep-vung-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có

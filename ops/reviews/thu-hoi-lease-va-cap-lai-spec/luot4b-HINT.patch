@@ -1,0 +1,109 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- SPEC.md
++++ SPEC.md
+@@ -171,6 +171,14 @@
+    `remote.<x>.vcs`, `url.*.insteadOf`, `include.path`, remote helper trong config ứng viên **không chạm** được adapter.
+    Profile transport không đo được ⇒ 12. Fixture: test tiêm endpoint (đường dẫn bare) qua **API nội bộ**; không có biến
+    môi trường/cờ production đổi authority.
++   **Biên tiến trình bắt buộc (S1):** adapter nhận profile deployment đã xác minh, không hợp môi trường caller vào
++   profile. Hợp đồng phải xác định executable Git và transport implementation được tin, môi trường con dựng bằng
++   allowlist, nguồn credential/proxy/CA và các cấu hình được phép. Mọi đầu vào chọn thư mục Git/worktree/object,
++   executable/helper, template/hook hoặc include/rewrite gián tiếp từ caller phải không có hiệu lực; tên cwd mới và
++   hai cờ config không tự chứng minh điều ấy. Profile tin cậy không được chứa đường gián tiếp đọc config ứng viên.
++   Authority consumer chạy trong process/job tin cậy, không dùng receipt do process ứng viên tự khai làm chứng thực
++   profile. Profile/boundary chưa đo được ⇒ 12; controls đúng nguồn vẫn phải xanh. ADR nguồn tin cậy phải chốt biên này
++   trước ready A0; các hướng đổi nguồn chỉ được điều phối dựng theo phân công review.
+ 2. **Chụp map cục bộ TRƯỚC:** `refs/heads/*` và `refs/remotes/origin/*` → map tên→OID một lần; tách map remote-tracking
+    (đối chiếu máy chủ) khỏi local heads (chỉ THÊM người giữ). Giữ map cùng mọi occurrence ref của từng cặp.
+ 3. **Một lời gọi discovery:** adapter `git ls-remote --symref <endpoint> HEAD 'refs/heads/*'` → nhánh mặc định máy chủ
+@@ -181,6 +189,12 @@
+    (và `--no-replace-objects`); phát hiện `refs/replace/*` hoặc `replace.refBase`/graft trong kho đọc ⇒ chẩn đoán, và
+    kết quả phải **bằng** cây thô; không cô lập được ⇒ 12. "Cùng SHA ký tự" chưa chứng minh cùng cây. Thiếu object / rc≠0
+    / output hỏng ⇒ 12; chỉ kết luận "sổ vắng" khi đọc thành công cây chứa nó. Một timestamp snapshot cho mọi consumer.
++   **Identity nội dung cache (S2):** object cache cục bộ là dữ liệu cần kiểm. Với từng commit/tree/blob và object
++   ancestry được dùng để quyết định, xác minh type, length và hash Git của bytes bằng OID được đối tượng cha đã xác
++   minh hoặc advertisement/event ghim tham chiếu. Parse và quyết định trên chính buffer đã xác minh; không xác minh
++   rồi mở lại dữ liệu mutable. `cat-file`/`ls-tree` rc0, thiếu replacement hoặc OID ký tự bằng nhau không thay phép
++   kiểm này. Hash lệch ⇒ 12, không coi là sổ rỗng; cache kết quả chỉ theo bytes/OID đã xác minh của snapshot. Control
++   sạch phải giữ verdict cũ; chi phí xác minh được cộng vào A6. Phần này nằm trong ADR nguồn tin cậy của S1.
+ 6. Nạp sổ một lần; áp theo `lease_id` cho **MỌI** cặp; in `<hạn> · ĐÃ_THU_HỒI`; `MAP_REF`; `MÙ 0` + số ref. Mọi lệnh
+    (`check`, `ai-dang-giu`, `body`, `kiem-github`, `kiem-thu-hoi-github`, guard packet_loop) dùng chung hàm trạng thái.
+ 7. Chi phí: một lời gọi Git mạng (`ls-remote --symref` qua adapter); chi phí cấu hình adapter/đọc cây/closure đo riêng ở
+@@ -243,7 +257,7 @@
+ 
+ | thứ | vì sao |
+ |---|---|
+-| Tạo policy closure §5 / cổng phái sinh tổng quát | nợ #473; là **dependency của kích hoạt** (Q3/Q13), không miễn nghĩa vụ điền/xác minh phái sinh |
++| Tạo policy closure §5 / cổng phái sinh tổng quát | nợ #473; kích hoạt cần **policy hợp lệ hoặc ngoại lệ Q13 có neo đúng phạm vi**, không miễn nghĩa vụ điền/xác minh phái sinh |
+ | Fencing máy; `land-packets` đọc sổ | Q11; nợ `LAND-DOC-SO-THU-HOI` |
+ | Sửa `ops-publish-lease.yml` · xoá nhánh cũ · `timeout-minutes` · `CHANGELOG.md` · chữ ký `web-flow` · di trú #456 · ruleset ngoài kho | như r3 |
+ | Cấp lại cho wp461 (lease g3) | ops PR riêng sau kích hoạt, theo Q11; không thuộc C |
+@@ -275,6 +289,17 @@
+   §5.1). Merge queue **chưa hỗ trợ** ⇒ chặn tới khi có lane `merge_group`.
+ - `permissions`: `contents: read`, `pull-requests: read`, `issues: write` (chỉ bước chiếu receipt). Required check phải
+   có provenance đúng H/T + OID workflow/mã; comment hoặc check trùng tên không đủ.
++- **Giao diện publisher/consumer (S5):** trước ready A0, Packet phải chốt object check nào là bằng chứng, actor/App
++  được phép phát nó, API/quyền tương ứng, consumer được bảo vệ nào đọc nó và cách gắn object thật vào H. Tối thiểu
++  biên nhận chứa object ID/run ID/attempt, repository, PR, S/H/T, workflow/checker OID và conclusion; consumer đối chiếu
++  các trường với provenance của object đã readback, không chỉ với thân receipt. Check thuộc S nhưng receipt tự ghi H
++  phải bị từ chối; check đúng H từ publisher khác cũng bị từ chối. `issues: write` chỉ đủ chiếu comment; không suy nó
++  cấp quyền phát check trên H. Nếu giải pháp cần App/quyền/phạm vi ngoài M9 thì chốt dependency/authority trước ready,
++  không tự thêm credential hoặc nâng quyền. A11 đo receipt Actions thật cùng các ca âm này; chưa đo ⇒ chưa kích hoạt.
++- Audit bootstrap A0 được ghi bền trong Packet Issue/journal của slice, neo object ID/hash, exact S/H/tree sẽ nhận,
++  review/gate/catalog độc lập, owner audit, biện pháp giữ đóng cập nhật, OID A0 sau land, cấu hình check được readback
++  và run đầu tiên từ A0. Chỉ mở lại cập nhật khi consumer đã xác minh receipt ấy. Đây là evidence của audit theo §8,
++  không phải quyền do comment chiếu tự tạo; sổ rỗng một mình không thay review semantics của checker.
+ - Kích hoạt (A1) chỉ sau Q10.
+ 
+ **Lược đồ bản ghi (M1)** giữ nguyên r3 (hợp đồng parser, thứ tự lỗi, append-only map path→(mode, type, blob), M1 toàn
+@@ -297,10 +322,16 @@
+ **A4** — chiều ngược hai nguồn; đối chứng sống 0.
+ **A5** — W giữ p ⇒ 11 (có/không thay thế; exact/prefix/case-fold; alias symlink; **cùng blob lease ở hai OID có đích
+ alias khác ⇒ giữ cả hai nguồn**; vòng/ngoài/thiếu ⇒ 12); **`effective_write_set: []` tự khai ⇒ 8** (cả phía Y lẫn W);
+-raw thiếu companion theo closure ⇒ 11; policy vắng ⇒ 12 (kích hoạt) / dự báo (chưa). Hàm thuần 0/0; CLI trước publish
++Ca companion chạy với policy hợp lệ đã ghim: raw thiếu companion nhưng closure giao ⇒ 11. Khi policy vắng, tách:
++ngoại lệ Q13 có neo/phạm vi hợp lệ ⇒ tính raw + symlink (ca chỉ giao qua companion policy cho 0; ca cùng raw vẫn 11);
++không có ngoại lệ hợp lệ ⇒ 12 khi kích hoạt. Khi chưa kích hoạt, lỗi/delta dự báo không đổi rc sản phẩm theo Q3.
++Hàm thuần 0/0; CLI trước publish
+ 12; sau publish đồng thời ⇒ 11/11. ĐỎ: bỏ bước chuẩn hoá; tin tự khai; CLI không so (blob, path).
+ **A6** — `b` cùng tên SHA cũ ⇒ 12; đổi ref sau so ⇒ kết quả không đổi; recapture ⇒ ĐỎ; **`refs/replace` cho OID
+-canonical ⇒ cây thô hoặc 12; mutant bỏ `GIT_NO_REPLACE_OBJECTS` ⇒ đọc bản ghi giả ⇒ ĐỎ**. Chi phí: xen kẽ 3 lượt, trung
++canonical ⇒ cây thô hoặc 12. Bỏ riêng biến bảo vệ khi cờ CLI vẫn có hiệu lực là mutant SỐNG dưới ca này; không nhận
++công giết. Catalog phải nêu đầy đủ các lớp bỏ trong mutant kết hợp (kể cả kiểm identity bytes nếu nó che cùng ca), và
++chỉ ghi giết khi output/verdict thực sự khác. Có ca độc lập cho hash commit/tree/blob lệch ⇒ 12 và đối chứng sạch;
++hướng thay nguồn/cây do điều phối dựng, reviewer 4b chỉ chạy control hợp lệ.** Chi phí: xen kẽ 3 lượt, trung
+ vị, tỷ lệ ≤ 2, raw giây/byte/lệnh.
+ **A7** — ma trận M1 như r3 + `120000` 12 + sổ không rỗng khi cờ `False` ⇒ 12 (consumer vận hành) + JSON envelope 12 /
+ JSON lệnh 8. `raise`→`continue` so verdict thật. Nới allowlist ⇒ ca đích ĐỎ.
+@@ -360,13 +391,27 @@
+ Thiếu ⇒ cờ `False`.
+ ❓ **Q11 — gỡ quyền worker cũ, cấp lại.** ➡️ (1) C land qua M9; (2) chủ kho xác nhận worker cũ dừng + giữ last SHA/state;
+ (3) lease g3 mới `check` trên ảnh chụp mới, land, readback `NGƯỜI_GIỮ 1`; (4) mới bắt đầu. KHÔNG "rc=0 là khoá".
+-❓ **Q12 — ready từng slice.** ➡️ Issue + `spec_hash`/revision/generation; phái sinh + policy SHA do dispatcher dẫn xuất
+-(không kế thừa miễn trừ `b416830`); base đã nhận slice trước; hợp đồng adapter/nguồn symlink/danh sách lịch sử/bootstrap
+-trước ready A0. Thiếu hợp đồng ⇒ `proposed`; thiếu facts ⇒ chưa kích hoạt.
++❓ **Q12 — ready từng slice.** ➡️ Issue + `spec_hash`/revision/generation; phái sinh do dispatcher dẫn xuất
++(không kế thừa miễn trừ `b416830`). Nguồn closure là union có tag: policy hợp lệ với `change_policy_sha` thật, hoặc
++ngoại lệ Q13 với `change_policy_sha: null` và descriptor có neo đã được duyệt trong cùng `spec_hash`; không giả SHA
++của policy vắng. Mỗi slice chỉ dùng ngoại lệ khi đúng phạm vi authority của nó; thiếu thì giữ `proposed`, không tự
++mở rộng Q13 từ A1 sang quyền thi công slice khác. Base đã nhận slice trước; hợp đồng adapter/nguồn symlink/danh sách
++lịch sử/bootstrap và giao diện publisher/consumer trước ready A0. Thiếu hợp đồng ⇒ `proposed`; thiếu facts ⇒ chưa kích hoạt.
+ ✅ **Q13 — closure khi policy chưa có — ĐÃ CHỐT (comment `5575587924` trên PR #475):** lối (ii) — ngoại lệ có phạm vi:
+ cho tới khi policy canonical `.github/coordination/change-impact.v1.json` tồn tại, closure = tập khai báo + giải symlink
+ theo cây OID, KHÔNG nhận `effective_write_set` tự khai; ngoại lệ phải được ghi vào Packet Issue và `spec_hash` của A1.
+ Hệ quả cho Q3: nhánh "policy vắng ⇒ 12" đổi thành "policy vắng ⇒ dùng ngoại lệ Q13 (có neo) ⇒ closure = khai báo + symlink";
+ không có neo ⇒ 12. Lối (i) (#473 land trước A1) không chọn.
++Descriptor ngoại lệ phải ghi ID comment 5575587924 + hash thân đã readback, owner/reason, Packet/slice/revision và phạm
++vi tính tập va chạm, cùng điều kiện hết hiệu lực. Nó cho bộ đọc của packet này tính closure tạm trên các lease được
++quét; không miễn phái sinh/ready/quyền ghi của packet khác. Chốt descriptor trong Issue và nội dung được `spec_hash`
++bao phủ trước dùng; mismatch/phạm vi không khớp ⇒ 12. Q13 đã chọn hết hiệu lực theo sự kiện policy canonical xuất
++hiện, không tự đặt thêm hạn UTC. Phải đánh giá điều kiện bằng snapshot canonical Q4 hiện tại, không giữ cờ exemption
++đã cache lúc A1. Policy có mặt nhưng hỏng/không khớp pin ⇒ 12; không fallback về ngoại lệ. Sau lần đầu policy xuất
++hiện, ngoại lệ được ghi retired bền trong journal và không tự hồi sinh nếu policy lại vắng. Dispatcher pause và
++re-evaluate packet chưa terminal theo §5/ADR-0025; closure/check/hash đổi ⇒ revision/generation mới trước chạy tiếp.
+ ✅ **Q14 — trần review (R10) — ĐÃ CHỐT:** comment `5575587924` trên PR #475: phạm vi = review đặc tả này; **trần 6
+-lượt**; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế, không tự nới. Lượt 4 phóng trên bản này.
++lượt**; dừng khi hết P1 hoặc chạm 6 ⇒ checkpoint kế, không tự nới. Đếm theo lời gọi: 1/2/3 đã xong; 4a đã sinh output
++rồi chết ⇒ vẫn là lời gọi 4; 4b là lời gọi 5/6. Không đồng nhất số lời gọi với số verdict hợp lệ. Các stop condition
++khác của §12 vẫn có hiệu lực; lượt 4b còn S1/S2 thuộc hình dạng nguồn tin cậy ⇒ dừng packet và chốt ADR nguồn tin cậy
++như mục `hinh_dang_ke_thua`, không tự dùng lượt 6 chỉ vì chưa chạm trần 6.

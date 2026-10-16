@@ -1,0 +1,43 @@
+chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+
+Đây là mô tả hướng sửa theo lớp, không phải unified diff và không được git am.
+Reviewer không cung cấp mã launcher. Cây sản phẩm đang review giữ read-only.
+
+[D65-control-catalog-not-validated] P2
+Vá ở đâu: bộ bằng chứng bang_chung_aw_d.py, hàm doi_chieu/d và bảng control D;
+đây là nơi thực thi hợp đồng D của B5, không phải _con_song.
+Vá thế nào: dùng bảng 65 khóa nhan:<nhãn> và tieu:<nhãn>/<tiểu nhãn> theo spec;
+validate thiếu/thừa/lặp khóa trước khi chạy control. So tập đơn vị quan sát bằng
+đúng 57 đơn vị kỳ vọng, đồng thời giữ kiểm thứ tự xuất hiện lần đầu. Nộp bảng máy
+đọc được gồm thay đổi control, đơn vị thiếu kỳ vọng và sáu cặp đảo thứ tự.
+Khóa: bản đúng xanh; thay dòng control cuối bằng dòng đầu (65 dòng/64 khóa) phải
+đỏ vì catalog, không được báo 65/65. Thêm đơn vị quan sát ngoài spec cũng phải đỏ.
+Rủi ro: một đơn vị hợp lệ có nhiều assertion và nhiều lần gọi; đừng cấm lặp quan
+sát hợp lệ hay đổi thứ tự/đầu vào test để làm comparator xanh.
+
+[ED-immutable-artifact-missing] P2, tiếp nối lớp cũ, thiếu một phần hiện vật
+Vá ở đâu: gói bằng chứng của attempt và SHA256SUMS.txt trên kênh được cấp quyền.
+Vá thế nào: nộp chính chot_tinh_r12.py đã chạy, nguyên văn khối 412 dòng của spec,
+SHA-256 add42b31beeaece6e3cf546d3915a153099bfe7a232995b0e1546bbd4a5735b6.
+Đối chiếu các script wrapper được báo cáo, nộp nếu chúng thuộc chuỗi chạy cần
+tái lập. Sau log cuối mới băm manifest; đọc lại hiện vật từ phía GitHub/commit
+đã công bố, không coi clone của kho ghi là bằng chứng phía đến. Không mở write
+set sản phẩm để đặt script bằng chứng vào đó.
+Khóa: kiểm danh mục bắt buộc, hash từng tệp và đọc ngược từ OID bất biến; bỏ
+chot_tinh_r12.py khỏi gói phải làm kiểm completeness đỏ dù các mục còn lại hash đúng.
+Rủi ro: manifest tự-consistent vẫn có thể thiếu tệp; đừng chỉ chạy sha256sum -c.
+
+[exact-head-gates-incomplete] P2, tiếp nối lớp cũ
+Vá ở đâu: handoff và log B1–B6/B8, không phải mã sản phẩm.
+Vá thế nào: nộp log thật neo candidate 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+và tree 952d7c3092e02886150bb9c936dec7b5fc779aec, phân biệt rõ nền ab457c6 và
+ứng viên. Log working tree cũ chỉ là corroboration; không sửa HEAD/tree trong
+log cũ để biến thành log commit. Log reviewer chỉ được dùng lại khi bytes được
+nộp qua kênh hợp lệ, băm đã công bố và đủ các neo SHA/tree/runner/runtime/môi trường.
+Thiếu hay mismatch thì đo lại đúng phần cần thiết. Giữ rc đỏ sẵn, skipped và
+not_measured; không đổi chúng thành pass. Giữ chính sách chưa mở PR/CI ở bước này.
+Khóa: validator phải bác log có HEAD=base dù hai băm tệp bằng candidate; nhận
+đúng log exact-head có positive marker và băm output kiểm được. Đổi runtime,
+tree hoặc command phải làm bằng chứng reuse stale.
+Rủi ro: commit mới chỉ để thay metadata cũng làm review cũ stale; nếu chỉ sửa
+gói bằng chứng thì giữ candidate sản phẩm và công bố OID bằng chứng mới.

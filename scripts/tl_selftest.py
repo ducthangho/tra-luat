@@ -4640,7 +4640,7 @@ def run() -> int:
     # ═══ v1.33.39 (log Cowork: stage cookie 'mới' [extracted_at tiến] mà NLM từ chối MỌI endpoint — cookie hết
     # hạn NHANH, chết cả local; stage cookie chết = Cowork kẹt vòng lặp) — r50_* ═══
     # cmd_nlm_auth_stage VERIFY LIVE (canary notebook_get, KHÔNG tin nlm login --check) TRƯỚC stage:
-    # dead+không-force → rc=4 TỪ CHỐI (KHÔNG upload); dead+--force → bỏ qua cổng, upload chạy; alive → stage.
+    # Every negative or uncertain canary blocks upload, including --force.
     _tg50 = _need_base("tl_gws")
     _o_files50, _o_alive50, _o_up50 = _tg50._nlm_auth_files, _tg50._nlm_auth_alive, _tg50._stage_enc_upload
     _o_tok50 = _os38.environ.get("TL_TOKEN")
@@ -4651,15 +4651,23 @@ def run() -> int:
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_uploaded50.append(fid) or (fid, True))
         _mkns50 = lambda force: argparse.Namespace(config=None, profile=None, refresh=False, folder=None,
                                                    cred_file_id="F50", new=False, force=force)
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (False, "AUTH_EXPIRED (test)")
+        _blocked50 = []
+        for _result50, _force50 in [((False, "AUTH_EXPIRED"), False),
+                                      ((False, "AUTH_EXPIRED"), True),
+                                      ((None, "NETWORK_FAILURE"), False),
+                                      ((None, "TIMEOUT"), False),
+                                      ((None, "INCONCLUSIVE"), False)]:
+            _tg50._nlm_auth_alive = lambda nb, timeout=30, result=_result50, **_kw50: result
+            with _hush():
+                _rc50 = _tg50.cmd_nlm_auth_stage(_mkns50(_force50))
+            _blocked50.append(_rc50 == 4 and len(_uploaded50) == 0)
+        def _raise50(nb, timeout=30, **_kw50):
+            raise TimeoutError("test")
+        _tg50._nlm_auth_alive = _raise50
         with _hush():
-            _rc50_dead = _tg50.cmd_nlm_auth_stage(_mkns50(False))
-        _refused = (_rc50_dead == 4 and _uploaded50 == [])
-        with _hush():
-            _rc50_force = _tg50.cmd_nlm_auth_stage(_mkns50(True))
-        _forced = (_rc50_force == 0 and _uploaded50 == ["F50"])
-        _uploaded50.clear()
-        _tg50._nlm_auth_alive = lambda nb, timeout=30: (True, "LIVE OK (test)")
+            _rc50_exception = _tg50.cmd_nlm_auth_stage(_mkns50(True))
+        _blocked50.append(_rc50_exception == 4 and len(_uploaded50) == 0)
+        _tg50._nlm_auth_alive = lambda nb, timeout=30, **_kw50: (True, "LIVE OK (test)")
         with _hush():
             _rc50_alive = _tg50.cmd_nlm_auth_stage(_mkns50(False))
         _allowed = (_rc50_alive == 0 and _uploaded50 == ["F50"])
@@ -4669,7 +4677,598 @@ def run() -> int:
             _os38.environ.pop("TL_TOKEN", None)
         else:
             _os38.environ["TL_TOKEN"] = _o_tok50
-    cases.append(("r50_nlm_stage_refuses_dead_cookie", _refused and _forced and _allowed))
+    cases.append(("wp710_nlm_stage_true_only_upload_count", all(_blocked50) and _allowed))
+
+    # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+    # `secrets-set --nlm` (nlm_cred.enc public + bundle) va `secrets-stage` (bundle co nlm_auth) la DUONG stage cung artefact:
+    # canary chet / khong ket luan -> KHONG duoc dua nlm credential len Drive; canary song -> van stage (doi chung duong).
+    # Chi `nlm_cli._run` (subprocess) bi thay, canary THAT chay.
+    import argparse as _ap50
+    _tg50c = _tg50
+    import time as _tm50c
+    _nc50c = _tg50._imp("nlm_cli")      # đúng module mà `_nlm_auth_alive` gọi
+    _names50c = ("_master_key", "_secrets_fetch", "_secrets_upload", "_refresh_nlm_auth", "_nlm_auth_files",
+                 "_stage_enc_upload", "_gws_export_cred", "load_creds")
+    _o50c = {k: getattr(_tg50c, k) for k in _names50c}
+    _o50c_nc = (_nc50c._run, _nc50c.nlm_available, _tm50c.sleep)
+    _o_env50c = {k: _os38.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_TOKEN")}
+    _store50c = _tg50c._imp("gws_cred_store")
+    _log50c = {"stage": [], "bundle": []}
+    _res50c = {}
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = "NB-WP710-CANARY-0001"
+        _os38.environ["TL_TOKEN"] = _o_env50c["TL_TOKEN"] or "selftest-token"
+        _tg50c._master_key = lambda: "mk50c"
+        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c"), "file")
+        _tg50c._secrets_upload = lambda blob, folder, fid: (
+            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c").decode())) or (fid, True))
+        _tg50c._refresh_nlm_auth = lambda: True
+        _tg50c._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50c._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_log50c["stage"].append(name) or (fid, True))
+        _tg50c._gws_export_cred = lambda: None
+        _tg50c.load_creds = lambda *a, **k: None
+        _nc50c.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None          # `_nlm_auth_alive` backoff 1.5s/3s: khong ngu that trong test
+        for _lab50c, _run50c, _want50c in [
+                ("chet", (1, "", "Error: Authentication expired"), False),
+                ("khong_ket_luan", (1, "", "Error: network connection failed"), False),
+                ("body_sai", (0, "{}", ""), False),
+                ("song", (0, json.dumps({"id": "NB-WP710-CANARY-0001", "title": "Canary", "sources": []}), ""), True)]:
+            _nc50c._run = lambda args, timeout=120, r=_run50c: r
+            for _cmd50c in ("secrets-set", "secrets-stage"):
+                _log50c["stage"].clear(); _log50c["bundle"].clear()
+                with _hush():
+                    if _cmd50c == "secrets-set":
+                        _tg50c.cmd_secrets_set(_ap50.Namespace(
+                            secrets_id="S50C", nlm=True, gas_token=None, webapp=None, gws=False, no_public=False,
+                            folder=None, config=None, profile=None, secrets_file=None, env=None))
+                    else:
+                        _tg50c.cmd_secrets_stage(_ap50.Namespace(
+                            config=None, profile=None, no_gws=True, no_nlm=False, folder=None, secrets_id=None))
+                _staged50c = ("nlm_cred.enc" in _log50c["stage"]) or any("nlm_auth" in b for b in _log50c["bundle"])
+                _res50c[(_lab50c, _cmd50c)] = (_staged50c == _want50c)
+    finally:
+        for _k50c, _v50c in _o50c.items():
+            setattr(_tg50c, _k50c, _v50c)
+        _nc50c._run, _nc50c.nlm_available, _tm50c.sleep = _o50c_nc
+        for _k50c, _v50c in _o_env50c.items():
+            if _v50c is None:
+                _os38.environ.pop(_k50c, None)
+            else:
+                _os38.environ[_k50c] = _v50c
+    cases.append(("wp710_nlm_secrets_set_stage_can_canary", bool(_res50c) and all(_res50c.values())))
+
+    # lop: stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary
+    _store50d = _tg50._imp("gws_cred_store")
+    _o714a = {k: getattr(_tg50, k) for k in (
+        "_master_key", "load_creds", "_secrets_fetch", "_secrets_upload", "_nlm_auth_alive",
+        "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred")}
+    _env714a = dict(_os38.environ)
+    _up714a, _probe714a, _res714a = [], [], []
+    _bundle714a = {"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "old-offline-jar"}}
+    def _alive714a(*a, **k):
+        _probe714a.append(True)
+        return None, "OFFLINE_INCONCLUSIVE"
+    try:
+        import tempfile as _tf714a
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "offline-test-master"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._nlm_auth_alive = _alive714a
+        _tg50._nlm_auth_files = lambda: {}
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(
+            json.dumps(_bundle714a).encode(), "offline-test-master"), "file")
+        _tg50._secrets_upload = lambda blob, *a, **k: (_up714a.append(json.loads(
+            _store50d.decrypt(blob, "offline-test-master").decode())) or ("OFFLINE", True))
+        with _tf714a.TemporaryDirectory() as _td714a:
+            _cfg714a = _os38.path.join(_td714a, "config.json")
+            with open(_cfg714a, "w", encoding="utf-8") as _f714a:
+                json.dump(_bundle714a, _f714a)
+            for _route714a in ("preserved_remote", "config_nojar", "config_no_nlm", "default_nojar"):
+                _up714a.clear(); _probe714a.clear()
+                with _hush():
+                    if _route714a == "preserved_remote":
+                        _rc714a = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None,
+                            secrets_id="OFFLINE", nlm=False, gas_token=None, webapp="offline-new", gws=False,
+                            no_public=True, folder=None, secrets_file=None, env=None))
+                    else:
+                        _rc714a = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                            config=None if _route714a == "default_nojar" else _cfg714a, profile=None,
+                            no_gws=True, no_nlm=(_route714a == "config_no_nlm"), folder=None, secrets_id="OFFLINE"))
+                # --no-nlm may upload only after actually removing nlm_auth from the payload.
+                if _route714a == "config_no_nlm":
+                    _res714a.append(not any("nlm_auth" in b for b in _up714a) or bool(_probe714a))
+                else:
+                    _res714a.append(_rc714a != 0 and not _up714a)
+    finally:
+        for _k714a, _v714a in _o714a.items(): setattr(_tg50, _k714a, _v714a)
+        _os38.environ.clear(); _os38.environ.update(_env714a)
+    cases.append(("wp714_nlm_bundle_payload_has_no_unguarded_route", all(_res714a) and len(_res714a) == 4))
+
+    # [HINT reviewer — CHUA chay tren cay that; executor tu ap, tu do, tu chiu trach nhiem] lop: stage-canary-true-khi-than-rong-hoac-sai-id
+    # Canary THAT: `_nlm_auth_alive` + `nlm_cli.notebook_get` + `_run_json` chay NGUYEN BAN; chi lop subprocess `nlm_cli._run`
+    # bi thay. rc=0 nhung than khong-JSON / rong / sai-ID / khong tieu de KHONG duoc stage (Spec r4 #2); than dung -> stage 1 lan.
+    _nc50b = _tg50._imp("nlm_cli")
+    _o50b = (_nc50b._run, _nc50b.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload)
+    _o_env50b = {k: _os38.environ.get(k) for k in ("TL_NOTEBOOK_ID", "TL_TOKEN")}
+    _up50b, _res50b = [], {}
+    _NB50B = "NB-WP710-CANARY-0001"
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = _NB50B
+        _os38.environ["TL_TOKEN"] = _o_env50b["TL_TOKEN"] or "selftest-token"
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_up50b.append(fid) or (fid, True))
+        _nc50b.nlm_available = lambda: True
+        for _n50b, _out50b, _want50b in [
+                ("body_dung", json.dumps({"id": _NB50B, "title": "Canary", "sources": []}), 1),
+                ("mang_nhieu_notebook", json.dumps([
+                    {"id": _NB50B, "title": "Canary"}, {"id": "NB-OTHER-9999", "title": "Other"}]), 0),
+                ("mang_hai_notebook_dung", json.dumps([
+                    {"id": _NB50B, "title": "Canary"}, {"id": _NB50B, "title": "Canary"}]), 0),
+                ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB50B, "title": "Other"}), 0),
+                ("khong_phai_json", "not json at all", 0),
+                ("obj_rong", "{}", 0),
+                ("list_rong", "[]", 0),
+                ("stdout_rong", "", 0),
+                ("sai_id", json.dumps({"id": "NB-OTHER-9999", "title": "Other", "sources": []}), 0),
+                ("khong_tieu_de", json.dumps({"id": _NB50B}), 0)]:
+            _up50b.clear()
+            _nc50b._run = lambda args, timeout=120, out=_out50b: (0, out, "")
+            with _hush():
+                _rc50b = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(
+                    config=None, profile=None, refresh=False, folder=None, cred_file_id="F50B", new=False, force=False))
+            _res50b[_n50b] = (len(_up50b) == _want50b and (_rc50b == 0) == bool(_want50b))
+    finally:
+        _nc50b._run, _nc50b.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload = _o50b
+        for _k50b, _v50b in _o_env50b.items():
+            if _v50b is None:
+                _os38.environ.pop(_k50b, None)
+            else:
+                _os38.environ[_k50b] = _v50b
+    cases.append(("wp710_nlm_stage_canary_doi_chieu_id_va_than", bool(_res50b) and all(_res50b.values())))
+
+    # lop: stage-error-output-leaks-credential
+    _store50d = _tg50._imp("gws_cred_store")
+    _nc714b = _tg50._imp("nlm_cli")
+    _o714b = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_refresh_nlm_auth", "_master_key", "_stage_enc_upload", "_secrets_upload", "_secrets_fetch")}
+    _saved714b = (_nc714b._run, _nc714b.nlm_available, _tm50c.sleep)
+    _env714b = dict(_os38.environ)
+    _res714b, _up714b = [], []
+    _sentinel714b = "OFFLINE" + "_SECRET_SENTINEL_714"
+    try:
+        import contextlib as _cx714b, io as _io714b
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._master_key = lambda: "offline-test-master"
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master"), "file")
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._stage_enc_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
+        _tg50._secrets_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
+        _nc714b.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None
+        for _error714b in ("network connection failed ", "unknown error "):
+            _nc714b._run = lambda *a, e=_error714b, **k: (1, "", e + _sentinel714b)
+            for _fn714b in (_tg50.cmd_nlm_auth_stage, _tg50.cmd_secrets_set, _tg50.cmd_secrets_stage):
+                _up714b.clear(); _cap714b = _io714b.StringIO()
+                _ns714b = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None,
+                    cred_file_id="OFFLINE", new=False, force=True, secrets_id="OFFLINE", nlm=True,
+                    gas_token=None, webapp=None, gws=False, no_public=False, no_gws=True, no_nlm=False,
+                    secrets_file=None, env=None)
+                with _cx714b.redirect_stdout(_cap714b), _cx714b.redirect_stderr(_cap714b):
+                    _rc714b = _fn714b(_ns714b)
+                _res714b.append(_rc714b == 4 and not _up714b and _sentinel714b not in _cap714b.getvalue())
+    finally:
+        for _k714b, _v714b in _o714b.items(): setattr(_tg50, _k714b, _v714b)
+        _nc714b._run, _nc714b.nlm_available, _tm50c.sleep = _saved714b
+        _os38.environ.clear(); _os38.environ.update(_env714b)
+    cases.append(("wp714_nlm_stage_refusal_does_not_print_child_secret", len(_res714b) == 6 and all(_res714b)))
+
+    # WP710 r4/g3 (cross-review PR #713, lớp P3 `ban-chup-credential-doc-truoc-canary`): ở 52f32db jar được đọc
+    # TRƯỚC canary nên bytes đem stage là trạng thái CHƯA được xác nhận. Ca này cho canary "ghi lại" jar (v2) rồi
+    # đòi bytes đã upload — giải mã ngược — ĐÚNG là v2, ở CẢ BA đường stage; kèm: cổng phải xin thân notebook
+    # (`require_notebook_body=True`) ở cả ba, không chỉ rc. Đột biến đọc-trước-canary hoặc bỏ cờ ⇒ ĐỎ.
+    _store50d = _tg50._imp("gws_cred_store")
+    _names50d = ("_nlm_auth_alive", "_nlm_auth_files", "_stage_enc_upload", "_master_key", "_secrets_fetch",
+                 "_secrets_upload", "_refresh_nlm_auth", "_gws_export_cred", "load_creds")
+    _o50d = {k: getattr(_tg50, k) for k in _names50d}
+    _o_env50d = {k: _os38.environ.get(k) for k in ("TL_TOKEN",)}
+    _st50d = {"jar": "v1-truoc-canary", "kw": [], "up": []}
+    _res50d = {}
+
+    def _alive50d(nb, timeout=30, **kw):
+        _st50d["kw"].append(kw.get("require_notebook_body") is True)
+        _st50d["jar"] = "v2-sau-canary"
+        return True, "LIVE OK (test)"
+    try:
+        _os38.environ["TL_TOKEN"] = "tok50d"
+        _tg50._nlm_auth_alive = _alive50d
+        _tg50._nlm_auth_files = lambda: {"auth.json": _st50d["jar"]}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "tok50d").decode())) or (fid, True))
+        _tg50._master_key = lambda: "mk50d"
+        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d"), "file")
+        _tg50._secrets_upload = lambda blob, folder, fid: (
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d").decode()).get("nlm_auth")) or (fid, True))
+        _tg50._refresh_nlm_auth = lambda: True
+        _tg50._gws_export_cred = lambda: None
+        _tg50.load_creds = lambda *a, **k: None
+        for _cmd50d in ("nlm-auth-stage", "secrets-set", "secrets-stage"):
+            _st50d.update(jar="v1-truoc-canary", kw=[], up=[])
+            with _hush():
+                if _cmd50d == "nlm-auth-stage":
+                    _rc50d = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(
+                        config=None, profile=None, refresh=False, folder=None, cred_file_id="F50D", new=False, force=True))
+                elif _cmd50d == "secrets-set":
+                    _rc50d = _tg50.cmd_secrets_set(_ap50.Namespace(
+                        secrets_id="S50D", nlm=True, gas_token=None, webapp=None, gws=False, no_public=False,
+                        folder=None, config=None, profile=None, secrets_file=None, env=None))
+                else:
+                    _rc50d = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                        config=None, profile=None, no_gws=True, no_nlm=False, folder=None, secrets_id="S50D"))
+            _res50d[_cmd50d] = (_rc50d == 0 and _st50d["kw"] == [True] and bool(_st50d["up"])
+                                and all(u == {"auth.json": "v2-sau-canary"} for u in _st50d["up"]))
+    finally:
+        for _k50d, _v50d in _o50d.items():
+            setattr(_tg50, _k50d, _v50d)
+        for _k50d, _v50d in _o_env50d.items():
+            if _v50d is None:
+                _os38.environ.pop(_k50d, None)
+            else:
+                _os38.environ[_k50d] = _v50d
+    cases.append(("wp710_nlm_stage_doc_credential_sau_canary_ca_ba_duong",
+                  len(_res50d) == 3 and all(_res50d.values())))
+
+    # lop: trusted-notebook-overwritten-by-stage-config
+    _o714c = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
+    _nc714c = _tg50._imp("nlm_cli")
+    _saved714c = (_nc714c._run, _nc714c.nlm_available)
+    _env714c = dict(_os38.environ)
+    _seen714c, _up714c = [], []
+    _trusted714c = "NB-PINNED-WRAPPER-0001"
+    def _run714c(argv, timeout=120):
+        _seen714c.append(argv[2])
+        return 0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""
+    try:
+        with _tf714a.TemporaryDirectory() as _td714c:
+            _cfg714c = _os38.path.join(_td714c, "tl-config.json")
+            with open(_cfg714c, "w", encoding="utf-8") as _f714c:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token",
+                    "profiles": {"vbqppl": {"notebookId": "NB-CONFIG-OTHER-0001"}}}, _f714c)
+            for _key714c in ("TL_TOKEN", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY"):
+                _os38.environ.pop(_key714c, None)
+            _os38.environ["TL_NOTEBOOK_ID"] = _trusted714c
+            _tg50.load_creds = _o714c["load_creds"]      # loader THAT (khong stub), tranh F821 cua _TL_MODULE
+            _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+            _tg50._stage_enc_upload = lambda *a, **k: (_up714c.append(True) or ("OFFLINE", True))
+            _nc714c._run = _run714c; _nc714c.nlm_available = lambda: True
+            with _hush():
+                _rc714c = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714c, profile=None,
+                    refresh=False, folder=None, cred_file_id="OFFLINE", new=False, force=False))
+            _ok714c = (_rc714c != 0 and not _up714c) or (_seen714c == [_trusted714c] and len(_up714c) == 1)
+    finally:
+        for _k714c, _v714c in _o714c.items(): setattr(_tg50, _k714c, _v714c)
+        _nc714c._run, _nc714c.nlm_available = _saved714c
+        _os38.environ.clear(); _os38.environ.update(_env714c)
+    cases.append(("wp714_nlm_stage_keeps_wrapper_notebook_with_config_token", _ok714c))
+
+    # WP714 (cross-review PR #714 vòng 1, executor Claude): các ca dưới đây khoá TỪNG chốt mới bằng một ca riêng,
+    # kèm ĐỐI CHỨNG DƯƠNG (allow-list không được biến thành "chặn tất cả"). Canary THẬT — chỉ subprocess
+    # `nlm_cli._run` và các sink Drive bị thay; không chạm mạng/Drive.
+    # (1) lớp `stage-canary-true-khi-than-rong-hoac-sai-id`: ĐÚNG MỘT đối tượng notebook, phán xét trên stdout THÔ.
+    _nc714d = _tg50._imp("nlm_cli")
+    _o714d = (_nc714d._run, _nc714d.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload, _tm50c.sleep)
+    _env714d = dict(_os38.environ)
+    _NB714d = "NB-WP714-CANARY-0001"
+    _good714d = {"id": _NB714d, "title": "Canary"}
+    _other714d = {"id": "NB-OTHER-9999", "title": "Other"}
+    _mat714d = [
+        ("mot_doi_tuong", json.dumps(_good714d), 1), ("bọc_data", json.dumps({"data": _good714d}), 1),
+        ("mang_mot", json.dumps([_good714d]), 1), ("name_notebook_id", json.dumps({"notebook_id": _NB714d, "name": "C"}), 1),
+        ("tieu_de_dang_ngay", json.dumps({"id": _NB714d, "title": "2026-01-01T00:00:00"}), 1),
+        ("mang_dung_sai", json.dumps([_good714d, _other714d]), 0), ("mang_sai_dung", json.dumps([_other714d, _good714d]), 0),
+        ("mang_dung_rong", json.dumps([_good714d, {}]), 0), ("mang_dung_dung", json.dumps([_good714d, _good714d]), 0),
+        ("hai_id_mau_thuan", json.dumps({"id": "NB-OTHER-9999", "notebook_id": _NB714d, "title": "C"}), 0),
+        ("khoa_trung", '{"id":"NB-OTHER-9999","id":"' + _NB714d + '","title":"C"}', 0),
+        ("khoa_khac_hoa", json.dumps({"id": _NB714d, "ID": "NB-OTHER-9999", "title": "C"}), 0),
+        ("ok_false", json.dumps(dict(_good714d, ok=False)), 0), ("error_co", json.dumps(dict(_good714d, error="x")), 0),
+        ("error_so_0", json.dumps(dict(_good714d, error=0)), 0),
+        ("title_bool", json.dumps({"id": _NB714d, "title": True}), 0), ("title_mang", json.dumps({"id": _NB714d, "title": ["C"]}), 0),
+        ("title_trang", json.dumps({"id": _NB714d, "title": "  "}), 0),
+        ("title_dung_name_rong", json.dumps({"id": _NB714d, "title": "C", "name": ""}), 0),
+        ("id_mang", json.dumps({"id": [_NB714d], "title": "C"}), 0), ("data_mang", json.dumps({"data": [_good714d]}), 0),
+        ("null", "null", 0), ("so", "42", 0), ("chuoi", '"x"', 0), ("mang_null", "[null]", 0), ("rong", "", 0),
+        # WP714 review: Python json.loads accepts these non-JSON constants by default.
+        ("json_nan", '{"id":"' + _NB714d + '","title":"C","source_count":NaN}', 0),
+        ("json_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":Infinity}', 0),
+        ("json_negative_infinity", '{"id":"' + _NB714d + '","title":"C","source_count":-Infinity}', 0),
+        # WP714 vòng 3 (executor Claude): cùng cơ chế "bộ đọc Python nhận thứ bộ đọc PS từ chối" — đo song song
+        # cùng đầu vào trên pwsh 7.4.6. Số TRÀN double (Python ra inf/int khổng lồ, PS ra ±∞), surrogate LẺ dạng
+        # thoát (PS ném khi đọc chuỗi/tên khoá), lồng > 64 mức (PS ném). Kèm ĐỐI CHỨNG DƯƠNG ngay biên.
+        ("so_tran_double", '{"id":"' + _NB714d + '","title":"C","n":1e400}', 0),
+        ("so_tran_am", '{"id":"' + _NB714d + '","title":"C","n":-1e400}', 0),
+        ("so_nguyen_400_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 400 + '}', 0),
+        ("surrogate_le_gia_tri", '{"id":"' + _NB714d + '","title":"C","n":"\\ud800"}', 0),
+        ("surrogate_le_khoa", '{"id":"' + _NB714d + '","title":"C","\\udc00":1}', 0),
+        ("long_65_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 64 + "]" * 64 + '}', 0),
+        ("bom_dau", "\ufeff" + json.dumps(_good714d), 0), ("phay_thua", json.dumps(_good714d)[:-1] + ",}", 0),
+        ("chu_thich", json.dumps(_good714d)[:-1] + "/*x*/}", 0),
+        ("dc_so_nguyen_300_chu_so", '{"id":"' + _NB714d + '","title":"C","n":1' + "0" * 300 + '}', 1),
+        ("dc_cap_surrogate_hop_le", '{"id":"' + _NB714d + '","title":"\\ud83d\\ude00"}', 1),
+        ("dc_long_64_muc", '{"id":"' + _NB714d + '","title":"C","n":' + "[" * 63 + "]" * 63 + '}', 1),
+        # WP714 vòng 4 (Codex lượt 3, cùng lớp): "trắng" theo MỘT bảng tường minh (`_NLM_CANARY_BLANK_CODEPOINTS`),
+        # không theo `strip()` — U+001C–U+001F từng Python=âm/PS=dương; ký tự độ rộng 0 nay cũng là trắng. Kèm đối
+        # chứng dương: ký tự trong bảng nằm GIỮA chữ thật vẫn là tên.
+        *[("title_trang_%04x" % _cp714d, json.dumps({"id": _NB714d, "title": chr(_cp714d)}), 0)
+          for _cp714d in (0x1C, 0x1D, 0x1E, 0x1F, 0x85, 0xA0, 0x180E, 0x200B, 0x2060, 0x3000, 0xFEFF)],
+        *[("name_trang_%04x" % _cp714d, json.dumps({"notebook_id": _NB714d, "name": " " + chr(_cp714d) + "\t"}), 0)
+          for _cp714d in (0x1C, 0x1F, 0x200B, 0xFEFF)],
+        ("dc_title_co_chu_giua_trang", json.dumps({"id": _NB714d, "title": "\u200bC\u001c"}), 1),
+    ]
+    _res714d = {}
+    try:
+        _os38.environ["TL_NOTEBOOK_ID"] = _NB714d
+        _os38.environ.pop("TL_CANARY_NOTEBOOK_ID", None)
+        _os38.environ["TL_TOKEN"] = _env714d.get("TL_TOKEN") or "selftest-token"
+        _up714d = []
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_up714d.append(fid) or (fid, True))
+        _nc714d.nlm_available = lambda: True
+        _tm50c.sleep = lambda s: None
+        for _n714d, _out714d, _want714d in _mat714d:
+            _nc714d._run = lambda args, timeout=120, out=_out714d: (0, out, "")
+            for _f714d in (False, True):
+                _up714d.clear()
+                with _hush():
+                    _rc714d = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=None, profile=None, refresh=False,
+                        folder=None, cred_file_id="F714D", new=False, force=_f714d))
+                _res714d[(_n714d, _f714d)] = (len(_up714d) == _want714d and (_rc714d == 0) == bool(_want714d))
+    finally:
+        _nc714d._run, _nc714d.nlm_available, _tg50._nlm_auth_files, _tg50._stage_enc_upload, _tm50c.sleep = _o714d
+        _os38.environ.clear(); _os38.environ.update(_env714d)
+    cases.append(("wp714_nlm_canary_dung_mot_doi_tuong_notebook",
+                  len(_res714d) == 2 * len(_mat714d) and all(_res714d.values())))
+
+    # (2) lớp `stage-nlm-ngoai-nlm-auth-stage-khong-qua-canary` — phần payload: mỗi chốt một vế, có đối chứng dương.
+    #   a. secrets-stage --no-nlm, config mang nlm_auth ⇒ rc0, ĐÚNG 1 upload, bundle KHÔNG còn nlm_auth, 0 probe.
+    #   b. secrets-stage thiếu jar, config KHÔNG có nlm_auth ⇒ rc3, 0 upload (không âm thầm xoá NLM trên Drive).
+    #   c. secrets-set không --nlm, bundle Drive mang nlm_auth ⇒ rc4, 0 upload (không gửi lại credential chưa canary).
+    #   d. secrets-set --nlm, bundle Drive mang nlm_auth CŨ, canary sống ⇒ rc0, bundle mang jar MỚI (guard không chặn oan).
+    #   e. guard trực tiếp: nlm_auth bằng NỘI DUNG nhưng KHÁC đối tượng với bản đã canary ⇒ 4; đúng đối tượng ⇒ 0.
+    _o714e = {k: getattr(_tg50, k) for k in ("_master_key", "load_creds", "_secrets_fetch", "_secrets_upload",
+              "_nlm_auth_alive", "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred", "_stage_enc_upload")}
+    _env714e = dict(_os38.environ)
+    _st714e = {"up": [], "probe": 0, "remote": {}}
+    _res714e = {}
+
+    def _alive714e(nb, timeout=30, **kw):
+        _st714e["probe"] += 1
+        return True, "LIVE OK (test)"
+    try:
+        import tempfile as _tf714e
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "mk714e"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._nlm_auth_alive = _alive714e
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_st714e["up"].append(name) or (fid, True))
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e"), "file")
+        _tg50._secrets_upload = lambda blob, *a, **k: (_st714e["up"].append(json.loads(
+            _store50d.decrypt(blob, "mk714e").decode())) or ("S714E", True))
+        with _tf714e.TemporaryDirectory() as _td714e:
+            _cfg714e = _os38.path.join(_td714e, "cfg.json")
+            with open(_cfg714e, "w", encoding="utf-8") as _fh714e:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token", "nlm_auth": {"auth.json": "cu"}}, _fh714e)
+            _cfg714e_sach = _os38.path.join(_td714e, "cfg-sach.json")
+            with open(_cfg714e_sach, "w", encoding="utf-8") as _fh714e:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token"}, _fh714e)
+            for _v714e in "abcd":
+                _st714e.update(up=[], probe=0)
+                _tg50._nlm_auth_files = (lambda: {}) if _v714e == "b" else (lambda: {"auth.json": "moi"})
+                _st714e["remote"] = {"token": "offline-test-token", "nlm_auth": {"auth.json": "cu"}}
+                with _hush():
+                    if _v714e in "ab":
+                        _rc714e = _tg50.cmd_secrets_stage(_ap50.Namespace(
+                            config=_cfg714e if _v714e == "a" else _cfg714e_sach, profile=None, no_gws=True,
+                            no_nlm=(_v714e == "a"), folder=None, secrets_id="S714E"))
+                    else:
+                        _rc714e = _tg50.cmd_secrets_set(_ap50.Namespace(config=None, profile=None, secrets_id="S714E",
+                            nlm=(_v714e == "d"), gas_token=None, webapp="offline-new", gws=False, no_public=True,
+                            folder=None, secrets_file=None, env=None))
+                _b714e = [u for u in _st714e["up"] if isinstance(u, dict)]
+                if _v714e == "a":
+                    _res714e[_v714e] = (_rc714e == 0 and len(_st714e["up"]) == 1 and len(_b714e) == 1
+                                        and "nlm_auth" not in _b714e[0] and _st714e["probe"] == 0)
+                elif _v714e in "bc":
+                    _res714e[_v714e] = (_rc714e == (3 if _v714e == "b" else 4) and not _st714e["up"])
+                else:
+                    _res714e[_v714e] = (_rc714e == 0 and _st714e["probe"] == 1 and len(_b714e) == 1
+                                        and _b714e[0].get("nlm_auth") == {"auth.json": "moi"})
+        _ok714e = {"auth.json": "x"}
+        with _hush():
+            _res714e["e"] = (_tg50._nlm_bundle_guard("t", {"nlm_auth": dict(_ok714e)}, _ok714e) == 4
+                             and _tg50._nlm_bundle_guard("t", {"nlm_auth": _ok714e}, _ok714e) == 0
+                             and _tg50._nlm_bundle_guard("t", {"nlm_auth": _ok714e}, None) == 4
+                             and _tg50._nlm_bundle_guard("t", {"token": "x"}, None) == 0)
+    finally:
+        for _k714e, _v714e in _o714e.items():
+            setattr(_tg50, _k714e, _v714e)
+        _os38.environ.clear(); _os38.environ.update(_env714e)
+    cases.append(("wp714_nlm_bundle_moi_chot_mot_ve", len(_res714e) == 5 and all(_res714e.values())))
+
+    # (3) lớp `stage-error-output-leaks-credential` — các nhánh lỗi NGOÀI canary: lỗi upload (cả ba lệnh, rc5),
+    #     lỗi đồng bộ public (secrets-set, giữ rc0 cảnh báo), lỗi giải mã, lỗi trong `_stage_enc_upload` (gws + gcloud),
+    #     ngoại lệ ném từ chính probe. Mọi output không được chứa sentinel.
+    _o714f = {k: getattr(_tg50, k) for k in ("_master_key", "load_creds", "_secrets_fetch", "_secrets_upload",
+              "_nlm_auth_alive", "_nlm_auth_files", "_refresh_nlm_auth", "_gws_export_cred", "_stage_enc_upload",
+              "_gcloud_access_token", "_gcloud_drive_update")}
+    _env714f = dict(_os38.environ)
+    _sen714f = "OFFLINE" + "_SENTINEL_714F"
+    _res714f = {}
+
+    def _boom714f(*a, **k):
+        raise RuntimeError(_sen714f)
+    try:
+        import contextlib as _cx714f, io as _io714f
+        _os38.environ["TL_TOKEN"] = "offline-test-token"
+        _tg50._master_key = lambda: "mk714f"
+        _tg50.load_creds = lambda *a, **k: None
+        _tg50._refresh_nlm_auth = lambda: False
+        _tg50._gws_export_cred = lambda: None
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._nlm_auth_alive = lambda nb, timeout=30, **kw: (True, "LIVE OK (test)")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f"), "file")
+
+        def _run714f(fn, ns):
+            _cap = _io714f.StringIO()
+            with _cx714f.redirect_stdout(_cap), _cx714f.redirect_stderr(_cap):
+                try:
+                    _rc = fn(ns)
+                except Exception:   # noqa: BLE001 — một ngoại lệ thoát ra là ca ĐỎ (tl.main sẽ in traceback)
+                    _rc = "exc"
+            return _rc, _sen714f in _cap.getvalue()
+        _ns714f = _ap50.Namespace(config=None, profile=None, refresh=False, folder=None, cred_file_id="OFFLINE",
+            new=False, force=False, secrets_id="OFFLINE", nlm=True, gas_token=None, webapp=None, gws=False,
+            no_public=False, no_gws=True, no_nlm=False, secrets_file=None, env=None)
+        _tg50._stage_enc_upload, _tg50._secrets_upload = _boom714f, _boom714f
+        for _nm714f, _fn714f in (("nlm-auth-stage", _tg50.cmd_nlm_auth_stage), ("secrets-set", _tg50.cmd_secrets_set),
+                                 ("secrets-stage", _tg50.cmd_secrets_stage)):
+            _rc714f, _leak714f = _run714f(_fn714f, _ns714f)
+            _res714f["upload:" + _nm714f] = (_rc714f == 5 and not _leak714f)
+        _tg50._secrets_upload = lambda *a, **k: ("OFFLINE", True)       # bundle ok, chỉ public lỗi ⇒ cảnh báo rc0
+        _rc714f, _leak714f = _run714f(_tg50.cmd_secrets_set, _ns714f)
+        _res714f["public"] = (_rc714f == 0 and not _leak714f)
+        _dec714f = _store50d.decrypt                                       # lỗi giải mã MANG sentinel trong thông điệp
+        _store50d.decrypt = _boom714f
+        try:
+            _rc714f, _leak714f = _run714f(_tg50.cmd_secrets_set, _ns714f)
+        finally:
+            _store50d.decrypt = _dec714f
+        _res714f["giai_ma"] = (_rc714f == 3 and not _leak714f)
+        _tg50._nlm_auth_alive = _boom714f
+        _rc714f, _leak714f = _run714f(_tg50.cmd_nlm_auth_stage, _ns714f)
+        _res714f["probe_exc"] = (_rc714f == 4 and not _leak714f)
+        _tg50._stage_enc_upload = _o714f["_stage_enc_upload"]               # helper THẬT, chỉ gws/gcloud giả
+        _g714f = type("G714F", (), {"update_content": staticmethod(_boom714f)})()
+        for _mode714f in ("khong_gcloud", "gcloud_loi"):
+            _tg50._gcloud_access_token = ((lambda: (None, _sen714f)) if _mode714f == "khong_gcloud"
+                                          else (lambda: ("tok", None)))
+            _tg50._gcloud_drive_update = lambda *a, **k: {"ok": False, "error": _sen714f, "fix": _sen714f}
+            _cap714f = _io714f.StringIO()
+            with _cx714f.redirect_stdout(_cap714f), _cx714f.redirect_stderr(_cap714f):
+                try:
+                    _tg50._stage_enc_upload("nlm_cred.enc", b"x", "F", "FID", False, g=_g714f)
+                    _msg714f = "khong_nem"
+                except RuntimeError as _e714f:
+                    _msg714f = str(_e714f) + repr(_e714f.__cause__) + repr(_e714f.__context__ if not _e714f.__suppress_context__ else None)
+            _res714f["stage_enc:" + _mode714f] = (_msg714f != "khong_nem" and _sen714f not in _msg714f
+                                                  and _sen714f not in _cap714f.getvalue())
+    finally:
+        for _k714f, _v714f in _o714f.items():
+            setattr(_tg50, _k714f, _v714f)
+        _os38.environ.clear(); _os38.environ.update(_env714f)
+    cases.append(("wp714_nlm_stage_moi_nhanh_loi_khong_ro_chuoi_tho", len(_res714f) == 8 and all(_res714f.values())))
+
+    # (4) lớp `trusted-notebook-overwritten-by-stage-config` — thứ tự tin cậy: TL_CANARY_NOTEBOOK_ID > TL_NOTEBOOK_ID ở
+    #     lối vào > nền. Đo bằng HAI profile thật trong config (loader THẬT): --profile khác + token chỉ ở config, và
+    #     đường `tl.main` đã overlay TL_NOTEBOOK_ID trước khi vào lệnh (giả lập: env đã mang ID của config).
+    _o714g = {k: getattr(_tg50, k) for k in ("load_creds", "_nlm_auth_files", "_stage_enc_upload")}
+    _nc714g = _tg50._imp("nlm_cli")
+    _saved714g = (_nc714g._run, _nc714g.nlm_available)
+    _env714g = dict(_os38.environ)
+    _seen714g, _res714g = [], {}
+    _PIN714g = "NB-PINNED-WRAPPER-0714"
+    try:
+        import tempfile as _tf714g
+        _nc714g._run = lambda argv, timeout=120: (_seen714g.append(argv[2]) or
+                                                  (0, json.dumps({"id": argv[2], "title": "Offline canary"}), ""))
+        _nc714g.nlm_available = lambda: True
+        _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
+        _tg50._stage_enc_upload = lambda *a, **k: ("OFFLINE", True)
+        _tg50.load_creds = _o714g["load_creds"]
+        with _tf714g.TemporaryDirectory() as _td714g:
+            _cfg714g = _os38.path.join(_td714g, "tl-config.json")
+            with open(_cfg714g, "w", encoding="utf-8") as _fh714g:
+                json.dump({"webappUrl": "offline", "token": "offline-test-token", "profiles": {
+                    "vbqppl": {"notebookId": "NB-CONFIG-BASE-0714"},
+                    "duan714": {"notebookId": "NB-CONFIG-DUAN-0714"}}}, _fh714g)
+            for _lab714g, _envset714g, _prof714g, _want714g in (
+                    ("profile_khac_token_config", {"TL_NOTEBOOK_ID": _PIN714g}, "duan714", _PIN714g),
+                    ("pin_thang_overlay", {"TL_NOTEBOOK_ID": "NB-CONFIG-DUAN-0714", "TL_CANARY_NOTEBOOK_ID": _PIN714g},
+                     "duan714", _PIN714g),
+                    ("khong_ghim_theo_profile", {}, "duan714", "NB-CONFIG-DUAN-0714")):
+                _os38.environ.clear(); _os38.environ.update(_env714g)
+                for _k714g in ("TL_TOKEN", "TL_WEBAPP", "TL_PROFILE", "TL_PROFILE_ENV_OVERLAY", "TL_NOTEBOOK_ID",
+                               "TL_CANARY_NOTEBOOK_ID"):
+                    _os38.environ.pop(_k714g, None)
+                _os38.environ.update(_envset714g)
+                _seen714g.clear()
+                with _hush():
+                    _rc714g = _tg50.cmd_nlm_auth_stage(_ap50.Namespace(config=_cfg714g, profile=_prof714g, refresh=False,
+                        folder=None, cred_file_id="OFFLINE", new=False, force=False))
+                _res714g[_lab714g] = (_rc714g == 0 and _seen714g == [_want714g])
+    finally:
+        for _k714g, _v714g in _o714g.items():
+            setattr(_tg50, _k714g, _v714g)
+        _nc714g._run, _nc714g.nlm_available = _saved714g
+        _os38.environ.clear(); _os38.environ.update(_env714g)
+    cases.append(("wp714_nlm_canary_ghim_notebook_qua_hai_profile", len(_res714g) == 3 and all(_res714g.values())))
+
+    # (6) WP714 vòng 3 (Codex lượt 2, lớp P3 `khai-rong-hon-phep-do-trong-changelog-runbook`): chốt payload làm
+    # `secrets-set` thiếu `--nlm` trả mã 4 khi bundle mang nlm_auth, nên MỌI lệnh mẫu xoay token/webapp/GWS (một
+    # đoạn trong dấu backtick) ở RUNBOOK và trong tl_gws (lời khắc phục GWS in ra) phải mang `--nlm` NGAY TRONG lệnh
+    # — chỉ dẫn cũ đưa người vận hành thẳng vào mã 4. Đếm số lệnh mẫu để ca không xanh rỗng khi chuỗi đổi dạng.
+    import re as _re714h
+    _pat714h = _re714h.compile(r"`[^`\n]*secrets-set --(?:gas-token|webapp|gws)[^`\n]*`")
+    _dir714h = _os38.path.dirname(_os38.path.dirname(_os38.path.abspath(_tg50.__file__)))
+    _cmd714h = {}
+    for _rel714h in (("references", "RUNBOOK.md"), ("scripts", "tl_gws.py")):
+        with open(_os38.path.join(_dir714h, *_rel714h), encoding="utf-8") as _f714h:
+            _cmd714h[_rel714h[-1]] = _pat714h.findall(_f714h.read())
+    cases.append(("wp714_huong_dan_secrets_set_kem_nlm",
+                  len(_cmd714h["RUNBOOK.md"]) >= 3 and len(_cmd714h["tl_gws.py"]) >= 4
+                  and all("--nlm" in _c for _v in _cmd714h.values() for _c in _v)))
+
+    # (7) WP714 vòng 4 (Codex lượt 3, lớp `stage-canary-true-khi-than-rong-hoac-sai-id`): wrapper PS và lệnh stage
+    # Python phải phán xét CÙNG một văn bản bằng CÙNG một luật. CI không có pwsh, nên ở đây khoá các BẢNG mà wrapper
+    # chép lại — đọc thẳng từ tệp .ps1, so với nguồn Python — để sửa một bên mà quên bên kia thì ĐỎ:
+    #   a. bảng ký tự "trắng": `$CanaryBlankCodePoints` == `_NLM_CANARY_BLANK_CODEPOINTS`, và Test-CanaryBody không
+    #      còn dùng `IsNullOrWhiteSpace` (tập .NET khác tập Python ở U+001C–U+001F, đo);
+    #   b. lớp ký tự ngắt dòng của `ConvertTo-StageText` (+ `\r`, đã đổi trước) == tập ký tự `str.splitlines` ngắt
+    #      (đo trên BMP) — `nlm_cli._strip_keyring` cắt dòng bằng `splitlines`;
+    #   c. mẫu nhiễu keyring của wrapper, biên dịch bằng `re` KHÔNG cờ, trả CÙNG kết quả `search` với
+    #      `nlm_cli._KEYRING_NOISE_RE` trên một bộ dòng thay từng ký tự bằng mọi biến thể hoa/thường Python nhận
+    #      (gồm U+017F, U+212A, U+0130, U+0131) và mọi ký tự `isspace`. Đếm số dòng để ca không xanh rỗng.
+    _ps714j = open(_os38.path.join(_dir714h, "scripts", "nlm-credential-refresh.ps1"), encoding="utf-8").read()
+    _m714j = _re714h.search(r"\$CanaryBlankCodePoints = @\(([^)]*)\)", _ps714j)
+    _blank714j = [int(_x, 16) for _x in _re714h.findall(r"0x[0-9A-Fa-f]+", _m714j.group(1))] if _m714j else []
+    _body714j = _ps714j.split("function Test-CanaryBody", 1)[-1].split("function Classify", 1)[0]
+    cases.append(("wp714_canary_bang_trang_khop_ps",
+                  _blank714j == list(_tg50._NLM_CANARY_BLANK_CODEPOINTS) and len(_blank714j) >= 30
+                  and "Test-CanaryBlank" in _body714j and "IsNullOrWhiteSpace" not in _body714j))
+    _nc714j = _tg50._imp("nlm_cli")
+    _split714j = _re714h.search(r"\[regex\]::Split\(\$text, '(\[[^']*\])'\)", _ps714j)
+    _want714j = {_c for _c in range(0x10000) if len(("a" + chr(_c) + "b").splitlines()) == 2}
+    _got714j = ({_c for _c in range(0x10000) if _re714h.fullmatch(_split714j.group(1), chr(_c))} | {0x0D}) if _split714j else set()
+    _kr714j = _re714h.search(r"\$KeyringNoise = '([^']*)' -f '([^']*)'", _ps714j)
+    _same714j, _n714j = False, 0
+    if _kr714j:
+        _psre714j = _re714h.compile(_kr714j.group(1).replace("{0}", _kr714j.group(2)))
+        _cand714j = ([chr(_c) for _c in range(0x21, 0x7F)] + ["\u017f", "\u212a", "\u0130", "\u0131", "\u00e9"]
+                     + [chr(_c) for _c in range(0x10000) if chr(_c).isspace()])
+        _same714j = True
+        for _base714j in ("using keyring backend", "keyring.backends", "keyring.backend", "no recommended backend"):
+            for _i714j in range(len(_base714j)):
+                for _ch714j in _cand714j:
+                    _line714j = "x " + _base714j[:_i714j] + _ch714j + _base714j[_i714j + 1:] + " y"
+                    _n714j += 1
+                    if bool(_psre714j.search(_line714j)) != bool(_nc714j._KEYRING_NOISE_RE.search(_line714j)):
+                        _same714j = False
+    cases.append(("wp714_canary_van_chuyen_khop_nlm_cli",
+                  bool(_want714j) and _got714j == _want714j and _same714j and _n714j > 5000))
 
     # ═══ v1.33.40 (MERGE bundle-15 'complete': source-delete (a) KHÔNG trash Drive dù docstring nói, (b) reg_delete
     # SAI shape g.get(fileId,force) — GAS đòi POST+drive_ids[]+confirm=yes) — r51_* ═══
@@ -9097,10 +9696,39 @@ def run() -> int:
     import io as _io110, contextlib as _ctx110, tempfile as _tf110
     from pathlib import Path as _P110
 
+    # #565 `M2`/`M4` — KHI NUỐT MỘT NGOẠI LỆ THÌ PHẢI NÓI RA NÓ LÀ NGOẠI LỆ GÌ.
+    #
+    # Bản trước chỉ in khi có `TL_SELFTEST_DEBUG`, nên không đặt biến ấy thì MỌI ca chết vì
+    # HẠ TẦNG (`PermissionError`, `TimeoutExpired`, `OSError`, `ImportError`) trông Y HỆT một
+    # ca thất bại vì MÃ SAI. Hai thứ ấy cần hai cách xử khác nhau, mà log không phân biệt nổi.
+    #
+    # Đã trả giá đo được: `r330_deploy_msg_khong_chay_lenh` chập chờn trên Windows suốt BỐN
+    # lượt đo của đợt #551, và mỗi lượt chỉ để lại đúng một dòng `[FAIL] r330` trần. Nguyên
+    # nhân thật là `TemporaryDirectory.__exit__` ném `PermissionError [WinError 32]` vì WSL
+    # còn giữ handle trên cwd — đo 16/20 = 80%. Bốn lượt ấy mất công vì DÒNG NÀY im lặng.
+    #
+    # NÉM ra ngoài thì KHÔNG được: một ca hạ tầng sẽ giết cả lượt chạy 1710 ca. Phải IN.
+    # Và phép PHÂN LOẠI không đổi một chút nào — `cases` vẫn nhận `(name, False)`, đúng thứ
+    # tự, đúng số lượng; dòng in chỉ ĐI KÈM.
+    _TRAN_CHAN_DOAN_110 = 400
+
+    def _goi_loi_110(exc):
+        """Kiểu VÀ thông điệp, một dòng, và KHAI RÕ khi phải cắt.
+
+        Thân ngoại lệ có thể NHIỀU DÒNG (một `AssertionError` của `run()` mang cả stdout lẫn
+        stderr của lệnh con), nên dừng ở dòng đầu là tái lập đúng bệnh đang chữa, chỉ nhỏ hơn.
+        Nuốt lặng phần dư cũng vậy — cắt thì phải nói đã cắt BAO NHIÊU ký tự.
+        """
+        than = f"{type(exc).__name__}: {exc}".replace("\n", " | ").strip() or "(rong)"
+        if len(than) <= _TRAN_CHAN_DOAN_110:
+            return than
+        return f"{than[:_TRAN_CHAN_DOAN_110]} …[CAT {len(than) - _TRAN_CHAN_DOAN_110} ky tu]"
+
     def _t110(name, fn):
         try:
             cases.append((name, bool(fn())))
-        except Exception:
+        except Exception as _e110:      # noqa: BLE001
+            print(f"  [LOI-VO-CAN?] {name}: {_goi_loi_110(_e110)}", flush=True)
             if os.environ.get("TL_SELFTEST_DEBUG"):
                 import traceback as _tb110; _tb110.print_exc()
             cases.append((name, False))
@@ -20982,15 +21610,12 @@ def run() -> int:
         #
         # r308 (T0-F/GATE-05): ca này TỪNG dựng package-set bằng `rglob` trên ĐĨA — sai nguồn. Cây dev
         # rộng hơn gói, nên con trỏ tới tệp CÓ-trên-đĩa-nhưng-NGOÀI-gói lọt test mà ĐỎ ở `release-verify`
-        # (đúng thứ guard sinh ra để chặn). Nay đọc `RELEASE_MANIFEST.json` như khuôn r289, và doc-set
-        # lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
+        # (đúng thứ guard sinh ra để chặn). Dựng manifest tạm của cây ứng viên bằng helper release,
+        # rồi lấy MỌI *.md trong manifest để khớp guard sản xuất sau r308. Vế (e)-(g) dưới là phép đo
         # FALSIFY được: cùng một tài liệu, nguồn-manifest ĐỎ mà nguồn-đĩa XANH ⇒ lỗ có thật, đã bịt.
         root = _ROOT209
-        mf = root / "RELEASE_MANIFEST.json"
-        if not mf.exists():
-            return True
         paths = sorted(str(x.get("path") or "") for x in
-                       (_j209.loads(mf.read_text(encoding="utf-8")).get("files") or []))
+                       (_rel209._build_release_manifest(root).get("files") or []))
         pset = set(paths)
         docs = {}
         for rel in sorted(p for p in paths if p.lower().endswith(".md")):
@@ -21264,15 +21889,139 @@ def run() -> int:
         # KÊ KHAI SLOT (MANG-SANDBOX-CODEX / #334): 70 → **71** Markdown dưới `docs/`. Thêm đúng
         # `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói. `RELEASE_MANIFEST.json` KHÔNG đổi nên
         # gói giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 71 = **251**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 71 == 251
+        # KÊ KHAI SLOT (PR #475 — ADR nguồn tin cậy cho cổng đọc lease): 71 → **72** Markdown dưới
+        # `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0047-nguon-tin-cay-cho-cong-doc-lease.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm; `ops/specs/**` và `ops/reviews/**`
+        # cùng PR nằm ngoài `docs/` nên ratchet này không đếm. `RELEASE_MANIFEST.json` KHÔNG đổi ⇒ gói
+        # giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 72 = **252**.
+        # TRẢ GIÁ LẦN THỨ TƯ đúng nếp "ĐÃ TRẢ GIÁ" trong ca này: phiên #475 chạy `adr-song` +
+        # `doctrine-scan` + `doc-claims-check --strict` (cả ba xanh) rồi đẩy; CI mới là nơi ca này đỏ
+        # (`tl selftest 1708/1709`, run 34183079571). Kê khai này viết SAU khi đọc đúng ca đỏ ấy.
+        # KÊ KHAI SLOT (PR #526 — ADR-0048 nâng trần trục VÒNG, packet #522 r3): 72 → **73** Markdown
+        # dưới `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0048-tran-vong-review-len-muoi.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng PR ấy, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 73 = **253**.
+        # TRẢ GIÁ LẦN THỨ NĂM, và lần này cái giá nằm ở chỗ khác hai lần trước nên ghi cho rõ: phiên
+        # thi công r2 chạy `adr-song` + `doctrine-scan` + `doc-claims-check --strict` + `git diff --check`
+        # — BỐN cổng, tất cả xanh — rồi bàn giao với lời khai "MỌI cổng xanh". Nó KHÔNG chạy `tl
+        # selftest`. Bàn giao còn ghi `gate` đang `in_progress` ⇒ "KHÔNG ĐO ĐƯỢC"; đo lại thì `gate`
+        # đã `completed/failure` TỪ TRƯỚC lúc bàn giao (run 34685943174 trên `a3f5f21`, run
+        # 34684537107 trên `7059cbb`). Tức bốn cổng kia trả lời một câu hỏi KHÁC, y như ba lần đã ghi
+        # ở trên — nhưng lần này còn thêm một cách sập mới: **đọc một lượt CI chưa xong thành "chưa
+        # biết" rồi bàn giao, trong khi nó đã đỏ**. Phép đo delta hai vế dựng trong MỘT lệnh (hai
+        # clone rời, cùng các bước, cùng ghim `core.abbrev 7`, chạy song song): nền `015ffcc` cho
+        # `rc=0` với `1709/1709` và 0 FAIL; head packet `a3f5f21` cho `rc=1` với `1708/1709` và đúng
+        # MỘT FAIL là chính ca này. Nền XANH ⇒ delta là của packet, không phải đỏ sẵn, không phải
+        # nhiễu rig.
+        # NỢ CÓ TÊN, vì kê khai slot là chữa TRIỆU CHỨNG: **`R291-DAM-SO-CUNG`**. Mỗi tệp `docs/*.md`
+        # thêm vào kho lại làm ca này đỏ và lại đòi một lần kê khai — đó chính là hình dạng đã lặp NĂM
+        # lần, và doctrine của kho nói lặp từ ba lần trở lên thì câu hỏi đúng là *"có nên làm việc này
+        # không"*, không phải *"vá thế nào"*. Cách chữa là cho ca này TÍNH số docs từ cây và chỉ
+        # ratchet phần thực sự là bất biến (số tệp trong GÓI); việc ấy ngoài phạm vi packet #522
+        # (`S6` của lease gen 3 chặn đúng chỗ này).
+        # KÊ KHAI SLOT (Packet #551 r2 — ADR-0050): 74 → **75** Markdown dưới `docs/`.
+        # Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0050-assurance-neo-vao-ho-model-khong-phai-hang-cong-cu.md`
+        # Đây là lần thứ BA cùng một cách sập (R291-DAM-SO-CUNG = 3: #522, #548, #551).
+        # `docs/PROTOCOL_DA_PHIEN.md` (dòng §20) là sửa, không thêm. `RELEASE_MANIFEST.json` có đổi
+        # trong cùng packet, nhưng CHỈ vì băm của CHÍNH TỆP NÀY đổi — không tệp runtime nào được thêm
+        # nên `file_count` giữ **180** và trần Package 200 không nhúc nhích; cây thật = 180 + 75 = **255**.
+        # KÊ KHAI SLOT (WP710 — land PR #714, Spec r4 mục 7 đã nêu ứng viên 183 tệp): gói 180 → **183**.
+        # Thêm đúng BA tệp vào gói, không tệp `docs/` nào đổi (vẫn 75):
+        #   + `scripts/nlm-credential-refresh.ps1`       — wrapper refresh → canary → stage (RUNTIME trên máy giữ hồ sơ gốc;
+        #     `references/RUNBOOK.md` trỏ tới nó nên nó PHẢI có trong gói, nếu không `release-verify --strict` đỏ).
+        #   + `scripts/nlm-credential-refresh.Tests.ps1` — bộ test hành vi của wrapper.
+        #   + `changelog.d/wp-710.md`                    — mảnh changelog của packet.
+        # Hai tệp sau là dev-side theo nghĩa hẹp; chúng vào gói vì bộ lọc gói hiện không loại chúng, không vì runtime
+        # cần. Cây thật = 183 + 75 = **258**; trần Package 200 còn 17 khe.
+        # KÊ KHAI SLOT (bookkeeping land WP725/WP726/WP727 — PR #729/#730/#731): gói 183 → **186**. Thêm đúng BA
+        # mảnh changelog, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới:
+        #   + `changelog.d/wp-725.md` · `changelog.d/wp-726.md` · `changelog.d/wp-727.md`
+        # Fragment `scripts/test_fragments/wp72{5,6,7}_*.py` KHÔNG vào gói (bộ lọc loại đúng tiền tố); bundle
+        # `scripts/tl_test_fragments_bundled.py` đã có sẵn trong gói, chỉ đổi băm. Ba PR worker được merge riêng
+        # lẻ nên master đỏ `release-verify --strict` giữa chừng — đúng lý do protocol §9 để manifest cho phiên land.
+        # Cây thật = 186 + 75 = **261**; trần Package 200 còn 14 khe.
+        # KÊ KHAI SLOT (bookkeeping land WP766 — PR #772, merge e03d4bf): gói 186 → **187**. Thêm đúng MỘT mảnh
+        # changelog `changelog.d/wp-766.md`, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới. PR worker
+        # thêm mảnh mà không kê manifest nên master đỏ `release-verify --strict` (gate 38861735146) — cùng hình dạng WP725-727.
+        # Cây thật = 187 + 75 = **262**; trần Package 200 còn 13 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 262
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 71
+        ok4 = (len(tren_dia) == 75
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))
         return ok1 and ok2 and ok3 and ok4
     _t110("r291_docs_ngoai_goi", _c291_docs_ngoai_goi)
+    def _c357_agents_ngoai_goi():
+        # r357 — `.agents/` la ANH EM THU BA cua `.claude`/`.codex`: vi tri adapter phia Codex ma
+        # `docs/adr/0019-ba-skill-adapter-hai-agent-mot-protocol.md` thiet ke, va
+        # `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md:273` khai thang "phai bi loai khoi release
+        # bundle". Tran goi la 200 tep CUNG (goi dang 180).
+        #
+        # DO TRUOC KHI VA (06-09-2026): chep mot cay `.agents/` 10 tep vao kho roi hoi
+        # `_release_should_include` => 10/10 SE VAO GOI, tuc 180 -> 190, an 10 trong 20 khe con lai.
+        # Cung hinh dang ca `.codex` (r331), khac dung mot dieu: bat duoc TRUOC khi tep vao git.
+        #
+        # VI SAO KHONG DO CAY THAT CUA KHO. `.agents/` CO Y khong nam trong kho: noi dung hien co la
+        # ban thay-chuoi-mu va con hong (22 tham chieu `.Codex/dev/*.py` tro thu muc khong ton tai,
+        # `--executor Codex` sai allowlist `PROVIDERS`, mot lenh Claude CLI bi doi ten thanh `Codex`)
+        # — de packet rieng. Neu ve nay soi `root/".agents"` thi cay rong => `all()` tren danh sach
+        # rong DUNG VO DIEU KIEN => "co MAT ma khong DO", dung benh `t24`.
+        #
+        # VA MOT LOI KHAI DA BI BAC NGAY TRONG LUOT VIET CA NAY, ghi lai vi no la cai bay that:
+        # ban nhap dung DUONG DAN TONG HOP (khong tao tep) va chu thich khai `_release_should_include`
+        # "thuan path, khong stat tep". SAI — dong cuoi cua ham la `return path.is_file()`
+        # (`release.py:593`). Duong dan khong ton tai luon tra False, nen ve "go khoa phai quay lai
+        # vao goi" KHONG THE do => ca se xanh ma khong co rang. Do duoc: go khoa ra van cho False.
+        # Nay dung CAY TAM voi TEP THAT, va lay chinh thu muc tam lam `root`.
+        import tempfile as _tf357
+        from pathlib import Path as _Path357
+        root = _ROOT209
+        ok1 = ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        mf = root / "RELEASE_MANIFEST.json"
+        ok2 = ok3 = ok_git = True
+        if not mf.exists():
+            if (root / ".git").exists():
+                ok_git = False
+        else:
+            j = _j209.loads(mf.read_text(encoding="utf-8"))
+            paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
+            ok2 = not [p for p in paths if p.startswith(".agents/")]
+            # RATCHET: goi giu 187 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
+            # r291_docs_ngoai_goi).
+            # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
+        # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
+        # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
+        # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.
+        with _tf357.TemporaryDirectory() as _td:
+            troot = _Path357(_td)
+            mau = [troot / ".agents" / "skills" / "cross-review" / "SKILL.md",
+                   troot / ".agents" / "skills" / "grill-me" / "LICENSE"]
+            mau_giu = [troot / "my.agents" / "file.txt",
+                       troot / "scripts" / ".agents_tools" / "file.py",
+                       troot / "scripts" / "tl.py"]
+            for q in mau + mau_giu:
+                q.parent.mkdir(parents=True, exist_ok=True)
+                q.write_text("x\n", encoding="utf-8")
+            loai = bool(mau) and all(not _rel209._release_should_include(q, troot) for q in mau)
+            giu = bool(mau_giu) and all(_rel209._release_should_include(q, troot) for q in mau_giu)
+            goc = set(_rel209._RELEASE_EXCLUDE_DIRS)
+            try:
+                _rel209._RELEASE_EXCLUDE_DIRS.discard(".agents")
+                quay_lai = bool(mau) and all(_rel209._release_should_include(q, troot) for q in mau)
+            finally:
+                _rel209._RELEASE_EXCLUDE_DIRS.clear()
+                _rel209._RELEASE_EXCLUDE_DIRS.update(goc)
+        ok4 = loai and quay_lai and giu and ".agents" in _rel209._RELEASE_EXCLUDE_DIRS
+        return ok1 and ok2 and ok3 and ok4 and ok_git
+    _t110("r357_agents_ngoai_goi", _c357_agents_ngoai_goi)
     def _c307_changelog_mot_version_mot_dot():
         # r307 — SỔ: MỘT version phải ứng ĐÚNG MỘT số đợt. Lớp này trước nay KHÔNG cổng nào soi:
         # merge PR #6 (`dfb9418`) đi qua CI xanh + gate local 8/8 xanh mà vẫn khai 15 số version
@@ -22258,13 +23007,32 @@ def run() -> int:
                 '(cần `gws auth login` có quyền GHI Drive)"; exit 3; }')
 
         def _goi(line):
-            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng."""
-            with _tf330.TemporaryDirectory() as _td:
+            """True ⇔ `gws` BỊ GỌI khi chạy đúng dòng đó với drive-push hỏng.
+
+            #565 `M1` — DỌN DẸP KHÔNG ĐƯỢC NẰM TRÊN ĐƯỜNG QUYẾT ĐỊNH. Bản trước dùng
+            `TemporaryDirectory()` làm CONTEXT MANAGER, mà `ignore_cleanup_errors` mặc định
+            `False` ⇒ `__exit__` NÉM. Trên Windows `_bash` là alias WSL (đo: `uname -s` →
+            `Linux`), và WSL GIỮ HANDLE trên cwd sau khi tiến trình con trả về — đo 16/20 =
+            80% thư mục tạm không xoá được, `PermissionError [WinError 32]` trên chính THƯ
+            MỤC. `_t110` nuốt lỗi ấy thành `False`, nên ca ĐỎ vì RIG chứ không vì thứ nó đo.
+            `_goi` được gọi HAI lần mỗi lượt ⇒ P(≥1 lần hỏng) ≈ 0,96; quan sát thực 3 đỏ /
+            1 xanh trên bốn lượt. Trên Linux không có WSL nên ca luôn [OK] — đó là lý do CI
+            chưa bao giờ thấy.
+
+            Chữa bằng KIẾN TRÚC chứ không bằng một `try` bọc thêm: đọc kết quả XONG rồi mới
+            dọn, và dọn là việc BỎ QUA ĐƯỢC. Hình dạng `RIG-QUYET-MAU-CUA-PHEP-DO` đã đếm
+            tới NĂM lần trong kho này, quá ngưỡng "lặp ba lần thì hỏi có nên làm thế không".
+            """
+            _td = _tf330.mkdtemp()
+            try:
                 _sp = os.path.join(_td, "p.sh")
                 with open(_sp, "w", encoding="utf-8", newline="\n") as _f:
                     _f.write("bad(){ :; }\ngws(){ echo CALLED >> goi.txt; }\nTL=false\nZIP=x\n" + line + "\n")
                 _sp330.run([_bash, "p.sh"], cwd=_td, capture_output=True, timeout=60)
+                # ĐỌC TRƯỚC, DỌN SAU. Đảo thứ tự là đọc một thư mục vừa bị xoá.
                 return os.path.exists(os.path.join(_td, "goi.txt"))
+            finally:
+                _sh330.rmtree(_td, ignore_errors=True)
         return okA and okB and okC and _goi(_old) and not _goi(_new[0])
     _t110("r330_deploy_msg_khong_chay_lenh", _c330_deploy_msg_khong_chay_lenh)
 
@@ -22305,6 +23073,104 @@ def run() -> int:
         ok4 = any(ln.strip() == ".codex/" for ln in _gi.splitlines())
         return ok1 and ok2 and ok3 and ok4
     _t110("r331_codex_ngoai_cay_phat_hanh", _c331_codex_ngoai_cay_phat_hanh)
+
+    # ═══ r379 — RIG KHÔNG ĐƯỢC QUYẾT MÀU, và NGOẠI LỆ KHÔNG ĐƯỢC BỊ NUỐT LẶNG ═══
+    def _c379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang():
+        """Packet #565. Hai khuyết tật CÙNG GỐC — rig quyết màu thay vì nội dung được đo.
+
+        VẾ A (`M1`) — `_goi` của `r330` để `TemporaryDirectory.__exit__` quyết màu. Đo trên máy
+          chủ kho 10:53Z 19-09-2026: 16/20 = 80% thư mục tạm không xoá được (`PermissionError
+          [WinError 32]` trên chính THƯ MỤC, vì `_bash` là alias WSL và WSL giữ handle trên cwd).
+          Ca này KHÔNG chạy lại `r330` — nó đo HÌNH DẠNG của `_goi` trên AST: dọn dẹp phải nằm
+          trong `finally` và phải `ignore_errors`, và `return` phải đứng TRƯỚC nó.
+        VẾ B (`M2`/`M4`) — `_t110` phải IN kiểu VÀ thông điệp khi nuốt, KHÔNG điều kiện
+          `TL_SELFTEST_DEBUG`. Đo THẲNG bằng cách gọi `_goi_loi_110` — nó là sản phẩm, không
+          phải bản sao.
+
+        HAI VẾ PHẢI PHÂN BIỆT ĐƯỢC BẰNG ĐẦU VÀO. Một đột biến gỡ vế A không được làm vế B đỏ và
+        ngược lại; nếu không chúng là bộ TƯƠNG ĐƯƠNG và ca này chỉ đang đo MỘT thứ (bài học đo
+        được ở #566 lượt này: `m76` phải đổi đối chứng vì đối chứng cũ đỏ theo).
+        """
+        import ast as _ast379
+        import inspect as _in379
+        import textwrap as _tw379
+        # ĐO ĐÚNG THỨ CẦN ĐO, ĐỪNG MƯỢN CẢ TỆP LÀM ĐẦU VÀO. Bản đầu của ca này `ast.parse`
+        # NGUYÊN `scripts/tl_selftest.py` (2 153 584 B, 30 340 dòng) chỉ để tìm một hàm ~30
+        # dòng. Ngày 20-09-2026 01:35Z nó ĐỎ trên máy chủ kho:
+        #     SyntaxError: invalid syntax (<unknown>, line 1602)
+        # trong khi CHÍNH tệp ấy đang chạy — tức thứ ĐỌC ĐƯỢC khác thứ đang THỰC THI. Cùng
+        # commit, cùng máy, cùng python, lượt 00:55Z cùng ngày thì ca này XANH. **NGUYÊN NHÂN
+        # CHƯA BIẾT.** Kho có sẵn một lớp sự cố cùng hình dạng — `scripts/tl_boot.py`: *"strip
+        # NUL phòng mount NUL-pad #51435 … Cắt cụt thật → SyntaxError"* — nhưng đó là GIẢ
+        # THUYẾT, không phải phép đo; chớ đọc nó thành lời giải thích (CLAUDE.md: một nguyên
+        # nhân sai trong doctrine tệ hơn không ghi).
+        #
+        # Hai việc làm ngay, CẢ HAI độc lập với nguyên nhân:
+        #   (1) lấy NGUỒN CỦA HÀM qua `inspect` thay vì đọc tệp 2 MB — bề mặt đầu vào từ
+        #       30 340 dòng xuống còn thân `_c330…`, và phép tra `_goi` hết mơ hồ;
+        #   (2) khi vẫn hỏng thì chẩn đoán phải NÊU được nó đã đọc GÌ. `ast.parse` không có
+        #       `filename=` nên in `<unknown>` — một chẩn đoán không gọi được tên đầu vào của
+        #       chính nó. Nay ném kèm đường dẫn, số byte và băm của tệp trên đĩa; `_t110` (vế
+        #       B của chính ca này) sẽ in ra, nên một lượt đỏ là đủ để biết.
+        try:
+            _src379 = _tw379.dedent(_in379.getsource(_c330_deploy_msg_khong_chay_lenh))
+            cay = _ast379.parse(_src379, filename="<nguon _c330 lay qua inspect>")
+        except Exception as _e379:
+            import hashlib as _h379
+            _p379 = _ROOT209 / "scripts" / "tl_selftest.py"
+            try:
+                _b379 = _p379.read_bytes()
+                _tt379 = (f"{len(_b379)} byte · sha256/16 "
+                          f"{_h379.sha256(_b379).hexdigest()[:16]}")
+            except Exception as _e2379:
+                _tt379 = f"KHONG DOC DUOC ({type(_e2379).__name__}: {_e2379})"
+            raise RuntimeError(
+                f"khong lay/parse duoc nguon `_c330_deploy_msg_khong_chay_lenh` "
+                f"({type(_e379).__name__}: {_e379}) | tep tren dia {_p379}: {_tt379}") from None
+        goi = next((n for n in _ast379.walk(cay)
+                    if isinstance(n, _ast379.FunctionDef) and n.name == "_goi"), None)
+        if goi is None:
+            return False                      # KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không phải "sạch"
+        # A1 — KHÔNG còn `with TemporaryDirectory()`; `mkdtemp` + `finally`.
+        okA1 = (not any(isinstance(n, _ast379.With) and any(
+                    isinstance(i.context_expr, _ast379.Call)
+                    and getattr(i.context_expr.func, "attr", "") == "TemporaryDirectory"
+                    for i in n.items) for n in _ast379.walk(goi))
+                and any(isinstance(n, _ast379.Call)
+                        and getattr(n.func, "attr", "") == "mkdtemp" for n in _ast379.walk(goi)))
+        thu = [n for n in _ast379.walk(goi) if isinstance(n, _ast379.Try) and n.finalbody]
+        # A1b — dọn nằm trong `finally` VÀ bỏ qua lỗi: `rmtree(..., ignore_errors=True)`.
+        okA1b = any(
+            isinstance(c, _ast379.Call) and getattr(c.func, "attr", "") == "rmtree"
+            and any(k.arg == "ignore_errors" and getattr(k.value, "value", False) is True
+                    for k in c.keywords)
+            for t in thu for n in t.finalbody for c in _ast379.walk(n))
+        # A2 — ĐỌC TRƯỚC, DỌN SAU: `return` phải nằm trong THÂN `try`, không nằm sau `finally`.
+        #      Đây là vế PHÂN BIỆT với A1: một bản vá dọn đúng mà đọc SAU khi dọn vẫn sai.
+        okA2 = any(isinstance(n, _ast379.Return) for t in thu for n in _ast379.walk(t.body[0])
+                   if t.body) or any(isinstance(n, _ast379.Return)
+                                     for t in thu for b in t.body for n in _ast379.walk(b))
+        # B — `_goi_loi_110` mang KIỂU và THÔNG ĐIỆP, và KHAI khi cắt.
+        try:
+            raise RuntimeError("MOC-B-dong-mot\nMOC-B-dong-hai")
+        except RuntimeError as e:
+            goi_ra = _goi_loi_110(e)
+        okB1 = "RuntimeError" in goi_ra and "MOC-B-dong-mot" in goi_ra
+        okB2 = "MOC-B-dong-hai" in goi_ra           # dòng THỨ HAI phải tới nơi
+        # SỐ KÝ TỰ CẮT phải tính từ THỨ ĐƯỢC ĐỊNH DẠNG, không từ thông điệp thô. Bản đầu
+        # của ca này đòi `"37"` — đúng phần đuôi mà quên tiền tố `"ValueError: "` (12 ký tự),
+        # nên số thật là 49 và ca ĐỎ vì CHÍNH NÓ tính sai, không vì sản phẩm sai. Ghi lại vì
+        # đó đúng lớp "lời khai rộng hơn phép đo", chỉ ở quy mô một hằng số.
+        _than379 = f"ValueError: {'x' * (_TRAN_CHAN_DOAN_110 + 37)}"
+        try:
+            raise ValueError("x" * (_TRAN_CHAN_DOAN_110 + 37))
+        except ValueError as e:
+            dai = _goi_loi_110(e)
+        okB3 = "CAT" in dai and str(len(_than379) - _TRAN_CHAN_DOAN_110) in dai
+        okB4 = _goi_loi_110(ValueError("ngan")) == "ValueError: ngan"
+        return okA1 and okA1b and okA2 and okB1 and okB2 and okB3 and okB4
+    _t110("r379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang",
+          _c379_rig_khong_quyet_mau_va_ngoai_le_khong_bi_nuot_lang)
 
     def _c300_dac_ta_khop_ma():
         # Chống trôi prose↔mã: enum trong tài liệu/thẻ phải khớp hằng trong lookup_ops.
@@ -24873,17 +25739,76 @@ def run() -> int:
         return normal and cat == "killed"
     _t110("r378_l7_claim_khop_tung_byte", _c378_claim_khop_byte)
 
+    # r378 (#574) — phản chứng dựng bằng GIÁN TIẾP THƯ MỤC, KHÔNG bằng symlink TỆP.
+    #
+    # Vì sao đổi: symlink TỆP đòi SeCreateSymbolicLinkPrivilege, nên trên Windows thiếu đặc quyền
+    # `link.symlink_to(outside)` ném `OSError [WinError 1314]`, `_t110` bắt rồi hạ ca xuống False.
+    # Ca ĐỎ vì RIG, không vì mã — đo được trên máy chủ kho 20-09-2026 ở CẢ HAI vế nền `dc85dd0a`
+    # và ứng viên `8c425b1`, nên nó không phải hồi quy của #565. Đó là hình dạng
+    # RIG-QUYET-MAU-CUA-PHEP-DO, đã đếm 5 lần trong kho ⇒ quá ngưỡng ba lần ⇒ phải chữa bằng
+    # KIẾN TRÚC (bỏ hẳn nhu cầu đặc quyền khỏi đường chính), không bằng một `try` bọc thêm.
+    #
+    # Mẫu KHÔNG tự nghĩ ra: lấy nguyên hình dạng của `_c41_fragment_read_error` trong CHÍNH tệp
+    # này — junction (`mklink /J`) trên Windows, directory symlink trên POSIX, cả hai KHÔNG đòi
+    # đặc quyền — cộng đúng bộ tên lỗi của nó. #574 đoán đúng cơ chế ("junction chỉ làm được cho
+    # THƯ MỤC") nhưng kết luận kèm theo ("giả thuyết, CHƯA CHẠY") HẸP HƠN phép đo: mẫu ấy đã tồn
+    # tại và đang xanh. Lời khai lệch phép đo theo chiều HẸP cũng là lệch.
+    #
+    # Chủ kho chốt cách xử `KHÔNG ĐO ĐƯỢC`: **ĐỎ — fail loud như `_c41`**. Dựng không được thì ném
+    # `AssertionError` CÓ TÊN, không tha êm. Giá phải trả, ghi thẳng: trên nền không dựng nổi
+    # reparse point, suite ĐỎ vì MÔI TRƯỜNG — nhưng nó NÓI RA lý do bằng một tên đọc được thay vì
+    # đỏ câm, và `_t110` in `[LOI-VO-CAN?] <ca>: <kiểu lỗi>` ra stdout.
+    def _r378_gian_tiep(link_dir, dich):
+        """Dựng gián tiếp THƯ MỤC trỏ `link_dir` -> `dich`. Không đòi đặc quyền trên cả hai nền."""
+        import os as _os378g
+        import subprocess as _sp378g
+        if _os378g.name == "nt":
+            jr = _sp378g.run(
+                [_os378g.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", "mklink", "/J",
+                 str(link_dir), str(dich)],
+                capture_output=True, text=True, encoding="utf-8", errors="replace")
+            if jr.returncode != 0:
+                raise AssertionError(
+                    f"JUNCTION_CREATE_FAILED:{jr.returncode}:{jr.stderr.strip()}")
+        else:
+            try:
+                link_dir.symlink_to(dich, target_is_directory=True)
+            except OSError as exc:
+                raise AssertionError("DIRECTORY_SYMLINK_CREATE_FAILED") from exc
+
+    def _r378_go_gian_tiep(link_dir):
+        """Junction gỡ bằng `rmdir`, symlink thư mục gỡ bằng `unlink` — hai nền, hai lệnh."""
+        import os as _os378u
+        if _os378u.name == "nt":
+            link_dir.rmdir()
+        else:
+            link_dir.unlink()
+
+    def _r378_kiem_thoat(target, root):
+        """Tiền đề phải CÓ THẬT trước khi đo (M4).
+
+        Thiếu chốt này thì ca có thể XANH vì phản chứng chưa từng tồn tại — đúng bệnh
+        'ca có MẶT khác ca có ĐO' mà `t24` đã trả giá. `_c41` gọi nó là PATH_MISMATCH_NOT_CREATED;
+        giữ nguyên tên để hai chỗ đọc như một."""
+        if target.resolve(strict=True).is_relative_to(root.resolve(strict=True)):
+            raise AssertionError("PATH_MISMATCH_NOT_CREATED")
+
     def _c378_resolve_phai_o_trong_kho():
         import tempfile as _tf378
         with _tf378.TemporaryDirectory() as td:
             root = Path(td) / "repo"
             root.mkdir()
-            outside = Path(td) / "outside.py"
-            outside.write_text("x = 1\n", encoding="utf-8")
-            link = root / "r378_escape.py"
+            outside = Path(td) / "outside"
+            outside.mkdir()
+            (outside / "r378_escape.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "r378_ngoai"
+            _r378_gian_tiep(link_dir, outside)
             try:
-                link.symlink_to(outside)
-                body = "r378_escape.py:99999999"
+                _r378_kiem_thoat(link_dir / "r378_escape.py", root)
+                # Có dấu `/` nên L7 đi nhánh `root / repo_fname` — tường minh, KHÔNG qua `pyindex`.
+                # Cố ý: `rglob` của pathlib BỎ thư mục là liên kết, nên một chỉ mục quét cây sẽ
+                # không thấy tệp này và ca sẽ xanh vì lý do sai.
+                body = "r378_ngoai/r378_escape.py:99999999"
                 oracle = lambda r: _r378_expect(
                     [(x["claim"], x["reason"]) for x in _r378_l7(r)]
                     == [(body, "PYLOC_FILE_MISSING")])
@@ -24896,8 +25821,284 @@ def run() -> int:
                                      body, oracle, root=root)
                 return normal and cat == "killed"
             finally:
-                link.unlink(missing_ok=True)
+                _r378_go_gian_tiep(link_dir)
     _t110("r378_l7_resolve_phai_o_trong_kho", _c378_resolve_phai_o_trong_kho)
+
+    def _c378_pyindex_cung_phai_o_trong_kho():
+        """A7 (#574 lượt 2) — CỬA THỨ HAI của cùng chốt containment: nhánh `pyindex`.
+
+        CA NÀY SINH RA TỪ MỘT ĐỘT BIẾN SỐNG SÓT, do cross-review codex lượt 1 bắt
+        (`mat-phu-pyindex-khi-doi-fixture`). Khi đổi phản chứng sang GIÁN TIẾP THƯ MỤC, thân
+        tài liệu phải mang dấu `/` (`r378_ngoai/r378_escape.py`) để trỏ được vào trong liên
+        kết — mà L7 rẽ theo ĐÚNG dấu ấy:
+
+            có `/`    -> cands = [root / repo_fname, doc.parent / fname]   (tường minh)
+            không `/` -> cands = ctx["pyindex"].get(<tên trần>)            (chỉ mục)
+
+        Nên fixture mới chỉ còn đo cửa TƯỜNG MINH. Fixture CŨ (symlink TỆP, tên trần) đo cửa
+        CHỈ MỤC. Đổi xong thì cửa chỉ mục KHÔNG còn ca nào — đo được: đột biến gỡ chốt
+        containment vẫn **sống sót 1714/1714** trên head, trong khi nền bắt được.
+
+        Đó là HỒI QUY ĐỘ PHỦ của bản vá test, không phải lỗi runtime: chốt sản phẩm vẫn còn
+        nguyên. Nhưng một chốt không có ca canh là một chốt sẽ âm thầm hở lại — cùng bài học
+        `ĐỘT BIẾN SỐNG SÓT ... là khoảng TRỐNG của bộ test`.
+
+        DỰNG CỬA CHỈ MỤC MÀ KHÔNG CẦN ĐẶC QUYỀN: `pyindex` quét bằng `glob("*.py")` trên BỐN
+        thư mục cố định (`scripts`, `scripts/tl_core`, `scripts/_fallback`, `.`) — không phải
+        `rglob`, nên nó KHÔNG bỏ qua thư mục liên kết như `rglob` làm. Cho chính `root/scripts`
+        là gián tiếp thư mục trỏ RA NGOÀI root: `glob` liệt kê tệp bên ngoài, ứng viên
+        `root/scripts/<tên>.py` `resolve()` ra ngoài, và chốt containment phải loại nó.
+
+        Dùng lại NGUYÊN `_r378_gian_tiep` / `_r378_go_gian_tiep` / `_r378_kiem_thoat` của ca
+        trước — cùng hợp đồng hai nền, cùng tên lỗi, không dựng cơ chế thứ hai.
+
+        ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ chốt `resolved.is_relative_to(root_resolved)`
+        (`scripts/tl_core/workflow.py`) ⇒ ứng viên ngoài kho được nhận, tệp CÓ THẬT nên L7
+        thôi báo `PYLOC_FILE_MISSING` ⇒ oracle vỡ. Đây là CÙNG đột biến mà
+        `r378_l7_resolve_phai_o_trong_kho` giết — có chủ đích: hai ca, hai CỬA, một chốt.
+        """
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            outside = Path(td) / "ngoai_scripts"
+            outside.mkdir()
+            (outside / "r378_pyidx.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "scripts"
+            _r378_gian_tiep(link_dir, outside)
+            try:
+                # Tiền đề PHẢI có thật: ứng viên chỉ mục thoát khỏi root. Thiếu chốt này thì ca
+                # xanh vì phản chứng chưa từng tồn tại (`t24`: ca có MẶT khác ca có ĐO).
+                _r378_kiem_thoat(link_dir / "r378_pyidx.py", root)
+                # KHÔNG có dấu `/` ⇒ L7 bắt buộc đi nhánh `ctx["pyindex"]`.
+                body = "r378_pyidx.py:99999999"
+                oracle = lambda r: _r378_expect(
+                    [(x["claim"], x["reason"]) for x in _r378_l7(r)]
+                    == [(body, "PYLOC_FILE_MISSING")])
+                normal = True
+                try:
+                    oracle(_r378_run(body, root=root))
+                except _R378SaiKyVong:
+                    normal = False
+                cat = _r378_classify("if resolved.is_relative_to(root_resolved):", "if True:",
+                                     body, oracle, root=root)
+                return normal and cat == "killed"
+            finally:
+                _r378_go_gian_tiep(link_dir)
+    _t110("r378_l7_pyindex_cung_phai_o_trong_kho", _c378_pyindex_cung_phai_o_trong_kho)
+
+    def _c378_dung_hong_thi_do_co_ten():
+        """A4 — dựng không được thì ĐỎ CÓ TÊN, không nuốt thành `False` câm.
+
+        Ép hỏng bằng một đích ĐÃ TỒN TẠI: POSIX ném `FileExistsError` (một `OSError`), Windows
+        cho `mklink` mã thoát khác 0. Hai nền hai đường, cùng một hợp đồng."""
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            dich = Path(td) / "dich"
+            dich.mkdir()
+            ke = Path(td) / "ke"
+            ke.mkdir()
+            try:
+                _r378_gian_tiep(ke, dich)
+            except AssertionError as exc:
+                return str(exc).split(":", 1)[0] in (
+                    "JUNCTION_CREATE_FAILED", "DIRECTORY_SYMLINK_CREATE_FAILED")
+            return False
+    _t110("r378_dung_gian_tiep_hong_thi_do_co_ten", _c378_dung_hong_thi_do_co_ten)
+
+    def _c378_tien_de_khong_thoat_thi_do():
+        """A5 — gián tiếp dựng xong mà `resolve()` KHÔNG thoát khỏi `root` thì phải ném.
+
+        Đây là chốt chống 'ca có MẶT khác ca có ĐO': trỏ liên kết vào một thư mục NẰM TRONG
+        `root` thì phản chứng không tồn tại, và ca đo an ninh sẽ xanh mà chẳng đo gì."""
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            trong = root / "trong"
+            trong.mkdir()
+            (trong / "r378_escape.py").write_text("x = 1\n", encoding="utf-8")
+            link_dir = root / "r378_ngoai"
+            _r378_gian_tiep(link_dir, trong)
+            try:
+                _r378_kiem_thoat(link_dir / "r378_escape.py", root)
+            except AssertionError as exc:
+                return str(exc) == "PATH_MISMATCH_NOT_CREATED"
+            finally:
+                _r378_go_gian_tiep(link_dir)
+            return False
+    _t110("r378_tien_de_khong_thoat_thi_do", _c378_tien_de_khong_thoat_thi_do)
+
+    def _c378_ma_tran_phan_hang():
+        """A6 — MA TRẬN cho `_r378_classify`. Mỗi nhãn là một HỌ, không phải một đại diện.
+
+        LỊCH SỬ NGẮN, vì nó giải thích hình dạng hiện tại. Slug
+        `phan-hang-giet-gia-thieu-doi-chung` đã lặp NĂM lượt cross-review:
+
+            lượt 1  m5       mất phủ CỦA CHỈ MỤC khi đổi fixture
+            lượt 2  m7/m9    bộ phân hạng có BA hạng, ca chỉ canh MỘT
+            lượt 3  m10      ba hạng đã canh, nhưng canh bằng THÔNG ĐIỆP
+            lượt 4  m11      canh theo lớp, nhưng so bằng TÊN lớp
+            lượt 5  m12/m13/m14 + MẤT PHỦ m3
+            (sau)   phiên điều phối TỰ ĐO khi soạn r3: `m10` và `m14` cho TẬP ô đỏ BẰNG NHAU
+                    (27 toạ độ, hai chiều rỗng) ⇒ một BỘ TƯƠNG ĐƯƠNG mà ma trận SÁU dạng của
+                    bản đầu theo HỌ (`576774b`) không phân biệt nổi. Không reviewer nào nêu; nó lộ ra vì `A11` đòi so TẬP
+                    chứ không so SỐ ĐẾM — và hai cái đó cùng cho `27` nên phép đếm im lặng.
+
+        Lượt 5 là lượt đắt nhất, và nó bắt hai thứ KHÁC NHAU:
+
+        (a) **MẤT PHỦ.** Bản r2 thay TRỌN bốn vế rời của r1 bằng ma trận, và đánh rơi đối
+            chứng `AssertionError` mà vế (a) của r1 có. Đo được: `r1/m3` ⇒ `False` (bắt
+            được), `r2/m3` ⇒ `1715/1715` (SỐNG). Thay một bộ đo mà không kiểm bộ cũ còn bị
+            bắt không là một hồi quy PHỦ, và nó không lộ ra bằng đọc.
+
+        (b) **NHÃN RỘNG HƠN TẬP FIXTURE.** r2 lấy MỘT đại diện cho mỗi nhãn: `RuntimeError`
+            là toàn bộ lớp "thường"; lớp con duy nhất dựng CÙNG module; mọi ngoại lệ tạo
+            bằng MỘT đối số chuỗi. Nên ba cài đặt sai NẰM NGAY TRONG các trục r2 đã khai vẫn
+            qua cả 14 ô: `m12` (nhận diện bằng tuple/`ValueError`) lọt ở `LỚP=thường`, `m13`
+            (giới hạn lớp con theo module) lọt ở `LỚP=con`, `m14` (phân hạng theo `args`)
+            lọt ở thông điệp rỗng.
+
+        Tức lời khai của r2 — con trỏ ⟦r2:67 #a64cff8f|dù nó sai theo chiều nào⟧
+        (ops/specs/r378-symlink-doi-dac-quyen-r2.md; băm nội dung dòng, và mảnh neo phải nằm
+        trong dòng ấy; kiểm bằng con_tro.py của đặc tả r11) — RỘNG HƠN phép đo. Không chép
+        lại lời r2 vào đây: hai bản trước chép, một bản diễn ý trong ngoặc (cross-review #574
+        lượt 4 bắt), và đặc tả r10 bỏ hẳn lời trích viết tay. Ma trận có trục, nhưng **mỗi trục chỉ có một điểm**, nên nó
+        vẫn là 14 ĐIỂM được sắp thành bảng. Đúng cái bẫy nó sinh ra để thoát.
+
+        NÊN BẢN NÀY ĐỔI BA THỨ:
+
+          1. Mỗi nhãn mang một HỌ thành viên. Lớp "thường" gồm cả `AssertionError` (khôi phục
+             phủ `m3`), `ValueError` (khoá `m12`), `TypeError`, `KeyError`. Lớp "con" gồm cả
+             lớp con KHÁC module (khoá `m13`) và lớp ĐA KẾ THỪA. "Trùng tên" gồm cả một bản
+             là lớp con của `ValueError`.
+          2. Dạng đối số thành một TRỤC THẬT, không phải một chuỗi duy nhất: không đối số ·
+             chuỗi rỗng · thông điệp gốc · thông điệp khác · hai đối số · **mốc KÈM đối số
+             thứ hai** · `None` (khoá `m14`, và tách `m10` khỏi `m14` — xem chú thích tại
+             `DOI_SO`).
+          3. Thu TẬP ô đỏ ĐẦY ĐỦ rồi mới ném, thay vì dừng ở ô hỏng đầu tiên. `A11` đòi so
+             TẬP ô của từng đột biến; dừng ở ô đầu thì không kiểm được điều đó.
+
+        Và thêm một vế mà r2 thiếu: nhánh oracle THOẢ phải chốt SỐ LẦN GỌI, không chỉ chốt
+        kết quả — một cài đặt gọi oracle hai lần vẫn cho `survived`.
+
+        `expected` mỗi ô là DỮ LIỆU: suy từ cờ `bat_duoc` VIẾT TAY và `lop.__name__`, KHÔNG
+        từ `_r378_classify`. Có chốt tự kiểm so `bat_duoc` với `issubclass` để bảng fixture
+        không âm thầm trôi.
+
+        GIỮ NGUYÊN ngữ nghĩa `except` của Python: lớp CON vẫn là `killed`. Ma trận ĐO bộ phân
+        hạng; nó KHÔNG tự quyết đổi sang so kiểu chính xác.
+
+        PHẠM VI, KHAI CHO ĐÚNG — và r2 đã khai quá rộng đúng chỗ này: ma trận bảo đảm cho
+        MIỀN ĐÃ LIỆT KÊ dưới đây (11 lớp × 7 dạng đối số × 3 trạng thái oracle, 79 ô), KHÔNG cho
+        mọi cài đặt sai có thể viết bằng Python (cách nói của đặc tả r3, con trỏ
+        ⟦r3:323-324 #e70e42b5|mọi cài đặt sai có thể viết bằng Python⟧ — bản trước ghi §8.4,
+        sai, nguồn thật là §8.3; KHÔNG phải lời của r2). Một `m17` theo một chiều chưa ai nêu vẫn
+        có thể tồn tại; `A11` đòi bằng chứng cho các chiều ĐÃ BIẾT, không đòi bằng chứng phủ
+        định về những chiều chưa biết.
+        """
+        class _ConCungModule(_R378SaiKyVong):
+            pass
+
+        class _DaKeThua(_R378SaiKyVong, ValueError):
+            pass
+
+        # Lớp CON nhưng khai `__module__` KHÁC — ô mà `m13` (giới hạn theo module) chết.
+        _ConKhacModule = type("_ConKhacModule", (_R378SaiKyVong,),
+                              {"__module__": "mot_module_hoan_toan_khac"})
+        # TRÙNG TÊN, khác `id()`, KHÔNG phải lớp con — ô mà `m11` chết.
+        _TrungTen = type("_R378SaiKyVong", (Exception,), {})
+        # Trùng tên VÀ là lớp con của một lớp thường — hai chiều cùng lúc.
+        _TrungTenCon = type("_R378SaiKyVong", (ValueError,), {})
+
+        # (ten, lop, bat_duoc) — `bat_duoc` là DỮ LIỆU viết tay, không suy từ bộ phân hạng.
+        LOP = (("that", _R378SaiKyVong, True),
+               ("con_cung_module", _ConCungModule, True),
+               ("con_khac_module", _ConKhacModule, True),
+               ("da_ke_thua", _DaKeThua, True),
+               ("thuong_runtime", RuntimeError, False),
+               ("thuong_assert", AssertionError, False),
+               ("thuong_value", ValueError, False),
+               ("thuong_type", TypeError, False),
+               ("thuong_key", KeyError, False),
+               ("trung_ten", _TrungTen, False),
+               ("trung_ten_con", _TrungTenCon, False))
+
+        # Chốt tự kiểm bảng fixture: cờ viết tay phải khớp ngữ nghĩa `except` của Python.
+        for ten, lop, bat_duoc in LOP:
+            if issubclass(lop, _R378SaiKyVong) is not bat_duoc:
+                raise AssertionError(
+                    f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} khai bat_duoc={bat_duoc} mà "
+                    f"issubclass cho {issubclass(lop, _R378SaiKyVong)}")
+        for ten in ("trung_ten", "trung_ten_con"):
+            lop = dict((a, b) for a, b, _c in LOP)[ten]
+            if lop.__name__ != _R378SaiKyVong.__name__:
+                raise AssertionError(
+                    f"R378_MA_TRAN_FIXTURE_TROI: lớp {ten!r} phải TRÙNG TÊN, đang là "
+                    f"{lop.__name__!r}")
+        if _ConKhacModule.__module__ == _R378SaiKyVong.__module__:
+            raise AssertionError("R378_MA_TRAN_FIXTURE_TROI: lớp con khác module lại cùng module")
+
+        # Trục ĐỐI SỐ. `R()` và `R("")` cùng hợp đồng nhưng KHÁC biểu diễn — r2 chỉ thử dạng
+        # sau, và đó là một trong ba chỗ `m14` lọt.
+        DOI_SO = (("khong_doi_so", ()),
+                  ("chuoi_rong", ("",)),
+                  ("thong_diep_goc", ("R378_EXPECTATION_MISMATCH",)),
+                  ("thong_diep_khac", ("MOT_THONG_DIEP_KHAC",)),
+                  ("hai_doi_so", ("a", "b")),
+                  # PHÂN GIẢI `m10` KHỎI `m14`. Đo 21-09: với 6 dạng trên, hai đột biến ấy cho
+                  # TẬP ô đỏ BẰNG NHAU (27 toạ độ, hai chiều rỗng) ⇒ ma trận không phân biệt
+                  # nổi "so bằng CHUỖI" với "so bằng `args`". Dạng này tách chúng: `str()` của
+                  # một ngoại lệ HAI đối số là `('...', 'x')` — CHỨA mốc, nên `m10` cấp `killed`
+                  # — trong khi `args` KHÁC tuple một phần tử, nên `m14` cấp tín dụng giả.
+                  ("moc_kem_doi_so_2", ("R378_EXPECTATION_MISMATCH", "x")),
+                  ("doi_so_None", (None,)))
+
+        sai = []          # THU TẬP ĐẦY ĐỦ, không dừng ở ô đầu — xem docstring mục 3.
+
+        def _ghi(toa_do, expected, quan_sat, so_goi=None):
+            if quan_sat != expected:
+                sai.append(f"[{toa_do}] expected={expected!r} observed={quan_sat!r}"
+                           + (f" oracle_calls={so_goi}" if so_goi is not None else ""))
+
+        # ---- KHỐI A: oracle CHẠY và NÉM. 11 lớp x 7 dạng đối số = 77 ô. ----
+        for ten, lop, bat_duoc in LOP:
+            for ten_ds, args in DOI_SO:
+                expected = "killed" if bat_duoc else "false_credit:" + lop.__name__
+                goi = []
+                def _oracle(_r, lop=lop, args=args, goi=goi):
+                    goi.append(1)
+                    raise lop(*args)
+                quan_sat = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1", _oracle)
+                _ghi(f"lop={ten},ds={ten_ds}", expected, quan_sat, len(goi))
+                if len(goi) != 1:
+                    sai.append(f"[lop={ten},ds={ten_ds}] oracle phải chạy ĐÚNG 1 lần, "
+                               f"chạy {len(goi)}")
+
+        # ---- KHỐI B: oracle CHẠY và THOẢ ⇒ `survived`, VÀ đúng MỘT lần gọi. ----
+        # Vế số lần gọi là MỚI ở bản này: r2 chỉ chốt kết quả, nên một cài đặt gọi oracle hai
+        # lần vẫn cho `survived` và không ô nào đỏ.
+        goi_b = []
+        quan_sat_b = _r378_classify(*_R378_REGEX, ".claude/dev/launcher.py:1",
+                                    lambda _r: goi_b.append(1))
+        _ghi("oracle=thoa", "survived", quan_sat_b, len(goi_b))
+        if len(goi_b) != 1:
+            sai.append(f"[oracle=thoa] oracle phải chạy ĐÚNG 1 lần, chạy {len(goi_b)}")
+
+        # ---- KHỐI C: khâu DỰNG hỏng ⇒ tín dụng giả, và oracle KHÔNG chạy lần nào. ----
+        goi_c = []
+        quan_sat_c = _r378_classify("R378_MO_NEO_KHONG_BAO_GIO_TON_TAI_TRONG_TEP_NAY", "x",
+                                    ".claude/dev/launcher.py:1", lambda _r: goi_c.append(1))
+        _ghi("dung=hong", "false_credit:RuntimeError", quan_sat_c, len(goi_c))
+        if goi_c:
+            sai.append(f"[dung=hong] oracle KHÔNG được chạy, đã chạy {len(goi_c)} lần. "
+                       f"`killed` ở đây là tín dụng cho một phép thử CHƯA XẢY RA.")
+
+        if sai:
+            raise AssertionError("R378_MA_TRAN_O_SAI (%d/%d ô): %s"
+                                 % (len(sai), len(LOP) * len(DOI_SO) + 2, " | ".join(sai)))
+        return True
+    _t110("r378_ma_tran_phan_hang", _c378_ma_tran_phan_hang)
 
     def _c378_giu_con_tro_cham_gach_cheo():
         body = "./scripts/tl.py:99999999\n../scripts/tl.py:99999999"

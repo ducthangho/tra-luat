@@ -1,0 +1,129 @@
+# LEASE — CI-REGISTRY-DOT-BIEN-THEO-DIFF revision 1 / generation 1 — vong dot bien nhanh_don_duoc theo diff, N=2
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 643
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/643#issuecomment-5841872823
+granted_on_instruction_nguyen_van: >-
+  'Làm cả 3. Tạo issue, Cấp lease và xử lý luôn cho tôi' va lua chon 'Duyệt lệch, bật ngay' (chu kho, phien Claude
+  Code cua executor #637, 2026-09-26).
+authority_caveat: >-
+  Comment neo do phien executor dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-26T01:20:00Z'
+lease_expires_at_utc: '2026-09-27T01:20:00Z'
+han_ghi_chu: '24 gio theo comment dong bang issues/643#issuecomment-5841872823.'
+
+packet_id: CI-REGISTRY-DOT-BIEN-THEO-DIFF
+packet_slug: CI-REGISTRY-DOT-BIEN-THEO-DIFF
+revision: 1
+generation: 1
+lease_id: ci-registry-dot-bien-theo-diff-r1-g1-claude
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: 'Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_service
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: >-
+  Review Codex CLI tai cho truoc push + Codex connector tren PR non-draft (advisory_review); human_audited la cong land.
+access: read-write
+
+spec_path: ops/specs/CI-REGISTRY-DOT-BIEN-THEO-DIFF-r1.md
+spec_ref: refs/heads/claude/spec-ci-registry-dot-bien-theo-diff-r1
+spec_source_oid: c32f001a69ff9e96d67568dfa3d4ef65a2b80ce6
+spec_sha256: 45b48cbdcb2a24928bfa2d31770da0991ad9af36447c96402400d8a33edf5038
+spec_hash: 45b48cbdcb2a24928bfa2d31770da0991ad9af36447c96402400d8a33edf5038
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CI-REGISTRY-DOT-BIEN-THEO-DIFF-r1.md
+prompt_sha256_required: 45b48cbdcb2a24928bfa2d31770da0991ad9af36447c96402400d8a33edf5038
+
+branch: claude/ci-registry-dot-bien-theo-diff-r1-g1
+branch_ownership: exclusive
+start_from_sha: b739616058a8b5f1344710b8b215535f964577a1
+immutable_acceptance_baseline: b739616058a8b5f1344710b8b215535f964577a1
+continuation_base: b739616058a8b5f1344710b8b215535f964577a1
+reviewed_sha_required: b739616058a8b5f1344710b8b215535f964577a1
+reviewed_sha_required_nghia: >-
+  Chua co head ung vien; moi verdict neo exact head THAT cua PR thi cong.
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+  - .github/workflows/ci.yml
+write_set_hash: 0f7b869da648e9b21023e461925efd0d45bca58fb308a8fcc82bc55ad9f66ef0
+write_set_hash_cach_tinh: >-
+  sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-26T01:1xZ: fetch '+refs/heads/*', hai nguon ref ls-remote 411 / cuc bo 411, comm -23 = 0,
+  is-shallow=false. ai-dang-giu .claude/dev/ci_dang_ky_test.py => NGUOI_GIU 0; .github/workflows/ci.yml => NGUOI_GIU 0.
+
+lech_protocol_duoc_duyet: >-
+  docs/PROTOCOL_DA_PHIEN.md:839-840 (selector chi activate sau shadow 2-4 tuan) — chu kho chon 'Duyệt lệch, bật ngay'.
+  Pham vi hep o spec §2: chi vong dot bien cua ops/nhanh_don_duoc_test.py; T1..T8 va moi bo khac van chay moi luot.
+
+lech_spec_duoc_duyet:
+  - muc: 'ngoai M1-M4 (hang so GIAY_TOI_DA_MOT_BO cua #637 M3)'
+    spec: 'khong nhac; gia tri ke thua 3600 giay'
+    thanh: '4500 giay'
+    neo: https://github.com/ducthangho/tra-luat/issues/643#issuecomment-5842443112
+    commit: d82c62af19ed1d990c43483c12dfd9230e9dc413
+    ly_do: >-
+      Do A5 run 36208617323 (N=2, che do du): ops/nhanh_don_duoc_test.py 3306,45 s = 92 % tran 3600 s
+      (PR #644 comment 5842399645). Chu kho chon phuong an 'b' (nang tran) trong phien executor.
+    khong_phai: 'KHONG gia han lease, KHONG cap them ngan sach CI (ci_budget giu nguyen 2 luot).'
+
+ci_budget:
+  gate_tu_dong: '3 / 0 / 2 luot pull_request (spec §7) — VUOT tran, xem ci_budget_da_dung'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+ci_budget_da_dung:
+  don_vi: 'mot workflow run gate (event pull_request) = mot luot; chay lai job trong CUNG run la attempt, KHONG tinh them luot'
+  luot:
+    - 'run 36208617323 attempt 1, head 4ca5d8cc55b965da9a520c4fff9e5d428838f595 (A5): 1/2'
+    - 'run 36212359766 attempt 1, head cb79de8a089bf17c2e265d4866bf5b1afa95bbab (tran 4500, chu kho chon b): 2/2'
+    - 'run 36212359766 attempt 2 (chi job gate 108364040831, chi thi chu kho "Lam 1, 3"): cung luot 2, khong tinh them'
+    - 'run 36233604256 attempt 1, head 3d07a8af92c09693f81cf28e26e5d9cd87da443b (va review connector #645 + Codex CLI 4 luot): 3/2 — theo chi thi chu kho "Cac PR chua cross review thi chay lap" (2026-09-26), coi la nang tran'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1/W2. DUNG.'
+  - 'S2 — luot CI (A5) do vi packet. DUNG, bao chu kho.'
+  - 'S3 — phai sua mot bo test moi lam duoc. DUNG.'
+  - 'S4 — push chi sau review tai cho sach; het allowance => DUNG.'
+  - 'S5 — > 300 dong them. DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'
+lease_sua_lan_cuoi: '2026-09-26T09:51:17Z'
+lease_sua_ghi_chu: >-
+  Sua sau khi cap va sau khi dang (comment 5841895375), theo review Codex tai cho PR #645 luot 1 tren e1cfd35d
+  (1 P3): them lech_spec_duoc_duyet cho tran 3600 -> 4500. KHONG doi truong mang quyen (leased_at, han,
+  write_set, hash, spec, branch, baseline, continuation). Ban chieu da dang la ban truoc sua; tep nay la nguon
+  co tham quyen. Luot 2 (review connector #645 tren 9726adb): sua moc lease_sua_lan_cuoi (ban truoc ghi 09:40:00Z,
+  SAU commit 09:28:31Z chua no) va cap nhat bo dem ci_budget theo lich su chay that. Luot 3 (review connector #645 tren ff5e457):
+  moi luot CI ghi run ID + attempt + SHA day du (protocol :1030-1039), neo luot 3 vao run 36233604256; lan chay lai
+  job ghi la attempt 2 cua run 36212359766, khong tinh them luot.
+da_bi_thay_the: ci-registry-pretooluse-che-do-nhe-r1-g1-claude

@@ -151,9 +151,9 @@ _TRANSPORT_CONTRACTS = (
     ("openai_api", ("llm",), "llm_cli", "machine"),
 )
 
-# Provider KHÔNG đi qua một CLI của launcher, nên `_TRANSPORT_CONTRACTS` không bao giờ
-# chứa chúng — nhưng chúng vẫn là provider hợp lệ của kho, và bộ kiểm biên nhận
-# (`ops/bien_nhan_v2.py`) cần một nguồn CÓ CẤU TRÚC để đọc.
+# Bề mặt KHÔNG đi qua một CLI của launcher nằm ngoài `_TRANSPORT_CONTRACTS`.
+# Một provider có thể có cả hàng CLI và ngoài CLI với hai bề mặt khác nhau (Codex).
+# Bộ kiểm biên nhận (`ops/bien_nhan_v2.py`) cần nguồn CÓ CẤU TRÚC cho các bề mặt này.
 #
 # VÌ SAO Ở ĐÂY, và vì sao là BẢNG chứ không phải văn xuôi: cross-review PR #455 đo được
 # hai lần liên tiếp rằng một danh sách CHO PHÉP rút từ VĂN BẢN TỰ DO thì nới được bằng
@@ -174,6 +174,12 @@ _PROVIDER_NGOAI_CLI = (
     # và Antigravity là hàng DUY NHẤT còn lệch.
     ("google_antigravity", "antigravity", "machine/local"),
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
+    # WP610: Desktop khai đúng bề mặt; không là CLI hoặc bằng chứng model/assurance.
+    ("openai_codex", "codex_desktop", "machine"),
+    # wp461 r3: Codex chạy như DỊCH VỤ — GitHub App `chatgpt-codex-connector[bot]` (review trên
+    # PR) và Codex cloud nói chung. Không CLI, không Desktop; không chứng minh model/effort hay
+    # tính độc lập của phiên. Tên máy chốt ở Mission #470 (Q1); định nghĩa ở spec r3 §2.
+    ("openai_codex", "codex_service", "machine"),
     # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
     # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455
     # lượt 7 (`R7-02`) đo được: `human` từng bị bộ kiểm biên nhận chép tay vào tập "KHÔNG hợp
@@ -353,7 +359,10 @@ def _khoa_danh_tinh(pid: int) -> str | None:
     he = platform.system()
     try:
         if he == "Linux":
-            noi_dung = Path(f"/proc/{pid}/stat").read_text()
+            # wp685 (Q-A.7; quyết định chủ kho, PR #688 comment 5905670017) — comm bị kernel cắt
+            # 15 byte nên tên tiếng Việt thành UTF-8 hỏng; read_text() theo locale ném UnicodeDecodeError
+            # và hàm trả None cho tiến trình CÒN SỐNG. latin-1 là song ánh byte↔ký tự: không bao giờ ném.
+            noi_dung = Path(f"/proc/{pid}/stat").read_text(encoding="latin-1")
             # comm có thể chứa khoảng trắng và dấu ')' -> cắt từ ')' CUỐI CÙNG
             sau = noi_dung[noi_dung.rindex(")") + 2:].split()
             return f"linux:{sau[19]}"  # trường 22 tính từ 1 = starttime
@@ -430,7 +439,8 @@ def _thanh_vien_nhom(pgid: int) -> list[int] | None:
         ra = []
         for p in ds:
             try:
-                nd = (p / "stat").read_text()
+                # wp685 (Q-A.7): giải mã latin-1, comm hỏng không được làm tiến trình sống "biến mất"
+                nd = (p / "stat").read_text(encoding="latin-1")
                 sau = nd[nd.rindex(")") + 2:].split()
                 if sau[0] == "Z":          # zombie = đã chết, chờ thu hồi
                     continue
@@ -484,7 +494,8 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
         tt = {}
         for p in ds:
             try:
-                nd = (p / "stat").read_text()
+                # wp685 (Q-A.7): giải mã latin-1, comm hỏng không được làm cháu vắng khỏi ảnh chụp
+                nd = (p / "stat").read_text(encoding="latin-1")
                 sau = nd[nd.rindex(")") + 2:].split()
                 if sau[0] == "Z":                     # zombie = đã chết
                     continue
@@ -645,12 +656,42 @@ def _con_song(pid: int, khoa: str | None = None) -> bool:
             return False
         return khoa is None or hien == khoa
     trang_thai = Path(f"/proc/{pid}/stat")
-    if trang_thai.exists():
+    # wp685 (ESRCH: PR #679, job 109303373142) — tiến trình biến mất giữa chừng làm phép thăm dò
+    # NÉM ProcessLookupError thay vì trả False, và ngoại lệ ấy thoát khỏi _con_song. Phép hỏi
+    # chạy ĐÚNG MỘT lần, không thử lại (cross-review lượt 2, lượt 6 trên PR #688).
+    # Chỉ bắt họ OSError ở đây: nhóm phân tích, Exception, BaseException thoát nguyên
+    # (cross-review lượt 3, lượt 5).
+    # #743 (py314-path-exists-nuot-oserror; t156/t157 đỏ trên Python 3.14.6) — từ 3.14
+    # `Path.exists()` là `os.path.exists`, NUỐT mọi OSError thành False và không đi qua
+    # `Path.stat`, nên hai nhánh dưới chết câm. Thăm dò bằng `stat()` để GIỮ errno:
+    # ENOENT/ENOTDIR ⇒ không có tệp; ESRCH ⇒ chết; OSError khác ⇒ chưa kết luận.
+    try:
+        trang_thai.stat()
+        co_tep = True
+    except (FileNotFoundError, NotADirectoryError):
+        co_tep = False
+    except ProcessLookupError:
+        return False
+    except OSError:
+        co_tep = None   # KHÔNG kết luận: không stat được chưa có nghĩa là không đọc được
+    if co_tep:
+        # Nhánh tệp có giữ nguyên xi (Q-A.3), trừ cách giải mã (Q-A.7: latin-1, PR #688
+        # comment 5905670017; cross-review lượt 7, lượt 8).
         try:
-            noi_dung = trang_thai.read_text()
+            noi_dung = trang_thai.read_text(encoding="latin-1")
             return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
         except (OSError, ValueError, IndexError):
             return False
+    if co_tep is None:
+        # wp685 (zombie: cross-review lượt 1 trên PR #688) — thử đọc nội dung ĐÚNG MỘT lần,
+        # zombie vẫn phải tính là đã chết. Đọc lỗi hay nội dung hỏng ⇒ KHÔNG trả False mà rơi
+        # về os.kill(pid, 0) bên dưới (cross-review lượt 2, lượt 4: bước kill phải THỰC SỰ được
+        # gọi và quyết định). Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.
+        try:
+            noi_dung = trang_thai.read_text(encoding="latin-1")
+            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
+        except (OSError, ValueError, IndexError):
+            pass
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -2017,6 +2058,12 @@ CONG_CU = [
              "Darwin": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
              "Linux": "curl -fsSL https://antigravity.google/cli/install.sh | bash"},
      "xac_thuc": ["models"]},
+    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],
+     "vi_sao": "kiem tra cu phap va schema cua GitHub Actions workflow (M1)",
+     "cai": {"*": "winget/brew install actionlint, hoac bash ops/cai_actionlint.sh"}},
+    {"ten": "shellcheck", "bat_buoc": False, "ung_vien": ["shellcheck"],
+     "vi_sao": "tinh huong va bat loi shell script trong kho (M1)",
+     "cai": {"*": "winget/brew/apt-get install shellcheck"}},
 ]
 
 # MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
@@ -4070,6 +4117,70 @@ def _do_launcher_cu(ws: str | None) -> tuple[str, str]:
             f"cu hon master; ket qua/so luot chay co the THIEU TRUONG ma khong bao gi")
 
 
+# --- M3: DẤU VẾT HOOK ĐÃ CHẠY ----------------------------------------------------
+_CAC_DUONG_VET_HOOK = (Path(".claude/.packet_state/session-start.ran"), Path(".tl_state/session-start.ran"))
+_HAN_DAU_VET_HOOK_GIAY = 12 * 3600
+
+
+def _do_hook_da_chay(ws: str | None, bay_gio: float | None = None) -> tuple[str, str]:
+    """Hook phiên đã CHẠY chưa (M3) — đo bằng dấu vết, VÀ đo cả ĐỘ TƯƠI của dấu vết."""
+    if not ws:
+        return ("KHONG_DO_DUOC", "khong xac dinh duoc workspace")
+    duong = Path(ws) / ".claude" / "hooks" / "session-start.sh"
+    if not duong.exists():
+        return ("KHONG_DO_DUOC", "cay nay KHONG co .claude/hooks/session-start.sh")
+    goc = Path(ws)
+    bay_gio = time.time() if bay_gio is None else bay_gio
+    for rel in _CAC_DUONG_VET_HOOK:
+        tep = goc / rel
+        if not tep.is_file():
+            continue
+        try:
+            noi_dung = tep.read_text(encoding="utf-8", errors="replace").strip()
+            tuoi = bay_gio - tep.stat().st_mtime
+        except OSError as e:
+            return ("KHONG_DO_DUOC", f"co dau vet {rel.as_posix()} nhung khong doc duoc: {e}")
+        if tuoi > _HAN_DAU_VET_HOOK_GIAY:
+            gio = int(tuoi // 3600)
+            return ("KHONG_DO_DUOC", f"KHÔNG ĐO ĐƯỢC — dau vet {rel.as_posix()} CU {gio}h (> {_HAN_DAU_VET_HOOK_GIAY // 3600}h, ghi luc {noi_dung or '?'}): no chung minh hook TUNG chay, khong chung minh hook chay cho phien nay")
+        truong = noi_dung.split()
+        nhanh = " [bo qua theo thiet ke tren may cuc bo]" if len(truong) > 1 and truong[1] == "cuc_bo" else ""
+        return ("DA_CHAY", f"ĐÃ CHẠY (dấu vết: {rel.as_posix()}" + (f" lúc {noi_dung}{nhanh})" if noi_dung else ")"))
+    return ("CHUA_CHAY", "CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)")
+
+
+# --- M2: ĐO HAI BIẾN UTF-8 -------------------------------------------------------
+def _do_bien_utf8(moi_truong: dict[str, str] | None = None) -> dict:
+    """Đo hai biến môi trường UTF-8 (M2). Cảnh báo khi thiếu PYTHONUTF8 hoặc PYTHONIOENCODING."""
+    mt = _env_da_chuan(moi_truong)
+    u8, enc = mt.get("PYTHONUTF8"), mt.get("PYTHONIOENCODING")
+    import locale
+    try:
+        ma_nen = locale.getpreferredencoding(False).lower()
+    except Exception:
+        ma_nen = "unknown"
+    thieu = [f"PYTHONUTF8={u8 or '<chua dat>'}" for _ in [1] if u8 != "1"]
+    if not enc or enc.lower() != "utf-8":
+        thieu.append(f"PYTHONIOENCODING={enc or '<chua dat>'}")
+    canh_bao = ((f"chua dat du hai bien UTF-8 ({', '.join(thieu)}) — nen dat PYTHONUTF8=1 va PYTHONIOENCODING=utf-8 de tranh loi doc ma charmap/cp1258 tren Windows") if thieu else None)
+    return {"PYTHONUTF8": u8, "PYTHONIOENCODING": enc, "ma_nen": ma_nen,
+            "nen_la_utf8": ma_nen in ("utf-8", "utf_8"), "canh_bao": canh_bao}
+
+
+# --- M5: ĐO ĐƯỜNG DẪN KHO -------------------------------------------------------
+def _kiem_tra_duong_dan_kho(ws: str | None) -> tuple[bool, str]:
+    """Đo đường dẫn kho (M5): có dấu cách hoặc ký tự ngoài ASCII thì nêu ra."""
+    if not ws:
+        return False, ""
+    duong = str(Path(ws).resolve())
+    co_dau_cach = " " in duong
+    co_ngoai_ascii = any(ord(c) > 127 for c in duong)
+    if co_dau_cach or co_ngoai_ascii:
+        loai = "dau cach va ky tu ngoai ASCII" if co_dau_cach and co_ngoai_ascii else "dau cach" if co_dau_cach else "ky tu ngoai ASCII"
+        return True, f"duong dan kho chua {loai} ('{duong}'): 6 ca da biet se do (lop B: t35-t40 trong lease_publish_test)"
+    return False, ""
+
+
 KHA_NANG = [
     {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
      "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
@@ -4088,6 +4199,9 @@ KHA_NANG = [
      "vi_sao": "hook cu hon master = thieu chot ma master da co (nguyen nhan goc 15-08)",
      "khac_phuc": "git show origin/master:.claude/hooks/session-start.sh > <tep>  "
                   "roi chay no; hoac merge master vao nhanh nay"},
+    {"ten": "hook-da-chay", "do": lambda ws, ks=False: _do_hook_da_chay(ws),
+     "vi_sao": "hook phien da thuc su CHAY chua (M3) — do bang dau vet de lai, tach khoi hook-phien",
+     "khac_phuc": "chay .claude/hooks/session-start.sh de thiet lap moi truong"},
     {"ten": "openai-llm", "do": lambda ws, ks=False: _do_openai_llm(_MOI_TRUONG_DA_DOC, ks),
      "vi_sao": "provider openai_api qua execution_surface llm_cli (§4, §5 ops/OPENAI_LLM_PROVIDER.md)",
      "khac_phuc": "pip install llm && export OPENAI_API_KEY=... (hoac llm keys set openai)"},
@@ -4342,7 +4456,9 @@ def lenh_doctor(a) -> int:
             tt, mo_ta = "KHONG_DO_DUOC", f"{type(e).__name__}"
         kha_nang.append({"ten": k["ten"], "trang_thai": tt, "chi_tiet": mo_ta,
                          "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
-        if tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
+        if k["ten"] == "hook-da-chay" and tt == "DA_CHAY":
+            pass
+        elif tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
             chua_xac_thuc.append(k["ten"])
         elif tt not in DA_CHUNG_MINH_KHA_DUNG:
             chua_chung_minh.append(k["ten"])
@@ -4401,6 +4517,8 @@ def lenh_doctor(a) -> int:
         # `CO_CREDENTIAL`. Hệ quả: tầng ĐO đã thôi nâng nhãn, nhưng tầng TIÊU THỤ
         # nâng lại nguyên vẹn — `ok_kha_dung=true` cho đúng credential mà lệnh gọi
         # thật trả 401. Sửa một đầu mà để đầu kia y nguyên thì chưa sửa gì.
+        b_u8 = _do_bien_utf8(moi_truong)
+        co_nd, mo_ta_nd = _kiem_tra_duong_dan_kho(ws)
         _in_an_toan(json.dumps({"ok": not thieu_bat_buoc,
                                 # `chua_do_bat_buoc` cũng phủ định `ok_kha_dung`:
                                 # "khả dụng" là nhãn ĐÃ CHỨNG MINH, mà công cụ bắt
@@ -4419,7 +4537,9 @@ def lenh_doctor(a) -> int:
                                 "thieu_bat_buoc": thieu_bat_buoc,
                                 "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
                                 "chua_chung_minh": chua_chung_minh,
-                                "bien_moi_truong": bien},
+                                "bien_moi_truong": bien,
+                                "bien_utf8": b_u8,
+                                "duong_dan_nguy_hiem": mo_ta_nd if co_nd else None},
                                ensure_ascii=False, indent=2))
         return ma_thoat
     else:
@@ -4471,6 +4591,17 @@ def lenh_doctor(a) -> int:
         for vt, ds in bien["nhom_trung_gia_tri"].items():
             _in_an_toan(f"  NGHI GIU CHO  {vt}  {len(ds)} bien cung gia tri: "
                         f"{', '.join(ds)}")
+        # M2: LUẬT ĐỌC BIẾN UTF-8 TRƯỚC KHI KẾT LUẬN — in KỂ CẢ khi mọi thứ xanh.
+        b_u8 = _do_bien_utf8(moi_truong)
+        _in_an_toan("BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):")
+        _in_an_toan(f"  PYTHONUTF8      : {b_u8['PYTHONUTF8'] or '<chua dat>'}")
+        _in_an_toan(f"  PYTHONIOENCODING: {b_u8['PYTHONIOENCODING'] or '<chua dat>'}")
+        if b_u8["canh_bao"]:
+            _in_an_toan(f"  CANH BAO        : {b_u8['canh_bao']}")
+        # M5: Đo đường dẫn kho (có dấu cách hoặc ký tự ngoài ASCII)
+        co_nd, mo_ta_nd = _kiem_tra_duong_dan_kho(ws)
+        if co_nd:
+            _in_an_toan(f"  CANH BAO DUONG DAN: {mo_ta_nd}")
         if chua_do_bat_buoc:
             _in_an_toan("CHUA DO DUOC: "
                         + ", ".join(chua_do_bat_buoc))

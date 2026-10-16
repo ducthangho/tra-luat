@@ -17,7 +17,7 @@ def _chuan_hoa_duong(duong):
     de_so = duong[:-1] if duong.endswith("/") else duong
     chuan = posixpath.normpath(de_so)
     if de_so != chuan: raise KhongDoDuoc("đường dẫn không chuẩn %r; bản chuẩn: %r" % (duong, chuan))
-    if chuan.startswith(".."): raise KhongDoDuoc("đường dẫn %r thoát repo; bản chuẩn repo-relative không có" % duong)
+    if chuan == ".." or chuan.startswith("../"): raise KhongDoDuoc("đường dẫn %r thoát repo; bản chuẩn repo-relative không có" % duong)
     return chuan
 def _cac_duong_dan(duong_dan):
     if isinstance(duong_dan, str): ds = duong_dan.split(",")

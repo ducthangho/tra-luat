@@ -1,0 +1,140 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 1 của PR #506 (packet #502 BO-CONG-DUYET-KHAC-DANH-TINH: rút cổng
+# `duyet khac danh tinh / cong`), KHÁC NỀN (codex), trên head `1e36bb4`.
+#
+# Verdict: changes_requested — 0 P1 / 2 P2 / 1 P3. Hai P2 đều ở khối ĐÃ RÚT của runbook (lời khai suy rộng từ hai
+# merge; đường spec trần không có trên HEAD); executor áp NGUYÊN HINT ở `88e89b3` và lượt 2 xác nhận ĐÃ VÁ THẬT.
+# P3 (hai chú dẫn cũ ở requirements.txt:29 và ops/PHAN_BIEN_*:118) nằm NGOÀI exact write set — cố ý không vá.
+# ĐỪNG đọc verdict này thành trạng thái cuối của #506: head cuối là `88e89b3`, đã merge (`26e2555d`, merge commit).
+
+schema_version: 2
+receipt_id: pr506-review-1-codex-20260911-2df4d177
+kind: review_delivery_receipt
+packet_id: 'wp502'
+lease_id: bo-cong-duyet-khac-danh-tinh-exec-1-claude-20260911
+phase_key: BO-CONG-DUYET-KHAC-DANH-TINH
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr506-review-1-codex-verdict.md
+verdict_sha256: 99ff36d0bc36b03926e36083fc5ca7c536d9367f5ee6b8da88a88d50c285d34a
+verdict_bytes: 19444
+reviewed_sha: 1e36bb42e42a34751feae4d312d9cc48a466bc3f
+reviewed_base: 27c413c3e531800431cad9db4452d7236505a5a9
+evidence_url: https://github.com/ducthangho/tra-luat/blob/fcf252ae7d1074cdc197c537bbdb083ec5aa186f/ops/reviews/pr506-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `fcf252a` — commit ĐẦU TIÊN chứa tệp verdict, đo bằng `git log --all --diff-filter=A -- <path>`,
+  trả ĐÚNG 1 commit. Bản chiếu công khai sớm hơn: PR #506 comment 5629838032 — chiếu frontmatter, kết luận, Findings,
+  Mutant, chua_do_duoc; `## BẢNG ĐO` (22 hàng, dòng 24–67) và `## Phân loại từng dòng tham chiếu` (75 dòng, dòng
+  121–176) CHỈ có trong tệp này.
+so_p1: 0
+so_p2: 2
+so_p3: 1
+findings_ids: [loi-khai-vuot-hai-su-kien, duong-dan-spec-khong-co-tren-head, tham-chieu-tai-lieu-song-con-sot]
+hint_patch:
+  sha256: d4fd61938176473ea07a6e3e0fd31f587ac2df60fcc4151322a10975eb5d6f70
+  bytes: 1969
+  noi_dung: '1 hunk, chỉ ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md (khối ĐÃ RÚT): bỏ suy rộng, permalink spec trên nhánh lease'
+  executor_ap: 'Áp NGUYÊN bằng `patch -p0` (rc=0), không sửa gì khác — commit 88e89b3; lượt 2 so từng hunk: khớp byte.'
+  khong_vao_kho: true
+
+noi_dung_do_duoc_van_dung:
+  - 'Đúng 4 tệp bị xoá, 6 workflow còn lại không có job `cong`/`phan-chung`; registry `ci_dang_ky_test.py` 21/21 TỔNG ĐẠT; 2 mutant phục hồi (dòng DA_NOI · 4 tệp) đều rc=1 đúng thông điệp ⇒ M5 không thừa.'
+  - 'actionlint 1.7.7 + shellcheck 0.9.0: HEAD rc=1 với đúng 1 SC1003:info ops-don-ref.yml:117, base 27c413c3 cùng output từng byte ⇒ delta 0 (A3 của spec đòi rc=0 — chưa đạt ở cả base lẫn HEAD, ghi thẳng).'
+  - 'lease_publish_test 146/146; t24/t34 đọc đủ 6/6 workflow còn lại (ghi nhận Path.read_text); don_ref_chot_test 105/105.'
+  - 'Quét 75 dòng tham chiếu toàn cây: 0 lời gọi sống trong CI/mã; 2 dòng doc sống ⇒ P3; write set hash 366dab36… khớp lease; 27 commit master mới không chạm write set (đính chính: có chạm ops/cong_cu.py, ngoài write set).'
+  - 'Numstat +12/−1710 đúng 6 tệp; các đường cấm (PROTOCOL, cai_actionlint.sh, cai_cong_cu.sh, CHANGELOG, manifest) OID base=HEAD.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: 'KHONG_DO_DUOC — codex exec không xuất modelUsage; reviewer tự khai `GPT-6 / Codex` trong model_tu_khai'
+  effort: xhigh
+  session_run_id: 2df4d177
+  run_id_day_du: 2df4d17747b04ffeb03dd306195e69e1
+  prompt_sha256: fa51fb355b109547f64d130e3eb441512bf64d8b8a556d4c4ec4962942ee13e7
+  bat_dau_utc: '2026-09-11T05:02:30.531735+00:00'
+  ket_thuc_utc: '2026-09-11T05:14:12.209926+00:00'
+  thoi_luong_giay: 701.678
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 296
+  stdout_sha256: bcb2b5fba0faf703d37e6623e0f7c0b1abfd2ce504dc2c0136d495cf771e7224
+  stderr_byte: 230695
+  stderr_sha256: f5f0bc708abd486f95f24b29c0384ddd9ee2a53e8e87f73a16eb61b6f84ebecc
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/2df4d177/`): run_id/short_id, prompt_sha256, bat_dau_utc,
+    ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
+    Dòng cuối stdout `XONG VERDICT sha256=99ff36d0…` khớp băm tệp. model_yeu_cau, effort, transport và
+    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối (lệnh phóng `codex exec -m gpt-6-astra -c
+    model_reasoning_effort=xhigh`), KHÔNG có khoá tương ứng trong run.json; run.json ghi lớp launcher
+    local_process/subprocess/machine.
+
+nang_luc_do_cua_goi:
+  mirror: 'clone từ mirror bare cục bộ guong.git (fetch 04:5xZ), detached 1e36bb4, core.abbrev 7, không nông, 329 ref refs/remotes/origin; nguon/ có spec đóng băng + actionlint 1.7.7; EVIDENCE.md của tác giả'
+  chua_do_duoc: 'Không mạng; không đọc doctrine (CLAUDE.md, PROTOCOL, skills, AGENTS.md — chỉ đếm mẫu, 11 tệp đều 0); prompt snapshot và stderr.log không kèm.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'scratch/logs/ (references.tsv/json, workflow-coverage.json, mutants-setup.json, actionlint-*.log, lease-head.log, don-ref-head.log, scope-check.json) ở sandbox ngoài kho.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'run.json worktree_sach: true; điều phối đo sau lượt: git status --porcelain rỗng, log 1e36bb4..HEAD rỗng.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization; changes_requested đăng bằng comment vì PAT là tác giả (không tạo được review REQUEST_CHANGES trên PR của mình).'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `fcf252a`. Head đã review `1e36bb4` là tổ tiên của master (`26e2555d`, merge commit #506, hai cha 4b5184e + 88e89b3; 1e36bb4 là cha của 88e89b3).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: CHANGES-REQUESTED-TREN-1e36bb4-DA-VA-o-88e89b3-KHONG-phai-trang-thai-cuoi
+    muc: P2
+    mo_ta: >-
+      Verdict chấm head `1e36bb4` với 2 P2 (`loi-khai-vuot-hai-su-kien`: khối ĐÃ RÚT suy rộng từ hai merge #500/#501
+      thành "mọi PR"; `duong-dan-spec-khong-co-tren-head`: đường spec trần không tồn tại trên HEAD vì spec ở nhánh
+      PR #475 và bản sao trên ops/cap-lease-502) và 1 P3 (`tham-chieu-tai-lieu-song-con-sot`: requirements.txt:29,
+      ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:118 — ngoài exact write set). Hai P2 vá ở `88e89b3` bằng
+      chính HINT (1 hunk runbook), lượt 2 đối chiếu từng hunk: ĐÃ VÁ THẬT. P3 cố ý KHÔNG vá trong packet (6 tệp đã
+      là ngoại lệ ADR-0044), còn mở làm nợ tài liệu nhỏ.
+    phai_lam_gi_khi_chay_lai: >-
+      Đọc lượt 1 làm NGUỒN finding, lượt 2 (`pr506-review-2-codex-verdict.md`) làm chốt đóng; số numstat +12 trong
+      verdict này là của 1e36bb4, cây đã land là +13/−1710.
+  - id: BANG-DO-va-PHAN-LOAI-75-DONG-KHONG-LEN-COMMENT-tep-trong-kho-la-ban-du
+    muc: P3
+    mo_ta: >-
+      Bản chiếu lên PR #506 (comment 5629838032) chỉ mang frontmatter, kết luận, Findings, Mutant, chua_do_duoc;
+      `## BẢNG ĐO` (22 hàng) và `## Phân loại từng dòng tham chiếu` (75 dòng, gồm bảng 11 tệp doctrine chỉ đếm)
+      KHÔNG lên comment — sự vắng mặt ở comment không phải reviewer không đo. Tra hai bảng trong CHÍNH tệp này
+      (sha256 99ff36d0…, 19 444 B). Lượt 2 cùng giới hạn (comment 5629940622).
+    phai_lam_gi_khi_chay_lai: >-
+      Muốn đối chiếu số đo từng hàng thì đọc tệp verdict trong kho, không đọc comment.
+
+khong_do_duoc:
+  - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'
+  - 'run.json/stdout.log/stderr.log không vào kho ⇒ scalar runtime là attestation.'
+  - 'Sự kiện GitHub lúc reviewer đọc (merge #500/#501, cấu hình nửa A): sandbox không mạng — reviewer ghi KHÔNG ĐO ĐƯỢC.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-11T06:2xZ'
+receipt_khong_khai:
+  - 'Không khai A3 "actionlint rc=0" đã đạt — đo là rc=1 delta=0 (SC1003:info có sẵn trên master).'
+  - 'Không khai P3 đã vá — nó ngoài write set và còn mở.'
+  - 'Không khai model đã chạy — codex không đo được.'

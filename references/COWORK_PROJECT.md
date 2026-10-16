@@ -49,7 +49,7 @@ Drive MCP để tải nếu tránh được). LUÔN gọi qua tl_boot.py (tự s
    # tl_boot = launcher tự strip NUL cho tl.py; seed đọc từ file Context (KHÔNG MCP); gws+cred qua direct-media.
 3) python scripts/tl_boot.py gws-ping --env cowork   # gws=0.22.5 auth=oauth2
 4) (nếu cần NLM CLI) python scripts/tl_boot.py nlm-install
-5) (refresh cookie giữa phiên) python scripts/tl_boot.py nlm-auth-pull --secrets-file ./tl_secrets.enc
+5) (refresh cookie giữa phiên) python scripts/tl_boot.py nlm-auth-load   # bản wrapper WP710 đẩy (NLM_CRED_FILEID)
 
 QUY TẮC: dùng `python scripts/tl_boot.py …` cho MỌI lệnh (thay tl.py). Tải Drive ưu tiên direct-media/gws; CHỈ
 MCP khi hết cách. Không có master key vẫn rà soát được: lệnh lõi (footnote-map/cluster/rasoat-chongcheo/overlap)
@@ -80,15 +80,20 @@ cũ → 42K NUL).
 
 nlm tự refresh cookie ở **Code** (từ browser profile). Để Cowork luôn có cookie mới:
 
-- **Local → Drive (đẩy):** định kỳ chạy `tl secrets-set --nlm` (tự `nlm login --check` refresh rồi gói vào bundle,
-  giữ nguyên fileId). Tự động hoá bằng **Windows Task Scheduler** (1 lần):
+- **Local → Drive (đẩy):** chỉ trên máy Windows giữ hồ sơ trình duyệt gốc, chạy wrapper WP710 —
+  `nlm auth refresh` → canary LIVE dương trên đúng notebook → `tl nlm-auth-stage` (ghi đè tại chỗ, giữ fileId).
+  Canary không dương thì 0 upload; `nlm login --check` xanh hay rc 0 của refresh KHÔNG đủ để stage.
   ```powershell
-  $cmd = "cd C:\Users\admin\Downloads\tra-luat; $env:TL_MASTER_KEY='<key>'; python scripts\tl.py secrets-set --nlm"
-  schtasks /Create /TN "tl-nlm-sync" /SC DAILY /ST 09:00 /TR "powershell -NonInteractive -Command `"$cmd`"" /F
+  pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json
   ```
-  (cookie sống ~2–4 tuần → đẩy hằng ngày là dư an toàn; bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo.)
-- **Drive → Cowork (kéo):** đầu phiên `bootstrap` đã ghi cookie; giữa phiên cần mới hơn thì
-  `python scripts/tl.py nlm-auth-pull --secrets-file ./tl_secrets.enc` (hoặc bỏ `--secrets-file` để direct-media
-  kéo bản mới nhất trên Drive). Cowork KHÔNG tự chạy browser được nên KHÔNG tự refresh — refresh thật ở Code.
+  Muốn lặp: thêm `-EnableKeepalive -IntervalSeconds 3600 -MaxCycles N` (có giới hạn, dừng được; không Scheduled
+  Task, không tự khởi động). Điều kiện tiên quyết, config, ý nghĩa mã thoát: `references/RUNBOOK.md` mục
+  "WP710 — làm tươi credential NLM". Đừng đặt master key vào dòng lệnh của một tác vụ hẹn giờ.
+- **Drive → Cowork (kéo):** bản do wrapper đẩy nằm ở `NLM_CRED_FILEID`, nên giữa phiên cần cookie mới thì
+  `python scripts/tl.py nlm-auth-load`. Cookie mà `bootstrap` ghi đầu phiên lấy từ bundle `secrets` — chỉ là bản
+  seed, có thể CŨ hơn bản wrapper vừa đẩy. `nlm-auth-pull` cũng đọc bundle `secrets`, nên chỉ nhận bản mới khi
+  chính bundle ấy vừa được cập nhật (`tl secrets-set --nlm`, cũng qua canary). Cowork KHÔNG tự chạy browser được
+  nên KHÔNG tự refresh — refresh thật ở máy giữ hồ sơ trình duyệt gốc.
 
-Khi Google bắt đăng nhập lại (profile chết): ở Code `nlm login` 1 lần → `tl secrets-set --nlm`.
+Khi Google bắt đăng nhập lại (wrapper báo `auth_failure`): đăng nhập tương tác lại trên chính máy giữ hồ sơ gốc
+(`nlm login`), rồi chạy lại wrapper ở trên — refresh → canary → stage; không stage thẳng sau `nlm login`.

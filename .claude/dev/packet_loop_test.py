@@ -23,6 +23,7 @@ import importlib.util
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import tempfile
@@ -1452,11 +1453,32 @@ CUM_TU_THU = [
 ]
 
 
-def _repo_gia(tmp: Path, noi_dung: str, ten="demo") -> Path:
+# Nguồn đối chiếu TRUNG TÍNH cho cây giả: đủ dài để qua `_PROTO_TU_TOI_THIEU`, và cố ý
+# KHÔNG chứa câu chữ nào của protocol thật lẫn của các adapter mẫu — nên nó không tự sinh
+# phát hiện. Dùng protocol THẬT làm mặc định là sai: nó nặng, và nó buộc các ca đối chứng
+# vốn "khác họ" phải phụ thuộc vào đường đọc protocol, làm 36 phép kiểm đột biến đỏ (đo được).
+_PROTO_TRUNG_TINH = ("man xanh luc bao phu trien doi thoai nguyen so bay muoi hai "
+                     "cau chuyen ve mot chiec thuyen go tren song vang " * 20)
+
+
+def _repo_gia(tmp: Path, noi_dung: str, ten="demo", protocol: str | None = None) -> Path:
+    """Cây giả cho `doctrine-scan`, NAY luôn có nguồn đối chiếu dưới `--root`.
+
+    Bản trước chỉ dựng `.claude/skills/<ten>/SKILL.md`, nên mọi ca dùng nó đo theo protocol
+    của kho THẬT qua fallback `parents[2]`; `--root` chỉ góp phần adapter. Đo được: gỡ
+    fallback thì `doctrine_scan_chep_tron_5_1_bi_chan` và `..._chep_doan_ngan_...` ĐỎ ngay
+    — hai ca ấy chưa từng đo cây mà chúng khai là đang đo.
+
+    `protocol=None` ⇒ ghi nguồn TRUNG TÍNH (ca không nói gì về chép). Ca nào đo hành vi chép
+    thì truyền protocol THẬT vào, tường minh, để người đọc thấy nguồn so sánh là gì.
+    """
     r = tmp / f"repo_{abs(hash(noi_dung)) % 10**8}_{ten}"
     d = r / ".claude" / "skills" / ten
     d.mkdir(parents=True, exist_ok=True)
     (d / "SKILL.md").write_text(noi_dung, encoding="utf-8", newline="\n")
+    (r / "docs").mkdir(parents=True, exist_ok=True)
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+        protocol if protocol is not None else _PROTO_TRUNG_TINH, encoding="utf-8", newline="\n")
     return r
 
 
@@ -1520,6 +1542,131 @@ def case_doctrine_scan_repo_that_sach(c: Ctx):
     _doi(0, rc, e, f"adapter thật phải sạch; stderr={_txt(e)}")
 
 
+def case_doctrine_scan_chep_tron_5_1_bi_chan(c: Ctx):
+    """A1 — Chép trọn §5.1 của protocol vào adapter ⇒ phải ĐỎ (rc=6)."""
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    raw = proto.read_text(encoding="utf-8")
+    m = re.search(r"(## 5\.1 .*?)(?=\n## |\Z)", raw, re.DOTALL)
+    if not m:
+        raise AssertionError("không tìm thấy §5.1 trong protocol")
+    sec_5_1 = m.group(1)
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{sec_5_1}\n", ten="sec_5_1", protocol=raw)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép trọn §5.1 phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_chep_doan_ngan_5_1_bi_chan(c: Ctx):
+    """A1 — Chép đoạn ngắn 29 từ từ §5.1 (không dính 28 cụm cấm) ⇒ phải ĐỎ (rc=6)."""
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    raw = proto.read_text(encoding="utf-8")
+    m = re.search(r"## 5\.1\s+.*?\n(.*?)(?=\n## |\Z)", raw, re.DOTALL)
+    if not m:
+        raise AssertionError("không tìm thấy §5.1 trong protocol")
+    lines = [
+        line.strip()
+        for line in m.group(1).splitlines()
+        if line.strip() and not line.strip().startswith(("#", "```", "-"))
+    ]
+    words = " ".join(lines).split()
+    doan = " ".join(words[:29])
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_5_1_ngan", protocol=raw)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép đoạn ngắn 29 từ của §5.1 phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_chep_12_bi_chan(c: Ctx):
+    """A1 — Chép đoạn văn xuôi thuần §12 (không dính 28 cụm cấm) ⇒ phải ĐỎ (rc=6).
+
+    Khác bản trước: bản trước chép trọn §12 (vốn chứa cả cụm cấm cũ như 'người có
+    thẩm quyền'), nên khi tắt n-gram (`bo_kiem_chep_protocol`), ca này vẫn XANH.
+    Đoạn này lấy 30 từ văn xuôi thuần ở §12 không dính bất kỳ cụm nào trong 28 cụm cấm
+    cũ, chứng minh cơ chế so sánh n-gram mới thật sự đo được hành vi chép.
+    """
+    proto = ROOT / "docs" / "PROTOCOL_DA_PHIEN.md"
+    raw = proto.read_text(encoding="utf-8")
+    m = re.search(r"(## 12\.\s+.*?)(?=\n## 13|\Z)", raw, re.DOTALL)
+    if not m:
+        raise AssertionError("không tìm thấy §12 trong protocol")
+    sec_12 = m.group(1)
+    words = [w for w in sec_12.split() if not w.startswith("#")]
+    doan = " ".join(words[45:75])
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan}\n", ten="sec_12_ngan", protocol=raw)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép đoạn ngắn §12 không dính cụm cấm phải ĐỎ (rc=6)")
+
+
+def case_doctrine_scan_fail_close_thieu_protocol(c: Ctx):
+    """Fail-close: thiếu docs/PROTOCOL_DA_PHIEN.md dưới --root ⇒ phải ĐỎ (rc=2)."""
+    r = c.tmp / "repo_thieu_proto"
+    d = r / ".claude" / "skills" / "demo"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "SKILL.md").write_text(SACH, encoding="utf-8", newline="\n")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "thiếu PROTOCOL_DA_PHIEN.md phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_doctrine_scan_fail_close_khong_phai_utf8(c: Ctx):
+    """Fail-close: PROTOCOL_DA_PHIEN.md lỗi UTF-8 ⇒ phải ĐỎ (rc=2)."""
+    r = c.tmp / "repo_proto_khong_utf8"
+    d = r / ".claude" / "skills" / "demo"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "SKILL.md").write_text(SACH, encoding="utf-8", newline="\n")
+    (r / "docs").mkdir(parents=True, exist_ok=True)
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_bytes(b"\x80\x81\xff\xfe")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "PROTOCOL_DA_PHIEN.md lỗi UTF-8 phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_doctrine_scan_fail_close_protocol_ngan(c: Ctx):
+    """Fail-close: PROTOCOL_DA_PHIEN.md quá ngắn (< 200 từ) ⇒ phải ĐỎ (rc=2)."""
+    proto_ngan = "tu " * 50
+    r = _repo_gia(c.tmp, SACH, ten="proto_ngan", protocol=proto_ngan)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "PROTOCOL_DA_PHIEN.md quá ngắn (< 200 từ) phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_doctrine_scan_fail_close_chi_co_fence(c: Ctx):
+    """Fail-close: PROTOCOL_DA_PHIEN.md chỉ có code fence (bỏ fence rỗng/<200 từ) ⇒ phải ĐỎ (rc=2)."""
+    proto_fence = "```markdown\n" + ("noi dung trong fence " * 100) + "\n```\n"
+    r = _repo_gia(c.tmp, SACH, ten="proto_fence", protocol=proto_fence)
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(2, rc, e, "PROTOCOL_DA_PHIEN.md chỉ có fence phải ĐỎ (rc=2)")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+
+def case_doctrine_scan_adr_0048_khong_phai_chep_protocol(c: Ctx):
+    """A1 — Đoạn trần ADR-0048 không thuộc PROTOCOL_DA_PHIEN.md ⇒ phải XANH (rc=0)."""
+    adr_48 = ROOT / "docs" / "adr" / "0048-tran-vong-review-len-muoi.md"
+    raw = adr_48.read_text(encoding="utf-8")
+    doan_adr = "\n".join(
+        l for l in raw.splitlines() if not l.startswith(">") and "PROTOCOL" not in l
+    )[:400]
+    r = _repo_gia(c.tmp, f"# Adapter\n\n{doan_adr}\n", ten="adr_48")
+    rc, o, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(0, rc, e, "đoạn trần ADR-0048 không phải chép protocol nên phải XANH (rc=0)")
+
+
+def case_doctrine_scan_con_tro_thuan_tuy_xanh(c: Ctx):
+    """A4 — Con trỏ thuần tuý nhắc §3.2, §8, assurance_target, reviewed_sha ⇒ phải XANH (rc=0)."""
+    nd = (
+        "# Adapter chuẩn\n\n"
+        "Đọc trước: `docs/PROTOCOL_DA_PHIEN.md` §3.2 và §8.\n"
+        "Quy định về assurance_target và reviewed_sha xem tại protocol.\n"
+        "Mọi hành vi tuân thủ stop condition tại §12.\n"
+    )
+    r = _repo_gia(c.tmp, nd, ten="con_tro")
+    rc, o, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(0, rc, e, "con trỏ thuần tuý phải XANH (rc=0)")
+
+
 # --- (d) stdout an toàn dưới codepage không UTF-8 ------------------------------
 
 
@@ -1579,6 +1726,9 @@ def _kich_ban_in(c: Ctx, codepage: str):
     # MỒ CÔI và lệnh trả rc=11, tức kịch bản codepage sẽ đo nhầm ĐƯỜNG THẤT BẠI (chỉ in stderr)
     # thay vì đường thành công. Chốt PHỦ ở cuối hàm bắt đúng chuyện này khi phép mồ côi vừa thêm.
     (r_bn / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
+    # #770: `kiem-gate` in "gate XANH trên …" lúc THÀNH CÔNG — chốt PHỦ dưới đã bắt nó.
+    cr = c.tmp / f"cp{codepage}-check-runs.json"
+    cr.write_text(json.dumps({"check_runs": [_kg_run(1, name="cổng-đủ")]}), encoding="utf-8")
 
     buoc = [
         (["where"], None),
@@ -1613,6 +1763,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
         (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
+        (["kiem-gate", "--head", _KG_HEAD, "--check-runs", cr, "--bat-buoc", "cổng-đủ"], None),
         # #338: cả hai lệnh in tiếng Việt CÓ DẤU lúc thành công. `ghi-uy-quyen` in "đã ghi
         # KHAI BÁO…", `doi-chieu-uy-quyen` in "CÓ khai báo"/"KHÔNG khai báo". Console máy
         # Việt là cp1258, nên thiếu phủ ở đây là để nguyên đúng cái bẫy mà chốt này sinh ra
@@ -2753,7 +2904,62 @@ def case_adr_song_KHO_THAT_xanh(c: Ctx):
         raise AssertionError(f"đòi hai số bằng nhau = {n}; được: {s!r}")
 
 
+def case_wp320_invalid_inputs(c: Ctx):
+    bad = c.tmp / "bad.json"
+    bad.write_text("{", encoding="utf-8")
+    missing = c.tmp / "missing.json"
+    missing.write_text('{"he_dieu_hanh": "Windows"}', encoding="utf-8")
+    missing_file_path = c.tmp / "nonexistent.json"
+    if missing_file_path.exists():
+        raise AssertionError("WP320 diagnostic: Missing file fixture already exists")
+
+    inputs = [
+        ("absent flag/environment", [], {BIEN_BC: ""},
+         ["không có ảnh môi trường", "''"]),
+        ("missing file", ["--bang-chung-moi-truong", str(missing_file_path)], None,
+         ["không có ảnh môi trường", "nonexistent.json"]),
+        ("malformed JSON", ["--bang-chung-moi-truong", str(bad)], None,
+         ["không đọc được", "JSONDecodeError"]),
+        ("missing required fields", ["--bang-chung-moi-truong", str(missing)], None,
+         ["thiếu trường của `doctor --json`"]),
+    ]
+
+    msgs = set()
+    for name, args, env_extra, expected_substrs in inputs:
+        sd = c.sd()
+        _doi(0, *c.init(sd)[0:1], b"", "init")
+        rc, o, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR] + args, sd, env_extra=env_extra)
+
+        err_msg = _txt(e)
+        msgs.add(err_msg)
+
+        if rc != 10:
+            raise AssertionError(f"WP320 diagnostic {name}: expected rc=10, got {rc}. err: {err_msg!r}")
+
+        for substr in expected_substrs:
+            if substr not in err_msg:
+                raise AssertionError(f"WP320 diagnostic {name}: expected {substr!r} in {err_msg!r}")
+
+        st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+        if st["attempts_used"] != 0 or st["attempt_open"]:
+            raise AssertionError(f"WP320 diagnostic {name}: state not isolated (attempts={st['attempts_used']}, open={st['attempt_open']})")
+
+    if len(msgs) != 4:
+        raise AssertionError(f"WP320 diagnostic: Expected 4 distinct messages, got {len(msgs)}: {msgs!r}")
+
+def case_wp320_valid_evidence(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, o, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "WP320 clean valid evidence")
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if st["attempts_used"] != 1 or not st["attempt_open"]:
+        raise AssertionError("WP320 diagnostic: Clean input phải increment lượt")
+
+
 CASES = [
+    ("wp320_invalid_inputs", case_wp320_invalid_inputs),
+    ("wp320_valid_evidence", case_wp320_valid_evidence),
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
     ("lease_da_het_han_khong_ghi_duoc", case_lease_da_het_han_khong_ghi_duoc),
@@ -2826,6 +3032,15 @@ CASES = [
     ("doctrine_scan_bom_cum_tu_do", case_doctrine_scan_bom_cum_tu_do),
     ("doctrine_scan_bat_doctrine_THAT_tu_protocol", case_doctrine_scan_bat_doctrine_THAT_tu_protocol),
     ("doctrine_scan_repo_that_sach", case_doctrine_scan_repo_that_sach),
+    ("doctrine_scan_chep_tron_5_1_bi_chan", case_doctrine_scan_chep_tron_5_1_bi_chan),
+    ("doctrine_scan_chep_doan_ngan_5_1_bi_chan", case_doctrine_scan_chep_doan_ngan_5_1_bi_chan),
+    ("doctrine_scan_chep_12_bi_chan", case_doctrine_scan_chep_12_bi_chan),
+    ("doctrine_scan_fail_close_thieu_protocol", case_doctrine_scan_fail_close_thieu_protocol),
+    ("doctrine_scan_fail_close_khong_phai_utf8", case_doctrine_scan_fail_close_khong_phai_utf8),
+    ("doctrine_scan_fail_close_protocol_ngan", case_doctrine_scan_fail_close_protocol_ngan),
+    ("doctrine_scan_fail_close_chi_co_fence", case_doctrine_scan_fail_close_chi_co_fence),
+    ("doctrine_scan_adr_0048_khong_phai_chep_protocol", case_doctrine_scan_adr_0048_khong_phai_chep_protocol),
+    ("doctrine_scan_con_tro_thuan_tuy_xanh", case_doctrine_scan_con_tro_thuan_tuy_xanh),
     ("stdout_cp1252", case_stdout_cp1252),
     ("stdout_cp1258", case_stdout_cp1258),
     ("cross_review_co_cu_phap_ghi_verdict_len_pr", case_cross_review_co_cu_phap_ghi_verdict_len_pr),
@@ -3288,6 +3503,11 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    "wp320_overwrite_diagnostic": (
+        "    if d is not None and (not isinstance(d, dict) or not {\"thieu_bat_buoc\", \"chua_xac_thuc\", \"he_dieu_hanh\"} <= d.keys()):\n",
+        "    if not isinstance(d, dict) or not {\"thieu_bat_buoc\", \"chua_xac_thuc\", \"he_dieu_hanh\"} <= d.keys():\n",
+        ["wp320_invalid_inputs"],
+    ),
     # --- dòng bảng phải THUỘC một bảng: đột biến dựng lại bản cũ -----------------
     #
     # Bản cũ đếm mọi dòng khớp `^| \`ADR-NNNN\` |` ở cột 0, bất kể nó có nằm trong
@@ -3644,6 +3864,10 @@ MUTANTS = {
         "    dot_bien_test = ten_mut in MUTANTS_NHAM_TEST\n",
         "    dot_bien_test = all(t in goc_test for t, _ in cap)  # đột biến: suy từ văn bản\n",
         ["phan_loai_dot_bien_san_pham_neo_trung_test_van_DO"]),
+    "bo_qua_html_guard_trong_trich_xuat": (
+        "            if html_end:\n",
+        "            if False:\n",
+        ["trich_xuat_74a_chong_nhieu"]),
     "bien_nhan_bo_nhanh_valueerror": (
         "        except ValueError:\n", "        except RuntimeError:\n",
         ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
@@ -3955,6 +4179,25 @@ MUTANTS = {
         "",
         ["ac19_bang_vai_tro_THAT_van_bi_bat"],
     ),
+    "luong_canonical_chay_that_dao_os_name": (
+        '    assert os.name == "nt", "phải chạy trên Windows"\n',
+        '    assert os.name != "nt", "phải chạy trên Windows"  # đột biến\n',
+        ["luong_canonical_chay_that"],
+    ),
+    "74a_splitlines_sai": ('    p = re.split(r\'(\\r\\n|\\r|\\n)\', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])', '    lines = noi_dung.splitlines(keepends=True)', ["trich_xuat_74a_chong_nhieu"]),
+    "74a_raw_closing_cung_ten": ('            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")', '            if mh:\n                end_re = re.compile(r"-->" if mh.group(1) else f"(?i)</{mh.group(2)}>")', ["trich_xuat_74a_chong_nhieu"]),
+    "bo_kiem_chep_protocol": (
+        "        if True:",
+        "        if False:  # bo_kiem_chep_protocol",
+        ["doctrine_scan_chep_tron_5_1_bi_chan",
+         "doctrine_scan_chep_doan_ngan_5_1_bi_chan",
+         "doctrine_scan_chep_12_bi_chan"],
+    ),
+    "nang_nguong_chep_protocol_len_50": (
+        "            threshold = 15 if is_claude_md else 10",
+        "            threshold = 50  # nang_nguong_chep_protocol_len_50",
+        ["doctrine_scan_chep_doan_ngan_5_1_bi_chan"],
+    ),
 }
 
 # Phân loại là KHAI BÁO: tên chỉ có mặt ở đây mới được sửa test harness.
@@ -3968,6 +4211,8 @@ MUTANTS_NHAM_TEST = frozenset({
     "moc_kiem_noi_vo_dieu_kien",
     "moc_kiem_to_vo_dieu_kien",
     "phan_loai_lai_dot_bien_test_bang_suy_luan",
+    "luong_canonical_chay_that_dao_os_name",
+    "bo_qua_html_guard_trong_trich_xuat", "74a_splitlines_sai", "74a_raw_closing_cung_ten",
 })
 
 
@@ -4566,7 +4811,289 @@ def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
         raise AssertionError("không tìm thấy mỏ neo: neo test-harness chết đã bị nuốt")
 
 
+def _ps_statements(script: str):
+    stmts, cur, state, start, i, n, tb = [], [], "N", 0, 0, len(script), True
+    while i < n:
+        c, os = script[i], state
+        if state == "N":
+            if tb and script.startswith("<#", i): state = "B"; cur.extend([" ", " "]); i += 1
+            elif tb and c == "#": state = "L"; cur.append(" ")
+            elif script.startswith("@'\n", i) or script.startswith("@'\r\n", i): state = "H1"; cur.extend(["@", "'"]); i += 1
+            elif script.startswith('@"\n', i) or script.startswith('@"\r\n', i): state = "H2"; cur.extend(["@", '"']); i += 1
+            elif c == "'": state = "S1"; cur.append(c)
+            elif c == '"': state = "S2"; cur.append(c)
+            elif c == "`": state = "E"; tb = False
+            elif c in ";\n":
+                txt = "".join(cur).strip(" \t\r\n")
+                if txt: stmts.append((start, i, txt))
+                cur, start = [], i + 1; tb = True
+            elif c in " \t\r": cur.append(c); tb = True
+            else: cur.append(c); tb = c in ")]}"
+        elif state == "L":
+            if c == "\n": state = "N"; continue
+            else: cur.append(" ")
+        elif state == "B":
+            if script.startswith("#>", i): state = "N"; cur.extend([" ", " "]); i += 1
+            else: cur.append(" " if c != "\n" else "\n")
+        elif state == "S1":
+            cur.append(c)
+            if c == "'":
+                if i+1 < n and script[i+1] == "'": cur.append("'"); i += 1
+                else: state = "N"
+        elif state == "S2":
+            cur.append(c)
+            if c == '"':
+                if i+1 < n and script[i+1] == '"': cur.append('"'); i += 1
+                else: state = "N"
+            elif c == "`": state = "E2"
+        elif state == "E":
+            state = "N"
+            if c == "\n": cur.append(" ")
+            elif c == "\r" and i+1 < n and script[i+1] == "\n": cur.append(" "); i += 1
+            else: cur.extend(["`", c])
+        elif state == "E2": state = "S2"; cur.append(c)
+        elif state == "H1":
+            if c == "\n" and script.startswith("'@", i+1): state = "N"; cur.extend(["\n", "'", "@"]); i += 2
+            else: cur.append(" " if c != "\n" else "\n")
+        elif state == "H2":
+            if c == "\n" and script.startswith('"@', i+1): state = "N"; cur.extend(["\n", '"', "@"]); i += 2
+            else: cur.append(" " if c != "\n" else "\n")
+        if state == "N" and os in ("B", "S1", "S2", "H1", "H2"): tb = True
+        i += 1
+    if state in ("B", "S1", "S2", "H1", "H2", "E", "E2"):
+        raise AssertionError("unfinished")
+    txt = "".join(cur).strip(" \t\r\n")
+    if txt: stmts.append((start, n, txt))
+    return stmts
+
+
+def _trich_xuat_powershell_74a(noi_dung: str) -> str:
+    import re
+    p = re.split(r'(\r\n|\r|\n)', noi_dung); lines = [p[i]+p[i+1] for i in range(0,len(p)-1,2)]+([p[-1]] if p[-1] else [])
+    f_char, f_len, in_sec, n_head, blocks, cur, html_end = None, 0, False, 0, [], None, None
+    for line in lines:
+        if not f_char:
+            if html_end:
+                if html_end.search(line): html_end = None
+                continue
+            mh = re.match(r"(?i)^ {0,3}(?:(<!--)|<(pre|script|style|textarea)(?:[ \t\v\f\r\n>]|$))", line)
+            if mh:
+                end_re = re.compile(r"-->" if mh.group(1) else r"(?i)</(?:pre|script|style|textarea)>")
+                if not end_re.search(line): html_end = end_re
+                continue
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if not f_char:
+            if line.rstrip("\r\n") == "#### 7.4a Thứ tự state trước khi gọi reviewer":
+                n_head, in_sec = n_head + 1, True
+                continue
+            if in_sec and re.match(r"^ {0,3}#{1,6}(?:[ \t\r\n]|$)", line): in_sec = False
+            if m:
+                f_char, f_len = m.group(1)[0], len(m.group(1))
+                if in_sec and m.group(2).rstrip("\r\n").strip(" \t") == "powershell": cur = []
+        else:
+            if m and m.group(1)[0] == f_char and len(m.group(1)) >= f_len and not m.group(2).rstrip("\r\n").strip(" \t"):
+                if cur is not None: blocks.append("".join(cur)); cur = None
+                f_char, f_len = None, 0
+            elif cur is not None: cur.append(line)
+    errs = []
+    if n_head != 1: errs.append("không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn")
+    if f_char: errs.append("unclosed fence")
+    if not blocks: errs.append("không tìm thấy khối powershell sau 7.4a")
+    elif len(blocks) > 1: errs.append("duplicate powershell fence")
+    if errs: raise AssertionError(" | ".join(errs))
+    return blocks[0].strip(" \t\r\n")
+
+
+def _loc_lenh_truoc_record_post(doan_code: str) -> str:
+    import re
+    py_script = r"python \.claude/dev/packet_loop\.py"
+    ws = r"[ \t]+"
+    opt = r"[ \t]*"
+    patterns = [
+        r"\$Begin" + opt + r"=" + opt + py_script + ws + r"begin-attempt" + ws + r"--packet" + ws + r"<issue>" + ws + r"--provider" + ws + r"<executor-provider>",
+        r"if" + opt + r"\(\$LASTEXITCODE" + ws + r"-ne" + ws + r"0\)" + opt + r"\{" + opt + r"exit" + ws + r"\$LASTEXITCODE" + opt + r"\}",
+        r"if" + opt + r"\(\$Begin" + ws + r"-notmatch" + ws + r"'nonce=\(\[0-9a-f\]\{32\}\)'\)" + opt + r"\{" + opt + r"throw" + ws + r"'begin-attempt không in nonce hợp lệ'" + opt + r"\}",
+        r"\$AttemptNonce" + opt + r"=" + opt + r"\$Matches\[1\]",
+        py_script + ws + r"chup-anh-doctor" + ws + r"--packet" + ws + r"<issue>" + ws + r"--out" + ws + r"<doctor-signed.json>",
+        py_script + ws + r"record-post" + ws + r"--packet" + ws + r"<issue>" + ws + r"--for" + ws + r"reviewing" + ws + r"--comment-id" + ws + r"<recorded-github-comment-id>"
+    ]
+    stmts = _ps_statements(doan_code)
+    if len(stmts) < 6:
+        raise AssertionError("thiếu lệnh")
+    for idx, pat in enumerate(patterns):
+        if not re.fullmatch(pat, stmts[idx][2]):
+            raise AssertionError(f"lệnh {idx+1} sai template: {stmts[idx][2]}")
+    return doan_code[:stmts[5][0]].strip(" \t\r\n")
+
+
+def _kiem_residual_placeholder(lenh: str):
+    import re
+    for _, _, code in _ps_statements(lenh):
+        if re.search(r"<[^>]+>", code):
+            raise AssertionError(f"residual placeholder trong lệnh: {code}")
+
+
+def case_luong_canonical_chay_that(c: Ctx):
+    assert os.name == "nt", "phải chạy trên Windows"
+
+    ke_hoach_md = ROOT / "ops" / "KE_HOACH_THI_CONG_CLAUDE_CODEX.md"
+    if not ke_hoach_md.is_file():
+        if (ROOT / ".git").exists():
+            raise AssertionError("thiếu kế hoạch thi công trong repo thật")
+        return
+
+    doan_code = _trich_xuat_powershell_74a(ke_hoach_md.read_text(encoding="utf-8"))
+
+    lenh_da_loc = _loc_lenh_truoc_record_post(doan_code)
+
+    if not lenh_da_loc or "nonce" not in lenh_da_loc:
+        raise AssertionError("tiền tố chạy lệnh rỗng hoặc thiếu logic nonce")
+
+    sd = c.sd()
+    rc, _, e = c.init(sd)
+    _doi(0, rc, e, "init")
+
+    lenh_da_loc = lenh_da_loc.replace("<issue>", "55")
+    lenh_da_loc = lenh_da_loc.replace("<executor-provider>", EXECUTOR)
+    sd_ps = "'" + str(sd).replace("'", "''") + "'"
+    doctor_ps = "'" + str(sd / "doctor-signed.json").replace("'", "''") + "'"
+    lenh_da_loc = lenh_da_loc.replace("packet_loop.py ", f"packet_loop.py --state-dir {sd_ps} ")
+    lenh_da_loc = lenh_da_loc.replace("<doctor-signed.json>", doctor_ps)
+
+    _kiem_residual_placeholder(lenh_da_loc)
+
+    env = os.environ.copy()
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env[BIEN_BC] = anh_doctor()
+
+    try:
+        p = subprocess.run(["pwsh", "-NoProfile", "-Command", lenh_da_loc], cwd=str(ROOT), capture_output=True, env=env)
+    except OSError:
+        raise AssertionError("thiếu pwsh trên Windows")
+
+    _doi(0, p.returncode, p.stderr, f"luồng canonical chạy thất bại (stdout={_txt(p.stdout)!r})")
+
+    import json as _json
+    try:
+        doc_data = _json.loads((sd / "doctor-signed.json").read_text(encoding="utf-8"))
+    except Exception as ex:
+        raise AssertionError(f"không đọc được doctor-signed.json: {ex}")
+    st = _json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    neo = st["attempt_anchor"]
+    if doc_data.get("nonce") != neo["nonce"]:
+        raise AssertionError("nonce không khớp")
+    if doc_data.get("attempt") != neo["attempt"]:
+        raise AssertionError("attempt không khớp")
+    if doc_data.get("chu_ky") != ky_ban_ghi_luot(doc_data, st["hmac_key"]):
+        raise AssertionError("chữ ký không khớp")
+
+
+def case_trich_xuat_74a_chong_nhieu(c: Ctx):
+    def loi(func, match):
+        try:
+            func()
+        except AssertionError as e:
+            if match not in str(e):
+                raise AssertionError(f"có lỗi nhưng không khớp {match!r}: {e}")
+            return
+        raise AssertionError(f"lọt {match}")
+
+    t_chuan = "#### 7.4a Thứ tự state trước khi gọi reviewer\n"
+    loi(lambda: _trich_xuat_powershell_74a("#### 7.4a\n```powershell\n```\n"), "đúng chuẩn")
+    assert _trich_xuat_powershell_74a("\t```powershell\n" + t_chuan + "```powershell\n# ok\n```\n") == "# ok"
+    loi(lambda: _trich_xuat_powershell_74a("#### 7.4a — SAI\n```powershell\n```\n"), "đúng chuẩn")
+    loi(lambda: _trich_xuat_powershell_74a("### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\n```\n"), "đúng chuẩn")
+    loi(lambda: _trich_xuat_powershell_74a("##### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\n```\n"), "đúng chuẩn")
+
+    assert _trich_xuat_powershell_74a(t_chuan + "```powershell\n# #### comment\n```\n#### 8.0\n") == "# #### comment"
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "\n#### 8.0\n```powershell\n```\n"), "không tìm thấy khối powershell")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n```\n```powershell\n```\n"), "duplicate powershell fence")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```powershell\n"), "unclosed fence")
+
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```\n#### 8.0\n```powershell\n```\n"), "không tìm thấy khối")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "```\n#### 8.0\n"), "unclosed fence")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "````\n```powershell\n```\n````\n"), "không tìm thấy khối")
+    assert _trich_xuat_powershell_74a(t_chuan + "~~~powershell\n#### 8.0\n~~~\n") == "#### 8.0"
+
+    loi(lambda: _trich_xuat_powershell_74a("````\n" + t_chuan + "````\n"), "không tìm thấy duy nhất một mục")
+    loi(lambda: _trich_xuat_powershell_74a("````\n" + t_chuan), "không tìm thấy duy nhất một mục")
+    loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n   ````\n"), "không tìm thấy duy nhất một mục")
+    loi(lambda: _trich_xuat_powershell_74a("   ````\n" + t_chuan + "```powershell\n```\n"), "không tìm thấy duy nhất một mục #### 7.4a đúng chuẩn | unclosed fence")
+    loi(lambda: _trich_xuat_powershell_74a("````\n````\xa0\n" + t_chuan + "```powershell\n```\n````\n"), "không tìm thấy duy nhất một mục")
+
+    _kiem_residual_placeholder("cmd # <harmless>")
+    loi(lambda: _kiem_residual_placeholder("cmd '<harmless>'"), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder('cmd "<harmless>"'), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder('cmd "a`"b # " <harmless>'), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder('cmd "a""b # " <harmless>'), "residual placeholder")
+    loi(lambda: _kiem_residual_placeholder("cmd 'a''b # ' <harmless>"), "residual placeholder")
+    _kiem_residual_placeholder("# comment <harmless>\n\n")
+    _kiem_residual_placeholder("<# <residual> #>")
+    _kiem_residual_placeholder("@'\n<residual>\n'@")
+    _kiem_residual_placeholder('@"\n<residual>\n"@')
+
+    cmd_b = "$Begin = python .claude/dev/packet_loop.py begin-attempt --packet <issue> --provider <executor-provider>"
+    cmd_e = "if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"
+    cmd_c = "if ($Begin -notmatch 'nonce=([0-9a-f]{32})') { throw 'begin-attempt không in nonce hợp lệ' }"
+    cmd_a = "$AttemptNonce = $Matches[1]"
+    cmd_d = "python .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>"
+    cmd_r = "python .claude/dev/packet_loop.py record-post --packet <issue> --for reviewing --comment-id <recorded-github-comment-id>"
+
+    valid_code = f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c\n{cmd_r}"
+    assert _loc_lenh_truoc_record_post(valid_code) == f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c"
+
+    for f, t in [("<executor-provider>", "<executor-provider> # tail"), ("chup-anh-doctor --packet", "chup-anh-doctor <# note #> --packet"), ("}", "}# harmless"), ("}", "}<# harmless #>"), (")", ")<# harmless #>"), ("hợp lệ' }", "hợp lệ'<# harmless #> }")]:
+        vc = valid_code.replace(f, t, 1)
+        assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+    assert _ps_statements("'x'# comment")[-1][2] == "'x'"
+    vc = f"# start\n{valid_code}"
+    assert _loc_lenh_truoc_record_post(vc) == vc[:vc.rfind(cmd_r)].strip()
+
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code.replace("<executor-provider>", "<executor-provider>#tail|Mark")), "lệnh 1 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code.replace("chup-anh-doctor --packet", "chup-anh-doctor<# note #>--packet")), "lệnh 5 sai template")
+
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_r}"), "thiếu lệnh")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d}\nexit 0\n{cmd_r}"), "lệnh 6 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_d}\n{cmd_b}\n{cmd_r}"), "thiếu lệnh")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} ; exit 0\n{cmd_r}"), "lệnh 6 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\npython .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>|Get-Date\n{cmd_r}"), "lệnh 5 sai template")
+    loi(lambda: _trich_xuat_powershell_74a("#### 7.4a Thứ tự state trước khi gọi reviewer\n```powershell\xa0\n```\n"), "không tìm thấy khối powershell")
+
+    for tg, sp, cl in [("<!--", "", "-->"), ("<pre", "\f", "</pre>"), ("<SCRIPT", "\v", "</SCRIPT>"), ("<TeXtArEa", "", "</textarea>")]: loi(lambda t=tg, s=sp, c=cl: _trich_xuat_powershell_74a(f"{t}{s}\n{t_chuan}```powershell\nc\n```\n{c}\n"), "không tìm thấy duy nhất")
+    loi(lambda: _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n"), "không tìm thấy duy nhất")
+    for s in "\v\f\x1c\x1d\x1e\x85\u2028\u2029":
+        loi(lambda s=s: _trich_xuat_powershell_74a(f"<!--\n-->{s}{t_chuan}```powershell\nc\n```\n"), "không tìm thấy")
+    for o, c in ((o, c) for o in ["pre", "script", "style", "textarea"] for c in ["pre", "script", "style", "textarea"]):
+        assert _trich_xuat_powershell_74a(f"<{o}>\n{t_chuan}```powershell\nc\n```\n</{c}>\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
+    assert _trich_xuat_powershell_74a(f"<!--\n{t_chuan}```powershell\nc\n```\n-->\n{t_chuan}```powershell\n# ok\n```\n") == "# ok"
+
+    # R8 Assertions
+    loi(lambda: _loc_lenh_truoc_record_post(f"\xa0{valid_code}"), "lệnh 1 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(f"{valid_code}\u2003"), "lệnh 6 sai template")
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code.replace("python .claude/dev/packet_loop.py", "python x|.claude/dev/packet_loop.py")), "lệnh 1 sai template")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + " #### 8.0\n```powershell\n```\n"), "không tìm thấy khối")
+    loi(lambda: _trich_xuat_powershell_74a(t_chuan + "   #### 8.0\n```powershell\n```\n"), "không tìm thấy khối")
+    assert _trich_xuat_powershell_74a(t_chuan + "    #### 8.0\n```powershell\n# INSIDE\n```\n") == "# INSIDE"
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code + "\n<#"), "unfinished")
+    loi(lambda: _loc_lenh_truoc_record_post(valid_code + "\n@'\n"), "unfinished")
+    assert _loc_lenh_truoc_record_post(valid_code + "\n# eof") == f"{cmd_b}\n{cmd_e}\n{cmd_c}\n{cmd_a}\n{cmd_d} # doctor\n# c"
+
+
+def case_windows_only_skip_khoa(c: Ctx):
+    goc_sys = platform.system
+    platform.system = lambda: "Linux"
+    try:
+        ket = chay_suite(c.script, c.tmp, chi_chay={"luong_canonical_chay_that"})
+        if not isinstance(ket.get("luong_canonical_chay_that"), BoQua):
+            raise AssertionError("chay_suite không ngắt WINDOWS_ONLY thành BoQua")
+    finally:
+        platform.system = goc_sys
+
+
 CASES += [
+    ("luong_canonical_chay_that", case_luong_canonical_chay_that),
+    ("trich_xuat_74a_chong_nhieu", case_trich_xuat_74a_chong_nhieu),
+    ("windows_only_skip_khoa", case_windows_only_skip_khoa),
     ("phan_loai_dot_bien_san_pham_neo_trung_test_van_DO",
      case_phan_loai_dot_bien_san_pham_neo_trung_test_van_DO),
     ("dot_bien_test_khai_bao_chay_va_giet_dung_ca",
@@ -4574,11 +5101,358 @@ CASES += [
     ("dot_bien_test_neo_chet_van_DO", case_dot_bien_test_neo_chet_van_DO),
 ]
 
+WINDOWS_ONLY = {"luong_canonical_chay_that"}
+
+
+def case_ag_identity_and_cross_family(c: Ctx):
+    sd = c.sd()
+    ag = ("--executor-model-family", "gemini", "--executor-execution-surface",
+          "antigravity", "--executor-transport", "machine/local")
+    rc, _, e = c.init(sd, executor="google_antigravity", reviewer="claude", extra=ag)
+    _doi(0, rc, e, "AG identity init")
+    state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["model_family"] != "gemini":
+        raise AssertionError("AG model family not preserved")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity"], sd)
+    _doi(2, rc, e, "AG runtime missing family")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "claude", "--execution-surface", "antigravity",
+                             "--transport", "machine/local"], sd)
+    _doi(4, rc, e, "AG runtime wrong family")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "gemini", "--execution-surface", "antigravity",
+                             "--transport", "machine/local"], sd)
+    _doi(0, rc, e, "AG runtime correct identity")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(8, rc, e, "AG invalid review state")
+    cid = "9000055002"
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "reviewing",
+                             "--comment-id", cid], sd)
+    _doi(0, rc, e, "AG review post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
+                             "--comment-id", cid, "--head-sha", c.head(1)], sd)
+    _doi(0, rc, e, "AG reviewing transition")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", "b" * 40], sd)
+    _doi(5, rc, e, "AG stale reviewed SHA")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "claude",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(0, rc, e, "AG exact SHA review")
+    sd2 = c.sd()
+    rc, _, e = c.init(sd2, executor="google_antigravity", reviewer="claude",
+                      extra=("--executor-model-family", "claude", *ag[2:]), lease=False)
+    _doi(4, rc, e, "same family cross-review")
+    sd3 = c.sd()
+    rc, _, e = c.init(sd3, executor="google_antigravity", reviewer="claude", lease=False)
+    _doi(2, rc, e, "AG missing identity")
+    sd4 = c.sd()
+    rc, _, e = c.init(sd4, executor="unknown", reviewer="claude", lease=False)
+    _doi(2, rc, e, "unknown provider")
+    for surface, transport in (("codex_cli", "machine/local"),
+                               ("antigravity", "human_mediated"),
+                               (" ", "machine/local")):
+        invalid_sd = c.sd()
+        rc, _, e = c.init(invalid_sd, executor="google_antigravity", reviewer="claude",
+                          extra=("--executor-model-family", "gemini",
+                                 "--executor-execution-surface", surface,
+                                 "--executor-transport", transport), lease=False)
+        _doi(2, rc, e, "AG unsupported executor surface/transport")
+    sd5 = c.sd()
+    rc, _, e = c.init(sd5, executor="codex", reviewer="google_antigravity",
+                      extra=("--reviewer-model-family", "gemini", "--reviewer-execution-surface",
+                             "antigravity", "--reviewer-transport", "machine/local"))
+    _doi(0, rc, e, "AG reviewer identity init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], sd5)
+    _doi(0, rc, e, "AG reviewer executor begin")
+    cid = "9000055004"
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "reviewing",
+                             "--comment-id", cid], sd5)
+    _doi(0, rc, e, "AG reviewer post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing",
+                             "--comment-id", cid, "--head-sha", c.head(1)], sd5)
+    _doi(0, rc, e, "AG reviewer transition")
+    for family, surface, expected_rc in (("openai", "antigravity", 4),
+                                         ("gemini", "codex_cli", 2)):
+        rc, _, e = run(c.script, ["record-review", "--packet", 55,
+                                 "--provider", "google_antigravity", "--model-family", family,
+                                 "--execution-surface", surface, "--transport", "machine/local",
+                                 "--verdict", "approve", "--reviewed-sha", c.head(1)], sd5)
+        _doi(expected_rc, rc, e, "AG reviewer runtime identity mismatch")
+        st = json.loads((sd5 / "wp55.json").read_text(encoding="utf-8"))
+        if st["state"] != "reviewing" or st["reviews"]:
+            raise AssertionError("failed AG review changed state or added verdict")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "google_antigravity",
+                             "--model-family", "gemini", "--execution-surface", "antigravity",
+                             "--transport", "machine/local", "--verdict", "approve",
+                             "--reviewed-sha", c.head(1)], sd5)
+    _doi(0, rc, e, "AG reviewer exact SHA")
+    for family, surface, transport in ((" ", "antigravity", "machine/local"),
+                                       ("gemini", "codex_cli", "machine/local"),
+                                       ("gemini", "antigravity", "human_mediated")):
+        invalid_sd = c.sd()
+        rc, _, e = c.init(invalid_sd, executor="codex", reviewer="google_antigravity",
+                          extra=("--reviewer-model-family", family,
+                                 "--reviewer-execution-surface", surface,
+                                 "--reviewer-transport", transport), lease=False)
+        _doi(2, rc, e, "AG unsupported reviewer identity")
+
+
+CASES.append(("ag_identity_and_cross_family", case_ag_identity_and_cross_family))
+
+
+def case_codex_runtime_surface_transport(c: Ctx):
+    sd = c.sd()
+    rc, _, e = c.init(sd, executor="codex", reviewer="claude",
+                      extra=("--executor-execution-surface", "codex_desktop",
+                             "--executor-transport", "machine/local"))
+    _doi(0, rc, e, "Codex Desktop identity init")
+    state = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["execution_surface"] != "codex_desktop":
+        raise AssertionError("Codex Desktop surface was replaced")
+    for surface, transport, expected_rc in (("codex_cli", "machine/local", 4),
+                                            ("codex_desktop", "service", 2)):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                                 "--execution-surface", surface, "--transport", transport], sd)
+        _doi(expected_rc, rc, e, "Codex executor runtime mismatch")
+        if c.state(sd, 55) != "leased":
+            raise AssertionError("mismatched Codex runtime opened attempt")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_desktop", "--transport", "machine/local"], sd)
+    _doi(0, rc, e, "Codex Desktop runtime match")
+
+    sd2 = c.sd()
+    rc, _, e = c.init(sd2, executor="claude", reviewer="codex",
+                      extra=("--reviewer-execution-surface", "codex_desktop",
+                             "--reviewer-transport", "machine/local"))
+    _doi(0, rc, e, "Codex reviewer identity init")
+    c.den_reviewing(sd2, 55, 1)
+    for surface, transport, expected_rc in (("codex_cli", "machine/local", 4),
+                                            ("codex_desktop", "service", 2)):
+        rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+                                 "--execution-surface", surface, "--transport", transport,
+                                 "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
+        _doi(expected_rc, rc, e, "Codex reviewer runtime mismatch")
+        st = json.loads((sd2 / "wp55.json").read_text(encoding="utf-8"))
+        if st["state"] != "reviewing" or st["reviews"]:
+            raise AssertionError("mismatched Codex reviewer recorded verdict")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_desktop", "--transport", "machine/local",
+                             "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
+    _doi(0, rc, e, "Codex Desktop reviewer match")
+
+    legacy = c.sd()
+    rc, _, e = c.init(legacy, executor="codex", reviewer="claude")
+    _doi(0, rc, e, "legacy Codex init")
+    state = json.loads((legacy / "wp55.json").read_text(encoding="utf-8"))
+    if state["executor_identity"]["execution_surface"] is not None:
+        raise AssertionError("legacy unknown Codex surface was fabricated")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], legacy)
+    _doi(0, rc, e, "legacy unknown Codex runtime")
+
+    service = c.sd()
+    rc, _, e = c.init(service, executor="codex", reviewer="claude",
+                      extra=("--executor-execution-surface", "codex_service",
+                             "--executor-transport", "machine"))
+    _doi(0, rc, e, "Codex service identity init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex",
+                             "--execution-surface", "codex_service", "--transport", "machine"], service)
+    _doi(0, rc, e, "Codex service runtime match")
+
+    claude = c.sd()
+    rc, _, e = c.init(claude, executor="claude", reviewer="codex",
+                      extra=("--executor-execution-surface", "claude_code",
+                             "--executor-transport", "machine/local"))
+    _doi(0, rc, e, "Claude declared identity init")
+    for surface, transport in (("codex_desktop", "machine/local"),
+                               ("claude_code", "service")):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
+                                 "--execution-surface", surface, "--transport", transport], claude)
+        _doi(2, rc, e, "Claude invalid runtime tuple")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "claude",
+                             "--execution-surface", "claude_code", "--transport", "machine/local"], claude)
+    _doi(0, rc, e, "Claude declared runtime match")
+
+    for provider, reviewer, surface, transport in (
+            ("codex", "claude", "antigravity", "machine/local"),
+            ("codex", "claude", "codex_service", "machine/local"),
+            ("claude", "codex", "codex_desktop", "machine/local")):
+        invalid = c.sd()
+        rc, _, e = c.init(invalid, executor=provider, reviewer=reviewer,
+                          extra=("--executor-execution-surface", surface,
+                                 "--executor-transport", transport), lease=False)
+        _doi(2, rc, e, "provider cannot declare foreign/invalid runtime tuple")
+
+
+CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_transport))
+
+
+# --- #770 `kiem-gate` (spec `ops/specs/wp770.md` r1, M1–M5) --------------------------
+#
+# Mỗi ca ĐỎ đòi CẢ mã 12 LẪN lý do (`_doi_ly_do`) — mã trần trùng nhau không chứng minh
+# chốt nào đã chạy. Mỗi chốt có đột biến riêng ở `MUTANTS.update` cuối khối.
+_KG_HEAD = "ab" * 20
+
+
+def _kg_run(i, name="gate", conclusion="success", status="completed", head=_KG_HEAD):
+    return {"id": i, "name": name, "head_sha": head, "status": status, "conclusion": conclusion}
+
+
+def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None):
+    f = c.tmp / f"cr{time.time_ns()}.json"
+    if du_lieu is not None or tho is not None:
+        f.write_text(tho if tho is not None else json.dumps(du_lieu), encoding="utf-8")
+    args = ["kiem-gate", "--check-runs", f] + (["--head", head] if head is not None else [])
+    for t in bat_buoc:
+        args += ["--bat-buoc", t]
+    return run(c.script, args)
+
+
+def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None):
+    def ca(c: Ctx):
+        rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho)
+        if expect == 0:
+            _doi(0, rc, e, "gate phải XANH")
+            for t in dict.fromkeys(bat_buoc):
+                if _txt(o).count(f"{t} id=") != 1:
+                    raise AssertionError(f"dòng xanh phải liệt kê {t!r} đúng MỘT lần: {_txt(o)!r}")
+        else:
+            _doi_ly_do(expect, rc, e, chua, "kiem-gate")
+    return ca
+
+
+_KG_1 = {"check_runs": [_kg_run(1)]}
+_KG_KDD = "KHÔNG ĐO ĐƯỢC"
+_KG_CA = {
+    # M1 — đối số
+    "kg_m1_thieu_head": _kg_ca(_KG_1, head=None, expect=2, chua="--head"),
+    "kg_m1_head_7_ky_tu": _kg_ca({"check_runs": [_kg_run(1, head="abababa")]},
+                                 head="abababa", expect=2, chua="SHA 40"),
+    "kg_m1_khong_bat_buoc": _kg_ca(_KG_1, bat_buoc=(), expect=2, chua="--bat-buoc"),
+    "kg_m1_bat_buoc_rong": _kg_ca(_KG_1, bat_buoc=("",), expect=2, chua="không được rỗng"),
+    "kg_m1_trung_ten_mot_dong": _kg_ca(_KG_1, bat_buoc=("gate", "gate"), expect=0),
+    # M2 — đọc đầu vào: mọi chỗ hỏng là KHÔNG ĐO ĐƯỢC + 12
+    "kg_m2_tep_vang": _kg_ca(None, chua=_KG_KDD),
+    "kg_m2_json_hong": _kg_ca(None, tho="{", chua=_KG_KDD),
+    "kg_m2_khong_co_check_runs": _kg_ca({"x": 1}, chua=_KG_KDD),
+    "kg_m2_check_runs_khong_phai_list": _kg_ca({"check_runs": {}}, chua=_KG_KDD),
+    "kg_m2_thieu_conclusion": _kg_ca(
+        {"check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
+        chua=_KG_KDD),
+    "kg_m2_id_bool": _kg_ca({"check_runs": [_kg_run(True)]}, chua=_KG_KDD),
+    "kg_m2_id_chuoi": _kg_ca({"check_runs": [_kg_run("5")]}, chua=_KG_KDD),
+    "kg_m2_thieu_trang": _kg_ca({"total_count": 3, "check_runs": [_kg_run(1)]}, chua="thiếu trang"),
+    "kg_m2_object_mot_trang": _kg_ca({"total_count": 1, "check_runs": [_kg_run(1)]}, expect=0),
+    "kg_m2_list_nhieu_trang": _kg_ca(
+        [{"total_count": 2, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+         {"total_count": 2, "check_runs": [_kg_run(2)]}], expect=0),
+    # M3 — luật xanh
+    "kg_m3_vang": _kg_ca({"check_runs": [_kg_run(1, name="khac")]}, chua="VẮNG"),
+    "kg_m3_huy_moi_nhat": _kg_ca(
+        {"check_runs": [_kg_run(1), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
+    "kg_m3_chay_lai_xanh": _kg_ca(
+        {"check_runs": [_kg_run(1, conclusion="cancelled"), _kg_run(2)]}, expect=0),
+    "kg_m3_in_progress": _kg_ca({"check_runs": [_kg_run(1, conclusion=None, status="in_progress")]},
+                                chua="'in_progress'"),
+    "kg_m3_head_khac": _kg_ca({"check_runs": [_kg_run(1, head="cd" * 20)]}, chua="cd" * 20),
+    "kg_m3_ten_tuyet_doi": _kg_ca(
+        {"check_runs": [_kg_run(1, name="gate (ubuntu-latest) extra"), _kg_run(2, name="gate")]},
+        bat_buoc=("gate (ubuntu-latest)",), chua="VẮNG"),
+    "kg_m3_ngoai_bo_qua": _kg_ca(
+        {"check_runs": [_kg_run(1), _kg_run(2, name="khac", conclusion="cancelled")]}, expect=0),
+    # Trùng `id` lớn nhất: MỌI bản ghi của id ấy phải xanh — không tự chọn bản thuận lợi.
+    "kg_m3_trung_id_moi_ban_phai_xanh": _kg_ca(
+        {"check_runs": [_kg_run(2), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
+}
+# F01 — không để parser xoá bằng chứng mâu thuẫn hoặc nhận hằng ngoài JSON.
+for _k, _v in {"id": 2, "name": "khac", "head_sha": "cd" * 20,
+               "status": "in_progress", "conclusion": "cancelled"}.items():
+    _raw = "{" + json.dumps(_k) + ":" + json.dumps(_v) + "," + json.dumps(_kg_run(1))[1:]
+    for _slurp in (False, True):
+        _page = '{"check_runs":[' + _raw + "]}"
+        _KG_CA[f"kg_m2_khoa_trung_{_k}_{_slurp}"] = _kg_ca(
+            None, tho="[" + _page + "]" if _slurp else _page, chua=_KG_KDD)
+for _k, _v in {"check_runs": [_kg_run(2, conclusion="cancelled")], "total_count": 2}.items():
+    _page = "{" + json.dumps(_k) + ":" + json.dumps(_v) + ',"total_count":1,"check_runs":' + json.dumps([_kg_run(1)]) + "}"
+    _KG_CA[f"kg_m2_khoa_trung_{_k}"] = _kg_ca(None, tho=_page, chua=_KG_KDD)
+for _token in ("NaN", "Infinity", "-Infinity"):
+    for _nested in (False, True):
+        _value = '{"x":' + _token + "}" if _nested else _token
+        _raw = json.dumps(_KG_1)[:-1] + ',"extra":' + _value + "}"
+        _KG_CA[f"kg_m2_hang_ngoai_json_{_token}_{_nested}"] = _kg_ca(None, tho=_raw, chua=_KG_KDD)
+# F02 — một điều kiện sai, hai điều kiện kia đúng; bắt riêng luật status.
+_KG_CA["kg_m3_in_progress_success"] = _kg_ca(
+    {"check_runs": [_kg_run(1, status="in_progress")]}, chua="status='in_progress'")
+
+# M3-ket-luan — mỗi giá trị một ca: luật là danh sách CHO PHÉP `success`.
+_KG_KET_LUAN = ("skipped", "neutral", "failure", "timed_out", "action_required", "stale", None)
+for _kl in _KG_KET_LUAN:
+    _KG_CA[f"kg_m3_ket_luan_{_kl}"] = _kg_ca({"check_runs": [_kg_run(1, conclusion=_kl)]},
+                                            chua=f"conclusion={_kl!r}")
+
+
+def case_kg_m4_rc_gate_12(c: Ctx):
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, conclusion="cancelled")]}, "gate")
+    _doi(12, rc, e, "gate đỏ phải trả ĐÚNG 12")
+    nguon = c.script.read_text(encoding="utf-8")
+    if "\nRC_GATE = 12\n" not in nguon or not re.search(r"^\s+12\s+`kiem-gate`", nguon, re.M):
+        raise AssertionError("thiếu `RC_GATE = 12` hoặc dòng 12 trong bảng mã thoát docstring")
+    rc, o, e = run(c.script, ["kiem-gate", "--help"])
+    if rc != 0 or "12 gate không xanh" not in _txt(o).replace("\n", " "):
+        raise AssertionError(f"--help của kiem-gate thiếu mã 12: {_txt(o)!r}")
+
+
+CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12)]
+
+_KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
+MUTANTS.update({
+    "kg_bo_status_rieng": ('r["status"] == "completed" and r["conclusion"] == "success"',
+                           'r["conclusion"] == "success"', ["kg_m3_in_progress_success"]),
+    "kg_bo_conclusion_rieng": ('r["status"] == "completed" and r["conclusion"] == "success"',
+                               'r["status"] == "completed"', [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN]),
+    "kg_bo_hook_khoa_trung": ("object_pairs_hook=_cam_khoa_trung, ", "",
+                              [k for k in _KG_CA if k.startswith("kg_m2_khoa_trung_")]),
+    "kg_bo_hook_hang_ngoai_json": (", parse_constant=_cam_hang_ngoai_json", "",
+                                   [k for k in _KG_CA if k.startswith("kg_m2_hang_ngoai_json_")]),
+    "kg_bo_sha_re": ("    if not SHA_RE.fullmatch(a.head):\n", "    if False:\n",
+                     ["kg_m1_head_7_ky_tu"]),
+    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() for t in ten_bb):\n", "    if False:\n",
+                            ["kg_m1_bat_buoc_rong"]),
+    "kg_bo_qua_phan_tu_thieu_truong": ("            if sai:\n                hong(",
+                                       "            if sai:\n                continue\n                hong(",
+                                       ["kg_m2_thieu_conclusion"]),
+    "kg_bool_la_int": ("type(r.get(k, _VANG)) not in kieu]", "not isinstance(r.get(k, _VANG), kieu)]",
+                       ["kg_m2_id_bool"]),
+    "kg_bo_kiem_thieu_trang": ("    if so_id < tong_khai:\n", "    if False:\n", ["kg_m2_thieu_trang"]),
+    "kg_bo_kiem_vang": ('do.append(f"{ten!r}: VẮNG', 'xanh.append(f"{ten!r}: VẮNG',
+                        ["kg_m3_vang", "kg_m3_ten_tuyet_doi"]),
+    "kg_chon_success_bat_ky": ('id_max = max(r["id"] for r in cung)',
+                               'id_max = max((r["id"] for r in cung if r["conclusion"] == "success"), default=-1)',
+                               ["kg_m3_huy_moi_nhat"]),
+    "kg_chon_luot_cu_nhat": ('id_max = max(r["id"]', 'id_max = min(r["id"]',
+                             ["kg_m3_chay_lai_xanh", "kg_m2_list_nhieu_trang"]),
+    "kg_trung_id_chon_mot": ('for r in (r for r in cung if r["id"] == id_max):',
+                             'for r in [next(r for r in cung if r["id"] == id_max)]:',
+                             ["kg_m3_trung_id_moi_ban_phai_xanh"]),
+    "kg_danh_sach_cam": ('hop_le = (r["status"] == "completed" and r["conclusion"] == "success"',
+                         'hop_le = (r["conclusion"] not in ("cancelled", "failure")', _KG_CAM),
+    "kg_bo_so_head": ('"success"\n                      and r["head_sha"] == a.head)', '"success")',
+                      ["kg_m3_head_khac"]),
+    "kg_khop_tien_to": ('if r["name"] == ten]', 'if r["name"].startswith(ten)]',
+                        ["kg_m3_ten_tuyet_doi"]),
+    "kg_xet_moi_check": ('cung = [r for r in runs if r["name"] == ten]', "cung = list(runs)",
+                         ["kg_m3_ngoai_bo_qua"]),
+    "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
+})
+
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:
         if chi_chay and ten not in chi_chay:
+            continue
+        if ten in WINDOWS_ONLY and platform.system() != "Windows":
+            ket[ten] = BoQua("chỉ đo lệnh pwsh trên Windows")
             continue
         d = tmp / ten
         d.mkdir(parents=True, exist_ok=True)

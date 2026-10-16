@@ -12,6 +12,18 @@ generation: 1
 lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907
 thay_the_cho:
   - wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907
+da_bi_thay_the_ly_do: >-
+  THU HOI SOM, khong doi het han (2026-09-08T05:27:42Z). Lease nay giu `generation: 1` va nhanh
+  `agent/wp461-g1-claude` Y HET lease r1 ma no thay the, trong khi ADR-0025 doi hop dong Packet
+  doi thi phai tao revision moi, THU HOI lease cu VA CAP GENERATION MOI — no lam 2/3.
+  Generation la FENCING TOKEN: cung generation + cung nhanh nghia la mot worker r1 hoi sinh va
+  executor r2 khong phan biet duoc. Bia mo trong tep lease la DU LIEU, khong phai khoa.
+  Tim ra boi `chatgpt-codex-connector[bot]`, P1 tren PR #471 luc 2026-09-07T09:45:16Z
+  (discussion_r3948491404); cross-review luot 2 da neu dung cho nay hai lan ma phien ghi lease
+  khong nang thanh viec phai lam. Da do: chua nhanh `agent/wp461-*` nao ton tai tren may chu va
+  `launcher.py` tren master chua co `codex_service` ⇒ chua co viec nao mo coi.
+  Cong KHONG canh duoc `generation` (`ops/lease_publish.py` nhac chu ay 0 lan) — no #473.
 role: executor
 provider: claude
 executor: claude

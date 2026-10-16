@@ -1,0 +1,130 @@
+# LEASE — CI-GATE-TACH-GATE-OPS revision 2 / generation 2 — tach job gate-ops khoi gate de cat thoi gian tuong cua PR
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 660
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/660#issuecomment-5855165210
+granted_on_instruction_nguyen_van: >-
+  'Chủ kho đã cho phép phiên này tự tạo Packet Issue và lease cho hai hướng dưới đây. … Hướng 2 — đo rồi rút ngắn
+  job `gate` của `.github/workflows/ci.yml` … Ràng buộc: không làm yếu cổng nào.' (chu kho, phien Claude Code,
+  2026-09-27); quyet dinh trong phien: 'H2a ngay: 2 job, chỉ sửa ci.yml', 'Chủ kho thêm context trước merge',
+  'gate-ops + ...'.
+authority_caveat: >-
+  Comment neo do phien executor dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-27T11:05:00Z'
+lease_expires_at_utc: '2026-09-27T13:30:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-09-28T11:05:00Z). RUT NGAN ve 2026-09-27T13:30:00Z — xem thu_hoi_bang_rut_han.
+
+packet_id: CI-GATE-TACH-GATE-OPS
+packet_slug: CI-GATE-TACH-GATE-OPS
+revision: 2
+generation: 2
+lease_id: ci-gate-tach-gate-ops-r2-g2-claude
+thay_the_cho: ci-gate-tach-gate-ops-r1-g1-claude
+thay_the_ghi_chu: >-
+  Review Rescue Checkpoint: Codex CLI luot 2/2 tren 6f2b0f9 = blocked (P2 spec-hua-windows-sau-land-sai-ma-tran, P3
+  a1 null key da va ngoai kho). Chu kho chon 'Revision r2 + 1 luot Codex' va Windows 'Khong, ghi chua do' (2026-09-27,
+  AskUserQuestion). Bia mo hai chieu: da_bi_thay_the trong tep g1 (commit 8d10a1a, day truoc).
+review_budget_ghi_chu: >-
+  Tran 2 luot Codex/PR (PROTOCOL §8) DA DUNG HET o r1 (3fa7773 changes_requested; 6f2b0f9 blocked). Chu kho cap THEM
+  DUNG 1 luot (luot 3) de xac nhan r2 — quyet dinh cua nguoi giu kho, khong phai tu noi tran.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: 'Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: 'Codex CLI tai cho (xhigh), toi da 2 luot theo PROTOCOL §8; Codex connector tren PR (advisory_review); human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/CI-GATE-TACH-GATE-OPS-r2.md
+spec_ref: refs/heads/ops/cap-lease-ci-gate-tach-gate-ops
+spec_source_oid: 789ca4fff03dbb64bbc68be57c2ac775214cc4de
+spec_sha256: 627b73c7ade61b2341e4862c630d6b7bd77a208803e0d8a0ca745bae21997468
+spec_hash: 627b73c7ade61b2341e4862c630d6b7bd77a208803e0d8a0ca745bae21997468
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CI-GATE-TACH-GATE-OPS-r2.md
+prompt_sha256_required: 627b73c7ade61b2341e4862c630d6b7bd77a208803e0d8a0ca745bae21997468
+
+branch: claude/ci-gate-tach-gate-ops-r1-g1
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec + lease o nhanh ops/cap-lease-ci-gate-tach-gate-ops (de ops-publish-lease.yml dang ban chieu); ma o nhanh
+  claude/ci-gate-tach-gate-ops-r1-g1 (giu ten cu: chua push, chua co PR) dat THANG tren start_from_sha (khong mang commit spec/lease) de diff PR chi
+  con W1 — sua theo Codex CLI luot 1 (P2 nguong-300-bo-sot-spec-lease: 5c79fa2..3fa7773 = +438 vi tinh ca spec 132
+  + lease 101). Spec/lease vao master bang PR bookkeeping rieng sau land (tien le #659).
+start_from_sha: 5c79fa2c94b328ae3bbbef52a4cfa820fc40bc4a
+immutable_acceptance_baseline: 5c79fa2c94b328ae3bbbef52a4cfa820fc40bc4a
+continuation_base: 6f2b0f96165a9292e34943b1a10904d4262b6549
+reviewed_sha_required: 5c79fa2c94b328ae3bbbef52a4cfa820fc40bc4a
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua PR thi cong.'
+
+write_set:
+  - .github/workflows/ci.yml
+write_set_hash: b1e4fcd28055c712644fe84f6a1e30a41018cf387dd808cec348f2e505e33a2a
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-27T09:46Z: repo unshallow + fetch '+refs/heads/*'; so TAP TEN ls-remote --heads (453) voi for-each-ref
+  refs/remotes/origin (453): comm -23 = 0, comm -13 = 0. ai-dang-giu tren ban sao scratch co 453 refs/heads (+ remote
+  origin that): .github/workflows/ci.yml => NGUOI_GIU 0, rc=0 (7 lease HET_HAN).
+
+lech_protocol_duoc_duyet: 'khong co'
+lech_nguong_duoc_duyet: 'khong co (spec §4: 1 tep, uoc +~230 dong, duoi tran ADR-0044 sensitive 3 tep / 300 dong)'
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 2 luot pull_request (mot luot = mot workflow run; attempt lai khong tinh them)'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - 'S3 — luot Codex thu 3 (duoc cap them) khong approve => Review Rescue Checkpoint, hoi chu kho; KHONG luot 4.'
+  - 'S4 — push chi sau review tai cho sach; het allowance => DUNG.'
+  - 'S5 — > 300 dong them. DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'
+lease_sua_lan_cuoi: '2026-09-27T13:30:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-28T11:05:00Z'
+  han_moi_utc: '2026-09-27T13:30:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code 2026-09-27 (sau land #662): "Land va bookeeping di. Thu hoi r2 g2."
+  ly_do: 'Packet #660 da LAND (PR #662 merge 518faca7c79b55f068bef8996d28cedad3d242aa, 2026-09-27T13:20Z).'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651: so ops/thu-hoi/ chua kich hoat (SO_THU_HOI_KICH_HOAT = False); rut han chi dung co che DA CAI
+    (phan loai lease theo han).
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-ci-gate-tach-gate-ops (ban rut han) va master sau PR bookkeeping. Nhanh
+    ma claude/ci-gate-tach-gate-ops-r1-g1 KHONG mang tep lease. Nghiem thu: ai-dang-giu .github/workflows/ci.yml
+    khong con ci-gate-tach-gate-ops-r2-g2-claude trong NGUOI_GIU khi quet du ref.
+

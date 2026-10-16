@@ -1,7 +1,7 @@
 # Manual successor handoff D0
 
 Dùng mẫu này sau **mọi phiên** cho tới khi deterministic dispatcher + auto-review loop được promote. Người giữ
-tạo một task Claude/Codex mới bằng prompt bên dưới; không tiếp tục trong task cũ bằng cách đổi vai.
+tạo một task Claude/Codex/Antigravity mới bằng prompt bên dưới; không tiếp tục trong task cũ bằng cách đổi vai.
 
 ## Gói handoff bắt buộc
 
@@ -13,7 +13,10 @@ packet_id: wp<number>
 revision: <integer>
 generation: <integer>
 spec_hash: <sha256>
-provider: claude | codex | human
+provider: <provider-đúng-vai-theo-bảng-dưới>
+model_family: claude | openai | gemini | null
+execution_surface: <actual-runtime-surface>
+transport: <actual-transport>
 role: executor | reviewer | land_operator
 session_id: <stable-run-id>
 base_sha: <git-oid>
@@ -40,6 +43,13 @@ superseded_identity: <sha/generation-or-null>
 stop_conditions: []
 ```
 
+Provider được phép theo vai: `executor` = `claude | codex | google_antigravity`;
+`reviewer` = `claude | codex | google_antigravity | human` (human chỉ với
+`human_audited` hoặc fallback được khai); `land_operator` = `claude | codex | human`.
+AG không giữ vai land. Họ model của AG lấy từ lượt chạy thực tế; Codex có surface
+`codex_cli`, `codex_desktop` hoặc `codex_service`, Claude dùng `claude_code`.
+Surface/transport chưa đo được để `null`, không suy Codex Desktop thành CLI.
+
 Trước khi phát prompt, đọc lại remote PR head và Issue projection. `head_sha`, generation, revision và spec hash
 không khớp thì ghi `blocked` và không đề nghị worker chọn head/rebase khác. Evidence chỉ hợp lệ cho exact SHA.
 
@@ -54,6 +64,9 @@ Packet: #{{PACKET_ISSUE}} / {{PACKET_ID}}, revision {{REVISION}}, generation {{G
 PR: {{PR_URL}}
 Exact head bắt buộc: {{HEAD_SHA}}
 Executor provider/session: {{EXECUTOR_PROVIDER}} / {{EXECUTOR_SESSION}}
+Executor model family/surface/transport: {{EXECUTOR_MODEL_FAMILY}} / {{EXECUTOR_EXECUTION_SURFACE}} / {{EXECUTOR_TRANSPORT}}
+Reviewer phải khai model family/surface/transport thực tế. Antigravity dùng provider google_antigravity;
+cùng họ model không được ghi cross_approved dù khác công cụ.
 
 Preflight fail-closed: đọc trực tiếp Mission, Packet, PR, protocol và Executor evidence; xác minh remote PR head,
 spec hash, generation và starting tree đều khớp exact identity trên. Nếu khác, dừng và báo blocker; không tự

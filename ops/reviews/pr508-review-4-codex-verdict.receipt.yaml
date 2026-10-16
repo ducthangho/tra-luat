@@ -1,0 +1,103 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 4 của PR #508 (ba đặc tả packet lane CI),
+# KHÁC NỀN (codex) trên head `41e83b5`. Ghi sổ SAU khi cả 5 lượt xong, theo tiền lệ #510/#511.
+# KHÔNG phải trạng thái cuối: finding lượt này đã được vá ở lượt sau (trừ lượt 5 — xem README).
+
+schema_version: 2
+receipt_id: pr508-review-4-codex-20260911-3173a318
+kind: review_delivery_receipt
+packet_id: 'PR508-DAC-TA-LANE-CI'
+lease_id: khong-co-lease
+phase_key: HO-SO-CROSS-REVIEW-PR508-20260911
+luot: 4
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr508-review-4-codex-verdict.md
+verdict_sha256: eab842214b4286befd2952028374a364f54206e56c2ae99459242eef42790067
+verdict_bytes: 47218
+reviewed_sha: 41e83b54fffc0672268b9512aef1afd4fff57cc7
+reviewed_base: fe05fa6de0a151ced39261ccb97a88026cd1de91
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9196eaf70ca0d908b8d23ff26512c4e395e1e997/ops/reviews/pr508-review-4-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `9196eaf` — commit ĐẦU TIÊN chứa tệp verdict (biên nhận đi ở commit SAU, đúng
+  tiền lệ #510). Bản chiếu công khai: PR #508 comment 5634418060 — bản chiếu TÓM TẮT, không phải toàn văn.
+so_p1: 4
+so_p2: 6
+so_p3: 1
+findings_ids: 'Đếm từ tiêu đề `### … [P1|P2|P3]` trong CHÍNH tệp verdict; đừng tin ba số trên.'
+hint_patch: false
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: KHONG_KHAI — lượt này không ghim model trong lệnh
+  model_da_chay: 'KHONG_DO_DUOC — `codex exec` không xuất modelUsage'
+  effort: KHONG_KHAI
+  session_run_id: 3173a318
+  run_id_day_du: 3173a318249a4cd88bda906b0ddb697c
+  prompt_sha256: 64501f0adf4a7104f3ec890995a5e61270d8b92059467d3ef2084df2a1ce4214
+  bat_dau_utc: '2026-09-11T12:13:33.529289+00:00'
+  ket_thuc_utc: '2026-09-11T12:27:04.585006+00:00'
+  thoi_luong_giay: 811.056
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 165
+  stdout_sha256: c0542cd2362baeec86e64466978e740af1093502b4263776350247c24b508bb3
+  stderr_byte: 692240
+  stderr_sha256: 7597de5e9d8042d49ea688ae6e212a7d013a3794ec3012ad7afc30789058fcf3
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với `run.json` (ngoài kho, `scratchpad/rv508r4/luot/3173a318/`):
+    run_id/short_id, prompt_sha256 (khớp `prompt.snapshot` cùng thư mục), bat_dau_utc, ket_thuc_utc,
+    thoi_luong_giay, ma_thoat, trang_thai. stdout/stderr byte + sha256 đo trực tiếp trên hai tệp log.
+    `model_da_chay` KHÔNG ĐO ĐƯỢC — không có `modelUsage` trong đường `codex exec`.
+nang_luc_do_cua_goi: >-
+  Gói sandbox có mirror git đầy đủ + bản làm việc tại `reviewed_sha`, ba đặc tả, bản lượt trước,
+  patch delta, và (từ lượt 4) hiện vật đo CI. KHÔNG có mạng ⇒ reviewer kiểm được tính nhất quán nội
+  tại và nhất quán với lời khai, KHÔNG kiểm được số GitHub Actions có phản ánh GitHub thật hay không.
+hien_vat_reviewer_vao_kho: 'Chỉ tệp verdict này. Sandbox (prompt, EVIDENCE, patch, log) ở ngoài kho.'
+tuan_thu_cam_cua_reviewer: >-
+  Phạm vi cứng trong PROMPT: chỉ đọc/ghi thư mục làm việc, không mạng, không sửa `cay-kho/`, không tự
+  soạn payload tấn công. Không có dấu hiệu vi phạm trong log.
+github_submitter_identity: null
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Blob verdict ghim `9196eaf`. Head đã review là TỔ TIÊN của head nhánh packet (đo
+    `git merge-base --is-ancestor`, cả 5/5 ⇒ CÓ).
+  gioi_han: >-
+    YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ
+    trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ
+    bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha`
+    thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.
+  pr: 508
+  branch: claude/handoff-tra-luat-repo-2ak5th
+  reviewed_sha: 41e83b54fffc0672268b9512aef1afd4fff57cc7
+  reviewed_base: fe05fa6de0a151ced39261ccb97a88026cd1de91
+  verdict_blob_commit: 9196eaf70ca0d908b8d23ff26512c4e395e1e997
+verdict_usage_caveats:
+  - id: BAM-DA-DANG-TREN-PR-LA-CUA-TEP-CHUA-VIET-XONG
+    muc: P1
+    mo_ta: >-
+      Comment lượt 4 trên PR #508 (issuecomment-5634418060) đăng `sha256 bb005aad…` / `46 637` B / 287 dòng. SAI — đó là tệp lúc còn đang ghi. Bản cuối: `eab84221…` / 47 218 B / 298 dòng; `run.json` báo `trang_thai: xong` lúc 12:27:04Z, băm lúc ~12:23. Kết luận và số đếm KHÔNG đổi.
+    phai_lam_gi_khi_chay_lai: >-
+      Tin băm trong biên nhận, đừng tin băm trong comment. Khi băm hiện vật do tiến trình khác sinh: chờ `trang_thai: xong`, đừng chờ tệp xuất hiện.
+khong_do_duoc:
+  - 'model_da_chay của reviewer'
+  - 'Số GitHub Actions trong hiện vật có phản ánh GitHub thật hay không (gói không có mạng)'
+codex_connector_cung_head: null
+delivered: true
+delivered_by: claude
+authoritative_source: 'Tệp verdict trong kho (băm ở `verdict_sha256`). Comment trên PR chỉ là bản chiếu.'
+receipt_written_by: claude
+receipt_written_at_utc: '2026-09-11T15:54:00Z'
+receipt_khong_khai: >-
+  Biên nhận này KHÔNG khai rằng năm lượt là vòng canon. Chúng không sinh biên nhận lúc chạy, và
+  `review_rounds_used` không tồn tại trong bất kỳ tệp `.py` nào (đo 11-09-2026 ⇒ 0 tệp, đúng như
+  `ADR-0043` tự khai; `§20` ghi `ADR-0043` và `ADR-0037` đều `0 cổng`). Ghi sổ SAU không hồi tố tư
+  cách vòng canon. Thẩm quyền lượt 4–5: chủ kho nâng trần `2 → 4` rồi cho phép lượt 5
+  (`ai_nang=ducthangho`, chỉ thị 11-09-2026).

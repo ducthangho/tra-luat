@@ -1,0 +1,5 @@
+Clone quet moi $SP/quet-710 (git clone --no-checkout --reference <clone chinh> <origin>; git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*' rc 0; khong shallow; checkout --detach origin/master 8b59185)
+ls-remote --heads (ten,SHA): 489  refs/remotes/origin bo HEAD: 489
+comm -23 (co tren may chu, thieu cuc bo):
+comm -13 (thua cuc bo):
+origin/ops/wp710-r4-g5-lease = a797078

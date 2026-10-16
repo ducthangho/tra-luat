@@ -185,7 +185,8 @@ chmod +x "$BIN" 2>/dev/null || true
 # bat binary VUA CAI tu khai phien ban, roi doi dong dau khop DUNG `AL_VER`.
 # Mot binary gia tra rc=0 nhung in thu khac se roi vao ma 7, khong phai xanh rong.
 RA="$("$BIN" --version 2>/dev/null)" || loi 6 "'$BIN' khong chay duoc (\`--version\` that bai)"
-DONG1="$(printf '%s\n' "$RA" | head -1 | tr -d '\r')"
+# #675: khong `| head -1` duoi pipefail (SIGPIPE -> rc=141 tren dau ra dai; do: ops/do_sigpipe.sh).
+DONG1="${RA%%$'\n'*}"; DONG1="${DONG1//$'\r'/}"
 [ "$DONG1" = "$AL_VER" ] \
   || loi 7 "cai xong nhung KHONG khop ban ghim: doi '$AL_VER', binary khai '$DONG1'"
 

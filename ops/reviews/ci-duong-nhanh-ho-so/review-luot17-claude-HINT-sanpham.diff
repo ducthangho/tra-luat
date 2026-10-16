@@ -1,0 +1,39 @@
+--- ops/ci_duong_nhanh.py
++++ ops/ci_duong_nhanh.py
+@@ -48,8 +48,8 @@
+ LỆNH `kiem-re` (bước bù cho các bước bị bỏ, chỉ chạy khi `che_do == duong_nhanh`):
+   YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
+   mọi đường dẫn đổi là TỆP THƯỜNG theo MODE TRONG GIT (`kiem_mode_git`: 100644/100755 hoặc xoá; gitlink, symlink ⇒ ĐỎ) ·
+-  KHÔNG symlink treo trong cây ĐĨA, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: `t82` của bước bị bỏ chép CẢ cây; phạm vi
+-  duyệt và chỗ nó không tới được ghi ở docstring hàm).
++  KHÔNG symlink treo trong cây ĐĨA, kể cả ngoài diff (`kiem_symlink_treo_ca_cay`: duyệt như `t82` của bước bị bỏ — CẢ cây,
++  THEO symlink thư mục; chi tiết ở docstring hàm).
+ Hai chỗ khác chữ trần của đặc tả r2, ĐO ngày 29-09-2026. CHỦ KHO ĐÃ DUYỆT CẢ HAI (lựa chọn (a)) — erratum của đặc tả r2,
+ không sửa r2: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5887720007 . Với reviewer: đây là HÀNH VI ĐƯỢC
+ DUYỆT, không phải finding về chính sách; vẫn tìm lỗi TRONG cách hiện thực (ví dụ `bo_qua_han` bỏ thêm chốt nào khác không,
+@@ -303,10 +303,12 @@
+     qua PR đầy đủ, ở `docs/`, dưới allowlist hay trong thư mục chấm) — hoặc xoá hết một thư mục hồ sơ mà đường dẫn symlink
+     đi XUYÊN qua — làm symlink ấy treo trong khi nó KHÔNG nằm trong diff ⇒ PR xanh, `t82` ĐỎ trên master (đo 01-10-2026).
+     Treo đo bằng `os.path.exists` (stat của nhân, theo từng thành phần), KHÔNG bằng ghép đường dẫn từ vựng: `a/b/../c` cần
+-    `a/b` có thật. `os.walk` xếp symlink treo vào danh sách TỆP (kể cả symlink từng trỏ thư mục) và không đi vào symlink thư
+-    mục. Giới hạn, chưa có ca: `t82` (copytree không `symlinks=True`) thì CÓ theo vào symlink thư mục, nên symlink treo chỉ
+-    với tới được QUA một symlink thư mục trỏ ra ngoài cây thì `t82` vấp mà chốt này không thấy (đo 01-10-2026 trên kho tạm:
+-    copytree ném `shutil.Error`, os.walk không liệt kê). Không đọc được một thư mục ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. Không lệnh git
++    `a/b` có thật. `os.walk` xếp symlink treo vào danh sách TỆP (kể cả symlink từng trỏ thư mục). Duyệt THEO symlink thư mục
++    (`followlinks=True`) vì `t82` (copytree không `symlinks=True`) cũng theo: symlink treo chỉ với tới được qua một bí danh
++    thư mục — trỏ vào thư mục tên bị bỏ qua (`*.pyc`, `__pycache__`) hay ra ngoài cây — làm `t82` vấp, nên ở đây cũng ĐỎ
++    (`t20zk` đo bí danh trong cây, cross-review lượt 17). Vòng symlink thư mục: đường dẫn dài dần tới khi nhân từ chối phân
++    giải, phần tử cuối hiện ra như symlink TREO ⇒ ĐỎ, không lặp vô hạn (`t20zk` đo; `t82` cũng vấp). Không đọc được một thư
++    mục ⇒ KHÔNG ĐO ĐƯỢC ⇒ ĐỎ. Không lệnh git
+     nào: đây là cây ĐĨA mà `t82` sẽ chép."""
+     bo_qua = shutil.ignore_patterns(*BO_QUA_NHU_T82)
+     loi = []
+@@ -314,7 +316,7 @@
+     def khong_doc_duoc(e):
+         loi.append(f"KHONG DO DUOC: khong duyet duoc cay de tim symlink treo: {type(e).__name__}: {getattr(e, 'filename', '')!r}")
+ 
+-    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc):
++    for goc, thu_muc, tep in os.walk(kho, onerror=khong_doc_duoc, followlinks=True):
+         bo = bo_qua(goc, thu_muc + tep)
+         thu_muc[:] = sorted(d for d in thu_muc if d not in bo)
+         for ten in sorted(t for t in tep if t not in bo):

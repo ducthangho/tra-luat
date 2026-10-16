@@ -1,0 +1,80 @@
+schema_version: 1
+mission_id: gh-686
+revision: 8
+status: running
+supersedes_revision: 7
+change_request: mcr-686-08
+base_sha: 8c98afacb9285aa71e5200739236284f7a190d4f
+objective: Sửa race ProcessLookupError trong launcher _con_song theo Packet wp685, giữ đúng phân biệt ESRCH với lỗi khác và hoàn tất nghiệm thu, review, land.
+acceptance_criteria:
+- wp709 installs first-class Google Antigravity provider support under its six-path effective write set.
+- wp685 repairs the launcher race under its two-path effective write set and frozen generation.
+- Both packets have independent exact-SHA review and positive required checks before land; wp685 uses a separate read-only Codex reviewer session of a different model family than its Claude executor (cross_approved) and an exact-SHA human audit.
+- Human audits and authorizes land; launcher-windows.yml is read after merge before wp685 closure.
+risk: sensitive
+requires_live: false
+envelope:
+  max_packets: 2
+  max_successor_depth: 1
+  max_attempts_per_packet: 3
+  max_run_minutes: 90
+  same_failure_limit: 2
+  max_parallel_workers: 1
+  max_agent_invocations: 30
+  max_cloud_minutes: 360
+  max_inbox_backlog: 100
+  provider_budgets: {}
+packet_plan:
+- packet_id: wp709
+  packet_issue: 709
+  dependency_issues: []
+  executor: codex
+  environment: local
+  review_class: sensitive
+  write_set:
+  - docs/PROTOCOL_DA_PHIEN.md
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+  - docs/prompts/MANUAL_SUCCESSOR_HANDOFF_D0.md
+  target_spec_revision: 1
+  packet_generation: 1
+  spec_hash: f569b613cf7369b70845728972d4f1f0227dcdf96df2ff7508ffb815f21d005c
+- packet_id: wp685
+  packet_issue: 685
+  dependency_issues:
+  - 668
+  - 709
+  executor: claude
+  model: claude-opus-5-5
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  review_class: sensitive
+  write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+  target_spec_revision: 28
+  packet_generation: 5
+  environment_gate: Linux container of the executor cloud session meets spec r28 environment criteria (a)-(c), including python3.11 and python3.12, before executor lease
+  reviewer: codex_independent_session
+  review_assurance: cross_approved_plus_human_audited
+  spec_hash: 8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156
+  attempt_limit: null
+  attempt_limit_basis: 'PROPOSED in MCR-686-08, binding only after the owner''s durable #686 decision on this plan_hash: generation 5 has no attempt cap. envelope.max_attempts_per_packet does not bind wp685 generation 5; it still binds every other packet. Attempt counter for generation 5 starts at 0; attempts of generations 2-4 are kept as data.'
+  same_failure_limit: 10
+  same_failure_limit_basis: 'PROPOSED in MCR-686-08, binding only after the owner''s durable #686 decision on this plan_hash: same_failure_limit is 10 for wp685 generation 5 ONLY, counted from 0 at generation 5; g2-g4 same-failure history is kept as data. envelope.same_failure_limit (2) still binds every other packet and any later wp685 generation.'
+provenance:
+  prepared_on: '2026-10-09'
+  source_mission_issue: https://github.com/ducthangho/tra-luat/issues/686
+  approved_decision_url: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
+  approved_decision_text: Đổi executor sang Claude (tôi)
+  durable_ratification: '#686 owner comment approving the exact plan_hash of this revision and the exact sha256 of ops/missions/mcr-686-08.yaml; its URL is recorded as mcr_decision_url in the mission_revision_installed event, not here (no hash cycle)'
+  prior_plan_hash: 6d49b8ec8848c8f8b2fe0690d1d4bcae75bc67486ece1dbb5edc39fb77626d4a
+  spec_path: ops/specs/launcher-con-song-esrch-r28.md
+  spec_git_commit: 4a35f633e1b3f05be12eecf74ab9a8a17ef82c69
+  spec_git_blob: fa07ca1bc3707bc273bf25349ffa6f3ca6ad6160
+  status: proposed_pending_owner_decision
+  plan_hash_formula: sha256(canonical JSON of parsed YAML excluding plan_hash; sort_keys=True, separators=(comma,colon), ensure_ascii=False)
+plan_hash: 50f710c1ff2baa12ed059ae46d746a1b39c26cb4c20b5e672e71bde45dcc56fd

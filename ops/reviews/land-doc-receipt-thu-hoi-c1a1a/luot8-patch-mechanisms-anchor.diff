@@ -1,0 +1,11 @@
+--- r7-input/patch_mechanisms.py
++++ r8-output/patch_mechanisms.py
+@@ -85,7 +85,7 @@
+   p=pathlib.Path(td)/'m5g.py';p.write_text(A.edit(row[3],row[4]));m=A.load(p,'M5g_independent')
+   A.emit(kind='M5g',baseline=A.target(A.M,T.MODUN,'k4_base'),positive=A.target(m,p,'duong_fixture'),target=A.target(m,p,'k4_base'),disposition=T.chay_dot_bien(A.SRC,row))
+   # Put back round-six narrow filter only in a separate imported test copy.
+-  src=(A.DEV/'doc_receipt_thu_hoi_test.py').read_text();old_filter='if re.match(r"K4\\b", x)';assert src.count(old_filter)==1
++  src=(A.DEV/'doc_receipt_thu_hoi_test.py').read_text();old_filter='if re.match(r"\\s*K4\\b", x)';assert src.count(old_filter)==1
+   tp=pathlib.Path(td)/'test.py';tp.write_text(src.replace(old_filter,'if x.startswith("K4: ")'));U=A.load(tp,'unfixed_filter')
+   A.emit(kind='M5g_old_filter',disposition=U.chay_dot_bien(A.SRC,row))
+  for name,repl in [('benign', '    # no behavioral change\n'+row[3]),('too_broad', '    ly_do += ["K4:S fresh"]\n'+row[3]),('wrong_exception','    if r["S"] != base_hien_hanh: raise ValueError("control")\n'+row[3])]:

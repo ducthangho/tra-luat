@@ -1,0 +1,124 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 của PR #505 (packet #503 M9-FETCH-AUTH, #499 C2a),
+# KHÁC NỀN (codex), generation 1 · lượt 2 trong gen, trên head `6254570` — head trung gian, ĐÃ là tổ tiên của master qua merge commit `fe05fa6d`.
+#
+# Verdict: changes_requested — 1 P1 + 1 P2 (m10 fetch thứ hai, m11 transport). Mười vòng qua bốn generation; mọi finding đều ở ca test t152, workflow 11 dòng
+# KHÔNG đổi từ round 1 (sha256 184a54a6…). `approve` (round 10) là ĐIỀU KIỆN DỪNG, không phải merge authorization:
+# uỷ quyền merge là chỉ thị chủ kho #503 comment 5632304817; merge `fe05fa6d` sau khi gate ubuntu xanh trên de49fa0.
+
+schema_version: 2
+receipt_id: pr505-review-2-codex-20260911-6b3e8525
+kind: review_delivery_receipt
+packet_id: 'wp503'
+lease_id: m9-fetch-auth-exec-1-claude-20260911
+phase_key: M9-FETCH-AUTH
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_reviewed
+verdict: changes_requested
+verdict_path: ops/reviews/pr505-review-2-codex-verdict.md
+verdict_sha256: 13a0b829fa81f330a8989872b4d3df4ed9968f5f5c563d9baa2dc4912784c4fb
+verdict_bytes: 24840
+reviewed_sha: 6254570b0604b42f9474091b9818dba9cd2b8704
+reviewed_base: 27c413c3e531800431cad9db4452d7236505a5a9
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9dc8460f55a61b8b9670606a62f6db40905d851c/ops/reviews/pr505-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `9dc8460` — commit ĐẦU TIÊN chứa 10 tệp verdict PR #505 (`git log --all --diff-filter=A`, đúng 1 commit).
+  Bản chiếu công khai sớm hơn: PR #505 comment 5630046807 — chiếu frontmatter, ĐỐI CHIẾU LƯỢT TRƯỚC, kết luận, Findings,
+  Mutant, chua_do_duoc; `## BẢNG ĐO` và các bảng shell/bề mặt lộ token CHỈ có trong tệp này.
+so_p1: 1
+so_p2: 1
+so_p3: 0
+findings_ids: [t152-bo-sot-fetch-thu-hai, t152-stub-khong-do-quyen-transport]
+hint_patch:
+  sha256: ebb87804eb7d1f4d8519aa671ccdbc1e6c5d5610d06f5cbf716d8a2331e3c2d8
+  bytes: 1032
+  noi_dung: '2 hunk test: bộ dò `git … fetch` refs/pull độc lập vị trí cờ; stub đòi protocol.https.allow=always'
+
+noi_dung_do_duoc_van_dung:
+  - 'ĐỐI CHIẾU: hai finding lượt 1 ĐÃ VÁ THẬT (áp HINT lượt 1 lên test 62c299a trùng byte HEAD trừ docstring). m10 (fetch thứ hai --quiet trước --no-tags, không header) và m11 (protocol.https.allow=never) SỐNG ⇒ P1 + P2.'
+  - 'Sau HINT 11/11 GIẾT; suite 147/147; tổng diff sau HINT +80/−0 đúng trần A4.'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: 'KHONG_DO_DUOC — codex exec không xuất modelUsage; reviewer tự khai `GPT-6 / Codex` trong model_tu_khai'
+  effort: xhigh
+  session_run_id: 6b3e8525
+  run_id_day_du: 6b3e8525a7b448fd929b41955aa9b265
+  prompt_sha256: 79269905687d109095ffa820cea35e66d8538cb081d976738e7223f0acaf7140
+  bat_dau_utc: '2026-09-11T05:28:06.170013+00:00'
+  ket_thuc_utc: '2026-09-11T05:41:40.060958+00:00'
+  thoi_luong_giay: 813.891
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 320
+  stdout_sha256: ad043d8285935c4f1e910994ce07a4ca7224f8d1dfe47febae69a9cdc8f8903e
+  stderr_byte: 207404
+  stderr_sha256: d621a60def44ad2201ac71fad025747d46cde90c3abead3f3abbd66a74311f23
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/6b3e8525/`): run_id/short_id, prompt_sha256, bat_dau_utc,
+    ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
+    Dòng cuối stdout `XONG VERDICT sha256=13a0b829…` khớp băm tệp. transport: machine CÓ trong run.json.
+    model_yeu_cau và effort có trong header stderr.log (cấu hình yêu cầu, không chứng thực model thực chạy),
+    KHÔNG có khoá tương ứng trong run.json. so_lan_chet_truoc_khi_xong là ATTESTATION điều phối,
+    không có khoá hoặc lịch sử retry tương ứng trong run.json.
+
+nang_luc_do_cua_goi:
+  mirror: 'clone mới từ guong.git (fetch sau push 6254570), detached 6254570, core.abbrev 7, không nông; nguon/ có spec M9-FETCH-AUTH.md (sha b8200141…) + actionlint 1.7.7 + VERDICT/HINT các lượt trước của chính reviewer; EVIDENCE.md bổ sung từng lượt'
+  chua_do_duoc: 'Không mạng; không đọc doctrine; prompt snapshot/stderr.log không kèm; suite chạy trên bản sao ops/.github (t82 copytree) — không phải trực tiếp trong clone.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'scratch/logs/*.json|log, scratch/mutants/, script tái lập (review_matrix.py, probe*.py, validate_hint.py, extra*.py) ở sandbox ngoài kho.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'run.json worktree_sach: true; điều phối đo sau lượt: git status --porcelain rỗng.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization; uỷ quyền merge là chỉ thị chủ kho #503 comment 5632304817 ("các PR thuộc phiên này thực hiện theo khuyến nghị") + "Tôi chọn A" (#503 comment 5633059702, gen 4 kèm điều kiện dừng).'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `9dc8460`. Head đã review `6254570` là tổ tiên của master (`fe05fa6d`, merge commit #505, hai cha fa717ee + de49fa0; nhánh claude/m9-fetch-auth tuyến tính 62c299a → de49fa0).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: CHANGES-REQUESTED-TREN-6254570-DA-VA-o-c851f80-KHONG-phai-trang-thai-cuoi
+    muc: P2
+    mo_ta: >-
+      Verdict chấm head `6254570` (round 2, gen 1 lượt 2) với 1 P1 / 1 P2 — finding `t152-bo-sot-fetch-thu-hai`,
+      `t152-stub-khong-do-quyen-transport`. Executor áp NGUYÊN HINT của chính verdict này tại `c851f80`; verdict round
+      3 đối chiếu từng hunk: ĐÃ VÁ THẬT. Mọi finding của 9 vòng đều ở ca test t152; workflow 11 dòng KHÔNG đổi từ
+      round 1 (sha256 184a54a6…).
+    phai_lam_gi_khi_chay_lai: >-
+      Đọc verdict này làm NGUỒN finding, round 3 làm chốt đóng. Số mutant/tín dụng trong tệp là của head `6254570`;
+      cây đã land là `de49fa0` (round 10 approve).
+
+khong_do_duoc:
+  - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'
+  - 'run.json/stdout.log/stderr.log không vào kho ⇒ scalar runtime là attestation.'
+  - 'Fetch trên runner GitHub thật, secret masker, receipt/artifact thật (A3/M3): sandbox không mạng — đo ở PR hồ sơ r366 sau land, ghi ở CHANGELOG r366/#503, không ở verdict.'
+  - 'Git 2.31/toàn dải, ảnh ubuntu-latest hiện hành, Windows: không chạy trong sandbox.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-11T11:2xZ'
+receipt_khong_khai:
+  - 'Không khai `thu-hoi` đã xanh trên #505 — nó ĐỎ tất định (định nghĩa từ master) tới lúc land; chủ kho quyết merge bằng chỉ thị.'
+  - 'Không khai A3 đã đạt — chưa đo lúc viết.'
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai các lease gen 1–3 "hết hạn" hay "bị thu hồi vì lỗi bản vá" — chúng bị thay thế vì hết lượt/vòng theo ADR-0043, chủ kho reroute.'

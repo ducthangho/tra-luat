@@ -1,0 +1,2 @@
+python3 -B ops/lease_publish.py ai-dang-giu --root . <p>  (tu checkout origin/master 3fc0932 cua clone quet moi)
+Clone quet moi $SP/quet-710b (git clone --no-checkout --reference <clone chinh> <origin>; git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*' rc 0; is-shallow false; checkout --detach origin/master 3fc0932)

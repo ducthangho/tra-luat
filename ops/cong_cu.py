@@ -61,46 +61,52 @@ def nen_hien_tai():
     return t or "unknown"
 
 def _bash_windows(path=None, system_root=None, program_files=None, git=None):
-    """Windows: KHÔNG để CreateProcess tự tra `bash`. Nó tra `%SystemRoot%\\System32` TRƯỚC
-    PATH, mà `System32\\bash.exe` là bộ PHÓNG WSL — không phải GNU bash: thiếu distro thì
-    `bash --version` rc=1, có distro thì trả bash của distro, đằng nào cũng không phải Git
-    Bash mà hook SessionStart cần. Đo 02-09-2026, run 33612364175 lane windows-latest: bước
-    G5 chạy TRONG Git Bash mà probe bash vẫn `rc=1, mong [0]`, `ban_thay: null`.
+    """`bash` ĐÃ CHỨNG MINH làm được việc — uỷ quyền cho `ops/bash_nen.py::tim_bash()`.
 
-    Thứ tự: `CONG_CU_BASH` → PATH (loại mọi ứng viên nằm DƯỚI SystemRoot — đó là một tệp
-    cụ thể do HĐH cấp, không phải danh sách cấm theo tên) → Git for Windows cạnh `git`
-    (`<Git>\\bin`, `<Git>\\usr\\bin`) → `%ProgramFiles%\\Git` (cùng hai vị trí launcher
-    đã dùng). Không thấy gì thì trả None để probe hỏng THẬT, không đoán.
-    Tham số chỉ để test ép nền: mặc định đọc từ môi trường lúc gọi."""
-    env = os.environ
-    chi_dinh = env.get("CONG_CU_BASH")
-    if chi_dinh and Path(chi_dinh).is_file():
-        return chi_dinh
-    path = env.get("PATH", "") if path is None else path
-    sr = env.get("SystemRoot", "") if system_root is None else system_root
-    sr_norm = os.path.normcase(os.path.abspath(sr)).rstrip("\\/") if sr else None
+    HỢP NHẤT (#570 revision 3, N14). Thân cũ của hàm này là bộ giải RIÊNG thứ HAI trong ba
+    bộ giải độc lập cho cùng một khuyết tật, và là bộ cuối cùng còn sót sau khi `_bash_posix`
+    hợp nhất ở r2. Nó quyết bằng ĐƯỜNG DẪN: loại mọi ứng viên nằm dưới `%SystemRoot%`.
 
-    def duoi_system_root(u):
-        if not sr_norm:
-            return False
-        q = os.path.normcase(os.path.abspath(str(u)))
-        return q == sr_norm or q.startswith(sr_norm + os.sep) or q.startswith(sr_norm + "/")
+    VÌ SAO BỎ CÁCH ẤY — đo được, không phải sở thích:
+    · `CLAUDE.md`: *"danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP"*.
+      Loại theo vị trí là một danh sách cấm đội lốt; nó phân biệt CHỖ ĐỨNG, không phân biệt
+      NĂNG LỰC. Một `bash` POSIX thật đặt dưới `%SystemRoot%` bị nó từ chối oan, còn một bộ
+      phóng WSL đặt chỗ khác thì nó nhận.
+    · Nghiệm thu Windows `570-do-5` (20-09-2026, máy chủ kho) cho thấy phép NĂNG LỰC bắt
+      đúng thứ cần bắt, và nêu được LÝ DO: `C:\\Windows\\system32\\bash.exe` ⇒ `dat=false`,
+      *"phép argv: `$0` là '/bin/bash', mong 'bn-argv-probe' — đối số vị trí KHÔNG tới nơi"*.
+      Còn `C:\\Program Files\\Git\\bin\\bash.exe` ⇒ `dat=true`. Tên không nói được điều đó.
 
-    ung_vien = []
-    for d in path.split(os.pathsep):
-        if d:
-            ung_vien += [Path(d) / "bash.exe", Path(d) / "bash"]
-    git = shutil.which("git", path=path) if git is None else git
-    if git:
-        g = Path(git).resolve()
-        for goc_git in (g.parent.parent, g.parent.parent.parent):
-            ung_vien += [goc_git / "bin" / "bash.exe", goc_git / "usr" / "bin" / "bash.exe"]
-    pf = env.get("ProgramFiles", r"C:\Program Files") if program_files is None else program_files
-    ung_vien += [Path(pf) / "Git" / "bin" / "bash.exe", Path(pf) / "Git" / "usr" / "bin" / "bash.exe"]
-    for u in ung_vien:
-        if u.is_file() and not duoi_system_root(u):
-            return str(u)
-    return None
+    `ung_vien()` VẪN xếp ứng viên dưới `%SystemRoot%` xuống CUỐI — nhưng đó là THỨ TỰ THỬ
+    (để phép đắt ít phải chạy), KHÔNG phải quyết định. Thứ loại là `_do_nang_luc`.
+
+    Trả `None` khi không ứng viên nào làm được việc, giữ nguyên HỢP ĐỒNG cũ: người gọi
+    fail-close chứ không đoán. Bốn tham số chỉ để test ép nền — chúng đi thẳng sang
+    `ung_vien()`, nơi có đúng bốn tham số cùng tên và cùng nghĩa."""
+    import sys as _sys
+    _here = Path(__file__).resolve().parent
+    if str(_here) not in _sys.path:
+        _sys.path.insert(0, str(_here))
+    try:
+        import bash_nen
+    except ImportError as ex:
+        # FAIL-CLOSE CO LY DO, khong phai `ModuleNotFoundError` tran.
+        # ĐO ĐƯỢC 20-09-2026 tren Windows that (bo do `570-do-6`): `_chay_batch` cua bo test
+        # chep `cong_cu.py` sang mot cay tam MA KHONG chep `bash_nen.py`, nen nhanh du phong
+        # duoi day no `ModuleNotFoundError` va giet ca suite TRUOC vong lap ca. Linux khong
+        # bat duoc: nhanh ay nam trong `except OSError`, ma tren Linux `subprocess.run` chay
+        # duoc script shebang nen no KHONG BAO GIO toi.
+        # Mot cay thieu bo giai la cay HONG, khong phai cay "khong co bash" — nen noi ro ra
+        # thay vi de nguoi doc di truy mot `ImportError` khong ten.
+        raise RuntimeError(
+            f"thieu bo giai dung chung: khong import duoc `bash_nen` tu {_here}. "
+            f"Moi cay mang `ops/cong_cu.py` phai mang ca `ops/bash_nen.py` (#570 N14). "
+            f"Goc: {type(ex).__name__}: {ex}") from ex
+    ep = {k: v for k, v in (("path", path), ("system_root", system_root),
+                            ("program_files", program_files), ("git", git))
+          if v is not None}
+    duong, _ = bash_nen.tim_bash(**ep)
+    return duong
 
 def _chay(argv, timeout=20):
     """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
@@ -109,7 +115,13 @@ def _chay(argv, timeout=20):
     argv = [sys.executable, *argv[1:]] if argv and argv[0] == "python" else argv
     if os.name == "nt" and argv and argv[0] == "bash":
         # Xem `_bash_windows`: đường dẫn TUYỆT ĐỐI để CreateProcess không rẽ vào System32.
-        bash_gb = _bash_windows()
+        # Cửa gọi THỨ NHẤT trong hai cửa — cửa kia ở nhánh dự phòng dưới. Cả hai phải xử lý
+        # `RuntimeError` như nhau, kẻo một cây thiếu `bash_nen.py` làm hỏng ĐÚNG MỘT cửa và
+        # ta lại đi vá cửa được chỉ rồi bỏ sót cửa còn lại — hình dạng kho đã ghi sổ.
+        try:
+            bash_gb = _bash_windows()
+        except RuntimeError as ex_bn:
+            return None, "", f"thieu_bo_giai:{ex_bn}"
         argv = [bash_gb, *argv[1:]] if bash_gb else argv
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
@@ -120,9 +132,18 @@ def _chay(argv, timeout=20):
     except OSError as ex:
         # Python native tren Windows khong chay truc tiep script shebang khong co `.exe`;
         # duong lui nay giu probe script dung duoc trong Git Bash, binary that van di duong tren.
-        bash = _bash_windows() if os.name == "nt" else (os.environ.get("CONG_CU_BASH") or shutil.which("bash"))
-        if os.name == "nt" and bash:
-            for d in os.environ.get("PATH", "").split(os.pathsep):
+        # MOT bo giai (#570 r3, N14). Ban cu re nhanh: Windows thi qua `_bash_windows`, con
+        # lai thi `shutil.which("bash")` TRAN — tuc nen khong sinh ra khuyet tat van phan giai
+        # theo TEN, va do la cho bo giai thu tu se moc len.
+        # Ban cu con MOT loi nua, chi thay khi doc ky: gia tri tinh o nhanh `else` ay KHONG BAO
+        # GIO duoc dung, vi vong lap duoi bi chan boi `os.name == "nt"`. Tuc no la ma chet dang
+        # tinh toan. Nay chi tinh khi SE dung.
+        if os.name == "nt":
+            try:
+                bash = _bash_windows()
+            except RuntimeError as ex_bn:
+                return None, "", f"thieu_bo_giai:{ex_bn}"
+            for d in (os.environ.get("PATH", "").split(os.pathsep) if bash else []):
                 ung = Path(d) / argv[0]
                 if ung.is_file():
                     try:
@@ -248,7 +269,15 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
             tong = KHONG_DO_DUOC
         elif kq["trang_thai"] == DO and tong != KHONG_DO_DUOC:
             tong = DO
-    return {"trang_thai_tong": tong, "cong_cu": list(theo_ten.values()), "canary": canary_kq}
+    if chi is not None:
+        pham_vi = "mot-cong-cu"
+        canary_da_quet = False
+        ghi_chu_pham_vi = "chua quet canary toan bo"
+    else:
+        pham_vi = "toan-bo"
+        canary_da_quet = True
+        ghi_chu_pham_vi = "da quet canary toan bo (khong co nghia moi canary dat)"
+    return {"trang_thai_tong": tong, "pham_vi": pham_vi, "canary_da_quet": canary_da_quet, "ghi_chu_pham_vi": ghi_chu_pham_vi, "cong_cu": list(theo_ten.values()), "canary": canary_kq}
 
 def _cai_lenh(ten, ban_ke, nen):
     dn = ban_ke["cong_cu"].get(ten)

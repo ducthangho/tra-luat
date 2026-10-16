@@ -1,0 +1,3323 @@
+{
+ "tu": {
+  "runner_sha256": "87501797224e972c12cc175e4c77e80bc4d63ce0935998bbfaf41bc48c508526",
+  "driver_sha256": "1e974b8e06b9c65b92b2b1afb00232de9cbfba6b12a8f04ee32175b0fd7c3e07",
+  "test_sha256_nen": "09cf6c78fae10c695436f7fb9b0803cb9295f69786377212e0dd4ff1b516816c",
+  "lease_publish_sha256_nen": "dd17b94cb880f27ba0291fa9a020c2ee3465dd55b13195f99424dfa10c834f83",
+  "python": "3.11.15",
+  "so_dot_bien": 118
+ },
+ "kq": [
+  {
+   "ten": "NEN",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t160",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t178",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t194",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t195",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t196",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t197",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t198",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/NEN-_huumu4i"
+  },
+  {
+   "ten": "s1:M1-bo-kiem-so",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "M3 t",
+    "(a) ",
+    "(b) "
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: M3 t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO sổ THIẾU: rc=0, \"_DO 0.015s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thà"
+    ]
+   },
+   "msg": "M3 t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO sổ THIẾU: rc=0, \"_DO 0.016s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M1_bo_kiem_so-8x_bkw2s"
+  },
+  {
+   "ten": "s1:M2-bo-include",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) include thêm windows"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) include thêm windows: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:08Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_"
+    ]
+   },
+   "msg": "(c/d) include thêm windows: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:06Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: '${{ matrix.os }}', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M2_bo_include-104lrx0d"
+  },
+  {
+   "ten": "s1:M3-prefix",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) ubuntu-not-a-runner"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) ubuntu-not-a-runner: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:10Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_v"
+    ]
+   },
+   "msg": "(c/d) ubuntu-not-a-runner: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:09Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-not-a-runner', phân giải thành ['ubuntu-not-a-runner']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M3_prefix-kuqwvm_z"
+  },
+  {
+   "ten": "s1:M4a-so-tan-cong",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t_ca_tan_cong'], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t_ca_tan_cong'], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M4a_so_tan_cong-pycvjrb6"
+  },
+  {
+   "ten": "s1:M4b-so-t01",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t01_lease_hop_le_thi_QUA'], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t01_lease_hop_le_thi_QUA'], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M4b_so_t01-cwchsh85"
+  },
+  {
+   "ten": "s1:M3a-bo-t196",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua'], thừa=[], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua'], thừa=[], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M3a_bo_t196-zmuq7dn1"
+  },
+  {
+   "ten": "s1:M3b-them-t199",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai'], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai'], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M3b_them_t199-9pn2sr6i"
+  },
+  {
+   "ten": "s1:M3c-them-t201",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai'], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t201_M1_gh_gia_hai_GET_cung_snapshot_va_POST_luu_trang_thai'], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M3c_them_t201-vsev34gr"
+  },
+  {
+   "ten": "s1:M3d-t200-sai-job",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=['t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung']"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=['t200_M1_nguon_lease_publish_tuy_chon_that_su_duoc_dung']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M3d_t200_sai_job-1s_mmkvq"
+  },
+  {
+   "ten": "s1:M8-bo-exclude",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) exclude"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) exclude: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:19Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het"
+    ]
+   },
+   "msg": "(c/d) exclude: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:18Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: '${{ matrix.os }}', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M8_bo_exclude-koujdaad"
+  },
+  {
+   "ten": "s1:M11-include-thieu-khoa",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) include sinh tổ hợp thiếu os"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) include sinh tổ hợp thiếu os: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:22Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_"
+    ]
+   },
+   "msg": "(c/d) include sinh tổ hợp thiếu os: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:20Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: '${{ matrix.os }}', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M11_include_thieu_khoa-3q7ajq1n"
+  },
+  {
+   "ten": "s1:R15-main-tin-so",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) ",
+    "A4 "
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) include thêm windows: phải ĐỎ vì bộ giải, được rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:22Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_"
+    ]
+   },
+   "msg": "(c/d) include thêm windows: phải ĐỎ vì bộ giải, được rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:21Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: chỉ chạy Ubuntu; tin sổ\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R15_main_tin_so-s_68z_t9"
+  },
+  {
+   "ten": "s1:R20-absolute",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "A5 alias .."
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: A5 alias .. trỏ CÙNG tệp phải được miễn: rc=1, \"o ('ops-publish-lease.yml', 'dang')\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho ('ops-publish-lease.yml', 'dang')\\n\\"
+    ]
+   },
+   "msg": "A5 alias .. trỏ CÙNG tệp phải được miễn: rc=1, \"o ('ops-publish-lease.yml', 'dang')\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho ('ops-publish-lease.yml', 'dang')\\n\\nlease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R20_absolute-8bj2n9te"
+  },
+  {
+   "ten": "s1:P1-chi-tep",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(b) "
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (b) cặp (/tmp/lp_wr3mkfm2/hai.yml, ghi) khác sổ mà được miễn/đỏ sai lý do: rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:25Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t"
+    ]
+   },
+   "msg": "(b) cặp (/tmp/lp_o6rs7o91/hai.yml, ghi) khác sổ mà được miễn/đỏ sai lý do: rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:23Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: hai.yml:ghi chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_P1_chi_tep-zgcdmsgh"
+  },
+  {
+   "ten": "s1:P2-chi-job",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(b) "
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (b) cặp (/tmp/lp_6vbwt1ee/k/ops-publish-lease.yml, dang) khác sổ mà được miễn/đỏ sai lý do: rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:25Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s B"
+    ]
+   },
+   "msg": "(b) cặp (/tmp/lp_ckd5gl6h/k/ops-publish-lease.yml, dang) khác sổ mà được miễn/đỏ sai lý do: rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:24Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_P2_chi_job-t0bkufxx"
+  },
+  {
+   "ten": "s1:Q-no-thi-mien",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) job vắng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) job vắng: được rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:26Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: no "
+    ]
+   },
+   "msg": "(c/d) job vắng: được rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:24Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: no => mien\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_Q_no_thi_mien-b4b739is"
+  },
+  {
+   "ten": "s1:T1-strategy-kieu",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) strategy sai kiểu"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) strategy sai kiểu: bộ giải phải trả None/nhãn ngoài danh sách, không ném: AttributeError(\"'str' object has no attribute 'get'\")"
+    ]
+   },
+   "msg": "(c/d) strategy sai kiểu: bộ giải phải trả None/nhãn ngoài danh sách, không ném: AttributeError(\"'str' object has no attribute 'get'\")",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_T1_strategy_kieu-x8eu26pu"
+  },
+  {
+   "ten": "s1:T2-matrix-kieu",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) matrix là biểu thức"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) matrix là biểu thức: bộ giải phải trả None/nhãn ngoài danh sách, không ném: AttributeError(\"'str' object has no attribute 'get'\")"
+    ]
+   },
+   "msg": "(c/d) matrix là biểu thức: bộ giải phải trả None/nhãn ngoài danh sách, không ném: AttributeError(\"'str' object has no attribute 'get'\")",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_T2_matrix_kieu-6yex89b0"
+  },
+  {
+   "ten": "s1:N5-include-kieu",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) literal + include là chuỗi"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) literal + include là chuỗi: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:29Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi"
+    ]
+   },
+   "msg": "(c/d) literal + include là chuỗi: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:27Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N5_include_kieu-uz2kkt23"
+  },
+  {
+   "ten": "s1:U1-literal-som",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) fixed_exclude"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) fixed_exclude: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:33Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_"
+    ]
+   },
+   "msg": "(c/d) fixed_exclude: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:30Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_U1_literal_som-a61b3x4r"
+  },
+  {
+   "ten": "s1:U2-list-som",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) list_exclude"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) list_exclude: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:33Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_l"
+    ]
+   },
+   "msg": "(c/d) list_exclude: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:31Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: ['ubuntu-latest'], phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_U2_list_som-u5qgsq94"
+  },
+  {
+   "ten": "s1:U3-truc-kieu",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(c/d) bad_other_axis"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (c/d) bad_other_axis: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:33Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu"
+    ]
+   },
+   "msg": "(c/d) bad_other_axis: phải ĐỎ vì bộ giải, được rc=0, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:31Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.001s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: w.yml:j chỉ chạy Ubuntu; runs-on đã đọc được: '${{ matrix.os }}', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_U3_truc_kieu-2qjt6im9"
+  },
+  {
+   "ten": "s1:M5-bo-goi-verifier",
+   "ca": "t160",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "AssertionError",
+   "last": "bang",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "t125 phải xác minh CẢ HAI vế"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125: t125 phải xác minh CẢ HAI vế, truyền rc, TRƯỚC khi so: []"
+    ]
+   },
+   "msg": "t125 phải xác minh CẢ HAI vế, truyền rc, TRƯỚC khi so: []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M5_bo_goi_verifier-90xb1nuy"
+  },
+  {
+   "ten": "s1:M5-bo-goi-verifier",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "nối: hai con cùng 0/0"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None"
+    ]
+   },
+   "msg": "nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M5_bo_goi_verifier-90xb1nuy"
+  },
+  {
+   "ten": "s1:R17-bo-kiem-rc",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'rc 7 mà không ca ĐỎ'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'rc 7 mà không ca ĐỎ': chờ lý do chứa 'mã thoát 7', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'rc 7 mà không ca ĐỎ': chờ lý do chứa 'mã thoát 7', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R17_bo_kiem_rc-5vca2cmx"
+  },
+  {
+   "ten": "s1:R18-t125-bo-rc",
+   "ca": "t160",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "AssertionError",
+   "last": "bang",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "t125 phải xác minh CẢ HAI vế"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125: t125 phải xác minh CẢ HAI vế, truyền rc, TRƯỚC khi so: [(False, None), (False, None)]"
+    ]
+   },
+   "msg": "t125 phải xác minh CẢ HAI vế, truyền rc, TRƯỚC khi so: [(False, None), (False, None)]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R18_t125_bo_rc-2mwk1lp3"
+  },
+  {
+   "ten": "s1:R18-t125-bo-rc",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "nối: hai con đủ ca, rc=7"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: nối: hai con đủ ca, rc=7 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None"
+    ]
+   },
+   "msg": "nối: hai con đủ ca, rc=7 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R18_t125_bo_rc-2mwk1lp3"
+  },
+  {
+   "ten": "s1:R16-bo-doichieu-BOQUA",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'dòng BỎ QUA mà ra là QUA'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'dòng BỎ QUA mà ra là QUA': chờ lý do chứa 'dòng BỎ QUA lệch', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'dòng BỎ QUA mà ra là QUA': chờ lý do chứa 'dòng BỎ QUA lệch', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R16_bo_doichieu_BOQUA-k5hsuxps"
+  },
+  {
+   "ten": "s1:N3-bo-doichieu-DO",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'ĐỎ thiếu dòng ĐỎ'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'ĐỎ thiếu dòng ĐỎ': chờ lý do chứa 'dòng ĐỎ lệch', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'ĐỎ thiếu dòng ĐỎ': chờ lý do chứa 'dòng ĐỎ lệch', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N3_bo_doichieu_DO-2cju3zd9"
+  },
+  {
+   "ten": "s1:M6-chi-dem-marker",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'trùng tên, đủ số ca'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'trùng tên, đủ số ca': chờ lý do chứa \"trùng=['tb']\", nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'trùng tên, đủ số ca': chờ lý do chứa \"trùng=['tb']\", nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M6_chi_dem_marker-0q2k96rj"
+  },
+  {
+   "ten": "s1:M7-bo-tk-vs-dem",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'tổng kết lệch marker'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'tổng kết lệch marker': chờ lý do chứa 'lệch marker', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'tổng kết lệch marker': chờ lý do chứa 'lệch marker', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M7_bo_tk_vs_dem-xd30fcfg"
+  },
+  {
+   "ten": "s1:M9-bo-BOQUA-trong-so",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'bỏ qua ngoài sổ'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'bỏ qua ngoài sổ': chờ lý do chứa 'ngoài sổ', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'bỏ qua ngoài sổ': chờ lý do chứa 'ngoài sổ', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M9_bo_BOQUA_trong_so-fzdo0_qd"
+  },
+  {
+   "ten": "s1:M10-bo-dung-mot-tk",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'hai dòng tổng kết'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'hai dòng tổng kết': chờ lý do chứa 'ĐÚNG MỘT', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'hai dòng tổng kết': chờ lý do chứa 'ĐÚNG MỘT', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_M10_bo_dung_mot_tk-9bfj_xq4"
+  },
+  {
+   "ten": "s1:N1-bo-ca-trung",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'CA kỳ vọng trùng'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'CA kỳ vọng trùng': chờ lý do chứa 'kỳ vọng TRÙNG', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'CA kỳ vọng trùng': chờ lý do chứa 'kỳ vọng TRÙNG', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N1_bo_ca_trung-_wyfcjr0"
+  },
+  {
+   "ten": "s1:N2-bo-ra-hop-le",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'trạng thái lạ'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'trạng thái lạ': chờ lý do chứa 'hỏng trạng thái', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'trạng thái lạ': chờ lý do chứa 'hỏng trạng thái', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N2_bo_ra_hop_le-46kxd2a9"
+  },
+  {
+   "ten": "s1:N7-regex-khong-CR",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'CRLF"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'CRLF + dòng chẩn đoán xen giữa marker' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'CRLF + dòng chẩn đoán xen giữa marker' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N7_regex_khong_CR-v0ibpd8n"
+  },
+  {
+   "ten": "s1:N4-t125-bo-chan",
+   "ca": "t160",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "AssertionError",
+   "last": "bang",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "classifier chỉ nhận cặp ĐÃ xác minh"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t160_lech_AB_phai_giu_bang_chung_va_CHAN_tai_consumer_t125: classifier chỉ nhận cặp ĐÃ xác minh, đúng tuple theo nhãn không-actor rồi có-actor: [call((0, '198', '198', frozenset(), frozenset()), (1, '198', '198', frozenset(), frozenset()))], 'LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN: hai lượt TOÀN SUITE A/B k"
+    ]
+   },
+   "msg": "classifier chỉ nhận cặp ĐÃ xác minh, đúng tuple theo nhãn không-actor rồi có-actor: [call((0, '198', '198', frozenset(), frozenset()), (1, '198', '198', frozenset(), frozenset()))], 'LỆCH_CHƯA_RÕ_NGUYÊN_NHÂN: hai lượt TOÀN SUITE A/B khác nhau; không-actor=(rc=0, 198/198), có-actor=(rc=1, 198/198); ca lệch ĐỎ=[] BỎ QUA=[]. CHƯA loại trừ rò GITHUB_ACTOR, ảnh hưởng thứ tự ca hoặc tải; không kết luận nguyên nhân từ riêng hai kết quả. Đọc lý do từng ca trong log [A]/[B]; mọi lệch đều chặn cổng.'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N4_t125_bo_chan-nejti2z0"
+  },
+  {
+   "ten": "s1:N4-t125-bo-chan",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "nối: hai con cùng 0/0"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None"
+    ]
+   },
+   "msg": "nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N4_t125_bo_chan-nejti2z0"
+  },
+  {
+   "ten": "s1:N6-ten-tu-transcript",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "nối: hai con cùng 0/0"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None"
+    ]
+   },
+   "msg": "nối: hai con cùng 0/0 phải làm t125 ĐỎ TRƯỚC khi so (classifier gọi 1 lần): None",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_N6_ten_tu_transcript-jjlx6246"
+  },
+  {
+   "ten": "s1:R21-nen-ghi-osname",
+   "ca": "t193",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": true,
+   "A": "DO_KHAC",
+   "cls": "NotImplementedError",
+   "last": "__new__",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: NotImplementedError: cannot instantiate 'WindowsPath' on your system"
+    ]
+   },
+   "msg": "cannot instantiate 'WindowsPath' on your system",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R21_nen_ghi_osname-k1426tve"
+  },
+  {
+   "ten": "s1:R21-nen-ghi-osname",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['os.name (nen=nt)', 'os.name (nen=nt)', 'os.name (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['os.name (nen=nt)', 'os.name (nen=nt)', 'os.name (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R21_nen_ghi_osname-k1426tve"
+  },
+  {
+   "ten": "s1:R22-chon-ghi-CA",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R22_chon_ghi_CA-4ue8h2jf"
+  },
+  {
+   "ten": "s1:R22-chon-ghi-CA",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R22_chon_ghi_CA-4ue8h2jf"
+  },
+  {
+   "ten": "s1:R23-so-ghi-so-that",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "(e) "
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc=1, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:42Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s DO\\n!!! do t51_lease_giua_bi_chan_va"
+    ]
+   },
+   "msg": "(e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc=1, \">>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:40Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s DO\\n!!! do t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho ('w.yml', 'vang')\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho ('w.yml', 'vang')\\n\\nlease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R23_so_ghi_so_that-2xzok0j_"
+  },
+  {
+   "ten": "s1:R23-so-ghi-so-that",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=nt)', 'SO_BO_QUA (nen=posix)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=nt)', 'SO_BO_QUA (nen=posix)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s1_R23_so_ghi_so_that-2xzok0j_"
+  },
+  {
+   "ten": "s2:R15p-tin-so-MAC-DINH",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": false,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [
+    "A4 có Windows"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: (e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:44Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_c"
+    ]
+   },
+   "msg": "(e) ca trong sổ + workflow Ubuntu-only thật phải BỎ QUA: rc=0, '>>> vao t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 2026-10-01T06:42:42Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: chỉ chạy Ubuntu; tin sổ\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_R15p_tin_so_MAC_DINH-s1jiq331"
+  },
+  {
+   "ten": "s2:R20p-symlink-only",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "A5 alias symlink"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: A5 alias symlink trỏ CÙNG tệp phải được miễn: rc=1, \" 'dang'), sổ cho ('ops-publish-lease.yml', 'dang')\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('lk.yml', 'dang'), sổ cho ('ops-publish-lease.yml', 'dang"
+    ]
+   },
+   "msg": "A5 alias symlink trỏ CÙNG tệp phải được miễn: rc=1, \" 'dang'), sổ cho ('ops-publish-lease.yml', 'dang')\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('lk.yml', 'dang'), sổ cho ('ops-publish-lease.yml', 'dang')\\n\\nlease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_R20p_symlink_only-lrxuh2ng"
+  },
+  {
+   "ten": "s2:V2-tk-khong-neo",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_V2_tk_khong_neo-r6n1bnh9"
+  },
+  {
+   "ten": "s2:V4-su-kien-khong-neo",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_V4_su_kien_khong_neo-99xsgy4s"
+  },
+  {
+   "ten": "s2:V5-ra-khong-neo",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_V5_ra_khong_neo-ptvij326"
+  },
+  {
+   "ten": "s2:V6-do-khong-neo",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_V6_do_khong_neo-pl_tv4xl"
+  },
+  {
+   "ten": "s2:V7-bo-kiem-thoi-luong",
+   "ca": "t194",
+   "ky_vong": "GHI",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'bỏ qua ngoài sổ': chờ lý do chứa 'ngoài sổ', nhận ['dòng BỎ QUA lệch kết quả `<<< ra` (BỎ QUA=[])', \"tổng kết lệch marker: dòng ghi ('2', '2', '2', '1'), đếm được ('3', '3', '3', '0')\"]"
+    ]
+   },
+   "msg": "vế ĐỎ 'bỏ qua ngoài sổ': chờ lý do chứa 'ngoài sổ', nhận ['dòng BỎ QUA lệch kết quả `<<< ra` (BỎ QUA=[])', \"tổng kết lệch marker: dòng ghi ('2', '2', '2', '1'), đếm được ('3', '3', '3', '0')\"]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_V7_bo_kiem_thoi_luong-2iq89o9d"
+  },
+  {
+   "ten": "s2:V8-rc-chi-ca-do",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế ĐỎ 'rc 0 mà có ca ĐỎ'"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế ĐỎ 'rc 0 mà có ca ĐỎ': chờ lý do chứa 'mã thoát 0', nhận []"
+    ]
+   },
+   "msg": "vế ĐỎ 'rc 0 mà có ca ĐỎ': chờ lý do chứa 'mã thoát 0', nhận []",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_V8_rc_chi_ca_do-4ek6aj8_"
+  },
+  {
+   "ten": "s2:L4a-seam-ghi-environ",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4a_seam_ghi_environ-k8u6sf1g"
+  },
+  {
+   "ten": "s2:L4b-seam-ghi-global-allow",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4b_seam_ghi_global_allow-f9nr35q0"
+  },
+  {
+   "ten": "s2:L4c-seam-chdir",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4c_seam_chdir-map4p9td"
+  },
+  {
+   "ten": "s2:L4d-seam-ghi-WORKFLOW_DANG",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái",
+    "lượt mặc định"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4d_seam_ghi_WORKFLOW_DANG-t65n4ka9"
+  },
+  {
+   "ten": "s2:L4e-seam-sua-NHAN-tren-sys.path",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4e_seam_sua_NHAN_tren_sys_path-r_3o1pxw"
+  },
+  {
+   "ten": "s2:L4f-so-ghi-gia-tri-trong-sổ(in-place-doi-tuple)",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=posix)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=posix)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4f_so_ghi_gia_tri_trong_s_in_place_d-4ldvte4o"
+  },
+  {
+   "ten": "s2:L4g-chon-chen-vao-CA-roi-xoa-giu-doi-tuong",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4g_chon_chen_vao_CA_roi_xoa_giu_doi_-ez4pjog_"
+  },
+  {
+   "ten": "s2:L4h-seam-doi-stdout",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  no: RuntimeError: fixture ném lỗi",
+     "  ĐỎ  no: RuntimeError: fixture ném lỗi"
+    ]
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s2_L4h_seam_doi_stdout-5ijwywj4"
+  },
+  {
+   "ten": "s5:R24-seam-ghi-argv",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s5_R24_seam_ghi_argv-z6_p0k93"
+  },
+  {
+   "ten": "s5:R25-nen-dinh",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"2:49Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ub"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"2:49Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s5_R25_nen_dinh-l_zmd0f8"
+  },
+  {
+   "ten": "s5:R26-chon-dinh",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, '>>> vao <lambda> 2026-10-01T06:42:49Z\\n<<< ra <lambda> 0.000s QUA\\n\\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\\n'"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, '>>> vao <lambda> 2026-10-01T06:42:49Z\\n<<< ra <lambda> 0.000s QUA\\n\\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\\n'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s5_R26_chon_dinh-oknqt89q"
+  },
+  {
+   "ten": "s5:R27-so-dinh",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=1, \"o t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho None\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=1, \"o t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho None\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho None\\n\\nlease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s5_R27_so_dinh-df6xm0a1"
+  },
+  {
+   "ten": "s6:R25L-nen-dinh-LAST-wins",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"2:50Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.017s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ub"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"2:49Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.017s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s6_R25L_nen_dinh_LAST_wins-dkdy1ukp"
+  },
+  {
+   "ten": "s6:R25F-nen-dinh-FIRST-wins",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"2:50Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.033s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ub"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"2:49Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/s6_R25F_nen_dinh_FIRST_wins-om7_7jnf"
+  },
+  {
+   "ten": "sA:L1a-ind-1tang-chua-dky",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t999_gian_tiep_qua_helper'], thừa=[], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t999_gian_tiep_qua_helper'], thừa=[], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1a_ind_1tang_chua_dky-vh94160d"
+  },
+  {
+   "ten": "sA:L1a-ind-1tang-chua-dky",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1a_ind_1tang_chua_dky-vh94160d"
+  },
+  {
+   "ten": "sA:L1b-ind-3tang-chua-dky",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t999_gian_tiep_3tang'], thừa=[], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=['t999_gian_tiep_3tang'], thừa=[], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1b_ind_3tang_chua_dky-5rozlojl"
+  },
+  {
+   "ten": "sA:L1b-ind-3tang-chua-dky",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1b_ind_3tang_chua_dky-5rozlojl"
+  },
+  {
+   "ten": "sA:L1c-ind-1tang-da-dky",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1c_ind_1tang_da_dky-l66v2hck"
+  },
+  {
+   "ten": "sA:L1c-ind-1tang-da-dky",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1c_ind_1tang_da_dky-l66v2hck"
+  },
+  {
+   "ten": "sA:L1d-ind-3tang-da-dky",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=[], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1d_ind_3tang_da_dky-d3s6ft46"
+  },
+  {
+   "ten": "sA:L1d-ind-3tang-da-dky",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1d_ind_3tang_da_dky-d3s6ft46"
+  },
+  {
+   "ten": "sA:L1e-GO-chot-uv+1tang",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1e_GO_chot_uv_1tang-gom0b26f"
+  },
+  {
+   "ten": "sA:L1e-GO-chot-uv+1tang",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1e_GO_chot_uv_1tang-gom0b26f"
+  },
+  {
+   "ten": "sA:L1f-GO-chot-uv+3tang",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1f_GO_chot_uv_3tang-c9elchrj"
+  },
+  {
+   "ten": "sA:L1f-GO-chot-uv+3tang",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1f_GO_chot_uv_3tang-c9elchrj"
+  },
+  {
+   "ten": "sA:L1g-GO-vedonvi-uv",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1g_GO_vedonvi_uv-4xs0_o7t"
+  },
+  {
+   "ten": "sA:L1h-vedonvi-tang3",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "ứng viên phải tính cả ca gọi helper BỌC"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: ứng viên phải tính cả ca gọi helper BỌC `_chay_buoc_dang*` (gián tiếp, nhiều tầng), không tính ca không gọi"
+    ]
+   },
+   "msg": "ứng viên phải tính cả ca gọi helper BỌC `_chay_buoc_dang*` (gián tiếp, nhiều tầng), không tính ca không gọi",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1h_vedonvi_tang3-3wpag8tx"
+  },
+  {
+   "ten": "sA:L1i-def-long-chua-dky",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1i_def_long_chua_dky-zv95vaj1"
+  },
+  {
+   "ten": "sA:L1i-def-long-chua-dky",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L1i_def_long_chua_dky-zv95vaj1"
+  },
+  {
+   "ten": "sA:L2-V2",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_V2-ygdkwcl3"
+  },
+  {
+   "ten": "sA:L2-GO-vey+V2",
+   "ca": "t194",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_GO_vey_V2-9v7p0tfs"
+  },
+  {
+   "ten": "sA:L2-V4",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_V4-rxlz8ygy"
+  },
+  {
+   "ten": "sA:L2-GO-vey+V4",
+   "ca": "t194",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_GO_vey_V4-p94zle68"
+  },
+  {
+   "ten": "sA:L2-V5",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_V5-iv3a5eap"
+  },
+  {
+   "ten": "sA:L2-GO-vey+V5",
+   "ca": "t194",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_GO_vey_V5-d5fz2lsk"
+  },
+  {
+   "ten": "sA:L2-V6",
+   "ca": "t194",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "vế QUA 'dòng chẩn đoán GIỮA dòng"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan"
+    ]
+   },
+   "msg": "vế QUA 'dòng chẩn đoán GIỮA dòng chứa chữ tổng kết/marker/ĐỎ (không neo đầu dòng ⇒ không tính)' bị chặn oan",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_V6-w9mqrqxb"
+  },
+  {
+   "ten": "sA:L2-GO-vey+V6",
+   "ca": "t194",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L2_GO_vey_V6-2dp9zyq2"
+  },
+  {
+   "ten": "sA:L3a-R25L",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"3:02Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.017s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ub"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"3:01Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3a_R25L-hciciqfc"
+  },
+  {
+   "ten": "sA:L3a-GO-luot5+R25L",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3a_GO_luot5_R25L-72z9a1rj"
+  },
+  {
+   "ten": "sA:L3b-R25F",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"3:02Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.008s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ub"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, \"3:02Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.010s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: ops-publish-lease.yml:dang chỉ chạy Ubuntu; runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3b_R25F-udenjjme"
+  },
+  {
+   "ten": "sA:L3c-environ",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3c_environ-_evw752f"
+  },
+  {
+   "ten": "sA:L3c-GO-anh+environ",
+   "ca": "t203",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "SONG",
+   "dung_ky_vong": false,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3c_GO_anh_environ-xw9mkmue"
+  },
+  {
+   "ten": "sA:L3d-environ-xoa",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3d_environ_xoa-nhfe_65n"
+  },
+  {
+   "ten": "sA:L3e-cwd",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3e_cwd-ukg238_7"
+  },
+  {
+   "ten": "sA:L3e-GO-anh+cwd",
+   "ca": "t203",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "SONG",
+   "dung_ky_vong": false,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3e_GO_anh_cwd-2as_sm1y"
+  },
+  {
+   "ten": "sA:L3f-syspath-insert",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3f_syspath_insert-8mln5h4j"
+  },
+  {
+   "ten": "sA:L3f-GO-anh+syspath",
+   "ca": "t203",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "SONG",
+   "dung_ky_vong": false,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3f_GO_anh_syspath-ynwimeq5"
+  },
+  {
+   "ten": "sA:L3g-syspath-xoa",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3g_syspath_xoa-9yahg7n2"
+  },
+  {
+   "ten": "sA:L3h-global-rebind-allow",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3h_global_rebind_allow-s0g8rri1"
+  },
+  {
+   "ten": "sA:L3h-GO-anh+global",
+   "ca": "t203",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "SONG",
+   "dung_ky_vong": false,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3h_GO_anh_global-01wwae0f"
+  },
+  {
+   "ten": "sA:L3i-global-moi-ten",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3i_global_moi_ten-kd4kdx8x"
+  },
+  {
+   "ten": "sA:L3j-global-xoa-ten",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3j_global_xoa_ten-0ieph143"
+  },
+  {
+   "ten": "sA:L3k-global-inplace-dict",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3k_global_inplace_dict-0h1ek_b2"
+  },
+  {
+   "ten": "sA:L3l-global-inplace-set",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3l_global_inplace_set-614eadpy"
+  },
+  {
+   "ten": "sA:L3m-global-inplace-list",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3m_global_inplace_list-5k18r1wo"
+  },
+  {
+   "ten": "sA:L3n-sys.modules",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3n_sys_modules-rb03bito"
+  },
+  {
+   "ten": "sA:L3o-umask",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L3o_umask-u4gvjc46"
+  },
+  {
+   "ten": "sA:R21",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['os.name (nen=nt)', 'os.name (nen=nt)', 'os.name (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['os.name (nen=nt)', 'os.name (nen=nt)', 'os.name (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_R21-qnb5j4tz"
+  },
+  {
+   "ten": "sA:R22",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)', 'CA (nen=posix)', 'CA (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_R22-9i5u6vnr"
+  },
+  {
+   "ten": "sA:R23",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=nt)', 'SO_BO_QUA (nen=posix)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=nt)', 'SO_BO_QUA (nen=posix)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_R23-vsq8b8zd"
+  },
+  {
+   "ten": "sA:R24",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)', 'sys.argv (nen=posix)', 'sys.argv (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_R24-13ux7u5q"
+  },
+  {
+   "ten": "sA:R26",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, '>>> vao <lambda> 2026-10-01T06:43:08Z\\n<<< ra <lambda> 0.000s QUA\\n\\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\\n'"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=0, '>>> vao <lambda> 2026-10-01T06:43:07Z\\n<<< ra <lambda> 0.000s QUA\\n\\nlease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0\\n'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_R26-bxlplicy"
+  },
+  {
+   "ten": "sA:R27",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "lượt mặc định phải dùng argv"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=1, \"o t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho None\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot"
+    ]
+   },
+   "msg": "lượt mặc định phải dùng argv + nền thật (posix) + sổ thật: rc=1, \"o t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho None\\n  ĐỎ  t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: bỏ qua NGOÀI SỔ: ca khai ('ops-publish-lease.yml', 'dang'), sổ cho None\\n\\nlease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_R27-237kmigh"
+  },
+  {
+   "ten": "sA:L4f",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=posix)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['SO_BO_QUA (nen=posix)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sA_L4f-tjgovaaz"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-os.environ+environ",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_os_environ_environ-uzycd93q"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-cwd+environ(doi-chung)",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)', 'os.environ (nen=posix)', 'os.environ (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_cwd_environ_doi_chung_-evxiifgh"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-cwd+cwd",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_cwd_cwd-uc8b7jkg"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-sys.path+cwd(doi-chung)",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)', 'cwd (nen=posix)', 'cwd (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_sys_path_cwd_doi_chung_-6p_di2ca"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-sys.path+syspath",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_sys_path_syspath-yit6ukvu"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-globals+syspath(doi-chung)",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)', 'sys.path (nen=posix)', 'sys.path (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_globals_syspath_doi_chung_-nhkn2a16"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-globals+global",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_globals_global-gu2x58pi"
+  },
+  {
+   "ten": "sSOLO:SOLO-GO-os.environ+global(doi-chung)",
+   "ca": "t203",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']"
+    ]
+   },
+   "msg": "seam của main() RÒ trạng thái toàn cục: ['globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)', 'globals (nen=posix)', 'globals (nen=nt)']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/sSOLO_SOLO_GO_os_environ_global_doi_chun-ltgzbqey"
+  },
+  {
+   "ten": "moi:M4c-so-ten-la",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "sổ phải BẰNG"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t999_ten_la_khong_ton_tai'], lệch cặp=[]"
+    ]
+   },
+   "msg": "sổ phải BẰNG tập ca ĐO được ném BoQuaNen trên nt, đúng cặp: thiếu=[], thừa=['t999_ten_la_khong_ton_tai'], lệch cặp=[]",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_M4c_so_ten_la-rq34_o19"
+  },
+  {
+   "ten": "moi:L-677",
+   "ca": "t178",
+   "ky_vong": "GIET",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": false,
+   "A": "DO_KHAC",
+   "cls": "TinHieuCuaDem",
+   "last": "_chot_cua_dem",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [
+    "`lease_id` là `None`"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t178_tien_kiem_mien_chan_TRUOC_khi_cham_mang: `lease_id` là `None`: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng — và phép dò phải TRẢ VỀ, không được vỡ. Mã thoát của cổng tổng KHÔNG phân biệt được (nền và đột biến `L` đều rc=8); chỉ số lời gọi của PHÉP DÒ phân biệt (0 so 1): phải có đún"
+    ]
+   },
+   "msg": "`lease_id` là `None`: tiền kiểm phải chặn PHÉP DÒ trước khi nó chạm mạng — và phép dò phải TRẢ VỀ, không được vỡ. Mã thoát của cổng tổng KHÔNG phân biệt được (nền và đột biến `L` đều rc=8); chỉ số lời gọi của PHÉP DÒ phân biệt (0 so 1): phải có đúng 0 lời gọi GitHub, có 1.",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_L_677-lqvaomet"
+  },
+  {
+   "ten": "moi:L-677",
+   "ca": "t195",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "M2 tập (i)"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat: M2 tập (i): nền phải rc=1, 0 lời gọi gh, 0 POST ở cả 14 ô (dãy lời gọi nền = rỗng); lệch: null/Issue/trống: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; null/Issue/có dấu: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0;"
+    ]
+   },
+   "msg": "M2 tập (i): nền phải rc=1, 0 lời gọi gh, 0 POST ở cả 14 ô (dãy lời gọi nền = rỗng); lệch: null/Issue/trống: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; null/Issue/có dấu: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; null/PR/trống: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; null/PR/có dấu: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; danh sách/Issue/trống: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; danh sách/Issue/có dấu: rc=1 goi=[('GET', 'repos/o/r/issues/55/comments')] POST=0; danh sách/PR/trống: rc=1 goi=[('GET', 're",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_L_677-lqvaomet"
+  },
+  {
+   "ten": "moi:L-677",
+   "ca": "t196",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "M3a: PR + có dấu + còn hạn"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua: M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: true/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True; 1.5/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True; ngày/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True"
+    ]
+   },
+   "msg": "M3a: PR + có dấu + còn hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: true/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True; 1.5/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True; ngày/PR/có dấu/còn hạn: rc=0 POST=0 bỏ_qua=True",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_L_677-lqvaomet"
+  },
+  {
+   "ten": "moi:L-677",
+   "ca": "t197",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "M3b: Issue + có dấu"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua: M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: true/Issue/có dấu/hết hạn: rc=0 POST=0 bỏ_qua=True; 1.5/Issue/có dấu/hết hạn: rc=0 POST=0 bỏ_qua=True; ngày/Issue/có dấu/hết hạn: rc=0 POST=0 "
+    ]
+   },
+   "msg": "M3b: Issue + có dấu + hết hạn phải rc≠0, 0 POST, không 'bỏ qua' (đột biến L cho rc=0); lệch: true/Issue/có dấu/hết hạn: rc=0 POST=0 bỏ_qua=True; 1.5/Issue/có dấu/hết hạn: rc=0 POST=0 bỏ_qua=True; ngày/Issue/có dấu/hết hạn: rc=0 POST=0 bỏ_qua=True",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_L_677-lqvaomet"
+  },
+  {
+   "ten": "moi:L-677",
+   "ca": "t198",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_L_677-lqvaomet"
+  },
+  {
+   "ten": "moi:DC1-TypeError-truoc-chot",
+   "ca": "t193",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": true,
+   "A": "DO_KHAC",
+   "cls": "TypeError",
+   "last": "t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: TypeError: unsupported operand type(s) for |: 'set' and 'int'"
+    ]
+   },
+   "msg": "unsupported operand type(s) for |: 'set' and 'int'",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_DC1_TypeError_truoc_chot-phlrov08"
+  },
+  {
+   "ten": "moi:DC2-bang-helper-chung",
+   "ca": "t194",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "AssertionError",
+   "last": "bang",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [
+    "vế ĐỎ",
+    "vế QUA",
+    "nối:"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t194_AB_phai_du_bang_chung_truoc_khi_so: DC2 helper chung"
+    ]
+   },
+   "msg": "DC2 helper chung",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_DC2_bang_helper_chung-uu39e701"
+  },
+  {
+   "ten": "moi:DC3-except-doi-thanh-chot",
+   "ca": "t203",
+   "ky_vong": "TIN_DUNG_GIA",
+   "hang": "TIN_DUNG_GIA",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": false,
+   "cho_phep": [
+    "RÒ trạng thái"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t203_seam_main_KHONG_ro_trang_thai_qua_luot_goi: seam của main() NÉM thay vì trả rc: ['nen=nt: RuntimeError', 'nen=posix: RuntimeError', 'nen=nt: RuntimeError', 'nen=posix: RuntimeError', 'nen=nt: RuntimeError']"
+    ]
+   },
+   "msg": "seam của main() NÉM thay vì trả rc: ['nen=nt: RuntimeError', 'nen=posix: RuntimeError', 'nen=nt: RuntimeError', 'nen=posix: RuntimeError', 'nen=nt: RuntimeError']",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5/moi_DC3_except_doi_thanh_chot-g2wyzm4c"
+  }
+ ]
+}

@@ -1,0 +1,337 @@
+# LAND EVIDENCE — PR #493 (`r360`: land evidence PR #491 + hiện vật cross-review #491
+# + sửa 5 đối tượng trong r358).
+#
+# Tệp này là vế bookkeeping ADR-0034 của #493. Nó KHÔNG tự sinh mắt xích tiếp theo:
+# xem `chuoi_ho_so_dung_o_dau` ở cuối.
+#
+# MỌI số trong tệp này đo tại `e82af37` trừ chỗ ghi rõ nguồn khác.
+
+schema_version: 1
+mission_id: KHONG-CO-MISSION
+packet_id: PR493-R360-LAND-EVIDENCE-PR491
+generation: 1
+provider: claude
+role: land_operator
+session_id: https://claude.ai/code/session_012KBPdsckzqhbnufu7JBSZz
+recorded_by: claude
+
+# ─────────────────────────── MERGE ───────────────────────────
+authorized_head_sha: 99aef141796ebce7044c9f5c0c8a1a3b3d673d8e
+approver: ducthangho
+# r370 (finding P1 của connector codex trên PR #514, ĐÚNG): schema land evidence ở
+# `docs/PROTOCOL_DA_PHIEN.md:478` đòi khoá này, và §ấy nói thẳng "chat transcript hoặc lời tự
+# khai không thay thế GitHub object". Bản đầu BỎ HẲN khoá — 8/8 tệp land khác đều có nó
+# (7 trỏ `pullrequestreview` bền, `plat-x8` ghi `null`), nên tệp này là tệp duy nhất thiếu.
+# `null` chứ KHÔNG bịa URL: uỷ quyền cho `99aef14` là chỉ thị trong phiên, không có object
+# GitHub nào; dựng một comment "uỷ quyền" sau khi #493 đã merge là BỊA PROVENANCE.
+authorization_url: null
+merge_method: merge
+merge_commit: e82af37fe66629d5378ac56fc689e24db26594fa
+merged_at: '2026-09-11T07:58:42Z'
+hai_cha: 26e2555d36c48b3c0f625ae50ab2cfb62b6cb858 99aef141796ebce7044c9f5c0c8a1a3b3d673d8e
+
+uy_quyen:
+  loai_nguon: >-
+    ATTESTATION. Chỉ thị trực tiếp trong phiên điều phối, chọn phương án 2 của một câu hỏi bốn
+    phương án: "Chọn 2. Không cần duyệt khác danh tính". KHÔNG có hiện vật GitHub cho câu này.
+  hai_dieu_no_mien:
+    - 'Vòng lặp cross-review: dừng ở lượt 17 thay vì chạy tới hết P3.'
+    - 'Duyệt khác danh tính: MIỄN tường minh. Cổng `duyet khac danh tinh / cong` đã bị gỡ khỏi
+       kho ở `26e2555` (PR #506) nên không có cổng nào để mà nới — nhưng việc nó vắng mặt KHÔNG
+       phải lý do miễn; lý do là chỉ thị trên.'
+  cai_KHONG_duoc_mien: >-
+    Gate. Chủ kho chọn phương án "để chạy hết" cho lượt gate hậu-merge khi được hỏi thẳng về
+    chi phí. Nên land này KHÔNG miễn CI.
+
+# ─────────────────── CÂY ĐÃ MERGE so CÂY ĐÃ ĐO ───────────────────
+cay_da_merge_trung_cay_da_do:
+  tree_merge_commit: e307ea3152d605b1456a04ef0757ff0f6b7fa128
+  tree_head_PR: e307ea3152d605b1456a04ef0757ff0f6b7fa128
+  bang_nhau: true
+  do_bang: '`git rev-parse e82af37^{tree}` so `git rev-parse 99aef14^{tree}`'
+  he_qua_phai_doc: >-
+    Merge là fast-forward về NỘI DUNG (master là tổ tiên của head): hai commit có tree bằng nhau.
+    VỚI NHỮNG BƯỚC MÀ LƯỢT PR ĐÃ CHẠY, chân `ubuntu-latest` của lượt hậu-merge đo lại CÙNG MỘT
+    NỘI DUNG GIT. Phần CHƯA ĐO: giá trị bổ sung do môi trường, đầu vào ngoài Git, hoặc tính chập
+    chờn — tree bằng nhau không loại trừ chúng. Và cây trùng băm KHÔNG kéo theo tập bước trùng:
+    phần mở rộng tập bước/nền của
+    lượt hậu-merge gồm BA phần chứ không phải một — bước `tl selftest (có bằng chứng
+    exact-identity)` (119 s) và bước `release-verify strict (lane LAND)` (1 s), cả hai lượt PR đã
+    `skipped`, CỘNG chân `windows-latest`.
+  ban_dau_viet_sai_o_day: >-
+    Bản đầu của trường trên viết "giá trị thêm nằm HẾT ở chân windows và ở bước release-verify
+    lane LAND" — BỎ SÓT bước `tl selftest`. Cross-review lượt 1 chấm câu tương ứng trong
+    CHANGELOG; lượt 2 chỉ ra rằng bản vá đầu chỉ sửa CHANGELOG mà để nguyên tệp này, tức đính
+    chính một bản chiếu còn để nguyên bản kia. Nay sửa tại cả hai.
+
+# ─────────────────────── CROSS-REVIEW ───────────────────────
+cross_review:
+  so_luot: 17
+  reviewer_provider: codex
+  executor_provider: claude
+  cross_provider: true
+  hien_vat_trong_kho: 'ops/reviews/pr493-review-{1..17}-codex-verdict.md + .receipt.yaml'
+  model_khai_boi_cong_cu: gpt-6-astra
+  model_da_chay: KHONG_DO_DUOC
+  reasoning_effort_do_duoc: none
+  reasoning_effort_ghi_chu: >-
+    ĐO ĐƯỢC từ header phiên `codex` in ra `stderr.log`: `reasoning effort: none` ở **17/17** lượt.
+    Đây là lời tự khai của CÔNG CỤ, không phải của phiên điều phối. Hồ sơ nào nói chuỗi này chạy
+    ở `xhigh` là SAI.
+  phien_ban_cong_cu:
+    luot_1_den_8: OpenAI Codex v0.153.4
+    luot_9_den_17: OpenAI Codex v0.154.0
+    canh_bao: >-
+      Chuỗi KHÔNG đồng nhất về công cụ. So P3 giữa hai nửa là so qua một biến chưa kiểm soát.
+  p_theo_luot:
+    don_vi: 'số TIÊU ĐỀ finding mang nhãn [P1]/[P2]/[P3] trong chính tệp verdict'
+    do_bang_may: >-
+      Đếm HEADING, KHÔNG lấy con số ở văn xuôi mở đầu của reviewer — chính `VERDICT-LUOT-10`
+      nêu kỷ luật này và chỉ ra rằng hai đại lượng ấy lệch nhau.
+    P1: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    P2: [4, 4, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    P3: [12, 15, 15, 15, 14, 10, 9, 10, 5, 3, 2, 3, 2, 4, 5, 3, 4]
+    P1_ve_0_tu_luot: 3
+    P2_ve_0_tu_luot: 5
+    P3_khong_don_dieu: >-
+      P3 KHÔNG giảm đơn điệu — nó xuống 2 ở lượt 11 rồi lên lại 3, 2, 4, 5, 3, 4. Đừng đọc chuỗi
+      này thành "đang hội tụ"; mỗi bản vá mở ra bề mặt đọc mới.
+  luot_cuoi:
+    so: 17
+    reviewed_sha: 61b4c24
+    verdict: changes_requested
+    p1: 0
+    p2: 0
+    p3: 4
+  khop_head_da_merge: false
+  ghi_chu_head: >-
+    KHÔNG lượt nào review head đã merge. Lượt 17 neo `61b4c24`; sau nó còn HAI commit đi vào
+    `99aef14` — `6da8291` (vá 2 P3 của chính lượt 17) và `99aef14` (khối đóng vòng lặp). Cả hai
+    CHƯA qua cross-review nào.
+  vi_sao_changes_requested_van_land: >-
+    Vòng lặp đóng theo quyết định chủ kho, KHÔNG phải vì hết finding. Trạng thái lúc đóng:
+    0 P1 (từ lượt 3) · 0 P2 (từ lượt 5) · 4 P3 ở lượt cuối.
+  duong_review_thu_ba:
+    nguon: 'connector `chatgpt-codex-connector[bot]`, kích hoạt bởi việc gỡ draft'
+    bat_dau_utc: '2026-09-11T07:55:23Z'
+    ket_thuc_utc: '2026-09-11T08:12:57Z'
+    head: 99aef14
+    ket_qua: KHONG_DO_DUOC
+    vi_sao_khong_do_duoc: >-
+      Review chạy trong lúc PR đang mở và kết thúc ~14 phút SAU khi PR đã merge. Ba chỗ đã hỏi:
+      `get_reviews` ⇒ `[]`; `get_review_comments` ⇒ 0; comment tổng kết ⇒ `Completed`, không
+      bảng finding. Connector tự khai tín hiệu "sạch" của nó là REACTION 👍 — mà reactions trên
+      PR là `total_count: 0`, KHÔNG có 👍 **và cũng không có 👀** dù lượt review chắc chắn đã
+      chạy. KHÔNG QUAN SÁT ĐƯỢC reaction nào tại lần đọc ấy; nguyên nhân (kênh hỏng, hay
+      connector không phản ứng trên PR đã đóng) CHƯA XÁC ĐỊNH. Nên sự VẮNG MẶT của 👍 không
+      đọc được theo chiều nào. Bằng chứng còn lại nghiêng MẠNH về "không có finding" — nhưng nghiêng
+      mạnh không phải đã chứng minh, và ghi thành `KHONG_DO_DUOC` chứ không làm tròn lên.
+
+# ─────────────────── CỔNG TRƯỚC MERGE ───────────────────
+pre_merge_checks:
+  - ten: 'gate (lượt PR)'
+    run_id: 34574232783
+    head: 99aef14
+    ket_qua: success
+    bang_chung_duong: '44 bước = 41 `success` + 3 `skipped`; 0 `failure`, 0 `cancelled`'
+    ba_buoc_skipped_va_ly_do:
+      - 'gate lifecycle selftest — nền không có cgroup (điều kiện hạ tầng runner)'
+      - 'tl selftest — có bằng chứng exact-identity; `tl.py` KHÔNG nằm trong write set 8 tệp'
+      - 'release-verify strict (lane LAND) — `github.ref != master`'
+    canh_bao_doc_ket_qua: >-
+      Lượt PR chỉ chạy `ubuntu-latest`. `windows-latest` CHƯA được đo ở bước này; ma trận chỉ
+      thêm Windows cho `refs/heads/master`, cho PR gắn nhãn `windows`, và cho `workflow_dispatch`.
+      PR này không gắn nhãn và không ai gọi tay ⇒ lần merge là lần đo Windows ĐẦU TIÊN.
+  - ten: 'release-verify strict (lane LAND) — chạy TAY tại chỗ'
+    ly_do_chay_tay: >-
+      Bước này `skipped` trên lượt PR, và lane WORKER sinh manifest TẠM từ chính cây nên nó HẤP
+      THỤ mọi thay đổi nội dung ⇒ PR xanh mà master có thể đỏ (bài học r356). `CHANGELOG.md`
+      NẰM TRONG manifest và PR này sửa nó, nên đây đúng là ca mà lane PR mù.
+    lenh: 'python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json'
+    ket_qua:
+      ok: true
+      expected_file_count: 180
+      checked_file_count: 180
+      bang_nhau: true
+      package_hash_match: true
+      package_hash_self_match: true
+      errors: 0
+      extra_files: 0
+      missing_from_current_manifest: 0
+      required_missing: 0
+    mot_loi_doc_sai_phai_ghi: >-
+      Lần đọc ĐẦU tôi so `expected == checked` — nhưng HAI KHOÁ ẤY KHÔNG TỒN TẠI trong JSON (tên
+      thật là `expected_file_count`/`checked_file_count`), nên phép so là `None == None` và cho
+      `True` RỖNG RUỘT. Con số 180/180 ở trên là bản đo LẠI bằng tên khoá thật. Ghi ra vì đó
+      đúng lớp lỗi "im lặng đọc thành bằng chứng dương" mà kho đã trả giá nhiều lần.
+  - ten: 'thu-hoi'
+    run_id: [34574229829, 34576651228]
+    ket_qua: failure
+    la_loi_cua_PR_nay: KHONG_DO_DUOC
+    la_loi_cua_PR_nay_ghi_chu: >-
+      Bản trước khai `false`. Đổi thành KHONG_DO_DUOC: triệu chứng CÓ TRƯỚC #493 là thứ đo được,
+      nhưng nó không đủ để LOẠI TRỪ mọi ảnh hưởng của #493 — chưa có đối chứng cho điều đó.
+    bang_chung: >-
+      Phép neo canonical `TL_WF_SHA == TL_S` (`26e2555d…`) ĐẠT — lần đầu tiên trong lịch sử
+      workflow ấy. Nhờ đó job chạy tiếp và chết ở bước fetch với `rc=128`,
+      `fatal: could not read Username for 'https://github.com'`. Tức 14/14 lượt đỏ trước đó DỪNG
+      TRƯỚC bước fetch, nên chúng chưa bao giờ cho phép đánh giá bước ấy. Điều này KHÔNG chứng
+      minh cùng lỗi credential đã tồn tại trong cả 14 lượt — chỉ chứng minh chúng không đo tới đó.
+    trang_thai_cua_check: 'CHƯA KÍCH HOẠT, chưa là required check — `mergeable_state: unstable`'
+    ngoai_write_set: true
+    thuoc_packet: '#503 M9-FETCH-AUTH (lease của phiên khác)'
+    mot_loi_khai_cong_khai_da_phai_rut: >-
+      Comment `5629351967` của tôi khai "nó không thể xanh cho một PR mở lâu" vì cho rằng
+      `base.sha` đóng băng lúc tạo PR. SAI: `base.sha` của `pull_request_target` bám tip nhánh
+      base TẠI THỜI ĐIỂM EVENT, nên sau mỗi `synchronize` nó cập nhật. Chính lần đẩy của tôi là
+      phản chứng. Đã đăng đính chính `5630987483`, và đã ĐO bản đã đến: `diff` = 0 dòng lệch.
+
+# ─────────────────── CỔNG SAU MERGE ───────────────────
+post_merge_checks:
+  - ten: 'gate (lượt master — ubuntu + windows)'
+    run_id: 34576916278
+    head: e82af37
+    ket_qua_run: cancelled
+    ket_qua_theo_chan:
+      ubuntu_latest:
+        ket_qua: success
+        bang_chung_duong: '44 bước = 40 `success` + 4 `skipped`; 0 `failure`, 0 `cancelled`'
+        bon_buoc_skipped_va_ly_do:
+          - 'PR head contains required EOL base — `if: event_name == pull_request`; lượt master
+             LUÔN skip bước này. Hệ quả: `skipped` phải xét THEO ĐIỀU KIỆN TỪNG BƯỚC, không đặt
+             tiêu chí tổng "lượt PR không được có bước nào skipped" — chính lượt PR cũng có 3 bước
+             skipped hợp lệ, liệt kê ở `pre_merge_checks`.'
+          - 'gate lifecycle selftest — nền không có cgroup'
+          - 'tl selftest (lượt PR — không sinh bằng chứng) — điều kiện lane'
+          - 'release-verify strict (lane WORKER) — `github.ref == master` nên chạy lane LAND'
+        buoc_master_only_DA_CHAY_THAT: >-
+          `release-verify strict (lane LAND — manifest committed)` bước 38 ⇒ `success` (1 s).
+          Đây là lần ĐẦU bước ấy chạy trên CI cho cây này; trước đó chỉ có phép đo TAY của điều
+          phối trên Linux. Cùng lượt còn chạy xanh: `golden-test` (26 s) · `doc-claims-check
+          strict` (3 s) · `determinism-audit strict` (34 s) · `release-check full` (2 s) ·
+          `release-bundle x2 cùng SHA-256` (4 s) · `tl selftest (có bằng chứng exact-identity)`
+          (119 s).
+      windows_latest:
+        ket_qua: cancelled
+        cat_o_buoc: 'bước 20 — `lease-publish selftest (đo lại setup sau G5)`'
+        so_giay_buoc_do_truoc_khi_bi_cat: 1258
+        tong_thoi_gian_job_giay: 3618
+        khoang_thoi_gian: '2026-09-11T07:58:49Z → 2026-09-11T08:59:07Z'
+        nguyen_nhan_SUY_LUAN: >-
+          3618 s = 60 phút 18 giây, PHÙ HỢP với `timeout-minutes: 60` ở `ci.yml:64`. Hồ sơ KHÔNG
+          có log nguyên nhân, nên đây là suy luận từ thời lượng — chưa xác nhận chạm trần, và
+          chưa loại trừ một ca test lỗi. Mọi bước sau bước 20 hiện `skipped` vì job đang
+          bị cắt, nên chân Windows **chưa đo** `release-verify strict (lane LAND)`,
+          `golden-test`, `determinism-audit` và 19 bước khác.
+        la_loi_cua_PR_nay: KHONG_DO_DUOC
+        la_loi_cua_PR_nay_ghi_chu: >-
+          Bản trước khai `false`. Dữ kiện đo được chỉ là TRIỆU CHỨNG đã có ở ba head trước;
+          từ đó không suy ra được việc loại trừ đóng góp của #493.
+        trieu_chung_CO_TRUOC: >-
+          Issue #504 (`WINDOWS-LEASE-SUITE`, đang MỞ) ghi BA lượt `cancelled` liên tiếp cùng
+          bước, cùng trần, kể từ khi A0 (#488) land: `0721811` (run 34439063235, ≥ 25 ph 50 s),
+          `c00c88a0` (34549206309), `27c413c3` (34552510232, ≥ 22 ph 52 s). Trước A0 bước ấy
+          chạy 2 ph 58 s. Lượt này là ca **THỨ TƯ** của cùng chuỗi.
+        mot_so_MOI_ma_Issue_504_chua_co: >-
+          #504 khai *"log bước bị đệm khối nên ca nào chậm/treo chưa đo được"* và nêu giả thuyết
+          H1 *"suite ≈ 3 × nền"*, suy từ Linux. Lượt này cho một cận dưới ĐO ĐƯỢC cho tỉ lệ
+          Windows/Linux của CÙNG bước trong CÙNG lượt chạy: Windows ≥ 1258 s (bị cắt, chưa xong)
+          so ubuntu 139 s ⇒ **≥ 9,05×**. Nếu H1 (`≈ 3×`) nói về cùng đại lượng và cùng mẫu số
+          thì H1 thấp ÍT NHẤT khoảng 3,02 lần. Đây là cận DƯỚI vì 1258 s là lúc bị cắt chứ không
+          phải lúc xong — TỈ SỐ KHI HOÀN TẤT CHƯA BIẾT.
+        khong_sua_o_day: >-
+          Thuộc packet #504, có đặc tả và quyết định chủ kho riêng. `CLAUDE.md` CẤM nâng
+          `timeout-minutes`. Không đụng `ci.yml` trong PR này.
+    he_qua_cho_trang_thai_landed: >-
+      §10.2 định nghĩa `landed` gồm "hậu-merge gate XANH". Lượt này KHÔNG xanh — nó `cancelled`.
+      Nên trạng thái đúng của #493 là: kết quả ĐÃ vào canonical ở exact SHA được duyệt ·
+      bookkeeping ĐANG hoàn tất bằng chính PR mang tệp này · **hậu-merge gate CHƯA xanh trên
+      chân Windows**, với triệu chứng trùng một nợ đã ghi ở #504 và có trước #493. Nguyên nhân
+      cụ thể, cùng phần đóng góp (nếu có) của #493, CHƯA ĐO ĐỘC LẬP. KHÔNG làm tròn thành
+      `landed`; cũng KHÔNG đọc thành "#493 có lỗi".
+    cai_da_do_duoc_va_cai_chua:
+      da_do: >-
+        Toàn bộ lane LAND trên Linux, gồm bước `release-verify strict` mà lượt PR đã skip.
+        Cộng phép đo TAY của điều phối trước merge (cùng lệnh, cùng kết quả `180 == 180`).
+      chua_do: >-
+        Mọi bước sau `lease-publish selftest` trên Windows. Với cây này, Windows vẫn là vùng
+        CHƯA ĐO — và nó đã chưa-đo suốt bốn lần land liên tiếp.
+
+# ─────────────────── KHÔNG ĐO ĐƯỢC ───────────────────
+khong_do_duoc:
+  - muc: 'Model đã phục vụ 17 lượt cross-review'
+    ly_do: >-
+      `codex exec` không phát `modelUsage`. `gpt-6-astra` là thứ CÔNG CỤ tự khai ở header phiên
+      (đo được từ `stderr.log`), không phải thứ đã phục vụ từng lượt.
+  - muc: 'Kết quả lượt review của connector codex trên `99aef14`'
+    ly_do: 'xem `cross_review.duong_review_thu_ba.vi_sao_khong_do_duoc`.'
+  - muc: 'Nội dung `run.json` và `stderr.log` của 17 lượt'
+    ly_do: 'Cả hai NGOÀI kho. Với người đọc kho, mọi scalar runtime là ATTESTATION.'
+  - muc: 'URL uỷ quyền bền cho `99aef14` (`authorization_url`)'
+    ly_do: >-
+      Chỉ thị chọn phương án 2 nằm trong phiên điều phối, KHÔNG có review/comment GitHub nào mang
+      nó. Nay ghi `authorization_url: null` để khoản thiếu bằng chứng dễ thấy hơn. Cả khoá vắng
+      lẫn giá trị null đều phát hiện được khi đối chiếu schema; cả hai vẫn thiếu URL bền. Bản vá
+      chưa thêm cổng kiểm land evidence. Không dựng hiện vật giả sau sự việc để lấp ô trống.
+  - muc: 'Byte thật của comment trên GitHub'
+    ly_do: >-
+      Đường ĐỌC của MCP chuẩn hoá thực thể HTML trong thân issue/comment, và container không có
+      client thứ hai (REST tới `repos/…` bị proxy chặn 403). `diff` bản-đã-đến chỉ khẳng định
+      được KHÔNG lệch về ký tự thật, không khẳng định được byte.
+
+# ─────────────────── NỢ SINH RA / MANG SANG ───────────────────
+no_ky_thuat:
+  - slug: cong-byte-co-rang-cong-claims-khong-dem-su-that
+    trang_thai: MANG_SANG
+    mo_ta: '`doc-claims-check` không bắt ba đột biến số; mã ở `scripts/tl_core/workflow.py`.'
+    ngoai_write_set: true
+  - slug: cong-receipt-chua-dinh-nghia-cay-dang-merge
+    trang_thai: MANG_SANG
+    mo_ta: >-
+      Cổng receipt đọc cây trên đĩa nhưng xét quan hệ tổ tiên từ `HEAD`, nên cây đang merge cho
+      kết quả đỏ hợp đồng mà khó đọc.
+    ngoai_write_set: true
+  - slug: gate-master-do-lai-cay-trung-bam
+    trang_thai: MOI
+    mo_ta: >-
+      Khi merge là fast-forward về nội dung, những BƯỚC LẶP LẠI của chân `ubuntu-latest` ở lượt
+      master đo lại một cây KHÔNG khác một byte so với cây lượt PR đã đo xanh. Đo được ở chính
+      lần land này: `tree(e82af37) == tree(99aef14) == e307ea31`. Chưa có cổng nào cắt những
+      bước lặp ấy.
+    pham_vi_HEP_co_chu_dich: >-
+      Nợ này KHÔNG đề xuất cắt CẢ chân ubuntu. Chân ấy còn chạy hai bước mà lượt PR bỏ qua
+      (`tl selftest` có bằng chứng exact-identity, và `release-verify strict` lane LAND); cắt cả
+      chân là mất luôn hai bước đó. Phát biểu rộng hơn phép đo chính là finding mà cross-review
+      lượt 1 và lượt 2 đã chấm ở đúng chỗ này.
+    chua_co_packet: true
+  - slug: khong-cong-nao-doc-ops-land
+    trang_thai: MOI
+    mo_ta: >-
+      Nợ schema/URL uỷ quyền; giữ slug lịch sử, không hiểu nó là không cổng nào đọc thư mục.
+      Đo trên `8802924`: grep `ops/*.py`, `.claude/dev/*.py`, `scripts/tl_core/*.py`,
+      `.github/workflows/*.yml` cho `ops/land` và `land_operator` ⇒ 0 nơi. Phép tìm literal
+      không đo đủ phạm vi đọc: tại cùng SHA, `eol-policy survey` trong `ci.yml` chạy
+      `python .githooks/eol_policy.py --all --json`, đọc blob trong index và kiểm EOL của cả
+      9 tệp `ops/land/*.yaml`, gồm tệp #493. Kiểm EOL không xác minh schema hay URL uỷ quyền.
+      Phản chứng bỏ dòng `authorization_url` trên bản sao r370 vẫn cho `bien_nhan_v2` ĐẠT.
+      Việc khoản thiếu đi qua gate PR, gate master và 11 lượt cross-review rồi được connector
+      nêu sau merge là ATTESTATION của phiên điều phối; gói không có đầy đủ log các lượt đó.
+      Không suy từ việc không báo finding thành cả 11 lượt đều chưa đối chiếu schema.
+    chua_co_packet: true
+  - slug: quyet-dinh-dong-vong-lap-review-chua-vao-doctrine
+    trang_thai: MOI
+    mo_ta: >-
+      "Đóng vòng lặp cross-review theo quyết định chủ kho khi P1=P2=0 nhưng P3 còn" hiện CHỈ nằm
+      trong tệp land evidence này và trong `r360`. Không doctrine nào nói khi nào được dừng.
+
+# ─────────────────── CHUỖI HỒ SƠ ───────────────────
+chuoi_ho_so_dung_o_dau:
+  quy_tac_dang_theo: >-
+    Tiền lệ #495/#490 và `r364`: verdict của PR hồ sơ vào kho ở PR hồ sơ KẾ TIẾP, và PR hồ sơ kế
+    tiếp KHÔNG tự sinh thêm lượt review khác nền trừ khi chủ kho gọi.
+  ap_dung_cho_lan_nay: >-
+    PR mang tệp này là PR hồ sơ của #493. Nó KHÔNG sinh mắt xích thứ ba: `merged` của nó là kết
+    cục cuối của tuyến hồ sơ #491 → #493 → (PR này).
+  loi_khai_nay_do_duoc_ve_sau: >-
+    Hệ quả của câu trên — sự VẮNG MẶT của một PR land evidence cho chính PR này — sẽ ĐO ĐƯỢC về
+    sau, nhưng CHƯA ĐO ĐƯỢC tại commit này. Ai đọc trước khi PR này merge phải coi đây là DỰ KIẾN.

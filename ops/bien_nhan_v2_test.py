@@ -21,6 +21,8 @@ from __future__ import annotations
 import copy
 import importlib.util
 import os
+os.environ["PYTHONUTF8"] = "1"
+os.environ["PYTHONIOENCODING"] = "utf-8"
 import shutil
 import re as _RE
 import subprocess
@@ -93,6 +95,8 @@ BO_BA_PROVIDER_DONG_BANG = (
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
     ("anthropic_claude", "claude_code", "machine/local"),
     ("openai_codex", "codex_cli", "machine"),
+    ("openai_codex", "codex_desktop", "machine"),
+    ("openai_codex", "codex_service", "machine"),
     ("human", "manual_audit", "human"),
 )
 KE_HOACH_PROVIDER = "ops/KE_HOACH_THI_CONG_DA_PROVIDER.md"
@@ -102,7 +106,7 @@ NEO_LUAT_DONG_BANG = (
     ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",
      "`human_audited`: người audit có danh tính bền trên GitHub"),
     ("ASSURANCE_CUA_MO_HINH", "docs/PROTOCOL_DA_PHIEN.md",
-     "`cross_approved`: Claude review Codex hoặc Codex review Claude"),
+     "`cross_approved`: reviewer và executor dùng hai họ model độc lập phục vụ lượt chạy (ví dụ họ Claude review họ Codex hoặc ngược lại)"),
 )
 # BA nguồn mà cổng đọc — chép tay để rig không hỏi cổng "anh cần gì" rồi chép đúng thứ cổng nói.
 NGUON_PHU = ("AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md", ".claude/dev/launcher.py")
@@ -112,7 +116,8 @@ NGUON_PHU = ("AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md", ".claude/dev/launcher.py"
 # mà hợp đồng đã khác, và một biên nhận lịch sử nguyên byte bị gương từ chối trong khi gốc nhận.
 HANG_PARITY = ("PROVIDER_CHO_PHEP", "PROVIDER_HOP_DONG", "PROVIDER_BI_DANH", "PROVIDER_NGUON_HONG",
                "ALLOWLIST_CUTOVER", "NO_DA_DO", "ANCHOR_LOAI_CHO_PHEP", "ASSURANCE_CAM_THEO_PROVIDER",
-               "ASSURANCE_CUA_NGUOI", "ASSURANCE_CUA_MO_HINH", "VAN_CHUYEN_NGUOI")
+               "ASSURANCE_CUA_NGUOI", "ASSURANCE_CUA_MO_HINH", "VAN_CHUYEN_NGUOI", "HO_MODEL_MAC_DINH",
+               "MUC_BANG_CHUNG_MODEL", "HO_MODEL_CHO_PHEP")
 
 
 class TinHieuChotCa(AssertionError):
@@ -431,6 +436,7 @@ def c4f_assurance_CHI_thieu_bang_chung():
         d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "claude_code_cli",
                                         "KHONG_do_duoc": "x"}          # KHÔNG che_do, KHÔNG run_id
         d["assurance"] = "cross_approved"
+        d["executor_provider"] = "openai_codex"
         tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
         n, loi = _kiem(tmp, allowlist={}, no_da_do={})
         bang(n == 1 and "session_run_id" in loi[0],
@@ -981,6 +987,7 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
     b = _bn_neo(sha, bam, duong)
     b["receipt_id"] = "ca-thu-b"
     b["assurance"] = "cross_approved"
+    b["executor_provider"] = "anthropic_claude"
     _ghi_bn(tmp, b, "b-verdict.receipt.yaml")
     return tmp / "ops" / "bien_nhan_v2.py"
 
@@ -2065,18 +2072,19 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
           `machine/local` phải ĐƯỢC NHẬN; với hàng LỆCH (`machine`, đúng bản trước bản vá) chính
           biên nhận ấy phải BỊ TỪ CHỐI. Không có (c) thì (a)/(b) chỉ là hai chuỗi bằng nhau."""
     # (a) bảng launcher ⊇ oracle, khớp từng cột
-    hang = {r[0]: r for r in (_doc_bang_launcher("_TRANSPORT_CONTRACTS")
+    hang = {(r[0], r[-2]): r for r in (_doc_bang_launcher("_TRANSPORT_CONTRACTS")
                               + _doc_bang_launcher("_PROVIDER_NGOAI_CLI")) if r}
     for prov, be_mat, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
-        r = hang.get(prov)
-        bang(r is not None, f"`{prov}` KHÔNG có hàng nào trong bảng của launcher.py")
+        r = hang.get((prov, be_mat))
+        bang(r is not None, f"`{prov}`/`{be_mat}` KHÔNG có hàng nào trong bảng của launcher.py")
         bang(r[-2:] == [be_mat, van_chuyen],
              f"hàng `{prov}` LỆCH oracle §2: launcher={r[-2:]} oracle={[be_mat, van_chuyen]}")
     # (b) oracle ⊆ bảng §2 của kế hoạch, đọc Ô CUỐI chứ không dò substring (`machine` là tiền tố
     #     của `machine/local`, nên `in` sẽ khớp nhầm và chốt mất răng đúng chỗ cần nó nhất).
     van = (GOC / KE_HOACH_PROVIDER).read_text(encoding="utf-8")
     for prov, be_mat_s2, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
-        dong = [l for l in van.splitlines() if l.startswith("|") and f"`{prov}`" in l]
+        dong = [l for l in van.splitlines() if l.startswith("|") and f"`{prov}`" in l
+                and f"`{be_mat_s2}`" in l]
         bang(len(dong) == 1,
              f"`{prov}`: tìm được {len(dong)} hàng trong §2 của `{KE_HOACH_PROVIDER}`, đòi ĐÚNG 1")
         o = [c.strip() for c in dong[0].strip("|").split("|")]
@@ -2085,20 +2093,10 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
         # `R9-F05`: đối chiếu CẢ cột surface, không chỉ transport. Bản trước chỉ so ô cuối, nên
         # lời khai "Antigravity là hàng DUY NHẤT lệch §2" rộng hơn phép đo — reviewer lượt 9 đổi
         # riêng ô surface trong bản sao kế hoạch và `c44` VẪN QUA.
-        # Ô surface có HAI dạng trong §2: một token trong dấu nháy ngược, hoặc prose nhiều giá trị
-        # (hàng Codex: "`codex_cli` hoặc Codex service"). Khai thẳng ngoại lệ ấy thay vì lờ đi:
-        # dạng nhiều giá trị chỉ đòi surface của oracle CÓ MẶT như một token, và *"Codex service"*
-        # chưa có tên máy trong hợp đồng dữ liệu — đó là nợ CHÍNH SÁCH, không vá trong PR này.
-        token = _RE.findall(r"`([^`]+)`", o[-2])
-        if len(token) == 1 and " hoặc " not in o[-2]:
-            bang(token[0] == be_mat_s2,
-                 f"`{prov}`: §2 khai bề mặt {token[0]!r}, oracle chép tay {be_mat_s2!r}")
-        else:
-            bang(be_mat_s2 in token,
-                 f"`{prov}`: ô bề mặt §2 nhiều giá trị {o[-2]!r} mà KHÔNG chứa {be_mat_s2!r}")
-            bang(prov == "openai_codex",
-                 f"`{prov}`: ô bề mặt nhiều giá trị — mới chỉ khai ngoại lệ cho `openai_codex`, "
-                 f"thêm hàng dạng này phải quyết cách biểu diễn trong hợp đồng dữ liệu trước")
+        # Mỗi hàng §2 có đúng một surface máy; nợ tên Codex service ở #461
+        # không được dùng làm ngoại lệ cho bảng contract hiện hành.
+        bang(o[-2] == f"`{be_mat_s2}`",
+             f"`{prov}`: §2 khai bề mặt {o[-2]!r}, đòi đúng một token `{be_mat_s2}`")
     # (c) witness đối xứng — hàng ấy phải ĐỔI HÀNH VI, không chỉ đổi chuỗi
     d = v2_du()
     d["model_reviewer_identity"].update(provider="google_antigravity", surface="antigravity",
@@ -2210,6 +2208,123 @@ def c45_neo_canonical_ancestry_KHONG_song_sot_qua_land_bang_SQUASH():
                         "thành câu trả lời 'không phải tổ tiên'")
 
 
+@ca
+def c49_cross_approved_cung_ho_model_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "openai_codex"
+    bang(any("cùng họ model" in x for x in bnv2._thieu(d)), "cùng họ model phải bị từ chối")
+
+
+@ca
+def c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"
+    bang(any("thiếu người audit" in x for x in bnv2._thieu(d)), "thiếu audit phải bị từ chối")
+
+
+@ca
+def c51_cross_approved_khac_ho_model_co_audit_phai_QUA():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "khai_co_audit"; d["model_reviewer_identity"]["nguoi_audit"] = "ducthangho"
+    bang([x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "người audit" in x] == [], "cross_approved hợp lệ dính lỗi")
+
+
+@ca
+def c52_cross_approved_thieu_executor_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"
+    bang(any("không xác định được họ model của executor" in x for x in bnv2._thieu(d)), "thiếu họ executor phải bị từ chối")
+
+
+@ca
+def c53_cross_approved_antigravity_khong_khai_model_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "google_antigravity"
+    bang(any("không xác định được họ model của executor" in x for x in bnv2._thieu(d)), "antigravity thiếu model phải bị từ chối")
+
+
+@ca
+def c54_cross_approved_model_la_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["executor_model"] = "grok-4"
+    bang(any("không xác định được họ model của executor" in x for x in bnv2._thieu(d)), "model lạ phải bị từ chối")
+
+
+@ca
+def c55_cross_approved_muc_bang_chung_la_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "xin_the"
+    bang(any("ngoài danh sách CHO PHÉP" in x for x in bnv2._thieu(d)), "mức lạ phải bị từ chối")
+
+
+@ca
+def c56_cross_approved_khong_do_duoc_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "khong_do_duoc"
+    bang(any("không đủ điều kiện cho cross_approved" in x for x in bnv2._thieu(d)), "khong_do_duoc phải bị từ chối")
+
+
+@ca
+def c57_cross_approved_do_may_thieu_ref_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "do_may"
+    bang(any("thiếu tham chiếu đo lường" in x for x in bnv2._thieu(d)), "do_may thiếu ref phải bị từ chối")
+
+
+@ca
+def c58_cross_approved_do_may_co_ref_phai_QUA():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "anthropic_claude"; d["model_reviewer_identity"]["model_evidence"] = "do_may"; d["model_reviewer_identity"]["model_evidence_ref"] = "runs/a1b2/telemetry.json"
+    bang([x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "đo lường" in x] == [], "do_may có ref dính lỗi")
+
+
+@ca
+def c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "google_antigravity"; d["executor_model"] = "gemini-2.5-pro"
+    bang(any("khai đè model executor cho `cross_approved` mà thiếu mức bằng chứng" in x for x in bnv2._thieu(d)), "executor khai đè thiếu evidence phải bị từ chối")
+
+
+@ca
+def c60_cross_approved_executor_do_may_co_ref_phai_QUA():
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "google_antigravity"; d["executor_model"] = "gemini-2.5-pro"; d["executor_model_evidence"] = "do_may"; d["executor_model_evidence_ref"] = "runs/c3d4/telemetry.json"
+    bang([x for x in bnv2._thieu(d) if "cross_approved" in x or "họ model" in x or "đo lường" in x or "bằng chứng" in x] == [], "executor do_may có ref dính lỗi")
+
+
+@ca
+def c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien():
+    bang(bnv2._ho_model_cua_ten("gemini-2.5-pro") == "gemini", "gemini phải nhận diện được")
+    goc = bnv2.HO_MODEL_CHO_PHEP
+    try:
+        bnv2.HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt"})
+        bang(bnv2._ho_model_cua_ten("gemini-2.5-pro") == "", "gỡ gemini khỏi CHO_PHEP phải trả về rỗng")
+    finally:
+        bnv2.HO_MODEL_CHO_PHEP = goc
+
+
+
+@ca
+def c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer():
+    """`M17` — `P2` của verdict lượt 3. Bên trong khối đã mang tên vai, khoá KHÔNG mang tiền tố.
+
+    Bản trước áp tiền tố `executor_` cho khoá tra CẢ TRONG `sub` lẫn `d`, nên
+    `model_reviewer_identity: {model: …}` CHẠY (vai reviewer tiền tố rỗng) còn
+    `model_executor_identity: {model: …}` thì KHÔNG — và thông điệp *"không xác định được họ model
+    của executor"* đọc như "bạn chưa khai" trong khi người ta ĐÃ khai.
+
+    Đo trên CẢ 184 biên nhận trước khi đổi: dạng CÓ tiền tố bên trong `sub` xuất hiện **0** lần,
+    nên bỏ nó không thu hẹp ai trong thực tế."""
+    d = v2_du(); d["assurance"] = "cross_approved"
+    d["model_executor_identity"] = {"model": "gemini-2.5-pro"}
+    bang(bnv2._giai_ho_va_bc(d, "executor")[0] == "gemini",
+         "model_executor_identity {model: …} phải nhận diện được họ model")
+    e = v2_du(); e["assurance"] = "cross_approved"
+    e["model_reviewer_identity"] = dict(e.get("model_reviewer_identity") or {}, model="gpt-5")
+    bang(bnv2._giai_ho_va_bc(e, "reviewer")[0] == "gpt",
+         "ĐỐI CHỨNG: khối reviewer vẫn phải nhận diện được bằng cùng cách viết")
+
+
+@ca
+def c63_muc_bang_chung_RONG_KHONG_khai_de_phai_QUA():
+    """`M21` — đóng `S2`. `A14` của r3 viết *"RỖNG ⇒ CHẶN"*, RỘNG HƠN mã: mã chỉ chặn RỖNG khi CÓ
+    khai đè (`ov and not bc`). Đo được **50/50** biên nhận `cross_approved` thật có mức bằng chứng
+    RỖNG mà vẫn QUA — nên `A14` và `A3` chưa bao giờ thật sự loại trừ nhau.
+
+    Ca này là ĐỐI CHỨNG BIẾT TRƯỚC ĐÁP ÁN cho `A14`: nó CHẶN nghĩa là `A3` sắp vỡ."""
+    d = v2_du(); d["assurance"] = "cross_approved"; d["executor_provider"] = "openai_codex"
+    bang([x for x in bnv2._thieu(d) if "bằng chứng" in x] == [],
+         "không khai đè + bằng chứng RỖNG phải QUA — nếu CHẶN thì 50 biên nhận cũ sắp đỏ")
+
+
 _mri_that = bnv2._mri
 _thieu_that = bnv2._thieu
 
@@ -2237,6 +2352,135 @@ def _git_bo_kiem_duong_dan(root, *args, timeout=20):
         goc = str(args[1]).split(":", 1)[0]
         return _git_that(root, "rev-parse", f"{goc}:ops/reviews/x-verdict.md", timeout=timeout)
     return _git_that(root, *args, timeout=timeout)
+
+
+@ca
+def c64_desktop_advisory_va_cli_giu_hop_dong():
+    """WP610: hai bề mặt khác nhau, cùng provider; oracle viết tay."""
+    for surface in ("codex_cli", "codex_desktop"):
+        d = v2_du()
+        d["assurance"] = "advisory_review"
+        d["model_reviewer_identity"].update(surface=surface, transport="machine")
+        bang(bnv2._thieu(d) == [], f"{surface}: receipt đúng bị từ chối: {bnv2._thieu(d)}")
+
+
+@ca
+def c65_desktop_khong_muon_quyen_hoac_bien_thanh_cli():
+    """Thêm surface không mở provider/transport/assurance khác."""
+    # Oracle đọc AST riêng: Desktop không phải lệnh CLI và chỉ có một hàng đúng.
+    cli = _doc_bang_launcher("_TRANSPORT_CONTRACTS")
+    ngoai_cli = _doc_bang_launcher("_PROVIDER_NGOAI_CLI")
+    bang(not any(r[-2] == "codex_desktop" for r in cli if r),
+         "Desktop bị khai thành CLI trong `_TRANSPORT_CONTRACTS`")
+    desktop = [r for r in ngoai_cli if r and r[:2] == ["openai_codex", "codex_desktop"]]
+    bang(desktop == [["openai_codex", "codex_desktop", "machine"]],
+         f"Desktop ngoài CLI phải có ĐÚNG 1 hàng với transport machine: {desktop}")
+    # Giữ đủ evidence phiên để đo riêng phân vùng NGƯỜI/MÔ HÌNH.
+    d = v2_du(); d["assurance"] = "human_audited"
+    d["model_reviewer_identity"].update(surface="codex_desktop", transport="machine", phien_doc_lap=True)
+    loi = bnv2._thieu(d)
+    bang(any("mức của NGƯỜI audit" in x for x in loi),
+         f"Desktop có session phải bị chặn human_audited bởi phân vùng người/mô hình: {loi}")
+    for field, value, reason in (("provider", "anthropic_claude", "surface"),
+                                  ("transport", "human", "transport"),
+                                  ("surface", "codex_desktop_fake", "surface")):
+        d = v2_du(); d["assurance"] = "advisory_review"
+        d["model_reviewer_identity"].update(surface="codex_desktop", transport="machine")
+        d["model_reviewer_identity"][field] = value
+        bang(any(reason in x for x in bnv2._thieu(d)), f"{field}={value}: thiếu lỗi đúng tính chất")
+    for assurance in ("human_audited", "same_provider_approved", "cross_approved"):
+        d = v2_du(); d["assurance"] = assurance
+        d["model_reviewer_identity"].update(surface="codex_desktop", transport="machine",
+                                            che_do="subagent", phien_doc_lap=False)
+        d["model_reviewer_identity"].pop("session_run_id")
+        d["model_reviewer_identity"]["KHONG_do_duoc"] = "Không đo được session/model"
+        loi = bnv2._thieu(d)
+        bang(any(assurance in x for x in loi), f"Desktop không evidence được nâng {assurance}: {loi}")
+
+
+@ca
+def c66_desktop_xoa_hang_doi_hanh_vi_cli_van_qua():
+    """Đột biến trên cây gương: bỏ đúng hàng Desktop; CLI là đối chứng cùng lúc."""
+    row = '    ("openai_codex", "codex_desktop", "machine"),'
+    for removed in (False, True):
+        with tempfile.TemporaryDirectory() as t:
+            kw = {"sua_launcher": _thay_1(row, "")} if removed else {}
+            cong = _cay_guong(Path(t), kho_rieng=False, **kw)
+            sp = importlib.util.spec_from_file_location("wp610_mirror", cong)
+            mod = importlib.util.module_from_spec(sp); sp.loader.exec_module(mod)
+            dung(mod.PROVIDER_NGUON_HONG is None, f"rig không đọc được nguồn: {mod.PROVIDER_NGUON_HONG}")
+            for surface in ("codex_cli", "codex_desktop"):
+                d = v2_du(); d["assurance"] = "advisory_review"
+                d["model_reviewer_identity"].update(surface=surface, transport="machine")
+                loi = mod._thieu(d)
+                if removed and surface == "codex_desktop":
+                    bang(len(loi) == 1 and "surface" in loi[0], f"bỏ hàng không chặn đúng surface: {loi}")
+                else:
+                    bang(loi == [], f"đối chứng {surface} removed={removed}: {loi}")
+
+
+@ca
+def c67_service_khai_that_duoc_nhan_khai_sai_bi_tu_choi_dung_cot():
+    """wp461 r3 (Mission #470 Q1): bề mặt thứ ba của Codex là `codex_service` — dịch vụ / GitHub App
+    `chatgpt-codex-connector[bot]`. Ba điều phải đúng CÙNG LÚC: (1) khai THẬT được nhận với danh
+    sách lỗi RỖNG (`R9-F04`: không phải "không có chữ surface"); (2) mọi tên khác cho cùng bề mặt
+    bị từ chối ĐÚNG MỘT lỗi, ĐÚNG cột surface — kể cả tên mà lượt r15 của wp523 đã thử
+    (`codex_github_connector`); (3) hợp đồng của `openai_codex` đúng ba bề mặt, không hơn."""
+    d = v2_du(); d["assurance"] = "advisory_review"
+    d["model_reviewer_identity"].update(surface="codex_service", transport="machine")
+    bang(bnv2._thieu(d) == [], f"codex_service khai THẬT bị từ chối: {bnv2._thieu(d)}")
+    for sai in ("codex_api", "codex_github_connector", "Codex service", "codex_service_fake"):
+        d = v2_du(); d["assurance"] = "advisory_review"
+        d["model_reviewer_identity"].update(surface=sai, transport="machine")
+        loi = bnv2._thieu(d)
+        bang(len(loi) == 1 and "surface" in loi[0] and "openai_codex" in loi[0],
+             f"surface={sai!r}: đòi ĐÚNG 1 lỗi ở cột surface, đo được {loi}")
+    bang(bnv2.PROVIDER_HOP_DONG["openai_codex"]["be_mat"] == frozenset({"codex_cli", "codex_desktop", "codex_service"}),
+         f"hợp đồng openai_codex lệch: {sorted(bnv2.PROVIDER_HOP_DONG['openai_codex']['be_mat'])}")
+    # service KHÔNG phải CLI: không được có mặt trong `_TRANSPORT_CONTRACTS` (S5 của spec r3).
+    cli = _doc_bang_launcher("_TRANSPORT_CONTRACTS")
+    bang(not any(r[-2] == "codex_service" for r in cli if r),
+         "codex_service bị khai thành CLI trong `_TRANSPORT_CONTRACTS`")
+    ngoai_cli = _doc_bang_launcher("_PROVIDER_NGOAI_CLI")
+    service = [r for r in ngoai_cli if r and r[:2] == ["openai_codex", "codex_service"]]
+    bang(service == [["openai_codex", "codex_service", "machine"]],
+         f"service ngoài CLI phải có ĐÚNG 1 hàng với transport machine: {service}")
+    # Tên hợp đồng KHÔNG mua được assurance: không session ⇒ không nâng mức mô hình; phân vùng
+    # người/mô hình vẫn chặn `human_audited` — y hệt Desktop (`c65`).
+    d = v2_du(); d["assurance"] = "human_audited"
+    d["model_reviewer_identity"].update(surface="codex_service", transport="machine", phien_doc_lap=True)
+    bang(any("mức của NGƯỜI audit" in x for x in bnv2._thieu(d)),
+         "codex_service có session không được chặn human_audited bởi phân vùng người/mô hình")
+    for assurance in ("same_provider_approved", "cross_approved"):
+        d = v2_du(); d["assurance"] = assurance
+        d["model_reviewer_identity"].update(surface="codex_service", transport="machine")
+        d["model_reviewer_identity"].pop("session_run_id")
+        d["model_reviewer_identity"]["KHONG_do_duoc"] = "GitHub App không xuất session/model"
+        loi = bnv2._thieu(d)
+        bang(any(assurance in x for x in loi), f"codex_service không evidence được nâng {assurance}: {loi}")
+
+
+@ca
+def c68_service_xoa_hang_doi_hanh_vi_cli_desktop_van_qua():
+    """Đột biến trên cây gương: bỏ ĐÚNG hàng `codex_service`; CLI và Desktop là đối chứng cùng lúc.
+    Đây là phép đo A6 của spec r3: rút hàng phải làm ca dương ĐỎ với thông báo nêu đúng cột."""
+    row = '    ("openai_codex", "codex_service", "machine"),'
+    for removed in (False, True):
+        with tempfile.TemporaryDirectory() as t:
+            kw = {"sua_launcher": _thay_1(row, "")} if removed else {}
+            cong = _cay_guong(Path(t), kho_rieng=False, **kw)
+            sp = importlib.util.spec_from_file_location("wp461_mirror", cong)
+            mod = importlib.util.module_from_spec(sp); sp.loader.exec_module(mod)
+            dung(mod.PROVIDER_NGUON_HONG is None, f"rig không đọc được nguồn: {mod.PROVIDER_NGUON_HONG}")
+            for surface in ("codex_cli", "codex_desktop", "codex_service"):
+                d = v2_du(); d["assurance"] = "advisory_review"
+                d["model_reviewer_identity"].update(surface=surface, transport="machine")
+                loi = mod._thieu(d)
+                if removed and surface == "codex_service":
+                    bang(len(loi) == 1 and "surface" in loi[0] and "codex_service" in loi[0],
+                         f"bỏ hàng không chặn đúng surface: {loi}")
+                else:
+                    bang(loi == [], f"đối chứng {surface} removed={removed}: {loi}")
 
 
 def _chay_1(fn):
@@ -2737,6 +2981,34 @@ def _dot_bien():
        "c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy",
        "`transport: null` lọt vì bị gộp vào nhánh VẮNG — hành vi đã công bố mà không ai canh",
        doi_chung="c18_neo_git_DUNG_thi_qua")
+    # M7 / A6 — các chốt họ model và mức bằng chứng cho cross_approved
+    do("m62_bo_chot_cung_ho_model", lambda: _dot_bien_tep("            if ho_rev and ho_exec and ho_rev == ho_exec:", "            if False:"),
+       "c49_cross_approved_cung_ho_model_phai_bi_tu_choi", "gỡ chốt cùng họ model", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m63_bo_chot_thieu_nguoi_audit", lambda: _dot_bien_tep('                elif bc == "khai_co_audit":', '                elif False and bc == "khai_co_audit":'),
+       "c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi", "gỡ chốt thiếu audit", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m64_bo_chot_thieu_ho_executor", lambda: _dot_bien_tep("            if not ho_exec:", "            if False:"),
+       "c52_cross_approved_thieu_executor_phai_bi_tu_choi", "gỡ chốt thiếu executor", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m65_bo_chot_antigravity_khong_khai_model", lambda: _dot_bien_tep('    "anthropic_claude": "claude",', '    "google_antigravity": "gemini", "anthropic_claude": "claude",', bo_qua_parity=("HO_MODEL_MAC_DINH",)),
+       "c53_cross_approved_antigravity_khong_khai_model_phai_bi_tu_choi", "antigravity ngầm định gemini", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m66_noi_bang_nhan_dien_model_la", lambda: _dot_bien_tep('    if "gemini" in t and "gemini" in HO_MODEL_CHO_PHEP:\n        return "gemini"\n    return ""', '    if "gemini" in t and "gemini" in HO_MODEL_CHO_PHEP:\n        return "gemini"\n    return t'),
+       "c54_cross_approved_model_la_phai_bi_tu_choi", "nới nhận diện model lạ", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m67_bo_chot_muc_bang_chung_la", lambda: _dot_bien_tep("                elif bc and bc not in MUC_BANG_CHUNG_MODEL:", "                elif False:"),
+       "c55_cross_approved_muc_bang_chung_la_phai_bi_tu_choi", "gỡ chốt mức lạ", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m68_bo_chot_khong_do_duoc", lambda: _dot_bien_tep('                elif bc == "khong_do_duoc":', "                elif False:"),
+       "c56_cross_approved_khong_do_duoc_phai_bi_tu_choi", "gỡ chốt khong_do_duoc", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m69_bo_chot_do_may_thieu_ref", lambda: _dot_bien_tep('                elif bc == "do_may":', "                elif False:"),
+       "c57_cross_approved_do_may_thieu_ref_phai_bi_tu_choi", "gỡ chốt do_may thiếu ref", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m70_bo_chot_executor_khai_de_thieu_evidence", lambda: _dot_bien_tep("                if ov and not bc:", "                if False:"),
+       "c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi", "gỡ chốt khai đè thiếu evidence", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m71_xoa_gemini_khoi_ho_model_cho_phep", lambda: _dot_bien_tep('HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt", "gemini"})', 'HO_MODEL_CHO_PHEP = frozenset({"claude", "gpt"})', bo_qua_parity=("HO_MODEL_CHO_PHEP",)),
+       "c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien", "xoá gemini khỏi HO_MODEL_CHO_PHEP", doi_chung="c18_neo_git_DUNG_thi_qua")
+    # `M17`/`A18` — đột biến TRẢ `pre` VỀ ÁP CHO CẢ `sub`, tức đúng hành vi cũ sinh ra `P2`.
+    # Nó phải làm ĐÚNG `c62` đỏ và phải phân hạng `giet_that`; chết vì một lỗi khác là TÍN DỤNG GIẢ.
+    do("m72_tra_tien_to_ve_ap_cho_ca_sub", lambda: _dot_bien_tep(
+        'return sub, ((sub, ""), (d, f"{vai}_" if vai == "executor" else ""))',
+        'return sub, ((sub, f"{vai}_" if vai == "executor" else ""), (d, f"{vai}_" if vai == "executor" else ""))'),
+       "c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer",
+       "áp lại tiền tố vai cho khoá tra BÊN TRONG khối model_<vai>_identity", doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig
     # chép (qua `shutil.copyfile`), bốn hằng parity cũ vẫn bằng nhau. Nay rig phải bắt được điều

@@ -1,0 +1,11 @@
+--- luot3-audit.py
++++ r5/audit.py
+@@ -59,7 +59,7 @@
+     experiments=[
+       ('pure_sys_list', edit(old,old+'\n    sys.path.append("c1a1a-review-probe")')),
+       ('pure_module_list',edit(old,old+'\n    _REVIEW_LOG.append(len(raw))').replace('BOM = b','_REVIEW_LOG = []\nBOM = b')),
+-      ('pure_io_file',edit(old,old+'\n    with __import__("io").open("/tmp/review650-r3/purity-marker.txt", "w") as f:\n        f.write("side-effect")')),
++      ('pure_io_file',edit(old,old+'\n    with __import__("io").open("/tmp/review650-r5-output/purity-marker.txt", "w") as f:\n        f.write("side-effect")')),
+     ]
+     for name,src in experiments:
+         m,p=suite(name,src)

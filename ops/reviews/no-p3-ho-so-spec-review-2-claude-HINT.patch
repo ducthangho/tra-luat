@@ -1,0 +1,36 @@
+# lop: n1-grep-chu-dung-khong-neu-pham-vi-dong, ngoai-pham-vi-pr721-khong-co-phep-do, n3c-khong-liet-ke-phep-kiem-khoa-landed-quyet-dinh, n5-goc-ghim-6f121a3-khong-theo-dau-nhanh-dich, phuluc-b-o7-con-tro-so-dong-spec-anh-em-r1
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit (hint của review đặc tả lượt 2; dry-run từ thư mục cay-kho theo lệnh điều phối nêu)
+--- ops/specs/no-p3-ho-so-r2.md
++++ ops/specs/no-p3-ho-so-r2.md
+# lop: n1-grep-chu-dung-khong-neu-pham-vi-dong
+@@ -124 +124,3 @@
+-    `grep -F` hai chuỗi chữ đúng. Đột biến (mỗi cái phải ĐỎ): số dòng lệch +1 và lệch −1 ở TỪNG phần; đổi một ký tự trong
++    `grep -F` hai chuỗi chữ đúng TRÊN CHÍNH dòng `chữ đúng:` của phần S2 và của phần M8 (không trên cả tệp: review lượt 2 đo 15-10-2026 ~10:10Z
++    trên bản mô phỏng — nếu tệp còn một câu giải thích mang đúng chuỗi ấy thì đột biến chỉ sửa dòng `chữ đúng:` thành `r13` hay chữ cũ SỐNG dưới
++    `grep -F` toàn tệp, ĐỎ dưới `grep -F` trên dòng). Đột biến (mỗi cái phải ĐỎ): số dòng lệch +1 và lệch −1 ở TỪNG phần; đổi một ký tự trong
+# lop: ngoai-pham-vi-pr721-khong-co-phep-do
+@@ -136,2 +138,5 @@
+-- **N2 (spec gốc bất biến):** `git diff --stat 6f121a3..HEAD -- ops/specs/ci-g5-cong-cu-va-tiep-r14.md ops/specs/launcher-con-song-esrch-r28.md`
+-  rỗng. Đột biến: chạm một byte spec gốc ⇒ lệnh trả không rỗng ⇒ ĐỎ.
++- **N2 (spec gốc và hồ sơ wp698 bất biến):** `git diff --stat 6f121a3..HEAD -- ops/specs/ci-g5-cong-cu-va-tiep-r14.md ops/specs/launcher-con-song-esrch-r28.md ops/land/pr721-wp698-land-evidence.yaml`
++  rỗng. Đột biến: chạm một byte spec gốc, hoặc "đóng" hai mục `S2-SPEC-HASH-CUA-R11` và `M8-GIU-RANG-CACH-NOI-R13` trong `no_con_mo` của hồ sơ wp698
++  (xoá hai mục ấy) ⇒ lệnh trả không rỗng ⇒ ĐỎ. Vì sao thêm tệp thứ ba (review lượt 2 đo 15-10-2026 10:03Z, PR mô phỏng sửa thêm đúng tệp ấy, 5 tệp):
++  N1, N2, N3, N3b, N3c, N4, N4b của r2 đều XANH và `kiem-re` ĐẠT (`5 tep doi, 0 loi`) vì tệp nằm trong allowlist `ops/land/`; `kiem-re` không so diff
++  PR với write set của lease, nên lời hứa "KHÔNG đóng hai mục" ở "Ngoài phạm vi" không có phép đo nào làm nó ĐỎ.
+# lop: n3c-khong-liet-ke-phep-kiem-khoa-landed-quyet-dinh
+@@ -150 +155,3 @@
+-    `sha256` = sha256 của `body` = `cc38f799…f09b` (đủ 64 ký tự như mục 5); `ghi_chu` chứa `pull/739#issuecomment-6103749546`.
++    `sha256` = sha256 của `body` = `cc38f799…f09b` (đủ 64 ký tự như mục 5); `ghi_chu` chứa `pull/739#issuecomment-6103749546`;
++    khoá `landed_quyet_dinh` KHÔNG có trong `trang_thai_packet` (cùng phép với N3b, để (iii) đỏ ở CHÍNH N3c: review lượt 2 đo 15-10-2026 ~09:51Z
++    trên bản mô phỏng — nếu N3c chỉ làm các phép so liệt kê ở trên thì (iii) XANH ở N3c và ĐỎ ở N3b).
+# lop: n5-goc-ghim-6f121a3-khong-theo-dau-nhanh-dich
+@@ -170 +177,4 @@
+-  PR), `CI_DUONG_NHANH_MERGE` (`github.sha`, commit merge ref). Dựng lại tại chỗ: `GOC` = `6f121a3…`, `DAU` = head PR, `MRG`
++  PR), `CI_DUONG_NHANH_MERGE` (`github.sha`, commit merge ref). Dựng lại tại chỗ: `GOC` = đầu nhánh đích lúc chạy (trong CI: `pull_request.base.sha`;
++  bằng `6f121a3…` chỉ khi master chưa tiến thêm commit nào ngoài `ops/{land,leases,reviews,specs}/**` — review lượt 2 đo 15-10-2026 ~09:59Z trên sandbox,
++  PR rẽ từ master đã tiến thêm một commit ngoài allowlist: `GOC` cố định `6f121a3…` ⇒ `day_du`, 5 tệp, `kiem-re` rc 1 oan; `GOC` = đầu master lúc đó
++  ⇒ `duong_nhanh`, 4 tệp; N2, N3b, N4b giới hạn theo đường dẫn nên không bị ảnh hưởng), `DAU` = head PR, `MRG`
+# lop: phuluc-b-o7-con-tro-so-dong-spec-anh-em-r1
+@@ -241 +251 @@
+-| O7 | 63 | — (khối không nêu dòng r28; nó nói về lease nháp và cổng lease) | — | `chỉ ghi nhận` — vế "cổng lease không đọc `spec_sha256_required`, `spec_hash`, `plan_hash`, `write_set_hash`, `spec_path`" là mục nợ 4 của packet #751 (`ops/specs/no-p3-lease-spec-hash-r1.md` dòng 8), không xử ở đây |
++| O7 | 63 | — (khối không nêu dòng r28; nó nói về lease nháp và cổng lease) | — | `chỉ ghi nhận` — vế "cổng lease không đọc `spec_sha256_required`, `spec_hash`, `plan_hash`, `write_set_hash`, `spec_path`" là mục nợ 4 của packet #751 (hàng `nguon_cap_viec`: `ops/specs/no-p3-lease-spec-hash-r1.md` dòng 8 và bản hiện hành `ops/specs/no-p3-lease-spec-hash-r2.md` dòng 10; đo 15-10-2026 ~09:46Z tại `a9ef33c`), không xử ở đây |

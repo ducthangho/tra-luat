@@ -1,0 +1,2 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CHAN [12]: KHÔNG_XÁC_ĐỊNH: ops/spec-lease-id-ep-kieu-yaml khai upstream không có ref: refs/remotes/origin/ops/spec-lease-id-ep-kieu-yaml

@@ -1,0 +1,226 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 2 cua packet #541
+# (WP541-PATH-TOI-THIEU-THEO-NEN revision 1 / generation 1), KHAC NEN
+# (claude review antigravity), tren `e60c757a`. **`changes_requested`** —
+# 1 LOP P1 · 1 LOP P2 · 0 P3 mo.
+#
+# VIET TAY TUNG TRUONG. Moi so do trong phien nay, 07:2x–07:4xZ 18-09-2026.
+
+schema_version: 2
+receipt_id: wp541-review-2-claude-20260918-ca4364fa
+kind: review_delivery_receipt
+packet_id: '541'
+packet_slug: 'WP541-PATH-TOI-THIEU-THEO-NEN'
+lease_id: wp541-path-r1-g1-antigravity
+phase_key: P541-R1-GEN1-PHIEN-20260918
+luot: 2
+role: reviewer
+provider: claude
+executor_provider: antigravity
+cross_provider: true
+
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Lease khai `assurance_target: human_audited` va `reviewer_provider: human`. Phien nay la mot
+  phien `claude`, KHONG phai nguoi audit theo §8; `antigravity` van 0 lan trong PROTOCOL nen cap
+  agy<->claude khong mua duoc `cross_approved` (packet rieng #551). Khong co `session_run_id`.
+
+verdict: changes_requested
+verdict_path: ops/reviews/wp541-review-2-claude-verdict.md
+verdict_sha256: ca4364fa0df0995adb2bef3829af88a49ab236d1cf16da25dcb3da928e92f65e
+verdict_bytes: 10995
+reviewed_sha: e60c757aa5353b4ca770beb83db25090597d9503
+reviewed_base: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+reviewed_sha_vi_sao: >-
+  Dau nhanh `fix_issue_541` sau khi agy hoa master va xu ly review luot 1. Khac luot 1,
+  `reviewed_base` nay TRUNG `start_from_sha` cua lease — do la P2-2 da vá.
+
+evidence_url: https://github.com/ducthangho/tra-luat/blob/820aebc767e20f00ff2ef86d0a4d09d9e680c31d/ops/reviews/wp541-review-2-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `820aebc767e20f00ff2ef86d0a4d09d9e680c31d` — commit DAU TIEN chua tep verdict,
+  tren nhanh claude/review-541-luot2-20260918.
+
+doi_chieu_luot_truoc:
+  luot_1_verdict: changes_requested
+  luot_1_tren_sha: 2170a4a4ce93fba8e7ba316da1ca51a0104dba96
+  luot_1_verdict_sha256: eb73292a7d748e920223b8e24b98fcfc130d718055942698e84bce654ad94e94
+  luot_1_so: '3 LOP P1 / 3 P2 / 4 P3'
+  P1_1_t168_do: 'DA VA THAT — chmod(0o755); bo day du 161/161, 0 DO'
+  P1_2_buoc3_nhan_bat_py: 'VA SINH CO CHE MOI — CON MO; va khuyet tat la cua REVIEWER luot 1'
+  P1_3_vi_pham_dieu_kien_bat_dau: 'DA DONG boi ngoai le §5 cua chu kho, KHONG do ban va'
+  P2_1_nhanh_khac_ten: 'DA DONG — lease ghi branch_thuc_te, quyet dinh giu ten fix_issue_541'
+  P2_2_base_lech: 'DA VA THAT — hoa master; thu-hoi failure -> success'
+  P2_3_gate_chua_chay: 'DA DONG — 5/5 check run success'
+  P3_1_bon_khoi_tautology: 'DA VA THAT — grep -c "def mutant_" => 0'
+  P3_2_thong_diep_dam_cung: 'DA VA THAT — nay noi suy {path_posix}'
+  P3_3_docstring_mau_thuan: 'DA VA THAT — buoc 3 that su goi shutil.which'
+  P3_4_ma_chet: 'DA VA THAT — grep -c ds_khao_sat => 0'
+
+phan_loai_finding: theo_lop
+so_lop_mo: 2
+so_p1: 1
+so_p2: 1
+so_p3: 0
+findings_ids:
+  - buoc3-shutil-which-keo-pathext-tren-py312   # P1, co che MOI
+  - ca-bat-buoc-cho-p1-2-khong-duoc-thi-cong    # P2, MOI
+
+bang_san:
+  - huong: 'check run tren head moi (no REVIEW-KHONG-DOC-CHECK-RUN, doc TRUOC moi viec khac)'
+    lenh: 'pull_request_read get_check_runs tren PR #554'
+    ket_qua: 'chuan-bi / gate / gate-registry / gate-packet-loop / thu-hoi = success (5/5)'
+    thanh: 'P2-3 va P2-2 cua luot 1 DA DONG'
+  - huong: 'head co troi trong luc review khong'
+    lenh: 'git rev-parse origin/fix_issue_541, hai lan'
+    ket_qua: 'e60c757aa535 ca hai lan'
+    thanh: 'KHOP — ghi ca cai khop'
+  - huong: 'base da hoa master chua'
+    lenh: 'git merge-base --is-ancestor origin/master origin/fix_issue_541'
+    ket_qua: 'CO'
+    thanh: 'P2-2 DA VA THAT'
+  - huong: 'bo test day du con ca DO nao khong (P1-1 + N5)'
+    lenh: 'archive head ra cay roi, chay lease_publish_test.py, doc rc TRUC TIEP'
+    ket_qua: 'rc=0 — 161/161 dat, da chay 161, bo qua 0, 0 dong DO'
+    thanh: 'P1-1 DA VA THAT; N5 delta 0 (nen 157/157, 157+4=161)'
+  - huong: 'bon khoi tautology con khong (P3-1)'
+    lenh: 'grep -c "def mutant_" tren tep test cua head'
+    ket_qua: '0'
+    thanh: 'P3-1 DA VA THAT'
+  - huong: 'ma chet [cw] + ds_thu_muc con khong (P3-4)'
+    lenh: 'grep -c ds_khao_sat tren ops/lease_publish.py cua head'
+    ket_qua: '0'
+    thanh: 'P3-4 DA VA THAT'
+  - huong: 'N6 tren base THAT'
+    lenh: 'git diff --numstat origin/master..origin/fix_issue_541 (HAI cham)'
+    ket_qua: '2 tep, +239 / -4'
+    thanh: 'DAT, va lan nay neo vao base THAT chu khong phai base cu'
+  - huong: 'buoc 3 moi co con nhan .bat/.py khong — doc MA NGUON that cua shutil.which'
+    lenh: 'inspect.getsource(shutil.which) tren /usr/bin/python3.11, 3.12, 3.13'
+    ket_qua: >-
+      3.11: `if os.path.dirname(cmd): if _access_check(cmd): return cmd; return None` (tra ve som).
+      3.12/3.13: `dirname, cmd = os.path.split(cmd); if dirname: path=[dirname]` roi roi xuong
+      `if sys.platform == "win32"` => `files = [cmd] + [cmd+ext for ext in pathext]`.
+    thanh: 'P1-2 CON MO tren py>=3.12 — hai ban Python, hai hanh vi'
+  - huong: 'phan chung CHAY DUOC cho cung ket luan (duong doc lap thu hai)'
+    lenh: 'dat sys.platform="win32" + PATHEXT dung os.pathsep, thu 4 ten, tren ca ba ban Python'
+    ket_qua: '3.11 tu choi ca bon; 3.12 va 3.13 CHAP NHAN git.bat, git.cmd, git.py, git.exe'
+    thanh: 'KHOP voi phep doc ma nguon — hai duong doc lap cung chi mot cho'
+  - huong: 'nen CI ghim ban Python nao'
+    lenh: 'git show origin/master:.github/workflows/ci.yml | grep -A3 setup-python'
+    ket_qua: 'python-version "3.12" o ba cho (dong 93, 626, 685)'
+    thanh: 'nen CI DUNG la nen co lo'
+  - huong: 'ca bat buoc cua ban giao co duoc thi cong khong'
+    lenh: 'dem def t<N>_ hai ben; doc than t166'
+    ket_qua: 'master 157 ca, head 161 ca => dung +4 (t165-t168), khong ca thu nam; t166 dat path == cwd'
+    thanh: 'P2-MOI'
+  - huong: 'rig mo phong Windows co dang tin khong (ca BIET TRUOC DAP AN)'
+    lenh: 'doi chieu ca git.exe — no PHAI duoc CHAP NHAN neu nhanh win32 that su chay'
+    ket_qua: >-
+      Lan 1: git.exe bi TU CHOI => rig hong (PATHEXT viet HOA, Linux phan biet hoa thuong).
+      Lan 2: van TU CHOI => rig hong (PATHEXT tach bang os.pathsep, ':' tren Linux).
+      Lan 3: git.exe duoc CHAP NHAN tren 3.12/3.13 => rig da cham nhanh win32.
+    thanh: >-
+      Chi sau lan 3 moi tin ket qua. Dung o lan 1 hoac 2 se ket luan NGUOC la "da va xong".
+
+cong_da_chay_tren_cay_ung_vien:
+  lease_publish_test: 'rc=0 — 161/161 dat, bo qua 0, 0 DO'
+  ghi_chu: >-
+    Cac cong khac (adr-song, doctrine-scan, doc-claims-check, release-verify) KHONG chay tren cay
+    ung vien luot nay: ban va khong cham duong nao thuoc pham vi cua chung, va CI da chay du tren
+    head (5/5 success). Khai thang thay vi de nguoi doc tuong da chay het.
+
+ci_tu_dong_tren_ung_vien:
+  run_id_gate: 35297254635
+  run_id_thu_hoi: 35297253065
+  head_sha: e60c757aa5353b4ca770beb83db25090597d9503
+  ket_qua: 'chuan-bi / gate / gate-registry / gate-packet-loop / thu-hoi = success'
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-opus-5
+  model_da_chay: 'claude-opus-5 (phien dieu phoi, khong phai tien trinh CLI rieng)'
+  effort: KHONG_KHAI
+  KHONG_do_duoc: >-
+    Khong co `session_run_id`: claude trong container nay CHUA_XAC_THUC theo `doctor`, nen khong
+    phong duoc bang `launcher.py run` va khong co `run.json` de trich modelUsage.
+  xung_dot_loi_ich_da_khai: >-
+    LUOT NAY KHONG DOC LAP VE HINH DANG P1-2. Ban va P1-2 duoc viet theo DUNG loi khuyen (A) ma
+    chinh reviewer nay dua o ban giao luot 1 ("dung shutil.which o buoc 3"). Loi khuyen ay SAI, va
+    phan quyet rang ban va chua du la reviewer dang cham HAU QUA loi khuyen cua chinh minh. Phep do
+    khong vi the ma sai — bang chung la ma nguon shutil.which cong hai luot chay — nhung KHUYET TAT
+    la cua REVIEWER, khong phai cua executor. Khai o dau VERDICT.md, khong giau trong bien nhan.
+    Them: phien nay ghi ho lease ci-windows-r2-g2-antigravity, cai lease sinh ra P1-3 (nay da dong).
+
+danh_tinh_executor_KHONG_do_duoc: >-
+  Commit e60c757 khong mang header CLI nao chung minh model/effort cua agy. No
+  AGY-CHUA-ATTEST-MODEL-TUNG-LUOT (khai trong Issue #551).
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: 'Ban chieu dang qua MCP github. Nguon co tham quyen la TEP CO BAM trong kho.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: 'Blob verdict ghim tren nhanh claude/review-541-luot2-20260918, commit 820aebc.'
+  gioi_han: >-
+    cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot
+    nay land hoac khi co tag luu-tru/*.
+
+pham_vi_changes_requested: >-
+  2 LOP MO, va CA HAI deu bat nguon tu ban giao luot 1 chu khong tu executor:
+  P1-2 la hau qua mot loi khuyen sai cua reviewer; P2-MOI la mot chot bat buoc cua ban giao khong
+  duoc thi cong. Tam LOP kia da dong, trong do SAU lop duoc va THAT boi agy.
+
+verdict_usage_caveats:
+  - id: LOI-KHUYEN-CUA-REVIEWER-LUOT-1-LA-NGUON-CUA-P1-2
+    muc: P1
+    mo_ta: >-
+      Ban giao luot 1 khuyen dung shutil.which o buoc 3. Loi khuyen ay SAI: shutil.which tren
+      Windows LUON mo PATHEXT, nen .bat/.cmd/.py quay lai bang cua khac. agy lam DUNG thu duoc bao.
+      Dung doc P1-2 nhu loi cua executor, va dung khuyen mot API ma chua do hanh vi cua no tren nen
+      dich.
+  - id: PHEP-DO-P1-2-LA-MO-PHONG-KHONG-PHAI-WINDOWS-THAT
+    muc: P2
+    mo_ta: >-
+      Bang chung gom (a) doc inspect.getsource(shutil.which) tren 3.11/3.12/3.13 va (b) chay voi
+      sys.platform dat thanh "win32" TREN LINUX. Hai duong doc lap cung chi mot cho, nhung KHONG
+      phai Windows that. He qua spawn .bat/.py van KHONG DO DUOC.
+  - id: RIG-MO-PHONG-WINDOWS-HO-HAI-LAN-TRUOC-KHI-DO-DUNG
+    muc: P2
+    mo_ta: >-
+      Lan dau moi ca tra None vi PATHEXT viet HOA khong khop tep .exe tren he tep phan biet hoa
+      thuong; lan hai van None vi PATHEXT tach bang os.pathsep (':' tren Linux). Dung o lan nao
+      cung se ket luan NGUOC la "da va xong". Mo phong mot nen khac ro ri o nhieu cho — kiem rig
+      bang mot ca BIET TRUOC DAP AN truoc khi tin ket qua.
+  - id: CA-MOI-CHO-P1-2-SE-XANH-VO-NGHIA-NEU-VIET-THANG
+    muc: P2
+    mo_ta: >-
+      Tren ubuntu-latest, sys.platform != "win32" nen shutil.which khong cham PATHEXT; mot ca do
+      git.bat o PATH viet thang se XANH vo dieu kien. Ca ay phai tiem nen VA PATHEXT + sys.platform,
+      hoac khai thang KHONG DO DUOC tren Linux.
+
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (`verdict_path` + `verdict_sha256`). Moi comment tren GitHub — ke ca ban
+  chieu do chinh phien nay dang — chi la BAN CHIEU. Verdict luot 1 (eb73292a…) giu nguyen tren dia;
+  luot nay KHONG rut dieu gi cua no.
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-18T07:45:00Z'
+receipt_basis: >-
+  sha256/bytes do tu tep verdict tren dia; reviewed_sha va reviewed_base do bang git rev-parse /
+  merge-base; check run do bang pull_request_read get_check_runs; bo test chay tren ban archive roi
+  ngoai kho, doc rc TRUC TIEP; hanh vi shutil.which do bang inspect.getsource tren ba ban Python
+  THAT co trong container (/usr/bin/python3.11, 3.12, 3.13) cong mot luot chay mo phong.
+receipt_khong_khai:
+  - >-
+    KHONG khai da chay du cong tren cay ung vien — xem cong_da_chay_tren_cay_ung_vien.
+  - >-
+    KHONG khai `cross_approved`. Tran §8 con nguyen.
+  - >-
+    KHONG khai da do hanh vi tren Windows that — xem caveat
+    PHEP-DO-P1-2-LA-MO-PHONG-KHONG-PHAI-WINDOWS-THAT.
+  - >-
+    KHONG khai N7 da duoc tra loi. Hai con so "Truoc = 1, Sau = 0" van khong kem don vi; luat L1
+    doi moi con so phai khai DEM GI. Van KHONG DO DUOC.

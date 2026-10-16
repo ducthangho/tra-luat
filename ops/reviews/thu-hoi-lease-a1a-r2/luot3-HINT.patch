@@ -1,0 +1,100 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+(docs/PROTOCOL_DA_PHIEN.md §13 patch-as-hint, ràng buộc 1. Nhãn thêm sau khi merge PR #652 theo hậu kiểm connector; sha256 bản reviewer sinh ra: 133e91d4d4d0d7368b46bfe6c812266b68e5e3777ac46f8f03a079cbf1f784fe)
+
+--- SPEC.md
++++ SPEC.md
+@@ -279,12 +279,12 @@
+ 
+ 2. **`BIA_MO_LICH_SU` theo Q6 + (b) — dẫn xuất từ cây mốc, clock ghim.** Script
+    `ops/reviews/thu-hoi-lease-a1a-r2/do_q6.py` (hiện vật review, **không** thuộc write set), dùng
+-   `yaml.safe_load` và `_danh_sach_thay_the_cho` của chính cổng, **không** regex, **không** đọc ref nào ngoài cây mốc:
++   `yaml.safe_load` và `_danh_sach_thay_the_cho` của chính cổng, **không** dùng regex để parse YAML, **không** đọc ref nào ngoài cây mốc:
+ 
+    ```
+    D     = kiểm kê mọi blob dưới ops/leases trong CÂY của MOC; không đuôi .yaml/.yml (vd .yaml.nhap) ⇒ `ngoai_mien`, không đọc
+    L     = blob .yaml/.yml trong D (không kiểm mode — khớp bộ quét của cổng), parse bằng yaml.safe_load; YAML hỏng/không mapping, thiếu ID,
+-           ID không phải chuỗi khác rỗng, tệp nằm trong thư mục con, tên tệp không bằng <lease_id>.yaml (hoặc .yml), trùng ID, `thay_the_cho` sai kiểu, `da_bi_thay_the` không phải chuỗi khác rỗng ⇒ rc=3
++           ID không phải chuỗi khớp ^[A-Za-z0-9._-]+$ (LEASE_ID của cổng), tệp nằm trong thư mục con, tên tệp không bằng <lease_id>.yaml (hoặc .yml), trùng ID, `thay_the_cho` sai kiểu, `da_bi_thay_the` có khoá nhưng không phải chuỗi khác rỗng (kể cả null) ⇒ rc=3
+            Không ép ID qua str() và không biến schema thay_the_cho sai kiểu thành danh sách rỗng
+    cặp   = (cũ, mới, blob cũ, blob mới): kiểm ID/tên của CẢ HAI đầu trước lọc (b);
+            `mới` khai thay_the_cho ∋ cũ VÀ `cũ` (cùng cây) khai da_bi_thay_the == mới
+@@ -293,21 +293,21 @@
+    C     = giờ commit của MOC (ghim, không phải giờ chạy)
+    ```
+ 
+-   **Script đã sửa theo thuật toán trên** (F11 lượt 2): `do_q6.py` sha256 `f20c0a1a45db2f604cac81ec221ab1bcc873041870f8465060a3d8dbea026d46`.
++   **Script đã sửa theo thuật toán trên** (F11 lượt 2, bổ sung F12 lượt 3): `do_q6.py` sha256 `7402a0bdb78821cb0fb3b6e9a8a8ba5e2285bb1a615176653ebdcaa506b229cf`.
+    Miền lease = mọi blob `.yaml`/`.yml` dưới `ops/leases` (đúng miền của `_quet_lease_toan_kho`); mọi tệp khác
+    (vd `.yaml.nhap`) vào `ngoai_mien`, không đọc. Mỗi tệp trong miền phải: nằm trực tiếp dưới `ops/leases` ·
+-   parse được · là mapping · `lease_id` là chuỗi khác rỗng · `lease_id` == tên tệp bỏ đuôi · `thay_the_cho` đúng
+-   kiểu · `da_bi_thay_the` vắng hoặc chuỗi khác rỗng · không trùng ID. Vi phạm ⇒ `rc=3`, không ép kiểu, không bỏ qua.
++   parse được · là mapping · `lease_id` là chuỗi khớp `^[A-Za-z0-9._-]+$` (`LEASE_ID` của cổng) · `lease_id` == tên tệp bỏ đuôi · `thay_the_cho` đúng
++   kiểu · `da_bi_thay_the` vắng khoá hoặc là chuỗi khác rỗng (có khoá mang `null` cũng sai kiểu) · không trùng ID. Vi phạm ⇒ `rc=3`, không ép kiểu, không bỏ qua.
+    In `path`/`blob` của **cả hai** đầu mỗi cặp.
+ 
+-   **Tự kiểm** `python3 -B do_q6.py --tu-kiem` (kho giả, clock = giờ mốc): **13/13 đạt** — sạch ⇒ rc0 giữ `(x,y)`;
++   **Tự kiểm** `python3 -B do_q6.py --tu-kiem` (kho giả, clock = giờ mốc): **18/18 đạt** — sạch ⇒ rc0 giữ `(x,y)`;
+    đổi riêng tên một đầu · không phải mapping · thiếu ID · ID sai kiểu · YAML hỏng · trùng ID · `thay_the_cho` sai
+    kiểu · bia mộ một chiều ở đầu mới ⇒ mỗi ca rc3; đầu mới bị thay tiếp ⇒ chỉ giữ cặp sau; hết hạn ⇒ `()`; tệp nháp
+-   ngoài miền ⇒ không ảnh hưởng; cây sau thêm cặp ⇒ kết quả cây mốc không đổi. **Đột biến** (bản sao tạm, mỗi cái
++   ngoài miền ⇒ không ảnh hưởng; cây sau thêm cặp ⇒ kết quả cây mốc không đổi. Thêm 5 ca F12: ID ASCII ngoài miền ở đầu cũ/đầu mới; bia mộ `null` ở đầu mới/tệp ngoài cặp; khoá bia mộ không có giá trị ⇒ cả 5 rc3. **Đột biến** (bản sao tạm, mỗi cái
+    gỡ đúng một chốt): bỏ kiểm tên · bỏ kiểm mapping · bỏ kiểm trùng · bỏ kiểm kiểu `thay_the_cho` · bỏ `rc=3` cho
+    `KHONG_XAC_DINH` · đọc `HEAD` thay cây mốc · bỏ lọc hạn ⇒ **7/7 đỏ, mỗi cái đúng một ca đích, không ca nào chết
+    vì ngoại lệ vô can** (bản đầu, mutant kiểu `thay_the_cho` chết `TypeError` — tín dụng giả — nên vòng lặp cặp nay
+-   dùng `or []` để chốt kiểu là chốt duy nhất).
++   dùng `or []` để chốt kiểu là chốt duy nhất). Thêm 2 mutant: bỏ miền ID ⇒ đúng 2 ca ID ngoài miền đỏ; coi `null` như vắng ⇒ đúng 3 ca bia mộ null/rỗng giá trị đỏ. Tổng **9/9 mutant đỏ**, khai đúng tập ca đích; không ngoại lệ vô can.
+ 
+    Chạy trên kho thật `python3 -B do_q6.py <kho> 072181157a27804e69deb35bb792a88c70ac31e3 2026-09-10T04:55:37Z`
+    (bản ghi `ops/reviews/thu-hoi-lease-a1a-r2/q6-do-2026-09-26.json`, sha256 `1fc99cd9…`, `rc=0`, chạy trong khoảng
+@@ -318,7 +318,7 @@
+    hạn, muộn nhất `2026-09-08T10:17:12Z`. Giờ commit của mốc là `2026-09-10T04:55:37Z` (`11:55:37+07:00`) ⇒ tại C,
+    (b) giữ **0** cặp ⇒ `BIA_MO_LICH_SU = ()`. `trang_thai` kiểm hạn **trước** bia mộ, nên mọi C ≥
+    `2026-09-08T10:17:12Z` cho cùng kết quả — clock không phải một nguồn trôi. Executor chạy lại đúng lệnh trên
+-   **và** `--tu-kiem` lúc thi công, dán cả hai bản in vào thân PR; lệch digest, lệch số cặp, hoặc tự kiểm dưới 13/13
++   **và** `--tu-kiem` lúc thi công, dán cả hai bản in vào thân PR; lệch digest, lệch số cặp, hoặc tự kiểm dưới 18/18
+    ⇒ **DỪNG**, không ghim. Script là hiện vật review (nhánh đặc tả), **không** mở write set A1a.
+ 
+    Hệ quả đã khai, không phải lỗ: cặp thay thế sinh **sau** mốc không vào hằng (r9 Q6 *"Feature tomb không
+--- do_q6.py
++++ do_q6.py
+@@ -6,7 +6,7 @@
+ Miền lease = mọi blob dưới ops/leases có đuôi .yaml/.yml (đúng miền của _quet_lease_toan_kho);
+ mọi thứ khác (vd .yaml.nhap) đếm vào `ngoai_mien`, không đọc.
+ Mỗi tệp trong miền PHẢI: nằm trực tiếp dưới ops/leases · YAML parse được · là mapping ·
+-lease_id là chuỗi khác rỗng · lease_id == tên tệp bỏ đuôi · thay_the_cho đúng kiểu
++lease_id là chuỗi khớp LEASE_ID (ASCII chữ/số/`.`/`_`/`-`) · lease_id == tên tệp bỏ đuôi · thay_the_cho đúng kiểu
+ (_danh_sach_thay_the_cho khác None) · da_bi_thay_the vắng hoặc là chuỗi khác rỗng ·
+ lease_id không trùng. Vi phạm bất kỳ ⇒ rc=3 (KHÔNG ĐO ĐƯỢC), không ép kiểu, không bỏ qua.
+ 
+@@ -62,8 +62,8 @@
+             vi_pham.append((duong, f"khong-phai-mapping: {type(d).__name__}"))
+             continue
+         lid = d.get("lease_id")
+-        if not isinstance(lid, str) or not lid.strip():
+-            vi_pham.append((duong, "lease_id-sai-kieu-hoac-rong"))
++        if not isinstance(lid, str) or not lp.LEASE_ID.fullmatch(lid):
++            vi_pham.append((duong, "lease_id-sai-kieu-hoac-mien"))
+             continue
+         if lid != re.sub(r"\.ya?ml$", "", ten):
+             vi_pham.append((duong, f"lease_id-khac-ten-tep: {lid!r}"))
+@@ -72,7 +72,7 @@
+             vi_pham.append((duong, "thay_the_cho-sai-kieu"))
+             continue
+         t = d.get("da_bi_thay_the")
+-        if t is not None and (not isinstance(t, str) or not t.strip()):
++        if "da_bi_thay_the" in d and (not isinstance(t, str) or not t.strip()):
+             vi_pham.append((duong, "da_bi_thay_the-sai-kieu"))
+             continue
+         if lid in L:
+@@ -164,6 +164,11 @@
+                              "z.yaml": _lease("z", SONG, thay="y")}, 0, [["y", "z"]]),
+         "het-han": ({"x.yaml": _lease("x", CHET, bi="y"), "y.yaml": _lease("y", CHET, thay="x")}, 0, []),
+         "nhap-ngoai-mien": ({**sach, "q.yaml.nhap": "- khong doc\n"}, 0, [["x", "y"]]),
++        "id-ngoai-mien-cu": ({"x+y.yaml": _lease("x+y", CHET, bi="y"), "y.yaml": _lease("y", SONG, thay="x+y")}, 3, []),
++        "id-ngoai-mien-moi": ({"x.yaml": _lease("x", CHET, bi="x+y"), "x+y.yaml": _lease("x+y", SONG, thay="x")}, 3, []),
++        "bia-null-moi": ({**sach, "y.yaml": sach["y.yaml"] + "da_bi_thay_the: null\n"}, 3, []),
++        "bia-null-ngoai-cap": ({**sach, "z.yaml": "lease_id: z\nda_bi_thay_the: null\n"}, 3, [["x", "y"]]),
++        "bia-khoa-khong-gia-tri": ({**sach, "y.yaml": sach["y.yaml"] + "da_bi_thay_the:\n"}, 3, []),
+     }
+     hong = 0
+     with tempfile.TemporaryDirectory() as t:

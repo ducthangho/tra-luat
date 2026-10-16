@@ -1,0 +1,20 @@
+# S11/P2 — patch-as-hint: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit.
+# R9 đang đóng băng: KHÔNG áp diff này vào SPEC.md đã neo hash.
+# Chuyển ghi chú tương ứng sang hồ sơ/projection/handoff preflight A0 theo phạm vi đã được giao;
+# không đổi hợp đồng hoặc spec_hash r9 chỉ vì P2 này. Không sửa ADR-0047.
+--- SPEC.md
++++ SPEC.md
+@@ -638,6 +638,13 @@
+ đối chiếu ADR-0047 cùng revision về boundary mã lỗi và biên/counter ngân sách (S10/S8). Giá trị
+ profile, ngân sách và activation binding phải được **điền ở đúng slice** trước ready/kích hoạt — executor không tự mặc định
+ nguồn, không tự nới trần. Thiếu hợp đồng ⇒ `proposed`; thiếu facts rollout ⇒ chưa kích hoạt.
++**Ghi chú đối chiếu hồ sơ A0 (S11, xử trong Packet Issue trước ready):** phân biệt ID packet theo §3.2
++(`wp<issue>`) với tên/alias của bản đặc tả; điền mission hợp lệ hoặc dẫn ngoại lệ standalone có thẩm quyền nếu
++thực sự tồn tại. Đọc lại raw Issue/projection và comment: dependency `LAND-DOC-RECEIPT-THU-HOI` đã nằm trong
++hợp đồng, không coi `depends_on: []` là đã bỏ nó. Resolve định danh và phân biệt dependency trước thực thi với
++land obligation bắt buộc trước cửa sổ bootstrap M9; dispatcher ghim biểu diễn đúng giai đoạn cùng các trường
++phái sinh Q12. So exact set ba path A0 ở `write_set`, không chỉ số lượng3. Đây là hoàn thiện biểu diễn của hợp
++đồng đã có, không thêm dependency/phạm vi; thiếu raw facts thì giữ proposed, không tự khai đã conform/ready.
+ ✅ **Q13 — closure khi policy chưa có — ĐÃ CHỐT (comment `5575587924` trên PR #475):** lối (ii) — ngoại lệ có phạm vi:
+ cho tới khi policy canonical `.github/coordination/change-impact.v1.json` tồn tại, closure = tập khai báo + giải symlink
+ theo cây OID, KHÔNG nhận `effective_write_set` tự khai; ngoại lệ phải được ghi vào Packet Issue và `spec_hash` của A1.

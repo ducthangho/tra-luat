@@ -1,0 +1,71 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 741
+packet_id: wp741
+mission_issue: 738
+revision: 1
+generation: 1
+lease_id: wp741-r1-g1-claude-20261015
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp741.md
+spec_sha256_required: a171937e651b59d2e0f06b04d5c2b78dc611ab2d415cbb0276105b487dd137ae
+spec_hash: a171937e651b59d2e0f06b04d5c2b78dc611ab2d415cbb0276105b487dd137ae
+prompt_path: ops/specs/wp741.md
+prompt_sha256_required: a171937e651b59d2e0f06b04d5c2b78dc611ab2d415cbb0276105b487dd137ae
+write_set:
+- ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py
+- ops/land/pr621-skill-bai-hoc-provenance/SHA256SUMS.txt
+- ops/land/pr621-skill-bai-hoc-land-evidence.yaml
+effective_write_set:
+- ops/land/pr621-skill-bai-hoc-provenance/kiem_ho_so.py
+- ops/land/pr621-skill-bai-hoc-provenance/SHA256SUMS.txt
+- ops/land/pr621-skill-bai-hoc-land-evidence.yaml
+branch: agent/wp741-r1-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6f121a3810045af27bf65eb723edf36b29e387f2
+start_from_sha: 6f121a3810045af27bf65eb723edf36b29e387f2
+reviewed_sha_required: 6f121a3810045af27bf65eb723edf36b29e387f2
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/741
+granted_on_instruction_note: >-
+  Chu kho chi thi trong phien session_01Fd7YEcw3odAk7QKkydKycE (15-10-2026), nguyen van:
+  "Cap lease #741, bat dau thi hanh. Executor claude opus 5.5, review codex, phan theo lop,
+  co hint patch neu van de phuc tap. Khong CI, CI windows. Lap toi het P1, P2."
+  Tien le chi thi trong phien: #710 g5 (a797078). Phien ghi lease nay CUNG la executor.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-15T06:45:00Z'
+lease_expires_at_utc: '2026-10-17T07:00:00Z'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Chu kho: "Lap toi het P1, P2" — so luot khong dat tran; dung khi luot review tren dung head
+  ra P1=0, P2=0. P3 xu ly theo spec (DA VA / KHONG VA co ly do). Vuot tran 2 luot Codex/PR cua
+  PROTOCOL §12 la theo chi thi nay, khong phai tu y.
+ci_policy: khong_ci_ke_ca_windows_cho_toi_khi_chu_kho_cho_phep
+ci_policy_note: >-
+  Nhanh agent/** khong kich hoat workflow nao khi push (ci.yml chi push master + pull_request;
+  ops-open-pr chi claude/** va ops/**). Khong mo PR cho nhanh agent toi khi chu kho cho phep,
+  vi PR se chay ci.yml.
+push_policy: push_nhanh_agent_de_ben_khong_mo_pr
+thay_the_cho: []
+da_bi_thay_the: wp741-r2-g2-claude-20261015
+da_bi_thay_the_ghi_chu: >-
+  Spec r1 + lease g1 co 6 P1 + 3 P2 theo codex connector tren PR #754 (11:20Z 15-10-2026); thay bang spec r2 + lease g2.
+xung_dot_write_set_do_luc: '2026-10-15T06:21Z ai-dang-giu: NGUOI_GIU 0 cho ca ba duong dan (534/534 nhanh)'

@@ -1,0 +1,21 @@
+diff --git a/ops/lease_publish_test.py b/ops/lease_publish_test.py
+index 2feb795..d9d22d2 100644
+--- a/ops/lease_publish_test.py
++++ b/ops/lease_publish_test.py
+@@ -6482,12 +6482,13 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
+ 
+         def doc_pid(tep, nhan, han=15.0):
+             """Tệp PID do tiến trình KHÁC ghi (`open(..,'w').write(..)`) KHÔNG nguyên tử: CÓ mà còn RỖNG — t154
+-            ĐỎ `int('')` dưới tải t125 (30-09-2026). Chờ tới khi là số nguyên; hết hạn ⇒ `bang`, không nuốt/treo."""
++            ĐỎ `int('')` dưới tải t125 (30-09-2026). Chờ tới khi là số nguyên; hết hạn ⇒ `bang`, không nuốt/treo.
++            GIỚI HẠN: chưa ca nào khoá hàm này; răng chỉ đo bằng chèn trễ/rác trên BẢN SAO (ngoài suite)."""
+             het = time.monotonic() + han
+             while True:
+-                try: nd = tep.read_text(encoding="utf-8").strip()
++                try: nd = tep.read_bytes().decode("utf-8", "replace").strip()  # byte lạ ⇒ `bang`
+                 except OSError: nd = None
+-                if nd and re.fullmatch(r"[0-9]+", nd): return int(nd)
++                if nd and re.fullmatch(r"[1-9][0-9]*", nd): return int(nd)  # "0": os.kill(0) = nhóm runner
+                 bang(time.monotonic() < het, f"{nhan}: tệp PID không thành số nguyên sau {han} s (đọc cuối: {nd!r})")
+                 time.sleep(0.05)
+ 

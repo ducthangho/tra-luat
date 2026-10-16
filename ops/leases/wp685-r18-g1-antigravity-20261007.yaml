@@ -1,0 +1,59 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 685
+packet_id: wp685
+mission_issue: 686
+mission_revision: 3
+plan_hash: 38b2b3ef9d4a410e2a6a00fdc1861611fd39295b7652062d2988ebc3513feb8a
+revision: 18
+generation: 1
+lease_id: wp685-r18-g1-antigravity-20261007
+role: executor
+provider: google_antigravity
+executor: google_antigravity
+model: gemini-3.1-pro-high
+model_family: gemini
+execution_surface: antigravity
+transport: machine/local
+reviewer: codex
+assurance_target: cross_approved_or_human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/launcher-con-song-esrch-r18.md
+spec_sha256_required: bfd490acb3ca26bb75bd3d628d9652a08a2b12256808024ba51e84b93e2ee68f
+spec_hash: bfd490acb3ca26bb75bd3d628d9652a08a2b12256808024ba51e84b93e2ee68f
+write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+effective_write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+write_set_hash: ae3e61d02ad972d642942871d4d83cb48b3d4ba87244fdfe1cc18333bc6db053
+change_policy_sha: null
+branch: agent/wp685-r18-g1-antigravity
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ab457c651eb4428705f0492163080b661c858b72
+start_from_sha: ab457c651eb4428705f0492163080b661c858b72
+reviewed_sha_required: ab457c651eb4428705f0492163080b661c858b72
+prompt_path: ops/prompts/wp685-r18-g1-antigravity-20261007.md
+prompt_sha256_required: dd8db6b63fd2a9572cb072d4df5c6465fbbc00041341955a9b9ebc4f12e4d051
+granted_by: ducthangho
+granted_on_instruction: 'Q5 conditional authority after #668 releases both launcher paths; AG executor approval on Mission #686'
+grant_context_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5888633201
+grant_confirmation_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-5988699983
+recorded_by: codex-dispatcher-session
+recorder_is_executor: false
+leased_at_utc: '2026-10-06T18:27:50Z'
+lease_expires_at_utc: '2026-10-07T18:27:50Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 10
+requires_live: false
+ci_policy: no_ci_or_full_ci_until_merge_readiness
+push_policy: one_code_push_after_zero_p1_p2_p3
+da_bi_thay_the: wp685-r19-g2-codex-20261007
+# Metadata branch includes the frozen prompt for this superseded lease.

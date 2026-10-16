@@ -324,13 +324,17 @@ lam() {
   # Trạng thái ref + tệp ghim MẶC ĐỊNH: mọi ref trong `$ref` đang ở `$S1`, và ghim cũng
   # `$S1` ⇒ lease khớp. Ca nào muốn dựng ĐUA thì tự cấp `GIA_REF_STATE`/`NEO_TEP` khác.
   local loai=heads; [ "$hd" != xoa-nhanh ] && loai=tags
-  if ! printf '%s\n' "$@" | grep -q '^GIA_REF_STATE='; then
+  # #675 B1: do dau tung doi so bang `case`, KHONG `printf | grep -q` — grep khop som + printf an SIGPIPE
+  # => pipefail 141 => `!` doi thanh dung => nhanh fallback noi de GIA_REF_STATE/NEO_TEP tuong minh. Khoa: ops/do_sigpipe.sh
+  local a mac_ref=1 mac_neo=1
+  for a in "$@"; do case "$a" in GIA_REF_STATE=*) mac_ref=0 ;; NEO_TEP=*) mac_neo=0 ;; esac; done
+  if [ "$mac_ref" -eq 1 ]; then
     : > "$TAM/refstate"
     local x; IFS=',' read -ra _rr <<< "$ref"
     for x in "${_rr[@]}"; do x="${x//[[:space:]]/}"; [ -n "$x" ] && printf 'refs/%s/%s %s\n' "$loai" "$x" "$S1" >> "$TAM/refstate"; done
     set -- "$@" GIA_REF_STATE="$TAM/refstate"
   fi
-  if ! printf '%s\n' "$@" | grep -q '^NEO_TEP='; then
+  if [ "$mac_neo" -eq 1 ]; then
     : > "$TAM/neo_auto"
     local y; IFS=',' read -ra _r2 <<< "$ref"
     for y in "${_r2[@]}"; do y="${y//[[:space:]]/}"; [ -n "$y" ] && printf '%s %s\n' "$y" "$S1" >> "$TAM/neo_auto"; done

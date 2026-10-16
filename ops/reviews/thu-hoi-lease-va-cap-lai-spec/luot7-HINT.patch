@@ -1,0 +1,89 @@
+--- SPEC.md
++++ SPEC.md
+@@ -315,8 +315,23 @@
+    `max_unique_objects=50000`, `max_object_bytes=8388608`, `max_total_object_bytes=134217728`,
+    `max_parent_path_edges=10000`, `max_tree_or_alias_edges=128`, `max_alternate_stores=8`,
+    `max_alternate_depth=4`, `max_reader_wall_seconds=60`. Số byte là bytes thô sau giải nén; depth là số cạnh;
+-   objects là `(actual_type,OID)` phân biệt, wall time dùng monotonic deadline cho cả reader/subprocess.
+-   Vượt bất kỳ trần/timeout/không đo được ⇒12, không cắt graph rồi kết luận vắng. Các giá trị phải được đo trên
++   objects là `(actual_type,OID)` phân biệt. **Đơn vị/phạm vi đếm (S8):** root có depth0;
++   `max_parent_path_edges` là số cạnh trên mỗi đường parent đang duyệt. `max_tree_or_alias_edges` là tổng
++   bước tree-entry + dereference symlink trên **một lần lookup/resolve một đường tại một occurrence OID**;
++   bước do restart sau symlink tiếp tục cộng vào lần resolve đó, không reset. Đây không phải tổng cạnh của
++   toàn snapshot: cây có129 thư mục anh em, mỗi đường dài2 cạnh, không tự vượt trần128. Width vẫn chịu
++   max_unique_objects/max_total_object_bytes/deadline. Mỗi occurrence được giải độc lập rồi hợp kết quả Q3.
++   `max_alternate_stores` đếm canonicalized store phân biệt ngoài primary; primary ở depth0,
++   `max_alternate_depth` đếm cạnh alternate theo đường dài nhất trong DAG store đã kiểm. Vòng alternate⇒12;
++   store trùng qua hai đường không tăng số store nhưng không được che đường sâu hơn. Các counter tree/parent
++   là counter traversal; memo bytes không reset counter của đường đang đi.
++   **Biên số lượng/bytes/depth là inclusive:** n≤bound được tiếp tục nếu mọi điều kiện khác hợp lệ;
++   muốn đọc/đi thêm làm n>bound⇒12. Đến S đúng parent bound được chấp nhận, không từ chối chỉ vì bằng trần.
++   Wall time là deadline monotonic cho cả reader và subprocess từ trước spawn đến khi thu hồi tiến trình;
++   phải còn thời gian để hoàn thành. Hết deadline⇒12; không chờ readline/read/wait vô hạn rồi mới kiểm clock.
++   Reader kiểm byte/object budget trước cấp phát body phía reader; preflight alternate chạy trước khi mở reader.
++   Các counter không lấy được từ cat-file (graph store, đường duyệt, thời gian chờ) do adapter/parent reader giữ.
++   Vượt bất kỳ trần/hết deadline/không đo được ⇒12, không cắt graph rồi kết luận vắng. Các giá trị phải được đo trên
+    roots thực của deployment và ghi trong profile/spec_hash trước ready; đổi giá trị qua revision/review, không
+    caller tự nới. A6 có bound−1/bound/bound+1 và graph rộng/object lớn ở seam, không chỉ depth.
+    Số scan cũ1186object/4.311.029B và closure2622commit thuộc map lượt5 chưa được tái lập exact; lượt6 đo map310ref:
+@@ -489,7 +504,12 @@
+   khác approved profile⇒12; bỏ phép so profile duy nhất⇒0 mới ĐỎ. Nếu còn chốt tương đương thì ghi SỐNG, không nhận công.
+   Helper/runtime/trust manifest lệch approved⇒12; negative source fixtures theo phân công điều phối, không tự soạn.
+ - Bare/linked worktree/pack/alternate hợp lệ⇒0; partial thiếu object⇒12, chuẩn bị đầy đủ trước snapshot⇒0;
+-  shallow⇒12. Bound−1/bound/bound+1 theo từng đơn vị Q4.5, thiếu/timeout⇒12, không cắt graph rồi0.
++  shallow⇒12. Với bảy trần count/byte/depth: bound−1/bound/bound+1⇒0/0/12 khi mọi điều kiện khác hợp lệ.
++  Ca wall deadline dùng clock tiêm: hoàn tất trước deadline⇒0; chạm/sau deadline khi công việc còn chờ⇒12;
++  thêm subprocess im lặng để chứng minh timeout có thể ngắt read/wait, không chỉ kiểm giữa hai object.
++  Alternate-chain depth3/4/5 dưới profile depth4⇒0/0/12; counter mutant bỏ depth phải bị ca5 bắt dù Git đọc được.
++  Cây129 thư mục anh em dài2 cạnh/đường dưới trần128⇒0; mutant cộng toàn snapshot thay từng resolve⇒12.
++  Object/time/unique/byte overflow vẫn⇒12; không cắt graph rồi0. Catalog ghi rõ seam và chốt che từng mutant.
+ Chi phí E2E baseline/candidate xen kẽ3cặp cùng ref/map/clock, trung vị tỷ lệ≤2; raw wall seconds, object-body bytes,
+ output bytes, số lệnh/phân biệt network, unique objects, visited commits và witness length. Benchmark chỉcat-file
+ hoặc chỉhash không chứng nhận E2E. Ghi cả chuẩn bị cache và profile setup khi chúng có chi phí.
+@@ -501,7 +521,9 @@
+ up-to-date cùng tree ⇒ xanh. First-policy+metadata hợp lệ0; sửa/xoá marker8; B(P1,R1)→B2(P2 hợp lệ,R1)0 sau binding mới; D(policy vắng,R1)12; không self-pin containing T.
+ **A9** — như r3; sau canonical: 0 lời gọi thêm.
+ **A10** — 5 cửa × {sống, thu hồi, không đo được, sổ ở ref khác}; `record-lease` ID ứng viên; REST 403 + Git hợp lệ ⇒ đi
+-tiếp; Git không đo được ⇒ chặn, state byte-match.
++tiếp; Git không đo được ⇒ **RC_STATE=8**, state byte-match và giữ chẩn đoán nguồn `reader_rc=12`.
++ Ca này tách boundary reader khỏi CLI: trả thẳng12 ở bất kỳ cửa nào là mutant sai mapping và phải ĐỎ;
++ không đổi hằng RC_STATE để khớp một câu tổng quát trong ADR. Thu hồi vẫn lưu stale/event rồi RC_STATE như Q5.
+ **A11** — hai vế một lệnh, delta theo tên; nền lịch sử lease_publish121/121(wrapper),packet_loop278/278+81mutant
+ chỉ là mốc, phải đo lại đúng ca/môi trường cho candidate. A0: checker canonical rỗng⇒receipt; thêm revocation dù xoá
+ test/wrapper/workflow ở PR vẫn12. Consumer dependency fixture đủ trước bootstrap; raw canary của workflow A0 chứng
+@@ -513,6 +535,25 @@
+ thay evidence. doc-claims-check --strict rc0+ok:true; doctrine-scan --path có spec⇒0.
+ **A12** — biên nhận đủ trường; **catalog ca kỳ vọng neo độc lập với cây PR**; mutant xoá cả đăng ký lẫn lời gọi không
+ được làm mẫu số nhỏ đi; mutant sống ghi sống kèm seam/chốt che theo A6. Lỗi hạ tầng/parser xảy ra trước seam không nhận công mutant; skipped/not_run không là pass.
++
++### Đồng bộ hợp đồng với ADR-0047 (S10)
++
++**Mã lỗi có hai biên:** rc4/8/12 của schema/nguồn dưới đây là mã reader/lease_publish; packet_loop ánh xạ
++mọi lỗi guard sang `RC_STATE=8`, giữ nguyên chẩn đoán nguyên nhân. Workflow/consumer chỉ công nhận receipt0
++và positive evidence, không tự coi mọi nonzero là cùng một trạng thái nghiệp vụ. Ba lớp nguồn không đo được
++⇒ reader12; điều đó không đổi giao diện packet_loop Q5/A10. Bảy trần count/byte/depth dùng biên inclusive Q4.5;
++wall deadline hết thì dừng. Không áp chữ “chạm trần” cho một ancestry đã tới S hợp lệ ở đúng bound.
++
++**Cùng revision, trước ready A0 phải đồng bộ bản Proposed ADR-0047 trên PR** (không sửa runtime hoặc tự
++promote Accepted bằng spec): ở §Quyết định thay câu áp `rc=12` cho mọi cổng bằng “reader/lease_publish trả12;
++wrapper giữ ánh xạ lỗi công khai của mình, packet_loop trả RC_STATE=8 kèm nguyên nhân”; ở lớp3 thay
++“chạm trần ⇒12” bằng “vượt trần count/byte/depth hoặc hết deadline ⇒12; định nghĩa counter/biên ở Q4.5”.
++Luật3 của ADR phải nói rõ rc8 là lỗi claim phái sinh trong lease; descriptor/activation binding nguồn không
++xác minh được theo Q13 trả reader12 rồi ánh xạ tại caller. Không áp câu “bất kỳ trường nào” để biến các input
++khai báo hợp lệ (write_set, timestamp...) thành phái sinh không có producer. Giữ phạm vi approver thống nhất:
++chủ kho hoặc người được chủ kho uỷ quyền bền, có phạm vi, qua commit review; không chọn tên/image thật ở đây.
++ADR giữ bất biến, spec giữ interface/counter cụ thể. Cả hai tệp phải cùng qua đối chiếu; chỉ áp HINT lên SPEC
++không tự tuyên bố ADR đã được sửa. Ca A10 mapping và A6 exact-bound phải có cùng oracle giữa hai tệp.
+ 
+ ## `hinh_dang_ke_thua` (L4)
+ 
+@@ -578,7 +619,8 @@
+ lệ) HOẶC `change_policy_sha: null` + descriptor ngoại lệ Q13 — một trong hai, đóng băng trong `spec_hash`; không giả SHA của
+ policy chưa tồn tại; base đã nhận slice trước và mã canonical nơi M9 đòi. **Trước ready A0 đóng băng:** hợp đồng deployment
+ profile (producer/approver/manifest bất biến/serialization), object-store layout + availability + ngân sách có đơn vị,
+-M1/reserved metadata/Q13 transitions, danh sách lịch sử/bootstrap, publisher/consumer API + retention + dependency. Giá trị
++M1/reserved metadata/Q13 transitions, danh sách lịch sử/bootstrap, publisher/consumer API + retention + dependency;
++đối chiếu ADR-0047 cùng revision về boundary mã lỗi và biên/counter ngân sách (S10/S8). Giá trị
+ profile, ngân sách và activation binding phải được **điền ở đúng slice** trước ready/kích hoạt — executor không tự mặc định
+ nguồn, không tự nới trần. Thiếu hợp đồng ⇒ `proposed`; thiếu facts rollout ⇒ chưa kích hoạt.
+ ✅ **Q13 — closure khi policy chưa có — ĐÃ CHỐT (comment `5575587924` trên PR #475):** lối (ii) — ngoại lệ có phạm vi:

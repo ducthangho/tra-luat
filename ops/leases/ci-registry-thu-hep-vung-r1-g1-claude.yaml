@@ -1,0 +1,144 @@
+# LEASE — CI-REGISTRY-THU-HEP-VUNG revision 1 / generation 1 — thu hep vung dot bien, che do nhe subagent, luot du hang tuan
+# GHI HO theo chi thi CHU KHO trong phien (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 651
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/651#issuecomment-5847409058
+granted_on_instruction_nguyen_van: >-
+  'Mở packet CI-REGISTRY-THU-HEP-VUNG: (1) sửa P2 #649 r4111733460 — chế độ nhẹ từ chối dòng khớp MAU_DAY_DU cho bộ
+  trong MAU_NHE; (2) thu hẹp VUNG_CHUNG/TIEN_TO_CHUNG trong .claude/dev/ci_dang_ky_test.py (bỏ ci_dang_ky_test.py khỏi
+  vùng đột biến của bộ khác, .github/** → ci.yml); (3) chế độ nhẹ cho .claude/hooks/subagent_ghi_detect_test.py;
+  (4) workflow riêng chạy đột biến đủ hằng tuần + workflow_dispatch.' (chu kho, phien Claude Code, 2026-09-26).
+authority_caveat: >-
+  Comment neo do phien executor dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-26T15:19:00Z'
+lease_expires_at_utc: '2026-09-26T23:25:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-09-27T15:19:00Z) theo comment dong bang issues/651#issuecomment-5847409058. RUT NGAN ve
+  2026-09-26T23:25:00Z — xem thu_hoi_bang_rut_han.
+
+packet_id: CI-REGISTRY-THU-HEP-VUNG
+packet_slug: CI-REGISTRY-THU-HEP-VUNG
+revision: 1
+generation: 1
+lease_id: ci-registry-thu-hep-vung-r1-g1-claude
+thay_the_cho: ci-registry-pretooluse-che-do-nhe-r1-g1-claude
+thay_the_ghi_chu: >-
+  Lease #647 g1 con han toi 2026-09-27T13:31:00Z va giu .claude/dev/ci_dang_ky_test.py, nhung packet #647 DA LAND
+  (PR #648 merge 425781450e4344b90eeea1b579561a8e95d849da, PR #649 merge 24c48e28bacd2c835e6acf7df64c7ee60ae6d424;
+  bien nhan land issues/647#issuecomment-5847271381). Bia mo hai chieu: da_bi_thay_the trong tep g1 cua #647
+  (sua tren chinh nhanh nay). Lease #643 g1 da co bia mo tro toi #647 g1 tu truoc.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+effort: medium
+effort_ghi_chu: 'Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_service
+reviewer_model_yeu_cau: gpt-6-astra
+reviewer_ghi_chu: 'Codex CLI tai cho truoc push + Codex connector tren PR non-draft (advisory_review); human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/CI-REGISTRY-THU-HEP-VUNG-r1.md
+spec_ref: refs/heads/claude/ci-registry-thu-hep-vung-49xikc
+spec_source_oid: f114fca0e62cd8e1dbab537a02b9cdfdc3754438
+spec_sha256: 36f3c2612289b67a6263f3b2c512647ce49e8f982f8151f5dfbf012d6a48709f
+spec_hash: 36f3c2612289b67a6263f3b2c512647ce49e8f982f8151f5dfbf012d6a48709f
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/CI-REGISTRY-THU-HEP-VUNG-r1.md
+prompt_sha256_required: 36f3c2612289b67a6263f3b2c512647ce49e8f982f8151f5dfbf012d6a48709f
+
+branch: claude/ci-registry-thu-hep-vung-49xikc
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Phien chi duoc cap MOT nhanh; spec, lease va ma di cung nhanh nay. Nhanh khong thuoc ops/** nen
+  ops-publish-lease.yml KHONG dang ban chieu comment — ai-dang-giu van thay lease vi no quet moi ref.
+start_from_sha: 24c48e28bacd2c835e6acf7df64c7ee60ae6d424
+immutable_acceptance_baseline: 24c48e28bacd2c835e6acf7df64c7ee60ae6d424
+continuation_base: 24c48e28bacd2c835e6acf7df64c7ee60ae6d424
+reviewed_sha_required: 24c48e28bacd2c835e6acf7df64c7ee60ae6d424
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua PR thi cong.'
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+  - .claude/hooks/subagent_ghi_detect_test.py
+  - .github/workflows/ci-dot-bien-du.yml
+write_set_hash: e000a475a8c53d0c8599f67be0a7a45a12e1be6ed01ab8888ae971d2e52b9068
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-26T15:14Z: fetch '+refs/heads/*', hai nguon ref ls-remote 427 / cuc bo 428, comm -23 = 0 (thua 1 =
+  nhanh chi dinh chua push). ai-dang-giu tren ban sao co 428 refs/heads: .claude/dev/ci_dang_ky_test.py => NGUOI_GIU 2 =
+  #643 g1 (da co bia mo) + #647 g1 (da land, thay the o day); .claude/hooks/subagent_ghi_detect_test.py => NGUOI_GIU 0;
+  .github/workflows/ci-dot-bien-du.yml => NGUOI_GIU 0.
+
+lech_protocol_duoc_duyet: >-
+  Mo rong lech cua #643/#647 (docs/PROTOCOL_DA_PHIEN.md:839-840, selector khong qua shadow) sang bo thu ba
+  .claude/hooks/subagent_ghi_detect_test.py; thu hep vung chung (spec §2), bu bang luot du hang tuan (M4).
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 2 luot pull_request (mot luot = mot workflow run; attempt lai khong tinh them)'
+  phep_do_duoc_cap: '0 / 0 / 0'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi push/chay lai ke tiep, cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1/W2/W3. DUNG.'
+  - 'S2 — CI do vi packet. DUNG, bao chu kho.'
+  - 'S4 — push chi sau review tai cho sach; het allowance => DUNG.'
+  - 'S5 — > 300 dong them. DUNG truoc review.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land; land chi bang merge commit
+  - Khong CI tay, khong Windows, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Effort thuc te cua phien executor.'
+
+lech_nguong_duoc_duyet: >-
+  S5 (spec §4, ADR-0044: <= 300 dong them) NANG len ~320 theo quyet dinh chu kho trong phien 2026-09-26 (hoi
+  AskUserQuestion, chon "Nang tran, dung actionlint"): cot chot M4 bi Codex CLI bat 4 luot lien cung mot hinh dang
+  (o tu do trong workflow tuan), va vá goc — actionlint THAT tren tep W3 tho, fail-close khi vang cong cu — can them
+  dong khi packet da o dung tran 300. Do sau va: 320 dong them tren 3 tep (luc hoi uoc 312–315).
+lease_sua_lan_cuoi: '2026-09-26T23:25:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: them lech_nguong_duoc_duyet (khong doi write set, han, spec). Lan 2: rut ngan lease_expires_at_utc
+  (thu_hoi_bang_rut_han); khong doi write set, spec. Lan 3 (2026-09-27, PR sau #654): chi sua LOI KHAI trong
+  thu_hoi_bang_rut_han theo review hau kiem Codex CLI tren eb32b50 (P2 xuyen ref, P3 pham vi rc=12); khong doi han.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-09-27T15:19:00Z'
+  han_moi_utc: '2026-09-26T23:25:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code 2026-09-26 (sau land #653): "Thu hoi lease g1"; chon cach "Chay 1 [rut ngan
+    han] roi kich hoat so thu hoi theo 3".
+  ly_do: 'Packet #651 da LAND (PR #653 merge 68b552d0f08200ba860ea788517558a4172df384; Issue #651 dong).'
+  vi_sao_khong_dung_so: >-
+    So ops/thu-hoi/ CHUA kich hoat (SO_THU_HOI_KICH_HOAT = False trong ops/lease_publish.py). So khong rong khi co
+    False => `check --du-bao` rc=12 (do, review hau kiem 27-09); `check` thuong KHONG kiem so (do: rc=0 voi so co ban
+    ghi); duong khac chua do. Rut han chi dung co che DA CAI (phan loai lease theo han).
+  gioi_han: >-
+    Duong moi, chua co tien le va chua co cong nao doc truong nay. Thu hoi CHUA hoan tat xuyen ref: master va nhanh
+    claude/ci-registry-thu-hep-vung-49xikc mang ban rut han, nhung ops/cap-lease-574-g21 (1212d11) va
+    ops/cap-lease-579-g20 (8168297) — nhanh cua phien khac, re tu master SAU 68b552d, TRUOC eb32b50 — con blob cu
+    3e447df (han 2026-09-27T15:19:00Z). ai-dang-giu tren du ref (review hau kiem, 00:33-00:36Z 27-09) van ra #651
+    CON_HAN/NGUOI_GIU, rc=11. Phien nay khong duoc day len nhanh ay. Hai ban cu het hieu luc luc 2026-09-27T15:19:00Z
+    (do: _phan_loai_lease 15:18:59Z con han, 15:19:00Z het han), hoac som hon CHI KHI chinh ref nhanh ay duoc cap nhat
+    sang ban rut han (chua do). Merge nhanh ay VAO master ma giu ref nguon thi #651 VAN con (do: rc=11). Nghiem thu:
+    #651 vang khoi NGUOI_GIU khi quet du ref.

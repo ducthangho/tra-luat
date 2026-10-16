@@ -1,0 +1,6 @@
+{
+  "run_id": "2bf7c916d30548348e95afac3180f52f",
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine"
+}

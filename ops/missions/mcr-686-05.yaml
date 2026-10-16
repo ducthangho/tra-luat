@@ -1,0 +1,20 @@
+schema_version: 1
+change_request_id: mcr-686-05
+mission_issue: 686
+requested_by: ducthangho
+reason: Frozen wp685 r19 binds generation 2 and Mission r4; owner-approved generation 3 requires matching spec and plan.
+proposed_changes:
+- Install wp685 spec revision 20 for generation 3, preserving B1-B8, objective, two-path effective write set, provider, required checks and land obligations from r19.
+- Install Mission revision 5 with wp685 target_spec_revision 20 / generation 3 and a new exact plan hash.
+- Preserve cumulative attempts_used 2 of 3 and same-failure history; supersede g2b lease and issue a fresh g3 lease after preflight.
+- Measure only missing evidence and exact-head gates; reuse evidence only when exact SHA, script/hash, Python and environment match.
+affected_packets:
+- wp685
+landed_work_impact: none
+risk_change: none
+decision: approved
+decision_source: human
+approved_by: ducthangho
+decision_url: https://github.com/ducthangho/tra-luat/issues/686#issuecomment-6030965299
+supersedes_revision: 4
+audit_note: Owner reapproved exact r20 SHA256 645d9a8b2b6887699999fdc349e81d0373bf4705d077ef0878e70def6449ce64 after one-line MCR reference correction; prior hash e4134ec385e63a43f7136ad0f4ea6083e0dc3a7096eee775d9d77e9d3c78f34d is superseded. No merge, land or LIVE authority.

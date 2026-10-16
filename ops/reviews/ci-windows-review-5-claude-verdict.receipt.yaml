@@ -1,0 +1,299 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 5 cua packet #548
+# (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND revision 2 / generation 2), KHAC NEN
+# (claude review antigravity), tren `dff2ec14`. **`approve`**.
+#
+# Bien nhan nay CONG THEM khoi `land` — no la ho so LAND cua packet, viet sau khi
+# chu kho merge PR #550 va sau khi CI hau merge da xong. Vi the no khai CA hai:
+# giao hang verdict (§7) VA bang chung hau merge (§13.1).
+#
+# VIET TAY TUNG TRUONG. Moi so do lai luc 23:5xZ 17-09-2026 trong chinh phien nay.
+
+schema_version: 2
+receipt_id: ci-windows-review-5-claude-20260917-8babf9a8
+kind: review_delivery_receipt
+packet_id: '548'
+packet_slug: 'CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND'
+lease_id: ci-windows-r2-g2-antigravity
+phase_key: P548-R2-GEN2-PHIEN-20260917
+luot: 5
+role: reviewer
+provider: claude
+executor_provider: antigravity
+cross_provider: true
+
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Tran CUNG, khong phai nhan xet ve ban va. §8 doi `Codex cross_approved` HOAC `human_audited`
+  cho class `sensitive`, va `antigravity` xuat hien 0 lan trong docs/PROTOCOL_DA_PHIEN.md
+  (do 17-09-2026). Lease khai `assurance_target: human_audited`. Khong ban va nao cua packet
+  nay mua duoc `cross_approved`; viec ay thuoc packet rieng #551.
+  Them: luot nay chay TRONG phien dieu phoi, khong co `session_run_id` (`doctor --kiem-song`
+  khong cho bang chung song cho claude). Checkout rieng CO that, context thi KHONG.
+
+verdict: approve
+verdict_path: ops/reviews/ci-windows-review-5-claude-verdict.md
+verdict_sha256: 8babf9a85dc856bb4ba171e94b745e9fe13bbed2f14db033ac889619aa2f8995
+verdict_bytes: 9278
+reviewed_sha: dff2ec14ed5b54551bbacfcba2313208c07efe56
+reviewed_base: a612c70cbc56d0e3a8c580f4759eddf215af82fb
+reviewed_sha_vi_sao: >-
+  Dau nhanh `agy/ci-windows-r1-g1` luc review, do HAI lan (17:20Z va 17:46Z) va KHONG troi.
+  Lease khai `reviewed_sha_required: 2ee0e218` — do co chu dich la MO NEO DUOI luc cap, KHONG
+  phai ung vien; ung vien that (M8/M9) chua ton tai luc ay. Verdict neo dung SHA ung vien that.
+
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c2f68987b3f298de12b84cf29a934c7b844c8558/ops/reviews/ci-windows-review-5-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `c2f68987b3f298de12b84cf29a934c7b844c8558` — commit DAU TIEN chua tep verdict
+  (do bang `git log --diff-filter=A`), tren nhanh claude/review-548-luot5-20260917.
+
+chuoi_verdict_cua_packet:
+  - luot: 1
+    sha: 2d8b4fb
+    verdict: changes_requested
+    verdict_sha256: 606287b285c88e99a7fc7c8c136a72a593687597f234c2162b55692483dee989
+  - luot: 2
+    sha: 7e2ef2e
+    verdict: 'approve — DA BI RUT o luot 3'
+    verdict_sha256: 5682e47107ef0a52d6f5591483ddb626b15bb0f1c75311f5dbeda0723f811587
+  - luot: 3
+    sha: 4bc35d3
+    verdict: changes_requested
+    verdict_sha256: 113b51157e2295df4944cc03cb4578a911aefcd12d46e6f602902ca66096708f
+  - luot: 4
+    sha: a45c8dc
+    verdict: 'blocked — khiem khuyet cua chinh DAC TA r1'
+    verdict_sha256: e112e404ffd9cef528ff3a40f1744cc33a5f983fab939e3d2368db9ee664f9a8
+  - luot: 5
+    sha: c2f6898
+    verdict: approve
+    verdict_sha256: 8babf9a85dc856bb4ba171e94b745e9fe13bbed2f14db033ac889619aa2f8995
+chuoi_verdict_ghi_chu: >-
+  Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va
+  KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG).
+  `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5.
+
+no_da_khai_trong_chuoi_nay:
+  - id: REVIEW-KHONG-DOC-CHECK-RUN
+    khai_o: 'verdict luot 3'
+    mo_ta: >-
+      Luot 2 phat `approve` trong khi CI tren dung `reviewed_sha` da DO tu 11 phut truoc
+      (`chuan-bi` FAILURE, ba job gate `skipped`). Truoc moi `approve` phai doc `get_check_runs`
+      tren `reviewed_sha`, va `skipped` la KHONG DO DUOC chu khong phai dat.
+  - id: RC-QUA-PIPE-KHONG-CO-CHOT
+    khai_o: 'verdict luot 2'
+    mo_ta: >-
+      `actionlint | tail -5; echo rc=$?` doc ma thoat cua `tail`, khong phai cua actionlint.
+      Ca reviewer (verdict luot 1) lan executor (than PR, o A6) cung mac. Nen `actionlint` o kho
+      nay la `rc=1` / 1 finding khi co shellcheck, KHONG phai `rc=0` — tieu chi phai phat bieu
+      theo DELTA.
+  - id: TIEU-CHI-NEU-TRUONG-CHUA-AI-DO
+    khai_o: 'verdict luot 5 (P3, tu bao)'
+    mo_ta: >-
+      `A7` cua spec r2 viet `expected == checked`; khoa THAT la `expected_file_count` /
+      `checked_file_count`. Nguoi doc roi `grep` dung chu se khong thay gi.
+
+hinh_dang_ke_thua_sau_packet:
+  TIEU-CHI-THEO-GIA-TRI-TUYET-DOI: 2
+  DOT-BIEN-TAUTOLOGY: 2
+  TIEU-CHI-NEU-TRUONG-CHUA-AI-DO: 1
+  vi_sao: 'Luat L4 — packet ke tiep phai CHEP bo dem nay, khong bat dau lai tu 0.'
+
+cong_da_chay_tren_cay_ung_vien:
+  a10_chuan_bi: 'success'
+  a10_ba_job_gate: 'CO CHAY, success ca ba — khong job nao skipped'
+  tl_selftest: 'rc=0 — 1710/1710, hai so BANG NHAU, 0 [FAIL]'
+  release_verify_strict: 'rc=0 — ok=true, expected_file_count == checked_file_count == 180'
+  lease_publish_test: 'rc=0 — 157/157 dat, bo qua 0'
+  adr_song: 'rc=0'
+  doctrine_scan: 'rc=0'
+  doc_claims_check_strict: 'rc=0 (core.abbrev=7)'
+  git_diff_check: 'rc=0'
+  actionlint: 'head rc=1 / 1 finding · nen a612c70 rc=1 / 1 finding => DELTA = 0'
+
+ci_tu_dong_tren_ung_vien:
+  run_id: 35252006006
+  head_sha: dff2ec14ed5b54551bbacfcba2313208c07efe56
+  ket_qua: 'chuan-bi success; gate/gate-registry/gate-packet-loop (ubuntu-latest) success; thu-hoi success'
+
+# ---------------------------------------------------------------------------
+# LAND — §13.1. Viet SAU khi chu kho merge; moi truong do lai trong phien nay.
+# ---------------------------------------------------------------------------
+land:
+  pull_request: 550
+  merged_by: ducthangho
+  merged_at_utc: '2026-09-17T17:51:05Z'
+  phuong_thuc: merge_commit
+  merge_commit: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+  merge_parents:
+    - a612c70cbc56d0e3a8c580f4759eddf215af82fb   # target truoc
+    - dff2ec14ed5b54551bbacfcba2313208c07efe56   # candidate (== reviewed_sha)
+  merge_tree: e59087bc81a780684cc5d956482e25314418d140
+  quan_he_da_xac_minh:
+    candidate_la_to_tien_cua_merge: true
+    target_truoc_la_to_tien_cua_merge: true
+    master_hien_tai_bang_merge_commit: true
+  full_ref_fence:
+    do_luc_utc: '2026-09-17T23:46:00Z'
+    so_ref: 904
+    sha256_danh_sach: fec4597bd78ccb6e864d1e972d1ababb3dbc4a701d23845f334503c1279906de
+    ghi_chu: 'Chup TRUOC buoc ghi cua phien nay; khong co thao tac ghi nao vao master sau merge.'
+  so_tap_ten_ref_hai_nguon:
+    ls_remote_heads: 427
+    for_each_ref_cache: 427
+    comm_23_thieu_cuc_bo: 'RONG — khong mu'
+    ghi_chu: >-
+      Lan do DAU cua phien thieu `ops/cap-lease-541` cuc bo (427/426) => MU, fail-close theo
+      doctrine; da fetch du roi do lai.
+
+  ci_hau_merge:
+    run_id: 35255237751
+    head_sha: d705623162b75b7340ee7cca54ac2d2abbddbb6f
+    bat_dau_utc: '2026-09-17T17:51:08Z'
+    ket_thuc_utc: '2026-09-17T18:14:58Z'
+    ket_luan: success
+    so_job: 4
+    job:
+      - {ten: 'chuan-bi', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate-packet-loop (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+      - {ten: 'gate-registry (ubuntu-latest)', nen: ubuntu-latest, ket_qua: success}
+    buoc_dang_ke:
+      release_verify_strict_lane_LAND: 'success (buoc 36) — lane DUY NHAT bat duoc lech manifest'
+      tl_selftest_co_bang_chung: 'success (buoc 27)'
+      PR_head_contains_required_EOL_base: >-
+        skipped (buoc 11) — DUNG nhu phai the tren luot master, vi buoc ay co
+        `if: github.event_name == pull_request`. Tieu chi "khong buoc nao skipped" chi ap cho
+        luot PR; be nguyen sang luot master la tu bao dong gia.
+    launcher_windows: >-
+      KHONG BAN — merge khong cham `.claude/dev/**`, dung nhu M6 khai. Khong phai loi.
+
+  # A9 la tieu chi DUY NHAT chi do duoc SAU merge.
+  a9_dem_job_windows:
+    truoc: '6 job, trong do 3 windows-latest (luot master trên 2e84f3f)'
+    sau: '4 job, TAT CA ubuntu-latest, 0 windows'
+    do_bang: 'actions_list list_workflow_jobs tren run 35255237751 — khong suy tu YAML'
+    ket_qua: DAT
+
+  bookkeeping_tung_muc:
+    ghi_chu: >-
+      §10.2.4 doi DUYET TUNG MUC viec ma lease khai, khong dung o hien vat chinh. Moi dong
+      duoi day do TREN master da land (d705623), khong doc tu nhanh packet.
+    M1_M2_M2b_ci_yml: >-
+      DAT — job `chuan-bi` co that; ba consumer khai `needs: chuan-bi` va doc
+      `fromJson(needs.chuan-bi.outputs.os)` (3 cho: dong 52, 606, 665); `outputs.os` la CHUOI.
+    M3_M3b_M4_lease_publish_test: >-
+      DAT — `_kiem_tra_outputs_ci_khong_boc_fromjson` co mat (5 lan nhac), cong chot nguon duy
+      nhat va evaluator fail-close.
+    M5_M6_adr_0049: 'DAT — docs/adr/0049-...md ton tai tren master'
+    M7_protocol_20: 'DAT — dung MOT hang §20 cho ADR-0049 (+1/-0)'
+    M8_ke_khai_slot: >-
+      DAT — scripts/tl_selftest.py:21300 co khoi `KE KHAI SLOT (PR #550 — ADR-0049, packet #548
+      r2)`; :21306 `len(paths) + 74 == 254`; :21309 `len(tren_dia) == 74`.
+    M9_tai_sinh_manifest: >-
+      DAT — RELEASE_MANIFEST.json tren master co `file_count: 180` (GIU nguyen); diff dung MOT
+      muc `scripts/tl_selftest.py`, khong them khong bot.
+    A9: 'DAT — xem a9_dem_job_windows'
+    A10: 'DAT — chuan-bi success VA ba job gate CO CHAY tren dff2ec14'
+    A11: >-
+      DAT, do lai tren master da land: docs/**/*.md = 74; release-verify --strict ok=true,
+      expected_file_count == checked_file_count == 180, package_hash_match=true,
+      package_hash_self_match=true, errors=0.
+    ngoai_le_adr_0044: 'DAT — 6 tep, +286 / -31 (tran da duyet: 6 tep / 300 dong them), du 14 dong'
+    write_set: 'DAT — dung 6 duong; `git diff --name-only` loc nguoc => 0 duong la'
+
+  trang_thai_theo_10_2_4:
+    merged: true
+    landed: true
+    landed_can_cu: >-
+      Ket qua da vao canonical o dung SHA duoc duyet (dff2ec14, parent thu hai cua d705623),
+      gate hau merge XANH, va bookkeeping tung muc o tren da duyet het.
+    packet_complete: false
+    packet_complete_vi_sao_KHONG: >-
+      §10.2.4 doi "khong con open work/lease". Lease `ci-windows-r2-g2-antigravity` VAN CON HAN
+      (het 2026-09-18T17:00:00Z) va `ai-dang-giu docs/PROTOCOL_DA_PHIEN.md` van tra
+      `rc=11 · NGUOI_GIU 1`. Xem `lease_chua_thu_hoi_duoc`.
+
+  lease_chua_thu_hoi_duoc:
+    lease_id: ci-windows-r2-g2-antigravity
+    het_han_utc: '2026-09-18T17:00:00Z'
+    do_luc_utc: '2026-09-17T23:5xZ (xem receipt_written_at_utc)'
+    ai_dang_giu: 'rc=11 · NGUOI_GIU 1 tren docs/PROTOCOL_DA_PHIEN.md'
+    vi_sao_khong_thu_hoi_duoc: >-
+      Do BANG MA, khong doan. (a) `_bia_mo_doi_xung` chi tat mot lease khi TON TAI mot lease
+      KHAC mang dung `lease_id` ay o `da_bi_thay_the` VA tro nguoc bang `thay_the_cho`. Do la co
+      che KE TUC revision, khong phai co che THU HOI khi packet da xong — packet #548 khong co
+      ke tuc. (b) So thu hoi `ops/thu-hoi/` DA CO MA nhung CHUA KICH HOAT:
+      `ops/lease_publish.py:929` `SO_THU_HOI_KICH_HOAT = False`, va bat ky ban ghi nao trong so
+      khi co con False lam MOI consumer van hanh tra `12` (`ops/lease_publish.py:1629-1634`).
+      Tuc ghi mot ban ghi thu hoi hom nay se lam DO ca `check` lan `kiem-thu-hoi-github`.
+    ket_luan: >-
+      KHONG CO DUONG THU HOI SOM trong quyen cua phien nay. Day dung la no
+      `AG-T0-01B-thu-hoi-lease-chua-co-duong` da khai trong CLAUDE.md, nay do duoc thanh mot ca
+      cu the. Lease tu het hieu luc luc 2026-09-18T17:00:00Z.
+    he_qua: >-
+      Packet #551 (`ASSURANCE-NEO-VAO-HO-MODEL`) co `docs/PROTOCOL_DA_PHIEN.md` trong write set
+      nen KHONG cap lease duoc truoc moc ay, dung nhu chinh than Issue #551 da chot:
+      "Khong cap lease khi #548 con giu PROTOCOL". Ba duong con lai cua #551 do duoc NGUOI_GIU 0.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-opus-5
+  model_da_chay: 'claude-opus-5 (phien dieu phoi, khong phai tien trinh CLI rieng)'
+  effort: KHONG_KHAI
+  KHONG_do_duoc: >-
+    Khong co `session_run_id`: khong phong duoc bang `launcher.py run` vi claude trong container
+    nay o trang thai CHUA_XAC_THUC (`doctor`), nen khong co `run.json` de trich
+    `modelUsage[*].canonicalModel`.
+  xung_dot_loi_ich_da_khai: >-
+    HAI tang, ca hai da khai o dau VERDICT.md luot 5.
+    (1) Phien nay SOAN dac ta r2 va GHI HO lease gen 2 — nen phan quyet ve HINH DANG cua M8/M9
+    khong co gia tri doc lap (chinh spec r2 neu san `73 -> 74`, `253 -> 254`).
+    (2) Reviewer cap HINT o luot 2, 3, 4 va executor ap theo.
+    Thu CO gia tri doc lap: phep do M9 theo CAU TRUC (so chi muc hai manifest), A10/A11 chay
+    tren CI va tren cay, va phat hien P3 (`A7` neu truong chua ai do).
+
+danh_tinh_executor_KHONG_do_duoc: >-
+  Cac commit cua agy khong mang header CLI nao chung minh model/effort. `agy` chua phat ra dinh
+  danh model tung luot chay — no `AGY-CHUA-ATTEST-MODEL-TUNG-LUOT`, khai trong Issue #551.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: >-
+    Ban chieu dang qua MCP github. Nguon co tham quyen la TEP CO BAM trong kho. Chu kho la nguoi
+    bam merge PR #550.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob verdict ghim tren nhanh claude/review-548-luot5-20260917, commit c2f6898.
+  gioi_han: >-
+    cuong_do THAP vi chinh tep verdict CHUA land: `merge-base --is-ancestor c2f6898 origin/master`
+    tra KHONG. San pham cua packet DA land (d705623) nhung ho so review thi chua — hai chuyen
+    khac nhau, khong duoc doc lan. Manh len khi nam verdict nay land, hoac khi co tag luu-tru/*.
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-17T23:58:00Z'
+receipt_basis: >-
+  sha256 do tu blob tren nhanh verdict; merge commit/parents/tree do bang `git show -s`; CI hau
+  merge do bang `actions_list list_workflow_jobs` tren run 35255237751; A9 dem job tu chinh
+  ket qua ay; bookkeeping tung muc do TREN `origin/master` da land (d705623); trang thai lease
+  do bang `ops/lease_publish.py ai-dang-giu` sau khi da fetch du ref (427/427, comm -23 RONG).
+receipt_khong_khai:
+  - >-
+    Khong khai `cross_approved`. Tran §8 con nguyen; xem `assurance_ghi_chu`.
+  - >-
+    Khong khai Packet complete. Lease con hieu luc; xem `land.trang_thai_theo_10_2_4`.
+  - >-
+    Khong khai `gate (windows-latest)` xanh. No CHUA TUNG xanh va se KHONG xanh sau packet nay:
+    14 ca do vi PATH (`ops/lease_publish.py:1106`, packet #541) + 1 ca `t150` do LY DO DOC LAP
+    (packet #552). Do la 14 + 1, KHONG phai 15 cung mot nguyen nhan — dinh chinh nay da ghi
+    trong verdict luot 5.
+  - >-
+    Khong khai gi ve chi phi phut Actions: `get_workflow_run_usage` tra `duration_ms: 0` cho moi
+    job tren kho nay, nen so tien la KHONG DO DUOC.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (`verdict_path` + `verdict_sha256`). Moi comment tren GitHub — ke ca ban
+  chieu do chinh phien nay dang — chi la BAN CHIEU.

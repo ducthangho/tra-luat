@@ -1,0 +1,145 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 2 (LƯỢT CUỐI) của PR #506 (packet #502 BO-CONG-DUYET-KHAC-DANH-TINH),
+# KHÁC NỀN (codex), trên head `88e89b3` — head ĐÃ MERGE vào master (`26e2555d`, merge commit, không squash).
+#
+# Verdict: approve — 0 P1 / 0 P2 / 1 P3 (ngoài write set, còn mở); hai P2 lượt 1 ĐÃ VÁ THẬT (đối chiếu từng hunk);
+# HINT 0 hunk. `approve` là ĐIỀU KIỆN DỪNG của vòng vá→review, KHÔNG phải merge authorization: chủ kho ra chỉ thị
+# merge sau khi trả lời Q3 nửa A ("chưa từng bật"), dấu vết #502 comment 5630265789.
+# Máy trạng thái cục bộ gen 1 về `blocked` vì executor ghi lại slug P3 làm khoá đếm (lỗi ghi sổ, không phải lỗi bản
+# vá) — chủ kho reroute bằng lease generation 2 (#502 comment 5630196493); gen 2 ghi lại đúng bản duyệt này ⇒ accepted.
+
+schema_version: 2
+receipt_id: pr506-review-2-codex-20260911-3c71bd7f
+kind: review_delivery_receipt
+packet_id: 'wp502'
+lease_id: bo-cong-duyet-khac-danh-tinh-exec-1-claude-20260911
+phase_key: BO-CONG-DUYET-KHAC-DANH-TINH
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+verdict_path: ops/reviews/pr506-review-2-codex-verdict.md
+verdict_sha256: 2133c7060bf8b73ddb5378689ad03978b69252ff23b6ff98d21f1c476d598b03
+verdict_bytes: 18508
+reviewed_sha: 88e89b3afcb547326ad4233c2b806538ddaeb37b
+reviewed_base: 27c413c3e531800431cad9db4452d7236505a5a9
+evidence_url: https://github.com/ducthangho/tra-luat/blob/fcf252ae7d1074cdc197c537bbdb083ec5aa186f/ops/reviews/pr506-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `fcf252a` — commit ĐẦU TIÊN chứa tệp verdict (`git log --all --diff-filter=A`, đúng 1 commit).
+  Bản chiếu công khai sớm hơn: PR #506 comment 5629940622 — chiếu frontmatter, ĐỐI CHIẾU LƯỢT TRƯỚC, kết luận,
+  Findings, Mutant, chua_do_duoc; `## BẢNG ĐO` (19 hàng, dòng 34–77) và `## Phân loại từng dòng tham chiếu`
+  (dòng 117–172) CHỈ có trong tệp này.
+so_p1: 0
+so_p2: 0
+so_p3: 1
+findings_ids: [tham-chieu-tai-lieu-song-con-sot]
+hint_patch:
+  sha256: fc895712f20e329e871dca595f67851a2daf1655688809d717ea0a6173e08b01
+  bytes: 413
+  noi_dung: '0 hunk — bốn dòng ghi chú: approve, hai P2 lượt 1 đã áp nguyên HINT, P3 ngoài write set giữ nguyên'
+
+noi_dung_do_duoc_van_dung:
+  - 'ĐỐI CHIẾU LƯỢT TRƯỚC: diff 1e36bb4..HEAD chỉ runbook +4/−3; hunk diff Git == hunk HINT lượt 1 từng byte; áp HINT lên runbook lượt 1 cho kết quả bằng HEAD từng byte ⇒ hai P2 ĐÃ VÁ THẬT; P3 CHƯA VÁ = xử lý đúng (ngoài exact write set).'
+  - 'Registry 21/21 TỔNG ĐẠT + 2 mutant phục hồi rc=1 đúng thông điệp; lease_publish_test 146/146; t24/t34 đọc đủ 6/6 workflow; don_ref 105/105; actionlint HEAD/base cùng 1 SC1003:info ⇒ delta 0.'
+  - 'Khối ĐÃ RÚT: 12 dòng blockquote + 1 dòng trống = +13, đúng 3 mục, lý do dẫn "Spec ghi hai PR" và khai GitHub/nửa A KHÔNG ĐO ĐƯỢC; bỏ 13 dòng thì runbook bằng base từng byte; permalink b3e4ae6 có blob khớp spec sha256 d8d1e083….'
+  - 'Numstat +13/−1710 đúng 6 tệp; OID các đường cấm base=HEAD; 27 commit master mới không giao write set (có chạm ops/cong_cu.py — ngoài write set).'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  model_yeu_cau: gpt-6-astra
+  model_da_chay: 'KHONG_DO_DUOC — codex exec không xuất modelUsage; reviewer tự khai `GPT-6 / Codex` trong model_tu_khai'
+  effort: xhigh
+  session_run_id: 3c71bd7f
+  run_id_day_du: 3c71bd7ffb724072a27b2cdd807318de
+  prompt_sha256: 21c7c04d701cf693e36c8a9a8bf3dc8a748418a2392b558c6c3baa53e4c585a9
+  bat_dau_utc: '2026-09-11T05:17:20.729494+00:00'
+  ket_thuc_utc: '2026-09-11T05:27:41.048910+00:00'
+  thoi_luong_giay: 620.319
+  ma_thoat: 0
+  trang_thai: xong
+  stdout_byte: 300
+  stdout_sha256: 70627550e69315491bf73ba114865770219acecd7c7c711e64a3170e3cf93f11
+  stderr_byte: 215467
+  stderr_sha256: 28e83aa98fc9f9ed44d62d30b800361b3ad7e00e9de5ed471588582290ac07ef
+  so_lan_chet_truoc_khi_xong: 0
+  nguon_cac_scalar_tren: >-
+    ĐỐI CHIẾU ĐƯỢC với run.json (ngoài kho, `scratchpad/runs/3c71bd7f/`): run_id/short_id, prompt_sha256, bat_dau_utc,
+    ket_thuc_utc, thoi_luong_giay, ma_thoat, trang_thai, stdout_byte/sha256, stderr_byte/sha256, worktree_sach, head.
+    Dòng cuối stdout `XONG VERDICT sha256=2133c706…` khớp băm tệp. model_yeu_cau, effort, transport và
+    so_lan_chet_truoc_khi_xong là ATTESTATION điều phối, KHÔNG có khoá tương ứng trong run.json.
+
+nang_luc_do_cua_goi:
+  mirror: 'clone mới từ guong.git (fetch sau push 88e89b3), detached 88e89b3, core.abbrev 7, không nông; nguon/ có spec + actionlint + VERDICT/HINT lượt 1 của chính reviewer; EVIDENCE.md bổ sung lượt 2'
+  chua_do_duoc: 'Không mạng; không đọc doctrine; prompt snapshot/stderr.log không kèm.'
+
+hien_vat_reviewer_vao_kho:
+  duong_dan: KHONG_CO
+  ghi_chu: 'scratch/logs/ (round2.patch, round2-comparison.json, hint-apply.log, references.*, workflow-coverage.json, scope-check.json, master-drift-all-commits.json) ở sandbox ngoài kho.'
+
+tuan_thu_cam_cua_reviewer:
+  cay_kho_sach: true
+  commit_them_ngoai_head: 0
+  bang_chung: 'run.json worktree_sach: true; điều phối đo sau lượt: git status --porcelain rỗng.'
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: verdict do tài khoản tác giả PR vận chuyển KHÔNG là merge authorization; uỷ quyền merge là chỉ thị chủ kho ghi ở #502 comment 5630265789 (Q3 nửa A: "chưa từng bật"; "#506 nếu đã cross review approve thì merge").'
+  phien_van_chuyen: https://claude.ai/code/session_01Lnos1VZ4KSzHLG9u4UETiW
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: cao
+  mo_ta: 'Blob verdict ghim `fcf252a`. Head đã review `88e89b3` là tổ tiên của master (`26e2555d`, merge commit #506, hai cha 4b5184e + 88e89b3).'
+  gioi_han: 'Vững khi land bằng merge commit hoặc fast-forward; squash phá quan hệ tổ tiên.'
+
+verdict_usage_caveats:
+  - id: APPROVE-la-dieu-kien-DUNG-gen1-BLOCKED-do-ghi-so-gen2-reroute
+    muc: P2
+    mo_ta: >-
+      `approve` là điều kiện DỪNG của vòng vá→review; uỷ quyền merge là chỉ thị chủ kho (#502 comment 5630265789)
+      sau khi trả lời Q3 nửa A "chưa từng bật". Khi ghi sổ lượt này, executor truyền lại slug P3
+      `tham-chieu-tai-lieu-song-con-sot` làm `--finding-id` lần thứ hai ⇒ `packet_loop.py` đếm same-failure 2/2 và đưa
+      gen 1 về `blocked` (event `blocked_same_failure`) dù bản ghi approve vẫn được lưu. Đó là lỗi GHI SỔ, không phải lỗi bản
+      vá; công cụ cố ý không có đường mở khoá. Chủ kho reroute bằng lease generation 2
+      (`bo-cong-duyet-khac-danh-tinh-exec-2-claude-20260911`, #502 comment 5630196493; gen 1 nhận `da_bi_thay_the`);
+      gen 2 ghi lại đúng bản duyệt này KHÔNG kèm slug P3 ⇒ `accepted` tại 88e89b3 (state-dir `.claude/.packet_state/gen2/`).
+    phai_lam_gi_khi_chay_lai: >-
+      Finding ngoài write set mà reviewer đã xếp "CHƯA VÁ = xử lý đúng" KHÔNG được truyền lại làm `--finding-id` ở lượt
+      sau — ghi vào `finding-desc`/hồ sơ. Đừng đọc `blocked` của gen 1 thành "bản vá bị bác".
+  - id: P3-tham-chieu-tai-lieu-song-con-sot-CON-MO-ngoai-write-set
+    muc: P3
+    mo_ta: >-
+      Hai chú dẫn sống còn trỏ tệp đã xoá: `requirements.txt:29` (comment "Ba workflow" kể `duyet-phan-chung.yml:39`)
+      và `ops/PHAN_BIEN_QUY_TRINH_BUILD_REVIEW_20260905.md:118` (lệnh tái hiện đọc `.claude/dev/duyet_danh_tinh.py`).
+      Không consumer thực thi/CI nào đọc hai tên ấy (quét 75 dòng, 0 lời gọi sống). Ngoài exact write set 6 tệp
+      (đã là ngoại lệ ADR-0044) nên cố ý không vá trong packet #502.
+    phai_lam_gi_khi_chay_lai: >-
+      Đừng chạy lệnh minh hoạ ở PHAN_BIEN:118 — tệp đích không còn. Sửa hai chú dẫn ở một PR hồ sơ/dọn tài liệu sau,
+      không cần lease sensitive.
+
+khong_do_duoc:
+  - 'Model build và danh tính model thật của codex exec: không có modelUsage, chỉ có lời tự khai.'
+  - 'run.json/stdout.log/stderr.log không vào kho ⇒ scalar runtime là attestation.'
+  - 'Sự kiện GitHub (merge #500/#501, cấu hình nửa A, HTTP của permalink): sandbox không mạng — reviewer ghi KHÔNG ĐO ĐƯỢC; Q3 "chưa từng bật" là lời chủ kho, không phải phép đo của reviewer.'
+  - 'A5/A6 sau land (check `cong`/`phan-chung` biến mất, gate master, Windows): đo ở PR hồ sơ này và lượt master 26e2555d — ghi ở CHANGELOG r365, không ở verdict.'
+
+codex_connector_cung_head:
+  kich_luc: '2026-09-11T06:10:55Z — bỏ draft ngay trước merge (merge 26e2555d lúc 06:1xZ)'
+  hoan_tat_luc: '2026-09-11T06:14:48Z — SAU merge'
+  ket_qua: 'KHÔNG có review object, KHÔNG có comment finding (chỉ bảng tóm tắt Completed, comment 5630269090, commit 88e89b3) ⇒ sạch theo những gì API trả về — thuật lại, điều phối đọc qua MCP; không được dùng làm điều kiện merge vì hoàn tất sau merge.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-09-11T06:2xZ'
+receipt_khong_khai:
+  - 'Không khai `cong` đã xanh trên #506 — nó ĐỎ tất định (định nghĩa từ master) tới lúc land; chủ kho quyết merge bằng chỉ thị.'
+  - 'Không khai P3 đã đóng — còn mở, ngoài write set.'
+  - 'Không khai model đã chạy — codex không đo được.'
+  - 'Không khai gen 1 "hết hạn" hay "bị thu hồi vì lỗi bản vá" — nó bị thay thế vì lỗi ghi sổ của executor.'

@@ -1,0 +1,52 @@
+# lop: a10-v-chi-ghim-o-moi-bo-o-co-san-van-lot — A10 (v) ghim số ô của phần MỚI trong lưới dùng chung `_luoi_noi_main` nhưng không ghim 179 hàng có sẵn từ #668; một dòng (+1/−1) bỏ 131 khoá của `--tu-kiem-main` mà 56/56, (iv), mọi số (v), A4-b, A4-d, 101/101 đột biến đích t54, 66 dò, (iii) đều xanh và Phụ lục I cho 0,830 (ĐẠT (i)); M8 Giữ răng khai 'số ô, số kịch bản của ba cửa con bằng g1' rộng hơn phép đo; thêm phép so tập khoá và hình dạng của KQ ba cửa con vào (v).
+--- ops/specs/ci-g5-cong-cu-va-tiep-r12.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r12.md
+# lop: a10-v-chi-ghim-o-moi-bo-o-co-san-van-lot
+@@ -2526,16 +2526,16 @@
+      oracle vẫn **không** gọi mã bị đo và cho cùng kỳ vọng trên trọn miền (đo: 0 ô lệch so với `_mong_che_do`/`_mong_git` hiện
+      có, trên đúng miền ấy); đổi cách cung cấp `TEP_TEST` hay `subprocess` giả cho phép quét `head`, miễn là chỉ đổi môi
+      trường mà giàn vốn đã kiểm soát (như `subprocess` giả của nền) và không đổi thân `_van_tay`.
+-   - **Cấm:** bỏ ô; thu hẹp `D698`, `R698`, `N698`, `T698`, `E698`, tập vị trí (kể cả giữ `D698` chỉ ở ba neo như quét `head`), tập giá trị
+-     chuẩn, tập đường dẫn, tập lớp ngoại lệ — công thức S1/S2 của cha không phải chốt chống việc này (sửa cả hai phía thì `t53` xanh); chốt là A10 (iv) cho miền M1/M1b và (r12) A10 (v) cho các lưới mà cha và cửa con cùng dựng từ một hàm (M2, M2b, M3, M5) và miền `E698` (M5b); giảm số canh
++   - **Cấm:** bỏ ô — kể cả ô CÓ SẴN từ #668 của một lưới mà cha và cửa con cùng dựng từ một hàm (vd các hàng `noi-…` của `_luoi_noi_main`); thu hẹp `D698`, `R698`, `N698`, `T698`, `E698`, tập vị trí (kể cả giữ `D698` chỉ ở ba neo như quét `head`), tập giá trị
++     chuẩn, tập đường dẫn, tập lớp ngoại lệ — công thức S1/S2 của cha không phải chốt chống việc này (sửa cả hai phía thì `t53` xanh); chốt là A10 (iv) cho miền M1/M1b và (r12) A10 (v) cho các lưới mà cha và cửa con cùng dựng từ một hàm (M2, M2b, M3, M5) và miền `E698` (M5b), và (r13) phép so khoá và hình dạng của `KQ` ba cửa con ở A10 (v) cho mọi ô còn lại; giảm số canh
+      (54) hay số mục `DOT_BIEN` (470); nới bất kỳ tiêu chí nào; cho cha của `t53` (công thức S1/S2, tập `B698`) và cửa con dùng
+      chung MỘT lần dẫn xuất — khi ấy một đột biến thu hẹp miền ở chỗ dẫn xuất chung đổi cả số ô của con lẫn công thức của cha,
+      nên phép so của hợp đồng đếm M1/M5b không còn bắt được nó (chưa đo dò nào khác có bắt hay không); dẫn xuất `E698` ngoài cửa con, hay trước lúc quét (M5b); mang kết quả
+      dẫn xuất qua tệp, biến môi trường hay đối số giữa các tiến trình (mỗi lượt đột biến chạy trên cây đã đột biến của nó, nên
+      một bản đệm chung giữa các lượt làm mutant đọc miền của cây khác); đổi thân sáu hàm của A4-d; đổi chữ M1–M6.
+    - **Giữ răng:** hạng của **từng** dò trong tập đóng 419 trên g2 bằng hạng của cùng dò trên g1 (A10 (ii)); 54 canh vẫn GIẾT
+-     đúng ca đích (A5); A1–A8 vẫn đạt; (r12) số ô M1/M1b của cửa con `t53` bằng g1 (A10 (iv)); số ô, số kịch bản của ba cửa con
+-     bằng g1 và tập khoá `E698` chứa tập của g1 (A10 (v)).
++     đúng ca đích (A5); A1–A8 vẫn đạt; (r12) số ô M1/M1b của cửa con `t53` bằng g1 (A10 (iv)); số ô, số kịch bản của năm lưới ở A10 (v)
++     bằng g1, tập khoá `E698` chứa tập của g1, và (r13) tập khoá `KQ` của ba cửa con chứa tập của g1 với độ dài mọi danh sách và từ điển lồng không nhỏ hơn (A10 (v)).
+ 
+ **Bảng canh `DOT_BIEN`.** Thêm đúng **54** mục canh: 16 mục của r1 (M1–M3 cũ), 27 mục r2 và 11 mục r3. Mỗi
+ hàng trong lớp của bảng họ ở §2 có ít nhất một canh, trừ hàng "B phép khác": mọi dò ở đó là đối
+# lop: a10-v-chi-ghim-o-moi-bo-o-co-san-van-lot
+@@ -2908,6 +2908,13 @@
+   cùng blob `9c628700…` cho 121 khoá trên cây `19a2d96`, 120 trên cây `bfb4ca3` (thiếu `lease_publish_test.A9KhongDoDuoc`), và
+   119 trên cây `19a2d96` khi `ops/__pycache__` đã có bản biên dịch của `lease_publish_test` và `bash_nen` (thiếu
+   `tokenize.TokenError` và `tokenize.StopTokenizing`, chỉ được nạp khi hai tệp ấy phát `SyntaxWarning` lúc biên dịch) (§0).
++  (r13) (v) ở trên chỉ ghim phần MỚI của `--tu-kiem-main`: 122 khoá `noi698-` (lưới `_luoi_noi_main`) và 162 khoá `m3698-` (lưới `_luoi_m3`) trong 508 khoá; 179 hàng có sẵn từ #668
++  (tam giác `noi-k{k}-n{n}`, `noi-{du,manh}-w{w}`, `noi-path-{i}`, `noi-nen-{i}`) và 45 khoá khác (kịch bản nền, trường phụ) không được ghim, nên một dòng (+1/−1) bỏ 131 hàng có sẵn
++  vẫn qua mọi phép so ở trên (đo, review lượt 12, cây `P1a` ở PHẢI ĐỎ Ở dưới). Phải thêm, với CẢ BA cửa con: tập khoá của đối tượng `KQ` của bản g2
++  CHỨA tập khoá của bản g1, và độ dài của mọi danh sách hay từ điển lồng trong nó (cùng đường khoá, mọi độ sâu) không NHỎ HƠN của g1 — trừ
++  `kq["m5b"][0]`, đã có phép chứa riêng ở trên. Số đo trên g1 (`19a2d96`, cây `git archive`): 32 · 508 · 72 khoá ở `--tu-kiem-che-do`,
++  `--tu-kiem-main`, `--tu-kiem-gom`. Thiếu một khoá, hay một độ dài nhỏ hơn ⇒ (v) ĐỎ. Phép này chặn việc BỎ ô; nó không chặn việc thêm ô giả
++  cho đủ số (cùng giới hạn đã khai ở dưới).
+   (iv) đọc được trên cùng cặp lượt này: `kq["m1"]` của cây `bfb4ca3` và của cây `19a2d96` bằng nhau (đo). (v) đếm số, không so
+   nội dung từng ô: bớt một ô rồi thêm một ô khác cho cùng số thì (v) không bắt; như (iv), nó không chống một cửa con in số giả.
+   **PHẢI ĐỎ Ở:** g1 đặt vào chỗ g2 (tỷ lệ Δ = 1,00 > 0,85); và, cho (iv), ứng viên đo `N68` của review lượt 11 (g1 cộng 8 dòng
+# lop: a10-v-chi-ghim-o-moi-bo-o-co-san-van-lot
+@@ -2924,6 +2931,10 @@
+   (§1.13.4), chênh 11,6 %, tức khoảng ba phần tư (11,6 trên 15) khoảng cách giữa 1,00 và 0,85 — lý do đòi xen kẽ và lấy min của hai lượt mỗi bên; một
+   g2 chỉ nhanh hơn g1 trong dải nhiễu sẽ không chắc qua (i). **Không bắt:** bản g2 chậm mà không tốn CPU (giới hạn của Phụ lục I,
+   §10); A9 đo tường nên bắt được phần ấy trên máy đo.
++  (r13) Cho phép so khoá của (v): cây `P1a` của review lượt 12 — g1 với MỘT dòng của `_luoi_noi_main` đổi (+1/−1), `for n in range(2, 17) for k in range(n)`
++  thành `for n in (2, 16) for k in (0, n - 1)` ở hàng `noi-k{k}-n{n}` — bỏ 131 trong 508 khoá của `--tu-kiem-main`, mà `t52`, `t53`, `t54` 56/56, (iv),
++  mọi số của (v) liệt kê ở trên, A4-b và A4-d đều như g1; 101/101 đột biến đích `t54` (gồm 12 canh) vẫn GIẾT đúng ca đích, bán kính 1/56, 63/63 dò đích `t54` đúng hạng đã khai (59 GIẾT; 4 SỐNG là `t_cf`, `t_tab`, `x_f50_tk_and_bq_ne3`, `x_f50_h_and_bq_ne3`) và ba dò KHÁC vẫn KHÁC; Phụ lục I (g1, P1a, g1, P1a) cho Δ 6,91 · 6,95 so 8,33 · 9,32 s, tức 0,830 ở (i) và `ty_le` 1,29 · 1,31 ở (iii);
++  CPU của cửa `--tu-kiem-main` giảm từ 3,40–3,88 xuống 2,09–2,32 s. Chỉ phép so khoá làm nó ĐỎ.
+ 
+ ## 7. `ci_budget`
+ 

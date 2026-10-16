@@ -1,0 +1,69 @@
+# lop: luoi-noi-main-hai-hang-ngoai-ascii-la-ba
+# Sửa số hạng: _luoi_noi_main trên nền có BA hàng (noi-path-3, noi-nen-2, noi-nen-do) với đường ra ngoài ASCII, trên HAI đường ra khác nhau — không phải "hai hàng". Sửa hai chỗ sống (§5 M6, §1.12) và ghi chú đếm lại ở cuối §1.12; chữ r4/r5 ở §1.10.3, §1.11.3 giữ để truy dòng dõi.
+--- ops/specs/ci-g5-cong-cu-va-tiep-r6.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r6.md
+@@ -1559,7 +1559,7 @@
+ 
+ - **Nền `fc852ff`, năm dò của Phụ lục L:** `x6_t1_ra`, `x6_t4_ra`, `x6_head`, `x6_luoi_git` SỐNG (ca đích qua; mỗi dò chỉ
+   ném trên giá trị mà ô cũ của nền không có); `x6_t2_ra` KHÁC — `tin_dung_gia` ở `t54_`, cùng lý do với hai dò `y4_t2_*`
+-  và bốn dò J-NEM của `main` (hai hàng cũ của `_luoi_noi_main` có ký tự ngoài ASCII, §5 M6). `so_neo` = 1 ở cả năm; `t2`
++  và bốn dò J-NEM của `main` (ba hàng cũ của `_luoi_noi_main` có ký tự ngoài ASCII, hai đường ra khác nhau, §5 M6). `so_neo` = 1 ở cả năm; `t2`
+   bỏ qua ở cả năm.
+ - **Lý do của K trên `v6_t4`, đọc nguyên văn (ba lượt chẩn đoán):** `x6_t1_ra` và `x6_luoi_git` — ca đích `t53_` ra
+   `tin_dung_gia`, chi tiết "giàn giáo hỏng (chưa tới chốt nghiệp vụ): cửa --tu-kiem-che-do hỏng: rc=1", stderr của cửa con
+@@ -1582,6 +1582,10 @@
+ - **Không chạy lại** trên các cây `v6_*`: 365 dò còn lại của tập đóng 419 (Phụ lục C và H, trừ `x_wr_ra_nfkc` đã nằm trong
+   36 dò J ở trên), Phụ lục A, A4 và A5 tám mảnh. r6 không đổi mã đo nào và `v6_all` trùng byte `v5_all`, nên các số ấy ở
+   §1.11 giữ nguyên (khai ở §10).
++- **Đếm lại "hai hàng cũ" của `_luoi_noi_main` (review lượt 6).** Lệnh đo trên nền `fc852ff`, Python 3.12.3:
++  `python3 -c 'import importlib.util as u; s=u.spec_from_file_location("c","ops/cong_cu_test.py"); m=u.module_from_spec(s); s.loader.exec_module(m); r=m._luoi_noi_main(); print(len(r), [x[0] for x in r if not x[4].isascii()], len({x[4] for x in r if not x[4].isascii()}))'`
++  in `179 ['noi-path-3', 'noi-nen-2', 'noi-nen-do'] 2`: BA hàng có đường ra ngoài ASCII, HAI đường ra khác nhau. Câu "hai hàng cũ của
++  `_luoi_noi_main` có ký tự ngoài ASCII" ở §1.10.3 và §1.11.3 là chữ của r4 và r5 (giữ để truy dòng dõi); đọc là "ba hàng, hai đường ra".
+ 
+ ## 2. Đường vào: liệt kê HẾT trước khi vá
+ 
+@@ -1980,8 +1984,9 @@
+    một lớp chưa tồn tại — nên chỉ khối bắt mọi `BaseException` đổi được nó thành dữ liệu; khối bắt liệt kê bốn lớp để nó lọt,
+    cửa con chết, và ca đích ra `tin_dung_gia` (KHÁC) ở đúng dò của chỗ ấy (§1.12). Dò răng của T1, `head`, T4 và chỗ thứ sáu chỉ ném
+    trên giá trị mà ô **cũ** của nền không có (ký tự ngoài ASCII ở `ra` của `_doc_che_do` và của bộ ghi, ký tự ngoài BMP ở
+-   stdout của `git`, ba kiểu ngoại lệ của M5), nên SỐNG trên nền và chỉ đo chỗ gọi của ô mới. Dò răng của T2/T3 ném cả trên hai hàng **cũ** của
+-   `_luoi_noi_main` có ký tự ngoài ASCII (`dir/Sub Dir/Mảnh.TXT`, ` Đỏ Sub/Mixed.TXT `), nên trên nền chúng ra KHÁC (vòng
++   stdout của `git`, ba kiểu ngoại lệ của M5), nên SỐNG trên nền và chỉ đo chỗ gọi của ô mới. Dò răng của T2/T3 ném cả trên ba hàng **cũ** của
++   `_luoi_noi_main` (`noi-path-3`, `noi-nen-2`, `noi-nen-do`) có ký tự ngoài ASCII, trên hai đường ra khác nhau (`dir/Sub Dir/Mảnh.TXT`
++   ở hai hàng đầu, ` Đỏ Sub/Mixed.TXT ` ở hàng cuối), nên trên nền chúng ra KHÁC (vòng
+    kịch bản của nền không bắt) và chỉ GIẾT khi vòng ấy bắt — đó là đúng chỗ gọi mà M6 thêm. Không đổi thân sáu hàm của
+    A4-d: các khối bọc nằm ở cửa con và ô, không trong mã bị đo.
+ 
+# lop: m2b-bat-hep-o-vong-quet-rieng-khong-co-do-nem
+# Khai thẳng khoảng hở: không dò nào của J, K, L ném lớp ngoài Exception ở ô bk/mh của M1, ô nhiều thẻ của M1b, kịch bản tích biên M3, ô ra thuần ASCII của M2; vòng riêng bắt hẹp hơn BaseException ở các ô ấy qua cả 419 dò (đo 28/28 GIẾT). Chữ M6 + §10 + nợ o-khong-do-nem-wp698; KHÔNG thêm dò (đổi băm tập đóng, cần chủ kho).
+--- ops/specs/ci-g5-cong-cu-va-tiep-r6.md
++++ ops/specs/ci-g5-cong-cu-va-tiep-r6.md
+@@ -66,5 +66,5 @@
+ | `effective_review_class` | `sensitive` |
+ | `required_checks` | Trên PR, tại exact head. PR chỉ được mở **một lần**, khi review đã đạt 0/0/0; không chạy CI trong vòng lặp (Q7). (a) Bốn context bắt buộc của ruleset `bao-ve-cong-dang-lease` (id `20856202`, đọc lại qua REST lúc 15:40Z 30-09, `updated_at` không đổi so với lần đọc 14:44:35Z): `gate (ubuntu-latest)`, `gate-ops (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`, `gate-cong-cu-gop (ubuntu-latest)`. (b) Tám job mảnh, từ `gate-cong-cu (ubuntu-latest, 0)` tới `gate-cong-cu (ubuntu-latest, 7)`; tên job lấy nguyên văn từ lượt hậu-merge `36696528580`. (c) `gate-registry (ubuntu-latest)` với rc=0. Theo quyết định Q9, nếu job này đỏ **vì hết trần** trên một run của PR #698 thì (c) được coi là đạt khi (a) và (b) xanh; phải ghi nợ có neo `gate-registry-het-tran-wp698` kèm run ID/job ID. Quyết định này chỉ áp cho các run của PR #698, và **chỉ miễn (c)**: nguyên văn Q9 nói về `gate-registry`, không nói về (d) hay (e), nên (d) và (e) vẫn bắt buộc. Muốn miễn (d) thì phải có quyết định chủ kho riêng (§11.1). **Định nghĩa tác nghiệp của "đỏ vì hết trần"** — ĐẠT khi cả ba điều sau đúng trên log job `gate-registry` của run ấy: (1) có **đúng một** dòng `CI_DANG_KY … ĐỎ`, và nó là `CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ <n> giây, rc=-9`; (2) không dòng `CI_DANG_KY` nào khác mang `ĐỎ` (dòng hợp lệ in `ĐẠT` hoặc `CÁCH LY`); (3) dòng tổng là `TỔNG: ĐỎ` và chỉ do mục ở (1). Tiền lệ có trong kho: `ops/land/pr696-wp668-provenance/trich-log.txt` — job `109832781748` của run `36696528580` có dòng 1962 `CI_DANG_KY_KE_HOACH ops/nhanh_don_duoc_test.py: day_du — diff chạm .github/workflows/ci.yml, ops/cong_cu_test.py`, dòng 2438 `…CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ 4500 giây, rc=-9`, dòng 2440 `TỔNG: ĐỎ`; run PR `36689211190` có dòng 2590 `CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐẠT rc=0`. Số "dòng" ở đây và ở S7 là số dòng trong **log thô**, đúng như trích log ghi ở đầu mỗi mục (định dạng `<số dòng log thô>: <nội dung>`, khai ở dòng 2 của tệp trích); trong tệp trích, các mục 1962/2438/2440 nằm ở dòng 23–25, mục 2590 ở dòng 99, hai mục 765/767 của S7 ở dòng 103–104 (đo lúc soạn r3 bằng `grep -n`). PR #698 cũng sẽ chạy chế độ đủ: `.claude/dev/ci_dang_ky_test.py:730` khai `TIEN_TO_CHUNG = ("ops/cai_", "ops/cong_cu")`, và `ops/cong_cu_test.py` khớp tiền tố ấy (đo lúc soạn r2). Thời lượng hai run ấy (reviewer lượt 1 ghi 66,5 phút và 83,3 phút) **KHÔNG ĐO ĐƯỢC** ở r2: trích log trong kho đã bỏ dấu thời gian. (d) Job `thu-hoi` của `.github/workflows/ops-thu-hoi-admission.yml` (`pull_request_target` vào `master`, các kiểu `opened` `reopened` `synchronize` `ready_for_review` `edited`). Job này **chưa là required check**: `ops/lease_publish.py:1093` đặt `SO_THU_HOI_KICH_HOAT = False`, và dòng 6 của workflow tự ghi "chưa là required check" (đo lúc soạn r3 trên `fc852ff`). Đặc tả vẫn giữ (d) làm điều kiện vì nó chặt hơn chữ Q9 theo hướng fail-closed — một lượt `thu-hoi` đỏ trên exact head là tín hiệu provenance (tiền lệ PR #696 ở S7) mà land không được tự bỏ qua — nhưng **không** tự phán đỏ thành thất bại: đỏ ⇒ DỪNG, hỏi chủ kho (S7). Đây là một cách đọc Q9 (§11.1 (B), dòng Q9), chỉ có hiệu lực khi comment Q10 xác nhận. (e) **Không** có lượt Windows (Q8). |
+-| `land_obligations` | 1. Chủ kho audit (`human_audited`) trên exact head, cộng uỷ quyền merge bền. Không phiên nào tự approve hay tự merge. 2. Verdict mọi lượt review và biên nhận v2 của chúng vào `ops/reviews/`, theo mẫu #668, với nhãn `review_deferred`; gồm cả lượt review đặc tả r1, r2, r3, r4, r5 và r6. 3. Hồ sơ land vào `ops/land/`, theo tiền lệ PR #691 và #697. 4. Đặc tả (r1, r2, r3, r4, r5 và r6) và lease vào master bằng một PR bookkeeping. 5. Thu hồi lease sau land bằng rút hạn. **Không** viết bia mộ `da_bi_thay_the` vào lease đã hết hạn (bài học run `35519177197`/`35519243379` trong `CLAUDE.md`). 6. Đóng #698 và đăng comment nối trên #668. 7. Ghi nợ có tên vào trường `no_con_mo` của hồ sơ land ở mục 3 (tiền lệ: `ops/land/pr696-wp668-land-evidence.yaml`, trường `no_con_mo`): `registry-nang-luc-ngoai-cua-so` (Q1); `so-tien-trinh-nhan-fullwidth` (Q2; gồm cả khe mức đo `t_cf`, `t_tab` của §1.8.6); `windows-chua-do-o-moi-wp698` (Q8); `gom-dau-manh-chuan-hoa-wp698` (§2, §11.1); `doc-argv-chua-co-o-wp698` (r3: thư mục `--gop` và cửa `argv[1]`, §1.9.6, §11.1); `j-chua-co-canh-wp698` (r4, r5, r6: các đường của Phụ lục J, Phụ lục K và Phụ lục L chỉ đo ở nghiệm thu, không có canh thường trực, §10, §11.1 (D), (E), (F)); và `gate-registry-het-tran-wp698` nếu xảy ra (Q9). Chủ thể ghi: phiên soạn hồ sơ land. 8. Hồ sơ lượt 22 vào một nhánh `ops/**` kèm băm (Q13). Chủ thể: **người chủ kho chỉ định**, vì executor không có các tệp ấy (phiên soạn r1, r2, r3, r4, r5 và r6 chỉ có băm của chúng trong comment `5911284002`). Việc này **không** chặn land. |
++| `land_obligations` | 1. Chủ kho audit (`human_audited`) trên exact head, cộng uỷ quyền merge bền. Không phiên nào tự approve hay tự merge. 2. Verdict mọi lượt review và biên nhận v2 của chúng vào `ops/reviews/`, theo mẫu #668, với nhãn `review_deferred`; gồm cả lượt review đặc tả r1, r2, r3, r4, r5 và r6. 3. Hồ sơ land vào `ops/land/`, theo tiền lệ PR #691 và #697. 4. Đặc tả (r1, r2, r3, r4, r5 và r6) và lease vào master bằng một PR bookkeeping. 5. Thu hồi lease sau land bằng rút hạn. **Không** viết bia mộ `da_bi_thay_the` vào lease đã hết hạn (bài học run `35519177197`/`35519243379` trong `CLAUDE.md`). 6. Đóng #698 và đăng comment nối trên #668. 7. Ghi nợ có tên vào trường `no_con_mo` của hồ sơ land ở mục 3 (tiền lệ: `ops/land/pr696-wp668-land-evidence.yaml`, trường `no_con_mo`): `registry-nang-luc-ngoai-cua-so` (Q1); `so-tien-trinh-nhan-fullwidth` (Q2; gồm cả khe mức đo `t_cf`, `t_tab` của §1.8.6); `windows-chua-do-o-moi-wp698` (Q8); `gom-dau-manh-chuan-hoa-wp698` (§2, §11.1); `doc-argv-chua-co-o-wp698` (r3: thư mục `--gop` và cửa `argv[1]`, §1.9.6, §11.1); `j-chua-co-canh-wp698` (r4, r5, r6: các đường của Phụ lục J, Phụ lục K và Phụ lục L chỉ đo ở nghiệm thu, không có canh thường trực, §10, §11.1 (D), (E), (F)); `o-khong-do-nem-wp698` (r6: ô `bk`/`mh` của M1, M1b, M3 và M2 thuần ASCII không có dò nào ném lớp ngoài `Exception`; §5 M6, §10); và `gate-registry-het-tran-wp698` nếu xảy ra (Q9). Chủ thể ghi: phiên soạn hồ sơ land. 8. Hồ sơ lượt 22 vào một nhánh `ops/**` kèm băm (Q13). Chủ thể: **người chủ kho chỉ định**, vì executor không có các tệp ấy (phiên soạn r1, r2, r3, r4, r5 và r6 chỉ có băm của chúng trong comment `5911284002`). Việc này **không** chặn land. |
+ 
+ Lease phải **chép** đúng các giá trị trên và khối `nang_tran`, không thêm, không đổi. Lệch ⇒ **DỪNG**.
+@@ -1990,4 +1990,9 @@
+    kịch bản của nền không bắt) và chỉ GIẾT khi vòng ấy bắt — đó là đúng chỗ gọi mà M6 thêm. Không đổi thân sáu hàm của
+    A4-d: các khối bọc nằm ở cửa con và ô, không trong mã bị đo.
++   Dò răng chỉ ném trên những ô mà chúng kích hoạt (đoạn trên), nên khối bắt của một chỗ gọi chỉ được đo ở các ô ấy: không dò nào của J, K
++   hay L ném trên ô `bk` và `mh` của M1, ô nhiều thẻ của M1b (stdout chỉ trong BMP), kịch bản tích biên của M3 (đường ra thuần ASCII)
++   hay ô `ra` thuần ASCII của M2. Ô mới của M1–M3 vì thế phải đi qua CHÍNH khối bắt của chỗ gọi tương ứng trong bảng trên (`doc`, bộ đọc
++   quét `head`, vòng kịch bản của `main`, bộ ghi T4/T5; câu mở của M6 nói "lưới mới đi qua"), không dựng vòng riêng mang khối bắt riêng: một
++   vòng riêng bắt hẹp hơn `BaseException` qua cả 419 dò (đo ở lượt 6, §10). Điều này được giữ bằng chữ và bằng review (A6), không bằng dò.
+ 
+ **Bảng canh `DOT_BIEN`.** Thêm đúng **54** mục canh: 16 mục của r1 (M1–M3 cũ), 27 mục r2 và 11 mục r3. Mỗi
+@@ -2601,4 +2606,11 @@
+   `j-chua-co-canh-wp698` mở rộng cho Phụ lục L; (c) vế "không có tín dụng giả" trong phép đo bắt buộc của bản ghi
+   `6052503775` không đạt nếu đọc theo hạng của từng dò; r6 đọc nó ở mức nghiệm thu (§0 mục 5, §11.1 (F) điểm 31).
++- **r6 (review lượt 6):** dò răng của năm chỗ chỉ ném trên những ô mà chúng kích hoạt (mục (a) ở trên), nên mọi ô còn lại của một chỗ gọi — ô
++  `bk` và `mh` của M1, ô nhiều thẻ của M1b, kịch bản tích biên của M3, ô `ra` thuần ASCII của M2 — không có dò nào ném lớp ngoài `Exception`.
++  Đo trên một ứng viên rút gọn của reviewer lượt 6 (không công bố; nền `fc852ff`, +38/−7 so nền; `t52`, `t53`, `t54` qua trên cây chưa đột biến)
++  có khối bắt `BaseException` ở cả năm chỗ cộng MỘT vòng quét `bk` riêng bắt `Exception`: cả năm dò L, mười ba dò K và mười dò J-NEM (28 dò)
++  GIẾT 28/28, bán kính 1/56, y hệt cây không có vòng riêng. Một dò ngoài tập đóng, ném `SystemExit` trong `_doc_che_do` khi `bk` ngoài ASCII,
++  ra KHÁC (`tin_dung_gia`) trên cây có vòng riêng và GIẾT trên cây bắt `BaseException` ở vòng ấy. Nợ `o-khong-do-nem-wp698`. Không thêm dò ở đây:
++  dò mới đổi băm tập đóng và cần quyết định chủ kho, như Phụ lục L.
+ - **r6:** trên các cây `v6_*` chỉ chạy hai lượt `nen`, 13 dò K, 36 dò J và năm dò của Phụ lục L, cộng năm dò ấy trên nền,
+   ba lượt chẩn đoán và Phụ lục F với bản ghép của r6 (§1.12); 365 dò còn lại của tập đóng 419, Phụ lục A, A4 và A5 tám

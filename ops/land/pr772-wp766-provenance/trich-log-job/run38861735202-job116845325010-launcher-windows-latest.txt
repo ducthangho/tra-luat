@@ -1,0 +1,12 @@
+# trich log job 116845325010 (run 38861735202, launcher windows-latest, head e03d4bf) — 2026-10-16T06:51:11Z
+# log day du: 79502 byte, sha256 5ff51e034e05b1ddefb5c6c427dfb17c302364c8f2c3dfe8c3e7f68926e93bb5 (gh api repos/ducthangho/tra-luat/actions/jobs/116845325010/logs); log day du KHONG luu
+173/173 ca DA CHAY QUA (tong 197, bo qua 24, hong 0) - KHONG DU: 24 ca BO QUA, chua do gi
+Exception in thread Thread-399 (_readerthread):
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 7278: character maps to <undefined>
+  chup_cay_khong_fail_closed_trong_cay OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+  chup_cay_fail_closed_ca_may  OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+  wp685_l8_hoi_them_UnicodeDecodeError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+  wp685_l20_doc_UnicodeDecodeError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+  wp685_l29_kill_them_UnicodeDecodeError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+  pid_gia_quay_ve_ghi_cung     OK  giet 1/1: r766_t81_khong_phu_thuoc_pid_cua_luot_chay
+DOT BIEN: 167/167 dat  (70 khong do duoc tren nen nay)

@@ -1,0 +1,205 @@
+# LEASE — wp698 (CI-G5-CONG-CU-VA-TIEP) revision 10 / generation 1 — executor claude
+# SOAN SAN boi phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT; HIEU LUC chi khi chu kho dang comment tren #698
+# vua XAC NHAN CLOSURE r10 (Q10) vua CAP QUYEN lease nay, neo dung lease_id + spec_sha256 (xem authority_caveat).
+# Cac truong closure (change_policy_sha, effective_write_set, effective_review_class, required_checks,
+# land_obligations) va khoi nang_tran duoc TRICH BANG MAY tu dac ta r10 (khong go lai); lech => DUNG.
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 698
+packet_id: wp698
+packet_slug: CI-G5-CONG-CU-VA-TIEP
+mission_issue: null
+mission_issue_ghi_chu: 'Dac ta r10 header: mission_issue RONG (#698 va #668 deu khong khai Mission); tham quyen closure di qua Q10.'
+revision: 10
+generation: 1
+lease_id: wp698-r10-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: >-
+  Lease dau tien cua wp698: quet ops/leases/ tren moi ref cua clone day du moi (2026-10-08T12:47Z, 483 nhanh may chu
+  = 483 ref cuc bo, 567 duong dan lease) khong co lease nao packet_issue 698 hay ten chua wp698 / cong-cu-va-tiep.
+  Khong co gi de thay, khong bia mo.
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/698
+granted_on_instruction_nguyen_van: >-
+  Dac ta r10 depends_on (4) va Q10 (#698 comment 5914438647): "chu kho xac nhan bang mot comment tren #698 neo spec_hash;
+  lease chi cap sau comment ay". Luc soan lease nay CHUA co comment ay (doc 21 comment #698 qua REST luc
+  2026-10-08T12:48Z: comment duy nhat chua d3ddf2f5 la ban chieu review luot 10, 6060153828 — khong phai xac nhan
+  closure). Review luot 10 (#698 comment 6060153828): approve 0 P1 / 0 P2 / 0 P3 tren reviewed_sha 9e00a2a, ghi
+  "Buoc tiep: phien dieu phoi soan lease thi hanh neo vao r10 (d3ddf2f5...) de chu kho cap quyen."
+authority_caveat: >-
+  Soan san; HIEU LUC KHI chu kho dang comment tren #698 (a) xac nhan closure cua r10 theo Q10 va (b) cap quyen lease
+  nay, neo dung lease_id wp698-r10-g1-claude va spec_sha256
+  d3ddf2f51d077b7b7715c6b800c7be2dd266e722caee4f51bfea89f5cb9960e3. Chua co comment ay thi lease nay KHONG cap viec
+  (dac ta S2). Moi diem tu quyet o §11.1 (A)-(F) cua dac ta cung chi co hieu luc khi comment Q10 xac nhan closure r10.
+  author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'Subagent cua phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT soan; KHONG push, KHONG dang.'
+
+leased_at_utc: '2026-10-08T12:50:00Z'
+lease_expires_at_utc: '2026-10-09T12:50:00Z'
+han_ghi_chu: '24 gio ke tu luc soan (UTC). Het han => ngung sua, handoff (dac ta S8).'
+
+role: executor
+provider: anthropic_claude
+executor: claude
+execution_surface: claude_code
+executor_execution_surface: >-
+  Phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT; thi hanh bang subagent tren BAN SAO (worktree/clone rieng), phien
+  chinh commit. Subagent KHONG sua tl.py canonical va khong ghi ngoai write set.
+transport: machine/local
+model: claude-opus-5-5
+effort: tu_khai
+effort_ghi_chu: 'Dac ta r10 hang executor: claude, Claude Opus 5.5 (claude-opus-5-5), theo #698 comment 5912199805. Effort do phien tu khai; tu ngoai KHONG DO DUOC.'
+environment: cloud
+environment_ghi_chu: 'Dac ta r10: cloud; KHONG chay Windows (Q8), no windows-chua-do-o-moi-wp698.'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: >-
+  Dac ta r10 "assurance dat duoc": review_deferred (reviewer chay subagent va cung ho Claude voi executor; bien_nhan_v2
+  tu choi cross_approved/same_provider_approved/human_audited cho reviewer subagent). Cong land la human_audited do chu
+  kho audit (§8: sensitive phai co cross_approved hoac human_audited).
+reviewer: claude
+reviewer_execution_surface: claude_code
+reviewer_ghi_chu: >-
+  Theo dac ta r10 (hang reviewer; §11 Q6): Claude Sonnet 5.5 chay bang subagent trong phien dieu phoi, muc
+  review_deferred; chi mo ta huong sua, khong dinh patch-as-hint chua ma (Q14). Cau hinh dung o luot review dac ta 10:
+  subagent review-sonnet-max (claude-sonnet-5-5, effort max); dinh nghia ghim sha256
+  98dfdebe79c245f9e565ee2b4fd0510f19271361d3a4815eba485901af4b5bd0 (~/.claude/agents/review-sonnet-max.md, do luc soan
+  lease). Bien nhan tu khai che_do: subagent_trong_phien_dieu_phoi; model/effort da phuc vu KHONG DO DUOC. Nguong 0 P1 /
+  0 P2 / 0 P3, khong gioi han so vong (Q5, khoi nang_tran). Land doi human_audited cua chu kho.
+access: read-write
+
+spec_path: ops/specs/ci-g5-cong-cu-va-tiep-r10.md
+spec_ref: refs/heads/claude/spec-wp698
+spec_source_oid: 9e00a2a30d046514546f8d9597e89e92715deb09
+spec_blob: 5b2d21a74c15e9d99a0158c58d1531b81315dbeb
+spec_sha256: d3ddf2f51d077b7b7715c6b800c7be2dd266e722caee4f51bfea89f5cb9960e3
+spec_hash: d3ddf2f51d077b7b7715c6b800c7be2dd266e722caee4f51bfea89f5cb9960e3
+spec_hash_formula: 'sha256sum ops/specs/ci-g5-cong-cu-va-tiep-r10.md tai commit dong bang, khong loai dong nao (dac ta, Cong thuc bam)'
+spec_review: >-
+  Luot 10 (#698 comment 6060153828, ban chieu): approve 0 P1 / 0 P2 / 0 P3, reviewed_sha
+  9e00a2a30d046514546f8d9597e89e92715deb09, reviewer Claude Sonnet 5.5 effort max (subagent review-sonnet-max),
+  review_deferred; verdict sha256 e7069dcdb26cdcf47dbce3c2c0ab1845cd163c3b50a15002f6fafae9ca354c74; HINT rong
+  (e3b0c442...b855). Nguon co tham quyen la tep VERDICT co bam; tep ay KHONG co trong kho/phien soan lease (chi doc
+  ban chieu) => noi dung VERDICT KHONG DO DUOC tu day. Approve nay khong thay xac nhan closure Q10.
+prompt_path: ops/specs/ci-g5-cong-cu-va-tiep-r10.md
+prompt_sha256_required: d3ddf2f51d077b7b7715c6b800c7be2dd266e722caee4f51bfea89f5cb9960e3
+
+branch: claude/wp698-r10-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: fc852fff7da37f1669569572b79571446e61c294
+immutable_acceptance_baseline: fc852fff7da37f1669569572b79571446e61c294
+start_from_sha: 8de47bcebc2ec4aaafde59611699c7c63413899d
+reviewed_sha_required: fc852fff7da37f1669569572b79571446e61c294
+reviewed_sha_required_nghia: 'Moi verdict neo exact head THAT cua nhanh thi cong; nen nghiem thu bat bien giu fc852ff (Q11).'
+nen_ghi_chu: >-
+  Nen nghiem thu fc852ff (Q11). Nen tiep noi (continuation base) = origin/master luc cap =
+  8de47bcebc2ec4aaafde59611699c7c63413899d (git ls-remote 2026-10-08T12:46:5xZ), KHAC fc852ff nen khai rieng o day:
+  fc852ff la to tien (merge-base --is-ancestor rc=0), rev-list --count fc852ff..8de47bc = 144, nhung
+  git diff --quiet fc852ff 8de47bc -- ops/cong_cu_test.py rc=0, git log fc852ff..8de47bc -- ops/cong_cu_test.py rong,
+  blob 9edea6b1629b46f27758b2073e74210dc73495b7 o ca hai => khong cham write set, khong doi nen (dac ta S3 khong kich
+  hoat). Diff nghiem thu do tren ops/cong_cu_test.py so voi fc852ff, cong dieu kien A4-f.
+
+write_set:
+  - ops/cong_cu_test.py
+write_set_hash: 66769b7f5148692e99c6a5b4507f08c5dc69a2eed7e505bbd9b62f3abceb7a6a
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8 (printf "ops/cong_cu_test.py\n" | sha256sum).'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-08T12:46:51Z-12:48Z (chi tiet o do_dieu_kien_cap). NGUOI_GIU 0 cho ops/cong_cu_test.py tren clone day du
+  moi; lease #671 (g1, g2, g3, ref origin/ops/cap-lease-671-g1) deu HET_HAN.
+
+do_dieu_kien_cap:
+  - dieu_kien: '(1) tap ten VA OID: git ls-remote --heads origin so voi git for-each-ref refs/remotes/origin (bo HEAD)'
+    lenh: "git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune; git ls-remote --heads origin | ... | sort; git for-each-ref --format='%(refname:lstrip=3) %(objectname)' refs/remotes/origin | grep -v '^HEAD ' | sort; comm -3"
+    ket_qua: 'fetch rc=0, ls-remote rc=0; kho chinh 12:46:51Z: may chu 483, cuc bo 483, thieu cuc bo 0, thua 0, lech ten+OID 0. Clone moi 12:47:31Z: 483/483, lech ten+OID 0. DAT.'
+  - dieu_kien: '(2) python ops/lease_publish.py ai-dang-giu ops/cong_cu_test.py => NGUOI_GIU 0, rc=0'
+    lenh: 'python3 -B ops/lease_publish.py ai-dang-giu ops/cong_cu_test.py (clone day du moi tu https://github.com/ducthangho/tra-luat, --no-single-branch, HEAD 8de47bc, khong shallow)'
+    ket_qua: 'rc=0; "NGUOI_GIU 0: khong co"; 56 dong HET_HAN (gom wp671-...-r1-g1/g2/g3-claude). 12:47:31Z-12:47:44Z. DAT.'
+    ghi_chu: >-
+      Cung lenh tren kho chinh /home/user/tra-luat (12:47:00Z) ra rc=12 KHONG_XAC_DINH: nhanh cuc bo
+      ops/spec-lease-id-ep-kieu-yaml khai upstream refs/remotes/origin/ops/spec-lease-id-ep-kieu-yaml khong con — dung ca
+      ma dac ta "Lich su do" bao truoc; loi cua kho cuc bo, KHONG phai ket qua ve nguoi giu. Khong sua kho chinh; do lai
+      tren clone sach theo dieu kien (2).
+  - dieu_kien: '(3) #671 land truoc va doi ops/cong_cu_test.py => doi nen'
+    lenh: 'git ls-remote origin refs/heads/master; git rev-parse fc852ff:ops/cong_cu_test.py origin/master:ops/cong_cu_test.py; git diff --quiet fc852ff origin/master -- ops/cong_cu_test.py; git log fc852ff..origin/master -- ops/cong_cu_test.py'
+    ket_qua: 'master 8de47bcebc2ec4aaafde59611699c7c63413899d; ca hai blob 9edea6b1629b46f27758b2073e74210dc73495b7; diff --quiet rc=0; log rong. Khong cham write set => khong doi nen. DAT.'
+  - dieu_kien: '(4) chu kho xac nhan closure bang comment tren #698 neo spec_hash cua r10 (Q10), va lease neo dung spec_hash ay'
+    lenh: "gh api --paginate 'repos/ducthangho/tra-luat/issues/698/comments?per_page=100' (chi doc)"
+    ket_qua: >-
+      rc=0, 21 comment; chi 6060153828 (ban chieu review luot 10, 12:45:03Z) chua d3ddf2f5; KHONG co comment xac nhan
+      closure r10. CHUA THOA => lease nay o trang thai SOAN SAN (authority_caveat). Lease neo dung spec_hash r10: CO.
+  - dieu_kien: '(5) khong co luot review nao dang chay tren write set'
+    lenh: 'khong co lenh do'
+    ket_qua: 'KHONG DO DUOC tu phien soan lease; dua vao xac nhan cua phien dieu phoi luc chu kho cap quyen.'
+
+# --- Closure dong bang r10 (CHEP nguyen gia tri tu dac ta; khong co descriptor mien tru) ---
+closure_descriptor: null
+closure_ghi_chu: >-
+  Dac ta r10: packet KHONG co descriptor mien tru nao (khac tien le lease-id-ep-kieu-yaml r6, Mission #682); phien soan
+  dien tay khoi closure; khoi chi co hieu luc khi chu kho xac nhan bang comment tren #698 neo spec_hash (Q10).
+change_policy_sha: null
+effective_write_set:
+  - type: exact
+    path: ops/cong_cu_test.py
+required_checks: |-
+  Trên PR, tại exact head. PR chỉ được mở **một lần**, khi review đã đạt 0/0/0; không chạy CI trong vòng lặp (Q7). (a) Bốn context bắt buộc của ruleset `bao-ve-cong-dang-lease` (id `20856202`, đọc lại qua REST lúc 15:40Z 30-09, `updated_at` không đổi so với lần đọc 14:44:35Z): `gate (ubuntu-latest)`, `gate-ops (ubuntu-latest)`, `gate-packet-loop (ubuntu-latest)`, `gate-cong-cu-gop (ubuntu-latest)`. (b) Tám job mảnh, từ `gate-cong-cu (ubuntu-latest, 0)` tới `gate-cong-cu (ubuntu-latest, 7)`; tên job lấy nguyên văn từ lượt hậu-merge `36696528580`. (c) `gate-registry (ubuntu-latest)` với rc=0. Theo quyết định Q9, nếu job này đỏ **vì hết trần** trên một run của PR #698 thì (c) được coi là đạt khi (a) và (b) xanh; phải ghi nợ có neo `gate-registry-het-tran-wp698` kèm run ID/job ID. Quyết định này chỉ áp cho các run của PR #698, và **chỉ miễn (c)**: nguyên văn Q9 nói về `gate-registry`, không nói về (d) hay (e), nên (d) và (e) vẫn bắt buộc. Muốn miễn (d) thì phải có quyết định chủ kho riêng (§11.1). **Định nghĩa tác nghiệp của "đỏ vì hết trần"** — ĐẠT khi cả ba điều sau đúng trên log job `gate-registry` của run ấy: (1) có **đúng một** dòng `CI_DANG_KY … ĐỎ`, và nó là `CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ <n> giây, rc=-9`; (2) không dòng `CI_DANG_KY` nào khác mang `ĐỎ` (dòng hợp lệ in `ĐẠT` hoặc `CÁCH LY`); (3) dòng tổng là `TỔNG: ĐỎ` và chỉ do mục ở (1). Tiền lệ có trong kho: `ops/land/pr696-wp668-provenance/trich-log.txt` — job `109832781748` của run `36696528580` có dòng 1962 `CI_DANG_KY_KE_HOACH ops/nhanh_don_duoc_test.py: day_du — diff chạm .github/workflows/ci.yml, ops/cong_cu_test.py`, dòng 2438 `…CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐỎ — LỖI HẠ TẦNG: hết giờ 4500 giây, rc=-9`, dòng 2440 `TỔNG: ĐỎ`; run PR `36689211190` có dòng 2590 `CI_DANG_KY ops/nhanh_don_duoc_test.py: ĐẠT rc=0`. Số "dòng" ở đây và ở S7 là số dòng trong **log thô**, đúng như trích log ghi ở đầu mỗi mục (định dạng `<số dòng log thô>: <nội dung>`, khai ở dòng 2 của tệp trích); trong tệp trích, các mục 1962/2438/2440 nằm ở dòng 23–25, mục 2590 ở dòng 99, hai mục 765/767 của S7 ở dòng 103–104 (đo lúc soạn r3 bằng `grep -n`). PR #698 cũng sẽ chạy chế độ đủ: `.claude/dev/ci_dang_ky_test.py:730` khai `TIEN_TO_CHUNG = ("ops/cai_", "ops/cong_cu")`, và `ops/cong_cu_test.py` khớp tiền tố ấy (đo lúc soạn r2). Thời lượng hai run ấy (reviewer lượt 1 ghi 66,5 phút và 83,3 phút) **KHÔNG ĐO ĐƯỢC** ở r2: trích log trong kho đã bỏ dấu thời gian. (d) Job `thu-hoi` của `.github/workflows/ops-thu-hoi-admission.yml` (`pull_request_target` vào `master`, các kiểu `opened` `reopened` `synchronize` `ready_for_review` `edited`). Job này **chưa là required check**: `ops/lease_publish.py:1093` đặt `SO_THU_HOI_KICH_HOAT = False`, và dòng 6 của workflow tự ghi "chưa là required check" (đo lúc soạn r3 trên `fc852ff`). Đặc tả vẫn giữ (d) làm điều kiện vì nó chặt hơn chữ Q9 theo hướng fail-closed — một lượt `thu-hoi` đỏ trên exact head là tín hiệu provenance (tiền lệ PR #696 ở S7) mà land không được tự bỏ qua — nhưng **không** tự phán đỏ thành thất bại: đỏ ⇒ DỪNG, hỏi chủ kho (S7). Đây là một cách đọc Q9 (§11.1 (B), dòng Q9), chỉ có hiệu lực khi comment Q10 xác nhận. (e) **Không** có lượt Windows (Q8).
+land_obligations: |-
+  1. Chủ kho audit (`human_audited`) trên exact head, cộng uỷ quyền merge bền. Không phiên nào tự approve hay tự merge. 2. Verdict mọi lượt review và biên nhận v2 của chúng vào `ops/reviews/`, theo mẫu #668, với nhãn `review_deferred`; gồm cả lượt review đặc tả r1, r2, r3, r4, r5, r6, r7, r8, r9 và r10. 3. Hồ sơ land vào `ops/land/`, theo tiền lệ PR #691 và #697. 4. Đặc tả (r1, r2, r3, r4, r5, r6, r7, r8, r9 và r10) và lease vào master bằng một PR bookkeeping. 5. Thu hồi lease sau land bằng rút hạn. **Không** viết bia mộ `da_bi_thay_the` vào lease đã hết hạn (bài học run `35519177197`/`35519243379` trong `CLAUDE.md`). 6. Đóng #698 và đăng comment nối trên #668. 7. Ghi nợ có tên vào trường `no_con_mo` của hồ sơ land ở mục 3 (tiền lệ: `ops/land/pr696-wp668-land-evidence.yaml`, trường `no_con_mo`): `registry-nang-luc-ngoai-cua-so` (Q1); `so-tien-trinh-nhan-fullwidth` (Q2; gồm cả khe mức đo `t_cf`, `t_tab` của §1.8.6); `windows-chua-do-o-moi-wp698` (Q8); `gom-dau-manh-chuan-hoa-wp698` (§2, §11.1); `doc-argv-chua-co-o-wp698` (r3: thư mục `--gop` và cửa `argv[1]`, §1.9.6, §11.1); `j-chua-co-canh-wp698` (r4, r5, r6: các đường của Phụ lục J, Phụ lục K và Phụ lục L chỉ đo ở nghiệm thu, không có canh thường trực, §10, §11.1 (D), (E), (F)); `o-khong-do-nem-wp698` (r6: ô `bk`/`mh` của M1, ô `head` của M1 có thành viên trong BMP, M1b, M3 và M2 thuần ASCII, và có thể còn ô khác, không có dò nào ném lớp ngoài `Exception`; §5 M6, §10); và `gate-registry-het-tran-wp698` nếu xảy ra (Q9). Chủ thể ghi: phiên soạn hồ sơ land. 8. Hồ sơ lượt 22 vào một nhánh `ops/**` kèm băm (Q13). Chủ thể: **người chủ kho chỉ định**, vì executor không có các tệp ấy (phiên soạn r1, r2, r3, r4, r5, r6, r7, r8, r9 và r10 chỉ có băm của chúng trong comment `5911284002`). Việc này **không** chặn land.
+
+# --- Khoi nang_tran: chep NGUYEN VAN tu dac ta r10 (ADR-0043/ADR-0048); khong cong may nao doc, kiem bang tay ---
+nang_tran:
+  truc: vong_review
+  tran_cu: 10
+  tran_cu_nguon: 'ADR-0048 (Accepted 2026-09-12), truc VONG; dac ta nay dong bang 2026-09-30, sau moc, nen khong ap so cu cua ADR-0043'
+  tran_moi: khong_gioi_han_lap_toi_0_P1_0_P2_0_P3
+  hieu_luc: 'tu vong review hop le dau tien vuot tran_cu; dinh nghia vong review hop le theo ADR-0043/ADR-0048, khong doi'
+  ai_nang: ducthangho
+  can_cu: https://github.com/ducthangho/tra-luat/issues/698#issuecomment-5914438647
+  khi_nao: '2026-09-30T15:30:09Z'
+  ghi_ho: phien agent dang ho chu kho (comment 5914438647, loi khai co neo #566)
+  ghi_chu_so_cu: 'comment 5914438647 viet "khong gioi han 2 vong": so 2 la so truc VONG cua ADR-0043 da bi ADR-0048 thay; y quyet dinh (lap toi 0/0/0, khong tran) khong doi'
+
+ci_budget:
+  gate_tu_dong: '0 / 1 / 1 — MOT luot ci.yml, ban khi mo PR sau khi review dat 0/0/0 (Q7); thu-hoi khong tinh; PR bookkeeping va merge vao master la chi ngoai packet. Day them commit len nhanh PR thi cong sau khi mo => vuot limit => DUNG, hoi chu kho (S10).'
+  phep_do_duoc_cap: '0 / 0 / 0 — khong workflow_dispatch, khong Windows (Q8).'
+  tham_do_chua_cap: khong
+  nguon: 'dac ta r10 §7'
+
+dieu_kien_dung:
+  - 'S1 — can sua thu gi ngoai ops/cong_cu_test.py, hoac doi than mot ham liet ke o A4-d => DUNG, handoff, revision moi.'
+  - 'S2 — luc cap: lech tap ten+OID ref, ai-dang-giu ops/cong_cu_test.py khac NGUOI_GIU 0, hoac chua co comment chu kho xac nhan closure neo spec_hash r10 (Q10) => khong cap.'
+  - 'S3 — #671 land truoc va doi ops/cong_cu_test.py => revision moi doi nen TRUOC khi cap.'
+  - 'S4 — mot muc canh hay mot do cua tap dong chi chet bang tin_dung_gia hoac ban kinh > 1, va muon sua phai doi ma ngoai pham vi => DUNG.'
+  - 'S5 — vuot <= 3 tep hoac <= 300 dong them (cot them cua git diff --numstat fc852ff -- ops/cong_cu_test.py; ADR-0044, Q12) => DUNG, hoi chu kho.'
+  - 'S6 — khong tran so vong ngoai tran truc VONG ADR-0048 da nang bang nang_tran (Q5); quy tac dung theo lop protocol §12 van ap (Review Rescue Checkpoint).'
+  - 'S7a — gate-registry do: dung dinh nghia "do vi het tran" thi theo Q9 (no gate-registry-het-tran-wp698); do vi ly do khac => DUNG.'
+  - 'S7b — job thu-hoi do vi bat ky ly do nao => DUNG, hoi chu kho.'
+  - 'S8 — lease het han => ngung sua, handoff (§7).'
+  - 'S9 — phat hien ngoai spec => handoff/successor (§3.2), khong tu mo write set.'
+  - 'S10 — chua dat 0/0/0 ma muon mo PR hay chay CI, hoac sau khi mo PR can them mot luot CI => DUNG, hoi chu kho (Q7).'
+dieu_kien_dung_nguon: 'Tom tat §8 dac ta r10; nguon co tham quyen la dac ta (spec_sha256 tren), khong phai ban tom tat nay.'
+
+cam_tuyet_doi:
+  - Khong sua dac ta; khong sua tep ngoai write set (ke ca ci.yml, ci_dang_ky_test.py, ruleset)
+  - Khong doi than _doc_che_do, _van_tay, main, _so_tien_trinh_ban_kinh, _ket_luan_ban_kinh, _chay_1_ca (A4-d, S1)
+  - Khong patch-as-hint chua ma tu reviewer (Q14)
+  - Khong tu review / approve / merge / land; land chi sau human_audited cua chu kho
+  - Khong chay CI trong vong lap va-review; khong Windows; khong LIVE/deploy
+  - Khong viet bia mo da_bi_thay_the vao lease da het han (land_obligations 5)
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky comment cap quyen: #566.'
+  - 'Dieu kien (4): chua co comment xac nhan closure r10 luc soan; phai do lai luc chu kho cap quyen.'
+  - 'Dieu kien (5) khong luot review nao dang chay tren write set: phien soan lease KHONG DO DUOC.'
+  - 'Noi dung tep VERDICT luot 10 (chi doc ban chieu 6060153828; tep co bam khong co trong phien nay).'
+  - 'Effort thuc te cua phien executor va reviewer.'
+  - 'Duong Windows cua cac o moi (Q8; no windows-chua-do-o-moi-wp698).'
+  - 'Cua so giua do (12:46:51Z-12:48Z) va luc cap khong nguyen tu; moi so trong do_dieu_kien_cap chi dung tai thoi diem do.'

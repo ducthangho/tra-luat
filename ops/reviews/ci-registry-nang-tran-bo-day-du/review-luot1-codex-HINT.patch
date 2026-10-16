@@ -1,0 +1,39 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+# lop: tran-runtime-khong-duoc-ca-kiem-khoa
+--- .claude/dev/ci_dang_ky_test.py
++++ .claude/dev/ci_dang_ky_test.py
+@@ -2159,8 +2159,16 @@
+     _them("p643-lenh-registry-deu-trong-vung", all(_cham_vung(t, set(VUNG_CHUNG)) for x in LENH_REGISTRY
+                                                    for t in x.split() if "/" in t and "@" not in t
+                                                    and t != ".claude/dev/ci_dang_ky_test.py"))
++    # #705: đo trần tới communicate qua đường runtime, không chỉ giá trị hằng.
++    def _tran_runtime_dung():
++        from unittest.mock import Mock, patch
++        p = Mock(returncode=0, pid=1234567)
++        p.communicate.return_value = ("", None)
++        with patch.object(subprocess, "Popen", return_value=p), patch.dict(globals(), {"_pid_song": lambda *a: []}):
++            ket_qua = _chay_that("bo-gia.py")
++        return ket_qua == (0, "", None) and p.communicate.call_args.kwargs.get("timeout") == GIAY_TOI_DA_MOT_BO
+     _them("p643-tran-bo-nho-hon-timeout-job", GIAY_TOI_DA_MOT_BO == 5400
+-          and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"])
++          and GIAY_TOI_DA_MOT_BO < 60 * _wf0["jobs"]["gate-registry"]["timeout-minutes"] and _tran_runtime_dung())
+     for _k in ENV_REGISTRY:
+         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
+         _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))
+# lop: ty-le-cham-khong-khop-so-do
+# Đề xuất erratum cho spec đóng băng; owner cấp revision/hash/lease mới trước khi áp trên kho thật.
+--- ops/specs/CI-REGISTRY-NANG-TRAN-BO-DAY-DU-r2.md
++++ ops/specs/CI-REGISTRY-NANG-TRAN-BO-DAY-DU-r2.md
+@@ -39,10 +39,10 @@
+ | PR #703 (run 36839918701) | `46bc11d` | > 4500 | rc=-9 hết giờ | ĐỎ, 83,2 phút |
+ 
+ Delta tại chỗ (container 4 lõi, hai clone dựng một lệnh, chạy tuần tự, 2026-10-01): `7b308bc` **4604 s** · `423b4ba`
+-**4586 s** (−0,4 %; output khớp từng dòng; tệp test trùng byte). Hai bộ vô can trong cùng các lượt ĐỎ cũng chậm 25–40 %
++**4586 s** (−0,4 %; output khớp từng dòng; tệp test trùng byte). Hai bộ vô can trong cùng các lượt ĐỎ cũng chậm 22–42 %
+ (`pretooluse_guard_test` 914 → 1213–1300 s; `subagent_ghi_detect_test` 316 → 386–400 s) ⇒ runner chậm, biên 19 % không đủ.
+ 
+-Chọn số (chủ kho Q4): 3645 s × 1,40 (mức chậm nhất đo được) ≈ 5100 s, cộng ~6 % ⇒ **5400 s**. Job: 5400 s (90 phút) +
++Chọn số (chủ kho Q4): 3645 s × 1,42 (mức chậm nhất đo được, làm tròn) ≈ 5180 s, cộng ~4 % ⇒ **5400 s**. Job: 5400 s (90 phút) +
+ ~8 phút thiết lập + ~2 phút chờ worker ≈ 100 ⇒ **105 phút**. KHÔNG bảo đảm mọi runner — chỉ nới biên tới ~48 % trên
+ 3645 s; giải pháp bền là chia mảnh (ngoài phạm vi, §3).
+ 

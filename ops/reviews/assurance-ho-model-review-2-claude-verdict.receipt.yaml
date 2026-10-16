@@ -1,0 +1,217 @@
+# BIEN NHAN GIAO HANG — review LUOT 2 cua packet #551 (r3/g3), tren `d8ef235`.
+# **`changes_requested`** — 1 P1 / 1 P2 voi BAN VA, cong 2 khuyet tat cua CHINH DAC TA.
+#
+# Ban va do executor `agy` viet => phan doi chieu TRIEN KHAI la doc lap THAT (khac
+# luot 1). Nhung phien nay soan ca ba dac ta va ghi ca ba lease => phan doi chieu
+# TIEU CHI van la tu cham bai minh ra de, va HAI trong bon phat hien la loi cua
+# dac ta chu khong cua executor.
+#
+# VIET TAY TUNG TRUONG. Moi so do trong phien nay, 13:04Z-13:13Z 18-09-2026.
+
+schema_version: 2
+receipt_id: assurance-ho-model-review-2-claude-20260918-306ae5d9
+kind: review_delivery_receipt
+packet_id: '551'
+packet_slug: 'ASSURANCE-NEO-VAO-HO-MODEL'
+lease_id: assurance-ho-model-r3-g3-antigravity
+phase_key: P551-R3-GEN3-PHIEN-20260918
+luot: 2
+role: reviewer
+provider: claude
+executor_provider: antigravity
+cross_provider: KHONG_DO_DUOC
+cross_provider_vi_sao: >-
+  KHONG khai `true`. Luot 1 cua packet nay DO DUOC rang cap claude<->agy chi khac provider tren
+  GIAY: agy chay duoc model ho Claude (ops/specs/ag-t0-01b-r3.md:47-51), va ho model that cua agy o
+  luot chay sinh ra d8ef235 khong co bang chung may nao. Khai `true` o day la lap lai dung loi ma
+  chinh packet nay sinh ra de sua. Xem S1 trong verdict.
+
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Lease gen 3 khai `assurance_target: cross_approved` CO DIEU KIEN, dieu kien la M16 (agy khai
+  executor_model that). S1 do duoc rang M16 KHONG THI HANH DUOC nhu da viet: khong co bien nhan
+  executor nao trong kho (177 bien nhan deu la review_delivery_receipt hoac khong khai kind), va
+  ops/reviews/** khong nam trong write set nen agy khong co duong ghi. Dieu kien chua thoa =>
+  assurance TUT ve advisory_review, dung theo `assurance_target_fallback` cua lease.
+
+verdict: changes_requested
+verdict_path: ops/reviews/assurance-ho-model-review-2-claude-verdict.md
+verdict_sha256: 306ae5d9c1b2281a8b5b4fabf993839c7e47187ab561b14533339222f202d250
+verdict_bytes: 13527
+reviewed_sha: d8ef235a312533515f2c73f2ea73de714f67a78e
+reviewed_base: eb15657dae7a5f0e494a1dca50fdd6d8a55ed7d3
+reviewed_sha_vi_sao: >-
+  Dau nhanh claude/assurance-ho-model-r2-g2 (PR #557) luc review. agy da merge origin/master o
+  7a11037 nen `merge-base --is-ancestor origin/master HEAD` = 0 — viec DAU TIEN ma ban giao doi,
+  va no da lam.
+
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c8a652e3bbc25ae86f654818428095defa5fcac3/ops/reviews/assurance-ho-model-review-2-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim `c8a652e3bbc25ae86f654818428095defa5fcac3` — commit DAU TIEN chua tep verdict,
+  tren nhanh claude/review-551-luot2-20260918. Thu dinh danh tep la BAM, khong phai ten nhanh.
+  Tim o `master` truoc; chua thay thi fetch nhanh tren.
+
+doi_chieu_luot_truoc:
+  luot_1_verdict: changes_requested
+  luot_1_tren_sha: f4684e45d77bf7c4aa9144b92b8043bb1774de68
+  luot_1_verdict_sha256: e039649cfb9d95845f5335456907a3c9b1d2d0fa12f9a579072a8fa0913fa789
+  luot_1_so: '3 LOP P1 / 3 P2 / 1 P3'
+  P1_1_fail_open_thieu_truong_executor: 'DA VA THAT — thieu ho executor => CHAN, thong diep rieng'
+  P1_2_mac_dinh_agy_sang_gemini: 'DA VA THAT — google_antigravity DA BI BO khoi HO_MODEL_MAC_DINH'
+  P1_3_thang_muc_bang_chung_lat_nguoc: >-
+    VA MOT PHAN. khong_do_duoc / muc BIA DAT / do_may thieu ref / khai_co_audit thieu nguoi audit
+    deu CHAN. Ve RONG van QUA — nhung do la loi cua A14 (xem S2), KHONG phai executor bo sot.
+  P2_1_chuan_hoa_ten_theo_cach_viet: 'DA VA THAT — ten la tra chuoi RONG => CHAN'
+  P2_2_dong_20_khai_0_cong: 'DA VA THAT — nay ghi ops/bien_nhan_v2.py'
+  P2_3_adr_gan_quyet_dinh_khong_neo: 'DA VA THAT, va TOT HON yeu cau — tu khai dung nguon quyet dinh'
+  P3_1_khop_chuoi_con_o1_o3: 'DA VA THAT — yi-o1 / o1_preview / mistral-o3x deu tra RONG'
+
+phan_loai_finding: theo_lop
+so_lop_mo: 2
+so_lop_mo_DEM_GI: >-
+  Dem so LOP con mo VOI BAN VA (P1-MOI, P2-MOI). KHONG dem S1/S2 vi chung la loi cua DAC TA, khong
+  phai viec cua executor. Khai ro don vi vi kho DO DUOC rang truong `so_lop_mo` chua co dinh nghia
+  o bat ky tep nao va dang duoc dung voi HAI nghia khac nhau — xem muc 4 verdict.
+so_p1: 1
+so_p2: 1
+so_p3: 0
+so_loi_dac_ta: 2
+findings_ids:
+  - bat-doi-xung-khai-de-model-executor-khong-doi-bang-chung   # P1-MOI
+  - ho-model-cho-phep-la-hang-so-chet                          # P2-MOI
+  - S1-M16-giao-nghia-vu-cho-hien-vat-khong-ton-tai            # loi DAC TA/LEASE
+  - S2-A14-va-A3-loai-tru-nhau                                 # loi DAC TA
+
+bang_san:
+  - huong: 'head co troi khong, va da hoa master chua'
+    lenh: 'git rev-parse origin/claude/assurance-ho-model-r2-g2; merge-base --is-ancestor'
+    ket_qua: 'f4684e45 -> d8ef235a (agy da day 2 commit); merge-base rc=0'
+    thanh: 'Viec DAU TIEN cua ban giao DA LAM. Neo verdict vao head MOI, khong vao f4684e45.'
+  - huong: 'delta bay cong, HAI VE DUNG TRONG MOT LENH'
+    lenh: 'cong551_l2.py — clone that, checkout --detach, core.abbrev 7, chay lien nhau'
+    ket_qua: '7/7 rc=0 hai ve; bien_nhan_v2 125 DAT/tong 178 Y HET; adr-song 49/49 -> 50/50'
+    thanh: 'A3 DAT (khong bien nhan cu nao ro cong); A7 DAT'
+  - huong: 'ca DOI CHUNG biet truoc dap an — kiem rig TRUOC khi tin bon ca kia'
+    lenh: 'do557_l2b.py: claude review codex PHAI qua; claude review claude PHAI chan'
+    ket_qua: 'QUA / CHAN dung du doan'
+    thanh: 'Rig song. Khong co ca nay thi bon ca duoi khong co gia tri.'
+  - huong: 'P1-1 va P1-2 co dong that khong'
+    lenh: 'bo executor_provider; dat executor_provider=google_antigravity khong khai model'
+    ket_qua: 'ca hai CHAN, thong diep rieng "khong xac dinh duoc ho model cua executor"'
+    thanh: 'DONG THAT. Doi chung: agy KHAI gemini => QUA, agy KHAI claude => CHAN.'
+  - huong: 'P2-1 / P3-1 — ten model la va khop chuoi con'
+    lenh: '_ho_model_cua_ten tren grok-4/grok-3, llama-*, deepseek-*, yi-o1, o1_preview, mistral-o3x'
+    ket_qua: 'tat ca tra chuoi RONG; con o1, o1-preview, o3-mini, openrouter/o1 van -> gpt'
+    thanh: 'DONG THAT — fallback "tra chuoi tho" da bi bo, khop chuoi con da bi siet'
+  - huong: 'BO LOC CUA CHINH TOI co mu khong (ca BIET TRUOC DAP AN cho rig)'
+    lenh: 'do557_l2.py loc theo 4 cum; roi do557_l2b.py KHONG loc, tru tap loi NEN'
+    ket_qua: >-
+      Ban loc bao khong_do_duoc => QUA. Ban khong loc bao CHAN. Nguyen nhan: thong diep viet "muc
+      bang chung", khong chua cum "bang chung model" ma bo loc tim.
+    thanh: >-
+      SUYT VIET MOT PHAT HIEN GIA len executor. Chi lo vi da dung lai hoi "bo loc cua minh co mu
+      khong" truoc khi viet. Ghi vao verdict muc 5.
+  - huong: 'BAT DOI XUNG reviewer vs executor (huong khong ai chi — tu liet ke)'
+    lenh: 'khai de model cho tung ben, khong kem muc bang chung'
+    ket_qua: 'reviewer => CHAN; executor => QUA; agy khai gemini-3 khong bang chung => QUA'
+    thanh: 'P1-MOI. Va duong TRUNG THUC (agy khai khong_do_duoc) lai bi CHAN.'
+  - huong: 'HO_MODEL_CHO_PHEP co dieu khien gi khong (dot bien TAI CHO)'
+    lenh: 'gan HO_MODEL_CHO_PHEP = frozenset() roi goi lai _ho_model_cua_ten("gemini-2.5")'
+    ket_qua: "truoc 'gemini', sau 'gemini' — KHONG DOI"
+    thanh: 'P2-MOI: hang so CHET, va docstring khang dinh sai ve chinh tep no nam trong'
+  - huong: 'M14 — moi chot mot dot bien, va co phai TIN DUNG GIA khong'
+    lenh: 'doc dong phan hang cua bo TinHieuChotCa tren ung vien'
+    ket_qua: 'm62-m69: 8 dot bien, 8 ca dich KHAC NHAU (c49 c50 c52-c57), TAT CA giet_that'
+    thanh: 'M14 DAT o muc chat nhat — khong bo tuong duong, khong tin dung gia'
+  - huong: 'S1 — M16 co thi hanh duoc khong'
+    lenh: 'dem kind tren moi *.receipt.yaml; doi chieu write_set cua lease gen 3'
+    ket_qua: '177 bien nhan: 174 review_delivery_receipt + 3 khong khai => 0 bien nhan executor'
+    thanh: 'M16 giao nghia vu cho mot hien vat chua tung ton tai, va agy khong co duong ghi'
+  - huong: 'S2 — A14 co thi hanh duoc cung A3 khong'
+    lenh: 'duyet 50 bien nhan cross_approved, dem muc bang chung'
+    ket_qua: "{'<RONG>': 50} — 50/50 RONG"
+    thanh: 'RONG bi CHAN => 50/50 ro cong => A3 bat kha thi. Hai tieu chi LOAI TRU NHAU.'
+  - huong: 'A9 — tran tep va tran dong'
+    lenh: 'git diff --numstat origin/master...origin/claude/assurance-ho-model-r2-g2'
+    ket_qua: '6 tep, +227 / -18'
+    thanh: >-
+      DAT. Va uoc luong 245-285 cua dac ta r3 CAO hon thuc te — ghi ra de lan sau dung xin noi tran
+      dua tren mot uoc luong chua ai kiem.
+  - huong: 'soat lai chinh verdict luot 1 (PR #558)'
+    lenh: 'doc tu REF roi so bam/byte/evidence_url/reviewed_sha/doi chieu noi tai'
+    ket_qua: 'bam, byte, blob neo, reviewed_sha, 7 findings_ids vs so_p* — KHOP het'
+    thanh: 'Khong loi khai nao lech. Bay phat hien cua luot 1 deu dung.'
+
+cong_da_chay_tren_cay_ung_vien:
+  bien_nhan_v2: 'rc=0 — 125 DAT v2 · 0 vi pham · 0 KHONG DO DUOC · tong 178 (Y HET nen)'
+  bien_nhan_v2_test: 'rc=0 — 58/58 ca · 71/71 dot bien CO RANG · 2/2 ca TU KIEM'
+  doctrine_scan: 'rc=0'
+  adr_song: 'rc=0 — 50 ADR / 50 dong §20, khop 1-1'
+  doc_claims_check_strict: 'rc=0'
+  git_diff_check: 'rc=0'
+  release_verify_strict: 'rc=0'
+  ghi_chu: 'Doc rc TRUC TIEP tu returncode, KHONG qua pipe (no RC-QUA-PIPE-KHONG-CO-CHOT).'
+
+ci_tu_dong_tren_ung_vien:
+  head_sha: d8ef235a312533515f2c73f2ea73de714f67a78e
+  KHONG_DO_DUOC: >-
+    Chua doc luot CI tu dong tren d8ef235 luc viet verdict. Verdict neo vao CAY, khong neo vao ket
+    qua CI. Va `gate (windows-latest)` KHONG duoc chay: chu kho dat manual_ci_budget 0.
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  model_yeu_cau: claude-opus-5
+  model_da_chay: 'claude-opus-5 (phien dieu phoi, khong phai tien trinh CLI rieng)'
+  model_evidence: khong_do_duoc
+  effort: KHONG_KHAI
+  KHONG_do_duoc: >-
+    Khong co `session_run_id`: claude trong container nay CHUA_XAC_THUC theo `doctor` nen khong
+    phong duoc bang launcher.py run va khong co run.json de trich modelUsage.
+  xung_dot_loi_ich_da_khai: >-
+    Phien nay SOAN ca ba dac ta (r1, r2, r3) va GHI ca ba lease cua packet, VA viet verdict luot 1.
+    Phan doi chieu TRIEN KHAI la doc lap that (ban va do agy viet). Phan doi chieu TIEU CHI thi
+    khong — va dieu do da tra qua: HAI trong bon phat hien cua luot nay (S1, S2) la loi cua chinh
+    dac ta/lease do phien nay viet. Khai o dau VERDICT.md, khong giau trong bien nhan.
+
+danh_tinh_executor_KHONG_do_duoc: >-
+  Hai commit 7a11037 va d8ef235 khong mang header CLI nao chung minh model/effort da phuc vu luot
+  chay cua agy. Day CHINH LA khuyet tat packet nay sinh ra de sua, va S1 cho thay co che dinh dung
+  de sua no (M16) chua thi hanh duoc. No AGY-CHUA-ATTEST-MODEL-TUNG-LUOT.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: 'Ban chieu dang qua MCP github. Nguon co tham quyen la TEP CO BAM trong kho.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: 'Blob verdict ghim tren nhanh claude/review-551-luot2-20260918.'
+  gioi_han: >-
+    cuong_do THAP vi tep verdict CHUA land. Manh len khi luot nay land hoac khi co tag luu-tru/*.
+
+pham_vi_changes_requested: >-
+  HAI lop mo voi ban va (P1-MOI bat doi xung, P2-MOI hang so chet). SAU lop cua luot 1 DA DONG
+  THAT. Hai muc S1/S2 KHONG phai viec cua executor — chung doi mot quyet dinh cua chu kho (revision
+  4, hoac mot mien tru co ten), va executor KHONG duoc tu xu ly chung.
+
+verdict_usage_caveats:
+  - id: LUOT-NAY-KHONG-MUA-DUOC-CROSS-APPROVED-VI-M16-CHUA-THI-HANH-DUOC
+    muc: P1
+    mo_ta: >-
+      Lease gen 3 gan `cross_approved` vao dieu kien M16 (agy khai executor_model that). S1 do duoc
+      rang M16 khong thi hanh duoc nhu da viet. Dung doc verdict nay thanh bang chung cross_approved
+      cho #551; muc that la `advisory_review`.
+  - id: HAI-PHAT-HIEN-LA-LOI-CUA-DAC-TA-KHONG-PHAI-CUA-EXECUTOR
+    muc: P1
+    mo_ta: >-
+      S1 va S2 la khuyet tat cua dac ta r3 va lease gen 3 — ca hai do CHINH phien reviewer nay viet.
+      Dung dem chung vao so lop mo cua executor, va dung giao chung cho agy xu ly: chung doi mot
+      quyet dinh cua chu kho.
+  - id: RIG-CUA-REVIEWER-DA-MU-MOT-VONG-TRUOC-KHI-DO-DUNG
+    muc: P2
+    mo_ta: >-
+      Vong do dau loc thong diep _thieu theo bon cum va bo sot nhanh khong_do_duoc (no viet "muc bang
+      chung", khong viet "bang chung model"), nen bao SAI rang chot ay khong co rang. Ai tai lap phep
+      do nay phai chay ban KHONG LOC (do557_l2b.py), dung chay ban loc.

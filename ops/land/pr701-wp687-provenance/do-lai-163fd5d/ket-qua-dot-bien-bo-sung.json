@@ -1,0 +1,256 @@
+{
+ "tu": {
+  "runner_sha256": "3feb397199e358b1a0f947ac43a776a86637b6159dd9211cd7a8de6cf9bee214",
+  "driver_sha256": "1e974b8e06b9c65b92b2b1afb00232de9cbfba6b12a8f04ee32175b0fd7c3e07",
+  "test_sha256_nen": "09cf6c78fae10c695436f7fb9b0803cb9295f69786377212e0dd4ff1b516816c",
+  "lease_publish_sha256_nen": "dd17b94cb880f27ba0291fa9a020c2ee3465dd55b13195f99424dfa10c834f83",
+  "python": "3.11.15",
+  "so_dot_bien": 2
+ },
+ "kq": [
+  {
+   "ten": "NEN",
+   "ca": "t70",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t160",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t178",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t193",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t194",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t195",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t196",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t197",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t198",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "NEN",
+   "ca": "t203",
+   "ky_vong": "SONG",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/NEN-r9wmej8_"
+  },
+  {
+   "ten": "moi:R15q-tin-so-ly-do-giu-nhan",
+   "ca": "t193",
+   "ky_vong": "GIET",
+   "hang": "GIET",
+   "dung_ky_vong": true,
+   "A": "CHOT",
+   "cls": "TinHieuChotCa",
+   "last": "chot",
+   "inca": true,
+   "B_khop": true,
+   "cho_phep": [
+    "A4 có Windows"
+   ],
+   "C": {
+    "rc": 1,
+    "tong_ket": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": [
+     "  ĐỎ  t193_hop_dong_bo_qua_chi_cap_cho_ca_da_dang_ky: A4 có Windows: sổ mặc định + YAML ở WORKFLOW_DANG: rc=0, \"01T06:45:28Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: chỉ chạy Ubuntu; tin sổ; runs-on 'ubuntu"
+    ]
+   },
+   "msg": "A4 có Windows: sổ mặc định + YAML ở WORKFLOW_DANG: rc=0, \"01T06:45:26Z\\n<<< ra t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO 0.000s BO_QUA\\n  BỎ QUA t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO: chỉ chạy Ubuntu; tin sổ; runs-on 'ubuntu-latest'\\n\\nlease_publish: 0/0 đạt; đã chạy=0, bỏ qua=1\\n\"",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/moi_R15q_tin_so_ly_do_giu_nhan-gwa5w14h"
+  },
+  {
+   "ten": "moi:V7q-bo-thoi-luong-giu-trang-thai",
+   "ca": "t194",
+   "ky_vong": "GHI",
+   "hang": "SONG",
+   "dung_ky_vong": true,
+   "A": "QUA",
+   "cls": null,
+   "last": null,
+   "inca": null,
+   "B_khop": false,
+   "cho_phep": [],
+   "C": {
+    "rc": 0,
+    "tong_ket": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+    "do": []
+   },
+   "msg": "",
+   "ban_sao": "/tmp/claude-0/-home-user-tra-luat/0c469e32-6eae-522a-ad2b-aacdd0027d2d/scratchpad/bk687-qd/w-l5-bosung/moi_V7q_bo_thoi_luong_giu_trang_thai-8uy8rt1a"
+  }
+ ]
+}

@@ -1,0 +1,144 @@
+# BIEN NHAN — luot human_audited cua packet #674 CI-DUONG-NHANH-HO-SO r2 (PR #703).
+#
+# DAO CHIEU nguon co tham quyen (tien le #523, slice-b-c, #675, #677, #687): comment cua chu kho la NGUON; tep verdict
+# trong kho la BAN CHIEU. Ban chieu va bien nhan nay di bang PR bookkeeping rieng (ngoai write set 4 tep cua lease g4).
+# Ghi so 2026-10-01 boi subagent bookkeeping cua phien session_01269GBDswLRWNxxkcxjuByt.
+
+schema_version: 2
+receipt_id: ci-duong-nhanh-ho-so-human-audit-ducthangho-20261001
+kind: review_delivery_receipt
+packet_id: CI-DUONG-NHANH-HO-SO
+packet_slug: CI-DUONG-NHANH-HO-SO
+packet_issue: 674
+revision: 2
+generation: 4
+lease_id: ci-duong-nhanh-ho-so-r2-g4-claude
+lease_ghi_chu: >-
+  Lease g4 la EXECUTOR lease cho write set 4 tep (.github/workflows/ci.yml, ops/ci_duong_nhanh.py,
+  ops/ci_duong_nhanh_test.py, .claude/dev/ci_dang_ky_test.py), neo spec r2 (sha256 b6e719c9…da57). Comment ky dang
+  08:41:09Z, trong cua so g4 [2026-09-30T15:55:00Z, 2026-10-01T10:15:00Z) (han goc 15:55Z, rut ve 10:15Z o 8dd7b83,
+  nhanh ops/cap-lease-ci-duong-nhanh-ho-so). Hai tep ban chieu/bien nhan nam NGOAI write set.
+target_pull_request: 703
+land_merge_commit: 7e5958e440285c8d63d2f710cf97ba20b85f2926
+
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+executor_provider: anthropic_claude
+verdict: approve
+cross_provider: false
+assurance_dat: human_audited
+assurance_ghi_chu: >-
+  Lease g3/g4 khai assurance_target human_audited (review_class sensitive). Chuoi review cua lease: codex luot 1-6
+  (khac ho), roi Opus 5.5 cung ho (advisory_review) tu luot 7 vi codex het quota. KHONG khai cross_approved: khong luot
+  khac ho nao neo head 46bc11d.
+assurance_YEU_HON_o_cho_nao: >-
+  Chinh comment ky tu khai: "Phạm vi chữ ký: nó xác nhận "tôi đã đọc và chấp nhận". Nó KHÔNG phải một lượt dò tìm độc
+  lập. Các phép đo là của review Opus lượt 8–18 và phiên điều phối."
+
+review_class_hieu_luc: sensitive
+reviewed_sha: 46bc11de82fab227e29e1bc0e057fcf3895e5fe1
+base_sha: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+base_sha_nguon: >-
+  (a) git merge-base 163fd5d 46bc11d = 20ec8d5 (master da merge vao nhanh o 6803012); base.sha cua PR luc doc
+  (readback-pr-703.json) = 163fd5d — master tien sau khi nhanh gop 20ec8d5.
+pham_vi_da_ky_do_duoc: >-
+  (a) git diff --shortstat 20ec8d5 46bc11d: 4 tep, +4317/-4 (khop "+4317/−4" va "bốn tệp" trong comment; = additions /
+  deletions / changed_files cua readback-pr-703.json). numstat: ci.yml 90/4, ops/ci_duong_nhanh.py 618/0,
+  ops/ci_duong_nhanh_test.py 3608/0, .claude/dev/ci_dang_ky_test.py 1/0 (khop "một dòng thêm").
+
+model_reviewer_identity:
+  provider: human
+  surface: manual_audit
+  transport: human
+  phien_doc_lap: true
+  phien_doc_lap_can_cu: >-
+    Ben ky la CHU KHO, nguoi ngoai phien agent (executor va reviewer la Opus 5.5 trong phien session_01269GBDswLRWNxxkcxjuByt).
+  phien_doc_lap_GIOI_HAN_phai_doc_kem: >-
+    "Doc lap" chi co nghia nguoi quyet dinh nam ngoai phien agent; KHONG co nghia mot phep do doc lap.
+  KHONG_do_duoc: >-
+    (a) Khong co session_run_id: luot cua NGUOI. (b) Danh tinh nguoi ky KHONG do duoc tu du lieu GitHub:
+    author_association OWNER va user.login ducthangho Y HET cho comment do phien agent dang bang token chu kho (#566).
+    performed_via_github_app = null (khac comment phien agent: slug claude) chi chung minh khong qua Claude GitHub App.
+    (c) Viec chu kho THUC SU doc diff khong de lai dau vet may.
+
+ai_dang_comment_ky:
+  khai: chu_kho_tu_dang
+  can_cu: >-
+    Than comment tu khai `dang_boi: chu_kho_tu_dang` (dong 3). Phien dieu phoi soan ban nhap
+    (scratchpad human-audit-674-46bc11d.md, mtime 2026-10-01T08:38:27Z); than DA DEN mat dinh dang Markdown cua ban
+    nhap (dau hieu dan van ban da render). Suy luan tu hien vat + loi khai, KHONG phai du lieu GitHub — xem (b) cua
+    KHONG_do_duoc.
+
+github_submitter_identity:
+  actor: ducthangho
+  ghi_chu: >-
+    Hai hien vat, hai duong van chuyen: (1) BAN CHIEU trong kho di bang git commit cua PR bookkeeping; (2) COMMENT co
+    tham quyen — duong van chuyen that KHONG DO DUOC tu phia GitHub.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    Blob ban chieu ghim vao commit ban chieu 09abc1b cua nhanh bookkeeping claude/bookkeeping-674-pr703 (commit chi mang
+    ban chieu; bien nhan di o commit sau, nen mo neo la TO TIEN cua HEAD).
+  gioi_han: >-
+    cuong_do THAP vi chua land. Chi song neu PR bookkeeping land bang MERGE COMMIT hoac FAST-FORWARD.
+
+authoritative_source: github_comment
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/09abc1bfe722598e06948fe542a3fbdaaa3452bf/ops/reviews/ci-duong-nhanh-ho-so-human-audit-ducthangho-verdict.md
+nguon_co_tham_quyen_url: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5927873457
+posted_comment_id: 5927873457
+posted_at_utc: '2026-10-01T08:41:09Z'
+author_association: OWNER
+posted_comment_do_duoc: >-
+  Doc nguoc qua REST GET /repos/ducthangho/tra-luat/issues/comments/5927873457 (2026-10-01 ~09:58Z): user.login
+  ducthangho, author_association OWNER, performed_via_github_app null, created_at = updated_at = 2026-10-01T08:41:09Z,
+  than 3554 byte (LF x32, CR 0, khong LF cuoi, NFC), sha256
+  24a1b8320ad7bbe3c05d991166a5b19b6a707ac2adf02056760b472634704c6d. Dong dau "VERDICT — human_audited · approve" —
+  KHONG co dong bat dau bang 'VERDICT:' (chuoi 'VERDICT:' 0 lan); 'Reviewed commit:' DUNG MOT LAN (dong 2); SHA day
+  du 46bc11de…3895e5fe1 DUNG MOT LAN; 0 chuoi '&#', 0 backtick.
+evidence_url_vi_sao_KHONG_tro_vao_comment: >-
+  evidence_url phai la BLOB thi anchor canonical_ancestry moi do duoc; nguon that nam o nguon_co_tham_quyen_url.
+
+verdict_path: ops/reviews/ci-duong-nhanh-ho-so-human-audit-ducthangho-verdict.md
+verdict_sha256: ac11cf3d3d503ef61384d9bbe3054110f4953cad2a83c17d402eb2e4663330a9
+verdict_bytes: 6273
+ban_chieu_vs_comment: >-
+  Than comment chep vao ban chieu KHOP TUNG BYTE voi ban DA DEN (kiem bang `body in tep`, 1 lan, khong qua ham chuan
+  hoa). Ban DA DEN KHONG khop byte ban nhap phien dieu phoi (3604 byte): mat backtick, `**`, tien to danh sach, dong
+  trong. Sau khi bo cac ky hieu ay va gop khoang trang o CA HAI ben thi khop (3100 = 3100 ky tu). Lop bo dinh dang:
+  KHONG DO DUOC.
+
+loi_khai_trong_than_doi_chieu:
+  - 'measured KHOP: "+4317/−4", "bốn tệp" (git diff --shortstat 20ec8d5 46bc11d).'
+  - 'measured KHOP: "VERDICT sha256 a49c2d90…3fb1" = sha256 review-luot18-claude-VERDICT.md.'
+  - 'measured KHOP: "Diff tính từ master 20ec8d5 (đã merge vào nhánh ở 6803012)" — 6803012 cha 5ec951c + 20ec8d5.'
+  - 'measured KHOP: ba comment luot 15-17 ton tai, neo 3569472 / 91cd2f7 / 41508cd (khong phai ban song song).'
+  - 'thuat_lai (khong tai chay trong ho so nay): "ci_duong_nhanh_test CA 104/104, DOT BIEN 383/383; ci_dang_ky_test 23/23 + 1025/1025; tl selftest 1715/1715" — so cua phien dieu phoi / review luot 18.'
+  - 'measured KHOP: "nhánh: claude/ci-duong-nhanh-ho-so @ 46bc11d (đã đẩy, chưa có PR)" — PR #703 created_at 09:00:21Z, SAU audit 08:41:09Z (readback-pr-703.json); run "ops — mở PR bằng git" 36837548318 tren 46bc11d tao 08:38:13Z (skipped) cho thay nhanh da day truoc audit.'
+
+gioi_han_duoc_chap_nhan:
+- 'Nghiem thu 11 (PR ho so that tren Actions) CHUA DO DUOC; phai do o PR land dau tien.'
+- 'Khong chay Windows CI; junction / core.symlinks=false tren Windows chua do.'
+- 'Symlink treo chi voi toi qua bi danh thu muc tro RA NGOAI cay: chua co ca (H11b song).'
+- 'Symlink luu trong git tro toi thiet bi lam chot do fail-close.'
+- 'Sau land: them context gate-cong-cu-gop (ubuntu-latest) vao ruleset (spec #668 §7) neu chua them.'
+
+verdict_usage_caveats:
+- id: khong-doc-thanh-luot-do-tim
+  noi_dung: >-
+    Chu ky xac nhan doc va chap nhan; comment tu khai cac phep do la cua review Opus luot 8-18 va phien dieu phoi. Dung
+    doc approve nay thanh "da soi o muc reviewer".
+- id: danh-tinh-nguoi-ky-khong-do-duoc
+  noi_dung: >-
+    Dung dung author_association lam bang chung manh (#566); performed_via_github_app null chi loai tru Claude GitHub App.
+- id: ban-chieu-mat-dinh-dang-markdown
+  noi_dung: >-
+    Than comment khong con Markdown (khong backtick, danh sach). Dung "sua" ban chieu cho dep: no phai giong byte than
+    DA DEN. Dong dau la "VERDICT — human_audited · approve", KHONG co dong `VERDICT:` — bo doc nao tim dung dong ay se
+    khong thay.
+- id: neo-chi-song-neu-land-bang-merge
+  noi_dung: >-
+    Mo neo canonical_ancestry chi song neu PR bookkeeping land bang merge commit hoac fast-forward.

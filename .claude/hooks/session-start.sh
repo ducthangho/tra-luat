@@ -39,15 +39,36 @@ TL_CODEX_SNAPSHOT="${CODEX_AUTH_JSON:-}"
 unset CODEX_AUTH_JSON
 CODEX_AUTH_CO=0; [ -n "$TL_CODEX_SNAPSHOT" ] && CODEX_AUTH_CO=1
 
+GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+ghi_dau_vet_hook() {
+  local nhan="${1:-chay}"
+  for d in "$GOC/.claude/.packet_state" "$GOC/.tl_state"; do
+    if mkdir -p "$d" 2>/dev/null; then
+      printf "%s %s\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$nhan" > "$d/session-start.ran" 2>/dev/null || true
+      return 0
+    fi
+  done
+  return 1
+}
+
 # Chỉ chạy trong môi trường remote. Máy cá nhân đã có sẵn công cụ theo ý người
 # dùng; cài đè vào đó là vượt quyền.
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  ghi_dau_vet_hook "cuc_bo" || true
   echo "[session-start] khong phai moi truong remote — bo qua"
   exit 0
 fi
 
-GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+ghi_dau_vet_hook "remote" || echo "[session-start] CANH BAO: khong ghi duoc dau vet hook"
+PATH_GOC="$PATH"   # chup PATH cua PHIEN truoc khi hook tu noi PATH cho rieng no
 cd "$GOC"
+
+# M4 / L4: Cưỡng chế UTF-8 tránh lỗi cp1258/charmap trên Windows (source hook de co o shell cha)
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+
+# M4 / A4: Ghim phiên bản actionlint đồng bộ với 5 chỗ trong .github/workflows/ci.yml
+AL_VER="1.7.7"
 
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
@@ -170,6 +191,23 @@ if ! co_chay rg; then
     echo "[session-start] rg: $(rg --version | head -1)"
   else
     echo "[session-start] CANH BAO: KHONG cai duoc rg — tra cuu ma se gay giua chung"
+  fi
+fi
+
+# --- actionlint (M4 / L2): cài actionlint bản ghim để kiểm tra workflow GitHub Actions
+if ! co_chay actionlint; then
+  echo "[session-start] cai actionlint $AL_VER ..."
+  AL_DICH="${HOME}/.local/bin"
+  mkdir -p "$AL_DICH" 2>/dev/null || AL_DICH="/tmp/actionlint"
+  if AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$GOC/ops/cai_actionlint.sh" >/dev/null 2>&1; then
+    export PATH="$AL_DICH:$PATH"
+    if env -u PATH PATH="$PATH_GOC" command -v actionlint >/dev/null 2>&1; then
+      echo "[session-start] actionlint: $(actionlint --version 2>/dev/null | head -1)"
+    else
+      echo "[session-start] CANH BAO: da cai actionlint vao $AL_DICH nhung PHIEN KHONG thay no (chua co trong PATH)"
+    fi
+  else
+    echo "[session-start] CANH BAO: KHONG cai duoc actionlint — kiem tra GitHub Actions workflow se gay giua chung"
   fi
 fi
 

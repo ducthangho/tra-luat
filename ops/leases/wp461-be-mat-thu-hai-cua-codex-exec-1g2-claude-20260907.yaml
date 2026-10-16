@@ -1,0 +1,262 @@
+# Lease EXECUTOR — `wp461` (Issue #461), revision 2, GENERATION 2.
+# THAY THE lease `…-exec-1r2-claude-20260907` bằng bia mộ HAI CHIỀU.
+#
+# VÌ SAO CÓ TỆP NÀY. Lease r2 làm ĐÚNG hai trong ba việc mà ADR-0025 đòi khi hợp đồng Packet đổi:
+# tạo revision mới (r1 -> r2) và thu hồi lease cũ (bia mộ hai chiều). Nó BỎ việc thứ ba —
+# "cấp generation mới" — và giữ nguyên `generation: 1` cùng nhánh `agent/wp461-g1-claude`.
+# Nguyên văn `docs/adr/0025-issue-contract-va-state-machine.md`:
+#   "Đổi trường điều phối hoặc policy làm closure thay đổi phải tạo revision mới,
+#    thu hồi lease cũ VÀ CẤP GENERATION MỚI."
+# `AGENTS.md` §6 xếp "thiếu hoặc stale Packet/lease/spec/generation" vào nhóm DỪNG NGAY.
+#
+# HẬU QUẢ THẬT của chỗ thiếu: generation là FENCING TOKEN. Cùng generation + cùng nhánh nghĩa là
+# một worker r1 hồi sinh và executor r2 không phân biệt được — cả hai đẩy/handoff vào cùng một
+# nhánh, và bia mộ trong TỆP LEASE không chặn được điều đó (bia mộ là dữ liệu, không phải khoá).
+#
+# ĐO ĐƯỢC, ngày 07-09-2026:
+#   r1  revision: 1  generation: 1  branch: agent/wp461-g1-claude
+#   r2  revision: 2  generation: 1  branch: agent/wp461-g1-claude   <- y HỆT
+#   `git ls-remote --heads origin 'refs/heads/agent/wp461*'`        -> RỖNG
+#   `launcher.py` trên master có `codex_service`                    -> KHÔNG
+# tức packet CHƯA được thi công, chưa có việc nào mồ côi. Rủi ro hai writer còn ở mức lý thuyết,
+# nhưng token thì đang sai thật — và nó sẽ sai đúng vào lúc có người bắt tay làm.
+#
+# VÌ SAO KHÔNG CỔNG NÀO BẮT: `ops/lease_publish.py` nhắc chữ `generation` **0 lần**. Không có gì
+# cưỡng chế; chỗ này chỉ người đọc mới thấy. Nợ ấy ghi ở Issue #473, KHÔNG thuộc write set wp461.
+#
+# AI TÌM RA: `chatgpt-codex-connector[bot]`, review P1 trên PR #471 lúc 2026-09-07T09:45:16Z
+#   https://github.com/ducthangho/tra-luat/pull/471#discussion_r3948491404
+# Cross-review lượt 2 ĐÃ nêu đúng chỗ này hai lần (bảng đo: "cả hai generation 1, cùng
+# agent/wp461-g1-claude"; và trong `bia-mo-check-bo-sot-chieu-nguoc`: "chưa chứng minh ngăn worker
+# cũ ghi") — phiên ghi lease đọc cả hai rồi KHÔNG nâng thành việc phải làm. Hai reviewer độc lập
+# hội tụ vào cùng một chỗ mà vẫn lọt: đó là lý do mục này được chép nguyên vào đây thay vì tóm tắt.
+#
+# VÌ SAO GIỮ `revision: 2`, KHÔNG lên r3. Bản đầu của dòng này biện minh bằng `grep generation`
+# trên tệp spec — cross-review lượt 3 nhận kết luận nhưng BÁC căn cứ: một phép grep không phải
+# một luận cứ quy phạm. Căn cứ ĐÚNG nằm ở văn bản:
+#   · §3.2 liệt kê ĐÚNG NĂM trường phái sinh nằm trong `spec_hash` — `change_policy_sha` ·
+#     `effective_write_set` · `required_checks` · `land_obligations` · `effective_review_class`.
+#     KHÔNG có `generation` trong đó.
+#   · `generation` được liệt kê ở §4 như trường của LEASE, và §4 cho reroute tăng generation
+#     mà KHÔNG mặc nhiên sinh revision mới.
+# Nên `spec_hash` không đổi, `spec_ban` vẫn r2. Điều này KHÔNG miễn trừ: lần đổi hợp đồng r1→r2
+# vẫn phải thu hồi r2 và cấp token mới — đó chính là việc tệp này làm.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 461
+packet_id: wp461
+packet_ten: WP461-BE-MAT-THU-HAI-CUA-CODEX
+mission_issue: 470
+revision: 2
+generation: 2
+lease_id: wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907
+thay_the_cho:
+  - wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+assurance_target: cross_approved
+access: read-write
+risk: sensitive
+
+spec_path: ops/specs/wp461-be-mat-thu-hai-cua-codex.md
+spec_sha256: db4980e3c5e12b3f9ffaac63e20d7f5d2316551f0b04a05449d2a87e85969b03
+spec_hash: db4980e3c5e12b3f9ffaac63e20d7f5d2316551f0b04a05449d2a87e85969b03
+spec_ban: r2
+spec_hash_ban_truoc: e74812cf1082daa39226ad3eae74c061afbbf65922b3f886adf3a84ac422df63
+
+write_set:
+  - .claude/dev/launcher.py
+  - CHANGELOG.md
+  - ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+  - ops/bien_nhan_v2_test.py
+
+write_set_hash: 8c8b4729863c18d66d6824442195a9b5bbee350c03e144bc039cfcd903774c0d
+write_set_hash_cach_tinh: >-
+  `sha256` của các đường dẫn ĐÃ SẮP XẾP, nối bằng `\n`, có `\n` cuối, mã hoá utf-8 —
+  cùng công thức và cùng cách ghi như `wp427-n9-ci-manifest-lane-g1-claude-20260831.yaml`,
+  vốn tự khai "PHẢI ghi cách tính ra đây vì KHÔNG CÓ TIỀN LỆ". Một băm không kèm công thức
+  là một băm không ai kiểm lại được; đây là lý do trường `_cach_tinh` tồn tại.
+  Write set KHÔNG đổi so r2 nên băm này BẰNG băm của r2 — đúng như mong đợi, không phải chép nhầm.
+depends_on:
+  - 460
+
+branch: agent/wp461-g2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: b416830ef2a509d60203d55552ce17950afcf67c
+start_from_sha: b416830ef2a509d60203d55552ce17950afcf67c
+reviewed_sha_required: b416830ef2a509d60203d55552ce17950afcf67c
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Mission Issue https://github.com/ducthangho/tra-luat/issues/470 — dấu vết BỀN, readback được,
+  ghi cả bốn quyết định Q1–Q4 kèm phép đo. Uỷ quyền cấp GENERATION 2 do chủ kho chốt trong phiên
+  `session_01U1x8jNn8u6VADDAYnvdzCj` sau khi đọc finding P1 của connector ("duyệt, soạn lease g2
+  đi"). Bốn quyết định nội dung KHÔNG đổi — lượt này chỉ sửa fencing token, không mở lại Q1–Q4.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-07T09:52:00Z'
+lease_expires_at_utc: '2026-09-08T09:52:00Z'
+heartbeat_at: '2026-09-07T09:52:00Z'
+lease_until: '2026-09-08T09:52:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  Phân theo HẬU QUẢ: lease chuyển quyền ghi lên nguồn hợp đồng mà `ops/bien_nhan_v2.py` bắt buộc
+  đọc để quyết nhận/từ chối mọi biên nhận. Reviewer lượt 1 xác nhận cách phân này đúng §8.
+
+fencing_generation:
+  vi_sao_len_2: >-
+    ADR-0025 đòi ĐỦ BA việc khi hợp đồng đổi: revision mới · thu hồi lease cũ · CẤP GENERATION MỚI.
+    r2 làm 2/3. Lượt này đóng việc thứ ba.
+  nhanh_cu: agent/wp461-g1-claude
+  nhanh_moi: agent/wp461-g2-claude
+  khong_mo_coi_viec: >-
+    `git ls-remote --heads origin 'refs/heads/agent/wp461*'` trả RỖNG lúc 2026-09-07T09:49Z, và
+    `launcher.py` trên master KHÔNG có `codex_service` ⇒ chưa worker nào đẩy gì lên nhánh g1.
+    Đổi nhánh không bỏ rơi công việc hay mỏ neo review nào.
+  chua_cuong_che_duoc: >-
+    KHÔNG ĐO ĐƯỢC bằng cổng: `ops/lease_publish.py` không nhắc `generation` lần nào, nên không có
+    phép thử "r1 heartbeat/push/handoff bị TỪ CHỐI còn r2 THÀNH CÔNG" để chạy. Connector đòi đúng
+    phép thử ấy và nó CHƯA TỒN TẠI — thuộc nợ #473, không nhét vào lease này.
+    Nói thẳng: lease này sửa GIÁ TRỊ của token, chưa làm token có RĂNG.
+
+dieu_kien_ready_DA_THOA:
+  depends_on_460: '#460 merge bằng MERGE COMMIT `d28c4b1` (2 cha 8ce02fd + 0c3405f)'
+  spec_dong_bang: 'sha256 ops/specs/wp461-… = db4980e3c5e12b3f…, 9789 byte, bản r2 — KHÔNG đổi'
+  neo_uy_quyen: 'Mission Issue #470 — readback được, không phải lời kể lại chat'
+  bon_quyet_dinh: 'Q1 Q2 Q3 Q4 ĐỦ BỐN, ghi trong spec §3 và Mission #470'
+  truong_S4: 'write_set_hash · heartbeat_at · lease_until — ĐỦ, kèm công thức tính'
+  cross_review: '2 lượt trên 6635379; verdict lượt 2 `blocked`, hai P1 đã được chủ kho xử lý ở #470'
+  duyet_khac_danh_tinh: 'notebyme88 (COLLABORATOR) APPROVED trên 6635379, run cong 34100901608 success'
+  gate_master_tren_base_sha: >-
+    ĐO ĐƯỢC 2026-09-07T10:27Z: run `34106235804`, branch=master, event=push, sha=`b416830`,
+    completed, conclusion=**success**, 09:28:46Z -> 10:17:31Z (~49 phút, khớp chân Windows ~48ph).
+    Phải tải cả trang 40 lượt rồi lọc tại chỗ vì công cụ MCP KHÔNG áp được bộ lọc branch/event —
+    ghi ra đây vì đó là lý do lượt soạn đầu phải khai KHÔNG ĐO ĐƯỢC.
+
+dieu_kien_ready_CHUA_DO_DUOC:
+  hoi_tu_nguoi_giu: >-
+    `ai-dang-giu` HIỆN trả NGƯỜI_GIỮ 2, và merge lease này KHÔNG tự làm nó về 1 — xem khoá
+    `hoi_tu_nguoi_giu_doi_thao_tac` bên dưới. Chừng nào chưa đo được 1 trên CẢ BỐN đường thì
+    executor CHƯA được bắt đầu.
+
+hoi_tu_nguoi_giu_doi_thao_tac:
+  finding: >-
+    `r2-van-giu-sau-merge` [P1] — nêu ở cross-review lượt 3 (`010a6f3`), và lượt 4 (`3c4c587`,
+    verdict sha256 421135f404d0316329191d10d9bed96ed44b490b8f8e157dba539d0f6659721f) giữ nó ở
+    mức VÁ HỜ vì PHƯƠNG ÁN của lượt 3 cũng sai. Cả hai lượt đều `changes_requested`.
+  loi_khai_da_bi_bac_LAN_MOT: >-
+    Phiên soạn khai "NGƯỜI_GIỮ 2 chỉ là cửa sổ giữa lúc commit và lúc merge", hàm ý merge xong là
+    về 1. SAI — bản r2 chưa bia mộ còn nằm trên ref khác ngoài master.
+  loi_khai_da_bi_bac_LAN_HAI: >-
+    Bản vá lần một khai "HAI ref" và đưa A/B trong đó vế B (xoá `ops/cap-lease-461` ⇒ NGƯỜI_GIỮ 1)
+    được coi là phương án đóng. CŨNG SAI. Thực tế có BA ref, và vế B KHÔNG tái lập được.
+    Ghi cả hai lời khai sai NGUYÊN VĂN ở đây thay vì xoá đi: một hiện vật thẩm quyền mà chỉ giữ
+    kết luận cuối thì người sau không thấy được đường nào đã bị loại và vì sao.
+  vi_sao_dem_SOT: >-
+    Ref cục bộ của nhánh thứ ba đã CŨ lúc liệt kê, và phép so hai nguồn `comm` chạy ngay trước đó
+    KHÔNG cứu được: nó so TẬP TÊN, nên một ref có tên đúng mà trỏ commit cũ đi qua sạch.
+    Phép ấy bắt ref THIẾU/THỪA, KHÔNG bắt ref CŨ — đừng dùng nó như chứng nhận độ tươi.
+  ba_ref_mang_r2_chua_bia_mo:
+    do_luc: '2026-09-07T12:16Z, sau `git fetch --prune`'
+    blob_chung: 26f07b4fe49964034c710864f350402fe5bf55c3
+    ref:
+      - 'refs/remotes/origin/master                                head b416830'
+      - 'refs/remotes/origin/ops/cap-lease-461                     head 6635379'
+      - 'refs/remotes/origin/claude/soan-spec-3-viec-treo-20260906 head 17c6901'
+    ghi_chu_bo_quet: >-
+      `_quet_lease_toan_kho` khử trùng theo (blob, path) rồi in MỘT ref đại diện — nên một dòng
+      output KHÔNG liệt kê mọi ref mang cùng blob. Muốn kiểm kê đủ phải duyệt từng ref.
+  vi_sao_KHONG_xoa_duoc_nhanh_thu_ba: >-
+    `claude/soan-spec-3-viec-treo-20260906` là nhánh ĐANG SỐNG của PR #468. Đo:
+    `git merge-base --is-ancestor <nhánh> origin/master` -> rc **1**, và **28** commit chỉ có ở đó.
+    `ops-don-ref.yml` chặn đúng ca này bằng `behind_by != 0`. Xoá là mất 28 commit — CẤM.
+    (Nhánh `ops/cap-lease-461` thì rc **0**, xoá được — nhưng xoá một mình KHÔNG đủ.)
+  vi_sao_day_la_CAU_TRUC_khong_phai_su_co: >-
+    BẤT KỲ nhánh nào merge master trong khoảng giữa lúc r2 land (#471) và lúc lease này land đều
+    mang theo bản r2 chưa bia mộ. Bia mộ là DỮ LIỆU trong một tệp được quét trên MỌI ref; nó không
+    đuổi kịp các bản sao. Số ref mang r2 sống có thể còn TĂNG trước khi packet này land.
+  ba_duong_ra:
+    a_het_han: >-
+      Không làm gì: r2 hết hạn 2026-09-08T05:27:42Z. Hội tụ bằng HẾT HẠN, không bằng thu hồi.
+      Đây là thứ dù sao cũng xảy ra nếu không ai làm gì.
+    b_merge_lai: >-
+      Sau khi lease này land, để PR #468 merge master lần nữa — nhánh ấy khi đó mang bản r2 ĐÃ CÓ
+      bia mộ. Reviewer lượt 4 dựng ca C trên ảnh chụp và đo: cả bốn đường về 1, giữ nguyên lịch sử.
+      Không phá huỷ. NHƯNG là việc của chủ PR #468 — packet này KHÔNG được tự đẩy lên nhánh người
+      khác, và ca C là bằng chứng khả thi chứ không phải uỷ quyền.
+    c_sua_chinh_sach: >-
+      Nợ #473: cho bia mộ tính theo `lease_id` trên toàn kho thay vì theo từng blob. Đóng cả lớp
+      lỗi. Là packet thẩm quyền riêng, KHÔNG thuộc write set wp461.
+    khuyen_nghi: 'b + c, với a là lưới an toàn.'
+  dieu_kien_dung: >-
+    Chưa đo được NGƯỜI_GIỮ 1 trên CẢ BỐN đường write set thì lease này KHÔNG độc quyền và executor
+    KHÔNG được bắt đầu.
+  dieu_kien_dung_KHONG_CO_RANG: >-
+    Nói thẳng vì reviewer lượt 4 đã đo và đúng: KHÔNG có consumer nào của khoá này trong mã cổng.
+    `ops/lease_publish.py` không đọc nó; `check` vẫn rc=0 khi khoá vắng. Đây là chỉ thị cho người
+    và agent tuân thủ quy trình, KHÔNG phải chốt máy. Đừng đọc nó mạnh hơn thế.
+    Hệ quả: bằng chứng gỡ chốt phải là phép ĐỌC LẠI refs/holder do bên có thẩm quyền chạy, không
+    phải một dòng trong chính tệp này đổi từ "chưa" sang "đã".
+
+hinh_dang_ban_va_da_dong_bang:
+  noi_dat_hang_moi: '_PROVIDER_NGOAI_CLI'
+  hang: '("openai_codex", "codex_service", "machine")'
+  vi_sao: >-
+    r1 để executor tự chọn, và cách hiểu hiển nhiên nhất (thêm vào `_TRANSPORT_CONTRACTS`) ĐÃ ĐƯỢC
+    ĐO là KHÔNG CHẠY: `_dinh_danh_van_chuyen` (`launcher.py:199-204`) ném
+    `RuntimeError: provider co nhieu transport: openai_codex` khi một provider có hai contract —
+    cả ba lệnh nền hỏng, kể cả biến thể tuple tên lệnh RỖNG. Chi tiết ở spec §3bis.
+  executor_khong_duoc_doi: >-
+    Đổi hình dạng này ⇒ verdict `blocked` + revision mới. Đây không phải gợi ý.
+
+do_va_cham:
+  cach_do: >-
+    KHÔNG dùng lại bộ lọc của r1. r1 grep `^[+-].*_TRANSPORT_CONTRACTS` nên mù với một HÀNG MỚI
+    bên trong bảng, và khai SAI rằng #447 không sửa bảng. Lượt này so KHỐI ĐÃ TRÍCH bằng AST/awk.
+  ket_qua: >-
+    #447 (`bc9aaf7`) CÓ thêm hàng `("github", ("gh",), "github_cli", "machine")` vào
+    `_TRANSPORT_CONTRACTS`: 3 hàng ở merge-base `c03a409` -> 4 hàng ở head.
+  he_qua: >-
+    Vì r2 đặt hàng mới ở `_PROVIDER_NGOAI_CLI`, wp461 KHÔNG còn chạm `_TRANSPORT_CONTRACTS`.
+    Va chạm với #447 tụt xuống mức HAI THAY ĐỔI TRONG CÙNG MỘT TỆP, không còn chung một hằng.
+    Vẫn phải merge master về khi #447 land; KHÔNG rebase, KHÔNG force-push, KHÔNG dọn hộ #447.
+  no_khai: >-
+    Reviewer lượt 1 đo được 22 ref không phải tổ tiên HEAD có diff giao write set, trong khi bảng
+    của r1 chỉ liệt kê 4 PR đang mở. Danh mục va chạm theo LEASE là chưa đủ; nợ này CHƯA đóng và
+    KHÔNG thuộc packet wp461.
+
+dieu_kien_dung:
+  - 'Chạm đường dẫn ngoài BỐN đường đã khai — đặc biệt `ops/bien_nhan_v2.py`. Phương án r2 đã
+     chứng minh không cần nó; phải sửa nó nghĩa là spec THIẾU ⇒ `blocked` + revision mới.'
+  - 'Đổi `_TRANSPORT_CONTRACTS` — dù chỉ một byte. Nó phá bất biến một-provider-một-contract VÀ
+     làm hỏng hai chỗ giải nén bộ-4 của PR #447.'
+  - 'Đẩy lên `agent/wp461-g1-claude`. Nhánh của generation này là `agent/wp461-g2-claude`;
+     nhánh g1 thuộc generation ĐÃ BỊ THAY THẾ. Cổng KHÔNG canh được điều này (nợ #473) nên nó
+     là kỷ luật của executor, không phải chốt máy.'
+  - 'Sửa hiện vật `ops/reviews/*.md` hoặc `*.receipt.yaml` — chúng neo băm. Q2 chốt 12 receipt ĐÚNG.'
+  - 'Thêm miễn trừ / danh sách bỏ qua để receipt lịch sử khỏi đỏ. Chúng đỏ ⇒ bản vá SAI, đó là
+     tín hiệu chứ không phải chướng ngại.'
+  - 'Biến Q2 thành một phép đo giả. Không có cách nào từ trong kho xác định một lượt chạy LỊCH SỬ
+     đi qua bề mặt nào — `codex` không phát `modelUsage`. Đó là QUYẾT ĐỊNH và đã được quyết.'
+  - 'Sửa `ops/reviews/README.md` — ngoài write set. Nếu có lý do chính đáng thì BẮT BUỘC chạy lại
+     `ops/lease_publish_test.py` (`t26`/`t27` đọc chính tệp ấy — `R9-F01`, trả giá ở `fa3f282`).'
+
+# BIA MO — g2 da bi thay the boi g3 (2026-09-24). Het han 2026-09-08T09:52:00Z, khong co ma land.
+da_bi_thay_the: wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924
+da_bi_thay_the_luc: '2026-09-24T17:05:59Z'
+da_bi_thay_the_boi_ai: 'ducthangho — comment dong bang r3 issues/461#issuecomment-5817701016; phien claude ghi ho'

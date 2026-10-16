@@ -1,0 +1,143 @@
+{
+ "moc": "072181157a27804e69deb35bb792a88c70ac31e3",
+ "clock": "2026-09-10T04:55:37Z",
+ "mien_lease": 89,
+ "lease_hop_le": 89,
+ "ngoai_mien": [
+  "ops/leases/lo-319-linux-bang-chung-xanh-exec-1-claude-20260906.yaml.nhap",
+  "ops/leases/mutant-windows-nhanh-don-duoc-exec-1-claude-20260906.yaml.nhap",
+  "ops/leases/mutant-windows-subagent-ghi-detect-exec-1-claude-20260906.yaml.nhap"
+ ],
+ "vi_pham": [],
+ "cap_hai_chieu": 11,
+ "mot_chieu": [
+  [
+   "cong-ngoai-write-set-exec-1r5-codex-20260828",
+   "ci-cai-jsonschema-exec-1-claude-20260829"
+  ],
+  [
+   "tach-danh-tinh-github-exec-1r6-codex-20260828",
+   "cong-duyet-theo-tham-quyen-exec-1-claude-20260829"
+  ],
+  [
+   "thu-hoi-lease-exec-1-codex-20260828",
+   "bo-ghi-nguoc-exec-1-claude-20260829"
+  ]
+ ],
+ "digest_cap_hai_chieu_sha256": "8f372ccd2ceab70901868a58d3380acbd89dce25c7127d4d514bc959270fef48",
+ "hang": [
+  {
+   "cu": "ci-cai-jsonschema-exec-1-claude-20260829",
+   "moi": "ci-cai-jsonschema-exec-1r2-claude-20260829",
+   "blob_cu": "8cceb3e856030d1f3d15bb1c976e9c6974687790",
+   "blob_moi": "ab9cd7a2bd1ae7c258e3e0337c99c7b8b7ee199e",
+   "path_cu": "ops/leases/ci-cai-jsonschema-exec-1-claude-20260829.yaml",
+   "path_moi": "ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml",
+   "han_moi": "2026-08-29T14:05:00Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "ci-cai-jsonschema-exec-1r2-claude-20260829",
+   "moi": "ci-cai-jsonschema-exec-1r3-claude-20260829",
+   "blob_cu": "ab9cd7a2bd1ae7c258e3e0337c99c7b8b7ee199e",
+   "blob_moi": "005c6288924f5d4a6e3e61e250ded4cf3fe673b8",
+   "path_cu": "ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml",
+   "path_moi": "ops/leases/ci-cai-jsonschema-exec-1r3-claude-20260829.yaml",
+   "han_moi": "2026-08-29T14:05:00Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+   "moi": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+   "blob_cu": "de30af933a090b91cbd7eff73f517f68a17cdd59",
+   "blob_moi": "3bb7c461cd9ca994c4b3ccd3445e1e96ef2ce345",
+   "path_cu": "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml",
+   "path_moi": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml",
+   "han_moi": "2026-09-08T07:50:35Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906",
+   "moi": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+   "blob_cu": "3bb7c461cd9ca994c4b3ccd3445e1e96ef2ce345",
+   "blob_moi": "cad296dd4b573793d960a34f45deba8dedff5567",
+   "path_cu": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml",
+   "path_moi": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml",
+   "han_moi": "2026-09-08T09:44:51Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906",
+   "moi": "gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906",
+   "blob_cu": "cad296dd4b573793d960a34f45deba8dedff5567",
+   "blob_moi": "5b0e2cff7f1a6a07974c653dfe454d34e7cb9a52",
+   "path_cu": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml",
+   "path_moi": "ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml",
+   "han_moi": "2026-09-08T10:17:12Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "khong-do-duoc-phai-do-exec-1-claude-20260829",
+   "moi": "khong-do-duoc-phai-do-exec-1r2-claude-20260829",
+   "blob_cu": "3ff71a9e60f528a22495789a99b5868b0f712b2f",
+   "blob_moi": "98e777ca12608fa44af4245a34840ded1f252a87",
+   "path_cu": "ops/leases/khong-do-duoc-phai-do-exec-1-claude-20260829.yaml",
+   "path_moi": "ops/leases/khong-do-duoc-phai-do-exec-1r2-claude-20260829.yaml",
+   "han_moi": "2026-08-30T02:46:00Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "lease-hoi-toan-kho-exec-1-claude-20260823",
+   "moi": "lease-hoi-toan-kho-exec-1r2-codex-20260823",
+   "blob_cu": "b955f957df3e31964b6a71983ee39c516c49099e",
+   "blob_moi": "a8d898e1004eb5a52c789b0217912528b2fefeb9",
+   "path_cu": "ops/leases/lease-hoi-toan-kho-exec-1-claude-20260823.yaml",
+   "path_moi": "ops/leases/lease-hoi-toan-kho-exec-1r2-codex-20260823.yaml",
+   "han_moi": "2026-08-24T05:35:00Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "lease-hoi-toan-kho-exec-1r2-codex-20260823",
+   "moi": "lease-hoi-toan-kho-exec-1r3-codex-20260823",
+   "blob_cu": "a8d898e1004eb5a52c789b0217912528b2fefeb9",
+   "blob_moi": "27bb601296b7800f7435d61ddb52d905adccd3a9",
+   "path_cu": "ops/leases/lease-hoi-toan-kho-exec-1r2-codex-20260823.yaml",
+   "path_moi": "ops/leases/lease-hoi-toan-kho-exec-1r3-codex-20260823.yaml",
+   "han_moi": "2026-08-24T07:50:00Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "lease-hoi-toan-kho-exec-1r3-codex-20260823",
+   "moi": "lease-hoi-toan-kho-exec-1r4-codex-20260823",
+   "blob_cu": "27bb601296b7800f7435d61ddb52d905adccd3a9",
+   "blob_moi": "fb473fe2572c9809a96e55bd479cbcd37a98eb71",
+   "path_cu": "ops/leases/lease-hoi-toan-kho-exec-1r3-codex-20260823.yaml",
+   "path_moi": "ops/leases/lease-hoi-toan-kho-exec-1r4-codex-20260823.yaml",
+   "han_moi": "2026-08-24T08:25:00Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "mutant-khong-chay-tren-windows-exec-1-claude-20260906",
+   "moi": "gate-tach-job-cat-chi-phi-exec-1-claude-20260906",
+   "blob_cu": "1f9504281c3415f7194e124eb7b2702c34c8efd1",
+   "blob_moi": "de30af933a090b91cbd7eff73f517f68a17cdd59",
+   "path_cu": "ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml",
+   "path_moi": "ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml",
+   "han_moi": "2026-09-08T03:37:33Z",
+   "trang_thai": "HET_HAN"
+  },
+  {
+   "cu": "wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907",
+   "moi": "wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907",
+   "blob_cu": "7485511cd930123598a71ece1c2162f46324a588",
+   "blob_moi": "26f07b4fe49964034c710864f350402fe5bf55c3",
+   "path_cu": "ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907.yaml",
+   "path_moi": "ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml",
+   "han_moi": "2026-09-08T05:27:42Z",
+   "trang_thai": "HET_HAN"
+  }
+ ],
+ "KHONG_XAC_DINH": 0,
+ "BIA_MO_LICH_SU_theo_b": [],
+ "ma_thoat": 0
+}

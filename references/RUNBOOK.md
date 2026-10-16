@@ -152,15 +152,28 @@ Khi muốn CẢ webapp token (GAS) cũng mã hoá (không chỉ gws cred): dùng
 ```bash
 # [CODE] 1 lần (hoặc khi secret đổi): gói full config + gws cred → mã hoá → upload, in fileId → baked SECRETS_FILEID
 export TL_MASTER_KEY='<passphrase mạnh>'
-python scripts/tl.py secrets-stage
+python scripts/tl.py secrets-stage            # máy ĐÃ `nlm login`: gói cả nlm_auth sau canary LIVE dương
+python scripts/tl.py secrets-stage --no-nlm   # máy CHƯA có jar nlm (setup chỉ GAS/GWS): bundle KHÔNG có NLM
+#   Từ WP710: thiếu jar mà không `--no-nlm` ⇒ mã 3, 0 upload; canary không dương ⇒ mã 4, 0 upload.
 # [COWORK] mỗi phiên — env-aware: nạp GAS token + full config (+ gws binary/cred ở Code/Cowork)
 export TL_MASTER_KEY='<passphrase>'
 #   agent tải SECRETS_FILEID qua Drive MCP → lưu /tmp/s.enc  (Cowork token-less); Code có token thì tự webapp-fetch
 python scripts/tl.py bootstrap --env cowork --secrets-file /tmp/s.enc
 python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
 ```
-**Xoay vòng / đổi token** (tại chỗ, giữ fileId): `tl secrets-set --gas-token <t>` · `--webapp <url>` · `--gws`
-(re-export gws cred). Sai `TL_MASTER_KEY` → HMAC chặn (báo "giải mã lỗi").
+**Xoay vòng / đổi token** (tại chỗ, giữ fileId): `tl secrets-set --gas-token <t> --nlm` · `--webapp <url>` ·
+`--gws` (re-export gws cred) — mỗi cờ đi kèm `--nlm`, lý do và đường thay thế ngay dưới. Sai `TL_MASTER_KEY` → HMAC chặn (báo "giải mã lỗi").
+> **Từ WP710 — bundle đang mang `nlm_auth`** (đã từng `secrets-stage`/`secrets-set --nlm` ở máy có `nlm login`):
+> MỌI lần `secrets-set` phải kèm `--nlm`, vd `tl secrets-set --gas-token <t> --nlm` · `--webapp <url> --nlm` ·
+> `--gws --nlm`. `--nlm` thay `nlm_auth` bằng jar CỤC BỘ vừa qua canary LIVE dương, nên chỉ chạy được trên máy
+> đã `nlm login` và đọc được notebook canary. Thiếu `--nlm` ⇒ **mã 4, 0 upload** (lệnh không gửi lại bản NLM
+> trên Drive vì không ai chứng minh được nó); `--no-public` không né được. Máy KHÔNG có jar / canary không dương:
+> · chỉ cần làm tươi GWS cho đường public: `tl gws-auth-stage` (ghi `.enc` public tại chỗ, KHÔNG đụng bundle; bundle
+>   giữ gws cred cũ tới lần `secrets-set --gws --nlm` ở máy có jar);
+> · đổi token/webapp: chạy lệnh ở máy có jar, HOẶC chủ ý bỏ NLM khỏi bundle — sửa config cục bộ
+>   (`~/.tra_luat_config.json`) rồi `tl secrets-stage --no-nlm` (gói lại TOÀN BỘ config cục bộ, ghi đè bundle,
+>   Cowork mất NLM headless tới lần `secrets-set --nlm` kế tiếp).
+> Bị từ chối thì đừng tìm cờ để ép (`--force` không áp cho hai lệnh này, và không bỏ được cổng ở `nlm-auth-stage`).
 > bootstrap **MERGE** vào `~/.tra_luat_config.json` (không clobber), `chmod 600`. So A0.4b: A0.4c mã hoá CẢ token
 > GAS lẫn gws cred bằng 1 master key (cao hơn 1 bậc — không gì plaintext trên Drive); đổi lại cần đặt 1 env var.
 
@@ -179,16 +192,23 @@ python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
   1) Ở **Code/máy có trình duyệt**: `nlm login` (1 lần) → cookies lưu `~/.notebooklm-mcp-cli/{auth.json, profiles/default/*}`.
   2) `tl secrets-stage` (đã có TL_MASTER_KEY) TỰ gói các file đó vào bundle `.enc` dưới khoá `nlm_auth` (SECRET — chỉ
      trong bundle mã hoá, secret_guard chặn lộ). 3) Cowork `tl bootstrap` GHI lại `~/.notebooklm-mcp-cli/…` → nlm chạy
-     **headless** (`nlm login --check` xanh). `--no-nlm` để bỏ gói.
+     **headless**; xác nhận sống CHỈ bằng canary LIVE dương trên đúng notebook (mục "WP710 — làm tươi credential NLM"), `nlm login --check` xanh KHÔNG đủ. `--no-nlm` để bỏ gói (từ WP710 bước 2) chỉ gói sau canary LIVE dương;
+     thiếu jar mà không `--no-nlm` ⇒ mã 3, 0 upload).
   - **Cơ chế refresh (vì sao GHI FILE, KHÔNG dùng env var):** nlm giữ 3 lớp — cookies (vài tuần, vài cái xoay/request),
     CSRF (vài phút, tự refresh mỗi lần init MCP), session-id (mỗi lần khởi động). Khi cookie hết hạn nlm đọc lại
     auth.json từ ĐĨA và tái sinh từ **browser profile** (`chrome-profiles/`) — nên PHẢI ghi ra file (bootstrap ghi
     đĩa, KHÔNG set `NOTEBOOKLM_COOKIES`/`_CSRF_TOKEN`/`_SESSION_ID` — env var "đông cứng" làm auto-refresh CHẾT).
   - **Cowork không tự refresh được** (không có Chrome/browser-profile) — nhưng 1 phiên Cowork (giờ) « tuổi cookie
     (tuần) nên đủ; CSRF/session tự sinh trong phiên từ cookie đĩa. Refresh THẬT xảy ra ở **Code** (browser profile).
-  - **Bảo trì ~2–4 tuần** (bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo): ở Code chạy `nlm login`
-    (hoặc để nlm tự headless-refresh khi dùng) rồi **`tl secrets-set --nlm`** (refresh cookie tại chỗ vào bundle,
-    giữ nguyên fileId — `secrets-stage` tự `nlm login --check` trước khi gói để bắt cookie mới nhất).
+  - **Bảo trì ~2–4 tuần** (bootstrap báo "cookie ~N ngày tuổi", >14 ngày thì cảnh báo): ở đúng máy giữ
+    browser profile gốc chạy `nlm auth refresh` và kiểm canary notebook dương. Nếu refresh hoặc canary
+    báo lỗi xác thực (`auth_failure` trong JSON của wrapper), chạy `nlm login` tương tác rồi kiểm lại
+    canary. Sau đó **`tl secrets-set --nlm`** (cổng riêng
+    của lệnh kiểm canary trước upload, giữ nguyên fileId). Từ WP710 cả `secrets-set --nlm` lẫn
+    `secrets-stage` đòi canary LIVE dương (thân JSON đúng
+    notebook) trước mọi upload — `nlm login --check` KHÔNG còn là bằng chứng; `secrets-set` KHÔNG kèm `--nlm` trên
+    bundle đang mang `nlm_auth` bị từ chối (mã 4) — cách làm đúng ở mục "Xoay vòng / đổi token" (A0.4c) và mục
+    WP710 cuối tệp.
 - **Lỗi `exporttext`: "không có quyền UrlFetchApp.fetch / cần script.external_request"** = webapp deploy
   THIẾU scope đã-cấp-quyền (dù `exportBlob_` ưu tiên `Drive.Files.export`, gặp quirk thì rơi xuống UrlFetchApp).
   Fix (chủ webapp, KHÔNG agent làm được): (1) appsscript.json có `https://www.googleapis.com/auth/
@@ -663,3 +683,179 @@ Nguyên tắc hygiene: giữ bản canonical có `nlm_source_id` + cat đúng + 
 - Trước mọi nạp nguồn web/NLM-native, chạy `tl external-ingest <url> ... --json` để kiểm kế hoạch. Lệnh này chỉ kiểm, không ghi Drive/NLM.
 - `research_start/research_status` chỉ dùng để phát hiện URL; `research_import/source_add(url)` không được dùng để nạp VBQPPL làm nguồn canonical.
 - Instruction dùng cho Claude Project/NLM phải qua `tl instruction-audit` hoặc sinh bằng `tl instructions`/`scripts/gen_instructions.py`; thiếu `SKILL_OF_RECORD`, `ingest_handoff`, `confirm_gate_web` thì không dùng.
+## WP710 — làm tươi credential NLM trên máy giữ hồ sơ trình duyệt gốc
+
+**Điều kiện tiên quyết** (chỉ chạy trên máy Windows đang giữ hồ sơ trình duyệt đã đăng nhập và
+`~/.notebooklm-mcp-cli` cục bộ): PowerShell 7 trở lên (`pwsh`; script khai `#requires -Version 7.0`,
+Windows PowerShell 5.1 không chạy), `nlm` và `python` gọi được trên PATH (script tự giải ra đường dẫn
+thật, kể cả shim `.cmd`), và `tl` có webapp token (`TL_TOKEN` hoặc config) để mã hoá. Lệnh stage mặc
+định là `scripts/tl.py` neo theo thư mục của script, nên không phụ thuộc thư mục hiện hành. Script KHÔNG
+chép hồ sơ trình duyệt, KHÔNG đăng nhập. Chuẩn bị một config JSON tin cậy, đặt NGOÀI kho:
+
+```json
+{"notebook_id":"YOUR_EXISTING_NOTEBOOK_ID","browser_profile_path":"C:\\path\\to\\original\\browser-profile"}
+```
+
+Chọn và tự kiểm notebook ID trước khi chạy. Chuỗi bước luôn là `nlm auth refresh` → canary
+`nlm notebook get <id> -j` → `tl nlm-auth-stage`. Canary chỉ dương khi thân trả về là ĐÚNG MỘT đối tượng
+notebook (một đối tượng JSON, mảng có đúng một phần tử, hoặc đối tượng bọc trong `data` một lần) mà: MỌI
+khoá `id`/`notebook_id` có mặt là chuỗi bằng đúng ID đã chọn (phân biệt hoa/thường); MỌI khoá `title`/`name`
+có mặt là chuỗi KHÔNG trắng — "trắng" theo MỘT bảng 35 ký tự viết tường minh ở cả hai phía
+(`_NLM_CANARY_BLANK_CODEPOINTS` / `$CanaryBlankCodePoints`: mọi ký tự `str.isspace()` của Python 3.11 cộng
+U+180E, U+200B–U+200D, U+2060, U+FEFF), không theo `strip()` hay `IsNullOrWhiteSpace` vốn khác nhau ở
+U+001C–U+001F; không có khoá trùng tên, không có khoá đã biết viết khác hoa/thường (`ID`);
+`ok` (nếu có) là `true`, `error` (nếu có) là rỗng. Mảng nhiều phần tử — kể cả các phần tử giống hệt
+nhau — hay hai ID mâu thuẫn đều KHÔNG dương. Wrapper và lệnh `tl` áp cùng một luật (danh sách cho phép)
+trên CÙNG một văn bản: wrapper đọc stdout của canary dạng BYTE, giải mã UTF-8 (byte hỏng thành U+FFFD,
+KHÔNG bỏ BOM — có BOM thì không dương ở cả hai), rồi áp đúng phép biến đổi mà `nlm_cli._run` làm trước khi
+lệnh `tl` phán xét (đổi `\r\n`/`\r` thành `\n`, cắt dòng như `str.splitlines`, bỏ dòng nhiễu keyring không
+có `{}[]`). Hệ quả cần biết: một dòng nhiễu keyring trước JSON vẫn dương ở cả hai; ký tự ngắt dòng lạ
+(`\f`, U+0085, U+2028…) nằm NGOÀI chuỗi JSON được cả hai đọc như xuống dòng, nằm TRONG title thì cả hai
+từ chối. Phạm vi ĐÃ ĐO (Linux, pwsh 7.4.6, Python 3.11): xem `changelog.d/wp-710.md`. Trên Windows thật
+(Windows 11, pwsh 7.6.6, Python 3.13.1) chỉ các ca canary của `nlm-credential-refresh.Tests.ps1` đã chạy; hai
+phép so 101 dạng / 168 chuỗi byte KHÔNG chạy lại ở đó. CHƯA đo với CLI `nlm` thật (bảng hoa/thường của mẫu
+keyring lấy từ Python 3.11).
+rc 0 của refresh, `nlm login --check` hay số notebook đều KHÔNG cho phép upload. Bước stage nhận
+`TL_CANARY_NOTEBOOK_ID` (và `TL_NOTEBOOK_ID` cho lệnh cũ) bằng ID của config; `TL_CANARY_NOTEBOOK_ID` là
+khoá GHIM mà config/profile của `tl` không bao giờ ghi đè, nên canary riêng của lệnh stage dò CÙNG notebook
+ấy kể cả khi token lấy từ một config có `notebookId` khác.
+
+```powershell
+pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json
+```
+
+**Bằng chứng ghi lại.** Mỗi chu kỳ in MỘT dòng JSON: `status`, `step` (bước kết thúc chu kỳ), `rc` và
+`elapsed_seconds` của bước đó, `cycle`, `cli_version`, và `steps` mang `rc`/`elapsed_seconds`/`timeout`/
+`child_confirmed_exited`/`descendants_stopped`/`tree_state` của TỪNG bước đã chạy (`version`, `refresh`, `canary`,
+`stage`), cùng `tree_measurement`, `containment_reason`, `takeover`, `takeover_reason` và `operator_reason` (xem
+"Tuần tự hoá"). Đầu ra của
+tiến trình con KHÔNG bao giờ được in vì có thể chứa cookie. `profile_fingerprint` là 16 ký tự hex đầu
+của SHA-256 trên đường dẫn `browser_profile_path` (viết thường, đầy đủ) khai trong config — nó định danh
+ĐƯỜNG DẪN đã khai, không phải nội dung hồ sơ; và `profile_bound_to_cli` luôn là `false`: script chỉ
+kiểm thư mục ấy tồn tại, KHÔNG truyền nó cho `nlm`. "Chạy trên hồ sơ gốc" là điều người vận hành bảo
+đảm bằng việc chọn máy.
+
+**Ý nghĩa trạng thái và mã thoát.** Mọi trạng thái kết thúc TRƯỚC bước stage (mã 2, 3, 4, 5) gọi lệnh
+stage 0 lần, nên không upload gì. `stage_failure` (mã 6) nghĩa bước stage lỗi sau canary dương:
+lỗi trước khi tạo con có thể cho 0 lời gọi stage; nếu con đã chạy, wrapper không bảo đảm 0 upload —
+lệnh có thể đã ghi một phần (vd `secrets-set` ghi bundle rồi mới lỗi ở bước sau)
+trước khi trả mã khác 0. `staged` chỉ nghĩa là lệnh stage trả rc 0; wrapper không tự đọc lại Drive.
+
+| `status` / `step` | mã thoát | nghĩa và việc cần làm |
+|---|---|---|
+| `staged` / `stage` | 0 | lệnh stage trả rc 0 sau canary dương. |
+| `auth_failure` / `refresh`·`canary` | 2 | thông báo lỗi khớp một cụm lỗi xác thực có neo (vd `Authentication expired`, `HTTP 401`); đăng nhập tương tác lại trên máy gốc rồi chạy lại. |
+| `network_failure` / `refresh`·`canary` | 2 | khớp một cụm lỗi mạng có neo (vd `connection reset`, `503 Service Unavailable`); kiểm kết nối rồi chạy lại. |
+| `inconclusive` / `refresh`·`canary` | 2 | rc khác 0 nhưng không khớp cụm nào, hoặc khớp CẢ HAI loại; đọc lỗi tại máy, không suy là auth. |
+| `timeout` / `version`·`refresh`·`canary` | 3 | bước quá `-TimeoutSeconds`, kể cả khi CLI đã thoát mà một tiến trình hậu duệ còn giữ ống ra. Con trực tiếp bị giết; trên Linux mọi hậu duệ (theo dấu thao tác VÀ theo quan hệ cha–con, xem "Tuần tự hoá") cũng bị giết và phải được xác nhận hết sống; trên Windows cả Job Object của bước bị kết thúc và số tiến trình của job phải về 0; nếu không xác nhận được (con, hậu duệ, ống chưa đóng, job chưa về 0) thì bản ghi thao tác được GIỮ để lần chạy sau chờ. `version` chỉ dừng lần chạy khi cây của nó chưa xác nhận; quá hạn mà cây đã xác nhận thì `cli_version` = `unavailable` và chạy tiếp. |
+| `inconclusive` / `canary` | 4 | canary rc 0 nhưng thân không phải JSON của đúng notebook (sai ID, thiếu tiêu đề/tên, rỗng, mảng nhiều phần tử). |
+| `inconclusive` / `preflight` | 4 | config/notebook_id/hồ sơ thiếu, không tìm thấy `nlm`/`python`, hoặc lỗi ngoài dự kiến. |
+| `inconclusive` / `tree_containment` | 5 | một bước của CHÍNH lần chạy này không được bao hoặc không chứng minh được là đã hết, nên KHÔNG bước nào sau nó được chạy. Trạng thái này chỉ xuất khi lệnh stage CHƯA chạy (bước trước stage, hoặc bước stage bị chặn trước khi con của nó được cho chạy) ⇒ 0 lần stage; lệnh stage đã chạy mà cây không chứng minh được thì là `stage_failure` ở dòng dưới. `containment_reason`: `job_create_failed:<mã lỗi Windows>` / `job_api_unavailable` (không tạo được Job Object: chưa tiến trình con nào được sinh, không có bản ghi); `job_assign_failed:<mã>` / `job_verify_failed:<mã>` (con đã tạo ở trạng thái treo nhưng không vào được job: bị kết thúc trước khi chạy lệnh nào); `job_assign_alive_failed:<mã>` / `job_verify_alive_failed:<mã>` (như trên nhưng KHÔNG xác nhận được con ấy đã kết thúc: nó còn đó, treo, ngoài job — bản ghi được GIỮ, mang pid của nó và cờ `outside_job`, lần chạy sau chờ ở `lock_busy`/`root_alive` chừng nào còn nhận ra nó đang sống, và ở cách ly `stray_child_unconfirmed` trong mọi trường hợp khác — số đếm của job KHÔNG được dùng cho con này, vì nó chưa từng ở trong job); `job_alive` / `job_unknown` (bước trả kết quả mà job không về 0 sau 5 giây, hoặc không đọc được số đếm: bản ghi được GIỮ); `tree_not_measurable` (nền không liệt kê cũng không bao được cây — không phải Linux, không phải Windows: bước thành công KHÔNG được coi là cây đã hết, bản ghi được GIỮ). |
+| `inconclusive` / `lock_busy` | 5 | không giành được khoá trong `-LockWaitSeconds`, HOẶC thao tác của một lần chạy trước còn sống (`takeover_reason`: `root_alive` = con trực tiếp, `marked_alive` = tiến trình mang dấu hoặc còn giữ ống ra của bước cũ, `job_alive` = Job Object của bước cũ trên Windows còn tiến trình), HOẶC bản ghi thao tác không đọc được (`record_unreadable`/`record_clock`: người vận hành xác nhận rồi xoá tệp). `-OperatorReleaseReason` KHÔNG thả trạng thái này. |
+| `inconclusive` / `tree_quarantine` | 5 | con trực tiếp của lần trước đã chết nhưng cây KHÔNG chứng minh được là hết. `takeover_reason` = `tree_unknown` (Linux ĐÃ đo và thấy tiến trình có thể là của thao tác cũ: môi trường không đọc được, hoặc tiến trình khởi động trong bước cũ, không mang dấu, mà cha của nó là init hay một tổ tiên của chủ cũ — xem "Tuần tự hoá"): **đồng hồ KHÔNG thả**; mỗi lần chạy chờ tối đa `-LockWaitSeconds` rồi trả mã 5, cho tới khi cây được chứng minh hết hoặc người vận hành thả tay. `takeover_reason` = `tree_not_measurable` (bản ghi không cho gì để đo: không có dấu trên Linux; không nêu Job Object trên Windows): **chỉ trên Linux** lần chạy đầu ĐÓNG DẤU thời điểm vào bản ghi và sau `-UnconfirmedQuarantineSeconds` (mặc định 900) lần chạy kế được tiếp quản với `takeover` = `quarantine_elapsed` — GIỚI HẠN, không phải bằng chứng, còn chờ quyết định của chủ kho. Ngoài Linux **đồng hồ KHÔNG thả** (`-UnconfirmedQuarantineSeconds` không có tác dụng): chờ không chứng minh được gì. Riêng Windows còn `job_closed_unconfirmed` (chủ cũ ĐÃ thử kết thúc job mà không đưa được nó về 0 rồi mới thoát: job đã đóng không đủ làm bằng chứng), `stray_child_unconfirmed` (bản ghi nói về một con nằm NGOÀI job mà không còn nhận ra được là đang sống) và `job_unknown` (job còn đó nhưng không mở/đọc được, vd của người dùng khác) — cả hai cũng không có lối ra theo đồng hồ. Thả tay: `-OperatorReleaseReason "<lý do, 8–200 ký tự>"` sau khi tự kiểm không còn tiến trình `nlm`/`python`/trình duyệt nào của lần trước ⇒ JSON mang `takeover` = `operator_release` và `operator_reason`. |
+| `stage_failure` / `stage` | 6 | canary dương, bước stage không kết thúc sạch. Lỗi trước khi tạo con cũng có thể trả mã này với 0 lời gọi stage; nếu con đã chạy thì có thể đã upload. Hoặc lệnh ĐÃ chạy xong mà cây tiến trình của nó không chứng minh được là hết (`containment_reason` = `job_alive`/`job_unknown`, `rc` = -1 vì mã thoát không còn được dùng làm kết luận; bản ghi thao tác được GIỮ). Hoặc không trả rc 0: thiếu `TL_TOKEN` (rc 2), không còn jar (rc 3), canary RIÊNG của lệnh stage hoặc chốt payload từ chối (rc 4), lỗi giữa chừng gồm cả lỗi upload (rc 5, chỉ in tên lớp lỗi), hoặc quá hạn. Có thể đã upload một phần: kiểm trạng thái Drive trước khi thử lại. |
+
+Phân loại `auth_failure`/`network_failure` là đọc VĂN BẢN lỗi theo danh sách cụm có neo (danh sách
+cho phép); từ trần như `auth`, `login`, `cookie` không được tính vì chính tên lệnh `nlm auth refresh`
+và gợi ý `nlm login` chứa chúng. Nhãn là chỉ dẫn, không phải phép đo; điều được bảo đảm là 0 lần stage.
+Không trạng thái nào từ bộ test offline chứng minh credential thật hay trạng thái Drive.
+
+**Keepalive** là opt-in và có giới hạn: thiếu `-EnableKeepalive` thì `-MaxCycles` bị bỏ qua và chỉ chạy
+một chu kỳ. Lệnh dưới chạy tối đa ba chu kỳ, cách nhau một giờ; dừng bằng Ctrl+C hoặc giết tiến trình.
+Không có Scheduled Task, không tự khởi động.
+
+```powershell
+pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath C:\private\nlm-refresh.json -EnableKeepalive -IntervalSeconds 3600 -MaxCycles 3
+```
+
+**Tuần tự hoá.** Một mutex Windows có tên `Global\tra_luat_nlm_credential_refresh` bao TRỌN một tiến trình
+wrapper — từ lúc giành khoá tới lúc thoát, GỒM CẢ các khoảng nghỉ keepalive. Vì vậy một lần chạy tay
+trong lúc keepalive đang nghỉ sẽ nhận `lock_busy` (mã 5) sau `-LockWaitSeconds`. Khoá của một chủ đã
+chết được nhận lại, nhưng chủ chết KHÔNG kéo theo con chết. Vì vậy TRƯỚC khi sinh mỗi tiến trình con,
+wrapper ghi `tra_luat_nlm_credential_refresh.operation.json` (thư mục tạm của người dùng) gồm một dấu thao
+tác ngẫu nhiên, rồi pid + thời điểm khởi động; con nhận dấu ấy qua biến `TRA_LUAT_NLM_OP` và mọi hậu duệ
+thừa kế nó. Trên Linux wrapper còn tự đặt mình làm *child subreaper* (`prctl`), nên mọi hậu duệ mồ côi —
+kể cả tiến trình đã XOÁ dấu khỏi môi trường hoặc tự tắt dumpable — được nhận làm con của wrapper và tìm
+được qua quan hệ cha–con khi wrapper còn sống (`tree_measurement` = `linux_subreaper_and_marker`; không đặt
+được thì `linux_marker`). Ở đường thành công, hậu duệ còn sống sau khi con trực tiếp trả kết quả bị dừng
+và xác nhận trước bước kế tiếp (`descendants_stopped`, `tree_state` = `gone`). Hậu duệ đã nhận làm con mà
+bị dừng thì wrapper THU HỒI (`waitpid`, không chặn) ngay sau đó, trừ con trực tiếp của bước — .NET tự thu
+hồi con ấy; không thu hồi thì mỗi chu kỳ keepalive để lại tiến trình zombie tới khi wrapper thoát.
+
+Chủ mới CHỜ (trong `-LockWaitSeconds`) tới khi thao tác cũ hết sống rồi mới chạy bước nào. Pid đã ghi còn
+sống ⇒ chờ. Trên Linux: còn tiến trình mang dấu ⇒ chờ; không còn và mọi tiến trình có thể là của thao tác
+đều đọc được ⇒ tiếp quản ngay. Tiến trình KHÔNG đọc được môi trường là KHÔNG XÁC ĐỊNH, không phải "không
+có" — chỉ tính tiến trình cùng người dùng (wrapper chạy bằng root thì mọi người dùng), khởi động SAU chủ cũ (mốc `owner_start_jiffies` trong bản ghi),
+trừ init và luồng nhân.
+
+Sau khi CHỦ CŨ chết, subreaper không còn: hậu duệ đã XOÁ dấu mà không giữ ống thì không còn gì nối nó với
+thao tác. Bản ghi định dạng 2 (wrapper này ghi) mang thêm mốc khởi động của bước (`step_start_jiffies`), các
+ống ra của bước (`pipes`) và chuỗi tổ tiên của chủ (`owner_chain`). Chủ mới xét mọi tiến trình khởi động từ
+mốc ấy, đọc được môi trường, không mang dấu (trừ chính nó và tổ tiên của nó): còn giữ một ống của bước cũ ⇒
+CÒN SỐNG (`marked_alive`); không giữ thì lần theo cha qua các tiến trình cũng khởi động từ mốc ấy — tới init,
+tới một tổ tiên của chủ cũ, hoặc tới chỗ không đọc được ⇒ KHÔNG XÁC ĐỊNH (`tree_unknown`), vì mồ côi chỉ được
+nhận bởi init hoặc một subreaper tổ tiên; tới một tiến trình khác ⇒ không phải của thao tác. Luật này
+fail-close nên có thể chặn oan một tiến trình vô can mở dưới chính tổ tiên ấy (vd tab terminal mới, dịch vụ
+của `systemd --user`) trong lúc cây cũ chưa được chứng minh hết: chờ tiến trình ấy thoát, hoặc thả tay. Bản
+ghi KHÔNG có định dạng 2 (bản cũ, hoặc do người dựng) chỉ được xét theo dấu và pid như trước — đó là chỗ còn
+mù với hậu duệ đã xoá dấu.
+
+Trên Windows wrapper KHÔNG liệt kê cây mà BAO nó (`tree_measurement` = `windows_job_object`). Mỗi bước chạy
+trong một Job Object riêng, có tên `Global\tra_luat_nlm_op_<dấu thao tác>`, đặt
+`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` và không cấp quyền thoát job. Tiến trình con được tạo ở trạng thái TREO,
+gán vào job, kiểm lại là thành viên, rồi mới cho chạy — nên mọi hậu duệ sinh ra đã nằm trong job, kể cả khi nó
+xoá dấu hay bỏ ống ra. Phép đo là số `ActiveProcesses` của chính job: sau mỗi bước (thành công hay quá hạn)
+wrapper kết thúc những gì còn trong job và chỉ đi tiếp khi số ấy đọc được là 0 (`tree_state` = `gone`,
+`descendants_stopped` = số thành viên ngoài con trực tiếp lúc kết thúc); không về 0 trong 5 giây hoặc không đọc
+được ⇒ dừng và giữ bản ghi: trước khi lệnh stage chạy là `tree_containment` (mã 5), sau khi lệnh stage đã chạy là
+`stage_failure` (mã 6). Không tạo được job, hoặc không gán được con vào job ⇒ cũng
+`tree_containment`, không lùi về cách chạy không bao. Bản ghi thao tác mang tên job (`job`). Chủ mới mở job
+theo tên: còn tiến trình ⇒ chờ (`job_alive`, thả tay cũng không được); đọc được 0 ⇒ tiếp quản; KHÔNG còn job
+tên ấy ⇒ handle cuối đã đóng, tức hệ điều hành đã kết thúc mọi thành viên lúc đóng ⇒ tiếp quản, TRỪ khi bản ghi
+nói chủ cũ đã thử mà không dọn được (`job_closed_unconfirmed`). Chỗ cuối này dựa vào cam kết của
+`KILL_ON_JOB_CLOSE`, không phải một phép đếm: chủ mới không còn job nào để hỏi. Đã đo trên Windows 11 (xem
+`changelog.d/wp-710.md`), không phải bằng chứng cho mọi máy.
+
+Không chứng minh được ⇒ `tree_quarantine` ở bảng trên. Cây chứng minh được là CÒN sống thì không bao giờ
+được thả, kể cả bằng tay. Bản ghi hỏng/không đọc được dừng ở `lock_busy` và KHÔNG đi qua cách ly: xác nhận
+không còn tiến trình `nlm`/`python`/trình duyệt nào của lần trước rồi xoá tệp ấy.
+
+Giới hạn đã biết của phần Windows: (1) Job Object chỉ bao tiến trình do cây của bước SINH RA. Tiến trình do
+một dịch vụ khác tạo hộ (WMI, Task Scheduler, COM ngoài tiến trình, hay một trình duyệt ĐANG chạy sẵn nhận lệnh
+mở cửa sổ rồi tiến trình mới thoát ngay) không phải hậu duệ và không được thấy — trên Linux cũng vậy. (2) Thư
+mục tạm là theo người dùng nên bản ghi thao tác của NGƯỜI DÙNG KHÁC không được thấy, dù mutex và tên job là
+`Global\`. (3) Mỗi lần chạy trên Windows biên dịch kiểu P/Invoke bằng `Add-Type` (thêm vài giây khởi động);
+biên dịch hỏng ⇒ `job_api_unavailable`, không chạy bước nào. (4) Nền không phải Linux cũng không phải Windows
+không stage được: bước đầu tiên dừng ở `tree_containment`/`tree_not_measurable`. (5) Trên Windows tiến trình con
+chỉ thừa kế đúng ba handle: `NUL` làm stdin và hai đầu ghi của ống stdout/stderr (danh sách handle tường
+minh). Nó KHÔNG nhận stdin của wrapper, nên lệnh `nlm`/stage nào chờ nhập từ bàn phím sẽ đọc thấy hết dữ liệu
+ngay thay vì treo. (6) "Pid đã ghi còn sống" được nhận bằng pid + thời điểm khởi động, dung sai 1 giây. Trên
+Linux .NET tính thời điểm ấy từ mốc khởi động máy mà mỗi tiến trình tự ước lượng một lần; ở máy mà đồng hồ
+tường và đồng hồ uptime chạy lệch tốc độ (đo được trong WSL2: lệch 2,9 giây sau 130 giây, 7 giây sau 256 giây)
+một chủ sống lâu ghi mốc lệch quá dung sai và con CÒN SỐNG bị đọc thành "pid đã tái dùng". Khi ấy chỉ còn dấu
+thao tác và ống ra giữ lại được nó (bản ghi do wrapper ghi luôn có dấu); bản ghi không có dấu thì rơi vào cách
+ly có đồng hồ. Windows lấy thời điểm tạo tiến trình từ nhân nên không có độ lệch này.
+
+**Cổng nằm ở lệnh, không chỉ ở wrapper.** `tl nlm-auth-stage`, `tl secrets-set --nlm` (bundle và
+`nlm_cred.enc` public) và `tl secrets-stage` (bundle mang `nlm_auth`) cùng đi qua MỘT hàm cổng: canary
+phải dương theo luật thân JSON ở trên trước khi lấy payload jar để upload và trước mọi upload;
+riêng `nlm-auth-stage` tiền kiểm sự hiện diện của jar bằng cách đọc nó vào RAM trước canary rồi bỏ.
+Canary không dương thì từ chối cả
+lệnh (mã 4), không upload gì. `--force` của `nlm-auth-stage` không bỏ qua được cổng (trợ giúp CLI của cờ
+này còn mô tả cũ — nợ ngoài write set). Notebook mà cổng dò, theo thứ tự: `TL_CANARY_NOTEBOOK_ID` →
+`TL_NOTEBOOK_ID` có sẵn lúc lệnh BẮT ĐẦU (trước khi lệnh tự nạp config) → `notebookId` của profile vừa nạp →
+notebook nền. Lưu ý `secrets-set`/`secrets-stage` nạp config trước khi vào lệnh, nên muốn ghim thì dùng
+`TL_CANARY_NOTEBOOK_ID`.
+
+Thêm một chốt ở PAYLOAD, ngay trước upload bundle: `nlm_auth` chỉ được gửi nếu nó chính là jar vừa qua
+canary ở lượt này. Hệ quả: `secrets-set` KHÔNG kèm `--nlm` mà bundle trên Drive đang mang `nlm_auth` thì
+bị từ chối (mã 4, 0 upload) — canary chỉ chứng minh jar CỤC BỘ, không chứng minh bản trên Drive, nên
+lệnh không gửi lại bản ấy; chạy lại kèm `--nlm` để thay bằng jar tươi đã qua canary. `secrets-stage`
+thiếu jar dừng ở mã 3 (bundle ghi đè `SECRETS_FILEID`, gói thiếu NLM là âm thầm xoá NLM trên Drive); chủ
+ý không gói NLM thì `--no-nlm`, và cờ này nay BỎ THẬT `nlm_auth` có sẵn trong config khỏi bundle. Bị từ
+chối thì sửa canary hoặc credential trước; đừng tìm cờ để ép.
+
+Ba lệnh chỉ in MÃ cố định của canary (vd `CANARY_ID_MISMATCH`, `AUTH_EXPIRED`, `PROBE_INCONCLUSIVE`) và
+TÊN LỚP lỗi, không bao giờ in văn bản lỗi/stdout/stderr của `nlm`, `gws`, `gcloud` hay thông điệp ngoại
+lệ (có thể mang cookie/token). Ngoại lệ giữa chừng làm lệnh trả mã 5 thay vì in traceback; mã 5 KHÔNG bảo
+đảm chưa upload gì.

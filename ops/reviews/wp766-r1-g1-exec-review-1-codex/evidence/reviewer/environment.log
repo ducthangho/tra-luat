@@ -1,0 +1,6 @@
+Linux-6.18.44-fc-v139-x86_64-with-glibc2.39
+executable /usr/bin/python3.13
+python313 3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]
+Python 3.12.3
+ruff 0.16.8
+git version 2.43.0

@@ -252,7 +252,6 @@ class Ctx:
         """
         rc, o, e = run(
             self.script,
-            # #775: trần rescue cao mặc định để ca cũ đo đúng chốt của nó; ca `pl_*` hạ qua `extra`.
             ["init", "--packet", packet, "--mission", 54, "--executor", executor, "--reviewer",
              reviewer, "--review-rounds-limit", 50, "--codex-review-calls-limit", 50, *extra],
             sd,
@@ -307,8 +306,7 @@ class Ctx:
 
     def review(self, sd, packet, ids, verdict="changes_requested", descs=(), luot=1, sha=None, goi=None):
         if goi is None:  # #775 M3: review codex neo một lời gọi đã ghi trên head của lượt
-            goi = f"g{luot}"
-            run(self.script, ["record-codex-call", "--packet", packet, "--head", self.head(luot), "--run-id", goi], sd)
+            run(self.script, ["record-codex-call", "--packet", packet, "--head", self.head(luot), "--run-id", goi := f"g{luot}"], sd)
         args = ["record-review", "--packet", packet, "--provider", REVIEWER, "--verdict", verdict,
                 "--reviewed-sha", self.head(luot) if sha is None else sha, "--codex-call", goi]
         for i in ids:
@@ -1759,9 +1757,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--since", "%040x" % 0 if False else "HEAD~1",
           "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
-    sd_r = c.sd()  # #775: hai lệnh rescue in lúc THÀNH CÔNG — cần state đã chạm trần, dựng ngoài kịch bản
-    _doi(0, c.init(sd_r, extra=("--codex-review-calls-limit", 1))[0], b"", "init rescue")
-    c.den_reviewing(sd_r, 55, 1)
+    sd_r = _reviewing(c, "--codex-review-calls-limit", 1)  # #775: rescue cần state đã chạm trần, dựng ngoài kịch bản
     _pl(c, sd_r, _goi("r1", _H1), _goi("r2", _H1, 3))
     buoc += [([b[1], "--packet", 55, *b[2:]], sd_r) for b in (_nang(0, tran=2), _rescue(0, "nang_tran"))]
     da_phu = set()
@@ -5435,10 +5431,8 @@ MUTANTS.update({
 })
 
 
-# --- #775 Review Rescue Checkpoint. Điều kiện ghép `verdict ≠ approve VÀ (vòng ≥ trần HOẶC codex ≥ trần)`:
-# mỗi vế có ca sai ĐÚNG MỘT vế (F02 #777) — `pl_m3_vong` · `pl_m3_codex` · nhánh approve của cả hai.
-_URL = "https://github.com/o/r/issues/775#issuecomment-1"
-_H1, _H2 = f"{1:040x}", f"{2:040x}"
+# --- #775 Review Rescue. `verdict ≠ approve VÀ (vòng ≥ trần HOẶC codex ≥ trần)`: mỗi vế một ca sai ĐÚNG MỘT vế.
+_URL, _H1, _H2 = "https://github.com/o/r/issues/775#issuecomment-1", f"{1:040x}", f"{2:040x}"
 _RESCUE = {"state": "blocked", "ly_do": "rescue_required"}
 
 
@@ -5486,8 +5480,7 @@ def case_pl_m2_loi_goi(c: Ctx):
     sd = _reviewing(c, "--codex-review-calls-limit", 2, vao=False)
     _pl(c, sd, _goi("g0", _H1, 8))
     c.den_reviewing(sd, 55, 1)
-    _pl(c, sd, _goi("g1", _H2, 5), _goi("g1", _H1), _goi("g1", _H1, 2), _goi("a b", _H1, 2), _goi("g2", _H1))
-    _pl(c, sd, _goi("g3", _H1, 3))
+    _pl(c, sd, _goi("g1", _H2, 5), _goi("g1", _H1), _goi("g1", _H1, 2), _goi("a b", _H1, 2), _goi("g2", _H1), _goi("g3", _H1, 3))
     _kiem(sd, "chặn TRƯỚC khi ghi", truc="codex_review_calls", codex_review_calls_used=2, **_RESCUE)
 
 
@@ -5504,9 +5497,8 @@ def case_pl_m3_neo_loi_goi(c: Ctx):
 
 
 def _hai_nhanh(c, sd, luot, truc):  # state chạm trần ⇒ changes_requested: rescue · approve: accepted
-    import shutil
     sd2, g, h = c.sd(), f"g{luot}", c.head(luot)
-    shutil.copytree(sd, sd2, dirs_exist_ok=True)
+    __import__("shutil").copytree(sd, sd2, dirs_exist_ok=True)
     _pl(c, sd, _goi(g, h), _rv(3, "changes_requested", g, h))
     _kiem(sd, "chạm trần + changes_requested", truc=truc, **_RESCUE)
     _pl(c, sd2, _goi(g, h), _rv(0, "approve", g, h))
@@ -5564,11 +5556,11 @@ def case_pl_m6_state_v1(c: Ctx):
     _pl(c, sd, _goi("g1", _H1, 3))
     _kiem(sd, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
-    for hong in ({}, {"schema_version": 3}, {"schema_version": 2.0}, {"codex_review_calls_limit": True},
-                 {"codex_calls": {}}, {"dem_tu_suy": "false"}, {"codex_calls": [dict(g, da_dung=0)]},
-                 {"codex_calls": [g, g]}, {"codex_calls": [dict(g, run_id=f"g{i}") for i in range(4)]},
-                 {"codex_review_calls_used": 2}, {"review_rounds_used": 2}, {"state": "blocked", "ly_do": "rescue_required",
-                 "truc": "vong_review", "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]}):
+    for hong in ({}, {"schema_version": 3}, {"schema_version": 2.0}, {"codex_review_calls_limit": True}, {"codex_calls": {}},
+                 {"dem_tu_suy": "false"}, {"codex_calls": [dict(g, da_dung=0)]}, {"codex_calls": [g, g]},
+                 {"codex_calls": [dict(g, run_id=f"g{i}") for i in range(4)]}, {"codex_review_calls_used": 2},
+                 {"review_rounds_used": 2}, {"state": "blocked", "ly_do": "rescue_required", "truc": "vong_review",
+                                             "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]}):
         (sd / "wp55.json").write_text(json.dumps({**t, **hong}))
         _pl(c, sd, (8 if hong else 0, "status"))
 
@@ -5578,31 +5570,29 @@ _PL_VONG = "in TRUC_TRAN.items():\n            if st[u] >= st[t]:"
 _PL_CHAN = ('    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:\n',
             '        _vao_rescue(state_dir, st, "codex_review_calls", "lời gọi codex bị CHẶN TRƯỚC")\n',
             '    st["codex_review_calls_used"] += 1\n')
-_M2, _M3 = ["pl_m2_loi_goi"], ["pl_m3_neo_loi_goi"]
 MUTANTS.update({f"pl_f01_bo_{ten}": (f'("{ten}", ', f'("{ten}", True or ', ["pl_m6_state_v1"])
                 for ten in ("schema", "bo-dem", "so", "loi-goi", "dem-goi", "dem-vong", "truc")})
 MUTANTS.update({
     "pl_m1_bo_kiem_so_duong": ("a.codex_review_calls_limit) <= 0:", "a.codex_review_calls_limit) < 0:", ["pl_m1_tran_so_duong"]),
-    "pl_m2_kiem_sau_khi_ghi": ("".join(_PL_CHAN), _PL_CHAN[2] + _PL_CHAN[0].replace(">=", ">") + _PL_CHAN[1], _M2),
-    "pl_m2_lon_hon_bang": (_PL_CHAN[0], _PL_CHAN[0].replace(">=", ">"), _M2),
-    "pl_m2_bo_so_head": ('    if a.head != st["reviewing_head_sha"]:\n', "    if False:\n", _M2),
-    "pl_m2_bo_kiem_trung": (' or any(g["run_id"]', ' or False and any(g["run_id"]', _M2),
-    "pl_m3_codex_call_tuy_chon": ("    if _la_codex(st):\n", "    if _la_codex(st) and a.codex_call:\n", _M3),
-    "pl_m3_bo_co_da_dung": ('        goi["da_dung"] = True\n', "        pass\n", _M3),
-    "pl_m3_bo_so_head_loi_goi": ('        if goi["head"] != a.reviewed_sha:\n', "        if False:\n", _M3),
+    "pl_m2_kiem_sau_khi_ghi": ("".join(_PL_CHAN), _PL_CHAN[2] + _PL_CHAN[0].replace(">=", ">") + _PL_CHAN[1], ["pl_m2_loi_goi"]),
+    "pl_m2_lon_hon_bang": (_PL_CHAN[0], _PL_CHAN[0].replace(">=", ">"), ["pl_m2_loi_goi"]),
+    "pl_m2_bo_so_head": ('    if a.head != st["reviewing_head_sha"]:\n', "    if False:\n", ["pl_m2_loi_goi"]),
+    "pl_m2_bo_kiem_trung": (' or any(g["run_id"]', ' or False and any(g["run_id"]', ["pl_m2_loi_goi"]),
+    "pl_m3_codex_call_tuy_chon": ("    if _la_codex(st):\n", "    if _la_codex(st) and a.codex_call:\n", ["pl_m3_neo_loi_goi"]),
+    "pl_m3_bo_co_da_dung": ('        goi["da_dung"] = True\n', "        pass\n", ["pl_m3_neo_loi_goi"]),
+    "pl_m3_bo_so_head_loi_goi": ('        if goi["head"] != a.reviewed_sha:\n', "        if False:\n", ["pl_m3_neo_loi_goi"]),
     "pl_m3_kich_ca_khi_approve": ('    if a.verdict != "approve":', "    if True:", ["pl_m3_vong", "pl_m3_codex"]),
     "pl_m3_bo_truc_vong": (_PL_VONG, _PL_VONG.replace("in T", "in [*T").replace("()", "()][1:]"), ["pl_m3_vong"]),
     "pl_m3_chi_xet_truc_vong": (_PL_VONG, _PL_VONG.replace("in T", "in [*T").replace("()", "()][:1]"), ["pl_m3_codex"]),
-    "pl_m4_danh_sach_cam": ('    if (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:',
-                            '    if (a.ai_nang or "").strip() in ("claude", "codex", ""):', ["pl_m4_nang_tran"]),
+    "pl_m4_danh_sach_cam": ('ai_nang or "").strip() not in NGUOI', 'ai_nang or "").strip() in ("claude", "codex", "") or 0 in NGUOI', ["pl_m4_nang_tran"]),
     "pl_m4_tran_moi_bang": ("if a.tran_moi <= st[t]", "if a.tran_moi < st[t]", ["pl_m4_nang_tran"]),
     "pl_m4_can_cu_long": ("#issuecomment-[0-9]+$", "(#issuecomment-[0-9]+)?$", ["pl_m4_nang_tran"]),
     "pl_m5_mo_khong_can_nang": ('] > st[TRUC_TRAN[st["truc"]][0]]', "] >= 0", ["pl_m5_rescue"]),
-    "pl_m5_quyet_dinh_khac_mo": ("    mo = nang and st[", "    mo = not nang or st[", ["pl_m5_rescue"]),
+    "pl_m5_quyet_dinh_khac_mo": ("mo = (nang := a", "mo = not (nang := a", ["pl_m5_rescue"]),
     "pl_m5_bo_kiem_ly_do": (' or st.get("ly_do") != "rescue_required":', ":", ["pl_m5_rescue"]),
     "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),
-    "pl_m6_suy_used_0": ("used=_la_codex(st) * sum(", "used=0 * sum(", ["pl_m6_state_v1"]),
-    "pl_m6_state_cu_mat_ho": (' or PROVIDER_FAMILIES.get(st["reviewer"])  # state cũ', "", ["pl_m6_state_v1"]),
+    "pl_m6_suy_used_0": ("codex_review_calls_used=can_duoi,", "codex_review_calls_used=0,", ["pl_m6_state_v1"]),
+    "pl_m6_state_cu_mat_ho": ('.get("model_family", "openai")', '.get("model_family")', ["pl_m6_state_v1"]),
 })
 
 

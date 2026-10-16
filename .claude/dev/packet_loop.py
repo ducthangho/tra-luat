@@ -12,8 +12,7 @@ Nó giữ state cục bộ và phát VĂN BẢN comment; phiên Claude mới là
 Mã thoát
     0  ok
     2  sai đối số — slug sai dạng, thiếu finding-id, lý do void ngoài allowlist
-    3  chạm trần — hết attempt, finding-id lặp tới same-failure limit, hoặc trần
-       vòng review / lời gọi codex (Review Rescue Checkpoint, ADR-0037)
+    3  chạm trần — hết attempt, same-failure, hoặc trần vòng review/lời gọi codex (ADR-0037)
     4  vi phạm cross-provider
     5  dấu vết comment không hợp lệ — chưa đăng ký, sai transition, hoặc đã dùng
     6  doctrine-scan bắt được cụm từ bị cấm trong adapter
@@ -636,13 +635,12 @@ def _load(state_dir: Path, packet: int) -> dict:
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
     try:  # #775 bộ đọc NGHIÊM: lệch hình dạng hay bất biến sổ/bộ đếm ⇒ RC_STATE, không traceback, không đoán
         st = json.loads(p.read_text(encoding="utf-8"))
-        if st["schema_version"] == 1:  # M6: SUY bộ đếm (cận DƯỚI) — suy 0 là fail-open
-            st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_calls=[],
-                      codex_review_calls_used=_la_codex(st) * sum(
-                          r.get("provider") == st["reviewer"] for r in st["reviews"]),
-                      review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW, nang_tran=[],
+        can_duoi = _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
+        if st["schema_version"] == 1:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
+            st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_review_calls_used=can_duoi,
+                      codex_calls=[], nang_tran=[], review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW,
                       codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True)
-        goi, can_duoi = st["codex_calls"], _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
+        goi = st["codex_calls"]
         vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
             ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2),
             ("bo-dem", all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
@@ -660,9 +658,8 @@ def _load(state_dir: Path, packet: int) -> dict:
     return st
 
 
-def _la_codex(st: dict) -> bool:  # #775: tên provider VÀ họ model — không vế nào đủ một mình
-    fam = (st.get("reviewer_identity") or {}).get("model_family") or PROVIDER_FAMILIES.get(st["reviewer"])  # state cũ
-    return st["reviewer"] == "codex" and fam == "openai"
+def _la_codex(st: dict) -> bool:  # #775: tên provider VÀ họ model; state cũ thiếu identity ⇒ họ mặc định của codex
+    return st["reviewer"] == "codex" and (st.get("reviewer_identity") or {}).get("model_family", "openai") == "openai"
 
 
 def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
@@ -670,8 +667,8 @@ def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
     st.update(state="blocked", ly_do="rescue_required", truc=truc)
     st["history"].append({"event": "blocked_rescue_required", "truc": truc, "used": st[u], "limit": st[t]})
     _save(state_dir, st)
-    _die(RC_TRAN, f"{ngu_canh}: {truc} {st[u]}/{st[t]} — Review Rescue Checkpoint (ADR-0037): dừng, lập "
-                  f"biên bản, hỏi chủ kho" + (f"\n{CANH_BAO_V1}" if st.get("dem_tu_suy") else ""))
+    _die(RC_TRAN, f"{ngu_canh}: {truc} {st[u]}/{st[t]} — Review Rescue Checkpoint: dừng, hỏi chủ kho"
+                  + (f"\n{CANH_BAO_V1}" if st.get("dem_tu_suy") else ""))
 
 
 def _save(state_dir: Path, st: dict) -> None:
@@ -764,9 +761,8 @@ def cmd_init(a, state_dir: Path) -> int:
             f"do bên điều phối cấp, với --state-dir mới.",
         )
     st = {
-        "schema_version": 2, "review_rounds_used": 0, "codex_review_calls_used": 0, "codex_calls": [],
-        "review_rounds_limit": a.review_rounds_limit, "nang_tran": [],
-        "codex_review_calls_limit": a.codex_review_calls_limit,
+        "schema_version": 2, "review_rounds_used": 0, "codex_review_calls_used": 0, "codex_calls": [], "nang_tran": [],
+        "review_rounds_limit": a.review_rounds_limit, "codex_review_calls_limit": a.codex_review_calls_limit,
         "packet": a.packet,
         "mission": a.mission,
         "executor": a.executor,
@@ -1289,16 +1285,14 @@ def cmd_record_codex_call(a, state_dir: Path) -> int:
 
 
 def cmd_nang_tran(a, state_dir: Path) -> int:
-    """#775 M4. LỜI KHAI, KHÔNG PHẢI BẰNG CHỨNG — chạy cục bộ, không đọc GitHub: `--can-cu` chỉ
-    được kiểm HÌNH DẠNG, `--ai-nang` chỉ chứng minh cái TÊN (xem `NGUOI_CO_THAM_QUYEN`)."""
+    """#775 M4. LỜI KHAI, KHÔNG PHẢI BẰNG CHỨNG: không đọc GitHub, chỉ kiểm HÌNH DẠNG `--can-cu` và cái TÊN."""
     st = _load(state_dir, a.packet)
     if (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:
         _die(RC_GUARD, f"--ai-nang {a.ai_nang!r} ngoài danh sách CHO PHÉP {NGUOI_CO_THAM_QUYEN}")
     u, t = TRUC_TRAN[a.truc]
     if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--tran-moi phải > trần {st[t]} và --can-cu phải là URL issuecomment GitHub")
-    st["nang_tran"].append({"truc": a.truc, "tu": st[t], "len": a.tran_moi, "ai_nang": a.ai_nang.strip(),
-                            "can_cu": a.can_cu, "la_loi_khai_khong_phai_bang_chung": True})
+    st["nang_tran"].append(dict(truc=a.truc, tu=st[t], len=a.tran_moi, ai_nang=a.ai_nang.strip(), can_cu=a.can_cu))
     st[t] = a.tran_moi
     _save(state_dir, st)
     print(f"đã nâng trần {a.truc} lên {a.tran_moi} (đã dùng {st[u]}) — LỜI KHAI, không phải bằng chứng")
@@ -1306,17 +1300,14 @@ def cmd_nang_tran(a, state_dir: Path) -> int:
 
 
 def cmd_record_rescue(a, state_dir: Path) -> int:
-    """#775 M5: cửa DUY NHẤT ra khỏi `blocked` vì rescue — `CHUYEN_HOP_LE` cố ý không đổi. Chỉ
-    `nang_tran` mở lại, khi trần trục đã chạm nay > số đã dùng; quyết định khác giữ blocked."""
+    """#775 M5: cửa DUY NHẤT ra khỏi blocked-vì-rescue (CHUYEN_HOP_LE không đổi); chỉ nang_tran ĐÃ nâng mở lại."""
     st = _load(state_dir, a.packet)
     if st["state"] != "blocked" or st.get("ly_do") != "rescue_required":
         _die(RC_STATE, f"record-rescue chỉ cho blocked vì rescue_required (đang {st['state']!r})")
     if not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--can-cu {a.can_cu!r} phải là URL issuecomment GitHub")
-    nang = a.quyet_dinh == "nang_tran"
-    mo = nang and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]]
-    st["history"].append({"event": "record_rescue", "quyet_dinh": a.quyet_dinh, "truc": st.get("truc"),
-                          "can_cu": a.can_cu, "mo_lai": mo})
+    mo = (nang := a.quyet_dinh == "nang_tran") and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]]
+    st["history"].append(dict(event="record_rescue", quyet_dinh=a.quyet_dinh, truc=st.get("truc"), can_cu=a.can_cu, mo_lai=mo))
     if mo:
         st["state"] = "running"
         del st["ly_do"], st["truc"]

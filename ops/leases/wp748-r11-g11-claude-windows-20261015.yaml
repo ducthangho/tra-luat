@@ -77,3 +77,7 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r12-g12-claude-windows-20261016
+da_bi_thay_the_ly_do: >-
+  Owner authorized r12/g12 at Issue #748 comment 6207072691;
+  preserve clean g11 product head 5dfb3ee79b4548c1ee4513bec89a74c5bd2fa59d.

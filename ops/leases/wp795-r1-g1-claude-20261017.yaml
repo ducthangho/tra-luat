@@ -50,7 +50,9 @@ granted_on_instruction_note: >-
 recorded_by: claude-dispatcher-session
 recorder_is_executor: false
 leased_at_utc: '2026-10-17T12:50:00Z'
-lease_expires_at_utc: '2026-10-19T12:00:00Z'
+lease_expires_at_utc: '2026-10-17T18:05:00Z'
+thu_hoi_bang_rut_han: >-
+  Packet #795 da merge qua PR #801 (merge d347d42); rut han de nha write set. Ghi so: claude/bookkeeping-800-801-land.
 review_rounds_limit: null
 review_rounds_limit_basis: >-
   Dac ta co dong khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi tam. Truc VONG theo ADR-0048.

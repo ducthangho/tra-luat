@@ -120,9 +120,24 @@ Windows-only); ca J01 lặp 3/3; hai đột biến đã đăng ký, chạy trên
 cả hai giết ca đích bằng assertion của chính ca (J01: lại thấy `NGOAI apt-get …`, đúng phản chứng 18 lời gọi của
 reviewer); ruff F 5/5 (delta 0); `bash_nen quet` ĐẠT; `bash -n` hook ok.
 
+## Sau Codex lượt 5 (`b28e8193`, approve, P0–P3 = 0, trên `907214d`)
+
+1. **M-4:** wp775 land (#779 `d8b15cb`) ⇒ merge `origin/master` @ `d347d42` ⇒ `bf10fab` (0 xung đột;
+   `packet_loop_test.py` tự gộp). Sau merge: `packet_loop_test` ĐẠT, `codex_cred_test` ĐẠT, `launcher_test` 221/221,
+   ruff F delta 0 so master, `bash_nen`/`doctrine-scan`/`adr-song` ĐẠT.
+2. **`launcher-windows` (dispatch):** lượt trên `907214d` chết ở `Verify tool manifest and shellcheck canary` (choco
+   cài `shellcheck` không khởi chạy được, trước mọi ca test) — lượt trên `bf10fab` qua bước ấy và cả bộ ca, nên đó là
+   lỗi cài của runner. Lượt `bf10fab` đỏ ở `Tu dot bien` **181/182**: runner đột biến HARNESS không có nhánh "ca đích
+   tự bỏ qua" (runner sản phẩm có), nên `g8_fixture_chep_nguyen_moi_truong` (ca đích POSIX, BỎ QUA trên Windows) bị
+   đếm SAI. Vá attempt 6: runner harness nhận `0/1 qua, 1 bo qua, 0 hong` rc 0 là bỏ qua ⇒ KHÔNG ĐO ĐƯỢC khi mọi ca
+   đích bỏ qua; dấu "giết" siết thành `0/1 qua, 0 bo qua` (chuỗi cũ `0/1 qua` cũng khớp dòng bỏ qua).
+   Đo hai chiều trên bản sao tạm (Linux, ca đích `t62` Windows-only): runner cũ ⇒ `SAI 0/1` (tái hiện Windows);
+   runner mới ⇒ `KHONG DO DUOC`; đích lẫn [t62, ca thật] ⇒ `OK giet 1/1 [bo qua: t62]`. Toàn bảng Linux 250/250.
+   Delta attempt 6 KHÔNG có lượt Codex (đã 5/5) — chủ kho audit.
+
 ## Ngân sách
 
-attempt 5/8 (trần nâng 4→8) · lời gọi Codex 4/5 đã dùng (trần nâng 4→5) — lượt 5 là lượt cuối được cấp.
+attempt 6/8 (trần nâng 4→8) · lời gọi Codex 5/5 (trần nâng 4→5) — không còn lượt Codex nào.
 
 ## Điều kiện merge còn mở
 

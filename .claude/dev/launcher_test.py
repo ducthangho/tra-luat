@@ -10301,6 +10301,7 @@ def chay_dot_bien() -> int:
             ban_test.write_text(moi_test, encoding="utf-8")
             (thu_muc / "launcher.py").write_text(goc, encoding="utf-8")
             chet = []
+            bo_qua = []
             loi_runner = []
             for ten_ca in phai_chet:
                 try:
@@ -10312,16 +10313,30 @@ def chay_dot_bien() -> int:
                 except (OSError, subprocess.SubprocessError) as e:
                     loi_runner.append(f"{ten_ca}({type(e).__name__})")
                     continue
-                dau_hong = f"LAP {ten_ca}: 0/1 qua"
+                dau_hong = f"LAP {ten_ca}: 0/1 qua, 0 bo qua"
+                dau_bo_qua = f"LAP {ten_ca}: 0/1 qua, 1 bo qua, 0 hong"
                 if p.returncode == 1 and dau_hong in p.stdout:
                     chet.append(ten_ca)
+                elif p.returncode == 0 and dau_bo_qua in p.stdout:
+                    # wp484 g7 (đo: launcher-windows 39057167905, `g8_fixture_chep_nguyen_moi_truong`
+                    # SAI 0/1 vì ca đích POSIX tự bỏ qua trên Windows) — cùng luật runner sản phẩm
+                    # phía trên: ca TỰ BỎ QUA trên nền này là KHÔNG ĐO ĐƯỢC, không phải "test yếu".
+                    bo_qua.append(ten_ca)
                 elif p.returncode != 0:
                     loi_runner.append(f"{ten_ca}(rc={p.returncode})")
-            ok = len(chet) == len(phai_chet) and not loi_runner
+            can_do = len(phai_chet) - len(bo_qua)
+            if can_do == 0 and not loi_runner:
+                khong_do += 1
+                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: "
+                      f"{', '.join(bo_qua)})")
+                continue
+            ok = len(chet) == can_do and not loi_runner
             if not ok:
                 hong += 1
             ghi_chu = f" [loi runner: {', '.join(loi_runner)}]" if loi_runner else ""
-            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{len(phai_chet)}: "
+            if bo_qua:
+                ghi_chu += f" [bo qua: {', '.join(bo_qua)}]"
+            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{can_do}: "
                   f"{', '.join(chet) or '(khong ca nao chet)'}{ghi_chu}")
     finally:
         LAUNCHER_DANG_DUNG = LAUNCHER

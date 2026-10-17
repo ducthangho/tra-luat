@@ -5430,12 +5430,12 @@ MUTANTS.update({
     "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
 })
 
-
 # --- #775 Review Rescue. `verdict ≠ approve VÀ (vòng ≥ trần HOẶC codex ≥ trần)`: mỗi vế một ca sai ĐÚNG MỘT vế.
 _URL, _H1, _H2 = "https://github.com/o/r/issues/775#issuecomment-1", f"{1:040x}", f"{2:040x}"
 _RESCUE = {"state": "blocked", "ly_do": "rescue_required"}
-
 _st = lambda sd: json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+
+
 def _pl(c, sd, *buoc):  # mỗi bước `(rc đòi, lệnh, đối số…)`; `--packet 55` tự chèn
     for rc_doi, lenh, *doi in buoc:
         rc, _, e = run(c.script, [lenh, "--packet", 55, *doi], sd)

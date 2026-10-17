@@ -124,3 +124,5 @@ push_policy: 'push nhanh agent/wp775-r1-g1-claude va mo PR draft (chu kho 621770
 thay_the_cho:
 - wp770-r1-g1-claude
 thay_the_cho_ghi_chu: 'lease wp770 (packet #770 da land o 1022a33) con han toi 2026-10-18T08:48:27Z va giu dung write set => thu hoi bang bia mo hai chieu (chu kho 6217700890 muc 2). Bia mo dat tren ops/wp770-spec, ref duy nhat mang lease wp770.'
+da_bi_thay_the: wp788-r1-g1-claude
+da_bi_thay_the_ghi_chu: 'Packet #775 da land (PR #779, merge d8b15cb); lease nay con han nen thu hoi bang bia mo hai chieu khi cap wp788 (cung write set), chu kho issuecomment-6237341979 muc 2.'

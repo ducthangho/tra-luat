@@ -21,6 +21,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
@@ -3064,6 +3065,11 @@ def t49_env_va_lease_khong_duoc_chon_moi_noi():
         gh = s / ("api" if os.name == "nt" else "gh")
         if os.name == "nt":
             shutil.copy2(sys.executable, s / "gh.exe")
+            # WP748 r17/g17 (G6 rc1 trên 19683a0: `gh api` rc=106 "failed to locate pyvenv.cfg") — trong
+            # venv, `python.exe` chỉ là launcher, đọc `pyvenv.cfg` CẠNH nó để tìm `home`. Chép trần thì
+            # đồ giả chết trước khi ghi nhật ký. Mang theo cfg; ngoài venv thì không có gì để mang.
+            if sys.prefix != sys.base_prefix:
+                shutil.copy2(Path(sys.prefix) / "pyvenv.cfg", s / "pyvenv.cfg")
         gh.write_text(
             ("" if os.name == "nt" else f"#!{Path(sys.executable).resolve()}\n") +
             "import json,os,pathlib,sys\n"
@@ -4862,6 +4868,14 @@ def _nap_launcher_thu_hoi():
     return mod
 
 
+# WP748 r17/g17 (G6 rc1 trên 19683a0: t125 `ArgumentError ... expected LP__PROCESSENTRY32W instance
+# instead of pointer to _PROCESSENTRY32W`) — hai waiter của t125 cùng quá hạn và cùng gọi `_giet_ca_cay`.
+# `launcher._cac_pid_cha_windows` dựng LỚP struct MỚI mỗi lời gọi rồi gán `argtypes` lên
+# `ctypes.windll.kernel32` dùng CHUNG toàn tiến trình ⇒ luồng kia ghi đè giữa chừng. Đo bằng probe hai
+# luồng: không khoá 40/80 lời gọi ném; có khoá 0/80. Vá tận gốc nằm ở launcher.py (ngoài write set).
+_KHOA_CHUP_CAY_WINDOWS = threading.Lock()
+
+
 def _giu_hau_due_windows(p):
     """Mở HANDLE tới mọi hậu duệ của `p` TRƯỚC khi giết. Trả (k32, [(pid, handle)], dòng nhật ký).
 
@@ -4880,7 +4894,8 @@ def _giu_hau_due_windows(p):
         import ctypes
         from ctypes import wintypes
         thu_hoi = _nap_launcher_thu_hoi()
-        anh = thu_hoi._chup_cay(p.pid)              # Toolhelp32 + khoá danh tính, đã bỏ PID của ta
+        with _KHOA_CHUP_CAY_WINDOWS:
+            anh = thu_hoi._chup_cay(p.pid)          # Toolhelp32 + khoá danh tính, đã bỏ PID của ta
         goc = (anh or {}).get(p.pid)
         if not anh or not goc:
             return None, None, f"hau_due: KHONG chup duoc cay (anh={anh!r}) - CHAU KHONG DO DUOC"

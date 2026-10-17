@@ -4247,6 +4247,10 @@ def _duong_bridge() -> Path:
 
 
 def _chay_bridge(env, timeout=60):
+    # wp484 g7 (đo 16-10: t124–t126 ĐỎ CHỈ khi phiên có CODEX_AUTH_JSON thật; master xanh cả hai) —
+    # bridge #509 gọi `chuan-bi` khi thấy biến, TRƯỚC hook, nên ca đo bash/mã thoát chết ở rc=13 và
+    # còn đem credential THẬT vào test. Ca bridge không đo credential ⇒ gỡ biến (mọi kiểu hoa/thường).
+    env = {k: v for k, v in env.items() if k.upper() != "CODEX_AUTH_JSON"}
     return subprocess.run([PY, str(_duong_bridge())], env=env, capture_output=True,
                           text=True, encoding="utf-8", errors="replace", timeout=timeout)
 
@@ -7629,6 +7633,90 @@ def r484_g6_trust_posix_backslash_is_not_separator():
         bang(got["trang_thai"] == "KHONG_DO_DUOC", f"POSIX trust broadened: {got}")
 
 
+# wp484 g7 — bốn P2 của connector trên #509 (13-10-2026) ở `faaedff`. Mỗi ca có đột biến
+# riêng trong DOT_BIEN; ca đích chết vì `bang`/assert của CHÍNH nó, không vì lỗi vô can.
+
+@ca
+def r484_g7_credential_status_home_sai_la_chan_khong_traceback():
+    """P2 thread XML: CODEX_HOME tương đối / có `..` ⇒ CHAN có mã, không traceback rc=1."""
+    m = _tai_launcher_thu()
+    for sai in ("tuong-doi/codex", os.path.join(os.sep, "x", "..", "y")):
+        with San() as s:
+            env = dict(os.environ, HOME=str(s), USERPROFILE=str(s), CODEX_HOME=sai)
+            env.pop("CODEX_AUTH_JSON", None)
+            r = subprocess.run([PY, "-B", str(LAUNCHER_DANG_DUNG), "credential-status"],
+                               env=env, capture_output=True, text=True, timeout=60)
+            bang("Traceback" not in r.stderr, f"{sai!r}: traceback thô: {r.stderr[-300:]}")
+            bang(r.returncode == MA_CHUA_XAC_THUC,
+                 f"{sai!r}: mong {MA_CHUA_XAC_THUC}, duoc {r.returncode}: {r.stderr[-200:]}")
+            bang("CODEX_HOME không hợp lệ" in r.stderr, f"{sai!r}: thiếu chẩn đoán: {r.stderr!r}")
+        from unittest.mock import patch
+        with patch.dict(os.environ, {"CODEX_HOME": sai}):
+            try:
+                m._cho_snapshot_hoac_chan()
+            except m.Chan as e:
+                bang(e.ma == MA_CHUA_XAC_THUC, f"{sai!r}: Chan sai mã {e.ma}")
+            else:
+                bang(False, f"{sai!r}: helper không chặn")
+
+
+@ca
+def r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra():
+    """P2 thread XMG: `_danh_dau_auth_hong` trả False thì KHÔNG được nuốt như đã ghi."""
+    import types
+    m = _tai_launcher_thu()
+    m.__file__ = str(LAUNCHER)          # bản sao đột biến nằm ở thư mục tạm, thiếu codex_cred.py
+    m._co_chan_codex = lambda: None
+    m._dang_cho_snapshot = lambda home: False
+    ns = {}
+    exec("def _kiem_song(home):\n    return False, 'credential BỊ TỪ CHỐI (INERT)'\n", ns)
+    m.runpy = types.SimpleNamespace(run_path=lambda p: {"_kiem_song": ns["_kiem_song"]})
+    from unittest.mock import patch
+    with San() as s, patch.dict(os.environ, {"CODEX_HOME": str(s / "codex")}):
+        m._danh_dau_auth_hong = lambda home: True
+        ok, ly_do = m._do_codex_song()
+        bang(not ok and ly_do == "credential BỊ TỪ CHỐI (INERT)", f"đối chứng sai: {ly_do!r}")
+        m._danh_dau_auth_hong = lambda home: False
+        ok, ly_do = m._do_codex_song()
+        bang(not ok, "credential bị từ chối mà vẫn ok")
+        bang(ly_do.startswith("KHÔNG ghi được trạng thái chờ snapshot"),
+             f"lỗi ghi trạng thái bị nuốt: {ly_do!r}")
+
+
+@ca
+def r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi():
+    """P2 thread XLy (THU HẸP, không đóng): đích đổi giữa lúc kiểm và `os.replace` ⇒
+    từ chối, giữ nguyên bản của tiến trình kia. Codex CLI không tôn trọng khoá của kho
+    nên khe syscall cuối vẫn còn — nợ có tên `codex-auth-json-khong-cas`."""
+    if LA_WINDOWS:
+        return "đo trên POSIX; nhánh Windows dùng cùng phép đọc lại trước os.replace"
+    m = _tai_launcher_thu()
+    cu, cua_ta, cua_ho = b'{"v":"INERT-CU"}', b'{"v":"INERT-TA"}', b'{"v":"INERT-HO"}'
+    with San() as s:
+        home = s / "codex"
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", cu, None)
+        with m._KhoCodex(home) as store:
+            that = store.read
+            dem = {"n": 0}
+            def doc(name="auth.json"):
+                dem["n"] += 1
+                if dem["n"] == 2:   # lần đọc ngay trước khi thay: tiến trình kia vừa refresh
+                    p = home / "auth.json"
+                    p.write_bytes(cua_ho)
+                    os.chmod(p, 0o600)
+                return that(name)
+            store.read = doc
+            try:
+                store.write("auth.json", cua_ta, cu)
+            except OSError as e:
+                bang("changed before promotion" in str(e), f"từ chối sai lý do: {e}")
+            else:
+                bang(False, "đã thay dù đích vừa đổi")
+        bang((home / "auth.json").read_bytes() == cua_ho, "bản mới của tiến trình kia bị ghi đè")
+        bang(not [p for p in home.iterdir() if ".tmp-" in p.name], "rác tệp tạm còn lại")
+
+
 # ---------------------------------------------------------------------------------------------
 # wp685 (LAUNCHER-CON-SONG-ESRCH, đặc tả r28 §7 B1–B4) — helper theo NHÃN cho t156/t157.
 # Nguồn: PR #679 job 109303373142 (ESRCH thoát khỏi `_con_song`); cross-review lượt 1–12 trên
@@ -8590,6 +8678,21 @@ DOT_BIEN = [
     ("g2_resume_bo_head",
      ('or cp["head"] != kq["head"]', 'or False'),
      ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+    # wp484 g7 — mỗi P2 một đột biến gỡ đúng bản vá.
+    ("g7_home_sai_lai_traceback",
+     ('    except OSError as e:\n        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ',
+      '    except ValueError as e:\n        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ'),
+     ["r484_g7_credential_status_home_sai_la_chan_khong_traceback"]),
+    ("g7_nuot_loi_ghi_trang_thai",
+     ('            if not _danh_dau_auth_hong(home):\n                return False, (f"KHÔNG ghi',
+      '            if False:\n                return False, (f"KHÔNG ghi'),
+     ["r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra"]),
+    ("g7_bo_doc_lai_truoc_replace",
+     ('            if self.read(name) != expected:\n'
+      '                raise OSError("credential changed before promotion")',
+      '            if False:\n'
+      '                raise OSError("credential changed before promotion")'),
+     ["r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi"]),
     ("m1_xoa_actionlint_khoi_cong_cu",
      ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
       '    {"ten": "actionlint_disabled", "bat_buoc": False, "ung_vien": ["actionlint"],'),

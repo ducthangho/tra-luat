@@ -481,6 +481,13 @@ def cmd_kiem(a) -> int:
     try:
         home = Path(a.codex_home).expanduser() if a.codex_home else _codex_home_hieu_luc()
         auth = home / "auth.json"
+        # wp484 g7 (P2 #509 thread XL-) — home hợp lệ nhưng CHƯA tạo cũng là "chưa có
+        # credential", giống thư mục có mà thiếu auth.json; bản trước để `_KhoCodex` ném
+        # FileNotFoundError rơi vào nhánh ĐỎ rc=2. `lexists`: symlink treo vẫn đi tiếp để
+        # `_KhoCodex` từ chối như cũ — không nới đường an toàn.
+        if not os.path.lexists(home):
+            _in("KHÔNG_ĐO_ĐƯỢC: thư mục Codex home chưa tồn tại — chưa có credential")
+            return RC[KHONG_DO_DUOC]
         helpers = _repo_helpers()
         with helpers["_KhoCodex"](home) as store:
             raw = store.read()
@@ -510,7 +517,10 @@ def cmd_kiem(a) -> int:
         return RC[DO]
     song, vi_sao = _kiem_song(home)
     if not song and vi_sao.startswith("credential BỊ TỪ CHỐI ("):
-        helpers["_danh_dau_auth_hong"](home)
+        # wp484 g7 — cùng lỗi với `_do_codex_song` (P2 thread XMG), đường THỨ HAI reviewer không chỉ.
+        if not helpers["_danh_dau_auth_hong"](home):
+            vi_sao = (f"KHÔNG ghi được trạng thái chờ snapshot sau khi {vi_sao} — "
+                      "CHẶN: sửa CODEX_HOME trước khi thử lại")
     _in(f"kiểm sống  : {vi_sao}")
     return RC[DAT] if song else RC[DO]
 

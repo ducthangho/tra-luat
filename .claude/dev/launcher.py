@@ -1599,7 +1599,7 @@ def lenh_run(a) -> int:
         if not ket or not all(x.get("ok") for x in ket):
             raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
     if Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd"):
-        if _dang_cho_snapshot(_codex_home_hieu_luc()):
+        if _cho_snapshot_hoac_chan():
             raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
         probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
@@ -2569,6 +2569,17 @@ def _codex_home_hieu_luc() -> Path:
     return home
 
 
+def _cho_snapshot_hoac_chan() -> bool:
+    """wp484 g7 (P2 #509 thread XML) — `CODEX_HOME` sai từng rơi ra traceback rc=1 ở
+    `credential-status` và `run … codex`, nên người gọi không phân biệt được "cấu hình
+    credential hỏng" với "launcher sập". Nay là một `Chan` có mã: KHÔNG ĐO ĐƯỢC ≠ sập."""
+    try:
+        home = _codex_home_hieu_luc()
+    except OSError as e:
+        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ: {e}") from None
+    return _dang_cho_snapshot(home)
+
+
 class _KhoCodex:
     """Pinned directory storage. No symlink traversal, broad ACL, or repo writes.
 
@@ -3180,7 +3191,12 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bo
             probe.__globals__["_co_codex"] = lambda: duong_dan
         ok, reason = probe(home)
         if not ok and reason.startswith("credential BỊ TỪ CHỐI ("):
-            _danh_dau_auth_hong(home)
+            # wp484 g7 (P2 #509 thread XMG) — kết quả ghi trạng thái từng bị NUỐT: không lưu được
+            # thì lần gọi sau lại thử đúng credential đã biết là hỏng mà không ai hay. Không ghi
+            # được thì không có cách nào nhớ hộ; tối thiểu phải nói ra, và lý do phải khác hẳn.
+            if not _danh_dau_auth_hong(home):
+                return False, (f"KHÔNG ghi được trạng thái chờ snapshot sau khi {reason} — "
+                               "CHẶN: sửa CODEX_HOME (quyền/dung lượng) trước khi thử lại")
         return ok, reason
     except (OSError, ValueError, UnicodeError):
         return False, "Không kiểm được credential Codex"
@@ -4666,7 +4682,7 @@ def build_parser():
     ap.add_argument("--version", action="version", version=VERSION)
     sub = ap.add_subparsers(dest="lenh_con", required=True)
     cs = sub.add_parser("credential-status", help="chốt offline: có đang chờ snapshot mới không")
-    cs.set_defaults(fn=lambda a: MA_CHUA_XAC_THUC if _dang_cho_snapshot(_codex_home_hieu_luc()) else 0)
+    cs.set_defaults(fn=lambda a: MA_CHUA_XAC_THUC if _cho_snapshot_hoac_chan() else 0)
 
     c = sub.add_parser("check", help="chi chay cac chot, khong goi gi")
     _them_chot(c)

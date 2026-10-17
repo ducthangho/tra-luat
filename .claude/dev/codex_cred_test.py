@@ -415,13 +415,43 @@ def t14_probe_khong_ke_thua_snapshot(M):
             os.chdir(cwd)
 
 
+def t15_home_chua_tao_la_KHONG_DO_DUOC(M):
+    """wp484 g7 (P2 #509 thread XL-): home hợp lệ nhưng chưa tạo = chưa có credential (rc 3),
+    cùng mã với thư mục có mà thiếu auth.json — không phải ĐỎ rc 2."""
+    import argparse
+    with tempfile.TemporaryDirectory(prefix="codex-home-vang-") as td:
+        for home in (Path(td) / "chua-tao", Path(td)):
+            rc = M.cmd_kiem(argparse.Namespace(codex_home=str(home), kiem_song=False))
+            assert rc == M.RC[M.KHONG_DO_DUOC], f"{home}: rc {rc} != {M.RC[M.KHONG_DO_DUOC]}"
+
+
+def t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra(M):
+    """wp484 g7 — đường thứ hai của P2 thread XMG: `kiem --kiem-song` từng nuốt kết quả ghi."""
+    import argparse
+    import json as _json
+    with tempfile.TemporaryDirectory(prefix="codex-ghi-hong-") as td:
+        home = Path(td) / "codex"
+        that = M._repo_helpers()
+        with that["_KhoCodex"](home, create=True) as store:
+            store.write("auth.json", _json.dumps({"tokens": {"refresh_token": "INERT"}}).encode(), None)
+        gia = dict(that, _danh_dau_auth_hong=lambda h: False, _dang_cho_snapshot=lambda h: False)
+        M._repo_helpers = lambda: gia
+        M._kiem_song = lambda h: (False, "credential BỊ TỪ CHỐI (INERT)")
+        ra = []
+        M._in = lambda *a: ra.append(" ".join(str(x) for x in a))
+        rc = M.cmd_kiem(argparse.Namespace(codex_home=str(home), kiem_song=True))
+        assert rc == M.RC[M.DO], f"rc {rc}"
+        assert any("KHÔNG ghi được trạng thái chờ snapshot" in x for x in ra), f"lỗi ghi bị nuốt: {ra}"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
-      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW, t14_probe_khong_ke_thua_snapshot]
+      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW, t14_probe_khong_ke_thua_snapshot,
+      t15_home_chua_tao_la_KHONG_DO_DUOC, t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -477,6 +507,10 @@ DOT_BIEN = [
      '    if not hasattr(os, "O_NOFOLLOW"):\n'
      '        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")\n', "",
      "t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW"),
+    ("t15_bo_nhanh_home_vang", "    if not os.path.lexists(home):\n", "    if False:\n",
+     "t15_home_chua_tao_la_KHONG_DO_DUOC"),
+    ("t16_nuot_loi_ghi", '        if not helpers["_danh_dau_auth_hong"](home):', "        if False:",
+     "t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra"),
 ]
 
 

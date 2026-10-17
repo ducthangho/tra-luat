@@ -1,0 +1,70 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 794
+packet_id: wp794
+packet_alias: R291-DAM-SO-CUNG
+mission_issue: 794
+revision: 2
+generation: 2
+lease_id: wp794-r2-g2-claude-20261017
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp794-r2.md
+spec_sha256_required: 8dad1a88ccabced3fc93baff05900c9aaa291df2fce4371da61701f9eab6e12c
+spec_hash: 8dad1a88ccabced3fc93baff05900c9aaa291df2fce4371da61701f9eab6e12c
+prompt_path: ops/specs/wp794-r2.md
+prompt_sha256_required: 8dad1a88ccabced3fc93baff05900c9aaa291df2fce4371da61701f9eab6e12c
+write_set:
+- scripts/tl_selftest.py
+effective_write_set:
+- scripts/tl_selftest.py
+depends_on: []
+branch: agent/wp794-g2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16
+start_from_sha: 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16
+reviewed_sha_required: 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16
+reviewed_sha_note: >-
+  Chua co head code; neo base. Head da review ghi o bien nhan truoc lan day duy nhat.
+granted_by: ducthangho
+granted_on_instruction_note: >-
+  Chu kho 17-10-2026 (phien session_01XaeBSkW4R49AEWj6x4uqff): "Soan dac ta MAY-ADR-0054. Tao packet moi cap lease
+  de thuc thi dac ta, xu ly het P3 cua phien. Tao phien moi de thuc thi packet", chon "4 packet tuan tu" va
+  "Phien nay: dac ta+lease+ghi so"; sau khi connector bat P1/P2 tren PR #798 chon "Va theo lop, revision 2". Phien ghi lease nay KHONG phai executor; executor la phien moi do phien nay tao.
+recorded_by: claude-dispatcher-session
+recorder_is_executor: false
+leased_at_utc: '2026-10-17T14:15:00Z'
+lease_expires_at_utc: '2026-10-19T12:00:00Z'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta co dong khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi tam. Truc VONG theo ADR-0048.
+ci_policy: ci_ubuntu_qua_draft_pr_khong_doi_windows
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Review Codex CLI offline tren SHA cuc bo; selftest + cong tai cho tren dung SHA; day nhanh code MOT lan. CI do
+  thi chi day va CI, ghi bien nhan. Connector bao P0-P2 thi DUNG hoi chu kho.
+thay_the_cho:
+- wp794-r1-g1-claude-20261017
+thay_the_cho_note: >-
+  Dac ta r1 bi connector bat P2 tren PR #798; r2 thay r1. Lease g1 con han nen dung bia mo hai chieu:
+  g1 mang da_bi_thay_the tro ve lease nay. Nhanh g1 (agent/wp794-g1-claude) chua day; executor chuyen viec sang nhanh g2.
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0}

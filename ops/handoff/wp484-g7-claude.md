@@ -68,9 +68,27 @@ Bằng chứng lượt 2 (17-10, Linux, sau khi `/tmp/.git` đã biến mất): 
 `packet_loop_test.py` TỔNG ĐẠT; `ops/cong_cu_test.py` cổng cây thật ĐẠT; 5 đột biến g7 trong `DOT_BIEN` + 2 đột biến
 tay F04 đều giết ca đích bằng assertion của chính ca; ruff F delta 0 (thêm `session_start.py` 0/0).
 
+## Lượt vá 3 — sau Codex lượt 2 (`changes_requested`, P2=2, run `7897dde1`, head `b355ff8`)
+
+Chủ kho nâng trần lời gọi Codex 2→3 (ghi hộ: <https://github.com/ducthangho/tra-luat/issues/484#issuecomment-6228814972>);
+lượt 3 chưa approve thì DỪNG hẳn. F01–F03 lượt 2 xác nhận đã đóng; F04 đóng một phần.
+
+| finding | vá | ca · đột biến |
+|---|---|---|
+| G01 (lớp F04) bridge tin "có trên PATH" | `_codex_chay_duoc`: `--version` có hạn, rc=0 VÀ có đầu ra, env đã gỡ snapshot; shim hỏng ⇒ hoãn | `r484_g7_bridge_codex_co_mat_nhung_hong_van_hoan` · đột biến tay `g01_tin_co_mat` |
+| G02 fixture shell gọi installer máy chạy | `codex`/`claude`/`npm` giả, PATH bỏ thư mục có bản thật, gọi npm là ĐỎ | `r484_g2_hook_shell_scrub_truoc_probe` · đột biến tay `hook_ro_snapshot` (gỡ `unset CODEX_AUTH_JSON`) |
+
+Kèm: `7cc31e9` — ca `credential-status` giải stderr UTF-8 (Windows cp1252 làm trượt phép so; `launcher-windows`
+run 38995632503 trên `b355ff8` 191/192 ⇒ run 38995966238 trên `7cc31e9` XANH).
+
+Bằng chứng lượt 3 (17-10, Linux): `launcher_test.py` **219/219** cả có/không biến giả; `codex_cred_test.py` 18/18 +
+đột biến 18/18; `packet_loop_test.py` ĐẠT; `ops/cong_cu_test.py` cổng cây thật ĐẠT; 3 đột biến tay (G01, rò snapshot,
+F04 bỏ hoãn) giết ca đích bằng assertion. CI Windows `gate`/`gate-cong-cu` ĐỎ vì `t23`/`t49` của `ops/cong_cu_test.py`
+— đỏ sẵn, thuộc wp748 (comment trên #792).
+
 ## Ngân sách
 
-attempt 2/3 · lời gọi Codex 1/2 đã dùng; lượt 2/2 là review lại cuối.
+attempt 3/3 · lời gọi Codex 2/3 đã dùng (trần nâng); lượt 3/3 là lượt CUỐI.
 
 ## Điều kiện merge còn mở
 

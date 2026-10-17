@@ -132,7 +132,9 @@ Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt ngườ
   tương ứng quy định. Đặc tả muốn áp trần của `ADR-0052`/`ADR-0053` thì khai dòng `tran_*` theo
   mục *Hiệu lực* của chính ADR ấy — giá trị sau `@` là OID 40 ký tự của commit LAND ADR trên nhánh
   mặc định, không phải một commit bất kỳ có chứa ADR (base của packet chứa ADR mà không phải
-  commit land); ADR nào đang hiệu lực thì hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
+  commit land). Hai dạng khai, mỗi dòng đứng riêng ở đầu đặc tả, `<OID land>` thay bằng OID thật:
+  `tran_loi_goi_codex: ADR-0052@<OID land>` và `tran_kich_thuoc_sensitive: ADR-0053@<OID land>`.
+  ADR nào đang hiệu lực thì hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
 - write set dự kiến có giao với packet nào đang mở không;
 - base dự kiến có phải tổ tiên của nhánh mặc định không;
 - lớp review theo đường dẫn bị chạm (`docs/PROTOCOL_DA_PHIEN.md` §8), fail-closed khi không rõ.

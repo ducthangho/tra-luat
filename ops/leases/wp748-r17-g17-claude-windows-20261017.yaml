@@ -81,3 +81,12 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r18-g18-claude-windows-20261018
+da_bi_thay_the_ly_do: >-
+  The g17 lease expired at 2026-10-17T20:03:56Z. Owner authorized r18/g18
+  at Issue #748 comment 6243361863. Product clone remained clean at head
+  b643cfca250497964e2d920dddf6f8eccfb85fce and tree
+  b0014831f1de884e49ab97ae1001ce90df4a384a; no push, PR, review,
+  merge, land or LIVE occurred. G3 and G5 full suites ended rc1; other
+  exact-head serial-chain receipt SHA256 is
+  99fc2e345166607af2251f51652d52d5963aa8667a8e2b8ceb2170b0dac34d44.

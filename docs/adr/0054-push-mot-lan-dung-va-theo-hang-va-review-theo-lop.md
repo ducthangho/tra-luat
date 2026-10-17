@@ -94,8 +94,10 @@ hiệu lực của luật này.
 ## Cưỡng chế
 
 Ba luật trên: **không cổng nào cưỡng chế**. Không bộ đếm số lần đẩy (GitHub không giữ lịch sử đẩy theo nhánh ở
-dạng một phiên đọc được qua MCP; reflog là cục bộ), không cổng đọc điều kiện dừng, và `luat_push_va_dung_va`
-có **0** dòng trong `ops/lease_publish.py` và `.claude/dev/packet_loop.py` (đo 17-10-2026, `rg -cw`). Luật được
+dạng một phiên đọc được qua MCP; reflog là cục bộ), không cổng đọc điều kiện dừng. Đo 17-10-2026 bằng
+`rg -cw 'luat_push_va_dung_va|ADR-0054'` trên đủ sáu vị trí cổng mà §20 của protocol liệt kê
+(`ops/lease_publish.py`, `.claude/dev/packet_loop.py`, `.claude/dev/launcher.py`, `.claude/dev/gate_lifecycle.py`,
+`.github/workflows/ci.yml`, `.github/workflows/ops-publish-lease.yml`): **0** dòng ở mỗi tệp. Luật được
 canh bằng kỷ luật đọc và bằng biên nhận. Cùng họ nợ `SO-CANON-CHUA-TON-TAI`.
 
 ## Protocol trỏ, không chép

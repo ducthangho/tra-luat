@@ -5531,9 +5531,9 @@ def case_pl_m5_rescue(c: Ctx):
         _doi(rc, c.review(sf, 55, ["lap-lai"], luot=n)[0], b"", f"same-failure lượt {n}")
     _pl(c, sf, _rescue(8, "dung"))  # blocked vì same-failure ⇒ không phải cửa rescue
     sd = _reviewing(c, "--codex-review-calls-limit", 1)
-    _pl(c, sd, _goi("g1", _H1), _goi("g2", _H1, 3), (8, "transition", "--to", "running"), _rescue(8, "nang_tran"),
-        *[_rescue(0, qd) for qd in ("tach_stable_slice", "revision", "dung")])
-    _kiem(sd, "ba quyết định GIỮ blocked", truc="codex_review_calls", **_RESCUE)
+    _pl(c, sd, _goi("g1", _H1), _goi("g2", _H1, 3), (8, "transition", "--to", "running"), _rescue(8, "nang_tran"))
+    for qd in ("tach_stable_slice", "revision", "dung"):
+        _pl(c, sd, _rescue(0, qd)); _kiem(sd, f"{qd} GIỮ blocked", truc="codex_review_calls", **_RESCUE)
     for hong in ({"nang_tran": [dict(truc="codex_review_calls", tran_cu=0, tran_moi=1, ai_nang="ducthangho", can_cu=_URL)]}, {"codex_review_calls_limit": 2}, {"codex_review_calls_limit": 2, "nang_tran": [{"truc": "codex_review_calls", "tran_moi": 2}]}): (sd / "wp55.json").write_text(json.dumps({**_st(sd), "nang_tran": [], **hong})); _pl(c, sd, _rescue(8, "nang_tran"))  # F12: sửa tay MỘT trường (sổ nâng / trần) không mở lại
     _pl(c, sd, _nang(0, tran=3), _rescue(0, "nang_tran")); _kiem(sd, "nang_tran mở lại running", state="running", ly_do=None, truc=None)
     if sum(h["event"] == "record_rescue" for h in _st(sd)["history"]) != 8: raise AssertionError("record-rescue phải LUÔN ghi biên bản")
@@ -5542,13 +5542,13 @@ def case_pl_m5_rescue(c: Ctx):
 def case_pl_m6_state_v1(c: Ctx):
     sd = _reviewing(c); st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
     (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER, "attempt": n} for n in (1, 2, 3)]}))
+    sd2 = c.sd(); __import__("shutil").copytree(sd, sd2, dirs_exist_ok=True); _pl(c, sd2, _goi("g1", _H1, 3))  # M6: đo call trước status, giữ fixture reader độc lập
+    _kiem(sd2, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     rc, o, e = run(c.script, ["status", "--packet", 55], sd)
     _doi(0, rc, e, "status trên state v1 hợp lệ")
     t = json.loads(o.decode("utf-8"))
     if "SUY RA" not in _txt(e) or (t["codex_review_calls_used"], t["review_rounds_used"], t["dem_tu_suy"]) != (3, 3, True):
         raise AssertionError(f"v1 phải suy 3/3 kèm cảnh báo: {_txt(e)!r}")
-    _pl(c, sd, _goi("g1", _H1, 3))
-    _kiem(sd, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
     for hong in ({}, *({k: ...} for k in ("packet", "state", "attempt_open", "reviewing_head_sha", "mission", "executor", "posts", "hmac_key")), {"schema_version": 1}, {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
                  *({k: v} for k, v in (("attempts_used", True), ("attempts_used", 0.5), ("attempts_used", "one"),
@@ -5600,7 +5600,7 @@ MUTANTS.update({
     "pl_m5_quyet_dinh_khac_mo": ('mo = (nang := a.quyet_dinh == "nang_tran") and', 'mo = not (nang := a.quyet_dinh == "nang_tran") or', ["pl_m5_rescue"]),
     "pl_m5_bo_kiem_ly_do": (' or st.get("ly_do") != "rescue_required":', ":", ["pl_m5_rescue"]),
     "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),
-    "pl_m6_suy_used_0": ("codex_review_calls_used=can_duoi,", "codex_review_calls_used=0,", ["pl_m6_state_v1"]),
+    "pl_m6_suy_used_0": (("codex_review_calls_used=can_duoi,", " >= can_duoi + sum("), ("codex_review_calls_used=0,", " >= 0 + sum("), ["pl_m6_state_v1"]),  # phối hợp: gỡ cận dưới reader để đo đúng fail-open lời gọi M6
     "pl_m6_state_cu_mat_ho": ('.get("model_family", "openai")', '.get("model_family")', ["pl_m6_state_v1"]),
 })
 

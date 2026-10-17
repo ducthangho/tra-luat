@@ -1,0 +1,79 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 784
+packet_id: wp784
+packet_alias: PUSH-MOT-LAN-VA-DUNG-VA
+mission_issue: 784
+revision: 2
+generation: 2
+lease_id: wp784-r2-g2-claude-20261017
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md
+spec_sha256_required: e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a
+spec_hash: e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a
+prompt_path: ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md
+prompt_sha256_required: e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a
+write_set:
+- docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+- docs/PROTOCOL_DA_PHIEN.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+effective_write_set:
+- docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+- docs/PROTOCOL_DA_PHIEN.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+depends_on: []
+depends_on_note: >-
+  Packet #782 da land o 8ab100793df9831505f495543a74044b91c2c9ab (PR #791) va 25cda36 (PR #783).
+branch: agent/wp784-g2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8ab100793df9831505f495543a74044b91c2c9ab
+start_from_sha: 8ab100793df9831505f495543a74044b91c2c9ab
+reviewed_sha_required: 8ab100793df9831505f495543a74044b91c2c9ab
+reviewed_sha_note: >-
+  Chua co head code; neo base. Head da review se ghi o bien nhan/lease ke tiep truoc lan push duy nhat.
+granted_by: ducthangho
+granted_on_instruction_note: >-
+  Chu kho (17-10-2026, phien session_01XaeBSkW4R49AEWj6x4uqff): "Dong y cap lease" cho packet 2 va
+  "Da merge #783 va #791, tiep tuc packet 2". Phien ghi lease nay CUNG la executor; no khong tu cap viec cho minh.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-17T08:05:00Z'
+lease_expires_at_utc: '2026-10-19T08:00:00Z'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta r2 co dong khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi tam. Truc VONG theo ADR-0048.
+ci_policy: ci_ubuntu_qua_draft_pr_khong_doi_windows
+ci_policy_note: >-
+  Chi doi tai lieu + mot dong ratchet selftest + manifest. Mo draft PR (ci.yml chay ubuntu). Khong merge, khong land.
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Theo Q1-Q3 cua dac ta: review Codex CLI offline tren SHA cuc bo; selftest + gate tai cho tren dung SHA; day
+  nhanh code dung MOT lan. CI do sau lan day thi chi day va CI, ghi bien nhan.
+thay_the_cho:
+- wp782-r5-g5b-claude-20261017
+thay_the_cho_note: >-
+  Packet #782 da land (8ab1007) nhung lease g5b con han toi 2026-10-18T17:00Z va con giu docs/PROTOCOL_DA_PHIEN.md,
+  scripts/tl_selftest.py, RELEASE_MANIFEST.json. Bia mo hai chieu: g5b mang da_bi_thay_the tro ve lease nay.
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0}

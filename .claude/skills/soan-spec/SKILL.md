@@ -117,8 +117,9 @@ thẳng vì sao trong tiêu chí.
   Cưỡng chế ban đầu chỉ dẫn hai tệp, phải đo lại trên đủ sáu vị trí (commit `1182060`, P2 connector
   4302037482 trên PR #785).
 
-Trước khi đóng băng, chạy thử từng tiêu chí trên nền (phải ra đúng màu "chưa làm") và nghĩ ra một
-đột biến làm nó đổi màu — nối với L3.
+Trước khi đóng băng, chạy thử từng tiêu chí trên nền. Tiêu chí đo hành vi MỚI phải ra đúng màu
+"chưa làm"; tiêu chí canh bất biến (`doctrine-scan`, selftest, `release-verify`…) xanh sẵn trên nền là
+đúng, và răng của nó đến từ đột biến. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
 
 ## 3. Đo trước khi hỏi
 

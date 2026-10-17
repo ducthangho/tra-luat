@@ -4,7 +4,7 @@
 # TRANG THAI: merged (d8b15cb). `landed: false` — `landed` chi len true khi chu kho quyet O PR GHI SO NAY va gate push
 # master phu ma nay XANH. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # Gate push master RIENG cua d8b15cb bi HUY do concurrency (master tien len d347d42 luc 17:27Z, PR #801); gate phu ma nay
-# la luot push master tren d347d42 (con con cua d8b15cb) — xem post_merge_checks.
+# la luot push master tren d347d42 (con truc tiep cua d8b15cb): XANH 14/14 (run 39053830242) — xem post_merge_checks.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr779-wp775-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -36,7 +36,7 @@ pre_merge_checks:
 post_merge_checks:
   - {name: 'ci.yml push master', run_id: 39051543180, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: cancelled, ly_do: 'concurrency — master tien len d347d42 (merge PR #801) luc 17:27:23Z; run cap nhat 17:27:24Z. Phien executor KHONG huy run nay.', nguon: [readback-run-39051543180.json, readback-runs-master-push.json]}
   - {name: 'launcher (Windows that) push master', run_id: 39051543211, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: success, nguon: readback-run-39051543211.json}
-  - {name: 'ci.yml push master (phu d8b15cb)', run_id: 39053830242, sha: d347d42, conclusion: CHO, ghi_chu: 'd347d42 la con truc tiep cua d8b15cb; ket qua ghi bo sung vao ho so nay truoc khi chu kho quyet landed.'}
+  - {name: 'ci.yml push master (phu d8b15cb)', run_id: 39053830242, sha: d347d426334bbe1bbb1161184ab0acffee9be054, conclusion: success, jobs: '14/14 success (chuan-bi, gate, gate-packet-loop, gate-ops, gate-registry, gate-cong-cu x8, gate-cong-cu-gop)', luc: '2026-10-17T17:59:39Z', ghi_chu: 'measured — d347d42 la con truc tiep cua d8b15cb (git merge-base --is-ancestor d8b15cb d347d42 rc=0; cha thu nhat d347d42 = d8b15cb).', nguon: [readback-run-39053830242.json, readback-jobs-39053830242.json]}
 bookkeeping:
   - {item: 'dong Issue #775 (completed) kem ban chieu ho so nay', luc: sau PR ghi so}
   - {item: 'mo 7 issue no ngoai pham vi spec r1', issues: [804, 805, 806, 807, 808, 809, 810]}
@@ -78,8 +78,8 @@ trang_thai_packet:
     d8b15cb0730c85e7019aee627c3bfa645a6d3eaf (cha 73bf92c + f9d84d7), merge commit (khong squash/rebase).
   landed: false
   landed_ly_do: >-
-    Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1), va gate push master phu ma nay (run 39053830242 tren
-    d347d42) phai xanh.
+    Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1). Dieu kien gate da thoa: push master phu ma nay
+    (run 39053830242 tren d347d42) XANH 14/14.
 
 uy_quyen_land:
   dang: >-
@@ -124,5 +124,5 @@ no_ngoai_pham_vi:
 khong_do_duoc:
   - 'Log day du cua cac job CI KHONG luu; chi readback run/check-run.'
   - 'stderr.log cua cac luot review KHONG luu (co the chua noi dung bo loc nen, lon); model thuc chay KHONG_DO_DUOC.'
-  - 'Gate push master rieng cua d8b15cb: KHONG co (bi huy do concurrency); chi do duoc qua run phu tren d347d42.'
+  - 'Gate push master rieng cua d8b15cb: KHONG co (bi huy do concurrency); do qua run phu tren d347d42 (xanh). Luot master nay chi co job ubuntu; Windows that cua d8b15cb do o launcher-windows 39051543211 (success).'
   - 'Than comment PR #779 khong luu nguyen van (441 KB); readback-comments-779-chi-muc.json giu id/user/thoi diem/sha256 than.'

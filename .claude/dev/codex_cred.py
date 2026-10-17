@@ -204,7 +204,10 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
         return (False, f"không chạy được: {type(e).__name__}")
     stdout, stderr = p.stdout or "", p.stderr or ""
     ra = stdout + stderr
-    for dau in ("token_revoked", "refresh_token_invalidated", "401 unauthorized",
+    # wp484 g7 (Codex lượt 1 F02) — HỢP với tập của `_do_codex_song` trên master: bản chuyển sang probe
+    # chung đánh rơi `token_invalidated`, nên lỗi ấy thành "rc=1 chung" (không ghi state) và rc=0 kèm
+    # marker + stderr từ chối thì bị báo KHỎE. Dấu hiệu từ chối phải thắng rc lẫn marker.
+    for dau in ("token_revoked", "refresh_token_invalidated", "token_invalidated", "401 unauthorized",
                 "please log in again", "could not be refreshed"):
         if dau in ra.lower():
             return (False, f"credential BỊ TỪ CHỐI ({dau})")
@@ -518,7 +521,7 @@ def cmd_kiem(a) -> int:
     song, vi_sao = _kiem_song(home)
     if not song and vi_sao.startswith("credential BỊ TỪ CHỐI ("):
         # wp484 g7 — cùng lỗi với `_do_codex_song` (P2 thread XMG), đường THỨ HAI reviewer không chỉ.
-        if not helpers["_danh_dau_auth_hong"](home):
+        if not helpers["_danh_dau_auth_hong"](home, raw):   # F03: bản ĐÃ probe, không đọc lại
             vi_sao = (f"KHÔNG ghi được trạng thái chờ snapshot sau khi {vi_sao} — "
                       "CHẶN: sửa CODEX_HOME trước khi thử lại")
     _in(f"kiểm sống  : {vi_sao}")

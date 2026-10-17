@@ -7499,14 +7499,21 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         shutil.copy2(source_hook, hooks / "session-start.sh")
         fakebin = s / "bin"; fakebin.mkdir()
         py = fakebin / "python3"
+        # wp484 g7 (F04): materialize nay chạy SAU bước cài CLI, nên hook còn nhiều `$PY` khác ở cả hai
+        # phía nó. Đo bằng NHẬT KÝ từng lời gọi chứ không bằng mã thoát (hook chạy tiếp tới doctor):
+        # materializer phải có mặt, MỌI lời gọi khác phải thấy môi trường SẠCH.
+        nhat_ky = s / "py.log"
         py.write_text("#!/bin/bash\n"
-                      "if [ \"$1\" = .claude/dev/launcher.py ]; then\n"
-                      "  [ \"$2\" = chuan-bi ] || exit 95\n"
+                      "if [ \"$1\" = .claude/dev/launcher.py ] && [ \"$2\" = chuan-bi ]; then\n"
+                      f"  echo CHUAN_BI >> '{nhat_ky}'\n"
                       f"  exec '{PY}' \"$@\"\n"
                       "fi\n"
-                      "[ -z \"${CODEX_AUTH_JSON:-}\" ] || exit 96\n"
-                      "[ -z \"${TL_CODEX_SNAPSHOT:-}\" ] || exit 96\n"
-                      "echo HOOK-BOUNDARY-OK >&2\nexit 97\n", encoding="utf-8")
+                      "if [ -n \"${CODEX_AUTH_JSON:-}${TL_CODEX_SNAPSHOT:-}\" ]; then\n"
+                      f"  echo \"BAN $1 $2\" >> '{nhat_ky}'; exit 96\n"
+                      "fi\n"
+                      f"echo \"SACH $1 $2\" >> '{nhat_ky}'\n"
+                      "[ \"$1\" = .claude/dev/launcher.py ] && exit 0\n"
+                      f"exec '{PY}' \"$@\"\n", encoding="utf-8")
         py.chmod(0o755)
         home = s / "codex"
         snapshot = '{"tokens":{"refresh_token":"INERT-HOOK"}}'
@@ -7521,7 +7528,12 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
         p = subprocess.run([vo, str(hooks / "session-start.sh")], env=env,
                            capture_output=True, text=True, timeout=30)
-        assert p.returncode == 97 and "HOOK-BOUNDARY-OK" in p.stderr, p.stdout + p.stderr
+        ky = nhat_ky.read_text(encoding="utf-8").splitlines() if nhat_ky.exists() else []
+        bang(ky.count("CHUAN_BI") == 1, f"materializer phải chạy đúng 1 lần: {ky} · {p.stdout[-400:]}")
+        bang(not [x for x in ky if x.startswith("BAN ")], f"lời gọi khác thấy snapshot: {ky}")
+        bang(any(x.startswith("SACH ") for x in ky[ky.index("CHUAN_BI") + 1:]),
+             f"không đo được lời gọi nào SAU materializer: {ky}")
+        bang(p.returncode != 13, f"hook dừng ở 13: {p.stdout[-300:]}")
         assert (home / "auth.json").read_text() == snapshot
         assert "INERT-HOOK" not in p.stdout + p.stderr
 
@@ -7543,7 +7555,9 @@ def r484_g2_bridge_scrub_va_chot_remote():
                                 "CLAUDE_PROJECT_DIR": str(LAUNCHER.parents[2])}):
         with patch.object(bridge.runpy, "run_path", return_value={"chuan_bi_xac_thuc": prepare}), \
              patch.object(bridge, "_ung_vien_bash", return_value=["inert-bash"]), \
+             patch.object(bridge.shutil, "which", return_value="/inert/codex"), \
              patch.object(bridge.subprocess, "run", side_effect=child):
+            # wp484 g7: ca này đo nhánh CÓ codex (materialize trước shell); nhánh vắng codex ở F04.
             assert bridge.main() == 0
             assert calls == ["prepare", "child", "child"]
             calls.clear()
@@ -7656,6 +7670,134 @@ def r484_g7_bo_test_kin_voi_credential_cua_phien():
     bang(r.stdout.strip().splitlines()[-1:] == ["SACH"], f"bộ test thừa hưởng credential phiên: {r.stdout!r}")
 
 
+@ca
+def r484_g7_bridge_vang_codex_hoan_materialize_sau_hook():
+    """F04 (Codex lượt 1): chưa có `codex` thì bridge KHÔNG được chết rc=13 trước hook (hook mới là
+    nơi cài CLI). Hoãn: hook chạy với env SẠCH, rồi materialize nhận snapshot làm tham số."""
+    from unittest.mock import patch
+    bridge = _nap_sach(LAUNCHER.parents[1] / "hooks/session_start.py")
+    calls, nhan = [], []
+    def prepare(**kwargs):
+        calls.append("prepare"); nhan.append(kwargs.get("snapshot"))
+        return [{"ok": True}]
+    def child(args, **kwargs):
+        bang(not any(k.upper() == "CODEX_AUTH_JSON" for k in kwargs["env"]), "shell thấy snapshot thô")
+        calls.append("child")
+        rc = 0 if "--version" in args else rc_hook[0]   # probe bash luôn đạt; chỉ hook mang rc
+        return subprocess.CompletedProcess(args, rc, "inert version", "")
+    rc_hook = [0]
+    with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-HOAN", "CLAUDE_CODE_REMOTE": "true",
+                                "CLAUDE_PROJECT_DIR": str(LAUNCHER.parents[2])}):
+        with patch.object(bridge.runpy, "run_path", return_value={"chuan_bi_xac_thuc": prepare}), \
+             patch.object(bridge, "_ung_vien_bash", return_value=["inert-bash"]), \
+             patch.object(bridge.shutil, "which", return_value=None), \
+             patch.object(bridge.subprocess, "run", side_effect=child):
+            rc = bridge.main()
+            bang(calls == ["child", "child", "prepare"], f"thứ tự sai (phải hook rồi mới materialize): {calls}")
+            bang(rc == 0 and nhan == ["INERT-HOAN"], f"rc={rc}, snapshot nhận={nhan}")
+            bang("CODEX_AUTH_JSON" not in os.environ, "snapshot còn trong os.environ")
+            calls.clear(); nhan.clear(); rc_hook[0] = 7
+            os.environ["CODEX_AUTH_JSON"] = "INERT-HOAN"
+            bang(bridge.main() == 7 and calls == ["child", "child"], f"hook hỏng mà vẫn materialize: {calls}")
+
+
+@ca
+def r484_g7_hook_vang_codex_cai_cli_truoc_materialize():
+    """F04 (Codex lượt 1), phía shell: PATH không có codex ⇒ `npm install` phải chạy TRƯỚC
+    `launcher.py chuan-bi`, và installer không thấy snapshot."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        project = s / "project"; hooks = project / ".claude/hooks"
+        (project / ".claude/dev").mkdir(parents=True); hooks.mkdir()
+        shutil.copy2(LAUNCHER.parents[1] / "hooks/session-start.sh", hooks / "session-start.sh")
+        fakebin = s / "bin"; fakebin.mkdir()
+        ky = s / "ky.log"
+        (fakebin / "npm").write_text(
+            "#!/bin/sh\n"
+            f"if [ -n \"${{CODEX_AUTH_JSON:-}}${{TL_CODEX_SNAPSHOT:-}}\" ]; then echo BAN-NPM >> '{ky}'; fi\n"
+            f"echo \"NPM $*\" >> '{ky}'\nexit 0\n", encoding="utf-8")
+        (fakebin / "python3").write_text(
+            "#!/bin/sh\n"
+            "if [ \"$1\" = .claude/dev/launcher.py ]; then\n"
+            f"  echo \"LAUNCHER $2\" >> '{ky}'; exit 0\n"
+            "fi\n"
+            f"exec '{PY}' \"$@\"\n", encoding="utf-8")
+        for f in fakebin.iterdir():
+            f.chmod(0o755)
+        sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
+                if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
+        env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
+                   CODEX_HOME=str(s / "codex"), CODEX_AUTH_JSON='{"tokens":{}}',
+                   PATH=os.pathsep.join([str(fakebin)] + sach))
+        import runpy
+        vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
+        bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
+        p = subprocess.run([vo, str(hooks / "session-start.sh")], env=env, cwd=project,
+                           capture_output=True, text=True, timeout=120)
+        dong = ky.read_text(encoding="utf-8").splitlines() if ky.exists() else []
+        npm = [i for i, x in enumerate(dong) if x.startswith("NPM install -g @openai/codex")]
+        cb = [i for i, x in enumerate(dong) if x == "LAUNCHER chuan-bi"]
+        bang(npm and cb, f"thiếu bước cài hoặc materialize: {dong} · rc={p.returncode} {p.stdout[-300:]}")
+        bang(npm[0] < cb[0], f"materialize chạy TRƯỚC cài codex: {dong}")
+        bang("BAN-NPM" not in dong, f"installer thấy snapshot: {dong}")
+
+
+@ca
+def r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do():
+    """F01 lối thứ ba (Codex lượt 1): `_ghi_rejected` hỏng trong materializer không được rơi về
+    câu "HỎNG" chung. Giới hạn qua tiến trình là nợ `codex-rejected-state-khong-ghi-duoc`."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    def payload(token, day):
+        return json.dumps({"tokens": {"refresh_token": token},
+                           "last_refresh": f"2026-09-{day:02d}T00:00:00Z"}).encode()
+    with San() as s:
+        home = s / "codex"
+        old = payload("INERT-OLD", 1)
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", old, None)
+        m._probe_snapshot = lambda data: (None, True)
+        def hong(store, identity):
+            raise OSError("INERT read-only state")
+        m._ghi_rejected = hong
+        with patch.dict(os.environ, {"CODEX_HOME": str(home)}):
+            ket = m.chuan_bi_xac_thuc(snapshot=payload("INERT-NEW", 2).decode())[0]
+        bang(not ket["ok"], f"vẫn ok: {ket}")
+        bang("KHÔNG ghi được trạng thái chờ" in ket["cach"], f"lý do bị gộp: {ket['cach']!r}")
+        bang((home / "auth.json").read_bytes() == old, "credential cũ bị đổi")
+
+
+@ca
+def r484_g7_tu_choi_ghi_dung_ban_da_probe():
+    """F03 (Codex lượt 1): probe từ chối A trong lúc tiến trình khác ghi B ⇒ A vào lịch sử,
+    B KHÔNG bị chặn."""
+    import types
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    m.__file__ = str(LAUNCHER)
+    m._co_chan_codex = lambda: None
+    a = json.dumps({"tokens": {"refresh_token": "INERT-A"}}).encode()
+    b = json.dumps({"tokens": {"refresh_token": "INERT-B"}}).encode()
+    with San() as s:
+        home = s / "codex"
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", a, None)
+        def kiem_song(h):
+            with m._KhoCodex(h) as st:
+                st.write("auth.json", b, a)        # tiến trình khác vừa refresh
+            return False, "credential BỊ TỪ CHỐI (INERT)"
+        m.runpy = types.SimpleNamespace(run_path=lambda p: {"_kiem_song": kiem_song})
+        with patch.dict(os.environ, {"CODEX_HOME": str(home)}):
+            ok, ly_do = m._do_codex_song()
+        bang(not ok and ly_do == "credential BỊ TỪ CHỐI (INERT)", f"kết quả sai: {ly_do!r}")
+        with m._KhoCodex(home) as store:
+            rejected, _ = m._doc_rejected(store)
+        bang(m._credential_id(a) in rejected, "bản đã probe (A) không vào lịch sử từ chối")
+        bang(m._credential_id(b) not in rejected, "bản mới (B) bị ghi nhầm là đã từ chối")
+        bang(not m._dang_cho_snapshot(home), "bản mới (B) bị chặn oan")
+
+
 # wp484 g7 — bốn P2 của connector trên #509 (13-10-2026) ở `faaedff`. Mỗi ca có đột biến
 # riêng trong DOT_BIEN; ca đích chết vì `bang`/assert của CHÍNH nó, không vì lỗi vô can.
 
@@ -7696,10 +7838,10 @@ def r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra():
     m.runpy = types.SimpleNamespace(run_path=lambda p: {"_kiem_song": ns["_kiem_song"]})
     from unittest.mock import patch
     with San() as s, patch.dict(os.environ, {"CODEX_HOME": str(s / "codex")}):
-        m._danh_dau_auth_hong = lambda home: True
+        m._danh_dau_auth_hong = lambda home, da_probe=None: True
         ok, ly_do = m._do_codex_song()
         bang(not ok and ly_do == "credential BỊ TỪ CHỐI (INERT)", f"đối chứng sai: {ly_do!r}")
-        m._danh_dau_auth_hong = lambda home: False
+        m._danh_dau_auth_hong = lambda home, da_probe=None: False
         ok, ly_do = m._do_codex_song()
         bang(not ok, "credential bị từ chối mà vẫn ok")
         bang(ly_do.startswith("KHÔNG ghi được trạng thái chờ snapshot"),
@@ -8707,9 +8849,19 @@ DOT_BIEN = [
       '    except ValueError as e:\n        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ'),
      ["r484_g7_credential_status_home_sai_la_chan_khong_traceback"]),
     ("g7_nuot_loi_ghi_trang_thai",
-     ('            if not _danh_dau_auth_hong(home):\n                return False, (f"KHÔNG ghi',
+     ('            if not _danh_dau_auth_hong(home, da_probe):\n                return False, (f"KHÔNG ghi',
       '            if False:\n                return False, (f"KHÔNG ghi'),
      ["r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra"]),
+    ("g7_f03_doc_lai_sau_probe",
+     ('            data = da_probe if da_probe is not None else store.read()',
+      '            data = store.read()'),
+     ["r484_g7_tu_choi_ghi_dung_ban_da_probe"]),
+    ("g7_f01_materializer_gop_loi",
+     ('                        except (OSError, ValueError) as e:\n'
+      '                            result["cach"] = ("CHỜ snapshot mới: auth bị từ chối nhưng KHÔNG',
+      '                        except KeyError as e:\n'
+      '                            result["cach"] = ("CHỜ snapshot mới: auth bị từ chối nhưng KHÔNG'),
+     ["r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do"]),
     ("g7_bo_doc_lai_truoc_replace",
      ('            if self.read(name) != expected:\n'
       '                raise OSError("credential changed before promotion")',

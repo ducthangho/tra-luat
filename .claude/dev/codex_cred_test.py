@@ -434,7 +434,7 @@ def t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra(M):
         that = M._repo_helpers()
         with that["_KhoCodex"](home, create=True) as store:
             store.write("auth.json", _json.dumps({"tokens": {"refresh_token": "INERT"}}).encode(), None)
-        gia = dict(that, _danh_dau_auth_hong=lambda h: False, _dang_cho_snapshot=lambda h: False)
+        gia = dict(that, _danh_dau_auth_hong=lambda h, da_probe=None: False, _dang_cho_snapshot=lambda h: False)
         M._repo_helpers = lambda: gia
         M._kiem_song = lambda h: (False, "credential BỊ TỪ CHỐI (INERT)")
         ra = []
@@ -444,6 +444,42 @@ def t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra(M):
         assert any("KHÔNG ghi được trạng thái chờ snapshot" in x for x in ra), f"lỗi ghi bị nuốt: {ra}"
 
 
+def t17_token_invalidated_la_tu_choi_va_thang_rc0(M):
+    """wp484 g7 (Codex lượt 1 F02) — hồi quy so master: `token_invalidated` phải là TỪ CHỐI, kể cả
+    khi rc=0 và stdout có dấu hiệu sống."""
+    ok, vi_sao = kiem_song_bang_codex_gia(M, rc=1, loi="error: token_invalidated")
+    assert not ok and "TỪ CHỐI (token_invalidated)" in vi_sao, vi_sao
+    ok, vi_sao = kiem_song_bang_codex_gia(M, rc=0, ra=f"{M.DAU_HIEU_SONG}\n", loi="token_invalidated")
+    assert not ok and "TỪ CHỐI" in vi_sao, f"rc0 + marker che mất từ chối: {vi_sao}"
+
+
+def t18_kiem_ghi_dung_ban_da_probe(M):
+    """wp484 g7 (Codex lượt 1 F03) qua `cmd_kiem` thật: probe từ chối A trong lúc B được ghi ⇒
+    A vào lịch sử, B không bị chặn."""
+    import argparse
+    import json as _json
+    with tempfile.TemporaryDirectory(prefix="codex-f03-") as td:
+        home = Path(td) / "codex"
+        h = M._repo_helpers()
+        a = _json.dumps({"tokens": {"refresh_token": "INERT-A"}}).encode()
+        b = _json.dumps({"tokens": {"refresh_token": "INERT-B"}}).encode()
+        with h["_KhoCodex"](home, create=True) as store:
+            store.write("auth.json", a, None)
+        def kiem_song(hm):
+            with h["_KhoCodex"](hm) as st:
+                st.write("auth.json", b, a)
+            return False, "credential BỊ TỪ CHỐI (INERT)"
+        M._kiem_song = kiem_song
+        M._repo_helpers = lambda: h
+        M._in = lambda *x: None
+        M.cmd_kiem(argparse.Namespace(codex_home=str(home), kiem_song=True))
+        with h["_KhoCodex"](home) as store:
+            rejected, _ = h["_doc_rejected"](store)
+        assert h["_credential_id"](a) in rejected, "A không vào lịch sử"
+        assert h["_credential_id"](b) not in rejected, "B bị ghi nhầm"
+        assert not h["_dang_cho_snapshot"](home), "B bị chặn oan"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
@@ -451,7 +487,8 @@ CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
       t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW, t14_probe_khong_ke_thua_snapshot,
-      t15_home_chua_tao_la_KHONG_DO_DUOC, t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra]
+      t15_home_chua_tao_la_KHONG_DO_DUOC, t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra,
+      t17_token_invalidated_la_tu_choi_va_thang_rc0, t18_kiem_ghi_dung_ban_da_probe]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -509,8 +546,12 @@ DOT_BIEN = [
      "t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW"),
     ("t15_bo_nhanh_home_vang", "    if not os.path.lexists(home):\n", "    if False:\n",
      "t15_home_chua_tao_la_KHONG_DO_DUOC"),
-    ("t16_nuot_loi_ghi", '        if not helpers["_danh_dau_auth_hong"](home):', "        if False:",
+    ("t16_nuot_loi_ghi", '        if not helpers["_danh_dau_auth_hong"](home, raw):', "        if False:",
      "t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra"),
+    ("t17_bo_token_invalidated", '"refresh_token_invalidated", "token_invalidated", "401 unauthorized",',
+     '"refresh_token_invalidated", "401 unauthorized",', "t17_token_invalidated_la_tu_choi_va_thang_rc0"),
+    ("t18_doc_lai_sau_probe", 'helpers["_danh_dau_auth_hong"](home, raw)', 'helpers["_danh_dau_auth_hong"](home)',
+     "t18_kiem_ghi_dung_ban_da_probe"),
 ]
 
 

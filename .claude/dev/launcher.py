@@ -2907,10 +2907,16 @@ def _ghi_rejected(store, identity):
     store.write("credential-recovery.json", data, raw)
 
 
-def _danh_dau_auth_hong(home: Path) -> bool:
+def _danh_dau_auth_hong(home: Path, da_probe: bytes | None = None) -> bool:
+    """Ghi danh tính credential ĐÃ BỊ TỪ CHỐI vào state.
+
+    wp484 g7 (cross-review Codex lượt 1 F03) — bản trước ĐỌC LẠI `auth.json` sau probe rồi ghi
+    danh tính của bản ĐANG có. Tiến trình khác refresh giữa chừng (A bị từ chối, B vừa ghi)
+    thì B — chưa từng bị thử — bị chặn, còn A không vào lịch sử. Người gọi có bytes đã probe
+    thì truyền vào `da_probe`; `_dang_cho_snapshot` so với bản đang có nên B vẫn đi tiếp."""
     try:
         with _KhoCodex(home) as store:
-            data = store.read()
+            data = da_probe if da_probe is not None else store.read()
             if data is None:
                 return False
             _ghi_rejected(store, _credential_id(data))
@@ -3012,7 +3018,15 @@ def chuan_bi_xac_thuc(that_su: bool = True, snapshot=None) -> list[dict]:
                 candidate, rejected_auth = _probe_snapshot(data)
                 if candidate is None:
                     if rejected_auth:
-                        _ghi_rejected(store, identity)
+                        # wp484 g7 (Codex lượt 1 F01, lối thứ ba) — lỗi ghi state từng rơi xuống câu
+                        # "HỎNG" chung. Không nhớ hộ được qua tiến trình (nợ chủ kho chấp nhận:
+                        # `codex-rejected-state-khong-ghi-duoc`), nhưng phải nói ĐÚNG lý do.
+                        try:
+                            _ghi_rejected(store, identity)
+                        except (OSError, ValueError) as e:
+                            result["cach"] = ("CHỜ snapshot mới: auth bị từ chối nhưng KHÔNG ghi được "
+                                              f"trạng thái chờ ({type(e).__name__}) — CHẶN; giữ credential cũ")
+                            return [result]
                     result["cach"] = ("CHỜ snapshot mới: auth bị từ chối; giữ nguyên credential cũ" if rejected_auth
                                        else "CHƯA ĐO ĐƯỢC probe; giữ nguyên credential cũ, chưa kết luận auth hỏng")
                     return [result]
@@ -3189,12 +3203,17 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bo
         probe.__globals__["HAN_KIEM_SONG_GIAY"] = han_giay
         if duong_dan:
             probe.__globals__["_co_codex"] = lambda: duong_dan
+        try:   # F03: danh tính của ĐÚNG bản sắp được probe; đọc không được thì như cũ
+            with _KhoCodex(home) as store:
+                da_probe = store.read()
+        except (OSError, ValueError):
+            da_probe = None
         ok, reason = probe(home)
         if not ok and reason.startswith("credential BỊ TỪ CHỐI ("):
             # wp484 g7 (P2 #509 thread XMG) — kết quả ghi trạng thái từng bị NUỐT: không lưu được
             # thì lần gọi sau lại thử đúng credential đã biết là hỏng mà không ai hay. Không ghi
             # được thì không có cách nào nhớ hộ; tối thiểu phải nói ra, và lý do phải khác hẳn.
-            if not _danh_dau_auth_hong(home):
+            if not _danh_dau_auth_hong(home, da_probe):
                 return False, (f"KHÔNG ghi được trạng thái chờ snapshot sau khi {reason} — "
                                "CHẶN: sửa CODEX_HOME (quyền/dung lượng) trước khi thử lại")
         return ok, reason

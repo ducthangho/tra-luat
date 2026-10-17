@@ -83,18 +83,10 @@ else
   exit 1
 fi
 
-# Only the trusted repository materializer receives the raw snapshot.
-if [ "$CODEX_AUTH_CO" = 1 ]; then
-  MA_AUTH=0
-  CODEX_AUTH_JSON="$TL_CODEX_SNAPSHOT" "$PY" .claude/dev/launcher.py chuan-bi || MA_AUTH=$?
-  unset TL_CODEX_SNAPSHOT
-  if [ "$MA_AUTH" != 0 ]; then
-    echo "[session-start] CHO snapshot Codex moi; dung truoc cac probe"
-    exit 13
-  fi
-else
-  unset TL_CODEX_SNAPSHOT
-fi
+# wp484 g7 (Codex lượt 1 F04): khối materialize snapshot đã DỜI xuống ngay SAU bước cài CLI agent.
+# Snapshot mới cần probe bằng `codex` thật; đặt ở đây thì máy chưa có `codex` chết rc=13 TRƯỚC
+# `npm install` và không bao giờ tự phục hồi được. `TL_CODEX_SNAPSHOT` là biến shell KHÔNG export
+# nên installer và mọi lệnh ở giữa không thấy nó.
 
 # CÓ MẶT ≠ CHẠY ĐƯỢC. `command -v` chỉ chứng minh có đường dẫn: audit dựng hai tệp
 # RỖNG tên git.exe/python.exe mà doctor vẫn báo xanh, và trên Windows `rg.exe` nằm
@@ -166,6 +158,20 @@ if co npm; then
   fi
 else
   echo "[session-start] CANH BAO: khong co npm — bo qua phan CLI agent"
+fi
+
+# Only the trusted repository materializer receives the raw snapshot — chạy SAU khi đã cố cài
+# `codex` (F04) nhưng vẫn TRƯỚC mọi probe credential phía dưới.
+if [ "$CODEX_AUTH_CO" = 1 ]; then
+  MA_AUTH=0
+  CODEX_AUTH_JSON="$TL_CODEX_SNAPSHOT" "$PY" .claude/dev/launcher.py chuan-bi || MA_AUTH=$?
+  unset TL_CODEX_SNAPSHOT
+  if [ "$MA_AUTH" != 0 ]; then
+    echo "[session-start] CHO snapshot Codex moi; dung truoc cac probe"
+    exit 13
+  fi
+else
+  unset TL_CODEX_SNAPSHOT
 fi
 
 # --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì

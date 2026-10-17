@@ -14,7 +14,9 @@ Executor **đẩy nhánh code của packet đúng một lần**, khi ứng viên
 
 - `python scripts/tl.py --selftest` ⇒ `N/N` với hai số bằng nhau;
 - các cổng mà đặc tả packet liệt kê (vd `adr-song`, `doctrine-scan`, `release-verify --strict`, `git diff --check`);
-- review khác nền đã approve trên chính SHA ấy (mục 2).
+- review đã approve trên chính SHA ấy, với đúng assurance mà Review Class và đặc tả packet đòi theo §8 của
+  protocol (mục 2). ADR này **không** nâng yêu cầu assurance: packet được phép `same_provider_approved` hay
+  `human_audited` theo §8 vẫn được phép như cũ.
 
 Lý do đo được: packet #782 đẩy lần đầu sau ba cổng tài liệu xanh nhưng **không** chạy selftest, và CI đỏ
 `1730/1731` ở ca `r291_docs_ngoai_goi` (run `38945289558`). Một lần đẩy hỏng kéo theo revision đặc tả, lease
@@ -41,6 +43,20 @@ Bốn ca, mỗi ca một câu trả lời:
 Vì nhánh code chưa đẩy trong lúc vá, mọi vòng review chạy **offline** trên bundle/mirror dựng từ commit cục bộ
 (cơ chế đã có ở §8 của protocol), neo SHA commit cục bộ. Verdict nêu SHA ấy và `spec_sha256` của đặc tả. Lần
 đẩy duy nhất đẩy **đúng** SHA đã được approve, nên điều kiện *"exact SHA"* vẫn đúng mà không phải review lại.
+
+**Ánh xạ các bước protocol vốn giả định đã có PR.** Với packet áp ADR này, trước lần đẩy chưa có nhánh từ xa
+và chưa có PR. Bốn chỗ của protocol đọc như sau, và mỗi chỗ có con trỏ về đây:
+
+| chỗ trong protocol | đọc trước lần đẩy |
+|---|---|
+| §7: handoff/evidence lên Packet Issue **và PR** | chỉ lên Packet Issue |
+| §7: reconciler đọc lại **PR head** rồi so các trường | đọc SHA ứng viên cục bộ ghi trong handoff và bundle; so đủ các trường như cũ (spec hash, generation, lease, `head_sha`, `tested_sha`, changed paths, gate policy) |
+| §13 `work-packet`: worker gate → **PR** → handoff | worker gate → handoff → review → đẩy → PR |
+| §13 `cross-review`: trigger khi **PR** vào `reviewing`; hoàn tất khi verdict ghi **vào PR** | trigger khi Packet vào `reviewing` với SHA ứng viên; verdict ghi vào biên nhận và Packet Issue, chép sang PR sau lần đẩy |
+
+Không bước nào bị bỏ: mỏ neo đổi từ PR head sang SHA ứng viên, mọi phép so giữ nguyên. Executor vẫn không tự
+tạo review có thẩm quyền. Sau lần đẩy, PR head phải **bằng** SHA đã được approve; khác SHA thì verdict cũ hết
+hiệu lực như quy tắc commit mới của §7.
 
 Connector review trên PR GitHub chạy sau lần đẩy. Nó **không** mở vòng vá tự động: nếu nó báo P0/P1/P2 trên
 head đã đẩy, executor DỪNG và đưa checkpoint cho chủ kho kèm phép đo. Đẩy thêm để vá finding ấy là quyết định
@@ -85,7 +101,7 @@ canh bằng kỷ luật đọc và bằng biên nhận. Cùng họ nợ `SO-CANO
 ## Protocol trỏ, không chép
 
 `docs/PROTOCOL_DA_PHIEN.md` sửa ba dòng class của bảng ngưỡng §8, câu reviewer ở §8, thêm một câu vào §8.3, một
-con trỏ ở §12 và dòng §20. Con số và cụm luật (một lần, hai vòng) chỉ ở **tệp này**.
+con trỏ ở §12, bốn con trỏ ánh xạ ở §7 và §13, và dòng §20. Con số và cụm luật (một lần, hai vòng) chỉ ở **tệp này**.
 
 ADR này **không** sửa `ADR-0037`, `ADR-0038`, `ADR-0041`, `ADR-0048`, `ADR-0052`, `ADR-0053` hay đặc tả đóng
 băng nào.

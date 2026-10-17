@@ -475,7 +475,8 @@ successors:
     acceptance_criteria: []
 ```
 
-Executor đăng handoff/evidence lên Packet Issue và PR trước khi state rời `running`. Test evidence phải có lệnh,
+Executor đăng handoff/evidence lên Packet Issue và PR trước khi state rời `running` (packet áp `ADR-0054`: chưa có
+PR trước lần đẩy, nên chỉ Packet Issue; xem ánh xạ ở ADR ấy). Test evidence phải có lệnh,
 rc đọc trực tiếp và bằng chứng dương (`N/N`, `ok=true`, số file/hash...), không chỉ “passed”. `changed_paths` phải
 khớp diff của exact `head_sha`; `tested_sha` phải bằng head được đề nghị review; test không chạy phải ghi
 `not_run` cùng lý do. Selector evidence phải ghi tier, policy/catalog identity, nhóm đã chọn và lý do fallback;
@@ -592,7 +593,7 @@ Packet cloud hợp lệ chạy ngay; packet local tự chạy khi host lên. H�
 `blocked`, quyền LIVE hoặc land/deploy.
 
 Với handoff Executor `status: done` HOẶC tổ hợp `status: needs_followup` VÀ `next_role: reviewer`, reconciler phải
-đọc lại PR head và so đồng thời mission revision, Packet revision/spec hash, generation, lease, `head_sha`,
+đọc lại PR head (packet áp `ADR-0054`, trước lần đẩy: SHA ứng viên cục bộ trong handoff và bundle) và so đồng thời mission revision, Packet revision/spec hash, generation, lease, `head_sha`,
 `tested_sha`, changed paths và gate policy. Chỉ khi tất cả khớp,
 nó mới ghi transition `running → reviewing` idempotent rồi dispatch một Reviewer mới, context/worktree độc lập và
 read-only mặc định. Executor không tự tạo review có thẩm quyền; nếu chưa có automation, nó chỉ xuất prompt thủ
@@ -1159,17 +1160,19 @@ thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không ch
 ### `work-packet` — model-invoked
 
 Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree →
-heartbeat → chỉ sửa effective write set → worker gate → PR → handoff. Hoàn tất khi handoff hợp lệ đã được dispatcher nhận.
+heartbeat → chỉ sửa effective write set → worker gate → PR → handoff (packet áp `ADR-0054`: worker gate → handoff →
+review → đẩy → PR, theo ánh xạ ở ADR ấy). Hoàn tất khi handoff hợp lệ đã được dispatcher nhận.
 Skill từ chối làm việc nếu lease/generation/spec hash sai, cần LIVE, closure thiếu hoặc security path chưa duyệt.
 Adapter chỉ trỏ các mục protocol và mô tả cú pháp/công cụ riêng của nền; không sao chép schema, stop condition hay
 completion criteria. Phiên `work-packet` không chuyển vai sang reviewer hoặc land trong cùng run.
 
 ### `cross-review` — model-invoked
 
-Trigger khi PR vào `reviewing`. Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`;
+Trigger khi PR vào `reviewing` (packet áp `ADR-0054`: khi Packet vào `reviewing` với SHA ứng viên cục bộ). Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`;
 không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Finding nên kèm
 *bằng chứng chạy được* và patch-as-hint (nếu dùng) phải theo đúng ràng buộc §8 — đính dạng artifact, không push
-ref. Hoàn tất khi verdict đã ghi vào PR và state nhận đúng review assurance.
+ref. Hoàn tất khi verdict đã ghi vào PR và state nhận đúng review assurance (packet áp `ADR-0054`: ghi vào biên nhận
+và Packet Issue trước lần đẩy, chép sang PR sau đó).
 Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
 assurance theo §8 khi evidence đủ, không tự nhận `same_provider_approved` chỉ từ cấu hình
 cùng provider và không giả thành cross-provider.

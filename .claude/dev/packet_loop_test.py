@@ -5593,7 +5593,7 @@ MUTANTS.update({
     "pl_m4_tran_moi_bang": ("if a.tran_moi <= st[t]", "if a.tran_moi < st[t]", ["pl_m4_nang_tran"]),
     "pl_m4_can_cu_long": ("#issuecomment-[0-9]+$", "(#issuecomment-[0-9]+)?$", ["pl_m4_nang_tran"]),
     "pl_m5_mo_khong_can_nang": ('] > st[TRUC_TRAN[st["truc"]][0]]', "] >= 0", ["pl_m5_rescue"]),
-    "pl_f12_bo_so_nang": ('] and any(type(n) is dict and n.get("truc") == st["truc"]', '] and True or any(type(n) is dict and n.get("truc") == st["truc"]', ["pl_m5_rescue"]),
+    "pl_f12_bo_so_nang": (' and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[TRUC_TRAN[st["truc"]][1]] for n in st["nang_tran"])', "", ["pl_m5_rescue"]),
     "pl_m5_quyet_dinh_khac_mo": ('mo = (nang := a.quyet_dinh == "nang_tran") and', 'mo = not (nang := a.quyet_dinh == "nang_tran") or', ["pl_m5_rescue"]),
     "pl_m5_bo_kiem_ly_do": (' or st.get("ly_do") != "rescue_required":', ":", ["pl_m5_rescue"]),
     "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),

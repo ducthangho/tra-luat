@@ -35,13 +35,15 @@ do workflow đăng, connector, CI và quyết định merge của chủ kho. M�
 | # | bất biến |
 |---|---|
 | I1 | Chuyển trạng thái **mở thêm quyền** (vào `approved_pending`, vào `accepted`, rời `cho_chu_kho`, tạo generation, ghi một lần đẩy) có ít nhất một đầu vào hạng Đ hoặc H; hạng R chỉ bổ sung. |
-| I2 | Thẩm quyền lease đo bằng **người giữ**: `ops/lease_publish.py ai-dang-giu` (sau fetch đủ ref theo CLAUDE.md) trả lease ấy là người giữ write set của packet. Không tự đặt thêm dấu "đã đăng" nào. |
-| I3 | Mọi vị từ trên tập là **đóng**: tập rỗng ⇒ không đạt; giá trị ngoài miền liệt kê (hạng ngoài {`P0`,`P1`,`P2`,`P3`}, kết luận check ngoài danh sách cho phép) ⇒ không đạt. |
+| I2 | Lease có thẩm quyền khi đủ ba: (H) qua `ops/lease_publish.py check`; (Đ) `ai-dang-giu` sau fetch đủ ref theo CLAUDE.md trả nó là người giữ write set; (R, bổ sung) readback comment của `github-actions[bot]` trên Packet Issue chứa đúng `lease_id` — tức workflow đã **đăng**. Thiếu một ⇒ không có thẩm quyền. |
+| I3 | Miền giá trị **đóng**: giá trị ngoài miền liệt kê (hạng ngoài {`P0`,`P1`,`P2`,`P3`}, kết luận check ngoài danh sách cho phép) ⇒ không đạt. Tập **bằng chứng dương** (check bắt buộc, finding dùng để mở lại) rỗng ⇒ không đạt; tập **finding còn mở** được phép rỗng (đó là kết quả sạch). |
 | I4 | Lỗi **đầu vào** ⇒ từ chối, state giữ nguyên từng byte. Kết quả **hợp lệ** chạm điều kiện dừng ⇒ ghi sổ đủ rồi `blocked`. |
-| I5 | Một hàm xét dừng duy nhất, gọi ở mọi cửa **đưa packet đi tiếp**; cửa **khép** công việc (ghi kết quả lượt đang mở) không bị nó chặn. |
+| I5 | Một hàm xét dừng duy nhất (`_xet_dung`, do **#812** viết), gọi ở mọi cửa **đưa packet đi tiếp** mà packet hiện hành mở hoặc sửa; cửa **khép** công việc (ghi kết quả lượt đang mở) không bị nó chặn. Packet sau thêm cửa mới thì gọi đúng hàm ấy. |
 | I6 | Mọi quyền phái sinh (mở lại, checkpoint, ngoại lệ đẩy) neo `(nguyên nhân, generation, sha)`, bị thay khi có sự kiện cùng loại mới hơn, và mất sau khi dùng. |
-| I7 | Readback GitHub neo **một kho + một PR + một head**, và "đủ trang" đo bằng **tập ID phân biệt**, không bằng số đếm. Không so chéo hai không gian ID, không so đồng hồ máy với đồng hồ GitHub. |
+| I7 | Check bắt buộc định danh bằng **(app, workflow, tên job)** và chỉ lấy attempt mới nhất của run mới nhất trên head (dùng `kiem-gate` sau khi #788 land, đúng protocol §10.2). Readback GitHub neo **một kho + một PR + một head**, và "đủ trang" đo bằng **tập ID phân biệt**, không bằng số đếm. Không so chéo hai không gian ID, không so đồng hồ máy với đồng hồ GitHub. |
 | I8 | So danh tính lease ↔ biên nhận qua đúng hàm chuẩn hoá của `ops/bien_nhan_v2.py`; giá trị không ánh xạ được ⇒ không đạt. |
+| I10 | Mọi biên nhận/hiện vật dùng ở một cửa phải khớp **(packet, generation, sha, spec_hash)** của state tại cửa ấy; hiện vật đúng lược đồ mà lệch một trong bốn ⇒ không đạt. |
+| I11 | **Phân lớp là việc của reviewer.** Mọi finding đi vào bộ đếm (offline, connector, muộn) mang slug lấy từ bảng lớp trong biên nhận hạng H (I10); executor không tự đặt slug. Slug ổn định xuyên ID, nguồn và generation; đổi phải qua bảng nối có lý do trong biên nhận. |
 | I9 | Packet không chịu `ADR-0054` đi đường cũ **y như trước**; mọi ca có sẵn của `packet_loop_test.py` vẫn ĐẠT. |
 
 ## Điều kiện dừng và đẩy (mọi packet con)

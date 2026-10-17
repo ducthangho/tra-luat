@@ -1,0 +1,14 @@
+025d6cca24c5f77eb39bc778248e6739445fc259a297a7b919c82658de913073  ./ai-dang-giu-sau-ghi-so/RELEASE_MANIFEST.json.txt
+fd34d1dbc380ecf387ec3b6f34460f97bbbd1554c7f5748b113d2b51282f85d7  ./ai-dang-giu-sau-ghi-so/do-ref.txt
+8f07c0f8aa3f8e8f57ae4c37c6c7ec424184534482f84c223fadf3b68831d95c  ./ai-dang-giu-sau-ghi-so/docs_PROTOCOL_DA_PHIEN.md.txt
+b91c6a5c00a4ae45960e7627c2267b7fafb416ea4c24d80c8d9bec3f03f72ca3  ./ai-dang-giu-sau-ghi-so/docs_adr_0052-tran-loi-goi-codex-len-tam.md.txt
+cc2883c8c4f4fd0b804a5f11fbd164882157882308947e0ba8e24e1b2c9ed9b4  ./ai-dang-giu-sau-ghi-so/docs_adr_0053-tran-kich-thuoc-sensitive-len-sau-tep.md.txt
+c649270d70c506f8f73772de5cc27ac38b854c58221e7c231ea40c39d637dc3a  ./ai-dang-giu-sau-ghi-so/docs_adr_0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md.txt
+6fbf58a60d61f6517ea25ad4549e9e30bdcecacb1195c80429dc764b0aba2fc0  ./ai-dang-giu-sau-ghi-so/scripts_tl_selftest.py.txt
+e5e68ce0f454260d52ff58db990265a9b461496f9410a34c20cbcfdf782b6b71  ./readback-check-runs-1b375db.json
+2459953a8d98e527e4a201df5028208d0f9ae69abff972dd8632e3d720f45064  ./readback-comments-793.json
+6fdf2f2789db817972d6d3cc6c4589b4c4f343bb72bca86eae96deca2f5651bf  ./readback-jobs-39030380292.json
+9bfffe5d095f636983fd95c2b3e3678514e77e80b9cf773263cbe48c6f4e02da  ./readback-pr-785.json
+cbdfaf966f37da667639e9558d1378bc2f27672849efd82355210820dc097684  ./readback-pr-793.json
+4a46d4035d4264aafc81523e60893adff17819296eaeddf32da14fbea20017f1  ./readback-reviews-793.json
+561bd32ac3377201ba8e71952b0df07824943269e7ade7c1c38272f429a4994e  ./readback-run-39030380292.json

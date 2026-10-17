@@ -1,0 +1,100 @@
+# HO SO LAND — packet #782 wp782 r5 (lease g5b), ma qua PR #791; dac ta qua PR #783. Khuon: ops/land/pr772-wp766-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (8ab1007). `landed: false` — chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge bang
+# merge commit (tien le #678 / #722 / #765 / #772). "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do trong phien ghi so (lenh/tep ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua
+# luot review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr791-wp782-provenance/. Moi phep do REST: `gh api <duong dan>` (GET) qua proxy phien.
+
+schema_version: 1
+mission_id: gh-782
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01XaeBSkW4R49AEWj6x4uqff
+input_packet_generations:
+  - {packet_issue: 782, packet_id: wp782, revision: 5, generation: 5, lease_id: wp782-r5-g5b-claude-20261017}
+authorized_head_sha: 1bcbaa0b564612b3072c7c6e8e884e18782a0745
+authorized_head_tree: 465b8789a3baad98fc633343452e01699c5ede27
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/791
+land_operator: 'ducthangho (chu kho tu merge; readback-pr-791.json merged_by ducthangho). Phien nay KHONG merge.'
+merge_method: merge
+merge_commit: 8ab100793df9831505f495543a74044b91c2c9ab
+merge_commit_tree: 26d00fcb964bbaa65a7f4198514c343e2cde5853
+merge_commit_parents: [25cda362afbdf18358b4808ce4fff37d79cb26fb, 1bcbaa0b564612b3072c7c6e8e884e18782a0745]
+pre_merge_checks:
+  - {name: 'gate, gate-packet-loop, gate-ops, gate-cong-cu (0-7), gate-cong-cu-gop, chuan-bi (ubuntu-latest)', sha: 1bcbaa0b564612b3072c7c6e8e884e18782a0745, conclusion: success, nguon: readback-check-runs-1bcbaa0.json}
+  - {name: gate-registry (ubuntu-latest), sha: 1bcbaa0b564612b3072c7c6e8e884e18782a0745, conclusion: success, ghi_chu: 'luot dau het gio 5400s (comment 6229200757, run 38993247614); chay lai job hong MOT lan theo quy tac flake -> xanh 05:01:45Z', nguon: readback-check-runs-1bcbaa0.json}
+  - {name: 'Codex connector review', sha: 1bcbaa0b564612b3072c7c6e8e884e18782a0745, conclusion: 'completed, has_any_findings false', luc: '2026-10-17T02:06:31Z (comment 6227623222 updated_at; receipt 6228301734 "Didn''t find any major issues")', nguon: readback-comments-791.json}
+post_merge_checks:
+  - {name: gate (ci.yml, push master), run_id: 39014797353, sha: 8ab100793df9831505f495543a74044b91c2c9ab, conclusion: success, ghi_chu: 'gom release-verify strict (lane LAND); gate-registry xanh 09:35:32Z', nguon: [readback-run-39014797353.json, readback-jobs-39014797353.json]}
+  - {name: 'launcher (Windows that)', conclusion: not_measured, ly_do: 'khong co luot tren 8ab1007 — PR khong cham .claude/dev/**, workflow khong ban'}
+pre_merge_checks_thu_tu_thoi_gian: >-
+  measured — merged_at 2026-10-17T07:45:02Z; check-run muon nhat tren 1bcbaa0 completed_at 05:01:45Z (gate-registry);
+  connector updated_at 02:06:31Z. Lenh tai kiem (offline, tu thu muc provenance): python3 -c 'import json;m="2026-10-17T07:45:02Z";c=json.load(open("readback-check-runs-1bcbaa0.json"))["check_runs"];print(all(r["completed_at"]<m for r in c if r["completed_at"]))' — mong True.
+bookkeeping:
+  - {item: 'lease wp782-r5-g5b mang da_bi_thay_the -> wp784-r2-g2-claude-20261017 (bia mo hai chieu, thu hoi som)', commit: 0da21d4, nhanh: ops/cap-lease-782}
+  - {item: 'chuoi lease cu tran-codex-va-sensitive r1/r2, wp782 r3/r4/r5-g5 deu da mang da_bi_thay_the', nguon: 'ai-dang-giu ben duoi'}
+  - {item: 'nghiem thu nha lease ai-dang-giu', nguon: '../pr793-wp784-provenance/ai-dang-giu-sau-ghi-so/ (do chung cho hai packet vi write set giao nhau)'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-782-784-land}
+# ---- het truong chuan
+packet_id: wp782
+packet_issue: 782
+generation: 5
+generation_nghia: 'Lan land THU NHAT cua ma packet #782; lease g5b (g5 doi ten nhanh/ban sao, cung revision 5).'
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_01XaeBSkW4R49AEWj6x4uqff — phien dieu phoi; cung la executor cua wp782 (lease g5b
+  recorder_is_executor true). KHONG la nguoi merge: chu kho merge, bao trong phien "Đã merge #783 và #791".
+
+spec:
+  path: ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md
+  sha256: 0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da
+  blob: aebf20085f5f8bd938026d6ee94179e445f14f61
+  vao_master_qua: 'PR #783 (merge 25cda36, merged_at 2026-10-17T07:44:48Z, head c3fde8a) — readback-pr-783.json'
+  nguon: 'measured — sha256sum tren master 7cc384e = spec_sha256_required cua lease g5b.'
+lease:
+  lease_id: wp782-r5-g5b-claude-20261017
+  path: ops/leases/wp782-r5-g5b-claude-20261017.yaml
+  nhanh: ops/cap-lease-782
+  cap_boi: 'loi_khai_co_neo — granted_by ducthangho, leased_at 2026-10-17T02:00:00Z (truong lease).'
+  thu_hoi: >-
+    bia mo hai chieu: wp784-r2-g2 khai thay_the_cho g5b; g5b mang da_bi_thay_the (commit 0da21d4). Lease con han
+    (2026-10-18T17:00Z) nen bia mo la co che thu hoi dung (CLAUDE.md "LEASE KHONG TU CHET KHI PACKET DA LAND").
+  write_set: ['docs/adr/0052-tran-loi-goi-codex-len-tam.md', 'docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md', 'docs/PROTOCOL_DA_PHIEN.md', 'scripts/tl_selftest.py', 'RELEASE_MANIFEST.json']
+  nghiem_thu_nha: >-
+    measured — sau fetch +refs/heads/* (ls-remote 583 = for-each-ref 583, thieu 0) va master cuc bo = origin/master:
+    `ai-dang-giu` cho 0052/0053/PROTOCOL rc=0 "NGƯỜI_GIỮ 0"; moi lease wp782 ra CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ.
+    tl_selftest.py / RELEASE_MANIFEST.json: NGƯỜI_GIỮ 1 = wp794-r1-g1-claude-20261017 (packet MOI, dung ky vong).
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-791.json: merged true, merged_at 2026-10-17T07:45:02Z, merge_commit_sha 8ab1007, merged_by ducthangho.'
+  landed: false
+  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1). Gate push master tren 8ab1007 da XANH.'
+
+uy_quyen_land:
+  neo: 'chu kho tu merge PR #791 (merged_by ducthangho) va bao trong phien session_01XaeBSkW4R49AEWj6x4uqff.'
+  candidate_sha: 1bcbaa0b564612b3072c7c6e8e884e18782a0745
+
+dieu_kien_truoc_merge:
+  head_khong_doi: 'measured — readback-pr-791.json head.sha 1bcbaa0 = cha thu hai cua 8ab1007.'
+  base_troi: >-
+    measured — PR mo tren base 653fef3; cha thu nhat cua merge la 25cda36 (#783 merge 13s truoc, chi them dac ta).
+    Tree merge 26d00fc khac tree head 465b878 vi kem tep dac ta cua #783; gate push master 39014797353 xanh tren tree ay.
+  windows: 'Khong doi luot Windows (PR docs/ops, khong cham .claude/dev/**).'
+
+review:
+  codex_cli: 'thuat_lai — cac luot Codex CLI offline r1-r5 (comment PR #791/#782); bien nhan v2 KHONG nam trong ops/reviews/ (khong_do_duoc).'
+  codex_connector: 'measured — completed, khong finding, tren 1bcbaa0 (pre_merge_checks).'
+
+khong_do_duoc:
+  - 'Log day du cac job CI KHONG luu; ket luan job doc tu readback-jobs-*.json.'
+  - 'Bien nhan v2 cho cac luot Codex CLI cua wp782 chua duoc ghi vao ops/reviews/; ghi la no, khong chan land.'

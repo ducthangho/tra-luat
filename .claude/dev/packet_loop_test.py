@@ -5582,7 +5582,7 @@ MUTANTS.update({
     "pl_m2_bo_so_head": ('    if a.head != st["reviewing_head_sha"]:\n', "    if False:\n", ["pl_m2_loi_goi"]),
     "pl_m2_bo_kiem_trung": (' or any(g["run_id"]', ' or False and any(g["run_id"]', ["pl_m2_loi_goi"]),
     "pl_m3_codex_call_tuy_chon": ("    if _la_codex(st):\n", "    if _la_codex(st) and a.codex_call:\n", ["pl_m3_neo_loi_goi"]),
-    "pl_m3_bo_co_da_dung": ('        goi["da_dung"] = True\n', "        pass\n", ["pl_m3_neo_loi_goi"]),
+    "pl_m3_bo_co_da_dung": ('        if goi["da_dung"]:\n', "        if False:\n", ["pl_m3_neo_loi_goi"]),
     "pl_m3_bo_so_head_loi_goi": ('        if goi["head"] != a.reviewed_sha:\n', "        if False:\n", ["pl_m3_neo_loi_goi"]),
     "pl_m3_kich_ca_khi_approve": ('    if a.verdict != "approve":', "    if True:", ["pl_m3_vong", "pl_m3_codex"]),
     "pl_m3_bo_truc_vong": (_PL_VONG, _PL_VONG.replace("in r", "in [*r").replace("())", "())][:1]"), ["pl_m3_vong"]),

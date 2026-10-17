@@ -1,0 +1,60 @@
+{
+  "version": "1.5.0",
+  "run_id": "7897dde1110c4c9f9d7340a53fe04e3f",
+  "short_id": "7897dde1",
+  "ten": "wp484-g7-review-2",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "38201dfe8e42eabc"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-17T02:38:05.563122+00:00",
+  "ket_thuc_utc": "2026-10-17T02:49:41.168501+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 5032,
+  "khoa_danh_tinh": "linux:314334",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792b",
+  "head": "b355ff8b3d081c8b64ce803f53a4a09216411a29",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "6bdea5f0edf9197d0579021685a1595d4e2d9309663a22b7ed0d9ed7688d04d0",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "13900f9b1066dfacf28be46d48d2c6b4696fc012e9b418ce6a7a6eeee6e0e073",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792b-out/runs/7897dde1/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown",
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 695.605,
+  "stdout_byte": 330,
+  "stdout_sha256": "94773f89159b9abc0ccd34786459d259734cb165c81309f2cb189bd93d28ae5f",
+  "stderr_byte": 938090,
+  "stderr_sha256": "1ac32397fba8432ea5702f7e37af1fa060b75f637081a07070b0a5068f695a4d"
+}

@@ -1,0 +1,60 @@
+{
+  "version": "1.5.0",
+  "run_id": "d43857560ae340c69ad7f9d09618af35",
+  "short_id": "d4385756",
+  "ten": "wp484-g7-review-1",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "5812112251b5a12c"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-17T02:05:09.467922+00:00",
+  "ket_thuc_utc": "2026-10-17T02:17:20.645471+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 11354,
+  "khoa_danh_tinh": "linux:116725",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792",
+  "head": "99e79b107d4fd138dcd3e5ad51851a846fac9eb5",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "2012efd839919734745deb745008be70e722bed2635bd12e1c0c4ca9a4416cfc",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "726e201337da2fd009174d3fc7d9edaef7e85c02a3d9a99b76ece353afdb4ff9",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792-out/runs/d4385756/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown",
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 731.178,
+  "stdout_byte": 171,
+  "stdout_sha256": "1c337dd3149b89241323d0b01222dc1a1c3d5e00c837ead47dd74148b80df8d0",
+  "stderr_byte": 1067927,
+  "stderr_sha256": "55c3143f44bc1fd2b3e833965fac064df1acd20efab576a38efe81e4a8263c79"
+}

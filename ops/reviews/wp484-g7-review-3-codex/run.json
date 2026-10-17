@@ -1,0 +1,60 @@
+{
+  "version": "1.5.0",
+  "run_id": "47cf857eaef34a8b975f3f5d8f1304a7",
+  "short_id": "47cf857e",
+  "ten": "wp484-g7-review-3",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "74d7bb5e809bf155"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-17T03:11:15.662402+00:00",
+  "ket_thuc_utc": "2026-10-17T03:21:18.236407+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 13957,
+  "khoa_danh_tinh": "linux:59678",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792c",
+  "head": "cfd3550b6336eecb6847543a5f33200b57dd81ba",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "4972f88598576b21d4305c7a76a99feb7c5f84449ec0576b8efbf8e4382f5c63",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "ab4122d0d75de532f823d04e8064265831942bb2a44a42001bcad9aa99667065",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792c-out/runs/47cf857e/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown",
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 602.574,
+  "stdout_byte": 270,
+  "stdout_sha256": "a513818b2847249b27f6e125b2df6491314e2cc7fe129f578adc26b4a42a07c2",
+  "stderr_byte": 617185,
+  "stderr_sha256": "19d24e843b898c7bba916d53c140062a25cb7a0dd253f48537f59b9054a276b1"
+}

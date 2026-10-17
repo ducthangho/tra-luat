@@ -91,10 +91,15 @@ thẳng vì sao trong tiêu chí.
   dòng` trên protocol), không phép nào đòi ADR mang ngưỡng mới
   (`ops/specs/TRAN-CODEX-VA-SENSITIVE-r3.md` mục A3); wp784 r2 — nợ
   `WP784-R2-TIEU-CHI-THIEU-VE-DUONG`.
-- **(b) Đo trên văn bản đã nối dòng, hoặc chọn cụm không bị xuống dòng.** Markdown được ngắt cột
-  tuỳ người viết, mà `rg` khớp TỪNG dòng: cụm đầy đủ vắt sang dòng sau thì `rg -F` không khớp gì
-  (tiêu chí dương đỏ oan); rút mẫu xuống phần đầu cho khỏi vướng chỗ ngắt thì một hậu tố sai vẫn
-  khớp (tiêu chí xanh giả). Cả hai đều đổi màu theo chỗ ngắt chứ không theo nội dung. Bằng chứng: lớp
+- **(b) Đo trên văn bản đã nối dòng, hoặc chọn cụm không bị xuống dòng — chỉ trong biên hẹp dưới
+  đây.** Markdown được ngắt cột tuỳ người viết, mà `rg` khớp TỪNG dòng: cụm đầy đủ vắt sang dòng sau
+  thì `rg -F` không khớp gì (tiêu chí dương đỏ oan); rút mẫu xuống phần đầu cho khỏi vướng chỗ ngắt
+  thì một hậu tố sai vẫn khớp (tiêu chí xanh giả). Cả hai đều đổi màu theo chỗ ngắt chứ không theo
+  nội dung. Mặc định là nối dòng: gộp khoảng trắng trong phạm vi TỪNG đoạn (không nối qua dòng trống
+  hay sang mục khác, kẻo khớp nhầm hai câu không liên quan) rồi khớp TOÀN BỘ lời khẳng định. Khớp
+  cụm trên một dòng chỉ được dùng khi cả hai điều sau cùng đúng: cụm ấy là toàn bộ lời khẳng định
+  (không phải tiền tố của nó), và phép đo chạy trên một blob đã neo băm nên không bị ngắt dòng lại.
+  Kèm đột biến: ngắt dòng lại mà giữ nghĩa thì vẫn xanh, đổi hậu tố thì đỏ. Bằng chứng: lớp
   "khớp tiền tố cụm bị cắt" của #782, chép ở `ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md` mục
   `hinh_dang_ke_thua`.
 - **(c) Tiêu chí nói "N chỗ" thì đếm theo từng vị trí, không đếm gộp.** Một tổng `≥ N` trên nhiều

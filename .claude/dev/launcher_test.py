@@ -7526,6 +7526,15 @@ def r484_g2_hook_shell_scrub_truoc_probe():
             (fakebin / ten).chmod(0o755)
         (fakebin / "npm").write_text(f"#!/bin/sh\necho \"NPM $*\" >> '{nhat_ky}'\nexit 0\n", encoding="utf-8")
         (fakebin / "npm").chmod(0o755)
+        # H01 (Codex lượt 3): máy chạy thiếu `rg` ⇒ hook gọi apt-get/sudo/cargo THẬT. `rg` giả chạy được
+        # (hook không cài), installer giả chỉ ghi nhật ký và thất bại. KHÔNG lọc PATH theo các tên này:
+        # `/usr/bin` chứa `sudo`/`apt-get` lẫn coreutils hook cần — `fakebin` đứng ĐẦU nên đã che bản thật.
+        (fakebin / "rg").write_text("#!/bin/sh\necho 'ripgrep-inert 0.0.0'\n", encoding="utf-8")
+        (fakebin / "rg").chmod(0o755)
+        for ten in ("apt-get", "sudo", "cargo"):
+            (fakebin / ten).write_text(f"#!/bin/sh\necho \"CAI {ten} $*\" >> '{nhat_ky}'\nexit 97\n",
+                                       encoding="utf-8")
+            (fakebin / ten).chmod(0o755)
         sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
                 if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
         home = s / "codex"
@@ -7544,7 +7553,7 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         ky = nhat_ky.read_text(encoding="utf-8").splitlines() if nhat_ky.exists() else []
         bang(ky.count("CHUAN_BI") == 1, f"materializer phải chạy đúng 1 lần: {ky} · {p.stdout[-400:]}")
         bang(not [x for x in ky if x.startswith("BAN ")], f"lời gọi khác thấy snapshot: {ky}")
-        bang(not [x for x in ky if x.startswith("NPM ")], f"fixture gọi installer: {ky}")
+        bang(not [x for x in ky if x.startswith(("NPM ", "CAI ", "SACH -m pip"))], f"fixture gọi installer: {ky}")
         bang(any(x.startswith("SACH ") for x in ky[ky.index("CHUAN_BI") + 1:]),
              f"không đo được lời gọi nào SAU materializer: {ky}")
         bang(p.returncode != 13, f"hook dừng ở 13: {p.stdout[-300:]}")

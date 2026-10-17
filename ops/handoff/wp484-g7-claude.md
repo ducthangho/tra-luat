@@ -86,9 +86,22 @@ Bằng chứng lượt 3 (17-10, Linux): `launcher_test.py` **219/219** cả có
 F04 bỏ hoãn) giết ca đích bằng assertion. CI Windows `gate`/`gate-cong-cu` ĐỎ vì `t23`/`t49` của `ops/cong_cu_test.py`
 — đỏ sẵn, thuộc wp748 (comment trên #792).
 
+## Lượt vá 4 — H01 (Codex lượt 3 `approve`, P2=1, run `47cf857e`, head `cfd3550`)
+
+Chủ kho nâng trần attempt 3→4, chỉ cho H01, delta test-only do chủ kho tự audit — không còn lời gọi Codex
+(ghi hộ: <https://github.com/ducthangho/tra-luat/issues/484#issuecomment-6233908560>).
+
+| finding | vá | ca · đột biến |
+|---|---|---|
+| H01 fixture shell gọi installer `rg` của máy chạy khi máy thiếu `rg` | `rg` giả chạy được; `apt-get`/`sudo`/`cargo` giả ghi nhật ký `CAI …` rồi thoát 97; phép so installer thêm `CAI ` và `SACH -m pip`. KHÔNG lọc PATH theo các tên này — `/usr/bin` chứa cả coreutils hook cần; `fakebin` đứng đầu PATH đã che bản thật | `r484_g2_hook_shell_scrub_truoc_probe` · đột biến tay `may_thieu_rg` (`rg` giả thoát 1 ⇒ hook đi nhánh cài ⇒ ĐỎ đúng assertion "fixture gọi installer") và đối chứng `may_thieu_rg_go_kiem` (gỡ `CAI ` khỏi phép so ⇒ XANH — chính assertion ấy là răng) |
+
+Bằng chứng lượt 4 (17-10, Linux): `launcher_test.py` **219/219** cả có/không `CODEX_AUTH_JSON` giả (bỏ qua 2 ca
+Windows-only); ca H01 lặp 3/3; ruff F delta 0 (5/5); `ops/bash_nen.py quet` ĐẠT (không lời gọi trần mới). Mã sản
+phẩm không đổi.
+
 ## Ngân sách
 
-attempt 3/3 · lời gọi Codex 2/3 đã dùng (trần nâng); lượt 3/3 là lượt CUỐI.
+attempt 4/4 (trần nâng 3→4 chỉ cho H01) · lời gọi Codex 3/3 (trần nâng 2→3) — không còn lượt nào.
 
 ## Điều kiện merge còn mở
 

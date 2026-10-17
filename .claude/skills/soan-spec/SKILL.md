@@ -117,9 +117,12 @@ thẳng vì sao trong tiêu chí.
   Cưỡng chế ban đầu chỉ dẫn hai tệp, phải đo lại trên đủ sáu vị trí (commit `1182060`, P2 connector
   4302037482 trên PR #785).
 
-Trước khi đóng băng, chạy thử từng tiêu chí trên nền. Tiêu chí đo hành vi MỚI phải ra đúng màu
-"chưa làm"; tiêu chí canh bất biến (`doctrine-scan`, selftest, `release-verify`…) xanh sẵn trên nền là
-đúng, và răng của nó đến từ đột biến. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
+Trước khi đóng băng, chạy thử trên nền mọi tiêu chí ĐO ĐƯỢC lúc ấy. Tiêu chí đo hành vi MỚI phải ra
+đúng màu "chưa làm"; tiêu chí canh bất biến (`doctrine-scan`, selftest, `release-verify`…) xanh sẵn trên
+nền là đúng, và răng của nó đến từ đột biến. Tiêu chí chỉ đo được sau land (canary trên PR đầu tiên sau
+land, gate master, receipt LIVE) thì khai điều kiện đo, thời điểm, ai đo và bằng chứng phải đọc lại; nó ở
+trạng thái `chưa đo được` cho tới khi đo thật — chưa chạy KHÔNG phải đạt, và đừng thay canary bằng một phép
+đo khác. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
 
 ## 3. Đo trước khi hỏi
 

@@ -22,9 +22,12 @@ Lý do đo được: packet #782 đẩy lần đầu sau ba cổng tài liệu x
 `1730/1731` ở ca `r291_docs_ngoai_goi` (run `38945289558`). Một lần đẩy hỏng kéo theo revision đặc tả, lease
 mới và vòng review mới.
 
-**Ngoại lệ duy nhất: CI đỏ sau lần đẩy.** Executor được đẩy thêm **chỉ để sửa CI**, và mỗi lần như vậy
-**ghi vào biên nhận** của packet: SHA trước/sau, check đỏ, nguyên nhân, vì sao cổng tại chỗ không bắt được.
-Lần đẩy vá CI không được mang thêm bản vá cho finding review; finding mới phát hiện thì đi mục 2.
+**Ngoại lệ duy nhất: CI đỏ sau lần đẩy.** Executor được đẩy thêm **chỉ để sửa CI**. Commit vá đổi `head_sha`,
+nên mọi verdict của SHA cũ hết hiệu lực (§7 của protocol): **trước khi đẩy**, commit vá phải qua review offline
+trên chính SHA mới (lượt xác minh lại bản vá theo `ADR-0052`) và chạy lại đủ cổng tại chỗ của mục này. Mỗi lần
+như vậy **ghi vào biên nhận** của packet: SHA trước/sau, check đỏ, nguyên nhân, vì sao cổng tại chỗ không bắt
+được, verdict của SHA mới. Lần đẩy vá CI không được mang thêm bản vá cho finding review; finding mới phát hiện
+thì đi mục 2.
 
 **Phạm vi.** Luật chỉ áp cho nhánh code của packet (`agent/wp<issue>-g<generation>-<executor>`). Nhánh
 `ops/**` (lease, bia mộ, biên nhận) và nhánh đặc tả là sổ sách, đẩy như trước, ngoài luật này.
@@ -35,7 +38,7 @@ Bốn ca, mỗi ca một câu trả lời:
 |---|---|
 | nhánh code, lần đầu, khi đã đủ điều kiện | được |
 | nhánh code, giữa các vòng vá | không |
-| nhánh code, CI đỏ sau lần đẩy, bản vá chỉ sửa CI | được, ghi vào biên nhận |
+| nhánh code, CI đỏ sau lần đẩy, bản vá chỉ sửa CI | được, sau khi SHA mới được approve; ghi vào biên nhận |
 | nhánh `ops/**` hoặc nhánh đặc tả | ngoài luật này |
 
 ## 2. Review offline, neo SHA commit cục bộ
@@ -58,9 +61,20 @@ Không bước nào bị bỏ: mỏ neo đổi từ PR head sang SHA ứng viên
 tạo review có thẩm quyền. Sau lần đẩy, PR head phải **bằng** SHA đã được approve; khác SHA thì verdict cũ hết
 hiệu lực như quy tắc commit mới của §7.
 
-Connector review trên PR GitHub chạy sau lần đẩy. Nó **không** mở vòng vá tự động: nếu nó báo P0/P1/P2 trên
-head đã đẩy, executor DỪNG và đưa checkpoint cho chủ kho kèm phép đo. Đẩy thêm để vá finding ấy là quyết định
-của chủ kho, không phải ngoại lệ vá CI.
+**Hoàn tất `work-packet` và run kế nhiệm.** Với packet áp ADR này, `work-packet` hoàn tất khi SHA đã approve được
+đẩy và PR đã mở, không phải khi handoff được nhận. Handoff phải kèm bundle của SHA ứng viên ở nơi lưu evidence bền
+(cùng bundle reviewer đã đọc), vì đường phục hồi nguội của §7 phải tự sống được. Run executor kết thúc trước khi
+đẩy (hết giờ, chết, hay chỉ giao handoff rồi dừng) thì reconciler giao một **run kế nhiệm cùng generation, cùng
+lease**. Run ấy chỉ làm đúng ba việc: kiểm SHA trong bundle bằng SHA đã approve, đẩy SHA ấy, mở PR. Không sửa gì
+khác; lệch SHA thì dừng.
+
+**Finding của connector sau lần đẩy.** Connector review trên PR GitHub chạy sau lần đẩy. Nó **không** mở vòng
+vá tự động: nếu nó báo P0/P1/P2 trên head đã đẩy, executor DỪNG và đưa checkpoint cho chủ kho kèm phép đo. Lúc ấy
+packet đã `accepted` theo verdict offline, mà `accepted` là trạng thái cuối của máy trạng thái (§4 của protocol;
+`.claude/dev/packet_loop.py` không có cạnh đi ra). Nếu chủ kho cho vá, đường đi là **generation mới** theo luật
+reroute của §12: `accepted` của generation cũ hết hiệu lực; generation mới có nhánh mới, lease mới, vòng review
+offline mới, rồi lại đẩy theo mục 1. Đẩy tiếp lên nhánh của generation cũ không phải ngoại lệ vá CI và không được
+làm.
 
 ## 3. Dừng vá theo hạng, ở mọi class
 
@@ -103,7 +117,8 @@ canh bằng kỷ luật đọc và bằng biên nhận. Cùng họ nợ `SO-CANO
 ## Protocol trỏ, không chép
 
 `docs/PROTOCOL_DA_PHIEN.md` sửa ba dòng class của bảng ngưỡng §8, câu reviewer ở §8, thêm một câu vào §8.3, một
-con trỏ ở §12, bốn con trỏ ánh xạ ở §7 và §13, và dòng §20. Con số và cụm luật (một lần, hai vòng) chỉ ở **tệp này**.
+con trỏ ở §12, bốn con trỏ ánh xạ ở §7 và §13, và dòng §20. **Mọi** chỗ ấy nói rõ chỉ áp cho packet áp ADR này;
+packet chưa áp giữ nguyên luật cũ, đúng mục *Hiệu lực*. Con số và cụm luật (một lần, hai vòng) chỉ ở **tệp này**.
 
 ADR này **không** sửa `ADR-0037`, `ADR-0038`, `ADR-0041`, `ADR-0048`, `ADR-0052`, `ADR-0053` hay đặc tả đóng
 băng nào.
@@ -112,4 +127,6 @@ băng nào.
 
 - **`CONG-DEM-PUSH`** — cổng mã đếm số lần đẩy nhánh code và đọc biên nhận vá CI. Packet riêng (Q7 của đặc tả).
 - **`R291-DAM-SO-CUNG`** — packet này là lần thứ **5** phải kê khai slot vì ratchet đếm cứng `docs/*.md`.
+- **`ACCEPTED-KHONG-CO-DUONG-RA`** — `packet_loop.py` không có lệnh đưa packet `accepted` sang generation mới; đường
+  ở mục 2 đi bằng quyết định chủ kho, lease mới và biên nhận, chưa có máy canh.
 - Chưa có số đo tác động lên tốc độ hội tụ khi bỏ đường *"review trên PR head"*.

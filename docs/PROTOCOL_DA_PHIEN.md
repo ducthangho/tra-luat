@@ -617,12 +617,13 @@ cần kiểm cùng assurance, không phải quyền tự approve hoặc land:
 
 | Class | Điều kiện severity mặc định để xét approval |
 |---|---|
-| `routine` | Không còn P0/P1/P2; P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
-| `systemic` | Không còn P0/P1/P2; P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
-| `sensitive` | Không còn P0/P1/P2; cần approval tường minh đúng assurance, quyết định có căn cứ cho từng finding P3 còn mở; thiếu quyết định thì chưa đủ. |
+| `routine` | Không còn P0/P1/P2 nếu packet áp `ADR-0054`; packet chưa áp giữ luật cũ: hết P0/P1, P2 được giữ dạng nợ. P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `systemic` | Không còn P0/P1/P2 (như cũ, mọi packet); P3 còn lại phải có nợ có tên, owner và hướng xử lý được ghi trong verdict. |
+| `sensitive` | Không còn P0/P1/P2 nếu packet áp `ADR-0054`; packet chưa áp giữ luật cũ: hết P0, có quyết định cho từng finding còn mở. Cần approval tường minh đúng assurance và quyết định có căn cứ cho từng finding P3 còn mở; thiếu quyết định thì chưa đủ. |
 | thiếu/không rõ | Xử lý như `sensitive`, không suy ra `routine`. |
 
-Ba dòng class theo `ADR-0054` (dừng vá khi hết P0/P1/P2; vòng vá thêm vì P3 và điều kiện dừng sớm ở ADR ấy).
+"Packet áp `ADR-0054`" nghĩa là đặc tả có dòng khai hợp lệ theo mục *Hiệu lực* của ADR ấy; vòng vá thêm vì P3 và
+điều kiện dừng sớm cũng ở ADR ấy.
 P0 chặn approval ở mọi class. Bảng không tự cho phép bỏ qua finding hoặc miễn
 review/gate/exact-SHA/human audit. Packet hoặc chỉ thị có ngưỡng chặt hơn thì áp
 ngưỡng đó; ví dụ yêu cầu0P1/P2/P3 vẫn chặn dù ngưỡng mặc định cho phép ghi nợ.
@@ -712,8 +713,8 @@ Mặc định vận hành khi quota Codex hữu hạn: Claude Code `opus` với 
 dành ít nhất 70% ngân sách Executor dự kiến cho Claude và đặt trần Codex Executor ở 30%; đây là ceiling, không phải
 chỉ tiêu phải tiêu. Codex chỉ nhận Packet `routine`/`systemic` nhỏ, đóng và độc lập khi phần ngân sách review đã
 được reserve; tỷ lệ thực tế có thể là 0%. PR do Codex code phải được phiên Claude mới độc lập hoặc human review.
-Codex vẫn là Reviewer read-only trên exact SHA ứng viên cho Packet giá trị hoặc rủi ro cao: commit cục bộ, review
-offline, rồi đẩy đúng SHA ấy (`ADR-0054`). Số lượt Codex tối đa mỗi PR
+Codex vẫn là Reviewer read-only trên exact SHA ứng viên cho Packet giá trị hoặc rủi ro cao: với packet áp `ADR-0054`
+là commit cục bộ, review offline rồi đẩy đúng SHA ấy; packet chưa áp thì SHA ứng viên là PR head như cũ. Số lượt Codex tối đa mỗi PR
 và điều kiện cấp từng lượt sau lượt đầu ở `ADR-0052` (protocol không chép con số). Hết trần mà chưa approve thì
 chuyển sang checkpoint tách phần đã ổn hoặc xem lại thiết kế, không tiếp tục gọi Codex theo quán tính. Packet thường có thể fallback
 sang phiên Claude mới độc lập với nhãn `same_provider_approved` hoặc sang `human_audited`; phạm vi nhạy cảm vẫn
@@ -792,8 +793,8 @@ biểu hiện vẫn phải nối lớp cũ. Reviewer tự dựng thước kiểm
 tiêu chí mới, không lấy danh sách Executor làm trần. Bảng đối chiếu ghi nguồn lượt/SHA,
 phạm vi đã đo, kết quả dương/âm và phần chưa đo; tổng suite hay số dòng khớp không đóng lớp.
 Đổi Packet hoặc baseline không reset lịch sử, budget hay receipt đã giao (§3.2.1/§12).
-Reviewer khái quát mỗi biểu hiện thành lớp và quét mọi biểu hiện cùng lớp trên candidate trước khi báo, không
-báo từng lỗi riêng lẻ (`ADR-0054`).
+Với packet áp `ADR-0054`, reviewer khái quát mỗi biểu hiện thành lớp và quét mọi biểu hiện cùng lớp trên candidate
+trước khi báo, không báo từng lỗi riêng lẻ.
 
 **Bảng lớp của mỗi lượt.** Mỗi finding có đúng một slug lớp nguyên nhân; mỗi lớp ghi
 các finding IDs/biểu hiện, mức nghiêm trọng cao nhất còn mở, nguồn lượt/SHA, cách vá
@@ -1090,8 +1091,9 @@ theo đơn vị đã chốt. Ngân sách tự động và phép đo không tự 
 Phân loại này không thay §10.2 về admission/provenance/gate hay chỉ thị thời điểm
 chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không chạy CI/fullCI giữa vòng vá.
 
-**Đẩy nhánh code packet và vòng vá thêm vì P3** theo `ADR-0054`: điều kiện trước lần đẩy, ngoại lệ đẩy vá CI kèm
-biên nhận, và trần vòng thêm ở ADR ấy (protocol không chép con số).
+**Đẩy nhánh code packet và vòng vá thêm vì P3** theo `ADR-0054`, chỉ cho packet áp ADR ấy: điều kiện trước lần đẩy,
+ngoại lệ đẩy vá CI (bản vá phải được approve trên SHA mới trước khi đẩy, kèm biên nhận), finding P0/P1/P2 sau lần
+đẩy (đi bằng generation mới, `accepted` cũ hết hiệu lực), và trần vòng thêm ở ADR ấy (protocol không chép con số).
 
 **Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
 slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh
@@ -1161,7 +1163,8 @@ thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không ch
 
 Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree →
 heartbeat → chỉ sửa effective write set → worker gate → PR → handoff (packet áp `ADR-0054`: worker gate → handoff →
-review → đẩy → PR, theo ánh xạ ở ADR ấy). Hoàn tất khi handoff hợp lệ đã được dispatcher nhận.
+review → đẩy → PR, theo ánh xạ ở ADR ấy). Hoàn tất khi handoff hợp lệ đã được dispatcher nhận (packet áp `ADR-0054`:
+khi SHA đã approve được đẩy và PR đã mở; run kết thúc trước đó thì run kế nhiệm làm nốt, xem ADR ấy).
 Skill từ chối làm việc nếu lease/generation/spec hash sai, cần LIVE, closure thiếu hoặc security path chưa duyệt.
 Adapter chỉ trỏ các mục protocol và mô tả cú pháp/công cụ riêng của nền; không sao chép schema, stop condition hay
 completion criteria. Phiên `work-packet` không chuyển vai sang reviewer hoặc land trong cùng run.

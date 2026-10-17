@@ -38,6 +38,14 @@ CODEX_ENV_POLICY = Path(__file__).resolve().parent / "codex_env_policy.py"
 PY = sys.executable or "python3"
 LA_WINDOWS = platform.system() == "Windows"
 
+# wp484 g7 — bộ test phải KÍN với credential của phiên đang chạy. Từ #509, `launcher.py run`
+# và bridge phiên khôi phục `CODEX_AUTH_JSON` TRƯỚC mọi child, nên mọi ca chép `os.environ`
+# xuống tiến trình con đều mang biến ấy theo. Đo 16-17-10 (`--lap-ca`, cùng biến giả):
+# `t158` master XANH, g7 ĐỎ rc=13; cả bộ: 68 ca đỏ với biến giả, 3 ca đỏ (t124–t126) với
+# credential THẬT — tức bộ test đã đem credential thật đi materialize. Ca nào cần biến thì
+# tự đặt tường minh (patch.dict / env=…), không ca nào được thừa hưởng từ phiên.
+os.environ.pop("CODEX_AUTH_JSON", None)
+
 MA_OK, MA_THAM_SO, MA_GIT, MA_HEAD, MA_REF = 0, 2, 3, 4, 5
 MA_BAN, MA_PROMPT, MA_HAN, MA_VA_CHAM, MA_DANH_TINH, MA_QUA_HAN = 6, 7, 8, 9, 10, 124
 MA_WORKTREE, MA_PROBE = 14, 15
@@ -4247,10 +4255,6 @@ def _duong_bridge() -> Path:
 
 
 def _chay_bridge(env, timeout=60):
-    # wp484 g7 (đo 16-10: t124–t126 ĐỎ CHỈ khi phiên có CODEX_AUTH_JSON thật; master xanh cả hai) —
-    # bridge #509 gọi `chuan-bi` khi thấy biến, TRƯỚC hook, nên ca đo bash/mã thoát chết ở rc=13 và
-    # còn đem credential THẬT vào test. Ca bridge không đo credential ⇒ gỡ biến (mọi kiểu hoa/thường).
-    env = {k: v for k, v in env.items() if k.upper() != "CODEX_AUTH_JSON"}
     return subprocess.run([PY, str(_duong_bridge())], env=env, capture_output=True,
                           text=True, encoding="utf-8", errors="replace", timeout=timeout)
 
@@ -7631,6 +7635,19 @@ def r484_g6_trust_posix_backslash_is_not_separator():
             different: {"hasTrustDialogAccepted": True}}}), encoding="utf-8")
         got = m._probe_trust_claude(str(repo), home)
         bang(got["trang_thai"] == "KHONG_DO_DUOC", f"POSIX trust broadened: {got}")
+
+
+@ca
+def r484_g7_bo_test_kin_voi_credential_cua_phien():
+    """Nạp module test với CODEX_AUTH_JSON có mặt ⇒ biến phải bị gỡ trước mọi ca (xem đầu tệp).
+    Gỡ dòng `os.environ.pop` ở đầu tệp thì ca này ĐỎ — không cần biến thật của phiên."""
+    script = ("import os,runpy,sys; runpy.run_path(sys.argv[1], run_name='nap_kiem'); "
+              "print('CON' if 'CODEX_AUTH_JSON' in os.environ else 'SACH')")
+    r = subprocess.run([PY, "-B", "-c", script, str(Path(__file__).resolve())],
+                       env=dict(os.environ, CODEX_AUTH_JSON="INERT-PHIEN"),
+                       capture_output=True, text=True, timeout=60)
+    bang(r.returncode == 0, f"nạp module hỏng: {r.stderr[-300:]}")
+    bang(r.stdout.strip().splitlines()[-1:] == ["SACH"], f"bộ test thừa hưởng credential phiên: {r.stdout!r}")
 
 
 # wp484 g7 — bốn P2 của connector trên #509 (13-10-2026) ở `faaedff`. Mỗi ca có đột biến

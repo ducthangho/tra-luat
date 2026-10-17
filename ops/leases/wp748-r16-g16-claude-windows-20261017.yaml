@@ -80,3 +80,10 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r17-g17-claude-windows-20261017
+da_bi_thay_the_ly_do: >-
+  Owner revoked stale g16 and authorized r17/g17 at Issue #748 comment 6231338050.
+  Product clone remained clean at head 19683a0b81ba33010fbee4e5a03631d3023a76b7
+  and tree aa2f3a35d2ef1244ec50f6220b7e68618cdc87ac; no push, PR,
+  review, merge, land or LIVE occurred. G1 and targeted gate have rc0 receipts;
+  G2 ended without rc and G3-G9 were not run.

@@ -1,0 +1,60 @@
+{
+  "version": "1.5.0",
+  "run_id": "fbfda8b5fec141bfa0fe770e815031f3",
+  "short_id": "fbfda8b5",
+  "ten": "wp484-g7-review-4",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "bd5ae0caa94bfbad"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-17T16:02:59.991189+00:00",
+  "ket_thuc_utc": "2026-10-17T16:15:29.287056+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 936,
+  "khoa_danh_tinh": "linux:47685",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792d",
+  "head": "0f31bb3e6151dd0cc67e8d4664b139259383b8d5",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "71f9694117236580b7bbe6f9bd2565c36c36ddba4aec3aedd815aa330111ec93",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "e8a0c57fc5062934d681e9f7fecf7e0998de3db3ea399b1c6e31a9f9ddaf0bdc",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/f5ea9c29-b7bf-59b1-89c5-898536fe68e2/scratchpad/rv792d-out/runs/fbfda8b5/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown",
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 749.296,
+  "stdout_byte": 212,
+  "stdout_sha256": "9ea57727dea3be1b02528fe0645824b09220be1e7bec0037397be394ca98ecf4",
+  "stderr_byte": 835707,
+  "stderr_sha256": "f3ca60a59d27f32f7129c955fa33cbd83a9ebb09802e71eb76fd00afd20fee52"
+}

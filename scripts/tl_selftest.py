@@ -21948,10 +21948,19 @@ def run() -> int:
         # changelog `changelog.d/wp-766.md`, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới. PR worker
         # thêm mảnh mà không kê manifest nên master đỏ `release-verify --strict` (gate 38861735146) — cùng hình dạng WP725-727.
         # Cây thật = 187 + 75 = **262**; trần Package 200 còn 13 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 262
+        # KÊ KHAI SLOT (packet #782 r2 — ADR-0052 + ADR-0053, PR #789): 75 → **77** Markdown dưới `docs/`.
+        # Thêm ĐÚNG HAI tệp dev-side/ngoài gói:
+        #   + `docs/adr/0052-tran-loi-goi-codex-len-tam.md`
+        #   + `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (§20) là sửa, không thêm. `RELEASE_MANIFEST.json` đổi CHỈ vì băm của chính
+        # tệp này đổi ⇒ `file_count` giữ **187**; cây thật = 187 + 77 = **264**; trần Package 200 còn 12 khe (ZIP mang thêm entry manifest: 188).
+        # R291-DAM-SO-CUNG = **4** (#522, #548, #551, #782). Lần này lại đúng hình dạng "cổng tài liệu xanh, không
+        # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ
+        # `1730/1731` (run 38945289558). Chủ kho chọn kê khai slot cho packet này; chữa nợ gốc là packet riêng.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 77 == 264
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 75
+        ok4 = (len(tren_dia) == 77
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

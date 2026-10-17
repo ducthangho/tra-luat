@@ -2,7 +2,7 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
 # TRANG THAI: merged (7cc384e). `landed: false` — chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge bang
-# merge commit. Gate push master tren 7cc384e CHUA XONG luc ghi so (in_progress) — phai xanh moi goi la landed.
+# merge commit. Gate push master tren 7cc384e: success (run 39030380292, do lai 13:27Z).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nhu ho so pr791-wp782.
 # Readback tho: ops/land/pr793-wp784-provenance/. Moi phep do REST: `gh api <duong dan>` (GET) qua proxy phien.
 
@@ -30,7 +30,7 @@ pre_merge_checks:
   - {name: 'gate, gate-packet-loop, gate-ops, gate-cong-cu (0-7), gate-cong-cu-gop, gate-registry, chuan-bi (ubuntu-latest)', sha: 1b375dbab5f4fe2694c7e12bbf159dd1c7c53828, conclusion: success, nguon: readback-check-runs-1b375db.json}
   - {name: 'Codex connector review', sha: 1b375dbab5f4fe2694c7e12bbf159dd1c7c53828, conclusion: 'completed, has_any_findings false', luc: '2026-10-17T09:36:20Z (comment 6231832833 updated_at; receipt 6232362147 "Didn''t find any major issues")', nguon: readback-comments-793.json}
 post_merge_checks:
-  - {name: gate (ci.yml, push master), run_id: 39030380292, sha: 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16, conclusion: 'in_progress luc ghi so (gate + gate-packet-loop + chuan-bi da success; gate-registry/gate-ops/gate-cong-cu dang chay)', nguon: [readback-run-39030380292.json, readback-jobs-39030380292.json]}
+  - {name: gate (ci.yml, push master), run_id: 39030380292, sha: 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16, conclusion: success, ghi_chu: 'moi job success, do lai 13:27Z 17-10-2026 (luc ghi so dau con in_progress)', nguon: [readback-run-39030380292.json, readback-jobs-39030380292.json]}
   - {name: 'launcher (Windows that)', conclusion: not_measured, ly_do: 'khong co luot tren 7cc384e — PR khong cham .claude/dev/**'}
 pre_merge_checks_thu_tu_thoi_gian: >-
   measured — merged_at 2026-10-17T11:53:00Z; check-run muon nhat tren 1b375db completed_at 10:55:20Z (gate-registry);
@@ -75,7 +75,7 @@ trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-793.json: merged true, merged_at 2026-10-17T11:53:00Z, merge_commit_sha 7cc384e, merged_by ducthangho.'
   landed: false
-  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay va cho gate push master 39030380292 tren 7cc384e xanh.'
+  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay. Gate push master 39030380292 tren 7cc384e da XANH.'
 
 uy_quyen_land:
   neo: 'chu kho tu merge PR #793 (merged_by ducthangho).'
@@ -93,6 +93,5 @@ review:
   codex_connector: 'measured — 2 review co finding tren 1182060 va 098a693 (readback-reviews-793.json); completed, khong finding, tren 1b375db.'
 
 khong_do_duoc:
-  - 'Ket luan cuoi cua gate push master 39030380292 — dang chay luc ghi so.'
   - 'Log day du cac job CI KHONG luu.'
   - 'Bien nhan v2 cho cac luot Codex CLI cua wp784 chua ghi vao ops/reviews/; ghi la no, khong chan land.'

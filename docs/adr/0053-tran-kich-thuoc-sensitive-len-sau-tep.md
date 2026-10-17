@@ -58,9 +58,11 @@ Luật **y hệt** `ADR-0052` (vì sao không dùng ngày, thời điểm commit
 Thiếu, trùng, sai một phép đo hoặc không đo được ⇒ trần `sensitive` cũ (≤ 3 tệp / ≤ 300 dòng thêm),
 fail-closed. Cùng giới hạn fast-forward như `ADR-0052`.
 
-Chính packet thi hành ADR này không có dòng khai ⇒ trần cũ: write set **3** tệp.
-Đó là lý do nó **không** sửa `.claude/skills/soan-spec/SKILL.md`, nơi vẫn trỏ ngưỡng về `ADR-0044` —
-thêm tệp ấy là thành bốn tệp, vượt trần cũ. Đây không phải con trỏ chết (`ADR-0044` vẫn tồn tại và §20
+Chính packet thi hành ADR này (`wp782`) không có dòng khai ở revision nào, kể cả r4 đang hiệu lực
+(`dc8df62d…`) ⇒ trần cũ ≤ 3 tệp / ≤ 300 dòng thêm. Write set thực tế là **5** tệp vì chủ kho nâng trần kích
+thước riêng cho packet ấy bằng khối `nang_tran` (3 → 5 tệp, giữ 300 dòng; Issue #782), không phải bằng luật
+này. Packet **không** sửa `.claude/skills/soan-spec/SKILL.md`, nơi vẫn trỏ ngưỡng về `ADR-0044` — tệp ấy nằm
+ngoài write set đã được nâng. Đây không phải con trỏ chết (`ADR-0044` vẫn tồn tại và §20
 dẫn tới ADR này) mà là nợ, ghi dưới đây.
 
 ADR này **không** sửa `docs/adr/0044-*.md`: sửa là viết lại một lời khai vốn đúng tại thời điểm của nó.

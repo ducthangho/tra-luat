@@ -5510,10 +5510,10 @@ def case_pl_m3_vong(c: Ctx):
 
 
 def case_pl_m3_codex(c: Ctx):
-    sd = _reviewing(c, "--codex-review-calls-limit", 2, "--review-rounds-limit", 2)  # hai trục chạm CÙNG review ⇒ trục codex (chạm trước) thắng
-    _doi(0, c.review(sd, 55, ["loi-1"])[0], b"", "lời gọi 1")
-    c.den_reviewing(sd, 55, 2)
-    _hai_nhanh(c, sd, 2, "codex_review_calls")
+    for tran_vong in (50, 2):  # riêng trục codex, rồi hai trục cùng chạm để khóa thứ tự
+        sd = _reviewing(c, "--codex-review-calls-limit", 2, "--review-rounds-limit", tran_vong)
+        _doi(0, c.review(sd, 55, ["loi-1"])[0], b"", "lời gọi 1")
+        c.den_reviewing(sd, 55, 2); _hai_nhanh(c, sd, 2, "codex_review_calls")
 
 
 def case_pl_m4_nang_tran(c: Ctx):

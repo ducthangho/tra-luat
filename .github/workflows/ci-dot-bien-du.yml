@@ -84,8 +84,9 @@ jobs:
           python-version: "3.12"
       - name: đột biến một mảnh
         env:
-          NHANH_DON_DUOC_MANH: ${{ matrix.manh }}/8
-          NHANH_DON_DUOC_MANH_RA: manh/manh-${{ matrix.manh }}.json
+          NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+          NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
+          NHANH_DON_DUOC_DICH_DU: "1"
         run: python ops/nhanh_don_duoc_test.py
       - uses: actions/upload-artifact@v4
         with:
@@ -108,4 +109,4 @@ jobs:
           path: manh
           merge-multiple: true
       - name: gom mảnh
-        run: python ops/nhanh_don_duoc_test.py --gop manh
+        run: python ops/nhanh_don_duoc_test.py --gop-du manh

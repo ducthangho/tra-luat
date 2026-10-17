@@ -5494,6 +5494,9 @@ def gop(thu_muc) -> int:
 TU_KIEM_CHI_CA_ENV = "NHANH_DON_DUOC_TU_KIEM_CHI_CA"
 DICH_ENV, DICH_RA_ENV, PHIEN_BAN_DICH = "NHANH_DON_DUOC_DICH", "NHANH_DON_DUOC_DICH_RA", 1
 CHE_DO_DICH = "targeted_mutant_gate"
+# full_mutant_audit qua CUNG bo bien nhan (head, rc that, tien do, RAM, thanh vien): `NHANH_DON_DUOC_DICH_DU=1`
+# => moi tu dot bien chay DU 52 ca (`chi_dich=False`, nghia goc), KHONG ap tran duong gang.
+CHE_DO_DU, DICH_DU_ENV, TRAN_GIAY_CON_DU = "full_mutant_audit", "NHANH_DON_DUOC_DICH_DU", 3600
 _MAU_DICH = r"[0-9]/[2-8]"         # cung mien k/N voi `doc_manh`
 TRAN_DUONG_GANG_GIAY = 540          # spec r16: duong gang DO DUOC, khong phai so ly thuyet
 TRAN_GIAY_CON_DICH = 600            # mot con qua tran => rc 124 => manh DO
@@ -5534,8 +5537,8 @@ def doc_dich(gia_tri) -> tuple[int, int]:
     return int(gia_tri[0]), int(gia_tri[2])
 
 
-def _muc_dich():
-    """Moi muc cua cong PR: `(khoa, trong so, muc)`. Fail-closed khi bang/ho so lech."""
+def _muc_dich(du=False):
+    """Moi muc: `(khoa, trong so, muc)`. `du` => trong so tu dot bien = DU 52 ca. Fail-closed khi lech."""
     ten_tk = [t for t, _, _ in TU_KIEM]
     if set(GIAY_CA_HO_SO) != set(ten_tk) or len(ten_tk) != len(set(ten_tk)):
         raise ValueError("GIAY_CA_HO_SO lech TU_KIEM (thieu/thua/trung ten)")
@@ -5543,7 +5546,8 @@ def _muc_dich():
     for x in DOT_BIEN_TU_KIEM:
         if not x[1] or not set(x[1]) <= set(ten_tk):
             raise ValueError(f"tu dot bien {x[0]}: tap dich rong hoac ten la")
-        muc.append((f"tk:{x[0]}", GIAY_PHONG_CON + sum(GIAY_CA_HO_SO[c] for c in sorted(set(x[1]))), x))
+        ca_chay = GIAY_CA_HO_SO if du else sorted(set(x[1]))
+        muc.append((f"tk:{x[0]}", GIAY_PHONG_CON + sum(GIAY_CA_HO_SO[c] for c in sorted(ca_chay)), x))
     muc += [(f"db:{x[0]}", GIAY_DOT_BIEN_SP, x) for x in DOT_BIEN]
     khoa = [k for k, _, _ in muc]
     if len(khoa) != len(set(khoa)):
@@ -5551,10 +5555,10 @@ def _muc_dich():
     return muc
 
 
-def phan_hoach_dich(n: int) -> list:
+def phan_hoach_dich(n: int, du=False) -> list:
     """LPT tat dinh: muc nang truoc (hoa: theo khoa), vao manh dang nhe nhat (hoa: chi so nho)."""
     tai, manh = [0.0] * n, [[] for _ in range(n)]
-    for khoa, w, x in sorted(_muc_dich(), key=lambda m: (-m[1], m[0])):
+    for khoa, w, x in sorted(_muc_dich(du), key=lambda m: (-m[1], m[0])):
         i = min(range(n), key=lambda j: (tai[j], j))
         tai[i] += w
         manh[i].append((khoa, x))
@@ -5659,7 +5663,7 @@ class _GhiCoTran(io.TextIOBase):
         return (f"[CAT {self.bo} ky tu dau]\n" if self.bo else "") + than
 
 
-def _chay_muc_dich(khoa, x, nen_sp_dat, lan_lai):
+def _chay_muc_dich(khoa, x, nen_sp_dat, lan_lai, du=False):
     """Mot muc -> trang thai trong `TRANG_THAI_KQ`. Ghi lan chay lai vao `lan_lai`."""
     global TU_KIEM, chay_mot_mutant
     loai = khoa.split(":", 1)[0]
@@ -5673,7 +5677,7 @@ def _chay_muc_dich(khoa, x, nen_sp_dat, lan_lai):
     if loai == "tk":
         ra = io.StringIO()
         with contextlib.redirect_stdout(ra):
-            g, h, kd = chay_dot_bien_tu_kiem([x], chi_dich=True)
+            g, h, kd = chay_dot_bien_tu_kiem([x], chi_dich=not du)
         print(ra.getvalue(), end="")
         if (g, h, kd) == (1, 0, 0):
             return "passed"
@@ -5694,8 +5698,8 @@ def _chay_muc_dich(khoa, x, nen_sp_dat, lan_lai):
     return "passed" if (dat, kg, kd) == (1, 0, 0) else ("not_measured" if kd else "failed")
 
 
-def chay_manh_dich(k: int, n: int, ra) -> int:
-    """Mot manh cua targeted_mutant_gate. LUON ghi bien nhan (ke ca khi DO); rc that trong bien nhan."""
+def chay_manh_dich(k: int, n: int, ra, du=False) -> int:
+    """Mot manh (targeted, hoac `du` = full_mutant_audit). LUON ghi bien nhan (ke ca khi DO); rc that."""
     global _TRAN_GIAY_CON
     import time as _thoi_gian
     ra = Path(ra).resolve()
@@ -5703,14 +5707,15 @@ def chay_manh_dich(k: int, n: int, ra) -> int:
     t0, bat_dau = _thoi_gian.monotonic(), _iso_utc()
     bam_dau = (_bam(__file__), _bam(TOOL))     # nguon doi GIUA luot => manh DO (khong tron hai ban)
     nhat_ky = _GhiCoTran(sys.stdout)
-    phan = phan_hoach_dich(n)[k]
+    che_do = CHE_DO_DU if du else CHE_DO_DICH
+    phan = phan_hoach_dich(n, du)[k]
     ket_qua = {khoa: "not_run" for khoa, _ in phan}
     ca_dich = {khoa: sorted(set(x[1])) for khoa, x in phan if khoa[:3] in ("tk:", "db:")}
     lan_lai, tien_do, rc = [], "chua bat dau", 1
-    _TRAN_GIAY_CON = TRAN_GIAY_CON_DICH
+    _TRAN_GIAY_CON = TRAN_GIAY_CON_DU if du else TRAN_GIAY_CON_DICH
     try:
         with contextlib.redirect_stdout(nhat_ky):
-            print(f"{CHE_DO_DICH} MANH {k}/{n}: {len(phan)} muc — KHONG phai full mutant audit")
+            print(f"{che_do} MANH {k}/{n}: {len(phan)} muc" + ("" if du else " — KHONG phai full mutant audit"))
             nen_sp_dat = True
             if any(khoa.startswith("db:") for khoa in ket_qua):
                 tien_do = f"MANH {k}/{n} nen san pham T1..T8"
@@ -5721,10 +5726,10 @@ def chay_manh_dich(k: int, n: int, ra) -> int:
                 tien_do = f"MANH {k}/{n} [{i}/{len(phan)}] {khoa} ca={dich}"
                 t = _thoi_gian.monotonic()
                 print(f"TIEN DO {tien_do}")
-                ket_qua[khoa] = _chay_muc_dich(khoa, x, nen_sp_dat, lan_lai)
+                ket_qua[khoa] = _chay_muc_dich(khoa, x, nen_sp_dat, lan_lai, du)
                 print(f"KET QUA {khoa}: {ket_qua[khoa]} ({_thoi_gian.monotonic() - t:.1f}s)")
             rc = 0 if nen_sp_dat and all(v == "passed" for v in ket_qua.values()) else 1
-            print(f"{CHE_DO_DICH} MANH {k}/{n}: rc={rc} · passed "
+            print(f"{che_do} MANH {k}/{n}: rc={rc} · passed "
                   f"{sum(v == 'passed' for v in ket_qua.values())}/{len(ket_qua)}")
     finally:
         _TRAN_GIAY_CON = None
@@ -5734,7 +5739,7 @@ def chay_manh_dich(k: int, n: int, ra) -> int:
             rc, tien_do = 1, f"NGUON DOI GIUA LUOT — {tien_do}"
         ra.parent.mkdir(parents=True, exist_ok=True)
         ra.write_text(json.dumps({
-            "phien_ban": PHIEN_BAN_DICH, "che_do": CHE_DO_DICH, "manh": k, "so_manh": n,
+            "phien_ban": PHIEN_BAN_DICH, "che_do": che_do, "manh": k, "so_manh": n,
             "head": _git_head(), "sha256_test": bam_test, "sha256_tool": bam_dau[1],
             "rc": rc, "bat_dau": bat_dau, "ket_thuc": _iso_utc(),
             "giay": round(_thoi_gian.monotonic() - t0, 2), "ram_dinh_mb": ram, "pham_vi_ram": pham_vi,
@@ -5743,7 +5748,7 @@ def chay_manh_dich(k: int, n: int, ra) -> int:
     return rc
 
 
-def _loi_gop_dich(thu_muc: Path, head=None):
+def _loi_gop_dich(thu_muc: Path, head=None, du=False):
     """`(loi, doc)` — MOI dieu kien la mot dong loi; rong <=> moi manh, moi muc deu duong."""
     doc = []
     for tep in sorted(Path(thu_muc).glob("*.json")):
@@ -5757,7 +5762,7 @@ def _loi_gop_dich(thu_muc: Path, head=None):
         return ["bien nhan sai khoa"], []
     if any(type(x[c]) is not int for x in doc for c in ("phien_ban", "manh", "so_manh", "rc", "so_lan_chay_lai")):
         return ["phien_ban/manh/so_manh/rc/so_lan_chay_lai phai la int"], []
-    if any(x["phien_ban"] != PHIEN_BAN_DICH or x["che_do"] != CHE_DO_DICH for x in doc):
+    if any(x["phien_ban"] != PHIEN_BAN_DICH or x["che_do"] != (CHE_DO_DU if du else CHE_DO_DICH) for x in doc):
         return ["phien_ban/che_do lech (bien nhan full audit KHONG thay duoc targeted, va nguoc lai)"], []
     n = doc[0]["so_manh"]
     if n not in range(2, 9) or any(x["so_manh"] != n for x in doc) or sorted(x["manh"] for x in doc) != list(range(n)):
@@ -5767,7 +5772,7 @@ def _loi_gop_dich(thu_muc: Path, head=None):
     if head is None:
         loi.append("KHONG DO DUOC head hien tai")
     bam = [_bam(__file__), _bam(TOOL)]
-    phan = phan_hoach_dich(n)
+    phan = phan_hoach_dich(n, du)
     for x in doc:
         m = x["manh"]
         if x["head"] != head:
@@ -5800,11 +5805,11 @@ def _loi_gop_dich(thu_muc: Path, head=None):
         if x["ca_dich"] != dich_mong:
             loi.append(f"manh {m}: bang ca dich lech bang khai")
     hop = [khoa for x in doc if isinstance(x["ket_qua"], dict) for khoa in x["ket_qua"]]
-    tat_ca = [k for k, _, _ in _muc_dich()]
+    tat_ca = [k for k, _, _ in _muc_dich(du)]
     if sorted(hop) != sorted(tat_ca):
         loi.append(f"hop cac manh != tron {len(tat_ca)} muc (thay {len(hop)}, phan biet {len(set(hop))})")
     duong_gang = max((x["giay"] for x in doc if type(x["giay"]) in (int, float)), default=None)
-    if duong_gang is None or duong_gang > TRAN_DUONG_GANG_GIAY:
+    if duong_gang is None or (not du and duong_gang > TRAN_DUONG_GANG_GIAY):
         loi.append(f"duong gang {duong_gang}s vuot tran {TRAN_DUONG_GANG_GIAY}s")
     return loi, doc
 
@@ -5873,11 +5878,13 @@ def _phan_chung_gop_dich() -> list:
             loi, _ = _loi_gop_dich(d, head=head)
             if bool(loi) != (sua is not None):
                 lot.append(f"{ten}: {'CHAP NHAN' if sua else loi[:2]}")
+            if sua is None and not _loi_gop_dich(d, head=head, du=True)[0]:
+                lot.append("hop-le-targeted: gom full_mutant_audit CHAP NHAN bien nhan targeted")
     return lot, 1 + len(hong)
 
 
-def gop_dich(thu_muc) -> int:
-    """`--gop-dich <thu muc>`: DAT khi DU N manh, DUNG head, MOI muc passed, duong gang <= tran."""
+def gop_dich(thu_muc, du=False) -> int:
+    """`--gop-dich`/`--gop-du <thu muc>`: DAT khi DU N manh, DUNG head, MOI muc passed (+ duong gang <= tran neu targeted)."""
     lot, tong = _phan_chung_gop_dich()
     for x in lot:
         print(f"GOP DICH: PHAN CHUNG LOT — {x}")
@@ -5885,12 +5892,18 @@ def gop_dich(thu_muc) -> int:
         print(f"{CHE_DO_DICH}: DO — phep gom KHONG co rang")
         return 1
     print(f"GOP DICH: phan chung {tong}/{tong} dung (1 hop le + {tong - 1} hong)")
-    loi, doc = _loi_gop_dich(Path(thu_muc))
+    loi, doc = _loi_gop_dich(Path(thu_muc), du=du)
     for x in loi:
         print(f"GOP DICH: LOI — {x}")
     if loi:
-        print(f"{CHE_DO_DICH}: DO — KHONG phai full mutant audit")
+        print(f"{CHE_DO_DU}: DO" if du else f"{CHE_DO_DICH}: DO — KHONG phai full mutant audit")
         return 1
+    if du:
+        print(f"{CHE_DO_DU} GOP {len(doc)}/{len(doc)} manh · head {doc[0]['head']} · ca nen {len(TU_KIEM)}/{len(TU_KIEM)}"
+              f" · tu dot bien (DU 52 ca moi con) {len(DOT_BIEN_TU_KIEM)}/{len(DOT_BIEN_TU_KIEM)}"
+              f" · dot bien san pham {len(DOT_BIEN)}/{len(DOT_BIEN)} · manh dai nhat {max(x['giay'] for x in doc)}s")
+        print(f"{CHE_DO_DU}: DAT")
+        return 0
     dem = lambda tien_to: sum(k.startswith(tien_to) for x in doc for k in x["ket_qua"])   # noqa: E731
     print(f"{CHE_DO_DICH} GOP {len(doc)}/{len(doc)} manh · head {doc[0]['head']}")
     print(f"CA NEN: {dem('ca:')}/{len(TU_KIEM)} passed · TU DOT BIEN (chi ca dich): {dem('tk:')}/"
@@ -5915,17 +5928,20 @@ def main() -> int:
             print(f"TU KIEM CHI CA: LOI — {e}")
             return 2
         return 1 if chay_tu_kiem() else 0
-    if DICH_ENV in os.environ or DICH_RA_ENV in os.environ:
+    if DICH_ENV in os.environ or DICH_RA_ENV in os.environ or DICH_DU_ENV in os.environ:
         gt_dich, ra_dich = os.environ.pop(DICH_ENV, None), os.environ.pop(DICH_RA_ENV, None)
+        co_du = os.environ.pop(DICH_DU_ENV, None)
         try:
             k, n = doc_dich(gt_dich)
             if ra_dich in (None, ""):
                 raise ValueError(f"thieu {DICH_RA_ENV}")
-            phan_hoach_dich(n)
+            if co_du not in (None, "1"):
+                raise ValueError(f"{DICH_DU_ENV}={co_du!r}: chi duoc vang hoac '1'")
+            phan_hoach_dich(n, co_du == "1")
         except ValueError as e:
             print(f"DICH: LOI — {e}")
             return 2
-        return chay_manh_dich(k, n, ra_dich)
+        return chay_manh_dich(k, n, ra_dich, co_du == "1")
     # #661 M1 — POP truoc moi thu (con chep `os.environ` => khong thua ke bien manh); sai hinh => rc 2, KHONG chay gi.
     if MANH_ENV in os.environ or MANH_RA_ENV in os.environ:
         gia_tri, ra = os.environ.pop(MANH_ENV, None), os.environ.pop(MANH_RA_ENV, None)
@@ -5987,6 +6003,8 @@ def main() -> int:
 if __name__ == "__main__":
     if sys.argv[1:2] == ["--gop-dich"]:     # WP748 r16: gom targeted_mutant_gate
         raise SystemExit(gop_dich(sys.argv[2]) if len(sys.argv) == 3 else 2)
+    if sys.argv[1:2] == ["--gop-du"]:       # WP748 r16: gom full_mutant_audit
+        raise SystemExit(gop_dich(sys.argv[2], du=True) if len(sys.argv) == 3 else 2)
     if sys.argv[1:2] == ["--gop"]:          # #661 M2: dung MOT doi so
         raise SystemExit(gop(sys.argv[2]) if len(sys.argv) == 3 else 2)
     raise SystemExit(main())

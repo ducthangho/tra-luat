@@ -919,13 +919,14 @@ def _job_manh_gop(goc):
     manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 360, "env": env,
             "strategy": {"fail-fast": False, "matrix": {"manh": list(range(SO_MANH))}},
             "steps": dau + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
-                             "env": {"NHANH_DON_DUOC_MANH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_MANH_RA": f"manh/manh-{m}.json"}},
+                             "env": {"NHANH_DON_DUOC_DICH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_DICH_RA": f"manh/manh-{m}.json",
+                                     "NHANH_DON_DUOC_DICH_DU": "1"}},
                             {"uses": "actions/upload-artifact@v4", "with": {
                                 "name": f"dot-bien-manh-{m}", "path": f"manh/manh-{m}.json", "if-no-files-found": "error"}}]}
     gop = {"needs": JOB_MANH, "runs-on": "ubuntu-latest", "timeout-minutes": 10,
            "steps": dau + [{"uses": "actions/download-artifact@v4",
                             "with": {"pattern": "dot-bien-manh-*", "path": "manh", "merge-multiple": True}},
-                           {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop manh"}]}
+                           {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop-du manh"}]}
     return manh, gop
 
 
@@ -2120,13 +2121,15 @@ def phan_chung():
     def _j(w, ten): return w["jobs"][ten]
     for _t, _f in (("thieu-gop", lambda w, j: w["jobs"].pop(JOB_GOP)), ("gop-khong-needs", lambda w, j: _j(w, JOB_GOP).pop("needs")),
                    ("matrix-3", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0, 1, 2])),
-                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_MANH="${{ matrix.manh }}/3")),
+                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_DICH="${{ matrix.manh }}/3")),
+                   ("manh-bo-co-du", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].pop("NHANH_DON_DUOC_DICH_DU")),
+                   ("gop-targeted", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="python ops/nhanh_don_duoc_test.py --gop-dich manh")),
                    ("manh-if", lambda w, j: _j(w, JOB_MANH).update({"if": "false"})),
                    ("manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),
                    ("gop-if", lambda w, j: _j(w, JOB_GOP).update({"if": "always()"})),
                    ("gop-lenh-khac", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="true")),
-                   ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True, 2, 3])),
-                   ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
+                   ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True] + list(range(2, SO_MANH)))),
+                   ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0] + list(range(1, SO_MANH)))),
                    ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 360.0})),
                    ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
                    # #705 F4: SUY từ ci.yml — hằng tay trôi khỏi trần thật thì ca thắng nhờ GIÁ TRỊ, thôi đo KIỂU.

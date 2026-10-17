@@ -58,6 +58,14 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
 - Bản sao đo: clone `--no-checkout` của kho cục bộ, `checkout --detach c522c17`, `core.abbrev 7` (23:31:11Z); bản bare đủ ref
   (`git clone --bare --reference` kho cục bộ + `fetch '+refs/heads/*:refs/remotes/origin/*'`, 23:31:42Z; so tập tên + OID với
   `ls-remote --heads`: thiếu 0, thừa 0, 541 nhánh); clone làm việc từ bản bare cho A6 ("ref cục bộ" = `git for-each-ref refs/heads refs/remotes` bỏ ref tên kết thúc `/HEAD`, đúng tập `_cac_ref_cuc_bo` — `ops/lease_publish.py` dòng 524–536 — mà `_quet_lease_toan_kho` đọc; số ấy đổi theo máy chủ và theo cách đọc, không chống đỡ tiêu chí nào — A6 đo TẬP — nên không ghi thành chữ số).
+- Môi trường chạy lệnh (điều kiện để TÁI LẬP mọi phép đo `ops/lease_publish.py` ở mục này và ở Nghiệm thu; là quy tắc cho người chạy lại, KHÔNG phải lời
+  khai về lần đo của lượt soạn): `GITHUB_ACTOR` không đặt, rỗng, hoặc bằng `ducthangho` (không phân biệt hoa thường). Biến ấy đặt mà ngoài
+  `NGUOI_CO_THAM_QUYEN = ("ducthangho",)` (`ops/lease_publish.py` dòng 271) thì `kiem()` ném rc 4 (dòng 1067–1072), nên `check`, `body` và vòng `kiem(bo_qua_han=True)`
+  của A6 ra rc 4 thay cho kết quả vốn có (rc 0, hoặc rc của các chốt đứng sau) ở mọi lease qua được các chốt đứng trước dòng 1067 (đo lượt 12, 17-10-2026 ở `c522c17`:
+  vòng ấy qua 152 lease với `GITHUB_ACTOR=claude` cho 0 lease rc 0; `check` và `body` trên một lease mẫu hợp lệ cho rc 0 khi biến không đặt hoặc là `ducthangho`,
+  rc 4 khi là `claude`). Riêng `kiem-github` còn đòi `GITHUB_REPOSITORY` dạng `chủ/kho` (`_repo_github()`, dòng 856–860; rỗng hoặc sai dạng ⇒ rc 8): thiếu biến ấy
+  thì ca A3b (ii) ra rc 8 chứ không phải rc 9 (đo lượt 12, 17-10-2026 ở `c522c17`, `gh` giả trả đúng dấu "đã đăng" mà `_kiem_comment_da_co` (dòng 882) nhận:
+  không đặt biến ⇒ rc 8, đặt `o/r` ⇒ rc 9).
 - Bảng mã thoát: `RC_OK 0`, `RC_THAM_SO 2`, `RC_TU_CAP 4`, `RC_NEO 6`, `RC_NOI_DUNG 8`, `RC_DA_DANG 9`, `RC_LOP 10`, `RC_DANG_GIU 11`,
   `RC_KHONG_XAC_DINH 12` (`ops/lease_publish.py` dòng 44–52, tệp không đổi từ `6f121a3`). Mã `13` chưa dùng. Docstring `MÃ THOÁT`
   dòng 18–25 thiếu 11, 12 (dòng 26 là dòng đóng docstring); `--help` in 0 dòng chứa `MÃ THOÁT` (00:03:51Z 16-10).
@@ -147,7 +155,7 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
    không xoá ⇒ 27/27 · 0/27 · 27/27 khi biến không đặt, `notebyme88`, `ducthangho`); (b) mọi lệnh `git` của bộ test chạy với
    `GIT_CONFIG_NOSYSTEM=1` và `GIT_CONFIG_GLOBAL` trỏ một tệp rỗng trong thư mục tạm; (c) mỗi kho tạm đặt cấu hình cục bộ
    `core.autocrlf=false`, `user.name`, `user.email`, `commit.gpgsign=false`; (d) mọi `git clone` kèm `-c core.autocrlf=false` (bảng thứ
-   hai, hàng c: thiếu CẢ (b) LẪN nó thì `HOME` có `core.autocrlf=true` làm A3c ĐỎ GIẢ; có (b) thì nó là lớp thứ hai). Ca `kiem-github` dùng `gh` giả ghi ra thư mục tạm trên PATH.
+   hai, hàng c: thiếu CẢ (b) LẪN nó thì `HOME` có `core.autocrlf=true` làm A3c ĐỎ GIẢ; có (b) thì nó là lớp thứ hai). Ca `kiem-github` dùng `gh` giả ghi ra thư mục tạm trên PATH và đặt `GITHUB_REPOSITORY=o/r` trong env con (Số đo nền, bullet Môi trường chạy lệnh: thiếu biến ấy thì A3b (ii) ra rc 8 chứ không phải rc 9).
    Ca phụ thuộc nền (`gh` giả bằng shebang, symlink, PATH rỗng) hoặc chạy được trên Windows, hoặc tự BỎ QUA CÓ TÊN kèm lý do khi
    `os.name == "nt"` — không im lặng xanh. Ca A4b "OSError ⇒ 12" chạy TRONG tiến trình: nạp `ops/lease_publish.py` của cây đang thử bằng
    `importlib`, chèn `PermissionError` vào lượt đọc byte của đúng tệp spec, gọi `kiem_bam`, đòi `Chan` mã 12, rồi trả lại hàm gốc.
@@ -395,4 +403,13 @@ Review lượt 11 (`changes_requested, 0 P1 · 1 P2 · 4 P3`; reviewer Claude So
 `f0632bb`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
 (`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 11")} f' <tệp spec> | wc -l` ra `9`). 5 lớp:
 `dinh-nghia-muc-cay-full-tree-chen-canh-2765-tep-khac-tap-do` · `hermetic-lop-d-ly-do-sai-khi-co-lop-b-hang-c-thieu-dieu-kien-lop-b` · `kich-thuoc-tran-bo-test-244-tinh-tu-uoc-chu-thich-1-do-lai-243` · `mo-dau-thay-doi-so-voi-r2-ngay-15-10-tru-16-10-nhung-co-17-10` · `trich-dan-docstring-ma-thoat-dong-18-26-gom-dong-dong-docstring`.
+
+## Vá sau review lượt 12
+
+Bản trước vá: commit `e074a25`, sha256 `7624d8a0937930964bedbfbbff4e1f9949986e474fa0a827c10753bf0d7e74ee` (`git show e074a25:ops/specs/no-p3-lease-spec-hash-r3.md` ra đúng băm này).
+Review lượt 12 (`changes_requested, 0 P1 · 1 P2 · 0 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `e074a2567c2eda7a491e4c15ef898d905038be8b`; VERDICT sha256 `b2329004a92ca1891d2f5b4ea930d6167319ec7b6f1018065e31b41d2df3c41b`, HINT sha256 `5885af9de70af1cfdde1d9c74c111079b166bbc71cb0e48743382db4bb12ec94`; hai tệp KHÔNG có trong kho — đo 2026-10-17 ở
+`e074a25`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 12")} f' <tệp spec> | wc -l` ra `9`). 1 lớp:
+`moi-truong-do-an-github-actor-github-repository-a3b-ii-a6-so-do-nen-thieu-dieu-kien-chay-lenh`.
 

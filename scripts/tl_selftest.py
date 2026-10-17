@@ -21962,10 +21962,12 @@ def run() -> int:
         # `docs/PROTOCOL_DA_PHIEN.md` là sửa, không thêm. Manifest đổi CHỈ vì băm tệp này ⇒ `file_count` giữ **187**;
         # cây thật = 187 + 78 = **265**; trần Package 200 vẫn còn 12 khe (gói không đổi; ZIP 188 entry).
         # R291-DAM-SO-CUNG = **5** (#522, #548, #551, #782, #784). Lần này chạy selftest TRƯỚC lần đẩy duy nhất.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 78 == 265
+        # ĐÓNG NỢ R291-DAM-SO-CUNG (packet #794): số `docs/*.md` nay TÍNH từ cây (ok4 đòi ≥ 1 và mọi tệp bị loại
+        # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3: 187). Thêm docs KHÔNG kê khai slot ở đây nữa.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 78
+        ok4 = (len(tren_dia) >= 1
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

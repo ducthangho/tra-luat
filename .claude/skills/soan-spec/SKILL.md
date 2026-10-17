@@ -82,17 +82,19 @@ NGAY: hỏi *"con số này có đang chống đỡ một câu về THẨM QUY�
 số, nó là một lời khai.
 
 **L6 — Tiêu chí khớp chuỗi là một thước đo, và thước đo phải được kiểm như mã.** Hai packet liền
-(wp782, wp784) đốt hơn mười revision/lượt review vào CÙNG một lớp lỗi: tiêu chí trông chặt mà mù.
+đốt hơn mười revision/lượt review vào CÙNG một lớp lỗi: tiêu chí trông chặt mà mù.
 Mỗi tiêu chí dùng `rg`/regex/đếm chuỗi phải qua đủ năm vế dưới đây; vế nào không áp dụng thì ghi
 thẳng vì sao trong tiêu chí.
 
 - **(a) Có vế dương trên nội dung MỚI và vế âm trên nội dung CŨ.** Chỉ có vế âm ("không còn câu
-  X") thì xoá trắng tệp cũng ĐẠT. Bằng chứng: wp782 r3 — phép kiểm A2/A3/A5 chỉ có vế âm
-  (`ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md` mục `hinh_dang_ke_thua`); wp784 r2 — nợ
+  X") thì xoá trắng tệp cũng ĐẠT. Bằng chứng: wp782 r3 — A3 chỉ có phép âm (`rg … ⇒ 0
+  dòng` trên protocol), không phép nào đòi ADR mang ngưỡng mới
+  (`ops/specs/TRAN-CODEX-VA-SENSITIVE-r3.md` mục A3); wp784 r2 — nợ
   `WP784-R2-TIEU-CHI-THIEU-VE-DUONG`.
 - **(b) Đo trên văn bản đã nối dòng, hoặc chọn cụm không bị xuống dòng.** Markdown được ngắt cột
-  tuỳ người viết; khớp một cụm dài bằng `rg` từng dòng thì chỉ khớp phần đầu (tiền tố) khi cụm ấy
-  vắt sang dòng sau, và tiêu chí đỏ hay xanh theo chỗ ngắt chứ không theo nội dung. Bằng chứng: lớp
+  tuỳ người viết, mà `rg` khớp TỪNG dòng: cụm đầy đủ vắt sang dòng sau thì `rg -F` không khớp gì
+  (tiêu chí dương đỏ oan); rút mẫu xuống phần đầu cho khỏi vướng chỗ ngắt thì một hậu tố sai vẫn
+  khớp (tiêu chí xanh giả). Cả hai đều đổi màu theo chỗ ngắt chứ không theo nội dung. Bằng chứng: lớp
   "khớp tiền tố cụm bị cắt" của #782, chép ở `ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md` mục
   `hinh_dang_ke_thua`.
 - **(c) Tiêu chí nói "N chỗ" thì đếm theo từng vị trí, không đếm gộp.** Một tổng `≥ N` trên nhiều
@@ -118,11 +120,12 @@ Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt ngườ
 - kích thước dự kiến (`git diff --numstat` trên phạm vi tương đương gần nhất) — đối chiếu
   ngưỡng thường ở `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md`; packet `sensitive`
   đối chiếu cặp số ở `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`; số lời gọi Codex
-  review dự kiến đối chiếu trần ở `docs/adr/0052-tran-loi-goi-codex-len-tam.md`. Con số chỉ ở
-  trong ADR — đừng chép vào đặc tả. Đặc tả muốn áp trần mới thì khai ở đầu tệp một dòng
-  `tran_*: ADR-<số>@<sha commit chứa ADR>` (ví dụ `tran_loi_goi_codex: ADR-0052@<sha>`,
-  `tran_kich_thuoc_sensitive: ADR-0053@<sha>`); ADR nào đang hiệu lực thì hỏi bảng định tuyến ADR
-  của `docs/PROTOCOL_DA_PHIEN.md`;
+  review dự kiến đối chiếu trần ở `docs/adr/0052-tran-loi-goi-codex-len-tam.md`. Skill này
+  không chép ngưỡng; đặc tả ghi số đo, trần hay khối vượt trần (`nang_tran`) theo đúng dạng ADR
+  tương ứng quy định. Đặc tả muốn áp trần của `ADR-0052`/`ADR-0053` thì khai dòng `tran_*` theo
+  mục *Hiệu lực* của chính ADR ấy — giá trị sau `@` là OID 40 ký tự của commit LAND ADR trên nhánh
+  mặc định, không phải một commit bất kỳ có chứa ADR (base của packet chứa ADR mà không phải
+  commit land); ADR nào đang hiệu lực thì hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
 - write set dự kiến có giao với packet nào đang mở không;
 - base dự kiến có phải tổ tiên của nhánh mặc định không;
 - lớp review theo đường dẫn bị chạm (`docs/PROTOCOL_DA_PHIEN.md` §8), fail-closed khi không rõ.

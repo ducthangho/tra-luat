@@ -7809,8 +7809,11 @@ def r484_g7_credential_status_home_sai_la_chan_khong_traceback():
         with San() as s:
             env = dict(os.environ, HOME=str(s), USERPROFILE=str(s), CODEX_HOME=sai)
             env.pop("CODEX_AUTH_JSON", None)
+            # encoding tường minh: launcher ép stdout/stderr UTF-8; `text=True` trần trên Windows giải
+            # bằng cp1252 ⇒ "khÃ´ng há»£p lá»‡" (đo: launcher-windows run 38995632503, b355ff8).
             r = subprocess.run([PY, "-B", str(LAUNCHER_DANG_DUNG), "credential-status"],
-                               env=env, capture_output=True, text=True, timeout=60)
+                               env=env, capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=60)
             bang("Traceback" not in r.stderr, f"{sai!r}: traceback thô: {r.stderr[-300:]}")
             bang(r.returncode == MA_CHUA_XAC_THUC,
                  f"{sai!r}: mong {MA_CHUA_XAC_THUC}, duoc {r.returncode}: {r.stderr[-200:]}")

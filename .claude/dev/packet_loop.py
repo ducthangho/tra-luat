@@ -1273,6 +1273,8 @@ def cmd_transition(a, state_dir: Path) -> int:
 
 def cmd_record_codex_call(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
+    if not _la_codex(st):  # connector P2: reviewer khác codex không tiêu ngân sách codex, không kích rescue giả
+        _die(RC_PROVIDER, f"reviewer {st['reviewer']!r} không phải codex — không có lời gọi codex để ghi")
     if st["state"] != "reviewing":
         _die(RC_STATE, f"chỉ ghi lời gọi codex khi state 'reviewing' (đang {st['state']!r})")
     if a.head != st["reviewing_head_sha"]:
@@ -1296,7 +1298,7 @@ def cmd_nang_tran(a, state_dir: Path) -> int:
     u, t = TRUC_TRAN[a.truc]
     if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--tran-moi phải > trần {st[t]} và --can-cu phải là URL issuecomment GitHub")
-    st["nang_tran"].append(dict(truc=a.truc, tu=st[t], len=a.tran_moi, ai_nang=a.ai_nang.strip(), can_cu=a.can_cu))
+    st["nang_tran"].append(dict(truc=a.truc, tran_cu=st[t], tran_moi=a.tran_moi, ai_nang=a.ai_nang.strip(), can_cu=a.can_cu))
     st[t] = a.tran_moi
     _save(state_dir, st)
     print(f"đã nâng trần {a.truc} lên {a.tran_moi} (đã dùng {st[u]}) — LỜI KHAI, không phải bằng chứng")
@@ -2434,16 +2436,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     q = sub.add_parser("record-codex-call", help="ghi lời gọi review codex; chặn TRƯỚC khi vượt trần")
     q.add_argument("--packet", type=int, required=True)
-    q.add_argument("--head", required=True)
-    q.add_argument("--run-id", required=True)
+    for co in ("--head", "--run-id"):
+        q.add_argument(co, required=True)
     q.set_defaults(fn=cmd_record_codex_call)
 
     q = sub.add_parser("nang-tran", help="nâng trần một trục (LỜI KHAI, không phải bằng chứng)")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--truc", required=True, choices=tuple(TRUC_TRAN))
     q.add_argument("--tran-moi", type=int, required=True)
-    q.add_argument("--ai-nang", required=True)
-    q.add_argument("--can-cu", required=True)
+    for co in ("--ai-nang", "--can-cu"):
+        q.add_argument(co, required=True)
     q.set_defaults(fn=cmd_nang_tran)
 
     q = sub.add_parser("record-rescue", help="quyết định Review Rescue Checkpoint")

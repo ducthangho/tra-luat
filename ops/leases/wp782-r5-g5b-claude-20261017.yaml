@@ -1,0 +1,103 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 782
+packet_id: wp782
+packet_alias: TRAN-CODEX-VA-SENSITIVE
+mission_issue: 782
+revision: 5
+generation: 5
+lease_id: wp782-r5-g5b-claude-20261017
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md
+spec_sha256_required: 0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da
+spec_hash: 0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da
+prompt_path: ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md
+prompt_sha256_required: 0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da
+write_set:
+- docs/adr/0052-tran-loi-goi-codex-len-tam.md
+- docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md
+- docs/PROTOCOL_DA_PHIEN.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+effective_write_set:
+- docs/adr/0052-tran-loi-goi-codex-len-tam.md
+- docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md
+- docs/PROTOCOL_DA_PHIEN.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+depends_on: []
+branch: agent/wp782-g5-claude
+branch_note: >-
+  Tao tu 4d2a19f7edd4c6aa2ebd85c7c66d3323bdecad7e (head PR #790, g4). PR thi hanh moi thay #790; #790 dong,
+  khong merge.
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 653fef3f52f3130dd6f597c1036430ffb807fef1
+start_from_sha: 653fef3f52f3130dd6f597c1036430ffb807fef1
+reviewed_sha_required: 1bcbaa0b564612b3072c7c6e8e884e18782a0745
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/782#issuecomment-6228149819
+granted_on_instruction_note: >-
+  Chu kho chon tai checkpoint (17-10-2026), nguyen van: "Va theo lop + nang tran 7 (Khuyen nghi)" — mo ta lua chon
+  ghi ro "cap nhat reviewed_sha cua lease". Cung dac ta r5, cung generation 5, cung nhanh; chi doi mo neo head
+  4d2a19f -> 1bcbaa0 (va P2 connector 4300615937) va nang_tran loi goi 6->7. Phien ghi lease nay CUNG la executor.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-17T02:00:00Z'
+lease_expires_at_utc: '2026-10-18T17:00:00Z'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Spec dong bang TRUOC ADR-0052: tran loi goi Codex cho PR nay la tran CU (2). Truc VONG theo ADR-0048.
+ci_policy: ci_ubuntu_qua_draft_pr_khong_doi_windows
+ci_policy_note: >-
+  Chi doi tai lieu (docs/), khong dung ma. Day nhanh agent, mo draft PR (ci.yml chay ubuntu). Khong merge, khong
+  land, khong deploy.
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  g2: nhanh da duoc day MOT lan o g1 (4711e874); lan day tiep theo la day VA CI theo ngoai le Q2, ghi vao
+  bien nhan.
+  Theo y chu kho (Q1-Q3 cua packet ke tiep, chua thanh luat): review Codex chay CUC BO tren commit da chot, roi day
+  dung commit ay MOT lan. CI do sau lan day thi chi duoc day va CI, ghi vao bien nhan.
+thay_the_cho:
+- wp782-r5-g5-claude-20261017
+thay_the_cho_note: >-
+  g5 con han (toi 2026-10-18T17:00Z) nen dung bia mo hai chieu: g5 mang da_bi_thay_the tro ve lease nay.
+xung_dot_write_set_do_luc: >-
+  2026-10-16T16:5xZ ai-dang-giu: ca ba duong dan NGUOI_GIU 0 (docs/PROTOCOL_DA_PHIEN.md co 5 lease HET_HAN,
+  khong lease song). DO LAI truoc khi day.
+nang_tran:
+- truc: loi_goi_codex
+  ai_nang: ducthangho
+  can_cu: >-
+    Lich su 2->3 (checkpoint sau luot 2), 3->4 (checkpoint sau luot 3, F02 lap lan 3); 4->5 theo lua chon
+    "Codex luot 5 cho delta" — luot 5 CHI review delta 4711e874..head moi; 5->6 "Ra r5 + Codex luot 6";
+    6->7 "Va theo lop + nang tran 7" — luot 7 CHI review delta 4d2a19f..1bcbaa0 (approve, 0 P0-P2).
+  tran_cu: 2
+  tran_moi: 7
+- truc: kich_thuoc_sensitive
+  ai_nang: ducthangho
+  can_cu: >-
+    Ratchet r291 dem cung so docs/*.md (75 -> 77 vi hai ADR); buoc sua scripts/tl_selftest.py va tai sinh
+    RELEASE_MANIFEST.json. Tien le ADR-0048, ADR-0050. Khong tach duoc.
+  tran_cu: '3 tep / 300 dong them'
+  tran_moi: '5 tep / 300 dong them'
+ngan_sach:
+  loi_goi_codex: {used: 7, reserved: 0, limit: 7}
+  vong_review_canon: {used: KHONG_DO_DUOC, ghi_chu: chua co bien nhan ops/reviews cho cac luot 1-4}
+  attempt: {used: 1, ghi_chu: 'lan push 4711e874 do CI'}

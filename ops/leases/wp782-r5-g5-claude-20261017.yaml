@@ -100,3 +100,4 @@ ngan_sach:
   loi_goi_codex: {used: 5, reserved: 1, limit: 6}
   vong_review_canon: {used: KHONG_DO_DUOC, ghi_chu: chua co bien nhan ops/reviews cho cac luot 1-4}
   attempt: {used: 1, ghi_chu: 'lan push 4711e874 do CI'}
+da_bi_thay_the: wp782-r5-g5b-claude-20261017

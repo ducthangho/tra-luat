@@ -54,7 +54,7 @@ MAC_DINH_TRAN_VONG_REVIEW = 10
 MAC_DINH_TRAN_CODEX = 2
 TRUC_TRAN = {"vong_review": ("review_rounds_used", "review_rounds_limit"),
              "codex_review_calls": ("codex_review_calls_used", "codex_review_calls_limit")}
-CAN_CU_RE = re.compile(r"^https://github\.com/[^/]+/[^/]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+$")
+CAN_CU_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+\Z")
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 CANH_BAO_V1 = "CẢNH BÁO: bộ đếm SUY RA từ state v1, có thể THẤP hơn thật"
 
@@ -1214,7 +1214,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
         )
 
     if a.verdict != "approve":  # approve KHÔNG BAO GIỜ kích rescue
-        for truc, (u, t) in TRUC_TRAN.items():
+        for truc, (u, t) in reversed(TRUC_TRAN.items()):  # codex chạm trần TRƯỚC (lúc record-codex-call) ⇒ xét trước (ADR-0048)
             if st[u] >= st[t]:
                 _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
 

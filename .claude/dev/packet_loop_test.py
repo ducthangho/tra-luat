@@ -5496,8 +5496,7 @@ def _hai_nhanh(c, sd, luot, truc):  # state chạm trần ⇒ changes_requested:
     __import__("shutil").copytree(sd, sd2, dirs_exist_ok=True)
     _pl(c, sd, _goi(g, h), _rv(3, "changes_requested", g, h))
     _kiem(sd, "chạm trần + changes_requested", truc=truc, **_RESCUE)
-    _pl(c, sd2, _goi(g, h), _rv(0, "approve", g, h))
-    _kiem(sd2, "approve không bao giờ kích rescue", state="accepted")
+    _pl(c, sd2, _goi(g, h), _rv(0, "approve", g, h)); _kiem(sd2, "approve không bao giờ kích rescue", state="accepted")
 
 
 def case_pl_m3_vong(c: Ctx):
@@ -5511,7 +5510,7 @@ def case_pl_m3_vong(c: Ctx):
 
 
 def case_pl_m3_codex(c: Ctx):
-    sd = _reviewing(c, "--codex-review-calls-limit", 2)
+    sd = _reviewing(c, "--codex-review-calls-limit", 2, "--review-rounds-limit", 2)  # hai trục chạm CÙNG review ⇒ trục codex (chạm trước) thắng
     _doi(0, c.review(sd, 55, ["loi-1"])[0], b"", "lời gọi 1")
     c.den_reviewing(sd, 55, 2)
     _hai_nhanh(c, sd, 2, "codex_review_calls")
@@ -5520,10 +5519,9 @@ def case_pl_m3_codex(c: Ctx):
 def case_pl_m4_nang_tran(c: Ctx):
     sd = _reviewing(c, "--codex-review-calls-limit", 2)
     _pl(c, sd, *[_nang(7, ai=t) for t in ("codex-dispatcher", "ducthangho-bot", "cödex", "codex", "")],
-        _nang(2, tran=2), _nang(2, can_cu=_URL.split("#")[0]), _nang(0, ai=" ducthangho "))
+        _nang(2, tran=2), *[_nang(2, can_cu=u) for u in (_URL.split("#")[0], "https://github.com/o#x/r/issues/775#issuecomment-1", _URL + "\n")], _nang(0, ai=" ducthangho "))
     _kiem(sd, "nâng trần hợp lệ", codex_review_calls_limit=3)
-    if [(n["tran_cu"], n["tran_moi"]) for n in _st(sd)["nang_tran"]] != [(2, 3)]:
-        raise AssertionError("khối nang_tran phải mang khoá chuẩn tran_cu/tran_moi (ADR-0043/0048)")
+    if [(n["tran_cu"], n["tran_moi"]) for n in _st(sd)["nang_tran"]] != [(2, 3)]: raise AssertionError("khối nang_tran phải mang khoá chuẩn tran_cu/tran_moi (ADR-0043/0048)")
 
 
 def case_pl_m5_rescue(c: Ctx):
@@ -5569,7 +5567,7 @@ def case_pl_m6_state_v1(c: Ctx):
 
 
 CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_pl_m")]
-_PL_VONG = "in TRUC_TRAN.items():\n            if st[u] >= st[t]:"
+_PL_VONG = "in reversed(TRUC_TRAN.items()):  #"
 _PL_CHAN = ('    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:\n',
             '        _vao_rescue(state_dir, st, "codex_review_calls", "lời gọi codex bị CHẶN TRƯỚC")\n',
             '    st["codex_review_calls_used"] += 1\n')
@@ -5587,12 +5585,14 @@ MUTANTS.update({
     "pl_m3_bo_co_da_dung": ('        goi["da_dung"] = True\n', "        pass\n", ["pl_m3_neo_loi_goi"]),
     "pl_m3_bo_so_head_loi_goi": ('        if goi["head"] != a.reviewed_sha:\n', "        if False:\n", ["pl_m3_neo_loi_goi"]),
     "pl_m3_kich_ca_khi_approve": ('    if a.verdict != "approve":', "    if True:", ["pl_m3_vong", "pl_m3_codex"]),
-    "pl_m3_bo_truc_vong": (_PL_VONG, _PL_VONG.replace("in T", "in [*T").replace("()", "()][1:]"), ["pl_m3_vong"]),
-    "pl_m3_chi_xet_truc_vong": (_PL_VONG, _PL_VONG.replace("in T", "in [*T").replace("()", "()][:1]"), ["pl_m3_codex"]),
+    "pl_m3_bo_truc_vong": (_PL_VONG, _PL_VONG.replace("in r", "in [*r").replace("())", "())][:1]"), ["pl_m3_vong"]),
+    "pl_m3_chi_xet_truc_vong": (_PL_VONG, _PL_VONG.replace("in r", "in [*r").replace("())", "())][1:]"), ["pl_m3_codex"]),
+    "pl_c12_thu_tu_truc": (_PL_VONG, _PL_VONG.replace("reversed(TRUC_TRAN.items())", "TRUC_TRAN.items()"), ["pl_m3_codex"]),
     "pl_m4_danh_sach_cam": ('ai_nang or "").strip() not in NGUOI', 'ai_nang or "").strip() in ("claude", "codex", "") or 0 in NGUOI', ["pl_m4_nang_tran"]),
     "pl_m2_bo_kiem_reviewer_codex": ("    if not _la_codex(st):  # connector P2", "    if False:  # connector P2", ["pl_m2_loi_goi"]),
     "pl_m4_tran_moi_bang": ("if a.tran_moi <= st[t]", "if a.tran_moi < st[t]", ["pl_m4_nang_tran"]),
-    "pl_m4_can_cu_long": ("#issuecomment-[0-9]+$", "(#issuecomment-[0-9]+)?$", ["pl_m4_nang_tran"]),
+    "pl_m4_can_cu_long": ("#issuecomment-[0-9]+\\Z", "(#issuecomment-[0-9]+)?\\Z", ["pl_m4_nang_tran"]),
+    "pl_c12_can_cu_doan": ("[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+\\Z", "[^/]+/[^/]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+$", ["pl_m4_nang_tran"]),
     "pl_m5_mo_khong_can_nang": (" and st[t] > st[u] and any(", " and st[t] >= 0 and any(", ["pl_m5_rescue"]),
     "pl_f12_bo_so_nang": (' and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[t] and type(n.get("tran_cu")) is int and n["tran_cu"] < st[t] and n.get("ai_nang") in NGUOI_CO_THAM_QUYEN and bool(CAN_CU_RE.match(str(n.get("can_cu")))) for n in st["nang_tran"])', "", ["pl_m5_rescue"]),
     "pl_c11_bo_hinh_nang": (' and type(n.get("tran_cu")) is int and n["tran_cu"] < st[t] and n.get("ai_nang") in NGUOI_CO_THAM_QUYEN and bool(CAN_CU_RE.match(str(n.get("can_cu"))))', "", ["pl_m5_rescue"]),

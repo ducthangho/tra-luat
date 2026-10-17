@@ -1829,6 +1829,11 @@ def lenh_run(a) -> int:
             pass
     ket_thuc = _bay_gio()
     ban_ghi.update(ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)
+    # wp484 g7 (connector P2 17-10, đo: run `47cf857e` ghi `xong`/0/`unknown`) — nhãn
+    # "unknown" gán lúc con vừa sinh là đúng cho lượt chết GIỮA chừng; lượt đã CHẠY HẾT
+    # và thoát 0 thì không có failure nào để phân lớp, giữ nhãn là khai sai trong sổ.
+    if ban_ghi["trang_thai"] == "xong" and ma_that == 0:
+        ban_ghi.pop("failure_class", None)
     # BẰNG CHỨNG ĐỊNH LƯỢNG cho câu "xong" — xem CẢNH BÁO ở đầu tệp. `trang_thai`
     # và `ma_thoat` chỉ nói về vòng đời tiến trình; ba số dưới đây là thứ duy nhất
     # trong sổ phân biệt được "đã làm" với "thoát 0 mà chưa làm gì". Tính ở đây

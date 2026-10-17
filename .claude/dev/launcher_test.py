@@ -7518,7 +7518,7 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         # G02 (Codex lượt 2): hook dời materialize ra sau bước cài CLI, nên fixture PHẢI kín với
         # installer của máy chạy test — `codex`/`claude` giả chạy được (hook không cài gì), `npm`
         # giả chỉ ghi nhật ký; PATH bỏ mọi thư mục có bản thật. Gọi tới npm là ĐỎ.
-        for ten in ("codex", "claude"):
+        for ten in ("codex", "claude", "actionlint"):
             (fakebin / ten).write_text(
                 "#!/bin/sh\n"
                 f"if [ -n \"${{CODEX_AUTH_JSON:-}}${{TL_CODEX_SNAPSHOT:-}}\" ]; then echo 'BAN {ten}' >> '{nhat_ky}'; exit 96; fi\n"
@@ -7539,7 +7539,14 @@ def r484_g2_hook_shell_scrub_truoc_probe():
                 if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
         home = s / "codex"
         snapshot = '{"tokens":{"refresh_token":"INERT-HOOK"}}'
-        env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
+        # J01 (Codex lượt 4): chép nguyên `os.environ` thì `BASH_ENV` (và `ENV`, hàm bash export
+        # `BASH_FUNC_*`) của máy chạy được bash nạp TRƯỚC thân hook — tệp khởi động ấy chèn được thư mục
+        # lên trước `fakebin`, và installer ngoài fixture chạy mà nhật ký của ta không thấy. `HOME` tạm vì
+        # nhánh actionlint ghi `$HOME/.local/bin`; `actionlint` giả có ở `fakebin` (vòng giả `codex` ở trên).
+        env = {k: v for k, v in os.environ.items()
+               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}
+        (s / "home").mkdir()
+        env.update(CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project), HOME=str(s / "home"),
                    CODEX_HOME=str(home), CODEX_AUTH_JSON=snapshot,
                    PATH=os.pathsep.join([str(fakebin)] + sach))
         # wp484 g7 — bản g6 gọi tên trần ["bash", …]: cổng `ops/bash_nen.py` (hạn ngạch 7 của master
@@ -7559,6 +7566,54 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         bang(p.returncode != 13, f"hook dừng ở 13: {p.stdout[-300:]}")
         assert (home / "auth.json").read_text() == snapshot
         assert "INERT-HOOK" not in p.stdout + p.stderr
+
+
+@ca
+def r484_g8_hook_scrub_kin_voi_bash_env():
+    """J01 (Codex lượt 4): `BASH_ENV`/`ENV` của máy chạy không được lọt vào hook của fixture.
+
+    Tệp khởi động ghi dấu `NAP` rồi chèn `ambient/` (rg hỏng + installer gián điệp) lên đầu PATH —
+    đúng phản chứng 18 lời gọi của reviewer. Fixture sạch ⇒ tệp ấy không bao giờ được nạp."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX; verified on WSL Linux"
+    from unittest.mock import patch
+    with San() as s:
+        amb = s / "ambient"; amb.mkdir()
+        log = s / "ambient.log"
+        (amb / "rg").write_text("#!/bin/sh\nexit 97\n", encoding="utf-8")
+        (amb / "rg").chmod(0o755)
+        for ten in ("apt-get", "sudo", "cargo", "npm"):
+            (amb / ten).write_text(f"#!/bin/sh\necho \"NGOAI {ten} $*\" >> '{log}'\nexit 97\n",
+                                   encoding="utf-8")
+            (amb / ten).chmod(0o755)
+        startup = s / "startup.sh"
+        startup.write_text(f"echo NAP >> '{log}'\nexport PATH='{amb}':\"$PATH\"\n", encoding="utf-8")
+        with patch.dict(os.environ, {"BASH_ENV": str(startup), "ENV": str(startup)}):
+            r484_g2_hook_shell_scrub_truoc_probe()
+        ky = log.read_text(encoding="utf-8").splitlines() if log.exists() else []
+        # `NAP` CÓ là bằng chứng tệp khởi động sống trong tiến trình này: chính phép dò của `tim_bash`
+        # (phía TEST, không phải hook) nạp nó — đo 17-10, `BASH_EXECUTION_STRING` = probe của bash_nen.
+        # Không có `NAP` thì ca này không đo gì (BASH_ENV chết sẵn), nên đó là ĐỎ chứ không phải xanh.
+        bang("NAP" in ky, f"BASH_ENV không có hiệu lực trong tiến trình test — ca không đo được: {ky}")
+        bang(not [x for x in ky if x.startswith("NGOAI ")], f"installer ngoài fixture đã chạy: {ky}")
+
+
+@ca
+def r484_g8_run_xong_khong_mang_failure_class():
+    """Connector P2 17-10: lượt `xong` rc=0 không được mang `failure_class`; lượt hỏng vẫn `unknown`."""
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "print('xong')")
+        bang(r.returncode == 0, f"{r.returncode}: {r.stderr}")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d["trang_thai"] == "xong" and d["ma_thoat"] == 0, f"{d['trang_thai']}/{d['ma_thoat']}")
+        bang("failure_class" not in d, f"lượt xong rc=0 vẫn mang failure_class={d.get('failure_class')!r}")
+        rr2 = s / "runs2"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr2), "--", PY, "-c", "raise SystemExit(3)")
+        bang(r.returncode != 0, f"lượt hỏng trả {r.returncode}")
+        d = json.loads((next(rr2.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d.get("failure_class") == "unknown", f"lượt rc=3 mất nhãn: {d.get('failure_class')!r}")
 
 
 @ca
@@ -8915,6 +8970,10 @@ DOT_BIEN = [
       '            if False:\n'
       '                raise OSError("credential changed before promotion")'),
      ["r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi"]),
+    ("g8_xong_rc0_van_giu_failure_class",
+     ('        ban_ghi.pop("failure_class", None)',
+      '        pass'),
+     ["r484_g8_run_xong_khong_mang_failure_class"]),
     ("m1_xoa_actionlint_khoi_cong_cu",
      ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
       '    {"ten": "actionlint_disabled", "bat_buoc": False, "ung_vien": ["actionlint"],'),
@@ -10097,6 +10156,11 @@ DOT_BIEN_HARNESS = [
      ('    tranh = {os.getpid(), os.getppid()}',
       '    tranh = set()'),
      ["r766_t81_khong_phu_thuoc_pid_cua_luot_chay"]),
+    # J01 (Codex lượt 4): bỏ bộ lọc môi trường thì BASH_ENV của máy chạy lại lọt vào hook.
+    ("g8_fixture_chep_nguyen_moi_truong",
+     ('               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
+      '               if True}'),
+     ["r484_g8_hook_scrub_kin_voi_bash_env"]),
 ]
 
 

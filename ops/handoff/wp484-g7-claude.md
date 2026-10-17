@@ -99,9 +99,30 @@ Bằng chứng lượt 4 (17-10, Linux): `launcher_test.py` **219/219** cả có
 Windows-only); ca H01 lặp 3/3; ruff F delta 0 (5/5); `ops/bash_nen.py quet` ĐẠT (không lời gọi trần mới). Mã sản
 phẩm không đổi.
 
+## Lượt vá 5 — sau Codex lượt 4 (CLI `fbfda8b5`: approve, P2=1 J01) + connector Codex (P1=1, P2=2) trên `0f31bb3`
+
+Chủ kho: vá J01 + P2 `failure_class`, P2 checkpoint thành nợ có tên `launcher-resume-checkpoint-khong-rang-buoc-luot-goc`;
+trần attempt 4→8, lời gọi Codex 4→5 (ghi hộ: <https://github.com/ducthangho/tra-luat/issues/484#issuecomment-6237196943>).
+P1 connector (spec/lease không có trong cây PR) không phải lỗi mã: chúng ở nhánh `ops/wp484-r7-spec` theo quy ước lease
+sống trên `ops/**` — đã trả lời thread.
+
+| finding | vá | ca · đột biến |
+|---|---|---|
+| J01 `BASH_ENV` của máy chạy lọt vào hook của fixture | fixture dựng env có lọc (`BASH_ENV`, `ENV`, `BASH_FUNC_*`), `HOME` tạm, thêm `actionlint` giả | `r484_g8_hook_scrub_kin_voi_bash_env` · `g8_fixture_chep_nguyen_moi_truong` (`DOT_BIEN_HARNESS`) |
+| P2 `failure_class="unknown"` cả khi `xong`/rc=0 (đo: run `47cf857e`) | `launcher.py`: gỡ nhãn khi `trang_thai == "xong"` và mã thoát 0; lượt hỏng/quá hạn/bị ngắt/`da_dung` giữ `unknown` | `r484_g8_run_xong_khong_mang_failure_class` · `g8_xong_rc0_van_giu_failure_class` (`DOT_BIEN`) |
+
+Đo được trong lúc vá: lần chạy đầu của ca J01 ĐỎ vì `NAP` (tệp khởi động bị nạp) — truy ra hai lời nạp đến từ phép
+dò của `ops/bash_nen.py tim_bash()` (phía TEST, `BASH_EXECUTION_STRING` = probe của bash_nen), không từ hook. Phép
+kiểm nay đòi `NAP` CÓ (BASH_ENV sống, ca không mù) và `NGOAI …` VẮNG (không installer ngoài fixture).
+
+Bằng chứng lượt 5 (17-10, Linux): `launcher_test.py` **221/221** cả có/không `CODEX_AUTH_JSON` giả (bỏ qua 2 ca
+Windows-only); ca J01 lặp 3/3; hai đột biến đã đăng ký, chạy trên bản sao tạm lấy nguyên cặp (cũ, mới) từ bảng:
+cả hai giết ca đích bằng assertion của chính ca (J01: lại thấy `NGOAI apt-get …`, đúng phản chứng 18 lời gọi của
+reviewer); ruff F 5/5 (delta 0); `bash_nen quet` ĐẠT; `bash -n` hook ok.
+
 ## Ngân sách
 
-attempt 4/4 (trần nâng 3→4 chỉ cho H01) · lời gọi Codex 3/3 (trần nâng 2→3) — không còn lượt nào.
+attempt 5/8 (trần nâng 4→8) · lời gọi Codex 4/5 đã dùng (trần nâng 4→5) — lượt 5 là lượt cuối được cấp.
 
 ## Điều kiện merge còn mở
 

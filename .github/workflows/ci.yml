@@ -824,6 +824,11 @@ jobs:
         if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/gate_lifecycle_test.py
 
+  # WP748 r16 — `targeted_mutant_gate` (cổng PR, KHÔNG phải full mutant audit): 52 ca nền + 239 tự đột biến
+  # (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh
+  # ghi biên nhận (head, sha256, rc, mốc giờ, tiến độ, nhật ký có trần, RAM đỉnh, số lần chạy lại). Gom đòi đủ
+  # thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở
+  # `ci-dot-bien-du.yml` trên đúng SHA ứng viên, BẮT BUỘC trước merge/land/release.
   gate-nhanh-manh:
     needs: chuan-bi
     strategy:
@@ -832,7 +837,7 @@ jobs:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
         manh: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 30
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -849,10 +854,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: chạy mảnh nhanh_don_duoc
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
         env:
-          NHANH_DON_DUOC_MANH: ${{ matrix.manh }}/8
-          NHANH_DON_DUOC_MANH_RA: manh/manh-${{ matrix.manh }}.json
+          NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+          NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
         run: python ops/nhanh_don_duoc_test.py
       - uses: actions/upload-artifact@v4
         with:
@@ -890,8 +895,8 @@ jobs:
           pattern: gate-nhanh-${{ matrix.os }}-*
           path: manh
           merge-multiple: true
-      - name: gộp mảnh nhanh_don_duoc
-        run: python ops/nhanh_don_duoc_test.py --gop manh
+      - name: gộp mảnh nhanh_don_duoc (targeted_mutant_gate)
+        run: python ops/nhanh_don_duoc_test.py --gop-dich manh
 
   gate-registry:
     # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất

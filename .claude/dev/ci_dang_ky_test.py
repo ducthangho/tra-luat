@@ -745,7 +745,8 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
 BAM_GATE_REGISTRY = "e2726e28ae7ecc869cd9df6c975e58f71c3c656594a509c9c2e4b9047c47bb4d"
-BAM_GATE_NHANH = "326b60b36421a7e1c71f25fac19ddba361091b0b5381b58c16708bc8f496a58a"
+# WP748 r16: hai job nay la `targeted_mutant_gate` (NHANH_DON_DUOC_DICH, gom `--gop-dich`, tran 30 phut).
+BAM_GATE_NHANH = "301d30a212b34bcff14390a3353084a9af0385fe917c76ab33a22cdc054e2e26"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -783,7 +784,7 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
 
 # #661 M4: CHỈ lượt tuần đặt biến này (ci.yml CẤM qua `loi_env_registry`); đột biến ĐỦ do job mảnh + gom (M5).
 BIEN_MANH, BO_MANH, JOB_MANH, JOB_GOP, SO_MANH = ("CI_DANG_KY_DOT_BIEN_MANH", "ops/nhanh_don_duoc_test.py",
-                                                  "dot-bien-manh", "dot-bien-gop", 4)
+                                                  "dot-bien-manh", "dot-bien-gop", 8)   # WP748 r16: full audit 8 manh
 
 
 def doc_bien_manh(env=os.environ):
@@ -914,7 +915,8 @@ def _job_manh_gop(goc):
     """#661 M5: hai job GHIM trọn; bước python + `env` TRÍCH từ `gate-registry`; matrix và N cùng từ `SO_MANH`."""
     dau = [{"uses": "actions/checkout@v4"}] + json.loads(json.dumps((goc.get("steps") or [])[2:3]))
     env, m = goc.get("env"), "${{ matrix.manh }}"
-    manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 30, "env": env,
+    # WP748 r16: full_mutant_audit ~73 800 s noi tiep (g12) => 8 manh x ~2,6 h => tran 360 (tran job GitHub).
+    manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 360, "env": env,
             "strategy": {"fail-fast": False, "matrix": {"manh": list(range(SO_MANH))}},
             "steps": dau + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
                              "env": {"NHANH_DON_DUOC_MANH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_MANH_RA": f"manh/manh-{m}.json"}},
@@ -2125,7 +2127,7 @@ def phan_chung():
                    ("gop-lenh-khac", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="true")),
                    ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True, 2, 3])),
                    ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
-                   ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 30.0})),
+                   ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 360.0})),
                    ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
                    # #705 F4: SUY từ ci.yml — hằng tay trôi khỏi trần thật thì ca thắng nhờ GIÁ TRỊ, thôi đo KIỂU.
                    ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": float(_wf0["jobs"]["gate-registry"]["timeout-minutes"])})),
@@ -2216,7 +2218,7 @@ def phan_chung():
         ("thieu-manh", lambda w: w["jobs"].pop("gate-nhanh-manh")),
         ("thieu-gop", lambda w: w["jobs"].pop("gate-nhanh-gop")),
         ("thieu-phan-hoach", lambda w: w["jobs"]["gate-nhanh-manh"]["strategy"]["matrix"].update(manh=[0, 1, 2, 3, 4, 5, 6])),
-        ("bo-bien-manh", lambda w: w["jobs"]["gate-nhanh-manh"]["steps"][3]["env"].pop("NHANH_DON_DUOC_MANH")),
+        ("bo-bien-manh", lambda w: w["jobs"]["gate-nhanh-manh"]["steps"][3]["env"].pop("NHANH_DON_DUOC_DICH")),
         ("bo-gop-khoi-needs", lambda w: w["jobs"]["gate-registry"].update(needs="chuan-bi")),
     ):
         w = json.loads(json.dumps(_wf0))

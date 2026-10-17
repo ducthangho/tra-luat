@@ -2289,7 +2289,7 @@ KHUNG_JOB = {
     'gate-cong-cu': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 45, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-cong-cu-gop': {'needs': ['chuan-bi', 'gate-cong-cu'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 10, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-ops': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
-    'gate-nhanh-manh': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 90, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-nhanh-manh': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 30, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-nhanh-gop': {'needs': ['chuan-bi', 'gate-nhanh-manh'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 10, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-registry': {'needs': ['chuan-bi', 'gate-nhanh-gop'], 'if': '${{ !cancelled() }}', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 105, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-packet-loop': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
@@ -2375,7 +2375,8 @@ KHUNG_BUOC = {
         ('Force LF checkout (hash parity với manifest)', {}),
         ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
         ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
-        ('chạy mảnh nhanh_don_duoc', {'env': {'NHANH_DON_DUOC_MANH': '${{ matrix.manh }}/8', 'NHANH_DON_DUOC_MANH_RA': 'manh/manh-${{ matrix.manh }}.json'}}),
+        # WP748 r16: targeted_mutant_gate (khong phai full mutant audit), tran job 90 -> 30 phut.
+        ('chạy mảnh nhanh_don_duoc (targeted_mutant_gate)', {'env': {'NHANH_DON_DUOC_DICH': '${{ matrix.manh }}/8', 'NHANH_DON_DUOC_DICH_RA': 'manh/manh-${{ matrix.manh }}.json'}}),
         ('actions/upload-artifact@v4', {'uses': 'actions/upload-artifact@v4', 'with': {'name': 'gate-nhanh-${{ matrix.os }}-${{ matrix.manh }}', 'path': 'manh/manh-${{ matrix.manh }}.json', 'if-no-files-found': 'error'}}),
     ],
     'gate-nhanh-gop': [
@@ -2383,7 +2384,7 @@ KHUNG_BUOC = {
         ('actions/checkout@v4', {'uses': 'actions/checkout@v4', 'with': {'fetch-depth': 0}}),
         ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
         ('actions/download-artifact@v4', {'uses': 'actions/download-artifact@v4', 'with': {'pattern': 'gate-nhanh-${{ matrix.os }}-*', 'path': 'manh', 'merge-multiple': True}}),
-        ('gộp mảnh nhanh_don_duoc', {}),
+        ('gộp mảnh nhanh_don_duoc (targeted_mutant_gate)', {}),
     ],
     'gate-registry': [
         ('Force LF checkout (hash parity với manifest)', {}),

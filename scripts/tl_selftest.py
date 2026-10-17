@@ -21953,7 +21953,7 @@ def run() -> int:
         #   + `docs/adr/0052-tran-loi-goi-codex-len-tam.md`
         #   + `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`
         # `docs/PROTOCOL_DA_PHIEN.md` (§20) là sửa, không thêm. `RELEASE_MANIFEST.json` đổi CHỈ vì băm của chính
-        # tệp này đổi ⇒ `file_count` giữ **187**; cây thật = 187 + 77 = **264**; trần Package 200 còn 13 khe.
+        # tệp này đổi ⇒ `file_count` giữ **187**; cây thật = 187 + 77 = **264**; trần Package 200 còn 12 khe (ZIP mang thêm entry manifest: 188).
         # R291-DAM-SO-CUNG = **4** (#522, #548, #551, #782). Lần này lại đúng hình dạng "cổng tài liệu xanh, không
         # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ
         # `1730/1731` (run 38945289558). Chủ kho chọn kê khai slot cho packet này; chữa nợ gốc là packet riêng.

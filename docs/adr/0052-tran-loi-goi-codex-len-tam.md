@@ -99,8 +99,10 @@ OID ấy có thể được biết trước; PR của kho không land kiểu ấ
 kiểm tay.
 
 Ngày ở dòng *Trạng thái* là ngày chủ kho duyệt, không tham gia phép đo. Ca của chính packet đọc ra đúng
-một câu trả lời: **không** revision nào của đặc tả packet `wp782` có dòng khai — đã đo cả bốn, r1 `56a0bf28…`,
-r2 `f54a18be…`, r3 `345b00c6…` và revision đang hiệu lực r4 `dc8df62d…` — ⇒ trần mặc định **hai**. Lời gọi thực
+một câu trả lời: **không** revision nào của đặc tả packet `wp782` có dòng khai — đo trên mọi revision đã đóng
+băng lúc viết (r1 tới r5, danh sách và băm ở bảng tiền nhiệm của revision mới nhất) — ⇒ trần mặc định **hai**.
+Câu này không thay phép đo: revision về sau chỉ đổi kết luận nếu chính nó mang dòng khai, và điều ấy đo trên
+băm của chính revision đó, không đọc từ đây. Lời gọi thực
 tế của PR ấy được nâng riêng bằng khối `nang_tran` của chủ kho (Issue #782), không phải bằng luật này.
 
 Vì vậy ADR này **không** sửa `ADR-0036`, `ADR-0037`, `ADR-0038`, `ADR-0041` hay đặc tả đóng băng

@@ -5535,10 +5535,9 @@ def case_pl_m5_rescue(c: Ctx):
     _pl(c, sd, _goi("g1", _H1), _goi("g2", _H1, 3), (8, "transition", "--to", "running"), _rescue(8, "nang_tran"),
         *[_rescue(0, qd) for qd in ("tach_stable_slice", "revision", "dung")])
     _kiem(sd, "ba quyết định GIỮ blocked", truc="codex_review_calls", **_RESCUE)
-    _pl(c, sd, _nang(0, tran=2), _rescue(0, "nang_tran"))
-    _kiem(sd, "nang_tran mở lại running", state="running", ly_do=None, truc=None)
-    if sum(h["event"] == "record_rescue" for h in _st(sd)["history"]) != 5:
-        raise AssertionError("record-rescue phải LUÔN ghi biên bản")
+    for hong in ({"nang_tran": [dict(truc="codex_review_calls", tran_cu=1, tran_moi=1, ai_nang="x", can_cu=_URL)]}, {"codex_review_calls_limit": 2}): (sd / "wp55.json").write_text(json.dumps({**_st(sd), "nang_tran": [], **hong})); _pl(c, sd, _rescue(8, "nang_tran"))  # F12: sửa tay MỘT trường (sổ nâng / trần) không mở lại
+    _pl(c, sd, _nang(0, tran=3), _rescue(0, "nang_tran")); _kiem(sd, "nang_tran mở lại running", state="running", ly_do=None, truc=None)
+    if sum(h["event"] == "record_rescue" for h in _st(sd)["history"]) != 7: raise AssertionError("record-rescue phải LUÔN ghi biên bản")
 
 
 def case_pl_m6_state_v1(c: Ctx):
@@ -5594,6 +5593,7 @@ MUTANTS.update({
     "pl_m4_tran_moi_bang": ("if a.tran_moi <= st[t]", "if a.tran_moi < st[t]", ["pl_m4_nang_tran"]),
     "pl_m4_can_cu_long": ("#issuecomment-[0-9]+$", "(#issuecomment-[0-9]+)?$", ["pl_m4_nang_tran"]),
     "pl_m5_mo_khong_can_nang": ('] > st[TRUC_TRAN[st["truc"]][0]]', "] >= 0", ["pl_m5_rescue"]),
+    "pl_f12_bo_so_nang": ('] and any(type(n) is dict and n.get("truc") == st["truc"]', '] and True or any(type(n) is dict and n.get("truc") == st["truc"]', ["pl_m5_rescue"]),
     "pl_m5_quyet_dinh_khac_mo": ('mo = (nang := a.quyet_dinh == "nang_tran") and', 'mo = not (nang := a.quyet_dinh == "nang_tran") or', ["pl_m5_rescue"]),
     "pl_m5_bo_kiem_ly_do": (' or st.get("ly_do") != "rescue_required":', ":", ["pl_m5_rescue"]),
     "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),

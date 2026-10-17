@@ -1315,13 +1315,13 @@ def cmd_record_rescue(a, state_dir: Path) -> int:
         _die(RC_STATE, f"record-rescue chỉ cho blocked vì rescue_required (đang {st['state']!r})")
     if not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--can-cu {a.can_cu!r} phải là URL issuecomment GitHub")
-    mo = (nang := a.quyet_dinh == "nang_tran") and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]]
+    mo = (nang := a.quyet_dinh == "nang_tran") and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]] and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[TRUC_TRAN[st["truc"]][1]] for n in st["nang_tran"])
     st["history"].append(dict(event="record_rescue", quyet_dinh=a.quyet_dinh, truc=st.get("truc"), can_cu=a.can_cu, mo_lai=mo))
     if mo:
         st["state"] = "running"; del st["ly_do"], st["truc"]
     _save(state_dir, st)
     if nang and not mo:
-        _die(RC_STATE, f"trục {st['truc']} chưa được nâng quá số đã dùng — chạy `nang-tran` trước")
+        _die(RC_STATE, f"trục {st['truc']} chưa có bản ghi nâng trần khớp trần hiện tại và lớn hơn số đã dùng — chạy `nang-tran` trước")
     print(f"đã ghi rescue {a.quyet_dinh} — state {st['state']}")
     return RC_OK
 

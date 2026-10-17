@@ -79,3 +79,10 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+da_bi_thay_the: wp748-r16-g16-claude-windows-20261017
+da_bi_thay_the_ly_do: >-
+  Owner revoked stale g15 and authorized r16/g16 at Issue #748 comment 6227461918.
+  The g15 Executor stopped during preflight after an unreceipted wall-clock gap.
+  Its product clone remained clean at head 5dfb3ee79b4548c1ee4513bec89a74c5bd2fa59d
+  and tree 8743bb72ebcf02767456bb3398a1e6527b6bed36; no patch,
+  product edit, commit, push, PR, gate or review occurred.

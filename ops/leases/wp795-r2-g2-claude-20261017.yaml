@@ -50,7 +50,11 @@ granted_on_instruction_note: >-
 recorded_by: claude-dispatcher-session
 recorder_is_executor: false
 leased_at_utc: '2026-10-17T14:15:00Z'
-lease_expires_at_utc: '2026-10-19T12:00:00Z'
+lease_expires_at_utc: '2026-10-17T15:36:00Z'
+thu_hoi_bang_rut_han: >-
+  Chu kho 17-10-2026 ~15:2xZ chon "Nhan r1 cho dot nay": executor da day va mo PR theo dac ta r1 (lease g1)
+  truoc khi nhan r2. Lease nay rut han, KHONG dung; g1 bo da_bi_thay_the va la lease hieu luc. Dac ta r2 giu lam
+  ho so, khong thi hanh.
 review_rounds_limit: null
 review_rounds_limit_basis: >-
   Dac ta co dong khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi tam. Truc VONG theo ADR-0048.
@@ -59,8 +63,7 @@ push_policy: push_mot_lan_sau_review_cuc_bo
 push_policy_note: >-
   Review Codex CLI offline tren SHA cuc bo; selftest + cong tai cho tren dung SHA; day nhanh code MOT lan. CI do
   thi chi day va CI, ghi bien nhan. Connector bao P0-P2 thi DUNG hoi chu kho.
-thay_the_cho:
-- wp795-r1-g1-claude-20261017
+thay_the_cho: []
 thay_the_cho_note: >-
   Dac ta r1 bi connector bat P2 tren PR #798; r2 thay r1. Lease g1 con han nen dung bia mo hai chieu:
   g1 mang da_bi_thay_the tro ve lease nay. Nhanh g1 (agent/wp795-g1-claude) chua day; executor chuyen viec sang nhanh g2.

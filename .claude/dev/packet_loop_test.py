@@ -5542,7 +5542,7 @@ def case_pl_m5_rescue(c: Ctx):
 def case_pl_m6_state_v1(c: Ctx):
     sd = _reviewing(c); st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
     (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER, "attempt": n} for n in (1, 2, 3)]}))
-    sd2 = c.sd(); __import__("shutil").copytree(sd, sd2, dirs_exist_ok=True); _pl(c, sd2, _goi("g1", _H1, 3))  # M6: đo call trước status, giữ fixture reader độc lập
+    sd2 = c.sd(); (sd2 / "wp55.json").write_text(json.dumps({**_st(sd), "reviewer_identity": {"model_family": "openai"}})); _pl(c, sd2, _goi("g1", _H1, 3))  # M6: call dùng họ tường minh; sd giữ thiếu họ để đo suy
     _kiem(sd2, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     rc, o, e = run(c.script, ["status", "--packet", 55], sd)
     _doi(0, rc, e, "status trên state v1 hợp lệ")

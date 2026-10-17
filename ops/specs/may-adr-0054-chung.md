@@ -44,7 +44,7 @@ do workflow đăng, connector, CI và quyết định merge của chủ kho. M�
 | I8 | So danh tính lease ↔ biên nhận qua đúng hàm chuẩn hoá của `ops/bien_nhan_v2.py`; giá trị không ánh xạ được ⇒ không đạt. |
 | I10 | Mỗi hiện vật dùng ở một cửa có **vai trò** khai rõ, và khớp đủ **(packet, generation, sha, spec_hash)** của đúng ngữ cảnh vai trò ấy: hiện vật **ứng viên** khớp generation hiện hành và SHA ứng viên; hiện vật **nguồn** (vd bằng chứng connector trên head đã mở lại, biên nhận finding muộn của generation trước) khớp generation và SHA **nguồn** đã ghi trong state. Lệch một trong bốn của vai trò mình, hay dùng sai vai trò ⇒ không đạt. |
 | I11 | **Phân lớp là việc của reviewer.** Mọi finding đi vào bộ đếm (offline, connector, muộn) mang slug lấy từ bảng lớp trong biên nhận hạng H (I10); executor không tự đặt slug. Slug ổn định xuyên ID, nguồn và generation; đổi phải qua bảng nối có lý do trong biên nhận. |
-| I9 | Packet không chịu `ADR-0054` đi đường cũ **y như trước**; mọi ca có sẵn của `packet_loop_test.py` vẫn ĐẠT (gồm `init` chưa có lease ⇒ `awaiting_lease`). Chế độ `ADR-0054` chỉ được xác định khi **lease được ghi vào state** (`record-lease`), không ở `init`. |
+| I9 | Packet không chịu `ADR-0054` đi đường cũ **y như trước**; mọi ca có sẵn của `packet_loop_test.py` vẫn ĐẠT (gồm `init` chưa có lease ⇒ `awaiting_lease`). Chế độ `ADR-0054` chỉ được xác định ở **đường lease mới** của `record-lease` (đọc lease từ ref remote); đường `record-lease` cũ (truyền trường lease trực tiếp) giữ nguyên và luôn cho `luat_adr0054: false`. |
 
 ## Điều kiện dừng và đẩy (mọi packet con)
 

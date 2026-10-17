@@ -21957,10 +21957,15 @@ def run() -> int:
         # R291-DAM-SO-CUNG = **4** (#522, #548, #551, #782). Lần này lại đúng hình dạng "cổng tài liệu xanh, không
         # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ
         # `1730/1731` (run 38945289558). Chủ kho chọn kê khai slot cho packet này; chữa nợ gốc là packet riêng.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 77 == 264
+        # KÊ KHAI SLOT (packet #784 r2 — ADR-0054): 77 → **78** Markdown dưới `docs/`. Thêm ĐÚNG MỘT tệp
+        # dev-side/ngoài gói: + `docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md`.
+        # `docs/PROTOCOL_DA_PHIEN.md` là sửa, không thêm. Manifest đổi CHỈ vì băm tệp này ⇒ `file_count` giữ **187**;
+        # cây thật = 187 + 78 = **265**; trần Package 200 vẫn còn 12 khe (gói không đổi; ZIP 188 entry).
+        # R291-DAM-SO-CUNG = **5** (#522, #548, #551, #782, #784). Lần này chạy selftest TRƯỚC lần đẩy duy nhất.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 78 == 265
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 77
+        ok4 = (len(tren_dia) == 78
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

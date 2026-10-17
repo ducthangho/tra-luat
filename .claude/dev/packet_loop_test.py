@@ -5558,9 +5558,10 @@ def case_pl_m6_state_v1(c: Ctx):
     _pl(c, sd, _goi("g1", _H1, 3))
     _kiem(sd, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
-    for hong in ({}, {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
+    for hong in ({}, *({k: ...} for k in ("packet", "state", "attempt_open", "reviewing_head_sha")), {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
                  *({k: v} for k, v in (("attempts_used", True), ("attempts_used", 0.5), ("attempts_used", "one"),
-                                      ("attempt_open", "false"), ("attempt_open", []), ("same_failure_limit", None), ("finding_counts", []))),
+                                      ("attempt_open", "false"), ("attempt_open", []), ("same_failure_limit", None), ("finding_counts", []), ("packet", None), ("packet", []), ("packet", True), ("packet", 56), ("state", []), ("state", "other"), ("reviewing_head_sha", []))),
+                 *({"state": s, "ly_do": "rescue_required", "truc": "codex_review_calls", "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]} for s in ("running", "reviewing", "accepted")),
                  {"codex_review_calls_limit": True}, {"codex_calls": {}}, {"dem_tu_suy": "false"}, {"codex_calls": [dict(g, da_dung=1)]},
                  {"codex_calls": [g, g]}, {"codex_calls": [dict(g, run_id=f"g{i}") for i in range(4)]}, {"codex_review_calls_used": 2},
                  {"codex_calls": [g]}, {"review_rounds_used": 2}, {"reviews": {}, "review_rounds_used": 0}, {"history": None}, {"history": [None]},
@@ -5568,7 +5569,7 @@ def case_pl_m6_state_v1(c: Ctx):
                  {"reviewer_identity": False}, {"state": "blocked", "ly_do": "rescue_required", "truc": "vong_review",
                                              "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]},
                  {"state": "blocked", "ly_do": "rescue_required", "truc": "unknown", "history": [{"event": "blocked_rescue_required", "truc": "unknown"}]}):
-        (sd / "wp55.json").write_text(json.dumps({**t, **hong}))
+        (sd / "wp55.json").write_text(json.dumps({k: v for k, v in {**t, **hong}.items() if v is not ...}))
         _pl(c, sd, (8 if hong else 0, "status"))
 
 

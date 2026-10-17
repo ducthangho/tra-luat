@@ -7513,7 +7513,13 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
                    CODEX_HOME=str(home), CODEX_AUTH_JSON=snapshot,
                    PATH=str(fakebin) + os.pathsep + os.environ["PATH"])
-        p = subprocess.run(["bash", str(hooks / "session-start.sh")], env=env,
+        # wp484 g7 — bản g6 gọi tên trần ["bash", …]: cổng `ops/bash_nen.py` (hạn ngạch 7 của master
+        # cho tệp này) đếm thành lời gọi trần thứ 8 ngay khi #509 gặp master. Dùng bộ giải CHUẨN;
+        # None là KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không được bỏ qua ca.
+        import runpy
+        vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
+        bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
+        p = subprocess.run([vo, str(hooks / "session-start.sh")], env=env,
                            capture_output=True, text=True, timeout=30)
         assert p.returncode == 97 and "HOOK-BOUNDARY-OK" in p.stderr, p.stdout + p.stderr
         assert (home / "auth.json").read_text() == snapshot

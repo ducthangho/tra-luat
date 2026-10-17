@@ -1,0 +1,128 @@
+# HO SO LAND — packet #775 wp775 r1 (lease g1), ma qua PR #779. Khuon: ops/land/pr772-wp766-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (d8b15cb). `landed: false` — `landed` chi len true khi chu kho quyet O PR GHI SO NAY va gate push
+# master phu ma nay XANH. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# Gate push master RIENG cua d8b15cb bi HUY do concurrency (master tien len d347d42 luc 17:27Z, PR #801); gate phu ma nay
+# la luot push master tren d347d42 (con con cua d8b15cb) — xem post_merge_checks.
+# NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
+# review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr779-wp775-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
+
+schema_version: 1
+mission_id: gh-775
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01EBdzzrGkYmDwogoNtscJrN
+input_packet_generations:
+  - {packet_issue: 775, packet_id: wp775, revision: 1, generation: 1, lease_id: wp775-r1-g1-claude}
+authorized_head_sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d
+authorized_head_tree: 4e712f37bf014e18e87df07d0f94d0ba353fb3e7
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/779
+land_operator: 'ducthangho (chu kho tu bam merge tren GitHub); phien executor KHONG merge'
+merge_method: merge
+merge_commit: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf
+merge_commit_tree: 6474598db320df3de03d0251ba9305dde1875b3f
+merge_commit_parents: [73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8, f9d84d70fb46540bbecfae963c9afb4a2b48984d]
+pre_merge_checks:
+  - {name: 'ci.yml (13 gate* + chuan-bi + thu-hoi)', run_id: 39047604566, run_attempt: 2, sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d, conclusion: success, kiem_gate: 'packet_loop.py kiem-gate 15 ten rc=0', nguon: [readback-run-39047604566.json, readback-check-runs-f9d84d7.json]}
+  - {name: 'executor cross-review codex luot 17 (launcher.py run)', sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d, conclusion: 'approve, P1=0 P2=0 P3=0', nguon: verdict-luot17/}
+  - {name: 'Codex connector review luot 18', sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d, conclusion: "completed — 'Didn't find any major issues', Reviewed commit f9d84d70fb", nguon: [readback-codex-connector-receipt-6236575036.json, readback-codex-connector-state-779.json]}
+post_merge_checks:
+  - {name: 'ci.yml push master', run_id: 39051543180, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: cancelled, ly_do: 'concurrency — master tien len d347d42 (merge PR #801) luc 17:27:23Z; run cap nhat 17:27:24Z. Phien executor KHONG huy run nay.', nguon: [readback-run-39051543180.json, readback-runs-master-push.json]}
+  - {name: 'launcher (Windows that) push master', run_id: 39051543211, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: success, nguon: readback-run-39051543211.json}
+  - {name: 'ci.yml push master (phu d8b15cb)', run_id: 39053830242, sha: d347d42, conclusion: CHO, ghi_chu: 'd347d42 la con truc tiep cua d8b15cb; ket qua ghi bo sung vao ho so nay truoc khi chu kho quyet landed.'}
+bookkeeping:
+  - {item: 'dong Issue #775 (completed) kem ban chieu ho so nay', luc: sau PR ghi so}
+  - {item: 'mo 7 issue no ngoai pham vi spec r1', issues: [804, 805, 806, 807, 808, 809, 810]}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-775-land}
+# ---- het truong chuan
+packet_id: wp775
+packet_issue: 775
+generation: 1
+generation_nghia: Lan land THU NHAT cua ma packet #775 (lease g1 duy nhat).
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session — CUNG phien la executor cua packet (session_01EBdzzrGkYmDwogoNtscJrN). Chu kho tu merge; phien nay
+  chi ghi so theo chi thi trong phien 17-10-2026 "Ghi sổ land và đóng #775, mở issue cho 7 nợ".
+
+spec:
+  path: ops/specs/wp775.md
+  sha256: 4b7530c265dddefbebd06ea209d7c0594210f57b391e0d0d353931171fd2b6d8
+  blob: 898369502c3ad4e4001e9f25692af61d2bf80102
+  nguon: 'measured — git show origin/ops/wp775-spec:ops/specs/wp775.md | sha256sum; spec CHUA vao master (nam tren nhanh ops/wp775-spec).'
+lease:
+  lease_id: wp775-r1-g1-claude
+  path: ops/leases/wp775-r1-g1-claude.yaml (nhanh ops/wp775-spec)
+  cap_boi: 'loi_khai_co_neo — granted_on_instruction https://github.com/ducthangho/tra-luat/issues/775#issuecomment-6217700890 (ghi trong lease).'
+  lease_until: '2026-10-18T14:31:56Z'
+  write_set: ['.claude/dev/packet_loop.py', '.claude/dev/packet_loop_test.py']
+  thu_hoi: >-
+    CHUA thu hoi. measured — 2026-10-17T16:58Z sau fetch +refs/heads/* (ls-remote 587 = for-each-ref 587, thieu 0) va dong
+    bo master cuc bo: `ops/lease_publish.py ai-dang-giu` cho ca hai duong dan rc=11, "NGƯỜI_GIỮ 1: wp775-r1-g1-claude"
+    (CÒN_HẠN). Packet da merge nen lease nay la quyen ghi con song sau khi viec xong (no AG-T0-01B); tu het han
+    2026-10-18T14:31:56Z. Rut han som can uy quyen chu kho (lease da dang, executor khong tu sua). Tho:
+    ops/land/pr779-wp775-provenance/ai-dang-giu/.
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-779.json: merged true, merged_at 2026-10-17T16:55:50Z, merged_by ducthangho, merge_commit_sha
+    d8b15cb0730c85e7019aee627c3bfa645a6d3eaf (cha 73bf92c + f9d84d7), merge commit (khong squash/rebase).
+  landed: false
+  landed_ly_do: >-
+    Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1), va gate push master phu ma nay (run 39053830242 tren
+    d347d42) phai xanh.
+
+uy_quyen_land:
+  dang: >-
+    measured — chu kho (ducthangho, OWNER) TU merge PR #779 tren GitHub luc 2026-10-17T16:55:50Z (readback-pr-779.json
+    merged_by, readback-events-779.json). Khong co comment uy quyen rieng; chinh thao tac merge cua chu kho la quyet dinh.
+    Phien executor da DUNG cho uy quyen (bao cao cuoi #775 issuecomment-6237056761, neo f9d84d7).
+  candidate_sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d
+  head_khong_doi: 'measured — readback-pr-779.json head.sha = f9d84d7 = cha thu hai cua d8b15cb.'
+  khong_xung_dot: >-
+    measured gian tiep — master tien tu 653fef3 (base packet) len 73bf92c truoc merge; merge commit 2 cha, khong conflict
+    (GitHub mergeable). Tree d8b15cb (6474598) khac tree f9d84d7 (4e712f3) vi master co commit khac — dung nhu mong doi.
+
+dieu_kien_merge_spec:
+  merge_1: 'measured — executor cross-review codex luot 17 tren f9d84d7: approve P1=0 P2=0 P3=0 (verdict-luot17/VERDICT.md sha256 a1957436…).'
+  merge_3: 'measured — ci.yml run 39047604566 tren f9d84d7: success; kiem-gate 15 ten rc=0.'
+  merge_4: 'measured — Codex connector luot 18 tren f9d84d7: sach (comment 6236575036).'
+
+review:
+  so_loi_goi_codex: 18
+  chi_tiet: >-
+    thuat_lai — executor-review 1–10 va 13–17 qua launcher.py run, connector 11, 12, 18; luot 5, 7, 9 bi bo loc noi dung
+    cua nen cat. Finding F01–F18 deu da va; ban chieu VERDICT (kem sha256) tren PR #779. Trac nghiem bang ngoai cuoi:
+    40/40 o dot bien chet DUNG chot (audit luot 17).
+  luot_cuoi:
+    reviewer: >-
+      codex (Codex CLI, khac ho executor) qua launcher.py run 'wp775-review-17-codex' (run.json ma_thoat 0, head f9d84d7,
+      prompt sha256 4ab354c8…). Read-only la CHI THI, khong cuong che.
+    hien_vat: ops/land/pr779-wp775-provenance/verdict-luot17/
+    ket_qua: 'thuat_lai — approve, P1=0 P2=0 P3=0'
+  codex_connector: 'measured — luot 18 sach tren f9d84d7.'
+  thread: 'measured — 13/13 review thread cua connector da tra loi va resolve truoc merge.'
+
+no_ngoai_pham_vi:
+  - {ma: wp775-no-launcher-evidence, issue: 804}
+  - {ma: wp775-no-receipt-truoc-dem-vong, issue: 805}
+  - {ma: wp775-no-tran-vong-theo-ngay-dong-bang, issue: 806}
+  - {ma: wp775-no-fallback-human-audited, issue: 807}
+  - {ma: wp775-no-ke-thua-ngan-sach-generation, issue: 808}
+  - {ma: wp775-no-rang-buoc-da-dung-voi-review, issue: 809}
+  - {ma: wp775-no-loi-goi-cuoi-that-bai, issue: 810}
+
+khong_do_duoc:
+  - 'Log day du cua cac job CI KHONG luu; chi readback run/check-run.'
+  - 'stderr.log cua cac luot review KHONG luu (co the chua noi dung bo loc nen, lon); model thuc chay KHONG_DO_DUOC.'
+  - 'Gate push master rieng cua d8b15cb: KHONG co (bi huy do concurrency); chi do duoc qua run phu tren d347d42.'
+  - 'Than comment PR #779 khong luu nguyen van (441 KB); readback-comments-779-chi-muc.json giu id/user/thoi diem/sha256 than.'

@@ -21966,7 +21966,8 @@ def run() -> int:
         # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3: 187). Thêm docs KHÔNG kê khai slot ở đây nữa.
         ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         d = root / "docs"
-        tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
+        # chỉ TỆP thật: thư mục hay symlink hỏng tên `*.md` không được tính là còn docs (F1 review wp794 lượt 1).
+        tren_dia = sorted(q for q in d.rglob("*.md") if q.is_file()) if d.is_dir() else []
         ok4 = (len(tren_dia) >= 1
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}

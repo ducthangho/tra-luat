@@ -1150,6 +1150,8 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"phải vào lại 'reviewing' với head mới.",
         )
 
+    if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
+        _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
     goi = None
     if _la_codex(st):
         goi = next((g for g in st["codex_calls"] if g["run_id"] == a.codex_call), None)
@@ -1315,7 +1317,8 @@ def cmd_record_rescue(a, state_dir: Path) -> int:
         _die(RC_STATE, f"record-rescue chỉ cho blocked vì rescue_required (đang {st['state']!r})")
     if not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--can-cu {a.can_cu!r} phải là URL issuecomment GitHub")
-    mo = (nang := a.quyet_dinh == "nang_tran") and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]] and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[TRUC_TRAN[st["truc"]][1]] for n in st["nang_tran"])
+    u, t = TRUC_TRAN.get(st.get("truc"), ("", ""))  # mở lại chỉ khi trần > đã dùng VÀ có bản ghi M4 ĐỦ HÌNH DẠNG (người nâng, căn cứ, trần cũ < mới) khớp trần hiện tại
+    mo = (nang := a.quyet_dinh == "nang_tran") and st[t] > st[u] and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[t] and type(n.get("tran_cu")) is int and n["tran_cu"] < st[t] and n.get("ai_nang") in NGUOI_CO_THAM_QUYEN and bool(CAN_CU_RE.match(str(n.get("can_cu")))) for n in st["nang_tran"])
     st["history"].append(dict(event="record_rescue", quyet_dinh=a.quyet_dinh, truc=st.get("truc"), can_cu=a.can_cu, mo_lai=mo))
     if mo:
         st["state"] = "running"; del st["ly_do"], st["truc"]

@@ -59,13 +59,22 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
   (`git clone --bare --reference` kho cục bộ + `fetch '+refs/heads/*:refs/remotes/origin/*'`, 23:31:42Z; so tập tên + OID với
   `ls-remote --heads`: thiếu 0, thừa 0, 541 nhánh); clone làm việc từ bản bare cho A6 ("ref cục bộ" = `git for-each-ref refs/heads refs/remotes` bỏ ref tên kết thúc `/HEAD`, đúng tập `_cac_ref_cuc_bo` — `ops/lease_publish.py` dòng 524–536 — mà `_quet_lease_toan_kho` đọc; số ấy đổi theo máy chủ và theo cách đọc, không chống đỡ tiêu chí nào — A6 đo TẬP — nên không ghi thành chữ số).
 - Môi trường chạy lệnh (điều kiện để TÁI LẬP mọi phép đo `ops/lease_publish.py` ở mục này và ở Nghiệm thu; là quy tắc cho người chạy lại, KHÔNG phải lời
-  khai về lần đo của lượt soạn): `GITHUB_ACTOR` không đặt, rỗng, hoặc bằng `ducthangho` (không phân biệt hoa thường). Biến ấy đặt mà ngoài
+  khai về lần đo của lượt soạn): `GITHUB_ACTOR` không đặt, rỗng, hoặc bằng `ducthangho` (không phân biệt hoa thường; `kiem()` cắt khoảng trắng hai đầu trước khi so, dòng 1067–1068: giá trị chỉ gồm
+  khoảng trắng tính là rỗng, ` ducthangho ` tính là `ducthangho` — đo lượt 13, 17-10-2026 ở `c522c17`: `check` và `body` rc 0 với một dấu cách, một dấu tab và ` ducthangho `). Biến ấy, sau khi cắt, khác rỗng mà ngoài
   `NGUOI_CO_THAM_QUYEN = ("ducthangho",)` (`ops/lease_publish.py` dòng 271) thì `kiem()` ném rc 4 (dòng 1067–1072), nên `check`, `body` và vòng `kiem(bo_qua_han=True)`
   của A6 ra rc 4 thay cho kết quả vốn có (rc 0, hoặc rc của các chốt đứng sau) ở mọi lease qua được các chốt đứng trước dòng 1067 (đo lượt 12, 17-10-2026 ở `c522c17`:
   vòng ấy qua 152 lease với `GITHUB_ACTOR=claude` cho 0 lease rc 0; `check` và `body` trên một lease mẫu hợp lệ cho rc 0 khi biến không đặt hoặc là `ducthangho`,
-  rc 4 khi là `claude`). Riêng `kiem-github` còn đòi `GITHUB_REPOSITORY` dạng `chủ/kho` (`_repo_github()`, dòng 856–860; rỗng hoặc sai dạng ⇒ rc 8): thiếu biến ấy
+  rc 4 khi là `claude`). Riêng `kiem-github` còn đòi `GITHUB_REPOSITORY` dạng `chủ/kho` (`_repo_github()`, dòng 856–860; rỗng hoặc sai dạng ⇒ rc 8; biến cũng bị cắt khoảng trắng hai đầu — đo lượt 13, 17-10-2026 ở `c522c17`,
+  với `gh` giả như bên dưới: ` o/r ` ⇒ rc 9, một dấu cách ⇒ rc 8): thiếu biến ấy
   thì ca A3b (ii) ra rc 8 chứ không phải rc 9 (đo lượt 12, 17-10-2026 ở `c522c17`, `gh` giả trả đúng dấu "đã đăng" mà `_kiem_comment_da_co` (dòng 882) nhận:
   không đặt biến ⇒ rc 8, đặt `o/r` ⇒ rc 9).
+  Hai biến trên là hai biến mà `kiem()` (dòng 1067) và `_repo_github()` (dòng 857) ĐỌC; chúng không phải toàn bộ thứ đổi được rc, nên người chạy lại dựng môi trường của các lệnh đo (`check`, `body`, `kiem-github`
+  và vòng A6; không tính các bước dựng kho tạm và `git clone`) theo DANH SÁCH CHO PHÉP chứ không theo danh sách cấm: dựng từ rỗng, trên Linux (nền đo; Windows chưa đo), chỉ gồm `PATH` (có `python3` và `git`)
+  cộng biến nêu riêng ở phép đo (`GITHUB_REPOSITORY=o/r` cho A3b (ii)), không kế thừa biến nào khác của phiên (các giá trị `GITHUB_ACTOR` nêu ở đầu bullet là phép đo cho cùng kết quả như khi không đặt,
+  không phải ngoại lệ của quy tắc này). Lý do: `GOI_GH` và `GOI_GIT` (`ops/lease_publish.py` dòng 70 và 76) gọi `subprocess.run` không đặt `env=`, nên `gh` và `git` kế thừa nguyên môi trường của người chạy.
+  Đo lượt 13, 17-10-2026 ở `c522c17` (`GITHUB_ACTOR` không đặt): đặt `GIT_DIR` hoặc `GIT_OBJECT_DIRECTORY` vào đường dẫn không phải kho làm 43 trong 152 lease của vòng A6 — đúng các lease có `thay_the_cho`
+  khác rỗng mà qua các chốt đứng trước `_kiem_bia_mo` — ra rc 12, không lease nào khác đổi; dưới môi trường chỉ có `PATH` (kèm `GITHUB_REPOSITORY=o/r` cho `kiem-github`), `check` và `body` trên lease mẫu hợp lệ
+  (kể cả lease có `thay_the_cho` trỏ lease cũ đã ghi bia mộ) ra rc 0, còn `kiem-github` với `gh` giả ra rc 9 khi đã đăng và rc 0 khi chưa đăng.
 - Bảng mã thoát: `RC_OK 0`, `RC_THAM_SO 2`, `RC_TU_CAP 4`, `RC_NEO 6`, `RC_NOI_DUNG 8`, `RC_DA_DANG 9`, `RC_LOP 10`, `RC_DANG_GIU 11`,
   `RC_KHONG_XAC_DINH 12` (`ops/lease_publish.py` dòng 44–52, tệp không đổi từ `6f121a3`). Mã `13` chưa dùng. Docstring `MÃ THOÁT`
   dòng 18–25 thiếu 11, 12 (dòng 26 là dòng đóng docstring); `--help` in 0 dòng chứa `MÃ THOÁT` (00:03:51Z 16-10).
@@ -412,4 +421,13 @@ Review lượt 12 (`changes_requested, 0 P1 · 1 P2 · 0 P3`; reviewer Claude So
 `e074a25`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
 (`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 12")} f' <tệp spec> | wc -l` ra `9`). 1 lớp:
 `moi-truong-do-an-github-actor-github-repository-a3b-ii-a6-so-do-nen-thieu-dieu-kien-chay-lenh`.
+
+## Vá sau review lượt 13
+
+Bản trước vá: commit `2ef2384`, sha256 `629cef69bd1bf0263f501e721a9ad9c12780487be6dc77889f11cf0f763d4ac5` (`git show 2ef2384:ops/specs/no-p3-lease-spec-hash-r3.md` ra đúng băm này).
+Review lượt 13 (`changes_requested, 0 P1 · 1 P2 · 1 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `0ebcb89407309ace85ecfa7bc7bb95933b157fe8`; VERDICT sha256 `c30a6eeedd7bba89512683d49c1f53c8d77314b4f3fdc65d16f44e49ca30ed91`, HINT sha256 `ad031435068047fd5f034c3d6447e1769709fbd04a006da8b9317c82e6894c13`; hai tệp KHÔNG có trong kho — đo 2026-10-17 ở
+`2ef2384`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 13")} f' <tệp spec> | wc -l` ra `9`). 2 lớp:
+`moi-truong-chay-lenh-bullet-thieu-bien-git-ke-thua-qua-goi-git-git-dir-doi-rc-12-a6-43-tren-152` · `moi-truong-github-actor-github-repository-bi-cat-khoang-trang-hai-dau-bullet-khai-dat-ma-ngoai-rc-4`.
 

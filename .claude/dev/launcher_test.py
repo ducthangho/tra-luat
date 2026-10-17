@@ -7515,11 +7515,24 @@ def r484_g2_hook_shell_scrub_truoc_probe():
                       "[ \"$1\" = .claude/dev/launcher.py ] && exit 0\n"
                       f"exec '{PY}' \"$@\"\n", encoding="utf-8")
         py.chmod(0o755)
+        # G02 (Codex lượt 2): hook dời materialize ra sau bước cài CLI, nên fixture PHẢI kín với
+        # installer của máy chạy test — `codex`/`claude` giả chạy được (hook không cài gì), `npm`
+        # giả chỉ ghi nhật ký; PATH bỏ mọi thư mục có bản thật. Gọi tới npm là ĐỎ.
+        for ten in ("codex", "claude"):
+            (fakebin / ten).write_text(
+                "#!/bin/sh\n"
+                f"if [ -n \"${{CODEX_AUTH_JSON:-}}${{TL_CODEX_SNAPSHOT:-}}\" ]; then echo 'BAN {ten}' >> '{nhat_ky}'; exit 96; fi\n"
+                f"echo '{ten}-inert 0.0.0'\n", encoding="utf-8")
+            (fakebin / ten).chmod(0o755)
+        (fakebin / "npm").write_text(f"#!/bin/sh\necho \"NPM $*\" >> '{nhat_ky}'\nexit 0\n", encoding="utf-8")
+        (fakebin / "npm").chmod(0o755)
+        sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
+                if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
         home = s / "codex"
         snapshot = '{"tokens":{"refresh_token":"INERT-HOOK"}}'
         env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
                    CODEX_HOME=str(home), CODEX_AUTH_JSON=snapshot,
-                   PATH=str(fakebin) + os.pathsep + os.environ["PATH"])
+                   PATH=os.pathsep.join([str(fakebin)] + sach))
         # wp484 g7 — bản g6 gọi tên trần ["bash", …]: cổng `ops/bash_nen.py` (hạn ngạch 7 của master
         # cho tệp này) đếm thành lời gọi trần thứ 8 ngay khi #509 gặp master. Dùng bộ giải CHUẨN;
         # None là KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không được bỏ qua ca.
@@ -7531,6 +7544,7 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         ky = nhat_ky.read_text(encoding="utf-8").splitlines() if nhat_ky.exists() else []
         bang(ky.count("CHUAN_BI") == 1, f"materializer phải chạy đúng 1 lần: {ky} · {p.stdout[-400:]}")
         bang(not [x for x in ky if x.startswith("BAN ")], f"lời gọi khác thấy snapshot: {ky}")
+        bang(not [x for x in ky if x.startswith("NPM ")], f"fixture gọi installer: {ky}")
         bang(any(x.startswith("SACH ") for x in ky[ky.index("CHUAN_BI") + 1:]),
              f"không đo được lời gọi nào SAU materializer: {ky}")
         bang(p.returncode != 13, f"hook dừng ở 13: {p.stdout[-300:]}")
@@ -7555,7 +7569,7 @@ def r484_g2_bridge_scrub_va_chot_remote():
                                 "CLAUDE_PROJECT_DIR": str(LAUNCHER.parents[2])}):
         with patch.object(bridge.runpy, "run_path", return_value={"chuan_bi_xac_thuc": prepare}), \
              patch.object(bridge, "_ung_vien_bash", return_value=["inert-bash"]), \
-             patch.object(bridge.shutil, "which", return_value="/inert/codex"), \
+             patch.object(bridge, "_codex_chay_duoc", return_value=True), \
              patch.object(bridge.subprocess, "run", side_effect=child):
             # wp484 g7: ca này đo nhánh CÓ codex (materialize trước shell); nhánh vắng codex ở F04.
             assert bridge.main() == 0
@@ -7690,7 +7704,7 @@ def r484_g7_bridge_vang_codex_hoan_materialize_sau_hook():
                                 "CLAUDE_PROJECT_DIR": str(LAUNCHER.parents[2])}):
         with patch.object(bridge.runpy, "run_path", return_value={"chuan_bi_xac_thuc": prepare}), \
              patch.object(bridge, "_ung_vien_bash", return_value=["inert-bash"]), \
-             patch.object(bridge.shutil, "which", return_value=None), \
+             patch.object(bridge, "_codex_chay_duoc", return_value=False), \
              patch.object(bridge.subprocess, "run", side_effect=child):
             rc = bridge.main()
             bang(calls == ["child", "child", "prepare"], f"thứ tự sai (phải hook rồi mới materialize): {calls}")
@@ -7699,6 +7713,27 @@ def r484_g7_bridge_vang_codex_hoan_materialize_sau_hook():
             calls.clear(); nhan.clear(); rc_hook[0] = 7
             os.environ["CODEX_AUTH_JSON"] = "INERT-HOAN"
             bang(bridge.main() == 7 and calls == ["child", "child"], f"hook hỏng mà vẫn materialize: {calls}")
+
+
+@ca
+def r484_g7_bridge_codex_co_mat_nhung_hong_van_hoan():
+    """G01 (Codex lượt 2): `codex` CÓ trên PATH nhưng chạy hỏng (rc=127) phải được coi như vắng ⇒
+    hoãn materialize để hook cài lại CLI. Shim chạy được ⇒ không hoãn. Child probe không thấy snapshot."""
+    if LA_WINDOWS:
+        return "BO QUA shim POSIX"
+    from unittest.mock import patch
+    bridge = _nap_sach(LAUNCHER.parents[1] / "hooks/session_start.py")
+    with San() as s:
+        for ten, than, mong in (
+                ("hong", "#!/bin/sh\nexit 127\n", False),
+                ("rong", "#!/bin/sh\nexit 0\n", False),
+                ("tot", "#!/bin/sh\n[ -z \"${CODEX_AUTH_JSON:-}\" ] || exit 3\necho codex-cli 0.0.0-inert\n", True)):
+            d = s / ten; d.mkdir()
+            (d / "codex").write_text(than, encoding="utf-8"); (d / "codex").chmod(0o755)
+            env = {"PATH": str(d), "CODEX_AUTH_JSON": "INERT-G01"}
+            with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-G01"}):
+                bang(bridge._codex_chay_duoc(env) is mong, f"{ten}: mong {mong}")
+        bang(bridge._codex_chay_duoc({"PATH": str(s / "khong-co")}) is False, "vắng codex mà báo chạy được")
 
 
 @ca

@@ -89,6 +89,23 @@ def _ep_utf8() -> None:
             pass
 
 
+def _codex_chay_duoc(env: dict[str, str]) -> bool:
+    """CÓ MẶT ≠ CHẠY ĐƯỢC (Codex lượt 2 G01): `shutil.which` thấy một shim hỏng (rc=127) vẫn trả
+    đường dẫn, và bridge từng materialize ngay ⇒ rc=13 trước khi hook kịp cài lại CLI. Cùng
+    phép thử với `co_chay` của hook: `--version` có hạn, đòi rc=0 VÀ có đầu ra. Child chạy với
+    env ĐÃ gỡ snapshot."""
+    duong = shutil.which("codex", path=_lay_env(env, "PATH"))
+    if not duong:
+        return False
+    sach = {k: v for k, v in env.items() if k.upper() != "CODEX_AUTH_JSON"}
+    try:
+        p = subprocess.run([duong, "--version"], stdin=subprocess.DEVNULL, capture_output=True,
+                           text=True, env=sach, timeout=8, encoding="utf-8", errors="replace")
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return p.returncode == 0 and bool(((p.stdout or "") + (p.stderr or "")).strip())
+
+
 def _vat_chat_hoa(project: Path, snapshot: str | None) -> bool:
     """Chạy materializer của kho trong tiến trình này. `snapshot=None` ⇒ đọc os.environ (như cũ)."""
     try:
@@ -121,7 +138,7 @@ def main() -> int:
     # đây. Snapshot thô vẫn KHÔNG bao giờ tới shell.
     hoan = None
     if _lay_env(env, "CODEX_AUTH_JSON") and env.get("CLAUDE_CODE_REMOTE") == "true":
-        if shutil.which("codex", path=_lay_env(env, "PATH")) is None:
+        if not _codex_chay_duoc(env):
             hoan = _lay_env(env, "CODEX_AUTH_JSON")
         elif not _vat_chat_hoa(project, None):
             os.environ.pop("CODEX_AUTH_JSON", None)

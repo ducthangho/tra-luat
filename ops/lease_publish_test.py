@@ -5784,33 +5784,88 @@ def t132_shallow_va_object_thieu_la_12_khong_phai_vang():
             kho.dong()
 
 
+_MAU_T133: dict = {}
+_POL_BYTES_T133 = b'{"schema": 1}\n'
+_DESC_T133 = "c" * 64
+
+
+def _mau_t133() -> dict:
+    """Kho fixture của `t133`, dựng MỘT lần mỗi tiến trình; mỗi lượt `t133` CHÉP ra bản riêng.
+
+    WP748 r17/g17 (profile t139 trên 7bb520b: t133 chạy 8 lần = 168,7 s, phần lớn là ~150 lần spawn git
+    dựng CÙNG một đồ thị commit). Chỉ dựng lại là thứ được chia sẻ: mẫu không bao giờ được trao cho cổng,
+    mỗi lượt — kể cả lượt mutant của t139 — nhận một `copytree` mới, nên không lượt nào thấy dấu của lượt
+    trước. Dựng HẾT commit trước mọi lời gọi cổng là tương đương vì cổng không ghi vào kho: probe bọc 35
+    lời gọi cổng của t133 (main trong tiến trình + CLI thật) bằng ảnh refs/HEAD/index/status/object ⇒ 0 lệch.
+    """
+    import atexit
+    import hashlib as _h
+    import shutil
+    if _MAU_T133 and _MAU_T133["cay"].is_dir():
+        return _MAU_T133
+    goc = Path(tempfile.mkdtemp(prefix="lp_mau_t133_"))
+    atexit.register(shutil.rmtree, goc, True)
+    cay, (c0, c1, S) = _kho_do_thi(goc)
+    RET = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
+    POL = ".github/coordination/change-impact.v1.json"
+    h = {"c0": c0, "S": S}
+    h["H_sach"] = _them_commit(cay, "h-sach", S, {"docs/b.md": b"b\n"})
+    h["H_thu_hoi"] = _them_commit(cay, "h-thu-hoi", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yaml": _yaml_bytes(_ban_ghi_thu_hoi())})
+    h["H_meta_policy"] = _them_commit(cay, "h-meta", S, {RET: _yaml_bytes(_metadata_retired()), POL: b"{}\n"})
+    h["H_meta_khong_policy"] = _them_commit(cay, "h-meta-0", S, {RET: _yaml_bytes(_metadata_retired())})
+    h["H_meta_hong"] = _them_commit(cay, "h-meta-hong", S, {RET: b"a: [\n", POL: b"{}\n"})
+    h["H_symlink"] = _them_commit(cay, "h-symlink", S, {}, symlink=("ops/thu-hoi/x.yaml", "../leases/x.yaml"))
+    h["H_thu_muc_con"] = _them_commit(cay, "h-sub", S, {"ops/thu-hoi/sub/x.yaml": b"a: 1\n"})
+    h["H_khong_yaml"] = _them_commit(cay, "h-yml", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yml": _yaml_bytes(_ban_ghi_thu_hoi())})
+    # S' có metadata + policy; H sửa / xoá metadata ⇒ append-only 8
+    S2 = h["S2"] = h["H_meta_policy"]
+    h["H_sua_meta"] = _them_commit(cay, "h-sua-meta", S2, {RET: _yaml_bytes(_metadata_retired(retired_at_utc=khi_truoc(2)))})
+    h["H_xoa_meta"] = _them_commit(cay, "h-xoa-meta", S2, {"docs/c.md": b"c\n"}, xoa=(RET,))
+    h["H_them_tren_S2"] = _them_commit(cay, "h-them-s2", S2, {"docs/c.md": b"c\n"})
+    # S'' có bản ghi thu hồi (lọt trước kích hoạt); H xoá nó ⇒ 8 (append-only đứng TRƯỚC chốt inactive)
+    S3 = h["S3"] = h["H_thu_hoi"]
+    h["H_xoa_thu_hoi"] = _them_commit(cay, "h-xoa-th", S3, {"docs/d.md": b"d\n"}, xoa=("ops/thu-hoi/wp1-exec-1-codex-20260901.yaml",))
+    h["H_giu_thu_hoi"] = _them_commit(cay, "h-giu-th", S3, {"docs/d.md": b"d\n"})
+    h["H_policy_khong_marker"] = _them_commit(cay, "h-policy-0", S, {POL: b"{}\n"})
+    # Binding Q13: đúng cả ba / sai từng cái / policy hỏng / policy executable / S đã có policy
+    dung = _metadata_retired(descriptor_sha256=_DESC_T133, first_policy_sha256=_h.sha256(_POL_BYTES_T133).hexdigest(),
+                             base_sha_before_add=S)
+    h["H_bind_ok"] = _them_commit(cay, "h-bind-ok", S, {RET: _yaml_bytes(dung), POL: _POL_BYTES_T133})
+    h["H_bind_desc"] = _them_commit(cay, "h-bind-desc", S, {RET: _yaml_bytes(dict(dung, descriptor_sha256="d" * 64)), POL: _POL_BYTES_T133})
+    h["H_bind_hash"] = _them_commit(cay, "h-bind-hash", S, {RET: _yaml_bytes(dict(dung, first_policy_sha256="e" * 64)), POL: _POL_BYTES_T133})
+    h["H_bind_base"] = _them_commit(cay, "h-bind-base", S, {RET: _yaml_bytes(dict(dung, base_sha_before_add=c0)), POL: _POL_BYTES_T133})
+    h["H_bind_pol_hong"] = _them_commit(cay, "h-bind-hong", S, {RET: _yaml_bytes(dung), POL: b"[1]\n"})
+    _them_commit(cay, "h-bind-exec", S, {RET: _yaml_bytes(dung), POL: _POL_BYTES_T133})
+    _g_a0(cay, "update-index", "--chmod=+x", POL); _g_a0(cay, "commit", "-qm", "exec")
+    h["H_bind_pol_exec"] = _g_a0(cay, "rev-parse", "HEAD")
+    S_pol = h["S_pol"] = h["H_policy_khong_marker"]
+    h["H_bind_S_co_policy"] = _them_commit(cay, "h-bind-s-pol", S_pol, {RET: _yaml_bytes(dict(
+        dung, base_sha_before_add=S_pol, first_policy_sha256=_h.sha256(b"{}\n").hexdigest()))})
+    # marker CŨ (đã ở S2 canonical): T thêm tệp ngoài sổ / T làm hỏng policy
+    h["H_old_marker"] = _them_commit(cay, "h-old-marker", h["H_bind_ok"], {"docs/z.md": b"z\n"})
+    h["H_old_marker_pol_hong"] = _them_commit(cay, "h-old-marker-pol-hong", h["H_bind_ok"], {POL: b"not JSON\n"})
+    _MAU_T133.update(cay=cay, h=h)
+    return _MAU_T133
+
+
 @ca
 def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
     """M4 end-to-end: ancestry S→H, T = tree(H), map append-only (8) trước validator, chế độ chưa kích hoạt
     đòi tập revocation RỖNG ở S và T (12), metadata Q13 cần policy; receipt S/H/T; CLI thật cũng chạy."""
     import json
+    import shutil
     mod = _nap_cong()
+    mau = _mau_t133()
     with San() as s:
-        cay, (c0, c1, S) = _kho_do_thi(s)
+        cay = s / "kho"
+        shutil.copytree(mau["cay"], cay, symlinks=True)   # bản RIÊNG của lượt này; mẫu không bao giờ tới cổng
+        h = mau["h"]
+        c0, S, H_sach, H_thu_hoi = h["c0"], h["S"], h["H_sach"], h["H_thu_hoi"]
+        H_meta_policy, H_meta_khong_policy, H_meta_hong = h["H_meta_policy"], h["H_meta_khong_policy"], h["H_meta_hong"]
+        H_symlink, H_thu_muc_con, H_khong_yaml = h["H_symlink"], h["H_thu_muc_con"], h["H_khong_yaml"]
+        S2, H_sua_meta, H_xoa_meta, H_them_tren_S2 = h["S2"], h["H_sua_meta"], h["H_xoa_meta"], h["H_them_tren_S2"]
+        S3, H_xoa_thu_hoi, H_giu_thu_hoi = h["S3"], h["H_xoa_thu_hoi"], h["H_giu_thu_hoi"]
         RET = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
-        POL = ".github/coordination/change-impact.v1.json"
-        H_sach = _them_commit(cay, "h-sach", S, {"docs/b.md": b"b\n"})
-        H_thu_hoi = _them_commit(cay, "h-thu-hoi", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yaml": _yaml_bytes(_ban_ghi_thu_hoi())})
-        H_meta_policy = _them_commit(cay, "h-meta", S, {RET: _yaml_bytes(_metadata_retired()), POL: b"{}\n"})
-        H_meta_khong_policy = _them_commit(cay, "h-meta-0", S, {RET: _yaml_bytes(_metadata_retired())})
-        H_meta_hong = _them_commit(cay, "h-meta-hong", S, {RET: b"a: [\n", POL: b"{}\n"})
-        H_symlink = _them_commit(cay, "h-symlink", S, {}, symlink=("ops/thu-hoi/x.yaml", "../leases/x.yaml"))
-        H_thu_muc_con = _them_commit(cay, "h-sub", S, {"ops/thu-hoi/sub/x.yaml": b"a: 1\n"})
-        H_khong_yaml = _them_commit(cay, "h-yml", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yml": _yaml_bytes(_ban_ghi_thu_hoi())})
-        # S' có metadata + policy; H sửa / xoá metadata ⇒ append-only 8
-        S2 = H_meta_policy
-        H_sua_meta = _them_commit(cay, "h-sua-meta", S2, {RET: _yaml_bytes(_metadata_retired(retired_at_utc=khi_truoc(2)))})
-        H_xoa_meta = _them_commit(cay, "h-xoa-meta", S2, {"docs/c.md": b"c\n"}, xoa=(RET,))
-        H_them_tren_S2 = _them_commit(cay, "h-them-s2", S2, {"docs/c.md": b"c\n"})
-        # S'' có bản ghi thu hồi (lọt trước kích hoạt); H xoá nó ⇒ 8 (append-only đứng TRƯỚC chốt inactive)
-        S3 = H_thu_hoi
-        H_xoa_thu_hoi = _them_commit(cay, "h-xoa-th", S3, {"docs/d.md": b"d\n"}, xoa=("ops/thu-hoi/wp1-exec-1-codex-20260901.yaml",))
-        H_giu_thu_hoi = _them_commit(cay, "h-giu-th", S3, {"docs/d.md": b"d\n"})
 
         def m4(H, S_, receipt=None, nhanh="master", goc=cay):
             argv = ["kiem-thu-hoi-github", H, "--canonical-base", S_, "--nhanh-mac-dinh", nhanh, "--root", str(goc)]
@@ -5839,25 +5894,17 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         # F01/Q13: marker MỚI khi descriptor CHƯA ghim (A0) ⇒ 12, kể cả policy JSON hợp lệ; policy mà không marker ⇒ 12
         rc, o, e = m4(H_meta_policy, S, rcp)
         chot(rc == 12 and "descriptor" in e and not rcp.exists(), f"marker mới ở A0 (descriptor chưa ghim) phải 12: {rc} {e!r}")
-        H_policy_khong_marker = _them_commit(cay, "h-policy-0", S, {POL: b"{}\n"})
+        H_policy_khong_marker = h["H_policy_khong_marker"]
         rc, o, e = m4(H_policy_khong_marker, S)
         chot(rc == 12 and "thiếu marker" in e, f"policy không marker phải 12 (không grandfather): {rc} {e!r}")
         # Binding Q13 với descriptor GHIM (tiêm qua thuộc tính module — API nội bộ, không CLI): đúng cả ba ⇒ 0;
         # sai từng cái ⇒ 12; policy đã có ở S mà marker mới ⇒ 12
         import hashlib as _h
-        POL_BYTES = b'{"schema": 1}\n'
-        DESC = "c" * 64
-        dung = _metadata_retired(descriptor_sha256=DESC, first_policy_sha256=_h.sha256(POL_BYTES).hexdigest(), base_sha_before_add=S)
-        H_bind_ok = _them_commit(cay, "h-bind-ok", S, {RET: _yaml_bytes(dung), POL: POL_BYTES})
-        H_bind_desc = _them_commit(cay, "h-bind-desc", S, {RET: _yaml_bytes(dict(dung, descriptor_sha256="d" * 64)), POL: POL_BYTES})
-        H_bind_hash = _them_commit(cay, "h-bind-hash", S, {RET: _yaml_bytes(dict(dung, first_policy_sha256="e" * 64)), POL: POL_BYTES})
-        H_bind_base = _them_commit(cay, "h-bind-base", S, {RET: _yaml_bytes(dict(dung, base_sha_before_add=c0)), POL: POL_BYTES})
-        H_bind_pol_hong = _them_commit(cay, "h-bind-hong", S, {RET: _yaml_bytes(dung), POL: b"[1]\n"})
-        H_bind_pol_exec = _them_commit(cay, "h-bind-exec", S, {RET: _yaml_bytes(dung), POL: POL_BYTES})
-        _g_a0(cay, "update-index", "--chmod=+x", POL); _g_a0(cay, "commit", "-qm", "exec"); H_bind_pol_exec = _g_a0(cay, "rev-parse", "HEAD")
-        S_pol = H_policy_khong_marker
-        H_bind_S_co_policy = _them_commit(cay, "h-bind-s-pol", S_pol, {RET: _yaml_bytes(dict(
-            dung, base_sha_before_add=S_pol, first_policy_sha256=_h.sha256(b"{}\n").hexdigest()))})
+        POL_BYTES = _POL_BYTES_T133
+        DESC = _DESC_T133
+        H_bind_ok, H_bind_desc, H_bind_hash, H_bind_base = h["H_bind_ok"], h["H_bind_desc"], h["H_bind_hash"], h["H_bind_base"]
+        H_bind_pol_hong, H_bind_pol_exec = h["H_bind_pol_hong"], h["H_bind_pol_exec"]
+        S_pol, H_bind_S_co_policy = h["S_pol"], h["H_bind_S_co_policy"]
         mod.DESCRIPTOR_Q13_SHA256 = DESC
         try:
             rc, o, e = m4(H_bind_ok, S, rcp)
@@ -5870,9 +5917,9 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
                 rc, o, e = m4(H, S_pol if H is H_bind_S_co_policy else S)
                 chot(rc == 12 and dau in e, f"binding {ten}: đợi 12 '{dau}', được {rc}: {e!r}")
             # marker CŨ (đã ở S2 canonical) không bị đòi binding lại: chỉ policy T phải là JSON object
-            rc, o, e = m4(_them_commit(cay, "h-old-marker", H_bind_ok, {"docs/z.md": b"z\n"}), H_bind_ok)
+            rc, o, e = m4(h["H_old_marker"], H_bind_ok)
             chot(rc == 0, f"marker cũ + policy hợp lệ ở T phải 0: {rc} {e!r}")
-            rc, o, e = m4(_them_commit(cay, "h-old-marker-pol-hong", H_bind_ok, {POL: b"not JSON\n"}), H_bind_ok)
+            rc, o, e = m4(h["H_old_marker_pol_hong"], H_bind_ok)
             chot(rc == 12 and "JSON" in e, f"marker cũ nhưng policy T hỏng phải 12: {rc} {e!r}")
         finally:
             mod.DESCRIPTOR_Q13_SHA256 = None

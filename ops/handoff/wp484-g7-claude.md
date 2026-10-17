@@ -42,9 +42,35 @@ Executor: Claude (`claude-opus-5-5`, Claude Code, cloud). Reviewer định tuy�
   `codex_cred_test.py` 0/0). `bash -n session-start.sh` ok. `doctrine-scan` rc 0.
 - CHƯA chạy trong phiên: bảng đột biến đầy đủ của `launcher_test.py --dot-bien` (để CI), Windows (M-3).
 
+## Lượt vá 2 — sau Codex lượt 1 (`changes_requested`, P2=4, run `d4385756`, head `99e79b1`)
+
+Spec r8 (`ops/specs/wp484-r8.md` sha256 `4a512dd3…`), lease `wp484-r8-g7-claude` thay r7 (bia mộ hai chiều),
+thẩm quyền <https://github.com/ducthangho/tra-luat/issues/484#issuecomment-6228500830> (ghi hộ).
+
+| finding | quyết định | vá | ca · đột biến |
+|---|---|---|---|
+| F01 state không ghi được ⇒ lần sau vẫn probe | chủ kho: chấp nhận giới hạn, nợ `codex-rejected-state-khong-ghi-duoc` | lối thứ ba (materializer) nay báo lý do riêng | `r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do` · `g7_f01_materializer_gop_loi` |
+| F02 mất `token_invalidated` (hồi quy so master) | — | hợp tập dấu hiệu với master | `t17_token_invalidated_la_tu_choi_va_thang_rc0` · `t17_bo_token_invalidated` |
+| F03 ghi nhầm danh tính bản mới | — | `_danh_dau_auth_hong(home, da_probe)`; hai lối truyền bytes đã probe | `r484_g7_tu_choi_ghi_dung_ban_da_probe` · `g7_f03_doc_lai_sau_probe`; `t18_kiem_ghi_dung_ban_da_probe` · `t18_doc_lai_sau_probe` |
+| F04 bootstrap chết trước khi cài codex | chủ kho: mở rộng write set (`session_start.py`) | shell: materialize SAU cài CLI; bridge: hoãn khi vắng codex | `r484_g7_hook_vang_codex_cai_cli_truoc_materialize`, `r484_g7_bridge_vang_codex_hoan_materialize_sau_hook` · 2 đột biến tay (đảo shell, bỏ nhánh hoãn) |
+
+Kèm theo: CI `gate` trên `99e79b1` ĐỎ vì `ops/bash_nen.py` đếm 8 lời gọi `bash` trần trong `launcher_test.py` (hạn
+ngạch master 7) — lời gọi thứ 8 là `["bash", …]` của g6 trong `r484_g2_hook_shell_scrub_truoc_probe`; đổi sang
+`bash_nen.tim_bash()`. Shim của ca ấy viết lại theo thứ tự hook mới (đo bằng nhật ký từng lời gọi python).
+Ca `r484_g2_bridge_scrub_va_chot_remote` nay ghim `shutil.which` = có codex (nó đo nhánh ấy).
+
+Phát hiện phụ: lượt Codex dùng `--sandbox workspace-write` dựng `/tmp/.git` rỗng trong lúc chạy; khi ấy `_KhoCodex`
+từ chối mọi home dưới `/tmp` ("Codex home is inside a repository") nên mọi phép đo credential cục bộ chạy song song
+đều nhiễm. Reviewer cũng ghi lại hiện tượng này.
+
+Bằng chứng lượt 2 (17-10, Linux, sau khi `/tmp/.git` đã biến mất): `launcher_test.py` **218/218** cả CÓ lẫn KHÔNG
+`CODEX_AUTH_JSON` giả (bỏ qua 2 ca Windows-only); `codex_cred_test.py` nền **18/18**, đột biến **18/18**;
+`packet_loop_test.py` TỔNG ĐẠT; `ops/cong_cu_test.py` cổng cây thật ĐẠT; 5 đột biến g7 trong `DOT_BIEN` + 2 đột biến
+tay F04 đều giết ca đích bằng assertion của chính ca; ruff F delta 0 (thêm `session_start.py` 0/0).
+
 ## Ngân sách
 
-attempt 1/3 · lời gọi Codex 0/2 (trước review).
+attempt 2/3 · lời gọi Codex 1/2 đã dùng; lượt 2/2 là review lại cuối.
 
 ## Điều kiện merge còn mở
 

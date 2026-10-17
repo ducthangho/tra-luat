@@ -9883,11 +9883,15 @@ def _chay_t190_tren(nguon: str, thu_muc: Path, ten: str) -> str:
     import importlib.util
     p = thu_muc / f"{ten}.py"
     p.write_text(nguon, encoding="utf-8")
+    # WP748 r17/g17 (profile t191 trên 7bb520b: 1762 lần `_nap` ⇒ `source_to_code` ~190 s / 439 s) — biên dịch
+    # MỘT lần từ CHÍNH byte vừa ghi, rồi mỗi `_nap` vẫn dựng module MỚI và exec mã ấy vào namespace mới — đúng
+    # việc `exec_module` làm, chỉ bỏ biên dịch lặp. Nguồn đổi ⇒ tệp mới ⇒ mã mới; không cache xuyên lời gọi.
+    ma = compile(p.read_bytes(), str(p), "exec", dont_inherit=True)
 
     def _nap():
         spec = importlib.util.spec_from_file_location(f"lp_t191_{ten}", p)
         m = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(m)
+        exec(ma, m.__dict__)
         return m
     cu, cu_bc = globals()["_nap_cong"], sys.dont_write_bytecode
     globals()["_nap_cong"], sys.dont_write_bytecode = _nap, True

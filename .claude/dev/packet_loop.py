@@ -640,7 +640,7 @@ def _load(state_dir: Path, packet: int) -> dict:
             if identity is not None and (type(identity) is not dict or role == "reviewer" and st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
                 raise ValueError(f"{role}_identity")
         can_duoi = _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
-        if type(st["schema_version"]) is int and st["schema_version"] == 1:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
+        if type(st["schema_version"]) is int and st["schema_version"] == 1 and not st.keys() & {"review_rounds_used", "review_rounds_limit", "codex_review_calls_used", "codex_review_calls_limit", "codex_calls", "nang_tran", "dem_tu_suy"}:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
             st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_review_calls_used=can_duoi,
                       codex_calls=[], nang_tran=[], review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW,
                       codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True, attempt_open=st.get("attempt_open", False), reviewing_head_sha=st.get("reviewing_head_sha"))

@@ -5542,8 +5542,7 @@ def case_pl_m5_rescue(c: Ctx):
 
 
 def case_pl_m6_state_v1(c: Ctx):
-    sd = _reviewing(c)
-    st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
+    sd = _reviewing(c); st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
     (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER, "attempt": n} for n in (1, 2, 3)]}))
     rc, o, e = run(c.script, ["status", "--packet", 55], sd)
     _doi(0, rc, e, "status trên state v1 hợp lệ")
@@ -5553,7 +5552,7 @@ def case_pl_m6_state_v1(c: Ctx):
     _pl(c, sd, _goi("g1", _H1, 3))
     _kiem(sd, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
     g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
-    for hong in ({}, *({k: ...} for k in ("packet", "state", "attempt_open", "reviewing_head_sha", "mission", "executor", "posts", "hmac_key")), {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
+    for hong in ({}, *({k: ...} for k in ("packet", "state", "attempt_open", "reviewing_head_sha", "mission", "executor", "posts", "hmac_key")), {"schema_version": 1}, {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
                  *({k: v} for k, v in (("attempts_used", True), ("attempts_used", 0.5), ("attempts_used", "one"),
                                       ("attempt_open", "false"), ("attempt_open", []), ("same_failure_limit", None), ("finding_counts", []), ("packet", None), ("packet", []), ("packet", True), ("packet", 55.0), ("packet", 56), ("state", []), ("state", "other"), ("reviewing_head_sha", []), ("reviewing_head_sha", t["reviewing_head_sha"] + "\n"), ("posts", None), ("posts", []), ("posts", "x"), ("executor_identity", []), ("executor_identity", False), ("executor_identity", "claude"))),
                  *({"posts": {"123456789": p}} for p in ({}, [], False, "x", {"for": "reviewing"})), {"attempt_anchor": {k: v for k, v in t["attempt_anchor"].items() if k != "nonce"}}, {"finding_counts": {"probe-finding": 1}}, {"reviews": [dict(r, finding_ids=["probe-finding"]) for r in t["reviews"]]}, {"history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]},
@@ -5577,6 +5576,7 @@ _PL_CHAN = ('    if st["codex_review_calls_used"] >= st["codex_review_calls_limi
 MUTANTS.update({f"pl_f01_bo_{ten}": (f'("{ten}", ', f'("{ten}", True or ', ["pl_m6_state_v1"])
                 for ten in ("schema", "bo-dem", "so", "loi-goi", "dem-goi", "dem-vong", "truc", "posts", "anchor", "findings", "checkpoint")})
 MUTANTS.update({
+    "pl_f10_bo_phan_biet_v1": (' and not st.keys() & {"review_rounds_used", "review_rounds_limit", "codex_review_calls_used", "codex_review_calls_limit", "codex_calls", "nang_tran", "dem_tu_suy"}', "", ["pl_m6_state_v1"]),
     "pl_f07_bo_kieu_packet": ('type(st["packet"]) is int and ', "", ["pl_m6_state_v1"]),
     "pl_m1_bo_kiem_so_duong": ("a.codex_review_calls_limit) <= 0:", "a.codex_review_calls_limit) < 0:", ["pl_m1_tran_so_duong"]),
     "pl_m2_kiem_sau_khi_ghi": ("".join(_PL_CHAN), _PL_CHAN[2] + _PL_CHAN[0].replace(">=", ">") + _PL_CHAN[1], ["pl_m2_loi_goi"]),

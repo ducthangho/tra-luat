@@ -220,7 +220,7 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 COMMENT_ID_RE = re.compile(r"^(?:[0-9]{6,}|[A-Za-z]{2}_[A-Za-z0-9_-]{10,})$")
 
 # Bằng chứng review gắn EXACT SHA — git oid đầy đủ, không nhận dạng rút gọn.
-SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 
 # --- (c) danh sách cụm từ doctrine BỊ CẤM trong adapter ------------------------
 # Đây là "đáy đo" mà revision 1 không có. Ba lượt review đều kết luận "adapter
@@ -635,27 +635,32 @@ def _load(state_dir: Path, packet: int) -> dict:
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
     try:  # #775 bộ đọc NGHIÊM: lệch hình dạng hay bất biến sổ/bộ đếm ⇒ RC_STATE, không traceback, không đoán
         st = json.loads(p.read_text(encoding="utf-8"))
-        identity = st.get("reviewer_identity")
-        if identity is not None and (type(identity) is not dict or st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
-            raise ValueError("reviewer_identity")
+        for role in ("executor", "reviewer"):
+            identity = st.get(f"{role}_identity")
+            if identity is not None and (type(identity) is not dict or role == "reviewer" and st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
+                raise ValueError(f"{role}_identity")
         can_duoi = _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
         if type(st["schema_version"]) is int and st["schema_version"] == 1:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
             st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_review_calls_used=can_duoi,
                       codex_calls=[], nang_tran=[], review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW,
                       codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True, attempt_open=st.get("attempt_open", False), reviewing_head_sha=st.get("reviewing_head_sha"))
-        goi = st["codex_calls"]
+        goi, posts, anchor = st["codex_calls"], st["posts"], st.get("attempt_anchor")
+        pending = next((h.get("event") != "record_rescue" or h.get("mo_lai") is not True for h in reversed(st["history"]) if h.get("event") in ("blocked_rescue_required", "record_rescue")), False)
         vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
-            ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2 and type(st["packet"]) is int and st["packet"] == packet and st["state"] in CHUYEN_HOP_LE and (st["reviewing_head_sha"] is None or SHA_RE.match(st["reviewing_head_sha"]))),
+            ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2 and type(st["packet"]) is int and st["packet"] == packet and st["state"] in CHUYEN_HOP_LE and type(st["mission"]) is int and st["executor"] in PROVIDERS and (st["reviewing_head_sha"] is None or SHA_RE.match(st["reviewing_head_sha"]))),
             ("bo-dem", all(type(st[k]) is int for k in ("attempts_used", "attempts_limit", "same_failure_limit")) and st["attempts_used"] >= 0 and all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
             ("so", all(type(st[k]) is list for k in ("codex_calls", "nang_tran", "reviews", "history"))
                    and all(r.get("provider") == st["reviewer"] and type(r.get("attempt")) is int for r in st["reviews"])
                    and all(type(h) is dict for h in st["history"]) and type(st.get("dem_tu_suy", False)) is bool and type(st["attempt_open"]) is bool
                    and type(st.get("finding_counts")) is dict and all(type(n) is int and n >= 0 for n in st["finding_counts"].values())),
+            ("posts", type(posts) is dict and all(type(r) is dict and type(r["for"]) is str and (r["consumed_by"] is None or type(r["consumed_by"]) is str) for r in posts.values())),
+            ("anchor", anchor is None or type(anchor) is dict and type(anchor["attempt"]) is int and type(anchor["consumed"]) is bool and re.fullmatch(r"[0-9a-f]{32}", anchor["nonce"]) and re.fullmatch(r"[0-9a-f]{64}", st["hmac_key"])),
+            ("findings", st["finding_counts"] == {fid: sum(fid in r.get("finding_ids", []) for r in st["reviews"]) for r in st["reviews"] for fid in r.get("finding_ids", [])}),
             ("loi-goi", all(set(g) == {"run_id", "head", "da_dung"} and RUN_ID_RE.match(g["run_id"])
                             and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
-            ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
+            ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
         vi_pham = [f"{type(e).__name__}: {e}"]
@@ -672,8 +677,7 @@ def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
     u, t = TRUC_TRAN[truc]
     st.update(state="blocked", ly_do="rescue_required", truc=truc)
     st["history"].append({"event": "blocked_rescue_required", "truc": truc, "used": st[u], "limit": st[t]})
-    _save(state_dir, st)
-    _die(RC_TRAN, f"{ngu_canh}: {truc} {st[u]}/{st[t]} — Review Rescue Checkpoint: dừng, hỏi chủ kho"
+    _save(state_dir, st); _die(RC_TRAN, f"{ngu_canh}: {truc} {st[u]}/{st[t]} — Review Rescue Checkpoint: dừng, hỏi chủ kho"
                   + (f"\n{CANH_BAO_V1}" if st.get("dem_tu_suy") else ""))
 
 
@@ -1299,8 +1303,7 @@ def cmd_nang_tran(a, state_dir: Path) -> int:
     if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--tran-moi phải > trần {st[t]} và --can-cu phải là URL issuecomment GitHub")
     st["nang_tran"].append(dict(truc=a.truc, tran_cu=st[t], tran_moi=a.tran_moi, ai_nang=a.ai_nang.strip(), can_cu=a.can_cu))
-    st[t] = a.tran_moi
-    _save(state_dir, st)
+    st[t] = a.tran_moi; _save(state_dir, st)
     print(f"đã nâng trần {a.truc} lên {a.tran_moi} (đã dùng {st[u]}) — LỜI KHAI, không phải bằng chứng")
     return RC_OK
 
@@ -1315,8 +1318,7 @@ def cmd_record_rescue(a, state_dir: Path) -> int:
     mo = (nang := a.quyet_dinh == "nang_tran") and st[TRUC_TRAN[st["truc"]][1]] > st[TRUC_TRAN[st["truc"]][0]]
     st["history"].append(dict(event="record_rescue", quyet_dinh=a.quyet_dinh, truc=st.get("truc"), can_cu=a.can_cu, mo_lai=mo))
     if mo:
-        st["state"] = "running"
-        del st["ly_do"], st["truc"]
+        st["state"] = "running"; del st["ly_do"], st["truc"]
     _save(state_dir, st)
     if nang and not mo:
         _die(RC_STATE, f"trục {st['truc']} chưa được nâng quá số đã dùng — chạy `nang-tran` trước")

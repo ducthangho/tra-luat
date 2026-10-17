@@ -1092,8 +1092,10 @@ Phân loại này không thay §10.2 về admission/provenance/gate hay chỉ th
 chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không chạy CI/fullCI giữa vòng vá.
 
 **Đẩy nhánh code packet và vòng vá thêm vì P3** theo `ADR-0054`, chỉ cho packet áp ADR ấy: điều kiện trước lần đẩy,
-ngoại lệ đẩy vá CI (bản vá phải được approve trên SHA mới trước khi đẩy, kèm biên nhận), finding P0/P1/P2 sau lần
-đẩy (đi bằng generation mới, `accepted` cũ hết hiệu lực), và trần vòng thêm ở ADR ấy (protocol không chép con số).
+ngoại lệ đẩy vá CI (bản vá phải được approve trên SHA mới trước khi đẩy, kèm biên nhận), thời điểm máy trạng thái
+ghi `approve` (sau CI xanh và connector sạch trên SHA đã đẩy, nên CI đỏ hay finding connector vẫn đi đường
+`changes_requested` → `running`), finding đến sau `accepted` (generation mới), và trần vòng thêm ở ADR ấy (protocol
+không chép con số).
 
 **Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
 slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh
@@ -1175,7 +1177,7 @@ Trigger khi PR vào `reviewing` (packet áp `ADR-0054`: khi Packet vào `reviewi
 không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Finding nên kèm
 *bằng chứng chạy được* và patch-as-hint (nếu dùng) phải theo đúng ràng buộc §8 — đính dạng artifact, không push
 ref. Hoàn tất khi verdict đã ghi vào PR và state nhận đúng review assurance (packet áp `ADR-0054`: ghi vào biên nhận
-và Packet Issue trước lần đẩy, chép sang PR sau đó).
+và Packet Issue trước lần đẩy, chép sang PR sau đó; state nhận verdict theo thời điểm ở ADR ấy).
 Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
 assurance theo §8 khi evidence đủ, không tự nhận `same_provider_approved` chỉ từ cấu hình
 cùng provider và không giả thành cross-provider.

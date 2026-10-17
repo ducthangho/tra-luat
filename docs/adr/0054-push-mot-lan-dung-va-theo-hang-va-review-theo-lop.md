@@ -68,13 +68,21 @@ hiệu lực như quy tắc commit mới của §7.
 lease**. Run ấy chỉ làm đúng ba việc: kiểm SHA trong bundle bằng SHA đã approve, đẩy SHA ấy, mở PR. Không sửa gì
 khác; lệch SHA thì dừng.
 
-**Finding của connector sau lần đẩy.** Connector review trên PR GitHub chạy sau lần đẩy. Nó **không** mở vòng
-vá tự động: nếu nó báo P0/P1/P2 trên head đã đẩy, executor DỪNG và đưa checkpoint cho chủ kho kèm phép đo. Lúc ấy
-packet đã `accepted` theo verdict offline, mà `accepted` là trạng thái cuối của máy trạng thái (§4 của protocol;
-`.claude/dev/packet_loop.py` không có cạnh đi ra). Nếu chủ kho cho vá, đường đi là **generation mới** theo luật
-reroute của §12: `accepted` của generation cũ hết hiệu lực; generation mới có nhánh mới, lease mới, vòng review
-offline mới, rồi lại đẩy theo mục 1. Đẩy tiếp lên nhánh của generation cũ không phải ngoại lệ vá CI và không được
-làm.
+**Khi nào verdict được ghi vào máy trạng thái.** `accepted` là trạng thái cuối (§4 của protocol;
+`.claude/dev/packet_loop.py` không có cạnh đi ra), nên mọi vòng vá phải xảy ra TRƯỚC khi máy ghi `approve`. Vì vậy:
+
+- Verdict `approve` offline trên SHA H là **điều kiện để đẩy** H và nằm trong biên nhận. Reconciler **chưa** ghi
+  nó vào máy; state vẫn `reviewing(H)`.
+- Reconciler ghi `approve` (→ `accepted`, `accepted_sha` = H) chỉ khi trên H đã đẩy: CI xanh, VÀ connector review
+  đã xong không còn P0/P1/P2.
+- **CI đỏ** ⇒ reconciler ghi `changes_requested` neo H, finding là check đỏ (state → `running`, đường rework có
+  sẵn). Executor vá CI, review offline SHA mới H1, đẩy H1 theo ngoại lệ mục 1, rồi `reviewing(H1)`.
+- **Connector báo P0/P1/P2** trên H ⇒ executor DỪNG, đưa checkpoint cho chủ kho kèm phép đo; connector không mở
+  vòng vá tự động. Chủ kho cho vá ⇒ reconciler ghi `changes_requested` neo H với các finding ấy, vòng vá và review
+  offline như mục 2, và lần đẩy tiếp theo là ngoại lệ do chính chủ kho cấp, ghi vào biên nhận.
+- Finding đến **sau** khi máy đã ghi `accepted` ⇒ **generation mới** theo luật reroute của §12: `accepted` của
+  generation cũ hết hiệu lực; nhánh mới, lease mới, vòng review offline mới, rồi lại đẩy theo mục 1. Lịch sử
+  finding, budget và biên nhận đi theo, không reset.
 
 ## 3. Dừng vá theo hạng, ở mọi class
 
@@ -83,7 +91,9 @@ làm.
 định có căn cứ cho từng finding P3 còn mở. P0 chặn ở mọi class như trước.
 
 **Vòng vá thêm vì P3.** Khi đã hết P0/P1/P2, executor được tự quyết vá thêm để giảm P3,
-**tối đa hai vòng vá thêm**. Dừng ngay nếu một vòng **không giảm số lớp P3** so với lượt trước (đếm lớp, không đếm biểu hiện, đúng
+**tối đa hai vòng vá thêm**. Quyết định ấy có TRƯỚC lần đẩy: chọn vá thêm thì verdict của lượt ấy được ghi vào máy
+là `changes_requested` với các finding P3 làm lý do (hạng giữ P3, không nâng), state về `running` hợp lệ; chọn
+dừng thì đi mục 1. Sau khi máy đã ghi `accepted`, không còn vòng P3 trên generation ấy. Dừng ngay nếu một vòng **không giảm số lớp P3** so với lượt trước (đếm lớp, không đếm biểu hiện, đúng
 cách đếm của §8.3). Mỗi vòng thêm vẫn tính vào trần lời gọi Codex (`ADR-0052`) và trần vòng (`ADR-0048`), và
 lượt Codex cho nó phải có lý do theo `ADR-0052` (cần xác minh lại bản vá). P3 còn lại ghi sổ nợ như nay.
 

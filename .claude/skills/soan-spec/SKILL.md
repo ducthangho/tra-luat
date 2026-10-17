@@ -99,7 +99,9 @@ thẳng vì sao trong tiêu chí.
   hay sang mục khác, kẻo khớp nhầm hai câu không liên quan) rồi khớp TOÀN BỘ lời khẳng định. Khớp
   cụm trên một dòng chỉ được dùng khi cả hai điều sau cùng đúng: cụm ấy là toàn bộ lời khẳng định
   (không phải tiền tố của nó), và phép đo chạy trên một blob đã neo băm nên không bị ngắt dòng lại.
-  Kèm đột biến: ngắt dòng lại mà giữ nghĩa thì vẫn xanh, đổi hậu tố thì đỏ. Bằng chứng: lớp
+  Đột biến kèm theo: với cách nối dòng, ngắt dòng lại mà giữ nghĩa thì vẫn xanh và đổi hậu tố thì
+  đỏ; với cụm cùng dòng chỉ đột biến đổi hậu tố áp dụng — ngắt dòng lại sinh blob MỚI, phải neo băm
+  và đo lại, đừng coi phép khớp cùng dòng là đã chịu được ngắt dòng. Bằng chứng: lớp
   "khớp tiền tố cụm bị cắt" của #782, chép ở `ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md` mục
   `hinh_dang_ke_thua`.
 - **(c) Tiêu chí nói "N chỗ" thì đếm theo từng vị trí, không đếm gộp.** Một tổng `≥ N` trên nhiều

@@ -1092,10 +1092,9 @@ Phân loại này không thay §10.2 về admission/provenance/gate hay chỉ th
 chạy: khi owner yêu cầu đợi tới đủ điều kiện merge, không chạy CI/fullCI giữa vòng vá.
 
 **Đẩy nhánh code packet và vòng vá thêm vì P3** theo `ADR-0054`, chỉ cho packet áp ADR ấy: điều kiện trước lần đẩy,
-ngoại lệ đẩy vá CI (bản vá phải được approve trên SHA mới trước khi đẩy, kèm biên nhận), thời điểm máy trạng thái
-ghi `approve` (sau CI xanh và connector sạch trên SHA đã đẩy, nên CI đỏ hay finding connector vẫn đi đường
-`changes_requested` → `running`), finding đến sau `accepted` (generation mới), và trần vòng thêm ở ADR ấy (protocol
-không chép con số).
+ngoại lệ đẩy vá CI (bản vá phải được approve trên SHA mới trước khi đẩy, kèm biên nhận), yêu cầu đối với máy
+trạng thái, điều kiện kích hoạt, và trần vòng thêm ở ADR ấy (protocol không chép con số). ADR ấy **chưa kích hoạt**
+tới khi packet máy của nó land; trước đó không packet nào áp nó.
 
 **Tín hiệu không hội tụ theo lớp.** Với chuyển tiếp từ lượt r sang r+1, đặt U là tập
 slug lớp còn mở ở cuối lượt r, F là tập con của U được reviewer lượt r+1 xác minh
@@ -1177,7 +1176,7 @@ Trigger khi PR vào `reviewing` (packet áp `ADR-0054`: khi Packet vào `reviewi
 không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Finding nên kèm
 *bằng chứng chạy được* và patch-as-hint (nếu dùng) phải theo đúng ràng buộc §8 — đính dạng artifact, không push
 ref. Hoàn tất khi verdict đã ghi vào PR và state nhận đúng review assurance (packet áp `ADR-0054`: ghi vào biên nhận
-và Packet Issue trước lần đẩy, chép sang PR sau đó; state nhận verdict theo thời điểm ở ADR ấy).
+và Packet Issue trước lần đẩy, chép sang PR sau đó; state nhận verdict theo yêu cầu máy trạng thái ở ADR ấy).
 Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
 assurance theo §8 khi evidence đủ, không tự nhận `same_provider_approved` chỉ từ cấu hình
 cùng provider và không giả thành cross-provider.
@@ -1517,7 +1516,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0050` | `cross_approved` neo vào họ model, không vào hãng công cụ; ba mức bằng chứng model | Accepted | `ops/bien_nhan_v2.py` (`_NEO_LUAT_CHEP_TAY` + chốt tách họ model) |
 | `ADR-0052` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 16-10-2026, thay số của `ADR-0036`/`0037`; lượt sau lượt đầu phải có lý do; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — `codex_review_calls_used` không có bộ đếm trong mã |
 | `ADR-0053` | Trần kích thước packet `sensitive` nâng theo chỉ thị chủ kho 16-10-2026, thay cặp số `sensitive` của `ADR-0044`; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** |
-| `ADR-0054` | Đẩy nhánh code packet khi đủ điều kiện merge, review offline neo SHA cục bộ, dừng vá khi hết P0/P1/P2 ở mọi class, review tìm theo lớp; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — không bộ đếm số lần đẩy |
+| `ADR-0054` | Đẩy nhánh code packet khi đủ điều kiện merge, review offline neo SHA cục bộ, dừng vá khi hết P0/P1/P2 ở mọi class, review tìm theo lớp; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted — chưa kích hoạt, chờ packet máy `MAY-ADR-0054` | **0 cổng** — không bộ đếm số lần đẩy |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

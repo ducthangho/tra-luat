@@ -1,7 +1,8 @@
 # ADR-0054 — Đẩy nhánh code một lần, dừng vá theo hạng, review tìm theo lớp
 
 - **Trạng thái:** Accepted (2026-10-16, chỉ thị chủ kho `ducthangho`; thi hành bằng packet `wp784`
-  `PUSH-MOT-LAN-VA-DUNG-VA`, Issue #784 — không phải một phiên tự đặt luật)
+  `PUSH-MOT-LAN-VA-DUNG-VA`, Issue #784 — không phải một phiên tự đặt luật) · **CHƯA KÍCH HOẠT**: chờ packet
+  máy trạng thái, xem mục *Hiệu lực*. Tới lúc ấy mọi packet chịu luật cũ.
 
 Ba luật, một chỉ thị. Chủ kho nói: *"sẽ không được push vào cho đến khi đủ điều kiện để merge"*, *"điều kiện
 để dừng vá là khi hết P1 và P2"*, và *"cross review thì luôn tìm theo phân lớp, không tìm theo các lỗi riêng
@@ -68,21 +69,28 @@ hiệu lực như quy tắc commit mới của §7.
 lease**. Run ấy chỉ làm đúng ba việc: kiểm SHA trong bundle bằng SHA đã approve, đẩy SHA ấy, mở PR. Không sửa gì
 khác; lệch SHA thì dừng.
 
-**Khi nào verdict được ghi vào máy trạng thái.** `accepted` là trạng thái cuối (§4 của protocol;
-`.claude/dev/packet_loop.py` không có cạnh đi ra), nên mọi vòng vá phải xảy ra TRƯỚC khi máy ghi `approve`. Vì vậy:
+**Finding của connector sau lần đẩy.** Connector review trên PR GitHub chạy sau lần đẩy. Nó **không** mở vòng vá
+tự động: nếu nó báo P0/P1/P2 trên head đã đẩy, executor DỪNG và đưa checkpoint cho chủ kho kèm phép đo. Vá hay
+không, và đẩy thêm hay không, là quyết định của chủ kho, không phải ngoại lệ vá CI; mọi lần đẩy như vậy ghi vào
+biên nhận.
 
-- Verdict `approve` offline trên SHA H là **điều kiện để đẩy** H và nằm trong biên nhận. Reconciler **chưa** ghi
-  nó vào máy; state vẫn `reviewing(H)`.
-- Reconciler ghi `approve` (→ `accepted`, `accepted_sha` = H) chỉ khi trên H đã đẩy: CI xanh, VÀ connector review
-  đã xong không còn P0/P1/P2.
-- **CI đỏ** ⇒ reconciler ghi `changes_requested` neo H, finding là check đỏ (state → `running`, đường rework có
-  sẵn). Executor vá CI, review offline SHA mới H1, đẩy H1 theo ngoại lệ mục 1, rồi `reviewing(H1)`.
-- **Connector báo P0/P1/P2** trên H ⇒ executor DỪNG, đưa checkpoint cho chủ kho kèm phép đo; connector không mở
-  vòng vá tự động. Chủ kho cho vá ⇒ reconciler ghi `changes_requested` neo H với các finding ấy, vòng vá và review
-  offline như mục 2, và lần đẩy tiếp theo là ngoại lệ do chính chủ kho cấp, ghi vào biên nhận.
-- Finding đến **sau** khi máy đã ghi `accepted` ⇒ **generation mới** theo luật reroute của §12: `accepted` của
-  generation cũ hết hiệu lực; nhánh mới, lease mới, vòng review offline mới, rồi lại đẩy theo mục 1. Lịch sử
-  finding, budget và biên nhận đi theo, không reset.
+**Vòng đời trên máy trạng thái — yêu cầu cho packet máy, chưa phải luật đang chạy.** Ba lượt review liên tiếp
+cho thấy cùng một hình dạng lỗi: tài liệu kê các chuyển trạng thái mà `.claude/dev/packet_loop.py` không làm được
+(`accepted` không có cạnh đi ra; `record-review approve` vừa ghi sổ vừa chuyển thẳng `accepted`; vòng P3 thứ hai chạm
+`same_failure_limit`). Chữa bằng câu chữ thì lại lộ lớp mới. Vì vậy ADR này **không** tự kê chuyển trạng thái nữa,
+mà đặt yêu cầu đo được cho một packet máy (nợ `MAY-ADR-0054`). Mỗi yêu cầu phải có ca phản chứng chạy được trong
+`.claude/dev/packet_loop_test.py`:
+
+1. Ghi verdict `approve` offline trên SHA H vào sổ (tính `review_rounds_used`, neo H, qua schema/exact-SHA/receipt)
+   **mà không** chuyển `accepted`. Chuyển `accepted` là một cổng riêng, chỉ mở khi trên H đã đẩy: CI xanh và
+   connector review đã xong.
+2. CI đỏ hoặc connector báo P0/P1/P2 trên H đã đẩy ⇒ có đường hợp lệ về `running` neo H, giữ lịch sử finding và
+   budget. Connector P0–P2 vẫn phải qua checkpoint chủ kho trước khi vá.
+3. Finding P3 của connector phải có xử lý (nợ có tên, owner, hướng; `sensitive`: quyết định có căn cứ) **trước**
+   khi ghi `accepted`.
+4. Vòng vá thêm vì P3 (mục 3) không bị `same_failure_limit` chặn khi số lớp P3 giảm, và vẫn bị chặn khi không giảm.
+5. Finding đến sau `accepted` ⇒ lệnh chuyển sang generation mới có biên nhận, `accepted` cũ hết hiệu lực, lịch sử
+   finding và budget đi theo, không reset.
 
 ## 3. Dừng vá theo hạng, ở mọi class
 
@@ -91,10 +99,9 @@ khác; lệch SHA thì dừng.
 định có căn cứ cho từng finding P3 còn mở. P0 chặn ở mọi class như trước.
 
 **Vòng vá thêm vì P3.** Khi đã hết P0/P1/P2, executor được tự quyết vá thêm để giảm P3,
-**tối đa hai vòng vá thêm**. Quyết định ấy có TRƯỚC lần đẩy: chọn vá thêm thì verdict của lượt ấy được ghi vào máy
-là `changes_requested` với các finding P3 làm lý do (hạng giữ P3, không nâng), state về `running` hợp lệ; chọn
-dừng thì đi mục 1. Sau khi máy đã ghi `accepted`, không còn vòng P3 trên generation ấy. Dừng ngay nếu một vòng **không giảm số lớp P3** so với lượt trước (đếm lớp, không đếm biểu hiện, đúng
-cách đếm của §8.3). Mỗi vòng thêm vẫn tính vào trần lời gọi Codex (`ADR-0052`) và trần vòng (`ADR-0048`), và
+**tối đa hai vòng vá thêm**, quyết định TRƯỚC lần đẩy. Dừng ngay nếu một vòng **không giảm số lớp P3** so với
+lượt trước (đếm lớp, không đếm biểu hiện, đúng cách đếm của §8.3). Cách máy ghi các vòng ấy là yêu cầu 1 và 4 ở
+mục 2. Mỗi vòng thêm vẫn tính vào trần lời gọi Codex (`ADR-0052`) và trần vòng (`ADR-0048`), và
 lượt Codex cho nó phải có lý do theo `ADR-0052` (cần xác minh lại bản vá). P3 còn lại ghi sổ nợ như nay.
 
 ## 4. Review tìm theo lớp
@@ -105,7 +112,12 @@ trước khi báo; không báo từng lỗi riêng lẻ. Đây là CÁCH TÌM; c
 
 ## Hiệu lực — không hồi tố
 
-Cùng luật land-OID của `ADR-0052`. Luật của ADR này áp cho một packet **khi và chỉ khi** blob đặc tả mà
+**Kích hoạt.** ADR này chỉ có hiệu lực sau khi packet máy (`MAY-ADR-0054`) land và một ADR kế nhiệm do packet ấy
+đưa vào tuyên bố kích hoạt nó, kèm dòng §20 của protocol. Trước đó mọi dòng khai dưới đây **vô hiệu** và mọi packet
+chịu luật cũ (fail-closed). Đo được: `rg -l 'kích hoạt `ADR-0054`' docs/adr/` không ra tệp nào ngoài tệp này
+⇒ chưa kích hoạt.
+
+Sau khi kích hoạt, cùng luật land-OID của `ADR-0052`. Luật của ADR này áp cho một packet **khi và chỉ khi** blob đặc tả mà
 `spec_hash` của lease trỏ tới có **đúng một** dòng khớp `^luat_push_va_dung_va: ADR-0054@([0-9a-f]{40})$`, và
 OID `<L>` bắt được thoả ba phép đo của `ADR-0052` thay đường dẫn bằng
 `docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md`. Thiếu dòng, hai dòng, phép đo sai hoặc
@@ -137,6 +149,6 @@ băng nào.
 
 - **`CONG-DEM-PUSH`** — cổng mã đếm số lần đẩy nhánh code và đọc biên nhận vá CI. Packet riêng (Q7 của đặc tả).
 - **`R291-DAM-SO-CUNG`** — packet này là lần thứ **5** phải kê khai slot vì ratchet đếm cứng `docs/*.md`.
-- **`ACCEPTED-KHONG-CO-DUONG-RA`** — `packet_loop.py` không có lệnh đưa packet `accepted` sang generation mới; đường
-  ở mục 2 đi bằng quyết định chủ kho, lease mới và biên nhận, chưa có máy canh.
+- **`MAY-ADR-0054`** — packet máy làm năm yêu cầu ở mục 2 trên `.claude/dev/packet_loop.py` và đưa ADR kích hoạt.
+  Tới khi nó land, ADR này chưa có hiệu lực.
 - Chưa có số đo tác động lên tốc độ hội tụ khi bỏ đường *"review trên PR head"*.

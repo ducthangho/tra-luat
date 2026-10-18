@@ -162,7 +162,8 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     return p.returncode, p.stdout, p.stderr
 
 
-def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -> Path:
+def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False,
+                  truoc_spawn=True) -> Path:
     launcher = c.script.with_name("launcher.py")
     if not launcher.is_file():
         launcher.write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
@@ -174,6 +175,22 @@ def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -
         cmd += [str(c.tmp / f"khong-ton-tai-{time.time_ns()}")]
     else:
         cmd += [sys.executable, "-c", "pass" if xong else "import sys; sys.exit(23)"]
+    if truoc_spawn and not loi_probe and not xong:
+        # Fail only the actual child launch; the existing --version probe runs.
+        # The real launcher writes/signs the pre-spawn record. Never forge a
+        # post-spawn verdict merely to reach the consumer's nonce checks.
+        driver = c.tmp / f"fail-popen-{time.time_ns()}.py"
+        driver.write_text(
+            "import runpy,sys,subprocess\n"
+            "real = subprocess.Popen\n"
+            "def fail(argv, *a, **kw):\n"
+            "    if list(argv)[-2:] == ['-c', 'import sys; sys.exit(23)']:\n"
+            "        raise PermissionError(13, 'INERT pre-spawn denial')\n"
+            "    return real(argv, *a, **kw)\n"
+            "subprocess.Popen = fail\n"
+            "sys.argv = sys.argv[1:]\n"
+            "runpy.run_path(sys.argv[0], run_name='__main__')\n", encoding="utf-8")
+        cmd.insert(1, str(driver))
     p = subprocess.run(cmd, capture_output=True,
                        env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
     f = next(rr.iterdir()) / "run.json"
@@ -181,17 +198,17 @@ def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -
         return f
 
     d = json.loads(f.read_text(encoding="utf-8"))
+    if truoc_spawn:
+        assert p.returncode != 0 and d.get("trang_thai") == "hong"
+        assert d.get("void_reason") == reason and not d.get("pid")
+        assert d.get("probe", {}).get("spawn", {}).get("trang_thai") == "DAT"
+        return f
     if p.returncode != 23 or d.get("ma_thoat") != 23:
         raise AssertionError(f"child sau-spawn không thất bại đúng cách: rc={p.returncode}, sổ={d}")
     if d.get("probe", {}).get("spawn", {}).get("trang_thai") != "DAT":
         raise AssertionError(f"child chưa qua probe spawn: {d.get('probe')}")
-    # Launcher gọi một child đã spawn rồi là `xong` kể cả khi rc != 0. Đây là
-    # fixture của packet_loop: giữ bằng chứng sau-spawn thật, đổi sang phán quyết
-    # hạ tầng `hong`, rồi ký lại đúng neo lượt như fixture doctor ở trên.
-    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
-    d["trang_thai"] = "hong"
-    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
-    f.write_text(json.dumps(d), encoding="utf-8")
+    # An unknown post-spawn failure has no machine-void certificate.
+    assert "void_reason" not in d and d.get("failure_class") == "unknown"
     return f
 
 
@@ -1307,12 +1324,17 @@ def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
 def case_void_phan_biet_loi_probe_va_sau_spawn(c: Ctx):
     sd = _mo_luot(c)
     probe = json.loads(run_json_that(c, sd, loi_probe=True).read_text(encoding="utf-8"))
-    sau = json.loads(run_json_that(c, sd).read_text(encoding="utf-8"))
+    sau_path = run_json_that(c, sd, truoc_spawn=False)
+    sau = json.loads(sau_path.read_text(encoding="utf-8"))
     assert probe.get("giai_doan") == "probe" and sau.get("giai_doan") is None
     assert probe["probe"]["spawn"]["trang_thai"] == "DO"
     assert sau["probe"]["spawn"]["trang_thai"] == "DAT"
     assert not {"nonce", "chu_ky"} & probe.keys()
     assert {"nonce", "chu_ky"} <= sau.keys()
+    assert "void_reason" not in sau
+    before = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"]
+    _doi(10, *_void_may(c, sd, sau_path)[0:1], b"", "unknown post-spawn cannot refund")
+    assert json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"] == before
     assert probe["ma_thoat"] != sau["ma_thoat"]
 
 

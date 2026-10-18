@@ -51,6 +51,7 @@ import json
 import math
 import os
 import re
+import runpy
 import select
 import shutil
 import subprocess
@@ -79,6 +80,21 @@ _MA = re.compile(r"\b([A-Z0-9]{3,6}-[A-Z0-9]{3,6})\b")
 
 def _in(*a):
     print(*a, flush=True)
+
+
+def _codex_home_hieu_luc() -> Path:
+    raw = os.environ.get("CODEX_HOME", "")
+    home = Path(raw).expanduser() if raw else Path.home() / ".codex"
+    if not home.is_absolute() or ".." in home.parts:
+        raise OSError("CODEX_HOME must be an absolute path without parent traversal")
+    return home
+
+
+def _repo_helpers():
+    helper = Path(__file__).with_name("launcher.py")
+    if not helper.is_file():
+        raise OSError("missing repository credential storage helper")
+    return runpy.run_path(str(helper))
 
 
 def _sach(s: str) -> str:
@@ -111,6 +127,7 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
 
     codex_home.mkdir(parents=True, exist_ok=True)  # sự thật (3): phải TỒN TẠI trước
     moi = dict(os.environ, CODEX_HOME=str(codex_home))
+    moi.pop("CODEX_AUTH_JSON", None)
     chu, con = pty.openpty()  # sự thật (2): không có TTY thì codex im lặng hoàn toàn
     try:
         p = subprocess.Popen([_co_codex() or "codex", "login", "--device-auth"],
@@ -174,11 +191,12 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     if not lenh:
         return (False, "không có codex trên PATH")
     moi = dict(os.environ, CODEX_HOME=str(codex_home))
+    moi.pop("CODEX_AUTH_JSON", None)
     try:
         with open(os.devnull) as rong:
             p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
                                 f"In ra dung mot tu: {DAU_HIEU_SONG}"],
-                               stdin=rong, capture_output=True, text=True, env=moi,
+                               stdin=rong, capture_output=True, text=True, env=moi, cwd=codex_home,
                                timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
         return (False, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
@@ -186,7 +204,10 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
         return (False, f"không chạy được: {type(e).__name__}")
     stdout, stderr = p.stdout or "", p.stderr or ""
     ra = stdout + stderr
-    for dau in ("token_revoked", "refresh_token_invalidated", "401 unauthorized",
+    # wp484 g7 (Codex lượt 1 F02) — HỢP với tập của `_do_codex_song` trên master: bản chuyển sang probe
+    # chung đánh rơi `token_invalidated`, nên lỗi ấy thành "rc=1 chung" (không ghi state) và rc=0 kèm
+    # marker + stderr từ chối thì bị báo KHỎE. Dấu hiệu từ chối phải thắng rc lẫn marker.
+    for dau in ("token_revoked", "refresh_token_invalidated", "token_invalidated", "401 unauthorized",
                 "please log in again", "could not be refreshed"):
         if dau in ra.lower():
             return (False, f"credential BỊ TỪ CHỐI ({dau})")
@@ -198,7 +219,7 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     return (True, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
 
 
-def _gio_con_lai(auth: Path) -> float | None:
+def _gio_con_lai(auth: Path, document=None) -> float | None:
     """Số giờ còn lại của access_token, đọc `exp` trong JWT. None khi không đọc được.
 
     CHỈ rút trường thời gian; token KHÔNG bao giờ được trả ra hay in ra. `exp` lấy từ
@@ -206,8 +227,8 @@ def _gio_con_lai(auth: Path) -> float | None:
     định còn dùng được: khẳng định đó chỉ đến từ `_kiem_song`.
     """
     try:
-        d = json.loads(auth.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        d = json.loads(auth.read_text(encoding="utf-8")) if document is None else document
+    except (OSError, UnicodeError, json.JSONDecodeError):
         return None
     if not isinstance(d, dict):
         return None
@@ -238,21 +259,10 @@ def _gio_con_lai(auth: Path) -> float | None:
 
 
 def _ghi_bi_mat(dich: Path, noi_dung: bytes) -> None:
-    """Ghi 0600 bằng tệp độc quyền rồi replace; không đi theo symlink/hardlink đích."""
-    fd, ten = tempfile.mkstemp(prefix=f".{dich.name}.tmp-", dir=dich.parent)
-    tam = Path(ten)
-    try:
-        with os.fdopen(fd, "wb") as f:
-            f.write(noi_dung)
-            f.flush()
-            os.fsync(f.fileno())
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    finally:
-        try:
-            tam.unlink()
-        except FileNotFoundError:
-            pass
+    """Use repository storage for private atomic artifacts, including native ACLs."""
+    dich = dich.absolute()
+    with _repo_helpers()["_KhoCodex"](dich.parent, artifact=True) as store:
+        store.write(dich.name, noi_dung, store.read(dich.name))
 
 
 def _sao_luu(dich: Path) -> Path | None:
@@ -367,12 +377,36 @@ def cmd_lay(a) -> int:
         return RC[KHONG_DO_DUOC]
 
     tam_ctx = None if a.codex_home else tempfile.TemporaryDirectory(prefix="codex-cred-")
-    tam = Path(a.codex_home) if a.codex_home else Path(tam_ctx.name)
+    tam = Path(a.codex_home).expanduser().absolute() if a.codex_home else Path(tam_ctx.name)
+    try:
+        # Reject export aliases before starting login, and revalidate at each write.
+        ra = Path(a.ra).expanduser().absolute() if a.ra else Path(tempfile.gettempdir()) / "CODEX_AUTH_JSON.b64"
+        dan = Path(a.tep_dan).expanduser().absolute() if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
+        protected = [tam.resolve(), _codex_home_hieu_luc().resolve()]
+        outputs = [ra.resolve(), dan.resolve()]
+        if outputs[0] == outputs[1] or any(p == h or h in p.parents for p in outputs for h in protected):
+            raise OSError("Từ chối artifact trùng credential home hoặc trùng nhau")
+        for output in (ra, dan):
+            with _repo_helpers()["_KhoCodex"](output.parent, artifact=True) as out_store:
+                out_store.read(output.name)
+        a.ra, a.tep_dan = str(ra), str(dan)
+        with _repo_helpers()["_KhoCodex"](tam, create=True) as store:
+            if store.read() is not None:
+                _in("ĐỎ: home device-auth phải trống; dùng một home tạm mới")
+                return RC[DO]
+            return _lay_trong_home(a, tam, store)
+    finally:
+        if tam_ctx is not None:
+            tam_ctx.cleanup()
+
+
+def _lay_trong_home(a, tam, store) -> int:
     _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
     ok, dau_ra = _chay_device_auth(tam, a.han_giay)
     if not ok:
         _in("KHÔNG_ĐO_ĐƯỢC: chưa hoàn tất device-auth.")
-        _in(_sach(dau_ra)[-1200:])
+        # Only the parsed URL/device code may be printed by the login runner.
+        # Unclassified child output can contain credentials and is not a log.
         return RC[KHONG_DO_DUOC]
 
     auth = tam / "auth.json"
@@ -387,29 +421,44 @@ def cmd_lay(a) -> int:
         return RC[DO]
     _in(f"kiểm sống: {vi_sao}")
 
-    auth_bytes = auth.read_bytes()
+    auth_bytes = store.read()
+    if auth_bytes is None:
+        return RC[DO]
+    document = _repo_helpers()["_doc_auth_bytes"](auth_bytes)
     b64 = base64.b64encode(auth_bytes).decode("ascii")
-    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
+    ra = Path(a.ra) if a.ra else Path(tempfile.gettempdir()) / "CODEX_AUTH_JSON.b64"
     _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
     if a.cai_de:
-        that = Path(os.path.expanduser("~/.codex/auth.json"))
-        that.parent.mkdir(parents=True, exist_ok=True)
-        bak = _sao_luu(that)
-        _ghi_bi_mat(that, auth_bytes)
+        that = _codex_home_hieu_luc() / "auth.json"
+        helpers = _repo_helpers()
+        helpers["_doc_auth_bytes"](auth_bytes)
+        with helpers["_KhoCodex"](that.parent, create=True) as store:
+            old = store.read()
+            before = helpers["_moc_refresh"](helpers["_doc_auth_bytes"](old).get("last_refresh")) if old else None
+            after = helpers["_moc_refresh"](document.get("last_refresh"))
+            if before is not None and (after is None or after < before):
+                _in("ĐỎ: từ chối hạ cấp credential đang có")
+                return RC[DO]
+            bak = None
+            if old is not None:
+                name = "auth.json.bak-" + str(time.time_ns())
+                store.write(name, old, None)
+                bak = that.parent / name
+            store.write("auth.json", auth_bytes, old)
         _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
 
     # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
     # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
-    gio_con = _gio_con_lai(auth)
+    gio_con = _gio_con_lai(auth, document=document)
     tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
     _ghi_bi_mat(tep_dan, soan_tep_dan(
         b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
 
     _in("")
     _in("ĐẠT — credential mới, đã chứng minh bằng lời gọi thật.")
-    _in(f"  base64 dài {len(b64)} ký tự, đã ghi (chmod 600): {ra}")
-    _in(f"  tệp hướng dẫn dán (chmod 600): {tep_dan}")
+    _in(f"  base64 dài {len(b64)} ký tự, đã ghi với quyền riêng tư: {ra}")
+    _in(f"  tệp hướng dẫn dán với quyền riêng tư: {tep_dan}")
     if gio_con is not None:
         _in(f"  access_token còn ~{gio_con:.0f} giờ")
     _in("  → GỬI TỆP TRÊN cho chủ kho (SendUserFile), đừng in chuỗi ra màn hình.")
@@ -432,31 +481,49 @@ def cmd_lay(a) -> int:
 
 def cmd_kiem(a) -> int:
     """Đo credential ĐANG dùng: còn sống thật không, còn bao lâu."""
-    home = Path(a.codex_home) if a.codex_home else Path(os.path.expanduser("~/.codex"))
-    auth = home / "auth.json"
-    if not auth.is_file():
-        _in(f"KHÔNG_ĐO_ĐƯỢC: không có {auth}")
-        return RC[KHONG_DO_DUOC]
     try:
-        d = json.loads(auth.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        _in(f"ĐỎ: {auth} không đọc được ({type(e).__name__})")
+        home = Path(a.codex_home).expanduser() if a.codex_home else _codex_home_hieu_luc()
+        auth = home / "auth.json"
+        # wp484 g7 (P2 #509 thread XL-) — home hợp lệ nhưng CHƯA tạo cũng là "chưa có
+        # credential", giống thư mục có mà thiếu auth.json; bản trước để `_KhoCodex` ném
+        # FileNotFoundError rơi vào nhánh ĐỎ rc=2. `lexists`: symlink treo vẫn đi tiếp để
+        # `_KhoCodex` từ chối như cũ — không nới đường an toàn.
+        if not os.path.lexists(home):
+            _in("KHÔNG_ĐO_ĐƯỢC: thư mục Codex home chưa tồn tại — chưa có credential")
+            return RC[KHONG_DO_DUOC]
+        helpers = _repo_helpers()
+        with helpers["_KhoCodex"](home) as store:
+            raw = store.read()
+            if raw is None:
+                _in("KHÔNG_ĐO_ĐƯỢC: không có auth.json")
+                return RC[KHONG_DO_DUOC]
+            d = helpers["_doc_auth_bytes"](raw)
+    except (OSError, ValueError, UnicodeError):
+        _in("ĐỎ: không đọc credential an toàn được")
         return RC[DO]
     if not isinstance(d, dict):
         _in(f"ĐỎ: {auth} không chứa JSON object")
         return RC[DO]
     # CHỈ đọc trường thời gian. Không in token, không trả token ra ngoài hàm.
-    lr = d.get("last_refresh")
+    lr = helpers["_moc_refresh"](d.get("last_refresh"))
     _in(f"tệp        : {auth}")
     _in(f"last_refresh: {lr}")
-    gio = _gio_con_lai(auth)
+    gio = _gio_con_lai(auth, document=d)
     if gio is not None:
         _in(f"access_token: còn ~{gio:.1f} giờ"
             + ("   ⚠ SẮP HẾT — chạy `lay --cai-de` để lấy bản mới" if gio < 48 else ""))
     if not a.kiem_song:
         _in("CHƯA CHỨNG MINH khả dụng — thêm --kiem-song để gọi thật (tốn quota).")
         return RC[KHONG_DO_DUOC]
+    if helpers["_dang_cho_snapshot"](home):
+        _in("CHỜ snapshot mới; không lặp credential đã thất bại")
+        return RC[DO]
     song, vi_sao = _kiem_song(home)
+    if not song and vi_sao.startswith("credential BỊ TỪ CHỐI ("):
+        # wp484 g7 — cùng lỗi với `_do_codex_song` (P2 thread XMG), đường THỨ HAI reviewer không chỉ.
+        if not helpers["_danh_dau_auth_hong"](home, raw):   # F03: bản ĐÃ probe, không đọc lại
+            vi_sao = (f"KHÔNG ghi được trạng thái chờ snapshot sau khi {vi_sao} — "
+                      "CHẶN: sửa CODEX_HOME trước khi thử lại")
     _in(f"kiểm sống  : {vi_sao}")
     return RC[DAT] if song else RC[DO]
 
@@ -488,7 +555,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     a = build_parser().parse_args(argv)
-    return a.fn(a)
+    try:
+        return a.fn(a)
+    except (OSError, ValueError, UnicodeError):
+        _in("ĐỎ: không thao tác credential an toàn được; không xuất nội dung lỗi")
+        return RC[DO]
 
 
 if __name__ == "__main__":

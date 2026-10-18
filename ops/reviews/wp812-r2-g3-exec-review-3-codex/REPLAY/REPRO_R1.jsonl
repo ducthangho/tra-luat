@@ -1,0 +1,8 @@
+{"probe": "positive-review-real-H", "rc": 0, "state": "approved_pending", "unchanged": false, "error": ""}
+{"probe": "chatgpt-as-codex", "rc": 11, "state": "reviewing", "unchanged": true, "error": "biên nhận /tmp/review812-repro-qdloggyg/review/bn.yaml không đủ điều kiện approve: [\"`model_reviewer_identity.surface`='codex_cli' không phải bề mặt của provider `openai_chatgpt` — hợp đồng của kho cho ['chatgpt_web']\", 'provider `openai_chatgpt` KHÔNG được tự tạo `cross_approved` — `AGENTS.md` §4 giới hạn provider này ở `advisory_review`; nhận một tên vào danh sách CHO PHÉP không mang theo quyền của tên khác', 'provider-reviewer']\n"}
+{"probe": "wrong-transport", "rc": 11, "state": "reviewing", "unchanged": true, "error": "biên nhận /tmp/review812-repro-qdloggyg/review/bn.yaml không đủ điều kiện approve: [\"`model_reviewer_identity.transport`='human' không phải vận chuyển của provider `openai_codex` — hợp đồng của kho cho ['machine']\", 'transport']\n"}
+{"probe": "absent-git-anchor", "rc": 11, "state": "reviewing", "unchanged": true, "error": "biên nhận /tmp/review812-repro-qdloggyg/review/bn.yaml không đủ điều kiện approve: ['bn.yaml: KHÔNG ĐO ĐƯỢC commit `ffffffffffff…` trong `evidence_url`']\n"}
+{"probe": "invalid-slug-newline", "rc": 11, "state": "reviewing", "unchanged": true, "error": "biên nhận /tmp/review812-repro-qdloggyg/review/bn.yaml không đủ điều kiện approve: ['bang-lop', 'con-P0-P2', 'slug-ngoai-bang']\n"}
+{"probe": "negative-review-without-H", "rc": 11, "state": "reviewing", "unchanged": true, "error": "packet áp ADR-0054: review phải kèm --bien-nhan đọc được (TypeError)\n"}
+{"probe": "valid-spec-only-in-ref", "rc": 0, "state": "leased", "unchanged": false, "error": ""}
+{"scratch": "/tmp/review812-repro-qdloggyg"}

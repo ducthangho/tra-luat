@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r3/VERDICT.md) và [HINT.patch](/tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r3/HINT.patch).
+
+**changes_requested — P0=0 P1=1 P2=3 P3=0.**
+
+Suite: **455/455, TỔNG: ĐẠT**; 218 mutant bị giết, một ca/mutant Windows skipped. HINT áp kiểm tra được trên exact head. Kho nguồn giữ nguyên.

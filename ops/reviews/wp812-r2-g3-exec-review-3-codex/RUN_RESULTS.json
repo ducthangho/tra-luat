@@ -1,0 +1,65 @@
+{
+  "head": "468667238e53e77580e4be62e0b8ed5753a75cd9",
+  "tree": "42b4aeb19e649a837aef4e81f14b621cf87d177f",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "spec_hashes": {
+    "ops/specs/wp812-r2.md": "d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef",
+    "ops/specs/may-adr-0054-chung.md": "4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0"
+  },
+  "full_suite_rc": 0,
+  "baseline": "nền: 455/455 đạt · BỎ QUA: 1",
+  "suite_total": "TỔNG: ĐẠT",
+  "full_suite_cases": 456,
+  "full_suite_mutants": 219,
+  "full_suite_killed": 218,
+  "full_suite_skipped_case": "luong_canonical_chay_that",
+  "full_suite_skipped_mutant": "luong_canonical_chay_that_dao_os_name",
+  "r812_baseline": {
+    "kind": "baseline",
+    "passed": 50,
+    "total": 50
+  },
+  "r812_declared_mutants": 51,
+  "r812_declared_survivors": [],
+  "r2_audits": [
+    {
+      "mutant": "audit_no_receipt_schema",
+      "killed_by": [
+        "r812_schema_h_bat_buoc"
+      ]
+    },
+    {
+      "mutant": "audit_no_land_adr_existence",
+      "killed_by": [
+        "r812_oid_khong_chua_adr"
+      ]
+    },
+    {
+      "mutant": "audit_no_land_first_addition",
+      "killed_by": [
+        "r812_oid_khong_dua_adr_vao"
+      ]
+    },
+    {
+      "mutant": "audit_no_land_first_parent",
+      "killed_by": [
+        "r812_oid_ngoai_first_parent"
+      ]
+    },
+    {
+      "mutant": "audit_no_adr0054_round_close",
+      "killed_by": [
+        "r812_tran_vong_cua_khep_ghi_ket_qua"
+      ]
+    },
+    {
+      "mutant": "audit_bad_review_stops_before_H",
+      "killed_by": [
+        "r812_tran_vong_cua_khep_ghi_ket_qua",
+        "r812_tran_vong_dau_vao_hong_khong_ghi"
+      ]
+    }
+  ],
+  "numstat": "288\t35\t.claude/dev/packet_loop.py\n307\t0\t.claude/dev/packet_loop_test.py\n4\t0\tdocs/PROTOCOL_DA_PHIEN.md\n"
+}

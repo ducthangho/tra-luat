@@ -1,0 +1,15 @@
+{
+  "probe": "readback-own-empty-branch",
+  "command": [
+    "python3",
+    "/tmp/rv812-r3-suite/.claude/dev/packet_loop.py",
+    "--state-dir",
+    "/tmp/review812-r3-own-dz59d7wx/lease-empty-branch/sd1",
+    "status",
+    "--packet",
+    "55"
+  ],
+  "rc": 8,
+  "error": "state hỏng (adr0054) — không đoán: /tmp/review812-r3-own-dz59d7wx/lease-empty-branch/sd1/wp55.json\n",
+  "unchanged": true
+}

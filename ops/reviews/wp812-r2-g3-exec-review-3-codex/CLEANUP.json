@@ -1,0 +1,26 @@
+[
+  {
+    "probe": "success",
+    "rc": 0,
+    "leftovers": [],
+    "worktrees": 1
+  },
+  {
+    "probe": "H-reject",
+    "rc": 7,
+    "leftovers": [],
+    "worktrees": 1
+  },
+  {
+    "probe": "review-reject",
+    "rc": 11,
+    "leftovers": [],
+    "worktrees": 1
+  },
+  {
+    "probe": "provider-type-error",
+    "rc": 1,
+    "leftovers": [],
+    "worktrees": 1
+  }
+]

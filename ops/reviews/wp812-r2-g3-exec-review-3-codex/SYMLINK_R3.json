@@ -1,0 +1,2 @@
+{"probe": "in-repository-symlink-baseline", "rc": 0, "state": "leased", "unchanged": false, "error": "", "scratch": "/tmp/review812-r3-alias-6ordprh8/False"}
+{"probe": "in-repository-symlink-conflict", "rc": 0, "state": "leased", "unchanged": false, "error": "", "scratch": "/tmp/review812-r3-alias-6ordprh8/True"}

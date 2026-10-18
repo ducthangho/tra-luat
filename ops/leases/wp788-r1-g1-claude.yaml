@@ -99,8 +99,15 @@ xung_dot_write_set_do_luc_cap:
 leased_at_utc: '2026-10-17T17:15:05Z'
 heartbeat_at: '2026-10-17T17:15:05Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-19T17:15:05Z'
-lease_expires_at_utc: '2026-10-19T17:15:05Z'
+lease_until: '2026-10-18T02:38:14Z'
+lease_expires_at_utc: '2026-10-18T02:38:14Z'
+rut_han:
+  han_cu: '2026-10-19T17:15:05Z'
+  han_moi: '2026-10-18T02:38:14Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #788 da land (PR #818, merge ebcc70209f000c929aa9be435c3621348a3b4791, 2026-10-18T02:24:34Z); issue #788 da dong. Chu kho yeu cau rut han de nha write set ngay, thay vi cho het han 2026-10-19T17:15:05Z.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; bia mo mot chieu lam ai-dang-giu tra KHONG_XAC_DINH rc=12 (do tren ban sao nhap, #788 issuecomment-6244745249)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 run_minutes: 90
 heartbeat_minutes: 30
 attempts_used: 0

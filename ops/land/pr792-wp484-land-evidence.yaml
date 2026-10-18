@@ -35,13 +35,13 @@ pre_merge_checks:
   - {name: 'ci.yml pull_request (14 job), kiem-gate offline', run_id: 39058187579, sha: 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261018/kiem-gate-288ad3e.txt: packet_loop.py kiem-gate suite 105849455756, 14 ten bat buoc, rc=0', nguon: readback-check-runs-288ad3e.json}
   - {name: 'thu-hoi (hai suite rieng)', sha: 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b, conclusion: success, ghi_chu: 'measured — readback-check-runs-288ad3e.json: suite 105849452267 va 105855265611, ca hai success', nguon: readback-check-runs-288ad3e.json}
   - {name: 'launcher (Windows that) workflow_dispatch', run_id: 39058188545, sha: 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b, conclusion: success, nguon: readback-run-39058188545.json}
-  - {name: 'check run `launcher` (job ubuntu-only cua launcher-windows.yml)', sha: 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b, conclusion: skipped, ghi_chu: 'measured — 1/18 check run skipped; job Windows that cung suite 105849458251 success. Khong tinh la xanh, cung khong tinh la do.'}
+  - {name: 'check run `launcher` (job ubuntu-only cua launcher-windows.yml)', sha: 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b, conclusion: skipped, ghi_chu: 'measured — readback-check-runs-288ad3e.json: 1/18 check run skipped; job Windows that cung suite 105849458251 success. Khong tinh la xanh, cung khong tinh la do.'}
   - {name: 'executor cross-review Codex CLI luot 5 (launcher.py run)', sha: 907214d2cd0b67ff444b3adf734811eab39bfc71, conclusion: 'approve, P0=0 P1=0 P2=0 P3=0', nguon: verdict-luot5/, ghi_chu: 'Reviewed head 907214d, KHONG phai head merge 288ad3e — xem review.chua_review'}
 post_merge_checks:
   - {name: 'ci.yml push master', run_id: 39091859943, run_attempt: 1, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: cancelled, ly_do: 'measured — readback-run-39091859943-attempt1.json. Nguyen nhan va actor huy KHONG_DO_DUOC.', nguon: readback-run-39091859943-attempt1.json}
   - {name: 'ci.yml push master (chay lai)', run_id: 39091859943, run_attempt: 2, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: cancelled, ly_do: 'measured — readback-run-39091859943-attempt2.json: run_started_at 04:08:49Z, 0 job, ket thuc cancelled 04:15:07Z; run push dba7fae7 (39096438142) created_at 04:15:06Z, cung nhom concurrency. GitHub chi giu MOT luot cho moi nhom — tuong quan, khong chung minh nhan qua.', nguon: readback-run-39091859943-attempt2.json}
   - {name: 'launcher (Windows that) push master', run_id: 39091859945, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: success, nguon: readback-run-39091859945.json}
-  - {name: 'ci.yml workflow_dispatch tren claude/gate-exact-de82ef74 — DUNG merge SHA', run_id: 39096585920, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: DANG_CHAY, ghi_chu: 'measured — nhanh tao bang git push de82ef74:refs/heads/claude/gate-exact-de82ef74 (ls-remote tra dung OID). ci.yml doc tu chinh de82ef74; dispatch => ma tran ubuntu+windows (rong hon push gate chi ubuntu). Ket qua ghi o ban cap nhat ke tiep cua ho so nay.'}
+  - {name: 'ci.yml workflow_dispatch tren claude/gate-exact-de82ef74 — DUNG merge SHA', run_id: 39096585920, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: DANG_CHAY, ghi_chu: 'measured — do-lai-nguon-20261018/nhanh-gate-exact.txt: nhanh tao bang git push de82ef74:refs/heads/claude/gate-exact-de82ef74 (ls-remote tra dung OID). ci.yml doc tu chinh de82ef74; dispatch => ma tran ubuntu+windows (rong hon push gate chi ubuntu). Ket qua ghi o ban cap nhat ke tiep cua ho so nay.'}
 bookkeeping:
   - {item: 'mo 3 issue no co ten', issues: [824, 825, 826], ket_qua: 'measured — readback-issue-824.json … 826.json: ca 3 ton tai, state open, tieu de "Nợ wp484 g7 (k/3)"'}
   - {item: 'dong Issue #484 (completed) kem comment ban chieu', ket_qua: 'lam sau commit nay; readback o ban cap nhat ke tiep'}
@@ -107,9 +107,9 @@ dieu_kien_merge_spec:
     Tran loi goi Codex 2 -> 5 do chu kho nang (issuecomment-6228814972, 6237196943); dung 5/5. Head merge 288ad3e KHAC head
     duoc review — xem review.chua_review.
   M-2: 'loi_khai_co_neo — 4 thread P2 connector tren #509; KHONG luu readback thread #509 trong provenance nay.'
-  M-3: 'measured — ci.yml 14/14 + kiem-gate rc=0 tren 288ad3e; launcher Windows that 39058188545 success tren 288ad3e.'
+  M-3: 'measured — readback-check-runs-288ad3e.json + do-lai-nguon-20261018/kiem-gate-288ad3e.txt: ci.yml 14/14 + kiem-gate rc=0 tren 288ad3e; readback-run-39058188545.json: launcher Windows that success tren 288ad3e.'
   M-4: 'measured — bf10fab7 merge origin/master d347d42 (chua d8b15cb = land #779 wp775) vao nhanh; do-lai-nguon-20261018/delta-sau-review.txt.'
-  M-5: 'measured — head doi 907214d -> 288ad3e sau verdict luot 5 => M-1 HET HIEU LUC tren head cuoi theo dung chu cua spec. Chu kho merge voi dieu nay da khai trong than PR (loi_khai_co_neo).'
+  M-5: 'measured — verdict-luot5/VERDICT.md + do-lai-nguon-20261018/delta-sau-review.txt: head doi 907214d -> 288ad3e sau verdict luot 5 => M-1 HET HIEU LUC tren head cuoi theo dung chu cua spec. Chu kho merge voi dieu nay da khai trong than PR (loi_khai_co_neo).'
 
 review:
   so_loi_goi_codex_cli: 5

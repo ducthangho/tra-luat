@@ -59,8 +59,10 @@ import yaml
 d=yaml.safe_load(open("ops/cong_cu.yaml", encoding="utf-8"))
 print("\n".join(k for k,v in d["cong_cu"].items() if v["bat_buoc"] or v.get("chuan_bi")))')
   [ "${#BAT_BUOC[@]}" -gt 0 ] || { echo "cai_cong_cu: ban ke khong co cong cu bat buoc" >&2; exit 5; }
-  unset CAI_CONG_CU_PY_CUA  # go thuoc tinh export neu co (F04), roi gan lai KHONG export
-  CAI_CONG_CU_PY_CUA=$$  # chi cac luot `source` duoi day thay (xem khoi chon python)
+  # Gan ROI MOI go export: duoi `allexport` (`bash -a`, SHELLOPTS) chinh phep gan tu export lai, ke ca sau `unset`
+  # hay `declare +x X=...` mot buoc (Codex luot 5: luot `source` cho rg thay dau export, xoa no, va bash chon lai Python).
+  CAI_CONG_CU_PY_CUA=$$
+  declare +x CAI_CONG_CU_PY_CUA  # chi cac luot `source` duoi day thay (xem khoi chon python); installer con khong thay
   for cong_cu in "${BAT_BUOC[@]}"; do
     # source de PATH do installer vua them ton tai o parent cho vong sau + probe cuoi.
     # KICH la path tuyet doi, khong dung lai $0 tu CWD cua caller.

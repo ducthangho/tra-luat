@@ -8257,7 +8257,8 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
-def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False, tiem=False):
+def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False, tiem=False,
+                       allexport=None, thu_tu=("rg", "bash")):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
     `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
     (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `truc_tiep`: eval công
@@ -8265,7 +8266,8 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
     THẬT không có PyYAML (F03). `batch`: chạy `--bat-buoc` thật trên bảng kê rút còn `rg` rồi `bash` (lấy NGUYÊN từ
     YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. `tiem`: khởi chạy qua `exec` (giữ PID) với
     `CAI_CONG_CU_PY_CUA=$$` và `PY` vô hướng trỏ Python của venv đã EXPORT sẵn (F04); installer giả ghi việc chúng thấy dấu
-    hay không vào `dau.log`. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    hay không vào `dau.log`. `allexport`: `"co"` chạy `bash -a`, `"env"` đặt `SHELLOPTS=allexport` (Codex lượt 5);
+    `thu_tu`: thứ tự hai mục của bảng kê batch. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cai_cong_cu.sh", "cong_cu.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
@@ -8273,7 +8275,7 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
         import yaml
         d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))
         (ops / "cong_cu.yaml").write_text(yaml.safe_dump(
-            {"schema_version": d["schema_version"], "cong_cu": {k: d["cong_cu"][k] for k in ("rg", "bash")}},
+            {"schema_version": d["schema_version"], "cong_cu": {k: d["cong_cu"][k] for k in thu_tu}},
             sort_keys=False, allow_unicode=True), encoding="utf-8")
     else:
         shutil.copy2(YAML_DANG_DUNG, ops / "cong_cu.yaml")
@@ -8304,7 +8306,9 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
         env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"][nen]["lenh"]
         lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); cd {shlex.quote(str(kho))}; eval "$LENH"']
     else:
-        lenh = [vo, str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
+        lenh = [vo] + (["-a"] if allexport == "co" else []) + [str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
+    if allexport == "env":
+        env["SHELLOPTS"] = "allexport"
     if tiem:
         lenh = [vo, "-c", f"export CAI_CONG_CU_PY_CUA=$$ PY={shlex.quote(str(uv / 'python'))}; exec "
                 + " ".join(shlex.quote(x) for x in lenh)]
@@ -8361,6 +8365,22 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
         bang(p.returncode == 0 and tong.get("trang_thai_tong") == "DAT" and dat == {"rg": "DAT", "bash": "DAT"},
              f"{nen}: --bat-buoc chon lai Python sau khi rg doi PATH: rc={p.returncode} {dat} "
              f"{p.stderr[-300:]}")
+    # F03 dưới `allexport` (Codex lượt 5): phép gán dấu của lượt cha tự export ⇒ lượt `source` cho rg xoá nó (rào F04) và
+    # bash chọn lại Python. Cả hai cách bật, cả hai thứ tự: rc 0, cả hai DAT, installer con không thấy dấu.
+    for ae in ("co", "env"):
+        for tt in (("rg", "bash"), ("bash", "rg")):
+            with San() as s:
+                p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True,
+                                                    allexport=ae, thu_tu=tt)
+                try:
+                    tong = json.loads(p.stdout[p.stdout.rindex('{\n  "trang_thai_tong"'):])
+                except ValueError:
+                    tong = {}
+                dat = {c.get("ten"): c.get("trang_thai") for c in tong.get("cong_cu", [])}
+                thay = (s / "dau.log").read_text().split() if (s / "dau.log").exists() else []
+                bang(p.returncode == 0 and dat == {"rg": "DAT", "bash": "DAT"} and set(thay) <= {"ABSENT"},
+                     f"{nen}: allexport={ae} thu_tu={tt}: rc={p.returncode} {dat} installer thay {thay} "
+                     f"{p.stderr[-300:]}")
     # F04 (Codex lượt 4): dấu và `PY` vô hướng đến từ MÔI TRƯỜNG (qua `exec` nên dấu TRÙNG PID) không được tin — lần gọi
     # mới vẫn tự chọn Python ban đầu; và installer con KHÔNG thấy dấu, kể cả khi dấu đầu vào đã được export.
     for batch in (False, True):

@@ -107,3 +107,8 @@ ngan_sach:
   vong_review_canon: {used: 0}
   attempt: {used: 0, limit: 3}
 kich_thuoc_tran: 'ADR-0053: <= 450 dong them, 3 duong dan'
+da_bi_thay_the: wp812-r2-g3-claude
+da_bi_thay_the_luc_utc: '2026-10-18T10:05:00Z'
+da_bi_thay_the_vi_sao: >-
+  Chu kho chon phuong an 2 (tach pham vi, dac ta r2 wp812-r2.md) issuecomment-6248507114; lease g3
+  wp812-r2-g3-claude khai thay_the_cho tro nguoc. g2 chua day nhanh code nao.

@@ -60,7 +60,7 @@ so_lan_day: >-
   lan 3 va 4 co bien nhan cua executor (comment 6236563063, 6237152105). Connector bat 2 P2 (4303133321 tren 301356c,
   4303469931 tren 6b3b4f3), ca hai da va; head cuoi khong finding.
 review:
-  codex_connector: 'measured — completed, khong finding, tren 76014ce.'
+  codex_connector: 'measured — readback-comments-801.json: summary codex-review-state completed, has_any_findings false, tren 76014ce.'
   codex_cli: 'thuat_lai — cac luot Codex CLI offline cua executor (comment PR #801); bien nhan v2 KHONG nam trong ops/reviews/ (no).'
 khong_do_duoc:
   - 'Bien nhan v2 cho cac luot Codex CLI cua wp795 chua ghi vao ops/reviews/; ghi la no, khong chan land.'

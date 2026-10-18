@@ -56,7 +56,7 @@ trang_thai_packet:
   landed: false
   landed_ly_do: 'Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1).'
 review:
-  codex_connector: 'measured — completed, khong finding, tren c679d64.'
+  codex_connector: 'measured — readback-comments-800.json: summary codex-review-state completed, has_any_findings false, tren c679d64.'
   codex_cli: 'thuat_lai — cac luot Codex CLI offline cua executor (comment PR #800); bien nhan v2 KHONG nam trong ops/reviews/ (no).'
 khong_do_duoc:
   - 'Bien nhan v2 cho cac luot Codex CLI cua wp794 chua ghi vao ops/reviews/; ghi la no, khong chan land.'

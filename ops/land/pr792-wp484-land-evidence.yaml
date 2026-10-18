@@ -1,8 +1,8 @@
 # HO SO LAND — packet #484 wp484 r8 (lease g7), ma qua PR #792 (thay #509). Khuon: ops/land/pr779-wp775-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (de82ef74), `landed: false` cho toi khi chu kho quyet — xem trang_thai_packet. "merged" KHONG dong
-# nghia "landed" (§10.2.4).
+# TRANG THAI: merged (de82ef74) va `landed: true` — hieu luc tu merge commit cua PR #827 (claude/bookkeeping-484-land)
+# dua dong nay vao master; neo quyet dinh: #484 issuecomment-6247376884. "merged" KHONG dong nghia "landed" (§10.2.4).
 # Gate exact-SHA: hai lan push-gate tren de82ef74 deu bi HUY (attempt 1 va attempt 2 do phien nay chay lai). Attempt 2 bi
 # huy luc 04:15:07Z, dung giay run push dba7fae7 duoc tao 04:15:06Z cung nhom concurrency `gate-refs/heads/master`
 # (tuong quan thoi gian, KHONG phai chung minh nhan qua). Thay vao: workflow_dispatch ci.yml tren nhanh
@@ -88,12 +88,18 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-792.json: merged true, merged_at 2026-10-18T02:56:31Z, merged_by ducthangho, merge_commit_sha
     de82ef74 (cha 924527c + 288ad3e: do-lai-nguon-20261018/merge-de82ef74.txt), merge commit (khong squash/rebase).
-  landed: false
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR #827 (nhanh claude/bookkeeping-484-land) dua dong nay vao master. Comment 6247376884 la NEO cua
+    quyet dinh, khong phai moc hieu luc (tien le #775). Cac commit truoc cua PR #827 ghi `landed: false`.
+  landed_quyet_dinh: >-
+    loi_khai_co_neo — chu kho chi thi trong phien 18-10-2026 "Ghi landed true cho #484"; phien chuyen loi thanh #484
+    issuecomment-6247376884 (readback-comment-6247376884.json: user ducthangho, OWNER, ghi ho qua app claude, 07:57:38Z).
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh: DAT cho tap push-gate (ubuntu 14/14, kiem-gate rc=0, run
     39096585920); windows cung run do san theo #748, ngoai tap push-gate; (2) lease da nha: DAT (xem
-    lease.thu_hoi_cuoi); (3) bookkeeping: 3 no #824–#826 open DAT, #484 closed/completed DAT. Ghi `landed: true` can
-    quyet dinh chu kho (tien le #775 / PR sua ho so).
+    lease.thu_hoi_cuoi); (3) bookkeeping: 3 no #824–#826 open DAT, #484 closed/completed DAT. Chu kho ghi landed
+    voi cac ghi chu ay (windows do san #748; bf10fab/288ad3e chua Codex review).
 
 uy_quyen_land:
   dang: >-

@@ -21944,10 +21944,35 @@ def run() -> int:
         # `scripts/tl_test_fragments_bundled.py` đã có sẵn trong gói, chỉ đổi băm. Ba PR worker được merge riêng
         # lẻ nên master đỏ `release-verify --strict` giữa chừng — đúng lý do protocol §9 để manifest cho phiên land.
         # Cây thật = 186 + 75 = **261**; trần Package 200 còn 14 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 75 == 261
+        # KÊ KHAI SLOT (bookkeeping land WP766 — PR #772, merge e03d4bf): gói 186 → **187**. Thêm đúng MỘT mảnh
+        # changelog `changelog.d/wp-766.md`, không tệp `docs/` nào đổi (vẫn 75), không tệp runtime mới. PR worker
+        # thêm mảnh mà không kê manifest nên master đỏ `release-verify --strict` (gate 38861735146) — cùng hình dạng WP725-727.
+        # Cây thật = 187 + 75 = **262**; trần Package 200 còn 13 khe.
+        # KÊ KHAI SLOT (packet #782 r2 — ADR-0052 + ADR-0053, PR #789): 75 → **77** Markdown dưới `docs/`.
+        # Thêm ĐÚNG HAI tệp dev-side/ngoài gói:
+        #   + `docs/adr/0052-tran-loi-goi-codex-len-tam.md`
+        #   + `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`
+        # `docs/PROTOCOL_DA_PHIEN.md` (§20) là sửa, không thêm. `RELEASE_MANIFEST.json` đổi CHỈ vì băm của chính
+        # tệp này đổi ⇒ `file_count` giữ **187**; cây thật = 187 + 77 = **264**; trần Package 200 còn 12 khe (ZIP mang thêm entry manifest: 188).
+        # R291-DAM-SO-CUNG = **4** (#522, #548, #551, #782). Lần này lại đúng hình dạng "cổng tài liệu xanh, không
+        # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ
+        # `1730/1731` (run 38945289558). Chủ kho chọn kê khai slot cho packet này; chữa nợ gốc là packet riêng.
+        # KÊ KHAI SLOT (packet #784 r2 — ADR-0054): 77 → **78** Markdown dưới `docs/`. Thêm ĐÚNG MỘT tệp
+        # dev-side/ngoài gói: + `docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md`.
+        # `docs/PROTOCOL_DA_PHIEN.md` là sửa, không thêm. Manifest đổi CHỈ vì băm tệp này ⇒ `file_count` giữ **187**;
+        # cây thật = 187 + 78 = **265**; trần Package 200 vẫn còn 12 khe (gói không đổi; ZIP 188 entry).
+        # R291-DAM-SO-CUNG = **5** (#522, #548, #551, #782, #784). Lần này chạy selftest TRƯỚC lần đẩy duy nhất.
+        # ĐÓNG NỢ R291-DAM-SO-CUNG (packet #794): số `docs/*.md` nay TÍNH từ cây (ok4 đòi ≥ 1 và mọi tệp bị loại
+        # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3: 187). Thêm docs KHÔNG kê khai slot ở đây nữa.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         d = root / "docs"
-        tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 75
+        # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
+        # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
+        goc_docs = d.resolve()
+        tren_dia = (sorted(q for q in d.rglob("*.md")
+                           if q.is_file() and not q.is_symlink() and q.resolve().is_relative_to(goc_docs))
+                    if d.is_dir() and not d.is_symlink() else [])
+        ok4 = (len(tren_dia) >= 1
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))
@@ -21988,10 +22013,11 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 186 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
-            # changelog.d — ke khai slot day du o r291_docs_ngoai_goi).
+            # RATCHET: goi giu 187 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
+            # r291_docs_ngoai_goi).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 186
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

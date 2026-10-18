@@ -1,0 +1,55 @@
+3.12 base t81 getpid=that: rc=0 
+3.12 base t81 getpid=1: rc=0 
+3.12 base t81 getpid=10: rc=1 HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh
+3.12 base t81 getpid=11: rc=1 HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: hau due khong lay duoc khoa bi bo qua im lang
+3.12 base t81 getpid=12: rc=1 HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh
+3.12 base t81 getpid=13: rc=0 
+3.12 base t81 getpid=14: rc=0 
+3.12 base t81 getpid=15: rc=0 
+3.12 base t81 getpid=99999: rc=0 
+3.12 head t81 getpid=that: rc=0 
+3.12 head t81 getpid=1: rc=0 
+3.12 head t81 getpid=10: rc=0 
+3.12 head t81 getpid=11: rc=0 
+3.12 head t81 getpid=12: rc=0 
+3.12 head t81 getpid=13: rc=0 
+3.12 head t81 getpid=14: rc=0 
+3.12 head t81 getpid=15: rc=0 
+3.12 head t81 getpid=99999: rc=0 
+3.12 head r766 getpid=that: rc=0 
+3.12 head r766 getpid=1: rc=0 
+3.12 head r766 getpid=10: rc=0 
+3.12 head r766 getpid=11: rc=0 
+3.12 head r766 getpid=12: rc=0 
+3.12 head r766 getpid=13: rc=0 
+3.12 head r766 getpid=14: rc=0 
+3.12 head r766 getpid=15: rc=0 
+3.12 head r766 getpid=99999: rc=0 
+3.13 base t81 getpid=that: rc=0 
+3.13 base t81 getpid=1: rc=0 
+3.13 base t81 getpid=10: rc=1 HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh
+3.13 base t81 getpid=11: rc=1 HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: hau due khong lay duoc khoa bi bo qua im lang
+3.13 base t81 getpid=12: rc=1 HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh
+3.13 base t81 getpid=13: rc=0 
+3.13 base t81 getpid=14: rc=0 
+3.13 base t81 getpid=15: rc=0 
+3.13 base t81 getpid=99999: rc=0 
+3.13 head t81 getpid=that: rc=0 
+3.13 head t81 getpid=1: rc=0 
+3.13 head t81 getpid=10: rc=0 
+3.13 head t81 getpid=11: rc=0 
+3.13 head t81 getpid=12: rc=0 
+3.13 head t81 getpid=13: rc=0 
+3.13 head t81 getpid=14: rc=0 
+3.13 head t81 getpid=15: rc=0 
+3.13 head t81 getpid=99999: rc=0 
+3.13 head r766 getpid=that: rc=0 
+3.13 head r766 getpid=1: rc=0 
+3.13 head r766 getpid=10: rc=0 
+3.13 head r766 getpid=11: rc=0 
+3.13 head r766 getpid=12: rc=0 
+3.13 head r766 getpid=13: rc=0 
+3.13 head r766 getpid=14: rc=0 
+3.13 head r766 getpid=15: rc=0 
+3.13 head r766 getpid=99999: rc=0 
+MATRIX commands=54 unexpected=0

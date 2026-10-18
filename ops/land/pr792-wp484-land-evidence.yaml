@@ -6,7 +6,8 @@
 # Gate exact-SHA: hai lan push-gate tren de82ef74 deu bi HUY (attempt 1 va attempt 2 do phien nay chay lai). Attempt 2 bi
 # huy luc 04:15:07Z, dung giay run push dba7fae7 duoc tao 04:15:06Z cung nhom concurrency `gate-refs/heads/master`
 # (tuong quan thoi gian, KHONG phai chung minh nhan qua). Thay vao: workflow_dispatch ci.yml tren nhanh
-# claude/gate-exact-de82ef74 tro DUNG de82ef74 (nhom concurrency rieng, ma tran ubuntu+windows) — xem post_merge_checks.
+# claude/gate-exact-de82ef74 tro DUNG de82ef74 (nhom concurrency rieng, ma tran ubuntu+windows): ubuntu 14/14 XANH;
+# windows do san (#748, khong phai cua #484) — xem post_merge_checks.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr792-wp484-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -41,10 +42,11 @@ post_merge_checks:
   - {name: 'ci.yml push master', run_id: 39091859943, run_attempt: 1, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: cancelled, ly_do: 'measured — readback-run-39091859943-attempt1.json. Nguyen nhan va actor huy KHONG_DO_DUOC.', nguon: readback-run-39091859943-attempt1.json}
   - {name: 'ci.yml push master (chay lai)', run_id: 39091859943, run_attempt: 2, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: cancelled, ly_do: 'measured — readback-run-39091859943-attempt2.json: run_started_at 04:08:49Z, 0 job, ket thuc cancelled 04:15:07Z; run push dba7fae7 (39096438142) created_at 04:15:06Z, cung nhom concurrency. GitHub chi giu MOT luot cho moi nhom — tuong quan, khong chung minh nhan qua.', nguon: readback-run-39091859943-attempt2.json}
   - {name: 'launcher (Windows that) push master', run_id: 39091859945, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: success, nguon: readback-run-39091859945.json}
-  - {name: 'ci.yml workflow_dispatch tren claude/gate-exact-de82ef74 — DUNG merge SHA', run_id: 39096585920, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: DANG_CHAY, ghi_chu: 'measured — do-lai-nguon-20261018/nhanh-gate-exact.txt: nhanh tao bang git push de82ef74:refs/heads/claude/gate-exact-de82ef74 (ls-remote tra dung OID). ci.yml doc tu chinh de82ef74; dispatch => ma tran ubuntu+windows (rong hon push gate chi ubuntu). Ket qua ghi o ban cap nhat ke tiep cua ho so nay.'}
+  - {name: 'ci.yml workflow_dispatch tren claude/gate-exact-de82ef74 — DUNG merge SHA, phan ubuntu (= tap job push-gate)', run_id: 39096585920, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261018/kiem-gate-de82ef7-ubuntu.txt: packet_loop.py kiem-gate suite 105949986767, 14 ten ubuntu, rc=0', ghi_chu: 'measured — do-lai-nguon-20261018/nhanh-gate-exact.txt: nhanh tao bang git push de82ef74:refs/heads/claude/gate-exact-de82ef74 (ls-remote tra dung OID); ci.yml doc tu chinh de82ef74. Push master chi chay ubuntu, nen 14 ten nay la DUNG tap gate hau-merge.', nguon: [readback-check-runs-de82ef7.json, readback-run-39096585920.json, readback-jobs-39096585920.json]}
+  - {name: 'cung run 39096585920, phan windows (ngoai push-gate)', run_id: 39096585920, sha: de82ef748e75659ab3dceed225b0f56dcc69e78b, conclusion: 'failure 11 job (gate-registry windows con chay luc do)', ghi_chu: 'measured — do-lai-nguon-20261018/windows-do-san.txt: do t23/t49 (cong_cu_test, ops/bash_nen.py) va t217 (lease_publish) — DUNG 11 job, cung buoc do tren run dispatch master 39095054115 (fb490a7c, readback-jobs-39095054115.json). #792 khong cham tep nao trong so do. readback-issue-671.json (28-09) va readback-issue-748.json (13-10) da theo doi chinh cac ca nay TRUOC merge => DO SAN, khong phai cua #484. Windows that cua launcher (lane #484 do) xanh: 39091859945.', nguon: [readback-jobs-39096585920.json, readback-jobs-39095054115.json, readback-issue-748.json]}
 bookkeeping:
   - {item: 'mo 3 issue no co ten', issues: [824, 825, 826], ket_qua: 'measured — readback-issue-824.json … 826.json: ca 3 ton tai, state open, tieu de "Nợ wp484 g7 (k/3)"'}
-  - {item: 'dong Issue #484 (completed) kem comment ban chieu', ket_qua: 'lam sau commit nay; readback o ban cap nhat ke tiep'}
+  - {item: 'dong Issue #484 (completed) kem comment ban chieu', ket_qua: 'measured — readback-issue-484.json: state closed, state_reason completed, closed_at 2026-10-18T05:22:57Z, closed_by ducthangho; comment dong 6246061714 (readback-comment-6246061714.json)'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-484-land}
 # ---- het truong chuan
 packet_id: wp484
@@ -88,9 +90,10 @@ trang_thai_packet:
     de82ef74 (cha 924527c + 288ad3e: do-lai-nguon-20261018/merge-de82ef74.txt), merge commit (khong squash/rebase).
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh: CHUA (run 39096585920 dang chay); (2) lease da nha: DAT (xem
-    lease.thu_hoi_cuoi); (3) bookkeeping: 3 no #824–#826 open DAT, dong #484 sau commit nay. Ghi `landed: true` can
-    quyet dinh chu kho sau khi (1) xanh (tien le #775 / PR sua ho so).
+    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh: DAT cho tap push-gate (ubuntu 14/14, kiem-gate rc=0, run
+    39096585920); windows cung run do san theo #748, ngoai tap push-gate; (2) lease da nha: DAT (xem
+    lease.thu_hoi_cuoi); (3) bookkeeping: 3 no #824–#826 open DAT, #484 closed/completed DAT. Ghi `landed: true` can
+    quyet dinh chu kho (tien le #775 / PR sua ho so).
 
 uy_quyen_land:
   dang: >-
@@ -134,5 +137,7 @@ no_ngoai_pham_vi:
 khong_do_duoc:
   - 'Log day du cua cac job CI KHONG luu; chi readback run/check-run.'
   - 'stderr.log cua cac luot review KHONG luu; model thuc chay KHONG_DO_DUOC.'
+  - 'gate-registry (windows-latest) cua run 39096585920 chua xong luc ghi; khong tinh vao tap push-gate.'
+  - 'Windows ci.yml tren base 924527c2 KHONG chay; "do san" neo vao issue #671/#748 mo truoc merge va run fb490a7c, khong phai phep do tren base.'
   - 'Nguyen nhan huy push-gate tren de82ef74 (ca hai attempt): KHONG_DO_DUOC; chi co tuong quan thoi gian voi run push ke tiep.'
   - 'Than comment PR #792 khong luu nguyen van; readback-comments-792-chi-muc.json giu id/user/thoi diem/sha256 than/120 ky tu dau.'

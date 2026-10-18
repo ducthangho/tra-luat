@@ -10515,30 +10515,22 @@ DOT_BIEN_HOOK = [
     ("wp802_yaml_khong_ghi_github_path", ('cygpath -w "$RG_DICH" >> "$GITHUB_PATH"', 'true'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
     # wp831 (N1–N3): cùng luật; mỗi neo khớp ĐÚNG MỘT chỗ trong YAML (linux ≠ macos nhờ ứng viên đầu).
+    # Một đột biến cho MỖI chốt (ứng viên dpkg · ứng viên brew · bộ chọn kiem-tra · có ghi $GITHUB_PATH · điều kiện
+    # ghi). Cả năm đều KHÔNG đo được trên Windows (ca đích cần shell POSIX), mà sàn ≥70% đo được mỗi nền
+    # (`_dot_bien_du_san`) chỉ còn chỗ cho 5: launcher-windows 39115887003 với 9 đột biến wp831 đo 197/285 = 69,1%.
     ("wp831_yaml_linux_bo_ung_vien_dpkg", ('for RG_D in "$(dirname "$(dpkg -L', 'for RG_D in "$(dirname "$(true -L'),
-     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_linux_quay_ve_command_v", ('ripgrep && RG_DICH= && for RG_D in "$(dirname "$(dpkg',
-                                            'ripgrep && dirname "$(command -v rg)" && exit 0 && for RG_D in "$(dirname "$(dpkg'),
      ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
     ("wp831_yaml_linux_chi_theo_ma_thoat", (': p)}\'\')")" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
                                             ': p)}\'\')")" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
      ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_linux_khong_ghi_github_path", ('apt-get install -y ripgrep && RG_DICH=', 'apt-get install -y ripgrep && GITHUB_PATH= && RG_DICH='),
-     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
     ("wp831_yaml_macos_bo_ung_vien_brew", ('for RG_D in "$(brew --prefix)/bin" ', 'for RG_D in '),
-     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_macos_chi_theo_ma_thoat", ('"$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
-                                            '"$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
      ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
     ("wp831_yaml_macos_khong_ghi_github_path", ('brew install ripgrep && RG_DICH=', 'brew install ripgrep && GITHUB_PATH= && RG_DICH='),
      ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
-    # Ghi $GITHUB_PATH vô điều kiện (bỏ phép hỏi `rg` tên trần) — đúng lỗi ci.yml run 39115659366.
     # Ghi $GITHUB_PATH vô điều kiện (bỏ phép hỏi `rg` tên trần) — đúng lỗi ci.yml run 39115659366. Neo kèm khoá dòng KẾ
     # để linux ≠ macos (đuôi hai công thức giống hệt).
     ("wp831_yaml_linux_ghi_github_path_vo_dieu_kien", ('{ [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:', '{ [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:'),
      ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_macos_ghi_github_path_vo_dieu_kien", ('{ [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      # wp802 (Q6)', '{ [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      # wp802 (Q6)'),
-     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
 ]
 
 

@@ -1,0 +1,8 @@
+219dcdaa9d164b8cf7dabb4c126bbfe0e65dfdb7
+Claude <noreply@anthropic.com>
+2026-10-17T17:15:18+00:00
+lease(#775): bia mo wp775-r1-g1-claude -> wp788-r1-g1-claude
+lease_until: '2026-10-18T14:31:56Z'
+lease_expires_at_utc: '2026-10-18T14:31:56Z'
+da_bi_thay_the: wp788-r1-g1-claude
+da_bi_thay_the_ghi_chu: 'Packet #775 da land (PR #779, merge d8b15cb); lease nay con han nen thu hoi bang bia mo hai chieu khi cap wp788 (cung write set), chu kho issuecomment-6237341979 muc 2.'

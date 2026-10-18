@@ -2392,7 +2392,7 @@ def _git_do(root: Path, *args) -> tuple[int, bytes]:
     try:
         p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, timeout=300)
         return p.returncode, p.stdout
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError, ValueError):
         return -1, b""
 
 
@@ -2418,7 +2418,14 @@ def _canon(root: Path, oid: str | None = None):
 
 def _nap(td: Path, ten: str):
     spec = importlib.util.spec_from_file_location(f"{ten}_canon", td / "ops" / f"{ten}.py")
-    spec.loader.exec_module(m := importlib.util.module_from_spec(spec))
+    try:
+        spec.loader.exec_module(m := importlib.util.module_from_spec(spec))
+    except Exception as ex:  # loader canon: lỗi nguồn phải có mã thoát được kiểm soát
+        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: nạp validator canon {ten}: {type(ex).__name__}")
+    api = ("PROVIDER_NGUON_HONG", "ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP", "_thieu", "_neo_git",
+           "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider")
+    if ten == "bien_nhan_v2" and any(not hasattr(m, k) for k in api):
+        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: validator canon {ten} thiếu giao diện")
     return m
 
 
@@ -2533,7 +2540,7 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
     ws = (l.get("effective_write_set") if "effective_write_set" in l else l.get("write_set")) if isinstance(l, dict) else None
     mr = REPO_RE.fullmatch(str(l.get("granted_on_instruction"))) if isinstance(l, dict) else None
     if not isinstance(l, dict) or any(type(l.get(k)) is not t for k, t in kieu.items()) or l["packet_issue"] != st["packet"] or not mr \
-            or int(mr[2]) != st["packet"] or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws) \
+            or mr[2].lstrip("0") != str(st["packet"]) or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws) \
             or any(PurePosixPath(l[k]).is_absolute() or ".." in PurePosixPath(l[k]).parts for k in ("prompt_path", "spec_path")) \
             or l.get("role") != "executor" or l["generation"] < 1 or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id) \
             or any(t is str and not l[k].strip() for k, t in kieu.items()) or type(l.get("write_set")) is not list or not l["write_set"] \
@@ -2546,7 +2553,10 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
         p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
         if p.returncode:  # I2(H) trên worktree Git TẠI lease OID, không trên worktree của ứng viên
             _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
-        if l["assurance_target"] not in _nap(td, "bien_nhan_v2").ASSURANCE_CAN_DOC_LAP:
+        bnv_lease = _nap(td, "bien_nhan_v2")
+        if bnv_lease.PROVIDER_NGUON_HONG is not None:
+            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: nguồn canon hỏng: {bnv_lease.PROVIDER_NGUON_HONG}")
+        if l["assurance_target"] not in bnv_lease.ASSURANCE_CAN_DOC_LAP:
             _die(RC_ARG, f"assurance_target {l['assurance_target']!r} ngoài miền của protocol")
         for duong in l["write_set"]:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn KHAI BÁO…
             p = subprocess.run([*lp, "ai-dang-giu", duong.removeprefix("planned:"), "--root", str(root)], capture_output=True)
@@ -2624,10 +2634,24 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
                     if pre + k in x and (type(x[pre + k]) is not str or not x[pre + k].strip())]
         kieu_sai += [f"model_{vai}_identity" for vai in ("reviewer", "executor")
                      if f"model_{vai}_identity" in d and type(d[f"model_{vai}_identity"]) is not dict]
+        # `_thieu` còn đọc các tham chiếu CÓ tiền tố ngay bên trong khối executor.
+        kieu_sai += [f"executor.{k}" for k in ("executor_model_evidence_ref", "executor_telemetry_path", "executor_nguoi_audit", "executor_audit_actor")
+                     if k in mei and (type(mei[k]) is not str or not mei[k].strip())]
+        kieu_sai += [f"reviewer.{k}" for k in ("che_do", "session_run_id", "KHONG_do_duoc")
+                     if k in mri and (type(mri[k]) is not str or not mri[k].strip())]
+        if "phien_doc_lap" in mri and type(mri["phien_doc_lap"]) is not bool:
+            kieu_sai.append("reviewer.phien_doc_lap")
         if type(d.get("schema_version")) is not int:
             kieu_sai.append("schema_version")
         if kieu_sai:  # có mặt mà sai kiểu KHÔNG phải vắng — dừng trước mọi phép chuẩn hoá/fallback
             _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan}: trường danh tính sai kiểu/rỗng {kieu_sai}")
+        # Chỉ chuẩn hoá bản chiếu dùng để SO; schema/Git/hash vẫn đo biên nhận nguyên byte.
+        import ast
+        cay = ast.parse((td / ".claude/dev/launcher.py").read_text(encoding="utf-8"))
+        bd_bm = dict(next(ast.literal_eval(n.value) for n in cay.body if isinstance(n, ast.Assign)
+                          and len(n.targets) == 1 and getattr(n.targets[0], "id", "") == "_BE_MAT_BI_DANH"))
+        p_chuan = lambda x: _ten_provider(bnv._chuan_hoa_provider(bnv._chuoi(x) or ""))  # noqa: E731
+        bm_chuan = lambda x: bd_bm.get(bnv._chuoi(x), bnv._chuoi(x))  # noqa: E731
         ho = lambda vai: HO_CANON[nc[vai]["model_family"]]  # noqa: E731 — họ LEASE KHAI, đổi sang miền canon của bien_nhan_v2
         ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
         lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
@@ -2639,12 +2663,12 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
             ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
             ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
             ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
-            ("provider-reviewer", _ten_provider(mri.get("provider")) == nc["reviewer"]["provider"]),
-            ("provider-executor", _ten_provider(mei.get("provider", d.get("executor_provider"))) == nc["executor"]["provider"]),
+            ("provider-reviewer", p_chuan(mri.get("provider")) == nc["reviewer"]["provider"]),
+            ("provider-executor", p_chuan(mei.get("provider", d.get("executor_provider"))) == nc["executor"]["provider"]),
             ("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer")), ("ho-executor", bool(ho_exec) and ho_exec == ho("executor")),
-            ("surface", nc["reviewer"]["execution_surface"] is not None and mri.get("surface") == nc["reviewer"]["execution_surface"]),
-            ("transport", nc["reviewer"]["transport"] is not None and mri.get("transport") == nc["reviewer"]["transport"]),
-            ("executor-surface-transport", all(mei.get(k, nc["executor"][f]) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")))),
+            ("surface", nc["reviewer"]["execution_surface"] is not None and bm_chuan(mri.get("surface")) == nc["reviewer"]["execution_surface"]),
+            ("transport", nc["reviewer"]["transport"] is not None and bnv._chuoi(mri.get("transport")) == nc["reviewer"]["transport"]),
+            ("executor-surface-transport", all((bm_chuan(mei[k]) if k == "surface" else bnv._chuoi(mei[k])) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")) if k in mei)),
             ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
             ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
             ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})) if not dung]

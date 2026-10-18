@@ -1,0 +1,424 @@
+#!/usr/bin/env python3
+"""Phản chứng CHẠY ĐƯỢC cho `ops/land_evidence_nguon.py` — packet #773, đặc tả r1 mục `nghiem_thu`.
+
+Ca `c*` dựng cây tạm (không chạm `ops/land/**` thật, Q5), dựng lại lượt 1 và 2 của connector trên #771; `c11` chạy CÂY
+THẬT (rc 0, m ≤ k). ĐỘT BIẾN sửa BẢN SAO TẠM của bộ kiểm (neo đúng một lần), ca đích chạy ở tiến trình con và phải XANH trên bản
+gốc trước. Chỉ `bang()` ném `TinHieuChotCa` (con in `DO:<ca>:`, thoát 3); lỗi vô can thoát 4 ⇒ TÍN DỤNG GIẢ, không tính
+giết (bài học CLAUDE.md "bị giết không phải bị giết ĐÚNG LÝ DO"). `TU_KIEM` kiểm chính bộ phân hạng.
+
+Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TONG: DAT`. Thoát 0 chỉ khi cả ba.
+"""
+import contextlib
+import hashlib
+import importlib.util
+import io
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from unittest import mock
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+for _s in (sys.stdout, sys.stderr):
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="backslashreplace")
+
+HERE = Path(__file__).resolve().parent
+ROOT_THAT = HERE.parent
+MA = Path(os.environ.get("LAND_EVIDENCE_NGUON_MA") or HERE / "land_evidence_nguon.py")
+TEN = "pr9001-thu-land-evidence.yaml"
+PROV = "pr9001-thu-provenance"
+
+# L5 — bản kỳ vọng CHÉP RIÊNG dạng VÂN TAY: sha256 của `json.dumps(sorted(MIEN_TRU_CUTOVER.items()))` đo trên `c73af7b`
+# (16-10-2026), 28 tên. Thêm/đổi/bỏ một tên hay một băm trong bộ kiểm ⇒ c10 ĐỎ; danh sách đọc được nằm trong bộ kiểm.
+KY_VONG_SO_MIEN_TRU = 28
+KY_VONG_VAN_TAY_MIEN_TRU = "5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257"
+
+
+class TinHieuChotCa(AssertionError):
+    """Chỉ `bang()` ném lớp này ⇒ phân biệt được giết thật (chốt) với chết vì lỗi vô can."""
+
+
+CA = {}
+
+
+def bang(dieu_kien, thong_diep):
+    if not dieu_kien:
+        raise TinHieuChotCa(thong_diep)
+
+
+def ca(f):
+    CA[f.__name__] = f
+    return f
+
+
+def nap():
+    spec = importlib.util.spec_from_file_location("land_evidence_nguon_duoi_test", MA)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+@contextlib.contextmanager
+def cay(ho_so, prov=None):
+    """Cây tạm: `ops/land/<TEN>` = `ho_so`; `prov` = {đường dẫn trong provenance: nội dung} (None ⇒ không tạo thư mục)."""
+    with tempfile.TemporaryDirectory(prefix="len_cay_") as thu:
+        goc = Path(thu) / "kho"
+        tep = {TEN: ho_so} | {f"{PROV}/{d}": nd for d, nd in (prov or {}).items()}
+        for duong, nd in tep.items():
+            (goc / "ops/land" / duong).parent.mkdir(parents=True, exist_ok=True)
+            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8")
+        if prov is not None:
+            (goc / "ops/land" / PROV).mkdir(exist_ok=True)
+        yield goc
+
+
+def kiem(m, goc):
+    with contextlib.redirect_stdout(io.StringIO()) as buf:
+        rc = m.main(["--root", str(goc)])
+    return rc, buf.getvalue()
+
+
+def chay(ho_so, prov=None):
+    with cay(ho_so, prov) as goc:
+        return kiem(nap(), goc)
+
+
+RB_PR = '{"number": 9001, "merged": true, "merged_at": "2026-10-16T02:58:26Z"}'
+RB_RUN = '{"id": 1, "status": "completed", "conclusion": "success"}'
+LOG = "# trich log\n195/195 ca DA CHAY QUA (tong 196, bo qua 1, hong 0)\n"
+
+
+def ky(ho_so, prov, mong, ly_do, chua=""):
+    """Một phép đo: hồ sơ + provenance ⇒ đòi đúng rc `mong` và chuỗi `chua` trong đầu ra."""
+    rc, ra = chay(ho_so, prov)
+    bang(rc == mong and chua in ra, f"{ly_do}: mong rc={mong}, được {rc} {ra[-300:]}")
+
+
+@ca
+def c01_l1_luot1_mergeable_clean_khong_nguon():
+    p = {"readback-pr-9001.json": RB_PR}
+    ky("dieu_kien:\n  khong_xung_dot: 'measured — mergeable_state clean'\n", p, 1, "lượt 1 #771", "L1 $.dieu_kien.khong_xung_dot")
+    ky("x: 'measured — readback-pr-9001.json: mergeable_state unknown'\n", p, 0, "token nguồn CÓ THẬT")
+    ky("x: 'measured — readback-pr-9999.json'\n", p, 1, "token trỏ tệp KHÔNG có", "L1")
+    ky(f"x: 'measured: ops/land/{PROV}/readback-pr-9001.json'\n", p, 0, "token tương đối gốc kho")
+    for tk in (TEN, "../", "ops/land/", "../ops/land/"):   # connector P1 #778: chính hồ sơ và thư mục CHỨA nó không là nguồn
+        ky(f"x: 'measured — {tk}'\n", p, 1, f"lời khai chỉ trỏ {tk!r} (tự chứng minh)", "L1")
+    ky("x: [{positive: '195/195 hong 0', nguon_positive: " + TEN + "}]\n", p, 1, "nguon_positive trỏ chính hồ sơ", "L2")
+
+
+@ca
+def c02_l1_glob_va_thu_muc():
+    for khai, mong in (("trich-log-job/*.txt", 0), ("trich-log-job/*.log", 1), ("trich-log-job/", 0), ("khong-co/", 1)):
+        ky(f"x: 'measured - {khai}'\n", {"trich-log-job/a.txt": LOG}, mong, khai)
+    with cay("x: 'measured - *.json'\n", {"a.txt": ""}) as goc:   # review F03: glob khớp THƯ MỤC mang đuôi tệp
+        (goc / "ops/land" / PROV / "thu-muc.json").mkdir()
+        rc, ra = kiem(nap(), goc)
+    bang(rc == 1 and "L1" in ra, f"glob chỉ khớp thư mục `thu-muc.json` phải ĐỎ: rc={rc}")
+
+
+@ca
+def c03_l1_token_khong_duoc_thoat_goc():
+    with cay("x: 'measured — ../ngoai-goc.json'\n", {"a.json": "{}"}) as goc:   # chỉ nền GỐC KHO phân giải được
+        (goc.parent / "ngoai-goc.json").write_text("{}", encoding="utf-8")
+        rc, ra = kiem(nap(), goc)
+    bang(rc == 1 and "L1" in ra, f"token trỏ RA NGOÀI gốc kho phải ĐỎ: rc={rc} {ra[-200:]}")
+
+
+@ca
+def c04_l1_measured_hoa_thuong_va_khong_phai_khai():
+    ky("x: 'Measured — khong nguon'\n", {"a.json": "{}"}, 1, "`Measured —` không được đi vòng L1")
+    ky("a: measured\nb: 'not_measured — khong do duoc'\nc: 'measuredx khong'\n", {"a.json": "{}"}, 0,
+       "`measured` trần / not_measured / measuredx KHÔNG phải lời khai đo")
+
+
+@ca
+def c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van():
+    p = {"readback-run-1.json": RB_RUN, "trich/u.txt": LOG}
+    hs = "post_merge_checks:\n  - {{name: g, positive: 'ubuntu 195/195 hong 0'{}}}\n"
+    ky(hs.format(""), p, 1, "thiếu nguon_positive", "thiếu nguon_positive")
+    ky(hs.format(", nguon_positive: readback-run-1.json"), p, 1, "lượt 2 #771 (chỉ metadata)", "'195/195'")
+    ky(hs.format(", nguon_positive: readback-run-1.json"), p, 1, "lượt 2 #771 (chỉ metadata)", "'hong 0'")
+    ky(hs.format(", nguon_positive: [readback-run-1.json, trich/u.txt]"), p, 0, "nguồn chứa nguyên văn")
+    for log in (LOG.replace("195/195", "194/195"), LOG.replace("195/195", "195/1950"), LOG.replace("hong 0", "hong 01")):
+        ky(hs.format(", nguon_positive: trich/u.txt"), {"trich/u.txt": log}, 1, f"đổi số trong nguồn {log!r}", "L2")
+    ky(hs.format(", nguon_positive: trich/khong-co.txt"), p, 1, "nguon_positive vắng tệp", "không có tệp")
+    for cao, thap in ((f"ops/land/{PROV}", "ops/land"), ("ops/land", ".")):   # F07 (lượt 5, 6): Q3 TỪNG CẶP nền liền kề —
+        with cay(hs.format(", nguon_positive: r.txt"), {}) as goc:   # nền CAO mang số sai, nền THẤP số đúng ⇒ phải ĐỎ L2
+            (goc / cao / "r.txt").write_text("1/1", encoding="utf-8")
+            (goc / thap / "r.txt").write_text(LOG, encoding="utf-8")
+            rc, ra = kiem(nap(), goc)
+        bang(rc == 1 and "'195/195'" in ra, f"Q3: {cao} phải được phân giải trước {thap}: rc={rc} {ra[-200:]}")
+
+
+@ca
+def c06_l3_luot2_moc_sau_merged_at():
+    p = {"readback-pr-9001.json": RB_PR}
+    # 02:58:54Z là mốc thật của connector #771; mốc BẰNG merged_at và mốc YAML không nháy (datetime) cũng phải ĐỎ.
+    for khoa, moc, mong in (("pre", "'2026-10-16T02:58:54Z'", 1), ("post", "'2026-10-16T02:58:54Z'", 0),
+                            ("pre", "'2026-10-16T02:58:26Z'", 1), ("pre", "2026-10-16T02:59:00Z", 1), ("pre", "'x 2026-10-16T02:49:19Z'", 0)):
+        ky(f"pre_merge_checks: []\n{khoa}_merge_checks:\n  - {{name: connector, luc: {moc}}}\n".replace("[]\npre_merge_checks:", ""),
+           p, mong, f"{khoa} {moc}")
+    for pmc in ("{'2026-10-16T02:59:00Z': ok}", "{c: '2026-10-16T02:59:00Z'}", "{2026-10-16T02:59:00Z: ok}"):   # review F02
+        ky(f"pre_merge_checks: {pmc}\n", p, 1, f"pre_merge_checks dạng mapping {pmc}", "L3")
+    for moc in ("+00:00", "+0000", "-00:00", "z", " naive"):   # connector P2 #778: mọi dạng múi giờ (thiếu ⇒ UTC) đều phải được so
+        hs = f"2026-10-16T03:00:00{moc}".replace(" naive", "")
+        ky(f"pre_merge_checks: ['{hs}', '{hs.replace('T', ' ').replace('03:00', '02:00')}']\n", p, 1, f"mốc {hs!r} sau merge", "L3")
+    ky("pre_merge_checks: ['2026-10-16 02:00:00+00:00', '2026-10-16t02:00:00Z', '2026-10-16T03:00:00+0100']\n", p, 0,
+       "mốc trước merge mọi dạng (03:00+0100 = 02:00Z: độ lệch phải được QUY ĐỔI)")
+    for moc in ("2026-10-16T02:00:00-01:00", "2026-10-16T02:00:00-0100"):   # lượt 8 F01: = 03:00Z, sau merge 02:58:26Z
+        ky(f"pre_merge_checks: ['{moc}']\n", p, 1, f"độ lệch âm {moc} phải quy đổi sang UTC", "L3")
+    ky("pre_merge_checks:\n  - {name: c, luc: '2026-10-16T03:00:00Z'}\n", {"a.json": "{}"}, 0, "không readback", "L3 không áp dụng")
+
+
+@ca
+def c07_l3_chi_doc_readback_cua_chinh_pr():
+    p = {"readback-pr-9001.json": RB_PR, "readback-pr-9002.json": RB_PR.replace("02:58:26", "01:00:00"), "readback-pr-9001-commits.json": "[]"}
+    ky("pre_merge_checks:\n  - {name: c, luc: '2026-10-16T02:00:00Z'}\n", p, 0, "readback PR lân cận/-commits chen vào L3")
+
+
+@ca
+def c14_cli_moi_to_hop_duong_dan():
+    """Review lượt 4 F06: root tương đối/tuyệt đối × tệp tương đối/tuyệt đối — CLI thật, cả bốn phải kiểm và ĐẠT."""
+    with cay("x: 'measured — a.json'\n", {"a.json": "{}"}) as goc:
+        rel, tuyet = f"ops/land/{TEN}", str(goc / "ops/land" / TEN)
+        for root, tep in ((".", rel), (".", tuyet), (str(goc), rel), (str(goc), tuyet)):
+            r = subprocess.run([sys.executable, "-B", str(MA), "--root", root, "--tep", tep], capture_output=True, text=True, cwd=goc)
+            bang(r.returncode == 0 and "1 ĐẠT" in r.stdout and r.stdout.rstrip().endswith("TỔNG: ĐẠT"),
+                 f"--root {root} --tep {tep}: rc={r.returncode} {(r.stdout + r.stderr)[-200:]}")
+    with cay("x: ok\n", {}) as goc:   # tên KHÔNG `pr<N>-` ⇒ mọi readback-pr-<số> mang merged_at phải cùng giá trị
+        for duong, nd in (("plat-y-land-evidence.yaml", "pre_merge_checks: ['2026-10-16T00:00:00Z']\n"),
+                          ("plat-y-provenance/readback-pr-1.json", RB_PR), ("plat-y-provenance/readback-pr-2.json",
+                                                                          RB_PR.replace("02:58:26", "01:00:00"))):
+            (goc / "ops/land" / duong).parent.mkdir(parents=True, exist_ok=True)
+            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8")
+        rc, ra = kiem(nap(), goc)
+    bang(rc == 2 and "merged_at khác nhau" in ra, f"readback mâu thuẫn ⇒ rc=2: rc={rc} {ra[-200:]}")
+
+
+@ca
+def c08_l4_khong_do_duoc_khong_bao_gio_dat():
+    ky("x: [khong dong\n", {"a.json": "{}"}, 2, "YAML hỏng", "KHÔNG ĐO ĐƯỢC")
+    ky("x: 'measured — readback-pr-9001.json'\n", None, 2, "provenance vắng khi có lời khai đo", "provenance")
+    ky("pre_merge_checks:\n  - {name: c, luc: '2026-10-16T02:00:00Z'}\n", {"readback-pr-9001.json": "{hong"}, 2, "readback hỏng")
+    for hs, rb in (("'2026-99-16T02:00:00Z'", RB_PR), ("'2026-10-16T02:00:00Z'", RB_PR.replace("10-16", "13-16"))):   # F04
+        with cay(f"pre_merge_checks: [{hs}]\n", {"readback-pr-9001.json": rb}) as goc:   # đo CLI THẬT: rc + dòng cuối
+            r = subprocess.run([sys.executable, "-B", str(MA), "--root", str(goc)], capture_output=True, text=True)
+        bang(r.returncode == 2 and r.stdout.rstrip().endswith("TỔNG: KHÔNG ĐO ĐƯỢC"), f"ngày sai {hs} ⇒ rc=2: {r.returncode}")
+    for hs in ("x: 'measured — khong nguon'\nx: ok\n", "a: {x: 'measured — khong', x: ok}\n",   # review F01 (lượt 1, 2)
+               "null: 'measured — khong'\n~: ok\n", "a: {null: 'measured — khong', null: ok}\n"):
+        ky(hs, {"a.json": "{}"}, 2, f"khoá YAML trùng che lời khai {hs!r}", "khoá trùng")
+    for hs, ly in (("x: {<<: {a: 'measured — khong', a: ok}}\n", "merge"), ("x: {<<: {null: 'measured — k', null: ok}}\n", "merge"),
+                   ("a: &n {x: 1}\nb: {<<: *n, y: 'measured — a.json'}\n", "merge"),   # review lượt 3 F01: merge ngoài mô hình
+                   ("a: &n 'measured — khong'\nb: *n\n", "alias"), ("a: &n [*n]\n", "alias")):
+        ky(hs, {"a.json": "{}"}, 2, f"{ly} {hs!r}", "ngoài mô hình")
+    for hs in ("x: 2026-02-30\n", "pre_merge_checks: [2026-99-16T02:00:00Z]\n", "x: !!int abc\n",   # lượt 3 F04 + lồng sâu
+               "x: " + "[" * 1000 + "]" * 1000 + "\n"):
+        with cay(hs, {"readback-pr-9001.json": RB_PR}) as goc:   # đo CLI THẬT
+            r = subprocess.run([sys.executable, "-B", str(MA), "--root", str(goc)], capture_output=True, text=True)
+        bang(r.returncode == 2 and r.stdout.rstrip().endswith("TỔNG: KHÔNG ĐO ĐƯỢC"), f"YAML sai/lồng sâu {hs[:40]!r}: {r.returncode}")
+    hs = "x: [{positive: '1/1', nguon_positive: u.txt}]\n"   # lượt 3: lỗi ĐỌC nguồn L2 là KHÔNG ĐO ĐƯỢC
+    goc_doc = Path.read_bytes
+    with cay(hs, {"u.txt": "1/1"}) as goc, mock.patch.object(Path, "read_bytes", lambda self: (_ for _ in ()).throw(
+            OSError("gia")) if self.name == "u.txt" else goc_doc(self)):
+        rc, ra = kiem(nap(), goc)
+    bang(rc == 2 and "đọc nguon_positive" in ra, f"lỗi đọc nguồn L2 ⇒ rc=2: rc={rc} {ra[-200:]}")
+    for hs in ("x: !!set {'measured — khong': null}\n", "x: !!omap [{a: 'measured — khong'}]\n",   # review lượt 2 F05
+               "x: !!pairs [{a: 'measured — khong'}]\n", "x: !!binary bWVhc3VyZWQgLSBraG9uZw==\n"):
+        ky(hs, {"a.json": "{}"}, 2, f"kiểu YAML ngoài dict/list {hs!r}", "ngoài mô hình")
+    ky("pre_merge_checks: ['2026-10-16T02:00:00Z']\n", {"readback-pr-9001.json": RB_PR.replace('"2026-10-16T02:58:26Z"', "null")},
+       2, "readback CỦA CHÍNH PR có merged_at null", "merged_at")
+    with tempfile.TemporaryDirectory() as rong:
+        rc, ra = kiem(nap(), Path(rong))
+    bang(rc == 2 and "tổng 0" in ra, f"không thấy hồ sơ nào ⇒ rc=2, không ĐẠT 0 tệp: rc={rc}")
+
+
+@ca
+def c09_l5_mien_tru_theo_bam():
+    hs = "x: 'measured — khong nguon'\n"
+    with cay(hs, {"a.json": "{}"}) as goc:
+        m = nap()
+        m.MIEN_TRU_CUTOVER[TEN] = hashlib.sha256(hs.encode()).hexdigest()
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and "1/1 miễn trừ" in ra, f"băm khớp ⇒ miễn trừ có ghi nhận: rc={rc} {ra[-200:]}")
+        (goc / "ops/land" / TEN).write_text(hs + " ", encoding="utf-8")
+        rc, ra = kiem(m, goc)
+        bang(rc == 1 and "MẤT MIỄN TRỪ" in ra and "0/1 miễn trừ" in ra, f"lệch một byte ⇒ kiểm đủ luật: rc={rc} {ra[-300:]}")
+        (goc / "ops/land" / TEN).write_text("x: 'measured — a.json'\n", encoding="utf-8")
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and "0/1 miễn trừ" in ra, f"mất miễn trừ mà vẫn ĐẠT luật ⇒ xanh: rc={rc} {ra[-300:]}")
+
+
+@ca
+def c13_bam_va_luat_tren_cung_mot_lan_doc():
+    with cay("x: ok\n", {"a.json": "{}"}) as goc:   # tệp trên đĩa SẠCH; byte đưa vào (bản đã băm) có lời khai không nguồn
+        vp, _ = nap().kiem_ho_so(goc / "ops/land" / TEN, b"x: 'measured - khong'\n", goc, __import__("yaml"))
+    bang(any(x.startswith("L1") for x in vp), f"luật phải đo CHÍNH byte đã băm, không đọc lại tệp: {vp}")
+
+
+@ca
+def c10_l5_danh_sach_dong_bang():
+    ds = nap().MIEN_TRU_CUTOVER
+    van_tay = hashlib.sha256(json.dumps(sorted(ds.items())).encode()).hexdigest()
+    bang(len(ds) == KY_VONG_SO_MIEN_TRU and van_tay == KY_VONG_VAN_TAY_MIEN_TRU,
+         f"MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: {len(ds)} tên, vân tay {van_tay[:12]}…")
+
+
+def _cay_that_dat(rc, ra, n):
+    """rc 0 và `· m/n miễn trừ` với m ≤ n. m < n hợp lệ: hồ sơ miễn trừ đổi byte mất miễn trừ mà vẫn ĐẠT luật (Q2)."""
+    import re
+    m = re.search(rf"· (\d+)/{n} miễn trừ", ra)
+    return rc == 0 and bool(m) and int(m.group(1)) <= n
+
+
+@ca
+def c11_cay_that_dat_va_mien_tru_du():
+    rc, ra = kiem(nap(), ROOT_THAT)
+    n = KY_VONG_SO_MIEN_TRU   # c10 khoá danh sách; c15 khoá chính phép so này
+    bang(_cay_that_dat(rc, ra, n), f"cây thật phải ĐẠT, mẫu số {n} miễn trừ: rc={rc} {ra[-400:]}")
+
+
+@ca
+def c15_c11_tu_kiem_qua_dau_ra_gia():
+    """Phản chứng cho phép so của c11 bằng đầu ra GIẢ — không phụ thuộc hồ sơ thật (review #778 g2 lượt 2 F1)."""
+    t = "land_evidence_nguon: 2 ĐẠT · {}/{} miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30\nTỔNG: ĐẠT\n"
+    nhan = {"m=k": (0, t.format(28, 28)), "m<k": (0, t.format(27, 28))}
+    tu_choi = {"m>k": (0, t.format(29, 28)), "mau_so_sai": (0, t.format(27, 27)), "rc_1": (1, t.format(28, 28)),
+               "khong_dong": (0, "TỔNG: ĐẠT\n")}
+    sai = [k for k, (rc, ra) in nhan.items() if not _cay_that_dat(rc, ra, 28)]
+    sai += [k for k, (rc, ra) in tu_choi.items() if _cay_that_dat(rc, ra, 28)]
+    bang(not sai, f"phép so c11 sai ở: {sai}")
+
+
+@ca
+def c12_dong_cuoi_dung_dinh_dang():
+    import re
+    rc, ra = chay("x: 'measured — a.json'\n", {"a.json": "{}"})
+    dong = ra.rstrip("\n").splitlines()[-2:]
+    bang(len(dong) == 2 and re.fullmatch(r"land_evidence_nguon: \d+ ĐẠT · \d+/\d+ miễn trừ \(băm khớp\) · \d+ vi phạm · "
+                                         r"\d+ KHÔNG ĐO ĐƯỢC · tổng \d+", dong[0]) and dong[1] == "TỔNG: ĐẠT",
+         f"định dạng dòng cuối (Q6): {dong}")
+
+
+# (tên, chuỗi gốc, chuỗi thay, ca đích). Mỗi chốt một đột biến; chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
+DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
+    ("L1_chi_can_co_token", "if not any(phan_giai(t, goc, prov, tep) for t in tk):", "if not tk:", "c01"),
+    ("P1_tu_tro_tep_la_nguon", "return r != tep.resolve() and not", "return not", "c01"),
+    ("P1_thu_muc_chua_ho_so_la_nguon", "and not (r.is_dir() and _trong_goc(tep, r))", "", "c01"),
+    ("P2_chi_nhan_Z", "(?:[Zz]|[+-]\\d{2}:?\\d{2})?(?![\\d:])", "Z", "c06"),
+    ("P2_bo_quy_doi_do_lech", "return t if t.tzinfo else t.replace(tzinfo=datetime.timezone.utc)",
+     "return t.replace(tzinfo=datetime.timezone.utc)", "c06"),
+    ("P2_thieu_mui_gio_khong_khop", "(?:[Zz]|[+-]\\d{2}:?\\d{2})?(?![\\d:])", "(?:[Zz]|[+-]\\d{2}:?\\d{2})(?![\\d:])", "c06"),
+    ("L1_glob_rong_van_qua", "            if khop:\n                return khop[0]", "            return nen", "c02"),
+    ("L1_bo_chot_trong_goc", "else p.is_file()) and _trong_goc(p, goc)):", "else p.is_file())):", "c03"),
+    ("L1_phan_biet_hoa_thuong", ", re.IGNORECASE)", ")", "c04"),
+    ("L2_bo_doi_nguon", "            vp.append(f\"L2 {d}: có positive mà thiếu", "            continue  # (f\"L2 {d}: có positive", "c05"),
+    ("L2_bo_bien_chu_so", 'else r"(?<![\\d/])" + re.escape(so) + r"(?![\\d/])")', "else re.escape(so))", "c05"),
+    ("L3_bang_nhau_la_truoc", "if _thoi_diem(x) >= moc_merge:", "if _thoi_diem(x) > moc_merge:", "c06"),
+    ("L3_bo_datetime_khong_nhay", "moc = [v] if isinstance(v, datetime.datetime)", "moc = [] if isinstance(v, datetime.datetime)", "c06"),
+    ("L3_doc_moi_readback", 'so = re.match(r"pr(\\d+)-", goc_ten)', "so = None", "c07"),
+    ("L4_provenance_vang_van_kiem", "if (khai or co_pos) and not prov.is_dir():", "if False:", "c08"),
+    ("L4_khong_do_duoc_thanh_dat", "rc = 1 if v else 2 if u else 0", "rc = 1 if v else 0", "c08"),
+    ("L4_rong_thanh_dat", "    if not teps:\n        u += 1", "    if False:\n        u += 1", "c08"),
+    ("F01_bo_chot_khoa_trung", "if khoa in da:", "if False:", "c08"),
+    ("F01_null_lam_dau_bo_qua", "                if khoa in da:", "                if khoa is not None and khoa in da:", "c08"),
+    ("R3_cho_merge", 'isinstance(n, yaml.MappingNode) and any(k.tag ==', 'False and any(k.tag ==', "c08"),
+    ("R3_cho_alias", "            if id(n) in da:", "            if False:", "c08"),
+    ("R3_vo_huong_sai_traceback", "(yaml.YAMLError, ValueError, TypeError,", "(yaml.YAMLError, TypeError,", "c08"),
+    ("R3_long_sau_traceback", "TypeError, OverflowError, RecursionError)", "TypeError, OverflowError)", "c08"),
+    ("R3_loi_doc_nguon_thanh_dat", 'raise KhongDoDuoc(f"đọc nguon_positive: {e}")', "return [], []", "c08"),
+    ("F05_bo_tu_choi_kieu_la", "if isinstance(nut, (set, frozenset, tuple, bytes, bytearray)):", "if False:", "c08"),
+    ("L3_readback_null_bo_qua", "is None and (not so or not t.exists()):", "is None:", "c08"),
+    ("F02_bo_khoa_mapping", "[{k: v} for k, v in pmc.items()] if", "list(pmc.values()) if", "c06"),
+    ("F02_khoa_khong_chuoi", "        if isinstance(nut, dict):\n            yield d", "        if isinstance(k, str):\n            yield d", "c06"),
+    ("F03_glob_chi_can_ton_tai", "khop = [x for x in khop if _la_nguon(x, token, goc, tep)]", "khop = [x for x in khop if x.exists()]", "c02"),
+    ("F04_ngay_sai_traceback", "    except ValueError as e:   # regex", "    except KeyError as e:   # regex", "c08"),
+    ("L5_doc_tep_lan_hai", "du_lieu = nap_yaml(yaml, byte)", "du_lieu = nap_yaml(yaml, tep.read_bytes())", "c13"),
+    ("F06_root_khong_resolve", "goc = Path(a.root).resolve()", "goc = Path(a.root)", "c14"),
+    ("L3_readback_mau_thuan_bo_qua", "    if len(gia_tri) > 1:", "    if False:", "c14"),
+    ("Q3_ops_land_truoc_prov", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (goc / THU_MUC, prov, goc):", "c05"),
+    ("Q3_goc_truoc_ops_land", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (prov, goc, goc / THU_MUC):", "c05"),
+    ("L5_bo_so_bam", "if hashlib.sha256(byte).hexdigest() == bam:", "if bam:", "c09"),
+    ("L5_noi_danh_sach", "MIEN_TRU_CUTOVER = {\n", "MIEN_TRU_CUTOVER = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c10"),
+)
+TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
+    ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),
+    ("chi_them_chu_thich", 'THU_MUC = "ops/land"\n', 'THU_MUC = "ops/land"  # vo hai\n', "c01", "SONG_SOT"),
+)
+
+
+def chay_con(ten_ca, ma):
+    r = subprocess.run([sys.executable, "-B", str(HERE / "land_evidence_nguon_test.py"), "--mot-ca", ten_ca],
+                       capture_output=True, env=dict(os.environ, LAND_EVIDENCE_NGUON_MA=str(ma), PYTHONDONTWRITEBYTECODE="1"),
+                       timeout=300)
+    return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
+
+
+def phan_hang(rc, ra, ten_ca):
+    if rc == 0:
+        return "SONG_SOT"
+    if rc == 3:
+        return "GIET" if f"DO:{ten_ca}:" in ra else "TIN_DUNG_GIA"
+    return "TIN_DUNG_GIA" if rc == 4 else "HONG"
+
+
+def chay_dot_bien(ten, cu, moi, tien_to):
+    khop = [c for c in CA if c.split("_")[0] == tien_to]
+    if len(khop) != 1:
+        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}"
+    ten_ca = khop[0]
+    goc = (HERE / "land_evidence_nguon.py").read_text(encoding="utf-8")
+    if goc.count(cu) != 1 or cu == moi:
+        return "HONG", f"neo phải xuất hiện đúng 1 lần và đột biến phải đổi mã (thấy {goc.count(cu)})"
+    with tempfile.TemporaryDirectory(prefix="len_db_") as thu:
+        ban_goc, ban_db = Path(thu) / "goc.py", Path(thu) / f"db_{ten}.py"
+        ban_goc.write_text(goc, encoding="utf-8")
+        ban_db.write_text(goc.replace(cu, moi), encoding="utf-8")
+        rc, ra = chay_con(ten_ca, ban_goc)
+        if rc != 0:
+            return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
+        rc, ra = chay_con(ten_ca, ban_db)
+        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:]
+
+
+def chay_ca(ten):
+    """(rc, dòng): 0 đạt · 3 `DO:<ca>:` (chỉ `TinHieuChotCa`) · 4 lỗi vô can — KHÔNG đổi lỗi vô can thành tín hiệu chốt."""
+    try:
+        CA[ten]()
+    except TinHieuChotCa as e:
+        return 3, f"DO:{ten}:{e}"
+    except Exception as e:
+        return 4, f"HONG:{ten}:{type(e).__name__}: {e}"
+    return 0, ""
+
+
+def main(argv):
+    if len(argv) == 2 and argv[0] == "--mot-ca" and argv[1] in CA:
+        rc, dong = chay_ca(argv[1])
+        print(dong)
+        return rc
+    if argv:
+        print("dung: land_evidence_nguon_test.py [--mot-ca TEN]", file=sys.stderr)
+        return 2
+    kq = [chay_ca(ten) for ten in CA]
+    print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
+    dat = sum(rc == 0 for rc, _ in kq)
+    print(f"CA: {dat}/{len(CA)} dat")
+    xau = [f"{ten}: {h} {ct}" for ten, cu, moi, dich in DOT_BIEN for h, ct in [chay_dot_bien(ten, cu, moi, dich)] if h != "GIET"]
+    for x in xau:
+        print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
+    print(f"DOT BIEN: {len(DOT_BIEN) - len(xau)}/{len(DOT_BIEN)} bi giet dung ly do")
+    loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
+              for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
+    for x in loi_tk:
+        print(f"[TU KIEM] {x}")
+    print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(TU_KIEM)} dot bien)")
+    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and not xau and not loi_tk
+    print(f"TONG: {'DAT' if ok else 'DO'}")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

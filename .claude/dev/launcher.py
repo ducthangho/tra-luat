@@ -2003,9 +2003,7 @@ CONG_CU = [
     # thì lệnh tìm của agent gãy giữa chừng chứ KHÔNG tự lùi về `grep`, nên phiên mất
     # khả năng tra cứu mà không báo lỗi ở chỗ đọc được. Một công cụ mà thiếu nó phiên
     # vẫn "chạy" nhưng làm việc sai thì nguy hơn công cụ thiếu là chết ngay.
-    # wp802 (Q5/Q6): lệnh Windows/Linux ở đây PHẢI khớp `rg.cai` của ops/cong_cu.yaml
-    # (phần trước ` && ` đầu tiên) và lệnh hook in ra. Ba bảng, không đọc YAML lúc chạy —
-    # `r802_bang_cai_rg_khop_cong_cu_yaml` trong launcher_test canh lệch.
+    # wp802 (Q5/Q6): PHẢI khớp `rg.cai` của ops/cong_cu.yaml và hook — `r802_bang_cai_rg_khop_cong_cu_yaml`.
     {"ten": "rg", "bat_buoc": True, "ung_vien": ["rg"],
      "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",
      "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"
@@ -2303,6 +2301,20 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         elif c["ten"] == "agy" and local:
             them(ten0, Path(local) / "agy" / "bin" / "agy.exe")
     return [(t, x) for t, x in ra if Path(x).is_file()]
+
+
+def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str]) -> str | None:
+    """Bản bash gọi khi gõ TÊN TRẦN: PATH theo thứ tự, mục RỖNG = cwd (wp802, Codex lượt 1
+    F1: `_cac_duong_dan` bỏ mục rỗng). Không `shutil.which`: trên Windows nó tự chèn cwd."""
+    duoi = [""]
+    if platform.system() == "Windows":
+        duoi += [e for e in moi_truong.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e]
+    for muc in moi_truong.get("PATH", "").split(os.pathsep):
+        for d in duoi:
+            p = os.path.join(muc or ".", ten + d)
+            if os.path.isfile(p) and os.access(p, os.X_OK):
+                return os.path.abspath(p)
+    return None
 
 
 def _phien_ban(duong_dan: str, *, env=None,
@@ -4330,12 +4342,9 @@ def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
     return MA_OK
 
 
-# wp802 (Q2/Q3) — "BỊ CHE": bản gọi bằng TÊN TRẦN (bản đầu PATH) hỏng trong khi một bản
-# sau nó chạy được. Đo 17-10-2026: `doctor` rc=0, `co: True` trỏ bản TỐT, còn `rg --version`
-# gõ trong shell rc=1 "Access is denied" — `_cac_duong_dan` trả lời đúng câu "có bản nào
-# chạy được không", nhưng agent gõ tên trần nên câu cần hỏi là "bản ĐẦU có chạy không".
-# Chỉ áp cho công cụ agent gõ trần: KHÔNG `bash` (đầu PATH Windows là WSL, kho gọi Git
-# Bash bằng đường dẫn tuyệt đối), KHÔNG `python` (đã dò ba tên).
+# wp802 (Q2/Q3) — "BỊ CHE": bản TÊN TRẦN hỏng mà bản khác chạy được. Đo 17-10-2026: `doctor`
+# rc=0 trỏ bản TỐT trong khi `rg --version` gõ trong shell rc=1. Chỉ công cụ agent gõ trần:
+# KHÔNG `bash` (đầu PATH Windows là WSL), KHÔNG `python` (đã dò ba tên).
 _AP_DUNG_BI_CHE = frozenset({"rg", "git"})
 
 
@@ -4364,8 +4373,16 @@ def lenh_doctor(a) -> int:
         xac_thuc_ok = None
         loi_xac_thuc = None
         xac_thuc_chua_do = None
-        hong_dau = None            # bản ĐẦU TIÊN (= bản tên trần giải ra) đo được là hỏng
-        for i_uv, (ten_uv, d) in enumerate(_cac_duong_dan(c, moi_truong)):
+        hong_dau = None            # bản TÊN TRẦN (shell gọi) đo được là hỏng
+        ung_vien = _cac_duong_dan(c, moi_truong)
+        # Bản tên trần giải ĐỘC LẬP rồi đặt LÊN ĐẦU — đo nó trước mọi bản dự phòng.
+        tran = (_ten_tran_giai_ra(c["ung_vien"][0], moi_truong)
+                if c["ten"] in _AP_DUNG_BI_CHE else None)
+        if tran:
+            ung_vien = [(c["ung_vien"][0], tran)] + [
+                x for x in ung_vien
+                if os.path.normcase(os.path.abspath(x[1])) != os.path.normcase(tran)]
+        for ten_uv, d in ung_vien:
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
                 # HẾT NGÂN SÁCH KHÔNG PHẢI "CÔNG CỤ HỎNG" — trạng thái thứ ba.
@@ -4408,13 +4425,11 @@ def lenh_doctor(a) -> int:
                 continue
             co_mat_nhung_hong = {"goi_bang": ten_uv,
                                  "duong_dan": d, "loi": pb}
-            if i_uv == 0:
+            if tran and d == tran:
                 hong_dau = co_mat_nhung_hong
-        # `_cac_duong_dan` duyệt PATH theo thứ tự TRƯỚC mọi vị trí nền chuẩn, nên phần tử 0
-        # chính là thứ shell giải ra khi gõ tên trần. Quá hạn ở phần tử 0 KHÔNG tính: chưa
-        # đo được không phải hỏng (`None ≠ False`).
+        # Quá hạn ở bản tên trần KHÔNG tính: chưa đo được không phải hỏng (`None ≠ False`).
         bi_che = None
-        if c["ten"] in _AP_DUNG_BI_CHE and thay is not None and hong_dau is not None:
+        if thay is not None and hong_dau is not None:     # `tran` chỉ có trong phạm vi
             hd = hong_dau or {}
             bi_che = {"trang_thai": "BI_CHE", "ban_hong": hd.get("duong_dan"),
                       "loi": hd.get("loi"), "ban_tot": thay["duong_dan"],
@@ -4474,9 +4489,7 @@ def lenh_doctor(a) -> int:
                 muc["loi_xac_thuc"] = loi_xac_thuc
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
-        if bi_che:
-            # `co` GIỮ True (công cụ CÓ cài — không dán nhãn "thiếu" trần), nhưng
-            # trạng thái và quyết định đi theo bản tên trần.
+        if bi_che:            # `co` GIỮ True: công cụ CÓ cài, chỉ bản tên trần hỏng
             muc["trang_thai"] = "BI_CHE"
             muc["bi_che"] = bi_che
         if thay is None and het_ngan_sach:

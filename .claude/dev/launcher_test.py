@@ -3054,6 +3054,7 @@ def t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot():
     m._doc_moi_truong = lambda: (
         {"PATH": "P", "TL_LAUNCHER_ENV_DA_DOC": "1"}, {"da_doc_truoc_cong_cu": True})
     m._cac_duong_dan = lambda _c, _env: [("rg", "/hong/rg"), ("rg", "/tot/rg")]
+    m._ten_tran_giai_ra = lambda _t, _e: "/hong/rg"
 
     def pb(duong, **_kwargs):
         da_thu.append(duong)
@@ -7992,6 +7993,7 @@ def r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi():
 # wp802 (RG-DA-NEN, spec ops/specs/wp802.md N1–N8). `HOOK_DANG_DUNG` là hook đang thử —
 # runner đột biến trỏ nó sang BẢN SAO TẠM, y như `LAUNCHER_DANG_DUNG`.
 HOOK_DANG_DUNG = LAUNCHER.parents[1] / "hooks" / "session-start.sh"
+YAML_DANG_DUNG = LAUNCHER.parents[2] / "ops" / "cong_cu.yaml"
 
 
 def _wp802_doctor(m, ten, cap, env=None):
@@ -8004,31 +8006,39 @@ def _wp802_doctor(m, ten, cap, env=None):
     if cap is not None:
         tot = {d for d, ok in cap if ok}
         m._cac_duong_dan = lambda _c, _e: [(ten, d) for d, _ in cap]
+        m._ten_tran_giai_ra = lambda _t, _e: cap[0][0]
         m._phien_ban = lambda d, **_k: ((True, f"{ten} 9.9.9", False) if d in tot
                                         else (False, "Access is denied", False))
     rc, d = _doctor_json(m)
     return rc, d, [x for x in d["cong_cu"] if x["ten"] == ten][0]
 
 
+def _wp802_rg_that(s, *hong):
+    """`rg` THẬT, không giả probe: mỗi thư mục `hong` một bản hỏng (POSIX: script rc 1;
+    Windows: `rg.exe` 0 BYTE, CreateProcess từ chối). Trả thư mục bản tốt (Windows: rg của runner)."""
+    for d in hong:
+        d.mkdir()
+        f = d / ("rg.exe" if LA_WINDOWS else "rg")
+        f.write_bytes(b"" if LA_WINDOWS else b"#!/bin/sh\necho 'Access is denied' >&2\nexit 1\n")
+        f.chmod(0o755)
+    if LA_WINDOWS:
+        that = shutil.which("rg")
+        bang(that is not None, "KHONG DO DUOC: runner Windows thieu rg that de lam ban tot")
+        return Path(that).parent
+    (s / "tot").mkdir()
+    (s / "tot" / "rg").write_text("#!/bin/sh\necho 'ripgrep 14.1.0'\n")
+    (s / "tot" / "rg").chmod(0o755)
+    return s / "tot"
+
+
 @ca
 def r802_doctor_rg_tran_hong_la_BI_CHE():
     """N1 + N5: bản `rg` ĐẦU PATH hỏng, bản sau chạy được ⇒ BI_CHE, thoát 12, nêu hai đường
-    dẫn. Tệp THẬT, không giả probe: POSIX là script in "Access is denied"; Windows là
-    `rg.exe` 0 BYTE (CreateProcess từ chối) — ca này phải QUA trên Windows, không bỏ qua."""
+    dẫn. Tệp THẬT — trên Windows ca này phải QUA, không bỏ qua."""
     m = _tai_launcher_thu()
     with San() as s:
-        hong = s / "hong"; hong.mkdir()
-        if LA_WINDOWS:
-            (hong / "rg.exe").write_bytes(b"")
-            that = shutil.which("rg")
-            bang(that is not None, "KHONG DO DUOC: runner Windows thieu rg that de lam ban tot")
-            tot = Path(that).parent
-        else:
-            tot = s / "tot"; tot.mkdir()
-            (hong / "rg").write_text("#!/bin/sh\necho 'Access is denied' >&2\nexit 1\n")
-            (tot / "rg").write_text("#!/bin/sh\necho 'ripgrep 14.1.0'\n")
-            for f in (hong / "rg", tot / "rg"):
-                f.chmod(0o755)
+        hong = s / "hong"
+        tot = _wp802_rg_that(s, hong)
         env = dict(os.environ, PATH=os.pathsep.join([str(hong), str(tot)]), LOCALAPPDATA="")
         rc, d, muc = _wp802_doctor(m, "rg", None, env)
         che = muc.get("bi_che") or {}
@@ -8039,12 +8049,10 @@ def r802_doctor_rg_tran_hong_la_BI_CHE():
         bang(Path(che.get("ban_hong", "")).parent == hong
              and Path(che.get("ban_tot", "")).parent == tot and che.get("cach_chua"),
              f"BI_CHE phai neu ca hai duong dan + cach chua: {che}")
-        a = type("A", (), {"json": False, "workspace": None, "doi_kha_dung": False})()
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            m.lenh_doctor(a)
-        bang("BI_CHE" in out.getvalue() and che["ban_hong"] in out.getvalue()
-             and che["ban_tot"] in out.getvalue(),
+            m.lenh_doctor(type("A", (), {"json": False, "workspace": None, "doi_kha_dung": False})())
+        bang(all(x in out.getvalue() for x in ("BI_CHE", che["ban_hong"], che["ban_tot"])),
              f"ban chu khong in BI_CHE + hai duong dan: {out.getvalue()[-600:]}")
 
 
@@ -8075,6 +8083,58 @@ def r802_doctor_bash_ngoai_pham_vi_BI_CHE():
          f"bash bi ap BI_CHE ngoai pham vi Q3: rc={rc}, muc={muc}")
 
 
+@ca
+def r802_doctor_ten_tran_tu_muc_PATH_rong():
+    """F1 (Codex lượt 1): `PATH=:<hỏng2>:<tốt>` với `./rg` hỏng ⇒ bash gọi `./rg`. Doctor phải
+    giải tên trần ĐỘC LẬP (mục rỗng = cwd) và nêu ĐÚNG bản đó, không phải bản hỏng thứ hai."""
+    m, cu = _tai_launcher_thu(), os.getcwd()
+    with San() as s:
+        cwd, hong2 = s / "cwd", s / "hong2"
+        tot = _wp802_rg_that(s, cwd, hong2)
+        env = dict(os.environ, PATH=os.pathsep.join(["", str(hong2), str(tot)]), LOCALAPPDATA="")
+        try:
+            os.chdir(cwd)
+            rc, d, muc = _wp802_doctor(m, "rg", None, env)
+        finally:
+            os.chdir(cu)
+        che = muc.get("bi_che") or {}
+        bang(rc == MA_THIEU_CONG_CU and Path(che.get("ban_hong", "")).parent == cwd,
+             f"ten tran tu muc PATH rong khong duoc do: rc={rc}, bi_che={che}")
+
+
+@ca
+def r802_cai_rg_windows_chon_ban_chay_duoc():
+    """F2 (Codex lượt 1): chạy NGUYÊN `rg.cai.windows` qua ops/cai_cong_cu.sh (winget/cygpath
+    giả). `rg` cũ HỎNG đứng đầu PATH, winget đặt bản tốt vào WinGet Links ⇒ cài `DAT`, và
+    thư mục ghi vào `$GITHUB_PATH` là WinGet Links."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
+    with San() as s:
+        ops = s / "kho" / "ops"; ops.mkdir(parents=True)
+        for t in ("cai_cong_cu.sh", "cong_cu.py"):
+            shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+        shutil.copy2(YAML_DANG_DUNG, ops / "cong_cu.yaml")
+        hong, bin_, links = s / "hong", s / "bin", s / "la" / "Microsoft" / "WinGet" / "Links"
+        for d in (hong, bin_, links):
+            d.mkdir(parents=True)
+        tep = {hong / "rg": "echo 'Access is denied' >&2; exit 1", links / "rg": "echo 'ripgrep 15.2.0'",
+               bin_ / "winget": "exit 0", bin_ / "cygpath": 'while [ "${1#-}" != "$1" ]; do shift; done; echo "$1"'}
+        for f, than in tep.items():
+            f.write_text(f"#!/bin/sh\n{than}\n")
+            f.chmod(0o755)
+        gp = s / "github_path"; gp.write_text("")
+        vo, env = _wp802_bash_env()
+        env.update(CONG_CU_NEN="windows", LOCALAPPDATA=str(s / "la"), ChocolateyInstall=str(s / "choco"),
+                   GITHUB_PATH=str(gp), PATH=os.pathsep.join([str(hong), str(bin_), env.get("PATH", "")]))
+        p = subprocess.run([vo, str(ops / "cai_cong_cu.sh"), "rg"], env=env, capture_output=True,
+                           text=True, timeout=120)
+        bang(p.returncode == 0 and '"DAT"' in p.stdout,
+             f"cai rg Windows khong DAT khi ban cu hong dung truoc: rc={p.returncode} "
+             f"{p.stdout[-300:]} {p.stderr[-300:]}")
+        bang(gp.read_text().strip() == str(links), f"GITHUB_PATH sai thu muc: {gp.read_text()!r}")
+
+
 def _wp802_rg_yaml():
     """Phần LỆNH CÀI của `rg.cai` trong ops/cong_cu.yaml. Quy tắc so: cắt ở ` && ` ĐẦU TIÊN —
     vế cài không chứa `&&`; phần sau là đuôi in thư mục cài (hợp đồng `cai_cong_cu.sh`) và
@@ -8083,8 +8143,7 @@ def _wp802_rg_yaml():
         import yaml
     except ImportError:
         bang(False, "KHONG DO DUOC: thieu PyYAML de doc ops/cong_cu.yaml")
-    goc = LAUNCHER.parents[2] / "ops" / "cong_cu.yaml"
-    cai = yaml.safe_load(goc.read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"]
+    cai = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"]
     ra = {}
     for nen in ("windows", "linux"):
         lenh = cai[nen]["lenh"]
@@ -8094,12 +8153,6 @@ def _wp802_rg_yaml():
     return ra
 
 
-def _wp802_hook_rg_windows(than):
-    m = re.search(r"^RG_CAI_WINDOWS='([^']*)'$", than, re.MULTILINE)
-    bang(m is not None, "hook khong con dong RG_CAI_WINDOWS='…'")
-    return m.group(1)
-
-
 @ca
 def r802_bang_cai_rg_khop_cong_cu_yaml():
     """N6: ba bảng cài `rg` (launcher `CONG_CU` · hook · ops/cong_cu.yaml) không được lệch."""
@@ -8107,8 +8160,17 @@ def r802_bang_cai_rg_khop_cong_cu_yaml():
     cai = [c for c in _tai_launcher_thu().CONG_CU if c["ten"] == "rg"][0]["cai"]
     bang(cai["Windows"] == y["windows"], f"launcher Windows lech YAML: {cai['Windows']!r} != {y['windows']!r}")
     bang(cai["Linux"] == y["linux"], f"launcher Linux lech YAML: {cai['Linux']!r} != {y['linux']!r}")
-    hook = _wp802_hook_rg_windows(HOOK_DANG_DUNG.read_text(encoding="utf-8"))
-    bang(hook == y["windows"], f"hook lech YAML: {hook!r} != {y['windows']!r}")
+    hook = re.findall(r"^RG_CAI_WINDOWS='([^']*)'$", HOOK_DANG_DUNG.read_text(encoding="utf-8"), re.M)
+    bang(hook == [y["windows"]], f"hook lech YAML: {hook!r} != {y['windows']!r}")
+
+
+def _wp802_bash_env():
+    """bash dùng được (ops/bash_nen.py, không gọi `bash` trần) + môi trường đã gỡ BASH_ENV/ENV."""
+    import runpy
+    vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
+    bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
+    bo = ("BASH_ENV", "ENV")
+    return vo, {k: v for k, v in os.environ.items() if k not in bo and not k.startswith("BASH_FUNC_")}
 
 
 def _wp802_chay_khoi_rg_hook(s, uname):
@@ -8130,11 +8192,7 @@ def _wp802_chay_khoi_rg_hook(s, uname):
         f.chmod(0o755)
     (s / "khoi.sh").write_text("set -euo pipefail\nPY=" + shlex.quote(PY) + "\n" + co.group(0)
                                + "\n" + co_chay.group(0) + than[dau:cuoi] + "\n")
-    import runpy
-    vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
-    bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
-    env = {k: v for k, v in os.environ.items()
-           if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}
+    vo, env = _wp802_bash_env()
     env["PATH"] = os.pathsep.join([str(bin_), env.get("PATH", "")])
     p = subprocess.run([vo, str(s / "khoi.sh")], env=env, capture_output=True, text=True,
                        timeout=60)
@@ -9095,21 +9153,31 @@ def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
 DOT_BIEN = [
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.
     ("wp802_bo_nhanh_BI_CHE",
-     ('if c["ten"] in _AP_DUNG_BI_CHE and thay is not None and hong_dau is not None:',
-      'if False:'),
+     ('        if thay is not None and hong_dau is not None:', '        if False:'),
      ["r802_doctor_rg_tran_hong_la_BI_CHE", "r802_doctor_git_tran_hong_la_BI_CHE"]),
     ("wp802_BI_CHE_khong_vao_thieu",
      ('xac_thuc_ok is False or bi_che)', 'xac_thuc_ok is False)'),
      ["r802_doctor_rg_tran_hong_la_BI_CHE", "r802_doctor_git_tran_hong_la_BI_CHE"]),
     ("wp802_luon_BI_CHE_khi_co_ung_vien",
-     (' and thay is not None and hong_dau is not None:', ' and thay is not None:'),
+     ('        if thay is not None and hong_dau is not None:', '        if thay is not None:'),
      ["r802_doctor_rg_chi_ban_tot_khong_BI_CHE"]),
     ("wp802_bo_git_khoi_tap_ap_dung",
      ('_AP_DUNG_BI_CHE = frozenset({"rg", "git"})', '_AP_DUNG_BI_CHE = frozenset({"rg"})'),
      ["r802_doctor_git_tran_hong_la_BI_CHE"]),
     ("wp802_BI_CHE_moi_cong_cu",
-     ('if c["ten"] in _AP_DUNG_BI_CHE and thay', 'if True and thay'),
+     ('if c["ten"] in _AP_DUNG_BI_CHE else None)', 'if True else None)'),
      ["r802_doctor_bash_ngoai_pham_vi_BI_CHE"]),
+    # Codex lượt 1 F1: tên trần giải độc lập (mục PATH rỗng = cwd), đo TRƯỚC, đúng bản.
+    ("wp802_ten_tran_bo_muc_PATH_rong",
+     ('    for muc in moi_truong.get("PATH", "").split(os.pathsep):\n        for d in duoi:',
+      '    for muc in filter(None, moi_truong.get("PATH", "").split(os.pathsep)):\n        for d in duoi:'),
+     ["r802_doctor_ten_tran_tu_muc_PATH_rong"]),
+    ("wp802_khong_dat_ten_tran_len_dau",
+     ('        if tran:\n            ung_vien = [', '        if False:\n            ung_vien = ['),
+     ["r802_doctor_ten_tran_tu_muc_PATH_rong"]),
+    ("wp802_hong_dau_la_moi_ban_hong",
+     ('            if tran and d == tran:\n', '            if True:\n'),
+     ["r802_doctor_ten_tran_tu_muc_PATH_rong"]),
     ("wp802_launcher_winget_thanh_choco",
      ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
@@ -9494,8 +9562,7 @@ DOT_BIEN = [
     # Dừng ở binary ĐẦU TIÊN trong PATH = đúng hành vi `shutil.which` cũ, tức dựng
     # lại lỗi đã đo trên Windows (rg của WindowsApps che mất bản chạy được).
     ("doctor_chi_thu_binary_dau",
-     ('        for i_uv, (ten_uv, d) in enumerate(_cac_duong_dan(c, moi_truong)):',
-      '        for i_uv, (ten_uv, d) in enumerate(_cac_duong_dan(c, moi_truong)[:1]):'),
+     ('        for ten_uv, d in ung_vien:', '        for ten_uv, d in ung_vien[:1]:'),
      ["t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot"]),
     # Lấy credential theo THỨ TỰ TÀI LIỆU thay vì loại chuỗi giữ chỗ => chọn đúng
     # bản giữ chỗ 14 ký tự trong container này. Xem `_doc_moi_truong`.
@@ -10335,14 +10402,21 @@ DOT_BIEN = [
 # tính là GIẾT — lỗi khác là tín dụng giả (CLAUDE.md, bài học 27-08).
 DOT_BIEN_HOOK = [
     ("wp802_hook_co_thay_co_chay",
-     ("      co_chay rg || { co cargo", "      co rg || { co cargo"),
+     ("  co_chay rg || { co cargo", "  co rg || { co cargo"),
      ["r802_hook_linux_rg_hong_van_thu_cargo"]),
     ("wp802_hook_windows_roi_vao_apt",
-     ("    MINGW*|MSYS*|CYGWIN*)", "    KHONG_KHOP_NEN_NAO)"),
+     ("MINGW*|MSYS*|CYGWIN*) RG_WIN=1", "KHONG_KHOP_NEN_NAO) RG_WIN=1"),
      ["r802_hook_windows_khong_cai_in_dung_lenh"]),
     ("wp802_hook_lenh_windows_lech_yaml",
      ("RG_CAI_WINDOWS='winget install", "RG_CAI_WINDOWS='choco install"),
      ["r802_bang_cai_rg_khop_cong_cu_yaml", "r802_hook_windows_khong_cai_in_dung_lenh"]),
+    # Phần tử thứ tư "yaml" = đột biến ops/cong_cu.yaml thay vì hook (Codex lượt 1 F2).
+    ("wp802_yaml_bo_ung_vien_winget_links",
+     (' "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")"', ''),
+     ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
+    ("wp802_yaml_khong_ghi_github_path",
+     ('cygpath -w "$RG_DICH" >> "$GITHUB_PATH"', 'true'),
+     ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
 ]
 
 
@@ -10395,7 +10469,7 @@ def chay_dot_bien() -> int:
     Sửa ở TẦNG chứ không vá triệu chứng: tệp dưới quản lý phiên bản không bao giờ
     bị ghi, nên dù bị SIGKILL (không bắt được) cây làm việc vẫn nguyên.
     """
-    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG
+    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG
     goc = LAUNCHER.read_text(encoding="utf-8")
     goc_test = Path(__file__).read_text(encoding="utf-8")
     hong = 0
@@ -10479,15 +10553,18 @@ def chay_dot_bien() -> int:
                   f"{', '.join(chet) or '(khong ca nao chet)'}{ghi_chu}")
 
         # wp802: đột biến HOOK — cùng luật bản sao tạm; chỉ `TinHieuChotCa` mới là giết.
-        goc_hook = HOOK_DANG_DUNG.read_text(encoding="utf-8")
-        for i, (ten, (c, m), phai_chet) in enumerate(DOT_BIEN_HOOK):
-            if goc_hook.count(c) != 1:
-                print(f"  {ten:<28} SAI - neo hook khong khop DUNG MOT cho")
+        hook_goc, yaml_goc = HOOK_DANG_DUNG, YAML_DANG_DUNG   # F3: trả ĐÚNG con trỏ người gọi
+        for i, muc in enumerate(DOT_BIEN_HOOK):
+            ten, (c, m), phai_chet = muc[:3]
+            dich = yaml_goc if muc[3:] == ("yaml",) else hook_goc
+            goc_dich = dich.read_text(encoding="utf-8")
+            if goc_dich.count(c) != 1:
+                print(f"  {ten:<28} SAI - neo hook/yaml khong khop DUNG MOT cho")
                 hong += 1
                 continue
-            ban_hook = tam / f"hook_db_{i:02d}.sh"
-            ban_hook.write_text(goc_hook.replace(c, m, 1), encoding="utf-8")
-            HOOK_DANG_DUNG = ban_hook
+            ban = tam / f"hook_db_{i:02d}{dich.suffix}"
+            ban.write_text(goc_dich.replace(c, m, 1), encoding="utf-8")
+            globals()["YAML_DANG_DUNG" if dich is yaml_goc else "HOOK_DANG_DUNG"] = ban
             chet, bo_qua, loi = [], [], []
             try:
                 for fn in [f for f in CA if f.__name__ in phai_chet]:
@@ -10500,7 +10577,7 @@ def chay_dot_bien() -> int:
                     except Exception as e:  # noqa: BLE001 - tín dụng giả, không phải giết
                         loi.append(f"{fn.__name__}({type(e).__name__})")
             finally:
-                HOOK_DANG_DUNG = LAUNCHER.parents[1] / "hooks" / "session-start.sh"
+                HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc
             can_do = len(phai_chet) - len(bo_qua)
             if can_do == 0 and not loi:
                 khong_do += 1

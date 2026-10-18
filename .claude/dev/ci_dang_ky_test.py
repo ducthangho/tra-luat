@@ -80,11 +80,34 @@ DA_NOI = {
 DANG_KY = set(MOI) | DA_NOI
 
 
-def tim(root):
-    """Trả (test sống, hiện vật, vị trí lạ); ops chỉ nhận tệp mức đỉnh."""
+def _git_bo_qua(root, ds, chay=subprocess.run):
+    """Tệp Git BỎ QUA và KHÔNG tracked trong `ds`.
+    WP748 r18 (G5 g17: k01 đỏ vì gương `.codex/hooks/*_test.py` bị `.gitignore` mà
+    `rglob` vẫn thấy, ra "vị trí chưa biết") — fix. `check-ignore` mặc định KHÔNG báo
+    tệp đã tracked, nên test tracked vẫn hiện. Fail-close: không phải gốc kho Git,
+    hoặc git không chạy/không đo được (rc ngoài 0/1) ⇒ rỗng, mọi tệp vẫn được đếm."""
+    if not ds or not (root / ".git").exists():
+        return set()
+    try:
+        r = chay(["git", "-C", str(root), "check-ignore", "-z", "--stdin"],
+                 input="".join(x + "\0" for x in ds), capture_output=True, text=True,
+                 encoding="utf-8", errors="surrogateescape", timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    if r.returncode not in (0, 1):
+        return set()
+    return set(r.stdout.split("\0")) & set(ds)
+
+
+def tim(root, chay=subprocess.run):
+    """Trả (test sống, hiện vật, vị trí lạ); ops chỉ nhận tệp mức đỉnh.
+    Tệp Git bỏ qua mà không tracked không thuộc cây ⇒ không đếm (xem `_git_bo_qua`)."""
     song, hien_vat, la = set(), set(), set()
-    for p in root.rglob("*_test.py"):
-        q = p.relative_to(root).as_posix()
+    ds = sorted(p.relative_to(root).as_posix() for p in root.rglob("*_test.py"))
+    bo_qua = _git_bo_qua(root, ds, chay)
+    for q in ds:
+        if q in bo_qua:
+            continue
         if q.startswith(OPS_REVIEWS):
             hien_vat.add(q)
         elif any(q.startswith(g + "/") for g in GOC) or (q.startswith("ops/") and q.count("/") == 1):
@@ -1244,6 +1267,41 @@ def phan_chung():
                 _them(("i-thieu-so", "ii-mat-tep", "iii-mat-loi-goi", "iv-vi-tri-la")[i], bool(kiem(r, reg, wf)[0]))
             finally:
                 DA_NOI.clear(); DA_NOI.update(old)
+        # WP748 r18 (G5 g17 k01 đỏ vì gương `.codex/` bị Git bỏ qua) — hai chiều trên kho Git
+        # thật: bỏ qua+không tracked ⇒ không đếm; KHÔNG bỏ qua, hoặc tracked dù nằm trong
+        # thư mục bị bỏ qua, hoặc git không đo được ⇒ vẫn là "vị trí chưa biết".
+        g = base / "git-bo-qua"
+        (g / ".claude/dev").mkdir(parents=True)
+        (g / ".github/workflows").mkdir(parents=True)
+        (g / ".claude/dev/a_test.py").touch()
+        (g / ".codex/hooks").mkdir(parents=True)
+        (g / ".codex/hooks/x_test.py").touch()
+        (g / ".gitignore").write_text(".codex/\n", encoding="utf-8")
+        def _git(*a):
+            subprocess.run(["git", "-C", str(g), *a], check=True, capture_output=True, timeout=120)
+        _git("init", "-q")
+        reg_g, wf_g = {".claude/dev/a_test.py"}, "python .claude/dev/ci_dang_ky_test.py --chay"
+        old = set(DA_NOI)
+        try:
+            DA_NOI.clear()
+            _them("r18-git-bo-qua-khong-dem", not kiem(g, reg_g, wf_g)[0]
+                  and ".codex/hooks/x_test.py" not in tim(g)[2])
+            def _git_hong(*a, **k): return subprocess.CompletedProcess(a, 128, "", "fatal")
+            def _git_vang(*a, **k): raise OSError("git vang")
+            _them("r18-git-hong-van-thay", ".codex/hooks/x_test.py" in tim(g, _git_hong)[2]
+                  and ".codex/hooks/x_test.py" in tim(g, _git_vang)[2])
+            kg = base / "khong-git"
+            (kg / ".codex/hooks").mkdir(parents=True); (kg / ".codex/hooks/x_test.py").touch()
+            (kg / ".gitignore").write_text(".codex/\n", encoding="utf-8")
+            _them("r18-khong-git-van-thay", ".codex/hooks/x_test.py" in tim(kg)[2])
+            (g / "la").mkdir(); (g / "la/y_test.py").touch()
+            _them("r18-khong-bo-qua-van-la", any("la/y_test.py" in x for x in kiem(g, reg_g, wf_g)[0]))
+            (g / "la/y_test.py").unlink()
+            _git("add", "-f", ".codex/hooks/x_test.py")
+            _them("r18-tracked-trong-thu-muc-bo-qua-van-la",
+                  any(".codex/hooks/x_test.py" in x for x in kiem(g, reg_g, wf_g)[0]))
+        finally:
+            DA_NOI.clear(); DA_NOI.update(old)
         # (a) Bản sao sổ cách ly mất slug phải đỏ.
         mutant_cu = {".claude/dev/a_test.py": {"slug": "", "ly_do": "đỏ trên CI"}}
         _them("a-cach-ly-thieu-slug", bool(kiem(r, reg, wf, mutant_cu)[0]))

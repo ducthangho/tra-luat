@@ -1,0 +1,4 @@
+$ git show origin/ops/wp484-r7-spec:ops/specs/wp484-r8.md | sha256sum  (ref @ 0a45383e5a2bf1645025968c8620489734e978a3)
+4a512dd38721c3c4eec7978489ba06485feab32f94a0c5637a085d6c694ba38c  -
+$ git rev-parse origin/ops/wp484-r7-spec:ops/specs/wp484-r8.md
+812bf04c48bf2a720a82ced7fcd36600289a4bbf

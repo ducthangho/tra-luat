@@ -8257,16 +8257,24 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
-def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False):
+def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
     `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
     (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `truc_tiep`: eval công
     thức trong bash thay vì qua cai_cong_cu.sh, để đọc thư mục nó in. `venv`: thư mục ứng viên là `bin/` của một venv
-    THẬT không có PyYAML (F03). Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    THẬT không có PyYAML (F03). `batch`: chạy `--bat-buoc` thật trên bảng kê rút còn `rg` rồi `bash` (lấy NGUYÊN từ
+    YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cai_cong_cu.sh", "cong_cu.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
-    shutil.copy2(YAML_DANG_DUNG, ops / "cong_cu.yaml")
+    if batch:
+        import yaml
+        d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))
+        (ops / "cong_cu.yaml").write_text(yaml.safe_dump(
+            {"schema_version": d["schema_version"], "cong_cu": {k: d["cong_cu"][k] for k in ("rg", "bash")}},
+            sort_keys=False, allow_unicode=True), encoding="utf-8")
+    else:
+        shutil.copy2(YAML_DANG_DUNG, ops / "cong_cu.yaml")
     goc, bin_ = s / "goc", s / "bin"
     uv = goc / "usr" / "bin"
     dau_d = {"hong": s / "hong", "uv": uv, "truoc": s / "truoc"}[dau]
@@ -8292,7 +8300,7 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False):
         env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"][nen]["lenh"]
         lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); cd {shlex.quote(str(kho))}; eval "$LENH"']
     else:
-        lenh = [vo, str(ops / "cai_cong_cu.sh"), "rg"]
+        lenh = [vo, str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
     p = subprocess.run(lenh, env=env, capture_output=True, text=True, timeout=120)
     return p, gp.read_text().strip(), uv, dau_d
 
@@ -8334,6 +8342,18 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
         bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
              f"{nen}: Python cua thu muc ung vien thay cho Python ban dau: rc={p.returncode} GITHUB_PATH={gp!r} "
              f"{p.stdout[-200:]} {p.stderr[-300:]}")
+    # F03 (Codex lượt 3): như trên nhưng qua `--bat-buoc` (rg rồi bash). Lượt `source` cho `bash` phải DÙNG LẠI Python
+    # đã ghim của lượt cha, không chọn lại từ PATH mà công thức `rg` vừa đổi.
+    with San() as s:
+        p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True)
+        try:
+            tong = json.loads(p.stdout[p.stdout.rindex('{\n  "trang_thai_tong"'):])
+        except ValueError:
+            tong = {}
+        dat = {c.get("ten"): c.get("trang_thai") for c in tong.get("cong_cu", [])}
+        bang(p.returncode == 0 and tong.get("trang_thai_tong") == "DAT" and dat == {"rg": "DAT", "bash": "DAT"},
+             f"{nen}: --bat-buoc chon lai Python sau khi rg doi PATH: rc={p.returncode} {dat} "
+             f"{p.stderr[-300:]}")
     # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục in ra phải
     # là thư mục của bản tốt (`command -v`), không phải thư mục ứng viên mà checker đã bỏ qua.
     with San() as s:

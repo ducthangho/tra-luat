@@ -11,7 +11,12 @@ cd -- "$GOC"  # cong thuc YAML la duong dan TUONG DOI; doc lap CWD nguoi goi
 TEN="${1:-}"
 [ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }
 # Windows thuong chi co `python`; Linux/macOS co the chi co `python3` (CLAUDE.md).
-if command -v python >/dev/null 2>&1; then PY=(python)
+# wp831 (Codex luot 3 F03): luot duoc `source` trong vong `--bat-buoc` cua CUNG shell DUNG LAI PY da ghim cua luot
+# cha — chon lai o day se doc PATH ma cong thuc cong cu truoc vua doi (vd thu muc rg co Python thieu PyYAML). Dau hieu
+# la bien shell KHONG export gan voi $$: tien trinh moi khong ke thua; tiem qua moi truong ma PY chua co thi `set -u`
+# dung ngay (fail-close).
+if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then :
+elif command -v python >/dev/null 2>&1; then PY=(python)
 elif command -v python3 >/dev/null 2>&1; then PY=(python3)
 elif command -v py >/dev/null 2>&1; then PY=(py -3)
 else echo "cai_cong_cu: khong tim thay python, python3 hay py" >&2; exit 4
@@ -52,6 +57,7 @@ import yaml
 d=yaml.safe_load(open("ops/cong_cu.yaml", encoding="utf-8"))
 print("\n".join(k for k,v in d["cong_cu"].items() if v["bat_buoc"] or v.get("chuan_bi")))')
   [ "${#BAT_BUOC[@]}" -gt 0 ] || { echo "cai_cong_cu: ban ke khong co cong cu bat buoc" >&2; exit 5; }
+  CAI_CONG_CU_PY_CUA=$$  # KHONG export: chi cac luot `source` duoi day thay (xem khoi chon python)
   for cong_cu in "${BAT_BUOC[@]}"; do
     # source de PATH do installer vua them ton tai o parent cho vong sau + probe cuoi.
     # KICH la path tuyet doi, khong dung lai $0 tu CWD cua caller.

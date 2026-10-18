@@ -68,6 +68,16 @@ KHÔNG merge/land/deploy — việc của chủ kho.
   có chủ ý:** phép loại dấu export ở đầu tệp đã chặn mọi đầu vào từ ngoài (dấu từ môi trường luôn mang `-x`), nên hai
   lớp này không thể chạm tới từ bên ngoài shell; giữ làm phòng thủ chiều sâu theo hướng Codex nêu.
 
+- Codex lượt 5/8 (1958,9s, rc 0) @`957ad2e` (cục bộ, chưa push): `changes_requested`; F01/F02 đóng; F04 đã vá (576/576
+  ma trận exec); **F03 tái mở dưới `allexport`** (`bash -a`/`SHELLOPTS=allexport`: phép gán dấu tự export ⇒ lượt
+  `source` cho rg xoá dấu ⇒ bash chọn lại Python, rc 3 12/12). Phán E/F: F dư (đã gỡ), E giữ làm bất biến `PY` là mảng.
+  Verdict `ops/reviews/wp831-g1-luot5-codex-verdict.md` (`ops/wp831-r4-g4-lease@b94063c`). Vá: gán rồi `declare +x`
+  (đo `declare --`, con ABSENT ở ba chế độ). Đột biến G (bỏ `declare +x`) ⇒ cả hai ca r831 đỏ đúng rc 3; A/B/C/D giết;
+  E sống sót (đã phán).
+- Sự cố đo 18-10: Codex sandbox tạo `/tmp/.git` (mount point bảo vệ `.git` trong vùng ghi `/tmp`) trong lúc review;
+  gate cục bộ chạy song song thấy nó là tổ tiên ⇒ 12 ca credential đỏ giả. Chạy lại với `TMPDIR` ngoài `/tmp`:
+  nền 232/232, head 234/234. Tệp tự biến mất khi lượt review kết thúc.
+
 ## Kết quả cuối
 (điền sau: run `ci.yml`, run `launcher-windows.yml` + số ca bỏ qua, verdict Codex lượt cuối, `release-verify`)
 

@@ -1,7 +1,10 @@
 # Handoff wp831 g1 — RG-NO-SAU-802 (executor `wp831-r1-g1-claude`)
 
-Packet #831 · spec `ops/specs/wp831.md` sha256 `92d179bc…9888` (ref `ops/wp831-spec@9eaea9b`) · lease
-`ops/leases/wp831-r1-g1-claude.yaml` (nhánh `ops/wp831-r1-g1-lease@c0fb50f`, đăng bởi run `39113916942` success).
+Packet #831 · spec r1 `ops/specs/wp831.md` (`92d179bc…`) → r2 `ops/specs/wp831-r2.md` (`3ab3aac4…`) → r3
+`ops/specs/wp831-r3.md` (`dd8f0fab…`). Lease r1 `wp831-r1-g1-claude` (run `39113916942`) → r2 `wp831-r2-g2-claude`
+(nhánh `ops/wp831-r2-g2-lease`, run `39128676976`) → r3 `wp831-r3-g3-claude` (nhánh `ops/wp831-r3-g3-lease@0f56285`).
+Mỗi lần thay có bia mộ hai chiều; r2/r3 khai `recorder_is_executor: true` theo chỉ thị chủ kho trong phiên executor
+(issuecomment-6250060975, -6251762410).
 Nhánh `agent/wp831-g1-claude`, base `dfe5437`, đã merge `origin/master@1e69d2a` (không rebase). PR #832 (DRAFT).
 KHÔNG merge/land/deploy — việc của chủ kho.
 
@@ -13,6 +16,8 @@ KHÔNG merge/land/deploy — việc của chủ kho.
 | `docs/GOI_AGENT_DA_NEN.md` | L2: bảng bắt buộc THEO NỀN (đo từ `_bat_buoc`), mã 12 gồm `xac_thuc` SAI và `BI_CHE`. |
 | `changelog.d/wp-831.md` | fragment. |
 | `RELEASE_MANIFEST.json` | L3: sinh lại (commit cuối có đổi tệp trong manifest). |
+| `scripts/tl_selftest.py` | spec r2: ratchet số tệp gói 187 → 189 ở `r291_docs_ngoai_goi`, `r357_agents_ngoai_goi` + chú thích kê khai slot. |
+| `ops/cai_cong_cu.sh` | spec r3 (F03): ghim `PY[0]` thành đường dẫn tuyệt đối ngay sau khối chọn python/python3/py. |
 
 ## Lệch chữ spec — trạng thái
 - **Q1: ĐÃ RÚT lệch.** Bản đầu thay `/usr/bin` bằng thư mục `dpkg -L` khai; Codex lượt 1 F02 (P2) chứng minh nó có
@@ -39,6 +44,11 @@ KHÔNG merge/land/deploy — việc của chủ kho.
 - `doctrine-scan --root .` rc 0 · `tl.py doc-claims-check --strict` `ok: true` · `golden-test` ok.
 
 ## Review
+- Codex lượt 2 (launcher, 1813,9s, rc 0) @`75bcd43`: `changes_requested`; F01/F02 ĐÃ VÁ THẬT; N6 đo được
+  1731/1731 (cô lập ký Git) và hai đột biến ratchet giết đúng ca; F03 `chooser-path-reselects-python` P2 mới. Verdict:
+  `ops/reviews/wp831-g1-luot2-codex-verdict.md` (nhánh `ops/wp831-r2-g2-lease@be0119d`). F03 vá theo spec r3; đột biến
+  bỏ dòng ghim (chạy một lần trên bản sao, không vào `DOT_BIEN_HOOK` vì sàn Windows) ⇒ CẢ HAI ca r831 đỏ bằng
+  `TinHieuChotCa` (rc=2, GITHUB_PATH rỗng).
 - Codex lượt 1 (`gpt-6.1-sol`, `xhigh`, launcher run `ce422f79`, 825,7s, rc 0) @`c3c790e`: `changes_requested`,
   F01 `chooser-checker-path-fallthrough` P2, F02 `linux-candidate-set-drops-usrbin` P2; N4 chấp nhận. Verdict:
   `ops/reviews/wp831-g1-luot1-codex-verdict.md` trên nhánh `ops/wp831-r1-g1-lease`. Cả hai đã vá (xem trên).
@@ -53,3 +63,6 @@ KHÔNG merge/land/deploy — việc của chủ kho.
 - `ops/bash_nen.py:900` `SyntaxWarning: invalid escape sequence '\('` mỗi lần nạp — lease `wp748-r18-g18`, #748.
 - `t86` không cách ly khi hai suite chạy song song (xem Cổng).
 - Sàn đột biến Windows còn ~0,1% dư.
+- `edit_skill_assert_count_gate_dry` (selftest) dùng tệp tạm CỐ ĐỊNH `$TMPDIR/_selftest_editskill.py` ⇒ đỏ giả khi
+  nhiều selftest chạy song song (đo 18-10-2026, bản đột biến r291). Cùng họ `t86`.
+- Selftest `r226`/`r268` đỏ khi cấu hình Git toàn cục bật ký commit (Codex lượt 2 đo, nền = head) — môi trường, delta 0.

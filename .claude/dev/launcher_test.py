@@ -8257,11 +8257,12 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
-def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False):
+def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
     `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
     (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `truc_tiep`: eval công
-    thức trong bash thay vì qua cai_cong_cu.sh, để đọc thư mục nó in. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    thức trong bash thay vì qua cai_cong_cu.sh, để đọc thư mục nó in. `venv`: thư mục ứng viên là `bin/` của một venv
+    THẬT không có PyYAML (F03). Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cai_cong_cu.sh", "cong_cu.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
@@ -8269,6 +8270,9 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False):
     goc, bin_ = s / "goc", s / "bin"
     uv = goc / "usr" / "bin"
     dau_d = {"hong": s / "hong", "uv": uv, "truoc": s / "truoc"}[dau]
+    if venv:
+        import venv as _venv
+        _venv.EnvBuilder(with_pip=False, symlinks=False).create(str(uv.parent))
     for d in {bin_, uv, dau_d}:
         d.mkdir(parents=True, exist_ok=True)
     tep = {uv / "rg": tot, bin_ / "sudo": 'exec "$@"', bin_ / "apt-get": "exit 0",
@@ -8316,6 +8320,20 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
         p, gp, _uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", dau="uv")
         bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == "",
              f"{nen}: rg ten tran da DAT ma van ghi GITHUB_PATH: rc={p.returncode} GITHUB_PATH={gp!r}")
+    # F03 (Codex lượt 2): thư mục ứng viên có Python KHÁC, thiếu PyYAML (venv thật), `rg` đầu PATH hỏng ⇒ wrapper vẫn
+    # chọn được ứng viên: interpreter của checker phải là bản ban đầu, không phải bản mà PATH mới trỏ tới.
+    vo_py, env_py = _wp802_bash_env()
+    co_yaml = subprocess.run([vo_py, "-c", "python -c 'import yaml' 2>/dev/null || python3 -c 'import yaml'"],
+                             env=env_py, capture_output=True, timeout=60).returncode == 0
+    bang(co_yaml, "KHONG DO DUOC: python ban dau tren PATH khong import duoc yaml")
+    with San() as s:
+        p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True)
+        bang(not (uv / "python").exists() or subprocess.run([str(uv / "python"), "-c", "import yaml"],
+                                                            capture_output=True, timeout=60).returncode != 0,
+             f"{nen}: venv ung vien lai co yaml — fixture khong do F03")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+             f"{nen}: Python cua thu muc ung vien thay cho Python ban dau: rc={p.returncode} GITHUB_PATH={gp!r} "
+             f"{p.stdout[-200:]} {p.stderr[-300:]}")
     # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục in ra phải
     # là thư mục của bản tốt (`command -v`), không phải thư mục ứng viên mà checker đã bỏ qua.
     with San() as s:

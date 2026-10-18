@@ -16,6 +16,10 @@ elif command -v python3 >/dev/null 2>&1; then PY=(python3)
 elif command -v py >/dev/null 2>&1; then PY=(py -3)
 else echo "cai_cong_cu: khong tim thay python, python3 hay py" >&2; exit 4
 fi
+# wp831 (Codex luot 2 F03): ghim PY[0] thanh duong dan tuyet doi NGAY tai day. Cong thuc `rg.cai` goi checker duoi
+# `PATH="$RG_D:$PATH"`, va dong kiem cuoi chay sau `export PATH="$DICH:$PATH"`: ten tran se doi sang Python cua thu muc
+# ung vien (vd thieu PyYAML). Giu nguyen doi so con lai cua mang (`py -3`).
+PY[0]="$(command -v "${PY[0]}")"
 
 if [ "$TEN" = "--bat-buoc" ]; then
   # PyYAML la bootstrap cua chinh ban ke. Ghim nay duoc t20 doi chieu voi YAML/CI;

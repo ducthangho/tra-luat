@@ -118,6 +118,9 @@ CA: list = []
 class BoQuaMoiTruong(Exception):
     """Máy chạy test thiếu tool THẬT cho ca này — KHÔNG_ĐO_ĐƯỢC, khác ca ĐỎ, đếm riêng."""
 
+class BoQuaStage(BoQuaMoiTruong):
+    """#671: `t49` KHÔNG stage được (INDEX/`git add`) — `t63` (0) phân loại theo LỚP (nơi ném), không theo chữ."""
+
 def ca(fn):
     CA.append(fn); return fn
 
@@ -3040,8 +3043,8 @@ def _k32_gia(hong=""):
         k.giu.append(cb)       # SẢN PHẨM tự gán argtypes/restype như với WinDLL; `k.giu` giữ callback sống kẻo treo
         setattr(k, ten, ctypes.CFUNCTYPE(i)(ctypes.cast(cb, vp).value))
 
-    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes truyền; < 64 KiB (số đưa làm con trỏ) ⇒ FALSE như nhân, không SIGSEGV
-        ok = h in k.job and lop == 9 and (p or 0) >= 1 << 16 and n == (144 if ctypes.sizeof(vp) == 8 else 112)
+    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes truyền; ngoài [64 KiB, 2^48) (số, handle giả ≈2^60) ⇒ FALSE
+        ok = h in k.job and lop == 9 and 1 << 16 <= (p or 0) < 1 << 48 and n == (112, 144)[ctypes.sizeof(vp) == 8]
         if ok:
             k.job[h].update(co=int.from_bytes(ctypes.string_at(p + 16, 4), "little"))
         return int(bool(ok))
@@ -6288,7 +6291,7 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run
     def _add(d, rel):        # #671: `goi_git` cho `t63` tráo bằng chứng TỪNG bước stage; `rc` PHẢI được đo
         ga = goi_git(["git", "-C", str(d), "add", "--", rel], capture_output=True, text=True, timeout=60)
         if ga.returncode:
-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: git add {rel} rc={ga.returncode} {ga.stderr[:200]!r}")
+            raise BoQuaStage(f"KHÔNG ĐO ĐƯỢC: git add {rel} rc={ga.returncode} {ga.stderr[:200]!r}")
 
     def _kho(tmp, ten):
         d = tmp / ten
@@ -6319,8 +6322,8 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run
         co = ten in goi_git(["git", "-C", str(d), "ls-files", "-z"], capture_output=True,
                             timeout=60).stdout.split(b"\0")
         if oid.returncode or r.returncode or not co:
-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: INDEX không nhận tên {ten!r}: "
-                                 f"rc={oid.returncode}/{r.returncode} {r.stderr[:200]!r}")
+            raise BoQuaStage(f"KHÔNG ĐO ĐƯỢC: INDEX không nhận tên {ten!r}: "
+                             f"rc={oid.returncode}/{r.returncode} {r.stderr[:200]!r}")
 
     BAN = 'import shutil\nb = shutil.which("bash")\n'
     with tempfile.TemporaryDirectory() as tmp:
@@ -6422,8 +6425,8 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run
         hai = [b"ops/va_\xff.py".decode("utf-8", "surrogateescape"), "ops/va_\\xff.py"]
         mv = nap(str(bq))                      # `nap`: `t63` thấy hai chốt THUẦN chạy TRƯỚC stage
         # #671 (S5, chủ kho 30-09) — (3) ở trên và hai chốt THUẦN dưới đây KHÔNG cần tên mang `\` trong INDEX
-        # nên chạy TRƯỚC; phần stage đứng CUỐI ca, `BoQuaMoiTruong` nổ tự nhiên (Git for Windows bỏ tên ấy với
-        # `Ignoring path` — lời khai trong thân `bd6ad5d`): không cơ chế hoãn nào để nuốt/ném sớm. `t63` khoá thứ tự.
+        # nên chạy TRƯỚC; stage đứng CUỐI ca, `BoQuaStage` nổ tự nhiên (Git for Windows thiếu cờ protectNTFS
+        # bỏ tên ấy, `Ignoring path` — handoff §1; `_stage_byte` mang cờ): không hoãn/nuốt/ném sớm. `t63` khoá cả hai.
         bang(mv["_duong_bao_cao"](hai[0]) != mv["_duong_bao_cao"](hai[1]),
              f"(2d) `_duong_bao_cao` vẫn KHÔNG đơn ánh: "
              f"{mv['_duong_bao_cao'](hai[0])!r} == {mv['_duong_bao_cao'](hai[1])!r}")
@@ -6449,9 +6452,9 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
     mang dấu bước ấy. Ca `bo_ten` mô phỏng điều phiên Windows đo: Git for Windows bỏ tên mang dấu chéo ngược
     (`Ignoring path`, rc=0) — `t49` phải đo xong (3) và hai chốt THUẦN (2d) rồi MỚI bỏ qua (stage đứng CUỐI), không
     nuốt, không ném sớm; `bo_hong` bỏ riêng `hong_` (2b) — chỗ gọi mà mọi phép tráo khác dừng trước khi tới.
-    ĐỐI CHỨNG: `t49` KHÔNG tráo chạy trước. Nó XANH mà `t49` ĐỎ dưới phép tráo ⇒ ĐỎ OAN khi stage hỏng (spec §2B)
-    ⇒ giết; nó ĐỎ ⇒ KHÔNG ĐO ĐƯỢC (đột biến đích `t49` giữ bán kính 1/N); nó BỎ QUA (nền không stage được) ⇒
-    chiều ĐỎ oan không đo ở nền ấy. `t49` bỏ qua vì lý do KHÁC dưới phép tráo ⇒ KHÔNG ĐO ĐƯỢC."""
+    ĐỐI CHỨNG: `t49` KHÔNG tráo chạy trước. XANH mà `t49` ĐỎ dưới phép tráo ⇒ ĐỎ OAN khi stage hỏng (spec §2B) ⇒ giết;
+    ĐỎ ⇒ KHÔNG ĐO ĐƯỢC (đột biến đích `t49` giữ bán kính 1/N); `BoQuaStage` (nền không nhận tên, ném bừa) ⇒ giết (0);
+    BỎ QUA lớp cha (tiền đề `t27`, lượt 8 P1) ⇒ KHÔNG ĐO ĐƯỢC. Đối chứng XANH ⇒ BỎ QUA dưới tráo phải là lớp ấy."""
     nhat_ky = []
 
     def trao(buoc, cach):
@@ -6472,36 +6475,33 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
         m["_duong_bao_cao"] = lambda s: nhat_ky.append(("(2d)", s)) or goc(s)
         return m
 
-    try:
-        t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC()
-        doi_chung_xanh = True
-    except BoQuaMoiTruong as ex:
-        bang(False, f"(0) đối chứng t49 KHÔNG tráo mà đã BỎ QUA — chốt staging ném bừa thì che mọi tráo: {ex}")
+    try:   # (0) phân loại theo LỚP: `BoQuaStage` ⇒ giết; BỎ QUA lớp cha (tiền đề `t27`) đi thẳng ra ⇒ `bo_qua`
+        t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=trao(None, None), nap=nap)  # git THẬT + nhật ký
+    except BoQuaStage as ex:
+        bang(False, f"(0) đối chứng t49 KHÔNG tráo mà staging BỎ QUA — chốt staging ném bừa thì che mọi tráo: {ex}")
     except TinHieuChotCa as ex:
         raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ cả khi KHÔNG tráo: {ex}") from ex
     for buoc, cach, dau in (("hash-object", "rc", "rc=128/0"), ("update-index", "rc", "rc=0/128"),
                             ("ls-files", "rong", "xau_"), ("add", "rc", "bình_thường"),
                             ("ops/no_cu.py", "rc", "no_cu"), ("update-index", "bo_ten", "va_"),
                             ("update-index", "bo_hong", "hong_")):
-        nhat_ky.clear()
+        moc = len(nhat_ky)   # KHÔNG xoá nhật ký: chốt (cờ) cuối ca đọc MỌI lượt, kể cả đối chứng
         try:
             t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=trao(buoc, cach), nap=nap)
             ly = None
         except BoQuaMoiTruong as ex:
+            bang(isinstance(ex, BoQuaStage), f"({buoc}/{cach}) đối chứng XANH mà t49 BỎ QUA NGOÀI staging: {ex}")
             ly = str(ex)
         except TinHieuChotCa as ex:
-            bang(not doi_chung_xanh, f"({buoc}/{cach}) stage hỏng mà t49 ĐỎ thay vì BỎ QUA — ĐỎ OAN: {ex}")
-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ khi tráo {buoc}/{cach}, đối chứng không XANH: {ex}") from ex
-        if ly is not None and not ly.startswith(("KHÔNG ĐO ĐƯỢC: INDEX", "KHÔNG ĐO ĐƯỢC: git add")):
-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 bỏ qua vì lý do khác khi tráo {buoc}/{cach}: {ly}")
+            bang(False, f"({buoc}/{cach}) stage hỏng mà t49 ĐỎ thay vì BỎ QUA — ĐỎ OAN (đối chứng XANH): {ex}")
         bang(ly is not None and dau in ly,
              f"({buoc}/{cach}) bằng chứng stage hỏng mà t49 không BỎ QUA đúng bước (chờ {dau!r}): {ly!r}")
-        bang(cach != "bo_ten" or any("ops/no_cu.py" in lenh for lenh in nhat_ky),
+        bang(cach != "bo_ten" or any("ops/no_cu.py" in lenh for lenh in nhat_ky[moc:]),
              "(bo_ten) t49 BỎ QUA trước khi đo (3) — phần stage phải đứng CUỐI ca")
-        bang(cach != "bo_ten" or any(lenh[0] == "(2d)" for lenh in nhat_ky),
+        bang(cach != "bo_ten" or any(lenh[0] == "(2d)" for lenh in nhat_ky[moc:]),
              "(bo_ten) t49 BỎ QUA trước hai chốt THUẦN (2d) — phần stage phải đứng CUỐI ca")
-    bang(any("core.protectNTFS=false" in lenh for lenh in nhat_ky if "update-index" in lenh),
-         "(cờ) update-index thiếu -c core.protectNTFS=false — Windows bỏ tên có dấu chéo ngược (handoff §1/§2)")
+    bang({"core.protectNTFS=false" in l for l in nhat_ky if "update-index" in l} == {True},
+         "(cờ) MỌI update-index MỌI lượt phải mang -c core.protectNTFS=false (Windows bỏ tên chéo ngược, handoff §1)")
 
 
 @ca

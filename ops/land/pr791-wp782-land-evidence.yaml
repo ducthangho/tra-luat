@@ -1,8 +1,8 @@
 # HO SO LAND — packet #782 wp782 r5 (lease g5b), ma qua PR #791; dac ta qua PR #783. Khuon: ops/land/pr772-wp766-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (8ab1007). `landed: false` — chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge bang
-# merge commit (tien le #678 / #722 / #765 / #772). "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# TRANG THAI: merged (8ab1007) va `landed: true` — chu kho quyet O PR GHI SO NAY (#799 issuecomment-6253492563); hieu luc
+# tu merge commit cua PR #799 (tien le #678 / #722 / #765 / #772 / #830). "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do trong phien ghi so (lenh/tep ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua
 # luot review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr791-wp782-provenance/. Moi phep do REST: `gh api <duong dan>` (GET) qua proxy phien.
@@ -77,8 +77,20 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-791.json: merged true, merged_at 2026-10-17T07:45:02Z, merge_commit_sha 8ab1007, merged_by ducthangho.'
-  landed: false
-  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1). Gate push master tren 8ab1007 da XANH.'
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR #799 (nhanh claude/bookkeeping-782-784-land) dua dong nay vao master. Comment 6253492563 la
+    NEO cua quyet dinh, khong phai moc hieu luc (tien le #765 / #820 / #830). Cac commit truoc (gom 70c40af) ghi
+    `landed: false`.
+  landed_quyet_dinh: >-
+    loi_khai_co_neo — chu kho chi thi trong phien session_017khPoiSXW9Yvefabg6MWaH ngay 18-10-2026, nguyen van "Truyen
+    thanh lan that true roi merge" (hieu la: landed true roi merge); executor chep loi thanh #799 issuecomment-6253492563
+    (readback-comment-6253492563.json: user ducthangho, performed_via_github_app claude — kenh dang la MCP cua phien,
+    KHONG phai chu kho tu go).
+  landed_ly_do: >-
+    PROTOCOL §10.2.4: ma vao canonical o exact SHA duoc duyet (1bcbaa0 la cha thu hai cua 8ab1007 — do-spec-va-merge.txt);
+    gate push master tren DUNG merge SHA xanh (readback-run-39014797353.json, readback-jobs-39014797353.json); lease da
+    nha (../pr793-wp784-provenance/ai-dang-giu-sau-ghi-so/). Windows cua gate hau-merge: not_measured (post_merge_checks).
 
 uy_quyen_land:
   neo: 'chu kho tu merge PR #791 (merged_by ducthangho) va bao trong phien session_01XaeBSkW4R49AEWj6x4uqff.'

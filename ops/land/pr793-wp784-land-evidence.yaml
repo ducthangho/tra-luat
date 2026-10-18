@@ -1,8 +1,8 @@
 # HO SO LAND — packet #784 wp784 r2 (lease g2), ma qua PR #793; dac ta qua PR #785. Khuon: ops/land/pr772-wp766-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (7cc384e). `landed: false` — chi len true khi chu kho quyet O PR GHI SO NAY va PR nay merge bang
-# merge commit. Gate push master tren 7cc384e: success (run 39030380292, do lai 13:27Z).
+# TRANG THAI: merged (7cc384e) va `landed: true` — chu kho quyet O PR GHI SO NAY (#799 issuecomment-6253492563); hieu luc
+# tu merge commit cua PR #799. Gate push master tren 7cc384e: success (run 39030380292, do lai 13:27Z).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nhu ho so pr791-wp782.
 # Readback tho: ops/land/pr793-wp784-provenance/. Moi phep do REST: `gh api <duong dan>` (GET) qua proxy phien.
 
@@ -74,8 +74,20 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-793.json: merged true, merged_at 2026-10-17T11:53:00Z, merge_commit_sha 7cc384e, merged_by ducthangho.'
-  landed: false
-  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay. Gate push master 39030380292 tren 7cc384e da XANH.'
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR #799 (nhanh claude/bookkeeping-782-784-land) dua dong nay vao master. Comment 6253492563 la
+    NEO cua quyet dinh, khong phai moc hieu luc (tien le #765 / #820 / #830). Cac commit truoc (gom 70c40af) ghi
+    `landed: false`.
+  landed_quyet_dinh: >-
+    loi_khai_co_neo — chu kho chi thi trong phien session_017khPoiSXW9Yvefabg6MWaH ngay 18-10-2026, nguyen van "Truyen
+    thanh lan that true roi merge" (hieu la: landed true roi merge); executor chep loi thanh #799 issuecomment-6253492563
+    (readback-comment-6253492563.json: user ducthangho, performed_via_github_app claude — kenh dang la MCP cua phien,
+    KHONG phai chu kho tu go).
+  landed_ly_do: >-
+    PROTOCOL §10.2.4: ma vao canonical o exact SHA duoc duyet (1b375db la cha thu hai cua 7cc384e — do-spec-va-merge.txt);
+    gate push master tren DUNG merge SHA xanh (readback-run-39030380292.json, readback-jobs-39030380292.json); lease da
+    nha (ai-dang-giu-sau-ghi-so/). Windows cua gate hau-merge: not_measured (post_merge_checks).
 
 uy_quyen_land:
   neo: 'chu kho tu merge PR #793 (merged_by ducthangho).'

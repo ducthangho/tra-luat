@@ -34,7 +34,15 @@ pre_merge_checks:
   - {name: 'Codex connector review', sha: 6f69f9de6675058a22f70697634f833b9a193f20, conclusion: 'completed, has_any_findings false', nguon: [readback-codex-connector-state-778.json, readback-codex-connector-receipt-6245287333.json]}
 post_merge_checks:
   - {name: 'launcher (Windows that) push master', run_id: 39096438104, sha: dba7fae7864dd0f346285bc5eb357c8d062c1a36, conclusion: success, nguon: [readback-run-39096438104.json, readback-jobs-39096438104.json]}
-  - {name: 'gate (ci.yml, push master)', run_id: 39096438142, sha: dba7fae7864dd0f346285bc5eb357c8d062c1a36, conclusion: TODO-GATE, nguon: readback-run-39096438142.json}
+  - {name: 'gate (ci.yml, push master)', run_id: 39096438142, sha: dba7fae7864dd0f346285bc5eb357c8d062c1a36, conclusion: failure, nguon: [readback-run-39096438142.json, readback-jobs-39096438142.json, readback-annotations-117604298214.json]}
+post_merge_checks_ghi_chu: >-
+  measured — readback-jobs-39096438142.json: 13 job ubuntu (chuan-bi, gate, gate-ops, gate-packet-loop, gate-registry,
+  8 manh gate-cong-cu) success; gate-cong-cu-gop failure sau 3 giay, khong runner. readback-annotations-117604298214.json:
+  "The job was not started because recent account payments have failed or your spending limit needs to be increased" —
+  GitHub Actions bi chan vi billing tai khoan tu ~06:00Z, KHONG phai loi ma. Ket qua gop va ma tran Windows cua gate tren
+  dba7fae: not_measured cho toi khi billing duoc sua va chay lai. Run 39096438142 xep hang sau run workflow_dispatch
+  39095054115 tren fb490a7 (readback-run-39095054115.json, readback-jobs-39095054115.json): phia Windows cua run ay DO
+  O NEN truoc #778 (bash_nen t23 CRLF / t49 Unicode).
 pre_merge_checks_thu_tu_thoi_gian: >-
   measured — readback-check-runs-6f69f9d.json va readback-pr-778.json: 16 check run tren 6f69f9d (15 success, launcher
   skipped), completed_at muon nhat 2026-10-18T04:14:33Z < merged_at 04:15:03Z; readback-codex-connector-state-778.json

@@ -2307,10 +2307,11 @@ def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = Tr
     """Bản bash gọi khi gõ TÊN TRẦN: PATH theo thứ tự, mục RỖNG = cwd (wp802, Codex lượt 1 F1).
     `kieu_bash=False`: thứ tự PATHEXT của `which` (`x.CMD` hơn shim `x`), cho tiến trình native (F6)."""
     duoi = [""]
-    if platform.system() == "Windows":
-        ext = [e for e in moi_truong.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e]
-        duoi = (duoi + ext if kieu_bash else
-                duoi if os.path.splitext(ten)[1].upper() in {e.upper() for e in ext} else ext)
+    if platform.system() == "Windows":   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13 (F6 lượt 4)
+        ext = [e.rstrip(".") for e in (moi_truong.get("PATHEXT") or ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC")
+               .split(";") if e]
+        duoi = (duoi + ext if kieu_bash else   # native: tên trần CHỈ khi đã mang đuôi PATHEXT, rồi vẫn nối đuôi
+                ([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)
     for muc in moi_truong.get("PATH", "").split(os.pathsep):
         for d in duoi:
             p = os.path.join(muc or ".", ten + d)

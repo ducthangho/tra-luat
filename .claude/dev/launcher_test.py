@@ -8104,7 +8104,8 @@ def r802_cai_rg_windows_chon_ban_chay_duoc():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
-    for lk in ("echo 'ripgrep 15.2.0'", "exit 0", "echo 'ripgrep 1.2.3junk'"):   # Codex lượt 2-3: rỗng/rác ⇒ choco
+    for lk in ("echo 'ripgrep 15.2.0'", "exit 0", "echo 'ripgrep 1.2.3junk'",   # lượt 2-4: rỗng/rác ⇒ choco;
+               "echo w >&2; echo 'ripgrep 15.2.0'", "echo h; echo 'ripgrep 15.2.0'"):  # cảnh báo/tiêu đề ⇒ Links
         with San() as s:
             ops = s / "kho" / "ops"; ops.mkdir(parents=True)
             for t in ("cai_cong_cu.sh", "cong_cu.py"):
@@ -8132,18 +8133,21 @@ def r802_cai_rg_windows_chon_ban_chay_duoc():
 
 @ca
 def r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT():
-    """F6 (Codex lượt 3): ứng viên chỉ từ CHÍNH thư mục PATH (không cwd), Windows theo PATHEXT (`x.CMD` hơn shim `x`)."""
+    """F6 (Codex lượt 3-4): ứng viên native theo ĐÚNG `which` Windows — không cwd, `x.CMD` hơn shim `x`, PATHEXT
+    rỗng ⇒ mặc định, tên đã có đuôi vẫn nối đuôi. Nhánh Windows đo trên MỌI nền bằng `platform` giả."""
     m, cu = _tai_launcher_thu(), os.getcwd()
+    m.platform = type("P", (), {"system": staticmethod(lambda: "Windows")})
     with San() as s:
         cwd, a = s / "cwd", s / "a"
-        for f in (cwd / "x", cwd / "x.CMD", a / "x", a / "x.CMD"):
+        for f in (cwd / "x.CMD", a / "x", a / "x.CMD", a / "y.EXE", a / "z.CMD.EXE"):
             f.parent.mkdir(exist_ok=True); f.write_text("x"); f.chmod(0o755)
+        tim = lambda ten, **e: [Path(d) for _, d in m._cac_duong_dan({"ten": ten, "ung_vien": [ten]}, {"PATH": str(a), **e})]
         try:
             os.chdir(cwd)
-            ds = [Path(d) for _, d in m._cac_duong_dan({"ten": "x", "ung_vien": ["x"]}, {"PATH": str(a)})]
+            kq = (tim("x"), tim("y", PATHEXT=""), tim("z.CMD"))
         finally:
             os.chdir(cu)
-        bang(ds == [a / ("x.CMD" if LA_WINDOWS else "x")], f"ung vien sai (cwd/shim): {ds}")
+        bang(kq == ([a / "x.CMD"], [a / "y.EXE"], [a / "z.CMD.EXE"]), f"ung vien native lech `which`: {kq}")
 
 
 @ca
@@ -9201,9 +9205,13 @@ DOT_BIEN = [
     ("wp802_hong_dau_la_moi_ban_hong", ('            if tran and d == tran:\n', '            if True:\n'),
      ["r802_doctor_ten_tran_tu_muc_PATH_rong"]),
     ("wp802_cac_duong_dan_lai_dung_which", ('them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc), kieu_bash=False))',
-     'them(ten, shutil.which(ten, path=muc))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"], ("windows", "cwd cua which")),
+     'them(ten, shutil.which(ten, path=muc))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
     ("wp802_cac_duong_dan_theo_kieu_bash", ('PATH=muc), kieu_bash=False))', 'PATH=muc)))'),
-     ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"], ("windows", "thu tu PATHEXT")),
+     ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
+    ("wp802_pathext_rong_khong_lui_mac_dinh", ('(moi_truong.get("PATHEXT") or ".COM', '(moi_truong.get("PATHEXT") if "PATHEXT" in moi_truong else ".COM'),
+     ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
+    ("wp802_ten_co_duoi_khong_noi_them", ('([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)',
+     '([""] if any(ten.upper().endswith(e.upper()) for e in ext) else ext))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
     ("wp802_launcher_winget_thanh_choco", ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
      ["r802_bang_cai_rg_khop_cong_cu_yaml"]),
@@ -10435,7 +10443,7 @@ DOT_BIEN_HOOK = [
     # Phần tử thứ tư "yaml" = đột biến ops/cong_cu.yaml thay vì hook (Codex lượt 1 F2).
     ("wp802_yaml_bo_ung_vien_winget_links", (' "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")"', ''),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
-    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('[[ "$RG_V" =~ ^ripgrep', '[[ "$RG_V" =~ ^ripgrep|'),
+    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('"${PY[@]}" ops/cong_cu.py kiem-tra --chi rg', '"$RG_D/rg" --version'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
     ("wp802_hook_windows_probe_hai_lan", ('if [ "$RG_WIN" = 1 ]; then', 'if [ "$RG_WIN" = 1 ] && ! co_chay rg; then'),
      ["r802_hook_windows_khong_cai_in_dung_lenh"]),

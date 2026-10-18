@@ -1211,7 +1211,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
         if st["finding_counts"][fid] >= st["same_failure_limit"]:
             cham_tran.append(fid)
 
-    _xet_dung(state_dir, st, "record-review", (a.verdict, cham_tran))  # M4: kết quả đã ghi sổ ⇒ xét dừng
+    _xet_dung(state_dir, st, "record-review", a, cham_tran)  # M4: kết quả đã ghi sổ ⇒ xét dừng
 
     st["state"] = {"approve": "approved_pending" if bn and a.verdict == "approve" else "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
     if bn and a.verdict == "approve":
@@ -2531,27 +2531,28 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
     return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}
 
 
-def _xet_dung(state_dir: Path, st: dict, cua: str, ket_qua=None) -> None:
+def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None:
     """I5 (M4): hàm DUY NHẤT xét MỌI điều kiện dừng (trần lượt, trần vòng, same-failure, rescue sau review), gọi SAU khi đầu vào của cửa
-    đã được xác thực (I4). `ket_qua` = (verdict, finding chạm trần) khi kết quả lượt đã ghi sổ. Packet áp ADR-0054 không bị trần vòng chặn
+    đã được xác thực (I4). `a`/`cham_tran` = đối số review + finding chạm trần, khi kết quả lượt đã ghi sổ. Packet áp ADR-0054 không bị trần vòng chặn
     TRƯỚC khi cửa khép ghi kết quả (I5); packet cũ giữ đúng hành vi cũ (I9)."""
     if cua == "begin-attempt" and st["attempts_used"] >= st["attempts_limit"]:
         st.update(state="blocked", history=[*st["history"], {"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]}])
         _save(state_dir, st)
         _die(RC_TRAN, f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.")
-    if cua == "record-review" and ket_qua is None and st.get("luat_adr0054") is not True:
+    if cua == "record-review" and a is None and st.get("luat_adr0054") is not True:
         if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
             _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
-    if ket_qua and ket_qua[1]:
-        st.update(state="blocked", history=[*st["history"], {"event": "blocked_same_failure", "finding_ids": ket_qua[1]}])
+    if cham_tran:
+        st.update(state="blocked", history=[*st["history"], {"event": "blocked_same_failure", "finding_ids": cham_tran}])
         _save(state_dir, st)
-        chi_tiet = ", ".join(f"{f}×{st['finding_counts'][f]}" for f in ket_qua[1])
+        chi_tiet = ", ".join(f"{f}×{st['finding_counts'][f]}" for f in cham_tran)
         _die(RC_TRAN, f"cùng finding-id lặp tới trần ({chi_tiet}; trần {st['same_failure_limit']}) "
                       f"— packet về blocked. Lặp lại nghĩa là bản vá không trúng gốc; ghi failure evidence + handoff rồi dừng.")
-    if ket_qua and ket_qua[0] != "approve":  # approve KHÔNG BAO GIỜ kích rescue
-        for truc, (u, t) in reversed(TRUC_TRAN.items()):  # codex chạm trần TRƯỚC (lúc record-codex-call) ⇒ xét trước (ADR-0048)
-            if st[u] >= st[t]:
-                _vao_rescue(state_dir, st, truc, f"review {ket_qua[0]} chưa approve")
+    if a is not None:
+        if a.verdict != "approve":  # approve KHÔNG BAO GIỜ kích rescue
+            for truc, (u, t) in reversed(TRUC_TRAN.items()):  # codex chạm trần TRƯỚC (lúc record-codex-call) ⇒ xét trước (ADR-0048)
+                if st[u] >= st[t]:
+                    _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
 
 
 def cmd_status(a, state_dir: Path) -> int:

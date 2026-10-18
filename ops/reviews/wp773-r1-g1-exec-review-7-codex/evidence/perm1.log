@@ -1,0 +1,6 @@
+argv=['/usr/bin/python3.13', '-B', PosixPath('/home/user/rv773/ops/land_evidence_nguon_test.py'), '--mot-ca', 'c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van']
+rc=3
+DO:c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van:Q3: ops/land phải được phân giải trước .: rc=0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+

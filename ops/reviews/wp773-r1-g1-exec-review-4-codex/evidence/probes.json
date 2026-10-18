@@ -1,0 +1,126 @@
+[
+  {
+    "label": "regression x: {<<: {a: 'measured — khong nguon', a: ok}}\n",
+    "rc": 2,
+    "stdout": "KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: parse YAML: YAMLError: khoá merge `<<` ngoài mô hình\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n",
+    "stderr": ""
+  },
+  {
+    "label": "regression x: {<<: {null: 'measured — khong', null: ok}}\n",
+    "rc": 2,
+    "stdout": "KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: parse YAML: YAMLError: khoá merge `<<` ngoài mô hình\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n",
+    "stderr": ""
+  },
+  {
+    "label": "regression x: 2026-02-30\n",
+    "rc": 2,
+    "stdout": "KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: parse YAML: ValueError: day is out of range for month\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n",
+    "stderr": ""
+  },
+  {
+    "label": "regression pre_merge_checks: [2026-99-16T02:00:00Z]\n",
+    "rc": 2,
+    "stdout": "KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: parse YAML: ValueError: month must be in 1..12\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary x: 'measured — a.json'\n",
+    "rc": 0,
+    "stdout": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary x: 'measured — trich/*.txt'\n",
+    "rc": 0,
+    "stdout": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary x: 'measured — trich/'\n",
+    "rc": 0,
+    "stdout": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary positive: 123\nnguon_positive: a.json\n",
+    "rc": 0,
+    "stdout": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary pre_merge_checks: {'2026-10-16T02:59:00Z': ok}\n",
+    "rc": 1,
+    "stdout": "ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm\n  L3 $.pre_merge_checks[0].2026-10-16T02:59:00Z<khoa>: mốc 2026-10-16T02:59:00Z không trước merged_at 2026-10-16T02:58:26Z\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐỎ\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary pre_merge_checks: ['2026-10-16T02:58:26.1Z']\n",
+    "rc": 1,
+    "stdout": "ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm\n  L3 $.pre_merge_checks[0]: mốc 2026-10-16T02:58:26.1Z không trước merged_at 2026-10-16T02:58:26Z\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐỎ\n",
+    "stderr": ""
+  },
+  {
+    "label": "boundary pre_merge_checks: ['2026-10-16T03:59:00+01:00']\n",
+    "rc": 0,
+    "stdout": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  {
+    "label": "internal symlink",
+    "rc": 0,
+    "stdout": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n",
+    "stderr": ""
+  },
+  {
+    "label": "relative root absolute file",
+    "rc": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"/home/user/rv773/ops/land_evidence_nguon.py\", line 312, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/user/rv773/ops/land_evidence_nguon.py\", line 278, in main\n    nhan = tep.relative_to(goc).as_posix() if _trong_goc(tep, goc) else str(tep)\n           ~~~~~~~~~~~~~~~^^^^^\n  File \"/usr/lib/python3.13/pathlib/_local.py\", line 385, in relative_to\n    raise ValueError(f\"{str(self)!r} is not in the subpath of {str(other)!r}\")\nValueError: '/tmp/len_cay_0i1863qj/kho/ops/land/pr9001-thu-land-evidence.yaml' is not in the subpath of '.'\n"
+  },
+  {
+    "label": "depth 100",
+    "stage": "both pass"
+  },
+  {
+    "label": "depth 300",
+    "stage": "both pass"
+  },
+  {
+    "label": "depth 450",
+    "stage": "both pass"
+  },
+  {
+    "label": "depth 480",
+    "stage": "both pass"
+  },
+  {
+    "label": "depth 490",
+    "stage": "both pass"
+  },
+  {
+    "label": "depth 495",
+    "stage": "loader",
+    "error": "RecursionError"
+  },
+  {
+    "label": "depth 500",
+    "stage": "loader",
+    "error": "RecursionError"
+  },
+  {
+    "label": "depth 600",
+    "stage": "loader",
+    "error": "RecursionError"
+  },
+  {
+    "label": "depth 1000",
+    "stage": "loader",
+    "error": "RecursionError"
+  },
+  {
+    "label": "extra mutation L2 content",
+    "rc": 3,
+    "stdout": "DO:c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van:lượt 2 #771 (chỉ metadata): mong rc=1, được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n\n",
+    "stderr": ""
+  }
+]

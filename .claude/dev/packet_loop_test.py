@@ -162,7 +162,8 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     return p.returncode, p.stdout, p.stderr
 
 
-def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -> Path:
+def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False,
+                  truoc_spawn=True) -> Path:
     launcher = c.script.with_name("launcher.py")
     if not launcher.is_file():
         launcher.write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
@@ -174,6 +175,22 @@ def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -
         cmd += [str(c.tmp / f"khong-ton-tai-{time.time_ns()}")]
     else:
         cmd += [sys.executable, "-c", "pass" if xong else "import sys; sys.exit(23)"]
+    if truoc_spawn and not loi_probe and not xong:
+        # Fail only the actual child launch; the existing --version probe runs.
+        # The real launcher writes/signs the pre-spawn record. Never forge a
+        # post-spawn verdict merely to reach the consumer's nonce checks.
+        driver = c.tmp / f"fail-popen-{time.time_ns()}.py"
+        driver.write_text(
+            "import runpy,sys,subprocess\n"
+            "real = subprocess.Popen\n"
+            "def fail(argv, *a, **kw):\n"
+            "    if list(argv)[-2:] == ['-c', 'import sys; sys.exit(23)']:\n"
+            "        raise PermissionError(13, 'INERT pre-spawn denial')\n"
+            "    return real(argv, *a, **kw)\n"
+            "subprocess.Popen = fail\n"
+            "sys.argv = sys.argv[1:]\n"
+            "runpy.run_path(sys.argv[0], run_name='__main__')\n", encoding="utf-8")
+        cmd.insert(1, str(driver))
     p = subprocess.run(cmd, capture_output=True,
                        env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
     f = next(rr.iterdir()) / "run.json"
@@ -181,17 +198,17 @@ def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -
         return f
 
     d = json.loads(f.read_text(encoding="utf-8"))
+    if truoc_spawn:
+        assert p.returncode != 0 and d.get("trang_thai") == "hong"
+        assert d.get("void_reason") == reason and not d.get("pid")
+        assert d.get("probe", {}).get("spawn", {}).get("trang_thai") == "DAT"
+        return f
     if p.returncode != 23 or d.get("ma_thoat") != 23:
         raise AssertionError(f"child sau-spawn không thất bại đúng cách: rc={p.returncode}, sổ={d}")
     if d.get("probe", {}).get("spawn", {}).get("trang_thai") != "DAT":
         raise AssertionError(f"child chưa qua probe spawn: {d.get('probe')}")
-    # Launcher gọi một child đã spawn rồi là `xong` kể cả khi rc != 0. Đây là
-    # fixture của packet_loop: giữ bằng chứng sau-spawn thật, đổi sang phán quyết
-    # hạ tầng `hong`, rồi ký lại đúng neo lượt như fixture doctor ở trên.
-    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
-    d["trang_thai"] = "hong"
-    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
-    f.write_text(json.dumps(d), encoding="utf-8")
+    # An unknown post-spawn failure has no machine-void certificate.
+    assert "void_reason" not in d and d.get("failure_class") == "unknown"
     return f
 
 
@@ -252,8 +269,8 @@ class Ctx:
         """
         rc, o, e = run(
             self.script,
-            ["init", "--packet", packet, "--mission", 54,
-             "--executor", executor, "--reviewer", reviewer, *extra],
+            ["init", "--packet", packet, "--mission", 54, "--executor", executor, "--reviewer",
+             reviewer, "--review-rounds-limit", 50, "--codex-review-calls-limit", 50, *extra],
             sd,
         )
         if rc != 0 or not lease:
@@ -290,7 +307,7 @@ class Ctx:
         """Head giả nhưng ĐÚNG DẠNG git oid, khác nhau theo lượt."""
         return f"{luot:040x}"
 
-    def den_reviewing(self, sd: Path, packet: int, luot: int):
+    def den_reviewing(self, sd: Path, packet: int, luot: int, head=None):
         """begin-attempt → record-post → transition reviewing (neo head của lượt)."""
         rc, _, e = run(self.script, ["begin-attempt", "--packet", packet, "--provider", EXECUTOR], sd)
         _doi(0, rc, e, f"begin-attempt lượt {luot}")
@@ -300,13 +317,15 @@ class Ctx:
         _doi(0, rc, e, f"record-post lượt {luot}")
         rc, _, e = run(self.script,
                        ["transition", "--packet", packet, "--to", "reviewing",
-                        "--comment-id", cid, "--head-sha", self.head(luot)], sd)
+                        "--comment-id", cid, "--head-sha", head or self.head(luot)], sd)
         _doi(0, rc, e, f"transition reviewing lượt {luot}")
         return cid
 
-    def review(self, sd, packet, ids, verdict="changes_requested", descs=(), luot=1, sha=None):
+    def review(self, sd, packet, ids, verdict="changes_requested", descs=(), luot=1, sha=None, goi=None):
+        if goi is None:  # #775 M3: review codex neo một lời gọi đã ghi trên head của lượt
+            run(self.script, ["record-codex-call", "--packet", packet, "--head", self.head(luot), "--run-id", goi := f"g{luot}"], sd)
         args = ["record-review", "--packet", packet, "--provider", REVIEWER, "--verdict", verdict,
-                "--reviewed-sha", self.head(luot) if sha is None else sha]
+                "--reviewed-sha", self.head(luot) if sha is None else sha, "--codex-call", goi]
         for i in ids:
             args += ["--finding-id", i]
         for d in descs:
@@ -1305,12 +1324,17 @@ def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
 def case_void_phan_biet_loi_probe_va_sau_spawn(c: Ctx):
     sd = _mo_luot(c)
     probe = json.loads(run_json_that(c, sd, loi_probe=True).read_text(encoding="utf-8"))
-    sau = json.loads(run_json_that(c, sd).read_text(encoding="utf-8"))
+    sau_path = run_json_that(c, sd, truoc_spawn=False)
+    sau = json.loads(sau_path.read_text(encoding="utf-8"))
     assert probe.get("giai_doan") == "probe" and sau.get("giai_doan") is None
     assert probe["probe"]["spawn"]["trang_thai"] == "DO"
     assert sau["probe"]["spawn"]["trang_thai"] == "DAT"
     assert not {"nonce", "chu_ky"} & probe.keys()
     assert {"nonce", "chu_ky"} <= sau.keys()
+    assert "void_reason" not in sau
+    before = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"]
+    _doi(10, *_void_may(c, sd, sau_path)[0:1], b"", "unknown post-spawn cannot refund")
+    assert json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"] == before
     assert probe["ma_thoat"] != sau["ma_thoat"]
 
 
@@ -1706,7 +1730,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
     (r_bn / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
     # #770: `kiem-gate` in "gate XANH trên …" lúc THÀNH CÔNG — chốt PHỦ dưới đã bắt nó.
     cr = c.tmp / f"cp{codepage}-check-runs.json"
-    cr.write_text(json.dumps({"check_runs": [_kg_run(1, name="cổng-đủ")]}), encoding="utf-8")
+    cr.write_text(json.dumps({"total_count": 1, "check_runs": [_kg_run(1, name="cổng-đủ")]}), encoding="utf-8")
 
     buoc = [
         (["where"], None),
@@ -1734,14 +1758,16 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000019"], sd),
         (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000019",
           "--head-sha", "%040x" % 2], sd),
+        (["record-codex-call", "--packet", 55, "--head", "%040x" % 2, "--run-id", "cp-1"], sd),
         (["record-review", "--packet", 55, "--provider", REVIEWER, "--verdict", "changes_requested",
-          "--reviewed-sha", "%040x" % 2,
+          "--reviewed-sha", "%040x" % 2, "--codex-call", "cp-1",
           "--finding-id", "loi-co-dau-tieng-viet", "--finding-desc", "mô tả có dấu tiếng Việt"], sd),
         (["status", "--packet", 55], sd),
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
         (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
-        (["kiem-gate", "--head", _KG_HEAD, "--check-runs", cr, "--bat-buoc", "cổng-đủ"], None),
+        (["kiem-gate", "--head", _KG_HEAD, "--check-runs", cr, "--bat-buoc", "cổng-đủ",
+          "--check-suite", _KG_SUITE], None),
         # #338: cả hai lệnh in tiếng Việt CÓ DẤU lúc thành công. `ghi-uy-quyen` in "đã ghi
         # KHAI BÁO…", `doi-chieu-uy-quyen` in "CÓ khai báo"/"KHÔNG khai báo". Console máy
         # Việt là cp1258, nên thiếu phủ ở đây là để nguyên đúng cái bẫy mà chốt này sinh ra
@@ -1754,6 +1780,9 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--since", "%040x" % 0 if False else "HEAD~1",
           "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
+    sd_r = _reviewing(c, "--codex-review-calls-limit", 1)  # #775: rescue cần state đã chạm trần, dựng ngoài kịch bản
+    _pl(c, sd_r, _goi("r1", _H1), _goi("r2", _H1, 3))
+    buoc += [([b[1], "--packet", 55, *b[2:]], sd_r) for b in (_nang(0, tran=2), _rescue(0, "nang_tran"))]
     da_phu = set()
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
@@ -5214,7 +5243,8 @@ def case_codex_runtime_surface_transport(c: Ctx):
         st = json.loads((sd2 / "wp55.json").read_text(encoding="utf-8"))
         if st["state"] != "reviewing" or st["reviews"]:
             raise AssertionError("mismatched Codex reviewer recorded verdict")
-    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex",
+    run(c.script, ["record-codex-call", "--packet", 55, "--head", c.head(1), "--run-id", "g1"], sd2)
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--codex-call", "g1",
                              "--execution-surface", "codex_desktop", "--transport", "machine/local",
                              "--verdict", "approve", "--reviewed-sha", c.head(1)], sd2)
     _doi(0, rc, e, "Codex Desktop reviewer match")
@@ -5270,27 +5300,48 @@ CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_tran
 # Mỗi ca ĐỎ đòi CẢ mã 12 LẪN lý do (`_doi_ly_do`) — mã trần trùng nhau không chứng minh
 # chốt nào đã chạy. Mỗi chốt có đột biến riêng ở `MUTANTS.update` cuối khối.
 _KG_HEAD = "ab" * 20
+# #788: suite neo mặc định = 1 CÓ CHỦ Ý — `True == 1` trong Python, nên chốt bool của
+# `check_suite.id` hỏng là ca `kg_n2_suite_id_bool` XANH chứ không chỉ đổi lý do.
+_KG_SUITE, _KG_SUITE_KHAC = 1, 9
 
 
-def _kg_run(i, name="gate", conclusion="success", status="completed", head=_KG_HEAD):
-    return {"id": i, "name": name, "head_sha": head, "status": status, "conclusion": conclusion}
+def _kg_run(i, name="gate", conclusion="success", status="completed", head=_KG_HEAD, suite=_KG_SUITE):
+    return {"id": i, "name": name, "head_sha": head, "status": status, "conclusion": conclusion,
+            "check_suite": {"id": suite}}
 
 
-def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None):
+def _kg_dem(du_lieu):
+    """#788 N5: `total_count` nay BẮT BUỘC. Trang nào chưa khai thì điền ĐÚNG số id phân biệt
+    trên mọi trang (bản sao, không sửa hằng). Ca đo chính chốt ấy truyền `dem=False`."""
+    du_lieu = json.loads(json.dumps(du_lieu))
+    trang = [t for t in (du_lieu if isinstance(du_lieu, list) else [du_lieu])
+             if isinstance(t, dict) and isinstance(t.get("check_runs"), list)]
+    so = len({json.dumps(r.get("id")) for t in trang for r in t["check_runs"] if isinstance(r, dict)})
+    for t in trang:
+        t.setdefault("total_count", so)
+    return du_lieu
+
+
+def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None, suite=_KG_SUITE, dem=True):
     f = c.tmp / f"cr{time.time_ns()}.json"
     if du_lieu is not None or tho is not None:
-        f.write_text(tho if tho is not None else json.dumps(du_lieu), encoding="utf-8")
+        f.write_text(tho if tho is not None else json.dumps(_kg_dem(du_lieu) if dem else du_lieu),
+                     encoding="utf-8")
     args = ["kiem-gate", "--check-runs", f] + (["--head", head] if head is not None else [])
+    args += ["--check-suite", suite] if suite is not None else []
     for t in bat_buoc:
         args += ["--bat-buoc", t]
     return run(c.script, args)
 
 
-def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None):
+def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None, suite=_KG_SUITE,
+           dem=True):
     def ca(c: Ctx):
-        rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho)
+        rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho, suite=suite, dem=dem)
         if expect == 0:
             _doi(0, rc, e, "gate phải XANH")
+            if f"(suite {suite})" not in _txt(o):   # N6: dòng xanh nêu suite đã neo
+                raise AssertionError(f"dòng xanh thiếu suite {suite}: {_txt(o)!r}")
             for t in dict.fromkeys(bat_buoc):
                 if _txt(o).count(f"{t} id=") != 1:
                     raise AssertionError(f"dòng xanh phải liệt kê {t!r} đúng MỘT lần: {_txt(o)!r}")
@@ -5299,7 +5350,7 @@ def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=N
     return ca
 
 
-_KG_1 = {"check_runs": [_kg_run(1)]}
+_KG_1 = {"total_count": 1, "check_runs": [_kg_run(1)]}
 _KG_KDD = "KHÔNG ĐO ĐƯỢC"
 _KG_CA = {
     # M1 — đối số
@@ -5314,8 +5365,9 @@ _KG_CA = {
     "kg_m2_json_hong": _kg_ca(None, tho="{", chua=_KG_KDD),
     "kg_m2_khong_co_check_runs": _kg_ca({"x": 1}, chua=_KG_KDD),
     "kg_m2_check_runs_khong_phai_list": _kg_ca({"check_runs": {}}, chua=_KG_KDD),
+    # #788: `total_count` 1 CÓ CHỦ Ý — đột biến bỏ phần tử hỏng phải ra XANH, không bị N5 chặn hộ.
     "kg_m2_thieu_conclusion": _kg_ca(
-        {"check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
+        {"total_count": 1, "check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
         chua=_KG_KDD),
     "kg_m2_id_bool": _kg_ca({"check_runs": [_kg_run(True)]}, chua=_KG_KDD),
     "kg_m2_id_chuoi": _kg_ca({"check_runs": [_kg_run("5")]}, chua=_KG_KDD),
@@ -5343,11 +5395,11 @@ _KG_CA = {
         {"check_runs": [_kg_run(2), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
 }
 # F01 — không để parser xoá bằng chứng mâu thuẫn hoặc nhận hằng ngoài JSON.
-for _k, _v in {"id": 2, "name": "khac", "head_sha": "cd" * 20,
-               "status": "in_progress", "conclusion": "cancelled"}.items():
+for _k, _v in {"id": 2, "name": "khac", "head_sha": "cd" * 20, "status": "in_progress",
+               "conclusion": "cancelled", "check_suite": {"id": _KG_SUITE_KHAC}}.items():
     _raw = "{" + json.dumps(_k) + ":" + json.dumps(_v) + "," + json.dumps(_kg_run(1))[1:]
     for _slurp in (False, True):
-        _page = '{"check_runs":[' + _raw + "]}"
+        _page = '{"total_count":1,"check_runs":[' + _raw + "]}"
         _KG_CA[f"kg_m2_khoa_trung_{_k}_{_slurp}"] = _kg_ca(
             None, tho="[" + _page + "]" if _slurp else _page, chua=_KG_KDD)
 for _k, _v in {"check_runs": [_kg_run(2, conclusion="cancelled")], "total_count": 2}.items():
@@ -5369,6 +5421,172 @@ for _kl in _KG_KET_LUAN:
                                             chua=f"conclusion={_kl!r}")
 
 
+# --- #788 (spec `ops/specs/wp788.md` r1, N1–N7) ------------------------------------------
+_KG_ARG = "--check-suite phải là"
+_KG_CA["kg_n1_thieu_check_suite"] = _kg_ca(_KG_1, suite=None, expect=2, chua="--check-suite")
+for _ten, _gt in {"abc": "abc", "am": "-1", "0": "0", "012": "012", "cong": "+5", "cach": " 1",
+                  "unicode": "1\u0661"}.items():
+    _KG_CA[f"kg_n1_check_suite_{_ten}"] = _kg_ca(_KG_1, suite=_gt, expect=2, chua=_KG_ARG)
+_KG_CS = "`check_suite` không phải object"
+_VANG_T = object()
+_kg_cs = lambda cs: {k: v for k, v in _kg_run(1).items() if k != "check_suite"} | (
+    {} if cs is _VANG_T else {"check_suite": cs})
+for _ten, _cs in {"thieu": _VANG_T, "null": None, "list": [1], "thieu_id": {},
+                  "id_bool": {"id": True}, "id_chuoi": {"id": "105"}}.items():
+    _KG_CA[f"kg_n2_suite_{_ten}"] = _kg_ca({"check_runs": [_kg_cs(_cs)]}, chua=_KG_CS,
+                                         suite="105" if _ten == "id_chuoi" else _KG_SUITE)
+_KG_CA["kg_n2_run_khong_bat_buoc_thieu_suite"] = _kg_ca(
+    {"check_runs": [_kg_run(1), {**_kg_cs(_VANG_T), "id": 2, "name": "khac"}]}, chua=_KG_CS)
+_KG_N3_PRODUCER = {"check_runs": [_kg_run(1, conclusion="failure"), _kg_run(2, suite=_KG_SUITE_KHAC)]}
+_KG_N3_CU_HON = {"check_runs": [_kg_run(1, conclusion="failure", suite=_KG_SUITE_KHAC),
+                                _kg_run(2, conclusion="cancelled"), _kg_run(3)]}
+_KG_CA.update({
+    "kg_n3_producer": _kg_ca(_KG_N3_PRODUCER, chua="conclusion='failure'"),
+    "kg_n3_vang": _kg_ca({"check_runs": [_kg_run(1, suite=_KG_SUITE_KHAC)]}, chua="VẮNG"),
+    "kg_n3_chay_lai": _kg_ca({"check_runs": [_kg_run(1, conclusion="cancelled"), _kg_run(2)]}, expect=0),
+    # Suite khác có run id NHỎ HƠN: phân biệt "lọc theo suite đã neo" với "lọc theo suite của run đầu".
+    "kg_n3_chay_lai_suite_khac_cu_hon": _kg_ca(_KG_N3_CU_HON, expect=0),
+    # N5 — `total_count` phải có, là số nguyên ≥ 0, cùng mọi trang, BẰNG ĐÚNG số id.
+    "kg_n5_thieu": _kg_ca({"check_runs": [_kg_run(1)]}, dem=False, chua="thiếu `total_count`"),
+    "kg_n5_thieu_o_trang_sau": _kg_ca([{"total_count": 2, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+                                       {"check_runs": [_kg_run(2)]}], dem=False, chua="trang 1 thiếu `total_count`"),
+    "kg_n5_khong_voi_mot_run": _kg_ca({"total_count": 0, "check_runs": [_kg_run(1)]}, chua="THỪA id"),
+    "kg_n5_khai_3_co_2": _kg_ca({"total_count": 3, "check_runs": [_kg_run(1, conclusion="cancelled"),
+                                                                  _kg_run(2)]}, chua="thiếu trang"),
+    "kg_n5_khai_1_co_2": _kg_ca({"total_count": 1, "check_runs": [_kg_run(1, conclusion="cancelled"),
+                                                                  _kg_run(2)]}, chua="THỪA id"),
+    "kg_n5_lech_trang": _kg_ca([{"total_count": 2, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+                                {"total_count": 3, "check_runs": [_kg_run(2)]}], chua="khác nhau"),
+})
+for _ten, _tc in {"am": -1, "bool": True, "thuc": 1.0, "chuoi": "1", "null": None}.items():
+    _KG_CA[f"kg_n5_{_ten}"] = _kg_ca({"total_count": _tc, "check_runs": [_kg_run(1)]}, chua="≥ 0")
+
+# F01 (cross-review lượt 1, H3): cùng `id` mà khác danh tính ⇒ KHÔNG ĐO ĐƯỢC, kể cả khi mọi
+# phép đếm đều đúng; bản trùng NHẤT QUÁN vẫn được (trang lặp hợp lệ).
+_KG_DT = "mang hai danh tính"
+_KG_CA.update({
+    "kg_f01_cung_id_khac_suite": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, suite=_KG_SUITE_KHAC, conclusion="failure")]},
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_khac_ten": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, name="khac", conclusion="failure")]},
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_hai_ten_bat_buoc": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, name="gate2")]},
+        bat_buoc=("gate", "gate2"), dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_khac_suite_hai_trang": _kg_ca(
+        [{"total_count": 1, "check_runs": [_kg_run(1)]},
+         {"total_count": 1, "check_runs": [_kg_run(1, suite=_KG_SUITE_KHAC, conclusion="failure")]}],
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_nhat_quan_hai_trang": _kg_ca(
+        [{"total_count": 1, "check_runs": [_kg_run(1)]}, {"total_count": 1, "check_runs": [_kg_run(1)]}],
+        dem=False, expect=0),
+})
+
+# F04 lượt 4 (chủ kho chốt 18-10): tên bắt buộc chứa ký tự ngắt dòng ⇒ RC_ARG; tab và chuỗi
+# hai ký tự `\` + `n` không phải ngắt dòng nên vẫn được.
+for _ten, _kt in {"lf": "\n", "cr": "\r", "crlf": "\r\n", "vt": "\x0b", "ff": "\x0c", "fs": "\x1c",
+                  "nel": "\x85", "ls": "\u2028", "ps": "\u2029"}.items():
+    _KG_CA[f"kg_f04_xuong_dong_{_ten}"] = _kg_ca(_KG_1, bat_buoc=(f"ga{_kt}te",), expect=2, chua="xuống dòng")
+_KG_CA["kg_f04_xuong_dong_cuoi"] = _kg_ca(_KG_1, bat_buoc=("gate\n",), expect=2, chua="xuống dòng")
+for _ten, _t in {"tab": "ga\tte", "cheo_n": "ga\\nte"}.items():
+    _KG_CA[f"kg_f04_ten_hop_le_{_ten}"] = _kg_ca({"check_runs": [_kg_run(1, name=_t)]}, bat_buoc=(_t,), expect=0)
+
+
+def case_kg_f02_suite_vuot_tran_int(c: Ctx):
+    """F02: đúng dạng N1 mà dài hơn trần chữ số của `int()` ⇒ VẮNG rc=12, KHÔNG traceback."""
+    rc, _, e = _kg(c, _KG_1, "gate", suite="1" * 4301)
+    _doi_ly_do(12, rc, e, "VẮNG", "kiem-gate --check-suite 4301 chữ số")
+    if "Traceback" in _txt(e):
+        raise AssertionError(f"không được traceback: {_txt(e)[-300:]!r}")
+
+
+def case_kg_n4_canh_bao(c: Ctx):
+    """N4: đúng MỘT dòng mỗi tên bắt buộc có run ở suite khác; 0 dòng cho tên không bắt buộc;
+    mã thoát do luật xanh quyết, cảnh báo không đổi nó. Kiểm NGAY sau từng lệnh."""
+    dem = lambda e: [d for d in _txt(e).splitlines() if d.startswith("CẢNH BÁO:")]
+    rc, _, e = _kg(c, _KG_N3_PRODUCER, "gate")
+    _doi(12, rc, e, "producer khác: gate đỏ vì suite neo đỏ")
+    if dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (2) — bỏ qua"]:
+        raise AssertionError(f"đòi đúng MỘT dòng cảnh báo cho 'gate': {dem(e)!r}")
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1), _kg_run(2, name="khac", suite=_KG_SUITE_KHAC)]}, "gate")
+    _doi(0, rc, e, "tên KHÔNG bắt buộc ở suite khác")
+    if dem(e):
+        raise AssertionError(f"tên không bắt buộc không được cảnh báo: {dem(e)!r}")
+    rc, _, e = _kg(c, _KG_N3_CU_HON, "gate")
+    _doi(0, rc, e, "cảnh báo không đổi mã thoát")
+    if dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (1) — bỏ qua"]:
+        raise AssertionError(f"ca xanh vẫn phải cảnh báo: {dem(e)!r}")
+    rc, _, e = _kg(c, [{"total_count": 2, "check_runs": [_kg_run(1), _kg_run(2, suite=_KG_SUITE_KHAC)]},
+                       {"total_count": 2, "check_runs": [_kg_run(2, suite=_KG_SUITE_KHAC)]}], "gate")
+    if rc != 0 or dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (2) — bỏ qua"]:   # F05
+        raise AssertionError(f"bản lặp là MỘT run: rc={rc} {dem(e)!r}")
+    t = "reviewer's gate"   # F04: tên in nguyên văn trong nháy đơn, không theo repr
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=t, suite=_KG_SUITE_KHAC)]}, t)
+    if rc != 0 or dem(e) != [f"CẢNH BÁO: '{t}' có 1 run ở suite khác (2) — bỏ qua"]:
+        raise AssertionError(f"tên nguyên văn: rc={rc} {dem(e)!r}")
+
+
+def case_kg_n6_help(c: Ctx):
+    rc, o, e = run(c.script, ["kiem-gate", "--help"])
+    t = _txt(o).replace("\n", " ")
+    for can in ("--check-suite", "check_suite_id", "actions/runs/", "filter=all"):
+        if rc != 0 or can not in t:
+            raise AssertionError(f"--help của kiem-gate thiếu {can!r}: {t!r}")
+
+
+# N7: cắt từ JSON check-runs THẬT của `bb8c0c4` (`gh api --paginate --slurp "repos/ducthangho/
+# tra-luat/commits/bb8c0c4…/check-runs?filter=all&per_page=100"`, đo 17-10-2026: 1 trang,
+# `total_count` 32 — spec đo 30 lúc 16-10, hai lượt `thu-hoi` đến sau). Mọi run `completed`,
+# cùng `app` 15368; chỉ bỏ trường lệnh không đọc. Cột: id · check_suite.id · conclusion · name.
+_KG_THAT_HEAD = "bb8c0c41d37ea5d7eddef254ea9079518e114890"
+_KG_THAT = """\
+116911923097 105371237228 success thu-hoi
+116911938097 105371250078 success chuan-bi
+116911939487 105371249716 skipped launcher
+116912042882 105371250078 success gate-packet-loop (ubuntu-latest)
+116912042979 105371250078 cancelled gate-ops (ubuntu-latest)
+116912042994 105371250078 cancelled gate-cong-cu (ubuntu-latest, 4)
+116912043019 105371250078 cancelled gate-cong-cu (ubuntu-latest, 0)
+116912043029 105371250078 cancelled gate-cong-cu (ubuntu-latest, 1)
+116912043048 105371250078 cancelled gate-cong-cu (ubuntu-latest, 7)
+116912043074 105371250078 cancelled gate-cong-cu (ubuntu-latest, 3)
+116912043090 105371250078 cancelled gate-cong-cu (ubuntu-latest, 2)
+116912043092 105371250078 success gate-registry (ubuntu-latest)
+116912043094 105371250078 success gate (ubuntu-latest)
+116912043162 105371250078 cancelled gate-cong-cu (ubuntu-latest, 6)
+116912043211 105371250078 cancelled gate-cong-cu (ubuntu-latest, 5)
+116915400395 105371250078 cancelled gate-cong-cu-gop
+116968288225 105371250078 success chuan-bi
+116968376214 105371250078 success gate (ubuntu-latest)
+116968376237 105371250078 success gate-registry (ubuntu-latest)
+116968376242 105371250078 success gate-cong-cu (ubuntu-latest, 0)
+116968376281 105371250078 success gate-cong-cu (ubuntu-latest, 5)
+116968376298 105371250078 success gate-packet-loop (ubuntu-latest)
+116968376337 105371250078 success gate-cong-cu (ubuntu-latest, 6)
+116968376346 105371250078 success gate-cong-cu (ubuntu-latest, 7)
+116968376359 105371250078 success gate-cong-cu (ubuntu-latest, 2)
+116968376391 105371250078 success gate-ops (ubuntu-latest)
+116968376441 105371250078 success gate-cong-cu (ubuntu-latest, 4)
+116968376482 105371250078 success gate-cong-cu (ubuntu-latest, 3)
+116968377756 105371250078 success gate-cong-cu (ubuntu-latest, 1)
+116979365158 105371250078 success gate-cong-cu-gop (ubuntu-latest)
+116980148107 105428551057 success thu-hoi
+117001304665 105446307702 success thu-hoi
+"""
+_KG_THAT_JSON = {"total_count": 32, "check_runs": [
+    {"id": int(i), "name": ten, "head_sha": _KG_THAT_HEAD, "status": "completed", "conclusion": kl,
+     "app": {"id": 15368, "slug": "github-actions"}, "check_suite": {"id": int(cs)}}
+    for i, cs, kl, ten in (d.split(" ", 3) for d in _KG_THAT.splitlines())]}
+_KG_CI14 = ("chuan-bi", "gate (ubuntu-latest)", "gate-registry (ubuntu-latest)", "gate-ops (ubuntu-latest)",
+            "gate-packet-loop (ubuntu-latest)", "gate-cong-cu-gop (ubuntu-latest)",
+            *(f"gate-cong-cu (ubuntu-latest, {k})" for k in range(8)))
+_KG_CA["kg_n7_that_suite_ci"] = _kg_ca(_KG_THAT_JSON, bat_buoc=_KG_CI14, expect=0, head=_KG_THAT_HEAD,
+                                       suite="105371250078", dem=False)
+_KG_CA["kg_n7_that_suite_thu_hoi"] = _kg_ca(_KG_THAT_JSON, bat_buoc=_KG_CI14, head=_KG_THAT_HEAD,
+                                            suite="105371237228", dem=False, chua="VẮNG")
+
+
 def case_kg_m4_rc_gate_12(c: Ctx):
     rc, _, e = _kg(c, {"check_runs": [_kg_run(1, conclusion="cancelled")]}, "gate")
     _doi(12, rc, e, "gate đỏ phải trả ĐÚNG 12")
@@ -5380,7 +5598,9 @@ def case_kg_m4_rc_gate_12(c: Ctx):
         raise AssertionError(f"--help của kiem-gate thiếu mã 12: {_txt(o)!r}")
 
 
-CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12)]
+CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12),
+                                 ("kg_n4_canh_bao", case_kg_n4_canh_bao), ("kg_n6_help", case_kg_n6_help),
+                                 ("kg_f02_suite_vuot_tran_int", case_kg_f02_suite_vuot_tran_int)]
 
 _KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
 MUTANTS.update({
@@ -5394,21 +5614,25 @@ MUTANTS.update({
                                    [k for k in _KG_CA if k.startswith("kg_m2_hang_ngoai_json_")]),
     "kg_bo_sha_re": ("    if not SHA_RE.fullmatch(a.head):\n", "    if False:\n",
                      ["kg_m1_head_7_ky_tu"]),
-    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() for t in ten_bb):\n", "    if False:\n",
-                            ["kg_m1_bat_buoc_rong"]),
+    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() or t.splitlines() != [t] for t in ten_bb):\n", "    if False:\n",
+                            ["kg_m1_bat_buoc_rong"] + [k for k in _KG_CA if k.startswith("kg_f04_xuong_dong_")]),
+    "kg_f04_bo_kiem_xuong_dong": (" or t.splitlines() != [t] for t in ten_bb", " for t in ten_bb",
+                                  [k for k in _KG_CA if k.startswith("kg_f04_xuong_dong_")]),
     "kg_bo_qua_phan_tu_thieu_truong": ("            if sai:\n                hong(",
                                        "            if sai:\n                continue\n                hong(",
                                        ["kg_m2_thieu_conclusion"]),
     "kg_bool_la_int": ("type(r.get(k, _VANG)) not in kieu]", "not isinstance(r.get(k, _VANG), kieu)]",
                        ["kg_m2_id_bool"]),
-    "kg_bo_kiem_thieu_trang": ("    if so_id < tong_khai:\n", "    if False:\n", ["kg_m2_thieu_trang"]),
+    "kg_bo_kiem_thieu_trang": ("    if so_id != tong_khai:\n", "    if False:\n",
+                               ["kg_m2_thieu_trang", "kg_n5_khai_3_co_2", "kg_n5_khai_1_co_2", "kg_n5_khong_voi_mot_run"]),
     "kg_bo_kiem_vang": ('do.append(f"{ten!r}: VẮNG', 'xanh.append(f"{ten!r}: VẮNG',
                         ["kg_m3_vang", "kg_m3_ten_tuyet_doi"]),
     "kg_chon_success_bat_ky": ('id_max = max(r["id"] for r in cung)',
                                'id_max = max((r["id"] for r in cung if r["conclusion"] == "success"), default=-1)',
                                ["kg_m3_huy_moi_nhat"]),
     "kg_chon_luot_cu_nhat": ('id_max = max(r["id"]', 'id_max = min(r["id"]',
-                             ["kg_m3_chay_lai_xanh", "kg_m2_list_nhieu_trang"]),
+                             ["kg_m3_chay_lai_xanh", "kg_m2_list_nhieu_trang", "kg_n3_chay_lai",
+                              "kg_n3_chay_lai_suite_khac_cu_hon"]),
     "kg_trung_id_chon_mot": ('for r in (r for r in cung if r["id"] == id_max):',
                              'for r in [next(r for r in cung if r["id"] == id_max)]:',
                              ["kg_m3_trung_id_moi_ban_phai_xanh"]),
@@ -5421,6 +5645,228 @@ MUTANTS.update({
     "kg_xet_moi_check": ('cung = [r for r in runs if r["name"] == ten]', "cung = list(runs)",
                          ["kg_m3_ngoai_bo_qua"]),
     "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
+    # --- #788: mỗi ô "Phép đo làm ĐỎ" một đột biến; ca đích chết vì đổi MÀU, không vì traceback.
+    "kg_n1_bo_kiem_dang": ('    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):\n', "    if False:\n",
+                           [f"kg_n1_check_suite_{t}" for t in ("abc", "am", "0", "012", "cong", "cach", "unicode")]),
+    "kg_n1_cho_so_0_dau": ('r"[1-9][0-9]*"', 'r"[0-9]+"', ["kg_n1_check_suite_0", "kg_n1_check_suite_012"]),
+    "kg_n1_chu_so_unicode": ('r"[1-9][0-9]*"', 'r"[1-9]\\d*"', ["kg_n1_check_suite_unicode"]),
+    # "chỉ kiểm run bắt buộc": gỡ chốt ở đầu đọc, dời nó vào lệnh cho đúng tên bắt buộc. Chốt
+    # danh tính F01 cũng đọc `check_suite` mọi run nên phải nới theo — thiếu vế ấy là traceback.
+    "kg_n2_chi_kiem_bat_buoc": (
+        ('            if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:\n',
+         'dt = (r["name"], r["check_suite"]["id"], r["head_sha"])',
+         "    runs = _doc_check_runs(a.check_runs)\n"),
+        ("            if False:\n", 'dt = (r["name"], (r.get("check_suite") or {}).get("id"), r["head_sha"])',
+         "    runs = _doc_check_runs(a.check_runs)\n    if any(not isinstance(r.get('check_suite'), dict) or "
+         "type(r['check_suite'].get('id')) is not int for r in runs if r['name'] in ten_bb):\n"
+         "        _die(RC_GATE, 'KHÔNG ĐO ĐƯỢC: `check_suite` không phải object')\n"),
+        ["kg_n2_run_khong_bat_buoc_thieu_suite"]),
+    "kg_n2_bool_la_int": ('type(cs.get("id", _VANG)) is not int', 'not isinstance(cs.get("id", _VANG), int)',
+                          ["kg_n2_suite_id_bool"]),
+    "kg_n3_bo_loc_suite": ('        cung = [r for r in cung if r["check_suite"]["id"] == suite]', "        pass",
+                           ["kg_n3_producer", "kg_n3_vang", "kg_n7_that_suite_thu_hoi"]),
+    "kg_n3_suite_cua_run_dau": ('r["check_suite"]["id"] == suite]',
+                                'r["check_suite"]["id"] == min(cung, key=lambda x: x["id"])["check_suite"]["id"]]',
+                                ["kg_n3_chay_lai_suite_khac_cu_hon"]),
+    "kg_n4_bo_canh_bao": ("        if khac:\n", "        if False:\n", ["kg_n4_canh_bao"]),
+    "kg_n4_canh_bao_moi_ten": ("    for ten_cb in ten_bb:\n", "    for ten_cb in dict.fromkeys(r['name'] for r in runs):\n",
+                               ["kg_n4_canh_bao"]),
+    "kg_n5_quay_ve_nho_hon": ("    if so_id != tong_khai:\n", "    if so_id < tong_khai:\n",
+                              ["kg_n5_khai_1_co_2", "kg_n5_khong_voi_mot_run"]),
+    "kg_n5_bo_doi_co_mat": ('tc = tr.get("total_count", _VANG)', 'tc = tr.get("total_count", len(tr["check_runs"]))',
+                            ["kg_n5_thieu"]),
+    "kg_n5_trang_sau_thua_huong": ('tc = tr.get("total_count", _VANG)', 'tc = tr.get("total_count", khai[0] if khai else _VANG)',
+                                   ["kg_n5_thieu_o_trang_sau"]),
+    "kg_n5_bo_so_giua_trang": ("    if any(t != tong_khai for t in khai):\n", "    if False:\n", ["kg_n5_lech_trang"]),
+    "kg_n5_bool_la_int": ("type(tc) is not int or", "not isinstance(tc, int) or", ["kg_n5_bool"]),
+    "kg_n6_xoa_help": ('help="id suite của CHÍNH lượt workflow', 'help=argparse.SUPPRESS or "', ["kg_n6_help"]),
+    # F01: mỗi trường danh tính một đột biến — gỡ cả kiểm, hoặc gỡ riêng từng trường.
+    "kg_f01_bo_kiem_danh_tinh": ("        if danh_tinh.setdefault(r[\"id\"], dt) != dt:\n", "        if False:\n",
+                                 [k for k in _KG_CA if k.startswith("kg_f01_cung_id_khac") or k.endswith("hai_ten_bat_buoc")]),
+    "kg_f01_bo_suite_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["name"], r["head_sha"])',
+                                       ["kg_f01_cung_id_khac_suite", "kg_f01_cung_id_khac_suite_hai_trang"]),
+    "kg_f01_bo_ten_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["check_suite"]["id"], r["head_sha"])',
+                                     ["kg_f01_cung_id_khac_ten", "kg_f01_cung_id_hai_ten_bat_buoc"]),
+    # F02: ca nền khoá traceback; đột biến gỡ đường bắt trần chết bằng traceback nên bị loại (F03).
+    "kg_f02_du_phong_khop_nham": ("        suite = a.check_suite   #", "        suite = 1   #", ["kg_f02_suite_vuot_tran_int"]),
+    "kg_n4_dem_ban_ghi": (('sorted({r["id"] for r in runs if', ' != suite})'), ('sorted([r["id"] for r in runs if', ' != suite])'),
+                          ["kg_n4_canh_bao"]),
+    "kg_n4_ten_theo_repr": ("CẢNH BÁO: '{ten_cb}'", "CẢNH BÁO: {ten_cb!r}", ["kg_n4_canh_bao"]),
+    "kg_n6_dong_xanh_khong_suite": ('(suite {suite}): ', ": ", ["kg_m2_object_mot_trang", "kg_n7_that_suite_ci"]),
+})
+
+# --- #775 Review Rescue. `verdict ≠ approve VÀ (vòng ≥ trần HOẶC codex ≥ trần)`: mỗi vế một ca sai ĐÚNG MỘT vế.
+_URL, _H1, _H2 = "https://github.com/o/r/issues/775#issuecomment-1", f"{1:040x}", f"{2:040x}"
+_RESCUE = {"state": "blocked", "ly_do": "rescue_required"}
+_st = lambda sd: json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+
+
+def _pl(c, sd, *buoc):  # mỗi bước `(rc đòi, lệnh, đối số…)`; `--packet 55` tự chèn
+    for rc_doi, lenh, *doi in buoc:
+        rc, _, e = run(c.script, [lenh, "--packet", 55, *doi], sd)
+        _doi(rc_doi, rc, e, f"{lenh} {doi}")
+
+
+def _kiem(sd, msg, **muon):
+    co = {k: _st(sd).get(k) for k in muon}
+    if co != muon: raise AssertionError(f"{msg}: đòi {muon}, được {co}")
+
+
+_goi = lambda run_id, head, rc=0: (rc, "record-codex-call", "--head", head, "--run-id", run_id)
+_rescue = lambda rc, qd: (rc, "record-rescue", "--quyet-dinh", qd, "--can-cu", _URL)
+_nang = lambda rc, ai="ducthangho", tran=3, can_cu=_URL: (rc, "nang-tran", "--truc", "codex_review_calls", "--tran-moi", tran, "--ai-nang", ai, "--can-cu", can_cu)
+_rv = lambda rc, verdict, goi, sha=_H1: (rc, "record-review", "--provider", REVIEWER, "--verdict", verdict, "--reviewed-sha", sha, *(["--codex-call", goi] if goi else []), *(["--finding-id", f"loi-{goi}"] if verdict != "approve" else []))
+
+
+def _reviewing(c, *extra, vao=True):
+    sd = c.sd(); _doi(0, c.init(sd, extra=extra)[0], b"", "init")
+    if vao: c.den_reviewing(sd, 55, 1)
+    return sd
+
+
+def case_pl_m1_tran_so_duong(c: Ctx):
+    for co in ("--review-rounds-limit", "--codex-review-calls-limit"):
+        for xau in ("0", "-1", "abc"):
+            _doi(2, c.init(c.sd(), extra=(co, xau), lease=False)[0], b"", f"init {co} {xau}")
+    sd = c.sd()
+    _pl(c, sd, (0, "init", "--mission", 54, "--executor", EXECUTOR, "--reviewer", REVIEWER))
+    _kiem(sd, "state v2 mặc định", schema_version=2, review_rounds_used=0, review_rounds_limit=10,
+          codex_review_calls_used=0, codex_review_calls_limit=2, codex_calls=[], nang_tran=[])
+
+
+def case_pl_m2_loi_goi(c: Ctx):
+    sd = _reviewing(c, "--codex-review-calls-limit", 2, vao=False)
+    _pl(c, sd, _goi("g0", _H1, 8))
+    c.den_reviewing(sd, 55, 1)
+    _pl(c, sd, _goi("g1", _H2, 5), _goi("g1", _H1), _goi("g1", _H1, 2), _goi("a b", _H1, 2), _goi("g2", _H1), _goi("g3", _H1, 3))
+    _kiem(sd, "chặn TRƯỚC khi ghi", truc="codex_review_calls", codex_review_calls_used=2, **_RESCUE)
+    (sd / "wp55.json").write_text(json.dumps({**_st(sd), "reviewer": "claude", "reviewer_identity": None}))
+    _pl(c, sd, _goi("g9", _H1, 4))  # reviewer khác codex ⇒ RC_PROVIDER, không phải RC_STATE/RC_TRAN
+
+
+def case_pl_m3_neo_loi_goi(c: Ctx):
+    sd = _reviewing(c)
+    _pl(c, sd, _goi("b1", _H1), _rv(5, "approve", None), _rv(0, "changes_requested", "b1"))
+    c.den_reviewing(sd, 55, 2, head=_H1)  # cùng head ⇒ chỉ vế `da_dung` sai
+    _pl(c, sd, _rv(5, "approve", "b1"))
+    _kiem(sd, "review bị từ chối không tăng vòng", review_rounds_used=1)
+    sd = _reviewing(c)
+    _pl(c, sd, _goi("a1", _H1), _goi("b1", _H1), _rv(0, "changes_requested", "b1"))
+    c.den_reviewing(sd, 55, 2)  # `a1` chưa dùng ⇒ chỉ vế head sai
+    _pl(c, sd, _rv(5, "approve", "a1", _H2))
+
+
+def _hai_nhanh(c, sd, luot, truc):  # state chạm trần ⇒ changes_requested: rescue · approve: accepted
+    sd2, g, h = c.sd(), f"g{luot}", c.head(luot)
+    __import__("shutil").copytree(sd, sd2, dirs_exist_ok=True)
+    _pl(c, sd, _goi(g, h), _rv(3, "changes_requested", g, h))
+    _kiem(sd, "chạm trần + changes_requested", truc=truc, **_RESCUE)
+    _pl(c, sd2, _goi(g, h), _rv(0, "approve", g, h)); _kiem(sd2, "approve không bao giờ kích rescue", state="accepted")
+
+
+def case_pl_m3_vong(c: Ctx):
+    sd = _reviewing(c, "--review-rounds-limit", 10, "--attempts-limit", 10, vao=False)
+    for n in range(1, 10):
+        c.den_reviewing(sd, 55, n)
+        _doi(0, c.review(sd, 55, [f"loi-{n}"], luot=n)[0], b"", f"vòng {n} < trần")
+    c.den_reviewing(sd, 55, 10)
+    sd3 = c.sd(); __import__("shutil").copytree(sd, sd3, dirs_exist_ok=True); (sd3 / "wp55.json").write_text(json.dumps({**_st(sd3), "review_rounds_limit": 9})); _pl(c, sd3, _goi("g10", c.head(10)), _rv(3, "approve", "g10", c.head(10)))  # review MỚI khi đã chạm trần vòng ⇒ rescue, kể cả approve
+    _hai_nhanh(c, sd, 10, "vong_review")
+
+
+def case_pl_m3_codex(c: Ctx):
+    for tran_vong in (50, 2):  # riêng trục codex, rồi hai trục cùng chạm để khóa thứ tự
+        sd = _reviewing(c, "--codex-review-calls-limit", 2, "--review-rounds-limit", tran_vong)
+        _doi(0, c.review(sd, 55, ["loi-1"])[0], b"", "lời gọi 1")
+        c.den_reviewing(sd, 55, 2); _hai_nhanh(c, sd, 2, "codex_review_calls")
+
+
+def case_pl_m4_nang_tran(c: Ctx):
+    sd = _reviewing(c, "--codex-review-calls-limit", 2)
+    _pl(c, sd, *[_nang(7, ai=t) for t in ("codex-dispatcher", "ducthangho-bot", "cödex", "codex", "")],
+        _nang(2, tran=2), *[_nang(2, can_cu=u) for u in (_URL.split("#")[0], "https://github.com/o#x/r/issues/775#issuecomment-1", _URL + "\n")], _nang(0, ai=" ducthangho "))
+    _kiem(sd, "nâng trần hợp lệ", codex_review_calls_limit=3)
+    if [(n["tran_cu"], n["tran_moi"]) for n in _st(sd)["nang_tran"]] != [(2, 3)]: raise AssertionError("khối nang_tran phải mang khoá chuẩn tran_cu/tran_moi (ADR-0043/0048)")
+
+
+def case_pl_m5_rescue(c: Ctx):
+    sf = _reviewing(c, vao=False)
+    for n, rc in ((1, 0), (2, 3)):
+        c.den_reviewing(sf, 55, n)
+        _doi(rc, c.review(sf, 55, ["lap-lai"], luot=n)[0], b"", f"same-failure lượt {n}")
+    _pl(c, sf, _rescue(8, "dung"))  # blocked vì same-failure ⇒ không phải cửa rescue
+    sd = _reviewing(c, "--codex-review-calls-limit", 1)
+    _pl(c, sd, _goi("g1", _H1), _goi("g2", _H1, 3), (8, "transition", "--to", "running"), _rescue(8, "nang_tran"))
+    for qd in ("tach_stable_slice", "revision", "dung"):
+        _pl(c, sd, _rescue(0, qd)); _kiem(sd, f"{qd} GIỮ blocked", truc="codex_review_calls", **_RESCUE)
+    for hong in ({"nang_tran": [dict(truc="codex_review_calls", tran_cu=0, tran_moi=1, ai_nang="ducthangho", can_cu=_URL)]}, {"codex_review_calls_limit": 2}, {"codex_review_calls_limit": 2, "nang_tran": [{"truc": "codex_review_calls", "tran_moi": 2}]}): (sd / "wp55.json").write_text(json.dumps({**_st(sd), "nang_tran": [], **hong})); _pl(c, sd, _rescue(8, "nang_tran"))  # F12: sửa tay MỘT trường (sổ nâng / trần) không mở lại
+    _pl(c, sd, _nang(0, tran=3), _rescue(0, "nang_tran")); _kiem(sd, "nang_tran mở lại running", state="running", ly_do=None, truc=None)
+    if sum(h["event"] == "record_rescue" for h in _st(sd)["history"]) != 8: raise AssertionError("record-rescue phải LUÔN ghi biên bản")
+
+
+def case_pl_m6_state_v1(c: Ctx):
+    sd = _reviewing(c); st = {k: v for k, v in _st(sd).items() if not k.startswith(("review_r", "reviewer_i", "codex_", "nang"))}
+    (sd / "wp55.json").write_text(json.dumps({**st, "schema_version": 1, "reviews": [{"provider": REVIEWER, "attempt": n} for n in (1, 2, 3)]}))
+    sd2 = c.sd(); (sd2 / "wp55.json").write_text(json.dumps({**_st(sd), "reviewer_identity": {"model_family": "openai"}})); _pl(c, sd2, _goi("g1", _H1, 3))  # M6: call dùng họ tường minh; sd giữ thiếu họ để đo suy
+    _kiem(sd2, "lần ghi sau lưu v2 giữ cờ", schema_version=2, dem_tu_suy=True, codex_review_calls_used=3)
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status trên state v1 hợp lệ")
+    t = json.loads(o.decode("utf-8"))
+    if "SUY RA" not in _txt(e) or (t["codex_review_calls_used"], t["review_rounds_used"], t["dem_tu_suy"]) != (3, 3, True):
+        raise AssertionError(f"v1 phải suy 3/3 kèm cảnh báo: {_txt(e)!r}")
+    g = {"run_id": "g1", "head": _H1, "da_dung": False}  # mỗi ca: state SẠCH `t` lệch ĐÚNG MỘT bất biến; {} là đối chứng
+    for hong in ({}, *({k: ...} for k in ("packet", "state", "attempt_open", "reviewing_head_sha", "mission", "executor", "posts", "hmac_key")), {"schema_version": 1}, {"schema_version": 3}, {"schema_version": 2.0}, {"schema_version": True}, {"schema_version": 1.0},
+                 *({k: v} for k, v in (("attempts_used", True), ("attempts_used", 0.5), ("attempts_used", "one"),
+                                      ("attempt_open", "false"), ("attempt_open", []), ("same_failure_limit", None), ("finding_counts", []), ("packet", None), ("packet", []), ("packet", True), ("packet", 55.0), ("packet", 56), ("state", []), ("state", "other"), ("reviewing_head_sha", []), ("reviewing_head_sha", t["reviewing_head_sha"] + "\n"), ("posts", None), ("posts", []), ("posts", "x"), ("executor_identity", []), ("executor_identity", False), ("executor_identity", "claude"))),
+                 *({"posts": {"123456789": p}} for p in ({}, [], False, "x", {"for": "reviewing"})), {"attempt_anchor": {k: v for k, v in t["attempt_anchor"].items() if k != "nonce"}}, {"finding_counts": {"probe-finding": 1}}, {"reviews": [dict(r, finding_ids=["probe-finding"]) for r in t["reviews"]]}, {"history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]},
+                 *({"state": s, "ly_do": "rescue_required", "truc": "codex_review_calls", "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]} for s in ("running", "reviewing", "accepted")),
+                 {"codex_review_calls_limit": True}, {"codex_calls": {}}, {"dem_tu_suy": "false"}, {"codex_calls": [dict(g, da_dung=1)]},
+                 {"codex_calls": [g, g]}, {"codex_calls": [dict(g, run_id=f"g{i}") for i in range(4)]}, {"codex_review_calls_used": 2},
+                 {"codex_calls": [g]}, {"review_rounds_used": 2}, {"reviews": {}, "review_rounds_used": 0}, {"history": None}, {"history": [None]},
+                 {"reviews": [{}], "review_rounds_used": 1}, {"reviews": [{"provider": REVIEWER}], "review_rounds_used": 1}, {"reviewer_identity": {"model_family": None}}, {"reviewer_identity": []},
+                 {"reviewer_identity": False}, {"state": "blocked", "ly_do": "rescue_required", "truc": "vong_review",
+                                             "history": [{"event": "blocked_rescue_required", "truc": "codex_review_calls"}]},
+                 {"state": "blocked", "ly_do": "rescue_required", "truc": "unknown", "history": [{"event": "blocked_rescue_required", "truc": "unknown"}]}):
+        (sd / "wp55.json").write_text(json.dumps({k: v for k, v in {**t, **hong}.items() if v is not ...}))
+        _pl(c, sd, (8 if hong else 0, "status"))
+
+
+CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_pl_m")]
+_PL_VONG = "in reversed(TRUC_TRAN.items()):  #"
+_PL_CHAN = ('    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:\n',
+            '        _vao_rescue(state_dir, st, "codex_review_calls", "lời gọi codex bị CHẶN TRƯỚC")\n',
+            '    st["codex_review_calls_used"] += 1\n')
+MUTANTS.update({f"pl_f01_bo_{ten}": (f'("{ten}", ', f'("{ten}", True or ', ["pl_m6_state_v1"])
+                for ten in ("schema", "bo-dem", "so", "loi-goi", "dem-goi", "dem-vong", "truc", "posts", "anchor", "findings", "checkpoint")})
+MUTANTS.update({
+    "pl_f10_bo_phan_biet_v1": (' and not st.keys() & {"review_rounds_used", "review_rounds_limit", "codex_review_calls_used", "codex_review_calls_limit", "codex_calls", "nang_tran", "dem_tu_suy"}', "", ["pl_m6_state_v1"]),
+    "pl_f07_bo_kieu_packet": ('type(st["packet"]) is int and ', "", ["pl_m6_state_v1"]),
+    "pl_m1_bo_kiem_so_duong": ("a.codex_review_calls_limit) <= 0:", "a.codex_review_calls_limit) < 0:", ["pl_m1_tran_so_duong"]),
+    "pl_m2_kiem_sau_khi_ghi": ("".join(_PL_CHAN), _PL_CHAN[2] + _PL_CHAN[0].replace(">=", ">") + _PL_CHAN[1], ["pl_m2_loi_goi"]),
+    "pl_m2_lon_hon_bang": (_PL_CHAN[0], _PL_CHAN[0].replace(">=", ">"), ["pl_m2_loi_goi"]),
+    "pl_m2_bo_so_head": ('    if a.head != st["reviewing_head_sha"]:\n', "    if False:\n", ["pl_m2_loi_goi"]),
+    "pl_m2_bo_kiem_trung": (' or any(g["run_id"]', ' or False and any(g["run_id"]', ["pl_m2_loi_goi"]),
+    "pl_m3_codex_call_tuy_chon": ("    if _la_codex(st):\n", "    if _la_codex(st) and a.codex_call:\n", ["pl_m3_neo_loi_goi"]),
+    "pl_m3_bo_co_da_dung": ('        if goi["da_dung"]:\n', "        if False:\n", ["pl_m3_neo_loi_goi"]),
+    "pl_m3_bo_so_head_loi_goi": ('        if goi["head"] != a.reviewed_sha:\n', "        if False:\n", ["pl_m3_neo_loi_goi"]),
+    "pl_m3_kich_ca_khi_approve": ('    if a.verdict != "approve":', "    if True:", ["pl_m3_vong", "pl_m3_codex"]),
+    "pl_m3_bo_truc_vong": (_PL_VONG, _PL_VONG.replace("in r", "in [*r").replace("())", "())][:1]"), ["pl_m3_vong"]),
+    "pl_m3_chi_xet_truc_vong": (_PL_VONG, _PL_VONG.replace("in r", "in [*r").replace("())", "())][1:]"), ["pl_m3_codex"]),
+    "pl_c12_thu_tu_truc": (_PL_VONG, _PL_VONG.replace("reversed(TRUC_TRAN.items())", "TRUC_TRAN.items()"), ["pl_m3_codex"]),
+    "pl_m4_danh_sach_cam": ('ai_nang or "").strip() not in NGUOI', 'ai_nang or "").strip() in ("claude", "codex", "") or 0 in NGUOI', ["pl_m4_nang_tran"]),
+    "pl_m2_bo_kiem_reviewer_codex": ("    if not _la_codex(st):  # connector P2", "    if False:  # connector P2", ["pl_m2_loi_goi"]),
+    "pl_m4_tran_moi_bang": ("if a.tran_moi <= st[t]", "if a.tran_moi < st[t]", ["pl_m4_nang_tran"]),
+    "pl_m4_can_cu_long": ("#issuecomment-[0-9]+\\Z", "(#issuecomment-[0-9]+)?\\Z", ["pl_m4_nang_tran"]),
+    "pl_c12_can_cu_doan": ("[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+\\Z", "[^/]+/[^/]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+$", ["pl_m4_nang_tran"]),
+    "pl_m5_mo_khong_can_nang": (" and st[t] > st[u] and any(", " and st[t] >= 0 and any(", ["pl_m5_rescue"]),
+    "pl_f12_bo_so_nang": (' and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[t] and type(n.get("tran_cu")) is int and n["tran_cu"] < st[t] and n.get("ai_nang") in NGUOI_CO_THAM_QUYEN and bool(CAN_CU_RE.match(str(n.get("can_cu")))) for n in st["nang_tran"])', "", ["pl_m5_rescue"]),
+    "pl_c11_bo_hinh_nang": (' and type(n.get("tran_cu")) is int and n["tran_cu"] < st[t] and n.get("ai_nang") in NGUOI_CO_THAM_QUYEN and bool(CAN_CU_RE.match(str(n.get("can_cu"))))', "", ["pl_m5_rescue"]),
+    "pl_c11_bo_chan_vuot_vong": ('    if st["review_rounds_used"] >= st["review_rounds_limit"]:  #', "    if False:  #", ["pl_m3_vong"]),
+    "pl_m5_quyet_dinh_khac_mo": ('mo = (nang := a.quyet_dinh == "nang_tran") and', 'mo = not (nang := a.quyet_dinh == "nang_tran") or', ["pl_m5_rescue"]),
+    "pl_m5_bo_kiem_ly_do": (' or st.get("ly_do") != "rescue_required":', ":", ["pl_m5_rescue"]),
+    "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),
+    "pl_m6_suy_used_0": (("codex_review_calls_used=can_duoi,", " >= can_duoi + sum("), ("codex_review_calls_used=0,", " >= 0 + sum("), ["pl_m6_state_v1"]),  # phối hợp: gỡ cận dưới reader để đo đúng fail-open lời gọi M6
+    "pl_m6_state_cu_mat_ho": ('.get("model_family", "openai")', '.get("model_family")', ["pl_m6_state_v1"]),
 })
 
 

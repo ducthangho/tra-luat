@@ -1,0 +1,23 @@
+diff --git a/ops/land_evidence_nguon_test.py b/ops/land_evidence_nguon_test.py
+index 1c6649e..831f9e2 100644
+--- a/ops/land_evidence_nguon_test.py
++++ b/ops/land_evidence_nguon_test.py
+@@ -143,6 +143,10 @@ def c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van():
+     for log in (LOG.replace("195/195", "194/195"), LOG.replace("195/195", "195/1950"), LOG.replace("hong 0", "hong 01")):
+         ky(hs.format(", nguon_positive: trich/u.txt"), {"trich/u.txt": log}, 1, f"đổi số trong nguồn {log!r}", "L2")
+     ky(hs.format(", nguon_positive: trich/khong-co.txt"), p, 1, "nguon_positive vắng tệp", "không có tệp")
++    with cay(hs.format(", nguon_positive: r.txt"), {"r.txt": "1/1"}) as goc:   # review lượt 5 F07: thứ tự Q3, provenance
++        (goc / "r.txt").write_text(LOG, encoding="utf-8")   # TRƯỚC gốc kho: bản trùng tên ở gốc (số đúng) KHÔNG được dùng
++        rc, ra = kiem(nap(), goc)
++    bang(rc == 1 and "'195/195'" in ra, f"Q3: nguồn phải phân giải ở provenance trước gốc kho: rc={rc} {ra[-200:]}")
+ 
+ 
+ @ca
+@@ -297,6 +301,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
+     ("L5_doc_tep_lan_hai", "du_lieu = nap_yaml(yaml, byte)", "du_lieu = nap_yaml(yaml, tep.read_bytes())", "c13"),
+     ("F06_root_khong_resolve", "goc = Path(a.root).resolve()", "goc = Path(a.root)", "c14"),
+     ("L3_readback_mau_thuan_bo_qua", "    if len(gia_tri) > 1:", "    if False:", "c14"),
++    ("Q3_dao_thu_tu_phan_giai", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (goc, goc / THU_MUC, prov):", "c05"),
+     ("L5_bo_so_bam", "if hashlib.sha256(byte).hexdigest() == bam:", "if bam:", "c09"),
+     ("L5_noi_danh_sach", "MIEN_TRU_CUTOVER = {\n", "MIEN_TRU_CUTOVER = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c10"),
+ )

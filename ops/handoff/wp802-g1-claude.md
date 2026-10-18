@@ -13,7 +13,7 @@
 | M2 | `launcher.py` | gợi ý Windows = `winget … -e --accept-source-agreements --accept-package-agreements --disable-interactivity \|\| choco install ripgrep --yes --no-progress` |
 | M3 | hook | `co rg` → `co_chay rg` trước nhánh cargo |
 | M4 | hook | `uname -s` khớp `MINGW*\|MSYS*\|CYGWIN*` ⇒ không installer nào; in cảnh báo + ĐÚNG MỘT dòng `$RG_CAI_WINDOWS` |
-| M5 | `ops/cong_cu.yaml` | `rg.cai.windows` = cùng lệnh; dòng cuối `dirname "$(command -v rg \|\| cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links/rg.exe")"` vì shim winget chưa có trong PATH của bash đang chạy |
+| M5 | `ops/cong_cu.yaml` | `rg.cai.windows` = cùng lệnh; đuôi lấy thư mục `rg` (lùi về `$LOCALAPPDATA/Microsoft/WinGet/Links` qua `cygpath -u` khi bash đang chạy chưa thấy shim), ghi thư mục ấy vào `$GITHUB_PATH` nếu có, rồi `echo` làm dòng cuối. Lý do `$GITHUB_PATH`: lượt 39093706610 (head `db1ed4d`) cài `DAT` 15.2.0 — tức vế **winget** đã chạy, choco không — nhưng bước sau (shell mới) `KHONG_DO_DUOC` |
 | M6 | `launcher_test.py` | 7 ca `r802_*` + 9 đột biến (6 `DOT_BIEN`, 3 `DOT_BIEN_HOOK` mới — bản sao tạm của hook, chỉ `TinHieuChotCa` mới tính giết) |
 
 Cờ phi tương tác của winget (Q6): `--accept-source-agreements --accept-package-agreements --disable-interactivity`.
@@ -41,7 +41,9 @@ Mọi giết của `wp802_*` ra tên ca TRẦN, tức `TinHieuChotCa` (runner s�
 ## Chưa đo / còn mở
 
 - N5, N9: chờ lượt `workflow_dispatch` `launcher-windows.yml` + `ci.yml` trên exact head (ghi ở PR).
-- Vế nào của `winget … || choco …` chạy trên `windows-latest`: đọc từ log N9 nếu có.
+- Vế chạy trên `windows-latest`: winget (suy từ lượt 39093706610: choco đặt shim vào thư mục đã có trên PATH runner, nên bước sau không thể mất `rg` nếu choco đã chạy).
+- Mô phỏng công thức trên Linux (winget/cygpath giả, `rg` chỉ ở WinGet Links): có `GITHUB_PATH` ⇒ ghi đúng thư mục, dòng cuối đúng; không có ⇒ không ghi, rc 0.
+- N6 nay cắt ở ` && ` ĐẦU TIÊN (vế cài không có `&&`; đuôi phải chứa `dirname`).
 - Ca WindowsApps THẬT: `chua_do_duoc` (spec). N7/N8 chỉ POSIX ⇒ ba đột biến hook là KHÔNG ĐO ĐƯỢC trên Windows.
 - `||` không chạy trong Windows PowerShell 5.1: gợi ý `doctor` dán vào PS 5.1 sẽ lỗi cú pháp (cmd/PS7/Git Bash chạy được). Theo Q6 nguyên văn; chưa sửa.
 - N12 (`release-verify` lane WORKER): đọc trên CI của PR.

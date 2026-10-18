@@ -183,7 +183,7 @@ fi
 #
 # wp802 (Q4): Windows (Git Bash) KHÔNG có apt-get và thường vắng cargo — hook KHÔNG tự
 # cài ở đó: in cảnh báo kèm ĐÚNG MỘT lệnh rồi để `doctor` chặn (thoát 12). Chuỗi dưới
-# PHẢI khớp `rg.cai.windows` của ops/cong_cu.yaml (bỏ đuôi `&& dirname …`) — canh bởi
+# PHẢI khớp `rg.cai.windows` của ops/cong_cu.yaml (phần trước ` && ` đầu tiên) — canh bởi
 # `r802_bang_cai_rg_khop_cong_cu_yaml` trong launcher_test.
 RG_CAI_WINDOWS='winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress'
 if ! co_chay rg; then

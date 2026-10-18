@@ -2004,7 +2004,7 @@ CONG_CU = [
     # khả năng tra cứu mà không báo lỗi ở chỗ đọc được. Một công cụ mà thiếu nó phiên
     # vẫn "chạy" nhưng làm việc sai thì nguy hơn công cụ thiếu là chết ngay.
     # wp802 (Q5/Q6): lệnh Windows/Linux ở đây PHẢI khớp `rg.cai` của ops/cong_cu.yaml
-    # (bỏ đuôi `&& dirname …`) và lệnh hook in ra. Ba bảng, không đọc YAML lúc chạy —
+    # (phần trước ` && ` đầu tiên) và lệnh hook in ra. Ba bảng, không đọc YAML lúc chạy —
     # `r802_bang_cai_rg_khop_cong_cu_yaml` trong launcher_test canh lệch.
     {"ten": "rg", "bat_buoc": True, "ung_vien": ["rg"],
      "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",

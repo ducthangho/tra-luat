@@ -8076,9 +8076,9 @@ def r802_doctor_bash_ngoai_pham_vi_BI_CHE():
 
 
 def _wp802_rg_yaml():
-    """Phần LỆNH CÀI của `rg.cai` trong ops/cong_cu.yaml. Quy tắc so: cắt ở lần xuất hiện
-    CUỐI của ` && dirname ` (đuôi in thư mục cài, hợp đồng `cai_cong_cu.sh`), phải có
-    đúng MỘT lần. PyYAML vắng ⇒ ĐỎ "KHÔNG ĐO ĐƯỢC", không bỏ qua (spec N6)."""
+    """Phần LỆNH CÀI của `rg.cai` trong ops/cong_cu.yaml. Quy tắc so: cắt ở ` && ` ĐẦU TIÊN —
+    vế cài không chứa `&&`; phần sau là đuôi in thư mục cài (hợp đồng `cai_cong_cu.sh`) và
+    phải có `dirname`. PyYAML vắng ⇒ ĐỎ "KHÔNG ĐO ĐƯỢC", không bỏ qua (spec N6)."""
     try:
         import yaml
     except ImportError:
@@ -8088,8 +8088,9 @@ def _wp802_rg_yaml():
     ra = {}
     for nen in ("windows", "linux"):
         lenh = cai[nen]["lenh"]
-        bang(lenh.count(" && dirname ") == 1, f"{nen}: khong tach duoc duoi dirname: {lenh}")
-        ra[nen] = lenh.rpartition(" && dirname ")[0]
+        cai_rg, _, duoi = lenh.partition(" && ")
+        bang("dirname " in duoi, f"{nen}: khong tach duoc duoi in thu muc: {lenh}")
+        ra[nen] = cai_rg
     return ra
 
 

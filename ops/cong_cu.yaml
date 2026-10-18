@@ -85,9 +85,11 @@ cong_cu:
       linux: {lenh: 'sudo apt-get install -y ripgrep && dirname "$(command -v rg)"'}
       macos: {lenh: 'brew install ripgrep && dirname "$(command -v rg)"'}
       # wp802 (Q6): winget trước, choco dự phòng. Portable của winget đặt shim vào
-      # WinGet\Links mà bash hiện tại CHƯA thấy trong PATH ⇒ dòng cuối lùi về thư mục ấy.
-      # Phần trước ` && dirname ` PHẢI khớp `CONG_CU` của launcher.py và hook (launcher_test canh).
-      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && dirname "$(command -v rg || cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links/rg.exe")"'}
+      # WinGet\Links: bash hiện tại CHƯA thấy nó trong PATH ⇒ lùi về thư mục ấy; và các BƯỚC
+      # sau của runner (shell mới) cũng không thấy — đo: launcher-windows 39093706610, cài
+      # `DAT` 15.2.0 rồi bước kế `KHONG_DO_DUOC` ⇒ có $GITHUB_PATH thì ghi thư mục vào đó.
+      # Phần trước ` && ` ĐẦU TIÊN PHẢI khớp `CONG_CU` của launcher.py và hook (launcher_test canh).
+      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && RG_DICH="$(dirname "$(command -v rg || cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links/rg.exe")")" && { [ -z "${GITHUB_PATH:-}" ] || cygpath -w "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
   bash:
     # Hook SessionStart là bash; trên Windows công thức này cấp Git Bash.
     bat_buoc: true

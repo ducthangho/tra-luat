@@ -77,7 +77,11 @@ lease:
     rut han g3 va g1x ve 2026-10-18T05:30:00Z (khoi thu_hoi_bang_rut_han trong tep lease), theo uy quyen land 6245464876.
     Hai lease cu g1/g2 da bia mo hai chieu luc cap g1x/g3.
   write_set: ['ops/land_evidence_nguon.py', 'ops/land_evidence_nguon_test.py', '.claude/dev/ci_dang_ky_test.py']
-  nghiem_thu_nha: TODO-AI-DANG-GIU
+  nghiem_thu_nha: >-
+    measured — ai-dang-giu-sau-0530/luc-do.txt: 2026-10-18T05:35:42Z, sau fetch +refs/heads/* (ls-remote-heads.txt 603 =
+    for-each-ref-remotes.txt 603, thieu 0): `ai-dang-giu` cho ca ba duong dan write set rc=0, "NGƯỜI_GIỮ 0: không có"
+    (ai-dang-giu-sau-0530/claude_dev_ci_dang_ky_test.py.txt, ops_land_evidence_nguon.py.txt,
+    ops_land_evidence_nguon_test.py.txt); g3 va g1x ra HẾT_HẠN, g1 va g2 ra ĐÃ_BỊ_THAY_THẾ.
 
 trang_thai_packet:
   merged: true

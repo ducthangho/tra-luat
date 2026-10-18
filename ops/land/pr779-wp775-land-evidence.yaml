@@ -40,8 +40,8 @@ post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA (chay lai)', run_id: 39051543180, run_attempt: 2, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: success, jobs: '14/14 success (chuan-bi, gate, gate-packet-loop, gate-ops, gate-registry, gate-cong-cu x8, gate-cong-cu-gop)', luc: '2026-10-18T01:23:44Z -> 01:52:05Z', ghi_chu: 'measured — chay lai attempt 1 da huy, theo P1 connector #811 thread 4305258340 (gate phai neo exact merge SHA). Day la gate hau-merge cua ho so nay.', nguon: [readback-run-39051543180-attempt2.json, readback-jobs-39051543180-attempt2.json]}
   - {name: 'ci.yml push master (bang chung PHU, khong thay exact-SHA)', run_id: 39053830242, sha: d347d426334bbe1bbb1161184ab0acffee9be054, conclusion: success, jobs: '14/14 success (chuan-bi, gate, gate-packet-loop, gate-ops, gate-registry, gate-cong-cu x8, gate-cong-cu-gop)', luc: '2026-10-17T17:59:39Z', ghi_chu: 'measured — d347d42 la con truc tiep cua d8b15cb (git merge-base --is-ancestor d8b15cb d347d42 rc=0; cha thu nhat d347d42 = d8b15cb).', nguon: [readback-run-39053830242.json, readback-jobs-39053830242.json]}
 bookkeeping:
-  - {item: 'dong Issue #775 (completed) kem ban chieu ho so nay', luc: sau PR ghi so}
-  - {item: 'mo 7 issue no ngoai pham vi spec r1', issues: [804, 805, 806, 807, 808, 809, 810]}
+  - {item: 'dong Issue #775 (completed) kem comment ban chieu', ket_qua: 'measured — readback-issue-775.json: state closed, state_reason completed, closed_at 2026-10-17T17:29:48Z, closed_by ducthangho; comment dong 6237647158 (readback-comment-6237647158.json)'}
+  - {item: 'mo 7 issue no ngoai pham vi spec r1', issues: [804, 805, 806, 807, 808, 809, 810], ket_qua: 'measured — readback-issue-804.json … readback-issue-810.json: ca 7 ton tai, state open, tieu de "Nợ wp775 r1 (k/7)"'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-775-land, pr: 811, ket_qua: 'merged 2026-10-18T01:37Z (readback-pr-811.json) voi landed false; P1 connector thread 4305258340 con mo luc merge'}
   - {item: 'PR sua ho so: gate exact-SHA + lease da thu hoi + landed true', nhanh: claude/bookkeeping-775-landed}
 # ---- het truong chuan
@@ -70,11 +70,13 @@ lease:
   thu_hoi_cuoi: >-
     DA THU HOI bang bia mo hai chieu: commit 219dcda (2026-10-17T17:15:18Z) tren ops/wp775-spec ghi
     `da_bi_thay_the: wp788-r1-g1-claude` theo chu kho issuecomment-6237341979 (cap lease wp788 cung write set).
-    measured — 2026-10-18T01:52:45Z sau fetch +refs/heads/*: ls-remote 591 = for-each-ref 591, thieu 0 (tap ten/OID luu
-    o ai-dang-giu-sau-bia-mo/ls-remote-heads.txt va for-each-ref-remotes.txt); `ai-dang-giu` ca hai duong dan rc=11,
-    "NGƯỜI_GIỮ 1: wp788-r1-g1-claude", wp775-r1-g1-claude ra "CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ" (khong con la nguoi giu).
-    Chu kho chi thi "Rut han lease luon"; KHONG rut han them vi lease da bi thay the — sua lease da bia mo khong mua
-    them gi va de dong luot dang lease. Tho: ops/land/pr779-wp775-provenance/ai-dang-giu-sau-bia-mo/.
+    measured — 2026-10-18T02:03:33Z sau `git fetch --prune +refs/heads/*`: ls-remote 592 ten = for-each-ref 592 ten, va dict ten->OID
+    BANG NHAU (0 thieu, 0 thua, 0 OID lech; hai tap luu o ai-dang-giu-sau-bia-mo/ls-remote-heads.txt va
+    for-each-ref-remotes.txt; luc-do.txt ghi moc va ket qua so). Tren dung bo ref ay: `ai-dang-giu` ca hai duong dan
+    rc=11, "NGƯỜI_GIỮ 1: wp788-r1-g1-claude"; wp775-r1-g1-claude ra "CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ" (khong con la nguoi giu).
+    Ban do truoc (01:52Z) lech mot OID o agent/wp788-r1-g1-claude (cross-review #820 luot 1 F01) — da thay bang ban
+    dong bo nay. Chu kho chi thi "Rut han lease luon"; KHONG rut han them vi lease da bi thay the.
+    Tho: ops/land/pr779-wp775-provenance/ai-dang-giu-sau-bia-mo/.
   thu_hoi: >-
     (Ghi luc PR #811, TRUOC commit 219dcda — giu nguyen de lich su.) CHUA thu hoi tai moc duoc thuat lai. measured — hai tep ai-dang-giu kem theo ghi rc=11,
     "NGƯỜI_GIỮ 1: wp775-r1-g1-claude" cho ca hai duong dan. loi_khai_co_neo — nguoi ghi so khai do luc
@@ -100,7 +102,7 @@ trang_thai_packet:
   landed_ly_do: >-
     PROTOCOL §10.2.4: da vao canonical o exact SHA duoc duyet (f9d84d7 la cha thu hai cua d8b15cb); gate hau-merge
     tren DUNG merge SHA xanh (run 39051543180 attempt 2, 14/14); lease da nha (bia mo 219dcda, ai-dang-giu khong con
-    wp775); bookkeeping: #775 dong, 7 no #804–#810, ho so nay. merge_4 van not_measured (dieu_kien_merge_spec) —
+    wp775); bookkeeping: #775 closed/completed (readback-issue-775.json), 7 no #804–#810 open (readback-issue-80x.json), ho so nay. merge_4 van not_measured (dieu_kien_merge_spec) —
     chu kho ghi landed voi ghi chu ay.
 
 uy_quyen_land:

@@ -32,7 +32,7 @@ f9d84d70fb46540bbecfae963c9afb4a2b48984d	refs/remotes/origin/agent/wp775-r1-g1-c
 4d2a19f7edd4c6aa2ebd85c7c66d3323bdecad7e	refs/remotes/origin/agent/wp782-g4-claude
 1bcbaa0b564612b3072c7c6e8e884e18782a0745	refs/remotes/origin/agent/wp782-g5-claude
 1b375dbab5f4fe2694c7e12bbf159dd1c7c53828	refs/remotes/origin/agent/wp784-g2-claude
-8264089a14f79867091da2629edbf45a22854c39	refs/remotes/origin/agent/wp788-r1-g1-claude
+984032f375aa0c8fe6039dfd35f6842acd49c926	refs/remotes/origin/agent/wp788-r1-g1-claude
 c679d645cafe5e4e0fbf4e782cfb0f3547759bca	refs/remotes/origin/agent/wp794-g1-claude
 76014ce0e76df70d8d3655b8f130747ae4d2cc14	refs/remotes/origin/agent/wp795-g1-claude
 78dad4b4debc9bbd2a0be5e100b552d5efe5d02f	refs/remotes/origin/agent/wp99-g2-codex
@@ -64,6 +64,7 @@ b5899eb8ca0557d791ba6eab87d70d4ae055acf6	refs/remotes/origin/claude/bookkeeping-
 faf6f0cb0044a5360dce143f45d73493d1f9a49c	refs/remotes/origin/claude/bookkeeping-766-land
 ab4cd428f5a01d69ead7825108593f1092fe78fd	refs/remotes/origin/claude/bookkeeping-772-nguon
 cba3c53c5018ee1b80a3eaa6870886d952a2940f	refs/remotes/origin/claude/bookkeeping-775-land
+cfb6f627938bf9aa584caa745932092cc3e5bd8d	refs/remotes/origin/claude/bookkeeping-775-landed
 7dbcedd374edc67d74eaba8265de225bfad66d7e	refs/remotes/origin/claude/bookkeeping-782-784-land
 d8608972c93674c1450375ba5f0c72d7853c722b	refs/remotes/origin/claude/bookkeeping-800-801-land
 4c550bc0fcdf63d92a709d217a3da22b33938a14	refs/remotes/origin/claude/bookkeeping-p3a-land
@@ -239,7 +240,7 @@ b70863e30cc6abe27dd5ddd79fb6f20fc3802c9b	refs/remotes/origin/codex/wp84-r5-g5-pr
 cb18d2f4d39d4e6777dac29f9b85c91f02adfac1	refs/remotes/origin/docs/goi-claude-cli
 2f30166f482552162f3cdc993c19e44594ae79dd	refs/remotes/origin/ducthangho-patch-1
 7b452718ee5990eef426a074b612238196fd3c93	refs/remotes/origin/luu-tru/238-ho-so-cross-review
-9bfc5077083cd807ba290833f443c66a51db73e4	refs/remotes/origin/master
+1360108b5e02a58ebcd7f1e7ee9fda73fb5bf70c	refs/remotes/origin/master
 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9	refs/remotes/origin/mission/744/integration
 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9	refs/remotes/origin/mission/748/integration
 60446be6467347e7242d5e03c001c19794e6e96d	refs/remotes/origin/mission/76/integration

@@ -64,6 +64,7 @@ b5899eb8ca0557d791ba6eab87d70d4ae055acf6	refs/heads/claude/bookkeeping-743-land
 faf6f0cb0044a5360dce143f45d73493d1f9a49c	refs/heads/claude/bookkeeping-766-land
 ab4cd428f5a01d69ead7825108593f1092fe78fd	refs/heads/claude/bookkeeping-772-nguon
 cba3c53c5018ee1b80a3eaa6870886d952a2940f	refs/heads/claude/bookkeeping-775-land
+cfb6f627938bf9aa584caa745932092cc3e5bd8d	refs/heads/claude/bookkeeping-775-landed
 7dbcedd374edc67d74eaba8265de225bfad66d7e	refs/heads/claude/bookkeeping-782-784-land
 d8608972c93674c1450375ba5f0c72d7853c722b	refs/heads/claude/bookkeeping-800-801-land
 4c550bc0fcdf63d92a709d217a3da22b33938a14	refs/heads/claude/bookkeeping-p3a-land
@@ -239,7 +240,7 @@ b70863e30cc6abe27dd5ddd79fb6f20fc3802c9b	refs/heads/codex/wp84-r5-g5-protocol-ha
 cb18d2f4d39d4e6777dac29f9b85c91f02adfac1	refs/heads/docs/goi-claude-cli
 2f30166f482552162f3cdc993c19e44594ae79dd	refs/heads/ducthangho-patch-1
 7b452718ee5990eef426a074b612238196fd3c93	refs/heads/luu-tru/238-ho-so-cross-review
-9bfc5077083cd807ba290833f443c66a51db73e4	refs/heads/master
+1360108b5e02a58ebcd7f1e7ee9fda73fb5bf70c	refs/heads/master
 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9	refs/heads/mission/744/integration
 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9	refs/heads/mission/748/integration
 60446be6467347e7242d5e03c001c19794e6e96d	refs/heads/mission/76/integration

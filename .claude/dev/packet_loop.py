@@ -127,6 +127,11 @@ def _check_runtime_identity(a, st, role):
     if any(expected.get(field) is not None and actual[field] != expected[field]
            for field in ("provider", "model_family", "execution_surface", "transport")):
         _die(RC_PROVIDER, f"{role} runtime identity khác state: {actual!r} != {expected!r}")
+    # #812 connector: init để trống surface/transport không phải giấy phép khai trái lease đã ghi — trường KHAI phải khớp lease.
+    lease = st["ngu_canh_lease"].get(role) if isinstance(st.get("ngu_canh_lease"), dict) else None
+    if isinstance(lease, dict) and any(lease.get(f) is not None and actual[f] is not None and actual[f] != lease[f]
+                                       for f in ("provider", "model_family", "execution_surface", "transport")):
+        _die(RC_PROVIDER, f"{role} runtime identity khác lease: {actual!r} != {lease!r}")
 
 # CHỐT THẬT của `--granted-by` — danh sách CHO PHÉP, không phải danh sách cấm.
 #
@@ -2483,6 +2488,32 @@ def _bieu_dien_duong(p: str, root: Path) -> set[str]:
     return {ten, _chuan_duong(dich.as_posix())}
 
 
+def _dich_trong_cay(root: Path, rev: str, p: str) -> str:
+    """§5 theo CÂY Git tại `rev` (không theo checkout): phân giải symlink từng thành phần; thoát gốc/vòng/không đọc được ⇒ ValueError."""
+    phan, ra, buoc = p.removeprefix("planned:").strip().replace("\\", "/").split("/"), [], 0
+    while phan:
+        x = phan.pop(0)
+        if x in ("", "."):
+            continue
+        if x == "..":
+            if not ra:
+                raise ValueError(f"symlink thoát gốc tại {rev}: {p!r}")
+            ra.pop()
+            continue
+        rc, ls = _git_do(root, "ls-tree", rev, "--", "/".join([*ra, x]))
+        if rc:
+            raise ValueError(f"không đọc được cây {rev} cho {p!r}")
+        if ls.startswith(b"120000 "):
+            rc, dich = _git_do(root, "cat-file", "blob", f"{rev}:{'/'.join([*ra, x])}")
+            buoc += 1
+            if rc or buoc > 40 or dich.startswith(b"/"):
+                raise ValueError(f"symlink không phân giải được tại {rev}: {p!r}")
+            phan = dich.decode("utf-8", "surrogateescape").split("/") + phan
+        else:
+            ra.append(x)
+    return _chuan_duong("/".join(ra))
+
+
 def _giao(a: str, b: str) -> bool:
     """§5: giao nhau khi bằng nhau hoặc một bên là prefix thư mục của bên kia — so trên biểu diễn chuẩn hoá."""
     a, b = _chuan_duong(a), _chuan_duong(b)
@@ -2584,14 +2615,20 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
             cac = lpm._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
             giu = lambda x: [y for k in ("write_set", "effective_write_set") for y in _ds_duong(x.get(k, []))]  # noqa: E731
             # Đối xứng: write_set ∪ effective_write_set của CẢ HAI bên, không để effective che tập khai.
-            own = set().union(*(_bieu_dien_duong(x, root) for x in giu(l)))
+            # Symlink phân giải theo checkout VÀ theo cây của cả hai lease (snapshot lease này + ref lease kia) — topology chỉ có
+            # trong một ref không được lọt vì checkout của người gọi thiếu nó (#812 connector).
+            bd = lambda x, revs: _bieu_dien_duong(x, root) | {_dich_trong_cay(root, r, x) for r in revs}  # noqa: E731
+            for x in giu(l):  # §5 cả khi không có đối thủ: đường dẫn không đo được ⇒ KHÔNG_XÁC_ĐỊNH
+                bd(x, (oid,))
             giao_nhau = []
             for m in cac:
                 other = m["lease"]
                 if lpm._lease_id_quet(other.get("lease_id")) == lid or lpm._phan_loai_lease(other) != "CÒN_HẠN" or lpm._bia_mo_doi_xung(other, cac) is True:
                     continue
-                paths = set().union(*(_bieu_dien_duong(x, root) for x in giu(other)))
-                if any(_giao(x, y) for x in own for y in paths):
+                revs = (oid, m["ref"])
+                paths = set().union(*(bd(x, revs) for x in giu(other)))
+                own_m = set().union(*(bd(x, revs) for x in giu(l)))
+                if any(_giao(x, y) for x in own_m for y in paths):
                     giao_nhau.append(f"{m['ref']}:{m['path']}")
             giao_nhau = sorted(set(giao_nhau))
         except Exception as ex:  # noqa: BLE001 — không đo được ⇒ không có thẩm quyền
@@ -2692,7 +2729,9 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
             ("executor-surface-transport", all((bm_chuan(mei[k]) if k == "surface" else bnv._chuoi(mei[k])) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")) if k in mei)),
             ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
             ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
-            ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})) if not dung]
+            ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop}),
+            # same-failure đếm theo `--finding-id`: verdict âm phải khai ĐỦ mọi lớp của bảng, bỏ một lớp tái diễn là né trần.
+            ("thieu-lop-am", lop_ok and (a.verdict == "approve" or {x["slug"] for x in lop} <= set(a.finding_id or [])))) if not dung]
     if loi:
         _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}")
     return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}

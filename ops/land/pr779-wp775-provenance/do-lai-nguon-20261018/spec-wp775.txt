@@ -1,0 +1,10 @@
+# do spec wp775 — 2026-10-18T02:37:19Z; spec CHUA vao master, nam tren nhanh ops/wp775-spec
+$ git rev-parse origin/ops/wp775-spec
+219dcdaa9d164b8cf7dabb4c126bbfe0e65dfdb7
+$ git rev-parse origin/ops/wp775-spec:ops/specs/wp775.md
+898369502c3ad4e4001e9f25692af61d2bf80102
+$ git show origin/ops/wp775-spec:ops/specs/wp775.md | sha256sum
+4b7530c265dddefbebd06ea209d7c0594210f57b391e0d0d353931171fd2b6d8  -
+$ git cat-file -e origin/master:ops/specs/wp775.md
+fatal: path 'ops/specs/wp775.md' does not exist in 'origin/master'
+rc=128

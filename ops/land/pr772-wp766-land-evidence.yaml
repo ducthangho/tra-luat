@@ -65,7 +65,7 @@ spec:
   path: ops/specs/wp766.md
   sha256: da3095b47567dc8cb94137d0cc675d722eb256a77c8e06ddb90a216e7f148666
   blob: 2176dd0c04e126beb6a57be645d315f51ebb2d23
-  nguon: 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay); PR #767 mang cung blob.'
+  nguon: 'measured — sha256sum ops/specs/wp766.md tren blob trong nhanh nay (vao master qua PR ghi so nay); PR #767 mang cung blob.'
 lease:
   lease_id: wp766-r1-g1-claude-20261016
   path: ops/leases/wp766-r1-g1-claude-20261016.yaml
@@ -114,7 +114,8 @@ dieu_kien_truoc_merge:
     code_review.commit_sha 701f41c, status completed, has_any_findings false, updated_at 06:31:29Z < merged_at 06:31:51Z.
     Khac #765 (connector xong 28s SAU merge): lan nay doi dung dieu kien uy quyen.
   khong_xung_dot: >-
-    measured gian tiep — merge_commit_tree e03d4bf = tree 701f41c (861df62); master khong troi (base e0273d3 = cha thu nhat).
+    measured gian tiep — do-tree-merge-e03d4bf.txt: merge_commit_tree e03d4bf = tree 701f41c (861df62); master khong troi
+    (readback-pr-772.json base e0273d3 = cha thu nhat).
   windows: >-
     Chu kho chot KHONG doi luot Windows truoc merge (spec wp766, uy quyen). Luot Windows dau tien cua ma nay: push master
     run 38861735202 — xanh (post_merge_checks).
@@ -139,7 +140,8 @@ sua_gate_master:
     186 -> 187, them dung changelog.d/wp-766.md, bot 0; scripts/tl_selftest.py: ratchet r291_docs_ngoai_goi (cay that
     261 -> 262) va r357_agents_ngoai_goi (goi 186 -> 187), kem chu thich ke khai slot. Tran Package 200 con 13 khe.
   do_sau_sua: >-
-    measured — 2026-10-16, tren cay 1a433a6 (core.abbrev 7, Python 3.13.16, Linux): `tl.py release-verify
+    measured — do-lai-sau-sua-1a433a6/transcript.txt (do lai 2026-10-18T01:16Z tren ban sao tach rieng, cung ket qua;
+    lan do goc 2026-10-16 KHONG giu transcript), tren cay 1a433a6 (core.abbrev 7, Python 3.13.16, Linux): `tl.py release-verify
     RELEASE_MANIFEST.json --strict --json` ok=true, expected 187 = checked 187, failed/extra/missing 0;
     `tl.py --selftest` "== tl selftest 1731/1731 ==" rc=0, 0 ca hong, r291_docs_ngoai_goi [OK], r357_agents_ngoai_goi
     [OK]; `tl.py golden-test --json --deterministic` (KHONG --write) ok=true 20/20, cay khong doi.
@@ -153,8 +155,8 @@ review:
     hien_vat: ops/reviews/wp766-r1-g1-exec-review-1-codex/
     bien_nhan_v2: 'ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml (bien_nhan_v2.py DAT)'
     ket_qua: 'thuat_lai — approve, P1=0 P2=0 P3=0 tren 701f41c'
-  codex_connector: 'measured — completed, khong finding, tren 701f41c (dieu_kien_truoc_merge.codex_connector).'
-  human_audit: 'measured — comment 6209427062 (uy_quyen_land).'
+  codex_connector: 'measured — readback-codex-connector-772.json: completed, khong finding, tren 701f41c (dieu_kien_truoc_merge.codex_connector).'
+  human_audit: 'measured — readback-comment-6209427062.json: comment 6209427062 (uy_quyen_land).'
 
 khong_do_duoc:
   - 'Log day du cua cac job CI KHONG luu; chi trich dong tong ket + sha256 log luc trich.'

@@ -1,0 +1,7 @@
+# do quan he cha con d8b15cb -> d347d42 — 2026-10-18T02:37:19Z
+$ git merge-base --is-ancestor d8b15cb d347d42
+rc=0
+$ git log -1 --format=%P d347d42
+d8b15cb0730c85e7019aee627c3bfa645a6d3eaf 76014ce0e76df70d8d3655b8f130747ae4d2cc14
+$ git rev-parse d8b15cb
+d8b15cb0730c85e7019aee627c3bfa645a6d3eaf

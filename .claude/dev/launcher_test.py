@@ -8257,6 +8257,61 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
+def _wp831_chay_cai_rg(s, nen, tot):
+    """NGUYÊN `rg.cai.<nen>` qua cai_cong_cu.sh; installer là stub, `rg` hỏng đứng ĐẦU PATH, `tot` là thân `rg`
+    ở thư mục ứng viên của trình cài (`dpkg -L` / `brew --prefix`). Trả (process, GITHUB_PATH, thư mục ứng viên)."""
+    ops = s / "kho" / "ops"; ops.mkdir(parents=True)
+    for t in ("cai_cong_cu.sh", "cong_cu.py"):
+        shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+    shutil.copy2(YAML_DANG_DUNG, ops / "cong_cu.yaml")
+    hong, bin_, uv = s / "hong", s / "bin", s / "pfx" / "bin"
+    for d in (hong, bin_, uv):
+        d.mkdir(parents=True)
+    tep = {hong / "rg": "echo 'rg: error while loading shared libraries' >&2; exit 1", uv / "rg": tot,
+           bin_ / "sudo": 'exec "$@"', bin_ / "apt-get": "exit 0",
+           bin_ / "dpkg": f"echo /usr/share/doc/ripgrep; echo '{uv}/rg'; echo /usr/share/man/man1/rg.1.gz",
+           bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}'; exit 0"}
+    for f, than in tep.items():
+        f.write_text(f"#!/bin/sh\n{than}\n")
+        f.chmod(0o755)
+    gp = s / "github_path"; gp.write_text("")
+    vo, env = _wp802_bash_env()
+    env.update(CONG_CU_NEN=nen, GITHUB_PATH=str(gp), PATH=os.pathsep.join([str(hong), str(bin_), env.get("PATH", "")]))
+    p = subprocess.run([vo, str(ops / "cai_cong_cu.sh"), "rg"], env=env, capture_output=True, text=True, timeout=120)
+    return p, gp.read_text().strip(), uv
+
+
+def _wp831_cai_rg_chon_ban_chay_duoc(nen):
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
+    for tot in ("echo 'ripgrep 14.1.0'", "echo w >&2; echo 'ripgrep 14.1.0'"):
+        with San() as s:
+            p, gp, uv = _wp831_chay_cai_rg(s, nen, tot)
+            bang(p.returncode == 0 and '"DAT"' in p.stdout,
+                 f"cai rg {nen} khong DAT khi ban hong dung dau PATH: rc={p.returncode} "
+                 f"{p.stdout[-300:]} {p.stderr[-300:]}")
+            bang(gp == str(uv), f"{nen}: thu muc chon khong phai ban TOT: GITHUB_PATH={gp!r}, mong {uv}")
+    # N3: `rg` của ứng viên hỏng, hoặc rc=0 mà `kiem-tra` không nhận (rỗng/rác) ⇒ KHÔNG chọn, thoát ≠ 0.
+    for tot in ("exit 1", "exit 0", "echo 'ripgrep 1.2.3junk'"):
+        with San() as s:
+            p, gp, _uv = _wp831_chay_cai_rg(s, nen, tot)
+            bang(p.returncode != 0 and gp == "",
+                 f"{nen}: khong ung vien nao chay duoc ma van chon ({tot!r}): rc={p.returncode} GITHUB_PATH={gp!r}")
+
+
+@ca
+def r831_cai_rg_linux_chon_ban_chay_duoc():
+    """N1/N3: NGUYÊN `rg.cai.linux`; `rg` hỏng đầu PATH ⇒ chọn thư mục `dpkg -L` khai khi bản ấy DAT, không thì ≠ 0."""
+    return _wp831_cai_rg_chon_ban_chay_duoc("linux")
+
+
+@ca
+def r831_cai_rg_macos_chon_ban_chay_duoc():
+    """N2/N3: NGUYÊN `rg.cai.macos`; ứng viên `$(brew --prefix)/bin`, cùng hai chiều như Linux."""
+    return _wp831_cai_rg_chon_ban_chay_duoc("macos")
+
+
 # ---------------------------------------------------------------------------------------------
 # wp685 (LAUNCHER-CON-SONG-ESRCH, đặc tả r28 §7 B1–B4) — helper theo NHÃN cho t156/t157.
 # Nguồn: PR #679 job 109303373142 (ESRCH thoát khỏi `_con_song`); cross-review lượt 1–12 trên
@@ -10443,12 +10498,32 @@ DOT_BIEN_HOOK = [
     # Phần tử thứ tư "yaml" = đột biến ops/cong_cu.yaml thay vì hook (Codex lượt 1 F2).
     ("wp802_yaml_bo_ung_vien_winget_links", (' "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")"', ''),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
-    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('"${PY[@]}" ops/cong_cu.py kiem-tra --chi rg', '"$RG_D/rg" --version'),
+    # wp831: neo dài thêm vì linux/macos nay cũng gọi `kiem-tra --chi rg` (neo phải khớp ĐÚNG MỘT chỗ).
+    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('[ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
+                                                    '[ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
     ("wp802_hook_windows_probe_hai_lan", ('if [ "$RG_WIN" = 1 ]; then', 'if [ "$RG_WIN" = 1 ] && ! co_chay rg; then'),
      ["r802_hook_windows_khong_cai_in_dung_lenh"]),
     ("wp802_yaml_khong_ghi_github_path", ('cygpath -w "$RG_DICH" >> "$GITHUB_PATH"', 'true'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
+    # wp831 (N1–N3): cùng luật; mỗi neo khớp ĐÚNG MỘT chỗ trong YAML (linux ≠ macos nhờ ứng viên đầu).
+    ("wp831_yaml_linux_bo_ung_vien_dpkg", ('for RG_D in "$(dirname "$(dpkg -L', 'for RG_D in "$(dirname "$(true -L'),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_linux_quay_ve_command_v", ('ripgrep && RG_DICH= && for RG_D in "$(dirname "$(dpkg',
+                                            'ripgrep && dirname "$(command -v rg)" && exit 0 && for RG_D in "$(dirname "$(dpkg'),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_linux_chi_theo_ma_thoat", (': p)}\')")" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
+                                            ': p)}\')")" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_linux_khong_ghi_github_path", ('apt-get install -y ripgrep && RG_DICH=', 'apt-get install -y ripgrep && GITHUB_PATH= && RG_DICH='),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_macos_bo_ung_vien_brew", ('for RG_D in "$(brew --prefix)/bin" ', 'for RG_D in '),
+     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_macos_chi_theo_ma_thoat", ('"$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
+                                            '"$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
+     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_macos_khong_ghi_github_path", ('brew install ripgrep && RG_DICH=', 'brew install ripgrep && GITHUB_PATH= && RG_DICH='),
+     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
 ]
 
 

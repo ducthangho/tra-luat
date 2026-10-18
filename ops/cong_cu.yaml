@@ -82,8 +82,12 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [rg, --version], regex: '(?m)^ripgrep\s+(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)'}]
     cai:
-      linux: {lenh: 'sudo apt-get install -y ripgrep && dirname "$(command -v rg)"'}
-      macos: {lenh: 'brew install ripgrep && dirname "$(command -v rg)"'}
+      # wp831 (L1): cùng bộ chọn với `windows` dưới đây — thư mục in ra là thư mục ĐẦU TIÊN có `rg` mà
+      # CHÍNH `cong_cu.py kiem-tra --chi rg` nhận `DAT`; bản `rg` hỏng đứng đầu PATH không còn được in.
+      # Linux: thư mục `dpkg -L ripgrep` khai (không đọc được ⇒ `/usr/bin`), rồi `command -v`.
+      # macOS: `$(brew --prefix)/bin`, rồi `command -v`.
+      linux: {lenh: 'sudo apt-get install -y ripgrep && RG_DICH= && for RG_D in "$(dirname "$(dpkg -L ripgrep 2>/dev/null | awk ''/\/bin\/rg$/ {p = $0} END {print (p == "" ? "/usr/bin/rg" : p)}'')")" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 && RG_DICH="$RG_D" && break; done && : "${RG_DICH:?khong thu muc nao co rg chay duoc}" && { [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
+      macos: {lenh: 'brew install ripgrep && RG_DICH= && for RG_D in "$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 && RG_DICH="$RG_D" && break; done && : "${RG_DICH:?khong thu muc nao co rg chay duoc}" && { [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
       # wp802 (Q6): winget trước, choco dự phòng. Thư mục in ra là thư mục ĐẦU TIÊN có `rg` mà CHÍNH
       # `cong_cu.py kiem-tra` (bộ kiểm cuối, `${PY[@]}` của cai_cong_cu.sh) nhận `DAT` — WinGet\Links,
       # choco\bin, rồi `command -v`. Một chuẩn duy nhất, không chép lại regex (Codex lượt 1-4 F2).

@@ -2003,9 +2003,13 @@ CONG_CU = [
     # thì lệnh tìm của agent gãy giữa chừng chứ KHÔNG tự lùi về `grep`, nên phiên mất
     # khả năng tra cứu mà không báo lỗi ở chỗ đọc được. Một công cụ mà thiếu nó phiên
     # vẫn "chạy" nhưng làm việc sai thì nguy hơn công cụ thiếu là chết ngay.
+    # wp802 (Q5/Q6): PHẢI khớp `rg.cai` của ops/cong_cu.yaml và hook — `r802_bang_cai_rg_khop_cong_cu_yaml`.
     {"ten": "rg", "bat_buoc": True, "ung_vien": ["rg"],
      "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",
-     "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e",
+     "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"
+                        " --accept-source-agreements --accept-package-agreements"
+                        " --disable-interactivity"
+                        " || choco install ripgrep --yes --no-progress",
              "Darwin": "brew install ripgrep",
              "Linux": "sudo apt-get install -y ripgrep"}},
     # bash: `.claude/settings.json` gọi hook qua bash và session-start.sh là bash
@@ -2278,8 +2282,8 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         for muc in path.split(os.pathsep):
             if not muc:
                 continue
-            try:
-                them(ten, shutil.which(ten, path=muc))
+            try:   # wp802: không `which` — trên Windows nó chèn cwd vào MỌI `muc` (Codex lượt 3 F6)
+                them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc), kieu_bash=False))
             except OSError:
                 continue
 
@@ -2297,6 +2301,23 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         elif c["ten"] == "agy" and local:
             them(ten0, Path(local) / "agy" / "bin" / "agy.exe")
     return [(t, x) for t, x in ra if Path(x).is_file()]
+
+
+def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = True) -> str | None:
+    """Bản bash gọi khi gõ TÊN TRẦN: PATH theo thứ tự, mục RỖNG = cwd (wp802, Codex lượt 1 F1).
+    `kieu_bash=False`: thứ tự PATHEXT của `which` (`x.CMD` hơn shim `x`), cho tiến trình native (F6)."""
+    duoi = [""]
+    if platform.system() == "Windows":   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13 (F6 lượt 4)
+        ext = [e.rstrip(".") for e in (moi_truong.get("PATHEXT") or ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC")
+               .split(";") if e]
+        duoi = (duoi + ext if kieu_bash else   # native: tên trần CHỈ khi đã mang đuôi PATHEXT, rồi vẫn nối đuôi
+                ([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)
+    for muc in moi_truong.get("PATH", "").split(os.pathsep):
+        for d in duoi:
+            p = os.path.join(muc or ".", ten + d)
+            if os.path.isfile(p) and os.access(p, os.X_OK):
+                return os.path.abspath(p)
+    return None
 
 
 def _phien_ban(duong_dan: str, *, env=None,
@@ -4324,6 +4345,12 @@ def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
     return MA_OK
 
 
+# wp802 (Q2/Q3) — "BỊ CHE": bản TÊN TRẦN hỏng mà bản khác chạy được. Đo 17-10-2026: `doctor`
+# rc=0 trỏ bản TỐT trong khi `rg --version` gõ trong shell rc=1. Chỉ công cụ agent gõ trần:
+# KHÔNG `bash` (đầu PATH Windows là WSL), KHÔNG `python` (đã dò ba tên).
+_AP_DUNG_BI_CHE = frozenset({"rg", "git"})
+
+
 def lenh_doctor(a) -> int:
     _chuan_bi_va_bo_snapshot()
     # ĐỌC MÔI TRƯỜNG TRƯỚC MỌI PHÉP HỎI CÔNG CỤ — thứ tự này là nội dung, không
@@ -4349,7 +4376,16 @@ def lenh_doctor(a) -> int:
         xac_thuc_ok = None
         loi_xac_thuc = None
         xac_thuc_chua_do = None
-        for ten_uv, d in _cac_duong_dan(c, moi_truong):
+        hong_dau = None            # bản TÊN TRẦN (shell gọi) đo được là hỏng
+        ung_vien = _cac_duong_dan(c, moi_truong)
+        # Bản tên trần giải ĐỘC LẬP rồi đặt LÊN ĐẦU — đo nó trước mọi bản dự phòng.
+        tran = (_ten_tran_giai_ra(c["ung_vien"][0], moi_truong)
+                if c["ten"] in _AP_DUNG_BI_CHE else None)
+        if tran:
+            ung_vien = [(c["ung_vien"][0], tran)] + [
+                x for x in ung_vien
+                if os.path.normcase(os.path.abspath(x[1])) != os.path.normcase(os.path.abspath(tran))]
+        for ten_uv, d in ung_vien:
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
                 # HẾT NGÂN SÁCH KHÔNG PHẢI "CÔNG CỤ HỎNG" — trạng thái thứ ba.
@@ -4392,6 +4428,17 @@ def lenh_doctor(a) -> int:
                 continue
             co_mat_nhung_hong = {"goi_bang": ten_uv,
                                  "duong_dan": d, "loi": pb}
+            if tran and d == tran:
+                hong_dau = co_mat_nhung_hong
+        # Quá hạn ở bản tên trần KHÔNG tính: chưa đo được không phải hỏng (`None ≠ False`).
+        bi_che = None
+        if thay is not None and hong_dau is not None:     # `tran` chỉ có trong phạm vi
+            hd = hong_dau or {}
+            bi_che = {"trang_thai": "BI_CHE", "ban_hong": hd.get("duong_dan"),
+                      "loi": hd.get("loi"), "ban_tot": thay["duong_dan"],
+                      "cach_chua": (f"dua thu muc {os.path.dirname(thay['duong_dan'])} len "
+                                    f"TRUOC trong PATH, hoac go ban hong "
+                                    f"{hd.get('duong_dan')}")}
         if thay is not None and c.get("xac_thuc"):
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
@@ -4445,6 +4492,9 @@ def lenh_doctor(a) -> int:
                 muc["loi_xac_thuc"] = loi_xac_thuc
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
+        if bi_che:            # `co` GIỮ True: công cụ CÓ cài, chỉ bản tên trần hỏng
+            muc["trang_thai"] = "BI_CHE"
+            muc["bi_che"] = bi_che
         if thay is None and het_ngan_sach:
             muc["chua_do_duoc"] = het_ngan_sach
         if thay is None and qua_han_probe:
@@ -4464,7 +4514,7 @@ def lenh_doctor(a) -> int:
             chua_do_bat_buoc.append(c["ten"])
         elif bb and thay is not None and xac_thuc_chua_do is not None:
             chua_do_bat_buoc.append(c["ten"])
-        elif bb and (thay is None or xac_thuc_ok is False):
+        elif bb and (thay is None or xac_thuc_ok is False or bi_che):
             thieu_bat_buoc.append(c["ten"])
 
     # --- KHẢ DỤNG, không chỉ CÓ MẶT.
@@ -4594,12 +4644,16 @@ def lenh_doctor(a) -> int:
                                  and c.get("loi_xac_thuc"))
             ly_do_chua_do = ((chua_do or {}).get("ly_do")
                               or xac_thuc_chua_do)
-            dau = ("CHUA_DO" if ly_do_chua_do else
+            che = c.get("bi_che")
+            dau = ("BI_CHE" if che else "CHUA_DO" if ly_do_chua_do else
                    ("co  " if c["co"] else ("HONG" if hong else
                                              ("THIEU" if c["bat_buoc"] else "khong"))))
             mo_ta = (ly_do_chua_do or
                      (c.get("phien_ban", "") if c["co"] else c["vi_sao"]))
             con_ong = _in_an_toan(f"  {dau:<8} {c['ten']:<8} {mo_ta}")
+            if che and con_ong:
+                con_ong = _in_an_toan(f"        ten tran `{c['ten']}` goi {che['ban_hong']} - KHONG chay duoc: "
+                                      f"{che['loi']}\n        ban chay duoc: {che['ban_tot']}\n        cach chua: {che['cach_chua']}")
             if hong and con_ong:
                 con_ong = _in_an_toan(
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
@@ -4646,7 +4700,10 @@ def lenh_doctor(a) -> int:
             _in_an_toan("CHUA DO DUOC: "
                         + ", ".join(chua_do_bat_buoc))
         if thieu_bat_buoc:
-            ket_luan = "THIEU " + ", ".join(thieu_bat_buoc)
+            ds_che = {c["ten"] for c in ket if c.get("bi_che")}
+            ket_luan = "THIEU " + ", ".join(
+                f"{t} (BI_CHE: co cai, ban ten tran hong)" if t in ds_che else t
+                for t in thieu_bat_buoc)
         elif chua_do_bat_buoc:
             ket_luan = "CHUA DO DUOC " + ", ".join(chua_do_bat_buoc)
         else:

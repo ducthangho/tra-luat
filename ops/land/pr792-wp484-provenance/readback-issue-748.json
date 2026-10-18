@@ -1,0 +1,78 @@
+{
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748",
+  "repository_url": "https://api.github.com/repos/ducthangho/tra-luat",
+  "labels_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748/labels{/name}",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748/comments",
+  "events_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748/events",
+  "html_url": "https://github.com/ducthangho/tra-luat/issues/748",
+  "id": 5822794811,
+  "node_id": "I_kwDOTNeRjc8AAAABWxDMOw",
+  "number": 748,
+  "title": "Packet Windows gate recovery: G5 t23/t49, lease t217, registry full matrix",
+  "user": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "labels": [
+
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [
+
+  ],
+  "milestone": null,
+  "comments": 41,
+  "created_at": "2026-10-13T01:13:47Z",
+  "updated_at": "2026-10-17T23:51:00Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "OWNER",
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+    "total": 0,
+    "completed": 0,
+    "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+    "blocked_by": 0,
+    "total_blocked_by": 0,
+    "blocking": 0,
+    "total_blocking": 0
+  },
+  "body": "# Packet đề xuất — khôi phục các gate Windows của run #747\n\nNguồn: [full matrix run 38322344390](https://github.com/ducthangho/tra-luat/actions/runs/38322344390) trên head PR #747 `fffd14f4546f5eb44b3fe1138bc49c9703c7ed97`, tree `72785c6c1e884bc0b5c1771df644622d590223b4`, base canonical `8aebf14af7d3918e4e45fc42569c2c156f9b3ca9`. Chủ kho yêu cầu tạo Packet/lease mới ngày 2026-10-13. Đây là Packet sửa gate, không thuộc write set WP744 g2 đã hết hạn.\n\n## Ba lớp cần đóng\n\n1. G5 Windows: `gate (windows-latest)` và 8 shard `gate-cong-cu` đỏ. `ops/cong_cu_test.py` báo 52/54 đạt, 2 failed, 2 skipped. `t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows` nhận `SyntaxWarning: invalid escape sequence '\\('` từ `ops/bash_nen.py:900`; `t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC` không giữ được đường Unicode thường. Đo nguyên nhân từng lớp, phản chứng trên bản sao tạm, không skip/đổi kỳ vọng để lấy xanh.\n2. `gate-ops (windows-latest)` đỏ tại `ops/lease_publish_test.py:t217_a9_object_store_thieu_blob_la_2`, `PermissionError [WinError 5]` khi `unlink()` object Git. Phân loại test-harness/read-only object và lỗi sản phẩm bằng phép đo; chỉ sửa đúng lớp chứng minh được. Giữ kiểm tra object-store/ancestry fail-closed.\n3. `gate-registry (windows-latest)` đang chạy từ 2026-10-12T23:30:20Z ở bước `test registry`; trần job hiện 105 phút. Đọc kết quả cuối và log trước khi chọn vá. Không chỉ nâng timeout/skip/giảm tập test; nếu cần thay kiến trúc hoặc mở rộng write set, dừng và revision mới.\n\n## Quan hệ với việc cũ\n\n#671 / draft PR #690 đã thử sửa `t23`/`t49` nhưng chưa land và chưa chứng minh xanh trên Windows; được dùng làm nguồn đối chiếu, không tự nhận làm bản vá. #698 và #700 cùng đụng `ops/cong_cu_test.py`, còn ở trạng thái đề xuất; không cấp writer thứ hai. #705 đã nâng trần registry 90→105 phút nhưng kết quả Windows hiện tại vẫn đang chờ. #541 đã đóng; lỗi `t217` là quan sát mới. Lease/branch cũ không tự cấp quyền cho Packet này.\n\n## Dự kiến hợp đồng\n\n- Review Class: `sensitive` vì CI/gate/security. Executor: Google Antigravity trên Windows thật; Reviewer: Codex phiên độc lập, read-only exact head/tree. Không dùng Claude đang hết quota.\n- Candidate write set, chốt bằng spec/closure trước lease: `ops/bash_nen.py`, `ops/cong_cu_test.py`, `ops/lease_publish_test.py`, `.claude/dev/ci_dang_ky_test.py`, `ops/nhanh_don_duoc_test.py`, `.github/workflows/ci.yml`, `.github/workflows/ci-dot-bien-du.yml`, `ops/ci_duong_nhanh_test.py`. Đường sản phẩm `ops/lease_publish.py` không được ghi nếu chưa có revision chứng minh cần.\n- Nền: canonical master SHA trên, chỉ dựng worktree riêng; không chạm checkout chính đang bẩn. Trước lease: đối chiếu đủ remote refs, scan toàn bộ holder cho từng đường dẫn, khóa spec hash/generation/base/write set, comment cấp quyền neo lease_id, `lease_publish check` và holder scan đạt.\n- Acceptance: ca đích đỏ trên nền và xanh sau vá trên Windows thật; phản chứng độc lập giết từng bản vá; Linux regression giữ xanh; G5 và lease-publish N/N không có lỗi nền; registry kết thúc trong trần với positive evidence; `git diff --check`, secret scan, ruff F delta theo tập `(code,message)` = 0; full selftest Windows/Linux và full CI matrix có artifact JSON + output hash đúng head/tree. `passed/failed/skipped/not_run/not_measured` tách riêng. Codex review theo lớp có hint patch, 0 P1/P2, exact SHA. Không LIVE, credential thật, Drive, approve, merge hoặc land trong lease Executor.\n\n**Trạng thái lúc mở Issue:** proposed. Chưa có lease, chưa giao Executor, chưa có kết luận registry cuối. Spec sẽ đóng băng sau preflight; nếu scan ref/holder không đạt thì không cấp lease.",
+  "closed_by": null,
+  "reactions": {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748/reactions",
+    "total_count": 0,
+    "+1": 0,
+    "-1": 0,
+    "laugh": 0,
+    "hooray": 0,
+    "confused": 0,
+    "heart": 0,
+    "rocket": 0,
+    "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/ducthangho/tra-luat/issues/748/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+}

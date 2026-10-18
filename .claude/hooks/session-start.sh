@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -180,7 +180,16 @@ fi
 #
 # Ba đường cài, thử lần lượt: apt-get (có/không sudo), rồi cargo. Không đường nào
 # chạy thì nói THẲNG là phiên sẽ thiếu — đừng để nó lộ ra giữa chừng.
-if ! co_chay rg; then
+#
+# wp802 (Q4): Windows (Git Bash) KHÔNG có apt-get và thường vắng cargo — hook KHÔNG tự cài ở
+# đó: in ĐÚNG MỘT lệnh rồi để `doctor` chặn (thoát 12). Chuỗi dưới PHẢI khớp `rg.cai.windows`
+# của ops/cong_cu.yaml (phần trước ` && ` đầu tiên) — canh: `r802_bang_cai_rg_khop_cong_cu_yaml`.
+RG_CAI_WINDOWS='winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress'
+RG_WIN=0; case "$(uname -s 2>/dev/null || true)" in MINGW*|MSYS*|CYGWIN*) RG_WIN=1 ;; esac
+if [ "$RG_WIN" = 1 ]; then   # chọn nền TRƯỚC probe: Windows probe ĐÚNG MỘT lần (Codex lượt 2 F5)
+  co_chay rg || { echo "[session-start] CANH BAO: rg THIEU/HONG (Windows) — hook KHONG tu cai; doctor se chan. Cai bang:"
+                  echo "$RG_CAI_WINDOWS"; }
+elif ! co_chay rg; then
   echo "[session-start] cai ripgrep ..."
   if co apt-get; then
     apt-get install -y -qq ripgrep >/dev/null 2>&1 \
@@ -190,7 +199,8 @@ if ! co_chay rg; then
            || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1; } \
       || true
   fi
-  co rg || { co cargo && cargo install ripgrep >/dev/null 2>&1 || true; }
+  # wp802 (M3): `co_chay`, KHÔNG `co` — `rg` có mặt mà hỏng thì `co rg` đúng, bỏ mất cargo.
+  co_chay rg || { co cargo && cargo install ripgrep >/dev/null 2>&1 || true; }
   # BANG CHUNG DUONG: `command -v` la CO MAT, `rg --version` la CHAY DUOC. Audit
   # codex tung dung hai tep RONG ten git.exe/python.exe roi doctor bao xanh.
   if rg --version >/dev/null 2>&1; then

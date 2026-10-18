@@ -2,7 +2,8 @@
 
 Packet #831 · spec r1 `ops/specs/wp831.md` (`92d179bc…`) → r2 `ops/specs/wp831-r2.md` (`3ab3aac4…`) → r3
 `ops/specs/wp831-r3.md` (`dd8f0fab…`). Lease r1 `wp831-r1-g1-claude` (run `39113916942`) → r2 `wp831-r2-g2-claude`
-(nhánh `ops/wp831-r2-g2-lease`, run `39128676976`) → r3 `wp831-r3-g3-claude` (nhánh `ops/wp831-r3-g3-lease@0f56285`).
+(nhánh `ops/wp831-r2-g2-lease`, run `39128676976`) → r3 `wp831-r3-g3-claude` (nhánh `ops/wp831-r3-g3-lease`) → r4 `wp831-r4-g4-claude` (nhánh `ops/wp831-r4-g4-lease@31d9641`,
+spec `ops/specs/wp831-r4.md` `5caec680…`, ngân sách Codex 8, chủ kho issuecomment-6252662788).
 Mỗi lần thay có bia mộ hai chiều; r2/r3 khai `recorder_is_executor: true` theo chỉ thị chủ kho trong phiên executor
 (issuecomment-6250060975, -6251762410).
 Nhánh `agent/wp831-g1-claude`, base `dfe5437`, đã merge `origin/master@1e69d2a` (không rebase). PR #832 (DRAFT).
@@ -17,7 +18,7 @@ KHÔNG merge/land/deploy — việc của chủ kho.
 | `changelog.d/wp-831.md` | fragment. |
 | `RELEASE_MANIFEST.json` | L3: sinh lại (commit cuối có đổi tệp trong manifest). |
 | `scripts/tl_selftest.py` | spec r2: ratchet số tệp gói 187 → 189 ở `r291_docs_ngoai_goi`, `r357_agents_ngoai_goi` + chú thích kê khai slot. |
-| `ops/cai_cong_cu.sh` | spec r3 (F03): ghim `PY[0]` thành đường dẫn tuyệt đối ngay sau khối chọn python/python3/py. |
+| `ops/cai_cong_cu.sh` | spec r3 (F03): ghim `PY[0]` thành đường dẫn tuyệt đối ngay sau khối chọn python/python3/py. spec r4: lượt `source` trong `--bat-buoc` dùng lại `PY` của lượt cha (dấu `CAI_CONG_CU_PY_CUA=$$` không export). |
 
 ## Lệch chữ spec — trạng thái
 - **Q1: ĐÃ RÚT lệch.** Bản đầu thay `/usr/bin` bằng thư mục `dpkg -L` khai; Codex lượt 1 F02 (P2) chứng minh nó có
@@ -52,6 +53,11 @@ KHÔNG merge/land/deploy — việc của chủ kho.
 - Codex lượt 1 (`gpt-6.1-sol`, `xhigh`, launcher run `ce422f79`, 825,7s, rc 0) @`c3c790e`: `changes_requested`,
   F01 `chooser-checker-path-fallthrough` P2, F02 `linux-candidate-set-drops-usrbin` P2; N4 chấp nhận. Verdict:
   `ops/reviews/wp831-g1-luot1-codex-verdict.md` trên nhánh `ops/wp831-r1-g1-lease`. Cả hai đã vá (xem trên).
+
+- Codex lượt 3/3 (1282,8s, rc 0) @`6376cd3`: `changes_requested`; F01/F02 ĐÃ VÁ THẬT; F03 VÁ MỘT PHẦN (wrapper đơn 12/12
+  đạt; `--bat-buoc` rg→bash rc 3 thiếu yaml 12/12). Verdict `ops/reviews/wp831-g1-luot3-codex-verdict.md` (nhánh
+  `ops/wp831-r3-g3-lease@d3a497e`). Vá theo spec r4; đột biến chạy một lần trên bản sao: bỏ phép dùng lại ⇒ cả hai ca
+  r831 đỏ (rc 3, đúng lỗi reviewer), bỏ dòng gán dấu ⇒ đỏ (rc 3), bỏ dòng ghim ⇒ đỏ (rc 2) — đều `TinHieuChotCa`.
 
 ## Kết quả cuối
 (điền sau: run `ci.yml`, run `launcher-windows.yml` + số ca bỏ qua, verdict Codex lượt cuối, `release-verify`)

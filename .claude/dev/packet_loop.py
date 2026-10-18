@@ -944,7 +944,9 @@ def cmd_record_lease(a, state_dir: Path) -> int:
     """
     st = _load(state_dir, a.packet)
     moi, cu = (a.lease_ref, a.lease_path, a.lease_comments), (a.lease_id, a.granted_by, a.evidence, a.expires_utc)
-    if any(moi) == any(cu) or not all(moi if any(moi) else cu):  # #812 M1: hai đường LOẠI TRỪ nhau
+    moi_co = any(x is not None for x in moi)
+    cu_co = any(x is not None for x in cu)
+    if moi_co == cu_co or not all(moi if moi_co else cu):  # #812 M1: hai đường LOẠI TRỪ nhau
         _die(RC_ARG, "chọn ĐÚNG một đường: --lease-ref/--lease-path/--lease-comments HOẶC "
                      "--lease-id/--granted-by/--evidence/--expires-utc, đủ cờ của đường ấy")
     _xet_dung(state_dir, st, "record-lease")
@@ -952,7 +954,7 @@ def cmd_record_lease(a, state_dir: Path) -> int:
         _die(RC_STATE,
              f"chỉ ghi được lease khi packet đang 'awaiting_lease'; hiện là {st['state']!r}. "
              f"Ghi đè lease của một packet đang chạy là hồi sinh một lượt đã cạn.")
-    if any(moi):
+    if moi_co:
         return _record_lease_ref(a, state_dir, st)
     # Dựng ứng viên rồi đưa qua ĐÚNG hàm kiểm chung. Không tự kiểm ở đây nữa —
     # hai chỗ tự kiểm rời nhau CHÍNH LÀ finding `partial-lease-authority-bypass`.
@@ -2448,6 +2450,7 @@ def _ten_provider(p):
     import launcher
     if type(p) is not str:
         return None
+    p = p.strip()  # I8: bản chiếu identity lease
     p = dict(launcher._PROVIDER_BI_DANH).get(p, p)
     return next((lenh[0] for prov, lenh, *_ in launcher._TRANSPORT_CONTRACTS if prov == p and lenh[0] in PROVIDERS), p)
 
@@ -2601,7 +2604,7 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
         _die(RC_ARG, f"KHÔNG ĐO ĐƯỢC: {a.lease_comments}: {type(ex).__name__}")
     ds = [c for t in (cm if isinstance(cm, list) else [cm]) for c in (t if isinstance(t, list) else [t])]
     if not any(isinstance(c, dict) and isinstance(c.get("user"), dict) and c["user"].get("login") == BOT_LEASE
-               and str(c.get("issue_url", "")).endswith(f"/{mr[1]}/issues/{st['packet']}")
+               and c.get("issue_url") in (f"https://api.github.com/repos/{mr[1]}/issues/{st['packet']}", f"https://github.com/{mr[1]}/issues/{st['packet']}")
                and re.search(rf"^lease_id: {re.escape(lid)}$", str(c.get("body", "")), re.M) for c in ds):
         _die(RC_GUARD, f"I2(R): không comment nào của {BOT_LEASE} trên issue #{st['packet']} chứa `lease_id: {lid}` — workflow chưa đăng")
     rc, spec = _git_do(root, "show", f"{oid}:{l['spec_path']}")

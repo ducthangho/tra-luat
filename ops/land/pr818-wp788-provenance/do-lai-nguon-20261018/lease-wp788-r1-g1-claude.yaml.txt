@@ -1,0 +1,133 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 788
+packet_id: wp788
+revision: 1
+generation: 1
+lease_id: wp788-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on:
+- 775
+depends_on_ghi_chu: 'Packet #775 da land (PR #779, merge d8b15cb0730c85e7019aee627c3bfa645a6d3eaf). Lease wp775-r1-g1-claude con han nen thu hoi bang bia mo hai chieu (xem thay_the_cho).'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+assurance_ghi_chu: 'Theo spec wp788 r1 muc routing: assurance = verdict codex approve tren head cuoi (ho openai vs ho claude, bang chung do_may qua launcher run.json). Uy quyen land cua chu kho la viec RIENG, khong phai human_audited.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp788.md
+spec_sha256_required: 82dc170446c3a4431739a3effbec8cb55adadc13d69f5c510f8782a2b45eb54e
+spec_hash: 82dc170446c3a4431739a3effbec8cb55adadc13d69f5c510f8782a2b45eb54e
+prompt_path: ops/specs/wp788.md
+prompt_sha256_required: 82dc170446c3a4431739a3effbec8cb55adadc13d69f5c510f8782a2b45eb54e
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+write_set_hash: a7ec25392f536bb7467de62e4bb9b0da8689fe4c020031ed88fec36390ea96b3
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+effective_write_set_ghi_chu: 'Spec wp788 r1 khai dung hai duong dan; khong phai ngoai le closure.'
+required_checks:
+- {id: chung-1, kiem: 'packet_loop_test N/N hai so BANG NHAU, TONG: DAT', do: 'a/b a!=b, rc!=0, hoac rc=0 ma output rong'}
+- {id: chung-2, kiem: 'moi ca khong thuoc ho kg_* giu mau; moi ca kg_* cu con mat', do: 'ca cu doi mau, hoac ten ca kg_* cu bien mat'}
+- {id: N1, kiem: 'thieu --check-suite / abc / -1 / 0 / 012 => RC_ARG', do: 'dot bien bo kiem dang lam ca abc khong tra RC_ARG'}
+- {id: N2, kiem: 'phan tu thieu check_suite / null / id true / id "105" / run KHONG bat buoc thieu check_suite => KHONG DO DUOC + 12', do: 'dot bien chi kiem run bat buoc lam ca run khong bat buoc XANH'}
+- {id: N3-producer, kiem: 'suite neo gate failure id1, suite khac gate success id2 => do, ly do neu failure', do: 'dot bien bo loc suite lam ca XANH'}
+- {id: N3-vang, kiem: 'gate chi co o suite khac => VANG', do: 'dot bien bo loc suite lam ca XANH'}
+- {id: N3-chay-lai, kiem: 'trong suite neo: id1 cancelled, id2 success => xanh', do: 'dot bien loc theo suite cua run id NHO nhat lam ca DO'}
+- {id: N4, kiem: 'stderr dung MOT dong CANH BAO cho ten bat buoc co run o suite khac; 0 dong khi khong co; ma thoat khong doi', do: 'dot bien bo canh bao / canh bao ca ten khong bat buoc lam ca DO'}
+- {id: N5, kiem: 'total_count vang / 0 voi 1 run / -1 / true / lech giua trang / thieu / thua => KHONG DO DUOC + 12; khai dung => xanh, 1 va nhieu trang', do: 'dot bien quay ve so_id < tong_khai / bo doi co mat / bo so giua trang lam ca tuong ung XANH'}
+- {id: N6, kiem: 'kiem-gate --help chua --check-suite va check_suite_id; dong xanh chua id suite', do: 'dot bien xoa dong help lam ca khoa help DO'}
+- {id: N7-that, kiem: 'fixture cat tu JSON that bb8c0c4, 14 ten ci.yml: --check-suite 105371250078 => rc0; --check-suite 105371237228 => rc12 VANG', do: 'mot trong hai sai ma'}
+- {id: kich-thuoc, kiem: 'git diff --numstat base...HEAD <= 3 tep, <= 300 dong them', do: 'vuot'}
+- {id: ruff, kiem: 'ruff F tren .claude/dev/packet_loop.py: DELTA so base = 0', do: 'delta > 0'}
+- {id: doctrine, kiem: 'doctrine-scan va adr-song rc nhu base', do: 'rc doi'}
+- {id: dot-bien, kiem: 'bang dot bien du moi o cot Phep do lam DO, moi ban sao mot tien trinh, -B, PYTHONDONTWRITEBYTECODE=1', do: 'thieu dot bien; o song khong ban va; traceback dem la giet'}
+- {id: tu-do, kiem: 'kiem-gate tren JSON check-runs THAT cua head cuoi (filter=all), 14 ten ci.yml, check_suite_id cua chinh luot ci.yml => rc0; suite workflow khac => rc12', do: 'mot trong hai sai ma'}
+merge_conditions:
+- {id: merge-1, dieu_kien: 'verdict codex approve tren head cuoi, P1=0 P2=0 (cross_approved)'}
+- {id: merge-2, dieu_kien: 'moi muc N1-N7 xep DA VA / KHONG VA co ly do hoac quyet dinh chu kho co link'}
+- {id: merge-3, dieu_kien: 'mot luot ci.yml XANH tren head cuoi, kiem bang packet_loop.py kiem-gate; luot huy/bo qua/vang KHONG tinh; trong vong va khong CI'}
+- {id: merge-4, dieu_kien: 'uy quyen merge cua chu kho neo dung head cuoi; connector codex tren dung head khong con P1/P2 mo'}
+- {id: merge-4b, dieu_kien: 'MOI luot connector codex dang chay hoac vua tu khoi khi PR roi draft phai KET THUC tren head cuoi (status completed) va khong con P1/P2 mo TRUOC khi merge; luot running la chua do'}
+- {id: merge-5, dieu_kien: 'head doi => merge-1, merge-3, merge-4, merge-4b het hieu luc'}
+land_obligations:
+- 'resolve hai thread P1 tren PR #777 (r4295393478, r4295393490) kem link merge sau khi land; truoc do de MO'
+land_obligations_ghi_chu: 'spec wp788 r1 muc Viec di kem khi mo packet'
+branch: agent/wp788-r1-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf
+start_from_sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf
+reviewed_sha_required: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf
+base_ghi_chu: 'origin/master sau khi PR #779 (#775) land, dung yeu cau muc base cua spec.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/788#issuecomment-6237341979
+granted_on_instruction_readback: 'GET issues/comments/6237341979: user ducthangho, author_association OWNER, performed_via_github_app null, created_at == updated_at 2026-10-17T17:12:50Z, body sha256 3a04b38eaee3ee35b49021b72f3b01b9d6b9e1eeceace0320cb3ed5b10f76195; dich danh generation g1 lease_id wp788-r1-g1-claude, neo spec sha256 82dc1704, base d8b15cb, ngan sach codex 0/0/3, co khoi cap_lease'
+granted_on_instruction_note: 'Chu kho cap g1 (6237341979): chi ghi lease khi ai-dang-giu <= 10 phut truoc leased_at khong con writer ngoai ngoai lease wp775 duoc thu hoi. lease_id dung NGUYEN VAN ten trong comment.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien dieu phoi ghi lease; executor la phien cloud KHAC, khong phai phien ghi.'
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-17T17:13:48Z'
+  ref: refs/heads/agent/wp788-r1-g1-claude
+  trang_thai: vang
+  oid_do_duoc: null
+  oid_yeu_cau: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf
+  ghi_chu: 'nhanh chua ton tai luc cap (ls-remote rong); executor tao tu base_sha.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-17T17:13:48Z'
+  goc_quet: 'master d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, quet refs/heads/* sau fetch day du'
+  so_nhanh: 'ls-remote 587 == cuc bo 587 (so TAP ten: thieu 0, thua 0)'
+  ket_qua: 'ai-dang-giu ca hai duong dan rc=11 NGUOI_GIU 1 = wp775-r1-g1-claude (ref ops/wp775-spec, packet #775 da land o d8b15cb) - duoc thay o day bang bia mo hai chieu; wp770-r1-g1-claude CON_HAN nhung DA_BI_THAY_THE; khong co writer ngoai'
+leased_at_utc: '2026-10-17T17:15:05Z'
+heartbeat_at: '2026-10-17T17:15:05Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-18T02:38:14Z'
+lease_expires_at_utc: '2026-10-18T02:38:14Z'
+rut_han:
+  han_cu: '2026-10-19T17:15:05Z'
+  han_moi: '2026-10-18T02:38:14Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #788 da land (PR #818, merge ebcc70209f000c929aa9be435c3621348a3b4791, 2026-10-18T02:24:34Z); issue #788 da dong. Chu kho yeu cau rut han de nha write set ngay, thay vi cho het han 2026-10-19T17:15:05Z.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; bia mo mot chieu lam ai-dang-giu tra KHONG_XAC_DINH rc=12 (do tren ban sao nhap, #788 issuecomment-6244745249)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+attempts_basis: tran canon 3/packet (protocol envelope max_attempts_per_packet).
+review_rounds_limit: 10
+budget:
+  vong_review:
+    pr_wp788: {used: 0, reserved: 0, limit: 10}
+  codex_review_calls:
+    pr_wp788: {used: 0, reserved: 0, limit: 3}
+  attempt:
+    packet_788: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+  ghi_chu: 'spec wp788 r1 muc ngan_sach_review: 3 loi goi codex = 2 executor-review qua launcher.py run + 1 connector tren head cuoi (merge-4/4b); luot connector tu khoi khi roi draft KHONG tru ngan sach nhung phai ket thuc truoc merge.'
+nang_tran: []
+requires_live: false
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+ci_cho_phep: 'mot luot ci.yml tren head cuoi truoc merge, kiem bang kiem-gate --check-suite (chinh cong cu cua packet nay neu da co tren head, nguoc lai ban tren master); luot tu chay giua vong thi huy'
+push_policy: 'push nhanh agent/wp788-r1-g1-claude va mo PR draft'
+thay_the_cho:
+- wp775-r1-g1-claude
+thay_the_cho_ghi_chu: 'lease wp775 (packet #775 da land o d8b15cb, PR #779) con han toi 2026-10-18T14:31:56Z va giu dung write set => thu hoi bang bia mo hai chieu (chu kho 6237341979). Bia mo dat tren ops/wp775-spec, ref duy nhat mang lease wp775.'

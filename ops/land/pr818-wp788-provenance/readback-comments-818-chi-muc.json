@@ -1,0 +1,75 @@
+{
+ "review_comments": [],
+ "issue_comments": [
+  {
+   "id": 6238218161,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T18:02:08Z",
+   "body_sha256": "a875c5822517af7ed4c1d789106707676bc48303c41a67aaf9cce036480774e1",
+   "body_dau": "`thu-hoi` ĐỎ trên `e995730` ([run 39056266595](https://github.com/ducthangho/tra-luat/actions/runs/39056266595/job/11746"
+  },
+  {
+   "id": 6238415805,
+   "user": "ducthangho",
+   "created_at": "2026-10-17T18:16:08Z",
+   "body_sha256": "e066111c41032c9807ac827af6523afe5f5f990793236c80d535209a19fd459b",
+   "body_dau": "## Bản chiếu VERDICT executor-review lượt 1 (codex) — `blocked`\n\n- `reviewed_sha`: `e995730464da03223cf636e49ad32e220c6e"
+  },
+  {
+   "id": 6243788791,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T00:35:47Z",
+   "body_sha256": "a1a088e52ea3aca7c710a2fc351fae1b6d65517a9a4a0cc7017df566f616a441",
+   "body_dau": "## Bản chiếu VERDICT executor-review lượt 2 (codex, phân lớp) — `changes_requested`\n\n- `reviewed_sha`: `4ffae005eb1c434d"
+  },
+  {
+   "id": 6243978124,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T00:58:43Z",
+   "body_sha256": "7881f05a826cf27ef78cfc8fb9cf09a33c565787fc0536d9c60f92d2b8945fe5",
+   "body_dau": "## Bản chiếu VERDICT executor-review lượt 3 (codex, phân lớp) — `changes_requested`\n\n- **`reviewed_sha`:** `8264089a14f7"
+  },
+  {
+   "id": 6243998989,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T01:01:10Z",
+   "body_sha256": "562e4736f7ffce7da8c72b1bb4fc9bd784034eea70a135881cee6699a8a7a1c7",
+   "body_dau": "## Bản chiếu VERDICT cross-review lượt 2 do phiên điều phối gọi (codex) — `blocked` vì head đổi giữa lượt\n\nLượt này do c"
+  },
+  {
+   "id": 6244176477,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T01:22:46Z",
+   "body_sha256": "c7ecc02a8457f0828812c8c3a56c901d969e59266e21f8c2a2a111383123a316",
+   "body_dau": "## Bản chiếu VERDICT executor-review lượt 4 (codex, phân lớp) — `changes_requested`\n\n- **`reviewed_sha`:** `47591ebc51af"
+  },
+  {
+   "id": 6244369249,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T01:43:37Z",
+   "body_sha256": "6ba076c1797de12d86a55bb2cfdfbd6f3d248405272ce6d9fd962b0212a75aaa",
+   "body_dau": "## Bản chiếu VERDICT executor-review lượt 5 (codex, phân lớp) — **`approve`**\n\n- `reviewed_sha`: `984032f375aa0c8fe6039d"
+  },
+  {
+   "id": 6244369404,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T01:43:38Z",
+   "body_sha256": "14f764fc163a0c89ce284a9ddd957c5895eac09c295b359c1dbeb4c777f4d958",
+   "body_dau": "@codex review\n\nHead cuối `984032f375aa0c8fe6039dfd35f6842acd49c926` (packet wp788, #788). Đây là lời gọi codex 6/6 cho đ"
+  },
+  {
+   "id": 6244370907,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-18T01:43:49Z",
+   "body_sha256": "fad401f71887828d849931edf41db0ec975a5f4912b0e363979389ae4b829fcd",
+   "body_dau": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"984032f375aa0c8fe603"
+  },
+  {
+   "id": 6244383348,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-18T01:45:17Z",
+   "body_sha256": "a7d6adececccb5b0446ed40337f1ef9f6bb4bfc828261a1c18db495d82ba8c6b",
+   "body_dau": "<!-- codex-review-receipt:v1 -->\n\nCodex Review: Didn't find any major issues. Nice work!\n\n**Reviewed commit:** `984032f3"
+  }
+ ]
+}

@@ -7,6 +7,7 @@ import datetime
 import hashlib
 import io
 import json
+import math
 import os
 import pathlib
 import re
@@ -1105,7 +1106,9 @@ def loi_json_thoi_gian(js, moi=MOI):
     loi = [] if sorted(m.get("duong_dan") for m in bo) == sorted(moi) else ["mục không khớp một-một với MOI"]
     for m in bo:
         mo = [m.get(k) for k in ("bat_dau_utc", "ket_thuc_utc")]
-        if type(m.get("rc")) is not int or type(m.get("giay")) not in (int, float) or m["giay"] < 0:
+        # WP748 r19 (cung lop Codex P2 o nhanh_don_duoc_test) — NaN/Infinity qua duoc `< 0`; int KHONG goi isfinite (OverflowError).
+        g = m.get("giay")
+        if type(m.get("rc")) is not int or not (type(g) is int or (type(g) is float and math.isfinite(g))) or g < 0:
             loi.append(f"rc/giay sai: {m.get('duong_dan')}")
         with contextlib.suppress(TypeError, ValueError):  # PARSE rồi so thời điểm, không so chuỗi (PR #640 P2)
             mo = [datetime.datetime.fromisoformat(x[:-1] + "+00:00") for x in mo if x.endswith("Z")]
@@ -1847,11 +1850,21 @@ def phan_chung():
                    ("giay-am", lambda b: b[0].update(giay=-1)), ("moc-khong-utc", lambda b: b[0].update(
                        bat_dau_utc="2026-09-25T08:00:00")), ("moc-dao", lambda b: b[0].update(
                        bat_dau_utc=b[0]["ket_thuc_utc"], ket_thuc_utc=b[0]["bat_dau_utc"])),
-                   ("moc-lich-khong-ton-tai", lambda b: b[0].update(bat_dau_utc="2026-99-99T99:99:99.000Z"))):
+                   ("moc-lich-khong-ton-tai", lambda b: b[0].update(bat_dau_utc="2026-99-99T99:99:99.000Z")),
+                   ("giay-nan", lambda b: b[0].update(giay=float("nan"))), ("giay-inf", lambda b: b[0].update(
+                       giay=float("inf"))), ("giay-am-inf", lambda b: b[0].update(giay=float("-inf")))):
         _j = json.loads(json.dumps(_bc)); _f(_j["bo"])
         _them("p637-A1-" + _t, bool(loi_json_thoi_gian(_j, _M)))
     _j["bo"] = [{**m, "bat_dau_utc": "2026-09-25T08:00:00Z", "ket_thuc_utc": "2026-09-25T08:00:00.100Z"} for m in _bc["bo"]]
     _them("p637-A1-do-chinh-xac-khac-van-dung", not loi_json_thoi_gian(_j, _M))
+    _j["bo"] = [{**m, "giay": 2} for m in _bc["bo"]]          # WP748 r19: giay int huu han van DUNG
+    _them("p637-A1-giay-int-van-dung", not loi_json_thoi_gian(_j, _M))
+    _j["bo"] = [{**m, "giay": 10 ** 400} for m in _bc["bo"]]  # int json khong lo: DUNG, khong duoc nem OverflowError
+    try:
+        _kq = not loi_json_thoi_gian(_j, _M)
+    except OverflowError:
+        _kq = False
+    _them("p637-A1-giay-int-khong-lo-khong-nem", _kq)
     _cv, _st = threading.Condition(), {"act": 0, "max": 0, "goi": []}
     def _tran(path):
         with _cv:

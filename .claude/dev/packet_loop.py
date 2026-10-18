@@ -2500,10 +2500,17 @@ def _dich_trong_cay(root: Path, rev: str, p: str) -> str:
                 raise ValueError(f"symlink thoát gốc tại {rev}: {p!r}")
             ra.pop()
             continue
-        rc, ls = _git_do(root, "ls-tree", rev, "--", "/".join([*ra, x]))
+        # §5: thành phần khớp entry THẬT của cây theo NFC + casefold (không theo byte) — `ALIAS` vẫn là symlink `alias`.
+        rc, ls = _git_do(root, "ls-tree", "-z", rev, *(("--", "/".join(ra) + "/") if ra else ()))
         if rc:
             raise ValueError(f"không đọc được cây {rev} cho {p!r}")
-        if ls.startswith(b"120000 "):
+        khoa = lambda s: unicodedata.normalize("NFC", s).casefold()  # noqa: E731
+        khop = [(meta, ten.rsplit("/", 1)[-1]) for meta, _, ten in (e.partition("\t") for e in ls.decode("utf-8", "surrogateescape").split("\0") if e)
+                if khoa(ten.rsplit("/", 1)[-1]) == khoa(x)]
+        if len(khop) > 1:
+            raise ValueError(f"thành phần {x!r} khớp nhiều entry tại {rev}: {[t for _, t in khop]}")
+        x = khop[0][1] if khop else x
+        if khop and khop[0][0].startswith("120000 "):
             rc, dich = _git_do(root, "cat-file", "blob", f"{rev}:{'/'.join([*ra, x])}")
             buoc += 1
             if rc or buoc > 40 or dich.startswith(b"/"):

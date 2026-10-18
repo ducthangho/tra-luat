@@ -6649,9 +6649,10 @@ MUTANTS["r812_r5_raw_provider"] = ((MUTANTS["r812_r5_raw_provider"][0], "    p =
 
 
 # #812 connector (review tự kích hoạt khi PR ready, trên f4ab8b6): ba lớp P2.
-def _r812_r8_symlink(dich, ws_khac, cay="khac"):
-    """Symlink `alias` CHỈ có trên MỘT cây (ref lease này · ref `ops/khac` của lease kia), checkout người gọi không có;
-    lease khác còn hiệu lực giữ `ws_khac` ở `ops/khac`."""
+def _r812_r8_symlink(dich, ws_khac, cay="khac", ten=None):
+    """Symlink (mặc định `alias -> dich`) CHỈ có trên MỘT cây (ref lease này · ref `ops/khac` của lease kia), checkout người gọi
+    không có; lease khác còn hiệu lực giữ `ws_khac` ở `ops/khac`. Symlink ghi THẲNG vào index (120000) — không cần quyền tạo
+    symlink của hệ tệp, và tạo được cả hai tên chỉ khác hoa/thường trên hệ tệp không phân biệt."""
     def doi(w):
         goc = _g(w, "rev-parse", "refs/remotes/origin/ops/wp55-spec")  # hai nhánh rẽ từ CÙNG gốc — symlink chỉ ở đúng một cây
         lease = json.loads(_g(w, "show", f"{goc}:ops/leases/l.yaml"))
@@ -6659,9 +6660,12 @@ def _r812_r8_symlink(dich, ws_khac, cay="khac"):
             _g(w, "checkout", "-qb", nhanh, goc)
             if nhanh == "ops/khac":
                 (w / "ops/leases/k.yaml").write_text(json.dumps({**lease, "lease_id": "wp55-r1-g1-khac", "write_set": ws_khac}))
+                _g(w, "add", "ops/leases")
             if nhanh.endswith(cay):
-                os.symlink(dich, w / "alias")
-            _g(w, "add", "-A"), _g(w, "commit", "-qm", "r8", "--allow-empty"), _g(w, "push", "-q", "origin", nhanh), _g(w, "checkout", "-q", "master")
+                for t, d in (ten or {"alias": dich}).items():
+                    blob = subprocess.run(["git", "hash-object", "-w", "--stdin"], input=d, cwd=w, text=True, capture_output=True, check=True).stdout.strip()
+                    _g(w, "update-index", "--add", "--cacheinfo", f"120000,{blob},{t}")
+            _g(w, "commit", "-qm", "r8", "--allow-empty"), _g(w, "push", "-q", "origin", nhanh), _g(w, "checkout", "-qf", "master")
             _g(w, "branch", "-q", "-D", nhanh)
     return doi
 
@@ -6671,6 +6675,10 @@ CASES += [
     ("r812_r8_symlink_chi_trong_ref", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["alias/a.py"]))),
     ("r812_r8_symlink_chi_trong_snapshot", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["alias/a.py"], cay="spec"))),
     ("r812_r8_symlink_doi_chung", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=_r812_r8_symlink("x", ["alias/b.py"]))),
+    ("r812_r8_symlink_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["ALIAS/a.py"]))),
+    ("r812_r8_symlink_unicode", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["CAFE\u0301/a.py"], ten={"caf\u00e9": "x"}))),
+    ("r812_r8_symlink_hoa_thuong_doi_chung", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=_r812_r8_symlink("x", ["ALIAS/b.py"]))),
+    ("r812_r8_symlink_mo_ho", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["Alias/a.py"], ten={"ALIAS": "y", "alias": "x"}))),
     ("r812_r8_am_bo_lop_tai_dien", _r812_ca("review", 11, bn=BN_AM, lop=LOP_R8, verdict="changes_requested", ids=("lop-moi",))),
     ("r812_r8_am_du_lop", _r812_ca("review", 0, {"state": "running", "finding_counts": {"lop-tai-dien": 1, "lop-moi": 1}}, bn=BN_AM,
                                    lop=LOP_R8, verdict="changes_requested", ids=("lop-tai-dien", "lop-moi"))),
@@ -6683,6 +6691,10 @@ MUTANTS.update({
                                       ["r812_r8_symlink_chi_trong_ref"]),
     "r812_r8_bo_cay_ref_kia": ("revs = (oid, m[\"ref\"])", "revs = (oid,)", ["r812_r8_symlink_chi_trong_ref"]),
     "r812_r8_bo_snapshot_lease": ("revs = (oid, m[\"ref\"])", "revs = (m[\"ref\"],)", ["r812_r8_symlink_chi_trong_snapshot"]),
+    "r812_r8_cay_theo_byte": ('        khoa = lambda s: unicodedata.normalize("NFC", s).casefold()  # noqa: E731', '        khoa = lambda s: s  # noqa: E731',
+                              ["r812_r8_symlink_hoa_thuong", "r812_r8_symlink_unicode"]),
+    "r812_r8_cay_bo_nfc": ('lambda s: unicodedata.normalize("NFC", s).casefold()  # noqa', 'lambda s: s.casefold()  # noqa', ["r812_r8_symlink_unicode"]),
+    "r812_r8_cay_bo_mo_ho": ("        if len(khop) > 1:", "        if False:", ["r812_r8_symlink_mo_ho"]),
     "r812_r8_bo_du_lop_am": ('("thieu-lop-am", lop_ok and (', '("thieu-lop-am", True or (', ["r812_r8_am_bo_lop_tai_dien"]),
     "r812_r8_du_lop_ca_approve": ('a.verdict == "approve" or {x["slug"]', 'False or {x["slug"]', ["r812_r8_approve_no_p3"]),
     "r812_r8_runtime_bo_lease": ('    if isinstance(lease, dict) and any(', '    if False and any(', ["r812_r8_runtime_trai_lease"]),

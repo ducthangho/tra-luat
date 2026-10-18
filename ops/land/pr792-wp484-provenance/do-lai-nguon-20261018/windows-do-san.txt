@@ -1,0 +1,42 @@
+# 2026-10-18T05:22:09Z — so job windows DO giua run exact-SHA va run dispatch tren master fb490a7c
+run 39096585920 (de82ef74): 11 job failure; ubuntu failure = 0
+   gate (windows-latest) ['G5 kiem ban ke cong cu + T1..T8 (packet']
+   gate-cong-cu (windows-latest, 0) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 1) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 2) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 3) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 4) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 5) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 6) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 7) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu-gop (windows-latest) ['G5 gom manh ban kinh dot bien (#668)']
+   gate-ops (windows-latest) ['lease-publish selftest (đo lại setup sau G5)']
+run 39095054115 (fb490a7c): 11 job failure; ubuntu failure = 0
+   gate (windows-latest) ['G5 kiem ban ke cong cu + T1..T8 (packet']
+   gate-cong-cu (windows-latest, 0) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 1) ['cài rg cho G5 (cài xong đo lại)']
+   gate-cong-cu (windows-latest, 2) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 3) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 4) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 5) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 6) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu (windows-latest, 7) ['G5 manh ban kinh dot bien (#668)']
+   gate-cong-cu-gop (windows-latest) ['G5 gom manh ban kinh dot bien (#668)']
+   gate-ops (windows-latest) ['lease-publish selftest (đo lại setup sau G5)']
+# ca do trong log (get job logs 117584224262 / 117584224313):
+  ĐỎ  t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows: vẫn lọt \r vào tên công cụ: C:\Users\runneradmin\AppData\Local\Temp\cong-cu-batch-9ak6vuxw\ops\bash_n
+  ĐỎ  t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC: (2) chiều ngược: đường Unicode THƯỜNG bị bóp méo: []
+[B]   ĐỎ  t217_a9_object_store_thieu_blob_la_2: PermissionError: [WinError 5] Access is denied: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\lp_ijyqa8ut\\kho\\.git\\obje
+[A]   ĐỎ  t217_a9_object_store_thieu_blob_la_2: PermissionError: [WinError 5] Access is denied: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\lp_89hoybfk\\kho\\.git\\obje
+  ĐỎ  t217_a9_object_store_thieu_blob_la_2: PermissionError: [WinError 5] Access is denied: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\lp_5uomzx_7\\kho\\.git\\objects\
+$ git diff --name-only 924527c2 de82ef74 (bo ops/handoff|leases|specs|reviews)
+.claude/dev/codex_cred.py
+.claude/dev/codex_cred_test.py
+.claude/dev/codex_env_policy.py
+.claude/dev/launcher.py
+.claude/dev/launcher_test.py
+.claude/dev/packet_loop_test.py
+.claude/hooks/session-start.sh
+.claude/hooks/session_start.py
+.github/workflows/launcher-windows.yml
+# => #792 KHONG cham ops/bash_nen.py, ops/cong_cu*, ops/lease_publish*; issue theo doi: #748

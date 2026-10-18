@@ -1,0 +1,8 @@
+# kiem-gate OFFLINE tren readback-check-runs-ebcc702.json — 2026-10-18T18:09:45Z; packet_loop.py tai ebcc702
+$ sha256sum packet_loop.py@ebcc702
+c15ac9330a084d4a10d559885dbeb606c841ca4ad22a6ca51686c681e59f8634
+$ sha256sum readback-check-runs-ebcc702.json
+d5773e08d96c76947267e5124227b8047d8c8ec8639aca1f9d8e97fe56a007b8
+$ kiem-gate --head ebcc70209f000c929aa9be435c3621348a3b4791 --check-suite 105932403554 (14 ten ci.yml)
+gate XANH trên ebcc70209f000c929aa9be435c3621348a3b4791 (suite 105932403554): chuan-bi id=117743682888 · gate (ubuntu-latest) id=117743707600 · gate-registry (ubuntu-latest) id=117743708053 · gate-ops (ubuntu-latest) id=117743707624 · gate-packet-loop (ubuntu-latest) id=117743707704 · gate-cong-cu-gop (ubuntu-latest) id=117749762797 · gate-cong-cu (ubuntu-latest, 0) id=117743707831 · gate-cong-cu (ubuntu-latest, 1) id=117743707739 · gate-cong-cu (ubuntu-latest, 2) id=117743707780 · gate-cong-cu (ubuntu-latest, 3) id=117743708031 · gate-cong-cu (ubuntu-latest, 4) id=117743707813 · gate-cong-cu (ubuntu-latest, 5) id=117743708000 · gate-cong-cu (ubuntu-latest, 6) id=117743707875 · gate-cong-cu (ubuntu-latest, 7) id=117743707742
+rc=0

@@ -1,0 +1,6 @@
+$ git log -1 --format="%H %T %P" ebcc7020
+ebcc70209f000c929aa9be435c3621348a3b4791 d2773d05a663dd92e6cc5df1010e63c51c331e11 1360108b5e02a58ebcd7f1e7ee9fda73fb5bf70c 984032f375aa0c8fe6039dfd35f6842acd49c926
+$ git log -1 --format=%T 984032f3
+ca01ca9b18b840fbb56668aab28adb9885f97005
+$ git merge-base --is-ancestor 984032f3 origin/master; echo rc=$?
+rc=0

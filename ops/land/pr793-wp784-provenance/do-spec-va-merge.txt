@@ -1,0 +1,18 @@
+# do 2026-10-18T17:48:55Z — phien session_017khPoiSXW9Yvefabg6MWaH (sua L1 cho PR #799)
+$ git show 7cc384e:ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md | sha256sum
+e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a  -
+$ git rev-parse 7cc384e:ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md
+98ddcb7db0aaa8c15705eaa19e43a99f9c0f393d
+$ git rev-parse origin/ops/cap-lease-784   # nhanh lease
+e69c7b412d3191afba1787161a6d4984adf0803d
+$ git show origin/ops/cap-lease-784:ops/leases/wp784-r2-g2-claude-20261017.yaml | grep -E 'lease_id|spec_sha256_required|spec_hash'
+lease_id: wp784-r2-g2-claude-20261017
+spec_sha256_required: e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a
+spec_hash: e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a
+$ git show -s --format='%H %T parents=%P' 7cc384e
+7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16 badb0d08f7fc920a909719ee0c14e065612438c4 parents=bb0ba77bf7beafdb0d2d64e5e0009052f19a37f1 1b375dbab5f4fe2694c7e12bbf159dd1c7c53828
+$ git diff --name-status bb0ba77^1 bb0ba77   # merge dac ta so voi cha thu nhat cua no
+A	ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md
+A	ops/specs/PUSH-MOT-LAN-VA-DUNG-VA.md
+$ git merge-base --is-ancestor bb0ba77 7cc384e^1 && echo la_to_tien
+la_to_tien

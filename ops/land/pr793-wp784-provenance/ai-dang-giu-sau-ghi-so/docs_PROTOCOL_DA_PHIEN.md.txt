@@ -1,0 +1,33 @@
+$ python ops/lease_publish.py ai-dang-giu docs/PROTOCOL_DA_PHIEN.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp538-r1-g1-codex-windows	refs/heads/agent/tran-codex-va-sensitive-r1-g1-claude:ops/leases/wp538-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/heads/agent/tran-codex-va-sensitive-r1-g1-claude:ops/leases/wp538-r2-g2-codex-windows.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	tran-codex-va-sensitive-r1-g1-claude-20261016	refs/heads/ops/cap-lease-782:ops/leases/tran-codex-va-sensitive-r1-g1-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	tran-codex-va-sensitive-r2-g2-claude-20261016	refs/heads/ops/cap-lease-782:ops/leases/tran-codex-va-sensitive-r2-g2-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r3-g3-claude-20261016	refs/heads/ops/cap-lease-782:ops/leases/wp782-r3-g3-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r4-g4-claude-20261017	refs/heads/ops/cap-lease-782:ops/leases/wp782-r4-g4-claude-20261017.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r5-g5-claude-20261017	refs/heads/ops/cap-lease-782:ops/leases/wp782-r5-g5-claude-20261017.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r5-g5b-claude-20261017	refs/heads/ops/cap-lease-782:ops/leases/wp782-r5-g5b-claude-20261017.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp784-r2-g2-claude-20261017	refs/heads/ops/cap-lease-784:ops/leases/wp784-r2-g2-claude-20261017.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g2-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/claude/bia-mo-wp538-g3-20260916:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	quy-trinh-lap-review-r13-g13-codex	refs/remotes/origin/codex/wp523-r13-authority:ops/leases/quy-trinh-lap-review-r13-g13-codex.yaml
+HẾT_HẠN	quy-trinh-lap-review-r14-g14-codex	refs/remotes/origin/codex/wp523-r14-authority:ops/leases/quy-trinh-lap-review-r14-g14-codex.yaml
+HẾT_HẠN	wp709-exec-g1-codex-20261005	refs/remotes/origin/codex/wp709-bootstrap:ops/leases/wp709-exec-g1-codex-20261005.yaml
+HẾT_HẠN	wp709-exec-g2-codex-20261006	refs/remotes/origin/codex/wp709-bootstrap:ops/leases/wp709-exec-g2-codex-20261006.yaml
+HẾT_HẠN	skill-goi-python-ba-ten-exec-1-claude-20260826	refs/remotes/origin/ops/cap-lease-4-packet-20260826:ops/leases/skill-goi-python-ba-ten-exec-1-claude-20260826.yaml
+HẾT_HẠN	tran-vong-review-len-muoi-exec-1-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/tran-vong-review-len-muoi-exec-1-claude-20260912.yaml
+HẾT_HẠN	tran-vong-review-len-muoi-exec-3-claude-20260912	refs/remotes/origin/ops/cap-lease-522-523:ops/leases/tran-vong-review-len-muoi-exec-3-claude-20260912.yaml
+HẾT_HẠN	wp538-r3-g3-claude-review	refs/remotes/origin/ops/cap-lease-538-r3:ops/leases/wp538-r3-g3-claude-review.yaml
+HẾT_HẠN	wp538-r4-g4-antigravity	refs/remotes/origin/ops/cap-lease-538-r4:ops/leases/wp538-r4-g4-antigravity.yaml
+HẾT_HẠN	ci-windows-r1-g1-antigravity	refs/remotes/origin/ops/cap-lease-548:ops/leases/ci-windows-r1-g1-antigravity.yaml
+HẾT_HẠN	ci-windows-r2-g2-antigravity	refs/remotes/origin/ops/cap-lease-548-r2:ops/leases/ci-windows-r2-g2-antigravity.yaml
+HẾT_HẠN	assurance-ho-model-r1-g1-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r1-g1-claude.yaml
+HẾT_HẠN	assurance-ho-model-r2-g2-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r2-g2-claude.yaml
+HẾT_HẠN	assurance-ho-model-r3-g3-antigravity	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r3-g3-antigravity.yaml
+HẾT_HẠN	assurance-ho-model-r4-g4-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r4-g4-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g1-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g1-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g2-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

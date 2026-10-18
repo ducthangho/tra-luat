@@ -2298,15 +2298,13 @@ def _doc_check_runs(duong: str) -> list[dict]:
             sai = [k for k, kieu in _TRUONG_CHECK_RUN if type(r.get(k, _VANG)) not in kieu]
             if sai:
                 hong(f"trang {i} check_runs[{j}] thiếu/sai kiểu trường {sai}")
-            # #788 N2: MỌI phần tử, không chỉ run bắt buộc — một phần tử không neo được suite
-            # là tệp không phải phản hồi check-runs như ta hiểu.
+            # #788 N2: MỌI phần tử, không chỉ run bắt buộc.
             cs = r.get("check_suite", _VANG)
             if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:
                 hong(f"trang {i} check_runs[{j}] `check_suite` không phải object có `id` số nguyên: {cs!r}")
             runs.append(r)
-    # #788 F01 (H3, cross-review lượt 1): cùng `id` là cùng MỘT check-run. Đếm id đúng mà danh
-    # tính mâu thuẫn (khác tên/suite/head) thì bước lọc tên/suite sau đó lặng lẽ bỏ bản mâu
-    # thuẫn và cấp xanh — kiểm ở ĐÂY, nơi còn mọi bản ghi của mọi trang, trước mọi lọc.
+    # #788 F01 (H3): cùng `id` là cùng MỘT check-run; danh tính mâu thuẫn mà để bước lọc tên/suite
+    # bỏ bản lệch thì cấp xanh giả — kiểm ở ĐÂY, nơi còn mọi bản ghi của mọi trang, trước mọi lọc.
     danh_tinh: dict = {}
     for r in runs:
         dt = (r["name"], r["check_suite"]["id"], r["head_sha"])
@@ -2341,9 +2339,10 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
     runs = _doc_check_runs(a.check_runs)
     # N4: run cùng tên ở suite KHÁC là producer khác — bỏ qua, nhưng nói ra. Chỉ tên bắt buộc.
     for ten_cb in ten_bb:
-        khac = sorted(r["id"] for r in runs if r["name"] == ten_cb and r["check_suite"]["id"] != suite)
+        # id PHÂN BIỆT (F05: bản lặp là một run); tên NGUYÊN VĂN trong nháy đơn (F04: không `!r`).
+        khac = sorted({r["id"] for r in runs if r["name"] == ten_cb and r["check_suite"]["id"] != suite})
         if khac:
-            print(f"CẢNH BÁO: {ten_cb!r} có {len(khac)} run ở suite khác "
+            print(f"CẢNH BÁO: '{ten_cb}' có {len(khac)} run ở suite khác "
                   f"({', '.join(map(str, khac))}) — bỏ qua", file=sys.stderr)
     do: list[str] = []
     xanh: list[str] = []

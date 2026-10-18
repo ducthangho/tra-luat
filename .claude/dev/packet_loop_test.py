@@ -5343,8 +5343,7 @@ _KG_CA = {
     "kg_m2_json_hong": _kg_ca(None, tho="{", chua=_KG_KDD),
     "kg_m2_khong_co_check_runs": _kg_ca({"x": 1}, chua=_KG_KDD),
     "kg_m2_check_runs_khong_phai_list": _kg_ca({"check_runs": {}}, chua=_KG_KDD),
-    # #788: `total_count` 1 CÓ CHỦ Ý — đột biến bỏ qua phần tử hỏng phải ra XANH, không bị
-    # chốt đếm id (N5) chặn hộ rồi đội tên chốt trường.
+    # #788: `total_count` 1 CÓ CHỦ Ý — đột biến bỏ phần tử hỏng phải ra XANH, không bị N5 chặn hộ.
     "kg_m2_thieu_conclusion": _kg_ca(
         {"total_count": 1, "check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
         chua=_KG_KDD),
@@ -5487,6 +5486,14 @@ def case_kg_n4_canh_bao(c: Ctx):
     _doi(0, rc, e, "cảnh báo không đổi mã thoát")
     if dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (1) — bỏ qua"]:
         raise AssertionError(f"ca xanh vẫn phải cảnh báo: {dem(e)!r}")
+    rc, _, e = _kg(c, [{"total_count": 2, "check_runs": [_kg_run(1), _kg_run(2, suite=_KG_SUITE_KHAC)]},
+                       {"total_count": 2, "check_runs": [_kg_run(2, suite=_KG_SUITE_KHAC)]}], "gate")
+    if rc != 0 or dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (2) — bỏ qua"]:   # F05
+        raise AssertionError(f"bản lặp là MỘT run: rc={rc} {dem(e)!r}")
+    t = "reviewer's gate"   # F04: tên in nguyên văn trong nháy đơn, không theo repr
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=t, suite=_KG_SUITE_KHAC)]}, t)
+    if rc != 0 or dem(e) != [f"CẢNH BÁO: '{t}' có 1 run ở suite khác (2) — bỏ qua"]:
+        raise AssertionError(f"tên nguyên văn: rc={rc} {dem(e)!r}")
 
 
 def case_kg_n6_help(c: Ctx):
@@ -5605,8 +5612,7 @@ MUTANTS.update({
     "kg_xet_moi_check": ('cung = [r for r in runs if r["name"] == ten]', "cung = list(runs)",
                          ["kg_m3_ngoai_bo_qua"]),
     "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
-    # --- #788: mỗi ô "Phép đo làm ĐỎ" của spec một đột biến; ca đích phải chết vì đổi MÀU,
-    # không vì traceback (bảng đột biến ngoài kiểm điều đó).
+    # --- #788: mỗi ô "Phép đo làm ĐỎ" một đột biến; ca đích chết vì đổi MÀU, không vì traceback.
     "kg_n1_bo_kiem_dang": ('    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):\n', "    if False:\n",
                            [f"kg_n1_check_suite_{t}" for t in ("abc", "am", "0", "012", "cong", "cach", "unicode")]),
     "kg_n1_cho_so_0_dau": ('r"[1-9][0-9]*"', 'r"[0-9]+"', ["kg_n1_check_suite_0", "kg_n1_check_suite_012"]),
@@ -5648,9 +5654,11 @@ MUTANTS.update({
                                        ["kg_f01_cung_id_khac_suite", "kg_f01_cung_id_khac_suite_hai_trang"]),
     "kg_f01_bo_ten_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["check_suite"]["id"], r["head_sha"])',
                                      ["kg_f01_cung_id_khac_ten", "kg_f01_cung_id_hai_ten_bat_buoc"]),
-    # F02: ca nền khoá traceback; bảng đột biến chỉ nhận chết vì ĐỔI MÀU, nên đột biến gỡ đường bắt
-    # trần (chết bằng traceback) bị loại khỏi bảng (cross-review lượt 2, F03).
+    # F02: ca nền khoá traceback; đột biến gỡ đường bắt trần chết bằng traceback nên bị loại (F03).
     "kg_f02_du_phong_khop_nham": ("        suite = a.check_suite   #", "        suite = 1   #", ["kg_f02_suite_vuot_tran_int"]),
+    "kg_n4_dem_ban_ghi": (('sorted({r["id"] for r in runs if', ' != suite})'), ('sorted([r["id"] for r in runs if', ' != suite])'),
+                          ["kg_n4_canh_bao"]),
+    "kg_n4_ten_theo_repr": ("CẢNH BÁO: '{ten_cb}'", "CẢNH BÁO: {ten_cb!r}", ["kg_n4_canh_bao"]),
     "kg_n6_dong_xanh_khong_suite": ('(suite {suite}): ', ": ", ["kg_m2_object_mot_trang", "kg_n7_that_suite_ci"]),
 })
 

@@ -78,6 +78,16 @@ KHÔNG merge/land/deploy — việc của chủ kho.
   gate cục bộ chạy song song thấy nó là tổ tiên ⇒ 12 ca credential đỏ giả. Chạy lại với `TMPDIR` ngoài `/tmp`:
   nền 232/232, head 234/234. Tệp tự biến mất khi lượt review kết thúc.
 
+- Codex lượt 6/8 (1147,8s, rc 0) @`bbdfc01` (push lần 2, chủ kho duyệt issuecomment-6253745668): `changes_requested`;
+  F01–F04 ĐÃ VÁ THẬT (F03 allexport 48/48 + 216/216 tuỳ chọn khác; F04 576/576); **F05 P2
+  `reverse-batch-fixture-escapes-installer-stubs`**: chiều bash→rg của TEST, công thức bash nguyên văn prepend `/usr/bin` ⇒
+  lượt rg gọi sudo/apt-get THẬT của máy. Verdict `ops/reviews/wp831-g1-luot6-codex-verdict.md`
+  (`ops/wp831-r4-g4-lease@e86d62c`). Vá trong test: symlink `bash` vào thư mục giả, chốt `command -v bash` TRƯỚC khi chạy
+  wrapper, `sudo` giả gọi `apt-get` giả bằng đường dẫn tuyệt đối, đòi số lần installer giả được gọi. Đột biến H (bỏ
+  symlink) ⇒ cả hai ca đỏ ở chốt trước wrapper (`fixture ro`), không chạm installer thật. Container này có
+  `/usr/bin/sudo` và chạy root: lượt bash→rg trước bản vá CÓ THỂ đã gọi `apt-get install -y ripgrep` thật (gói đã cài, không
+  để lại dòng history) — KHÔNG ĐO ĐƯỢC chắc chắn.
+
 ## Kết quả cuối
 (điền sau: run `ci.yml`, run `launcher-windows.yml` + số ca bỏ qua, verdict Codex lượt cuối, `release-verify`)
 

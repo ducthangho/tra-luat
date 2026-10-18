@@ -1,0 +1,6 @@
+$ git show origin/ops/wp788-spec:ops/specs/wp788.md | sha256sum
+82dc170446c3a4431739a3effbec8cb55adadc13d69f5c510f8782a2b45eb54e  -
+$ git rev-parse origin/ops/wp788-spec:ops/specs/wp788.md
+e7d0beca8d9e4aff2065ef05d8ec0064f0c75829
+$ git rev-parse origin/ops/wp788-spec
+735a208db79462018be669cca16e920d129eb4b8

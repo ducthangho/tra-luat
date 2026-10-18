@@ -1,0 +1,164 @@
+[
+  {
+    "api": "ASSURANCE_CAN_DOC_LAP",
+    "door": "lease",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "awaiting_lease",
+    "mode": null
+  },
+  {
+    "api": "ASSURANCE_CAN_DOC_LAP",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "HO_MODEL_CHO_PHEP",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "HO_MODEL_CHO_PHEP",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_thieu",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_thieu",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_neo_git",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_neo_git",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_nguon_tra_model",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_nguon_tra_model",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_giai_ho_model_reviewer",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_giai_ho_model_reviewer",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_giai_ho_model_executor",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_giai_ho_model_executor",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_chuoi",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_chuoi",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  },
+  {
+    "api": "_chuan_hoa_provider",
+    "door": "lease",
+    "rc": 0,
+    "unchanged": false,
+    "traceback": false,
+    "state": "leased",
+    "mode": true
+  },
+  {
+    "api": "_chuan_hoa_provider",
+    "door": "review",
+    "rc": 1,
+    "unchanged": true,
+    "traceback": true,
+    "state": "reviewing",
+    "mode": true
+  }
+]

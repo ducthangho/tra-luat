@@ -1,0 +1,1 @@
+{"mutant": "role", "total": 94, "passed": 93, "errors": {"r812_r5_review_role": "AssertionError: r812 review ['bn']: đòi rc=11, được rc=0; stderr=''"}, "scratch": "/tmp/review812-r5-mut-role-gtxsl_5c"}

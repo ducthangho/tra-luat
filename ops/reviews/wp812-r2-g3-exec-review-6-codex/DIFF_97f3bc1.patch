@@ -1,0 +1,726 @@
+diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py
+index 3b8773d7..e558f8d2 100644
+--- a/.claude/dev/packet_loop.py
++++ b/.claude/dev/packet_loop.py
+@@ -27,6 +27,7 @@ liên tiếp chứng minh là sai từ thiết kế — chi tiết ở phần ch
+ from __future__ import annotations
+ 
+ import argparse
++import contextlib
+ import hashlib
+ import hmac
+ import html
+@@ -36,6 +37,7 @@ import os
+ import platform
+ import re
+ import secrets
++import shutil
+ import subprocess
+ import sys
+ import tempfile
+@@ -667,7 +669,7 @@ def _load(state_dir: Path, packet: int) -> dict:
+             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
+             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
+                         and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
+-                        and (st.get("luat_adr0054") is not True or set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH))),
++                        and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
+             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
+                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
+     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
+@@ -2380,6 +2382,7 @@ HANG_LOP = ("P0", "P1", "P2", "P3")
+ CHECK_BAT_BUOC = tuple((".github/workflows/ci.yml", f"{j} (ubuntu-latest)") for j in ("gate", "gate-cong-cu-gop", "gate-ops", "gate-packet-loop", "gate-registry"))
+ BOT_LEASE, RC_DANG_GIU_LEASE = "github-actions[bot]", 11  # `ops/lease_publish.py::RC_DANG_GIU` — `ai-dang-giu` có người giữ
+ CANON = ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py", "AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md")  # validator + nguồn nó đọc
++HO_CANON = {"claude": "claude", "openai": "gpt", "gemini": "gemini"}  # MODEL_FAMILIES → `bien_nhan_v2.HO_MODEL_CHO_PHEP`
+ REPO_RE = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/issues/([0-9]+)#issuecomment-[0-9]{1,30}\Z")
+ KHOA_NGU_CANH = ("lease_id", "lease_ref", "lease_oid", "lease_path", "repo", "branch", "generation", "spec_hash", "assurance_target",
+                  "executor", "reviewer", "required_checks")
+@@ -2389,18 +2392,101 @@ def _git_do(root: Path, *args) -> tuple[int, bytes]:
+     try:
+         p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, timeout=300)
+         return p.returncode, p.stdout
+-    except (OSError, subprocess.SubprocessError):
++    except (OSError, subprocess.SubprocessError, ValueError):
+         return -1, b""
+ 
+ 
+-def _canon(root: Path) -> Path:
++@contextlib.contextmanager
++def _canon(root: Path, oid: str | None = None):
++    """Validator CANON (+ nguồn nó đọc) từ `origin/master`; `oid` ⇒ thêm `snap/` là worktree Git tách rời TẠI lease OID (cùng refs
++    với kho, để validator đo bia mộ/ref). Dọn sạch kể cả khi `_die` ném SystemExit."""
+     td = Path(tempfile.mkdtemp(prefix="pl812-canon-"))
+-    for p in CANON:
+-        rc, b = _git_do(root, "show", f"refs/remotes/origin/master:{p}")
+-        if rc != 0 or not b:
+-            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {p} trên origin/master")
+-        (td / p).parent.mkdir(parents=True, exist_ok=True), (td / p).write_bytes(b)
+-    return td
++    try:
++        for p in CANON:
++            rc, b = _git_do(root, "show", f"refs/remotes/origin/master:{p}")
++            if rc != 0 or not b:
++                _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {p} trên origin/master")
++            (td / p).parent.mkdir(parents=True, exist_ok=True), (td / p).write_bytes(b)
++        if oid and _git_do(root, "worktree", "add", "-q", "--detach", str(td / "snap"), oid)[0]:
++            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không dựng được worktree tại {oid[:12]}")
++        yield td
++    finally:
++        if (td / "snap").exists():
++            _git_do(root, "worktree", "remove", "--force", str(td / "snap"))
++        shutil.rmtree(td, ignore_errors=True)
++
++
++def _nap(td: Path, ten: str):
++    spec = importlib.util.spec_from_file_location(f"{ten}_canon", td / "ops" / f"{ten}.py")
++    try:
++        spec.loader.exec_module(m := importlib.util.module_from_spec(spec))
++    except Exception as ex:  # loader canon: lỗi nguồn phải có mã thoát được kiểm soát
++        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: nạp validator canon {ten}: {type(ex).__name__}")
++    api = ("PROVIDER_NGUON_HONG", "ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP", "_thieu", "_neo_git",
++           "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider")
++    if ten == "bien_nhan_v2" and any(not hasattr(m, k) for k in api):
++        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: validator canon {ten} thiếu giao diện")
++    return m
++
++
++def _ten_provider(p):
++    """Bí danh canon (`launcher._PROVIDER_BI_DANH`, `_TRANSPORT_CONTRACTS`: `anthropic_claude`/`openai_codex`) → tên của `PROVIDERS`."""
++    import launcher
++    if type(p) is not str:
++        return None
++    p = dict(launcher._PROVIDER_BI_DANH).get(p, p)
++    return next((lenh[0] for prov, lenh, *_ in launcher._TRANSPORT_CONTRACTS if prov == p and lenh[0] in PROVIDERS), p)
++
++
++def _ds_duong(v) -> list:
++    if type(v) is not list or not all(type(x) is str for x in v):
++        raise TypeError(f"write set không phải list chuỗi: {v!r}")  # sai kiểu ⇒ KHÔNG_XÁC_ĐỊNH, không bỏ qua
++    return v
++
++
++def _chuan_duong(p: str) -> str:
++    """§5: một biểu diễn cho mọi cách viết — bỏ `planned:`, separator `/`, NFC, casefold, bỏ `./`; tuyệt đối/`..` ⇒ ValueError (không đo được)."""
++    q = unicodedata.normalize("NFC", p.removeprefix("planned:").strip().replace("\\", "/")).casefold()
++    parts = [x for x in q.split("/") if x not in ("", ".")]
++    if not parts or q.startswith("/") or ".." in parts or ":" in parts[0]:
++        raise ValueError(f"đường dẫn ngoài miền §5: {p!r}")
++    return "/".join(parts)
++
++
++def _bieu_dien_duong(p: str, root: Path) -> set[str]:
++    """§5: kiểm mọi đường, cả khi không có đối thủ; giữ cả tên khai và đích symlink/parent."""
++    q = p.removeprefix("planned:").strip().replace("\\", "/")
++    if "." in q.split("/"):
++        raise ValueError(f"đường dẫn có thành phần '.': {p!r}")
++    if any(c in q for c in "*?[]"):
++        raise ValueError(f"write set không nhận glob: {p!r}")
++    ten = _chuan_duong(p)  # kiểm absolute/.. TRƯỚC phép resolve
++    goc = root.resolve()
++    dich = (goc / q).resolve(strict=False).relative_to(goc)
++    return {ten, _chuan_duong(dich.as_posix())}
++
++
++def _giao(a: str, b: str) -> bool:
++    """§5: giao nhau khi bằng nhau hoặc một bên là prefix thư mục của bên kia — so trên biểu diễn chuẩn hoá."""
++    a, b = _chuan_duong(a), _chuan_duong(b)
++    return a == b or a.startswith(b + "/") or b.startswith(a + "/")
++
++
++def _nc_hop_le(nc) -> bool:
++    """Lược đồ LỒNG của ngữ cảnh lease trong state — thiếu/sai hình dạng ⇒ `_load` báo state hỏng, không traceback ở cửa sau."""
++    return (type(nc) is dict and set(nc) == set(KHOA_NGU_CANH) and type(nc["generation"]) is int and nc["generation"] > 0
++            and all(type(nc[k]) is str and nc[k].strip() for k in ("lease_id", "lease_ref", "lease_path", "branch", "spec_hash", "assurance_target"))
++            and type(nc["lease_oid"]) is str and bool(SHA_RE.match(nc["lease_oid"])) and type(nc["repo"]) is str
++            and bool(re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", nc["repo"]))
++            and all(type(nc[v]) is dict and set(nc[v]) == {"provider", "model_family", "execution_surface", "transport"}
++                    and nc[v]["provider"] in PROVIDERS and nc[v]["model_family"] in MODEL_FAMILIES
++                    and (nc[v]["execution_surface"] is None or type(nc[v]["execution_surface"]) is str
++                         and nc[v]["execution_surface"] in RUNTIME_CAPABILITIES[nc[v]["provider"]])
++                    and (nc[v]["transport"] is None or type(nc[v]["transport"]) is str
++                         and nc[v]["transport"] in {t for surface, ts in RUNTIME_CAPABILITIES[nc[v]["provider"]].items()
++                                                   if nc[v]["execution_surface"] in (None, surface) for t in ts}) for v in ("executor", "reviewer"))
++            and type(nc["required_checks"]) is list and all(type(x) in (list, tuple) and len(x) == 2 and all(type(y) is str and y for y in x)
++                                                             for x in nc["required_checks"]))
+ 
+ 
+ def _ngu_canh_lease(l: dict, ref: str, oid: str, path: str, repo: str) -> dict:
+@@ -2410,8 +2496,8 @@ def _ngu_canh_lease(l: dict, ref: str, oid: str, path: str, repo: str) -> dict:
+         _die(RC_ARG, "lease `required_checks` phải là list các cặp [workflow, job]")
+     return {"lease_id": l["lease_id"], "lease_ref": ref, "lease_oid": oid, "lease_path": path, "repo": repo,
+             "branch": l["branch"], "generation": l["generation"], "spec_hash": l["spec_hash"], "assurance_target": l["assurance_target"],
+-            "executor": _identity(l.get("provider"), l.get("model_family"), l.get("execution_surface"), l.get("transport")),
+-            "reviewer": _identity(l.get("reviewer"), l.get("reviewer_model_family"), l.get("reviewer_execution_surface"), l.get("reviewer_transport")),
++            "executor": _identity(_ten_provider(l.get("provider")), l.get("model_family"), l.get("execution_surface"), l.get("transport")),
++            "reviewer": _identity(_ten_provider(l.get("reviewer")), l.get("reviewer_model_family"), l.get("reviewer_execution_surface"), l.get("reviewer_transport")),
+             "required_checks": sorted({tuple(x) for x in CHECK_BAT_BUOC} | {tuple(x) for x in rc})}
+ 
+ 
+@@ -2446,27 +2532,55 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
+     rc, raw = _git_do(root, "show", f"{oid}:{a.lease_path}")
+     try:
+         l = yaml.safe_load(raw) if rc == 0 else None
+-    except yaml.YAMLError:
++    except (yaml.YAMLError, RecursionError):
+         l = None
+     kieu = {"lease_id": str, "branch": str, "spec_path": str, "spec_hash": str, "assurance_target": str, "granted_on_instruction": str,
+             "prompt_path": str, "generation": int, "packet_issue": int}
++    ten_id = ("model_family", "execution_surface", "transport", "reviewer_model_family", "reviewer_execution_surface", "reviewer_transport")
+     ws = (l.get("effective_write_set") if "effective_write_set" in l else l.get("write_set")) if isinstance(l, dict) else None
+     mr = REPO_RE.fullmatch(str(l.get("granted_on_instruction"))) if isinstance(l, dict) else None
+     if not isinstance(l, dict) or any(type(l.get(k)) is not t for k, t in kieu.items()) or l["packet_issue"] != st["packet"] or not mr \
+-            or int(mr[2]) != st["packet"] or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws) \
+-            or any(PurePosixPath(l[k]).is_absolute() or ".." in PurePosixPath(l[k]).parts for k in ("prompt_path", "spec_path")):
+-        _die(RC_ARG, f"lease {a.lease_path} tại {oid[:12]} hỏng: sai kiểu {sorted(kieu)}, khác packet {st['packet']}, không có write set, "
+-                     f"đường dẫn thoát gốc, hoặc granted_on_instruction không trỏ chính Packet Issue")
+-    td, (rc_p, prompt) = _canon(root), _git_do(root, "show", f"{oid}:{l['prompt_path']}")
+-    (snap := td / "snap" / l["prompt_path"]).parent.mkdir(parents=True), snap.write_bytes(prompt), (td / "lease.yaml").write_bytes(raw)
+-    p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
+-    if rc_p or p.returncode:  # I2(H) trên SNAPSHOT tại lease OID, không trên worktree của ứng viên
+-        _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
++            or mr[2].lstrip("0") != str(st["packet"]) or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws) \
++            or any(PurePosixPath(l[k]).is_absolute() or ".." in PurePosixPath(l[k]).parts for k in ("prompt_path", "spec_path")) \
++            or l.get("role") != "executor" or l["generation"] < 1 or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id) \
++            or any(t is str and not l[k].strip() for k, t in kieu.items()) or type(l.get("write_set")) is not list or not l["write_set"] \
++            or not all(type(x) is str and x for x in l["write_set"]):
++        _die(RC_ARG, f"lease {a.lease_path} tại {oid[:12]} hỏng: sai kiểu/miền {sorted(kieu)} + role/identity, khác packet {st['packet']}, "
++                     f"không có write set, đường dẫn thoát gốc, hoặc granted_on_instruction không trỏ chính Packet Issue")
+     lid = l["lease_id"]
+-    for duong in ws:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn
+-        p = subprocess.run([*lp, "ai-dang-giu", duong, "--root", str(root)], capture_output=True)
+-        if p.returncode != RC_DANG_GIU_LEASE or p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] != [f"NGƯỜI_GIỮ 1: {lid}"]:
+-            _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
++    with _canon(root, oid) as td:
++        (td / "lease.yaml").write_bytes(raw)
++        p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
++        if p.returncode:  # I2(H) trên worktree Git TẠI lease OID, không trên worktree của ứng viên
++            _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
++        bnv_lease = _nap(td, "bien_nhan_v2")
++        if bnv_lease.PROVIDER_NGUON_HONG is not None:
++            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: nguồn canon hỏng: {bnv_lease.PROVIDER_NGUON_HONG}")
++        if l["assurance_target"] not in bnv_lease.ASSURANCE_CAN_DOC_LAP:
++            _die(RC_ARG, f"assurance_target {l['assurance_target']!r} ngoài miền của protocol")
++        for duong in l["write_set"]:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn KHAI BÁO…
++            p = subprocess.run([*lp, "ai-dang-giu", duong.removeprefix("planned:"), "--root", str(root)], capture_output=True)
++            if p.returncode != RC_DANG_GIU_LEASE or p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] != [f"NGƯỜI_GIỮ 1: {lid}"]:
++                _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
++        try:  # …và KHÔNG lease còn hiệu lực nào khác GIAO write set HIỆU LỰC (§5 chuẩn hoá, prefix hai chiều, cả write_set lẫn effective_write_set)
++            lpm = _nap(td, "lease_publish")
++            cac = lpm._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
++            giu = lambda x: [y for k in ("write_set", "effective_write_set") for y in _ds_duong(x.get(k, []))]  # noqa: E731
++            # Đối xứng: write_set ∪ effective_write_set của CẢ HAI bên, không để effective che tập khai.
++            own = set().union(*(_bieu_dien_duong(x, root) for x in giu(l)))
++            giao_nhau = []
++            for m in cac:
++                other = m["lease"]
++                if lpm._lease_id_quet(other.get("lease_id")) == lid or lpm._phan_loai_lease(other) != "CÒN_HẠN" or lpm._bia_mo_doi_xung(other, cac) is True:
++                    continue
++                paths = set().union(*(_bieu_dien_duong(x, root) for x in giu(other)))
++                if any(_giao(x, y) for x in own for y in paths):
++                    giao_nhau.append(f"{m['ref']}:{m['path']}")
++            giao_nhau = sorted(set(giao_nhau))
++        except Exception as ex:  # noqa: BLE001 — không đo được ⇒ không có thẩm quyền
++            _die(RC_GUARD, f"I2(Đ): KHÔNG_XÁC_ĐỊNH khi quét lease toàn kho: {type(ex).__name__}: {str(ex)[:300]}")
++        if giao_nhau:
++            _die(RC_GUARD, f"I2(Đ): lease khác còn hiệu lực giao write set của {lid}: {giao_nhau}")
+     try:
+         cm = json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode((raw_cm := Path(a.lease_comments).read_bytes()).decode("utf-8"))
+     except (OSError, ValueError, RecursionError) as ex:
+@@ -2480,6 +2594,8 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
+     if rc or hashlib.sha256(spec).hexdigest() != l["spec_hash"]:
+         _die(RC_ARG, f"đặc tả {l['spec_path']} tại {oid[:12]} lệch `spec_hash` của lease")
+     nc = _ngu_canh_lease(l, a.lease_ref, oid, a.lease_path, mr[1])
++    if not _nc_hop_le(json.loads(json.dumps(nc))):  # CÙNG lược đồ mà `_load` đọc lại — không ghi một state mà lần đọc sau gọi là hỏng
++        _die(RC_ARG, f"ngữ cảnh lease dựng từ {a.lease_path} không qua lược đồ state")
+     for vai in ("executor", "reviewer"):
+         if any(v is not None and nc[vai][k] != v for k, v in (st.get(f"{vai}_identity") or {}).items()):
+             _die(RC_PROVIDER, f"{vai} của lease {nc[vai]!r} khác state {st.get(f'{vai}_identity')!r}")
+@@ -2495,37 +2611,67 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
+ 
+ def _du_dieu_kien_approve(st: dict, a) -> dict:
+     """M2 — vị từ DÙNG CHUNG cho MỌI verdict của packet áp ADR-0054: verdict TRONG biên nhận H phải khớp `--verdict`; biên nhận qua
+-    `_thieu` + `_neo_git` của validator canon (nguồn hỏng ⇒ từ chối); I8 qua hàm chuẩn hoá của `bien_nhan_v2`, họ theo `model_family`
+-    lease khai; I10; bảng lớp đúng lược đồ; approve không còn P0–P2; verdict âm chỉ dùng slug có trong bảng lớp (I11)."""
++    `_thieu` + `_neo_git` của validator canon (nguồn hỏng ⇒ từ chối); I8: danh tính chuẩn hoá (bí danh canon) khớp lease ở cả hai vai —
++    provider, và surface/transport khi biên nhận khai; họ theo `model_family` lease khai; I10; bảng lớp đúng lược đồ; approve không còn
++    P0–P2; verdict âm chỉ dùng slug có trong bảng lớp (I11)."""
+     import yaml
+     try:
+         d = yaml.safe_load(raw := Path(a.bien_nhan).read_bytes())
+     except Exception as ex:  # noqa: BLE001 — thiếu cờ/tệp/YAML hỏng đều là KHÔNG ĐO ĐƯỢC
+         _die(RC_BIEN_NHAN, f"packet áp ADR-0054: review phải kèm --bien-nhan đọc được ({type(ex).__name__})")
+-    spec = importlib.util.spec_from_file_location("bien_nhan_v2_canon", _canon(Path(a.root)) / "ops" / "bien_nhan_v2.py")
+-    spec.loader.exec_module(bnv := importlib.util.module_from_spec(spec))
+-    if bnv.PROVIDER_NGUON_HONG is not None:
+-        _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: validator canon thiếu nguồn ({bnv.PROVIDER_NGUON_HONG}) — không chạy ở chế độ suy giảm")
+-    d = d if isinstance(d, dict) else {}
+-    nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
+-    mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
+-    ho = lambda vai: bnv._ho_model_cua_ten(nc[vai]["model_family"] or "") or bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(nc[vai]["provider"]), "")  # noqa: E731
+-    ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
+-    lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
+-                                       and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
+-    neo = bnv._neo_git(Path(a.root), Path(a.bien_nhan).name, d) if d else (["không phải ánh xạ"], [])
+-    loi = list(bnv._thieu(d) if d else []) + neo[0] + neo[1] + [ten for ten, dung in (
+-        ("verdict", d.get("verdict") == a.verdict), ("role", d.get("role") == "reviewer"),
+-        ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
+-        ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
+-        ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
+-        ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
+-        ("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer")), ("ho-executor", bool(ho_exec) and ho_exec == ho("executor")),
+-        ("surface", nc["reviewer"]["execution_surface"] is not None and mri.get("surface") == nc["reviewer"]["execution_surface"]),
+-        ("transport", nc["reviewer"]["transport"] is not None and mri.get("transport") == nc["reviewer"]["transport"]),
+-        ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
+-        ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
+-        ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})) if not dung]
++    with _canon(Path(a.root)) as td:
++        bnv = _nap(td, "bien_nhan_v2")
++        if bnv.PROVIDER_NGUON_HONG is not None or not set(HO_CANON.values()) <= bnv.HO_MODEL_CHO_PHEP:
++            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: validator canon thiếu nguồn ({bnv.PROVIDER_NGUON_HONG}) hoặc HO_CANON trôi khỏi miền canon")
++        d = d if isinstance(d, dict) else {}
++        nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
++        mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
++        mei = d["model_executor_identity"] if isinstance(d.get("model_executor_identity"), dict) else {}
++        # Dùng ĐÚNG bảng nguồn mà canon tra cho cả hai vai, kể cả fallback top-level và bí danh.
++        kieu_sai = [f"{vai}.{pre}{k}" for vai in ("reviewer", "executor") for x, pre in bnv._nguon_tra_model(d, vai)[1]
++                    for k in ("provider", "surface", "transport", "model_family", "ho_model", "canonical_model", "model", "model_evidence",
++                              "bang_chung_model", "model_evidence_ref", "telemetry_path", "nguoi_audit", "audit_actor")
++                    if pre + k in x and (type(x[pre + k]) is not str or not x[pre + k].strip())]
++        kieu_sai += [f"model_{vai}_identity" for vai in ("reviewer", "executor")
++                     if f"model_{vai}_identity" in d and type(d[f"model_{vai}_identity"]) is not dict]
++        # `_thieu` còn đọc các tham chiếu CÓ tiền tố ngay bên trong khối executor.
++        kieu_sai += [f"executor.{k}" for k in ("executor_model_evidence_ref", "executor_telemetry_path", "executor_nguoi_audit", "executor_audit_actor")
++                     if k in mei and (type(mei[k]) is not str or not mei[k].strip())]
++        kieu_sai += [f"reviewer.{k}" for k in ("che_do", "session_run_id", "KHONG_do_duoc")
++                     if k in mri and (type(mri[k]) is not str or not mri[k].strip())]
++        if "phien_doc_lap" in mri and type(mri["phien_doc_lap"]) is not bool:
++            kieu_sai.append("reviewer.phien_doc_lap")
++        if type(d.get("schema_version")) is not int:
++            kieu_sai.append("schema_version")
++        if kieu_sai:  # có mặt mà sai kiểu KHÔNG phải vắng — dừng trước mọi phép chuẩn hoá/fallback
++            _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan}: trường danh tính sai kiểu/rỗng {kieu_sai}")
++        # Chỉ chuẩn hoá bản chiếu dùng để SO; schema/Git/hash vẫn đo biên nhận nguyên byte.
++        import ast
++        cay = ast.parse((td / ".claude/dev/launcher.py").read_text(encoding="utf-8"))
++        bd_bm = dict(next(ast.literal_eval(n.value) for n in cay.body if isinstance(n, ast.Assign)
++                          and len(n.targets) == 1 and getattr(n.targets[0], "id", "") == "_BE_MAT_BI_DANH"))
++        p_chuan = lambda x: _ten_provider(bnv._chuan_hoa_provider(bnv._chuoi(x) or ""))  # noqa: E731
++        bm_chuan = lambda x: bd_bm.get(bnv._chuoi(x), bnv._chuoi(x))  # noqa: E731
++        ho = lambda vai: HO_CANON[nc[vai]["model_family"]]  # noqa: E731 — họ LEASE KHAI, đổi sang miền canon của bien_nhan_v2
++        ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
++        lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
++                                           and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
++        neo = bnv._neo_git(Path(a.root), Path(a.bien_nhan).name, d) if d else (["không phải ánh xạ"], [])
++        loi = list(bnv._thieu(d) if d else []) + neo[0] + neo[1] + [ten for ten, dung in (
++            ("verdict", d.get("verdict") == a.verdict), ("role", d.get("role") == "reviewer"),
++            ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
++            ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
++            ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
++            ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
++            ("provider-reviewer", p_chuan(mri.get("provider")) == nc["reviewer"]["provider"]),
++            ("provider-executor", p_chuan(mei.get("provider", d.get("executor_provider"))) == nc["executor"]["provider"]),
++            ("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer")), ("ho-executor", bool(ho_exec) and ho_exec == ho("executor")),
++            ("surface", nc["reviewer"]["execution_surface"] is not None and bm_chuan(mri.get("surface")) == nc["reviewer"]["execution_surface"]),
++            ("transport", nc["reviewer"]["transport"] is not None and bnv._chuoi(mri.get("transport")) == nc["reviewer"]["transport"]),
++            ("executor-surface-transport", all((bm_chuan(mei[k]) if k == "surface" else bnv._chuoi(mei[k])) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")) if k in mei)),
++            ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
++            ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
++            ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})) if not dung]
+     if loi:
+         _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}")
+     return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}
+diff --git a/.claude/dev/packet_loop_test.py b/.claude/dev/packet_loop_test.py
+index 1556ebc8..32028940 100644
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -5887,7 +5887,8 @@ _R812_LEASE = {"schema_version": 2, "event": "executor_lease_granted", "packet_i
+ 
+ 
+ def _kho812(c: Ctx, bien: str = "") -> Path:
+-    """Biến thể: khong_kich_hoat · spec_lech · cuc_bo · h_hong · giu_khac · nong · hai_dong · thieu_nguon · rc_falsy."""
++    """Biến thể: khong_kich_hoat · spec_lech · cuc_bo · h_hong · giu_khac · nong · hai_dong · thieu_nguon · rc_falsy · oid_khong_chua ·
++    oid_khong_dua_vao · oid_ngoai_fp (ba phép đo land-OID, mỗi biến thể làm hỏng đúng MỘT phép)."""
+     if bien not in _R812_MAU:
+         goc, R = Path(tempfile.mkdtemp(prefix="r812-")), HERE.parent.parent
+         w = goc / "w"
+@@ -5898,9 +5899,14 @@ def _kho812(c: Ctx, bien: str = "") -> Path:
+                 (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_bytes(b if isinstance(b, bytes) else b.encode())
+             return [_g(w, "add", "-A"), _g(w, "commit", "-qm", msg), _g(w, "rev-parse", "HEAD")][-1]
+         pr = (R / "docs/PROTOCOL_DA_PHIEN.md").read_text(encoding="utf-8")
+-        ghi({**{p: (R / p).read_bytes() for p in ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py", "AGENTS.md")},
+-             **({"AGENTS.md": "# rong\n"} if bien == "thieu_nguon" else {})}, "base")  # `thieu_nguon`: validator đọc được tệp nhưng nguồn luật hỏng
+-        L = ghi({"docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md": "x\n"}, "adr54")
++        B0 = ghi({**{p: (R / p).read_bytes() for p in ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py", "AGENTS.md")},
++                  **({"AGENTS.md": "# rong\n"} if bien == "thieu_nguon" else {})}, "base")  # `thieu_nguon`: validator đọc được tệp nhưng nguồn luật hỏng
++        adr = {"docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md": "x\n"}
++        if bien == "oid_ngoai_fp":  # commit đưa ADR vào nằm ở nhánh phụ, master chỉ thấy qua merge --no-ff ⇒ ngoài chuỗi first-parent
++            L = [_g(w, "checkout", "-qb", "phu"), ghi(adr, "adr54 phu"), _g(w, "checkout", "-q", "master"), _g(w, "merge", "-q", "--no-ff", "-m", "m", "phu")][1]
++        else:
++            L = ghi(adr, "adr54")
++            L = {"oid_khong_dua_vao": ghi({"docs/z.md": "z\n"}, "noop"), "oid_khong_chua": B0}.get(bien, L)
+         spec = f"# spec\nluat_push_va_dung_va: ADR-0054@{L}\n" * (2 if bien == "hai_dong" else 1)
+         V = ghi({"ops/specs/wp55.md": spec, "ops/specs/wp55-prompt.md": "prompt\n", "ops/reviews/v.md": "Verdict: approve\n", "docs/PROTOCOL_DA_PHIEN.md": pr.replace("chưa kích hoạt", "đã kích hoạt"),
+                  **({} if bien == "khong_kich_hoat" else {"docs/adr/0055-kich-hoat-adr-0054.md": "kích hoạt `ADR-0054`\n"})}, "act")
+@@ -5925,6 +5931,7 @@ def _kho812(c: Ctx, bien: str = "") -> Path:
+ 
+ def _bn812(w: Path, h: str, sh: str, lop=(), bn=None) -> dict:
+     v = _R812_MAU[next(k for k, (g, _) in _R812_MAU.items() if w.parent.name == f"kho{k}")][1]
++    bn = {k: x.format(V=v) if isinstance(x, str) else x for k, x in (bn or {}).items()}
+     return {"schema_version": 2, "receipt_id": "r1", "packet_issue": 55, "generation": 1, "lease_id": "wp55-r1-g1-claude", "role": "reviewer", "reviewed_sha": h,
+             "spec_hash": sh, "verdict": "approve", "assurance": "cross_approved", "executor_provider": "claude", "verdict_path": "ops/reviews/v.md",
+             "verdict_sha256": __import__("hashlib").sha256(b"Verdict: approve\n").hexdigest(), "evidence_url": f"https://github.com/o/r/blob/{v}/ops/reviews/v.md",
+@@ -6015,6 +6022,140 @@ def case_r812_executor_antigravity_hop_le(c: Ctx):
+         raise AssertionError(f"antigravity/gemini hợp lệ phải đạt: {kq}")
+ 
+ 
++def _r812_doi_lease(w, doi, them=None):
++    """Đổi lease (và thêm lease khác) trên nhánh ops của fixture rồi đẩy — mỗi ca đổi ĐÚNG một yếu tố."""
++    import yaml
++    _g(w, "checkout", "-qb", "ops/wp55-spec", "refs/remotes/origin/ops/wp55-spec")
++    lease = {**yaml.safe_load((w / "ops/leases/l.yaml").read_bytes()), **doi}
++    (w / "ops/leases/l.yaml").write_text(yaml.safe_dump(lease))
++    for ten, nd in (them(lease) if them else {}).items():
++        (w / "ops/leases" / ten).write_text(yaml.safe_dump(nd))
++    _g(w, "add", "-A"), _g(w, "commit", "-qm", "doi lease"), _g(w, "push", "-q", "origin", "ops/wp55-spec"), _g(w, "checkout", "-q", "master")
++    _g(w, "branch", "-q", "-D", "ops/wp55-spec")
++
++
++def _r812_tran_vong(c: Ctx, verdict: str, rc_doi: int, muon=None):
++    """State ADR-0054 ở TRẦN VÒNG (sổ nhất quán: một review cũ), rồi chạy cửa khép lượt đang mở."""
++    rc, sd, e, raw = _r812(c, "review")
++    _doi(0, rc, e, "baseline H thật")
++    st = json.loads(raw)
++    st.update(review_rounds_limit=1, review_rounds_used=1, codex_review_calls_used=2, reviews=[{
++        "attempt": 1, "provider": "codex", "verdict": "changes_requested", "reviewed_sha": st["reviewing_head_sha"], "finding_ids": [], "finding_descs": []}])
++    (sd / "wp55.json").write_text(json.dumps(st))
++    truoc = (sd / "wp55.json").read_bytes()
++    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--verdict", verdict, "--reviewed-sha", st["reviewing_head_sha"],
++                              "--codex-call", "g1", "--bien-nhan", c.tmp / "bn.yaml", "--root", c.tmp / "kho/w"], sd)
++    _doi(rc_doi, rc, e, f"cửa khép ADR-0054 ở trần vòng ({verdict})")
++    if muon:
++        _kiem(sd, "đã ghi kết quả", **muon)
++    elif (sd / "wp55.json").read_bytes() != truoc:
++        raise AssertionError("I4: đầu vào hỏng ở trần vòng mà state đổi")
++
++
++def case_r812_don_thu_muc_tam(c: Ctx):
++    (t := c.tmp / "tmpd").mkdir()
++    rc, sd, e, _ = _r812(c, "review", env={"TMPDIR": str(t)})
++    _doi(0, rc, e, "chuỗi lease → review")
++    if list(t.glob("pl812-canon-*")):
++        raise AssertionError(f"thư mục canon tạm không được dọn: {list(t.iterdir())}")
++
++
++def case_r812_ngu_canh_long_sai_hinh(c: Ctx):
++    rc, sd, e, _ = _r812(c, "lease")
++    _doi(0, rc, e, "lease đường mới")
++    st = _st(sd)
++    st["ngu_canh_lease"]["reviewer"] = {}
++    (sd / "wp55.json").write_text(json.dumps(st))
++    _doi(8, *run(c.script, ["status", "--packet", 55], sd)[::2], "ngữ cảnh lồng sai hình dạng ⇒ state hỏng, không traceback")
++
++
++def case_r812_executor_ag_qua_cli(c: Ctx):
++    """I8 qua CLI đầy đủ, băm thật: executor Antigravity khai họ `gemini` rồi `openai` (biên nhận khai họ canon `gpt`) ⇒ approved_pending."""
++    import yaml
++    for ho, ho_bn in (("gemini", "gemini"), ("openai", "gpt")):
++        (d := c.tmp / ho).mkdir()
++        w, sd = _kho812(cc := Ctx(c.script, d)), cc.sd()
++        _r812_doi_lease(w, {"provider": "google_antigravity", "executor": "google_antigravity", "model_family": ho, "execution_surface": "antigravity",
++                            "reviewer": "claude", "reviewer_model_family": "claude", "reviewer_execution_surface": "claude_code", "reviewer_transport": "machine/local"})
++        _doi(0, *cc.init(sd, executor="google_antigravity", reviewer="claude", lease=False, extra=(
++            "--executor-model-family", ho, "--executor-execution-surface", "antigravity", "--executor-transport", "machine/local"))[::2], "init AG")
++        (d / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "lease_id: wp55-r1-g1-claude",
++                                                "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
++        h = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
++        for args in (["record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", d / "cm.json", "--root", w],
++                     ["begin-attempt", "--provider", "google_antigravity", "--model-family", ho, "--execution-surface", "antigravity", "--transport", "machine/local"],
++                     ["record-post", "--for", "reviewing", "--comment-id", "9000055002"],
++                     ["transition", "--to", "reviewing", "--comment-id", "9000055002", "--head-sha", h]):
++            _doi(0, *run(c.script, [args[0], "--packet", 55, *args[1:]], sd)[::2], f"AG/{ho} {args[0]}")
++        (d / "bn.yaml").write_text(yaml.safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn={
++            "executor_provider": "google_antigravity", "model_executor_identity": {"model_family": ho_bn, "model_evidence": "do_may", "model_evidence_ref": "r"},
++            "model_reviewer_identity": {"provider": "anthropic_claude", "surface": "claude_code", "transport": "machine/local", "session_run_id": "s"}})))
++        _doi(0, *run(c.script, ["record-review", "--packet", 55, "--provider", "claude", "--verdict", "approve", "--reviewed-sha", h,
++                                "--bien-nhan", d / "bn.yaml", "--root", w], sd)[::2], f"AG/{ho} H hợp lệ")
++        _kiem(sd, f"AG/{ho}", state="approved_pending")
++
++
++def case_r812_canon_vang_phu_thuoc(c: Ctx):
++    rc, sd, e, truoc = _r812(c, "lease", truoc_lease=lambda w: [_g(w, "rm", "-q", "AGENTS.md"), _g(w, "commit", "-qm", "rm"), _g(w, "push", "-q", "origin", "master")])
++    _doi(8, rc, e, "validator canon vắng phụ thuộc trên origin/master")
++    if (sd / "wp55.json").read_bytes() != truoc:
++        raise AssertionError("I4: state đổi")
++
++
++def case_r812_r4_yaml_deep(c: Ctx):
++    def mutate(w):
++        import yaml
++        _g(w, "checkout", "-qb", "ops/wp55-spec", "refs/remotes/origin/ops/wp55-spec")
++        p = w / "ops/leases/l.yaml"
++        l = yaml.safe_load(p.read_bytes())
++        p.write_text(yaml.safe_dump(l) + "extra: " + "[" * 700 + "0" + "]" * 700 + "\n")
++        _g(w, "add", "-A"), _g(w, "commit", "-qm", "nested ordinary metadata"), _g(w, "push", "-q", "origin", "ops/wp55-spec")
++        _g(w, "checkout", "-q", "master"), _g(w, "branch", "-q", "-D", "ops/wp55-spec")
++    _r812_ca("lease", 2, truoc_lease=mutate)(c)
++
++
++def case_r812_r4_symlink_scope(c: Ctx):
++    def mutate(w, conflict):
++        (w / "x").mkdir()
++        (w / "x/a.py").write_text("a = 1\n")
++        (w / "alias").symlink_to("x", target_is_directory=True)
++        assert (w / "alias/a.py").resolve() == (w / "x/a.py").resolve()
++        _g(w, "add", "-A"), _g(w, "commit", "-qm", "alias inside fixture"), _g(w, "push", "-q", "origin", "master")
++        _r812_doi_lease(w, {}, (lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["alias/a.py"]}}) if conflict else None)
++    for conflict in (False, True):
++        (d := c.tmp / str(conflict)).mkdir()
++        _r812_ca("lease", 7 if conflict else 0, None if conflict else {"state": "leased"},
++                 truoc_lease=lambda w: mutate(w, conflict))(Ctx(c.script, d))
++
++
++def case_r812_r4_context_executor_surface(c: Ctx):
++    rc, sd, e, before = _r812(c, "review")
++    _doi(0, rc, e, "baseline H thật")
++    st = json.loads(before)
++    st["ngu_canh_lease"]["executor"]["execution_surface"] = []
++    (sd / "wp55.json").write_text(json.dumps(st))
++    raw = (sd / "wp55.json").read_bytes()
++    _doi(8, *run(c.script, ["status", "--packet", 55], sd)[::2], "context sai kiểu")
++    if raw != (sd / "wp55.json").read_bytes():
++        raise AssertionError("I4: state đổi")
++
++
++
++def _r812_r5_canon_hong_sau_lease(c: Ctx):
++    rc, sd, e, before = _r812(c, "review")
++    _doi(0, rc, e, "baseline H thật")
++    (sd / "wp55.json").write_bytes(before)
++    w = c.tmp / "kho/w"
++    (w / "AGENTS.md").write_text("# nguồn hỏng\n")
++    _g(w, "add", "AGENTS.md"), _g(w, "commit", "-qm", "source invalid after valid lease")
++    _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin")
++    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--verdict", "approve",
++        "--reviewed-sha", json.loads(before)["reviewing_head_sha"], "--codex-call", "g1", "--bien-nhan", c.tmp / "bn.yaml", "--root", w], sd)
++    _doi(11, rc, e, "review không được dùng nguồn canon hỏng")
++    if (sd / "wp55.json").read_bytes() != before:
++        raise AssertionError("I4: state đổi")
++
++_R812_KHAC = lambda **x: lambda w: _r812_doi_lease(w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", **x}})  # noqa: E731
+ _R812_XOA_DAC_TA = lambda w: [(w / p).unlink() for p in ("ops/specs/wp55.md", "ops/specs/wp55-prompt.md")]  # noqa: E731 — vắng ở worktree, có tại lease OID
+ CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r812_")] + [
+     ("r812_duong_moi_du_dieu_kien", _r812_ca("review", 0, {"state": "approved_pending", "luat_adr0054": True})),
+@@ -6028,7 +6169,7 @@ CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r
+     ("r812_lease_h_hong", _r812_ca("lease", 7, bien="h_hong")),
+     ("r812_nguoi_giu_khac", _r812_ca("lease", 7, bien="giu_khac")),
+     ("r812_required_checks_falsy", _r812_ca("lease", 2, bien="rc_falsy")),
+-    ("r812_canon_thieu_nguon", _r812_ca("review", 11, bien="thieu_nguon")),
++    ("r812_canon_thieu_nguon", _r812_r5_canon_hong_sau_lease),
+     ("r812_approve_kem_lop_p1", _r812_ca("review", 11, lop=(("a-b", "P1"),))),
+     ("r812_hang_px", _r812_ca("review", 11, lop=(("a-b", "PX"),))),
+     ("r812_slug_xuong_dong", _r812_ca("review", 11, lop=(("a-b\n", "P3"),))),
+@@ -6041,28 +6182,76 @@ CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r
+     ("r812_verdict_changes_requested", _r812_ca("review", 11, bn={"verdict": "changes_requested"})),
+     ("r812_verdict_blocked", _r812_ca("review", 11, bn={"verdict": "blocked"})),
+     ("r812_slug_ngoai_bang_lop", _r812_ca("review", 11, bn={"verdict": "changes_requested"}, lop=(("a-b", "P2"),), verdict="changes_requested", ids=("tu-dat",))),
++    ("r812_oid_khong_chua_adr", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="oid_khong_chua")),
++    ("r812_oid_khong_dua_adr_vao", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="oid_khong_dua_vao")),
++    ("r812_oid_ngoai_first_parent", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="oid_ngoai_fp")),
++    ("r812_bia_mo_hai_chieu_tai_lease_oid", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=lambda w: _r812_doi_lease(
++        w, {"thay_the_cho": ["old-lease"]}, lambda l: {"old.yaml": {**l, "lease_id": "old-lease", "thay_the_cho": [], "da_bi_thay_the": l["lease_id"]}}))),
++    ("r812_nguoi_giu_prefix_giao_nhau", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
++        w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["x/"]}}))),
++    ("r812_nguoi_giu_effective_giao_nhau", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
++        w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["y/b.py"], "effective_write_set": ["y/b.py", "x/a.py"]}}))),
++    ("r812_nguoi_giu_planned_hop_le", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["planned:x/a.py"]}))),
++    ("r812_model_family_falsy", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"model_family": False}))),
++    ("r812_lease_role_sai", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"role": "reviewer"}))),
++    ("r812_lease_generation_khong_duong", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"generation": 0}))),
++    ("r812_lease_assurance_ngoai_mien", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"assurance_target": "advisory_review"}))),
++    ("r812_prompt_path_thu_muc", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"prompt_path": "."}))),
++    ("r812_provider_bi_danh_canon", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=lambda w: _r812_doi_lease(
++        w, {"provider": "anthropic_claude", "executor": "anthropic_claude"}))),
++    ("r812_executor_provider_lech_lease", _r812_ca("review", 11, bn={"executor_provider": "google_antigravity", "model_executor_identity": {
++        "model_family": "claude", "model_evidence": "do_may", "model_evidence_ref": "r"}})),
++    ("r812_executor_surface_lech_lease", _r812_ca("review", 11, bn={"model_executor_identity": {"surface": "antigravity"}})),
++    ("r812_schema_h_bat_buoc", _r812_ca("review", 11, bn={"github_submitter_identity": False})),
++    ("r812_verdict_path_khong_ton_tai", _r812_ca("review", 11, bn={"verdict_path": "ops/reviews/khong.md", "evidence_url": "https://github.com/o/r/blob/{V}/ops/reviews/khong.md"})),
++    ("r812_tran_vong_cua_khep_ghi_ket_qua", lambda c: _r812_tran_vong(c, "approve", 0, {"state": "approved_pending", "review_rounds_used": 2, "attempt_open": False})),
++    ("r812_tran_vong_dau_vao_hong_khong_ghi", lambda c: _r812_tran_vong(c, "blocked", 11)),
++    ("r812_nguoi_giu_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["X/"]))),
++    ("r812_nguoi_giu_dau_cheo_nguoc", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["x\\a.py"]))),
++    ("r812_nguoi_giu_unicode_nfd", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["café/a.py"]}, lambda l: {
++        "other.yaml": {**l, "lease_id": "other-lease", "write_set": ["cafe\u0301/"]}}))),
++    ("r812_nguoi_giu_cham_gach", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["./x/a.py"]))),
++    ("r812_effective_mo_rong_hop_le", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=lambda w: _r812_doi_lease(w, {"effective_write_set": ["x/a.py", "y/b.py"]}))),
++    ("r812_lease_branch_rong", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"branch": ""}))),
++    ("r812_bien_nhan_provider_sai_kieu", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": [], "surface": "codex_cli", "transport": "machine", "session_run_id": "s1"}})),
++    ("r812_bien_nhan_family_sai_kieu", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "transport": "machine",
++                                                                                              "session_run_id": "s1", "model_family": []}})),
++    ("r812_bien_nhan_lech_sha", _r812_ca("review", 11, bn={"reviewed_sha": "{V}"})),
++    ("r812_bien_nhan_lech_lease_id", _r812_ca("review", 11, bn={"lease_id": "lease-khac"})),
++    ("r812_executor_transport_lech_lease", _r812_ca("review", 11, bn={"model_executor_identity": {"transport": "human"}})),
+     ("r812_verdict_am_dung_bang_lop", _r812_ca("review", 0, {"state": "running"}, bn={"verdict": "changes_requested"}, lop=(("a-b", "P2"),),
+                                                verdict="changes_requested", ids=("a-b",))),
+ ]
++CASES += [
++    ("r812_r4_own_union_conflict", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
++        w, {"effective_write_set": ["y/b.py"]}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["x/"], "effective_write_set": ["x/"]}}))),
++    ("r812_r4_own_dot", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["./x/a.py"]}))),
++    ("r812_r4_own_parent", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"effective_write_set": ["x/../y/b.py"]}))),
++    ("r812_r4_own_glob", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/*.py"]}))),
++    ("r812_r4_empty_declared", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": [], "effective_write_set": ["x/a.py"]}))),
++    ("r812_r4_top_family", _r812_ca("review", 11, bn={"model_family": []})),
++    ("r812_r4_executor_identity", _r812_ca("review", 11, bn={"model_executor_identity": False})),
++    ("r812_r4_duplicate_slug", _r812_ca("review", 11, lop=(("a-b", "P3"), ("a-b", "P3")))),
++]
+ MUTANTS.update({
+     "r812_bo_so_ls_remote": ('    if xa[0] or gan[0] or xa[1].split() != [oid.encode(), f"refs/heads/{m[1]}".encode()]:\n', "    if gan[0]:\n", ["r812_lease_chi_o_ref_cuc_bo"]),
+     "r812_ghi_state_roi_moi_tu_choi": ("        _die(RC_ARG, f\"đặc tả {l['spec_path']}", "        _save(state_dir, {**st, \"state\": \"leased\"}) or _die(RC_ARG, f\"đặc tả {l['spec_path']}", ["r812_dac_ta_lech_bam"]),
+     "r812_bo_bam_dac_ta": ('hashlib.sha256(spec).hexdigest() != l["spec_hash"]:', "False:", ["r812_dac_ta_lech_bam"]),
+     "r812_bo_comment_workflow": ("    if not any(isinstance(c, dict) and", "    if False and any(isinstance(c, dict) and", ["r812_lease_chua_comment_workflow"]),
+-    "r812_bo_h_check": ("    if rc_p or p.returncode:", "    if rc_p:", ["r812_lease_h_hong"]),
++    "r812_bo_h_check": ("        if p.returncode:  # I2(H)", "        if False:  # I2(H)", ["r812_lease_h_hong"]),
+     "r812_h_check_tren_worktree": ('"--root", str(td / "snap")]', '"--root", str(root)]', ["r812_dac_ta_chi_tai_lease_oid"]),
+-    "r812_bo_nguoi_giu": ('        if p.returncode != RC_DANG_GIU_LEASE or', "        if False and", ["r812_nguoi_giu_khac"]),
++    "r812_bo_nguoi_giu": (("        if p.returncode != RC_DANG_GIU_LEASE or", "        if giao_nhau:\n            _die(RC_GUARD, f\"I2(Đ): lease khác"), ("        if False and", "        if False:\n            _die(RC_GUARD, f\"I2(Đ): lease khác"), ["r812_nguoi_giu_khac"]),  # phối hợp: hai lớp cùng chặn
+     "r812_bo_shallow": ('_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\\n")', "True", ["r812_nong_la_false"]),
+     "r812_nhan_nhieu_dong_khai": ("    if len(khai) != 1:", "    if not khai:", ["r812_hai_dong_khai_la_false"]),
+     "r812_bo_kich_hoat": ('            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])\n', "", ["r812_khong_kich_hoat_la_false"]),
+     "r812_rc_falsy_thanh_rong": ('rc = l.get("required_checks", [])', 'rc = l.get("required_checks") or []', ["r812_required_checks_falsy"]),
+-    "r812_canon_suy_giam": ("    if bnv.PROVIDER_NGUON_HONG is not None:", "    if False:", ["r812_canon_thieu_nguon"]),
++    "r812_canon_suy_giam": ("if bnv.PROVIDER_NGUON_HONG is not None or ", "if False or ", ["r812_canon_thieu_nguon"]),
+     "r812_bo_neo_git": ("+ neo[0] + neo[1] +", "+", ["r812_verdict_blob_khong_co"]),
+     "r812_duong_cu_ghi_true": ('st["luat_adr0054"] = False  # I9', 'st["luat_adr0054"] = None  # I9', ["r812_duong_cu_luon_false"]),
+     "r812_bn_chi_cho_approve": ('if st.get("luat_adr0054") is True else None', 'if st.get("luat_adr0054") is True and a.verdict == "approve" else None', ["r812_slug_ngoai_bang_lop"]),
+     "r812_approve_cu_cho_adr0054": ('if st.get("luat_adr0054") is True else None', "if False else None", ["r812_approve_kem_lop_p1", "r812_duong_moi_du_dieu_kien"]),
+     "r812_bo_chan_p0_p2": ('("con-P0-P2", lop_ok and (', '("con-P0-P2", True or (', ["r812_approve_kem_lop_p1"]),
+-    "r812_mien_hang_mo": ("\n                                       and x.get(\"hang\") in HANG_LOP for x in lop)", " for x in lop)", ["r812_hang_px"]),
++    "r812_mien_hang_mo": ("\n                                           and x.get(\"hang\") in HANG_LOP for x in lop)", " for x in lop)", ["r812_hang_px"]),
+     "r812_slug_match_thay_fullmatch": ('SLUG_RE.fullmatch(x["slug"])', 'SLUG_RE.match(x["slug"])', ["r812_slug_xuong_dong"]),
+     "r812_bo_surface": ('("surface", nc[', '("surface", True or nc[', ["r812_bien_nhan_lech_surface"]),
+     "r812_bo_transport": ('("transport", nc[', '("transport", True or nc[', ["r812_bien_nhan_lech_transport"]),
+@@ -6071,13 +6260,122 @@ MUTANTS.update({
+     "r812_bo_spec_hash": ('("spec_hash", d.get("spec_hash")', '("spec_hash", True or d.get("spec_hash")', ["r812_bien_nhan_lech_spec_hash"]),
+     "r812_verdict_tu_nguoi_goi": ('("verdict", d.get("verdict") == a.verdict)', '("verdict", True)', ["r812_verdict_changes_requested", "r812_verdict_blocked"]),
+     "r812_bo_slug_trong_bang": ('("slug-ngoai-bang", lop_ok and', '("slug-ngoai-bang", True or', ["r812_slug_ngoai_bang_lop"]),
+-    "r812_ho_executor_theo_provider": ('bnv._ho_model_cua_ten(nc[vai]["model_family"] or "") or ', "", ["r812_executor_antigravity_hop_le"]),
+     "r812_siet_lop_khong_rong": ("lop_ok = type(lop) is list and all(", "lop_ok = type(lop) is list and bool(lop) and all(", ["r812_duong_moi_du_dieu_kien"]),
+     "r812_tran_chan_cua_khep": ('if cua == "begin-attempt" and st["attempts_used"]', 'if cua in ("begin-attempt", "record-review") and st["attempts_used"]', ["r812_cua_khep_luot_van_chay"]),
+     "r812_xet_dung_truoc_dau_vao": ('    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong"', '    _xet_dung(state_dir, st, "begin-attempt")\n    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong"', ["r812_cua_khep_luot_van_chay"]),
++    "r812_bo_do_chua_adr": ('            and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0054_TEP}")[0] == 0\n', "", ["r812_oid_khong_chua_adr"]),
++    "r812_bo_do_dua_vao": ('            and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0054_TEP}")[0] != 0\n', "", ["r812_oid_khong_dua_adr_vao"]),
++    "r812_bo_do_first_parent": ("            and chuoi[0] == 0 and oid.encode() in chuoi[1].split()\n", "", ["r812_oid_ngoai_first_parent"]),
++    "r812_snapshot_khong_git": ('_git_do(root, "worktree", "add", "-q", "--detach", str(td / "snap"), oid)[0]', '(td / "snap").mkdir() or _git_do(root, "archive", oid)[0] and False', ["r812_bia_mo_hai_chieu_tai_lease_oid"]),
++    "r812_giao_chi_bang_nhau": ("    return a == b or a.startswith(b + \"/\") or b.startswith(a + \"/\")", "    return a == b", ["r812_nguoi_giu_prefix_giao_nhau"]),
++    "r812_bo_effective_nguoi_khac": ('for k in ("write_set", "effective_write_set")', 'for k in ("write_set",)', ["r812_nguoi_giu_effective_giao_nhau"]),
++    "r812_bo_quet_giao": ("        if giao_nhau:\n            _die(RC_GUARD, f\"I2(Đ): lease khác", "        if False:\n            _die(RC_GUARD, f\"I2(Đ): lease khác", ["r812_nguoi_giu_prefix_giao_nhau", "r812_nguoi_giu_effective_giao_nhau"]),
++    "r812_planned_khong_go": ('"ai-dang-giu", duong.removeprefix("planned:")', '"ai-dang-giu", duong', ["r812_nguoi_giu_planned_hop_le"]),
++    "r812_bo_kieu_identity_lease": (' or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id)', "", ["r812_model_family_falsy"]),
++    "r812_bo_role_lease": (' or l.get("role") != "executor"', "", ["r812_lease_role_sai"]),
++    "r812_bo_generation_duong": ((' or l["generation"] < 1', ' and nc["generation"] > 0'), ("", ""), ["r812_lease_generation_khong_duong"]),  # phối hợp: chốt lease + lược đồ state
++    "r812_bo_mien_assurance": ('        if l["assurance_target"] not in bnv_lease.ASSURANCE_CAN_DOC_LAP:\n', "        if False:\n", ["r812_lease_assurance_ngoai_mien"]),
++    "r812_bo_bi_danh": ('    p = dict(launcher._PROVIDER_BI_DANH).get(p, p)\n    return next(', "    return p or next(", ["r812_provider_bi_danh_canon"]),
++    "r812_bo_provider_executor": ('("provider-executor", p_chuan(', '("provider-executor", True or p_chuan(', ["r812_executor_provider_lech_lease"]),
++    "r812_bo_surface_executor": ('("executor-surface-transport", all(', '("executor-surface-transport", True or all(', ["r812_executor_surface_lech_lease"]),
++    "r812_bo_thieu": ("list(bnv._thieu(d) if d else [])", "list([])", ["r812_schema_h_bat_buoc"]),
++    "r812_tran_vong_chan_cua_khep": (' and a is None and st.get("luat_adr0054") is not True:', " and a is None:", ["r812_tran_vong_cua_khep_ghi_ket_qua"]),
++    "r812_dung_truoc_H": ("    bn = _du_dieu_kien_approve(st, a) if", '    _xet_dung(state_dir, st, "record-review", a)\n    bn = _du_dieu_kien_approve(st, a) if', ["r812_tran_vong_dau_vao_hong_khong_ghi"]),
++    "r812_khong_don_tam": ("        shutil.rmtree(td, ignore_errors=True)", "        pass", ["r812_don_thu_muc_tam"]),
++    "r812_nc_chi_tap_khoa": ('_nc_hop_le(st["ngu_canh_lease"])', 'set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH)', ["r812_ngu_canh_long_sai_hinh"]),
++    "r812_bo_casefold": (').casefold()\n    parts', ')\n    parts', ["r812_nguoi_giu_hoa_thuong"]),
++    "r812_bo_dau_cheo_nguoc": (('.strip().replace("\\\\", "/")).casefold()', 'q = p.removeprefix("planned:").strip().replace("\\\\", "/")\n'),
++                                    (".strip()).casefold()", 'q = p.removeprefix("planned:").strip()\n'), ["r812_nguoi_giu_dau_cheo_nguoc"]),
++    "r812_bo_nfc": ('    q = unicodedata.normalize("NFC", p.removeprefix', '    q = (lambda _f, x: x)("NFC", p.removeprefix', ["r812_nguoi_giu_unicode_nfd"]),
++    "r812_bo_cham_gach": ('    if "." in q.split("/"):', '    if False:', ["r812_r4_own_dot"]),
++    "r812_ai_dang_giu_ca_effective": ('        for duong in l["write_set"]:  # I2(Đ)', "        for duong in ws:  # I2(Đ)", ["r812_effective_mo_rong_hop_le"]),
++    "r812_branch_rong_lot": ((' or any(t is str and not l[k].strip() for k, t in kieu.items())', "    if not _nc_hop_le(json.loads(json.dumps(nc))):"), ("", "    if False:"),
++                             ["r812_lease_branch_rong"]),  # phối hợp: chốt kiểu lease + lược đồ state trước `_save`
++    "r812_bo_kieu_danh_tinh_bn": ("        if kieu_sai:  # có mặt", "        if False:  # có mặt", ["r812_bien_nhan_family_sai_kieu"]),
++    "r812_bo_so_sha_bn": ('("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha)', '("reviewed_sha", True)', ["r812_bien_nhan_lech_sha"]),
++    "r812_bo_so_lease_id_bn": ('("lease_id", d.get("lease_id") == nc["lease_id"])', '("lease_id", True)', ["r812_bien_nhan_lech_lease_id"]),
++    "r812_bo_transport_executor": ('(("surface", "execution_surface"), ("transport", "transport"))', '(("surface", "execution_surface"),)', ["r812_executor_transport_lech_lease"]),
++    "r812_ho_theo_ten_provider": ("    ho = lambda vai: HO_CANON[nc[vai][\"model_family\"]]", "    ho = lambda vai: bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(nc[vai][\"provider\"]), \"\")",
++                                  ["r812_executor_ag_qua_cli", "r812_executor_antigravity_hop_le"]),
+     "r812_bo_chan_awaiting": ('    if st["state"] != "awaiting_lease":\n        _die(RC_STATE,\n             f"chỉ ghi', '    if False:\n        _die(RC_STATE,\n             f"chỉ ghi', ["r812_true_khong_quay_ve_duong_cu", "r812_duong_cu_luon_false"]),
+ })
+ 
++MUTANTS.update({
++    "r812_r4_bo_chan_yaml_sau": ('except (yaml.YAMLError, RecursionError):', 'except yaml.YAMLError:', ["r812_r4_yaml_deep"]),
++    "r812_r4_bo_resolve": ('return {ten, _chuan_duong(dich.as_posix())}', 'return {ten}', ["r812_r4_symlink_scope"]),
++    "r812_r4_own_chi_effective": ('for x in giu(l)))', 'for x in ws))', ["r812_r4_own_union_conflict"]),
++    "r812_r4_bo_glob": ('    if any(c in q for c in "*?[]"):', '    if False:', ["r812_r4_own_glob"]),
++    "r812_r4_bo_parent": (' or ".." in parts', '', ["r812_r4_own_parent"]),
++    "r812_r4_cho_declared_rong": (' or not l["write_set"]', '', ["r812_r4_empty_declared"]),
++    "r812_r4_bo_schema_bn": ('        if kieu_sai:  # có mặt', '        if False:  # có mặt', ["r812_r4_top_family", "r812_r4_executor_identity"]),
++    "r812_r4_bo_schema_surface": (('                    and (nc[v]["execution_surface"] is None or type(nc[v]["execution_surface"]) is str',
++                                    '                    and (nc[v]["transport"] is None or type(nc[v]["transport"]) is str'),
++                                   ('                    and (True or type(nc[v]["execution_surface"]) is str',
++                                    '                    and (True or type(nc[v]["transport"]) is str'), ["r812_r4_context_executor_surface"]),
++    "r812_r4_bo_unique_slug": ('and len({x["slug"] for x in lop}) == len(lop)', '', ["r812_r4_duplicate_slug"]),
++    "r812_r4_init_tu_cap": ('"state": "awaiting_lease",', '"state": "leased",', ["r812_duong_cu_luon_false"]),
++    "r812_r4_bo_dep_vang": (('            if rc != 0 or not b:', '        if bnv_lease.PROVIDER_NGUON_HONG is not None:'),
++                                 ('            if False:', '        if False:'), ["r812_canon_vang_phu_thuoc"]),
++    "r812_r4_bo_neo_path": ('+ neo[0] + neo[1] +', '+', ["r812_verdict_path_khong_ton_tai"]),
++    "r812_r4_chan_am_hop_le": ('("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})',
++                               '("slug-ngoai-bang", lop_ok and not a.finding_id)', ["r812_verdict_am_dung_bang_lop"]),
++})
++MUTANTS["r812_bo_h_check"][2].append("r812_prompt_path_thu_muc")
++
++
++
++
++def _r812_r5_source_module(w, content):
++    (w / "ops/bien_nhan_v2.py").write_text(content)
++    _g(w, "add", "ops/bien_nhan_v2.py"), _g(w, "commit", "-qm", "invalid canon module")
++    _g(w, "push", "-q", "origin", "master")
++
++# #812 lượt 5: nguồn suy giảm ở lease, mọi nguồn tham chiếu, chuẩn hoá tuple và lỗi argv.
++CASES += [
++    ("r812_r5_lease_canon_hong", _r812_ca("lease", 8, bien="thieu_nguon")),
++    ("r812_r5_source_api_missing", _r812_ca("lease", 8, truoc_lease=lambda w: _r812_r5_source_module(w, "# missing API\n"))),
++    ("r812_r5_source_syntax", _r812_ca("lease", 8, truoc_lease=lambda w: _r812_r5_source_module(w, "ordinary invalid syntax\n"))),
++    ("r812_r5_instruction_long", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {
++        "granted_on_instruction": "https://github.com/o/r/issues/" + "5" * 4400 + "#issuecomment-1"}))),
++    ("r812_r5_spec_path_zero", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"spec_path": "ops/specs/wp55\x00.md"}))),
++]
++for k in ("executor_model_evidence_ref", "executor_telemetry_path", "executor_nguoi_audit", "executor_audit_actor"):
++    CASES.append(("r812_r5_nested_" + k, _r812_ca("review", 11, bn={"model_executor_identity": {
++        "model_family": "claude", "model_evidence": "do_may", "model_evidence_ref": "r", k: []}})))
++for k, val in (("che_do", []), ("KHONG_do_duoc", []), ("phien_doc_lap", "false")):
++    CASES.append(("r812_r5_reviewer_" + k, _r812_ca("review", 11, bn={"model_reviewer_identity": {
++        "provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": "s1", k: val}})))
++CASES.append(("r812_r5_session_list", _r812_ca("review", 11, bn={"model_reviewer_identity": {
++    "provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": [], "phien_doc_lap": True, "KHONG_do_duoc": "ordinary explanation"}})))
++for k, val in (("provider", " openai_codex "), ("surface", " codex_cli "), ("transport", " machine ")):
++    CASES.append(("r812_r5_padded_" + k, _r812_ca("review", 0, {"state": "approved_pending"}, bn={"model_reviewer_identity": {
++        "provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": "s1", k: val}})))
++CASES += [
++    ("r812_r5_alias_surface", _r812_ca("review", 0, {"state": "approved_pending"}, bn={"model_executor_identity": {"surface": "claude_code_cli", "transport": "machine/local"}})),
++    ("r812_r5_prefixed_reference_valid", _r812_ca("review", 0, {"state": "approved_pending"}, bn={"model_executor_identity": {
++        "model_family": "claude", "model_evidence": "do_may", "executor_model_evidence_ref": "r"}})),
++]
++MUTANTS.update({
++    "r812_r5_no_loader_guard": ('    except Exception as ex:  # loader canon:', '    except OSError as ex:  # loader canon:', ["r812_r5_source_syntax"]),
++    "r812_r5_no_api_guard": ('if ten == "bien_nhan_v2" and any(not hasattr(m, k) for k in api):', 'if False:', ["r812_r5_source_api_missing"]),
++    "r812_r5_lease_degraded": ('        if bnv_lease.PROVIDER_NGUON_HONG is not None:', '        if False:', ["r812_r5_lease_canon_hong"]),
++    "r812_r5_unbounded_int": ('mr[2].lstrip("0") != str(st["packet"])', 'int(mr[2]) != st["packet"]', ["r812_r5_instruction_long"]),
++    "r812_r5_argv_valueerror": ('except (OSError, subprocess.SubprocessError, ValueError):', 'except (OSError, subprocess.SubprocessError):', ["r812_r5_spec_path_zero"]),
++    "r812_r5_ignore_bad_attestations": ('        if kieu_sai:  # có mặt', '        if False:  # có mặt',
++        ["r812_r5_nested_executor_model_evidence_ref", "r812_r5_reviewer_che_do", "r812_r5_reviewer_phien_doc_lap", "r812_r5_reviewer_KHONG_do_duoc", "r812_r5_session_list"]),
++    "r812_r5_raw_provider": ('bnv._chuan_hoa_provider(bnv._chuoi(x) or "")', 'bnv._chuan_hoa_provider(x or "")', ["r812_r5_padded_provider"]),
++    "r812_r5_raw_surface": ('bm_chuan(mri.get("surface")) ==', 'mri.get("surface") ==', ["r812_r5_padded_surface"]),
++    "r812_r5_raw_transport": ('bnv._chuoi(mri.get("transport")) ==', 'mri.get("transport") ==', ["r812_r5_padded_transport"]),
++})
++
++CASES += [
++    ("r812_r5_review_role", _r812_ca("review", 11, bn={"role": "executor"})),
++    ("r812_r5_review_assurance", _r812_ca("review", 11, bn={"assurance": "same_provider_approved"})),
++]
++MUTANTS.update({
++    "r812_r5_drop_role": ('("role", d.get("role") == "reviewer")', '("role", True)', ["r812_r5_review_role"]),
++    "r812_r5_drop_assurance": ('("assurance", d.get("assurance") == nc["assurance_target"])', '("assurance", True)', ["r812_r5_review_assurance"]),
++})
+ 
+ def chay_suite(script: Path, tmp: Path, chi_chay=None):
+     ket = {}

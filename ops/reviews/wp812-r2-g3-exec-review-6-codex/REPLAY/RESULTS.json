@@ -1,0 +1,34 @@
+[
+  {
+    "script": "REPRO_R1_APPLICABLE",
+    "rc": 0
+  },
+  {
+    "script": "REPRO_R2",
+    "rc": 0
+  },
+  {
+    "script": "REPRO_R3",
+    "rc": 0
+  },
+  {
+    "script": "IDENTITY_R3",
+    "rc": 0
+  },
+  {
+    "script": "SYMLINK_R3",
+    "rc": 0
+  },
+  {
+    "script": "PROBE_R4",
+    "rc": 0
+  },
+  {
+    "script": "PARSER_R4",
+    "rc": 0
+  },
+  {
+    "script": "CLEANUP_R4",
+    "rc": 0
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "head": "e93dad700a7d2274dbcca5a0f5069b4a358639dc",
+  "tree": "766cb4ea971e27b23cab54ce6049cd2ba12f6fe8",
+  "shallow": "false",
+  "status": "",
+  "base_ancestor_rc": 0,
+  "numstat": "368\t35\t.claude/dev/packet_loop.py\n507\t0\t.claude/dev/packet_loop_test.py\n4\t0\tdocs/PROTOCOL_DA_PHIEN.md\n",
+  "files": {
+    ".claude/dev/packet_loop.py": {
+      "sha256": "f8db70e63bf50a9d22b23d296fa43f7bdb0dfb07a6576492585ffb6f35e2a032",
+      "matches_HEAD": true
+    },
+    ".claude/dev/packet_loop_test.py": {
+      "sha256": "ad2aba499046ecfc0adf0fe4814f0cd5c6f15ac68213c4dbc615b3aa2f78d504",
+      "matches_HEAD": true
+    },
+    "docs/PROTOCOL_DA_PHIEN.md": {
+      "sha256": "805216bc03de651c0ad91b6256ee2a50b8858b4634176929c5da278eb9512201",
+      "matches_HEAD": true
+    }
+  }
+}

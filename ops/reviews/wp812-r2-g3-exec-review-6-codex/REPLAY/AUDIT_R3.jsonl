@@ -1,0 +1,5 @@
+{"cases": 94, "declared_mutants": 85, "untargeted": ["r812_bien_nhan_provider_sai_kieu", "r812_nguoi_giu_cham_gach", "r812_r5_alias_surface", "r812_r5_nested_executor_audit_actor", "r812_r5_nested_executor_nguoi_audit", "r812_r5_nested_executor_telemetry_path", "r812_r5_prefixed_reference_valid"]}
+{"mutant": "audit_receipt_sha_unbound", "total": 94, "passed": 93, "errors": {"r812_bien_nhan_lech_sha": "AssertionError: r812 review ['bn']: đòi rc=11, được rc=0; stderr=''"}}
+{"mutant": "audit_receipt_lease_id_unbound", "total": 94, "passed": 93, "errors": {"r812_bien_nhan_lech_lease_id": "AssertionError: r812 review ['bn']: đòi rc=11, được rc=0; stderr=''"}}
+{"mutant": "audit_no_executor_transport", "total": 94, "passed": 93, "errors": {"r812_executor_transport_lech_lease": "AssertionError: r812 review ['bn']: đòi rc=11, được rc=0; stderr=''"}}
+{"mutant": "audit_no_class_uniqueness", "total": 94, "passed": 93, "errors": {"r812_r4_duplicate_slug": "AssertionError: r812 review ['lop']: đòi rc=11, được rc=0; stderr=''"}}

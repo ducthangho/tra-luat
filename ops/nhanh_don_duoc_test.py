@@ -8,6 +8,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import math
 import os
 import secrets
 import re
@@ -5748,6 +5749,12 @@ def chay_manh_dich(k: int, n: int, ra, du=False) -> int:
     return rc
 
 
+def _so_huu_han(v) -> bool:
+    """int/float (KHONG bool) va huu han — NaN, Infinity, -Infinity deu sai. int luon huu han; KHONG goi
+    math.isfinite tren int vi int json khong lo (10**400) nem OverflowError thay vi ra mot dong loi."""
+    return type(v) is int or (type(v) is float and math.isfinite(v))
+
+
 def _loi_gop_dich(thu_muc: Path, head=None, du=False):
     """`(loi, doc)` — MOI dieu kien la mot dong loi; rong <=> moi manh, moi muc deu duong."""
     doc = []
@@ -5783,9 +5790,11 @@ def _loi_gop_dich(thu_muc: Path, head=None, du=False):
             loi.append(f"manh {m}: rc={x['rc']}")
         if x["so_lan_chay_lai"] < 0:
             loi.append(f"manh {m}: so_lan_chay_lai am")
-        if type(x["giay"]) not in (int, float) or x["giay"] < 0:
+        # WP748 r19 (Codex P2: giay=NaN + ram=NaN o manh 0 => 0 loi) — json.loads nhan NaN/Infinity,
+        # moi so sanh voi NaN la False nen `< 0`/`<= 0` khong bao gio ban: doi so HUU HAN truoc khi so.
+        if not _so_huu_han(x["giay"]) or x["giay"] < 0:
             loi.append(f"manh {m}: giay khong hop le")
-        if type(x["ram_dinh_mb"]) not in (int, float) or x["ram_dinh_mb"] <= 0:
+        if not _so_huu_han(x["ram_dinh_mb"]) or x["ram_dinh_mb"] <= 0:
             loi.append(f"manh {m}: RAM KHONG DO DUOC ({x['pham_vi_ram']})")
         if not all(isinstance(x[c], str) and x[c] for c in ("bat_dau", "ket_thuc", "tien_do", "pham_vi_ram")):
             loi.append(f"manh {m}: thieu moc thoi gian/tien do")
@@ -5808,7 +5817,7 @@ def _loi_gop_dich(thu_muc: Path, head=None, du=False):
     tat_ca = [k for k, _, _ in _muc_dich(du)]
     if sorted(hop) != sorted(tat_ca):
         loi.append(f"hop cac manh != tron {len(tat_ca)} muc (thay {len(hop)}, phan biet {len(set(hop))})")
-    duong_gang = max((x["giay"] for x in doc if type(x["giay"]) in (int, float)), default=None)
+    duong_gang = max((x["giay"] for x in doc if _so_huu_han(x["giay"])), default=None)
     if duong_gang is None or (not du and duong_gang > TRAN_DUONG_GANG_GIAY):
         loi.append(f"duong gang {duong_gang}s vuot tran {TRAN_DUONG_GANG_GIAY}s")
     return loi, doc
@@ -5824,7 +5833,8 @@ def _phan_chung_gop_dich() -> list:
         return [{"phien_ban": PHIEN_BAN_DICH, "che_do": CHE_DO_DICH, "manh": m, "so_manh": n, "head": head,
                  "sha256_test": bam[0], "sha256_tool": bam[1], "rc": 0,
                  "bat_dau": "2026-01-01T00:00:00.000Z", "ket_thuc": "2026-01-01T00:05:00.000Z",
-                 "giay": 300.0, "ram_dinh_mb": 100.0, "pham_vi_ram": "tong hop", "so_lan_chay_lai": 0,
+                 # manh 0 dung int, cac manh khac float — bo hop le phai nhan CA HAI kieu so (WP748 r19)
+                 "giay": 300.0 if m else 300, "ram_dinh_mb": 100.0 if m else 100, "pham_vi_ram": "tong hop", "so_lan_chay_lai": 0,
                  "tien_do": "xong", "ca_dich": {k: sorted(set(x[1])) for k, x in phan[m] if k[:3] in ("tk:", "db:")},
                  "ket_qua": {k: "passed" for k, _ in phan[m]}, "nhat_ky_duoi": "ok"} for m in range(n)]
 
@@ -5858,6 +5868,14 @@ def _phan_chung_gop_dich() -> list:
         "manh-trung": lambda bo: dat(bo[7], "manh", 6),
         "duong-gang-vuot": lambda bo: dat(bo[1], "giay", TRAN_DUONG_GANG_GIAY + 0.5),
         "ram-vang": lambda bo: dat(bo[1], "ram_dinh_mb", None),
+        # WP748 r19 — so KHONG huu han di qua json (NaN/Infinity/-Infinity), dat o manh 0 (manh dau cua max)
+        "giay-ram-nan-manh-0": lambda bo: (dat(bo[0], "giay", float("nan")), dat(bo[0], "ram_dinh_mb", float("nan"))),
+        "giay-nan": lambda bo: dat(bo[0], "giay", float("nan")),
+        "giay-inf": lambda bo: dat(bo[0], "giay", float("inf")),
+        "giay-am-inf": lambda bo: dat(bo[0], "giay", float("-inf")),
+        "ram-nan": lambda bo: dat(bo[0], "ram_dinh_mb", float("nan")),
+        "ram-inf": lambda bo: dat(bo[0], "ram_dinh_mb", float("inf")),
+        "giay-int-khong-lo": lambda bo: dat(bo[0], "giay", 10 ** 400),
         "chay-lai-am": lambda bo: dat(bo[1], "so_lan_chay_lai", -1),
         "rc-bool": lambda bo: dat(bo[1], "rc", False),
         "tien-do-rong": lambda bo: dat(bo[1], "tien_do", ""),

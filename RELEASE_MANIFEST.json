@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 189,
-  "total_bytes": 8768012,
-  "package_hash": "70b6b44a534b2ce1c8cf2bd01fad4211874d21bdba6b3aa68bfdf2a868d5fccb",
-  "content_hash": "70b6b44a534b2ce1c8cf2bd01fad4211874d21bdba6b3aa68bfdf2a868d5fccb",
+  "total_bytes": 8768243,
+  "package_hash": "b0d3aa28dc091c02a8feff179e9622333a4f5db15d9b2a1a45378ca30553b41b",
+  "content_hash": "b0d3aa28dc091c02a8feff179e9622333a4f5db15d9b2a1a45378ca30553b41b",
   "required_missing": [],
   "files": [
     {
@@ -88,8 +88,8 @@
     },
     {
       "path": "changelog.d/wp-831.md",
-      "size": 1696,
-      "sha256": "ee6719866ce5f1e1c277dfb85aa3b7884f934971b36a56dee035c25e3bb6aaa8"
+      "size": 1927,
+      "sha256": "613e6d92803f9772ce6f4341d2dc81547953ac213d9251fa51ab66bcfa9a3503"
     },
     {
       "path": "references/API_CONTRACT.md",

@@ -1,0 +1,21 @@
+# do 2026-10-18T17:48:55Z — phien session_017khPoiSXW9Yvefabg6MWaH (sua L1 cho PR #799)
+$ git show 7cc384e:ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md | sha256sum
+0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da  -
+$ git rev-parse 7cc384e:ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md
+aebf20085f5f8bd938026d6ee94179e445f14f61
+$ git rev-parse origin/ops/cap-lease-782   # nhanh lease
+0da21d4eb899ddf70fe63b5b7a86c6fe5db2f7da
+$ git show origin/ops/cap-lease-782:ops/leases/wp782-r5-g5b-claude-20261017.yaml | grep -E 'lease_id|spec_sha256_required|spec_hash'
+lease_id: wp782-r5-g5b-claude-20261017
+spec_sha256_required: 0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da
+spec_hash: 0e5c882ef6cd92ee59c1f5ab4c44a77f6a2b0328b8a1e4a2ecbc2973111823da
+$ git show -s --format='%H %T parents=%P' 8ab1007
+8ab100793df9831505f495543a74044b91c2c9ab 26d00fcb964bbaa65a7f4198514c343e2cde5853 parents=25cda362afbdf18358b4808ce4fff37d79cb26fb 1bcbaa0b564612b3072c7c6e8e884e18782a0745
+$ git diff --name-status 25cda36^1 25cda36   # merge dac ta so voi cha thu nhat cua no
+A	ops/specs/TRAN-CODEX-VA-SENSITIVE-r2.md
+A	ops/specs/TRAN-CODEX-VA-SENSITIVE-r3.md
+A	ops/specs/TRAN-CODEX-VA-SENSITIVE-r4.md
+A	ops/specs/TRAN-CODEX-VA-SENSITIVE-r5.md
+A	ops/specs/TRAN-CODEX-VA-SENSITIVE.md
+$ git merge-base --is-ancestor 25cda36 8ab1007^1 && echo la_to_tien
+la_to_tien

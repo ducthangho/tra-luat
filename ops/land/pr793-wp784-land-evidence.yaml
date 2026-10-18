@@ -56,7 +56,7 @@ spec:
   sha256: e9c042ffab043ccf3019da8a29304c7bb070cddd7bcc72c3b85863959570912a
   blob: 98ddcb7db0aaa8c15705eaa19e43a99f9c0f393d
   vao_master_qua: 'PR #785 (merge bb0ba77, merged_at 2026-10-17T11:52:08Z, head 2747aee) — readback-pr-785.json; gate push master 39030328846 success.'
-  nguon: 'measured — sha256sum tren master 7cc384e = spec_sha256_required cua lease g2.'
+  nguon: 'measured — sha256sum tren master 7cc384e = spec_sha256_required cua lease g2 (do-spec-va-merge.txt).'
 lease:
   lease_id: wp784-r2-g2-claude-20261017
   path: ops/leases/wp784-r2-g2-claude-20261017.yaml
@@ -83,7 +83,7 @@ uy_quyen_land:
 
 dieu_kien_truoc_merge:
   head_khong_doi: 'measured — readback-pr-793.json head.sha 1b375db = cha thu hai cua 7cc384e.'
-  base_troi: 'measured — PR mo tren base 8ab1007; cha thu nhat cua merge la bb0ba77 (#785 merge 52s truoc, chi them dac ta).'
+  base_troi: 'measured — PR mo tren base 8ab1007; cha thu nhat cua merge la bb0ba77 (#785 merge 52s truoc, chi them dac ta) (readback-pr-793.json, readback-pr-785.json, do-spec-va-merge.txt).'
   so_lan_day: >-
     thuat_lai — nhanh code day BA lan (1182060, 098a693, 1b375db) theo uy quyen chu kho "Vá theo lớp + đẩy lần 2" va
     vong 3 (comment 6232192239, 6232350831). Ngoai le truoc khi ADR-0054 co hieu luc.

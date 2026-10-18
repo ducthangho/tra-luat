@@ -8257,13 +8257,15 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
-def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False):
+def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False, tiem=False):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
     `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
     (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `truc_tiep`: eval công
     thức trong bash thay vì qua cai_cong_cu.sh, để đọc thư mục nó in. `venv`: thư mục ứng viên là `bin/` của một venv
     THẬT không có PyYAML (F03). `batch`: chạy `--bat-buoc` thật trên bảng kê rút còn `rg` rồi `bash` (lấy NGUYÊN từ
-    YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. `tiem`: khởi chạy qua `exec` (giữ PID) với
+    `CAI_CONG_CU_PY_CUA=$$` và `PY` vô hướng trỏ Python của venv đã EXPORT sẵn (F04); installer giả ghi việc chúng thấy dấu
+    hay không vào `dau.log`. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cai_cong_cu.sh", "cong_cu.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
@@ -8283,8 +8285,10 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
         _venv.EnvBuilder(with_pip=False, symlinks=False).create(str(uv.parent))
     for d in {bin_, uv, dau_d}:
         d.mkdir(parents=True, exist_ok=True)
-    tep = {uv / "rg": tot, bin_ / "sudo": 'exec "$@"', bin_ / "apt-get": "exit 0",
-           bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}'; exit 0"}
+    dau_log = s / "dau.log"
+    ghi_dau = f'echo "${{CAI_CONG_CU_PY_CUA:-ABSENT}}" >> \'{dau_log}\''
+    tep = {uv / "rg": tot, bin_ / "sudo": 'exec "$@"', bin_ / "apt-get": f"{ghi_dau}; exit 0",
+           bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}' && exit 0; {ghi_dau}; exit 0"}
     if dau != "uv":
         tep[dau_d / "rg"] = ("echo 'rg: error while loading shared libraries' >&2; exit 1" if dau == "hong"
                              else "echo 'ripgrep 14.1.0'")
@@ -8301,6 +8305,9 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
         lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); cd {shlex.quote(str(kho))}; eval "$LENH"']
     else:
         lenh = [vo, str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
+    if tiem:
+        lenh = [vo, "-c", f"export CAI_CONG_CU_PY_CUA=$$ PY={shlex.quote(str(uv / 'python'))}; exec "
+                + " ".join(shlex.quote(x) for x in lenh)]
     p = subprocess.run(lenh, env=env, capture_output=True, text=True, timeout=120)
     return p, gp.read_text().strip(), uv, dau_d
 
@@ -8354,6 +8361,16 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
         bang(p.returncode == 0 and tong.get("trang_thai_tong") == "DAT" and dat == {"rg": "DAT", "bash": "DAT"},
              f"{nen}: --bat-buoc chon lai Python sau khi rg doi PATH: rc={p.returncode} {dat} "
              f"{p.stderr[-300:]}")
+    # F04 (Codex lượt 4): dấu và `PY` vô hướng đến từ MÔI TRƯỜNG (qua `exec` nên dấu TRÙNG PID) không được tin — lần gọi
+    # mới vẫn tự chọn Python ban đầu; và installer con KHÔNG thấy dấu, kể cả khi dấu đầu vào đã được export.
+    for batch in (False, True):
+        with San() as s:
+            p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=batch, tiem=True)
+            thay = (s / "dau.log").read_text().split() if (s / "dau.log").exists() else []
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+                 f"{nen}: dau + PY vo huong tu moi truong duoc tin (batch={batch}): rc={p.returncode} "
+                 f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+            bang(thay and set(thay) == {"ABSENT"}, f"{nen}: installer con thay dau (batch={batch}): {thay}")
     # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục in ra phải
     # là thư mục của bản tốt (`command -v`), không phải thư mục ứng viên mà checker đã bỏ qua.
     with San() as s:

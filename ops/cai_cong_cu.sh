@@ -13,9 +13,11 @@ TEN="${1:-}"
 # Windows thuong chi co `python`; Linux/macOS co the chi co `python3` (CLAUDE.md).
 # wp831 (Codex luot 3 F03): luot duoc `source` trong vong `--bat-buoc` cua CUNG shell DUNG LAI PY da ghim cua luot
 # cha — chon lai o day se doc PATH ma cong thuc cong cu truoc vua doi (vd thu muc rg co Python thieu PyYAML). Dau hieu
-# la bien shell KHONG export gan voi $$: tien trinh moi khong ke thua; tiem qua moi truong ma PY chua co thi `set -u`
-# dung ngay (fail-close).
-if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then :
+# la bien shell KHONG export gan voi $$, va PY phai la MANG do luot cha tao.
+# Codex luot 4 F04: dau den tu MOI TRUONG luon mang thuoc tinh export (va `exec` giu nguyen PID, nen so gia tri voi $$
+# khong du) => bo dau ay truoc khi xet; PY vo huong tu moi truong khong bao gio duoc dung lai.
+case "$(declare -p CAI_CONG_CU_PY_CUA 2>/dev/null)" in "declare -x"*) unset CAI_CONG_CU_PY_CUA ;; esac
+if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && [[ "$(declare -p PY 2>/dev/null)" == "declare -a"* ]]; then :
 elif command -v python >/dev/null 2>&1; then PY=(python)
 elif command -v python3 >/dev/null 2>&1; then PY=(python3)
 elif command -v py >/dev/null 2>&1; then PY=(py -3)
@@ -57,7 +59,8 @@ import yaml
 d=yaml.safe_load(open("ops/cong_cu.yaml", encoding="utf-8"))
 print("\n".join(k for k,v in d["cong_cu"].items() if v["bat_buoc"] or v.get("chuan_bi")))')
   [ "${#BAT_BUOC[@]}" -gt 0 ] || { echo "cai_cong_cu: ban ke khong co cong cu bat buoc" >&2; exit 5; }
-  CAI_CONG_CU_PY_CUA=$$  # KHONG export: chi cac luot `source` duoi day thay (xem khoi chon python)
+  unset CAI_CONG_CU_PY_CUA  # go thuoc tinh export neu co (F04), roi gan lai KHONG export
+  CAI_CONG_CU_PY_CUA=$$  # chi cac luot `source` duoi day thay (xem khoi chon python)
   for cong_cu in "${BAT_BUOC[@]}"; do
     # source de PATH do installer vua them ton tai o parent cho vong sau + probe cuoi.
     # KICH la path tuyet doi, khong dung lai $0 tu CWD cua caller.

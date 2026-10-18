@@ -8289,7 +8289,8 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
         d.mkdir(parents=True, exist_ok=True)
     dau_log = s / "dau.log"
     ghi_dau = f'echo "${{CAI_CONG_CU_PY_CUA:-ABSENT}}" >> \'{dau_log}\''
-    tep = {uv / "rg": tot, bin_ / "sudo": 'exec "$@"', bin_ / "apt-get": f"{ghi_dau}; exit 0",
+    # `sudo` giả gọi `apt-get` giả bằng ĐƯỜNG DẪN TUYỆT ĐỐI, không qua PATH (Codex lượt 6 F05).
+    tep = {uv / "rg": tot, bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": f"{ghi_dau}; exit 0",
            bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}' && exit 0; {ghi_dau}; exit 0"}
     if dau != "uv":
         tep[dau_d / "rg"] = ("echo 'rg: error while loading shared libraries' >&2; exit 1" if dau == "hong"
@@ -8301,6 +8302,14 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
     vo, env = _wp802_bash_env()
     env.update(CONG_CU_NEN=nen, CONG_CU_GOC=str(goc), GITHUB_PATH=str(gp),
                PATH=os.pathsep.join([str(dau_d), str(bin_), env.get("PATH", "")]))
+    if batch:
+        # F05 (Codex lượt 6): công thức `bash` NGUYÊN VĂN prepend `dirname "$(command -v bash)"`. Bash phải được tìm thấy
+        # TRONG thư mục giả, nếu không nó prepend `/usr/bin` và lượt `rg` kế tiếp gọi sudo/apt-get THẬT của máy. Chốt TRƯỚC
+        # khi chạy wrapper: lệch thì ĐỎ ngay, không bao giờ chạm installer thật.
+        (bin_ / "bash").symlink_to(vo)
+        thay_bash = subprocess.run([vo, "-c", "command -v bash"], env=env, capture_output=True, text=True,
+                                   timeout=30).stdout.strip()
+        bang(thay_bash == str(bin_ / "bash"), f"fixture ro: bash ten tran la {thay_bash!r}, khong phai {bin_ / 'bash'}")
     if truc_tiep:
         import yaml
         env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"][nen]["lenh"]
@@ -8378,7 +8387,7 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
                     tong = {}
                 dat = {c.get("ten"): c.get("trang_thai") for c in tong.get("cong_cu", [])}
                 thay = (s / "dau.log").read_text().split() if (s / "dau.log").exists() else []
-                bang(p.returncode == 0 and dat == {"rg": "DAT", "bash": "DAT"} and set(thay) <= {"ABSENT"},
+                bang(p.returncode == 0 and dat == {"rg": "DAT", "bash": "DAT"} and thay == ["ABSENT", "ABSENT"],
                      f"{nen}: allexport={ae} thu_tu={tt}: rc={p.returncode} {dat} installer thay {thay} "
                      f"{p.stderr[-300:]}")
     # F04 (Codex lượt 4): dấu và `PY` vô hướng đến từ MÔI TRƯỜNG (qua `exec` nên dấu TRÙNG PID) không được tin — lần gọi
@@ -8390,7 +8399,8 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
             bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
                  f"{nen}: dau + PY vo huong tu moi truong duoc tin (batch={batch}): rc={p.returncode} "
                  f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
-            bang(thay and set(thay) == {"ABSENT"}, f"{nen}: installer con thay dau (batch={batch}): {thay}")
+            bang(thay == ["ABSENT"] * (2 if batch else 1),
+                 f"{nen}: installer gia khong duoc goi dung so lan / con thay dau (batch={batch}): {thay}")
     # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục in ra phải
     # là thư mục của bản tốt (`command -v`), không phải thư mục ứng viên mà checker đã bỏ qua.
     with San() as s:

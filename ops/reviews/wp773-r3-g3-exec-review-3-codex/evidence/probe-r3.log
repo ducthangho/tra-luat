@@ -1,0 +1,31 @@
+c15 original (0, '')
+mutant bound (3, "DO:c15_c11_tu_kiem_qua_dau_ra_gia:phép so c11 sai ở: ['m>k']")
+mutant strict (3, "DO:c15_c11_tu_kiem_qua_dau_ra_gia:phép so c11 sai ở: ['m=k']")
+mutant equal (3, "DO:c15_c11_tu_kiem_qua_dau_ra_gia:phép so c11 sai ở: ['m<k']")
+mutant rc (3, "DO:c15_c11_tu_kiem_qua_dau_ra_gia:phép so c11 sai ở: ['rc_1']")
+mutant denominator (3, "DO:c15_c11_tu_kiem_qua_dau_ra_gia:phép so c11 sai ở: ['mau_so_sai']")
+mutant missing (3, "DO:c15_c11_tu_kiem_qua_dau_ra_gia:phép so c11 sai ở: ['mau_so_sai', 'khong_dong']")
+groups 3
+regex valid True consumer 0
+regex bad_total False consumer 1
+regex partial False consumer 1
+regex zero_ca False consumer 1
+regex zero_mut False consumer 1
+regex survivor False consumer 1
+regex missing_mut False consumer 1
+regex extra_end False consumer 1
+regex extra_middle False consumer 1
+regex order False consumer 1
+regex do_before False consumer 1
+regex self_do False consumer 1
+regex nhe False consumer 1
+regex prefix False consumer 1
+regex raw_crlf False consumer 1
+regex neutral_before True consumer 0
+normalized_crlf True
+regex_mut_no_DO True
+regex_mut_no_end True
+mode ('day_du',) {}
+real (0, 'MIỄN TRỪ ops/land/plat-x8-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr468-hoso-4-packet-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr477-dung-goi-review-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr478-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr480-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr487-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr489-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr491-r358-ghi-so-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr493-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr554-wp541-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr594-wp578-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr621-skill-bai-hoc-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr666-wp650-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr672-wp574-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr679-wp678-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr680-wp676-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr684-wp677-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr689-wp677-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr696-wp668-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr701-wp687-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr703-wp674-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr707-wp705-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr714-wp710-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr718-wp678-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr721-wp698-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr732-wp685-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr759-no-p3-ho-so-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml (băm khớp ảnh chụp cutover)\nĐẠT ops/land/pr772-wp766-land-evidence.yaml\nĐẠT ops/land/pr779-wp775-land-evidence.yaml\nland_evidence_nguon: 2 ĐẠT · 28/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30\nTỔNG: ĐẠT\n')
+future_valid (0, '')
+exempt_changed (0, '')

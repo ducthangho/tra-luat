@@ -1,0 +1,29 @@
+groups 2
+good bang_chung_xanh= True chay_moi_rc= 0
+TONG_DO bang_chung_xanh= False chay_moi_rc= 1
+CA_13_14 bang_chung_xanh= False chay_moi_rc= 1
+DB_0_0 bang_chung_xanh= False chay_moi_rc= 1
+missing_DB bang_chung_xanh= False chay_moi_rc= 1
+reordered bang_chung_xanh= False chay_moi_rc= 1
+CA_0_0 bang_chung_xanh= False chay_moi_rc= 1
+NHE bang_chung_xanh= False chay_moi_rc= 1
+CRLF bang_chung_xanh= False chay_moi_rc= 1
+CI_prefix bang_chung_xanh= False chay_moi_rc= 1
+DB_36_37 bang_chung_xanh= True chay_moi_rc= 0
+extra_error bang_chung_xanh= True chay_moi_rc= 0
+DO_then_DAT bang_chung_xanh= True chay_moi_rc= 0
+selfcheck_DO bang_chung_xanh= True chay_moi_rc= 0
+extra_line bang_chung_xanh= True chay_moi_rc= 0
+groups_real ('14', '14')
+plan_present False NHE False env {}
+mutation removed ['test sống chưa đăng ký: ops/land_evidence_nguon_test.py']
+mutation wrong_path ['test sống chưa đăng ký: ops/land_evidence_nguon_test.py', 'mục đăng ký không có tệp: ops/land_evidence_nguon_typo_test.py']
+mutation wrong_pattern kiem_errors= [] evidence_good= False evidence_bad= False
+mutation permissive_pattern kiem_errors= [] evidence_good= True evidence_bad= True
+REAL_CHAY_MOI 0 seconds 41.0
+CA: 14/14 dat
+DOT BIEN: 37/37 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+CI_DANG_KY ops/land_evidence_nguon_test.py: ĐẠT rc=0
+

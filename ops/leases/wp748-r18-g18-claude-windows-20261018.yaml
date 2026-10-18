@@ -81,3 +81,14 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: separate exact candidate approval required before merge or land
+
+da_bi_thay_the: wp748-r19-g19-claude-windows-20261018
+da_bi_thay_the_ly_do: >-
+  The r18/g18 Executor made no progress for more than 30 minutes after
+  its second G3 child was killed for critical memory pressure around
+  2026-10-18T10:06Z. Owner authorized r19/g19 at Issue #748 comment
+  6252394793. Product source is clean at head
+  a2a358ae6b8649f9e2869f7042c42abf1c98dfd4 and tree
+  381528ea5ed1809965a49637f8def0f4159f51b6; k01 rc0, first G3
+  child inconclusive, second G3 child not run. No product push, PR,
+  independent review, merge, land or LIVE occurred.

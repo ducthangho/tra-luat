@@ -33,16 +33,16 @@
   "labels": [
 
   ],
-  "state": "open",
+  "state": "closed",
   "locked": false,
   "assignees": [
 
   ],
   "milestone": null,
-  "comments": 10,
+  "comments": 11,
   "created_at": "2026-10-17T15:13:07Z",
-  "updated_at": "2026-10-18T08:37:33Z",
-  "closed_at": null,
+  "updated_at": "2026-10-18T09:50:30Z",
+  "closed_at": "2026-10-18T09:50:30Z",
   "assignee": null,
   "author_association": "OWNER",
   "active_lock_reason": null,
@@ -58,7 +58,27 @@
     "total_blocking": 0
   },
   "body": "Packet do chủ kho chỉ thị trong phiên Claude ngày 17-10-2026: *\"Đọc launcher, công cụ xem đã xử lý rg chưa. Lưu ý cả môi trường Windows\"*, rồi *\"Có\"* khi được hỏi có soạn spec không, rồi chốt Q1–Q9 theo khuyến nghị. Issue do phiên này tạo hộ chủ kho qua GitHub App.\n\n## Lỗi (đo 12:45Z 17-10, Linux, mô phỏng ca Windows 15-08)\n\nDựng hai bản `rg` trên PATH: bản đứng đầu trả \"Access is denied\" (giống bản `rg` của Codex Desktop trong WindowsApps), bản thứ hai chạy tốt.\n\n| phép đo | kết quả |\n|---|---|\n| `launcher.py doctor --json` | **rc=0**, `rg.co=True`, `duong_dan` trỏ bản THỨ HAI, không cảnh báo gì |\n| gõ `rg --version` bằng tên trần (đúng thứ agent gọi) | **rc=1**, \"Access is denied\" |\n| `ops/cong_cu.py kiem-tra --chi rg` | **`DO`** |\n\nHai bộ đo trong kho kết luận ngược nhau, và bên sai là `doctor`: trong `lenh_doctor`, bản hỏng phía trước chỉ được ghi khi KHÔNG có bản nào chạy được.\n\nNgoài ra:\n- `session-start.sh` không có đường cài `rg` trên Windows: Git Bash không có `apt-get`, và `cargo` thường cũng không có.\n- Ba bảng cài đặt lệch nhau. `launcher.py` gợi ý `winget`, `ops/cong_cu.yaml` dùng `choco`, còn hook không có gì cho Windows. Phía Linux cũng mỗi chỗ một kiểu.\n- Sau bước `apt-get`, hook kiểm `co rg` (chỉ cần có mặt) thay vì `co_chay rg` (phải chạy được).\n\n## Quyết định đã chốt (chủ kho, 17-10)\n\n- Q1: chờ #792 land rồi mới cấp lease.\n- Q2: trạng thái mới `BI_CHE`, thoát mã 12.\n- Q3: chỉ áp cho `rg` (và `git`), không áp cho `bash`/`python`.\n- Q4: hook không tự cài trên Windows, chỉ báo to và in lệnh cài.\n- Q5: thêm ca test đối chiếu bảng cài với `ops/cong_cu.yaml`.\n- Q6: `winget … || choco …`.\n- Q7: dùng `rg.exe` 0 byte làm bản hỏng, cộng một lượt `workflow_dispatch` Windows.\n- Q8: Claude thi công, Codex review, lớp `sensitive`.\n- Q9: chủ kho cho phép vượt trần, nhưng write set đo lại chỉ có 6 tệp nên không dùng tới.\n\nĐặc tả đóng băng sẽ được đăng trong comment kế tiếp, kèm sha256. **Đặc tả không phải lease**: chưa có lease thì không ai được bắt tay làm.",
-  "closed_by": null,
+  "closed_by": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
   "reactions": {
     "url": "https://api.github.com/repos/ducthangho/tra-luat/issues/802/reactions",
     "total_count": 0,
@@ -141,6 +161,6 @@
       "sub_issues"
     ]
   },
-  "state_reason": null,
+  "state_reason": "completed",
   "pinned_comment": null
 }

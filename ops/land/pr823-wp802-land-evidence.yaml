@@ -39,9 +39,9 @@ post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39112158391, sha: dfe5437f7354eeb0ead564f0f26d973c293988f6, conclusion: 'failure (gate-registry con chay luc ghi)', buoc_do: 'release-verify strict (lane LAND — manifest committed)', ghi_chu: 'measured — readback-jobs-39112158391.json: 13/14 job da xong, 12 success; DUNG MOT job do (`gate (ubuntu-latest)`) o DUNG MOT buoc release-verify strict. Nguyen nhan do tai cho tren origin/master (do-lai-nguon-20261018/release-verify-master.txt): ok false, extra_files [changelog.d/wp-802.md], failed 0, missing 0.', nguon: [readback-run-39112158391.json, readback-jobs-39112158391.json]}
   - {name: 'launcher (Windows that) push master', run_id: 39112158406, sha: dfe5437f7354eeb0ead564f0f26d973c293988f6, conclusion: success, nguon: readback-run-39112158406.json}
 bookkeeping:
-  - {item: 'dong Issue #802 (completed) kem comment ban chieu', ket_qua: 'lam sau commit nay'}
+  - {item: 'dong Issue #802 (completed) kem comment ban chieu', ket_qua: 'measured — readback-issue-802.json: state closed, state_reason completed, closed_at 2026-10-18T09:50:30Z, closed_by ducthangho; comment 6248433003 (readback-comment-6248433003.json)'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-802-land, pr: 833}
   - {item: 'no ngoai pham vi', ket_qua: 'KHONG mo issue moi — moi no executor neu (comment 6247715483) da co chu: L1 cong thuc rg Linux/macOS + L2 docs/GOI_AGENT_DA_NEN.md + L3 manifest -> packet #831; Windows t23/t49/t217 -> #748 (va #671).'}
-  - {item: 'PR ghi so', nhanh: claude/bookkeeping-802-land}
 # ---- het truong chuan
 packet_id: wp802
 packet_issue: 802
@@ -81,8 +81,8 @@ trang_thai_packet:
   landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA: DO o release-verify strict (thieu ke manifest cho changelog.d/wp-802.md);
-    sua thuoc packet #831 L3, phai xanh tren master sau khi #831 land; (2) lease da nha: DAT; (3) bookkeeping: dong #802
-    sau commit nay, no da co chu (#831, #748). Ghi `landed: true` can quyet dinh chu kho.
+    sua thuoc packet #831 L3, phai xanh tren master sau khi #831 land; (2) lease da nha: DAT; (3) bookkeeping: #802 closed/completed DAT,
+    no da co chu (#831, #748). Ghi `landed: true` can quyet dinh chu kho.
 
 uy_quyen_land:
   dang: >-

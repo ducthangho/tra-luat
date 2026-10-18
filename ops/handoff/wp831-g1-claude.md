@@ -59,6 +59,15 @@ KHÔNG merge/land/deploy — việc của chủ kho.
   `ops/wp831-r3-g3-lease@d3a497e`). Vá theo spec r4; đột biến chạy một lần trên bản sao: bỏ phép dùng lại ⇒ cả hai ca
   r831 đỏ (rc 3, đúng lỗi reviewer), bỏ dòng gán dấu ⇒ đỏ (rc 3), bỏ dòng ghim ⇒ đỏ (rc 2) — đều `TinHieuChotCa`.
 
+- Codex lượt 4/8 (1392,4s, rc 0) @`c59d479`: `changes_requested`; F01/F02 đóng; cơ chế PATH của F03 đóng (wrapper đơn
+  12/12, source chain 24/24, batch 24/24); **F04 P2 `inherited-marker-reuses-scalar-python`** mới: dấu từ môi trường
+  (qua `exec`, trùng PID) + `PY` vô hướng được tin, và dấu đã export lọt xuống installer con. Verdict
+  `ops/reviews/wp831-g1-luot4-codex-verdict.md` (`ops/wp831-r4-g4-lease@f1fc1c8`). Vá trong phạm vi spec r4 mục 2.
+  Đột biến một lần trên bản sao: A bỏ phép dùng lại · B bỏ gán dấu · C bỏ ghim · D bỏ phép loại dấu export ⇒ đều giết
+  đúng ca r831 bằng `TinHieuChotCa`. **E (bỏ kiểm `PY` là mảng) và F (bỏ `unset` trước khi gán dấu) SỐNG SÓT — đo,
+  có chủ ý:** phép loại dấu export ở đầu tệp đã chặn mọi đầu vào từ ngoài (dấu từ môi trường luôn mang `-x`), nên hai
+  lớp này không thể chạm tới từ bên ngoài shell; giữ làm phòng thủ chiều sâu theo hướng Codex nêu.
+
 ## Kết quả cuối
 (điền sau: run `ci.yml`, run `launcher-windows.yml` + số ca bỏ qua, verdict Codex lượt cuối, `release-verify`)
 
@@ -69,6 +78,9 @@ KHÔNG merge/land/deploy — việc của chủ kho.
 - `ops/bash_nen.py:900` `SyntaxWarning: invalid escape sequence '\('` mỗi lần nạp — lease `wp748-r18-g18`, #748.
 - `t86` không cách ly khi hai suite chạy song song (xem Cổng).
 - Sàn đột biến Windows còn ~0,1% dư.
+- Công thức cài `bash` (`dirname "$(command -v bash)"`) đưa thư mục công cụ ban đầu trở lại đầu PATH trong
+  `--bat-buoc`; khi `rg` hỏng nằm cùng thư mục với `bash` thì tổng cuối `rg` DO (Codex lượt 4 đo 12/12) — cùng hình dạng
+  nợ L1, ngoài phạm vi.
 - `edit_skill_assert_count_gate_dry` (selftest) dùng tệp tạm CỐ ĐỊNH `$TMPDIR/_selftest_editskill.py` ⇒ đỏ giả khi
   nhiều selftest chạy song song (đo 18-10-2026, bản đột biến r291). Cùng họ `t86`.
 - Selftest `r226`/`r268` đỏ khi cấu hình Git toàn cục bật ký commit (Codex lượt 2 đo, nền = head) — môi trường, delta 0.

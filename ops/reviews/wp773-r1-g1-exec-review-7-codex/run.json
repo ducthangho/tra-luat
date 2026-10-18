@@ -1,0 +1,58 @@
+{
+  "version": "1.5.0",
+  "run_id": "76eba47025904b3fbb2df30936f53f45",
+  "short_id": "76eba470",
+  "ten": "wp773-review-7-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 7,
+    "van_tay": "f1a527bd4dad31b7"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-16T16:18:20.871345+00:00",
+  "ket_thuc_utc": "2026-10-16T16:21:02.999930+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 30562,
+  "khoa_danh_tinh": "linux:460451",
+  "workspace": "/home/user/rv773",
+  "head": "98d7d2501f0c35f6a150bdd41eaf610bc1bc92ed",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "1c49094df545d0c5162edc73fd845e1bcfe5af1cab47468d9bba4a9c1ef4f8f8",
+  "deadline_utc": "2026-10-16T23:00:00+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/runs/76eba470/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 162.129,
+  "stdout_byte": 259,
+  "stdout_sha256": "881046f0c89a4508dd3485d0917020518537e0c5bd50f1178fc00c5dc74ac9a5",
+  "stderr_byte": 177587,
+  "stderr_sha256": "22a9f3b52cebe2c1d0056024a667bf82a5f05761f85513deab1a4136a9bf7412"
+}

@@ -1,0 +1,58 @@
+duplicate_key
+rc=
+0
+ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+pmc_dict_key
+rc=
+0
+ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+fraction
+rc=
+1
+ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L3 $.pre_merge_checks[0]: mốc 2026-10-16T02:58:26.100Z không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+offset_quoted
+rc=
+0
+ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+offset_unquoted
+rc=
+1
+ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L3 $.pre_merge_checks[0]: mốc 2026-10-16 02:59:00+00:00 không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+positive_number
+rc=
+0
+ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+bad_date EXCEPTION ValueError month must be in 1..12
+nonstring
+rc=
+0
+ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+list_key
+rc=
+2
+KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: đọc/parse YAML: ConstructorError: while constructing a mapping
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: KHÔNG ĐO ĐƯỢC
+glob_directory (0, 'ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n')
+MUTATION l2_content rc= 3 DO:c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van:lượt 2 #771 (chỉ metadata) phải ĐỎ L2: ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+MUTATION dict_walk rc= 0 
+MUTATION glob_file rc= 0 
+MUTATION rename_allowlist rc= 3 DO:c10_l5_danh_sach_dong_bang:MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: 28 tên, vân tay ef22b9a8bf2e…

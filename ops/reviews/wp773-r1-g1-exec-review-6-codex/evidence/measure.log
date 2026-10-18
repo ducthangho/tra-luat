@@ -1,0 +1,190 @@
+tree rc= 0 utover)
+MIỄN TRỪ ops/land/pr732-wp685-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr759-no-p3-ho-so-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml (băm khớp ảnh chụp cutover)
+land_evidence_nguon: 0 ĐẠT · 28/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 28
+TỔNG: ĐẠT
+
+archive c6e2401 0
+history-c6e2401 rc= 1  nhanh nay (vao master qua PR ghi so nay)'
+  L1 $.dieu_kien_truoc_merge.khong_xung_dot: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — mergeable_state clean. Master troi 9fddb1d -> 1101cd2 (11 commit cua #741, chi '
+land_evidence_nguon: 0 ĐẠT · 0/1 miễn trừ (băm khớp) · 2 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+archive 1a4c417 0
+history-1a4c417 rc= 1 _checks[5]: có positive mà thiếu nguon_positive (chuỗi/danh sách)
+  L2 $.post_merge_checks[1]: có positive mà thiếu nguon_positive (chuỗi/danh sách)
+  L3 $.pre_merge_checks[6].luc: mốc 2026-10-16T02:58:54Z không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/1 miễn trừ (băm khớp) · 4 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+archive d60b9e6 0
+history-d60b9e6 rc= 1 chụp cutover — kiểm đủ luật
+ĐỎ ops/land/pr765-wp743-land-evidence.yaml: 1 vi phạm
+  L1 $.spec.nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay)'
+land_evidence_nguon: 0 ĐẠT · 0/1 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+no-exemption 1 en: không có) — 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay)'
+land_evidence_nguon: 16 ĐẠT · 0/0 miễn trừ (băm khớp) · 82 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 28
+TỔNG: ĐỎ
+
+independent-cutover 28 5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257
+reverse-c01_l1_luot1_mergeable_clean_khong_nguon rc= 0 
+
+reverse-c02_l1_glob_va_thu_muc rc= 0 
+
+reverse-c03_l1_token_khong_duoc_thoat_goc rc= 0 
+
+reverse-c04_l1_measured_hoa_thuong_va_khong_phai_khai rc= 0 
+
+reverse-c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van rc= 3 DO:c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van:Q3: nguồn phải phân giải ở provenance trước gốc kho: rc=0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+
+reverse-c06_l3_luot2_moc_sau_merged_at rc= 0 
+
+reverse-c07_l3_chi_doc_readback_cua_chinh_pr rc= 0 
+
+reverse-c14_cli_moi_to_hop_duong_dan rc= 0 
+
+reverse-c08_l4_khong_do_duoc_khong_bao_gio_dat rc= 0 
+
+reverse-c09_l5_mien_tru_theo_bam rc= 0 
+
+reverse-c13_bam_va_luat_tren_cung_mot_lan_doc rc= 0 
+
+reverse-c10_l5_danh_sach_dong_bang rc= 0 
+
+reverse-c11_cay_that_dat_va_mien_tru_du rc= 0 
+
+reverse-c12_dong_cuoi_dung_dinh_dang rc= 0 
+
+reverse-prov-vs-land rc= 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+priority A/B reverse prov-vs-land head 1 mutant 0
+reverse-land-vs-root rc= 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+priority A/B reverse land-vs-root head 1 mutant 0
+middle-first-c01_l1_luot1_mergeable_clean_khong_nguon rc= 0 
+
+middle-first-c02_l1_glob_va_thu_muc rc= 0 
+
+middle-first-c03_l1_token_khong_duoc_thoat_goc rc= 0 
+
+middle-first-c04_l1_measured_hoa_thuong_va_khong_phai_khai rc= 0 
+
+middle-first-c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van rc= 0 
+
+middle-first-c06_l3_luot2_moc_sau_merged_at rc= 0 
+
+middle-first-c07_l3_chi_doc_readback_cua_chinh_pr rc= 0 
+
+middle-first-c14_cli_moi_to_hop_duong_dan rc= 0 
+
+middle-first-c08_l4_khong_do_duoc_khong_bao_gio_dat rc= 0 
+
+middle-first-c09_l5_mien_tru_theo_bam rc= 0 
+
+middle-first-c13_bam_va_luat_tren_cung_mot_lan_doc rc= 0 
+
+middle-first-c10_l5_danh_sach_dong_bang rc= 0 
+
+middle-first-c11_cay_that_dat_va_mien_tru_du rc= 0 
+
+middle-first-c12_dong_cuoi_dung_dinh_dang rc= 0 
+
+middle-first-prov-vs-land rc= 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+priority A/B middle-first prov-vs-land head 1 mutant 0
+middle-first-land-vs-root rc= 1 ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L2 $: positive khai '1/1' mà không tệp nguon_positive nào chứa nguyên văn
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+priority A/B middle-first land-vs-root head 1 mutant 1
+root-before-middle-c01_l1_luot1_mergeable_clean_khong_nguon rc= 0 
+
+root-before-middle-c02_l1_glob_va_thu_muc rc= 0 
+
+root-before-middle-c03_l1_token_khong_duoc_thoat_goc rc= 0 
+
+root-before-middle-c04_l1_measured_hoa_thuong_va_khong_phai_khai rc= 0 
+
+root-before-middle-c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van rc= 0 
+
+root-before-middle-c06_l3_luot2_moc_sau_merged_at rc= 0 
+
+root-before-middle-c07_l3_chi_doc_readback_cua_chinh_pr rc= 0 
+
+root-before-middle-c14_cli_moi_to_hop_duong_dan rc= 0 
+
+root-before-middle-c08_l4_khong_do_duoc_khong_bao_gio_dat rc= 0 
+
+root-before-middle-c09_l5_mien_tru_theo_bam rc= 0 
+
+root-before-middle-c13_bam_va_luat_tren_cung_mot_lan_doc rc= 0 
+
+root-before-middle-c10_l5_danh_sach_dong_bang rc= 0 
+
+root-before-middle-c11_cay_that_dat_va_mien_tru_du rc= 0 
+
+root-before-middle-c12_dong_cuoi_dung_dinh_dang rc= 0 
+
+root-before-middle-prov-vs-land rc= 1 ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L2 $: positive khai '1/1' mà không tệp nguon_positive nào chứa nguyên văn
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+priority A/B root-before-middle prov-vs-land head 1 mutant 1
+root-before-middle-land-vs-root rc= 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+priority A/B root-before-middle land-vs-root head 1 mutant 0
+probe numeric-positive 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+probe fractional 1 ecks[0]: mốc 2026-10-16T02:58:26.1Z không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+probe offset-quoted 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+probe dict-key 1 00Z<khoa>: mốc 2026-10-16T02:59:00Z không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+probe internal-symlink 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+probe non-string-source 1 .yaml: 1 vi phạm
+  L2 $: có positive mà thiếu nguon_positive (chuỗi/danh sách)
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+probe duplicate 2 hu-land-evidence.yaml: parse YAML: ConstructorError: khoá trùng 'x'
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: KHÔNG ĐO ĐƯỢC
+
+probe glob 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+probe directory 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+rename rc= 3 DO:c10_l5_danh_sach_dong_bang:MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: 28 tên, vân tay ef22b9a8bf2e…
+

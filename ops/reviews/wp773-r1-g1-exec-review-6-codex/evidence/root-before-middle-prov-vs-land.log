@@ -1,0 +1,4 @@
+ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L2 $: positive khai '1/1' mà không tệp nguon_positive nào chứa nguyên văn
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ

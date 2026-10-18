@@ -1,0 +1,21 @@
+fixed LAND_EVIDENCE_NGUON_MA=/tmp/rv773-null-fixed.py ['python3.13', '-B', 'evidence/regression.py', '--mot-ca', 'r01_null_key']
+RC=0
+
+
+revert LAND_EVIDENCE_NGUON_MA=/home/user/rv773/ops/land_evidence_nguon.py ['python3.13', '-B', 'evidence/regression.py', '--mot-ca', 'r01_null_key']
+RC=3
+DO:r01_null_key:khoá null trùng phải bị từ chối: mong rc=2, được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+
+fixed LAND_EVIDENCE_NGUON_MA=/tmp/rv773-walker-fixed.py ['python3.13', '-B', 'evidence/regression.py', '--mot-ca', 'r02_collections']
+RC=0
+
+
+revert LAND_EVIDENCE_NGUON_MA=/home/user/rv773/ops/land_evidence_nguon.py ['python3.13', '-B', 'evidence/regression.py', '--mot-ca', 'r02_collections']
+RC=3
+DO:r02_collections:mọi chuỗi YAML phải qua L1: mong rc=1, được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+

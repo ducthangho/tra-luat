@@ -66,3 +66,7 @@ xung_dot_write_set_do_luc: >-
 base_ghi_chu: >-
   Spec r1 do base e0273d3 luc soan (05:38Z); master troi qua #772 (e03d4bf) va #771 (c73af7b) truoc luc cap. Theo spec
   muc base, lease neo master do lai luc cap: c73af7b. MIEN_TRU_CUTOVER do tren base nay (gom pr765-wp743-land-evidence.yaml).
+da_bi_thay_the: wp773-r1-g1x-claude-20261018
+da_bi_thay_the_ly_do: >-
+  Chu kho gia han va chap nhan spec r3 tai Issue #773 issuecomment-6245193547 (2026-10-18T03:28:46Z): lease wp773-r1-g1x-claude-20261018
+  thay lease nay, toi 2026-10-18T19:00:00Z. Lease nay con han luc ghi bia mo, nen bia mo hai chieu la duong thu hoi.

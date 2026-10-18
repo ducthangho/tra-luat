@@ -27,8 +27,10 @@ liên tiếp chứng minh là sai từ thiết kế — chi tiết ở phần ch
 from __future__ import annotations
 
 import argparse
+import hashlib
 import hmac
 import html
+import importlib.util
 import json
 import os
 import platform
@@ -36,6 +38,7 @@ import re
 import secrets
 import subprocess
 import sys
+import tempfile
 import time
 import unicodedata
 from datetime import datetime, timezone
@@ -198,6 +201,8 @@ CHUYEN_HOP_LE = {
     # một bài học trong tệp này — `accepted`, rồi `leased`, giờ tới `reviewing`:
     # canh từng cửa là thua, chỉ để lại MỘT cửa mới thắng.
     "reviewing": (),
+    # #812 M2/M3: packet áp ADR-0054 — `record-review` (biên nhận H) vào, chỉ `accept` ra.
+    "approved_pending": (),
     "accepted": (),
     "blocked": (),
 }
@@ -205,7 +210,7 @@ CHUYEN_HOP_LE = {
 # Các state chỉ được ghi bởi luồng review, không bao giờ bởi `transition`.
 # `reviewing` không nằm đây vì nó VÀO được bằng `transition` (từ `running`); thứ bị
 # cấm là đường RA. Bảng `CHUYEN_HOP_LE` ở trên đã cưỡng chế điều đó.
-STATE_CHI_DO_REVIEW_GHI = ("accepted",)
+STATE_CHI_DO_REVIEW_GHI = ("accepted", "approved_pending")
 
 # --- (a) same-failure theo ID ỔN ĐỊNH ----------------------------------------
 # Vì sao không dùng vân tay văn xuôi: ba lượt review liên tiếp lách được nó bằng
@@ -660,6 +665,8 @@ def _load(state_dir: Path, packet: int) -> dict:
                             and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
+            ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
+                        and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)),
             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
@@ -932,10 +939,17 @@ def cmd_record_lease(a, state_dir: Path) -> int:
     và hạn (để lease không sống mãi).
     """
     st = _load(state_dir, a.packet)
+    moi, cu = (a.lease_ref, a.lease_path, a.lease_comments), (a.lease_id, a.granted_by, a.evidence, a.expires_utc)
+    if any(moi) == any(cu) or not all(moi if any(moi) else cu):  # #812 M1: hai đường LOẠI TRỪ nhau
+        _die(RC_ARG, "chọn ĐÚNG một đường: --lease-ref/--lease-path/--lease-comments HOẶC "
+                     "--lease-id/--granted-by/--evidence/--expires-utc, đủ cờ của đường ấy")
+    _xet_dung(state_dir, st, "record-lease")
     if st["state"] != "awaiting_lease":
         _die(RC_STATE,
              f"chỉ ghi được lease khi packet đang 'awaiting_lease'; hiện là {st['state']!r}. "
              f"Ghi đè lease của một packet đang chạy là hồi sinh một lượt đã cạn.")
+    if any(moi):
+        return _record_lease_ref(a, state_dir, st)
     # Dựng ứng viên rồi đưa qua ĐÚNG hàm kiểm chung. Không tự kiểm ở đây nữa —
     # hai chỗ tự kiểm rời nhau CHÍNH LÀ finding `partial-lease-authority-bypass`.
     lease = _kiem_luoc_do_lease(
@@ -949,6 +963,7 @@ def cmd_record_lease(a, state_dir: Path) -> int:
     )
     st["lease"] = lease
     st["state"] = "leased"
+    st["luat_adr0054"] = False  # I9: đường cũ LUÔN luật cũ — chế độ chỉ xác định ở đường lease ref
     st["history"].append({"event": "record_lease", "lease_id": lease["lease_id"],
                           "granted_by": lease["granted_by"],
                           "expires_utc": lease["expires_utc"]})
@@ -996,15 +1011,7 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
             f"lượt {st['attempts_used']} đang mở — đóng nó bằng một review trước đã. "
             f"Gọi lại begin-attempt không mở lượt mới và không tiêu thêm trần.",
         )
-    if st["attempts_used"] >= st["attempts_limit"]:
-        st["state"] = "blocked"
-        st["history"].append({"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]})
-        _save(state_dir, st)
-        _die(
-            RC_TRAN,
-            f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. "
-            f"Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.",
-        )
+    _xet_dung(state_dir, st, "begin-attempt")
     if not isinstance(st.get("hmac_key"), str) or not re.fullmatch(r"[0-9a-f]{64}", st["hmac_key"]):
         _die(RC_STATE, "state thiếu/hỏng khoá toàn vẹn — không nâng cấp state cũ ngầm")
     anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)
@@ -1150,8 +1157,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"phải vào lại 'reviewing' với head mới.",
         )
 
-    if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
-        _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
+    _xet_dung(state_dir, st, "record-review")
     goi = None
     if _la_codex(st):
         goi = next((g for g in st["codex_calls"] if g["run_id"] == a.codex_call), None)
@@ -1172,6 +1178,9 @@ def cmd_record_review(a, state_dir: Path) -> int:
                 f"--finding-id {fid!r} sai dạng slug kebab-case (^[a-z0-9]+(-[a-z0-9]+)*$). "
                 f"KHÔNG tự suy ID từ mô tả — ID phải do reviewer khai.",
             )
+
+    # #812 M2: packet áp ADR-0054 chỉ `approve` được qua biên nhận H; `--verdict` một mình không đủ.
+    bn = _du_dieu_kien_approve(st, a) if st.get("luat_adr0054") is True and a.verdict == "approve" else None
 
     # (c) cùng ID lặp TRONG MỘT review chỉ tính MỘT lần: dedup trước khi đếm.
     # Không có bước này thì reviewer nhắc lại một lỗi hai lần trong cùng một
@@ -1218,8 +1227,10 @@ def cmd_record_review(a, state_dir: Path) -> int:
             if st[u] >= st[t]:
                 _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
 
-    st["state"] = {"approve": "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
-    if a.verdict == "approve":
+    st["state"] = {"approve": "approved_pending" if bn else "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
+    if bn:
+        st.update(pending_sha=a.reviewed_sha, bien_nhan_approve=bn)
+    elif a.verdict == "approve":
         st["accepted_sha"] = a.reviewed_sha
     st["history"].append(
         {"event": "record_review", "verdict": a.verdict,
@@ -2374,6 +2385,239 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# --- #812 MAY-ADR-0054-a (`ops/specs/wp812.md` + phần chung, I1–I11). Đ = git do CHÍNH tiến trình này fetch/ls-remote · H = lease/biên nhận
+# qua validator CANON chép từ `origin/master` (không chạy bản của cây ứng viên) · R = readback người gọi lấy. Lỗi đầu vào `_die` TRƯỚC `_save` (I4).
+ADR0054_TEP = "docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md"
+ADR0055_TEP = "docs/adr/0055-kich-hoat-adr-0054.md"
+LUAT_0054_RE = re.compile(rb"^luat_push_va_dung_va: ADR-0054@([0-9a-f]{40})$", re.M)
+HANG_LOP = ("P0", "P1", "P2", "P3")
+CHECK_BAT_BUOC = tuple((".github/workflows/ci.yml", f"{j} (ubuntu-latest)") for j in ("gate", "gate-cong-cu-gop", "gate-ops", "gate-packet-loop", "gate-registry"))
+APP_CHECK, BOT_LEASE, BOT_CONNECTOR = "github-actions", "github-actions[bot]", "chatgpt-codex-connector[bot]"
+CANON = ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py")
+RC_DANG_GIU_LEASE = 11  # `ops/lease_publish.py::RC_DANG_GIU` — `ai-dang-giu` có người giữ
+REPO_RE = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/issues/([0-9]+)#issuecomment-[0-9]+\Z")
+
+
+def _git_do(root: Path, *args) -> tuple[int, bytes]:
+    try:
+        p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, timeout=300)
+        return p.returncode, p.stdout
+    except (OSError, subprocess.SubprocessError):
+        return -1, b""
+
+
+def _canon(root: Path) -> Path:
+    td = Path(tempfile.mkdtemp(prefix="pl812-canon-"))
+    for p in CANON:
+        rc, b = _git_do(root, "show", f"refs/remotes/origin/master:{p}")
+        if rc != 0 or not b:
+            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {p} trên origin/master")
+        (td / p).parent.mkdir(parents=True, exist_ok=True), (td / p).write_bytes(b)
+    return td
+
+
+def _doc_json(duong: str, rc: int) -> tuple:
+    try:
+        b = Path(duong).read_bytes()
+        return json.loads(b, object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json), hashlib.sha256(b).hexdigest()
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
+        _die(rc, f"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}")
+
+
+def _trang_du(d, khoa: str, nhan: str) -> list:
+    """I7: 'đủ trang' = tập id PHÂN BIỆT bằng `total_count` của MỌI trang; id phải là int thật."""
+    trang = d if isinstance(d, list) else [d]
+    ok = bool(trang) and all(isinstance(t, dict) and isinstance(t.get(khoa), list) and type(t.get("total_count")) is int for t in trang)
+    ds = [x for t in trang for x in t[khoa]] if ok else []
+    if not ok or not all(isinstance(x, dict) and type(x.get("id")) is int for x in ds) or {t["total_count"] for t in trang} != {len({x["id"] for x in ds})}:
+        _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {nhan}: cần trang {{`{khoa}`, `total_count`}}, id int, tập id phân biệt = total_count")
+    return ds
+
+
+def _ngu_canh_lease(l: dict, ref: str, oid: str, path: str, repo: str) -> dict:
+    """M1: hàm DUY NHẤT dựng tập khoá ngữ cảnh lease (`record-lease` ghi; `record-review`/`accept` đọc)."""
+    rc = l.get("required_checks") or []
+    if type(rc) is not list or not all(type(x) is list and len(x) == 2 and all(type(s) is str and s for s in x) for x in rc):
+        _die(RC_ARG, "lease `required_checks` phải là list các cặp [workflow, job]")
+    return {"lease_id": l["lease_id"], "lease_ref": ref, "lease_oid": oid, "lease_path": path, "repo": repo,
+            "branch": l["branch"], "generation": l["generation"], "spec_hash": l["spec_hash"], "assurance_target": l["assurance_target"],
+            "executor": _identity(l.get("provider"), l.get("model_family"), l.get("execution_surface"), l.get("transport")),
+            "reviewer": _identity(l.get("reviewer"), l.get("reviewer_model_family"), l.get("reviewer_execution_surface"), l.get("reviewer_transport")),
+            "required_checks": sorted({tuple(x) for x in CHECK_BAT_BUOC} | {tuple(x) for x in rc})}
+
+
+def _che_do_0054(root: Path, spec: bytes) -> bool:
+    """Đúng MỘT dòng khai + ba phép đo land-OID của ADR-0052 (đường dẫn ADR-0054) + đã kích hoạt; không đo được ⇒ False."""
+    khai = LUAT_0054_RE.findall(spec)
+    if len(khai) != 1:
+        return False
+    oid, m = khai[0].decode(), "refs/remotes/origin/master"
+    chuoi, a55, pr = _git_do(root, "rev-list", "--first-parent", m), _git_do(root, "show", f"{m}:{ADR0055_TEP}"), _git_do(root, "show", f"{m}:docs/PROTOCOL_DA_PHIEN.md")
+    nfc = lambda b: unicodedata.normalize("NFC", b.decode("utf-8", "replace"))  # noqa: E731
+    dong20 = [d for d in nfc(pr[1]).splitlines() if re.match(r"^\|\s*`ADR-0054`\s*\|", d)]
+    return (_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\n")
+            and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0054_TEP}")[0] == 0
+            and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0054_TEP}")[0] != 0
+            and chuoi[0] == 0 and oid.encode() in chuoi[1].split()
+            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])
+            and pr[0] == 0 and len(dong20) == 1 and "chưa kích hoạt" not in dong20[0].casefold())
+
+
+def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
+    """M1 đường MỚI: lease từ ref REMOTE vừa fetch; I2 (H check · Đ ai-dang-giu · R comment workflow); đặc tả theo `spec_hash`; rồi MỚI xác định chế độ."""
+    import yaml
+    root, m = Path(a.root), re.fullmatch(r"origin/([A-Za-z0-9._/-]+)", a.lease_ref)
+    if not m or ".." in a.lease_ref or _git_do(root, "fetch", "-q", "origin", "+refs/heads/*:refs/remotes/origin/*")[0]:
+        _die(RC_ARG, f"--lease-ref phải là origin/<nhánh> và `git fetch origin` phải chạy được: {a.lease_ref!r}")
+    xa, gan = _git_do(root, "ls-remote", "origin", f"refs/heads/{m[1]}"), _git_do(root, "rev-parse", "-q", "--verify", f"refs/remotes/origin/{m[1]}^{{commit}}")
+    oid = gan[1].decode().strip()
+    if xa[0] or gan[0] or xa[1].split() != [oid.encode(), f"refs/heads/{m[1]}".encode()]:
+        _die(RC_GUARD, f"{a.lease_ref} không có trên remote hoặc lệch ls-remote — lease ở ref cục bộ không có thẩm quyền")
+    rc, raw = _git_do(root, "show", f"{oid}:{a.lease_path}")
+    td = _canon(root)
+    (td / "lease.yaml").write_bytes(raw)
+    p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(root)], capture_output=True)
+    if rc or p.returncode:
+        _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
+    l = yaml.safe_load(raw)
+    lid, ws = l.get("lease_id"), l.get("effective_write_set") or l.get("write_set")
+    kieu = {"lease_id": str, "branch": str, "spec_path": str, "spec_hash": str, "assurance_target": str, "granted_on_instruction": str, "generation": int, "packet_issue": int}
+    mr = REPO_RE.fullmatch(str(l.get("granted_on_instruction")))
+    if any(type(l.get(k)) is not t for k, t in kieu.items()) or l["packet_issue"] != st["packet"] or not mr or int(mr[2]) != st["packet"] \
+            or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws):
+        _die(RC_ARG, f"lease sai kiểu {sorted(kieu)}, khác packet {st['packet']}, không có write set, hoặc granted_on_instruction không trỏ chính Packet Issue")
+    for duong in ws:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn
+        p = subprocess.run([*lp, "ai-dang-giu", duong, "--root", str(root)], capture_output=True)
+        if p.returncode != RC_DANG_GIU_LEASE or p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] != [f"NGƯỜI_GIỮ 1: {lid}"]:
+            _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
+    cm, sha_cm = _doc_json(a.lease_comments, RC_ARG)
+    ds = [c for t in (cm if isinstance(cm, list) else [cm]) for c in (t if isinstance(t, list) else [t])]
+    if not any(isinstance(c, dict) and isinstance(c.get("user"), dict) and c["user"].get("login") == BOT_LEASE
+               and str(c.get("issue_url", "")).endswith(f"/{mr[1]}/issues/{st['packet']}")
+               and re.search(rf"^lease_id: {re.escape(lid)}$", str(c.get("body", "")), re.M) for c in ds):
+        _die(RC_GUARD, f"I2(R): không comment nào của {BOT_LEASE} trên issue #{st['packet']} chứa `lease_id: {lid}` — workflow chưa đăng")
+    rc, spec = _git_do(root, "show", f"{oid}:{l['spec_path']}")
+    if rc or hashlib.sha256(spec).hexdigest() != l["spec_hash"]:
+        _die(RC_ARG, f"đặc tả {l['spec_path']} tại {oid[:12]} lệch `spec_hash` của lease")
+    nc = _ngu_canh_lease(l, a.lease_ref, oid, a.lease_path, mr[1])
+    for vai in ("executor", "reviewer"):
+        if any(v is not None and nc[vai][k] != v for k, v in (st.get(f"{vai}_identity") or {}).items()):
+            _die(RC_PROVIDER, f"{vai} của lease {nc[vai]!r} khác state {st.get(f'{vai}_identity')!r}")
+    lease = _kiem_luoc_do_lease({"lease_id": lid, "granted_by": l.get("granted_by"), "evidence": l["granted_on_instruction"], "expires_utc": l.get("lease_expires_at_utc")}, RC_ARG)
+    che_do = _che_do_0054(root, spec)
+    st.update(lease=lease, state="leased", luat_adr0054=che_do, ngu_canh_lease=nc)
+    st["history"].append({"event": "record_lease_ref", "lease_id": lid, "lease_oid": oid, "luat_adr0054": che_do, "lease_comments_sha256": sha_cm})
+    _save(state_dir, st)
+    print(f"đã ghi lease {lid} từ {a.lease_ref}@{oid[:12]} — luat_adr0054={che_do} — state leased")
+    return RC_OK
+
+
+def _du_dieu_kien_approve(st: dict, a) -> dict:
+    """M2 — vị từ DÙNG CHUNG cho `approve` của packet áp ADR-0054: verdict TRONG biên nhận H (không phải `--verdict`), I8 qua hàm chuẩn
+    hoá của `bien_nhan_v2`, I10 (packet, generation, sha, spec_hash), assurance = lease, bảng lớp đúng lược đồ, không còn P0–P2."""
+    import yaml
+    try:
+        d = yaml.safe_load(raw := Path(a.bien_nhan).read_bytes())
+    except Exception as ex:  # noqa: BLE001 — thiếu cờ/tệp/YAML hỏng đều là KHÔNG ĐO ĐƯỢC
+        _die(RC_BIEN_NHAN, f"packet áp ADR-0054: `approve` phải kèm --bien-nhan đọc được ({type(ex).__name__})")
+    spec = importlib.util.spec_from_file_location("bien_nhan_v2_canon", _canon(Path(a.root)) / "ops" / "bien_nhan_v2.py")
+    spec.loader.exec_module(bnv := importlib.util.module_from_spec(spec))
+    d = d if isinstance(d, dict) else {}
+    nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
+    mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
+    ho = lambda prov: bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(prov if type(prov) is str else ""), "")  # noqa: E731
+    ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
+    lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.match(x["slug"])
+                                       and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
+    loi = list(bnv._thieu(d) if d else ["không phải ánh xạ"]) + [ten for ten, dung in (
+        ("verdict", d.get("verdict") == "approve"), ("role", d.get("role") == "reviewer"),
+        ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
+        ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
+        ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
+        ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
+        ("ho-reviewer", bool(ho_rev) and ho_rev == ho(nc["reviewer"]["provider"]) == ho(mri.get("provider"))),
+        ("ho-executor", bool(ho_exec) and ho_exec == ho(nc["executor"]["provider"])),
+        ("surface", nc["reviewer"]["execution_surface"] is not None and mri.get("surface") == nc["reviewer"]["execution_surface"]),
+        ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec),
+        ("bang-lop", lop_ok), ("con-P0-P2", lop_ok and not any(x["hang"] in HANG_LOP[:3] for x in lop))) if not dung]
+    if loi:
+        _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện approve: {loi}")
+    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}
+
+
+def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
+    """I7 — neo MỘT kho + MỘT PR + MỘT head; đủ trang theo tập id PHÂN BIỆT của TỪNG endpoint (không so chéo không gian id). Dạng:
+    {"repo","pr","head_sha","reviews"|"review_comments"|"issue_comments": {"total_count","items"}}. Trả (id P3 mở, mốc id lớn nhất/endpoint)."""
+    d, _ = _doc_json(duong, RC_GATE)
+    if not isinstance(d, dict) or (d.get("repo"), d.get("pr"), d.get("head_sha")) != (repo, pr, head):
+        _die(RC_GATE, f"readback connector không neo đúng ({repo}, PR {pr}, {head})")
+    ep = {k: _trang_du(d.get(k), "items", f"connector {k}") for k in ("reviews", "review_comments", "issue_comments")}
+    for k, v in ep.items():
+        url, duoi = ("issue_url", f"/{repo}/issues/{pr}") if k == "issue_comments" else ("pull_request_url", f"/{repo}/pulls/{pr}")
+        if not all(str(x.get(url, "")).endswith(duoi) and isinstance(x.get("user"), dict) and type(x.get("body")) is str for x in v):
+            _die(RC_GATE, f"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body")
+    cua = {k: [x for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
+    if not ([x for x in cua["issue_comments"] if (m := re.search(r"Reviewed commit:\s*`?([0-9a-f]{7,40})\b", x["body"])) and head.startswith(m[1])]
+            or [x for x in cua["reviews"] if x.get("commit_id") == head]):  # I3: bằng chứng dương rỗng ⇒ không đạt
+        _die(RC_GATE, f"connector chưa xong trên {head}: không review/kết luận sạch nào của {BOT_CONNECTOR}")
+    hang = {x["id"]: set(re.findall(r"!\[(P[0-9]+) Badge\]", x["body"])) for x in cua["review_comments"] if x.get("commit_id") == head}
+    if [i for i, v in hang.items() if len(v) != 1 or not v <= set(HANG_LOP)]:  # I3: miền đóng — P4, PX, không/hai badge ⇒ không đạt
+        _die(RC_GATE, f"connector: hạng ngoài miền {HANG_LOP}: { {i: sorted(v) for i, v in hang.items()} }")
+    if cao := [i for i, v in hang.items() if v != {"P3"}]:
+        _die(RC_GATE, f"connector còn P0–P2 trên {head}: {cao} — DỪNG, hỏi chủ kho")
+    return [i for i, v in hang.items() if v == {"P3"}], {k: max((x["id"] for x in v), default=None) for k, v in ep.items()}
+
+
+def cmd_accept(a, state_dir: Path) -> int:
+    """M3: (Đ) đầu nhánh lease trên remote = `pending_sha`; check bắt buộc xanh (luật `kiem-gate`, chỉ app `github-actions`);
+    connector xong không P0–P2; mọi P3 còn mở có đúng một quyết định đủ bốn trường + lý do."""
+    st = _load(state_dir, a.packet)
+    if st["state"] != "approved_pending" or st.get("luat_adr0054") is not True:
+        _die(RC_STATE, f"accept chỉ chạy từ 'approved_pending' của packet áp ADR-0054 (đang {st['state']!r})")
+    _xet_dung(state_dir, st, "accept")
+    nc, h, root = st["ngu_canh_lease"], st["pending_sha"], Path(a.root)
+    xa = _git_do(root, "ls-remote", "origin", f"refs/heads/{nc['branch']}")
+    if xa[0] or xa[1].split() != [h.encode(), f"refs/heads/{nc['branch']}".encode()]:
+        _die(RC_TRACE, f"đầu nhánh {nc['branch']} trên remote ≠ pending_sha {h}")
+    wr, sha_wr = _doc_json(a.workflow_runs, RC_GATE)
+    runs_wf = _trang_du(wr, "workflow_runs", "workflow_runs")
+    for wf in sorted({w for w, _ in nc["required_checks"]}):
+        ung = [r for r in runs_wf if (r.get("path"), r.get("head_sha")) == (wf, h)
+               and isinstance(r.get("repository"), dict) and r["repository"].get("full_name") == nc["repo"]]
+        suite, jobs = (max(ung, key=lambda r: r["id"]).get("check_suite_id") if ung else None), [j for w, j in nc["required_checks"] if w == wf]
+        if type(suite) is not int:
+            _die(RC_GATE, f"VẮNG: không run {wf} nào trên {h} trong {nc['repo']} (hoặc thiếu check_suite_id)")
+        if [r for r in _doc_check_runs(a.check_runs) if r["name"] in jobs and r["check_suite"]["id"] == suite
+                and (r.get("app") if isinstance(r.get("app"), dict) else {}).get("slug") != APP_CHECK]:
+            _die(RC_GATE, f"check bắt buộc của {wf} có run từ app khác {APP_CHECK!r}")
+        cmd_kiem_gate(argparse.Namespace(head=h, check_suite=str(suite), bat_buoc=jobs, check_runs=a.check_runs), state_dir)
+    p3_cn, moc = _doc_connector(a.connector, nc["repo"], a.pr, h)
+    con_mo = {("offline", s) for s in st["bien_nhan_approve"]["p3"]} | {("connector", str(i)) for i in p3_cn}
+    qd, truong = (_doc_json(a.quyet_dinh_p3, RC_ARG)[0] if a.quyet_dinh_p3 else []), {"nguon", "khoa", "ten_no", "owner", "huong", "ly_do"}
+    if (type(qd) is not list or not all(type(q) is dict and set(q) == truong and all(type(v) is str and v.strip() for v in q.values()) for q in qd)
+            or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):
+        _die(RC_ARG, f"P3 còn mở {sorted(con_mo)} phải có ĐÚNG một quyết định {sorted(truong)} mỗi mục")
+    st.update(state="accepted", accepted_sha=h, moc_connector=moc, quyet_dinh_p3=qd)
+    st["history"].append({"event": "accept", "accepted_sha": h, "workflow_runs_sha256": sha_wr, "connector_sha256": _doc_json(a.connector, RC_GATE)[1], "moc_connector": moc})
+    _save(state_dir, st)
+    print(f"accepted {h} — {len(qd)} quyết định P3, mốc connector {moc}")
+    return RC_OK
+
+
+def _xet_dung(state_dir: Path, st: dict, cua: str) -> None:
+    """I5 (M4): hàm DUY NHẤT xét dừng ở mọi cửa ĐƯA packet đi tiếp. Cửa KHÉP lượt đang mở không bị chặn: trần lượt chỉ khoá
+    `begin-attempt` (mở lượt MỚI); trần vòng ở `record-review` giữ đúng hành vi cũ (I9)."""
+    if cua == "begin-attempt" and st["attempts_used"] >= st["attempts_limit"]:
+        st.update(state="blocked", history=[*st["history"], {"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]}])
+        _save(state_dir, st)
+        _die(RC_TRAN, f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.")
+    if cua == "record-review":
+        if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
+            _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
+    if cua == "accept":
+        _kiem_luoc_do_lease(st.get("lease"), RC_STATE)
+
+
 def cmd_status(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
@@ -2422,14 +2666,17 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("record-lease",
                        help="GHI HỘ lease do bên có thẩm quyền cấp (awaiting_lease → leased)")
     q.add_argument("--packet", type=int, required=True)
-    q.add_argument("--lease-id", required=True, help="định danh lease bên điều phối đã cấp")
-    q.add_argument("--granted-by", required=True,
+    q.add_argument("--lease-id", help="định danh lease bên điều phối đã cấp")
+    q.add_argument("--granted-by",
                    help=f"bên CÓ THẨM QUYỀN đã cấp. KHÔNG được là {PROVIDERS} — "
                         f"agent không tự cấp cho mình")
-    q.add_argument("--evidence", required=True,
+    q.add_argument("--evidence",
                    help="dấu vết bền để đối chiếu (URL/ID comment nơi lease được cấp)")
-    q.add_argument("--expires-utc", required=True,
+    q.add_argument("--expires-utc",
                    help="hạn lease, ISO8601 CÓ múi giờ, ví dụ 2026-08-13T18:30:00Z")
+    for co, mo_ta in (("--lease-ref", "#812 đường mới: origin/<nhánh> chứa tệp lease"), ("--lease-path", "tệp lease trong ref"),
+                      ("--lease-comments", "JSON comment của Packet Issue (readback R)"), ("--root", "gốc kho git")):
+        q.add_argument(co, help=mo_ta, default="." if co == "--root" else None)
     q.set_defaults(fn=cmd_record_lease)
 
     q = sub.add_parser("begin-attempt", help="mở một lượt executor")
@@ -2476,7 +2723,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="mô tả tự do, CHỈ để đọc — không tham gia phép đếm.",
     )
     q.add_argument("--codex-call", help="run_id của record-codex-call (bắt buộc khi reviewer codex)")
+    q.add_argument("--bien-nhan", help="#812: biên nhận review (YAML v2 + bang_lop) — bắt buộc khi approve packet áp ADR-0054")
+    q.add_argument("--root", default=".", help="gốc kho git (đọc validator canon từ origin/master)")
     q.set_defaults(fn=cmd_record_review)
+
+    q = sub.add_parser("accept", help="#812: approved_pending → accepted (packet áp ADR-0054)")
+    for co in ("--packet", "--pr"):
+        q.add_argument(co, type=int, required=True)
+    for co in ("--check-runs", "--workflow-runs", "--connector"):  # JSON readback (R) trên pending_sha; dạng connector: `_doc_connector`
+        q.add_argument(co, required=True)
+    q.add_argument("--quyet-dinh-p3", help="JSON list quyết định cho mọi P3 còn mở")
+    q.add_argument("--root", default=".")
+    q.set_defaults(fn=cmd_accept)
 
     q = sub.add_parser("record-codex-call", help="ghi lời gọi review codex; chặn TRƯỚC khi vượt trần")
     q.add_argument("--packet", type=int, required=True)

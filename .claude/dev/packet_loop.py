@@ -694,11 +694,12 @@ def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
 def _save(state_dir: Path, st: dict) -> None:
     state_dir.mkdir(parents=True, exist_ok=True)
     p = _state_path(state_dir, st["packet"])
-    p.write_text(
-        json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    # Mọi lỗi serialization/encoding là lỗi đầu vào: đo TRƯỚC khi mở/truncate state.
+    try:
+        raw = (json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    except (ValueError, TypeError, UnicodeError) as ex:
+        _die(RC_STATE, f"state không mã hoá được: {type(ex).__name__}")
+    p.write_bytes(raw)
 
 
 def _kiem_chuyen(st: dict, den: str) -> None:
@@ -2426,7 +2427,20 @@ def _nap(td: Path, ten: str):
            "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider")
     if ten == "bien_nhan_v2" and any(not hasattr(m, k) for k in api):
         _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: validator canon {ten} thiếu giao diện")
+    if ten == "bien_nhan_v2":
+        tap = ("ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP")
+        if (any(type(getattr(m, k)) not in (set, frozenset) or not getattr(m, k)
+                or not all(type(x) is str and x for x in getattr(m, k)) for k in tap)
+                or any(not callable(getattr(m, k)) for k in api[3:])):
+            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: validator canon {ten} giao diện sai kiểu")
     return m
+
+
+def _chay_canon(*args, **kwargs):
+    try:
+        return subprocess.run(*args, **kwargs)
+    except (OSError, subprocess.SubprocessError, ValueError) as ex:
+        _die(RC_GUARD, f"KHÔNG ĐO ĐƯỢC: chạy validator canon: {type(ex).__name__}")
 
 
 def _ten_provider(p):
@@ -2550,7 +2564,7 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
     lid = l["lease_id"]
     with _canon(root, oid) as td:
         (td / "lease.yaml").write_bytes(raw)
-        p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
+        p = _chay_canon([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
         if p.returncode:  # I2(H) trên worktree Git TẠI lease OID, không trên worktree của ứng viên
             _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
         bnv_lease = _nap(td, "bien_nhan_v2")
@@ -2559,7 +2573,7 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
         if l["assurance_target"] not in bnv_lease.ASSURANCE_CAN_DOC_LAP:
             _die(RC_ARG, f"assurance_target {l['assurance_target']!r} ngoài miền của protocol")
         for duong in l["write_set"]:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn KHAI BÁO…
-            p = subprocess.run([*lp, "ai-dang-giu", duong.removeprefix("planned:"), "--root", str(root)], capture_output=True)
+            p = _chay_canon([*lp, "ai-dang-giu", duong.removeprefix("planned:"), "--root", str(root)], capture_output=True)
             if p.returncode != RC_DANG_GIU_LEASE or p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] != [f"NGƯỜI_GIỮ 1: {lid}"]:
                 _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
         try:  # …và KHÔNG lease còn hiệu lực nào khác GIAO write set HIỆU LỰC (§5 chuẩn hoá, prefix hai chiều, cả write_set lẫn effective_write_set)
@@ -2656,8 +2670,12 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
         ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
         lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
                                            and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
-        neo = bnv._neo_git(Path(a.root), Path(a.bien_nhan).name, d) if d else (["không phải ánh xạ"], [])
-        loi = list(bnv._thieu(d) if d else []) + neo[0] + neo[1] + [ten for ten, dung in (
+        try:
+            neo = bnv._neo_git(Path(a.root), Path(a.bien_nhan).name, d) if d else (["không phải ánh xạ"], [])
+            thieu = list(bnv._thieu(d) if d else [])
+        except Exception as ex:  # H hỏng/không đo được vẫn phải giữ state và mã thoát có kiểm soát.
+            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: kiểm biên nhận canon: {type(ex).__name__}")
+        loi = thieu + neo[0] + neo[1] + [ten for ten, dung in (
             ("verdict", d.get("verdict") == a.verdict), ("role", d.get("role") == "reviewer"),
             ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
             ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),

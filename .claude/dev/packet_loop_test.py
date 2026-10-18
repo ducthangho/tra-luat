@@ -6377,6 +6377,148 @@ MUTANTS.update({
     "r812_r5_drop_assurance": ('("assurance", d.get("assurance") == nc["assurance_target"])', '("assurance", True)', ["r812_r5_review_assurance"]),
 })
 
+# #812 lượt 6: API canon dùng được, lỗi argv/serialization giữ byte, và mỗi thành phần authority/identity có phản chứng riêng.
+def _r812_r6_api_lease(w, key):
+    p = w / "ops/bien_nhan_v2.py"
+    p.write_text(p.read_text() + "\n" + key + " = None\n")
+    _g(w, "add", "ops/bien_nhan_v2.py"), _g(w, "commit", "-qm", "invalid canonical API type")
+    _g(w, "push", "-q", "origin", "master")
+
+
+def _r812_r6_comment(c, field):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    (sd / "wp55.json").write_bytes(before)
+    p = c.tmp / "cm.json"
+    cm = json.loads(p.read_text())
+    if field == "author":
+        cm[0]["user"]["login"] = "ordinary-reviewer"
+    elif field == "issue":
+        cm[0]["issue_url"] = "https://api.github.com/repos/o/r/issues/56"
+    else:
+        cm[0]["body"] = "lease_id: different-lease"
+    p.write_text(json.dumps(cm))
+    rc, _, e = run(c.script, ["record-lease", "--packet", 55, "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml",
+                            "--lease-comments", p, "--root", c.tmp / "kho/w"], sd)
+    _doi(7, rc, e, "I2(R) chỉ lệch " + field)
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi")
+
+
+def _r812_r6_activation(c, variant):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline đã kích hoạt")
+    _kiem(sd, "baseline bật", luat_adr0054=True)
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    p = w / "docs/PROTOCOL_DA_PHIEN.md"
+    row = next(x for x in p.read_text().splitlines() if re.match(r"^\|\s*`ADR-0054`\s*\|", x))
+    replacement = {"pending": row + " chưa kích hoạt", "missing": "", "duplicate": row + "\n" + row}[variant]
+    p.write_text(p.read_text().replace(row, replacement, 1))
+    _g(w, "add", "docs/PROTOCOL_DA_PHIEN.md"), _g(w, "commit", "-qm", "protocol activation condition")
+    _g(w, "push", "-q", "origin", "master")
+    rc, _, e = run(c.script, ["record-lease", "--packet", 55, "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml",
+                            "--lease-comments", c.tmp / "cm.json", "--root", w], sd)
+    _doi(0, rc, e, "lease hợp lệ khi chế độ chưa đủ điều kiện")
+    _kiem(sd, "kích hoạt protocol thiếu " + variant, luat_adr0054=False)
+
+
+def _r812_r6_family(c, role):
+    import yaml
+    w, sd = _kho812(c), c.sd()
+    ex, rv = ("google_antigravity", "claude") if role == "executor" else ("claude", "google_antigravity")
+    doi = {"provider": ex, "executor": ex, "reviewer": rv}
+    if role == "executor":
+        doi.update(model_family="gemini", execution_surface="antigravity", reviewer_model_family="claude",
+                   reviewer_execution_surface="claude_code", reviewer_transport="machine/local")
+    else:
+        doi.update(reviewer_model_family="gemini", reviewer_execution_surface="antigravity", reviewer_transport="machine/local")
+    _r812_doi_lease(w, doi)
+    _doi(0, *c.init(sd, executor=ex, reviewer=rv, lease=False, extra=(f"--{role}-model-family", "gemini",
+        f"--{role}-execution-surface", "antigravity", f"--{role}-transport", "machine/local"))[::2], "init AG " + role)
+    (c.tmp / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "lease_id: wp55-r1-g1-claude",
+                                               "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
+    h = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+    args = ["--model-family", "gemini", "--execution-surface", "antigravity", "--transport", "machine/local"]
+    for cmd in (["record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", c.tmp / "cm.json", "--root", w],
+                ["begin-attempt", "--provider", ex, *(args if role == "executor" else [])],
+                ["record-post", "--for", "reviewing", "--comment-id", "9000055002"],
+                ["transition", "--to", "reviewing", "--comment-id", "9000055002", "--head-sha", h]):
+        _doi(0, *run(c.script, [cmd[0], "--packet", 55, *cmd[1:]], sd)[::2], "AG baseline " + cmd[0])
+    sub = {"model_family": "gemini", "model_evidence": "do_may", "model_evidence_ref": "r"}
+    bn = _bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn={"executor_provider": ex,
+        "model_reviewer_identity": {"provider": "anthropic_claude" if role == "executor" else "google_antigravity",
+            "surface": "claude_code" if role == "executor" else "antigravity", "transport": "machine/local", "session_run_id": "s1"}})
+    bn.setdefault("model_" + role + "_identity", {}).update(sub)
+    p, before = c.tmp / "bn.yaml", (sd / "wp55.json").read_bytes()
+    cmd = ["record-review", "--packet", 55, "--provider", rv, *(args if role == "reviewer" else []), "--verdict", "approve",
+           "--reviewed-sha", h, "--bien-nhan", p, "--root", w]
+    p.write_text(yaml.safe_dump(bn))
+    _doi(0, *run(c.script, cmd, sd)[::2], "baseline H thật, họ khớp lease")
+    (sd / "wp55.json").write_bytes(before)
+    bn["model_" + role + "_identity"]["model_family"] = "gpt"  # vẫn khác họ Claude, H canon vẫn hợp lệ
+    p.write_text(yaml.safe_dump(bn))
+    rc, _, e = run(c.script, cmd, sd)
+    _doi(11, rc, e, "I8 họ " + role + " lệch lease")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi")
+
+
+def _r812_r6_bad_receipt_path(c, native=False):
+    import yaml
+    rc, sd, e, before = _r812(c, "review")
+    _doi(0, rc, e, "baseline H thật")
+    (sd / "wp55.json").write_bytes(before)
+    p = c.tmp / "bn.yaml"
+    if native:
+        if os.name == "nt":
+            raise BoQua("tên tệp byte native (surrogateescape) chỉ có trên POSIX") from OSError("không áp dụng trên Windows")
+        q = c.tmp / ("receipt-" + chr(0xdc80) + ".yaml")
+        q.write_bytes(p.read_bytes())
+        p = q
+    else:
+        bn = yaml.safe_load(p.read_bytes())
+        bn["verdict_path"] += "\x00"
+        bn["evidence_url"] += "\x00"
+        p.write_text(yaml.safe_dump(bn))
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--verdict", "approve",
+        "--reviewed-sha", json.loads(before)["reviewing_head_sha"], "--codex-call", "g1", "--bien-nhan", p, "--root", c.tmp / "kho/w"], sd)
+    _doi(8 if native else 11, rc, e, "đường dẫn biên nhận không mã hoá/không gọi git được")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: đầu vào làm hỏng state")
+
+
+for key in ("ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP", "_thieu", "_neo_git", "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider"):
+    CASES.append(("r812_r6_api_" + key, _r812_ca("lease", 8, truoc_lease=lambda w, k=key: _r812_r6_api_lease(w, k))))
+for field in ("author", "issue", "lease_id"):
+    CASES.append(("r812_r6_workflow_" + field, lambda c, k=field: _r812_r6_comment(c, k)))
+for variant in ("pending", "missing", "duplicate"):
+    CASES.append(("r812_r6_activation_" + variant, lambda c, k=variant: _r812_r6_activation(c, k)))
+for role in ("executor", "reviewer"):
+    CASES.append(("r812_r6_family_" + role, lambda c, k=role: _r812_r6_family(c, k)))
+CASES += [
+    ("r812_r6_write_set_nul", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/a.py\x00"]}))),
+    ("r812_r6_write_set_long", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/" + "a" * 140000]}))),
+    ("r812_r6_receipt_nul", _r812_r6_bad_receipt_path),
+    ("r812_r6_receipt_native", lambda c: _r812_r6_bad_receipt_path(c, native=True)),
+]
+MUTANTS.update({
+    "r812_r6_no_api_types": ('        if (any(type(getattr(m, k))', '        if False and (any(type(getattr(m, k))', ["r812_r6_api_" + k for k in ("ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP", "_thieu", "_neo_git", "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider")]),
+    "r812_r6_unhandled_argv_valueerror": ('except (OSError, subprocess.SubprocessError, ValueError) as ex:', 'except (OSError, subprocess.SubprocessError) as ex:', ["r812_r6_write_set_nul"]),
+    "r812_r6_unhandled_argv_oserror": ('except (OSError, subprocess.SubprocessError, ValueError) as ex:', 'except (subprocess.SubprocessError, ValueError) as ex:', ["r812_r6_write_set_long"]),
+    "r812_r6_unhandled_receipt_path": ('        except Exception as ex:  # H hỏng/không đo được', '        except OSError as ex:  # H hỏng/không đo được', ["r812_r6_receipt_nul"]),
+    "r812_r6_family_executor": ('("ho-executor", bool(ho_exec) and ho_exec == ho("executor"))', '("ho-executor", True)', ["r812_r6_family_executor"]),
+    "r812_r6_family_reviewer": ('("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer"))', '("ho-reviewer", True)', ["r812_r6_family_reviewer"]),
+    "r812_r6_activation_protocol": ('and pr[0] == 0 and len(dong20) == 1 and "chưa kích hoạt" not in dong20[0].casefold()', 'and True', ["r812_r6_activation_" + k for k in ("pending", "missing", "duplicate")]),
+    "r812_r6_workflow_author": ('c["user"].get("login") == BOT_LEASE', 'True', ["r812_r6_workflow_author"]),
+    "r812_r6_workflow_issue": ('str(c.get("issue_url", "")).endswith(f"/{mr[1]}/issues/{st[\'packet\']}")', 'True', ["r812_r6_workflow_issue"]),
+    "r812_r6_workflow_lease_id": ('re.search(rf"^lease_id: {re.escape(lid)}$", str(c.get("body", "")), re.M)', 'True', ["r812_r6_workflow_lease_id"]),
+})
+MUTANTS["r812_r6_encode_after_truncate"] = (
+    ('    try:\n        raw = (json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\\n").encode("utf-8")\n    except (ValueError, TypeError, UnicodeError) as ex:\n        _die(RC_STATE, f"state không mã hoá được: {type(ex).__name__}")\n    p.write_bytes(raw)'),
+    '    p.write_text(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\\n", encoding="utf-8", newline="\\n")', ["r812_r6_receipt_native"])
+
+
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
     ket = {}
     for ten, fn in CASES:

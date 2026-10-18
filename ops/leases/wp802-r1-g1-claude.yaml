@@ -104,3 +104,9 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'push nhanh agent/wp802-g1-claude va mo PR draft'
+da_bi_thay_the: wp831-r1-g1-claude
+da_bi_thay_the_ly_do: >-
+  Packet #802 da land (PR #823, merge dfe5437 vao master 2026-10-18T08:37Z); lease con han toi 2026-10-20T03:05Z nhung giu
+  2/6 tep write set cua #831 (ops/cong_cu.yaml, .claude/dev/launcher_test.py; do ai-dang-giu 18-10-2026). Chu kho chi thi
+  "tao packet de xu ly cac no ... cap lease va xu ly luon" (issuecomment-6247998270, ghi ho). Khong con viec nao cua #802
+  tren cac tep nay.

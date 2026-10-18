@@ -1,0 +1,5 @@
+`changes_requested — P0=0 P1=0 P2=4 P3=0`.
+
+Đã ghi [VERDICT.md](VERDICT.md) và [HINT.patch](HINT.patch).
+
+Suite đạt `479/479`, `TỔNG: ĐẠT`; một ca Windows bị bỏ qua. Hint áp được trên exact head. KHO giữ nguyên.

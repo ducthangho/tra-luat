@@ -1,0 +1,6 @@
+{"baseline": "exact_head", "targets": {"r812_r5_review_role": null, "r812_r5_review_assurance": null}}
+{"baseline": "hint", "targets": {"r812_r5_review_role": null, "r812_r5_review_assurance": null}}
+{"mutant": "r812_r4_bo_dep_vang", "targets": {"r812_canon_vang_phu_thuoc": "AssertionError: validator canon vắng phụ thuộc trên origin/master: đòi rc=8, được rc=0; stderr=''"}}
+{"mutant": "r812_r5_drop_role", "targets": {"r812_r5_review_role": "AssertionError: r812 review ['bn']: đòi rc=11, được rc=0; stderr=''"}}
+{"mutant": "r812_r5_drop_assurance", "targets": {"r812_r5_review_assurance": "AssertionError: r812 review ['bn']: đòi rc=11, được rc=0; stderr=''"}}
+{"scratch": "/tmp/review812-r5-hint-delta-xkzwtlbg"}

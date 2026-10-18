@@ -1,0 +1,17 @@
+{
+  "exit_code": 0,
+  "baseline_passed": 479,
+  "baseline_executed": 479,
+  "cases_declared": 480,
+  "mutants_declared": 242,
+  "mutants_killed": 241,
+  "r812_mutants_killed": 74,
+  "skipped": [
+    "  BỎ QUA  luong_canonical_chay_that: chỉ đo lệnh pwsh trên Windows",
+    "  BỎ QUA  đột biến luong_canonical_chay_that_dao_os_name: ca ['luong_canonical_chay_that'] không được tính là đã giết"
+  ],
+  "gates": {
+    "ADR": 0,
+    "DOCTRINE": 0
+  }
+}

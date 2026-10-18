@@ -1,0 +1,4 @@
+{"probe": "prefix-conflict", "rc": 7, "state": "awaiting_lease", "unchanged": true, "error": "I2(Đ): lease khác còn hiệu lực giao write set của wp55-r1-g1-claude: ['refs/remotes/origin/ops/wp55-spec:ops/leases/other.yaml']\n"}
+{"probe": "planned-path", "rc": 0, "state": "leased", "unchanged": false, "error": ""}
+{"probe": "effective-conflict", "rc": 7, "state": "awaiting_lease", "unchanged": true, "error": "I2(Đ): lease khác còn hiệu lực giao write set của wp55-r1-g1-claude: ['refs/remotes/origin/ops/wp55-spec:ops/leases/other.yaml']\n"}
+{"scratch": "/tmp/review812-extra-cmauzcco"}

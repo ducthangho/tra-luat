@@ -1,0 +1,33 @@
+{
+  "head": "77393f6b5d9b04070567ec999e0137b9024b04f1",
+  "tree": "0a3fd21d995c8b931f2035202b2f4c144503580e",
+  "base": "4c7c29858220ae575bebc5e0a343842cd3db4546",
+  "shallow": "false",
+  "base_is_ancestor": true,
+  "status": "",
+  "numstat": "344\t35\t.claude/dev/packet_loop.py\n438\t0\t.claude/dev/packet_loop_test.py\n4\t0\tdocs/PROTOCOL_DA_PHIEN.md\n",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "platform": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "files": {
+    ".claude/dev/packet_loop.py": {
+      "sha256_worktree": "294ceccf9cf1fea1716efe5c525dc6bd480fd88e6e8ec9a8adedeea73bf01908",
+      "sha256_head_blob": "294ceccf9cf1fea1716efe5c525dc6bd480fd88e6e8ec9a8adedeea73bf01908"
+    },
+    ".claude/dev/packet_loop_test.py": {
+      "sha256_worktree": "b75313403b60625879a6bf435b012b9a5081d8b16093b97009e9f1a01ec29ff1",
+      "sha256_head_blob": "b75313403b60625879a6bf435b012b9a5081d8b16093b97009e9f1a01ec29ff1"
+    },
+    "docs/PROTOCOL_DA_PHIEN.md": {
+      "sha256_worktree": "805216bc03de651c0ad91b6256ee2a50b8858b4634176929c5da278eb9512201",
+      "sha256_head_blob": "805216bc03de651c0ad91b6256ee2a50b8858b4634176929c5da278eb9512201"
+    }
+  },
+  "specs": {
+    "ops/specs/wp812-r2.md": "d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef",
+    "ops/specs/may-adr-0054-chung.md": "4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0"
+  },
+  "final_head": "77393f6b5d9b04070567ec999e0137b9024b04f1",
+  "final_status": "",
+  "detached_head": true,
+  "checked_at_utc": "2026-10-18T16:19:02.667801+00:00"
+}

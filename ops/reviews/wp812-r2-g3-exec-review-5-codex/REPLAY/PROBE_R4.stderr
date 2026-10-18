@@ -1,0 +1,2 @@
+/tmp/rv812-r5-suite/.claude/dev/packet_loop_test.py:3708: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

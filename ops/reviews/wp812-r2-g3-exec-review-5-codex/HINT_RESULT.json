@@ -1,0 +1,13 @@
+{
+  "baseline_r812": {
+    "passed": 94,
+    "executed": 94
+  },
+  "mutants_r812": {
+    "killed": 85,
+    "executed": 85
+  },
+  "git_apply_check": 0,
+  "legacy_suite_on_hint": "not_run",
+  "artifact_sha256": "2cf14debccec04427a1fe85ab1ee19361c47303dc7b62c4fd3133d000de54a60"
+}

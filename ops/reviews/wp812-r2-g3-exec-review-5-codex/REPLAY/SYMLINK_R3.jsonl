@@ -1,0 +1,2 @@
+{"probe": "in-repository-symlink-baseline", "rc": 0, "state": "leased", "unchanged": false, "error": "", "scratch": "/tmp/review812-r3-alias-h5egnokn/False"}
+{"probe": "in-repository-symlink-conflict", "rc": 7, "state": "awaiting_lease", "unchanged": true, "error": "I2(Đ): lease khác còn hiệu lực giao write set của wp55-r1-g1-claude: ['refs/remotes/origin/ops/wp55-spec:ops/leases/other.yaml']\n", "scratch": "/tmp/review812-r3-alias-h5egnokn/True"}

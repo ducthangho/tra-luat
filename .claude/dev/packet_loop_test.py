@@ -6069,6 +6069,40 @@ def case_r812_ngu_canh_long_sai_hinh(c: Ctx):
     _doi(8, *run(c.script, ["status", "--packet", 55], sd)[::2], "ngữ cảnh lồng sai hình dạng ⇒ state hỏng, không traceback")
 
 
+def case_r812_executor_ag_qua_cli(c: Ctx):
+    """I8 qua CLI đầy đủ, băm thật: executor Antigravity khai họ `gemini` rồi `openai` (biên nhận khai họ canon `gpt`) ⇒ approved_pending."""
+    import yaml
+    for ho, ho_bn in (("gemini", "gemini"), ("openai", "gpt")):
+        (d := c.tmp / ho).mkdir()
+        w, sd = _kho812(cc := Ctx(c.script, d)), cc.sd()
+        _r812_doi_lease(w, {"provider": "google_antigravity", "executor": "google_antigravity", "model_family": ho, "execution_surface": "antigravity",
+                            "reviewer": "claude", "reviewer_model_family": "claude", "reviewer_execution_surface": "claude_code", "reviewer_transport": "machine/local"})
+        _doi(0, *cc.init(sd, executor="google_antigravity", reviewer="claude", lease=False, extra=(
+            "--executor-model-family", ho, "--executor-execution-surface", "antigravity", "--executor-transport", "machine/local"))[::2], "init AG")
+        (d / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "lease_id: wp55-r1-g1-claude",
+                                                "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
+        h = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+        for args in (["record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", d / "cm.json", "--root", w],
+                     ["begin-attempt", "--provider", "google_antigravity", "--model-family", ho, "--execution-surface", "antigravity", "--transport", "machine/local"],
+                     ["record-post", "--for", "reviewing", "--comment-id", "9000055002"],
+                     ["transition", "--to", "reviewing", "--comment-id", "9000055002", "--head-sha", h]):
+            _doi(0, *run(c.script, [args[0], "--packet", 55, *args[1:]], sd)[::2], f"AG/{ho} {args[0]}")
+        (d / "bn.yaml").write_text(yaml.safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn={
+            "executor_provider": "google_antigravity", "model_executor_identity": {"model_family": ho_bn, "model_evidence": "do_may", "model_evidence_ref": "r"},
+            "model_reviewer_identity": {"provider": "anthropic_claude", "surface": "claude_code", "transport": "machine/local", "session_run_id": "s"}})))
+        _doi(0, *run(c.script, ["record-review", "--packet", 55, "--provider", "claude", "--verdict", "approve", "--reviewed-sha", h,
+                                "--bien-nhan", d / "bn.yaml", "--root", w], sd)[::2], f"AG/{ho} H hợp lệ")
+        _kiem(sd, f"AG/{ho}", state="approved_pending")
+
+
+def case_r812_canon_vang_phu_thuoc(c: Ctx):
+    rc, sd, e, truoc = _r812(c, "lease", truoc_lease=lambda w: [_g(w, "rm", "-q", "AGENTS.md"), _g(w, "commit", "-qm", "rm"), _g(w, "push", "-q", "origin", "master")])
+    _doi(8, rc, e, "validator canon vắng phụ thuộc trên origin/master")
+    if (sd / "wp55.json").read_bytes() != truoc:
+        raise AssertionError("I4: state đổi")
+
+
+_R812_KHAC = lambda **x: lambda w: _r812_doi_lease(w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", **x}})  # noqa: E731
 _R812_XOA_DAC_TA = lambda w: [(w / p).unlink() for p in ("ops/specs/wp55.md", "ops/specs/wp55-prompt.md")]  # noqa: E731 — vắng ở worktree, có tại lease OID
 CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r812_")] + [
     ("r812_duong_moi_du_dieu_kien", _r812_ca("review", 0, {"state": "approved_pending", "luat_adr0054": True})),
@@ -6119,6 +6153,19 @@ CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r
     ("r812_verdict_path_khong_ton_tai", _r812_ca("review", 11, bn={"verdict_path": "ops/reviews/khong.md", "evidence_url": "https://github.com/o/r/blob/{V}/ops/reviews/khong.md"})),
     ("r812_tran_vong_cua_khep_ghi_ket_qua", lambda c: _r812_tran_vong(c, "approve", 0, {"state": "approved_pending", "review_rounds_used": 2, "attempt_open": False})),
     ("r812_tran_vong_dau_vao_hong_khong_ghi", lambda c: _r812_tran_vong(c, "blocked", 11)),
+    ("r812_nguoi_giu_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["X/"]))),
+    ("r812_nguoi_giu_dau_cheo_nguoc", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["x\\a.py"]))),
+    ("r812_nguoi_giu_unicode_nfd", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["café/a.py"]}, lambda l: {
+        "other.yaml": {**l, "lease_id": "other-lease", "write_set": ["cafe\u0301/"]}}))),
+    ("r812_nguoi_giu_cham_gach", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["./x/a.py"]))),
+    ("r812_effective_mo_rong_hop_le", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=lambda w: _r812_doi_lease(w, {"effective_write_set": ["x/a.py", "y/b.py"]}))),
+    ("r812_lease_branch_rong", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"branch": ""}))),
+    ("r812_bien_nhan_provider_sai_kieu", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": [], "surface": "codex_cli", "transport": "machine", "session_run_id": "s1"}})),
+    ("r812_bien_nhan_family_sai_kieu", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "transport": "machine",
+                                                                                              "session_run_id": "s1", "model_family": []}})),
+    ("r812_bien_nhan_lech_sha", _r812_ca("review", 11, bn={"reviewed_sha": "{V}"})),
+    ("r812_bien_nhan_lech_lease_id", _r812_ca("review", 11, bn={"lease_id": "lease-khac"})),
+    ("r812_executor_transport_lech_lease", _r812_ca("review", 11, bn={"model_executor_identity": {"transport": "human"}})),
     ("r812_verdict_am_dung_bang_lop", _r812_ca("review", 0, {"state": "running"}, bn={"verdict": "changes_requested"}, lop=(("a-b", "P2"),),
                                                verdict="changes_requested", ids=("a-b",))),
 ]
@@ -6134,7 +6181,7 @@ MUTANTS.update({
     "r812_nhan_nhieu_dong_khai": ("    if len(khai) != 1:", "    if not khai:", ["r812_hai_dong_khai_la_false"]),
     "r812_bo_kich_hoat": ('            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])\n', "", ["r812_khong_kich_hoat_la_false"]),
     "r812_rc_falsy_thanh_rong": ('rc = l.get("required_checks", [])', 'rc = l.get("required_checks") or []', ["r812_required_checks_falsy"]),
-    "r812_canon_suy_giam": ("    if bnv.PROVIDER_NGUON_HONG is not None:", "    if False:", ["r812_canon_thieu_nguon"]),
+    "r812_canon_suy_giam": ("if bnv.PROVIDER_NGUON_HONG is not None or ", "if False or ", ["r812_canon_thieu_nguon"]),
     "r812_bo_neo_git": ("+ neo[0] + neo[1] +", "+", ["r812_verdict_blob_khong_co"]),
     "r812_duong_cu_ghi_true": ('st["luat_adr0054"] = False  # I9', 'st["luat_adr0054"] = None  # I9', ["r812_duong_cu_luon_false"]),
     "r812_bn_chi_cho_approve": ('if st.get("luat_adr0054") is True else None', 'if st.get("luat_adr0054") is True and a.verdict == "approve" else None', ["r812_slug_ngoai_bang_lop"]),
@@ -6149,7 +6196,6 @@ MUTANTS.update({
     "r812_bo_spec_hash": ('("spec_hash", d.get("spec_hash")', '("spec_hash", True or d.get("spec_hash")', ["r812_bien_nhan_lech_spec_hash"]),
     "r812_verdict_tu_nguoi_goi": ('("verdict", d.get("verdict") == a.verdict)', '("verdict", True)', ["r812_verdict_changes_requested", "r812_verdict_blocked"]),
     "r812_bo_slug_trong_bang": ('("slug-ngoai-bang", lop_ok and', '("slug-ngoai-bang", True or', ["r812_slug_ngoai_bang_lop"]),
-    "r812_ho_executor_theo_provider": ('bnv._ho_model_cua_ten(nc[vai]["model_family"] or "") or ', "", ["r812_executor_antigravity_hop_le"]),
     "r812_siet_lop_khong_rong": ("lop_ok = type(lop) is list and all(", "lop_ok = type(lop) is list and bool(lop) and all(", ["r812_duong_moi_du_dieu_kien"]),
     "r812_tran_chan_cua_khep": ('if cua == "begin-attempt" and st["attempts_used"]', 'if cua in ("begin-attempt", "record-review") and st["attempts_used"]', ["r812_cua_khep_luot_van_chay"]),
     "r812_xet_dung_truoc_dau_vao": ('    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong"', '    _xet_dung(state_dir, st, "begin-attempt")\n    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong"', ["r812_cua_khep_luot_van_chay"]),
@@ -6163,7 +6209,7 @@ MUTANTS.update({
     "r812_planned_khong_go": ('"ai-dang-giu", duong.removeprefix("planned:")', '"ai-dang-giu", duong', ["r812_nguoi_giu_planned_hop_le"]),
     "r812_bo_kieu_identity_lease": (' or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id)', "", ["r812_model_family_falsy"]),
     "r812_bo_role_lease": (' or l.get("role") != "executor"', "", ["r812_lease_role_sai"]),
-    "r812_bo_generation_duong": (' or l["generation"] < 1', "", ["r812_lease_generation_khong_duong"]),
+    "r812_bo_generation_duong": ((' or l["generation"] < 1', ' and nc["generation"] > 0'), ("", ""), ["r812_lease_generation_khong_duong"]),  # phối hợp: chốt lease + lược đồ state
     "r812_bo_mien_assurance": ('        if l["assurance_target"] not in _nap(td, "bien_nhan_v2").ASSURANCE_CAN_DOC_LAP:\n', "        if False:\n", ["r812_lease_assurance_ngoai_mien"]),
     "r812_bo_bi_danh": ('    p = dict(launcher._PROVIDER_BI_DANH).get(p, p)\n    return next(', "    return p or next(", ["r812_provider_bi_danh_canon"]),
     "r812_bo_provider_executor": ('("provider-executor", _ten_provider(', '("provider-executor", True or _ten_provider(', ["r812_executor_provider_lech_lease"]),
@@ -6173,6 +6219,19 @@ MUTANTS.update({
     "r812_dung_truoc_H": ("    bn = _du_dieu_kien_approve(st, a) if", '    _xet_dung(state_dir, st, "record-review", a)\n    bn = _du_dieu_kien_approve(st, a) if', ["r812_tran_vong_dau_vao_hong_khong_ghi"]),
     "r812_khong_don_tam": ("        shutil.rmtree(td, ignore_errors=True)", "        pass", ["r812_don_thu_muc_tam"]),
     "r812_nc_chi_tap_khoa": ('_nc_hop_le(st["ngu_canh_lease"])', 'set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH)', ["r812_ngu_canh_long_sai_hinh"]),
+    "r812_bo_casefold": (').casefold()\n    parts', ')\n    parts', ["r812_nguoi_giu_hoa_thuong"]),
+    "r812_bo_dau_cheo_nguoc": ('.strip().replace("\\\\", "/")', ".strip()", ["r812_nguoi_giu_dau_cheo_nguoc"]),
+    "r812_bo_nfc": ('    q = unicodedata.normalize("NFC", p.removeprefix', '    q = (lambda _f, x: x)("NFC", p.removeprefix', ["r812_nguoi_giu_unicode_nfd"]),
+    "r812_bo_cham_gach": ('if x not in ("", ".")]', 'if x != ""]', ["r812_nguoi_giu_cham_gach"]),
+    "r812_ai_dang_giu_ca_effective": ('        for duong in l["write_set"]:  # I2(Đ)', "        for duong in ws:  # I2(Đ)", ["r812_effective_mo_rong_hop_le"]),
+    "r812_branch_rong_lot": ((' or any(t is str and not l[k].strip() for k, t in kieu.items())', "    if not _nc_hop_le(json.loads(json.dumps(nc))):"), ("", "    if False:"),
+                             ["r812_lease_branch_rong"]),  # phối hợp: chốt kiểu lease + lược đồ state trước `_save`
+    "r812_bo_kieu_danh_tinh_bn": ("        if kieu_sai:  # có mặt", "        if False:  # có mặt", ["r812_bien_nhan_family_sai_kieu"]),
+    "r812_bo_so_sha_bn": ('("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha)', '("reviewed_sha", True)', ["r812_bien_nhan_lech_sha"]),
+    "r812_bo_so_lease_id_bn": ('("lease_id", d.get("lease_id") == nc["lease_id"])', '("lease_id", True)', ["r812_bien_nhan_lech_lease_id"]),
+    "r812_bo_transport_executor": ('(("surface", "execution_surface"), ("transport", "transport"))', '(("surface", "execution_surface"),)', ["r812_executor_transport_lech_lease"]),
+    "r812_ho_theo_ten_provider": ("    ho = lambda vai: HO_CANON[nc[vai][\"model_family\"]]", "    ho = lambda vai: bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(nc[vai][\"provider\"]), \"\")",
+                                  ["r812_executor_ag_qua_cli", "r812_executor_antigravity_hop_le"]),
     "r812_bo_chan_awaiting": ('    if st["state"] != "awaiting_lease":\n        _die(RC_STATE,\n             f"chỉ ghi', '    if False:\n        _die(RC_STATE,\n             f"chỉ ghi', ["r812_true_khong_quay_ve_duong_cu", "r812_duong_cu_luon_false"]),
 })
 

@@ -103,3 +103,8 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'push nhanh agent/wp831-g1-claude va mo PR draft'
+da_bi_thay_the: wp831-r2-g2-claude
+da_bi_thay_the_ly_do: >-
+  Chu kho chon phuong an 1 ("Chon 1", ghi ho issuecomment-6250060975) cho cau hoi issuecomment-6248569624: L3 can sua
+  ratchet 187 -> 189 trong scripts/tl_selftest.py (r291_docs_ngoai_goi, r357_agents_ngoai_goi), ngoai write set r1 va
+  vuot tran 6 tep. Lease r2 (spec ops/specs/wp831-r2.md) mo rong write set len 7 tep, cung nhanh agent/wp831-g1-claude.

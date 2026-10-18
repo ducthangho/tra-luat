@@ -1,0 +1,3 @@
+{"probe": "success", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": "", "remaining_canon": [], "worktrees": 1}
+{"probe": "lease-reject", "rc": 7, "state": "awaiting_lease", "unchanged": true, "traceback": false, "error": "I2(H): lease_publish check rc=10: CHAN [10]: effective_review_class='<thiếu>' không bằng lớp cổng tính được 'sensitive' cho role='executor'\n", "remaining_canon": [], "worktrees": 1}
+{"probe": "review-reject", "rc": 11, "state": "reviewing", "unchanged": true, "traceback": false, "error": "biên nhận /tmp/review812-r4-own-0j6mrxdo/review-reject/bn.yaml: trường danh tính sai kiểu/rỗng ['reviewer.provider']\n", "remaining_canon": [], "worktrees": 1}

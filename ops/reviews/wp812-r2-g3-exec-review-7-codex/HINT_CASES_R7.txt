@@ -1,0 +1,127 @@
+# #812 lượt 7: phân biệt cờ có mặt/rỗng; URL issue đầy đủ; identity lease chuẩn hoá; chốt M1 độc lập.
+def _r812_r7_cmd(c, sd, w, *extra):
+    return run(c.script, ["record-lease", "--packet", 55, "--lease-ref", "origin/ops/wp55-spec",
+        "--lease-path", "ops/leases/l.yaml", "--lease-comments", c.tmp / "cm.json", "--root", w, *extra], sd)
+
+
+def _r812_r7_mixed(c, key, old_empty=False):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    if old_empty:
+        rc, _, e = _r812_r7_cmd(c, sd, w, key, "")
+    elif key == "complete":
+        rc, _, e = _r812_r7_cmd(c, sd, w, "--lease-id", "old", "--granted-by", "ducthangho",
+            "--evidence", "ordinary authority", "--expires-utc", __import__("datetime").datetime.fromtimestamp(time.time() + 3600, __import__("datetime").timezone.utc).isoformat())
+    else:
+        rc, _, e = run(c.script, ["record-lease", "--packet", 55, "--lease-id", "old", "--granted-by", "ducthangho",
+            "--evidence", "ordinary authority", "--expires-utc", __import__("datetime").datetime.fromtimestamp(time.time() + 3600,
+                __import__("datetime").timezone.utc).isoformat(), key, ""], sd)
+    _doi(2, rc, e, "hai đường phải loại trừ khi cờ CÓ MẶT, kể cả rỗng")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi khi cờ hai đường trộn nhau")
+
+
+def _r812_r7_comment_url(c, url, rc_doi):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    (sd / "wp55.json").write_bytes(before)
+    p = c.tmp / "cm.json"
+    cm = json.loads(p.read_bytes()); cm[0]["issue_url"] = url
+    p.write_text(json.dumps(cm))
+    rc, _, e = _r812_r7_cmd(c, sd, c.tmp / "kho/w")
+    _doi(rc_doi, rc, e, "I2(R) URL phải neo đúng GitHub repo và issue")
+    if rc_doi and (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi khi URL comment sai")
+
+
+def _r812_r7_init_identity(c, role):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    st = json.loads(before)
+    st[role + "_identity"]["execution_surface"] = "codex_desktop" if role == "reviewer" else "claude_code"
+    raw = json.dumps(st).encode(); (sd / "wp55.json").write_bytes(raw)
+    rc, _, e = _r812_r7_cmd(c, sd, c.tmp / "kho/w")
+    _doi(4, rc, e, "lease không đổi identity đã init")
+    if (sd / "wp55.json").read_bytes() != raw:
+        raise AssertionError("I4: lease identity khác init làm state đổi")
+
+
+def _r812_r7_activation_name(c):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline kích hoạt ADR-0054")
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    p = w / "docs/adr/0055-kich-hoat-adr-0054.md"
+    p.write_text(p.read_text().replace("ADR-0054", "ADR-0053"))
+    _g(w, "add", p.relative_to(w).as_posix()), _g(w, "commit", "-qm", "different activation target")
+    _g(w, "push", "-q", "origin", "master")
+    rc, _, e = _r812_r7_cmd(c, sd, w)
+    _doi(0, rc, e, "lease hợp lệ, kích hoạt ADR khác")
+    _kiem(sd, "chế độ phải false khi tệp kích hoạt ADR khác", luat_adr0054=False)
+
+
+def _r812_r7_init_ag_family(c, role):
+    w, sd = _kho812(c), c.sd()
+    ex, rv = ("google_antigravity", "claude") if role == "executor" else ("claude", "google_antigravity")
+    doi = {"provider": ex, "executor": ex, "reviewer": rv}
+    if role == "executor":
+        doi.update(model_family="gemini", execution_surface="antigravity", reviewer_model_family="claude",
+                   reviewer_execution_surface="claude_code", reviewer_transport="machine/local")
+    else:
+        doi.update(reviewer_model_family="gemini", reviewer_execution_surface="antigravity", reviewer_transport="machine/local")
+    _r812_doi_lease(w, doi)
+    _doi(0, *c.init(sd, executor=ex, reviewer=rv, lease=False, extra=(f"--{role}-model-family", "gemini",
+        f"--{role}-execution-surface", "antigravity", f"--{role}-transport", "machine/local"))[::2], "init AG")
+    (c.tmp / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"},
+        "body": "lease_id: wp55-r1-g1-claude", "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
+    before = (sd / "wp55.json").read_bytes()
+    _doi(0, *_r812_r7_cmd(c, sd, w)[::2], "baseline lease khớp init AG")
+    st = json.loads(before); st[role + "_identity"]["model_family"] = "openai"
+    raw = json.dumps(st).encode(); (sd / "wp55.json").write_bytes(raw)
+    _doi(4, *_r812_r7_cmd(c, sd, w)[::2], "lease chỉ lệch họ model đã init " + role)
+    if (sd / "wp55.json").read_bytes() != raw:
+        raise AssertionError("I4: state đổi khi lease lệch identity init")
+
+
+for role in ("executor", "reviewer"):
+    CASES.append(("r812_r7_lease_init_ag_" + role, lambda c, r=role: _r812_r7_init_ag_family(c, r)))
+
+for key in ("--lease-id", "--granted-by", "--evidence", "--expires-utc"):
+    CASES.append(("r812_r7_new_plus_empty_" + key[2:].replace("-", "_"), lambda c, k=key: _r812_r7_mixed(c, k, True)))
+for key in ("--lease-ref", "--lease-path", "--lease-comments"):
+    CASES.append(("r812_r7_old_plus_empty_" + key[2:].replace("-", "_"), lambda c, k=key: _r812_r7_mixed(c, k)))
+CASES.append(("r812_r7_paths_exclusive", lambda c: _r812_r7_mixed(c, "complete")))
+for name, url in (("wrong_host", "https://example.org/repos/o/r/issues/55"), ("not_url", "ordinary/o/r/issues/55"),
+                  ("extra_prefix", "https://api.github.com/repos/different/o/r/issues/55")):
+    CASES.append(("r812_r7_comment_" + name, lambda c, u=url: _r812_r7_comment_url(c, u, 7)))
+CASES.append(("r812_r7_comment_web", lambda c: _r812_r7_comment_url(c, "https://github.com/o/r/issues/55", 0)))
+for role, key, value in (("executor", "provider", " claude "), ("reviewer", "reviewer", " codex "),
+                          ("executor_alias", "provider", " anthropic_claude "), ("reviewer_alias", "reviewer", " openai_codex ")):
+    CASES.append(("r812_r7_padded_lease_" + role, _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True},
+        truoc_lease=lambda w, k=key, v=value: _r812_doi_lease(w, {k: v}))))
+CASES += [
+    ("r812_r7_lease_packet", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"packet_issue": 56}))),
+    ("r812_r7_instruction_packet", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w,
+        {"granted_on_instruction": "https://github.com/o/r/issues/56#issuecomment-1"}))),
+    ("r812_r7_lease_init_reviewer", lambda c: _r812_r7_init_identity(c, "reviewer")),
+    ("r812_r7_activation_adr_name", _r812_r7_activation_name),
+]
+MUTANTS.update({
+    "r812_r7_ignore_empty_flags": (("moi_co = any(x is not None for x in moi)", "cu_co = any(x is not None for x in cu)"),
+        ("moi_co = any(moi)", "cu_co = any(cu)"), [n for n, _ in CASES if n.startswith(("r812_r7_new_plus_empty_", "r812_r7_old_plus_empty_"))]),
+    "r812_r7_paths_mixed": ("if moi_co == cu_co or not all(moi if moi_co else cu):", "if not all(moi if moi_co else cu):", ["r812_r7_paths_exclusive"]),
+    "r812_r7_comment_suffix": ('c.get("issue_url") in (f"https://api.github.com/repos/{mr[1]}/issues/{st[\'packet\']}", f"https://github.com/{mr[1]}/issues/{st[\'packet\']}")',
+        'str(c.get("issue_url", "")).endswith(f"/{mr[1]}/issues/{st[\'packet\']}")', ["r812_r7_comment_" + k for k in ("wrong_host", "not_url", "extra_prefix")]),
+    "r812_r7_lease_raw_provider": ("    p = p.strip()  # I8: bản chiếu identity lease", "    # I8: không strip provider", ["r812_r7_padded_lease_" + k for k in ("executor", "reviewer", "executor_alias", "reviewer_alias")]),
+    "r812_r7_lease_packet": (' or l["packet_issue"] != st["packet"]', '', ["r812_r7_lease_packet"]),
+    "r812_r7_instruction_packet": (' or mr[2].lstrip("0") != str(st["packet"])', '', ["r812_r7_instruction_packet"]),
+    "r812_r7_lease_init_identity": ('if any(v is not None and nc[vai][k] != v for k, v in (st.get(f"{vai}_identity") or {}).items()):', 'if False:', ["r812_r7_lease_init_reviewer", "r812_r7_lease_init_ag_executor", "r812_r7_lease_init_ag_reviewer"]),
+    "r812_r7_activation_adr_name": (' and "ADR-0054" in nfc(a55[1])', '', ["r812_r7_activation_adr_name"]),
+    "r812_r7_reject_web_comment": ('f"https://github.com/{mr[1]}/issues/{st[\'packet\']}"', '"web-form-rejected"', ["r812_r7_comment_web"]),
+})
+MUTANTS["r812_r6_workflow_issue"] = (MUTANTS["r812_r7_comment_suffix"][0], "True", ["r812_r6_workflow_issue"])
+# `_ten_provider` chuẩn hoá dùng chung: gỡ một trong hai phép strip của receipt là mutant tương đương.
+MUTANTS["r812_r5_raw_provider"] = ((MUTANTS["r812_r5_raw_provider"][0], "    p = p.strip()  # I8: bản chiếu identity lease"),
+    (MUTANTS["r812_r5_raw_provider"][1], "    # bỏ strip dùng chung"), ["r812_r5_padded_provider"])

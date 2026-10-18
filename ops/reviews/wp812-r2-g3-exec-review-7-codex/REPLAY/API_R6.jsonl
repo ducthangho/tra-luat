@@ -1,0 +1,19 @@
+{"api": "ASSURANCE_CAN_DOC_LAP", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "ASSURANCE_CAN_DOC_LAP", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "HO_MODEL_CHO_PHEP", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "HO_MODEL_CHO_PHEP", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_thieu", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_thieu", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_neo_git", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_neo_git", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_nguon_tra_model", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_nguon_tra_model", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_giai_ho_model_reviewer", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_giai_ho_model_reviewer", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_giai_ho_model_executor", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_giai_ho_model_executor", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_chuoi", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_chuoi", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_chuan_hoa_provider", "door": "lease", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"api": "_chuan_hoa_provider", "door": "review", "rc": 8, "unchanged": true, "traceback": false, "error": "KHÔNG ĐO ĐƯỢC: validator canon bien_nhan_v2 giao diện sai kiểu\n"}
+{"scratch": "/tmp/wp812-r6-api-goqud9my"}

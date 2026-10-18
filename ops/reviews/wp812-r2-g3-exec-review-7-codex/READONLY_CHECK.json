@@ -1,0 +1,39 @@
+{
+  "head": "91c6d8c31190f5f9ea08e4da42ecafd898ee8935",
+  "tree": "93e27f856872101a9410f82fa870becc4e60a606",
+  "shallow": "false",
+  "files": {
+    ".claude/dev/packet_loop.py": {
+      "sha256": "1f601d16419782e224a0cbd20188e4a7915b90f933540f00cb1dde44f7eb3ef3",
+      "equals_HEAD_blob": true
+    },
+    ".claude/dev/packet_loop_test.py": {
+      "sha256": "3d8557a1ba7cf269edbaeaad4a7a1717e05b6287e57346551a39989cfab564e0",
+      "equals_HEAD_blob": true
+    },
+    "docs/PROTOCOL_DA_PHIEN.md": {
+      "sha256": "805216bc03de651c0ad91b6256ee2a50b8858b4634176929c5da278eb9512201",
+      "equals_HEAD_blob": true
+    }
+  },
+  "spec_sha256": {
+    "SPEC.txt": "d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef",
+    "COMMON.txt": "4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0"
+  },
+  "final_head": "91c6d8c31190f5f9ea08e4da42ecafd898ee8935",
+  "final_clean_status": "",
+  "final_files": {
+    ".claude/dev/packet_loop.py": {
+      "equals_HEAD_blob": true,
+      "sha256": "1f601d16419782e224a0cbd20188e4a7915b90f933540f00cb1dde44f7eb3ef3"
+    },
+    ".claude/dev/packet_loop_test.py": {
+      "equals_HEAD_blob": true,
+      "sha256": "3d8557a1ba7cf269edbaeaad4a7a1717e05b6287e57346551a39989cfab564e0"
+    },
+    "docs/PROTOCOL_DA_PHIEN.md": {
+      "equals_HEAD_blob": true,
+      "sha256": "805216bc03de651c0ad91b6256ee2a50b8858b4634176929c5da278eb9512201"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"mutant": "lease_instruction_packet", "total": 115, "passed": 114, "errors": {"r812_r5_instruction_long": "AssertionError: r812 lease ['truoc_lease']: đòi rc=2, được rc=0; stderr=''"}, "scratch": "/tmp/rv812-r7-mut-lease_instruction_packet-le02t1ur"}

@@ -1,0 +1,5 @@
+{"mutant": "lease_packet", "rc": 0}
+{"mutant": "lease_paths_exclusive", "rc": 0}
+{"mutant": "lease_instruction_packet", "rc": 0}
+{"mutant": "lease_identity_matches_init", "rc": 0}
+{"mutant": "activation_adr_name", "rc": 0}

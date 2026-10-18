@@ -1,0 +1,6 @@
+{"probe": "positive", "rc": 0, "unchanged": false, "error": ""}
+{"probe": "padded-executor", "rc": 2, "unchanged": true, "error": "provider phải thuộc ('claude', 'codex', 'google_antigravity')\n"}
+{"probe": "padded-reviewer", "rc": 2, "unchanged": true, "error": "provider phải thuộc ('claude', 'codex', 'google_antigravity')\n"}
+{"probe": "padded-alias-executor", "rc": 2, "unchanged": true, "error": "provider phải thuộc ('claude', 'codex', 'google_antigravity')\n"}
+{"probe": "padded-alias-reviewer", "rc": 2, "unchanged": true, "error": "provider phải thuộc ('claude', 'codex', 'google_antigravity')\n"}
+{"scratch": "/tmp/rv812-r7-lease-identity-fega3zy0"}

@@ -1,0 +1,227 @@
+] != v for k, v in (st.get(f"{vai}_identity") or {}).items()):', 'if False:', ["r812_r7_lease_init_reviewer", "r812_r7_lease_init_ag_executor", "r812_r7_lease_init_ag_reviewer"]),
+{'hint_mutants_completed': 75, 'survivors': {}}
+{'suite_ok_mutants_so_far': 185, 'last_lines': ['  ok  r812_approve_cu_cho_adr0054 → giết 2 ca đích · 3 đối chứng khác họ còn sống', '  ok  r812_bo_chan_p0_p2 → giết 1 ca đích · 3 đối chứng khác họ còn sống', '  ok  r812_mien_hang_mo → giết 1 ca đích · 3 đối chứng khác họ còn sống']}
+/tmp/rv812-r7-suite/.claude/dev/packet_loop_test.py:3708: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+17:35:39
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json
+p=Path('REPLAY/RESULTS.json')
+rs={}
+for f in sorted(Path('REPLAY').glob('*.jsonl')):
+ rows=[json.loads(l) for l in f.read_text().splitlines()]
+ rs[f.stem]={'records':len(rows),'tracebacks':sum(r.get('traceback') is True for r in rows)}
+rows=[json.loads(f.read_text()) for f in sorted(Path('OWN_MUTANTS').glob('*.jsonl')) if f.read_text().strip()]
+rs['OWN_MUTANTS']=[{'mutant':r['mutant'],'passed':r['passed'],'total':r['total'],'errors':r['errors']} for r in rows]
+p.write_text(json.dumps(rs,ensure_ascii=False,indent=2)+'\\n')
+print(json.dumps(rs['OWN_MUTANTS'],ensure_ascii=False))
+PY
+GIT_OPTIONAL_LOCKS=0 git -C /home/user/rv812 status --porcelain=v1; git -C /home/user/rv812 merge-base --is-ancestor 4c7c29858220ae575bebc5e0a343842cd3db4546 HEAD" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+[{"mutant": "activation_adr_name", "passed": 115, "total": 115, "errors": {}}, {"mutant": "lease_identity_matches_init", "passed": 115, "total": 115, "errors": {}}, {"mutant": "lease_instruction_packet", "passed": 114, "total": 115, "errors": {"r812_r5_instruction_long": "AssertionError: r812 lease ['truoc_lease']: đòi rc=2, được rc=0; stderr=''"}}, {"mutant": "lease_packet", "passed": 115, "total": 115, "errors": {}}, {"mutant": "lease_paths_exclusive", "passed": 115, "total": 115, "errors": {}}]
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json
+rows=[json.loads(l) for l in Path('HINT_FINAL_VERIFY.jsonl').read_text().splitlines()];rs=[r for r in rows if 'mutant' in r]
+print({'hint_mutants_completed':len(rs),'survivors':sum(any(v is None for v in r['results'].values()) for r in rs)})
+s=Path('/tmp/rv812-r7-suite.log').read_text();print({'suite_ok_mutants':sum(l.startswith('  ok  ') and '→ giết' in l for l in s.splitlines()),'done':'TỔNG:' in s,'last':s.splitlines()[-1]})
+PY
+date -u +%H:%M:%S" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+{'hint_mutants_completed': 91, 'survivors': 1}
+{'suite_ok_mutants': 206, 'done': False, 'last': '  ok  r812_bo_role_lease → giết 1 ca đích · 3 đối chứng khác họ còn sống'}
+17:36:25
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json
+for l in open('HINT_FINAL_VERIFY.jsonl'):
+ r=json.loads(l)
+ if 'mutant' in r and any(v is None for v in r['results'].values()):print(json.dumps(r,ensure_ascii=False))
+PY" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+{"mutant": "r812_r5_raw_provider", "results": {"r812_r5_padded_provider": null}}
+
+ succeeded in 417568ms:
+exec
+/bin/bash -lc "cat >> HINT_CASES_R7.txt <<'PY'
+# "'`_ten_provider` chuẩn hoá dùng chung: gỡ một trong hai phép strip của receipt là mutant tương đương.
+MUTANTS["r812_r5_raw_provider"] = ((MUTANTS["r812_r5_raw_provider"][0], "    p = p.strip()  # I8: bản chiếu identity lease"),
+    (MUTANTS["r812_r5_raw_provider"][1], "    # bỏ strip dùng chung"), ["r812_r5_padded_provider"])
+PY
+python3 - <<'"'PY'
+from pathlib import Path
+p=Path('/tmp/rv812-r7-hint/.claude/dev/packet_loop_test.py');orig=Path('/tmp/rv812-r7-suite/.claude/dev/packet_loop_test.py').read_text();p.write_text(orig.replace('\\ndef chay_suite(script: Path,','\\n'+Path('HINT_CASES_R7.txt').read_text()+'\\n\\ndef chay_suite(script: Path,',1))
+PY
+cat > HINT_MUTANT_DELTA_R7.py <<'PY'
+import importlib.util,json,shutil,sys,tempfile
+from pathlib import Path
+sys.dont_write_bytecode=True
+repo=Path('/tmp/rv812-r7-hint');sys.path.insert(0,str(repo/'.claude/dev'))
+s=importlib.util.spec_from_file_location('r7_mutant_delta_t',repo/'.claude/dev/packet_loop_test.py');t=importlib.util.module_from_spec(s);sys.modules[s.name]=t;s.loader.exec_module(t)
+out=Path(tempfile.mkdtemp(prefix='rv812-r7-mutant-delta-'));source=t.CANONICAL.read_text()
+for n in ('r812_r5_raw_provider','r812_r7_lease_raw_provider'):
+ old,new,targets=t.MUTANTS[n];d=out/n;d.mkdir();ss=source
+ r=t.chay_suite(t.CANONICAL,d/'baseline',set(targets));print(json.dumps({'baseline_for':n,'results':r},ensure_ascii=False),flush=True)
+ for a,b in t._cap_thay_the(old,new):assert ss.count(a)==1,(n,a);ss=ss.replace(a,b,1)
+ p=d/'packet_loop.py';p.write_text(ss);shutil.copyfile(t.HERE/'launcher.py',d/'launcher.py')
+ print(json.dumps({'mutant':n,'results':t.chay_suite(p,d/'cases',set(targets))},ensure_ascii=False),flush=True)
+PY
+python3 HINT_MUTANT_DELTA_R7.py > HINT_MUTANT_DELTA_R7.jsonl 2> HINT_MUTANT_DELTA_R7.stderr" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 12288ms:
+codex
+Phép đo HINT phát hiện một mutant cũ trở thành tương đương: bỏ một phép strip vẫn còn phép strip ở hàm dùng chung. Tôi đã sửa mutant để gỡ cả hai lớp chuẩn hoá của cùng yếu tố và đang đo lại nhóm ca bị ảnh hưởng. Đây không phải lỗi sản phẩm mới.
+
+exec
+/bin/bash -lc "nl -ba /home/user/rv812/.claude/dev/packet_loop.py | sed -n '2524,2535p'; cat HINT_MUTANT_DELTA_R7.jsonl; tail -3 /tmp/rv812-r7-suite.log; wc -l HINT_FINAL_VERIFY.jsonl; date -u +%H:%M:%S" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+  2524	    chuoi, a55, pr = _git_do(root, "rev-list", "--first-parent", m), _git_do(root, "show", f"{m}:{ADR0055_TEP}"), _git_do(root, "show", f"{m}:docs/PROTOCOL_DA_PHIEN.md")
+  2525	    nfc = lambda b: unicodedata.normalize("NFC", b.decode("utf-8", "replace"))  # noqa: E731
+  2526	    dong20 = [d for d in nfc(pr[1]).splitlines() if re.match(r"^\|\s*`ADR-0054`\s*\|", d)]
+  2527	    return (_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\n")
+  2528	            and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0054_TEP}")[0] == 0
+  2529	            and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0054_TEP}")[0] != 0
+  2530	            and chuoi[0] == 0 and oid.encode() in chuoi[1].split()
+  2531	            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])
+  2532	            and pr[0] == 0 and len(dong20) == 1 and "chưa kích hoạt" not in dong20[0].casefold())
+  2533	
+  2534	
+  2535	def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
+{"baseline_for": "r812_r5_raw_provider", "results": {"r812_r5_padded_provider": null}}
+{"mutant": "r812_r5_raw_provider", "results": {"r812_r5_padded_provider": "AssertionError: r812 review ['bn']: đòi rc=0, được rc=11; stderr=\"biên nhận /tmp/rv812-r7-mutant-delta-kw16xk3r/r812_r5_raw_provider/cases/r812_r5_padded_provider/bn.yaml không đủ điều kiện approve: ['provider-reviewer']\""}}
+{"baseline_for": "r812_r7_lease_raw_provider", "results": {"r812_r7_padded_lease_executor": null, "r812_r7_padded_lease_reviewer": null, "r812_r7_padded_lease_executor_alias": null, "r812_r7_padded_lease_reviewer_alias": null}}
+{"mutant": "r812_r7_lease_raw_provider", "results": {"r812_r7_padded_lease_executor": "AssertionError: r812 lease ['truoc_lease']: đòi rc=0, được rc=2; stderr=\"provider phải thuộc ('claude', 'codex', 'google_antigravity')\"", "r812_r7_padded_lease_reviewer": "AssertionError: r812 lease ['truoc_lease']: đòi rc=0, được rc=2; stderr=\"provider phải thuộc ('claude', 'codex', 'google_antigravity')\"", "r812_r7_padded_lease_executor_alias": "AssertionError: r812 lease ['truoc_lease']: đòi rc=0, được rc=2; stderr=\"provider phải thuộc ('claude', 'codex', 'google_antigravity')\"", "r812_r7_padded_lease_reviewer_alias": "AssertionError: r812 lease ['truoc_lease']: đòi rc=0, được rc=2; stderr=\"provider phải thuộc ('claude', 'codex', 'google_antigravity')\""}}
+  ok  r812_r4_bo_neo_path → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r4_chan_am_hop_le → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_no_loader_guard → giết 1 ca đích · 3 đối chứng khác họ còn sống
+107 HINT_FINAL_VERIFY.jsonl
+17:37:37
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+import json,hashlib,subprocess
+from pathlib import Path
+rows=[json.loads(l) for l in Path('HINT_FINAL_VERIFY.jsonl').read_text().splitlines()];m={r['mutant']:r for r in rows if 'mutant' in r};updates=[json.loads(l) for l in Path('HINT_MUTANT_DELTA_R7.jsonl').read_text().splitlines()]
+for r in updates:
+ if 'mutant' in r:m[r['mutant']]=r
+assert len(m)==105
+assert all(all(v is not None for v in r['results'].values()) for r in m.values())
+b=next(r for r in rows if r.get('phase')=='hint-baseline');assert len(b['results'])==137 and all(v is None for v in b['results'].values())
+p=Path('HINT.patch');p.write_bytes(subprocess.check_output(['git','-C','/tmp/rv812-r7-hint','diff','--','.claude/dev/packet_loop.py','.claude/dev/packet_loop_test.py']))
+a=subprocess.run(['git','-C','/tmp/rv812-r7-suite','apply','--check',str(p.resolve())],capture_output=True);Path('HINT_APPLY_CHECK.log').write_bytes(a.stdout+a.stderr);Path('HINT_APPLY_CHECK.exit').write_text(str(a.returncode)+'\\n');assert a.returncode==0
+result={'baseline':{'passed':137,'total':137},'mutants':{'killed':105,'total':105},'patch_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'apply_check_rc':a.returncode,'source_tree':'/tmp/rv812-r7-hint','note':'Final mutation definitions: replace raw-provider result with HINT_MUTANT_DELTA_R7. Product code unchanged during verification.'}
+Path('HINT_RESULT.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\\n');print(json.dumps(result,ensure_ascii=False))
+PY" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+{"baseline": {"passed": 137, "total": 137}, "mutants": {"killed": 105, "total": 105}, "patch_sha256": "719935be2e322e3c6130c4004d32a1834151f5ef32b612060f4b1fcffd65d89c", "apply_check_rc": 0, "source_tree": "/tmp/rv812-r7-hint", "note": "Final mutation definitions: replace raw-provider result with HINT_MUTANT_DELTA_R7. Product code unchanged during verification."}
+
+exec
+/bin/bash -lc 'tail -12 /tmp/rv812-r7-suite.log; date -u +%H:%M:%S; git -C /tmp/rv812-r7-hint diff --stat' in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+  ok  r812_r4_chan_am_hop_le → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_no_loader_guard → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_no_api_guard → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_lease_degraded → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_unbounded_int → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_argv_valueerror → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_ignore_bad_attestations → giết 5 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_raw_provider → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_raw_surface → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_raw_transport → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_drop_role → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  r812_r5_drop_assurance → giết 1 ca đích · 3 đối chứng khác họ còn sống
+17:38:08
+ .claude/dev/packet_loop.py      |   9 ++-
+ .claude/dev/packet_loop_test.py | 129 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 135 insertions(+), 3 deletions(-)
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+p=Path('VERDICT.md');s=p.read_text().replace('pl:947, pl:2529, pl:2556, pl:2614','pl:947, pl:2531, pl:2556, pl:2614')
+s=s.replace('Ma trận mới quét **đủ bốn cờ cũ và ba cờ mới** trên exact head rồi trên HINT.', 'Ma trận mới quét **đủ bốn cờ cũ** ("'`--lease-id`, `--granted-by`, `--evidence`, `--expires-utc`) và **ba cờ mới** (`--lease-ref`, `--lease-path`, `--lease-comments`) trên exact head rồi trên HINT.'"')
+s=s.replace('HINT_VERIFY_PENDING', '''Trên sản phẩm HINT cuối, **137/137 ca r812 xanh; 105/105 mutant r812 theo định nghĩa cuối bị giết tại ca đích**. Trên exact head, 22 ca mới cho **14 ca đỏ đúng lỗi sản phẩm** (7 cờ rỗng, 3 URL, 4 identity lease); 8 ca còn lại xanh, gồm các chốt sản phẩm đúng đang thiếu bảo vệ. [HINT_FINAL_VERIFY.jsonl](HINT_FINAL_VERIFY.jsonl), [HINT_RESULT.json](HINT_RESULT.json).
+
+Việc thêm strip ở "'`_ten_provider` khiến mutant cũ `r812_r5_raw_provider` chỉ bỏ strip ở caller trở thành tương đương: hàm dùng chung còn strip. Bản HINT cuối sửa mutant thành phối hợp bỏ hai lớp chuẩn hoá của **cùng một yếu tố**; ca receipt vẫn đỏ đúng rc=11/provider-reviewer. Đã đo lại cả nhóm lease provider bốn chiều: baseline xanh, bỏ strip chung thì đều đỏ đúng rc=2. [HINT_MUTANT_DELTA_R7.jsonl](HINT_MUTANT_DELTA_R7.jsonl). Log lần đầu giữ nguyên để thấy vì sao phải cập nhật định nghĩa mutant; kết quả cuối dùng phép đo delta thay cho kết quả mutant tương đương ấy. Không thay mã sản phẩm giữa hai phép đo.
+
+**not_run:** chưa chạy toàn bộ suite legacy trên HINT. Kết quả suite đầy đủ thuộc exact head candidate; kết quả HINT không thay verdict của candidate.'"''')
+p.write_text(s)
+PY" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+exec
+/bin/bash -lc "tail -8 /tmp/rv812-r7-suite.log; date -u +%H:%M:%S; rg -n 'PENDING|HINT_VERIFY' VERDICT.md; wc -l VERDICT.md HINT.patch" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 521
+  đột biến         : 264
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+
+TỔNG: ĐẠT
+17:38:55
+134:SUITE_RESULT_PENDING
+  164 VERDICT.md
+  181 HINT.patch
+  345 total
+
+ succeeded in 1063635ms:
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import json,re,shutil,hashlib,subprocess
+src=Path('/tmp/rv812-r7-suite.log');shutil.copyfile(src,'SUITE.log');Path('SUITE.exit').write_text('0\\n')
+s=src.read_text();baseline=re.search(r'"'^nền: ('"\\d+)/(\\d+) đạt · BỎ QUA: (\\d+)"'$'"',s,re.M);assert baseline and baseline.group(1)==baseline.group(2)=='520'
+ok=re.findall(r'"'^  ok  ('"\\S+) → giết ',s,re.M);skipped=re.findall(r'"'^  BỎ QUA  đột biến (.+)$'"',s,re.M)
+assert 'TỔNG: ĐẠT' in s and len(ok)==263 and len([n for n in ok if n.startswith('r812_')])==96 and not re.search(r'"'^  ĐỎ'"',s,re.M)
+r={'rc':0,'baseline':{'passed':int(baseline[1]),'total':int(baseline[2]),'skipped':int(baseline[3])},'declared_cases':521,'declared_mutants':264,'killed_mutants':len(ok),'skipped_mutants':skipped,'r812_cases':115,'r812_mutants_killed':96,'total':'ĐẠT'}
+Path('SUITE_RESULT.json').write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\\n')
+p=Path('VERDICT.md');v=p.read_text().replace('SUITE_RESULT_PENDING','''Đã chạy "'`cp -a /home/user/rv812 /tmp/rv812-r7-suite`, rồi `python3 /tmp/rv812-r7-suite/.claude/dev/packet_loop_test.py`:
+
+- **rc=0; `nền: 520/520 đạt · BỎ QUA: 1`; `TỔNG: ĐẠT`.**
+- 521 ca khai báo; **263/263 mutant đo được bị giết** trong tổng 264 mutant. Một ca `luong_canonical_chay_that` và mutant tương ứng chỉ chạy Windows bị skipped, không tính là đã đo/đã giết.
+- **115/115 ca r812 xanh; 96/96 mutant r812 khai báo bị giết**; không có r812 skipped. Bốn mutant kiểm toán riêng sống được báo ở lớp coverage, không bị con số mutant candidate che khuất.
+
+[SUITE.log](SUITE.log), [SUITE_RESULT.json](SUITE_RESULT.json), [SUITE.exit](SUITE.exit).'"''');p.write_text(v)
+# Recheck source bytes and status after all execution. No source Python was imported/run.
+p=Path('READONLY_CHECK.json');d=json.loads(p.read_text());repo=Path('/home/user/rv812');d['final_head']=subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD']).decode().strip();d['final_clean_status']=subprocess.check_output(['git','--no-optional-locks','-C',str(repo),'status','--porcelain=v1']).decode()
+d['final_files']={str(k):{'equals_HEAD_blob':(repo/k).read_bytes()==subprocess.check_output(['git','-C',str(repo),'show','HEAD:'+k]),'sha256':hashlib.sha256((repo/k).read_bytes()).hexdigest()} for k in d['files']}
+assert not d['final_clean_status'] and all(v['equals_HEAD_blob'] for v in d['final_files'].values());p.write_text(json.dumps(d,indent=2)+'\\n')
+print(json.dumps(r,ensure_ascii=False))
+PY" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 36ms:
+{"rc": 0, "baseline": {"passed": 520, "total": 520, "skipped": 1}, "declared_cases": 521, "declared_mutants": 264, "killed_mutants": 263, "skipped_mutants": ["luong_canonical_chay_that_dao_os_name: ca ['luong_canonical_chay_that'] không được tính là đã giết"], "r812_cases": 115, "r812_mutants_killed": 96, "total": "ĐẠT"}
+
+codex
+Suite đã hoàn tất: **rc=0, nền 520/520, `TỔNG: ĐẠT`**; 263 mutant đo được đều bị giết, gồm 96/96 mutant r812. `VERDICT.md` ghi **changes_requested, 4 lớp P2**. HINT áp kiểm được trên exact head; cây HINT đạt 137/137 ca r812 và 105/105 mutant theo định nghĩa cuối. Kho nguồn vẫn sạch.
+
+exec
+/bin/bash -lc "python3 - <<'PY'
+from pathlib import Path
+import re,json,hashlib
+v=Path('VERDICT.md').read_text();assert v.splitlines()[0]=='Reviewed commit: 91c6d8c31190f5f9ea08e4da42ecafd898ee8935';assert v.splitlines()[1]=='Verdict: changes_requested — P0=0 P1=0 P2=4 P3=0';assert 'PENDING' not in v
+missing=[]
+for target in re.findall(r'\\]\\((["'^)]+)'"\\)',v):
+ if not target.startswith(('http://','https://')) and not Path(target).exists():missing.append(target)
+assert not missing,missing
+r=json.loads(Path('HINT_RESULT.json').read_text());assert hashlib.sha256(Path('HINT.patch').read_bytes()).hexdigest()==r['patch_sha256']
+paths=[p for p in Path('.').rglob('*') if p.is_file() and p.name"'!='"'SHA256SUMS']
+Path('SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.as_posix()+'\\n' for p in sorted(paths)))
+print({'verdict_exists':Path('VERDICT.md').stat().st_size,'hint_bytes':Path('HINT.patch').stat().st_size,'missing_links':missing,'artifact_files':len(paths)})
+PY" in /tmp/claude-0/-home-user-tra-luat/1b438939-a558-5491-bf47-81ca88fd5720/scratchpad/rv812-r7
+ succeeded in 0ms:
+{'verdict_exists': 22269, 'hint_bytes': 12419, 'missing_links': [], 'artifact_files': 89}
+
+codex
+Đã ghi [VERDICT.md](./VERDICT.md) và [HINT.patch](./HINT.patch).
+
+**changes_requested — P0=0 P1=0 P2=4 P3=0**
+
+Suite đạt **520/520**, `TỔNG: ĐẠT`; 96/96 mutant r812 bị giết. Kho nguồn giữ nguyên.
+tokens used
+254,618

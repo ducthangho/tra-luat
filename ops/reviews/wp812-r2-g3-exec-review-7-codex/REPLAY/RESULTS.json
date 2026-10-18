@@ -1,0 +1,80 @@
+{
+  "API_R6": {
+    "records": 19,
+    "tracebacks": 0
+  },
+  "AUDIT_R4": {
+    "records": 100,
+    "tracebacks": 0
+  },
+  "AUDIT_R5": {
+    "records": 24,
+    "tracebacks": 0
+  },
+  "CLEANUP_R4": {
+    "records": 3,
+    "tracebacks": 0
+  },
+  "HEALTH_R5": {
+    "records": 5,
+    "tracebacks": 0
+  },
+  "IDENTITY_AB_R2": {
+    "records": 4,
+    "tracebacks": 0
+  },
+  "IDENTITY_R3": {
+    "records": 2,
+    "tracebacks": 0
+  },
+  "IDENTITY_R5": {
+    "records": 8,
+    "tracebacks": 0
+  },
+  "R1_APPLICABLE": {
+    "records": 8,
+    "tracebacks": 0
+  },
+  "REPRO_R2": {
+    "records": 32,
+    "tracebacks": 0
+  },
+  "REPRO_R3": {
+    "records": 32,
+    "tracebacks": 0
+  },
+  "OWN_MUTANTS": [
+    {
+      "mutant": "activation_adr_name",
+      "passed": 115,
+      "total": 115,
+      "errors": {}
+    },
+    {
+      "mutant": "lease_identity_matches_init",
+      "passed": 115,
+      "total": 115,
+      "errors": {}
+    },
+    {
+      "mutant": "lease_instruction_packet",
+      "passed": 114,
+      "total": 115,
+      "errors": {
+        "r812_r5_instruction_long": "AssertionError: r812 lease ['truoc_lease']: đòi rc=2, được rc=0; stderr=''"
+      }
+    },
+    {
+      "mutant": "lease_packet",
+      "passed": 115,
+      "total": 115,
+      "errors": {}
+    },
+    {
+      "mutant": "lease_paths_exclusive",
+      "passed": 115,
+      "total": 115,
+      "errors": {}
+    }
+  ]
+}

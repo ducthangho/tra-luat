@@ -1,0 +1,14 @@
+{
+  "baseline": {
+    "passed": 137,
+    "total": 137
+  },
+  "mutants": {
+    "killed": 105,
+    "total": 105
+  },
+  "patch_sha256": "719935be2e322e3c6130c4004d32a1834151f5ef32b612060f4b1fcffd65d89c",
+  "apply_check_rc": 0,
+  "source_tree": "/tmp/rv812-r7-hint",
+  "note": "Final mutation definitions: replace raw-provider result with HINT_MUTANT_DELTA_R7. Product code unchanged during verification."
+}

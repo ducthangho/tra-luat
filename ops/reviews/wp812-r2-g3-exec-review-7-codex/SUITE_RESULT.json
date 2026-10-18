@@ -1,0 +1,17 @@
+{
+  "rc": 0,
+  "baseline": {
+    "passed": 520,
+    "total": 520,
+    "skipped": 1
+  },
+  "declared_cases": 521,
+  "declared_mutants": 264,
+  "killed_mutants": 263,
+  "skipped_mutants": [
+    "luong_canonical_chay_that_dao_os_name: ca ['luong_canonical_chay_that'] không được tính là đã giết"
+  ],
+  "r812_cases": 115,
+  "r812_mutants_killed": 96,
+  "total": "ĐẠT"
+}

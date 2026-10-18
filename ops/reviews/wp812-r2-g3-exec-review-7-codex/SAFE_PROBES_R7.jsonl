@@ -1,0 +1,7 @@
+{"probe": "positive-comment", "rc": 0, "unchanged": false, "traceback": false, "error": ""}
+{"probe": "comment-url-https://example.org/repos/o/r/issues/55", "rc": 0, "unchanged": false, "traceback": false, "error": ""}
+{"probe": "comment-url-ordinary/o/r/issues/55", "rc": 0, "unchanged": false, "traceback": false, "error": ""}
+{"probe": "comment-url-https://api.github.com/repos/different/o/r/issues/55", "rc": 0, "unchanged": false, "traceback": false, "error": ""}
+{"probe": "mixed-paths-complete", "rc": 2, "unchanged": true, "traceback": false, "error": "chọn ĐÚNG một đường: --lease-ref/--lease-path/--lease-comments HOẶC --lease-id/--granted-by/--evidence/--expires-utc, đủ cờ của đường ấy\n"}
+{"probe": "mixed-paths-empty-old-option", "rc": 0, "unchanged": false, "traceback": false, "error": ""}
+{"scratch": "/tmp/rv812-r7-safe-i_wg3xn_"}

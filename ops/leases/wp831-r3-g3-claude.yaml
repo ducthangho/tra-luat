@@ -109,3 +109,8 @@ nang_tran:
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'push nhanh agent/wp831-g1-claude va mo PR draft'
+da_bi_thay_the: wp831-r4-g4-claude
+da_bi_thay_the_ly_do: >-
+  Codex luot 3/3 @6376cd3: F03 P2 chooser-path-reselects-python va MOT PHAN (nhanh --bat-buoc chon lai Python sau khi PATH
+  doi). Chu kho "Chon 1 nhung nang ngan sach codex len 8" (ghi ho issuecomment-6252662788). Lease r4 (spec
+  ops/specs/wp831-r4.md) mo pham vi sua ops/cai_cong_cu.sh, ngan sach Codex 8, cung 8 tep, cung nhanh.

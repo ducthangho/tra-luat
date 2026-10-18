@@ -2334,8 +2334,10 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
     except ValueError:   # F02: vượt trần chữ số của `int()`; `json` chịu đúng trần ấy nên không id
         suite = a.check_suite   # nào khớp — giữ CHUỖI (≠ mọi int) ⇒ VẮNG, không traceback
     ten_bb = list(dict.fromkeys(a.bat_buoc))   # trùng tên ⇒ tính MỘT lần, giữ thứ tự
-    if any(not t.strip() for t in ten_bb):
-        _die(RC_ARG, "--bat-buoc không được rỗng")
+    # F04 (chủ kho chốt 18-10): tên chứa ký tự ngắt dòng (mọi thứ `splitlines()` cắt) bị TỪ CHỐI —
+    # dòng cảnh báo N4 in tên nguyên văn, và chỉ tên bắt buộc được in, nên nó luôn là MỘT dòng.
+    if any(not t.strip() or t.splitlines() != [t] for t in ten_bb):
+        _die(RC_ARG, "--bat-buoc không được rỗng hoặc chứa ký tự xuống dòng")
     runs = _doc_check_runs(a.check_runs)
     # N4: run cùng tên ở suite KHÁC là producer khác — bỏ qua, nhưng nói ra. Chỉ tên bắt buộc.
     for ten_cb in ten_bb:

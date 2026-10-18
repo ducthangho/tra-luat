@@ -5461,6 +5461,15 @@ _KG_CA.update({
         dem=False, expect=0),
 })
 
+# F04 lượt 4 (chủ kho chốt 18-10): tên bắt buộc chứa ký tự ngắt dòng ⇒ RC_ARG; tab và chuỗi
+# hai ký tự `\` + `n` không phải ngắt dòng nên vẫn được.
+for _ten, _kt in {"lf": "\n", "cr": "\r", "crlf": "\r\n", "vt": "\x0b", "ff": "\x0c", "fs": "\x1c",
+                  "nel": "\x85", "ls": "\u2028", "ps": "\u2029"}.items():
+    _KG_CA[f"kg_f04_xuong_dong_{_ten}"] = _kg_ca(_KG_1, bat_buoc=(f"ga{_kt}te",), expect=2, chua="xuống dòng")
+_KG_CA["kg_f04_xuong_dong_cuoi"] = _kg_ca(_KG_1, bat_buoc=("gate\n",), expect=2, chua="xuống dòng")
+for _ten, _t in {"tab": "ga\tte", "cheo_n": "ga\\nte"}.items():
+    _KG_CA[f"kg_f04_ten_hop_le_{_ten}"] = _kg_ca({"check_runs": [_kg_run(1, name=_t)]}, bat_buoc=(_t,), expect=0)
+
 
 def case_kg_f02_suite_vuot_tran_int(c: Ctx):
     """F02: đúng dạng N1 mà dài hơn trần chữ số của `int()` ⇒ VẮNG rc=12, KHÔNG traceback."""
@@ -5583,8 +5592,10 @@ MUTANTS.update({
                                    [k for k in _KG_CA if k.startswith("kg_m2_hang_ngoai_json_")]),
     "kg_bo_sha_re": ("    if not SHA_RE.fullmatch(a.head):\n", "    if False:\n",
                      ["kg_m1_head_7_ky_tu"]),
-    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() for t in ten_bb):\n", "    if False:\n",
-                            ["kg_m1_bat_buoc_rong"]),
+    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() or t.splitlines() != [t] for t in ten_bb):\n", "    if False:\n",
+                            ["kg_m1_bat_buoc_rong"] + [k for k in _KG_CA if k.startswith("kg_f04_xuong_dong_")]),
+    "kg_f04_bo_kiem_xuong_dong": (" or t.splitlines() != [t] for t in ten_bb", " for t in ten_bb",
+                                  [k for k in _KG_CA if k.startswith("kg_f04_xuong_dong_")]),
     "kg_bo_qua_phan_tu_thieu_truong": ("            if sai:\n                hong(",
                                        "            if sai:\n                continue\n                hong(",
                                        ["kg_m2_thieu_conclusion"]),

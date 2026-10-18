@@ -1,0 +1,109 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 812
+packet_id: wp812
+packet_alias: MAY-ADR-0054-a
+mission_issue: 796
+revision: 1
+generation: 2
+lease_id: wp812-r1-g2-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_effort: medium
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp812.md
+spec_sha256_required: 6b8b6c79703bc21949adf006ffc4bb351374254f5a27a0d85ed908ece6511d26
+spec_hash: 6b8b6c79703bc21949adf006ffc4bb351374254f5a27a0d85ed908ece6511d26
+prompt_path: ops/specs/wp812.md
+prompt_sha256_required: 6b8b6c79703bc21949adf006ffc4bb351374254f5a27a0d85ed908ece6511d26
+spec_chung_path: ops/specs/may-adr-0054-chung.md
+spec_chung_sha256_required: 4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0
+spec_nguon_note: >-
+  Hai tep dac ta nam tren nhanh nay (ops/wp812-spec, re tu head ffd1f73 cua PR #819 — connector sach,
+  chua merge). Dinh danh tep la BAM, khong phai ten nhanh: tim o master truoc, chua thay thi doc tu
+  nhanh ops/wp812-spec hoac claude/spec-may-adr-0054-tach.
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+effective_write_set_nguon: khai_bao_trong_spec
+depends_on:
+- 775
+- 788
+depends_on_ghi_chu: >-
+  #775 land d8b15cb (PR #779). #788 land ebcc702 (PR #818); lease wp788-r1-g1-claude da rut han ve
+  2026-10-18T02:38:14Z (commit 735a208 tren ops/wp788-spec).
+branch: agent/wp812-g2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 4c7c29858220ae575bebc5e0a343842cd3db4546
+start_from_sha: 4c7c29858220ae575bebc5e0a343842cd3db4546
+reviewed_sha_required: 4c7c29858220ae575bebc5e0a343842cd3db4546
+reviewed_sha_note: >-
+  Chua co head code; neo base (origin/master 4c7c298 luc cap g2, sau #818 #819 #828 #829). Head da review ghi o bien nhan
+  truoc lan day duy nhat.
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/812#issuecomment-6247356060
+granted_on_instruction_note: >-
+  Chu kho 18-10-2026 (phien dieu phoi session_01XaeBSkW4R49AEWj6x4uqff): "Chuyen Executor sang Claude opus 5.5
+  medium. Thuc hien va theo quy trinh toi het P1, P2, P3". Doi executor la doi truong §3.2 => generation moi.
+  Dac ta wp812.md giu nguyen bam; dong executor (antigravity) trong phan dau dac ta bi lease nay thay theo
+  quyet dinh chu kho, cac bat bien va nghiem thu khong doi.
+recorded_by: claude-dispatcher-session
+recorder_is_executor: false
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-18T07:54:01Z'
+  ref: refs/heads/agent/wp812-g2-claude
+  trang_thai: vang
+  ghi_chu: 'ls-remote rong; executor tao tu base_sha. Nhanh g1 agent/wp812-g1-antigravity cung chua tung ton tai.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-18T07:54:01Z'
+  so_nhanh: 'ls-remote 605 == cuc bo 605 (so TAP ten: thieu 0)'
+  ket_qua: >-
+    ai-dang-giu ca ba duong dan => NGUOI_GIU 1 = wp812-r1-g1-antigravity, chinh lease duoc thay o day bang bia mo
+    hai chieu. Con lai chi CON_HAN-DA_BI_THAY_THE hoac HET_HAN.
+leased_at_utc: '2026-10-18T07:58:00Z'
+heartbeat_at: '2026-10-18T07:58:00Z'
+lease_until: '2026-10-20T07:58:00Z'
+lease_expires_at_utc: '2026-10-20T07:58:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi la truc chan. Truc VONG theo ADR-0048.
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Review Codex CLI offline tren SHA cuc bo (prompt chuan connector, khong loc theo mo hinh tin cay);
+  gate tai cho tren dung SHA; day nhanh code MOT lan khi du dieu kien merge. Connector bao P0-P2 sau
+  khi day thi DUNG hoi chu kho. Va theo LOP, khong theo tung finding.
+thay_the_cho:
+- wp812-r1-g1-antigravity
+thay_the_cho_note: >-
+  g1 con han toi 2026-10-20T02:55Z va giu dung write set => bia mo hai chieu: g1 mang da_bi_thay_the tro ve lease
+  nay. g1 chua sinh nhanh, PR hay heartbeat nao. Lease nay khong chep dau dang comment cua g1.
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0, limit: 3}
+kich_thuoc_tran: 'ADR-0053: <= 450 dong them, 3 duong dan'

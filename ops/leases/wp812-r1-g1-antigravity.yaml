@@ -106,3 +106,8 @@ ngan_sach:
   vong_review_canon: {used: 0}
   attempt: {used: 0, limit: 3}
 kich_thuoc_tran: 'ADR-0053: <= 450 dong them, 3 duong dan'
+da_bi_thay_the: wp812-r1-g2-claude
+da_bi_thay_the_luc_utc: '2026-10-18T07:58:00Z'
+da_bi_thay_the_vi_sao: >-
+  Chu kho doi executor (antigravity -> claude-opus-5-5 medium) tai issuecomment-6247356060; §3.2 doi executor =>
+  generation moi. g1 chua sinh nhanh/PR/heartbeat nao.

@@ -1,6 +1,6 @@
 # HO SO LAND — packet #794 wp794 r1 (lease g1), ma qua PR #800. Khuon: ops/land/pr793-wp784-land-evidence.yaml.
-# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. TRANG THAI: merged (73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8). `landed: false` cho toi khi chu kho
-# quyet o PR ghi so nay. NHAN: measured · loi_khai_co_neo · thuat_lai · not_measured. Readback: ops/land/pr800-wp794-provenance/.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. TRANG THAI: merged (73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8). `landed: true` theo quyet dinh chu kho
+# o PR ghi so nay (18-10-2026). NHAN: measured · loi_khai_co_neo · thuat_lai · not_measured. Readback: ops/land/pr800-wp794-provenance/.
 
 schema_version: 1
 mission_id: gh-794
@@ -53,8 +53,14 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-800.json: merged true, merged_at 2026-10-17T16:10:31Z, merged_by ducthangho.'
-  landed: false
-  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1).'
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so #817 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) PR #800 merge tai 73bf92c. (2) hau-merge gate: run 39048258873 tren 73bf92c (push master) conclusion success
+    (doc lai 18-10-2026 qua actions_get) — xem post_merge_checks. (3) bookkeeping: lease g1 rut han ve 18:05Z
+    (ops/cap-lease-p3-dot 7e8b6f1) + PR ghi so #817. Ban dau tep ghi `landed: false`; chu kho quyet doi
+    sang true o #817 ngay 18-10-2026.
 review:
   codex_connector: 'measured — readback-comments-800.json: summary codex-review-state completed, has_any_findings false, tren c679d64.'
   codex_cli: 'thuat_lai — cac luot Codex CLI offline cua executor (comment PR #800); bien nhan v2 KHONG nam trong ops/reviews/ (no).'

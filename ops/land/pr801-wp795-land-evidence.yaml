@@ -1,6 +1,6 @@
 # HO SO LAND — packet #795 wp795 r1 (lease g1), ma qua PR #801. Khuon: ops/land/pr793-wp784-land-evidence.yaml.
-# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. TRANG THAI: merged (d347d426334bbe1bbb1161184ab0acffee9be054). `landed: false` cho toi khi chu kho
-# quyet o PR ghi so nay. NHAN: measured · loi_khai_co_neo · thuat_lai · not_measured. Readback: ops/land/pr801-wp795-provenance/.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. TRANG THAI: merged (d347d426334bbe1bbb1161184ab0acffee9be054). `landed: true` theo quyet dinh chu kho
+# o PR ghi so nay (18-10-2026). NHAN: measured · loi_khai_co_neo · thuat_lai · not_measured. Readback: ops/land/pr801-wp795-provenance/.
 
 schema_version: 1
 mission_id: gh-795
@@ -25,7 +25,7 @@ pre_merge_checks:
   - {name: 'moi check-run tren head (16)', sha: 76014ce0e76df70d8d3655b8f130747ae4d2cc14, conclusion: success, nguon: readback-check-runs-76014ce.json}
   - {name: 'Codex connector review', sha: 76014ce0e76df70d8d3655b8f130747ae4d2cc14, conclusion: 'completed, has_any_findings false', nguon: readback-comments-801.json}
 post_merge_checks:
-  - {name: gate (ci.yml, push master), run_id: 39053830242, sha: d347d426334bbe1bbb1161184ab0acffee9be054, conclusion: 'in_progress luc ghi so'}
+  - {name: gate (ci.yml, push master), run_id: 39053830242, sha: d347d426334bbe1bbb1161184ab0acffee9be054, conclusion: success, ghi_chu: 'luc ghi so dau tien con in_progress; doc lai 18-10-2026 qua actions_get: completed/success'}
 bookkeeping:
   - {item: 'rut han lease wp795-r1-g1-claude-20261017', nhanh: ops/cap-lease-p3-dot}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-800-801-land}
@@ -53,8 +53,14 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-801.json: merged true, merged_at 2026-10-17T17:27:20Z, merged_by ducthangho.'
-  landed: false
-  landed_ly_do: 'Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1).'
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so #817 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) PR #801 merge tai d347d42. (2) hau-merge gate: run 39053830242 tren d347d42 (push master) conclusion success
+    (doc lai 18-10-2026 qua actions_get) — xem post_merge_checks. (3) bookkeeping: lease g1 rut han ve 18:05Z
+    (ops/cap-lease-p3-dot 7e8b6f1) + PR ghi so #817. Ban dau tep ghi `landed: false`; chu kho quyet doi
+    sang true o #817 ngay 18-10-2026.
 so_lan_day: >-
   thuat_lai — nhanh code day 4 lan (301356c, a69f2c7, 6b3b4f3, 76014ce); lan 2 chu kho duyet (comment 6235613390);
   lan 3 va 4 co bien nhan cua executor (comment 6236563063, 6237152105). Connector bat 2 P2 (4303133321 tren 301356c,

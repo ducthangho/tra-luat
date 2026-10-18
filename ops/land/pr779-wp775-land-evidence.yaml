@@ -90,7 +90,7 @@ trang_thai_packet:
   merged: true
   merged_nguon: >-
     measured — readback-pr-779.json: merged true, merged_at 2026-10-17T16:55:50Z, merged_by ducthangho, merge_commit_sha
-    d8b15cb0730c85e7019aee627c3bfa645a6d3eaf (cha 73bf92c + f9d84d7), merge commit (khong squash/rebase).
+    d8b15cb0730c85e7019aee627c3bfa645a6d3eaf (cha 73bf92c + f9d84d7: do-lai-nguon-20261018/merge-d8b15cb.txt), merge commit (khong squash/rebase).
   landed: true
   landed_hieu_luc_tu: >-
     merge commit cua PR sua ho so (nhanh claude/bookkeeping-775-landed) dua dong nay vao master. Comment
@@ -107,15 +107,15 @@ trang_thai_packet:
 
 uy_quyen_land:
   dang: >-
-    measured — readback-pr-779.json ghi merged_by.login=ducthangho, merged_at=2026-10-17T16:55:50Z; event merged
+    measured — readback-pr-779.json ghi merged_by.login=ducthangho, merged_at=2026-10-17T16:55:50Z; readback-events-779.json: event merged
     ghi actor=ducthangho luc 16:55:51Z, performed_via_github_app=null. Cac truong nay chi chung minh tai khoan.
     loi_khai_co_neo — nguoi ghi so khai chu kho tu bam merge, executor khong merge; bao cao 6237056761 tu khai DUNG
     cho uy quyen tren f9d84d7. Nguoi bam/phien dung credential KHONG_DO_DUOC; null app khong tu chung minh thao tac tay.
     Provenance khong luu comment uy quyen merge rieng; khong dung danh tinh tai khoan thay bang chung uy quyen cho agent.
   candidate_sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d
-  head_khong_doi: 'measured — readback-pr-779.json head.sha = f9d84d7 = cha thu hai cua d8b15cb.'
+  head_khong_doi: 'measured — readback-pr-779.json head.sha = f9d84d7 = cha thu hai cua d8b15cb (do-lai-nguon-20261018/merge-d8b15cb.txt).'
   khong_xung_dot: >-
-    measured — merge commit d8b15cb co hai cha 73bf92c va f9d84d7; tree 6474598 khac tree head 4e712f3.
+    measured — do-lai-nguon-20261018/merge-d8b15cb.txt: merge commit d8b15cb co hai cha 73bf92c va f9d84d7; tree 6474598 khac tree head 4e712f3.
     not_measured — readback-pr-779.json ghi mergeable=null, mergeable_state=unknown; khong luu trang thai mergeable
     truoc merge. So cha va tree khac nhau khong tu chung minh khong conflict; khong ket luan merge sach tu readback nay.
 

@@ -2282,8 +2282,8 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         for muc in path.split(os.pathsep):
             if not muc:
                 continue
-            try:
-                them(ten, shutil.which(ten, path=muc))
+            try:   # wp802: KHÔNG `shutil.which` — trên Windows nó trả bản ở cwd cho MỌI `muc`
+                them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc)))
             except OSError:
                 continue
 
@@ -4381,7 +4381,7 @@ def lenh_doctor(a) -> int:
         if tran:
             ung_vien = [(c["ung_vien"][0], tran)] + [
                 x for x in ung_vien
-                if os.path.normcase(os.path.abspath(x[1])) != os.path.normcase(tran)]
+                if os.path.normcase(os.path.abspath(x[1])) != os.path.normcase(os.path.abspath(tran))]
         for ten_uv, d in ung_vien:
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
@@ -4649,10 +4649,8 @@ def lenh_doctor(a) -> int:
                      (c.get("phien_ban", "") if c["co"] else c["vi_sao"]))
             con_ong = _in_an_toan(f"  {dau:<8} {c['ten']:<8} {mo_ta}")
             if che and con_ong:
-                con_ong = _in_an_toan(
-                    f"        ten tran `{c['ten']}` goi {che['ban_hong']} - KHONG chay "
-                    f"duoc: {che['loi']}\n        ban chay duoc: {che['ban_tot']}\n"
-                    f"        cach chua: {che['cach_chua']}")
+                con_ong = _in_an_toan(f"        ten tran `{c['ten']}` goi {che['ban_hong']} - KHONG chay duoc: "
+                                      f"{che['loi']}\n        ban chay duoc: {che['ban_tot']}\n        cach chua: {che['cach_chua']}")
             if hong and con_ong:
                 con_ong = _in_an_toan(
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")

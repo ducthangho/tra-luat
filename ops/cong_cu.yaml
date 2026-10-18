@@ -84,13 +84,13 @@ cong_cu:
     cai:
       linux: {lenh: 'sudo apt-get install -y ripgrep && dirname "$(command -v rg)"'}
       macos: {lenh: 'brew install ripgrep && dirname "$(command -v rg)"'}
-      # wp802 (Q6): winget trước, choco dự phòng. Thư mục in ra là thư mục ĐẦU TIÊN có `rg`
-      # CHẠY ĐƯỢC — WinGet\Links, choco\bin, rồi `command -v` — vì `command -v` một mình trả
-      # bản cũ hỏng đứng trước (Codex lượt 1 F2); không thư mục nào chạy được ⇒ thoát khác 0.
+      # wp802 (Q6): winget trước, choco dự phòng. Thư mục in ra là thư mục ĐẦU TIÊN có `rg` in
+      # được `ripgrep X.Y.Z` (cùng tiêu chí probe) — WinGet\Links, choco\bin, rồi `command -v` —
+      # vì `command -v` một mình trả bản cũ hỏng (Codex lượt 1-2 F2); không có ⇒ thoát khác 0.
       # Có $GITHUB_PATH thì ghi thư mục vào đó: bước sau của runner là shell mới (đo:
       # launcher-windows 39093706610 cài `DAT` 15.2.0, bước kế `KHONG_DO_DUOC`).
       # Phần trước ` && ` ĐẦU TIÊN PHẢI khớp `CONG_CU` của launcher.py và hook (launcher_test canh).
-      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && for RG_D in "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")" "$(cygpath -u "${ChocolateyInstall:-C:/ProgramData/chocolatey}")/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do "$RG_D/rg" --version >/dev/null 2>&1 && RG_DICH="$RG_D" && break; done && { [ -z "${GITHUB_PATH:-}" ] || cygpath -w "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
+      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && RG_DICH= && for RG_D in "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")" "$(cygpath -u "${ChocolateyInstall:-C:/ProgramData/chocolatey}")/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do RG_V="$("$RG_D/rg" --version 2>/dev/null)" || continue; case "$RG_V" in "ripgrep "[0-9]*.[0-9]*.[0-9]*) RG_DICH="$RG_D"; break ;; esac; done && : "${RG_DICH:?khong thu muc nao co rg chay duoc}" && { [ -z "${GITHUB_PATH:-}" ] || cygpath -w "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
   bash:
     # Hook SessionStart là bash; trên Windows công thức này cấp Git Bash.
     bat_buoc: true

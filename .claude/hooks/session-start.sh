@@ -186,9 +186,9 @@ fi
 # của ops/cong_cu.yaml (phần trước ` && ` đầu tiên) — canh: `r802_bang_cai_rg_khop_cong_cu_yaml`.
 RG_CAI_WINDOWS='winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress'
 RG_WIN=0; case "$(uname -s 2>/dev/null || true)" in MINGW*|MSYS*|CYGWIN*) RG_WIN=1 ;; esac
-if [ "$RG_WIN" = 1 ] && ! co_chay rg; then
-  echo "[session-start] CANH BAO: rg THIEU/HONG (Windows) — hook KHONG tu cai; doctor se chan. Cai bang:"
-  echo "$RG_CAI_WINDOWS"
+if [ "$RG_WIN" = 1 ]; then   # chọn nền TRƯỚC probe: Windows probe ĐÚNG MỘT lần (Codex lượt 2 F5)
+  co_chay rg || { echo "[session-start] CANH BAO: rg THIEU/HONG (Windows) — hook KHONG tu cai; doctor se chan. Cai bang:"
+                  echo "$RG_CAI_WINDOWS"; }
 elif ! co_chay rg; then
   echo "[session-start] cai ripgrep ..."
   if co apt-get; then

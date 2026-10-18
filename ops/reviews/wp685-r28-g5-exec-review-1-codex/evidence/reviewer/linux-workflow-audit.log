@@ -1,0 +1,1267 @@
+# UTC 2026-10-10T07:01:16Z
+$ uname -s
+Linux
+# rc=0
+$ uname -r
+6.18.44-fc-v114
+# rc=0
+$ uname -m
+x86_64
+# rc=0
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+# rc=0
+$ python3.11 -V
+Python 3.11.17
+# rc=0
+$ python3.12 -V
+Python 3.12.3
+# rc=0
+$ uname -a
+Linux vm 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# rc=0
+{"name": "linux-workflow-audit", "command": "python3.12 -B scripts/tl.py workflow-audit --strict --json", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate", "started_utc": "2026-10-10T07:01:16.656802+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3"}
+{
+  "ok": true,
+  "schema": "workflow_audit.v2",
+  "card_schema": "workflow_card.v1",
+  "cards": [
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/bundle_export.json",
+      "id": "bundle_export",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_bundle_zip",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "bundle-export --note \"<mục đích nhánh>\" --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/chunk_ingest.json",
+      "id": "chunk_ingest",
+      "schema": "workflow_card.v1",
+      "risk": "medium",
+      "write_scope": "local_chunks_profile_ingest",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "chunk-plan",
+          "available": true
+        },
+        {
+          "command": "chunk-apply",
+          "available": true
+        },
+        {
+          "command": "chunk-verify",
+          "available": true
+        },
+        {
+          "command": "profile-ingest-chunks",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/convert_rename.json",
+      "id": "convert_rename",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "drive_convert_registry_nlm",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "ingest-local <file> --auto-plan --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest <file> --json",
+          "available": true
+        },
+        {
+          "command": "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/deploy_plan.json",
+      "id": "deploy_plan",
+      "schema": "workflow_card.v1",
+      "risk": "medium",
+      "write_scope": "local_deploy_plan",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "deploy-plan --bundle <file.zip> --json",
+          "available": true
+        },
+        {
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+          "available": true
+        },
+        {
+          "command": "release-check --json",
+          "available": true
+        },
+        {
+          "command": "live-readiness --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/doc_claims_check.json",
+      "id": "doc_claims_check",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out",
+        "basis"
+      ],
+      "recommended": [
+        {
+          "command": "doc-claims-check",
+          "available": true
+        },
+        {
+          "command": "doc-claims-check --strict --json",
+          "available": true
+        },
+        {
+          "command": "doc-claims-check --path references --json",
+          "available": true
+        },
+        {
+          "command": "doc-claims-check --out bao_cao_trich_dan.json --json",
+          "available": true
+        },
+        {
+          "command": "workflow-audit --strict --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/final_acceptance.json",
+      "id": "final_acceptance",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "none",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "final-acceptance --json",
+          "available": true
+        },
+        {
+          "command": "workflow-audit --json",
+          "available": true
+        },
+        {
+          "command": "release-check --json",
+          "available": true
+        },
+        {
+          "command": "release-manifest --out RELEASE_MANIFEST.json --json",
+          "available": true
+        },
+        {
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+          "available": true
+        },
+        {
+          "command": "live-readiness --json",
+          "available": true
+        },
+        {
+          "command": "live-smoke-plan --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/go_live_runbook.json",
+      "id": "go_live_runbook",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "none",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "go-live-runbook --out GO_LIVE_RUNBOOK.md",
+          "available": true
+        },
+        {
+          "command": "deploy-plan --json",
+          "available": true
+        },
+        {
+          "command": "rollback-plan --json",
+          "available": true
+        },
+        {
+          "command": "live-readiness --json",
+          "available": true
+        },
+        {
+          "command": "live-contract-check --json",
+          "available": true
+        },
+        {
+          "command": "live-state-snapshot --out before.json --json",
+          "available": true
+        },
+        {
+          "command": "live-state-diff before.json after.json --json",
+          "available": true
+        },
+        {
+          "command": "live-smoke-plan --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/ingest_local.json",
+      "id": "ingest_local",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "drive_registry_nlm",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "ingest-route <file> --json",
+          "available": true
+        },
+        {
+          "command": "ingest-local <file> --auto-plan --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest <file> --json",
+          "available": true
+        },
+        {
+          "command": "ingest-local <file> --auto-plan --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest <file> --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+          "available": true
+        },
+        {
+          "command": "convert-verify --gdoc-id <id> --expected-name <name> --src-id <id> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/ingest_zip.json",
+      "id": "ingest_zip",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "drive_registry_nlm_batch",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "ingest-zip <file.zip> --cat <NN> --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest-zip <file.zip> --json",
+          "available": true
+        },
+        {
+          "command": "ingest-zip <file.zip> --cat <NN> --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest-zip <file.zip> --apply --confirm yes --expected-plan-hash <plan_hash> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/large_doc_chunk.json",
+      "id": "large_doc_chunk",
+      "schema": "workflow_card.v1",
+      "risk": "medium",
+      "write_scope": "local_chunks",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "chunk-plan <file> --mode profile --json",
+          "available": true
+        },
+        {
+          "command": "chunk-apply <file> --mode profile --expected-hash <sha256> --json",
+          "available": true
+        },
+        {
+          "command": "chunk-verify <chunk_manifest.json> --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest-chunks <chunk_manifest.json> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/live_contract_check.json",
+      "id": "live_contract_check",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "none",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "recommended": [
+        {
+          "command": "live-contract-check --json",
+          "available": true
+        },
+        {
+          "command": "live-readiness --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/live_readiness.json",
+      "id": "live_readiness",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "none",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "recommended": [
+        {
+          "command": "live-readiness --json",
+          "available": true
+        },
+        {
+          "command": "live-contract-check --json",
+          "available": true
+        },
+        {
+          "command": "live-state-snapshot --out before.json --json",
+          "available": true
+        },
+        {
+          "command": "live-smoke-plan --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/live_smoke_plan.json",
+      "id": "live_smoke_plan",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "live_drive_nlm_smoke",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "live-readiness --json",
+          "available": true
+        },
+        {
+          "command": "live-contract-check --json",
+          "available": true
+        },
+        {
+          "command": "live-state-snapshot --out before.json --json",
+          "available": true
+        },
+        {
+          "command": "live-smoke-plan --json",
+          "available": true
+        },
+        {
+          "command": "live-state-snapshot --out after.json --json",
+          "available": true
+        },
+        {
+          "command": "live-state-diff before.json after.json --json",
+          "available": true
+        },
+        {
+          "command": "ping",
+          "available": true
+        },
+        {
+          "command": "doctor",
+          "available": true
+        },
+        {
+          "command": "ingest-local",
+          "available": true
+        },
+        {
+          "command": "profile-ingest",
+          "available": true
+        },
+        {
+          "command": "convert-verify",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/live_state_diff.json",
+      "id": "live_state_diff",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_diff_file_only",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "recommended": [
+        {
+          "command": "live-state-diff before.json after.json --json --allow source_counts --allow notebooks.get.source_count",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/live_state_snapshot.json",
+      "id": "live_state_snapshot",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_snapshot_file_only",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail",
+        "generatedAt",
+        "generatedEpoch"
+      ],
+      "recommended": [
+        {
+          "command": "live-state-snapshot --out before.json --json",
+          "available": true
+        },
+        {
+          "command": "live-state-snapshot --out after.json --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/nlm_query_quality.json",
+      "id": "nlm_query_quality",
+      "schema": "workflow_card.v1",
+      "risk": "medium",
+      "write_scope": "nlm_read_only",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "source-map --json",
+          "available": true
+        },
+        {
+          "command": "reg-query --json",
+          "available": true
+        },
+        {
+          "command": "nlm-query-plan <question> --source-id <id> --json",
+          "available": true
+        },
+        {
+          "command": "nlm-query <question> --source-id <id> --json",
+          "available": true
+        },
+        {
+          "command": "nlm-cross <question> --notebooks <nb1,nb2> --json",
+          "available": true
+        },
+        {
+          "command": "extract <query> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/ocr_ingest.json",
+      "id": "ocr_ingest",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "local_ocr_drive_registry_nlm",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "ocr-run",
+          "available": true
+        },
+        {
+          "command": "ocr-verify",
+          "available": true
+        },
+        {
+          "command": "ingest-ocr",
+          "available": true
+        },
+        {
+          "command": "profile-ingest-ocr",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/ocr_pdf_scan.json",
+      "id": "ocr_pdf_scan",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "local_ocr",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "ocr-analyze <scan.pdf> --json",
+          "available": true
+        },
+        {
+          "command": "ocr-run <scan.pdf> --engine auto --mode profile --json",
+          "available": true
+        },
+        {
+          "command": "ocr-verify <sidecar.txt> --mode profile --json",
+          "available": true
+        },
+        {
+          "command": "ingest-ocr <scan.pdf> --text-file <sidecar.txt> --cat <NN> --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest-ocr <scan.pdf> --text-file <sidecar.txt> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/rasoat_hoso.json",
+      "id": "rasoat_hoso",
+      "schema": "workflow_card.v1",
+      "risk": "medium",
+      "write_scope": "profile_meta_rasoat_state_drive + master_local_out_dir (NGOAI cay skill - doctrine B.5)",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "session_claim",
+        "quota_nlm",
+        "quota_tvpl",
+        "verified_at",
+        "timestamp",
+        "progress"
+      ],
+      "recommended": [
+        {
+          "command": "rasoat-loop --dry-rounds 2 --json",
+          "available": true
+        },
+        {
+          "command": "state-get --json",
+          "available": true
+        },
+        {
+          "command": "state-put --in <out-dir>/rasoat_state.json --expect-claim <id> --json",
+          "available": true
+        },
+        {
+          "command": "rasoat-merge --in <out-dir>/master --out <out-dir>/BANG_MASTER.json --state <out-dir>/rasoat_state.json --json",
+          "available": true
+        },
+        {
+          "command": "frontier-expand --json",
+          "available": true
+        },
+        {
+          "command": "reg-query --refresh --json",
+          "available": true
+        },
+        {
+          "command": "profile-ingest --staged --json",
+          "available": true
+        },
+        {
+          "command": "verify-staged --json",
+          "available": true
+        },
+        {
+          "command": "nlm-reconcile <nb> --all-notebooks",
+          "available": true
+        },
+        {
+          "command": "doctor --json",
+          "available": true
+        },
+        {
+          "command": "precheck --json",
+          "available": true
+        },
+        {
+          "command": "nlm-auth-status --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/release_bundle.json",
+      "id": "release_bundle",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_release_bundle",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "release-bundle --out <file.zip> --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/release_check.json",
+      "id": "release_check",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_release_gate",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "release-check",
+          "available": true
+        },
+        {
+          "command": "workflow-audit",
+          "available": true
+        },
+        {
+          "command": "instructions --target project --check",
+          "available": true
+        },
+        {
+          "command": "instructions --target nlm --check",
+          "available": true
+        },
+        {
+          "command": "determinism-audit --strict --json",
+          "available": true
+        },
+        {
+          "command": "golden-test --json",
+          "available": true
+        },
+        {
+          "command": "release-check --strict-determinism --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/release_manifest.json",
+      "id": "release_manifest",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_manifest",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "release-manifest --out RELEASE_MANIFEST.json --json",
+          "available": true
+        },
+        {
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/release_verify.json",
+      "id": "release_verify",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "local_manifest_verify",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "test-fragments-check --root <repo> --json",
+          "available": true
+        },
+        {
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+          "available": true
+        },
+        {
+          "command": "release-verify RELEASE_MANIFEST.json --strict --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/rollback_plan.json",
+      "id": "rollback_plan",
+      "schema": "workflow_card.v1",
+      "risk": "medium",
+      "write_scope": "local_rollback_plan",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": true,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "rollback-plan --json",
+          "available": true
+        },
+        {
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+          "available": true
+        },
+        {
+          "command": "release-check --json",
+          "available": true
+        },
+        {
+          "command": "live-readiness --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/workflow_audit.json",
+      "id": "workflow_audit",
+      "schema": "workflow_card.v1",
+      "risk": "low",
+      "write_scope": "none",
+      "contract": {
+        "confirm_required": false,
+        "dry_run_required": false,
+        "live_state_required": false,
+        "readback_required": false,
+        "rollback_required": false
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "workflow-audit",
+          "available": true
+        },
+        {
+          "command": "tool-inventory",
+          "available": true
+        },
+        {
+          "command": "route-task",
+          "available": true
+        },
+        {
+          "command": "release-check",
+          "available": true
+        },
+        {
+          "command": "workflow-audit --strict --json",
+          "available": true
+        },
+        {
+          "command": "determinism-audit --json",
+          "available": true
+        },
+        {
+          "command": "golden-test --json",
+          "available": true
+        }
+      ]
+    },
+    {
+      "file": "/home/user/wp685-r28-g5-review/goi/scratch/candidate/references/workflows/write_new_tool.json",
+      "id": "write_new_tool",
+      "schema": "workflow_card.v1",
+      "risk": "high",
+      "write_scope": "skill_code_local",
+      "contract": {
+        "confirm_required": true,
+        "dry_run_required": true,
+        "live_state_required": false,
+        "readback_required": true,
+        "rollback_required": true
+      },
+      "volatile_fields": [
+        "path",
+        "file",
+        "out_dir",
+        "seconds",
+        "stdout_tail",
+        "stderr_tail"
+      ],
+      "recommended": [
+        {
+          "command": "tool-inventory --json",
+          "available": true
+        },
+        {
+          "command": "route-task --task <task> --json",
+          "available": true
+        },
+        {
+          "command": "workflow-audit --json",
+          "available": true
+        },
+        {
+          "command": "release-check --json",
+          "available": true
+        },
+        {
+          "command": "edit-skill",
+          "available": true
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "name": "bootstrap_health",
+      "missing_commands": [],
+      "command_count": 8
+    },
+    {
+      "name": "inventory_decision",
+      "missing_commands": [],
+      "command_count": 19
+    },
+    {
+      "name": "source_discovery",
+      "missing_commands": [],
+      "command_count": 8
+    },
+    {
+      "name": "legal_verification",
+      "missing_commands": [],
+      "command_count": 9
+    },
+    {
+      "name": "ingest_convert",
+      "missing_commands": [],
+      "command_count": 14
+    },
+    {
+      "name": "ocr_text_quality",
+      "missing_commands": [],
+      "command_count": 8
+    },
+    {
+      "name": "chunk_query_quality",
+      "missing_commands": [],
+      "command_count": 9
+    },
+    {
+      "name": "nlm_operations",
+      "missing_commands": [],
+      "command_count": 11
+    },
+    {
+      "name": "registry_profile_corpus",
+      "missing_commands": [],
+      "command_count": 11
+    },
+    {
+      "name": "hygiene_maintenance",
+      "missing_commands": [],
+      "command_count": 13
+    },
+    {
+      "name": "prompt_instruction_dev",
+      "missing_commands": [],
+      "command_count": 22
+    }
+  ],
+  "errors": [],
+  "warnings": [],
+  "summary": {
+    "cards": 26,
+    "tasks": 60,
+    "groups": 11,
+    "available_commands": 189
+  },
+  "registry": {
+    "schema": "registry_validate.v1",
+    "ok": true,
+    "issues": [],
+    "warnings": [],
+    "checked_commands": 196,
+    "coverage": {
+      "total_nodes": 198,
+      "container_commands": 2,
+      "total_leaf_commands": 196,
+      "registered_leaf_commands": 196,
+      "unregistered_leaf_commands": 0,
+      "coverage_percent": 100.0,
+      "registry_orphaned_commands": 0,
+      "high_risk_unregistered_count": 0
+    }
+  },
+  "kernel": {
+    "size_bytes": 47724,
+    "size_limit": 49152,
+    "size_warn_limit": 48128,
+    "size_ok": true,
+    "size_warn": false,
+    "links_checked": 15,
+    "links_missing": [],
+    "links_ok": true
+  },
+  "py_size": {
+    "warn_limit": 286720,
+    "fail_limit": 327680,
+    "files_scanned": 73,
+    "warn": [],
+    "fail": [],
+    "waived": [
+      "scripts/tl_selftest.py"
+    ],
+    "size_ok": true,
+    "basis": "trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)"
+  },
+  "strict": true
+}
+
+{"name": "linux-workflow-audit", "command": "python3.12 -B scripts/tl.py workflow-audit --strict --json", "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate", "started_utc": "2026-10-10T07:01:16.656802+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.12.3", "rc": 0, "duration_seconds": 0.967, "ended_utc": "2026-10-10T07:01:17.641637+00:00"}

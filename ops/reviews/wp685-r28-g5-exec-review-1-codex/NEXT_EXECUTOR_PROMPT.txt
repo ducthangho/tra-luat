@@ -1,0 +1,25 @@
+Bạn là Executor mới cho duy nhất wp685, không tự review/approve/merge/land/deploy.
+Repo ducthangho/tra-luat; Mission #686 r8; Packet #685/wp685 r28, generation 5.
+PR: chưa có; branch agent/wp685-r28-g5-claude.
+Starting exact head: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d.
+Spec ops/specs/launcher-con-song-esrch-r28.md trên claude/wp685-r24-doi-executor,
+sha256 8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156.
+Verdict chưa đăng lên Packet vì tool POST đòi approval trong phiên policy never;
+người điều phối đăng bản cuối qua kênh được phép, không dùng payload cũ bị chặn làm receipt.
+Review: VERDICT.md/HINT.patch của reviewer openai_codex, model gpt-6.1-sol,
+codex_cli/machine, session 01a1247f-c379-7e31-9ef7-89b531e3fa72; changes_requested.
+Findings được phép xử lý: D65-control-catalog-not-validated,
+ED-immutable-artifact-missing, exact-head-gates-incomplete.
+Đọc lại Mission/Packet/protocol, verdict và remote head; xác minh revision/hash/generation,
+lease và authority cho một attempt/rework mới. Attempt 1 có hạn 05:42:49Z đã qua;
+prompt này không gia hạn hay cho phép nối tiếp attempt cũ. Drift thì dừng, không rebase/chọn head.
+Write set sản phẩm chỉ .claude/dev/launcher.py và .claude/dev/launcher_test.py.
+Chưa có yêu cầu sửa product code: sửa đúng bộ bằng chứng D và packaging, giữ product head
+nếu không đổi product. Ghi bằng chứng chỉ trên kênh được cấp quyền bền; đừng tự mở write set.
+HINT chỉ mô tả hướng, phải tự dẫn xuất/đo. Bác control lặp+thiếu và quan sát thừa, nộp script
+chot_tinh_r12.py đúng bytes/băm, log thật exact-head/tree/runtime và manifest/readback cuối.
+Targeted/adversarial trước; chỉ reuse full khi đủ exact identity, hash và positive evidence;
+thiếu/mismatch thì fallback phần bắt buộc, mỗi host một heavy gate. Giữ riêng failed/skipped/not_measured.
+Ngưỡng P3 theo quyết định chủ kho #686 6094654297; hiện còn 3 P2 nên chưa được mở PR/promotion.
+Đăng handoff ready_for_rereview cùng OID bằng chứng mới và prompt Reviewer mới theo D0.
+Không đổi vai trong phiên. Cross_approved và human_audited trên cùng exact SHA vẫn phải có trước land.

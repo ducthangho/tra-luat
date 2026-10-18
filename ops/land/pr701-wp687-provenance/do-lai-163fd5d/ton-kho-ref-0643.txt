@@ -1,0 +1,12 @@
+# Ton kho ref luc quet han g3 (kho quet scratch bk687-qd/khoquet2: git init + alternates -> clone day du bk677/khoday; remote https://github.com/ducthangho/tra-luat)
+# 2026-10-01T06:43:11Z git ls-remote --heads origin -> 461 nhanh; 06:43:12Z git fetch origin '+refs/heads/*:refs/remotes/origin/*' rc 0; for-each-ref refs/remotes/origin -> 461
+ten co tren may chu, thieu cuc bo: 0
+ten thua cuc bo: 0
+cap (ten, SHA) lech: 0
+# nhanh lien quan (ls-remote):
+claude/bookkeeping-677-pr689 5d524855cae4084e9c22ed53df178cf9058ba37d
+claude/cap-lease-687-g3 5955819de16ece428c424a1fad2216491fb4580e
+claude/lease-publish-windows-do 9d7a523e80e91ef6aca2c7935f3ee1813fc369f9
+master 163fd5d448d8d3e65766ee238f33be0f47ae72c4
+ops/do-lease-publish-windows-150 4bc94325e647ee5e32373f3af30b8f83b98a90fa
+claude/bookkeeping-687-pr701: 0 dong (nhanh ghi so chi o cuc bo luc do)

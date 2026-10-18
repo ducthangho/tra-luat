@@ -1,0 +1,3 @@
+COMMAND: ['ruff', 'check', '--no-cache', '--select', 'F', '/home/user/rv773/ops/land_evidence_nguon.py', '/home/user/rv773/ops/land_evidence_nguon_test.py']
+RC: 0
+All checks passed!

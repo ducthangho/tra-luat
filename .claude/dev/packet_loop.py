@@ -12,12 +12,13 @@ Nó giữ state cục bộ và phát VĂN BẢN comment; phiên Claude mới là
 Mã thoát
     0  ok
     2  sai đối số — slug sai dạng, thiếu finding-id, lý do void ngoài allowlist
-    3  chạm trần — hết attempt, hoặc một finding-id lặp tới same-failure limit
+    3  chạm trần — hết attempt, same-failure, hoặc trần vòng review/lời gọi codex (ADR-0037)
     4  vi phạm cross-provider
     5  dấu vết comment không hợp lệ — chưa đăng ký, sai transition, hoặc đã dùng
     6  doctrine-scan bắt được cụm từ bị cấm trong adapter
     7  guard chặn cứng một hành vi trong bảng
     8  trạng thái không hợp lệ — transition sai, lượt đang mở, init đè state
+   12  `kiem-gate`: gate bắt buộc không XANH trên head (gồm cả KHÔNG ĐO ĐƯỢC)
 
 Ba cơ chế dưới đây là LÕI của revision 2. Chúng thay ba cơ chế mà ba lượt review
 liên tiếp chứng minh là sai từ thiết kế — chi tiết ở phần chú thích từng chỗ.
@@ -48,6 +49,14 @@ from launcher import ky_ban_ghi_luot
 # khi người gọi không khai; envelope của mission mới là nguồn.
 MAC_DINH_TRAN_ATTEMPT = 3
 MAC_DINH_TRAN_SAME_FAILURE = 2
+# #775 Review Rescue (ADR-0037): trần vòng (ADR-0048) + lời gọi codex (§12); trục → (khoá dùng, khoá trần).
+MAC_DINH_TRAN_VONG_REVIEW = 10
+MAC_DINH_TRAN_CODEX = 2
+TRUC_TRAN = {"vong_review": ("review_rounds_used", "review_rounds_limit"),
+             "codex_review_calls": ("codex_review_calls_used", "codex_review_calls_limit")}
+CAN_CU_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+\Z")
+RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+CANH_BAO_V1 = "CẢNH BÁO: bộ đếm SUY RA từ state v1, có thể THẤP hơn thật"
 
 # --- Mã thoát ----------------------------------------------------------------
 RC_OK = 0
@@ -61,8 +70,58 @@ RC_STATE = 8
 RC_ADR = 9
 RC_MOI_TRUONG = 10
 RC_BIEN_NHAN = 11
+RC_GATE = 12
 
-PROVIDERS = ("claude", "codex")
+PROVIDER_FAMILIES = {"claude": "claude", "codex": "openai", "google_antigravity": None}
+PROVIDERS = tuple(PROVIDER_FAMILIES)
+MODEL_FAMILIES = ("claude", "openai", "gemini")
+RUNTIME_CAPABILITIES = {
+    "claude": {"claude_code": ("machine/local",)},
+    # machine/local là cách khai legacy của Codex CLI/Desktop; service chỉ nhận machine.
+    "codex": {"codex_cli": ("machine", "machine/local"),
+              "codex_desktop": ("machine", "machine/local"),
+              "codex_service": ("machine",)},
+    "google_antigravity": {"antigravity": ("machine/local",)},
+}
+
+
+def _identity(provider, model_family=None, surface=None, transport=None):
+    if provider not in PROVIDERS:
+        _die(RC_ARG, f"provider phải thuộc {PROVIDERS}")
+    family = model_family.strip() if isinstance(model_family, str) else model_family
+    surface = surface.strip() if isinstance(surface, str) else surface
+    transport = transport.strip() if isinstance(transport, str) else transport
+    if surface == "" or transport == "":
+        _die(RC_ARG, "execution_surface/transport đã khai không được rỗng")
+    if provider == "google_antigravity" and not all((family, surface, transport)):
+        _die(RC_ARG, "google_antigravity cần model_family, execution_surface và transport")
+    family = family or PROVIDER_FAMILIES[provider]
+    if family not in MODEL_FAMILIES:
+        _die(RC_ARG, f"model_family phải thuộc {MODEL_FAMILIES}")
+    if provider != "google_antigravity" and family != PROVIDER_FAMILIES[provider]:
+        _die(RC_ARG, f"{provider} không thể khai model_family={family!r}")
+    capabilities = RUNTIME_CAPABILITIES[provider]
+    if surface is not None and surface not in capabilities:
+        _die(RC_ARG, f"{provider} không hỗ trợ execution_surface={surface!r}")
+    allowed_transports = (capabilities[surface] if surface is not None else
+                          {t for options in capabilities.values() for t in options})
+    if transport is not None and transport not in allowed_transports:
+        _die(RC_ARG, f"{provider} không hỗ trợ transport={transport!r} trên {surface!r}")
+    return {"provider": provider, "model_family": family,
+            "execution_surface": surface,
+            "transport": transport}
+
+
+def _check_runtime_identity(a, st, role):
+    expected = st.get(f"{role}_identity")
+    if expected is None:
+        if st[role] == "google_antigravity":
+            _die(RC_STATE, f"{role} thiếu identity trong state")
+        return
+    actual = _identity(a.provider, a.model_family, a.execution_surface, a.transport)
+    if any(expected.get(field) is not None and actual[field] != expected[field]
+           for field in ("provider", "model_family", "execution_surface", "transport")):
+        _die(RC_PROVIDER, f"{role} runtime identity khác state: {actual!r} != {expected!r}")
 
 # CHỐT THẬT của `--granted-by` — danh sách CHO PHÉP, không phải danh sách cấm.
 #
@@ -161,7 +220,7 @@ SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 COMMENT_ID_RE = re.compile(r"^(?:[0-9]{6,}|[A-Za-z]{2}_[A-Za-z0-9_-]{10,})$")
 
 # Bằng chứng review gắn EXACT SHA — git oid đầy đủ, không nhận dạng rút gọn.
-SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")
 
 # --- (c) danh sách cụm từ doctrine BỊ CẤM trong adapter ------------------------
 # Đây là "đáy đo" mà revision 1 không có. Ba lượt review đều kết luận "adapter
@@ -574,7 +633,52 @@ def _load(state_dir: Path, packet: int) -> dict:
     p = _state_path(state_dir, packet)
     if not p.exists():
         _die(RC_STATE, f"chưa có state cho packet {packet} — chạy `init` trước ({p})")
-    return json.loads(p.read_text(encoding="utf-8"))
+    try:  # #775 bộ đọc NGHIÊM: lệch hình dạng hay bất biến sổ/bộ đếm ⇒ RC_STATE, không traceback, không đoán
+        st = json.loads(p.read_text(encoding="utf-8"))
+        for role in ("executor", "reviewer"):
+            identity = st.get(f"{role}_identity")
+            if identity is not None and (type(identity) is not dict or role == "reviewer" and st["reviewer"] == "codex" and identity.get("model_family", PROVIDER_FAMILIES["codex"]) != "openai"):
+                raise ValueError(f"{role}_identity")
+        can_duoi = _la_codex(st) * sum(r.get("provider") == st["reviewer"] for r in st["reviews"])
+        if type(st["schema_version"]) is int and st["schema_version"] == 1 and not st.keys() & {"review_rounds_used", "review_rounds_limit", "codex_review_calls_used", "codex_review_calls_limit", "codex_calls", "nang_tran", "dem_tu_suy"}:  # M6: SUY bộ đếm = cận DƯỚI ở trên — suy 0 là fail-open
+            st.update(schema_version=2, review_rounds_used=len(st["reviews"]), codex_review_calls_used=can_duoi,
+                      codex_calls=[], nang_tran=[], review_rounds_limit=MAC_DINH_TRAN_VONG_REVIEW,
+                      codex_review_calls_limit=MAC_DINH_TRAN_CODEX, dem_tu_suy=True, attempt_open=st.get("attempt_open", False), reviewing_head_sha=st.get("reviewing_head_sha"))
+        goi, posts, anchor = st["codex_calls"], st["posts"], st.get("attempt_anchor")
+        pending = next((h.get("event") != "record_rescue" or h.get("mo_lai") is not True for h in reversed(st["history"]) if h.get("event") in ("blocked_rescue_required", "record_rescue")), False)
+        vi_pham = [ten for ten, dung in (  # mỗi bất biến MỘT phần tử ⇒ mỗi cái một đột biến riêng
+            ("schema", type(st["schema_version"]) is int and st["schema_version"] == 2 and type(st["packet"]) is int and st["packet"] == packet and st["state"] in CHUYEN_HOP_LE and type(st["mission"]) is int and st["executor"] in PROVIDERS and (st["reviewing_head_sha"] is None or SHA_RE.match(st["reviewing_head_sha"]))),
+            ("bo-dem", all(type(st[k]) is int for k in ("attempts_used", "attempts_limit", "same_failure_limit")) and st["attempts_used"] >= 0 and all(type(st[u]) is int is type(st[t]) and st[u] >= 0 < st[t] for u, t in TRUC_TRAN.values())),
+            ("so", all(type(st[k]) is list for k in ("codex_calls", "nang_tran", "reviews", "history"))
+                   and all(r.get("provider") == st["reviewer"] and type(r.get("attempt")) is int for r in st["reviews"])
+                   and all(type(h) is dict for h in st["history"]) and type(st.get("dem_tu_suy", False)) is bool and type(st["attempt_open"]) is bool
+                   and type(st.get("finding_counts")) is dict and all(type(n) is int and n >= 0 for n in st["finding_counts"].values())),
+            ("posts", type(posts) is dict and all(type(r) is dict and type(r["for"]) is str and (r["consumed_by"] is None or type(r["consumed_by"]) is str) for r in posts.values())),
+            ("anchor", anchor is None or type(anchor) is dict and type(anchor["attempt"]) is int and type(anchor["consumed"]) is bool and re.fullmatch(r"[0-9a-f]{32}", anchor["nonce"]) and re.fullmatch(r"[0-9a-f]{64}", st["hmac_key"])),
+            ("findings", st["finding_counts"] == {fid: sum(fid in r.get("finding_ids", []) for r in st["reviews"]) for r in st["reviews"] for fid in r.get("finding_ids", [])}),
+            ("loi-goi", all(set(g) == {"run_id", "head", "da_dung"} and RUN_ID_RE.match(g["run_id"])
+                            and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
+            ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
+            ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
+            ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
+                h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
+    except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
+        vi_pham = [f"{type(e).__name__}: {e}"]
+    if vi_pham:
+        _die(RC_STATE, f"state hỏng ({', '.join(vi_pham)}) — không đoán: {p}")
+    return st
+
+
+def _la_codex(st: dict) -> bool:  # #775: tên provider VÀ họ model; state cũ thiếu identity ⇒ họ mặc định của codex
+    return st["reviewer"] == "codex" and (st.get("reviewer_identity") or {}).get("model_family", "openai") == "openai"
+
+
+def _vao_rescue(state_dir: Path, st: dict, truc: str, ngu_canh: str) -> None:
+    u, t = TRUC_TRAN[truc]
+    st.update(state="blocked", ly_do="rescue_required", truc=truc)
+    st["history"].append({"event": "blocked_rescue_required", "truc": truc, "used": st[u], "limit": st[t]})
+    _save(state_dir, st); _die(RC_TRAN, f"{ngu_canh}: {truc} {st[u]}/{st[t]} — Review Rescue Checkpoint: dừng, hỏi chủ kho"
+                  + (f"\n{CANH_BAO_V1}" if st.get("dem_tu_suy") else ""))
 
 
 def _save(state_dir: Path, st: dict) -> None:
@@ -640,10 +744,14 @@ def _tieu_thu_comment_id(st: dict, comment_id: str | None, cho: str) -> dict:
 
 
 def cmd_init(a, state_dir: Path) -> int:
-    if a.executor not in PROVIDERS or a.reviewer not in PROVIDERS:
-        _die(RC_ARG, f"provider phải thuộc {PROVIDERS}")
+    if min(a.review_rounds_limit, a.codex_review_calls_limit) <= 0:  # #775 M1
+        _die(RC_ARG, "--review-rounds-limit/--codex-review-calls-limit phải là số nguyên DƯƠNG")
+    executor_identity = _identity(a.executor, a.executor_model_family,
+                                  a.executor_execution_surface, a.executor_transport)
+    reviewer_identity = _identity(a.reviewer, a.reviewer_model_family,
+                                  a.reviewer_execution_surface, a.reviewer_transport)
     # Cross-provider: chặn NGAY từ init, không đợi tới lúc ghi review.
-    if a.executor == a.reviewer:
+    if a.executor == a.reviewer or executor_identity["model_family"] == reviewer_identity["model_family"]:
         _die(
             RC_PROVIDER,
             f"executor và reviewer cùng là {a.executor!r} — mặc định phải khác nền "
@@ -663,11 +771,14 @@ def cmd_init(a, state_dir: Path) -> int:
             f"do bên điều phối cấp, với --state-dir mới.",
         )
     st = {
-        "schema_version": 1,
+        "schema_version": 2, "review_rounds_used": 0, "codex_review_calls_used": 0, "codex_calls": [], "nang_tran": [],
+        "review_rounds_limit": a.review_rounds_limit, "codex_review_calls_limit": a.codex_review_calls_limit,
         "packet": a.packet,
         "mission": a.mission,
         "executor": a.executor,
         "reviewer": a.reviewer,
+        "executor_identity": executor_identity,
+        "reviewer_identity": reviewer_identity,
         # `awaiting_lease`, KHÔNG phải `leased`. Bản trước ghi thẳng `leased` ở đây,
         # nghĩa là bất kỳ ai gõ được `init` đều tự cấp cho mình một lease hợp lệ rồi
         # `begin-attempt` sang `running` — đường vòng qua đúng doctrine "không tự cấp
@@ -875,6 +986,7 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
             RC_PROVIDER,
             f"provider {a.provider!r} không phải executor của packet này ({st['executor']!r})",
         )
+    _check_runtime_identity(a, st, "executor")
     # Một lượt ĐANG MỞ thì không mở thêm được. Thiếu chốt này, gõ `begin-attempt`
     # bốn lần liên tiếp sẽ đốt sạch trần dù chưa lượt nào chạy xong — trần bị
     # tiêu bởi thao tác lặp, không phải bởi công việc thật.
@@ -1004,6 +1116,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             RC_PROVIDER,
             f"reviewer {a.provider!r} sai nền — packet này đòi {st['reviewer']!r}",
         )
+    _check_runtime_identity(a, st, "reviewer")
 
     # LỚP THỨ HAI của `void-reviewing-accepts-attempt-zero`, độc lập với chốt trong
     # `cmd_void_attempt`. Một bản duyệt phải nói về một LƯỢT CÓ THẬT: có lượt đang
@@ -1037,6 +1150,18 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"phải vào lại 'reviewing' với head mới.",
         )
 
+    if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
+        _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
+    goi = None
+    if _la_codex(st):
+        goi = next((g for g in st["codex_calls"] if g["run_id"] == a.codex_call), None)
+        if goi is None:
+            _die(RC_TRACE, f"--codex-call {a.codex_call!r} không trỏ lời gọi nào đã `record-codex-call`")
+        if goi["head"] != a.reviewed_sha:
+            _die(RC_TRACE, f"lời gọi {a.codex_call!r} chạy trên head {goi['head']}, không phải review này")
+        if goi["da_dung"]:
+            _die(RC_TRACE, f"lời gọi {a.codex_call!r} đã neo một review — mỗi lời gọi MỘT lần")
+
     ids = list(a.finding_id or [])
     if a.verdict == "changes_requested" and not ids:
         _die(RC_ARG, "verdict changes_requested phải có ít nhất một --finding-id SLUG")
@@ -1054,6 +1179,9 @@ def cmd_record_review(a, state_dir: Path) -> int:
     ids_duy_nhat = sorted(set(ids))
 
     st["attempt_open"] = False
+    st["review_rounds_used"] += 1
+    if goi is not None:
+        goi["da_dung"] = True
     st["reviews"].append(
         {
             "attempt": st["attempts_used"],
@@ -1084,6 +1212,11 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"— packet về blocked. Lặp lại nghĩa là bản vá không trúng gốc; "
             f"ghi failure evidence + handoff rồi dừng.",
         )
+
+    if a.verdict != "approve":  # approve KHÔNG BAO GIỜ kích rescue
+        for truc, (u, t) in reversed(TRUC_TRAN.items()):  # codex chạm trần TRƯỚC (lúc record-codex-call) ⇒ xét trước (ADR-0048)
+            if st[u] >= st[t]:
+                _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
 
     st["state"] = {"approve": "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
     if a.verdict == "approve":
@@ -1141,6 +1274,58 @@ def cmd_transition(a, state_dir: Path) -> int:
     )
     _save(state_dir, st)
     print(f"đã chuyển {truoc} → {a.to}, neo vào comment {a.comment_id}")
+    return RC_OK
+
+
+def cmd_record_codex_call(a, state_dir: Path) -> int:
+    st = _load(state_dir, a.packet)
+    if not _la_codex(st):  # connector P2: reviewer khác codex không tiêu ngân sách codex, không kích rescue giả
+        _die(RC_PROVIDER, f"reviewer {st['reviewer']!r} không phải codex — không có lời gọi codex để ghi")
+    if st["state"] != "reviewing":
+        _die(RC_STATE, f"chỉ ghi lời gọi codex khi state 'reviewing' (đang {st['state']!r})")
+    if a.head != st["reviewing_head_sha"]:
+        _die(RC_TRACE, f"--head {a.head!r} KHÔNG khớp head đưa ra review ({st['reviewing_head_sha']})")
+    if not RUN_ID_RE.match(a.run_id) or any(g["run_id"] == a.run_id for g in st["codex_calls"]):
+        _die(RC_ARG, f"--run-id {a.run_id!r} sai dạng hoặc đã ghi")
+    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:
+        _vao_rescue(state_dir, st, "codex_review_calls", "lời gọi codex bị CHẶN TRƯỚC")
+    st["codex_review_calls_used"] += 1
+    st["codex_calls"].append({"run_id": a.run_id, "head": a.head, "da_dung": False})
+    _save(state_dir, st)
+    print(f"đã ghi lời gọi codex {a.run_id} — {st['codex_review_calls_used']}/{st['codex_review_calls_limit']}")
+    return RC_OK
+
+
+def cmd_nang_tran(a, state_dir: Path) -> int:
+    """#775 M4. LỜI KHAI, KHÔNG PHẢI BẰNG CHỨNG: không đọc GitHub, chỉ kiểm HÌNH DẠNG `--can-cu` và cái TÊN."""
+    st = _load(state_dir, a.packet)
+    if (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:
+        _die(RC_GUARD, f"--ai-nang {a.ai_nang!r} ngoài danh sách CHO PHÉP {NGUOI_CO_THAM_QUYEN}")
+    u, t = TRUC_TRAN[a.truc]
+    if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):
+        _die(RC_ARG, f"--tran-moi phải > trần {st[t]} và --can-cu phải là URL issuecomment GitHub")
+    st["nang_tran"].append(dict(truc=a.truc, tran_cu=st[t], tran_moi=a.tran_moi, ai_nang=a.ai_nang.strip(), can_cu=a.can_cu))
+    st[t] = a.tran_moi; _save(state_dir, st)
+    print(f"đã nâng trần {a.truc} lên {a.tran_moi} (đã dùng {st[u]}) — LỜI KHAI, không phải bằng chứng")
+    return RC_OK
+
+
+def cmd_record_rescue(a, state_dir: Path) -> int:
+    """#775 M5: cửa DUY NHẤT ra khỏi blocked-vì-rescue (CHUYEN_HOP_LE không đổi); chỉ nang_tran ĐÃ nâng mở lại."""
+    st = _load(state_dir, a.packet)
+    if st["state"] != "blocked" or st.get("ly_do") != "rescue_required":
+        _die(RC_STATE, f"record-rescue chỉ cho blocked vì rescue_required (đang {st['state']!r})")
+    if not CAN_CU_RE.match(a.can_cu):
+        _die(RC_ARG, f"--can-cu {a.can_cu!r} phải là URL issuecomment GitHub")
+    u, t = TRUC_TRAN.get(st.get("truc"), ("", ""))  # mở lại chỉ khi trần > đã dùng VÀ có bản ghi M4 ĐỦ HÌNH DẠNG (người nâng, căn cứ, trần cũ < mới) khớp trần hiện tại
+    mo = (nang := a.quyet_dinh == "nang_tran") and st[t] > st[u] and any(type(n) is dict and n.get("truc") == st["truc"] and n.get("tran_moi") == st[t] and type(n.get("tran_cu")) is int and n["tran_cu"] < st[t] and n.get("ai_nang") in NGUOI_CO_THAM_QUYEN and bool(CAN_CU_RE.match(str(n.get("can_cu")))) for n in st["nang_tran"])
+    st["history"].append(dict(event="record_rescue", quyet_dinh=a.quyet_dinh, truc=st.get("truc"), can_cu=a.can_cu, mo_lai=mo))
+    if mo:
+        st["state"] = "running"; del st["ly_do"], st["truc"]
+    _save(state_dir, st)
+    if nang and not mo:
+        _die(RC_STATE, f"trục {st['truc']} chưa có bản ghi nâng trần khớp trần hiện tại và lớn hơn số đã dùng — chạy `nang-tran` trước")
+    print(f"đã ghi rescue {a.quyet_dinh} — state {st['state']}")
     return RC_OK
 
 
@@ -2050,9 +2235,150 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# --- #770 `kiem-gate`: gate trên head cuối phải XANH THẬT ----------------------------
+#
+# VÌ SAO CÓ: trong vòng vá, lượt `gate` tự chạy bị HUỶ theo chỉ thị, và trên giao diện lượt
+# huỷ với lượt xanh cùng hiện là "completed". Hỏi "có check nào completed không" là hỏi
+# chỗ tiện tay. Lệnh này đọc JSON check-runs do NGƯỜI GỌI lấy (không gọi mạng) và chỉ
+# nhận đúng một kết luận: DANH SÁCH CHO PHÉP `completed` + `success` + đúng head. Danh
+# sách cấm (`cancelled`, `failure`…) thua từ trong thiết kế — `stale`, `neutral`, `null`…
+# đều lọt. Nó là cổng ĐỌC BẰNG CHỨNG, không xác thực nguồn của tệp.
+# #788 (spec `ops/specs/wp788.md`): run cùng TÊN có thể đến từ workflow khác — neo `app` không phân
+# biệt được (đo `bb8c0c4`: cả 30 run cùng `app.id`), neo `check_suite.id` thì được. Và
+# `total_count` vắng/0/âm từng làm phép kiểm thiếu trang im lặng bỏ qua (P1 connector PR #777).
+_TRUONG_CHECK_RUN = (("id", (int,)), ("name", (str,)), ("head_sha", (str,)),
+                     ("status", (str,)), ("conclusion", (str, type(None))))
+_VANG = object()
+
+
+def _cam_khoa_trung(cap: list) -> dict:
+    """Khoá trùng ở BẤT KỲ tầng nào: decoder mặc định giữ vế cuối, tức tự chọn một vế
+    của bằng chứng mâu thuẫn (`conclusion` cancelled rồi success ⇒ xanh). Cross-review #777 F01."""
+    d: dict = {}
+    for k, v in cap:
+        if k in d:
+            raise ValueError(f"khoá trùng {k!r} — bằng chứng mâu thuẫn")
+        d[k] = v
+    return d
+
+
+def _cam_hang_ngoai_json(ten: str):
+    raise ValueError(f"hằng {ten} không thuộc JSON chuẩn")
+
+
+def _doc_check_runs(duong: str) -> list[dict]:
+    """Đọc tệp check-runs; mọi chỗ không chắc là `KHÔNG ĐO ĐƯỢC` + `RC_GATE`, không đoán."""
+    def hong(ly_do: str) -> None:
+        _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {duong}: {ly_do}")
+
+    try:
+        d = json.loads(Path(duong).read_text(encoding="utf-8"),
+                       object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
+        hong(f"không đọc được như JSON ({type(ex).__name__}: {ex})")
+    trang = d if isinstance(d, list) else [d]
+    if not trang:
+        hong("list trang RỖNG — không có bằng chứng nào")
+    runs: list[dict] = []
+    khai: list[int] = []
+    for i, tr in enumerate(trang):
+        if not isinstance(tr, dict) or not isinstance(tr.get("check_runs"), list):
+            hong(f"trang {i} không phải object có `check_runs` là list")
+        # #788 N5: vắng `total_count` là KHÔNG biết đã đủ trang — không phải "đủ".
+        tc = tr.get("total_count", _VANG)
+        if tc is _VANG:
+            hong(f"trang {i} thiếu `total_count` — không biết đã đủ trang chưa")
+        if type(tc) is not int or tc < 0:
+            hong(f"trang {i}: `total_count` không phải số nguyên ≥ 0: {tc!r}")
+        khai.append(tc)
+        for j, r in enumerate(tr["check_runs"]):
+            if not isinstance(r, dict):
+                hong(f"trang {i} check_runs[{j}] không phải object")
+            # `type(...) in kieu`, KHÔNG `isinstance`: `True` là `int` theo isinstance.
+            sai = [k for k, kieu in _TRUONG_CHECK_RUN if type(r.get(k, _VANG)) not in kieu]
+            if sai:
+                hong(f"trang {i} check_runs[{j}] thiếu/sai kiểu trường {sai}")
+            # #788 N2: MỌI phần tử, không chỉ run bắt buộc.
+            cs = r.get("check_suite", _VANG)
+            if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:
+                hong(f"trang {i} check_runs[{j}] `check_suite` không phải object có `id` số nguyên: {cs!r}")
+            runs.append(r)
+    # #788 F01 (H3): cùng `id` là cùng MỘT check-run; danh tính mâu thuẫn mà để bước lọc tên/suite
+    # bỏ bản lệch thì cấp xanh giả — kiểm ở ĐÂY, nơi còn mọi bản ghi của mọi trang, trước mọi lọc.
+    danh_tinh: dict = {}
+    for r in runs:
+        dt = (r["name"], r["check_suite"]["id"], r["head_sha"])
+        if danh_tinh.setdefault(r["id"], dt) != dt:
+            hong(f"id {r['id']} mang hai danh tính {danh_tinh[r['id']]!r} và {dt!r} — bằng chứng mâu thuẫn")
+    tong_khai = khai[0]
+    if any(t != tong_khai for t in khai):
+        hong(f"các trang khai `total_count` khác nhau {khai} — không phải cùng một lần lấy")
+    # Thiếu trang thì lượt MỚI NHẤT có thể nằm ở trang chưa lấy — xanh khi ấy là xanh giả.
+    # THỪA id cũng không phải một lần lấy trọn vẹn (ghép tệp?) — đòi BẰNG ĐÚNG, không `<`.
+    so_id = len({r["id"] for r in runs})
+    if so_id != tong_khai:
+        hong(f"`total_count` khai {tong_khai} mà có {so_id} id — "
+             + ("thiếu trang (`--paginate --slurp`)" if so_id < tong_khai else "THỪA id, không phải một lần lấy"))
+    return runs
+
+
+def cmd_kiem_gate(a, state_dir: Path) -> int:
+    if not SHA_RE.fullmatch(a.head):
+        _die(RC_ARG, f"--head phải là SHA 40 ký tự hex thường, được {a.head!r}")
+    # `[0-9]`, KHÔNG `\d`: `int()` nhận cả chữ số Unicode.
+    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):
+        _die(RC_ARG, f"--check-suite phải là số nguyên dương thập phân (không dấu, không số 0 đầu), "
+                     f"được {a.check_suite!r}")
+    try:
+        suite = int(a.check_suite)
+    except ValueError:   # F02: vượt trần chữ số của `int()`; `json` chịu đúng trần ấy nên không id
+        suite = a.check_suite   # nào khớp — giữ CHUỖI (≠ mọi int) ⇒ VẮNG, không traceback
+    ten_bb = list(dict.fromkeys(a.bat_buoc))   # trùng tên ⇒ tính MỘT lần, giữ thứ tự
+    # F04 (chủ kho chốt 18-10): tên chứa ký tự ngắt dòng (mọi thứ `splitlines()` cắt) bị TỪ CHỐI —
+    # dòng cảnh báo N4 in tên nguyên văn, và chỉ tên bắt buộc được in, nên nó luôn là MỘT dòng.
+    if any(not t.strip() or t.splitlines() != [t] for t in ten_bb):
+        _die(RC_ARG, "--bat-buoc không được rỗng hoặc chứa ký tự xuống dòng")
+    runs = _doc_check_runs(a.check_runs)
+    # N4: run cùng tên ở suite KHÁC là producer khác — bỏ qua, nhưng nói ra. Chỉ tên bắt buộc.
+    for ten_cb in ten_bb:
+        # id PHÂN BIỆT (F05: bản lặp là một run); tên NGUYÊN VĂN trong nháy đơn (F04: không `!r`).
+        khac = sorted({r["id"] for r in runs if r["name"] == ten_cb and r["check_suite"]["id"] != suite})
+        if khac:
+            print(f"CẢNH BÁO: '{ten_cb}' có {len(khac)} run ở suite khác "
+                  f"({', '.join(map(str, khac))}) — bỏ qua", file=sys.stderr)
+    do: list[str] = []
+    xanh: list[str] = []
+    for ten in ten_bb:
+        cung = [r for r in runs if r["name"] == ten]   # khớp TUYỆT ĐỐI
+        cung = [r for r in cung if r["check_suite"]["id"] == suite]   # #788 N3: chỉ suite đã neo
+        if not cung:
+            do.append(f"{ten!r}: VẮNG — không check-run nào mang đúng tên này trong suite {suite}")
+            continue
+        # Lượt bị huỷ rồi chạy lại: chỉ lượt `id` LỚN NHẤT có quyền nói. Trùng id thì
+        # MỌI bản ghi của id ấy đều phải xanh — không tự chọn một bản.
+        id_max = max(r["id"] for r in cung)
+        for r in (r for r in cung if r["id"] == id_max):
+            hop_le = (r["status"] == "completed" and r["conclusion"] == "success"
+                      and r["head_sha"] == a.head)
+            if not hop_le:
+                do.append(f"{ten!r} id={r['id']}: status={r['status']!r} "
+                          f"conclusion={r['conclusion']!r} head_sha={r['head_sha']!r}")
+                break
+        else:
+            xanh.append(f"{ten} id={id_max}")
+    if do:
+        for dong in do:
+            print(f"  ĐỎ  {dong}", file=sys.stderr)
+        _die(RC_GATE, f"gate KHÔNG xanh trên {a.head}: {len(do)}/{len(ten_bb)} tên bắt buộc đỏ")
+    print(f"gate XANH trên {a.head} (suite {suite}): " + " · ".join(xanh))
+    return RC_OK
+
+
 def cmd_status(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
+    if st.get("dem_tu_suy"):
+        print(CANH_BAO_V1, file=sys.stderr)
     return RC_OK
 
 
@@ -2072,7 +2398,7 @@ def build_parser() -> argparse.ArgumentParser:
             "Mã thoát: 0 ok · 2 sai đối số · 3 chạm trần · 4 sai provider · "
             "5 dấu vết comment không hợp lệ · 6 adapter chép doctrine · "
             "7 hành vi bị chặn cứng · 8 trạng thái không hợp lệ · "
-            "9 bảng ADR §20 lệch với docs/adr/."
+            "9 bảng ADR §20 lệch với docs/adr/ · 12 gate không xanh trên head."
         ),
     )
     p.add_argument("--state-dir", default=".claude/.packet_state", help="nơi giữ state cục bộ")
@@ -2083,8 +2409,14 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--mission", type=int, required=True)
     q.add_argument("--executor", required=True)
     q.add_argument("--reviewer", required=True)
+    for role in ("executor", "reviewer"):
+        q.add_argument(f"--{role}-model-family")
+        q.add_argument(f"--{role}-execution-surface")
+        q.add_argument(f"--{role}-transport")
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
     q.add_argument("--same-failure-limit", type=int, default=MAC_DINH_TRAN_SAME_FAILURE)
+    q.add_argument("--review-rounds-limit", type=int, default=MAC_DINH_TRAN_VONG_REVIEW)
+    q.add_argument("--codex-review-calls-limit", type=int, default=MAC_DINH_TRAN_CODEX)
     q.set_defaults(fn=cmd_init)
 
     q = sub.add_parser("record-lease",
@@ -2103,6 +2435,9 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("begin-attempt", help="mở một lượt executor")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--provider", required=True)
+    q.add_argument("--model-family")
+    q.add_argument("--execution-surface")
+    q.add_argument("--transport")
     q.add_argument("--bang-chung-moi-truong",
                    help=f"ảnh launcher doctor --json; thiếu thì đọc ${BIEN_BANG_CHUNG}")
     q.set_defaults(fn=cmd_begin_attempt)
@@ -2125,6 +2460,9 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("record-review", help="ghi một lượt review")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--provider", required=True)
+    q.add_argument("--model-family")
+    q.add_argument("--execution-surface")
+    q.add_argument("--transport")
     q.add_argument("--verdict", required=True, choices=("approve", "changes_requested", "blocked"))
     q.add_argument("--reviewed-sha", help="exact head đã đọc; phải khớp head đưa ra review")
     q.add_argument(
@@ -2137,7 +2475,28 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         help="mô tả tự do, CHỈ để đọc — không tham gia phép đếm.",
     )
+    q.add_argument("--codex-call", help="run_id của record-codex-call (bắt buộc khi reviewer codex)")
     q.set_defaults(fn=cmd_record_review)
+
+    q = sub.add_parser("record-codex-call", help="ghi lời gọi review codex; chặn TRƯỚC khi vượt trần")
+    q.add_argument("--packet", type=int, required=True)
+    for co in ("--head", "--run-id"):
+        q.add_argument(co, required=True)
+    q.set_defaults(fn=cmd_record_codex_call)
+
+    q = sub.add_parser("nang-tran", help="nâng trần một trục (LỜI KHAI, không phải bằng chứng)")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--truc", required=True, choices=tuple(TRUC_TRAN))
+    q.add_argument("--tran-moi", type=int, required=True)
+    for co in ("--ai-nang", "--can-cu"):
+        q.add_argument(co, required=True)
+    q.set_defaults(fn=cmd_nang_tran)
+
+    q = sub.add_parser("record-rescue", help="quyết định Review Rescue Checkpoint")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--quyet-dinh", required=True, choices=("nang_tran", "tach_stable_slice", "revision", "dung"))
+    q.add_argument("--can-cu", required=True)
+    q.set_defaults(fn=cmd_record_rescue)
 
     q = sub.add_parser("transition", help="chuyển state, đòi dấu vết comment bền")
     q.add_argument("--packet", type=int, required=True)
@@ -2188,6 +2547,21 @@ def build_parser() -> argparse.ArgumentParser:
                        help="bảng §20 của protocol phải phủ hết docs/adr/")
     q.add_argument("--root", default=".")
     q.set_defaults(fn=cmd_adr_song)
+
+    q = sub.add_parser("kiem-gate",
+                       help="gate bắt buộc phải XANH THẬT trên head, trong đúng check suite (đọc JSON check-runs)",
+                       epilog="Mã thoát: 0 mọi tên bắt buộc xanh · 2 sai đối số · "
+                              "12 gate không xanh trên head hoặc KHÔNG ĐO ĐƯỢC.")
+    q.add_argument("--head", required=True, help="SHA 40 ký tự của head cần kiểm")
+    q.add_argument("--check-runs", required=True, dest="check_runs",
+                   help="tệp JSON: object có `check_runs`, hoặc list trang (`--slurp`)")
+    q.add_argument("--bat-buoc", action="append", required=True, dest="bat_buoc",
+                   help="tên check-run bắt buộc, khớp TUYỆT ĐỐI; lặp lại được")
+    q.add_argument("--check-suite", required=True, dest="check_suite",
+                   help="id suite của CHÍNH lượt workflow cần kiểm: `GET actions/runs/<run_id>` → "
+                        "`check_suite_id`; chỉ run thuộc suite này được xét. Tệp check-runs lấy với "
+                        "`filter=all` (mọi lần chạy lại, không chỉ lần mới nhất)")
+    q.set_defaults(fn=cmd_kiem_gate)
 
     q = sub.add_parser("bien-nhan",
                        help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")

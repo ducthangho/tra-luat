@@ -1,0 +1,43 @@
+diff --git a/ops/lease_publish_test.py b/ops/lease_publish_test.py
+index d61dfdb..e40fcee 100644
+--- a/ops/lease_publish_test.py
++++ b/ops/lease_publish_test.py
+@@ -10744,6 +10744,8 @@ def t199_A9_guard_nen_cua_helper_qua_diem_do_o_ba_trang_thai():
+     Sentinel chỉ bắt thao tác SAU guard; thao tác đứng TRƯỚC guard (lượt 3 L3, NA11) đo bằng `ast`: guard rồi điểm dò
+     phải là HAI câu lệnh đầu tiên (chỉ bỏ docstring — KHÔNG tha `import`) và hàm không có decorator; lượt 4 (L2): đối
+     tượng THẬT được gọi phải là chính hàm biên dịch từ def ấy (mã byte), nên gán lại bằng wrapper — có `wraps` — đỏ.
++    GIỚI HẠN (lượt 5, đo): I/O trong chính hàm guard (`_ly_do_bo_qua_workflow`/`BoQuaNen` bị bọc), lúc import, hoặc
++    sửa helper SAU khi ca này chạy thì KHÔNG thấy.
+     """
+     from unittest import mock
+     mod, that = sys.modules[__name__], WORKFLOW_DANG
+@@ -10886,8 +10888,9 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+     ca không đọc (M3: `rc=2`, dãy gọi — Q9) phải xanh; VAI (PR, hết hạn) mà `t196`/`t197` truyền ghim bằng literal (R2-F3).
+     Lượt 4 (L1, đóng theo LỚP): helper giả trả THẺ MÙ, hàm quyết định thật nhận lại dict qua đồng nhất; consumer đọc,
+     đổi, thay, bỏ, gọi lặp kết quả helper — bất kể điều kiện — đều đỏ; mỗi kết quả khác rỗng của hàm quyết định phải có
+-    trong chốt. Lượt dict thật + VECTƠ QUAN SÁT THẬT của `L`/A3 phủ khâu quyết định → chốt. GIỚI HẠN (không khai rộng
+-    hơn): consumer dò GIÀN (`type()`, tên helper, môi trường) VÀ viết đè theo đặc trưng không vectơ nào có thì lọt.
++    trong chốt. Lượt dict thật + VECTƠ QUAN SÁT THẬT của `L`/A3 (mỗi họ có ô thật TRÙNG HỆT một vectơ, nên dò `type()`
++    rồi đọc cũng đỏ) phủ khâu quyết định → chốt. GIỚI HẠN (lượt 5, đo): consumer rẽ nhánh theo thứ NGOÀI (đầu vào,
++    kết quả) — tên/đồng nhất helper, thời gian chạy, khung gọi, môi trường — thì lọt.
+     """
+     sai, ep = [], "repos/o/r/issues/55/comments"
+     GOI_M4 = [("GET", ep), ("GET", "repos/o/r/issues/55"), ("GET", ep), ("POST", ep)]
+@@ -10922,6 +10925,7 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+     for i in range(len(tt)):
+         if not _lech_m4(kq(0, [tt[:i] + ("#" if tt[i] != "#" else "@") + tt[i + 1:] + " — x"])):
+             sai.append(f"M4 tiền tố lệch ở vị trí {i} vẫn qua")
++    import inspect
+     from unittest import mock
+     t195, t196 = t195_M2_tap_i_bien_cong_khai_khoa_ca_bo_quan_sat, t196_M3a_tap_ii_PR_co_dau_con_han_phai_DO_khong_bo_qua
+     t197, t198 = t197_M3b_tap_ii_Issue_co_dau_het_han_phai_DO_khong_bo_qua, t198_M4_doi_chung_duong_chuoi_hop_le_dang_dung_mot_POST
+@@ -10950,7 +10954,8 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+         "__reduce__ __reduce_ex__ __getstate__ __enter__ __exit__ __dir__ __sizeof__ __next__ __await__").split()}})
+ 
+     def _q(ten):
+-        def q(*a):
++        def q(*a, **kw):   # lượt 5: nhận cả đối số TÊN (`kq=`), như hàm thật — không đỏ oan bằng TypeError
++            a = tuple(inspect.signature(that[ten]).bind(*a, **kw).arguments.values())
+             ghi["nhan"].append(a[-1])
+             k, anh = next(((d, r) for t, d, r in ghi["phat"] if t is a[-1]), (a[-1], None))
+             if anh is not None and repr(k) != anh:

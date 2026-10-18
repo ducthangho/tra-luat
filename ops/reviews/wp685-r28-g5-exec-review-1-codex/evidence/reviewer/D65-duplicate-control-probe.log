@@ -1,0 +1,111 @@
+# UTC 2026-10-10T06:37:59Z
+$ uname -s
+Linux
+# rc=0
+$ uname -r
+6.18.44-fc-v114
+# rc=0
+$ uname -m
+x86_64
+# rc=0
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+# rc=0
+$ python3.11 -V
+Python 3.11.17
+# rc=0
+$ python3.12 -V
+Python 3.12.3
+# rc=0
+$ uname -a
+Linux vm 6.18.44-fc-v114 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+# rc=0
+{"name": "D65-duplicate-control-probe", "command": "python3.11 -B /home/user/wp685-r28-g5-review/goi/evidence/reviewer/D65-duplicate-control-probe.py /home/user/wp685-r28-g5-review/cay-kho/.claude/dev /home/user/wp685-r28-g5-review/goi/scratch/d-duplicate d", "cwd": "/home/user/wp685-r28-g5-review/cay-kho", "started_utc": "2026-10-10T06:37:59.705475+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.11.17"}
+D ban dung: XANH thieu=[] order_sai=False loi={}
+{"khoa": "noi_mac_dinh:B1", "doi": "noi", "thieu_ky_vong": [["B1", null]], "thieu_do": [["B1", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-eacces", "doi": "noi", "thieu_ky_vong": [["B2-eacces", null]], "thieu_do": [["B2-eacces", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-eio", "doi": "noi", "thieu_ky_vong": [["B2-eio", null]], "thieu_do": [["B2-eio", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-eperm-hoi", "doi": "noi", "thieu_ky_vong": [["B2-eperm-hoi", null]], "thieu_do": [["B2-eperm-hoi", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-doc-hong", "doi": "noi", "thieu_ky_vong": [["B2-doc-hong", "EACCES"], ["B2-doc-hong", "EIO"], ["B2-doc-hong", "ESRCH"], ["B2-doc-hong", "EPERM"]], "thieu_do": [["B2-doc-hong", "EACCES"], ["B2-doc-hong", "EIO"], ["B2-doc-hong", "ESRCH"], ["B2-doc-hong", "EPERM"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-tin-hieu", "doi": "noi", "thieu_ky_vong": [["B2-tin-hieu", "hoi"], ["B2-tin-hieu", "doc"], ["B2-tin-hieu", "kill"]], "thieu_do": [["B2-tin-hieu", "hoi"], ["B2-tin-hieu", "doc"], ["B2-tin-hieu", "kill"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-dem-lan", "doi": "noi", "thieu_ky_vong": [["B2-dem-lan", null]], "thieu_do": [["B2-dem-lan", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-exception", "doi": "noi", "thieu_ky_vong": [["B2-exception", "hoi"], ["B2-exception", "doc"], ["B2-exception", "kill"]], "thieu_do": [["B2-exception", "hoi"], ["B2-exception", "doc"], ["B2-exception", "kill"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-thoat-parse", "doi": "noi", "thieu_ky_vong": [["B2-thoat-parse", "hoi-index"], ["B2-thoat-parse", "hoi-value"], ["B2-thoat-parse", "hoi-decode"], ["B2-thoat-parse", "kill-index"], ["B2-thoat-parse", "kill-value"], ["B2-thoat-parse", "kill-decode"]], "thieu_do": [["B2-thoat-parse", "hoi-index"], ["B2-thoat-parse", "hoi-value"], ["B2-thoat-parse", "hoi-decode"], ["B2-thoat-parse", "kill-index"], ["B2-thoat-parse", "kill-value"], ["B2-thoat-parse", "kill-decode"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-parse", "doi": "noi", "thieu_ky_vong": [["B2-parse", "p1"], ["B2-parse", "p2"], ["B2-parse", "p3"], ["B2-parse", "p4"]], "thieu_do": [["B2-parse", "p1"], ["B2-parse", "p2"], ["B2-parse", "p3"], ["B2-parse", "p4"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-dem-doc", "doi": "noi", "thieu_ky_vong": [["B2-dem-doc", "1"], ["B2-dem-doc", "2"], ["B2-dem-doc", "3"], ["B2-dem-doc", "4"]], "thieu_do": [["B2-dem-doc", "1"], ["B2-dem-doc", "2"], ["B2-dem-doc", "3"], ["B2-dem-doc", "4"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-pid-du-phong", "doi": "noi", "thieu_ky_vong": [["B2-pid-du-phong", "song"], ["B2-pid-du-phong", "da-wait"], ["B2-pid-du-phong", "eperm"], ["B2-pid-du-phong", "eio"]], "thieu_do": [["B2-pid-du-phong", "song"], ["B2-pid-du-phong", "da-wait"], ["B2-pid-du-phong", "eperm"], ["B2-pid-du-phong", "eio"]], "dat": true}
+{"khoa": "noi_mac_dinh:B2-nhanh-cu", "doi": "noi", "thieu_ky_vong": [["B2-nhanh-cu", "song"], ["B2-nhanh-cu", "EACCES"], ["B2-nhanh-cu", "EIO"], ["B2-nhanh-cu", "ESRCH"], ["B2-nhanh-cu", "EPERM"], ["B2-nhanh-cu", "p1"], ["B2-nhanh-cu", "p3"], ["B2-nhanh-cu", "p4"], ["B2-nhanh-cu", "utf8-hong-that"], ["B2-nhanh-cu", "tin-hieu"], ["B2-nhanh-cu", "exception"], ["B2-nhanh-cu", "vang"], ["B2-nhanh-cu", "vang-da-wait"], ["B2-nhanh-cu", "vang-eperm"], ["B2-nhanh-cu", "vang-eio"], ["B2-nhanh-cu", "vang-tin-hieu"], ["B2-nhanh-cu", "vang-exception"], ["B2-nhanh-cu", "vang-index"], ["B2-nhanh-cu", "vang-value"], ["B2-nhanh-cu", "vang-decode"]], "thieu_do": [["B2-nhanh-cu", "song"], ["B2-nhanh-cu", "EACCES"], ["B2-nhanh-cu", "EIO"], ["B2-nhanh-cu", "ESRCH"], ["B2-nhanh-cu", "EPERM"], ["B2-nhanh-cu", "p1"], ["B2-nhanh-cu", "p3"], ["B2-nhanh-cu", "p4"], ["B2-nhanh-cu", "utf8-hong-that"], ["B2-nhanh-cu", "tin-hieu"], ["B2-nhanh-cu", "exception"], ["B2-nhanh-cu", "vang"], ["B2-nhanh-cu", "vang-da-wait"], ["B2-nhanh-cu", "vang-eperm"], ["B2-nhanh-cu", "vang-eio"], ["B2-nhanh-cu", "vang-tin-hieu"], ["B2-nhanh-cu", "vang-exception"], ["B2-nhanh-cu", "vang-index"], ["B2-nhanh-cu", "vang-value"], ["B2-nhanh-cu", "vang-decode"]], "dat": true}
+{"khoa": "noi_mac_dinh:B3-song", "doi": "noi", "thieu_ky_vong": [["B3-song", null]], "thieu_do": [["B3-song", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B3-da-wait", "doi": "noi", "thieu_ky_vong": [["B3-da-wait", null]], "thieu_do": [["B3-da-wait", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B3-zombie", "doi": "noi", "thieu_ky_vong": [["B3-zombie", null]], "thieu_do": [["B3-zombie", null]], "dat": true}
+{"khoa": "noi_mac_dinh:B3b-giet-cay", "doi": "noi", "thieu_ky_vong": [["B3b-giet-cay", null]], "thieu_do": [["B3b-giet-cay", null]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-doc-hong EACCES", "doi": "bo", "thieu_ky_vong": [["B2-doc-hong", "EACCES"]], "thieu_do": [["B2-doc-hong", "EACCES"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-doc-hong EIO", "doi": "bo", "thieu_ky_vong": [["B2-doc-hong", "EIO"]], "thieu_do": [["B2-doc-hong", "EIO"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-doc-hong ESRCH", "doi": "bo", "thieu_ky_vong": [["B2-doc-hong", "ESRCH"]], "thieu_do": [["B2-doc-hong", "ESRCH"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-doc-hong EPERM", "doi": "bo", "thieu_ky_vong": [["B2-doc-hong", "EPERM"]], "thieu_do": [["B2-doc-hong", "EPERM"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-tin-hieu hoi", "doi": "bo", "thieu_ky_vong": [["B2-tin-hieu", "hoi"]], "thieu_do": [["B2-tin-hieu", "hoi"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-tin-hieu doc", "doi": "bo", "thieu_ky_vong": [["B2-tin-hieu", "doc"]], "thieu_do": [["B2-tin-hieu", "doc"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-tin-hieu kill", "doi": "bo", "thieu_ky_vong": [["B2-tin-hieu", "kill"]], "thieu_do": [["B2-tin-hieu", "kill"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-exception hoi", "doi": "bo", "thieu_ky_vong": [["B2-exception", "hoi"]], "thieu_do": [["B2-exception", "hoi"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-exception doc", "doi": "bo", "thieu_ky_vong": [["B2-exception", "doc"]], "thieu_do": [["B2-exception", "doc"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-exception kill", "doi": "bo", "thieu_ky_vong": [["B2-exception", "kill"]], "thieu_do": [["B2-exception", "kill"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-thoat-parse hoi-index", "doi": "bo", "thieu_ky_vong": [["B2-thoat-parse", "hoi-index"]], "thieu_do": [["B2-thoat-parse", "hoi-index"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-thoat-parse hoi-value", "doi": "bo", "thieu_ky_vong": [["B2-thoat-parse", "hoi-value"]], "thieu_do": [["B2-thoat-parse", "hoi-value"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-thoat-parse hoi-decode", "doi": "bo", "thieu_ky_vong": [["B2-thoat-parse", "hoi-decode"]], "thieu_do": [["B2-thoat-parse", "hoi-decode"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-thoat-parse kill-index", "doi": "bo", "thieu_ky_vong": [["B2-thoat-parse", "kill-index"]], "thieu_do": [["B2-thoat-parse", "kill-index"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-thoat-parse kill-value", "doi": "bo", "thieu_ky_vong": [["B2-thoat-parse", "kill-value"]], "thieu_do": [["B2-thoat-parse", "kill-value"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-thoat-parse kill-decode", "doi": "bo", "thieu_ky_vong": [["B2-thoat-parse", "kill-decode"]], "thieu_do": [["B2-thoat-parse", "kill-decode"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-parse p1", "doi": "bo", "thieu_ky_vong": [["B2-parse", "p1"]], "thieu_do": [["B2-parse", "p1"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-parse p2", "doi": "bo", "thieu_ky_vong": [["B2-parse", "p2"]], "thieu_do": [["B2-parse", "p2"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-parse p3", "doi": "bo", "thieu_ky_vong": [["B2-parse", "p3"]], "thieu_do": [["B2-parse", "p3"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-parse p4", "doi": "bo", "thieu_ky_vong": [["B2-parse", "p4"]], "thieu_do": [["B2-parse", "p4"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-dem-doc 1", "doi": "bo", "thieu_ky_vong": [["B2-dem-doc", "1"]], "thieu_do": [["B2-dem-doc", "1"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-dem-doc 2", "doi": "bo", "thieu_ky_vong": [["B2-dem-doc", "2"]], "thieu_do": [["B2-dem-doc", "2"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-dem-doc 3", "doi": "bo", "thieu_ky_vong": [["B2-dem-doc", "3"]], "thieu_do": [["B2-dem-doc", "3"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-dem-doc 4", "doi": "bo", "thieu_ky_vong": [["B2-dem-doc", "4"]], "thieu_do": [["B2-dem-doc", "4"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-pid-du-phong song", "doi": "bo", "thieu_ky_vong": [["B2-pid-du-phong", "song"]], "thieu_do": [["B2-pid-du-phong", "song"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-pid-du-phong da-wait", "doi": "bo", "thieu_ky_vong": [["B2-pid-du-phong", "da-wait"]], "thieu_do": [["B2-pid-du-phong", "da-wait"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-pid-du-phong eperm", "doi": "bo", "thieu_ky_vong": [["B2-pid-du-phong", "eperm"]], "thieu_do": [["B2-pid-du-phong", "eperm"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-pid-du-phong eio", "doi": "bo", "thieu_ky_vong": [["B2-pid-du-phong", "eio"]], "thieu_do": [["B2-pid-du-phong", "eio"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu song", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "song"]], "thieu_do": [["B2-nhanh-cu", "song"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu EACCES", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "EACCES"]], "thieu_do": [["B2-nhanh-cu", "EACCES"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu EIO", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "EIO"]], "thieu_do": [["B2-nhanh-cu", "EIO"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu ESRCH", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "ESRCH"]], "thieu_do": [["B2-nhanh-cu", "ESRCH"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu EPERM", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "EPERM"]], "thieu_do": [["B2-nhanh-cu", "EPERM"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu p1", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "p1"]], "thieu_do": [["B2-nhanh-cu", "p1"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu p3", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "p3"]], "thieu_do": [["B2-nhanh-cu", "p3"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu p4", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "p4"]], "thieu_do": [["B2-nhanh-cu", "p4"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu utf8-hong-that", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "utf8-hong-that"]], "thieu_do": [["B2-nhanh-cu", "utf8-hong-that"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu tin-hieu", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "tin-hieu"]], "thieu_do": [["B2-nhanh-cu", "tin-hieu"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu exception", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "exception"]], "thieu_do": [["B2-nhanh-cu", "exception"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang"]], "thieu_do": [["B2-nhanh-cu", "vang"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-da-wait", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-da-wait"]], "thieu_do": [["B2-nhanh-cu", "vang-da-wait"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-eperm", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-eperm"]], "thieu_do": [["B2-nhanh-cu", "vang-eperm"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-eio", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-eio"]], "thieu_do": [["B2-nhanh-cu", "vang-eio"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-tin-hieu", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-tin-hieu"]], "thieu_do": [["B2-nhanh-cu", "vang-tin-hieu"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-exception", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-exception"]], "thieu_do": [["B2-nhanh-cu", "vang-exception"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-index", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-index"]], "thieu_do": [["B2-nhanh-cu", "vang-index"]], "dat": true}
+{"khoa": "bo_tieu_nhan:B2-nhanh-cu vang-value", "doi": "bo", "thieu_ky_vong": [["B2-nhanh-cu", "vang-value"]], "thieu_do": [["B2-nhanh-cu", "vang-value"]], "dat": true}
+{"khoa": "noi_mac_dinh:B1", "doi": "noi", "thieu_ky_vong": [["B1", null]], "thieu_do": [["B1", null]], "dat": true}
+DAO B1<->B2-eacces: missing=[] order=False DO dung
+DAO B2-thoat-parse<->B2-exception: missing=[] order=False DO dung
+DAO B2-pid-du-phong<->B3-song: missing=[] order=False DO dung
+DAO B2-dem-doc<->B2-pid-du-phong: missing=[] order=False DO dung
+DAO B2-eperm-hoi<->B2-doc-hong: missing=[] order=False DO dung
+DAO B2-pid-du-phong<->B2-nhanh-cu: missing=[] order=False DO dung
+TONG D: control 65/65 do dung; hong=0
+KET LUAN: DAT hong=0
+
+{"name": "D65-duplicate-control-probe", "command": "python3.11 -B /home/user/wp685-r28-g5-review/goi/evidence/reviewer/D65-duplicate-control-probe.py /home/user/wp685-r28-g5-review/cay-kho/.claude/dev /home/user/wp685-r28-g5-review/goi/scratch/d-duplicate d", "cwd": "/home/user/wp685-r28-g5-review/cay-kho", "started_utc": "2026-10-10T06:37:59.705475+00:00", "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d", "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec", "base": "ab457c651eb4428705f0492163080b661c858b72", "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39", "uname": ["Linux", "vm", "6.18.44-fc-v114", "#1 SMP PREEMPT_DYNAMIC @0", "x86_64", "x86_64"], "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n", "python": "Python 3.11.17", "rc": 0, "duration_seconds": 25.397, "ended_utc": "2026-10-10T06:38:25.127321+00:00"}

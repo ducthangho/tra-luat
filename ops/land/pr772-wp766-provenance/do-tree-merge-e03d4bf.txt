@@ -1,0 +1,7 @@
+# do tree merge PR #772 — 2026-10-16T17:35:51Z, kho tra-luat tai master 653fef3
+$ git rev-parse e03d4bf^{tree}
+861df62ee0c17abf423908c5f41ba59b2604fdb4
+$ git rev-parse 701f41c^{tree}
+861df62ee0c17abf423908c5f41ba59b2604fdb4
+$ git log -1 --format=%P e03d4bf
+e0273d31aba78b014aa89297f32ff86f9daf0277 701f41c686cef8456d43528ab9556a6b867cd7d6

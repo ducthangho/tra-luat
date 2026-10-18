@@ -1,0 +1,192 @@
+[
+ {
+  "id": 6221053890,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-16T17:29:23Z",
+  "updated_at": "2026-10-16T17:29:23Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "2a752cef1744ceed1582add1e6150b06219d36d0349d20e98acec75d69d8a889",
+  "body_dau": "## Cross-review codex lượt 1 — packet wp775 (bản chiếu)\n\nNguồn có thẩm quyền: `VERDICT.md` của lượt `launcher.py run` `a"
+ },
+ {
+  "id": 6221677410,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-16T18:03:57Z",
+  "updated_at": "2026-10-16T18:03:57Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "cf9c9635effe36bf05b168df976516e962ca56a5200eaed4f44100a69966ae43",
+  "body_dau": "## Cross-review codex lượt 2 (cuối) — packet wp775 (bản chiếu)\n\nNguồn có thẩm quyền: `VERDICT.md` của lượt `launcher.py "
+ },
+ {
+  "id": 6221748292,
+  "user": "chatgpt-codex-connector[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-16T18:07:38Z",
+  "updated_at": "2026-10-17T16:24:17Z",
+  "performed_via_github_app": "chatgpt-codex-connector",
+  "body_sha256": "d3be84ad5defc2e58ec66ba9ff1fb326a4d11302f90f44e00edc9c6bd29cea64",
+  "body_dau": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"f9d84d70fb46540bbecf"
+ },
+ {
+  "id": 6222565333,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-16T18:55:41Z",
+  "updated_at": "2026-10-16T18:55:41Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "0bd1b6a203cfbc8f07ae1159ecbaef3295e418700cc155927cb4a21592a040f9",
+  "body_dau": "## Cross-review codex lượt 3 — packet wp775 (bản chiếu)\n\nNguồn có thẩm quyền: `VERDICT.md` của lượt `launcher.py run` `9"
+ },
+ {
+  "id": 6228505006,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T02:28:23Z",
+  "updated_at": "2026-10-17T02:28:23Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "f64bc7a37ae280d2bfc841b3c943c248924e3a3684b473237f38ad49da11259e",
+  "body_dau": "## Cross-review codex lượt 4 — packet wp775 (bản chiếu)\n\nNguồn có thẩm quyền: `VERDICT.md` của lượt `launcher.py run` `2"
+ },
+ {
+  "id": 6228802590,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T03:01:25Z",
+  "updated_at": "2026-10-17T03:01:25Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "784a425cfcec52dced2e63af5e06b6d08d2b0fbb187f90060846d75e3130c15a",
+  "body_dau": "## Cross-review codex lượt 5 + 6 — packet wp775 (bản chiếu)\n\n- **Lượt 5** (`launcher.py run` `9e484c8a`, head `3234cc2`,"
+ },
+ {
+  "id": 6229111105,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T03:35:18Z",
+  "updated_at": "2026-10-17T03:35:18Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "a4e1ec8dd3e92177617b4135423377e1a83e563a16d894506f7c8579d6e1fbf3",
+  "body_dau": "## Cross-review codex lượt 7 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `f4135d8`, lời gọi **7/8**: bộ"
+ },
+ {
+  "id": 6229465517,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T04:09:21Z",
+  "updated_at": "2026-10-17T04:09:21Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "fd4c5f9adf3bee96566ecff845742cbbfc9e49813851755fbad0e57321cc066c",
+  "body_dau": "## Cross-review codex lượt 8 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` `230eb412` trên head `14bc438`, lời gọi "
+ },
+ {
+  "id": 6231678587,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T08:21:22Z",
+  "updated_at": "2026-10-17T08:21:22Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "22dc955c69779737105322ed87aadd3f4ff0c612abe9f4591e87ed48c8122eef",
+  "body_dau": "## Cross-review codex lượt 9 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `8700648`, lời gọi **9/10** (t"
+ },
+ {
+  "id": 6233553793,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T11:51:38Z",
+  "updated_at": "2026-10-17T11:51:38Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "6fc052a28d3971a4a7c56b18445e3bbc6fe5c9bab1efa6135491586e1a63bbac",
+  "body_dau": "## Cross-review codex lượt 10 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `3197a44`, lời gọi **10/11** "
+ },
+ {
+  "id": 6233625271,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T11:59:48Z",
+  "updated_at": "2026-10-17T11:59:48Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "ee6e7a54b00d177175db86afa2aff2aa87854d0d943493b0e3a1ad097062ef68",
+  "body_dau": "@codex review\n\nLời gọi Codex 11/11 của PR này (connector, theo #775 issuecomment-6233623429). Head cần review: `6dee01b9"
+ },
+ {
+  "id": 6234113482,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T12:53:20Z",
+  "updated_at": "2026-10-17T12:53:20Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "429871d862a9fe9beef8774190ce60aa0c4d1d3265bbc3011a8780c7d1f21476",
+  "body_dau": "@codex review\n\nLời gọi Codex 12/12 của PR này (connector, theo #775). Head cần review: `fa5be283f63af1eaddbb21141aaf9489"
+ },
+ {
+  "id": 6235225425,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T14:42:01Z",
+  "updated_at": "2026-10-17T14:42:01Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "ebd8f1d4774f6d6a53ac5cfaa062821939393c0c0043117f736c37675ffa6586",
+  "body_dau": "## Cross-review codex lượt 13 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `13f0c4d`, lời gọi **13** (th"
+ },
+ {
+  "id": 6235494062,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T15:07:37Z",
+  "updated_at": "2026-10-17T15:07:37Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "dae91bb1650add54558aeafd97ac27429809ba0f620bd0c6429c17081e8fb270",
+  "body_dau": "## Cross-review codex lượt 14 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `d34b1ff`, lời gọi **14**. Lư"
+ },
+ {
+  "id": 6235834869,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T15:33:45Z",
+  "updated_at": "2026-10-17T15:33:45Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "93ce9aae2ba32af98d6a03c8816a3d6edfb4727f8120ec990f80d24a286d16e0",
+  "body_dau": "## Cross-review codex lượt 15 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `5eaedce`, lời gọi **15**. Lư"
+ },
+ {
+  "id": 6236261382,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T16:01:51Z",
+  "updated_at": "2026-10-17T16:01:51Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "7f81258e977143fa270938a8a53eaf6ff876e7e01f4c67a6ac5ad7122310cd42",
+  "body_dau": "## Cross-review codex lượt 16 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `84bdbac`, lời gọi **16**. Lư"
+ },
+ {
+  "id": 6236502149,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T16:19:19Z",
+  "updated_at": "2026-10-17T16:19:19Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "d16b0d3180a87cf0b1c3ffa9f431976895a606038c2ce206afae491770a131d4",
+  "body_dau": "## Cross-review codex lượt 17 — packet wp775 (bản chiếu)\n\nLượt `launcher.py run` trên head `f9d84d7`, lời gọi **17**. Lư"
+ },
+ {
+  "id": 6236502379,
+  "user": "ducthangho",
+  "author_association": "OWNER",
+  "created_at": "2026-10-17T16:19:19Z",
+  "updated_at": "2026-10-17T16:19:19Z",
+  "performed_via_github_app": "claude",
+  "body_sha256": "b674ca79f043cc925db3fb8693a19e7345710fa395062fc8aca7ede0db30bd01",
+  "body_dau": "@codex review\n\nLời gọi Codex 18 của PR này (connector, theo #775 issuecomment-6234968131). Head cần review: `f9d84d70fb4"
+ },
+ {
+  "id": 6236575036,
+  "user": "chatgpt-codex-connector[bot]",
+  "author_association": "NONE",
+  "created_at": "2026-10-17T16:24:14Z",
+  "updated_at": "2026-10-17T16:24:14Z",
+  "performed_via_github_app": "chatgpt-codex-connector",
+  "body_sha256": "98803d1db822cd73445dac5dc3e183e372d8e4e807a43bdf0856a6875883d1f5",
+  "body_dau": "<!-- codex-review-receipt:v1 -->\n\nCodex Review: Didn't find any major issues. Already looking forward to the next diff.\n"
+ }
+]

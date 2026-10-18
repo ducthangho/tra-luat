@@ -1,0 +1,12 @@
+{
+  "same_failures": true,
+  "failures": [
+    "r202_profile_delete_backup_ngoai_cay",
+    "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+    "r268_l2_trichotomy_theo_trang_thai_object"
+  ],
+  "candidate_total": "1712/1715",
+  "baseline_total": "1712/1715",
+  "git_pin": "core.abbrev=7 via GIT_CONFIG_COUNT; disclosed in run_gates.py",
+  "out_of_write_set_hash_equal": true
+}

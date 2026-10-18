@@ -1,0 +1,396 @@
+# pid=2223 tong so ca=197
+>>> vao   0 t01_workspace_khong_phai_repo
+<<< ra    0 t01_workspace_khong_phai_repo -> qua
+>>> vao   1 t02_workspace_khong_ton_tai
+<<< ra    1 t02_workspace_khong_ton_tai -> qua
+>>> vao   2 t03_git_gia_thoat_0_im_lang_van_bi_chan
+<<< ra    2 t03_git_gia_thoat_0_im_lang_van_bi_chan -> qua
+>>> vao   3 t04_duong_dan_co_dau_tieng_viet
+<<< ra    3 t04_duong_dan_co_dau_tieng_viet -> qua
+>>> vao   4 t05_head_khop
+<<< ra    4 t05_head_khop -> qua
+>>> vao   5 t06_head_lech_bi_chan
+<<< ra    5 t06_head_lech_bi_chan -> qua
+>>> vao   6 t07_head_hoa_thuong_van_khop
+<<< ra    6 t07_head_hoa_thuong_van_khop -> qua
+>>> vao   7 t08_ref_lech_bi_chan
+<<< ra    7 t08_ref_lech_bi_chan -> qua
+>>> vao   8 t09_ref_khop
+<<< ra    8 t09_ref_khop -> qua
+>>> vao   9 t10_worktree_ban_bi_chan_khi_doi_sach
+<<< ra    9 t10_worktree_ban_bi_chan_khi_doi_sach -> qua
+>>> vao  10 t11_worktree_ban_van_qua_khi_khong_doi
+<<< ra   10 t11_worktree_ban_van_qua_khi_khong_doi -> qua
+>>> vao  11 t12_tep_khong_theo_doi_van_tinh_la_ban
+<<< ra   11 t12_tep_khong_theo_doi_van_tinh_la_ban -> qua
+>>> vao  12 t13_prompt_khop
+<<< ra   12 t13_prompt_khop -> qua
+>>> vao  13 t14_prompt_lech_bi_chan
+<<< ra   13 t14_prompt_lech_bi_chan -> qua
+>>> vao  14 t15_prompt_rong_bi_chan_du_sha_dung
+<<< ra   14 t15_prompt_rong_bi_chan_du_sha_dung -> qua
+>>> vao  15 t16_prompt_thieu_tep
+<<< ra   15 t16_prompt_thieu_tep -> qua
+>>> vao  16 t17_prompt_thieu_mot_nua_la_loi_tham_so
+<<< ra   16 t17_prompt_thieu_mot_nua_la_loi_tham_so -> qua
+>>> vao  17 t18_prompt_utf8_tinh_sha_theo_BYTE
+<<< ra   17 t18_prompt_utf8_tinh_sha_theo_BYTE -> qua
+>>> vao  18 t19_han_da_qua_bi_chan
+<<< ra   18 t19_han_da_qua_bi_chan -> qua
+>>> vao  19 t20_han_tuong_lai_qua_duoc
+<<< ra   19 t20_han_tuong_lai_qua_duoc -> qua
+>>> vao  20 t21_han_khong_doc_duoc_la_loi_tham_so
+<<< ra   20 t21_han_khong_doc_duoc_la_loi_tham_so -> qua
+>>> vao  21 t22_han_thieu_mui_gio_coi_la_UTC
+<<< ra   21 t22_han_thieu_mui_gio_coi_la_UTC -> qua
+>>> vao  22 t23_run_truyen_lai_ma_thoat
+<<< ra   22 t23_run_truyen_lai_ma_thoat -> qua
+>>> vao  23 t24_run_chan_TRUOC_khi_goi_lenh
+<<< ra   23 t24_run_chan_TRUOC_khi_goi_lenh -> qua
+>>> vao  24 t25_run_ghi_so_doc_duoc
+<<< ra   24 t25_run_ghi_so_doc_duoc -> qua
+>>> vao  25 t26_short_id_don_nhat
+<<< ra   25 t26_short_id_don_nhat -> qua
+>>> vao  26 t27_qua_han_thi_giet_va_tra_124
+<<< ra   26 t27_qua_han_thi_giet_va_tra_124 -> qua
+>>> vao  27 t28_qua_han_giet_ca_CON_CHAU
+<<< ra   27 t28_qua_han_giet_ca_CON_CHAU -> qua
+>>> vao  28 t29_status_tim_theo_short_id
+<<< ra   28 t29_status_tim_theo_short_id -> qua
+>>> vao  29 t30_status_id_khong_co
+<<< ra   29 t30_status_id_khong_co -> qua
+>>> vao  30 t31_stop_tu_choi_khi_khoa_danh_tinh_khac
+<<< ra   30 t31_stop_tu_choi_khi_khoa_danh_tinh_khac -> qua
+>>> vao  31 t32_stop_tu_choi_khi_khong_co_khoa
+<<< ra   31 t32_stop_tu_choi_khi_khong_co_khoa -> qua
+>>> vao  32 t33_stop_giet_that
+<<< ra   32 t33_stop_giet_that -> qua
+>>> vao  33 t34_run_thieu_lenh
+<<< ra   33 t34_run_thieu_lenh -> qua
+>>> vao  34 t35_json_doc_duoc_bang_may
+<<< ra   34 t35_json_doc_duoc_bang_may -> qua
+>>> vao  35 t36_so_ghi_nguyen_tu
+<<< ra   35 t36_so_ghi_nguyen_tu -> qua
+>>> vao  36 t37_khong_can_truyen_workspace
+<<< ra   36 t37_khong_can_truyen_workspace -> qua
+>>> vao  37 t38_dung_o_thu_muc_CON_van_ra_GOC
+<<< ra   37 t38_dung_o_thu_muc_CON_van_ra_GOC -> qua
+>>> vao  38 t39_bien_moi_truong_TL_WORKSPACE
+<<< ra   38 t39_bien_moi_truong_TL_WORKSPACE -> qua
+>>> vao  39 t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh
+<<< ra   39 t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh -> qua
+>>> vao  40 t41_kho_khac_bi_chan
+<<< ra   40 t41_kho_khac_bi_chan -> qua
+>>> vao  41 t42_khong_co_remote_van_bi_chan_khi_doi_kho
+<<< ra   41 t42_khong_co_remote_van_bi_chan_khi_doi_kho -> qua
+>>> vao  42 t43_commit_goc_lech_bi_chan
+<<< ra   42 t43_commit_goc_lech_bi_chan -> qua
+>>> vao  43 t44_bon_cach_viet_URL_cung_mot_danh_tinh
+<<< ra   43 t44_bon_cach_viet_URL_cung_mot_danh_tinh -> qua
+>>> vao  44 t45_token_trong_URL_KHONG_duoc_lo_ra
+<<< ra   44 t45_token_trong_URL_KHONG_duoc_lo_ra -> qua
+>>> vao  45 t46_run_cung_dung_duoc_neo_kho
+<<< ra   45 t46_run_cung_dung_duoc_neo_kho -> qua
+>>> vao  46 t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau
+<<< ra   46 t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau -> qua
+>>> vao  47 t48_host_gia_mao_KHONG_duoc_khop
+<<< ra   47 t48_host_gia_mao_KHONG_duoc_khop -> qua
+>>> vao  48 t49_owner_repo_khong_phan_biet_hoa_thuong
+<<< ra   48 t49_owner_repo_khong_phan_biet_hoa_thuong -> qua
+>>> vao  49 t50_stop_roi_runner_KHONG_duoc_de_len_so
+<<< ra   49 t50_stop_roi_runner_KHONG_duoc_de_len_so -> qua
+>>> vao  50 t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut
+<<< ra   50 t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut -> qua
+>>> vao  51 t52_so_hong_KHONG_duoc_im_lang
+<<< ra   51 t52_so_hong_KHONG_duoc_im_lang -> qua
+>>> vao  52 t53_doctor_bao_du_khi_du
+<<< ra   52 t53_doctor_bao_du_khi_du -> qua
+>>> vao  53 t54_doctor_thieu_cong_cu_bat_buoc_thi_DO
+<<< ra   53 t54_doctor_thieu_cong_cu_bat_buoc_thi_DO -> qua
+>>> vao  54 t55_doctor_nhan_python_khong_can_ten_python3
+<<< ra   54 t55_doctor_nhan_python_khong_can_ten_python3 -> qua
+>>> vao  55 t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con
+<<< ra   55 t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con -> qua
+>>> vao  56 t57_host_KHONG_co_dau_cham_van_phai_chan
+<<< ra   56 t57_host_KHONG_co_dau_cham_van_phai_chan -> qua
+>>> vao  57 t58_expected_repo_mot_doan_bi_TU_CHOI
+<<< ra   57 t58_expected_repo_mot_doan_bi_TU_CHOI -> qua
+>>> vao  58 t59_so_KHONG_luu_doi_so_nguyen_van
+<<< ra   58 t59_so_KHONG_luu_doi_so_nguyen_van -> qua
+>>> vao  59 t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc
+<<< ra   59 t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc -> qua
+>>> vao  60 t61_run_root_khong_ghi_duoc_KHONG_do_traceback
+<<< ra   60 t61_run_root_khong_ghi_duoc_KHONG_do_traceback -> qua
+>>> vao  61 t62_qua_han_ma_khong_giet_het_cay_phai_tra_125
+<<< ra   61 t62_qua_han_ma_khong_giet_het_cay_phai_tra_125 -> BO QUA: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, k
+>>> vao  62 t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi
+<<< ra   62 t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi -> qua
+>>> vao  63 t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem
+<<< ra   63 t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem -> qua
+>>> vao  64 t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet
+<<< ra   64 t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet -> qua
+>>> vao  65 t64_short_id_da_bi_GIANH_thi_khong_duoc_cap_lai
+<<< ra   65 t64_short_id_da_bi_GIANH_thi_khong_duoc_cap_lai -> qua
+>>> vao  66 t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con
+<<< ra   66 t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con -> qua
+>>> vao  67 t68_kho_duong_dan_SAU_neu_host_van_phai_QUA
+<<< ra   67 t68_kho_duong_dan_SAU_neu_host_van_phai_QUA -> qua
+>>> vao  68 t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so
+<<< ra   68 t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so -> qua
+>>> vao  69 t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN
+<<< ra   69 t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN -> qua
+>>> vao  70 t71_ban_chup_prompt_phai_KIN_va_bi_XOA
+<<< ra   70 t71_ban_chup_prompt_phai_KIN_va_bi_XOA -> qua
+>>> vao  71 t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau
+<<< ra   71 t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau -> qua
+>>> vao  72 t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay
+<<< ra   72 t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay -> qua
+>>> vao  73 t72_bi_ngat_KHONG_duoc_ghi_thanh_xong
+<<< ra   73 t72_bi_ngat_KHONG_duoc_ghi_thanh_xong -> qua
+>>> vao  74 t73_doctor_phai_do_bash_va_npm
+<<< ra   74 t73_doctor_phai_do_bash_va_npm -> qua
+>>> vao  75 t74_dut_ong_KHONG_duoc_nuot_ma_that
+<<< ra   75 t74_dut_ong_KHONG_duoc_nuot_ma_that -> qua
+>>> vao  76 t75_tep_tam_mo_coi_bi_don
+<<< ra   76 t75_tep_tam_mo_coi_bi_don -> qua
+>>> vao  77 t78_khong_do_duoc_nhom_KHONG_phai_cay_rong
+<<< ra   77 t78_khong_do_duoc_nhom_KHONG_phai_cay_rong -> qua
+>>> vao  78 t79_job_windows_phai_kiem_ket_qua_dat_gioi_han
+<<< ra   78 t79_job_windows_phai_kiem_ket_qua_dat_gioi_han -> qua
+>>> vao  79 t80_job_pid_tang_buffer_khi_qua_suc_chua
+<<< ra   79 t80_job_pid_tang_buffer_khi_qua_suc_chua -> qua
+>>> vao  80 t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+<<< ra   80 t81_chup_cay_windows_thieu_creationdate_phai_fail_closed -> qua
+>>> vao  81 r766_t81_khong_phu_thuoc_pid_cua_luot_chay
+<<< ra   81 r766_t81_khong_phu_thuoc_pid_cua_luot_chay -> qua
+>>> vao  82 t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+<<< ra   82 t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung -> qua
+>>> vao  83 t82_dot_bien_khong_duoc_mat_qua_30_phan_tram
+<<< ra   83 t82_dot_bien_khong_duoc_mat_qua_30_phan_tram -> qua
+>>> vao  84 t84_nhom_van_tay_khong_duoc_bat_oan_co_bat_tat
+<<< ra   84 t84_nhom_van_tay_khong_duoc_bat_oan_co_bat_tat -> qua
+>>> vao  85 t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao
+<<< ra   85 t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao -> qua
+>>> vao  86 t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac
+<<< ra   86 t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac -> qua
+>>> vao  87 t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien
+<<< ra   87 t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien -> qua
+>>> vao  88 t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep
+<<< ra   88 t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep -> qua
+>>> vao  89 t89_harness_phai_hoan_nguyen_trang_thai_toan_cuc
+<<< ra   89 t89_harness_phai_hoan_nguyen_trang_thai_toan_cuc -> qua
+>>> vao  90 t90_tu_tach_nhom_khi_chung_nhom_voi_vo_shell
+<<< ra   90 t90_tu_tach_nhom_khi_chung_nhom_voi_vo_shell -> qua
+>>> vao  91 t91_ban_khai_moi_truong_khong_duoc_chet_va_khong_duoc_doan
+<<< ra   91 t91_ban_khai_moi_truong_khong_duoc_chet_va_khong_duoc_doan -> qua
+>>> vao  92 t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+<<< ra   92 t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom -> qua
+>>> vao  93 t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung
+<<< ra   93 t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung -> qua
+>>> vao  94 t94_canh_bao_TRUOC_khi_credential_het_han
+<<< ra   94 t94_canh_bao_TRUOC_khi_credential_het_han -> qua
+>>> vao  95 t95_tuoi_anh_chup_doc_dung_va_khong_chet
+<<< ra   95 t95_tuoi_anh_chup_doc_dung_va_khong_chet -> qua
+>>> vao  96 t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han
+<<< ra   96 t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han -> qua
+>>> vao  97 t104_khong_duoc_dung_API_CHI_CO_TREN_MOT_NEN_ma_khong_hoi_truoc
+<<< ra   97 t104_khong_duoc_dung_API_CHI_CO_TREN_MOT_NEN_ma_khong_hoi_truoc -> qua
+>>> vao  98 t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc
+<<< ra   98 t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc -> qua
+>>> vao  99 t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot
+<<< ra   99 t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot -> qua
+>>> vao 100 t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho
+<<< ra  100 t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho -> qua
+>>> vao 101 t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT
+<<< ra  101 t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT -> qua
+>>> vao 102 t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung
+<<< ra  102 t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung -> qua
+>>> vao 103 t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+<<< ra  103 t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI -> qua
+>>> vao 104 t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+<<< ra  104 t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec -> qua
+>>> vao 105 t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+<<< ra  105 t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong -> qua
+>>> vao 106 t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA
+<<< ra  106 t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA -> qua
+>>> vao 107 t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU
+<<< ra  107 t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU -> qua
+>>> vao 108 t103_nam_finding_cua_bot_review_PR128
+<<< ra  108 t103_nam_finding_cua_bot_review_PR128 -> qua
+>>> vao 109 t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+<<< ra  109 t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec -> qua
+>>> vao 110 t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho
+<<< ra  110 t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho -> qua
+>>> vao 111 t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator
+<<< ra  111 t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator -> qua
+>>> vao 112 t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua
+<<< ra  112 t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua -> qua
+>>> vao 113 t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua
+<<< ra  113 t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua -> qua
+>>> vao 114 t120_subprocess_decoding_chong_loi_charmap_tren_windows
+<<< ra  114 t120_subprocess_decoding_chong_loi_charmap_tren_windows -> qua
+>>> vao 115 t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log
+<<< ra  115 t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log -> qua
+>>> vao 116 t122_ung_vien_bash_thu_tu_PATH_dedup_va_fallback_ProgramFiles
+<<< ra  116 t122_ung_vien_bash_thu_tu_PATH_dedup_va_fallback_ProgramFiles -> qua
+>>> vao 117 t123_bridge_thieu_session_start_sh_phai_rc12_truoc_khi_probe
+<<< ra  117 t123_bridge_thieu_session_start_sh_phai_rc12_truoc_khi_probe -> qua
+>>> vao 118 t124_bridge_khong_co_bash_chay_duoc_phai_rc12_khong_fail_open
+<<< ra  118 t124_bridge_khong_co_bash_chay_duoc_phai_rc12_khong_fail_open -> qua
+>>> vao 119 t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven
+<<< ra  119 t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven -> qua
+>>> vao 120 t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0
+<<< ra  120 t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0 -> qua
+>>> vao 121 t127_settings_phai_noi_day_bridge_exec_form_va_khong_dung_den_PreToolUse
+<<< ra  121 t127_settings_phai_noi_day_bridge_exec_form_va_khong_dung_den_PreToolUse -> qua
+>>> vao 122 t128_bridge_duong_loi_khong_duoc_chet_UnicodeEncodeError_cp1258
+<<< ra  122 t128_bridge_duong_loi_khong_duoc_chet_UnicodeEncodeError_cp1258 -> qua
+>>> vao 123 t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU
+<<< ra  123 t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU -> qua
+>>> vao 124 t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+<<< ra  124 t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO -> qua
+>>> vao 125 t131_hong_that_khong_phai_qua_han_van_la_THIEU
+<<< ra  125 t131_hong_that_khong_phai_qua_han_van_la_THIEU -> qua
+>>> vao 126 t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+<<< ra  126 t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU -> qua
+>>> vao 127 t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+<<< ra  127 t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran -> qua
+>>> vao 128 t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai
+<<< ra  128 t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai -> qua
+>>> vao 129 t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU
+<<< ra  129 t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU -> qua
+>>> vao 130 t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU
+<<< ra  130 t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU -> qua
+>>> vao 131 t137_ung_vien_hong_that_cong_ung_vien_qua_han_la_CHUA_DO
+<<< ra  131 t137_ung_vien_hong_that_cong_ung_vien_qua_han_la_CHUA_DO -> qua
+>>> vao 132 t138_auth_het_ngan_sach_phai_vao_CHUA_DO
+<<< ra  132 t138_auth_het_ngan_sach_phai_vao_CHUA_DO -> qua
+>>> vao 133 t139_ung_vien_qua_han_khong_duoc_che_ung_vien_tot
+<<< ra  133 t139_ung_vien_qua_han_khong_duoc_che_ung_vien_tot -> qua
+>>> vao 134 t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+<<< ra  134 t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU -> qua
+>>> vao 135 t141_comment_timeout_phai_co_version_nguon_va_phep_do
+<<< ra  135 t141_comment_timeout_phai_co_version_nguon_va_phep_do -> qua
+>>> vao 136 t142_ban_sao_roi_chi_duoc_tha_khi_goc_vang_git
+<<< ra  136 t142_ban_sao_roi_chi_duoc_tha_khi_goc_vang_git -> qua
+>>> vao 137 t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite
+<<< ra  137 t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite -> qua
+>>> vao 138 t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+<<< ra  138 t102_khong_go_duoc_policy_thi_phai_CHAN_codex -> qua
+>>> vao 139 t100_cong_cu_policy_KHONG_BAO_GIO_duoc_ghi_vao_config
+<<< ra  139 t100_cong_cu_policy_KHONG_BAO_GIO_duoc_ghi_vao_config -> qua
+>>> vao 140 t99_nhat_ky_ca_phai_song_sot_qua_mot_cu_giet
+<<< ra  140 t99_nhat_ky_ca_phai_song_sot_qua_mot_cu_giet -> qua
+>>> vao 141 t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor
+<<< ra  141 t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor -> qua
+>>> vao 142 t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU
+<<< ra  142 t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU -> qua
+>>> vao 143 t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+<<< ra  143 t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec -> qua
+>>> vao 144 t144_run_ghi_nonce_va_hmac_khong_lo_khoa
+<<< ra  144 t144_run_ghi_nonce_va_hmac_khong_lo_khoa -> qua
+>>> vao 145 t145_agy_cong_cu_va_kha_nang
+<<< ra  145 t145_agy_cong_cu_va_kha_nang -> qua
+>>> vao 146 t146_do_antigravity_cac_trang_thai_va_luong
+<<< ra  146 t146_do_antigravity_cac_trang_thai_va_luong -> qua
+>>> vao 147 t147_agy_fallback_localappdata_windows
+<<< ra  147 t147_agy_fallback_localappdata_windows -> qua
+>>> vao 148 t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+<<< ra  148 t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG -> qua
+>>> vao 149 t149_doctor_do_actionlint_va_shellcheck
+<<< ra  149 t149_doctor_do_actionlint_va_shellcheck -> qua
+>>> vao 150 t150_doctor_do_bien_utf8_in_ca_khi_xanh
+<<< ra  150 t150_doctor_do_bien_utf8_in_ca_khi_xanh -> qua
+>>> vao 151 t151_m3_phan_biet_da_chay_voi_tep_moi
+<<< ra  151 t151_m3_phan_biet_da_chay_voi_tep_moi -> qua
+>>> vao 152 t152_hook_cai_dat_va_khop_al_ver_ci
+<<< ra  152 t152_hook_cai_dat_va_khop_al_ver_ci -> qua
+>>> vao 153 t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii
+<<< ra  153 t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii -> qua
+>>> vao 154 t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY
+<<< ra  154 t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY -> qua
+>>> vao 155 t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote
+<<< ra  155 t155_m3_hook_cuc_bo_ghi_dau_vet_truoc_cong_remote -> qua
+>>> vao 156 r01_worktree_that_bi_chan
+<<< ra  156 r01_worktree_that_bi_chan -> qua
+>>> vao 157 r02_clone_that_di_tiep
+<<< ra  157 r02_clone_that_di_tiep -> qua
+>>> vao 158 r03_probe_ghi_bi_tu_choi_thi_do
+<<< ra  158 r03_probe_ghi_bi_tu_choi_thi_do -> qua
+>>> vao 159 r04_spawn_rc0_dau_ra_rong_bi_chan
+<<< ra  159 r04_spawn_rc0_dau_ra_rong_bi_chan -> qua
+>>> vao 160 r05_trust_thieu_khoa_la_khong_do_duoc
+<<< ra  160 r05_trust_thieu_khoa_la_khong_do_duoc -> qua
+>>> vao 161 r06_probe_hong_khong_override_phai_chan
+<<< ra  161 r06_probe_hong_khong_override_phai_chan -> qua
+>>> vao 162 r07_override_ly_do_rong_bi_tu_choi
+<<< ra  162 r07_override_ly_do_rong_bi_tu_choi -> qua
+>>> vao 163 r08_override_co_ly_do_duoc_ghi_so
+<<< ra  163 r08_override_co_ly_do_duoc_ghi_so -> qua
+>>> vao 164 r09_run_json_giu_ba_trang_thai_probe
+<<< ra  164 r09_run_json_giu_ba_trang_thai_probe -> qua
+>>> vao 165 r10_trust_json_hong_bi_chan_sach
+<<< ra  165 r10_trust_json_hong_bi_chan_sach -> qua
+>>> vao 166 r11_trust_gia_tri_that_ba_chieu
+<<< ra  166 r11_trust_gia_tri_that_ba_chieu -> qua
+>>> vao 167 r12_prompt_doi_ngay_sau_preflight_phai_DO
+<<< ra  167 r12_prompt_doi_ngay_sau_preflight_phai_DO -> qua
+>>> vao 168 r13_PROMPT_FILE_thieu_prompt_file_phai_DO
+<<< ra  168 r13_PROMPT_FILE_thieu_prompt_file_phai_DO -> qua
+>>> vao 169 r14_run_json_bam_lai_dung_hai_log
+<<< ra  169 r14_run_json_bam_lai_dung_hai_log -> qua
+>>> vao 170 r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh
+<<< ra  170 r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh -> qua
+>>> vao 171 r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO
+<<< ra  171 r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO -> qua
+>>> vao 172 r17_schema_tu_choi_reviewed_sha_khac_exact_head
+<<< ra  172 r17_schema_tu_choi_reviewed_sha_khac_exact_head -> qua
+>>> vao 173 r18_schema_tu_choi_generation_khac
+<<< ra  173 r18_schema_tu_choi_generation_khac -> qua
+>>> vao 174 r19_schema_tu_choi_role_khong_duoc_cho_phep
+<<< ra  174 r19_schema_tu_choi_role_khong_duoc_cho_phep -> qua
+>>> vao 175 r20_schema_tu_choi_identity_khong_duoc_cho_phep
+<<< ra  175 r20_schema_tu_choi_identity_khong_duoc_cho_phep -> qua
+>>> vao 176 r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO
+<<< ra  176 r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO -> qua
+>>> vao 177 r345_than_hook_KHONG_duoc_co_duong_mang_nao
+<<< ra  177 r345_than_hook_KHONG_duoc_co_duong_mang_nao -> qua
+>>> vao 178 r345_chan_socket_that_ma_than_hook_van_chay_dung
+<<< ra  178 r345_chan_socket_that_ma_than_hook_van_chay_dung -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 179 r345_cac_phep_do_cuc_bo_van_dung
+<<< ra  179 r345_cac_phep_do_cuc_bo_van_dung -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 180 r345_lop_tham_import_van_co_rang
+<<< ra  180 r345_lop_tham_import_van_co_rang -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 181 r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO
+<<< ra  181 r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 182 r347_tham_import_van_song_tren_python_truoc_310
+<<< ra  182 r347_tham_import_van_song_tren_python_truoc_310 -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 183 r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO
+<<< ra  183 r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 184 r351_co_chi_thi_thi_KHONG_duoc_dat_moc
+<<< ra  184 r351_co_chi_thi_thi_KHONG_duoc_dat_moc -> qua
+>>> vao 185 r351_KHONG_co_chi_thi_thi_van_phai_dat_moc
+<<< ra  185 r351_KHONG_co_chi_thi_thi_van_phai_dat_moc -> HONG: khong co chi thi ma cung khong dat moc — hook se chay pip mo
+>>> vao 186 r351_requirements_cua_kho_khong_phai_tra_gia
+<<< ra  186 r351_requirements_cua_kho_khong_phai_tra_gia -> qua
+>>> vao 187 r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia
+<<< ra  187 r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 188 r348_dot_bien_bo_isidentifier_lam_ca_dich_DO
+<<< ra  188 r348_dot_bien_bo_isidentifier_lam_ca_dich_DO -> BO QUA: KHONG DO DUOC: khong dung duoc venv/pip (co the khong co man
+>>> vao 189 r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan
+<<< ra  189 r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan -> qua
+>>> vao 190 t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan
+<<< ra  190 t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan -> qua
+>>> vao 191 t157_giet_cay_khi_stat_EACCES_van_tron_ven
+<<< ra  191 t157_giet_cay_khi_stat_EACCES_van_tron_ven -> qua
+>>> vao 192 r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban
+<<< ra  192 r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban -> qua
+>>> vao 193 t158_comm_hong_SAU_luc_sinh_qua_han_khong_duoc_124_khi_con_song
+<<< ra  193 t158_comm_hong_SAU_luc_sinh_qua_han_khong_duoc_124_khi_con_song -> qua
+>>> vao 194 t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc
+<<< ra  194 t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc -> qua
+>>> vao 195 t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM
+<<< ra  195 t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM -> qua
+>>> vao 196 t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong
+<<< ra  196 t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong -> qua
+# XONG TRON VEN

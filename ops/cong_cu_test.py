@@ -2322,6 +2322,62 @@ for _ten, _ca, _tim, _thay in (
     ('f45_ghi_de_ten', 't52_', _D45, 'DOT_BIEN["f45_them_ten_la"] = DOT_BIEN["f45_xoa_ten"]\n' + _D45),
     ('f27_full_seed', 't54_', '    else:\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"',
      '    else:\n        loi_db = loi_nen\n        print(f"\\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một"'),
+    # #698: 54 CANH thường trực (16 r1 · 27 r2 · 11 r3) — cùng mỏ neo, phép thay, ca đích với dò cùng tên của spec wp698
+    # (Phụ lục A, C, H); mỏ neo không có xuống dòng viết NỐI CHUỖI để không tự va chạm. Tập dò đóng 419 chỉ đo ở nghiệm thu.
+    ('w698_e49_nfkc_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    bk = None if bk is None else unicodedata.normalize("NFKC", bk)\n'),
+    ('w698_e49_nfkc_mh', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    mh = None if mh is None else unicodedata.normalize("NFKC", mh)\n'),
+    ('w698_e49_nfkc_head', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        import unicodedata\n        head = unicodedata.normalize("NFKC", p.stdout).strip() if p.returncode == 0 else ""\n'),
+    ('w698_e49_cf_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    bk = None if bk is None else "".join(c for c in bk if unicodedata.category(c) != "Cf")\n'),
+    ('w698_e49_cf_mh', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    mh = None if mh is None else "".join(c for c in mh if unicodedata.category(c) != "Cf")\n'),
+    ('w698_e49_cf_head', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        import unicodedata\n        head = "".join(c for c in p.stdout if unicodedata.category(c) != "Cf").strip() if p.returncode == 0 else ""\n'),
+    ('w698_x46_tab_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    bk = None if bk is None else bk.replace(chr(9), "")\n'),
+    ('w698_x46_tab_mh', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    mh = None if mh is None else mh.replace(chr(9), "")\n'),
+    ('w698_x46_tab_head', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        head = p.stdout.replace(chr(9), "").strip() if p.returncode == 0 else ""\n'),
+    ('w698_e49_ra_normpath', 't53_', '    return "manh", (k, n, ra)\n', '    return "manh", (k, n, os.path.normpath(ra))\n'),
+    ('w698_e49_ra_expanduser', 't53_', '    return "manh", (k, n, ra)\n', '    return "manh", (k, n, os.path.expanduser(ra))\n'),
+    ('w698_e50_bang_2', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if hong or tien_kiem_bo_qua or len(bo_qua) == 2:\n            _ket_thuc_manh('),
+    ('w698_e50_tu_2', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if hong or tien_kiem_bo_qua or len(bo_qua) >= 2:\n            _ket_thuc_manh('),
+    ('w698_x50_bang_n_tru_1', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if hong or tien_kiem_bo_qua or len(bo_qua) == len(CA) - 1:\n            _ket_thuc_manh('),
+    ('w698_x47_hong_bang_1', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if len(hong) == 1 or tien_kiem_bo_qua:\n            _ket_thuc_manh('),
+    ('w698_x47_tk_bang_1', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if hong or len(tien_kiem_bo_qua) == 1:\n            _ket_thuc_manh('),
+    ('w698_s_ra_nfkc', 't53_', '    return "manh", (k, n, ra)\n', '    import unicodedata\n    return "manh", (k, n, unicodedata.normalize("NFKC", ra))\n'),
+    ('w698_s_ra_cf', 't53_', '    return "manh", (k, n, ra)\n', '    import unicodedata\n    return "manh", (k, n, "".join(c for c in ra if unicodedata.category(c) != "Cf"))\n'),
+    ('w698_s_ra_tab', 't53_', '    return "manh", (k, n, ra)\n', '    return "manh", (k, n, ra.replace(chr(9), ""))\n'),
+    ('w698_s_ra_rstrip_slash', 't53_', '    return "manh", (k, n, ra)\n', '    return "manh", (k, n, ra.rstrip("/"))\n'),
+    ('w698_s_ra_lstrip_dot', 't53_', '    return "manh", (k, n, ra)\n', '    return "manh", (k, n, ra[2:] if ra.startswith("./") else ra)\n'),
+    ('w698_s_ra_expandvars', 't53_', '    return "manh", (k, n, ra)\n', '    import unicodedata\n    ra = os.path.expandvars(ra)\n    return "manh", (k, n, ra)\n'),
+    ('w698_q_cf_mid_ra', 't53_', '    return "manh", (k, n, ra)\n', '    import unicodedata\n    ra = ra if len(ra) < 3 else ra[:1] + "".join(c for c in ra[1:-1] if not (unicodedata.category(c) == "Cf")) + ra[-1:]\n    return "manh", (k, n, ra)\n'),
+    ('w698_m_cf_tag_ra', 't53_', '    return "manh", (k, n, ra)\n', '    import unicodedata\n    ra = "".join(c for c in ra if not (0xE0000 <= ord(c) <= 0xE007F))\n    return "manh", (k, n, ra)\n'),
+    ('w698_q_cf_lead_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    while bk and unicodedata.category(bk[0]) == "Cf":\n        bk = bk[1:]\n'),
+    ('w698_q_cf_mid_head', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        import unicodedata\n        _s = p.stdout.strip()\n        _s = _s[:1] + "".join(c for c in _s[1:-1] if unicodedata.category(c) != "Cf") + _s[-1:]\n        head = _s if p.returncode == 0 else ""\n'),
+    ('w698_q_tab_lead_mh', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    mh = mh if mh is None else mh.lstrip(chr(9))\n'),
+    ('w698_p_cf_head_17', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        import unicodedata\n        _s = p.stdout\n        _s = (_s[:17] + _s[17 + 1:]) if len(_s) > 17 and (lambda c: unicodedata.category(c) == "Cf")(_s[17]) else _s\n        head = _s.strip() if p.returncode == 0 else ""\n'),
+    ('w698_m_cf_tag_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    bk = bk if bk is None else "".join(c for c in bk if not 0xE0000 <= ord(c) <= 0xE007F)\n'),
+    ('w698_m_cf_061c_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    bk = bk if bk is None else bk.replace(chr(0x61C), "")\n'),
+    ('w698_m_nfkc_ngoai_bmp_mh', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    mh = None if mh is None else "".join(unicodedata.normalize("NFKC", c) if (ord(c) >= 0x10000) else c for c in mh)\n'),
+    ('w698_m_bodau_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    bk = None if bk is None else "".join(c for c in unicodedata.normalize("NFD", bk) if unicodedata.category(c) != "Mn")\n'),
+    ('w698_m_cc_head', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        import unicodedata\n        _s = p.stdout\n        _s = "".join(c for c in _s if not ((unicodedata.category(c) == "Cc" and c != chr(9))))\n        head = _s.strip() if p.returncode == 0 else ""\n'),
+    ('w698_m_co_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    bk = None if bk is None else "".join(c for c in bk if not (unicodedata.category(c) == "Co"))\n'),
+    ('w698_s_bk_drop_zs', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    bk = bk if bk is None else bk.translate({0xA0: None, 0x2003: None, 0x3000: None})\n'),
+    ('w698_s_mh_drop_zs', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    mh = mh if mh is None else mh.translate({0xA0: None, 0x2003: None, 0x3000: None})\n'),
+    ('w698_s_head_strip_ascii', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        head = p.stdout.strip(" " + chr(9) + chr(10) + chr(11) + chr(12) + chr(13)) if p.returncode == 0 else ""\n'),
+    ('w698_z_exc_all', 't53_', '    except (OSError, subprocess.SubprocessError):\n        head = ""\n', '    except Exception:\n        head = ""\n'),
+    ('w698_z_exc_them_valueerror', 't53_', '    except (OSError, subprocess.SubprocessError):\n        head = ""\n', '    except (OSError, subprocess.SubprocessError, ValueError):\n        head = ""\n'),
+    ('w698_s2_hong_va_khong_bq', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if (hong and not bo_qua) or tien_kiem_bo_qua:\n            _ket_thuc_manh('),
+    ('w698_s2_hong_gt_bq', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if len(hong) > len(bo_qua) or tien_kiem_bo_qua:\n            _ket_thuc_manh('),
+    ('w698_s2_tk_va_khong_bq', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if hong or (tien_kiem_bo_qua and not bo_qua):\n            _ket_thuc_manh('),
+    ('w698_s3_xor', 't54_', '        if hong or tien_kiem_bo_qua:\n            _ket_thuc_manh(', '        if (hong and not tien_kiem_bo_qua) or (tien_kiem_bo_qua and not hong):\n            _ket_thuc_manh('),
+    ('w698_x_exc_typeerror', 't53_', '    except (OSError, subprocess.SubprocessError):\n        head = ""\n', '    except (OSError, subprocess.SubprocessError, TypeError):\n        head = ""\n'),
+    ('w698_x3_exc_kbint', 't53_', '    except (OSError, subprocess.SubprocessError):\n        head = ""\n', '    except (OSError, subprocess.SubprocessError, KeyboardInterrupt):\n        head = ""\n'),
+    ('w698_x3_exc_re_error', 't53_', '    except (OSError, subprocess.SubprocessError):\n        head = ""\n', '    except (OSError, subprocess.SubprocessError, re.error):\n        head = ""\n'),
+    ('w698_x_head_nl_last', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        head = p.stdout.strip().split(chr(10))[-1].strip() if p.returncode == 0 else ""\n'),
+    ('w698_x3_head_emsp_last', 't53_', '        head = p.stdout.strip() if p.returncode == 0 else ""\n', '        head = p.stdout.strip().split(chr(0x2003))[-1].strip() if p.returncode == 0 else ""\n'),
+    ('w698_x_cat_mc_bk', 't53_', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n', '    import re\n    bk, mh, ra = env.get(_BIEN_BAN_KINH), env.get(_BIEN_MANH), env.get(_BIEN_MANH_RA)\n    import unicodedata\n    bk = None if bk is None else "".join(c for c in bk if not (unicodedata.category(c) == "Mc"))\n'),
+    ('w698_x_main_ra_normpath', 't54_', '        k, n, ra = tham_so\n', '        import unicodedata\n        k, n, ra = tham_so\n        ra = os.path.normpath(ra)\n'),
+    ('w698_x3_m3a_ra_nfkc', 't54_', '            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", _van_tay())\n', '            import unicodedata\n            _ket_thuc_manh(k, n, unicodedata.normalize("NFKC", ra), ten, None, "nền đỏ hoặc tiền kiểm bị bỏ qua — không đo", _van_tay())\n'),
+    ('w698_x3_m3b_ra_cf', 't54_', '        dong, loi = _ket_thuc_manh(k, n, ra, ten, None if ly_con else ket, ly_con, _van_tay())\n', '        import unicodedata\n        dong, loi = _ket_thuc_manh(k, n, "".join(c for c in ra if unicodedata.category(c) != "Cf"), ten, None if ly_con else ket, ly_con, _van_tay())\n'),
+    ('w698_x_wr_ra_nfkc', 't52_', '    tep = Path(ra)\n', '    import unicodedata\n    tep = Path(unicodedata.normalize("NFKC", ra))\n'),
+    ('w698_x3_wr5_nfkc', 't52_', '    tep.' + 'write_bytes((', '    import unicodedata\n    Path(unicodedata.normalize("NFKC", str(tep))).write_bytes(('),
 ):
     DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668[_ca])
 # F36 (Codex lượt 15): nguồn vân tay — bảy cách băm SAI BYTES của TEP_TEST; con băm bảng byte cố định, cha tự băm lại.
@@ -7207,11 +7263,28 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     sai16 = {t: kq.get(t) for t, m in f16.items() if kq.get(t) != m}
     bang(not sai16, f"gom phải KẾT LUẬN đủ mọi bản ghi, cộng ĐỦ lỗi, in ĐỦ bảng — trực tiếp và qua CLI thật "
                     f"([rc/lỗi, số ok, số ĐỎ, SỐ LIỆU(, dòng đầu)], mong {f16}): {sai16}")
+    # #698 M2b T4/T5: bộ ghi THẬT trên mọi ô (> 60: 60 đường + khúc tên tệp) — tập mục, hai dòng in, HOME rỗng.
+    # PR #721: trên Windows khối không chạy (tên Windows cấm) ⇒ đúng [0, [], 0].
+    bang(kq["ghi698"] == [0, [], 0] if os.name == "nt" else kq["ghi698"][0] > 60 and kq["ghi698"][1:] == [[], 0],
+         f"bộ ghi #698 [số ô, ô lệch đầu, tổng lệch]: {kq['ghi698']}")
+    # Chốt nền của khối, đo không cần Windows: `ten_nen="nt"` ⇒ KHÔNG lời gọi bộ ghi nào mang ký tự Windows cấm.
+    goi, g = [], globals()
+    cu, g["_ket_thuc_manh"] = g["_ket_thuc_manh"], lambda *a: (goi.append(a[2]), [["x"], 0])[1]
+    try:
+        with tempfile.TemporaryDirectory(prefix="t52nt_") as d:
+            ra_nt = _ghi698(Path(d), 3, {}, list(DOT_BIEN)[:1], ten_nen="nt")
+    finally:
+        g["_ket_thuc_manh"] = cu
+    cam = [ascii(p)[:40] for p in goi if any(ord(c) < 32 or c in '"*:?|<>' + chr(92) for c in p)]
+    bang(ra_nt == [0, [], 0] and not cam, f"khối #698 M2b trên `nt` gọi bộ ghi với tên Windows cấm: {ra_nt} {cam[:3]}")
 
 
 @ca
 def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON():
     """#668 M1/M2: `_doc_che_do` nhận ĐÚNG ba chế độ; mọi cấu hình lạ ⇒ lỗi mang ĐÚNG thẻ `[C-…]`.
+
+    #698: "mọi" chỉ đúng tới MIỀN ĐO — bảng, lưới, D698 ∪ N698 × mọi vị trí (M1), 12 ô `ra` cấu trúc (M2); `head`: D698 chỉ ở ba
+    neo, thành viên ngoài R698 × vị trí khác KHÔNG đo; điểm mã ngoài D698 ∪ N698 ngoài ba đại diện KHÔNG đo (spec wp698 §10).
 
     Chuỗi rỗng KHÔNG phải "vắng": `gate` rơi nhầm về `du` thì chỉ chậm, còn một biến mảnh hỏng rơi về `gate` thì không
     ai đo bán kính. `\\u0661` (chữ số Ả Rập) và `\\n` cuối là hai lối `\\d`/`$` từng lọt ở kho này. Phân hoạch
@@ -7234,6 +7307,21 @@ def t53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON
            [(i, x, y) for i, (x, y) in enumerate(zip(kq.get(t) or [], m)) if x != y][:5] + [len(kq.get(t) or []), len(m)]
            for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`_doc_che_do`/nguồn HEAD sai (thấy, mong | lưới: [(ô, thấy, mong)…, số ô thấy, số ô mong]): {sai}")
+    # #698 M1/M1b: số ô bằng CÔNG THỨC từ kích thước miền mà cha TỰ dẫn xuất (biểu thức riêng, không gọi `_d698`) — bớt vị trí
+    # hay bớt điểm mã ở con thì lệch. M5b: 0 ô lệch, không lớp nào không dựng được, khoá đã đo ⊇ B698 (mọi lớp ngoại lệ builtins).
+    import builtins
+    import unicodedata as u
+    trong = lambda c: u.category(chr(c)) not in ("Lo", "Co", "Cn") or u.normalize("NFKC", chr(c)) != chr(c)
+    nd, nt = 0, 1   # nt: mọi `c.isspace()` (trừ surrogate) cộng CR LF
+    for c in (c for c in range(0x110000) if not 0xD800 <= c <= 0xDFFF):
+        nd, nt = nd + trong(c), nt + chr(c).isspace()
+    s1 = (nd + len(_N698)) * sum(2 * len(v) + 1 for v in ("manh", "3/8", "15/16", "a/b"))
+    s2 = 2 * 3 * nd + (sum(map(trong, _R698)) + len(_N698)) * sum(2 * h + 1 for h in (40, 64)) + 2 * 2 * nt
+    bang(kq["m1"] == [s1, s2, [], 0], f"M1/M1b #698 [ô doc, ô head, ô lệch đầu, tổng lệch]: {kq['m1']} ≠ [{s1}, {s2}, [], 0]")
+    b698 = {f"{v.__module__}.{v.__qualname__}" for v in vars(builtins).values()
+            if isinstance(v, type) and issubclass(v, BaseException)}
+    bang(kq["m5b"][1:] == [[], 0, []] and b698 <= set(kq["m5b"][0]),
+         f"M5b #698 [ô lệch, tổng lệch, không dựng được]: {kq['m5b'][1:]}; B698 thiếu {sorted(b698 - set(kq['m5b'][0]))[:5]}")
     # F34: lời gọi `git` — đúng argv trên CHÍNH `GOC` của tiến trình con, đủ capture/text và timeout 60.
     bang(kq["goi_git"] == [[["git", "-C", kq["goi_git"][1], "rev-parse", "HEAD"],
                             [["capture_output", True], ["text", True], ["timeout", 60]]], kq["goi_git"][1]],
@@ -7331,6 +7419,10 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
         "manh_12": [0, dau + phong + ghi("dung", "none", "1/2", "x"), ra(duoi=manh_ra("1/2"))],
         "manh_0": [0, dau + phong + ghi("dung", "none", "0/8", "x"), ra(duoi=manh_ra("0/8"))],
         "du_nhieu_nguon": [1, day([cn]), ra(do=[cn], duoi=du_ra(55, nen=1))]}
+    for h, b, t in _luoi_m3(n):   # #698 M3: kỳ vọng bằng CHÍNH các hàm dựng sẵn — ĐỎ ⇔ h > 0 hoặc t ≠ ∅, độc lập với b
+        mong[f"m3698-{h}-{b}-{'+'.join(t)}"] = (
+            [1, dau + ghi_nen, ra(tk=list(t), bq=cac[h:h + b], do=cac[:h], duoi=nen_ra)] if h or t
+            else [0, dau + phong + ghi_dung, ra(bq=cac[h:h + b], duoi=manh_ra())])
     for name, mode, ki, ni, path, workers in _luoi_noi_main():
         so = workers
         if mode == "du":
@@ -7996,6 +8088,42 @@ _TEN_SL = ("f24_nhan_symlink", "f35_writer_broken_link", "f37_bo_f24", "f37_bo_f
 _TEN_SL_FALSE = ("f37_dk_luon_dung", "f40_false_khong", "f41_bo_f40_khong", "f41_f40_luon_ra_ngoai")   # F40: đăng ký CHỈ ở nền KHÔNG symlink
 
 
+def _ghi698(d, n, vt, t1, ten_nen=os.name):
+    # #698 M2b T4/T5 (dò x_wr_ra_*, x3_wr*, x4_t4/t5_*, y4_t4_*, x6_t4_ra): bộ ghi THẬT trên 60 đường của `_duong698` cộng khúc
+    # tên tệp phủ D698 ∪ N698 (bỏ NUL và "/", khúc 50 ký tự mở bằng "k"); gọi HAI lần (lần hai gặp tệp cũ ⇒ nhánh gỡ chạy),
+    # `cwd` riêng từng ô, HOME rỗng. Kỳ vọng ĐỘC LẬP (không gọi bộ ghi): tập mục = `Path(p)` và các cha, ghép `cwd`, giải `..`;
+    # dòng in của mỗi lần dựng từ `Path(p)`. Mọi BaseException của bộ ghi là DỮ LIỆU (M6). Chỉ đo POSIX (nợ Windows, Q8).
+    # PR #721 (Codex P1): tên ô chứa U+0001–U+001F, chéo ngược và `"*:?|<>` — Windows cấm ⇒ bộ ghi ném, ô lệch. Nên trên
+    # `nt` KHÔNG chạy, trả [0, [], 0]; `t52` đòi đúng giá trị ấy trên `nt` và đo chốt bằng `ten_nen="nt"` (không cần Windows).
+    if ten_nen == "nt":
+        return [0, [], 0]
+    nha, cu_cwd, cu_nha, lech = d / "nha698", os.getcwd(), {x: os.environ.get(x) for x in ("HOME", "USERPROFILE")}, []
+    nha.mkdir()
+    tv = [c for c in sorted(set(_d698() + list(_N698))) if c not in (0, 47)]
+    cac_p = _duong698()[:60] + ["k" + "".join(map(chr, tv[i:i + 50])) for i in range(0, len(tv), 50)]
+    os.environ.update(HOME=str(nha), USERPROFILE=str(nha))
+    try:
+        for j, p in enumerate(cac_p):
+            o = d / "o698" / str(j)
+            o.mkdir(parents=True)
+            os.chdir(o)
+            try:
+                thay = [None, [_ket_thuc_manh(0, n, p, t1, {t1[0]: _ban_ghi_du_gia(t1[0])}, None, vt)[0][-1] for _ in "12"]]
+                thay[0] = sorted(str(x.relative_to(o)) for x in o.rglob("*"))
+            except BaseException as ex:  # noqa: BLE001
+                thay = ["NEM:" + type(ex).__name__]
+            q = Path(p)
+            mong = [sorted({os.path.relpath(os.path.normpath(o / x), o) for x in (q, *q.parents)} - {"."}),
+                    [f"MẢNH 0/{n}: 1/1 đột biến bán kính 1 · ghi {q}"] * 2]
+            if thay != mong or any(nha.iterdir()):
+                lech.append([j, ascii(p)[:60], str(thay)[:160]])
+    finally:
+        os.chdir(cu_cwd)
+        for x, v in cu_nha.items():
+            os.environ.pop(x, None) if v is None else os.environ.update({x: v})
+    return [len(cac_p), lech[:10], len(lech)]
+
+
 def _in_tu_kiem_gom():
     """Cửa tiến trình con cho `t52`: dựng bộ mảnh bằng CHÍNH `_ket_thuc_manh`, làm hỏng từng cách, gom, in `KQ`."""
     n = 3
@@ -8247,6 +8375,7 @@ def _in_tu_kiem_gom():
             kq["ghi_duong"] = [p.is_file(), p.is_file() and p.read_text(encoding="utf-8").startswith("MANH ")]
         except Exception as ex:  # noqa: BLE001
             kq["ghi_duong"] = [f"NEM:{type(ex).__name__}"]
+        kq["ghi698"] = _ghi698(d, n, vt, cac[:1])
         if _CO_SYMLINK:
             gay = ghi / "gay.txt"
             os.symlink(ghi / "khong-co", gay)
@@ -8266,7 +8395,8 @@ def _luoi_noi_main():
     rows += [(f"noi-nen-{i}", "nen", k, n, path, 3) for i, (k, n, path) in enumerate(
         ((9, 16, " space "), (15, 16, "Mixed.TXT"), (4, 5, "dir/Sub Dir/Mảnh.TXT"), (10, 11, "x"), (0, 2, "  ")))]
     rows += [("noi-nen-do", "nen_do", 10, 11, " Đỏ Sub/Mixed.TXT ", 3)]
-    return rows
+    # #698 M2b (dò x_main_ra_*, x3_main_ra_*, x3_m3a/m3b_ra_*, x4/y4/x6_t2/t3*): 61 đường × `manh` (T2+T3b) và `nen` (T2+T3a).
+    return rows + [(f"noi698-{md}-{i}", md, 9, 16, p, 3) for md in ("manh", "nen") for i, p in enumerate(_duong698())]
 
 
 def _in_tu_kiem_main():
@@ -8275,7 +8405,8 @@ def _in_tu_kiem_main():
     F7 (Codex lượt 4, lần thứ TƯ cùng lớp): vá theo từng đường reviewer chỉ ra thì lượt sau lại có đường khác. Nên
     ở đây KHÔNG chọn đường: MỌI thứ `main` gọi đều bị thay bằng bộ ghi sự kiện kèm tham số (tiền kiểm batch/alias,
     từng ca, phóng con, bộ nhận thật, bộ ghi mảnh, cổng cây thật, ba tự kiểm, báo cáo nền, bán kính đủ), và MỖI nguồn
-    lỗi có một kịch bản riêng lẻ. `t54` so NGUYÊN nhật ký + mã thoát. Kỳ vọng tên (`list(DOT_BIEN)`, `_phan_manh`) in
+    lỗi có một kịch bản riêng lẻ — nhưng #698 (F50) đo được: một kịch bản mỗi nguồn KHÔNG phủ LỰC LƯỢNG; nay `bo_qua`/`hong`/
+    tiền kiểm theo TRỤC trọn + TÍCH BIÊN (`_luoi_m3`), không trọn tích. `t54` so NGUYÊN nhật ký + mã thoát. Kỳ vọng tên (`list(DOT_BIEN)`, `_phan_manh`) in
     từ CHÍNH tiến trình này: ca đo DÂY NỐI, tính đúng của phân hoạch là việc của `t52`.
     """
     import contextlib
@@ -8283,7 +8414,7 @@ def _in_tu_kiem_main():
     import io
     g, ten_ca, kb, log = globals(), [fn.__name__ for fn in CA], {}, []
     bam = lambda x: hashlib.sha256(json.dumps(x, sort_keys=True).encode()).hexdigest()
-    vt_gia, phat = {"sha256_test": "a" * 64, "head": "b" * 40}, {}
+    vt_gia, phat, phat_nho = {"sha256_test": "a" * 64, "head": "b" * 40}, {}, {}
 
     def ca_gia(t):
         def f():
@@ -8296,6 +8427,15 @@ def _in_tu_kiem_main():
 
     def phong(ten, do_o_nen, so):
         log.append(f"phong:{ten == phat['mong']}:{list(do_o_nen)}:{so}")
+        # #698 M8: đầu ra giả của con và kỳ vọng `gt`/`ly` chỉ phụ thuộc (tên, kb["con"]) ⇒ dựng MỘT lần mỗi khoá trong tiến trình.
+        khoa = (tuple(ten), kb.get("con"))
+        if khoa not in phat_nho:
+            phat_nho[khoa] = phong_dung(ten)
+        phat["gt"], kq_con, phat["ly"] = phat_nho[khoa]
+        return [(list(n), rc, ra) for n, rc, ra in kq_con]   # bản sao mới mỗi lời gọi, như bản dựng lại
+
+    def phong_dung(ten):   # thân cũ của `phong`, `phat` cục bộ
+        phat = {}
         nhom, phat["gt"] = [ten[0::2], ten[1::2]], bam({t: _ban_ghi_du_gia(t) for t in ten})
         # "rc": nhóm 0 rc=3 mà stdout ĐỦ; "rong": nhóm 0 rc=0 mà stdout rỗng; "hai": nhóm 0 rc=3 VÀ nhóm 1 rc=5
         # (F15: rc khác nhau để biết `main` giữ lý do của nhóm hỏng ĐẦU TIÊN).
@@ -8306,7 +8446,7 @@ def _in_tu_kiem_main():
         # `_nhan_ket_qua_con`) + rc + đuôi đầu ra — so nguyên chuỗi, không nén thành rc.
         phat["ly"] = next((f"{ly}; rc={rc}, đuôi đầu ra: {ra[-300:]!r}" for n, rc, ra in kq_con
                            for _, ly in [_nhan_ket_qua_con(n, rc, ra, ())] if ly), None)
-        return kq_con
+        return phat["gt"], kq_con, phat["ly"]
 
     def ghi(k, n, ra, ten, ket, ly, vt):
         gt = "None" if ket is None else ("dung" if bam(ket) == phat.get("gt") else "sai")
@@ -8376,6 +8516,8 @@ def _in_tu_kiem_main():
     for name, (mode, k, n, path, workers) in noi.items():
         env = {_BIEN_MANH: f"{k}/{n}", _BIEN_MANH_RA: path} if mode != "du" else {}
         kich_ban[name] = ({**env, tt: str(workers)}, {"tk": {tb}} if mode == "nen" else {"ca_do": {cn}} if mode == "nen_do" else {})
+    for h, b, t in _luoi_m3(len(ten_ca)):   # #698 M3: hong = h ca ĐẦU, bo_qua = b ca KẾ TIẾP (rời nhau), tiền kiểm bỏ = t
+        kich_ban[f"m3698-{h}-{b}-{'+'.join(t)}"] = (manh, {"ca_do": set(ten_ca[:h]), "ca_bq": set(ten_ca[h:h + b]), "tk": set(t)})
     for ten, (env, dat) in kich_ban.items():
         kb.clear()
         kb.update(dat)
@@ -8396,6 +8538,8 @@ def _in_tu_kiem_main():
         try:
             with contextlib.redirect_stdout(buf):
                 rc = main()
+        except BaseException as ex:  # noqa: BLE001 — #698 M6: ngoại lệ của `main` là DỮ LIỆU (mã thoát `NEM:`), không giết con
+            rc = "NEM:" + type(ex).__name__
         finally:
             g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"] = cu_doc, cu_so
         # F12/F15: stdout cũng là đầu ra — MỌI dòng mang nghĩa hợp đồng (chẩn đoán, đếm, giao mảnh, bảng, SỐ LIỆU),
@@ -8413,7 +8557,44 @@ def _luoi_che_do():
     so += ["16/16", "17/16", "00/8", "0/08", "01/8", "1/08", "100/8", "1/100", "0/016", "+1/8", "-1/8", "1/+8", "1/-8",
            "1:8", "1\\8", "1 /8", "1/ 8", "1//8", "1/8/", "/8", "1/", "1/8x"]
     so += ["12/16"[:i] + chr(0x660 + int("12/16"[i])) + "12/16"[i + 1:] for i in (0, 1, 3, 4)]
-    return o + [{M: x, R: "x"} for x in so] + [{M: "3/8", R: r} for r in ("y z", " y ", "  ", "a/b c/manh 3.txt")]
+    return (o + [{M: x, R: "x"} for x in so] + [{M: "3/8", R: r} for r in ("y z", " y ", "  ", "a/b c/manh 3.txt")]
+            + [{M: "3/8", R: r} for r in _RA698])   # #698 M2: 12 ô `ra` có cấu trúc (dò `s_ra_*`, `e49_ra_*`)
+
+
+# #698 M2 (dò `s_ra_*`, `e49_ra_*`): mỗi phép — normpath, expanduser, expandvars, bỏ `./` đầu, bỏ `/` cuối, gộp `//`, chéo ngược,
+# lower/casefold, NFD, NFC, Zs cuối — có ô RIÊNG làm đổi giá trị. Ký tự ngoài ASCII dựng bằng chr() (A1-iv của spec wp698).
+_RA698 = ("a/./b//c", "a/../b", "~/x", "$HOME/x", "./x", "x/", "a//b", "a" + chr(92) + "b", "X/Y.TXT",
+          "M" + chr(0x1EA3) + "nh", "Ma" + chr(0x309) + "nh", "x" + chr(0xA0))
+# #698 M1: đại diện R698 (Cf, TAB, Zs, Mn, Cc, NFKC khác chính nó) và N698 (một điểm mã mỗi nhóm Lo/Co/Cn bị loại khỏi D698).
+_R698 = (0x200B, 0xFEFF, 0x200E, 0xAD, 0x61C, 0xE0001, 0x9, 0xA0, 0x3000, 0x301, 0xB, 0xB2, 0xFF10)
+_N698 = (0x4E00, 0xE000, 0x378)
+
+
+def _d698(_nho=[]):
+    """#698 M1: `D698` DẪN XUẤT lúc chạy (luật CHO PHÉP thử, không liệt kê): mọi điểm mã trừ surrogate, không thuộc Lo/Co/Cn
+    HOẶC có NFKC khác chính nó. Cha (`t53`) đếm lại bằng biểu thức RIÊNG, không gọi hàm này. Nhớ đệm trong tiến trình (A4-g)."""
+    import unicodedata as u
+    _nho[:] = _nho or [[c for c in range(0x110000) if not 0xD800 <= c <= 0xDFFF and (
+        u.category(chr(c)) not in ("Lo", "Co", "Cn") or not u.is_normalized("NFKC", chr(c)))]]
+    return list(_nho[0])
+
+
+def _duong698():
+    """#698 M2b: đường ra ở MỌI tầng sau `_doc_che_do` — (i) 12 đường `_RA698`; (ii) mỗi điểm mã R698 ∪ N698 ở đầu, giữa, cuối
+    của `a/b` (48); (iii) MỘT đường chứa mọi điểm mã D698 ∪ N698 tăng dần, trừ U+0000 (biến môi trường không chứa được NUL)."""
+    cs = [chr(c) for c in _R698 + _N698]
+    return (list(_RA698) + [x for c in cs for x in (c + "a/b", "a" + c + "/b", "a/b" + c)]
+            + ["".join(chr(c) for c in sorted(set(_d698() + list(_N698))) if c)])
+
+
+def _luoi_m3(n):
+    """#698 M3 (dò `s2_*`, `s3_*`, `x_f50_*`, `e50_*`, `x47_*`): (hong, bo_qua, tiền kiểm bỏ) của nhánh mảnh — TRỤC trọn
+    (bo_qua 0…n, hong 1…n, tiền kiểm cả hai) cộng TÍCH BIÊN (h, b ∈ {0, 1, 2, n−1, n}, h + b ≤ n, ≥ 2 toạ độ khác 0).
+    KHÔNG phải quét trọn miền: tích đầy đủ 6612 kịch bản (spec wp698 §5 M3, §7); hằng giữa của `bo_qua` là giới hạn đã khai."""
+    tk, bien = ("batch_behavior_test", "python_alias_behavior_test"), (0, 1, 2, n - 1, n)
+    return ([(0, b, ()) for b in range(n + 1)] + [(h, 0, ()) for h in range(1, n + 1)] + [(0, 0, tk)]
+            + [(h, b, t) for h in bien for b in bien for t in ((), tk[:1], tk[1:], tk)
+               if h + b <= n and (h > 0) + (b > 0) + (t != ()) >= 2])
 
 
 def _mong_che_do(env):
@@ -8441,11 +8622,15 @@ def _luoi_git():
         bien = [hop, hop[:-1], hop + "a", " " + hop + "\n", hop + " " + hop]
         bien += [hop[:i] + c + hop[i + 1:] for i in (0, dai // 2, dai - 1) for c in ("A", "F", "g", "z", "_", "\u0660")]
         o += [(0, x, None) for x in bien] + [(rc, hop, None) for rc in (1, 2, -9)]
-    return o + [(0, "", None), (0, "not-a-head", None)] + [(0, "", e) for e in ("OSError", "SubprocessError", "TimeoutExpired")]
+    # #698 M5 (dò `z_exc_*`): ba kiểu NGOÀI tập bắt — phía mở rộng; ba kiểu sẵn có đo phía thu hẹp.
+    return o + [(0, "", None), (0, "not-a-head", None)] + [(0, "", e) for e in (
+        "OSError", "SubprocessError", "TimeoutExpired", "ValueError", "UnicodeDecodeError", "RuntimeError")]
 
 
 def _mong_git(rc, ra, loi):
     s = ra.strip()
+    if loi in ("ValueError", "UnicodeDecodeError", "RuntimeError"):   # #698 M5: `_van_tay` KHÔNG được bắt ⇒ lọt thành dữ liệu
+        return "NEM:" + loi
     return s if loi is None and rc == 0 and len(s) in (40, 64) and all(c in "0123456789abcdef" for c in s) else None
 
 
@@ -8484,9 +8669,30 @@ def _in_tu_kiem_che_do():
             return list(_doc_che_do(env))
         except ValueError as ex:
             return ["loi", str(ex).split("]")[0] + "]"]
+        except BaseException as ex:  # noqa: BLE001 — #698 M6: ngoại lệ KHÁC của mã bị đo là DỮ LIỆU (dò x4/y4/x6_t1_ra)
+            return ["NEM", type(ex).__name__]
     for ten, env in bang_env.items():
         kq[ten] = doc(env)
-    kq["luoi"] = [doc(env) for env in _luoi_che_do()]
+    # #698 M1/M2: HOME ghim (không có HOME thì `expanduser("~/x")` trả nguyên ⇒ dò expanduser thành tương đương vì máy).
+    # M1 (dò e49_*, x46_*, q_*, p_cf_*, m_*, s_*_drop_zs, x_cat_*/x3_cat_*): D698 ∪ N698 × MỌI vị trí chèn/thay của `manh`,
+    # `3/8`, `15/16`, `a/b`, qua CHÍNH `doc`; so sau vòng JSON với
+    # `_mong_che_do`. Con trả SỐ ô + ô lệch; cha đòi số ô bằng CÔNG THỨC (thu hẹp miền ⇒ ĐỎ).
+    cu_nha, lech = {x: os.environ.get(x) for x in ("HOME", "USERPROFILE")}, []
+    os.environ.update(HOME="/nha698", USERPROFILE="/nha698")
+    try:
+        kq["luoi"] = [doc(env) for env in _luoi_che_do()]
+        D, B, M, R = _d698(), _BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA
+        o1 = 0
+        for nh, f, v in (("bk", lambda s: {B: s}, "manh"), ("mh", lambda s: {M: s, R: "x"}, "3/8"),
+                         ("mh", lambda s: {M: s, R: "x"}, "15/16"), ("ra", lambda s: {M: "3/8", R: s}, "a/b")):
+            for e in (f(v[:i // 2] + c + v[i // 2 + i % 2:]) for c in map(chr, D + list(_N698)) for i in range(2 * len(v) + 1)):
+                o1 += 1   # i chẵn: CHÈN tại i//2 (0…len); i lẻ: THAY tại i//2 (0…len−1)
+                x, m = doc(e), _mong_che_do(e)   # bằng nhau TRƯỚC vòng JSON (kể cả dạng tuple) ⇒ bằng nhau sau; lệch mới đi vòng
+                if x != m and not (m[0] == "manh" and x == ["manh", tuple(m[1])]) and json.loads(json.dumps(x)) != m:
+                    lech.append([nh, ascii(e)[:90], x, m])
+    finally:
+        for x, v in cu_nha.items():
+            os.environ.pop(x, None) if v is None else os.environ.update({x: v})
     # F9 (Codex lượt 4): NGUỒN vân tay — `sha256_test` bám BYTES của `TEP_TEST`, `head` bám HEAD thật của `GOC`, không git
     # ⇒ `None`. Mọi ca khác dùng vân tay giả, nên thay nguồn bằng hằng số từng sống qua mọi ca.
     import hashlib
@@ -8513,21 +8719,68 @@ def _in_tu_kiem_che_do():
     import types
     cu_sp, goi, kq["luoi_git"] = g["subprocess"], [], []
     nem = {"OSError": lambda: OSError("giả"), "SubprocessError": lambda: cu_sp.SubprocessError("giả"),
-           "TimeoutExpired": lambda: cu_sp.TimeoutExpired("git", 60)}
+           "TimeoutExpired": lambda: cu_sp.TimeoutExpired("git", 60), "ValueError": lambda: ValueError("giả"),
+           "UnicodeDecodeError": lambda: UnicodeDecodeError("utf-8", bytes([255]), 0, 1, "giả"),
+           "RuntimeError": lambda: RuntimeError("giả")}   # #698 M5 (dò z_exc_*): ba kiểu ngoài tập bắt
+
+    def dau_head(run):   # #698 M6: CHỖ GỌI `_van_tay` chung của `_luoi_git`, quét `head` (M1/M1b) và M5b
+        g["subprocess"] = types.SimpleNamespace(run=run, SubprocessError=cu_sp.SubprocessError)
+        try:
+            return _van_tay()["head"]
+        except BaseException as ex:  # noqa: BLE001 — MỌI lớp, kể cả lớp ngoài Exception (dò y4/x5/x6 head, luoi_git)
+            return "NEM:" + type(ex).__name__
+        finally:
+            g["subprocess"] = cu_sp
     for rc, ra, loi in _luoi_git():
         def run(*a, **kw):
             goi.append([list(a[0]), sorted(kw.items())])
             if loi:
                 raise nem[loi]()
             return types.SimpleNamespace(returncode=rc, stdout=ra)
-        g["subprocess"] = types.SimpleNamespace(run=run, SubprocessError=cu_sp.SubprocessError)
-        try:
-            kq["luoi_git"].append(_van_tay()["head"])
-        except Exception as ex:  # noqa: BLE001
-            kq["luoi_git"].append("NEM:" + type(ex).__name__)
-        finally:
-            g["subprocess"] = cu_sp
+        kq["luoi_git"].append(dau_head(run))
     kq["goi_git"] = [goi[0], str(GOC)]
+    # #698 M1/M1b: stdout giả = `h` (40/64 hex) với D698 ở ba neo (chèn đầu, chèn cuối, thay ở len//2), R698 ∩ D698 ∪ N698 ở
+    # MỌI vị trí, và "x"+s+h / h+s+"x" với s ∈ T698 (mọi `c.isspace()` cộng CR LF, dẫn xuất) — kỳ vọng `_mong_git(0, v, None)`.
+    # Giới hạn ĐÃ KHAI: thành viên ngoài R698 × vị trí ngoài ba neo KHÔNG đo. TEP_TEST trỏ tệp vài byte (A4-g của spec wp698).
+    with tempfile.TemporaryDirectory(prefix="h698_") as d:
+        g["TEP_TEST"] = Path(d) / "t.py"
+        g["TEP_TEST"].write_bytes(b"698")
+        # #698 M8: bytes của TEP_TEST cấp TỪ BỘ NHỚ trong lúc quét (`head` không phụ thuộc chúng; F36 đo băm ở bảng byte dưới) —
+        # đổi MÔI TRƯỜNG giàn kiểm soát, không đổi thân `_van_tay`; khôi phục ở `finally`. Cùng lối thay `Path.read_bytes` của F35 ở `--tu-kiem-gom`.
+        cu_rb, Path.read_bytes = Path.read_bytes, lambda self, _b=g["TEP_TEST"].read_bytes(): _b
+        try:
+            DS, o2 = set(D), 0
+            T = [chr(c) for c in range(0x110000) if not 0xD800 <= c <= 0xDFFF and chr(c).isspace()] + [chr(13) + chr(10)]
+            for h in (("0123456789abcdef" * 4)[:40], ("0123456789abcdef" * 4)[:64]):
+                L, rn = len(h), [c for c in _R698 if c in DS] + list(_N698)
+                o = [(c, i) for c in D for i in (0, 2 * L, L // 2 * 2 + 1)] + [(c, i) for c in rn for i in range(2 * L + 1)]
+                for v in [h[:i // 2] + chr(c) + h[i // 2 + i % 2:] for c, i in o] + [y for s in T for y in ("x" + s + h, h + s + "x")]:
+                    o2 += 1
+                    x, m = dau_head(lambda *a, **kw: types.SimpleNamespace(returncode=0, stdout=v)), _mong_git(0, v, None)
+                    if x != m:
+                        lech.append(["head", ascii(v)[:90], x, m])
+            # #698 M5b: miền KIỂU dẫn xuất E698 = bao đóng bắc cầu BaseException.__subclasses__() LÚC QUÉT (+ chính nó; danh sách
+            # lớn dần trong vòng). Hợp đồng — luật CHO PHÉP đóng: `_van_tay` bắt E ⇔ issubclass(E, (OSError, SubprocessError)).
+            import builtins
+            E, k5, l5, h5 = [BaseException], [], [], []
+            for e in E:
+                E += [z for z in e.__subclasses__() if z not in E]
+                try:
+                    x = (e("698", [(Exception if issubclass(e, Exception) else BaseException)("698")])
+                         if issubclass(e, getattr(builtins, "BaseExceptionGroup", ())) else e.__new__(e))
+                except Exception:  # noqa: BLE001 — không dựng được ⇒ vào danh sách riêng, cha đòi RỖNG
+                    x = None
+                (k5 if type(x) is e else h5).append(f"{e.__module__}.{e.__qualname__}")
+
+                def nem5(*a, **kw):
+                    raise x
+                y, m = dau_head(nem5), None if issubclass(e, (OSError, cu_sp.SubprocessError)) else "NEM:" + e.__name__
+                if type(x) is e and y != m:
+                    l5.append([k5[-1], y, m])
+            kq["m5b"] = [k5, l5[:10], len(l5), h5]
+        finally:
+            g["TEP_TEST"], Path.read_bytes = cu[1], cu_rb
+    kq["m1"] = [o1, o2, lech[:10], len(lech)]
     # F36 (Codex lượt 15): NGUỒN băm trên bảng byte lớn/biên — lệnh ngoài giả (không cần `head`); ngoại lệ thành dữ liệu.
     kq["byte"] = {"tep": str(cu[1]), "thuc": None, "luoi": []}
     g["subprocess"] = types.SimpleNamespace(run=lambda *a, **kw: types.SimpleNamespace(returncode=1, stdout=""),

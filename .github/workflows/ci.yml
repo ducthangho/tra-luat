@@ -35,14 +35,54 @@ jobs:
   chuan-bi:
     # packet #548 (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND): nguon duy nhat cho ma tran os.
     # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
+    #
+    # packet #674 (CI-DUONG-NHANH-HO-SO r2): nguon duy nhat cho `che_do`. PR chi doi ho so
+    # (ops/{land,leases,reviews,specs}/**) => `duong_nhanh`: ba job bat buoc VAN KHOI DONG va bao ket qua,
+    # chi cac buoc nang bi `if:` muc buoc bo qua. KHONG dung `paths:` / `paths-ignore:` — workflow khong chay
+    # thi required check VANG MAT va PR ket `blocked`. Logic phan loai o `ops/ci_duong_nhanh.py` (co phan
+    # chung), khong o bieu thuc YAML. Chi `pull_request` duoc phan loai; push va workflow_dispatch LUON day du.
+    # Fail-close: chi dung chuoi `duong_nhanh` moi bo buoc; rong/la/vang => day du (phia job: `!= 'duong_nhanh'`).
     runs-on: ubuntu-latest
+    # Tran ngoai: het gio CAP JOB thi `chuan-bi` DO (ba context bat buoc khong duoc tao => PR bi chan, khong mo) — chi
+    # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
+    timeout-minutes: 20
     outputs:
       os: ${{ (github.event_name == 'workflow_dispatch'
                || contains(github.event.pull_request.labels.*.name, 'windows'))
               && '["ubuntu-latest","windows-latest"]'
               || '["ubuntu-latest"]' }}
+      che_do: ${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}
     steps:
-      - run: 'true'
+      # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: khong phan loai duoc thi phai roi
+      # ve `day_du` (chay day du), khong lam `chuan-bi` do. Do 29-09 (Issue #674 comment 5889459132, 4 luot that):
+      # `chuan-bi` do thi job phu thuoc `skipped` mang ten TRAN, context bat buoc `(ubuntu-latest)` khong duoc tao ⇒ PR bi
+      # CHAN (dong), khong mo — nhung chan toi 360 phut neu buoc treo. Nen hai buoc co `timeout-minutes` rieng: het gio
+      # ⇒ buoc that bai ⇒ `continue-on-error` giu job xanh ⇒ `che_do` vang ⇒ `day_du`.
+      - uses: actions/checkout@v4
+        if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        with:
+          # Diff `base...head` can lich su du de tinh merge-base; thieu object => `git diff` loi => day_du.
+          fetch-depth: 0
+      - name: phan loai diff (duong nhanh ho so - chi pull_request)
+        id: phan-loai
+        if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+          CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
+          CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+          # Commit merge THAT ma moi job checkout va test; phan loai hop them diff base -> no (vang/hong => day_du).
+          CI_DUONG_NHANH_MERGE: ${{ github.sha }}
+        run: python3 ops/ci_duong_nhanh.py
+      - name: che do (push / workflow_dispatch luon day du)
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          SU_KIEN: ${{ github.event_name }}
+        run: |
+          echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"
 
   gate:
     needs: chuan-bi
@@ -119,6 +159,16 @@ jobs:
         run: |
           python -m pip install --quiet ruff==0.15.15
           ruff --version
+      # packet #674: bước bị `if:` bỏ ở đường nhanh PHẢI tự nói lý do trong log, không để `skipped` trơn.
+      # Danh sách dưới KHỚP TỪNG CHỮ tên bước mang `if:` theo `che_do` của job này (ops/ci_duong_nhanh_test.py đo).
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua tl selftest (luot PR — khong sinh bang chung) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua golden-test vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua determinism-audit strict vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua release-check full vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua release-bundle x2 cùng SHA-256 vi diff chi gom ops/{land,leases,reviews,specs}/**"
       # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
       # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
       - name: PR head contains required EOL base
@@ -221,7 +271,7 @@ jobs:
       # push/handoff: chờ CI tạo full evidence exact-head"). Lượt PR vẫn chạy
       # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử.
       - name: tl selftest (luot PR — khong sinh bang chung)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py --selftest
       - name: tl selftest (co bang chung exact-identity)
         if: ${{ github.event_name != 'pull_request' }}
@@ -268,12 +318,14 @@ jobs:
       - name: workflow-audit strict
         run: python scripts/tl.py workflow-audit --strict --json
       - name: golden-test
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py golden-test --json
       # r225: r218 dựng cổng kiểm trích dẫn, r219 nối vào `/gate` (đường TAY) mà QUÊN CI (đường TỰ ĐỘNG)
       # — đúng loại hỏng r219 tự mô tả: "guard không nối vào đường chạy tự động thì guard chỉ là tài liệu".
       - name: doc-claims-check strict
         run: python scripts/tl.py doc-claims-check --strict --json
       - name: determinism-audit strict
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py determinism-audit --strict --json
       # r246 — NOI BANG PHU THUOC VAO DUONG CHAY TU DONG (M7, Issue #254).
       # Hai tep `.github/checks/ci_phamvi*.py` land 22-08 (#251, master 26856f9) ma
@@ -361,6 +413,7 @@ jobs:
         if: runner.os != 'Windows'
         run: python .github/checks/ci_phamvi_test.py
       - name: release-check full
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python scripts/tl.py release-check --full --json
       # ── LANE LAND vs LANE WORKER — chia theo REF ĐANG ĐƯỢC GÁC, không theo cò (packet #427) ──
       # `PROTOCOL:652` cấm worker sửa `RELEASE_MANIFEST.json`; `PROTOCOL:710` cấm worker CI so
@@ -422,6 +475,7 @@ jobs:
           print("manifest tam:", len(duong), "tep, tat ca deu duoc git theo doi")
           PY
       - name: release-bundle x2 cùng SHA-256
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: |
           python scripts/tl.py release-bundle --out dist/a.zip --json > /dev/null
@@ -448,7 +502,7 @@ jobs:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
         manh: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -580,6 +634,32 @@ jobs:
       - name: cài rg cho G5 (cài xong đo lại)
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
+      # packet #674: khối này chỉ có ở đường nhanh (che_do == duong_nhanh). Danh sách bước bỏ KHỚP TỪNG CHỮ tên bước
+      # mang `if:` theo `che_do` của job này; bước kiểm rẻ bù ngay dưới. Bước gọi test của chính packet KHÔNG có `if:`
+      # theo `che_do` — đó là cổng DUY NHẤT canh các `if:` cấp job/bước sau G5 (nợ Q6-i, xem ops/ci_duong_nhanh_test.py).
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-ops)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua lease-publish selftest (đo lại setup sau G5) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua bo ca gate chay TRONG cgroup duoc uy quyen (Linux) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+          echo "DUONG_NHANH: bo qua gate lifecycle selftest (nen khong co cgroup) vi diff chi gom ops/{land,leases,reviews,specs}/**"
+      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        shell: bash
+        env:
+          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+          CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
+          CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+          CI_DUONG_NHANH_MERGE: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python .claude/dev/packet_loop.py doctrine-scan --root .
+          python ops/ci_duong_nhanh.py kiem-re
+      # Phản chứng của bộ phân loại + của chính các `if:` ở trên (đột biến trên bản sao tạm). Chỉ Linux: bộ phân
+      # loại chạy ở `chuan-bi` (ubuntu-latest); test dựng kho git tạm và chạy tiến trình con. KHÔNG có `if:` theo `che_do`.
+      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)
+        if: runner.os == 'Linux'
+        run: python ops/ci_duong_nhanh_test.py
       # CONG LUOC DO v2 CHO BIEN NHAN REVIEW (PROTOCOL §8, dong 453-458). Dac ta co tu
       # `2f84531` (18-08-2026) va KHONG AI THI CONG: do tren `3bc2895`, 62 bien nhan / 10
       # khai v2 / chi 4 du truong, va `t26` chi kiem verdict path + bam. Chinh hai bien nhan
@@ -624,6 +704,7 @@ jobs:
       # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
       # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
       - name: lease-publish selftest (đo lại setup sau G5)
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           AL_VER: 1.7.7
@@ -699,7 +780,7 @@ jobs:
       # "PHẠM VI CỦA CHÍNH LỚP CGROUP" trong `gate_lifecycle.py` và
       # `ops/NO_KY_THUAT.md` mục 1. Bước này chặn thoát VÔ TÌNH, không chặn cố ý.
       - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
-        if: runner.os == 'Linux'
+        if: ${{ runner.os == 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: |
           set -euo pipefail
           MOUNT="$(awk '{for(i=1;i<=NF;i++) if($i=="-" && $(i+1)=="cgroup2"){print $5; exit}}' /proc/self/mountinfo)"
@@ -740,7 +821,7 @@ jobs:
           PY
           python .claude/dev/gate_lifecycle_test.py
       - name: gate lifecycle selftest (nen khong co cgroup)
-        if: runner.os != 'Linux'
+        if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/gate_lifecycle_test.py
 
   gate-registry:
@@ -752,6 +833,8 @@ jobs:
     # #593 r2-g4 (đo 25-09-2026, ubuntu): trần 60 cắt job 107895998908 — `test registry` chạy TUẦN TỰ;
     # bước ấy 32,65 phút trên master (run 36076793429) → 52,15 phút với #593 (job 107910512895) ⇒ 60 → 90.
     # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
+    # #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 90 → 105 cùng trần một bộ 4500 → 5400 s — số đo và lý do ở
+    # `GIAY_TOI_DA_MOT_BO` (.claude/dev/ci_dang_ky_test.py). 105 vẫn cỡ theo UBUNTU, KHÔNG bảo đảm Windows.
     # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
     needs: chuan-bi
     strategy:
@@ -759,7 +842,7 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 105
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -863,5 +946,10 @@ jobs:
         run: |
           python -m pip install --quiet ruff==0.15.15
           ruff --version
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)
+        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
+        run: |
+          echo "DUONG_NHANH: bo qua packet-loop selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
       - name: packet-loop selftest
+        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/packet_loop_test.py

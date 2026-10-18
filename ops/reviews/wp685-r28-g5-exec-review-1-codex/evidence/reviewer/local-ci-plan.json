@@ -1,0 +1,24 @@
+{
+  "candidate": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "base": "ab457c651eb4428705f0492163080b661c858b72",
+  "canonical_observed": "353da6b30f7e2f54a7bed92db97c0fe9ea70a21d",
+  "event_now": null,
+  "pr": null,
+  "ci_state": "not_run (pre-PR push policy)",
+  "gate_tier_requested": "T3",
+  "selection": "conservative full; no affected selector activated",
+  "selected_groups": [
+    "launcher targeted/adversarial",
+    "launcher full/mutation baseline+candidate 3.11+3.12",
+    "Linux full selftest",
+    "Linux release gates"
+  ],
+  "scope_limit": "Windows/3.13 not_run; no frozen integration approval",
+  "dependency_roots_sha256": {
+    "scripts/tl.py": "ae0e4f07d7a346da28f4a4d3191de08a5821a34ed3a02df4cf092433c851f8c1",
+    "scripts/tl_selftest.py": "81bbfc18f2c2b6ce8876f9ee23eb1ec8fa3b2d0154780014610af3a6a8f49f5d",
+    ".claude/dev/gate_lifecycle.py": "637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+    "scripts/gen_instructions.py": "7ebcb77404f6ad18884d3089c7e5a776d5db6fc2c54acf26b94d7453d1898412"
+  },
+  "code_change_policy": null
+}

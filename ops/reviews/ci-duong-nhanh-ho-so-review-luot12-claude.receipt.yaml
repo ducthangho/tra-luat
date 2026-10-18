@@ -1,0 +1,110 @@
+# BIEN NHAN GIAO HANG — review luot 12 cua packet #674 CI-DUONG-NHANH-HO-SO (PR #703, merge 7e5958e),
+# CUNG HO (reviewer Opus 5.5, executor Opus 5.5), tren `9f5cb77`. **`changes_requested`** — P1 0 / P2 0 / P3 1 theo bang lop.
+#
+# GHI SO HAU KY boi subagent bookkeeping cua phien session_01269GBDswLRWNxxkcxjuByt (CUNG phien da chay chuoi executor
+# g3/g4 va dieu phoi luot review nay). Khong co run.json. Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-01 ·
+# (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: ci-duong-nhanh-ho-so-review-luot12-claude-20261001-1c6e052e
+kind: review_delivery_receipt
+packet_id: CI-DUONG-NHANH-HO-SO
+packet_slug: CI-DUONG-NHANH-HO-SO
+packet_issue: 674
+target_pull_request: 703
+land_merge_commit: 7e5958e440285c8d63d2f710cf97ba20b85f2926
+revision: 2
+generation: 3
+lease_id: ci-duong-nhanh-ho-so-r2-g3-claude
+spec_path: ops/specs/CI-DUONG-NHANH-HO-SO-r2.md
+spec_hash: b6e719c999d5990f987628963c248b1ac53d377dfa5b668ac06adce76981da57
+spec_ghi_chu: >-
+  (a) sha256 blob 93155225 tai origin/ops/cap-lease-ci-duong-nhanh-ho-so (8dd7b83) = spec_hash cua lease g3/g4. Spec va
+  lease CHUA co tren master luc ghi so; chi o nhanh ops ay.
+lease_gan_theo: >-
+  (a) Doc tu ops/leases/ci-duong-nhanh-ho-so-r2-g3-claude.yaml tai origin/ops/cap-lease-ci-duong-nhanh-ho-so: cua so [2026-09-29T10:52:00Z, 2026-09-30T10:52:00Z). reviewed_sha
+  9f5cb77 commit 2026-09-30T08:57:51Z (committer, UTC); VERDICT.md mtime 2026-09-30T09:13:32Z (tep scratchpad rv12/out); comment ban chieu
+  2026-09-30T09:14:19Z.
+luot: 12
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: >-
+  lease g3 (a, doc tep): provider anthropic_claude, surface claude_code, model claude-opus-5-5, effort xhigh — TU KHAI
+  trong lease, KHONG DO DUOC tu ngoai.
+cross_provider: false
+review_class: sensitive
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Reviewer Opus 5.5 CUNG ho Claude voi executor; tep verdict tu ghi `advisory_review`. Lease khai reviewer_provider
+  openai_codex (gpt-6-astra) nhung codex het quota, reviewer doi sang Opus theo chi thi chu kho (issues/674#issuecomment-5904741561,
+  phien agent dang ho). Cong land la human_audited cua chu kho (issues/674#issuecomment-5927873457), KHONG phai luot nay.
+verdict: changes_requested
+verdict_nguon: '(a) dong dau tep `verdict: changes_requested`; tep co DUNG 1 dong bat dau bang `verdict:`'
+verdict_path: ops/reviews/ci-duong-nhanh-ho-so/review-luot12-claude-VERDICT.md
+verdict_sha256: 1c6e052ec646c0b420300d8e56b05b4cab2bf243adf3118d5211af3f15ada2a7
+verdict_bytes: 11404
+verdict_mtime: '2026-09-30T09:13:32Z (mtime tep goc rv12/out/VERDICT.md trong scratchpad cua phien)'
+hint_path: ops/reviews/ci-duong-nhanh-ho-so/review-luot12-claude-HINT.patch
+hint_sha256: a099660d9c88898e82c3a593efccb4641fe51cdee1f02e516e52cada0e6a04b4
+hint_bytes: 6094
+reviewed_sha: 9f5cb77a87c528b90783c14292e2fcf498d886c6
+reviewed_sha_nguon: '(a) dong 2 cua tep `reviewed_sha: <SHA>`; SHA day du xuat hien DUNG 2 lan trong tep (dong 2 reviewed_sha + dong 3 Reviewed commit)'
+reviewed_sha_commit_utc: '2026-09-30T08:57:51Z'
+reviewed_sha_to_tien: >-
+  (a) git merge-base --is-ancestor 9f5cb77 46bc11d rc 0; 46bc11d = cha thu hai cua merge 7e5958e (PR #703).
+evidence_url: https://github.com/ducthangho/tra-luat/blob/09abc1bfe722598e06948fe542a3fbdaaa3452bf/ops/reviews/ci-duong-nhanh-ho-so/review-luot12-claude-VERDICT.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 09abc1b cua nhanh bookkeeping claude/bookkeeping-674-pr703 — commit CHI mang ban chieu (verdict,
+  HINT, human audit); bien nhan di o commit sau, nen mo neo la to tien cua HEAD nhanh.
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/674#issuecomment-5908056135
+evidence_ban_chieu_created_at: '2026-09-30T09:14:19Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET issues/674/comments (2026-10-01 ~09:55Z): user ducthangho, app
+  claude, author_association OWNER, than 2596 byte,
+  sha256 b8b6099ae0b6a79a74aae6783b4c0c8aa9064f81155198478c9153d5bf841999, 0 chuoi '&#'. sha256 MOI tep chep (verdict + HINT) co mat NGUYEN 64 hex trong
+  than: true. Comment la BAN TOM TAT do phien agent dang, khong phai nguyen van tep. So bang chuoi hex nen
+  chuan hoa thuc the HTML cua duong doc khong anh huong phep so.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 1
+so_dem_theo: lop
+so_dem_nguon: >-
+  (a) dong `TONG: P0=0 P1=0 P2=0 P3=1` trong tep verdict; khop cac so P trong comment ban chieu (regex).
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  che_do: 'subagent Opus 5.5 (khong nap duoc review-opus-max) cua phien session_01269GBDswLRWNxxkcxjuByt'
+  model_yeu_cau: claude-opus-5-5
+  effort_yeu_cau: 'KHONG DO DUOC (luot 8-13: comment tu khai effort KHONG phai max; luot 14-18: review-opus-max, tu khai max)'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien, khong qua launcher.py. Model thuc chay, effort, thoi
+    luong, ma thoat va tinh doc lap cua reviewer so voi executor KHONG tai kiem duoc; tep verdict tu khai "Model/effort
+    thuc chay: KHONG DO DUOC".
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 5908056135 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude); author_association OWNER
+    khong tach chu kho khoi phien agent (#566).
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) Blob verdict ghim o commit ban chieu 09abc1b cua nhanh claude/bookkeeping-674-pr703; to tien cua HEAD nhanh ay;
+    CHUA la to tien cua master luc ghi so.
+  gioi_han: >-
+    Len trung_binh/cao chi khi PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH pha quan he to tien.
+verdict_usage_caveats:
+  - id: ADVISORY-CUNG-HO-KHONG-PHAI-CROSS-REVIEW
+    muc: P2
+    mo_ta: >-
+      Reviewer Opus 5.5 cung ho Claude voi executor Opus 5.5 (lease g3 tu khai); nhan advisory_review. Dung doc luot nay thanh cross_approved hay same_provider_approved. Cong land cua #674 la human_audited (issues/674#issuecomment-5927873457), KHONG phai luot nay.
+  - id: REVIEWED-SHA-CUC-BO-LUC-REVIEW
+    muc: P3
+    mo_ta: >-
+      Luc review, reviewed_sha 9f5cb77 la commit CUC BO chua day (comment ban chieu tu khai: "chua day"/"ky cuc bo"); nay la to tien cua 46bc11d (head PR #703) va cua master 7e5958e — do bang git merge-base --is-ancestor luc ghi so. Dung doc 'chua day' trong comment la trang thai hien tai.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #674 chi la BAN CHIEU. Hai ban lech thi tin blob.

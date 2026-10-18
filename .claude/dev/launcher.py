@@ -72,15 +72,18 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
 import hashlib
 import hmac
 import json
 import os
 import platform
 import re
+import runpy
 import secrets
 import shutil
 import signal
+import stat
 import subprocess
 import sys
 import tempfile
@@ -356,7 +359,10 @@ def _khoa_danh_tinh(pid: int) -> str | None:
     he = platform.system()
     try:
         if he == "Linux":
-            noi_dung = Path(f"/proc/{pid}/stat").read_text()
+            # wp685 (Q-A.7; quyết định chủ kho, PR #688 comment 5905670017) — comm bị kernel cắt
+            # 15 byte nên tên tiếng Việt thành UTF-8 hỏng; read_text() theo locale ném UnicodeDecodeError
+            # và hàm trả None cho tiến trình CÒN SỐNG. latin-1 là song ánh byte↔ký tự: không bao giờ ném.
+            noi_dung = Path(f"/proc/{pid}/stat").read_text(encoding="latin-1")
             # comm có thể chứa khoảng trắng và dấu ')' -> cắt từ ')' CUỐI CÙNG
             sau = noi_dung[noi_dung.rindex(")") + 2:].split()
             return f"linux:{sau[19]}"  # trường 22 tính từ 1 = starttime
@@ -433,7 +439,8 @@ def _thanh_vien_nhom(pgid: int) -> list[int] | None:
         ra = []
         for p in ds:
             try:
-                nd = (p / "stat").read_text()
+                # wp685 (Q-A.7): giải mã latin-1, comm hỏng không được làm tiến trình sống "biến mất"
+                nd = (p / "stat").read_text(encoding="latin-1")
                 sau = nd[nd.rindex(")") + 2:].split()
                 if sau[0] == "Z":          # zombie = đã chết, chờ thu hồi
                     continue
@@ -487,7 +494,8 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
         tt = {}
         for p in ds:
             try:
-                nd = (p / "stat").read_text()
+                # wp685 (Q-A.7): giải mã latin-1, comm hỏng không được làm cháu vắng khỏi ảnh chụp
+                nd = (p / "stat").read_text(encoding="latin-1")
                 sau = nd[nd.rindex(")") + 2:].split()
                 if sau[0] == "Z":                     # zombie = đã chết
                     continue
@@ -648,12 +656,42 @@ def _con_song(pid: int, khoa: str | None = None) -> bool:
             return False
         return khoa is None or hien == khoa
     trang_thai = Path(f"/proc/{pid}/stat")
-    if trang_thai.exists():
+    # wp685 (ESRCH: PR #679, job 109303373142) — tiến trình biến mất giữa chừng làm phép thăm dò
+    # NÉM ProcessLookupError thay vì trả False, và ngoại lệ ấy thoát khỏi _con_song. Phép hỏi
+    # chạy ĐÚNG MỘT lần, không thử lại (cross-review lượt 2, lượt 6 trên PR #688).
+    # Chỉ bắt họ OSError ở đây: nhóm phân tích, Exception, BaseException thoát nguyên
+    # (cross-review lượt 3, lượt 5).
+    # #743 (py314-path-exists-nuot-oserror; t156/t157 đỏ trên Python 3.14.6) — từ 3.14
+    # `Path.exists()` là `os.path.exists`, NUỐT mọi OSError thành False và không đi qua
+    # `Path.stat`, nên hai nhánh dưới chết câm. Thăm dò bằng `stat()` để GIỮ errno:
+    # ENOENT/ENOTDIR ⇒ không có tệp; ESRCH ⇒ chết; OSError khác ⇒ chưa kết luận.
+    try:
+        trang_thai.stat()
+        co_tep = True
+    except (FileNotFoundError, NotADirectoryError):
+        co_tep = False
+    except ProcessLookupError:
+        return False
+    except OSError:
+        co_tep = None   # KHÔNG kết luận: không stat được chưa có nghĩa là không đọc được
+    if co_tep:
+        # Nhánh tệp có giữ nguyên xi (Q-A.3), trừ cách giải mã (Q-A.7: latin-1, PR #688
+        # comment 5905670017; cross-review lượt 7, lượt 8).
         try:
-            noi_dung = trang_thai.read_text()
+            noi_dung = trang_thai.read_text(encoding="latin-1")
             return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
         except (OSError, ValueError, IndexError):
             return False
+    if co_tep is None:
+        # wp685 (zombie: cross-review lượt 1 trên PR #688) — thử đọc nội dung ĐÚNG MỘT lần,
+        # zombie vẫn phải tính là đã chết. Đọc lỗi hay nội dung hỏng ⇒ KHÔNG trả False mà rơi
+        # về os.kill(pid, 0) bên dưới (cross-review lượt 2, lượt 4: bước kill phải THỰC SỰ được
+        # gọi và quyết định). Khối bọc chỉ gồm phép đọc và biểu thức tách theo ')' CUỐI.
+        try:
+            noi_dung = trang_thai.read_text(encoding="latin-1")
+            return noi_dung[noi_dung.rindex(")") + 2:].split()[0] != "Z"
+        except (OSError, ValueError, IndexError):
+            pass
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -1114,11 +1152,19 @@ def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
 def _probe_trust_claude(ws: str, home: Path | None = None) -> dict:
     try:
         data = json.loads(((home or Path.home()) / ".claude.json").read_text(encoding="utf-8"))
-        muc = data.get("projects", {}).get(str(Path(ws).resolve()))
+        # Claude writes Windows project keys with forward slashes. Only fold
+        # separators; do not broaden trust through case, parents or symlinks.
+        khoa = str(Path(ws).resolve())
+        chuan = (lambda p: p.replace("\\", "/")) if platform.system() == "Windows" else (lambda p: p)
+        cac_muc = [v for k, v in data.get("projects", {}).items() if chuan(k) == chuan(khoa)]
+        muc = cac_muc[0] if cac_muc else None
     except (OSError, TypeError, AttributeError, json.JSONDecodeError):
         return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "khong doc duoc trust Claude"}
     if not isinstance(muc, dict) or "hasTrustDialogAccepted" not in muc:
         return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}
+    if any(not isinstance(v, dict) or "hasTrustDialogAccepted" not in v
+           or v["hasTrustDialogAccepted"] is not muc["hasTrustDialogAccepted"] for v in cac_muc):
+        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude co alias mau thuan"}
     if muc["hasTrustDialogAccepted"] is True:
         return {"trang_thai": "DAT", "chi_tiet": "Claude trust=true"}
     if muc["hasTrustDialogAccepted"] is False:
@@ -1513,10 +1559,48 @@ def lenh_check(a) -> int:
     return MA_OK
 
 
+def _kiem_checkpoint(a, kq) -> str | None:
+    path = getattr(a, "resume_checkpoint", None)
+    expected = getattr(a, "expected_checkpoint_sha256", None)
+    if not path and not expected:
+        return None
+    try:
+        if (not path or not expected or not re.fullmatch(r"[0-9a-f]{64}", expected)
+                or not a.expected_head or not a.expected_prompt_sha256):
+            raise ValueError("missing resume anchors")
+        with Path(path).open("rb") as f:
+            data = f.read(4097)
+        if len(data) > 4096 or hashlib.sha256(data).hexdigest() != expected:
+            raise ValueError("checkpoint changed")
+        cp = json.loads(data)
+        if (not isinstance(cp, dict) or type(cp.get("schema_version")) is not int
+                or cp["schema_version"] != 1
+                or set(cp) != {"schema_version", "checkpoint_id", "head", "prompt_sha256"}
+                or not isinstance(cp["checkpoint_id"], str)
+                or not re.fullmatch(r"[0-9a-f]{32}", cp["checkpoint_id"])
+                or cp["head"] != kq["head"]
+                or cp["prompt_sha256"] != kq["prompt_sha256"]):
+            raise ValueError("resume identity mismatch")
+        return cp["checkpoint_id"]
+    except (OSError, ValueError, TypeError, KeyError, UnicodeError):
+        raise Chan(MA_THAM_SO, "Checkpoint/HEAD/prompt không khớp; chưa materialize hoặc resume") from None
+
+
 def lenh_run(a) -> int:
+    # Git/probes must never inherit the snapshot, including rejected resumes.
+    snapshot = os.environ.pop("CODEX_AUTH_JSON", "")
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
+    resume_id = _kiem_checkpoint(a, kq)
+    if snapshot:
+        ket = chuan_bi_xac_thuc(that_su=True, snapshot=snapshot)
+        snapshot = ""
+        if not ket or not all(x.get("ok") for x in ket):
+            raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
+    if Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd"):
+        if _cho_snapshot_hoac_chan():
+            raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
         probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
     except Chan as e:
@@ -1570,6 +1654,15 @@ def lenh_run(a) -> int:
     }
     if neo:
         ban_ghi.update(nonce=neo["nonce"], attempt=neo["attempt"], void_reason=a.void_reason)
+    if resume_id:
+        ban_ghi["resumed_from_checkpoint"] = resume_id
+    if kq.get("prompt_sha256"):
+        checkpoint = {"schema_version": 1, "checkpoint_id": rid,
+                      "head": kq["head"], "prompt_sha256": kq["prompt_sha256"]}
+        data = (json.dumps(checkpoint, sort_keys=True) + "\n").encode("utf-8")
+        with (thu_muc / "checkpoint.json").open("xb") as f:
+            f.write(data)
+        ban_ghi["checkpoint_sha256"] = hashlib.sha256(data).hexdigest()
     _ghi_so(thu_muc, ban_ghi, khoa_ky)
 
     # --- TOCTOU của prompt. Audit codex đo được: hash xong rồi con vẫn MỞ LẠI
@@ -1624,11 +1717,21 @@ def lenh_run(a) -> int:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
                              stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
     except (OSError, ValueError) as e:
+        if isinstance(e, ValueError):
+            ban_ghi.pop("void_reason", None)
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
                        ket_thuc_utc=_bay_gio().isoformat())
         _ghi_so(thu_muc, ban_ghi, khoa_ky)
         f_out.close(); f_err.close()
         raise Chan(MA_THAM_SO, f"khong chay duoc lenh: {e}")
+
+    # Once a child has started, a timeout/nonzero exit does not prove its cause.
+    # Keep the requested label for audit, not as a machine-void certificate.
+    # The existing consumer rejects a signed record without void_reason.
+    requested_void = ban_ghi.pop("void_reason", None)
+    if requested_void:
+        ban_ghi["void_reason_requested"] = requested_void
+    ban_ghi["failure_class"] = "unknown"
 
     # Nhot con vao Job Object NGAY sau khi sinh: chi co no giu duoc hau due mo coi
     # tren Windows (xem `_job_windows`). Tren POSIX tra None, khong anh huong gi.
@@ -1726,6 +1829,11 @@ def lenh_run(a) -> int:
             pass
     ket_thuc = _bay_gio()
     ban_ghi.update(ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)
+    # wp484 g7 (connector P2 17-10, đo: run `47cf857e` ghi `xong`/0/`unknown`) — nhãn
+    # "unknown" gán lúc con vừa sinh là đúng cho lượt chết GIỮA chừng; lượt đã CHẠY HẾT
+    # và thoát 0 thì không có failure nào để phân lớp, giữ nhãn là khai sai trong sổ.
+    if ban_ghi["trang_thai"] == "xong" and ma_that == 0:
+        ban_ghi.pop("failure_class", None)
     # BẰNG CHỨNG ĐỊNH LƯỢNG cho câu "xong" — xem CẢNH BÁO ở đầu tệp. `trang_thai`
     # và `ma_thoat` chỉ nói về vòng đời tiến trình; ba số dưới đây là thứ duy nhất
     # trong sổ phân biệt được "đã làm" với "thoát 0 mà chưa làm gì". Tính ở đây
@@ -1895,9 +2003,13 @@ CONG_CU = [
     # thì lệnh tìm của agent gãy giữa chừng chứ KHÔNG tự lùi về `grep`, nên phiên mất
     # khả năng tra cứu mà không báo lỗi ở chỗ đọc được. Một công cụ mà thiếu nó phiên
     # vẫn "chạy" nhưng làm việc sai thì nguy hơn công cụ thiếu là chết ngay.
+    # wp802 (Q5/Q6): PHẢI khớp `rg.cai` của ops/cong_cu.yaml và hook — `r802_bang_cai_rg_khop_cong_cu_yaml`.
     {"ten": "rg", "bat_buoc": True, "ung_vien": ["rg"],
      "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",
-     "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e",
+     "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"
+                        " --accept-source-agreements --accept-package-agreements"
+                        " --disable-interactivity"
+                        " || choco install ripgrep --yes --no-progress",
              "Darwin": "brew install ripgrep",
              "Linux": "sudo apt-get install -y ripgrep"}},
     # bash: `.claude/settings.json` gọi hook qua bash và session-start.sh là bash
@@ -2170,8 +2282,8 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         for muc in path.split(os.pathsep):
             if not muc:
                 continue
-            try:
-                them(ten, shutil.which(ten, path=muc))
+            try:   # wp802: không `which` — trên Windows nó chèn cwd vào MỌI `muc` (Codex lượt 3 F6)
+                them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc), kieu_bash=False))
             except OSError:
                 continue
 
@@ -2189,6 +2301,23 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         elif c["ten"] == "agy" and local:
             them(ten0, Path(local) / "agy" / "bin" / "agy.exe")
     return [(t, x) for t, x in ra if Path(x).is_file()]
+
+
+def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = True) -> str | None:
+    """Bản bash gọi khi gõ TÊN TRẦN: PATH theo thứ tự, mục RỖNG = cwd (wp802, Codex lượt 1 F1).
+    `kieu_bash=False`: thứ tự PATHEXT của `which` (`x.CMD` hơn shim `x`), cho tiến trình native (F6)."""
+    duoi = [""]
+    if platform.system() == "Windows":   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13 (F6 lượt 4)
+        ext = [e.rstrip(".") for e in (moi_truong.get("PATHEXT") or ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC")
+               .split(";") if e]
+        duoi = (duoi + ext if kieu_bash else   # native: tên trần CHỈ khi đã mang đuôi PATHEXT, rồi vẫn nối đuôi
+                ([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)
+    for muc in moi_truong.get("PATH", "").split(os.pathsep):
+        for d in duoi:
+            p = os.path.join(muc or ".", ten + d)
+            if os.path.isfile(p) and os.access(p, os.X_OK):
+                return os.path.abspath(p)
+    return None
 
 
 def _phien_ban(duong_dan: str, *, env=None,
@@ -2444,130 +2573,501 @@ def quet_bien_moi_truong() -> dict:
     }
 
 
-def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
-    """Dựng credential trên ĐĨA từ biến môi trường, cho CLI nào cần đọc từ đĩa.
-
-    Hiện chỉ `codex` cần: nó đọc `~/.codex/auth.json`, không đọc biến.
-
-    KHÔNG IN NỘI DUNG, kể cả khi hỏng. Ghi quyền 0600. Idempotent: nội dung đã
-    khớp thì không đụng tệp.
-
-    QUAN HỆ VỚI `.claude/hooks/session-start.sh`: hook ĐÃ làm đúng việc này từ
-    14-08-2026, với bốn chốt được lập luận kỹ. Hàm này KHÔNG thay hook và không
-    được yếu hơn hook — nó tồn tại cho đúng một tình huống, và tình huống ấy chính
-    là thứ đã đốt ngày 15-08-2026: **hook KHÔNG chạy**. Cây làm việc lúc đó đứng
-    trên nhánh packet, mà nhánh packet rẽ từ `base_sha` CŨ HƠN commit thêm khối
-    khôi phục credential — nên hook chạy là bản cũ, không có khối ấy.
-    `.claude/skills/work-packet/SKILL.md` cảnh báo sẵn đúng cái bẫy đó ("nhánh
-    packet KHÔNG mang công cụ của kho"), và tôi vẫn rơi vào.
-
-    BỐN CHỐT LẤY NGUYÊN TỪ HOOK, đừng nới cái nào:
-      1. Không in giá trị, đọc thẳng từ môi trường (không qua đối số — `ps` thấy).
-      2. ĐÃ ĐĂNG NHẬP THÌ KHÔNG ĐÈ. Bản trên đĩa có thể MỚI HƠN biến vì `codex` tự
-         làm mới token; đè bừa là hạ cấp một credential đang tốt.
-      3. Kiểm JSON + khoá `tokens` TRƯỚC khi ghi. Biến hỏng mà ghi đè thì biến một
-         phiên "chưa đăng nhập" (dễ đọc) thành "đăng nhập hỏng" (khó đọc).
-      4. Ghi tệp tạm → `chmod 600` → `os.replace` — không hở khoảnh khắc quyền rộng,
-         không để lại tệp nửa vời nếu chết giữa chừng.
-
-    Chỉ RIÊNG việc nhận cả base64 lẫn JSON thô là thêm so với hook, và có lý do:
-    sáng 15-08-2026 tôi ghi base64 THÔ vào `auth.json`, `codex` trả `expected value
-    at line 1 column 1`, và tôi đọc thành "biến này không dùng được". Câu đó nói
-    ĐÚNG rằng TỆP không phải JSON — nó không hề nói BIẾN sai.
-    """
-    ket = []
-    thoc = os.environ.get("CODEX_AUTH_JSON", "").strip()
-    if not thoc:
-        return ket
-    dich = Path(os.path.expanduser("~/.codex/auth.json"))
-    # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
-    noi_dung_tam = None
-    for thu in (thoc, None):
-        if thu is None:
-            try:
-                thu = base64.b64decode(thoc, validate=True).decode("utf-8")
-            except Exception:
-                break
-        try:
-            json.loads(thu)
-            noi_dung_tam = thu
-            break
-        except Exception:
-            continue
-
-    # Chốt 2 — SO MỐC `last_refresh`, KHÔNG hỏi `codex login status`.
-    #
-    # Ý ĐỊNH của chốt này không đổi: đừng hạ cấp một credential trên đĩa MỚI HƠN biến
-    # (codex tự làm mới token rồi ghi lại). Nhưng CÁCH HỎI thì sai, và đã gây hại thật.
-    #
-    # ĐO ĐƯỢC 16-08-2026: chủ kho đăng nhập lại và cập nhật `CODEX_AUTH_JSON`
-    # (`last_refresh=2026-08-16T01:58`), trong khi trên đĩa vẫn là bản ĐÃ BỊ THU HỒI
-    # (`last_refresh=2026-08-14T04:13`). `codex login status` trả rc=0 "Logged in" —
-    # nó chỉ kiểm tệp đọc được — nên chốt cũ kết luận "đã đăng nhập sẵn, GIỮ nguyên" và
-    # CHẶN bản mới. Chốt sinh ra để bảo vệ bản mới hơn lại đi bảo vệ đúng bản đã chết.
-    #
-    # Nay so MỐC THỜI GIAN, thứ đo được và không nói dối. Trên đĩa mới hơn hoặc bằng thì
-    # giữ; cũ hơn thì thay. Không đọc được mốc của một trong hai bên ⇒ đi tiếp theo đường
-    # so nội dung bên dưới, đừng đoán.
-    # SO MỐC THẬT, không so TUỔI ĐÃ LÀM TRÒN. `_tuoi_anh_chup_gio` làm tròn tới 0,1 giờ
-    # = 6 PHÚT; hai credential rơi cùng một ô 6 phút thì so ra BẰNG NHAU, và nhánh
-    # `<=` giữ bản trên ĐĨA. Với refresh token XOAY VÒNG, bản đĩa giữ lại có thể đã bị
-    # vô hiệu bởi chính lần đăng nhập mới — tức chốt lại bảo vệ đúng bản đã chết, đúng
-    # sự cố mà nó sinh ra để chặn. Làm tròn chỉ để NGƯỜI ĐỌC, đừng để MÁY QUYẾT ĐỊNH.
-    moc_dia = _moc_refresh(_last_refresh_cua(dich.read_text(encoding="utf-8"))
-                           ) if dich.exists() else None
-    moc_bien = _moc_refresh(_last_refresh_cua(noi_dung_tam)) if noi_dung_tam else None
-    if moc_dia is not None and moc_bien is not None and moc_dia >= moc_bien:
-        return [{"ten": "codex", "ok": True, "doi": False,
-                 "cach": f"tren dia MOI HON hoac BANG bien ({moc_dia.isoformat()} vs "
-                         f"{moc_bien.isoformat()}) "
-                         f"— GIU nguyen, khong ha cap",
-                 "duong_dan": str(dich)}]
-
-    # Chốt 3 — giải mã + kiểm lược đồ TRƯỚC khi đụng đĩa.
-    noi_dung, cach = None, ""
-    for ten_cach, thu in (("base64 → JSON", None), ("JSON thô", thoc)):
-        if thu is None:
-            try:
-                thu = base64.b64decode(thoc, validate=True).decode("utf-8")
-            except Exception:
-                continue
-        try:
-            d = json.loads(thu)
-        except Exception:
-            continue
-        if not isinstance(d, dict) or "tokens" not in d:
-            cach = f"HỎNG: giải được ({ten_cach}) nhưng thiếu khoá bắt buộc 'tokens'"
-            continue
-        noi_dung, cach = thu, ten_cach
-        break
-    if noi_dung is None:
-        return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
-                 "cach": cach or "HỎNG: không phải base64-của-JSON, cũng không phải JSON thô"}]
-
-    if dich.exists() and dich.read_text(encoding="utf-8") == noi_dung:
-        return [{"ten": "codex", "ok": True, "doi": False,
-                 "cach": cach + " (đã khớp, không đụng)", "duong_dan": str(dich)}]
-    if not that_su:
-        return [{"ten": "codex", "ok": True, "doi": True,
-                 "cach": cach + " (thử khan)", "duong_dan": str(dich)}]
-
-    # Chốt 4 — tệp tạm, quyền hẹp, rồi mới thay.
-    dich.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    fd, tam = tempfile.mkstemp(dir=str(dich.parent))
+def _chuan_bi_va_bo_snapshot() -> None:
+    """Materialize in this process, then remove the snapshot before any child."""
+    if not os.environ.get("CODEX_AUTH_JSON"):
+        os.environ.pop("CODEX_AUTH_JSON", None)
+        return
     try:
-        os.write(fd, noi_dung.encode("utf-8"))
-        os.close(fd)
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    except BaseException:
+        ket = chuan_bi_xac_thuc(that_su=True)
+        if not ket or not all(x.get("ok") for x in ket):
+            raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
+    finally:
+        os.environ.pop("CODEX_AUTH_JSON", None)
+
+
+def _codex_home_hieu_luc() -> Path:
+    """Resolve only; standalone doctor must not depend on another dev module."""
+    raw = os.environ.get("CODEX_HOME", "")
+    home = Path(raw).expanduser() if raw else Path.home() / ".codex"
+    if not home.is_absolute() or ".." in home.parts:
+        raise OSError("CODEX_HOME must be an absolute path without parent traversal")
+    return home
+
+
+def _cho_snapshot_hoac_chan() -> bool:
+    """wp484 g7 (P2 #509 thread XML) — `CODEX_HOME` sai từng rơi ra traceback rc=1 ở
+    `credential-status` và `run … codex`, nên người gọi không phân biệt được "cấu hình
+    credential hỏng" với "launcher sập". Nay là một `Chan` có mã: KHÔNG ĐO ĐƯỢC ≠ sập."""
+    try:
+        home = _codex_home_hieu_luc()
+    except OSError as e:
+        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ: {e}") from None
+    return _dang_cho_snapshot(home)
+
+
+class _KhoCodex:
+    """Pinned directory storage. No symlink traversal, broad ACL, or repo writes.
+
+    POSIX uses directory-relative descriptors. Windows pins every ancestor without
+    FILE_SHARE_DELETE, opens reparse points themselves, and checks DACLs on handles.
+    Native calls are local only; no shell, chmod-as-ACL, or credential subprocess.
+    """
+    MAX_BYTES = 8 * 1024 * 1024
+
+    def __init__(self, home: Path, create=False, artifact=False):
+        self.home = home
+        self.stack = contextlib.ExitStack()
+        self.fd = None
+        self.windows = os.name == "nt"
         try:
-            os.unlink(tam)
-        except OSError:
-            pass
-        raise
-    return [{"ten": "codex", "ok": True, "doi": True, "cach": cach,
-             "duong_dan": str(dich)}]
+            if not home.is_absolute() or ".." in home.parts or home == Path(home.anchor):
+                raise OSError("invalid Codex home")
+            if self.windows:
+                if home.anchor.startswith("\\\\") or any(
+                        p.rstrip(" .") != p or ":" in p for p in home.parts[1:]):
+                    raise OSError("unsupported Windows Codex home")
+                self._win_init()
+                current = Path(home.anchor)
+                for part in (None, *home.parts[1:]):
+                    if part is not None:
+                        current /= part
+                        if create and not current.exists():
+                            with self._win_security(directory=True) as sa:
+                                if not self.k.CreateDirectoryW(str(current), self.c.byref(sa)):
+                                    raise OSError("cannot create private Codex directory")
+                    h = self._win_open(current, directory=True, security=current == home)
+                    self.stack.callback(self.k.CloseHandle, h)
+                    if (current / ".git").exists() or (current / ".git").is_symlink():
+                        raise OSError("Codex home is inside a repository")
+                self._win_private(h)
+            else:
+                if not hasattr(os, "O_NOFOLLOW") or os.open not in os.supports_dir_fd:
+                    raise OSError("secure directory-relative storage unavailable")
+                current = os.open(home.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+                self.stack.callback(os.close, current)
+                for part in (None, *home.parts[1:]):
+                    if part is not None:
+                        if create:
+                            try:
+                                os.mkdir(part, mode=0o700, dir_fd=current)
+                            except FileExistsError:
+                                pass
+                        current = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                                          dir_fd=current)
+                        self.stack.callback(os.close, current)
+                    try:
+                        os.stat(".git", dir_fd=current, follow_symlinks=False)
+                    except FileNotFoundError:
+                        pass
+                    else:
+                        raise OSError("Codex home is inside a repository")
+                info = os.fstat(current)
+                private = info.st_uid == os.getuid() and not info.st_mode & 0o022
+                sticky_export = (artifact and info.st_uid in (0, os.getuid())
+                                 and bool(info.st_mode & stat.S_ISVTX))
+                if not private and not sticky_export:
+                    raise OSError("Codex directory has unsafe ownership or permissions")
+                self.fd = current
+        except BaseException:
+            self.stack.close()
+            raise
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.stack.close()
+
+    def _name(self, name):
+        if not name or Path(name).name != name or name in (".", "..") or ":" in name:
+            raise OSError("invalid credential filename")
+
+    def read(self, name="auth.json"):
+        self._name(name)
+        try:
+            if self.windows:
+                import msvcrt
+                h = self._win_open(self.home / name)
+                try:
+                    self._win_private(h)
+                    fd = msvcrt.open_osfhandle(h, os.O_RDONLY | os.O_BINARY)
+                except BaseException:
+                    self.k.CloseHandle(h)
+                    raise
+            else:
+                fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=self.fd)
+                info = os.fstat(fd)
+                if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
+                        or info.st_uid != os.getuid() or info.st_mode & 0o077):
+                    os.close(fd)
+                    raise OSError("credential file has unsafe ownership or permissions")
+        except FileNotFoundError:
+            return None
+        with os.fdopen(fd, "rb") as f:
+            data = f.read(self.MAX_BYTES + 1)
+        if len(data) > self.MAX_BYTES:
+            raise OSError("credential file exceeds size limit")
+        return data
+
+    def write(self, name, data, expected):
+        self._name(name)
+        if len(data) > self.MAX_BYTES:
+            raise OSError("credential exceeds size limit")
+        if self.read(name) != expected:
+            raise OSError("credential changed during preparation")
+        temp = "." + name + ".tmp-" + secrets.token_hex(16)
+        try:
+            if self.windows:
+                import msvcrt
+                with self._win_security() as sa:
+                    h = self._win_open(self.home / temp, create=True, sa=sa)
+                try:
+                    self._win_private(h)
+                    fd = msvcrt.open_osfhandle(h, os.O_WRONLY | os.O_BINARY)
+                except BaseException:
+                    self.k.CloseHandle(h)
+                    raise
+            else:
+                fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=self.fd)
+            with os.fdopen(fd, "wb") as f:
+                f.write(data)
+                f.flush()
+                os.fsync(f.fileno())
+            if self.read(name) != expected:
+                raise OSError("credential changed before promotion")
+            if self.windows:
+                os.replace(self.home / temp, self.home / name)
+            else:
+                os.replace(temp, name, src_dir_fd=self.fd, dst_dir_fd=self.fd)
+                os.fsync(self.fd)
+        finally:
+            try:
+                if self.windows:
+                    (self.home / temp).unlink()
+                else:
+                    os.unlink(temp, dir_fd=self.fd)
+            except FileNotFoundError:
+                pass
+
+    def _win_init(self):
+        import ctypes as c
+        from ctypes import wintypes as w
+        self.c, self.w = c, w
+        self.k = c.WinDLL("kernel32", use_last_error=True)
+        self.a = c.WinDLL("advapi32", use_last_error=True)
+        V, D, H, B, S = c.c_void_p, w.DWORD, w.HANDLE, w.BOOL, w.LPCWSTR
+        for dll, name, args, result in (
+            (self.k, "CreateFileW", [S,D,D,V,D,D,H], H),
+            (self.k, "CreateDirectoryW", [S,V], B),
+            (self.k, "CloseHandle", [H], B),
+            (self.k, "GetCurrentProcess", [], H),
+            (self.k, "GetFileInformationByHandle", [H,V], B),
+            (self.k, "GetFileType", [H], D),
+            (self.k, "LocalFree", [V], V),
+            (self.a, "OpenProcessToken", [H,D,c.POINTER(H)], B),
+            (self.a, "GetTokenInformation", [H,c.c_int,V,D,c.POINTER(D)], B),
+            (self.a, "ConvertSidToStringSidW", [V,c.POINTER(w.LPWSTR)], B),
+            (self.a, "ConvertStringSidToSidW", [S,c.POINTER(V)], B),
+            (self.a, "GetSecurityInfo", [H,c.c_int,D,V,V,V,V,c.POINTER(V)], D),
+            (self.a, "ConvertSecurityDescriptorToStringSecurityDescriptorW",
+             [V,D,D,c.POINTER(w.LPWSTR),V], B),
+            (self.a, "ConvertStringSecurityDescriptorToSecurityDescriptorW",
+             [S,D,c.POINTER(V),V], B),
+        ):
+            fn = getattr(dll, name)
+            fn.argtypes, fn.restype = args, result
+        token = H()
+        if not self.a.OpenProcessToken(self.k.GetCurrentProcess(), 8, c.byref(token)):
+            raise OSError("cannot determine credential owner")
+        try:
+            length = D()
+            self.a.GetTokenInformation(token, 1, None, 0, c.byref(length))
+            buf = c.create_string_buffer(length.value)
+            if not self.a.GetTokenInformation(token, 1, buf, length, c.byref(length)):
+                raise OSError("cannot determine credential owner")
+            sid = c.cast(buf, c.POINTER(V))[0]
+            text = w.LPWSTR()
+            if not self.a.ConvertSidToStringSidW(sid, c.byref(text)):
+                raise OSError("cannot determine credential owner")
+            try:
+                self.sid = text.value
+            finally:
+                self.k.LocalFree(c.cast(text, V))
+        finally:
+            self.k.CloseHandle(token)
+
+    def _win_open(self, path, directory=False, create=False, sa=None, security=True):
+        c, w = self.c, self.w
+        # FILE_LIST_DIRECTORY (bit 1) participates in share-access accounting;
+        # an attributes-only handle does NOT prevent rename despite share=3.
+        access = (0x81 | (0x20000 if security else 0)) if directory else (0x40020000 if create else 0x80020000)
+        h = self.k.CreateFileW(str(path), access, 3 if directory else 1,
+                               c.byref(sa) if sa is not None else None,
+                               1 if create else 3, 0x02000000 | 0x00200000, None)
+        if h == c.c_void_p(-1).value:
+            error = c.get_last_error()
+            if error in (2, 3) and not create:
+                raise FileNotFoundError("credential path does not exist")
+            raise OSError(error, "cannot open credential path securely")
+        class Info(c.Structure):
+            _fields_ = [("attrs", w.DWORD), ("times", w.FILETIME * 3),
+                        ("volume", w.DWORD), ("size_hi", w.DWORD),
+                        ("size_lo", w.DWORD), ("links", w.DWORD),
+                        ("index_hi", w.DWORD), ("index_lo", w.DWORD)]
+        info = Info()
+        if (not self.k.GetFileInformationByHandle(h, c.byref(info))
+                or info.attrs & 0x400 or bool(info.attrs & 0x10) != directory
+                or self.k.GetFileType(h) != 1 or (not directory and info.links != 1)):
+            self.k.CloseHandle(h)
+            raise OSError("credential path is a reparse point or non-regular object")
+        return h
+
+    def _win_sid(self, value):
+        # SDDL may abbreviate a token SID (e.g. local RID 500 -> LA).
+        # Compare identity, never accept an alias for every caller.
+        c, w = self.c, self.w
+        sid, text = c.c_void_p(), w.LPWSTR()
+        if not self.a.ConvertStringSidToSidW(value, c.byref(sid)):
+            raise OSError("cannot resolve credential ACL principal")
+        try:
+            if not self.a.ConvertSidToStringSidW(sid, c.byref(text)):
+                raise OSError("cannot normalize credential ACL principal")
+            return text.value
+        finally:
+            if text:
+                self.k.LocalFree(c.cast(text, c.c_void_p))
+            self.k.LocalFree(sid)
+
+    def _win_private(self, handle):
+        c, w = self.c, self.w
+        sd, text = c.c_void_p(), w.LPWSTR()
+        if self.a.GetSecurityInfo(handle, 1, 5, None, None, None, None, c.byref(sd)):
+            raise OSError("cannot verify credential ACL")
+        try:
+            if not self.a.ConvertSecurityDescriptorToStringSecurityDescriptorW(
+                    sd, 1, 5, c.byref(text), None):
+                raise OSError("cannot inspect credential ACL")
+            value = text.value
+        finally:
+            if text:
+                self.k.LocalFree(c.cast(text, c.c_void_p))
+            self.k.LocalFree(sd)
+        owner = re.search(r"O:(.*?)(?=[GDS]:|$)", value)
+        acl = re.search(r"D:(.*?)(?=S:|$)", value)
+        allowed = {self.sid, "S-1-5-18", "S-1-5-32-544"}
+        if (not owner or not acl or "NO_ACCESS_CONTROL" in acl[1]
+                or self._win_sid(owner[1]) not in allowed):
+            raise OSError("credential owner or DACL is unsafe")
+        for ace in re.findall(r"\(([^()]*)\)", acl[1]):
+            fields = ace.split(";")
+            if len(fields) != 6:
+                raise OSError("unsupported credential ACL")
+            if "IO" in fields[1] or fields[0] == "D":
+                continue
+            # Python's private Windows directories use OWNER RIGHTS (OW).
+            # It is safe here only because the actual owner was checked above.
+            if fields[0] != "A" or self._win_sid(fields[5]) not in allowed | {"S-1-3-4"}:
+                raise OSError("credential ACL grants access to another principal")
+
+    @contextlib.contextmanager
+    def _win_security(self, directory=False):
+        c, w = self.c, self.w
+        class SA(c.Structure):
+            _fields_ = [("length", w.DWORD), ("descriptor", c.c_void_p),
+                        ("inherit", w.BOOL)]
+        flags = "OICI" if directory else ""
+        sddl = "D:P" + "".join(f"(A;{flags};FA;;;{sid})" for sid in (self.sid, "SY", "BA"))
+        sd = c.c_void_p()
+        if not self.a.ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl, 1, c.byref(sd), None):
+            raise OSError("cannot create private credential ACL")
+        try:
+            yield SA(c.sizeof(SA), sd, False)
+        finally:
+            self.k.LocalFree(sd)
+
+
+def _doc_auth_bytes(data: bytes) -> dict:
+    if len(data) > _KhoCodex.MAX_BYTES:
+        raise ValueError("snapshot too large")
+    parsed = json.loads(data.decode("utf-8"))
+    if not isinstance(parsed, dict) or not isinstance(parsed.get("tokens"), dict):
+        raise ValueError("tokens must be an object")
+    if any(v is not None and not isinstance(v, str) for v in parsed["tokens"].values()):
+        raise ValueError("token fields must be strings")
+    return parsed
+
+
+def _credential_id(data: bytes) -> str:
+    # Formatting, last_refresh and extra metadata cannot revive a rejected token.
+    tokens = _doc_auth_bytes(data)["tokens"]
+    # A changed access/id token or account metadata cannot rehabilitate the same
+    # rejected refresh token. That is the credential used to renew this snapshot.
+    key = "refresh_token" if tokens.get("refresh_token") else "access_token"
+    payload = {key: tokens.get(key)}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _doc_rejected(store):
+    raw = store.read("credential-recovery.json")
+    if raw is None:
+        return [], None
+    state = json.loads(raw.decode("utf-8"))
+    rejected = state.get("rejected") if (isinstance(state, dict)
+                and type(state.get("version")) is int and state["version"] == 1) else None
+    if (not isinstance(rejected, list) or len(rejected) > 4096
+            or any(not isinstance(x, str) or not re.fullmatch(r"[0-9a-f]{64}", x) for x in rejected)):
+        raise ValueError("invalid credential recovery state")
+    return rejected, raw
+
+
+def _ghi_rejected(store, identity):
+    rejected, raw = _doc_rejected(store)
+    if identity in rejected:
+        return
+    if len(rejected) >= 4096:
+        raise OSError("credential recovery history is full")
+    rejected.append(identity)
+    data = json.dumps({"version": 1, "rejected": rejected}, sort_keys=True).encode("utf-8")
+    store.write("credential-recovery.json", data, raw)
+
+
+def _danh_dau_auth_hong(home: Path, da_probe: bytes | None = None) -> bool:
+    """Ghi danh tính credential ĐÃ BỊ TỪ CHỐI vào state.
+
+    wp484 g7 (cross-review Codex lượt 1 F03) — bản trước ĐỌC LẠI `auth.json` sau probe rồi ghi
+    danh tính của bản ĐANG có. Tiến trình khác refresh giữa chừng (A bị từ chối, B vừa ghi)
+    thì B — chưa từng bị thử — bị chặn, còn A không vào lịch sử. Người gọi có bytes đã probe
+    thì truyền vào `da_probe`; `_dang_cho_snapshot` so với bản đang có nên B vẫn đi tiếp."""
+    try:
+        with _KhoCodex(home) as store:
+            data = da_probe if da_probe is not None else store.read()
+            if data is None:
+                return False
+            _ghi_rejected(store, _credential_id(data))
+        return True
+    except (OSError, ValueError, UnicodeError):
+        return False
+
+
+def _dang_cho_snapshot(home: Path) -> bool:
+    try:
+        with _KhoCodex(home) as store:
+            rejected, _ = _doc_rejected(store)
+            data = store.read()
+            return data is not None and _credential_id(data) in rejected
+    except FileNotFoundError:
+        return False
+    except (OSError, ValueError, UnicodeError):
+        return True  # unreadable recovery state is not permission to retry
+
+
+def _probe_snapshot(data: bytes):
+    """Use the existing credential probe; promote its refreshed bytes, not the input."""
+    import runpy
+    helper = Path(__file__).with_name("codex_cred.py")
+    if not helper.is_file():
+        return None, False
+    with tempfile.TemporaryDirectory(prefix="tral-cred-candidate-") as temp:
+        home = Path(temp) / "codex"
+        with _KhoCodex(home, create=True) as candidate:
+            candidate.write("auth.json", data, None)
+            ok, reason = runpy.run_path(str(helper))["_kiem_song"](home)
+            if not ok:
+                return None, reason.startswith("credential BỊ TỪ CHỐI (")
+            refreshed = candidate.read()
+            if refreshed is None:
+                return None, False
+            _doc_auth_bytes(refreshed)
+            return refreshed, False
+
+
+def chuan_bi_xac_thuc(that_su: bool = True, snapshot=None) -> list[dict]:
+    """Prepare disk credentials, without claiming health from readability/freshness.
+
+    Existing credentials are replaced only after an isolated live probe. Initial
+    materialization is structural preparation, not a live-auth success claim.
+    All path/storage errors are controlled; errors never contain snapshot bytes.
+    """
+    raw = os.environ.get("CODEX_AUTH_JSON", "") if snapshot is None else snapshot
+    raw = raw.strip()
+    if not raw:
+        return []
+    result = {"ten": "codex", "ok": False, "doi": False}
+    try:
+        home = _codex_home_hieu_luc()
+        result["duong_dan"] = str(home / "auth.json")
+        data, parsed = None, None
+        if len(raw) <= 2 * _KhoCodex.MAX_BYTES:
+            for method in ("base64", "JSON thô"):
+                try:
+                    value = base64.b64decode(raw, validate=True) if method == "base64" else raw.encode("utf-8")
+                    parsed = _doc_auth_bytes(value)
+                    data = value
+                    break
+                except (ValueError, UnicodeError):
+                    pass
+        if data is None:
+            result["cach"] = "HỎNG: đã thử base64 và JSON thô; cần JSON object có tokens object"
+            return [result]
+        with contextlib.ExitStack() as stack:
+            try:
+                store = stack.enter_context(_KhoCodex(home))
+            except FileNotFoundError:
+                if not that_su:
+                    result.update(ok=True, doi=True, cach="JSON hợp lệ; thử khan, chưa kiểm quyền đích chưa tồn tại")
+                    return [result]
+                store = stack.enter_context(_KhoCodex(home, create=True))
+            rejected, _ = _doc_rejected(store)
+            identity = _credential_id(data)
+            if identity in rejected or len(rejected) >= 4096:
+                result["cach"] = "CHỜ snapshot mới: credential này đã thất bại hoặc history đã đầy"
+                return [result]
+            old = store.read()
+            old_parsed = _doc_auth_bytes(old) if old is not None else None
+            if old == data:
+                result.update(ok=True, cach="đã khớp, không đụng; chưa phải bằng chứng sống")
+                return [result]
+            before = _moc_refresh(old_parsed.get("last_refresh")) if old_parsed else None
+            after = _moc_refresh(parsed.get("last_refresh"))
+            if before is not None and after is not None and before >= after:
+                if _credential_id(old) in rejected:
+                    result["cach"] = "CHỜ snapshot mới hơn; không lặp credential đã thất bại"
+                    return [result]
+                result.update(ok=True, cach="trên đĩa mới hơn hoặc bằng; giữ nguyên, không hạ cấp")
+                return [result]
+            if not that_su:
+                result.update(ok=True, doi=True, cach="thử khan; chưa probe, chưa ghi")
+                return [result]
+            if old is not None:
+                candidate, rejected_auth = _probe_snapshot(data)
+                if candidate is None:
+                    if rejected_auth:
+                        # wp484 g7 (Codex lượt 1 F01, lối thứ ba) — lỗi ghi state từng rơi xuống câu
+                        # "HỎNG" chung. Không nhớ hộ được qua tiến trình (nợ chủ kho chấp nhận:
+                        # `codex-rejected-state-khong-ghi-duoc`), nhưng phải nói ĐÚNG lý do.
+                        try:
+                            _ghi_rejected(store, identity)
+                        except (OSError, ValueError) as e:
+                            result["cach"] = ("CHỜ snapshot mới: auth bị từ chối nhưng KHÔNG ghi được "
+                                              f"trạng thái chờ ({type(e).__name__}) — CHẶN; giữ credential cũ")
+                            return [result]
+                    result["cach"] = ("CHỜ snapshot mới: auth bị từ chối; giữ nguyên credential cũ" if rejected_auth
+                                       else "CHƯA ĐO ĐƯỢC probe; giữ nguyên credential cũ, chưa kết luận auth hỏng")
+                    return [result]
+                refreshed = _doc_auth_bytes(candidate)
+                refreshed_time = _moc_refresh(refreshed.get("last_refresh"))
+                if before is not None and (refreshed_time is None or refreshed_time < before):
+                    result["cach"] = "từ chối snapshot sau probe vì không chứng minh được không hạ cấp"
+                    return [result]
+                data = candidate
+            store.write("auth.json", data, old)
+            result.update(ok=True, doi=True, cach="đã chuẩn bị credential an toàn" if old is None else "probe đạt; đã promote")
+            return [result]
+    except (OSError, ValueError, UnicodeError):
+        result["cach"] = "HỎNG: không đọc/ghi an toàn được credential hoặc state; không chạy child"
+        return [result]
 
 
 # Cảnh báo TRƯỚC khi hỏng, không phải sau. Sự cố 15-08-2026: credential bị thu hồi giữa
@@ -2646,12 +3146,15 @@ def _han_token_codex() -> dict:
     ra = {"doc_duoc": False, "last_refresh": None, "tuoi_anh_chup_gio": None,
           "gio_con_lai": {}}
     try:
-        d = json.loads(Path(os.path.expanduser("~/.codex/auth.json"))
-                       .read_text(encoding="utf-8"))
+        with _KhoCodex(_codex_home_hieu_luc()) as store:
+            data = store.read()
+            if data is None:
+                return ra
+            d = _doc_auth_bytes(data)
     except Exception:
         return ra
     ra["doc_duoc"] = True
-    ra["last_refresh"] = d.get("last_refresh")
+    ra["last_refresh"] = d.get("last_refresh") if _moc_refresh(d.get("last_refresh")) else None
     ra["tuoi_anh_chup_gio"] = _tuoi_anh_chup_gio(d.get("last_refresh"))
     for ten, v in (d.get("tokens") or {}).items():
         # BỎ QUA `id_token`: nó NGẮN HẠN THEO THIẾT KẾ (đo được: 1.0h ngay sau
@@ -2688,7 +3191,10 @@ def _co_chan_codex() -> str | None:
     terminal thì KHÔNG có gì đọc cờ — muốn chặn tới đó phải là cơ chế khác (đổi PATH,
     gói bọc), và ta KHÔNG làm thế vì nó lại là thứ sửa môi trường sau lưng người dùng.
     """
-    co = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
+    try:
+        co = _codex_home_hieu_luc() / CO_CHAN_CODEX
+    except (OSError, ValueError):
+        return "BI CHAN: CODEX_HOME khong hop le"
     if not co.exists():
         return None
     return (f"BI CHAN: {co} ton tai — config codex con khoi "
@@ -2712,22 +3218,34 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bo
     if bi_chan:
         # Đây là cửa THẬT SỰ chạy `codex exec`. Bản trước bỏ sót đúng cửa này.
         return (False, bi_chan)
-    lenh = duong_dan or shutil.which("codex") or "codex"
+    home = _codex_home_hieu_luc()
+    if _dang_cho_snapshot(home):
+        return False, "CHỜ snapshot Codex mới"
     try:
-        with open(os.devnull) as rong:
-            p = subprocess.run([lenh, "exec", "--skip-git-repo-check", "in ra: ok"],
-                               stdin=rong, capture_output=True, text=True,
-                               timeout=han_giay, encoding="utf-8", errors="replace")
-    except subprocess.TimeoutExpired:
-        return (False, f"qua han {han_giay}s")
-    except (OSError, subprocess.SubprocessError) as e:
-        return (False, f"khong chay duoc: {type(e).__name__}")
-    ra = ((p.stdout or "") + (p.stderr or "")).lower()
-    for dau in ("token_revoked", "refresh_token_invalidated", "token_invalidated",
-                "401 unauthorized", "please log in again", "could not be refreshed"):
-        if dau in ra:
-            return (False, f"credential BI TU CHOI ({dau})")
-    return (p.returncode == 0, f"rc={p.returncode}")
+        helper = Path(__file__).with_name("codex_cred.py")
+        if not helper.is_file():
+            return False, "Thiếu repository codex_cred.py"
+        probe = runpy.run_path(str(helper))["_kiem_song"]
+        probe.__globals__["HAN_KIEM_SONG_GIAY"] = han_giay
+        if duong_dan:
+            probe.__globals__["_co_codex"] = lambda: duong_dan
+        try:   # F03: danh tính của ĐÚNG bản sắp được probe; đọc không được thì như cũ
+            with _KhoCodex(home) as store:
+                da_probe = store.read()
+        except (OSError, ValueError):
+            da_probe = None
+        ok, reason = probe(home)
+        if not ok and reason.startswith("credential BỊ TỪ CHỐI ("):
+            # wp484 g7 (P2 #509 thread XMG) — kết quả ghi trạng thái từng bị NUỐT: không lưu được
+            # thì lần gọi sau lại thử đúng credential đã biết là hỏng mà không ai hay. Không ghi
+            # được thì không có cách nào nhớ hộ; tối thiểu phải nói ra, và lý do phải khác hẳn.
+            if not _danh_dau_auth_hong(home, da_probe):
+                return False, (f"KHÔNG ghi được trạng thái chờ snapshot sau khi {reason} — "
+                               "CHẶN: sửa CODEX_HOME (quyền/dung lượng) trước khi thử lại")
+        return ok, reason
+    except (OSError, ValueError, UnicodeError):
+        return False, "Không kiểm được credential Codex"
+
 
 
 def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
@@ -2752,6 +3270,8 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
     bi_chan = _co_chan_codex()
     if bi_chan:
         return ("CHUA_XAC_THUC", bi_chan)
+    if _dang_cho_snapshot(_codex_home_hieu_luc()):
+        return ("CHUA_XAC_THUC", "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
         # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
         # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy
@@ -3825,7 +4345,14 @@ def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
     return MA_OK
 
 
+# wp802 (Q2/Q3) — "BỊ CHE": bản TÊN TRẦN hỏng mà bản khác chạy được. Đo 17-10-2026: `doctor`
+# rc=0 trỏ bản TỐT trong khi `rg --version` gõ trong shell rc=1. Chỉ công cụ agent gõ trần:
+# KHÔNG `bash` (đầu PATH Windows là WSL), KHÔNG `python` (đã dò ba tên).
+_AP_DUNG_BI_CHE = frozenset({"rg", "git"})
+
+
 def lenh_doctor(a) -> int:
+    _chuan_bi_va_bo_snapshot()
     # ĐỌC MÔI TRƯỜNG TRƯỚC MỌI PHÉP HỎI CÔNG CỤ — thứ tự này là nội dung, không
     # phải nếp code: kết luận "công cụ không dùng được" chỉ có nghĩa khi đã biết
     # nó xác thực bằng đường nào (bài học 15-08-2026).
@@ -3849,7 +4376,16 @@ def lenh_doctor(a) -> int:
         xac_thuc_ok = None
         loi_xac_thuc = None
         xac_thuc_chua_do = None
-        for ten_uv, d in _cac_duong_dan(c, moi_truong):
+        hong_dau = None            # bản TÊN TRẦN (shell gọi) đo được là hỏng
+        ung_vien = _cac_duong_dan(c, moi_truong)
+        # Bản tên trần giải ĐỘC LẬP rồi đặt LÊN ĐẦU — đo nó trước mọi bản dự phòng.
+        tran = (_ten_tran_giai_ra(c["ung_vien"][0], moi_truong)
+                if c["ten"] in _AP_DUNG_BI_CHE else None)
+        if tran:
+            ung_vien = [(c["ung_vien"][0], tran)] + [
+                x for x in ung_vien
+                if os.path.normcase(os.path.abspath(x[1])) != os.path.normcase(os.path.abspath(tran))]
+        for ten_uv, d in ung_vien:
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
                 # HẾT NGÂN SÁCH KHÔNG PHẢI "CÔNG CỤ HỎNG" — trạng thái thứ ba.
@@ -3892,6 +4428,17 @@ def lenh_doctor(a) -> int:
                 continue
             co_mat_nhung_hong = {"goi_bang": ten_uv,
                                  "duong_dan": d, "loi": pb}
+            if tran and d == tran:
+                hong_dau = co_mat_nhung_hong
+        # Quá hạn ở bản tên trần KHÔNG tính: chưa đo được không phải hỏng (`None ≠ False`).
+        bi_che = None
+        if thay is not None and hong_dau is not None:     # `tran` chỉ có trong phạm vi
+            hd = hong_dau or {}
+            bi_che = {"trang_thai": "BI_CHE", "ban_hong": hd.get("duong_dan"),
+                      "loi": hd.get("loi"), "ban_tot": thay["duong_dan"],
+                      "cach_chua": (f"dua thu muc {os.path.dirname(thay['duong_dan'])} len "
+                                    f"TRUOC trong PATH, hoac go ban hong "
+                                    f"{hd.get('duong_dan')}")}
         if thay is not None and c.get("xac_thuc"):
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
@@ -3945,6 +4492,9 @@ def lenh_doctor(a) -> int:
                 muc["loi_xac_thuc"] = loi_xac_thuc
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
+        if bi_che:            # `co` GIỮ True: công cụ CÓ cài, chỉ bản tên trần hỏng
+            muc["trang_thai"] = "BI_CHE"
+            muc["bi_che"] = bi_che
         if thay is None and het_ngan_sach:
             muc["chua_do_duoc"] = het_ngan_sach
         if thay is None and qua_han_probe:
@@ -3964,7 +4514,7 @@ def lenh_doctor(a) -> int:
             chua_do_bat_buoc.append(c["ten"])
         elif bb and thay is not None and xac_thuc_chua_do is not None:
             chua_do_bat_buoc.append(c["ten"])
-        elif bb and (thay is None or xac_thuc_ok is False):
+        elif bb and (thay is None or xac_thuc_ok is False or bi_che):
             thieu_bat_buoc.append(c["ten"])
 
     # --- KHẢ DỤNG, không chỉ CÓ MẶT.
@@ -4094,12 +4644,16 @@ def lenh_doctor(a) -> int:
                                  and c.get("loi_xac_thuc"))
             ly_do_chua_do = ((chua_do or {}).get("ly_do")
                               or xac_thuc_chua_do)
-            dau = ("CHUA_DO" if ly_do_chua_do else
+            che = c.get("bi_che")
+            dau = ("BI_CHE" if che else "CHUA_DO" if ly_do_chua_do else
                    ("co  " if c["co"] else ("HONG" if hong else
                                              ("THIEU" if c["bat_buoc"] else "khong"))))
             mo_ta = (ly_do_chua_do or
                      (c.get("phien_ban", "") if c["co"] else c["vi_sao"]))
             con_ong = _in_an_toan(f"  {dau:<8} {c['ten']:<8} {mo_ta}")
+            if che and con_ong:
+                con_ong = _in_an_toan(f"        ten tran `{c['ten']}` goi {che['ban_hong']} - KHONG chay duoc: "
+                                      f"{che['loi']}\n        ban chay duoc: {che['ban_tot']}\n        cach chua: {che['cach_chua']}")
             if hong and con_ong:
                 con_ong = _in_an_toan(
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
@@ -4146,7 +4700,10 @@ def lenh_doctor(a) -> int:
             _in_an_toan("CHUA DO DUOC: "
                         + ", ".join(chua_do_bat_buoc))
         if thieu_bat_buoc:
-            ket_luan = "THIEU " + ", ".join(thieu_bat_buoc)
+            ds_che = {c["ten"] for c in ket if c.get("bi_che")}
+            ket_luan = "THIEU " + ", ".join(
+                f"{t} (BI_CHE: co cai, ban ten tran hong)" if t in ds_che else t
+                for t in thieu_bat_buoc)
         elif chua_do_bat_buoc:
             ket_luan = "CHUA DO DUOC " + ", ".join(chua_do_bat_buoc)
         else:
@@ -4205,6 +4762,8 @@ def build_parser():
     ap = argparse.ArgumentParser(prog="launcher.py", description=__doc__.split("\n")[0])
     ap.add_argument("--version", action="version", version=VERSION)
     sub = ap.add_subparsers(dest="lenh_con", required=True)
+    cs = sub.add_parser("credential-status", help="chốt offline: có đang chờ snapshot mới không")
+    cs.set_defaults(fn=lambda a: MA_CHUA_XAC_THUC if _cho_snapshot_hoac_chan() else 0)
 
     c = sub.add_parser("check", help="chi chay cac chot, khong goi gi")
     _them_chot(c)
@@ -4215,6 +4774,8 @@ def build_parser():
     r.add_argument("--run-root", required=True)
     r.add_argument("--name", default="")
     r.add_argument("--attempt-state", help="state packet chứa neo của lượt đang mở")
+    r.add_argument("--resume-checkpoint", help="checkpoint.json của công việc cần tiếp tục")
+    r.add_argument("--expected-checkpoint-sha256", help="SHA-256 checkpoint đã lưu trước khi thay credential")
     r.add_argument("--void-reason", choices=("infrastructure", "permission"),
                    help="lý do được buộc nguyên khối vào run.json của lượt")
     r.add_argument("--giu-ban-chup", action="store_true",
@@ -4277,6 +4838,8 @@ def main(argv=None) -> int:
     if getattr(a, "lenh", None) and a.lenh and a.lenh[0] == "--":
         a.lenh = a.lenh[1:]
     try:
+        if a.lenh_con not in ("run", "doctor", "chuan-bi"):
+            os.environ.pop("CODEX_AUTH_JSON", None)
         ma = a.fn(a)
     except Chan as e:
         # In lỗi cũng có thể vỡ ống (stderr gộp vào ống rồi bị cắt). `except

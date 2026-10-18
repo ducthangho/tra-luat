@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import os
 import platform
+import runpy
 import shutil
 import subprocess
 import sys
@@ -88,6 +89,38 @@ def _ep_utf8() -> None:
             pass
 
 
+def _codex_chay_duoc(env: dict[str, str]) -> bool:
+    """CÓ MẶT ≠ CHẠY ĐƯỢC (Codex lượt 2 G01): `shutil.which` thấy một shim hỏng (rc=127) vẫn trả
+    đường dẫn, và bridge từng materialize ngay ⇒ rc=13 trước khi hook kịp cài lại CLI. Cùng
+    phép thử với `co_chay` của hook: `--version` có hạn, đòi rc=0 VÀ có đầu ra. Child chạy với
+    env ĐÃ gỡ snapshot."""
+    duong = shutil.which("codex", path=_lay_env(env, "PATH"))
+    if not duong:
+        return False
+    sach = {k: v for k, v in env.items() if k.upper() != "CODEX_AUTH_JSON"}
+    try:
+        p = subprocess.run([duong, "--version"], stdin=subprocess.DEVNULL, capture_output=True,
+                           text=True, env=sach, timeout=8, encoding="utf-8", errors="replace")
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return p.returncode == 0 and bool(((p.stdout or "") + (p.stderr or "")).strip())
+
+
+def _vat_chat_hoa(project: Path, snapshot: str | None) -> bool:
+    """Chạy materializer của kho trong tiến trình này. `snapshot=None` ⇒ đọc os.environ (như cũ)."""
+    try:
+        launcher = runpy.run_path(str(project / ".claude/dev/launcher.py"))
+        ket = launcher["chuan_bi_xac_thuc"](that_su=True, snapshot=snapshot)
+        if not ket or not all(x.get("ok") for x in ket):
+            raise ValueError("credential unavailable")
+        return True
+    except Exception:
+        print("[session-start] HONG: khong chuan bi duoc Codex credential")
+        return False
+    finally:
+        os.environ.pop("CODEX_AUTH_JSON", None)
+
+
 def main() -> int:
     env = dict(os.environ)  # PHẢI là thao tác runtime đầu tiên, trước resolve/probe
     env["TL_LAUNCHER_ENV_DA_DOC"] = "1"
@@ -97,6 +130,21 @@ def main() -> int:
     if not script.is_file():
         print(f"[session-start] HONG: khong thay hook {script}")
         return 12
+    # Run the repository materializer in this process before even bash --version.
+    # The shell and all its descendants receive only the selected on-disk home.
+    # wp484 g7 (Codex lượt 1 F04): chưa có `codex` trên PATH thì snapshot mới KHÔNG probe được,
+    # và rc=13 ở đây chặn luôn bước `npm install` của hook — máy mới không bao giờ tự phục hồi.
+    # Khi ấy HOÃN: hook chạy với môi trường đã gỡ snapshot (cài CLI), rồi mới materialize tại
+    # đây. Snapshot thô vẫn KHÔNG bao giờ tới shell.
+    hoan = None
+    if _lay_env(env, "CODEX_AUTH_JSON") and env.get("CLAUDE_CODE_REMOTE") == "true":
+        if not _codex_chay_duoc(env):
+            hoan = _lay_env(env, "CODEX_AUTH_JSON")
+        elif not _vat_chat_hoa(project, None):
+            os.environ.pop("CODEX_AUTH_JSON", None)
+            return 13
+    os.environ.pop("CODEX_AUTH_JSON", None)
+    env = {k: v for k, v in env.items() if k.upper() != "CODEX_AUTH_JSON"}
     loi = []
     for bash in _ung_vien_bash(env):
         try:
@@ -110,9 +158,12 @@ def main() -> int:
             loi.append(f"{bash}: rc={probe.returncode}")
             continue
         try:
-            return subprocess.run([bash, str(script)], cwd=project, env=env,
-                                  stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
-                                  timeout=_tran_giay(env)).returncode
+            rc = subprocess.run([bash, str(script)], cwd=project, env=env,
+                                stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
+                                timeout=_tran_giay(env)).returncode
+            if hoan is not None and rc == 0 and not _vat_chat_hoa(project, hoan):
+                return 13
+            return rc
         except subprocess.TimeoutExpired:
             print("[session-start] HONG: hook vuot han "
                   f"{_tran_giay(env):g}s")

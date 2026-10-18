@@ -1,0 +1,24 @@
+{
+  "name": "linux-dependency-probe",
+  "command": "python3.12 -B -c 'import importlib, json, platform, shutil, subprocess; mods=['\"'\"'json'\"'\"','\"'\"'hashlib'\"'\"','\"'\"'zipfile'\"'\"','\"'\"'tempfile'\"'\"','\"'\"'venv'\"'\"']; print(json.dumps({'\"'\"'python'\"'\"':platform.python_version(),'\"'\"'modules'\"'\"':{m:bool(importlib.import_module(m)) for m in mods},'\"'\"'tools'\"'\"':{t:shutil.which(t) for t in ['\"'\"'git'\"'\"','\"'\"'bash'\"'\"','\"'\"'node'\"'\"','\"'\"'jq'\"'\"','\"'\"'actionlint'\"'\"','\"'\"'shellcheck'\"'\"']}},sort_keys=True)); subprocess.run(['\"'\"'git'\"'\"','\"'\"'--version'\"'\"'],check=True); subprocess.run(['\"'\"'bash'\"'\"','\"'\"'--version'\"'\"'],check=True); subprocess.run(['\"'\"'node'\"'\"','\"'\"'--version'\"'\"'],check=True)'",
+  "cwd": "/home/user/wp685-r28-g5-review/goi/scratch/candidate",
+  "started_utc": "2026-10-10T06:57:58.284872+00:00",
+  "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "tree": "952d7c3092e02886150bb9c936dec7b5fc779aec",
+  "base": "ab457c651eb4428705f0492163080b661c858b72",
+  "os": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+  "uname": [
+    "Linux",
+    "vm",
+    "6.18.44-fc-v114",
+    "#1 SMP PREEMPT_DYNAMIC @0",
+    "x86_64",
+    "x86_64"
+  ],
+  "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "python": "Python 3.12.3",
+  "rc": 0,
+  "duration_seconds": 0.315,
+  "ended_utc": "2026-10-10T06:57:58.625592+00:00",
+  "output_sha256": "d75703b2bdebdc4bc13a88a2d14e9123bc9eaa708dcf1d2bd08b69b571f45481"
+}

@@ -1,0 +1,7 @@
+# TAI_LAP.sh roi semantics.py (python3.13) luc ~2026-10-16T05:0xZ, phien session_017khPoiSXW9Yvefabg6MWaH; rc=0
+base OSError 9 True stat 1 read 0 kill 1
+base OSError 40 True stat 1 read 0 kill 1
+base ValueError None True stat 1 read 0 kill 1
+head OSError 9 True stat 1 read 1 kill 0
+head OSError 40 True stat 1 read 1 kill 0
+head ValueError None ValueError stat 1 read 0 kill 0

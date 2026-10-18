@@ -1,0 +1,29 @@
+{
+  "captured_utc": "2026-10-10 07:09:28 UTC",
+  "/git/ref/heads/agent/wp685-r28-g5-claude": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+  "/git/ref/heads/claude/wp685-r24-doi-executor": "7b402fdd554e9cba3ba6c40b1df08c4a7df5a85c",
+  "/git/ref/heads/ops/wp685-r28-g5-lease": "5f77db6e8b1f4926d2bf45596f55088fb53a0899",
+  "/git/ref/heads/ops/wp685-r28-g5-bang-chung": "d0d72b97330c0ddc1144e33d581f954a777d8175",
+  "projection": {
+    "event_comment": 6093646019,
+    "revision": 28,
+    "generation": 5,
+    "spec_hash": "8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156",
+    "base_sha": "ab457c651eb4428705f0492163080b661c858b72",
+    "state": "running",
+    "attempt_open": true,
+    "attempt_deadline": "2026-10-10T05:42:49Z",
+    "last_comment_ids": [
+      6093645600,
+      6093646019,
+      6094654297
+    ]
+  },
+  "packet_last_comment_ids": [
+    6049008227,
+    6091778629,
+    6094640204
+  ],
+  "pr_count": 0,
+  "identity_ok": true
+}

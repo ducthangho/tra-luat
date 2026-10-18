@@ -1,0 +1,110 @@
+# BIEN NHAN GIAO HANG — review LUOT 5 cua packet #677 DOT-BIEN-L-BIEN-CONG-KHAI r8 (PR #689, merge
+# 20ec8d5), CUNG HO (reviewer Opus 5.5, executor Opus 5.5), tren `66ec303`. **`approve`** —
+# 0 P1 / 0 P2 / 0 P3 / 4 P4 theo bang finding.
+#
+# GHI SO HAU KY boi subagent bookkeeping cua phien session_01RU4YGG (CUNG phien da dieu phoi luot review nay).
+# Khong co run.json: luot review la SUBAGENT trong phien, khong qua launcher.py. Nhan: (a) DO tu kho/REST luc
+# ghi so 2026-10-01 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: dot-bien-l-bien-cong-khai-pr689-review-5-claude-20261001-71df6aaa
+kind: review_delivery_receipt
+packet_id: wp677
+packet_slug: DOT-BIEN-L-BIEN-CONG-KHAI
+packet_issue: 677
+target_pull_request: 689
+land_merge_commit: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+revision: 8
+generation: 5
+lease_id: dot-bien-l-bien-cong-khai-exec-5-claude-20260929
+lease_gan_theo: >-
+  (a) Doc tu ops/leases/dot-bien-l-bien-cong-khai-exec-5-claude-20260929.yaml: cua so [2026-09-29T17:12:00Z, 2026-09-30T10:48:00Z). Commit reviewed_sha
+  66ec303 luc 2026-09-30T07:44:44Z (committer, UTC), tep VERDICT.md sua lan cuoi 2026-09-30T08:13:52Z (mtime tep scratchpad)
+  va comment ban chieu 2026-09-30T08:14:32Z deu nam trong cua so.
+luot: 5
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: >-
+  lease g5 (a, doc tep): provider anthropic_claude, surface claude_code, model claude-opus-5-5 —
+  model/effort executor la TU KHAI trong lease.
+cross_provider: false
+review_class: sensitive
+assurance: advisory_review
+assurance_ghi_chu: >-
+  Reviewer Opus 5.5 CUNG ho Claude voi executor Opus 5.5; tep verdict tu ghi nhan `advisory_review`. Khong
+  co bang chung phien doc lap (subagent cua chinh phien dieu phoi). Cong land cua packet la human_audited cua chu
+  kho (pull/689#issuecomment-5922154333), KHONG phai luot nay.
+verdict: approve
+verdict_nguyen_van: PASS
+verdict_nguon: '(a) dong `VERDICT:` cuoi tep; tep co 1 dong bat dau bang `VERDICT:`'
+verdict_path: ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-5-claude-VERDICT.md
+verdict_sha256: 71df6aaab293befee6e3501b1a6983dc8deeaf27fa0c6ad14bd72a45d02b73da
+verdict_bytes: 23769
+hint_path: ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-5-claude-HINT.patch
+hint_sha256: 89ff1c096c1dee763eb48b787586ab6381b1b2748861b665b80b26a2d040a016
+hint_bytes: 3634
+reviewed_sha: 66ec303effa344e1e3a3ed60bf2920a2bd8e76fe
+reviewed_sha_nguon: '(a) doc tu tep verdict: dong `reviewed_sha` xuat hien 1 lan'
+reviewed_sha_commit_utc: '2026-09-30T07:44:44Z'
+reviewed_sha_to_tien: >-
+  (a) git merge-base --is-ancestor 66ec303 20ec8d5 rc 0 (cha 85124dc); tuc commit da review nam trong lich su
+  master sau merge PR #689.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/0eb7a3121c64591eb0a9341714335fb06dfc4171/ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-5-claude-VERDICT.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit cua PR bookkeeping mang ban chieu (commit chi chua ban chieu; bien nhan di o commit sau,
+  nen mo neo la to tien cua HEAD). 0eb7a3121c64591eb0a9341714335fb06dfc4171 la SHA THAT cua commit ban chieu (do: git show --name-only 0eb7a31 = 10
+  ban chieu; git merge-base --is-ancestor 0eb7a31 5d52485 rc 0).
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/pull/689#issuecomment-5907068050
+evidence_ban_chieu_created_at: '2026-09-30T08:14:32Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET issues/comments/5907068050 (2026-10-01T01:43Z): user ducthangho, app
+  claude, than 28817 byte. sha256 tep verdict co mat NGUYEN 64 hex trong than: true.
+  sha256 tep HINT co mat nguyen 64 hex trong than: true. So bang chuoi hex nen chuan hoa thuc the
+  HTML cua duong doc khong anh huong phep so. Comment la BAN TOM TAT do phien dieu phoi dang, khong phai nguyen van tep.
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_p4: 4
+so_dem_theo: finding
+so_dem_nguon: '(a) dem hang theo cot muc o bang lop/finding cuoi tep verdict; khop dong tong cua comment ban chieu.'
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  surface_nguon: >-
+    (b) THUAT LAI: general-purpose subagent (model: opus) cua phien session_01RU4YGG. Subagent chay trong Claude Code nen be mat hop dong la claude_code.
+  che_do: 'general-purpose subagent (model: opus) cua phien session_01RU4YGG'
+  model_yeu_cau: claude-opus-5-5
+  effort_yeu_cau: 'max (tu khai; KHONG DO DUOC)'
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien dieu phoi, khong qua launcher.py. Model thuc
+    chay, effort, thoi luong, ma thoat va tinh doc lap cua reviewer so voi executor KHONG tai kiem duoc.
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 5907068050 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude);
+    author_association OWNER khong tach chu kho khoi phien agent (#566).
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) Blob verdict ghim o commit ban chieu cua nhanh bookkeeping claude/bookkeeping-677-pr689; to tien cua HEAD
+    nhanh ay; CHUA la to tien cua master luc ghi so.
+  gioi_han: >-
+    Len trung_binh/cao chi khi PR bookkeeping land bang MERGE commit hoac fast-forward; SQUASH pha quan he to tien.
+verdict_usage_caveats:
+  - id: ADVISORY-CUNG-HO-CLAUDE-KHONG-PHAI-CROSS-REVIEW
+    muc: P2
+    mo_ta: >-
+      Reviewer Opus 5.5 cung ho Claude voi executor; nhan advisory_review. Dung doc luot nay thanh
+      cross_approved hay approval doc lap. Khong luot codex nao neo head cuoi 0614f7f; cong land la human_audited.
+  - id: PASS-TREN-HEAD-CU-KHONG-PHAI-HEAD-LAND
+    muc: P3
+    mo_ta: >-
+      PASS neo 66ec303, KHONG phai head da land 0614f7f: sau luot nay con hai luot va (4dc226b, 3c308b3/adad5f5)
+      va mot merge master. HINT.patch (P4) KHONG duoc ap o luot 5; mot phan noi dung cua no di vao cac luot sau
+      theo duong khac. Dung doc PASS nay thanh duyet head cuoi.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren PR #689 chi la BAN CHIEU TOM TAT: sua duoc,
+  va khong mang nguyen van. Hai ban lech thi tin blob.

@@ -1,0 +1,7 @@
+COMMAND: ['/usr/bin/python3.13', '-B', '/home/user/rv773/ops/land_evidence_nguon_test.py', '--mot-ca', 'c06_l3_luot2_moc_sau_merged_at']
+RC: 3
+DO:c06_l3_luot2_moc_sau_merged_at:mốc trước merge mọi dạng (03:00+0100 = 02:00Z: độ lệch phải được QUY ĐỔI): mong rc=0, được 1 ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L3 $.pre_merge_checks[2]: mốc 2026-10-16T03:00:00+0100 không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+

@@ -1,0 +1,107 @@
+# BIEN NHAN GIAO HANG — review THI HANH luot 3 cua wp678 r17 g1 (Issue #678, PR #718, merge a671920), CUNG HO
+# (subagent review-opus-max, Claude Opus 5.5) tren 0dd86c6. `changes_requested` — 0 P1 / 0 P2 / 2 P3 theo lop.
+# GHI SO HAU KY boi subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT (CUNG phien da dieu phoi luot
+# review nay). Khong co run.json. Nhan: (a) DO tu kho/REST/tep luc ghi so 2026-10-08 · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp678-exec-review-3-claude-a6b1e3bd
+kind: review_delivery_receipt
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+packet_issue: 678
+mission_issue: 682
+target_pull_request: 718
+land_merge_commit: a671920b6caa32337831e453b37ea8477e6ceef5
+revision: 17
+generation: 1
+lease_id: wp678-r17-g1-claude
+spec_path: ops/specs/lease-id-ep-kieu-yaml-r17.md
+spec_hash: f39091a1d2be7629a11eb53b7daf3f076ce91f701012f7093108a98e91d140cc
+spec_ghi_chu: >-
+  (a) sha256 blob ops/specs/lease-id-ep-kieu-yaml-r17.md tai cd25aba = spec_hash lease g1 = dong spec_sha256 dong 3
+  tep verdict.
+lease_gan_theo: >-
+  (a) Cua so g1 [2026-10-08T05:45:00Z, 2026-10-09T05:45:00Z) (han goc; rut han ve 19:00Z trong PR bookkeeping nay).
+  Comment ban chieu 2026-10-08T11:46:08Z trong cua so.
+luot: 3
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: 'lease g1 (a, doc tep): provider anthropic_claude, surface claude_code, model claude-opus-5-5, effort >= medium — TU KHAI, KHONG DO DUOC tu ngoai.'
+cross_provider: false
+review_class: sensitive
+assurance: review_deferred
+assurance_ghi_chu: >-
+  Lease g1 reviewer_ghi_chu: subagent review-opus-max trong phien dieu phoi, muc review_deferred (Q10/Q12). Cung ho
+  voi executor; cong land la human_audited cua chu kho (pull/718#issuecomment-6063240400), khong phai luot nay.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 tep `verdict: changes_requested`; tep co DUNG 1 dong bat dau bang `verdict:`'
+verdict_path: ops/reviews/wp678-exec-review-3-claude-verdict.md
+verdict_sha256: a6b1e3bd9b2f9d38b0fce80da2effaf7a968bb0004e2516fc556cdde9c570bd6
+verdict_bytes: 42905
+verdict_ban_goc: 'tep goc cr678-x3/goi/VERDICT.md trong scratchpad cua phien (cp, do lai sha256 tren blob 9e5da35)'
+hint_path: ops/reviews/wp678-exec-review-3-claude-HINT.patch
+hint_patch_sha256: 55caec390d086e8985f5085de2f333f84afd32fb829b48a40289b60c694f23b8
+hint_patch_bytes: 8653
+hint_ghi_chu: '(a) HINT chep NGUYEN BYTE tu cr678-x3/goi/HINT.patch vi lease land_obligations doi ''ghi so verdict + HINT cac luot''; bam khop comment ban chieu.'
+reviewed_sha: 0dd86c6687ff3906f67649798b65650277d34204
+reviewed_sha_nguon: '(a) dong 2 tep verdict; `git merge-base --is-ancestor <sha> a671920` rc 0 (to tien cua master)'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9e5da35b0cb96d2d3f3ddcc01ac5fc434c7f8ed1/ops/reviews/wp678-exec-review-3-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo BLOB ghim commit 9e5da35 cua nhanh bookkeeping claude/bookkeeping-678-land — commit CHI mang ban sao; bien nhan
+  di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven.
+evidence_ban_chieu: https://github.com/ducthangho/tra-luat/issues/678#issuecomment-6059156411
+evidence_ban_chieu_created_at: '2026-10-08T11:46:08Z'
+evidence_ban_chieu_doi_chieu: >-
+  (a) Doc lai qua REST GET repos/ducthangho/tra-luat/issues/678/comments (gh api, 2026-10-08 ~15:30Z,
+  readback-comments-678-p1.json trong ops/land/pr718-wp678-provenance/): user ducthangho, app claude,
+  author_association OWNER, than 2574 byte, sha256 9e9d7a8e963c5b82199060b54addb5725d326bd4a3f198736c93f3493e342726.
+  verdict_sha256, hint_patch_sha256 va spec_sha256 co mat NGUYEN 64 hex trong than. Comment la BAN TOM TAT, khong phai
+  nguyen van tep.
+so_p1: 0
+so_p2: 0
+so_p3: 2
+so_dem_theo: lop
+so_dem_nguon: '(a) dong ''Tom tat'' dau tep verdict (0 P1 · 0 P2 · 2 P3); khop tieu de comment ban chieu'
+
+model_reviewer_identity:
+  provider: anthropic_claude
+  surface: claude_code
+  transport: machine/local
+  che_do: 'subagent review-opus-max (Claude Opus 5.5) trong phien dieu phoi, khong qua launcher.py'
+  che_do_nguon: '(a) dong 4-5 tep verdict: reviewer_provider anthropic, reviewer_model claude-opus-5-5 (subagent review-opus-max, tu khai)'
+  model_yeu_cau: claude-opus-5-5
+  effort_yeu_cau: max
+  dinh_nghia_agent_sha256: e225b81cf2fbdd0f05a54a689cac17db8972b2f8c0684a0a30931875cd4b792c
+  dinh_nghia_agent_nguon: '(b) lease g1 reviewer_ghi_chu (~/.claude/agents/review-opus-max.md); khong do lai luc ghi so'
+  model_da_chay: KHONG_DO_DUOC
+  KHONG_do_duoc: >-
+    Khong co session_run_id/run.json: luot la subagent trong phien, khong qua launcher.py. Model thuc chay, effort, thoi
+    luong va tinh doc lap so voi executor KHONG tai kiem duoc.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(a) user.login cua comment 6059156411 doc qua REST luc ghi so'
+  ghi_chu: >-
+    Comment do PHIEN AGENT dang bang credential chu kho (performed_via_github_app.slug claude); author_association OWNER
+    khong tach chu kho khoi phien agent (#566).
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) Blob verdict ghim o commit ban sao 9e5da35 cua nhanh claude/bookkeeping-678-land; to tien cua HEAD nhanh ay;
+    CHUA la to tien cua master luc ghi so (va CHUA day).
+  gioi_han: >-
+    Len trung_binh chi khi nhanh duoc push nguyen ven va PR bookkeeping land bang MERGE commit hoac fast-forward;
+    SQUASH/rebase pha quan he to tien.
+
+verdict_usage_caveats:
+  - id: SUBAGENT-CUNG-HO-REVIEW-DEFERRED
+    muc: P2
+    mo_ta: >-
+      Reviewer Claude Opus 5.5 chay bang SUBAGENT review-opus-max trong phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT,
+      CUNG ho Claude voi phien executor g1; khong session_run_id, khong run.json, khong modelUsage. Muc review_deferred:
+      dung doc luot nay thanh cross_approved hay same_provider_approved.
+nguon_co_tham_quyen: >-
+  TEP CO BAM trong kho (verdict_path + verdict_sha256). Comment tren #678 chi la BAN CHIEU. Hai ban lech thi tin blob.

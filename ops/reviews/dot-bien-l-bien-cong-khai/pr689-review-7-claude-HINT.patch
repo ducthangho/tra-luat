@@ -1,0 +1,38 @@
+diff --git a/ops/lease_publish_test.py b/ops/lease_publish_test.py
+index 8a9618b..cf25ed1 100644
+--- a/ops/lease_publish_test.py
++++ b/ops/lease_publish_test.py
+@@ -6479,6 +6479,7 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
+             b = nhip.stat().st_size if nhip.exists() else -1
+             return b > a, a, b
+ 
++        nguy = {1, os.getpid(), os.getppid(), *(g(0) for g in (getattr(os, "getpgid", None), getattr(os, "getsid", None)) if g)}
+         def doc_pid(tep, nhan, han=15.0):
+             """Tệp PID do tiến trình KHÁC ghi (`open(..,'w').write(..)`) KHÔNG nguyên tử: CÓ mà còn RỖNG — t154
+             ĐỎ `int('')` dưới tải t125 (30-09-2026). Chờ tới khi là PID HỢP LỆ; hết hạn ⇒ `bang`, không nuốt/treo.
+@@ -6487,7 +6488,7 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
+             while True:
+                 try: nd = tep.read_text(encoding="utf-8").strip()
+                 except OSError: nd = None
+-                if nd and re.fullmatch(r"[1-9][0-9]*", nd) and int(nd) not in (os.getpid(), os.getppid()): return int(nd)
++                if nd and re.fullmatch(r"[1-9][0-9]*", nd) and int(nd) not in nguy: return int(nd)
+                 bang(time.monotonic() < het, f"{nhan}: tệp PID không thành PID hợp lệ sau {han} s (đọc cuối: {nd!r})")
+                 time.sleep(0.05)
+ 
+@@ -6503,7 +6504,7 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
+             except (OSError, subprocess.SubprocessError):
+                 pass
+ 
+-        for x in ("0", str(os.getpid()), str(os.getppid())):   # lượt 6 L2: đích giết NGUY HIỂM ⇒ ĐỎ ở hạn, không trả về
++        for x in ("0", "1", str(os.getpid()), str(os.getppid()), *(str(g(0)) for g in (getattr(os, "getpgid", None), getattr(os, "getsid", None)) if g)):   # đích giết NGUY HIỂM (lượt 6 L2 + lượt 7: init, ta, cha, trưởng nhóm, phiên) ⇒ ĐỎ ở hạn
+             (Path(td) / "tu.pid").write_text(x, encoding="utf-8")
+             try: bang(False, f"doc_pid trả đích giết nguy hiểm {doc_pid(Path(td) / 'tu.pid', 'tự kiểm', 0.2)!r}")
+             except AssertionError as e: bang(str(e).startswith("tự kiểm:"), str(e))
+@@ -10925,6 +10926,7 @@ def t202_M3_M4_moi_chot_quyet_dinh_co_phan_chung_rieng():
+                           ("M4 nhật ký rỗng", True, kq(0, [dau], goi=[])),
+                           ("M4 nhật ký chỉ POST", True, kq(0, [dau], goi=[("POST", ep)])),
+                           ("M4 cắt dòng đầu", True, kq(0, [dau], goi=GOI_M4[1:])), ("M4 đảo thứ tự", True, kq(0, [dau], goi=GOI_M4[::-1])),
++                          ("M4 thừa lời gọi phía sau", True, kq(0, [dau], goi=GOI_M4 + [("GET", ep)])), ("M4 thừa lời gọi phía trước", True, kq(0, [dau], goi=[("GET", ep)] + GOI_M4)),
+                           ("M4 thiếu GET loại số hiệu", True, kq(0, [dau], goi=GOI_M4[:1] + GOI_M4[2:]))):
+         if bool(_lech_m4(k)) != lech: sai.append(nhan)
+     tt = "**Lease `wp-ok-1`**"

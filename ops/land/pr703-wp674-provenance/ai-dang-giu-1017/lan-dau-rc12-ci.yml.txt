@@ -1,0 +1,2 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CHAN [12]: NHÁNH_CỤC_BỘ_TỤT_SAU: master -> refs/remotes/origin/master (0/751). ai-dang-giu quét refs/heads/*; chữa: git branch -f master refs/remotes/origin/master

@@ -1,0 +1,6 @@
+# do quan he cha / tree cua merge commit d8b15cb (PR #779) — 2026-10-18T02:40:38Z
+$ git show -s --format='%H %P %T' d8b15cb
+d8b15cb0730c85e7019aee627c3bfa645a6d3eaf 73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8 f9d84d70fb46540bbecfae963c9afb4a2b48984d 6474598db320df3de03d0251ba9305dde1875b3f
+$ git rev-parse 'f9d84d7^{tree}'
+4e712f37bf014e18e87df07d0f94d0ba353fb3e7
+# => cha thu nhat 73bf92c, cha thu hai f9d84d7 (head PR #779); tree merge 6474598 != tree head 4e712f3

@@ -1,0 +1,259 @@
+# HO SO LAND — packet #685 wp685 LAUNCHER-CON-SONG-ESRCH r28 g5, ma qua PR #732.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1. Duong dan ops/land/*-land-evidence.yaml la quy uoc thuc te
+# (tien le pr714 #710, pr718 #678, pr707 #705).
+#
+# TRANG THAI: merged (77fb028), `landed: true` THEO QUYET DINH CHU KHO (pull/739#issuecomment-6103749546,
+# 2026-10-11T00:27:22Z), CO HIEU LUC tu merge commit cua PR ghi so #739. Gate hau merge XANH tren 11cf185 (run
+# 38076548735, 14/14). Lan ghi so thu nhat: PR #734 (404ecbb), landed false.
+# "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do lai trong phien ghi so (lenh ghi kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu
+# cua luot review/phien khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr732-wp685-provenance/ (SHA256SUMS.txt). Moi phep do REST: `gh api <duong dan>` (GET).
+
+schema_version: 1
+mission_id: gh-686
+packet_id: wp685
+packet_slug: LAUNCHER-CON-SONG-ESRCH
+packet_issue: 685
+mission_issue: 686
+generation: 1
+generation_nghia: >-
+  Lan land THU NHAT cua ma wp685 r28 (land-attempt generation; khac generation LEASE g5).
+pham_vi_land: ma
+provider: claude
+provider_taxonomy_da_provider: anthropic_claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+operating_system: linux
+role: land_operator
+session_id: https://claude.ai/code/session_014N46zU47UjPmRbH4UNrEf5
+recorded_by: claude-session (phien ha tang chay reviewer Codex luot 2, sau do giu vai land operator theo uy quyen 6099610473)
+mat_quan_sat_duoc_the_nao: >-
+  Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
+github_write_channel: >-
+  Merge PR #732 bang `gh api --method PUT repos/ducthangho/tra-luat/pulls/732/merge -f merge_method=merge
+  -f sha=3089b54455a44b8cfcf2fd27b01894bc2a5d764d` tu phien nay (token chu kho qua proxy phien); merge-response.json:
+  merged true, sha 77fb028. readback-pr-732.json merged_by ducthangho — KHONG tach duoc phien voi chu kho (#338/#566,
+  tu khai). Ready-for-review do chu kho bam (su kien pull_request.ready_for_review, actor ducthangho, 16:21:03Z).
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-732.json: merged true, merged_at 2026-10-10T16:41:22Z, merge_commit_sha
+    77fb0288dca8483f28209cae42c38d4cb97397d9, head 3089b54455a44b8cfcf2fd27b01894bc2a5d764d.
+  merge_commit:
+    sha: 77fb0288dca8483f28209cae42c38d4cb97397d9
+    parents: [bc6630afacf378b8f69c31fe467b53e64f5d9e4d, 3089b54455a44b8cfcf2fd27b01894bc2a5d764d]
+    tree: 76ba29b170f5b685663296beba650c86565127bf
+    nguon: "measured — `git show -s --format='%H %P %T' 77fb028`; `git diff --stat bc6630a 77fb028` = 2 tep +1129/-7 (dung write set)."
+  landed: true
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #739 dua dong nay vao master (cac commit truoc tren nhanh ghi so va PR #734 van ghi
+    `landed: false`). Comment 6103749546 la NEO cua quyet dinh, khong phai moc hieu luc (tien le #710 / PR #722).
+  quyet_dinh_chu_kho:
+    trang_thai: measured
+    lenh_nguyen_van: '"**Quyết định:** WP685 / #685 **landed** tại `77fb028`. `landed` có hiệu lực từ merge commit của PR ghi sổ #739."'
+    luc: '2026-10-11T00:27:22Z (created_at = updated_at)'
+    neo_ben: https://github.com/ducthangho/tra-luat/pull/739#issuecomment-6103749546
+    neo_ben_do_duoc: >-
+      measured (readback-comment-6103749546.json): user ducthangho, author_association OWNER, performed_via_github_app
+      null, than 1050 byte sha256 65d8b1e011415f045c3d959ff102380a469d6f63aef2fb81ad25d5dab01057af. Gia han land operator
+      toi 2026-10-11T12:00:00Z chi de ghi dong nay va merge PR #739 bang merge commit khi CI bat buoc xanh. Than comment
+      do phien nay SOAN, chu kho dang (OWNER + app null khong tach chu kho khoi token chu kho, #566 — tu khai).
+    neo_phu:
+      url: https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6103888794
+      luc: '2026-10-11T00:45:59Z (created_at = updated_at)'
+      nguoi_dang: ducthangho
+      author_association: OWNER
+      performed_via_github_app: null
+      so_byte: 631
+      sha256: cc38f7996531c5239f2e4e8ad760fcc20a2720a132f90de81251e65342e8f09b
+      ghi_chu: >-
+        Đây là neo PHỤ (packet no-p3-ho-so #750): comment quyết định landed của chủ kho trên #685, mọi giá trị đo
+        từ readback-comment-6103888794.json (gh api GET 2026-10-15 ~10:38Z). Neo chuẩn vẫn là neo_ben =
+        https://github.com/ducthangho/tra-luat/pull/739#issuecomment-6103749546; landed_hieu_luc_tu không đổi.
+  landed_ly_do: >-
+    PROTOCOL §10.2.4: landed = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va bookkeeping xong. Uy quyen
+    6099610473 ghi: "gate tren master sau merge phai xanh moi duoc goi la landed". Xem con_thieu_de_goi_landed.
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-77FB028
+      trang_thai: 'DA DONG — measured: gate push 38076548735 tren 11cf185 success 14/14 (2026-10-10T20:12:37Z)'
+      dong_bang: >-
+        11cf1857a80d0da48e7f1ce8922baad9d1be47b5 (merge PR #733 cua phien khac: tai sinh RELEASE_MANIFEST.json 183 -> 186
+        + ratchet goi) la commit master dau tien sau 77fb028 co gate push chay tron. 77fb028 la to tien cua 11cf185
+        (`git merge-base --is-ancestor` rc 0). Run 38076548735: event push, run_attempt 1, 14 job deu success, trong do
+        `gate (ubuntu-latest)` gom buoc release-verify strict (readback-run-38076548735.json, readback-jobs-38076548735.json,
+        readback-check-runs-11cf185.json). Gate cua 404ecbb (merge #734, run 38077773440) bi HUY khi con cho (0 job) vi
+        concurrency master chi giu mot luot cho; khong dung no lam bang chung.
+        Lich su cua muc nay (truoc khi dong):
+      mo_ta: >-
+        Run push 38068681967 tren 77fb028: 13/14 job success, `gate (ubuntu-latest)` failure dung mot buoc
+        `release-verify strict (lane LAND — manifest committed)`. Master truoc PR (47c9ba4, run 38065934579): cung 13/14,
+        cung buoc. `scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` tai cho: 47c9ba4 extra_files =
+        [changelog.d/wp-725.md, changelog.d/wp-726.md]; 77fb028 = [.., changelog.d/wp-727.md] (them tu PR #731).
+        Khong tep nao cua PR #732 (.claude/dev/** nam ngoai manifest). launcher (Windows that) push 38068682069 tren
+        77fb028: success.
+      can_da_lam: >-
+        PR rieng tai sinh RELEASE_MANIFEST.json: PR #733 (phien khac) merge 11cf185. Packet trung viec cua phien nay
+        (#735, PR #736) da dong not_planned; lease manifest-725-727-g1 rut han 19:00Z, HẾT_HẠN, NGƯỜI_GIỮ 0.
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: 'DA DONG — pull/739#issuecomment-6103749546 (2026-10-11T00:27:22Z)'
+      mo_ta: 'Chu kho quyet landed tai PR ghi so nay (uy quyen 6099610473: "`landed` chi do tôi quyết ở PR ghi sổ").'
+    - id: NGHIEM-THU-RUT-HAN-LEASE
+      trang_thai: 'DA DONG — measured 2026-10-10T17:31:18Z'
+      mo_ta: >-
+        Rut han push 0f1b008 len ops/wp685-r28-g5-lease (16:42Z, truoc han moi 17:30Z); run dang lease 38068733276
+        success. Sau 17:30Z: clone moi + fetch '+refs/heads/*', ls-remote vs for-each-ref 505/505 (thieu 0, thua 0);
+        `lease_publish.py ai-dang-giu` cho .claude/dev/launcher.py va .claude/dev/launcher_test.py: ca hai rc 0
+        "NGƯỜI_GIỮ 0", wp685-r28-g5-claude-20261009 HẾT_HẠN (ai-dang-giu-sau-1730.txt).
+
+input_packet_generations:
+  - packet_issue: 685
+    revision: 28
+    spec_path: ops/specs/launcher-con-song-esrch-r28.md
+    spec_sha256: 8007edf4e00aaefc298bf299bf19be9a71c54e73ff6a1610eb676a806773e156
+    spec_sha256_nguon: 'measured — sha256 `git show origin/claude/wp685-r24-doi-executor:<spec>` = spec_hash lease g5.'
+    write_set: [.claude/dev/launcher.py, .claude/dev/launcher_test.py]
+    write_set_hash: 0a2ec511e97d0e14ff9be00f73e539bf638d78639d8eda25fb52ebf46e1c9f65
+    leases:
+      - lease_id: wp685-r28-g5-claude-20261009
+        generation: 5
+        cua_so: '2026-10-10T00:38:00Z..2026-10-11T00:38:00Z (rut ve 2026-10-10T17:30:00Z o 0f1b008)'
+        environment: cloud
+        start_from: ab457c651eb4428705f0492163080b661c858b72
+        cap_quyen: 'issues/686#issuecomment-6093540100 (grant), event 6093645123'
+        sha256_truoc_rut_han: fe9ce1eb6d0c36c695385aae8e1b58d12fa32981d2fee8105de356268e158761
+        thay_the_cho: []
+    lease_ve_master: 'qua merge nhanh ops/wp685-r28-g5-lease (0f1b008) vao nhanh ghi so nay.'
+
+candidates:
+  - pr: 732
+    head: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+    tree: 952d7c3092e02886150bb9c936dec7b5fc779aec
+    base_lease: ab457c651eb4428705f0492163080b661c858b72
+    noi_dung: 'measured — 1 commit, 2 tep +1129/-7: .claude/dev/launcher.py +33/-5, .claude/dev/launcher_test.py +1096/-2.'
+    head_doi_sau_review: false
+
+authorized_head_sha: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/732#issuecomment-6099610473
+authorization:
+  uy_quyen_land:
+    url: https://github.com/ducthangho/tra-luat/pull/732#issuecomment-6099610473
+    do_duoc: >-
+      measured (readback-comment-6099610473.json): ducthangho, OWNER, performed_via_github_app null, tao 16:19:27Z,
+      SUA 16:20:53Z (ban dau chi co dong tieu de vi mau do phien soan long khoi code; chu kho sua lai). Than 1496 byte
+      sha256 53722cb8df72336e5e7b9a115374c6208edfb78f9a56e0bba67037a862e3d979. Neo exact SHA, target master, merge
+      commit, han 2026-10-11T00:38:00Z, land_operator session_014N46zU47UjPmRbH4UNrEf5. Hai comment phu cung noi dung
+      tung phan: 6099615349 (dieu kien, 1108 byte, e4b060dc…0e48) va 6099629083 (khoi dau, 318 byte, 1a674ef1…745d).
+    thu_tu_thoi_gian: 'measured — sua xong 16:20:53Z, TRUOC merge 16:41:22Z.'
+    ghi_uy_quyen_cuc_bo: '`packet_loop.py ghi-uy-quyen --action merge --nguoi-cap ducthangho --bang-chung <url 6099610473> --head-sha 3089b54…` rc 0 (LOI KHAI, guard van tra 7 theo thiet ke).'
+  chap_nhan_no_p2:
+    url: https://github.com/ducthangho/tra-luat/pull/732#issuecomment-6099799597
+    do_duoc: >-
+      measured (readback-comment-6099799597.json): ducthangho, OWNER, app null, 16:40:08Z (TRUOC merge), 1381 byte
+      sha256 0f0eeba4ff1349783d7c6205e599cf5ed2776e9d357e1c4b80bb57acc217f8d8. No co ten py314-path-exists-nuot-oserror.
+  human_audit:
+    url: https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6099534056
+    assurance: human_audited
+    verdict: approve
+    reviewed_sha: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+    do_duoc: >-
+      measured (readback-comment-6099534056.json): ducthangho, OWNER, app null, 16:11:14Z, 2846 byte sha256
+      47c78ece3e4bf151135d4cce29386b357abdc256078e74b73ac4e210caca5757. Than comment do phien nay SOAN theo yeu cau
+      chu kho ("điền đủ nội dung"); chu kho dang. So lieu trong do (194/194 py3.13, hash spec/lease, write set) do phien
+      nay do lai tren exact SHA (launcher_test-py3.13-3089b54.log). Tu khai: OWNER + app null khong chung minh chu kho
+      tu doc diff; do la cam ket cua nguoi dang.
+
+review:
+  thi_hanh:
+    - luot: 1
+      reviewer: openai_codex / gpt-6.1-sol / codex_cli / machine
+      verdict: changes_requested
+      reviewed_sha: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+      so_lop: 'P1 0 / P2 3 / P3 0'
+      hien_vat: 'ops/reviews/wp685-r28-g5-exec-review-1-codex/ (tu nhanh ops/wp685-r28-g5-review-1 @ 0f0bc57)'
+      verdict_sha256: 3c06c0fe04550743eb34f0befa37febce031ba75b884cf999047e8705bc8dd43
+    - luot: 2
+      reviewer: openai_codex / gpt-6.1-sol / codex_cli / machine (effort xhigh, session 01a12652-3033-7160-a78e-872f25eb8832)
+      verdict: approve
+      reviewed_sha: 3089b54455a44b8cfcf2fd27b01894bc2a5d764d
+      so_lop: 'P1 0 / P2 0 / P3 0; dong ca 3 lop luot 1'
+      hien_vat: 'ops/reviews/wp685-r28-g5-exec-review-2-codex/ (tu nhanh ops/wp685-r28-g5-review-2 @ ee21d10)'
+      verdict_sha256: 99096c2631826c2513eaa6dfee33943c5c547e4e88f00ecf5b5dc284548ef1fa
+      run: 'launcher.py run 21561ce1, ma_thoat 0, 2809.705 s; run.json sha256 81798b55b05b388f1544521cda45d88a8a06ac857f80e3cdc6413da38414a381'
+      ban_chieu: https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6099270804
+      ban_chieu_ghi_chu: 'readback-comment-6099270804.json: performed_via_github_app = Claude (dang qua token phien), KHONG phai chu kho.'
+  connector_github:
+    review_id: 5479858097
+    tac_gia: chatgpt-codex-connector[bot]
+    commit: 3089b54
+    finding:
+      id: py314-path-exists-nuot-oserror
+      muc: P2
+      vi_tri: .claude/dev/launcher.py:662
+      thread: https://github.com/ducthangho/tra-luat/pull/732#discussion_r4238336830
+      do_duoc: >-
+        measured — Python 3.14.6 (uv): `pathlib.Path.exists` = `return os.path.exists(self)`. `python3.14 -B
+        .claude/dev/launcher_test.py`: 3089b54 = 189/194 hong 5 (t156, t157, r09, r15, r351); ab457c6 = 185/188 hong 3
+        (r09, r15, r351). Delta = t156, t157. Log: launcher_test-py3.14-{3089b54,ab457c6}.log. CI ghim 3.12, review 3.13.
+      xu_ly: 'chap nhan thanh no — authorization.chap_nhan_no_p2; packet ke nhiem chua mo.'
+  assurance: 'cross_approved (Codex luot 2, ho openai vs executor ho claude) + human_audited (6099534056); cong mot P2 da chap nhan thanh no.'
+
+ci_truoc_merge:
+  bat_buoc_pr:
+    run: 38066871069
+    event: pull_request (merge ref, master 47c9ba4)
+    ket_qua: 'measured — completed/success; gate, gate-packet-loop, gate-ops, gate-cong-cu-gop (ubuntu-latest) success.'
+  launcher_windows:
+    run: 38066944950
+    event: workflow_dispatch (runner_set windows-and-ubuntu, ref agent/wp685-r28-g5-claude)
+    ket_qua: 'measured — completed/success.'
+  do_khong_phai_cua_pr:
+    phan_loai: https://github.com/ducthangho/tra-luat/pull/732#issuecomment-6099803120
+    muc:
+      - 'thu-hoi (2 luot): CHAN [12] S 47c9ba4 khong phai to tien cua H 3089b54 — head re tu ab457c6; khong bat buoc.'
+      - 'gate (windows) va gate-cong-cu (windows, 0..7) cua run goi tay 38066883016 tren cay nhanh: cong_cu_test t23/t49 (ops/bash_nen.py, ngoai write set), log ghi "ca da DO O NEN".'
+      - 'master 47c9ba4 run 38065934579: release-verify strict (lane LAND) package_hash_match false — do san truoc PR.'
+
+master_drift:
+  base: ab457c651eb4428705f0492163080b661c858b72
+  master_luc_merge: bc6630afacf378b8f69c31fe467b53e64f5d9e4d
+  drift_tep: 273
+  drift_nguon: 'measured — `git diff --name-only ab457c6 bc6630a | wc -l` = 273. Thong diep merge 77fb028 ghi 275 — SAI, so dung la 273.'
+  kich_hoat_5_1: >-
+    trung 3 (RELEASE_MANIFEST.json, references/golden/parser_surface.json), 5 (.claude/dev/ci_dang_ky_test.py tham chieu
+    launcher_test.py), 6 (.github/workflows/ci.yml, ci-dot-bien-du.yml); khong trung 1, 2. Doan 47c9ba4..bc6630a
+    (PR #731) chi cham scripts/tl_gws.py, scripts/tl_test_fragments_bundled.py, scripts/test_fragments/wp727_tl_gws_refresh.py,
+    changelog.d/wp-727.md.
+  fence:
+    truoc: 'refs-truoc-merge.sorted (1124 ref, git ls-remote origin rc 0)'
+    sau: 'refs-sau-merge.sorted'
+    delta: 'measured — chi HEAD + refs/heads/master bc6630a -> 77fb028 va mat refs/pull/732/merge 7984638.'
+
+post_merge_checks:
+  gate_push_dong_bang:
+    run: 38076548735
+    head_sha: 11cf1857a80d0da48e7f1ce8922baad9d1be47b5
+    ket_qua: 'measured — completed/success, 14/14 job success, run_attempt 1, updated_at 2026-10-10T20:12:37Z.'
+  gate_push:
+    run: 38068681967
+    head_sha: 77fb0288dca8483f28209cae42c38d4cb97397d9
+    ket_qua: 'measured — completed/failure; 13/14 success; do: gate (ubuntu-latest) / release-verify strict (do san, xem GATE-HAU-MERGE-77FB028).'
+  launcher_windows_push:
+    run: 38068682069
+    ket_qua: 'measured — completed/success.'
+  dang_lease_rut_han:
+    run: 38068733276
+    head_sha: 0f1b0089fa6ab40ccda0a35f6b24013fc111502a
+    ket_qua: 'measured — ops — đăng lease bằng git, job dang success.'
+
+ghi_chu_sau_ghi_so_lan_1:
+  mission_event: >-
+    Mission #686 comment 6100869080 (18:36:58Z, packet_integrated, phien dieu phoi) ghi wp685 integrated chua landed,
+    no P2 trong accepted_debt, va dinh chinh event 6099897976 (readback-comment-6100869080.json).
+  human_audit_mau_rong: >-
+    Issue #685 comment 6099867854 (16:47:54Z, ducthangho, app null) la MAU human audit con nguyen o trong
+    ("[đạt / không]", "Verdict: [approve | changes_requested]") — KHONG mang verdict. Human audit co hieu luc van la
+    6099534056 (readback-comment-6099867854.json).

@@ -1,0 +1,13 @@
+# do lai kiem-gate OFFLINE tren readback-check-runs-f9d84d7.json (khong goi GitHub) — 2026-10-18T02:40:39Z
+$ git rev-parse HEAD HEAD^{tree}
+8e150cf0d9f046a761c49448c8173ad501f53a1c
+6e8e27cde969a7b6bd8a54758bda4b24508ad18f
+$ sha256sum .claude/dev/packet_loop.py
+c15ac9330a084d4a10d559885dbeb606c841ca4ad22a6ca51686c681e59f8634  .claude/dev/packet_loop.py
+# check_suite_id 105821166384 = readback-run-39047604566.json (ci.yml); thu-hoi o suite rieng 105821159612
+$ python .claude/dev/packet_loop.py kiem-gate --head f9d84d70fb46540bbecfae963c9afb4a2b48984d --check-runs readback-check-runs-f9d84d7.json --check-suite 105821166384 --bat-buoc 'chuan-bi' --bat-buoc 'gate (ubuntu-latest)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 0)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 1)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 2)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 3)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 4)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 5)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 6)' --bat-buoc 'gate-cong-cu (ubuntu-latest, 7)' --bat-buoc 'gate-cong-cu-gop (ubuntu-latest)' --bat-buoc 'gate-ops (ubuntu-latest)' --bat-buoc 'gate-packet-loop (ubuntu-latest)' --bat-buoc 'gate-registry (ubuntu-latest)'
+gate XANH trên f9d84d70fb46540bbecfae963c9afb4a2b48984d (suite 105821166384): chuan-bi id=117444408400 · gate (ubuntu-latest) id=117444457292 · gate-cong-cu (ubuntu-latest, 0) id=117444457321 · gate-cong-cu (ubuntu-latest, 1) id=117444457346 · gate-cong-cu (ubuntu-latest, 2) id=117444457308 · gate-cong-cu (ubuntu-latest, 3) id=117444457301 · gate-cong-cu (ubuntu-latest, 4) id=117444457381 · gate-cong-cu (ubuntu-latest, 5) id=117444457340 · gate-cong-cu (ubuntu-latest, 6) id=117444457307 · gate-cong-cu (ubuntu-latest, 7) id=117444457406 · gate-cong-cu-gop (ubuntu-latest) id=117450285930 · gate-ops (ubuntu-latest) id=117444457330 · gate-packet-loop (ubuntu-latest) id=117444457228 · gate-registry (ubuntu-latest) id=117444457266
+rc=0
+$ python .claude/dev/packet_loop.py kiem-gate --head f9d84d70fb46540bbecfae963c9afb4a2b48984d --check-runs readback-check-runs-f9d84d7.json --check-suite 105821159612 --bat-buoc 'thu-hoi'
+gate XANH trên f9d84d70fb46540bbecfae963c9afb4a2b48984d (suite 105821159612): thu-hoi id=117439366745
+rc=0

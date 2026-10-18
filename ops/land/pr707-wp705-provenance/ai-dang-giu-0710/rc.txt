@@ -1,0 +1,4 @@
+.claude/dev/ci_dang_ky_test.py rc=0
+.github/workflows/ci-dot-bien-du.yml rc=0
+.github/workflows/ci.yml rc=0
+ops/ci_duong_nhanh_test.py rc=0

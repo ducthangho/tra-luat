@@ -1,0 +1,173 @@
+# LEASE — wp678 (LEASE-ID-EP-KIEU-YAML) revision 17 / generation 1 — executor claude, phan loi (Stable Slice theo Q16)
+# SOAN SAN boi phien dieu phoi theo uy quyen Q8 (Mission #682 comment 5888631719); HIEU LUC chi khi chu kho dang comment
+# cap quyen tren #678 neo dung lease_id + spec_sha256 nay (xem authority_caveat).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 678
+packet_id: wp678
+packet_slug: LEASE-ID-EP-KIEU-YAML
+mission_issue: 682
+revision: 17
+generation: 1
+lease_id: wp678-r17-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: >-
+  Lease dau tien cua wp678: quet ops/leases/ tren ca 480 ref theo doi (clone day du 2026-10-08T05:3xZ, 597 blob lease)
+  khong co lease nao packet_issue 678 hay ten chua wp678 / lease-id-ep-kieu-yaml. Khong co gi de thay, khong bia mo.
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/678
+granted_on_instruction_nguyen_van: >-
+  Uy quyen cap lease wp678 cua chu kho: Q8 (Mission #682 comment 5888631719, "chu kho uy quyen cap lease wp678", nam dieu
+  kien cap o depends_on cua spec r17). Q17 (#678 comment 6053124537, ghi ho, phien session_01CSM7GNazhN6uGJb4v1TqBT,
+  2026-10-08): "Wp678 tôi quyết định Q17 nhận lượt Codex thay cho Opus." — luot Codex 17 (#678 comment 6052502411,
+  approve 0/0/0 tren cd25aba) duoc nhan thay review-opus-max cho dieu kien (3) cua r17.
+authority_caveat: >-
+  Soan san; HIEU LUC KHI chu kho dang comment cap quyen tren #678 neo dung lease_id wp678-r17-g1-claude va spec_sha256
+  f39091a1d2be7629a11eb53b7daf3f076ce91f701012f7093108a98e91d140cc. Chua co comment ay thi lease nay KHONG cap viec.
+  author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'Subagent cua phien dieu phoi session_01CSM7GNazhN6uGJb4v1TqBT soan; KHONG push, KHONG dang.'
+
+leased_at_utc: '2026-10-08T05:45:00Z'
+lease_expires_at_utc: '2026-10-08T19:00:00Z'
+han_ghi_chu: >-
+  Goc 2026-10-09T05:45:00Z. RUT NGAN ve 2026-10-08T19:00:00Z — xem thu_hoi_bang_rut_han.
+
+role: executor
+provider: anthropic_claude
+executor: claude
+execution_surface: claude_code
+transport: machine/local
+model: claude-opus-5-5
+effort: '>= medium'
+effort_ghi_chu: 'Spec r17 hang executor: Claude Opus 5.5, effort >= medium. Tu khai; KHONG DO DUOC tu ngoai.'
+environment: cloud
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: >-
+  Spec r17 ghi chu wp709: lease wp678 KHONG duoc khai assurance_target chua cross_approved (reviewer cung ho => rc=10);
+  khai human_audited dung gate land (Q12).
+reviewer: claude
+reviewer_execution_surface: claude_code
+reviewer_ghi_chu: >-
+  Luot thi hanh (Q10/Q12; Q17 KHONG doi): subagent review-opus-max trong phien dieu phoi, cau hinh Claude Opus 5.5
+  claude-opus-5-5 effort max, muc review_deferred; bien nhan tu khai che_do: subagent_trong_phien_dieu_phoi; model/effort
+  da phuc vu KHONG_do_duoc. Dinh nghia ghim sha256 e225b81cf2fbdd0f05a54a689cac17db8972b2f8c0684a0a30931875cd4b792c
+  (~/.claude/agents/review-opus-max.md). Land doi human_audited cua chu kho.
+access: read-write
+
+spec_path: ops/specs/lease-id-ep-kieu-yaml-r17.md
+spec_ref: refs/heads/claude/spec-wp678-r7
+spec_source_oid: cd25aba0fab9831dd7e87ba378b7429fa0602166
+spec_blob: 506ced2c9ae652e7bd4426ac27442888e4861cea
+spec_sha256: f39091a1d2be7629a11eb53b7daf3f076ce91f701012f7093108a98e91d140cc
+spec_hash: f39091a1d2be7629a11eb53b7daf3f076ce91f701012f7093108a98e91d140cc
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_review: >-
+  r17 review sach: Codex luot 17 (#678 comment 6052502411), approve 0 P1 / 0 P2 / 0 P3 tren reviewed_sha cd25aba,
+  verdict sha256 83d97947b68cb0b2e12715d19b01f671fd4091ffe984b1233b8c54f0ecb30337; nhan cho dieu kien (3) theo Q17.
+  Khong co revision nao sau r17 (quet 480 ref: r1..r17).
+prompt_path: ops/specs/lease-id-ep-kieu-yaml-r17.md
+prompt_sha256_required: f39091a1d2be7629a11eb53b7daf3f076ce91f701012f7093108a98e91d140cc
+
+branch: claude/wp678-r17-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ab457c651eb4428705f0492163080b661c858b72
+start_from_sha: ab457c651eb4428705f0492163080b661c858b72
+immutable_acceptance_baseline: ab457c651eb4428705f0492163080b661c858b72
+reviewed_sha_required: ab457c651eb4428705f0492163080b661c858b72
+reviewed_sha_required_nghia: 'Moi verdict neo exact head THAT cua nhanh thi cong; baseline nghiem thu giu ab457c6.'
+nen_ghi_chu: >-
+  origin/master luc cap = 19ca703328b6c2f0c578480692ea48e76af59e65 (merge PR #707). Buoc (v) chuoi cap:
+  git diff --quiet ab457c6 refs/remotes/origin/master -- hai tep write set rc=0, ls-tree 2 dong (blob 93cff2f, 7dd06ab),
+  nen dieu kien (4) khong doi nen. Nen tiep noi (neu executor re tu 19ca703) khong doi tep write set nao; nen nghiem thu
+  van la ab457c6.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_hash: 907e3d283ae2abb75eb357e26be7fd34eb316d2d4b3e006525576179131f095f
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Chuoi lenh do dieu kien cap r17 chay nguyen van 2026-10-08T05:38:10Z-05:39:01Z tren clone day du moi (46/46 buoc rc=0):
+  480 = 480 = 480 ref (thieu 0, master 19ca703 trong chung); cong_cu.oid = nen.oid = 93cff2f; s5.oid c730245c;
+  ai-dang-giu hai tep NGUOI_GIU 0, 0 CON_HAN; s5.py "S5 TU_KIEM 38/38 dat; NGUOI_GIU 0 o 2/2 duong dan".
+
+# --- Closure dong bang r17 (chep NGUYEN gia tri; descriptor {mission_issue: 682, object_id: 5627190292}) ---
+closure_descriptor:
+  mission_issue: 682
+  object_id: 5627190292
+closure_mien_tru_hieu_luc: >-
+  Do 2026-10-08T05:39:18Z (cung clone va T): ls-tree .github/coordination/ 4 dong, coord.khop 0, coord.neo 2 dong
+  => chua co policy canonical, mien tru #682 con hieu luc.
+change_policy_sha: null
+effective_write_set:
+  - type: exact
+    path: ops/lease_publish.py
+  - type: exact
+    path: ops/lease_publish_test.py
+required_checks: >-
+  Tren PR thi hanh: gate (ubuntu-latest), gate-ops (ubuntu-latest), gate-registry (ubuntu-latest), gate-packet-loop
+  (ubuntu-latest) cua .github/workflows/ci.yml, va workflow thu-hoi; review bang subagent review-opus-max trong phien
+  dieu phoi (cau hinh Claude Opus 5.5 claude-opus-5-5, effort max), muc review_deferred, 0 P1/P2/P3 theo phan lop tren
+  exact reviewed_sha, kem VERDICT + HINT va bien nhan tu khai che_do: subagent_trong_phien_dieu_phoi.
+land_obligations: >-
+  Chu kho audit muc human_audited (PROTOCOL §8 muc 2; Q12) + merge (khong tu merge/approve); ghi so verdict + HINT cac
+  luot vao ops/reviews/ kem receipt va muc README; thu hoi lease sau land; dong #678; cap nhat #677 ve tuong tac A2.
+
+ci_budget:
+  gate_tu_dong: '1 — chi cac job required_checks tren PR draft khi da sach; khong chay tay'
+  windows: 'cam (environment cloud; spec khong do hanh vi phu thuoc nen)'
+  het: 'DUNG truoc moi CI them; cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai hai tep write set (ke ca .github/workflows/**, spec). DUNG.'
+  - 'S2 — gap phat hien ngoai spec (ai-dang-giu khop nguyen chuoi hep hon §5; _quet_lease_toan_kho khong -z; ep kieu truong khac) => ghi handoff, KHONG va.'
+  - 'S3 — mot required_check do vi packet. DUNG, bao chu kho.'
+  - 'S4 — cung lop finding lap lai (PROTOCOL §12) => Review Rescue Checkpoint, hoi chu kho.'
+  - 'S5 — ca moi bat dau tu t204; nghia vu §4 (i)-(iii) cho t70/t193 khong dat duoc ma khong noi vi tu => DUNG, hoi.'
+  - 'S6 — het han lease => ngung ghi, handoff §7.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong noi vi tu _ca_doc_than_buoc / _ca_ung_vien_gian_tiep, khong doi literal cua t70/t193 thanh phep dem dong
+  - Khong them/doi lease tren Issue that de thu; moi phep do dung gh gia
+  - Khong tu review / approve / merge / land; land chi sau human_audited cua chu kho
+  - Khong chay CI tay, khong Windows CI, khong LIVE/deploy
+  - Khong force-push
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Dieu kien (2) khong luot review nao dang chay: theo xac nhan cua phien dieu phoi, phien soan lease KHONG DO DUOC.'
+  - 'Effort thuc te cua phien executor.'
+  - 'Cua so giua do va cap khong nguyen tu (spec r17 muc Gioi han).'
+lease_sua_lan_cuoi: '2026-10-08T15:29Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-09T05:45:00Z'
+  han_moi_utc: '2026-10-08T19:00:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_01CSM7GNazhN6uGJb4v1TqBT giao ghi so land #678 / PR #718 va thu hoi lease
+    g1 theo tien le #705 g3 (c5881a0) (chi thi giao viec cho subagent bookkeeping; loi_khai_co_neo, khong phai comment
+    GitHub). land_obligations cua chinh lease nay: "thu hoi lease sau land".
+  ly_do: >-
+    Packet #678 da MERGE: PR #718 merge a671920 (2026-10-08 ~15:26Z), cha thu hai 57bb4b3 = head duoc human_audited
+    (pull/718#issuecomment-6063240400). Lease khong tu chet khi land (CLAUDE.md).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668/#677/#687/#674/#705: so ops/thu-hoi/ chua kich hoat; rut han dung co che DA CAI. Han
+    moi dat SAU luc push du kien de luot dang lease (neu chay) con thay lease song, tranh rc=8 che rc=9 (bai hoc 20-09).
+    Neu nhanh chua push truoc ~18:50Z thi phai doi han_moi_utc ve sau luc push TRUOC khi push. Khong bia mo: khong co
+    lease ke nhiem (bia mo chi dung khi co lease moi thay_the_cho).
+  nguoi_rut: 'subagent bookkeeping cua phien session_01CSM7GNazhN6uGJb4v1TqBT (cung phien dieu phoi executor g1 va review)'
+  gioi_han: >-
+    Commit rut han chi o CUC BO luc ghi (nhanh bk678-rut-han-g1, tien len tu origin/ops/wp678-r17-g1-lease ee55165); phien
+    chinh push no thanh ops/wp678-r17-g1-lease (fast-forward). Nghiem thu: ai-dang-giu cho ops/lease_publish.py va
+    ops/lease_publish_test.py khong con wp678-r17-g1-claude trong NGUOI_GIU sau 19:00Z — CHUA DO.

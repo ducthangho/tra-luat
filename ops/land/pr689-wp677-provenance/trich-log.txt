@@ -1,0 +1,239 @@
+##### run 36792473622 job 110148322748 [chuan-bi] bytes=2886 sha256=cd7fa0c230ad0ea0085b94bf6a275d0ced25d567f455b5a74d5d42ae4617d466 lines=55
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+##### run 36792473622 job 110148349586 [gate-ops (ubuntu-latest)] bytes=294015 sha256=0ec05014beb0378a3715013dc97486539ad1b735bf385715750fa13a7848bf13 lines=2579
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L683 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L699: Successfully set up CPython (3.12.14)
+  L956: bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 56/74 đột biến thường khai đối chứng
+  L957: TỔNG: ĐẠT
+  L2271: lease_publish: 195/195
+  L2274: lease_publish: 195/195
+  L2482: lease_publish: 195/195
+##### run 36792473622 job 110148349603 [gate-packet-loop (ubuntu-latest)] bytes=112929 sha256=732024094042bd87690a932c113340db0c8047ce8f58c6006fe4cb8528f8dd56 lines=1099
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L678 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L967: nền: 291/291 đạt · BỎ QUA: 1
+  L1078: TỔNG: ĐẠT
+##### run 36792473622 job 110148349622 [gate (ubuntu-latest)] bytes=627404 sha256=ee8701cf09ed40840a7982a7c25a02760df17256bfb5e43d68f0213e20cb7d2d lines=9530
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L684 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L701: Successfully set up CPython (3.12.14)
+  L1039: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1124: nền: 13/13 đạt
+  L1142: TỔNG: ĐẠT
+  L1157: nền: 7/7 đạt · BỎ QUA: 0
+  L1176: TỔNG: ĐẠT
+  L3189: == tl selftest 1715/1715 ==
+##### run 36792473622 job 110148349624 [gate-registry (ubuntu-latest)] bytes=213407 sha256=6a2ef3955c5bfe7328b06c4563b58746a1730e5f88a3d174c0f1895288d828da lines=2237
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L678 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L1984: nền: 28/28 đạt
+  L2031: TỔNG: ĐẠT
+  L2083: TỔNG: ĐẠT
+  L2090: nền: 11/11 đạt
+  L2097: TỔNG: ĐẠT
+  L2216: TỔNG: ĐẠT
+##### run 36792473622 job 110148349648 [gate-cong-cu (ubuntu-latest, 4)] bytes=109842 sha256=459dd9b4ddc927a6778c4c46205c99de4ee22bad3027207d944193dce0ca6942 lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L696: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 4/8: 52/52 đột biến bán kính 1 · ghi manh/manh-4.txt
+##### run 36792473622 job 110148349659 [gate-cong-cu (ubuntu-latest, 3)] bytes=109786 sha256=e23b056320c4b389c37c0d1d4ac3b23ff7497a43d2cf426fda669a705625541e lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L696: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 3/8: 52/52 đột biến bán kính 1 · ghi manh/manh-3.txt
+##### run 36792473622 job 110148349677 [gate-cong-cu (ubuntu-latest, 1)] bytes=109779 sha256=a0fd6a44397704a16a5eefba20937fbc2d298e546ee3a13e8708b66bfafa52a1 lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 1/8: 52/52 đột biến bán kính 1 · ghi manh/manh-1.txt
+##### run 36792473622 job 110148349691 [gate-cong-cu (ubuntu-latest, 0)] bytes=109940 sha256=295301819dc9873f14acb14f3478afe604c004ec37e03a060f739c2f142f26f9 lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 0/8: 52/52 đột biến bán kính 1 · ghi manh/manh-0.txt
+##### run 36792473622 job 110148349708 [gate-cong-cu (ubuntu-latest, 6)] bytes=109813 sha256=552476954236f7e6164d348ebb51349ab517c8ddf35f965dc954eb9d2d9c3183 lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 6/8: 52/52 đột biến bán kính 1 · ghi manh/manh-6.txt
+##### run 36792473622 job 110148349710 [gate-cong-cu (ubuntu-latest, 2)] bytes=109826 sha256=92e6295cfe7746682c85ce247e69e908fecf99e832ed578e7c0a6f276ab35d98 lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 2/8: 52/52 đột biến bán kính 1 · ghi manh/manh-2.txt
+##### run 36792473622 job 110148349756 [gate-cong-cu (ubuntu-latest, 5)] bytes=109885 sha256=454ddd621ea24af13e17c74fb71eaa7aa7a12e195622803a2d8ce56d875bfd2e lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 5/8: 52/52 đột biến bán kính 1 · ghi manh/manh-5.txt
+##### run 36792473622 job 110148349815 [gate-cong-cu (ubuntu-latest, 7)] bytes=109906 sha256=512ec16c3ad49c4ee67dd5d2a69d50f44d106ba241a6e7f5fffa4a4885ce283e lines=1062
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L679 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L695: Successfully set up CPython (3.12.14)
+  L953: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1008: MẢNH 7/8: 52/52 đột biến bán kính 1 · ghi manh/manh-7.txt
+##### run 36792473622 job 110153193715 [gate-cong-cu-gop (ubuntu-latest)] bytes=87371 sha256=4273a465d9b19c26e215c584b70d68a1609dc9063e844790c14b41e9e2d66cab lines=713
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L155 checkout: 0339845ccbfec38d1ff8f3300d95c31fff3f685c
+  L171: Successfully set up CPython (3.12.14)
+  L274: GOM MẢNH 8/8
+  L692: SỐ LIỆU GOM: ca=56 · đột biến=416 · lỗi đột biến=0
+##### run 36798575727 job 110172104369 [chuan-bi] bytes=2886 sha256=e3397621ef7412ae964cc74f3e5a3606575b004ee88ac7baeac43dbbad16a05a lines=55
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+##### run 36798575727 job 110172127258 [gate-packet-loop (ubuntu-latest)] bytes=106667 sha256=ae6a962c351223b3a6768c3ec5c572eda1104b169d9051367fbce602bb39bdad lines=1087
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L666 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L683: Successfully set up CPython (3.12.14)
+  L955: nền: 291/291 đạt · BỎ QUA: 1
+  L1066: TỔNG: ĐẠT
+##### run 36798575727 job 110172127260 [gate-ops (ubuntu-latest)] bytes=287753 sha256=73ba919e88949008f161e927e4587b6637cf2e30fd1a55b6ba8a5be4a1246291 lines=2567
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L671 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L688: Successfully set up CPython (3.12.14)
+  L944: bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 56/74 đột biến thường khai đối chứng
+  L945: TỔNG: ĐẠT
+  L2259: lease_publish: 195/195
+  L2262: lease_publish: 195/195
+  L2470: lease_publish: 195/195
+##### run 36798575727 job 110172127274 [gate-registry (ubuntu-latest)] bytes=207138 sha256=2f32b861bcf643ec9c991e001b0147a25ba5cf6634d3771f56b9e8abf0d95edd lines=2225
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L666 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L682: Successfully set up CPython (3.12.14)
+  L1972: nền: 28/28 đạt
+  L2019: TỔNG: ĐẠT
+  L2071: TỔNG: ĐẠT
+  L2078: nền: 11/11 đạt
+  L2085: TỔNG: ĐẠT
+  L2204: TỔNG: ĐẠT
+##### run 36798575727 job 110172127294 [gate-cong-cu (ubuntu-latest, 4)] bytes=103587 sha256=c27be16616df2dd299d9c60b6e2b13a10f2998505d7bcfc8662400ce04b17b00 lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L683: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 4/8: 52/52 đột biến bán kính 1 · ghi manh/manh-4.txt
+##### run 36798575727 job 110172127299 [gate (ubuntu-latest)] bytes=670634 sha256=9108de360530e80ba1b4e98373797b80f98b65af8c340eca0c183aeb40fa7cf6 lines=10480
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L672 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L689: Successfully set up CPython (3.12.14)
+  L1027: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L1092: nền: 13/13 đạt
+  L1110: TỔNG: ĐẠT
+  L1125: nền: 7/7 đạt · BỎ QUA: 0
+  L1144: TỔNG: ĐẠT
+  L3189: == tl selftest 1715/1715 ==
+  L3190: "returncode": 0
+##### run 36798575727 job 110172127300 [gate-cong-cu (ubuntu-latest, 2)] bytes=103564 sha256=4d35147b5cdd8e4a7975cb8d418a10209921a41a9af9d2046b959e439777495b lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L683: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 2/8: 52/52 đột biến bán kính 1 · ghi manh/manh-2.txt
+##### run 36798575727 job 110172127302 [gate-cong-cu (ubuntu-latest, 6)] bytes=103550 sha256=7564ebffb03f3e4c450f0368d13ca7bfd77ff6ab2ff621639e891a7770ffc4bb lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L684: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 6/8: 52/52 đột biến bán kính 1 · ghi manh/manh-6.txt
+##### run 36798575727 job 110172127307 [gate-cong-cu (ubuntu-latest, 1)] bytes=103517 sha256=671bc88a04edae32367f0dcc549448148e3cb50192a2273f066b4e813284f264 lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L683: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 1/8: 52/52 đột biến bán kính 1 · ghi manh/manh-1.txt
+##### run 36798575727 job 110172127324 [gate-cong-cu (ubuntu-latest, 7)] bytes=103652 sha256=18efb8d84b9c2d98a3f80ac1060034f86cab30b9f9ac1ba634ae835bfe241f09 lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L684: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 7/8: 52/52 đột biến bán kính 1 · ghi manh/manh-7.txt
+##### run 36798575727 job 110172127341 [gate-cong-cu (ubuntu-latest, 0)] bytes=103670 sha256=2cc20b8c293e1c23b117435b6050bf4af344d00afc576cf9100f3655c7865fe8 lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L683: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 0/8: 52/52 đột biến bán kính 1 · ghi manh/manh-0.txt
+##### run 36798575727 job 110172127376 [gate-cong-cu (ubuntu-latest, 3)] bytes=103523 sha256=4780377f1c0ab98c43d993266a558e799a1c104bfee05c98d497393f0ffffa52 lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L684: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 3/8: 52/52 đột biến bán kính 1 · ghi manh/manh-3.txt
+##### run 36798575727 job 110172127397 [gate-cong-cu (ubuntu-latest, 5)] bytes=103620 sha256=97f506fd0cf96d8216b652594b8327cc98946dec3d8fe9cc186646fead112f4f lines=1050
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L667 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L684: Successfully set up CPython (3.12.14)
+  L941: cong_cu_test: 56/56 đạt; tổng=56, bỏ qua=0, tiền kiểm bỏ qua=0
+  L996: MẢNH 5/8: 52/52 đột biến bán kính 1 · ghi manh/manh-5.txt
+##### run 36798575727 job 110176880597 [gate-cong-cu-gop (ubuntu-latest)] bytes=86302 sha256=15c1284e8eeeddf67d46c1780a8342dc73e9175d8462636e0b965dd411041444 lines=697
+  L2: Runner Image Provisioner
+  L15: Runner Image
+  L16: Image: ubuntu-24.04
+  L139 checkout: 20ec8d5d0e86cb7dc01f202c7596407a957e5961
+  L156: Successfully set up CPython (3.12.14)
+  L258: GOM MẢNH 8/8
+  L676: SỐ LIỆU GOM: ca=56 · đột biến=416 · lỗi đột biến=0

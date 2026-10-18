@@ -1,0 +1,7 @@
+# wp685 r18 generation 1 — Antigravity executor
+
+Mission #686 revision 3, plan hash 38b2b3ef9d4a410e2a6a00fdc1861611fd39295b7652062d2988ebc3513feb8a. Packet #685, spec at PR #688 commit 6709c36cdc5cf9a7a361300265dae6714c701c24, path ops/specs/launcher-con-song-esrch-r18.md, SHA-256 bfd490acb3ca26bb75bd3d628d9652a08a2b12256808024ba51e84b93e2ee68f. Read the frozen source and lease before editing. Baseline ab457c651eb4428705f0492163080b661c858b72. Exclusive branch agent/wp685-r18-g1-antigravity.
+
+Read CONTEXT.md, docs/PROTOCOL_DA_PHIEN.md, CLAUDE.md, AGENTS.md, ops/KE_HOACH_THI_CONG_DA_PROVIDER.md and ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md. Verify lease generation, expiry, spec hash, exact baseline and overlapping holders. Stop and report any mismatch. Never edit the dirty root checkout.
+
+Implement the ESRCH ProcessLookupError race fix and undecodable comm rc=124 within the exact write set: .claude/dev/launcher.py and .claude/dev/launcher_test.py. Apply acceptance B1-B8 in the spec, including local Linux Python 3.11 and 3.12 evidence. Treat findings by defect class. Record exact head/tree, commands, exit codes, positive evidence, skipped/not_run, environment, and patch hint provenance. Do not run full CI until merge readiness. Do not push launcher code until all P1/P2/P3 are cleared. Hand off to an independent Codex reviewer; do not self review, approve, merge, land, call LIVE or widen scope.

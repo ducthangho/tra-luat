@@ -1,0 +1,134 @@
+# lop: trich-nguong-sai-nguyen-van, review-class-standard-ngoai-enum, thoi-diem-do-sau-gio-commit, erratum-ten-lien-ket-dang-ky-chua-khai, nhanh-chu-kho-chua-merge-ghi-cung-neo, nguon-o1-o6-khong-co-trong-kho, o7-va-quyet-dinh-moi-o-chua-chot, n2-n3-chinh-xac-hoa, neo-phu-bia-van-xanh, n3-n4-khong-khoa-bat-bien-chi-them, n1-khong-khoa-chu-dung-va-dot-bien-so-dong-song, n5-kiem-re-thieu-bien-moi-truong, hinh-dang-ke-thua-khong-chep-bo-dem
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit (hint của review đặc tả lượt 1; dry-run trên bản sao r1 đặt ở ops/specs/no-p3-ho-so-r1.md)
+--- ops/specs/no-p3-ho-so-r1.md
++++ ops/specs/no-p3-ho-so-r1.md
+# lop: trich-nguong-sai-nguyen-van
+@@ -8,1 +8,1 @@
+-| `nguon_cap_viec` | Sổ nợ P3 của phiên điều phối `session_01CSM7GNazhN6uGJb4v1TqBT`, mục 1, 2, 3, 11; ngưỡng chủ kho "chỉ P1/P2 chặn merge, P3 xử ở packet riêng" (#698 comment `6094652521`, #686 comment `6094654297`); `no_con_mo` của `ops/land/pr721-wp698-land-evidence.yaml` (mục `S2-SPEC-HASH-CUA-R11`, `M8-GIU-RANG-CACH-NOI-R13`). Cách tách ba packet do chủ kho chốt trong phiên soạn spec ngày 15-10-2026 (Q1–Q10, "đồng ý hết" hai vòng). |
++| `nguon_cap_viec` | Sổ nợ P3 của phiên điều phối `session_01CSM7GNazhN6uGJb4v1TqBT`, mục 1, 2, 3, 11; ngưỡng chủ kho, nguyên văn "Lớp P3 trở xuống KHÔNG chặn; chúng được ghi vào sổ nợ và xử lý ở một packet riêng" (#698 comment `6094652521`, đặt cho wp698 g2; #686 comment `6094654297`, đặt cho wp685 g5 — chỉ đúng cho hai lease ấy; đo 15-10-2026 ~06:30Z trên `ops/land/pr721-wp698-provenance/readback-comment-6094652521.json` và `ops/reviews/wp685-r28-g5-exec-review-1-codex/evidence/reviewer/preflight-remote.json`); `no_con_mo` của `ops/land/pr721-wp698-land-evidence.yaml` (mục `S2-SPEC-HASH-CUA-R11`, `M8-GIU-RANG-CACH-NOI-R13`). Cách tách ba packet do chủ kho chốt trong phiên soạn spec ngày 15-10-2026 (Q1–Q10, "đồng ý hết" hai vòng). |
+# lop: review-class-standard-ngoai-enum
+@@ -9,1 +9,1 @@
+-| `review_class` | standard — chỉ chạm `ops/specs/` (tệp MỚI) và một hồ sơ `ops/land/`; không chạm mã, workflow, authority. |
++| `review_class` | khai `routine` (đề nghị; mức tối thiểu, PROTOCOL §8: hồ sơ/docs cô lập — chủ kho có thể nâng). `effective_review_class` của lease sẽ là **`sensitive`**: `ops/lease_publish.py` `_tinh_lop_tu_write_set` (dòng 357) ra `sensitive` cho mọi write set không rỗng vì `_BANG_LOP` (dòng 59) chỉ chứa lớp `sensitive` — đo 15-10-2026 ~06:30Z: bốn đường của packet ⇒ `sensitive`; `_kiem_lop_review` với `effective_review_class` là `routine` hay `standard` ⇒ rc 10. Giá trị `standard` của r1 KHÔNG thuộc enum `routine`, `systemic`, `sensitive` (PROTOCOL dòng 156) nên `chon_reviewer.chon` từ chối (`KhongDoDuoc`, `.claude/dev/chon_reviewer.py` dòng 62–66), và PROTOCOL §8 xử lý giá trị không rõ như `sensitive`. |
+# lop: review-class-standard-ngoai-enum, trich-nguong-sai-nguyen-van
+@@ -10,1 +10,1 @@
+-| `executor` · `reviewer` | Claude (executor); reviewer subagent Claude Sonnet, mức `review_deferred` (cùng họ). Ngưỡng: chỉ P1/P2 chặn merge. |
++| `executor` · `reviewer` | Claude (executor); reviewer subagent Claude Sonnet, mức `review_deferred` (cùng họ). Với lớp hiệu lực `sensitive`, PROTOCOL §8 (dòng 725) đòi Codex `cross_approved` hoặc `human_audited` mới ĐẠT; `review_deferred` chỉ cho vào draft PR (§8 mức 4, dòng 612: "cần xác nhận riêng khi apply"), và cả hai comment ngưỡng ở `nguon_cap_viec` đều giữ "Land vẫn đòi … human_audited". Ngưỡng: 0 P1 / 0 P2 để đạt review, P3 không chặn (ghi nợ); căn cứ cho packet NÀY là quyết định phiên soạn spec 15-10-2026, chưa có bản ghi trong kho (KHÔNG ĐO ĐƯỢC từ review đặc tả lượt 1). |
+# lop: thoi-diem-do-sau-gio-commit
+@@ -11,1 +11,1 @@
+-| `base` | `origin/master` `6f121a3810045af27bf65eb723edf36b29e387f2` (đo 15-10 ~06:10Z). |
++| `base` | `origin/master` `6f121a3810045af27bf65eb723edf36b29e387f2` (đo 15-10-2026; giờ "~06:10Z" ở r1 muộn hơn giờ commit 05:55:53Z của chính tệp này nên sai một trong hai — giờ đo thật KHÔNG ĐO ĐƯỢC từ kho). |
+# lop: review-class-standard-ngoai-enum
+@@ -13,1 +13,1 @@
+-| `kich_thuoc` | 4 tệp. Ước ≤ 250 dòng thêm (đơn vị: dòng `git diff --numstat` cộng thêm + xoá); dưới trần thường ADR-0044 (6 tệp, 1.000 dòng). |
++| `kich_thuoc` | 4 tệp. Ước ≤ 250 dòng (đơn vị: dòng `git diff --numstat`, cộng thêm + xoá; packet chỉ thêm nên xoá = 0, khoá bằng N3b và N4b). Trần thường ADR-0044: 6 tệp, 1.000 dòng. ADR-0044 đặt trần 3 tệp, 300 dòng cho packet `sensitive` CHẠM AUTHORITY: spec này đọc là KHÔNG chạm authority (không cấp, không đổi quyền land; `landed`, `neo_ben`, `landed_hieu_luc_tu`, `authorized_head_sha` giữ nguyên, khoá bằng N3b) nên dùng trần thường; chủ kho đọc `ops/land/*-land-evidence.yaml` là authority thì 4 tệp vượt trần ⇒ dừng revision. |
+# lop: erratum-ten-lien-ket-dang-ky-chua-khai, nhanh-chu-kho-chua-merge-ghi-cung-neo
+@@ -19,1 +19,4 @@
+-- Mục nợ 4 (#751), 5–6 (#752), nhóm `ops/cong_cu_test.py` (chờ #748) và hai mục đo Windows: thuộc packet khác.
++- Mục nợ 4 (#751), 5–6 (#752), nhóm `ops/cong_cu_test.py` (chờ #748) và hai mục đo Windows: thuộc packet khác.
++- **KHÔNG đóng** hai mục `S2-SPEC-HASH-CUA-R11` và `M8-GIU-RANG-CACH-NOI-R13` trong `no_con_mo` của `ops/land/pr721-wp698-land-evidence.yaml` (ngoài write set): sau packet này hai mục vẫn "mở" ở đó; trỏ sang tệp đính chính hay đóng chúng thuộc packet khác.
++- **Tệp đính chính không cần băm hay đăng ký riêng** — đo 15-10-2026 ~06:30Z: không mã nào liệt kê `ops/specs/*.md` (ngoài allowlist tiền tố ở `ops/ci_duong_nhanh.py` dòng 115), `ops/` không nằm trong `RELEASE_MANIFEST.json` (0 chỗ `"ops/`). Tiền lệ `ops/specs/*.ERRATA.md` (`CI-DOT-BIEN-CHIA-MANH-r2.ERRATA.md`, `LAND-DOC-RECEIPT-THU-HOI-C1a1a-r5.ERRATA.md`) mở bằng sha256 + blob + commit của spec gốc và câu "Không sửa tệp ấy; đính chính sống ở đây"; tệp này gộp hai spec nên đặt tên `dinh-chinh-…`, và PHẢI mở bằng ba thứ ấy cho CẢ HAI spec gốc (blob lấy tại `6f121a3`).
++- **Nhánh chưa merge của chủ kho cùng tệp:** `origin/ducthangho-patch-1` có 1 commit `2f30166f` (chủ kho, 11-10-2026 07:55:44+0700, cha `b2ca3a1` = merge PR #739; master đã tiến 38 commit) thêm `landed_quyet_dinh: 'chu kho #685 comment 6103888794 (2026-10-11T00:45:59Z); …'` vào đúng hồ sơ pr732 ở cấp `trang_thai_packet`. Đo 15-10-2026 ~06:30Z trên 601 ref: đó là commit chưa merge DUY NHẤT chạm write set, và 0 trong 1.310 blob lease (mọi phiên bản trên các ref) còn hạn tại 2026-10-15T06:30Z mà giao write set (so ref phía máy chủ: KHÔNG ĐO ĐƯỢC). Packet này không dựa vào, không đóng, không hợp nhất nhánh ấy; trước khi ghi, hỏi chủ kho bỏ hay giữ — nếu merge SAU packet này, hồ sơ có hai khoá cho cùng một neo (`landed_quyet_dinh`, `neo_phu`).
+# lop: nguon-o1-o6-khong-co-trong-kho, o7-va-quyet-dinh-moi-o-chua-chot
+@@ -35,1 +38,4 @@
+-   closure hay write set của wp685 (theo VERDICT); tệp đính chính phải nói thẳng điều đó.
++   closure hay write set của wp685 (theo VERDICT); tệp đính chính phải nói thẳng điều đó.
++   - **Nguồn không nằm trong kho** (đo 15-10-2026 ~06:30Z, bản sao 601 ref, 45.743 đối tượng git): không blob nào dài 32.989 byte (cỡ của VERDICT) và không blob nào chứa "hẹp hơn diff ở hai chỗ không chuẩn tắc" (tiêu đề O1). Executor nhận tệp từ điều phối; `sha256sum` phải bằng băm trên, thiếu hay lệch ⇒ DỪNG, không viết mục này từ trí nhớ. Mỗi O chép NGUYÊN VĂN thành một khối trích riêng kèm số dòng của VERDICT, không tóm tắt.
++   - **Đếm:** mục ấy có 7 gạch đầu dòng O1…O7 (`grep -c "^- \*\*O[0-9]"` = 7), trong khi dòng 7, 12 và 54 của VERDICT nói "sáu"/"O1–O6". O7 ("đã biết, không hồi quy") cố ý KHÔNG ghi; tệp đính chính nói một dòng như vậy.
++   - **Quyết định từng mục:** O1, O2 — ghi nhận, kèm chữ đề nghị cho r29 nếu có r29 (VERDICT nêu sẵn); O3, O4, O5, O6 — chỉ ghi nhận (VERDICT: không quyết định nào dựa vào). Dòng r28 của O4 là 162–163 (con trỏ ngắt dòng, `grep` một dòng không thấy).
+# lop: n2-n3-chinh-xac-hoa
+@@ -37,2 +43,4 @@
+-   `trang_thai_packet.quyet_dinh_chu_kho`: URL `https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6103888794`,
+-   thời điểm, người đăng, số byte, sha256 thân — đo từ readback; ghi rõ **neo chuẩn vẫn là**
++   `trang_thai_packet.quyet_dinh_chu_kho` (cùng cấp `neo_ben`, đứng trước `landed_ly_do`) với các khoá `url`
++   (`https://github.com/ducthangho/tra-luat/issues/685#issuecomment-6103888794`), `luc` (`created_at`, nói `updated_at` có bằng nó không),
++   `nguoi_dang` (`user.login`), `author_association`, `performed_via_github_app` (nguyên giá trị: `null` hay tên), `so_byte` (số byte UTF-8
++   của `body`), `sha256` (của `body` UTF-8) — đo từ readback; ghi rõ **neo chuẩn vẫn là**
+# lop: neo-phu-bia-van-xanh
+@@ -40,1 +48,6 @@
+-5. **[`ops/land/pr732-wp685-provenance/readback-comment-6103888794.json`] Readback thô** của comment ấy (`gh api` GET, không sửa).
++5. **[`ops/land/pr732-wp685-provenance/readback-comment-6103888794.json`] Readback thô** của comment ấy (`gh api` GET, không sửa).
++   DỪNG — không đặt `neo_phu`, không dựng readback từ bản đọc MCP — nếu: (a) `gh api repos/ducthangho/tra-luat/issues/comments/6103888794`
++   không chạy được (CLAUDE.md ghi REST tới `repos/<kho>` bị proxy chặn 403 ở phiên web đo 15–17-08-2026; `pr732-wp685-land-evidence.yaml` dòng 11 ghi `gh api`
++   chạy ở phiên ghi sổ 10-10 — nên liệu phiên executor gọi được là KHÔNG ĐO ĐƯỢC từ review này); (b) `user.login` ≠ `ducthangho`, `author_association` ≠
++   `OWNER` hoặc `created_at` ≠ `2026-10-11T00:45:59Z` (người đăng và giờ do chủ kho tự ghi ở commit `2f30166f`: "chu kho #685 comment 6103888794 (2026-10-11T00:45:59Z)" — lời khai, không phải readback); (c) thân không ghi quyết định landed của WP685/#685. Tiền lệ của chính kho: `pr478-land-evidence.yaml` dòng 104 gọi neo comment không có
++   response thô cùng phép đối chiếu độc lập là ATTESTATION, không phải bằng chứng.
+# lop: n3-n4-khong-khoa-bat-bien-chi-them
+@@ -41,1 +54,2 @@
+-6. **[`ops/land/pr732-wp685-provenance/SHA256SUMS.txt`] Cập nhật** dòng băm cho tệp ở mục 5; mọi dòng cũ giữ nguyên.
++6. **[`ops/land/pr732-wp685-provenance/SHA256SUMS.txt`] Cập nhật** dòng băm cho tệp ở mục 5; mọi dòng cũ giữ nguyên. Tệp đang xếp theo tên theo
++   `LC_ALL=C` (44 dòng, `sort -c` đạt, đo 15-10-2026 ~06:30Z): chèn dòng mới giữa `readback-comment-6103749546.json` và `readback-comments-732.json`, không nối vào cuối.
+# lop: n2-n3-chinh-xac-hoa
+@@ -45,1 +59,1 @@
+-Mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3).
++Mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3). Mọi đột biến phải được commit: phép so `6f121a3..HEAD` không thấy cây làm việc chưa commit (đo 15-10-2026 ~06:30Z).
+# lop: n1-khong-khoa-chu-dung-va-dot-bien-so-dong-song
+@@ -47,3 +61,8 @@
+-- **N1 (mục 1–3):** tệp đính chính có đúng ba phần `S2-r14`, `M8-r14`, `O1..O6-r28`; mỗi phần trích **nguyên văn** chữ cũ
+-  kèm số dòng và băm spec gốc. Phép đo ĐỎ: script trích dòng nêu từ blob spec gốc tại `6f121a3` và so chuỗi trích —
+-  một ký tự lệch ⇒ ĐỎ. Đột biến: đổi số dòng trong tệp đính chính sai 1 ⇒ phép so ĐỎ.
++- **N1 (mục 1–3):** tệp đính chính có đúng ba phần `S2-r14`, `M8-r14`, `O1..O6-r28`. Mỗi trích gồm dòng
++  `tệp: <đường> · sha256 <64 hex> · dòng <a>–<b>`, rồi khối ```` ```text ```` chép NGUYÊN các dòng a..b của blob `6f121a3:<đường>` (cả dòng,
++  không rút thành cụm); S2 và M8 thêm dòng `chữ đúng:` mang đúng chuỗi ở mục 1 và mục 2. Phép đo ĐỎ: script trích dòng a..b từ blob và
++  so BẰNG TUYỆT ĐỐI với khối trích, so sha256 đầy đủ của blob, và `grep -F` hai chuỗi chữ đúng. Đột biến (mỗi cái phải ĐỎ): số dòng
++  lệch +1 và lệch −1 ở TỪNG phần; đổi một ký tự trong khối trích; `r14` → `r13` ở chữ đúng; chữ đúng = chữ cũ. Review đặc tả lượt 1
++  đo 15-10-2026 ~06:30Z: trích CỤM rồi so "chứa" (cách r1 tự dùng ở mục 1–2) thì lệch +1 SỐNG ở S2 (cụm ở dòng 3262 trong 3261–3262) lẫn M8
++  (cụm ở dòng 2731 trong 2729–2731), và không phép đo nào của r1 chạm chữ đúng (đổi `r14` thành `r13` hay giữ nguyên `r11` vẫn XANH).
++  Khối O: reviewer so từng khối với VERDICT cấp kèm; một ký tự lệch ⇒ ĐỎ.
+# lop: n2-n3-chinh-xac-hoa, n3-n4-khong-khoa-bat-bien-chi-them, neo-phu-bia-van-xanh
+@@ -52,3 +71,12 @@
+-- **N3 (mục 4–6):** `yaml.safe_load` hồ sơ pr732 thành công; `trang_thai_packet.landed` vẫn `true`; `neo_ben` vẫn là
+-  6103749546; `neo_phu.sha256` = sha256 của trường `body` trong readback (UTF-8). Đột biến: sửa 1 ký tự sha256 ⇒ ĐỎ;
+-  đổi `neo_ben` ⇒ ĐỎ.
++- **N3 (mục 4–6):** `yaml.safe_load` hồ sơ pr732 thành công; `trang_thai_packet.landed` vẫn `true`; `neo_ben` vẫn đúng chuỗi
++  `https://github.com/ducthangho/tra-luat/pull/739#issuecomment-6103749546` (trường là URL, không phải số `6103749546`); `neo_phu.sha256` = sha256
++  của trường `body` trong readback (UTF-8). Đột biến: sửa 1 ký tự sha256 ⇒ ĐỎ; đổi `neo_ben` ⇒ ĐỎ (cả hai đã đo ĐỎ, 15-10-2026 ~06:30Z).
++  - **N3b (chỉ THÊM):** `git diff --numstat 6f121a3..HEAD` của hồ sơ pr732 có 0 dòng xoá và `git diff -U0` có đúng MỘT hunk với dòng thêm đầu là
++    `    neo_phu:`. Đột biến: sửa một chữ của `landed_hieu_luc_tu` hay của `authorized_head_sha` ⇒ ĐỎ (review lượt 1 đo: N3 như r1 viết XANH ở cả hai).
++  - **N3c (neo phụ chép đúng và đúng chủ):** script so `neo_phu.url` = `html_url`, `nguoi_dang` = `user.login` = `ducthangho`, `author_association` =
++    `OWNER`, `luc` = `created_at` = `2026-10-11T00:45:59Z`, `performed_via_github_app` = giá trị readback, `so_byte` = số byte UTF-8 của `body`, `sha256`. Đột biến: readback bịa với người đăng
++    khác (thân vô nghĩa, `sha256`/`so_byte`/SHA256SUMS cập nhật cho khớp) ⇒ ĐỎ (review lượt 1 đo: N2–N5 như r1 viết XANH).
++  - **N3d (đối chiếu sống, reviewer chạy):** `gh api` GET lại cùng đường và so các trường ổn định (`id`, `user.login`, `author_association`,
++    `performed_via_github_app`, `created_at`, `updated_at`, `body`) với tệp readback; không có mạng ⇒ ghi KHÔNG ĐO ĐƯỢC, không tính là đạt. Đột biến:
++    sửa 1 ký tự `body` trong readback rồi cập nhật `sha256`, `so_byte` và SHA256SUMS cho khớp, ghi người đăng là chủ kho ⇒ N3, N3c, N4 XANH,
++    chỉ N3d ĐỎ.
+# lop: n3-n4-khong-khoa-bat-bien-chi-them
+@@ -56,1 +84,4 @@
+-  readback ⇒ ĐỎ.
++  readback ⇒ ĐỎ (đã đo ĐỎ, 15-10-2026 ~06:30Z).
++  - **N4b (provenance chỉ THÊM):** `git diff --name-status 6f121a3..HEAD -- ops/land/pr732-wp685-provenance/` chỉ có `A readback-comment-6103888794.json` và
++    `M SHA256SUMS.txt`; `git diff --numstat` của `SHA256SUMS.txt` = `1 0`; `LC_ALL=C sort -c` trên cột tên đạt. Đột biến: xoá một dòng cũ; sửa một tệp
++    cũ cùng dòng băm của nó; để dòng mới ở cuối tệp ⇒ ĐỎ (review lượt 1 đo: N4 như r1 viết XANH ở cả ba).
+# lop: n5-kiem-re-thieu-bien-moi-truong
+@@ -57,3 +88,9 @@
+-- **N5 (cổng kho):** CI PR xanh; `python ops/ci_duong_nhanh.py kiem-re` ĐẠT (cả 4 tệp nằm trong `ops/{land,specs}/**`);
+-  `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0. Đột biến: thêm một tệp nhị phân vào provenance ⇒
+-  `kiem-re` ĐỎ (đã đo 15-10 ở PR #749).
++- **N5 (cổng kho):** CI PR xanh; bước `DUONG_NHANH - kiem re …` của `ci.yml` (dòng 646–657) chạy `doctrine-scan` rồi `kiem-re` VỚI bốn biến
++  `CI_DUONG_NHANH_SU_KIEN=pull_request`, `CI_DUONG_NHANH_GOC` (base), `CI_DUONG_NHANH_DAU` (head PR), `CI_DUONG_NHANH_MERGE` (`github.sha`, commit merge
++  ref). Dựng lại tại chỗ: `GOC` = `6f121a3…`, `DAU` = head PR, `MRG` = commit `git merge --no-ff` DAU vào GOC, checkout `MRG`, rồi
++  `CI_DUONG_NHANH_SU_KIEN=pull_request CI_DUONG_NHANH_GOC=$GOC CI_DUONG_NHANH_DAU=$DAU CI_DUONG_NHANH_MERGE=$MRG python ops/ci_duong_nhanh.py kiem-re`
++  ⇒ ĐẠT (`4 tep doi, 0 loi`, rc 0; cả 4 tệp nằm trong `ops/{land,specs}/**`). Lệnh TRẦN `python ops/ci_duong_nhanh.py kiem-re` KHÔNG phải phép đo:
++  rc 1 ("kiem-re CHI chay khi diff toan ho so") trên CẢ cây sạch lẫn cây thêm tệp nhị phân (review lượt 1 đo, 15-10-2026 ~06:30Z). Đột biến: thêm một
++  tệp nhị phân vào provenance rồi chạy ĐÚNG lệnh có bốn biến ⇒ rc 1, dòng `tep ho so nhi phan` (đỏ vì tệp nhị phân, không vì thiếu biến; đã đo 15-10 ở PR #749 và
++  lại ở review lượt 1). `doctrine-scan` chỉ đọc `.claude/skills/**`, `.agents/skills/**`, `CLAUDE.md` (đo: 10 tệp) — không tệp nào trong write set, nên KHÔNG
++  thể đỏ do packet này; giữ làm cổng CI, không tính là tiêu chí nghiệm thu.
+# lop: hinh-dang-ke-thua-khong-chep-bo-dem
+@@ -63,3 +100,6 @@
+-`khong_ap_dung` cho đếm hình dạng lỗi của mã (packet không sửa mã). Ghi lại hai hình dạng đã gặp ở packet tiền nhiệm
+-có thể tái phát ở đây: (a) **tệp nhị phân trong hồ sơ** bị `kiem-re` từ chối (PR #749 lượt `0876395`) — readback phải là
+-JSON văn bản; (b) **lời khai vị trí/số dòng trôi** (L5) — mọi số dòng trong tệp đính chính phải đo trên blob tại `6f121a3`.
++`khong_ap_dung` cho đếm hình dạng lỗi của mã (packet không sửa mã). Ghi lại ba hình dạng đã gặp ở packet tiền nhiệm
++có thể tái phát ở đây: (a) **tệp nhị phân trong hồ sơ** bị `kiem-re` từ chối (PR #749 lượt `0876395`) — readback phải là
++JSON văn bản; (b) **lời khai vị trí/số dòng trôi** (L5) — mọi số dòng trong tệp đính chính phải đo trên blob tại `6f121a3`;
++(c) **vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba** — wp685 r28 §9 đếm 15 lần tới lượt 14 (r28 dòng 3541–3550), wp698 r14 §9 gọi tên nó (dòng 3493). Đính chính
++chữ cũng dính hình dạng ấy, nên executor tự liệt kê MỌI chỗ cùng hình dạng trước khi viết. Đã liệt kê trên blob `6f121a3` (15-10-2026 ~06:30Z): "neo `spec_hash`
++**của r11**" ở r14 = 1 chỗ (dòng 3262); "độ dài mọi danh sách" ở r14 = 1 chỗ (dòng 2731); "cùng đường, cùng loại" ở r14 = 0 chỗ. Executor chạy lại và ghi số.
+# lop: neo-phu-bia-van-xanh, trich-nguong-sai-nguyen-van, hinh-dang-ke-thua-khong-chep-bo-dem
+@@ -71,1 +111,5 @@
+-  trên readback REST (`gh api`), không trên bản đọc qua MCP.
++  trên readback REST (`gh api`), không trên bản đọc qua MCP.
++- Sự tồn tại, người đăng, thời điểm và nội dung của comment 6103888794, và việc phiên executor gọi được `gh api repos/…`: KHÔNG ĐO ĐƯỢC từ review đặc tả lượt 1
++  (không dùng mạng); trong kho chuỗi `6103888794` có ở spec này và ở commit `2f30166f` chưa merge của chủ kho (đo 15-10-2026 ~06:30Z trên 45.743 đối tượng git: đúng hai blob) — đó là lời khai của chủ kho về người đăng và giờ, không phải readback.
++- Sổ nợ P3 của phiên điều phối (mục 1, 2, 3, 11) và quyết định Q1–Q10 không có trong kho: KHÔNG ĐO ĐƯỢC.
++- Lượt CI `gate-ops` đỏ ở `0876395` của PR #749 chỉ có lời khai trong thân commit `c29ee11` ("gate-ops tren 0876395 DO … 23 tep .zip/.log.gz"); chạy lại CI thật: KHÔNG ĐO ĐƯỢC.

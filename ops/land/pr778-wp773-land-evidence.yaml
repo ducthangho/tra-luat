@@ -41,8 +41,10 @@ post_merge_checks_ghi_chu: >-
   "The job was not started because recent account payments have failed or your spending limit needs to be increased" —
   GitHub Actions bi chan vi billing tai khoan tu ~06:00Z, KHONG phai loi ma. Ket qua gop va ma tran Windows cua gate tren
   dba7fae: not_measured cho toi khi billing duoc sua va chay lai. Run 39096438142 xep hang sau run workflow_dispatch
-  39095054115 tren fb490a7 (readback-run-39095054115.json, readback-jobs-39095054115.json): phia Windows cua run ay DO
-  O NEN truoc #778 (bash_nen t23 CRLF / t49 Unicode).
+  39095054115 tren fb490a7 (readback-run-39095054115.json, readback-jobs-39095054115.json): 11 job windows-latest cua run
+  ay failure O NEN truoc #778. Nguyen nhan chi DO cho MOT job — trich-log-gate-windows-fb490a7.txt (job 'gate
+  (windows-latest)' 117579671380): ca t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows va
+  t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC DO; 10 job windows con lai: nguyen nhan not_measured.
 pre_merge_checks_thu_tu_thoi_gian: >-
   measured — readback-check-runs-6f69f9d.json va readback-pr-778.json: 16 check run tren 6f69f9d (15 success, launcher
   skipped), completed_at muon nhat 2026-10-18T04:14:33Z < merged_at 04:15:03Z; readback-codex-connector-state-778.json

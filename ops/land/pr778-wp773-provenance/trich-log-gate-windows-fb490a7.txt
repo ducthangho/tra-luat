@@ -1,0 +1,6 @@
+# trich log job 'gate (windows-latest)' id 117579671380, run 39095054115 (workflow_dispatch, head fb490a7 — nen truoc #778) — 2026-10-18T06:21:50Z
+# sha256 log day du luc trich: 882d9b10616fc41c8dda2d3e40b02f4340872b26d0613adf98c9d39ab103db82 (121343 byte); log day du KHONG luu
+  ĐỎ  t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows: vẫn lọt \r vào tên công cụ: C:\Users\runneradmin\AppData\Local\Temp\cong-cu-batch-x49gyqtr\ops\bash_nen.py:900: SyntaxWarning: invalid escape sequence '\('
+  ĐỎ  t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC: (2) chiều ngược: đường Unicode THƯỜNG bị bóp méo: []
+  KHÔNG_ĐO_ĐƯỢC bán kính cho ['t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows', 't49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC']: ca đã ĐỎ Ở NỀN, trước mọi đột biến. Loại khỏi phép tính bán kính của MỌI đột biến (chúng chết vì nền, không vì đột biến), và vẫn tính là LỖI — một ca đỏ ở nền là một ca chưa đo �
+##[error]Process completed with exit code 1.

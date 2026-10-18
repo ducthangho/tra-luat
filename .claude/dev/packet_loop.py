@@ -2395,7 +2395,7 @@ CHECK_BAT_BUOC = tuple((".github/workflows/ci.yml", f"{j} (ubuntu-latest)") for 
 APP_CHECK, BOT_LEASE, BOT_CONNECTOR = "github-actions", "github-actions[bot]", "chatgpt-codex-connector[bot]"
 CANON = ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py")
 RC_DANG_GIU_LEASE = 11  # `ops/lease_publish.py::RC_DANG_GIU` — `ai-dang-giu` có người giữ
-REPO_RE = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/issues/([0-9]+)#issuecomment-[0-9]+\Z")
+REPO_RE = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/issues/([0-9]+)#issuecomment-[0-9]{1,30}\Z")
 
 
 def _git_do(root: Path, *args) -> tuple[int, bytes]:
@@ -2419,7 +2419,7 @@ def _canon(root: Path) -> Path:
 def _doc_json(duong: str, rc: int) -> tuple:
     try:
         b = Path(duong).read_bytes()
-        return json.loads(b, object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json), hashlib.sha256(b).hexdigest()
+        return json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode(b.decode("utf-8")), hashlib.sha256(b).hexdigest()
     except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
         _die(rc, f"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}")
 
@@ -2615,7 +2615,7 @@ def _xet_dung(state_dir: Path, st: dict, cua: str) -> None:
         if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
             _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
     if cua == "accept":
-        _kiem_luoc_do_lease(st.get("lease"), RC_STATE)
+        _kiem_luoc_do_lease(st["lease"], RC_STATE)
 
 
 def cmd_status(a, state_dir: Path) -> int:

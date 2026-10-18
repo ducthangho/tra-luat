@@ -1780,10 +1780,12 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--since", "%040x" % 0 if False else "HEAD~1",
           "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
+    if _r812(c, "accept", env=env)[0]:  # #812: `record-lease` đường ref + `accept` in tiếng Việt; rc khác 0 ⇒ ĐỎ (stdout bị capture)
+        raise AssertionError(f"[{codepage}] chuỗi r812 lease → accept không rc=0")
     sd_r = _reviewing(c, "--codex-review-calls-limit", 1)  # #775: rescue cần state đã chạm trần, dựng ngoài kịch bản
     _pl(c, sd_r, _goi("r1", _H1), _goi("r2", _H1, 3))
     buoc += [([b[1], "--packet", 55, *b[2:]], sd_r) for b in (_nang(0, tran=2), _rescue(0, "nang_tran"))]
-    da_phu = set()
+    da_phu = {"accept"}
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
@@ -5916,11 +5918,11 @@ def _kho812(c: Ctx, bien: str = "") -> Path:
     return c.tmp / f"kho{bien}" / "w"
 
 
-def _r812(c: Ctx, den: str, bien="", comment=True, bn=None, lop=(), cr=None, wr=None, cn=None, qd=()):
+def _r812(c: Ctx, den: str, bien="", comment=True, bn=None, lop=(), cr=None, wr=None, cn=None, qd=(), env=None):
     """Baseline dương tới `den` (lease · review · accept); mỗi tham số đổi ĐÚNG một yếu tố; `cr`/`wr`/`cn` là hàm (head, danh sách
     mặc định) → danh sách. Trả (rc, sd, err, bytes state NGAY TRƯỚC bước cuối)."""
     w, sd, f, id_ = _kho812(c, bien), c.sd(), c.tmp, lambda h, x: x
-    buoc = lambda *l: (lambda truoc: (*run(c.script, [l[0], "--packet", 55, *l[1:], "--root", w], sd)[::2], truoc))((sd / "wp55.json").read_bytes())  # noqa: E731
+    buoc = lambda *l: (lambda truoc: (*run(c.script, [l[0], "--packet", 55, *l[1:], "--root", w], sd, env)[::2], truoc))((sd / "wp55.json").read_bytes())  # noqa: E731
     _doi(0, *c.init(sd, lease=False)[::2], "init")
     (f / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "```yaml\nlease_id: wp55-r1-g1-claude\n```",
                                             "issue_url": "https://api.github.com/repos/o/r/issues/55"}][:int(comment)]))

@@ -32,6 +32,32 @@ pre_merge_checks:
 post_merge_checks:
   - {name: gate (ci.yml, push master), run_id: 39030380292, sha: 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16, conclusion: success, ghi_chu: 'moi job success, do lai 13:27Z 17-10-2026 (luc ghi so dau con in_progress)', nguon: [readback-run-39030380292.json, readback-jobs-39030380292.json]}
   - {name: 'launcher (Windows that)', conclusion: not_measured, ly_do: 'khong co luot tren 7cc384e — PR khong cham .claude/dev/**'}
+danh_tinh_CI_10_2_2:
+  # §10.2.2 doi BON MOC cho bang chung gate hau-merge (finding P1 connector #799 thread 4308178812, review 5564274965).
+  run: 'measured — 39030380292, attempt 1, event push, head_sha 7cc384e, path .github/workflows/ci.yml (readback-run-39030380292.json).'
+  checkout: >-
+    measured — `git log -1 --format=%H` sau actions/checkout = 7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16 o 13/13 job co buoc checkout; job chuan-bi
+    khong checkout (do-danh-tinh-ci-39030380292.txt, trich-log-run-39030380292.txt).
+  workflow_definition:
+    exact_commit_oid: 'not_measured — GraphQL WorkflowRun.file.repositoryFileUrl tra 403 tu phien nay (do-danh-tinh-ci-39030380292.txt).'
+    nguon_thay_the: >-
+      measured — blob .github/workflows/ci.yml tai 7cc384e = 2e3095bb4cadf77aa020f682dfd8e4125943ca5e, sha256
+      226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0, 62825 byte; dong lenh dau cua MOI buoc Run trong
+      log co nguyen van trong blob ay o 14/14 job (gate 27/27, gate-ops 9/9, gate-registry 8/8, gate-packet-loop 8/8,
+      8 manh gate-cong-cu 6/6, gate-cong-cu-gop 3/3, chuan-bi 1/1) — do-danh-tinh-ci-39030380292.txt. KHONG suy ra commit OID.
+    quyet_dinh_chu_kho:
+      kenh: 'AskUserQuestion trong phien session_017khPoiSXW9Yvefabg6MWaH, 18-10-2026 (sau finding P1 tren b6e5b8d)'
+      cau_hoi_nguyen_van: '#799 mốc Workflow definition (§10.2.2): commit nguồn của workflow KHÔNG đo được (GraphQL 403). Nguồn thay thế đo được cho cả 2 run push master — 39014797353 (8ab1007) và 39030380292 (7cc384e): blob ci.yml 2e3095bb tại đúng merge SHA (sha256 226495bd…, 62825 byte, giống nhau ở hai SHA), thân bước khớp log nguyên văn ở cả 14/14 job mỗi run (gate 27/27, gate-ops 9/9, gate-registry 8/8, gate-packet-loop 8/8, 8 mảnh gate-cong-cu 6/6, gop 3/3); checkout `git log -1` = merge SHA ở 13/13 job có checkout. Chấp nhận nguồn thay thế cho RIÊNG hai run này để giữ landed: true?'
+      tra_loi_nguyen_van: 'Chấp nhận (Recommended)'
+      disposition: chu_kho_chap_nhan_nguon_thay_the
+      pham_vi: 'RIENG run 39014797353 va 39030380292; tien le pr666 / pr696 / pr701, quyet dinh cu KHONG tai su dung.'
+  gate_output: >-
+    measured — 14/14 job success, run_attempt 1, runner ubuntu-24.04 (image 20261012.334.1); 0 dong ##[error], 0 dong
+    "Process completed with exit code"; marker duong: gate "ok": true (selftest/release-verify JSON), gate-ops
+    lease_publish 265/265 dat, gate-packet-loop 343/343 dat + TONG: DAT, gate-registry CA 45/45 + DOT BIEN 25/25 + TONG: DAT,
+    8 manh gate-cong-cu cong_cu_test 56/56 dat, gate-cong-cu-gop SO LIEU GOM ca=56 dot bien=470 loi=0
+    (trich-log-run-39030380292.txt; sha256 bytes log tung job ghi o dau moi khoi).
+  windows: 'not_measured — run push master khong co job windows-latest (readback-jobs-39030380292.json); khong suy tu Linux.'
 pre_merge_checks_thu_tu_thoi_gian: >-
   measured — merged_at 2026-10-17T11:53:00Z; check-run muon nhat tren 1b375db completed_at 10:55:20Z (gate-registry);
   connector updated_at 09:36:20Z. Lenh tai kiem: nhu ho so pr791-wp782, voi m="2026-10-17T11:53:00Z" va readback-check-runs-1b375db.json.
@@ -86,7 +112,8 @@ trang_thai_packet:
     KHONG phai chu kho tu go).
   landed_ly_do: >-
     PROTOCOL §10.2.4: ma vao canonical o exact SHA duoc duyet (1b375db la cha thu hai cua 7cc384e — do-spec-va-merge.txt);
-    gate push master tren DUNG merge SHA xanh (readback-run-39030380292.json, readback-jobs-39030380292.json); lease da
+    gate push master tren DUNG merge SHA xanh, du bon moc §10.2.2 voi workflow definition qua nguon thay the chu kho chap
+    nhan (danh_tinh_CI_10_2_2; readback-run-39030380292.json, trich-log-run-39030380292.txt); lease da
     nha (ai-dang-giu-sau-ghi-so/). Windows cua gate hau-merge: not_measured (post_merge_checks).
 
 uy_quyen_land:

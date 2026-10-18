@@ -5,6 +5,7 @@ b91c6a5c00a4ae45960e7627c2267b7fafb416ea4c24d80c8d9bec3f03f72ca3  ./ai-dang-giu-
 cc2883c8c4f4fd0b804a5f11fbd164882157882308947e0ba8e24e1b2c9ed9b4  ./ai-dang-giu-sau-ghi-so/docs_adr_0053-tran-kich-thuoc-sensitive-len-sau-tep.md.txt
 c649270d70c506f8f73772de5cc27ac38b854c58221e7c231ea40c39d637dc3a  ./ai-dang-giu-sau-ghi-so/docs_adr_0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md.txt
 6fbf58a60d61f6517ea25ad4549e9e30bdcecacb1195c80429dc764b0aba2fc0  ./ai-dang-giu-sau-ghi-so/scripts_tl_selftest.py.txt
+1591722a9c182edbe0875c433101ce2fc7da8004b77fed3a884de52c71824156  ./do-danh-tinh-ci-39030380292.txt
 b7e46bf76b024a37423ab4033e60722e2c5676fd2ca53c3146ccf6e3c7d57c18  ./do-spec-va-merge.txt
 e5e68ce0f454260d52ff58db990265a9b461496f9410a34c20cbcfdf782b6b71  ./readback-check-runs-1b375db.json
 1eff00803ce8d5847b7172d090171142a326b593f56fcfd62233e7c72f92b3af  ./readback-comment-6253492563.json
@@ -14,3 +15,4 @@ e5e68ce0f454260d52ff58db990265a9b461496f9410a34c20cbcfdf782b6b71  ./readback-che
 cbdfaf966f37da667639e9558d1378bc2f27672849efd82355210820dc097684  ./readback-pr-793.json
 4a46d4035d4264aafc81523e60893adff17819296eaeddf32da14fbea20017f1  ./readback-reviews-793.json
 4c06013c1a288286e075b2511ed23d54794cceca718364c7e4a6c3bab7415d71  ./readback-run-39030380292.json
+9d9c176da4dc253843be914a61b2bedf9618dd43d07a26cd132bdbed7e11dd8f  ./trich-log-run-39030380292.txt

@@ -27,6 +27,7 @@ liên tiếp chứng minh là sai từ thiết kế — chi tiết ở phần ch
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import hmac
 import html
@@ -36,6 +37,7 @@ import os
 import platform
 import re
 import secrets
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -667,7 +669,7 @@ def _load(state_dir: Path, packet: int) -> dict:
             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
                         and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
-                        and (st.get("luat_adr0054") is not True or set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH))),
+                        and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
@@ -2393,14 +2395,58 @@ def _git_do(root: Path, *args) -> tuple[int, bytes]:
         return -1, b""
 
 
-def _canon(root: Path) -> Path:
+@contextlib.contextmanager
+def _canon(root: Path, oid: str | None = None):
+    """Validator CANON (+ nguồn nó đọc) từ `origin/master`; `oid` ⇒ thêm `snap/` là worktree Git tách rời TẠI lease OID (cùng refs
+    với kho, để validator đo bia mộ/ref). Dọn sạch kể cả khi `_die` ném SystemExit."""
     td = Path(tempfile.mkdtemp(prefix="pl812-canon-"))
-    for p in CANON:
-        rc, b = _git_do(root, "show", f"refs/remotes/origin/master:{p}")
-        if rc != 0 or not b:
-            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {p} trên origin/master")
-        (td / p).parent.mkdir(parents=True, exist_ok=True), (td / p).write_bytes(b)
-    return td
+    try:
+        for p in CANON:
+            rc, b = _git_do(root, "show", f"refs/remotes/origin/master:{p}")
+            if rc != 0 or not b:
+                _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {p} trên origin/master")
+            (td / p).parent.mkdir(parents=True, exist_ok=True), (td / p).write_bytes(b)
+        if oid and _git_do(root, "worktree", "add", "-q", "--detach", str(td / "snap"), oid)[0]:
+            _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không dựng được worktree tại {oid[:12]}")
+        yield td
+    finally:
+        if (td / "snap").exists():
+            _git_do(root, "worktree", "remove", "--force", str(td / "snap"))
+        shutil.rmtree(td, ignore_errors=True)
+
+
+def _nap(td: Path, ten: str):
+    spec = importlib.util.spec_from_file_location(f"{ten}_canon", td / "ops" / f"{ten}.py")
+    spec.loader.exec_module(m := importlib.util.module_from_spec(spec))
+    return m
+
+
+def _ten_provider(p):
+    """Bí danh canon (`launcher._PROVIDER_BI_DANH`, `_TRANSPORT_CONTRACTS`: `anthropic_claude`/`openai_codex`) → tên của `PROVIDERS`."""
+    import launcher
+    p = dict(launcher._PROVIDER_BI_DANH).get(p, p)
+    return next((lenh[0] for prov, lenh, *_ in launcher._TRANSPORT_CONTRACTS if prov == p and lenh[0] in PROVIDERS), p)
+
+
+def _ds_duong(v) -> list:
+    if type(v) is not list or not all(type(x) is str for x in v):
+        raise TypeError(f"write set không phải list chuỗi: {v!r}")  # sai kiểu ⇒ KHÔNG_XÁC_ĐỊNH, không bỏ qua
+    return v
+
+
+def _giao(a: str, b: str) -> bool:
+    """§5: hai đường dẫn (đường dẫn chính xác hoặc prefix thư mục) giao nhau khi bằng nhau hoặc một bên là prefix thư mục của bên kia."""
+    a, b = a.removeprefix("planned:").strip().rstrip("/"), b.removeprefix("planned:").strip().rstrip("/")
+    return a == b or a.startswith(b + "/") or b.startswith(a + "/")
+
+
+def _nc_hop_le(nc) -> bool:
+    """Lược đồ LỒNG của ngữ cảnh lease trong state — thiếu/sai hình dạng ⇒ `_load` báo state hỏng, không traceback ở cửa sau."""
+    return (type(nc) is dict and set(nc) == set(KHOA_NGU_CANH) and type(nc["generation"]) is int and nc["generation"] > 0
+            and all(type(nc[k]) is str and nc[k] for k in ("lease_id", "lease_oid", "repo", "branch", "spec_hash", "assurance_target"))
+            and all(type(nc[v]) is dict and set(nc[v]) == {"provider", "model_family", "execution_surface", "transport"}
+                    and nc[v]["provider"] in PROVIDERS and nc[v]["model_family"] in MODEL_FAMILIES for v in ("executor", "reviewer"))
+            and type(nc["required_checks"]) is list)
 
 
 def _ngu_canh_lease(l: dict, ref: str, oid: str, path: str, repo: str) -> dict:
@@ -2410,8 +2456,8 @@ def _ngu_canh_lease(l: dict, ref: str, oid: str, path: str, repo: str) -> dict:
         _die(RC_ARG, "lease `required_checks` phải là list các cặp [workflow, job]")
     return {"lease_id": l["lease_id"], "lease_ref": ref, "lease_oid": oid, "lease_path": path, "repo": repo,
             "branch": l["branch"], "generation": l["generation"], "spec_hash": l["spec_hash"], "assurance_target": l["assurance_target"],
-            "executor": _identity(l.get("provider"), l.get("model_family"), l.get("execution_surface"), l.get("transport")),
-            "reviewer": _identity(l.get("reviewer"), l.get("reviewer_model_family"), l.get("reviewer_execution_surface"), l.get("reviewer_transport")),
+            "executor": _identity(_ten_provider(l.get("provider")), l.get("model_family"), l.get("execution_surface"), l.get("transport")),
+            "reviewer": _identity(_ten_provider(l.get("reviewer")), l.get("reviewer_model_family"), l.get("reviewer_execution_surface"), l.get("reviewer_transport")),
             "required_checks": sorted({tuple(x) for x in CHECK_BAT_BUOC} | {tuple(x) for x in rc})}
 
 
@@ -2450,23 +2496,38 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
         l = None
     kieu = {"lease_id": str, "branch": str, "spec_path": str, "spec_hash": str, "assurance_target": str, "granted_on_instruction": str,
             "prompt_path": str, "generation": int, "packet_issue": int}
+    ten_id = ("model_family", "execution_surface", "transport", "reviewer_model_family", "reviewer_execution_surface", "reviewer_transport")
     ws = (l.get("effective_write_set") if "effective_write_set" in l else l.get("write_set")) if isinstance(l, dict) else None
     mr = REPO_RE.fullmatch(str(l.get("granted_on_instruction"))) if isinstance(l, dict) else None
     if not isinstance(l, dict) or any(type(l.get(k)) is not t for k, t in kieu.items()) or l["packet_issue"] != st["packet"] or not mr \
             or int(mr[2]) != st["packet"] or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws) \
-            or any(PurePosixPath(l[k]).is_absolute() or ".." in PurePosixPath(l[k]).parts for k in ("prompt_path", "spec_path")):
-        _die(RC_ARG, f"lease {a.lease_path} tại {oid[:12]} hỏng: sai kiểu {sorted(kieu)}, khác packet {st['packet']}, không có write set, "
-                     f"đường dẫn thoát gốc, hoặc granted_on_instruction không trỏ chính Packet Issue")
-    td, (rc_p, prompt) = _canon(root), _git_do(root, "show", f"{oid}:{l['prompt_path']}")
-    (snap := td / "snap" / l["prompt_path"]).parent.mkdir(parents=True), snap.write_bytes(prompt), (td / "lease.yaml").write_bytes(raw)
-    p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
-    if rc_p or p.returncode:  # I2(H) trên SNAPSHOT tại lease OID, không trên worktree của ứng viên
-        _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
+            or any(PurePosixPath(l[k]).is_absolute() or ".." in PurePosixPath(l[k]).parts for k in ("prompt_path", "spec_path")) \
+            or l.get("role") != "executor" or l["generation"] < 1 or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id):
+        _die(RC_ARG, f"lease {a.lease_path} tại {oid[:12]} hỏng: sai kiểu/miền {sorted(kieu)} + role/identity, khác packet {st['packet']}, "
+                     f"không có write set, đường dẫn thoát gốc, hoặc granted_on_instruction không trỏ chính Packet Issue")
     lid = l["lease_id"]
-    for duong in ws:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn
-        p = subprocess.run([*lp, "ai-dang-giu", duong, "--root", str(root)], capture_output=True)
-        if p.returncode != RC_DANG_GIU_LEASE or p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] != [f"NGƯỜI_GIỮ 1: {lid}"]:
-            _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
+    with _canon(root, oid) as td:
+        (td / "lease.yaml").write_bytes(raw)
+        p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(td / "snap")], capture_output=True)
+        if p.returncode:  # I2(H) trên worktree Git TẠI lease OID, không trên worktree của ứng viên
+            _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
+        if l["assurance_target"] not in _nap(td, "bien_nhan_v2").ASSURANCE_CAN_DOC_LAP:
+            _die(RC_ARG, f"assurance_target {l['assurance_target']!r} ngoài miền của protocol")
+        for duong in ws:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn…
+            p = subprocess.run([*lp, "ai-dang-giu", duong.removeprefix("planned:"), "--root", str(root)], capture_output=True)
+            if p.returncode != RC_DANG_GIU_LEASE or p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] != [f"NGƯỜI_GIỮ 1: {lid}"]:
+                _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
+        try:  # …và KHÔNG lease còn hiệu lực nào khác GIAO write set (§5: prefix hai chiều, cả write_set lẫn effective_write_set)
+            lpm = _nap(td, "lease_publish")
+            cac = lpm._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
+            giu = lambda x: [y for k in ("write_set", "effective_write_set") for y in _ds_duong(x.get(k, []))]  # noqa: E731
+            khac = sorted({f"{m['ref']}:{m['path']}" for m in cac if lpm._lease_id_quet(m["lease"].get("lease_id")) != lid
+                           and lpm._phan_loai_lease(m["lease"]) == "CÒN_HẠN" and lpm._bia_mo_doi_xung(m["lease"], cac) is not True
+                           and any(_giao(x, y) for x in ws for y in giu(m["lease"]))})
+        except Exception as ex:  # noqa: BLE001 — không đo được ⇒ không có thẩm quyền
+            _die(RC_GUARD, f"I2(Đ): KHÔNG_XÁC_ĐỊNH khi quét lease toàn kho: {type(ex).__name__}: {str(ex)[:300]}")
+        if khac:
+            _die(RC_GUARD, f"I2(Đ): lease khác còn hiệu lực giao write set của {lid}: {khac}")
     try:
         cm = json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode((raw_cm := Path(a.lease_comments).read_bytes()).decode("utf-8"))
     except (OSError, ValueError, RecursionError) as ex:
@@ -2495,37 +2556,42 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
 
 def _du_dieu_kien_approve(st: dict, a) -> dict:
     """M2 — vị từ DÙNG CHUNG cho MỌI verdict của packet áp ADR-0054: verdict TRONG biên nhận H phải khớp `--verdict`; biên nhận qua
-    `_thieu` + `_neo_git` của validator canon (nguồn hỏng ⇒ từ chối); I8 qua hàm chuẩn hoá của `bien_nhan_v2`, họ theo `model_family`
-    lease khai; I10; bảng lớp đúng lược đồ; approve không còn P0–P2; verdict âm chỉ dùng slug có trong bảng lớp (I11)."""
+    `_thieu` + `_neo_git` của validator canon (nguồn hỏng ⇒ từ chối); I8: danh tính chuẩn hoá (bí danh canon) khớp lease ở cả hai vai —
+    provider, và surface/transport khi biên nhận khai; họ theo `model_family` lease khai; I10; bảng lớp đúng lược đồ; approve không còn
+    P0–P2; verdict âm chỉ dùng slug có trong bảng lớp (I11)."""
     import yaml
     try:
         d = yaml.safe_load(raw := Path(a.bien_nhan).read_bytes())
     except Exception as ex:  # noqa: BLE001 — thiếu cờ/tệp/YAML hỏng đều là KHÔNG ĐO ĐƯỢC
         _die(RC_BIEN_NHAN, f"packet áp ADR-0054: review phải kèm --bien-nhan đọc được ({type(ex).__name__})")
-    spec = importlib.util.spec_from_file_location("bien_nhan_v2_canon", _canon(Path(a.root)) / "ops" / "bien_nhan_v2.py")
-    spec.loader.exec_module(bnv := importlib.util.module_from_spec(spec))
-    if bnv.PROVIDER_NGUON_HONG is not None:
-        _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: validator canon thiếu nguồn ({bnv.PROVIDER_NGUON_HONG}) — không chạy ở chế độ suy giảm")
-    d = d if isinstance(d, dict) else {}
-    nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
-    mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
-    ho = lambda vai: bnv._ho_model_cua_ten(nc[vai]["model_family"] or "") or bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(nc[vai]["provider"]), "")  # noqa: E731
-    ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
-    lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
-                                       and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
-    neo = bnv._neo_git(Path(a.root), Path(a.bien_nhan).name, d) if d else (["không phải ánh xạ"], [])
-    loi = list(bnv._thieu(d) if d else []) + neo[0] + neo[1] + [ten for ten, dung in (
-        ("verdict", d.get("verdict") == a.verdict), ("role", d.get("role") == "reviewer"),
-        ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
-        ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
-        ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
-        ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
-        ("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer")), ("ho-executor", bool(ho_exec) and ho_exec == ho("executor")),
-        ("surface", nc["reviewer"]["execution_surface"] is not None and mri.get("surface") == nc["reviewer"]["execution_surface"]),
-        ("transport", nc["reviewer"]["transport"] is not None and mri.get("transport") == nc["reviewer"]["transport"]),
-        ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
-        ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
-        ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})) if not dung]
+    with _canon(Path(a.root)) as td:
+        bnv = _nap(td, "bien_nhan_v2")
+        if bnv.PROVIDER_NGUON_HONG is not None:
+            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: validator canon thiếu nguồn ({bnv.PROVIDER_NGUON_HONG}) — không chạy ở chế độ suy giảm")
+        d = d if isinstance(d, dict) else {}
+        nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
+        mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
+        mei = d["model_executor_identity"] if isinstance(d.get("model_executor_identity"), dict) else {}
+        ho = lambda vai: bnv._ho_model_cua_ten(nc[vai]["model_family"] or "") or bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(nc[vai]["provider"]), "")  # noqa: E731
+        ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
+        lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
+                                           and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
+        neo = bnv._neo_git(Path(a.root), Path(a.bien_nhan).name, d) if d else (["không phải ánh xạ"], [])
+        loi = list(bnv._thieu(d) if d else []) + neo[0] + neo[1] + [ten for ten, dung in (
+            ("verdict", d.get("verdict") == a.verdict), ("role", d.get("role") == "reviewer"),
+            ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
+            ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
+            ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
+            ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
+            ("provider-reviewer", _ten_provider(mri.get("provider")) == nc["reviewer"]["provider"]),
+            ("provider-executor", _ten_provider(mei.get("provider", d.get("executor_provider"))) == nc["executor"]["provider"]),
+            ("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer")), ("ho-executor", bool(ho_exec) and ho_exec == ho("executor")),
+            ("surface", nc["reviewer"]["execution_surface"] is not None and mri.get("surface") == nc["reviewer"]["execution_surface"]),
+            ("transport", nc["reviewer"]["transport"] is not None and mri.get("transport") == nc["reviewer"]["transport"]),
+            ("executor-surface-transport", all(mei.get(k, nc["executor"][f]) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")))),
+            ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
+            ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
+            ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})) if not dung]
     if loi:
         _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}")
     return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}

@@ -1,0 +1,36 @@
+CROSS_VERSION 3.11 merge_duplicate 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+ []
+CROSS_VERSION 3.11 unquoted_date 1  ['ValueError: day is out of range for month']
+CROSS_VERSION 3.12 merge_duplicate 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+ []
+CROSS_VERSION 3.12 unquoted_date 1  ['ValueError: day is out of range for month']
+CROSS_VERSION 3.13 merge_duplicate 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+ []
+CROSS_VERSION 3.13 unquoted_date 1  ['ValueError: day is out of range for month']
+CROSS_VERSION 3.14 merge_duplicate 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+ []
+CROSS_VERSION 3.14 unquoted_date 1  ['ValueError: day 30 must be in range 1..28 for month 2 in year 2026']
+READ_ERROR_MUTATION c01_l1_luot1_mergeable_clean_khong_nguon 0 
+READ_ERROR_MUTATION c02_l1_glob_va_thu_muc 0 
+READ_ERROR_MUTATION c03_l1_token_khong_duoc_thoat_goc 0 
+READ_ERROR_MUTATION c04_l1_measured_hoa_thuong_va_khong_phai_khai 0 
+READ_ERROR_MUTATION c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van 0 
+READ_ERROR_MUTATION c06_l3_luot2_moc_sau_merged_at 0 
+READ_ERROR_MUTATION c07_l3_chi_doc_readback_cua_chinh_pr 0 
+READ_ERROR_MUTATION c08_l4_khong_do_duoc_khong_bao_gio_dat 0 
+READ_ERROR_MUTATION c09_l5_mien_tru_theo_bam 0 
+READ_ERROR_MUTATION c13_bam_va_luat_tren_cung_mot_lan_doc 0 
+READ_ERROR_MUTATION c10_l5_danh_sach_dong_bang 0 
+READ_ERROR_MUTATION c11_cay_that_dat_va_mien_tru_du 0 
+READ_ERROR_MUTATION c12_dong_cuoi_dung_dinh_dang 0 
+CONTROLLED_READ_ERROR /home/user/rv773/ops/land_evidence_nguon.py (2, 'KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: đọc nguon_positive: review controlled source read failure\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n')
+CONTROLLED_READ_ERROR /tmp/rv773-r3-read_error_green.py (0, 'ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n')
+INTERNAL_SYMLINK_AND_PRECEDENCE (0, 'ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n')

@@ -1,0 +1,10 @@
+argv=['/usr/bin/python3.13', '-B', PosixPath('/home/user/rv773/ops/land_evidence_nguon.py'), '--root', PosixPath('/tmp/rv773-r7-u6ccyq8j/1a4c417'), '--tep', 'ops/land/pr765-wp743-land-evidence.yaml']
+rc=1
+MẤT MIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml: băm lệch ảnh chụp cutover — kiểm đủ luật
+ĐỎ ops/land/pr765-wp743-land-evidence.yaml: 4 vi phạm
+  L1 $.spec.nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay)'
+  L2 $.pre_merge_checks[5]: có positive mà thiếu nguon_positive (chuỗi/danh sách)
+  L2 $.post_merge_checks[1]: có positive mà thiếu nguon_positive (chuỗi/danh sách)
+  L3 $.pre_merge_checks[6].luc: mốc 2026-10-16T02:58:54Z không trước merged_at 2026-10-16T02:58:26Z
+land_evidence_nguon: 0 ĐẠT · 0/1 miễn trừ (băm khớp) · 4 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ

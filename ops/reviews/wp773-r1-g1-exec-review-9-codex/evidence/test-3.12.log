@@ -1,0 +1,15 @@
+[DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=2 KHÔNG ĐO ĐƯỢC: thiếu PyYAML (No module named 'yaml')
+TỔNG: KHÔNG ĐO ĐƯỢC
+]
+CA: 13/14 dat
+[DOT BIEN KHONG BI GIET DUNG] F06_root_khong_resolve: HONG ca đích không xanh trên bản gốc (rc=3): DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=2 KHÔNG ĐO ĐƯỢC: thiếu PyYAML (No module named 'yaml')
+TỔNG: KHÔNG ĐO ĐƯỢC
+
+
+[DOT BIEN KHONG BI GIET DUNG] L3_readback_mau_thuan_bo_qua: HONG ca đích không xanh trên bản gốc (rc=3): DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=2 KHÔNG ĐO ĐƯỢC: thiếu PyYAML (No module named 'yaml')
+TỔNG: KHÔNG ĐO ĐƯỢC
+
+
+DOT BIEN: 35/37 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DO

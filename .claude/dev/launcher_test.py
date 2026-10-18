@@ -8104,7 +8104,7 @@ def r802_cai_rg_windows_chon_ban_chay_duoc():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
-    for lk in ("echo 'ripgrep 15.2.0'", "exit 0"):   # Codex lượt 2: Links rc 0 mà RỖNG ⇒ lùi sang choco
+    for lk in ("echo 'ripgrep 15.2.0'", "exit 0", "echo 'ripgrep 1.2.3junk'"):   # Codex lượt 2-3: rỗng/rác ⇒ choco
         with San() as s:
             ops = s / "kho" / "ops"; ops.mkdir(parents=True)
             for t in ("cai_cong_cu.sh", "cong_cu.py"):
@@ -8127,7 +8127,23 @@ def r802_cai_rg_windows_chon_ban_chay_duoc():
             bang(p.returncode == 0 and '"DAT"' in p.stdout,
                  f"cai rg Windows khong DAT khi ban cu hong dung truoc: rc={p.returncode} "
                  f"{p.stdout[-300:]} {p.stderr[-300:]}")
-            bang(gp.read_text().strip() == str(links if "ripgrep" in lk else choco), f"GITHUB_PATH sai: {gp.read_text()!r}")
+            bang(gp.read_text().strip() == str(links if "15.2.0" in lk else choco), f"GITHUB_PATH sai: {gp.read_text()!r}")
+
+
+@ca
+def r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT():
+    """F6 (Codex lượt 3): ứng viên chỉ từ CHÍNH thư mục PATH (không cwd), Windows theo PATHEXT (`x.CMD` hơn shim `x`)."""
+    m, cu = _tai_launcher_thu(), os.getcwd()
+    with San() as s:
+        cwd, a = s / "cwd", s / "a"
+        for f in (cwd / "x", cwd / "x.CMD", a / "x", a / "x.CMD"):
+            f.parent.mkdir(exist_ok=True); f.write_text("x"); f.chmod(0o755)
+        try:
+            os.chdir(cwd)
+            ds = [Path(d) for _, d in m._cac_duong_dan({"ten": "x", "ung_vien": ["x"]}, {"PATH": str(a)})]
+        finally:
+            os.chdir(cu)
+        bang(ds == [a / ("x.CMD" if LA_WINDOWS else "x")], f"ung vien sai (cwd/shim): {ds}")
 
 
 @ca
@@ -8137,7 +8153,7 @@ def r802_runner_tra_lai_con_tro_nguoi_goi():
     luu = {k: g[k] for k in ("DOT_BIEN", "DOT_BIEN_HARNESS", "DOT_BIEN_HOOK", "HOOK_DANG_DUNG", "YAML_DANG_DUNG")}
     with San() as s:
         try:
-            g.update(DOT_BIEN=[], DOT_BIEN_HARNESS=[], DOT_BIEN_HOOK=[("x", ("a", "b"), [])],
+            g.update(DOT_BIEN=[], DOT_BIEN_HARNESS=[], DOT_BIEN_HOOK=[("x", ("a", "b"), []), ("y", ("a", "b"), [], "yaml")],
                      HOOK_DANG_DUNG=s / "h.sh", YAML_DANG_DUNG=s / "y.yaml")
             (s / "h.sh").write_text("a"); (s / "y.yaml").write_text("a")
             with contextlib.redirect_stdout(io.StringIO()):
@@ -9184,6 +9200,10 @@ DOT_BIEN = [
      ["r802_doctor_ten_tran_tu_muc_PATH_rong"]),
     ("wp802_hong_dau_la_moi_ban_hong", ('            if tran and d == tran:\n', '            if True:\n'),
      ["r802_doctor_ten_tran_tu_muc_PATH_rong"]),
+    ("wp802_cac_duong_dan_lai_dung_which", ('them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc), kieu_bash=False))',
+     'them(ten, shutil.which(ten, path=muc))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"], ("windows", "cwd cua which")),
+    ("wp802_cac_duong_dan_theo_kieu_bash", ('PATH=muc), kieu_bash=False))', 'PATH=muc)))'),
+     ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"], ("windows", "thu tu PATHEXT")),
     ("wp802_launcher_winget_thanh_choco", ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
      ["r802_bang_cai_rg_khop_cong_cu_yaml"]),
@@ -10415,7 +10435,7 @@ DOT_BIEN_HOOK = [
     # Phần tử thứ tư "yaml" = đột biến ops/cong_cu.yaml thay vì hook (Codex lượt 1 F2).
     ("wp802_yaml_bo_ung_vien_winget_links", (' "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")"', ''),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
-    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('case "$RG_V" in "ripgrep "[0-9]*.[0-9]*.[0-9]*)', 'case "$RG_V" in *)'),
+    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('[[ "$RG_V" =~ ^ripgrep', '[[ "$RG_V" =~ ^ripgrep|'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
     ("wp802_hook_windows_probe_hai_lan", ('if [ "$RG_WIN" = 1 ]; then', 'if [ "$RG_WIN" = 1 ] && ! co_chay rg; then'),
      ["r802_hook_windows_khong_cai_in_dung_lenh"]),
@@ -10452,9 +10472,10 @@ DOT_BIEN_HARNESS = [
       '    tranh = set()'),
      ["r766_t81_khong_phu_thuoc_pid_cua_luot_chay"]),
     # J01 (Codex lượt 4): bỏ bộ lọc môi trường thì BASH_ENV của máy chạy lại lọt vào hook.
-    ("wp802_runner_tra_con_tro_canonical",
-     ('HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc', 'HOOK_DANG_DUNG, YAML_DANG_DUNG = HOOK_DANG_DUNG, YAML_DANG_DUNG'),
-     ["r802_runner_tra_lai_con_tro_nguoi_goi"]),
+    ("wp802_runner_bo_tra_con_tro_hook", ('HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc',
+     'HOOK_DANG_DUNG, YAML_DANG_DUNG = HOOK_DANG_DUNG, yaml_goc'), ["r802_runner_tra_lai_con_tro_nguoi_goi"]),
+    ("wp802_runner_bo_tra_con_tro_yaml", ('HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc',
+     'HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, YAML_DANG_DUNG'), ["r802_runner_tra_lai_con_tro_nguoi_goi"]),
     ("g8_fixture_chep_nguyen_moi_truong",
      ('               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
       '               if True}'),

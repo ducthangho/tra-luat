@@ -2282,8 +2282,8 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
         for muc in path.split(os.pathsep):
             if not muc:
                 continue
-            try:   # wp802: KHÔNG `shutil.which` — trên Windows nó trả bản ở cwd cho MỌI `muc`
-                them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc)))
+            try:   # wp802: không `which` — trên Windows nó chèn cwd vào MỌI `muc` (Codex lượt 3 F6)
+                them(ten, _ten_tran_giai_ra(ten, dict(moi_truong, PATH=muc), kieu_bash=False))
             except OSError:
                 continue
 
@@ -2303,12 +2303,14 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
     return [(t, x) for t, x in ra if Path(x).is_file()]
 
 
-def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str]) -> str | None:
-    """Bản bash gọi khi gõ TÊN TRẦN: PATH theo thứ tự, mục RỖNG = cwd (wp802, Codex lượt 1
-    F1: `_cac_duong_dan` bỏ mục rỗng). Không `shutil.which`: trên Windows nó tự chèn cwd."""
+def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = True) -> str | None:
+    """Bản bash gọi khi gõ TÊN TRẦN: PATH theo thứ tự, mục RỖNG = cwd (wp802, Codex lượt 1 F1).
+    `kieu_bash=False`: thứ tự PATHEXT của `which` (`x.CMD` hơn shim `x`), cho tiến trình native (F6)."""
     duoi = [""]
     if platform.system() == "Windows":
-        duoi += [e for e in moi_truong.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e]
+        ext = [e for e in moi_truong.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e]
+        duoi = (duoi + ext if kieu_bash else
+                duoi if os.path.splitext(ten)[1].upper() in {e.upper() for e in ext} else ext)
     for muc in moi_truong.get("PATH", "").split(os.pathsep):
         for d in duoi:
             p = os.path.join(muc or ".", ten + d)

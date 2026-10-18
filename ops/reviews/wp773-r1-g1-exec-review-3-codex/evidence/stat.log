@@ -1,0 +1,4 @@
+COMMAND: ['git', '-C', '/home/user/rv773', 'diff', '--numstat', 'c73af7b', '5250883']
+RC: 0
+297	0	ops/land_evidence_nguon.py
+342	0	ops/land_evidence_nguon_test.py

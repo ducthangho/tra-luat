@@ -1,0 +1,152 @@
+[
+  {
+    "cmd": [
+      "python3.11",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/home/user/rv773/ops/land_evidence_nguon.py",
+    "rc": 3,
+    "output": "DO:r06_cli_absolute:--root . --tep /tmp/len_cay_9a87guam/kho/ops/land/pr9001-thu-land-evidence.yaml: rc=1, stdout='', stderr='_goc(tep, goc) else str(tep)\\n           ^^^^^^^^^^^^^^^^^^^^\\n  File \"/root/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py\", line 730, in relative_to\\n    raise ValueError(\"{!r} is not in the subpath of {!r}\"\\nValueError: \\'/tmp/len_cay_9a87guam/kho/ops/land/pr9001-thu-land-evidence.yaml\\' is not in the subpath of \\'\\' OR one path is relative and the other is absolute.\\n'\n"
+  },
+  {
+    "cmd": [
+      "python3.11",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/tmp/rv773-r4-root-resolved.py",
+    "rc": 0,
+    "output": ""
+  },
+  {
+    "cmd": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/home/user/rv773/ops/land_evidence_nguon.py",
+    "rc": 3,
+    "output": "DO:r06_cli_absolute:--root . --tep /tmp/len_cay_pgtkgtqq/kho/ops/land/pr9001-thu-land-evidence.yaml: rc=1, stdout='', stderr='_to(goc).as_posix() if _trong_goc(tep, goc) else str(tep)\\n           ^^^^^^^^^^^^^^^^^^^^\\n  File \"/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/pathlib.py\", line 682, in relative_to\\n    raise ValueError(f\"{str(self)!r} is not in the subpath of {str(other)!r}\")\\nValueError: \\'/tmp/len_cay_pgtkgtqq/kho/ops/land/pr9001-thu-land-evidence.yaml\\' is not in the subpath of \\'.\\'\\n'\n"
+  },
+  {
+    "cmd": [
+      "python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/tmp/rv773-r4-root-resolved.py",
+    "rc": 0,
+    "output": ""
+  },
+  {
+    "cmd": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/home/user/rv773/ops/land_evidence_nguon.py",
+    "rc": 3,
+    "output": "DO:r06_cli_absolute:--root . --tep /tmp/len_cay_gv86ql88/kho/ops/land/pr9001-thu-land-evidence.yaml: rc=1, stdout='', stderr='uon.py\", line 278, in main\\n    nhan = tep.relative_to(goc).as_posix() if _trong_goc(tep, goc) else str(tep)\\n           ~~~~~~~~~~~~~~~^^^^^\\n  File \"/usr/lib/python3.13/pathlib/_local.py\", line 385, in relative_to\\n    raise ValueError(f\"{str(self)!r} is not in the subpath of {str(other)!r}\")\\nValueError: \\'/tmp/len_cay_gv86ql88/kho/ops/land/pr9001-thu-land-evidence.yaml\\' is not in the subpath of \\'.\\'\\n'\n"
+  },
+  {
+    "cmd": [
+      "python3.13",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/tmp/rv773-r4-root-resolved.py",
+    "rc": 0,
+    "output": ""
+  },
+  {
+    "cmd": [
+      "python3.14",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/home/user/rv773/ops/land_evidence_nguon.py",
+    "rc": 3,
+    "output": "DO:r06_cli_absolute:--root . --tep /tmp/len_cay_0ksflo6t/kho/ops/land/pr9001-thu-land-evidence.yaml: rc=1, stdout='', stderr='.as_posix() if _trong_goc(tep, goc) else str(tep)\\n           ~~~~~~~~~~~~~~~^^^^^\\n  File \"/root/.local/share/uv/python/cpython-3.14.6-linux-x86_64-gnu/lib/python3.14/pathlib/__init__.py\", line 490, in relative_to\\n    raise ValueError(f\"{str(self)!r} is not in the subpath of {str(other)!r}\")\\nValueError: \\'/tmp/len_cay_0ksflo6t/kho/ops/land/pr9001-thu-land-evidence.yaml\\' is not in the subpath of \\'.\\'\\n'\n"
+  },
+  {
+    "cmd": [
+      "python3.14",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/25822fa2-ac40-52b8-b361-6687f0dd1ccb/scratchpad/rv773-out4/evidence/regression.py"
+    ],
+    "ma": "/tmp/rv773-r4-root-resolved.py",
+    "rc": 0,
+    "output": ""
+  },
+  {
+    "label": "rename-cutover",
+    "rc": 3,
+    "output": "DO:c10_l5_danh_sach_dong_bang:MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: 28 tên, vân tay ef22b9a8bf2e…\n"
+  },
+  {
+    "label": "conflict-guard c01_l1_luot1_mergeable_clean_khong_nguon",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c02_l1_glob_va_thu_muc",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c03_l1_token_khong_duoc_thoat_goc",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c04_l1_measured_hoa_thuong_va_khong_phai_khai",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c06_l3_luot2_moc_sau_merged_at",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c07_l3_chi_doc_readback_cua_chinh_pr",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c08_l4_khong_do_duoc_khong_bao_gio_dat",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c09_l5_mien_tru_theo_bam",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c13_bam_va_luat_tren_cung_mot_lan_doc",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c10_l5_danh_sach_dong_bang",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c11_cay_that_dat_va_mien_tru_du",
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "label": "conflict-guard c12_dong_cuoi_dung_dinh_dang",
+    "rc": 0,
+    "output": "\n"
+  }
+]

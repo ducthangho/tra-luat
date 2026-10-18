@@ -1,0 +1,16 @@
+drop rc 1 
+ĐỎ: test sống chưa đăng ký: ops/land_evidence_nguon_test.py
+TỔNG: ĐỎ
+path rc 1 
+ĐỎ: test sống chưa đăng ký: ops/land_evidence_nguon_test.py
+ĐỎ: mục đăng ký không có tệp: ops/no_such_test.py
+TỔNG: ĐỎ
+pattern rc 0 
+PHẢN CHỨNG: 1025/1025 đỏ đúng
+TỔNG: ĐẠT
+no_DO rc 0 
+PHẢN CHỨNG: 1025/1025 đỏ đúng
+TỔNG: ĐẠT
+no_end rc 0 
+PHẢN CHỨNG: 1025/1025 đỏ đúng
+TỔNG: ĐẠT

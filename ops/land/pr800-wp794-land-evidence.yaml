@@ -1,0 +1,69 @@
+# HO SO LAND — packet #794 wp794 r1 (lease g1), ma qua PR #800. Khuon: ops/land/pr793-wp784-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. TRANG THAI: merged (73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8). `landed: true` theo quyet dinh chu kho
+# o PR ghi so nay (18-10-2026). NHAN: measured · loi_khai_co_neo · thuat_lai · not_measured. Readback: ops/land/pr800-wp794-provenance/.
+
+schema_version: 1
+mission_id: gh-794
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01XaeBSkW4R49AEWj6x4uqff
+input_packet_generations:
+  - {packet_issue: 794, packet_id: wp794, revision: 1, generation: 1, lease_id: wp794-r1-g1-claude-20261017}
+authorized_head_sha: c679d645cafe5e4e0fbf4e782cfb0f3547759bca
+authorized_head_tree: 2f9f32ada0818944a609668ae9f8acff2ae36f98
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/800
+land_operator: 'ducthangho (chu kho tu merge; readback-pr-800.json merged_by ducthangho). Phien nay KHONG merge.'
+merge_method: merge
+merge_commit: 73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8
+merge_commit_tree: 2f9f32ada0818944a609668ae9f8acff2ae36f98
+merge_commit_parents: [7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16, c679d645cafe5e4e0fbf4e782cfb0f3547759bca]
+pre_merge_checks:
+  - {name: 'moi check-run tren head (16)', sha: c679d645cafe5e4e0fbf4e782cfb0f3547759bca, conclusion: success, nguon: readback-check-runs-c679d64.json}
+  - {name: 'Codex connector review', sha: c679d645cafe5e4e0fbf4e782cfb0f3547759bca, conclusion: 'completed, has_any_findings false', nguon: readback-comments-800.json}
+post_merge_checks:
+  - {name: gate (ci.yml, push master), run_id: 39048258873, sha: 73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8, conclusion: success, ghi_chu: 'gom release-verify strict (manifest r1 nam trong write set worker)'}
+bookkeeping:
+  - {item: 'rut han lease wp794-r1-g1-claude-20261017', nhanh: ops/cap-lease-p3-dot}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-800-801-land}
+# ---- het truong chuan
+packet_id: wp794
+packet_issue: 794
+generation: 1
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_01XaeBSkW4R49AEWj6x4uqff — phien dieu phoi (ghi lease, KHONG la executor). Executor la phien
+  session_01TWAhPi9PeV7V2txRZxP1tR do phien nay tao.
+spec:
+  path: ops/specs/wp794.md
+  sha256: 88fa7eed80f16f9e8ecad1896a8903d307b9f80534f5e1f5686761a2962bdb56
+  vi_tri: >-
+    loi_khai_co_neo — dac ta r1 nam tren nhanh claude/spec-p3-dot (PR #798, chua merge luc ghi so); vao master khi #798
+    merge. Ban r2 (ops/specs/wp794-r2.md) KHONG thi hanh: chu kho chon "Nhan r1 cho dot nay".
+lease:
+  lease_id: wp794-r1-g1-claude-20261017
+  path: ops/leases/wp794-r1-g1-claude-20261017.yaml
+  nhanh: ops/cap-lease-p3-dot
+  thu_hoi: 'rut han ve gan thoi diem ghi so (khoi thu_hoi_bang_rut_han trong lease), packet da merge.'
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-800.json: merged true, merged_at 2026-10-17T16:10:31Z, merged_by ducthangho.'
+  landed: true
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so #817 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
+  landed_ghi_chu: >-
+    PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
+    (1) PR #800 merge tai 73bf92c. (2) hau-merge gate: run 39048258873 tren 73bf92c (push master) conclusion success
+    (doc lai 18-10-2026 qua actions_get) — xem post_merge_checks. (3) bookkeeping: lease g1 rut han ve 18:05Z
+    (ops/cap-lease-p3-dot 7e8b6f1) + PR ghi so #817. Ban dau tep ghi `landed: false`; chu kho quyet doi
+    sang true o #817 ngay 18-10-2026.
+review:
+  codex_connector: 'measured — readback-comments-800.json: summary codex-review-state completed, has_any_findings false, tren c679d64.'
+  codex_cli: 'thuat_lai — cac luot Codex CLI offline cua executor (comment PR #800); bien nhan v2 KHONG nam trong ops/reviews/ (no).'
+khong_do_duoc:
+  - 'Bien nhan v2 cho cac luot Codex CLI cua wp794 chua ghi vao ops/reviews/; ghi la no, khong chan land.'
+  - 'Log day du cac job CI KHONG luu.'

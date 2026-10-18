@@ -1,0 +1,274 @@
+[
+  {
+    "label": "priority mutant c01_l1_luot1_mergeable_clean_khong_nguon",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c01_l1_luot1_mergeable_clean_khong_nguon"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c02_l1_glob_va_thu_muc",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c02_l1_glob_va_thu_muc"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c03_l1_token_khong_duoc_thoat_goc",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c03_l1_token_khong_duoc_thoat_goc"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c04_l1_measured_hoa_thuong_va_khong_phai_khai",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c04_l1_measured_hoa_thuong_va_khong_phai_khai"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c06_l3_luot2_moc_sau_merged_at",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c06_l3_luot2_moc_sau_merged_at"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c07_l3_chi_doc_readback_cua_chinh_pr",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c07_l3_chi_doc_readback_cua_chinh_pr"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c14_cli_moi_to_hop_duong_dan",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c14_cli_moi_to_hop_duong_dan"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c08_l4_khong_do_duoc_khong_bao_gio_dat",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c08_l4_khong_do_duoc_khong_bao_gio_dat"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c09_l5_mien_tru_theo_bam",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c09_l5_mien_tru_theo_bam"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c13_bam_va_luat_tren_cung_mot_lan_doc",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c13_bam_va_luat_tren_cung_mot_lan_doc"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c10_l5_danh_sach_dong_bang",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c10_l5_danh_sach_dong_bang"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c11_cay_that_dat_va_mien_tru_du",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority mutant c12_dong_cuoi_dung_dinh_dang",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c12_dong_cuoi_dung_dinh_dang"
+    ],
+    "rc": 0,
+    "out": "\n"
+  },
+  {
+    "label": "priority A/B /home/user/rv773/ops/land_evidence_nguon.py",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon.py",
+      "--root",
+      "/tmp/len_cay_d4smxvdi/kho"
+    ],
+    "rc": 1,
+    "out": "ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm\n  L2 $: positive khai '1/1' mà không tệp nguon_positive nào chứa nguyên văn\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐỎ\n"
+  },
+  {
+    "label": "priority A/B /tmp/rv773-r5-priority.py",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/tmp/rv773-r5-priority.py",
+      "--root",
+      "/tmp/len_cay_d4smxvdi/kho"
+    ],
+    "rc": 0,
+    "out": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n"
+  },
+  {
+    "label": "root normalization + internal symlink",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon.py",
+      "--root",
+      "child/..",
+      "--tep",
+      "alias/pr9001-thu-land-evidence.yaml"
+    ],
+    "rc": 0,
+    "out": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n"
+  },
+  {
+    "label": "root normalization + internal symlink",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon.py",
+      "--root",
+      ".",
+      "--tep",
+      "/tmp/len_cay_98zxo1cw/kho/alias/pr9001-thu-land-evidence.yaml"
+    ],
+    "rc": 0,
+    "out": "ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n"
+  },
+  {
+    "label": "fingerprint rename",
+    "args": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/home/user/rv773/ops/land_evidence_nguon_test.py",
+      "--mot-ca",
+      "c10_l5_danh_sach_dong_bang"
+    ],
+    "rc": 3,
+    "out": "DO:c10_l5_danh_sach_dong_bang:MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: 28 tên, vân tay ef22b9a8bf2e…\n"
+  },
+  {
+    "label": "old regression 3.11",
+    "args": [
+      "python3.11",
+      "-B",
+      "evidence/regression.py"
+    ],
+    "rc": 0,
+    "out": ""
+  },
+  {
+    "label": "old regression 3.12",
+    "args": [
+      "python3.12",
+      "-B",
+      "evidence/regression.py"
+    ],
+    "rc": 0,
+    "out": ""
+  },
+  {
+    "label": "old regression 3.13",
+    "args": [
+      "python3.13",
+      "-B",
+      "evidence/regression.py"
+    ],
+    "rc": 0,
+    "out": ""
+  },
+  {
+    "label": "old regression 3.14",
+    "args": [
+      "python3.14",
+      "-B",
+      "evidence/regression.py"
+    ],
+    "rc": 0,
+    "out": ""
+  }
+]

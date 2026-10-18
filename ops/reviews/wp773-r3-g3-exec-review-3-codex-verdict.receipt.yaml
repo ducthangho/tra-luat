@@ -1,0 +1,104 @@
+# BIEN NHAN GIAO HANG — review THI HANH luot 3 cua packet #773 (land-evidence-khai-phai-co-nguon), PR #778, merge dba7fae.
+# Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run f76cb02b` tren 6f69f9d. `approve` 0/0/0.
+# Tep verdict la BAN SAO NGUYEN BYTE cua ops/reviews/wp773-r3-g3-exec-review-3-codex/VERDICT.md (thu muc ay giu run.json, PROMPT.md va
+# evidence reviewer). Ghi so boi CHINH phien executor/land operator session_017khPoiSXW9Yvefabg6MWaH — phien ay KHONG viet
+# verdict, chi dung workspace va goi CLI. Nhan: (a) DO tu kho/tep luc ghi so 2026-10-18 · (b) THUAT LAI · KHONG_DO_DUOC.
+# Khuon: ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml.
+
+schema_version: 2
+receipt_id: wp773-r3-g3-exec-review-3-codex-8b0996d0
+kind: review_delivery_receipt
+packet_id: land-evidence-khai-phai-co-nguon
+packet_issue: 773
+mission_issue: 773
+target_pull_request: 778
+land_merge_commit: dba7fae7864dd0f346285bc5eb357c8d062c1a36
+revision: 3
+generation: 3
+lease_id: wp773-r3-g3-claude-20261018
+spec_path: ops/specs/land-evidence-khai-phai-co-nguon-r3.md
+spec_hash: 81543d80b4d27cbecdcce4bfcdfe5a8974bb8a17cae6e8a2de56d0e53b4ee012
+spec_ghi_chu: '(a) sha256 tep spec = spec_hash cua lease wp773-r3-g3-claude-20261018.'
+luot: 3
+luot_ghi_chu: 'g2/g3 + toan PR luot 3 tren CHINH candidate land 6f69f9d (luot 1 128b2e8 P2=2, luot 2 92df275 P3=1, da va).'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho (codex CLI, executor Claude) va verdict `approve`, nhung KHONG khai cross_approved: (1) model thuc chay
+  KHONG_DO_DUOC — codex khong xuat modelUsage; (2) checkout duoc review (/home/user/rv773) KHONG bi cuong che read-only
+  (caveat CHECKOUT-GHI-DUOC). Assurance land cua packet la human_audited (uy quyen #778 issuecomment-6245464876).
+verdict: approve
+verdict_nguon: '(a) dong 2 `Verdict: approve — P1=0 P2=0 P3=0`'
+verdict_path: ops/reviews/wp773-r3-g3-exec-review-3-codex-verdict.md
+verdict_sha256: 8b0996d0bf382d973c4d6ce129bca5dcb3abea7dd8ef333538b932c19801f577
+verdict_bytes: 7459
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/wp773-r3-g3-exec-review-3-codex/VERDICT.md, chep nguyen byte tu thu muc ra cua reviewer (sha256 khop SHA256SUMS
+  cua thu muc); tep phang nay la ban sao `cp` cua no, cmp khop, cung sha256.
+hint_ghi_chu: '(a) Khong co HINT.patch: verdict approve, 0 finding.'
+reviewed_sha: 6f69f9de6675058a22f70697634f833b9a193f20
+reviewed_tree: 2121397a1e12840b89900991a64b4ce1821b0785
+reviewed_sha_nguon: >-
+  (a) dong 1 tep verdict `Reviewed commit:`; `git rev-parse 6f69f9d^{tree}` = reviewed_tree;
+  `git merge-base --is-ancestor 6f69f9d origin/master` rc 0.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/5df37cb3c6353a24c364ac1d91a13e3c1bd7aa05/ops/reviews/wp773-r3-g3-exec-review-3-codex-verdict.md
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim commit 5df37cb cua nhanh claude/bookkeeping-773-land — commit CHI mang ban phang verdict; bien
+  nhan di o commit sau. Khong co ban chieu verdict tren GitHub: phien chi bao ket qua cho chu kho trong phien.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 2 `Verdict: approve — P1=0 P2=0 P3=0`'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: f76cb02b0ddf4f79b77cd2eada6405bf
+  run_json: ops/reviews/wp773-r3-g3-exec-review-3-codex/run.json
+  run_json_ghi_chu: '(a) ma_thoat 0, thoi_luong_giay 153.54, trang_thai xong, head 6f69f9d, prompt_sha256 1e21b6aa…'
+  cli: >-
+    codex-cli 0.163.0, `codex exec --skip-git-repo-check -s workspace-write -C <thu muc ra> <noi dung PROMPT.md>`
+    (b — run.json chi ghi van tay lenh d3f435902700fb05, 7 doi so)
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model_da_chay: KHONG_DO_DUOC
+  model_loi_khai_cli: 'KHONG_DO_DUOC — stderr.log cua luot KHONG luu trong kho (tien le #743).'
+
+github_submitter_identity:
+  actor: KHONG_AP_DUNG
+  actor_nguon: '(a) verdict KHONG dang len GitHub; tep trong kho la nguon duy nhat.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+
+independent_from_executor_session: true
+independent_ghi_chu: >-
+  Tien trinh codex rieng, context rieng (prompt tu chua, khong fork context executor); KHONG phai phien Claude Code rieng.
+review_axes: [spec, standards_security]
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) 6f69f9d la cha thu hai cua merge dba7fae tren master; tree 2121397 = tree merge. Tep verdict/bien nhan nam tren nhanh claude/bookkeeping-773-land, CHUA la to tien master luc ghi
+    so; len trung_binh khi PR ghi so merge bang merge commit.
+
+verdict_usage_caveats:
+  - id: CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY
+    muc: P2
+    mo_ta: >-
+      Prompt va VERDICT.md ghi "read-only", nhung checkout review /home/user/rv773 nam ngoai vung ghi sandbox codex mot
+      cach DUOC KHAI, khong duoc kiem chung bang co che. Do sau luot: `git status --porcelain` 0 dong, HEAD khong doi —
+      anh chup diem cuoi khong loai tru ghi-roi-hoan-nguyen.
+  - id: DRIVER-DO-DOC-CAY-TAM
+    muc: P3
+    mo_ta: >-
+      evidence/*.py cua reviewer doc /tmp/* va duong dan tuyet doi cua phien nay, khong co trong kho; tai lap can dung
+      lai ban sao tai 6f69f9d. KHONG_DO_DUOC luc ghi so: chua chay lai driver tu kho.
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

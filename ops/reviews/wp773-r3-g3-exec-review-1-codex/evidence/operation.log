@@ -1,0 +1,8 @@
+baseline checker_rc 0 ['land_evidence_nguon: 2 ĐẠT · 28/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30', 'TỔNG: ĐẠT']
+baseline c11 (0, '')
+new_valid_record checker_rc 0 ['land_evidence_nguon: 3 ĐẠT · 28/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 31', 'TỔNG: ĐẠT']
+new_valid_record c11 (0, '')
+exempt_byte_change checker_rc 0 ['land_evidence_nguon: 3 ĐẠT · 27/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30', 'TỔNG: ĐẠT']
+exempt_byte_change c11 (3, 'DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT với 28/28 miễn trừ: rc=0 land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr759-no-p3-ho-so-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml (băm khớp ảnh chụp cutover)\nĐẠT ops/land/pr772-wp766-land-evidence.yaml\nĐẠT ops/land/pr779-wp775-land-evidence.yaml\nland_evidence_nguon: 3 ĐẠT · 27/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30\nTỔNG: ĐẠT\n')
+exempt_now_valid checker_rc 0 ['land_evidence_nguon: 3 ĐẠT · 27/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30', 'TỔNG: ĐẠT']
+exempt_now_valid c11 (3, 'DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT với 28/28 miễn trừ: rc=0 land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr759-no-p3-ho-so-land-evidence.yaml (băm khớp ảnh chụp cutover)\nMIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml (băm khớp ảnh chụp cutover)\nĐẠT ops/land/pr772-wp766-land-evidence.yaml\nĐẠT ops/land/pr779-wp775-land-evidence.yaml\nland_evidence_nguon: 3 ĐẠT · 27/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30\nTỔNG: ĐẠT\n')

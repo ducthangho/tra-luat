@@ -1,0 +1,38 @@
+MIỄN TRỪ ops/land/plat-x8-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr468-hoso-4-packet-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr477-dung-goi-review-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr478-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr480-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr487-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr489-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr491-r358-ghi-so-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr493-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr554-wp541-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr594-wp578-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr621-skill-bai-hoc-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr666-wp650-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr672-wp574-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr679-wp678-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr680-wp676-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr684-wp677-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr689-wp677-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr696-wp668-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr701-wp687-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr703-wp674-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr707-wp705-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr714-wp710-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr718-wp678-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr721-wp698-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr732-wp685-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr759-no-p3-ho-so-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr765-wp743-land-evidence.yaml (băm khớp ảnh chụp cutover)
+ĐẠT ops/land/pr772-wp766-land-evidence.yaml
+ĐỎ ops/land/pr779-wp775-land-evidence.yaml: 6 vi phạm
+  L1 $.post_merge_checks[0].ly_do: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — run ket thuc cancelled, updated_at 17:27:24Z; run push d347d42 created_at 17:27'
+  L1 $.post_merge_checks[2].ghi_chu: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — chay lai attempt 1 da huy, theo P1 connector #811 thread 4305258340 (gate phai '
+  L1 $.post_merge_checks[3].ghi_chu: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — d347d42 la con truc tiep cua d8b15cb (git merge-base --is-ancestor d8b15cb d347'
+  L1 $.spec.nguon: lời khai đo không có token nguồn phân giải được (token: ops/specs/wp775.md) — 'measured — git show origin/ops/wp775-spec:ops/specs/wp775.md | sha256sum; spec CHUA vao ma'
+  L1 $.dieu_kien_merge_spec.merge_3: lời khai đo không có token nguồn phân giải được (token: ci.yml) — 'measured — ci.yml run 39047604566 tren f9d84d7: success; kiem-gate 15 ten rc=0.'
+  L1 $.review.codex_connector: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — receipt luot 18 khong bao major issue tren f9d84d7; readback state cung head va'
+land_evidence_nguon: 1 ĐẠT · 28/28 miễn trừ (băm khớp) · 6 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30
+TỔNG: ĐỎ

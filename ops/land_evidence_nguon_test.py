@@ -266,13 +266,30 @@ def c10_l5_danh_sach_dong_bang():
          f"MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: {len(ds)} tên, vân tay {van_tay[:12]}…")
 
 
+def _cay_that_dat(rc, ra, n):
+    """rc 0 và `· m/n miễn trừ` với m ≤ n. m < n hợp lệ: hồ sơ miễn trừ đổi byte mất miễn trừ mà vẫn ĐẠT luật (Q2)."""
+    import re
+    m = re.search(rf"· (\d+)/{n} miễn trừ", ra)
+    return rc == 0 and bool(m) and int(m.group(1)) <= n
+
+
 @ca
 def c11_cay_that_dat_va_mien_tru_du():
-    import re
     rc, ra = kiem(nap(), ROOT_THAT)
-    n = KY_VONG_SO_MIEN_TRU   # m < k hợp lệ: hồ sơ miễn trừ đổi byte mất miễn trừ nhưng vẫn ĐẠT luật (Q2); c10 khoá danh sách
-    m = re.search(rf"· (\d+)/{n} miễn trừ", ra)
-    bang(rc == 0 and m and int(m.group(1)) <= n, f"cây thật phải ĐẠT, mẫu số {n} miễn trừ: rc={rc} {ra[-400:]}")
+    n = KY_VONG_SO_MIEN_TRU   # c10 khoá danh sách; c15 khoá chính phép so này
+    bang(_cay_that_dat(rc, ra, n), f"cây thật phải ĐẠT, mẫu số {n} miễn trừ: rc={rc} {ra[-400:]}")
+
+
+@ca
+def c15_c11_tu_kiem_qua_dau_ra_gia():
+    """Phản chứng cho phép so của c11 bằng đầu ra GIẢ — không phụ thuộc hồ sơ thật (review #778 g2 lượt 2 F1)."""
+    t = "land_evidence_nguon: 2 ĐẠT · {}/{} miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 30\nTỔNG: ĐẠT\n"
+    nhan = {"m=k": (0, t.format(28, 28)), "m<k": (0, t.format(27, 28))}
+    tu_choi = {"m>k": (0, t.format(29, 28)), "mau_so_sai": (0, t.format(27, 27)), "rc_1": (1, t.format(28, 28)),
+               "khong_dong": (0, "TỔNG: ĐẠT\n")}
+    sai = [k for k, (rc, ra) in nhan.items() if not _cay_that_dat(rc, ra, 28)]
+    sai += [k for k, (rc, ra) in tu_choi.items() if _cay_that_dat(rc, ra, 28)]
+    bang(not sai, f"phép so c11 sai ở: {sai}")
 
 
 @ca

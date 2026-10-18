@@ -1780,6 +1780,8 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--since", "%040x" % 0 if False else "HEAD~1",
           "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
+    if _r812(c, "review", env=env)[0]:  # #812: `record-lease` đường ref + `record-review` có biên nhận in tiếng Việt; rc khác 0 ⇒ ĐỎ
+        raise AssertionError(f"[{codepage}] chuỗi r812 lease → review không rc=0")
     sd_r = _reviewing(c, "--codex-review-calls-limit", 1)  # #775: rescue cần state đã chạm trần, dựng ngoài kịch bản
     _pl(c, sd_r, _goi("r1", _H1), _goi("r2", _H1, 3))
     buoc += [([b[1], "--packet", 55, *b[2:]], sd_r) for b in (_nang(0, tran=2), _rescue(0, "nang_tran"))]
@@ -5867,6 +5869,835 @@ MUTANTS.update({
     "pl_m5_them_blocked_running": ('    "blocked": (),\n', '    "blocked": ("running",),\n', ["pl_m5_rescue"]),
     "pl_m6_suy_used_0": (("codex_review_calls_used=can_duoi,", " >= can_duoi + sum("), ("codex_review_calls_used=0,", " >= 0 + sum("), ["pl_m6_state_v1"]),  # phối hợp: gỡ cận dưới reader để đo đúng fail-open lời gọi M6
     "pl_m6_state_cu_mat_ho": ('.get("model_family", "openai")', '.get("model_family")', ["pl_m6_state_v1"]),
+})
+
+
+# --- #812 MAY-ADR-0054-a r2: mỗi ca dựng baseline DƯƠNG đầy đủ (kho git + origin bare, lease đã đẩy, validator canon + nguồn của nó
+# trên origin/master, biên nhận H THẬT: verdict blob trong git, băm đúng) rồi đổi ĐÚNG một yếu tố. Mẫu kho dựng MỘT lần mỗi biến thể.
+_R812_MAU: dict = {}
+_g = lambda cwd, *a: subprocess.run(["git", *a], cwd=cwd, capture_output=True, text=True, check=True).stdout.strip()  # noqa: E731
+_R812_LEASE = {"schema_version": 2, "event": "executor_lease_granted", "packet_issue": 55, "packet_id": "wp55", "mission_issue": 54, "revision": 1,
+               "generation": 1, "lease_id": "wp55-r1-g1-claude", "role": "executor", "provider": "claude", "executor": "claude", "model": "claude-opus-5-5",
+               "model_family": "claude", "execution_surface": "claude_code", "transport": "machine/local", "environment": "cloud", "reviewer": "codex",
+               "reviewer_model_family": "openai", "reviewer_execution_surface": "codex_cli", "reviewer_transport": "machine", "access": "read-write",
+               "assurance_target": "cross_approved", "review_class": "sensitive", "effective_review_class": "sensitive", "spec_path": "ops/specs/wp55.md",
+               "prompt_path": "ops/specs/wp55-prompt.md", "write_set": ["x/a.py"], "branch": "agent/wp55-g1-claude", "granted_by": "ducthangho",
+               "leased_at_utc": "2026-10-18T07:58:00Z", "granted_on_instruction": "https://github.com/o/r/issues/55#issuecomment-5281636040",
+               "heartbeat_at": "2026-10-18T07:58:00Z"}
+
+
+def _kho812(c: Ctx, bien: str = "") -> Path:
+    """Biến thể: khong_kich_hoat · spec_lech · cuc_bo · h_hong · giu_khac · nong · hai_dong · thieu_nguon · rc_falsy · oid_khong_chua ·
+    oid_khong_dua_vao · oid_ngoai_fp (ba phép đo land-OID, mỗi biến thể làm hỏng đúng MỘT phép)."""
+    if bien not in _R812_MAU:
+        goc, R = Path(tempfile.mkdtemp(prefix="r812-")), HERE.parent.parent
+        w = goc / "w"
+        _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
+
+        def ghi(nd, msg):
+            for p, b in nd.items():
+                (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_bytes(b if isinstance(b, bytes) else b.encode())
+            return [_g(w, "add", "-A"), _g(w, "commit", "-qm", msg), _g(w, "rev-parse", "HEAD")][-1]
+        pr = (R / "docs/PROTOCOL_DA_PHIEN.md").read_text(encoding="utf-8")
+        B0 = ghi({**{p: (R / p).read_bytes() for p in ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py", "AGENTS.md")},
+                  **({"AGENTS.md": "# rong\n"} if bien == "thieu_nguon" else {})}, "base")  # `thieu_nguon`: validator đọc được tệp nhưng nguồn luật hỏng
+        adr = {"docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md": "x\n"}
+        if bien == "oid_ngoai_fp":  # commit đưa ADR vào nằm ở nhánh phụ, master chỉ thấy qua merge --no-ff ⇒ ngoài chuỗi first-parent
+            L = [_g(w, "checkout", "-qb", "phu"), ghi(adr, "adr54 phu"), _g(w, "checkout", "-q", "master"), _g(w, "merge", "-q", "--no-ff", "-m", "m", "phu")][1]
+        else:
+            L = ghi(adr, "adr54")
+            L = {"oid_khong_dua_vao": ghi({"docs/z.md": "z\n"}, "noop"), "oid_khong_chua": B0}.get(bien, L)
+        spec = f"# spec\nluat_push_va_dung_va: ADR-0054@{L}\n" * (2 if bien == "hai_dong" else 1)
+        V = ghi({"ops/specs/wp55.md": spec, "ops/specs/wp55-prompt.md": "prompt\n", "ops/reviews/v.md": "Verdict: approve\n", "docs/PROTOCOL_DA_PHIEN.md": pr.replace("chưa kích hoạt", "đã kích hoạt"),
+                 **({} if bien == "khong_kich_hoat" else {"docs/adr/0055-kich-hoat-adr-0054.md": "kích hoạt `ADR-0054`\n"})}, "act")
+        sh, han = __import__("hashlib").sha256(spec.encode()).hexdigest(), time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() + 6 * 3600))
+        lease = {**_R812_LEASE, "spec_hash": sh, "prompt_sha256_required": __import__("hashlib").sha256(b"prompt\n").hexdigest(), "base_sha": L, "reviewed_sha_required": L, "lease_until": han,
+                 "lease_expires_at_utc": han, **({"required_checks": False} if bien == "rc_falsy" else {})}
+        if bien == "h_hong":  # validator canon từ chối (thiếu lớp review hiệu lực) — mọi phép kiểm khác của packet_loop vẫn qua
+            del lease["effective_review_class"]
+        _g(w, "push", "-q", "origin", "master"), _g(w, "checkout", "-qb", "ops/wp55-spec")
+        ghi({"ops/leases/l.yaml": json.dumps(lease), **({"ops/specs/wp55.md": spec + "lech\n"} if bien == "spec_lech" else {}),
+             **({"ops/leases/k.yaml": json.dumps({**lease, "lease_id": "wp55-r1-g1-khac"})} if bien == "giu_khac" else {})}, "lease")
+        # `cuc_bo`: lease CHỈ ở ref cục bộ — ref theo dõi remote GIẢ (update-ref), máy chủ không có nhánh.
+        _g(w, *(("update-ref", "refs/remotes/origin/ops/wp55-spec", "HEAD") if bien == "cuc_bo" else ("push", "-q", "origin", "ops/wp55-spec")))
+        _g(w, "checkout", "-q", "-b", "agent/wp55-g1-claude", "master"), ghi({"x/a.py": "a = 1\n"}, "code")
+        _g(w, "push", "-q", "origin", "agent/wp55-g1-claude"), _g(w, "checkout", "-q", "master"), _g(w, "branch", "-q", "-D", "ops/wp55-spec", "agent/wp55-g1-claude")
+        if bien == "nong":
+            (w / ".git" / "shallow").write_text(_g(w, "rev-parse", "master~2") + "\n")
+        _R812_MAU[bien] = (goc, V)
+    __import__("shutil").copytree(_R812_MAU[bien][0], c.tmp / f"kho{bien}", symlinks=True)
+    return c.tmp / f"kho{bien}" / "w"
+
+
+def _bn812(w: Path, h: str, sh: str, lop=(), bn=None) -> dict:
+    v = _R812_MAU[next(k for k, (g, _) in _R812_MAU.items() if w.parent.name == f"kho{k}")][1]
+    bn = {k: x.format(V=v) if isinstance(x, str) else x for k, x in (bn or {}).items()}
+    return {"schema_version": 2, "receipt_id": "r1", "packet_issue": 55, "generation": 1, "lease_id": "wp55-r1-g1-claude", "role": "reviewer", "reviewed_sha": h,
+            "spec_hash": sh, "verdict": "approve", "assurance": "cross_approved", "executor_provider": "claude", "verdict_path": "ops/reviews/v.md",
+            "verdict_sha256": __import__("hashlib").sha256(b"Verdict: approve\n").hexdigest(), "evidence_url": f"https://github.com/o/r/blob/{v}/ops/reviews/v.md",
+            "github_submitter_identity": None, "anchor": {"loai": "canonical_ancestry", "cuong_do": "x"}, "bang_lop": [{"slug": s, "hang": g} for s, g in lop],
+            "model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": "s1"}, **(bn or {})}
+
+
+def _r812(c: Ctx, den: str, bien="", comment=True, bn=None, lop=(), verdict="approve", ids=(), env=None, truoc_lease=None, rv=()):
+    """Baseline dương tới `den` (lease · review); mỗi tham số đổi ĐÚNG một yếu tố. Trả (rc, sd, err, bytes state NGAY TRƯỚC bước cuối)."""
+    w, sd, f = _kho812(c, bien), c.sd(), c.tmp
+    buoc = lambda *l: (lambda truoc: (*run(c.script, [l[0], "--packet", 55, *l[1:], "--root", w], sd, env)[::2], truoc))((sd / "wp55.json").read_bytes())  # noqa: E731
+    _doi(0, *c.init(sd, lease=False)[::2], "init")
+    (f / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "```yaml\nlease_id: wp55-r1-g1-claude\n```",
+                                            "issue_url": "https://api.github.com/repos/o/r/issues/55"}][:int(comment)]))
+    (truoc_lease or (lambda w: None))(w)
+    rc, e, truoc = buoc("record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", f / "cm.json")
+    if den == "lease" or rc:
+        return rc, sd, e, truoc
+    c.den_reviewing(sd, 55, 1, head=(h := _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")))
+    (f / "bn.yaml").write_text(__import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], lop, bn)))
+    _doi(0, *run(c.script, ["record-codex-call", "--packet", 55, "--head", h, "--run-id", "g1"], sd)[::2], "codex-call")
+    rc, e, truoc = buoc("record-review", "--provider", "codex", "--verdict", verdict, "--reviewed-sha", h, "--codex-call", "g1", "--bien-nhan", f / "bn.yaml",
+                        *(x for i in ids for x in ("--finding-id", i)), *rv)
+    return rc, sd, e, truoc
+
+
+def _r812_ca(den, rc_doi, muon=None, **doi):
+    """rc đúng; ca dương kiểm `muon`, ca âm đòi state giữ nguyên TỪNG BYTE so với ảnh ngay trước bước bị từ chối (I4)."""
+    def ca(c):
+        rc, sd, e, truoc = _r812(c, den, **doi)
+        _doi(rc_doi, rc, e, f"r812 {den} {sorted(doi)}")
+        if muon:
+            _kiem(sd, f"r812 {den} {sorted(doi)}", **muon)
+        elif (sd / "wp55.json").read_bytes() != truoc:
+            raise AssertionError(f"I4: state đổi sau khi {den} từ chối")
+    return ca
+
+
+def case_r812_duong_cu_luon_false(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd, lease=False)[::2], "init")
+    _kiem(sd, "init chưa có lease", state="awaiting_lease")
+    _doi(0, *c.cap_lease(sd)[::2], "Ctx.cap_lease")
+    if _st(sd)["luat_adr0054"] is not False or _st(sd)["state"] != "leased":
+        raise AssertionError("đường cũ phải đưa về leased với luat_adr0054: false")
+    _doi(8, *c.cap_lease(sd)[::2], "gọi lại đường cũ")
+
+
+def case_r812_true_khong_quay_ve_duong_cu(c: Ctx):
+    rc, sd, e, _ = _r812(c, "lease")
+    _doi(0, rc, e, "lease đường mới")
+    truoc = (sd / "wp55.json").read_bytes()
+    _doi(8, *c.cap_lease(sd)[::2], "đường cũ khi chế độ đã true")
+    if (sd / "wp55.json").read_bytes() != truoc:
+        raise AssertionError("I4: state đổi")
+
+
+def case_r812_cua_khep_luot_van_chay(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd, extra=("--attempts-limit", 1))[::2], "init trần 1")
+    c.den_reviewing(sd, 55, 1)
+    _doi(8, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[::2], "chạm trần, lượt đang mở")
+    _doi(0, *c.review(sd, 55, ["x"])[::2], "cửa KHÉP lượt đang mở vẫn chạy")
+    truoc = (sd / "wp55.json").read_bytes()  # I4: đầu vào hỏng (ảnh doctor không có) ở trần ⇒ từ chối, state nguyên byte
+    _doi(10, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR, "--bang-chung-moi-truong", c.tmp / "khong-co.json"], sd)[::2], "đầu vào hỏng ở trần")
+    if (sd / "wp55.json").read_bytes() != truoc:
+        raise AssertionError("I4: begin-attempt ghi state trước khi kiểm đầu vào")
+    _doi(3, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[::2], "mở lượt mới ở trần")
+
+
+def case_r812_executor_antigravity_hop_le(c: Ctx):
+    """I8: họ executor theo `model_family` lease khai (gemini), không theo họ mặc định của tên provider."""
+    w = _kho812(c)
+    spec = importlib.util.spec_from_file_location("pl812_ag", c.script)
+    sys.path.insert(0, str(c.script.parent))
+    spec.loader.exec_module(m := importlib.util.module_from_spec(spec))
+    nc = m._ngu_canh_lease({**_R812_LEASE, "provider": "google_antigravity", "model_family": "gemini", "execution_surface": "antigravity",
+                            "spec_hash": "s" * 64}, "origin/x", "0" * 40, "l.yaml", "o/r")
+    h = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+    (c.tmp / "ag.yaml").write_text(__import__("yaml").safe_dump(_bn812(w, h, "s" * 64, bn={
+        "executor_provider": "google_antigravity", "model_executor_identity": {"model_family": "gemini", "model_evidence": "do_may", "model_evidence_ref": "r"}})))
+    try:  # `_die` là SystemExit — không để nó thoát khỏi bộ chạy
+        kq = m._du_dieu_kien_approve({"packet": 55, "ngu_canh_lease": nc}, __import__("argparse").Namespace(
+            bien_nhan=c.tmp / "ag.yaml", root=w, verdict="approve", reviewed_sha=h, finding_id=None))
+    except SystemExit as ex:
+        raise AssertionError(f"antigravity/gemini hợp lệ phải đạt, được rc={ex.code}") from None
+    if kq["p3"] != []:
+        raise AssertionError(f"antigravity/gemini hợp lệ phải đạt: {kq}")
+
+
+def _r812_doi_lease(w, doi, them=None):
+    """Đổi lease (và thêm lease khác) trên nhánh ops của fixture rồi đẩy — mỗi ca đổi ĐÚNG một yếu tố."""
+    import yaml
+    _g(w, "checkout", "-qb", "ops/wp55-spec", "refs/remotes/origin/ops/wp55-spec")
+    lease = {**yaml.safe_load((w / "ops/leases/l.yaml").read_bytes()), **doi}
+    (w / "ops/leases/l.yaml").write_text(yaml.safe_dump(lease))
+    for ten, nd in (them(lease) if them else {}).items():
+        (w / "ops/leases" / ten).write_text(yaml.safe_dump(nd))
+    _g(w, "add", "-A"), _g(w, "commit", "-qm", "doi lease"), _g(w, "push", "-q", "origin", "ops/wp55-spec"), _g(w, "checkout", "-q", "master")
+    _g(w, "branch", "-q", "-D", "ops/wp55-spec")
+
+
+def _r812_tran_vong(c: Ctx, verdict: str, rc_doi: int, muon=None):
+    """State ADR-0054 ở TRẦN VÒNG (sổ nhất quán: một review cũ), rồi chạy cửa khép lượt đang mở."""
+    rc, sd, e, raw = _r812(c, "review")
+    _doi(0, rc, e, "baseline H thật")
+    st = json.loads(raw)
+    st.update(review_rounds_limit=1, review_rounds_used=1, codex_review_calls_used=2, reviews=[{
+        "attempt": 1, "provider": "codex", "verdict": "changes_requested", "reviewed_sha": st["reviewing_head_sha"], "finding_ids": [], "finding_descs": []}])
+    (sd / "wp55.json").write_text(json.dumps(st))
+    truoc = (sd / "wp55.json").read_bytes()
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--verdict", verdict, "--reviewed-sha", st["reviewing_head_sha"],
+                              "--codex-call", "g1", "--bien-nhan", c.tmp / "bn.yaml", "--root", c.tmp / "kho/w"], sd)
+    _doi(rc_doi, rc, e, f"cửa khép ADR-0054 ở trần vòng ({verdict})")
+    if muon:
+        _kiem(sd, "đã ghi kết quả", **muon)
+    elif (sd / "wp55.json").read_bytes() != truoc:
+        raise AssertionError("I4: đầu vào hỏng ở trần vòng mà state đổi")
+
+
+def case_r812_don_thu_muc_tam(c: Ctx):
+    (t := c.tmp / "tmpd").mkdir()
+    rc, sd, e, _ = _r812(c, "review", env={"TMPDIR": str(t)})
+    _doi(0, rc, e, "chuỗi lease → review")
+    if list(t.glob("pl812-canon-*")):
+        raise AssertionError(f"thư mục canon tạm không được dọn: {list(t.iterdir())}")
+
+
+def case_r812_ngu_canh_long_sai_hinh(c: Ctx):
+    rc, sd, e, _ = _r812(c, "lease")
+    _doi(0, rc, e, "lease đường mới")
+    st = _st(sd)
+    st["ngu_canh_lease"]["reviewer"] = {}
+    (sd / "wp55.json").write_text(json.dumps(st))
+    _doi(8, *run(c.script, ["status", "--packet", 55], sd)[::2], "ngữ cảnh lồng sai hình dạng ⇒ state hỏng, không traceback")
+
+
+def case_r812_executor_ag_qua_cli(c: Ctx):
+    """I8 qua CLI đầy đủ, băm thật: executor Antigravity khai họ `gemini` rồi `openai` (biên nhận khai họ canon `gpt`) ⇒ approved_pending."""
+    import yaml
+    for ho, ho_bn in (("gemini", "gemini"), ("openai", "gpt")):
+        (d := c.tmp / ho).mkdir()
+        w, sd = _kho812(cc := Ctx(c.script, d)), cc.sd()
+        _r812_doi_lease(w, {"provider": "google_antigravity", "executor": "google_antigravity", "model_family": ho, "execution_surface": "antigravity",
+                            "reviewer": "claude", "reviewer_model_family": "claude", "reviewer_execution_surface": "claude_code", "reviewer_transport": "machine/local"})
+        _doi(0, *cc.init(sd, executor="google_antigravity", reviewer="claude", lease=False, extra=(
+            "--executor-model-family", ho, "--executor-execution-surface", "antigravity", "--executor-transport", "machine/local"))[::2], "init AG")
+        (d / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "lease_id: wp55-r1-g1-claude",
+                                                "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
+        h = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+        for args in (["record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", d / "cm.json", "--root", w],
+                     ["begin-attempt", "--provider", "google_antigravity", "--model-family", ho, "--execution-surface", "antigravity", "--transport", "machine/local"],
+                     ["record-post", "--for", "reviewing", "--comment-id", "9000055002"],
+                     ["transition", "--to", "reviewing", "--comment-id", "9000055002", "--head-sha", h]):
+            _doi(0, *run(c.script, [args[0], "--packet", 55, *args[1:]], sd)[::2], f"AG/{ho} {args[0]}")
+        (d / "bn.yaml").write_text(yaml.safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn={
+            "executor_provider": "google_antigravity", "model_executor_identity": {"model_family": ho_bn, "model_evidence": "do_may", "model_evidence_ref": "r"},
+            "model_reviewer_identity": {"provider": "anthropic_claude", "surface": "claude_code", "transport": "machine/local", "session_run_id": "s"}})))
+        _doi(0, *run(c.script, ["record-review", "--packet", 55, "--provider", "claude", "--verdict", "approve", "--reviewed-sha", h,
+                                "--bien-nhan", d / "bn.yaml", "--root", w], sd)[::2], f"AG/{ho} H hợp lệ")
+        _kiem(sd, f"AG/{ho}", state="approved_pending")
+
+
+def case_r812_canon_vang_phu_thuoc(c: Ctx):
+    rc, sd, e, truoc = _r812(c, "lease", truoc_lease=lambda w: [_g(w, "rm", "-q", "AGENTS.md"), _g(w, "commit", "-qm", "rm"), _g(w, "push", "-q", "origin", "master")])
+    _doi(8, rc, e, "validator canon vắng phụ thuộc trên origin/master")
+    if (sd / "wp55.json").read_bytes() != truoc:
+        raise AssertionError("I4: state đổi")
+
+
+def case_r812_r4_yaml_deep(c: Ctx):
+    def mutate(w):
+        import yaml
+        _g(w, "checkout", "-qb", "ops/wp55-spec", "refs/remotes/origin/ops/wp55-spec")
+        p = w / "ops/leases/l.yaml"
+        l = yaml.safe_load(p.read_bytes())
+        p.write_text(yaml.safe_dump(l) + "extra: " + "[" * 700 + "0" + "]" * 700 + "\n")
+        _g(w, "add", "-A"), _g(w, "commit", "-qm", "nested ordinary metadata"), _g(w, "push", "-q", "origin", "ops/wp55-spec")
+        _g(w, "checkout", "-q", "master"), _g(w, "branch", "-q", "-D", "ops/wp55-spec")
+    _r812_ca("lease", 2, truoc_lease=mutate)(c)
+
+
+def case_r812_r4_symlink_scope(c: Ctx):
+    def mutate(w, conflict):
+        (w / "x").mkdir()
+        (w / "x/a.py").write_text("a = 1\n")
+        (w / "alias").symlink_to("x", target_is_directory=True)
+        assert (w / "alias/a.py").resolve() == (w / "x/a.py").resolve()
+        _g(w, "add", "-A"), _g(w, "commit", "-qm", "alias inside fixture"), _g(w, "push", "-q", "origin", "master")
+        _r812_doi_lease(w, {}, (lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["alias/a.py"]}}) if conflict else None)
+    for conflict in (False, True):
+        (d := c.tmp / str(conflict)).mkdir()
+        _r812_ca("lease", 7 if conflict else 0, None if conflict else {"state": "leased"},
+                 truoc_lease=lambda w: mutate(w, conflict))(Ctx(c.script, d))
+
+
+def case_r812_r4_context_executor_surface(c: Ctx):
+    rc, sd, e, before = _r812(c, "review")
+    _doi(0, rc, e, "baseline H thật")
+    st = json.loads(before)
+    st["ngu_canh_lease"]["executor"]["execution_surface"] = []
+    (sd / "wp55.json").write_text(json.dumps(st))
+    raw = (sd / "wp55.json").read_bytes()
+    _doi(8, *run(c.script, ["status", "--packet", 55], sd)[::2], "context sai kiểu")
+    if raw != (sd / "wp55.json").read_bytes():
+        raise AssertionError("I4: state đổi")
+
+
+
+def _r812_r5_canon_hong_sau_lease(c: Ctx):
+    rc, sd, e, before = _r812(c, "review")
+    _doi(0, rc, e, "baseline H thật")
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    (w / "AGENTS.md").write_text("# nguồn hỏng\n")
+    _g(w, "add", "AGENTS.md"), _g(w, "commit", "-qm", "source invalid after valid lease")
+    _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin")
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--verdict", "approve",
+        "--reviewed-sha", json.loads(before)["reviewing_head_sha"], "--codex-call", "g1", "--bien-nhan", c.tmp / "bn.yaml", "--root", w], sd)
+    _doi(11, rc, e, "review không được dùng nguồn canon hỏng")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi")
+
+_R812_KHAC = lambda **x: lambda w: _r812_doi_lease(w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", **x}})  # noqa: E731
+_R812_XOA_DAC_TA = lambda w: [(w / p).unlink() for p in ("ops/specs/wp55.md", "ops/specs/wp55-prompt.md")]  # noqa: E731 — vắng ở worktree, có tại lease OID
+CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r812_")] + [
+    ("r812_duong_moi_du_dieu_kien", _r812_ca("review", 0, {"state": "approved_pending", "luat_adr0054": True})),
+    ("r812_dac_ta_chi_tai_lease_oid", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=_R812_XOA_DAC_TA)),
+    ("r812_khong_kich_hoat_la_false", _r812_ca("review", 0, {"state": "accepted", "luat_adr0054": False}, bien="khong_kich_hoat")),
+    ("r812_nong_la_false", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="nong")),
+    ("r812_hai_dong_khai_la_false", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="hai_dong")),
+    ("r812_lease_chi_o_ref_cuc_bo", _r812_ca("lease", 7, bien="cuc_bo")),
+    ("r812_dac_ta_lech_bam", _r812_ca("lease", 2, bien="spec_lech")),
+    ("r812_lease_chua_comment_workflow", _r812_ca("lease", 7, comment=False)),
+    ("r812_lease_h_hong", _r812_ca("lease", 7, bien="h_hong")),
+    ("r812_nguoi_giu_khac", _r812_ca("lease", 7, bien="giu_khac")),
+    ("r812_required_checks_falsy", _r812_ca("lease", 2, bien="rc_falsy")),
+    ("r812_canon_thieu_nguon", _r812_r5_canon_hong_sau_lease),
+    ("r812_approve_kem_lop_p1", _r812_ca("review", 11, lop=(("a-b", "P1"),))),
+    ("r812_hang_px", _r812_ca("review", 11, lop=(("a-b", "PX"),))),
+    ("r812_slug_xuong_dong", _r812_ca("review", 11, lop=(("a-b\n", "P3"),))),
+    ("r812_verdict_blob_khong_co", _r812_ca("review", 11, bn={"verdict_sha256": "b" * 64})),
+    ("r812_bien_nhan_lech_surface", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_desktop", "transport": "machine", "session_run_id": "s1"}})),
+    ("r812_bien_nhan_lech_transport", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "session_run_id": "s1"}})),
+    ("r812_bien_nhan_lech_generation", _r812_ca("review", 11, bn={"generation": 2})),
+    ("r812_bien_nhan_lech_packet", _r812_ca("review", 11, bn={"packet_issue": 56})),
+    ("r812_bien_nhan_lech_spec_hash", _r812_ca("review", 11, bn={"spec_hash": "c" * 64})),
+    ("r812_verdict_changes_requested", _r812_ca("review", 11, bn={"verdict": "changes_requested"})),
+    ("r812_verdict_blocked", _r812_ca("review", 11, bn={"verdict": "blocked"})),
+    ("r812_slug_ngoai_bang_lop", _r812_ca("review", 11, bn={"verdict": "changes_requested"}, lop=(("a-b", "P2"),), verdict="changes_requested", ids=("a-b", "tu-dat"))),
+    ("r812_oid_khong_chua_adr", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="oid_khong_chua")),
+    ("r812_oid_khong_dua_adr_vao", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="oid_khong_dua_vao")),
+    ("r812_oid_ngoai_first_parent", _r812_ca("lease", 0, {"luat_adr0054": False}, bien="oid_ngoai_fp")),
+    ("r812_bia_mo_hai_chieu_tai_lease_oid", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=lambda w: _r812_doi_lease(
+        w, {"thay_the_cho": ["old-lease"]}, lambda l: {"old.yaml": {**l, "lease_id": "old-lease", "thay_the_cho": [], "da_bi_thay_the": l["lease_id"]}}))),
+    ("r812_nguoi_giu_prefix_giao_nhau", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
+        w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["x/"]}}))),
+    ("r812_nguoi_giu_effective_giao_nhau", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
+        w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["y/b.py"], "effective_write_set": ["y/b.py", "x/a.py"]}}))),
+    ("r812_nguoi_giu_planned_hop_le", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["planned:x/a.py"]}))),
+    ("r812_model_family_falsy", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"model_family": False}))),
+    ("r812_lease_role_sai", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"role": "reviewer"}))),
+    ("r812_lease_generation_khong_duong", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"generation": 0}))),
+    ("r812_lease_assurance_ngoai_mien", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"assurance_target": "advisory_review"}))),
+    ("r812_prompt_path_thu_muc", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"prompt_path": "."}))),
+    ("r812_provider_bi_danh_canon", _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True}, truoc_lease=lambda w: _r812_doi_lease(
+        w, {"provider": "anthropic_claude", "executor": "anthropic_claude"}))),
+    ("r812_executor_provider_lech_lease", _r812_ca("review", 11, bn={"executor_provider": "google_antigravity", "model_executor_identity": {
+        "model_family": "claude", "model_evidence": "do_may", "model_evidence_ref": "r"}})),
+    ("r812_executor_surface_lech_lease", _r812_ca("review", 11, bn={"model_executor_identity": {"surface": "antigravity"}})),
+    ("r812_schema_h_bat_buoc", _r812_ca("review", 11, bn={"github_submitter_identity": False})),
+    ("r812_verdict_path_khong_ton_tai", _r812_ca("review", 11, bn={"verdict_path": "ops/reviews/khong.md", "evidence_url": "https://github.com/o/r/blob/{V}/ops/reviews/khong.md"})),
+    ("r812_tran_vong_cua_khep_ghi_ket_qua", lambda c: _r812_tran_vong(c, "approve", 0, {"state": "approved_pending", "review_rounds_used": 2, "attempt_open": False})),
+    ("r812_tran_vong_dau_vao_hong_khong_ghi", lambda c: _r812_tran_vong(c, "blocked", 11)),
+    ("r812_nguoi_giu_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["X/"]))),
+    ("r812_nguoi_giu_dau_cheo_nguoc", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["x\\a.py"]))),
+    ("r812_nguoi_giu_unicode_nfd", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["café/a.py"]}, lambda l: {
+        "other.yaml": {**l, "lease_id": "other-lease", "write_set": ["cafe\u0301/"]}}))),
+    ("r812_nguoi_giu_cham_gach", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["./x/a.py"]))),
+    ("r812_effective_mo_rong_hop_le", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=lambda w: _r812_doi_lease(w, {"effective_write_set": ["x/a.py", "y/b.py"]}))),
+    ("r812_lease_branch_rong", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"branch": ""}))),
+    ("r812_bien_nhan_provider_sai_kieu", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": [], "surface": "codex_cli", "transport": "machine", "session_run_id": "s1"}})),
+    ("r812_bien_nhan_family_sai_kieu", _r812_ca("review", 11, bn={"model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "transport": "machine",
+                                                                                              "session_run_id": "s1", "model_family": []}})),
+    ("r812_bien_nhan_lech_sha", _r812_ca("review", 11, bn={"reviewed_sha": "{V}"})),
+    ("r812_bien_nhan_lech_lease_id", _r812_ca("review", 11, bn={"lease_id": "lease-khac"})),
+    ("r812_executor_transport_lech_lease", _r812_ca("review", 11, bn={"model_executor_identity": {"transport": "human"}})),
+    ("r812_verdict_am_dung_bang_lop", _r812_ca("review", 0, {"state": "running"}, bn={"verdict": "changes_requested"}, lop=(("a-b", "P2"),),
+                                               verdict="changes_requested", ids=("a-b",))),
+]
+CASES += [
+    ("r812_r4_own_union_conflict", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
+        w, {"effective_write_set": ["y/b.py"]}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["x/"], "effective_write_set": ["x/"]}}))),
+    ("r812_r4_own_dot", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["./x/a.py"]}))),
+    ("r812_r4_own_parent", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"effective_write_set": ["x/../y/b.py"]}))),
+    ("r812_r4_own_glob", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/*.py"]}))),
+    ("r812_r4_empty_declared", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": [], "effective_write_set": ["x/a.py"]}))),
+    ("r812_r4_top_family", _r812_ca("review", 11, bn={"model_family": []})),
+    ("r812_r4_executor_identity", _r812_ca("review", 11, bn={"model_executor_identity": False})),
+    ("r812_r4_duplicate_slug", _r812_ca("review", 11, lop=(("a-b", "P3"), ("a-b", "P3")))),
+]
+MUTANTS.update({
+    "r812_bo_so_ls_remote": ('    if xa[0] or gan[0] or xa[1].split() != [oid.encode(), f"refs/heads/{m[1]}".encode()]:\n', "    if gan[0]:\n", ["r812_lease_chi_o_ref_cuc_bo"]),
+    "r812_ghi_state_roi_moi_tu_choi": ("        _die(RC_ARG, f\"đặc tả {l['spec_path']}", "        _save(state_dir, {**st, \"state\": \"leased\"}) or _die(RC_ARG, f\"đặc tả {l['spec_path']}", ["r812_dac_ta_lech_bam"]),
+    "r812_bo_bam_dac_ta": ('hashlib.sha256(spec).hexdigest() != l["spec_hash"]:', "False:", ["r812_dac_ta_lech_bam"]),
+    "r812_bo_comment_workflow": ("    if not any(isinstance(c, dict) and", "    if False and any(isinstance(c, dict) and", ["r812_lease_chua_comment_workflow"]),
+    "r812_bo_h_check": ("        if p.returncode:  # I2(H)", "        if False:  # I2(H)", ["r812_lease_h_hong"]),
+    "r812_h_check_tren_worktree": ('"--root", str(td / "snap")]', '"--root", str(root)]', ["r812_dac_ta_chi_tai_lease_oid"]),
+    "r812_bo_nguoi_giu": (("        if p.returncode != RC_DANG_GIU_LEASE or", "        if giao_nhau:\n            _die(RC_GUARD, f\"I2(Đ): lease khác"), ("        if False and", "        if False:\n            _die(RC_GUARD, f\"I2(Đ): lease khác"), ["r812_nguoi_giu_khac"]),  # phối hợp: hai lớp cùng chặn
+    "r812_bo_shallow": ('_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\\n")', "True", ["r812_nong_la_false"]),
+    "r812_nhan_nhieu_dong_khai": ("    if len(khai) != 1:", "    if not khai:", ["r812_hai_dong_khai_la_false"]),
+    "r812_bo_kich_hoat": ('            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])\n', "", ["r812_khong_kich_hoat_la_false"]),
+    "r812_rc_falsy_thanh_rong": ('rc = l.get("required_checks", [])', 'rc = l.get("required_checks") or []', ["r812_required_checks_falsy"]),
+    "r812_canon_suy_giam": ("if bnv.PROVIDER_NGUON_HONG is not None or ", "if False or ", ["r812_canon_thieu_nguon"]),
+    "r812_bo_neo_git": ("+ neo[0] + neo[1] +", "+", ["r812_verdict_blob_khong_co"]),
+    "r812_duong_cu_ghi_true": ('st["luat_adr0054"] = False  # I9', 'st["luat_adr0054"] = None  # I9', ["r812_duong_cu_luon_false"]),
+    "r812_bn_chi_cho_approve": ('if st.get("luat_adr0054") is True else None', 'if st.get("luat_adr0054") is True and a.verdict == "approve" else None', ["r812_slug_ngoai_bang_lop"]),
+    "r812_approve_cu_cho_adr0054": ('if st.get("luat_adr0054") is True else None', "if False else None", ["r812_approve_kem_lop_p1", "r812_duong_moi_du_dieu_kien"]),
+    "r812_bo_chan_p0_p2": ('("con-P0-P2", lop_ok and (', '("con-P0-P2", True or (', ["r812_approve_kem_lop_p1"]),
+    "r812_mien_hang_mo": ("\n                                           and x.get(\"hang\") in HANG_LOP for x in lop)", " for x in lop)", ["r812_hang_px"]),
+    "r812_slug_match_thay_fullmatch": ('SLUG_RE.fullmatch(x["slug"])', 'SLUG_RE.match(x["slug"])', ["r812_slug_xuong_dong"]),
+    "r812_bo_surface": ('("surface", nc[', '("surface", True or nc[', ["r812_bien_nhan_lech_surface"]),
+    "r812_bo_transport": ('("transport", nc[', '("transport", True or nc[', ["r812_bien_nhan_lech_transport"]),
+    "r812_bo_generation": ('("generation", type(', '("generation", True or type(', ["r812_bien_nhan_lech_generation"]),
+    "r812_bo_packet": ('("packet", type(', '("packet", True or type(', ["r812_bien_nhan_lech_packet"]),
+    "r812_bo_spec_hash": ('("spec_hash", d.get("spec_hash")', '("spec_hash", True or d.get("spec_hash")', ["r812_bien_nhan_lech_spec_hash"]),
+    "r812_verdict_tu_nguoi_goi": ('("verdict", d.get("verdict") == a.verdict)', '("verdict", True)', ["r812_verdict_changes_requested", "r812_verdict_blocked"]),
+    "r812_bo_slug_trong_bang": ('("slug-ngoai-bang", lop_ok and', '("slug-ngoai-bang", True or', ["r812_slug_ngoai_bang_lop"]),
+    "r812_siet_lop_khong_rong": ("lop_ok = type(lop) is list and all(", "lop_ok = type(lop) is list and bool(lop) and all(", ["r812_duong_moi_du_dieu_kien"]),
+    "r812_tran_chan_cua_khep": ('if cua == "begin-attempt" and st["attempts_used"]', 'if cua in ("begin-attempt", "record-review") and st["attempts_used"]', ["r812_cua_khep_luot_van_chay"]),
+    "r812_xet_dung_truoc_dau_vao": ('    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong"', '    _xet_dung(state_dir, st, "begin-attempt")\n    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong"', ["r812_cua_khep_luot_van_chay"]),
+    "r812_bo_do_chua_adr": ('            and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0054_TEP}")[0] == 0\n', "", ["r812_oid_khong_chua_adr"]),
+    "r812_bo_do_dua_vao": ('            and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0054_TEP}")[0] != 0\n', "", ["r812_oid_khong_dua_adr_vao"]),
+    "r812_bo_do_first_parent": ("            and chuoi[0] == 0 and oid.encode() in chuoi[1].split()\n", "", ["r812_oid_ngoai_first_parent"]),
+    "r812_snapshot_khong_git": ('_git_do(root, "worktree", "add", "-q", "--detach", str(td / "snap"), oid)[0]', '(td / "snap").mkdir() or _git_do(root, "archive", oid)[0] and False', ["r812_bia_mo_hai_chieu_tai_lease_oid"]),
+    "r812_giao_chi_bang_nhau": ("    return a == b or a.startswith(b + \"/\") or b.startswith(a + \"/\")", "    return a == b", ["r812_nguoi_giu_prefix_giao_nhau"]),
+    "r812_bo_effective_nguoi_khac": ('for k in ("write_set", "effective_write_set")', 'for k in ("write_set",)', ["r812_nguoi_giu_effective_giao_nhau"]),
+    "r812_bo_quet_giao": ("        if giao_nhau:\n            _die(RC_GUARD, f\"I2(Đ): lease khác", "        if False:\n            _die(RC_GUARD, f\"I2(Đ): lease khác", ["r812_nguoi_giu_prefix_giao_nhau", "r812_nguoi_giu_effective_giao_nhau"]),
+    "r812_planned_khong_go": ('"ai-dang-giu", duong.removeprefix("planned:")', '"ai-dang-giu", duong', ["r812_nguoi_giu_planned_hop_le"]),
+    "r812_bo_kieu_identity_lease": (' or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id)', "", ["r812_model_family_falsy"]),
+    "r812_bo_role_lease": (' or l.get("role") != "executor"', "", ["r812_lease_role_sai"]),
+    "r812_bo_generation_duong": ((' or l["generation"] < 1', ' and nc["generation"] > 0'), ("", ""), ["r812_lease_generation_khong_duong"]),  # phối hợp: chốt lease + lược đồ state
+    "r812_bo_mien_assurance": ('        if l["assurance_target"] not in bnv_lease.ASSURANCE_CAN_DOC_LAP:\n', "        if False:\n", ["r812_lease_assurance_ngoai_mien"]),
+    "r812_bo_bi_danh": ('    p = dict(launcher._PROVIDER_BI_DANH).get(p, p)\n    return next(', "    return p or next(", ["r812_provider_bi_danh_canon"]),
+    "r812_bo_provider_executor": ('("provider-executor", p_chuan(', '("provider-executor", True or p_chuan(', ["r812_executor_provider_lech_lease"]),
+    "r812_bo_surface_executor": ('("executor-surface-transport", all(', '("executor-surface-transport", True or all(', ["r812_executor_surface_lech_lease"]),
+    "r812_bo_thieu": ("list(bnv._thieu(d) if d else [])", "list([])", ["r812_schema_h_bat_buoc"]),
+    "r812_tran_vong_chan_cua_khep": (' and a is None and st.get("luat_adr0054") is not True:', " and a is None:", ["r812_tran_vong_cua_khep_ghi_ket_qua"]),
+    "r812_dung_truoc_H": ("    bn = _du_dieu_kien_approve(st, a) if", '    _xet_dung(state_dir, st, "record-review", a)\n    bn = _du_dieu_kien_approve(st, a) if', ["r812_tran_vong_dau_vao_hong_khong_ghi"]),
+    "r812_khong_don_tam": ("        shutil.rmtree(td, ignore_errors=True)", "        pass", ["r812_don_thu_muc_tam"]),
+    "r812_nc_chi_tap_khoa": ('_nc_hop_le(st["ngu_canh_lease"])', 'set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH)', ["r812_ngu_canh_long_sai_hinh"]),
+    "r812_bo_casefold": (').casefold()\n    parts', ')\n    parts', ["r812_nguoi_giu_hoa_thuong"]),
+    "r812_bo_dau_cheo_nguoc": (('.strip().replace("\\\\", "/")).casefold()', 'q = p.removeprefix("planned:").strip().replace("\\\\", "/")\n',
+                                     '.replace("\\\\", "/").split("/"), [], 0'),
+                                    (".strip()).casefold()", 'q = p.removeprefix("planned:").strip()\n', '.split("/"), [], 0'), ["r812_nguoi_giu_dau_cheo_nguoc"]),
+    "r812_bo_nfc": ('    q = unicodedata.normalize("NFC", p.removeprefix', '    q = (lambda _f, x: x)("NFC", p.removeprefix', ["r812_nguoi_giu_unicode_nfd"]),
+    "r812_bo_cham_gach": ('    if "." in q.split("/"):', '    if False:', ["r812_r4_own_dot"]),
+    "r812_ai_dang_giu_ca_effective": ('        for duong in l["write_set"]:  # I2(Đ)', "        for duong in ws:  # I2(Đ)", ["r812_effective_mo_rong_hop_le"]),
+    "r812_branch_rong_lot": ((' or any(t is str and not l[k].strip() for k, t in kieu.items())', "    if not _nc_hop_le(json.loads(json.dumps(nc))):"), ("", "    if False:"),
+                             ["r812_lease_branch_rong"]),  # phối hợp: chốt kiểu lease + lược đồ state trước `_save`
+    "r812_bo_kieu_danh_tinh_bn": ("        if kieu_sai:  # có mặt", "        if False:  # có mặt", ["r812_bien_nhan_family_sai_kieu"]),
+    "r812_bo_so_sha_bn": ('("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha)', '("reviewed_sha", True)', ["r812_bien_nhan_lech_sha"]),
+    "r812_bo_so_lease_id_bn": ('("lease_id", d.get("lease_id") == nc["lease_id"])', '("lease_id", True)', ["r812_bien_nhan_lech_lease_id"]),
+    "r812_bo_transport_executor": ('(("surface", "execution_surface"), ("transport", "transport"))', '(("surface", "execution_surface"),)', ["r812_executor_transport_lech_lease"]),
+    "r812_ho_theo_ten_provider": ("    ho = lambda vai: HO_CANON[nc[vai][\"model_family\"]]", "    ho = lambda vai: bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(nc[vai][\"provider\"]), \"\")",
+                                  ["r812_executor_ag_qua_cli", "r812_executor_antigravity_hop_le"]),
+    "r812_bo_chan_awaiting": ('    if st["state"] != "awaiting_lease":\n        _die(RC_STATE,\n             f"chỉ ghi', '    if False:\n        _die(RC_STATE,\n             f"chỉ ghi', ["r812_true_khong_quay_ve_duong_cu", "r812_duong_cu_luon_false"]),
+})
+
+MUTANTS.update({
+    "r812_r4_bo_chan_yaml_sau": ('except (yaml.YAMLError, RecursionError):', 'except yaml.YAMLError:', ["r812_r4_yaml_deep"]),
+    "r812_r4_bo_resolve": ('return {ten, _chuan_duong(dich.as_posix())}', 'return {ten}', ["r812_r4_symlink_scope"]),
+    "r812_r4_own_chi_effective": ('for x in giu(l)))', 'for x in ws))', ["r812_r4_own_union_conflict"]),
+    "r812_r4_bo_glob": ('    if any(c in q for c in "*?[]"):', '    if False:', ["r812_r4_own_glob"]),
+    "r812_r4_bo_parent": (' or ".." in parts', '', ["r812_r4_own_parent"]),
+    "r812_r4_cho_declared_rong": (' or not l["write_set"]', '', ["r812_r4_empty_declared"]),
+    "r812_r4_bo_schema_bn": ('        if kieu_sai:  # có mặt', '        if False:  # có mặt', ["r812_r4_top_family", "r812_r4_executor_identity"]),
+    "r812_r4_bo_schema_surface": (('                    and (nc[v]["execution_surface"] is None or type(nc[v]["execution_surface"]) is str',
+                                    '                    and (nc[v]["transport"] is None or type(nc[v]["transport"]) is str'),
+                                   ('                    and (True or type(nc[v]["execution_surface"]) is str',
+                                    '                    and (True or type(nc[v]["transport"]) is str'), ["r812_r4_context_executor_surface"]),
+    "r812_r4_bo_unique_slug": ('and len({x["slug"] for x in lop}) == len(lop)', '', ["r812_r4_duplicate_slug"]),
+    "r812_r4_init_tu_cap": ('"state": "awaiting_lease",', '"state": "leased",', ["r812_duong_cu_luon_false"]),
+    "r812_r4_bo_dep_vang": (('            if rc != 0 or not b:', '        if bnv_lease.PROVIDER_NGUON_HONG is not None:'),
+                                 ('            if False:', '        if False:'), ["r812_canon_vang_phu_thuoc"]),
+    "r812_r4_bo_neo_path": ('+ neo[0] + neo[1] +', '+', ["r812_verdict_path_khong_ton_tai"]),
+    "r812_r4_chan_am_hop_le": ('("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})',
+                               '("slug-ngoai-bang", lop_ok and not a.finding_id)', ["r812_verdict_am_dung_bang_lop"]),
+})
+MUTANTS["r812_bo_h_check"][2].append("r812_prompt_path_thu_muc")
+
+
+
+
+def _r812_r5_source_module(w, content):
+    (w / "ops/bien_nhan_v2.py").write_text(content)
+    _g(w, "add", "ops/bien_nhan_v2.py"), _g(w, "commit", "-qm", "invalid canon module")
+    _g(w, "push", "-q", "origin", "master")
+
+# #812 lượt 5: nguồn suy giảm ở lease, mọi nguồn tham chiếu, chuẩn hoá tuple và lỗi argv.
+CASES += [
+    ("r812_r5_lease_canon_hong", _r812_ca("lease", 8, bien="thieu_nguon")),
+    ("r812_r5_source_api_missing", _r812_ca("lease", 8, truoc_lease=lambda w: _r812_r5_source_module(w, "# missing API\n"))),
+    ("r812_r5_source_syntax", _r812_ca("lease", 8, truoc_lease=lambda w: _r812_r5_source_module(w, "ordinary invalid syntax\n"))),
+    ("r812_r5_instruction_long", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {
+        "granted_on_instruction": "https://github.com/o/r/issues/" + "5" * 4400 + "#issuecomment-1"}))),
+    ("r812_r5_spec_path_zero", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"spec_path": "ops/specs/wp55\x00.md"}))),
+]
+for k in ("executor_model_evidence_ref", "executor_telemetry_path", "executor_nguoi_audit", "executor_audit_actor"):
+    CASES.append(("r812_r5_nested_" + k, _r812_ca("review", 11, bn={"model_executor_identity": {
+        "model_family": "claude", "model_evidence": "do_may", "model_evidence_ref": "r", k: []}})))
+for k, val in (("che_do", []), ("KHONG_do_duoc", []), ("phien_doc_lap", "false")):
+    CASES.append(("r812_r5_reviewer_" + k, _r812_ca("review", 11, bn={"model_reviewer_identity": {
+        "provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": "s1", k: val}})))
+CASES.append(("r812_r5_session_list", _r812_ca("review", 11, bn={"model_reviewer_identity": {
+    "provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": [], "phien_doc_lap": True, "KHONG_do_duoc": "ordinary explanation"}})))
+for k, val in (("provider", " openai_codex "), ("surface", " codex_cli "), ("transport", " machine ")):
+    CASES.append(("r812_r5_padded_" + k, _r812_ca("review", 0, {"state": "approved_pending"}, bn={"model_reviewer_identity": {
+        "provider": "openai_codex", "surface": "codex_cli", "transport": "machine", "session_run_id": "s1", k: val}})))
+CASES += [
+    ("r812_r5_alias_surface", _r812_ca("review", 0, {"state": "approved_pending"}, bn={"model_executor_identity": {"surface": "claude_code_cli", "transport": "machine/local"}})),
+    ("r812_r5_prefixed_reference_valid", _r812_ca("review", 0, {"state": "approved_pending"}, bn={"model_executor_identity": {
+        "model_family": "claude", "model_evidence": "do_may", "executor_model_evidence_ref": "r"}})),
+]
+MUTANTS.update({
+    "r812_r5_no_loader_guard": ('    except Exception as ex:  # loader canon:', '    except OSError as ex:  # loader canon:', ["r812_r5_source_syntax"]),
+    "r812_r5_no_api_guard": ('if ten == "bien_nhan_v2" and any(not hasattr(m, k) for k in api):', 'if False:', ["r812_r5_source_api_missing"]),
+    "r812_r5_lease_degraded": ('        if bnv_lease.PROVIDER_NGUON_HONG is not None:', '        if False:', ["r812_r5_lease_canon_hong"]),
+    "r812_r5_unbounded_int": ('mr[2].lstrip("0") != str(st["packet"])', 'int(mr[2]) != st["packet"]', ["r812_r5_instruction_long"]),
+    "r812_r5_argv_valueerror": ('except (OSError, subprocess.SubprocessError, ValueError):', 'except (OSError, subprocess.SubprocessError):', ["r812_r5_spec_path_zero"]),
+    "r812_r5_ignore_bad_attestations": ('        if kieu_sai:  # có mặt', '        if False:  # có mặt',
+        ["r812_r5_nested_executor_model_evidence_ref", "r812_r5_reviewer_che_do", "r812_r5_reviewer_phien_doc_lap", "r812_r5_reviewer_KHONG_do_duoc", "r812_r5_session_list"]),
+    "r812_r5_raw_provider": ('bnv._chuan_hoa_provider(bnv._chuoi(x) or "")', 'bnv._chuan_hoa_provider(x or "")', ["r812_r5_padded_provider"]),
+    "r812_r5_raw_surface": ('bm_chuan(mri.get("surface")) ==', 'mri.get("surface") ==', ["r812_r5_padded_surface"]),
+    "r812_r5_raw_transport": ('bnv._chuoi(mri.get("transport")) ==', 'mri.get("transport") ==', ["r812_r5_padded_transport"]),
+})
+
+CASES += [
+    ("r812_r5_review_role", _r812_ca("review", 11, bn={"role": "executor"})),
+    ("r812_r5_review_assurance", _r812_ca("review", 11, bn={"assurance": "same_provider_approved"})),
+]
+MUTANTS.update({
+    "r812_r5_drop_role": ('("role", d.get("role") == "reviewer")', '("role", True)', ["r812_r5_review_role"]),
+    "r812_r5_drop_assurance": ('("assurance", d.get("assurance") == nc["assurance_target"])', '("assurance", True)', ["r812_r5_review_assurance"]),
+})
+
+# #812 lượt 6: API canon dùng được, lỗi argv/serialization giữ byte, và mỗi thành phần authority/identity có phản chứng riêng.
+def _r812_r6_api_lease(w, key):
+    p = w / "ops/bien_nhan_v2.py"
+    p.write_text(p.read_text() + "\n" + key + " = None\n")
+    _g(w, "add", "ops/bien_nhan_v2.py"), _g(w, "commit", "-qm", "invalid canonical API type")
+    _g(w, "push", "-q", "origin", "master")
+
+
+def _r812_r6_comment(c, field):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    (sd / "wp55.json").write_bytes(before)
+    p = c.tmp / "cm.json"
+    cm = json.loads(p.read_text())
+    if field == "author":
+        cm[0]["user"]["login"] = "ordinary-reviewer"
+    elif field == "issue":
+        cm[0]["issue_url"] = "https://api.github.com/repos/o/r/issues/56"
+    else:
+        cm[0]["body"] = "lease_id: different-lease"
+    p.write_text(json.dumps(cm))
+    rc, _, e = run(c.script, ["record-lease", "--packet", 55, "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml",
+                            "--lease-comments", p, "--root", c.tmp / "kho/w"], sd)
+    _doi(7, rc, e, "I2(R) chỉ lệch " + field)
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi")
+
+
+def _r812_r6_activation(c, variant):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline đã kích hoạt")
+    _kiem(sd, "baseline bật", luat_adr0054=True)
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    p = w / "docs/PROTOCOL_DA_PHIEN.md"
+    row = next(x for x in p.read_text().splitlines() if re.match(r"^\|\s*`ADR-0054`\s*\|", x))
+    replacement = {"pending": row + " chưa kích hoạt", "missing": "", "duplicate": row + "\n" + row}[variant]
+    p.write_text(p.read_text().replace(row, replacement, 1))
+    _g(w, "add", "docs/PROTOCOL_DA_PHIEN.md"), _g(w, "commit", "-qm", "protocol activation condition")
+    _g(w, "push", "-q", "origin", "master")
+    rc, _, e = run(c.script, ["record-lease", "--packet", 55, "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml",
+                            "--lease-comments", c.tmp / "cm.json", "--root", w], sd)
+    _doi(0, rc, e, "lease hợp lệ khi chế độ chưa đủ điều kiện")
+    _kiem(sd, "kích hoạt protocol thiếu " + variant, luat_adr0054=False)
+
+
+def _r812_r6_family(c, role):
+    import yaml
+    w, sd = _kho812(c), c.sd()
+    ex, rv = ("google_antigravity", "claude") if role == "executor" else ("claude", "google_antigravity")
+    doi = {"provider": ex, "executor": ex, "reviewer": rv}
+    if role == "executor":
+        doi.update(model_family="gemini", execution_surface="antigravity", reviewer_model_family="claude",
+                   reviewer_execution_surface="claude_code", reviewer_transport="machine/local")
+    else:
+        doi.update(reviewer_model_family="gemini", reviewer_execution_surface="antigravity", reviewer_transport="machine/local")
+    _r812_doi_lease(w, doi)
+    _doi(0, *c.init(sd, executor=ex, reviewer=rv, lease=False, extra=(f"--{role}-model-family", "gemini",
+        f"--{role}-execution-surface", "antigravity", f"--{role}-transport", "machine/local"))[::2], "init AG " + role)
+    (c.tmp / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"}, "body": "lease_id: wp55-r1-g1-claude",
+                                               "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
+    h = _g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude")
+    args = ["--model-family", "gemini", "--execution-surface", "antigravity", "--transport", "machine/local"]
+    for cmd in (["record-lease", "--lease-ref", "origin/ops/wp55-spec", "--lease-path", "ops/leases/l.yaml", "--lease-comments", c.tmp / "cm.json", "--root", w],
+                ["begin-attempt", "--provider", ex, *(args if role == "executor" else [])],
+                ["record-post", "--for", "reviewing", "--comment-id", "9000055002"],
+                ["transition", "--to", "reviewing", "--comment-id", "9000055002", "--head-sha", h]):
+        _doi(0, *run(c.script, [cmd[0], "--packet", 55, *cmd[1:]], sd)[::2], "AG baseline " + cmd[0])
+    sub = {"model_family": "gemini", "model_evidence": "do_may", "model_evidence_ref": "r"}
+    bn = _bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn={"executor_provider": ex,
+        "model_reviewer_identity": {"provider": "anthropic_claude" if role == "executor" else "google_antigravity",
+            "surface": "claude_code" if role == "executor" else "antigravity", "transport": "machine/local", "session_run_id": "s1"}})
+    bn.setdefault("model_" + role + "_identity", {}).update(sub)
+    p, before = c.tmp / "bn.yaml", (sd / "wp55.json").read_bytes()
+    cmd = ["record-review", "--packet", 55, "--provider", rv, *(args if role == "reviewer" else []), "--verdict", "approve",
+           "--reviewed-sha", h, "--bien-nhan", p, "--root", w]
+    p.write_text(yaml.safe_dump(bn))
+    _doi(0, *run(c.script, cmd, sd)[::2], "baseline H thật, họ khớp lease")
+    (sd / "wp55.json").write_bytes(before)
+    bn["model_" + role + "_identity"]["model_family"] = "gpt"  # vẫn khác họ Claude, H canon vẫn hợp lệ
+    p.write_text(yaml.safe_dump(bn))
+    rc, _, e = run(c.script, cmd, sd)
+    _doi(11, rc, e, "I8 họ " + role + " lệch lease")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi")
+
+
+def _r812_r6_bad_receipt_path(c, native=False):
+    import yaml
+    rc, sd, e, before = _r812(c, "review")
+    _doi(0, rc, e, "baseline H thật")
+    (sd / "wp55.json").write_bytes(before)
+    p = c.tmp / "bn.yaml"
+    if native:
+        if os.name == "nt":
+            raise BoQua("tên tệp byte native (surrogateescape) chỉ có trên POSIX") from OSError("không áp dụng trên Windows")
+        q = c.tmp / ("receipt-" + chr(0xdc80) + ".yaml")
+        q.write_bytes(p.read_bytes())
+        p = q
+    else:
+        bn = yaml.safe_load(p.read_bytes())
+        bn["verdict_path"] += "\x00"
+        bn["evidence_url"] += "\x00"
+        p.write_text(yaml.safe_dump(bn))
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", "codex", "--verdict", "approve",
+        "--reviewed-sha", json.loads(before)["reviewing_head_sha"], "--codex-call", "g1", "--bien-nhan", p, "--root", c.tmp / "kho/w"], sd)
+    _doi(8 if native else 11, rc, e, "đường dẫn biên nhận không mã hoá/không gọi git được")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: đầu vào làm hỏng state")
+
+
+for key in ("ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP", "_thieu", "_neo_git", "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider"):
+    CASES.append(("r812_r6_api_" + key, _r812_ca("lease", 8, truoc_lease=lambda w, k=key: _r812_r6_api_lease(w, k))))
+for field in ("author", "issue", "lease_id"):
+    CASES.append(("r812_r6_workflow_" + field, lambda c, k=field: _r812_r6_comment(c, k)))
+for variant in ("pending", "missing", "duplicate"):
+    CASES.append(("r812_r6_activation_" + variant, lambda c, k=variant: _r812_r6_activation(c, k)))
+for role in ("executor", "reviewer"):
+    CASES.append(("r812_r6_family_" + role, lambda c, k=role: _r812_r6_family(c, k)))
+CASES += [
+    ("r812_r6_write_set_nul", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/a.py\x00"]}))),
+    ("r812_r6_write_set_long", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/" + "a" * 140000]}))),
+    ("r812_r6_receipt_nul", _r812_r6_bad_receipt_path),
+    ("r812_r6_receipt_native", lambda c: _r812_r6_bad_receipt_path(c, native=True)),
+]
+MUTANTS.update({
+    "r812_r6_no_api_types": ('        if (any(type(getattr(m, k))', '        if False and (any(type(getattr(m, k))', ["r812_r6_api_" + k for k in ("ASSURANCE_CAN_DOC_LAP", "HO_MODEL_CHO_PHEP", "_thieu", "_neo_git", "_nguon_tra_model", "_giai_ho_model_reviewer", "_giai_ho_model_executor", "_chuoi", "_chuan_hoa_provider")]),
+    "r812_r6_unhandled_argv_valueerror": ('except (OSError, subprocess.SubprocessError, ValueError) as ex:', 'except (OSError, subprocess.SubprocessError) as ex:', ["r812_r6_write_set_nul"]),
+    "r812_r6_unhandled_argv_oserror": ('except (OSError, subprocess.SubprocessError, ValueError) as ex:', 'except (subprocess.SubprocessError, ValueError) as ex:', ["r812_r6_write_set_long"]),
+    "r812_r6_unhandled_receipt_path": ('        except Exception as ex:  # H hỏng/không đo được', '        except OSError as ex:  # H hỏng/không đo được', ["r812_r6_receipt_nul"]),
+    "r812_r6_family_executor": ('("ho-executor", bool(ho_exec) and ho_exec == ho("executor"))', '("ho-executor", True)', ["r812_r6_family_executor"]),
+    "r812_r6_family_reviewer": ('("ho-reviewer", bool(ho_rev) and ho_rev == ho("reviewer"))', '("ho-reviewer", True)', ["r812_r6_family_reviewer"]),
+    "r812_r6_activation_protocol": ('and pr[0] == 0 and len(dong20) == 1 and "chưa kích hoạt" not in dong20[0].casefold()', 'and True', ["r812_r6_activation_" + k for k in ("pending", "missing", "duplicate")]),
+    "r812_r6_workflow_author": ('c["user"].get("login") == BOT_LEASE', 'True', ["r812_r6_workflow_author"]),
+    "r812_r6_workflow_issue": ('str(c.get("issue_url", "")).endswith(f"/{mr[1]}/issues/{st[\'packet\']}")', 'True', ["r812_r6_workflow_issue"]),
+    "r812_r6_workflow_lease_id": ('re.search(rf"^lease_id: {re.escape(lid)}$", str(c.get("body", "")), re.M)', 'True', ["r812_r6_workflow_lease_id"]),
+})
+MUTANTS["r812_r6_encode_after_truncate"] = (
+    ('    try:\n        raw = (json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\\n").encode("utf-8")\n    except (ValueError, TypeError, UnicodeError) as ex:\n        _die(RC_STATE, f"state không mã hoá được: {type(ex).__name__}")\n    p.write_bytes(raw)'),
+    '    p.write_text(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\\n", encoding="utf-8", newline="\\n")', ["r812_r6_receipt_native"])
+
+
+# #812 lượt 7: phân biệt cờ có mặt/rỗng; URL issue đầy đủ; identity lease chuẩn hoá; chốt M1 độc lập.
+def _r812_r7_cmd(c, sd, w, *extra):
+    return run(c.script, ["record-lease", "--packet", 55, "--lease-ref", "origin/ops/wp55-spec",
+        "--lease-path", "ops/leases/l.yaml", "--lease-comments", c.tmp / "cm.json", "--root", w, *extra], sd)
+
+
+def _r812_r7_mixed(c, key, old_empty=False):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    if old_empty:
+        rc, _, e = _r812_r7_cmd(c, sd, w, key, "")
+    elif key == "complete":
+        rc, _, e = _r812_r7_cmd(c, sd, w, "--lease-id", "old", "--granted-by", "ducthangho",
+            "--evidence", "ordinary authority", "--expires-utc", _han_tuong_lai(1))
+    else:
+        rc, _, e = run(c.script, ["record-lease", "--packet", 55, "--lease-id", "old", "--granted-by", "ducthangho",
+            "--evidence", "ordinary authority", "--expires-utc", _han_tuong_lai(1), key, ""], sd)
+    _doi(2, rc, e, "hai đường phải loại trừ khi cờ CÓ MẶT, kể cả rỗng")
+    if (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi khi cờ hai đường trộn nhau")
+
+
+def _r812_r7_comment_url(c, url, rc_doi):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    (sd / "wp55.json").write_bytes(before)
+    p = c.tmp / "cm.json"
+    cm = json.loads(p.read_bytes()); cm[0]["issue_url"] = url
+    p.write_text(json.dumps(cm))
+    rc, _, e = _r812_r7_cmd(c, sd, c.tmp / "kho/w")
+    _doi(rc_doi, rc, e, "I2(R) URL phải neo đúng GitHub repo và issue")
+    if rc_doi and (sd / "wp55.json").read_bytes() != before:
+        raise AssertionError("I4: state đổi khi URL comment sai")
+
+
+def _r812_r7_init_identity(c, role):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline lease H/Đ/R")
+    st = json.loads(before)
+    st[role + "_identity"]["execution_surface"] = "codex_desktop" if role == "reviewer" else "claude_code"
+    raw = json.dumps(st).encode(); (sd / "wp55.json").write_bytes(raw)
+    rc, _, e = _r812_r7_cmd(c, sd, c.tmp / "kho/w")
+    _doi(4, rc, e, "lease không đổi identity đã init")
+    if (sd / "wp55.json").read_bytes() != raw:
+        raise AssertionError("I4: lease identity khác init làm state đổi")
+
+
+def _r812_r7_activation_name(c):
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline kích hoạt ADR-0054")
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    p = w / "docs/adr/0055-kich-hoat-adr-0054.md"
+    p.write_text(p.read_text().replace("ADR-0054", "ADR-0053"))
+    _g(w, "add", p.relative_to(w).as_posix()), _g(w, "commit", "-qm", "different activation target")
+    _g(w, "push", "-q", "origin", "master")
+    rc, _, e = _r812_r7_cmd(c, sd, w)
+    _doi(0, rc, e, "lease hợp lệ, kích hoạt ADR khác")
+    _kiem(sd, "chế độ phải false khi tệp kích hoạt ADR khác", luat_adr0054=False)
+
+
+def _r812_r7_init_ag_family(c, role):
+    w, sd = _kho812(c), c.sd()
+    ex, rv = ("google_antigravity", "claude") if role == "executor" else ("claude", "google_antigravity")
+    doi = {"provider": ex, "executor": ex, "reviewer": rv}
+    if role == "executor":
+        doi.update(model_family="gemini", execution_surface="antigravity", reviewer_model_family="claude",
+                   reviewer_execution_surface="claude_code", reviewer_transport="machine/local")
+    else:
+        doi.update(reviewer_model_family="gemini", reviewer_execution_surface="antigravity", reviewer_transport="machine/local")
+    _r812_doi_lease(w, doi)
+    _doi(0, *c.init(sd, executor=ex, reviewer=rv, lease=False, extra=(f"--{role}-model-family", "gemini",
+        f"--{role}-execution-surface", "antigravity", f"--{role}-transport", "machine/local"))[::2], "init AG")
+    (c.tmp / "cm.json").write_text(json.dumps([{"user": {"login": "github-actions[bot]"},
+        "body": "lease_id: wp55-r1-g1-claude", "issue_url": "https://api.github.com/repos/o/r/issues/55"}]))
+    before = (sd / "wp55.json").read_bytes()
+    _doi(0, *_r812_r7_cmd(c, sd, w)[::2], "baseline lease khớp init AG")
+    st = json.loads(before); st[role + "_identity"]["model_family"] = "openai"
+    raw = json.dumps(st).encode(); (sd / "wp55.json").write_bytes(raw)
+    _doi(4, *_r812_r7_cmd(c, sd, w)[::2], "lease chỉ lệch họ model đã init " + role)
+    if (sd / "wp55.json").read_bytes() != raw:
+        raise AssertionError("I4: state đổi khi lease lệch identity init")
+
+
+for role in ("executor", "reviewer"):
+    CASES.append(("r812_r7_lease_init_ag_" + role, lambda c, r=role: _r812_r7_init_ag_family(c, r)))
+
+for key in ("--lease-id", "--granted-by", "--evidence", "--expires-utc"):
+    CASES.append(("r812_r7_new_plus_empty_" + key[2:].replace("-", "_"), lambda c, k=key: _r812_r7_mixed(c, k, True)))
+for key in ("--lease-ref", "--lease-path", "--lease-comments"):
+    CASES.append(("r812_r7_old_plus_empty_" + key[2:].replace("-", "_"), lambda c, k=key: _r812_r7_mixed(c, k)))
+CASES.append(("r812_r7_paths_exclusive", lambda c: _r812_r7_mixed(c, "complete")))
+for name, url in (("wrong_host", "https://example.org/repos/o/r/issues/55"), ("not_url", "ordinary/o/r/issues/55"),
+                  ("extra_prefix", "https://api.github.com/repos/different/o/r/issues/55")):
+    CASES.append(("r812_r7_comment_" + name, lambda c, u=url: _r812_r7_comment_url(c, u, 7)))
+CASES.append(("r812_r7_comment_web", lambda c: _r812_r7_comment_url(c, "https://github.com/o/r/issues/55", 0)))
+for role, key, value in (("executor", "provider", " claude "), ("reviewer", "reviewer", " codex "),
+                          ("executor_alias", "provider", " anthropic_claude "), ("reviewer_alias", "reviewer", " openai_codex ")):
+    CASES.append(("r812_r7_padded_lease_" + role, _r812_ca("lease", 0, {"state": "leased", "luat_adr0054": True},
+        truoc_lease=lambda w, k=key, v=value: _r812_doi_lease(w, {k: v}))))
+CASES += [
+    ("r812_r7_lease_packet", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"packet_issue": 56}))),
+    ("r812_r7_instruction_packet", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w,
+        {"granted_on_instruction": "https://github.com/o/r/issues/56#issuecomment-1"}))),
+    ("r812_r7_lease_init_reviewer", lambda c: _r812_r7_init_identity(c, "reviewer")),
+    ("r812_r7_activation_adr_name", _r812_r7_activation_name),
+]
+MUTANTS.update({
+    "r812_r7_ignore_empty_flags": (("moi_co = any(x is not None for x in moi)", "cu_co = any(x is not None for x in cu)"),
+        ("moi_co = any(moi)", "cu_co = any(cu)"), [n for n, _ in CASES if n.startswith(("r812_r7_new_plus_empty_", "r812_r7_old_plus_empty_"))]),
+    "r812_r7_paths_mixed": ("if moi_co == cu_co or not all(moi if moi_co else cu):", "if not all(moi if moi_co else cu):", ["r812_r7_paths_exclusive"]),
+    "r812_r7_comment_suffix": ('c.get("issue_url") in (f"https://api.github.com/repos/{mr[1]}/issues/{st[\'packet\']}", f"https://github.com/{mr[1]}/issues/{st[\'packet\']}")',
+        'str(c.get("issue_url", "")).endswith(f"/{mr[1]}/issues/{st[\'packet\']}")', ["r812_r7_comment_" + k for k in ("wrong_host", "not_url", "extra_prefix")]),
+    "r812_r7_lease_raw_provider": ("    p = p.strip()  # I8: bản chiếu identity lease", "    # I8: không strip provider", ["r812_r7_padded_lease_" + k for k in ("executor", "reviewer", "executor_alias", "reviewer_alias")]),
+    "r812_r7_lease_packet": (' or l["packet_issue"] != st["packet"]', '', ["r812_r7_lease_packet"]),
+    "r812_r7_instruction_packet": (' or mr[2].lstrip("0") != str(st["packet"])', '', ["r812_r7_instruction_packet"]),
+    "r812_r7_lease_init_identity": ('if any(v is not None and nc[vai][k] != v for k, v in (st.get(f"{vai}_identity") or {}).items()):', 'if False:', ["r812_r7_lease_init_reviewer", "r812_r7_lease_init_ag_executor", "r812_r7_lease_init_ag_reviewer"]),
+    "r812_r7_activation_adr_name": (' and "ADR-0054" in nfc(a55[1])', '', ["r812_r7_activation_adr_name"]),
+    "r812_r7_reject_web_comment": ('f"https://github.com/{mr[1]}/issues/{st[\'packet\']}"', '"web-form-rejected"', ["r812_r7_comment_web"]),
+})
+MUTANTS["r812_r6_workflow_issue"] = (MUTANTS["r812_r7_comment_suffix"][0], "True", ["r812_r6_workflow_issue"])
+# `_ten_provider` chuẩn hoá dùng chung: gỡ một trong hai phép strip của receipt là mutant tương đương.
+MUTANTS["r812_r5_raw_provider"] = ((MUTANTS["r812_r5_raw_provider"][0], "    p = p.strip()  # I8: bản chiếu identity lease"),
+    (MUTANTS["r812_r5_raw_provider"][1], "    # bỏ strip dùng chung"), ["r812_r5_padded_provider"])
+
+
+# #812 connector (review tự kích hoạt khi PR ready, trên f4ab8b6): ba lớp P2.
+def _r812_r8_symlink(dich, ws_khac, cay="khac", ten=None):
+    """Symlink (mặc định `alias -> dich`) CHỈ có trên MỘT cây (ref lease này · ref `ops/khac` của lease kia), checkout người gọi
+    không có; lease khác còn hiệu lực giữ `ws_khac` ở `ops/khac`. Symlink ghi THẲNG vào index (120000) — không cần quyền tạo
+    symlink của hệ tệp, và tạo được cả hai tên chỉ khác hoa/thường trên hệ tệp không phân biệt."""
+    def doi(w):
+        goc = _g(w, "rev-parse", "refs/remotes/origin/ops/wp55-spec")  # hai nhánh rẽ từ CÙNG gốc — symlink chỉ ở đúng một cây
+        lease = json.loads(_g(w, "show", f"{goc}:ops/leases/l.yaml"))
+        for nhanh in ("ops/wp55-spec", "ops/khac"):
+            _g(w, "checkout", "-qb", nhanh, goc)
+            if nhanh == "ops/khac":
+                (w / "ops/leases/k.yaml").write_text(json.dumps({**lease, "lease_id": "wp55-r1-g1-khac", "write_set": ws_khac}))
+                _g(w, "add", "ops/leases")
+            if nhanh.endswith(cay):
+                for t, d in (ten or {"alias": dich}).items():
+                    blob = subprocess.run(["git", "hash-object", "-w", "--stdin"], input=d, cwd=w, text=True, capture_output=True, check=True).stdout.strip()
+                    _g(w, "update-index", "--add", "--cacheinfo", f"120000,{blob},{t}")
+            _g(w, "commit", "-qm", "r8", "--allow-empty"), _g(w, "push", "-q", "origin", nhanh), _g(w, "checkout", "-qf", "master")
+            _g(w, "branch", "-q", "-D", nhanh)
+    return doi
+
+LOP_R8 = (("lop-tai-dien", "P1"), ("lop-moi", "P2"))
+BN_AM = {"verdict": "changes_requested"}
+CASES += [
+    ("r812_r8_symlink_chi_trong_ref", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["alias/a.py"]))),
+    ("r812_r8_symlink_chi_trong_snapshot", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["alias/a.py"], cay="spec"))),
+    ("r812_r8_symlink_doi_chung", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=_r812_r8_symlink("x", ["alias/b.py"]))),
+    ("r812_r8_symlink_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["ALIAS/a.py"]))),
+    ("r812_r8_symlink_unicode", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["CAFE\u0301/a.py"], ten={"caf\u00e9": "x"}))),
+    ("r812_r8_symlink_hoa_thuong_doi_chung", _r812_ca("lease", 0, {"state": "leased"}, truoc_lease=_r812_r8_symlink("x", ["ALIAS/b.py"]))),
+    ("r812_r8_symlink_mo_ho", _r812_ca("lease", 7, truoc_lease=_r812_r8_symlink("x", ["Alias/a.py"], ten={"ALIAS": "y", "alias": "x"}))),
+    ("r812_r8_am_bo_lop_tai_dien", _r812_ca("review", 11, bn=BN_AM, lop=LOP_R8, verdict="changes_requested", ids=("lop-moi",))),
+    ("r812_r8_am_du_lop", _r812_ca("review", 0, {"state": "running", "finding_counts": {"lop-tai-dien": 1, "lop-moi": 1}}, bn=BN_AM,
+                                   lop=LOP_R8, verdict="changes_requested", ids=("lop-tai-dien", "lop-moi"))),
+    ("r812_r8_approve_no_p3", _r812_ca("review", 0, {"state": "approved_pending"}, lop=(("no-p3", "P3"),))),
+    ("r812_r8_runtime_trai_lease", _r812_ca("review", 4, rv=("--execution-surface", "codex_desktop", "--transport", "machine/local"))),
+    ("r812_r8_runtime_khop_lease", _r812_ca("review", 0, {"state": "approved_pending"}, rv=("--execution-surface", "codex_cli", "--transport", "machine"))),
+]
+MUTANTS.update({
+    "r812_r8_symlink_theo_checkout": ("_bieu_dien_duong(x, root) | {_dich_trong_cay(root, r, x) for r in revs}", "_bieu_dien_duong(x, root)",
+                                      ["r812_r8_symlink_chi_trong_ref"]),
+    "r812_r8_bo_cay_ref_kia": ("revs = (oid, m[\"ref\"])", "revs = (oid,)", ["r812_r8_symlink_chi_trong_ref"]),
+    "r812_r8_bo_snapshot_lease": ("revs = (oid, m[\"ref\"])", "revs = (m[\"ref\"],)", ["r812_r8_symlink_chi_trong_snapshot"]),
+    "r812_r8_cay_theo_byte": ('        khoa = lambda s: unicodedata.normalize("NFC", s).casefold()  # noqa: E731', '        khoa = lambda s: s  # noqa: E731',
+                              ["r812_r8_symlink_hoa_thuong", "r812_r8_symlink_unicode"]),
+    "r812_r8_cay_bo_nfc": ('lambda s: unicodedata.normalize("NFC", s).casefold()  # noqa', 'lambda s: s.casefold()  # noqa', ["r812_r8_symlink_unicode"]),
+    "r812_r8_cay_bo_mo_ho": ("        if len(khop) > 1:", "        if False:", ["r812_r8_symlink_mo_ho"]),
+    "r812_r8_bo_du_lop_am": ('("thieu-lop-am", lop_ok and (', '("thieu-lop-am", True or (', ["r812_r8_am_bo_lop_tai_dien"]),
+    "r812_r8_du_lop_ca_approve": ('a.verdict == "approve" or {x["slug"]', 'False or {x["slug"]', ["r812_r8_approve_no_p3"]),
+    "r812_r8_runtime_bo_lease": ('    if isinstance(lease, dict) and any(', '    if False and any(', ["r812_r8_runtime_trai_lease"]),
 })
 
 

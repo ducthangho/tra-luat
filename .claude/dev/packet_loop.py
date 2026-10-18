@@ -2243,6 +2243,9 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
 # nhận đúng một kết luận: DANH SÁCH CHO PHÉP `completed` + `success` + đúng head. Danh
 # sách cấm (`cancelled`, `failure`…) thua từ trong thiết kế — `stale`, `neutral`, `null`…
 # đều lọt. Nó là cổng ĐỌC BẰNG CHỨNG, không xác thực nguồn của tệp.
+# #788 (spec `ops/specs/wp788.md`): run cùng TÊN có thể đến từ workflow khác — neo `app` không phân
+# biệt được (đo `bb8c0c4`: cả 30 run cùng `app.id`), neo `check_suite.id` thì được. Và
+# `total_count` vắng/0/âm từng làm phép kiểm thiếu trang im lặng bỏ qua (P1 connector PR #777).
 _TRUONG_CHECK_RUN = (("id", (int,)), ("name", (str,)), ("head_sha", (str,)),
                      ("status", (str,)), ("conclusion", (str, type(None))))
 _VANG = object()
@@ -2277,15 +2280,17 @@ def _doc_check_runs(duong: str) -> list[dict]:
     if not trang:
         hong("list trang RỖNG — không có bằng chứng nào")
     runs: list[dict] = []
-    tong_khai = 0
+    khai: list[int] = []
     for i, tr in enumerate(trang):
         if not isinstance(tr, dict) or not isinstance(tr.get("check_runs"), list):
             hong(f"trang {i} không phải object có `check_runs` là list")
+        # #788 N5: vắng `total_count` là KHÔNG biết đã đủ trang — không phải "đủ".
         tc = tr.get("total_count", _VANG)
-        if tc is not _VANG:
-            if type(tc) is not int:
-                hong(f"trang {i}: `total_count` không phải số nguyên: {tc!r}")
-            tong_khai = max(tong_khai, tc)
+        if tc is _VANG:
+            hong(f"trang {i} thiếu `total_count` — không biết đã đủ trang chưa")
+        if type(tc) is not int or tc < 0:
+            hong(f"trang {i}: `total_count` không phải số nguyên ≥ 0: {tc!r}")
+        khai.append(tc)
         for j, r in enumerate(tr["check_runs"]):
             if not isinstance(r, dict):
                 hong(f"trang {i} check_runs[{j}] không phải object")
@@ -2293,27 +2298,61 @@ def _doc_check_runs(duong: str) -> list[dict]:
             sai = [k for k, kieu in _TRUONG_CHECK_RUN if type(r.get(k, _VANG)) not in kieu]
             if sai:
                 hong(f"trang {i} check_runs[{j}] thiếu/sai kiểu trường {sai}")
+            # #788 N2: MỌI phần tử, không chỉ run bắt buộc.
+            cs = r.get("check_suite", _VANG)
+            if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:
+                hong(f"trang {i} check_runs[{j}] `check_suite` không phải object có `id` số nguyên: {cs!r}")
             runs.append(r)
+    # #788 F01 (H3): cùng `id` là cùng MỘT check-run; danh tính mâu thuẫn mà để bước lọc tên/suite
+    # bỏ bản lệch thì cấp xanh giả — kiểm ở ĐÂY, nơi còn mọi bản ghi của mọi trang, trước mọi lọc.
+    danh_tinh: dict = {}
+    for r in runs:
+        dt = (r["name"], r["check_suite"]["id"], r["head_sha"])
+        if danh_tinh.setdefault(r["id"], dt) != dt:
+            hong(f"id {r['id']} mang hai danh tính {danh_tinh[r['id']]!r} và {dt!r} — bằng chứng mâu thuẫn")
+    tong_khai = khai[0]
+    if any(t != tong_khai for t in khai):
+        hong(f"các trang khai `total_count` khác nhau {khai} — không phải cùng một lần lấy")
     # Thiếu trang thì lượt MỚI NHẤT có thể nằm ở trang chưa lấy — xanh khi ấy là xanh giả.
+    # THỪA id cũng không phải một lần lấy trọn vẹn (ghép tệp?) — đòi BẰNG ĐÚNG, không `<`.
     so_id = len({r["id"] for r in runs})
-    if so_id < tong_khai:
-        hong(f"`total_count` khai {tong_khai} mà chỉ có {so_id} id — thiếu trang (`--paginate --slurp`)")
+    if so_id != tong_khai:
+        hong(f"`total_count` khai {tong_khai} mà có {so_id} id — "
+             + ("thiếu trang (`--paginate --slurp`)" if so_id < tong_khai else "THỪA id, không phải một lần lấy"))
     return runs
 
 
 def cmd_kiem_gate(a, state_dir: Path) -> int:
     if not SHA_RE.fullmatch(a.head):
         _die(RC_ARG, f"--head phải là SHA 40 ký tự hex thường, được {a.head!r}")
+    # `[0-9]`, KHÔNG `\d`: `int()` nhận cả chữ số Unicode.
+    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):
+        _die(RC_ARG, f"--check-suite phải là số nguyên dương thập phân (không dấu, không số 0 đầu), "
+                     f"được {a.check_suite!r}")
+    try:
+        suite = int(a.check_suite)
+    except ValueError:   # F02: vượt trần chữ số của `int()`; `json` chịu đúng trần ấy nên không id
+        suite = a.check_suite   # nào khớp — giữ CHUỖI (≠ mọi int) ⇒ VẮNG, không traceback
     ten_bb = list(dict.fromkeys(a.bat_buoc))   # trùng tên ⇒ tính MỘT lần, giữ thứ tự
-    if any(not t.strip() for t in ten_bb):
-        _die(RC_ARG, "--bat-buoc không được rỗng")
+    # F04 (chủ kho chốt 18-10): tên chứa ký tự ngắt dòng (mọi thứ `splitlines()` cắt) bị TỪ CHỐI —
+    # dòng cảnh báo N4 in tên nguyên văn, và chỉ tên bắt buộc được in, nên nó luôn là MỘT dòng.
+    if any(not t.strip() or t.splitlines() != [t] for t in ten_bb):
+        _die(RC_ARG, "--bat-buoc không được rỗng hoặc chứa ký tự xuống dòng")
     runs = _doc_check_runs(a.check_runs)
+    # N4: run cùng tên ở suite KHÁC là producer khác — bỏ qua, nhưng nói ra. Chỉ tên bắt buộc.
+    for ten_cb in ten_bb:
+        # id PHÂN BIỆT (F05: bản lặp là một run); tên NGUYÊN VĂN trong nháy đơn (F04: không `!r`).
+        khac = sorted({r["id"] for r in runs if r["name"] == ten_cb and r["check_suite"]["id"] != suite})
+        if khac:
+            print(f"CẢNH BÁO: '{ten_cb}' có {len(khac)} run ở suite khác "
+                  f"({', '.join(map(str, khac))}) — bỏ qua", file=sys.stderr)
     do: list[str] = []
     xanh: list[str] = []
     for ten in ten_bb:
         cung = [r for r in runs if r["name"] == ten]   # khớp TUYỆT ĐỐI
+        cung = [r for r in cung if r["check_suite"]["id"] == suite]   # #788 N3: chỉ suite đã neo
         if not cung:
-            do.append(f"{ten!r}: VẮNG — không check-run nào mang đúng tên này")
+            do.append(f"{ten!r}: VẮNG — không check-run nào mang đúng tên này trong suite {suite}")
             continue
         # Lượt bị huỷ rồi chạy lại: chỉ lượt `id` LỚN NHẤT có quyền nói. Trùng id thì
         # MỌI bản ghi của id ấy đều phải xanh — không tự chọn một bản.
@@ -2331,7 +2370,7 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
         for dong in do:
             print(f"  ĐỎ  {dong}", file=sys.stderr)
         _die(RC_GATE, f"gate KHÔNG xanh trên {a.head}: {len(do)}/{len(ten_bb)} tên bắt buộc đỏ")
-    print(f"gate XANH trên {a.head}: " + " · ".join(xanh))
+    print(f"gate XANH trên {a.head} (suite {suite}): " + " · ".join(xanh))
     return RC_OK
 
 
@@ -2510,7 +2549,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.set_defaults(fn=cmd_adr_song)
 
     q = sub.add_parser("kiem-gate",
-                       help="gate bắt buộc phải XANH THẬT trên head (đọc JSON check-runs)",
+                       help="gate bắt buộc phải XANH THẬT trên head, trong đúng check suite (đọc JSON check-runs)",
                        epilog="Mã thoát: 0 mọi tên bắt buộc xanh · 2 sai đối số · "
                               "12 gate không xanh trên head hoặc KHÔNG ĐO ĐƯỢC.")
     q.add_argument("--head", required=True, help="SHA 40 ký tự của head cần kiểm")
@@ -2518,6 +2557,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="tệp JSON: object có `check_runs`, hoặc list trang (`--slurp`)")
     q.add_argument("--bat-buoc", action="append", required=True, dest="bat_buoc",
                    help="tên check-run bắt buộc, khớp TUYỆT ĐỐI; lặp lại được")
+    q.add_argument("--check-suite", required=True, dest="check_suite",
+                   help="id suite của CHÍNH lượt workflow cần kiểm: `GET actions/runs/<run_id>` → "
+                        "`check_suite_id`; chỉ run thuộc suite này được xét. Tệp check-runs lấy với "
+                        "`filter=all` (mọi lần chạy lại, không chỉ lần mới nhất)")
     q.set_defaults(fn=cmd_kiem_gate)
 
     q = sub.add_parser("bien-nhan",

@@ -181,15 +181,23 @@ def viet_ban_da_go(dich: Path, noi_dung: bytes) -> None:
 
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--tep", default="~/.codex/config.toml",
-                   help="config codex; mac dinh ~/.codex/config.toml")
+    p.add_argument("--tep", default=None,
+                   help="config codex; mac dinh <CODEX_HOME>/config.toml, fallback ~/.codex")
     p.add_argument("--go", action="store_true",
                    help="dung ban DA GO ra tep ben canh (VAN khong dung ban goc)")
     p.add_argument("--co-chan", default=None,
                    help="duong dan tep CO CHAN codex; mac dinh canh config")
     a = p.parse_args(argv)
 
-    tep = Path(os.path.expanduser(a.tep))
+    if a.tep is not None:
+        tep = Path(os.path.expanduser(a.tep))
+    else:
+        raw = os.environ.get("CODEX_HOME", "")
+        home = Path(raw).expanduser() if raw else Path.home() / ".codex"
+        if not home.is_absolute() or ".." in home.parts:
+            _in("codex env policy: CODEX_HOME khong hop le — CHAN", loi=True)
+            return MA_CON_KHOI
+        tep = home / "config.toml"
     co_chan = Path(os.path.expanduser(a.co_chan)) if a.co_chan else tep.with_name(TEN_CO_CHAN)
 
     def dat_co(ly_do: str) -> None:

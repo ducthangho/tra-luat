@@ -107,3 +107,8 @@ nang_tran:
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'push nhanh agent/wp831-g1-claude va mo PR draft'
+da_bi_thay_the: wp831-r3-g3-claude
+da_bi_thay_the_ly_do: >-
+  Codex luot 2 @75bcd43 mo F03 P2 chooser-path-reselects-python (ops/cai_cong_cu.sh chon Python bang ten tran). Chu kho
+  chon "Lease r3 them cai_cong_cu.sh" (ghi ho issuecomment-6251762410). Lease r3 (spec ops/specs/wp831-r3.md) them
+  ops/cai_cong_cu.sh, tran 8 tep, cung nhanh agent/wp831-g1-claude.

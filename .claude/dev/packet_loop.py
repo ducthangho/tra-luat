@@ -2521,13 +2521,13 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
             lpm = _nap(td, "lease_publish")
             cac = lpm._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
             giu = lambda x: [y for k in ("write_set", "effective_write_set") for y in _ds_duong(x.get(k, []))]  # noqa: E731
-            khac = sorted({f"{m['ref']}:{m['path']}" for m in cac if lpm._lease_id_quet(m["lease"].get("lease_id")) != lid
+            giao_nhau = sorted({f"{m['ref']}:{m['path']}" for m in cac if lpm._lease_id_quet(m["lease"].get("lease_id")) != lid
                            and lpm._phan_loai_lease(m["lease"]) == "CÒN_HẠN" and lpm._bia_mo_doi_xung(m["lease"], cac) is not True
                            and any(_giao(x, y) for x in ws for y in giu(m["lease"]))})
         except Exception as ex:  # noqa: BLE001 — không đo được ⇒ không có thẩm quyền
             _die(RC_GUARD, f"I2(Đ): KHÔNG_XÁC_ĐỊNH khi quét lease toàn kho: {type(ex).__name__}: {str(ex)[:300]}")
-        if khac:
-            _die(RC_GUARD, f"I2(Đ): lease khác còn hiệu lực giao write set của {lid}: {khac}")
+        if giao_nhau:
+            _die(RC_GUARD, f"I2(Đ): lease khác còn hiệu lực giao write set của {lid}: {giao_nhau}")
     try:
         cm = json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode((raw_cm := Path(a.lease_comments).read_bytes()).decode("utf-8"))
     except (OSError, ValueError, RecursionError) as ex:

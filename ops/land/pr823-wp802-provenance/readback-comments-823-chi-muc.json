@@ -1,0 +1,26 @@
+{
+ "review_comments": [],
+ "issue_comments": [
+  {
+   "id": 6246160446,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T05:36:18Z",
+   "body_sha256": "df0d0fda9a6e6aa9097727d578aad31aa040e1d0a1ebb5004cc511cadb420b36",
+   "body_dau": "**Head `abc16de` VƯỢT TRẦN ADR-0053 — chưa đủ điều kiện, đang chờ quyết định chủ kho.**\n\n- Đẩy chỉ để giữ việc (containe"
+  },
+  {
+   "id": 6246264582,
+   "user": "ducthangho",
+   "created_at": "2026-10-18T05:50:26Z",
+   "body_sha256": "95245d44f878c971f9994c98c5b505f2d0521770902f080ccd3783e0513028b8",
+   "body_dau": "`gate-ops (windows-latest)` đỏ trên `a0de1f9` (job 117587203853): **không phải của PR này**.\n\n- Ca đỏ: `ops/lease_publis"
+  },
+  {
+   "id": 6247624486,
+   "user": "chatgpt-codex-connector[bot]",
+   "created_at": "2026-10-18T08:26:52Z",
+   "body_sha256": "128ba9d98bcc76ea26045a2f1f19e89f534ee6e671809b31e99546d9c6097192",
+   "body_dau": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"5c6c7a8ac0dc1b968cfd"
+  }
+ ]
+}

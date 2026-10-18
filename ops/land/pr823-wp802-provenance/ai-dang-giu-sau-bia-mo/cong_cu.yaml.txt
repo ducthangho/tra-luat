@@ -1,0 +1,8 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-cai-jsonschema-exec-1-claude-20260829	refs/heads/agent/wp484-g7-claude:ops/leases/ci-cai-jsonschema-exec-1-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r2-claude-20260829	refs/heads/agent/wp484-g7-claude:ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r3-claude-20260829	refs/heads/agent/wp484-g7-claude:ops/leases/ci-cai-jsonschema-exec-1r3-claude-20260829.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp802-r1-g1-claude	refs/heads/ops/wp802-r1-g1-lease:ops/leases/wp802-r1-g1-claude.yaml
+CÒN_HẠN	wp831-r1-g1-claude	refs/remotes/origin/ops/wp831-r1-g1-lease:ops/leases/wp831-r1-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp831-r1-g1-claude
+rc=11

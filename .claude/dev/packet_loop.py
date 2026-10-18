@@ -2446,6 +2446,19 @@ def _chuan_duong(p: str) -> str:
     return "/".join(parts)
 
 
+def _bieu_dien_duong(p: str, root: Path) -> set[str]:
+    """§5: kiểm mọi đường, cả khi không có đối thủ; giữ cả tên khai và đích symlink/parent."""
+    q = p.removeprefix("planned:").strip().replace("\\", "/")
+    if "." in q.split("/"):
+        raise ValueError(f"đường dẫn có thành phần '.': {p!r}")
+    if any(c in q for c in "*?[]"):
+        raise ValueError(f"write set không nhận glob: {p!r}")
+    ten = _chuan_duong(p)  # kiểm absolute/.. TRƯỚC phép resolve
+    goc = root.resolve()
+    dich = (goc / q).resolve(strict=False).relative_to(goc)
+    return {ten, _chuan_duong(dich.as_posix())}
+
+
 def _giao(a: str, b: str) -> bool:
     """§5: giao nhau khi bằng nhau hoặc một bên là prefix thư mục của bên kia — so trên biểu diễn chuẩn hoá."""
     a, b = _chuan_duong(a), _chuan_duong(b)
@@ -2459,7 +2472,12 @@ def _nc_hop_le(nc) -> bool:
             and type(nc["lease_oid"]) is str and bool(SHA_RE.match(nc["lease_oid"])) and type(nc["repo"]) is str
             and bool(re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", nc["repo"]))
             and all(type(nc[v]) is dict and set(nc[v]) == {"provider", "model_family", "execution_surface", "transport"}
-                    and nc[v]["provider"] in PROVIDERS and nc[v]["model_family"] in MODEL_FAMILIES for v in ("executor", "reviewer"))
+                    and nc[v]["provider"] in PROVIDERS and nc[v]["model_family"] in MODEL_FAMILIES
+                    and (nc[v]["execution_surface"] is None or type(nc[v]["execution_surface"]) is str
+                         and nc[v]["execution_surface"] in RUNTIME_CAPABILITIES[nc[v]["provider"]])
+                    and (nc[v]["transport"] is None or type(nc[v]["transport"]) is str
+                         and nc[v]["transport"] in {t for surface, ts in RUNTIME_CAPABILITIES[nc[v]["provider"]].items()
+                                                   if nc[v]["execution_surface"] in (None, surface) for t in ts}) for v in ("executor", "reviewer"))
             and type(nc["required_checks"]) is list and all(type(x) in (list, tuple) and len(x) == 2 and all(type(y) is str and y for y in x)
                                                              for x in nc["required_checks"]))
 
@@ -2507,7 +2525,7 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
     rc, raw = _git_do(root, "show", f"{oid}:{a.lease_path}")
     try:
         l = yaml.safe_load(raw) if rc == 0 else None
-    except yaml.YAMLError:
+    except (yaml.YAMLError, RecursionError):
         l = None
     kieu = {"lease_id": str, "branch": str, "spec_path": str, "spec_hash": str, "assurance_target": str, "granted_on_instruction": str,
             "prompt_path": str, "generation": int, "packet_issue": int}
@@ -2518,7 +2536,7 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
             or int(mr[2]) != st["packet"] or type(ws) is not list or not ws or not all(type(x) is str and x for x in ws) \
             or any(PurePosixPath(l[k]).is_absolute() or ".." in PurePosixPath(l[k]).parts for k in ("prompt_path", "spec_path")) \
             or l.get("role") != "executor" or l["generation"] < 1 or any(k in l and (type(l[k]) is not str or not l[k].strip()) for k in ten_id) \
-            or any(t is str and not l[k].strip() for k, t in kieu.items()) or type(l.get("write_set")) is not list \
+            or any(t is str and not l[k].strip() for k, t in kieu.items()) or type(l.get("write_set")) is not list or not l["write_set"] \
             or not all(type(x) is str and x for x in l["write_set"]):
         _die(RC_ARG, f"lease {a.lease_path} tại {oid[:12]} hỏng: sai kiểu/miền {sorted(kieu)} + role/identity, khác packet {st['packet']}, "
                      f"không có write set, đường dẫn thoát gốc, hoặc granted_on_instruction không trỏ chính Packet Issue")
@@ -2538,9 +2556,17 @@ def _record_lease_ref(a, state_dir: Path, st: dict) -> int:
             lpm = _nap(td, "lease_publish")
             cac = lpm._quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
             giu = lambda x: [y for k in ("write_set", "effective_write_set") for y in _ds_duong(x.get(k, []))]  # noqa: E731
-            giao_nhau = sorted({f"{m['ref']}:{m['path']}" for m in cac if lpm._lease_id_quet(m["lease"].get("lease_id")) != lid
-                           and lpm._phan_loai_lease(m["lease"]) == "CÒN_HẠN" and lpm._bia_mo_doi_xung(m["lease"], cac) is not True
-                           and any(_giao(x, y) for x in ws for y in giu(m["lease"]))})
+            # Đối xứng: write_set ∪ effective_write_set của CẢ HAI bên, không để effective che tập khai.
+            own = set().union(*(_bieu_dien_duong(x, root) for x in giu(l)))
+            giao_nhau = []
+            for m in cac:
+                other = m["lease"]
+                if lpm._lease_id_quet(other.get("lease_id")) == lid or lpm._phan_loai_lease(other) != "CÒN_HẠN" or lpm._bia_mo_doi_xung(other, cac) is True:
+                    continue
+                paths = set().union(*(_bieu_dien_duong(x, root) for x in giu(other)))
+                if any(_giao(x, y) for x in own for y in paths):
+                    giao_nhau.append(f"{m['ref']}:{m['path']}")
+            giao_nhau = sorted(set(giao_nhau))
         except Exception as ex:  # noqa: BLE001 — không đo được ⇒ không có thẩm quyền
             _die(RC_GUARD, f"I2(Đ): KHÔNG_XÁC_ĐỊNH khi quét lease toàn kho: {type(ex).__name__}: {str(ex)[:300]}")
         if giao_nhau:
@@ -2591,9 +2617,15 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
         nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
         mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
         mei = d["model_executor_identity"] if isinstance(d.get("model_executor_identity"), dict) else {}
-        kieu_sai = [f"{vai}.{k}" for vai, x in (("reviewer", mri), ("executor", mei), ("", d)) for k in (
-            ("executor_provider",) if not vai else ("provider", "surface", "transport", "model_family", "ho_model", "canonical_model", "model", "model_evidence"))
-                    if k in x and (type(x[k]) is not str or not x[k].strip())]
+        # Dùng ĐÚNG bảng nguồn mà canon tra cho cả hai vai, kể cả fallback top-level và bí danh.
+        kieu_sai = [f"{vai}.{pre}{k}" for vai in ("reviewer", "executor") for x, pre in bnv._nguon_tra_model(d, vai)[1]
+                    for k in ("provider", "surface", "transport", "model_family", "ho_model", "canonical_model", "model", "model_evidence",
+                              "bang_chung_model", "model_evidence_ref", "telemetry_path", "nguoi_audit", "audit_actor")
+                    if pre + k in x and (type(x[pre + k]) is not str or not x[pre + k].strip())]
+        kieu_sai += [f"model_{vai}_identity" for vai in ("reviewer", "executor")
+                     if f"model_{vai}_identity" in d and type(d[f"model_{vai}_identity"]) is not dict]
+        if type(d.get("schema_version")) is not int:
+            kieu_sai.append("schema_version")
         if kieu_sai:  # có mặt mà sai kiểu KHÔNG phải vắng — dừng trước mọi phép chuẩn hoá/fallback
             _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan}: trường danh tính sai kiểu/rỗng {kieu_sai}")
         ho = lambda vai: HO_CANON[nc[vai]["model_family"]]  # noqa: E731 — họ LEASE KHAI, đổi sang miền canon của bien_nhan_v2

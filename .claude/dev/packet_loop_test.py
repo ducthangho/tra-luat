@@ -6102,6 +6102,44 @@ def case_r812_canon_vang_phu_thuoc(c: Ctx):
         raise AssertionError("I4: state đổi")
 
 
+def case_r812_r4_yaml_deep(c: Ctx):
+    def mutate(w):
+        import yaml
+        _g(w, "checkout", "-qb", "ops/wp55-spec", "refs/remotes/origin/ops/wp55-spec")
+        p = w / "ops/leases/l.yaml"
+        l = yaml.safe_load(p.read_bytes())
+        p.write_text(yaml.safe_dump(l) + "extra: " + "[" * 700 + "0" + "]" * 700 + "\n")
+        _g(w, "add", "-A"), _g(w, "commit", "-qm", "nested ordinary metadata"), _g(w, "push", "-q", "origin", "ops/wp55-spec")
+        _g(w, "checkout", "-q", "master"), _g(w, "branch", "-q", "-D", "ops/wp55-spec")
+    _r812_ca("lease", 2, truoc_lease=mutate)(c)
+
+
+def case_r812_r4_symlink_scope(c: Ctx):
+    def mutate(w, conflict):
+        (w / "x").mkdir()
+        (w / "x/a.py").write_text("a = 1\n")
+        (w / "alias").symlink_to("x", target_is_directory=True)
+        assert (w / "alias/a.py").resolve() == (w / "x/a.py").resolve()
+        _g(w, "add", "-A"), _g(w, "commit", "-qm", "alias inside fixture"), _g(w, "push", "-q", "origin", "master")
+        _r812_doi_lease(w, {}, (lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["alias/a.py"]}}) if conflict else None)
+    for conflict in (False, True):
+        (d := c.tmp / str(conflict)).mkdir()
+        _r812_ca("lease", 7 if conflict else 0, None if conflict else {"state": "leased"},
+                 truoc_lease=lambda w: mutate(w, conflict))(Ctx(c.script, d))
+
+
+def case_r812_r4_context_executor_surface(c: Ctx):
+    rc, sd, e, before = _r812(c, "review")
+    _doi(0, rc, e, "baseline H thật")
+    st = json.loads(before)
+    st["ngu_canh_lease"]["executor"]["execution_surface"] = []
+    (sd / "wp55.json").write_text(json.dumps(st))
+    raw = (sd / "wp55.json").read_bytes()
+    _doi(8, *run(c.script, ["status", "--packet", 55], sd)[::2], "context sai kiểu")
+    if raw != (sd / "wp55.json").read_bytes():
+        raise AssertionError("I4: state đổi")
+
+
 _R812_KHAC = lambda **x: lambda w: _r812_doi_lease(w, {}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", **x}})  # noqa: E731
 _R812_XOA_DAC_TA = lambda w: [(w / p).unlink() for p in ("ops/specs/wp55.md", "ops/specs/wp55-prompt.md")]  # noqa: E731 — vắng ở worktree, có tại lease OID
 CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r812_")] + [
@@ -6169,6 +6207,17 @@ CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r
     ("r812_verdict_am_dung_bang_lop", _r812_ca("review", 0, {"state": "running"}, bn={"verdict": "changes_requested"}, lop=(("a-b", "P2"),),
                                                verdict="changes_requested", ids=("a-b",))),
 ]
+CASES += [
+    ("r812_r4_own_union_conflict", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(
+        w, {"effective_write_set": ["y/b.py"]}, lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["x/"], "effective_write_set": ["x/"]}}))),
+    ("r812_r4_own_dot", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["./x/a.py"]}))),
+    ("r812_r4_own_parent", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"effective_write_set": ["x/../y/b.py"]}))),
+    ("r812_r4_own_glob", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["x/*.py"]}))),
+    ("r812_r4_empty_declared", _r812_ca("lease", 2, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": [], "effective_write_set": ["x/a.py"]}))),
+    ("r812_r4_top_family", _r812_ca("review", 11, bn={"model_family": []})),
+    ("r812_r4_executor_identity", _r812_ca("review", 11, bn={"model_executor_identity": False})),
+    ("r812_r4_duplicate_slug", _r812_ca("review", 11, lop=(("a-b", "P3"), ("a-b", "P3")))),
+]
 MUTANTS.update({
     "r812_bo_so_ls_remote": ('    if xa[0] or gan[0] or xa[1].split() != [oid.encode(), f"refs/heads/{m[1]}".encode()]:\n', "    if gan[0]:\n", ["r812_lease_chi_o_ref_cuc_bo"]),
     "r812_ghi_state_roi_moi_tu_choi": ("        _die(RC_ARG, f\"đặc tả {l['spec_path']}", "        _save(state_dir, {**st, \"state\": \"leased\"}) or _die(RC_ARG, f\"đặc tả {l['spec_path']}", ["r812_dac_ta_lech_bam"]),
@@ -6220,9 +6269,10 @@ MUTANTS.update({
     "r812_khong_don_tam": ("        shutil.rmtree(td, ignore_errors=True)", "        pass", ["r812_don_thu_muc_tam"]),
     "r812_nc_chi_tap_khoa": ('_nc_hop_le(st["ngu_canh_lease"])', 'set(st["ngu_canh_lease"]) == set(KHOA_NGU_CANH)', ["r812_ngu_canh_long_sai_hinh"]),
     "r812_bo_casefold": (').casefold()\n    parts', ')\n    parts', ["r812_nguoi_giu_hoa_thuong"]),
-    "r812_bo_dau_cheo_nguoc": ('.strip().replace("\\\\", "/")', ".strip()", ["r812_nguoi_giu_dau_cheo_nguoc"]),
+    "r812_bo_dau_cheo_nguoc": (('.strip().replace("\\\\", "/")', '.strip().replace("\\\\", "/")'),
+                                    (".strip()", ".strip()"), ["r812_nguoi_giu_dau_cheo_nguoc"]),
     "r812_bo_nfc": ('    q = unicodedata.normalize("NFC", p.removeprefix', '    q = (lambda _f, x: x)("NFC", p.removeprefix', ["r812_nguoi_giu_unicode_nfd"]),
-    "r812_bo_cham_gach": ('if x not in ("", ".")]', 'if x != ""]', ["r812_nguoi_giu_cham_gach"]),
+    "r812_bo_cham_gach": ('    if "." in q.split("/"):', '    if False:', ["r812_r4_own_dot"]),
     "r812_ai_dang_giu_ca_effective": ('        for duong in l["write_set"]:  # I2(Đ)', "        for duong in ws:  # I2(Đ)", ["r812_effective_mo_rong_hop_le"]),
     "r812_branch_rong_lot": ((' or any(t is str and not l[k].strip() for k, t in kieu.items())', "    if not _nc_hop_le(json.loads(json.dumps(nc))):"), ("", "    if False:"),
                              ["r812_lease_branch_rong"]),  # phối hợp: chốt kiểu lease + lược đồ state trước `_save`
@@ -6234,6 +6284,28 @@ MUTANTS.update({
                                   ["r812_executor_ag_qua_cli", "r812_executor_antigravity_hop_le"]),
     "r812_bo_chan_awaiting": ('    if st["state"] != "awaiting_lease":\n        _die(RC_STATE,\n             f"chỉ ghi', '    if False:\n        _die(RC_STATE,\n             f"chỉ ghi', ["r812_true_khong_quay_ve_duong_cu", "r812_duong_cu_luon_false"]),
 })
+
+MUTANTS.update({
+    "r812_r4_bo_chan_yaml_sau": ('except (yaml.YAMLError, RecursionError):', 'except yaml.YAMLError:', ["r812_r4_yaml_deep"]),
+    "r812_r4_bo_resolve": ('return {ten, _chuan_duong(dich.as_posix())}', 'return {ten}', ["r812_r4_symlink_scope"]),
+    "r812_r4_own_chi_effective": ('for x in giu(l)))', 'for x in ws))', ["r812_r4_own_union_conflict"]),
+    "r812_r4_bo_glob": ('    if any(c in q for c in "*?[]"):', '    if False:', ["r812_r4_own_glob"]),
+    "r812_r4_bo_parent": (' or ".." in parts', '', ["r812_r4_own_parent"]),
+    "r812_r4_cho_declared_rong": (' or not l["write_set"]', '', ["r812_r4_empty_declared"]),
+    "r812_r4_bo_schema_bn": ('        if kieu_sai:  # có mặt', '        if False:  # có mặt', ["r812_r4_top_family", "r812_r4_executor_identity"]),
+    "r812_r4_bo_schema_surface": (('                    and (nc[v]["execution_surface"] is None or type(nc[v]["execution_surface"]) is str',
+                                    '                    and (nc[v]["transport"] is None or type(nc[v]["transport"]) is str'),
+                                   ('                    and (True or type(nc[v]["execution_surface"]) is str',
+                                    '                    and (True or type(nc[v]["transport"]) is str'), ["r812_r4_context_executor_surface"]),
+    "r812_r4_bo_unique_slug": ('and len({x["slug"] for x in lop}) == len(lop)', '', ["r812_r4_duplicate_slug"]),
+    "r812_r4_init_tu_cap": ('"state": "awaiting_lease",', '"state": "leased",', ["r812_duong_cu_luon_false"]),
+    "r812_r4_bo_dep_vang": ('            if rc != 0 or not b:', '            if False:', ["r812_canon_vang_phu_thuoc"]),
+    "r812_r4_bo_neo_path": ('+ neo[0] + neo[1] +', '+', ["r812_verdict_path_khong_ton_tai"]),
+    "r812_r4_chan_am_hop_le": ('("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop})',
+                               '("slug-ngoai-bang", lop_ok and not a.finding_id)', ["r812_verdict_am_dung_bang_lop"]),
+})
+MUTANTS["r812_bo_h_check"][2].append("r812_prompt_path_thu_muc")
+
 
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):

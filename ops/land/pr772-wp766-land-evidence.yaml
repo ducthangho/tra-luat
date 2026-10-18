@@ -140,7 +140,8 @@ sua_gate_master:
     186 -> 187, them dung changelog.d/wp-766.md, bot 0; scripts/tl_selftest.py: ratchet r291_docs_ngoai_goi (cay that
     261 -> 262) va r357_agents_ngoai_goi (goi 186 -> 187), kem chu thich ke khai slot. Tran Package 200 con 13 khe.
   do_sau_sua: >-
-    measured — 2026-10-16, tren cay 1a433a6 (core.abbrev 7, Python 3.13.16, Linux): `tl.py release-verify
+    measured — do-lai-sau-sua-1a433a6/transcript.txt (do lai 2026-10-18T01:16Z tren ban sao tach rieng, cung ket qua;
+    lan do goc 2026-10-16 KHONG giu transcript), tren cay 1a433a6 (core.abbrev 7, Python 3.13.16, Linux): `tl.py release-verify
     RELEASE_MANIFEST.json --strict --json` ok=true, expected 187 = checked 187, failed/extra/missing 0;
     `tl.py --selftest` "== tl selftest 1731/1731 ==" rc=0, 0 ca hong, r291_docs_ngoai_goi [OK], r357_agents_ngoai_goi
     [OK]; `tl.py golden-test --json --deterministic` (KHONG --write) ok=true 20/20, cay khong doi.

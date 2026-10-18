@@ -109,3 +109,8 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'push nhanh agent/wp484-g7-claude va mo PR draft thay #509'
+da_bi_thay_the: wp802-r1-g1-claude
+da_bi_thay_the_ly_do: >-
+  Packet #484 da land (PR #792, merge de82ef74 vao master 2026-10-18T02:56Z); lease con han toi 18:40Z nhung giu 3/6 tep
+  write set cua #802 (launcher.py, launcher_test.py, session-start.sh; do ai-dang-giu 02:57Z). Chu kho chi thi
+  "cap lease cho #802, viet bia mo cho lease cu" (issuecomment-6244971063, ghi ho). Khong con viec nao cua #484 tren cac tep nay.

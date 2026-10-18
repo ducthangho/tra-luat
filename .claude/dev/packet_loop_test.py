@@ -162,7 +162,8 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     return p.returncode, p.stdout, p.stderr
 
 
-def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -> Path:
+def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False,
+                  truoc_spawn=True) -> Path:
     launcher = c.script.with_name("launcher.py")
     if not launcher.is_file():
         launcher.write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
@@ -174,6 +175,22 @@ def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -
         cmd += [str(c.tmp / f"khong-ton-tai-{time.time_ns()}")]
     else:
         cmd += [sys.executable, "-c", "pass" if xong else "import sys; sys.exit(23)"]
+    if truoc_spawn and not loi_probe and not xong:
+        # Fail only the actual child launch; the existing --version probe runs.
+        # The real launcher writes/signs the pre-spawn record. Never forge a
+        # post-spawn verdict merely to reach the consumer's nonce checks.
+        driver = c.tmp / f"fail-popen-{time.time_ns()}.py"
+        driver.write_text(
+            "import runpy,sys,subprocess\n"
+            "real = subprocess.Popen\n"
+            "def fail(argv, *a, **kw):\n"
+            "    if list(argv)[-2:] == ['-c', 'import sys; sys.exit(23)']:\n"
+            "        raise PermissionError(13, 'INERT pre-spawn denial')\n"
+            "    return real(argv, *a, **kw)\n"
+            "subprocess.Popen = fail\n"
+            "sys.argv = sys.argv[1:]\n"
+            "runpy.run_path(sys.argv[0], run_name='__main__')\n", encoding="utf-8")
+        cmd.insert(1, str(driver))
     p = subprocess.run(cmd, capture_output=True,
                        env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
     f = next(rr.iterdir()) / "run.json"
@@ -181,17 +198,17 @@ def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -
         return f
 
     d = json.loads(f.read_text(encoding="utf-8"))
+    if truoc_spawn:
+        assert p.returncode != 0 and d.get("trang_thai") == "hong"
+        assert d.get("void_reason") == reason and not d.get("pid")
+        assert d.get("probe", {}).get("spawn", {}).get("trang_thai") == "DAT"
+        return f
     if p.returncode != 23 or d.get("ma_thoat") != 23:
         raise AssertionError(f"child sau-spawn không thất bại đúng cách: rc={p.returncode}, sổ={d}")
     if d.get("probe", {}).get("spawn", {}).get("trang_thai") != "DAT":
         raise AssertionError(f"child chưa qua probe spawn: {d.get('probe')}")
-    # Launcher gọi một child đã spawn rồi là `xong` kể cả khi rc != 0. Đây là
-    # fixture của packet_loop: giữ bằng chứng sau-spawn thật, đổi sang phán quyết
-    # hạ tầng `hong`, rồi ký lại đúng neo lượt như fixture doctor ở trên.
-    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
-    d["trang_thai"] = "hong"
-    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
-    f.write_text(json.dumps(d), encoding="utf-8")
+    # An unknown post-spawn failure has no machine-void certificate.
+    assert "void_reason" not in d and d.get("failure_class") == "unknown"
     return f
 
 
@@ -1307,12 +1324,17 @@ def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
 def case_void_phan_biet_loi_probe_va_sau_spawn(c: Ctx):
     sd = _mo_luot(c)
     probe = json.loads(run_json_that(c, sd, loi_probe=True).read_text(encoding="utf-8"))
-    sau = json.loads(run_json_that(c, sd).read_text(encoding="utf-8"))
+    sau_path = run_json_that(c, sd, truoc_spawn=False)
+    sau = json.loads(sau_path.read_text(encoding="utf-8"))
     assert probe.get("giai_doan") == "probe" and sau.get("giai_doan") is None
     assert probe["probe"]["spawn"]["trang_thai"] == "DO"
     assert sau["probe"]["spawn"]["trang_thai"] == "DAT"
     assert not {"nonce", "chu_ky"} & probe.keys()
     assert {"nonce", "chu_ky"} <= sau.keys()
+    assert "void_reason" not in sau
+    before = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"]
+    _doi(10, *_void_may(c, sd, sau_path)[0:1], b"", "unknown post-spawn cannot refund")
+    assert json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"] == before
     assert probe["ma_thoat"] != sau["ma_thoat"]
 
 
@@ -1708,7 +1730,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
     (r_bn / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
     # #770: `kiem-gate` in "gate XANH trên …" lúc THÀNH CÔNG — chốt PHỦ dưới đã bắt nó.
     cr = c.tmp / f"cp{codepage}-check-runs.json"
-    cr.write_text(json.dumps({"check_runs": [_kg_run(1, name="cổng-đủ")]}), encoding="utf-8")
+    cr.write_text(json.dumps({"total_count": 1, "check_runs": [_kg_run(1, name="cổng-đủ")]}), encoding="utf-8")
 
     buoc = [
         (["where"], None),
@@ -1744,7 +1766,8 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
         (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
-        (["kiem-gate", "--head", _KG_HEAD, "--check-runs", cr, "--bat-buoc", "cổng-đủ"], None),
+        (["kiem-gate", "--head", _KG_HEAD, "--check-runs", cr, "--bat-buoc", "cổng-đủ",
+          "--check-suite", _KG_SUITE], None),
         # #338: cả hai lệnh in tiếng Việt CÓ DẤU lúc thành công. `ghi-uy-quyen` in "đã ghi
         # KHAI BÁO…", `doi-chieu-uy-quyen` in "CÓ khai báo"/"KHÔNG khai báo". Console máy
         # Việt là cp1258, nên thiếu phủ ở đây là để nguyên đúng cái bẫy mà chốt này sinh ra
@@ -5277,27 +5300,48 @@ CASES.append(("codex_runtime_surface_transport", case_codex_runtime_surface_tran
 # Mỗi ca ĐỎ đòi CẢ mã 12 LẪN lý do (`_doi_ly_do`) — mã trần trùng nhau không chứng minh
 # chốt nào đã chạy. Mỗi chốt có đột biến riêng ở `MUTANTS.update` cuối khối.
 _KG_HEAD = "ab" * 20
+# #788: suite neo mặc định = 1 CÓ CHỦ Ý — `True == 1` trong Python, nên chốt bool của
+# `check_suite.id` hỏng là ca `kg_n2_suite_id_bool` XANH chứ không chỉ đổi lý do.
+_KG_SUITE, _KG_SUITE_KHAC = 1, 9
 
 
-def _kg_run(i, name="gate", conclusion="success", status="completed", head=_KG_HEAD):
-    return {"id": i, "name": name, "head_sha": head, "status": status, "conclusion": conclusion}
+def _kg_run(i, name="gate", conclusion="success", status="completed", head=_KG_HEAD, suite=_KG_SUITE):
+    return {"id": i, "name": name, "head_sha": head, "status": status, "conclusion": conclusion,
+            "check_suite": {"id": suite}}
 
 
-def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None):
+def _kg_dem(du_lieu):
+    """#788 N5: `total_count` nay BẮT BUỘC. Trang nào chưa khai thì điền ĐÚNG số id phân biệt
+    trên mọi trang (bản sao, không sửa hằng). Ca đo chính chốt ấy truyền `dem=False`."""
+    du_lieu = json.loads(json.dumps(du_lieu))
+    trang = [t for t in (du_lieu if isinstance(du_lieu, list) else [du_lieu])
+             if isinstance(t, dict) and isinstance(t.get("check_runs"), list)]
+    so = len({json.dumps(r.get("id")) for t in trang for r in t["check_runs"] if isinstance(r, dict)})
+    for t in trang:
+        t.setdefault("total_count", so)
+    return du_lieu
+
+
+def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None, suite=_KG_SUITE, dem=True):
     f = c.tmp / f"cr{time.time_ns()}.json"
     if du_lieu is not None or tho is not None:
-        f.write_text(tho if tho is not None else json.dumps(du_lieu), encoding="utf-8")
+        f.write_text(tho if tho is not None else json.dumps(_kg_dem(du_lieu) if dem else du_lieu),
+                     encoding="utf-8")
     args = ["kiem-gate", "--check-runs", f] + (["--head", head] if head is not None else [])
+    args += ["--check-suite", suite] if suite is not None else []
     for t in bat_buoc:
         args += ["--bat-buoc", t]
     return run(c.script, args)
 
 
-def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None):
+def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None, suite=_KG_SUITE,
+           dem=True):
     def ca(c: Ctx):
-        rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho)
+        rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho, suite=suite, dem=dem)
         if expect == 0:
             _doi(0, rc, e, "gate phải XANH")
+            if f"(suite {suite})" not in _txt(o):   # N6: dòng xanh nêu suite đã neo
+                raise AssertionError(f"dòng xanh thiếu suite {suite}: {_txt(o)!r}")
             for t in dict.fromkeys(bat_buoc):
                 if _txt(o).count(f"{t} id=") != 1:
                     raise AssertionError(f"dòng xanh phải liệt kê {t!r} đúng MỘT lần: {_txt(o)!r}")
@@ -5306,7 +5350,7 @@ def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=N
     return ca
 
 
-_KG_1 = {"check_runs": [_kg_run(1)]}
+_KG_1 = {"total_count": 1, "check_runs": [_kg_run(1)]}
 _KG_KDD = "KHÔNG ĐO ĐƯỢC"
 _KG_CA = {
     # M1 — đối số
@@ -5321,8 +5365,9 @@ _KG_CA = {
     "kg_m2_json_hong": _kg_ca(None, tho="{", chua=_KG_KDD),
     "kg_m2_khong_co_check_runs": _kg_ca({"x": 1}, chua=_KG_KDD),
     "kg_m2_check_runs_khong_phai_list": _kg_ca({"check_runs": {}}, chua=_KG_KDD),
+    # #788: `total_count` 1 CÓ CHỦ Ý — đột biến bỏ phần tử hỏng phải ra XANH, không bị N5 chặn hộ.
     "kg_m2_thieu_conclusion": _kg_ca(
-        {"check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
+        {"total_count": 1, "check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
         chua=_KG_KDD),
     "kg_m2_id_bool": _kg_ca({"check_runs": [_kg_run(True)]}, chua=_KG_KDD),
     "kg_m2_id_chuoi": _kg_ca({"check_runs": [_kg_run("5")]}, chua=_KG_KDD),
@@ -5350,11 +5395,11 @@ _KG_CA = {
         {"check_runs": [_kg_run(2), _kg_run(2, conclusion="cancelled")]}, chua="'cancelled'"),
 }
 # F01 — không để parser xoá bằng chứng mâu thuẫn hoặc nhận hằng ngoài JSON.
-for _k, _v in {"id": 2, "name": "khac", "head_sha": "cd" * 20,
-               "status": "in_progress", "conclusion": "cancelled"}.items():
+for _k, _v in {"id": 2, "name": "khac", "head_sha": "cd" * 20, "status": "in_progress",
+               "conclusion": "cancelled", "check_suite": {"id": _KG_SUITE_KHAC}}.items():
     _raw = "{" + json.dumps(_k) + ":" + json.dumps(_v) + "," + json.dumps(_kg_run(1))[1:]
     for _slurp in (False, True):
-        _page = '{"check_runs":[' + _raw + "]}"
+        _page = '{"total_count":1,"check_runs":[' + _raw + "]}"
         _KG_CA[f"kg_m2_khoa_trung_{_k}_{_slurp}"] = _kg_ca(
             None, tho="[" + _page + "]" if _slurp else _page, chua=_KG_KDD)
 for _k, _v in {"check_runs": [_kg_run(2, conclusion="cancelled")], "total_count": 2}.items():
@@ -5376,6 +5421,172 @@ for _kl in _KG_KET_LUAN:
                                             chua=f"conclusion={_kl!r}")
 
 
+# --- #788 (spec `ops/specs/wp788.md` r1, N1–N7) ------------------------------------------
+_KG_ARG = "--check-suite phải là"
+_KG_CA["kg_n1_thieu_check_suite"] = _kg_ca(_KG_1, suite=None, expect=2, chua="--check-suite")
+for _ten, _gt in {"abc": "abc", "am": "-1", "0": "0", "012": "012", "cong": "+5", "cach": " 1",
+                  "unicode": "1\u0661"}.items():
+    _KG_CA[f"kg_n1_check_suite_{_ten}"] = _kg_ca(_KG_1, suite=_gt, expect=2, chua=_KG_ARG)
+_KG_CS = "`check_suite` không phải object"
+_VANG_T = object()
+_kg_cs = lambda cs: {k: v for k, v in _kg_run(1).items() if k != "check_suite"} | (
+    {} if cs is _VANG_T else {"check_suite": cs})
+for _ten, _cs in {"thieu": _VANG_T, "null": None, "list": [1], "thieu_id": {},
+                  "id_bool": {"id": True}, "id_chuoi": {"id": "105"}}.items():
+    _KG_CA[f"kg_n2_suite_{_ten}"] = _kg_ca({"check_runs": [_kg_cs(_cs)]}, chua=_KG_CS,
+                                         suite="105" if _ten == "id_chuoi" else _KG_SUITE)
+_KG_CA["kg_n2_run_khong_bat_buoc_thieu_suite"] = _kg_ca(
+    {"check_runs": [_kg_run(1), {**_kg_cs(_VANG_T), "id": 2, "name": "khac"}]}, chua=_KG_CS)
+_KG_N3_PRODUCER = {"check_runs": [_kg_run(1, conclusion="failure"), _kg_run(2, suite=_KG_SUITE_KHAC)]}
+_KG_N3_CU_HON = {"check_runs": [_kg_run(1, conclusion="failure", suite=_KG_SUITE_KHAC),
+                                _kg_run(2, conclusion="cancelled"), _kg_run(3)]}
+_KG_CA.update({
+    "kg_n3_producer": _kg_ca(_KG_N3_PRODUCER, chua="conclusion='failure'"),
+    "kg_n3_vang": _kg_ca({"check_runs": [_kg_run(1, suite=_KG_SUITE_KHAC)]}, chua="VẮNG"),
+    "kg_n3_chay_lai": _kg_ca({"check_runs": [_kg_run(1, conclusion="cancelled"), _kg_run(2)]}, expect=0),
+    # Suite khác có run id NHỎ HƠN: phân biệt "lọc theo suite đã neo" với "lọc theo suite của run đầu".
+    "kg_n3_chay_lai_suite_khac_cu_hon": _kg_ca(_KG_N3_CU_HON, expect=0),
+    # N5 — `total_count` phải có, là số nguyên ≥ 0, cùng mọi trang, BẰNG ĐÚNG số id.
+    "kg_n5_thieu": _kg_ca({"check_runs": [_kg_run(1)]}, dem=False, chua="thiếu `total_count`"),
+    "kg_n5_thieu_o_trang_sau": _kg_ca([{"total_count": 2, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+                                       {"check_runs": [_kg_run(2)]}], dem=False, chua="trang 1 thiếu `total_count`"),
+    "kg_n5_khong_voi_mot_run": _kg_ca({"total_count": 0, "check_runs": [_kg_run(1)]}, chua="THỪA id"),
+    "kg_n5_khai_3_co_2": _kg_ca({"total_count": 3, "check_runs": [_kg_run(1, conclusion="cancelled"),
+                                                                  _kg_run(2)]}, chua="thiếu trang"),
+    "kg_n5_khai_1_co_2": _kg_ca({"total_count": 1, "check_runs": [_kg_run(1, conclusion="cancelled"),
+                                                                  _kg_run(2)]}, chua="THỪA id"),
+    "kg_n5_lech_trang": _kg_ca([{"total_count": 2, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+                                {"total_count": 3, "check_runs": [_kg_run(2)]}], chua="khác nhau"),
+})
+for _ten, _tc in {"am": -1, "bool": True, "thuc": 1.0, "chuoi": "1", "null": None}.items():
+    _KG_CA[f"kg_n5_{_ten}"] = _kg_ca({"total_count": _tc, "check_runs": [_kg_run(1)]}, chua="≥ 0")
+
+# F01 (cross-review lượt 1, H3): cùng `id` mà khác danh tính ⇒ KHÔNG ĐO ĐƯỢC, kể cả khi mọi
+# phép đếm đều đúng; bản trùng NHẤT QUÁN vẫn được (trang lặp hợp lệ).
+_KG_DT = "mang hai danh tính"
+_KG_CA.update({
+    "kg_f01_cung_id_khac_suite": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, suite=_KG_SUITE_KHAC, conclusion="failure")]},
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_khac_ten": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, name="khac", conclusion="failure")]},
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_hai_ten_bat_buoc": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, name="gate2")]},
+        bat_buoc=("gate", "gate2"), dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_khac_suite_hai_trang": _kg_ca(
+        [{"total_count": 1, "check_runs": [_kg_run(1)]},
+         {"total_count": 1, "check_runs": [_kg_run(1, suite=_KG_SUITE_KHAC, conclusion="failure")]}],
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_nhat_quan_hai_trang": _kg_ca(
+        [{"total_count": 1, "check_runs": [_kg_run(1)]}, {"total_count": 1, "check_runs": [_kg_run(1)]}],
+        dem=False, expect=0),
+})
+
+# F04 lượt 4 (chủ kho chốt 18-10): tên bắt buộc chứa ký tự ngắt dòng ⇒ RC_ARG; tab và chuỗi
+# hai ký tự `\` + `n` không phải ngắt dòng nên vẫn được.
+for _ten, _kt in {"lf": "\n", "cr": "\r", "crlf": "\r\n", "vt": "\x0b", "ff": "\x0c", "fs": "\x1c",
+                  "nel": "\x85", "ls": "\u2028", "ps": "\u2029"}.items():
+    _KG_CA[f"kg_f04_xuong_dong_{_ten}"] = _kg_ca(_KG_1, bat_buoc=(f"ga{_kt}te",), expect=2, chua="xuống dòng")
+_KG_CA["kg_f04_xuong_dong_cuoi"] = _kg_ca(_KG_1, bat_buoc=("gate\n",), expect=2, chua="xuống dòng")
+for _ten, _t in {"tab": "ga\tte", "cheo_n": "ga\\nte"}.items():
+    _KG_CA[f"kg_f04_ten_hop_le_{_ten}"] = _kg_ca({"check_runs": [_kg_run(1, name=_t)]}, bat_buoc=(_t,), expect=0)
+
+
+def case_kg_f02_suite_vuot_tran_int(c: Ctx):
+    """F02: đúng dạng N1 mà dài hơn trần chữ số của `int()` ⇒ VẮNG rc=12, KHÔNG traceback."""
+    rc, _, e = _kg(c, _KG_1, "gate", suite="1" * 4301)
+    _doi_ly_do(12, rc, e, "VẮNG", "kiem-gate --check-suite 4301 chữ số")
+    if "Traceback" in _txt(e):
+        raise AssertionError(f"không được traceback: {_txt(e)[-300:]!r}")
+
+
+def case_kg_n4_canh_bao(c: Ctx):
+    """N4: đúng MỘT dòng mỗi tên bắt buộc có run ở suite khác; 0 dòng cho tên không bắt buộc;
+    mã thoát do luật xanh quyết, cảnh báo không đổi nó. Kiểm NGAY sau từng lệnh."""
+    dem = lambda e: [d for d in _txt(e).splitlines() if d.startswith("CẢNH BÁO:")]
+    rc, _, e = _kg(c, _KG_N3_PRODUCER, "gate")
+    _doi(12, rc, e, "producer khác: gate đỏ vì suite neo đỏ")
+    if dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (2) — bỏ qua"]:
+        raise AssertionError(f"đòi đúng MỘT dòng cảnh báo cho 'gate': {dem(e)!r}")
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1), _kg_run(2, name="khac", suite=_KG_SUITE_KHAC)]}, "gate")
+    _doi(0, rc, e, "tên KHÔNG bắt buộc ở suite khác")
+    if dem(e):
+        raise AssertionError(f"tên không bắt buộc không được cảnh báo: {dem(e)!r}")
+    rc, _, e = _kg(c, _KG_N3_CU_HON, "gate")
+    _doi(0, rc, e, "cảnh báo không đổi mã thoát")
+    if dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (1) — bỏ qua"]:
+        raise AssertionError(f"ca xanh vẫn phải cảnh báo: {dem(e)!r}")
+    rc, _, e = _kg(c, [{"total_count": 2, "check_runs": [_kg_run(1), _kg_run(2, suite=_KG_SUITE_KHAC)]},
+                       {"total_count": 2, "check_runs": [_kg_run(2, suite=_KG_SUITE_KHAC)]}], "gate")
+    if rc != 0 or dem(e) != ["CẢNH BÁO: 'gate' có 1 run ở suite khác (2) — bỏ qua"]:   # F05
+        raise AssertionError(f"bản lặp là MỘT run: rc={rc} {dem(e)!r}")
+    t = "reviewer's gate"   # F04: tên in nguyên văn trong nháy đơn, không theo repr
+    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=t, suite=_KG_SUITE_KHAC)]}, t)
+    if rc != 0 or dem(e) != [f"CẢNH BÁO: '{t}' có 1 run ở suite khác (2) — bỏ qua"]:
+        raise AssertionError(f"tên nguyên văn: rc={rc} {dem(e)!r}")
+
+
+def case_kg_n6_help(c: Ctx):
+    rc, o, e = run(c.script, ["kiem-gate", "--help"])
+    t = _txt(o).replace("\n", " ")
+    for can in ("--check-suite", "check_suite_id", "actions/runs/", "filter=all"):
+        if rc != 0 or can not in t:
+            raise AssertionError(f"--help của kiem-gate thiếu {can!r}: {t!r}")
+
+
+# N7: cắt từ JSON check-runs THẬT của `bb8c0c4` (`gh api --paginate --slurp "repos/ducthangho/
+# tra-luat/commits/bb8c0c4…/check-runs?filter=all&per_page=100"`, đo 17-10-2026: 1 trang,
+# `total_count` 32 — spec đo 30 lúc 16-10, hai lượt `thu-hoi` đến sau). Mọi run `completed`,
+# cùng `app` 15368; chỉ bỏ trường lệnh không đọc. Cột: id · check_suite.id · conclusion · name.
+_KG_THAT_HEAD = "bb8c0c41d37ea5d7eddef254ea9079518e114890"
+_KG_THAT = """\
+116911923097 105371237228 success thu-hoi
+116911938097 105371250078 success chuan-bi
+116911939487 105371249716 skipped launcher
+116912042882 105371250078 success gate-packet-loop (ubuntu-latest)
+116912042979 105371250078 cancelled gate-ops (ubuntu-latest)
+116912042994 105371250078 cancelled gate-cong-cu (ubuntu-latest, 4)
+116912043019 105371250078 cancelled gate-cong-cu (ubuntu-latest, 0)
+116912043029 105371250078 cancelled gate-cong-cu (ubuntu-latest, 1)
+116912043048 105371250078 cancelled gate-cong-cu (ubuntu-latest, 7)
+116912043074 105371250078 cancelled gate-cong-cu (ubuntu-latest, 3)
+116912043090 105371250078 cancelled gate-cong-cu (ubuntu-latest, 2)
+116912043092 105371250078 success gate-registry (ubuntu-latest)
+116912043094 105371250078 success gate (ubuntu-latest)
+116912043162 105371250078 cancelled gate-cong-cu (ubuntu-latest, 6)
+116912043211 105371250078 cancelled gate-cong-cu (ubuntu-latest, 5)
+116915400395 105371250078 cancelled gate-cong-cu-gop
+116968288225 105371250078 success chuan-bi
+116968376214 105371250078 success gate (ubuntu-latest)
+116968376237 105371250078 success gate-registry (ubuntu-latest)
+116968376242 105371250078 success gate-cong-cu (ubuntu-latest, 0)
+116968376281 105371250078 success gate-cong-cu (ubuntu-latest, 5)
+116968376298 105371250078 success gate-packet-loop (ubuntu-latest)
+116968376337 105371250078 success gate-cong-cu (ubuntu-latest, 6)
+116968376346 105371250078 success gate-cong-cu (ubuntu-latest, 7)
+116968376359 105371250078 success gate-cong-cu (ubuntu-latest, 2)
+116968376391 105371250078 success gate-ops (ubuntu-latest)
+116968376441 105371250078 success gate-cong-cu (ubuntu-latest, 4)
+116968376482 105371250078 success gate-cong-cu (ubuntu-latest, 3)
+116968377756 105371250078 success gate-cong-cu (ubuntu-latest, 1)
+116979365158 105371250078 success gate-cong-cu-gop (ubuntu-latest)
+116980148107 105428551057 success thu-hoi
+117001304665 105446307702 success thu-hoi
+"""
+_KG_THAT_JSON = {"total_count": 32, "check_runs": [
+    {"id": int(i), "name": ten, "head_sha": _KG_THAT_HEAD, "status": "completed", "conclusion": kl,
+     "app": {"id": 15368, "slug": "github-actions"}, "check_suite": {"id": int(cs)}}
+    for i, cs, kl, ten in (d.split(" ", 3) for d in _KG_THAT.splitlines())]}
+_KG_CI14 = ("chuan-bi", "gate (ubuntu-latest)", "gate-registry (ubuntu-latest)", "gate-ops (ubuntu-latest)",
+            "gate-packet-loop (ubuntu-latest)", "gate-cong-cu-gop (ubuntu-latest)",
+            *(f"gate-cong-cu (ubuntu-latest, {k})" for k in range(8)))
+_KG_CA["kg_n7_that_suite_ci"] = _kg_ca(_KG_THAT_JSON, bat_buoc=_KG_CI14, expect=0, head=_KG_THAT_HEAD,
+                                       suite="105371250078", dem=False)
+_KG_CA["kg_n7_that_suite_thu_hoi"] = _kg_ca(_KG_THAT_JSON, bat_buoc=_KG_CI14, head=_KG_THAT_HEAD,
+                                            suite="105371237228", dem=False, chua="VẮNG")
+
+
 def case_kg_m4_rc_gate_12(c: Ctx):
     rc, _, e = _kg(c, {"check_runs": [_kg_run(1, conclusion="cancelled")]}, "gate")
     _doi(12, rc, e, "gate đỏ phải trả ĐÚNG 12")
@@ -5387,7 +5598,9 @@ def case_kg_m4_rc_gate_12(c: Ctx):
         raise AssertionError(f"--help của kiem-gate thiếu mã 12: {_txt(o)!r}")
 
 
-CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12)]
+CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12),
+                                 ("kg_n4_canh_bao", case_kg_n4_canh_bao), ("kg_n6_help", case_kg_n6_help),
+                                 ("kg_f02_suite_vuot_tran_int", case_kg_f02_suite_vuot_tran_int)]
 
 _KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
 MUTANTS.update({
@@ -5401,21 +5614,25 @@ MUTANTS.update({
                                    [k for k in _KG_CA if k.startswith("kg_m2_hang_ngoai_json_")]),
     "kg_bo_sha_re": ("    if not SHA_RE.fullmatch(a.head):\n", "    if False:\n",
                      ["kg_m1_head_7_ky_tu"]),
-    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() for t in ten_bb):\n", "    if False:\n",
-                            ["kg_m1_bat_buoc_rong"]),
+    "kg_bo_kiem_ten_rong": ("    if any(not t.strip() or t.splitlines() != [t] for t in ten_bb):\n", "    if False:\n",
+                            ["kg_m1_bat_buoc_rong"] + [k for k in _KG_CA if k.startswith("kg_f04_xuong_dong_")]),
+    "kg_f04_bo_kiem_xuong_dong": (" or t.splitlines() != [t] for t in ten_bb", " for t in ten_bb",
+                                  [k for k in _KG_CA if k.startswith("kg_f04_xuong_dong_")]),
     "kg_bo_qua_phan_tu_thieu_truong": ("            if sai:\n                hong(",
                                        "            if sai:\n                continue\n                hong(",
                                        ["kg_m2_thieu_conclusion"]),
     "kg_bool_la_int": ("type(r.get(k, _VANG)) not in kieu]", "not isinstance(r.get(k, _VANG), kieu)]",
                        ["kg_m2_id_bool"]),
-    "kg_bo_kiem_thieu_trang": ("    if so_id < tong_khai:\n", "    if False:\n", ["kg_m2_thieu_trang"]),
+    "kg_bo_kiem_thieu_trang": ("    if so_id != tong_khai:\n", "    if False:\n",
+                               ["kg_m2_thieu_trang", "kg_n5_khai_3_co_2", "kg_n5_khai_1_co_2", "kg_n5_khong_voi_mot_run"]),
     "kg_bo_kiem_vang": ('do.append(f"{ten!r}: VẮNG', 'xanh.append(f"{ten!r}: VẮNG',
                         ["kg_m3_vang", "kg_m3_ten_tuyet_doi"]),
     "kg_chon_success_bat_ky": ('id_max = max(r["id"] for r in cung)',
                                'id_max = max((r["id"] for r in cung if r["conclusion"] == "success"), default=-1)',
                                ["kg_m3_huy_moi_nhat"]),
     "kg_chon_luot_cu_nhat": ('id_max = max(r["id"]', 'id_max = min(r["id"]',
-                             ["kg_m3_chay_lai_xanh", "kg_m2_list_nhieu_trang"]),
+                             ["kg_m3_chay_lai_xanh", "kg_m2_list_nhieu_trang", "kg_n3_chay_lai",
+                              "kg_n3_chay_lai_suite_khac_cu_hon"]),
     "kg_trung_id_chon_mot": ('for r in (r for r in cung if r["id"] == id_max):',
                              'for r in [next(r for r in cung if r["id"] == id_max)]:',
                              ["kg_m3_trung_id_moi_ban_phai_xanh"]),
@@ -5428,6 +5645,54 @@ MUTANTS.update({
     "kg_xet_moi_check": ('cung = [r for r in runs if r["name"] == ten]', "cung = list(runs)",
                          ["kg_m3_ngoai_bo_qua"]),
     "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
+    # --- #788: mỗi ô "Phép đo làm ĐỎ" một đột biến; ca đích chết vì đổi MÀU, không vì traceback.
+    "kg_n1_bo_kiem_dang": ('    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):\n', "    if False:\n",
+                           [f"kg_n1_check_suite_{t}" for t in ("abc", "am", "0", "012", "cong", "cach", "unicode")]),
+    "kg_n1_cho_so_0_dau": ('r"[1-9][0-9]*"', 'r"[0-9]+"', ["kg_n1_check_suite_0", "kg_n1_check_suite_012"]),
+    "kg_n1_chu_so_unicode": ('r"[1-9][0-9]*"', 'r"[1-9]\\d*"', ["kg_n1_check_suite_unicode"]),
+    # "chỉ kiểm run bắt buộc": gỡ chốt ở đầu đọc, dời nó vào lệnh cho đúng tên bắt buộc. Chốt
+    # danh tính F01 cũng đọc `check_suite` mọi run nên phải nới theo — thiếu vế ấy là traceback.
+    "kg_n2_chi_kiem_bat_buoc": (
+        ('            if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:\n',
+         'dt = (r["name"], r["check_suite"]["id"], r["head_sha"])',
+         "    runs = _doc_check_runs(a.check_runs)\n"),
+        ("            if False:\n", 'dt = (r["name"], (r.get("check_suite") or {}).get("id"), r["head_sha"])',
+         "    runs = _doc_check_runs(a.check_runs)\n    if any(not isinstance(r.get('check_suite'), dict) or "
+         "type(r['check_suite'].get('id')) is not int for r in runs if r['name'] in ten_bb):\n"
+         "        _die(RC_GATE, 'KHÔNG ĐO ĐƯỢC: `check_suite` không phải object')\n"),
+        ["kg_n2_run_khong_bat_buoc_thieu_suite"]),
+    "kg_n2_bool_la_int": ('type(cs.get("id", _VANG)) is not int', 'not isinstance(cs.get("id", _VANG), int)',
+                          ["kg_n2_suite_id_bool"]),
+    "kg_n3_bo_loc_suite": ('        cung = [r for r in cung if r["check_suite"]["id"] == suite]', "        pass",
+                           ["kg_n3_producer", "kg_n3_vang", "kg_n7_that_suite_thu_hoi"]),
+    "kg_n3_suite_cua_run_dau": ('r["check_suite"]["id"] == suite]',
+                                'r["check_suite"]["id"] == min(cung, key=lambda x: x["id"])["check_suite"]["id"]]',
+                                ["kg_n3_chay_lai_suite_khac_cu_hon"]),
+    "kg_n4_bo_canh_bao": ("        if khac:\n", "        if False:\n", ["kg_n4_canh_bao"]),
+    "kg_n4_canh_bao_moi_ten": ("    for ten_cb in ten_bb:\n", "    for ten_cb in dict.fromkeys(r['name'] for r in runs):\n",
+                               ["kg_n4_canh_bao"]),
+    "kg_n5_quay_ve_nho_hon": ("    if so_id != tong_khai:\n", "    if so_id < tong_khai:\n",
+                              ["kg_n5_khai_1_co_2", "kg_n5_khong_voi_mot_run"]),
+    "kg_n5_bo_doi_co_mat": ('tc = tr.get("total_count", _VANG)', 'tc = tr.get("total_count", len(tr["check_runs"]))',
+                            ["kg_n5_thieu"]),
+    "kg_n5_trang_sau_thua_huong": ('tc = tr.get("total_count", _VANG)', 'tc = tr.get("total_count", khai[0] if khai else _VANG)',
+                                   ["kg_n5_thieu_o_trang_sau"]),
+    "kg_n5_bo_so_giua_trang": ("    if any(t != tong_khai for t in khai):\n", "    if False:\n", ["kg_n5_lech_trang"]),
+    "kg_n5_bool_la_int": ("type(tc) is not int or", "not isinstance(tc, int) or", ["kg_n5_bool"]),
+    "kg_n6_xoa_help": ('help="id suite của CHÍNH lượt workflow', 'help=argparse.SUPPRESS or "', ["kg_n6_help"]),
+    # F01: mỗi trường danh tính một đột biến — gỡ cả kiểm, hoặc gỡ riêng từng trường.
+    "kg_f01_bo_kiem_danh_tinh": ("        if danh_tinh.setdefault(r[\"id\"], dt) != dt:\n", "        if False:\n",
+                                 [k for k in _KG_CA if k.startswith("kg_f01_cung_id_khac") or k.endswith("hai_ten_bat_buoc")]),
+    "kg_f01_bo_suite_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["name"], r["head_sha"])',
+                                       ["kg_f01_cung_id_khac_suite", "kg_f01_cung_id_khac_suite_hai_trang"]),
+    "kg_f01_bo_ten_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["check_suite"]["id"], r["head_sha"])',
+                                     ["kg_f01_cung_id_khac_ten", "kg_f01_cung_id_hai_ten_bat_buoc"]),
+    # F02: ca nền khoá traceback; đột biến gỡ đường bắt trần chết bằng traceback nên bị loại (F03).
+    "kg_f02_du_phong_khop_nham": ("        suite = a.check_suite   #", "        suite = 1   #", ["kg_f02_suite_vuot_tran_int"]),
+    "kg_n4_dem_ban_ghi": (('sorted({r["id"] for r in runs if', ' != suite})'), ('sorted([r["id"] for r in runs if', ' != suite])'),
+                          ["kg_n4_canh_bao"]),
+    "kg_n4_ten_theo_repr": ("CẢNH BÁO: '{ten_cb}'", "CẢNH BÁO: {ten_cb!r}", ["kg_n4_canh_bao"]),
+    "kg_n6_dong_xanh_khong_suite": ('(suite {suite}): ', ": ", ["kg_m2_object_mot_trang", "kg_n7_that_suite_ci"]),
 })
 
 # --- #775 Review Rescue. `verdict ≠ approve VÀ (vòng ≥ trần HOẶC codex ≥ trần)`: mỗi vế một ca sai ĐÚNG MỘT vế.

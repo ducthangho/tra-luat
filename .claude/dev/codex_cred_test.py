@@ -35,6 +35,10 @@ def nap(nguon: str, nhan: str):
     # tên riêng từng đột biến: lớp 2 chống va chạm .pyc
     t = d / f"cc_{nhan}_{_dem}.py"
     t.write_text(nguon, encoding="utf-8")
+    # The public credential command uses the repository's shared storage backend.
+    companion = Path(__file__).with_name("launcher.py")
+    (d / "launcher.py").write_text(companion.read_text(encoding="utf-8"),
+                                    encoding="utf-8", newline="\n")
     importlib.invalidate_caches()  # lớp 3
     spec = importlib.util.spec_from_file_location(t.stem, t)
     m = importlib.util.module_from_spec(spec)
@@ -137,9 +141,12 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     """Mặc định KHÔNG được in base64 ra màn hình."""
     bi_mat = b'{"tokens":{"refresh_token":"BIMAT-KHONG-DUOC-IN"}}'
     d = Path(tempfile.mkdtemp())
-    (d / "auth.json").write_bytes(bi_mat)
     M._co_codex = lambda: "/gia/codex"
-    M._chay_device_auth = lambda home, han: (True, "ok")
+    def login(home, han):
+        (home / "auth.json").write_bytes(bi_mat)
+        (home / "auth.json").chmod(0o600)
+        return True, "ok"
+    M._chay_device_auth = login
     M._kiem_song = lambda home: (True, "rc=0, có dấu hiệu")
     ra_tep = d / "b64.txt"
     vat_giu = d / "khong-duoc-doi.txt"
@@ -147,13 +154,24 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     os.link(vat_giu, ra_tep)  # ghi tại chỗ sẽ sửa cả hardlink; replace nguyên tử thì không
 
     class A:
-        codex_home, ra, han_giay = str(d), str(ra_tep), 5
+        codex_home, ra, han_giay = None, str(ra_tep), 5
         in_gia_tri, cai_de = False, False
         tep_dan = None          # argparse thật LUÔN có trường này; đồ giả phải giống thật.
 
     import io
     from contextlib import redirect_stdout
     buf = io.StringIO()
+    # The shared store now rejects hardlinked output rather than replacing it.
+    # Both links must remain intact on that fail-closed path.
+    with redirect_stdout(io.StringIO()):
+        try:
+            M.cmd_lay(A())
+        except OSError:
+            pass
+        else:
+            raise AssertionError("hardlinked credential artifact was accepted")
+    assert ra_tep.read_text() == vat_giu.read_text() == "GIU-NGUYEN"
+    ra_tep.unlink()
     with redirect_stdout(buf):
         rc = M.cmd_lay(A())
     out = buf.getvalue()
@@ -168,6 +186,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     homes = []
     def dang_nhap_tam(home, _han):
         homes.append(home); (home / "auth.json").write_bytes(bi_mat)
+        (home / "auth.json").chmod(0o600)
         return (True, "ok")
     M._chay_device_auth = dang_nhap_tam
     class B(A):
@@ -219,14 +238,17 @@ def t9_cmd_lay_GHI_tep_huong_dan_dan(M):
     """
     bi_mat = b'{"tokens":{"access_token":"a.b.c","refresh_token":"R"}}'
     d = Path(tempfile.mkdtemp())
-    (d / "auth.json").write_bytes(bi_mat)
     M._co_codex = lambda: "/gia/codex"
-    M._chay_device_auth = lambda home, han: (True, "ok")
+    def login(home, han):
+        (home / "auth.json").write_bytes(bi_mat)
+        (home / "auth.json").chmod(0o600)
+        return True, "ok"
+    M._chay_device_auth = login
     M._kiem_song = lambda home: (True, "rc=0")
     tep_dan = d / "huong_dan.md"
 
     class A:
-        codex_home, ra, han_giay = str(d), str(d / "b64.txt"), 5
+        codex_home, ra, han_giay = None, str(d / "b64.txt"), 5
         in_gia_tri, cai_de = False, False
     A.tep_dan = str(tep_dan)
 
@@ -285,10 +307,11 @@ def t11_sao_luu_tu_choi_symlink(M):
         dich.symlink_to(nguon)
     except (OSError, NotImplementedError):
         print("  BỎ QUA symlink thật; nền không cho tạo — đo guard bằng symlink giả")
+        original_path = dich
         class SymlinkGia:
             def is_symlink(self): return True
             def is_file(self): return False
-            def __str__(self): return str(dich)
+            def __str__(self): return str(original_path)
         dich = SymlinkGia()
     try:
         M._sao_luu(dich)
@@ -372,17 +395,108 @@ def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
     assert bak and bak.read_text() == "AN-TOAN", "chặn oan nền có O_NOFOLLOW"
 
 
+def t14_probe_khong_ke_thua_snapshot(M):
+    """A real inert child checks its environment before returning the marker."""
+    from unittest.mock import patch
+    with tempfile.TemporaryDirectory(prefix="codex-env-boundary-") as td:
+        d = Path(td)
+        (d / "exec").write_text(
+            "import os\nassert 'CODEX_AUTH_JSON' not in os.environ\n"
+            "print('TRALUAT-CRED-OK')\n", encoding="utf-8")
+        cwd = os.getcwd()
+        try:
+            os.chdir(d)
+            M._co_codex = lambda: sys.executable
+            with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-RAW-SNAPSHOT"}):
+                ok, message = M._kiem_song(d)
+                assert ok and "TRALUAT-CRED-OK" in message
+                assert os.environ["CODEX_AUTH_JSON"] == "INERT-RAW-SNAPSHOT"
+        finally:
+            os.chdir(cwd)
+
+
+def t15_home_chua_tao_la_KHONG_DO_DUOC(M):
+    """wp484 g7 (P2 #509 thread XL-): home hợp lệ nhưng chưa tạo = chưa có credential (rc 3),
+    cùng mã với thư mục có mà thiếu auth.json — không phải ĐỎ rc 2."""
+    import argparse
+    with tempfile.TemporaryDirectory(prefix="codex-home-vang-") as td:
+        for home in (Path(td) / "chua-tao", Path(td)):
+            rc = M.cmd_kiem(argparse.Namespace(codex_home=str(home), kiem_song=False))
+            assert rc == M.RC[M.KHONG_DO_DUOC], f"{home}: rc {rc} != {M.RC[M.KHONG_DO_DUOC]}"
+
+
+def t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra(M):
+    """wp484 g7 — đường thứ hai của P2 thread XMG: `kiem --kiem-song` từng nuốt kết quả ghi."""
+    import argparse
+    import json as _json
+    with tempfile.TemporaryDirectory(prefix="codex-ghi-hong-") as td:
+        home = Path(td) / "codex"
+        that = M._repo_helpers()
+        with that["_KhoCodex"](home, create=True) as store:
+            store.write("auth.json", _json.dumps({"tokens": {"refresh_token": "INERT"}}).encode(), None)
+        gia = dict(that, _danh_dau_auth_hong=lambda h, da_probe=None: False, _dang_cho_snapshot=lambda h: False)
+        M._repo_helpers = lambda: gia
+        M._kiem_song = lambda h: (False, "credential BỊ TỪ CHỐI (INERT)")
+        ra = []
+        M._in = lambda *a: ra.append(" ".join(str(x) for x in a))
+        rc = M.cmd_kiem(argparse.Namespace(codex_home=str(home), kiem_song=True))
+        assert rc == M.RC[M.DO], f"rc {rc}"
+        assert any("KHÔNG ghi được trạng thái chờ snapshot" in x for x in ra), f"lỗi ghi bị nuốt: {ra}"
+
+
+def t17_token_invalidated_la_tu_choi_va_thang_rc0(M):
+    """wp484 g7 (Codex lượt 1 F02) — hồi quy so master: `token_invalidated` phải là TỪ CHỐI, kể cả
+    khi rc=0 và stdout có dấu hiệu sống."""
+    ok, vi_sao = kiem_song_bang_codex_gia(M, rc=1, loi="error: token_invalidated")
+    assert not ok and "TỪ CHỐI (token_invalidated)" in vi_sao, vi_sao
+    ok, vi_sao = kiem_song_bang_codex_gia(M, rc=0, ra=f"{M.DAU_HIEU_SONG}\n", loi="token_invalidated")
+    assert not ok and "TỪ CHỐI" in vi_sao, f"rc0 + marker che mất từ chối: {vi_sao}"
+
+
+def t18_kiem_ghi_dung_ban_da_probe(M):
+    """wp484 g7 (Codex lượt 1 F03) qua `cmd_kiem` thật: probe từ chối A trong lúc B được ghi ⇒
+    A vào lịch sử, B không bị chặn."""
+    import argparse
+    import json as _json
+    with tempfile.TemporaryDirectory(prefix="codex-f03-") as td:
+        home = Path(td) / "codex"
+        h = M._repo_helpers()
+        a = _json.dumps({"tokens": {"refresh_token": "INERT-A"}}).encode()
+        b = _json.dumps({"tokens": {"refresh_token": "INERT-B"}}).encode()
+        with h["_KhoCodex"](home, create=True) as store:
+            store.write("auth.json", a, None)
+        def kiem_song(hm):
+            with h["_KhoCodex"](hm) as st:
+                st.write("auth.json", b, a)
+            return False, "credential BỊ TỪ CHỐI (INERT)"
+        M._kiem_song = kiem_song
+        M._repo_helpers = lambda: h
+        M._in = lambda *x: None
+        M.cmd_kiem(argparse.Namespace(codex_home=str(home), kiem_song=True))
+        with h["_KhoCodex"](home) as store:
+            rejected, _ = h["_doc_rejected"](store)
+        assert h["_credential_id"](a) in rejected, "A không vào lịch sử"
+        assert h["_credential_id"](b) not in rejected, "B bị ghi nhầm"
+        assert not h["_dang_cho_snapshot"](home), "B bị chặn oan"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
-      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW]
+      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW, t14_probe_khong_ke_thua_snapshot,
+      t15_home_chua_tao_la_KHONG_DO_DUOC, t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra,
+      t17_token_invalidated_la_tu_choi_va_thang_rc0, t18_kiem_ghi_dung_ban_da_probe]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
 DOT_BIEN = [
+    ("t14_probe_ke_thua_snapshot",
+     '    moi.pop("CODEX_AUTH_JSON", None)\n    try:\n        with open(os.devnull)',
+     '    try:\n        with open(os.devnull)',
+     "t14_probe_khong_ke_thua_snapshot"),
     # Đột biến của t1 phải chạm ĐÚNG tính chất t1 canh (rút đúng url+mã từ đầu ra CÓ ANSI).
     # Bản đầu nới lỏng regex url thành r"device" — nó giết cả t2, vì chuỗi "device code
     # login flow" khớp. Đó là đột biến ĐO HAI THỨ, không phải chốt trói nhầm: sửa đột
@@ -430,6 +544,14 @@ DOT_BIEN = [
      '    if not hasattr(os, "O_NOFOLLOW"):\n'
      '        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")\n', "",
      "t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW"),
+    ("t15_bo_nhanh_home_vang", "    if not os.path.lexists(home):\n", "    if False:\n",
+     "t15_home_chua_tao_la_KHONG_DO_DUOC"),
+    ("t16_nuot_loi_ghi", '        if not helpers["_danh_dau_auth_hong"](home, raw):', "        if False:",
+     "t16_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra"),
+    ("t17_bo_token_invalidated", '"refresh_token_invalidated", "token_invalidated", "401 unauthorized",',
+     '"refresh_token_invalidated", "401 unauthorized",', "t17_token_invalidated_la_tu_choi_va_thang_rc0"),
+    ("t18_doc_lai_sau_probe", 'helpers["_danh_dau_auth_hong"](home, raw)', 'helpers["_danh_dau_auth_hong"](home)',
+     "t18_kiem_ghi_dung_ban_da_probe"),
 ]
 
 

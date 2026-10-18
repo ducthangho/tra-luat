@@ -38,6 +38,14 @@ CODEX_ENV_POLICY = Path(__file__).resolve().parent / "codex_env_policy.py"
 PY = sys.executable or "python3"
 LA_WINDOWS = platform.system() == "Windows"
 
+# wp484 g7 — bộ test phải KÍN với credential của phiên đang chạy. Từ #509, `launcher.py run`
+# và bridge phiên khôi phục `CODEX_AUTH_JSON` TRƯỚC mọi child, nên mọi ca chép `os.environ`
+# xuống tiến trình con đều mang biến ấy theo. Đo 16-17-10 (`--lap-ca`, cùng biến giả):
+# `t158` master XANH, g7 ĐỎ rc=13; cả bộ: 68 ca đỏ với biến giả, 3 ca đỏ (t124–t126) với
+# credential THẬT — tức bộ test đã đem credential thật đi materialize. Ca nào cần biến thì
+# tự đặt tường minh (patch.dict / env=…), không ca nào được thừa hưởng từ phiên.
+os.environ.pop("CODEX_AUTH_JSON", None)
+
 MA_OK, MA_THAM_SO, MA_GIT, MA_HEAD, MA_REF = 0, 2, 3, 4, 5
 MA_BAN, MA_PROMPT, MA_HAN, MA_VA_CHAM, MA_DANH_TINH, MA_QUA_HAN = 6, 7, 8, 9, 10, 124
 MA_WORKTREE, MA_PROBE = 14, 15
@@ -2288,6 +2296,8 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     dòng đầu tiên một công cụ nói ra.
     """
     m = _tai_launcher_thu()
+    m._dang_cho_snapshot = lambda home: False  # Recovery is measured by g2 dedicated cases.
+    m._codex_home_hieu_luc = lambda: Path("INERT-HOME")
     m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
     # Ghim HẠN TOKEN thay vì đọc `~/.codex/auth.json` THẬT: ca này đo phép kiểm DÒNG
     # ĐẦU, không đo credential của máy đang chạy. Không ghim thì nó xanh/đỏ tuỳ máy —
@@ -2752,6 +2762,8 @@ def t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung():
       DUNG_DUOC      CHỈ khi đã gọi thật và thành công
     """
     m = _tai_launcher_thu()
+    m._dang_cho_snapshot = lambda home: False  # Recovery is measured by g2 dedicated cases.
+    m._codex_home_hieu_luc = lambda: Path("INERT-HOME")
     m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
 
     class P:
@@ -2808,6 +2820,8 @@ def t94_canh_bao_TRUOC_khi_credential_het_han():
     đỏ khi mọi thứ còn chạy và người ta học cách bỏ qua nó.
     """
     m = _tai_launcher_thu()
+    m._dang_cho_snapshot = lambda home: False  # Recovery is measured by g2 dedicated cases.
+    m._codex_home_hieu_luc = lambda: Path("INERT-HOME")
     m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
 
     class P:
@@ -2886,6 +2900,8 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
     KHÔNG được phép nuốt câu kia.
     """
     m = _tai_launcher_thu()
+    m._dang_cho_snapshot = lambda home: False  # Recovery is measured by g2 dedicated cases.
+    m._codex_home_hieu_luc = lambda: Path("INERT-HOME")
     m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
 
     class P:
@@ -4650,6 +4666,8 @@ def t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran():
     đường dẫn `which` đã trả — hai cửa, hai đột biến riêng.
     """
     m = _tai_launcher_thu()
+    m._dang_cho_snapshot = lambda home: False  # Recovery is measured by g2 dedicated cases.
+    m._codex_home_hieu_luc = lambda: Path("INERT-HOME")
     goi = []
     m.shutil.which = lambda t: "/gia/codex.cmd" if t == "codex" else None
     m._co_chan_codex = lambda: None
@@ -4694,9 +4712,11 @@ def t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran():
     m._do_codex_song = do_codex_song_goc
     goi.clear()
     m.subprocess.run = lambda cmd, **_k: (goi.append(list(cmd)) or POk())
-    m._do_codex_song()
-    bang(goi and goi[0][0] == "/gia/codex.cmd",
-         f"_do_codex_song van spawn ten tran: {goi[:1]}")
+    for kw in ({}, {"duong_dan": "/gia/codex.cmd"}):
+        goi.clear()
+        m._do_codex_song(**kw)
+        bang(goi and goi[0][0] == "/gia/codex.cmd",
+             f"_do_codex_song van spawn ten tran ({kw}): {goi[:1]}")
 
 
 @ca
@@ -5050,6 +5070,8 @@ def t102_khong_go_duoc_policy_thi_phai_CHAN_codex():
     """
     cs = _nap_sach(CODEX_ENV_POLICY)
     m = _tai_launcher_thu()
+    m._dang_cho_snapshot = lambda home: False  # Recovery is measured by g2 dedicated cases.
+    m._codex_home_hieu_luc = lambda: Path("INERT-HOME")
     bang(m.CO_CHAN_CODEX == cs.TEN_CO_CHAN,
          f"hai tep lech ten co chan: {m.CO_CHAN_CODEX!r} vs {cs.TEN_CO_CHAN!r} — "
          f"lech la chot an ninh IM LANG bien mat")
@@ -5086,8 +5108,10 @@ def t102_khong_go_duoc_policy_thi_phai_CHAN_codex():
         m.subprocess.run = lambda *_a, **_k: (goi.append(1), PhienBanTot())[1]
         m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
                                       "gio_con_lai": {"access_token": 100.0}}
-        m.os.path.expanduser = lambda d: str(s.parent) if d == "~/.codex" else d
-        (s.parent / cs.TEN_CO_CHAN).write_text("x", encoding="utf-8")
+        policy_home = s / "policy-home"
+        policy_home.mkdir()
+        m._codex_home_hieu_luc = lambda: policy_home
+        (policy_home / cs.TEN_CO_CHAN).write_text("x", encoding="utf-8")
         try:
             tt, mo_ta = m._do_codex()
             bang(tt == "CHUA_XAC_THUC", f"co co chan ma van bao {tt}")
@@ -5102,7 +5126,7 @@ def t102_khong_go_duoc_policy_thi_phai_CHAN_codex():
             bang("BI CHAN" in ly_do, f"_do_codex_song khong noi ro bi chan: {ly_do!r}")
             bang(not goi, "_do_codex_song da chay codex THAT du dang bi chan")
         finally:
-            (s.parent / cs.TEN_CO_CHAN).unlink()
+            (policy_home / cs.TEN_CO_CHAN).unlink()
 
         # (3) don xong => co PHAI tu het
         sach = s / "sach.toml"
@@ -7063,6 +7087,903 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
 
 # ------------------------------------------------------ tự đột biến: có răng không
 
+@ca
+def r484_g2_doctor_doc_dung_home_da_materialize():
+    """Custom home must be the same source for materialization and diagnostics."""
+    with tempfile.TemporaryDirectory(prefix="wp484-home-") as td:
+        root = Path(td)
+        default = root / "default"
+        custom = root / "custom"
+        default.mkdir()
+        custom.mkdir()
+        (custom / "auth.json").write_text(
+            json.dumps({"tokens": {"refresh_token": "INERT-FIXTURE"},
+                        "last_refresh": "2026-09-09T00:00:00Z"}), encoding="utf-8")
+        (custom / "auth.json").chmod(0o600)
+        env = dict(os.environ, HOME=str(default), USERPROFILE=str(default),
+                   CODEX_HOME=str(custom))
+        env.pop("CODEX_AUTH_JSON", None)
+        script = ("import json,runpy,sys; m=runpy.run_path(sys.argv[1]); "
+                  "print(json.dumps(m['_han_token_codex']()))")
+        result = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
+                                env=env, capture_output=True, text=True, timeout=30)
+        assert result.returncode == 0, result.stderr
+        measured = json.loads(result.stdout)
+        assert measured["doc_duoc"], "doctor ignored the credential in CODEX_HOME"
+        assert measured["last_refresh"] == "2026-09-09T00:00:00Z"
+        assert not (default / ".codex").exists(), "diagnostic modified fallback home"
+
+
+@ca
+def r484_g2_env_policy_cung_home_hai_chieu():
+    """The active config, not residue in the other home, controls the gate."""
+    import runpy
+    policy = runpy.run_path(str(CODEX_ENV_POLICY))
+    block = (policy["MOC_MO"] + b"\n" + policy["_THAN_KHOI_CU"][0]
+             + b"\n" + policy["MOC_DONG"] + b"\n")
+    with tempfile.TemporaryDirectory(prefix="wp484-policy-") as td:
+        root = Path(td)
+        default = root / "default" / ".codex"
+        custom = root / "custom"
+        default.mkdir(parents=True)
+        custom.mkdir()
+        env = dict(os.environ, HOME=str(default.parent), USERPROFILE=str(default.parent),
+                   CODEX_HOME=str(custom))
+        env.pop("CODEX_AUTH_JSON", None)
+
+        def gate(*args):
+            return subprocess.run([PY, str(CODEX_ENV_POLICY), *args], env=env,
+                                  capture_output=True, text=True, timeout=30)
+
+        (custom / "config.toml").write_bytes(block)
+        assert gate("--tep", str(custom / "config.toml")).returncode == 3, "invalid control fixture"
+        assert gate().returncode == 3, "gate ignored active legacy block in CODEX_HOME"
+        (custom / "config.toml").write_bytes(b"# clean custom home\n")
+        (default / "config.toml").write_bytes(block)
+        assert gate().returncode == 0, "residue in fallback home blocked clean CODEX_HOME"
+        env["CODEX_HOME"] = ""
+        assert gate().returncode == 3, "empty CODEX_HOME did not use fallback"
+
+
+@ca
+def r484_g2_auth_hong_utf8_tra_loi_co_kiem_soat():
+    with tempfile.TemporaryDirectory(prefix="wp484-corrupt-") as td:
+        root = Path(td)
+        home = root / ".codex"
+        home.mkdir()
+        auth = home / "auth.json"
+        auth.write_bytes(b"\xff\xfeINERT-CORRUPT")
+        env = dict(os.environ, HOME=str(root), USERPROFILE=str(root), CODEX_HOME=str(home),
+                   CODEX_AUTH_JSON=json.dumps({"tokens": {"refresh_token": "INERT-NEW"}}))
+        script = ("import json,runpy,sys; m=runpy.run_path(sys.argv[1]); "
+                  "print(json.dumps(m['chuan_bi_xac_thuc'](that_su=False)))")
+        result = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
+                                env=env, capture_output=True, text=True, timeout=30)
+        assert result.returncode == 0, "corrupt auth escaped as traceback: " + result.stderr
+        measured = json.loads(result.stdout)
+        assert measured and measured[0]["ok"] is False, "unreadable disk auth was reported healthy"
+        assert auth.read_bytes() == b"\xff\xfeINERT-CORRUPT"
+        assert "INERT-NEW" not in result.stdout + result.stderr
+
+
+@ca
+def r484_g2_schema_truoc_freshness_va_home_materialize():
+    """A newer disk snapshot must not hide malformed input or select default home."""
+    with tempfile.TemporaryDirectory(prefix="wp484-schema-") as td:
+        root = Path(td)
+        custom = root / "custom"
+        custom.mkdir()
+        old = json.dumps({"tokens": {"refresh_token": "INERT-DISK"},
+                          "last_refresh": "2026-09-09T00:00:00Z"})
+        auth = custom / "auth.json"
+        auth.write_text(old, encoding="utf-8")
+        auth.chmod(0o600)
+        script = ("import json,runpy,sys; m=runpy.run_path(sys.argv[1]); "
+                  "print(json.dumps(m['chuan_bi_xac_thuc'](that_su=False)))")
+        for tokens, expected in (([], False), (None, False), ("INERT-BAD", False), ({}, True)):
+            env = dict(os.environ, HOME=str(root), USERPROFILE=str(root),
+                       CODEX_HOME=str(custom), CODEX_AUTH_JSON=json.dumps({
+                           "tokens": tokens, "last_refresh": "2026-09-08T00:00:00Z"}))
+            p = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
+                               env=env, capture_output=True, text=True, timeout=30)
+            assert p.returncode == 0, "schema validation escaped controlled result"
+            result = json.loads(p.stdout)[0]
+            assert result["ok"] is expected, "freshness hid invalid schema"
+            assert result["duong_dan"] == str(auth), "materializer selected another home"
+            assert result["doi"] is False
+            assert auth.read_text(encoding="utf-8") == old
+            assert "INERT-" not in p.stdout + p.stderr
+        assert not (root / ".codex").exists()
+
+
+@ca
+def r484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
+    """Run a real inert child; malformed snapshot must stop before run creation."""
+    with San() as s:
+        repo = tao_repo(s)
+        home = s / "custom-home"
+        home.mkdir()
+        snapshot = json.dumps({"tokens": {"refresh_token": "INERT-BOUNDARY"}})
+        auth = home / "auth.json"
+        auth.write_text(snapshot, encoding="utf-8")
+        auth.chmod(0o600)
+        env = dict(os.environ, CODEX_HOME=str(home), CODEX_AUTH_JSON=snapshot,
+                   HOME=str(s), USERPROFILE=str(s))
+        code = ("import json,os,pathlib; "
+                "assert 'CODEX_AUTH_JSON' not in os.environ; "
+                "p=pathlib.Path(os.environ['CODEX_HOME'])/'auth.json'; "
+                "assert json.loads(p.read_text())['tokens']['refresh_token']=='INERT-BOUNDARY'; "
+                "print('BOUNDARY-OK')")
+        rr = s / "runs"
+        p = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
+                            "--expected-head", head_cua(repo), "--deadline-utc", mai_sau(30),
+                            "--run-root", str(rr), "--", PY, "-c", code],
+                           env=env, capture_output=True, text=True, timeout=45)
+        assert p.returncode == 0, "inert launcher child failed: " + p.stderr
+        logs = list(rr.glob("*/stdout*"))
+        assert logs and any("BOUNDARY-OK" in f.read_text(encoding="utf-8") for f in logs)
+        assert auth.read_text(encoding="utf-8") == snapshot
+        bad_runs = s / "bad-runs"
+        env["CODEX_AUTH_JSON"] = '{"tokens": "INERT-BAD"}'
+        p = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
+                            "--expected-head", head_cua(repo), "--run-root", str(bad_runs),
+                            "--", PY, "-c", "raise AssertionError('child must not run')"],
+                           env=env, capture_output=True, text=True, timeout=30)
+        assert p.returncode == MA_CHUA_XAC_THUC
+        assert not bad_runs.exists(), "invalid snapshot reached probe/run stage"
+        assert "INERT-BAD" not in p.stdout + p.stderr
+        assert auth.read_text(encoding="utf-8") == snapshot
+
+
+@ca
+def r484_g2_storage_kernel_guardrails():
+    """Kernel measurements: private replace, hardlinks, reparse/ancestors, rollback."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    with San() as s:
+        home = s / "codex"
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", b"INERT-OLD", None)
+            assert store.read() == b"INERT-OLD"
+            with patch.object(m.os, "replace", side_effect=OSError("injected rename failure")):
+                try:
+                    store.write("auth.json", b"INERT-NEW", b"INERT-OLD")
+                except OSError:
+                    pass
+                else:
+                    raise AssertionError("rename failure was accepted")
+            assert store.read() == b"INERT-OLD"
+            assert not list(home.glob("*.tmp-*"))
+            try:
+                store.write("auth.json", b"INERT-NEW", b"WRONG-CAS")
+            except OSError:
+                pass
+            else:
+                raise AssertionError("changed credential was overwritten")
+            link = s / "hardlink"
+            os.link(home / "auth.json", link)
+            try:
+                store.read()
+            except OSError:
+                pass
+            else:
+                raise AssertionError("hardlinked credential was accepted")
+            link.unlink()
+            moved = s / "moved"
+            assert home.resolve().is_relative_to(s.resolve())
+            assert moved.resolve().is_relative_to(s.resolve())
+            if LA_WINDOWS:
+                try:
+                    home.rename(moved)
+                except OSError:
+                    pass
+                else:
+                    raise AssertionError("Windows ancestor was not pinned")
+            else:
+                home.rename(moved)
+                home.mkdir()
+                (home / "auth.json").write_bytes(b"INERT-DECOY")
+                store.write("auth.json", b"INERT-NEW", b"INERT-OLD")
+                assert (moved / "auth.json").read_bytes() == b"INERT-NEW"
+                assert (home / "auth.json").read_bytes() == b"INERT-DECOY"
+        repo = s / "repo"
+        (repo / ".git").mkdir(parents=True)
+        try:
+            with m._KhoCodex(repo / "credentials", create=True):
+                raise AssertionError("repository credential destination accepted")
+        except OSError:
+            pass
+        assert not (repo / "credentials").exists()
+        target = s / "target"
+        target.mkdir()
+        (target / "sentinel").write_text("INERT-SENTINEL", encoding="utf-8")
+        junction = s / "redirect"
+        if LA_WINDOWS:
+            p = subprocess.run(["cmd", "/d", "/c", "mklink", "/J", str(junction), str(target)],
+                               capture_output=True, text=True, timeout=20)
+            assert p.returncode == 0, "Windows junction could not be measured"
+        else:
+            junction.symlink_to(target, target_is_directory=True)
+        try:
+            with m._KhoCodex(junction / "credentials", create=True):
+                raise AssertionError("ancestor redirect accepted")
+        except OSError:
+            pass
+        assert not (target / "credentials").exists()
+        assert (target / "sentinel").read_text() == "INERT-SENTINEL"
+        if LA_WINDOWS:
+            os.rmdir(junction)
+            p = subprocess.run(["icacls", str(home / "auth.json"), "/grant", "*S-1-1-0:(R)"],
+                               capture_output=True, text=True, timeout=20)
+            assert p.returncode == 0, "ACL counterexample could not be measured"
+            try:
+                with m._KhoCodex(home) as store:
+                    store.read()
+            except OSError:
+                pass
+            else:
+                raise AssertionError("credential readable by Everyone was accepted")
+
+
+@ca
+def r484_g2_recovery_probe_rollback_va_snapshot_moi():
+    """A rejected token stays rejected across formatting; unknown errors are not auth."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    def payload(token, day):
+        return json.dumps({"tokens": {"refresh_token": token},
+                           "last_refresh": f"2026-09-{day:02d}T00:00:00Z"}).encode()
+    with San() as s:
+        home = s / "codex"
+        old, bad, new, rotated = (payload("INERT-OLD", 1), payload("INERT-BAD", 2),
+                                  payload("INERT-NEW", 3), payload("INERT-ROTATED", 4))
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", old, None)
+        assert m._danh_dau_auth_hong(home)
+        assert m._dang_cho_snapshot(home)
+        calls = []
+        def failed(data):
+            calls.append(data)
+            assert (home / "auth.json").read_bytes() == old
+            return None, True
+        m._probe_snapshot = failed
+        with patch.dict(os.environ, {"CODEX_HOME": str(home)}):
+            result = m.chuan_bi_xac_thuc(snapshot=json.dumps(json.loads(old), indent=2))
+            assert not result[0]["ok"] and not calls
+            assert not m.chuan_bi_xac_thuc(snapshot=bad.decode())[0]["ok"]
+            assert calls == [bad]
+            assert not m.chuan_bi_xac_thuc(snapshot=json.dumps(json.loads(bad), indent=2))[0]["ok"]
+            assert calls == [bad], "same rejected token was probed again"
+            spoof = json.loads(bad)
+            spoof["tokens"].update(access_token="INERT-SPOOF", account_id="changed")
+            assert not m.chuan_bi_xac_thuc(snapshot=json.dumps(spoof))[0]["ok"]
+            assert calls == [bad], "changed metadata revived the rejected refresh token"
+            assert (home / "auth.json").read_bytes() == old
+            m._probe_snapshot = lambda data: (None, False)
+            assert not m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"]
+            assert (home / "auth.json").read_bytes() == old
+            m._probe_snapshot = lambda data: (rotated, False)
+            assert m.chuan_bi_xac_thuc(snapshot=new.decode())[0]["ok"]
+            assert (home / "auth.json").read_bytes() == rotated
+            assert not m._dang_cho_snapshot(home)
+            def unexpected(data):
+                raise AssertionError("older snapshot must not reach live probe")
+            m._probe_snapshot = unexpected
+            result = m.chuan_bi_xac_thuc(snapshot=payload("INERT-OLDER", 2).decode())[0]
+            assert result["ok"] and not result["doi"]
+            assert (home / "auth.json").read_bytes() == rotated
+            m._probe_snapshot = lambda data: (payload("INERT-DOWNGRADE", 2), False)
+            assert not m.chuan_bi_xac_thuc(snapshot=payload("INERT-LATER", 5).decode())[0]["ok"]
+            assert (home / "auth.json").read_bytes() == rotated
+
+
+@ca
+def r484_g2_checkpoint_resume_va_gia_auth_khong_refund():
+    """Real CLI: frozen resume anchors, plus generated auth/quota spoof output."""
+    with San() as s:
+        repo = tao_repo(s)
+        prompt = s / "prompt.txt"
+        prompt.write_text("INERT work", encoding="utf-8")
+        sha = hashlib.sha256(prompt.read_bytes()).hexdigest()
+        state = s / "state.json"
+        state.write_text(json.dumps({"attempt_open": True, "hmac_key": "2" * 64,
+                         "attempt_anchor": {"attempt": 1, "nonce": "1" * 32, "consumed": False}}))
+        rr = s / "runs"
+        args = ["run", "--workspace", str(repo), "--expected-head", head_cua(repo),
+                "--prompt-file", str(prompt), "--expected-prompt-sha256", sha,
+                "--run-root", str(rr), "--attempt-state", str(state), "--void-reason", "infrastructure"]
+        r = chay(*args, "--", PY, "-c", "print('401 unauthorized quota exceeded'); raise SystemExit(1)")
+        assert r.returncode != 0
+        folder = next(rr.iterdir())
+        record = json.loads((folder / "run.json").read_text(encoding="utf-8"))
+        assert "void_reason" not in record, "untrusted child text became refund evidence"
+        assert record["failure_class"] == "unknown"
+        checkpoint = folder / "checkpoint.json"
+        digest = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+        assert digest == record["checkpoint_sha256"]
+        cp = json.loads(checkpoint.read_bytes())
+        assert cp == {"schema_version": 1, "checkpoint_id": record["run_id"],
+                      "head": head_cua(repo), "prompt_sha256": sha}
+        resume = ["--resume-checkpoint", str(checkpoint), "--expected-checkpoint-sha256", digest]
+        r = chay(*args, *resume, "--", PY, "-c", "print('RESUME-OK')")
+        assert r.returncode == 0, r.stderr
+        count = len(list(rr.iterdir()))
+        for field, value in (("head", "0" * 40), ("prompt_sha256", "0" * 64),
+                             ("checkpoint_id", "bad")):
+            bad = dict(cp, **{field: value})
+            checkpoint.write_text(json.dumps(bad), encoding="utf-8")
+            badsha = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
+            r = chay(*args, "--resume-checkpoint", str(checkpoint),
+                     "--expected-checkpoint-sha256", badsha,
+                     "--", PY, "-c", "raise AssertionError('must not spawn')")
+            assert r.returncode != 0 and len(list(rr.iterdir())) == count
+        r = chay(*args, *resume, "--", PY, "-c", "raise AssertionError('must not spawn')")
+        assert r.returncode != 0 and len(list(rr.iterdir())) == count
+
+
+@ca
+def r484_g2_timeout_sau_output_khong_refund():
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        state = s / "state.json"
+        state.write_text(json.dumps({"attempt_open": True, "hmac_key": "2" * 64,
+                         "attempt_anchor": {"attempt": 1, "nonce": "1" * 32, "consumed": False}}))
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--deadline-utc", mai_sau(8), "--attempt-state", str(state),
+                 "--void-reason", "infrastructure", "--", PY, "-c",
+                 "import time; print('INERT GENERATED OUTPUT', flush=True); time.sleep(30)")
+        assert r.returncode == 124, r.stderr
+        record = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        assert record["stdout_byte"] > 0 and record["trang_thai"] == "qua_han"
+        assert "void_reason" not in record and record["failure_class"] == "unknown"
+
+
+@ca
+def r484_g2_probe_isolated_marker_va_refresh():
+    """Real inert child through the repository live-probe parser; no network."""
+    import runpy
+    from types import SimpleNamespace
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    helper = runpy.run_path(str(LAUNCHER.with_name("codex_cred.py")))
+    probe = helper["_kiem_song"]
+    with San() as s:
+        active = s / "active"
+        old = b'{"tokens":{"refresh_token":"INERT-OLD"}}'
+        new = b'{"tokens":{"refresh_token":"INERT-NEW"}}'
+        rotated = b'{"tokens":{"refresh_token":"INERT-ROTATED"}}'
+        with m._KhoCodex(active, create=True) as store:
+            store.write("auth.json", old, None)
+        script = s / "exec"
+        code = ("import os,pathlib\n"
+                "assert 'CODEX_AUTH_JSON' not in os.environ\n"
+                "home=pathlib.Path(os.environ['CODEX_HOME'])\n"
+                "assert pathlib.Path.cwd() == home\n"
+                f"assert home != pathlib.Path({str(active)!r})\n"
+                f"assert (home/'auth.json').read_bytes()=={new!r}\n"
+                f"assert pathlib.Path({str(active / 'auth.json')!r}).read_bytes()=={old!r}\n"
+                f"(home/'auth.json').write_bytes({rotated!r})\n"
+                "print('TRALUAT-CRED-OK')\n")
+        script.write_text(code, encoding="utf-8")
+        real_run = subprocess.run
+        calls = []
+        def run(args, **kw):
+            calls.append(kw["env"]["CODEX_HOME"])
+            assert Path(kw["cwd"]) == Path(kw["env"]["CODEX_HOME"])
+            return real_run([args[0], str(script), *args[2:]], **kw)
+        probe.__globals__["subprocess"] = SimpleNamespace(run=run, TimeoutExpired=subprocess.TimeoutExpired,
+                                                         SubprocessError=subprocess.SubprocessError)
+        probe.__globals__["_co_codex"] = lambda: PY
+        with patch.object(m.runpy, "run_path", return_value=helper):
+            got, dead = m._probe_snapshot(new)
+            assert got == rotated and not dead and len(calls) == 1
+            assert not Path(calls[0]).exists(), "candidate home was not cleaned"
+            assert (active / "auth.json").read_bytes() == old
+            script.write_text(code.replace("print('TRALUAT-CRED-OK')", "print('no marker')"), encoding="utf-8")
+            got, dead = m._probe_snapshot(new)
+            assert got is None and not dead, "rc=0 without marker was accepted"
+
+
+@ca
+def r484_g2_hook_shell_scrub_truoc_probe():
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX; verified on WSL Linux"
+    with San() as s:
+        project = s / "project"
+        dev = project / ".claude/dev"
+        hooks = project / ".claude/hooks"
+        dev.mkdir(parents=True); hooks.mkdir()
+        shutil.copy2(LAUNCHER_DANG_DUNG, dev / "launcher.py")
+        source_hook = LAUNCHER.parents[1] / "hooks/session-start.sh"
+        shutil.copy2(source_hook, hooks / "session-start.sh")
+        fakebin = s / "bin"; fakebin.mkdir()
+        py = fakebin / "python3"
+        # wp484 g7 (F04): materialize nay chạy SAU bước cài CLI, nên hook còn nhiều `$PY` khác ở cả hai
+        # phía nó. Đo bằng NHẬT KÝ từng lời gọi chứ không bằng mã thoát (hook chạy tiếp tới doctor):
+        # materializer phải có mặt, MỌI lời gọi khác phải thấy môi trường SẠCH.
+        nhat_ky = s / "py.log"
+        py.write_text("#!/bin/bash\n"
+                      "if [ \"$1\" = .claude/dev/launcher.py ] && [ \"$2\" = chuan-bi ]; then\n"
+                      f"  echo CHUAN_BI >> '{nhat_ky}'\n"
+                      f"  exec '{PY}' \"$@\"\n"
+                      "fi\n"
+                      "if [ -n \"${CODEX_AUTH_JSON:-}${TL_CODEX_SNAPSHOT:-}\" ]; then\n"
+                      f"  echo \"BAN $1 $2\" >> '{nhat_ky}'; exit 96\n"
+                      "fi\n"
+                      f"echo \"SACH $1 $2\" >> '{nhat_ky}'\n"
+                      "[ \"$1\" = .claude/dev/launcher.py ] && exit 0\n"
+                      f"exec '{PY}' \"$@\"\n", encoding="utf-8")
+        py.chmod(0o755)
+        # G02 (Codex lượt 2): hook dời materialize ra sau bước cài CLI, nên fixture PHẢI kín với
+        # installer của máy chạy test — `codex`/`claude` giả chạy được (hook không cài gì), `npm`
+        # giả chỉ ghi nhật ký; PATH bỏ mọi thư mục có bản thật. Gọi tới npm là ĐỎ.
+        for ten in ("codex", "claude", "actionlint"):
+            (fakebin / ten).write_text(
+                "#!/bin/sh\n"
+                f"if [ -n \"${{CODEX_AUTH_JSON:-}}${{TL_CODEX_SNAPSHOT:-}}\" ]; then echo 'BAN {ten}' >> '{nhat_ky}'; exit 96; fi\n"
+                f"echo '{ten}-inert 0.0.0'\n", encoding="utf-8")
+            (fakebin / ten).chmod(0o755)
+        (fakebin / "npm").write_text(f"#!/bin/sh\necho \"NPM $*\" >> '{nhat_ky}'\nexit 0\n", encoding="utf-8")
+        (fakebin / "npm").chmod(0o755)
+        # H01 (Codex lượt 3): máy chạy thiếu `rg` ⇒ hook gọi apt-get/sudo/cargo THẬT. `rg` giả chạy được
+        # (hook không cài), installer giả chỉ ghi nhật ký và thất bại. KHÔNG lọc PATH theo các tên này:
+        # `/usr/bin` chứa `sudo`/`apt-get` lẫn coreutils hook cần — `fakebin` đứng ĐẦU nên đã che bản thật.
+        (fakebin / "rg").write_text("#!/bin/sh\necho 'ripgrep-inert 0.0.0'\n", encoding="utf-8")
+        (fakebin / "rg").chmod(0o755)
+        for ten in ("apt-get", "sudo", "cargo"):
+            (fakebin / ten).write_text(f"#!/bin/sh\necho \"CAI {ten} $*\" >> '{nhat_ky}'\nexit 97\n",
+                                       encoding="utf-8")
+            (fakebin / ten).chmod(0o755)
+        sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
+                if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
+        home = s / "codex"
+        snapshot = '{"tokens":{"refresh_token":"INERT-HOOK"}}'
+        # J01 (Codex lượt 4): chép nguyên `os.environ` thì `BASH_ENV` (và `ENV`, hàm bash export
+        # `BASH_FUNC_*`) của máy chạy được bash nạp TRƯỚC thân hook — tệp khởi động ấy chèn được thư mục
+        # lên trước `fakebin`, và installer ngoài fixture chạy mà nhật ký của ta không thấy. `HOME` tạm vì
+        # nhánh actionlint ghi `$HOME/.local/bin`; `actionlint` giả có ở `fakebin` (vòng giả `codex` ở trên).
+        env = {k: v for k, v in os.environ.items()
+               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}
+        (s / "home").mkdir()
+        env.update(CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project), HOME=str(s / "home"),
+                   CODEX_HOME=str(home), CODEX_AUTH_JSON=snapshot,
+                   PATH=os.pathsep.join([str(fakebin)] + sach))
+        # wp484 g7 — bản g6 gọi tên trần ["bash", …]: cổng `ops/bash_nen.py` (hạn ngạch 7 của master
+        # cho tệp này) đếm thành lời gọi trần thứ 8 ngay khi #509 gặp master. Dùng bộ giải CHUẨN;
+        # None là KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không được bỏ qua ca.
+        import runpy
+        vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
+        bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
+        p = subprocess.run([vo, str(hooks / "session-start.sh")], env=env,
+                           capture_output=True, text=True, timeout=30)
+        ky = nhat_ky.read_text(encoding="utf-8").splitlines() if nhat_ky.exists() else []
+        bang(ky.count("CHUAN_BI") == 1, f"materializer phải chạy đúng 1 lần: {ky} · {p.stdout[-400:]}")
+        bang(not [x for x in ky if x.startswith("BAN ")], f"lời gọi khác thấy snapshot: {ky}")
+        bang(not [x for x in ky if x.startswith(("NPM ", "CAI ", "SACH -m pip"))], f"fixture gọi installer: {ky}")
+        bang(any(x.startswith("SACH ") for x in ky[ky.index("CHUAN_BI") + 1:]),
+             f"không đo được lời gọi nào SAU materializer: {ky}")
+        bang(p.returncode != 13, f"hook dừng ở 13: {p.stdout[-300:]}")
+        assert (home / "auth.json").read_text() == snapshot
+        assert "INERT-HOOK" not in p.stdout + p.stderr
+
+
+@ca
+def r484_g8_hook_scrub_kin_voi_bash_env():
+    """J01 (Codex lượt 4): `BASH_ENV`/`ENV` của máy chạy không được lọt vào hook của fixture.
+
+    Tệp khởi động ghi dấu `NAP` rồi chèn `ambient/` (rg hỏng + installer gián điệp) lên đầu PATH —
+    đúng phản chứng 18 lời gọi của reviewer. Fixture sạch ⇒ tệp ấy không bao giờ được nạp."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX; verified on WSL Linux"
+    from unittest.mock import patch
+    with San() as s:
+        amb = s / "ambient"; amb.mkdir()
+        log = s / "ambient.log"
+        (amb / "rg").write_text("#!/bin/sh\nexit 97\n", encoding="utf-8")
+        (amb / "rg").chmod(0o755)
+        for ten in ("apt-get", "sudo", "cargo", "npm"):
+            (amb / ten).write_text(f"#!/bin/sh\necho \"NGOAI {ten} $*\" >> '{log}'\nexit 97\n",
+                                   encoding="utf-8")
+            (amb / ten).chmod(0o755)
+        startup = s / "startup.sh"
+        startup.write_text(f"echo NAP >> '{log}'\nexport PATH='{amb}':\"$PATH\"\n", encoding="utf-8")
+        with patch.dict(os.environ, {"BASH_ENV": str(startup), "ENV": str(startup)}):
+            r484_g2_hook_shell_scrub_truoc_probe()
+        ky = log.read_text(encoding="utf-8").splitlines() if log.exists() else []
+        # `NAP` CÓ là bằng chứng tệp khởi động sống trong tiến trình này: chính phép dò của `tim_bash`
+        # (phía TEST, không phải hook) nạp nó — đo 17-10, `BASH_EXECUTION_STRING` = probe của bash_nen.
+        # Không có `NAP` thì ca này không đo gì (BASH_ENV chết sẵn), nên đó là ĐỎ chứ không phải xanh.
+        bang("NAP" in ky, f"BASH_ENV không có hiệu lực trong tiến trình test — ca không đo được: {ky}")
+        bang(not [x for x in ky if x.startswith("NGOAI ")], f"installer ngoài fixture đã chạy: {ky}")
+
+
+@ca
+def r484_g8_run_xong_khong_mang_failure_class():
+    """Connector P2 17-10: lượt `xong` rc=0 không được mang `failure_class`; lượt hỏng vẫn `unknown`."""
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "print('xong')")
+        bang(r.returncode == 0, f"{r.returncode}: {r.stderr}")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d["trang_thai"] == "xong" and d["ma_thoat"] == 0, f"{d['trang_thai']}/{d['ma_thoat']}")
+        bang("failure_class" not in d, f"lượt xong rc=0 vẫn mang failure_class={d.get('failure_class')!r}")
+        rr2 = s / "runs2"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr2), "--", PY, "-c", "raise SystemExit(3)")
+        bang(r.returncode != 0, f"lượt hỏng trả {r.returncode}")
+        d = json.loads((next(rr2.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d.get("failure_class") == "unknown", f"lượt rc=3 mất nhãn: {d.get('failure_class')!r}")
+
+
+@ca
+def r484_g2_bridge_scrub_va_chot_remote():
+    from unittest.mock import patch
+    source = LAUNCHER.parents[1] / "hooks/session_start.py"
+    bridge = _nap_sach(source)
+    calls = []
+    def prepare(**kwargs):
+        calls.append("prepare")
+        return [{"ok": True}]
+    def child(args, **kwargs):
+        assert not any(k.upper() == "CODEX_AUTH_JSON" for k in kwargs["env"])
+        calls.append("child")
+        return subprocess.CompletedProcess(args, 0, "inert version", "")
+    with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-BRIDGE", "CLAUDE_CODE_REMOTE": "true",
+                                "CLAUDE_PROJECT_DIR": str(LAUNCHER.parents[2])}):
+        with patch.object(bridge.runpy, "run_path", return_value={"chuan_bi_xac_thuc": prepare}), \
+             patch.object(bridge, "_ung_vien_bash", return_value=["inert-bash"]), \
+             patch.object(bridge, "_codex_chay_duoc", return_value=True), \
+             patch.object(bridge.subprocess, "run", side_effect=child):
+            # wp484 g7: ca này đo nhánh CÓ codex (materialize trước shell); nhánh vắng codex ở F04.
+            assert bridge.main() == 0
+            assert calls == ["prepare", "child", "child"]
+            calls.clear()
+            os.environ["CODEX_AUTH_JSON"] = "INERT-BRIDGE"
+            os.environ["CLAUDE_CODE_REMOTE"] = "false"
+            assert bridge.main() == 0
+            assert calls == ["child", "child"], "local hook materialized credential"
+
+
+@ca
+def r484_g4_windows_sid_alias_identity():
+    """Native SID conversion, with inert descriptor/owner contexts; no real auth."""
+    if not LA_WINDOWS:
+        return "BO QUA native Windows SID conversion"
+    m = _tai_launcher_thu()
+    store = m._KhoCodex.__new__(m._KhoCodex)
+    store._win_init()
+    c, native = store.c, store.a
+    admin_sid = store._win_sid("LA")
+    assert admin_sid.startswith("S-1-") and admin_sid.endswith("-500")
+    print("Windows token matches local RID500:", store.sid == admin_sid)
+    class Descriptor:
+        sddl = ""
+        def __getattr__(self, name):
+            return getattr(native, name)
+        def GetSecurityInfo(self, *args):
+            sd = c.c_void_p()
+            assert native.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+                self.sddl, 1, c.byref(sd), None)
+            c.cast(args[-1], c.POINTER(c.c_void_p))[0] = sd.value
+            return 0
+    fixture = Descriptor()
+    store.a = fixture
+    for who, owner, trustee, accepted in (
+            (admin_sid, "LA", "LA", True),
+            (admin_sid, "BA", "OW", True),
+            (admin_sid, "BA", "WD", False),
+            (admin_sid, "WD", "LA", False),
+            ("S-1-5-21-1-2-3-1234", "BA", "LA", False),
+            ("S-1-5-21-1-2-3-1234", "LA", "OW", False)):
+        store.sid = who  # explicit simulated token context, not impersonation
+        fixture.sddl = f"O:{owner}D:P(A;;FA;;;{trustee})(A;;FA;;;SY)(A;;FA;;;BA)"
+        try:
+            store._win_private(None)
+        except OSError:
+            assert not accepted, "same native SID rejected because of SDDL alias"
+        else:
+            assert accepted, "another principal was accepted through an alias"
+
+
+
+@ca
+def r484_g6_trust_windows_separator_aliases():
+    """Native and simulated Windows keys must refer to exactly one consent."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        forward = str(repo.resolve()).replace("\\", "/")
+        backward = forward.replace("/", "\\")
+        mixed = forward.replace("/", "\\", 1)
+        tep = home / ".claude.json"
+        def check(projects, expected):
+            raw = json.dumps({"projects": projects}).encode("utf-8")
+            tep.write_bytes(raw)
+            got = m._probe_trust_claude(str(repo), home)
+            bang(got["trang_thai"] == expected, f"separator trust expected={expected}: {got}")
+            bang(tep.read_bytes() == raw, "probe modified user trust fixture")
+        with patch.object(m.platform, "system", return_value="Windows"):
+            for key in (forward, backward, mixed):
+                for value, expected in ((True, "DAT"), (False, "DO"), (1, "KHONG_DO_DUOC"),
+                                        (None, "KHONG_DO_DUOC"), ("true", "KHONG_DO_DUOC")):
+                    check({key: {"hasTrustDialogAccepted": value}}, expected)
+            check({}, "KHONG_DO_DUOC")
+            check({forward + "-other": {"hasTrustDialogAccepted": True}}, "KHONG_DO_DUOC")
+            check({forward: {}}, "KHONG_DO_DUOC")
+            check({forward: {"hasTrustDialogAccepted": True},
+                   backward: {"hasTrustDialogAccepted": True}}, "DAT")
+            for first, second in ((True, False), (False, True), (True, 1), (True, None)):
+                check({forward: {"hasTrustDialogAccepted": first},
+                       backward: {"hasTrustDialogAccepted": second}}, "KHONG_DO_DUOC")
+            check({forward: {"hasTrustDialogAccepted": True}, backward: {}}, "KHONG_DO_DUOC")
+            check({forward: {"hasTrustDialogAccepted": True}, backward: []}, "KHONG_DO_DUOC")
+
+
+@ca
+def r484_g6_trust_posix_backslash_is_not_separator():
+    if LA_WINDOWS:
+        return "POSIX literal backslash semantics measured on Linux"
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        different = str(repo.resolve()).replace("/", "\\")
+        (home / ".claude.json").write_text(json.dumps({"projects": {
+            different: {"hasTrustDialogAccepted": True}}}), encoding="utf-8")
+        got = m._probe_trust_claude(str(repo), home)
+        bang(got["trang_thai"] == "KHONG_DO_DUOC", f"POSIX trust broadened: {got}")
+
+
+@ca
+def r484_g7_bo_test_kin_voi_credential_cua_phien():
+    """Nạp module test với CODEX_AUTH_JSON có mặt ⇒ biến phải bị gỡ trước mọi ca (xem đầu tệp).
+    Gỡ dòng `os.environ.pop` ở đầu tệp thì ca này ĐỎ — không cần biến thật của phiên."""
+    script = ("import os,runpy,sys; runpy.run_path(sys.argv[1], run_name='nap_kiem'); "
+              "print('CON' if 'CODEX_AUTH_JSON' in os.environ else 'SACH')")
+    r = subprocess.run([PY, "-B", "-c", script, str(Path(__file__).resolve())],
+                       env=dict(os.environ, CODEX_AUTH_JSON="INERT-PHIEN"),
+                       capture_output=True, text=True, timeout=60)
+    bang(r.returncode == 0, f"nạp module hỏng: {r.stderr[-300:]}")
+    bang(r.stdout.strip().splitlines()[-1:] == ["SACH"], f"bộ test thừa hưởng credential phiên: {r.stdout!r}")
+
+
+@ca
+def r484_g7_bridge_vang_codex_hoan_materialize_sau_hook():
+    """F04 (Codex lượt 1): chưa có `codex` thì bridge KHÔNG được chết rc=13 trước hook (hook mới là
+    nơi cài CLI). Hoãn: hook chạy với env SẠCH, rồi materialize nhận snapshot làm tham số."""
+    from unittest.mock import patch
+    bridge = _nap_sach(LAUNCHER.parents[1] / "hooks/session_start.py")
+    calls, nhan = [], []
+    def prepare(**kwargs):
+        calls.append("prepare"); nhan.append(kwargs.get("snapshot"))
+        return [{"ok": True}]
+    def child(args, **kwargs):
+        bang(not any(k.upper() == "CODEX_AUTH_JSON" for k in kwargs["env"]), "shell thấy snapshot thô")
+        calls.append("child")
+        rc = 0 if "--version" in args else rc_hook[0]   # probe bash luôn đạt; chỉ hook mang rc
+        return subprocess.CompletedProcess(args, rc, "inert version", "")
+    rc_hook = [0]
+    with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-HOAN", "CLAUDE_CODE_REMOTE": "true",
+                                "CLAUDE_PROJECT_DIR": str(LAUNCHER.parents[2])}):
+        with patch.object(bridge.runpy, "run_path", return_value={"chuan_bi_xac_thuc": prepare}), \
+             patch.object(bridge, "_ung_vien_bash", return_value=["inert-bash"]), \
+             patch.object(bridge, "_codex_chay_duoc", return_value=False), \
+             patch.object(bridge.subprocess, "run", side_effect=child):
+            rc = bridge.main()
+            bang(calls == ["child", "child", "prepare"], f"thứ tự sai (phải hook rồi mới materialize): {calls}")
+            bang(rc == 0 and nhan == ["INERT-HOAN"], f"rc={rc}, snapshot nhận={nhan}")
+            bang("CODEX_AUTH_JSON" not in os.environ, "snapshot còn trong os.environ")
+            calls.clear(); nhan.clear(); rc_hook[0] = 7
+            os.environ["CODEX_AUTH_JSON"] = "INERT-HOAN"
+            bang(bridge.main() == 7 and calls == ["child", "child"], f"hook hỏng mà vẫn materialize: {calls}")
+
+
+@ca
+def r484_g7_bridge_codex_co_mat_nhung_hong_van_hoan():
+    """G01 (Codex lượt 2): `codex` CÓ trên PATH nhưng chạy hỏng (rc=127) phải được coi như vắng ⇒
+    hoãn materialize để hook cài lại CLI. Shim chạy được ⇒ không hoãn. Child probe không thấy snapshot."""
+    if LA_WINDOWS:
+        return "BO QUA shim POSIX"
+    from unittest.mock import patch
+    bridge = _nap_sach(LAUNCHER.parents[1] / "hooks/session_start.py")
+    with San() as s:
+        for ten, than, mong in (
+                ("hong", "#!/bin/sh\nexit 127\n", False),
+                ("rong", "#!/bin/sh\nexit 0\n", False),
+                ("tot", "#!/bin/sh\n[ -z \"${CODEX_AUTH_JSON:-}\" ] || exit 3\necho codex-cli 0.0.0-inert\n", True)):
+            d = s / ten; d.mkdir()
+            (d / "codex").write_text(than, encoding="utf-8"); (d / "codex").chmod(0o755)
+            env = {"PATH": str(d), "CODEX_AUTH_JSON": "INERT-G01"}
+            with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-G01"}):
+                bang(bridge._codex_chay_duoc(env) is mong, f"{ten}: mong {mong}")
+        bang(bridge._codex_chay_duoc({"PATH": str(s / "khong-co")}) is False, "vắng codex mà báo chạy được")
+
+
+@ca
+def r484_g7_hook_vang_codex_cai_cli_truoc_materialize():
+    """F04 (Codex lượt 1), phía shell: PATH không có codex ⇒ `npm install` phải chạy TRƯỚC
+    `launcher.py chuan-bi`, và installer không thấy snapshot."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        project = s / "project"; hooks = project / ".claude/hooks"
+        (project / ".claude/dev").mkdir(parents=True); hooks.mkdir()
+        shutil.copy2(LAUNCHER.parents[1] / "hooks/session-start.sh", hooks / "session-start.sh")
+        fakebin = s / "bin"; fakebin.mkdir()
+        ky = s / "ky.log"
+        (fakebin / "npm").write_text(
+            "#!/bin/sh\n"
+            f"if [ -n \"${{CODEX_AUTH_JSON:-}}${{TL_CODEX_SNAPSHOT:-}}\" ]; then echo BAN-NPM >> '{ky}'; fi\n"
+            f"echo \"NPM $*\" >> '{ky}'\nexit 0\n", encoding="utf-8")
+        (fakebin / "python3").write_text(
+            "#!/bin/sh\n"
+            "if [ \"$1\" = .claude/dev/launcher.py ]; then\n"
+            f"  echo \"LAUNCHER $2\" >> '{ky}'; exit 0\n"
+            "fi\n"
+            f"exec '{PY}' \"$@\"\n", encoding="utf-8")
+        for f in fakebin.iterdir():
+            f.chmod(0o755)
+        sach = [d for d in os.environ.get("PATH", "").split(os.pathsep)
+                if d and not any((Path(d) / t).exists() for t in ("codex", "npm", "claude"))]
+        env = dict(os.environ, CLAUDE_CODE_REMOTE="true", CLAUDE_PROJECT_DIR=str(project),
+                   CODEX_HOME=str(s / "codex"), CODEX_AUTH_JSON='{"tokens":{}}',
+                   PATH=os.pathsep.join([str(fakebin)] + sach))
+        import runpy
+        vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
+        bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
+        p = subprocess.run([vo, str(hooks / "session-start.sh")], env=env, cwd=project,
+                           capture_output=True, text=True, timeout=120)
+        dong = ky.read_text(encoding="utf-8").splitlines() if ky.exists() else []
+        npm = [i for i, x in enumerate(dong) if x.startswith("NPM install -g @openai/codex")]
+        cb = [i for i, x in enumerate(dong) if x == "LAUNCHER chuan-bi"]
+        bang(npm and cb, f"thiếu bước cài hoặc materialize: {dong} · rc={p.returncode} {p.stdout[-300:]}")
+        bang(npm[0] < cb[0], f"materialize chạy TRƯỚC cài codex: {dong}")
+        bang("BAN-NPM" not in dong, f"installer thấy snapshot: {dong}")
+
+
+@ca
+def r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do():
+    """F01 lối thứ ba (Codex lượt 1): `_ghi_rejected` hỏng trong materializer không được rơi về
+    câu "HỎNG" chung. Giới hạn qua tiến trình là nợ `codex-rejected-state-khong-ghi-duoc`."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    def payload(token, day):
+        return json.dumps({"tokens": {"refresh_token": token},
+                           "last_refresh": f"2026-09-{day:02d}T00:00:00Z"}).encode()
+    with San() as s:
+        home = s / "codex"
+        old = payload("INERT-OLD", 1)
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", old, None)
+        m._probe_snapshot = lambda data: (None, True)
+        def hong(store, identity):
+            raise OSError("INERT read-only state")
+        m._ghi_rejected = hong
+        with patch.dict(os.environ, {"CODEX_HOME": str(home)}):
+            ket = m.chuan_bi_xac_thuc(snapshot=payload("INERT-NEW", 2).decode())[0]
+        bang(not ket["ok"], f"vẫn ok: {ket}")
+        bang("KHÔNG ghi được trạng thái chờ" in ket["cach"], f"lý do bị gộp: {ket['cach']!r}")
+        bang((home / "auth.json").read_bytes() == old, "credential cũ bị đổi")
+
+
+@ca
+def r484_g7_tu_choi_ghi_dung_ban_da_probe():
+    """F03 (Codex lượt 1): probe từ chối A trong lúc tiến trình khác ghi B ⇒ A vào lịch sử,
+    B KHÔNG bị chặn."""
+    import types
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    m.__file__ = str(LAUNCHER)
+    m._co_chan_codex = lambda: None
+    a = json.dumps({"tokens": {"refresh_token": "INERT-A"}}).encode()
+    b = json.dumps({"tokens": {"refresh_token": "INERT-B"}}).encode()
+    with San() as s:
+        home = s / "codex"
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", a, None)
+        def kiem_song(h):
+            with m._KhoCodex(h) as st:
+                st.write("auth.json", b, a)        # tiến trình khác vừa refresh
+            return False, "credential BỊ TỪ CHỐI (INERT)"
+        m.runpy = types.SimpleNamespace(run_path=lambda p: {"_kiem_song": kiem_song})
+        with patch.dict(os.environ, {"CODEX_HOME": str(home)}):
+            ok, ly_do = m._do_codex_song()
+        bang(not ok and ly_do == "credential BỊ TỪ CHỐI (INERT)", f"kết quả sai: {ly_do!r}")
+        with m._KhoCodex(home) as store:
+            rejected, _ = m._doc_rejected(store)
+        bang(m._credential_id(a) in rejected, "bản đã probe (A) không vào lịch sử từ chối")
+        bang(m._credential_id(b) not in rejected, "bản mới (B) bị ghi nhầm là đã từ chối")
+        bang(not m._dang_cho_snapshot(home), "bản mới (B) bị chặn oan")
+
+
+# wp484 g7 — bốn P2 của connector trên #509 (13-10-2026) ở `faaedff`. Mỗi ca có đột biến
+# riêng trong DOT_BIEN; ca đích chết vì `bang`/assert của CHÍNH nó, không vì lỗi vô can.
+
+@ca
+def r484_g7_credential_status_home_sai_la_chan_khong_traceback():
+    """P2 thread XML: CODEX_HOME tương đối / có `..` ⇒ CHAN có mã, không traceback rc=1."""
+    m = _tai_launcher_thu()
+    for sai in ("tuong-doi/codex", os.path.join(os.sep, "x", "..", "y")):
+        with San() as s:
+            env = dict(os.environ, HOME=str(s), USERPROFILE=str(s), CODEX_HOME=sai)
+            env.pop("CODEX_AUTH_JSON", None)
+            # encoding tường minh: launcher ép stdout/stderr UTF-8; `text=True` trần trên Windows giải
+            # bằng cp1252 ⇒ "khÃ´ng há»£p lá»‡" (đo: launcher-windows run 38995632503, b355ff8).
+            r = subprocess.run([PY, "-B", str(LAUNCHER_DANG_DUNG), "credential-status"],
+                               env=env, capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=60)
+            bang("Traceback" not in r.stderr, f"{sai!r}: traceback thô: {r.stderr[-300:]}")
+            bang(r.returncode == MA_CHUA_XAC_THUC,
+                 f"{sai!r}: mong {MA_CHUA_XAC_THUC}, duoc {r.returncode}: {r.stderr[-200:]}")
+            bang("CODEX_HOME không hợp lệ" in r.stderr, f"{sai!r}: thiếu chẩn đoán: {r.stderr!r}")
+        from unittest.mock import patch
+        with patch.dict(os.environ, {"CODEX_HOME": sai}):
+            try:
+                m._cho_snapshot_hoac_chan()
+            except m.Chan as e:
+                bang(e.ma == MA_CHUA_XAC_THUC, f"{sai!r}: Chan sai mã {e.ma}")
+            else:
+                bang(False, f"{sai!r}: helper không chặn")
+
+
+@ca
+def r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra():
+    """P2 thread XMG: `_danh_dau_auth_hong` trả False thì KHÔNG được nuốt như đã ghi."""
+    import types
+    m = _tai_launcher_thu()
+    m.__file__ = str(LAUNCHER)          # bản sao đột biến nằm ở thư mục tạm, thiếu codex_cred.py
+    m._co_chan_codex = lambda: None
+    m._dang_cho_snapshot = lambda home: False
+    ns = {}
+    exec("def _kiem_song(home):\n    return False, 'credential BỊ TỪ CHỐI (INERT)'\n", ns)
+    m.runpy = types.SimpleNamespace(run_path=lambda p: {"_kiem_song": ns["_kiem_song"]})
+    from unittest.mock import patch
+    with San() as s, patch.dict(os.environ, {"CODEX_HOME": str(s / "codex")}):
+        m._danh_dau_auth_hong = lambda home, da_probe=None: True
+        ok, ly_do = m._do_codex_song()
+        bang(not ok and ly_do == "credential BỊ TỪ CHỐI (INERT)", f"đối chứng sai: {ly_do!r}")
+        m._danh_dau_auth_hong = lambda home, da_probe=None: False
+        ok, ly_do = m._do_codex_song()
+        bang(not ok, "credential bị từ chối mà vẫn ok")
+        bang(ly_do.startswith("KHÔNG ghi được trạng thái chờ snapshot"),
+             f"lỗi ghi trạng thái bị nuốt: {ly_do!r}")
+
+
+@ca
+def r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi():
+    """P2 thread XLy (THU HẸP, không đóng): đích đổi giữa lúc kiểm và `os.replace` ⇒
+    từ chối, giữ nguyên bản của tiến trình kia. Codex CLI không tôn trọng khoá của kho
+    nên khe syscall cuối vẫn còn — nợ có tên `codex-auth-json-khong-cas`."""
+    if LA_WINDOWS:
+        return "đo trên POSIX; nhánh Windows dùng cùng phép đọc lại trước os.replace"
+    m = _tai_launcher_thu()
+    cu, cua_ta, cua_ho = b'{"v":"INERT-CU"}', b'{"v":"INERT-TA"}', b'{"v":"INERT-HO"}'
+    with San() as s:
+        home = s / "codex"
+        with m._KhoCodex(home, create=True) as store:
+            store.write("auth.json", cu, None)
+        with m._KhoCodex(home) as store:
+            that = store.read
+            dem = {"n": 0}
+            def doc(name="auth.json"):
+                dem["n"] += 1
+                if dem["n"] == 2:   # lần đọc ngay trước khi thay: tiến trình kia vừa refresh
+                    p = home / "auth.json"
+                    p.write_bytes(cua_ho)
+                    os.chmod(p, 0o600)
+                return that(name)
+            store.read = doc
+            try:
+                store.write("auth.json", cua_ta, cu)
+            except OSError as e:
+                bang("changed before promotion" in str(e), f"từ chối sai lý do: {e}")
+            else:
+                bang(False, "đã thay dù đích vừa đổi")
+        bang((home / "auth.json").read_bytes() == cua_ho, "bản mới của tiến trình kia bị ghi đè")
+        bang(not [p for p in home.iterdir() if ".tmp-" in p.name], "rác tệp tạm còn lại")
+
+
 # ---------------------------------------------------------------------------------------------
 # wp685 (LAUNCHER-CON-SONG-ESRCH, đặc tả r28 §7 B1–B4) — helper theo NHÃN cho t156/t157.
 # Nguồn: PR #679 job 109303373142 (ESRCH thoát khỏi `_con_song`); cross-review lượt 1–12 trên
@@ -7991,6 +8912,68 @@ def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
 
 
 DOT_BIEN = [
+    ("g6_trust_windows_separator_disabled",
+     ('if platform.system() == "Windows" else (lambda p: p)',
+      'if False else (lambda p: p)'),
+     ["r484_g6_trust_windows_separator_aliases"]),
+    ("g6_trust_conflicting_alias_ignored",
+     ('for v in cac_muc):', 'for v in []):'),
+     ["r484_g6_trust_windows_separator_aliases"]),
+    ("g6_trust_posix_separator_folded",
+     ('if platform.system() == "Windows" else (lambda p: p)', 'if True else (lambda p: p)'),
+     ["r484_g6_trust_posix_backslash_is_not_separator"], ("posix", "POSIX path semantics")),
+    ("g4_windows_sid_alias_not_normalized",
+     ('self._win_sid(fields[5])', 'fields[5]'),
+     ["r484_g4_windows_sid_alias_identity"], ("windows", "native SID conversion")),
+    ("g4_windows_LA_not_current_owner",
+     ('allowed = {self.sid, "S-1-5-18", "S-1-5-32-544"}',
+      'allowed = {self.sid, "S-1-5-18", "S-1-5-32-544", self._win_sid("LA")}'),
+     ["r484_g4_windows_sid_alias_identity"], ("windows", "native SID conversion")),
+    ("g2_windows_directory_pin_access",
+     ('(0x81 | (0x20000 if security else 0))', '(0x80 | (0x20000 if security else 0))'),
+     ["r484_g2_storage_kernel_guardrails"], ("windows", "native Windows share-delete pin")),
+    ("g2_rejected_refresh_khong_phu_thuoc_metadata",
+     ('payload = {key: tokens.get(key)}', 'payload = tokens'),
+     ["r484_g2_recovery_probe_rollback_va_snapshot_moi"]),
+    ("g2_resume_bo_prompt",
+     ('or cp["prompt_sha256"] != kq["prompt_sha256"]', 'or False'),
+     ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+    ("g2_unknown_child_khong_duoc_cap_void",
+     ('requested_void = ban_ghi.pop("void_reason", None)',
+      'requested_void = ban_ghi.get("void_reason")'),
+     ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+    ("g2_resume_bo_head",
+     ('or cp["head"] != kq["head"]', 'or False'),
+     ["r484_g2_checkpoint_resume_va_gia_auth_khong_refund"]),
+    # wp484 g7 — mỗi P2 một đột biến gỡ đúng bản vá.
+    ("g7_home_sai_lai_traceback",
+     ('    except OSError as e:\n        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ',
+      '    except ValueError as e:\n        raise Chan(MA_CHUA_XAC_THUC, f"CODEX_HOME không hợp lệ'),
+     ["r484_g7_credential_status_home_sai_la_chan_khong_traceback"]),
+    ("g7_nuot_loi_ghi_trang_thai",
+     ('            if not _danh_dau_auth_hong(home, da_probe):\n                return False, (f"KHÔNG ghi',
+      '            if False:\n                return False, (f"KHÔNG ghi'),
+     ["r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra"]),
+    ("g7_f03_doc_lai_sau_probe",
+     ('            data = da_probe if da_probe is not None else store.read()',
+      '            data = store.read()'),
+     ["r484_g7_tu_choi_ghi_dung_ban_da_probe"]),
+    ("g7_f01_materializer_gop_loi",
+     ('                        except (OSError, ValueError) as e:\n'
+      '                            result["cach"] = ("CHỜ snapshot mới: auth bị từ chối nhưng KHÔNG',
+      '                        except KeyError as e:\n'
+      '                            result["cach"] = ("CHỜ snapshot mới: auth bị từ chối nhưng KHÔNG'),
+     ["r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do"]),
+    ("g7_bo_doc_lai_truoc_replace",
+     ('            if self.read(name) != expected:\n'
+      '                raise OSError("credential changed before promotion")',
+      '            if False:\n'
+      '                raise OSError("credential changed before promotion")'),
+     ["r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi"]),
+    ("g8_xong_rc0_van_giu_failure_class",
+     ('        ban_ghi.pop("failure_class", None)',
+      '        pass'),
+     ["r484_g8_run_xong_khong_mang_failure_class"]),
     ("m1_xoa_actionlint_khoi_cong_cu",
      ('    {"ten": "actionlint", "bat_buoc": False, "ung_vien": ["actionlint"],',
       '    {"ten": "actionlint_disabled", "bat_buoc": False, "ung_vien": ["actionlint"],'),
@@ -8156,8 +9139,8 @@ DOT_BIEN = [
        '            chua_chung_minh.append(k["ten"])')],
      ["t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor"]),
     ("chuan_bi_bo_duong_JSON_tho",
-     ('    for ten_cach, thu in (("base64 → JSON", None), ("JSON thô", thoc)):',
-      '    for ten_cach, thu in (("base64 → JSON", None),):'),
+     ('            for method in ("base64", "JSON thô"):',
+      '            for method in ("base64",):'),
      ["t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac"]),
     ("hook_phien_bo_phep_so_nang_luc",
      ('    thieu = sorted(cua_master - dang_co)',
@@ -8489,8 +9472,8 @@ DOT_BIEN = [
       '                           text=True, timeout=30, encoding="utf-8", errors="replace")'),
      ["t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran"]),
     ("do_codex_song_spawn_ten_tran",
-     ('    lenh = duong_dan or shutil.which("codex") or "codex"',
-      '    lenh = "codex"'),
+     ('            probe.__globals__["_co_codex"] = lambda: duong_dan',
+      '            probe.__globals__["_co_codex"] = lambda: "codex"'),
      ["t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran"]),
     ("footer_van_khuyen_bat_kiem_song",
      ('            if getattr(a, "kiem_song", False):\n'
@@ -9173,6 +10156,11 @@ DOT_BIEN_HARNESS = [
      ('    tranh = {os.getpid(), os.getppid()}',
       '    tranh = set()'),
      ["r766_t81_khong_phu_thuoc_pid_cua_luot_chay"]),
+    # J01 (Codex lượt 4): bỏ bộ lọc môi trường thì BASH_ENV của máy chạy lại lọt vào hook.
+    ("g8_fixture_chep_nguyen_moi_truong",
+     ('               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
+      '               if True}'),
+     ["r484_g8_hook_scrub_kin_voi_bash_env"]),
 ]
 
 
@@ -9197,6 +10185,11 @@ def chay_dot_bien() -> int:
     khong_do = 0
     tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
+        # Preserve the real delegated probe dependency in neutral/mutant copies.
+        # Otherwise t133 fails before reaching the mutation and reports a false kill.
+        companion = LAUNCHER.with_name("codex_cred.py")
+        if companion.is_file():
+            shutil.copy2(companion, tam / companion.name)
         for muc in DOT_BIEN:
             ten, cap, phai_chet = muc[0], muc[1], muc[2]
             # Phan tu thu TU (tuy chon) = ('posix'|'windows', ly do). Co dot bien
@@ -9308,6 +10301,7 @@ def chay_dot_bien() -> int:
             ban_test.write_text(moi_test, encoding="utf-8")
             (thu_muc / "launcher.py").write_text(goc, encoding="utf-8")
             chet = []
+            bo_qua = []
             loi_runner = []
             for ten_ca in phai_chet:
                 try:
@@ -9319,16 +10313,30 @@ def chay_dot_bien() -> int:
                 except (OSError, subprocess.SubprocessError) as e:
                     loi_runner.append(f"{ten_ca}({type(e).__name__})")
                     continue
-                dau_hong = f"LAP {ten_ca}: 0/1 qua"
+                dau_hong = f"LAP {ten_ca}: 0/1 qua, 0 bo qua"
+                dau_bo_qua = f"LAP {ten_ca}: 0/1 qua, 1 bo qua, 0 hong"
                 if p.returncode == 1 and dau_hong in p.stdout:
                     chet.append(ten_ca)
+                elif p.returncode == 0 and dau_bo_qua in p.stdout:
+                    # wp484 g7 (đo: launcher-windows 39057167905, `g8_fixture_chep_nguyen_moi_truong`
+                    # SAI 0/1 vì ca đích POSIX tự bỏ qua trên Windows) — cùng luật runner sản phẩm
+                    # phía trên: ca TỰ BỎ QUA trên nền này là KHÔNG ĐO ĐƯỢC, không phải "test yếu".
+                    bo_qua.append(ten_ca)
                 elif p.returncode != 0:
                     loi_runner.append(f"{ten_ca}(rc={p.returncode})")
-            ok = len(chet) == len(phai_chet) and not loi_runner
+            can_do = len(phai_chet) - len(bo_qua)
+            if can_do == 0 and not loi_runner:
+                khong_do += 1
+                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: "
+                      f"{', '.join(bo_qua)})")
+                continue
+            ok = len(chet) == can_do and not loi_runner
             if not ok:
                 hong += 1
             ghi_chu = f" [loi runner: {', '.join(loi_runner)}]" if loi_runner else ""
-            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{len(phai_chet)}: "
+            if bo_qua:
+                ghi_chu += f" [bo qua: {', '.join(bo_qua)}]"
+            print(f"  {ten:<28} {'OK' if ok else 'SAI'}  giet {len(chet)}/{can_do}: "
                   f"{', '.join(chet) or '(khong ca nao chet)'}{ghi_chu}")
     finally:
         LAUNCHER_DANG_DUNG = LAUNCHER

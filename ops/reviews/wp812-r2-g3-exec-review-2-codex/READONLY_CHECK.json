@@ -1,0 +1,9 @@
+{
+  "source_vs_initial_cp_changed_or_missing": [
+    ".git/index"
+  ],
+  "extra_in_suite_copy": [
+    ".claude/dev/__pycache__/launcher.cpython-313.pyc",
+    ".claude/dev/__pycache__/packet_loop.cpython-313.pyc"
+  ]
+}

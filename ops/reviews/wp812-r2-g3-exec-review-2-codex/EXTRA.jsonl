@@ -1,0 +1,6 @@
+/tmp/rv812-r2-suite/.claude/dev/packet_loop_test.py:3708: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+{"probe": "prefix-conflict", "rc": 0, "state": "leased", "unchanged": false, "error": ""}
+{"probe": "planned-path", "rc": 7, "state": "awaiting_lease", "unchanged": true, "error": "I2(Đ): ai-dang-giu planned:x/a.py không trả wp55-r1-g1-claude là người giữ duy nhất (rc=0)\n"}
+{"probe": "effective-conflict", "rc": 0, "state": "leased", "unchanged": false, "error": ""}
+{"scratch": "/tmp/review812-extra-6_tu_0dc"}

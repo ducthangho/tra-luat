@@ -1,0 +1,7 @@
+Đã ghi [VERDICT.md](VERDICT.md) và [HINT.patch](HINT.patch).
+
+**changes_requested — P0=0 P1=1 P2=4 P3=1**
+
+Suite: **434/434, TỔNG: ĐẠT**; 198 mutant bị giết, 1 mutant Windows bỏ qua. Tuy nhiên, 6 mutant kiểm toán vẫn sống.
+
+Kho gốc không bị sửa.

@@ -1,0 +1,14 @@
+{
+  "r2": {
+    "ref": "origin/ops/wp812-spec:ops/specs/wp812-r2.md",
+    "sha256": "d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef"
+  },
+  "common": {
+    "ref": "origin/ops/wp812-spec:ops/specs/may-adr-0054-chung.md",
+    "sha256": "4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0"
+  },
+  "r1_repro": {
+    "ref": "origin/ops/wp812-g2-reviews:ops/reviews/wp812-r1-g2-exec-review-1-codex/REPRO.py",
+    "sha256": "63138d14b60b19460c60d0a8337c5d055af0588c9f2075336e8660227d6d2d70"
+  }
+}

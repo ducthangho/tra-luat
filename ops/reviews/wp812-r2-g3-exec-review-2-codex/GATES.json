@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "python3",
+      "/tmp/rv812-r2-suite/.claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "/tmp/rv812-r2-suite"
+    ],
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "/tmp/rv812-r2-suite/.claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "/tmp/rv812-r2-suite"
+    ],
+    "rc": 0,
+    "stdout": "adr-song: sạch — 53 ADR trên đĩa, 53 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])\n",
+    "stderr": ""
+  }
+]

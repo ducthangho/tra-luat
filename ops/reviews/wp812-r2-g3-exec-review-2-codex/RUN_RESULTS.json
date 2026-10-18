@@ -1,0 +1,11 @@
+{
+  "command": "cp -a /home/user/rv812 /tmp/rv812-r2-suite && python3 /tmp/rv812-r2-suite/.claude/dev/packet_loop_test.py > SUITE.log 2>&1",
+  "rc": 0,
+  "baseline_passed": 434,
+  "baseline_measured": 434,
+  "baseline_skipped": 1,
+  "mutants_total": 199,
+  "mutants_killed": 198,
+  "mutants_skipped": 1,
+  "result": "TỔNG: ĐẠT"
+}

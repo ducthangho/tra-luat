@@ -1,0 +1,9 @@
+{
+  "cases": 435,
+  "mutants": 199,
+  "r812_cases": 29,
+  "r812_mutants": 31,
+  "r812_cases_without_declared_target_mutant": [
+    "r812_verdict_am_dung_bang_lop"
+  ]
+}

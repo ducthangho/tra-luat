@@ -1,0 +1,3 @@
+# 2026-10-18T09:49:50Z tren worktree origin/master 1e69d2a0d3c708efe0dec86752fc13a0fe039aab, core.abbrev 7
+$ python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json  (trich ok/so dem/failed/extra/missing)
+{"ok": false, "expected_file_count": 187, "checked_file_count": 187, "failed": [], "extra_files": ["changelog.d/wp-802.md"], "missing_from_current_manifest": [], "required_missing": []}

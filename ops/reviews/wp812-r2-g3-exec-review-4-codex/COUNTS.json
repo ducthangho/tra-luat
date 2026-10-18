@@ -1,0 +1,9 @@
+{
+  "cases": 469,
+  "mutants": 229,
+  "r812_cases": 63,
+  "r812_mutants": 61,
+  "windows_only": [
+    "luong_canonical_chay_that"
+  ]
+}

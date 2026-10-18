@@ -1,0 +1,4 @@
+{"probe": "positive-full-tuple", "changed_field": null, "rc": 0, "state": "approved_pending", "error": ""}
+{"probe": "executor-provider-one-field", "changed_field": "executor_provider", "rc": 11, "state": "reviewing", "error": "biên nhận /tmp/review812-identity-ab-1phcbkbt/bn.yaml không đủ điều kiện approve: ['provider-executor']\n"}
+{"probe": "executor-surface-one-field", "changed_field": "surface", "rc": 11, "state": "reviewing", "error": "biên nhận /tmp/review812-identity-ab-1phcbkbt/bn.yaml không đủ điều kiện approve: ['executor-surface-transport']\n"}
+{"probe": "executor-transport-one-field", "changed_field": "transport", "rc": 11, "state": "reviewing", "error": "biên nhận /tmp/review812-identity-ab-1phcbkbt/bn.yaml không đủ điều kiện approve: ['executor-surface-transport']\n"}

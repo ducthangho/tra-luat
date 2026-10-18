@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](VERDICT.md) và [HINT.patch](HINT.patch).
+
+**changes_requested — P0=0 P1=1 P2=2 P3=0.**
+
+Suite đạt **468/468**, `TỔNG: ĐẠT`; 228 mutant bị giết, một mutant Windows bị bỏ qua. HINT áp kiểm tra thành công trên bản sao exact head. KHO không bị sửa.

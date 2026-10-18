@@ -1,0 +1,10 @@
+{
+  "doctrine-scan": {
+    "rc": 0,
+    "output": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n"
+  },
+  "adr-song": {
+    "rc": 0,
+    "output": "adr-song: sạch — 53 ADR trên đĩa, 53 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])\n"
+  }
+}

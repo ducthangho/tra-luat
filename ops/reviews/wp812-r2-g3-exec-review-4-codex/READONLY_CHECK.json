@@ -1,0 +1,36 @@
+{
+  "head": {
+    "rc": 0,
+    "stdout": "4504b80e67e4c3c8e967be92212842eb835c6e85\n",
+    "stderr": ""
+  },
+  "status": {
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "diff": {
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "staged": {
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "tracked_file_hashes": {
+    ".claude/dev/packet_loop.py": {
+      "matches_head": true,
+      "sha256": "eeec7132a04a1b54fed1311ab572c6c269ec3e84a05e9950d79cf34820d7e3ec"
+    },
+    ".claude/dev/packet_loop_test.py": {
+      "matches_head": true,
+      "sha256": "681e3937716f02660cc5843353b451be27a5ab42b82d08052fe10079daaca5b0"
+    },
+    "docs/PROTOCOL_DA_PHIEN.md": {
+      "matches_head": true,
+      "sha256": "805216bc03de651c0ad91b6256ee2a50b8858b4634176929c5da278eb9512201"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "command": "cp -a /home/user/rv812 /tmp/rv812-r4-suite && python3 /tmp/rv812-r4-suite/.claude/dev/packet_loop_test.py",
+  "rc": 0,
+  "baseline": "nền: 468/468 đạt · BỎ QUA: 1",
+  "total_pass": true,
+  "mutants_killed": 228,
+  "skips": [
+    "  BỎ QUA  luong_canonical_chay_that: chỉ đo lệnh pwsh trên Windows",
+    "  BỎ QUA  đột biến luong_canonical_chay_that_dao_os_name: ca ['luong_canonical_chay_that'] không được tính là đã giết"
+  ]
+}

@@ -1,0 +1,59 @@
+{"probe": "effective-disjoint-baseline", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "effective-omits-declared-conflict", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "empty-declared", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "own-dot", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "own-parent", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "own-glob", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "own-glob-conflict", "rc": 0, "state": "leased", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "wrong-provider-type", "rc": 7, "state": "awaiting_lease", "unchanged": true, "traceback": false, "error": "I2(H): lease_publish check rc=8: CHAN [8]: provider khai rỗng\n"}
+{"probe": "positive-H", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": "", "thieu": [], "neo": [[], []]}
+{"probe": "model_family-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model_family-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model_family-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "ho_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "ho_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "ho_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "canonical_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "canonical_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "canonical_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_model_family-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_model_family-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_model_family-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_ho_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_ho_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_ho_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_canonical_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_canonical_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_canonical_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "bang_chung_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "bang_chung_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "bang_chung_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_bang_chung_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_bang_chung_model-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor_bang_chung_model-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model_executor_identity-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model_executor_identity-dict", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "model_executor_identity-bool", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "reviewer-bang_chung_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "reviewer-model_evidence_ref-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "reviewer-telemetry_path-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor-bang_chung_model-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor-model_evidence_ref-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "executor-telemetry_path-list", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "schema_version-domain", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "bang_lop-domain", "rc": 11, "state": "reviewing", "unchanged": true, "traceback": false, "error": "biên nhận /tmp/review812-r4-own-uhkc8zdv/receipt/bn.yaml không đủ điều kiện approve: ['bang-lop', 'con-P0-P2', 'slug-ngoai-bang']\n"}
+{"probe": "context-executor-provider", "rc": 8, "state": "reviewing", "unchanged": true, "traceback": false, "error": "state hỏng (adr0054) — không đoán: /tmp/review812-r4-own-uhkc8zdv/receipt/sd1/wp55.json\n"}
+{"probe": "context-executor-model_family", "rc": 8, "state": "reviewing", "unchanged": true, "traceback": false, "error": "state hỏng (adr0054) — không đoán: /tmp/review812-r4-own-uhkc8zdv/receipt/sd1/wp55.json\n"}
+{"probe": "context-executor-execution_surface", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "context-executor-transport", "rc": 0, "state": "approved_pending", "unchanged": false, "traceback": false, "error": ""}
+{"probe": "context-reviewer-provider", "rc": 8, "state": "reviewing", "unchanged": true, "traceback": false, "error": "state hỏng (adr0054) — không đoán: /tmp/review812-r4-own-uhkc8zdv/receipt/sd1/wp55.json\n"}
+{"probe": "context-reviewer-model_family", "rc": 8, "state": "reviewing", "unchanged": true, "traceback": false, "error": "state hỏng (adr0054) — không đoán: /tmp/review812-r4-own-uhkc8zdv/receipt/sd1/wp55.json\n"}
+{"probe": "context-reviewer-execution_surface", "rc": 11, "state": "reviewing", "unchanged": true, "traceback": false, "error": "biên nhận /tmp/review812-r4-own-uhkc8zdv/receipt/bn.yaml không đủ điều kiện approve: ['surface']\n"}
+{"probe": "context-reviewer-transport", "rc": 11, "state": "reviewing", "unchanged": true, "traceback": false, "error": "biên nhận /tmp/review812-r4-own-uhkc8zdv/receipt/bn.yaml không đủ điều kiện approve: ['transport']\n"}
+{"scratch": "/tmp/review812-r4-own-uhkc8zdv"}

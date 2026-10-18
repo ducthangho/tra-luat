@@ -84,7 +84,10 @@ cong_cu:
     cai:
       linux: {lenh: 'sudo apt-get install -y ripgrep && dirname "$(command -v rg)"'}
       macos: {lenh: 'brew install ripgrep && dirname "$(command -v rg)"'}
-      windows: {lenh: 'choco install ripgrep --yes --no-progress && dirname "$(command -v rg)"'}
+      # wp802 (Q6): winget trước, choco dự phòng. Portable của winget đặt shim vào
+      # WinGet\Links mà bash hiện tại CHƯA thấy trong PATH ⇒ dòng cuối lùi về thư mục ấy.
+      # Phần trước ` && dirname ` PHẢI khớp `CONG_CU` của launcher.py và hook (launcher_test canh).
+      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && dirname "$(command -v rg || cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links/rg.exe")"'}
   bash:
     # Hook SessionStart là bash; trên Windows công thức này cấp Git Bash.
     bat_buoc: true

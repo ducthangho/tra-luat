@@ -12,8 +12,8 @@ from pathlib import Path
 # cho MỌI tiến trình con/cháu. Đo 27-09-2026 (Linux, `PYTHONIOENCODING=ascii` cho con): `t29`, `t42`,
 # `t45` chết `tin_dung_gia` vì cháu in chữ Việt ra stdout ASCII; chạy tay trên Windows (cp1252/cp1258)
 # ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi. Phạm vi
-# ĐÃ ĐO (AST, mọi Call có `env=`): giá trị là `moi_truong(…)`, `dict(os.environ, …)`, `{**os.environ, …}`, hoặc
-# biến/`dict(biến, …)` truy tay về các dạng ấy hay `None` (= thừa kế) — CỐ Ý không ghi số đếm (trôi mỗi lượt); lời
+# ĐÃ ĐO (AST, mọi Call có `env=`): giá trị là `moi_truong(…)`, `dict(os.environ, …)`, `{**os.environ, …}`, `dict({k: v
+# … os.environ.items() …}, …)`, hoặc biến/`dict(biến, …)` truy về chúng hay `None` (= thừa kế) — CỐ Ý không ghi số đếm; lời
 # gọi không `env=` thì thừa kế. Điểm phóng viết SAU phải tự giữ điều đó — chưa ca nào khoá.
 # `t61` đo từng vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
 _BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
@@ -3028,7 +3028,7 @@ def _k32_gia(hong=""):
     """kernel32 GIẢ cho `t64` — giữ TRẠNG THÁI (bảng job, cờ đọc từ BYTE cấu trúc, thành viên, kế thừa lúc phóng),
     KHÔNG diễn kịch bản: `cha_chet()` giết ai là do trạng thái `_phong_lai` đã dựng. Mỗi API là HÀM C thật
     (`CFUNCTYPE`, chữ ký Win32) nên ctypes CHUYỂN KIỂU theo argtypes/restype SẢN PHẨM khai — handle giả > 32 bit
-    (restype sai thì bị cắt), thiếu/lệch `byref` thì lỗi ở BIÊN, không lọt. `hong` = tên API bị bắt trả 0."""
+    (restype sai thì bị cắt), thiếu `byref` lỗi ở BIÊN, lệch `byref` đọc cờ sai chỗ — không lọt. `hong` = API bị bắt trả 0."""
     import ctypes, threading, types
     vp, i = ctypes.c_void_p, ctypes.c_int
     H = 1 << (8 * ctypes.sizeof(vp) - 4)       # handle nền > 32 bit: restype mặc định `c_int` cắt còn 32 là HỎNG THẬT
@@ -3040,15 +3040,15 @@ def _k32_gia(hong=""):
         k.giu.append(cb)       # SẢN PHẨM tự gán argtypes/restype như với WinDLL; `k.giu` giữ callback sống kẻo treo
         setattr(k, ten, ctypes.CFUNCTYPE(i)(ctypes.cast(cb, vp).value))
 
-    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes thật truyền sang; đọc cờ LimitFlags tại p+16 (4 byte)
-        ok = h in k.job and lop == 9 and p and n == (144 if ctypes.sizeof(vp) == 8 else 112)
+    def dat(h, lop, p, n):     # `p` = ĐỊA CHỈ ctypes truyền; < 64 KiB (số đưa làm con trỏ) ⇒ FALSE như nhân, không SIGSEGV
+        ok = h in k.job and lop == 9 and (p or 0) >= 1 << 16 and n == (144 if ctypes.sizeof(vp) == 8 else 112)
         if ok:
             k.job[h].update(co=int.from_bytes(ctypes.string_at(p + 16, 4), "little"))
         return int(bool(ok))
 
     def popen(lenh, **kw):
-        k.con.append(subprocess.Popen(lenh, **kw))  # phóng từ thành viên ⇒ con thuộc job, trừ khi job cho thoát lặng
-        [j["tv"].add(k.con[-1]) for j in k.job.values() if "cha" in j["tv"] and not j["co"] & 0x1000]
+        k.con.append(subprocess.Popen(lenh, **{"stdin": subprocess.DEVNULL, **kw}))  # đọc stdin ⇒ EOF, (w2) đỏ không treo
+        [j["tv"].add(k.con[-1]) for j in k.job.values() if "cha" in j["tv"] and not j["co"] & 0x1000]  # thuộc job trừ thoát lặng
         return k.co.set() or k.con[-1]  # báo hiệu SAU khi đã ghi thành viên — trước thì `cha_chet` đua với dòng trên
     api("CreateJobObjectW", lambda *_: k.job.setdefault(H + len(k.job) + 1, dict(co=0, tv=set())) and max(k.job), vp, vp, vp)
     api("SetInformationJobObject", dat, i, vp, i, vp, ctypes.c_uint32)
@@ -3074,12 +3074,12 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
     mac_dinh = (lambda: [signal.signal(s, signal.SIG_DFL) for s in (signal.SIGINT, signal.SIGTERM)]) if os.name == "posix" else None
     with tempfile.TemporaryDirectory(prefix="t64-") as td:
         (tep := Path(td) / "dau.py").write_text(nguon.split(cat)[0] + "\nimport signal\nprint(f'PID={os.getpid()} U8={sys.flags.utf8_mode} PL="
-                                                "{int(_DA_PHONG_LAI)} INT={signal.getsignal(2) is signal.default_int_handler:d}', flush=True)"
-                                                "\nsys.stdin.read()\n", encoding="utf-8")
+                                                "{int(_DA_PHONG_LAI)} INT={signal.getsignal(2) is signal.default_int_handler:d}', flush=True,"
+                                                " file=sys.stdout or sys.stderr)\nsys.stdin.read()\n", encoding="utf-8")
         for sig in (None,) + ((signal.SIGTERM,) if os.name == "posix" else ()):
             with subprocess.Popen([sys.executable, str(tep)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE, env=env, preexec_fn=mac_dinh) as p:
-                (hen := threading.Timer(120, p.kill)).start()  # treo không in ⇒ giết ⇒ `dung` dưới ĐỎ, không treo tới trần job
+                (hen := threading.Timer(120, lambda: p.kill() or p.stdin.close())).start()  # treo ⇒ giết + EOF ⇒ `dung` ĐỎ
                 dau, rc = p.stdout.readline().decode("utf-8", "replace"), None
                 hen.cancel()
                 dung("U8=1 PL=1" in dau, f"giàn giáo: phần đầu không phóng lại sang UTF-8 — không đo gì: {dau!r}")
@@ -3097,7 +3097,8 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
         for fd in (1, 2) if os.name == "posix" else ():  # (k4) fd ĐÓNG lúc gọi ⇒ sys.stdout/stderr None: phần đầu VẪN phóng
             r = subprocess.run([sys.executable, str(tep)], input=b"", capture_output=True, env=env, timeout=120,
                                preexec_fn=lambda: os.close(fd))
-            bang(r.returncode == 0, f"(k4) fd {fd} đóng ⇒ nổ trước khi phóng lại: rc={r.returncode} {r.stderr[-99:]!r}")
+            bang(r.returncode == 0 and b"U8=1 PL=1" in r.stdout + r.stderr,  # rc=0 TRẦN lọt "thoát 0 không phóng/chạy"
+                 f"(k4) fd {fd} đóng ⇒ không phóng lại tới bộ ca: rc={r.returncode} {(r.stdout + r.stderr)[-99:]!r}")
 
     def phong(k, lenh, gia=True):
         with contextlib.redirect_stderr(loi := io.StringIO()):
@@ -6312,7 +6313,7 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC(goi_git=subprocess.run
             pass
         oid = goi_git(["git", "-C", str(d), "hash-object", "-w", "--stdin"],
                       input=than.encode("utf-8"), capture_output=True, timeout=60)
-        r = goi_git(["git", "-C", str(d), "update-index", "--add", "-z", "--index-info"],
+        r = goi_git(["git", "-c", "core.protectNTFS=false", "-C", str(d), "update-index", "--add", "-z", "--index-info"],
                     input=b"100644 " + oid.stdout.strip() + b"\t" + ten + b"\0",
                     capture_output=True, timeout=60)
         co = ten in goi_git(["git", "-C", str(d), "ls-files", "-z"], capture_output=True,
@@ -6474,8 +6475,8 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
     try:
         t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC()
         doi_chung_xanh = True
-    except BoQuaMoiTruong:
-        doi_chung_xanh = False
+    except BoQuaMoiTruong as ex:
+        bang(False, f"(0) đối chứng t49 KHÔNG tráo mà đã BỎ QUA — chốt staging ném bừa thì che mọi tráo: {ex}")
     except TinHieuChotCa as ex:
         raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ cả khi KHÔNG tráo: {ex}") from ex
     for buoc, cach, dau in (("hash-object", "rc", "rc=128/0"), ("update-index", "rc", "rc=0/128"),
@@ -6499,6 +6500,8 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
              "(bo_ten) t49 BỎ QUA trước khi đo (3) — phần stage phải đứng CUỐI ca")
         bang(cach != "bo_ten" or any(lenh[0] == "(2d)" for lenh in nhat_ky),
              "(bo_ten) t49 BỎ QUA trước hai chốt THUẦN (2d) — phần stage phải đứng CUỐI ca")
+    bang(any("core.protectNTFS=false" in lenh for lenh in nhat_ky if "update-index" in lenh),
+         "(cờ) update-index thiếu -c core.protectNTFS=false — Windows bỏ tên có dấu chéo ngược (handoff §1/§2)")
 
 
 @ca

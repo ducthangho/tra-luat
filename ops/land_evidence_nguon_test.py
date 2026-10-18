@@ -2,7 +2,7 @@
 """Phản chứng CHẠY ĐƯỢC cho `ops/land_evidence_nguon.py` — packet #773, đặc tả r1 mục `nghiem_thu`.
 
 Ca `c*` dựng cây tạm (không chạm `ops/land/**` thật, Q5), dựng lại lượt 1 và 2 của connector trên #771; `c11` chạy CÂY
-THẬT (m = k). ĐỘT BIẾN sửa BẢN SAO TẠM của bộ kiểm (neo đúng một lần), ca đích chạy ở tiến trình con và phải XANH trên bản
+THẬT (rc 0, m ≤ k). ĐỘT BIẾN sửa BẢN SAO TẠM của bộ kiểm (neo đúng một lần), ca đích chạy ở tiến trình con và phải XANH trên bản
 gốc trước. Chỉ `bang()` ném `TinHieuChotCa` (con in `DO:<ca>:`, thoát 3); lỗi vô can thoát 4 ⇒ TÍN DỤNG GIẢ, không tính
 giết (bài học CLAUDE.md "bị giết không phải bị giết ĐÚNG LÝ DO"). `TU_KIEM` kiểm chính bộ phân hạng.
 
@@ -246,6 +246,9 @@ def c09_l5_mien_tru_theo_bam():
         (goc / "ops/land" / TEN).write_text(hs + " ", encoding="utf-8")
         rc, ra = kiem(m, goc)
         bang(rc == 1 and "MẤT MIỄN TRỪ" in ra and "0/1 miễn trừ" in ra, f"lệch một byte ⇒ kiểm đủ luật: rc={rc} {ra[-300:]}")
+        (goc / "ops/land" / TEN).write_text("x: 'measured — a.json'\n", encoding="utf-8")
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and "0/1 miễn trừ" in ra, f"mất miễn trừ mà vẫn ĐẠT luật ⇒ xanh: rc={rc} {ra[-300:]}")
 
 
 @ca
@@ -265,9 +268,11 @@ def c10_l5_danh_sach_dong_bang():
 
 @ca
 def c11_cay_that_dat_va_mien_tru_du():
+    import re
     rc, ra = kiem(nap(), ROOT_THAT)
-    n = KY_VONG_SO_MIEN_TRU
-    bang(rc == 0 and f"· {n}/{n} miễn trừ" in ra, f"cây thật phải ĐẠT với {n}/{n} miễn trừ: rc={rc} {ra[-400:]}")
+    n = KY_VONG_SO_MIEN_TRU   # m < k hợp lệ: hồ sơ miễn trừ đổi byte mất miễn trừ nhưng vẫn ĐẠT luật (Q2); c10 khoá danh sách
+    m = re.search(rf"· (\d+)/{n} miễn trừ", ra)
+    bang(rc == 0 and m and int(m.group(1)) <= n, f"cây thật phải ĐẠT, mẫu số {n} miễn trừ: rc={rc} {ra[-400:]}")
 
 
 @ca

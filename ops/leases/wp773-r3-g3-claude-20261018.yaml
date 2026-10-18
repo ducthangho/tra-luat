@@ -1,0 +1,70 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 773
+packet_id: land-evidence-khai-phai-co-nguon
+mission_issue: 773
+revision: 3
+generation: 3
+lease_id: wp773-r3-g3-claude-20261018
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/land-evidence-khai-phai-co-nguon-r3.md
+spec_sha256_required: 81543d80b4d27cbecdcce4bfcdfe5a8974bb8a17cae6e8a2de56d0e53b4ee012
+spec_hash: 81543d80b4d27cbecdcce4bfcdfe5a8974bb8a17cae6e8a2de56d0e53b4ee012
+prompt_path: ops/specs/land-evidence-khai-phai-co-nguon-r3.md
+prompt_sha256_required: 81543d80b4d27cbecdcce4bfcdfe5a8974bb8a17cae6e8a2de56d0e53b4ee012
+write_set:
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set:
+- .claude/dev/ci_dang_ky_test.py
+branch: agent/wp773-g1-claude
+branch_ownership: shared_with_g1
+branch_ownership_note: >-
+  Spec r2 Q1-r2: commit g2 day vao CHINH nhanh cua g1 (PR #778) de g1 va g2 vao master trong mot merge. Cung executor,
+  cung packet; write set hai dot khong giao nhau.
+target_branch_neu_land: master
+base_sha: fb490a7c3fa2992c6f4635ed091dafa813df2fe7
+start_from_sha: 128b2e892f91dd353367c082bfc9cf2c300ecfb7
+reviewed_sha_required: 128b2e892f91dd353367c082bfc9cf2c300ecfb7
+base_ghi_chu: >-
+  base_sha = origin/master fb490a7 (merge #821) do luc soan; start_from_sha = head PR #778 128b2e8 (g2 dong MOI theo r2;
+  review Codex CLI g2 luot 1 request_changes P2=2). Ban va F2 (g1, c11) da day o 597edf7 duoi lease g1 cu; F1 = mau r3.
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/773#issuecomment-6245193547
+granted_on_instruction_note: >-
+  Chu kho ducthangho dang comment 6245193547 (OWNER, performed_via_github_app null, 2026-10-18T03:28:46Z, doc lai qua
+  API 03:29Z): gia han toi 2026-10-18T19:00:00Z, chap nhan spec r3 sha256 81543d80 (ops/wp773-r3-g3-lease, 3c92353),
+  lease moi g3 (g2) va g1x (g1) thay hai lease cu kem bia mo hai chieu. Comment nay thay comment 6244761753 (02:32Z,
+  ban nhap cu neo spec r2, base 1360108) cung lease_id.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-18T03:35:00Z'
+lease_expires_at_utc: '2026-10-18T19:00:00Z'
+size_limit: 'g2: 1 tep, <= 5 dong them (spec r3, giu Q4-r2)'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Review Codex doc lap toi khi P1=0, P2=0, P3=0 tren dung head (chi thi chu kho cho #773).
+ci_policy: ci_day_du_tren_pr_778
+ci_policy_note: >-
+  Day vao agent/wp773-g1-claude (PR #778). Nghiem thu: gate-registry va gate-ops XANH, log gate-registry co
+  `CI_DANG_KY ops/land_evidence_nguon_test.py: ĐẠT rc=0`. Khong merge, khong land, khong deploy.
+push_policy: push_nhanh_agent_pr_san_co
+thay_the_cho: wp773-r2-g2-claude-20261017
+xung_dot_write_set_do_luc: >-
+  2026-10-18T03:3xZ ai-dang-giu .claude/dev/ci_dang_ky_test.py: NGUOI_GIU 1 = wp773-r2-g2-claude-20261017 (chinh lease
+  duoc thay). wp748 r18 (#748 issuecomment-6243361863) CHUA dang lease tren ref nao luc do.

@@ -1,0 +1,4 @@
+{"mutant": "remove-lease-H-check", "passed": 19, "total": 19, "failures": {}}
+{"mutant": "remove-lease-holder-check", "passed": 19, "total": 19, "failures": {}}
+{"mutant": "remove-shallow-mode-check", "passed": 19, "total": 19, "failures": {}}
+{"mutant": "remove-remote-head-check", "passed": 19, "total": 19, "failures": {}}

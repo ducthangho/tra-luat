@@ -1,0 +1,5 @@
+**changes_requested — P0=0, P1=4, P2=6, P3=0.**
+
+Đã ghi [VERDICT.md](VERDICT.md), [HINT.patch](HINT.patch) và [script tái hiện](REPRO.py). HINT đã qua `git apply --check` trên exact head.
+
+Suite: `424/424`, `TỔNG: ĐẠT`; 1 ca và 1 mutant Windows chưa đo. Các phản chứng vẫn tái hiện cấp quyền sai. KHO không bị sửa.

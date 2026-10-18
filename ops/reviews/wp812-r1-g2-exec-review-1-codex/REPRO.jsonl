@@ -1,0 +1,18 @@
+{"probe": "positive-review-real-H", "rc": 0, "state": "approved_pending", "unchanged": false, "error": ""}
+{"probe": "chatgpt-as-codex", "rc": 0, "state": "approved_pending", "unchanged": false, "error": ""}
+{"probe": "wrong-transport", "rc": 0, "state": "approved_pending", "unchanged": false, "error": ""}
+{"probe": "absent-git-anchor", "rc": 0, "state": "approved_pending", "unchanged": false, "error": ""}
+{"probe": "invalid-slug-newline", "rc": 0, "state": "approved_pending", "unchanged": false, "error": ""}
+{"probe": "negative-review-without-H", "rc": 0, "state": "running", "unchanged": false, "error": ""}
+{"probe": "bad-doctor-at-attempt-cap", "rc": 3, "state": "blocked", "unchanged": false, "error": "đã dùng hết 1/1 lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.\n"}
+{"probe": "positive-accept-real-H", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "pending-review", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "P1-in-review", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "P1-in-issue-comment", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "old-attempt-jobs", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "wrong-check-repository", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "duplicate-P1-P3", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "duplicate-workflow-id", "rc": 0, "state": "accepted", "unchanged": false, "error": ""}
+{"probe": "malformed-context", "rc": 1, "state": "approved_pending", "unchanged": true, "error": "Traceback (most recent call last):\n  File \"/tmp/rv812-review-copy/.claude/dev/packet_loop.py\", line 2847, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File \"/tmp/rv812-review-copy/.claude/dev/packet_loop.py\", line 2843, in main\n    return a.fn(a, Path(a.state_dir))\n           ~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/rv812-review-copy/.claude/dev/packet_loop.py\", line 2579, in cmd_accept\n    xa = _git_do(root, \"ls-remote\", \"origin\", f\"refs/heads/{nc['branch']}\")\n                                                            ~~^^^^^^^^^^\nKeyError: 'branch'\n"}
+{"probe": "valid-spec-only-in-ref", "rc": 7, "state": "awaiting_lease", "unchanged": true, "error": "I2(H): lease_publish check rc=6: CHAN [6]: prompt_path 'ops/specs/wp55.md' không có tệp (tìm ở /tmp/review812-repro-_hx0tg_6/lease/kho/w/ops/specs/wp55.md) — lease neo một vật không tồn tại thì reviewer không bao giờ qua được cổng\n"}
+{"scratch": "/tmp/review812-repro-_hx0tg_6"}

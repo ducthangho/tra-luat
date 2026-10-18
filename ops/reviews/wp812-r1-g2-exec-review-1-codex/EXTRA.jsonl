@@ -1,0 +1,20 @@
+{"probe": "invalid-review-at-round-cap", "rc": 3, "state": "blocked", "reviews": 1, "attempt_open": true, "unchanged": false, "err": "review vượt trần vòng: vong_review 1/1 — Review Rescue Checkpoint: dừng, hỏi chủ kho\n"}
+{"probe": "valid-lease-spec-only-in-ref", "rc": 7, "state": "awaiting_lease", "reviews": 0, "attempt_open": false, "unchanged": true, "err": "I2(H): lease_publish check rc=6: CHAN [6]: prompt_path 'ops/specs/wp55.md' không có tệp (tìm ở /tmp/rv812-extra/lease-spec-only-ref/kho/w/ops/specs/wp55.md) — lease neo một vật không tồn tại thì reviewer không bao giờ qua được cổng\n"}
+{"probe": "required-checks-bool", "rc": 0, "state": "leased", "reviews": 0, "attempt_open": false, "unchanged": false, "err": ""}
+{"probe": "required-checks-int", "rc": 0, "state": "leased", "reviews": 0, "attempt_open": false, "unchanged": false, "err": ""}
+{"probe": "required-checks-dict", "rc": 0, "state": "leased", "reviews": 0, "attempt_open": false, "unchanged": false, "err": ""}
+{"probe": "required-checks-str", "rc": 0, "state": "leased", "reviews": 0, "attempt_open": false, "unchanged": false, "err": ""}
+{"probe": "malformed-context-input", "rc": 1, "state": "approved_pending", "reviews": 1, "attempt_open": false, "unchanged": true, "err": "Traceback (most recent call last):\n  File \"/tmp/rv812-review-copy/.claude/dev/packet_loop.py\", line 2847, in <module>\n    sys.exit(main())\n             ~~~~^^\n  File \"/tmp/rv812-review-copy/.claude/dev/packet_loop.py\", line 2843, in main\n    return a.fn(a, Path(a.state_dir))\n           ~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/rv812-review-copy/.claude/dev/packet_loop.py\", line 2579, in cmd_accept\n    xa = _git_do(root, \"ls-remote\", \"origin\", f\"refs/heads/{nc['branch']}\")\n                                                            ~~^^^^^^^^^^\nKeyError: 'branch'\n"}
+{"probe": "duplicate-P1-P3", "rc": 0, "state": "accepted", "err": ""}
+{"probe": "duplicate-workflow-id", "rc": 0, "state": "accepted", "err": ""}
+{"probe": "valid-gemini-executor-predicate", "rc": 11}
+{"probe": "baseline", "mode": true}
+{"probe": "missing-declaration", "mode": false}
+{"probe": "duplicate-declaration", "mode": false}
+{"probe": "oid-containing-but-not-introducing-adr", "mode": false}
+{"probe": "activation-missing-phrase", "mode": false}
+{"probe": "protocol-not-activated", "mode": false}
+{"probe": "shallow", "mode": false}
+{"probe": "candidate-validator-ignored", "rc": 0, "err": ""}
+{"cases": 425, "mutants": 188, "r812_cases": 19, "r812_mutants": 20}
+{"probe": "invalid-doctor-at-attempt-cap", "rc": 3, "unchanged": false, "state": "blocked", "err": "đã dùng hết 1/1 lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.\n"}

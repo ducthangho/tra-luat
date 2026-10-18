@@ -1,0 +1,350 @@
+--- a/.claude/dev/packet_loop.py
++++ b/.claude/dev/packet_loop.py
+@@ -665,8 +665,8 @@
+                             and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
+             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
+             ("dem-vong", st["review_rounds_used"] == len(st["reviews"])),
+-            ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
+-                        and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)),
++            ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or _ngu_canh_0054_hop_le(st.get("ngu_canh_lease")))
++                        and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict and type(st["bien_nhan_approve"].get("p3")) is list)),
+             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
+                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
+     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
+@@ -1011,11 +1011,14 @@
+             f"lượt {st['attempts_used']} đang mở — đóng nó bằng một review trước đã. "
+             f"Gọi lại begin-attempt không mở lượt mới và không tiêu thêm trần.",
+         )
+-    _xet_dung(state_dir, st, "begin-attempt")
++    if st.get("luat_adr0054") is not True:
++        _xet_dung(state_dir, st, "begin-attempt")
+     if not isinstance(st.get("hmac_key"), str) or not re.fullmatch(r"[0-9a-f]{64}", st["hmac_key"]):
+         _die(RC_STATE, "state thiếu/hỏng khoá toàn vẹn — không nâng cấp state cũ ngầm")
+     anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)
+                                or os.environ.get(BIEN_BANG_CHUNG), can_sach=True)
++    if st.get("luat_adr0054") is True:
++        _xet_dung(state_dir, st, "begin-attempt")
+     st["attempts_used"] += 1
+     st["state"] = "running"
+     st["attempt_open"] = True
+@@ -1169,7 +1172,7 @@
+             _die(RC_TRACE, f"lời gọi {a.codex_call!r} đã neo một review — mỗi lời gọi MỘT lần")
+ 
+     ids = list(a.finding_id or [])
+-    if a.verdict == "changes_requested" and not ids:
++    if a.verdict == "changes_requested" and not ids and st.get("luat_adr0054") is not True:
+         _die(RC_ARG, "verdict changes_requested phải có ít nhất một --finding-id SLUG")
+     for fid in ids:
+         if not SLUG_RE.match(fid):
+@@ -1180,7 +1183,12 @@
+             )
+ 
+     # #812 M2: packet áp ADR-0054 chỉ `approve` được qua biên nhận H; `--verdict` một mình không đủ.
+-    bn = _du_dieu_kien_approve(st, a) if st.get("luat_adr0054") is True and a.verdict == "approve" else None
++    bn = _du_dieu_kien_approve(st, a, verdict=a.verdict) if st.get("luat_adr0054") is True else None
++    if bn:
++        lop_h = sorted(x["slug"] for x in bn["lop"])
++        if ids and sorted(set(ids)) != lop_h or a.verdict == "changes_requested" and not lop_h:
++            _die(RC_BIEN_NHAN, "finding-id phải khớp bảng lớp H; changes_requested cần lớp dương")
++        ids = lop_h
+ 
+     # (c) cùng ID lặp TRONG MỘT review chỉ tính MỘT lần: dedup trước khi đếm.
+     # Không có bước này thì reviewer nhắc lại một lỗi hai lần trong cùng một
+@@ -1204,31 +1212,12 @@
+         }
+     )
+ 
+-    cham_tran = []
+     for fid in ids_duy_nhat:
+         st["finding_counts"][fid] = st["finding_counts"].get(fid, 0) + 1
+-        if st["finding_counts"][fid] >= st["same_failure_limit"]:
+-            cham_tran.append(fid)
+-
+-    if cham_tran:
+-        st["state"] = "blocked"
+-        st["history"].append({"event": "blocked_same_failure", "finding_ids": cham_tran})
+-        _save(state_dir, st)
+-        chi_tiet = ", ".join(f"{f}×{st['finding_counts'][f]}" for f in cham_tran)
+-        _die(
+-            RC_TRAN,
+-            f"cùng finding-id lặp tới trần ({chi_tiet}; trần {st['same_failure_limit']}) "
+-            f"— packet về blocked. Lặp lại nghĩa là bản vá không trúng gốc; "
+-            f"ghi failure evidence + handoff rồi dừng.",
+-        )
+-
+-    if a.verdict != "approve":  # approve KHÔNG BAO GIỜ kích rescue
+-        for truc, (u, t) in reversed(TRUC_TRAN.items()):  # codex chạm trần TRƯỚC (lúc record-codex-call) ⇒ xét trước (ADR-0048)
+-            if st[u] >= st[t]:
+-                _vao_rescue(state_dir, st, truc, f"review {a.verdict} chưa approve")
++    _xet_dung(state_dir, st, "record-review", ket_qua=True)
+ 
+     st["state"] = {"approve": "approved_pending" if bn else "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
+-    if bn:
++    if bn and a.verdict == "approve":
+         st.update(pending_sha=a.reviewed_sha, bien_nhan_approve=bn)
+     elif a.verdict == "approve":
+         st["accepted_sha"] = a.reviewed_sha
+@@ -2393,7 +2382,8 @@
+ HANG_LOP = ("P0", "P1", "P2", "P3")
+ CHECK_BAT_BUOC = tuple((".github/workflows/ci.yml", f"{j} (ubuntu-latest)") for j in ("gate", "gate-cong-cu-gop", "gate-ops", "gate-packet-loop", "gate-registry"))
+ APP_CHECK, BOT_LEASE, BOT_CONNECTOR = "github-actions", "github-actions[bot]", "chatgpt-codex-connector[bot]"
+-CANON = ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py")
++CANON = ("ops/lease_publish.py", "ops/bien_nhan_v2.py", ".claude/dev/launcher.py",
++         "AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md")
+ RC_DANG_GIU_LEASE = 11  # `ops/lease_publish.py::RC_DANG_GIU` — `ai-dang-giu` có người giữ
+ REPO_RE = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/issues/([0-9]+)#issuecomment-[0-9]{1,30}\Z")
+ 
+@@ -2431,12 +2421,17 @@
+     ds = [x for t in trang for x in t[khoa]] if ok else []
+     if not ok or not all(isinstance(x, dict) and type(x.get("id")) is int for x in ds) or {t["total_count"] for t in trang} != {len({x["id"] for x in ds})}:
+         _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {nhan}: cần trang {{`{khoa}`, `total_count`}}, id int, tập id phân biệt = total_count")
+-    return ds
++    theo_id = {}
++    for x in ds:
++        if x["id"] in theo_id and theo_id[x["id"]] != x:
++            _die(RC_GATE, f"{nhan}: id {x['id']} có hai bản ghi mâu thuẫn")
++        theo_id[x["id"]] = x
++    return list(theo_id.values())
+ 
+ 
+ def _ngu_canh_lease(l: dict, ref: str, oid: str, path: str, repo: str) -> dict:
+     """M1: hàm DUY NHẤT dựng tập khoá ngữ cảnh lease (`record-lease` ghi; `record-review`/`accept` đọc)."""
+-    rc = l.get("required_checks") or []
++    rc = l.get("required_checks", [])
+     if type(rc) is not list or not all(type(x) is list and len(x) == 2 and all(type(s) is str and s for s in x) for x in rc):
+         _die(RC_ARG, "lease `required_checks` phải là list các cặp [workflow, job]")
+     return {"lease_id": l["lease_id"], "lease_ref": ref, "lease_oid": oid, "lease_path": path, "repo": repo,
+@@ -2444,6 +2439,22 @@
+             "executor": _identity(l.get("provider"), l.get("model_family"), l.get("execution_surface"), l.get("transport")),
+             "reviewer": _identity(l.get("reviewer"), l.get("reviewer_model_family"), l.get("reviewer_execution_surface"), l.get("reviewer_transport")),
+             "required_checks": sorted({tuple(x) for x in CHECK_BAT_BUOC} | {tuple(x) for x in rc})}
++
++
++def _ngu_canh_0054_hop_le(nc) -> bool:
++    if type(nc) is not dict:
++        return False
++    for k in ("lease_id", "repo", "branch", "spec_hash", "assurance_target"):
++        if type(nc.get(k)) is not str or not nc[k].strip():
++            return False
++    if type(nc.get("generation")) is not int or nc["generation"] < 1:
++        return False
++    for vai in ("executor", "reviewer"):
++        d = nc.get(vai)
++        if type(d) is not dict or any(type(d.get(k)) is not str or not d[k] for k in ("provider", "model_family", "execution_surface", "transport")):
++            return False
++    checks = nc.get("required_checks")
++    return type(checks) is list and bool(checks) and all(type(x) in (list, tuple) and len(x) == 2 and all(type(v) is str and v.strip() for v in x) for x in checks)
+ 
+ 
+ def _che_do_0054(root: Path, spec: bytes) -> bool:
+@@ -2475,8 +2486,14 @@
+         _die(RC_GUARD, f"{a.lease_ref} không có trên remote hoặc lệch ls-remote — lease ở ref cục bộ không có thẩm quyền")
+     rc, raw = _git_do(root, "show", f"{oid}:{a.lease_path}")
+     td = _canon(root)
++    snapshot, gitdir = td / "snapshot", td / "lease-context.git"
++    snapshot.mkdir()
++    cloned = subprocess.run(["git", "clone", "--quiet", "--mirror", "--shared", str(root.resolve()), str(gitdir)], capture_output=True)
++    if cloned.returncode or _git_do(gitdir, "config", "core.bare", "false")[0] or _git_do(gitdir, "config", "core.worktree", str(snapshot))[0] or _git_do(gitdir, "checkout", "--quiet", "--force", "--detach", oid)[0]:
++        _die(RC_GUARD, "không dựng được snapshot lease theo OID")
++    (snapshot / ".git").write_text(f"gitdir: {gitdir}\n", encoding="utf-8")
+     (td / "lease.yaml").write_bytes(raw)
+-    p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(root)], capture_output=True)
++    p = subprocess.run([*(lp := [sys.executable, str(td / "ops" / "lease_publish.py")]), "check", str(td / "lease.yaml"), "--root", str(snapshot)], capture_output=True)
+     if rc or p.returncode:
+         _die(RC_GUARD, f"I2(H): lease_publish check rc={p.returncode}: {p.stderr.decode('utf-8', 'replace').strip()[-300:]}")
+     l = yaml.safe_load(raw)
+@@ -2512,7 +2529,7 @@
+     return RC_OK
+ 
+ 
+-def _du_dieu_kien_approve(st: dict, a) -> dict:
++def _du_dieu_kien_approve(st: dict, a, *, verdict="approve") -> dict:
+     """M2 — vị từ DÙNG CHUNG cho `approve` của packet áp ADR-0054: verdict TRONG biên nhận H (không phải `--verdict`), I8 qua hàm chuẩn
+     hoá của `bien_nhan_v2`, I10 (packet, generation, sha, spec_hash), assurance = lease, bảng lớp đúng lược đồ, không còn P0–P2."""
+     import yaml
+@@ -2522,27 +2539,40 @@
+         _die(RC_BIEN_NHAN, f"packet áp ADR-0054: `approve` phải kèm --bien-nhan đọc được ({type(ex).__name__})")
+     spec = importlib.util.spec_from_file_location("bien_nhan_v2_canon", _canon(Path(a.root)) / "ops" / "bien_nhan_v2.py")
+     spec.loader.exec_module(bnv := importlib.util.module_from_spec(spec))
++    if bnv.PROVIDER_NGUON_HONG is not None:
++        _die(RC_BIEN_NHAN, f"nguồn validator không đo được: {bnv.PROVIDER_NGUON_HONG}")
+     d = d if isinstance(d, dict) else {}
+     nc, lop = st["ngu_canh_lease"], d.get("bang_lop")
+     mri = d["model_reviewer_identity"] if isinstance(d.get("model_reviewer_identity"), dict) else {}
+-    ho = lambda prov: bnv.HO_MODEL_MAC_DINH.get(bnv._chuan_hoa_provider(prov if type(prov) is str else ""), "")  # noqa: E731
++    def provider(p):
++        return bnv._chuan_hoa_provider({"codex": "openai_codex", "claude": "anthropic_claude"}.get(p, p)) if type(p) is str else ""
++
++    def ho_lease(vai):
++        family = nc[vai]["model_family"]
++        return "gpt" if family == "openai" else bnv._ho_model_cua_ten(family)
+     ho_rev, ho_exec = bnv._giai_ho_model_reviewer(d)[0], bnv._giai_ho_model_executor(d)
+-    lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.match(x["slug"])
++    lop_ok = type(lop) is list and all(type(x) is dict and type(x.get("slug")) is str and SLUG_RE.fullmatch(x["slug"])
+                                        and x.get("hang") in HANG_LOP for x in lop) and len({x["slug"] for x in lop}) == len(lop)
+     loi = list(bnv._thieu(d) if d else ["không phải ánh xạ"]) + [ten for ten, dung in (
+-        ("verdict", d.get("verdict") == "approve"), ("role", d.get("role") == "reviewer"),
++        ("verdict", d.get("verdict") == verdict), ("role", d.get("role") == "reviewer"),
+         ("packet", type(d.get("packet_issue")) is int and d["packet_issue"] == st["packet"]),
+         ("generation", type(d.get("generation")) is int and d["generation"] == nc["generation"]),
+         ("reviewed_sha", d.get("reviewed_sha") == a.reviewed_sha), ("spec_hash", d.get("spec_hash") == nc["spec_hash"]),
+         ("lease_id", d.get("lease_id") == nc["lease_id"]), ("assurance", d.get("assurance") == nc["assurance_target"]),
+-        ("ho-reviewer", bool(ho_rev) and ho_rev == ho(nc["reviewer"]["provider"]) == ho(mri.get("provider"))),
+-        ("ho-executor", bool(ho_exec) and ho_exec == ho(nc["executor"]["provider"])),
++        ("provider-reviewer", provider(mri.get("provider")) == provider(nc["reviewer"]["provider"])),
++        ("ho-reviewer", bool(ho_rev) and ho_rev == ho_lease("reviewer")),
++        ("ho-executor", bool(ho_exec) and ho_exec == ho_lease("executor")),
++        ("transport", nc["reviewer"]["transport"] is not None and mri.get("transport") == nc["reviewer"]["transport"]),
+         ("surface", nc["reviewer"]["execution_surface"] is not None and mri.get("surface") == nc["reviewer"]["execution_surface"]),
+         ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec),
+-        ("bang-lop", lop_ok), ("con-P0-P2", lop_ok and not any(x["hang"] in HANG_LOP[:3] for x in lop))) if not dung]
++        ("bang-lop", lop_ok), ("con-P0-P2", lop_ok and (verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop)))) if not dung]
++    if not loi:
++        vi_pham, chua_do = bnv._neo_git(Path(a.root), str(a.bien_nhan), d)
++        loi.extend(vi_pham + chua_do)
+     if loi:
+-        _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện approve: {loi}")
+-    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}
++        _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện {verdict}: {loi}")
++    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "lop": lop,
++            "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}
+ 
+ 
+ def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
+@@ -2557,15 +2587,33 @@
+         if not all(str(x.get(url, "")).endswith(duoi) and isinstance(x.get("user"), dict) and type(x.get("body")) is str for x in v):
+             _die(RC_GATE, f"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body")
+     cua = {k: [x for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
+-    if not ([x for x in cua["issue_comments"] if (m := re.search(r"Reviewed commit:\s*`?([0-9a-f]{7,40})\b", x["body"])) and head.startswith(m[1])]
+-            or [x for x in cua["reviews"] if x.get("commit_id") == head]):  # I3: bằng chứng dương rỗng ⇒ không đạt
+-        _die(RC_GATE, f"connector chưa xong trên {head}: không review/kết luận sạch nào của {BOT_CONNECTOR}")
+-    hang = {x["id"]: set(re.findall(r"!\[(P[0-9]+) Badge\]", x["body"])) for x in cua["review_comments"] if x.get("commit_id") == head}
+-    if [i for i, v in hang.items() if len(v) != 1 or not v <= set(HANG_LOP)]:  # I3: miền đóng — P4, PX, không/hai badge ⇒ không đạt
+-        _die(RC_GATE, f"connector: hạng ngoài miền {HANG_LOP}: { {i: sorted(v) for i, v in hang.items()} }")
+-    if cao := [i for i, v in hang.items() if v != {"P3"}]:
+-        _die(RC_GATE, f"connector còn P0–P2 trên {head}: {cao} — DỪNG, hỏi chủ kho")
+-    return [i for i, v in hang.items() if v == {"P3"}], {k: max((x["id"] for x in v), default=None) for k, v in ep.items()}
++    def moc_head(x):
++        m = re.search(r"Reviewed commit:\s*`?([0-9a-f]{7,40})\b", x["body"])
++        return bool(m and head.startswith(m[1]))
++
++    da_xong = {"APPROVED", "COMMENTED", "CHANGES_REQUESTED"}
++    if not (any(moc_head(x) for x in cua["issue_comments"])
++            or any(x.get("commit_id") == head and x.get("state") in da_xong for x in cua["reviews"])):
++        _die(RC_GATE, f"connector chưa xong trên {head}")
++    p3 = []
++    for k, v in cua.items():
++        for x in v:
++            tags = set(re.findall(r"!\[(P[^]\s]*) Badge\]", x["body"]))
++            if k == "issue_comments":
++                if tags and not moc_head(x):
++                    _die(RC_GATE, "finding issue comment thiếu mỏ neo head")
++                hien_hanh = moc_head(x)
++            else:
++                hien_hanh = x.get("commit_id") == head
++            if not hien_hanh:
++                continue
++            if k == "review_comments" or tags:
++                if len(tags) != 1 or not tags <= set(HANG_LOP):
++                    _die(RC_GATE, f"connector {k} {x['id']}: hạng không hợp lệ {tags}")
++                if tags != {"P3"}:
++                    _die(RC_GATE, f"connector {k} {x['id']}: còn P0–P2 — DỪNG")
++                p3.append((k, x["id"]))
++    return p3, {k: max((x["id"] for x in v), default=None) for k, v in ep.items()}
+ 
+ 
+ def cmd_accept(a, state_dir: Path) -> int:
+@@ -2581,10 +2629,25 @@
+         _die(RC_TRACE, f"đầu nhánh {nc['branch']} trên remote ≠ pending_sha {h}")
+     wr, sha_wr = _doc_json(a.workflow_runs, RC_GATE)
+     runs_wf = _trang_du(wr, "workflow_runs", "workflow_runs")
++    jobs_doc, _ = _doc_json(a.workflow_jobs, RC_GATE)
++    all_jobs = _trang_du(jobs_doc, "jobs", "workflow_jobs")
+     for wf in sorted({w for w, _ in nc["required_checks"]}):
+         ung = [r for r in runs_wf if (r.get("path"), r.get("head_sha")) == (wf, h)
+                and isinstance(r.get("repository"), dict) and r["repository"].get("full_name") == nc["repo"]]
+-        suite, jobs = (max(ung, key=lambda r: r["id"]).get("check_suite_id") if ung else None), [j for w, j in nc["required_checks"] if w == wf]
++        run = max(ung, key=lambda r: r["id"]) if ung else {}
++        suite, jobs = run.get("check_suite_id"), [j for w, j in nc["required_checks"] if w == wf]
++        if type(run.get("run_attempt")) is not int or run["run_attempt"] < 1 or (run.get("status"), run.get("conclusion")) != ("completed", "success"):
++            _die(RC_GATE, f"{wf}: run/attempt mới nhất chưa xanh hoặc thiếu identity")
++        for ten in jobs:
++            jj = [j for j in all_jobs if (j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten)]
++            if not jj:
++                _die(RC_GATE, f"{wf}: thiếu {ten} trên attempt {run['run_attempt']}")
++            job = max(jj, key=lambda j: j["id"])
++            if (job.get("status"), job.get("conclusion")) != ("completed", "success"):
++                _die(RC_GATE, f"{wf}: {ten} chưa xanh trên attempt mới nhất")
++            check_url = re.fullmatch(rf"https://api\.github\.com/repos/{re.escape(nc['repo'])}/check-runs/([1-9][0-9]*)", str(job.get("check_run_url", "")))
++            if not check_url or not any(r["id"] == int(check_url[1]) and r["name"] == ten and r["head_sha"] == h and r["check_suite"]["id"] == suite and isinstance(r.get("app"), dict) and r["app"].get("slug") == APP_CHECK for r in _doc_check_runs(a.check_runs)):
++                _die(RC_GATE, f"{wf}: job không neo check-run của đúng kho/app/suite")
+         if type(suite) is not int:
+             _die(RC_GATE, f"VẮNG: không run {wf} nào trên {h} trong {nc['repo']} (hoặc thiếu check_suite_id)")
+         if [r for r in _doc_check_runs(a.check_runs) if r["name"] in jobs and r["check_suite"]["id"] == suite
+@@ -2592,7 +2655,19 @@
+             _die(RC_GATE, f"check bắt buộc của {wf} có run từ app khác {APP_CHECK!r}")
+         cmd_kiem_gate(argparse.Namespace(head=h, check_suite=str(suite), bat_buoc=jobs, check_runs=a.check_runs), state_dir)
+     p3_cn, moc = _doc_connector(a.connector, nc["repo"], a.pr, h)
+-    con_mo = {("offline", s) for s in st["bien_nhan_approve"]["p3"]} | {("connector", str(i)) for i in p3_cn}
++    lop_cn = []
++    if p3_cn:
++        args_h = argparse.Namespace(root=a.root, reviewed_sha=h, bien_nhan=a.bien_nhan_connector)
++        receipt = _du_dieu_kien_approve(st, args_h)
++        lop_cn = receipt["lop"]
++        for x in lop_cn:
++            refs = x.get("connector_refs")
++            if type(refs) is not list or not refs or not all(type(r) is list and len(r) == 2 and r[0] in ("reviews", "review_comments", "issue_comments") and type(r[1]) is int for r in refs):
++                _die(RC_BIEN_NHAN, "connector_refs phải là danh sách cặp (endpoint, id)")
++        refs_h = [(x["slug"], tuple(ref)) for x in lop_cn for ref in x["connector_refs"]]
++        if any(x["hang"] != "P3" or not x.get("connector_refs") for x in lop_cn) or sorted(ref for _, ref in refs_h) != sorted(p3_cn):
++            _die(RC_BIEN_NHAN, "bảng lớp H phải phủ đúng từng (endpoint, id) connector P3")
++    con_mo = {("offline", s) for s in st["bien_nhan_approve"]["p3"]} | {("connector", x["slug"]) for x in lop_cn}
+     qd, truong = (_doc_json(a.quyet_dinh_p3, RC_ARG)[0] if a.quyet_dinh_p3 else []), {"nguon", "khoa", "ten_no", "owner", "huong", "ly_do"}
+     if (type(qd) is not list or not all(type(q) is dict and set(q) == truong and all(type(v) is str and v.strip() for v in q.values()) for q in qd)
+             or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):
+@@ -2604,16 +2679,27 @@
+     return RC_OK
+ 
+ 
+-def _xet_dung(state_dir: Path, st: dict, cua: str) -> None:
+-    """I5 (M4): hàm DUY NHẤT xét dừng ở mọi cửa ĐƯA packet đi tiếp. Cửa KHÉP lượt đang mở không bị chặn: trần lượt chỉ khoá
+-    `begin-attempt` (mở lượt MỚI); trần vòng ở `record-review` giữ đúng hành vi cũ (I9)."""
++def _xet_dung(state_dir: Path, st: dict, cua: str, *, ket_qua=False) -> None:
++    """Evaluate stops only after validation; a closing review is recorded before it can stop."""
+     if cua == "begin-attempt" and st["attempts_used"] >= st["attempts_limit"]:
+         st.update(state="blocked", history=[*st["history"], {"event": "blocked_attempts_exhausted", "at_attempt": st["attempts_used"]}])
+         _save(state_dir, st)
+-        _die(RC_TRAN, f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.")
++        _die(RC_TRAN, "đã dùng hết lượt — packet về blocked")
+     if cua == "record-review":
+-        if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
+-            _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
++        if not ket_qua:
++            if st.get("luat_adr0054") is not True and st["review_rounds_used"] >= st["review_rounds_limit"]:
++                _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
++            return
++        lap = [f for f in st["reviews"][-1]["finding_ids"] if st["finding_counts"][f] >= st["same_failure_limit"]]
++        if lap:
++            st["state"] = "blocked"
++            st["history"].append({"event": "blocked_same_failure", "finding_ids": lap})
++            _save(state_dir, st)
++            _die(RC_TRAN, f"cùng finding-id lặp tới trần: {lap}")
++        if st["reviews"][-1]["verdict"] != "approve":
++            for truc, (u, t) in reversed(TRUC_TRAN.items()):
++                if st[u] >= st[t]:
++                    _vao_rescue(state_dir, st, truc, "review chưa approve")
+     if cua == "accept":
+         _kiem_luoc_do_lease(st["lease"], RC_STATE)
+ 
+@@ -2730,9 +2816,10 @@
+     q = sub.add_parser("accept", help="#812: approved_pending → accepted (packet áp ADR-0054)")
+     for co in ("--packet", "--pr"):
+         q.add_argument(co, type=int, required=True)
+-    for co in ("--check-runs", "--workflow-runs", "--connector"):  # JSON readback (R) trên pending_sha; dạng connector: `_doc_connector`
++    for co in ("--check-runs", "--workflow-runs", "--workflow-jobs", "--connector"):  # JSON readback (R) trên pending_sha; dạng connector: `_doc_connector`
+         q.add_argument(co, required=True)
+     q.add_argument("--quyet-dinh-p3", help="JSON list quyết định cho mọi P3 còn mở")
++    q.add_argument("--bien-nhan-connector", help="biên nhận H có bang_lop[].connector_refs = [[endpoint, id], ...]")
+     q.add_argument("--root", default=".")
+     q.set_defaults(fn=cmd_accept)
+ 

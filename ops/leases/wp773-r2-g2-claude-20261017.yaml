@@ -72,3 +72,7 @@ xung_dot_write_set_do_luc: >-
   for-each-ref theo tap ten, thieu 0). Truoc do tep bi wp748 r14 -> r15 -> r16 -> r17 giu lien tuc; r17 het han
   2026-10-17T20:03:56Z. Do lai 2026-10-18T01:0xZ: NGUOI_GIU 0 (591/591 nhanh, thieu 0). wp748 r17 da co bia mo
   (50b0efe, da_bi_thay_the wp748-r18-g18-claude-windows-20261018); lease r18 CHUA dang tren ref nao luc do.
+da_bi_thay_the: wp773-r3-g3-claude-20261018
+da_bi_thay_the_ly_do: >-
+  Chu kho gia han va chap nhan spec r3 tai Issue #773 issuecomment-6245193547 (2026-10-18T03:28:46Z): lease wp773-r3-g3-claude-20261018
+  thay lease nay, toi 2026-10-18T19:00:00Z. Lease nay con han luc ghi bia mo, nen bia mo hai chieu la duong thu hoi.

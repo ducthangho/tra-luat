@@ -1,0 +1,2 @@
+2026-10-18T09:47:17Z
+ls-remote=609 for-each-ref=609 ten_thieu=0 ten_thua=0 oid_lech=0 (so dict ten->OID sau chuan hoa tien to)

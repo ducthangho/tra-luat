@@ -5648,11 +5648,8 @@ MUTANTS.update({
                                        ["kg_f01_cung_id_khac_suite", "kg_f01_cung_id_khac_suite_hai_trang"]),
     "kg_f01_bo_ten_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["check_suite"]["id"], r["head_sha"])',
                                      ["kg_f01_cung_id_khac_ten", "kg_f01_cung_id_hai_ten_bat_buoc"]),
-    # F02: bỏ đường bắt trần `int()` ⇒ traceback. Ở ĐÂY traceback chính là lỗi đang khoá, nên ca
-    # đích chết vì nó là đúng chốt (ca đòi rc=12 và vắng traceback).
-    "kg_f02_bo_bat_tran_int": (("    try:\n        suite = int(a.check_suite)\n    except ValueError:", "        suite = a.check_suite   #"),
-                               ("    if True:\n        suite = int(a.check_suite)\n    if False:", "        pass   #"),
-                               ["kg_f02_suite_vuot_tran_int"]),
+    # F02: ca nền khoá traceback; bảng đột biến chỉ nhận chết vì ĐỔI MÀU, nên đột biến gỡ đường bắt
+    # trần (chết bằng traceback) bị loại khỏi bảng (cross-review lượt 2, F03).
     "kg_f02_du_phong_khop_nham": ("        suite = a.check_suite   #", "        suite = 1   #", ["kg_f02_suite_vuot_tran_int"]),
     "kg_n6_dong_xanh_khong_suite": ('(suite {suite}): ', ": ", ["kg_m2_object_mot_trang", "kg_n7_that_suite_ci"]),
 })

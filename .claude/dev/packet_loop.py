@@ -2304,6 +2304,14 @@ def _doc_check_runs(duong: str) -> list[dict]:
             if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:
                 hong(f"trang {i} check_runs[{j}] `check_suite` không phải object có `id` số nguyên: {cs!r}")
             runs.append(r)
+    # #788 F01 (H3, cross-review lượt 1): cùng `id` là cùng MỘT check-run. Đếm id đúng mà danh
+    # tính mâu thuẫn (khác tên/suite/head) thì bước lọc tên/suite sau đó lặng lẽ bỏ bản mâu
+    # thuẫn và cấp xanh — kiểm ở ĐÂY, nơi còn mọi bản ghi của mọi trang, trước mọi lọc.
+    danh_tinh: dict = {}
+    for r in runs:
+        dt = (r["name"], r["check_suite"]["id"], r["head_sha"])
+        if danh_tinh.setdefault(r["id"], dt) != dt:
+            hong(f"id {r['id']} mang hai danh tính {danh_tinh[r['id']]!r} và {dt!r} — bằng chứng mâu thuẫn")
     tong_khai = khai[0]
     if any(t != tong_khai for t in khai):
         hong(f"các trang khai `total_count` khác nhau {khai} — không phải cùng một lần lấy")
@@ -2320,10 +2328,13 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
     if not SHA_RE.fullmatch(a.head):
         _die(RC_ARG, f"--head phải là SHA 40 ký tự hex thường, được {a.head!r}")
     # `[0-9]`, KHÔNG `\d`: `int()` nhận cả chữ số Unicode.
-    suite = int(a.check_suite) if re.fullmatch(r"[1-9][0-9]*", a.check_suite) else None
-    if suite is None:
+    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):
         _die(RC_ARG, f"--check-suite phải là số nguyên dương thập phân (không dấu, không số 0 đầu), "
                      f"được {a.check_suite!r}")
+    try:
+        suite = int(a.check_suite)
+    except ValueError:   # F02: vượt trần chữ số của `int()`; `json` chịu đúng trần ấy nên không id
+        suite = a.check_suite   # nào khớp — giữ CHUỖI (≠ mọi int) ⇒ VẮNG, không traceback
     ten_bb = list(dict.fromkeys(a.bat_buoc))   # trùng tên ⇒ tính MỘT lần, giữ thứ tự
     if any(not t.strip() for t in ten_bb):
         _die(RC_ARG, "--bat-buoc không được rỗng")

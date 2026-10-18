@@ -5440,6 +5440,36 @@ _KG_CA.update({
 for _ten, _tc in {"am": -1, "bool": True, "thuc": 1.0, "chuoi": "1", "null": None}.items():
     _KG_CA[f"kg_n5_{_ten}"] = _kg_ca({"total_count": _tc, "check_runs": [_kg_run(1)]}, chua="≥ 0")
 
+# F01 (cross-review lượt 1, H3): cùng `id` mà khác danh tính ⇒ KHÔNG ĐO ĐƯỢC, kể cả khi mọi
+# phép đếm đều đúng; bản trùng NHẤT QUÁN vẫn được (trang lặp hợp lệ).
+_KG_DT = "mang hai danh tính"
+_KG_CA.update({
+    "kg_f01_cung_id_khac_suite": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, suite=_KG_SUITE_KHAC, conclusion="failure")]},
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_khac_ten": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, name="khac", conclusion="failure")]},
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_hai_ten_bat_buoc": _kg_ca(
+        {"total_count": 1, "check_runs": [_kg_run(1), _kg_run(1, name="gate2")]},
+        bat_buoc=("gate", "gate2"), dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_khac_suite_hai_trang": _kg_ca(
+        [{"total_count": 1, "check_runs": [_kg_run(1)]},
+         {"total_count": 1, "check_runs": [_kg_run(1, suite=_KG_SUITE_KHAC, conclusion="failure")]}],
+        dem=False, chua=_KG_DT),
+    "kg_f01_cung_id_nhat_quan_hai_trang": _kg_ca(
+        [{"total_count": 1, "check_runs": [_kg_run(1)]}, {"total_count": 1, "check_runs": [_kg_run(1)]}],
+        dem=False, expect=0),
+})
+
+
+def case_kg_f02_suite_vuot_tran_int(c: Ctx):
+    """F02: đúng dạng N1 mà dài hơn trần chữ số của `int()` ⇒ VẮNG rc=12, KHÔNG traceback."""
+    rc, _, e = _kg(c, _KG_1, "gate", suite="1" * 4301)
+    _doi_ly_do(12, rc, e, "VẮNG", "kiem-gate --check-suite 4301 chữ số")
+    if "Traceback" in _txt(e):
+        raise AssertionError(f"không được traceback: {_txt(e)[-300:]!r}")
+
 
 def case_kg_n4_canh_bao(c: Ctx):
     """N4: đúng MỘT dòng mỗi tên bắt buộc có run ở suite khác; 0 dòng cho tên không bắt buộc;
@@ -5531,7 +5561,8 @@ def case_kg_m4_rc_gate_12(c: Ctx):
 
 
 CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12),
-                                 ("kg_n4_canh_bao", case_kg_n4_canh_bao), ("kg_n6_help", case_kg_n6_help)]
+                                 ("kg_n4_canh_bao", case_kg_n4_canh_bao), ("kg_n6_help", case_kg_n6_help),
+                                 ("kg_f02_suite_vuot_tran_int", case_kg_f02_suite_vuot_tran_int)]
 
 _KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
 MUTANTS.update({
@@ -5576,15 +5607,17 @@ MUTANTS.update({
     "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
     # --- #788: mỗi ô "Phép đo làm ĐỎ" của spec một đột biến; ca đích phải chết vì đổi MÀU,
     # không vì traceback (bảng đột biến ngoài kiểm điều đó).
-    "kg_n1_bo_kiem_dang": ("    if suite is None:\n", "    if False:\n",
+    "kg_n1_bo_kiem_dang": ('    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):\n', "    if False:\n",
                            [f"kg_n1_check_suite_{t}" for t in ("abc", "am", "0", "012", "cong", "cach", "unicode")]),
     "kg_n1_cho_so_0_dau": ('r"[1-9][0-9]*"', 'r"[0-9]+"', ["kg_n1_check_suite_0", "kg_n1_check_suite_012"]),
     "kg_n1_chu_so_unicode": ('r"[1-9][0-9]*"', 'r"[1-9]\\d*"', ["kg_n1_check_suite_unicode"]),
-    # "chỉ kiểm run bắt buộc": gỡ chốt ở đầu đọc, dời nó vào lệnh cho đúng tên bắt buộc.
+    # "chỉ kiểm run bắt buộc": gỡ chốt ở đầu đọc, dời nó vào lệnh cho đúng tên bắt buộc. Chốt
+    # danh tính F01 cũng đọc `check_suite` mọi run nên phải nới theo — thiếu vế ấy là traceback.
     "kg_n2_chi_kiem_bat_buoc": (
         ('            if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:\n',
+         'dt = (r["name"], r["check_suite"]["id"], r["head_sha"])',
          "    runs = _doc_check_runs(a.check_runs)\n"),
-        ("            if False:\n",
+        ("            if False:\n", 'dt = (r["name"], (r.get("check_suite") or {}).get("id"), r["head_sha"])',
          "    runs = _doc_check_runs(a.check_runs)\n    if any(not isinstance(r.get('check_suite'), dict) or "
          "type(r['check_suite'].get('id')) is not int for r in runs if r['name'] in ten_bb):\n"
          "        _die(RC_GATE, 'KHÔNG ĐO ĐƯỢC: `check_suite` không phải object')\n"),
@@ -5608,6 +5641,19 @@ MUTANTS.update({
     "kg_n5_bo_so_giua_trang": ("    if any(t != tong_khai for t in khai):\n", "    if False:\n", ["kg_n5_lech_trang"]),
     "kg_n5_bool_la_int": ("type(tc) is not int or", "not isinstance(tc, int) or", ["kg_n5_bool"]),
     "kg_n6_xoa_help": ('help="id suite của CHÍNH lượt workflow', 'help=argparse.SUPPRESS or "', ["kg_n6_help"]),
+    # F01: mỗi trường danh tính một đột biến — gỡ cả kiểm, hoặc gỡ riêng từng trường.
+    "kg_f01_bo_kiem_danh_tinh": ("        if danh_tinh.setdefault(r[\"id\"], dt) != dt:\n", "        if False:\n",
+                                 [k for k in _KG_CA if k.startswith("kg_f01_cung_id_khac") or k.endswith("hai_ten_bat_buoc")]),
+    "kg_f01_bo_suite_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["name"], r["head_sha"])',
+                                       ["kg_f01_cung_id_khac_suite", "kg_f01_cung_id_khac_suite_hai_trang"]),
+    "kg_f01_bo_ten_khoi_danh_tinh": ('dt = (r["name"], r["check_suite"]["id"], r["head_sha"])', 'dt = (r["check_suite"]["id"], r["head_sha"])',
+                                     ["kg_f01_cung_id_khac_ten", "kg_f01_cung_id_hai_ten_bat_buoc"]),
+    # F02: bỏ đường bắt trần `int()` ⇒ traceback. Ở ĐÂY traceback chính là lỗi đang khoá, nên ca
+    # đích chết vì nó là đúng chốt (ca đòi rc=12 và vắng traceback).
+    "kg_f02_bo_bat_tran_int": (("    try:\n        suite = int(a.check_suite)\n    except ValueError:", "        suite = a.check_suite   #"),
+                               ("    if True:\n        suite = int(a.check_suite)\n    if False:", "        pass   #"),
+                               ["kg_f02_suite_vuot_tran_int"]),
+    "kg_f02_du_phong_khop_nham": ("        suite = a.check_suite   #", "        suite = 1   #", ["kg_f02_suite_vuot_tran_int"]),
     "kg_n6_dong_xanh_khong_suite": ('(suite {suite}): ', ": ", ["kg_m2_object_mot_trang", "kg_n7_that_suite_ci"]),
 })
 

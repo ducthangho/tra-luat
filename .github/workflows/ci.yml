@@ -502,7 +502,9 @@ jobs:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
         manh: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # WP748 r20 (chu kho, PR #849): 45 -> 150. Do run 39304938900 tren 9983615: CA 8 manh Windows bi huy
+    # o dung phut 45 (18:45:15 -> 19:29:33), khong mot assertion nao do; Ubuntu cung dot xong trong 18-32 phut.
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

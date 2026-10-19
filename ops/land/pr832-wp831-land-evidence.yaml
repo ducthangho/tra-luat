@@ -2,8 +2,8 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
 # TRANG THAI: merged (6842a62) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-831-land)
-# dua dong nay vao master; neo quyet dinh: chi thi chu kho trong phien "Land và bookeeping đi" (ban chieu: @@NEO_LAND@@).
-# "merged" KHONG dong nghia "landed" (§10.2.4). Gate push master tren DUNG merge SHA 6842a62: @@GATE_MASTER@@.
+# dua dong nay vao master; neo quyet dinh: chi thi chu kho trong phien "Land và bookeeping đi" (ban chieu: CHO_DIEN).
+# "merged" KHONG dong nghia "landed" (§10.2.4). Gate push master tren DUNG merge SHA 6842a62: CHO_DIEN.
 # Ho qua: release-verify strict tren master DO tu f1979a5 va 2d33a0c (extra_files changelog.d/wp-802.md) nay XANH tren
 # 6842a62 — L3 cua packet nay la dieu kien (1) con thieu cua `landed` cho #802 (xem muc `ho_qua_cho_802`).
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
@@ -37,8 +37,8 @@ pre_merge_checks:
   - {name: 'Codex connector', sha: 6376cd33474f60c64e7605c8a3774a0c448dc703, conclusion: 'completed, has_any_findings=false — tren head CU 6376cd3 (luc roi draft), KHONG tren head merge', nguon: readback-comments-832.json, ghi_chu: 'measured — comment 6252813529. Connector khong tu chay lai sau cac push sau; dieu kien merge M-1 neo verdict launcher, khong neo connector.'}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-832.json, readback-review-comments-832.json]}
   - {name: 'release-verify --strict tren merge SHA (tai cho)', sha: 6842a625f457843a21bd3a3b0422f13cb13de911, conclusion: 'ok true, 189/189, failed 0, extra_files 0', nguon: do-lai-nguon-20261019/release-verify-6842a62.json}
-post_merge_checks: @@POST_MERGE@@
-bookkeeping: @@BOOKKEEPING@@
+post_merge_checks: 'CHO_DIEN — POST_MERGE (cho gate push master tren 6842a62)'
+bookkeeping: 'CHO_DIEN — BOOKKEEPING (cho gate push master tren 6842a62)'
 # ---- het truong chuan
 packet_id: wp831
 packet_issue: 831
@@ -61,7 +61,7 @@ lease:
   cap_boi: 'loi_khai_co_neo — granted_on_instruction https://github.com/ducthangho/tra-luat/issues/831#issuecomment-6252662788 (readback-comment-6252662788.json).'
   lease_until_ban_dau: '2026-10-20T17:30:00Z'
   write_set: ['ops/cong_cu.yaml', '.claude/dev/launcher_test.py', 'docs/GOI_AGENT_DA_NEN.md', 'RELEASE_MANIFEST.json', 'changelog.d/wp-831.md', 'ops/handoff/wp831-g1-claude.md', 'scripts/tl_selftest.py', 'ops/cai_cong_cu.sh']
-  thu_hoi_cuoi: @@THU_HOI@@
+  thu_hoi_cuoi: 'CHO_DIEN — THU_HOI (cho gate push master tren 6842a62)'
 
 trang_thai_packet:
   merged: true
@@ -69,7 +69,7 @@ trang_thai_packet:
     measured — readback-pr-832.json: merged true, merged_at 2026-10-19T00:59:37Z, merged_by ducthangho, merge_commit_sha 6842a62
     (cha f1979a5 + 51ae5c0: do-lai-nguon-20261019/merge-6842a62.txt), merge commit (khong squash/rebase).
   landed: true
-  landed_dieu_kien: @@LANDED@@
+  landed_dieu_kien: 'CHO_DIEN — LANDED (cho gate push master tren 6842a62)'
 
 uy_quyen_land:
   dang: >-
@@ -90,7 +90,7 @@ review:
   cac_luot_truoc: 'luot 1-3 tren cac nhanh lease r1-r3; luot 4 f1fc1c8, luot 5 b94063c, luot 6 e86d62c tren origin/ops/wp831-r4-g4-lease.'
   thread: 'measured — readback-reviews-832.json: 0 review; readback-review-comments-832.json: 0.'
 
-ho_qua_cho_802: @@HO_QUA_802@@
+ho_qua_cho_802: 'CHO_DIEN — HO_QUA_802 (cho gate push master tren 6842a62)'
 
 no_ngoai_pham_vi:
   - {ma: 'mutant-E-kiem-mang-PY', ghi_chu: 'song sot co chu dich (reviewer chap nhan tu luot 5); khong mo issue.'}

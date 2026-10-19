@@ -1,0 +1,7 @@
+# kiem-gate offline tren readback-check-runs-6842a62-all.json (filter=all); ten bat buoc = moi job cua run do.
+== run 39183257258 suite 106178142711 14 ten
+gate XANH trên 6842a625f457843a21bd3a3b0422f13cb13de911 (suite 106178142711): chuan-bi id=117840321708 · gate-registry (ubuntu-latest) id=117840336564 · gate (ubuntu-latest) id=117840336591 · gate-packet-loop (ubuntu-latest) id=117840336621 · gate-cong-cu (ubuntu-latest, 6) id=117840336641 · gate-cong-cu (ubuntu-latest, 4) id=117840336642 · gate-ops (ubuntu-latest) id=117840336651 · gate-cong-cu (ubuntu-latest, 2) id=117840336662 · gate-cong-cu (ubuntu-latest, 7) id=117840336675 · gate-cong-cu (ubuntu-latest, 5) id=117840336679 · gate-cong-cu (ubuntu-latest, 3) id=117840336692 · gate-cong-cu (ubuntu-latest, 1) id=117840336698 · gate-cong-cu (ubuntu-latest, 0) id=117840336705 · gate-cong-cu-gop (ubuntu-latest) id=117847659950
+rc=0
+== run 39183257264 suite 106178142721 2 ten
+gate XANH trên 6842a625f457843a21bd3a3b0422f13cb13de911 (suite 106178142721): launcher (ubuntu-latest) id=117840321783 · launcher (windows-latest) id=117840322092
+rc=0

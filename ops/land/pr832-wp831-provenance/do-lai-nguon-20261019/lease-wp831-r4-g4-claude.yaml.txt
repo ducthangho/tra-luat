@@ -1,0 +1,119 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 831
+packet_id: wp831
+revision: 4
+generation: 4
+lease_id: wp831-r4-g4-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: '#802 da land tai dfe5437 (PR #823).'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; verdict codex approve tren head cuoi, bang chung do_may qua launcher run.json.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp831-r4.md
+spec_sha256_required: 5caec680395ae3dbe673091153e917feb4262a69142f36e54c63a2260d48bdad
+spec_hash: 5caec680395ae3dbe673091153e917feb4262a69142f36e54c63a2260d48bdad
+spec_ref: refs/heads/ops/wp831-r4-g4-lease (cung commit voi tep lease nay)
+prompt_path: ops/specs/wp831-r4.md
+prompt_sha256_required: 5caec680395ae3dbe673091153e917feb4262a69142f36e54c63a2260d48bdad
+write_set:
+- ops/cong_cu.yaml
+- .claude/dev/launcher_test.py
+- docs/GOI_AGENT_DA_NEN.md
+- RELEASE_MANIFEST.json
+- changelog.d/wp-831.md
+- ops/handoff/wp831-g1-claude.md
+- scripts/tl_selftest.py
+- ops/cai_cong_cu.sh
+write_set_hash: 4ea46743e4fd297084d37dabe43583db32a12a7ce3fadf016187d32e1360fb61
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- ops/cong_cu.yaml
+- .claude/dev/launcher_test.py
+- docs/GOI_AGENT_DA_NEN.md
+- RELEASE_MANIFEST.json
+- changelog.d/wp-831.md
+- ops/handoff/wp831-g1-claude.md
+- scripts/tl_selftest.py
+- ops/cai_cong_cu.sh
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1; P2/P3 mo phai co quyet dinh chu kho co link; toi da 8 loi goi codex (spec r4 muc 4)'}
+- {id: M-2, dieu_kien: 'moi thread review (connector/nguoi) duoc tra loi va resolve'}
+- {id: M-3, dieu_kien: 'mot luot ci.yml XANH tren head cuoi doc bang check run + mot luot workflow_dispatch launcher-windows.yml XANH tren dung head'}
+- {id: M-4, dieu_kien: 'kich thuoc <= 8 tep / <= 450 dong them (ADR-0053, tran nang rieng cho packet nay theo spec r3 muc 3); vuot thi DUNG va hoi chu kho'}
+- {id: M-5, dieu_kien: 'head doi => M-1, M-3 het hieu luc; release-verify --strict ok=true tren head cuoi'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho. RELEASE_MANIFEST.json nam TRONG write set theo chi thi chu kho (L3 cua spec).'
+branch: agent/wp831-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: dfe5437f7354eeb0ead564f0f26d973c293988f6
+start_from_sha: 6376cd33474f60c64e7605c8a3774a0c448dc703
+start_from_ghi_chu: 'head nhanh agent/wp831-g1-claude luc cap r4 (PR #832, CI + Windows xanh); base_sha giu nguyen.'
+reviewed_sha_required: 6376cd33474f60c64e7605c8a3774a0c448dc703
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/831#issuecomment-6252662788
+granted_on_instruction_readback: 'add_issue_comment (MCP) 2026-10-18 tra id 6252662788. Bam byte cua body KHONG DO DUOC (duong doc MCP chuan hoa thuc the HTML).'
+granted_on_instruction_note: >-
+  Chu kho tra loi truc tiep trong phien executor session_01FBUBzbedsJaUtQvX4vEYDE (18-10-2026), nguyen van: "Chon 1 nhung
+  nang ngan sach codex len 8" cho F03 con lai sau Codex luot 3. Ghi ho qua GitHub App.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien executor tu ghi lease r2 theo chi thi truc tiep cua chu kho trong chinh phien nay; tien le wp741-r2-g2 (recorder_is_executor true).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-18T17:20:00Z'
+  goc_quet: 'master 1e69d2a0d3c708efe0dec86752fc13a0fe039aab, ls-remote 612 == cuc bo 612, thieu 0'
+  ket_qua: 'ca 8 tep: NGUOI_GIU 1 = wp831-r3-g3-claude (chinh lease duoc thay o day, bia mo hai chieu).'
+thay_the_cho:
+- wp831-r3-g3-claude
+thay_the_cho_ghi_chu: 'wp831-r3-g3-claude CON HAN (toi 2026-10-20T16:00:00Z) va giu 8 tep => bia mo hai chieu: tep r3 tren nhanh ops/wp831-r3-g3-lease (commit d3a497e) mang da_bi_thay_the.'
+leased_at_utc: '2026-10-18T17:25:00Z'
+heartbeat_at: '2026-10-18T17:25:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-19T03:10:15Z'
+lease_expires_at_utc: '2026-10-19T03:10:15Z'
+rut_han:
+  han_cu: '2026-10-20T17:30:00Z'
+  han_moi: '2026-10-19T03:10:15Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #831 da merge (PR #832, merge 6842a625f457843a21bd3a3b0422f13cb13de911, 2026-10-19T00:59:37Z); gate push master tren 6842a62 xanh (ci.yml 39183257258 14/14, launcher-windows 39183257264). Chu kho yeu cau land + ghi so ("Land và bookeeping đi") de nha write set ngay.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp788 (735a208): bia mo mot chieu lam ai-dang-giu tra KHONG_XAC_DINH rc=12'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+attempts_basis: 'Q3 cua spec wp831 (r1), khong reset o r2/r3/r4.'
+review_rounds_limit: 10
+budget:
+  codex_review_calls:
+    pr_wp831_g1: {used: 3, reserved: 0, limit: 8}
+  attempt:
+    packet_831_r1: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran:
+- {truc: kich_thuoc_tep, tu: 6, len: 7, nguon: 'spec r2 muc 3; chu kho issuecomment-6250060975'}
+- {truc: kich_thuoc_tep, tu: 7, len: 8, nguon: 'spec r3 muc 3; chu kho issuecomment-6251762410'}
+- {truc: codex_review_calls, tu: 3, len: 8, nguon: 'spec r4 muc 4; chu kho issuecomment-6252662788'}
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'nhanh agent/wp831-g1-claude: push MOT LAN khi du dieu kien merge cuc bo (chi thi chu kho trong phien); PR #832 da mo'

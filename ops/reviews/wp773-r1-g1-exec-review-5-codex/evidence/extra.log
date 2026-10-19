@@ -1,0 +1,51 @@
+priority mutant c01_l1_luot1_mergeable_clean_khong_nguon 0 
+
+priority mutant c02_l1_glob_va_thu_muc 0 
+
+priority mutant c03_l1_token_khong_duoc_thoat_goc 0 
+
+priority mutant c04_l1_measured_hoa_thuong_va_khong_phai_khai 0 
+
+priority mutant c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van 0 
+
+priority mutant c06_l3_luot2_moc_sau_merged_at 0 
+
+priority mutant c07_l3_chi_doc_readback_cua_chinh_pr 0 
+
+priority mutant c14_cli_moi_to_hop_duong_dan 0 
+
+priority mutant c08_l4_khong_do_duoc_khong_bao_gio_dat 0 
+
+priority mutant c09_l5_mien_tru_theo_bam 0 
+
+priority mutant c13_bam_va_luat_tren_cung_mot_lan_doc 0 
+
+priority mutant c10_l5_danh_sach_dong_bang 0 
+
+priority mutant c11_cay_that_dat_va_mien_tru_du 0 
+
+priority mutant c12_dong_cuoi_dung_dinh_dang 0 
+
+priority A/B /home/user/rv773/ops/land_evidence_nguon.py 1 d/pr9001-thu-land-evidence.yaml: 1 vi phạm
+  L2 $: positive khai '1/1' mà không tệp nguon_positive nào chứa nguyên văn
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐỎ
+
+priority A/B /tmp/rv773-r5-priority.py 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+root normalization + internal symlink 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+root normalization + internal symlink 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+fingerprint rename 3 DO:c10_l5_danh_sach_dong_bang:MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: 28 tên, vân tay ef22b9a8bf2e…
+
+old regression 3.11 0 
+old regression 3.12 0 
+old regression 3.13 0 
+old regression 3.14 0 

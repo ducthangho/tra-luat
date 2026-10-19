@@ -1,0 +1,17 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/agent/wp484-g7-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/agent/wp484-g7-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/agent/wp484-g7-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/agent/wp484-g7-claude:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/agent/wp484-g7-claude:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/agent/wp484-g7-claude:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp484-r7-g7-claude	refs/heads/ops/wp484-r7-spec:ops/leases/wp484-r7-g7-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp484-r8-g7-claude	refs/heads/ops/wp484-r7-spec:ops/leases/wp484-r8-g7-claude.yaml
+CÒN_HẠN	wp802-r1-g1-claude	refs/heads/ops/wp802-r1-g1-lease:ops/leases/wp802-r1-g1-claude.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g1	refs/remotes/origin/agent/codex-credential-refresh-g1:ops/leases/wp-codex-credential-refresh-exec-g1.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	moi-truong-r1-g1-antigravity	refs/remotes/origin/ops/cap-lease-546:ops/leases/moi-truong-r1-g1-antigravity.yaml
+NGƯỜI_GIỮ 1: wp802-r1-g1-claude
+rc=11

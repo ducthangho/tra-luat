@@ -1,0 +1,2 @@
+{"ma": "/home/user/rv773/ops/land_evidence_nguon.py", "rc": 2, "output": "KHÔNG ĐO ĐƯỢC ops/land/thu-land-evidence.yaml: readback-pr-*.json cho 2 merged_at khác nhau\nland_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"ma": "/tmp/rv773-r4-conflict-off.py", "rc": 0, "output": "ĐẠT ops/land/thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n"}

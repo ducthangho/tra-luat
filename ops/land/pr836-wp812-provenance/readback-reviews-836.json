@@ -1,0 +1,242 @@
+[
+  {
+    "id": 5564252087,
+    "node_id": "PRR_kwDOTNeRjc8AAAABS6e_tw",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "<!-- codex-review-receipt:v1 -->\n\n\n### 💡 Codex Review\n\nHere are some automated review suggestions for this pull request.\n\n**Reviewed commit:** `f4ab8b6cec`\n    \n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+    "state": "COMMENTED",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564252087",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836",
+    "author_association": "NONE",
+    "_links": {
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564252087"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836"
+      }
+    },
+    "submitted_at": "2026-10-18T18:20:45Z",
+    "commit_id": "f4ab8b6cec07d2ce0d68b9efab660c73ca364395"
+  },
+  {
+    "id": 5564569062,
+    "node_id": "PRR_kwDOTNeRjc8AAAABS6yV5g",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "<!-- codex-review-receipt:v1 -->\n\n\n### 💡 Codex Review\n\nHere are some automated review suggestions for this pull request.\n\n**Reviewed commit:** `be792d1da1`\n    \n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>",
+    "state": "COMMENTED",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564569062",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836",
+    "author_association": "NONE",
+    "_links": {
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564569062"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836"
+      }
+    },
+    "submitted_at": "2026-10-18T19:20:18Z",
+    "commit_id": "be792d1da1f015e04eee1f784edd902c523378e2"
+  },
+  {
+    "id": 5564682695,
+    "node_id": "PRR_kwDOTNeRjc8AAAABS65Rxw",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "",
+    "state": "COMMENTED",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564682695",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836",
+    "author_association": "OWNER",
+    "_links": {
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564682695"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836"
+      }
+    },
+    "submitted_at": "2026-10-18T19:53:51Z",
+    "commit_id": "d7b42d26f09dad0599dc0434dfad25b3897f3e51"
+  },
+  {
+    "id": 5564682819,
+    "node_id": "PRR_kwDOTNeRjc8AAAABS65SQw",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "",
+    "state": "COMMENTED",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564682819",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836",
+    "author_association": "OWNER",
+    "_links": {
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564682819"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836"
+      }
+    },
+    "submitted_at": "2026-10-18T19:53:53Z",
+    "commit_id": "d7b42d26f09dad0599dc0434dfad25b3897f3e51"
+  },
+  {
+    "id": 5564682964,
+    "node_id": "PRR_kwDOTNeRjc8AAAABS65S1A",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "",
+    "state": "COMMENTED",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564682964",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836",
+    "author_association": "OWNER",
+    "_links": {
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564682964"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836"
+      }
+    },
+    "submitted_at": "2026-10-18T19:53:56Z",
+    "commit_id": "d7b42d26f09dad0599dc0434dfad25b3897f3e51"
+  },
+  {
+    "id": 5564683125,
+    "node_id": "PRR_kwDOTNeRjc8AAAABS65TdQ",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "",
+    "state": "COMMENTED",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564683125",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836",
+    "author_association": "OWNER",
+    "_links": {
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/836#pullrequestreview-5564683125"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/836"
+      }
+    },
+    "submitted_at": "2026-10-18T19:53:58Z",
+    "commit_id": "d7b42d26f09dad0599dc0434dfad25b3897f3e51"
+  }
+]

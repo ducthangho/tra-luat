@@ -1,0 +1,9 @@
+# kiem-gate offline tren readback-check-runs-51ae5c0-all.json (filter=all); ten bat buoc = 14 job cua attempt 2 (readback-jobs-39162352795.json).
+# Luot dau cua tep nay (bo, sai phep do): lay MOI ten trong suite gom ca 5 ten 'skipped' cua attempt 1 (billing chan, 0 step) => rc=12 gia.
+== ci.yml run 39162352795 suite 106123754526, 14 ten
+gate XANH trên 51ae5c095972611d2c6045bd81786a4fc7e9ca62 (suite 106123754526): chuan-bi id=117820643185 · gate-ops (ubuntu-latest) id=117820687156 · gate-cong-cu (ubuntu-latest, 1) id=117820687196 · gate-cong-cu (ubuntu-latest, 5) id=117820687202 · gate-packet-loop (ubuntu-latest) id=117820687204 · gate-registry (ubuntu-latest) id=117820687212 · gate-cong-cu (ubuntu-latest, 2) id=117820687225 · gate (ubuntu-latest) id=117820687234 · gate-cong-cu (ubuntu-latest, 7) id=117820687239 · gate-cong-cu (ubuntu-latest, 3) id=117820687245 · gate-cong-cu (ubuntu-latest, 0) id=117820687259 · gate-cong-cu (ubuntu-latest, 4) id=117820687264 · gate-cong-cu (ubuntu-latest, 6) id=117820687286 · gate-cong-cu-gop (ubuntu-latest) id=117826904914
+rc=0
+== launcher-windows run 39162450359 suite 106124009467
+gate XANH trên 51ae5c095972611d2c6045bd81786a4fc7e9ca62 (suite 106124009467): launcher (windows-latest) id=117820643862
+rc=0
+# packet_loop.py sha256 1e701b0fc66ee733… tai 6842a62; check-runs sha256 fc872a9f9ce5d58f…

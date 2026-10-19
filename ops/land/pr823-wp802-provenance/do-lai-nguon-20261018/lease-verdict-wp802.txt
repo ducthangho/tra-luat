@@ -1,0 +1,4 @@
+$ git show origin/ops/wp802-r1-g1-lease:ops/reviews/wp802-g1-luot5-codex-verdict.md | sha256sum (ref @ ca05e38f56be3cfebc40d627ab77951c93a87d91)
+b6ee86d0c9e523dfbe87718d12b4d646464e7a8720e9789f071f4aa04d6e3f01  -
+$ git show --format="%H %cI %s" -s ca05e38
+ca05e38f56be3cfebc40d627ab77951c93a87d91 2026-10-18T09:04:18+00:00 lease(#802): bia mo wp802-r1-g1-claude -> wp831-r1-g1-claude (packet #802 da land dfe5437)

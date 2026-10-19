@@ -1,0 +1,57 @@
+F841 Local variable `goc_open` is assigned to but never used
+    --> .claude/dev/launcher_test.py:2568:5
+     |
+2566 |     goc_readlink = os.readlink
+2567 |     goc_getpgid = getattr(os, "getpgid", None)
+2568 |     goc_open = __builtins__["open"] if isinstance(__builtins__, dict) else __builtins__.open
+     |     ^^^^^^^^
+2569 |
+2570 |     def no(*_a, **_k):
+     |
+help: Remove assignment to unused variable `goc_open`
+
+F841 Local variable `rc` is assigned to but never used
+    --> .claude/dev/launcher_test.py:3389:9
+     |
+3387 |     out = io.StringIO()
+3388 |     with contextlib.redirect_stdout(out):
+3389 |         rc = m.lenh_doctor(a_)
+     |         ^^
+3390 |     d = json.loads(out.getvalue())
+     |
+help: Remove assignment to unused variable `rc`
+
+F841 Local variable `PENDING` is assigned to but never used
+    --> .claude/dev/launcher_test.py:3631:5
+     |
+3630 |     KHOE = "github:\n  Scope: User config\n  Status: √ Connected\n  Type: stdio\n"
+3631 |     PENDING = ("github:\n  Scope: Project config (shared via .mcp.json)\n"
+     |     ^^^^^^^
+3632 |                "  Status: ⏸ Pending approval (run `claude` to approve)\n")
+     |
+help: Remove assignment to unused variable `PENDING`
+
+F841 Local variable `goc_run` is assigned to but never used
+    --> .claude/dev/launcher_test.py:4112:5
+     |
+4111 |     goc_which = m.shutil.which
+4112 |     goc_run = m._chay_van_ban_an_toan
+     |     ^^^^^^^
+4113 |     lenh_chay = []
+     |
+help: Remove assignment to unused variable `goc_run`
+
+F841 Local variable `p` is assigned to but never used
+    --> .claude/dev/launcher_test.py:6064:9
+     |
+6062 |         return "bo qua vi khong co bash"
+6063 |     with San() as s:
+6064 |         p = subprocess.run(
+     |         ^
+6065 |             [bash, "-c", f"unset CLAUDE_CODE_REMOTE; CLAUDE_PROJECT_DIR='{s.as_posix()}' '{hook_path.as_posix()}' >/dev/null 2>&1 ||…
+6066 |             capture_output=True, text=True)
+     |
+help: Remove assignment to unused variable `p`
+
+Found 5 errors.
+No fixes available (5 hidden fixes can be enabled with the `--unsafe-fixes` option).

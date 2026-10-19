@@ -1,0 +1,6 @@
+# run 38841991504 job 116783962845 (launcher (windows-latest)) — trich tu GET repos/ducthangho/tra-luat/actions/jobs/116783962845/logs luc 2026-10-16T05:13:50Z
+# log day du sha256 550095f1fb31839ee57799e1fdc034c677941d30927b6a9bafb4d7554cee2516 (80632 byte) — KHONG luu, chi trich dong duoi
+  co       python   Python 3.13.16
+172/172 ca DA CHAY QUA (tong 196, bo qua 24, hong 0) - KHONG DU: 24 ca BO QUA, chua do gi
+SO_DONG_SAI_DOT_BIEN=0
+SO_DONG_OK_DOT_BIEN=128

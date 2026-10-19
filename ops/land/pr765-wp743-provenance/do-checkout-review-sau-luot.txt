@@ -1,0 +1,5 @@
+# do checkout review sau luot, 2026-10-16T05:21:35Z
+$ git -C <rv> rev-parse HEAD
+80e0fac0a4ab8c74486cf3bab1a73e1dec600994
+$ git -C <rv> status --porcelain --ignored | wc -l
+0

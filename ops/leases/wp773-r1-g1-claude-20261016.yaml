@@ -1,0 +1,72 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 773
+packet_id: land-evidence-khai-phai-co-nguon
+mission_issue: 773
+revision: 1
+generation: 1
+lease_id: wp773-r1-g1-claude-20261016
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/land-evidence-khai-phai-co-nguon-r1.md
+spec_sha256_required: 063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd
+spec_hash: 063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd
+prompt_path: ops/specs/land-evidence-khai-phai-co-nguon-r1.md
+prompt_sha256_required: 063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd
+write_set:
+- ops/land_evidence_nguon.py
+- ops/land_evidence_nguon_test.py
+effective_write_set:
+- ops/land_evidence_nguon.py
+- ops/land_evidence_nguon_test.py
+branch: agent/wp773-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: c73af7b0ba751bfbb974f5ba11147ccb555015dc
+start_from_sha: c73af7b0ba751bfbb974f5ba11147ccb555015dc
+reviewed_sha_required: c73af7b0ba751bfbb974f5ba11147ccb555015dc
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/773#issuecomment-6216577038
+granted_on_instruction_note: >-
+  Chu kho ducthangho dang comment cap lease 6216577038 (OWNER, performed_via_github_app null, doc lai qua API
+  2026-10-16T13:3xZ) neo dung lease_id, spec_sha256, base_sha c73af7b va han nay; chap nhan Q1-Q6 (gom ngoai le
+  ADR-0044 <= 600 dong cho g1). Phien soan lease (claude) CUNG la executor; no khong tu cap viec cho minh.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-16T12:30:00Z'
+lease_expires_at_utc: '2026-10-18T12:30:00Z'
+size_limit_exception: 'g1 <= 600 dong them (ADR-0044 ngoai le, spec Q4) — chi hieu luc khi comment cap lease chap nhan Q4'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Review Codex doc lap toi khi P1=0, P2=0 tren dung head (theo tien le #743).
+ci_policy: ci_day_du_qua_draft_pr
+ci_policy_note: >-
+  Day nhanh agent/wp773-g1-claude, mo draft PR (ci.yml chay). g1 KHONG sua workflow; noi CI la g2 (spec Q1).
+  Khong merge, khong land, khong deploy.
+push_policy: push_nhanh_agent_mo_draft_pr
+thay_the_cho: []
+xung_dot_write_set_do_luc: >-
+  2026-10-16T12:27Z ai-dang-giu: NGUOI_GIU 0 cho ca hai duong dan g1 (559/559 nhanh, ls-remote = for-each-ref).
+  .github/workflows/ci.yml: NGUOI_GIU 1 (wp748-r14-g14-claude-windows-20261016) — vi vay ngoai g1 (spec Q1).
+base_ghi_chu: >-
+  Spec r1 do base e0273d3 luc soan (05:38Z); master troi qua #772 (e03d4bf) va #771 (c73af7b) truoc luc cap. Theo spec
+  muc base, lease neo master do lai luc cap: c73af7b. MIEN_TRU_CUTOVER do tren base nay (gom pr765-wp743-land-evidence.yaml).
+da_bi_thay_the: wp773-r1-g1x-claude-20261018
+da_bi_thay_the_ly_do: >-
+  Chu kho gia han va chap nhan spec r3 tai Issue #773 issuecomment-6245193547 (2026-10-18T03:28:46Z): lease wp773-r1-g1x-claude-20261018
+  thay lease nay, toi 2026-10-18T19:00:00Z. Lease nay con han luc ghi bia mo, nen bia mo hai chieu la duong thu hoi.

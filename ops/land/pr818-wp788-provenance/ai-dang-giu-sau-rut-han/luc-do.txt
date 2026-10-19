@@ -1,0 +1,2 @@
+2026-10-18T17:32:30Z
+ls-remote=613 for-each-ref=613 ten_thieu=0 ten_thua=0 oid_lech=0 (so dict ten->OID)

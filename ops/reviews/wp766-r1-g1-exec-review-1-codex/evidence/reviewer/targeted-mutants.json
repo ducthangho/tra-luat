@@ -1,0 +1,62 @@
+[
+  {
+    "name": "chup_cay_khong_fail_closed_trong_cay",
+    "target": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-mutants-tw5m5afk/repo",
+    "argv": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/tmp/wp766-mutants-tw5m5afk/repo/.claude/dev/launcher_test.py",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=33 pgid=33 sid=33 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532488] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: hau due khong lay duoc khoa bi bo qua im lang\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": "",
+    "exception": "TinHieuChotCa",
+    "detail": "hau due khong lay duoc khoa bi bo qua im lang",
+    "is_signal": true
+  },
+  {
+    "name": "chup_cay_fail_closed_ca_may",
+    "target": "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+    "cwd": "/tmp/wp766-mutants-tw5m5afk/repo",
+    "argv": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/tmp/wp766-mutants-tw5m5afk/repo/.claude/dev/launcher_test.py",
+      "--lap-ca",
+      "t81_chup_cay_windows_thieu_creationdate_phai_fail_closed",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=34 pgid=34 sid=34 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532488] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: HONG\n  HONG t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: tien trinh mu NGOAI cay khong duoc lam hong ca anh\n\nLAP t81_chup_cay_windows_thieu_creationdate_phai_fail_closed: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": "",
+    "exception": "TinHieuChotCa",
+    "detail": "tien trinh mu NGOAI cay khong duoc lam hong ca anh",
+    "is_signal": true
+  },
+  {
+    "name": "pid_gia_quay_ve_ghi_cung",
+    "target": "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+    "cwd": "/tmp/wp766-mutants-tw5m5afk/repo",
+    "argv": [
+      "/usr/bin/python3.13",
+      "-B",
+      "/tmp/wp766-mutants-tw5m5afk/repo/.claude/dev/launcher_test.py",
+      "--lap-ca",
+      "r766_t81_khong_phu_thuoc_pid_cua_luot_chay",
+      "--lan",
+      "1"
+    ],
+    "rc": 1,
+    "stdout": "moi truong: pid=35 pgid=35 sid=35 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026532488] init=codex\nnhom tien trinh: khong can (da la truong nhom)\n  lan 1/1: HONG\n  HONG r766_t81_khong_phu_thuoc_pid_cua_luot_chay: getpid=11: tien trinh mu NGOAI cay khong duoc lam hong ca anh\n\nLAP r766_t81_khong_phu_thuoc_pid_cua_luot_chay: 0/1 qua, 0 bo qua, 1 hong\n",
+    "stderr": "",
+    "exception": "TinHieuChotCa",
+    "detail": "getpid=11: tien trinh mu NGOAI cay khong duoc lam hong ca anh",
+    "is_signal": true
+  }
+]

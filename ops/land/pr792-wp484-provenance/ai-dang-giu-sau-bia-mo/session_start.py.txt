@@ -1,0 +1,11 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/agent/wp484-g7-claude:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/agent/wp484-g7-claude:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/agent/wp484-g7-claude:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp484-r8-g7-claude	refs/heads/ops/wp484-r7-spec:ops/leases/wp484-r8-g7-claude.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g1	refs/remotes/origin/agent/codex-credential-refresh-g1:ops/leases/wp-codex-credential-refresh-exec-g1.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

@@ -1,0 +1,9 @@
+100 both pass
+300 both pass
+450 both pass
+480 both pass
+490 both pass
+495 loader RecursionError
+500 loader RecursionError
+600 loader RecursionError
+1000 loader RecursionError

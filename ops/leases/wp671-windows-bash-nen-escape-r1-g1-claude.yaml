@@ -1,0 +1,107 @@
+# LEASE — WINDOWS-BASH-NEN-ESCAPE revision 1 / generation 1 — docstring raw + t49 INDEX + gop no ep UTF-8
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 671
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/671#issuecomment-5884427456
+granted_on_instruction_nguyen_van: >-
+  'Cập nhật trạng thái và áp dụng các thay đổi. Tôi đồng ý cấp lease. Cho tôi prompt để thực hiện các nhiệm vụ của
+  phiên này trong môi trường local có Windows'; AskUserQuestion: 'Cấp ngay, chấp nhận chồng', 'Gộp vào #671',
+  'Chỉ chạy tại máy'.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-29T05:45:00Z'
+lease_expires_at_utc: '2026-09-30T05:45:00Z'
+
+packet_id: WINDOWS-BASH-NEN-ESCAPE
+packet_slug: WINDOWS-BASH-NEN-ESCAPE
+revision: 1
+generation: 1
+lease_id: wp671-windows-bash-nen-escape-r1-g1-claude
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: tu_khai_boi_phien_local
+model_ghi_chu: 'Phien local Windows tu khai model/effort trong bao cao; KHONG DO DUOC tu ngoai.'
+environment: local
+environment_ghi_chu: 'May Windows cua chu kho — packet do hanh vi chi lo tren Windows (protocol §6 parity Windows).'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Cross-review theo .claude/skills/cross-review/SKILL.md; human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/WINDOWS-BASH-NEN-ESCAPE-r1.md
+spec_ref: refs/heads/ops/cap-lease-671-g1
+spec_source_oid: 8da6c16d9c2fb3a1b0dfa423095c2745ec4001aa
+spec_blob: 0e94c8ac95286bab8581710263dd1cfc45a54d38
+spec_sha256: 18504ced1549cbe62816f067b6ed16f36c12292820c8204cb6085a9c39e80b88
+spec_hash: 18504ced1549cbe62816f067b6ed16f36c12292820c8204cb6085a9c39e80b88
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/WINDOWS-BASH-NEN-ESCAPE-r1.md
+prompt_sha256_required: 18504ced1549cbe62816f067b6ed16f36c12292820c8204cb6085a9c39e80b88
+ban_va_tham_chieu: ops/specs/WINDOWS-BASH-NEN-ESCAPE-r1.patch
+ban_va_tham_chieu_sha256: 59fcf3679e05cd5bd4689d5c3310ff3cf829d7b5300563734771b38375d4f011
+
+branch: claude/wp671-windows-bash-nen-escape-g1
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec + lease o nhanh ops/cap-lease-671-g1; ma o nhanh claude/wp671-windows-bash-nen-escape-g1 dat THANG tren
+  start_from_sha (khong mang commit spec/lease) de diff chi con W1–W2.
+start_from_sha: 1741e0a1ab7ebce4b26912aefadca56ddfcdc691
+immutable_acceptance_baseline: 1741e0a1ab7ebce4b26912aefadca56ddfcdc691
+reviewed_sha_required: 1741e0a1ab7ebce4b26912aefadca56ddfcdc691
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+
+write_set:
+  - ops/bash_nen.py
+  - ops/cong_cu_test.py
+write_set_hash: 0ec9fb5315b4df36d79408a4510d5bd0ac57830dc0a92a885975039fe67b9d01
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-09-29T05:38Z tren clone du 500 refs/heads (ls-remote khop tap ten, comm -23 = 0): ops/bash_nen.py
+  ai-dang-giu rc=0 NGUOI_GIU 0; ops/cong_cu_test.py ai-dang-giu rc=11 NGUOI_GIU 1 =
+  ci-g5-cong-cu-chia-manh-r1-g1-claude (#668, CON_HAN toi 2026-09-29T07:40:00Z) — CHONG CO DUYET (xem duoi).
+
+lech_protocol_duoc_duyet: >-
+  (1) CHONG write set voi lease #668 tren ops/cong_cu_test.py — chu kho "Cấp ngay, chấp nhận chồng"; nhanh land sau
+  phai merge base va do lai; executor KHONG doc/chep ma tu nhanh #668. (2) Gop no CONG-CU-TEST-EP-UTF8 (ban giao tu
+  #570) — chu kho "Gộp vào #671". (3) Khong workflow_dispatch — chu kho "Chỉ chạy tại máy".
+
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) duoc phep neu mo PR draft'
+  phep_do_duoc_cap: '0 workflow_dispatch'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi workflow_dispatch; cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1–W2. DUNG.'
+  - 'S2 — gia thuyet B (t49) sai tren Windows. DUNG phan B, bao so do, hoi chu kho.'
+  - 'S3 — > 300 dong them hoac > 2 tep (tran ADR-0044 sensitive). DUNG, hoi chu kho.'
+  - 'S4 — het han lease => ngung ghi, handoff §7.'
+  - 'S5 — cung hinh dang finding >= 3 lan => hoi chu kho.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong workflow_dispatch, khong LIVE/deploy, khong VERSION/Package
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Model/effort thuc te cua phien executor local.'
+  - 'Git for Windows co nhan ten byte tho / ten mang dau cheo nguoc trong INDEX khong.'
+
+da_bi_thay_the: wp671-windows-bash-nen-escape-r1-g2-claude

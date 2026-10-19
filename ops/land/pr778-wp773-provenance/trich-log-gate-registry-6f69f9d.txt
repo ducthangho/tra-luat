@@ -1,0 +1,9 @@
+# trich log job gate-registry (ubuntu-latest) id 117577873039 tren 6f69f9d — 2026-10-18T04:40:47Z
+# sha256 log day du luc trich: 6be83f0d246732b60bb16af33d50114382f4bf73fe09be389f0700295bf68241 (231698 byte); log day du KHONG luu
+  CI_DANG_KY_DAU: 6f69f9de6675058a22f70697634f833b9a193f20
+ĐỘT BIẾN p643-A4-thieu-CI_DANG_KY_DAU: ĐỎ đúng
+ĐỘT BIẾN p643-A4-lech-CI_DANG_KY_DAU: ĐỎ đúng
+CA: 15/15 dat
+DOT BIEN: 37/37 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+CI_DANG_KY ops/land_evidence_nguon_test.py: ĐẠT rc=0

@@ -1,0 +1,11 @@
+# do 2026-10-19T09:27:27Z sau git fetch --prune '+refs/heads/*:refs/remotes/origin/*'
+# ls-remote --heads 530 ten; for-each-ref 530 ten; thieu 0 thua 0
+# origin/ops/wp845-r1-g1-lease = 41a72cbc08e60f842ae20dcac1e94e4aa4e6fecd
+== ops/land_evidence_nguon.py
+HẾT_HẠN	wp845-r1-g1-claude	refs/remotes/origin/ops/wp845-r1-g1-lease:ops/leases/wp845-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land_evidence_nguon_test.py
+HẾT_HẠN	wp845-r1-g1-claude	refs/remotes/origin/ops/wp845-r1-g1-lease:ops/leases/wp845-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

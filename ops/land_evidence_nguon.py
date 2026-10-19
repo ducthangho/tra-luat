@@ -23,10 +23,15 @@ LUẬT:
       khác nhau, không thấy hồ sơ nào ⇒ KHÔNG ĐO ĐƯỢC, không bao giờ ĐẠT. Băm L5 và luật đo trên CÙNG một lần đọc.
   L5  `MIEN_TRU_CUTOVER` = {tên: sha256 byte} của MỌI hồ sơ trên `origin/master` lúc bắt đầu (`c73af7b`). Băm khớp ⇒
       bỏ qua có ghi nhận. Băm lệch ⇒ mất miễn trừ, kiểm đủ luật. Bản kỳ vọng CHÉP RIÊNG trong test: thêm tên ⇒ ĐỎ.
+  L6  (#845, `ops/specs/land-evidence-landed-chua-dien-r1.md`) Chỉ khi `trang_thai_packet` là mapping CÓ khoá `landed`:
+      `landed` không phải bool ⇒ ĐỎ. `landed: true` ⇒ `post_merge_checks` và `bookkeeping` phải là list KHÁC RỖNG mà mọi
+      phần tử là mapping (kiểm KIỂU, không đoán chuỗi giữ chỗ — PR #840 merge suýt mang `landed: true` với hai trường ấy là
+      chuỗi `CHO_DIEN`, connector P1 4309577154), và không chuỗi nào chứa `CHO_DIEN`. `landed: false` (bản nháp) ⇒ không đòi.
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
 văn — một tệp vô can vẫn làm L1 qua. Chỉ L2 đọc NỘI DUNG, và chỉ cho token số. Hồ sơ cũ đi qua miễn trừ, không được kiểm.
-Không sửa hồ sơ nào. Chưa nằm trên đường CI tự động — việc của lease g2 (`ci.yml`).
+Không sửa hồ sơ nào. Lên CI GIÁN TIẾP: `ops/land_evidence_nguon_test.py` đăng ký trong `.claude/dev/ci_dang_ky_test.py`, ca `c11`
+của nó gọi bộ kiểm này trên cây thật (bản trước ghi "chưa nằm trên đường CI" — cũ từ lease g2 #773, review #845 lượt 1 P3).
 
 Dùng: python ops/land_evidence_nguon.py [--root GOC] [--tep TEP ...] — thoát 0 ĐẠT · 1 ĐỎ · 2 KHÔNG ĐO ĐƯỢC (không vi phạm).
 """
@@ -85,6 +90,8 @@ RE_DAI = re.compile(rf"(?<![{_KT}])[{_KT}]+")
 RE_DUOI_NGUON = re.compile(r"\.(?:json|txt|log|yaml|yml|md|sh|py|patch)$")
 RE_SO_POS = re.compile(r"(?<!\d)\d+/\d+(?!\d)|(?<![A-Za-z0-9_])hong \d+(?!\d)")
 RE_MOC = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:[Zz]|[+-]\d{2}:?\d{2})?(?![\d:])")
+L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")   # cây thật 19-10-2026: mọi hồ sơ landed true đã có cả hai
+L6_DAU_GIU_CHO = "CHO_DIEN"
 
 
 class KhongDoDuoc(Exception):
@@ -267,6 +274,17 @@ def kiem_ho_so(tep, byte, goc, yaml):
                     for x in moc:
                         if _thoi_diem(x) >= moc_merge:
                             vp.append(f"L3 {d}: mốc {x} không trước merged_at {moc_merge:%Y-%m-%dT%H:%M:%SZ}")
+    tt = du_lieu.get("trang_thai_packet") if isinstance(du_lieu, dict) else None
+    if isinstance(tt, dict) and "landed" in tt:   # L6
+        if not isinstance(tt["landed"], bool):
+            vp.append(f"L6 $.trang_thai_packet.landed: phải là bool, được {tt['landed']!r}")
+        elif tt["landed"]:
+            for khoa in L6_PHAN_HOAN_TAT:
+                ds = du_lieu.get(khoa)
+                if not (isinstance(ds, list) and ds and all(isinstance(x, dict) for x in ds)):
+                    vp.append(f"L6 $.{khoa}: landed true mà không phải danh sách mapping khác rỗng — {str(ds)[:60]!r}")
+            vp += [f"L6 {d}: landed true mà còn dấu giữ chỗ {L6_DAU_GIU_CHO} — {v[:60]!r}"
+                   for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]
     return vp, ghi
 
 

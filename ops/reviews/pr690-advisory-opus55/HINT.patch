@@ -1,0 +1,313 @@
+diff --git a/ops/cong_cu_test.py b/ops/cong_cu_test.py
+index 45a3ab9..56fdcde 100644
+--- a/ops/cong_cu_test.py
++++ b/ops/cong_cu_test.py
+@@ -11,9 +11,10 @@ from pathlib import Path
+ # #671 (gộp nợ CONG-CU-TEST-EP-UTF8 của #570) — ÉP UTF-8 TRƯỚC MỌI `print`, cho CHÍNH tệp này và
+ # cho MỌI tiến trình con/cháu. Đo 27-09-2026 (Linux, `PYTHONIOENCODING=ascii` cho con): `t29`, `t42`,
+ # `t45` chết `tin_dung_gia` vì cháu in chữ Việt ra stdout ASCII; chạy tay trên Windows (cp1252/cp1258)
+-# ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi: đo
+-# bằng AST có 66 điểm phóng, mọi `env=` tường minh đều dựng TỪ `os.environ` (`moi_truong`,
+-# `dict(os.environ, …)`, `{**os.environ, …}`), nên một chỗ này phủ hết — kể cả điểm phóng chưa ai viết.
++# ĐỎ oan, còn CI che mất vì tự đặt hai biến này. Đặt vào `os.environ` chứ không vá từng lời gọi.
++# Phạm vi ĐÃ ĐO (e46f569, AST: `subprocess.run`/`subprocess.Popen`/`chay`/`_chay` gọi trực tiếp) là
++# 82 lời gọi tĩnh; các `env=` tường minh đọc được đều dựng TỪ `os.environ`. Đó là số call site, không
++# phải số tiến trình, và KHÔNG bảo đảm điểm phóng viết sau này — một `env=` dựng từ đầu sẽ lọt.
+ # `t61` đo cả hai vế trong một tiến trình con CỐ Ý ép ASCII, nên nó có răng cả khi CI đã đặt sẵn.
+ _BIEN_UTF8 = (("PYTHONIOENCODING", "utf-8"), ("PYTHONUTF8", "1"))
+ 
+@@ -34,10 +35,23 @@ _ep_utf8()
+ # locale ở đó đã là UTF-8. Đặt `PYTHONUTF8` lúc chạy KHÔNG đổi chế độ của tiến trình ĐANG chạy, nên
+ # chạy làm `__main__` ngoài chế độ UTF-8 thì phóng LẠI chính mình với `-X utf8` — đúng chế độ CI đang
+ # chạy (CI đặt `PYTHONUTF8=1`, nên CI không bao giờ đi nhánh này). Chỉ ở `__main__`: `t61` NẠP tệp
+-# này bằng importlib, và nạp thì không được phóng gì. `-X utf8` bật cờ bất kể môi trường ⇒ không lặp.
+-# `t62` khoá.
++# này bằng importlib, và nạp thì không được phóng gì. `t62` khoá TỪNG phần hợp đồng: cờ UTF-8, mã
++# thoát đi qua lần phóng lại, cờ trình thông dịch (`-B`) được giữ, và không lặp khi `-E` làm
++# `PYTHONUTF8` vô hiệu. Không lặp KHÔNG dựa vào thứ tự `-X` (không có tài liệu nào hứa): lần phóng lại
++# mang dấu `_DAU_PHONG_LAI`; đã phóng mà vẫn không UTF-8 thì DỪNG ồn ào (fail-close) thay vì lặp.
++# Dấu bị gỡ ngay khi đọc để các tiến trình con (vd `t62` gọi lại tệp này) không thừa hưởng nó.
++# Chương trình đến từ STDIN (`argv[0]` là `""` hoặc `"-"`) thì DỪNG ồn ào: stdin đã bị tiêu thụ, phóng
++# lại sẽ chạy chương trình RỖNG và trả `rc=0` không in gì (đo ở e46f569: `PYTHONUTF8=0 python < tệp`).
++_DAU_PHONG_LAI = "CONG_CU_TEST_DA_PHONG_LAI"
++_DA_PHONG_LAI = os.environ.pop(_DAU_PHONG_LAI, None) == "1"
+ if __name__ == "__main__" and not sys.flags.utf8_mode:
+-    sys.exit(subprocess.run([sys.executable, "-X", "utf8", *sys.orig_argv[1:]]).returncode)
++    if _DA_PHONG_LAI:
++        sys.exit("cong_cu_test: đã phóng lại với -X utf8 mà vẫn KHÔNG ở chế độ UTF-8 — dừng, không lặp")
++    if sys.argv[0] in ("", "-"):
++        sys.exit("cong_cu_test: chương trình đọc từ stdin, không phóng lại với -X utf8 được — "
++                 "chạy bằng TỆP hoặc đặt PYTHONUTF8=1")
++    sys.exit(subprocess.run([sys.executable, "-X", "utf8", *sys.orig_argv[1:]],
++                            env={**os.environ, _DAU_PHONG_LAI: "1"}).returncode)
+ 
+ import yaml
+ 
+@@ -2264,30 +2278,59 @@ def t60_import_bash_nen_khong_in_gi_ra_stderr():
+          f"(2) import bash_nen rc={p.returncode}, stderr không rỗng: {p.stderr[:300]!r}")
+ 
+ 
++_NAP_UTF8 = """import importlib.util, io, subprocess, sys
++print('(0) truoc nap', flush=True)
++spec = importlib.util.spec_from_file_location('cct_utf8', sys.argv[1])
++m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
++print('(a) chữ Việt', flush=True)
++print('(e) chữ Việt', file=sys.stderr, flush=True)
++luong, sys.stdout = sys.stdout, io.StringIO()
++try:
++    m._ep_utf8({})
++finally:
++    sys.stdout = luong
++print('(d) luong khong reconfigure duoc van qua', flush=True)
++print('(f) surrogate', '\\udcff', flush=True)
++chau = ("import os, sys; print('(b) ch' + chr(0x1eef) + ' Vi' + chr(0x1ec7) + 't'); "
++        "print('(c)', os.environ.get('PYTHONIOENCODING'), os.environ.get('PYTHONUTF8'), sys.flags.utf8_mode)")
++p = subprocess.run([sys.executable, '-c', chau], capture_output=True)
++sys.stdout.flush(); sys.stdout.buffer.write(p.stdout); sys.stdout.buffer.flush()
++sys.exit(0 if p.returncode == 0 else 7)
++"""
++
++
+ @ca
+ def t61_ep_UTF8_phai_co_RANG_ca_khi_moi_truong_ngoai_la_ASCII():
+-    """#671 (nợ CONG-CU-TEST-EP-UTF8) — nạp tệp này trong một tiến trình con CỐ Ý ép ASCII, rồi đòi:
+-    (a) chính tiến trình ấy in được chữ Việt; (b) một tiến trình CHÁU phóng KHÔNG truyền `env=` cũng in
+-    được. Dựng môi trường ASCII NGAY TẠI ĐÂY vì CI tự đặt `PYTHONIOENCODING=utf-8`: đo trong môi
+-    trường thừa hưởng thì gỡ `_ep_utf8` vẫn xanh trên CI — ca không răng. Mã thoát tách hai vế:
+-    ném ở `print` (a) ⇒ 1; cháu hỏng (b) ⇒ 7."""
+-    ma = (
+-        "import importlib.util, subprocess, sys\n"
+-        "spec = importlib.util.spec_from_file_location('cct_utf8', sys.argv[1])\n"
+-        "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
+-        "print('(a) chữ Việt')\n"
+-        "p = subprocess.run([sys.executable, '-c', \"print('(b) chữ Việt')\"], capture_output=True)\n"
+-        "sys.exit(0 if p.returncode == 0 else 7)\n")
+-    env = dict(os.environ, PYTHONIOENCODING="ascii", PYTHONUTF8="0")
+-    p = subprocess.run([sys.executable, "-B", "-c", ma, str(TEP_TEST)], env=env, cwd=GOC,
+-                       capture_output=True, timeout=120)
+-    ra = p.stdout.decode("utf-8", "replace")
+-    bang(p.returncode != 1 and "(a) chữ Việt" in ra,
+-         f"(a) tiến trình nạp cong_cu_test.py dưới ASCII không in được chữ Việt: rc={p.returncode} "
+-         f"{p.stderr.decode('utf-8', 'replace')[-300:]!r}")
+-    bang(p.returncode == 0,
+-         f"(b) tiến trình CHÁU (không `env=`) không in được chữ Việt: rc={p.returncode} — "
+-         f"`PYTHONIOENCODING`/`PYTHONUTF8` chưa được đặt cho con")
++    """#671 (nợ CONG-CU-TEST-EP-UTF8) — nạp tệp này trong một tiến trình con CỐ Ý ép ASCII, rồi đòi
++    TỪNG phần hợp đồng, mỗi phần một chốt: (0) nạp KHÔNG phóng lại người nạp; (a) stdout và (e) stderr
++    của chính tiến trình ấy mang chữ Việt NGUYÊN VẸN (không phải chữ thoát); (d) luồng không có
++    `reconfigure` không làm `_ep_utf8` ném; (f) chuỗi mang surrogate lạc in ra chữ thoát, không ném; (b) cháu phóng KHÔNG `env=` in được chữ Việt và (c) nhận
++    `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`, `utf8_mode=1`. Mã nguồn con nằm trong TỆP (Python đọc
++    nguồn bằng UTF-8 bất kể locale) và mã cháu chỉ có ASCII: đưa chữ Việt qua `argv` dưới `LC_ALL=C`
++    thì con chết lúc giải mã dòng lệnh — ca ĐỎ oan với chẩn đoán sai (đo được ở e46f569)."""
++    with tempfile.TemporaryDirectory(prefix="cct-utf8-") as td:
++        nap = Path(td) / "nap_utf8.py"
++        nap.write_text(_NAP_UTF8, encoding="utf-8")
++        env = dict(os.environ, PYTHONIOENCODING="ascii", PYTHONUTF8="0")
++        p = subprocess.run([sys.executable, "-B", str(nap), str(TEP_TEST)], env=env, cwd=GOC,
++                           capture_output=True, timeout=120)
++    ra, loi = p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")
++    dung("(0) truoc nap" in ra, f"tiến trình nạp không khởi chạy được: rc={p.returncode} {loi[-300:]!r}")
++    bang(ra.count("(0) truoc nap") == 1,
++         f"(0) NẠP cong_cu_test.py mà người nạp bị PHÓNG LẠI: {ra.count('(0) truoc nap')} lần")
++    bang("(a) chữ Việt" in ra, f"(a) stdout của tiến trình nạp không mang chữ Việt: rc={p.returncode} {loi[-300:]!r}")
++    bang("(e) chữ Việt" in loi, f"(e) stderr của tiến trình nạp không mang chữ Việt: {loi[-300:]!r}")
++    bang("(d) luong khong reconfigure duoc van qua" in ra,
++         f"(d) `_ep_utf8` ném trên luồng không có `reconfigure`: {loi[-300:]!r}")
++    bang("(f) surrogate " + chr(92) + "udcff" in ra,
++         f"(f) in chuỗi mang surrogate lạc (tên tệp byte thô) phải ra chữ thoát, không ném: {loi[-300:]!r}")
++    bang(p.returncode == 0 and "(b) chữ Việt" in ra,
++         f"(b) tiến trình CHÁU (không `env=`) không in được chữ Việt: rc={p.returncode} {ra[-200:]!r}")
++    bang("(c) utf-8 1 1" in ra,
++         f"(c) cháu không nhận đủ `PYTHONIOENCODING=utf-8`/`PYTHONUTF8=1`/utf8_mode=1: {ra[-200:]!r}")
++
++
++_MA_TU_KIEM_UTF8 = 5
+ 
+ 
+ @ca
+@@ -2295,15 +2338,45 @@ def t62_chay_lam_main_phai_o_che_do_UTF8_ca_khi_PYTHONUTF8_0():
+     """#671 — chạy tệp này làm `__main__` với `PYTHONUTF8=0` thì tiến trình CHẠY BỘ CA vẫn phải ở chế
+     độ UTF-8. Đo CỜ (`sys.flags.utf8_mode`) chứ không đo một lần giải mã: trên Linux locale đã là UTF-8
+     nên phép giải mã xanh cả khi gỡ bản vá, còn cờ thì phân biệt được trên MỌI nền. Hậu quả đo được
+-    khi cờ tắt (Windows cp1258): `t29`/`t39`/`t42`/`t45` ĐỎ vì cha đọc `text=True` bằng locale."""
++    khi cờ tắt (Windows cp1258): `t29`/`t39`/`t42`/`t45` ĐỎ vì cha đọc `text=True` bằng locale.
++    Kèm các phần còn lại của hợp đồng phóng lại, mỗi phần một chốt: mã thoát đi qua (cửa trả mã RIÊNG
++    `_MA_TU_KIEM_UTF8`, nên nuốt mã thành 0 là đỏ); `-B` được giữ; `-E` (làm `PYTHONUTF8` vô hiệu)
++    vẫn ra UTF-8 mà không lặp (và đã mang dấu mà vẫn không UTF-8 thì dừng); dấu không sót cho con;
++    `python - < tệp` không biến lỗi thành `rc=0`."""
+     env = dict(os.environ, PYTHONUTF8="0", PYTHONIOENCODING="ascii")
+-    p = subprocess.run([sys.executable, str(TEP_TEST), "--tu-kiem-che-do-utf8"], env=env, cwd=GOC,
+-                       capture_output=True, timeout=120)
+-    ra = p.stdout.decode("utf-8", "replace")
+-    dung(p.returncode == 0 and "UTF8_MODE=" in ra,
+-         f"cửa --tu-kiem-che-do-utf8 hỏng: rc={p.returncode} {p.stderr.decode('utf-8', 'replace')[-300:]!r}")
++    for k in (_DAU_PHONG_LAI, "PYTHONDONTWRITEBYTECODE"):
++        env.pop(k, None)
++
++    def _hoi(*co, **them):
++        p = subprocess.run([sys.executable, *co, str(TEP_TEST), "--tu-kiem-che-do-utf8"],
++                           env=dict(env, **them), cwd=GOC, capture_output=True, timeout=120)
++        return p, p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")[-300:]
++
++    p, ra, loi = _hoi("-B")
++    dung("UTF8_MODE=" in ra, f"cửa --tu-kiem-che-do-utf8 hỏng: rc={p.returncode} {loi!r}")
+     bang("UTF8_MODE=1" in ra,
+          f"chạy làm __main__ với PYTHONUTF8=0 mà tiến trình chạy bộ ca KHÔNG ở chế độ UTF-8: {ra.strip()!r}")
++    bang(p.returncode == _MA_TU_KIEM_UTF8,
++         f"mã thoát KHÔNG đi qua lần phóng lại: rc={p.returncode}, mong {_MA_TU_KIEM_UTF8}")
++    bang("KHONG_GHI_BYTECODE=1" in ra, f"cờ `-B` bị mất ở lần phóng lại: {ra.strip()!r}")
++    bang("DAU_SOT=0" in ra, f"dấu phóng lại còn trong môi trường, con cháu sẽ thừa hưởng: {ra.strip()!r}")
++    p4, ra4, _ = _hoi("-B", **{_DAU_PHONG_LAI: "1"})
++    bang(p4.returncode not in (0, _MA_TU_KIEM_UTF8) and "UTF8_MODE" not in ra4,
++         f"đã mang dấu phóng lại mà vẫn KHÔNG UTF-8 thì phải dừng, không phóng tiếp: rc={p4.returncode} {ra4.strip()!r}")
++    for co_stdin in (["-"], []):          # `python - < tệp` và `python < tệp`; cwd=HERE để import được
++        p3 = subprocess.run([sys.executable, "-B", *co_stdin], input=TEP_TEST.read_bytes(), env=env,
++                            cwd=HERE, capture_output=True, timeout=120)
++        bang(p3.returncode not in (0, _MA_TU_KIEM_UTF8) and b"stdin" in p3.stderr,
++             f"`python {' '.join(co_stdin)} < cong_cu_test.py` ngoài UTF-8 phải DỪNG ồn ào, không chạy "
++             f"chương trình RỖNG: rc={p3.returncode} {p3.stderr[-200:]!r}")
++    thu = subprocess.run([sys.executable, "-E", "-c", "import sys; print(sys.flags.utf8_mode)"],
++                         env=dict(env, LC_ALL="C.UTF-8"), capture_output=True, text=True, timeout=60)
++    if thu.stdout.strip() != "0":
++        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC nhánh `-E`: nền tự bật UTF-8 (utf8_mode={thu.stdout.strip()!r})")
++    p2, ra2, loi2 = _hoi("-E", "-B", LC_ALL="C.UTF-8")
++    bang("UTF8_MODE=1" in ra2 and "DA_PHONG_LAI=1" in ra2 and p2.returncode == _MA_TU_KIEM_UTF8,
++         f"`-E` làm `PYTHONUTF8` vô hiệu: lần phóng lại phải tự mang `-X utf8`: rc={p2.returncode} "
++         f"{ra2.strip()!r} {loi2!r}")
+ 
+ 
+ def python_alias_behavior_test() -> None:
+@@ -5451,6 +5524,78 @@ def t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi():
+                     os.environ[k] = v
+ 
+ 
++def _stage_byte_vao_index(d, ten: bytes, than: str, chay=subprocess.run):
++    """#671 — đặt tên BYTE THÔ thẳng vào INDEX, KHÔNG qua hệ tệp.
++
++    `quet` đọc từ INDEX (`t46`), nên cây làm việc không cần mang tên ấy. Đi qua đĩa thì
++    đo HỆ TỆP chứ không đo cổng: windows-latest (run 36454930689) ra `[]` ở chiều ngược
++    — tái hiện đúng chữ trên Linux bằng `git add -A` hỏng cả lượt. `rc` PHẢI được đo:
++    không stage được là KHÔNG ĐO ĐƯỢC, không phải một cây rỗng xanh/đỏ oan."""
++    # Cây làm việc CŨNG mang tệp khi nền cho phép: t49 đo biên giới BÁO CÁO, không đo
++    # nguồn đọc — thiếu tệp trên đĩa thì đột biến `bn_doc_cay_lam_viec` (đích `t46`)
++    # giết luôn t49 (đo được: bán kính 2/54). Nền từ chối tên ấy thì INDEX vẫn đủ.
++    try:
++        (d / ten.decode("utf-8", "surrogateescape")).write_text(than, encoding="utf-8")
++    except (OSError, UnicodeError):
++        pass
++    oid = chay(["git", "-C", str(d), "hash-object", "-w", "--stdin"],
++               input=than.encode("utf-8"), capture_output=True, timeout=60)
++    r = chay(["git", "-C", str(d), "update-index", "--add", "-z", "--index-info"],
++             input=b"100644 " + oid.stdout.strip() + b"\t" + ten + b"\0",
++             capture_output=True, timeout=60)
++    co = ten in chay(["git", "-C", str(d), "ls-files", "-z"], capture_output=True,
++                     timeout=60).stdout.split(b"\0")
++    if oid.returncode or r.returncode or not co:
++        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: INDEX không nhận tên {ten!r}: "
++                             f"rc={oid.returncode}/{r.returncode} {r.stderr[:200]!r}")
++
++
++def _git_add_do_rc(d, duong: str, chay=subprocess.run):
++    """#671 — `git add` một tệp Unicode thường và ĐO `rc`: hỏng là KHÔNG ĐO ĐƯỢC, không phải cây rỗng."""
++    ga = chay(["git", "-C", str(d), "add", "--", duong], capture_output=True, text=True, timeout=60)
++    if ga.returncode:
++        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: git add rc={ga.returncode} {ga.stderr[:200]!r}")
++
++
++@ca
++def t63_chot_stage_INDEX_moi_bang_chung_hong_phai_la_KHONG_DO_DUOC():
++    """#671 (codex lượt 1, CA-KHOA-STAGING) — bốn chốt của `_stage_byte_vao_index`/`_git_add_do_rc`, mỗi
++    chốt một phép tráo RIÊNG: lệnh git THẬT vẫn chạy (stage thành công), chỉ `rc` hoặc danh sách trả
++    về bị tráo. Tráo cả việc stage thì chốt khác bắt hộ và không đo được chốt đang xét. Đòi đúng
++    `BoQuaMoiTruong`; đối chứng không tráo thì KHÔNG được ném."""
++    def _trao(buoc, kieu):
++        def chay(lenh, **kw):
++            p = subprocess.run(lenh, **kw)
++            if buoc not in lenh:
++                return p
++            if kieu == "rc":
++                return subprocess.CompletedProcess(p.args, 128, p.stdout, p.stderr)
++            return subprocess.CompletedProcess(p.args, p.returncode, b"", p.stderr)
++        return chay
++
++    with tempfile.TemporaryDirectory(prefix="cct-stage-") as tmp:
++        def _kho(ten):
++            d = Path(tmp) / ten
++            (d / "ops").mkdir(parents=True)
++            (d / "ops" / "b.py").write_text("x = 1", encoding="utf-8")
++            dung(subprocess.run(["git", "init", "-q", str(d)], capture_output=True, timeout=60).returncode == 0,
++                 "git init hỏng")
++            return d
++        d = _kho("doi_chung")
++        _stage_byte_vao_index(d, b"ops/a.py", "x = 1")
++        _git_add_do_rc(d, "ops/b.py")
++        for buoc, kieu in (("hash-object", "rc"), ("update-index", "rc"), ("ls-files", "ds"), ("add", "rc")):
++            d = _kho(f"{buoc}-{kieu}")
++            try:
++                if buoc == "add":
++                    _git_add_do_rc(d, "ops/b.py", chay=_trao(buoc, kieu))
++                else:
++                    _stage_byte_vao_index(d, b"ops/a.py", "x = 1", chay=_trao(buoc, kieu))
++            except BoQuaMoiTruong:
++                continue
++            bang(False, f"tráo RIÊNG bằng chứng `{buoc}` ({kieu}) mà helper không báo KHÔNG ĐO ĐƯỢC")
++
++
+ @ca
+ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
+     """THUỘC TÍNH: biên giới BÁO CÁO ra JSON hợp lệ, và NGÀY GỠ là một hạn ĐỌC ĐƯỢC.
+@@ -5482,30 +5627,7 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
+             subprocess.run(["git", "-C", str(d)] + l, capture_output=True, timeout=60)
+         return d
+ 
+-    def _stage_byte(d, ten: bytes, than: str):
+-        """#671 — đặt tên BYTE THÔ thẳng vào INDEX, KHÔNG qua hệ tệp.
+-
+-        `quet` đọc từ INDEX (`t46`), nên cây làm việc không cần mang tên ấy. Đi qua đĩa thì
+-        đo HỆ TỆP chứ không đo cổng: windows-latest (run 36454930689) ra `[]` ở chiều ngược
+-        — tái hiện đúng chữ trên Linux bằng `git add -A` hỏng cả lượt. `rc` PHẢI được đo:
+-        không stage được là KHÔNG ĐO ĐƯỢC, không phải một cây rỗng xanh/đỏ oan."""
+-        # Cây làm việc CŨNG mang tệp khi nền cho phép: t49 đo biên giới BÁO CÁO, không đo
+-        # nguồn đọc — thiếu tệp trên đĩa thì đột biến `bn_doc_cay_lam_viec` (đích `t46`)
+-        # giết luôn t49 (đo được: bán kính 2/54). Nền từ chối tên ấy thì INDEX vẫn đủ.
+-        try:
+-            (d / ten.decode("utf-8", "surrogateescape")).write_text(than, encoding="utf-8")
+-        except (OSError, UnicodeError):
+-            pass
+-        oid = subprocess.run(["git", "-C", str(d), "hash-object", "-w", "--stdin"],
+-                             input=than.encode("utf-8"), capture_output=True, timeout=60)
+-        r = subprocess.run(["git", "-C", str(d), "update-index", "--add", "-z", "--index-info"],
+-                           input=b"100644 " + oid.stdout.strip() + b"\t" + ten + b"\0",
+-                           capture_output=True, timeout=60)
+-        co = ten in subprocess.run(["git", "-C", str(d), "ls-files", "-z"], capture_output=True,
+-                                   timeout=60).stdout.split(b"\0")
+-        if oid.returncode or r.returncode or not co:
+-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: INDEX không nhận tên {ten!r}: "
+-                                 f"rc={oid.returncode}/{r.returncode} {r.stderr[:200]!r}")
++    _stage_byte = _stage_byte_vao_index
+ 
+     BAN = 'import shutil\nb = shutil.which("bash")\n'
+     with tempfile.TemporaryDirectory() as tmp:
+@@ -5516,9 +5638,7 @@ def t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC():
+         #     Unicode thường vẫn nguyên vẹn.
+         d = _kho(tmp, "duong")
+         (d / "ops" / "bình_thường.py").write_text(BAN, encoding="utf-8")
+-        ga = _g(d, "add", "--", "ops/bình_thường.py")
+-        if ga.returncode:
+-            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: git add rc={ga.returncode} {ga.stderr[:200]!r}")
++        _git_add_do_rc(d, "ops/bình_thường.py")
+         _stage_byte(d, b"ops/xau_\xff.py", BAN)
+         pc = subprocess.run([sys.executable, str(bq), "quet", "--root", str(d), "--json"],
+                             capture_output=True, timeout=180)
+@@ -6840,8 +6960,9 @@ def _in_tu_kiem_ban_kinh():
+ 
+ if __name__ == "__main__":
+     if "--tu-kiem-che-do-utf8" in sys.argv[1:]:
+-        print(f"UTF8_MODE={sys.flags.utf8_mode}")
+-        sys.exit(0)
++        print(f"UTF8_MODE={sys.flags.utf8_mode} KHONG_GHI_BYTECODE={int(sys.flags.dont_write_bytecode)} "
++              f"DA_PHONG_LAI={int(_DA_PHONG_LAI)} DAU_SOT={int(_DAU_PHONG_LAI in os.environ)}")
++        sys.exit(_MA_TU_KIEM_UTF8)
+     if "--tu-kiem-ban-kinh" in sys.argv[1:]:
+         _in_tu_kiem_ban_kinh()
+         sys.exit(0)

@@ -33,6 +33,7 @@ PROV = "pr9001-thu-provenance"
 
 # L5 — bản kỳ vọng CHÉP RIÊNG dạng VÂN TAY: sha256 của `json.dumps(sorted(MIEN_TRU_CUTOVER.items()))` đo trên `c73af7b`
 # (16-10-2026), 28 tên. Thêm/đổi/bỏ một tên hay một băm trong bộ kiểm ⇒ c10 ĐỎ; danh sách đọc được nằm trong bộ kiểm.
+L6_TRUONG = ("post_merge_checks", "bookkeeping")   # chép riêng, không đọc từ bộ kiểm: bỏ một trường ở đó ⇒ c16 ĐỎ
 KY_VONG_SO_MIEN_TRU = 28
 KY_VONG_VAN_TAY_MIEN_TRU = "5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257"
 
@@ -293,6 +294,51 @@ def c15_c11_tu_kiem_qua_dau_ra_gia():
 
 
 @ca
+def c16_l6_landed_true_phai_co_phan_hoan_tat():
+    """#845 spec r1 Q1: landed true đòi post_merge_checks/bookkeeping là list mapping khác rỗng, không chuỗi CHO_DIEN."""
+    hs = "trang_thai_packet: {{landed: {}}}\npost_merge_checks: {}\nbookkeeping: {}\n"
+    tot, bk = "[{name: g, conclusion: success}]", "[{item: dong issue}]"
+    ky(hs.format("true", tot, bk), None, 0, "landed true đủ phần hoàn tất")
+    ky(hs.format("true", "'CHO_DIEN — POST_MERGE'", "'CHO_DIEN — BOOKKEEPING'"), None, 1, "ca #840 head 473d56a",
+       "L6 $.post_merge_checks")
+    ky(hs.format("true", "'chua dien'", bk), None, 1, "chuỗi KHÔNG mang dấu đứng chỗ danh sách", "L6 $.post_merge_checks")
+    ky(hs.format("true", "[]", bk), None, 1, "danh sách rỗng", "L6 $.post_merge_checks")
+    ky(hs.format("true", "[chuoi]", bk), None, 1, "phần tử không phải mapping", "L6 $.post_merge_checks")
+    ky(f"trang_thai_packet: {{landed: true}}\npost_merge_checks: {tot}\n", None, 1, "thiếu bookkeeping", "L6 $.bookkeeping")
+    ky(hs.format("true", tot, bk) + "lease: {thu_hoi_cuoi: 'CHO_DIEN — THU_HOI'}\n", None, 1, "dấu trong trường chuỗi",
+       "dấu giữ chỗ")
+    ky(hs.format("true", "[{CHO_DIEN: x}]", bk), None, 1, "dấu nằm ở KHOÁ", "dấu giữ chỗ")
+    # Review #845 lượt 1–2: vá theo từng biên được chỉ thì luôn sót biên kế (A/B/C rồi D–H). Nên đo MA TRẬN: mọi hình dạng sai ×
+    # CẢ HAI trường, mọi vị trí dấu, để mỗi chốt có ca riêng bất kể đột biến nhắm vào trường nào.
+    sai = (None, "null", "[]", "{a: 1}", "'chua dien'", "[{a: 1}, chuoi]", "[chuoi, {a: 1}]", "[{a: 1}, chuoi, {b: 2}]",
+           "[{a: 1}, null]", "[{a: 1}, 3]", "[{a: 1}, 1.5]", "[{a: 1}, []]", "[{a: 1}, true]")   # lượt 3 K/O/P: phần tử sai mọi KIỂU
+    for khoa in L6_TRUONG:
+        for hinh in sai:
+            hop = {"post_merge_checks": tot, "bookkeeping": bk} | {khoa: hinh}
+            ho_so = "trang_thai_packet: {landed: true}\n" + "".join(f"{k}: {v}\n" for k, v in hop.items() if v is not None)
+            ky(ho_so, None, 1, f"{khoa} = {hinh}", f"L6 $.{khoa}")
+    for them in ("x: 'CHO_DIEN dau'\n", "x: 'giua CHO_DIEN giua'\n", "x: 'cuoi CHO_DIEN'\n", "x: [ok, 'a CHO_DIEN']\n",
+                 "x: {a: {b: [{c: {d: 'sau CHO_DIEN sau'}}]}}\n", "x: {a: {b: [{c: {CHO_DIEN: 1}}]}}\n", "x: {a: [{ten_CHO_DIEN: 1}]}\n"):
+        ky(hs.format("true", tot, bk) + them, None, 1, f"dấu ở {them.strip()}", "dấu giữ chỗ")
+    for ho_so, mong in (("trang_thai_packet: {merged: true}\npost_merge_checks: 'CHO_DIEN'\n", 0),   # có mà thiếu landed
+                        ("trang_thai_packet: 'landed true'\npost_merge_checks: 'CHO_DIEN'\n", 0),   # không phải mapping
+                        ("trang_thai_packet: [landed]\npost_merge_checks: 'CHO_DIEN'\n", 0),   # lượt 3 Q: list cũng không
+                        ("trang_thai_packet: {landed: false}\n", 0),   # lượt 3 N: bản nháp thiếu hẳn phần hoàn tất
+                        ("trang_thai_packet: {landed: true}\npost_merge_checks: [{}]\nbookkeeping: [{}]\n", 0),   # L: mapping rỗng ĐÚNG Q1.2
+                        (hs.format("true", tot, bk) + "x: 'cho_dien Cho_Dien viet thuong'\n", 0),   # M: Q1.3 là NGUYÊN VĂN, phân biệt hoa
+                        (hs.format("true", tot, bk) + "x: {1: a, 2026-10-19: b, null: c}\n", 0)):   # khoá không phải chuỗi
+        try:   # L6 không áp / không vi phạm, và KHÔNG được ném (traceback không phải ĐỎ)
+            rc, ra = chay(ho_so)
+        except Exception as e:
+            rc, ra = -1, f"{type(e).__name__}: {e}"
+        bang(rc == mong and "L6" not in ra, f"{ho_so.splitlines()[0]!r}: rc={rc} {ra[-200:]}")
+    for ld in ("'true'", "1", "null", "0", "0.0", "1.0", "[true]", "{a: 1}"):   # lượt 3 I/J: số bằng False/True vẫn không phải bool
+        ky(hs.format(ld, tot, bk), None, 1, f"landed {ld} không phải bool", "phải là bool")
+    ky(hs.format("false", "'CHO_DIEN — POST_MERGE'", "'CHO_DIEN — BOOKKEEPING'"), None, 0, "bản nháp landed false được giữ chỗ")
+    ky("post_merge_checks: 'CHO_DIEN'\n", None, 0, "không có trang_thai_packet.landed ⇒ L6 không áp")
+
+
+@ca
 def c12_dong_cuoi_dung_dinh_dang():
     import re
     rc, ra = chay("x: 'measured — a.json'\n", {"a.json": "{}"})
@@ -342,6 +388,41 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("Q3_goc_truoc_ops_land", "for nen in (prov, goc / THU_MUC, goc):", "for nen in (prov, goc, goc / THU_MUC):", "c05"),
     ("L5_bo_so_bam", "if hashlib.sha256(byte).hexdigest() == bam:", "if bam:", "c09"),
     ("L5_noi_danh_sach", "MIEN_TRU_CUTOVER = {\n", "MIEN_TRU_CUTOVER = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c10"),
+    ("L6_bo_ca_luat", 'if isinstance(tt, dict) and "landed" in tt:   # L6', "if False:   # L6", "c16"),
+    ("L6_bo_kiem_bool", 'if not isinstance(tt["landed"], bool):', "if False:", "c16"),
+    ("L6_ban_nhap_van_kiem", 'elif tt["landed"]:', "else:", "c16"),
+    ("L6_chuoi_thay_danh_sach", "if not (isinstance(ds, list) and ds and all(isinstance(x, dict) for x in ds)):", "if not ds:", "c16"),
+    ("L6_danh_sach_rong_hop_le", "isinstance(ds, list) and ds and all(", "isinstance(ds, list) and all(", "c16"),
+    ("L6_phan_tu_bat_ky", " and all(isinstance(x, dict) for x in ds)", "", "c16"),
+    ("L6_bo_bookkeeping", 'L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")', 'L6_PHAN_HOAN_TAT = ("post_merge_checks",)', "c16"),
+    ("L6_bo_dau_giu_cho", "for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]", "for d, v in nut if False]", "c16"),
+    ("L6_moi_thanh_mot", " and all(isinstance(x, dict) for x in ds)", " and any(isinstance(x, dict) for x in ds)", "c16"),
+    ("L6_bookkeeping_chi_co_mat", "                ds = du_lieu.get(khoa)\n",
+     "                ds = du_lieu.get(khoa)\n                if khoa == \"bookkeeping\" and ds:\n                    continue\n", "c16"),
+    ("L6_dau_gioi_han_do_sau", "for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]",
+     "for d, v in nut if d.count(\".\") + d.count(\"[\") <= 3 and isinstance(v, str) and L6_DAU_GIU_CHO in v]", "c16"),
+    ("L6_dau_chi_o_dau_chuoi", "and L6_DAU_GIU_CHO in v]", "and v.startswith(L6_DAU_GIU_CHO)]", "c16"),
+    ("L6_thieu_pmc_mac_dinh_hop_le", "ds = du_lieu.get(khoa)\n",
+     "ds = du_lieu.get(khoa, [{}] if khoa == \"post_merge_checks\" else None)\n", "c16"),
+    ("L6_bookkeeping_rong_hop_le", "isinstance(ds, list) and ds and all(",
+     "isinstance(ds, list) and (ds or khoa == \"bookkeeping\") and all(", "c16"),
+    ("L6_chi_kiem_phan_tu_cuoi", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, dict) for x in ds[-1:])", "c16"),
+    ("L6_bo_kiem_co_landed", 'if isinstance(tt, dict) and "landed" in tt:   # L6', "if isinstance(tt, dict):   # L6", "c16"),
+    ("L6_bo_kiem_mapping", 'if isinstance(tt, dict) and "landed" in tt:   # L6', 'if tt and "landed" in tt:   # L6', "c16"),
+    ("L6_dau_bo_kiem_chuoi", "for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]",
+     "for d, v in nut if not isinstance(v, (bool, int, float, list, dict, type(None))) and L6_DAU_GIU_CHO in v]", "c16"),
+    # lượt 3 I–Q (review #845): mỗi biên một đột biến
+    ("L6_I_nhan_so_0", 'if not isinstance(tt["landed"], bool):', 'if not (isinstance(tt["landed"], bool) or tt["landed"] == 0):', "c16"),
+    ("L6_J_nhan_float", 'if not isinstance(tt["landed"], bool):', 'if not isinstance(tt["landed"], (bool, float)):', "c16"),
+    ("L6_K_loc_null", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, dict) for x in ds if x is not None)", "c16"),
+    ("L6_L_doi_mapping_khac_rong", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, dict) and x for x in ds)", "c16"),
+    ("L6_M_khong_phan_biet_hoa", "and L6_DAU_GIU_CHO in v]", "and L6_DAU_GIU_CHO in v.upper()]", "c16"),
+    ("L6_N_ban_nhap_doi_truong", 'elif tt["landed"]:', 'elif tt["landed"] or not all(k in du_lieu for k in L6_PHAN_HOAN_TAT):', "c16"),
+    ("L6_O_null_thanh_hop_le", "ds = du_lieu.get(khoa)\n",
+     "ds = du_lieu.get(khoa)\n                ds = [{}] if ds is None and khoa in du_lieu else ds\n", "c16"),
+    ("L6_P_phan_tu_so", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, (dict, int, float)) for x in ds)", "c16"),
+    ("L6_Q_list_la_trang_thai", 'if isinstance(tt, dict) and "landed" in tt:   # L6',
+     'if isinstance(tt, (dict, list)) and "landed" in tt:   # L6', "c16"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),

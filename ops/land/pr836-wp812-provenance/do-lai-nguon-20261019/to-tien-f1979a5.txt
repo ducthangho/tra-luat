@@ -1,0 +1,9 @@
+# 2026-10-19T03:15:36Z
+$ git merge-base --is-ancestor f1979a5 6842a625f457843a21bd3a3b0422f13cb13de911
+rc=0
+$ git merge-base --is-ancestor f1979a5 062292b2c75be8c316a0cf7347290574efa10861
+rc=0
+$ git merge-base --is-ancestor f1979a5 f712205aa39e0b54d04a5bd8145fa69a84601fed
+rc=0
+$ git diff --stat f1979a5ddd5b04562e054cc87beb5f28c7a7e934 062292b2c75be8c316a0cf7347290574efa10861 -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py docs/PROTOCOL_DA_PHIEN.md
+(rong = 3 tep cua PR #836 khong doi tu f1979a5 toi 062292b)

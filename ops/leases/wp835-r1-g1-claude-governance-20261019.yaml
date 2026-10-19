@@ -1,0 +1,68 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 835
+packet_id: wp835
+mission_issue: 835
+revision: 1
+generation: 1
+lease_id: wp835-r1-g1-claude-governance-20261019
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/835#issuecomment-6257466986
+authority_url: https://github.com/ducthangho/tra-luat/issues/835#issuecomment-6257466986
+recorded_by: codex_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-10-19T01:23:04Z'
+heartbeat_at: '2026-10-19T01:23:04Z'
+lease_until: '2026-10-19T13:23:04Z'
+lease_expires_at_utc: '2026-10-19T13:23:04Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+operating_system: Windows
+shell: pwsh
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head
+spec_path: ops/specs/wp835-lease-6h-governance-r1.md
+spec_ref: ops/wp835-r1-g1-lease
+spec_commit: 2869fc80f6844e379a07b043fdeb2e1a4f533543
+spec_hash: cb00c5cfca40657c3ed3b078f6008a25a97d01dd424c14dec9cd8f590f1788ea
+spec_sha256: cb00c5cfca40657c3ed3b078f6008a25a97d01dd424c14dec9cd8f590f1788ea
+branch: agent/wp835-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6842a625f457843a21bd3a3b0422f13cb13de911
+start_from_sha: 6842a625f457843a21bd3a3b0422f13cb13de911
+reviewed_sha_required: 6842a625f457843a21bd3a3b0422f13cb13de911
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0055-lease-no-progress-six-hours.md
+write_set_hash: 8291cd8461c21d3909cc47a95b58d493d29db7941175db7a8647e08b0a28619b
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: owner-approved manual two-path closure exception on Issue 835; canonical policy absent at base
+coordination_paths:
+- ops/specs/wp835-lease-6h-governance-r1.md
+- ops/leases/wp835-r1-g1-claude-governance-20261019.yaml
+run_minutes: 720
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: separate exact candidate approval required before merge or land; 360-minute threshold only after governance activation

@@ -1,0 +1,92 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 744
+packet_id: wp744
+revision: 3
+generation: 3
+lease_id: wp744-r3-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; verdict codex approve tren head cuoi, bang chung qua launcher run.json.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp744-dinh-chinh-p2-r3.md
+spec_sha256_required: 7d2b31cd646870ae4ec55a6158d8efeee1af0786d1bfc9d045f5dfbc735222e8
+spec_hash: 7d2b31cd646870ae4ec55a6158d8efeee1af0786d1bfc9d045f5dfbc735222e8
+spec_ref: refs/heads/ops/wp744-r3-g3-lease (cung commit voi tep lease nay)
+prompt_path: ops/specs/wp744-dinh-chinh-p2-r3.md
+prompt_sha256_required: 7d2b31cd646870ae4ec55a6158d8efeee1af0786d1bfc9d045f5dfbc735222e8
+write_set:
+- ops/specs/wp725-nlm-huong-dan-tai-lieu-r2.md
+- ops/specs/wp726-nlm-script-phan-quyet-canary-r2.md
+- ops/specs/wp727-nlm-refresh-va-goi-y-tl-gws-r2.md
+write_set_hash: f7cab4cf03de3f84a7646652a1067e2d0c2319568637dfa21d651654c844cafc
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- ops/specs/wp725-nlm-huong-dan-tai-lieu-r2.md
+- ops/specs/wp726-nlm-script-phan-quyet-canary-r2.md
+- ops/specs/wp727-nlm-refresh-va-goi-y-tl-gws-r2.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 3 loi goi codex (spec Q5)'}
+- {id: M-2, dieu_kien: 'moi thread review duoc tra loi va resolve'}
+- {id: M-3, dieu_kien: 'mot luot ci.yml XANH tren head cuoi'}
+- {id: M-4, dieu_kien: 'dung 3 tep / <= 80 dong them (spec Q4); wp728-r2 tren master khong doi'}
+- {id: M-5, dieu_kien: 'head doi => M-1, M-3 het hieu luc'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp744-g3-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 5618020a67709ca6f2c93138905df0aa8d9c2df6
+start_from_sha: 5618020a67709ca6f2c93138905df0aa8d9c2df6
+reviewed_sha_required: 5618020a67709ca6f2c93138905df0aa8d9c2df6
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/744#issuecomment-6272548529
+granted_on_instruction_note: >-
+  Chu kho tra loi truc tiep trong phien executor session_01FBUBzbedsJaUtQvX4vEYDE (19-10-2026), nguyen van: "Thực hiện quy trình
+  vá, cross review đi, chỉ push khi đủ điều kiện merge, cấp lease nếu cần" va chon "Rút gọn + đổi đích master". Ghi ho qua GitHub App.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien executor tu ghi lease theo chi thi truc tiep cua chu kho trong chinh phien nay; tien le wp831-r4-g4 (recorder_is_executor true).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-19T16:55:00Z'
+  goc_quet: 'master 5618020a, sau git fetch --prune +refs/heads/*'
+  ket_qua: 'ca 3 tep: NGUOI_GIU 0 (lease g1 wp744-r1-g1-claude-windows-20261012 va g2 wp744-r2-g2-antigravity-20261013 HET_HAN).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1, g2 da het han (2026-10-12/13) nen khong can bia mo hai chieu.'
+tuyen_ghi_chu: 'PR dich master, sai lech co ghi so voi Protocol §5 (Packet PR vao mission/<issue>/integration); tien le #755. Quyet dinh chu kho trong phien.'
+leased_at_utc: '2026-10-19T17:00:00Z'
+heartbeat_at: '2026-10-19T17:00:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-20T20:00:00Z'
+lease_expires_at_utc: '2026-10-20T20:00:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp744_g3: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'nhanh agent/wp744-g3-claude: push MOT LAN khi du dieu kien merge cuc bo (chi thi chu kho trong phien)'

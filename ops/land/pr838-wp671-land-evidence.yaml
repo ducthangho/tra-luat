@@ -6,7 +6,8 @@
 # (xem trang_thai_packet.dieu_kien_con_lai). "merged" KHONG dong nghia "landed" (PROTOCOL §10).
 # NHAN: measured = do lai trong phien soan ho so (lenh ghi kem); loi_khai_co_neo = co neo comment/transcript;
 # not_measured = khong do duoc, ghi ly do.
-# Moi phep do REST: `gh api` (client GitHub cua phien, tai khoan chu kho) luc 2026-10-19T01:40Z..02:00Z.
+# Moi phep do REST: `gh api` (client GitHub cua phien, tai khoan chu kho) luc 2026-10-19T01:40Z..02:05Z; readback tho
+# o ops/land/pr838-wp671-provenance/ (readback-*.json), lenh git o do-git.txt.
 
 schema_version: 1
 mission_id: gh-671
@@ -24,7 +25,7 @@ session_id: https://claude.ai/code/session_014dEtdMqShJhdQ8JfNbEeLU
 recorded_by: claude-session
 github_write_channel: >-
   Tai khoan chu kho `ducthangho` (#566: tai khoan KHONG tach phien agent khoi chu kho). Ca hai PR merged_by =
-  ducthangho (measured). Lenh merge do chu kho bam, khong phai phien agent (loi_khai_co_neo: phien nay khong goi
+  ducthangho (do o readback-pr-690.json, readback-pr-838.json). Lenh merge do chu kho bam, khong phai phien agent (loi_khai_co_neo: phien nay khong goi
   merge_pull_request cho #690 lan #838).
 
 spec:
@@ -40,12 +41,12 @@ leases:
   - id: wp671-windows-bash-nen-escape-r1-g3-claude
     trang_thai: het_han 2026-10-02T00:20Z
   - id: wp671-windows-bash-nen-escape-r1-g4-claude
-    trang_thai: thu_hoi_bang_rut_han ve 2026-10-19T01:58:00Z (commit tren ops/cap-lease-671-g1; workflow dang lease run 39186654324 success)
+    trang_thai: thu_hoi_bang_rut_han ve 2026-10-19T01:58:00Z (commit tren ops/cap-lease-671-g1; workflow dang lease readback-run-39186654324.json success)
     chong_co_duyet: wp748-r19-g19-claude-windows-20261018 (issues/671#issuecomment-6252830932)
 
 pr:
   - so: 690
-    trang_thai: measured
+    trang_thai: 'measured — readback-pr-690.json'
     merged: true
     merged_at: '2026-10-18T18:42:26Z'
     merged_by: ducthangho
@@ -58,32 +59,34 @@ pr:
       Chu kho merge truc tiep — quyet dinh cua chu kho, KHONG phai approval duoc protocol cong nhan; human_audited cua
       #838 phu toan packet o head sau (xem duoi).
     hau_merge_ci: >-
-      measured: run 39155389998 (gate) tren 6b641ca conclusion failure — buoc release-verify strict (lane LAND) do;
-      cung buoc do o cha 577d7b9 (job 117737384053) TRUOC khi #690 vao => do san, delta = 0. Cac job khac success.
+      measured: readback-run-39155389998.json va readback-jobs-39155389998.json (gate tren 6b641ca, failure —
+      buoc release-verify strict (lane LAND) do); cung buoc do o cha 577d7b9 (readback-job-117737384053.json) TRUOC
+      khi #690 vao => do san, delta = 0. Cac job khac success.
   - so: 838
-    trang_thai: measured
+    trang_thai: 'measured — readback-pr-838.json'
     merged: true
     merged_at: '2026-10-19T01:40:32Z'
     merged_by: ducthangho
     head: 72a1d6419e320e9a5231dabc086d15a5f81586a0
     merge_commit: ed02bf65a3bacba249670ab9f23c320f3deb3a10
     merge_commit_parents: [6842a625f457843a21bd3a3b0422f13cb13de911, 72a1d6419e320e9a5231dabc086d15a5f81586a0]
-    diff_so_base: 'ops/cong_cu_test.py +35/-32 (base f1979a5)'
-    ci_tren_head: '13/13 job gate success, mergeable_state clean (gh api, 2026-10-19T01:16Z va 01:2xZ)'
+    diff_so_base: 'measured — do-git.txt: ops/cong_cu_test.py +35/-32 (base f1979a5)'
+    ci_tren_head: 'measured — readback-checkruns-72a1d64.json: 13/13 job gate success; mergeable_state clean (readback-pr-838.json luc merge)'
     approval:
       human_audited: https://github.com/ducthangho/tra-luat/pull/838#issuecomment-6257649150
+      human_audited_nguon: 'measured — readback-comment-6257649150.json (user ducthangho, Reviewed commit 72a1d64)'
       reviewed_sha: 72a1d6419e320e9a5231dabc086d15a5f81586a0
       khop_head_luc_merge: true
       dang_boi: chu_kho_tu_dang (comment do ducthangho tao 01:22:14Z, sua 01:35:54Z)
       pham_vi: 'xac nhan "da doc va chap nhan", KHONG phai luot do tim doc lap (tu khai trong comment)'
-      same_provider_approved: 'review luot 9 Sonnet 5.5 approve tren c9c8a82 — issues/671#issuecomment-6256494266'
-      codex_connector: '72a1d64: completed, 0 finding (comment 6257124783)'
+      same_provider_approved: 'review luot 9 Sonnet 5.5 approve tren c9c8a82 — issues/671#issuecomment-6256494266 (readback-comment-6256494266.json)'
+      codex_connector: '72a1d64: completed, 0 finding (readback-comment-6257124783.json)'
     hau_merge_ci: >-
-      not_measured luc soan: run 39186435964 tren ed02bf6 CANCELLED (concurrency — master di tiep sang 062292b).
+      not_measured luc soan. Run tren ed02bf6 CANCELLED (concurrency — master di tiep sang 062292b): readback-run-39186435964.json.
       Gate hau-merge neo vao 062292b (chua ed02bf6, write set khong doi giua hai commit): run 39187057200, pending luc soan.
 
 pham_vi_packet_tren_master:
-  trang_thai: measured
+  trang_thai: 'measured — do-git.txt'
   lenh: 'git diff --numstat 577d7b9 ed02bf6 -- ops/bash_nen.py ops/cong_cu_test.py'
   ket_qua: 'toan packet +420/-42 (bash_nen.py +1/-1, cong_cu_test.py +419/-41) — tran ~420 chu kho nang (issues/671#issuecomment-5925174103)'
 

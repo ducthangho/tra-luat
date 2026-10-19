@@ -4921,7 +4921,12 @@ def _giu_hau_due_windows(p):
                 bo.append(q)                       # đã thoát giữa lúc chụp và lúc mở
                 continue
             mo.append((q, h))                      # vào `mo` NGAY, trước mọi lời gọi có thể ném
-            if thu_hoi._khoa_danh_tinh(q) != khoa:  # handle đã giữ ⇒ phép so này không còn khe tái dùng
+            # WP748 r20 (Codex WP748-R3 trên 9d471d9) — `_khoa_danh_tinh` cũng gán `GetProcessTimes.argtypes`
+            # bằng lớp `_FILETIME` MỚI trên kernel32 dùng chung, y hệt `_chup_cay`; gọi ngoài khoá thì waiter
+            # kia đè chữ ký giữa chừng ⇒ `ctypes.ArgumentError`. Cùng một khoá cho MỌI lời gọi ctypes launcher.
+            with _KHOA_CHUP_CAY_WINDOWS:
+                khoa_hien = thu_hoi._khoa_danh_tinh(q)
+            if khoa_hien != khoa:                  # handle đã giữ ⇒ phép so này không còn khe tái dùng
                 mo.pop()
                 k32.CloseHandle(h)
                 bo.append(q)
@@ -13129,6 +13134,46 @@ def t217_a9_bien_pyyaml_vang():
         (gia / "yaml.py").write_text("raise ImportError('PyYAML vắng (giả)')\n", encoding="utf-8")
         e = _a9_chot("PyYAML vắng", _a9_cli(kho, env=dict(os.environ, PYTHONPATH=str(gia))), 2)
         chot("ImportError" in e, f"A9: {e!r}")
+
+
+@ca
+def t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa():
+    """WP748 r20 (Codex WP748-R3 trên 9d471d9) — hai waiter t125 cùng vào `_giu_hau_due_windows`; launcher
+    gán `argtypes` lên kernel32 DÙNG CHUNG ở CẢ `_chup_cay` lẫn `_khoa_danh_tinh`, nên lời gọi nào nằm
+    ngoài `_KHOA_CHUP_CAY_WINDOWS` là còn khe ném `ctypes.ArgumentError`. Đo HÀNH VI, chạy được mọi nền:
+    launcher giả ghi `locked()` lúc từng lời gọi, kernel32 giả trả handle thật-giả. Đối chứng: cháu đúng
+    danh tính PHẢI được giữ (không thì ca đo một đường thoát sớm, không đo khoá)."""
+    import ctypes
+    from unittest import mock
+    goi = []
+
+    class _ThuHoiGia:
+        @staticmethod
+        def _chup_cay(pid):
+            goi.append(("_chup_cay", _KHOA_CHUP_CAY_WINDOWS.locked()))
+            return {pid: "win:100", 4242: "win:200"}
+
+        @staticmethod
+        def _khoa_danh_tinh(pid):
+            goi.append(("_khoa_danh_tinh", _KHOA_CHUP_CAY_WINDOWS.locked()))
+            return "win:200" if pid == 4242 else None
+
+    class _K32Gia:
+        def __init__(self):
+            for ten in ("OpenProcess", "WaitForSingleObject", "TerminateProcess", "CloseHandle"):
+                setattr(self, ten, mock.Mock(return_value=7 if ten == "OpenProcess" else 1))
+
+    class _P:
+        pid = 1000
+
+    with mock.patch.dict(globals(), {"_nap_launcher_thu_hoi": lambda: _ThuHoiGia}), \
+            mock.patch.object(ctypes, "WinDLL", lambda *a, **k: _K32Gia(), create=True):
+        k32, giu, ghi = _giu_hau_due_windows(_P())
+    chot(giu is not None and [q for q, _ in giu] == [4242],
+         f"đối chứng: cháu đúng danh tính phải được GIỮ, được giu={giu!r} ({ghi})")
+    chot([t for t, _ in goi] == ["_chup_cay", "_khoa_danh_tinh"], f"tập lời gọi lệch: {goi!r}")
+    ngoai = [t for t, giu_khoa in goi if not giu_khoa]
+    chot(not ngoai, f"lời gọi ctypes launcher NGOÀI _KHOA_CHUP_CAY_WINDOWS: {ngoai} — waiter kia đè argtypes")
 
 
 def _a9_tep_object(kho: Path, oid: str) -> Path:

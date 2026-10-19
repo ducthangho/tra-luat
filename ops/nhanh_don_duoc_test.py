@@ -5465,11 +5465,21 @@ def _loi_gop(thu_muc: Path):
             loi.append(f"{khoa}: hop cac manh != tron bang")
         if len(hop) != len(set(hop)):
             loi.append(f"{khoa}: ten LAP")
+    loi += _loi_nhom_bat_buoc()
+    return loi, n
+
+
+def _loi_nhom_bat_buoc() -> list:
+    """Nhom bat buoc phai DU (moi ca bat buoc co trong TU_KIEM VA co tu dot bien nham vao) va KHONG duoi san.
+
+    WP748 r20 (Codex WP748-R2 tren 9d471d9) — chot nay tung chi nam trong `_loi_gop`, nen `gop_dich`
+    (duong CI moi, ca targeted lan full) nhan bang thieu ca bat buoc ma van tra 0. Dung CHUNG cho ca
+    hai duong gom; mot ban sao thu hai se troi lech, va neo dot bien `gop-bo-kiem-nhom`/`-san` doi duy nhat."""
     nhom = {c for _, dich, _, _ in DOT_BIEN_TU_KIEM for c in dich}
     thieu = (NHOM_BAT_BUOC - nhom) | (NHOM_BAT_BUOC - {t for t, _, _ in TU_KIEM})
     if thieu or len(NHOM_BAT_BUOC) < SAN_NHOM:
-        loi.append(f"nhom bat buoc thieu {sorted(thieu)} hoac duoi san {SAN_NHOM}")
-    return loi, n
+        return [f"nhom bat buoc thieu {sorted(thieu)} hoac duoi san {SAN_NHOM}"]
+    return []
 
 
 def gop(thu_muc) -> int:
@@ -5820,6 +5830,7 @@ def _loi_gop_dich(thu_muc: Path, head=None, du=False):
     duong_gang = max((x["giay"] for x in doc if _so_huu_han(x["giay"])), default=None)
     if duong_gang is None or (not du and duong_gang > TRAN_DUONG_GANG_GIAY):
         loi.append(f"duong gang {duong_gang}s vuot tran {TRAN_DUONG_GANG_GIAY}s")
+    loi += _loi_nhom_bat_buoc()                   # WP748 r20 (Codex R2): cung chot voi `_loi_gop`
     return loi, doc
 
 
@@ -5827,10 +5838,10 @@ def _phan_chung_gop_dich() -> list:
     """Phep gom phai CO RANG truoc khi duoc tin: bo bien nhan TONG HOP hop le => 0 loi; MOI hong
     MOT dieu kien => co loi. Tra danh sach phan chung LOT (rong <=> moi chot co rang)."""
     n, head, bam = 8, "a" * 40, (_bam(__file__), _bam(TOOL))
-    phan = phan_hoach_dich(n)
 
-    def bo_hop_le():
-        return [{"phien_ban": PHIEN_BAN_DICH, "che_do": CHE_DO_DICH, "manh": m, "so_manh": n, "head": head,
+    def bo_hop_le(du=False):
+        phan = phan_hoach_dich(n, du)             # tinh LAI moi lan: ca bang-hong (duoi) doi bang truoc khi dung bo
+        return [{"phien_ban": PHIEN_BAN_DICH, "che_do": CHE_DO_DU if du else CHE_DO_DICH, "manh": m, "so_manh": n, "head": head,
                  "sha256_test": bam[0], "sha256_tool": bam[1], "rc": 0,
                  "bat_dau": "2026-01-01T00:00:00.000Z", "ket_thuc": "2026-01-01T00:05:00.000Z",
                  # manh 0 dung int, cac manh khac float — bo hop le phai nhan CA HAI kieu so (WP748 r19)
@@ -5898,18 +5909,46 @@ def _phan_chung_gop_dich() -> list:
                 lot.append(f"{ten}: {'CHAP NHAN' if sua else loi[:2]}")
             if sua is None and not _loi_gop_dich(d, head=head, du=True)[0]:
                 lot.append("hop-le-targeted: gom full_mutant_audit CHAP NHAN bien nhan targeted")
-    return lot, 1 + len(hong)
+        # WP748 r20 (Codex WP748-R2) — BANG bat buoc hong ma bien nhan van khop bang ay: ca hai che do
+        # phai tu choi, va tu choi DUNG vi chot nhom (moi loi khac la chet vi ly do vo can, khong tinh).
+        # Bo bien nhan dung SAU khi doi bang, nen phan hoach/thanh vien van khop — chi chot nhom con ban.
+        g = globals()
+        bang_hong = [
+            ("nhom-thieu-dot-bien", "DOT_BIEN_TU_KIEM", [x for x in DOT_BIEN_TU_KIEM if "r549" not in x[1]]),
+            ("nhom-bat-buoc-la", "NHOM_BAT_BUOC", NHOM_BAT_BUOC | {"r999"}),
+            ("nhom-duoi-san", "NHOM_BAT_BUOC", NHOM_BAT_BUOC - {"r549"}),
+        ]
+        for du in (False, True):
+            for ten, bien, gia_tri in [("hop-le", None, None)] + bang_hong:
+                cu = g[bien] if bien else None
+                try:
+                    if bien:
+                        g[bien] = gia_tri
+                    d = Path(td) / f"bang-{'du' if du else 'dich'}-{ten}"
+                    d.mkdir()
+                    for i, b in enumerate(bo_hop_le(du)):
+                        (d / f"manh-{i}.json").write_text(json.dumps(b), encoding="utf-8")
+                    loi, _ = _loi_gop_dich(d, head=head, du=du)
+                finally:
+                    if bien:
+                        g[bien] = cu
+                nhan = f"{ten}{' (du)' if du else ''}"
+                if bien is None and loi:
+                    lot.append(f"{nhan}: {loi[:2]}")
+                elif bien is not None and not (loi and all(x.startswith("nhom bat buoc") for x in loi)):
+                    lot.append(f"{nhan}: {'CHAP NHAN' if not loi else 'chet vi ly do vo can ' + repr(loi[:2])}")
+    return lot, 1 + len(hong) + 2 * (1 + len(bang_hong)), 3
 
 
 def gop_dich(thu_muc, du=False) -> int:
     """`--gop-dich`/`--gop-du <thu muc>`: DAT khi DU N manh, DUNG head, MOI muc passed (+ duong gang <= tran neu targeted)."""
-    lot, tong = _phan_chung_gop_dich()
+    lot, tong, hop_le = _phan_chung_gop_dich()
     for x in lot:
         print(f"GOP DICH: PHAN CHUNG LOT — {x}")
     if lot:
         print(f"{CHE_DO_DICH}: DO — phep gom KHONG co rang")
         return 1
-    print(f"GOP DICH: phan chung {tong}/{tong} dung (1 hop le + {tong - 1} hong)")
+    print(f"GOP DICH: phan chung {tong}/{tong} dung ({hop_le} hop le + {tong - hop_le} hong)")
     loi, doc = _loi_gop_dich(Path(thu_muc), du=du)
     for x in loi:
         print(f"GOP DICH: LOI — {x}")

@@ -17,7 +17,9 @@ recorded_by: claude-session
 recorder_is_dispatcher: false
 
 leased_at_utc: '2026-10-18T17:21:00Z'
-lease_expires_at_utc: '2026-10-19T05:21:00Z'
+lease_expires_at_utc: '2026-10-19T01:58:00Z'
+han_ghi_chu: >-
+  Goc 12 gio (2026-10-19T05:21:00Z). RUT NGAN ve 2026-10-19T01:58:00Z — xem thu_hoi_bang_rut_han.
 
 packet_id: WINDOWS-BASH-NEN-ESCAPE
 packet_slug: WINDOWS-BASH-NEN-ESCAPE
@@ -105,3 +107,22 @@ cam_tuyet_doi:
 chua_do_duoc:
   - 'Danh tinh nguoi ky: #566.'
   - 'Git for Windows co nhan ten byte tho / ten mang dau cheo nguoc trong INDEX khong.'
+lease_sua_lan_cuoi: '2026-10-19T01:45Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-19T05:21:00Z'
+  han_moi_utc: '2026-10-19T01:58:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_014dEtdMqShJhdQ8JfNbEeLU 2026-10-19 ~01:42Z: "Đã merge, hãy land, bookeeping".
+  ly_do: >-
+    Packet #671 da MERGE het: PR #690 merge 6b641ca2a2b889c9f43eec58bae47a00a80373cd (2026-10-18T18:42:26Z, head
+    abc03391) va PR #838 merge ed02bf65a3bacba249670ab9f23c320f3deb3a10 (2026-10-19T01:40:32Z, head 72a1d641,
+    human_audited pull/838#issuecomment-6257649150).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668: rut han chi dung co che da cai (phan loai lease theo han). Han moi dat vai phut SAU
+    luc push de ops-publish-lease.yml con thay lease song (nhanh rc=9 da dang), khong roi vao rc=8.
+  nguoi_rut: 'phien dieu phoi/executor session_014dEtdMqShJhdQ8JfNbEeLU'
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-671-g1 (ban rut han) va master sau PR bookkeeping. Nghiem thu: ai-dang-giu
+    cho ops/bash_nen.py, ops/cong_cu_test.py khong con wp671-windows-bash-nen-escape-r1-g4-claude sau han moi.

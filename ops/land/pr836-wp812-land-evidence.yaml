@@ -1,11 +1,10 @@
 # HO SO LAND — packet #812 MAY-ADR-0054-a, revision 2 (lease g3), ma qua PR #836. Khuon: ops/land/pr823-wp802-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (f1979a5), `landed: false`. Gate push master tren f1979a5 DO o DUNG buoc `release-verify strict
-# (lane LAND)`: extra_files changelog.d/wp-802.md — DO SAN tu dfe5437 (#802), cung do tren cha thu nhat 2d33a0c; ban sua manifest
-# thuoc packet #831 L3 (lease wp831-r4-g4-claude giu RELEASE_MANIFEST.json, PR #832), KHONG thuoc ho so nay. PR #836 chi doi
-# .claude/dev/packet_loop{,_test}.py + docs/PROTOCOL_DA_PHIEN.md => delta = 0. `landed` chi len true khi gate master xanh sau khi
-# #831 land VA chu kho quyet. Lease wp812-r2-g3-claude DA NHA (rut han 673592f, NGƯỜI_GIỮ 0).
+# TRANG THAI: merged (f1979a5), `landed: true` — NANG tu false (062292b, PR #839) theo quyet dinh chu kho 19-10-2026
+# ("Đồng ý, làm theo khuyến nghị"). Gate push master tren CHINH f1979a5 van DO o release-verify strict (do san tu dfe5437,
+# delta 0, sua thuoc #831); sau khi #831 land (6842a62) gate push master XANH 14/14 tren 6842a62 va 062292b — ca hai la
+# hau due cua f1979a5 va 3 tep cua PR #836 KHONG doi (do-lai-nguon-20261019/to-tien-f1979a5.txt). Lease da nha (673592f).
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr836-wp812-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -37,11 +36,15 @@ pre_merge_checks:
   - {name: 'Codex connector loi goi 10/10', sha: d7b42d26f09dad0599dc0434dfad25b3897f3e51, conclusion: 'completed, khong finding', nguon: [readback-comment-6254397816.json, verdict/wp812-r2-g3-connector-review-10-codex/VERDICT.md]}
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39176832958, sha: f1979a5ddd5b04562e054cc87beb5f28c7a7e934, conclusion: failure, buoc_do: 'release-verify strict (lane LAND — manifest committed)', ghi_chu: 'measured — readback-jobs-39176832958.json: 15/15 job xong, 14 success (ke ca gate-cong-cu-gop, runner duoc cap); DUNG MOT job do (`gate (ubuntu-latest)`) o DUNG MOT buoc release-verify strict. Do tai cho tren cay f1979a5 (do-lai-nguon-20261019/release-verify-master.txt): rc=2 ok false, extra_files [changelog.d/wp-802.md], failed 0, missing 0 — DO SAN tu dfe5437 (pr823-wp802-land-evidence.yaml), PR #836 khong cham manifest => delta 0.', nguon: [readback-run-39176832958.json, readback-jobs-39176832958.json]}
+  - {name: 'ci.yml push master — hau due 6842a62 (merge PR #832, #831 land)', run_id: 39183257258, sha: 6842a625f457843a21bd3a3b0422f13cb13de911, conclusion: success, ghi_chu: 'measured — readback-jobs-39183257258.json: 14/14 job success, attempt 1; f1979a5 la to tien (do-lai-nguon-20261019/to-tien-f1979a5.txt).', nguon: [readback-run-39183257258.json, readback-jobs-39183257258.json]}
+  - {name: 'ci.yml push master — hau due 062292b (merge PR #839)', run_id: 39187057200, sha: 062292b2c75be8c316a0cf7347290574efa10861, conclusion: success, ghi_chu: 'measured — readback-jobs-39187057200.json: 14/14 job success, attempt 1.', nguon: [readback-run-39187057200.json, readback-jobs-39187057200.json]}
+  - {name: 'release-verify strict tren master f712205 (sau #831)', sha: f712205aa39e0b54d04a5bd8145fa69a84601fed, conclusion: 'ok', ghi_chu: 'measured — do-lai-nguon-20261019/release-verify-master-sau-831.txt: rc=0 ok true, 189/189, extra_files rong.'}
   - {name: 'launcher (Windows that) push master', run_id: 39176832957, sha: f1979a5ddd5b04562e054cc87beb5f28c7a7e934, conclusion: success, nguon: readback-run-39176832957.json}
 bookkeeping:
   - {item: 'dong Issue #812 (completed)', ket_qua: 'measured — readback-issue-812.json: state closed, state_reason completed, closed_at 2026-10-18T23:52:24Z, closed_by ducthangho'}
   - {item: 'heartbeat chot tren #812', ket_qua: 'loi_khai_co_neo — issuecomment-6256525696'}
-  - {item: 'PR ghi so', nhanh: claude/bookkeeping-812-land}
+  - {item: 'PR ghi so (landed false)', nhanh: claude/bookkeeping-812-land, pr: 839, ket_qua: 'merged 062292b'}
+  - {item: 'PR ghi so (nang landed true + dac ta wp812-r2, wp834 len master)', nhanh: claude/bookkeeping-812-landed}
   - {item: 'no ngoai pham vi', ket_qua: 'KHONG mo issue moi — manifest wp-802 -> #831 (L3, PR #832); accept + I7 -> #834.'}
 # ---- het truong chuan
 packet_id: wp812
@@ -59,7 +62,7 @@ spec:
   path: ops/specs/wp812-r2.md
   sha256: d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef
   blob: d5b56893f457067a66eea0da60f411677a0ee3f2
-  nguon: 'measured — do-lai-nguon-20261019/spec-lease-wp812.txt: git show origin/ops/wp812-spec:ops/specs/wp812-r2.md | sha256sum (ref 77816dd); khop spec_hash cua lease. Spec CHUA vao master.'
+  nguon: 'measured — do-lai-nguon-20261019/spec-lease-wp812.txt: git show origin/ops/wp812-spec:ops/specs/wp812-r2.md | sha256sum (ref 77816dd); khop spec_hash cua lease. Vao master (byte y het, cung ops/specs/wp834.md c57ef4d8…) qua nhanh claude/bookkeeping-812-landed.'
 lease:
   lease_id: wp812-r2-g3-claude
   path: ops/leases/wp812-r2-g3-claude.yaml (nhanh ops/wp812-spec)
@@ -80,11 +83,14 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-836.json: merged true, merged_at 2026-10-18T23:30:49Z, merged_by ducthangho, merge_commit_sha f1979a5
     (cha 2d33a0c + d7b42d2, tree = tree cua head: do-lai-nguon-20261019/merge-f1979a5.txt), merge commit (khong squash/rebase).
-  landed: false
-  landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA: DO o release-verify strict (manifest thieu changelog.d/wp-802.md, do san);
-    sua thuoc packet #831 L3 (PR #832), phai xanh tren master sau khi #831 land; (2) lease da nha: DAT (rut han 673592f, NGƯỜI_GIỮ 0 ca 3 duong dan);
-    (3) bookkeeping: #812 closed DAT, no da co chu (#831, #834). Ghi `landed: true` can quyet dinh chu kho.
+  landed: true
+  landed_nguon: >-
+    loi_khai_co_neo — chu kho quyet nang `landed` trong phien session_01DHM6bohGX6Dmx37wQwpeaD 19-10-2026 ("Đồng ý, làm theo
+    khuyến nghị", tra loi de xuat nang landed true). measured — dieu kien §10.2.4: (1) hau-merge gate xanh tren master chua
+    f1979a5: readback-jobs-39183257258.json va readback-jobs-39187057200.json 14/14; gate tren CHINH f1979a5 do o
+    release-verify (do san, delta 0, readback-jobs-39176832958.json) — ghi ro, khong che; (2) lease da nha: ai-dang-giu-sau-rut-han/luc-do.txt;
+    (3) bookkeeping: readback-issue-812.json closed completed, ho so nay.
+  landed_luc_dau: 'false (PR #839, 062292b) — cho #831 sua manifest; xem lich su git cua tep nay.'
 
 uy_quyen_land:
   dang: >-

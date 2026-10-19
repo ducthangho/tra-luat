@@ -4079,6 +4079,43 @@ def r552_gop_chi_dat_khi_phu_dung_hai_bang(d: Path):
     chot(p.returncode == 0 and p.stdout.startswith("GOP MANH 4/4\n"), "r552")
 
 
+def r553_ram_windows_du_phong_cap_du_PROCESS_MEMORY_COUNTERS(d: Path):
+    """WP748 r20 (connector Codex, PR #849 tren 4e89dd9, P2) — duong du phong `job=None` cua `_ram_dinh_mb`
+    cap `_PMC` thieu `PeakPagefileUsage` (7 SIZE_T thay vi 8 theo psapi.h), nen tren Win64 bo dem 64 byte
+    thay vi 72, `GetProcessMemoryInfo` that bai, RAM thanh KHONG DO DUOC va `gop_dich` bac mot manh xanh.
+    Do HANH VI tren moi nen: psapi gia tu choi `cb` nho hon kich thuoc tai lieu, nhu API that."""
+    import ctypes
+    from unittest import mock
+    # psapi.h: 2 DWORD roi DUNG 8 SIZE_T tu `PeakWorkingSetSize`. Do so O SIZE_T tinh tu `peak_ws`, KHONG do
+    # kich thuoc tuyet doi: tren Linux `wintypes.DWORD` la c_ulong 8 byte, so tuyet doi khong phan biet 7 voi 8.
+    o = ctypes.sizeof(ctypes.c_size_t)
+    nhan = {}
+
+    class _Ham:
+        def __init__(self, f):
+            self.f = f
+
+        def __call__(self, *a):
+            return self.f(*a)
+
+    def _gpmi(_h, ref, cb):
+        nhan["o_size_t"] = (cb - type(ref._obj).peak_ws.offset) // o
+        if nhan["o_size_t"] < 8 or ctypes.sizeof(ref._obj) < cb:
+            return 0                                # ERROR_INSUFFICIENT_BUFFER o API that
+        ref._obj.peak_ws = 512 * 2 ** 20
+        return 1
+
+    psapi = type("P", (), {})()
+    psapi.GetProcessMemoryInfo = _Ham(_gpmi)
+    k32 = type("K", (), {})()
+    k32.GetCurrentProcess = _Ham(lambda: 1)
+    with mock.patch.object(os, "name", "nt"), \
+            mock.patch.object(ctypes, "WinDLL", lambda ten, **k: psapi if ten == "psapi" else k32, create=True):
+        mb, pham_vi = _ram_dinh_mb(None)
+    chot(nhan.get("o_size_t") == 8, "r553")
+    chot(mb == 512.0 and pham_vi.startswith("windows PeakWorkingSet CHI tien trinh manh"), "r553")
+
+
 TU_KIEM = [
     ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
     ("r539", r539_bang_chung_phai_den_tu_con_chay_that, True),
@@ -4132,6 +4169,7 @@ TU_KIEM = [
     ("r550", r550_phan_hoach_phu_dung_bang_va_roi_nhau, True),
     ("r551", r551_manh_chi_chay_phan_hoach_va_chi_ghi_khi_dat_tron, True),
     ("r552", r552_gop_chi_dat_khi_phu_dung_hai_bang, True),
+    ("r553", r553_ram_windows_du_phong_cap_du_PROCESS_MEMORY_COUNTERS, True),
 ]
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
@@ -4885,6 +4923,7 @@ DOT_BIEN_TU_KIEM = [
     ("gop-rc-0-khi-loi", ("r552",), "    if loi:\n        return 1\n    g, tk", "    if False:\n        return 1\n    g, tk"),
     ("ghi-so-gop", ("r546",), "            _ghi_ha_tang(e)                       # r2 M1 diem nuot: _loi_gop\n", ""),
     ("gop-cli-bo-qua", ("r552",), '    if sys.argv[1:2] == ["--gop"]:', "    if False:"),
+    ("ram-pmc-thieu-truong", ("r553",), "for i in range(7)]   # WP748 r20 (r553)", "for i in range(6)]   # WP748 r20 (r553)"),
 ]
 
 
@@ -4903,8 +4942,9 @@ NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r543", "r544"}      # #593 r1
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r545", "r546", "r547"}      # #593 r2
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r548"}      # #593 r3
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r549", "r550", "r551", "r552"}      # #661
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r553"}      # WP748 r20
 
-SAN_NHOM = 52
+SAN_NHOM = 53                                 # WP748 r20: san = tron tap bat buoc (them r553)
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
@@ -5524,7 +5564,7 @@ GIAY_CA_HO_SO = {
     "r531": 0.92, "r532": 0.56, "r533": 0.47, "r534": 0.46, "r535": 0.44, "r536": 0.41,
     "r537": 0.42, "r538": 0.92, "r539": 9.77, "r540": 0.74, "r541": 0.39, "r542": 4.96,
     "r543": 0.65, "r544": 0.53, "r545": 0.49, "r546": 72.02, "r547": 1.12, "r548": 4.41,
-    "r549": 0.58, "r550": 0.52, "r551": 5.72, "r552": 2.19,
+    "r549": 0.58, "r550": 0.52, "r551": 5.72, "r552": 2.19, "r553": 0.05,
 }
 GIAY_PHONG_CON, GIAY_DOT_BIEN_SP, GIAY_NEN_SP = 1.5, 30.0, 27.0
 _KHOA_DICH = {"phien_ban", "che_do", "manh", "so_manh", "head", "sha256_test", "sha256_tool",
@@ -5627,7 +5667,7 @@ def _ram_dinh_mb(job):
 
     class _PMC(ctypes.Structure):
         _fields_ = [("cb", wintypes.DWORD), ("pf", wintypes.DWORD), ("peak_ws", ctypes.c_size_t)] + \
-                   [(f"x{i}", ctypes.c_size_t) for i in range(6)]
+                   [(f"x{i}", ctypes.c_size_t) for i in range(7)]   # WP748 r20 (r553): du 8 SIZE_T, ke ca PeakPagefileUsage
     try:
         k32 = ctypes.WinDLL("kernel32", use_last_error=True)
         if job:
@@ -5916,7 +5956,8 @@ def _phan_chung_gop_dich() -> list:
         bang_hong = [
             ("nhom-thieu-dot-bien", "DOT_BIEN_TU_KIEM", [x for x in DOT_BIEN_TU_KIEM if "r549" not in x[1]]),
             ("nhom-bat-buoc-la", "NHOM_BAT_BUOC", NHOM_BAT_BUOC | {"r999"}),
-            ("nhom-duoi-san", "NHOM_BAT_BUOC", NHOM_BAT_BUOC - {"r549"}),
+            # dung SAN_NHOM - 1 ca CO THAT (khong `thieu`), khong ghi cung ten: them ca bat buoc khong lam ca nay mat rang
+            ("nhom-duoi-san", "NHOM_BAT_BUOC", frozenset(sorted(NHOM_BAT_BUOC)[:SAN_NHOM - 1])),
         ]
         for du in (False, True):
             for ten, bien, gia_tri in [("hop-le", None, None)] + bang_hong:

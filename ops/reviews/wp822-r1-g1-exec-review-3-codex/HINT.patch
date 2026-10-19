@@ -1,0 +1,92 @@
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -5781,21 +5781,16 @@
+     "kg_k05_trang_khong_phai_object": _kg_ca([[1], {"total_count": 1, "check_runs": [_kg_run(1)]}], chua="trang 0 " + _KG_TRANG),
+     "kg_k08_phan_tu_khong_phai_object": _kg_ca(_KG_RUN1_SAU(5, tc=1), chua="check_runs[1] không phải object"),
+     "kg_k09_id_chuoi_khong_bat_buoc": _kg_ca(_KG_RUN1_SAU(_kg_khac(id="x")), chua=f"{_KG_TRUONG} ['id']"),
+-    # D3–D6 (K10–K13) + K37: sai kiểu / VẮNG trên run KHÔNG bắt buộc.
+     "kg_d3_name_sai_kieu": _kg_ca(_KG_RUN1_SAU(_kg_khac(name=5)), chua=f"{_KG_TRUONG} ['name']"),
+     "kg_d4_head_sha_sai_kieu": _kg_ca(_KG_RUN1_SAU(_kg_khac(head_sha=5)), chua=f"{_KG_TRUONG} ['head_sha']"),
+     "kg_d5_status_sai_kieu": _kg_ca(_KG_RUN1_SAU(_kg_khac(status=5)), chua=f"{_KG_TRUONG} ['status']"),
+     "kg_d5_thieu_status_khong_bat_buoc": _kg_ca(_KG_RUN1_SAU(_kg_khac(status=_VANG_T)), chua=f"{_KG_TRUONG} ['status']"),
+     "kg_d6_conclusion_sai_kieu": _kg_ca(_KG_RUN1_SAU(_kg_khac(conclusion=5)), chua=f"{_KG_TRUONG} ['conclusion']"),
+-    # M4: ca THAY `kg_m2_thieu_conclusion` — `total_count` đúng 2, run hỏng không bắt buộc ⇒ D6 ra rc 0.
+     "kg_m2_thieu_conclusion_khong_bat_buoc": _kg_ca(_KG_RUN1_SAU(_kg_khac(conclusion=_VANG_T)),
+                                                     chua=f"{_KG_TRUONG} ['conclusion']"),
+     "kg_k37_conclusion_null_khong_bat_buoc": _kg_ca(_KG_RUN1_SAU(_kg_khac(conclusion=None, status="queued")), expect=0),
+-    # K15: total_count đúng hai id; gỡ chốt bằng bỏ run làm đổi lý do sang thiếu trang (M1).
+     "kg_k15_bo_qua_run_thieu_suite": _kg_ca(_KG_RUN1_SAU(_kg_khac(check_suite=_VANG_T), tc=2), dem=False, chua=_KG_CS),
+-    # D1 (K18): cùng id, khác `head_sha`; id lớn hơn xanh ⇒ dưới D1 cấp XANH GIẢ.
+     "kg_d1_cung_id_khac_head": _kg_ca(_KG_RUN1_SAU(_kg_run(1, head="cd" * 20), _kg_run(2), tc=2), dem=False, chua=_KG_DT),
+-    # D2 (K35): MỘT tên đỏ cạnh một tên xanh.
+     "kg_d2_mot_ten_do_mot_ten_xanh": _kg_ca(_KG_RUN1_SAU(_kg_run(2, name="gate2", conclusion="cancelled")),
+                                             bat_buoc=("gate", "gate2"), chua="1/2 tên bắt buộc đỏ"),
+     "kg_k21_head_hoa": _kg_ca({"check_runs": [_kg_run(1, head="AB" * 20)]}, head="AB" * 20, expect=2, chua="SHA 40"),
+@@ -5808,11 +5803,9 @@
+                                      chua="status='in_progress'"),
+     "kg_k31_conclusion_do_truoc": _kg_ca({"check_runs": [_kg_run(2, conclusion="cancelled"), _kg_run(2)]},
+                                          chua="conclusion='cancelled'"),
+-    # K40: hai bản ghi đỏ cùng id lớn nhất ⇒ vẫn MỘT tên đỏ.
+     "kg_k40_hai_ban_do_mot_ten": _kg_ca({"check_runs": [_kg_run(2, conclusion="cancelled"), _kg_run(2, conclusion="failure")]},
+                                         chua="1/1 tên bắt buộc đỏ"),
+ })
+-# #822 r2 (review 2): biên SHA · so id theo SỐ · MỌI trang đều qua kiểm schema/kiểu · so total_count MỌI trang.
+ for _ten, _head in (("phi_hex", "g" * 40), ("39", "a" * 39), ("41", "a" * 41)):
+     _KG_CA[f"kg_r2_sha_{_ten}"] = _kg_ca({"check_runs": [_kg_run(1, head=_head)]}, head=_head, expect=2, chua="SHA 40")
+ for _ten, _cu, _moi, _rc in (("moi_do", "success", "cancelled", 12), ("moi_xanh", "cancelled", "success", 0)):
+@@ -5833,6 +5826,30 @@
+     [{"total_count": 3, "check_runs": [_kg_run(1, conclusion="cancelled")]},
+      {"total_count": 3, "check_runs": [_kg_run(2, conclusion="cancelled")]}, {"total_count": 4, "check_runs": [_kg_run(3)]}],
+     chua="khác nhau")
++# Review 3: mỗi biến thể một fixture chỉ sai đúng chốt; dữ liệu + mutant dùng chung bảng.
++_KG_R3 = (
++    ('K07', 'later_page_negative_count', 'negative', 'if type(tc) is not int or tc < 0:', 'if type(tc) is not int or (tc < 0 and i == 0):', [{'total_count': 1, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'total_count': -1, 'check_runs': []}], {'dem': False, 'chua': 'trang 1: `total_count` không phải số nguyên ≥ 0'}),
++    ('K15', 'later_page_suite_bool', 'bool', 'type(cs.get("id", _VANG)) is not int:', '(not isinstance(cs.get("id", _VANG), int) if i else type(cs.get("id", _VANG)) is not int):', [{'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'total_count': 2, 'check_runs': [{'id': 2, 'name': 'khac', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': True}}]}], {'dem': False, 'chua': 'trang 1 check_runs[0] `check_suite` không phải object'}),
++    ('K14', 'later_page_run_bool', 'bool', 'if type(r.get(k, _VANG)) not in kieu]', 'if (not isinstance(r.get(k, _VANG), kieu) if i else type(r.get(k, _VANG)) not in kieu)]', [{'total_count': 2, 'check_runs': [{'id': 2, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'total_count': 2, 'check_runs': [{'id': True, 'name': 'khac', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}], {'dem': False, 'chua': "trang 1 check_runs[0] thiếu/sai kiểu trường ['id']"}),
++    ('K02', 'nested_suite_duplicates_ignored', 'suite_id', 'object_pairs_hook=_cam_khoa_trung, ', 'object_pairs_hook=lambda pairs: dict(pairs) if all(k == "id" for k, _ in pairs) else _cam_khoa_trung(pairs), ', None, {'dem': False, 'tho': '{"total_count": 1, "check_runs": [{"id": 1, "name": "gate", "head_sha": "abababababababababababababababababababab", "status": "completed", "conclusion": "success", "check_suite": {"id": 9, "id": 1}}]}', 'chua': 'khoá trùng'}),
++    ('K02', 'extra_key_duplicates_ignored', 'root', 'object_pairs_hook=_cam_khoa_trung, ', 'object_pairs_hook=lambda pairs: _cam_khoa_trung([(k,v) for k,v in pairs if k in {"check_runs", "total_count", "id", "name", "head_sha", "status", "conclusion", "check_suite"}]) | dict(pairs), ', None, {'dem': False, 'tho': '{"total_count": 1, "check_runs": [{"id": 1, "name": "gate", "head_sha": "abababababababababababababababababababab", "status": "completed", "conclusion": "success", "check_suite": {"id": 1}}],"extra":1,"extra":2}', 'chua': 'khoá trùng'}),
++    ('K02', 'extra_key_duplicates_ignored', 'nested', 'object_pairs_hook=_cam_khoa_trung, ', 'object_pairs_hook=lambda pairs: _cam_khoa_trung([(k,v) for k,v in pairs if k in {"check_runs", "total_count", "id", "name", "head_sha", "status", "conclusion", "check_suite"}]) | dict(pairs), ', None, {'dem': False, 'tho': '{"total_count": 1, "check_runs": [{"id": 1, "name": "gate", "head_sha": "abababababababababababababababababababab", "status": "completed", "conclusion": "success", "check_suite": {"id": 1}}],"extra":{"x":1,"x":2}}', 'chua': 'khoá trùng'}),
++    ('K02', 'extra_key_duplicates_ignored', 'array', 'object_pairs_hook=_cam_khoa_trung, ', 'object_pairs_hook=lambda pairs: _cam_khoa_trung([(k,v) for k,v in pairs if k in {"check_runs", "total_count", "id", "name", "head_sha", "status", "conclusion", "check_suite"}]) | dict(pairs), ', None, {'dem': False, 'tho': '{"total_count": 1, "check_runs": [{"id": 1, "name": "gate", "head_sha": "abababababababababababababababababababab", "status": "completed", "conclusion": "success", "check_suite": {"id": 1}}],"extra":[{"x":1,"x":2}]}', 'chua': 'khoá trùng'}),
++    ('K34', 'head_prefix', 'prefix', 'and r["head_sha"] == a.head)', 'and r["head_sha"].startswith(a.head))', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab1', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'head_sha='}),
++    ('K34', 'head_suffix', 'head_suffix', 'and r["head_sha"] == a.head)', 'and r["head_sha"].endswith(a.head))', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': '1abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'head_sha='}),
++    ('K34', 'head_casefold', 'head_casefold', 'and r["head_sha"] == a.head)', 'and r["head_sha"].lower() == a.head.lower())', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'ABABABABABABABABABABABABABABABABABABABAB', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'head_sha='}),
++    ('K34', 'head_first7', 'head_first7', 'and r["head_sha"] == a.head)', 'and r["head_sha"][:7] == a.head[:7])', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababaccccccccccccccccccccccccccccccccc', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'head_sha='}),
++    ('K27', 'name_suffix', 'name_suffix', 'if r["name"] == ten]', 'if r["name"].endswith(ten)]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'extra gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'VẮNG'}),
++    ('K27', 'name_casefold', 'name_casefold', 'if r["name"] == ten]', 'if r["name"].lower() == ten.lower()]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'GATE', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'VẮNG'}),
++    ('K27', 'name_strip_run', 'name_strip_run', 'if r["name"] == ten]', 'if r["name"].strip() == ten]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': ' gate ', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'VẮNG'}),
++    ('K27', 'name_strip_arg', 'spaces', 'if r["name"] == ten]', 'if r["name"] == ten.strip()]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': ' gate ', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'expect': 0, 'bat_buoc': (' gate ',)}),
++    ('K39', 'red_first_name_only', 'two_red', '        for dong in do:\n', '        for dong in do[:1]:\n', {'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'failure', 'check_suite': {'id': 1}}, {'id': 2, 'name': 'gate2', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'cancelled', 'check_suite': {'id': 1}}]}, {'dem': False, 'bat_buoc': ('gate', 'gate2'), 'chua': "'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ"}),
++    ('K40', 'red_count_constant', 'two_red', '{len(do)}/{len(ten_bb)} tên bắt buộc đỏ', '{1}/{len(ten_bb)} tên bắt buộc đỏ', {'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'failure', 'check_suite': {'id': 1}}, {'id': 2, 'name': 'gate2', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'cancelled', 'check_suite': {'id': 1}}]}, {'dem': False, 'bat_buoc': ('gate', 'gate2'), 'chua': "'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ"}),
++)
++for _k, _m, _nhan, _tim, _thay, _du_lieu, _opts in _KG_R3:
++    _ca = f"kg_r3_{_m}_{_nhan}"
++    MUTANTS.setdefault("kg_r3_" + _m, (_tim, _thay, []))[2].append(_ca)
++    _KG_CA[_ca] = _kg_ca(_du_lieu, **_opts)
+ _KG_CA_822 = [k for k in _KG_CA if k not in dict(CASES)]
+ CASES += [(k, _KG_CA[k]) for k in _KG_CA_822]
+ 
+@@ -5972,6 +5989,8 @@
+                "K26": tuple(f"kg_r2_canh_bao_{n}" for n in ("dem_1", "id_dau", "ten_dau")), "K30": ("kg_r2_id_theo_chuoi",)}.items():
+     _KG_KIEM_KE[_k] += _m
+ 
++for _k, _m, *_ in _KG_R3:
++    _KG_KIEM_KE[_k] = tuple(dict.fromkeys((*_KG_KIEM_KE[_k], "kg_r3_" + _m)))
+ 
+ def case_kg_m5_kiem_ke(c: Ctx):
+     """M5: (a) mọi đột biến `kg_` có dòng · (b) mọi tên trong bảng có thật · (c) đủ K01…K37 · dòng
+@@ -6064,6 +6083,7 @@
+     # test — KHÔNG thành `CliSapDo`, nên không thể biến một ca đúng thành tín dụng giả.
+     ten = "Traceback (most recent call last):"
+     for du_lieu, tho, bb in (({"check_runs": [_kg_run(1, name=ten)]}, None, ten),
++                             (_KG_1, None, ten),
+                              (None, json.dumps(_KG_1).replace('"gate"', '"\\u0054raceback (most recent call last)"'), "gate")):
+         ket = "không bị từ chối"
+         try:
+@@ -6092,6 +6112,7 @@
+         ("chi_doc_stderr", "sap = any(_KG_BANNER in out for out in (o, " + "e))", "sap = any(_KG_BANNER in out for out in (e,))"),
+         ("dau_vao_khong_kiem", "    if any(_KG_BANNER in b for b in " + "vao):\n", "    if False:\n"),
+         ("bo_giai_ma_fixture", "            vao.append(json.dumps(json.loads(vao[-1]), " + "ensure_ascii=False)", "            vao.append(b'' if 1 else json.dumps(json.loads(vao[-1]), ensure_ascii=False)"),
++        ('bo_doi_so', '    vao = [str(x).encode("utf-8", "surrogatepass") for x in cmd]\n', '    vao = []\n'),
+         ("rc_moi_so", "_KG_RC_HOP_LE = frozenset((0, 2, " + "12))", "_KG_RC_HOP_LE = frozenset(range(256))"),
+         ("boqua_rua_sap", 'ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap' + "_do(ex) else",
+          'ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if False else'),

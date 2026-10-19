@@ -1,0 +1,42 @@
+From 08aa09610b346edbe64dd2a397de6645e87f2276 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 19 Oct 2026 04:21:18 +0000
+Subject: [PATCH 2/4] =?UTF-8?q?wp822:=20m=E1=BB=91c=20=C4=91=E1=BB=99t=20b?=
+ =?UTF-8?q?i=E1=BA=BFn=20nh=E1=BA=AFm=20test=20kh=E1=BB=9Bp=20=C4=91=C3=BA?=
+ =?UTF-8?q?ng=20m=E1=BB=99t=20ch=E1=BB=97=20(moc=5Fdot=5Fbien=5Fphai=5Fkho?=
+ =?UTF-8?q?p=5FDUNG=5FMOT=5FCHO)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01A68yvG8s7cjpbWp81QzppN
+---
+ .claude/dev/packet_loop_test.py | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/.claude/dev/packet_loop_test.py b/.claude/dev/packet_loop_test.py
+index 96dc126..3ec13e1 100644
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -5920,12 +5920,13 @@ CASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke), ("kg_m6_tin_dung_giet", case_kg
+ # A4 + A12: đột biến NHẮM TEST — gỡ từng vế của hai ca tự kiểm thì ca ấy phải ĐỎ.
+ MUTANTS.update({
+     "t822_bang_xoa_K14": ('    "K14": ("kg_bool_la_int", "kg_n2_bool_la_int", "kg_n5_bool_la_int"),\n', "", ["kg_m5_kiem_ke"]),
+-    "t822_bang_ten_khong_ton_tai": ('    "K25": ("kg_k25_bo_khu_trung",),', '    "K25": ("kg_k25_bo_khu_trung", "kg_khong_ton_tai"),',
++    # Mốc ghép bằng `+` để chuỗi liền chỉ có ở ĐÚNG chỗ bị đột biến (`moc_dot_bien_phai_khop_DUNG_MOT_CHO`).
++    "t822_bang_ten_khong_ton_tai": ('    "K25": ("kg_k25_bo' + '_khu_trung",),', '    "K25": ("kg_k25_bo_khu_trung", "kg_khong_ton_tai"),',
+                                     ["kg_m5_kiem_ke"]),
+-    "t822_mutant_kg_ngoai_bang": ('CASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke),',
+-                                  'MUTANTS["kg_ngoai_bang"] = ("x", "y", ["kg_m5_kiem_ke"])\nCASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke),',
++    "t822_mutant_kg_ngoai_bang": ('CASES += [("kg_m5_kiem' + '_ke", case_kg_m5_kiem_ke),',
++                                  'MUTANTS["kg_ngoai_bang"] = ("x", "y", ["kg_m5_kiem_ke"])\nCASES += [("kg_m5_kiem' + '_ke", case_kg_m5_kiem_ke),',
+                                   ["kg_m5_kiem_ke"]),
+-    "t822_moi_ca_do_la_giet": ('else "TIN_DUNG_GIA" if isinstance(v, _TinDungGia)', 'else "TIN_DUNG_GIA" if False', ["kg_m6_tin_dung_giet"]),
++    "t822_moi_ca_do_la_giet": ('else "TIN_DUNG_GIA" if isinstance(v, _TinDung' + 'Gia)', 'else "TIN_DUNG_GIA" if False', ["kg_m6_tin_dung_giet"]),
+ })
+ MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {k for k in MUTANTS if k.startswith("t822_")}
+ 
+-- 
+2.43.0
+

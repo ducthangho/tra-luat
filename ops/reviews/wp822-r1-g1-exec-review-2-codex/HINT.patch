@@ -1,0 +1,156 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -160,7 +160,7 @@
+         env.update(env_extra)
+     p = subprocess.run(cmd, capture_output=True, env=env)
+     if args and str(args[0]) == "kiem-gate":
+-        _kg_kiem_ket_qua(p.returncode, p.stdout, p.stderr)
++        _kg_kiem_ket_qua(p.returncode, p.stdout, p.stderr, args)
+     return p.returncode, p.stdout, p.stderr
+ 
+ 
+@@ -5362,9 +5362,26 @@
+ _KG_RC_HOP_LE = frozenset((0, 2, 12))
+ 
+ 
+-def _kg_kiem_ket_qua(rc, o, e):
+-    # Cần banner đầu dòng (có thể bọc repr) lẫn frame; không nhận nhầm tên check trong cảnh báo.
+-    mau = rb"(?m)^[ +|]*[\"']?(?:Exception Group )?Traceback \(most recent call last\):(?:\r?\n|\\n)[ +|]*File "
++def _kg_kiem_ket_qua(rc, o, e, args=()):
++    # #822 r2: tách dữ liệu đã in khỏi chẩn đoán; không tin tiền tố JSON/log hoặc tiền tố CLI.
++    cho, chuoi = [list(map(str, args))], set()
++    try:
++        if "--check-runs" in args:
++            cho.append(json.loads(Path(args[args.index("--check-runs") + 1]).read_text(encoding="utf-8")))
++    except (OSError, ValueError, RecursionError):
++        pass
++    while cho:
++        v = cho.pop()
++        if isinstance(v, str):
++            chuoi.add(v)
++        elif isinstance(v, dict):
++            cho += list(v) + list(v.values())
++        elif isinstance(v, list):
++            cho += v
++    for v in sorted(chuoi, key=len, reverse=True):
++        for token in (repr(v), json.dumps(v), f"'{v}' có ", f"{v} id="):
++            o, e = (out.replace(token.encode("utf-8", "backslashreplace"), b"<du-lieu>") for out in (o, e))
++    mau = rb"(?:Exception Group )?Traceback \(most recent call last\):(?:\r?\n|\\+n)"
+     sap = any(re.search(mau, out) for out in (o, e))
+     if sap or rc not in _KG_RC_HOP_LE:
+         raise CliSapDo(f"kiem-gate SẬP: rc={rc}; stdout={_txt(o)[-300:]!r}; stderr={_txt(e)[-300:]!r}")
+@@ -5576,6 +5593,13 @@
+     rc, _, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=t, suite=_KG_SUITE_KHAC)]}, t)
+     if rc != 0 or dem(e) != [f"CẢNH BÁO: '{t}' có 1 run ở suite khác (2) — bỏ qua"]:
+         raise AssertionError(f"tên nguyên văn: rc={rc} {dem(e)!r}")
++
++    rc, _, e = _kg(c, {"check_runs": [_kg_run(1), _kg_run(2, name="gate2"), _kg_run(3, suite=9),
++                       _kg_run(4, suite=9), _kg_run(4, suite=9), _kg_run(5, name="gate2", suite=9)]}, "gate", "gate2")
++    _doi(0, rc, e, "hai tên bắt buộc, nhiều id suite khác")
++    if dem(e) != ["CẢNH BÁO: 'gate' có 2 run ở suite khác (3, 4) — bỏ qua",
++                  "CẢNH BÁO: 'gate2' có 1 run ở suite khác (5) — bỏ qua"]:
++        raise AssertionError(f"cảnh báo phải đủ tên và id phân biệt: {dem(e)!r}")
+ 
+ 
+ def case_kg_n6_help(c: Ctx):
+@@ -5793,6 +5817,23 @@
+     "kg_k40_hai_ban_do_mot_ten": _kg_ca({"check_runs": [_kg_run(2, conclusion="cancelled"), _kg_run(2, conclusion="failure")]},
+                                         chua="1/1 tên bắt buộc đỏ"),
+ })
++# #822 r2: miền SHA, so sánh id bằng số, và mọi trang đều được kiểm schema.
++for _ten, _head in (("phi_hex", "g" * 40), ("39", "a" * 39), ("41", "a" * 41)):
++    _KG_CA[f"kg_r2_sha_{_ten}"] = _kg_ca({"check_runs": [_kg_run(1, head=_head)]}, head=_head, expect=2, chua="SHA 40")
++for _ten, _cu, _moi, _rc in (("moi_do", "success", "cancelled", 12), ("moi_xanh", "cancelled", "success", 0)):
++    _KG_CA[f"kg_r2_id_so_{_ten}"] = _kg_ca({"check_runs": [_kg_run(9, conclusion=_cu), _kg_run(10, conclusion=_moi)]},
++                                           expect=_rc, chua="conclusion='cancelled'")
++for _truong, _gt in (("id", "x"), ("name", 5), ("head_sha", 5), ("status", 5), ("conclusion", 5),
++                     ("status", _VANG_T), ("conclusion", _VANG_T)):
++    _ten = f"kg_r2_trang_sau_{_truong}_{'vang' if _gt is _VANG_T else 'kieu'}"
++    _KG_CA[_ten] = _kg_ca([{"total_count": 2, "check_runs": [_kg_run(1)]},
++                           {"total_count": 2, "check_runs": [_kg_khac(**{_truong: _gt})]}], chua=f"trường ['{_truong}']")
++for _ten, _trang, _tc, _ly in (
++        ("suite_bool", [_kg_khac(check_suite={"id": True})], 2, _KG_CS),
++        ("tc_thuc", [_kg_run(2)], 2.0, "≥ 0"), ("tc_bool", [], True, "≥ 0"),
++        ("page_shape", {}, 1, _KG_TRANG), ("run_shape", [5], 1, "check_runs[0] không phải object")):
++    _KG_CA[f"kg_r2_trang_sau_{_ten}"] = _kg_ca([
++        {"total_count": int(_tc), "check_runs": [_kg_run(1)]}, {"total_count": _tc, "check_runs": _trang}], chua=_ly)
+ _KG_CA_822 = [k for k in _KG_CA if k not in dict(CASES)]
+ CASES += [(k, _KG_CA[k]) for k in _KG_CA_822]
+ 
+@@ -5852,6 +5893,29 @@
+                         ["kg_k40_hai_ban_do_mot_ten"]),
+ })
+ 
++
++MUTANTS.update({
++    **{f"kg_r2_sha_{n}": ('SHA_RE = re.compile(r"^[0-9a-f]{40}\\Z")'.replace("\\\\", "\\"),
++                           f'SHA_RE = re.compile(r"^{r}\\Z")'.replace("\\\\", "\\"), [f"kg_r2_sha_{n}"])
++       for n, r in (("phi_hex", "[0-9a-z]{40}"), ("39", "[0-9a-f]{39,40}"), ("41", "[0-9a-f]{40,41}"))},
++    "kg_r2_id_so": ('id_max = max(r["id"] for r in cung)', 'id_max = max((r["id"] for r in cung), key=str)',
++                     ["kg_r2_id_so_moi_do", "kg_r2_id_so_moi_xanh"]),
++    "kg_r2_canh_bao_dem_1": ('{len(khac)} run ở suite khác', '{1} run ở suite khác', ["kg_n4_canh_bao"]),
++    "kg_r2_canh_bao_id_dau": ("', '.join(map(str, khac))", "', '.join(map(str, khac[:1]))", ["kg_n4_canh_bao"]),
++    "kg_r2_canh_bao_ten_dau": ("    for ten_cb in ten_bb:\n", "    for ten_cb in ten_bb[:1]:\n", ["kg_n4_canh_bao"]),
++    "kg_r2_schema_trang_dau": ("            if sai:\n", "            if sai and i == 0:\n",
++                               [n for n in _KG_CA if n.startswith("kg_r2_trang_sau_") and n.rsplit("_", 1)[-1] in ("vang", "kieu")]),
++    "kg_r2_suite_trang_dau": ('            if not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int:\n',
++                              '            if i == 0 and (not isinstance(cs, dict) or type(cs.get("id", _VANG)) is not int):\n',
++                              ["kg_r2_trang_sau_suite_bool"]),
++    "kg_r2_tc_trang_dau": ("        if type(tc) is not int or tc < 0:\n", "        if i == 0 and (type(tc) is not int or tc < 0):\n",
++                           ["kg_r2_trang_sau_tc_thuc", "kg_r2_trang_sau_tc_bool"]),
++    "kg_r2_bo_page_sau": ('            hong(f"trang {i} không phải object có',
++                          '            if i > 0:\n                continue\n            hong(f"trang {i} không phải object có', ["kg_r2_trang_sau_page_shape"]),
++    "kg_r2_bo_run_sau": ('                hong(f"trang {i} check_runs[{j}] không phải object")',
++                         '                if i > 0:\n                    continue\n                hong(f"trang {i} check_runs[{j}] không phải object")', ["kg_r2_trang_sau_run_shape"]),
++})
++
+ # M1 — bảng kiểm kê: mỗi thành phần ⇒ đột biến (không sập, M6) HOẶC `("tuong_duong", "<lập luận hành vi>")`.
+ # K38–K41 executor thêm khi kiểm kê lại trên base `f712205`; K41 là argparse (ngoài lớp) nhưng M5(a) đòi mọi
+ # đột biến `kg_` có dòng.
+@@ -5900,6 +5964,12 @@
+     "K41": ("kg_n6_xoa_help",),   # `--help` nêu cách lấy check-suite (argparse)
+ }
+ 
++for _k, _m in {"K05": ("kg_r2_bo_page_sau",), "K07": ("kg_r2_tc_trang_dau",), "K08": ("kg_r2_bo_run_sau",),
++                **{f"K{i:02d}": ("kg_r2_schema_trang_dau",) for i in (9, 10, 11, 12, 13, 37)},
++                "K15": ("kg_r2_suite_trang_dau",), "K21": tuple(f"kg_r2_sha_{n}" for n in ("phi_hex", "39", "41")),
++                "K26": tuple(f"kg_r2_canh_bao_{n}" for n in ("dem_1", "id_dau", "ten_dau")), "K30": ("kg_r2_id_so",)}.items():
++    _KG_KIEM_KE[_k] += _m
++
+ 
+ def case_kg_m5_kiem_ke(c: Ctx):
+     """M5: (a) mọi đột biến `kg_` có dòng · (b) mọi tên trong bảng có thật · (c) đủ K01…K37 · dòng
+@@ -5946,6 +6016,23 @@
+         v = chay_suite(d / "packet_loop.py", d / "run", chi_chay={dich})[dich]
+         if _phan_loai_giet(v) != doi:
+             raise AssertionError(f"{ten}: đòi {doi}, được {_phan_loai_giet(v)} ({v!r})")
++
++    for nhan, bieu_thuc in (("json", 'json.dumps({"traceback": traceback.format_exc()})'),
++                            ("nested", 'json.dumps({"error": {"traceback": traceback.format_exc()}})'),
++                            ("list", 'repr([traceback.format_exc()])'), ("dict", 'repr({"traceback": traceback.format_exc()})'),
++                            ("log", '"ERROR: " + traceback.format_exc()'),
++                            ("cli_prefix", '"KHÔNG ĐO ĐƯỢC: " + traceback.format_exc()'),
++                            ("double_json", 'json.dumps(json.dumps({"error": traceback.format_exc()}))'),
++                            ("no_frame", '"Traceback (most recent call last):\n" + traceback.format_exc(limit=0)')):
++        for kenh in ("stdout", "stderr"):
++            d = c.tmp / f"{nhan}_{kenh}"
++            d.mkdir()
++            (d / "launcher.py").write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
++            (d / "packet_loop.py").write_text(goc.replace("        suite = a.check_suite   #",
++                f"        import traceback; print({bieu_thuc}, file=sys.{kenh}); return RC_GATE   #", 1), encoding="utf-8")
++            v = chay_suite(d / "packet_loop.py", d / "run", chi_chay={ca})[ca]
++            if _phan_loai_giet(v) != "TIN_DUNG_GIA" or "ValueError" not in str(v):
++                raise AssertionError(f"{nhan}/{kenh}: traceback bọc bị cấp {_phan_loai_giet(v)}")
+ 
+     # Mọi nhánh except phải giữ tín hiệu crash, kể cả BoQua.
+     global CASES
+@@ -5997,7 +6084,7 @@
+                                   ["kg_m5_kiem_ke"]),
+     # M6: mỗi chốt của bộ phân loại một đột biến riêng — gỡ chốt nào thì ca tự kiểm M6 phải ĐỎ.
+     **{f"t822_m6_{ten}": (tim, thay, ["kg_m6_tin_dung_giet"]) for ten, tim, thay in (
+-        ("run_khong_kiem", "        _kg_kiem_ket_qua(p.returncode, p.stdout," + " p.stderr)\n", "        pass\n"),
++        ("run_khong_kiem", "        _kg_kiem_ket_qua(p.returncode, p.stdout," + " p.stderr, args)\n", "        pass\n"),
+         ("chi_doc_stderr", "sap = any(re.search(mau, out) for out in (o, " + "e))", "sap = any(re.search(mau, out) for out in (e,))"),
+         ("rc_moi_so", "_KG_RC_HOP_LE = frozenset((0, 2, " + "12))", "_KG_RC_HOP_LE = frozenset(range(256))"),
+         ("boqua_rua_sap", 'ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap' + "_do(ex) else",

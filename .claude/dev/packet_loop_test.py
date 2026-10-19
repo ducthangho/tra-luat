@@ -5907,7 +5907,19 @@ def case_kg_r4_ba_ten(c: Ctx):
         raise AssertionError(f"ba tên cảnh báo: rc={rc} {dong!r}")
 
 
-CASES += [(f"kg_r4_gan_{k}", _kg_ho_gan(k)) for k in _KG_GAN] + [("kg_r4_gan_canh_bao", case_kg_r4_gan_canh_bao),
+def case_kg_r4_tha_ten(c: Ctx):
+    """Chiều THA: tên KHÔNG chuẩn (đệm trắng/hoa/NFD/fullwidth) mà run và `--bat-buoc` trùng NGUYÊN VĂN ⇒ khớp + cảnh báo
+    đúng. Chuẩn hoá MỘT phía (chỉ run, hoặc chỉ đối số) làm vỡ phép bằng ở đây."""
+    for nhan, t in _kg_gan(_KG_T).items():
+        if nhan in ("tien_to", "hau_to", "doi_dau", "doi_cuoi"):
+            continue
+        rc, o, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=t, suite=_KG_SUITE_KHAC)]}, t)
+        if rc != 0 or _txt(o).count(f"{t} id=1") != 1 or f"CẢNH BÁO: '{t}' có 1 run ở suite khác (2)" not in _txt(e):
+            raise AssertionError(f"tha/{nhan} ({t!r}): rc={rc} {_txt(o)!r} {_txt(e)!r}")
+
+
+CASES += [(f"kg_r4_gan_{k}", _kg_ho_gan(k)) for k in _KG_GAN] + [("kg_r4_tha_ten", case_kg_r4_tha_ten),
+                                                                  ("kg_r4_gan_canh_bao", case_kg_r4_gan_canh_bao),
                                                                   ("kg_r4_ba_ten", case_kg_r4_ba_ten)]
 _KG_CA_822 = [k for k in _KG_CA if k not in dict(CASES)]
 CASES += [(k, _KG_CA[k]) for k in _KG_CA_822]
@@ -6006,6 +6018,11 @@ for _cho, _x, _y, _sau in (("status", 'r["status"]', '"completed"', ""), ("concl
         _KG_R4.setdefault(_cho, []).append(f"kg_r4_{_cho}_{_n}")
         MUTANTS[f"kg_r4_{_cho}_{_n}"] = (f"{_x} == {_y}{_sau}", _thay + _sau,
                                          ["kg_r4_gan_canh_bao" if _cho == "canh_bao" else f"kg_r4_gan_{_cho}"])
+        if _cho in ("ten", "canh_bao") and _f:   # chuẩn hoá MỘT phía: chỉ run, hoặc chỉ đối số
+            for _phia, _a, _b in (("run", _f.format(_x), _y), ("doi_so", _x, _f.format(_y))):
+                _KG_R4[_cho].append(f"kg_r4_{_cho}_{_n}_{_phia}")
+                MUTANTS[f"kg_r4_{_cho}_{_n}_{_phia}"] = (f"{_x} == {_y}{_sau}", f"{_a} == {_b}{_sau}".replace(
+                    "unicodedata", '__import__("unicodedata")'), ["kg_r4_tha_ten"])
 _KG_DT_DONG = 'dt = (r["name"], r["check_suite"]["id"], r["head_sha"])'
 for _cho, _x in (("dt_ten", 'r["name"]'), ("dt_head", 'r["head_sha"]')):
     for _n, _f in [*_KG_NOI.items()][:4 if _cho == "dt_ten" else 3] + [*_KG_NOI.items()][4:]:

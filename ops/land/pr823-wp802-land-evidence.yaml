@@ -1,10 +1,10 @@
 # HO SO LAND — packet #802 wp802 r1 (lease g1), ma qua PR #823. Khuon: ops/land/pr792-wp484-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (dfe5437), `landed: false`. Gate push master tren dfe5437 DO o DUNG MOT buoc `release-verify strict
-# (lane LAND)`: extra_files changelog.d/wp-802.md — PR worker them manh changelog ma khong ke manifest (protocol §9 de viec
-# nay cho phien land). Ban sua manifest thuoc packet #831 (lease wp831-r1-g1-claude giu RELEASE_MANIFEST.json, muc L3),
-# KHONG thuoc ho so nay. `landed` chi len true khi gate master xanh sau khi #831 land VA chu kho quyet.
+# TRANG THAI: merged (dfe5437) va `landed: true` — hieu luc tu merge commit cua PR ghi so claude/bookkeeping-802-landed;
+# neo quyet dinh: #802 issuecomment-6259349980. Gate push master tren CHINH dfe5437 DO o DUNG MOT buoc `release-verify strict`
+# (extra_files changelog.d/wp-802.md) — su that ay KHONG doi. Phan sua thuoc #831 L3; gate push master tren 6842a62 (chua dfe5437)
+# XANH 14/14 ke ca buoc ay. Ban truoc cua dong nay ghi `landed: false` cho toi khi #831 land VA chu kho quyet — ca hai da xay ra.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr823-wp802-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -38,9 +38,13 @@ pre_merge_checks:
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39112158391, sha: dfe5437f7354eeb0ead564f0f26d973c293988f6, conclusion: 'failure (gate-registry con chay luc ghi)', buoc_do: 'release-verify strict (lane LAND — manifest committed)', ghi_chu: 'measured — readback-jobs-39112158391.json: 13/14 job da xong, 12 success; DUNG MOT job do (`gate (ubuntu-latest)`) o DUNG MOT buoc release-verify strict. Nguyen nhan do tai cho tren origin/master (do-lai-nguon-20261018/release-verify-master.txt): ok false, extra_files [changelog.d/wp-802.md], failed 0, missing 0.', nguon: [readback-run-39112158391.json, readback-jobs-39112158391.json]}
   - {name: 'launcher (Windows that) push master', run_id: 39112158406, sha: dfe5437f7354eeb0ead564f0f26d973c293988f6, conclusion: success, nguon: readback-run-39112158406.json}
+  - {name: 'ci.yml push master — dfe5437, KET QUA CUOI', run_id: 39112158391, sha: dfe5437f7354eeb0ead564f0f26d973c293988f6, conclusion: failure, ghi_chu: 'measured — readback-jobs-39112158391-cuoi.json: job khong success DUY NHAT la gate (ubuntu-latest), dung buoc da ghi o tren; gate-registry da xong va xanh.', nguon: readback-jobs-39112158391-cuoi.json}
+  - {name: 'ci.yml push master — 6842a62 (merge #831, CHUA dfe5437)', run_id: 39183257258, sha: 6842a625f457843a21bd3a3b0422f13cb13de911, conclusion: success, jobs: '14/14 success, ke ca buoc release-verify strict (lane LAND)', ghi_chu: 'measured — readback-jobs-39183257258.json; quan he to tien: do-lai-nguon-20261019/to-tien-dfe5437-6842a62.txt (rc=0). Day KHONG phai gate tren exact merge SHA cua #802 — la gate tren commit dau tien sau no ma lane LAND xanh.', nguon: [readback-run-39183257258.json, readback-jobs-39183257258.json]}
+  - {name: 'launcher-windows.yml push master — 6842a62', run_id: 39183257264, sha: 6842a625f457843a21bd3a3b0422f13cb13de911, conclusion: success, nguon: readback-run-39183257264.json}
 bookkeeping:
   - {item: 'dong Issue #802 (completed) kem comment ban chieu', ket_qua: 'measured — readback-issue-802.json: state closed, state_reason completed, closed_at 2026-10-18T09:50:30Z, closed_by ducthangho; comment 6248433003 (readback-comment-6248433003.json)'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-802-land, pr: 833}
+  - {item: 'PR ghi so (landed true)', nhanh: claude/bookkeeping-802-landed}
   - {item: 'no ngoai pham vi', ket_qua: 'KHONG mo issue moi — moi no executor neu (comment 6247715483) da co chu: L1 cong thuc rg Linux/macOS + L2 docs/GOI_AGENT_DA_NEN.md + L3 manifest -> packet #831; Windows t23/t49/t217 -> #748 (va #671).'}
 # ---- het truong chuan
 packet_id: wp802
@@ -78,11 +82,20 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-823.json: merged true, merged_at 2026-10-18T08:37:21Z, merged_by ducthangho, merge_commit_sha
     dfe5437 (cha 46753af + 5c6c7a8: do-lai-nguon-20261018/merge-dfe5437.txt), merge commit (khong squash/rebase).
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA: DO o release-verify strict (thieu ke manifest cho changelog.d/wp-802.md);
     sua thuoc packet #831 L3, phai xanh tren master sau khi #831 land; (2) lease da nha: DAT; (3) bookkeeping: #802 closed/completed DAT,
     no da co chu (#831, #748). Ghi `landed: true` can quyet dinh chu kho.
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so claude/bookkeeping-802-landed dua dong nay vao master; comment 6259349980 la NEO quyet dinh, khong phai moc hieu luc.'
+  landed_quyet_dinh: >-
+    loi_khai_co_neo — chu kho chi thi trong phien session_01FBUBzbedsJaUtQvX4vEYDE 19-10-2026 "Đồng ý làm 1, 2 ..." (muc 1 = doi
+    landed cua #802); phien chuyen loi thanh #802 issuecomment-6259349980 (readback-comment-6259349980.json). Comment do phien dang
+    bang tai khoan chu kho — GitHub hien OWNER, khong phan biet duoc voi xac nhan rieng.
+  landed_ly_do: >-
+    (1) gate: DO tren chinh dfe5437 o release-verify strict (thieu ke manifest, protocol §9 de cho phien land); #831 L3 sua; gate
+    tren 6842a62 (chua dfe5437) XANH 14/14 ke ca buoc ay — xem post_merge_checks. (2) lease da nha: DAT. (3) bookkeeping: DAT.
+    Doc dung: day la landed theo quyet dinh chu kho tren co so gate xanh o commit SAU, KHONG phai gate xanh tren exact merge SHA.
 
 uy_quyen_land:
   dang: >-
@@ -109,5 +122,5 @@ no_ngoai_pham_vi:
 
 khong_do_duoc:
   - 'Log day du cac job CI KHONG luu; chi readback run/job/check-run.'
-  - 'gate-registry (ubuntu-latest) cua run 39112158391 chua xong luc ghi.'
+  - 'gate-registry (ubuntu-latest) cua run 39112158391 chua xong luc ghi (ban dau); 19-10 da doc lai: xanh (readback-jobs-39112158391-cuoi.json).'
   - 'stderr/transcript luot review Codex KHONG luu; model thuc chay KHONG_DO_DUOC.'

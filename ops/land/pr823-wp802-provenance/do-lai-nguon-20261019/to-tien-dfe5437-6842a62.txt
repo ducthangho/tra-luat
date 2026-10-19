@@ -1,0 +1,5 @@
+# do 2026-10-19
+$ git merge-base --is-ancestor dfe5437 6842a62; echo rc
+rc=0
+$ git show -s --format='%H %P' 6842a62
+6842a625f457843a21bd3a3b0422f13cb13de911 f1979a5ddd5b04562e054cc87beb5f28c7a7e934 51ae5c095972611d2c6045bd81786a4fc7e9ca62

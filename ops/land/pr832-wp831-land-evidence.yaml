@@ -1,7 +1,7 @@
 # HO SO LAND — packet #831 wp831 r4 (lease g4), ma qua PR #832. Khuon: ops/land/pr818-wp788-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (6842a62) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-831-land)
+# TRANG THAI: merged (6842a62), `landed: false` cho toi khi dien bang chung hau-merge; khi len true thi hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-831-land)
 # dua dong nay vao master; neo quyet dinh: chi thi chu kho trong phien "Land và bookeeping đi" (ban chieu: CHO_DIEN).
 # "merged" KHONG dong nghia "landed" (§10.2.4). Gate push master tren DUNG merge SHA 6842a62: CHO_DIEN.
 # Ho qua: release-verify strict tren master DO tu f1979a5 va 2d33a0c (extra_files changelog.d/wp-802.md) nay XANH tren
@@ -68,7 +68,7 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-832.json: merged true, merged_at 2026-10-19T00:59:37Z, merged_by ducthangho, merge_commit_sha 6842a62
     (cha f1979a5 + 51ae5c0: do-lai-nguon-20261019/merge-6842a62.txt), merge commit (khong squash/rebase).
-  landed: true
+  landed: false  # CHO_DIEN — len true CUNG commit dien bang chung hau-merge (connector P1 r4309577154)
   landed_dieu_kien: 'CHO_DIEN — LANDED (cho gate push master tren 6842a62)'
 
 uy_quyen_land:

@@ -1,7 +1,7 @@
 # ADR-0055 — Ngưỡng thu hồi lease vì không tiến triển nâng lên SÁU giờ (360 phút)
 
 - **Trạng thái:** Accepted (2026-10-19, chỉ thị chủ kho `ducthangho`; thi hành bằng packet `wp835`
-  revision 1, Issue #835 — không phải một phiên tự nới ngưỡng) · **CHƯA KÍCH HOẠT VẬN HÀNH**: chờ
+  revision 2 · generation 2 (thay r1/g1 khi `master` tiến), Issue #835 — không phải một phiên tự nới ngưỡng) · **CHƯA KÍCH HOẠT VẬN HÀNH**: chờ
   controller ngoài được đồng bộ và xác minh, xem mục *Hiệu lực*. Tới lúc ấy mọi lease vẫn chịu ngưỡng
   đã đóng dấu trong chính nó.
 
@@ -29,12 +29,13 @@ kế nhiệm được cấp quyền riêng sau khi ADR này kích hoạt; không
 
 ## Hiệu lực
 
-Đo tại base `6842a625`: không có controller nào **trong kho** mang hằng 30 phút cho việc thu hồi;
+Đo 19-10-2026 bằng quét mã tĩnh tại acceptance base `062292b2c75be8c316a0cf7347290574efa10861`
+của revision 2: không có controller nào **trong kho** mang hằng 30 phút cho việc thu hồi;
 ngưỡng ấy sống trong văn bản protocol và trong trường `heartbeat_required_minutes` của từng lease.
 Controller ngoài (dispatcher) **chưa đo được** từ phiên này. Nên ADR này chưa được khai là đã kích hoạt
 vận hành: chưa xác minh được controller đã đồng bộ thì không cấp lease 360 phút.
 
-`.github/coordination/change-impact.v1.json` (`ADR-0032`) vắng mặt ở base. Write set hai tệp của
+`.github/coordination/change-impact.v1.json` (`ADR-0032`) vắng mặt ở cùng acceptance base ấy. Write set hai tệp của
 packet này là một ngoại lệ đóng tay một-packet do chủ kho duyệt trên Issue #835, không phải một
 closure tính từ policy.
 

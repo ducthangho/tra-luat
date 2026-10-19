@@ -1,7 +1,9 @@
 # HO SO LAND — packet #831 wp831 r4 (lease g4), ma qua PR #832. Khuon: ops/land/pr818-wp788-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (6842a62), `landed: false` cho toi khi dien bang chung hau-merge; khi len true thi hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-831-land)
+# TRANG THAI: merged (6842a62) va `landed: true` — hieu luc tu merge commit cua PR ghi so THU HAI (claude/bookkeeping-831-land-2).
+# PR #840 da merge (f712205) o head ef81b98 khi ho so con o giu cho va `landed: false`, 3 phut TRUOC khi ban day du
+# (79045a0) duoc push; ban day du di qua PR ghi so thu hai.
 # dua dong nay vao master; neo quyet dinh: chi thi chu kho trong phien "Land và bookeeping đi" (ban chieu: #831 issuecomment-6258838145).
 # "merged" KHONG dong nghia "landed" (§10.2.4). Gate push master tren DUNG merge SHA 6842a62: ci.yml 39183257258 XANH 14/14,
 # launcher-windows 39183257264 XANH.
@@ -45,7 +47,8 @@ bookkeeping:
   - {item: 'dong Issue #831 (completed) kem comment ban chieu', ket_qua: 'measured — readback-issue-831.json: state closed, state_reason completed, closed_at 2026-10-19T03:13:03Z, closed_by ducthangho (thao tac do phien executor goi bang tai khoan chu kho theo chi thi trong phien); comment 6258838145 (readback-comment-6258838145.json)'}
   - {item: 'rut han lease wp831-r4-g4-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'verdict Codex tren Packet Issue + PR (protocol §13)', ket_qua: 'measured — readback-comment-6254633610.json (#831) va readback-comments-832.json (#832 comment 6254634024)'}
-  - {item: 'PR ghi so', nhanh: claude/bookkeeping-831-land, pr: 840}
+  - {item: 'PR ghi so (ban nhap, merge o head ef81b98 con o giu cho)', nhanh: claude/bookkeeping-831-land, pr: 840, merge_commit: f712205}
+  - {item: 'PR ghi so (ban day du, landed true)', nhanh: claude/bookkeeping-831-land-2}
 # ---- het truong chuan
 packet_id: wp831
 packet_issue: 831
@@ -84,7 +87,7 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 6842a62: ci.yml 14/14 + launcher-windows XANH (post_merge_checks) DAT;
     (2) lease da nha: rut han, 8/8 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #831 closed/completed DAT, khong no mo moi.
-    `landed: true` theo quyet dinh chu kho "Land và bookeeping đi" (#831 issuecomment-6258838145); hieu luc khi PR #840 vao master.
+    `landed: true` theo quyet dinh chu kho "Land và bookeeping đi" (#831 issuecomment-6258838145); hieu luc khi PR ghi so thu hai (claude/bookkeeping-831-land-2) vao master.
 
 uy_quyen_land:
   dang: >-

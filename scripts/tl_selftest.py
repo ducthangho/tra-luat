@@ -21963,8 +21963,10 @@ def run() -> int:
         # cây thật = 187 + 78 = **265**; trần Package 200 vẫn còn 12 khe (gói không đổi; ZIP 188 entry).
         # R291-DAM-SO-CUNG = **5** (#522, #548, #551, #782, #784). Lần này chạy selftest TRƯỚC lần đẩy duy nhất.
         # ĐÓNG NỢ R291-DAM-SO-CUNG (packet #794): số `docs/*.md` nay TÍNH từ cây (ok4 đòi ≥ 1 và mọi tệp bị loại
-        # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3: 187). Thêm docs KHÔNG kê khai slot ở đây nữa.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
+        # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3). Thêm docs KHÔNG kê khai slot ở đây nữa.
+        # KÊ KHAI SLOT (packet #831 spec r2): gói 187 → **189** = + `changelog.d/wp-802.md` (#802 land không sinh lại
+        # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 189
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22013,11 +22015,11 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 187 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # RATCHET: goi giu 189 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
             # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
-            # r291_docs_ngoai_goi).
+            # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 187
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 189
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

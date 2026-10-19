@@ -8257,6 +8257,172 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
+def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False, tiem=False,
+                       allexport=None, thu_tu=("rg", "bash")):
+    """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
+    `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
+    (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `truc_tiep`: eval công
+    thức trong bash thay vì qua cai_cong_cu.sh, để đọc thư mục nó in. `venv`: thư mục ứng viên là `bin/` của một venv
+    THẬT không có PyYAML (F03). `batch`: chạy `--bat-buoc` thật trên bảng kê rút còn `rg` rồi `bash` (lấy NGUYÊN từ
+    YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. `tiem`: khởi chạy qua `exec` (giữ PID) với
+    `CAI_CONG_CU_PY_CUA=$$` và `PY` vô hướng trỏ Python của venv đã EXPORT sẵn (F04); installer giả ghi việc chúng thấy dấu
+    hay không vào `dau.log`. `allexport`: `"co"` chạy `bash -a`, `"env"` đặt `SHELLOPTS=allexport` (Codex lượt 5);
+    `thu_tu`: thứ tự hai mục của bảng kê batch. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
+    for t in ("cai_cong_cu.sh", "cong_cu.py"):
+        shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+    if batch:
+        import yaml
+        d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))
+        (ops / "cong_cu.yaml").write_text(yaml.safe_dump(
+            {"schema_version": d["schema_version"], "cong_cu": {k: d["cong_cu"][k] for k in thu_tu}},
+            sort_keys=False, allow_unicode=True), encoding="utf-8")
+    else:
+        shutil.copy2(YAML_DANG_DUNG, ops / "cong_cu.yaml")
+    goc, bin_ = s / "goc", s / "bin"
+    uv = goc / "usr" / "bin"
+    dau_d = {"hong": s / "hong", "uv": uv, "truoc": s / "truoc"}[dau]
+    if venv:
+        import venv as _venv
+        _venv.EnvBuilder(with_pip=False, symlinks=False).create(str(uv.parent))
+    for d in {bin_, uv, dau_d}:
+        d.mkdir(parents=True, exist_ok=True)
+    dau_log = s / "dau.log"
+    ghi_dau = f'echo "${{CAI_CONG_CU_PY_CUA:-ABSENT}}" >> \'{dau_log}\''
+    # `sudo` giả gọi `apt-get` giả bằng ĐƯỜNG DẪN TUYỆT ĐỐI, không qua PATH (Codex lượt 6 F05).
+    tep = {uv / "rg": tot, bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": f"{ghi_dau}; exit 0",
+           bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}' && exit 0; {ghi_dau}; exit 0"}
+    if dau != "uv":
+        tep[dau_d / "rg"] = ("echo 'rg: error while loading shared libraries' >&2; exit 1" if dau == "hong"
+                             else "echo 'ripgrep 14.1.0'")
+    for f, than in tep.items():
+        f.write_text(f"#!/bin/sh\n{than}\n")
+        f.chmod(0o644 if (dau == "truoc" and f == uv / "rg") else 0o755)
+    gp = s / "github_path"; gp.write_text("")
+    vo, env = _wp802_bash_env()
+    env.update(CONG_CU_NEN=nen, CONG_CU_GOC=str(goc), GITHUB_PATH=str(gp),
+               PATH=os.pathsep.join([str(dau_d), str(bin_), env.get("PATH", "")]))
+    if batch:
+        # F05 (Codex lượt 6): công thức `bash` NGUYÊN VĂN prepend `dirname "$(command -v bash)"`. Bash phải được tìm thấy
+        # TRONG thư mục giả, nếu không nó prepend `/usr/bin` và lượt `rg` kế tiếp gọi sudo/apt-get THẬT của máy. Chốt TRƯỚC
+        # khi chạy wrapper: lệch thì ĐỎ ngay, không bao giờ chạm installer thật.
+        (bin_ / "bash").symlink_to(vo)
+        thay_bash = subprocess.run([vo, "-c", "command -v bash"], env=env, capture_output=True, text=True,
+                                   timeout=30).stdout.strip()
+        bang(thay_bash == str(bin_ / "bash"), f"fixture ro: bash ten tran la {thay_bash!r}, khong phai {bin_ / 'bash'}")
+    if truc_tiep:
+        import yaml
+        env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"][nen]["lenh"]
+        lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); cd {shlex.quote(str(kho))}; eval "$LENH"']
+    else:
+        lenh = [vo] + (["-a"] if allexport == "co" else []) + [str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
+    if allexport == "env":
+        env["SHELLOPTS"] = "allexport"
+    if tiem:
+        lenh = [vo, "-c", f"export CAI_CONG_CU_PY_CUA=$$ PY={shlex.quote(str(uv / 'python'))}; exec "
+                + " ".join(shlex.quote(x) for x in lenh)]
+    p = subprocess.run(lenh, env=env, capture_output=True, text=True, timeout=120)
+    return p, gp.read_text().strip(), uv, dau_d
+
+
+def _wp831_cai_rg_chon_ban_chay_duoc(nen):
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
+    for tot in ("echo 'ripgrep 14.1.0'", "echo w >&2; echo 'ripgrep 14.1.0'"):
+        with San() as s:
+            p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, tot)
+            bang(p.returncode == 0 and '"DAT"' in p.stdout,
+                 f"cai rg {nen} khong DAT khi ban hong dung dau PATH: rc={p.returncode} "
+                 f"{p.stdout[-300:]} {p.stderr[-300:]}")
+            bang(gp == str(uv), f"{nen}: thu muc chon khong phai ban TOT: GITHUB_PATH={gp!r}, mong {uv}")
+    # N3: `rg` của ứng viên hỏng, hoặc rc=0 mà `kiem-tra` không nhận (rỗng/rác) ⇒ KHÔNG chọn, thoát ≠ 0.
+    for tot in ("exit 1", "exit 0", "echo 'ripgrep 1.2.3junk'"):
+        with San() as s:
+            p, gp, _uv, _d = _wp831_chay_cai_rg(s, nen, tot)
+            bang(p.returncode != 0 and gp == "",
+                 f"{nen}: khong ung vien nao chay duoc ma van chon ({tot!r}): rc={p.returncode} GITHUB_PATH={gp!r}")
+    # `rg` tên trần đã DAT ⇒ KHÔNG ghi $GITHUB_PATH: ghi `/usr/bin` đẩy nó lên trước python của setup-python ở bước
+    # sau (ci.yml run 39115659366: `jsonschema` 4.10.3 của python hệ thống thay 4.26.0 đã ghim).
+    with San() as s:
+        p, gp, _uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", dau="uv")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == "",
+             f"{nen}: rg ten tran da DAT ma van ghi GITHUB_PATH: rc={p.returncode} GITHUB_PATH={gp!r}")
+    # F03 (Codex lượt 2): thư mục ứng viên có Python KHÁC, thiếu PyYAML (venv thật), `rg` đầu PATH hỏng ⇒ wrapper vẫn
+    # chọn được ứng viên: interpreter của checker phải là bản ban đầu, không phải bản mà PATH mới trỏ tới.
+    vo_py, env_py = _wp802_bash_env()
+    co_yaml = subprocess.run([vo_py, "-c", "python -c 'import yaml' 2>/dev/null || python3 -c 'import yaml'"],
+                             env=env_py, capture_output=True, timeout=60).returncode == 0
+    bang(co_yaml, "KHONG DO DUOC: python ban dau tren PATH khong import duoc yaml")
+    with San() as s:
+        p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True)
+        bang(not (uv / "python").exists() or subprocess.run([str(uv / "python"), "-c", "import yaml"],
+                                                            capture_output=True, timeout=60).returncode != 0,
+             f"{nen}: venv ung vien lai co yaml — fixture khong do F03")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+             f"{nen}: Python cua thu muc ung vien thay cho Python ban dau: rc={p.returncode} GITHUB_PATH={gp!r} "
+             f"{p.stdout[-200:]} {p.stderr[-300:]}")
+    # F03 (Codex lượt 3): như trên nhưng qua `--bat-buoc` (rg rồi bash). Lượt `source` cho `bash` phải DÙNG LẠI Python
+    # đã ghim của lượt cha, không chọn lại từ PATH mà công thức `rg` vừa đổi.
+    with San() as s:
+        p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True)
+        try:
+            tong = json.loads(p.stdout[p.stdout.rindex('{\n  "trang_thai_tong"'):])
+        except ValueError:
+            tong = {}
+        dat = {c.get("ten"): c.get("trang_thai") for c in tong.get("cong_cu", [])}
+        bang(p.returncode == 0 and tong.get("trang_thai_tong") == "DAT" and dat == {"rg": "DAT", "bash": "DAT"},
+             f"{nen}: --bat-buoc chon lai Python sau khi rg doi PATH: rc={p.returncode} {dat} "
+             f"{p.stderr[-300:]}")
+    # F03 dưới `allexport` (Codex lượt 5): phép gán dấu của lượt cha tự export ⇒ lượt `source` cho rg xoá nó (rào F04) và
+    # bash chọn lại Python. Cả hai cách bật, cả hai thứ tự: rc 0, cả hai DAT, installer con không thấy dấu.
+    for ae in ("co", "env"):
+        for tt in (("rg", "bash"), ("bash", "rg")):
+            with San() as s:
+                p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True,
+                                                    allexport=ae, thu_tu=tt)
+                try:
+                    tong = json.loads(p.stdout[p.stdout.rindex('{\n  "trang_thai_tong"'):])
+                except ValueError:
+                    tong = {}
+                dat = {c.get("ten"): c.get("trang_thai") for c in tong.get("cong_cu", [])}
+                thay = (s / "dau.log").read_text().split() if (s / "dau.log").exists() else []
+                bang(p.returncode == 0 and dat == {"rg": "DAT", "bash": "DAT"} and thay == ["ABSENT", "ABSENT"],
+                     f"{nen}: allexport={ae} thu_tu={tt}: rc={p.returncode} {dat} installer thay {thay} "
+                     f"{p.stderr[-300:]}")
+    # F04 (Codex lượt 4): dấu và `PY` vô hướng đến từ MÔI TRƯỜNG (qua `exec` nên dấu TRÙNG PID) không được tin — lần gọi
+    # mới vẫn tự chọn Python ban đầu; và installer con KHÔNG thấy dấu, kể cả khi dấu đầu vào đã được export.
+    for batch in (False, True):
+        with San() as s:
+            p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=batch, tiem=True)
+            thay = (s / "dau.log").read_text().split() if (s / "dau.log").exists() else []
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+                 f"{nen}: dau + PY vo huong tu moi truong duoc tin (batch={batch}): rc={p.returncode} "
+                 f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+            bang(thay == ["ABSENT"] * (2 if batch else 1),
+                 f"{nen}: installer gia khong duoc goi dung so lan / con thay dau (batch={batch}): {thay}")
+    # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục in ra phải
+    # là thư mục của bản tốt (`command -v`), không phải thư mục ứng viên mà checker đã bỏ qua.
+    with San() as s:
+        p, _gp, uv, truoc = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", dau="truoc", truc_tiep=True)
+        cuoi = (p.stdout.strip().splitlines() or [""])[-1]
+        bang(p.returncode == 0 and cuoi == str(truoc),
+             f"{nen}: ung vien khong thuc thi van bi chon: rc={p.returncode} in={cuoi!r}, mong {truoc} "
+             f"(ung vien {uv}) {p.stderr[-300:]}")
+
+
+@ca
+def r831_cai_rg_linux_chon_ban_chay_duoc():
+    """N1/N3: NGUYÊN `rg.cai.linux`; `rg` hỏng đầu PATH ⇒ chọn `/usr/bin` (dưới `CONG_CU_GOC` tạm) khi bản ấy DAT, không thì ≠ 0."""
+    return _wp831_cai_rg_chon_ban_chay_duoc("linux")
+
+
+@ca
+def r831_cai_rg_macos_chon_ban_chay_duoc():
+    """N2/N3: NGUYÊN `rg.cai.macos`; ứng viên `$(brew --prefix)/bin`, cùng hai chiều như Linux."""
+    return _wp831_cai_rg_chon_ban_chay_duoc("macos")
+
+
 # ---------------------------------------------------------------------------------------------
 # wp685 (LAUNCHER-CON-SONG-ESRCH, đặc tả r28 §7 B1–B4) — helper theo NHÃN cho t156/t157.
 # Nguồn: PR #679 job 109303373142 (ESRCH thoát khỏi `_con_song`); cross-review lượt 1–12 trên
@@ -10443,12 +10609,32 @@ DOT_BIEN_HOOK = [
     # Phần tử thứ tư "yaml" = đột biến ops/cong_cu.yaml thay vì hook (Codex lượt 1 F2).
     ("wp802_yaml_bo_ung_vien_winget_links", (' "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")"', ''),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
-    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('"${PY[@]}" ops/cong_cu.py kiem-tra --chi rg', '"$RG_D/rg" --version'),
+    # wp831: neo dài thêm vì linux/macos nay cũng gọi `kiem-tra --chi rg` (neo phải khớp ĐÚNG MỘT chỗ).
+    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('[ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
+                                                    '[ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
     ("wp802_hook_windows_probe_hai_lan", ('if [ "$RG_WIN" = 1 ]; then', 'if [ "$RG_WIN" = 1 ] && ! co_chay rg; then'),
      ["r802_hook_windows_khong_cai_in_dung_lenh"]),
     ("wp802_yaml_khong_ghi_github_path", ('cygpath -w "$RG_DICH" >> "$GITHUB_PATH"', 'true'),
      ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
+    # wp831 (N1–N3 + F01): cùng luật; mỗi neo khớp ĐÚNG MỘT chỗ trong YAML (linux ≠ macos nhờ ứng viên đầu).
+    # Một đột biến cho MỖI chốt: ứng viên `/usr/bin` · ứng viên brew · bộ chọn kiem-tra · `-x` (F01) · điều kiện ghi
+    # $GITHUB_PATH. Cả năm đều KHÔNG đo được trên Windows (ca đích cần shell POSIX), mà sàn ≥70% đo được mỗi nền
+    # (`_dot_bien_du_san`) chỉ còn chỗ cho 5 (launcher-windows 39115887003: 9 đột biến wp831 ⇒ 197/285 = 69,1%).
+    # Việc CÓ ghi $GITHUB_PATH không có đột biến riêng; assertion `GITHUB_PATH == ứng viên` của chiều dương canh nó.
+    ("wp831_yaml_linux_bo_ung_vien_usrbin", ('for RG_D in "${CONG_CU_GOC:-}/usr/bin" ', 'for RG_D in '),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_macos_bo_ung_vien_brew", ('for RG_D in "$(brew --prefix)/bin" ', 'for RG_D in '),
+     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_linux_chi_theo_ma_thoat", ('/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
+                                            '/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    ("wp831_yaml_macos_bo_kiem_thuc_thi", ('--prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && ',
+                                           '--prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && '),
+     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
+    # Ghi $GITHUB_PATH vô điều kiện — đúng lỗi ci.yml run 39115659366. Neo kèm khoá dòng KẾ để linux ≠ macos.
+    ("wp831_yaml_linux_ghi_github_path_vo_dieu_kien", ('{ [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:', '{ [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:'),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
 ]
 
 

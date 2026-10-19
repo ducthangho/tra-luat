@@ -1,0 +1,102 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 812
+packet_id: wp812
+packet_alias: MAY-ADR-0054-a
+mission_issue: 796
+revision: 2
+generation: 3
+lease_id: wp812-r2-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_effort: medium
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp812-r2.md
+spec_sha256_required: d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef
+spec_hash: d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef
+prompt_path: ops/specs/wp812-r2.md
+prompt_sha256_required: d64987461d89429ca97230ec5e796bf987bb9383d765279543e6a7fc14513eef
+spec_chung_path: ops/specs/may-adr-0054-chung.md
+spec_chung_sha256_required: 4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0
+spec_nguon_note: >-
+  Dac ta r2 nam tren nhanh ops/wp812-spec (chua vao master). Dinh danh tep la BAM, khong phai ten nhanh: tim o
+  master truoc, chua thay thi doc tu nhanh ops/wp812-spec. r2 thay r1 (6b8b6c79...11d26); M3 accept + I7 tach sang #834.
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/PROTOCOL_DA_PHIEN.md
+effective_write_set_nguon: khai_bao_trong_spec
+depends_on:
+- 775
+- 788
+branch: agent/wp812-g3-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 4c7c29858220ae575bebc5e0a343842cd3db4546
+start_from_sha: 783463b5d62efbc43c6a6116e32c43accbc485f7
+start_from_note: >-
+  Candidate g2 (chi cuc bo, chua day); bundle candidate-783463b.bundle tren nhanh ops/wp812-g2-reviews (commit 49877d9).
+  Chu kho cho di tiep tu day (issuecomment-6248507114) thay vi viet lai tu base; phan accept/I7 phai go ra (thuoc #834).
+reviewed_sha_required: 4c7c29858220ae575bebc5e0a343842cd3db4546
+reviewed_sha_note: >-
+  Chua co head code cua g3; neo base. Head da review ghi o bien nhan truoc lan day duy nhat.
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/812#issuecomment-6248507114
+granted_on_instruction_note: >-
+  Chu kho 18-10-2026 trong phien executor g2 (session_01DHM6bohGX6Dmx37wQwpeaD): "Dong y phuong an 2 theo khuyen nghi.
+  Thuc hien ngay cho toi." (tra loi bien ban issuecomment-6248356194). Doi dac ta => revision moi => generation moi.
+recorded_by: claude-executor-session-g2
+recorder_is_executor: true
+recorder_note: >-
+  Phien ghi lease la chinh phien executor g2, theo chi thi truc tiep cua chu kho trong phien; khai that de nguoi doc
+  biet lease nay KHONG do phien dieu phoi doc lap ghi.
+leased_at_utc: '2026-10-18T10:05:00Z'
+heartbeat_at: '2026-10-18T10:05:00Z'
+lease_until: '2026-10-19T00:43:50Z'
+lease_expires_at_utc: '2026-10-19T00:43:50Z'
+rut_han:
+  han_cu: '2026-10-20T10:05:00Z'
+  han_moi: '2026-10-19T00:43:50Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #812 da merge (PR #836, merge f1979a5ddd5b04562e054cc87beb5f28c7a7e934, 2026-10-18T23:30:49Z); issue #812 da dong. Chu kho dong y nha write set som (phien session_01DHM6bohGX6Dmx37wQwpeaD, 19-10-2026, tra loi "Tôi đồng ý cả hai."), thay vi cho het han 2026-10-20T10:05:00Z.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho (#834 chua cap lease); tien le rut han wp788-r1-g1-claude (ops/land/pr818-wp788-land-evidence.yaml).'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi la truc chan. Truc VONG theo ADR-0048.
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Review Codex CLI offline tren SHA cuc bo (prompt chuan connector, khong loc theo mo hinh tin cay); gate tai cho
+  tren dung SHA; day nhanh code MOT lan khi du dieu kien merge. Connector bao P0-P2 sau khi day thi DUNG hoi chu kho.
+thay_the_cho:
+- wp812-r1-g2-claude
+thay_the_cho_note: >-
+  g2 con han toi 2026-10-20T07:58Z va giu dung write set => bia mo hai chieu. Lease nay khong chep dau dang comment cua g2.
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0, limit: 3}
+kich_thuoc_tran: 'ADR-0053: <= 450 dong them, 3 duong dan'

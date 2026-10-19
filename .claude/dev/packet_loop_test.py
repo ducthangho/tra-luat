@@ -5404,7 +5404,7 @@ def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None, suite=_KG_SUITE, de
 
 
 def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None, suite=_KG_SUITE,
-           dem=True):
+           dem=True, dong_xanh=None):
     def ca(c: Ctx):
         rc, o, e = _kg(c, du_lieu, *bat_buoc, head=head, tho=tho, suite=suite, dem=dem)
         if expect == 0:
@@ -5414,6 +5414,8 @@ def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=N
             for t in dict.fromkeys(bat_buoc):
                 if _txt(o).count(f"{t} id=") != 1:
                     raise AssertionError(f"dòng xanh phải liệt kê {t!r} đúng MỘT lần: {_txt(o)!r}")
+            if dong_xanh is not None and _txt(o) != dong_xanh:   # #822 r5: NGUYÊN VĂN (head, id lớn nhất, thứ tự `--bat-buoc`)
+                raise AssertionError(f"dòng xanh đòi {dong_xanh!r}, được {_txt(o)!r}")
         else:
             _doi_ly_do(expect, rc, e, chua, "kiem-gate")
     return ca
@@ -5900,9 +5902,9 @@ def case_kg_r4_ba_ten(c: Ctx):
     if rc != 12 or thieu:
         raise AssertionError(f"ba tên đỏ: rc={rc} thiếu {thieu}: {_txt(e)!r}")
     rc, _, e = _kg(c, {"check_runs": [_kg_run(i + 1, name=t) for i, t in enumerate(ten)] + [_kg_run(i, name=t, suite=9)
-                   for i, t in ((4, "gate"), (5, "gate"), (6, "gate"), (7, "gate2"), (8, "gate3"))]}, *ten)
+                   for i, t in ((10, "gate"), (9, "gate"), (16, "gate"), (7, "gate2"), (8, "gate3"))]}, *ten)   # id: số ≠ chữ ≠ thứ tự set
     dong = [d for d in _txt(e).splitlines() if d.startswith("CẢNH BÁO:")]
-    if rc != 0 or dong != ["CẢNH BÁO: 'gate' có 3 run ở suite khác (4, 5, 6) — bỏ qua", "CẢNH BÁO: 'gate2' có 1 run ở suite khác (7) — bỏ qua",
+    if rc != 0 or dong != ["CẢNH BÁO: 'gate' có 3 run ở suite khác (9, 10, 16) — bỏ qua", "CẢNH BÁO: 'gate2' có 1 run ở suite khác (7) — bỏ qua",
                            "CẢNH BÁO: 'gate3' có 1 run ở suite khác (8) — bỏ qua"]:
         raise AssertionError(f"ba tên cảnh báo: rc={rc} {dong!r}")
 
@@ -5992,7 +5994,10 @@ def _kg_sinh_id():   # cặp id × hai thứ tự × hai chiều màu; đáp án
                 ds = [_kg_run(lo, conclusion="cancelled" if hi_xanh else "success"),
                       _kg_run(hi, conclusion="success" if hi_xanh else "cancelled")]
                 yield f"{lo}_{hi}_{dao}_{hi_xanh}", dict(du_lieu={"check_runs": ds[::-1] if dao else ds},
-                                                          expect=0 if hi_xanh else 12, chua="conclusion='cancelled'")
+                                                          expect=0 if hi_xanh else 12, chua="conclusion='cancelled'",
+                                                          dong_xanh=f"gate XANH trên {_KG_HEAD} (suite 1): gate id={hi}")
+    yield "thu_tu_bat_buoc", dict(du_lieu={"check_runs": [_kg_run(1), _kg_run(2, name="gate2")]}, bat_buoc=("gate2", "gate"),
+                                  expect=0, dong_xanh=f"gate XANH trên {_KG_HEAD} (suite 1): gate2 id=2 · gate id=1")
 
 
 _KG_HEAD_SO = "0123456789abcdef" * 2 + "01234567"
@@ -6189,6 +6194,17 @@ for _tr, _goc in (("status", 'r["status"] == "completed"'), ("conclusion", 'r["c
                    ("chi_cuoi", "r is not cung[-1]")):
         _kg_r5(_tr, f"trung_id_{_tr}_{_n}", _goc, f"({_g} or {_goc})", "kg_r5_trung_id")
 
+# Đầu ra THÀNH CÔNG nguyên văn (review 5 xếp "quan sát"; đóng luôn để dòng xanh/cảnh báo không trôi).
+_KG_CB = 'khac = sorted({r["id"] for r in runs if r["name"] == ten_cb and r["check_suite"]["id"] != suite})'
+for _lop, _ten, _tim, _thay, _ca in (
+        ("xanh", "xanh_id_dau", 'xanh.append(f"{ten} id={id_max}")', """xanh.append(f"{ten} id={cung[0]['id']}")""", "kg_r5_id"),
+        ("xanh", "xanh_id_cuoi", 'xanh.append(f"{ten} id={id_max}")', """xanh.append(f"{ten} id={cung[-1]['id']}")""", "kg_r5_id"),
+        ("xanh", "xanh_bo_head", 'print(f"gate XANH trên {a.head} (suite {suite}): "', 'print(f"gate XANH (suite {suite}): "', "kg_r5_id"),
+        ("xanh", "xanh_sap_xep", '" · ".join(xanh))', '" · ".join(sorted(xanh)))', "kg_r5_id"),
+        ("canh_bao_thu_tu", "canh_bao_sap_chu", _KG_CB, _KG_CB[:-1] + ", key=str)", "kg_r4_ba_ten"),
+        ("canh_bao_thu_tu", "canh_bao_khong_sap", _KG_CB, "khac = list(" + _KG_CB[len("khac = sorted("):], "kg_r4_ba_ten")):
+    _kg_r5(_lop, _ten, _tim, _thay, _ca)
+
 # M1 — bảng kiểm kê: mỗi thành phần ⇒ đột biến (không sập, M6) HOẶC `("tuong_duong", "<lập luận hành vi>")`.
 # K38–K41 executor thêm khi kiểm kê lại trên base `f712205`; K41 là argparse (ngoài lớp) nhưng M5(a) đòi mọi
 # đột biến `kg_` có dòng.
@@ -6219,7 +6235,7 @@ _KG_KIEM_KE = {
     "K24": ("kg_bo_kiem_ten_rong", "kg_f04_bo_kiem_xuong_dong", "kg_k24_bo_strip", "kg_k24_chi_strip_space", *_KG_R5["vi_tri_ten"]),
     "K25": ("kg_k25_bo_khu_trung",),
     "K26": ("kg_n4_bo_canh_bao", "kg_n4_canh_bao_moi_ten", "kg_n4_dem_ban_ghi", "kg_n4_ten_theo_repr",
-            "kg_k26_canh_bao_ca_suite_neo", "kg_k26_canh_bao_ra_stdout", "kg_r2_canh_bao_dem_1", "kg_r2_canh_bao_id_dau", "kg_r2_canh_bao_ten_dau", *_KG_R4["canh_bao"], "kg_r4_canh_bao_id_hai_dau", "kg_r4_canh_bao_ten_hai_dau"),
+            "kg_k26_canh_bao_ca_suite_neo", "kg_k26_canh_bao_ra_stdout", "kg_r2_canh_bao_dem_1", "kg_r2_canh_bao_id_dau", "kg_r2_canh_bao_ten_dau", *_KG_R4["canh_bao"], "kg_r4_canh_bao_id_hai_dau", "kg_r4_canh_bao_ten_hai_dau", *_KG_R5["canh_bao_thu_tu"]),
     "K27": ("kg_khop_tien_to", "kg_xet_moi_check", "kg_r3_name_suffix", "kg_r3_name_casefold", "kg_r3_name_strip_run", "kg_r3_name_strip_arg", *_KG_R4["ten"]),
     "K28": ("kg_n3_bo_loc_suite", "kg_n3_suite_cua_run_dau"),
     "K29": ("kg_bo_kiem_vang", *_KG_R5["vi_tri_vang"]),
@@ -6229,7 +6245,7 @@ _KG_KIEM_KE = {
     "K33": ("kg_bo_conclusion_rieng", "kg_danh_sach_cam", *_KG_R4["conclusion"]),
     "K34": ("kg_bo_so_head", "kg_r3_head_prefix", "kg_r3_head_suffix", "kg_r3_head_casefold", "kg_r3_head_first7", *_KG_R4["head"]),
     "K35": ("kg_d2_mot_ten_xanh_che_do", "kg_rc_gate_thanh_0"),
-    "K36": ("kg_n6_dong_xanh_khong_suite", "kg_k36_chi_ten_dau"),
+    "K36": ("kg_n6_dong_xanh_khong_suite", "kg_k36_chi_ten_dau", *_KG_R5["xanh"]),
     "K37": ("kg_k37_vang_la_null", "kg_r2_schema_trang_dau"),
     "K38": ("kg_k38_list_la_mot_trang", "kg_k38_object_bi_bo"),   # list ⇒ nhiều trang, object ⇒ một trang
     "K39": ("kg_k39_khong_in_dong_do", "kg_r3_red_first_name_only", "kg_r4_do_chi_cuoi", "kg_r4_do_hai_dau"),   # mỗi tên đỏ một dòng `ĐỎ` trên stderr nêu status/conclusion/head

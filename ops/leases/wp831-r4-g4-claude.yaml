@@ -89,8 +89,15 @@ thay_the_cho_ghi_chu: 'wp831-r3-g3-claude CON HAN (toi 2026-10-20T16:00:00Z) va 
 leased_at_utc: '2026-10-18T17:25:00Z'
 heartbeat_at: '2026-10-18T17:25:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-20T17:30:00Z'
-lease_expires_at_utc: '2026-10-20T17:30:00Z'
+lease_until: '2026-10-19T03:10:15Z'
+lease_expires_at_utc: '2026-10-19T03:10:15Z'
+rut_han:
+  han_cu: '2026-10-20T17:30:00Z'
+  han_moi: '2026-10-19T03:10:15Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #831 da merge (PR #832, merge 6842a625f457843a21bd3a3b0422f13cb13de911, 2026-10-19T00:59:37Z); gate push master tren 6842a62 xanh (ci.yml 39183257258 14/14, launcher-windows 39183257264). Chu kho yeu cau land + ghi so ("Land và bookeeping đi") de nha write set ngay.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp788 (735a208): bia mo mot chieu lam ai-dang-giu tra KHONG_XAC_DINH rc=12'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0

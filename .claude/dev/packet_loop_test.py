@@ -159,6 +159,8 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     if env_extra:
         env.update(env_extra)
     p = subprocess.run(cmd, capture_output=True, env=env)
+    if args and str(args[0]) == "kiem-gate":
+        _kg_kiem_ket_qua(p.returncode, p.stdout, p.stderr)
     return p.returncode, p.stdout, p.stderr
 
 
@@ -5347,6 +5349,8 @@ def _co_sap_do(ex) -> bool:
             return True
         thay.add(id(ex))
         cho += [ex.__cause__, ex.__context__]
+        if isinstance(ex, getattr(sys.modules["builtins"], "BaseExceptionGroup", ())):
+            cho += list(ex.exceptions)
     return False
 
 
@@ -5355,7 +5359,15 @@ def _phan_loai_giet(v) -> str:
             else "TIN_DUNG_GIA" if isinstance(v, _TinDungGia) else "GIET")
 
 
-_KG_RC_HOP_LE = frozenset(int(x) for x in re.findall(r"^RC_\w+ = (\d+)$", CANONICAL.read_text(encoding="utf-8"), re.M))
+_KG_RC_HOP_LE = frozenset((0, 2, 12))
+
+
+def _kg_kiem_ket_qua(rc, o, e):
+    # Cần banner đầu dòng (có thể bọc repr) lẫn frame; không nhận nhầm tên check trong cảnh báo.
+    mau = rb"(?m)^[ +|]*[\"']?(?:Exception Group )?Traceback \(most recent call last\):(?:\r?\n|\\n)[ +|]*File "
+    sap = any(re.search(mau, out) for out in (o, e))
+    if sap or rc not in _KG_RC_HOP_LE:
+        raise CliSapDo(f"kiem-gate SẬP: rc={rc}; stdout={_txt(o)[-300:]!r}; stderr={_txt(e)[-300:]!r}")
 
 
 def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None, suite=_KG_SUITE, dem=True):
@@ -5369,10 +5381,7 @@ def _kg(c: Ctx, du_lieu, *bat_buoc, head=_KG_HEAD, tho=None, suite=_KG_SUITE, de
     args += ["--check-suite", suite] if suite is not None else []
     for t in bat_buoc:
         args += ["--bat-buoc", t]
-    rc, o, e = run(c.script, args)
-    if b"Traceback (most recent call last):" in e or rc not in _KG_RC_HOP_LE:
-        raise CliSapDo(f"kiem-gate SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
-    return rc, o, e
+    return run(c.script, args)
 
 
 def _kg_ca(du_lieu, bat_buoc=("gate",), expect=12, chua="", head=_KG_HEAD, tho=None, suite=_KG_SUITE,
@@ -5405,11 +5414,11 @@ _KG_CA = {
     # M2 — đọc đầu vào: mọi chỗ hỏng là KHÔNG ĐO ĐƯỢC + 12
     "kg_m2_tep_vang": _kg_ca(None, chua="như JSON (FileNotFoundError"),
     "kg_m2_json_hong": _kg_ca(None, tho="{", chua="như JSON (JSONDecodeError"),
-    "kg_m2_khong_co_check_runs": _kg_ca({"x": 1}, chua=_KG_TRANG),
-    "kg_m2_check_runs_khong_phai_list": _kg_ca({"check_runs": {}}, chua=_KG_TRANG),
-    # #788: `total_count` 1 CÓ CHỦ Ý — đột biến bỏ phần tử hỏng phải ra XANH, không bị N5 chặn hộ.
+    "kg_m2_khong_co_check_runs": _kg_ca({"total_count": 1, "x": 1}, chua=_KG_TRANG),
+    "kg_m2_check_runs_khong_phai_list": _kg_ca({"total_count": 1, "check_runs": {"gate": _kg_run(1)}}, chua=_KG_TRANG),
+    # Chỉ conclusion vắng: giữ số id đúng; run hỏng không bắt buộc để gỡ kiểm không KeyError.
     "kg_m2_thieu_conclusion": _kg_ca(
-        {"total_count": 1, "check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2).items() if k != "conclusion"}]},
+        {"total_count": 2, "check_runs": [_kg_run(1), {k: v for k, v in _kg_run(2, name="khac").items() if k != "conclusion"}]},
         chua="trường ['conclusion']"),
     "kg_m2_id_bool": _kg_ca({"check_runs": [_kg_run(True)]}, chua="trường ['id']"),
     "kg_m2_id_chuoi": _kg_ca({"check_runs": [_kg_run("5")]}, chua="trường ['id']"),
@@ -5644,7 +5653,7 @@ CASES += list(_KG_CA.items()) + [("kg_m4_rc_gate_12", case_kg_m4_rc_gate_12),
                                  ("kg_n4_canh_bao", case_kg_n4_canh_bao), ("kg_n6_help", case_kg_n6_help),
                                  ("kg_f02_suite_vuot_tran_int", case_kg_f02_suite_vuot_tran_int)]
 
-_KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"] + ["kg_m3_in_progress"]
+_KG_CAM = [f"kg_m3_ket_luan_{k}" for k in _KG_KET_LUAN if k != "failure"]
 MUTANTS.update({
     "kg_bo_status_rieng": ('r["status"] == "completed" and r["conclusion"] == "success"',
                            'r["conclusion"] == "success"', ["kg_m3_in_progress_success"]),
@@ -5679,14 +5688,14 @@ MUTANTS.update({
                              'for r in [next(r for r in cung if r["id"] == id_max)]:',
                              ["kg_m3_trung_id_moi_ban_phai_xanh"]),
     "kg_danh_sach_cam": ('hop_le = (r["status"] == "completed" and r["conclusion"] == "success"',
-                         'hop_le = (r["conclusion"] not in ("cancelled", "failure")', _KG_CAM),
+                         'hop_le = (r["status"] == "completed" and r["conclusion"] not in ("cancelled", "failure")', _KG_CAM),
     "kg_bo_so_head": ('"success"\n                      and r["head_sha"] == a.head)', '"success")',
                       ["kg_m3_head_khac"]),
     "kg_khop_tien_to": ('if r["name"] == ten]', 'if r["name"].startswith(ten)]',
                         ["kg_m3_ten_tuyet_doi"]),
     "kg_xet_moi_check": ('cung = [r for r in runs if r["name"] == ten]', "cung = list(runs)",
                          ["kg_m3_ngoai_bo_qua"]),
-    "kg_rc_gate_thanh_8": ("\nRC_GATE = 12\n", "\nRC_GATE = 8\n", ["kg_m4_rc_gate_12"]),
+    "kg_rc_gate_thanh_0": ("\nRC_GATE = 12\n", "\nRC_GATE = 0\n", ["kg_m4_rc_gate_12"]),
     # --- #788: mỗi ô "Phép đo làm ĐỎ" một đột biến; ca đích chết vì đổi MÀU, không vì traceback.
     "kg_n1_bo_kiem_dang": ('    if not re.fullmatch(r"[1-9][0-9]*", a.check_suite):\n', "    if False:\n",
                            [f"kg_n1_check_suite_{t}" for t in ("abc", "am", "0", "012", "cong", "cach", "unicode")]),
@@ -5763,8 +5772,8 @@ _KG_CA.update({
     "kg_m2_thieu_conclusion_khong_bat_buoc": _kg_ca(_KG_RUN1_SAU(_kg_khac(conclusion=_VANG_T)),
                                                     chua=f"{_KG_TRUONG} ['conclusion']"),
     "kg_k37_conclusion_null_khong_bat_buoc": _kg_ca(_KG_RUN1_SAU(_kg_khac(conclusion=None, status="queued")), expect=0),
-    # K15: `total_count` 1 CÓ CHỦ Ý — đột biến bỏ qua run hỏng phải ra XANH.
-    "kg_k15_bo_qua_run_thieu_suite": _kg_ca(_KG_RUN1_SAU(_kg_khac(check_suite=_VANG_T), tc=1), dem=False, chua=_KG_CS),
+    # K15: total_count đúng hai id; gỡ chốt bằng bỏ run làm đổi lý do sang thiếu trang (M1).
+    "kg_k15_bo_qua_run_thieu_suite": _kg_ca(_KG_RUN1_SAU(_kg_khac(check_suite=_VANG_T), tc=2), dem=False, chua=_KG_CS),
     # D1 (K18): cùng id, khác `head_sha`; id lớn hơn xanh ⇒ dưới D1 cấp XANH GIẢ.
     "kg_d1_cung_id_khac_head": _kg_ca(_KG_RUN1_SAU(_kg_run(1, head="cd" * 20), _kg_run(2), tc=2), dem=False, chua=_KG_DT),
     # D2 (K35): MỘT tên đỏ cạnh một tên xanh.
@@ -5772,6 +5781,14 @@ _KG_CA.update({
                                             bat_buoc=("gate", "gate2"), chua="1/2 tên bắt buộc đỏ"),
     "kg_k21_head_hoa": _kg_ca({"check_runs": [_kg_run(1, head="AB" * 20)]}, head="AB" * 20, expect=2, chua="SHA 40"),
     "kg_k24_ten_chi_khoang_trang": _kg_ca(_KG_1, bat_buoc=(" ",), expect=2, chua="không được rỗng"),
+    "kg_k24_ten_chi_tab": _kg_ca({"check_runs": [_kg_run(1, name="\t")]},
+                                 bat_buoc=("\t",), expect=2, chua="không được rỗng"),
+    "kg_k24_ten_chi_nbsp": _kg_ca({"check_runs": [_kg_run(1, name="\u00a0")]},
+                                  bat_buoc=("\u00a0",), expect=2, chua="không được rỗng"),
+    "kg_k31_status_do_truoc": _kg_ca({"check_runs": [_kg_run(2, status="in_progress"), _kg_run(2)]},
+                                     chua="status='in_progress'"),
+    "kg_k31_conclusion_do_truoc": _kg_ca({"check_runs": [_kg_run(2, conclusion="cancelled"), _kg_run(2)]},
+                                         chua="conclusion='cancelled'"),
     # K40: hai bản ghi đỏ cùng id lớn nhất ⇒ vẫn MỘT tên đỏ.
     "kg_k40_hai_ban_do_mot_ten": _kg_ca({"check_runs": [_kg_run(2, conclusion="cancelled"), _kg_run(2, conclusion="failure")]},
                                         chua="1/1 tên bắt buộc đỏ"),
@@ -5816,6 +5833,11 @@ MUTANTS.update({
     "kg_k22_match_tien_to": ('re.fullmatch(r"[1-9][0-9]*", a.check_suite)', 're.match(r"[1-9][0-9]*", a.check_suite)',
                              ["kg_n1_check_suite_unicode"]),
     "kg_k24_bo_strip": ("if any(not t.strip() or", "if any(not t or", ["kg_k24_ten_chi_khoang_trang"]),
+    "kg_k24_chi_strip_space": ('not t.strip() or t.splitlines()', 'not t.strip(" ") or t.splitlines()',
+                                ["kg_k24_ten_chi_tab", "kg_k24_ten_chi_nbsp"]),
+    "kg_k31_chon_ban_cuoi": ('for r in (r for r in cung if r["id"] == id_max):',
+                              'for r in [r for r in cung if r["id"] == id_max][-1:]:',
+                              ["kg_k31_status_do_truoc", "kg_k31_conclusion_do_truoc"]),
     "kg_k25_bo_khu_trung": ("ten_bb = list(dict.fromkeys(a.bat_buoc))", "ten_bb = list(a.bat_buoc)", ["kg_m1_trung_ten_mot_dong"]),
     "kg_k26_canh_bao_ca_suite_neo": (' and r["check_suite"]["id"] != suite})', "})", ["kg_n4_canh_bao"]),
     "kg_k26_canh_bao_ra_stdout": ('— bỏ qua", file=sys.stderr)', '— bỏ qua")', ["kg_n4_canh_bao"]),
@@ -5857,7 +5879,7 @@ _KG_KIEM_KE = {
     "K21": ("kg_bo_sha_re", "kg_k21_nhan_hex_hoa"),
     "K22": ("kg_n1_bo_kiem_dang", "kg_n1_cho_so_0_dau", "kg_n1_chu_so_unicode", "kg_k22_match_tien_to"),
     "K23": ("kg_f02_du_phong_khop_nham",),
-    "K24": ("kg_bo_kiem_ten_rong", "kg_f04_bo_kiem_xuong_dong", "kg_k24_bo_strip"),
+    "K24": ("kg_bo_kiem_ten_rong", "kg_f04_bo_kiem_xuong_dong", "kg_k24_bo_strip", "kg_k24_chi_strip_space"),
     "K25": ("kg_k25_bo_khu_trung",),
     "K26": ("kg_n4_bo_canh_bao", "kg_n4_canh_bao_moi_ten", "kg_n4_dem_ban_ghi", "kg_n4_ten_theo_repr",
             "kg_k26_canh_bao_ca_suite_neo", "kg_k26_canh_bao_ra_stdout"),
@@ -5865,11 +5887,11 @@ _KG_KIEM_KE = {
     "K28": ("kg_n3_bo_loc_suite", "kg_n3_suite_cua_run_dau"),
     "K29": ("kg_bo_kiem_vang",),
     "K30": ("kg_chon_success_bat_ky", "kg_chon_luot_cu_nhat"),
-    "K31": ("kg_trung_id_chon_mot",),
+    "K31": ("kg_trung_id_chon_mot", "kg_k31_chon_ban_cuoi"),
     "K32": ("kg_bo_status_rieng",),
     "K33": ("kg_bo_conclusion_rieng", "kg_danh_sach_cam"),
     "K34": ("kg_bo_so_head",),
-    "K35": ("kg_d2_mot_ten_xanh_che_do", "kg_rc_gate_thanh_8"),
+    "K35": ("kg_d2_mot_ten_xanh_che_do", "kg_rc_gate_thanh_0"),
     "K36": ("kg_n6_dong_xanh_khong_suite", "kg_k36_chi_ten_dau"),
     "K37": ("kg_k37_vang_la_null",),
     "K38": ("kg_k38_list_la_mot_trang", "kg_k38_object_bi_bo"),   # list ⇒ nhiều trang, object ⇒ một trang
@@ -5902,18 +5924,65 @@ def case_kg_m6_tin_dung_giet(c: Ctx):
     """M6: đột biến SẬP ở F02 (`ValueError→TypeError`) là TÍN DỤNG GIẢ; đột biến dự phòng `suite = 1`
     (xanh giả, không sập) là GIẾT; nền là SỐNG. Đo qua đúng `chay_suite` + `_phan_loai_giet` mà bộ chạy dùng."""
     goc, ca = c.script.read_text(encoding="utf-8"), "kg_f02_suite_vuot_tran_int"
-    for ten, (tim, thay), doi in (("nen", ("", ""), "SONG"),
-                                  ("sap", ("    except ValueError:   # F02:", "    except TypeError:   # F02:"), "TIN_DUNG_GIA"),
-                                  ("du_phong", MUTANTS["kg_f02_du_phong_khop_nham"][:2], "GIET")):
+    help_tim = 'help="id suite của CHÍNH lượt workflow'
+    help_thay = 'help=1 or "id suite của CHÍNH lượt workflow'
+    for ten, (tim, thay), doi, dich in (
+            ("nen", ("", ""), "SONG", ca),
+            ("sap", ("    except ValueError:   # F02:", "    except TypeError:   # F02:"), "TIN_DUNG_GIA", ca),
+            ("du_phong", MUTANTS["kg_f02_du_phong_khop_nham"][:2], "GIET", ca),
+            ("stdout", ("        suite = a.check_suite   #",
+                        "        import traceback; traceback.print_exc(file=sys.stdout); return RC_GATE   #"), "TIN_DUNG_GIA", ca),
+            ("repr", ("        suite = a.check_suite   #",
+                      "        import traceback; print(repr(traceback.format_exc())); return RC_GATE   #"), "TIN_DUNG_GIA", ca),
+            ("rc8", ("        suite = a.check_suite   #", "        return RC_STATE   #"), "TIN_DUNG_GIA", ca),
+            ("help", (help_tim, help_thay), "TIN_DUNG_GIA", "kg_n6_help"),
+            ("help12", (help_tim, help_thay), "TIN_DUNG_GIA", "kg_m4_rc_gate_12")):
         d = c.tmp / ten
         d.mkdir()
         if tim and goc.count(tim) != 1:
             raise AssertionError(f"mỏ neo {tim!r} phải khớp đúng một chỗ")
         (d / "packet_loop.py").write_text(goc.replace(tim, thay, 1) if tim else goc, encoding="utf-8", newline="\n")
         (d / "launcher.py").write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
-        v = chay_suite(d / "packet_loop.py", d / "run", chi_chay={ca})[ca]
+        v = chay_suite(d / "packet_loop.py", d / "run", chi_chay={dich})[dich]
         if _phan_loai_giet(v) != doi:
             raise AssertionError(f"{ten}: đòi {doi}, được {_phan_loai_giet(v)} ({v!r})")
+
+    # Mọi nhánh except phải giữ tín hiệu crash, kể cả BoQua.
+    global CASES
+    cu = CASES
+    nhom = getattr(sys.modules["builtins"], "ExceptionGroup", None)
+    try:
+        for mode in ("cause", "context", "none", "skip_cause", "skip_context") + (("group",) if nhom else ()):
+            def boc(ctx, mode=mode):
+                loi = None
+                try:
+                    case_kg_f02_suite_vuot_tran_int(ctx)
+                except CliSapDo as ex:
+                    if mode == "group":
+                        loi = ex
+                    else:
+                        if mode == "skip_cause":
+                            raise BoQua("bọc crash") from ex
+                        if mode == "skip_context":
+                            raise BoQua("bọc crash")
+                        if mode == "cause":
+                            raise AssertionError("bọc crash") from ex
+                        if mode == "none":
+                            raise AssertionError("bọc crash") from None
+                        raise AssertionError("bọc crash")
+                if mode == "group":
+                    raise nhom("bọc crash", [loi])
+            CASES = [("kg_m6_boc_cli", boc)]
+            v = chay_suite(c.tmp / "sap" / "packet_loop.py", c.tmp / mode)["kg_m6_boc_cli"]
+            if _phan_loai_giet(v) != "TIN_DUNG_GIA":
+                raise AssertionError(f"{mode}: crash bị rửa thành {_phan_loai_giet(v)}")
+    finally:
+        CASES = cu
+
+    # Một tên check hợp lệ chứa banner ở giữa dòng không phải là traceback CLI.
+    for ten in ("Traceback (most recent call last):", r"Traceback (most recent call last):\n  File x"):
+        rc, o, e = _kg(c, {"check_runs": [_kg_run(1, name=ten), _kg_run(2, name=ten, suite=9)]}, ten)
+        _doi(0, rc, e, "tên check chứa banner phải được chấp nhận")
 
 
 CASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke), ("kg_m6_tin_dung_giet", case_kg_m6_tin_dung_giet)]
@@ -5926,6 +5995,14 @@ MUTANTS.update({
     "t822_mutant_kg_ngoai_bang": ('CASES += [("kg_m5_kiem' + '_ke", case_kg_m5_kiem_ke),',
                                   'MUTANTS["kg_ngoai_bang"] = ("x", "y", ["kg_m5_kiem_ke"])\nCASES += [("kg_m5_kiem' + '_ke", case_kg_m5_kiem_ke),',
                                   ["kg_m5_kiem_ke"]),
+    # M6: mỗi chốt của bộ phân loại một đột biến riêng — gỡ chốt nào thì ca tự kiểm M6 phải ĐỎ.
+    **{f"t822_m6_{ten}": (tim, thay, ["kg_m6_tin_dung_giet"]) for ten, tim, thay in (
+        ("run_khong_kiem", "        _kg_kiem_ket_qua(p.returncode, p.stdout," + " p.stderr)\n", "        pass\n"),
+        ("chi_doc_stderr", "sap = any(re.search(mau, out) for out in (o, " + "e))", "sap = any(re.search(mau, out) for out in (e,))"),
+        ("rc_moi_so", "_KG_RC_HOP_LE = frozenset((0, 2, " + "12))", "_KG_RC_HOP_LE = frozenset(range(256))"),
+        ("boqua_rua_sap", 'ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap' + "_do(ex) else",
+         'ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if False else'),
+        ("bo_duyet_group", "            cho += list(ex." + "exceptions)\n", "            pass\n"))},
     "t822_moi_ca_do_la_giet": ('else "TIN_DUNG_GIA" if isinstance(v, _TinDung' + 'Gia)', 'else "TIN_DUNG_GIA" if False', ["kg_m6_tin_dung_giet"]),
 })
 MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {k for k in MUTANTS if k.startswith("t822_")}
@@ -6948,7 +7025,8 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
             fn(Ctx(script, d))
             ket[ten] = None
         except BoQua as ex:
-            ket[ten] = ex if isinstance(ex.__cause__, OSError) else f"BỎ QUA không có OSError đo được: {ex}"
+            ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap_do(ex) else
+                        ex if isinstance(ex.__cause__, OSError) else f"BỎ QUA không có OSError đo được: {ex}")
         except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố
             ket[ten] = (_TinDungGia if _co_sap_do(ex) else str)(f"{type(ex).__name__}: {ex}")
     return ket

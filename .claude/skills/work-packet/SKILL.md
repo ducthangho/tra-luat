@@ -264,8 +264,9 @@ Identity/attempt/provenance và fallback endpoint: protocol §10.2.2–§10.2.3;
 **Hướng dẫn** (luật đọc, không phải kết quả đo). Mỗi ca một lệnh, lấy rc ngay sau lệnh:
 
 ```bash
-python -B -c 'import yaml'   # thiếu PyYAML thì module chết lúc nạp, không phải lỗi ca
-python -B ops/ci_duong_nhanh_test.py --mot-ca t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY" -B -c 'import yaml'   # thiếu PyYAML thì module chết lúc nạp, không phải lỗi ca
+"$PY" -B ops/ci_duong_nhanh_test.py --mot-ca t20zk_kiem_re_symlink_treo_qua_bi_danh_thu_muc_do
 echo "t20zk rc=$?"           # 0 = đạt (không in gì); 3 = DO; 4 = HONG
 ```
 

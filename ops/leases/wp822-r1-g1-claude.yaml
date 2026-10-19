@@ -1,0 +1,98 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 822
+packet_id: wp822
+packet_alias: KG-RANG-TEST
+mission_issue: 822
+revision: 1
+generation: 1
+lease_id: wp822-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp822.md
+spec_sha256_required: 6bcac18917516e89119065a249037cb81f13d77b01bb77e7b557f6d23d5c0b07
+spec_hash: 6bcac18917516e89119065a249037cb81f13d77b01bb77e7b557f6d23d5c0b07
+prompt_path: ops/specs/wp822.md
+prompt_sha256_required: 6bcac18917516e89119065a249037cb81f13d77b01bb77e7b557f6d23d5c0b07
+spec_nguon_note: >-
+  Dac ta da land tren master (PR #828, merge 7321d39); dinh danh tep la BAM.
+write_set:
+- .claude/dev/packet_loop_test.py
+effective_write_set:
+- .claude/dev/packet_loop_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+depends_on:
+- 812
+depends_on_ghi_chu: >-
+  #812 land f1979a5 (PR #836). Lease #812 (g1, g2) deu DA_BI_THAY_THE; ai-dang-giu packet_loop_test.py
+  => NGUOI_GIU 0 luc cap.
+branch: agent/wp822-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: f712205aa39e0b54d04a5bd8145fa69a84601fed
+start_from_sha: f712205aa39e0b54d04a5bd8145fa69a84601fed
+reviewed_sha_required: f712205aa39e0b54d04a5bd8145fa69a84601fed
+reviewed_sha_note: >-
+  Chua co head code; neo base (origin/master luc cap, packet_loop.py/_test.py khong doi so voi f1979a5).
+  Head da review ghi o bien nhan truoc lan day duy nhat.
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/822#issuecomment-6259006223
+granted_on_instruction_note: >-
+  Chu kho 19-10-2026 (phien dieu phoi session_01XaeBSkW4R49AEWj6x4uqff) chon "Cap + mo phien ngay" sau khi #812
+  land. Thu tu: sau #812, truoc #813 (Q2 dac ta).
+recorded_by: claude-dispatcher-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien dieu phoi ghi lease; executor la phien cloud KHAC do phien nay tao.'
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-19T03:28:16Z'
+  ref: refs/heads/agent/wp822-g1-claude
+  trang_thai: vang
+  ghi_chu: 'ls-remote rong; executor tao tu base_sha.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-19T03:30:00Z'
+  so_nhanh: 'ls-remote 623 == cuc bo 623 (so TAP ten: thieu 0)'
+  ket_qua: >-
+    ai-dang-giu .claude/dev/packet_loop_test.py => NGUOI_GIU 0; wp812 g1/g2 CON_HAN-DA_BI_THAY_THE, con lai HET_HAN.
+do_lai_dac_ta_luc_cap:
+  do_luc: '2026-10-19T00:48:22Z'
+  sha: f1979a5ddd5b04562e054cc87beb5f28c7a7e934
+  ket_qua: 'D1-D6 moi cap khop dung 1 cho; ca 6 song tren 100 ca kg_* (do=0), nen 100/100.'
+leased_at_utc: '2026-10-19T03:32:00Z'
+heartbeat_at: '2026-10-19T03:32:00Z'
+lease_until: '2026-10-21T03:32:00Z'
+lease_expires_at_utc: '2026-10-21T03:32:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran loi goi la truc chan. Truc VONG theo ADR-0048.
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Review Codex CLI offline tren SHA cuc bo (prompt chuan connector, khong loc theo mo hinh tin cay);
+  gate tai cho tren dung SHA; day nhanh MOT lan khi du dieu kien merge. Connector bao P0-P2 sau khi day
+  thi DUNG hoi chu kho. Va theo LOP, khong theo tung finding; approve chi khi P0=P1=P2=P3=0.
+thay_the_cho: []
+thay_the_cho_note: 'Lease dau tien cua #822; khong co lease nao con hieu luc giu write set.'
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0, limit: 3}
+kich_thuoc_tran: 'ADR-0053: <= 450 dong them, 1 duong dan'

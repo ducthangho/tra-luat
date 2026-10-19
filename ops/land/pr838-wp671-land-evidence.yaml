@@ -2,8 +2,8 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7 "Land evidence tach approval khoi thao tac"; quy uoc duong dan theo
 # tien le ops/land/pr696-wp668-land-evidence.yaml.
 #
-# TRANG THAI: merged (6b641ca, ed02bf6). landed: false — cho HAU-MERGE GATE tren master va merge PR bookkeeping
-# (xem trang_thai_packet.dieu_kien_con_lai). "merged" KHONG dong nghia "landed" (PROTOCOL §10).
+# TRANG THAI: merged (6b641ca, ed02bf6); hau-merge gate xanh (run 39187057200). landed: false — chi con cho merge PR
+# bookkeeping va dong #671 (xem trang_thai_packet.dieu_kien_con_lai). "merged" KHONG dong nghia "landed" (PROTOCOL §10).
 # NHAN: measured = do lai trong phien soan ho so (lenh ghi kem); loi_khai_co_neo = co neo comment/transcript;
 # not_measured = khong do duoc, ghi ly do.
 # Moi phep do REST: `gh api` (client GitHub cua phien, tai khoan chu kho) luc 2026-10-19T01:40Z..02:05Z; readback tho
@@ -82,8 +82,10 @@ pr:
       same_provider_approved: 'review luot 9 Sonnet 5.5 approve tren c9c8a82 — issues/671#issuecomment-6256494266 (readback-comment-6256494266.json)'
       codex_connector: '72a1d64: completed, 0 finding (readback-comment-6257124783.json)'
     hau_merge_ci: >-
-      not_measured luc soan. Run tren ed02bf6 CANCELLED (concurrency — master di tiep sang 062292b): readback-run-39186435964.json.
-      Gate hau-merge neo vao 062292b (chua ed02bf6, write set khong doi giua hai commit): run 39187057200, pending luc soan.
+      measured: readback-run-39187057200.json va readback-jobs-39187057200.json — run 39187057200 tren 062292b,
+      completed/success, 14/14 job success (gate, gate-cong-cu 0-7, gate-cong-cu-gop, gate-ops, gate-packet-loop,
+      gate-registry, chuan-bi). 062292b chua ed02bf6 va write set khong doi giua hai commit (do-git.txt). Run tren
+      ed02bf6 CANCELLED do concurrency (readback-run-39186435964.json). Buoc release-verify strict xanh o lan nay.
 
 pham_vi_packet_tren_master:
   trang_thai: 'measured — do-git.txt'
@@ -120,12 +122,13 @@ no_chuyen_tiep:
     quyet_dinh: 'chu kho: giu t60-t64, khai o PR'
   - id: RELEASE-VERIFY-STRICT-MASTER-DO-SAN
     hang: ngoai_packet
-    ghi_chu: 'gate tren master do o buoc release-verify strict (lane LAND) tu 577d7b9, truoc #690 — khong thuoc #671'
+    ghi_chu: 'gate tren master do o buoc release-verify strict (lane LAND) tu 577d7b9, truoc #690 — khong thuoc #671; da xanh lai o 062292b (readback-jobs-39187057200.json)'
 
 trang_thai_packet:
   merged: true
   landed: false
+  da_dat:
+    - 'Hau-merge gate tren master chua ed02bf6: run 39187057200 tren 062292b success 14/14 (readback-run-39187057200.json).'
   dieu_kien_con_lai:
-    - 'Hau-merge gate tren master chua ed02bf6 (run 39187057200 tren 062292b) xanh, hoac chu kho quyet cho tung job do.'
     - 'Merge PR bookkeeping nay (dua spec, lease g1-g4, verdict luot 4-9 va ho so nay vao master).'
     - 'Sau do: dong Issue #671 (P2 Windows da chuyen #748).'

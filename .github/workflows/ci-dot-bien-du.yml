@@ -5,7 +5,10 @@ name: đột biến đủ (hằng tuần)
 # Chốt `loi_workflow_dot_bien_du` (`.claude/dev/ci_dang_ky_test.py`): mọi giá trị hoặc GHIM, hoặc BẰNG `gate-registry` của
 # `ci.yml` (trích từ chính hai tệp) trừ `env` bước registry. Sửa `gate-registry` mà quên tệp này ⇒ registry ĐỎ trên PR.
 # Chỉ ubuntu: Windows vốn bỏ đột biến của `pretooluse_guard_test`.
-# #661: đột biến ĐỦ của `ops/nhanh_don_duoc_test.py` chia 4 job mảnh + job gom; registry chạy bộ ấy NHẸ (M4/M5 ở W2).
+# #661: đột biến ĐỦ của `ops/nhanh_don_duoc_test.py` chia job mảnh + job gom; registry chạy bộ ấy NHẸ (M4/M5 ở W2).
+# WP748 r16: đây là `full_mutant_audit` — 52 ca dưới MỖI 239 tự đột biến + 10 đột biến sản phẩm, KHÔNG thu hẹp ma trận.
+# Bắt buộc trên ĐÚNG SHA ứng viên (workflow_dispatch trên ref ấy) trước merge/land/release; biên nhận targeted của
+# `ci.yml` KHÔNG thay được. Ước tính g12: ~73 800 s nối tiếp ⇒ 8 mảnh ≈ 2,6 h/mảnh ⇒ trần 360 phút (trần job GitHub).
 
 on:
   schedule:
@@ -65,11 +68,11 @@ jobs:
 
   dot-bien-manh:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
-        manh: [0, 1, 2, 3]
+        manh: [0, 1, 2, 3, 4, 5, 6, 7]
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -81,8 +84,9 @@ jobs:
           python-version: "3.12"
       - name: đột biến một mảnh
         env:
-          NHANH_DON_DUOC_MANH: ${{ matrix.manh }}/4
-          NHANH_DON_DUOC_MANH_RA: manh/manh-${{ matrix.manh }}.json
+          NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+          NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
+          NHANH_DON_DUOC_DICH_DU: "1"
         run: python ops/nhanh_don_duoc_test.py
       - uses: actions/upload-artifact@v4
         with:
@@ -105,4 +109,4 @@ jobs:
           path: manh
           merge-multiple: true
       - name: gom mảnh
-        run: python ops/nhanh_don_duoc_test.py --gop manh
+        run: python ops/nhanh_don_duoc_test.py --gop-du manh

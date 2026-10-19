@@ -307,6 +307,12 @@ def c16_l6_landed_true_phai_co_phan_hoan_tat():
     ky(hs.format("true", tot, bk) + "lease: {thu_hoi_cuoi: 'CHO_DIEN — THU_HOI'}\n", None, 1, "dấu trong trường chuỗi",
        "dấu giữ chỗ")
     ky(hs.format("true", "[{CHO_DIEN: x}]", bk), None, 1, "dấu nằm ở KHOÁ", "dấu giữ chỗ")
+    for pmc, b in (("[{name: g}, chuoi]", bk), ("[chuoi, {name: g}]", bk), (tot, "[{item: b}, chuoi]")):   # #845 lượt 1 P2-A
+        ky(hs.format("true", pmc, b), None, 1, f"danh sách TRỘN mapping/vô hướng {pmc} {b}", "L6 $.")
+    for b in ("{item: dong issue}", "'chua dien'"):   # P2-B: bookkeeping CÓ MẶT mà sai kiểu
+        ky(hs.format("true", tot, b), None, 1, f"bookkeeping có mặt mà sai kiểu {b}", "L6 $.bookkeeping")
+    for sau in ("x: {a: {b: [{c: {d: 'CHO_DIEN — sau'}}]}}\n", "x: {a: {b: [{c: {CHO_DIEN: 1}}]}}\n"):   # P2-C: mọi độ sâu
+        ky(hs.format("true", tot, bk) + sau, None, 1, f"dấu lồng sâu {sau.strip()}", "dấu giữ chỗ")
     for ld in ("'true'", "1", "null"):
         ky(hs.format(ld, tot, bk), None, 1, f"landed {ld} không phải bool", "phải là bool")
     ky(hs.format("false", "'CHO_DIEN — POST_MERGE'", "'CHO_DIEN — BOOKKEEPING'"), None, 0, "bản nháp landed false được giữ chỗ")
@@ -371,6 +377,11 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L6_phan_tu_bat_ky", " and all(isinstance(x, dict) for x in ds)", "", "c16"),
     ("L6_bo_bookkeeping", 'L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")', 'L6_PHAN_HOAN_TAT = ("post_merge_checks",)', "c16"),
     ("L6_bo_dau_giu_cho", "for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]", "for d, v in nut if False]", "c16"),
+    ("L6_moi_thanh_mot", " and all(isinstance(x, dict) for x in ds)", " and any(isinstance(x, dict) for x in ds)", "c16"),
+    ("L6_bookkeeping_chi_co_mat", "                ds = du_lieu.get(khoa)\n",
+     "                ds = du_lieu.get(khoa)\n                if khoa == \"bookkeeping\" and ds:\n                    continue\n", "c16"),
+    ("L6_dau_gioi_han_do_sau", "for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]",
+     "for d, v in nut if d.count(\".\") + d.count(\"[\") <= 3 and isinstance(v, str) and L6_DAU_GIU_CHO in v]", "c16"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),

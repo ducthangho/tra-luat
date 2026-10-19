@@ -30,7 +30,8 @@ LUẬT:
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
 văn — một tệp vô can vẫn làm L1 qua. Chỉ L2 đọc NỘI DUNG, và chỉ cho token số. Hồ sơ cũ đi qua miễn trừ, không được kiểm.
-Không sửa hồ sơ nào. Chưa nằm trên đường CI tự động — việc của lease g2 (`ci.yml`).
+Không sửa hồ sơ nào. Lên CI GIÁN TIẾP: `ops/land_evidence_nguon_test.py` đăng ký trong `.claude/dev/ci_dang_ky_test.py`, ca `c11`
+của nó gọi bộ kiểm này trên cây thật (bản trước ghi "chưa nằm trên đường CI" — cũ từ lease g2 #773, review #845 lượt 1 P3).
 
 Dùng: python ops/land_evidence_nguon.py [--root GOC] [--tep TEP ...] — thoát 0 ĐẠT · 1 ĐỎ · 2 KHÔNG ĐO ĐƯỢC (không vi phạm).
 """

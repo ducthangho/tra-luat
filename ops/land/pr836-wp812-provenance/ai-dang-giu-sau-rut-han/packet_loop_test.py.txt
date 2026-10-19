@@ -1,0 +1,37 @@
+$ python3 ops/lease_publish.py ai-dang-giu .claude/dev/packet_loop_test.py --root .
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	doctrine-scan-r1-g1-antigravity	refs/heads/agent/wp812-g2-claude:ops/leases/doctrine-scan-r1-g1-antigravity.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/agent/wp812-g2-claude:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp55-r4-exec-1-claude-20260816	refs/heads/agent/wp812-g2-claude:ops/leases/wp55-r4-exec-1-claude-20260816.yaml
+HẾT_HẠN	wp55-r4-exec-2-claude-20260816	refs/heads/agent/wp812-g2-claude:ops/leases/wp55-r4-exec-2-claude-20260816.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp812-r1-g1-antigravity	refs/heads/ops/wp812-spec:ops/leases/wp812-r1-g1-antigravity.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp812-r1-g2-claude	refs/heads/ops/wp812-spec:ops/leases/wp812-r1-g2-claude.yaml
+HẾT_HẠN	wp812-r2-g3-claude	refs/heads/ops/wp812-spec:ops/leases/wp812-r2-g3-claude.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/remotes/origin/codex/wp484-g3-windows:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp709-exec-g1-codex-20261005	refs/remotes/origin/codex/wp709-bootstrap:ops/leases/wp709-exec-g1-codex-20261005.yaml
+HẾT_HẠN	wp709-exec-g2-codex-20261006	refs/remotes/origin/codex/wp709-bootstrap:ops/leases/wp709-exec-g2-codex-20261006.yaml
+HẾT_HẠN	uy-quyen-merge-neo-hien-vat-exec-1-claude-20260826	refs/remotes/origin/ops/cap-lease-4-packet-20260826:ops/leases/uy-quyen-merge-neo-hien-vat-exec-1-claude-20260826.yaml
+HẾT_HẠN	verdict-khong-boc-hoi-exec-1-claude-20260908	refs/remotes/origin/ops/cap-lease-mu-ref-va-verdict:ops/leases/verdict-khong-boc-hoi-exec-1-claude-20260908.yaml
+HẾT_HẠN	bien-nhan-review-s2-exec-1-claude-20260824	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/bien-nhan-review-s2-exec-1-claude-20260824.yaml
+HẾT_HẠN	bien-nhan-review-s2-exec-1r2-claude-20260824	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/bien-nhan-review-s2-exec-1r2-claude-20260824.yaml
+HẾT_HẠN	bien-nhan-review-s2-exec-1r3-claude-20260824	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/bien-nhan-review-s2-exec-1r3-claude-20260824.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1-codex-20260825	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1-codex-20260825.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1r2-codex-20260826	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1r2-codex-20260826.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1r3-codex-20260826	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1r3-codex-20260826.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1r4-codex-20260826	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1r4-codex-20260826.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1r5-codex-20260826	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1r5-codex-20260826.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1r6-codex-20260826	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1r6-codex-20260826.yaml
+HẾT_HẠN	khoa-neo-be-rong-exec-1r7-codex-20260826	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-be-rong-exec-1r7-codex-20260826.yaml
+HẾT_HẠN	khoa-neo-that-exec-1-codex-20260824	refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck:ops/leases/khoa-neo-that-exec-1-codex-20260824.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-2-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-2-codex-20260828.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-3-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-3-codex-20260828.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-4-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-4-codex-20260828.yaml
+HẾT_HẠN	wp55-r2-exec-3-claude-20260814	refs/remotes/origin/ops/wp55-lease-exec-3:ops/leases/wp55-r2-exec-3-claude-20260814.yaml
+HẾT_HẠN	wp55-r3-exec-4-claude-20260814	refs/remotes/origin/ops/wp55-r3-exec-4:ops/leases/wp55-r3-exec-4-claude-20260814.yaml
+HẾT_HẠN	wp55-r3-exec-5-claude-20260815	refs/remotes/origin/ops/wp55-r3-exec-5:ops/leases/wp55-r3-exec-5-claude-20260815.yaml
+HẾT_HẠN	wp55-r3-exec-9-claude-20260815	refs/remotes/origin/ops/wp55-r3-exec-9:ops/leases/wp55-r3-exec-9-claude-20260815.yaml
+HẾT_HẠN	wp770-r1-g1-claude	refs/remotes/origin/ops/wp770-spec:ops/leases/wp770-r1-g1-claude.yaml
+HẾT_HẠN	wp775-r1-g1-claude	refs/remotes/origin/ops/wp775-spec:ops/leases/wp775-r1-g1-claude.yaml
+HẾT_HẠN	wp788-r1-g1-claude	refs/remotes/origin/ops/wp788-spec:ops/leases/wp788-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

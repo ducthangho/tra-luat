@@ -1,10 +1,11 @@
 # HO SO LAND — packet #845 wp845 r1 (lease g1), ma qua PR #846. Khuon: ops/land/pr832-wp831-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (f64f9b8) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-845-land)
-# dua dong nay vao master; neo quyet dinh: #845 issuecomment-6264046882. "merged" KHONG dong nghia "landed" (§10.2.4).
+# TRANG THAI: merged (f64f9b8), `landed: false`. Gate master XANH, lease DA NHA, #845 DA DONG — nhung verdict Codex neo 7a39463,
+# KHONG neo head merge 974859d; lease M-5 lam M-1 het hieu luc khi head doi (connector P1 #847 r4312283489). "merged" KHONG
+# dong nghia "landed" (§10.2.4). `landed` chi len true khi co review/audit neo DUNG 974859d.
 # Gate push master tren DUNG merge SHA f64f9b8: ci.yml 39226246616 XANH 14/14.
-# Ho so nay la ho so dau tien chay qua chinh luat L6 ma packet them vao (landed true + phan hoan tat day du).
+# Ho so nay chay qua chinh luat L6 ma packet them vao (phan hoan tat day du, khong o giu cho).
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr846-wp845-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
@@ -78,11 +79,14 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-846.json: merged true, merged_at 2026-10-19T08:55:29Z, merged_by ducthangho, merge_commit_sha
     f64f9b8 (cha 3cfbf41 + 974859d: do-lai-nguon-20261019/merge-va-diff.txt), merge commit (khong squash/rebase).
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA f64f9b8: ci.yml 14/14 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
     2/2 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #845 closed/completed DAT, no P3 co ten ghi o PR #846.
-    `landed: true` theo chi thi chu kho "Land và bookeeping" (#845 issuecomment-6264046882); hieu luc khi PR ghi so nay vao master.
+    CHUA DAT: dieu kien review (lease M-1/M-5, protocol §8) — verdict approve duy nhat neo 7a39463; head merge 974859d (them
+    merge origin/master do thu-hoi doi) chua co review hay human audit neo DUNG SHA. Write set khop byte va chu kho bam merge
+    KHONG thay the review neo SHA (connector P1 #847 r4312283489). Len true khi co mot trong hai: (a) loi goi Codex neo 974859d
+    (can chu kho nang ngan sach 4 -> 5), (b) chu kho ghi human audit neo 974859d.
 
 uy_quyen_land:
   dang: >-

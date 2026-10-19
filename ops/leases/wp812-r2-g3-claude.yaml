@@ -70,8 +70,15 @@ recorder_note: >-
   biet lease nay KHONG do phien dieu phoi doc lap ghi.
 leased_at_utc: '2026-10-18T10:05:00Z'
 heartbeat_at: '2026-10-18T10:05:00Z'
-lease_until: '2026-10-20T10:05:00Z'
-lease_expires_at_utc: '2026-10-20T10:05:00Z'
+lease_until: '2026-10-19T00:43:50Z'
+lease_expires_at_utc: '2026-10-19T00:43:50Z'
+rut_han:
+  han_cu: '2026-10-20T10:05:00Z'
+  han_moi: '2026-10-19T00:43:50Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #812 da merge (PR #836, merge f1979a5ddd5b04562e054cc87beb5f28c7a7e934, 2026-10-18T23:30:49Z); issue #812 da dong. Chu kho dong y nha write set som (phien session_01DHM6bohGX6Dmx37wQwpeaD, 19-10-2026, tra loi "Tôi đồng ý cả hai."), thay vi cho het han 2026-10-20T10:05:00Z.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho (#834 chua cap lease); tien le rut han wp788-r1-g1-claude (ops/land/pr818-wp788-land-evidence.yaml).'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0

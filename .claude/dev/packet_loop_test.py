@@ -5920,12 +5920,13 @@ CASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke), ("kg_m6_tin_dung_giet", case_kg
 # A4 + A12: đột biến NHẮM TEST — gỡ từng vế của hai ca tự kiểm thì ca ấy phải ĐỎ.
 MUTANTS.update({
     "t822_bang_xoa_K14": ('    "K14": ("kg_bool_la_int", "kg_n2_bool_la_int", "kg_n5_bool_la_int"),\n', "", ["kg_m5_kiem_ke"]),
-    "t822_bang_ten_khong_ton_tai": ('    "K25": ("kg_k25_bo_khu_trung",),', '    "K25": ("kg_k25_bo_khu_trung", "kg_khong_ton_tai"),',
+    # Mốc ghép bằng `+` để chuỗi liền chỉ có ở ĐÚNG chỗ bị đột biến (`moc_dot_bien_phai_khop_DUNG_MOT_CHO`).
+    "t822_bang_ten_khong_ton_tai": ('    "K25": ("kg_k25_bo' + '_khu_trung",),', '    "K25": ("kg_k25_bo_khu_trung", "kg_khong_ton_tai"),',
                                     ["kg_m5_kiem_ke"]),
-    "t822_mutant_kg_ngoai_bang": ('CASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke),',
-                                  'MUTANTS["kg_ngoai_bang"] = ("x", "y", ["kg_m5_kiem_ke"])\nCASES += [("kg_m5_kiem_ke", case_kg_m5_kiem_ke),',
+    "t822_mutant_kg_ngoai_bang": ('CASES += [("kg_m5_kiem' + '_ke", case_kg_m5_kiem_ke),',
+                                  'MUTANTS["kg_ngoai_bang"] = ("x", "y", ["kg_m5_kiem_ke"])\nCASES += [("kg_m5_kiem' + '_ke", case_kg_m5_kiem_ke),',
                                   ["kg_m5_kiem_ke"]),
-    "t822_moi_ca_do_la_giet": ('else "TIN_DUNG_GIA" if isinstance(v, _TinDungGia)', 'else "TIN_DUNG_GIA" if False', ["kg_m6_tin_dung_giet"]),
+    "t822_moi_ca_do_la_giet": ('else "TIN_DUNG_GIA" if isinstance(v, _TinDung' + 'Gia)', 'else "TIN_DUNG_GIA" if False', ["kg_m6_tin_dung_giet"]),
 })
 MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {k for k in MUTANTS if k.startswith("t822_")}
 

@@ -1,0 +1,209 @@
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -6036,6 +6036,151 @@
+     "kg_r4_canh_bao_ten_hai_dau": ("for ten_cb in ten_bb:", "for ten_cb in ten_bb[:1] + ten_bb[-1:]:", ["kg_r4_ba_ten"]),
+ })
+ 
++# Review 5: lượng từ phải đúng với mọi vị trí; thứ tự ID phải là thứ tự số nguyên.
++def case_kg_r5_id(c: Ctx):
++    for lo, hi in ((9, 10), (-20, -10), (2**53, 2**53 + 1)):
++        for moi_do in (False, True):
++            rows = [_kg_run(lo, conclusion="success" if moi_do else "failure"),
++                    _kg_run(hi, conclusion="failure" if moi_do else "success")]
++            for runs in (rows, rows[::-1]):
++                _kg_ca({"check_runs": runs}, expect=12 if moi_do else 0, chua="conclusion='failure'")(c)
++
++
++def case_kg_r5_ten(c: Ctx):
++    for bad in ("", " ", "\t", "\u00a0", *(f"ga{x}te" for x in "\n\r\v\f\x1c\x85\u2028\u2029"), "gate\n"):
++        for pos in range(3):
++            names = ["gate", "gate2", "gate3"]
++            names[pos] = bad
++            _kg_ca({"check_runs": [_kg_run(i + 1, name=n) for i, n in enumerate(names)]},
++                   bat_buoc=names, expect=2, chua="không được rỗng hoặc chứa ký tự xuống dòng")(c)
++
++
++def case_kg_r5_vang(c: Ctx):
++    names = ("gate", "gate2", "gate3")
++    for present in range(7):   # mọi tập con thiếu ít nhất một tên, kể cả không có run
++        missing = [n for i, n in enumerate(names) if not present & (1 << i)]
++        for khac_suite in (False, True):
++            rows = [_kg_run(i + 1, name=n, suite=1 if present & (1 << i) else 9)
++                    for i, n in enumerate(names) if present & (1 << i) or khac_suite]
++            rc, _, e = _kg(c, {"check_runs": rows}, *names)
++            _doi_ly_do(12, rc, e, f"{len(missing)}/3 tên bắt buộc đỏ", "tập tên vắng")
++            for n in missing:
++                if f"{n!r}: VẮNG" not in _txt(e):
++                    raise AssertionError(f"thiếu lý do VẮNG cho {n!r}: {_txt(e)!r}")
++
++
++def case_kg_r5_danh_tinh(c: Ctx):
++    for field, bad in (("name", "EXTRA"), ("head_sha", "cd" * 20), ("check_suite", {"id": 9})):
++        rows = [_kg_run(1), _kg_run(2, name="other"), _kg_run(4, name="extra"),
++                {**_kg_run(4, name="extra"), field: bad}, _kg_run(3, name="tail")]
++        for pos in range(len(rows)):
++            _kg_ca({"total_count": 4, "check_runs": rows[pos:] + rows[:pos]}, dem=False, chua=_KG_DT)(c)
++
++
++def case_kg_r5_trang(c: Ctx):
++    bad_pages = [None, False, 5, 0.5, "", [], {"total_count": 1}]
++    bad_pages += [{"total_count": 1, "check_runs": v} for v in (None, False, 5, 0.5, "", {}, {"gate": _kg_run(1)})]
++    for bad in bad_pages:
++        for pos in range(3):
++            pages = [{"total_count": 1, "check_runs": [_kg_run(1)]}, {"total_count": 1, "check_runs": []}]
++            pages.insert(pos, bad)
++            _kg_ca(pages, dem=False, chua=f"trang {pos} " + _KG_TRANG)(c)
++
++
++def case_kg_r5_trung(c: Ctx):
++    for field, bad in (("status", "in_progress"), ("conclusion", "failure")):
++        for pos in range(3):
++            rows = [_kg_run(2) for _ in range(3)]
++            rows[pos][field] = bad
++            _kg_ca({"check_runs": rows}, chua=f"{field}={bad!r}")(c)
++
++
++def case_kg_r5_dang(c: Ctx):
++    for field, good, reason in (("head", _KG_HEAD, "SHA 40"), ("head", "1" * 40, "SHA 40"), ("suite", "1", _KG_ARG)):
++        full = "".join(chr(ord(ch) + 0xFEE0) for ch in good)
++        for bad in [full] + [a + good + b for a, b in ((" ", ""), ("", " "), ("\t", "\t"), ("\u00a0", "\u00a0"), ("", "\n"))]:
++            data = {"check_runs": [_kg_run(1, head=bad if field == "head" else _KG_HEAD)]}
++            _kg_ca(data, expect=2, chua=reason, **{field: bad})(c)
++
++
++CASES += [("kg_r5_" + name, fn) for name, fn in (("id", case_kg_r5_id), ("ten", case_kg_r5_ten),
++    ("vang", case_kg_r5_vang), ("danh_tinh", case_kg_r5_danh_tinh), ("trang", case_kg_r5_trang),
++    ("trung", case_kg_r5_trung), ("dang", case_kg_r5_dang))]
++_KG_R5 = {}
++
++
++def _kg_r5_mut(ks, name, find, replace, case):
++    name = "kg_r5_" + name
++    MUTANTS[name] = (find, replace, ["kg_r5_" + case])
++    for k in ks.split():
++        _KG_R5.setdefault(k, []).append(name)
++
++
++for mode, expr in (("cuoi", 'cung[-1]["id"]'), ("abs", 'max((r["id"] for r in cung), key=abs)'),
++                   ("float", 'max((r["id"] for r in cung), key=float)')):
++    _kg_r5_mut("K30", "id_" + mode, 'id_max = max(r["id"] for r in cung)', 'id_max = ' + expr, "id")
++for mode, expr in (("dau", "ten_bb[:1]"), ("cuoi", "ten_bb[-1:]"), ("hai_dau", "ten_bb[:1] + ten_bb[-1:]")):
++    _kg_r5_mut("K24", "ten_" + mode, 't.splitlines() != [t] for t in ten_bb)',
++               f't.splitlines() != [t] for t in {expr})', "ten")
++    line = '            do.append(f"{ten!r}: VẮNG — không check-run nào mang đúng tên này trong suite {suite}")'
++    _kg_r5_mut("K29", "vang_" + mode, line, f'            if ten in {expr}:\n    ' + line, "vang")
++line = '            do.append(f"{ten!r}: VẮNG — không check-run nào mang đúng tên này trong suite {suite}")'
++_kg_r5_mut("K29", "vang_khi_co_run", line, '            if runs:\n    ' + line, "vang")
++for mode, expr in (("dau", "runs[:2]"), ("cuoi", "runs[-2:]"), ("hai_dau", "runs[:2] + runs[-2:]")):
++    _kg_r5_mut("K16 K17 K18", "danh_tinh_" + mode, '    for r in runs:\n        dt =',
++               f'    for r in {expr}:\n        dt =', "danh_tinh")
++_kg_r5_mut("K05", "trang_sau_bo_object", '    for i, tr in enumerate(trang):\n',
++           '    for i, tr in enumerate(trang):\n        if i and not isinstance(tr, dict):\n            continue\n', "trang")
++for field, word, k in (("status", "completed", "K32"), ("conclusion", "success", "K33")):
++    for mode, expr in (("dau", "cung[0]"), ("cuoi", "cung[-1]")):
++        find = f'r["{field}"] == "{word}"'
++        _kg_r5_mut("K31 " + k, field + "_" + mode, find, f'(r is not {expr} or {find})', "trung")
++for field, find in (("head", "SHA_RE.fullmatch(a.head)"), ("suite", 're.fullmatch(r"[1-9][0-9]*", a.check_suite)')):
++    attr = "a.head" if field == "head" else "a.check_suite"
++    for mode, expr in (("strip", attr + ".strip()"), ("nfkc", f'__import__("unicodedata").normalize("NFKC", {attr})')):
++        _kg_r5_mut("K21" if field == "head" else "K22", field + "_" + mode, find, find.replace(attr, expr), "dang")
++
++
++# Kiểu JSON là tập đóng; kiểm mọi kiểu sai trên mọi trường và vị trí, không chỉ int=5.
++_KG_R5_JSON = (("null", None, "type(None)"), ("bool", False, "bool"), ("int", 2, "int"),
++              ("float", 2.5, "float"), ("str", "wrong", "str"), ("list", [], "list"), ("dict", {}, "dict"))
++_KG_R5_SCHEMA = {"id": ("K09", ("int",), "int,"), "name": ("K10", ("str",), "str,"),
++    "head_sha": ("K11", ("str",), "str,"), "status": ("K12", ("str",), "str,"),
++    "conclusion": ("K13", ("str", "null"), "str, type(None)"), "suiteid": ("K15", ("int",), "int,")}
++
++
++def _kg_r5_kieu(field):
++    def ca(c: Ctx):
++        for kind, value, _ in _KG_R5_JSON:
++            if kind in _KG_R5_SCHEMA[field][1]:
++                continue
++            bad = {**_kg_run(2, name="khac"), **({"check_suite": {"id": value}} if field == "suiteid" else {field: value})}
++            reason = _KG_CS if field == "suiteid" else f"{_KG_TRUONG} ['{field}']"
++            for pos in range(3):
++                rows = [_kg_run(1), _kg_run(3, name="extra")]
++                rows.insert(pos, bad)
++                for data in ({"check_runs": rows}, [{"check_runs": [r]} for r in rows]):
++                    _kg_ca(data, chua=reason)(c)
++    return ca
++
++
++CASES += [("kg_r5_kieu_" + f, _kg_r5_kieu(f)) for f in _KG_R5_SCHEMA]
++for field, (k, valid, types) in _KG_R5_SCHEMA.items():
++    for kind, _, expr in _KG_R5_JSON:
++        if kind in valid or field == "id" and kind in ("list", "dict"):
++            continue   # id không hash được: nới kiểu riêng nó gây crash, M6 cấm tính là GIẾT
++        find = ('type(cs.get("id", _VANG)) is not int' if field == "suiteid" else f'("{field}", ({types}))')
++        replace = (f'type(cs.get("id", _VANG)) not in (int, {expr})' if field == "suiteid" else
++                   f'("{field}", ({types.rstrip(",")}, {expr}))')
++        _kg_r5_mut(k, "kieu_" + field + "_" + kind, find, replace, "kieu_" + field)
++_kg_r5_mut("K05", "trang_sau_thieu_check_runs", '    for i, tr in enumerate(trang):\n',
++    '    for i, tr in enumerate(trang):\n        if i and isinstance(tr, dict) and "check_runs" not in tr:\n            continue\n', "trang")
++_kg_r5_mut("K05", "check_runs_la_str", 'not isinstance(tr.get("check_runs"), list)',
++    'not isinstance(tr.get("check_runs"), (list, str))', "trang")
++
++_kg_r5_mut("K21", "head_unicode_digits", r'SHA_RE = re.compile(r"^[0-9a-f]{40}\Z")',
++    r'SHA_RE = re.compile(r"^[\da-f]{40}\Z")', "dang")
++
+ # M1 — bảng kiểm kê: mỗi thành phần ⇒ đột biến (không sập, M6) HOẶC `("tuong_duong", "<lập luận hành vi>")`.
+ # K38–K41 executor thêm khi kiểm kê lại trên base `f712205`; K41 là argparse (ngoài lớp) nhưng M5(a) đòi mọi
+ # đột biến `kg_` có dòng.
+@@ -6044,36 +6189,36 @@
+     "K02": ("kg_bo_hook_khoa_trung", "kg_r3_nested_suite_duplicates_ignored", "kg_r3_extra_key_duplicates_ignored"),
+     "K03": ("kg_bo_hook_hang_ngoai_json",),
+     "K04": ("kg_k04_list_rong_im_lang",),
+-    "K05": ("kg_k05_bo_qua_trang_hong", "kg_k05_bo_kiem_check_runs_list", "kg_r2_bo_trang_sau_hong"),
++    "K05": ("kg_k05_bo_qua_trang_hong", "kg_k05_bo_kiem_check_runs_list", "kg_r2_bo_trang_sau_hong", *_KG_R5["K05"]),
+     "K06": ("kg_n5_bo_doi_co_mat", "kg_n5_trang_sau_thua_huong"),
+     "K07": ("kg_k07_bo_kiem_kieu_tc", "kg_k07_bo_kiem_am", "kg_n5_bool_la_int", "kg_r2_tc_trang_dau", "kg_r3_later_page_negative_count"),
+     "K08": ("kg_k08_bo_qua_phan_tu", "kg_r2_bo_run_trang_sau"),
+-    "K09": ("kg_k09_bo_kieu_id", "kg_bool_la_int", "kg_bo_qua_phan_tu_thieu_truong", "kg_r2_schema_trang_dau"),
+-    "K10": ("kg_d3_bo_kieu_name", "kg_r2_schema_trang_dau"),
+-    "K11": ("kg_d4_bo_kieu_head_sha", "kg_r2_schema_trang_dau"),
+-    "K12": ("kg_d5_bo_kieu_status", "kg_r2_schema_trang_dau"),
+-    "K13": ("kg_d6_bo_kieu_conclusion", "kg_r2_schema_trang_dau"),
++    "K09": ("kg_k09_bo_kieu_id", "kg_bool_la_int", "kg_bo_qua_phan_tu_thieu_truong", "kg_r2_schema_trang_dau", *_KG_R5["K09"]),
++    "K10": ("kg_d3_bo_kieu_name", "kg_r2_schema_trang_dau", *_KG_R5["K10"]),
++    "K11": ("kg_d4_bo_kieu_head_sha", "kg_r2_schema_trang_dau", *_KG_R5["K11"]),
++    "K12": ("kg_d5_bo_kieu_status", "kg_r2_schema_trang_dau", *_KG_R5["K12"]),
++    "K13": ("kg_d6_bo_kieu_conclusion", "kg_r2_schema_trang_dau", *_KG_R5["K13"]),
+     "K14": ("kg_bool_la_int", "kg_n2_bool_la_int", "kg_n5_bool_la_int", "kg_r3_later_page_run_bool"),
+-    "K15": ("kg_n2_chi_kiem_bat_buoc", "kg_n2_bool_la_int", "kg_k15_bo_kieu_id_suite", "kg_k15_bo_qua_run_suite_hong", "kg_r2_suite_trang_dau", "kg_r3_later_page_suite_bool"),
+-    "K16": ("kg_f01_bo_ten_khoi_danh_tinh", "kg_f01_bo_kiem_danh_tinh", *_KG_R4["dt_ten"]),
+-    "K17": ("kg_f01_bo_suite_khoi_danh_tinh",),
+-    "K18": ("kg_d1_bo_head_khoi_danh_tinh", *_KG_R4["dt_head"]),
++    "K15": ("kg_n2_chi_kiem_bat_buoc", "kg_n2_bool_la_int", "kg_k15_bo_kieu_id_suite", "kg_k15_bo_qua_run_suite_hong", "kg_r2_suite_trang_dau", "kg_r3_later_page_suite_bool", *_KG_R5["K15"]),
++    "K16": ("kg_f01_bo_ten_khoi_danh_tinh", "kg_f01_bo_kiem_danh_tinh", *_KG_R4["dt_ten"], *_KG_R5["K16"]),
++    "K17": ("kg_f01_bo_suite_khoi_danh_tinh", *_KG_R5["K17"]),
++    "K18": ("kg_d1_bo_head_khoi_danh_tinh", *_KG_R4["dt_head"], *_KG_R5["K18"]),
+     "K19": ("kg_n5_bo_so_giua_trang", "kg_r2_so_hai_trang_dau"),
+     "K20": ("kg_bo_kiem_thieu_trang", "kg_n5_quay_ve_nho_hon", "kg_k20_dem_ban_ghi"),
+-    "K21": ("kg_bo_sha_re", "kg_k21_nhan_hex_hoa", "kg_r2_sha_phi_hex", "kg_r2_sha_39", "kg_r2_sha_41"),
+-    "K22": ("kg_n1_bo_kiem_dang", "kg_n1_cho_so_0_dau", "kg_n1_chu_so_unicode", "kg_k22_match_tien_to"),
++    "K21": ("kg_bo_sha_re", "kg_k21_nhan_hex_hoa", "kg_r2_sha_phi_hex", "kg_r2_sha_39", "kg_r2_sha_41", *_KG_R5["K21"]),
++    "K22": ("kg_n1_bo_kiem_dang", "kg_n1_cho_so_0_dau", "kg_n1_chu_so_unicode", "kg_k22_match_tien_to", *_KG_R5["K22"]),
+     "K23": ("kg_f02_du_phong_khop_nham",),
+-    "K24": ("kg_bo_kiem_ten_rong", "kg_f04_bo_kiem_xuong_dong", "kg_k24_bo_strip", "kg_k24_chi_strip_space"),
++    "K24": ("kg_bo_kiem_ten_rong", "kg_f04_bo_kiem_xuong_dong", "kg_k24_bo_strip", "kg_k24_chi_strip_space", *_KG_R5["K24"]),
+     "K25": ("kg_k25_bo_khu_trung",),
+     "K26": ("kg_n4_bo_canh_bao", "kg_n4_canh_bao_moi_ten", "kg_n4_dem_ban_ghi", "kg_n4_ten_theo_repr",
+             "kg_k26_canh_bao_ca_suite_neo", "kg_k26_canh_bao_ra_stdout", "kg_r2_canh_bao_dem_1", "kg_r2_canh_bao_id_dau", "kg_r2_canh_bao_ten_dau", *_KG_R4["canh_bao"], "kg_r4_canh_bao_id_hai_dau", "kg_r4_canh_bao_ten_hai_dau"),
+     "K27": ("kg_khop_tien_to", "kg_xet_moi_check", "kg_r3_name_suffix", "kg_r3_name_casefold", "kg_r3_name_strip_run", "kg_r3_name_strip_arg", *_KG_R4["ten"]),
+     "K28": ("kg_n3_bo_loc_suite", "kg_n3_suite_cua_run_dau"),
+-    "K29": ("kg_bo_kiem_vang",),
+-    "K30": ("kg_chon_success_bat_ky", "kg_chon_luot_cu_nhat", "kg_r2_id_theo_chuoi"),
+-    "K31": ("kg_trung_id_chon_mot", "kg_k31_chon_ban_cuoi"),
+-    "K32": ("kg_bo_status_rieng", *_KG_R4["status"]),
+-    "K33": ("kg_bo_conclusion_rieng", "kg_danh_sach_cam", *_KG_R4["conclusion"]),
++    "K29": ("kg_bo_kiem_vang", *_KG_R5["K29"]),
++    "K30": ("kg_chon_success_bat_ky", "kg_chon_luot_cu_nhat", "kg_r2_id_theo_chuoi", *_KG_R5["K30"]),
++    "K31": ("kg_trung_id_chon_mot", "kg_k31_chon_ban_cuoi", *_KG_R5["K31"]),
++    "K32": ("kg_bo_status_rieng", *_KG_R4["status"], *_KG_R5["K32"]),
++    "K33": ("kg_bo_conclusion_rieng", "kg_danh_sach_cam", *_KG_R4["conclusion"], *_KG_R5["K33"]),
+     "K34": ("kg_bo_so_head", "kg_r3_head_prefix", "kg_r3_head_suffix", "kg_r3_head_casefold", "kg_r3_head_first7", *_KG_R4["head"]),
+     "K35": ("kg_d2_mot_ten_xanh_che_do", "kg_rc_gate_thanh_0"),
+     "K36": ("kg_n6_dong_xanh_khong_suite", "kg_k36_chi_ten_dau"),

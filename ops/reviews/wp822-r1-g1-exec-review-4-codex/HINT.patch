@@ -1,0 +1,158 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -5601,6 +5601,30 @@
+                              "CẢNH BÁO: 'gate2' có 1 run ở suite khác (5) — bỏ qua"]:
+         raise AssertionError(f"cảnh báo phải đủ tên và id phân biệt: rc={rc} {dem(e)!r}")
+ 
++    # Review 4: tên gần giống không được cảnh báo; đối số có space vẫn là tên nguyên văn.
++    for t in ("GATE", "gate extra", "extra gate", " gate "):
++        rc, _, e = _kg(c, {"check_runs": [_kg_run(1), _kg_run(2, name=t, suite=9)]}, "gate")
++        if rc != 0 or dem(e):
++            raise AssertionError(f"cảnh báo phải so tên tuyệt đối: {t!r}, rc={rc}, {dem(e)!r}")
++    t = " gate "
++    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=t, suite=9)]}, t)
++    if rc != 0 or dem(e) != [f"CẢNH BÁO: '{t}' có 1 run ở suite khác (2) — bỏ qua"]:
++        raise AssertionError(f"cảnh báo phải giữ nguyên đối số: rc={rc}, {dem(e)!r}")
++
++    rc, _, e = _kg(c, {"check_runs": [_kg_run(1), _kg_run(2, name="gate2"), _kg_run(3, name="gate3"),
++                                      _kg_run(4, suite=9), _kg_run(5, suite=9), _kg_run(6, suite=9),
++                                      _kg_run(7, name="gate2", suite=9), _kg_run(8, name="gate3", suite=9)]},
++                    "gate", "gate2", "gate3")
++    if rc != 0 or dem(e) != ["CẢNH BÁO: 'gate' có 3 run ở suite khác (4, 5, 6) — bỏ qua",
++                             "CẢNH BÁO: 'gate2' có 1 run ở suite khác (7) — bỏ qua",
++                             "CẢNH BÁO: 'gate3' có 1 run ở suite khác (8) — bỏ qua"]:
++        raise AssertionError(f"cảnh báo phải đủ phần tử đầu/giữa/cuối: rc={rc}, {dem(e)!r}")
++
++    t, nfd = "cổng-đủ", "co\u0302\u0309ng-đu\u0309"
++    rc, _, e = _kg(c, {"check_runs": [_kg_run(1, name=t), _kg_run(2, name=nfd, suite=9)]}, t)
++    if rc != 0 or dem(e):
++        raise AssertionError(f"cảnh báo không chuẩn hóa Unicode của tên: rc={rc}, {dem(e)!r}")
++
+ 
+ def case_kg_n6_help(c: Ctx):
+     rc, o, e = run(c.script, ["kiem-gate", "--help"])
+@@ -5848,13 +5872,82 @@
+     ('K27', 'name_casefold', 'name_casefold', 'if r["name"] == ten]', 'if r["name"].lower() == ten.lower()]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': 'GATE', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'VẮNG'}),
+     ('K27', 'name_strip_run', 'name_strip_run', 'if r["name"] == ten]', 'if r["name"].strip() == ten]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': ' gate ', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'chua': 'VẮNG'}),
+     ('K27', 'name_strip_arg', 'spaces', 'if r["name"] == ten]', 'if r["name"] == ten.strip()]', {'total_count': 1, 'check_runs': [{'id': 1, 'name': ' gate ', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'success', 'check_suite': {'id': 1}}]}, {'dem': False, 'expect': 0, 'bat_buoc': (' gate ',)}),
+-    ('K39', 'red_first_name_only', 'two_red', '        for dong in do:\n', '        for dong in do[:1]:\n', {'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'failure', 'check_suite': {'id': 1}}, {'id': 2, 'name': 'gate2', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'cancelled', 'check_suite': {'id': 1}}]}, {'dem': False, 'bat_buoc': ('gate', 'gate2'), 'chua': "'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ"}),
+-    ('K40', 'red_count_constant', 'two_red', '{len(do)}/{len(ten_bb)} tên bắt buộc đỏ', '{1}/{len(ten_bb)} tên bắt buộc đỏ', {'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'failure', 'check_suite': {'id': 1}}, {'id': 2, 'name': 'gate2', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'cancelled', 'check_suite': {'id': 1}}]}, {'dem': False, 'bat_buoc': ('gate', 'gate2'), 'chua': "'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ"}),
++    ('K39', 'red_first_name_only', 'two_red', '        for dong in do:\n', '        for dong in do[:1]:\n', {'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'failure', 'check_suite': {'id': 1}}, {'id': 2, 'name': 'gate2', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'cancelled', 'check_suite': {'id': 1}}]}, {'dem': False, 'bat_buoc': ('gate', 'gate2'), 'chua': "'gate' id=1: status='completed' conclusion='failure' head_sha='abababababababababababababababababababab'\n  ĐỎ  'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ"}),
++    ('K40', 'red_count_constant', 'two_red', '{len(do)}/{len(ten_bb)} tên bắt buộc đỏ', '{1}/{len(ten_bb)} tên bắt buộc đỏ', {'total_count': 2, 'check_runs': [{'id': 1, 'name': 'gate', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'failure', 'check_suite': {'id': 1}}, {'id': 2, 'name': 'gate2', 'head_sha': 'abababababababababababababababababababab', 'status': 'completed', 'conclusion': 'cancelled', 'check_suite': {'id': 1}}]}, {'dem': False, 'bat_buoc': ('gate', 'gate2'), 'chua': "'gate' id=1: status='completed' conclusion='failure' head_sha='abababababababababababababababababababab'\n  ĐỎ  'gate2' id=2: status='completed' conclusion='cancelled' head_sha='abababababababababababababababababababab'\ngate KHÔNG xanh trên abababababababababababababababababababab: 2/2 tên bắt buộc đỏ"}),
+ )
+ for _k, _m, _nhan, _tim, _thay, _du_lieu, _opts in _KG_R3:
+     _ca = f"kg_r3_{_m}_{_nhan}"
+     MUTANTS.setdefault("kg_r3_" + _m, (_tim, _thay, []))[2].append(_ca)
+     _KG_CA[_ca] = _kg_ca(_du_lieu, **_opts)
++# Review 4: phép bằng chuỗi tại MỌI vị trí, từng fixture chỉ sai chính chốt ấy.
++_KG_R4 = {}
++
++
++def _kg_r4(k, nhan, tim, thay, du_lieu=None, ly_do="", bat_buoc=("gate",)):
++    ten = "kg_r4_" + nhan
++    dich = ten if du_lieu is not None else "kg_n4_canh_bao"
++    if du_lieu is not None:
++        _KG_CA[dich] = _kg_ca(du_lieu, bat_buoc=bat_buoc, dem=False, chua=ly_do)
++    MUTANTS[ten] = (tim, thay, [dich])
++    _KG_R4.setdefault(k, []).append(ten)
++
++
++for _truong, _dung, _k in (("status", "completed", "K32"), ("conclusion", "success", "K33")):
++    _r = f'r["{_truong}"]'
++    for _nhan, _gt, _so in (
++            ("case", _dung.upper(), f'({_r} or "").lower() == "{_dung}"'),
++            ("prefix", _dung + " extra", f'({_r} or "").startswith("{_dung}")'),
++            ("suffix", "extra " + _dung, f'({_r} or "").endswith("{_dung}")'),
++            ("strip", " " + _dung + " ", f'({_r} or "").strip() == "{_dung}"')):
++        _kg_r4(_k, _truong + "_" + _nhan, f'{_r} == "{_dung}"', _so,
++               {"total_count": 1, "check_runs": [_kg_run(1, **{_truong: _gt})]}, f"{_truong}={_gt!r}")
++for _truong, _dung, _k in (("name", "gate", "K16"), ("head_sha", _KG_HEAD, "K18")):
++    _r = f'r["{_truong}"]'
++    _dt = 'dt = (r["name"], r["check_suite"]["id"], r["head_sha"])'
++    for _nhan, _gt, _so in (("case", _dung.upper(), _r + ".lower()"),
++                           ("strip", " " + _dung + " ", _r + ".strip()"),
++                           ("first", _dung + "X", f"{_r}[:{len(_dung)}]"),
++                           ("last", "X" + _dung, f"{_r}[-{len(_dung)}:]")):
++        _kg_r4(_k, "identity_" + _truong + "_" + _nhan, _dt, _dt.replace(_r, _so),
++               {"total_count": 2, "check_runs": [_kg_run(1), {**_kg_run(1), _truong: _gt}, _kg_run(2)]}, _KG_DT)
++_kg_r4("K18", "identity_head_short", _dt, _dt.replace('r["head_sha"]', 'r["head_sha"][:7]'),
++       {"total_count": 2, "check_runs": [_kg_run(1), _kg_run(1, head=_KG_HEAD[:7] + "c" * 33), _kg_run(2)]}, _KG_DT)
++for _nhan, _so in (("case", 'r["name"].lower() == ten_cb.lower() and'),
++                  ("prefix", 'r["name"].startswith(ten_cb) and'), ("suffix", 'r["name"].endswith(ten_cb) and'),
++                  ("strip_run", 'r["name"].strip() == ten_cb and'), ("strip_arg", 'r["name"] == ten_cb.strip() and')):
++    _kg_r4("K26", "warning_name_" + _nhan, 'r["name"] == ten_cb and', _so)
++
++MUTANTS["kg_r4_red_last_name_only"] = ("        for dong in do:\n", "        for dong in do[-1:]:\n",
++                                          ["kg_r3_red_first_name_only_two_red"])
++# Ba phần tử để kiểm cả đầu, giữa và cuối của đầu ra.
++_red3 = [_kg_run(1, conclusion="failure"), _kg_run(2, name="gate2", conclusion="cancelled"),
++         _kg_run(3, name="gate3", conclusion="timed_out")]
++_ly = "\n  ĐỎ  ".join(f"{r['name']!r} id={r['id']}: status={r['status']!r} conclusion={r['conclusion']!r} "
++                        f"head_sha={r['head_sha']!r}" for r in _red3) + f"\ngate KHÔNG xanh trên {_KG_HEAD}: 3/3 tên bắt buộc đỏ"
++_kg_r4("K39", "red_ends_only", "        for dong in do:\n",
++       "        for dong in (do[:1] + do[-1:] if len(do) > 1 else do):\n",
++       {"total_count": 3, "check_runs": _red3}, _ly, ("gate", "gate2", "gate3"))
++_kg_r4("K26", "warning_id_ends_only", "', '.join(map(str, khac))",
++       "', '.join(map(str, khac[:1] + khac[-1:] if len(khac) > 1 else khac))")
++_kg_r4("K26", "warning_name_ends_only", "    for ten_cb in ten_bb:\n",
++       "    for ten_cb in (ten_bb[:1] + ten_bb[-1:] if len(ten_bb) > 1 else ten_bb):\n")
++# NFC/NFKC và strip cũng không thay được phép bằng tuyệt đối.
++_fw = lambda t: "".join(chr(ord(c) + 0xfee0) if "!" <= c <= "~" else c for c in t)
++_nfc, _nfd = "cổng-đủ", "co\u0302\u0309ng-đu\u0309"
++_kg_r4("K34", "match_head_strip", 'and r["head_sha"] == a.head)', 'and r["head_sha"].strip() == a.head)',
++       {"total_count": 1, "check_runs": [_kg_run(1, head=" " + _KG_HEAD + " ")]}, "head_sha=")
++for _k, _f, _ok in (("K32", "status", "completed"), ("K33", "conclusion", "success")):
++    _kg_r4(_k, _f + "_nfkc", f'r["{_f}"] == "{_ok}"', f'unicodedata.normalize("NFKC", r["{_f}"] or "") == "{_ok}"',
++           {"total_count": 1, "check_runs": [_kg_run(1, **{_f: _fw(_ok)})]}, f"{_f}={_fw(_ok)!r}")
++_kg_r4("K34", "match_head_nfkc", 'and r["head_sha"] == a.head)', 'and unicodedata.normalize("NFKC", r["head_sha"]) == a.head)',
++       {"total_count": 1, "check_runs": [_kg_run(1, head=_fw(_KG_HEAD))]}, "head_sha=")
++_kg_r4("K27", "match_name_nfc", 'if r["name"] == ten]', 'if unicodedata.normalize("NFC", r["name"]) == ten]',
++       {"total_count": 1, "check_runs": [_kg_run(1, name=_nfd)]}, "VẮNG", (_nfc,))
++_kg_r4("K16", "identity_name_nfc", _dt, _dt.replace('r["name"]', 'unicodedata.normalize("NFC", r["name"])'),
++       {"total_count": 2, "check_runs": [_kg_run(1, name=_nfc), _kg_run(1, name=_nfd), _kg_run(2)]}, _KG_DT)
++_kg_r4("K18", "identity_head_nfkc", _dt, _dt.replace('r["head_sha"]', 'unicodedata.normalize("NFKC", r["head_sha"])'),
++       {"total_count": 2, "check_runs": [_kg_run(1), _kg_run(1, head=_fw(_KG_HEAD)), _kg_run(2)]}, _KG_DT)
++_kg_r4("K26", "warning_name_nfc", 'r["name"] == ten_cb and', 'unicodedata.normalize("NFC", r["name"]) == ten_cb and')
+ _KG_CA_822 = [k for k in _KG_CA if k not in dict(CASES)]
+ CASES += [(k, _KG_CA[k]) for k in _KG_CA_822]
+ 
+@@ -5958,9 +6051,9 @@
+     "K13": ("kg_d6_bo_kieu_conclusion", "kg_r2_schema_trang_dau"),
+     "K14": ("kg_bool_la_int", "kg_n2_bool_la_int", "kg_n5_bool_la_int", "kg_r3_later_page_run_bool"),
+     "K15": ("kg_n2_chi_kiem_bat_buoc", "kg_n2_bool_la_int", "kg_k15_bo_kieu_id_suite", "kg_k15_bo_qua_run_suite_hong", "kg_r2_suite_trang_dau", "kg_r3_later_page_suite_bool"),
+-    "K16": ("kg_f01_bo_ten_khoi_danh_tinh", "kg_f01_bo_kiem_danh_tinh"),
++    "K16": ("kg_f01_bo_ten_khoi_danh_tinh", "kg_f01_bo_kiem_danh_tinh") + tuple(_KG_R4["K16"]),
+     "K17": ("kg_f01_bo_suite_khoi_danh_tinh",),
+-    "K18": ("kg_d1_bo_head_khoi_danh_tinh",),
++    "K18": ("kg_d1_bo_head_khoi_danh_tinh",) + tuple(_KG_R4["K18"]),
+     "K19": ("kg_n5_bo_so_giua_trang", "kg_r2_so_hai_trang_dau"),
+     "K20": ("kg_bo_kiem_thieu_trang", "kg_n5_quay_ve_nho_hon", "kg_k20_dem_ban_ghi"),
+     "K21": ("kg_bo_sha_re", "kg_k21_nhan_hex_hoa", "kg_r2_sha_phi_hex", "kg_r2_sha_39", "kg_r2_sha_41"),
+@@ -5969,20 +6062,20 @@
+     "K24": ("kg_bo_kiem_ten_rong", "kg_f04_bo_kiem_xuong_dong", "kg_k24_bo_strip", "kg_k24_chi_strip_space"),
+     "K25": ("kg_k25_bo_khu_trung",),
+     "K26": ("kg_n4_bo_canh_bao", "kg_n4_canh_bao_moi_ten", "kg_n4_dem_ban_ghi", "kg_n4_ten_theo_repr",
+-            "kg_k26_canh_bao_ca_suite_neo", "kg_k26_canh_bao_ra_stdout", "kg_r2_canh_bao_dem_1", "kg_r2_canh_bao_id_dau", "kg_r2_canh_bao_ten_dau"),
+-    "K27": ("kg_khop_tien_to", "kg_xet_moi_check", "kg_r3_name_suffix", "kg_r3_name_casefold", "kg_r3_name_strip_run", "kg_r3_name_strip_arg"),
++            "kg_k26_canh_bao_ca_suite_neo", "kg_k26_canh_bao_ra_stdout", "kg_r2_canh_bao_dem_1", "kg_r2_canh_bao_id_dau", "kg_r2_canh_bao_ten_dau") + tuple(_KG_R4["K26"]),
++    "K27": ("kg_khop_tien_to", "kg_xet_moi_check", "kg_r3_name_suffix", "kg_r3_name_casefold", "kg_r3_name_strip_run", "kg_r3_name_strip_arg") + tuple(_KG_R4["K27"]),
+     "K28": ("kg_n3_bo_loc_suite", "kg_n3_suite_cua_run_dau"),
+     "K29": ("kg_bo_kiem_vang",),
+     "K30": ("kg_chon_success_bat_ky", "kg_chon_luot_cu_nhat", "kg_r2_id_theo_chuoi"),
+     "K31": ("kg_trung_id_chon_mot", "kg_k31_chon_ban_cuoi"),
+-    "K32": ("kg_bo_status_rieng",),
+-    "K33": ("kg_bo_conclusion_rieng", "kg_danh_sach_cam"),
+-    "K34": ("kg_bo_so_head", "kg_r3_head_prefix", "kg_r3_head_suffix", "kg_r3_head_casefold", "kg_r3_head_first7"),
++    "K32": ("kg_bo_status_rieng",) + tuple(_KG_R4["K32"]),
++    "K33": ("kg_bo_conclusion_rieng", "kg_danh_sach_cam") + tuple(_KG_R4["K33"]),
++    "K34": ("kg_bo_so_head", "kg_r3_head_prefix", "kg_r3_head_suffix", "kg_r3_head_casefold", "kg_r3_head_first7") + tuple(_KG_R4["K34"]),
+     "K35": ("kg_d2_mot_ten_xanh_che_do", "kg_rc_gate_thanh_0"),
+     "K36": ("kg_n6_dong_xanh_khong_suite", "kg_k36_chi_ten_dau"),
+     "K37": ("kg_k37_vang_la_null", "kg_r2_schema_trang_dau"),
+     "K38": ("kg_k38_list_la_mot_trang", "kg_k38_object_bi_bo"),   # list ⇒ nhiều trang, object ⇒ một trang
+-    "K39": ("kg_k39_khong_in_dong_do", "kg_r3_red_first_name_only"),   # mỗi tên đỏ một dòng `ĐỎ` trên stderr nêu status/conclusion/head
++    "K39": ("kg_k39_khong_in_dong_do", "kg_r3_red_first_name_only", "kg_r4_red_last_name_only") + tuple(_KG_R4["K39"]),   # mỗi tên đỏ một dòng `ĐỎ` trên stderr nêu status/conclusion/head
+     "K40": ("kg_k40_bo_break", "kg_r3_red_count_constant"),   # nhiều bản ghi đỏ cùng id lớn nhất vẫn là MỘT tên đỏ
+     "K41": ("kg_n6_xoa_help",),   # `--help` nêu cách lấy check-suite (argparse)
+ }

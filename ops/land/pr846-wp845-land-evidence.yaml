@@ -1,10 +1,10 @@
 # HO SO LAND — packet #845 wp845 r1 (lease g1), ma qua PR #846. Khuon: ops/land/pr832-wp831-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (f64f9b8), `landed: false`. Gate master XANH, lease DA NHA, #845 DA DONG — nhung verdict Codex neo 7a39463,
-# KHONG neo head merge 974859d; lease M-5 lam M-1 het hieu luc khi head doi (connector P1 #847 r4312283489). "merged" KHONG
-# dong nghia "landed" (§10.2.4). `landed` chi len true khi co review/audit neo DUNG 974859d.
-# Gate push master tren DUNG merge SHA f64f9b8: ci.yml 39226246616 XANH 14/14.
+# TRANG THAI: merged (f64f9b8) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-845-land)
+# dua dong nay vao master; neo quyet dinh: #845 issuecomment-6264046882. "merged" KHONG dong nghia "landed" (§10.2.4).
+# Gate push master tren DUNG merge SHA f64f9b8: ci.yml 39226246616 XANH 14/14. Review neo DUNG head merge 974859d: Codex luot 5
+# approve (ban dau ghi landed false vi verdict chi neo 7a39463 — connector P1 #847 r4312283489; chu kho nang ngan sach 4 -> 5).
 # Ho so nay chay qua chinh luat L6 ma packet them vao (phan hoan tat day du, khong o giu cho).
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
@@ -34,6 +34,7 @@ pre_merge_checks:
   - {name: 'ci.yml pull_request (14 job ubuntu) tren head cuoi', run_id: 39219036773, sha: 974859d67a8062f869cb49e8d3be75db44ef4d58, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261019/kiem-gate-974859d.txt: packet_loop.py kiem-gate suite 106271935066, 14 ten, rc=0', nguon: [readback-run-39219036773.json, readback-jobs-39219036773.json, readback-check-runs-974859d-all.json]}
   - {name: 'thu-hoi (pull_request_target) tren head cuoi', run_id: 39219033052, sha: 974859d67a8062f869cb49e8d3be75db44ef4d58, conclusion: success, kiem_gate: 'measured — cung tep do-lai-nguon-20261019/kiem-gate-974859d.txt: suite 106271925190, rc=0', ghi_chu: 'thu-hoi DO tren 7a39463 (S 3cfbf41 khong phai to tien cua H); executor merge origin/master -> 974859d, khong rebase/force-push.', nguon: [readback-run-39219033052.json, readback-jobs-39219033052.json]}
   - {name: 'executor cross-review Codex luot 4/4 (launcher.py run 620b7047, 709s, ma_thoat 0)', sha: 7a39463e8b6c25d4811bcc9cd544b164e7ce53a7, conclusion: 'approve, P0=0 P1=0 P2=0; P3 mo: SPACE do sau/do dai mau (loai b), dinh chinh 5/10', nguon: [verdicts/wp845-g1-luot4-codex-verdict.md, verdicts/run-620b7047.json], ghi_chu: 'measured — do-lai-nguon-20261019/spec-va-verdict.txt: bon verdict khop byte tep tren origin/ops/wp845-r1-g1-lease (commit 9d401ef). Verdict neo 7a39463, KHONG neo 974859d: do-lai-nguon-20261019/merge-va-diff.txt cho git diff 7a39463 974859d tren 2 tep write set = 0 dong (974859d chi them merge origin/master). Chu kho merge 974859d sau khi doc comment 6262430085 neu ro dieu nay.'}
+  - {name: 'executor cross-review Codex luot 5/5 — XAC NHAN head merge (launcher.py run 964888d9, 431s, ma_thoat 0)', sha: 974859d67a8062f869cb49e8d3be75db44ef4d58, conclusion: 'approve; write set khop byte voi 7a39463; master mang vao khong doi hanh vi L6/test; P3 cua luot 4 giu nguyen', nguon: [verdicts/wp845-g1-luot5-codex-verdict.md, verdicts/run-964888d9.json], ghi_chu: 'measured — do-lai-nguon-20261019/verdict-luot5.txt: sha256 50ebdabc… = tep tren origin/ops/wp845-r1-g1-lease commit 12e1885; reviewed_sha = authorized_head_sha 974859d. Ngan sach 4 -> 5: readback-comment-6264218205.json.'}
   - {name: 'executor cross-review Codex luot 1-3', conclusion: 'changes_requested ca ba, deu ve rang cua test (bien the dot bien song A-C, D-H, I-Q); khong luot nao thay loi hanh vi L6', nguon: [verdicts/wp845-g1-luot1-codex-verdict.md, verdicts/wp845-g1-luot2-codex-verdict.md, verdicts/wp845-g1-luot3-codex-verdict.md, verdicts/run-8b928d5e.json, verdicts/run-c6000a68.json, verdicts/run-6df1d601.json]}
   - {name: 'Codex connector', sha: 7a39463e8b6c25d4811bcc9cd544b164e7ce53a7, conclusion: 'completed, has_any_findings=false', nguon: readback-comments-846.json, ghi_chu: 'measured — readback-comments-846.json comment 6262407766 (neo 7a39463, chay luc roi draft).'}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-846.json, readback-review-comments-846.json]}
@@ -79,14 +80,13 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-846.json: merged true, merged_at 2026-10-19T08:55:29Z, merged_by ducthangho, merge_commit_sha
     f64f9b8 (cha 3cfbf41 + 974859d: do-lai-nguon-20261019/merge-va-diff.txt), merge commit (khong squash/rebase).
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA f64f9b8: ci.yml 14/14 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
     2/2 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #845 closed/completed DAT, no P3 co ten ghi o PR #846.
-    CHUA DAT: dieu kien review (lease M-1/M-5, protocol §8) — verdict approve duy nhat neo 7a39463; head merge 974859d (them
-    merge origin/master do thu-hoi doi) chua co review hay human audit neo DUNG SHA. Write set khop byte va chu kho bam merge
-    KHONG thay the review neo SHA (connector P1 #847 r4312283489). Len true khi co mot trong hai: (a) loi goi Codex neo 974859d
-    (can chu kho nang ngan sach 4 -> 5), (b) chu kho ghi human audit neo 974859d.
+    (4) review neo DUNG authorized_head_sha 974859d: Codex luot 5 approve (pre_merge_checks), DAT — ban truoc ghi CHUA DAT vi
+    verdict chi neo 7a39463 (connector P1 #847 r4312283489); chu kho chon nang ngan sach 4 -> 5 (#845 issuecomment-6264218205).
+    `landed: true` theo chi thi chu kho "Land và bookeeping" (#845 issuecomment-6264046882); hieu luc khi PR ghi so nay vao master.
 
 uy_quyen_land:
   dang: >-
@@ -97,11 +97,14 @@ uy_quyen_land:
   khong_xung_dot: 'not_measured — mergeable truoc merge khong luu.'
 
 review:
-  so_loi_goi_codex_cli: 4
-  tran: 'loi_khai_co_neo — tran 3 (spec Q4) nang len 4 theo chu kho "Nâng lên 4, review lần cuối" (#845 issuecomment-6262145099).'
+  so_loi_goi_codex_cli: 5
+  tran: 'loi_khai_co_neo — tran 3 (spec Q4) nang len 4 theo chu kho "Nâng lên 4, review lần cuối" (#845 issuecomment-6262145099), roi 5 theo "Codex lượt 5 trên 974859d" (#845 issuecomment-6264218205).'
   luot_cuoi:
-    reviewer: 'codex qua launcher.py run 620b7047bb964f7c93676348f87c9ffe (measured — verdicts/run-620b7047.json: thoi_luong_giay 709.116, ma_thoat 0, head 7a39463).'
+    reviewer: 'codex qua launcher.py run 964888d964f24e3e9715b5f38b908457 (measured — verdicts/run-964888d9.json: thoi_luong_giay 431.001, ma_thoat 0, head 974859d).'
     hien_vat: ops/land/pr846-wp845-provenance/verdicts/
+    ket_qua: 'thuat_lai — approve tren 974859d (= authorized_head_sha): write set khop byte voi 7a39463, master mang vao khong doi hanh vi L6/test.'
+  luot_noi_dung:
+    reviewer: 'codex qua launcher.py run 620b7047bb964f7c93676348f87c9ffe (measured — verdicts/run-620b7047.json: thoi_luong_giay 709.116, ma_thoat 0, head 7a39463).'
     ket_qua: 'thuat_lai — approve tren 7a39463; A-Q (17 bieu hien) va R-X (7 cach doc sai tu thu) deu bi giet bang TinHieuChotCa.'
   thread: 'measured — readback-reviews-846.json: 0 review; readback-review-comments-846.json: 0.'
 

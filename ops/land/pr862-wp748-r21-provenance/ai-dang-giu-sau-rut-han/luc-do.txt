@@ -1,0 +1,5 @@
+luc: 2026-10-20T07:22:11Z
+ls-remote: 521 ten; guong refs/heads: 521; thieu=0 thua=0
+== ops/lease_publish_test.py rc=0
+HẾT_HẠN	wp748-r21-g21-claude-remote-20261020	refs/heads/ops/wp748-r21-g21-lease:ops/leases/wp748-r21-g21-claude-remote-20261020.yaml
+NGƯỜI_GIỮ 0: không có

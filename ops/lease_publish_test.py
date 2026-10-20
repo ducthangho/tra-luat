@@ -5382,6 +5382,10 @@ def _kho_do_thi(tmp: Path):
     cay = tmp / "kho"
     cay.mkdir()
     _g_a0(cay, "init", "-q", "-b", "master")
+    # WP748 r21 (run 39352202619, 2/2 đỏ trên git 2.55) — mỗi `git commit` sinh `git maintenance run --auto --detach`;
+    # tiến trình nền ấy tạo rồi xoá `.git/objects/maintenance.lock` trong kho mẫu `_mau_t133`, nên `copytree` của t133
+    # liệt kê thấy tệp rồi chép thì mất (`[Errno 2]`). Tắt TRƯỚC commit đầu tiên để không commit nào sinh tiến trình nền.
+    _g_a0(cay, "config", "maintenance.auto", "false"); _g_a0(cay, "config", "gc.auto", "0")
     (cay / "README.md").write_bytes("nen\n".encode("utf-8"))
     _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "c0")
     (cay / "docs").mkdir(); (cay / "docs" / "a.md").write_bytes("a\n".encode("utf-8"))
@@ -5967,6 +5971,33 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         _g_a0(cay, "checkout", "-q", H_thu_hoi)
         rc, o, e = m4(H_sach, S)
         chot(rc == 0, f"checkout hiện tại không được đổi verdict: {rc} {e!r}")
+
+
+@ca
+def t221_mau_t133_tat_auto_maintenance_truoc_commit_dau():
+    """WP748 r21: kho mẫu `_mau_t133` phải tắt `maintenance.auto` và `gc.auto` TRƯỚC commit đầu tiên.
+
+    Đỏ thật (run 39352202619, 2/2, git 2.55): `copytree` của t133 ném `[Errno 2] ... maintenance.lock` vì commit của
+    mẫu sinh maintenance nền; container git 2.43 không tái hiện được nên race không đo trực tiếp ở đây. Ca này đo
+    ĐIỀU KIỆN chặn race trên CHÍNH kho mẫu: config cục bộ đọc bằng git thật, và mốc khai config phải ở reflog TRƯỚC
+    commit `c0` (config đặt sau commit đầu vẫn để lọt tiến trình nền của các commit trước nó).
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `config maintenance.auto false` / `config gc.auto 0` trong `_kho_do_thi`."""
+    mau = _mau_t133()
+    cay = mau["cay"]
+    auto = subprocess.run(["git", "-C", str(cay), "config", "--local", "--get", "maintenance.auto"],
+                          capture_output=True, text=True)
+    gc = subprocess.run(["git", "-C", str(cay), "config", "--local", "--get", "gc.auto"],
+                        capture_output=True, text=True)
+    chot(auto.returncode == 0 and auto.stdout.strip() == "false",
+         f"kho mẫu t133 phải có maintenance.auto=false cục bộ: rc={auto.returncode} {auto.stdout!r}")
+    chot(gc.returncode == 0 and gc.stdout.strip() == "0",
+         f"kho mẫu t133 phải có gc.auto=0 cục bộ: rc={gc.returncode} {gc.stdout!r}")
+    # Thứ tự: `_kho_do_thi` đặt config ngay sau `init`, nên tệp config phải cũ hơn object của commit c0.
+    cfg = (cay / ".git" / "config").stat().st_mtime_ns
+    c0 = mau["h"]["c0"]
+    obj = cay / ".git" / "objects" / c0[:2] / c0[2:]
+    chot(obj.is_file() and cfg <= obj.stat().st_mtime_ns,
+         f"config phải được ghi TRƯỚC commit c0: config={cfg} c0={obj.stat().st_mtime_ns if obj.is_file() else None}")
 
 
 @ca

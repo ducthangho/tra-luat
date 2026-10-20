@@ -21,17 +21,21 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [git, --version], regex: '(?m)^git version\s+(\d+\.\d+\.\d+(?:[.+-][0-9A-Za-z.+-]*)?)'}]
     cai:
-      linux: {lenh: 'sudo apt-get install -y git && dirname "$(command -v git)"'}
-      macos: {lenh: 'brew install git && dirname "$(command -v git)"'}
-      windows: {lenh: 'choco install git --yes --no-progress && dirname "$(command -v git)"'}
+      # wp858 (L1): `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) thay `dirname "$(command -v …)"` — thư mục in ra là
+      # ứng viên ĐẦU TIÊN mà CHÍNH `cong_cu.py kiem-tra --chi <tên>` nhận `DAT`; tên trần đã DAT ⇒ không in gì (không
+      # đổi PATH). Ứng viên (Q2): Linux `/usr/bin` (dưới `CONG_CU_GOC` khi test) · macOS `$(brew --prefix)/bin` · Windows
+      # thư mục do choco đặt tệp; cuối cùng `command -v`. Cùng hàm cho python/shellcheck/bash; `rg` giữ bộ chọn riêng.
+      linux: {lenh: 'sudo apt-get install -y git && chon_thu_muc_chay_duoc git "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v git || echo ./git)")"'}
+      macos: {lenh: 'brew install git && chon_thu_muc_chay_duoc git "$(brew --prefix)/bin" "$(dirname "$(command -v git || echo ./git)")"'}
+      windows: {lenh: 'choco install git --yes --no-progress && chon_thu_muc_chay_duoc --win git "${ProgramFiles:-C:/Program Files}/Git/cmd" "${ProgramFiles:-C:/Program Files}/Git/bin" "${ProgramFiles:-C:/Program Files}/Git/usr/bin" "$(dirname "$(command -v git || echo ./git)")"'}
   python:
     bat_buoc: true
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [python, --version], regex: '(?m)^Python\s+(\d+\.\d+\.\d+)'}]
     cai:
-      linux: {lenh: 'sudo apt-get install -y python3 python3-pip && dirname "$(command -v python3)"'}
-      macos: {lenh: 'brew install python && dirname "$(command -v python)"'}
-      windows: {lenh: 'choco install python --yes --no-progress && dirname "$(command -v python)"'}
+      linux: {lenh: 'sudo apt-get install -y python3 python3-pip && chon_thu_muc_chay_duoc python "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v python || echo ./python)")"'}
+      macos: {lenh: 'brew install python && chon_thu_muc_chay_duoc python "$(brew --prefix)/bin" "$(dirname "$(command -v python || echo ./python)")"'}
+      windows: {lenh: 'choco install python --yes --no-progress && chon_thu_muc_chay_duoc --win python "${ChocolateyInstall:-C:/ProgramData/chocolatey}/bin" "$(cygpath -u "${SystemDrive:-C:}/")"Python3* "$(dirname "$(command -v python || echo ./python)")"'}
   PyYAML:
     # Khai để LUẬT ở `t16` có hiệu lực: mọi gói bên thứ ba phải có mặt trong bản kê.
     # `ban_ghim: null` CÓ CHỦ ĐÍCH — `ci.yml` giữ quyền ghim (6.0.3). Container dev
@@ -73,9 +77,9 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [shellcheck, --version], regex: 'version:\s*(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)'}]
     cai:
-      linux: {lenh: 'sudo apt-get install -y shellcheck && dirname "$(command -v shellcheck)"'}
-      macos: {lenh: 'brew install shellcheck && dirname "$(command -v shellcheck)"'}
-      windows: {lenh: 'choco install shellcheck --yes --no-progress && dirname "$(command -v shellcheck)"'}
+      linux: {lenh: 'sudo apt-get install -y shellcheck && chon_thu_muc_chay_duoc shellcheck "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v shellcheck || echo ./shellcheck)")"'}
+      macos: {lenh: 'brew install shellcheck && chon_thu_muc_chay_duoc shellcheck "$(brew --prefix)/bin" "$(dirname "$(command -v shellcheck || echo ./shellcheck)")"'}
+      windows: {lenh: 'choco install shellcheck --yes --no-progress && chon_thu_muc_chay_duoc --win shellcheck "${ChocolateyInstall:-C:/ProgramData/chocolatey}/bin" "$(dirname "$(command -v shellcheck || echo ./shellcheck)")"'}
   rg:
     # Agent không thể tra cứu an toàn nếu thiếu rg; launcher đã coi đây là bắt buộc.
     bat_buoc: true
@@ -105,6 +109,6 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [bash, --version], regex: '(?m)^GNU bash, version\s+(\d+\.\d+\.\d+)[^(]*\('}]
     cai:
-      linux: {lenh: 'sudo apt-get install -y bash && dirname "$(command -v bash)"'}
-      macos: {lenh: 'brew install bash && dirname "$(command -v bash)"'}
-      windows: {lenh: 'choco install git --yes --no-progress && dirname "$(command -v bash)"'}
+      linux: {lenh: 'sudo apt-get install -y bash && chon_thu_muc_chay_duoc bash "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v bash || echo ./bash)")"'}
+      macos: {lenh: 'brew install bash && chon_thu_muc_chay_duoc bash "$(brew --prefix)/bin" "$(dirname "$(command -v bash || echo ./bash)")"'}
+      windows: {lenh: 'choco install git --yes --no-progress && chon_thu_muc_chay_duoc --win bash "${ProgramFiles:-C:/Program Files}/Git/cmd" "${ProgramFiles:-C:/Program Files}/Git/bin" "${ProgramFiles:-C:/Program Files}/Git/usr/bin" "$(dirname "$(command -v bash || echo ./bash)")"'}

@@ -3978,8 +3978,12 @@ def run() -> int:
                       {"nlm_notebook_id": "", "nlm_status": "pushed", "nlm_source_id": "s5"},
                   ]) == {"NB-A": 2, "NB-B": 1}))
     # ───── KH1 III.2 — edit-skill: cổng assert-đếm (DRY, an toàn), offline ─────
+    import shutil as _shx
     import tempfile as _tfx
-    _esf = Path(_tfx.gettempdir()) / "_selftest_editskill.py"
+    # wp858 (L3) — tên tệp CỐ ĐỊNH trong gettempdir() ⇒ hai selftest song song ghi/đọc chéo cùng tệp (đỏ giả,
+    # đo 18-10-2026 ở #831). Thư mục riêng từng lượt (mkdtemp) — cách ly theo CẤU TRÚC.
+    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))
+    _esf = _esd / "_selftest_editskill.py"
     _editskill = False
     try:
         _esf.write_text("x = 1\ny = 2\n", encoding="utf-8")
@@ -3995,8 +3999,7 @@ def run() -> int:
     except Exception:
         _editskill = False
     finally:
-        try: _esf.unlink()
-        except Exception: pass
+        _shx.rmtree(_esd, ignore_errors=True)
     cases.append(("edit_skill_assert_count_gate_dry", _editskill))
     # ───── KH1 1.23.2 — nlm-orphans: pure _classify_nlm_sources (active / mismatch-live / unregistered), offline ─────
     _orph = _classify_nlm_sources(

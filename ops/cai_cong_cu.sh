@@ -28,6 +28,33 @@ fi
 # ung vien (vd thieu PyYAML). Giu nguyen doi so con lai cua mang (`py -3`).
 PY[0]="$(command -v "${PY[0]}")"
 
+# wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (cong thuc duoc `eval` duoi day nen goi duoc ham nay).
+# `dirname "$(command -v X)"` in thu muc ban DAU PATH — ban hong dung truoc thi in thu muc ban HONG (cung loi #831 voi rg).
+# Chuan DUY NHAT la CHINH `cong_cu.py kiem-tra --chi <ten>` chay bang PY da ghim tuyet doi (wp831 F03), khong chep regex.
+# Ten tran da DAT => KHONG in thu muc nao: in lai thu muc cua no se dua ca thu muc ay len DAU PATH va che cong cu khac
+# cung thu muc (#831 luot 4: cong thuc bash dua rg hong len truoc => tong cuoi rg DO). `--win`: ung vien la duong
+# Windows, doi qua `cygpath -u`; ghi $GITHUB_PATH bang `cygpath -w`. Ghi $GITHUB_PATH chi khi ten tran chua DAT (ly do
+# nhu rg.cai.linux). Khong ung vien nao DAT => tra 1.
+chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
+  local win="" ten d dich=""
+  if [ "${1:-}" = "--win" ]; then win=1; shift; fi
+  ten="$1"; shift
+  if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then
+    echo "cai_cong_cu: '$ten' ten tran da DAT, giu nguyen PATH" >&2
+    return 0
+  fi
+  for d in "$@"; do
+    [ -n "$win" ] && d="$(cygpath -u "$d")"
+    { { [ -f "$d/$ten" ] && [ -x "$d/$ten" ]; } || [ -f "$d/$ten.exe" ]; } || continue
+    if PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then dich="$d"; break; fi
+  done
+  [ -n "$dich" ] || { echo "cai_cong_cu: khong thu muc nao co '$ten' chay duoc" >&2; return 1; }
+  if [ -n "${GITHUB_PATH:-}" ]; then
+    if [ -n "$win" ]; then cygpath -w "$dich" >> "$GITHUB_PATH"; else echo "$dich" >> "$GITHUB_PATH"; fi
+  fi
+  echo "$dich"
+}
+
 if [ "$TEN" = "--bat-buoc" ]; then
   # PyYAML la bootstrap cua chinh ban ke. Ghim nay duoc t20 doi chieu voi YAML/CI;
   # khong the doc YAML de tim cong thuc cai khi module doc YAML chua ton tai.

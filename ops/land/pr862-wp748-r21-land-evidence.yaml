@@ -1,3 +1,10 @@
+# PR #863 EOL repair: transcript luu o dang LF, KHONG con la ban sao byte-nguyen-goc.
+# Chi thay 2 byte CR don (offset 0-based [431103, 431182]) bang LF; cac byte khac giu nguyen.
+# Nguon bat bien: commit 80c4da103770f8090651891d76d3849d97b95e8b,
+# blob a85a7085d28e2b3d45dd93fd59a099e5e54d9bb0, cung duong dan transcript ben duoi.
+# SHA-256 ban goc: fe7e8c7c13685c2a419fa725b2e4718d5749884f94438a7fa92c00d6399512c4
+# SHA-256 ban LF:  16464429a3d145f4c97d6a3aec09b5533ee7f037939f30d93bc53131825045eb
+# SHA256SUMS ghi bam ban LF. Verdict va prompt giu nguyen; khong tai chay review.
 # HO SO LAND — packet #748 wp748 r21 (lease g21), ma qua PR #862. Khuon: ops/land/pr849-wp748-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #

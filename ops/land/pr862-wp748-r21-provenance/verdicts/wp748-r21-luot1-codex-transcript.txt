@@ -5613,7 +5613,9 @@ sed -n '5751,5776p' src/ops/lease_publish_test.py" in /tmp/claude-0/-home-user-t
  succeeded in 0ms:
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   378    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0   378    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 curl: (22) The requested URL returned error: 403
 ## 8. Review phân tầng
 

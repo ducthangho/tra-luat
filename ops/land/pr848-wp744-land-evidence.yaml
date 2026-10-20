@@ -31,16 +31,16 @@ merge_commit_tree: d49c674d3c3fb81d7c389b44e5ae4085d3d229be
 merge_commit_parents: [94220547cd155c73392e95726e8daf353888b3aa, 23bc189f28ea60f04ca1634b6fe66d02babf12ed]
 pre_merge_checks:
   - {name: 'ci.yml pull_request (14 job ubuntu) tren head cuoi', run_id: 39291888405, sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-23bc189.txt: packet_loop.py kiem-gate suite 106474075749, 14 ten, rc=0', nguon: [readback-run-39291888405.json, readback-jobs-39291888405.json, readback-check-runs-23bc189-all.json]}
-  - {name: 'thu-hoi (pull_request_target) tren head cuoi, 2 luot (mo PR + roi draft)', run_id: [39291888633, 39320797755], sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed, conclusion: success, kiem_gate: 'measured — cung tep kiem-gate-23bc189.txt: suite 106474076361 rc=0, suite 106555136375 rc=0', nguon: [readback-run-39291888633.json, readback-jobs-39291888633.json, readback-run-39320797755.json, readback-jobs-39320797755.json]}
+  - {name: 'thu-hoi (pull_request_target) tren head cuoi, 2 luot (mo PR + roi draft)', run_id: [39291888633, 39320797755], sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed, conclusion: success, kiem_gate: 'measured — cung tep do-lai-nguon-20261020/kiem-gate-23bc189.txt: suite 106474076361 rc=0, suite 106555136375 rc=0', nguon: [readback-run-39291888633.json, readback-jobs-39291888633.json, readback-run-39320797755.json, readback-jobs-39320797755.json]}
   - {name: 'executor cross-review Codex luot 1/3 (launcher.py run f65e544e, 600s, ma_thoat 0)', sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed, conclusion: 'approve, P0=0 P1=0 P2=0 P3=0', nguon: [verdicts/wp744-g3-luot1-codex-verdict.md, verdicts/run-f65e544e.json], ghi_chu: 'measured — do-lai-nguon-20261020/spec-va-verdict.txt: dong 1-2 verdict = approve + reviewed_sha 23bc189 (= authorized_head_sha); sha256 af2b5fa4… = ban da chieu o #848 issuecomment-6272837552.'}
   - {name: 'Codex connector', sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed, conclusion: 'completed, has_any_findings=false', nguon: readback-comments-848.json, ghi_chu: 'measured — readback-comments-848.json comment 6276780956 (neo 23bc189, chay luc roi draft).'}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-848.json, readback-review-comments-848.json]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, conclusion: CHO_DIEN_KET_LUAN, kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success (gom windows)', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
 bookkeeping:
   - {item: 'dong PR #747 la da thay the (khong merge)', ket_qua: 'measured — readback-pr-747.json: state closed, merged false; comment 6281281678 neu ly do wp728/#755 (readback-comment-6281281678.json)'}
   - {item: 'rut han lease wp744-r3-g3-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
-  - {item: 'dong Issue #744 (completed) kem comment ban chieu', ket_qua: CHO_DIEN_744}
+  - {item: 'dong Issue #744 (completed) kem comment ban chieu', ket_qua: 'measured — readback-issue-744.json: state closed, state_reason completed, closed_at 2026-10-20T02:08:11Z, closed_by ducthangho (thao tac do phien executor goi bang tai khoan chu kho theo chi thi trong phien); comment 6281670864 (readback-comment-6281670864.json)'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-744-land}
 # ---- het truong chuan
 packet_id: wp744
@@ -65,7 +65,12 @@ lease:
   cap_boi: 'loi_khai_co_neo — granted_on_instruction https://github.com/ducthangho/tra-luat/issues/744#issuecomment-6272548529 (readback-comment-6272548529.json).'
   lease_until_ban_dau: '2026-10-20T20:00:00Z'
   write_set: ['ops/specs/wp725-nlm-huong-dan-tai-lieu-r2.md', 'ops/specs/wp726-nlm-script-phan-quyet-canary-r2.md', 'ops/specs/wp727-nlm-refresh-va-goi-y-tl-gws-r2.md']
-  thu_hoi_cuoi: CHO_DIEN_LEASE
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN (khong bia mo): commit f85a4f7 tren ops/wp744-r3-g3-lease dua lease_until/lease_expires_at_utc ve
+    2026-10-20T02:06:07Z theo chu kho trong phien; ly do o khoi `rut_han` cua chinh tep lease
+    (do-lai-nguon-20261020/lease-wp744-r3-g3-claude.yaml.txt). measured — ai-dang-giu-sau-rut-han/luc-do.txt: sau
+    `git fetch --prune +refs/heads/*`, ls-remote 517 ten = for-each-ref 517 ten (thieu 0, thua 0); ca 3 duong dan rc=0
+    "NGƯỜI_GIỮ 0", wp744-r3-g3-claude ra HẾT_HẠN.
 
 trang_thai_packet:
   merged: true
@@ -73,7 +78,11 @@ trang_thai_packet:
     measured — readback-pr-848.json: merged true, merged_at 2026-10-20T01:34:07Z, merged_by ducthangho, merge_commit_sha
     3a3a3ca (cha 9422054 + 23bc189: do-lai-nguon-20261020/merge-va-diff.txt), merge commit (khong squash/rebase).
   landed: true
-  landed_dieu_kien: CHO_DIEN_LANDED
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 3a3a3ca: ci.yml 23/23 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
+    3/3 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #744 closed/completed, #747 closed (da thay the) DAT; (4) review neo DUNG
+    authorized_head_sha 23bc189: Codex luot 1/3 approve + connector khong finding (pre_merge_checks) DAT.
+    `landed: true` theo chi thi chu kho "Đã merge #848, land và bookeeping"; hieu luc khi PR ghi so nay vao master.
 
 uy_quyen_land:
   dang: >-
@@ -82,7 +91,7 @@ uy_quyen_land:
   candidate_sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed
   head_khong_doi: 'measured — readback-pr-848.json head.sha = 23bc189 = cha thu hai cua 3a3a3ca.'
   khong_xung_dot: 'not_measured tho — mergeable truoc merge khong luu; phien doc pull_request_read luc 17:43Z va 21:18Z (19-10) thay mergeable_state clean (thuat_lai).'
-  write_set_qua_merge: 'measured — merge-va-diff.txt: git diff 23bc189 3a3a3ca tren 3 tep write set = 0 dong; wp728-r2 blob 0f05c51d o ca 5618020a lan 3a3a3ca.'
+  write_set_qua_merge: 'measured — do-lai-nguon-20261020/merge-va-diff.txt: git diff 23bc189 3a3a3ca tren 3 tep write set = 0 dong; wp728-r2 blob 0f05c51d o ca 5618020a lan 3a3a3ca.'
 
 review:
   so_loi_goi_codex_cli: 1

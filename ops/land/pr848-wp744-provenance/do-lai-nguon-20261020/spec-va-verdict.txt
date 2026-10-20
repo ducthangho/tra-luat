@@ -3,5 +3,5 @@
 spec_hash: 7d2b31cd646870ae4ec55a6158d8efeee1af0786d1bfc9d045f5dfbc735222e8
 write_set_hash: f7cab4cf03de3f84a7646652a1067e2d0c2319568637dfa21d651654c844cafc
 base_sha: 5618020a67709ca6f2c93138905df0aa8d9c2df6
-verdict: approve reviewed_sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed 
+verdict: approve reviewed_sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed
 af2b5fa426a7d53755148f4f9711712246afadc91e1d75e5267f8c8023bc3911  ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md

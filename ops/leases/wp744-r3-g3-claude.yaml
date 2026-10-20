@@ -76,8 +76,15 @@ tuyen_ghi_chu: 'PR dich master, sai lech co ghi so voi Protocol §5 (Packet PR v
 leased_at_utc: '2026-10-19T17:00:00Z'
 heartbeat_at: '2026-10-19T17:00:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-20T20:00:00Z'
-lease_expires_at_utc: '2026-10-20T20:00:00Z'
+lease_until: '2026-10-20T02:06:07Z'
+lease_expires_at_utc: '2026-10-20T02:06:07Z'
+rut_han:
+  han_cu: '2026-10-20T20:00:00Z'
+  han_moi: '2026-10-20T02:06:07Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #744 r3 da merge (PR #848, merge 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, 2026-10-20T01:34:07Z); gate push master tren 3a3a3ca xanh (ci.yml 39354156843, 23/23). Chu kho yeu cau land + ghi so ("Đã merge #848, land và bookeeping") de nha write set ngay.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp845 (41a72cb)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0

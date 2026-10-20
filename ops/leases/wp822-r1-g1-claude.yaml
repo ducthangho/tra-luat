@@ -96,3 +96,8 @@ ngan_sach:
   vong_review_canon: {used: 0}
   attempt: {used: 0, limit: 3}
 kich_thuoc_tran: 'ADR-0053: <= 450 dong them, 1 duong dan'
+da_bi_thay_the: wp856-r1-g1-claude
+da_bi_thay_the_luc_utc: '2026-10-19T23:52:00Z'
+da_bi_thay_the_vi_sao: >-
+  Packet #822 da land (PR #851, merge b27fe85). Chu kho mo packet tiep noi #856 cung write set
+  .claude/dev/packet_loop_test.py; lease nay con han toi 2026-10-21T03:32Z nen phai bia mo hai chieu.

@@ -1,0 +1,107 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 858
+packet_id: wp858
+revision: 1
+generation: 1
+lease_id: wp858-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: '#831 da land (PR #832, 6842a62); base origin/master 3a3a3ca.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; verdict codex approve tren head cuoi, bang chung do_may qua launcher run.json.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp858.md
+spec_sha256_required: 5a61e959281f852592b2a5420b4618718d2364db8fa6320934d2651bbb7d4c54
+spec_hash: 5a61e959281f852592b2a5420b4618718d2364db8fa6320934d2651bbb7d4c54
+spec_ref: refs/heads/ops/wp858-spec@83782a8e1c8daf7415b2e94666ed07435b2cbea4
+prompt_path: ops/specs/wp858.md
+prompt_sha256_required: 5a61e959281f852592b2a5420b4618718d2364db8fa6320934d2651bbb7d4c54
+write_set:
+- ops/cong_cu.yaml
+- ops/cai_cong_cu.sh
+- .claude/dev/launcher_test.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+- changelog.d/wp-858.md
+- ops/handoff/wp858-g1-claude.md
+write_set_hash: 7b634b8dcf57b206b26cb48ded4e64864e155f21df6caa411127f841f7a8ccf6
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'ops/handoff/wp858-g1-claude.md chi ghi tren nhanh lease ops/wp858-r1-g1-lease, KHONG vao diff PR; diff PR toi da 6 tep (ADR-0053).'
+change_policy_sha: null
+effective_write_set:
+- ops/cong_cu.yaml
+- ops/cai_cong_cu.sh
+- .claude/dev/launcher_test.py
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+- changelog.d/wp-858.md
+- ops/handoff/wp858-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1; P2/P3 mo phai co quyet dinh chu kho co link; toi da 5 loi goi codex'}
+- {id: M-2, dieu_kien: 'moi thread review (connector/nguoi) duoc tra loi va resolve'}
+- {id: M-3, dieu_kien: 'mot luot ci.yml XANH tren head cuoi doc bang check run + mot luot workflow_dispatch launcher-windows.yml XANH tren dung head'}
+- {id: M-4, dieu_kien: 'diff PR <= 6 tep / <= 450 dong them (ADR-0053@8ab1007); vuot thi DUNG va hoi chu kho (nang_tran)'}
+- {id: M-5, dieu_kien: 'head doi => M-1, M-3 het hieu luc; release-verify --strict ok=true va tl.py --selftest N/N tren head cuoi'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho. RELEASE_MANIFEST.json va ratchet tl_selftest nam TRONG write set theo spec.'
+branch: agent/wp858-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5
+start_from_sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5
+start_from_ghi_chu: 'origin/master luc cap lease (sau #848).'
+reviewed_sha_required: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/858#issuecomment-6281348126
+granted_on_instruction_readback: 'add_issue_comment (MCP) 2026-10-20T01:3xZ tra id 6281348126. Bam byte cua body KHONG DO DUOC: duong doc MCP chuan hoa thuc the HTML trong body (CLAUDE.md, muc DUONG DOC CUNG CHUAN HOA).'
+granted_on_instruction_note: >-
+  Chu kho chi thi truc tiep trong phien session_01B8U8TTEwfMS1u4u4E1VmRW (20-10-2026): "tao packet cho muc 2 va gop
+  muc 3 neu muon luon". Ghi ho qua GitHub App (yeu hon comment tu tay).
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (session_01B8U8TTEwfMS1u4u4E1VmRW) KHONG phai executor; executor la phien moi duoc tao theo chi thi chu kho.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-20T01:44:00Z'
+  goc_quet: 'master 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, quet refs sau fetch day du (ls-remote <-> for-each-ref thieu 0)'
+  ket_qua: 'ca 7 duong dan: NGUOI_GIU 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'khong lease song nao giu write set nay => khong can bia mo.'
+leased_at_utc: '2026-10-20T01:46:00Z'
+heartbeat_at: '2026-10-20T01:46:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-22T01:46:00Z'
+lease_expires_at_utc: '2026-10-22T01:46:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+attempts_basis: 'Q5 cua spec wp858.'
+review_rounds_limit: 10
+budget:
+  codex_review_calls:
+    pr_wp858_g1: {used: 0, reserved: 0, limit: 5}
+  attempt:
+    packet_858_r1: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'push nhanh agent/wp858-g1-claude va mo PR draft'

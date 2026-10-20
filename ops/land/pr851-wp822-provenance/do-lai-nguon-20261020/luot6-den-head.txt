@@ -1,0 +1,5 @@
+$ git log -1 --format="%h %p %s" 4005893
+4005893 039dbe3 5618020 Merge origin/master vào agent/wp822-g1-claude trước lần đẩy duy nhất
+$ git diff --numstat 039dbe3 4005893 -- .claude/dev/packet_loop_test.py   (rong = 0 dong doi)
+$ git diff --numstat 039dbe3 4005893 | wc -l   (chi tep master mang vao)
+121

@@ -15,8 +15,15 @@ recorded_by: anthropic_claude_executor
 recorder_is_dispatcher: false
 leased_at_utc: '2026-10-20T02:25:01Z'
 heartbeat_at: '2026-10-20T02:25:01Z'
-lease_until: '2026-10-20T14:25:01Z'
-lease_expires_at_utc: '2026-10-20T14:25:01Z'
+lease_until: '2026-10-20T07:21:56Z'
+lease_expires_at_utc: '2026-10-20T07:21:56Z'
+rut_han:
+  han_cu: '2026-10-20T14:25:01Z'
+  han_moi: '2026-10-20T07:21:56Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #748 r21 da merge (PR #862, head 28e35fd9206cdc8b2b44a39999421934f8437192, merge 401d4f15362b3270d5dc8437ade3be5ab449eb22, 2026-10-20T06:30Z); gate push master tren 401d4f1 xanh (ci.yml 39380754094); ops-publish-lease 39358824666 attempt 2 xanh tren master 401d4f15. Chu kho duyet land #748 issuecomment-6285607005 va yeu cau land r21.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp748 r20 (54aca23), wp845 (41a72cb)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

@@ -1,0 +1,70 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 21
+generation: 21
+lease_id: wp748-r21-g21-claude-remote-20261020
+thay_the_cho: []
+thay_the_cho_ghi_chu: r20 g20 lease da rut han ve 2026-10-20T01:13:00Z (54aca23) truoc khi cap r21; khong viet bia mo vao lease da chet (CLAUDE.md bai hoc 20-09-2026)
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6281866960
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6281866960
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-20T02:25:01Z'
+heartbeat_at: '2026-10-20T02:25:01Z'
+lease_until: '2026-10-20T14:25:01Z'
+lease_expires_at_utc: '2026-10-20T14:25:01Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head
+spec_path: ops/specs/wp748-r21-mau-t133-maintenance.md
+spec_ref: ops/wp748-r21-g21-lease
+spec_commit: aaf515286f8d3ebd59c7ba7ca58b5260db6b2f9f
+spec_hash: c356696e60607b8a5d73a2db673cc4e276112f1741d0044b36f6cdfd667d600a
+spec_sha256: c356696e60607b8a5d73a2db673cc4e276112f1741d0044b36f6cdfd667d600a
+branch: agent/wp748-r21-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3950a0f9fd0a9c29a36a599edc7a2d305619fc27
+start_from_sha: 3950a0f9fd0a9c29a36a599edc7a2d305619fc27
+reviewed_sha_required: 3950a0f9fd0a9c29a36a599edc7a2d305619fc27
+reviewed_sha_ghi_chu: neo base; review Codex cuoi phai neo dung head PR cuoi
+write_set:
+- ops/lease_publish_test.py
+write_set_hash: 5cb55494c271c8ab73b6728bccfa8573c971c539eb1ad6d7912b647fd55eec0f
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: holder scan 2026-10-20T02:23:49Z on 518/518 live refs NGUOI_GIU 0
+coordination_paths:
+- ops/leases/wp748-r21-g21-claude-remote-20261020.yaml
+run_minutes: 720
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

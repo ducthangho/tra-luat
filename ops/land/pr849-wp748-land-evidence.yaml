@@ -1,8 +1,8 @@
 # HO SO LAND — packet #748 wp748 r20 (lease g20), ma qua PR #849. Khuon: ops/land/pr846-wp845-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (9422054), `landed: false` — CHUA co ban ghi BEN cua chu kho duyet 3818bd4 + chap nhan do Windows
-# (connector P1 #857 r4320578796). Se nang true khi comment duyet tren #748 co mat va duoc readback. "merged" KHONG dong nghia "landed" (§10.2.4).
+# TRANG THAI: merged (9422054), `landed: true` tu PR ghi so thu hai (ccr-e425b16e-j9g9p7, sau #857): chu kho dang ban ghi
+# BEN duyet 3818bd4 + chap nhan do Windows o #748 issuecomment-6281831890 (dong connector P1 #857 r4320578796). "merged" KHONG dong nghia "landed" (§10.2.4).
 # Gate push master tren DUNG merge SHA 9422054: ci.yml 39343232426 XANH 23/23. Review neo DUNG head merge 3818bd4: Codex luot 4
 # (0 P0-P3, blocked vi sandbox chan AF_UNIX) + luot 5 (do lai voi socket) approve.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
@@ -23,12 +23,17 @@ input_packet_generations:
 authorized_head_sha: 3818bd4a9685e1782afdd7e8a593482f74b663ff
 authorized_head_tree: b5d32c370207b8f8a35bdc15c591b9947dc5ae92
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6273564956
+authorization_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6281831890
+authorization_lease_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6273564956
 authorization_ghi_chu: >-
   CHUA DU (connector P1 #857 r4320578796, dung): 6273564956 la lenh cap lease r20/g20 tu 1243019 va GIU merge/land toi khi
   chu kho duyet lan cuoi tren SHA cu the; 6278489152 la phien HOI chu kho co merge 3818bd4 khong. Quyet dinh cuoi ("Tôi chọn a",
   "Chọn 1", "Đã merge #851, #849") nam trong PHIEN, chua co ban ghi ben tren GitHub neo 3818bd4 va chap nhan do Windows.
-  merged_by chi chung minh tai khoan bam merge. Cho comment duyet cua chu kho tren #748; chua co thi landed false.
+  merged_by chi chung minh tai khoan bam merge. DA DU tu 2026-10-20T02:21:18Z: measured — readback-comment-6281831890.json,
+  user ducthangho, author_association OWNER, than "Duyệt land WP748 trên SHA 3818bd4a9685e1782afdd7e8a593482f74b663ff (merge
+  9422054). Chấp nhận các đỏ Windows sẵn có hoặc trước đây bị che, đã tách thành #852–#855; R1 theo dõi ở #850." Ghi THANG:
+  ban ghi ben nay dang SAU merge (merged_at 2026-10-19T23:42:33Z) — no ghi lai quyet dinh chu kho da dua trong phien truoc
+  khi bam merge, khong phai duyet truoc merge tren GitHub.
 land_operator: 'loi_khai_co_neo — chu kho tu bam merge, executor khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential'
 merge_method: merge
 merge_commit: 94220547cd155c73392e95726e8daf353888b3aa
@@ -82,20 +87,20 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-849.json: merged true, merged_at 2026-10-19T23:42:33Z, merged_by ducthangho, merge_commit_sha
     9422054, head.sha 3818bd4; cha va tree o do-lai-nguon-20261020/merge-va-diff.txt; merge commit (khong squash/rebase).
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 9422054: ci.yml 23/23 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
     12/12 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #748 closed/completed DAT, do Windows san co tach #852-#855, R1 o #850.
     (4) review neo DUNG authorized_head_sha 3818bd4: Codex luot 5 approve (luot 4 khong finding, blocked vi moi truong) DAT;
     10/10 tep PR trung byte giua 3818bd4 va 9422054 (do-lai-nguon-20261020/merge-va-diff.txt).
-    Windows full matrix tren head cuoi DO o cac bo do san/bi che; chu kho chon merge trong PHIEN (phuong an a;
-    PR #849 issuecomment-6278489152 la cau HOI, khong phai duyet). (5) uy quyen land neo DUNG 3818bd4: CHUA DAT — quyet dinh cua
-    chu kho chi nam trong phien (xem authorization_ghi_chu); landed false toi khi co comment duyet ben.
+    Windows full matrix tren head cuoi DO o cac bo do san/bi che; chu kho chap nhan bang ban ghi ben #748 issuecomment-6281831890.
+    (5) uy quyen land neo DUNG 3818bd4: DAT — #748 issuecomment-6281831890 (readback-comment-6281831890.json), dang sau merge
+    (xem authorization_ghi_chu). `landed: true` hieu luc khi PR ghi so nay vao master.
 
 uy_quyen_land:
   dang: >-
     measured — readback-pr-849.json merged_by.login=ducthangho; readback-events-849.json event merged actor=ducthangho.
-    Chi chung minh tai khoan. loi_khai_KHONG_neo — chu kho chon phuong an (a) trong PHIEN; chua co ban ghi ben.
+    Chi chung minh tai khoan. measured — readback-comment-6281831890.json: chu kho (OWNER) duyet ben neo 3818bd4, dang sau merge.
   candidate_sha: 3818bd4a9685e1782afdd7e8a593482f74b663ff
   head_khong_doi: 'measured — readback-pr-849.json head.sha = 3818bd4 = cha thu hai cua 9422054.'
   khong_xung_dot: 'loi_khai_co_neo — mergeable_state clean doc qua MCP luc 2026-10-19T23:39Z; khong luu readback.'

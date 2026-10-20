@@ -6843,6 +6843,13 @@ def _kg_t4_mau(loai):
             yield f"vang_{k}", dict(du_lieu={"total_count": 4, "check_runs": runs(bo=k)}, bat_buoc=_KG_TEN5,
                                     chua=f"'{_KG_TEN5[k]}': VẮNG"), dict(du_lieu={"total_count": 5, "check_runs": runs()},
                                                                         bat_buoc=_KG_TEN5, expect=0)
+        if loai == "do" and k == 0:   # NĂM tên đỏ: mọi dòng `ĐỎ` phải có, đúng thứ tự (lát cắt vòng in)
+            do = [f"ĐỎ  '{t}' id={i + 1}: status='completed' conclusion='cancelled' head_sha='{_KG_HEAD}'"
+                  for i, t in enumerate(_KG_TEN5)]
+            yield "do_ca_nam", dict(du_lieu={"total_count": 5, "check_runs": [_kg_run(i + 1, name=t, conclusion="cancelled")
+                                                                              for i, t in enumerate(_KG_TEN5)]},
+                                    bat_buoc=_KG_TEN5, chua="\n  ".join(do) + "\n"), \
+                dict(du_lieu={"total_count": 5, "check_runs": runs()}, bat_buoc=_KG_TEN5, expect=0)
         if loai in (None, "do"):
             yield f"do_{k}", dict(du_lieu={"total_count": 5, "check_runs": runs(do=k)}, bat_buoc=_KG_TEN5,
                                   chua=f"'{_KG_TEN5[k]}' id={k + 1}: status='completed' conclusion='cancelled'"), \
@@ -6853,6 +6860,26 @@ def _kg_t4_canh_bao():
     ds = [_kg_run(i + 1, name=t) for i, t in enumerate(_KG_TEN5)] + [_kg_run(i + 11, name=t, suite=9) for i, t in enumerate(_KG_TEN5)]
     yield "nam_ten", dict(du_lieu={"total_count": 10, "check_runs": ds}, bat_buoc=_KG_TEN5, expect=0, canh_bao=tuple(
         f"CẢNH BÁO: '{t}' có 1 run ở suite khác ({i + 11}) — bỏ qua" for i, t in enumerate(_KG_TEN5))), None
+    # MỘT tên, NĂM run ở suite khác: lát cắt trên `runs` của cảnh báo và trên danh sách id in ra đều phân biệt được.
+    # Run suite khác đứng ĐẦU (mục trên để chúng cuối): cắt đầu lẫn cắt cuối `runs` đều rơi đúng một id cần in.
+    yield "nam_id", dict(du_lieu={"total_count": 6, "check_runs": [_kg_run(20 + i, suite=9) for i in range(1, 6)] + [_kg_run(1)]},
+                         expect=0, canh_bao=(_KG_CB_DONG(list(range(21, 26))),)), None
+
+
+def _kg_t4_truong():   # NĂM trường kiểu của run, mỗi mục sai ĐÚNG một trường (lát cắt bảng `_TRUONG_CHECK_RUN`)
+    for f, gt in (("id", "x"), ("name", 5), ("head_sha", 5), ("status", 5), ("conclusion", 5)):
+        yield f, dict(du_lieu={"total_count": 2, "check_runs": [_kg_run(11), _kg_khac(**{"id": 15, f: gt})]},
+                      chua=f"trang 0 check_runs[1] {_KG_TRUONG} ['{f}']"), \
+            dict(du_lieu={"total_count": 2, "check_runs": [_kg_run(11), _kg_khac(id=15)]}, expect=0)
+
+
+def _kg_t4_max():   # NĂM bản ghi CÙNG tên, id khác nhau; bản id lớn nhất (xanh) đặt ở từng vị trí, các bản khác huỷ
+    for p in range(5):
+        ids = [1, 2, 3, 4]
+        ids.insert(p, 5)
+        yield f"max_{p}", dict(du_lieu={"total_count": 5, "check_runs": [_kg_run(i, conclusion="success" if i == 5 else "cancelled")
+                                                                         for i in ids]},
+                               expect=0, dong_xanh=f"gate XANH trên {_KG_HEAD} (suite 1): gate id=5"), None
 
 
 def _kg_t4_dt():   # cặp xung đột (bản lưu a, bản lệch chèn ở b) như `_kg_sinh_vi_tri`; bản sửa = bản lặp NHẤT QUÁN
@@ -6885,7 +6912,7 @@ _KG_T4_CA = {"kg_t4_trang_cat": lambda: _kg_t4_trang(None), "kg_t4_run_cat": lam
              **{f"kg_t4_run_{c}": (lambda c=c: _kg_t4_run(c)) for c in ("run", "schema", "suite")},
              "kg_t4_doi_so": _kg_t4_doi_so, "kg_t4_mau": lambda: _kg_t4_mau(None), "kg_t4_mau_vang": lambda: _kg_t4_mau("vang"),
              "kg_t4_mau_do": lambda: _kg_t4_mau("do"), "kg_t4_canh_bao": _kg_t4_canh_bao, "kg_t4_dt": _kg_t4_dt,
-             "kg_t4_id_max": _kg_t4_id_max, "kg_t4_khai": _kg_t4_khai}
+             "kg_t4_id_max": _kg_t4_id_max, "kg_t4_khai": _kg_t4_khai, "kg_t4_truong": _kg_t4_truong, "kg_t4_max": _kg_t4_max}
 _KG_NHOM_MAX = '[x for x in cung if x["id"] == id_max]'
 _KG_T4_VONG = {   # vòng → (hàng K, tìm, dạng thay chứa {S} cho tập đã cắt, ca đích lát cắt)
     "trang": ("K05", "    for i, tr in enumerate(trang):\n", "    for i, tr in enumerate({S}):\n", "trang", "kg_t4_trang_cat"),
@@ -6897,17 +6924,32 @@ _KG_T4_VONG = {   # vòng → (hàng K, tìm, dạng thay chứa {S} cho tập �
     "danh_tinh": ("K16", "    for r in runs:\n        dt =", "    for r in {S}:\n        dt =", "runs", "kg_t4_dt"),
     "id_max": ("K31", 'for r in (r for r in cung if r["id"] == id_max):', "for r in {S}:", _KG_NHOM_MAX, "kg_t4_id_max"),
     "khai": ("K19", "any(t != tong_khai for t in khai)", "any(t != tong_khai for t in {S})", "khai", "kg_t4_khai"),
+    # #856 lượt 1: MỌI vòng lặp/comprehension của hai hàm (AST đếm 16, `kg_t_ma_tran` đối chiếu) + 3 phép duyệt NGẦM.
+    "truong": ("K09", "for k, kieu in _TRUONG_CHECK_RUN if", "for k, kieu in {S} if", "_TRUONG_CHECK_RUN", "kg_t4_truong"),
+    "id_dem": ("K20", 'so_id = len({r["id"] for r in runs})', 'so_id = len({r["id"] for r in {S}})', "runs", "kg_t4_run_cat"),
+    "canh_bao_runs": ("K26", 'khac = sorted({r["id"] for r in runs if', 'khac = sorted({r["id"] for r in {S} if', "runs", "kg_t4_canh_bao"),
+    "cung_ten": ("K27", 'cung = [r for r in runs if r["name"] == ten]', 'cung = [r for r in {S} if r["name"] == ten]', "runs", "kg_t4_mau"),
+    "cung_suite": ("K28", 'cung = [r for r in cung if r["check_suite"]["id"] == suite]',
+                   'cung = [r for r in {S} if r["check_suite"]["id"] == suite]', "cung", "kg_t4_id_max"),
+    "max_cung": ("K30", 'id_max = max(r["id"] for r in cung)', 'id_max = max(r["id"] for r in {S})', "cung", "kg_t4_max"),
+    "id_max_cung": ("K31", 'for r in (r for r in cung if r["id"] == id_max):', 'for r in (r for r in {S} if r["id"] == id_max):', "cung",
+                    "kg_t4_id_max"),
+    "dong_do": ("K39", "        for dong in do:\n", "        for dong in {S}:\n", "do", "kg_t4_mau_do"),
+    "bat_buoc_khu": ("K25", "ten_bb = list(dict.fromkeys(a.bat_buoc))", "ten_bb = list(dict.fromkeys({S}))", "a.bat_buoc", "kg_t4_mau"),
+    "xanh_join": ("K36", '" · ".join(xanh))', '" · ".join({S}))', "xanh", "kg_t4_mau"),
+    "khac_join": ("K26", "', '.join(map(str, khac))", "', '.join(map(str, {S}))", "khac", "kg_t4_canh_bao"),
 }
+_KG_T4_NGAM = ("bat_buoc_khu", "xanh_join", "khac_join")   # duyệt tập qua hàm dựng sẵn, không có nút vòng lặp trong AST
 for _vg, (_hang, _tim, _thay, _tap, _ca) in _KG_T4_VONG.items():
     for _tt, _cat in _KG_CAT_T4.items():
         if (_vg, _tt) == ("khai", "bo_dau"):
             _kg_khong("T4", _vg, f"cat_{_tt}", "tuong_duong", "`tong_khai` CHÍNH LÀ `khai[0]`, nên `t != tong_khai` luôn False ở phần "
                       "tử đầu: bỏ nó không đổi `any(...)`, và mọi dòng sau dùng `khai` nguyên vẹn")
             continue
-        _kg_o("T4", _vg, f"cat_{_tt}", _hang, f"kg_t4_{_vg}_cat_{_tt}", _tim, _thay.format(S=_cat.format(_tap)), _ca)
+        _kg_o("T4", _vg, f"cat_{_tt}", _hang, f"kg_t4_{_vg}_cat_{_tt}", _tim, _thay.replace("{S}", _cat.format(_tap)), _ca)
     _kg_khong("T4", _vg, "chi_khi_khac_rong", "tuong_duong",
-              "thân vòng chỉ chạy khi tập đang duyệt có phần tử, nên điều kiện \"tập khác rỗng\" luôn True ở mọi lần kiểm; các tập "
-              "này lại đã được chặn rỗng trước vòng (`trang` ⇒ `list trang RỖNG`, `ten_bb` ⇒ argparse/`--bat-buoc`, `cung` ⇒ VẮNG)")
+              "thân vòng (hoặc biểu thức trong comprehension / hàm duyệt) chỉ chạy khi tập đang duyệt có phần tử, nên điều kiện "
+              "\"tập khác rỗng\" luôn True ở mọi lần nó được xét; tập rỗng thì cả bản gốc lẫn đột biến đều không duyệt gì")
 # Điều kiện chặn: phép kiểm trong vòng chỉ chạy ở phần tử ĐẦU / CUỐI / HAI ĐẦU. Hai dạng hiện thực, chọn dạng KHÔNG SẬP:
 # "cho qua" (bỏ phép kiểm, phần tử đi tiếp) hoặc "bỏ qua" (bỏ cả phần tử) khi cho qua chắc chắn chạm khoá hỏng.
 _KG_G = {"dau": "{0} == 0", "cuoi": "{0} == {1} - 1", "hai_dau": "({0} == 0 or {0} == {1} - 1)"}
@@ -7061,6 +7103,12 @@ def case_kg_t_ma_tran(c: Ctx):
            "T4": len(_KG_T4_VONG) * (len(_KG_CAT_T4) + 1) + len(_KG_G) * (len(_KG_T4_CHOT) + 3 + 1 + 2 + 1 + 1 + 1 + 1),
            "T5": 3 * (len(_KG_T5_CHUAN) * 2 + 1) + 2 + 4 + 2}
     loi = _kg_ma_tran_loi(_KG_MA_TRAN, MUTANTS, _KG_KIEM_KE) + [f"{h}: {so[h]} ô, đòi {doi[h]}" for h in so if so[h] != doi[h]]
+    import ast   # T4 "mọi vòng lặp": số nút vòng lặp/comprehension THẬT của hai hàm = số vị trí T4 tường minh
+    ham = [n for n in ast.parse(c.script.read_text(encoding="utf-8")).body
+           if isinstance(n, ast.FunctionDef) and n.name in ("_doc_check_runs", "cmd_kiem_gate")]
+    vong = sum(isinstance(x, (ast.For, ast.comprehension)) for h in ham for x in ast.walk(h))
+    if len(ham) != 2 or vong != len(_KG_T4_VONG) - len(_KG_T4_NGAM):
+        loi.append(f"T4: AST đếm {vong} vòng lặp, bảng khai {len(_KG_T4_VONG) - len(_KG_T4_NGAM)}")
     gia = _kg_ma_tran_loi({("T0", "x", "y"): "kg_khong_ton_tai", ("T0", "x", "z"): ("tuong_duong", " ")}, MUTANTS, _KG_KIEM_KE)
     if loi or len(gia) != 2:
         raise AssertionError(f"ma trận tập toán tử: {loi[:5]} · tự kiểm tố {len(gia)}/2")

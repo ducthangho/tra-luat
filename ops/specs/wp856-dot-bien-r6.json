@@ -1,0 +1,452 @@
+[
+ {
+  "lop": "check-suite-chua-phu-bien-chuoi",
+  "ten": "suite_digits_interior_space",
+  "tim": "r\"[1-9][0-9]*\"",
+  "thay": "r\"[1-9](?:[0-9 ]*[0-9])?\""
+ },
+ {
+  "lop": "check-suite-chua-phu-bien-chuoi",
+  "ten": "suite_digits_interior_unicode",
+  "tim": "r\"[1-9][0-9]*\"",
+  "thay": "r\"[1-9](?:\\d*[0-9])?\""
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "count_negative_last",
+  "tim": "if type(tc) is not int or tc < 0:",
+  "thay": "if type(tc) is not int or (tc < 0 and i == len(trang)-1):"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "count_negative_page_ends",
+  "tim": "if type(tc) is not int or tc < 0:",
+  "thay": "if type(tc) is not int or (tc < 0 and (i == 0 or i == len(trang) - 1)):"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "count_presence_last",
+  "tim": "        if tc is _VANG:\n",
+  "thay": "        if tc is _VANG and i == len(trang)-1:\n"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "count_presence_page_ends",
+  "tim": "        tc = tr.get(\"total_count\", _VANG)\n",
+  "thay": "        tc = tr.get(\"total_count\", _VANG)\n        if tc is _VANG and not (i == 0 or i == len(trang) - 1):\n            tc = khai[0]\n"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "count_type_page_ends",
+  "tim": "if type(tc) is not int or tc < 0:",
+  "thay": "if (type(tc) is not int or tc < 0) and (i == 0 or i == len(trang) - 1):"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "run_shape_page_ends",
+  "tim": "            if not isinstance(r, dict):\n",
+  "thay": "            if not isinstance(r, dict) and not (i == 0 or i == len(trang) - 1):\n                continue\n            if not isinstance(r, dict):\n"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "schema_page_ends",
+  "tim": "            if sai:\n",
+  "thay": "            if sai and (i == 0 or i == len(trang) - 1):\n"
+ },
+ {
+  "lop": "chi-kiem-kieu-trang-dau",
+  "ten": "suite_shape_page_ends",
+  "tim": "            if not isinstance(cs, dict) or type(cs.get(\"id\", _VANG)) is not int:\n",
+  "thay": "            if not isinstance(cs, dict) or type(cs.get(\"id\", _VANG)) is not int:\n                if not (i == 0 or i == len(trang) - 1):\n                    continue\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "count_coerce_dict",
+  "tim": "        tc = tr.get(\"total_count\", _VANG)\n",
+  "thay": "        tc = tr.get(\"total_count\", _VANG)\n        if type(tc) is dict:\n            tc = len(tr[\"check_runs\"])\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "count_coerce_list",
+  "tim": "        tc = tr.get(\"total_count\", _VANG)\n",
+  "thay": "        tc = tr.get(\"total_count\", _VANG)\n        if type(tc) is list:\n            tc = len(tr[\"check_runs\"])\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "presence_skip_head_sha",
+  "tim": "            if sai:\n",
+  "thay": "            if \"head_sha\" not in r:\n                continue\n            if sai:\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "presence_skip_id",
+  "tim": "            if sai:\n",
+  "thay": "            if \"id\" not in r:\n                continue\n            if sai:\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "presence_skip_name",
+  "tim": "            if sai:\n",
+  "thay": "            if \"name\" not in r:\n                continue\n            if sai:\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "run_shape_skip_bool",
+  "tim": "            if not isinstance(r, dict):\n",
+  "thay": "            if type(r) is bool:\n                continue\n            if not isinstance(r, dict):\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "run_shape_skip_float",
+  "tim": "            if not isinstance(r, dict):\n",
+  "thay": "            if type(r) is float:\n                continue\n            if not isinstance(r, dict):\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "run_shape_skip_list",
+  "tim": "            if not isinstance(r, dict):\n",
+  "thay": "            if type(r) is list:\n                continue\n            if not isinstance(r, dict):\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "run_shape_skip_null",
+  "tim": "            if not isinstance(r, dict):\n",
+  "thay": "            if type(r) is type(None):\n                continue\n            if not isinstance(r, dict):\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "run_shape_skip_str",
+  "tim": "            if not isinstance(r, dict):\n",
+  "thay": "            if type(r) is str:\n                continue\n            if not isinstance(r, dict):\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "suite_shape_skip_bool",
+  "tim": "            cs = r.get(\"check_suite\", _VANG)\n",
+  "thay": "            cs = r.get(\"check_suite\", _VANG)\n            if type(cs) is bool:\n                continue\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "suite_shape_skip_float",
+  "tim": "            cs = r.get(\"check_suite\", _VANG)\n",
+  "thay": "            cs = r.get(\"check_suite\", _VANG)\n            if type(cs) is float:\n                continue\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "suite_shape_skip_int",
+  "tim": "            cs = r.get(\"check_suite\", _VANG)\n",
+  "thay": "            cs = r.get(\"check_suite\", _VANG)\n            if type(cs) is int:\n                continue\n"
+ },
+ {
+  "lop": "kiem-kieu-chi-do-mot-loai-sai",
+  "ten": "suite_shape_skip_str",
+  "tim": "            cs = r.get(\"check_suite\", _VANG)\n",
+  "thay": "            cs = r.get(\"check_suite\", _VANG)\n            if type(cs) is str:\n                continue\n"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "run_identity_abs",
+  "tim": "danh_tinh.setdefault(r[\"id\"], dt)",
+  "thay": "danh_tinh.setdefault(abs(r[\"id\"]), dt)"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "run_identity_abs_safe",
+  "tim": "        if danh_tinh.setdefault(r[\"id\"], dt) != dt:\n            hong(f\"id {r['id']} mang hai danh tính {danh_tinh[r['id']]!r} và {dt!r} — bằng chứng mâu thuẫn\")\n",
+  "thay": "        if danh_tinh.setdefault(abs(r[\"id\"]), dt) != dt:\n            hong(f\"id {r['id']} mang hai danh tính {danh_tinh[abs(r['id'])]!r} và {dt!r} — bằng chứng mâu thuẫn\")\n"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "run_identity_float",
+  "tim": "danh_tinh.setdefault(r[\"id\"], dt)",
+  "thay": "danh_tinh.setdefault(float(r[\"id\"]), dt)"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "run_identity_float_safe",
+  "tim": "        if danh_tinh.setdefault(r[\"id\"], dt) != dt:\n            hong(f\"id {r['id']} mang hai danh tính {danh_tinh[r['id']]!r} và {dt!r} — bằng chứng mâu thuẫn\")\n",
+  "thay": "        if danh_tinh.setdefault(float(r[\"id\"]), dt) != dt:\n            hong(f\"id {r['id']} mang hai danh tính {danh_tinh[float(r['id'])]!r} và {dt!r} — bằng chứng mâu thuẫn\")\n"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_anchor_abs_safe",
+  "tim": "r[\"check_suite\"][\"id\"] == suite]",
+  "thay": "abs(r[\"check_suite\"][\"id\"]) == (abs(suite) if isinstance(suite,int) else suite)]"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_anchor_float",
+  "tim": "r[\"check_suite\"][\"id\"] == suite]",
+  "thay": "float(r[\"check_suite\"][\"id\"]) == float(suite)]"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_identity_abs",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], abs(r[\"check_suite\"][\"id\"]), r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_identity_float",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], float(r[\"check_suite\"][\"id\"]), r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_identity_strprefix",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], str(r[\"check_suite\"][\"id\"])[:1], r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_range_positive",
+  "tim": "            runs.append(r)\n",
+  "thay": "            if cs[\"id\"] <= 0:\n                hong(\"suite id outside added range\")\n            runs.append(r)\n"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_range_small",
+  "tim": "            runs.append(r)\n",
+  "thay": "            if abs(cs[\"id\"]) > 2**53:\n                hong(\"suite id outside added range\")\n            runs.append(r)\n"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_warning_abs_safe",
+  "tim": "r[\"check_suite\"][\"id\"] != suite})",
+  "thay": "abs(r[\"check_suite\"][\"id\"]) != (abs(suite) if isinstance(suite,int) else suite)})"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_warning_float",
+  "tim": "r[\"check_suite\"][\"id\"] != suite})",
+  "thay": "float(r[\"check_suite\"][\"id\"]) != float(suite)})"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "suite_warning_strprefix",
+  "tim": "r[\"check_suite\"][\"id\"] != suite})",
+  "thay": "str(r[\"check_suite\"][\"id\"])[:1] != str(suite)[:1]})"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "warning_id_abs",
+  "tim": "khac = sorted({r[\"id\"] for r in runs if r[\"name\"] == ten_cb and r[\"check_suite\"][\"id\"] != suite})",
+  "thay": "khac = sorted({abs(r[\"id\"]) for r in runs if r[\"name\"] == ten_cb and r[\"check_suite\"][\"id\"] != suite})"
+ },
+ {
+  "lop": "so-khop-so-nguyen-chua-chinh-xac",
+  "ten": "warning_id_float",
+  "tim": "khac = sorted({r[\"id\"] for r in runs if r[\"name\"] == ten_cb and r[\"check_suite\"][\"id\"] != suite})",
+  "thay": "khac = sorted({int(float(r[\"id\"])) for r in runs if r[\"name\"] == ten_cb and r[\"check_suite\"][\"id\"] != suite})"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_conclusion_left",
+  "tim": "r[\"conclusion\"] == \"success\"",
+  "thay": "(r[\"conclusion\"].lstrip(\"success\"[:1]) if isinstance(r[\"conclusion\"], str) else r[\"conclusion\"]) == \"success\".lstrip(\"success\"[:1])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_conclusion_right",
+  "tim": "r[\"conclusion\"] == \"success\"",
+  "thay": "(r[\"conclusion\"].rstrip(\"success\"[-1:]) if isinstance(r[\"conclusion\"], str) else r[\"conclusion\"]) == \"success\".rstrip(\"success\"[-1:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_dt_head_left",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"].lstrip('a'))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_dt_head_right",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"].rstrip('b'))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_dt_name_left",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"].lstrip('g'), r[\"check_suite\"][\"id\"], r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_dt_name_right",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"].rstrip('é'), r[\"check_suite\"][\"id\"], r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_head_left",
+  "tim": "r[\"head_sha\"] == a.head",
+  "thay": "(r[\"head_sha\"].lstrip(a.head[:1]) if isinstance(r[\"head_sha\"], str) else r[\"head_sha\"]) == a.head.lstrip(a.head[:1])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_head_right",
+  "tim": "r[\"head_sha\"] == a.head",
+  "thay": "(r[\"head_sha\"].rstrip(a.head[-1:]) if isinstance(r[\"head_sha\"], str) else r[\"head_sha\"]) == a.head.rstrip(a.head[-1:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_name_left",
+  "tim": "r[\"name\"] == ten]",
+  "thay": "(r[\"name\"].lstrip(ten[:1]) if isinstance(r[\"name\"], str) else r[\"name\"]) == ten.lstrip(ten[:1])]"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_status_left",
+  "tim": "r[\"status\"] == \"completed\"",
+  "thay": "(r[\"status\"].lstrip(\"completed\"[:1]) if isinstance(r[\"status\"], str) else r[\"status\"]) == \"completed\".lstrip(\"completed\"[:1])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_status_right",
+  "tim": "r[\"status\"] == \"completed\"",
+  "thay": "(r[\"status\"].rstrip(\"completed\"[-1:]) if isinstance(r[\"status\"], str) else r[\"status\"]) == \"completed\".rstrip(\"completed\"[-1:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "boundary_warning_left",
+  "tim": "r[\"name\"] == ten_cb",
+  "thay": "(r[\"name\"].lstrip(ten_cb[:1]) if isinstance(r[\"name\"], str) else r[\"name\"]) == ten_cb.lstrip(ten_cb[:1])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_boundary_first",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({t[1:]:t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_boundary_left",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({t.lstrip(t[:1]):t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_casefold",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({t.casefold(): t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_nfc",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({__import__(\"unicodedata\").normalize(\"NFC\",t): t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_nfkc",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({__import__(\"unicodedata\").normalize(\"NFKC\",t): t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_position_middle",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({(t[:1] + t[2:]):t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_position_sorted",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({tuple(sorted(t)):t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "dedup_strip",
+  "tim": "ten_bb = list(dict.fromkeys(a.bat_buoc))",
+  "thay": "ten_bb = list({t.strip(): t for t in a.bat_buoc}.values())"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_conclusion_middle",
+  "tim": "r[\"conclusion\"] == \"success\"",
+  "thay": "((r[\"conclusion\"][:1] + r[\"conclusion\"][2:]) if isinstance(r[\"conclusion\"], str) else r[\"conclusion\"]) == (\"success\"[:1] + \"success\"[2:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_conclusion_sorted",
+  "tim": "r[\"conclusion\"] == \"success\"",
+  "thay": "(tuple(sorted(r[\"conclusion\"])) if isinstance(r[\"conclusion\"], str) else r[\"conclusion\"]) == tuple(sorted(\"success\"))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_dt_head_middle",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], (r[\"head_sha\"][:1] + r[\"head_sha\"][2:]))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_dt_head_sorted",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], tuple(sorted(r[\"head_sha\"])))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_dt_name_middle",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = ((r[\"name\"][:1] + r[\"name\"][2:]), r[\"check_suite\"][\"id\"], r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_dt_name_sorted",
+  "tim": "dt = (r[\"name\"], r[\"check_suite\"][\"id\"], r[\"head_sha\"])",
+  "thay": "dt = (tuple(sorted(r[\"name\"])), r[\"check_suite\"][\"id\"], r[\"head_sha\"])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_head_middle",
+  "tim": "r[\"head_sha\"] == a.head",
+  "thay": "((r[\"head_sha\"][:1] + r[\"head_sha\"][2:]) if isinstance(r[\"head_sha\"], str) else r[\"head_sha\"]) == (a.head[:1] + a.head[2:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_head_sorted",
+  "tim": "r[\"head_sha\"] == a.head",
+  "thay": "(tuple(sorted(r[\"head_sha\"])) if isinstance(r[\"head_sha\"], str) else r[\"head_sha\"]) == tuple(sorted(a.head))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_name_middle",
+  "tim": "r[\"name\"] == ten]",
+  "thay": "((r[\"name\"][:1] + r[\"name\"][2:]) if isinstance(r[\"name\"], str) else r[\"name\"]) == (ten[:1] + ten[2:])]"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_name_sorted",
+  "tim": "r[\"name\"] == ten]",
+  "thay": "(tuple(sorted(r[\"name\"])) if isinstance(r[\"name\"], str) else r[\"name\"]) == tuple(sorted(ten))]"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_status_middle",
+  "tim": "r[\"status\"] == \"completed\"",
+  "thay": "((r[\"status\"][:1] + r[\"status\"][2:]) if isinstance(r[\"status\"], str) else r[\"status\"]) == (\"completed\"[:1] + \"completed\"[2:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_status_sorted",
+  "tim": "r[\"status\"] == \"completed\"",
+  "thay": "(tuple(sorted(r[\"status\"])) if isinstance(r[\"status\"], str) else r[\"status\"]) == tuple(sorted(\"completed\"))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_warning_middle",
+  "tim": "r[\"name\"] == ten_cb",
+  "thay": "((r[\"name\"][:1] + r[\"name\"][2:]) if isinstance(r[\"name\"], str) else r[\"name\"]) == (ten_cb[:1] + ten_cb[2:])"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "position_warning_sorted",
+  "tim": "r[\"name\"] == ten_cb",
+  "thay": "(tuple(sorted(r[\"name\"])) if isinstance(r[\"name\"], str) else r[\"name\"]) == tuple(sorted(ten_cb))"
+ },
+ {
+  "lop": "so-khop-tuyet-doi-chua-du",
+  "ten": "status_slice_first",
+  "tim": "r[\"status\"] == \"completed\"",
+  "thay": "r[\"status\"][1:] == \"completed\"[1:]"
+ }
+]

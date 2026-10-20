@@ -1,0 +1,56 @@
+DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT (IsADirectoryError) - DO
+dung: ci_duong_nhanh.py [kiem-re]
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:2961: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5104: SyntaxWarning: invalid escape sequence '\d'
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CA: 104/104 dat · 0 do · 0 hong
+DOT BIEN: 383/383 bi giet dung ly do
+KIEM KE: ca hanh_vi=74 + cau_truc_yaml=16 + so_dang_ky=3 + tu_kiem=11 = 104 · dot bien .claude/dev/ci_dang_ky_test.py=2 + .github/workflows/ci.yml=74 + ops/ci_duong_nhanh.py=211 + ops/ci_duong_nhanh_test.py=93 + ops/lease_publish.py=3 = 383
+TU KIEM PHAN HANG: DAT (5 mau rc, 3 dot bien that)
+TONG: DAT
+rc=0 start=2026-10-19T23:54:12Z end=2026-10-19T23:56:25Z

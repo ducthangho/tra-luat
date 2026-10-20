@@ -1,0 +1,116 @@
+# HO SO LAND — packet #748 wp748 r21 (lease g21), ma qua PR #862. Khuon: ops/land/pr849-wp748-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (401d4f1) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (ccr-e425b16e-j9g9p7) dua dong nay
+# vao master. Duyet ben cua chu kho: #748 issuecomment-6285607005 (dang SAU merge, xem authorization_ghi_chu).
+# Gate push master tren DUNG merge SHA 401d4f1: ci.yml 39380754094 XANH 23/23. Bang chung race dong: ops-publish-lease
+# 39358824666 attempt 1 DO (master 3950a0f) -> attempt 2 XANH (master 401d4f15).
+# NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
+# review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr862-wp748-r21-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.
+
+schema_version: 1
+mission_id: gh-748
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_014eUnFtkty9fZicFG9T1Wei
+input_packet_generations:
+  - {packet_issue: 748, packet_id: wp748, revision: 21, generation: 21, lease_id: wp748-r21-g21-claude-remote-20261020}
+authorized_head_sha: 28e35fd9206cdc8b2b44a39999421934f8437192
+authorized_head_tree: f886966025dde4e2a850658a5479abbdb5bd762f
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6285607005
+authorization_lease_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6281866960
+authorization_ghi_chu: >-
+  measured — readback-comment-6285607005.json: user ducthangho, author_association OWNER, 2026-10-20T07:19:54Z, than
+  "Duyệt land WP748 r21 trên SHA 28e35fd9206cdc8b2b44a39999421934f8437192 (merge 401d4f1)". Ghi THANG: ban ghi ben dang SAU
+  merge (merged_at 2026-10-20T06:30:22Z); truoc merge phien da de nghi chu kho duyet tren SHA 28e35fd, chu kho bam merge,
+  roi dang ban ghi ben theo de nghi cua phien.
+land_operator: 'loi_khai_co_neo — chu kho tu bam merge, executor khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential'
+merge_method: merge
+merge_commit: 401d4f15362b3270d5dc8437ade3be5ab449eb22
+merge_commit_tree: f886966025dde4e2a850658a5479abbdb5bd762f
+merge_commit_parents: [3950a0f9fd0a9c29a36a599edc7a2d305619fc27, 28e35fd9206cdc8b2b44a39999421934f8437192]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 39376774218, sha: 28e35fd9206cdc8b2b44a39999421934f8437192, conclusion: success, ghi_chu: 'measured — readback-check-runs-28e35fd-all.json: 25/25 success.', nguon: [readback-run-39376774218.json, readback-jobs-39376774218.json, readback-check-runs-28e35fd-all.json]}
+  - {name: 'executor cross-review Codex luot 1/1 tren head cuoi', sha: 28e35fd9206cdc8b2b44a39999421934f8437192, conclusion: 'approve; 0 P0-P2; P3 khong chan: t221 dung mtime lam proxy thu tu (co the lot tren he tep thoi gian tho, do oan neu config bi ghi lai), docstring dung chu reflog khong chinh xac. Suite 267/267 (t125 A va B 267/267); 4/4 dot bien lam t221 DO; Trace2: hai khoa tat truoc 27/27 commit, 0 child_start.', nguon: [verdicts/wp748-r21-luot1-codex-verdict.md, verdicts/wp748-r21-luot1-codex-transcript.txt, verdicts/wp748-r21-luot1-prompt.md], ghi_chu: 'measured — dau tep transcript: "OpenAI Codex v0.163.0", model yeu cau gpt-6-astra, provider openai, sandbox workspace-write (network access enabled), session id 01a157da-…; codex exec truc tiep trong container phien executor, env -i loc credential; KHONG qua bo chot launcher nen KHONG co bien nhan run. Model THUC phuc vu KHONG_DO_DUOC. Tom tat dang o readback-comment-6284466644.json.'}
+  - {name: 'Codex connector', sha: 28e35fd9206cdc8b2b44a39999421934f8437192, conclusion: 'completed, has_any_findings=false', nguon: readback-comments-862.json}
+  - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-862.json, readback-review-comments-862.json]}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39380754094, run_attempt: 1, sha: 401d4f15362b3270d5dc8437ade3be5ab449eb22, conclusion: success, jobs: '23/23 success', luc: '2026-10-20T06:30:25Z -> 2026-10-20T07:02:14Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-401d4f1.txt: packet_loop.py kiem-gate suite 106713838828 (check-runs filter=all), 23 ten, rc=0', log: 'measured — log-39380754094/ (23 log tho) + do-lai-nguon-20261020/gate-401d4f1-log.txt: sha256 tung log; 22/23 job in DUNG merge SHA (chuan-bi khong checkout); dinh nghia .github/workflows/ci.yml blob ghi trong tep do.', nguon: [readback-run-39380754094.json, readback-jobs-39380754094.json, readback-check-runs-401d4f1-all.json]}
+  - {name: 'ops-publish-lease.yml — BANG CHUNG RACE DONG', run_id: 39358824666, sha: 2bc007072ef1555ac6092dbb0d890db3baac2304, conclusion: 'attempt 1 failure -> attempt 2 success', ghi_chu: 'measured — do-lai-nguon-20261020/publish-lease-39358824666.txt + log-39358824666/: attempt 1 chay bo test tu origin/master @ 3950a0f9 (truoc ban va), [A] t133 DO "[Errno 2] … maintenance.lock", 265/266, t125 DO; attempt 2 chay tu origin/master @ 401d4f15 (sau ban va), [A] va [B] deu 267/267, t133 va t221 QUA, "đã đăng comment 6284998410 lên #748". Ba luot do truoc ban va: 39352202619 a1/a2, 39358824666 a1. Git 2.55 tren runner; container dev git 2.43 khong tai hien.', nguon: [readback-run-39358824666.json, readback-jobs-39358824666.json, readback-comment-6284998410.json]}
+bookkeeping:
+  - {item: 'comment land r21 len #748 (Issue da closed/completed tu r20)', ket_qua: 'measured — readback-comment-6285673903.json; readback-issue-748.json: state closed, state_reason completed.'}
+  - {item: 'rut han lease wp748-r21-g21-claude-remote-20261020', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: ccr-e425b16e-j9g9p7}
+# ---- het truong chuan
+packet_id: wp748
+packet_issue: 748
+generation: 21
+generation_nghia: 'Lan land cua ban va r21 (tat git auto-maintenance tren kho mau _mau_t133) qua lease r21/g21; r20 da land rieng (ops/land/pr849-wp748-land-evidence.yaml).'
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_014eUnFtkty9fZicFG9T1Wei — CUNG phien la executor cua packet. Chu kho tu merge; phien nay ghi so theo
+  chi thi trong phien 20-10-2026 "Đã đăng lên #748, land r21 cho tôi".
+
+spec:
+  path: ops/specs/wp748-r21-mau-t133-maintenance.md (nhanh ops/wp748-r21-g21-lease, commit aaf5152)
+  sha256: c356696e60607b8a5d73a2db673cc4e276112f1741d0044b36f6cdfd667d600a
+  nguon: 'measured — git show origin/ops/wp748-r21-g21-lease:ops/specs/wp748-r21-mau-t133-maintenance.md | sha256sum = spec_hash cua lease (do-lai-nguon-20261020/lease-wp748-r21-g21.yaml.txt).'
+lease:
+  lease_id: wp748-r21-g21-claude-remote-20261020
+  path: ops/leases/wp748-r21-g21-claude-remote-20261020.yaml (nhanh ops/wp748-r21-g21-lease)
+  cap_boi: 'loi_khai_co_neo — granted_on_instruction https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6281866960 (readback-comment-6281866960.json, ghi ho chi thi "Cấp packet r21 đi").'
+  lease_until_ban_dau: '2026-10-20T14:25:01Z'
+  write_set: ['ops/lease_publish_test.py']
+  write_set_hash: 5cb55494c271c8ab73b6728bccfa8573c971c539eb1ad6d7912b647fd55eec0f
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN (khong bia mo): commit 571b586 tren ops/wp748-r21-g21-lease dua lease_until/lease_expires_at_utc ve
+    2026-10-20T07:21:56Z; ly do o khoi `rut_han` cua chinh tep lease (do-lai-nguon-20261020/lease-wp748-r21-g21.yaml.txt).
+    measured — ai-dang-giu-sau-rut-han/luc-do.txt: ls-remote 521 ten = guong 521 ten (thieu 0, thua 0);
+    ops/lease_publish_test.py rc=0 "NGƯỜI_GIỮ 0", wp748-r21-g21-claude-remote-20261020 ra HẾT_HẠN.
+  heartbeat_ghi_chu: 'not_measured — heartbeat_at khong cap nhat sau 02:25Z; phien bi khoi dong lai giua 02:3xZ va 05:46Z. Khong ghi heartbeat vao tep lease vi moi lan sua tep lease kich hoat ops-publish-lease dang DO (truoc ban va).'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-862.json: merged true, merged_at 2026-10-20T06:30:22Z, merged_by ducthangho, merge_commit_sha
+    401d4f1, head.sha 28e35fd; cha va tree o do-lai-nguon-20261020/merge-va-diff.txt; merge commit (khong squash/rebase).
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 401d4f1: ci.yml 23/23 XANH, kiem-gate rc=0, log kem (post_merge_checks) DAT;
+    (2) lease da nha: rut han, 1/1 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: comment land r21 tren #748 (Issue da closed) DAT;
+    (4) review neo DUNG authorized_head_sha 28e35fd: Codex approve 0 P0-P2 DAT; tree merge = tree head (f886966);
+    (5) uy quyen land neo DUNG 28e35fd: #748 issuecomment-6285607005 DAT, dang sau merge (authorization_ghi_chu);
+    (6) muc tieu packet: ops-publish-lease xanh tren master co ban va (39358824666 attempt 2) DAT.
+    `landed: true` hieu luc khi PR ghi so nay vao master.
+
+uy_quyen_land:
+  dang: >-
+    measured — readback-pr-862.json merged_by.login=ducthangho; readback-events-862.json event merged actor=ducthangho.
+    Chi chung minh tai khoan. measured — readback-comment-6285607005.json: chu kho (OWNER) duyet ben neo 28e35fd, dang sau merge.
+  candidate_sha: 28e35fd9206cdc8b2b44a39999421934f8437192
+  head_khong_doi: 'measured — readback-pr-862.json head.sha = 28e35fd = cha thu hai cua 401d4f1.'
+  khong_xung_dot: 'loi_khai_co_neo — CI PR xanh tren 28e35fd, base 3950a0f = cha thu nhat cua merge; khong luu readback mergeable.'
+
+review:
+  so_loi_goi_codex_cli: 1
+  luot_cuoi:
+    reviewer: 'measured — verdicts/wp748-r21-luot1-codex-transcript.txt: Codex CLI v0.163.0, model yeu cau gpt-6-astra, provider openai; be mat THUC la codex exec trong container phien executor; model THUC phuc vu KHONG_DO_DUOC.'
+    hien_vat: ops/land/pr862-wp748-r21-provenance/verdicts/
+    ket_qua: 'thuat_lai — approve tren 28e35fd (= authorized_head_sha), 0 P0-P2, 1 P3 khong chan.'
+  thread: 'measured — readback-reviews-862.json: 0 review; readback-review-comments-862.json: 0.'
+
+no_ngoai_pham_vi:
+  - {ma: 't221-mtime-proxy', muc: P3, ghi_chu: 't221 so mtime config voi object c0 de kiem thu tu; he tep thoi gian tho co the lot, ghi lai config vo hai co the do oan; docstring dong 5982 dung chu reflog. Giu nguyen theo ADR-0054 (dung va khi het P0-P2). Chua mo issue.'}
+
+khong_do_duoc:
+  - 'Race khong tai hien tai cho (git 2.43); bang chung la ba luot do truoc ban va va mot luot xanh sau ban va tren runner git 2.55.'
+  - 'Windows khong thuoc dieu kien lease r21 (spec chi doi Linux + ops-publish-lease).'
+  - 'Model thuc phuc vu luot review KHONG_DO_DUOC.'

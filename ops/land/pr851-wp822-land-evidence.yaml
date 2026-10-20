@@ -1,9 +1,9 @@
 # HO SO LAND — packet #822 wp822 r1 (lease g1), ma qua PR #851. Khuon: ops/land/pr846-wp845-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (b27fe85), `landed: true`. Hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-822-land)
-# dua dong nay vao master. Neo quyet dinh: chi thi chu kho trong phien 20-10-2026 "#822 land đi"; ban chieu o
-# #822 issuecomment-6282007279.
+# TRANG THAI: merged (b27fe85), `landed: false`. Ban dau ghi landed true theo chi thi chu kho "#822 land đi"
+# (#822 issuecomment-6282007279); ha xuong false vi connector #860 neu 2 P1 dung (r4322219465, r4322219472): thieu provenance
+# CI §10.2.2 (checkout/workflow-definition/gate output tu log) va thieu reviewer assurance §8.1 tren exact head. Cho chu kho.
 # Gate push master tren DUNG merge SHA b27fe85: ci.yml 39342960764 XANH 14/14; launcher-windows 39342960711 XANH 2/2.
 # Review Codex CLI KHONG approve: luot 6 changes_requested P2=6. Chu kho chon (c) (#822 issuecomment-6275876705): land phan
 # hien co, chap nhan 6 lop P2, chuyen ca 6 sang packet tiep noi #856. Connector review DUNG head 4005893: khong finding.
@@ -81,14 +81,18 @@ trang_thai_packet:
     measured — readback-pr-851.json: merged true, merged_at 2026-10-19T23:39:53Z, merged_by ducthangho, merge_commit_sha
     b27fe85 (cha 5618020 + 4005893; tree = tree head 857bc47: do-lai-nguon-20261020/merge-va-diff.txt), merge commit.
     Diff so base 5618020: 1 tep, +717/-20.
-  landed: true
+  landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA b27fe85: ci.yml 14/14 va launcher-windows 2/2 XANH (post_merge_checks) DAT;
-    (2) lease da nha: bia mo hai chieu, write set chi con nguoi giu wp856 DAT; (3) bookkeeping: #822 closed/completed DAT,
-    6 lop P2 co ten va co packet tiep noi #856. (4) review neo DUNG authorized_head_sha 4005893: connector completed,
-    khong finding, DAT. Review CLI luot cuoi KHONG approve: chu kho chap nhan theo (c) (#822 issuecomment-6275876705), va
-    tep write set khong doi tu luot 6 toi head.
-    `landed: true` theo chi thi chu kho "#822 land đi"; hieu luc khi PR ghi so nay vao master.
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA b27fe85: GitHub ket luan ci.yml 14/14 va launcher-windows 2/2 success
+    (post_merge_checks), NHUNG provenance §10.2.2 CHUA DU: checkout SHA/parents/tree tu log job, workflow definition (OID,
+    blob, sha256) va gate output (marker duong) KHONG luu — chi co readback run/job/check-run va kiem-gate (danh sach id).
+    CHUA DAT (connector #860 P1 r4322219465). (2) lease da nha: bia mo hai chieu, write set chi con nguoi giu wp856 DAT.
+    (3) bookkeeping: #822 closed/completed DAT; 6 lop P2 co ten va co packet tiep noi #856. (4) review neo DUNG
+    authorized_head_sha 4005893: connector completed, khong finding — chi chung minh hoan tat + khong finding, KHONG chung
+    minh model/phien doc lap/assurance §8.1; lease doi cross_approved; review CLI luot cuoi changes_requested tren 039dbe3.
+    Chap nhan 6 P2 theo (c) la no, khong phai assurance. CHUA DAT (connector #860 P1 r4322219472).
+    Nang len true khi: (1) luu log/artifact cua dung cac run tren b27fe85 du bon moc §10.2.2; (4) co receipt review exact
+    head du identity, hoac chu kho ghi waiver/kiem toan nguoi doc lap co pham vi ro.
 
 uy_quyen_land:
   dang: >-

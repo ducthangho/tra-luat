@@ -1,0 +1,9 @@
+$ git log -1 --format='%H %P' b27fe85
+b27fe85c9e9593ddbb059808fe4347fe1bd267be 5618020a67709ca6f2c93138905df0aa8d9c2df6 400589368e09ab2ee0e734b7af08b93478035503
+$ git diff --numstat 5618020a67709ca6f2c93138905df0aa8d9c2df6 b27fe85
+717	20	.claude/dev/packet_loop_test.py
+$ git diff --numstat 5618020 4005893
+717	20	.claude/dev/packet_loop_test.py
+$ git rev-parse b27fe85^{tree} 4005893^{tree}
+857bc47e6bc5f0024e442b400819ac51286dfc55
+857bc47e6bc5f0024e442b400819ac51286dfc55

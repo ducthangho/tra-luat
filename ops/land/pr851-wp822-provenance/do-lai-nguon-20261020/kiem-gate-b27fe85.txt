@@ -1,0 +1,6 @@
+== run 39342960764 suite 106614552391 14 ten
+gate XANH trên b27fe85c9e9593ddbb059808fe4347fe1bd267be (suite 106614552391): chuan-bi id=118368688427 · gate (ubuntu-latest) id=118368717941 · gate-registry (ubuntu-latest) id=118368717984 · gate-cong-cu (ubuntu-latest, 5) id=118368717985 · gate-cong-cu (ubuntu-latest, 7) id=118368718000 · gate-cong-cu (ubuntu-latest, 4) id=118368718039 · gate-ops (ubuntu-latest) id=118368718087 · gate-cong-cu (ubuntu-latest, 3) id=118368718096 · gate-cong-cu (ubuntu-latest, 0) id=118368718099 · gate-cong-cu (ubuntu-latest, 1) id=118368718105 · gate-cong-cu (ubuntu-latest, 2) id=118368718106 · gate-packet-loop (ubuntu-latest) id=118368718118 · gate-cong-cu (ubuntu-latest, 6) id=118368718171 · gate-cong-cu-gop (ubuntu-latest) id=118379100524
+rc=0
+== run 39342960711 suite 106614552327 2 ten
+gate XANH trên b27fe85c9e9593ddbb059808fe4347fe1bd267be (suite 106614552327): launcher (ubuntu-latest) id=118368688145 · launcher (windows-latest) id=118368688495
+rc=0

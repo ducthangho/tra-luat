@@ -30,27 +30,36 @@ PY[0]="$(command -v "${PY[0]}")"
 
 # wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (cong thuc duoc `eval` duoi day nen goi duoc ham nay).
 # `dirname "$(command -v X)"` in thu muc ban DAU PATH — ban hong dung truoc thi in thu muc ban HONG (cung loi #831 voi rg).
-# Chuan DUY NHAT la CHINH `cong_cu.py kiem-tra --chi <ten>` chay bang PY da ghim tuyet doi (wp831 F03), khong chep regex.
-# Ten tran da DAT => KHONG in thu muc nao: in lai thu muc cua no se dua ca thu muc ay len DAU PATH va che cong cu khac
-# cung thu muc (#831 luot 4: cong thuc bash dua rg hong len truoc => tong cuoi rg DO). `--win`: ung vien la duong
-# Windows, doi qua `cygpath -u`; ghi $GITHUB_PATH bang `cygpath -w`. Ghi $GITHUB_PATH chi khi ten tran chua DAT (ly do
-# nhu rg.cai.linux). Khong ung vien nao DAT => tra 1.
+# Chuan DUY NHAT la CHINH `cong_cu.py kiem-tra --chi <ten>` chay bang PY da ghim tuyet doi (wp831 F03), khong chep regex,
+# khong loc truoc bang `-f/-x/.exe`: ten tran chua DAT thi them mot thu muc KHONG co <ten> vao dau PATH khong doi ket qua
+# tra ten, nen bo loc ay tuong duong checker (Codex wp858 luot 1 F858-02).
+# Ten tran da DAT => dong cuoi la `:giu-nguyen-PATH:` (KHONG phai thu muc): in lai thu muc cua no se dua ca thu muc ay len
+# DAU PATH va che cong cu khac cung thu muc (#831 luot 4: cong thuc bash dua rg hong len truoc); im lang thi dong cuoi
+# stdout cua TRINH CAI bi doc lam thu muc chon (F858-03). `--win`: ung vien la duong Windows, doi qua `cygpath -u`; ghi
+# $GITHUB_PATH bang `cygpath -w`. Ghi $GITHUB_PATH chi khi ten tran chua DAT (ly do nhu rg.cai.linux). Moi buoc hong
+# (khong ung vien DAT, cygpath, ghi $GITHUB_PATH) => tra 1 TUONG MINH: `errexit` tat trong `$(eval ...)` (F858-01).
 chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
-  local win="" ten d dich=""
+  local win="" ten d dich="" w
   if [ "${1:-}" = "--win" ]; then win=1; shift; fi
   ten="$1"; shift
   if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then
     echo "cai_cong_cu: '$ten' ten tran da DAT, giu nguyen PATH" >&2
+    echo ":giu-nguyen-PATH:"
     return 0
   fi
   for d in "$@"; do
-    [ -n "$win" ] && d="$(cygpath -u "$d")"
-    { { [ -f "$d/$ten" ] && [ -x "$d/$ten" ]; } || [ -f "$d/$ten.exe" ]; } || continue
+    if [ -n "$win" ]; then
+      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua '$ten'" >&2; return 1; }
+    fi
     if PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then dich="$d"; break; fi
   done
   [ -n "$dich" ] || { echo "cai_cong_cu: khong thu muc nao co '$ten' chay duoc" >&2; return 1; }
   if [ -n "${GITHUB_PATH:-}" ]; then
-    if [ -n "$win" ]; then cygpath -w "$dich" >> "$GITHUB_PATH"; else echo "$dich" >> "$GITHUB_PATH"; fi
+    w="$dich"
+    if [ -n "$win" ]; then
+      w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho '$dich'" >&2; return 1; }
+    fi
+    printf '%s\n' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; return 1; }
   fi
   echo "$dich"
 }

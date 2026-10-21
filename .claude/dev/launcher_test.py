@@ -2340,6 +2340,43 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     bang(tt == "CHUA_XAC_THUC", f"rc=0 ma noi chua dang nhap thi phai fail-closed, duoc {tt}")
 
 
+# wp858 (L2, đo 21-10-2026): `codex-linux-sandbox` (bwrap) gắn tmpfs chỉ đọc lên `<gốc ghi được>/.git` để bảo vệ nó,
+# nên khi một phiên Codex đang sống thì THƯ MỤC RỖNG `/tmp/.git` có mặt trên hệ tệp máy chủ
+# (`/proc/<pid>/mountinfo`: `/tmp/.git ro … tmpfs`). Mọi `mkdtemp()` dưới `/tmp` khi ấy có tổ tiên mang `.git` và
+# `_KhoCodex` từ chối ĐÚNG thiết kế (`Codex home is inside a repository`) ⇒ `t86` đỏ "khi chạy song song" ở #831 —
+# thật ra là khi chạy CÙNG LÚC với một lượt Codex. Ca chọn gốc tạm mà không tổ tiên nào có `.git`.
+_WP858_GOC_TAM_UNG_VIEN = (tempfile.gettempdir(), "/var/tmp", "/dev/shm")
+
+
+def _goc_tam_khong_git(ung_vien):
+    """Thư mục ĐẦU TIÊN tồn tại mà nó và mọi tổ tiên đều KHÔNG có `.git` (kể cả symlink hỏng); không có ⇒ None."""
+    for u in ung_vien:
+        p = Path(u)
+        if p.is_dir() and not any(os.path.lexists(q / ".git") for q in (p, *p.parents)):
+            return str(p)
+    return None
+
+
+@ca
+def r858_goc_tam_tranh_to_tien_co_git():
+    """N5 (L2): bộ chọn gốc tạm của `t86` bỏ ứng viên có `.git` ở CHÍNH nó hoặc ở tổ tiên; hết ứng viên ⇒ None."""
+    goc = _goc_tam_khong_git(_WP858_GOC_TAM_UNG_VIEN)
+    bang(goc is not None, f"KHONG DO DUOC: moi goc tam ung vien deu nam duoi mot `.git` ({_WP858_GOC_TAM_UNG_VIEN})")
+    s = Path(tempfile.mkdtemp(prefix="lt_", dir=goc))
+    try:
+        co_git, sach = s / "co_git", s / "sach"
+        (co_git / ".git").mkdir(parents=True)
+        (co_git / "con" / "chau").mkdir(parents=True)
+        sach.mkdir()
+        bang(_goc_tam_khong_git([str(co_git / "con" / "chau"), str(sach)]) == str(sach),
+             "to tien co .git van duoc chon lam goc tam")
+        bang(_goc_tam_khong_git([str(co_git), str(sach)]) == str(sach), "goc co .git van duoc chon")
+        bang(_goc_tam_khong_git([str(s / "vang"), str(co_git / "con")]) is None,
+             "khong ung vien sach ma van tra goc")
+    finally:
+        shutil.rmtree(s, ignore_errors=True)
+
+
 @ca
 def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
     """Sáng 15-08-2026 tôi ghi base64 THÔ vào `auth.json`, `codex` trả `expected
@@ -2353,9 +2390,12 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
     import base64 as _b64
     m = _tai_launcher_thu()
     that = '{"tokens":{"access":"gia-dinh"}}'
+    goc = _goc_tam_khong_git(_WP858_GOC_TAM_UNG_VIEN)
+    bang(goc is not None, "KHONG DO DUOC: moi goc tam ung vien deu nam duoi mot `.git` "
+                          f"({_WP858_GOC_TAM_UNG_VIEN}) — _KhoCodex se tu choi dung thiet ke")
     for ten, gia_tri in (("base64", _b64.b64encode(that.encode()).decode()),
                          ("json tho", that)):
-        nha = tempfile.mkdtemp()
+        nha = tempfile.mkdtemp(dir=goc)
         m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
         m.os.environ = {"CODEX_AUTH_JSON": gia_tri}
         ket = m.chuan_bi_xac_thuc(that_su=True)
@@ -2378,7 +2418,7 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
         bang(m.chuan_bi_xac_thuc(that_su=True)[0].get("doi") is False,
              f"{ten}: goi lai phai nhan ra da khop va khong dung tep")
     # rac => tu choi, va noi ro da thu CA HAI duong
-    nha = tempfile.mkdtemp()
+    nha = tempfile.mkdtemp(dir=goc)
     m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
     m.os.environ = {"CODEX_AUTH_JSON": "!!khong-phai-gi-ca!!"}
     ket = m.chuan_bi_xac_thuc(that_su=True)
@@ -10934,6 +10974,11 @@ DOT_BIEN_HARNESS = [
      ('               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
       '               if True}'),
      ["r484_g8_hook_scrub_kin_voi_bash_env"]),
+    # wp858 (N5): bộ chọn gốc tạm của `t86` chỉ nhìn `.git` ở CHÍNH thư mục, bỏ tổ tiên ⇒ `/tmp/.git` của sandbox
+    # Codex lọt qua lại.
+    ("wp858_goc_tam_bo_kiem_to_tien",
+     ('not any(os.path.lexists(q / ".git") for q in (p, *p.parents))', 'not os.path.lexists(p / ".git")'),
+     ["r858_goc_tam_tranh_to_tien_co_git"]),
 ]
 
 

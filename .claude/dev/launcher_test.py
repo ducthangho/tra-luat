@@ -8520,6 +8520,10 @@ def _wp858_cai_chon_ban_chay_duoc(nen):
                 bang(p.returncode != 0 and gp == "",
                      f"{nen}/{ten}: khong ung vien nao chay duoc ma van chon ({xau!r}): rc={p.returncode} "
                      f"GITHUB_PATH={gp!r}")
+            # Chính CÔNG THỨC phải thoát ≠ 0 — bước kiểm cuối của cai_cong_cu.sh che mất mã của hàm chọn.
+            with San() as s:
+                p, _gp, _uv, _d = _wp858_chay_cai(s, ten, nen, xau, truc_tiep=True)
+                bang(p.returncode != 0, f"{nen}/{ten}: cong thuc rc=0 khi khong ung vien nao chay duoc ({xau!r})")
         # Tên trần đã DAT ⇒ không đổi PATH, không ghi GITHUB_PATH (ghi thì đẩy thư mục ấy lên trước bước sau).
         with San() as s:
             p, gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], dau="tot")

@@ -1,0 +1,75 @@
+# do luc 2026-10-20T01:32:07Z: tai log 23 job cua run 39343232426 qua GET actions/jobs/<id>/logs (GITHUB_PAT, proxy phien); ban tho (doi duoi .log -> .txt) o log-39343232426/
+# dinh nghia workflow: run.path=.github/workflows/ci.yml ; blob ci.yml @9422054 = 55d06ab452a060b836fdf6fa45ba3408fc44c90c ; run.head_sha=94220547cd155c73392e95726e8daf353888b3aa
+# cot: sha256(log tho) | byte | so lan xuat hien merge SHA 9422054 day du | dong dau duong (TONG/N-N/DAT)
+== 118379194293-chuan-bi.log | c9211fe754c715fe21f93010b19fdaf47cc1deee0d45fb70800c11b0457d22b5 | 3519 | sha=0
+== 118379223205-gate_ubuntu-latest.log | e539f03ab84a786e8c0ee7f408c89f194b1e5346d06aaa4a946f838260d4a1e3 | 665671 | sha=4
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    nền: 18/18 đạt
+    TỔNG: ĐẠT
+    nền: 7/7 đạt · BỎ QUA: 0
+    TỔNG: ĐẠT
+== 118379223284-gate-cong-cu_ubuntu-latest_5.log | e5d6dd62a31aaab342c8165f7cdbfce8e7684bc8e32b27d11a8c121db5bfbcdb | 106138 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 5/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 5/8: 59/59 đột biến bán kính 1 · ghi manh/manh-5.txt
+== 118379223295-gate-ops_ubuntu-latest.log | 77961208cf69378722f9336ae12a42066a73e8f2b3cecf7633a2f724841272c6 | 352916 | sha=2
+    DOT BIEN: 383/383 bi giet dung ly do
+    TONG: DAT
+    bien_nhan_v2_test: 68/68 ca đạt · 74/74 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 56/74 đột biến thường khai đối chứng
+    TỔNG: ĐẠT
+    [B] lease_publish: 265/266 đạt; đã chạy=266, bỏ qua=0
+    [A] lease_publish: 265/266 đạt; đã chạy=266, bỏ qua=0
+    lease_publish: 266/266 đạt; đã chạy=266, bỏ qua=0
+    gate lifecycle tests: 28/28 ca QUA (bo qua 0, hong 0)
+== 118379223301-gate-cong-cu_ubuntu-latest_0.log | cb9f869e8804675862145b7b4e9dcf708327fd88001d4ec277f1976fb82cae0d | 106221 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 0/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 0/8: 59/59 đột biến bán kính 1 · ghi manh/manh-0.txt
+== 118379223305-gate-packet-loop_ubuntu-latest.log | f66f0bac736e5e15c3434a3bf441280ae8180eb2abc36d18766efe28f379c8d8 | 166476 | sha=2
+    nền: 634/634 đạt · BỎ QUA: 1
+    TỔNG: ĐẠT
+== 118379223310-gate-cong-cu_ubuntu-latest_1.log | 84c96129ab5bc9912b194dd6cc13f5b234d5cc94e518bb0c53c40f5ce14efafb | 106025 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 1/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 1/8: 59/59 đột biến bán kính 1 · ghi manh/manh-1.txt
+== 118379223337-gate-cong-cu_ubuntu-latest_7.log | 67a3f41027ad7df0c2725c16d26edcda134b3b28695c282969afcb39d1be1382 | 106009 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 7/8 (58/470 đột biến; 2 tiến trình):
+    MẢNH 7/8: 58/58 đột biến bán kính 1 · ghi manh/manh-7.txt
+== 118379223345-gate-nhanh-manh_ubuntu-latest_2.log | 79dc7aaa8bfc26eb48c4b0ef4179b4b9d0613b7819f96b3d27d07c192951237f | 95329 | sha=2
+== 118379223352-gate-nhanh-manh_ubuntu-latest_7.log | cdde979ce5539044d4bae3338fd5e75704f190bed37e7bef7562e4a4d7b25833 | 94846 | sha=2
+== 118379223363-gate-cong-cu_ubuntu-latest_2.log | caff8473bdd4ebb43e3099b4134ef5975eceec5f95b3af934f4de10a74e8890c | 106079 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 2/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 2/8: 59/59 đột biến bán kính 1 · ghi manh/manh-2.txt
+== 118379223367-gate-cong-cu_ubuntu-latest_3.log | 5f7027d4101519f97355011b7e5e9edf0cf858e28ae6e430a0f3f1f0a9bcefc5 | 106038 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 3/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 3/8: 59/59 đột biến bán kính 1 · ghi manh/manh-3.txt
+== 118379223377-gate-nhanh-manh_ubuntu-latest_3.log | 00bafe15df55a63342402b431d16ab03004551e40715b64b8a16bc5fbc485894 | 94528 | sha=2
+== 118379223416-gate-nhanh-manh_ubuntu-latest_4.log | ae666d18ffd6a9c04f7f742f95a7a3abf35470d5ec90695c5bf2b71f6355687f | 94927 | sha=2
+== 118379223440-gate-nhanh-manh_ubuntu-latest_0.log | 256bbaa7f535579b15dada967852797ae0d8410e10dbf9379d04c5b5f781c8e6 | 94569 | sha=2
+== 118379223446-gate-cong-cu_ubuntu-latest_6.log | da275872c474c1fda80a4dc18800f970e687dd89da5bc72179752756b34ce92a | 105926 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 6/8 (58/470 đột biến; 2 tiến trình):
+    MẢNH 6/8: 58/58 đột biến bán kính 1 · ghi manh/manh-6.txt
+== 118379223457-gate-nhanh-manh_ubuntu-latest_1.log | c05e7268d2c98c28461e00855b5f7d63b95432295b0be1b62677ead9677ea566 | 94344 | sha=2
+== 118379223471-gate-cong-cu_ubuntu-latest_4.log | 5c43aed1e209549eff02013fdb4f1308dff19a9f11a6693267f312b29b71c74d | 106095 | sha=2
+    cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+    BÁN KÍNH ĐỘT BIẾN — MẢNH 4/8 (59/470 đột biến; 2 tiến trình):
+    MẢNH 4/8: 59/59 đột biến bán kính 1 · ghi manh/manh-4.txt
+== 118379223538-gate-nhanh-manh_ubuntu-latest_6.log | bffc27892c7d458735475f7bdf5bbfa4228fe03a0d1ff85422543af401bc2f9b | 94347 | sha=2
+== 118379223814-gate-nhanh-manh_ubuntu-latest_5.log | 37ed3323ae3180b6bbdc9b45a70676dda3db57d84e1bd5995a6178bb98d62711 | 94705 | sha=2
+== 118379508467-gate-nhanh-gop_ubuntu-latest.log | f9eb4d0a26d223d5ccbd5373fff10085bf20dbfd80a6fdbf0c79ec99a195d1a6 | 90552 | sha=3
+    targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+== 118379621061-gate-registry_ubuntu-latest.log | cf047fc4976bf786ebf46265eba9a5fc2fb3243625600fdfd390249bde0ab2f2 | 228271 | sha=3
+    doc_receipt_thu_hoi tests: 156/156 ca QUA · 162/162 dot bien GIET
+    nền: 28/28 đạt
+    TỔNG: ĐẠT
+    gh_readback tests: 8/8 ca QUA (hong 0)
+    CA         : 42/42 đạt · 0 đỏ · ĐẠT
+    TỔNG: ĐẠT
+    mcp_github_doc tests: 17/17 ca QUA (hong 0, bo qua 0)
+    nền: 11/11 đạt
+== 118389116390-gate-cong-cu-gop_ubuntu-latest.log | 5a18a761b2ac372fe86c7b8fd83f57830363117666b4667718d7031fb970467e | 94813 | sha=3
+# chuan-bi khong checkout (0 lan SHA) — job phan loai che do; 22/23 job con lai in dung merge SHA.

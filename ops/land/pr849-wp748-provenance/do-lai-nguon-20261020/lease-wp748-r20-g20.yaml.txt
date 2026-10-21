@@ -1,0 +1,89 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 20
+generation: 20
+lease_id: wp748-r20-g20-claude-remote-20261019
+thay_the_cho: []
+thay_the_cho_ghi_chu: r19 g19 lease het han 2026-10-19T04:48:21Z truoc khi cap r20; khong viet bia mo vao lease da chet (CLAUDE.md bai hoc 20-09-2026)
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6273564956
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6273564956
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-19T17:54:37Z'
+heartbeat_at: '2026-10-19T17:54:37Z'
+lease_until: '2026-10-20T01:13:00Z'
+lease_expires_at_utc: '2026-10-20T01:13:00Z'
+rut_han:
+  han_cu: '2026-10-20T05:54:37Z'
+  han_moi: '2026-10-20T01:13:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #748 da merge (PR #849, head 3818bd4a9685e1782afdd7e8a593482f74b663ff, merge 94220547cd155c73392e95726e8daf353888b3aa, 2026-10-19T23:42Z); gate push master tren 9422054 xanh (ci.yml 39343232426); Codex luot 5 approve neo 3818bd4. Chu kho chon ghi so land (phuong an 1) de nha write set ngay.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp845 (41a72cb)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head
+spec_path: ops/specs/wp748-windows-gates-r20.md
+spec_ref: ops/wp748-r20-g20-lease
+spec_commit: 5488bf4774aa0c4a6839ff4acb1bd81fc50b0da4
+spec_hash: 43714acde5f6f520d9911fe486951108c925dd31809ab52e326544fb92b1eb0c
+spec_sha256: 43714acde5f6f520d9911fe486951108c925dd31809ab52e326544fb92b1eb0c
+branch: agent/wp748-g19-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8aebf14af7d3918e4e45fc42569c2c156f9b3ca9
+start_from_sha: 12430197e76dfb87c0e72796d0299b6faaa8b70b
+human_audited_sha: a2a358ae6b8649f9e2869f7042c42abf1c98dfd4
+reviewed_sha_required: 12430197e76dfb87c0e72796d0299b6faaa8b70b
+reviewed_sha_ghi_chu: neo head ke thua; review Codex cuoi phai neo dung head PR sau merge master
+write_set:
+- ops/bash_nen.py
+- ops/cong_cu_test.py
+- ops/lease_publish_test.py
+- .claude/dev/ci_dang_ky_test.py
+- ops/nhanh_don_duoc_test.py
+- .github/workflows/ci.yml
+- .github/workflows/ci-dot-bien-du.yml
+- ops/ci_duong_nhanh_test.py
+- .claude/dev/doc_receipt_thu_hoi_test.py
+- .claude/skills/work-packet/SKILL.md
+- .agents/skills/work-packet/SKILL.md
+- .claude/hooks/subagent_ghi_detect_test.py
+write_set_hash: e06292877ba0a66faab54c598f54d9e4845e4c6c41a47a52dc5fd94f850db46d
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: r20 same twelve paths; holder scan 2026-10-19 on 511/511 live refs NGUOI_GIU 0 for all twelve
+coordination_paths:
+- ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+run_minutes: 720
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

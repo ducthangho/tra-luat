@@ -1,0 +1,11 @@
+== run 39291888405 suite 106474075749 14 ten
+gate XANH trên 23bc189f28ea60f04ca1634b6fe66d02babf12ed (suite 106474075749): chuan-bi id=118194380522 · gate (ubuntu-latest) id=118194513265 · gate-cong-cu (ubuntu-latest, 0) id=118194513606 · gate-cong-cu (ubuntu-latest, 1) id=118194513489 · gate-cong-cu (ubuntu-latest, 2) id=118194513639 · gate-cong-cu (ubuntu-latest, 3) id=118194513669 · gate-cong-cu (ubuntu-latest, 4) id=118194513552 · gate-cong-cu (ubuntu-latest, 5) id=118194513550 · gate-cong-cu (ubuntu-latest, 6) id=118194513813 · gate-cong-cu (ubuntu-latest, 7) id=118194513598 · gate-cong-cu-gop (ubuntu-latest) id=118209947510 · gate-ops (ubuntu-latest) id=118194513336 · gate-packet-loop (ubuntu-latest) id=118194513297 · gate-registry (ubuntu-latest) id=118194513351
+rc=0
+== run 39291888633 suite 106474076361 1 ten
+CẢNH BÁO: 'thu-hoi' có 1 run ở suite khác (118294005020) — bỏ qua
+gate XANH trên 23bc189f28ea60f04ca1634b6fe66d02babf12ed (suite 106474076361): thu-hoi id=118194361407
+rc=0
+== run 39320797755 suite 106555136375 1 ten
+CẢNH BÁO: 'thu-hoi' có 1 run ở suite khác (118194361407) — bỏ qua
+gate XANH trên 23bc189f28ea60f04ca1634b6fe66d02babf12ed (suite 106555136375): thu-hoi id=118294005020
+rc=0

@@ -1,0 +1,38 @@
+luc: 2026-10-20T01:13:46Z
+ls-remote: 514 ten; guong refs/heads: 514
+== ops/bash_nen.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== ops/cong_cu_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== ops/lease_publish_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/dev/ci_dang_ky_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== ops/nhanh_don_duoc_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .github/workflows/ci.yml rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .github/workflows/ci-dot-bien-du.yml rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== ops/ci_duong_nhanh_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/dev/doc_receipt_thu_hoi_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/skills/work-packet/SKILL.md rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .agents/skills/work-packet/SKILL.md rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/hooks/subagent_ghi_detect_test.py rc=0
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+NGƯỜI_GIỮ 0: không có

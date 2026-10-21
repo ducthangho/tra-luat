@@ -1,0 +1,230 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -6272,7 +6272,7 @@
+              for k, v in MUTANTS.items() if k.startswith("kg_")}
+ 
+ 
+-def _kg_o(ho, vi_tri, toan_tu, k, ten, tim, thay, ca):
++def _kg_o(ho, vi_tri, toan_tu, k, ten, tim, thay, ca, _ghi_o=True):
+     """Đăng ký MỘT ô bằng một đột biến. Đột biến PHẢI đổi mã (bài học #822: bộ sinh từng khai 22 đột biến không đổi
+     gì); trùng NGUỒN sau đột biến với một đột biến đã có ⇒ ô trỏ về tên cũ, không chạy hai lần cùng một mã."""
+     moi = _kg_ap(_KG_GOC, tim, thay)
+@@ -6282,7 +6282,8 @@
+         MUTANTS[ten] = (tim, thay, [ca])
+         _KG_DA_CO[bam] = ten
+         _KG_T_K.setdefault(f"{ho}-{k}", []).append(ten)
+-    _KG_MA_TRAN[(ho, vi_tri, toan_tu)] = _KG_DA_CO[bam]
++    if _ghi_o:   # thêm hiện thực cùng ô, giữ đại diện đầy đủ trong ma trận
++        _KG_MA_TRAN[(ho, vi_tri, toan_tu)] = _KG_DA_CO[bam]
+ 
+ 
+ def _kg_khong(ho, vi_tri, toan_tu, loai, ly_do):
+@@ -6330,9 +6331,49 @@
+     return f"{tien_to} {_KG_CS}" if vi_tri.startswith("check_suite") else f"{tien_to} {_KG_TRUONG} ['{vi_tri}']"
+ 
+ 
+-def _kg_t1_muc(vi_tri, kieu, gt):
++def _kg_t1_muc(vi_tri, kieu, gt, _bo_sung=True):
+     """Run-level: đầu/giữa/cuối × (một trang · trang GIỮA của ba trang), luôn có run hợp lệ trước HOẶC sau trong trang
+     và cả hai phía qua trang. Trang-level: đầu/giữa/cuối giữa năm trang hợp lệ, cộng trang duy nhất."""
++    if _bo_sung:
++        yield from _kg_t1_muc(vi_tri, kieu, gt, _bo_sung=False)
++        them = []
++        if kieu == "float" and vi_tri in ("id", "check_suite.id", "total_count"):
++            them = [("so_thuc_nguyen", 1.0)]
++        elif kieu == "list" and vi_tri in ("phan_tu", "check_suite", "trang"):
++            gia_tri = {"phan_tu": lambda: list(_kg_khac(id=15).items()), "check_suite": lambda: [["id", 1]],
++                       "trang": lambda: (lambda n: list({"total_count": n, "check_runs": [_kg_run(11)] if n == 1 else []}.items()))}
++            them = [("cap_khoa_gia_tri", gia_tri[vi_tri]())]
++        elif kieu == "str" and vi_tri in ("phan_tu", "check_suite", "trang", "check_runs"):
++            gia_tri = {"phan_tu": lambda: json.dumps(_kg_khac(id=15)), "check_suite": lambda: json.dumps({"id": 1}),
++                       "trang": lambda: (lambda n: json.dumps({"total_count": n, "check_runs": [_kg_run(11)] if n == 1 else []})),
++                       "check_runs": lambda: (lambda n: json.dumps([_kg_run(11)] if n == 1 else []))}
++            them = [("chuoi_json", gia_tri[vi_tri]())]
++        for nhan, gia_tri in them:
++            # Bản lặp nhất quán: nhận sau ép kiểu HOẶC bỏ bản sai đều không làm lệch số id.
++            dung = _kg_run(1)
++            hong = dict(dung)
++            if vi_tri == "id":
++                hong["id"] = gia_tri
++            elif vi_tri == "check_suite.id":
++                hong["check_suite"] = {"id": gia_tri}
++            elif vi_tri == "phan_tu":
++                hong = json.dumps(dung) if kieu == "str" else list(dung.items())
++            elif vi_tri == "check_suite":
++                hong["check_suite"] = json.dumps({"id": 1}) if kieu == "str" else [["id", 1]]
++            if vi_tri in ("trang", "check_runs", "total_count"):
++                xanh = {"total_count": 1, "check_runs": [dung]}
++                rong = {"total_count": 1, "check_runs": []}
++                hong = (json.dumps(rong) if kieu == "str" else list(rong.items())) if vi_tri == "trang" else {
++                    "total_count": gia_tri if vi_tri == "total_count" else 1,
++                    "check_runs": json.dumps([]) if vi_tri == "check_runs" else []}
++                du, sua, tien_to = [xanh, hong, rong], [xanh, dict(rong), rong], "trang 1"
++            else:
++                du, sua, tien_to = {"total_count": 1, "check_runs": [dung, hong]}, {
++                    "total_count": 1, "check_runs": [dung, dict(dung)]}, "trang 0 check_runs[1]"
++            yield f"ep_kieu_{nhan}_ban_lap", dict(du_lieu=du, chua=_kg_t1_ly_do(vi_tri, kieu, tien_to)), dict(du_lieu=sua, expect=0)
++            for ten, kw, sua in _kg_t1_muc(vi_tri, kieu, gia_tri, _bo_sung=False):
++                yield f"ep_kieu_{nhan}_{ten}", kw, sua
++        return
+     if vi_tri not in ("trang", "check_runs", "total_count"):
+         hong, tot = _kg_t1_run(vi_tri, gt), _kg_khac(id=15)
+         for vt, j in (("dau", 0), ("giua", 2), ("cuoi", 4)):
+@@ -6357,13 +6398,13 @@
+     sua = {"trang": lambda n: {"total_count": n, "check_runs": []}, "check_runs": lambda n: {"total_count": n, "check_runs": []},
+            "total_count": lambda n: {"total_count": n, "check_runs": run_trang}}[vi_tri]
+     for vt, p in (("dau", 0), ("giua", 2), ("cuoi", 5)):
+-        yield f"nam_trang_{vt}", dict(du_lieu=tot[:p] + [lam(gt, tc)] + tot[p:], chua=_kg_t1_ly_do(vi_tri, kieu, f"trang {p}")), \
++        yield f"nam_trang_{vt}", dict(du_lieu=tot[:p] + [lam(gt(tc) if callable(gt) else gt, tc)] + tot[p:], chua=_kg_t1_ly_do(vi_tri, kieu, f"trang {p}")), \
+             dict(du_lieu=tot[:p] + [sua(tc)] + tot[p:], expect=0)
+     # Trang DUY NHẤT: bản sửa mang run `gate` ngay trong chính phần tử đích (không còn trang nào khác giữ nó).
+     mot = {"trang": lambda: {"total_count": 1, "check_runs": [_kg_run(11)]},
+            "check_runs": lambda: {"total_count": 1, "check_runs": [_kg_run(11)]},
+            "total_count": lambda: {"total_count": 1, "check_runs": [_kg_run(11)]}}[vi_tri]()
+-    hong1 = {"trang": gt, "check_runs": {"total_count": 1, **({} if gt is _VANG_T else {"check_runs": gt})},
++    hong1 = {"trang": gt(1) if callable(gt) else gt, "check_runs": {"total_count": 1, **({} if gt is _VANG_T else {"check_runs": gt(1) if callable(gt) else gt})},
+              "total_count": {**({} if gt is _VANG_T else {"total_count": gt}), "check_runs": [_kg_run(11)]}}[vi_tri]
+     yield "trang_duy_nhat", dict(du_lieu=[hong1], chua=_kg_t1_ly_do(vi_tri, kieu, "trang 0")), dict(du_lieu=[mot], expect=0)
+ 
+@@ -6408,6 +6449,38 @@
+         for _tt, (_tim, _thay) in (("nhan", _nhan), ("bo_qua", _bo)):
+             _kg_o("T1", f"{_vt}:{_k}", _tt, _hang, f"{_ca}_{_tt}", _tim, _thay, _ca)
+ 
++# Hiện thực ép kiểu bảo toàn giá trị: khoá chính các miền fixture bổ sung ở trên.
++for _ep_loai, _ep_kieu, _ep_vi_tri in (("nguyen", "float", ("id", "check_suite.id")),
++                                      ("cap", "list", ("phan_tu", "check_suite", "trang")),
++                                      ("json", "str", ("phan_tu", "check_suite", "trang", "check_runs"))):
++    for _vt in _ep_vi_tri:
++        _vao = {
++            "id": (_KG_A_SAI, 'r.get("id", _VANG)', "            ", 'r = {**r, "id": _ep}', "True"),
++            "check_suite.id": (_KG_A_SUITE, 'cs.get("id", _VANG) if isinstance(cs, dict) else _VANG', "            ",
++                               'cs = {**cs, "id": _ep}\n            r = {**r, "check_suite": cs}', "True"),
++            "phan_tu": (_KG_A_RUN, "r", "            ", "r = _ep",
++                        '{"id", "name", "head_sha", "status", "conclusion", "check_suite"}.issubset(_ep)'),
++            "check_suite": (_KG_A_SUITE, "cs", "            ", 'cs = _ep\n            r = {**r, "check_suite": cs}',
++                            'type(_ep.get("id")) is int'),
++            "trang": (_KG_A_TRANG, "tr", "        ", "tr = _ep",
++                      'type(_ep.get("total_count")) is int and type(_ep.get("check_runs")) is list'),
++            "check_runs": (_KG_A_TRANG, 'tr.get("check_runs", _VANG) if isinstance(tr, dict) else _VANG', "        ",
++                           'tr = {**tr, "check_runs": _ep}', "True"),
++        }
++        _tim, _raw, _le, _gan, _dung = _vao[_vt]
++        _dk, _ep = (('type(_raw) is float and _raw.is_integer()', 'int(_raw)') if _ep_loai == "nguyen" else
++                    ('type(_raw) is list', 'dict(_raw)') if _ep_loai == "cap" else ('type(_raw) is str', 'json.loads(_raw)'))
++        _du = ('_ep is not _VANG' if _ep_loai == "nguyen" else
++               f'type(_ep) is {"list" if _vt == "check_runs" else "dict"} and {_dung}')
++        for _cach in ("nhan", "bo_qua"):
++            _than = (_le + f'_raw = {_raw}\n' + _le + '_ep = _VANG\n' + _le + f'if {_dk}:\n' +
++                     _le + '    try:\n' + _le + f'        _ep = {_ep}\n' + _le + '    except (TypeError, ValueError):\n' +
++                     _le + '        pass\n' + _le + f'if {_du}:\n' + _le + '    ' +
++                     ('continue' if _cach == "bo_qua" else _gan.replace('\n', '\n    ')) + '\n' + _tim)
++            _ca = f'kg_t1_{_vt.replace(".", "_")}_{_ep_kieu}'
++            _kg_o("T1", f"{_vt}:{_ep_kieu}", _cach, _KG_T1_VI_TRI[_vt][2],
++                  f"{_ca}_ep_{_ep_loai}_{_cach}", _tim, _than, _ca, _ghi_o=False)
++
+ # --- T2: nới phép so chuỗi. Toán tử → (mã nguồn, hàm Python CÙNG nghĩa để tự tính fixture nào giết ô nào).
+ _KG_NFC = '__import__("unicodedata").normalize("NFC", {})'
+ _KG_T2_F = {"casefold": ("{}.casefold()", str.casefold), "strip": ("{}.strip()", str.strip),
+@@ -6431,17 +6504,17 @@
+ 
+ def _kg_bien_the(v):
+     """Họ gần đúng: mỗi biến thể THẬT SỰ khác `v` (bài học #822: đổi ký tự đầu `completed` bằng `c` trùng gốc)."""
+-    m = len(v) // 2
+     ds = {"hoa": v.upper(), "dem": f" {v} ", "dem_trai": " " + v, "dem_phai": v + " ", "nfd": unicodedata.normalize("NFD", v),
+           "rong": "".join(chr(ord(k) + 0xFEE0) if "!" <= k <= "~" else k for k in v), "tien_to": "x" + v, "hau_to": v + "x",
+-          "cat_dau": v[1:], "cat_cuoi": v[:-1], "dao": v[::-1], "chen_giua": v[:(len(v) + 1) // 2] + "x" + v[(len(v) + 1) // 2:]}
+-    for i in sorted({0, 1, m, len(v) - 1}):
++          "cat_dau": v[1:], "cat_cuoi": v[:-1], "dao": v[::-1], "sap_xep": "".join(sorted(v)), "chen_giua": v[:(len(v) + 1) // 2] + "x" + v[(len(v) + 1) // 2:]}
++    for i in range(len(v)):   # T2: mọi ký tự giữa, không chỉ chỉ số trung tâm
+         k = v[i]
+         ds[f"doi_{i}"] = v[:i] + ("x" if k != "x" else "y") + v[i + 1:]
+         ds[f"bo_{i}"] = v[:i] + v[i + 1:]
+         ds[f"lap_{i}"] = v[:i] + k + v[i:]
+         if i + 1 < len(v):
+             ds[f"doi_cho_{i}"] = v[:i] + v[i + 1] + k + v[i + 2:]
++    ds.update({f: _KG_T2_F[f][1](v) for f in ("casefold", "strip", "lstrip", "rstrip", "nfc", "nfkc")})
+     ra = {n: p for n, p in ds.items() if p != v}
+     assert all(p != v for p in ra.values())
+     return ra
+@@ -6458,13 +6531,13 @@
+     "conclusion": ("K33", ("success",), ("success",),
+                    lambda p, t: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, conclusion=p)]}, chua=f"conclusion={p!r}"),
+                    lambda v: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, conclusion=v)]}, expect=0)),
+-    "head": ("K34", (_KG_HEAD,), (_KG_HEAD,),
+-             lambda p, t: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, head=p)]}, chua=f"head_sha={p!r}"),
+-             lambda v: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, head=v)]}, expect=0)),
+-    "ten": ("K27", (_KG_T,), (_KG_T, _KG_T2_KHONG_CHUAN),
++    "head": ("K34", (_KG_HEAD, "".join(sorted(_KG_HEAD))), (_KG_HEAD,),
++             lambda p, t: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, head=p)]}, head=t, chua=f"head_sha={p!r}"),
++             lambda v: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, head=v)]}, head=v, expect=0)),
++    "ten": ("K27", (_KG_T, "".join(sorted(_KG_T)), _KG_T2_KHONG_CHUAN), (_KG_T, _KG_T2_KHONG_CHUAN),
+             lambda p, t: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, name=p)]}, bat_buoc=(t,), chua="VẮNG"),
+             lambda v: dict(du_lieu={"total_count": 1, "check_runs": [_kg_run(1, name=v)]}, bat_buoc=(v,), expect=0)),
+-    "canh_bao": ("K26", (_KG_T,), (_KG_T, _KG_T2_KHONG_CHUAN),
++    "canh_bao": ("K26", (_KG_T, "".join(sorted(_KG_T)), _KG_T2_KHONG_CHUAN), (_KG_T, _KG_T2_KHONG_CHUAN),
+                  lambda p, t: dict(du_lieu={"total_count": 2, "check_runs": [_kg_run(1, name=t), _kg_run(2, name=p, suite=9)]},
+                                    bat_buoc=(t,), expect=0, canh_bao=()),
+                  lambda v: dict(du_lieu={"total_count": 2, "check_runs": [_kg_run(1, name=v), _kg_run(2, name=v, suite=9)]},
+@@ -6600,6 +6673,44 @@
+ 
+ 
+ _KG_T2_CA.update({f"kg_t2_{v}_ho": (lambda v=v: _kg_t2_ho(v)) for v in _KG_T2_VI_TRI})
++
++# Cùng toán tử sắp xếp, hiện thực nới giữ phép bằng nguyên văn để không lấy tín dụng từ từ chối oan.
++for _vt, _ph in (("status", "phai"), ("conclusion", "phai"), ("head", "phai"),
++                 ("head", "trai"), ("ten", "trai"), ("canh_bao", "trai")):
++    _so = _KG_T2_SO[_vt]
++    _duoi = _so.get("duoi", "")
++    _x, _y = _so["x"], _so["y"]
++    _noi = f'str.join("", sorted({_x})) == {_y}' if _ph == "trai" else f'{_x} == str.join("", sorted({_y}))'
++    _kg_o("T2", _vt, f"sap_xep:{_ph}", _KG_T2_VI_TRI[_vt][0], f"kg_t2_{_vt}_sap_xep_noi_{_ph}",
++          _so["mau"] + _duoi, f'({_so["mau"]} or ({_noi}))' + _duoi, f"kg_t2_{_vt}_ho", _ghi_o=False)
++
++
++def case_kg_t_phu_bien_the(c: Ctx):
++    """Độ phủ dữ liệu theo mọi chỉ số, không phụ thuộc chính vòng lặp dùng để sinh dữ liệu."""
++    for v in ("completed", "success", _KG_HEAD, _KG_T):
++        cac_gia_tri = set(_kg_bien_the(v).values())
++        for i in range(len(v)):
++            doi = v[:i] + ("x" if v[i] != "x" else "y") + v[i + 1:]
++            if doi not in cac_gia_tri:
++                raise AssertionError(f"thiếu biến thể thay riêng ký tự {i} của {v!r}")
++        sap = "".join(sorted(v))
++        if sap != v and sap not in cac_gia_tri:
++            raise AssertionError(f"thiếu biến thể sắp xếp {v!r}")
++
++
++CASES.append(("kg_t_phu_bien_the", case_kg_t_phu_bien_the))
++MUTANTS["t856_bien_the_chi_trung_tam"] = (
++    "    for i in range(" + "len(v)):   # T2:",
++    "    for i in sorted({0, 1, len(v) // 2, len(v) - 1}):   # T2:", ["kg_t_phu_bien_the"])
++
++# Chiều đối số không chuẩn: giữ so nguyên văn rồi nới bằng chuẩn hoá riêng đối số.
++for _vt in ("ten", "canh_bao"):
++    for _tt in _KG_T2_BAT_BIEN:
++        _so = _KG_T2_SO[_vt]
++        _duoi = _so.get("duoi", "")
++        _noi = _KG_T2_PHIA["phai"][0](_KG_T2_F[_tt][0], _so["x"], _so["y"])
++        _kg_o("T2", _vt, f"{_tt}:phai", _KG_T2_VI_TRI[_vt][0], f"kg_t2_{_vt}_{_tt}_noi_phai",
++              _so["mau"] + _duoi, f'({_so["mau"]} or ({_noi}))' + _duoi, f"kg_t2_{_vt}_ho", _ghi_o=False)
+ 
+ # --- T3: so số nguyên lỏng. Cặp phân biệt: 2^53 / 2^53+1 (float), âm/dương (abs), 9/10 (thứ tự chữ ≠ số), 12/13 (tiền tố).
+ _KG_T3_OP = {"float": ("float({})", "float"), "abs": ("abs({})", "abs"), "str": ("str({})", "str"),
+@@ -6695,10 +6806,11 @@
+         _m = f"str({_a}).startswith(str({_b}))"
+         _th = tuple(t.replace("{m}", _m) for t in _thay) if isinstance(_thay, tuple) else _thay.replace("{m}", _m)
+         _kg_o("T3", _vt, f"bat_dau_{_h}", _KG_T3_VI_TRI[_vt][0], f"kg_t3_{_vt}_bat_dau_{_h}", _tim, _th, f"kg_t3_{_vt}")
+-for _h in ("xy", "yx"):
+-    _kg_khong("T3", "id_max", f"bat_dau_{_h}", "khong_ap_dung",
+-              "`max` cần một THỨ TỰ toàn phần; quan hệ tiền tố không phải thứ tự (không toàn phần: 12 và 13 không so được) nên không "
+-              "có phép \"so qua tiền tố\" để chọn id lớn nhất. So theo thứ tự chuỗi là ô `str`, theo chiếu ký tự đầu là ô `tien_to`")
++for _h, (_x, _y) in (("xy", ("x", "y")), ("yx", ("y", "x"))):
++    _kg_o("T3", "id_max", f"bat_dau_{_h}", "K30", f"kg_t3_id_max_bat_dau_{_h}",
++          'id_max = max(r["id"] for r in cung)',
++          'id_max = max((r["id"] for r in cung), key=__import__("functools").cmp_to_key('
++          f'lambda x, y: 0 if str({_x}).startswith(str({_y})) else (x > y) - (x < y)))', "kg_t3_id_max")
+ 
+ # --- T5: dạng đối số. Run trùng NGUYÊN VĂN đối số sai, nên chỉ chốt đối số quyết định màu.
+ _KG_T5_HEAD = _KG_HEAD_SO

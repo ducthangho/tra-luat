@@ -10943,9 +10943,11 @@ DOT_BIEN_HOOK = [
       'sudo apt-get install -y python3 python3-pip && dirname "$(command -v python3)"'),
      ["r858_cai_python_khong_in_thu_muc_ban_hong", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
     ("wp858_sh_bo_kiem_ten_tran",
+     # Không nhắm N4: khi không còn lọc `-f/-x` (F858-02), bỏ kiểm tên trần thì ứng viên ĐẦU (`/usr/bin`) luôn DAT nhờ
+     # tên trần — PATH nhận `/usr/bin` (có `rg` tốt) nên N4 vẫn xanh; N4 do dòng canh giữ (`wp858_sh_bo_dong_canh_giu_path`).
+     # Hại thật của đột biến này là GHI $GITHUB_PATH khi tên trần đã DAT — ca Linux đo đúng điều đó.
      ('  if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then', '  if false; then'),
-     ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_cai_linux_chon_ban_chay_duoc",
-      "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+     ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_chon_theo_ma_thoat",
      ('if PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then',
       'if "$d/$ten" --version >/dev/null 2>&1; then'),

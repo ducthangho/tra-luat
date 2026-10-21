@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 189,
-  "total_bytes": 8768538,
-  "package_hash": "1f2f6d8c6d6d1590ec3e6e522170b5dba291b6fb72d93dccd3c56a0c72bf6d05",
-  "content_hash": "1f2f6d8c6d6d1590ec3e6e522170b5dba291b6fb72d93dccd3c56a0c72bf6d05",
+  "file_count": 190,
+  "total_bytes": 8770861,
+  "package_hash": "dcc34cffe9af500f92c2c8eb940d45ba36dbf5285abf79eff90061a25d222c5d",
+  "content_hash": "dcc34cffe9af500f92c2c8eb940d45ba36dbf5285abf79eff90061a25d222c5d",
   "required_missing": [],
   "files": [
     {
@@ -90,6 +90,11 @@
       "path": "changelog.d/wp-831.md",
       "size": 2222,
       "sha256": "b1c18da5232a0da61618b0f74baebcb9045703933faa39ab4951d50d450c2287"
+    },
+    {
+      "path": "changelog.d/wp-858.md",
+      "size": 1835,
+      "sha256": "941e76cc8d2eb3e561acc239fd66ba4c1ed89add1c6165198e9bb659337cc176"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -903,8 +908,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2224403,
-      "sha256": "e26b4a303a665f2bcf2eb9752652f359860810730e5e971c4e4788849dc30038"
+      "size": 2224891,
+      "sha256": "37cb847a48060d04d348a48a70993d0ff94b3a094935da2aaa4f46d16c6e6f5d"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

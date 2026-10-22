@@ -8719,11 +8719,11 @@ def r858_selftest_editskill_thu_muc_rieng():
 
 # wp868 (CAI-TACH-KENH-KET-QUA): kết quả bộ chọn đi qua KÊNH RIÊNG, không qua stdout chung với trình cài. Ca hành vi
 # chạy NGUYÊN `rg.cai.linux` (hoặc công thức sân tạm) qua cai_cong_cu.sh, installer là stub; ca hình dạng thuần Python.
-def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None, env_them=None):
+def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None, env_them=None, allexport=None):
     """`rg` qua cai_cong_cu.sh trong sân tạm: `rg` HỎNG đầu PATH và ở `xau/`, `rg` tốt ở `/usr/bin` dưới `CONG_CU_GOC`.
     `apt`: thân stub `apt-get`; `lenh`: thay `rg.cai.linux` (mặc định NGUYÊN VĂN YAML đang đo); `ung_vien`: {thư mục: thân
     `rg`} thêm (khoá `dau/<tệp>` đặt tệp bất kỳ lên ĐẦU PATH); `env_them`: biến thêm. Trả (process, GITHUB_PATH, ứng
-    viên `/usr/bin`, `xau`, giây chạy)."""
+    viên `/usr/bin`, `xau`, giây chạy). `allexport`: `"co"` chạy `bash -a`, `"env"` đặt `SHELLOPTS=allexport`."""
     import yaml
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cong_cu.py", "bash_nen.py"):
@@ -8747,8 +8747,11 @@ def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None, env_them=None):
     vo, env = _wp802_bash_env()
     env.update(CONG_CU_NEN="linux", CONG_CU_GOC=str(s / "goc"), GITHUB_PATH=str(gp),
                PATH=os.pathsep.join([str(dau), str(bin_), env.get("PATH", "")]), **(env_them or {}))
+    if allexport == "env":
+        env["SHELLOPTS"] = "allexport"
     t0 = time.monotonic()
-    p = subprocess.run([vo, str(ops / "cai_cong_cu.sh"), "rg"], env=env, capture_output=True, text=True, timeout=120)
+    p = subprocess.run([vo] + (["-a"] if allexport == "co" else []) + [str(ops / "cai_cong_cu.sh"), "rg"], env=env,
+                       capture_output=True, text=True, timeout=120)
     return p, gp.read_text().strip(), uv, xau, time.monotonic() - t0
 
 
@@ -8782,6 +8785,15 @@ def r868_kenh_rieng_khong_doc_stdout_trinh_cai():
                  f"{kieu}: stdout trinh cai bi doc lam thu muc: rc={p.returncode} GITHUB_PATH={gp!r} mong {uv} "
                  f"{p.stdout[-200:]} {p.stderr[-300:]}")
             bang(thay.read_text().split() == ["ABSENT", "ABSENT"], f"{kieu}: trinh cai thay kenh: {thay.read_text()!r}")
+    # F868-06 (Codex lượt 3): dưới allexport MỌI phép gán tự export — kênh vẫn phải vô hình với trình cài, cả hai cách bật.
+    for ae in ("co", "env"):
+        with San() as s:
+            thay = s / "thay.log"
+            ghi_thay = f'echo "${{KENH_KQ:-ABSENT}} ${{TAM_CAI:-ABSENT}}" >> {shlex.quote(str(thay))}'
+            p, gp, uv, _xau, _t = _wp868_chay(s, apt=f"{ghi_thay}\nexit 0", allexport=ae)
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+                 f"allexport={ae}: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+            bang(thay.read_text().split() == ["ABSENT", "ABSENT"], f"allexport={ae}: trinh cai thay kenh: {thay.read_text()!r}")
 
 
 @ca
@@ -8936,7 +8948,8 @@ def r868_hinh_dang_kenh_ket_qua():
     sh = CAI_SH_DANG_DUNG.read_text(encoding="utf-8")
     dau = sh.index("TAM_CAI=\"$(mktemp -d")
     than = sh[dau:sh.index('"${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json')]
-    for can in ('TAM_CAI="$(mktemp -d "${TMPDIR:-/tmp}/cai_cong_cu.XXXXXX")"\ndeclare +x TAM_CAI\n',
+    for can in ('TAM_CAI="$(mktemp -d "${TMPDIR:-/tmp}/cai_cong_cu.XXXXXX")"\ndeclare +x TAM_CAI\ntrap ',
+                'KENH_KQ="$TAM_CAI/kq"\ndeclare +x KENH_KQ\n: > "$KENH_KQ"\n# eval',
                 "trap 'rm -rf -- \"$TAM_CAI\"' EXIT\n", 'KENH_KQ="$TAM_CAI/kq"\ndeclare +x KENH_KQ\n',
                 '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n',
                 'KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }\n',
@@ -11245,6 +11258,11 @@ DOT_BIEN_HOOK = [
      ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_bo_rm_tuong_minh", ('rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ]', '[ -d "$DICH" ]'),
      ["r868_don_kenh_khi_loi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    # Codex lượt 3: F868-06 — gán lại SAU `declare +x` (allexport tự export lại).
+    ("wp868_sh_gan_lai_kenh_sau_go_export", ('declare +x KENH_KQ\n: > "$KENH_KQ"', 'declare +x KENH_KQ\nKENH_KQ="$KENH_KQ"\n: > "$KENH_KQ"'),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_gan_lai_tam_sau_go_export", ("declare +x TAM_CAI\ntrap ", 'declare +x TAM_CAI\nTAM_CAI="$TAM_CAI"\ntrap '),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_chi_duyet_hai_ung_vien", ('  for d in "$@"; do', '  for d in "${@:1:2}"; do'),
      ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp868_sh_bo_break", ('then dich="$d"; break; fi', 'then dich="$d"; fi'),

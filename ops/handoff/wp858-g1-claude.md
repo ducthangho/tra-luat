@@ -13,13 +13,13 @@ role: executor
 session_id: session_012ZJ73eyfSWoNKcmQWQpoiQ
 base_sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5     # merge master (Q7): merge-base 637f78029f5a5fe56d35199dd0f75c50274f2c0f
 head_sha: 521efebab226fe3a92b2ccce4a59c27dd638edff     # PR #864
-status: blocked
+status: done
 summary: >-
   L1: 12 cong thuc git/python/shellcheck/bash goi chon_thu_muc_chay_duoc (ops/cai_cong_cu.sh) — ung vien Q2 dau tien ma
   cong_cu.py kiem-tra --chi DAT; ten tran DAT => khong doi PATH, in /dev/null tren dong rieng; moi buoc hong return 1.
   L2: goc DO DUOC — codex-linux-sandbox gan tmpfs ro len /tmp/.git => _KhoCodex tu choi moi home duoi /tmp; t86 chon goc
-  tam khong .git o to tien. L3: mkdtemp rieng. Ratchet goi 189->190, manifest. Codex 5/5 da dung; luot 5 changes_requested
-  vi F858-08 (P2 do phu vong duyet ung vien, KHONG loi runtime) — chua co quyet dinh chu kho; tran diff 450/450.
+  tam khong .git o to tien. L3: mkdtemp rieng. Ratchet goi 189->190, manifest. Codex 5/5 da dung; P2 mo con lai
+  (F858-03 writer muon, F858-08 vong duyet ung vien) deu co quyet dinh chu kho chon A => du M-1..M-5; tran diff 450/450.
 changed_paths: [ops/cong_cu.yaml, ops/cai_cong_cu.sh, .claude/dev/launcher_test.py, scripts/tl_selftest.py,
                 RELEASE_MANIFEST.json, changelog.d/wp-858.md]
 tests:   # tren 521efeb; hai ve nen 637f780 / head dung trong MOT lenh, /tmp/.git VANG
@@ -40,10 +40,9 @@ test_selection:
   tested_sha: 521efebab226fe3a92b2ccce4a59c27dd638edff
   selected_groups: [launcher_test, dot-bien, selftest, release-verify, cong_cu_test, ruff, doctrine-scan, doc-claims, actionlint]
   full_fallback_reason: "sensitive; chay du bo cong cua spec muc Cong"
-remaining_work:
-  - "F858-08 (P2, Codex luot 5): vong duyet ung vien khong co ca khoa — dot bien 'chi duyet hai ung vien dau' va 'bo break' song. Va: ca Windows chi ung vien thu ba (Git/usr/bin) tot => DAT dung thu muc; ca hai ung vien cung tot => chon ung vien DAU. Can >0 dong them (vuot tran 450) va >=1 luot Codex (ngan sach 5/5 het)."
-next_role: human
-manual_next_action: "Chu kho quyet F858-08 tren #858: (A) nhan no co ten 'vong-duyet-ung-vien-chua-khoa' => du M-1..M-5; hoac (B) nang_tran + them ngan sach Codex de va."
+remaining_work: []   # cac no co ten o duoi; packet tach kenh chi mo khi chu kho yeu cau
+next_role: land_operator
+manual_next_action: "Chu kho merge PR #864 (head 521efeb). Executor khong co quyen merge/land/deploy."
 copyable_prompt: null
 failure: {fingerprint: null, category: content}
 successors: []
@@ -73,6 +72,9 @@ Tệp: `ops/reviews/wp858-g1-luot{1..5}-codex-verdict.md` trên nhánh này.
 - `rg-installer-stdout-khong-LF` — công thức `rg` (bộ chọn riêng, Q1) nối dòng khi trình cài không kết thúc bằng LF;
   Codex lượt 4 đồng ý ngoài phạm vi Q1/Q8. Packet tách kênh chỉ mở khi chủ kho yêu cầu.
 - `r484_*` đỏ khi có Codex chạy song song (cùng cơ chế `/tmp/.git` của L2) — packet khác (Q8), không vá.
+- `vong-duyet-ung-vien-chua-khoa` — F858-08 (Codex lượt 5): vòng duyệt ứng viên chưa có ca khoá; đột biến "chỉ duyệt
+  hai ứng viên đầu" và "bỏ `break`" sống. Thiếu test, không phải lỗi runtime. Chủ kho chọn A, #858 issuecomment-6334411484.
+  Vá: ca Windows chỉ `Git/usr/bin` tốt ⇒ DAT đúng thư mục; hai ứng viên cùng tốt ⇒ chọn ứng viên ĐẦU; kèm hai đột biến.
 - Thứ tự commit: manifest là commit cuối của head `521efeb`; `release-verify --strict` 190/190.
 
 ## Bài học đo được (đề nghị ghi CLAUDE.md qua packet có quyền)

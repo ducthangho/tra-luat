@@ -87,8 +87,15 @@ thay_the_cho_ghi_chu: 'wp858-r1-g1-claude DA HET HAN (2026-10-22T01:46Z) => KHON
 leased_at_utc: '2026-10-22T04:32:00Z'
 heartbeat_at: '2026-10-22T04:32:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-24T04:32:00Z'
-lease_expires_at_utc: '2026-10-24T04:32:00Z'
+lease_until: '2026-10-22T06:40:37Z'
+lease_expires_at_utc: '2026-10-22T06:40:37Z'
+rut_han:
+  han_cu: '2026-10-24T04:32:00Z'
+  han_moi: '2026-10-22T06:40:37Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #858 da merge (PR #864, head 521efebab226fe3a92b2ccce4a59c27dd638edff, merge 9e9a74b2a396ef458d25c51a5563efafbb45ba0c, 2026-10-22T06:38Z) theo chi thi chu kho "merge đi"; chu kho yeu cau "ghi sổ land và thu hồi lease luôn" trong phien executor.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp748 r21 (571b586)'
+  ghi_boi: claude-executor-session session_012ZJ73eyfSWoNKcmQWQpoiQ (theo chi thi chu kho trong phien)
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 1

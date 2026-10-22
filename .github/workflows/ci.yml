@@ -16,7 +16,20 @@ on:
   # từng chạy lần nào. `workflow_dispatch` cho phép soi gate theo yêu cầu trên BẤT KỲ ref nào, không
   # phải mở PR mới biết. (GitHub đòi workflow có mặt ở nhánh mặc định thì nút này mới dùng được ⇒ chỉ
   # hiệu lực SAU khi bản này lên master.)
+  #
+  # packet #878 (CI-DISPATCH-CHI-WINDOWS): dispatch hầu như luôn được gọi để đo WINDOWS cho một head ĐÃ có lượt PR
+  # Ubuntu, nên phần Ubuntu (250–330 phút/lượt, đo 19→22-10-2026) là lặp. `windows-only` bỏ phần ấy; mặc định
+  # GIỮ hành vi cũ (hai nền). Cùng từ vựng với `launcher-windows.yml` — ghim ở `.claude/dev/ci_dang_ky_test.py`.
   workflow_dispatch:
+    inputs:
+      runner_set:
+        description: "windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)"
+        required: false
+        default: windows-and-ubuntu
+        type: choice
+        options:
+          - windows-and-ubuntu
+          - windows-only
 
 # r245 — CẮT PHÚT ACTIONS. Đo ngày 13-08: gate chạy 6,6 phút tường, nhân hệ số
 # Windows x2 thành ~20 phút TÍNH TIỀN mỗi lượt, x13,6 lượt/ngày = ~8.100 phút/tháng.
@@ -47,7 +60,10 @@ jobs:
     # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
     timeout-minutes: 20
     outputs:
-      os: ${{ (github.event_name == 'workflow_dispatch'
+      # #878: vế đầu chỉ đúng khi dispatch CHỌN `windows-only`; dispatch không input (API cũ) rơi xuống vế hai như cũ.
+      os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')
+              && '["windows-latest"]'
+              || (github.event_name == 'workflow_dispatch'
                || contains(github.event.pull_request.labels.*.name, 'windows'))
               && '["ubuntu-latest","windows-latest"]'
               || '["ubuntu-latest"]' }}

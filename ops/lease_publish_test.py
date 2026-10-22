@@ -7847,65 +7847,56 @@ def _kiem_tra_outputs_ci_khong_boc_fromjson(wf_path_or_dict):
 
 def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
     """Evaluator tối giản cho đúng hình biểu thức của chuan-bi.
-    Hình chuẩn: ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]'
-    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài).
+    Hình chuẩn: một hay nhiều nhánh `( <cond> ) && '<mảng>' ||` rồi một `'<mảng>'` cuối — `&&` đứng trước `||` như
+    Actions, nên nhánh ĐẦU TIÊN có cond đúng thắng (#878 thêm nhánh `windows-only` trước nhánh hai nền).
+    `<cond>` là các vế nối `||`, mỗi vế là các nguyên tử nối `&&`: `github.event_name == '…'`, `github.ref == '…'`,
+    `contains(github.event.pull_request.labels.*.name, '…')`, `inputs.<tên> == '…'` (đọc `ctx["inputs"]`; vắng = rỗng).
+    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài) hoặc một nguyên tử lạ — mọi
+    nguyên tử được kiểm TRƯỚC khi tính, để một vế lạ không trốn được sau một vế đúng đứng trước nó.
     """
     import json
     raw = expr_str.strip()
     if raw.startswith("${{") and raw.endswith("}}"):
         raw = raw[3:-2].strip()
 
-    m = re.fullmatch(
-        r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')",
-        raw,
-        re.DOTALL,
-    )
-    if not m:
-        msg = f"KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}"
+    def _khong_do_duoc(msg):
+        msg = f"KHÔNG ĐO ĐƯỢC: {msg}"
         print(msg)
         raise ValueError(msg)
 
-    cond_str = m.group("cond").strip()
-    try:
-        true_arr = json.loads(m.group("t").strip("'"))
-        false_arr = json.loads(m.group("f").strip("'"))
-    except Exception as ex:
-        msg = f"KHÔNG ĐO ĐƯỢC: không parse được mảng JSON trong biểu thức: {ex}"
-        print(msg)
-        raise ValueError(msg)
+    nhanh, con_lai = [], raw
+    mau_nhanh = re.compile(r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<arr>'\[[^']*\]')\s*\|\|\s*", re.DOTALL)
+    while (m := mau_nhanh.match(con_lai)):
+        nhanh.append((m.group("cond").strip(), m.group("arr")))
+        con_lai = con_lai[m.end():]
+    if not nhanh or not re.fullmatch(r"'\[[^']*\]'", con_lai.strip()):
+        _khong_do_duoc(f"biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}")
 
-    ve_list = [v.strip() for v in cond_str.split("||")]
-    cond_true = False
-    for ve in ve_list:
-        m_eq = re.fullmatch(r"github\.event_name\s*==\s*'([^']+)'", ve)
-        if m_eq:
-            if ctx.get("event_name") == m_eq.group(1):
-                cond_true = True
-                break
-            continue
+    def _mang(chuoi):
+        try:
+            return json.loads(chuoi.strip().strip("'"))
+        except ValueError as ex:
+            _khong_do_duoc(f"không parse được mảng JSON trong biểu thức: {ex}")
 
-        m_ref = re.fullmatch(r"github\.ref\s*==\s*'([^']+)'", ve)
-        if m_ref:
-            if ctx.get("ref") == m_ref.group(1):
-                cond_true = True
-                break
-            continue
+    def _nguyen_tu(nt):
+        nt = nt.strip()
+        for mau, khoa in ((r"github\.event_name\s*==\s*'([^']+)'", "event_name"),
+                          (r"github\.ref\s*==\s*'([^']+)'", "ref")):
+            if (m := re.fullmatch(mau, nt)):
+                return lambda c, k=khoa, v=m.group(1): c.get(k) == v
+        if (m := re.fullmatch(r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", nt)):
+            return lambda c, v=m.group(1): v in (c.get("labels") or [])
+        if (m := re.fullmatch(r"inputs\.(\w+)\s*==\s*'([^']+)'", nt)):
+            return lambda c, k=m.group(1), v=m.group(2): (c.get("inputs") or {}).get(k, "") == v
+        _khong_do_duoc(f"vế điều kiện không nằm trong tập tối giản hỗ trợ: {nt!r}")
 
-        m_contains = re.fullmatch(
-            r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", ve
-        )
-        if m_contains:
-            labels = ctx.get("labels") or []
-            if m_contains.group(1) in labels:
-                cond_true = True
-                break
-            continue
-
-        msg = f"KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: {ve!r}"
-        print(msg)
-        raise ValueError(msg)
-
-    return true_arr if cond_true else false_arr
+    dieu_kien = [[[_nguyen_tu(nt) for nt in ve.split("&&")] for ve in cond.split("||")] for cond, _ in nhanh]
+    mang = [_mang(arr) for _, arr in nhanh]
+    cuoi = _mang(con_lai)
+    for cac_ve, arr in zip(dieu_kien, mang):
+        if any(all(f(ctx) for f in ve) for ve in cac_ve):
+            return arr
+    return cuoi
 
 
 @ca
@@ -7993,6 +7984,34 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
     bang(r_pr == ["ubuntu-latest"], f"PR thường phải chỉ chạy ubuntu-latest, nhận được: {r_pr}")
     bang(r_pr_win == ["ubuntu-latest", "windows-latest"], f"PR nhãn windows phải chạy hai nền, nhận được: {r_pr_win}")
     bang(r_disp == ["ubuntu-latest", "windows-latest"], f"workflow_dispatch phải chạy hai nền, nhận được: {r_disp}")
+
+    # #878 N2: input `runner_set` của dispatch — `windows-only` bỏ Ubuntu; giá trị mặc định / vắng input GIỮ hai nền.
+    def _disp(gia_tri):
+        return dict(c_dispatch, inputs={} if gia_tri is None else {"runner_set": gia_tri})
+    r_win_only = _danh_gia_bieu_thuc_chuan_bi(raw_expr, _disp("windows-only"))
+    bang(r_win_only == ["windows-latest"], f"dispatch windows-only phải chỉ chạy windows-latest, nhận được: {r_win_only}")
+    for gia_tri in ("windows-and-ubuntu", None):
+        r = _danh_gia_bieu_thuc_chuan_bi(raw_expr, _disp(gia_tri))
+        bang(r == ["ubuntu-latest", "windows-latest"], f"dispatch runner_set={gia_tri!r} phải chạy hai nền, nhận được: {r}")
+    for ctx in (c_push_master, c_pr_thuong, c_pr_windows):   # input chỉ có ở dispatch: sự kiện khác KHÔNG được đổi
+        r = _danh_gia_bieu_thuc_chuan_bi(raw_expr, dict(ctx, inputs={"runner_set": "windows-only"}))
+        bang(r == _danh_gia_bieu_thuc_chuan_bi(raw_expr, ctx), f"runner_set lọt sang sự kiện {ctx['event_name']}: {r}")
+    # Đột biến #878 (trên CHÍNH biểu thức thật): gỡ nhánh windows-only ⇒ windows-only lại chạy hai nền; nhánh ấy trả
+    # hai nền ⇒ cũng vậy. Neo phải xuất hiện đúng một lần, kẻo đột biến không chạy mà vẫn "giết".
+    neo_vao = "(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')"
+    neo_mang = """&& '["windows-latest"]'"""
+    bang(raw_expr.count(neo_vao) == 1 and raw_expr.count(neo_mang) == 1,
+         f"neo đột biến #878 phải xuất hiện đúng một lần trong biểu thức thật: {raw_expr!r}")
+    dot_bien_878 = {
+        # YAML gập biểu thức nhiều dòng thành dấu cách ⇒ khớp khoảng trắng bằng regex, không bằng chuỗi cố định.
+        "go_nhanh_windows_only": re.sub(re.escape(neo_vao) + r"\s*" + re.escape(neo_mang) + r"\s*\|\|\s*", "",
+                                        raw_expr, count=1),
+        "nhanh_windows_only_tra_hai_nen": raw_expr.replace(neo_mang, """&& '["ubuntu-latest","windows-latest"]'""", 1),
+    }
+    for ten, bt in dot_bien_878.items():
+        bang(bt != raw_expr, f"đột biến #878 {ten} không đổi được biểu thức (neo trôi)")
+        r = _danh_gia_bieu_thuc_chuan_bi(bt, _disp("windows-only"))
+        bang(r != ["windows-latest"], f"đột biến #878 {ten} SỐNG: windows-only vẫn chỉ ra {r}")
 
     # Đột biến A3: đưa github.ref == 'refs/heads/master' trở lại => push master phải sinh 2 nền (làm ca đích ĐỎ)
     expr_dot_bien_ref = """(github.event_name == 'workflow_dispatch'

@@ -7886,11 +7886,35 @@ def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
                 return lambda c, k=khoa, v=m.group(1): c.get(k) == v
         if (m := re.fullmatch(r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", nt)):
             return lambda c, v=m.group(1): v in (c.get("labels") or [])
-        if (m := re.fullmatch(r"inputs\.(\w+)\s*==\s*'([^']+)'", nt)):
+        # P3 review Codex #878: tên input theo ngữ pháp định danh của Actions (không bắt đầu bằng số, cho phép `-`).
+        if (m := re.fullmatch(r"inputs\.([A-Za-z_][A-Za-z0-9_-]*)\s*==\s*'([^']+)'", nt)):
             return lambda c, k=m.group(1), v=m.group(2): (c.get("inputs") or {}).get(k, "") == v
         _khong_do_duoc(f"vế điều kiện không nằm trong tập tối giản hỗ trợ: {nt!r}")
 
-    dieu_kien = [[[_nguyen_tu(nt) for nt in ve.split("&&")] for ve in cond.split("||")] for cond, _ in nhanh]
+    def _tach(chuoi, toan_tu):
+        """Tách theo `toan_tu` CHỈ ở ngoài literal `'…'` và ngoài ngoặc (vd `contains(...)`) — review Codex #878 P2:
+        `split` thô tách cả `'refs/heads/a&&b'`, làm một ref/label hợp lệ thành KHÔNG ĐO ĐƯỢC."""
+        phan, dau, sau, trong_nhay = [], 0, 0, False
+        i = 0
+        while i < len(chuoi):
+            c = chuoi[i]
+            if c == "'":
+                trong_nhay = not trong_nhay      # `''` trong literal là dấu nháy thoát: hai lần đảo, triệt tiêu
+            elif not trong_nhay and c == "(":
+                sau += 1
+            elif not trong_nhay and c == ")":
+                sau -= 1
+            elif not trong_nhay and sau == 0 and chuoi.startswith(toan_tu, i):
+                phan.append(chuoi[dau:i])
+                i += len(toan_tu)
+                dau = i
+                continue
+            i += 1
+        if trong_nhay or sau:
+            _khong_do_duoc(f"literal/ngoặc không cân trong điều kiện: {chuoi!r}")
+        return phan + [chuoi[dau:]]
+
+    dieu_kien = [[[_nguyen_tu(nt) for nt in _tach(ve, "&&")] for ve in _tach(cond, "||")] for cond, _ in nhanh]
     mang = [_mang(arr) for _, arr in nhanh]
     cuoi = _mang(con_lai)
     for cac_ve, arr in zip(dieu_kien, mang):
@@ -8012,6 +8036,35 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
         bang(bt != raw_expr, f"đột biến #878 {ten} không đổi được biểu thức (neo trôi)")
         r = _danh_gia_bieu_thuc_chuan_bi(bt, _disp("windows-only"))
         bang(r != ["windows-latest"], f"đột biến #878 {ten} SỐNG: windows-only vẫn chỉ ra {r}")
+
+    # Review Codex #878 (P2, P3): toán tử NẰM TRONG literal không được tách; tên input theo ngữ pháp Actions.
+    # Bản `split` thô làm các ca "nhận" dưới đây thành KHÔNG ĐO ĐƯỢC — chính chúng là đột biến của bộ tách.
+    hai_nen, chi_u = """'["ubuntu-latest","windows-latest"]'""", """'["ubuntu-latest"]'"""
+    def _bt(cond):
+        return f"({cond}) && {hai_nen} || {chi_u}"
+    nhan = [
+        ("ref chứa &&", "github.ref == 'refs/heads/feature&&x'", {"ref": "refs/heads/feature&&x"}),
+        ("ref chứa ||", "github.ref == 'refs/heads/a||b'", {"ref": "refs/heads/a||b"}),
+        ("label chứa &&", "contains(github.event.pull_request.labels.*.name, 'win&&dows')", {"labels": ["win&&dows"]}),
+        ("input có gạch nối", "inputs.runner-set == 'x'", {"inputs": {"runner-set": "x"}}),
+    ]
+    for ten, cond, ctx in nhan:
+        try:
+            r = _danh_gia_bieu_thuc_chuan_bi(_bt(cond), ctx)
+        except ValueError as ex:
+            r = f"ValueError: {ex}"
+        bang(r == ["ubuntu-latest", "windows-latest"], f"evaluator phải NHẬN và tính đúng ({ten}): {r}")
+    r = _danh_gia_bieu_thuc_chuan_bi(_bt("github.event_name == 'workflow_dispatch' && inputs.runner-set == 'x'"),
+                                     {"event_name": "workflow_dispatch", "inputs": {"runner-set": "y"}})
+    bang(r == ["ubuntu-latest"], f"`&&` THẬT ngoài literal vẫn phải tách (một vế sai ⇒ nhánh sai): {r}")
+    for ten, bt in (("input bắt đầu bằng số", _bt("inputs.123 == 'x'")), ("nhánh rỗng", _bt("github.ref == 'a' || ")),
+                    ("nháy không cân", _bt("github.ref == 'a"))):
+        try:
+            _danh_gia_bieu_thuc_chuan_bi(bt, {})
+            bat = False
+        except ValueError as ex:
+            bat = "KHÔNG ĐO ĐƯỢC" in str(ex)
+        bang(bat, f"evaluator phải fail-close với {ten}: {bt!r}")
 
     # Đột biến A3: đưa github.ref == 'refs/heads/master' trở lại => push master phải sinh 2 nền (làm ca đích ĐỎ)
     expr_dot_bien_ref = """(github.event_name == 'workflow_dispatch'

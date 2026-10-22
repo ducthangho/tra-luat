@@ -8837,7 +8837,7 @@ def r868_doc_kenh_hong_thi_dung():
     for hong in (False, True):
         with San() as s:
             nk, dau = s / "xau.log", s / "dau"
-            cat_gia = (f"case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; " if hong else "") + \
+            cat_gia = ("case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; " if hong else "") + \
                 f"exec {shlex.quote(cat_that)} \"$@\""
             p, gp, uv, _xau, _t = _wp868_chay(
                 s, apt=f"echo {shlex.quote(str(s / 'xau'))}; exit 0",

@@ -244,7 +244,8 @@ def _doi_ly_do(expect: int, rc: int, err: bytes, phai_chua: str, msg: str) -> No
     """
     if rc != expect:
         raise AssertionError(f"{msg}: đòi rc={expect}, được rc={rc}; stderr={_txt(err)!r}")
-    t = _txt(err)
+    # #856 (run 39729983506, Windows): stderr của CLI con ra `\r\n`, lý do nhiều dòng viết `\n` ⇒ 3 ca `kg_*` đỏ oan.
+    t = _txt(err).replace("\r\n", "\n")
     if phai_chua not in t:
         raise AssertionError(
             f"{msg}: rc đúng nhưng LÝ DO sai — đòi chứa {phai_chua!r}, stderr={t!r}. "
@@ -7249,9 +7250,21 @@ def case_kg_t_ho_sap(c: Ctx):
 
 
 CASES += [(k, _kg_ho(k, v)) for d in (_KG_T1_CA, _KG_T2_CA, _KG_T3_CA, _KG_T4_CA, _KG_T5_CA) for k, v in d.items()]
+
+
+def case_kg_t_crlf_ly_do(c: Ctx):
+    """#856 (run 39729983506, Windows): `_doi_ly_do` khớp lý do nhiều dòng dù stderr ra `\r\n`; lý do sai vẫn ĐỎ."""
+    _doi_ly_do(2, 2, "A\r\nB\r\n".encode(), "A\nB", "crlf")
+    try:
+        _doi_ly_do(2, 2, "A\r\nC\r\n".encode(), "A\nB", "crlf")
+    except AssertionError:
+        return
+    raise AssertionError("lý do sai mà vẫn qua")
+
+
 CASES += [("kg_t6_ban_sua", case_kg_t6_ban_sua), ("kg_t6_co_rang", case_kg_t6_co_rang), ("kg_t_bo_de", case_kg_t_bo_de),
           ("kg_t_ma_tran", case_kg_t_ma_tran),
-          ("kg_t_ho_sap", case_kg_t_ho_sap)]
+          ("kg_t_ho_sap", case_kg_t_ho_sap), ("kg_t_crlf_ly_do", case_kg_t_crlf_ly_do)]
 
 
 # M1 — bảng kiểm kê: mỗi thành phần ⇒ đột biến (không sập, M6) HOẶC `("tuong_duong", "<lập luận hành vi>")`.
@@ -7449,6 +7462,7 @@ MUTANTS.update({
     "t856_ma_tran_khong_kiem_ten": ("if v not in mutants or v not in " + "co else []", "if False else []", ["kg_t_ma_tran"]),
     "t856_ho_nuot_sap": ("        if sap:\n            raise " + "sap\n", "        if False:\n            raise sap\n", ["kg_t_ho_sap"]),
     "t856_ho_sap_thanh_giet": ("                sap = sap " + "or ex\n", "                loi = f\"{ten}: {ex}\"\n", ["kg_t_ho_sap"]),
+    "t856_ly_do_bo_crlf": ('    t = _txt(err).replace("\\r\\n", ' + '"\\n")\n', "    t = _txt(err)\n", ["kg_t_crlf_ly_do"]),
 })
 MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {k for k in MUTANTS if k.startswith("t856_")}
 

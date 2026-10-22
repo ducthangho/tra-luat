@@ -20,6 +20,8 @@ on:
   # packet #878 (CI-DISPATCH-CHI-WINDOWS): dispatch hầu như luôn được gọi để đo WINDOWS cho một head ĐÃ có lượt PR
   # Ubuntu, nên phần Ubuntu (250–330 phút/lượt, đo 19→22-10-2026) là lặp. `windows-only` bỏ phần ấy; mặc định
   # GIỮ hành vi cũ (hai nền). Cùng từ vựng với `launcher-windows.yml` — ghim ở `.claude/dev/ci_dang_ky_test.py`.
+  # Biểu thức `os` của `chuan-bi`: vế đầu chỉ đúng khi dispatch CHỌN `windows-only`; dispatch không input (API cũ)
+  # rơi xuống vế hai như cũ.
   workflow_dispatch:
     inputs:
       runner_set:
@@ -60,7 +62,6 @@ jobs:
     # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
     timeout-minutes: 20
     outputs:
-      # #878: vế đầu chỉ đúng khi dispatch CHỌN `windows-only`; dispatch không input (API cũ) rơi xuống vế hai như cũ.
       os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')
               && '["windows-latest"]'
               || (github.event_name == 'workflow_dispatch'

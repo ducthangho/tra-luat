@@ -1,0 +1,31 @@
+# do lai sua_gate_master.do_sau_sua — 2026-10-18T01:16:54Z, ban sao tach rieng detached o 1a433a6
+$ git rev-parse HEAD HEAD^{tree}
+1a433a690d56d6cce16312a10a35f4984e8d3644
+a623dbee938465677da535cbc00dabe5dc69012c
+$ git config core.abbrev
+7
+$ python --version
+Python 3.13.16
+$ git status --porcelain | wc -l   # truoc
+0
+$ python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+rc=0
+  -> release-verify-strict.json: ok=true, expected_file_count 187 = checked_file_count 187, failed/extra_files/missing_from_current_manifest rong, package_hash_match true
+$ python scripts/tl.py --selftest    # -> selftest.txt
+selftest rc=0
+== tl selftest 1731/1731 ==
+  [OK] r291_docs_ngoai_goi
+  [OK] r357_agents_ngoai_goi
+$ python scripts/tl.py golden-test --json --deterministic    # KHONG --write -> golden-test.json
+golden rc=0
+  -> ok=true, case_count 20, 20/20 ca ok
+$ git status --porcelain | wc -l   # sau
+0
+$ git status --porcelain --ignored   # sau; KHONG do --ignored truoc khi chay
+!! ops/__pycache__/
+!! references/golden/fixtures/
+!! scripts/.tl_state/
+!! scripts/__pycache__/
+!! scripts/_fallback/__pycache__/
+!! scripts/tl_core/__pycache__/
+# khong tep THEO DOI nao doi (porcelain = 0 truoc va sau). Ban day du cua ba dau ra nam canh tep nay.

@@ -1,0 +1,71 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4305258340",
+    "pull_request_review_id": 5560926141,
+    "id": 4305258340,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAJ0HZA",
+    "diff_hunk": "@@ -0,0 +1,133 @@\n+# HO SO LAND — packet #775 wp775 r1 (lease g1), ma qua PR #779. Khuon: ops/land/pr772-wp766-land-evidence.yaml.\n+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi \"Land evidence tach approval khoi thao tac\".\n+#\n+# TRANG THAI: merged (d8b15cb). `landed: false` — `landed` chi len true khi chu kho quyet O PR GHI SO NAY va gate push\n+# master phu ma nay XANH. \"merged\" KHONG dong nghia \"landed\" (PROTOCOL §10.2.4).\n+# Gate push master RIENG cua d8b15cb bi HUY; nguyen nhan va actor huy KHONG_DO_DUOC. Gate phu ma nay\n+# la luot push master tren d347d42 (con truc tiep cua d8b15cb): XANH 14/14 (run 39053830242) — xem post_merge_checks.\n+# NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot\n+# review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.\n+# Readback tho: ops/land/pr779-wp775-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT.\n+\n+schema_version: 1\n+mission_id: gh-775\n+# ---- TRUONG CHUAN PROTOCOL §7\n+provider: claude\n+role: land_operator\n+model_family: claude\n+execution_surface: claude_code\n+transport: machine/local\n+session_id: https://claude.ai/code/session_01EBdzzrGkYmDwogoNtscJrN\n+input_packet_generations:\n+  - {packet_issue: 775, packet_id: wp775, revision: 1, generation: 1, lease_id: wp775-r1-g1-claude}\n+authorized_head_sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d\n+authorized_head_tree: 4e712f37bf014e18e87df07d0f94d0ba353fb3e7\n+approver: ducthangho\n+authorization_url: https://github.com/ducthangho/tra-luat/pull/779\n+land_operator: 'loi_khai_co_neo — chu kho tu bam merge, executor khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential'\n+merge_method: merge\n+merge_commit: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf\n+merge_commit_tree: 6474598db320df3de03d0251ba9305dde1875b3f\n+merge_commit_parents: [73bf92c0db05fead9d7e98c7b4f3643bd72bfcd8, f9d84d70fb46540bbecfae963c9afb4a2b48984d]\n+pre_merge_checks:\n+  - {name: 'ci.yml (13 gate* + chuan-bi; 14 job), cong check thu-hoi tu run rieng 39047602166 de kiem 15 ten', run_id: 39047604566, run_attempt: 2, sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d, conclusion: success, kiem_gate: 'packet_loop.py kiem-gate 15 ten rc=0', nguon: [readback-run-39047604566.json, readback-check-runs-f9d84d7.json]}\n+  - {name: 'executor cross-review codex luot 17 (launcher.py run)', sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d, conclusion: 'approve, P1=0 P2=0 P3=0', nguon: verdict-luot17/}\n+  - {name: 'Codex connector review luot 18', sha: f9d84d70fb46540bbecfae963c9afb4a2b48984d, conclusion: \"completed — receipt 'Didn't find any major issues' neo f9d84d70fb; state cung head van has_any_findings=true va has_unresolved_findings=true; CHUA ket luan merge-4 dat\", nguon: [readback-codex-connector-receipt-6236575036.json, readback-codex-connector-state-779.json]}\n+post_merge_checks:\n+  - {name: 'ci.yml push master', run_id: 39051543180, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: cancelled, ly_do: 'measured — run ket thuc cancelled, updated_at 17:27:24Z; run push d347d42 created_at 17:27:23Z. Tuong quan thoi gian khong chung minh nguyen nhan concurrency hay actor huy; ca hai KHONG_DO_DUOC. Executor tu khai khong huy run (loi_khai_co_neo), khong co audit xac minh.', nguon: [readback-run-39051543180.json, readback-runs-master-push.json]}\n+  - {name: 'launcher (Windows that) push master', run_id: 39051543211, sha: d8b15cb0730c85e7019aee627c3bfa645a6d3eaf, conclusion: success, nguon: readback-run-39051543211.json}\n+  - {name: 'ci.yml push master (phu d8b15cb)', run_id: 39053830242, sha: d347d426334bbe1bbb1161184ab0acffee9be054, conclusion: success, jobs: '14/14 success (chuan-bi, gate, gate-packet-loop, gate-ops, gate-registry, gate-cong-cu x8, gate-cong-cu-gop)', luc: '2026-10-17T17:59:39Z', ghi_chu: 'measured — d347d42 la con truc tiep cua d8b15cb (git merge-base --is-ancestor d8b15cb d347d42 rc=0; cha thu nhat d347d42 = d8b15cb).', nguon: [readback-run-39053830242.json, readback-jobs-39053830242.json]}\n+bookkeeping:\n+  - {item: 'dong Issue #775 (completed) kem ban chieu ho so nay', luc: sau PR ghi so}\n+  - {item: 'mo 7 issue no ngoai pham vi spec r1', issues: [804, 805, 806, 807, 808, 809, 810]}\n+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-775-land}\n+# ---- het truong chuan\n+packet_id: wp775\n+packet_issue: 775\n+generation: 1\n+generation_nghia: Lan land THU NHAT cua ma packet #775 (lease g1 duy nhat).\n+pham_vi_land: ma\n+environment: cloud\n+operating_system: linux\n+recorded_by: >-\n+  claude-session — CUNG phien la executor cua packet (session_01EBdzzrGkYmDwogoNtscJrN). Chu kho tu merge; phien nay\n+  chi ghi so theo chi thi trong phien 17-10-2026 \"Ghi sổ land và đóng #775, mở issue cho 7 nợ\".\n+\n+spec:\n+  path: ops/specs/wp775.md\n+  sha256: 4b7530c265dddefbebd06ea209d7c0594210f57b391e0d0d353931171fd2b6d8\n+  blob: 898369502c3ad4e4001e9f25692af61d2bf80102\n+  nguon: 'measured — git show origin/ops/wp775-spec:ops/specs/wp775.md | sha256sum; spec CHUA vao master (nam tren nhanh ops/wp775-spec).'\n+lease:\n+  lease_id: wp775-r1-g1-claude\n+  path: ops/leases/wp775-r1-g1-claude.yaml (nhanh ops/wp775-spec)\n+  cap_boi: 'loi_khai_co_neo — granted_on_instruction https://github.com/ducthangho/tra-luat/issues/775#issuecomment-6217700890 (ghi trong lease).'\n+  lease_until: '2026-10-18T14:31:56Z'\n+  write_set: ['.claude/dev/packet_loop.py', '.claude/dev/packet_loop_test.py']\n+  thu_hoi: >-\n+    CHUA thu hoi tai moc duoc thuat lai. measured — hai tep ai-dang-giu kem theo ghi rc=11,\n+    \"NGƯỜI_GIỮ 1: wp775-r1-g1-claude\" cho ca hai duong dan. loi_khai_co_neo — nguoi ghi so khai do luc\n+    2026-10-17T16:58Z, sau fetch +refs/heads/* va dong bo master, ls-remote 587 = for-each-ref 587, thieu 0;\n+    KHONG_DO_DUOC tu provenance vi khong luu timestamp, tap ref ten/OID, output fetch/ls-remote/for-each-ref.\n+    (CÒN_HẠN). Packet da merge nen lease nay la quyen ghi con song sau khi viec xong (no AG-T0-01B); tu het han\n+    2026-10-18T14:31:56Z. Rut han som can uy quyen chu kho (lease da dang, executor khong tu sua). Tho:\n+    ops/land/pr779-wp775-provenance/ai-dang-giu/.\n+\n+trang_thai_packet:\n+  merged: true\n+  merged_nguon: >-\n+    measured — readback-pr-779.json: merged true, merged_at 2026-10-17T16:55:50Z, merged_by ducthangho, merge_commit_sha\n+    d8b15cb0730c85e7019aee627c3bfa645a6d3eaf (cha 73bf92c + f9d84d7), merge commit (khong squash/rebase).\n+  landed: false\n+  landed_ly_do: >-\n+    Cho chu kho quyet o PR ghi so nay (PROTOCOL §10.2.4, §13.1). Dieu kien gate da thoa: push master phu ma nay\n+    (run 39053830242 tren d347d42) XANH 14/14.",
+    "path": "ops/land/pr779-wp775-land-evidence.yaml",
+    "commit_id": "cba3c53c5018ee1b80a3eaa6870886d952a2940f",
+    "original_commit_id": "cba3c53c5018ee1b80a3eaa6870886d952a2940f",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Keep the post-merge gate unsatisfied until exact-SHA evidence exists**\n\nFor merge commit `d8b15cb`, the archived `ci.yml` run 39051543180 is cancelled; the successful run 39053830242 tested the different commit `d347d42`. Ancestry establishes that the latter contains the packet, but does not make it an exact-SHA gate result. Declaring the gate satisfied here leaves the owner decision as the apparent sole remaining land condition, despite missing required evidence. Keep this condition unmet and describe the descendant run as supplemental evidence until an exact-merge-SHA run succeeds or durable authority explicitly accepts replacement evidence under protocol §10.2.1. Validate that the reported gate SHA matches the merge SHA, while handling an explicitly authorized substitution separately so legitimate exceptions are not lost.\n\nAGENTS.md reference: [AGENTS.md:L120-L122](https://github.com/ducthangho/tra-luat/blob/cba3c53c5018ee1b80a3eaa6870886d952a2940f/AGENTS.md#L120-L122)\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-18T01:23:29Z",
+    "updated_at": "2026-10-18T01:23:29Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/811#discussion_r4305258340",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/811",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4305258340"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/811#discussion_r4305258340"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/811"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4305258340/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 83,
+    "original_start_line": 83,
+    "start_side": "RIGHT",
+    "line": 84,
+    "original_line": 84,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 84,
+    "position": 84,
+    "subject_type": "line"
+  }
+]

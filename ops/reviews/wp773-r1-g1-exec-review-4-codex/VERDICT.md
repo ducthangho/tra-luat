@@ -1,0 +1,52 @@
+Reviewed commit: a3cfc53b00cf2476ebef202201e416c01ad9b637
+
+verdict: changes_requested
+P1=0 P2=1 P3=0
+
+Reviewer: Codex, provider OpenAI; trực tiếp chạy shell/tool trong sandbox của phiên này, độc lập với executor Claude. Không tự chứng nhận launcher, model identity từ GitHub actor, hay assurance `human_audited`. Tree: `369570338055b0b4f04de456409f8af40b3b3e42`. Review g1 lượt 4; KHO read-only. Chỉ thị review tới P1=P2=0 và trần 700 trong prompt được dùng thay giới hạn cũ.
+
+## Findings
+
+### F06 — P2 — `ops/land_evidence_nguon.py:278`: `--root` tương đối kết hợp `--tep` tuyệt đối làm CLI chết trước khi kiểm hồ sơ
+
+`--tep` công bố nhận cả đường dẫn tương đối và tuyệt đối (dòng 267). Tuy nhiên, với `--root . --tep <đường dẫn tuyệt đối tới hồ sơ ngay trong root>`, `_trong_goc` so đường dẫn đã resolve nên trả True, còn `tep.relative_to(goc)` lại so đường dẫn nguyên dạng tuyệt đối với tương đối, ném `ValueError`. Không hồ sơ nào được đọc; stdout rỗng, rc=1 bằng traceback, thiếu hai dòng tổng kết Q6. Đây là tổ hợp tham số hợp lệ, không cần YAML hỏng, symlink hay đường dẫn thoát cây. Cùng hồ sơ hợp lệ trả rc=0 khi cả hai tham số cùng dạng. Ngoài việc mất báo cáo ba trạng thái, đường gọi này hoàn toàn không thực hiện phép kiểm được yêu cầu.
+
+PHÉP ĐO: `PYTHONDONTWRITEBYTECODE=1 python3.13 -B evidence/probes.py > evidence/probes.log` ⇒ script rc=0; mục `relative root absolute file`: CLI **rc=1**, stdout rỗng, traceback tại dòng 278. [Dữ liệu đầy đủ](evidence/probes.json).
+
+Chốt độc lập: với mỗi `v=3.11,3.12,3.13,3.14`, chạy `PYTHONPATH=$SP/yaml-python$v PYTHONDONTWRITEBYTECODE=1 LAND_EVIDENCE_NGUON_MA=$KHO/ops/land_evidence_nguon.py python$v -B evidence/regression.py`. **Cả bốn rc=3 + `DO:r06_cli_absolute:`**. Chốt kiểm bốn tổ hợp đường dẫn trên cùng hồ sơ sạch, có provenance và nguồn thật; ba tổ hợp đầu xanh, tổ hợp root tương đối/file tuyệt đối thất bại. Không phải lỗi vô can rc=4. [Chốt](evidence/regression.py), [lệnh con, rc và đối chứng](evidence/extra.json).
+
+HINT: thống nhất hệ quy chiếu trước khi tính nhãn, hoặc để lỗi tạo nhãn chỉ đổi cách hiển thị đường dẫn, không ngăn kiểm hồ sơ. Bản đối chứng `/tmp/rv773-r4-root-resolved.py` chỉ đổi `goc = Path(a.root)` thành `goc = Path(a.root).resolve()`: cùng chốt **rc=0 trên cả bốn Python**. Đây là đối chứng chẩn đoán, chưa phải patch production đã kiểm toàn diện. Thêm ca CLI thật cho các tổ hợp root/file tương đối/tuyệt đối; hiện 13 ca đều không đi qua tổ hợp bị lỗi.
+
+## Đã đo
+
+Quy ước: `KHO=/home/user/rv773`; `SP` là thư mục cha của thư mục ra. Python đều dùng `-B` và/hoặc `PYTHONDONTWRITEBYTECODE=1`; mọi cây dựng/bản sao mã ở `/tmp`. Các script trong [evidence](evidence/) ghi rõ lệnh con và dữ liệu dựng.
+
+- `sha256sum /home/user/rv773-spec-r1.md`: rc=0, đúng `063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd`. Đọc spec Q1–Q6, L1–L5, bảng nghiệm thu; đọc ba verdict trước, AGENTS và hướng dẫn repo liên quan. Đọc toàn bộ hai tệp, diff base→head và riêng vá `5250883..a3cfc53`.
+- `git -C KHO rev-parse HEAD HEAD^{tree}`: rc=0, đúng head/tree đầu verdict; [identity.log](evidence/identity.log). `git -C KHO diff c73af7b a3cfc53` rc=0; [diff.log](evidence/diff.log). `git -C KHO diff --numstat c73af7b a3cfc53` rc=0: **2 tệp / 673 dòng thêm; trần ngoại lệ 700 theo prompt**. Write set đúng hai tệp, không sửa workflow/hồ sơ cũ.
+- Với mỗi `v=3.11,3.12,3.13,3.14`: `PYTHONPATH=$SP/yaml-python$v PYTHONDONTWRITEBYTECODE=1 python$v -B KHO/ops/land_evidence_nguon_test.py`: **tất cả rc=0, CA 13/13, ĐỘT BIẾN 29/29 giết đúng lý do, TỰ KIỂM PHÂN HẠNG ĐẠT (2), TỔNG ĐẠT**. [Lệnh và đầu ra](evidence/tests.json); log riêng `test-3.11.log` đến `test-3.14.log` trong evidence.
+- `PYTHONDONTWRITEBYTECODE=1 python3.13 -B evidence/measure.py`: rc=0. Script chạy CLI cây thật, lịch sử, lint, diff-check, bản module xoá miễn trừ trong bộ nhớ, và băm cutover độc lập như các mục dưới.
+- `python3.13 -B KHO/ops/land_evidence_nguon.py --root KHO`: **rc=0, 0 ĐẠT · 28/28 miễn trừ · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 28, TỔNG ĐẠT**. [tree.log](evidence/tree.log).
+- Với `c=c6e2401,1a4c417,d60b9e6`: `git -C KHO archive <c> ops/land` đều rc=0; giải nén thành công vào `/tmp/rv773-r4-history/<c>`; `python3.13 -B KHO/ops/land_evidence_nguon.py --root <tmp> --tep ops/land/pr765-wp743-land-evidence.yaml` đều **rc=1**. Lần lượt **2 L1** (gồm `khong_xung_dot`), **1 L1 + 2 L2 + 1 L3** (02:58:54Z ≥ 02:58:26Z), **1 L1 tại `$.spec.nguon`**. [c6e2401](evidence/history-c6e2401.log), [1a4c417](evidence/history-1a4c417.log), [d60b9e6](evidence/history-d60b9e6.log).
+- Xoá `MIEN_TRU_CUTOVER` chỉ trong module import riêng rồi gọi `main`: **rc=1, 16 ĐẠT, 12 ĐỎ, 82 vi phạm toàn L1, 0 KHÔNG ĐO ĐƯỢC**; [no-exemption.log](evidence/no-exemption.log). `git ls-tree --name-only c73af7b ops/land/` rồi `git show c73af7b:<path>` cho từng hồ sơ đều thành công: băm blob độc lập được **28 tên**, vân tay `5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257`, khớp hằng test. Cách băm nằm trong `measure.py`, không tính lại kỳ vọng từ dictionary đang kiểm.
+- `PYTHONDONTWRITEBYTECODE=1 python3.13 -B evidence/probes.py > evidence/probes.log`: rc=0. Hai đầu vào merge trùng chuỗi/null của F01 lượt 3 nay **rc=2**, lý do từ chối merge trước dựng; ngày sai không nháy 30-02 và tháng 99 của F04 nay **rc=2**, đủ tổng kết, không traceback. Các ca null trùng trực tiếp, kiểu YAML ngoài mô hình, alias dùng lại, lỗi đọc nguồn L2 được c08 đo; các mutation mới tương ứng đều bị giết trong bộ 29 mutation. **F01 và F04 lượt 3 đóng**; chốt đọc lỗi L2 còn thiếu ở lượt 3 nay có ca và mutation có răng.
+- Cũng trong probes: nguồn thường/glob/thư mục và symlink nội bộ ⇒ rc=0; `pre_merge_checks` dạng mapping có timestamp ở khoá ⇒ rc=1 L3; timestamp phân số sau merge ⇒ rc=1 L3. `positive: 123` cùng nguồn thật ⇒ rc=0 (không có token số L2). Timestamp offset có nháy ⇒ rc=0, nằm ngoài regex Z đóng băng của spec; không tính finding. c03 hiện hữu đã chạy nguyên trạng trên cả bốn Python.
+- Đột biến bổ sung trên bản sao `/tmp/rv773-r4-l2-content.py`, bỏ riêng so nội dung L2 (`if not any(mau.search(nd) for nd in noi_dung):` → `if False:`), chạy `LAND_EVIDENCE_NGUON_MA=<bản sao> python3.13 -B KHO/ops/land_evidence_nguon_test.py --mot-ca c05_l2_luot2_positive_phai_co_nguon_chua_nguyen_van`: **rc=3 + `DO:c05...:`**, giết thật; kết quả trong `probes.json`.
+- Với mỗi Python, `PYTHONPATH=$SP/yaml-python$v PYTHONDONTWRITEBYTECODE=1 python$v -B /tmp/rv773-r4-depth.py`: **rc=0**. Gọi riêng `nap_yaml` rồi mới `duyet`: 100, 300, 450, 480, 490 tầng đều qua cả hai; 495, 500, 600, 1000 tầng đều ném **RecursionError ngay ở loader**. [3.13](evidence/depth-3.13.log), ba log khác cùng thư mục. Điều này xác nhận lời khai về loader trước walker ở môi trường/default recursion limit đã đo; không chứng minh mọi cấu hình recursion limit hoặc parser tương lai.
+- `PYTHONDONTWRITEBYTECODE=1 python3.13 -B evidence/extra.py > evidence/extra.log`: rc=0. Ngoài regression F06 trên bốn Python, mutation đổi tên `plat-x8` thành `plat-x9` chạy `--mot-ca c10_l5_danh_sach_dong_bang` ⇒ **rc=3 + đúng `DO:c10...:`**. Mutation thêm tên chính thức cũng bị giết; c09 kiểm đổi byte mất miễn trừ; c11 đòi đúng **m=k=28**, không chỉ rc=0.
+- **Chốt chưa có ca/đột biến canh:** bản sao `/tmp/rv773-r4-conflict-off.py` đổi duy nhất `if len(gia_tri) > 1:` thành `if False:`. Chạy qua `LAND_EVIDENCE_NGUON_MA` và `--mot-ca <từng ca>`: **13/13 rc=0**, mutation sống. `PYTHONDONTWRITEBYTECODE=1 python3.13 -B evidence/conflict.py > evidence/conflict.log` rc=0: hồ sơ tên chung có hai readback mang merged_at khác nhau ⇒ **head rc=2, bản sao rc=0**. [Đối chứng](evidence/conflict.log), [13 lệnh con](evidence/extra.json). Đây là khoảng trống bảo vệ nhánh hiện đúng, không phải fail-open hiện hữu trên head, và không vi phạm ngưỡng tối thiểu một mutation mỗi L1–L5. Nên thêm ca tên hồ sơ chung và mutation này.
+- `ruff check --no-cache --select F KHO/ops/land_evidence_nguon.py KHO/ops/land_evidence_nguon_test.py`: **rc=0**, All checks passed; hai tệp mới nên F delta=0. `git -C KHO diff --check c73af7b a3cfc53`: **rc=0**. [ruff](evidence/ruff.log), [diff-check](evidence/diff-check.log).
+- `git -C KHO status --porcelain --ignored` lưu trước/sau, `cmp evidence/status-before evidence/status-after`: **rc=0**, trạng thái KHO không đổi.
+
+## Đối chiếu tuyên bố và nghiệm thu
+
+Không phát hiện ĐẠT sai mới trên head trong các probe đã chạy. Các phép nghiệm thu cây thật, L1/L2/L3 dựng lại #771, đổi số nguồn, chuyển post-merge, YAML lỗi/provenance vắng, băm lệch, fingerprint, mutation tối thiểu từng luật, lịch sử, lint và diff-check đều tái lập. Tuy nhiên CLI còn tổ hợp hợp lệ không thực hiện phép kiểm và phá tổng kết Q6 (F06), nên chưa đạt ngưỡng P2=0.
+
+Không thấy mutation chính thức được đếm giết do rc=4 hoặc thiếu `DO:<ca>:`. Các ca parse mới dùng subprocess và kiểm rc/tổng kết bằng `bang`, nên traceback con khi bỏ chốt được phát hiện đúng mục tiêu, không bị nhầm là ngoại lệ vô can của ca ngoài. Chốt đọc nguồn L2 dùng mock riêng `u.txt`, vẫn đọc hồ sơ bình thường. Chưa có ca canh nhánh readback mâu thuẫn tên chung như trên; bộ xanh không chứng minh nhánh này có răng.
+
+Docstring khai giới hạn L1 chỉ đo sự tồn tại, L2 chỉ token số, không kiểm ngữ nghĩa chứng minh lời khai; điều này phù hợp ngoại phạm vi. So `measured` không phân biệt hoa thường và loại nguồn tự trỏ được khai rõ, có ca đo. Chọn readback theo PR trong tên hồ sơ được khai ở hàm, c07 đo việc tránh readback lân cận; hợp lý trong phạm vi này. Từ chối merge và alias/nút dùng lại thay vì hỗ trợ chúng được khai ở `nap_yaml`, chuyển sang KHÔNG ĐO ĐƯỢC, không làm xanh sai. Chú thích loader trước walker được phép đo độ sâu hỗ trợ trong bốn môi trường đã chạy. g2 nối CI ngoài scope; không coi g1 xanh là packet đã hoàn thành.
+
+## KHÔNG ĐO ĐƯỢC
+
+- Không truy cập issue/lease/ngoại lệ kích thước/CI trên GitHub. Dùng spec đã kiểm băm, exact checkout và lịch sử cục bộ, cùng chỉ thị chủ kho trong prompt về trần 700 và số lượt review. Không xác nhận g2 đã land, launcher/receipt hay cấp assurance land.
+- Không soạn token thoát cây, mã khai thác, cấu trúc alias mới để gây cạn tài nguyên hoặc symlink thoát gốc. Chỉ chạy c03 và ca alias hiện hữu, bổ sung symlink nội bộ. Không tuyên bố vét hết lỗi hệ thống tệp/quyền truy cập; lỗi đọc nguồn L2 đo bằng mock kiểm soát.
+- Không kiểm ngữ nghĩa nguồn chứng minh câu văn (ngoại phạm vi), không chạy toàn bộ test repo/CI. Đã chạy gate chuyên biệt của hai tệp trên bốn Python. Bản đối chứng F06 chỉ đo chốt đường dẫn, không được coi là bản vá đã qua full regression.

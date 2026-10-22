@@ -1,0 +1,26 @@
+# do luc 2026-10-20T01:19:17Z, kho /home/user/tra-luat sau git fetch --prune +refs/heads/*
+$ git rev-parse 3818bd4^{tree} 9422054^{tree}
+b5d32c370207b8f8a35bdc15c591b9947dc5ae92
+e57968d536a0bfd19c868e70fa88392974398073
+$ git rev-list --parents -n1 9422054
+94220547cd155c73392e95726e8daf353888b3aa b27fe85c9e9593ddbb059808fe4347fe1bd267be 3818bd4a9685e1782afdd7e8a593482f74b663ff
+$ git diff --name-only 5618020 3818bd4  (write set PR thuan so master cu)
+.agents/skills/work-packet/SKILL.md
+.claude/dev/ci_dang_ky_test.py
+.claude/dev/doc_receipt_thu_hoi_test.py
+.claude/hooks/subagent_ghi_detect_test.py
+.claude/skills/work-packet/SKILL.md
+.github/workflows/ci-dot-bien-du.yml
+.github/workflows/ci.yml
+ops/ci_duong_nhanh_test.py
+ops/lease_publish_test.py
+ops/nhanh_don_duoc_test.py
+$ git diff --stat 3818bd4 9422054 -- <10 tep tren>  (phai rong)
+rc=0 (rong = 10 tep trung byte giua head duoc duyet va merge)
+$ git diff --stat 3818bd4 9422054
+ .claude/dev/packet_loop_test.py | 737 ++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 717 insertions(+), 20 deletions(-)
+$ git diff --stat 9983615 3818bd4
+ .github/workflows/ci.yml   | 4 +++-
+ ops/ci_duong_nhanh_test.py | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)

@@ -1,0 +1,10 @@
+# trich log job 116845324739 (run 38861735202, launcher ubuntu-latest, head e03d4bf) — 2026-10-16T06:51:12Z
+# log day du: 57171 byte, sha256 f0825c5a2714071988d5055b18c4eddacd360c33c83f7b01c5047ee2009f9261 (gh api repos/ducthangho/tra-luat/actions/jobs/116845324739/logs); log day du KHONG luu
+196/196 ca DA CHAY QUA (tong 197, bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi
+  chup_cay_khong_fail_closed_trong_cay OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+  chup_cay_fail_closed_ca_may  OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+  wp685_l8_hoi_them_UnicodeDecodeError OK  giet 1/1: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan
+  wp685_l20_doc_UnicodeDecodeError_False OK  giet 1/1: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan
+  wp685_l29_kill_them_UnicodeDecodeError OK  giet 1/1: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan
+  pid_gia_quay_ve_ghi_cung     OK  giet 1/1: r766_t81_khong_phu_thuoc_pid_cua_luot_chay
+DOT BIEN: 236/236 dat  (1 khong do duoc tren nen nay)

@@ -1,0 +1,55 @@
+HINT.patch — reviewer lượt 9 (advisory_review, Claude Sonnet 5.5) cho follow-up PR #690 / packet #671, áp lên c9c8a8247b102e51a550b9b5356d9e6f33e39eb8
+Nhãn §8 (nguyên văn): chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+Áp: từ GỐC cây làm việc, `patch -p0 --fuzz=0 < HINT.patch` (đường dẫn repo-relative, không tiền tố a/ b/). MỘT tệp: ops/cong_cu_test.py. BA hunk, HAI finding P4, CẢ HAI TUỲ CHỌN (độc lập nhau).
+MỌI hunk là mã TEST (`t64`, `t63`) — KHÔNG hunk nào chạm sản phẩm (`_ep_utf8`, `_phong_lai`, khối phóng lại, `main()`), `bash_nen.py`, `.github/workflows/**`. Executor phải khai `hint_provenance` theo hunk.
+  hunk 1 (@@ -3103) + hunk 2 (@@ -3121)  NT-STDERR-NONE-GUARD-KHONG-RANG [P4] — `phong()` nhận `err` (None ⇒ `sys.stderr` là None, như `pythonw`) + chốt `(w3)`: nhánh nt của
+                     `_phong_lai` phải VẪN phóng khi stderr None. Gỡ guard `if sys.stderr is not None:` từ SỐNG (t64 qua) thành `giet_that "(w3) … AttributeError('NoneType' …)"`. Net +2 dòng.
+  hunk 3 (@@ -6480)  T63-GIAN-GIAO-TRONG-DOI-CHUNG [P4, VÁ SINH LỖI MỚI nhỏ] — đối chứng (0) nay chạy CÓ giàn giáo (`trao`/`nap`) nên giàn giáo hỏng làm t49 đỏ bị đọc thành "t49 ĐỎ cả khi
+                     KHÔNG tráo" ⇒ `bo_qua` im lặng (vá 8: `giet_that`). Hunk chạy lại t49 TRẦN khi đối chứng đỏ: trần cũng đỏ ⇒ KHÔNG ĐO ĐƯỢC (đột biến đích t49, bán kính 1/N không đổi); trần XANH ⇒
+                     `giet_that "(0) giàn giáo trao/nap làm t49 ĐỎ …"`. Net +4 dòng.
+TRẦN DÒNG (chủ kho ~420 so master 577d7b9): c9c8a82 = +420/−42 (myers = patience = minimal); áp CẢ BA hunk ⇒ +426/−42 (VƯỢT 6: hunk 1+2 → +2, hunk 3 → +4). Dòng >118 ký tự: cả tệp 368 → 368 (dòng dài nhất thêm: 118).
+Không có hunk cho NGHIEM-THU-WINDOWS-CON-THIEU [P2]: KHÔNG vá được bằng mã ở Linux (chủ kho: "Chỉ chạy tại máy").
+
+diff --git ops/cong_cu_test.py ops/cong_cu_test.py
+index 0e6a2d2..0a01b14 100644
+--- ops/cong_cu_test.py
++++ ops/cong_cu_test.py
+@@ -3103,13 +3103,13 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
+             bang(r.returncode == 0 and b"U8=1 PL=1" in r.stdout + r.stderr,  # rc=0 TRẦN lọt "thoát 0 không phóng/chạy"
+                  f"(k4) fd {fd} đóng ⇒ không phóng lại tới bộ ca: rc={r.returncode} {(r.stdout + r.stderr)[-99:]!r}")
+ 
+-    def phong(k, lenh, gia=True):
+-        with contextlib.redirect_stderr(loi := io.StringIO()):
++    def phong(k, lenh, gia=True, err=io.StringIO):   # err=None ⇒ sys.stderr là None (pythonw: không std handle)
++        with contextlib.redirect_stderr(loi := err and err()):
+             try:
+                 rc = _phong_lai(lenh, dict(os.environ), nen="nt", k32=k if gia else None, popen=k.popen, execve=k.execve)
+             except Exception as ex:  # noqa: BLE001 — sản phẩm NÉM thay vì chạy là KẾT QUẢ cho chốt đọc, không phải giàn giáo
+                 rc = ex
+-        return rc, loi.getvalue()
++        return rc, loi and loi.getvalue()
+ 
+     k, kq = _k32_gia(), {}
+     (th := threading.Thread(target=lambda: kq.update(zip("rl", phong(k, [sys.executable, "-c", "import time; time.sleep(60)"]))))).start()
+@@ -3121,6 +3121,8 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
+         rc, loi = phong(k := _k32_gia(hong), [sys.executable, "-c", "raise SystemExit(7)"], gia=hong != "WinDLL")
+         bang(rc == 7 and "CANH_BAO_MO_COI" in loi and len(k.con) == 1, f"(w2) Job hỏng ở {hong} (nt KHÔNG thử WinDLL: Job THẬT "
+              f"sẽ gắn vào CHÍNH bộ test): phải VẪN chạy đúng một lần, mã 7 đi qua, và NÓI ra: rc={rc} {loi!r}")
++    rc = phong(_k32_gia("CreateJobObjectW"), [sys.executable, "-c", "raise SystemExit(7)"], err=None)[0]
++    bang(rc == 7, f"(w3) sys.stderr None (pythonw): Job hỏng phải VẪN chạy, mã 7 đi qua, KHÔNG nổ khi báo: rc={rc!r}")
+ 
+ 
+ def python_alias_behavior_test() -> None:
+@@ -6480,7 +6482,11 @@ def t63_t49_hong_STAGE_tung_buoc_phai_BO_QUA_dung_buoc():
+     except BoQuaStage as ex:
+         bang(False, f"(0) đối chứng t49 KHÔNG tráo mà staging BỎ QUA — chốt staging ném bừa thì che mọi tráo: {ex}")
+     except TinHieuChotCa as ex:
+-        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ cả khi KHÔNG tráo: {ex}") from ex
++        try:
++            t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC()   # TRẦN, không giàn giáo: đỏ ⇒ đột biến đích t49
++        except TinHieuChotCa:
++            raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC: t49 ĐỎ cả khi KHÔNG tráo: {ex}") from ex
++        bang(False, f"(0) giàn giáo trao/nap làm t49 ĐỎ trong khi t49 trần XANH (t63 không đo được gì): {ex}")
+     for buoc, cach, dau in (("hash-object", "rc", "rc=128/0"), ("update-index", "rc", "rc=0/128"),
+                             ("ls-files", "rong", "xau_"), ("add", "rc", "bình_thường"),
+                             ("ops/no_cu.py", "rc", "no_cu"), ("update-index", "bo_ten", "va_"),

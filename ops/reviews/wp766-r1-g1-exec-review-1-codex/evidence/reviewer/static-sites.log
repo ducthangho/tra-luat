@@ -1,0 +1,4 @@
+544:    ra.pop(os.getpid(), None)                          # tuyệt đối không tự giết mình
+626:        if q == os.getpid() or not _con_song_dung_khoa(q, khoa):
+1007:        nhom_that = os.getpgid(pid)
+1490:    tam = thu_muc / f"run.json.{os.getpid()}.{uuid.uuid4().hex[:8]}.tmp"

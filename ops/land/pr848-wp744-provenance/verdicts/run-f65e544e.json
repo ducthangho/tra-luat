@@ -1,0 +1,93 @@
+{
+  "version": "1.5.0",
+  "run_id": "f65e544ef5d64ba7a1e0edb607edcf0a",
+  "short_id": "f65e544e",
+  "ten": "wp744-r3-luot1",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "4c1cfbea38b3652f"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-19T16:59:09.376559+00:00",
+  "ket_thuc_utc": "2026-10-19T17:09:09.186843+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 8027,
+  "khoa_danh_tinh": "linux:59167",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/7c9b32e8-6a49-5683-8485-2ffb0aa39856/scratchpad/rv744a/cay-kho",
+  "head": "23bc189f28ea60f04ca1634b6fe66d02babf12ed",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "06fc9a893765b25d97949bd0df3b54f8e9cf583d",
+    "e766eb3a0cac5fdf9cba647aab8e5979e69f2653",
+    "4b95d091452757eee86e24a27d3536e46607a522",
+    "886d0d297e2f6aabf4ca33e16c2ec741fc5affde",
+    "42292b4219901137607d3fd9adda26d49f7cfd5e",
+    "c54b502bff2aaf3e9a40f8b0b37a657fa09174c1",
+    "5b2631c38e9f55c6c9264359f45338504adb00f7",
+    "543f2e8971c87bbc567c048112e6c144bb79b6e2",
+    "77f109564164e042ca23521adc6161c397eb8b82",
+    "fc610c2ee2a4ab424a566bb9b267ccc676be6340",
+    "9baaef87d19ee0cf235e484d39eda07329379a07",
+    "85124dceb17b63b867dc2fb322d06925c67fff07",
+    "d5c97266947e0661da5fd38182d359a35976ca0c",
+    "18030699ecdfe305dffc0a6ea3f17f3dfdfe2d2a",
+    "cfff4d23803ea746f0527ec3723c8d840d44c826",
+    "dcc2a7c166b43c6533e034bdff57ded61403df12",
+    "f860ab7eacb6bf0cc1735fc963f73bc6fa7549ac",
+    "ad868deff20bdecc7c3791f89fffd1f30e598239",
+    "87a07df2fa3d9e1092a4b61afdf7ca7ab6f713ed",
+    "e311bbffaa820f3a12f2e2f8316582e312e344ea",
+    "c57df32f0fd8c992ed363d7000f4f761275750ea",
+    "212da2fc7aff2411f344c5d1e516dbad68affe10",
+    "8e922e2d1618cbfb718e371881013a0fa3704444",
+    "1c23933b13f33d6b0ebdb2901a3dec33c474d34c",
+    "1741e0a1ab7ebce4b26912aefadca56ddfcdc691",
+    "4d2a6f69e67ce5299253bf8905b6b742d516f3fc",
+    "f5098dd69e1f998f81165734340b500f0940034b",
+    "736f72381f044e6e86337c3d8d4a23ad3e605362",
+    "582a43692d028cc7faeba43090c7a39757adf4d9",
+    "13faf438bcbbb490dd2d097781baab29e241a364",
+    "f77f19895e00835d71644d82f1c54e9b519ccfe6",
+    "669ba5866cf249d3d9f89a542d48b5d2e60fdfd0",
+    "f34fc67e947ceaa62145b7a13568dbee7c51fbda",
+    "bc78656f8090c0e57748b3d7d092018223df8a41",
+    "c0f18ac1fac53d72cb8e458fc20611dd8099fedc",
+    "1b3caa11df3e339bcfdb52be903884b5b99b9f77"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "fc610ad29620c899cdc98c28244e3b113ffb2fed1ade52c89088fe7df3be4857",
+  "deadline_utc": "2026-10-19T18:14:08+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "35512b5381e566c926228686930c0214f62d2259e6b2660702db173a2ab741b0",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/7c9b32e8-6a49-5683-8485-2ffb0aa39856/scratchpad/runs/f65e544e/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "thoi_luong_giay": 599.81,
+  "stdout_byte": 311,
+  "stdout_sha256": "a5720c2c44cb39df3d686c46bbea7f9df0a1476d9ae8dcdaea4e5443d23b0c53",
+  "stderr_byte": 796241,
+  "stderr_sha256": "5814f4c7bfd845379fe75fa023d385ebfc132e5ab8e1c17c08bf42d86bae939c"
+}

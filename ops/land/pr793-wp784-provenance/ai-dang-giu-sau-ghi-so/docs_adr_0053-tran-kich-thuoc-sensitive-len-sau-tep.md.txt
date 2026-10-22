@@ -1,0 +1,10 @@
+$ python ops/lease_publish.py ai-dang-giu docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	tran-codex-va-sensitive-r1-g1-claude-20261016	refs/heads/ops/cap-lease-782:ops/leases/tran-codex-va-sensitive-r1-g1-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	tran-codex-va-sensitive-r2-g2-claude-20261016	refs/heads/ops/cap-lease-782:ops/leases/tran-codex-va-sensitive-r2-g2-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r3-g3-claude-20261016	refs/heads/ops/cap-lease-782:ops/leases/wp782-r3-g3-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r4-g4-claude-20261017	refs/heads/ops/cap-lease-782:ops/leases/wp782-r4-g4-claude-20261017.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r5-g5-claude-20261017	refs/heads/ops/cap-lease-782:ops/leases/wp782-r5-g5-claude-20261017.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp782-r5-g5b-claude-20261017	refs/heads/ops/cap-lease-782:ops/leases/wp782-r5-g5b-claude-20261017.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

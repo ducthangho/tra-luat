@@ -1,0 +1,10 @@
+# do lai kiem-gate OFFLINE tren readback-check-runs-288ad3e.json (khong goi GitHub) — 2026-10-18T04:18:45Z
+$ git rev-parse HEAD HEAD^{tree}
+fb490a7c3fa2992c6f4635ed091dafa813df2fe7
+78cf0bfe8ac4b327ce834800ccf687c6d42f52c9
+$ sha256sum .claude/dev/packet_loop.py
+c15ac9330a084d4a10d559885dbeb606c841ca4ad22a6ca51686c681e59f8634  .claude/dev/packet_loop.py
+# check_suite_id 105849455756 = ci.yml run 39058187579 (14 job)
+$ python3 .claude/dev/packet_loop.py kiem-gate --head 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b --check-runs readback-check-runs-288ad3e.json --check-suite 105849455756 [14 --bat-buoc]
+gate XANH trên 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b (suite 105849455756): chuan-bi id=117470484021 · gate (ubuntu-latest) id=117470541528 · gate-cong-cu (ubuntu-latest, 0) id=117470541529 · gate-cong-cu (ubuntu-latest, 1) id=117470541507 · gate-cong-cu (ubuntu-latest, 2) id=117470541502 · gate-cong-cu (ubuntu-latest, 3) id=117470541536 · gate-cong-cu (ubuntu-latest, 4) id=117470541591 · gate-cong-cu (ubuntu-latest, 5) id=117470541553 · gate-cong-cu (ubuntu-latest, 6) id=117470541620 · gate-cong-cu (ubuntu-latest, 7) id=117470541597 · gate-cong-cu-gop (ubuntu-latest) id=117476661611 · gate-ops (ubuntu-latest) id=117470541562 · gate-packet-loop (ubuntu-latest) id=117470541572 · gate-registry (ubuntu-latest) id=117470541570
+rc=0

@@ -1,0 +1,4 @@
+# 2026-10-19T03:15:45Z — cay origin/master f712205aa39e0b54d04a5bd8145fa69a84601fed (worktree, core.abbrev 7)
+$ python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+rc=0 ok=True expected=189 checked=189 failed=[] missing=[] extra_files=[]
+Already up to date.

@@ -1,0 +1,5 @@
+argv=['/usr/bin/python3.13', '-B', PosixPath('/home/user/rv773/ops/land_evidence_nguon.py'), '--root', PosixPath('/tmp/len_cay_t_vw_h_e/kho')]
+rc=2
+KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: parse YAML: ConstructorError: khoá trùng 'x'
+land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: KHÔNG ĐO ĐƯỢC

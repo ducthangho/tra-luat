@@ -1,0 +1,1 @@
+DO:r04_yaml_date:mong rc=2 + tổng kết, được rc=1, stdout='', stderr cuối=['ValueError: day is out of range for month']

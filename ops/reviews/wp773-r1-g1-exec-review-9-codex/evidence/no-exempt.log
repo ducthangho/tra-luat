@@ -1,0 +1,129 @@
+RC: 1
+  ghi chú ops/land/plat-x8-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/plat-x8-land-evidence.yaml
+  ghi chú ops/land/pr468-hoso-4-packet-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr468-hoso-4-packet-land-evidence.yaml
+  ghi chú ops/land/pr477-dung-goi-review-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr477-dung-goi-review-land-evidence.yaml
+  ghi chú ops/land/pr478-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr478-land-evidence.yaml
+  ghi chú ops/land/pr480-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr480-land-evidence.yaml
+  ghi chú ops/land/pr487-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr487-land-evidence.yaml
+  ghi chú ops/land/pr489-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr489-land-evidence.yaml
+  ghi chú ops/land/pr491-r358-ghi-so-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr491-r358-ghi-so-land-evidence.yaml
+  ghi chú ops/land/pr493-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr493-land-evidence.yaml
+ĐẠT ops/land/pr554-wp541-land-evidence.yaml
+  ghi chú ops/land/pr594-wp578-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr594-wp578-land-evidence.yaml
+  ghi chú ops/land/pr621-skill-bai-hoc-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐỎ ops/land/pr621-skill-bai-hoc-land-evidence.yaml: 2 vi phạm
+  L1 $.pre_merge_checks[4].tong: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — 14 + 1 + 1 + 1 = 17 check run = 16 success + 1 skipped (mo).'
+  L1 $.ung_vien.head_drift.phan_chung: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — digest PHU THUOC core.abbrev (dong `index` cua diff): voi core.abbrev=40 ca hai'
+  ghi chú ops/land/pr666-wp650-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr666-wp650-land-evidence.yaml
+  ghi chú ops/land/pr672-wp574-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr672-wp574-land-evidence.yaml
+  ghi chú ops/land/pr679-wp678-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr679-wp678-land-evidence.yaml
+  ghi chú ops/land/pr680-wp676-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr680-wp676-land-evidence.yaml
+  ghi chú ops/land/pr684-wp677-land-evidence.yaml: L3 không áp dụng: provenance không có readback PR mang merged_at
+ĐẠT ops/land/pr684-wp677-land-evidence.yaml
+ĐỎ ops/land/pr689-wp677-land-evidence.yaml: 3 vi phạm
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tep o nhanh bookkeeping; = spec_hash khai trong lease g5 va g6; ls-tr'
+  L1 $.authorization.human_audit.khong_chua_uy_quyen_land: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — than khong co cau uy quyen merge; chu kho tu merge (merged_by ducthangho) nen t'
+  L1 $.merge_commit_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git cat-file -p 20ec8d5: 1 khoi gpgsig (BEGIN PGP SIGNATURE), committer GitHub'
+ĐỎ ops/land/pr696-wp668-land-evidence.yaml: 10 vi phạm
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tep o bc57bca; git rev-parse 8bda84b:<spec> = HEAD:<spec> = 47355031'
+  L1 $.authorization.human_audit.doi_chieu_mau: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: than = khoi mau o muc 5 cua ho so audit 5906911882 (do phien agent soan) voi DUN'
+  L1 $.authorization.human_audit.khong_chua_uy_quyen_land: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — than khong co muc uy quyen merge/land; uy quyen merge den tu chi thi 08:09:13Z.'
+  L1 $.authorization.ho_so_audit.do_duoc: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — created_at 08:05:08Z, than 5715 byte sha256 f6039f67…250a, app claude; than tu '
+  L1 $.authorization.chi_thi_merge.neo_ben_do_duoc: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: created_at 08:09:51Z, than 1492 byte sha256 9fbf32c6…501e, app claude, dong dau '
+  L1 $.authorization.thu_hoi_do_giai_thich.do_duoc: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: created_at 08:20:10Z, than 1456 byte sha256 111456dc…ca98, app claude; bao cao c'
+  L1 $.authorization.head_moi.neo_ben_do_duoc: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: created_at 08:21:41Z, than 1493 byte sha256 0962d12e…a731, app claude, dong dau '
+  L1 $.merge_commit_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git cat-file -p 423b4ba: 1 khoi gpgsig, committer GitHub'
+  L1 $.chu_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — 27/27 commit f8a7829..cc78b33 va 3ddda02 co 1 khoi BEGIN ... SIGNATURE (git cat'
+  L1 $.post_merge_checks[0].moc_gate_output[3].thoi_gian_bo_nhanh_don_duoc: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured tu dong CI_DANG_KY_THOI_GIAN cua hai log: hau-merge 4500.384 s rc -9 (09:59:02Z..'
+ĐỎ ops/land/pr701-wp687-land-evidence.yaml: 12 vi phạm
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tep o 163fd5d; = spec_hash khai trong lease g3'
+  L1 $.authorization.human_audit.khong_chua_uy_quyen_land: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — than khong co cau uy quyen merge; chu kho tu merge (merged_by ducthangho) nen t'
+  L1 $.authorization.human_audit.loi_khai_trong_than_doi_chieu[1]: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured KHOP: "So BO QUA dung 12 ca" — SO_BO_QUA tai 9d7a523 co 12 ten: t51 t59 t60 t62 t'
+  L1 $.authorization.human_audit.loi_khai_trong_than_doi_chieu[2]: lời khai đo không có token nguồn phân giải được (token: /) — 'measured KHOP: "nen 20ec8d5 ra 195/195; nhanh ra 198/198, bo qua=0, ke ca [A]/[B]" — do la'
+  L1 $.authorization.human_audit.loi_khai_trong_than_doi_chieu[3]: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured KHOP: "Run 36816901782 ... 15 check success va 1 skipped" — luc 05:38:09Z co 16 c'
+  L1 $.authorization.human_audit.loi_khai_trong_than_doi_chieu[4]: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured LECH: "Do so 89fc4fa thi tong la 1048 78" — do lai 1082 78 o 9d7a523; 1048 78 la '
+  L1 $.authorization.human_audit.loi_khai_trong_than_doi_chieu[5]: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured LECH: "Hai P4 de lai lam ho so" — bang lop cua verdict r3 luot 2 co 3 hang P4 (le'
+  L1 $.authorization.human_audit.loi_khai_trong_than_doi_chieu[6]: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: "VERDICT sha256 dcccc301…ad32" khop tep review r3 luot 2.'
+  L1 $.tree_khop_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git rev-parse 163fd5d^{tree} 9d7a523^{tree}; git diff --name-status 9d7a523 163'
+  L1 $.merge_commit_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git cat-file -p 163fd5d: 1 khoi gpgsig (BEGIN PGP SIGNATURE), committer GitHub'
+  L1 $.lech_trong_tai_lieu_da_ky_hoac_da_dang.muc[1].do_duoc: lời khai đo không có token nguồn phân giải được (token: VERDICT.md) — 'measured — bang "Bảng lớp lượt này" cua VERDICT.md r3 luot 2 (sha256 dcccc301…ad32) co 3 h'
+  L1 $.bookkeeping[4].noi_dung: lời khai đo không có token nguồn phân giải được (token: dien_neo.py, /, *.patch, HINT.patch) — 'measured 07:05:04Z..07:05:13Z tren clone day du (bk677/khoday), nhanh gia lap thu-2-buoc-6'
+ĐỎ ops/land/pr703-wp674-land-evidence.yaml: 8 vi phạm
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: CI-DUONG-NHANH-HO-SO.md) — 'measured — sha256 blob 93155225 tai origin/ops/cap-lease-ci-duong-nhanh-ho-so (8dd7b83) = '
+  L1 $.authorization.human_audit.khong_chua_uy_quyen_land: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — than khong co cau uy quyen merge. Uy quyen merge la lenh land rieng (authorizat'
+  L1 $.tree_khop: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — `git merge-tree --write-tree a6de9d1 46bc11d` = 99d009e = tree 7e5958e (merge s'
+  L1 $.merge_commit_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git cat-file -p 7e5958e: 1 khoi gpgsig (BEGIN PGP SIGNATURE), committer GitHub'
+  L1 $.pre_merge_checks[1].rc_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — dong ##[error] cua log job'
+  L1 $.review.bam_khop: lời khai đo không có token nguồn phân giải được (token: HINT.patch) — 'measured — sha256 cua MOI tep chep (11 VERDICT, 9 HINT.patch, 3 HINT-sanpham.diff) = tep g'
+  L1 $.nghiem_thu_spec_r2.muc[9].trang_thai: lời khai đo không có token nguồn phân giải được (token: /) — 'measured (selftest) / thuat_lai (ruff)'
+  L1 $.lech_protocol_khai[3].mo_ta: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured tu comment va ref (review.chuoi_song_song_khong_gop): hai chuoi commit ky cung ne'
+ĐỎ ops/land/pr707-wp705-land-evidence.yaml: 6 vi phạm
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256 blob 2130f0a2 tai 36473cd (nhanh ops/cap-lease-ci-registry-nang-tran) = '
+  L1 $.authorization.human_audit.thu_tu_thoi_gian: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — ky 23:52:02Z, SAU attempt 1 gate-registry DO (job 113034233519 xong 22:55:48Z; '
+  L1 $.authorization.human_audit.khong_chua_uy_quyen_land_ro: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — than co dong "Land: bằng merge commit." (chi dinh PHUONG THUC); khong co cau "m'
+  L1 $.merge_commit_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git cat-file -p 19ca703: 1 khoi chu ky, committer GitHub'
+  L1 $.chu_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git rev-list 8c98afa..36190a3 = 4 commit; ca 4 co 1 khoi BEGIN … SIGNATURE. Xac'
+  L1 $.review.bam_khop: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256 tep chep (2 VERDICT, 1 HINT) = tep goc sandbox cr707-c1/c2 (cp -p), va c'
+ĐỎ ops/land/pr714-wp710-land-evidence.yaml: 9 vi phạm
+  L1 $.trang_thai_packet.con_thieu_de_goi_landed[0].do_them: lời khai đo không có token nguồn phân giải được (token: VERDICT.md) — 'measured — phan <details> "Nguyên văn VERDICT.md lượt 9" cua than comment 6078803297 (doc '
+  L1 $.trang_thai_packet.con_thieu_de_goi_landed[2].trang_thai: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — co, nhung SAU merge'
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256 `git show 8b59185:<spec>` = `git show origin/packet/wp710-spec-r4:<spec>'
+  L1 $.input_packet_generations[0].lease_ve_master: lời khai đo không có token nguồn phân giải được (token: lease_publish.py) — 'measured — ba tep lease g3-g5 KHONG co tren 8b59185; vao master qua merge 7dcb9d4 (cha 8b5'
+  L1 $.authorization.quyet_dinh_landed.thu_tu_thoi_gian: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — 15:39:03Z, SAU merge 8b59185 (11:08:09Z), SAU hau-merge gate xanh va SAU nghiem'
+  L1 $.authorization.human_audit.thu_tu_thoi_gian: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — merged 11:08:09Z; bot Codex xong 11:09:19Z; thu-hoi 37921863071 xong 11:08:31Z;'
+  L1 $.authorization.codex_connector.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: chatgpt-codex-connector[bot] comment tom tat 6079668745 (tao 11:08:17Z, sua 11:0'
+  L1 $.review.thi_hanh[8].nhan: lời khai đo không có token nguồn phân giải được (token: /) — 'measured (dung lai tu ban chieu, khop bam) / tep goc chua co'
+  L1 $.review.bam_khop: lời khai đo không có token nguồn phân giải được (token: ngoai_write_set.patch) — 'measured — luot 1-3: sha256 VERDICT + HINT tren tep goc $SP/cr714-l{1,2,3}/goi co mat NGUY'
+ĐỎ ops/land/pr718-wp678-land-evidence.yaml: 7 vi phạm
+  L1 $.authorization.human_audit.thu_tu_thoi_gian: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — ky 15:25:54Z, SAU CI PR luot 2 (run 37796447671 updated_at 15:15:11Z) va thu-ho'
+  L1 $.authorization.human_audit.khong_chua_uy_quyen_land_ro: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — than co dong "PR phải land bằng merge commit, KHÔNG squash hay rebase." (chi di'
+  L1 $.tree_khop: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — `git merge-tree --write-tree 8de47bc 57bb4b3` = f0527ad = tree a671920 = tree 5'
+  L1 $.merge_commit_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git cat-file -p a671920: 1 khoi chu ky, committer GitHub'
+  L1 $.chu_ky: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — git rev-list ab457c6..57bb4b3 phan nhanh thi cong: 6 commit, ca 6 co 1 khoi BEG'
+  L1 $.pre_merge_checks[1].check_runs_tren_57bb4b3: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured: 17 check run = 16 success (gom 2 thu-hoi) + mo skipped.'
+  L1 $.review.bam_khop: lời khai đo không có token nguồn phân giải được (token: /) — 'measured — sha256 9 VERDICT + 8 HINT (luot 17 khong HINT) tren tep goc scratchpad cr678-r1'
+ĐỎ ops/land/pr721-wp698-land-evidence.yaml: 6 vi phạm
+  L1 $.authorization.human_audit.thu_tu_thoi_gian: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — 00:45:43Z, TRUOC merge 00:47:18Z.'
+  L1 $.review.dac_ta.ban_sao_trong_kho: lời khai đo không có token nguồn phân giải được (token: 14}-claude-verdict.md) — 'measured — sha256sum ops/reviews/wp698-spec-review-{2..7,12,13,14}-claude-verdict.md tai c'
+  L1 $.review.thi_hanh[1].verdict_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tren nhanh ghi so = sha256 khai trong duyet CI luot 2 (6096574305).'
+  L1 $.review.thi_hanh[2].verdict_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tren nhanh ghi so = sha256 khai trong duyet CI luot 3 (6101111445); H'
+  L1 $.post_merge_checks.gate_push.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — completed/success, 14/14 job success, run_attempt 1, updated_at 2026-10-11T02:0'
+  L1 $.post_merge_checks.gate_push_master_ke_tiep.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — completed/success, 14/14 job success, run_attempt 1, updated_at 2026-10-11T17:3'
+ĐỎ ops/land/pr732-wp685-land-evidence.yaml: 11 vi phạm
+  L1 $.trang_thai_packet.merge_commit.nguon: lời khai đo không có token nguồn phân giải được (token: không có) — "measured — `git show -s --format='%H %P %T' 77fb028`; `git diff --stat bc6630a 77fb028` = "
+  L1 $.input_packet_generations[0].spec_sha256_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256 `git show origin/claude/wp685-r24-doi-executor:<spec>` = spec_hash lease'
+  L1 $.authorization.uy_quyen_land.thu_tu_thoi_gian: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sua xong 16:20:53Z, TRUOC merge 16:41:22Z.'
+  L1 $.ci_truoc_merge.bat_buoc_pr.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — completed/success; gate, gate-packet-loop, gate-ops, gate-cong-cu-gop (ubuntu-l'
+  L1 $.ci_truoc_merge.launcher_windows.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — completed/success.'
+  L1 $.master_drift.drift_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — `git diff --name-only ab457c6 bc6630a | wc -l` = 273. Thong diep merge 77fb028 '
+  L1 $.master_drift.fence.delta: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — chi HEAD + refs/heads/master bc6630a -> 77fb028 va mat refs/pull/732/merge 7984'
+  L1 $.post_merge_checks.gate_push_dong_bang.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — completed/success, 14/14 job success, run_attempt 1, updated_at 2026-10-10T20:1'
+  L1 $.post_merge_checks.gate_push.ket_qua: lời khai đo không có token nguồn phân giải được (token: /) — 'measured — completed/failure; 13/14 success; do: gate (ubuntu-latest) / release-verify str'
+  L1 $.post_merge_checks.launcher_windows_push.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — completed/success.'
+  L1 $.post_merge_checks.dang_lease_rut_han.ket_qua: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — ops — đăng lease bằng git, job dang success.'
+ĐỎ ops/land/pr759-no-p3-ho-so-land-evidence.yaml: 7 vi phạm
+  L1 $.merge_method_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — "measured — `git log --format='%H %P' -1 c7daa8c` = hai cha (0ed5b63, 39dbfbf) => merge com"
+  L1 $.pre_merge_checks[0].tree_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — `git rev-parse 39dbfbf^{tree}`.'
+  L1 $.pre_merge_checks_phu[0].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-run/jobs-38727261380.json) — 'measured (readback-run/jobs-38727261380.json) — completed/success, 1 job thu-hoi success, '
+  L1 $.pre_merge_checks_phu[1].ket_qua: lời khai đo không có token nguồn phân giải được (token: readback-run/jobs-38727537692.json) — 'measured (readback-run/jobs-38727537692.json) — completed/success, 1 job thu-hoi success, '
+  L1 $.post_merge_checks[0].tree_nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — `git rev-parse c7daa8c^{tree}` = `git rev-parse 39dbfbf^{tree}` = 00a7e5fd… => '
+  L1 $.post_merge_checks[0].checkout_thuc: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — 13/14 log co `git log -1 --format=%H` = c7daa8cf6ef3e3a118d525536587e6e87985ed5'
+  L1 $.ghi_chu.tran_adr_0044: lời khai đo không có token nguồn phân giải được (token: /) — 'measured — 4 tep +148/-0, trong ngoai le 10 tep / 500 dong da cap (6190095083).'
+ĐỎ ops/land/pr765-wp743-land-evidence.yaml: 1 vi phạm
+  L1 $.spec.nguon: lời khai đo không có token nguồn phân giải được (token: không có) — 'measured — sha256sum tren blob trong nhanh nay (vao master qua PR ghi so nay)'
+land_evidence_nguon: 16 ĐẠT · 0/0 miễn trừ (băm khớp) · 82 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 28
+TỔNG: ĐỎ

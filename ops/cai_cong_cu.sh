@@ -28,6 +28,39 @@ fi
 # ung vien (vd thieu PyYAML). Giu nguyen doi so con lai cua mang (`py -3`).
 PY[0]="$(command -v "${PY[0]}")"
 
+# wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (duoc `eval` duoi day). `dirname "$(command -v X)"` in thu
+# muc ban DAU PATH, ke ca ban HONG. Chuan DUY NHAT: CHINH `cong_cu.py kiem-tra --chi <ten>` bang PY da ghim (wp831 F03),
+# khong loc `-f/-x/.exe` (ten tran chua DAT thi thu muc khong co <ten> khong doi phep tra ten — F858-02). Ten tran da DAT
+# => khong doi PATH, dong cuoi `/dev/null` (KHONG BAO GIO la thu muc): in thu muc cu dua `rg` hong cung thu muc len dau
+# (#831 luot 4), im lang/ten khac/khong LF rieng thi stdout TRINH CAI bi doc lam thu muc (F858-03, Codex luot 1-3).
+# `--win`: ung vien qua `cygpath -u`, $GITHUB_PATH qua `cygpath -w`; ghi $GITHUB_PATH chi khi ten tran chua DAT. Moi buoc
+# hong => `return 1` TUONG MINH vi `errexit` tat trong `$(eval ...)` (F858-01/04).
+chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
+  local win="" ten d dich="" w
+  if [ "${1:-}" = "--win" ]; then win=1; shift; fi
+  ten="$1"; shift
+  if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then
+    echo "cai_cong_cu: '$ten' ten tran da DAT, giu nguyen PATH" >&2
+    printf '\n%s\n' /dev/null
+    return 0
+  fi
+  for d in "$@"; do
+    if [ -n "$win" ]; then
+      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua '$ten'" >&2; return 1; }
+    fi
+    if PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then dich="$d"; break; fi
+  done
+  [ -n "$dich" ] || { echo "cai_cong_cu: khong thu muc nao co '$ten' chay duoc" >&2; return 1; }
+  if [ -n "${GITHUB_PATH:-}" ]; then
+    w="$dich"
+    if [ -n "$win" ]; then
+      w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho '$dich'" >&2; return 1; }
+    fi
+    printf '%s\n' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; return 1; }
+  fi
+  printf '\n%s\n' "$dich"
+}
+
 if [ "$TEN" = "--bat-buoc" ]; then
   # PyYAML la bootstrap cua chinh ban ke. Ghim nay duoc t20 doi chieu voi YAML/CI;
   # khong the doc YAML de tim cong thuc cai khi module doc YAML chua ton tai.

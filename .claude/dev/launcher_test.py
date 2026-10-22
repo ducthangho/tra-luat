@@ -2340,9 +2340,8 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     bang(tt == "CHUA_XAC_THUC", f"rc=0 ma noi chua dang nhap thi phai fail-closed, duoc {tt}")
 
 
-# wp858 (L2, đo 21-10-2026): khi một phiên Codex đang sống, `codex-linux-sandbox` gắn tmpfs ro lên `/tmp/.git` (mountinfo)
-# ⇒ thư mục rỗng `/tmp/.git` có trên máy chủ ⇒ `_KhoCodex` từ chối ĐÚNG mọi home dưới `/tmp` ⇒ `t86` đỏ "khi song song"
-# (#831). Ca chọn gốc tạm không có `.git` ở chính nó hay tổ tiên.
+# wp858 (L2, đo 21-10-2026): phiên Codex đang sống gắn tmpfs ro lên `/tmp/.git` ⇒ `_KhoCodex` từ chối ĐÚNG mọi home dưới
+# `/tmp` ⇒ `t86` đỏ "khi song song" (#831). Ca chọn gốc tạm không có `.git` ở chính nó hay tổ tiên.
 _WP858_GOC_TAM_UNG_VIEN = (tempfile.gettempdir(), "/var/tmp", "/dev/shm")
 
 
@@ -8491,7 +8490,7 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
                     env_them=None, gp_thu_muc=False):
     """NGUYÊN `<ten>.cai.<nen>` qua cai_cong_cu.sh (`--bat-buoc` khi có `bang_ke`). `tot`: thân `<ten>` ở ứng viên;
     `dau`: `"hong"`/`"tot"`/None ở ĐẦU PATH; `them`: tệp thêm ở thư mục đầu; `truc_tiep`: eval công thức để đọc dòng IN
-    cuối; `cai_in`: stdout stub apt-get; `gp_thu_muc`: $GITHUB_PATH là thư mục. Trả (p, GITHUB_PATH, ứng viên, đầu)."""
+    cuối; `cai_in`: stdout stub apt-get khi cài bash; `gp_thu_muc`: $GITHUB_PATH là thư mục. Trả (p, GITHUB_PATH, ứng viên, đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cong_cu.py", "bash_nen.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
@@ -8508,7 +8507,7 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
     bin_, dau_d = s / "bin", s / "dau"
     for d in (bin_, uv, dau_d):
         d.mkdir(parents=True, exist_ok=True)
-    apt = f"echo {shlex.quote(cai_in)}; exit 0" if cai_in else "exit 0"
+    apt = f'case " $* " in *" bash "*) printf %s {shlex.quote(cai_in)};; esac; exit 0' if cai_in else "exit 0"
     tep = {bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": apt,
            bin_ / "choco": "exit 0", bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{s / 'brew'}'; exit 0",
            # `-w` → `W:<đường>`; `-u` ánh xạ `V:` về `<sân>/v`; `CYGPATH_{W,U}_HONG` ⇒ thoát 37 (`-u` vẫn in đường đúng).
@@ -8570,6 +8569,9 @@ def _wp858_cai_chon_ban_chay_duoc(nen):
             with San() as s:
                 p, _gp, _uv, _d = _wp858_chay_cai(s, ten, nen, xau, truc_tiep=True)
                 bang(p.returncode != 0, f"{nen}/{ten}: cong thuc rc=0 khi khong ung vien nao chay duoc ({xau!r})")
+        with San() as s:   # F858-06: KHÔNG có $GITHUB_PATH thì ứng viên Windows vẫn phải qua `cygpath -u`
+            p, gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], env_them={"GITHUB_PATH": ""})
+            bang(p.returncode == 0 and '"DAT"' in p.stdout, f"{nen}/{ten}: khong GITHUB_PATH thi khong DAT rc={p.returncode}")
         # F858-01/04: ghi $GITHUB_PATH hoặc `cygpath` hỏng ⇒ installer THẬT ≠ 0 (`errexit` tắt trong `$(eval ...)`).
         hong_ghi = [dict(gp_thu_muc=True)] + ([dict(env_them={"CYGPATH_W_HONG": "1"}),
                                                dict(env_them={"CYGPATH_U_HONG": "1"})] if nen == "windows" else [])
@@ -8633,11 +8635,14 @@ def r858_bat_buoc_bash_khong_dua_rg_hong_len_dau():
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()
     vo, _env = _wp802_bash_env()
-    # F858-03: trình cài in thư mục đầu ở dòng cuối stdout (lượt 1); thư mục THẬT trùng tên dòng canh cũ + `rg` hỏng ở
-    # cwd, vì `:` trong PATH tạo phần tử rỗng = cwd (lượt 2).
+    # F858-03: trình cài in thư mục đầu (l.1); thư mục trùng tên canh cũ + `rg` hỏng ở cwd (l.2); tiền tố KHÔNG LF (l.3).
     for thu_tu in (("rg", "bash"), ("bash", "rg")):
-      for in_dau in (False, True, "trung"):
+      for in_dau in (False, True, "trung", "khong_lf"):
         with San() as s:
+            if in_dau == "khong_lf":
+                (s / "p" / "dev" / "null").mkdir(parents=True)
+                (s / "p" / "dev" / "null" / "rg").write_text(f"#!/bin/sh\n{_WP858_HONG}\n")
+                (s / "p" / "dev" / "null" / "rg").chmod(0o755)
             if in_dau == "trung":
                 (s / "kho" / ":giu-nguyen-PATH:").mkdir(parents=True)
                 (s / "kho" / "rg").write_text(f"#!/bin/sh\n{_WP858_HONG}\n")
@@ -8645,7 +8650,8 @@ def r858_bat_buoc_bash_khong_dua_rg_hong_len_dau():
             (s / "dau").mkdir()
             (s / "dau" / "bash").symlink_to(vo)
             p, _gp, _uv, _d = _wp858_chay_cai(s, "rg", "linux", "echo 'ripgrep 14.1.0'", dau=None, bang_ke=thu_tu,
-                                              them={"rg": _WP858_HONG}, cai_in=str(s / "dau") if in_dau is True else None)
+                                              them={"rg": _WP858_HONG},
+                                              cai_in={True: f"{s / 'dau'}\n", "khong_lf": str(s / "p")}.get(in_dau))
             try:
                 tong = json.loads(p.stdout[p.stdout.rindex('{\n  "trang_thai_tong"'):])
             except ValueError:
@@ -8687,7 +8693,8 @@ def r858_hinh_dang_cong_thuc_cai():
     than = than[:than.index("\n}\n")]
     for can in ('if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then',
                 'PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten"',
-                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'echo "/dev/null"',
+                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'printf \'\\n%s\\n\' /dev/null', 'printf \'\\n%s\\n\' "$dich"',
+                '    if [ -n "$win" ]; then\n      d="$(cygpath -u "$d")"',
                 'd="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
                 'printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || {', '\'$ten\' chay duoc" >&2; return 1; }'):
         bang(can in than, f"ham chon_thu_muc_chay_duoc thieu {can!r}")
@@ -10949,7 +10956,6 @@ DOT_BIEN_HOOK = [
      ('      w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho \'$dich\'" >&2; return 1; }',
       '      w="$dich"'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
-    # Codex wp858 lượt 1–2: F858-01/02/03/04.
     ("wp858_sh_bo_cygpath_u",
      ('      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
       '      :'),
@@ -10963,14 +10969,20 @@ DOT_BIEN_HOOK = [
       'printf \'%s\\n\' "$w" >> "$GITHUB_PATH"'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_bo_dong_canh_giu_path",
-     ('    echo "/dev/null"\n', ''),
+     ("    printf '\\n%s\\n' /dev/null\n", ''),
      ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_cygpath_u_hong_khong_tra_loi",
      ("cygpath -u hong cho ung vien cua '$ten'\" >&2; return 1; }", "cygpath -u hong cho ung vien cua '$ten'\" >&2; }"),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_dong_canh_la_ten_thu_muc",
-     ('    echo "/dev/null"\n', '    echo ":giu-nguyen-PATH:"\n'),
+     ("    printf '\\n%s\\n' /dev/null\n", '    echo ":giu-nguyen-PATH:"\n'),
      ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    # Codex wp858 lượt 1–3: F858-01/02/03/04/06.
+    ("wp858_sh_dong_canh_khong_tach_dong", ("    printf '\\n%s\\n' /dev/null\n", "    printf '%s\\n' /dev/null\n"),
+     ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp858_sh_cygpath_u_chi_khi_ghi_path",
+     ('    if [ -n "$win" ]; then\n      d="$(cygpath -u', '    if [ -n "$win" ] && [ -n "${GITHUB_PATH:-}" ]; then\n      d="$(cygpath -u'),
+     ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_selftest_editskill_ten_co_dinh",
      ('    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))\n    _esf = _esd / "_selftest_editskill.py"',
       '    _esd = Path(_tfx.gettempdir())\n    _esf = _esd / "_selftest_editskill.py"'),

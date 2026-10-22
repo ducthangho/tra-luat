@@ -3980,8 +3980,7 @@ def run() -> int:
     # ───── KH1 III.2 — edit-skill: cổng assert-đếm (DRY, an toàn), offline ─────
     import shutil as _shx
     import tempfile as _tfx
-    # wp858 (L3) — tên tệp CỐ ĐỊNH trong thư mục tạm chung ⇒ hai selftest song song ghi/đọc chéo cùng tệp (đỏ giả,
-    # đo 18-10-2026 ở #831). Thư mục riêng từng lượt (mkdtemp) — cách ly theo CẤU TRÚC.
+    # wp858 (L3): tên tệp CỐ ĐỊNH trong temp chung ⇒ hai selftest song song đỏ giả (#831) — thư mục riêng từng lượt.
     _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))
     _esf = _esd / "_selftest_editskill.py"
     _editskill = False

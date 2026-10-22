@@ -21,10 +21,9 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [git, --version], regex: '(?m)^git version\s+(\d+\.\d+\.\d+(?:[.+-][0-9A-Za-z.+-]*)?)'}]
     cai:
-      # wp858 (L1): `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) in ứng viên ĐẦU TIÊN mà `cong_cu.py kiem-tra --chi` nhận
-      # DAT; tên trần đã DAT ⇒ không đổi PATH. Ứng viên (Q2): Linux `/usr/bin` (`CONG_CU_GOC` khi test) · macOS brew · Windows
-      # thư mục choco; cuối cùng `command -v`. Cùng hàm cho python/shellcheck/bash. python: checker dùng `sys.executable`
-      # ⇒ python hỏng đầu PATH lọt — nợ `python-probe-khong-theo-PATH` (chủ kho chọn (a), #858 issuecomment-6312034981).
+      # wp858 (L1): `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) in ứng viên Q2 ĐẦU TIÊN mà `cong_cu.py kiem-tra` nhận DAT
+      # (Linux `/usr/bin` · macOS brew · Windows choco; cuối `command -v`). python: checker dùng `sys.executable` ⇒ python
+      # hỏng đầu PATH lọt — nợ `python-probe-khong-theo-PATH` (chủ kho chọn (a), #858 issuecomment-6312034981).
       linux: {lenh: 'sudo apt-get install -y git && chon_thu_muc_chay_duoc git "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v git || echo ./git)")"'}
       macos: {lenh: 'brew install git && chon_thu_muc_chay_duoc git "$(brew --prefix)/bin" "$(dirname "$(command -v git || echo ./git)")"'}
       windows: {lenh: 'choco install git --yes --no-progress && chon_thu_muc_chay_duoc --win git "${ProgramFiles:-C:/Program Files}/Git/cmd" "${ProgramFiles:-C:/Program Files}/Git/bin" "${ProgramFiles:-C:/Program Files}/Git/usr/bin" "$(dirname "$(command -v git || echo ./git)")"'}

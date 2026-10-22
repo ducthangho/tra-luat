@@ -5370,10 +5370,10 @@ DOT_BIEN_TU_KIEM = [
     ("ghi-so-gop-dich", ("r546",), "            _ghi_ha_tang(e)                       # WP748 r22: diem nuot _loi_gop_dich (r546 qua r554)\n", ""),
     # r556 (c) do CHINH diem goi nay (don cay nem => van rc 124) nen cung phai chet: dich hai ca, moi nen.
     ("timeout-chi-giet-con", ("r555", "r556"), "                            duong = _ket_thuc_cay(q, ve)   # WP748 r22 F02: diem goi don cay",
-     "                            q.kill(); duong = \"chi con\""),
+     "                            duong = _giet_truc_tiep(q)"),   # chi giet con, KHONG nem (l4: q.kill tran nem o r556 c2 = tin dung gia)
     ("con-treo-wait-loi-thoat", ("r556",), "    except OSError as e:                             # WP748 r22 l4: wait loi van la rc 126, khong thoat\n        return",
      "    except ZeroDivisionError as e:\n        return"),
-    ("popen-nem-mat-ghi-chu-dong", ("r556",), "                    e.add_note(ve.loi)", "                    pass"),
+    ("popen-nem-mat-ghi-chu-dong", ("r556",), "                    e.add_note(ve_nem.loi)", "                    pass"),
     ("don-cay-nem-thieu-ngoai-hop-dong", ("r556",), "+ (\"\" if ve is not None else f\" · {NGOAI_HOP_DONG_POSIX}\"))  # WP748 r22 l4: ngoai hop dong",
      "+ \"\")"),
     ("thu-output-loi-thoat", ("r556",), "                        except Exception as e:                  # noqa: BLE001 — WP748 r22 l4: van rc 124",

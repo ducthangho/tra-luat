@@ -8,8 +8,8 @@
 # HO SO LAND — packet #748 wp748 r21 (lease g21), ma qua PR #862. Khuon: ops/land/pr849-wp748-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (401d4f1), `landed: false` tu PR dinh chinh (22-10-2026): THIEU reviewer assurance §8.1 (connector P1 #863
-# r4323596458, tien le #822). Ban 80c4da1 khai landed true. Duyet ben cua chu kho: #748 issuecomment-6285607005 (dang SAU merge, xem authorization_ghi_chu).
+# TRANG THAI: merged (401d4f1), `landed: true` tu PR dinh chinh (22-10-2026): reviewer assurance §8.1 nay neo luot review qua
+# launcher.py run f0909b38 (connector P1 #863 r4323596458 dong). Ban 80c4da1 khai landed true chi dua luot codex exec truc tiep. Duyet ben cua chu kho: #748 issuecomment-6285607005 (dang SAU merge, xem authorization_ghi_chu).
 # Gate push master tren DUNG merge SHA 401d4f1: ci.yml 39380754094 XANH 23/23. Bang chung race dong: ops-publish-lease
 # 39358824666 attempt 1 DO (master 3950a0f) -> attempt 2 XANH (master 401d4f15).
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
@@ -89,17 +89,20 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-862.json: merged true, merged_at 2026-10-20T06:30:22Z, merged_by ducthangho, merge_commit_sha
     401d4f1, head.sha 28e35fd; cha va tree o do-lai-nguon-20261020/merge-va-diff.txt; merge commit (khong squash/rebase).
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 401d4f1: ci.yml 23/23 XANH, kiem-gate rc=0, log kem (post_merge_checks) DAT;
     (2) lease da nha: rut han, 1/1 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: comment land r21 tren #748 (Issue da closed) DAT;
     (4) review neo DUNG authorized_head_sha 28e35fd: Codex approve 0 P0-P2 (noi dung; assurance xem (7)); tree merge = tree head (f886966);
     (5) uy quyen land neo DUNG 28e35fd: #748 issuecomment-6285607005 DAT, dang sau merge (authorization_ghi_chu);
     (6) muc tieu packet: ops-publish-lease xanh tren master co ban va (39358824666 attempt 2) DAT.
-    (7) reviewer assurance §8.1 (lop sensitive doi cross_approved/human_audited): CHUA DAT — luot review la codex exec TRUC TIEP,
-    KHONG co bien nhan launcher (run.json), model THUC phuc vu KHONG_DO_DUOC; header CLI chi chung minh model CLI cong bo
-    (§8.1). Duyet land cua chu kho khong phai audit hay ghi de assurance. Connector P1 #863 r4323596458; tien le #822 (cc26c8e).
-    landed false toi khi co luot review qua launcher.py run neo dung SHA nay (chu kho chon 22-10-2026: buoc 1 + buoc 2).
+    (7) reviewer assurance §8.1: DAT — luot 2 qua launcher.py run f0909b3813784cd3885f2b64f5eb808b (verdicts/run-f0909b38.json):
+    trang_thai xong, ma_thoat 0, head 28e35fd, worktree_sach true, prompt_sha256 a7a7ddc3… khop verdicts/wp748-r21-luot2-launcher-prompt.md,
+    provider openai_codex, execution_surface codex_cli, transport machine, 3/3 probe DAT, 605.389 s; verdict approve 0 P0-P2
+    (verdicts/wp748-r21-luot2-launcher-verdict.md). Luot 1 (codex exec truc tiep) KHONG duoc tinh assurance (connector P1 #863
+    r4323596458). Gioi han ghi thang: model THUC phuc vu van KHONG_DO_DUOC — run.json va luong su kien --json
+    (verdicts/wp748-r21-luot2-launcher-codex-events.jsonl) khong mang truong model; cung muc bang chung voi #845 (run-964888d9).
+    `landed: true` hieu luc khi PR dinh chinh nay vao master.
 
 uy_quyen_land:
   dang: >-
@@ -110,11 +113,15 @@ uy_quyen_land:
   khong_xung_dot: 'loi_khai_co_neo — CI PR xanh tren 28e35fd, base 3950a0f = cha thu nhat cua merge; khong luu readback mergeable.'
 
 review:
-  so_loi_goi_codex_cli: 1
+  so_loi_goi_codex_cli: 2
+  ly_do_luot_2: 'ADR-0052 — bo sung bang chung nhan dang reviewer (bien nhan launcher) theo connector P1 #863; khong review lai vi noi dung doi.'
   luot_cuoi:
-    reviewer: 'measured — verdicts/wp748-r21-luot1-codex-transcript.txt: Codex CLI v0.163.0, model yeu cau gpt-6-astra, provider openai; be mat THUC la codex exec trong container phien executor; model THUC phuc vu KHONG_DO_DUOC.'
+    reviewer: 'measured — verdicts/run-f0909b38.json: launcher.py run, provider openai_codex, execution_surface codex_cli, transport machine, head 28e35fd, ma_thoat 0; codex exec --json -m gpt-6-astra xhigh; model THUC phuc vu KHONG_DO_DUOC.'
     hien_vat: ops/land/pr862-wp748-r21-provenance/verdicts/
-    ket_qua: 'thuat_lai — approve tren 28e35fd (= authorized_head_sha), 0 P0-P2, 1 P3 khong chan.'
+    ket_qua: 'thuat_lai — approve tren 28e35fd, 0 P0-P2, 1 P3 (mtime-order-proxy, trung luot 1); suite 267/267, t125 A/B 267/267, 3/3 dot bien giet dung ly do.'
+  luot_1:
+    reviewer: 'verdicts/wp748-r21-luot1-codex-transcript.txt: codex exec truc tiep, KHONG bien nhan launcher — KHONG tinh assurance.'
+    ket_qua: 'thuat_lai — approve, 0 P0-P2, 1 P3.'
   thread: 'measured — readback-reviews-862.json: 0 review; readback-review-comments-862.json: 0.'
 
 no_ngoai_pham_vi:

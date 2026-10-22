@@ -100,7 +100,11 @@ trang_thai_packet:
     (6) reviewer assurance §8.1 (lop sensitive doi cross_approved/human_audited): CHUA DAT — luot review la codex exec TRUC TIEP,
     KHONG co bien nhan launcher (run.json), model THUC phuc vu KHONG_DO_DUOC; header CLI chi chung minh model CLI cong bo
     (§8.1). Duyet land cua chu kho khong phai audit hay ghi de assurance. Connector P1 #863 r4323596458; tien le #822 (cc26c8e).
-    landed false toi khi co luot review qua launcher.py run neo dung SHA nay (chu kho chon 22-10-2026: buoc 1 + buoc 2).
+    Luot 6 qua launcher.py run 03c4f6be (verdicts/run-03c4f6be.json: xong, ma_thoat 0, head 3818bd4, codex_cli) tra
+    CHANGES_REQUESTED voi 2 P2 MOI (verdicts/wp748-r20-luot6-launcher-verdict.md): F01 timing-receipt-validation
+    (ops/nhanh_don_duoc_test.py:5849/5870 — bat_dau/ket_thuc chuoi tuy y, dao nguoc, lech 900 s voi giay=0 van DAT) va F02
+    timeout-descendant-containment (:405-411 — subprocess.run timeout chi giet con truc tiep, chau song tiep; Windows co the treo).
+    landed false toi khi hai P2 duoc va trong packet moi va co review co bien nhan approve.
 
 uy_quyen_land:
   dang: >-

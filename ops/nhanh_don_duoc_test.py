@@ -404,19 +404,20 @@ def _doc_kenh_xac_thuc(duong: Path, dau_phien: str, mutant: str, lan_thu: int, d
 _TRAN_GIAY_CON = None
 _GIAY_THU_SAU_GIET = 5.0
 MA_KHONG_RANH_GIOI = 126     # WP748 r22 l2: KHONG dung duoc ranh gioi job tren Windows => khong chay con (fail-closed)
-# WP748 r22 l3 (phuong an b, chu kho chon sau Codex l22c) — HOP DONG HEP cua qua tran: (1) `run` TRA CO HAN, rc 124;
+# WP748 r22 l3 (phuong an b, chu kho chon sau Codex l22c) — HOP DONG HEP cua qua tran: (1) `run` TRA CO HAN, rc 124
+# (voi `check=False`; `check=True` van nem AssertionError cho moi rc != 0, nhu moi lenh khac);
 # (2) giet NHOM cua con (POSIX: phien rieng + `killpg`; Windows: Job Object `KILL_ON_JOB_CLOSE`); (3) NOI THAT phan
 # khong lam. Hau due TACH PHIEN tren POSIX nam NGOAI hop dong va duoc noi ra trong `duong`. Ba luot vet can cay qua
 # PPID/dau env deu de lai khe (doi the he PID giua hai lan doc /proc, env sach, run long nhau); giam tron cay la
 # packet rieng, can ranh gioi cuong che duoc (pid namespace/cgroup), khong phai them mot lop quet.
-NGOAI_HOP_DONG_POSIX = "hau due TACH PHIEN (setsid) NGOAI hop dong qua tran: KHONG don, KHONG do"
+NGOAI_HOP_DONG_POSIX = "hau due ROI NHOM cua con (setsid/setpgid) NGOAI hop dong qua tran: KHONG don, KHONG do"
 
 
 class _VeWindows:
     """WP748 r22 (Codex l22 F02) — ranh gioi vong doi cho ca cay tren Windows: Job Object rieng moi luot, dat
     `KILL_ON_JOB_CLOSE`. Con tao TREO (`CREATE_SUSPENDED`), gan vao job, roi moi chay tiep (`NtResumeProcess`) — nen
-    KHONG hau due nao sinh truoc khi job co hieu luc. Qua tran => `TerminateJobObject`; dong job (moi duong ra, ke ca
-    ngoai le) cung giet ca cay. Hong o tao/dat/gan/chay tiep => KHONG co ranh gioi => `run` tra `MA_KHONG_RANH_GIOI`
+    KHONG hau due nao sinh truoc khi job co hieu luc. Qua tran => `TerminateJobObject`; dong job THANH CONG (moi duong
+    ra, ke ca ngoai le) cung giet ca cay — dong HONG thi duoc bao ra. Hong o tao/dat/gan/chay tiep => KHONG co ranh gioi => `run` tra `MA_KHONG_RANH_GIOI`
     chu KHONG cho con chay ngoai job. Moi buoc hong — tra False HAY nem — deu dong handle va ghi vao `loi`."""
     CREATE_SUSPENDED = 0x4
     _KILL_ON_JOB_CLOSE, _LOP_GIOI_HAN_MO_RONG = 0x2000, 9
@@ -462,7 +463,8 @@ class _VeWindows:
         return self.job is not None and self.ntdll is not None
 
     def gan_va_chay(self, q) -> bool:
-        """True = con dang chay TRONG job. False = con (dang treo, chua chay dong nao) da bi giet; `loi` noi vi sao."""
+        """True = con dang chay TRONG job. False = con VAN TREO (chua chay dong nao), NGUOI GOI phai giet (`_giet_con_treo`);
+        `loi` noi vi sao."""
         import ctypes
         try:
             h = int(q._handle)
@@ -479,19 +481,16 @@ class _VeWindows:
             return False
 
     def ket_thuc(self, q) -> str:
-        if self.job and self.k32.TerminateJobObject(self.job, 1):
-            return "TerminateJobObject (ca cay trong job)"
-        ghi = f"TerminateJobObject HONG ({self.loi}) -> taskkill, CAY CO THE CON SONG toi khi dong job"
-        tk = shutil.which("taskkill")
-        if tk:
-            try:
-                r = subprocess.run([tk, "/T", "/F", "/PID", str(q.pid)], capture_output=True, text=True,
-                                   timeout=_GIAY_THU_SAU_GIET)
-                ghi += f" rc={r.returncode}"
-            except (OSError, subprocess.TimeoutExpired) as e:
-                ghi += f" loi {type(e).__name__}"
-        q.kill()
-        return ghi
+        """WP748 r22 l4 (Codex l22d) — KHONG con duong lui `taskkill`: `subprocess.run(timeout=...)` cua no tren Windows
+        tu `communicate()` KHONG han khi qua han, tuc mo lai dung loi tra khong co han. Hong thi giet con truc tiep va
+        NOI RA; job van duoc dong (KILL_ON_JOB_CLOSE) o `finally` cua `run`."""
+        try:
+            if self.job and self.k32.TerminateJobObject(self.job, 1):
+                return "TerminateJobObject (ca cay trong job)"
+            ghi = f"TerminateJobObject HONG ({self.loi}) — cay chi chet khi dong job THANH CONG"
+        except Exception as e:                       # noqa: BLE001 — ghi, van giet con
+            ghi = f"TerminateJobObject nem {type(e).__name__} — cay chi chet khi dong job THANH CONG"
+        return f"{ghi} · {_giet_truc_tiep(q)}"
 
     def dong(self) -> None:
         if self.job:
@@ -515,11 +514,18 @@ def _ket_thuc_cay(q, ve) -> str:
         if nhom == q.pid and nhom != os.getpgid(0):
             os.killpg(nhom, signal.SIGKILL)
             return f"killpg {nhom} · {NGOAI_HOP_DONG_POSIX}"
-        q.kill()
-        return f"KHONG co nhom rieng -> CHI giet con · {NGOAI_HOP_DONG_POSIX}"
+        return f"KHONG co nhom rieng -> {_giet_truc_tiep(q)} · {NGOAI_HOP_DONG_POSIX}"
     except OSError as e:
+        return f"getpgid/killpg loi {type(e).__name__} -> {_giet_truc_tiep(q)} · {NGOAI_HOP_DONG_POSIX}"
+
+
+def _giet_truc_tiep(q) -> str:
+    """WP748 r22 l4 — giet CHI tien trinh con, tra mot dong noi THAT ket qua (khong bao gio noi "da giet" khi hong)."""
+    try:
         q.kill()
-        return f"getpgid/killpg loi {type(e).__name__} -> CHI giet con · {NGOAI_HOP_DONG_POSIX}"
+    except OSError as e:
+        return f"KHONG giet duoc con ({type(e).__name__}: {e})"
+    return "da gui lenh giet con"
 
 
 def _giet_con_treo(q, ve) -> str:
@@ -532,6 +538,8 @@ def _giet_con_treo(q, ve) -> str:
         q.wait(timeout=_GIAY_THU_SAU_GIET)
     except subprocess.TimeoutExpired:
         return f"con treo da goi kill nhung CHUA thoat sau {_GIAY_THU_SAU_GIET}s"
+    except OSError as e:                             # WP748 r22 l4: wait loi van la rc 126, khong thoat
+        return f"con treo da goi kill, cho LOI ({type(e).__name__}: {e})"
     return "con treo da bi giet va thu hoi"
 
 
@@ -566,20 +574,26 @@ def run(args: list[str], cwd: Path, check: bool = True, env: dict[str, str] | No
                             duong = _ket_thuc_cay(q, ve)   # WP748 r22 F02: diem goi don cay
                         except Exception as e:                  # noqa: BLE001 — ghi vao `duong`, rc van 124
                             _ghi_ha_tang(e)
-                            duong = f"LOI don cay {type(e).__name__}: {e} — CAY CO THE CON SONG"
-                            try:
-                                q.kill()
-                            except OSError:
-                                pass
+                            duong = (f"LOI don cay {type(e).__name__}: {e} — CAY CO THE CON SONG · {_giet_truc_tiep(q)}"
+                                     + ("" if ve is not None else f" · {NGOAI_HOP_DONG_POSIX}"))  # WP748 r22 l4: ngoai hop dong
                         try:
                             ra, loi = q.communicate(timeout=_GIAY_THU_SAU_GIET)
                         except subprocess.TimeoutExpired:
-                            ra, loi = "", f"output BO sau {_GIAY_THU_SAU_GIET}s (con giu ong)"
+                            ra, loi = "", f"output BO: thu output/cho con KHONG xong sau {_GIAY_THU_SAU_GIET}s"
+                        except Exception as e:                  # noqa: BLE001 — WP748 r22 l4: van rc 124
+                            ra, loi = "", f"output BO: thu output LOI {type(e).__name__}: {e}"
                         p = subprocess.CompletedProcess(args, 124, ra or "",
-                                                        f"{loi or ''}\nQUA TRAN {_TRAN_GIAY_CON}s: con bi giet ({duong})")
+                                                        f"{loi or ''}\nQUA TRAN {_TRAN_GIAY_CON}s: {duong}")
+        except Exception as e:
+            if ve is not None:
+                ve, ve_nem = None, ve                    # dong DUNG mot lan, o day, de con gan ghi chu
+                ve_nem.dong()   # WP748 r22 l3: moi duong ra, ke ca Popen nem — job KHONG ro
+                if ve_nem.loi and "CloseHandle" in ve_nem.loi:   # WP748 r22 l4: dong hong khong mat tren duong nem
+                    e.add_note(ve_nem.loi)
+            raise
         finally:
             if ve is not None:
-                ve.dong()   # WP748 r22 l3: moi duong ra, ke ca Popen nem — job KHONG ro
+                ve.dong()
         if ve is not None and ve.loi and "CloseHandle" in ve.loi:
             p = subprocess.CompletedProcess(p.args, p.returncode, p.stdout, f"{p.stderr}\n{ve.loi}")
     if check and p.returncode:
@@ -4310,7 +4324,7 @@ def r554_gop_dich_bac_moc_thoi_gian_hong(d: Path):
 _NHIP_CHAU = """import os, pathlib, sys, time
 p = pathlib.Path(sys.argv[1])
 (p.parent / (p.name + ".pid")).write_text(str(os.getpid()))
-for i in range(1200):                    # ~60 s: LAU hon moi han cho, de nhip chi dung khi BI GIET
+for i in range(1200):                    # ~60 s: LAU hon moi han cho; truoc teardown nhip chi dung khi BI GIET
     if (p.parent / (p.name + ".dung")).exists():   # WP748 r22 l3: teardown xin dung, KHONG giet theo PID
         break
     p.write_text(str(i))
@@ -4382,7 +4396,10 @@ def r556_tran_giay_khong_ranh_gioi_va_don_cay_nem(d: Path):
     """WP748 r22 l2 lo 2 + lo 3 (Codex l22 F02; l3 them cac duong Codex l22c chi) — gia lap, MOI nen: (a) khong dung
     duoc job => rc `MA_KHONG_RANH_GIOI`, con KHONG duoc tao, job van DONG; (b) gan job / chay tiep hong => con (dang
     treo) bi giet va cho CO HAN, KHONG `communicate`; (b2) giet con treo cung hong => van rc 126, NOI RA; (b3) `Popen`
-    nem => job van DONG; (c) don cay NEM => van rc 124, dong khai `LOI don cay`, con bi giet."""
+    nem => job van DONG; (c) don cay NEM => van rc 124, dong khai `LOI don cay`, con bi giet. l4 (Codex l22d): (b4) wait
+    LOI sau giet con treo => van 126; (b5) Popen nem + dong job hong => loi dong NAM trong ghi chu cua ngoai le; (c2)
+    POSIX: don cay nem + giet con hong + thu output loi => van 124, noi `KHONG giet duoc`, `NGOAI_HOP_DONG_POSIX`,
+    `thu output LOI`, KHONG noi "con bi giet"; (w) `TerminateJobObject` hong => KHONG goi tien trinh phu (taskkill)."""
     global _TRAN_GIAY_CON, _VeWindows, _ket_thuc_cay
     from unittest import mock
     tao, ve_tao = [], []
@@ -4456,6 +4473,67 @@ def r556_tran_giay_khong_ranh_gioi_va_don_cay_nem(d: Path):
             except OSError:
                 nem = True
         chot(nem and len(ve_tao) == 1 and ve_tao[0].dong_goi == 1, "r556")
+        # (b4) wait LOI sau giet con treo => van 126, noi ra
+        _VeWindows = ve_gia(True, False)
+        _Q.kill_hong = False
+
+        class _QChoLoi(_Q):
+            def wait(self, timeout=None):
+                raise OSError(5, "r556 wait loi")
+        with mock.patch.object(os, "name", "nt"), mock.patch.object(subprocess, "Popen", _QChoLoi):
+            try:
+                p = run(["khong-chay"], cwd=d, check=False)
+            except OSError:
+                p = None
+        chot(p is not None and p.returncode == MA_KHONG_RANH_GIOI and "cho LOI" in p.stderr, "r556")
+        # (b5) Popen nem + dong job hong => loi dong NAM trong ghi chu cua ngoai le duoc nem
+        ve_tao.clear()
+
+        class _VDongHong(ve_gia(True, True)):
+            def dong(self):
+                self.dong_goi += 1
+                self.loi = "CloseHandle(job) HONG — r556"
+        _VeWindows = _VDongHong
+        ghi_chu = []
+        with mock.patch.object(os, "name", "nt"), mock.patch.object(subprocess, "Popen", _PopenNem):
+            try:
+                run(["khong-chay"], cwd=d, check=False)
+            except OSError as e:
+                ghi_chu = list(getattr(e, "__notes__", []))
+        chot(any("CloseHandle(job) HONG" in g for g in ghi_chu), "r556")
+        # (c2) POSIX gia: don cay nem + giet con hong + thu output loi => van 124, noi THAT, khong noi "con bi giet"
+        _VeWindows = cu_ve
+
+        class _QQuaTran(_Q):
+            kill_hong = True
+
+            def communicate(self, timeout=None):
+                self.lam.append("communicate")
+                if len(self.lam) == 1:
+                    raise subprocess.TimeoutExpired("x", timeout)
+                raise OSError(5, "r556 doc ong loi")
+
+        def nem_kt2(*a, **k):
+            raise RuntimeError("r556 don cay nem 2")
+        _ket_thuc_cay = nem_kt2
+        with mock.patch.object(os, "name", "posix"), mock.patch.object(subprocess, "Popen", _QQuaTran):
+            try:
+                p = run(["khong-chay"], cwd=d, check=False)
+            except Exception:                         # noqa: BLE001 — thoat ra chinh la loi can bat
+                p = None
+        _ket_thuc_cay = cu_kt
+        chot(p is not None and p.returncode == 124, "r556")
+        chot(all(x in p.stderr for x in ("LOI don cay", "KHONG giet duoc con", NGOAI_HOP_DONG_POSIX,
+                                          "thu output LOI")) and "con bi giet" not in p.stderr, "r556")
+        # (w) TerminateJobObject hong => KHONG goi tien trinh phu (taskkill co the cho KHONG han), van giet con
+        ve_that = object.__new__(cu_ve)
+        ve_that.job, ve_that.loi = 1, None
+        ve_that.k32 = type("K", (), {"TerminateJobObject": staticmethod(lambda job, ma: 0)})()
+        goi_phu = []
+        q_w = _Q()
+        with mock.patch.object(subprocess, "run", lambda *a, **k: goi_phu.append(a)):
+            dong_w = ve_that.ket_thuc(q_w)
+        chot(goi_phu == [] and q_w.lam == ["kill"] and "HONG" in dong_w, "r556")
         _VeWindows = cu_ve
         loi = RuntimeError("r556 don cay nem")
 
@@ -5293,7 +5371,16 @@ DOT_BIEN_TU_KIEM = [
     # r556 (c) do CHINH diem goi nay (don cay nem => van rc 124) nen cung phai chet: dich hai ca, moi nen.
     ("timeout-chi-giet-con", ("r555", "r556"), "                            duong = _ket_thuc_cay(q, ve)   # WP748 r22 F02: diem goi don cay",
      "                            q.kill(); duong = \"chi con\""),
-    ("windows-popen-nem-ro-job", ("r556",), "                ve.dong()   # WP748 r22 l3: moi duong ra, ke ca Popen nem — job KHONG ro",
+    ("con-treo-wait-loi-thoat", ("r556",), "    except OSError as e:                             # WP748 r22 l4: wait loi van la rc 126, khong thoat\n        return",
+     "    except ZeroDivisionError as e:\n        return"),
+    ("popen-nem-mat-ghi-chu-dong", ("r556",), "                    e.add_note(ve.loi)", "                    pass"),
+    ("don-cay-nem-thieu-ngoai-hop-dong", ("r556",), "+ (\"\" if ve is not None else f\" · {NGOAI_HOP_DONG_POSIX}\"))  # WP748 r22 l4: ngoai hop dong",
+     "+ \"\")"),
+    ("thu-output-loi-thoat", ("r556",), "                        except Exception as e:                  # noqa: BLE001 — WP748 r22 l4: van rc 124",
+     "                        except ZeroDivisionError as e:"),
+    ("ket-thuc-goi-taskkill", ("r556",), "        return f\"{ghi} · {_giet_truc_tiep(q)}\"",
+     "        subprocess.run([\"taskkill\", \"/T\", \"/F\", \"/PID\", str(q.pid)], timeout=_GIAY_THU_SAU_GIET)\n        return f\"{ghi} · {_giet_truc_tiep(q)}\""),
+    ("windows-popen-nem-ro-job", ("r556",), "                ve_nem.dong()   # WP748 r22 l3: moi duong ra, ke ca Popen nem — job KHONG ro",
      "                pass"),
     ("con-treo-cho-khong-han", ("r556",), "        q.wait(timeout=_GIAY_THU_SAU_GIET)\n    except subprocess.TimeoutExpired:\n        return f\"con treo",
      "        q.wait()\n    except subprocess.TimeoutExpired:\n        return f\"con treo"),
@@ -5768,8 +5855,9 @@ def chay_tu_kiem():
     nonce = os.environ.pop(TU_KIEM_NONCE_ENV, None)
     proof_path = os.environ.pop(TU_KIEM_FILE_ENV, None)
     # WP748 r22 l2 — DON thu muc tam hong (Windows: tien trinh vua bi giet chua nha handle) KHONG duoc nuot bang
-    # chung hoan tat cua ca luot: CI 39741391940 manh 5 do `timeout-chi-giet-con` thanh KHONG DO DUOC vi `rmtree`
-    # nem SAU dong tong ket, TRUOC khi ghi proof. Don hong thi noi ra stderr, khong im.
+    # chung hoan tat cua ca luot. Gia thuyet cho CI 39741391940 manh 5 (`timeout-chi-giet-con` KHONG DO DUOC): `rmtree`
+    # cua khoi `with` nem khi ROI khoi — TRUOC ca dong tong ket lan proof (dinh chinh l3: ban dau ghi "sau dong tong
+    # ket", sai). CHUA xac minh bang traceback tu CI. Don hong thi noi ra stderr, khong im.
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
         for ten, fn, can_thu_muc in TU_KIEM:
             d = Path(td) / ten

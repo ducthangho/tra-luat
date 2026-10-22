@@ -5389,9 +5389,13 @@ DOT_BIEN_TU_KIEM = [
     ("moc-bo-kiem-lech-giay", ("r554",), "and not khoang - LECH_MOC_GIAY <= x[\"giay\"] <= khoang + LECH_MOC_GIAY:   # WP748 r22 F01 lech",
      "and False:"),
     ("ghi-so-gop-dich", ("r546",), "            _ghi_ha_tang(e)                       # WP748 r22: diem nuot _loi_gop_dich (r546 qua r554)\n", ""),
-    ("timeout-chi-giet-con", ("r555",), "                            duong = _ket_thuc_cay(q, ve, dau)   # WP748 r22 F02: diem goi don cay",
+    # r556 (c) do CHINH diem goi nay (don cay nem => van rc 124) nen cung phai chet: dich hai ca, moi nen.
+    ("timeout-chi-giet-con", ("r555", "r556"), "                            duong = _ket_thuc_cay(q, ve, dau)   # WP748 r22 F02: diem goi don cay",
      "                            q.kill(); duong = \"chi con\""),
-    ("cay-bo-quet-dau", ("r557",), "        if can in moi_truong and truong is not None:", "        if False:"),
+    # Khong `if False:` o day: bo han phep quet thi bien the mo-coi cua r555 cung chet tren POSIX (khong tren Windows,
+    # noi job lo viec ay) => ban kinh phu thuoc nen. Dot bien chi lam sai DO CHINH XAC cua phep khop (r557 do).
+    ("cay-dau-khop-tien-to", ("r557",), "        if can in moi_truong and truong is not None:",
+     "        if any(x.startswith(can) for x in moi_truong) and truong is not None:"),
     ("giet-bo-kiem-danh-tinh", ("r557",), "            if not _con_song_posix(pid, khoa, goc_proc):   # WP748 r22 l2: kiem danh tinh pidfd",
      "            if False:"),
     ("windows-khong-job-van-chay", ("r556",), "        if ve is not None and not ve.dung_duoc():   # WP748 r22 l2 lo 2: khong job thi KHONG chay",

@@ -1,0 +1,1037 @@
+﻿2026-10-22T06:15:40.0672373Z Current runner version: '2.338.0'
+2026-10-22T06:15:40.0712636Z ##[group]Runner Image Provisioner
+2026-10-22T06:15:40.0714341Z Hosted Compute Agent
+2026-10-22T06:15:40.0715318Z Version: 20261002.596
+2026-10-22T06:15:40.0716298Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-22T06:15:40.0717534Z Build Date: 2026-10-02T22:28:27Z
+2026-10-22T06:15:40.0718606Z Worker ID: {9e517709-8350-4ca6-b22a-3bb96be9a508}
+2026-10-22T06:15:40.0719719Z Region: canadaeast
+2026-10-22T06:15:40.0720690Z Cloud: Azure
+2026-10-22T06:15:40.0721513Z ##[endgroup]
+2026-10-22T06:15:40.0723779Z ##[group]Operating System
+2026-10-22T06:15:40.0724914Z Microsoft Windows Server 2025
+2026-10-22T06:15:40.0725949Z 10.0.26100
+2026-10-22T06:15:40.0726769Z Datacenter
+2026-10-22T06:15:40.0727527Z ##[endgroup]
+2026-10-22T06:15:40.0728331Z ##[group]Runner Image
+2026-10-22T06:15:40.0729333Z Image: windows-2025-vs2026
+2026-10-22T06:15:40.0730341Z Version: 20261007.264.1
+2026-10-22T06:15:40.0733067Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261007.264/images/windows/Windows2025-VS2026-Readme.md
+2026-10-22T06:15:40.0736583Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261007.264
+2026-10-22T06:15:40.0738451Z ##[endgroup]
+2026-10-22T06:15:40.0744143Z ##[group]GITHUB_TOKEN Permissions
+2026-10-22T06:15:40.0747574Z Actions: write
+2026-10-22T06:15:40.0748486Z ArtifactMetadata: write
+2026-10-22T06:15:40.0749582Z Attestations: write
+2026-10-22T06:15:40.0750442Z Checks: write
+2026-10-22T06:15:40.0751250Z CodeQuality: write
+2026-10-22T06:15:40.0752102Z Contents: write
+2026-10-22T06:15:40.0753024Z CopilotRequests: write
+2026-10-22T06:15:40.0754439Z Deployments: write
+2026-10-22T06:15:40.0755385Z Discussions: write
+2026-10-22T06:15:40.0756258Z Drives: write
+2026-10-22T06:15:40.0757176Z Issues: write
+2026-10-22T06:15:40.0758162Z Metadata: read
+2026-10-22T06:15:40.0759081Z Models: read
+2026-10-22T06:15:40.0759993Z Packages: write
+2026-10-22T06:15:40.0760847Z Pages: write
+2026-10-22T06:15:40.0761820Z PullRequests: write
+2026-10-22T06:15:40.0762714Z RepositoryProjects: write
+2026-10-22T06:15:40.0763693Z SecurityEvents: write
+2026-10-22T06:15:40.0764601Z Statuses: write
+2026-10-22T06:15:40.0765460Z VulnerabilityAlerts: read
+2026-10-22T06:15:40.0766553Z ##[endgroup]
+2026-10-22T06:15:40.0769632Z Secret source: Actions
+2026-10-22T06:15:40.0771150Z Cache mode: write
+2026-10-22T06:15:40.0772482Z Prepare workflow directory
+2026-10-22T06:15:40.1355723Z Prepare all required actions
+2026-10-22T06:15:40.1430374Z Getting action download info
+2026-10-22T06:15:40.4144192Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-22T06:15:40.5991916Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-22T06:15:40.8922955Z Complete job name: launcher (windows-latest)
+2026-10-22T06:15:41.0404474Z ##[group]Run git config --global core.autocrlf false
+2026-10-22T06:15:41.0405408Z [36;1mgit config --global core.autocrlf false[0m
+2026-10-22T06:15:41.0406259Z [36;1mgit config --global core.eol lf[0m
+2026-10-22T06:15:41.1397661Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:15:41.1399253Z ##[endgroup]
+2026-10-22T06:15:42.2372952Z ##[group]Run actions/checkout@v4
+2026-10-22T06:15:42.2374201Z with:
+2026-10-22T06:15:42.2375100Z   repository: ducthangho/tra-luat
+2026-10-22T06:15:42.2384923Z   token: ***
+2026-10-22T06:15:42.2385786Z   ssh-strict: true
+2026-10-22T06:15:42.2386647Z   ssh-user: git
+2026-10-22T06:15:42.2387560Z   persist-credentials: true
+2026-10-22T06:15:42.2389904Z   clean: true
+2026-10-22T06:15:42.2390814Z   sparse-checkout-cone-mode: true
+2026-10-22T06:15:42.2391866Z   fetch-depth: 1
+2026-10-22T06:15:42.2392708Z   fetch-tags: false
+2026-10-22T06:15:42.2393601Z   show-progress: true
+2026-10-22T06:15:42.2394502Z   lfs: false
+2026-10-22T06:15:42.2395313Z   submodules: false
+2026-10-22T06:15:42.2396223Z   set-safe-directory: true
+2026-10-22T06:15:42.2399834Z   allow-unsafe-pr-checkout: false
+2026-10-22T06:15:42.2400899Z ##[endgroup]
+2026-10-22T06:15:43.3180417Z Syncing repository: ducthangho/tra-luat
+2026-10-22T06:15:43.3182603Z ##[group]Getting Git version info
+2026-10-22T06:15:43.3183660Z Working directory is 'D:\a\tra-luat\tra-luat'
+2026-10-22T06:15:43.3185166Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-22T06:15:43.3185949Z git version 2.56.0.windows.2
+2026-10-22T06:15:43.3188712Z ##[endgroup]
+2026-10-22T06:15:43.3194044Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\64ecc891-ee93-418d-a86b-960f4b1cde48\.gitconfig'
+2026-10-22T06:15:43.3195393Z Temporarily overriding HOME='D:\a\_temp\64ecc891-ee93-418d-a86b-960f4b1cde48' before making global git config changes
+2026-10-22T06:15:43.3196696Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T06:15:43.3197886Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\tra-luat\tra-luat
+2026-10-22T06:15:43.3200575Z Deleting the contents of 'D:\a\tra-luat\tra-luat'
+2026-10-22T06:15:43.3201696Z ##[group]Initializing the repository
+2026-10-22T06:15:43.3202585Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\tra-luat\tra-luat
+2026-10-22T06:15:43.3203616Z Initialized empty Git repository in D:/a/tra-luat/tra-luat/.git/
+2026-10-22T06:15:43.3205858Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/ducthangho/tra-luat
+2026-10-22T06:15:43.3208175Z ##[endgroup]
+2026-10-22T06:15:43.3209055Z ##[group]Disabling automatic garbage collection
+2026-10-22T06:15:43.3209918Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-22T06:15:43.3212337Z ##[endgroup]
+2026-10-22T06:15:43.3213213Z ##[group]Setting up auth
+2026-10-22T06:15:43.3214159Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T06:15:43.3216773Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-22T06:15:44.6421683Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T06:15:44.6872505Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-22T06:15:45.3210180Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T06:15:45.3678390Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-22T06:15:45.9871222Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-22T06:15:46.0487823Z ##[endgroup]
+2026-10-22T06:15:46.0515488Z ##[group]Fetching the repository
+2026-10-22T06:15:46.0708616Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +521efebab226fe3a92b2ccce4a59c27dd638edff:refs/remotes/origin/agent/wp858-g1-claude
+2026-10-22T06:15:48.9942219Z From https://github.com/ducthangho/tra-luat
+2026-10-22T06:15:48.9952470Z  * [new ref]         521efebab226fe3a92b2ccce4a59c27dd638edff -> origin/agent/wp858-g1-claude
+2026-10-22T06:15:48.9988890Z ##[endgroup]
+2026-10-22T06:15:48.9989806Z ##[group]Determining the checkout info
+2026-10-22T06:15:49.0004982Z ##[endgroup]
+2026-10-22T06:15:49.0010685Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-22T06:15:49.0617088Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-22T06:15:49.9019965Z ##[group]Checking out the ref
+2026-10-22T06:15:49.9022402Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B agent/wp858-g1-claude refs/remotes/origin/agent/wp858-g1-claude
+2026-10-22T06:15:50.1830234Z Updating files:  51% (2475/4839)
+2026-10-22T06:15:50.1962010Z Updating files:  52% (2517/4839)
+2026-10-22T06:15:50.2076282Z Updating files:  53% (2565/4839)
+2026-10-22T06:15:50.2220174Z Updating files:  54% (2614/4839)
+2026-10-22T06:15:50.2350017Z Updating files:  55% (2662/4839)
+2026-10-22T06:15:50.2476722Z Updating files:  56% (2710/4839)
+2026-10-22T06:15:50.2611194Z Updating files:  57% (2759/4839)
+2026-10-22T06:15:50.2731474Z Updating files:  58% (2807/4839)
+2026-10-22T06:15:50.2845532Z Updating files:  59% (2856/4839)
+2026-10-22T06:15:50.2979002Z Updating files:  60% (2904/4839)
+2026-10-22T06:15:50.3129034Z Updating files:  61% (2952/4839)
+2026-10-22T06:15:50.3243039Z Updating files:  62% (3001/4839)
+2026-10-22T06:15:50.3378959Z Updating files:  63% (3049/4839)
+2026-10-22T06:15:50.3540033Z Updating files:  64% (3097/4839)
+2026-10-22T06:15:50.3716335Z Updating files:  65% (3146/4839)
+2026-10-22T06:15:50.3866898Z Updating files:  66% (3194/4839)
+2026-10-22T06:15:50.4035022Z Updating files:  67% (3243/4839)
+2026-10-22T06:15:50.4232825Z Updating files:  68% (3291/4839)
+2026-10-22T06:15:50.4393818Z Updating files:  69% (3339/4839)
+2026-10-22T06:15:50.4590838Z Updating files:  70% (3388/4839)
+2026-10-22T06:15:50.4798364Z Updating files:  71% (3436/4839)
+2026-10-22T06:15:50.5027233Z Updating files:  72% (3485/4839)
+2026-10-22T06:15:50.5209070Z Updating files:  73% (3533/4839)
+2026-10-22T06:15:50.5366171Z Updating files:  74% (3581/4839)
+2026-10-22T06:15:50.5540058Z Updating files:  75% (3630/4839)
+2026-10-22T06:15:50.5706751Z Updating files:  76% (3678/4839)
+2026-10-22T06:15:50.5861718Z Updating files:  77% (3727/4839)
+2026-10-22T06:15:50.6026836Z Updating files:  78% (3775/4839)
+2026-10-22T06:15:50.6153972Z Updating files:  79% (3823/4839)
+2026-10-22T06:15:50.6282968Z Updating files:  80% (3872/4839)
+2026-10-22T06:15:50.6404378Z Updating files:  81% (3920/4839)
+2026-10-22T06:15:50.6516784Z Updating files:  82% (3968/4839)
+2026-10-22T06:15:50.6641068Z Updating files:  83% (4017/4839)
+2026-10-22T06:15:50.6754202Z Updating files:  84% (4065/4839)
+2026-10-22T06:15:50.6870268Z Updating files:  85% (4114/4839)
+2026-10-22T06:15:50.6979054Z Updating files:  86% (4162/4839)
+2026-10-22T06:15:50.7087123Z Updating files:  87% (4210/4839)
+2026-10-22T06:15:50.7223756Z Updating files:  88% (4259/4839)
+2026-10-22T06:15:50.7369033Z Updating files:  89% (4307/4839)
+2026-10-22T06:15:50.7526925Z Updating files:  90% (4356/4839)
+2026-10-22T06:15:50.7818738Z Updating files:  91% (4404/4839)
+2026-10-22T06:15:50.8110103Z Updating files:  92% (4452/4839)
+2026-10-22T06:15:50.8990704Z Updating files:  93% (4501/4839)
+2026-10-22T06:15:50.9314256Z Updating files:  94% (4549/4839)
+2026-10-22T06:15:50.9434073Z Updating files:  95% (4598/4839)
+2026-10-22T06:15:50.9735516Z Updating files:  96% (4646/4839)
+2026-10-22T06:15:50.9877109Z Updating files:  97% (4694/4839)
+2026-10-22T06:15:51.0119129Z Updating files:  98% (4743/4839)
+2026-10-22T06:15:51.0467081Z Updating files:  99% (4791/4839)
+2026-10-22T06:15:51.0470369Z Updating files: 100% (4839/4839)
+2026-10-22T06:15:51.0472325Z Updating files: 100% (4839/4839), done.
+2026-10-22T06:15:51.0666159Z Switched to a new branch 'agent/wp858-g1-claude'
+2026-10-22T06:15:51.0736155Z branch 'agent/wp858-g1-claude' set up to track 'origin/agent/wp858-g1-claude'.
+2026-10-22T06:15:51.0849340Z ##[endgroup]
+2026-10-22T06:15:51.1499929Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-22T06:15:51.1893366Z 521efebab226fe3a92b2ccce4a59c27dd638edff
+2026-10-22T06:15:51.2354264Z ##[group]Run actions/setup-python@v5
+2026-10-22T06:15:51.2354594Z with:
+2026-10-22T06:15:51.2354803Z   python-version: 3.13
+2026-10-22T06:15:51.2355020Z   check-latest: false
+2026-10-22T06:15:51.2357708Z   token: ***
+2026-10-22T06:15:51.2357917Z   update-environment: true
+2026-10-22T06:15:51.2358374Z   allow-prereleases: false
+2026-10-22T06:15:51.2358588Z   freethreaded: false
+2026-10-22T06:15:51.2358784Z ##[endgroup]
+2026-10-22T06:15:51.5150913Z ##[group]Installed versions
+2026-10-22T06:15:51.7324589Z (node:6532) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T06:15:51.7325657Z Successfully set up CPython (3.13.16)
+2026-10-22T06:15:51.7347093Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T06:15:51.7348142Z ##[endgroup]
+2026-10-22T06:15:51.7655849Z ##[group]Run python -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"
+2026-10-22T06:15:51.7656759Z [36;1mpython -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"[0m
+2026-10-22T06:15:51.7657392Z [36;1mpython -c "import sys;print('stdout encoding:',sys.stdout.encoding)"[0m
+2026-10-22T06:15:51.7657953Z [36;1mWrite-Host "PYTHONUTF8      = '$env:PYTHONUTF8'      (rong = tot, chot phai tu dung)"[0m
+2026-10-22T06:15:51.7658752Z [36;1mWrite-Host "PYTHONIOENCODING= '$env:PYTHONIOENCODING' (rong = tot)"[0m
+2026-10-22T06:15:51.7659252Z [36;1mforeach ($t in 'python','python3','py','git','powershell','taskkill') {[0m
+2026-10-22T06:15:51.7659710Z [36;1m  $c = Get-Command $t -ErrorAction SilentlyContinue[0m
+2026-10-22T06:15:51.7660154Z [36;1m  Write-Host ("  {0,-11} {1}" -f $t, $(if ($c) { $c.Source } else { '(khong co)' }))[0m
+2026-10-22T06:15:51.7660534Z [36;1m}[0m
+2026-10-22T06:15:51.7854638Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:15:51.7855007Z env:
+2026-10-22T06:15:51.7855281Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:51.7855778Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:15:51.7856324Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:51.7856750Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:51.7857152Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:51.7857467Z ##[endgroup]
+2026-10-22T06:15:53.1143059Z he: Windows | python: 3.13.16
+2026-10-22T06:15:53.1463882Z stdout encoding: cp1252
+2026-10-22T06:15:53.2238771Z PYTHONUTF8      = ''      (rong = tot, chot phai tu dung)
+2026-10-22T06:15:53.2247389Z PYTHONIOENCODING= '' (rong = tot)
+2026-10-22T06:15:53.2453335Z   python      C:\hostedtoolcache\windows\Python\3.13.16\x64\python.exe
+2026-10-22T06:15:53.2465856Z   python3     C:\hostedtoolcache\windows\Python\3.13.16\x64\python3.exe
+2026-10-22T06:15:53.2515093Z   py          C:\Windows\py.exe
+2026-10-22T06:15:53.2545330Z   git         C:\Program Files\Git\bin\git.exe
+2026-10-22T06:15:53.2594903Z   powershell  C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+2026-10-22T06:15:53.2633681Z   taskkill    C:\Windows\system32\taskkill.exe
+2026-10-22T06:15:53.3489498Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-10-22T06:15:53.3490302Z [36;1mpython -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0[0m
+2026-10-22T06:15:53.3571521Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:15:53.3572056Z env:
+2026-10-22T06:15:53.3572451Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:53.3573181Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:15:53.3573902Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:53.3574571Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:53.3575236Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:53.3575762Z ##[endgroup]
+2026-10-22T06:15:59.5097712Z 
+2026-10-22T06:15:59.5100654Z [notice] A new release of pip is available: 26.2.1 -> 26.2.2
+2026-10-22T06:15:59.5101858Z [notice] To update, run: python.exe -m pip install --upgrade pip
+2026-10-22T06:15:59.7165799Z ##[group]Run set -euo pipefail
+2026-10-22T06:15:59.7166165Z [36;1mset -euo pipefail[0m
+2026-10-22T06:15:59.7166513Z [36;1mif [ "${RUNNER_OS:-}" = "Linux" ]; then sudo apt-get update -qq; fi[0m
+2026-10-22T06:15:59.7166909Z [36;1mfor tool in shellcheck rg actionlint; do[0m
+2026-10-22T06:15:59.7167210Z [36;1m  bash ops/cai_cong_cu.sh "$tool"[0m
+2026-10-22T06:15:59.7167457Z [36;1mdone[0m
+2026-10-22T06:15:59.7185362Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-22T06:15:59.7185759Z env:
+2026-10-22T06:15:59.7186027Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:59.7186490Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:15:59.7186951Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:59.7187355Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:59.7187812Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:15:59.7188129Z ##[endgroup]
+2026-10-22T06:16:17.7579621Z cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+2026-10-22T06:16:17.9990396Z {
+2026-10-22T06:16:17.9991247Z   "trang_thai_tong": "DAT",
+2026-10-22T06:16:18.0001488Z   "pham_vi": "mot-cong-cu",
+2026-10-22T06:16:18.0002044Z   "canary_da_quet": false,
+2026-10-22T06:16:18.0002554Z   "ghi_chu_pham_vi": "chua quet canary toan bo",
+2026-10-22T06:16:18.0003148Z   "cong_cu": [
+2026-10-22T06:16:18.0003504Z     {
+2026-10-22T06:16:18.0003834Z       "ten": "shellcheck",
+2026-10-22T06:16:18.0004254Z       "bat_buoc": false,
+2026-10-22T06:16:18.0004647Z       "ban_ghim": null,
+2026-10-22T06:16:18.0005015Z       "ban_thay": {
+2026-10-22T06:16:18.0005362Z         "mac_dinh": "0.9.0"
+2026-10-22T06:16:18.0005776Z       },
+2026-10-22T06:16:18.0006160Z       "trang_thai": "DAT",
+2026-10-22T06:16:18.0006565Z       "chi_tiet": "dat"
+2026-10-22T06:16:18.0006959Z     }
+2026-10-22T06:16:18.0007276Z   ],
+2026-10-22T06:16:18.0007577Z   "canary": []
+2026-10-22T06:16:18.0007908Z }
+2026-10-22T06:16:24.5455185Z {
+2026-10-22T06:16:24.5455854Z   "trang_thai_tong": "DAT",
+2026-10-22T06:16:24.5456452Z   "pham_vi": "mot-cong-cu",
+2026-10-22T06:16:24.5456975Z   "canary_da_quet": false,
+2026-10-22T06:16:24.5457513Z   "ghi_chu_pham_vi": "chua quet canary toan bo",
+2026-10-22T06:16:24.5459707Z   "cong_cu": [
+2026-10-22T06:16:24.5460394Z     {
+2026-10-22T06:16:24.5462103Z       "ten": "rg",
+2026-10-22T06:16:24.5472827Z       "bat_buoc": true,
+2026-10-22T06:16:24.5473385Z       "ban_ghim": null,
+2026-10-22T06:16:24.5473918Z       "ban_thay": {
+2026-10-22T06:16:24.5474349Z         "mac_dinh": "15.2.0"
+2026-10-22T06:16:24.5474795Z       },
+2026-10-22T06:16:24.5475177Z       "trang_thai": "DAT",
+2026-10-22T06:16:24.5475615Z       "chi_tiet": "dat"
+2026-10-22T06:16:24.5476021Z     }
+2026-10-22T06:16:24.5476378Z   ],
+2026-10-22T06:16:24.5476740Z   "canary": []
+2026-10-22T06:16:24.5477174Z }
+2026-10-22T06:16:26.0182804Z {
+2026-10-22T06:16:26.0183471Z   "trang_thai_tong": "DAT",
+2026-10-22T06:16:26.0184068Z   "pham_vi": "mot-cong-cu",
+2026-10-22T06:16:26.0184575Z   "canary_da_quet": false,
+2026-10-22T06:16:26.0185116Z   "ghi_chu_pham_vi": "chua quet canary toan bo",
+2026-10-22T06:16:26.0185689Z   "cong_cu": [
+2026-10-22T06:16:26.0186086Z     {
+2026-10-22T06:16:26.0186491Z       "ten": "actionlint",
+2026-10-22T06:16:26.0186961Z       "bat_buoc": true,
+2026-10-22T06:16:26.0187506Z       "ban_ghim": "1.7.7",
+2026-10-22T06:16:26.0187963Z       "ban_thay": {
+2026-10-22T06:16:26.0188376Z         "mac_dinh": "1.7.7"
+2026-10-22T06:16:26.0188821Z       },
+2026-10-22T06:16:26.0189212Z       "trang_thai": "DAT",
+2026-10-22T06:16:26.0189662Z       "chi_tiet": "dat"
+2026-10-22T06:16:26.0190087Z     }
+2026-10-22T06:16:26.0190438Z   ],
+2026-10-22T06:16:26.0190795Z   "canary": []
+2026-10-22T06:16:26.0191175Z }
+2026-10-22T06:16:26.0641527Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-10-22T06:16:26.0643026Z [36;1mpython ops/cong_cu.py kiem-tra --json[0m
+2026-10-22T06:16:26.0719041Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:16:26.0719391Z env:
+2026-10-22T06:16:26.0719659Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:26.0720120Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:16:26.0720595Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:26.0721250Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:26.0721864Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:26.0722179Z ##[endgroup]
+2026-10-22T06:16:27.2558711Z {
+2026-10-22T06:16:27.2559424Z   "trang_thai_tong": "DAT",
+2026-10-22T06:16:27.2560048Z   "pham_vi": "toan-bo",
+2026-10-22T06:16:27.2560523Z   "canary_da_quet": true,
+2026-10-22T06:16:27.2561294Z   "ghi_chu_pham_vi": "da quet canary toan bo (khong co nghia moi canary dat)",
+2026-10-22T06:16:27.2562084Z   "cong_cu": [
+2026-10-22T06:16:27.2562469Z     {
+2026-10-22T06:16:27.2562896Z       "ten": "git",
+2026-10-22T06:16:27.2563341Z       "bat_buoc": true,
+2026-10-22T06:16:27.2563796Z       "ban_ghim": null,
+2026-10-22T06:16:27.2564247Z       "ban_thay": {
+2026-10-22T06:16:27.2564681Z         "mac_dinh": "2.56.0.windows.2"
+2026-10-22T06:16:27.2565183Z       },
+2026-10-22T06:16:27.2565573Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2566016Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2566439Z     },
+2026-10-22T06:16:27.2566791Z     {
+2026-10-22T06:16:27.2567180Z       "ten": "python",
+2026-10-22T06:16:27.2567611Z       "bat_buoc": true,
+2026-10-22T06:16:27.2568041Z       "ban_ghim": null,
+2026-10-22T06:16:27.2568479Z       "ban_thay": {
+2026-10-22T06:16:27.2568893Z         "mac_dinh": "3.13.16"
+2026-10-22T06:16:27.2569330Z       },
+2026-10-22T06:16:27.2569728Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2570196Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2570611Z     },
+2026-10-22T06:16:27.2570970Z     {
+2026-10-22T06:16:27.2571414Z       "ten": "PyYAML",
+2026-10-22T06:16:27.2571844Z       "bat_buoc": true,
+2026-10-22T06:16:27.2572262Z       "ban_ghim": null,
+2026-10-22T06:16:27.2572682Z       "ban_thay": {
+2026-10-22T06:16:27.2573093Z         "mac_dinh": "6.0.3"
+2026-10-22T06:16:27.2573583Z       },
+2026-10-22T06:16:27.2573958Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2574422Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2574823Z     },
+2026-10-22T06:16:27.2575180Z     {
+2026-10-22T06:16:27.2575558Z       "ten": "actionlint",
+2026-10-22T06:16:27.2576004Z       "bat_buoc": true,
+2026-10-22T06:16:27.2576421Z       "ban_ghim": "1.7.7",
+2026-10-22T06:16:27.2576885Z       "ban_thay": {
+2026-10-22T06:16:27.2577609Z         "mac_dinh": "1.7.7"
+2026-10-22T06:16:27.2578071Z       },
+2026-10-22T06:16:27.2578457Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2578922Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2579340Z     },
+2026-10-22T06:16:27.2579696Z     {
+2026-10-22T06:16:27.2580071Z       "ten": "jsonschema",
+2026-10-22T06:16:27.2580536Z       "bat_buoc": true,
+2026-10-22T06:16:27.2580970Z       "ban_ghim": "4.26.0",
+2026-10-22T06:16:27.2581414Z       "ban_thay": {
+2026-10-22T06:16:27.2581826Z         "mac_dinh": "4.26.0"
+2026-10-22T06:16:27.2582261Z       },
+2026-10-22T06:16:27.2582636Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2583148Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2583572Z     },
+2026-10-22T06:16:27.2583919Z     {
+2026-10-22T06:16:27.2584306Z       "ten": "shellcheck",
+2026-10-22T06:16:27.2584764Z       "bat_buoc": false,
+2026-10-22T06:16:27.2585216Z       "ban_ghim": null,
+2026-10-22T06:16:27.2585660Z       "ban_thay": {
+2026-10-22T06:16:27.2586083Z         "mac_dinh": "0.9.0"
+2026-10-22T06:16:27.2586538Z       },
+2026-10-22T06:16:27.2586963Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2591037Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2591845Z     },
+2026-10-22T06:16:27.2592568Z     {
+2026-10-22T06:16:27.2592924Z       "ten": "rg",
+2026-10-22T06:16:27.2593325Z       "bat_buoc": true,
+2026-10-22T06:16:27.2593766Z       "ban_ghim": null,
+2026-10-22T06:16:27.2594221Z       "ban_thay": {
+2026-10-22T06:16:27.2594643Z         "mac_dinh": "15.2.0"
+2026-10-22T06:16:27.2595128Z       },
+2026-10-22T06:16:27.2595564Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2596078Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2596540Z     },
+2026-10-22T06:16:27.2596933Z     {
+2026-10-22T06:16:27.2597659Z       "ten": "bash",
+2026-10-22T06:16:27.2598122Z       "bat_buoc": true,
+2026-10-22T06:16:27.2598584Z       "ban_ghim": null,
+2026-10-22T06:16:27.2602636Z       "ban_thay": {
+2026-10-22T06:16:27.2603185Z         "mac_dinh": "5.3.15"
+2026-10-22T06:16:27.2603712Z       },
+2026-10-22T06:16:27.2604135Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2604647Z       "chi_tiet": "dat"
+2026-10-22T06:16:27.2605110Z     }
+2026-10-22T06:16:27.2605495Z   ],
+2026-10-22T06:16:27.2605902Z   "canary": [
+2026-10-22T06:16:27.2606320Z     {
+2026-10-22T06:16:27.2606756Z       "ten": "actionlint_shellcheck",
+2026-10-22T06:16:27.2607335Z       "chu_so_huu": "actionlint",
+2026-10-22T06:16:27.2607862Z       "chinh_sach": "blocking",
+2026-10-22T06:16:27.2608395Z       "trang_thai": "DAT",
+2026-10-22T06:16:27.2608931Z       "chi_tiet": "canary bat dung SC1003 (rc=1)"
+2026-10-22T06:16:27.2609545Z     }
+2026-10-22T06:16:27.2610028Z   ]
+2026-10-22T06:16:27.2610422Z }
+2026-10-22T06:16:27.3990700Z ##[group]Run python .claude/dev/launcher.py doctor
+2026-10-22T06:16:27.3991257Z [36;1mpython .claude/dev/launcher.py doctor[0m
+2026-10-22T06:16:27.4085448Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:16:27.4086082Z env:
+2026-10-22T06:16:27.4086550Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:27.4087681Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:16:27.4088560Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:27.4089322Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:27.4090080Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:27.4090671Z ##[endgroup]
+2026-10-22T06:16:38.1385411Z he dieu hanh : Windows  |  python dang chay: 3.13.16
+2026-10-22T06:16:38.1386421Z   co       git      git version 2.56.0.windows.2
+2026-10-22T06:16:38.1387156Z   co       python   Python 3.13.16
+2026-10-22T06:16:38.1395340Z   khong    claude   CLI chinh thuc de goi phien Claude (khong tu viet script spawn)
+2026-10-22T06:16:38.1396304Z         cai bang: npm install -g @anthropic-ai/claude-code
+2026-10-22T06:16:38.1397192Z   khong    codex    CLI chinh thuc de goi phien Codex (khong tu viet script spawn)
+2026-10-22T06:16:38.1398054Z         cai bang: npm install -g @openai/codex
+2026-10-22T06:16:38.1398697Z   co       rg       ripgrep 15.2.0 (rev e89fff89ac)
+2026-10-22T06:16:38.1399447Z   co       bash     GNU bash, version 5.3.15(2)-release (x86_64-pc-cygwin)
+2026-10-22T06:16:38.1400282Z   co       gh       gh version 2.102.0 (2026-09-30)
+2026-10-22T06:16:38.1400864Z   co       npm      10.9.9
+2026-10-22T06:16:38.1401329Z   co       node     v22.23.3
+2026-10-22T06:16:38.1402053Z   khong    llm      CLI client goi OpenAI API (provider: openai_api, surface: llm_cli)
+2026-10-22T06:16:38.1403093Z         cai bang: pip install llm  (hoac: uv tool install llm / brew install llm)
+2026-10-22T06:16:38.1404255Z   khong    agy      CLI client cho Google Antigravity (provider: google_antigravity, surface: antigravity)
+2026-10-22T06:16:38.1405743Z         cai bang: irm https://antigravity.google/cli/install.ps1 | iex
+2026-10-22T06:16:38.1406519Z   co       actionlint 1.7.7
+2026-10-22T06:16:38.1407161Z   co       shellcheck ShellCheck - shell script analysis tool
+2026-10-22T06:16:38.1408051Z MODULE PYTHON (do bang C:\hostedtoolcache\windows\Python\3.13.16\x64\python.exe):
+2026-10-22T06:16:38.1409297Z   co    PyYAML   6.0.3
+2026-10-22T06:16:38.1409770Z KHA DUNG (co mat != dung duoc):
+2026-10-22T06:16:38.1410699Z   THIEU          codex    chua cai — npm install -g @openai/codex
+2026-10-22T06:16:38.1411661Z   THIEU          claude   chua cai — npm install -g @anthropic-ai/claude-code
+2026-10-22T06:16:38.1413622Z   DUNG_DUOC      github   git=OK · gh-cli=khong · rest-chung=OK · rest-kho=khong · gh-kho=khong · mcp-cli=chua-do-duoc · mcp-endpoint=khong · mcp-endpoint: HTTP 401 (toi GitHub, thieu quyen)
+2026-10-22T06:16:38.1419031Z   KHONG_DO_DUOC  launcher-phien chua co origin/master trong cay nay — `git fetch origin master` roi do lai
+2026-10-22T06:16:38.1420591Z   KHONG_DO_DUOC  hook-phien chua co origin/master trong cay nay — `git fetch origin master` roi do lai
+2026-10-22T06:16:38.1422271Z   CHUA_CHAY      hook-da-chay CHƯA CHẠY — hook chua chay lan nao trong cay nay (chua co dau vet)
+2026-10-22T06:16:38.1423356Z   THIEU          openai-llm chua cai llm CLI — pip install llm
+2026-10-22T06:16:38.1424997Z   THIEU          antigravity chua cai agy CLI — irm https://antigravity.google/cli/install.ps1 | iex (Windows) / curl -fsSL https://antigravity.google/cli/install.sh | bash
+2026-10-22T06:16:38.1426825Z BIEN MOI TRUONG khop mau: 42 (xem day du: `launcher.py moi-truong`)
+2026-10-22T06:16:38.1427639Z BIEN UTF-8 (chong loi charmap/cp1258 tren Windows):
+2026-10-22T06:16:38.1428265Z   PYTHONUTF8      : <chua dat>
+2026-10-22T06:16:38.1428848Z   PYTHONIOENCODING: <chua dat>
+2026-10-22T06:16:38.1433890Z   CANH BAO        : chua dat du hai bien UTF-8 (PYTHONUTF8=<chua dat>, PYTHONIOENCODING=<chua dat>) — nen dat PYTHONUTF8=1 va PYTHONIOENCODING=utf-8 de tranh loi doc ma charmap/cp1258 tren Windows
+2026-10-22T06:16:38.1435766Z KET LUAN  : DU CONG CU BAT BUOC
+2026-10-22T06:16:38.1436841Z   CHUA CHUNG MINH KHA DUNG (co mat, chua ai goi that): codex, claude, launcher-phien, hook-phien, hook-da-chay, openai-llm, antigravity
+2026-10-22T06:16:38.1438543Z                  chay lai voi --kiem-song de doi bang chung that
+2026-10-22T06:16:38.3181178Z ##[group]Run python .claude/dev/launcher_test.py
+2026-10-22T06:16:38.3181618Z [36;1mpython .claude/dev/launcher_test.py[0m
+2026-10-22T06:16:38.3259441Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:16:38.3259806Z env:
+2026-10-22T06:16:38.3260074Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:38.3260549Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:16:38.3261018Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:38.3261424Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:38.3261844Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:16:38.3262167Z ##[endgroup]
+2026-10-22T06:16:39.4567011Z moi truong: pid=8512 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+2026-10-22T06:16:39.4568235Z nhom tien trinh: bo qua (khong phai POSIX)
+2026-10-22T06:16:39.4569359Z   BO QUA t03_git_gia_thoat_0_im_lang_van_bi_chan: bo qua tren Windows (can shim .cmd)
+2026-10-22T06:17:01.0539014Z   BO QUA t28_qua_han_giet_ca_CON_CHAU: bo qua tren Windows (can kiem bang cay tien trinh that)
+2026-10-22T06:17:04.5997512Z   BO QUA t33_stop_giet_that: bo qua tren Windows
+2026-10-22T06:17:18.4458793Z   BO QUA t50_stop_roi_runner_KHONG_duoc_de_len_so: bo qua tren Windows (can kiem rieng)
+2026-10-22T06:17:18.4460800Z   BO QUA t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut: bo qua tren Windows (can tin hieu POSIX)
+2026-10-22T06:17:22.0143757Z   BO QUA t55_doctor_nhan_python_khong_can_ten_python3: bo qua tren Windows (can shim khong duoi .exe)
+2026-10-22T06:17:26.9194694Z   BO QUA t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc: bo qua tren Windows (can .exe rong)
+2026-10-22T06:17:32.0423043Z   BO QUA t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi: ca nay dung SIG_IGN cua POSIX; duong Windows la t62
+2026-10-22T06:17:32.0425418Z   BO QUA t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem: dua tren SIGTERM cua POSIX; duong Windows la t62
+2026-10-22T06:17:32.0427292Z   BO QUA t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet: setsid la khai niem POSIX; duong Windows la t62
+2026-10-22T06:17:40.0731508Z   BO QUA t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau: ca nhom tien trinh POSIX; Windows can fixture that rieng
+2026-10-22T06:17:41.3802449Z   BO QUA t72_bi_ngat_KHONG_duoc_ghi_thanh_xong: SIGINT tren Windows khong cung ngu nghia; can ca rieng
+2026-10-22T06:17:47.1300186Z   BO QUA t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT: bo qua tren Windows (can shim .cmd cho fixture)
+2026-10-22T06:17:48.7979032Z   BO QUA t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)
+2026-10-22T06:17:48.7981521Z   BO QUA t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)
+2026-10-22T06:18:51.5461588Z   BO QUA r351_co_chi_thi_thi_KHONG_duoc_dat_moc: bo qua: khoi dat moc la shell POSIX
+2026-10-22T06:18:51.5466701Z   BO QUA r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: bo qua: khoi dat moc la shell POSIX
+2026-10-22T06:19:18.6352607Z   BO QUA r484_g2_hook_shell_scrub_truoc_probe: BO QUA shell POSIX; verified on WSL Linux
+2026-10-22T06:19:18.6354338Z   BO QUA r484_g8_hook_scrub_kin_voi_bash_env: BO QUA shell POSIX; verified on WSL Linux
+2026-10-22T06:19:19.9939147Z Windows token matches local RID500: True
+2026-10-22T06:19:19.9940931Z   BO QUA r484_g6_trust_posix_backslash_is_not_separator: POSIX literal backslash semantics measured on Linux
+2026-10-22T06:19:20.2577568Z   BO QUA r484_g7_bridge_codex_co_mat_nhung_hong_van_hoan: BO QUA shim POSIX
+2026-10-22T06:19:20.2579509Z   BO QUA r484_g7_hook_vang_codex_cai_cli_truoc_materialize: BO QUA shell POSIX
+2026-10-22T06:19:20.8911011Z   BO QUA r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi: đo trên POSIX; nhánh Windows dùng cùng phép đọc lại trước os.replace
+2026-10-22T06:19:21.7269187Z   BO QUA r802_cai_rg_windows_chon_ban_chay_duoc: BO QUA shell POSIX
+2026-10-22T06:19:21.8429474Z   BO QUA r802_hook_linux_rg_hong_van_thu_cargo: BO QUA shell POSIX
+2026-10-22T06:19:21.8431185Z   BO QUA r802_hook_windows_khong_cai_in_dung_lenh: BO QUA shell POSIX
+2026-10-22T06:19:21.8434314Z   BO QUA r831_cai_rg_linux_chon_ban_chay_duoc: BO QUA shell POSIX
+2026-10-22T06:19:21.8437008Z   BO QUA r831_cai_rg_macos_chon_ban_chay_duoc: BO QUA shell POSIX
+2026-10-22T06:19:21.8440104Z   BO QUA r858_cai_linux_chon_ban_chay_duoc: BO QUA shell POSIX
+2026-10-22T06:19:21.8442758Z   BO QUA r858_cai_macos_chon_ban_chay_duoc: BO QUA shell POSIX
+2026-10-22T06:19:21.8445415Z   BO QUA r858_cai_windows_chon_ban_chay_duoc: BO QUA shell POSIX
+2026-10-22T06:19:21.8448117Z   BO QUA r858_cai_python_khong_in_thu_muc_ban_hong: BO QUA shell POSIX
+2026-10-22T06:19:21.8450830Z   BO QUA r858_bat_buoc_bash_khong_dua_rg_hong_len_dau: BO QUA shell POSIX
+2026-10-22T06:19:21.8637210Z   BO QUA t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan: bo qua: nhanh /proc chi co tren Linux
+2026-10-22T06:19:21.8638975Z   BO QUA t157_giet_cay_khi_stat_EACCES_van_tron_ven: bo qua: nhanh /proc chi co tren Linux
+2026-10-22T06:19:21.8641461Z   BO QUA r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban: bo qua: nhanh /proc chi co tren Linux
+2026-10-22T06:19:21.8644353Z   BO QUA t158_comm_hong_SAU_luc_sinh_qua_han_khong_duoc_124_khi_con_song: bo qua: comm/prctl/proc chi co tren Linux
+2026-10-22T06:19:21.8647043Z   BO QUA t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc: bo qua: comm/proc chi co tren Linux
+2026-10-22T06:19:21.8649893Z   BO QUA t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM: bo qua: setsid/proc chi co tren Linux
+2026-10-22T06:19:21.8652314Z   BO QUA t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong: bo qua: nhom tien trinh/proc chi co tren Linux
+2026-10-22T06:19:21.8653424Z 
+2026-10-22T06:19:21.8653961Z 204/204 ca DA CHAY QUA (tong 244, bo qua 40, hong 0) - KHONG DU: 40 ca BO QUA, chua do gi
+2026-10-22T06:19:22.0206401Z ##[group]Run python .claude/dev/launcher_test.py --dot-bien
+2026-10-22T06:19:22.0207495Z [36;1mpython .claude/dev/launcher_test.py --dot-bien[0m
+2026-10-22T06:19:22.0295790Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:19:22.0296164Z env:
+2026-10-22T06:19:22.0296439Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:19:22.0296937Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:19:22.0297386Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:19:22.0297796Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:19:22.0298203Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:19:22.0298512Z ##[endgroup]
+2026-10-22T06:20:03.1523480Z moi truong: pid=2812 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+2026-10-22T06:20:03.1525869Z nhom tien trinh: bo qua (khong phai POSIX)
+2026-10-22T06:20:03.1526678Z TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:
+2026-10-22T06:20:03.1527781Z   wp802_bo_nhanh_BI_CHE        OK  giet 2/2: r802_doctor_rg_tran_hong_la_BI_CHE, r802_doctor_git_tran_hong_la_BI_CHE
+2026-10-22T06:20:03.1529493Z   wp802_BI_CHE_khong_vao_thieu OK  giet 2/2: r802_doctor_rg_tran_hong_la_BI_CHE, r802_doctor_git_tran_hong_la_BI_CHE
+2026-10-22T06:20:03.1530712Z   wp802_luon_BI_CHE_khi_co_ung_vien OK  giet 1/1: r802_doctor_rg_chi_ban_tot_khong_BI_CHE
+2026-10-22T06:20:03.1531716Z   wp802_bo_git_khoi_tap_ap_dung OK  giet 1/1: r802_doctor_git_tran_hong_la_BI_CHE
+2026-10-22T06:20:03.1532660Z   wp802_BI_CHE_moi_cong_cu     OK  giet 1/1: r802_doctor_bash_ngoai_pham_vi_BI_CHE
+2026-10-22T06:20:03.1533662Z   wp802_ten_tran_bo_muc_PATH_rong OK  giet 1/1: r802_doctor_ten_tran_tu_muc_PATH_rong
+2026-10-22T06:20:03.1534651Z   wp802_khong_dat_ten_tran_len_dau OK  giet 1/1: r802_doctor_ten_tran_tu_muc_PATH_rong
+2026-10-22T06:20:03.1537176Z   wp802_hong_dau_la_moi_ban_hong OK  giet 1/1: r802_doctor_ten_tran_tu_muc_PATH_rong
+2026-10-22T06:20:03.1538308Z   wp802_cac_duong_dan_lai_dung_which OK  giet 1/1: r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT
+2026-10-22T06:20:03.1540734Z   wp802_cac_duong_dan_theo_kieu_bash OK  giet 1/1: r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT
+2026-10-22T06:20:03.1541939Z   wp802_pathext_rong_khong_lui_mac_dinh OK  giet 1/1: r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT
+2026-10-22T06:20:03.1543422Z   wp802_ten_co_duoi_khong_noi_them OK  giet 1/1: r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT
+2026-10-22T06:20:03.1544446Z   wp802_launcher_winget_thanh_choco OK  giet 1/1: r802_bang_cai_rg_khop_cong_cu_yaml
+2026-10-22T06:20:03.1546191Z   g6_trust_windows_separator_disabled OK  giet 1/1: r484_g6_trust_windows_separator_aliases
+2026-10-22T06:20:03.1547311Z   g6_trust_conflicting_alias_ignored OK  giet 1/1: r484_g6_trust_windows_separator_aliases
+2026-10-22T06:20:03.1548395Z   g6_trust_posix_separator_folded KHONG DO DUOC tren nen nay (POSIX path semantics)
+2026-10-22T06:20:03.1549240Z Windows token matches local RID500: True
+2026-10-22T06:20:03.1550454Z   g4_windows_sid_alias_not_normalized OK  giet 1/1: r484_g4_windows_sid_alias_identity(AssertionError:same native SID rejected because of SDDL alias)
+2026-10-22T06:20:03.1551721Z Windows token matches local RID500: True
+2026-10-22T06:20:03.1552937Z   g4_windows_LA_not_current_owner OK  giet 1/1: r484_g4_windows_sid_alias_identity(AssertionError:another principal was accepted through an alias)
+2026-10-22T06:20:03.1554698Z   g2_windows_directory_pin_access OK  giet 1/1: r484_g2_storage_kernel_guardrails(AssertionError:Windows ancestor was not pinned)
+2026-10-22T06:20:03.1556626Z   g2_rejected_refresh_khong_phu_thuoc_metadata OK  giet 1/1: r484_g2_recovery_probe_rollback_va_snapshot_moi(AssertionError:changed metadata revived the rejected refresh token)
+2026-10-22T06:20:03.1560596Z   g2_resume_bo_prompt          OK  giet 1/1: r484_g2_checkpoint_resume_va_gia_auth_khong_refund(AssertionError:)
+2026-10-22T06:20:03.1564974Z   g2_unknown_child_khong_duoc_cap_void OK  giet 1/1: r484_g2_checkpoint_resume_va_gia_auth_khong_refund(AssertionError:untrusted child text became refund evidence)
+2026-10-22T06:20:03.1566691Z   g2_resume_bo_head            OK  giet 1/1: r484_g2_checkpoint_resume_va_gia_auth_khong_refund(AssertionError:)
+2026-10-22T06:20:03.1568273Z   g7_home_sai_lai_traceback    OK  giet 1/1: r484_g7_credential_status_home_sai_la_chan_khong_traceback
+2026-10-22T06:20:03.1569439Z   g7_nuot_loi_ghi_trang_thai   OK  giet 1/1: r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra
+2026-10-22T06:20:03.1570340Z   g7_f03_doc_lai_sau_probe     OK  giet 1/1: r484_g7_tu_choi_ghi_dung_ban_da_probe
+2026-10-22T06:20:03.1571498Z   g7_f01_materializer_gop_loi  OK  giet 1/1: r484_g7_materializer_khong_ghi_duoc_trang_thai_noi_dung_ly_do
+2026-10-22T06:20:03.1572902Z   g7_bo_doc_lai_truoc_replace  KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi)
+2026-10-22T06:20:03.1574213Z   g8_xong_rc0_van_giu_failure_class OK  giet 1/1: r484_g8_run_xong_khong_mang_failure_class
+2026-10-22T06:20:03.1575186Z   m1_xoa_actionlint_khoi_cong_cu OK  giet 1/1: t149_doctor_do_actionlint_va_shellcheck
+2026-10-22T06:20:03.1576177Z   m2_im_lang_khi_bien_utf8_xanh OK  giet 1/1: t150_doctor_do_bien_utf8_in_ca_khi_xanh
+2026-10-22T06:20:03.1577254Z   m3_doc_bam_tep_thay_vi_dau_vet OK  giet 1/1: t151_m3_phan_biet_da_chay_voi_tep_moi
+2026-10-22T06:20:03.1581570Z   m3b_bo_kiem_do_tuoi_dau_vet  OK  giet 1/1: t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY
+2026-10-22T06:20:03.1582680Z   m4_noi_long_da_chung_minh_kha_dung OK  giet 1/1: t149_doctor_do_actionlint_va_shellcheck
+2026-10-22T06:20:03.1583879Z   m5_bo_kiem_tra_ngoai_ascii   OK  giet 1/1: t153_doctor_do_duong_dan_kho_co_dau_cach_hoac_phi_ascii
+2026-10-22T06:20:03.1585066Z   bo_ky_ban_ghi_luot           OK  giet 1/1: t144_run_ghi_nonce_va_hmac_khong_lo_khoa
+2026-10-22T06:20:03.1585853Z   m1_coi_worktree_la_hop_le    OK  giet 1/1: r01_worktree_that_bi_chan
+2026-10-22T06:20:03.1586789Z   m6c_khong_ghi_khi_probe_chan OK  giet 1/1: r01_worktree_that_bi_chan(FileNotFoundError)
+2026-10-22T06:20:03.1588141Z   m1_chan_ca_clone_that        OK  giet 1/1: r02_clone_that_di_tiep
+2026-10-22T06:20:03.1589017Z   m2_bo_probe_ghi              OK  giet 1/1: r03_probe_ghi_bi_tu_choi_thi_do
+2026-10-22T06:20:03.1589888Z   m3_chi_kiem_rc               OK  giet 1/1: r04_spawn_rc0_dau_ra_rong_bi_chan
+2026-10-22T06:20:03.1590842Z   m4_thieu_khoa_coi_la_tin_cay OK  giet 1/1: r05_trust_thieu_khoa_la_khong_do_duoc
+2026-10-22T06:20:03.1591884Z   m4_bo_bat_JSON_hong          OK  giet 1/1: r10_trust_json_hong_bi_chan_sach(FileNotFoundError)
+2026-10-22T06:20:03.1592980Z   m4_bool_nghiem_ngat_thanh_truthy_else OK  giet 1/1: r11_trust_gia_tri_that_ba_chieu
+2026-10-22T06:20:03.1593979Z   m4_non_bool_bi_coi_la_DAT    OK  giet 1/1: r11_trust_gia_tri_that_ba_chieu
+2026-10-22T06:20:03.1594962Z   m5_canh_bao_thay_vi_chan     OK  giet 1/1: r06_probe_hong_khong_override_phai_chan
+2026-10-22T06:20:03.1595998Z   m5b_cho_bo_qua_khong-can-ly-do OK  giet 1/1: r07_override_ly_do_rong_bi_tu_choi
+2026-10-22T06:20:03.1596986Z   m6_khong_ghi_so              OK  giet 1/1: r08_override_co_ly_do_duoc_ghi_so
+2026-10-22T06:20:03.1597844Z   m6b_gop_khong_do_duoc_vao_dat OK  giet 1/1: r09_run_json_giu_ba_trang_thai_probe
+2026-10-22T06:20:03.1598941Z   bo_kiem_rong_CA_BON_LOP      KHONG DO DUOC tren nen nay (ca dich bo qua: t03_git_gia_thoat_0_im_lang_van_bi_chan)
+2026-10-22T06:20:03.1600213Z   bo_hmac_tra_ve_sha256_tran_va_xuat_lai_van_tay OK  giet 1/1: t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien
+2026-10-22T06:20:03.1601437Z   bo_loc_do_dai_va_ten_khi_gom_van_tay OK  giet 1/1: t84_nhom_van_tay_khong_duoc_bat_oan_co_bat_tat
+2026-10-22T06:20:03.1602682Z   do_codex_tin_DONG_DAU_thay_vi_ma_thoat OK  giet 1/1: t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao
+2026-10-22T06:20:03.1604760Z   claude_dem_ca_BIEN_RONG_la_credential OK  giet 1/1: t103_nam_finding_cua_bot_review_PR128
+2026-10-22T06:20:03.1606051Z   github_dem_CO_MAT_gh_la_da_xac_thuc OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+2026-10-22T06:20:03.1607239Z   moc_refresh_MAT_DO_PHAN_GIAI OK  giet 1/1: t103_nam_finding_cua_bot_review_PR128
+2026-10-22T06:20:03.1608833Z   co_chan_codex_luon_tra_KHONG_BI_CHAN OK  giet 1/1: t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+2026-10-22T06:20:03.1610039Z   do_codex_song_bo_qua_co_chan OK  giet 1/1: t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+2026-10-22T06:20:03.1611371Z   chot_truong_nhom_FAIL_OPEN_khi_khong_do_duoc_pgid OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+2026-10-22T06:20:03.1612868Z   ok_kha_dung_bo_qua_muc_CHUA_CHUNG_MINH OK  giet 1/1: t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor
+2026-10-22T06:20:03.1614175Z   chuan_bi_bo_duong_JSON_tho   OK  giet 1/1: t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac
+2026-10-22T06:20:03.1615427Z   hook_phien_bo_phep_so_nang_luc OK  giet 1/1: t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep
+2026-10-22T06:20:03.1619930Z   lay_ca_id_token_lam_tin_hieu_han OK  giet 1/1: t94_canh_bao_TRUOC_khi_credential_het_han
+2026-10-22T06:20:03.1621083Z   kiem_song_bi_canh_bao_nuot   OK  giet 1/1: t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han
+2026-10-22T06:20:03.1622163Z   bo_canh_bao_som_theo_exp     OK  giet 1/1: t94_canh_bao_TRUOC_khi_credential_het_han
+2026-10-22T06:20:03.1623265Z   bo_canh_bao_theo_tuoi_anh_chup OK  giet 1/1: t94_canh_bao_TRUOC_khi_credential_het_han
+2026-10-22T06:20:03.1624545Z   nang_nhan_CO_CREDENTIAL_thanh_DUNG_DUOC OK  giet 1/1: t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung
+2026-10-22T06:20:03.1625829Z   bo_kiem_han_token_codex      OK  giet 1/1: t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung
+2026-10-22T06:20:03.1627044Z   bo_chot_truong_nhom_truoc_killpg OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+2026-10-22T06:20:03.1628175Z   bo_kiem_prompt_rong          OK  giet 1/1: t15_prompt_rong_bi_chan_du_sha_dung
+2026-10-22T06:20:03.1629500Z   giet_lieu_khong_can_khoa     OK  giet 1/1: t31_stop_tu_choi_khi_khoa_danh_tinh_khac
+2026-10-22T06:20:03.1630519Z   bao_da_giet_du_chua_giet     OK  giet 1/1: t31_stop_tu_choi_khi_khoa_danh_tinh_khac
+2026-10-22T06:20:03.1632963Z   124_khi_chau_con_song        KHONG DO DUOC tren nen nay (KHONG DUNG DUOC tren ca hai nen, va da DO chu khong doan: t62 nay dung fixture MO COI - ca kho nhat dung duoc - the ma Job Object van giet duoc chau, nen nhanh 'chau con song' khong the cham toi. Dot bien nay chi song lai khi ai do dung duoc mot ca ma duong giet THAT BAI that su.)
+2026-10-22T06:20:03.1635527Z   khong_cat_thong_tin_dang_nhap OK  giet 1/1: t45_token_trong_URL_KHONG_duoc_lo_ra
+2026-10-22T06:20:03.1636961Z   quay_ve_so_hau_to            OK  giet 3/3: t48_host_gia_mao_KHONG_duoc_khop, t57_host_KHONG_co_dau_cham_van_phai_chan, t58_expected_repo_mot_doan_bi_TU_CHOI
+2026-10-22T06:20:03.1638692Z   so_URL_tho_khong_chuan_hoa   OK  giet 2/2: t40_HAI_BAN_CLONE_hai_duong_dan_CUNG_danh_tinh, t44_bon_cach_viet_URL_cung_mot_danh_tinh
+2026-10-22T06:20:42.8129178Z Exception in thread Thread-483 (_readerthread):
+2026-10-22T06:20:42.8374225Z Traceback (most recent call last):
+2026-10-22T06:20:42.8391083Z   File "C:\hostedtoolcache\windows\Python\3.13.16\x64\Lib\threading.py", line 1044, in _bootstrap_inner
+2026-10-22T06:20:42.8392155Z     self.run()
+2026-10-22T06:20:42.8392869Z     ~~~~~~~~^^
+2026-10-22T06:20:42.8393976Z   File "C:\hostedtoolcache\windows\Python\3.13.16\x64\Lib\threading.py", line 995, in run
+2026-10-22T06:20:42.8395620Z     self._target(*self._args, **self._kwargs)
+2026-10-22T06:20:42.8396374Z     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T06:20:42.8397548Z   File "C:\hostedtoolcache\windows\Python\3.13.16\x64\Lib\subprocess.py", line 1616, in _readerthread
+2026-10-22T06:20:42.8398655Z     buffer.append(fh.read())
+2026-10-22T06:20:42.8399279Z                   ~~~~~~~^^
+2026-10-22T06:20:42.8401166Z   File "C:\hostedtoolcache\windows\Python\3.13.16\x64\Lib\encodings\cp1252.py", line 23, in decode
+2026-10-22T06:20:42.8402438Z     return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+2026-10-22T06:20:42.8403293Z            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T06:20:42.8404381Z UnicodeDecodeError: 'charmap' codec can't decode byte 0x90 in position 7840: character maps to <undefined>
+2026-10-22T06:20:46.5384114Z   lay_cwd_thay_vi_goc_repo     OK  giet 1/1: t38_dung_o_thu_muc_CON_van_ra_GOC
+2026-10-22T06:20:46.5385124Z   khong_remote_thi_coi_la_khop OK  giet 1/1: t42_khong_co_remote_van_bi_chan_khi_doi_kho
+2026-10-22T06:20:46.5386021Z   bo_cung_hoa_dau_ra           OK  giet 1/1: t47_console_khong_UTF8_van_in_duoc_duong_dan_co_dau
+2026-10-22T06:20:46.5387153Z   de_len_quyet_dinh_cua_stop   KHONG DO DUOC tren nen nay (ca dich bo qua: t50_stop_roi_runner_KHONG_duoc_de_len_so)
+2026-10-22T06:20:46.5388881Z   so_hong_im_lang              OK  giet 1/1: t52_so_hong_KHONG_duoc_im_lang
+2026-10-22T06:20:46.5389773Z   doctor_luon_xanh             OK  giet 1/1: t54_doctor_thieu_cong_cu_bat_buoc_thi_DO
+2026-10-22T06:20:46.5391054Z   doctor_bo_qua_auth_hong      OK  giet 1/1: t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc
+2026-10-22T06:20:46.5392451Z   khong_chup_prompt            OK  giet 2/2: t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con, r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO
+2026-10-22T06:20:46.5393562Z short_id  : 3b91f453
+2026-10-22T06:20:46.5393948Z run_id    : 3b91f453bc5f4903ac79073991c8716b
+2026-10-22T06:20:46.5394598Z so        : C:\Users\runneradmin\AppData\Local\Temp\lt_8fa6waeh\runs\3b91f453
+2026-10-22T06:20:46.5395260Z trang thai: xong  ma_thoat=0
+2026-10-22T06:20:46.5395676Z thoi luong: 0.038s  stdout=0B  stderr=0B
+2026-10-22T06:20:46.5396454Z   prompt_sau_preflight_khong_rehash OK  giet 1/1: r12_prompt_doi_ngay_sau_preflight_phai_DO
+2026-10-22T06:20:46.5397497Z   bam_output_luon_lay_chuoi_rong OK  giet 1/1: r14_run_json_bam_lai_dung_hai_log
+2026-10-22T06:20:46.5398569Z   mot_provider_hai_transport   OK  giet 1/1: r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh
+2026-10-22T06:20:46.5399584Z   luu_argv_nguyen_van          OK  giet 1/1: t59_so_KHONG_luu_doi_so_nguyen_van
+2026-10-22T06:20:46.5400670Z   doctor_tin_which             KHONG DO DUOC tren nen nay (ca dich bo qua: t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc)
+2026-10-22T06:20:46.5401912Z   doctor_chi_thu_binary_dau    OK  giet 1/1: t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot
+2026-10-22T06:20:46.5403293Z   moi_truong_tin_gh_token_giu_cho OK  giet 1/1: t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho
+2026-10-22T06:20:46.5404357Z   bat_buoc_bo_qua_nen          OK  giet 1/1: t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung
+2026-10-22T06:20:46.5405345Z   bat_buoc_bo_qua_nen_ci       OK  giet 1/1: t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung
+2026-10-22T06:20:46.5406828Z   rest_phan_loai_theo_ma_trang_thai OK  giet 1/1: t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+2026-10-22T06:20:46.5408098Z   github_dem_gh_auth_la_lam_duoc_viec OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+2026-10-22T06:20:46.5409464Z   tran_tong_chon_tay           OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+2026-10-22T06:20:46.5410626Z   het_ngan_sach_thanh_cong_cu_hong OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+2026-10-22T06:20:46.5411767Z   kha_dung_chay_ngoai_tran     OK  giet 1/1: t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU
+2026-10-22T06:20:46.5412872Z   het_ngan_sach_van_thanh_thieu OK  giet 1/1: t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU
+2026-10-22T06:20:46.5413921Z   probe_qua_han_dem_la_THIEU   OK  giet 1/1: t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU
+2026-10-22T06:20:46.5414916Z   probe_khong_retry_khi_qua_han OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+2026-10-22T06:20:46.5416301Z   phien_ban_timeout_khong_mang_co_qua_han OK  giet 1/1: t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU
+2026-10-22T06:20:46.5417647Z   xac_thuc_timeout_khong_mang_co_qua_han OK  giet 1/1: t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU
+2026-10-22T06:20:46.5418722Z   xac_thuc_qua_han_van_la_THIEU OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+2026-10-22T06:20:46.5419702Z   doi_kha_dung_bo_qua_CHUA_DO  OK  giet 1/1: t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU
+2026-10-22T06:20:46.5420704Z   auth_het_ngan_sach_khong_vao_chua_do OK  giet 1/1: t138_auth_het_ngan_sach_phai_vao_CHUA_DO
+2026-10-22T06:20:46.5421763Z   qua_han_uu_tien_dung_lai_break OK  giet 1/1: t139_ung_vien_qua_han_khong_duoc_che_ung_vien_tot
+2026-10-22T06:20:46.5422884Z   review_codex_auth_timeout_mat_dau_chua_do OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+2026-10-22T06:20:46.5424019Z   review_codex_retry_version_gap_ba OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+2026-10-22T06:20:46.5425119Z   review_codex_retry_auth_gap_ba OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+2026-10-22T06:20:46.5426290Z   review_codex_retry_version_giu_loi_luot_mot OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+2026-10-22T06:20:46.5427548Z   review_same_provider_retry_bo_qua_ngan_sach OK  giet 1/1: t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho
+2026-10-22T06:20:46.5428968Z   doctor_text_gop_CHUA_DO_thanh_THIEU OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+2026-10-22T06:20:46.5430107Z   doctor_text_auth_None_khong_in_ly_do OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+2026-10-22T06:20:46.5431277Z   doctor_text_footer_khoa_cung_het_ngan_sach OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+2026-10-22T06:20:46.5432427Z   doctor_text_CHUA_DO_van_ket_luan_DU OK  giet 1/1: t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU
+2026-10-22T06:20:46.5433540Z   comment_timeout_mat_idiom_version_va_phep_do OK  giet 1/1: t141_comment_timeout_phai_co_version_nguon_va_phep_do
+2026-10-22T06:20:46.5434969Z   codex_live_callsite_sap_het_han_truyen_ten_tran OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+2026-10-22T06:20:46.5436482Z   codex_live_callsite_binh_thuong_truyen_ten_tran OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+2026-10-22T06:20:46.5437796Z   do_codex_spawn_ten_tran      OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+2026-10-22T06:20:46.5438964Z   do_codex_song_spawn_ten_tran OK  giet 1/1: t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran
+2026-10-22T06:20:46.5440159Z   footer_van_khuyen_bat_kiem_song OK  giet 1/1: t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai
+2026-10-22T06:20:46.5441365Z   auth_hong_that_sau_retry_thanh_chua_do OK  giet 1/1: t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU
+2026-10-22T06:20:46.5442303Z   vut_co_qua_han_cua_luot_retry OK  giet 1/1: t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU
+2026-10-22T06:20:46.5443366Z   hong_that_thang_qua_han      OK  giet 1/1: t137_ung_vien_hong_that_cong_ung_vien_qua_han_la_CHUA_DO
+2026-10-22T06:20:46.5444411Z   retry_van_cung_han           OK  giet 1/1: t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO
+2026-10-22T06:20:46.5445404Z   retry_auth_van_cung_han      OK  giet 1/1: t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU
+2026-10-22T06:20:46.5446556Z   probe_github_bo_qua_moi_truong_chuan_hoa OK  giet 1/1: t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA
+2026-10-22T06:20:46.5447867Z   rest_gop_khong_do_duoc_vao_chan OK  giet 1/1: t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+2026-10-22T06:20:46.5449521Z   rest_toi_duoc_la_lam_duoc_viec OK  giet 1/1: t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI
+2026-10-22T06:20:46.5450601Z   worktree_bo_qua_tep_moi      OK  giet 1/1: t12_tep_khong_theo_doi_van_tinh_la_ban
+2026-10-22T06:20:46.5452971Z   me_chet_la_coi_nhu_ca_cay_chet KHONG DO DUOC tren nen nay (ca dich bo qua: t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi)
+2026-10-22T06:20:46.5454660Z   nhom_luon_rong               KHONG DO DUOC tren nen nay (ca dich bo qua: t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem)
+2026-10-22T06:20:46.5455953Z   khong_chup_cay               KHONG DO DUOC tren nen nay (ca dich bo qua: t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet)
+2026-10-22T06:20:46.5457096Z   rid_quay_lai_ten_thu_muc     OK  giet 1/1: t64_short_id_da_bi_GIANH_thi_khong_duoc_cap_lai
+2026-10-22T06:20:46.5458224Z   run_root_khong_resolve       OK  giet 1/1: t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con
+2026-10-22T06:20:46.5459227Z   kho_bo_o_dung_ba_doan        OK  giet 1/1: t68_kho_duong_dan_SAU_neu_host_van_phai_QUA
+2026-10-22T06:20:46.5459987Z   stop_de_len_luot_da_xong     OK  giet 1/1: t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so
+2026-10-22T06:20:46.5460748Z   chet_roi_van_bao_PID_tai_dung OK  giet 1/1: t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so
+2026-10-22T06:20:46.5461910Z   PROMPT_FILE_mo_coi_di_tiep   OK  giet 2/2: t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN, r13_PROMPT_FILE_thieu_prompt_file_phai_DO
+2026-10-22T06:20:46.5463315Z   ban_chup_de_ho_quyen         KHONG DO DUOC tren nen nay (t71 bo qua khang dinh quyen 0600 tren Windows)
+2026-10-22T06:20:46.5464649Z   ban_chup_de_lai_tren_dia     KHONG DO DUOC tren nen nay (tren Windows ban chup GIU LAI theo thiet ke, nen 'khong xoa' khong doi gi)
+2026-10-22T06:20:46.5466169Z   xoa_prompt_khi_wrapper_vua_thoat KHONG DO DUOC tren nen nay (ca dich bo qua: t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau)
+2026-10-22T06:20:46.5467544Z   ngat_ghi_thanh_xong          KHONG DO DUOC tren nen nay (ca dich bo qua: t72_bi_ngat_KHONG_duoc_ghi_thanh_xong)
+2026-10-22T06:20:46.5468641Z   doctor_bo_do_bash            OK  giet 1/1: t73_doctor_phai_do_bash_va_npm(TypeError)
+2026-10-22T06:20:46.5469904Z   khong_quet_ban_chup_qua_han  OK  giet 1/1: t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay
+2026-10-22T06:20:46.5470828Z   khong_don_tep_tam_mo_coi     OK  giet 1/1: t75_tep_tam_mo_coi_bi_don
+2026-10-22T06:20:46.5471651Z   dut_ong_nuot_ma_that         OK  giet 1/1: t74_dut_ong_KHONG_duoc_nuot_ma_that
+2026-10-22T06:20:46.5472892Z   none_nhom_thanh_cay_rong     OK  giet 2/2: t78_khong_do_duoc_nhom_KHONG_phai_cay_rong, t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+2026-10-22T06:20:46.5474636Z   job_bo_qua_loi_dat_gioi_han  OK  giet 1/1: t79_job_windows_phai_kiem_ket_qua_dat_gioi_han(AssertionError:khong duoc di tiep sau SetInformation hong)
+2026-10-22T06:20:46.5476001Z   job_pid_khong_tang_buffer    OK  giet 1/1: t80_job_pid_tang_buffer_khi_qua_suc_chua
+2026-10-22T06:20:46.5476945Z   san_dot_bien_chi_can_mot     OK  giet 1/1: t82_dot_bien_khong_duoc_mat_qua_30_phan_tram
+2026-10-22T06:20:51.2888455Z   windows_khong_co_duong_bang_chung_me_da_tat OK  giet 1/1: t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+2026-10-22T06:20:51.2889970Z   chup_cay_khong_fail_closed_trong_cay OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+2026-10-22T06:20:51.2891131Z   chup_cay_fail_closed_ca_may  OK  giet 1/1: t81_chup_cay_windows_thieu_creationdate_phai_fail_closed
+2026-10-22T06:20:51.2892299Z   mcp_endpoint_bo_doc_PORT     OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2893640Z   mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2895984Z   mcp_endpoint_tinh_vao_LAM_DUOC_VIEC OK  giet 2/2: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec, t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2897999Z   mcp_endpoint_phan_loai_theo_MA_thay_vi_HEADER OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2899480Z   mcp_endpoint_toi_duoc_la_LAM_DUOC_VIEC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2901295Z   mcp_endpoint_gop_khong_do_duoc_vao_chan OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2903989Z   mcp_endpoint_bo_kiem_scheme_cho_phep OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2905370Z   mcp_endpoint_bo_kiem_userinfo OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2907176Z   mcp_endpoint_userinfo_do_bang_KY_TU_thay_vi_CAU_TRUC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2909092Z   mcp_endpoint_userinfo_chi_doc_username_theo_tinh_chan_ly OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2911038Z   mcp_endpoint_nhanh_scheme_in_lai_url_ra_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2912557Z   mcp_endpoint_tu_choi_userinfo_MA_VAN_in_url OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2913987Z   mcp_endpoint_in_token_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2915374Z   mcp_endpoint_nuot_ly_do_o_chuoi_tom_tat OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2916847Z   mcp_endpoint_chua_biet_URL_bi_ke_thanh_HONG OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2918266Z   mcp_ket_xuat_gop_chua_do_duoc_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2919542Z   mcp_ten_server_khop_chuoi_con OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2920786Z   mcp_ten_server_phan_biet_hoa_thuong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2922131Z   mcp_bo_bat_loi_json_hong     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(JSONDecodeError)
+2026-10-22T06:20:51.2923445Z   mcp_bo_kiem_kieu_goc         OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(TypeError)
+2026-10-22T06:20:51.2924739Z   mcp_bo_kiem_kieu_bang_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(TypeError)
+2026-10-22T06:20:51.2926089Z   mcp_bo_kiem_kieu_gia_tri_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec(AttributeError)
+2026-10-22T06:20:51.2927438Z   mcp_bo_kiem_kieu_headers     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2928786Z   mcp_servers_che_khuat_mcpServers_sai_kieu OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2930312Z   mcp_chon_ten_theo_thu_tu_khoa_JSON OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2931561Z   mcp_suc_khoe_do_chuoi_con_ca_dong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2932870Z   mcp_suc_khoe_khop_TIEN_TO_thay_vi_bang_dung OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2934244Z   mcp_trang_thai_LA_bi_doan_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2935495Z   mcp_doc_Status_CUOI_thay_vi_DAU OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2936807Z   mcp_hoi_ten_dung_san_thay_vi_ten_da_khai OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2938105Z   mcp_bo_chuan_hoa_env_trong_ham OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2939397Z   env_da_chuan_tra_ve_os_environ_THO OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2941018Z   mcp_ep_env_None_o_loi_goi    OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2942339Z   rest_kho_khong_do_duoc_bi_gop_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2943655Z   mcp_mat_env_da_chuan_hoa     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2944633Z   agy_cong_cu_xoa_muc          OK  giet 1/1: t145_agy_cong_cu_va_kha_nang
+2026-10-22T06:20:51.2945418Z   agy_xac_thuc_sang_version    OK  giet 1/1: t145_agy_cong_cu_va_kha_nang
+2026-10-22T06:20:51.2946192Z   agy_kha_nang_xoa_muc         OK  giet 1/1: t145_agy_cong_cu_va_kha_nang
+2026-10-22T06:20:51.2947040Z   agy_goi_xac_thuc_models      OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+2026-10-22T06:20:51.2948152Z   agy_bo_qua_ket_qua_doctor    OK  giet 1/1: t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+2026-10-22T06:20:51.2949603Z   doctor_khong_ghi_ket_qua_xac_thuc OK  giet 1/1: t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+2026-10-22T06:20:51.2950868Z   doctor_khong_xoa_bang_xac_thuc_luot_truoc OK  giet 1/1: t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG
+2026-10-22T06:20:51.2952054Z   agy_goi_models_lan_hai       OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+2026-10-22T06:20:51.2953097Z   agy_probe_models_timeout_thanh_thieu OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+2026-10-22T06:20:51.2954213Z   agy_probe_models_rong_thanh_co_mat OK  giet 1/1: t146_do_antigravity_cac_trang_thai_va_luong
+2026-10-22T06:20:51.2955303Z   agy_windows_bo_fallback_localappdata OK  giet 1/1: t147_agy_fallback_localappdata_windows
+2026-10-22T06:20:51.2956390Z   agy_windows_fallback_bo_chan_doan_path OK  giet 1/1: t147_agy_fallback_localappdata_windows
+2026-10-22T06:20:51.2957613Z   antigravity_tinh_vao_LAM_DUOC_VIEC OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-10-22T06:20:51.2959014Z   wp685_a_go_ban_va            KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2960367Z   wp685_b_ban_rong             KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2962034Z   wp685_c_bo_doc_duong_moi     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan, t157_giet_cay_khi_stat_EACCES_van_tron_ven)
+2026-10-22T06:20:51.2963802Z   wp685_d1_hoi_chi_PermissionError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2965348Z   wp685_d2_doc_chi_PermissionError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2968003Z   wp685_e1_hoi_nuot_BaseException KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2969282Z   wp685_e2_doc_nuot_KeyboardInterrupt KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2970653Z   wp685_f_hoi_exists_lan_hai   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2972152Z   wp685_g1_doc_loi_False       KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2973560Z   wp685_g2_doc_ESRCH_False     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2974975Z   wp685_h1_hoi_bat_Exception   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2976418Z   wp685_h2_doc_bat_Exception   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2978156Z   wp685_i_noi_dung_hong_False  KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2980939Z   wp685_j1_doc_lan_hai_sau_thanh_cong KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2982447Z   wp685_j2_doc_lan_hai_khi_doc_loi KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2983920Z   wp685_k1_tra_True_khong_hoi_pid KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:51.2985723Z   wp685_k2_hoi_pid_bo_ket_qua  KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7446111Z   wp685_k3_tu_kill_PermissionError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7448240Z   wp685_k4_tu_kill_OSError_khac_True KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7450197Z   wp685_k5_hoi_pid_hai_lan     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7452323Z   wp685_l1_hoi_chi_ProcessLookupError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7454159Z   wp685_l2_hoi_ESRCH_chung_nhanh KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7455738Z   wp685_l3_hoi_OSError_khac_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7457333Z   wp685_l4_hoi_errno_trang_EACCES_EIO KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7458896Z   wp685_l5_hoi_EPERM_False     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7460436Z   wp685_l6_hoi_them_IndexError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7462024Z   wp685_l7_hoi_them_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7463667Z   wp685_l8_hoi_them_UnicodeDecodeError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7465254Z   wp685_l9_hoi_boc_Exception   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7466803Z   wp685_l10_doc_chi_bat_phan_tich KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7468424Z   wp685_l11_doc_errno_EACCES_EIO KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7470060Z   wp685_l12_doc_errno_EACCES_EIO_ESRCH KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7471634Z   wp685_l13_doc_EPERM_False    KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7473531Z   wp685_l14_doc_OSError_khac_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7475173Z   wp685_l15_doc_khong_bat_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7476790Z   wp685_l16_doc_kiem_chuoi_rong KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7478448Z   wp685_l17_doc_khong_bat_IndexError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7480044Z   wp685_l18_doc_IndexError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7483250Z   wp685_l19_doc_chi_OSError_tach_rieng KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7485098Z   wp685_l20_doc_UnicodeDecodeError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7486751Z   wp685_l21_doc_boc_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7488398Z   wp685_l22_kill_chi_PermissionError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7490052Z   wp685_l23_kill_chi_ProcessLookupError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7491641Z   wp685_l24_kill_bo_OSError    KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7493579Z   wp685_l25_kill_them_BaseException KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7495301Z   wp685_l26_kill_them_Exception KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7496862Z   wp685_l27_kill_them_IndexError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.7498419Z   wp685_l28_kill_them_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.8111252Z   wp685_l29_kill_them_UnicodeDecodeError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.8167604Z   wp685_m1_nhanh_cu_hop_nhat_ve_kill KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.8184869Z   wp685_m2_nhanh_cu_bat_BaseException KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.8207192Z   wp685_m3_tep_vang_False      KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.8271890Z   wp685_m4_ESRCH_hoi_lai       KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.8603473Z   wp685_m5_duong_moi_tach_ngoac_dau KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-10-22T06:20:53.9133843Z   r743_a_ve_lai_exists         KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-10-22T06:20:53.9469343Z   r743_b_ENOENT_chua_ket_luan  KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-10-22T06:20:53.9789828Z   r743_c_bo_ENOTDIR            KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-10-22T06:20:54.0131890Z   r743_d_OSError_khac_khong_tep KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-10-22T06:20:54.0461303Z   r743_e_bo_nhanh_ESRCH        KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-10-22T06:20:54.0598320Z   wp802_hook_co_thay_co_chay   KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_linux_rg_hong_van_thu_cargo)
+2026-10-22T06:20:54.0754120Z   wp802_hook_windows_roi_vao_apt KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_windows_khong_cai_in_dung_lenh)
+2026-10-22T06:20:54.0893378Z   wp802_hook_lenh_windows_lech_yaml OK  giet 1/1: r802_bang_cai_rg_khop_cong_cu_yaml
+2026-10-22T06:20:54.0974513Z   wp802_yaml_bo_ung_vien_winget_links KHONG DO DUOC tren nen nay (ca dich bo qua: r802_cai_rg_windows_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1140907Z   wp802_yaml_chon_ung_vien_chi_theo_ma_thoat KHONG DO DUOC tren nen nay (ca dich bo qua: r802_cai_rg_windows_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1144496Z   wp802_hook_windows_probe_hai_lan KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_windows_khong_cai_in_dung_lenh)
+2026-10-22T06:20:54.1146895Z   wp802_yaml_khong_ghi_github_path KHONG DO DUOC tren nen nay (ca dich bo qua: r802_cai_rg_windows_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1711312Z   wp831_yaml_linux_bo_ung_vien_usrbin KHONG DO DUOC tren nen nay (ca dich bo qua: r831_cai_rg_linux_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1719603Z   wp831_yaml_macos_bo_ung_vien_brew KHONG DO DUOC tren nen nay (ca dich bo qua: r831_cai_rg_macos_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1721662Z   wp831_yaml_linux_chi_theo_ma_thoat KHONG DO DUOC tren nen nay (ca dich bo qua: r831_cai_rg_linux_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1724054Z   wp831_yaml_macos_bo_kiem_thuc_thi KHONG DO DUOC tren nen nay (ca dich bo qua: r831_cai_rg_macos_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1754495Z   wp831_yaml_linux_ghi_github_path_vo_dieu_kien KHONG DO DUOC tren nen nay (ca dich bo qua: r831_cai_rg_linux_chon_ban_chay_duoc)
+2026-10-22T06:20:54.1778296Z   wp858_yaml_git_linux_ve_dirname OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1779812Z   wp858_yaml_bash_macos_bo_ung_vien_brew OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1843738Z   wp858_yaml_shellcheck_windows_bo_ung_vien_choco OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1940486Z   wp858_yaml_python_linux_ve_dirname OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1953340Z   wp858_sh_bo_kiem_ten_tran    OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1955065Z   wp858_sh_chon_theo_ma_thoat  OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1956319Z   wp858_sh_khong_ung_vien_van_rc0 OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.1961740Z   wp858_sh_github_path_khong_qua_cygpath OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.2012544Z   wp858_sh_bo_cygpath_u        OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.2112981Z   wp858_sh_nuot_loi_cygpath_w  OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.2765290Z   wp858_sh_nuot_loi_ghi_github_path OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.3100083Z   wp858_sh_bo_dong_canh_giu_path OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.3351664Z   wp858_sh_cygpath_u_hong_khong_tra_loi OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.3563107Z   wp858_sh_dong_canh_la_ten_thu_muc OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.3585407Z   wp858_sh_dong_canh_khong_tach_dong OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:54.3687208Z   wp858_sh_cygpath_u_chi_khi_ghi_path OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:59.8903573Z   wp858_sh_github_path_vang_khong_mac_dinh OK  giet 1/1: r858_hinh_dang_cong_thuc_cai
+2026-10-22T06:20:59.8904938Z   wp858_selftest_editskill_ten_co_dinh OK  giet 1/1: r858_selftest_editskill_thu_muc_rieng
+2026-10-22T06:20:59.8906782Z   fixture_MODULE_PY_quay_lai_ten_chet OK  giet 2/2: t129_probe_qua_han_la_CHUA_DO_khong_phai_THIEU, t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai
+2026-10-22T06:20:59.8908400Z   ban_sao_roi_tha_ca_kho_that  OK  giet 1/1: t142_ban_sao_roi_chi_duoc_tha_khi_goc_vang_git
+2026-10-22T06:20:59.8910037Z   headline_lay_tong_lam_so_ca_da_chay OK  giet 2/2: t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua, t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua
+2026-10-22T06:20:59.8911549Z   pid_gia_quay_ve_ghi_cung     OK  giet 1/1: r766_t81_khong_phu_thuoc_pid_cua_luot_chay
+2026-10-22T06:20:59.8912655Z   wp802_runner_bo_tra_con_tro_hook OK  giet 1/1: r802_runner_tra_lai_con_tro_nguoi_goi
+2026-10-22T06:20:59.8914970Z   wp802_runner_bo_tra_con_tro_yaml OK  giet 1/1: r802_runner_tra_lai_con_tro_nguoi_goi
+2026-10-22T06:20:59.8916306Z   g8_fixture_chep_nguyen_moi_truong KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g8_hook_scrub_kin_voi_bash_env)
+2026-10-22T06:20:59.8919316Z   wp858_goc_tam_bo_kiem_to_tien OK  giet 1/1: r858_goc_tam_tranh_to_tien_co_git
+2026-10-22T06:20:59.8920009Z 
+2026-10-22T06:20:59.8920750Z DOT BIEN: 216/216 dat  (84 khong do duoc tren nen nay)
+2026-10-22T06:21:00.0869681Z ##[group]Run $ban = git status --porcelain
+2026-10-22T06:21:00.0870409Z [36;1m$ban = git status --porcelain[0m
+2026-10-22T06:21:00.0871041Z [36;1mif ($ban) { Write-Host "BAN:`n$ban"; exit 1 }[0m
+2026-10-22T06:21:00.0871649Z [36;1mWrite-Host 'sach'[0m
+2026-10-22T06:21:00.0971182Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:21:00.0971623Z env:
+2026-10-22T06:21:00.0971960Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.0972536Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:21:00.0973076Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.0973547Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.0974037Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.0974420Z ##[endgroup]
+2026-10-22T06:21:00.8717555Z sach
+2026-10-22T06:21:00.9693429Z ##[group]Run # Tren Linux da do: 0 khi du cong cu, 12 khi thieu, o CA BA kieu cat ong.
+2026-10-22T06:21:00.9694257Z [36;1m# Tren Linux da do: 0 khi du cong cu, 12 khi thieu, o CA BA kieu cat ong.[0m
+2026-10-22T06:21:00.9694798Z [36;1m# Neu Windows khac, hook doc ma nay se bao "THIEU CONG CU" oan.[0m
+2026-10-22T06:21:00.9695198Z [36;1m#[0m
+2026-10-22T06:21:00.9695588Z [36;1m# BAN DAU viet `... doctor | Invoke-Expression $cat | Out-Null` de dung MOT dong[0m
+2026-10-22T06:21:00.9696182Z [36;1m# cho ca hai kieu cat. SAI, va sai theo kieu te nhat: `Invoke-Expression` khong[0m
+2026-10-22T06:21:00.9696719Z [36;1m# nhan doi tuong tu ONG (tham so -Command khong ValueFromPipeline), nen buoc chet[0m
+2026-10-22T06:21:00.9697305Z [36;1m# ngay o vong lap dau voi "The input object cannot be bound to any parameters".[0m
+2026-10-22T06:21:00.9697897Z [36;1m# He qua: buoc nay DO tu lan chay dau, va vi no dung TRUOC ba probe con lai nen[0m
+2026-10-22T06:21:00.9699040Z [36;1m# cp1258 / t62 / taskkill CHUA TUNG chay lan nao tren Windows. Mot dong pwsh viet[0m
+2026-10-22T06:21:00.9699627Z [36;1m# mu (khong co Windows de thu) da khoa toan bo phan do Windows lai. Nay dung[0m
+2026-10-22T06:21:00.9700167Z [36;1m# scriptblock: dang duy nhat vua tham so hoa duoc kieu cat, vua khong dinh[0m
+2026-10-22T06:21:00.9700608Z [36;1m# Invoke-Expression.[0m
+2026-10-22T06:21:00.9701011Z [36;1m# DO DUOC O LUOT DAU TIEN BUOC NAY THUC SU CHAY (13-08), va ket qua bat ngo:[0m
+2026-10-22T06:21:00.9701529Z [36;1m#     du cong cu  | Select-Object -First 1 -> rc=   (RONG)[0m
+2026-10-22T06:21:00.9701991Z [36;1m#     du cong cu  | Out-Null               -> rc=0[0m
+2026-10-22T06:21:00.9702442Z [36;1m#     thieu cong cu | Select -First 1      -> rc=0  (mong doi 12)[0m
+2026-10-22T06:21:00.9703013Z [36;1m# `Select-Object -First N` CAT ONG bang StopUpstreamCommandsException. Khi do[0m
+2026-10-22T06:21:00.9703633Z [36;1m# PowerShell KHONG dat $LASTEXITCODE cho lenh native bi cat: lan dau no con[0m
+2026-10-22T06:21:00.9704207Z [36;1m# $null (in ra rong), lan sau no GIU NGUYEN gia tri cua lenh TRUOC do (0) - nen[0m
+2026-10-22T06:21:00.9704718Z [36;1m# ca "thieu cong cu" bao 0 trong khi doctor that su tra 12.[0m
+2026-10-22T06:21:00.9705241Z [36;1m# => Tren Windows, $LASTEXITCODE SAU mot ong bi cat KHONG PHAI ma cua tien trinh[0m
+2026-10-22T06:21:00.9705854Z [36;1m#    con. Khang dinh gi qua kenh do la khang dinh thu PowerShell khong cung cap:[0m
+2026-10-22T06:21:00.9706400Z [36;1m#    cho rc=0 thi la cong XANH GIA, cho rc=12 thi la cong DO OAN. Ca hai deu sai.[0m
+2026-10-22T06:21:00.9706951Z [36;1m# Nen o day CHI khang dinh qua ong chay TRON VEN (`Out-Null`), con kieu cat giua[0m
+2026-10-22T06:21:00.9707461Z [36;1m# chung thi IN RA de lam ho so chu KHONG lay lam chot.[0m
+2026-10-22T06:21:00.9707970Z [36;1m# Duong cat-giua-chung van duoc do THAT, nhung boi `t74` trong bo phan chung: no[0m
+2026-10-22T06:21:00.9709605Z [36;1m# spawn con tu Python, doc dung 1 byte roi dong ong, va doc returncode TRUC TIEP[0m
+2026-10-22T06:21:00.9710568Z [36;1m# tu tien trinh con - kenh do khong di qua PowerShell nen khong dinh be nay.[0m
+2026-10-22T06:21:00.9711519Z [36;1m# `t74` DA XANH tren windows-latest, tuc bao dam "dut ong khong nuot ma that" van[0m
+2026-10-22T06:21:00.9712453Z [36;1m# co bang chung tren nen nay; buoc probe nay khong phai cho do.[0m
+2026-10-22T06:21:00.9713131Z [36;1m$loi = 0[0m
+2026-10-22T06:21:00.9713643Z [36;1mpython .claude/dev/launcher.py doctor | Out-Null[0m
+2026-10-22T06:21:00.9714253Z [36;1m$ma = $LASTEXITCODE[0m
+2026-10-22T06:21:00.9714874Z [36;1mWrite-Host "CHOT | du cong cu   | Out-Null -> rc=$ma (mong doi 0)"[0m
+2026-10-22T06:21:00.9715527Z [36;1mif ($ma -ne 0) { $loi++ }[0m
+2026-10-22T06:21:00.9715920Z [36;1m# Thieu cong cu: thu hep PATH con moi thu muc python => mat git[0m
+2026-10-22T06:21:00.9716876Z [36;1m$duong = Split-Path (Get-Command python).Source[0m
+2026-10-22T06:21:00.9717499Z [36;1m$cu = $env:PATH[0m
+2026-10-22T06:21:00.9721165Z [36;1mtry {[0m
+2026-10-22T06:21:00.9721692Z [36;1m  $env:PATH = $duong[0m
+2026-10-22T06:21:00.9722265Z [36;1m  python .claude/dev/launcher.py doctor | Out-Null[0m
+2026-10-22T06:21:00.9722863Z [36;1m  $ma = $LASTEXITCODE[0m
+2026-10-22T06:21:00.9723534Z [36;1m  Write-Host "CHOT | thieu cong cu | Out-Null -> rc=$ma (mong doi 12)"[0m
+2026-10-22T06:21:00.9724234Z [36;1m  if ($ma -ne 12) { $loi++ }[0m
+2026-10-22T06:21:00.9724847Z [36;1m} finally { $env:PATH = $cu }[0m
+2026-10-22T06:21:00.9725321Z [36;1m# HO SO (khong phai chot): chung minh ngu nghia PowerShell bang MOC NHAN BIET, de[0m
+2026-10-22T06:21:00.9725901Z [36;1m# lan sau khong ai tuong day la loi cua launcher roi di "va" nham cho.[0m
+2026-10-22T06:21:00.9726487Z [36;1m# Dat $LASTEXITCODE = 77 truoc. Neu sau khi chay lenh native BI CAT ONG ma no VAN[0m
+2026-10-22T06:21:00.9727028Z [36;1m# bang 77, thi da chung minh: PowerShell khong he dat lai no.[0m
+2026-10-22T06:21:00.9727431Z [36;1m$global:LASTEXITCODE = 77[0m
+2026-10-22T06:21:00.9727893Z [36;1mpython .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null[0m
+2026-10-22T06:21:00.9728706Z [36;1mWrite-Host "ho so| du cong cu | Select -First 1 -> LASTEXITCODE=$LASTEXITCODE (dat truoc = 77; van 77 nghia la PowerShell KHONG dat lai)"[0m
+2026-10-22T06:21:00.9729396Z [36;1mif ($loi) { Write-Host "CO $loi truong hop SAI"; exit 1 }[0m
+2026-10-22T06:21:00.9729850Z [36;1m# BUOC PHAI THOAT TUONG MINH. Da tra gia: buoc nay tung DO voi $loi = 0 va ca[0m
+2026-10-22T06:21:00.9730401Z [36;1m# ba phep do ĐÚNG. Ly do — chinh cai bay no vua chung minh: dong cuoi cua buoc[0m
+2026-10-22T06:21:00.9730922Z [36;1m# la mot lenh native trong ONG BI CAT, nen `$LASTEXITCODE` con nguyen moc 77 va[0m
+2026-10-22T06:21:00.9731444Z [36;1m# `$?` la $false; runner goi `pwsh -command ". 'script'"` roi lay ma thoat tu do[0m
+2026-10-22T06:21:00.9731978Z [36;1m# ⇒ moc DIEN GIAI thanh phan quyet. Phan quyet cua buoc la `$loi`, khong phai[0m
+2026-10-22T06:21:00.9732489Z [36;1m# tan du cua lenh cuoi. (Lan thu tu cung mot ho benh trong dot nay: minh chung[0m
+2026-10-22T06:21:00.9732903Z [36;1m# cua mot bay lai tro thanh chinh bay do.)[0m
+2026-10-22T06:21:00.9733171Z [36;1mexit 0[0m
+2026-10-22T06:21:00.9816011Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:21:00.9816561Z env:
+2026-10-22T06:21:00.9817341Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.9818139Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:21:00.9818958Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.9819667Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.9820352Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:00.9821212Z ##[endgroup]
+2026-10-22T06:21:04.2807126Z CHOT | du cong cu   | Out-Null -> rc=0 (mong doi 0)
+2026-10-22T06:21:05.1780779Z CHOT | thieu cong cu | Out-Null -> rc=12 (mong doi 12)
+2026-10-22T06:21:07.6923008Z ho so| du cong cu | Select -First 1 -> LASTEXITCODE=77 (dat truoc = 77; van 77 nghia la PowerShell KHONG dat lai)
+2026-10-22T06:21:07.7669165Z ##[group]Run chcp 1258
+2026-10-22T06:21:07.7669665Z [36;1mchcp 1258[0m
+2026-10-22T06:21:07.7670022Z [36;1mmkdir "Quoc hoi ban do"[0m
+2026-10-22T06:21:07.7670473Z [36;1mgit init -q "Quoc hoi ban do\kho"[0m
+2026-10-22T06:21:07.7671278Z [36;1mgit -C "Quoc hoi ban do\kho" -c user.email=a@b -c user.name=c commit -q --allow-empty -m x[0m
+2026-10-22T06:21:07.7672323Z [36;1mpython .claude\dev\launcher.py check --workspace "Quoc hoi ban do\kho"[0m
+2026-10-22T06:21:07.7673305Z [36;1mrem CHOT %ERRORLEVEL% NGAY, truoc khi `echo` chay: cmd cap nhat ERRORLEVEL theo[0m
+2026-10-22T06:21:07.7674290Z [36;1mrem lenh gan nhat, nen doc no SAU mot cau echo la doc ma cua echo chu khong con[0m
+2026-10-22T06:21:07.7675722Z [36;1mrem la ma cua python. Chot roi so bang bien rieng thi khong con cho cai nay tro.[0m
+2026-10-22T06:21:07.7676439Z [36;1mset MA=%ERRORLEVEL%[0m
+2026-10-22T06:21:07.7676806Z [36;1mecho rc=%MA% (mong doi 0)[0m
+2026-10-22T06:21:07.7677322Z [36;1mif not "%MA%"=="0" exit /b 1[0m
+2026-10-22T06:21:07.7724626Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+2026-10-22T06:21:07.7725240Z env:
+2026-10-22T06:21:07.7725695Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:07.7726530Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:21:07.7727377Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:07.7728123Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:07.7728859Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:07.7729456Z ##[endgroup]
+2026-10-22T06:21:07.8088787Z Active code page: 1258
+2026-10-22T06:21:08.4434673Z workspace : D:\a\tra-luat\tra-luat\Quoc hoi ban do\kho
+2026-10-22T06:21:08.4435549Z kho       : (khong co remote)
+2026-10-22T06:21:08.4436106Z commit goc: 9a2619a
+2026-10-22T06:21:08.4436663Z HEAD      : 9a2619ad6e3f3833716c38f29491a615e3dafe5d
+2026-10-22T06:21:08.4437257Z ref       : master
+2026-10-22T06:21:08.4437657Z worktree  : sach
+2026-10-22T06:21:08.4438077Z KET LUAN  : QUA HET CHOT
+2026-10-22T06:21:08.4625729Z rc=0 (mong doi 0)
+2026-10-22T06:21:08.4874151Z ##[group]Run python -c @"
+2026-10-22T06:21:08.4874499Z [36;1mpython -c @"[0m
+2026-10-22T06:21:08.4874737Z [36;1mimport importlib.util, sys[0m
+2026-10-22T06:21:08.4875150Z [36;1msp = importlib.util.spec_from_file_location('LT', '.claude/dev/launcher_test.py')[0m
+2026-10-22T06:21:08.4875764Z [36;1mM = importlib.util.module_from_spec(sp); sys.modules['LT'] = M; sp.loader.exec_module(M)[0m
+2026-10-22T06:21:08.4876277Z [36;1mfn = next(f for f in M.CA if f.__name__.startswith('t62_'))[0m
+2026-10-22T06:21:08.4876609Z [36;1mtry:[0m
+2026-10-22T06:21:08.4876780Z [36;1m    kq = fn()[0m
+2026-10-22T06:21:08.4876986Z [36;1m    if isinstance(kq, str):[0m
+2026-10-22T06:21:08.4877287Z [36;1m        print('t62: BO QUA BAT NGO ->', kq); sys.exit(1)[0m
+2026-10-22T06:21:08.4877609Z [36;1m    print('t62: QUA')[0m
+2026-10-22T06:21:08.4877845Z [36;1mexcept AssertionError as e:[0m
+2026-10-22T06:21:08.4878118Z [36;1m    print('t62: DO ->', e); sys.exit(1)[0m
+2026-10-22T06:21:08.4878408Z [36;1m"@[0m
+2026-10-22T06:21:08.4952817Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:21:08.4953181Z env:
+2026-10-22T06:21:08.4953447Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:08.4953932Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:21:08.4954397Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:08.4955010Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:08.4955408Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:08.4955731Z ##[endgroup]
+2026-10-22T06:21:13.1805178Z t62: QUA
+2026-10-22T06:21:13.3281739Z ##[group]Run # Vong 2 ket luan "Access denied" la han che sandbox codex chu khong phai
+2026-10-22T06:21:13.3282821Z [36;1m# Vong 2 ket luan "Access denied" la han che sandbox codex chu khong phai[0m
+2026-10-22T06:21:13.3283678Z [36;1m# Windows noi chung. Day la phep do TRUC TIEP khang dinh do.[0m
+2026-10-22T06:21:13.3284556Z [36;1m# `Start-Process -ArgumentList 'a','b'` NOI cac phan tu bang DAU CACH ma[0m
+2026-10-22T06:21:13.3285475Z [36;1m# KHONG dat dau nhay. Ban dau viet -ArgumentList '-c','import time;...' nen[0m
+2026-10-22T06:21:13.3286377Z [36;1m# python nhan `-c import time;time.sleep(60)`, tach ra thanh `-c` `import`[0m
+2026-10-22T06:21:13.3287247Z [36;1m# `time;...` => chay chuong trinh `import` => SyntaxError => CHET NGAY.[0m
+2026-10-22T06:21:13.3288139Z [36;1m# Mot giay sau taskkill bao rc=128 "The process not found". Suot thoi gian[0m
+2026-10-22T06:21:13.3289037Z [36;1m# buoc nay chi IN ket qua (khong khang dinh gi) thi loi do vo hinh; codex[0m
+2026-10-22T06:21:13.3289888Z [36;1m# sieu no thanh chot o vong 7 va no lo ra ngay luot dau. Truyen MOT chuoi[0m
+2026-10-22T06:21:13.3290557Z [36;1m# co dau nhay long vao la dung.[0m
+2026-10-22T06:21:13.3291332Z [36;1m$p = Start-Process python -ArgumentList '-c "import time; time.sleep(60)"' -PassThru[0m
+2026-10-22T06:21:13.3292123Z [36;1mStart-Sleep -Seconds 1[0m
+2026-10-22T06:21:13.3292742Z [36;1m# KIEM TIEN DE truoc khi do (nep t69 vong 5): neu tien trinh moi da chet thi[0m
+2026-10-22T06:21:13.3293631Z [36;1m# taskkill khong do duoc gi ca, va "rc!=0" luc do la loi FIXTURE chu khong[0m
+2026-10-22T06:21:13.3294434Z [36;1m# phai ket luan ve taskkill. Phai tach hai chuyen do ra.[0m
+2026-10-22T06:21:13.3295209Z [36;1mif (-not (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)) {[0m
+2026-10-22T06:21:13.3296175Z [36;1m  Write-Host "FIXTURE HONG: tien trinh moi sinh da chet truoc khi do - KHONG DO DUOC"[0m
+2026-10-22T06:21:13.3296922Z [36;1m  exit 1[0m
+2026-10-22T06:21:13.3297213Z [36;1m}[0m
+2026-10-22T06:21:13.3297540Z [36;1m$ra = & taskkill /PID $p.Id /T /F 2>&1[0m
+2026-10-22T06:21:13.3298009Z [36;1m$ma = $LASTEXITCODE[0m
+2026-10-22T06:21:13.3298412Z [36;1mWrite-Host "taskkill rc=$ma : $ra"[0m
+2026-10-22T06:21:13.3299176Z [36;1mStart-Sleep -Seconds 1[0m
+2026-10-22T06:21:13.3299805Z [36;1m$con = Get-Process -Id $p.Id -ErrorAction SilentlyContinue[0m
+2026-10-22T06:21:13.3300506Z [36;1mWrite-Host "tien trinh con song? $([bool]$con)"[0m
+2026-10-22T06:21:13.3301107Z [36;1mif ($con) { Stop-Process -Id $p.Id -Force }[0m
+2026-10-22T06:21:13.3301637Z [36;1mif ($ma -ne 0 -or $con) { exit 1 }[0m
+2026-10-22T06:21:13.3302061Z [36;1mexit 0[0m
+2026-10-22T06:21:13.3406980Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-22T06:21:13.3407576Z env:
+2026-10-22T06:21:13.3408029Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:13.3408859Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.13.16\x64/lib/pkgconfig
+2026-10-22T06:21:13.3409664Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:13.3410379Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:13.3411091Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.13.16\x64
+2026-10-22T06:21:13.3411640Z ##[endgroup]
+2026-10-22T06:21:14.9507293Z taskkill rc=0 : SUCCESS: The process with PID 6440 (child process of PID 4792) has been terminated. SUCCESS: The process with PID 4792 (child process of PID 5708) has been terminated.
+2026-10-22T06:21:15.9631586Z tien trinh con song? False
+2026-10-22T06:21:16.0414003Z Post job cleanup.
+2026-10-22T06:21:16.2195344Z (node:1764) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T06:21:16.2197774Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T06:21:16.2547701Z Post job cleanup.
+2026-10-22T06:21:16.5410695Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-22T06:21:16.6047209Z git version 2.56.0.windows.2
+2026-10-22T06:21:16.6280314Z Copying 'C:\Users\runneradmin\.gitconfig' to 'D:\a\_temp\033fe90b-0570-4d0e-8b32-73b8b30e7882\.gitconfig'
+2026-10-22T06:21:16.6287840Z Temporarily overriding HOME='D:\a\_temp\033fe90b-0570-4d0e-8b32-73b8b30e7882' before making global git config changes
+2026-10-22T06:21:16.6310148Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T06:21:16.6348392Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\tra-luat\tra-luat
+2026-10-22T06:21:16.7241099Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T06:21:16.7907308Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-22T06:21:17.4754673Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T06:21:17.5135658Z http.https://github.com/.extraheader
+2026-10-22T06:21:17.5210261Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-10-22T06:21:17.5642901Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-22T06:21:18.2193976Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T06:21:18.2638862Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-22T06:21:19.0053469Z Cleaning up orphan processes
+2026-10-22T06:21:19.0510098Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

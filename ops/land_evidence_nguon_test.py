@@ -245,10 +245,13 @@ def c09_l5_mien_tru_theo_bam():
         m.MIEN_TRU_CUTOVER[TEN] = hashlib.sha256(hs.encode()).hexdigest()
         rc, ra = kiem(m, goc)
         bang(rc == 0 and "1/1 miễn trừ" in ra, f"băm khớp ⇒ miễn trừ có ghi nhận: rc={rc} {ra[-200:]}")
-        (goc / "ops/land" / TEN).write_text(hs + " ", encoding="utf-8", newline="")
+        def ghi(nd):   # wp871 P3 (Codex lượt 1): CRLF cũng "lệch hash", nên đo chính byte đã ghi
+            (goc / "ops/land" / TEN).write_text(nd, encoding="utf-8", newline="")
+            bang((goc / "ops/land" / TEN).read_bytes() == nd.encode(), f"byte ghi phải đúng nguyên văn (LF): {nd!r}")
+        ghi(hs + " ")
         rc, ra = kiem(m, goc)
         bang(rc == 1 and "MẤT MIỄN TRỪ" in ra and "0/1 miễn trừ" in ra, f"lệch một byte ⇒ kiểm đủ luật: rc={rc} {ra[-300:]}")
-        (goc / "ops/land" / TEN).write_text("x: 'measured — a.json'\n", encoding="utf-8", newline="")
+        ghi("x: 'measured — a.json'\n")
         rc, ra = kiem(m, goc)
         bang(rc == 0 and "0/1 miễn trừ" in ra, f"mất miễn trừ mà vẫn ĐẠT luật ⇒ xanh: rc={rc} {ra[-300:]}")
 

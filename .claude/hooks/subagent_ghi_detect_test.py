@@ -1622,7 +1622,12 @@ def _xoa_cay(p):
     Go bit chi doc roi thu lai; con loi khac (vd tep con bi giu tren Windows) thi doi ngan va
     thu lai toan cay, het lan thi de loi bay ra.
     """
-    def go_chi_doc(ham, duong, _loi):
+    def go_chi_doc(ham, duong, loi):
+        loi = loi[1] if isinstance(loi, tuple) else loi   # `onerror` trao exc_info, `onexc` trao chinh loi
+        # CHI loi chi-doc khi XOA moi go bit roi thu lai; con lai (vd `os.open` can them doi so,
+        # quyen THU MUC tren Linux) thi tra NGUYEN loi goc — review Codex #854 P3.
+        if ham not in (os.unlink, os.remove, os.rmdir) or not isinstance(loi, PermissionError):
+            raise loi
         os.chmod(duong, stat.S_IWRITE)
         ham(duong)
 
@@ -1647,11 +1652,21 @@ def chay_trong_goc_tam():
     TU DO voi ly do ro, khong doi registry phat hien mot thu muc con sot ma khong biet vi sao.
     """
     goc, cu = tempfile.mkdtemp(prefix="tl329-bo-"), tempfile.tempdir
+    # `tempfile.tempdir` chi doi tien trinh NAY. Tien trinh con (hook, ke ca dot bien m9 khong doc
+    # `TL_SUBAGENT_SNAP_DIR`) doc bien moi truong, nen ba bien cung phai tro vao goc — review Codex
+    # #854 P2 do duoc `tl-subagent-snap/` + 7 JSON con sot NGOAI goc. Luu ca trang thai VANG de tra lai.
+    bien_cu = {k: os.environ.get(k) for k in ("TMPDIR", "TEMP", "TMP")}
     tempfile.tempdir = goc
+    os.environ.update(dict.fromkeys(bien_cu, goc))
     try:
         rc = chay()
     finally:
         tempfile.tempdir = cu
+        for k, v in bien_cu.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
         try:
             _xoa_cay(goc)
             loi = f"{goc} con" if os.path.exists(goc) else ""

@@ -43,7 +43,9 @@ pre_merge_checks:
   - {name: 'executor cross-review Codex CLI luot 3/3', sha: bf671b0524a8472eb0b0fcd1d75ea3a89d1f6973, conclusion: 'approve, P0=0 P1=0 P2=0 P3=0', nguon: [verdicts/luot3-VERDICT.md, verdicts/luot3-run.json], ghi_chu: 'measured — verdicts/luot3-run.json: thoi_luong_giay 6623.357, ma_thoat 0. a08033f = merge(bf671b0, origin/master 637f780).'}
   - {name: 'executor cross-review Codex CLI luot 1-2', conclusion: 'luot 1 (7302ea3) P2=4 · luot 2 (19fdfa6) P2=3; khong luot nao co P0/P1', nguon: [verdicts/luot1-VERDICT.md, verdicts/luot2-VERDICT.md, verdicts/luot1-run.json, verdicts/luot2-run.json, verdicts/README-exec-head.md]}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-866.json, readback-review-comments-866.json]}
-post_merge_checks: CHO_DO
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39756827661, run_attempt: 1, sha: c021e4768670ee493202edd1d53d97b15b9c2ed0, conclusion: success, jobs: '23/23 success (ubuntu-latest)', kiem_gate: 'measured — do-lai-nguon-20261022/kiem-gate-c021e47.txt: suite 107745715399, 23 ten, rc=0', nguon: [readback-run-39756827661.json, readback-jobs-39756827661.json, readback-check-runs-c021e47-all.json]}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA', run_id: 39756827721, run_attempt: 1, sha: c021e4768670ee493202edd1d53d97b15b9c2ed0, conclusion: success, jobs: '2/2 success (ubuntu-latest, windows-latest)', kiem_gate: 'measured — do-lai-nguon-20261022/kiem-gate-c021e47.txt: suite 107745715572, 2 ten, rc=0', nguon: [readback-run-39756827721.json, readback-jobs-39756827721.json]}
 bookkeeping:
   - {item: 'thu hoi lease wp856-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'dong Issue #856', ket_qua: 'CHUA LAM — de chu kho quyet vi landed false (xem landed_dieu_kien).'}
@@ -90,7 +92,7 @@ trang_thai_packet:
     c021e47 (cha 5f288ea + 9c18ba7; do-lai-nguon-20261022/merge-va-diff.txt), merge commit. Diff so base: 3 tep, +1091/-11.
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA c021e47: xem post_merge_checks; provenance §10.2.2 CHUA DU (checkout
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA c021e47: GitHub ket luan ci.yml 23/23 va launcher-windows 2/2 success (post_merge_checks), NHUNG provenance §10.2.2 CHUA DU (checkout
     SHA/parents/tree tu log job, workflow definition, gate output KHONG luu — chi readback run/job/check-run va kiem-gate).
     CHUA DAT. (2) lease: het han tu nhien, NGƯỜI_GIỮ 0 cho write set — DAT. (3) bookkeeping: #856 CHUA dong. (4) review neo
     DUNG authorized_head_sha 9c18ba7: KHONG CO — connector sach tren a08033f, CLI approve tren bf671b0; 9fcd49c (CI) va

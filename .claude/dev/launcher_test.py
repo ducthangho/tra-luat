@@ -8534,7 +8534,7 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
     vo, env = _wp802_bash_env()
     env.update(bien, CONG_CU_NEN=nen, GITHUB_PATH=str(gp),
                PATH=os.pathsep.join([str(dau_d), str(bin_), env.get("PATH", "")]))
-    env.update(env_them or {})
+    [env.pop(k, None) if v is None else env.__setitem__(k, v) for k, v in (env_them or {}).items()]  # None ⇒ bỏ biến
     lenh = [vo, str(ops / "cai_cong_cu.sh"), "--bat-buoc" if bang_ke else ten]
     if truc_tiep:
         import yaml
@@ -8569,9 +8569,10 @@ def _wp858_cai_chon_ban_chay_duoc(nen):
             with San() as s:
                 p, _gp, _uv, _d = _wp858_chay_cai(s, ten, nen, xau, truc_tiep=True)
                 bang(p.returncode != 0, f"{nen}/{ten}: cong thuc rc=0 khi khong ung vien nao chay duoc ({xau!r})")
-        with San() as s:   # F858-06: KHÔNG có $GITHUB_PATH thì ứng viên Windows vẫn phải qua `cygpath -u`
-            p, gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], env_them={"GITHUB_PATH": ""})
-            bang(p.returncode == 0 and '"DAT"' in p.stdout, f"{nen}/{ten}: khong GITHUB_PATH thi khong DAT rc={p.returncode}")
+        for gp_v in ("", None):   # F858-06/07: $GITHUB_PATH rỗng / VẮNG (dưới `set -u`) ⇒ vẫn DAT, Windows vẫn qua `-u`
+            with San() as s:
+                p, gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], env_them={"GITHUB_PATH": gp_v})
+                bang(p.returncode == 0 and '"DAT"' in p.stdout, f"{nen}/{ten}: GITHUB_PATH={gp_v!r} khong DAT rc={p.returncode}")
         # F858-01/04: ghi $GITHUB_PATH hoặc `cygpath` hỏng ⇒ installer THẬT ≠ 0 (`errexit` tắt trong `$(eval ...)`).
         hong_ghi = [dict(gp_thu_muc=True)] + ([dict(env_them={"CYGPATH_W_HONG": "1"}),
                                                dict(env_them={"CYGPATH_U_HONG": "1"})] if nen == "windows" else [])
@@ -8693,7 +8694,7 @@ def r858_hinh_dang_cong_thuc_cai():
     than = than[:than.index("\n}\n")]
     for can in ('if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then',
                 'PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten"',
-                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'printf \'\\n%s\\n\' /dev/null', 'printf \'\\n%s\\n\' "$dich"',
+                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'printf \'\\n%s\\n\' /dev/null', '  if [ -n "${GITHUB_PATH:-}" ]; then', 'printf \'\\n%s\\n\' "$dich"',
                 '    if [ -n "$win" ]; then\n      d="$(cygpath -u "$d")"',
                 'd="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
                 'printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || {', '\'$ten\' chay duoc" >&2; return 1; }'):
@@ -10983,6 +10984,8 @@ DOT_BIEN_HOOK = [
     ("wp858_sh_cygpath_u_chi_khi_ghi_path",
      ('    if [ -n "$win" ]; then\n      d="$(cygpath -u', '    if [ -n "$win" ] && [ -n "${GITHUB_PATH:-}" ]; then\n      d="$(cygpath -u'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp858_sh_github_path_vang_khong_mac_dinh", ('  if [ -n "${GITHUB_PATH:-}" ]; then', '  if [ -n "$GITHUB_PATH" ]; then'),
+     ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_selftest_editskill_ten_co_dinh",
      ('    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))\n    _esf = _esd / "_selftest_editskill.py"',
       '    _esd = Path(_tfx.gettempdir())\n    _esf = _esd / "_selftest_editskill.py"'),

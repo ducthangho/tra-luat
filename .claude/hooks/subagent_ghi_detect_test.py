@@ -18,9 +18,11 @@ import json
 import os
 import pathlib
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
+import time
 
 HERE = pathlib.Path(__file__).resolve().parent
 HOOK = HERE / "subagent_ghi_detect.py"
@@ -1610,5 +1612,56 @@ def chay():
     return 0 if dat else 1
 
 
+def _xoa_cay(p):
+    """Xoa cay `p`, KE CA tep CHI DOC; khong xoa duoc thi NEM, khong nuot (#854).
+
+    Git ghi `.git/objects/**` chi doc. Linux xoa duoc tep chi doc (quyen nam o THU MUC), Windows
+    thi khong: `shutil.rmtree` nem `PermissionError` — va 43 cho `ignore_errors=True` trong bo nay
+    NUOT dung loi ay, de cay o lai trong `TMP` ma registry cap (`bo-*`), roi chot don tam cua
+    `.claude/dev/ci_dang_ky_test.py` bao DO "don thu muc tam that bai" du bo `rc=0`.
+    Go bit chi doc roi thu lai; con loi khac (vd tep con bi giu tren Windows) thi doi ngan va
+    thu lai toan cay, het lan thi de loi bay ra.
+    """
+    def go_chi_doc(ham, duong, _loi):
+        os.chmod(duong, stat.S_IWRITE)
+        ham(duong)
+
+    kieu = {"onexc": go_chi_doc} if sys.version_info >= (3, 12) else {"onerror": go_chi_doc}
+    for lan in range(3):
+        try:
+            shutil.rmtree(p, **kieu)
+            return
+        except FileNotFoundError:
+            return
+        except OSError:
+            if lan == 2:
+                raise
+            time.sleep(0.5)
+
+
+def chay_trong_goc_tam():
+    """Chay bo trong mot GOC TAM RIENG, va don no bang `_xoa_cay` khi xong (#854).
+
+    Moi `mkdtemp`/`TemporaryDirectory` cua bo (ke ca cac kho git KHONG duoc don nhu
+    `tl329-gitcfg-`, `tl329-wt-`) roi vao goc nay qua `tempfile.tempdir`. Don hong thi bo
+    TU DO voi ly do ro, khong doi registry phat hien mot thu muc con sot ma khong biet vi sao.
+    """
+    goc, cu = tempfile.mkdtemp(prefix="tl329-bo-"), tempfile.tempdir
+    tempfile.tempdir = goc
+    try:
+        rc = chay()
+    finally:
+        tempfile.tempdir = cu
+        try:
+            _xoa_cay(goc)
+            loi = f"{goc} con" if os.path.exists(goc) else ""
+        except OSError as e:
+            loi = f"{type(e).__name__}: {e}"
+    if loi:
+        print(f"TONG: DO — don goc tam cua bo that bai: {loi}")
+        return rc or 1
+    return rc
+
+
 if __name__ == "__main__":
-    sys.exit(chay())
+    sys.exit(chay_trong_goc_tam())

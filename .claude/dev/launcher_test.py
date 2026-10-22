@@ -8297,12 +8297,11 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
-def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, batch=False, tiem=False,
+def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=False,
                        allexport=None, thu_tu=("rg", "bash")):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
     `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
-    (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `truc_tiep`: eval công
-    thức trong bash thay vì qua cai_cong_cu.sh, để đọc thư mục nó in. `venv`: thư mục ứng viên là `bin/` của một venv
+    (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `venv`: thư mục ứng viên là `bin/` của một venv
     THẬT không có PyYAML (F03). `batch`: chạy `--bat-buoc` thật trên bảng kê rút còn `rg` rồi `bash` (lấy NGUYÊN từ
     YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. `tiem`: khởi chạy qua `exec` (giữ PID) với
     `CAI_CONG_CU_PY_CUA=$$` và `PY` vô hướng trỏ Python của venv đã EXPORT sẵn (F04); installer giả ghi việc chúng thấy dấu
@@ -8350,12 +8349,7 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", truc_tiep=False, venv=False, bat
         thay_bash = subprocess.run([vo, "-c", "command -v bash"], env=env, capture_output=True, text=True,
                                    timeout=30).stdout.strip()
         bang(thay_bash == str(bin_ / "bash"), f"fixture ro: bash ten tran la {thay_bash!r}, khong phai {bin_ / 'bash'}")
-    if truc_tiep:
-        import yaml
-        env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["rg"]["cai"][nen]["lenh"]
-        lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); cd {shlex.quote(str(kho))}; eval "$LENH"']
-    else:
-        lenh = [vo] + (["-a"] if allexport == "co" else []) + [str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
+    lenh = [vo] + (["-a"] if allexport == "co" else []) + [str(ops / "cai_cong_cu.sh"), "--bat-buoc" if batch else "rg"]
     if allexport == "env":
         env["SHELLOPTS"] = "allexport"
     if tiem:
@@ -8441,13 +8435,13 @@ def _wp831_cai_rg_chon_ban_chay_duoc(nen):
                  f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
             bang(thay == ["ABSENT"] * (2 if batch else 1),
                  f"{nen}: installer gia khong duoc goi dung so lan / con thay dau (batch={batch}): {thay}")
-    # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục in ra phải
-    # là thư mục của bản tốt (`command -v`), không phải thư mục ứng viên mà checker đã bỏ qua.
+    # F01 (Codex lượt 1): tệp `rg` của ứng viên KHÔNG thực thi, một `rg` tốt khác đứng đầu PATH ⇒ thư mục ứng viên mà
+    # checker đã bỏ qua KHÔNG được chọn. wp868 (Q4): `rg` nay dùng bộ chọn chung — tên trần đã DAT ⇒ `GIU_PATH`, nên đo qua
+    # cai_cong_cu.sh: DAT và $GITHUB_PATH không nhận thư mục ứng viên (trước đây: dòng in cuối là thư mục bản tốt).
     with San() as s:
-        p, _gp, uv, truoc = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", dau="truoc", truc_tiep=True)
-        cuoi = (p.stdout.strip().splitlines() or [""])[-1]
-        bang(p.returncode == 0 and cuoi == str(truoc),
-             f"{nen}: ung vien khong thuc thi van bi chon: rc={p.returncode} in={cuoi!r}, mong {truoc} "
+        p, gp, uv, _truoc = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", dau="truoc")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == "",
+             f"{nen}: ung vien khong thuc thi van bi chon: rc={p.returncode} GITHUB_PATH={gp!r} "
              f"(ung vien {uv}) {p.stderr[-300:]}")
 
 
@@ -8489,8 +8483,8 @@ def _wp858_ung_vien(s, ten, nen):
 def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_tiep=False, cai_in=None,
                     env_them=None, gp_thu_muc=False):
     """NGUYÊN `<ten>.cai.<nen>` qua cai_cong_cu.sh (`--bat-buoc` khi có `bang_ke`). `tot`: thân `<ten>` ở ứng viên;
-    `dau`: `"hong"`/`"tot"`/None ở ĐẦU PATH; `them`: tệp thêm ở thư mục đầu; `truc_tiep`: eval công thức để đọc dòng IN
-    cuối; `cai_in`: stdout stub apt-get khi cài bash; `gp_thu_muc`: $GITHUB_PATH là thư mục. Trả (p, GITHUB_PATH, ứng viên, đầu)."""
+    `dau`: `"hong"`/`"tot"`/None ở ĐẦU PATH; `them`: tệp thêm ở thư mục đầu; `truc_tiep`: eval công thức (kênh kết quả
+    tạm, wp868) rồi in như reader: kênh có nội dung ⇒ in kênh (dòng cuối là thư mục chọn hoặc `GIU_PATH`), rỗng ⇒ stdout; `cai_in`: stdout stub apt-get khi cài bash; `gp_thu_muc`: $GITHUB_PATH là thư mục. Trả (p, GITHUB_PATH, ứng viên, đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cong_cu.py", "bash_nen.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
@@ -8542,7 +8536,9 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
                         re.M | re.S)
         env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"][ten]["cai"][nen]["lenh"]
         lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); GOC={shlex.quote(str(kho))}; cd "$GOC"\n'
-                + (ham.group(0) if ham else "") + '\neval "$LENH"']
+                + f'KENH_KQ={shlex.quote(str(s / "kenh_kq"))}; : > "$KENH_KQ"\n'
+                + (ham.group(0) if ham else "") + '\n( set +e; eval "$LENH" ) > "$KENH_KQ.out"\n'
+                + 'if [ -s "$KENH_KQ" ]; then cat "$KENH_KQ"; else cat "$KENH_KQ.out"; fi']
     p = subprocess.run(lenh, env=env, capture_output=True, text=True, timeout=180)
     return p, ("" if gp_thu_muc else gp.read_text().strip()), uv, dau_d
 
@@ -8665,8 +8661,8 @@ def r858_bat_buoc_bash_khong_dua_rg_hong_len_dau():
 
 @ca
 def r858_hinh_dang_cong_thuc_cai():
-    """Thuần Python, MỌI nền: 12 công thức gọi `chon_thu_muc_chay_duoc` đúng tên/`--win`/ứng viên Q2, lệnh cài giữ nguyên
-    (Q3); hàm trong cai_cong_cu.sh có đủ các chốt."""
+    """Thuần Python, MỌI nền: 15 công thức (wp868 N4: thêm `rg`) gọi `chon_thu_muc_chay_duoc` đúng tên/`--win`/ứng viên
+    Q2, lệnh cài giữ nguyên (Q3); hàm trong cai_cong_cu.sh có đủ các chốt."""
     import yaml
     d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))["cong_cu"]
     cai_dat = {"git": ("sudo apt-get install -y git", "brew install git", "choco install git --yes --no-progress"),
@@ -8674,12 +8670,16 @@ def r858_hinh_dang_cong_thuc_cai():
                           "choco install python --yes --no-progress"),
                "shellcheck": ("sudo apt-get install -y shellcheck", "brew install shellcheck",
                               "choco install shellcheck --yes --no-progress"),
-               "bash": ("sudo apt-get install -y bash", "brew install bash", "choco install git --yes --no-progress")}
+               "bash": ("sudo apt-get install -y bash", "brew install bash", "choco install git --yes --no-progress"),
+               "rg": ("sudo apt-get install -y ripgrep", "brew install ripgrep",
+                      "winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements "
+                      "--accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress")}
     git_win = ('"${ProgramFiles:-C:/Program Files}/Git/cmd" "${ProgramFiles:-C:/Program Files}/Git/bin" '
                '"${ProgramFiles:-C:/Program Files}/Git/usr/bin"')
     choco = '"${ChocolateyInstall:-C:/ProgramData/chocolatey}/bin"'
     ung = {"linux": lambda t: '"${CONG_CU_GOC:-}/usr/bin"', "macos": lambda t: '"$(brew --prefix)/bin"',
            "windows": lambda t: {"git": git_win, "bash": git_win, "shellcheck": choco,
+                                 "rg": '"$LOCALAPPDATA/Microsoft/WinGet/Links" ' + choco,
                                  "python": choco + ' "$(cygpath -u "${SystemDrive:-C:}/")"Python3*'}[t]}
     for ten, cai in cai_dat.items():
         for nen, lenh_cai in zip(("linux", "macos", "windows"), cai):
@@ -8694,7 +8694,9 @@ def r858_hinh_dang_cong_thuc_cai():
     than = than[:than.index("\n}\n")]
     for can in ('if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then',
                 'PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten"',
-                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'printf \'\\n%s\\n\' /dev/null', '  if [ -n "${GITHUB_PATH:-}" ]; then', 'printf \'\\n%s\\n\' "$dich"',
+                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', "printf 'GIU_PATH' > \"$KENH_KQ\" || {",
+                '  if [ -n "${GITHUB_PATH:-}" ]; then', "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || {",
+                'for d in "$@"; do', 'kiem-tra --chi "$ten" >/dev/null 2>&1; then dich="$d"; break; fi',
                 '    if [ -n "$win" ]; then\n      d="$(cygpath -u "$d")"',
                 'd="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
                 'printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || {', '\'$ten\' chay duoc" >&2; return 1; }'):
@@ -8713,6 +8715,142 @@ def r858_selftest_editskill_thu_muc_rieng():
     bang(re.search(r"^    _esd = Path\(_tfx\.mkdtemp\(", khoi, re.M) and "_esf = _esd / " in khoi,
          "tep tam edit-skill khong nam trong thu muc rieng mkdtemp")
     bang("_shx.rmtree(_esd, ignore_errors=True)" in khoi, "khoi edit-skill khong don thu muc rieng")
+
+
+# wp868 (CAI-TACH-KENH-KET-QUA): kết quả bộ chọn đi qua KÊNH RIÊNG, không qua stdout chung với trình cài. Ca hành vi
+# chạy NGUYÊN `rg.cai.linux` (hoặc công thức sân tạm) qua cai_cong_cu.sh, installer là stub; ca hình dạng thuần Python.
+def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None):
+    """`rg` qua cai_cong_cu.sh trong sân tạm: `rg` HỎNG đầu PATH và ở `xau/`, `rg` tốt ở `/usr/bin` dưới `CONG_CU_GOC`.
+    `apt`: thân stub `apt-get`; `lenh`: thay `rg.cai.linux` (mặc định NGUYÊN VĂN YAML đang đo); `ung_vien`: {thư mục: thân
+    `rg`} thêm. Trả (process, GITHUB_PATH, ứng viên `/usr/bin`, `xau`, giây chạy)."""
+    import yaml
+    kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
+    for t in ("cong_cu.py", "bash_nen.py"):
+        shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+    shutil.copy2(CAI_SH_DANG_DUNG, ops / "cai_cong_cu.sh")
+    d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))
+    rg = d["cong_cu"]["rg"]
+    if lenh is not None:
+        rg["cai"]["linux"]["lenh"] = lenh
+    (ops / "cong_cu.yaml").write_text(yaml.safe_dump({"schema_version": d["schema_version"], "cong_cu": {"rg": rg}},
+                                                     sort_keys=False, allow_unicode=True), encoding="utf-8")
+    uv, bin_, dau, xau = s / "goc" / "usr" / "bin", s / "bin", s / "dau", s / "xau"
+    tep = {uv / "rg": "echo 'ripgrep 14.1.0'", dau / "rg": _WP858_HONG, xau / "rg": _WP858_HONG,
+           bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": apt}
+    tep.update({Path(k) / "rg": v for k, v in (ung_vien or {}).items()})
+    for f, than in tep.items():
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(f"#!/bin/sh\n{than}\n")
+        f.chmod(0o755)
+    gp = s / "github_path"; gp.write_text("")
+    vo, env = _wp802_bash_env()
+    env.update(CONG_CU_NEN="linux", CONG_CU_GOC=str(s / "goc"), GITHUB_PATH=str(gp),
+               PATH=os.pathsep.join([str(dau), str(bin_), env.get("PATH", "")]))
+    t0 = time.monotonic()
+    p = subprocess.run([vo, str(ops / "cai_cong_cu.sh"), "rg"], env=env, capture_output=True, text=True, timeout=120)
+    return p, gp.read_text().strip(), uv, xau, time.monotonic() - t0
+
+
+@ca
+def r868_kenh_rieng_khong_doc_stdout_trinh_cai():
+    """N1: NGUYÊN `rg.cai.linux` qua cai_cong_cu.sh; trình cài (a) có tiến trình con ghi thư mục `xau` vào stdout SAU khi bộ
+    chọn đã ghi $GITHUB_PATH · (b) in `xau` KHÔNG kết thúc LF · (c) in `xau` ở dòng cuối ⇒ DAT, $GITHUB_PATH = ứng viên tốt.
+    (a)(b) ĐỎ trên nền 9e9a74b (`rg` dùng bộ chọn riêng, `tail -1` của stdout chung). (d) công thức in `xau` SAU bộ chọn
+    (tất định, Q2: kênh đã ghi thì stdout không còn là kết quả). Kèm: trình cài KHÔNG thấy kênh."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    for kieu in ("muon", "khong_lf", "dong_cuoi", "sau_bo_chon"):
+        with San() as s:
+            gp_f, mk, thay = s / "github_path", s / "muon.xong", s / "thay.log"
+            ghi_thay = f'echo "${{KENH_KQ:-ABSENT}} ${{TAM_CAI:-ABSENT}}" >> {shlex.quote(str(thay))}'
+            xau = shlex.quote(str(s / "xau"))
+            apt = {"muon": (f"( i=0; while [ ! -s {shlex.quote(str(gp_f))} ] && [ $i -lt 400 ]; do sleep 0.05; i=$((i+1)); "
+                            f"done; sleep 0.3; echo {xau}; echo xong > {shlex.quote(str(mk))} ) 2>/dev/null &"),
+                   "khong_lf": f"printf %s {xau}", "dong_cuoi": f"echo {xau}", "sau_bo_chon": ":"}[kieu]
+            lenh = ('sudo apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" && echo '
+                    + xau) if kieu == "sau_bo_chon" else None
+            p, gp, uv, _xau, _t = _wp868_chay(s, apt=f"{ghi_thay}\n{apt}\nexit 0", lenh=lenh)
+            if kieu == "muon":   # ca có ĐO: writer muộn PHẢI đã ghi (không thì không đo gì)
+                for _ in range(200):
+                    if mk.exists():
+                        break
+                    time.sleep(0.05)
+                bang(mk.exists(), f"KHONG DO DUOC: writer muon khong chay rc={p.returncode} {p.stderr[-300:]}")
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+                 f"{kieu}: stdout trinh cai bi doc lam thu muc: rc={p.returncode} GITHUB_PATH={gp!r} mong {uv} "
+                 f"{p.stdout[-200:]} {p.stderr[-300:]}")
+            bang(thay.read_text().split() == ["ABSENT", "ABSENT"], f"{kieu}: trinh cai thay kenh: {thay.read_text()!r}")
+
+
+@ca
+def r868_writer_muon_khong_lam_treo():
+    """N2: tiến trình con của trình cài giữ stdout mở 20 giây ⇒ cai_cong_cu.sh vẫn xong dưới 12 giây, DAT, đúng thư mục."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        pf = s / "giu.pid"
+        apt = (f"( sh -c 'echo $$ > {shlex.quote(str(pf))}; exec sleep 20'; echo {shlex.quote(str(s / 'xau'))} ) "
+               "2>/dev/null & exit 0")
+        try:
+            p, gp, uv, _xau, giay = _wp868_chay(s, apt=apt)
+        finally:
+            with contextlib.suppress(Exception):
+                os.kill(int(pf.read_text().strip()), signal.SIGKILL)
+        bang(pf.exists(), "KHONG DO DUOC: tien trinh giu stdout khong chay")
+        bang(giay < 12 and p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+             f"cai_cong_cu cho EOF stdout trinh cai: {giay:.1f}s rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+
+
+@ca
+def r868_khong_bo_chon_doc_dong_cuoi():
+    """N3: công thức KHÔNG gọi bộ chọn (như pip/cai_actionlint.sh) ⇒ kênh rỗng ⇒ dòng cuối stdout vẫn lên đầu PATH."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        uv = s / "goc" / "usr" / "bin"
+        p, gp, _uv, _xau, _t = _wp868_chay(s, apt="echo 'log trinh cai'; exit 0",
+                                           lenh=f"sudo apt-get install -y ripgrep && echo {shlex.quote(str(uv))}")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == "",
+             f"cong thuc khong bo chon mat duong lui dong cuoi: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+
+
+@ca
+def r868_vong_duyet_ung_vien():
+    """N5 (F858-08): ứng viên TỐT duy nhất ở vị trí 3 ⇒ chọn nó; hai ứng viên tốt (3, 4) ⇒ chọn cái ĐẦU và `rg` của ứng
+    viên 4 KHÔNG bị gọi (có `break`)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        u = [s / f"u{i}" for i in range(1, 5)]
+        nk = s / "u4.log"
+        p, gp, _uv, _xau, _t = _wp868_chay(
+            s, lenh="sudo apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg " + " ".join(shlex.quote(str(d)) for d in u),
+            ung_vien={u[0]: _WP858_HONG, u[1]: "exit 0", u[2]: "echo 'ripgrep 14.1.0'",
+                      u[3]: f"echo u4 >> {shlex.quote(str(nk))}; echo 'ripgrep 14.1.0'"})
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(u[2]),
+             f"vong duyet khong chon ung vien tot DAU TIEN (vi tri 3): rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+        bang(not nk.exists(), f"bo chon van goi ung vien sau khi da chon (thieu break): {nk.read_text() if nk.exists() else ''!r}")
+
+
+@ca
+def r868_hinh_dang_kenh_ket_qua():
+    """Thuần Python, MỌI nền: cai_cong_cu.sh tạo kênh RIÊNG (mktemp, không export, trap), chạy công thức bằng subshell
+    chuyển hướng vào TỆP (không `$( )` chờ EOF), đọc kênh trước, chỉ rơi về dòng cuối stdout khi kênh rỗng."""
+    sh = CAI_SH_DANG_DUNG.read_text(encoding="utf-8")
+    dau = sh.index("TAM_CAI=\"$(mktemp -d")
+    than = sh[dau:sh.index('"${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json')]
+    for can in ('TAM_CAI="$(mktemp -d "${TMPDIR:-/tmp}/cai_cong_cu.XXXXXX")"\ndeclare +x TAM_CAI\n',
+                "trap 'rm -rf -- \"$TAM_CAI\"' EXIT\n", 'KENH_KQ="$TAM_CAI/kq"\ndeclare +x KENH_KQ\n',
+                '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n', 'KQ="$(cat -- "$KENH_KQ"; printf x)"; KQ="${KQ%x}"\n',
+                '  GIU_PATH) DICH="" ;;\n', "  DICH$'\\n'?*) DICH=\"${KQ#DICH$'\\n'}\" ;;\n",
+                '    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"\n', '  *) echo "cai_cong_cu: kenh ket qua hong',
+                'rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ] && export PATH="$DICH:$PATH"\n'):
+        bang(can in than, f"cai_cong_cu.sh thieu chot kenh ket qua {can!r}")
+    bang("$(eval" not in than and "KET_QUA_CAI=\"$(eval" not in sh, "cong thuc lai chay trong $( ) (cho EOF stdout)")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -10899,34 +11037,20 @@ DOT_BIEN_HOOK = [
     ("wp802_hook_lenh_windows_lech_yaml", ("RG_CAI_WINDOWS='winget install", "RG_CAI_WINDOWS='choco install"),
      ["r802_bang_cai_rg_khop_cong_cu_yaml", "r802_hook_windows_khong_cai_in_dung_lenh"]),
     # Phần tử thứ tư "yaml" = đột biến ops/cong_cu.yaml thay vì hook (Codex lượt 1 F2).
-    ("wp802_yaml_bo_ung_vien_winget_links", (' "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")"', ''),
-     ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
-    # wp831: neo dài thêm vì linux/macos nay cũng gọi `kiem-tra --chi rg` (neo phải khớp ĐÚNG MỘT chỗ).
-    ("wp802_yaml_chon_ung_vien_chi_theo_ma_thoat", ('[ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
-                                                    '[ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
-     ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
+    # wp868 (N4): `rg.cai.windows` dùng bộ chọn chung — chọn theo `kiem-tra` và ghi $GITHUB_PATH nay là chốt của hàm
+    # (đột biến wp858_sh_*); bỏ hai đột biến YAML cũ đã mất neo (`wp802_yaml_chon_ung_vien_chi_theo_ma_thoat`,
+    # `wp802_yaml_khong_ghi_github_path`).
+    ("wp802_yaml_bo_ung_vien_winget_links", (' "$LOCALAPPDATA/Microsoft/WinGet/Links"', ''),
+     ["r802_cai_rg_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
     ("wp802_hook_windows_probe_hai_lan", ('if [ "$RG_WIN" = 1 ]; then', 'if [ "$RG_WIN" = 1 ] && ! co_chay rg; then'),
      ["r802_hook_windows_khong_cai_in_dung_lenh"]),
-    ("wp802_yaml_khong_ghi_github_path", ('cygpath -w "$RG_DICH" >> "$GITHUB_PATH"', 'true'),
-     ["r802_cai_rg_windows_chon_ban_chay_duoc"], "yaml"),
-    # wp831 (N1–N3 + F01): cùng luật; mỗi neo khớp ĐÚNG MỘT chỗ trong YAML (linux ≠ macos nhờ ứng viên đầu).
-    # Một đột biến cho MỖI chốt: ứng viên `/usr/bin` · ứng viên brew · bộ chọn kiem-tra · `-x` (F01) · điều kiện ghi
-    # $GITHUB_PATH. Cả năm đều KHÔNG đo được trên Windows (ca đích cần shell POSIX), mà sàn ≥70% đo được mỗi nền
-    # (`_dot_bien_du_san`) chỉ còn chỗ cho 5 (launcher-windows 39115887003: 9 đột biến wp831 ⇒ 197/285 = 69,1%).
-    # Việc CÓ ghi $GITHUB_PATH không có đột biến riêng; assertion `GITHUB_PATH == ứng viên` của chiều dương canh nó.
-    ("wp831_yaml_linux_bo_ung_vien_usrbin", ('for RG_D in "${CONG_CU_GOC:-}/usr/bin" ', 'for RG_D in '),
-     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_macos_bo_ung_vien_brew", ('for RG_D in "$(brew --prefix)/bin" ', 'for RG_D in '),
-     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_linux_chi_theo_ma_thoat", ('/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg',
-                                            '/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && PATH="$RG_D:$PATH" "$RG_D/rg" --version'),
-     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
-    ("wp831_yaml_macos_bo_kiem_thuc_thi", ('--prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && ',
-                                           '--prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && '),
-     ["r831_cai_rg_macos_chon_ban_chay_duoc"], "yaml"),
-    # Ghi $GITHUB_PATH vô điều kiện — đúng lỗi ci.yml run 39115659366. Neo kèm khoá dòng KẾ để linux ≠ macos.
-    ("wp831_yaml_linux_ghi_github_path_vo_dieu_kien", ('{ [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:', '{ [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:'),
-     ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
+    # wp831 (N1–N3 + F01): wp868 (N4) chuyển `rg.cai.linux/macos` sang bộ chọn chung nên ba đột biến YAML về `-x`, chọn
+    # theo mã thoát và ghi $GITHUB_PATH vô điều kiện mất neo — chốt ấy nay nằm trong hàm (wp858_sh_*). Giữ hai đột biến ứng
+    # viên, kèm ca hình dạng để đo được trên Windows.
+    ("wp831_yaml_linux_bo_ung_vien_usrbin", ('chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" ', 'chon_thu_muc_chay_duoc rg '),
+     ["r831_cai_rg_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
+    ("wp831_yaml_macos_bo_ung_vien_brew", ('chon_thu_muc_chay_duoc rg "$(brew --prefix)/bin" ', 'chon_thu_muc_chay_duoc rg '),
+     ["r831_cai_rg_macos_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
     # wp858: mỗi đột biến kèm ca hình dạng thuần Python để đo được cả Windows (sàn ≥70%, 39343232374: 197/281).
     ("wp858_yaml_git_linux_ve_dirname",
      ('sudo apt-get install -y git && chon_thu_muc_chay_duoc git "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v git || echo ./git)")"',
@@ -10969,23 +11093,45 @@ DOT_BIEN_HOOK = [
      ('printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \\$GITHUB_PATH" >&2; return 1; }',
       'printf \'%s\\n\' "$w" >> "$GITHUB_PATH"'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    # wp868 (Q3): dòng canh `/dev/null` trên stdout thay bằng `GIU_PATH` trên kênh riêng; ba đột biến dòng canh đổi neo.
     ("wp858_sh_bo_dong_canh_giu_path",
-     ("    printf '\\n%s\\n' /dev/null\n", ''),
+     ('    printf \'GIU_PATH\' > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }\n', ''),
      ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_cygpath_u_hong_khong_tra_loi",
      ("cygpath -u hong cho ung vien cua '$ten'\" >&2; return 1; }", "cygpath -u hong cho ung vien cua '$ten'\" >&2; }"),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_dong_canh_la_ten_thu_muc",
-     ("    printf '\\n%s\\n' /dev/null\n", '    echo ":giu-nguyen-PATH:"\n'),
+     ("    printf 'GIU_PATH' > \"$KENH_KQ\"", "    printf 'DICH\\n%s' :giu-nguyen-PATH: > \"$KENH_KQ\""),
      ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     # Codex wp858 lượt 1–3: F858-01/02/03/04/06.
-    ("wp858_sh_dong_canh_khong_tach_dong", ("    printf '\\n%s\\n' /dev/null\n", "    printf '%s\\n' /dev/null\n"),
-     ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp858_sh_dong_canh_khong_tach_dong", ('  GIU_PATH) DICH="" ;;', '  GIU_PATH) DICH="$(tail -n 1 "$TAM_CAI/stdout")" ;;'),
+     ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp858_sh_cygpath_u_chi_khi_ghi_path",
      ('    if [ -n "$win" ]; then\n      d="$(cygpath -u', '    if [ -n "$win" ] && [ -n "${GITHUB_PATH:-}" ]; then\n      d="$(cygpath -u'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_github_path_vang_khong_mac_dinh", ('  if [ -n "${GITHUB_PATH:-}" ]; then', '  if [ -n "$GITHUB_PATH" ]; then'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    # wp868 (N1–N5): mỗi đột biến kèm ca hình dạng thuần Python để đo được cả Windows.
+    ("wp868_sh_ham_in_stdout_thay_kenh",
+     ("  printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+      "  printf '\\n%s\\n' \"$dich\""),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp868_sh_doc_stdout_thay_kenh", ("  DICH$'\\n'?*) DICH=\"${KQ#DICH$'\\n'}\" ;;", "  DICH$'\\n'?*) DICH=\"$(tail -n 1 \"$TAM_CAI/stdout\")\" ;;"),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_kenh_export", ("declare +x KENH_KQ\n", "export KENH_KQ\n"),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_cho_eof_stdout", ('( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"', 'printf \'%s\\n\' "$(eval "$LENH")" > "$TAM_CAI/stdout"'),
+     ["r868_writer_muon_khong_lam_treo", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_bo_duong_lui_dong_cuoi", ('    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"', '    KET_QUA_CAI=""'),
+     ["r868_khong_bo_chon_doc_dong_cuoi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_chi_duyet_hai_ung_vien", ('  for d in "$@"; do', '  for d in "${@:1:2}"; do'),
+     ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp868_sh_bo_break", ('then dich="$d"; break; fi', 'then dich="$d"; fi'),
+     ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp868_yaml_rg_linux_ve_bo_chon_rieng",
+     ('sudo apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"',
+      'sudo apt-get install -y ripgrep && RG_D="${CONG_CU_GOC:-}/usr/bin" && echo "$RG_D"'),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
     ("wp858_selftest_editskill_ten_co_dinh",
      ('    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))\n    _esf = _esd / "_selftest_editskill.py"',
       '    _esd = Path(_tfx.gettempdir())\n    _esf = _esd / "_selftest_editskill.py"'),

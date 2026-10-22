@@ -85,23 +85,16 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [rg, --version], regex: '(?m)^ripgrep\s+(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)'}]
     cai:
-      # wp831 (L1): cùng bộ chọn với `windows` dưới đây — thư mục in ra là thư mục ĐẦU TIÊN có `rg` mà
-      # CHÍNH `cong_cu.py kiem-tra --chi rg` nhận `DAT`; bản `rg` hỏng đứng đầu PATH không còn được in.
-      # Linux: `/usr/bin` (Q1), rồi `command -v`. `CONG_CU_GOC` (mặc định RỖNG) chỉ để test cô lập `/usr/bin`:
-      # máy đo và runner đều có `/usr/bin/rg` tốt nên không có nó thì nửa âm của N1 không thể đỏ (Codex lượt 1 F02).
-      # `-x` cùng `-f`: tệp `rg` không thực thi bị PATH bỏ qua ⇒ checker đo bản KHÁC mà vẫn gán thư mục này (F01).
-      # macOS: `$(brew --prefix)/bin`, rồi `command -v`.
-      # Chỉ ghi $GITHUB_PATH khi `rg` TÊN TRẦN vẫn chưa DAT: ghi `/usr/bin` vô điều kiện đẩy nó lên trước
-      # python của setup-python ở các bước sau (đo: ci.yml run 39115659366, `jsonschema` 4.10.3 của python hệ thống).
-      linux: {lenh: 'sudo apt-get install -y ripgrep && RG_DICH= && for RG_D in "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 && RG_DICH="$RG_D" && break; done && : "${RG_DICH:?khong thu muc nao co rg chay duoc}" && { [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
-      macos: {lenh: 'brew install ripgrep && RG_DICH= && for RG_D in "$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do [ -f "$RG_D/rg" ] && [ -x "$RG_D/rg" ] && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 && RG_DICH="$RG_D" && break; done && : "${RG_DICH:?khong thu muc nao co rg chay duoc}" && { [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
-      # wp802 (Q6): winget trước, choco dự phòng. Thư mục in ra là thư mục ĐẦU TIÊN có `rg` mà CHÍNH
-      # `cong_cu.py kiem-tra` (bộ kiểm cuối, `${PY[@]}` của cai_cong_cu.sh) nhận `DAT` — WinGet\Links,
-      # choco\bin, rồi `command -v`. Một chuẩn duy nhất, không chép lại regex (Codex lượt 1-4 F2).
-      # Có $GITHUB_PATH thì ghi thư mục vào đó: bước sau của runner là shell mới (đo:
-      # launcher-windows 39093706610 cài `DAT` 15.2.0, bước kế `KHONG_DO_DUOC`).
-      # Phần trước ` && ` ĐẦU TIÊN PHẢI khớp `CONG_CU` của launcher.py và hook (launcher_test canh).
-      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && RG_DICH= && for RG_D in "$(cygpath -u "$LOCALAPPDATA/Microsoft/WinGet/Links")" "$(cygpath -u "${ChocolateyInstall:-C:/ProgramData/chocolatey}")/bin" "$(dirname "$(command -v rg || echo ./rg)")"; do { [ -f "$RG_D/rg" ] || [ -f "$RG_D/rg.exe" ]; } && PATH="$RG_D:$PATH" "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 && RG_DICH="$RG_D" && break; done && : "${RG_DICH:?khong thu muc nao co rg chay duoc}" && { [ -z "${GITHUB_PATH:-}" ] || cygpath -w "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"'}
+      # wp868 (N4): cùng bộ chọn `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) với git/python/shellcheck/bash — thư mục
+      # là ứng viên ĐẦU TIÊN mà CHÍNH `cong_cu.py kiem-tra --chi rg` nhận `DAT`, đi qua kênh kết quả RIÊNG (trình cài
+      # `ripgrep` không kết thúc stdout bằng LF nên không còn bị nối dòng). Tên trần đã DAT ⇒ không đổi PATH, không ghi
+      # $GITHUB_PATH (ci.yml run 39115659366). Ứng viên: Linux `/usr/bin` (dưới `CONG_CU_GOC` khi test) · macOS
+      # `$(brew --prefix)/bin` · Windows WinGet\Links, choco\bin — rồi `command -v`.
+      # Phần trước ` && ` ĐẦU TIÊN (lệnh cài) PHẢI khớp `CONG_CU` của launcher.py và hook (launcher_test canh); wp802 (Q6):
+      # winget trước, choco dự phòng.
+      linux: {lenh: 'sudo apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"'}
+      macos: {lenh: 'brew install ripgrep && chon_thu_muc_chay_duoc rg "$(brew --prefix)/bin" "$(dirname "$(command -v rg || echo ./rg)")"'}
+      windows: {lenh: 'winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress && chon_thu_muc_chay_duoc --win rg "$LOCALAPPDATA/Microsoft/WinGet/Links" "${ChocolateyInstall:-C:/ProgramData/chocolatey}/bin" "$(dirname "$(command -v rg || echo ./rg)")"'}
   bash:
     # Hook SessionStart là bash; trên Windows công thức này cấp Git Bash.
     bat_buoc: true

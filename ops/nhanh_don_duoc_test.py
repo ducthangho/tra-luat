@@ -14,6 +14,7 @@ import secrets
 import re
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -401,14 +402,66 @@ def _doc_kenh_xac_thuc(duong: Path, dau_phien: str, mutant: str, lan_thu: int, d
 # `chay_manh_dich` dat no. Qua tran => rc 124 + dong khai trong stderr, KHONG nem: nguoi
 # goi phan hang rc != 1 thanh TIN DUNG GIA / KHONG DO DUOC, tuc manh DO (fail-closed).
 _TRAN_GIAY_CON = None
+_GIAY_THU_SAU_GIET = 5.0
+
+
+def _giet_cay_con(p) -> str:
+    """WP748 r22 F02 (Codex 03c4f6be) — `subprocess.run(timeout=)` chi giet CON truc tiep: chau (git, harness con)
+    song tiep, giu tep fixture va ONG stdout, nen tren Windows `communicate()` sau giet co the TREO. Giet CA NHOM:
+    POSIX `killpg` CHI khi nhom con DUNG BANG pid con va KHAC nhom minh (khong bao gio giet nhom cua chinh minh);
+    Windows `taskkill /T /F` roi `p.kill()` (taskkill KHONG dang tin, xem CLAUDE.md). Tra mot dong DO DUOC."""
+    killpg, getpgid = getattr(os, "killpg", None), getattr(os, "getpgid", None)
+    if killpg and getpgid:
+        try:
+            nhom = getpgid(p.pid)
+            if nhom == p.pid and nhom != getpgid(0):
+                killpg(nhom, signal.SIGKILL)   # WP748 r22 F02: giet ca cay
+                return f"killpg {nhom}"
+        except OSError as e:
+            p.kill()
+            return f"getpgid/killpg loi {type(e).__name__} -> chi giet con"
+        p.kill()
+        return "KHONG co nhom rieng -> chi giet con, CHAU KHONG DO DUOC"
+    ghi = "taskkill vang"
+    tk = shutil.which("taskkill")
+    if tk:
+        try:
+            r = subprocess.run([tk, "/T", "/F", "/PID", str(p.pid)], capture_output=True, text=True,
+                               timeout=_GIAY_THU_SAU_GIET)
+            ghi = f"taskkill rc={r.returncode}"
+        except (OSError, subprocess.TimeoutExpired) as e:
+            ghi = f"taskkill loi {type(e).__name__}"
+    p.kill()
+    return ghi
+
+
 def run(args: list[str], cwd: Path, check: bool = True, env: dict[str, str] | None = None):
-    try:
+    if _TRAN_GIAY_CON is None:
         p = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", env=env, check=False, timeout=_TRAN_GIAY_CON)
-    except subprocess.TimeoutExpired as e:
-        ra, loi = (x.decode("utf-8", "replace") if isinstance(x, bytes) else (x or "")
-                   for x in (e.stdout, e.stderr))
-        p = subprocess.CompletedProcess(args, 124, ra, f"{loi}\nQUA TRAN {_TRAN_GIAY_CON}s: con bi giet")
+                           errors="replace", env=env, check=False)
+    else:
+        # WP748 r22 F02 — nhom rieng de giet ca cay; thu output SAU giet cung CO HAN (Windows: chau mo coi
+        # giu ong thi `communicate()` khong han se treo). Van rc 124, fail-closed nhu ban r16.
+        tach = ({"start_new_session": True} if os.name != "nt"
+                else {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)})
+        q = subprocess.Popen(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                             encoding="utf-8", errors="replace", env=env, **tach)
+        try:
+            ra, loi = q.communicate(timeout=_TRAN_GIAY_CON)
+            p = subprocess.CompletedProcess(args, q.returncode, ra, loi)
+        except subprocess.TimeoutExpired:
+            duong = _giet_cay_con(q)
+            try:
+                ra, loi = q.communicate(timeout=_GIAY_THU_SAU_GIET)
+            except subprocess.TimeoutExpired:
+                for o in (q.stdout, q.stderr):
+                    try:
+                        o.close()
+                    except OSError:
+                        pass
+                ra, loi = "", f"output KHONG thu duoc trong {_GIAY_THU_SAU_GIET}s sau giet"
+            p = subprocess.CompletedProcess(args, 124, ra or "",
+                                            f"{loi or ''}\nQUA TRAN {_TRAN_GIAY_CON}s: con bi giet ({duong})")
     if check and p.returncode:
         raise AssertionError(f"rc={p.returncode}: {' '.join(args)}\n{p.stdout}\n{p.stderr}")
     return p
@@ -4116,6 +4169,59 @@ def r553_ram_windows_du_phong_cap_du_PROCESS_MEMORY_COUNTERS(d: Path):
     chot(mb == 512.0 and pham_vi.startswith("windows PeakWorkingSet CHI tien trinh manh"), "r553")
 
 
+def r554_gop_dich_bac_moc_thoi_gian_hong(d: Path):
+    """WP748 r22 F01 (Codex 03c4f6be, P2) — phep gom `_loi_gop_dich` phai bac MOI phan chung hong, ke ca ba phan
+    chung moc thoi gian (sai dinh dang · dao nguoc · lech `giay`), va nhan bo hop le. Moi chot moc co dot bien rieng."""
+    global TU_KIEM
+    cu, TU_KIEM = TU_KIEM, _TU_KIEM_DAY_DU
+    try:
+        lot, tong, hop_le = _phan_chung_gop_dich()
+    finally:
+        TU_KIEM = cu
+    chot(not lot and tong > hop_le, "r554")
+
+
+_NHIP_CHAU = """import os, pathlib, sys, time
+p = pathlib.Path(sys.argv[1])
+(p.parent / "chau.pid").write_text(str(os.getpid()))
+for i in range(200):
+    p.write_text(str(i))
+    time.sleep(0.05)
+"""
+
+
+def r555_tran_giay_con_giet_ca_chau(d: Path):
+    """WP748 r22 F02 (Codex 03c4f6be, P2) — qua `_TRAN_GIAY_CON` thi `run` phai giet CA CHAU, khong chi con, va tra
+    co han. Chau GIU ong stdout cua con (dung dieu kien lam Windows treo o `communicate()`) va ghi nhip tim: sau khi
+    `run` tra rc 124 thi nhip phai DUNG. Chau chua kip chay truoc han = KHONG DO DUOC = DO."""
+    global _TRAN_GIAY_CON
+    import time as _t
+    nhip, pid_tep = d / "nhip", d / "chau.pid"
+    con = ("import subprocess, sys, time; "
+           f"subprocess.Popen([sys.executable, '-c', {_NHIP_CHAU!r}, {str(nhip)!r}]); time.sleep(60)")
+    cu = _TRAN_GIAY_CON
+    try:
+        _TRAN_GIAY_CON = 1.5
+        t0 = _t.monotonic()
+        p = run([sys.executable, "-c", con], cwd=d, check=False)
+        troi = _t.monotonic() - t0
+    finally:
+        _TRAN_GIAY_CON = cu
+    try:
+        chot(p.returncode == 124 and "QUA TRAN" in p.stderr, "r555")
+        chot(troi < 1.5 + _GIAY_THU_SAU_GIET + 3, "r555")
+        chot(nhip.is_file(), "r555")
+        _t.sleep(0.3)
+        v1 = nhip.read_text()
+        _t.sleep(0.6)
+        chot(nhip.read_text() == v1, "r555")
+    finally:
+        try:
+            os.kill(int(pid_tep.read_text()), getattr(signal, "SIGKILL", signal.SIGTERM))
+        except (OSError, ValueError):
+            pass
+
+
 TU_KIEM = [
     ("r542", r542_kenh_hoan_tat_khong_duoc_xoa_chan_doan, True),
     ("r539", r539_bang_chung_phai_den_tu_con_chay_that, True),
@@ -4170,7 +4276,12 @@ TU_KIEM = [
     ("r551", r551_manh_chi_chay_phan_hoach_va_chi_ghi_khi_dat_tron, True),
     ("r552", r552_gop_chi_dat_khi_phu_dung_hai_bang, True),
     ("r553", r553_ram_windows_du_phong_cap_du_PROCESS_MEMORY_COUNTERS, True),
+    ("r554", r554_gop_dich_bac_moc_thoi_gian_hong, True),
+    ("r555", r555_tran_giay_con_giet_ca_chau, True),
 ]
+# WP748 r22 — ban DAY DU, `main` cua con targeted thu hep `TU_KIEM` nhung khong dung toi ten nay: r554 do phep gom tren
+# TRON phan hoach (`_muc_dich` doi GIAY_CA_HO_SO khop du bang), nen chay ca ay voi bang day du.
+_TU_KIEM_DAY_DU = list(TU_KIEM)
 
 # ---- A6: MOI ca tu kiem phai co MOT dot bien rieng lam no DO --------------
 # Ca khong doi mau theo dot bien duoc chi dinh thi KHONG duoc tinh vao so nhom.
@@ -4924,6 +5035,13 @@ DOT_BIEN_TU_KIEM = [
     ("ghi-so-gop", ("r546",), "            _ghi_ha_tang(e)                       # r2 M1 diem nuot: _loi_gop\n", ""),
     ("gop-cli-bo-qua", ("r552",), '    if sys.argv[1:2] == ["--gop"]:', "    if False:"),
     ("ram-pmc-thieu-truong", ("r553",), "for i in range(7)]   # WP748 r20 (r553)", "for i in range(6)]   # WP748 r20 (r553)"),
+    ("moc-nhan-sai-dinh-dang", ("r554",), "        return None  # WP748 r22 F01 sai dinh dang",
+     "        return datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)"),
+    ("moc-bo-kiem-dao-nguoc", ("r554",), "        if moc and moc[1] < moc[0]:   # WP748 r22 F01 dao nguoc", "        if False:"),
+    ("moc-bo-kiem-lech-giay", ("r554",), "and not khoang - LECH_MOC_GIAY <= x[\"giay\"] <= khoang + LECH_MOC_GIAY:   # WP748 r22 F01 lech",
+     "and False:"),
+    ("ghi-so-gop-dich", ("r546",), "            _ghi_ha_tang(e)                       # WP748 r22: diem nuot _loi_gop_dich (r546 qua r554)\n", ""),
+    ("timeout-chi-giet-con", ("r555",), "                killpg(nhom, signal.SIGKILL)   # WP748 r22 F02: giet ca cay", "                p.kill()"),
 ]
 
 
@@ -4943,8 +5061,9 @@ NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r545", "r546", "r547"}      # #593 r2
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r548"}      # #593 r3
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r549", "r550", "r551", "r552"}      # #661
 NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r553"}      # WP748 r20
+NHOM_BAT_BUOC = NHOM_BAT_BUOC | {"r554", "r555"}      # WP748 r22
 
-SAN_NHOM = 53                                 # WP748 r20: san = tron tap bat buoc (them r553)
+SAN_NHOM = 55                                 # WP748 r22: san = tron tap bat buoc (them r554, r555)
 
 
 # #568 r4 / B1 — `str.splitlines()` coi CHIN ky tu NGOAI `\n` la het dong, con
@@ -5565,6 +5684,7 @@ GIAY_CA_HO_SO = {
     "r537": 0.42, "r538": 0.92, "r539": 9.77, "r540": 0.74, "r541": 0.39, "r542": 4.96,
     "r543": 0.65, "r544": 0.53, "r545": 0.49, "r546": 72.02, "r547": 1.12, "r548": 4.41,
     "r549": 0.58, "r550": 0.52, "r551": 5.72, "r552": 2.19, "r553": 0.05,
+    "r554": 0.5, "r555": 2.41,          # WP748 r22
 }
 GIAY_PHONG_CON, GIAY_DOT_BIEN_SP, GIAY_NEN_SP = 1.5, 30.0, 27.0
 _KHOA_DICH = {"phien_ban", "che_do", "manh", "so_manh", "head", "sha256_test", "sha256_tool",
@@ -5805,13 +5925,34 @@ def _so_huu_han(v) -> bool:
     return type(v) is int or (type(v) is float and math.isfinite(v))
 
 
+# WP748 r22 F01 (Codex 03c4f6be) — moc `bat_dau`/`ket_thuc` tung chi can la CHUOI khac rong va tran duong gang chi do
+# bang `giay` khai rieng: moc "invalid", moc dao nguoc, hay khoang 900 s voi `giay=0` deu ra DAT. Moc phai la DUNG
+# dang `_iso_utc` (UTC, mili giay, hau to Z); `ket_thuc - bat_dau` khong am va lech `giay` (monotonic) toi da
+# LECH_MOC_GIAY — du cho lam tron va chinh dong ho nho, lech hon thi fail-closed chu khong doan.
+_MOC_ISO_UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z")
+LECH_MOC_GIAY = 5.0
+
+
+def _doc_moc_utc(v):
+    import datetime
+    if not isinstance(v, str) or not _MOC_ISO_UTC.fullmatch(v):
+        return None  # WP748 r22 F01 sai dinh dang
+    try:
+        return datetime.datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=datetime.timezone.utc)
+    except ValueError:
+        return None
+
+
 def _loi_gop_dich(thu_muc: Path, head=None, du=False):
     """`(loi, doc)` — MOI dieu kien la mot dong loi; rong <=> moi manh, moi muc deu duong."""
     doc = []
     for tep in sorted(Path(thu_muc).glob("*.json")):
         try:
             doc.append(json.loads(tep.read_text(encoding="utf-8")))
-        except (OSError, ValueError) as e:
+        except OSError as e:
+            _ghi_ha_tang(e)                       # WP748 r22: diem nuot _loi_gop_dich (r546 qua r554)
+            return [f"{tep.name}: {type(e).__name__}: {e}"], []
+        except ValueError as e:
             return [f"{tep.name}: {type(e).__name__}: {e}"], []
     if not doc:
         return ["khong co bien nhan manh nao"], []
@@ -5848,6 +5989,16 @@ def _loi_gop_dich(thu_muc: Path, head=None, du=False):
             loi.append(f"manh {m}: RAM KHONG DO DUOC ({x['pham_vi_ram']})")
         if not all(isinstance(x[c], str) and x[c] for c in ("bat_dau", "ket_thuc", "tien_do", "pham_vi_ram")):
             loi.append(f"manh {m}: thieu moc thoi gian/tien do")
+        moc = [_doc_moc_utc(x[c]) for c in ("bat_dau", "ket_thuc")]
+        if None in moc:
+            loi.append(f"manh {m}: moc thoi gian sai dinh dang {x['bat_dau']!r}/{x['ket_thuc']!r}")
+            moc = None
+        if moc and moc[1] < moc[0]:   # WP748 r22 F01 dao nguoc
+            loi.append(f"manh {m}: ket_thuc truoc bat_dau")
+        # so sanh KHOANG (khong tru): int json khong lo (10**400) tru float se nem OverflowError, so sanh thi khong
+        khoang = (moc[1] - moc[0]).total_seconds() if moc else None
+        if moc and _so_huu_han(x["giay"]) and not khoang - LECH_MOC_GIAY <= x["giay"] <= khoang + LECH_MOC_GIAY:   # WP748 r22 F01 lech
+            loi.append(f"manh {m}: khoang moc {khoang}s lech giay qua {LECH_MOC_GIAY}s")
         if not isinstance(x["nhat_ky_duoi"], str) or len(x["nhat_ky_duoi"]) > TRAN_NHAT_KY + 64:
             loi.append(f"manh {m}: nhat ky vang hoac vuot tran")
         mong = {khoa: x2 for khoa, x2 in phan[m]}
@@ -5933,6 +6084,12 @@ def _phan_chung_gop_dich() -> list:
         "nhat-ky-vuot-tran": lambda bo: dat(bo[1], "nhat_ky_duoi", "x" * (TRAN_NHAT_KY + 100)),
         "ca-dich-lech": lambda bo: bo[1]["ca_dich"].update({k_tk: ["r501"] if bo[1]["ca_dich"][k_tk] != ["r501"] else ["r502"]}),
         "thua-khoa": lambda bo: dat(bo[1], "thua", 1),
+        # WP748 r22 F01 — moi chot moc mot phan chung rieng, dung sao cho CHI chot ay ban duoc (r554 + dot bien rieng)
+        "moc-sai-dinh-dang": lambda bo: (dat(bo[0], "bat_dau", "invalid"), dat(bo[0], "ket_thuc", "invalid"),
+                                         dat(bo[0], "giay", 0)),
+        "moc-dao-nguoc": lambda bo: (dat(bo[0], "bat_dau", "2026-01-01T00:00:01.000Z"),
+                                     dat(bo[0], "ket_thuc", "2026-01-01T00:00:00.000Z"), dat(bo[0], "giay", 0)),
+        "moc-lech-giay": lambda bo: (dat(bo[0], "ket_thuc", "2026-01-01T00:15:00.000Z"), dat(bo[0], "giay", 0)),
     }
     lot = []
     with tempfile.TemporaryDirectory() as td:

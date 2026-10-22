@@ -8,8 +8,8 @@
 # HO SO LAND — packet #748 wp748 r21 (lease g21), ma qua PR #862. Khuon: ops/land/pr849-wp748-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (401d4f1) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (ccr-e425b16e-j9g9p7) dua dong nay
-# vao master. Duyet ben cua chu kho: #748 issuecomment-6285607005 (dang SAU merge, xem authorization_ghi_chu).
+# TRANG THAI: merged (401d4f1), `landed: false` tu PR dinh chinh (22-10-2026): THIEU reviewer assurance §8.1 (connector P1 #863
+# r4323596458, tien le #822). Ban 80c4da1 khai landed true. Duyet ben cua chu kho: #748 issuecomment-6285607005 (dang SAU merge, xem authorization_ghi_chu).
 # Gate push master tren DUNG merge SHA 401d4f1: ci.yml 39380754094 XANH 23/23. Bang chung race dong: ops-publish-lease
 # 39358824666 attempt 1 DO (master 3950a0f) -> attempt 2 XANH (master 401d4f15).
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
@@ -89,14 +89,17 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-862.json: merged true, merged_at 2026-10-20T06:30:22Z, merged_by ducthangho, merge_commit_sha
     401d4f1, head.sha 28e35fd; cha va tree o do-lai-nguon-20261020/merge-va-diff.txt; merge commit (khong squash/rebase).
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 401d4f1: ci.yml 23/23 XANH, kiem-gate rc=0, log kem (post_merge_checks) DAT;
     (2) lease da nha: rut han, 1/1 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: comment land r21 tren #748 (Issue da closed) DAT;
-    (4) review neo DUNG authorized_head_sha 28e35fd: Codex approve 0 P0-P2 DAT; tree merge = tree head (f886966);
+    (4) review neo DUNG authorized_head_sha 28e35fd: Codex approve 0 P0-P2 (noi dung; assurance xem (7)); tree merge = tree head (f886966);
     (5) uy quyen land neo DUNG 28e35fd: #748 issuecomment-6285607005 DAT, dang sau merge (authorization_ghi_chu);
     (6) muc tieu packet: ops-publish-lease xanh tren master co ban va (39358824666 attempt 2) DAT.
-    `landed: true` hieu luc khi PR ghi so nay vao master.
+    (7) reviewer assurance §8.1 (lop sensitive doi cross_approved/human_audited): CHUA DAT — luot review la codex exec TRUC TIEP,
+    KHONG co bien nhan launcher (run.json), model THUC phuc vu KHONG_DO_DUOC; header CLI chi chung minh model CLI cong bo
+    (§8.1). Duyet land cua chu kho khong phai audit hay ghi de assurance. Connector P1 #863 r4323596458; tien le #822 (cc26c8e).
+    landed false toi khi co luot review qua launcher.py run neo dung SHA nay (chu kho chon 22-10-2026: buoc 1 + buoc 2).
 
 uy_quyen_land:
   dang: >-

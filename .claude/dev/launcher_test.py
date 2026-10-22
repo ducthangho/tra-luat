@@ -8828,26 +8828,58 @@ def r868_khong_bo_chon_doc_dong_cuoi():
 def r868_doc_kenh_hong_thi_dung():
     """F868-01 (Codex lượt 1): đọc kênh LỖI (cat giả rc 74 cho tệp kênh) không được coi là kênh rỗng rồi lấy dòng cuối
     stdout — trình cài in thư mục `xau` (có `rg` tốt KHÁC, ghi nhật ký khi bị gọi) ⇒ thoát ≠ 0, `rg` của `xau` không chạy.
-    Đối chứng: cùng sân, cat giả cho qua ⇒ DAT và `xau` không bị gọi (stub trong suốt)."""
+    F868-05 (lượt 2): kênh đọc được mà SAI giao thức (`BAD_CHANNEL`) ⇒ thoát ≠ 0, không DAT. Đối chứng: cat giả cho qua ⇒
+    DAT và `xau` không bị gọi (stub trong suốt)."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()
     cat_that = shutil.which("cat")
     bang(cat_that is not None, "KHONG DO DUOC: thieu cat")
-    for hong in (False, True):
+    for hong in ("", "loi", "rac"):
         with San() as s:
             nk, dau = s / "xau.log", s / "dau"
-            cat_gia = ("case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; " if hong else "") + \
+            cat_gia = {"": "", "loi": "case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; ",
+                       "rac": "case \"$*\" in */kq) printf BAD_CHANNEL; exit 0;; esac; "}[hong] + \
                 f"exec {shlex.quote(cat_that)} \"$@\""
             p, gp, uv, _xau, _t = _wp868_chay(
                 s, apt=f"echo {shlex.quote(str(s / 'xau'))}; exit 0",
                 ung_vien={s / "xau": f"echo xau >> {shlex.quote(str(nk))}; echo 'ripgrep 14.1.0'", dau / "cat": cat_gia})
             if hong:
-                bang(p.returncode != 0 and not nk.exists(),
-                     f"doc kenh hong ma van dung stdout trinh cai: rc={p.returncode} xau_goi={nk.exists()} {p.stderr[-300:]}")
+                dau_hieu = {"loi": "khong doc duoc kenh ket qua", "rac": "kenh ket qua hong"}[hong]
+                bang(p.returncode != 0 and '"DAT"' not in p.stdout and not nk.exists() and dau_hieu in p.stderr,
+                     f"kenh {hong} ma van chay tiep: rc={p.returncode} xau_goi={nk.exists()} {p.stderr[-300:]}")
             else:
                 bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv) and not nk.exists(),
                      f"doi chung cat trong suot hong: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+
+
+@ca
+def r868_ghi_kenh_hong_thi_dung():
+    """F868-04 (Codex lượt 2): bộ chọn ghi kênh LỖI (`printf` bị thay bằng hàm bash nhập từ môi trường, rc 74 đúng cho
+    payload `GIU_PATH` / `DICH`) ⇒ thoát ≠ 0, KHÔNG rơi về dòng cuối stdout (`xau`, `rg` tốt KHÁC có nhật ký). Cả hai
+    nhánh: tên trần đã DAT (`GIU_PATH`) và chọn ứng viên (`DICH`). Đối chứng: không hàm giả ⇒ DAT, `xau` không bị gọi."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    ham = ("() { case \"$1\" in GIU_PATH|'DICH\\n%s') echo 'printf: loi ghi gia' >&2; return 74;; esac; "
+           "builtin printf \"$@\"; }")
+    for nhanh in ("GIU_PATH", "DICH"):
+        for gia in (False, True):
+            with San() as s:
+                nk = s / "xau.log"
+                uv = {s / "xau": f"echo xau >> {shlex.quote(str(nk))}; echo 'ripgrep 14.1.0'"}
+                if nhanh == "GIU_PATH":
+                    uv[s / "dau" / "rg"] = "echo 'ripgrep 14.1.0'"
+                p, _gp, _uv, _xau, _t = _wp868_chay(s, apt=f"echo {shlex.quote(str(s / 'xau'))}; exit 0", ung_vien=uv,
+                                                    env_them={"BASH_FUNC_printf%%": ham} if gia else None)
+                if gia:
+                    bang("printf: loi ghi gia" in p.stderr, f"KHONG DO DUOC {nhanh}: printf gia khong chay {p.stderr[-300:]}")
+                    bang(p.returncode != 0 and '"DAT"' not in p.stdout and not nk.exists(),
+                         f"{nhanh}: ghi kenh hong ma van chay tiep: rc={p.returncode} xau_goi={nk.exists()} "
+                         f"{p.stderr[-300:]}")
+                else:
+                    bang(p.returncode == 0 and '"DAT"' in p.stdout and not nk.exists(),
+                         f"{nhanh}: doi chung hong: rc={p.returncode} xau_goi={nk.exists()} {p.stderr[-300:]}")
 
 
 @ca
@@ -8868,6 +8900,14 @@ def r868_don_kenh_khi_loi():
             bang(len(thay) == 1, f"KHONG DO DUOC: trinh cai khong thay thu muc kenh trong TMPDIR ({thay})")
             bang((p.returncode != 0) == (ma != 0) and con == [],
                  f"thu muc kenh con sau khi thoat (ma trinh cai {ma}): rc={p.returncode} con={con} {p.stderr[-200:]}")
+    # `--bat-buoc`: các lượt `source` ghi đè trap của nhau ⇒ mỗi lượt phải TỰ xoá thư mục của nó (rm tường minh).
+    with San() as s:
+        tmp = s / "tmp"; tmp.mkdir()
+        p, _gp, _uv, _d = _wp858_chay_cai(s, "rg", "linux", "echo 'ripgrep 14.1.0'", dau=None, bang_ke=("rg", "bash"),
+                                          them={"rg": _WP858_HONG}, env_them={"TMPDIR": str(tmp)})
+        con = [x.name for x in tmp.iterdir() if x.name.startswith("cai_cong_cu.")]
+        bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout and con == [],
+             f"--bat-buoc: thu muc kenh ro: rc={p.returncode} con={con} {p.stderr[-300:]}")
 
 
 @ca
@@ -8906,6 +8946,10 @@ def r868_hinh_dang_kenh_ket_qua():
                 'rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ] && export PATH="$DICH:$PATH"\n'):
         bang(can in than, f"cai_cong_cu.sh thieu chot kenh ket qua {can!r}")
     bang("$(eval" not in than and "KET_QUA_CAI=\"$(eval" not in sh, "cong thuc lai chay trong $( ) (cho EOF stdout)")
+    for can in ("printf 'GIU_PATH' > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+                "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+                "printf '%q' \"$KQ\")\" >&2; exit 7 ;;"):
+        bang(can in sh, f"cai_cong_cu.sh thieu chot ghi/doc kenh {can!r}")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -11186,6 +11230,21 @@ DOT_BIEN_HOOK = [
      ["r868_don_kenh_khi_loi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_duong_lui_bo_cat_cr", ("    DICH=\"${DICH%$'\\r'}\" ;;", "    ;;"),
      ["r868_khong_bo_chon_doc_dong_cuoi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    # Codex lượt 2: F868-04 (nuốt lỗi ghi payload, hai nhánh) · F868-05 (nhận payload sai giao thức).
+    ("wp868_sh_ghi_giu_path_nuot_loi",
+     ("printf 'GIU_PATH' > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+      "printf 'GIU_PATH' > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 0; }"),
+     ["r868_ghi_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_ghi_dich_nuot_loi",
+     ("printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+      "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 0; }"),
+     ["r868_ghi_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_kenh_rac_rc0", ("printf '%q' \"$KQ\")\" >&2; exit 7 ;;", "printf '%q' \"$KQ\")\" >&2; exit 0 ;;"),
+     ["r868_doc_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_tam_export", ("declare +x TAM_CAI\n", "export TAM_CAI\n"),
+     ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_bo_rm_tuong_minh", ('rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ]', '[ -d "$DICH" ]'),
+     ["r868_don_kenh_khi_loi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_chi_duyet_hai_ung_vien", ('  for d in "$@"; do', '  for d in "${@:1:2}"; do'),
      ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp868_sh_bo_break", ('then dich="$d"; break; fi', 'then dich="$d"; fi'),

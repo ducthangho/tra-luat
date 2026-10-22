@@ -3978,8 +3978,11 @@ def run() -> int:
                       {"nlm_notebook_id": "", "nlm_status": "pushed", "nlm_source_id": "s5"},
                   ]) == {"NB-A": 2, "NB-B": 1}))
     # ───── KH1 III.2 — edit-skill: cổng assert-đếm (DRY, an toàn), offline ─────
+    import shutil as _shx
     import tempfile as _tfx
-    _esf = Path(_tfx.gettempdir()) / "_selftest_editskill.py"
+    # wp858 (L3): tên tệp CỐ ĐỊNH trong temp chung ⇒ hai selftest song song đỏ giả (#831) — thư mục riêng từng lượt.
+    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))
+    _esf = _esd / "_selftest_editskill.py"
     _editskill = False
     try:
         _esf.write_text("x = 1\ny = 2\n", encoding="utf-8")
@@ -3995,8 +3998,7 @@ def run() -> int:
     except Exception:
         _editskill = False
     finally:
-        try: _esf.unlink()
-        except Exception: pass
+        _shx.rmtree(_esd, ignore_errors=True)
     cases.append(("edit_skill_assert_count_gate_dry", _editskill))
     # ───── KH1 1.23.2 — nlm-orphans: pure _classify_nlm_sources (active / mismatch-live / unregistered), offline ─────
     _orph = _classify_nlm_sources(
@@ -21966,7 +21968,8 @@ def run() -> int:
         # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3). Thêm docs KHÔNG kê khai slot ở đây nữa.
         # KÊ KHAI SLOT (packet #831 spec r2): gói 187 → **189** = + `changelog.d/wp-802.md` (#802 land không sinh lại
         # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 189
+        # KÊ KHAI SLOT (packet #858): 189 → **190** = + `changelog.d/wp-858.md`. Trần Package 200 còn 9 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 190
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22015,11 +22018,12 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 189 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # RATCHET: goi giu 190 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
             # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
-            # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md).
+            # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md;
+            # packet #858: 189 -> 190, manh changelog.d/wp-858.md).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 189
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 190
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

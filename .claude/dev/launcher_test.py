@@ -8840,7 +8840,8 @@ def r868_khong_bo_chon_doc_dong_cuoi():
 def r868_doc_kenh_hong_thi_dung():
     """F868-01 (Codex lượt 1): đọc kênh LỖI (cat giả rc 74 cho tệp kênh) không được coi là kênh rỗng rồi lấy dòng cuối
     stdout — trình cài in thư mục `xau` (có `rg` tốt KHÁC, ghi nhật ký khi bị gọi) ⇒ thoát ≠ 0, `rg` của `xau` không chạy.
-    F868-05 (lượt 2): kênh đọc được mà SAI giao thức (`BAD_CHANNEL`) ⇒ thoát ≠ 0, không DAT. Đối chứng: cat giả cho qua ⇒
+    F868-05 (lượt 2): kênh đọc được mà SAI giao thức (`BAD_CHANNEL`) ⇒ thoát ≠ 0, không DAT. F868-02 (lượt 4): cả hai đường
+    `exit 7` ấy vẫn dọn thư mục kênh (cat giả ghi lại đường dẫn kênh ⇒ chứng minh kênh có thật). Đối chứng: cat giả cho qua ⇒
     DAT và `xau` không bị gọi (stub trong suốt)."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
@@ -8849,13 +8850,19 @@ def r868_doc_kenh_hong_thi_dung():
     bang(cat_that is not None, "KHONG DO DUOC: thieu cat")
     for hong in ("", "loi", "rac"):
         with San() as s:
-            nk, dau = s / "xau.log", s / "dau"
-            cat_gia = {"": "", "loi": "case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; ",
-                       "rac": "case \"$*\" in */kq) printf BAD_CHANNEL; exit 0;; esac; "}[hong] + \
+            nk, dau, tmp, kq = s / "xau.log", s / "dau", s / "tmp", s / "kq.log"
+            tmp.mkdir()
+            cat_gia = f"case \"$*\" in */kq) echo \"$*\" >> {shlex.quote(str(kq))};; esac; " + \
+                {"": "", "loi": "case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; ",
+                 "rac": "case \"$*\" in */kq) printf BAD_CHANNEL; exit 0;; esac; "}[hong] + \
                 f"exec {shlex.quote(cat_that)} \"$@\""
             p, gp, uv, _xau, _t = _wp868_chay(
                 s, apt=f"echo {shlex.quote(str(s / 'xau'))}; exit 0",
-                ung_vien={s / "xau": f"echo xau >> {shlex.quote(str(nk))}; echo 'ripgrep 14.1.0'", dau / "cat": cat_gia})
+                ung_vien={s / "xau": f"echo xau >> {shlex.quote(str(nk))}; echo 'ripgrep 14.1.0'", dau / "cat": cat_gia},
+                env_them={"TMPDIR": str(tmp)})
+            con = [x.name for x in tmp.iterdir() if x.name.startswith("cai_cong_cu.")]
+            bang(kq.exists() and str(tmp) in kq.read_text(), f"KHONG DO DUOC {hong!r}: kenh khong duoc doc trong TMPDIR san")
+            bang(con == [], f"kenh {hong!r}: thu muc kenh con sau khi thoat: rc={p.returncode} con={con}")
             if hong:
                 dau_hieu = {"loi": "khong doc duoc kenh ket qua", "rac": "kenh ket qua hong"}[hong]
                 bang(p.returncode != 0 and '"DAT"' not in p.stdout and not nk.exists() and dau_hieu in p.stderr,
@@ -8959,6 +8966,8 @@ def r868_hinh_dang_kenh_ket_qua():
                 'rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ] && export PATH="$DICH:$PATH"\n'):
         bang(can in than, f"cai_cong_cu.sh thieu chot kenh ket qua {can!r}")
     bang("$(eval" not in than and "KET_QUA_CAI=\"$(eval" not in sh, "cong thuc lai chay trong $( ) (cho EOF stdout)")
+    bang(re.findall(r"^\s*trap\b.*$", sh, re.M) == ["trap 'rm -rf -- \"$TAM_CAI\"' EXIT"],
+         "trap EXIT don kenh phai la DUY NHAT, khong bi go/ghi de")
     for can in ("printf 'GIU_PATH' > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
                 "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
                 "printf '%q' \"$KQ\")\" >&2; exit 7 ;;"):
@@ -11263,6 +11272,9 @@ DOT_BIEN_HOOK = [
      ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_gan_lai_tam_sau_go_export", ("declare +x TAM_CAI\ntrap ", 'declare +x TAM_CAI\nTAM_CAI="$TAM_CAI"\ntrap '),
      ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    # Codex lượt 4: F868-02 mở lại — gỡ trap SAU khi công thức chạy ⇒ hai đường `exit 7` của reader rò thư mục kênh.
+    ("wp868_sh_go_trap_sau_eval", ('( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n', '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\ntrap - EXIT\n'),
+     ["r868_doc_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_chi_duyet_hai_ung_vien", ('  for d in "$@"; do', '  for d in "${@:1:2}"; do'),
      ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp868_sh_bo_break", ('then dich="$d"; break; fi', 'then dich="$d"; fi'),

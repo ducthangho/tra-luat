@@ -1,0 +1,141 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4335026029",
+    "pull_request_review_id": 5597446326,
+    "id": 4335026029,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAmM_bQ",
+    "diff_hunk": "@@ -21966,7 +21969,8 @@ def _c291_docs_ngoai_goi():\n         # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3). Thêm docs KHÔNG kê khai slot ở đây nữa.\n         # KÊ KHAI SLOT (packet #831 spec r2): gói 187 → **189** = + `changelog.d/wp-802.md` (#802 land không sinh lại\n         # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.\n-        ok3 = int(j.get(\"file_count\") or 0) == len(paths) and len(paths) == 189\n+        # KÊ KHAI SLOT (packet #858): 189 → **190** = + `changelog.d/wp-858.md`. Trần Package 200 còn 9 khe.\n+        ok3 = int(j.get(\"file_count\") or 0) == len(paths) and len(paths) == 190",
+    "path": "scripts/tl_selftest.py",
+    "commit_id": "521efebab226fe3a92b2ccce4a59c27dd638edff",
+    "original_commit_id": "ff498b5c3b602182d5ee71c63d5560a9a6cb85d5",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep both manifest ratchets compatible with the worker tree**\n\nOn this commit, the checked-in `RELEASE_MANIFEST.json` still contains 189 entries, but this assertion and its counterpart in `_c357_agents_ngoai_goi` now require 190. Both functions read that committed manifest directly, so both return `False` on the supplied tree; independently executing the same functions from the parent returns `True`. This breaks the selftest required by `.github/workflows/ci.yml`, even though the worker release-verification step correctly generates a temporary manifest. Make both ratchets inspect the generated worker manifest, or defer their increases until the land-side manifest update. Cover both worker and regenerated-land manifests in a regression test, retaining the exact-count check so unexpected package additions are still detected.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-21T09:13:01Z",
+    "updated_at": "2026-10-21T09:13:01Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/864#discussion_r4335026029",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/864",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4335026029"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/864#discussion_r4335026029"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/864"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4335026029/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": 21972,
+    "original_line": 21973,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 30,
+    "position": 29,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4335093473",
+    "pull_request_review_id": 5597529066,
+    "id": 4335093473,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABAmRG4Q",
+    "diff_hunk": "@@ -21966,7 +21969,8 @@ def _c291_docs_ngoai_goi():\n         # đúng vì khoá `docs`); chỉ số tệp GÓI còn ratchet (ok3). Thêm docs KHÔNG kê khai slot ở đây nữa.\n         # KÊ KHAI SLOT (packet #831 spec r2): gói 187 → **189** = + `changelog.d/wp-802.md` (#802 land không sinh lại\n         # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.\n-        ok3 = int(j.get(\"file_count\") or 0) == len(paths) and len(paths) == 189\n+        # KÊ KHAI SLOT (packet #858): 189 → **190** = + `changelog.d/wp-858.md`. Trần Package 200 còn 9 khe.\n+        ok3 = int(j.get(\"file_count\") or 0) == len(paths) and len(paths) == 190",
+    "path": "scripts/tl_selftest.py",
+    "commit_id": "521efebab226fe3a92b2ccce4a59c27dd638edff",
+    "original_commit_id": "ff498b5c3b602182d5ee71c63d5560a9a6cb85d5",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đúng với `ff498b5`. Đó là commit trung gian: spec #858 bắt sinh lại `RELEASE_MANIFEST.json` ở commit CUỐI, sau khi merge master. Head hiện tại `bfbd273` đã mang manifest sinh lại, nên chỗ này đã xử lý. Đo trên cây ấy:\n- `release-verify RELEASE_MANIFEST.json --strict --json` (abbrev 7): `ok=true`, `expected_file_count = checked_file_count = 190`.\n- `tl.py --selftest`: `1731/1731`, rc 0. Gồm `r291_docs_ngoai_goi` và `r357_agents_ngoai_goi` với đúng 190 tệp.\n\nKhông đổi ratchet sang đọc manifest tạm của worker. Phép đếm cứng trên manifest đã commit là chủ ý của hai ca ấy: thêm tệp vào gói mà không kê khai slot thì phải đỏ. Cách ly worker/land là phạm vi của packet khác, không thuộc #858.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-10-21T09:20:26Z",
+    "updated_at": "2026-10-21T09:20:26Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/864#discussion_r4335093473",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/864",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4335093473"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/864#discussion_r4335093473"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/864"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4335093473/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": 21972,
+    "original_line": 21973,
+    "side": "RIGHT",
+    "in_reply_to_id": 4335026029,
+    "author_association": "OWNER",
+    "original_position": 30,
+    "position": 29,
+    "subject_type": "line"
+  }
+]

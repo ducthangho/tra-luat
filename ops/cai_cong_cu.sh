@@ -28,23 +28,20 @@ fi
 # ung vien (vd thieu PyYAML). Giu nguyen doi so con lai cua mang (`py -3`).
 PY[0]="$(command -v "${PY[0]}")"
 
-# wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (cong thuc duoc `eval` duoi day nen goi duoc ham nay).
-# `dirname "$(command -v X)"` in thu muc ban DAU PATH — ban hong dung truoc thi in thu muc ban HONG (cung loi #831 voi rg).
-# Chuan DUY NHAT la CHINH `cong_cu.py kiem-tra --chi <ten>` chay bang PY da ghim tuyet doi (wp831 F03), khong chep regex,
-# khong loc truoc bang `-f/-x/.exe`: ten tran chua DAT thi them mot thu muc KHONG co <ten> vao dau PATH khong doi ket qua
-# tra ten, nen bo loc ay tuong duong checker (Codex wp858 luot 1 F858-02).
-# Ten tran da DAT => dong cuoi la `:giu-nguyen-PATH:` (KHONG phai thu muc): in lai thu muc cua no se dua ca thu muc ay len
-# DAU PATH va che cong cu khac cung thu muc (#831 luot 4: cong thuc bash dua rg hong len truoc); im lang thi dong cuoi
-# stdout cua TRINH CAI bi doc lam thu muc chon (F858-03). `--win`: ung vien la duong Windows, doi qua `cygpath -u`; ghi
-# $GITHUB_PATH bang `cygpath -w`. Ghi $GITHUB_PATH chi khi ten tran chua DAT (ly do nhu rg.cai.linux). Moi buoc hong
-# (khong ung vien DAT, cygpath, ghi $GITHUB_PATH) => tra 1 TUONG MINH: `errexit` tat trong `$(eval ...)` (F858-01).
+# wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (duoc `eval` duoi day). `dirname "$(command -v X)"` in thu
+# muc ban DAU PATH, ke ca ban HONG. Chuan DUY NHAT: CHINH `cong_cu.py kiem-tra --chi <ten>` bang PY da ghim (wp831 F03),
+# khong loc `-f/-x/.exe` (ten tran chua DAT thi thu muc khong co <ten> khong doi phep tra ten — F858-02). Ten tran da DAT
+# => khong doi PATH, dong cuoi `/dev/null` (KHONG BAO GIO la thu muc): in thu muc cu dua `rg` hong cung thu muc len dau
+# (#831 luot 4), im lang thi dong cuoi cua TRINH CAI bi doc lam thu muc, ten canh khac thi trung thu muc that (F858-03).
+# `--win`: ung vien qua `cygpath -u`, $GITHUB_PATH qua `cygpath -w`; ghi $GITHUB_PATH chi khi ten tran chua DAT. Moi buoc
+# hong => `return 1` TUONG MINH vi `errexit` tat trong `$(eval ...)` (F858-01/04).
 chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
   local win="" ten d dich="" w
   if [ "${1:-}" = "--win" ]; then win=1; shift; fi
   ten="$1"; shift
   if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then
     echo "cai_cong_cu: '$ten' ten tran da DAT, giu nguyen PATH" >&2
-    echo ":giu-nguyen-PATH:"
+    echo "/dev/null"
     return 0
   fi
   for d in "$@"; do

@@ -21,13 +21,10 @@ cong_cu:
     ban_ghim: null
     probe: [{ten: mac_dinh, lenh: [git, --version], regex: '(?m)^git version\s+(\d+\.\d+\.\d+(?:[.+-][0-9A-Za-z.+-]*)?)'}]
     cai:
-      # wp858 (L1): `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) thay `dirname "$(command -v …)"` — thư mục in ra là
-      # ứng viên ĐẦU TIÊN mà CHÍNH `cong_cu.py kiem-tra --chi <tên>` nhận `DAT`; tên trần đã DAT ⇒ không in gì (không
-      # đổi PATH). Ứng viên (Q2): Linux `/usr/bin` (dưới `CONG_CU_GOC` khi test) · macOS `$(brew --prefix)/bin` · Windows
-      # thư mục do choco đặt tệp; cuối cùng `command -v`. Cùng hàm cho python/shellcheck/bash; `rg` giữ bộ chọn riêng.
-      # python (chủ kho chọn (a), #858 issuecomment-6312034981): checker đo `python` bằng `sys.executable`, KHÔNG theo
-      # PATH ⇒ tên trần luôn DAT khi checker chạy được ⇒ hàm không đổi PATH. Bản `python` hỏng đầu PATH KHÔNG bị phát
-      # hiện qua `cong_cu.py` — nợ có tên `python-probe-khong-theo-PATH`.
+      # wp858 (L1): `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) in ứng viên ĐẦU TIÊN mà `cong_cu.py kiem-tra --chi` nhận
+      # DAT; tên trần đã DAT ⇒ không đổi PATH. Ứng viên (Q2): Linux `/usr/bin` (`CONG_CU_GOC` khi test) · macOS brew · Windows
+      # thư mục choco; cuối cùng `command -v`. Cùng hàm cho python/shellcheck/bash. python: checker dùng `sys.executable`
+      # ⇒ python hỏng đầu PATH lọt — nợ `python-probe-khong-theo-PATH` (chủ kho chọn (a), #858 issuecomment-6312034981).
       linux: {lenh: 'sudo apt-get install -y git && chon_thu_muc_chay_duoc git "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v git || echo ./git)")"'}
       macos: {lenh: 'brew install git && chon_thu_muc_chay_duoc git "$(brew --prefix)/bin" "$(dirname "$(command -v git || echo ./git)")"'}
       windows: {lenh: 'choco install git --yes --no-progress && chon_thu_muc_chay_duoc --win git "${ProgramFiles:-C:/Program Files}/Git/cmd" "${ProgramFiles:-C:/Program Files}/Git/bin" "${ProgramFiles:-C:/Program Files}/Git/usr/bin" "$(dirname "$(command -v git || echo ./git)")"'}

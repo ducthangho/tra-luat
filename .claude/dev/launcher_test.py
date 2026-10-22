@@ -2340,11 +2340,9 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     bang(tt == "CHUA_XAC_THUC", f"rc=0 ma noi chua dang nhap thi phai fail-closed, duoc {tt}")
 
 
-# wp858 (L2, đo 21-10-2026): `codex-linux-sandbox` (bwrap) gắn tmpfs chỉ đọc lên `<gốc ghi được>/.git` để bảo vệ nó,
-# nên khi một phiên Codex đang sống thì THƯ MỤC RỖNG `/tmp/.git` có mặt trên hệ tệp máy chủ
-# (`/proc/<pid>/mountinfo`: `/tmp/.git ro … tmpfs`). Mọi `mkdtemp()` dưới `/tmp` khi ấy có tổ tiên mang `.git` và
-# `_KhoCodex` từ chối ĐÚNG thiết kế (`Codex home is inside a repository`) ⇒ `t86` đỏ "khi chạy song song" ở #831 —
-# thật ra là khi chạy CÙNG LÚC với một lượt Codex. Ca chọn gốc tạm mà không tổ tiên nào có `.git`.
+# wp858 (L2, đo 21-10-2026): khi một phiên Codex đang sống, `codex-linux-sandbox` gắn tmpfs ro lên `/tmp/.git` (mountinfo)
+# ⇒ thư mục rỗng `/tmp/.git` có trên máy chủ ⇒ `_KhoCodex` từ chối ĐÚNG mọi home dưới `/tmp` ⇒ `t86` đỏ "khi song song"
+# (#831). Ca chọn gốc tạm không có `.git` ở chính nó hay tổ tiên.
 _WP858_GOC_TAM_UNG_VIEN = (tempfile.gettempdir(), "/var/tmp", "/dev/shm")
 
 
@@ -8466,10 +8464,8 @@ def r831_cai_rg_macos_chon_ban_chay_duoc():
     return _wp831_cai_rg_chon_ban_chay_duoc("macos")
 
 
-# wp858 (L1): `git`/`python`/`shellcheck`/`bash` gọi `chon_thu_muc_chay_duoc` (ops/cai_cong_cu.sh) thay cho
-# `dirname "$(command -v …)"`. Ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh với installer là stub — POSIX.
-# Ca hình dạng (`r858_hinh_dang_cong_thuc_cai`) thuần Python, chạy cả Windows: nhờ nó đột biến wp858 đo được ở mọi
-# nền, không kéo sàn ≥70% (launcher-windows 39343232374: 197/281) xuống dưới ngưỡng.
+# wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
+# chạy cả Windows nên đột biến wp858 đo được mọi nền (sàn ≥70%: launcher-windows 39343232374 là 197/281).
 _WP858_TOT = {"git": "echo 'git version 2.43.0'",
               "shellcheck": "echo 'ShellCheck - shell script analysis tool'; echo 'version: 0.9.0'",
               "bash": "echo 'GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)'"}
@@ -8493,12 +8489,9 @@ def _wp858_ung_vien(s, ten, nen):
 
 def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_tiep=False, cai_in=None,
                     env_them=None, gp_thu_muc=False):
-    """NGUYÊN `<ten>.cai.<nen>` qua cai_cong_cu.sh (hoặc `--bat-buoc` khi có `bang_ke`); installer là stub.
-    `tot` là thân `<ten>` ở thư mục ứng viên (None = không đặt). `dau`: thư mục đứng ĐẦU PATH — `"hong"` chứa `<ten>`
-    hỏng, `"tot"` chứa `<ten>` tốt (tên trần đã DAT), `None` không có. `them`: {tên: thân} đặt thêm vào thư mục đầu.
-    `truc_tiep`: eval công thức trong bash (kèm hàm chọn chép từ CHÍNH cai_cong_cu.sh, nếu có) để đọc thư mục nó IN
-    ở dòng cuối. `cai_in`: dòng stub `apt-get` in ra stdout (F858-03). `env_them`: biến thêm (vd `CYGPATH_W_HONG`).
-    `gp_thu_muc`: `$GITHUB_PATH` là THƯ MỤC ⇒ ghi hỏng (F858-01). Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    """NGUYÊN `<ten>.cai.<nen>` qua cai_cong_cu.sh (`--bat-buoc` khi có `bang_ke`). `tot`: thân `<ten>` ở ứng viên;
+    `dau`: `"hong"`/`"tot"`/None ở ĐẦU PATH; `them`: tệp thêm ở thư mục đầu; `truc_tiep`: eval công thức để đọc dòng IN
+    cuối; `cai_in`: stdout stub apt-get; `gp_thu_muc`: $GITHUB_PATH là thư mục. Trả (p, GITHUB_PATH, ứng viên, đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cong_cu.py", "bash_nen.py"):
         shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
@@ -8518,11 +8511,11 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
     apt = f"echo {shlex.quote(cai_in)}; exit 0" if cai_in else "exit 0"
     tep = {bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": apt,
            bin_ / "choco": "exit 0", bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{s / 'brew'}'; exit 0",
-           # `-w` đánh dấu `W:` (N2: GITHUB_PATH đi qua `cygpath -w`), thoát 37 khi `CYGPATH_W_HONG`; `-u` ánh xạ `V:` về
-           # `<sân>/v` và giữ nguyên đường POSIX.
+           # `-w` → `W:<đường>`; `-u` ánh xạ `V:` về `<sân>/v`; `CYGPATH_{W,U}_HONG` ⇒ thoát 37 (`-u` vẫn in đường đúng).
            bin_ / "cygpath": ('[ "$1" = -w ] && { [ -n "${CYGPATH_W_HONG:-}" ] && exit 37; echo "W:$2"; exit 0; }; '
                               'while [ "${1#-}" != "$1" ]; do shift; done; '
-                              f'case "$1" in V:*) echo "{s / "v"}${{1#V:}}";; *) echo "$1";; esac')}
+                              f'case "$1" in V:*) echo "{s / "v"}${{1#V:}}";; *) echo "$1";; esac; '
+                              'exit ${CYGPATH_U_HONG:+37}')}
     if tot is not None:
         tep[uv / ten] = tot
     if dau:
@@ -8577,9 +8570,9 @@ def _wp858_cai_chon_ban_chay_duoc(nen):
             with San() as s:
                 p, _gp, _uv, _d = _wp858_chay_cai(s, ten, nen, xau, truc_tiep=True)
                 bang(p.returncode != 0, f"{nen}/{ten}: cong thuc rc=0 khi khong ung vien nao chay duoc ({xau!r})")
-        # F858-01 (Codex wp858 lượt 1): ghi $GITHUB_PATH hỏng / `cygpath -w` hỏng ⇒ installer THẬT thoát ≠ 0 — `errexit`
-        # tắt trong `$(eval ...)` nên hàm phải tự trả 1; bước kiểm cuối chỉ chứng minh PATH của tiến trình này.
-        hong_ghi = [dict(gp_thu_muc=True)] + ([dict(env_them={"CYGPATH_W_HONG": "1"})] if nen == "windows" else [])
+        # F858-01/04: ghi $GITHUB_PATH hoặc `cygpath` hỏng ⇒ installer THẬT ≠ 0 (`errexit` tắt trong `$(eval ...)`).
+        hong_ghi = [dict(gp_thu_muc=True)] + ([dict(env_them={"CYGPATH_W_HONG": "1"}),
+                                               dict(env_them={"CYGPATH_U_HONG": "1"})] if nen == "windows" else [])
         for kw in hong_ghi:
             with San() as s:
                 p, _gp, _uv, _d = _wp858_chay_cai(s, ten, nen, _WP858_TOT[ten], **kw)
@@ -8611,9 +8604,8 @@ def r858_cai_windows_chon_ban_chay_duoc():
 
 @ca
 def r858_cai_python_khong_in_thu_muc_ban_hong():
-    """N1/N3 cho `python`, thu hẹp theo chủ kho (#858 issuecomment-6312034981, phương án (a)): checker đo `python`
-    bằng `sys.executable`, nên chỉ khẳng định rc 0 và KHÔNG in/ghi thư mục của bản hỏng. Nợ có tên
-    `python-probe-khong-theo-PATH`: bản `python` hỏng đầu PATH KHÔNG bị phát hiện qua `cong_cu.py`."""
+    """N1/N3 cho python, thu hẹp theo chủ kho (#858 issuecomment-6312034981 (a)): chỉ rc 0 và KHÔNG in/ghi thư mục bản
+    hỏng. Nợ `python-probe-khong-theo-PATH`: checker đo bằng `sys.executable` nên python hỏng đầu PATH lọt."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()
@@ -8625,8 +8617,7 @@ def r858_cai_python_khong_in_thu_muc_ban_hong():
                                                them={"python": hong})
             bang(p.returncode == 0 and '"DAT"' in p.stdout and str(dau_d) not in gp,
                  f"{nen}/python: rc={p.returncode} GITHUB_PATH={gp!r} (thu muc ban hong {dau_d}) {p.stderr[-300:]}")
-        # Thư mục công thức IN (dòng cuối) — thứ cai_cong_cu.sh đưa lên đầu PATH. `python3` cũng hỏng ở đầu (Linux cũ
-        # in `dirname "$(command -v python3)"`).
+        # Dòng công thức IN cuối (thứ lên đầu PATH); `python3` cũng hỏng vì Linux cũ in `dirname` của nó.
         with San() as s:
             p, _gp, _uv, dau_d = _wp858_chay_cai(s, "python", nen, "echo 'Python 3.12.3'", dau=None,
                                                  them={"python": hong, "python3": hong}, truc_tiep=True)
@@ -8637,21 +8628,24 @@ def r858_cai_python_khong_in_thu_muc_ban_hong():
 
 @ca
 def r858_bat_buoc_bash_khong_dua_rg_hong_len_dau():
-    """N4 (Codex #831 lượt 4): `--bat-buoc`, `rg` hỏng nằm CÙNG thư mục với `bash` ban đầu, `rg` tốt ở `/usr/bin`
-    (dưới `CONG_CU_GOC`). Công thức `bash` cũ in lại thư mục ấy ⇒ `rg` hỏng lên đầu ⇒ tổng cuối `rg` DO. Cả hai thứ tự."""
+    """N4 (Codex #831 lượt 4): `--bat-buoc`, `rg` hỏng CÙNG thư mục với `bash` ban đầu ⇒ tổng cuối `rg` không được DO."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()
     vo, _env = _wp802_bash_env()
-    # F858-03 (Codex wp858 lượt 1): installer in thư mục đầu (có `bash` tốt, `rg` hỏng) ở DÒNG CUỐI stdout — nhánh tên
-    # trần DAT phải chặn cai_cong_cu.sh nhận dòng ấy làm thư mục chọn.
+    # F858-03: trình cài in thư mục đầu ở dòng cuối stdout (lượt 1); thư mục THẬT trùng tên dòng canh cũ + `rg` hỏng ở
+    # cwd, vì `:` trong PATH tạo phần tử rỗng = cwd (lượt 2).
     for thu_tu in (("rg", "bash"), ("bash", "rg")):
-      for in_dau in (False, True):
+      for in_dau in (False, True, "trung"):
         with San() as s:
+            if in_dau == "trung":
+                (s / "kho" / ":giu-nguyen-PATH:").mkdir(parents=True)
+                (s / "kho" / "rg").write_text(f"#!/bin/sh\n{_WP858_HONG}\n")
+                (s / "kho" / "rg").chmod(0o755)
             (s / "dau").mkdir()
             (s / "dau" / "bash").symlink_to(vo)
             p, _gp, _uv, _d = _wp858_chay_cai(s, "rg", "linux", "echo 'ripgrep 14.1.0'", dau=None, bang_ke=thu_tu,
-                                              them={"rg": _WP858_HONG}, cai_in=str(s / "dau") if in_dau else None)
+                                              them={"rg": _WP858_HONG}, cai_in=str(s / "dau") if in_dau is True else None)
             try:
                 tong = json.loads(p.stdout[p.stdout.rindex('{\n  "trang_thai_tong"'):])
             except ValueError:
@@ -8664,9 +8658,8 @@ def r858_bat_buoc_bash_khong_dua_rg_hong_len_dau():
 
 @ca
 def r858_hinh_dang_cong_thuc_cai():
-    """Thuần Python, chạy MỌI nền: 12 công thức `git`/`python`/`shellcheck`/`bash` gọi `chon_thu_muc_chay_duoc`
-    (đúng tên công cụ, `--win` đúng ở Windows, ứng viên Q2 đứng trước `command -v`), không còn in thẳng
-    `dirname "$(command -v …)"`; lệnh cài trước ` && ` đầu tiên giữ nguyên (Q3); hàm có trong cai_cong_cu.sh."""
+    """Thuần Python, MỌI nền: 12 công thức gọi `chon_thu_muc_chay_duoc` đúng tên/`--win`/ứng viên Q2, lệnh cài giữ nguyên
+    (Q3); hàm trong cai_cong_cu.sh có đủ các chốt."""
     import yaml
     d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))["cong_cu"]
     cai_dat = {"git": ("sudo apt-get install -y git", "brew install git", "choco install git --yes --no-progress"),
@@ -8694,15 +8687,15 @@ def r858_hinh_dang_cong_thuc_cai():
     than = than[:than.index("\n}\n")]
     for can in ('if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then',
                 'PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten"',
-                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'echo ":giu-nguyen-PATH:"',
+                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', 'echo "/dev/null"',
+                'd="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
                 'printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || {', '\'$ten\' chay duoc" >&2; return 1; }'):
         bang(can in than, f"ham chon_thu_muc_chay_duoc thieu {can!r}")
 
 
 @ca
 def r858_selftest_editskill_thu_muc_rieng():
-    """N6 (L3): khối edit-skill của tl_selftest dùng thư mục tạm RIÊNG từng lượt (`mkdtemp`) rồi dọn — không còn tên
-    tệp cố định trong `gettempdir()` mà hai selftest song song ghi/đọc chéo (đỏ giả, #831 đo 18-10-2026)."""
+    """N6 (L3): edit-skill của tl_selftest dùng thư mục tạm RIÊNG (`mkdtemp`) rồi dọn, không tên cố định trong temp chung."""
     than = SELFTEST_DANG_DUNG.read_text(encoding="utf-8")
     dau = than.find("KH1 III.2 — edit-skill")
     cuoi = than.find('cases.append(("edit_skill_assert_count_gate_dry"', dau)
@@ -10926,8 +10919,7 @@ DOT_BIEN_HOOK = [
     # Ghi $GITHUB_PATH vô điều kiện — đúng lỗi ci.yml run 39115659366. Neo kèm khoá dòng KẾ để linux ≠ macos.
     ("wp831_yaml_linux_ghi_github_path_vo_dieu_kien", ('{ [ -z "${GITHUB_PATH:-}" ] || "${PY[@]}" ops/cong_cu.py kiem-tra --chi rg >/dev/null 2>&1 || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:', '{ [ -z "${GITHUB_PATH:-}" ] || echo "$RG_DICH" >> "$GITHUB_PATH"; } && echo "$RG_DICH"\'}\n      macos:'),
      ["r831_cai_rg_linux_chon_ban_chay_duoc"], "yaml"),
-    # wp858: mỗi đột biến kèm ca hình dạng thuần Python (chạy MỌI nền) để đo được cả trên Windows — sàn ≥70% của
-    # launcher-windows 39343232374 là 197/281, không còn chỗ cho đột biến nào chỉ đo được trên POSIX.
+    # wp858: mỗi đột biến kèm ca hình dạng thuần Python để đo được cả Windows (sàn ≥70%, 39343232374: 197/281).
     ("wp858_yaml_git_linux_ve_dirname",
      ('sudo apt-get install -y git && chon_thu_muc_chay_duoc git "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v git || echo ./git)")"',
       'sudo apt-get install -y git && dirname "$(command -v git)"'),
@@ -10943,9 +10935,7 @@ DOT_BIEN_HOOK = [
       'sudo apt-get install -y python3 python3-pip && dirname "$(command -v python3)"'),
      ["r858_cai_python_khong_in_thu_muc_ban_hong", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
     ("wp858_sh_bo_kiem_ten_tran",
-     # Không nhắm N4: khi không còn lọc `-f/-x` (F858-02), bỏ kiểm tên trần thì ứng viên ĐẦU (`/usr/bin`) luôn DAT nhờ
-     # tên trần — PATH nhận `/usr/bin` (có `rg` tốt) nên N4 vẫn xanh; N4 do dòng canh giữ (`wp858_sh_bo_dong_canh_giu_path`).
-     # Hại thật của đột biến này là GHI $GITHUB_PATH khi tên trần đã DAT — ca Linux đo đúng điều đó.
+     # Không nhắm N4 (ứng viên đầu luôn DAT nhờ tên trần, PATH nhận `/usr/bin` có `rg` tốt); hại thật: ghi $GITHUB_PATH.
      ('  if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then', '  if false; then'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_chon_theo_ma_thoat",
@@ -10959,7 +10949,7 @@ DOT_BIEN_HOOK = [
      ('      w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho \'$dich\'" >&2; return 1; }',
       '      w="$dich"'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
-    # Codex wp858 lượt 1: F858-02 (bỏ `cygpath -u`), F858-01 (nuốt lỗi `cygpath -w` / lỗi ghi), F858-03 (bỏ dòng canh).
+    # Codex wp858 lượt 1–2: F858-01/02/03/04.
     ("wp858_sh_bo_cygpath_u",
      ('      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
       '      :'),
@@ -10973,7 +10963,13 @@ DOT_BIEN_HOOK = [
       'printf \'%s\\n\' "$w" >> "$GITHUB_PATH"'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_bo_dong_canh_giu_path",
-     ('    echo ":giu-nguyen-PATH:"\n', ''),
+     ('    echo "/dev/null"\n', ''),
+     ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp858_sh_cygpath_u_hong_khong_tra_loi",
+     ("cygpath -u hong cho ung vien cua '$ten'\" >&2; return 1; }", "cygpath -u hong cho ung vien cua '$ten'\" >&2; }"),
+     ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    ("wp858_sh_dong_canh_la_ten_thu_muc",
+     ('    echo "/dev/null"\n', '    echo ":giu-nguyen-PATH:"\n'),
      ["r858_bat_buoc_bash_khong_dua_rg_hong_len_dau", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_selftest_editskill_ten_co_dinh",
      ('    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))\n    _esf = _esd / "_selftest_editskill.py"',
@@ -11018,8 +11014,7 @@ DOT_BIEN_HARNESS = [
      ('               if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
       '               if True}'),
      ["r484_g8_hook_scrub_kin_voi_bash_env"]),
-    # wp858 (N5): bộ chọn gốc tạm của `t86` chỉ nhìn `.git` ở CHÍNH thư mục, bỏ tổ tiên ⇒ `/tmp/.git` của sandbox
-    # Codex lọt qua lại.
+    # wp858 (N5): bộ chọn gốc tạm của `t86` bỏ kiểm tổ tiên ⇒ `/tmp/.git` của sandbox Codex lọt lại.
     ("wp858_goc_tam_bo_kiem_to_tien",
      ('not any(os.path.lexists(q / ".git") for q in (p, *p.parents))', 'not os.path.lexists(p / ".git")'),
      ["r858_goc_tam_tranh_to_tien_co_git"]),

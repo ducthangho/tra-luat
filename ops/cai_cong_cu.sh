@@ -132,7 +132,9 @@ declare +x KENH_KQ
 # (writer muon) khong lam treo (N2), va moi gi no ghi sau do khong con duoc doc lam ket qua. `set +e`: giu ngu nghia
 # `$( )` cu (errexit tat) — ma thoat la cua chuoi `&&`, cac `return 1` tuong minh cua bo chon la chot.
 ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
-KQ="$(cat -- "$KENH_KQ"; printf x)"; KQ="${KQ%x}"
+# F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
+KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
+KQ="${KQ%x}"
 case "$KQ" in
   GIU_PATH) DICH="" ;;
   DICH$'\n'?*) DICH="${KQ#DICH$'\n'}" ;;

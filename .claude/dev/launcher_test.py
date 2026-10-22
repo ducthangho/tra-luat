@@ -8719,10 +8719,11 @@ def r858_selftest_editskill_thu_muc_rieng():
 
 # wp868 (CAI-TACH-KENH-KET-QUA): kết quả bộ chọn đi qua KÊNH RIÊNG, không qua stdout chung với trình cài. Ca hành vi
 # chạy NGUYÊN `rg.cai.linux` (hoặc công thức sân tạm) qua cai_cong_cu.sh, installer là stub; ca hình dạng thuần Python.
-def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None):
+def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None, env_them=None):
     """`rg` qua cai_cong_cu.sh trong sân tạm: `rg` HỎNG đầu PATH và ở `xau/`, `rg` tốt ở `/usr/bin` dưới `CONG_CU_GOC`.
     `apt`: thân stub `apt-get`; `lenh`: thay `rg.cai.linux` (mặc định NGUYÊN VĂN YAML đang đo); `ung_vien`: {thư mục: thân
-    `rg`} thêm. Trả (process, GITHUB_PATH, ứng viên `/usr/bin`, `xau`, giây chạy)."""
+    `rg`} thêm (khoá `dau/<tệp>` đặt tệp bất kỳ lên ĐẦU PATH); `env_them`: biến thêm. Trả (process, GITHUB_PATH, ứng
+    viên `/usr/bin`, `xau`, giây chạy)."""
     import yaml
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     for t in ("cong_cu.py", "bash_nen.py"):
@@ -8737,7 +8738,7 @@ def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None):
     uv, bin_, dau, xau = s / "goc" / "usr" / "bin", s / "bin", s / "dau", s / "xau"
     tep = {uv / "rg": "echo 'ripgrep 14.1.0'", dau / "rg": _WP858_HONG, xau / "rg": _WP858_HONG,
            bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": apt}
-    tep.update({Path(k) / "rg": v for k, v in (ung_vien or {}).items()})
+    tep.update({(Path(k) if str(k).startswith(str(dau)) else Path(k) / "rg"): v for k, v in (ung_vien or {}).items()})
     for f, than in tep.items():
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(f"#!/bin/sh\n{than}\n")
@@ -8745,7 +8746,7 @@ def _wp868_chay(s, apt="exit 0", lenh=None, ung_vien=None):
     gp = s / "github_path"; gp.write_text("")
     vo, env = _wp802_bash_env()
     env.update(CONG_CU_NEN="linux", CONG_CU_GOC=str(s / "goc"), GITHUB_PATH=str(gp),
-               PATH=os.pathsep.join([str(dau), str(bin_), env.get("PATH", "")]))
+               PATH=os.pathsep.join([str(dau), str(bin_), env.get("PATH", "")]), **(env_them or {}))
     t0 = time.monotonic()
     p = subprocess.run([vo, str(ops / "cai_cong_cu.sh"), "rg"], env=env, capture_output=True, text=True, timeout=120)
     return p, gp.read_text().strip(), uv, xau, time.monotonic() - t0
@@ -8815,6 +8816,58 @@ def r868_khong_bo_chon_doc_dong_cuoi():
                                            lenh=f"sudo apt-get install -y ripgrep && echo {shlex.quote(str(uv))}")
         bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == "",
              f"cong thuc khong bo chon mat duong lui dong cuoi: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+    with San() as s:   # F868-03 (Codex lượt 1): trình cài Windows in CRLF ⇒ đường lùi vẫn cắt `\r`
+        uv = s / "goc" / "usr" / "bin"
+        p, _gp, _uv, _xau, _t = _wp868_chay(s, lenh=f"sudo apt-get install -y ripgrep && printf 'log\\r\\n%s\\r\\n' "
+                                                  f"{shlex.quote(str(uv))}")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout,
+             f"duong lui dong cuoi khong cat CR: rc={p.returncode} {p.stdout[-200:]} {p.stderr[-300:]}")
+
+
+@ca
+def r868_doc_kenh_hong_thi_dung():
+    """F868-01 (Codex lượt 1): đọc kênh LỖI (cat giả rc 74 cho tệp kênh) không được coi là kênh rỗng rồi lấy dòng cuối
+    stdout — trình cài in thư mục `xau` (có `rg` tốt KHÁC, ghi nhật ký khi bị gọi) ⇒ thoát ≠ 0, `rg` của `xau` không chạy.
+    Đối chứng: cùng sân, cat giả cho qua ⇒ DAT và `xau` không bị gọi (stub trong suốt)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    cat_that = shutil.which("cat")
+    bang(cat_that is not None, "KHONG DO DUOC: thieu cat")
+    for hong in (False, True):
+        with San() as s:
+            nk, dau = s / "xau.log", s / "dau"
+            cat_gia = (f"case \"$*\" in */kq) echo 'cat: loi I/O gia' >&2; exit 74;; esac; " if hong else "") + \
+                f"exec {shlex.quote(cat_that)} \"$@\""
+            p, gp, uv, _xau, _t = _wp868_chay(
+                s, apt=f"echo {shlex.quote(str(s / 'xau'))}; exit 0",
+                ung_vien={s / "xau": f"echo xau >> {shlex.quote(str(nk))}; echo 'ripgrep 14.1.0'", dau / "cat": cat_gia})
+            if hong:
+                bang(p.returncode != 0 and not nk.exists(),
+                     f"doc kenh hong ma van dung stdout trinh cai: rc={p.returncode} xau_goi={nk.exists()} {p.stderr[-300:]}")
+            else:
+                bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv) and not nk.exists(),
+                     f"doi chung cat trong suot hong: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+
+
+@ca
+def r868_don_kenh_khi_loi():
+    """F868-02 (Codex lượt 1): thư mục tạm của kênh PHẢI bị xoá cả khi trình cài lỗi (trap EXIT), không chỉ ở đường thành
+    công. Trình cài liệt kê $TMPDIR lúc chạy ⇒ chứng minh thư mục từng được tạo; sau đó không còn `cai_cong_cu.*`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    for ma in (29, 0):
+        with San() as s:
+            tmp, nk = s / "tmp", s / "ls.log"
+            tmp.mkdir()
+            p, _gp, _uv, _xau, _t = _wp868_chay(s, apt=f'ls "$TMPDIR" > {shlex.quote(str(nk))}; exit {ma}',
+                                                env_them={"TMPDIR": str(tmp)})
+            thay = [x for x in (nk.read_text().split() if nk.exists() else []) if x.startswith("cai_cong_cu.")]
+            con = [x.name for x in tmp.iterdir() if x.name.startswith("cai_cong_cu.")]
+            bang(len(thay) == 1, f"KHONG DO DUOC: trinh cai khong thay thu muc kenh trong TMPDIR ({thay})")
+            bang((p.returncode != 0) == (ma != 0) and con == [],
+                 f"thu muc kenh con sau khi thoat (ma trinh cai {ma}): rc={p.returncode} con={con} {p.stderr[-200:]}")
 
 
 @ca
@@ -8845,7 +8898,9 @@ def r868_hinh_dang_kenh_ket_qua():
     than = sh[dau:sh.index('"${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json')]
     for can in ('TAM_CAI="$(mktemp -d "${TMPDIR:-/tmp}/cai_cong_cu.XXXXXX")"\ndeclare +x TAM_CAI\n',
                 "trap 'rm -rf -- \"$TAM_CAI\"' EXIT\n", 'KENH_KQ="$TAM_CAI/kq"\ndeclare +x KENH_KQ\n',
-                '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n', 'KQ="$(cat -- "$KENH_KQ"; printf x)"; KQ="${KQ%x}"\n',
+                '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n',
+                'KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }\n',
+                "    DICH=\"${DICH%$'\\r'}\" ;;",
                 '  GIU_PATH) DICH="" ;;\n', "  DICH$'\\n'?*) DICH=\"${KQ#DICH$'\\n'}\" ;;\n",
                 '    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"\n', '  *) echo "cai_cong_cu: kenh ket qua hong',
                 'rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ] && export PATH="$DICH:$PATH"\n'):
@@ -11123,6 +11178,13 @@ DOT_BIEN_HOOK = [
     ("wp868_sh_cho_eof_stdout", ('( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"', 'printf \'%s\\n\' "$(eval "$LENH")" > "$TAM_CAI/stdout"'),
      ["r868_writer_muon_khong_lam_treo", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_bo_duong_lui_dong_cuoi", ('    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"', '    KET_QUA_CAI=""'),
+     ["r868_khong_bo_chon_doc_dong_cuoi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    # Codex lượt 1: F868-01 (đọc kênh nuốt lỗi) · F868-02 (bỏ trap EXIT) · F868-03 (đường lùi bỏ cắt CR).
+    ("wp868_sh_doc_kenh_nuot_loi", ('KQ="$(cat -- "$KENH_KQ" && printf x)"', 'KQ="$(cat -- "$KENH_KQ"; printf x)"'),
+     ["r868_doc_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_bo_trap_exit", ("trap 'rm -rf -- \"$TAM_CAI\"' EXIT\n", ":\n"),
+     ["r868_don_kenh_khi_loi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
+    ("wp868_sh_duong_lui_bo_cat_cr", ("    DICH=\"${DICH%$'\\r'}\" ;;", "    ;;"),
      ["r868_khong_bo_chon_doc_dong_cuoi", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_chi_duyet_hai_ung_vien", ('  for d in "$@"; do', '  for d in "${@:1:2}"; do'),
      ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),

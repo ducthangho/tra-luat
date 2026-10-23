@@ -7739,6 +7739,16 @@ def _r812_ca(den, rc_doi, muon=None, **doi):
     return ca
 
 
+def _r812_ca_posix(ca):
+    """Đo hành vi trên MỌI nền, nhưng trên Windows khai BỎ QUA sau khi đo: `Path.resolve()` của Windows tự hiểu `\\`
+    nên đột biến `r812_bo_dau_cheo_nguoc` TƯƠNG ĐƯƠNG ở đó (run 39729983506 · 5618020: VẪN XANH) — chỉ POSIX phân biệt được."""
+    def bao(c):
+        ca(c)
+        if os.name == "nt":
+            raise BoQua("đột biến bỏ thay dấu chéo ngược tương đương trên Windows") from OSError("Path Windows nhận cả hai dấu chéo")
+    return bao
+
+
 def case_r812_duong_cu_luon_false(c: Ctx):
     sd = c.sd()
     _doi(0, *c.init(sd, lease=False)[::2], "init")
@@ -7889,7 +7899,12 @@ def case_r812_r4_symlink_scope(c: Ctx):
         (w / "x/a.py").write_text("a = 1\n")
         (w / "alias").symlink_to("x", target_is_directory=True)
         assert (w / "alias/a.py").resolve() == (w / "x/a.py").resolve()
+        # Windows (run 39729983506): Git for Windows mặc định `core.symlinks=false` nên `add` chép `alias/` thành thư mục
+        # thường — cây không còn symlink, `alias/a.py` là tệp KHÁC, rc 0 là đúng với cây ấy. Bật cờ cho kho fixture, rồi ĐO.
+        _g(w, "config", "core.symlinks", "true")
         _g(w, "add", "-A"), _g(w, "commit", "-qm", "alias inside fixture"), _g(w, "push", "-q", "origin", "master")
+        if not _g(w, "ls-tree", "HEAD", "alias").startswith("120000 "):
+            raise BoQua("nền không ghi được symlink vào cây Git") from OSError(_g(w, "ls-tree", "HEAD", "alias"))
         _r812_doi_lease(w, {}, (lambda l: {"other.yaml": {**l, "lease_id": "other-lease", "write_set": ["alias/a.py"]}}) if conflict else None)
     for conflict in (False, True):
         (d := c.tmp / str(conflict)).mkdir()
@@ -7976,7 +7991,7 @@ CASES += [(n[5:], f) for n, f in list(globals().items()) if n.startswith("case_r
     ("r812_tran_vong_cua_khep_ghi_ket_qua", lambda c: _r812_tran_vong(c, "approve", 0, {"state": "approved_pending", "review_rounds_used": 2, "attempt_open": False})),
     ("r812_tran_vong_dau_vao_hong_khong_ghi", lambda c: _r812_tran_vong(c, "blocked", 11)),
     ("r812_nguoi_giu_hoa_thuong", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["X/"]))),
-    ("r812_nguoi_giu_dau_cheo_nguoc", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["x\\a.py"]))),
+    ("r812_nguoi_giu_dau_cheo_nguoc", _r812_ca_posix(_r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["x\\a.py"])))),
     ("r812_nguoi_giu_unicode_nfd", _r812_ca("lease", 7, truoc_lease=lambda w: _r812_doi_lease(w, {"write_set": ["café/a.py"]}, lambda l: {
         "other.yaml": {**l, "lease_id": "other-lease", "write_set": ["cafe\u0301/"]}}))),
     ("r812_nguoi_giu_cham_gach", _r812_ca("lease", 7, truoc_lease=_R812_KHAC(write_set=["./x/a.py"]))),

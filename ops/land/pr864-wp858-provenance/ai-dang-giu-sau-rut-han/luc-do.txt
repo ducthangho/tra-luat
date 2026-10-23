@@ -1,0 +1,68 @@
+# do luc 2026-10-22T06:42:00Z — sau rut han wp858-r1-g2-claude (lease branch 0f54226)
+# ls-remote heads: 527 ; for-each-ref: 527 ; thieu: 0
+== ops/cong_cu.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1-claude-20260829	refs/heads/agent/wp858-g1-claude:ops/leases/ci-cai-jsonschema-exec-1-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r2-claude-20260829	refs/heads/agent/wp858-g1-claude:ops/leases/ci-cai-jsonschema-exec-1r2-claude-20260829.yaml
+HẾT_HẠN	ci-cai-jsonschema-exec-1r3-claude-20260829	refs/heads/agent/wp858-g1-claude:ops/leases/ci-cai-jsonschema-exec-1r3-claude-20260829.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/cai_cong_cu.sh
+HẾT_HẠN	cai-cong-cu-sigpipe-r1-g1-claude	refs/heads/agent/wp858-g1-claude:ops/leases/cai-cong-cu-sigpipe-r1-g1-claude.yaml
+HẾT_HẠN	cai-cong-cu-sigpipe-r2-g2-claude	refs/heads/agent/wp858-g1-claude:ops/leases/cai-cong-cu-sigpipe-r2-g2-claude.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== .claude/dev/launcher_test.py
+HẾT_HẠN	ag-t0-01b-exec-1-antigravity-20260821	refs/heads/agent/wp858-g1-claude:ops/leases/ag-t0-01b-exec-1-antigravity-20260821.yaml
+HẾT_HẠN	ag-t0-01b-exec-1r2-antigravity-20260822	refs/heads/agent/wp858-g1-claude:ops/leases/ag-t0-01b-exec-1r2-antigravity-20260822.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/agent/wp858-g1-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/agent/wp858-g1-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/agent/wp858-g1-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	plat-m4-exec-2-claude-20260821	refs/heads/agent/wp858-g1-claude:ops/leases/plat-m4-exec-2-claude-20260821.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/agent/wp858-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/agent/wp858-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/agent/wp858-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g6	refs/heads/agent/wp858-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g6.yaml
+HẾT_HẠN	wp685-r18-g1-antigravity-20261007	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r18-g1-antigravity-20261007.yaml
+HẾT_HẠN	wp685-r19-g2-codex-20261007	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r19-g2-codex-20261007.yaml
+HẾT_HẠN	wp685-r19-g2b-codex-20261007	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r19-g2b-codex-20261007.yaml
+HẾT_HẠN	wp685-r20-g3-codex-20261007	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r20-g3-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4-codex-20261007	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r23-g4-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4b-codex-20261007	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r23-g4b-codex-20261007.yaml
+HẾT_HẠN	wp685-r28-g5-claude-20261009	refs/heads/agent/wp858-g1-claude:ops/leases/wp685-r28-g5-claude-20261009.yaml
+HẾT_HẠN	wp743-r1-g1-claude-20261016	refs/heads/agent/wp858-g1-claude:ops/leases/wp743-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp766-r1-g1-claude-20261016	refs/heads/agent/wp858-g1-claude:ops/leases/wp766-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== scripts/tl_selftest.py
+HẾT_HẠN	r378-symlink-doi-dac-quyen-r43-g43-claude	refs/heads/agent/wp858-g1-claude:ops/leases/r378-symlink-doi-dac-quyen-r43-g43-claude.yaml
+HẾT_HẠN	wp710-r3-g1-codex	refs/heads/agent/wp858-g1-claude:ops/leases/wp710-r3-g1-codex.yaml
+HẾT_HẠN	wp710-r4-g2-codex	refs/heads/agent/wp858-g1-claude:ops/leases/wp710-r4-g2-codex.yaml
+HẾT_HẠN	wp710-r4-g3-claude	refs/heads/agent/wp858-g1-claude:ops/leases/wp710-r4-g3-claude.yaml
+HẾT_HẠN	wp710-r4-g4-claude-windows	refs/heads/agent/wp858-g1-claude:ops/leases/wp710-r4-g4-claude-windows.yaml
+HẾT_HẠN	wp710-r4-g5-claude-windows	refs/heads/agent/wp858-g1-claude:ops/leases/wp710-r4-g5-claude-windows.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== RELEASE_MANIFEST.json
+HẾT_HẠN	r378-symlink-doi-dac-quyen-r43-g43-claude	refs/heads/agent/wp858-g1-claude:ops/leases/r378-symlink-doi-dac-quyen-r43-g43-claude.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== changelog.d/wp-858.md
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/handoff/wp858-g1-claude.md
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

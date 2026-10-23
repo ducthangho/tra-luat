@@ -1,0 +1,6 @@
+# do 2026-10-23 bang: git rev-parse <sha>:CLAUDE.md ; git diff --stat 094e8d1 6ac385f
+094e8d17ae4dfcf21dca63702c9262267bdc072c:CLAUDE.md 975cd94ff851a3a0ee3aa0493e90184e5f81c874
+6ac385fdd7325f532ac4b4b6eb861292bfa7e970:CLAUDE.md 975cd94ff851a3a0ee3aa0493e90184e5f81c874
+ .claude/hooks/subagent_ghi_detect_test.py | 70 ++++++++++++++++++++++++++++++-
+ ops/land_evidence_nguon_test.py           | 12 ++++--
+ 2 files changed, 77 insertions(+), 5 deletions(-)

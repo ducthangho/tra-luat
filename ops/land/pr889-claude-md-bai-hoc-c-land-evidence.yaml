@@ -144,3 +144,30 @@ no_con_mo:
 
 ghi_chu: >-
   Ho so cua lan sua dau tien doan (c): ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
+
+# BO SUNG SAU LANDED (2026-10-23 15:16Z) — chi THEM khoi duoi day; moi dong phia tren giu nguyen ban chu kho da quyet
+# o #891 (head 0390130, comment 6366218495). Readback moi dung TEN MOI, khong ghi de readback cu.
+bo_sung_sau_landed:
+  - id: CONNECTOR-REVIEW-LAI-6AC385F
+    ngay_do: 2026-10-23T15:16:09Z
+    lien_quan_no: HEAD-MERGE-KHONG-CO-REVIEW-HOAN-TAT
+    yeu_cau: >-
+      measured — readback-comments-889-sau-review-lai.json comment 6366307732 (ducthangho, 13:43:34Z): "@codex review",
+      dang sau khi #891 merge, xin cham lai vi luot 6360319005 tren 094e8d1 van running.
+    ket_qua: >-
+      measured — readback-comments-889-sau-review-lai.json comment 6366338141 (chatgpt-codex-connector[bot], 13:45:03Z):
+      "Didn't find any major issues", dong "Reviewed commit: 6ac385fdd7". Comment tom tat 6360319005 nay mang
+      codex-review-state commit_sha 6ac385fdd7325f532ac4b4b6eb861292bfa7e970, status completed, has_any_findings false,
+      updated_at 13:45:05Z. readback-reactions-pr-889-sau-review-lai.json: +1 cua connector 13:45:08Z, khong con eyes.
+    doi_chieu_noi_dung: >-
+      measured — readback-blob-claude-md-094e8d1-6ac385f.txt: CLAUDE.md tai 094e8d1 va tai 6ac385f cung blob
+      975cd94ff851a3a0ee3aa0493e90184e5f81c874; `git diff --stat 094e8d1 6ac385f` chi co
+      .claude/hooks/subagent_ghi_detect_test.py va ops/land_evidence_nguon_test.py (cua PR #872/#877 tren master), khong
+      cham CLAUDE.md. Nen noi dung CLAUDE.md connector cham o 6ac385f dung la noi dung head da merge 094e8d1.
+    gioi_han: >-
+      Connector cham MERGE COMMIT 6ac385f, khong cham 094e8d1; tuong duong chi ve CLAUDE.md (do bang blob), khong phai ve
+      SHA. Connector van chi la tin hieu "khong gop y", khong co tep verdict. Comment tom tat 6360319005 bi connector SUA
+      TAI CHO: trang thai running tren 094e8d1 chi con trong readback-comments-889.json cu, khong con tren GitHub.
+    anh_huong_no_con_mo: >-
+      HEAD-MERGE-KHONG-CO-REVIEW-HOAN-TAT duoc BU ve noi dung (connector sach tren cung blob CLAUDE.md, sau merge). Muc
+      no_con_mo phia tren KHONG sua: thu tu "merge truoc review" van la thieu sot quy trinh da xay ra.

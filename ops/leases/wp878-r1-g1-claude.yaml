@@ -75,6 +75,8 @@ xung_dot_write_set_do_luc_cap:
   do_luc: '2026-10-22T15:45:00Z'
   goc_quet: 'master 4581cfa5124ef803bfda10ce4de499b0ed31380e, quet refs sau fetch day du (ls-remote <-> for-each-ref thieu 0)'
   ket_qua: 'ca 5 duong dan cua write set: NGUOI_GIU 0.'
+da_bi_thay_the: wp879-r1-g1-claude
+ly_do_thu_hoi: 'packet #878 da LAND (PR #880, merge 747f983); lease wp879-r1-g1-claude cap cung ci.yml/ci_dang_ky_test.py/ci_duong_nhanh_test.py khai thay_the_cho.'
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'khong co lease song nao giu cac duong dan nay => khong viet bia mo vao tep da chet.'
 leased_at_utc: '2026-10-22T15:49:00Z'

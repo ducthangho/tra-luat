@@ -2551,6 +2551,77 @@ def _ket_luan_ban_kinh(ten_db, ca_dich, ket, tong_ca, do_o_nen=()):
     return (dau + chi_tiet, 1)
 
 
+# #671-W (chủ kho 23-10-2026, phiên `session_0185N8Bv9napC7SUg5k6ZDXb`, chọn "(1)"): NGOẠI LỆ THEO NỀN cho bán kính.
+# Mỗi dòng là KẾT CỤC ĐÃ ĐO trên `windows-latest` (run 39729983506, `9fcd49c`, bảy mảnh `gate-cong-cu` đỏ, 15 lỗi), kèm
+# lý do. Bảng KHÔNG nới cổng một chiều: chỉ tha khi lượt đo KHỚP TUYỆT ĐỐI với kết cục khai; đo ra khác — kể cả đột biến
+# nay đạt bình thường (dòng THỪA) — là ĐỎ. `t65` chốt cả hai chiều qua cửa `--tu-kiem-ngoai-le-nen`.
+#   ("bo_qua",)          — ca ĐÍCH bị BỎ QUA trên nền ấy, không ca nào khác chết;
+#   ("song",)            — ca ĐÍCH vẫn XANH, không ca nào khác chết (đột biến TƯƠNG ĐƯƠNG trên nền ấy);
+#   ("ban_kinh", {ca…})  — ca ĐÍCH chết thật, tập ca chết THÊM bằng ĐÚNG tập khai, không tín dụng giả.
+_T48, _T51 = "t48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB", "t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi"
+_LY_T51 = "đích t51 dựng `bash` giả bằng script `#!/bin/sh`; Windows không có `/bin/sh` nên ca BỎ QUA"
+_LY_T48 = "đích t48 đặt tên tệp chứa `\\r`; NTFS từ chối (`[Errno 22] Invalid argument`) nên ca BỎ QUA"
+_LY_T52 = "đích t52 vẫn XANH trên Windows — đo được; nguyên nhân CHƯA ĐO (đường dẫn Windows chuẩn hoá trước khi ghi?)"
+NGOAI_LE_NEN = {
+    **{("nt", t): ("bo_qua", _LY_T51) for t in (
+        "bn_path_rong_bo_qua", "bn_cache_dung_lai", "bn_path_vang_thanh_rong", "bn_tra_duong_goc", "bn_khong_han_tong",
+        "bn_han_tong_theo_ung_vien", "bn_ghi_de_ten_tran_khong_giai")},
+    **{("nt", t): ("bo_qua", _LY_T48) for t in ("bn_khung_dich_dong", "bn_anh_chup_chi_dem_so")},
+    **{("nt", t): ("song", _LY_T52) for t in ("f35_writer_path_trim", "w698_x_wr_ra_nfkc", "w698_x3_wr5_nfkc")},
+    ("nt", "bn_doc_cay_lam_viec"): ("ban_kinh", {"t49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC"},
+                                    "trên Windows tên XẤU của t49 chỉ nằm trong INDEX (NTFS từ chối ghi đĩa), nên đọc "
+                                    "cây làm việc làm t49 chết bằng chốt của nó — t49 cũng đo INDEX trên nền ấy"),
+    ("nt", "bn_giu_bien_git_ke_thua"): ("ban_kinh", {"t43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep"},
+                                        "t43 chết bằng chốt (5): `core.excludesFile` qua `GIT_CONFIG_GLOBAL` kế thừa "
+                                        "đổi được danh sách — trên Windows biến git kế thừa chạm cả chốt ấy"),
+    ("nt", "w698_e49_ra_normpath"): ("ban_kinh", {"t54_main_chon_DUNG_vong_ban_kinh_theo_che_do"},
+                                     "`os.path.normpath` của Windows đổi `/` thành `\\` nên `main` (t54) cũng ghi "
+                                     "sai đường — t54 so đường nguyên văn"),
+}
+
+
+def _ap_ngoai_le_nen(ten_db, ca_dich, ket, dong, loi, do_o_nen=(), nen=None, bang_nl=None):
+    """(dòng, lỗi) sau khi áp `NGOAI_LE_NEN`. Hàm THUẦN. Không có dòng khai ⇒ trả nguyên `(dong, loi)`."""
+    nen = os.name if nen is None else nen
+    kh = (NGOAI_LE_NEN if bang_nl is None else bang_nl).get((nen, ten_db))
+    if kh is None:
+        return dong, loi
+    kieu, ly = kh[0], kh[-1]
+    if loi == 0:
+        return dong + [f"  ĐỎ  {ten_db}: ngoại lệ nền {nen} ({kieu}) THỪA — đột biến nay đạt bình thường; gỡ dòng khỏi "
+                       f"NGOAI_LE_NEN"], 1
+    ket = {t: v for t, v in ket.items() if t not in set(do_o_nen)}
+    tt = ket.get(ca_dich, ("bo_qua", ""))[0]
+    chet = {t for t, (x, _) in ket.items() if x in ("giet_that", "tin_dung_gia") and t != ca_dich}
+    gia = any(x == "tin_dung_gia" for x, _ in ket.values())
+    khop = ((kieu == "bo_qua" and tt == "bo_qua" and not chet) or (kieu == "song" and tt == "qua" and not chet)
+            or (kieu == "ban_kinh" and tt == "giet_that" and not gia and chet == set(kh[1])))
+    if khop:
+        return [f"  ok  {ten_db}: NGOẠI LỆ NỀN {nen} ({kieu}) — {ly}"], 0
+    return dong + [f"  ĐỎ  {ten_db}: ngoại lệ nền {nen} khai {kieu} nhưng đo ra đích={tt}, chết thêm={sorted(chet)}"], loi
+
+
+def _loi_bang_ngoai_le_nen(bang_nl=None):
+    """Dòng hỏng của bảng: đột biến không có thật, nền lạ, kiểu lạ, thiếu lý do, `ban_kinh` rỗng."""
+    bang_nl = NGOAI_LE_NEN if bang_nl is None else bang_nl
+    return sorted(f"{n}:{t}" for (n, t), v in bang_nl.items()
+                  if t not in DOT_BIEN or n not in ("nt", "posix") or v[0] not in ("bo_qua", "song", "ban_kinh")
+                  or not (isinstance(v[-1], str) and v[-1].strip()) or (v[0] == "ban_kinh" and not (len(v) == 3 and v[1])))
+
+
+# #671-W: răng của `NGOAI_LE_NEN` — mỗi chốt một đột biến, đích `t65`. Neo ghép bằng `+` để không tự khớp chính bảng này.
+_T65 = "t65_ngoai_le_nen_chi_tha_khi_KHOP_TUYET_DOI"
+for _ten, _tim, _thay in (
+    ("nl_khop_luon", "    if khop" + ":\n", "    if True:\n"),
+    ("nl_thua_khong_do", "    if loi" + " == 0:\n", "    if False:\n"),
+    ("nl_bo_tham_so_nen", "nen = os.name if nen" + " is None else nen\n", "nen = os.name\n"),
+    ("nl_ban_kinh_tap_con", "chet ==" + " set(kh[1])", "chet <= set(kh[1])"),
+    ("nl_bo_loai_nen", "if t not in" + " set(do_o_nen)}", "if True}"),
+    ("nl_bang_bo_kiem_ten", "if t not" + " in DOT_BIEN or ", "if "),
+):
+    DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _T65)
+
+
 def _do_ban_kinh(ten_dot_bien, bo_qua_ca=()):
     """`bo_qua_ca`: ca đã ĐỎ Ở NỀN — không chạy lại dưới đột biến (chúng chết vì nền, chạy chỉ
     thêm nhiễu); `_ket_luan_ban_kinh` vẫn tự loại chúng nếu có mặt, nên hai lớp không mâu thuẫn."""
@@ -7093,6 +7164,21 @@ def t44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob():
 
 
 @ca
+def t65_ngoai_le_nen_chi_tha_khi_KHOP_TUYET_DOI():
+    """THUỘC TÍNH: `NGOAI_LE_NEN` (#671-W) chỉ tha một đột biến khi lượt đo KHỚP TUYỆT ĐỐI kết cục khai; lệch hay THỪA ⇒ ĐỎ.
+
+    Qua cửa `--tu-kiem-ngoai-le-nen` (đột biến trên đĩa không cắn mã đã nạp — bài học `t29`/`t42`). Mười hai kịch bản trên
+    bảng GIẢ (mười hai, kể cả `bk_thieu`: chết THIẾU so tập khai), cộng bảng THẬT phải sạch và bảng hỏng phải bị bắt. Mỗi chốt của `_ap_ngoai_le_nen` có đột biến `nl_*` riêng.
+    """
+    kq = _doc_kq_tu_kiem("--tu-kiem-ngoai-le-nen")
+    mong = {"bq_khop": 0, "bq_dich_chet": 1, "song_khop": 0, "song_chet_them": 1, "bk_khop": 0, "bk_chet_them": 1,
+            "bk_dich_gia": 1, "bk_thieu": 1, "thua": 1, "nen_khac": [["X"], 1], "khong_khai": [["X"], 1], "loai_nen": 0,
+            "bang_that": [], "bang_hong": ["nt:db_khong_co"]}
+    sai = {k: [kq.get(k), v] for k, v in mong.items() if kq.get(k) != v}
+    bang(not sai, f"`_ap_ngoai_le_nen` sai (thấy, mong): {sai}")
+
+
+@ca
 def t42_ca_do_o_NEN_bi_loai_khoi_ban_kinh_va_van_keo_ma_thoat():
     """THUỘC TÍNH: ca đã ĐỎ Ở NỀN bị LOẠI khỏi bán kính của MỌI đột biến, báo MỘT lần, vẫn là LỖI.
 
@@ -7530,7 +7616,8 @@ def _ket_luan_ban_ghi(ban_ghi, do_o_nen):
     if ban_ghi[0] == "loi":
         return [f"  ĐỎ  {ban_ghi[1]}: {ban_ghi[2]}"], 1
     _, ten_db, ca_dich, ket = ban_ghi
-    return _ket_luan_ban_kinh(ten_db, ca_dich, {t: tuple(v) for t, v in ket.items()}, len(CA), do_o_nen)
+    ket = {t: tuple(v) for t, v in ket.items()}
+    return _ap_ngoai_le_nen(ten_db, ca_dich, ket, *_ket_luan_ban_kinh(ten_db, ca_dich, ket, len(CA), do_o_nen), do_o_nen)
 
 
 def _ban_kinh_mot(ten_db, do_o_nen):
@@ -8981,6 +9068,21 @@ def _in_tu_kiem_nen_do():
     print("ND4 " + json.dumps([l4, d4], ensure_ascii=False))
 
 
+def _in_tu_kiem_ngoai_le_nen():
+    """Cửa `t65` (#671-W): mười hai kịch bản trên bảng GIẢ, in `KQ`."""
+    g = {("nt", "db_bq"): ("bo_qua", "ly"), ("nt", "db_song"): ("song", "ly"), ("nt", "db_bk"): ("ban_kinh", {"c_x"}, "ly")}
+    ap = lambda ten, ket, loi=1, nen="nt", nd=(): _ap_ngoai_le_nen(ten, "c_dich", ket, ["X"], loi, nd, nen, g)  # noqa: E731
+    G, Q, B = ("giet_that", "chốt"), ("qua", None), ("bo_qua", "nền")
+    kq = {"bq_khop": ap("db_bq", {"c_dich": B, "c_x": Q})[1], "bq_dich_chet": ap("db_bq", {"c_dich": G})[1],
+          "song_khop": ap("db_song", {"c_dich": Q, "c_y": B})[1], "song_chet_them": ap("db_song", {"c_dich": Q, "c_x": G})[1],
+          "bk_khop": ap("db_bk", {"c_dich": G, "c_x": G})[1], "bk_chet_them": ap("db_bk", {"c_dich": G, "c_x": G, "c_y": G})[1],
+          "bk_dich_gia": ap("db_bk", {"c_dich": ("tin_dung_gia", "vô can"), "c_x": G})[1], "bk_thieu": ap("db_bk", {"c_dich": G})[1],
+          "thua": ap("db_song", {"c_dich": G}, loi=0)[1], "nen_khac": list(ap("db_song", {"c_dich": Q}, nen="posix")),
+          "khong_khai": list(ap("db_khac", {"c_dich": Q})), "loai_nen": ap("db_bk", {"c_dich": G, "c_x": G, "c_z": G}, nd=("c_z",))[1],
+          "bang_that": _loi_bang_ngoai_le_nen(), "bang_hong": _loi_bang_ngoai_le_nen({("nt", "db_khong_co"): ("song", "ly")})}
+    print("KQ " + json.dumps(kq, ensure_ascii=False))
+
+
 def _in_tu_kiem_ban_kinh():
     """Cửa để ĐỘT BIẾN chạm tới được phần phán quyết.
 
@@ -9011,7 +9113,7 @@ if __name__ == "__main__":
             "--tu-kiem-luat-phan-quyet": _in_tu_kiem_luat_phan_quyet, "--tu-kiem-cong-that": _in_tu_kiem_cong_that,
             "--ban-kinh-con": _in_ban_kinh_con, "--tu-kiem-gom": _in_tu_kiem_gom,
             "--tu-kiem-che-do": _in_tu_kiem_che_do, "--tu-kiem-main": _in_tu_kiem_main,
-            "--tu-kiem-che-do-utf8": _in_tu_kiem_che_do_utf8}
+            "--tu-kiem-che-do-utf8": _in_tu_kiem_che_do_utf8, "--tu-kiem-ngoai-le-nen": _in_tu_kiem_ngoai_le_nen}
     cua = sys.argv[1] if len(sys.argv) > 1 else None
     if cua == "--gop":
         sys.exit(_main_gop())

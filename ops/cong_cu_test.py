@@ -1949,6 +1949,10 @@ for _ten, _ca, _tim, _thay in (
     ('wp892_bo_dk_rong', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            True):\n'),
     ('wp892_nhan_tep', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            not thu_muc_gom.is_dir() or not any(thu_muc_gom.iterdir())):\n'),
     ('wp892_rc_do', 't52_', '              f"không chạy ở lượt này, bán kính đủ đo trên push master")\n        return 0\n', '              f"không chạy ở lượt này, bán kính đủ đo trên push master")\n        return 1\n'),
+    # Codex lượt 1 P3: ba dạng nới mà bộ cũ không bắt (hậu tố · bỏ CR · bỏ qua tệp ẩn).
+    ('wp892_hau_to', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").endswith("duong_nhanh") and (\n'),
+    ('wp892_bo_cr', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").rstrip("\\r") == "duong_nhanh" and (\n'),
+    ('wp892_lo_tep_an', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(x for x in thu_muc_gom.iterdir() if not x.name.startswith(".")))):\n'),
     ('wp892_dong_gia_giet', 't52_', '        print(f"GOM: KHÔNG ĐO — PR chỉ đổi hồ sơ ({_BIEN_GOP_CHE_DO}=duong_nhanh, 0 mảnh); {len(DOT_BIEN)} đột biến "\n', '        print(f"GOM MẢNH 0/0 — bị giết {len(DOT_BIEN)} ({_BIEN_GOP_CHE_DO}=duong_nhanh) "\n'),
     ('f7_cau_hinh_nuot', 't54_',
      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
@@ -7272,9 +7276,10 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     bang(not nhanh, f"gom đường nhanh (duong_nhanh + 0 mảnh) phải rc 0, dòng KHÔNG ĐO, không lấy vân tay: {nhanh}")
     that = {t: (kq.get(t), kq.get(c)) for t, c in (("dn_dung", "cli_dung"), ("dn_thieu", "cli_thieu")) if kq.get(t) != kq.get(c)}
     bang(not that, f"duong_nhanh mà CÓ mảnh phải gom THẬT y hệt đường thường: {that}")
-    thuong = {t: kq.get(t) for t in ("dn_tep", "dn_vang", "dn_trong", "dn_day_du", "dn_hoa", "dn_cach", "dn_tien_to")
+    thuong = {t: kq.get(t) for t in ("dn_tep", "dn_vang", "dn_trong", "dn_day_du", "dn_hoa", "dn_cach", "dn_tien_to",
+                                     "dn_dau", "dn_cr", "dn_tep_an")
               if not (kq.get(t) and kq[t][0] >= 1 and kq[t][2] == 1 and "KHÔNG ĐO" not in kq[t][1]
-                      and ("[G-rong]" in kq[t][1] or t == "dn_tep"))}
+                      and ("[G-rong]" in kq[t][1] or t in ("dn_tep", "dn_tep_an")))}
     bang(not thuong, f"chỉ ĐÚNG chuỗi `duong_nhanh` + thư mục vắng/rỗng mới được bỏ gom; còn lại phải ĐỎ: {thuong}")
     # F16: bộ ĐÚNG cấu trúc, SAI kết quả (đích sống ở đầu mảnh 0, tín dụng giả ở giữa mảnh 1, bán kính 2 ở cuối mảnh 2)
     # ⇒ ĐÚNG 3 lỗi, bảng ĐỦ (N−3 dòng `ok` + 3 dòng ĐỎ), SỐ LIỆU nói đúng 3. F17: cùng thứ ấy qua CLI THẬT, cộng đường
@@ -8397,13 +8402,18 @@ def _in_tu_kiem_gom():
             # wp892: nhánh đường nhanh của gom — giá trị env × trạng thái thư mục. `None` = biến VẮNG.
             tep_la = d / "tep_la_dn"
             tep_la.write_text("x", encoding="utf-8")
+            an = d / "chi_tep_an_dn"   # Codex lượt 1 P3: thư mục chỉ có tệp ẩn KHÔNG phải "rỗng"
+            an.mkdir()
+            (an / ".gitkeep").write_text("", encoding="utf-8")
             cu_cd = os.environ.pop(_BIEN_GOP_CHE_DO, None)
             try:
                 for ten, thu, gt in (("dn_rong", rong, "duong_nhanh"), ("dn_khong_co", d / "khong_co", "duong_nhanh"),
                                      ("dn_dung", d / "dung", "duong_nhanh"), ("dn_thieu", d / "thieu", "duong_nhanh"),
                                      ("dn_tep", tep_la, "duong_nhanh"), ("dn_vang", rong, None), ("dn_trong", rong, ""),
                                      ("dn_day_du", rong, "day_du"), ("dn_hoa", rong, "Duong_nhanh"),
-                                     ("dn_cach", rong, "duong_nhanh "), ("dn_tien_to", rong, "duong_nhanh_x")):
+                                     ("dn_cach", rong, "duong_nhanh "), ("dn_tien_to", rong, "duong_nhanh_x"),
+                                     ("dn_dau", rong, "x_duong_nhanh"), ("dn_cr", rong, "duong_nhanh\r"),
+                                     ("dn_tep_an", an, "duong_nhanh")):
                     os.environ.pop(_BIEN_GOP_CHE_DO, None)
                     if gt is not None:
                         os.environ[_BIEN_GOP_CHE_DO] = gt

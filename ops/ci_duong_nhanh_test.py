@@ -2134,7 +2134,7 @@ def y03_buoc_nang_mang_if_bo_theo_che_do():
 
 
 # wp892 (#892, spec r2 — chu kho chon "Nới y04 hẹp, spec r2"): DUNG hai ngoai le, so NGUYEN VAN. Luat goc giu nguyen
-# cho moi cho khac: bo CA job theo che_do thi check VANG MAT. `gate-cong-cu` (8 manh) KHONG la context bat buoc; context
+# cho moi cho khac: bo CA job theo che_do thi check VANG MAT. `gate-cong-cu` (cac job manh) KHONG la context bat buoc; context
 # bat buoc `gate-cong-cu-gop` van chay va doc che_do qua DUNG mot bien env de noi KHONG DO thay vi `skipped`.
 Y04_IF_JOB_CHE_DO = {"gate-cong-cu": "needs.chuan-bi.outputs.che_do != 'duong_nhanh'"}
 Y04_ENV_BUOC_CHE_DO = {("gate-cong-cu-gop", "G5 gom manh ban kinh dot bien (#668)"):

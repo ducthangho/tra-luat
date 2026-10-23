@@ -48,6 +48,10 @@ abf91415741ebb14face8b3d7e4dda140c0c5039b9060ec5be186b6a9e90ae7e  ./readback-pr-
 dba1ed554e2bd38649166d2bcbc8f49aef552acf2af520bc4c9f648c265e8be7  ./readback-run-39358824666.json
 f4486a5110474452eb33df45e92a8ab2c468026f2aa49b08188df92b7aa6aff3  ./readback-run-39376774218.json
 9453ef83723ac3a5f0482888f4a56d2448efc3fa5cf3639d9a3bb3b19deac9ff  ./readback-run-39380754094.json
+075d0c13e653aa13c2ff0ac5590074cf3e3b88dc4a7c367ac9e68e158adac55a  ./verdicts/run-f0909b38.json
 16464429a3d145f4c97d6a3aec09b5533ee7f037939f30d93bc53131825045eb  ./verdicts/wp748-r21-luot1-codex-transcript.txt
 95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87  ./verdicts/wp748-r21-luot1-codex-verdict.md
 ca689a86c85a2fb1ace67d29fd6fe9eaab4e07a12878578834ac93ceda6f01ab  ./verdicts/wp748-r21-luot1-prompt.md
+e6193959bdc627bd7902354e73cfcad1c8ad8c82e64b0bdf61b43c8c703b8a7d  ./verdicts/wp748-r21-luot2-launcher-codex-events.jsonl
+a7a7ddc31b6c1d4a030bc35e85ef102ea6b6092b260a6e2686829cdcf5656b38  ./verdicts/wp748-r21-luot2-launcher-prompt.md
+a8a0670fd06cd4847f754f235735cf972fbad8f3f2cb1351103c292d436ca020  ./verdicts/wp748-r21-luot2-launcher-verdict.md

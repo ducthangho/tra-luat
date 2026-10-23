@@ -161,6 +161,8 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên
   `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
   HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
+  **Đo lại 23-10-2026** trên `e63961f`: #878 thêm nhánh thứ ba — gọi tay với `runner_set=windows-only` ⇒
+  `["windows-latest"]` (KHÔNG có Ubuntu); gọi tay mặc định (`windows-and-ubuntu`) vẫn ra hai nền.
   Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,
   20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở
   `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên
@@ -175,6 +177,16 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.
   **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó** — kèm
   `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.
+  **Nhưng "gate trên Windows" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên
+  `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`
+  duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:
+  `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;
+  `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi
+  `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong
+  `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên "có job Windows" chưa phải "mọi
+  bước chạy". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —
+  phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy
+  từ lượt Ubuntu của CÙNG head.
   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt

@@ -1,8 +1,10 @@
 # HO SO LAND — packet #845 wp845 r1 (lease g1), ma qua PR #846. Khuon: ops/land/pr832-wp831-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (f64f9b8) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-845-land)
-# dua dong nay vao master; neo quyet dinh: #845 issuecomment-6264046882. "merged" KHONG dong nghia "landed" (§10.2.4).
+# TRANG THAI: merged (f64f9b8), `landed: false` (dinh chinh 23-10-2026, packet wp748 r23/g23, chu kho #748
+# issuecomment-6355107238): bien nhan launcher.py run 964888d9 KHONG mang model phuc vu => ho model reviewer `khong_do_duoc`
+# (§8) => §8.1 "khong du nhan dang thi chua nhan assurance". Ban truoc khai `landed: true` (#845 issuecomment-6264046882) — giu
+# nguyen ben duoi lam lich su. "merged" KHONG dong nghia "landed" (§10.2.4).
 # Gate push master tren DUNG merge SHA f64f9b8: ci.yml 39226246616 XANH 14/14. Review neo DUNG head merge 974859d: Codex luot 5
 # approve (ban dau ghi landed false vi verdict chi neo 7a39463 — connector P1 #847 r4312283489; chu kho nang ngan sach 4 -> 5).
 # Ho so nay chay qua chinh luat L6 ma packet them vao (phan hoan tat day du, khong o giu cho).
@@ -80,13 +82,25 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-846.json: merged true, merged_at 2026-10-19T08:55:29Z, merged_by ducthangho, merge_commit_sha
     f64f9b8 (cha 3cfbf41 + 974859d: do-lai-nguon-20261019/merge-va-diff.txt), merge commit (khong squash/rebase).
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA f64f9b8: ci.yml 14/14 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
     2/2 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #845 closed/completed DAT, no P3 co ten ghi o PR #846.
     (4) review neo DUNG authorized_head_sha 974859d: Codex luot 5 approve (pre_merge_checks), DAT — ban truoc ghi CHUA DAT vi
     verdict chi neo 7a39463 (connector P1 #847 r4312283489); chu kho chon nang ngan sach 4 -> 5 (#845 issuecomment-6264218205).
-    `landed: true` theo chi thi chu kho "Land và bookeeping" (#845 issuecomment-6264046882); hieu luc khi PR ghi so nay vao master.
+    (5) reviewer assurance §8.1 (lop sensitive doi cross_approved/human_audited): CHUA DAT — measured: verdicts/run-964888d9.json
+    co 35 khoa, KHONG khoa nao mang model (chi provider openai_codex, execution_surface codex_cli, transport); ho model reviewer
+    `khong_do_duoc` (§8), va §8.1: "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance
+    khong gan theo ten cong cu. Cung lop voi connector P1 #867 r4355165076 (r21). Dinh chinh boi packet wp748 r23/g23 (chu kho
+    #748 issuecomment-6355107238).
+    Mo lai (5) — Codex luot 1 r23 F01: (5) chi DAT khi co (A) HOAC (B), dung dinh nghia §8. (A) `cross_approved`: dieu kien CHUNG — mot lan approve
+    DOC LAP da hoan tat tren DUNG 974859d, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model
+    executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve
+    sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay
+    ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du).
+    Cung ho, du co auditor, KHONG thanh `cross_approved`. (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben,
+    tu doc spec/diff, evidence + verdict ben neo DUNG 974859d.
+    Lich su: ban truoc khai `landed: true` theo chi thi chu kho "Land và bookeeping" (#845 issuecomment-6264046882).
 
 uy_quyen_land:
   dang: >-

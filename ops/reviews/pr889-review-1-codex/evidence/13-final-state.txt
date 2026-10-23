@@ -1,0 +1,20 @@
+$ git rev-parse HEAD
+8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8
+rc=0
+$ git status --porcelain=v1 --untracked-files=all
+(stdout rỗng)
+rc=0
+$ git diff --exit-code
+(stdout rỗng)
+rc=0
+$ git diff --cached --exit-code
+(stdout rỗng)
+rc=0
+$ git hash-object CLAUDE.md
+44b0bd119b9f521895ce4059a5d0fca057b638c0
+rc=0
+$ git rev-parse HEAD:CLAUDE.md
+44b0bd119b9f521895ce4059a5d0fca057b638c0
+rc=0
+artifact_structure=passed
+HINT.patch sha256=abfeaa000582a7169640e85307e0824c4ca0f7b8aeb3e87090c04d966cdc6109

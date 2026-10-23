@@ -96,12 +96,13 @@ trang_thai_packet:
     provenance CI (run · checkout · dinh nghia workflow · output gate, PROTOCOL §10); bang tree/ma tuong duong KHONG thay duoc —
     muon thay bang luot tren SHA ke tiep thi phai co uy quyen ghi ro SHA/run/attempt, ancestry, so sanh pham vi, du context bat
     buoc va xu ly ro luot cancelled goc (Codex luot 1 r23 F02); (5) chu kho ghi duyet ben neo b9318cc; dot-bien-gop chay xanh
-    tren b9318cc; VA (7) chi DAT khi co MOT trong ba, dung dinh nghia §8: (i) `cross_approved` `do_may` — mot lan
-    approve DOC LAP da hoan tat tren DUNG b9318cc, kem bang chung may do cho CHINH lan chay approve ay rang ho model reviewer phuc vu
-    KHAC ho model executor (claude); nang cap launcher ve sau KHONG do nguoc cac luot cu, va mot lan do cung ho / khac luot / khac
-    SHA KHONG du; (ii) `khai_co_audit` — loi khai ho model cua luot approve tren b9318cc KEM xac nhan ben cua mot auditor co ten,
-    tu khai yeu hon `do_may` ngay tai cho dung; loi khai cua chu kho khong kem auditor KHONG du; (iii) `human_audited` day du
-    §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG b9318cc.
+    tren b9318cc; VA (7) chi DAT khi co (A) HOAC (B), dung dinh nghia §8. (A) `cross_approved`: dieu kien CHUNG — mot lan approve
+    DOC LAP da hoan tat tren DUNG b9318cc, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model
+    executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve
+    sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay
+    ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du).
+    Cung ho, du co auditor, KHONG thanh `cross_approved`. (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben,
+    tu doc spec/diff, evidence + verdict ben neo DUNG b9318cc.
 
 uy_quyen_land:
   dang: >-

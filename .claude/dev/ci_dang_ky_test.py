@@ -1168,10 +1168,13 @@ JOB_G5 = ("gate", "gate-registry", "gate-packet-loop", JOB_G5_MANH, JOB_G5_GOP)
 G5_GOP = "python ops/cong_cu_test.py --gop manh"
 G5_LENH = {"gate": [G5_PROBE, G5_SELFTEST], JOB_G5_MANH: [G5_PROBE, G5_SELFTEST], JOB_G5_GOP: [G5_GOP]}
 G5_ENV = {"gate": {"CONG_CU_TEST_BAN_KINH": "manh"},
+          JOB_G5_GOP: {"CONG_CU_TEST_GOP_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"},   # wp892: gom đọc che_do
           JOB_G5_MANH: {"CONG_CU_TEST_MANH": f"${{{{ matrix.manh }}}}/{SO_MANH_G5}",
                         "CONG_CU_TEST_MANH_RA": "manh/manh-${{ matrix.manh }}.txt"}}
 # wp879 (#879): Windows chỉ còn mảnh 0 và chỉ chạy ca nền ⇒ không ghi tệp mảnh, không tải lên, không có job gom Windows.
 G5_MANH_LOAI = [{"os": "windows-latest", "manh": k} for k in range(1, SO_MANH_G5)]
+# wp892 (#892): PR chỉ đổi hồ sơ ⇒ 8 mảnh `skipped`. Ghim NGUYÊN chuỗi: dạng `== 'day_du'` thì `che_do` rỗng/vắng cũng bỏ mảnh.
+G5_MANH_IF = "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
 G5_TAI_LEN = {"if": "runner.os != 'Windows'", "uses": "actions/upload-artifact@v4", "with": {
     "name": "gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}", "path": "manh/manh-${{ matrix.manh }}.txt",
     "if-no-files-found": "error"}}
@@ -1200,7 +1203,7 @@ G5_OS = "${{ fromJson(needs.chuan-bi.outputs.os) }}"
 
 def _loi_thuc_thi_g5(j, v, buoc):
     """Lỗi ngữ nghĩa thực thi của job G5 `j` trên các bước `buoc` (từ đầu tới HẾT bước G5; job mới: mọi bước)."""
-    _if_duoc = {"if"} if j in (JOB_G5_GOP, "gate-registry") else set()
+    _if_duoc = {"if"} if j in (JOB_G5_GOP, JOB_G5_MANH, "gate-registry") else set()
     loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - _if_duoc)}"] \
         if set(v) - G5_KHOA_JOB - _if_duoc else []
     st = v.get("strategy") or {}
@@ -1233,7 +1236,8 @@ def _loi_g5_manh_gop(j, v, buoc, i):
         loi = [] if (ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh", "exclude"}
                      and ma.get("exclude") == G5_MANH_LOAI) else [
             f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))} + exclude {G5_MANH_LOAI}, thấy {ma}"]
-        loi += [] if v.get("needs") == "chuan-bi" and "if" not in v else [f"{j}: needs/if lệch: {v.get('needs')!r}/{v.get('if')!r}"]
+        loi += [] if v.get("needs") == "chuan-bi" and v.get("if") == G5_MANH_IF else [
+            f"{j}: needs/if phải đúng 'chuan-bi'/{G5_MANH_IF!r}, thấy {v.get('needs')!r}/{v.get('if')!r}"]
         return loi + ([] if buoc[i + 1:] == [G5_TAI_LEN] else [f"{j}: sau bước G5 phải đúng MỘT bước tải lên {G5_TAI_LEN}"])
     loi = [] if set(ma) == {"os", "exclude"} and ma.get("exclude") == G5_GOP_LOAI else [
         f"{j}: matrix phải đúng os + exclude {G5_GOP_LOAI}, thấy {ma}"]
@@ -1265,7 +1269,8 @@ def loi_g5_workflow(data):
         elif buoc[cham[0]].get("shell") != "bash":
             loi.append(f"{j}: bước G5 phải khai rõ `shell: bash` (thấy {buoc[cham[0]].get('shell')!r})")
         elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"}
-              if j == JOB_G5_GOP or (j == "gate-registry" and v.get("if") == "${{ !cancelled() }}"
+              if j == JOB_G5_GOP or (j == JOB_G5_MANH and v.get("if") == G5_MANH_IF)
+              or (j == "gate-registry" and v.get("if") == "${{ !cancelled() }}"
                                          and v.get("needs") == ["chuan-bi", "gate-nhanh-gop"]) else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
         elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
@@ -2023,6 +2028,13 @@ def phan_chung():
             ("wp879-gop-khong-loai-windows", _G, lambda v, b, i: v["strategy"]["matrix"].pop("exclude")),
             ("wp879-gop-loai-ubuntu", _G, lambda v, b, i: v["strategy"]["matrix"].update({"exclude": [{"os": "ubuntu-latest"}]})),
             ("wp879-gop-if-cu", _G, lambda v, b, i: v.update({"if": "${{ !cancelled() }}"})),
+            # wp892 N2: if mảnh bị bỏ / đảo sang `== 'day_du'` (che_do rỗng ⇒ bỏ mảnh) / so lỏng; env gom bị bỏ / lấy nguồn khác.
+            ("wp892-manh-bo-if", _M, lambda v, b, i: v.pop("if")),
+            ("wp892-manh-if-day-du", _M, lambda v, b, i: v.update({"if": "${{ needs.chuan-bi.outputs.che_do == 'day_du' }}"})),
+            ("wp892-manh-if-contains", _M, lambda v, b, i: v.update({"if": "${{ !contains(needs.chuan-bi.outputs.che_do, 'duong') }}"})),
+            ("wp892-gop-bo-env", _G, lambda v, b, i: b[i].pop("env")),
+            ("wp892-gop-env-hang", _G, lambda v, b, i: b[i].update({"env": {"CONG_CU_TEST_GOP_CHE_DO": "duong_nhanh"}})),
+            ("wp892-gop-env-ten-khac", _G, lambda v, b, i: b[i].update({"env": {"CONG_CU_TEST_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}})),
             ("wp879-gop-if-windows", _G, lambda v, b, i: v.update(
                 {"if": "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'windows-latest') }}"})),
     ):

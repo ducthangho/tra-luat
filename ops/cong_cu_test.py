@@ -1940,6 +1940,16 @@ _NEN_M = '            _ket_thuc_manh(k, n, ra, ten, None, "nền đỏ hoặc ti
 _NEN_IN = '            print(f"  ĐỎ  mảnh {k}/{n} [M-nen]: nền KHÔNG xanh — không đo bán kính, không ghi tệp")\n'
 _D45 = 'if not _CO_SYMLINK:\n'   # F45: neo ĐỘC LẬP với dòng quan sát — gỡ chốt quan sát thì neo vẫn còn
 for _ten, _ca, _tim, _thay in (
+    # wp892 (#892): nhánh đường nhanh của gom — mỗi cách nới/gỡ chốt một đột biến, đích t52.
+    ('wp892_bo_nhanh', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if False and (\n'),
+    ('wp892_strip', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").strip() == "duong_nhanh" and (\n'),
+    ('wp892_lower', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").lower() == "duong_nhanh" and (\n'),
+    ('wp892_tien_to', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").startswith("duong_nhanh") and (\n'),
+    ('wp892_vang_la_nhanh', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if os.environ.get(_BIEN_GOP_CHE_DO, "duong_nhanh") == "duong_nhanh" and (\n'),
+    ('wp892_bo_dk_rong', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            True):\n'),
+    ('wp892_nhan_tep', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            not thu_muc_gom.is_dir() or not any(thu_muc_gom.iterdir())):\n'),
+    ('wp892_rc_do', 't52_', '              f"không chạy ở lượt này, bán kính đủ đo trên push master")\n        return 0\n', '              f"không chạy ở lượt này, bán kính đủ đo trên push master")\n        return 1\n'),
+    ('wp892_dong_gia_giet', 't52_', '        print(f"GOM: KHÔNG ĐO — PR chỉ đổi hồ sơ ({_BIEN_GOP_CHE_DO}=duong_nhanh, 0 mảnh); {len(DOT_BIEN)} đột biến "\n', '        print(f"GOM MẢNH 0/0 — bị giết {len(DOT_BIEN)} ({_BIEN_GOP_CHE_DO}=duong_nhanh) "\n'),
     ('f7_cau_hinh_nuot', 't54_',
      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        che_do, tham_so = "du", None\n'),
@@ -7254,6 +7264,18 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     cli_sai = {t: kq.get(t) for t, (rc, dau_ra, vt) in cli.items()
                if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1] and kq[t][2] == vt)}
     bang(not cli_sai, f"CLI `--gop` phải gọi gom + `_van_tay` đúng một lần + truyền mã (mong {cli}): {cli_sai}")
+    # wp892: CHỈ `duong_nhanh` + thư mục vắng/rỗng ⇒ rc 0, dòng KHÔNG ĐO, không lấy vân tay. Có mảnh ⇒ gom thật y hệt
+    # đường thường; mọi giá trị khác (vắng, rỗng, `day_du`, lệch hoa-thường, dư khoảng trắng, tiền tố) ⇒ ĐỎ thiếu mảnh.
+    nhanh = {t: kq.get(t) for t in ("dn_rong", "dn_khong_co")
+             if not (kq.get(t) and kq[t][0] == 0 and kq[t][2] == 0 and "KHÔNG ĐO" in kq[t][1]
+                     and "CONG_CU_TEST_GOP_CHE_DO=duong_nhanh" in kq[t][1] and "giết" not in kq[t][1])}
+    bang(not nhanh, f"gom đường nhanh (duong_nhanh + 0 mảnh) phải rc 0, dòng KHÔNG ĐO, không lấy vân tay: {nhanh}")
+    that = {t: (kq.get(t), kq.get(c)) for t, c in (("dn_dung", "cli_dung"), ("dn_thieu", "cli_thieu")) if kq.get(t) != kq.get(c)}
+    bang(not that, f"duong_nhanh mà CÓ mảnh phải gom THẬT y hệt đường thường: {that}")
+    thuong = {t: kq.get(t) for t in ("dn_tep", "dn_vang", "dn_trong", "dn_day_du", "dn_hoa", "dn_cach", "dn_tien_to")
+              if not (kq.get(t) and kq[t][0] >= 1 and kq[t][2] == 1 and "KHÔNG ĐO" not in kq[t][1]
+                      and ("[G-rong]" in kq[t][1] or t == "dn_tep"))}
+    bang(not thuong, f"chỉ ĐÚNG chuỗi `duong_nhanh` + thư mục vắng/rỗng mới được bỏ gom; còn lại phải ĐỎ: {thuong}")
     # F16: bộ ĐÚNG cấu trúc, SAI kết quả (đích sống ở đầu mảnh 0, tín dụng giả ở giữa mảnh 1, bán kính 2 ở cuối mảnh 2)
     # ⇒ ĐÚNG 3 lỗi, bảng ĐỦ (N−3 dòng `ok` + 3 dòng ĐỎ), SỐ LIỆU nói đúng 3. F17: cùng thứ ấy qua CLI THẬT, cộng đường
     # DƯƠNG (rc=0, N dòng `ok`) trên kho git tạm có vân tay khớp.
@@ -7884,6 +7906,9 @@ def _tu_kiem_song_song(do_o_nen):
 # Tệp mảnh chứa ĐÚNG các dòng `BKCON` mà tiến trình con vẫn in (hợp đồng N129: con gửi DỮ LIỆU, cha kết luận), nên
 # `--gop` kiểm lại bằng CÙNG `_nhan_ket_qua_con` + `_ket_luan_ban_ghi` — không có đường phân hạng thứ hai.
 _BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA = "CONG_CU_TEST_BAN_KINH", "CONG_CU_TEST_MANH", "CONG_CU_TEST_MANH_RA"
+# wp892 (#892): `che_do` của job `chuan-bi` (#674) trao cho bước GOM qua env. Chỉ ĐÚNG chuỗi `duong_nhanh` mới mở nhánh
+# "không đo" — vắng/rỗng/lạ/lệch hoa-thường-khoảng-trắng đều gom như cũ (thiếu mảnh ⇒ ĐỎ). Danh sách CHO PHÉP một giá trị.
+_BIEN_GOP_CHE_DO = "CONG_CU_TEST_GOP_CHE_DO"
 _TRAN_MANH = 16
 _PHIEN_BAN_MANH = 1
 _KHOA_DAU_MANH = frozenset({"phien_ban", "manh", "so_manh", "sha256_test", "head"})
@@ -8121,6 +8146,15 @@ def _main_gop():
     if len(sys.argv) != i + 2:
         print(f"  ĐỎ  gom [G-doi-so]: cần đúng một thư mục sau --gop, thấy {sys.argv[i + 1:]!r}")
         return 2
+    # wp892: PR chỉ đổi hồ sơ (`che_do=duong_nhanh`) thì 8 job mảnh `skipped`, không tệp nào tới đây. Gom — context BẮT
+    # BUỘC của ruleset — vẫn chạy và nói thẳng là KHÔNG ĐO, không để check bắt buộc ở `skipped` (trông như xanh). Có tệp
+    # mảnh thì KHÔNG dùng đường này: gom thật, đủ chốt. Đường dẫn là TỆP ⇒ cũng gom thật (ĐỎ ở chốt thư mục).
+    thu_muc_gom = Path(sys.argv[i + 1])
+    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (
+            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):
+        print(f"GOM: KHÔNG ĐO — PR chỉ đổi hồ sơ ({_BIEN_GOP_CHE_DO}=duong_nhanh, 0 mảnh); {len(DOT_BIEN)} đột biến "
+              f"không chạy ở lượt này, bán kính đủ đo trên push master")
+        return 0
     dong, loi = _gom_manh(sys.argv[i + 1], _van_tay())
     for d in dong:
         print(d)
@@ -8360,6 +8394,28 @@ def _in_tu_kiem_gom():
                 with contextlib.redirect_stdout(buf):
                     rc = _main_gop()
                 kq[ten] = [rc, (buf.getvalue().splitlines() or [""])[0], len(goi_vt)]
+            # wp892: nhánh đường nhanh của gom — giá trị env × trạng thái thư mục. `None` = biến VẮNG.
+            tep_la = d / "tep_la_dn"
+            tep_la.write_text("x", encoding="utf-8")
+            cu_cd = os.environ.pop(_BIEN_GOP_CHE_DO, None)
+            try:
+                for ten, thu, gt in (("dn_rong", rong, "duong_nhanh"), ("dn_khong_co", d / "khong_co", "duong_nhanh"),
+                                     ("dn_dung", d / "dung", "duong_nhanh"), ("dn_thieu", d / "thieu", "duong_nhanh"),
+                                     ("dn_tep", tep_la, "duong_nhanh"), ("dn_vang", rong, None), ("dn_trong", rong, ""),
+                                     ("dn_day_du", rong, "day_du"), ("dn_hoa", rong, "Duong_nhanh"),
+                                     ("dn_cach", rong, "duong_nhanh "), ("dn_tien_to", rong, "duong_nhanh_x")):
+                    os.environ.pop(_BIEN_GOP_CHE_DO, None)
+                    if gt is not None:
+                        os.environ[_BIEN_GOP_CHE_DO] = gt
+                    goi_vt.clear()
+                    sys.argv, buf = ["cong_cu_test.py", "--gop", str(thu)], io.StringIO()
+                    with contextlib.redirect_stdout(buf):
+                        rc = _main_gop()
+                    kq[ten] = [rc, (buf.getvalue().splitlines() or [""])[0], len(goi_vt)]
+            finally:
+                os.environ.pop(_BIEN_GOP_CHE_DO, None)
+                if cu_cd is not None:
+                    os.environ[_BIEN_GOP_CHE_DO] = cu_cd
         finally:
             g["_van_tay"], sys.argv = cu_vt, argv
         # F13 (Codex lượt 5): cả dây DISPATCHER trong `__main__` — gọi CHÍNH tệp này làm CLI (đúng thứ workflow chạy).

@@ -2288,7 +2288,7 @@ KHUNG_JOB = {
     'chuan-bi': {'runs-on': 'ubuntu-latest', 'timeout-minutes': 20, 'outputs': {'os': '${{ (github.event_name == \'workflow_dispatch\' && inputs.runner_set == \'windows-only\') && \'["windows-latest"]\' || (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}', 'che_do': "${{ github.event_name == 'pull_request' && steps.phan-loai.outputs.che_do || 'day_du' }}"}},
     'gate': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     # #668 (land truoc #674, tich hop o g4): hai job G5 chia manh. KHONG mang `if:` theo `che_do` (chay du = fail-close).
-    'gate-cong-cu': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7], 'exclude': [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 150, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
+    'gate-cong-cu': {'needs': 'chuan-bi', 'if': "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7], 'exclude': [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 150, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-cong-cu-gop': {'needs': ['chuan-bi', 'gate-cong-cu'], 'if': "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'exclude': [{'os': 'windows-latest'}]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 10, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-ops': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 60, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
     'gate-nhanh-manh': {'needs': 'chuan-bi', 'strategy': {'fail-fast': False, 'matrix': {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}}, 'runs-on': '${{ matrix.os }}', 'timeout-minutes': 30, 'env': {'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'}},
@@ -2355,7 +2355,7 @@ KHUNG_BUOC = {
         ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
         ('cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)', {}),
         ('actions/download-artifact@v4', {'uses': 'actions/download-artifact@v4', 'with': {'pattern': 'gate-cong-cu-manh-${{ matrix.os }}-*', 'path': 'manh', 'merge-multiple': True}}),
-        ('G5 gom manh ban kinh dot bien (#668)', {'shell': 'bash'}),
+        ('G5 gom manh ban kinh dot bien (#668)', {'shell': 'bash', 'env': {'CONG_CU_TEST_GOP_CHE_DO': '${{ needs.chuan-bi.outputs.che_do }}'}}),
     ],
     'gate-ops': [
         ('Force LF checkout (hash parity với manifest)', {}),
@@ -2421,7 +2421,7 @@ KHUNG_BUOC = {
 # `needs` mac dinh se cho no `skipped`, ma `skipped` doc nhu xanh (ngu nghia GitHub Actions theo tai lieu, chua tu do).
 # wp879 (#879): gom them `contains(... 'ubuntu-latest')` — luot `windows-only` khong con manh nao de gom.
 # Doi bieu thuc (vd `always()`), bo no, hay them `if:` cap job vao job KHAC (ke ca cung bieu thuc) deu phai DO. `ci_dang_ky_test.loi_g5_workflow` canh cung khoa ay tu phia #668.
-JOB_CO_IF_CHO_PHEP = {"gate-cong-cu-gop": "!cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest')", "gate-nhanh-gop": "!cancelled()", "gate-registry": "!cancelled()"}
+JOB_CO_IF_CHO_PHEP = {"gate-cong-cu": "needs.chuan-bi.outputs.che_do != 'duong_nhanh'", "gate-cong-cu-gop": "!cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest')", "gate-nhanh-gop": "!cancelled()", "gate-registry": "!cancelled()"}
 
 
 @ca
@@ -3263,9 +3263,11 @@ DOT_BIEN = [
     ("yml_gop_bo_if", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}\n", "    needs: [chuan-bi, gate-cong-cu]\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     # wp879: bo dieu kien ubuntu khoi `if` cua gom ⇒ luot windows-only gom DO oan vi thieu manh.
     ("yml_gop_if_bo_ubuntu", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}\n", "    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() }}\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
-    ("yml_them_if_cung_bieu_thuc_vao_job_manh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n", "  gate-cong-cu:\n    if: ${{ !cancelled() }}\n    needs: chuan-bi\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    ("yml_them_if_cung_bieu_thuc_vao_job_manh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ !cancelled() }}\n"),
+    # wp892: bo `if:` duong nhanh cua job manh ⇒ PR ho so van dot 8 manh.
+    ("yml_manh_bo_if_duong_nhanh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     ("yml_them_if_false_vao_buoc_gom", _yml("      - name: G5 gom manh ban kinh dot bien (#668)\n", "      - name: G5 gom manh ban kinh dot bien (#668)\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
-    ("yml_bot_manh_g5", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3, 4, 5, 6, 7]\n", "  gate-cong-cu:\n    needs: chuan-bi\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3]\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
+    ("yml_bot_manh_g5", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3, 4, 5, 6, 7]\n", "  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3]\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_g5_gate_bo_env_ban_kinh", _yml("        env:\n          CONG_CU_TEST_BAN_KINH: manh\n", ""), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     # ---- lop tin-dung-dot-bien-khong-co-ca-dich (luot 3): moi cua mot chot
     ("test_go_kiem_rong_o_callee", _test('    if not dich:\n        return "HONG", "tap ca dich rong: khong co bang chung duong thi khong duoc cap GIET"\n', ""), ("t97_harness_khong_cap_giet_khi_khong_co_bang_chung_duong",)),

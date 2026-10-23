@@ -33,14 +33,14 @@ tests:   # tren efa6e8d (Linux, container remote) tru khi ghi khac
   - {name: launcher_test, status: passed, evidence: "nen e63961f 250/250 (tong 252, bo qua 2) · head 256/256 (tong 258, bo qua 2), CA HAI che do co/khong CODEX_AUTH_JSON gia; hai ve dung trong MOT lenh (scratchpad ab/run.sh); delta do moi = 0"}
   - {name: phan chung tren nen e63961f, status: passed, evidence: "r886_n1/n2/n3/n4 + r858_cai_python DO bang TinHieuChotCa voi cong_cu.py cua nen; n6/Q1 khong nap duoc API moi (AttributeError, du kien)"}
   - {name: dot bien wp886 (rieng), status: passed, evidence: "9/9 giet dung ca dich bang TinHieuChotCa: 8 wp886_cc_* + wp858_yaml_python_linux_ve_dirname; moi dot bien co it nhat mot ca dich chay duoc tren Windows"}
-  - {name: launcher_test --dot-bien (toan bo), status: not_run, evidence: "dang chay sau khi phien bi khoi dong lai; se cap nhat"}
+  - {name: launcher_test --dot-bien (toan bo), status: passed, evidence: "318/318 giet dung ly do (4 khong do duoc tren Linux: dot bien chi Windows), rc=0"}
   - {name: tl.py --selftest, status: passed, evidence: "1731/1731 rc=0"}
   - {name: release-verify --strict, status: passed, evidence: "ok=true, expected=checked=192"}
   - {name: ops/cong_cu_test.py (Linux), status: passed, evidence: "61/61, bo qua 0, tien kiem bo qua 0, cong cay that DAT, rc=0"}
   - {name: ruff F delta, status: passed, evidence: "cong_cu.py 1=1 · launcher_test 5=5 · tl_selftest 4392=4392 · tl.py 12=12"}
   - {name: doctrine-scan / doc-claims-check --strict, status: passed, evidence: "rc0 / rc0"}
   - {name: ci.yml PR (ubuntu), status: passed, evidence: "run 39913744298: gate, gate-ops, gate-packet-loop, gate-registry, gate-cong-cu 0..7 + gop, gate-nhanh-manh 0..7 + gop deu success"}
-  - {name: ci.yml runner_set=windows-only, status: failed, evidence: "run 39913747351: gate + gate-cong-cu(0) DO o python_alias_behavior_test (CO CHU DICH, xem summary); gate-registry DO o ops/land_evidence_nguon_test.py 63/64 — do san tren master e63961f (run 39905884453 job 120258809916), khong thuoc PR"}
+  - {name: ci.yml runner_set=windows-only, status: failed, evidence: "run 39913747351: gate + gate-cong-cu(0) DO o python_alias_behavior_test (CO CHU DICH, xem summary). Hai job DO SAN tren master, delta 0, khong chan M-3 (phien dieu phoi xac nhan): gate-registry — ops/land_evidence_nguon_test.py 63/64, master e63961f run 39905884453 job 120258809916; gate-packet-loop — 2 loi r812 (r812_r4_symlink_scope, dot bien r812_bo_dau_cheo_nguoc), master 5618020 run 39312038882 va 9fcd49c run 39729983506; ban sua o PR #881, ngoai write set nen KHONG port"}
   - {name: launcher-windows.yml (workflow_dispatch), status: not_run, evidence: "cho head cuoi cua r2"}
   - {name: Codex cross-review, status: not_run, evidence: "0/5 loi goi; chu kho cam goi Codex trong luc cho r2"}
 test_selection:
@@ -51,7 +51,7 @@ test_selection:
   full_fallback_reason: "spec muc Cong liet ke dich danh cac cong nay"
 remaining_work:
   - "r2: cap lease sau khi wp879-r1-g1-claude het han (2026-10-24T01:22Z) hoac duoc rut han; dua ops/cong_cu_test.py vao write set; bia mo hai chieu cho wp886-r1-g1-claude"
-  - "r2: sua fixture python_alias_behavior_test — ban NHAP do executor soan, CHUA commit: Windows dung `python3.cmd` goi sys.executable (symlink `python3.exe` CHUA DO: python co the khong thay DLL canh link); POSIX giu symlink `python3`. Linux voi ban nhap: xem dong cap nhat sau"
+  - "r2: sua fixture python_alias_behavior_test — ban NHAP do executor soan, CHUA commit: Windows dung `python3.cmd` goi sys.executable (symlink `python3.exe` CHUA DO: python co the khong thay DLL canh link); POSIX giu symlink `python3`. Linux voi ban nhap: cong_cu_test 61/61, tien kiem bo qua 0, cay that DAT (ban kinh dot bien dang chay). Phien dieu phoi xac nhan `.cmd` nam trong r2 (spec ghi `tep co duoi PATHEXT`); dieu kien: DO THAT tren windows-latest rang probe chay duoc `.cmd` qua subprocess/CreateProcess"
   - "r2: merge master (khong rebase), tai sinh RELEASE_MANIFEST + ratchet neu master tien"
   - "r2: ci.yml xanh tren head cuoi + windows-only (gate-cong-cu) + launcher-windows.yml dispatch MOT lan"
   - "r2: cross-review Codex (sandbox + PROMPT da soan cho r1, can sua neo head va them cau hoi fixture)"
@@ -64,6 +64,14 @@ failure:
   category: content
 successors: []
 ```
+
+## Vì sao fixture r2 dùng `python3.cmd`, không dùng symlink `python3.exe`
+- Bản cũ của fixture không bao giờ CHẠY symlink: checker dùng `sys.executable`. Bản vá làm checker chạy đúng tệp tìm
+  được trên PATH, nên fixture r2 sẽ thực thi thật thứ nó dựng.
+- Chạy `python.exe` qua symlink trên Windows là đường CHƯA ĐO: interpreter có thể tìm DLL/stdlib theo đường dẫn của
+  link thay vì đích. `.cmd` gọi đúng `sys.executable` theo đường dẫn tuyệt đối nên không phụ thuộc chuyện ấy, và cũng
+  không cần đặc quyền symlink (bỏ được nhánh `WinError 1314` → `BoQuaMoiTruong` trên Windows).
+- Cùng cách ca `r886_n1`/`r886_n2` dựng `python.cmd` trên Windows.
 
 ## Ghi chú vận hành
 - Phiên executor bị khởi động lại một lần giữa chừng. Các cổng chạy nền đã xong TRƯỚC lúc khởi động lại; log nằm

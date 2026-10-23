@@ -1,0 +1,103 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 856
+packet_id: wp856
+packet_alias: KG-RANG-TEST-2
+mission_issue: 856
+revision: 1
+generation: 1
+lease_id: wp856-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp856.md
+spec_sha256_required: d50065e79fcb92c223fc1799418e266579e339b4033cc509ef22a083e6e8dd34
+spec_hash: d50065e79fcb92c223fc1799418e266579e339b4033cc509ef22a083e6e8dd34
+prompt_path: ops/specs/wp856.md
+prompt_sha256_required: d50065e79fcb92c223fc1799418e266579e339b4033cc509ef22a083e6e8dd34
+spec_phu_luc_path: ops/specs/wp856-dot-bien-r6.json
+spec_phu_luc_sha256: 6b1c41958fb36eaeef35d32bd03c424ef7a90e5ab2d8a32cc7d67bc8bea9e85d
+spec_nguon_note: >-
+  Dac ta va phu luc o nhanh ops/wp856-spec; dinh danh tep la BAM, khong phai ten nhanh.
+write_set:
+- .claude/dev/packet_loop_test.py
+effective_write_set:
+- .claude/dev/packet_loop_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+depends_on:
+- 822
+depends_on_ghi_chu: >-
+  #822 land o PR #851 (merge b27fe85). Lease wp822-r1-g1-claude con han nen bia mo hai chieu (xem thay_the_cho).
+branch: agent/wp856-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 94220547cd155c73392e95726e8daf353888b3aa
+start_from_sha: 94220547cd155c73392e95726e8daf353888b3aa
+reviewed_sha_required: 94220547cd155c73392e95726e8daf353888b3aa
+reviewed_sha_note: >-
+  Chua co head code; neo base (origin/master luc cap). Head da review ghi o bien nhan truoc lan day duy nhat.
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/856
+granted_on_instruction_note: >-
+  Chu kho 20-10-2026 (phien executor #822 session_01A68yvG8s7cjpbWp81QzppN) yeu cau "Mo packet tiep noi cho 6 lop
+  P2 da chap nhan, tao phien moi de xu ly packet nay"; chot tieu chi tap toan tu co dinh, 8 loi goi Codex, cho vuot
+  450 dong, executor Claude / reviewer Codex.
+recorded_by: claude-dispatcher-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (executor cu cua #822) khong thi cong #856; executor la phien cloud KHAC do phien nay tao.'
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-20T00:21:00Z'
+  ref: refs/heads/agent/wp856-g1-claude
+  trang_thai: vang
+  ghi_chu: 'ls-remote rong; executor tao tu base_sha.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-19T23:53:30Z'
+  so_nhanh: 'ls-remote 513 / cuc bo 632 (so TAP ten: thieu 0, thua 119 nhanh da xoa tren may chu)'
+  ket_qua: >-
+    ai-dang-giu .claude/dev/packet_loop_test.py => NGUOI_GIU 1: wp822-r1-g1-claude (con han, packet da land) =>
+    bia mo hai chieu; wp812 g1/g2 CON_HAN-DA_BI_THAY_THE, con lai HET_HAN.
+do_lai_dac_ta_luc_cap:
+  do_luc: '2026-10-20T00:20:00Z'
+  sha: 94220547cd155c73392e95726e8daf353888b3aa
+  ket_qua: 'Phu luc 75 dot bien: moi neo khop dung 1 cho; ca 75 SONG tren moi ca kg_* (replay chay_suite).'
+leased_at_utc: '2026-10-20T00:21:00Z'
+heartbeat_at: '2026-10-20T00:21:00Z'
+lease_until: '2026-10-22T00:21:00Z'
+lease_expires_at_utc: '2026-10-22T00:21:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta khai tran_loi_goi_codex: 8 => tran loi goi la truc chan.
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Review Codex CLI offline tren SHA cuc bo (prompt chuan connector, pham vi cham = tap_toan_tu cua dac ta);
+  gate tai cho tren dung SHA; day nhanh MOT lan khi du dieu kien merge. Connector bao P0-P2 sau khi day thi DUNG
+  hoi chu kho. Va theo LOP; approve chi khi P0=P1=P2=P3=0 trong tap.
+thay_the_cho:
+- wp822-r1-g1-claude
+thay_the_cho_note: >-
+  wp822-r1-g1-claude con han toi 2026-10-21T03:32Z va giu dung write set => bia mo hai chieu: lease cu mang
+  da_bi_thay_the tro ve lease nay. Packet #822 da land; lease nay khong chep dau dang comment cua lease cu.
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0, limit: 3}
+kich_thuoc_tran: 'Chu kho cho vuot 450 dong (ghi so do, khong tinh finding); 1 duong dan'

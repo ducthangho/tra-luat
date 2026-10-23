@@ -1,0 +1,20 @@
+$ git show -s --format="%H %P %T" c021e47
+c021e4768670ee493202edd1d53d97b15b9c2ed0 5f288eaf7dd217e9057d2f864dc15278bfd4e597 9c18ba7725c7e4a173934bd9f190a24c4efc8c15 0e90958fd7c7d52ee1c04cbcb4efbe5ac72f548d
+$ git show -s --format=%T 9c18ba7
+5ff72c8836dbc32b571381e39c2019fdcd83dab7
+$ git diff --numstat 5f288ea c021e47
+1086	8	.claude/dev/packet_loop_test.py
+4	2	.github/workflows/ci.yml
+1	1	ops/ci_duong_nhanh_test.py
+$ git diff --numstat 637f780 9c18ba7
+1086	8	.claude/dev/packet_loop_test.py
+4	2	.github/workflows/ci.yml
+1	1	ops/ci_duong_nhanh_test.py
+$ git log --oneline 637f780..9c18ba7
+9c18ba7 wp856: _doi_ly_do chuan hoa CRLF cua stderr (Windows)
+9fcd49c ci(wp856): tran gate-packet-loop 60 -> 120 phut theo chu kho
+a08033f Merge origin/master vào agent/wp856-g1-claude trước lần đẩy duy nhất
+bf671b0 wp856 vòng 2: đóng 3 lớp P2 của review Codex 2/8 theo lớp, kèm tự kiểm độ phủ
+19fdfa6 wp856 vòng 1b: T4 phủ MỌI vòng lặp của hai hàm (AST đếm 16 + 3 duyệt ngầm)
+48b7c8b wp856 vòng 1: đóng 4 lớp P2 của review Codex 1/8 theo lớp
+7302ea3 wp856 KG-RANG-TEST-2: tập toán tử cố định T1–T6 cho kiem-gate, sinh bằng vòng

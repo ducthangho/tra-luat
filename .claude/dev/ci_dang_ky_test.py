@@ -599,6 +599,37 @@ def loi_ruff_ci(source=None):
     ]
     return [message for ok, message in checks if not ok], len(checks)
 
+def loi_ci_dispatch_windows(source=None):
+    """#878: hợp đồng `workflow_dispatch.inputs.runner_set` của `ci.yml` — cùng từ vựng với launcher, nhưng MẶC ĐỊNH
+    giữ hai nền (đổi mặc định là quyết định riêng của chủ kho, Q3 spec wp878). Biểu thức `os` của `chuan-bi` phải đọc
+    input ấy và trả đúng ba mảng theo thứ tự: chỉ Windows · hai nền · chỉ Ubuntu."""
+    source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
+    try:
+        data = yaml.safe_load(source) or {}
+    except yaml.YAMLError as e:
+        return [f"ci.yml YAML lỗi: {e}"], 1
+    triggers = data.get("on", data.get(True))
+    dispatch = triggers.get("workflow_dispatch") if isinstance(triggers, dict) else None
+    runner = ((dispatch or {}).get("inputs") or {}).get("runner_set") if isinstance(dispatch, dict) else None
+    expected = {"required": False, "default": "windows-and-ubuntu", "type": "choice",
+                "options": ["windows-and-ubuntu", "windows-only"]}
+    expr = ((((data.get("jobs") or {}).get("chuan-bi") or {}).get("outputs")) or {}).get("os")
+    compact = re.sub(r"\s+", " ", expr) if isinstance(expr, str) else ""
+    try:
+        arrays = [json.loads(x) for x in re.findall(r"'(\[[^']*\])'", compact)]
+    except json.JSONDecodeError:
+        arrays = None
+    checks = [
+        (isinstance(runner, dict) and all(runner.get(k) == v for k, v in expected.items()),
+         "ci.yml sai hợp đồng workflow_dispatch.runner_set"),
+        ("github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only'" in compact,
+         "ci.yml: os của chuan-bi không đọc inputs.runner_set == 'windows-only' trong nhánh dispatch"),
+        (arrays == [["windows-latest"], ["ubuntu-latest", "windows-latest"], ["ubuntu-latest"]],
+         f"ci.yml: os của chuan-bi sai ba mảng chỉ-Windows · hai nền · chỉ-Ubuntu (thấy {arrays})"),
+    ]
+    return [message for ok, message in checks if not ok], len(checks)
+
+
 def giet_windows_311_launcher_workflow(source):
     anchor = "'3.13'"
     if source.count(anchor) != 1:
@@ -1451,6 +1482,14 @@ def phan_chung():
           bool(launcher_source) and giet_windows_311_launcher_workflow(launcher_source))
     _them("launcher-semantic-spacing", bool(launcher_source) and not loi_launcher_windows(
           launcher_source.replace("fromJSON(", "fromJSON( ", 1))[0])
+    # #878: hợp đồng runner_set của ci.yml — bản thật sạch; hai đột biến (đổi mặc định sang windows-only, bỏ option
+    # windows-only) đều phải ĐỎ. Neo phải có đúng một lần, kẻo đột biến không đổi gì mà vẫn tính là "giết".
+    _neo_md, _neo_op = "default: windows-and-ubuntu", "          - windows-only\n"
+    _them("ci-dispatch-runner-set-that-sach", bool(ci_source) and not loi_ci_dispatch_windows(ci_source)[0])
+    _them("ci-dispatch-runner-set-mac-dinh-windows-only-DO", ci_source.count(_neo_md) == 1 and bool(
+          loi_ci_dispatch_windows(ci_source.replace(_neo_md, "default: windows-only", 1))[0]))
+    _them("ci-dispatch-runner-set-bo-option-DO", ci_source.count(_neo_op) == 1 and bool(
+          loi_ci_dispatch_windows(ci_source.replace(_neo_op, "", 1))[0]))
     # Doi DUNG LOAI thong diep, khong phai `bool(loi)`: bo ghim lam CA ghim LAN probe do, nen ca
     # cu van xanh khi da XOA HAN chot ghim — do duoc 102/102 (luot 8, P2 #2).
     _them("ruff-pin-required", bool(ci_source) and any("ghim Ruff" in m for m in
@@ -2335,7 +2374,9 @@ def main():
     loi, tren_cay, trong_so = kiem()
     launcher_loi, launcher_chot = loi_launcher_windows()
     ruff_loi, ruff_chot = loi_ruff_ci()
+    ci_disp_loi, _ = loi_ci_dispatch_windows()
     loi += launcher_loi
+    loi += ci_disp_loi
     loi += ruff_loi
     wf = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
     loi += ["G5 (M6): " + x for x in loi_g5_workflow(wf)] + ["ENV registry (#643 M4): " + x for x in loi_env_registry(wf)] \

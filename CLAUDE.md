@@ -173,7 +173,8 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge
   của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là "lần đo Windows đầu tiên" như bản cũ viết.
   Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.
-  **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+  **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó** — kèm
+  `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.
   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt

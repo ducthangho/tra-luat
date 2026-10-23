@@ -73,6 +73,8 @@ xung_dot_write_set_do_luc_cap:
   do_luc: '2026-10-23T13:01:00Z'
   goc_quet: 'master 1d7e642092fb3dda15967be44d095f37bb22ac5f, quet refs sau fetch day du (ls-remote <-> for-each-ref thieu 0)'
   ket_qua: 'ca 4 duong dan cua write set: NGUOI_GIU 0 (ops/land/pr883-wp879-provenance/ai-dang-giu-sau-rut-han/luc-do.txt tren nhanh ghi so).'
+da_bi_thay_the: wp892-r2-g2-claude
+ly_do_thu_hoi: 'spec r1 chan o luat y04 (#674); chu kho chon "Nới y04 hẹp, spec r2" (issuecomment-6366348553) => lease r2 g2 thay.'
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'ai-dang-giu luc cap: ca 4 duong dan NGUOI_GIU 0 (wp879 da rut han 7943012) => khong bia mo.'
 leased_at_utc: '2026-10-23T13:01:00Z'

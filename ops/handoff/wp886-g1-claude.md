@@ -51,7 +51,7 @@ test_selection:
   full_fallback_reason: "spec muc Cong liet ke dich danh cac cong nay"
 remaining_work:
   - "r2: cap lease sau khi wp879-r1-g1-claude het han (2026-10-24T01:22Z) hoac duoc rut han; dua ops/cong_cu_test.py vao write set; bia mo hai chieu cho wp886-r1-g1-claude"
-  - "r2: sua fixture python_alias_behavior_test — ban NHAP do executor soan, CHUA commit: Windows dung `python3.cmd` goi sys.executable (symlink `python3.exe` CHUA DO: python co the khong thay DLL canh link); POSIX giu symlink `python3`. Linux voi ban nhap: cong_cu_test 61/61, tien kiem bo qua 0, cay that DAT (ban kinh dot bien dang chay). Phien dieu phoi xac nhan `.cmd` nam trong r2 (spec ghi `tep co duoi PATHEXT`); dieu kien: DO THAT tren windows-latest rang probe chay duoc `.cmd` qua subprocess/CreateProcess"
+  - "r2: sua fixture python_alias_behavior_test — ban NHAP do executor soan, CHUA commit: Windows dung `python3.cmd` goi sys.executable (symlink `python3.exe` CHUA DO: python co the khong thay DLL canh link); POSIX giu symlink `python3`. Linux voi ban nhap: cong_cu_test rc=0: ca=61/61 · dot bien=470 · loi dot bien=0 · tien kiem bo qua=0 · cong cay that DAT (Linux, efa6e8d + ban nhap). Phien dieu phoi xac nhan `.cmd` nam trong r2 (spec ghi `tep co duoi PATHEXT`); dieu kien: DO THAT tren windows-latest rang probe chay duoc `.cmd` qua subprocess/CreateProcess"
   - "r2: merge master (khong rebase), tai sinh RELEASE_MANIFEST + ratchet neu master tien"
   - "r2: ci.yml xanh tren head cuoi + windows-only (gate-cong-cu) + launcher-windows.yml dispatch MOT lan"
   - "r2: cross-review Codex (sandbox + PROMPT da soan cho r1, can sua neo head va them cau hoi fixture)"

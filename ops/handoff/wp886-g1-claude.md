@@ -50,14 +50,15 @@ test_selection:
   selected_groups: [launcher_test, cong_cu_test, tl_selftest, release_verify, ruff_F, doctrine_scan, doc_claims]
   full_fallback_reason: "spec muc Cong liet ke dich danh cac cong nay"
 remaining_work:
-  - "r2: cap lease sau khi wp879-r1-g1-claude het han (2026-10-24T01:22Z) hoac duoc rut han; dua ops/cong_cu_test.py vao write set; bia mo hai chieu cho wp886-r1-g1-claude"
+  - "r2: DOI LICH — 2026-10-23T13:46Z lease wp892-r2-g2-claude (packet #892, han 2026-10-24T13:46Z) nhan giu ops/cong_cu_test.py ngay khi wp879 nha (ai-dang-giu do lai 13:50Z: NGUOI_GIU 1 wp892-r2-g2-claude). Lease r2 som nhat 2026-10-24T13:55Z neu tep ay khong con nguoi giu; dua ops/cong_cu_test.py vao write set; bia mo hai chieu cho wp886-r1-g1-claude (han r1 2026-10-25T06:42Z)"
+  - "r2: MERGE MASTER TRUOC khi ap ban nhap fixture — #892 co the da sua chinh ops/cong_cu_test.py; ap lai ban nhap len ban cua master roi do lai"
   - "r2: sua fixture python_alias_behavior_test — ban NHAP do executor soan, CHUA commit: Windows dung `python3.cmd` goi sys.executable (symlink `python3.exe` CHUA DO: python co the khong thay DLL canh link); POSIX giu symlink `python3`. Linux voi ban nhap: cong_cu_test rc=0: ca=61/61 · dot bien=470 · loi dot bien=0 · tien kiem bo qua=0 · cong cay that DAT (Linux, efa6e8d + ban nhap). Phien dieu phoi xac nhan `.cmd` nam trong r2 (spec ghi `tep co duoi PATHEXT`); dieu kien: DO THAT tren windows-latest rang probe chay duoc `.cmd` qua subprocess/CreateProcess"
   - "r2: merge master (khong rebase), tai sinh RELEASE_MANIFEST + ratchet neu master tien"
   - "r2: ci.yml xanh tren head cuoi + windows-only (gate-cong-cu) + launcher-windows.yml dispatch MOT lan"
   - "r2: cross-review Codex (sandbox + PROMPT da soan cho r1, can sua neo head va them cau hoi fixture)"
   - "ngoai packet: cong_cu.yaml dong 25-26 con chu thich mo ta no `python-probe-khong-theo-PATH` (Q2 cam sua yaml) — se loi thoi khi packet land"
 next_role: human
-manual_next_action: "Phien dieu phoi soan spec wp886 r2 + cap lease r2 sau 2026-10-24T01:22Z"
+manual_next_action: "Phien dieu phoi cap lease r2 som nhat 2026-10-24T13:55Z (sau khi wp892-r2-g2-claude nha ops/cong_cu_test.py)"
 copyable_prompt: null
 failure:
   fingerprint: null

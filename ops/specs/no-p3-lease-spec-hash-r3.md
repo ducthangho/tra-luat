@@ -3,22 +3,24 @@
 | mục | nội dung |
 |---|---|
 | `packet_id` | `no-p3-lease-spec-hash` |
-| `packet_issue` | #751 (`gh api repos/ducthangho/tra-luat/issues/751` lúc 23:57:40Z 15-10-2026: `open`, `updated_at 2026-10-15T05:52:49Z`). |
+| `packet_issue` | #751 (`gh api repos/ducthangho/tra-luat/issues/751` lúc 23:57:40Z 15-10-2026: `open`, `updated_at 2026-10-15T05:52:49Z`; đọc lại 13:08:55Z 23-10-2026: vẫn `open`, `updated_at` không đổi). |
 | `revision` | 3 |
 | `thay_the_cho` | **r2**: `ops/specs/no-p3-lease-spec-hash-r2.md`, sha256 `8f700b06b28e4c02c615b591b02a75a2fd901239746eb2a3fb8389dd9f549ec4`, blob `3a708be2867bab1e14e93dab07f0711479e8b867`, commit thêm `a9ef33c24665dedc70f2c839e2357353bd4054af`; vào `master` qua PR #762 (merge vào `master` là `c522c17`; `207250f` là merge vào nhánh của PR, không nằm trên first-parent của `master`) CHỈ ĐỂ LƯU VẾT (nợ `SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE`, hàng dưới). r2 thay r1 (sha256 `17df1dccb4df520acb0d525cfc091dbee07fc8d878cf63f2fe2a4874a1a2fc6c`, commit `55bd0d24`). Thứ định danh r1, r2 là băm, không phải tên nhánh hay vị trí tệp. r3 không sửa byte nào của r1, r2 (đóng băng); mọi closure, lease và `spec_hash` từ nay neo **r3**. |
-| review của r2 | **Lượt 2** (hẹp), reviewer Claude Sonnet 5.5 chạy bằng subagent (tự khai): `verdict: approve`, `reviewed_sha` `a9ef33c24665dedc70f2c839e2357353bd4054af`, `spec_sha256` `8f700b06…549ec4`, **0 P1 · 0 P2 · 8 P3**; 11 lớp của lượt 1 ĐÃ ĐÓNG. `VERDICT.md` sha256 `fcb545136985a89e6711f37dd3f4e3c42121202f6d4c7d156b80b13604353102` (167 dòng); `HINT.patch` sha256 `f536ce126e5b1048d29f361534dd60a78c00c80d404535110f5e4126f4fab037` (11 hunk, mỗi hunk một dòng `# lop:`, chỉ văn bản đặc tả). Hai tệp KHÔNG có trong kho ở `c522c17` (0 trên 3510 mục cây có sha256 bằng một trong hai băm, đo 17-10-2026; mục cây định nghĩa ở mục Chưa đo được; băm của r1 và của r2 làm điều khiển dương, mỗi băm khớp đúng 1 mục. Lọc tên `ls ops/reviews` theo `spec-hash` ra 0 dòng nhưng chỉ phủ `ops/reviews`: toàn cây có 2 đường dẫn chứa `spec-hash`, là hai bản đặc tả r1, r2); thứ định danh là băm. Cách r3 đóng từng lớp: mục **Thay đổi so với r2**. |
-| finding sau review | **P2 Codex trên PR #762**: comment review `4286041913` (`pull/762#discussion_r4286041913`), `chatgpt-codex-connector[bot]`, `created_at 2026-10-15T17:13:10Z`, neo r2 dòng 231 tại `4c550bc0fcdf63d92a709d217a3da22b33938a14`, tiêu đề "Keep the documented pre-commit lease check usable" (đọc lại bằng `gh api repos/ducthangho/tra-luat/pulls/comments/4286041913` ~23:30Z). Ý: r2 bắt `check` đọc `spec_path` CHỈ từ `HEAD` đã commit và trả 13 khi spec chưa commit (r2 dòng 89–95), trong khi runbook `ops/README.md` dòng 33–44 bảo soạn lease → `check` → rồi mới commit; r2 tự nhận runbook sẽ sai mà để README nguyên. Ghi sổ thành nợ `SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE` (P2, `trang_thai: mo`) ở `ops/land/pr759-no-p3-ho-so-land-evidence.yaml` dòng 407–418 tại `c522c17`: không lease nào được cấp trên r2; r3 phải xử lý finding trước khi review lại và cấp lease. r3 đóng phần #751 của nợ ấy (hàng C1); phần #752 (`discussion_r4286041896`) thuộc đặc tả khác. |
-| `nguon_cap_viec` | Sổ nợ P3 mục 4: review wp685 lượt 2–5 đo `lease_publish.py check` không đọc `spec_hash`, `spec_sha256_required`, `plan_hash`, `write_set_hash`, `spec_path` (VERDICT review lượt 5 r28 sha256 `d3f1d9db4896efe8c1b62112a3d0aa479b64c5dc110da1d323b3297d7e7c45fb`, M11: đột biến D2, D3, D5, D6, D7 cho rc=0 cả năm) — **KHÔNG ĐO ĐƯỢC từ kho**: đo lại 23:50:15Z–23:50:34Z 15-10 trên 540 nhánh (`refs/remotes/origin/*` của bản bare đủ ref, bỏ `claude/spec-no-p3`): 0/1102 blob trong lịch sử có tên tệp chứa `verdict` (không phân biệt hoa thường) khớp băm này; 831 blob như thế ở đầu nhánh, đều thuộc tập lịch sử ấy. "Sổ nợ P3" sống ở phiên điều phối, ngoài kho. Vế "`check` không đọc các trường ấy" đo lại: `grep -cE` năm tên trong `ops/lease_publish.py` tại `c522c17` = 0 dòng (00:03:51Z 16-10). Ngưỡng chủ kho #698 `6094652521`. Phạm vi do chủ kho chốt 15-10-2026 (Q7, Q8) và quyết định 15-10 cho r2 (test mới phải đăng ký vào sổ test sống) giữ nguyên. Issue #763 (`open`, `ducthangho`, `created_at 2026-10-15T23:26:04Z`, tiêu đề "Packet NO-P3-DANG-KY-CI: đăng ký hai bộ test của #752 vào ci_dang_ky_test.py") nhận phần đăng ký của #752; phần đăng ký bộ test của #751 vẫn thuộc #751 (Mục tiêu 6). |
-| `review_class` | **sensitive** — `ops/lease_publish.py` là cổng cấp lease (authority). Trần ADR-0044 dòng 5: ≤ 3 tệp, ≤ 300 dòng thêm. Đo `_tinh_lop_tu_write_set` gọi thẳng tại `c522c17` (23:49Z): từng đường dẫn của write set và cả ba cùng lúc ⇒ `sensitive` (`_BANG_LOP` mở ở dòng 59, mục `ops/lease_publish.py` ở dòng 65; hai tệp còn lại rơi về `sensitive` theo chú thích dòng 56–58); `ops/README.md` cũng ⇒ `sensitive`. |
-| `executor` · `reviewer` | Claude (executor). Reviewer: lớp `sensitive` chạm security path ⇒ ADR-0036 dòng 9–10 và PROTOCOL §8 dòng 705–707 đòi **Codex cross-review hoặc `human_audited`**; `review_deferred` bị cấm, `same_provider_approved` một mình không thay được (dòng 696). Subagent Claude Sonnet chỉ là lượt PHỤ; Sonnet không nằm trong `MO_HINH_CHO_PHEP` của `.claude/dev/chon_reviewer.py` (dòng 7). Bộ chọn: `--duong-dan` nhận MỘT chuỗi phân tách bằng dấu phẩy, lặp cờ thì chỉ giá trị CUỐI được dùng — đo 23:49:48Z (với `--so-dong` dưới 400 và `--luot` không quá 2; mỗi điều kiện vượt cộng thêm 1 vào tổng — đo lại 17-10-2026): lặp ba cờ ⇒ `claude-opus-5`/`xhigh`, "tổng=2", mất dòng "+2 chạm vùng cong"; dạng dấu phẩy cho ba đường dẫn ở 210, 280, 300 dòng ⇒ `claude-fable-5`/`xhigh`, "tổng=4" (23:50:09Z). Đường dự phòng khi Codex không làm mới được: `human_audited` — KHÔNG merge chỉ với Sonnet. Chỉ P1/P2 chặn merge. |
-| `base` | `c522c173cb58b506bac8cffb24239e16e8459836` (merge PR #762) — nền ĐO của r3 theo chỉ thị phiên điều phối. `git ls-remote --heads origin` lúc 23:31:30Z: 541 nhánh, `master` máy chủ đã sang `9fddb1d19e8e5b753bb687673846d484fb710182` (merge PR #755); `git diff --stat c522c17 9fddb1d` = 1 tệp `ops/specs/wp728-do-linux-doc-lap-wp710-r2.md` +246, không chạm write set hay bộ đo nền nào. Từ `6f121a3` (nền r2) tới `c522c17`: 17 commit, 87 tệp, toàn `ops/**`; diff trên ba tệp write set, ba bộ đo nền, `ops/README.md`, `ci.yml`, `ops-publish-lease.yml`, `ops/ci_duong_nhanh.py`, cùng `docs/`, `.claude/`, `.github/` = 0 dòng ⇒ mọi số dòng mã r2 dẫn vẫn đúng tại `c522c17`. #748 CHƯA land: mọi số đo nền phải ĐO LẠI sau khi #748 land (L5 của `.claude/skills/soan-spec/SKILL.md`, `depends_on` (3), A0); không lease nào được cấp trước đó. |
-| `write_set` | `ops/lease_publish.py` · `ops/lease_publish_spec_hash_test.py` (MỚI) · `.claude/dev/ci_dang_ky_test.py` (+1 dòng `MOI`, Mục tiêu 6) — giữ nguyên ba tệp của r2. `ops/README.md` KHÔNG vào: thiết kế r3 giữ runbook đúng (hàng C1). Đường dự phòng "đưa README vào write set" sẽ là tệp THỨ TƯ, vượt trần sensitive 3 tệp ⇒ cần ngoại lệ trần của chủ kho hoặc tách phần đăng ký; thiết kế r3 tránh được cả hai. |
-| `depends_on` | **CHẶN cấp lease** cho tới khi ĐỦ năm điều kiện, đo lại lúc cấp (số trong ô này không thay được phép đo lúc cấp). **(1)** #748 đã land vào `master` — không chỉ vào `mission/748/integration`. Đo 23:31:42Z: CHƯA (`c522c17..origin/master` = 7 commit, toàn spec wp728; Issue #748 `open` lúc 23:57:40Z). **(2)** Trên một clone ĐỦ ref — so `git ls-remote --heads origin` với `git for-each-ref refs/remotes/origin` (bỏ `HEAD`) theo tập tên VÀ OID: thiếu 0, lệch 0, VÀ `git remote get-url origin` ra `https://github.com/ducthangho/tra-luat` (hoặc dạng có `.git`) — nếu `origin` là một bản sao cũ thì `ls-remote` và `for-each-ref` cùng mù và cùng khớp, còn `ai-dang-giu` ra `NGƯỜI_GIỮ 0`, rc 0 cho đường dẫn mà máy chủ đang có người giữ; khác URL hoặc không chạy được ⇒ `KHÔNG_XÁC_ĐỊNH` ⇒ không cấp — `python3 ops/lease_publish.py ai-dang-giu <đường dẫn> --root <bản bare>` ra `NGƯỜI_GIỮ 0`, rc 0, cho từng đường dẫn của write set. Mọi lệnh của (2), kể cả bước cần mạng, chạy dưới hợp đồng môi trường đo (Số đo nền); phép so chạy TRONG bản bare vừa `fetch`, và chỉ so khi `git for-each-ref refs/remotes/origin` trong bản bare ấy in ít nhất một dòng — in 0 dòng ⇒ `KHÔNG_XÁC_ĐỊNH` ⇒ không cấp. Đo 23:32:15Z–23:33:09Z trên bản bare đủ ref (thiếu 0, thừa 0, OID khớp, 541 nhánh): `ops/lease_publish.py` 0 rc 0; `ops/lease_publish_spec_hash_test.py` 0 rc 0; `.claude/dev/ci_dang_ky_test.py` ⇒ `NGƯỜI_GIỮ 1: wp748-r11-g11-claude-windows-20261015`, **rc 11** — lease r11 của #748 (nhánh `ops/wp748-r11-g11-lease` @ `181e3fbd`, hạn `2026-10-16T04:27:21Z`, write set 11 đường dẫn gồm `ops/lease_publish_test.py`, `.claude/dev/ci_dang_ky_test.py`, `ops/ci_duong_nhanh_test.py`, `.github/workflows/ci.yml`; `spec_path ops/specs/wp748-windows-gates-r11.md`; `thay_the_cho` r10). Kho cục bộ `/home/user/tra-luat` lúc 23:31:30Z thiếu 4 nhánh (trong đó `ops/wp748-r11-g11-lease`) và lệch OID 3 nhánh (trong đó `master`, `ops/wp748-r10-g10-lease`) so với máy chủ — đo trên bộ đệm ấy là mù đúng lease đang giữ. **(3)** Nếu bất kỳ commit nào sau `c522c17` trên `master` đổi một tệp của write set hoặc một bộ đo nền (`ops/lease_publish_test.py`, `ops/ci_duong_nhanh_test.py`, `.claude/dev/ci_dang_ky_test.py`) ⇒ dời nền bằng revision mới và đo lại mọi số ở Số đo nền TRƯỚC khi cấp; không cấp trên nền `c522c17`. Lease r11 của #748 khai cả ba bộ ấy ⇒ gần như chắc phải dời nền. **(4)** Write set giao với #763 (`no-p3-dang-ky-ci`) ở `.claude/dev/ci_dang_ky_test.py` ⇒ hai lease KHÔNG được đồng thời; packet land sau phải qua (3). Nếu #763 land trước, N của A7 đổi (bản nháp #763 khai +2 dòng `MOI`: 23 ⇒ 25, đích của #751 thành `26/26`). Bản nháp r3 của #752 (chưa đóng băng, đọc 23:57:40Z) đã đưa sổ RA khỏi write set của nó — giao #751↔#752 ở sổ không còn, chỉ còn #751↔#763. **(5)** Có bằng chứng bền (đường dẫn comment) cho quyết định chủ kho 15-10 về sổ test sống VÀ cho đồng ý đi tiếp ở ngưỡng L4 (mục Hình dạng kế thừa). Hiện trạng lúc đo (23:31Z–23:58Z 15-10; hạn r11 `2026-10-16T04:27:21Z` qua sau đó, nên (2) phải đo lại lúc cấp): (1) chưa · (2) ĐỎ (rc 11) · (3) chờ (1) · (4) chờ · (5) chưa. |
-| `kich_thuoc` | 3 tệp — **đúng trần** sensitive, dư 0 tệp. Trần cứng 300 dòng thêm theo `git diff --numstat` (ADR-0044 dòng 5). Đo bản THĂM DÒ của lượt soạn r3 (KHÔNG giao; dựng từ chữ Mục tiêu 1–3, 5 lên bản sao `c522c17`, 23:35Z): `ops/lease_publish.py` +54/−0, 5 hunk (`-25,0 +26` · `-52,0 +54` · `-1116,0 +1119,49` · `-2294,0 +2346` · `-2305,0 +2358,2`), chưa gồm sửa chú thích dòng 2313 (ước +1/−1) và chưa gồm sửa docstring dòng 15–16 (Mục tiêu 1, thêm sau lượt 3); `ci_dang_ky_test.py` +1/−0 (số reviewer lượt 2) ⇒ bộ test còn ≤ 244 dòng theo ước ấy (theo số đo lượt 3 dưới, +56 đã gồm sửa chú thích: ≤ 243 dòng, và ≤ 241–242 khi tính thêm sửa docstring dòng 15–16, đo lượt 4 dưới). r3 đòi **40 ca** (A1 1 · A2 5 · A2b 3 · A3 5 · A3b 3 · A3c 2 · A4 6 · A4b 9 · A5 4 · A5b 2). Viết tay từng ca KHÔNG vừa (reviewer lượt 2: 27 ca viết tay = 461 dòng ⇒ 52 + 1 + 461 = 514 > 300) ⇒ bộ test PHẢI dạng bảng: một hàm dựng kho, một hàm chạy `check`, một bảng ca. Số "24 ca dạng bảng = 144 dòng" là của reviewer lượt 1, không tái lập. Đo lượt 3 (16-10-2026, cửa sổ 02:12Z–02:55Z; bản dựng KHÔNG giao): đúng 40 ca dạng bảng viết dày = 239 dòng (241 khi thêm dòng BỎ QUA CÓ TÊN trên `nt` mà Mục tiêu 4 đòi) ⇒ `git diff --numstat` +56/−1 (kể cả sửa chú thích dòng 2313) · +239/−0 · +1/−0 = 296 (298) dòng thêm, CHƯA gồm sửa docstring dòng 15–16; đo lượt 4 (16-10-2026, bản thăm dò lượt 4 KHÔNG giao, trên `ops/lease_publish.py` nền): sửa docstring ấy thêm +1/−1 và một hunk khi nối vào dòng 16, hoặc +2/−1 và một hunk khi bọc dòng ⇒ 297–298 (299–300) dòng thêm ≤ 300, dư 3–2 (1–0); cùng bộ test 239 dòng ấy qua `ruff format --line-length 100` = 374 dòng, `--line-length 88` = 428 dòng ⇒ ngân sách ≤ 243 dòng chỉ đủ khi giữ kiểu dày (mỗi ca một hàng bảng, dòng tới ~155 ký tự; nền, dòng dài nhất tính bằng KÝ TỰ: `lease_publish.py` 161, `lease_publish_test.py` 248 — tính bằng BYTE: 174 và 270; đo lượt 4, 16-10-2026, `c522c17`); executor đo `git diff --numstat <nền>` (tệp mới đã `git add -N` hoặc đã commit — xem A7) ngay khi bộ test xanh. Vượt 300 dòng thêm hoặc cần tệp thứ tư ⇒ dừng TRƯỚC review và soạn revision. |
+| review của r2 | **Lượt 2** (hẹp), reviewer Claude Sonnet 5.5 chạy bằng subagent (tự khai): `verdict: approve`, `reviewed_sha` `a9ef33c24665dedc70f2c839e2357353bd4054af`, `spec_sha256` `8f700b06…549ec4`, **0 P1 · 0 P2 · 8 P3**; 11 lớp của lượt 1 ĐÃ ĐÓNG. `VERDICT.md` sha256 `fcb545136985a89e6711f37dd3f4e3c42121202f6d4c7d156b80b13604353102` (167 dòng); `HINT.patch` sha256 `f536ce126e5b1048d29f361534dd60a78c00c80d404535110f5e4126f4fab037` (11 hunk, mỗi hunk một dòng `# lop:`, chỉ văn bản đặc tả). Hai tệp KHÔNG có trong kho ở `1d7e642` (0 trên 5049 mục cây có sha256 bằng một trong hai băm, đo 13:13:51Z 23-10-2026; ở `c522c17`: 0 trên 3510, đo 17-10-2026; mục cây định nghĩa ở mục Chưa đo được; băm của r1 và của r2 làm điều khiển dương, mỗi băm khớp đúng 1 mục ở cả hai nền. Lọc tên `git ls-tree -r --name-only 1d7e642 ops/reviews` theo `spec-hash` ra 0 dòng nhưng chỉ phủ `ops/reviews`: toàn cây `1d7e642` có 2 đường dẫn chứa `spec-hash`, là hai bản đặc tả r1, r2); thứ định danh là băm. Cách r3 đóng từng lớp: mục **Thay đổi so với r2**. |
+| finding sau review | **P2 Codex trên PR #762**: comment review `4286041913` (`pull/762#discussion_r4286041913`), `chatgpt-codex-connector[bot]`, `created_at 2026-10-15T17:13:10Z`, neo r2 dòng 231 tại `4c550bc0fcdf63d92a709d217a3da22b33938a14`, tiêu đề "Keep the documented pre-commit lease check usable" (đọc lại bằng `gh api repos/ducthangho/tra-luat/pulls/comments/4286041913` ~23:30Z). Ý: r2 bắt `check` đọc `spec_path` CHỈ từ `HEAD` đã commit và trả 13 khi spec chưa commit (r2 dòng 89–95), trong khi runbook `ops/README.md` dòng 33–44 bảo soạn lease → `check` → rồi mới commit; r2 tự nhận runbook sẽ sai mà để README nguyên. Ghi sổ thành nợ `SPEC-R2-751-752-KHONG-DUOC-CAP-LEASE` (P2, `trang_thai: mo`) ở `ops/land/pr759-no-p3-ho-so-land-evidence.yaml` dòng 407–418 tại `c522c17` (tệp không đổi tới `1d7e642`; `git grep -l` mã nợ ấy trên toàn cây `1d7e642` ra đúng 1 tệp là tệp này, 13:25:37Z 23-10-2026): không lease nào được cấp trên r2; r3 phải xử lý finding trước khi review lại và cấp lease. r3 đóng phần #751 của nợ ấy (hàng C1); phần #752 (`discussion_r4286041896`) thuộc đặc tả khác. |
+| `nguon_cap_viec` | Sổ nợ P3 mục 4: review wp685 lượt 2–5 đo `lease_publish.py check` không đọc `spec_hash`, `spec_sha256_required`, `plan_hash`, `write_set_hash`, `spec_path` (VERDICT review lượt 5 r28 sha256 `d3f1d9db4896efe8c1b62112a3d0aa479b64c5dc110da1d323b3297d7e7c45fb`, M11: đột biến D2, D3, D5, D6, D7 cho rc=0 cả năm) — **KHÔNG ĐO ĐƯỢC từ kho**: đo lại 13:12:37Z–13:13:36Z 23-10-2026 trên 557 nhánh (`refs/remotes/origin/*` của bản bare đủ ref, bỏ nhánh của chính đặc tả `claude/spec-no-p3-r3`): 0/1240 blob trong lịch sử có tên tệp chứa `verdict` (không phân biệt hoa thường) khớp băm này; 967 blob như thế ở đầu nhánh, đều thuộc tập lịch sử ấy (lần đo 15-10 trên 540 nhánh: 0/1102 và 831). "Sổ nợ P3" sống ở phiên điều phối, ngoài kho. Vế "`check` không đọc các trường ấy" đo lại: `grep -cE` năm tên trong `ops/lease_publish.py` tại `1d7e642` = 0 dòng (13:25:13Z 23-10-2026; tệp byte-identical với `c522c17`). Ngưỡng chủ kho #698 `6094652521`. Phạm vi do chủ kho chốt 15-10-2026 (Q7, Q8) và quyết định 15-10 cho r2 (test mới phải đăng ký vào sổ test sống) giữ nguyên. Issue #763 (`open`, `ducthangho`, `created_at 2026-10-15T23:26:04Z`; đọc lại 13:08:55Z 23-10-2026 vẫn `open`; tiêu đề "Packet NO-P3-DANG-KY-CI: đăng ký hai bộ test của #752 vào ci_dang_ky_test.py") nhận phần đăng ký của #752; phần đăng ký bộ test của #751 vẫn thuộc #751 (Mục tiêu 6). |
+| `review_class` | **sensitive** — `ops/lease_publish.py` là cổng cấp lease (authority). Trần: ADR-0053 dòng 6, ≤ 6 tệp và ≤ 450 dòng thêm theo `git diff --numstat` — thay đúng cặp số `sensitive` của ADR-0044 dòng 5 (≤ 3 tệp, ≤ 300 dòng thêm); `docs/PROTOCOL_DA_PHIEN.md` §20 dòng 1514, 1522 tại `1d7e642` ghi cả hai ADR là `Accepted`, **0 cổng**. Trần mới CHỈ áp khi đặc tả mang đúng một dòng `tran_kich_thuoc_sensitive: ADR-0053@<OID land>` (ADR-0053 mục Hiệu lực, dòng 48–59): dòng ấy nằm ngay dưới bảng này, OID `8ab100793df9831505f495543a74044b91c2c9ab` (merge PR #791), và đo 13:17:29Z–13:17:31Z 23-10-2026 trên bản bare không nông vừa fetch `master` ⇒ `git cat-file -e <L>:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md` rc 0 · cùng phép trên `<L>^1` rc 128 · `git rev-list --first-parent refs/remotes/origin/master` chứa `<L>` (rc 0 của `grep -qx`). Thiếu, trùng hay sai dòng ấy ⇒ trần cũ ≤ 3 tệp / ≤ 300 dòng thêm (fail-closed). Không cổng nào canh trần (ADR-0053 dòng 42–46): người cấp lease và reviewer đo bằng tay. Đo `_tinh_lop_tu_write_set` gọi thẳng tại `1d7e642` (13:14:21Z 23-10-2026; `ops/lease_publish.py` byte-identical với `c522c17`, sha256 `d8079330007ab6ba53d328ba2d4abb1d4eb2737e2b5466b702ce9152958014f6`): từng đường dẫn của write set và cả ba cùng lúc ⇒ `sensitive` (`_BANG_LOP` mở ở dòng 59, mục `ops/lease_publish.py` ở dòng 65; hai tệp còn lại rơi về `sensitive` theo chú thích dòng 56–58); `ops/README.md` cũng ⇒ `sensitive`. |
+| `executor` · `reviewer` | Claude (executor). Reviewer: lớp `sensitive` chạm security path ⇒ ADR-0036 dòng 9–10 và PROTOCOL §8 dòng 712–714 tại `1d7e642` (705–707 tại `c522c17`) đòi **Codex cross-review hoặc `human_audited`**; `review_deferred` bị cấm, `same_provider_approved` một mình không thay được (dòng 703 tại `1d7e642`, 696 tại `c522c17`). Subagent Claude Sonnet chỉ là lượt PHỤ; Sonnet không nằm trong `MO_HINH_CHO_PHEP` của `.claude/dev/chon_reviewer.py` (dòng 7). Bộ chọn: `--duong-dan` nhận MỘT chuỗi phân tách bằng dấu phẩy, lặp cờ thì chỉ giá trị CUỐI được dùng — đo 23:49:48Z (với `--so-dong` dưới 400 và `--luot` không quá 2; mỗi điều kiện vượt cộng thêm 1 vào tổng — đo lại 17-10-2026): lặp ba cờ ⇒ `claude-opus-5`/`xhigh`, "tổng=2", mất dòng "+2 chạm vùng cong"; dạng dấu phẩy cho ba đường dẫn ở 210, 280, 300 dòng ⇒ `claude-fable-5`/`xhigh`, "tổng=4" (23:50:09Z). Đo lại cả hai dạng tại `1d7e642` với `--review-class sensitive --luot 1` (13:14:21Z 23-10-2026; `chon_reviewer.py` không đổi từ `c522c17`): cùng kết quả. Đường dự phòng khi Codex không làm mới được: `human_audited` — KHÔNG merge chỉ với Sonnet. Chỉ P1/P2 chặn merge. |
+| `base` | `1d7e642092fb3dda15967be44d095f37bb22ac5f` (merge PR #885) — nền ĐO của r3 sau khi #748 land, theo chỉ thị phiên điều phối (chủ kho duyệt đổi nền; bằng chứng bền của lần duyệt: mục Chưa đo được). `git ls-remote --heads origin` lúc 13:02:47Z 23-10-2026: 558 nhánh, `master` máy chủ = `1d7e642`; đọc lại 13:20:16Z 23-10-2026: 560 nhánh, `master` vẫn `1d7e642`. Từ `c522c17` (nền r3 được duyệt, merge PR #762) tới `1d7e642`: 522 commit (73 trên first-parent), 1574 tệp. `git diff --numstat c522c17 1d7e642` trên tệp spec này dẫn: ĐỔI `.claude/dev/ci_dang_ky_test.py` +222/−30 (write set VÀ bộ đo nền), `ops/lease_publish_test.py` +476/−102, `ops/ci_duong_nhanh_test.py` +162/−47, `.github/workflows/ci.yml` +122/−7, `.github/workflows/launcher-windows.yml` +9/−11, `docs/PROTOCOL_DA_PHIEN.md` +41/−19, `.claude/skills/soan-spec/SKILL.md` +54/−2, `ops/reviews/README.md` +18/−0, cùng ba ADR mới `0052`–`0054`; KHÔNG ĐỔI (0 dòng) `ops/lease_publish.py`, `ops/ci_duong_nhanh.py`, `ops/README.md`, `.github/workflows/ops-publish-lease.yml`, `.gitattributes`, `.claude/dev/chon_reviewer.py`, ADR-0036, ADR-0044 ⇒ mọi số dòng spec dẫn vào các tệp không đổi vẫn đúng tại `1d7e642`; số dòng dẫn vào các tệp đã đổi được đo lại tại chỗ (mục cuối). Lịch sử nền: r3 soạn và được duyệt trên `c522c17`; từ `6f121a3` (nền r2) tới `c522c17`: 17 commit, 87 tệp, toàn `ops/**`, 0 dòng trên các tệp spec dẫn. #748 ĐÃ land (merge first-parent của #748 trong `c522c17..1d7e642`: PR #849 `9422054`, #862 `401d4f1`, #869 `7400df4`, #882 `8223fd2`; Issue #748 `closed`/`completed` lúc 2026-10-20T01:19:38Z, đọc 13:08:55Z 23-10-2026) — mọi số đo nền đã ĐO LẠI trên `1d7e642` (L5 của `.claude/skills/soan-spec/SKILL.md`, `depends_on` (3), A0; mục cuối); không lease nào được cấp trước đó. |
+| `write_set` | `ops/lease_publish.py` · `ops/lease_publish_spec_hash_test.py` (MỚI) · `.claude/dev/ci_dang_ky_test.py` (+1 dòng `MOI`, Mục tiêu 6) — giữ nguyên ba tệp của r2. `ops/README.md` KHÔNG vào: thiết kế r3 giữ runbook đúng (hàng C1). Đường dự phòng "đưa README vào write set" sẽ là tệp THỨ TƯ: lúc soạn r3 nó vượt trần sensitive 3 tệp của ADR-0044 (cần ngoại lệ trần của chủ kho hoặc tách phần đăng ký); dưới trần 6 tệp của ADR-0053 mà r3 nay áp (hàng `review_class`) nó KHÔNG còn vượt trần, nhưng vẫn là đổi write set ⇒ revision mới. Lý do loại README là hàng C1, không phải trần. |
+| `depends_on` | **CHẶN cấp lease** cho tới khi ĐỦ năm điều kiện, đo lại lúc cấp (số trong ô này không thay được phép đo lúc cấp). **(1)** #748 đã land vào `master` — không chỉ vào `mission/748/integration`. Đo 13:08:55Z 23-10-2026: ĐÃ — bốn merge first-parent của #748 nằm trong `c522c17..1d7e642` (hàng `base`), Issue #748 `closed`/`completed` lúc 2026-10-20T01:19:38Z. Lần đo 23:31:42Z 15-10: CHƯA (`c522c17..origin/master` khi ấy = 7 commit, toàn spec wp728; Issue #748 `open` lúc 23:57:40Z). **(2)** Trên một clone ĐỦ ref — so `git ls-remote --heads origin` với `git for-each-ref refs/remotes/origin` (bỏ `HEAD`) theo tập tên VÀ OID: thiếu 0, lệch 0, VÀ `git remote get-url origin` ra `https://github.com/ducthangho/tra-luat` (hoặc dạng có `.git`) — nếu `origin` là một bản sao cũ thì `ls-remote` và `for-each-ref` cùng mù và cùng khớp, còn `ai-dang-giu` ra `NGƯỜI_GIỮ 0`, rc 0 cho đường dẫn mà máy chủ đang có người giữ; khác URL hoặc không chạy được ⇒ `KHÔNG_XÁC_ĐỊNH` ⇒ không cấp — `python3 ops/lease_publish.py ai-dang-giu <đường dẫn> --root <bản bare>` ra `NGƯỜI_GIỮ 0`, rc 0, cho từng đường dẫn của write set. Mọi lệnh của (2), kể cả bước cần mạng, chạy dưới hợp đồng môi trường đo (Số đo nền); phép so chạy TRONG bản bare vừa `fetch`, và chỉ so khi `git for-each-ref refs/remotes/origin` trong bản bare ấy in ít nhất một dòng — in 0 dòng ⇒ `KHÔNG_XÁC_ĐỊNH` ⇒ không cấp. Đo lại 13:20:16Z–13:23:31Z 23-10-2026 trên bản bare đủ ref (thiếu 0, thừa 0, OID khớp, 560 nhánh; `remote get-url` ra đúng URL trên): `ops/lease_publish.py` 0 rc 0; `ops/lease_publish_spec_hash_test.py` 0 rc 0; `.claude/dev/ci_dang_ky_test.py` ⇒ `NGƯỜI_GIỮ 1: wp892-r1-g1-claude`, **rc 11** — lease r1 của #892 (nhánh `ops/wp892-r1-g1-lease` @ `62fb3c1a`, commit 13:01:49Z 23-10-2026, `lease_expires_at_utc 2026-10-24T13:01:00Z`, write set 4 đường dẫn `ops/cong_cu_test.py`, `.github/workflows/ci.yml`, `.claude/dev/ci_dang_ky_test.py`, `ops/ci_duong_nhanh_test.py`; `spec_path ops/specs/wp892.md`; `thay_the_cho: []`; `base_sha` = `1d7e642`); cùng lượt in thêm `CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ wp878-r1-g1-claude`, không tính là người giữ. Lượt đầu 12:58:12Z–13:01:25Z 23-10-2026 (556 nhánh lúc 12:58:02Z cùng ngày) cho `ci_dang_ky_test.py` rc 0 — lease #892 được cấp SAU lượt ấy. Lúc soạn r3 (23:32:15Z–23:33:09Z 15-10, 541 nhánh) người giữ là lease r11 của #748 (`wp748-r11-g11-claude-windows-20261015`, nhánh `ops/wp748-r11-g11-lease` @ `181e3fbd`, hạn `2026-10-16T04:27:21Z`). Hai đường ra `KHÔNG_XÁC_ĐỊNH` đo được trong lần đo lại, cả hai fail-close rc 12: (a) nhánh tạo trên máy chủ sau lần fetch (`cache thiếu nhánh máy chủ: ops/wp892-spec`, 13:01:25Z 23-10-2026); (b) `ai-dang-giu` quét `refs/heads/*` của bản bare (dòng đầu nó in: `PHẠM_VI: quét refs/heads/*`), nên bản bare clone từ trước mà chỉ fetch vào `refs/remotes/origin/*` ra rc 12 `NHÁNH_CỤC_BỘ_TỤT_SAU` (13:01:56Z–13:02:22Z 23-10-2026, cả 7 đường dẫn đã hỏi); lượt đo cuối fetch `'+refs/heads/*:refs/heads/*' '+refs/heads/*:refs/remotes/origin/*'` trong cùng một lệnh. Kho cục bộ `/home/user/tra-luat` lúc 13:23:41Z 23-10-2026 có 538 nhánh `refs/remotes/origin/*` so với 560 trên máy chủ: thiếu 91 (trong đó `ops/wp892-r1-g1-lease`), thừa 69, lệch OID 1 — đo trên bộ đệm ấy là mù đúng lease đang giữ (lúc 23:31:30Z 15-10: thiếu 4, lệch OID 3). **(3)** Điều kiện này ĐÃ xảy ra một lần: `c522c17..1d7e642` đổi `.claude/dev/ci_dang_ky_test.py` (write set) và cả ba bộ đo nền (hàng `base`); nền đã dời sang `1d7e642` bằng lần đo lại ghi ở mục cuối — làm TẠI CHỖ trong r3 theo chỉ thị phiên điều phối, KHÔNG bằng revision mới như chữ gốc của ô này đòi (lệch thủ tục, khai thẳng ở đây). Từ nay: nếu bất kỳ commit nào sau `1d7e642` trên `master` đổi một tệp của write set hoặc một bộ đo nền (`ops/lease_publish_test.py`, `ops/ci_duong_nhanh_test.py`, `.claude/dev/ci_dang_ky_test.py`) ⇒ dời nền và đo lại mọi số ở Số đo nền TRƯỚC khi cấp; không cấp trên nền `1d7e642`. Lease r1 của #892 (ô (2)) khai `.claude/dev/ci_dang_ky_test.py` và `ops/ci_duong_nhanh_test.py` ⇒ nếu #892 land trước lúc cấp thì phải dời nền lần nữa. **(4)** Write set giao với #763 (`no-p3-dang-ky-ci`) và — từ 13:01:49Z 23-10-2026 — với lease còn hạn của #892, cùng ở `.claude/dev/ci_dang_ky_test.py` ⇒ không lease nào của #751 được đồng thời với lease của hai packet ấy; packet land sau phải qua (3). Nếu #763 land trước, N của A7 đổi (`ops/specs/no-p3-dang-ky-ci-r1.md` dòng 19 tại `c3f6f5f` vẫn khai +2 dòng `MOI`: 24 ⇒ 26, đích của #751 thành `27/27`; lúc soạn r3: 23 ⇒ 25, `26/26`). Đặc tả #892 (`ops/specs/wp892.md` @ `8a0c3672`, sha256 bằng `spec_sha256_required` của lease, đọc 13:27:32Z 23-10-2026) có 0 dòng chứa `MOI`, `DA_NOI`, `DANG_KY` hay `ĐĂNG KÝ` và 2 dòng nhắc `ci_dang_ky_test` — nó đổi sổ và hai bộ đo nền, không đổi N theo chữ. Bản r3 của #752 (`ops/specs/no-p3-cong-cu-ho-so-r3.md` dòng 16 tại `c3f6f5f`) đã đưa sổ RA khỏi write set của nó — giao #751↔#752 ở sổ không còn. **(5)** Có bằng chứng bền (đường dẫn comment) cho quyết định chủ kho 15-10 về sổ test sống VÀ cho đồng ý đi tiếp ở ngưỡng L4 (mục Hình dạng kế thừa). Hiện trạng lúc đo lại (12:58Z–13:28Z 23-10-2026; hạn lease #892 `2026-10-24T13:01:00Z`, nên (2) phải đo lại lúc cấp): (1) ĐÃ · (2) ĐỎ (rc 11, lease #892) · (3) đã xảy ra một lần và đã đo lại trên `1d7e642`; còn treo theo #892 · (4) chờ (#763 `open` lúc 13:08:55Z 23-10-2026; #892 đang giữ sổ) · (5) chưa. Lúc soạn r3 (23:31Z–23:58Z 15-10): (1) chưa · (2) ĐỎ (rc 11, lease r11 của #748) · (3) chờ (1) · (4) chờ · (5) chưa. |
+| `kich_thuoc` | 3 tệp — trong trần sensitive 6 tệp của ADR-0053 mà r3 áp (hàng `review_class`), dư 3 tệp (trần cũ ADR-0044 dòng 5: 3 tệp, dư 0). Trần cứng 450 dòng thêm theo `git diff --numstat` (ADR-0053 dòng 6; trần cũ 300). Mọi số kích thước dưới đây đo trên `ops/lease_publish.py` của `c522c17`, byte-identical tại `1d7e642` (hàng `base`), nên giữ nguyên; chỉ phép so với trần đổi. Đo bản THĂM DÒ của lượt soạn r3 (KHÔNG giao; dựng từ chữ Mục tiêu 1–3, 5 lên bản sao `c522c17`, 23:35Z): `ops/lease_publish.py` +54/−0, 5 hunk (`-25,0 +26` · `-52,0 +54` · `-1116,0 +1119,49` · `-2294,0 +2346` · `-2305,0 +2358,2`), chưa gồm sửa chú thích dòng 2313 (ước +1/−1) và chưa gồm sửa docstring dòng 15–16 (Mục tiêu 1, thêm sau lượt 3); `ci_dang_ky_test.py` +1/−0 (số reviewer lượt 2) ⇒ bộ test còn ≤ 244 dòng theo ước ấy (theo số đo lượt 3 dưới, +56 đã gồm sửa chú thích: ≤ 243 dòng, và ≤ 241–242 khi tính thêm sửa docstring dòng 15–16, đo lượt 4 dưới). r3 đòi **40 ca** (A1 1 · A2 5 · A2b 3 · A3 5 · A3b 3 · A3c 2 · A4 6 · A4b 9 · A5 4 · A5b 2). Viết tay từng ca KHÔNG vừa (reviewer lượt 2: 27 ca viết tay = 461 dòng ⇒ 52 + 1 + 461 = 514 > 450, và > 300 của trần cũ) ⇒ bộ test PHẢI dạng bảng: một hàm dựng kho, một hàm chạy `check`, một bảng ca. Số "24 ca dạng bảng = 144 dòng" là của reviewer lượt 1, không tái lập. Đo lượt 3 (16-10-2026, cửa sổ 02:12Z–02:55Z; bản dựng KHÔNG giao): đúng 40 ca dạng bảng viết dày = 239 dòng (241 khi thêm dòng BỎ QUA CÓ TÊN trên `nt` mà Mục tiêu 4 đòi) ⇒ `git diff --numstat` +56/−1 (kể cả sửa chú thích dòng 2313) · +239/−0 · +1/−0 = 296 (298) dòng thêm, CHƯA gồm sửa docstring dòng 15–16; đo lượt 4 (16-10-2026, bản thăm dò lượt 4 KHÔNG giao, trên `ops/lease_publish.py` nền): sửa docstring ấy thêm +1/−1 và một hunk khi nối vào dòng 16, hoặc +2/−1 và một hunk khi bọc dòng ⇒ 297–298 (299–300) dòng thêm ≤ 450, dư 153–152 (151–150) — so trần cũ 300: dư 3–2 (1–0); cùng bộ test 239 dòng ấy qua `ruff format --line-length 100` = 374 dòng, `--line-length 88` = 428 dòng ⇒ dưới trần cũ 300 ngân sách ≤ 243 dòng chỉ đủ khi giữ kiểu dày (mỗi ca một hàng bảng, dòng tới ~155 ký tự; nền, dòng dài nhất tính bằng KÝ TỰ: `lease_publish.py` 161, `lease_publish_test.py` 248 — tính bằng BYTE: 174 và 270; đo lượt 4, 16-10-2026, `c522c17`); dưới trần 450, ngân sách bộ test là 450 − 57 − 1 = 392 dòng (nối docstring) hoặc 450 − 58 − 1 = 391 dòng (bọc dòng), nên bản 374 dòng của `--line-length 100` (đo trên bản 239 dòng, chưa gồm dòng BỎ QUA trên `nt`) cũng vừa, dư 18–17, còn bản 428 dòng của `--line-length 88` vượt 36–37 — kiểu dày không còn bắt buộc theo trần (phép tính 23-10-2026 từ các số đo ấy, không dựng lại bản thăm dò 40 ca; dòng dài nhất đo lại 13:28:58Z 23-10-2026 tại `1d7e642`: vẫn 161/248 ký tự, 174/270 byte, và cùng kịch bản tái lập đúng bốn số ấy tại `c522c17`); executor đo `git diff --numstat <nền>` (tệp mới đã `git add -N` hoặc đã commit — xem A7) ngay khi bộ test xanh. Vượt 450 dòng thêm ⇒ dừng TRƯỚC review và soạn revision, hoặc khai khối `nang_tran` (ADR-0053 dòng 32–38); cần tệp thứ tư là đổi write set ⇒ revision mới — trần 6 tệp không thay được việc ấy. |
+
+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
 ## Thay đổi so với r2
 
-r3 viết lại từ r2 (không áp `HINT.patch` máy móc: 3/11 hunk được viết cho thiết kế đọc `HEAD` của r2 và sai với thiết kế r3 — xem bảng thứ hai). Mọi con số mới của lượt soạn r3 đều đo lại trên `c522c17` hoặc bản sao của nó, kèm thời điểm (giờ UTC, ngày 15-10-2026 trừ chỗ ghi ngày khác); số do các bản vá review thêm sau nằm ngoài câu này; số nào không đo lại thì ghi rõ là số của reviewer.
+r3 viết lại từ r2 (không áp `HINT.patch` máy móc: 3/11 hunk được viết cho thiết kế đọc `HEAD` của r2 và sai với thiết kế r3 — xem bảng thứ hai). Mọi con số mới của lượt soạn r3 đều đo lại trên `c522c17` hoặc bản sao của nó, kèm thời điểm (giờ UTC, ngày 15-10-2026 trừ chỗ ghi ngày khác); số do các bản vá review thêm sau nằm ngoài câu này; số của lần đo lại sau khi #748 land đo trên `1d7e642` hoặc bản sao của nó ngày 23-10-2026, ghi ngày tại chỗ và liệt kê ở mục cuối; số nào không đo lại thì ghi rõ là số của reviewer.
 
 | # | nguồn · hạng | id lớp | chỗ sửa trong r3 |
 |---|---|---|---|
@@ -28,14 +30,14 @@ r3 viết lại từ r2 (không áp `HINT.patch` máy móc: 3/11 hunk được v
 | B3 | lượt 2 · P3 | `dong-cuoi-bo-test-phai-la-N-tren-N-mot-minh` | Mục tiêu 4 (dòng `N/N` đứng một mình là dòng DUY NHẤT có dạng số/số, và là dòng cuối — hàng g); A7 (phép `chay_moi`). |
 | B4 | lượt 2 · P3 | `yeu-cau-muc-tieu-1-chua-co-tieu-chi-do` | Mỗi yêu cầu mà lượt 2 liệt kê (tám đột biến sống sót bộ A của r2) có một ca và một đột biến: A1 (dòng "ĐĂNG ĐƯỢC" và băm 12 ký tự); A2 (thông điệp lệch nêu trường · giá trị khai · giá trị đo; rc 13 KHÔNG kèm "ĐĂNG ĐƯỢC"; thông điệp tệp vắng); A2b (iii) và A4b (thông điệp "64 ký tự hex thường"); A4 (dòng bằng chứng write set; phần tử không phải chuỗi); A5 (ca 3, 4: `spec_path` không băm, `spec_hash: null`). Các yêu cầu khác của Mục tiêu 1–6 CHƯA có ca nào: sáu do lượt 3 đo, năm nhóm do lượt 4 đo, năm nhóm do lượt 5 đo (mục Chưa đo được) — danh sách các nhóm ĐÃ ĐO THẤY, KHÔNG phải tập đóng. |
 | B5 | lượt 2 · P3 | `kich-thuoc-viet-tay-15-ca-thieu-so-voi-26-ca` | Hàng `kich_thuoc` (đếm 40 ca của r3, đo bản thăm dò +54, buộc dạng bảng). |
-| B6 | lượt 2 · P3 | `a6-so-tuyet-doi-phu-thuoc-so-ref-cua-clone` | A6 (i): tiêu chí là TẬP lease đổi rc; số tuyệt đối đo lại trên `c522c17` kèm điều kiện ref (clone làm việc của Số đo nền; số ref cục bộ đếm bằng `git for-each-ref refs/heads refs/remotes` bỏ `/HEAD`, không ghi thành chữ số). |
+| B6 | lượt 2 · P3 | `a6-so-tuyet-doi-phu-thuoc-so-ref-cua-clone` | A6 (i): tiêu chí là TẬP lease đổi rc; số tuyệt đối đo lại trên `c522c17` (rồi trên `1d7e642`, 23-10-2026) kèm điều kiện ref (clone làm việc của Số đo nền; số ref cục bộ đếm bằng `git for-each-ref refs/heads refs/remotes` bỏ `/HEAD`, không ghi thành chữ số). |
 | B7 | lượt 2 · P3 | `luat-hai-truong-chua-nhat-quan-fixture-va-dang-sai` | Mục tiêu 1 (kiểm DẠNG mọi trường băm có mặt TRƯỚC khi chọn trường quyết định); A2 (tiền đề fixture: lease CHỈ mang trường được sửa); A2b (iii) mới. |
 | B8 | lượt 2 · P3 | `chu-thich-check-thuan-va-body-cung-cong-se-sai` | Mục tiêu 1 (chú thích dòng 2313 PHẢI sửa; dòng 2295–2296 nay GIỮ ĐÚNG vì `check` vẫn không chạm git — đo, hàng b); A3 (v) khoá "check THUẦN"; A6b khoá chú thích. |
 | G1 | lượt 2 · ghi nhận IV.2 | lời dẫn `depends_on` (4) trỏ r1 của #752 | `depends_on` (4) viết lại: giao nay là #751↔#763. |
-| G2 | lượt 2 · ghi nhận IV.3 | trôi ảnh chụp ref (12 → 13 blob hai trường) | Mọi số trên toàn ref đo lại trên bản bare đủ ref, so tên + OID với `ls-remote` trước khi đo (17 blob hai trường, 15 bằng, 2 khác). |
+| G2 | lượt 2 · ghi nhận IV.3 | trôi ảnh chụp ref (12 → 13 blob hai trường) | Mọi số trên toàn ref đo lại trên bản bare đủ ref, so tên + OID với `ls-remote` trước khi đo (17 blob hai trường, 15 bằng, 2 khác; đo lại 13:29:49Z 23-10-2026: 62, 60 bằng, 2 khác — Số đo nền). |
 | G3 | lượt 2 · ghi nhận IV.4 | nền sẽ phải dời | Hàng `base`, `depends_on` (3), A0. |
-| G4 | lượt 2 · ghi nhận IV.5 | `spec_hash` không kèm `spec_path` (15/612 blob) | Mục tiêu 1: thông điệp "spec: không khai — không kiểm" giữ, chấp nhận như lease cũ (15/619 blob đo lại). |
-| G5 | lượt 2 · ghi nhận IV.1 | trần ADR-0044 chờ chủ kho | Hàng `kich_thuoc`; không đổi trần. |
+| G4 | lượt 2 · ghi nhận IV.5 | `spec_hash` không kèm `spec_path` (15/612 blob) | Mục tiêu 1: thông điệp "spec: không khai — không kiểm" giữ, chấp nhận như lease cũ (15/619 blob đo lại; 15/680 lúc 13:29:49Z 23-10-2026). |
+| G5 | lượt 2 · ghi nhận IV.1 | trần ADR-0044 chờ chủ kho | Hàng `kich_thuoc`; không đổi trần. Sau đó ADR-0053 (land `8ab1007`) thay cặp số `sensitive`; lần đo lại 23-10-2026 áp nó qua dòng `tran_kich_thuoc_sensitive` dưới bảng đầu (hàng `review_class`). |
 
 Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
 
@@ -47,17 +49,21 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
 | (d) | A4b | Ca "PATH không có git ⇒ rc 12" của r2 BỎ: r3 không gọi git, ca ấy nay là A3 (v) với đáp án rc 0. Trạng thái thứ ba đổi thành "có tệp mà đọc ném `OSError` ⇒ 12" (ca trong tiến trình, chèn lỗi). |
 | (e) | A4b, CRLF | Đột biến của ca CRLF đổi từ "đọc qua `GOI_GIT`/`_git`" sang "đọc văn bản" (`read_text` rồi mã hoá lại): đo 23:56:43Z ⇒ ca CRLF rc 13, ĐỎ. Đột biến "đọc blob tại `HEAD`" thuộc A3. |
 | (f) | Mục tiêu 1, NUL | Cơ chế cụ thể dưới thiết kế đĩa (Python 3.11.15, đo 23:35Z): `PurePosixPath` nhận chuỗi có NUL không ném; `Path.resolve()` ném `ValueError: embedded null byte`; `Path.is_file()` trả `False`; `read_bytes()` ném `ValueError`. Nên chốt NUL đứng TRƯỚC `resolve()`; gỡ chốt ⇒ rc 1 kèm traceback (đo 23:56:43Z). |
-| (g) | Mục tiêu 4, B3 | HINT nói "dòng CUỐI đúng `N/N`". Đo `bang_chung_xanh` (`.claude/dev/ci_dang_ky_test.py` dòng 616–620, `re.search` đa dòng ở dòng 617; 23:58:24Z): `1/1`, `x`, `26/27` ⇒ **True** (xanh giả: khớp dòng ĐẦU có dạng ấy); `26/27`, `27/27` ⇒ False; `a`, `27/27`, `b` ⇒ True. Nên dòng `N/N` phải là dòng DUY NHẤT có dạng số/số đứng một mình, không chỉ là dòng cuối. |
+| (g) | Mục tiêu 4, B3 | HINT nói "dòng CUỐI đúng `N/N`". Đo `bang_chung_xanh` (`.claude/dev/ci_dang_ky_test.py` dòng 677–681 tại `1d7e642`, `re.search` đa dòng ở dòng 678; dòng 616–620 và 617 tại `c522c17`; thân hàm giống hệt, so AST nguồn; đo 23:58:24Z 15-10, đo lại 13:09:24Z 23-10-2026 với mẫu của khoá `ops/nhanh_don_duoc_test.py`): `1/1`, `x`, `26/27` ⇒ **True** (xanh giả: khớp dòng ĐẦU có dạng ấy); `26/27`, `27/27` ⇒ False; `a`, `27/27`, `b` ⇒ True. Nên dòng `N/N` phải là dòng DUY NHẤT có dạng số/số đứng một mình, không chỉ là dòng cuối. |
 | (h) | Mục tiêu 1, chốt đường dẫn | Mới hoàn toàn: đọc đĩa biến `spec_path` (dữ liệu YAML) thành một lượt đọc hệ tệp, nên r3 thừa kế nguyên chốt của `_kiem_neo_prompt` dòng 973–996 (tuyệt đối, `..`, dấu chéo ngược, `relative_to` sau `resolve()`). Đo 23:56:43Z: gỡ chốt dạng ⇒ ba ca vẫn rc 13 nhưng sai thông điệp (đúng bài học chú thích dòng 977–979); gỡ `relative_to` ⇒ ca symlink ra ngoài kho rc 0. |
-| (i) | A6 | Số tuyệt đối của hunk `@@ -190` (140/4/5 · 38/58/3, đo trên `6f121a3`) thay bằng số đo lại trên `c522c17` (Số đo nền). |
+| (i) | A6 | Số tuyệt đối của hunk `@@ -190` (140/4/5 · 38/58/3, đo trên `6f121a3`) thay bằng số đo lại trên `c522c17`, rồi trên `1d7e642` (Số đo nền). |
 | (j) | `kich_thuoc` | Hunk `@@ -16` dẫn 26 ca; r3 đòi 40 ca và có số đo bản thăm dò (+54) thay cho +52 của reviewer. |
 | (k) | A2b | Hunk `@@ -105` nói kiểm dạng mọi trường nhưng không thêm ca; r3 thêm A2b (iii), và đo: đột biến "chỉ kiểm dạng trường quyết định" ⇒ ca ấy rc 0, ĐỎ (23:56:43Z). |
 
-## Số đo nền (base `c522c17`, 15-10-2026, giờ UTC, đơn vị ghi rõ)
+## Số đo nền (base `1d7e642`, đo lại 23-10-2026; giờ UTC, mốc không ghi ngày là 15-10-2026; đơn vị ghi rõ)
 
-- Bản sao đo: clone `--no-checkout` của kho cục bộ, `checkout --detach c522c17`, `core.abbrev 7` (23:31:11Z); bản bare đủ ref
-  (`git clone --bare --reference` kho cục bộ + `fetch '+refs/heads/*:refs/remotes/origin/*'`, 23:31:42Z; so tập tên + OID với
-  `ls-remote --heads`: thiếu 0, thừa 0, 541 nhánh); clone làm việc từ bản bare cho A6 ("ref cục bộ" = `git for-each-ref refs/heads refs/remotes` bỏ ref tên kết thúc `/HEAD`, đúng tập `_cac_ref_cuc_bo` — `ops/lease_publish.py` dòng 524–536 — mà `_quet_lease_toan_kho` đọc; số ấy đổi theo máy chủ và theo cách đọc, không chống đỡ tiêu chí nào — A6 đo TẬP — nên không ghi thành chữ số).
+- Bản sao đo (23-10-2026, mọi bước dưới hợp đồng môi trường đo ngay dưới): clone `--no-checkout` của worktree đặc tả, `checkout --detach c3f6f5f`
+  (= `1d7e642` cộng đúng ba tệp `ops/specs/no-p3-*`, `git diff --name-only 1d7e642 c3f6f5f`), `core.abbrev 7` (12:56:05Z–12:56:07Z 23-10-2026), và
+  một clone thứ hai `checkout --detach 1d7e642`; bản bare đủ ref (`git clone --bare --reference` kho cục bộ từ `https://github.com/ducthangho/tra-luat`,
+  12:57:47Z–12:57:52Z 23-10-2026, + `fetch '+refs/heads/*:refs/remotes/origin/*'`, 12:58:02Z 23-10-2026; so tập tên + OID với `ls-remote --heads`: thiếu 0, thừa 0,
+  lệch 0, 556 nhánh; fetch lại lúc 13:02:47Z 23-10-2026 — 558 nhánh — và 13:20:16Z 23-10-2026 — 560 nhánh —, mỗi lần thiếu 0, thừa 0, lệch 0; lần fetch 13:01:54Z 23-10-2026 ra thiếu 1 vì một
+  nhánh được tạo giữa `fetch` và `ls-remote`, bị loại và đo lại). Lần soạn r3:
+  clone kho cục bộ `checkout --detach c522c17` (23:31:11Z), bản bare 541 nhánh (23:31:42Z). Clone làm việc từ bản bare cho A6 ("ref cục bộ" = `git for-each-ref refs/heads refs/remotes` bỏ ref tên kết thúc `/HEAD`, đúng tập `_cac_ref_cuc_bo` — `ops/lease_publish.py` dòng 524–536 — mà `_quet_lease_toan_kho` đọc; số ấy đổi theo máy chủ và theo cách đọc, không chống đỡ tiêu chí nào — A6 đo TẬP — nên không ghi thành chữ số).
 - Hợp đồng môi trường đo — quy tắc cho người chạy lại MỌI lệnh đo của spec, ở bất kỳ mục nào (kể cả bước dựng kho tạm, `git clone` và bước cần
   mạng; trừ các quan sát trạng thái GitHub có ngày giờ — Issue, PR, comment, hàng `packet_issue` và hàng `finding sau review` — bằng `gh api`, công cụ
   của phiên điều phối chứ không nằm trong năm liên kết — `gh` ra rc 127 khi `/usr/bin` và `/bin` không có nó, đo lượt 16 — và đo lại lúc cấp);
@@ -68,12 +74,13 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
   thư mục rỗng vừa tạo cho MỖI lệnh (không có cấu hình git hay gói Python của người dùng; MỘT `HOME` dùng chung cho hai lệnh chỉ là độ lệch
   mà phép đo nêu tại chỗ, hàng (c) bảng thứ hai); `GITHUB_REPOSITORY=o/r` vì `kiem-github` đọc nó qua
   `_repo_github()` (`ops/lease_publish.py` dòng 856–860; A3b (ii)). `GITHUB_ACTOR` và mọi biến `GIT_*` không có mặt. Công cụ: năm liên kết
-  trong `$B` (đo 17-10-2026 dưới chính tiền tố: Python 3.11.15 nhập được PyYAML 6.0.1, git 2.43.0, actionlint 1.7.7, shellcheck 0.9.0,
+  trong `$B` (đo 17-10-2026 dưới chính tiền tố, đo lại 13:04:19Z 23-10-2026 ra cùng phiên bản: Python 3.11.15 nhập được PyYAML 6.0.1, git 2.43.0, actionlint 1.7.7, shellcheck 0.9.0,
   ruff 0.15.8) cộng `/usr/bin` và `/bin` cho `bash`, `sh` và các tiện ích dòng lệnh mà bộ đo nền gọi; trình thông dịch gọi bằng tên `python3`.
   Bước cần mạng (`git clone` hoặc `fetch` từ máy chủ, `ls-remote`, `ai-dang-giu`) dùng CÙNG tiền tố, chỉ thêm biến mạng và xác thực, ghi TÊN
-  biến trong biên bản đo, không ghi giá trị. Đo 17-10-2026 (14:00:09Z–14:03:06Z) trên container phiên web, bước cần mạng chỉ thêm
-  `HTTPS_PROXY`: `git clone --bare --reference` kho cục bộ, rồi trong bản bare ấy `fetch origin '+refs/heads/*:refs/remotes/origin/*'` và
-  `ls-remote --heads origin` đều rc 0; `ai-dang-giu --root <bản bare>` cho ba đường dẫn write set ra rc 0, 0, 11 (11 là `NGƯỜI_GIỮ 1`; ai giữ
+  biến trong biên bản đo, không ghi giá trị. Đo lại 23-10-2026 (12:57:47Z–13:23:41Z) trên container phiên web, bước cần mạng chỉ thêm
+  `HTTPS_PROXY`, như lần đo 17-10-2026 (14:00:09Z–14:03:06Z): `git clone --bare --reference` kho cục bộ, rồi trong bản bare ấy `fetch origin '+refs/heads/*:refs/remotes/origin/*'`
+  (lần cuối kèm `'+refs/heads/*:refs/heads/*'` trong cùng lệnh, `depends_on` (2)) và
+  `ls-remote --heads origin` đều rc 0; `ai-dang-giu --root <bản bare>` cho ba đường dẫn write set ra rc 0, 0, 11 ở cả hai ngày (11 là `NGƯỜI_GIỮ 1`; ai giữ
   thì đo lại lúc cấp, `depends_on` (2)). Bước cục bộ trong bản bare ấy, dưới hợp đồng không thêm gì: `git for-each-ref refs/remotes/origin`
   (bỏ `HEAD`) khác rỗng và so với kết quả `ls-remote` trên theo tập tên và OID ra thiếu 0, thừa 0, lệch 0; `git remote get-url origin` ra
   `https://github.com/ducthangho/tra-luat`.
@@ -81,47 +88,65 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
   độ lệch ấy ngay tại chỗ bằng lệnh dựng nguyên văn, không bằng danh từ, và giữ mọi thứ khác theo hợp đồng. Ngoài hợp đồng này, kết quả KHÔNG được khẳng định; chạy ngoài hợp đồng là chạy
   sai, không phải phản chứng.
 - Bảng mã thoát: `RC_OK 0`, `RC_THAM_SO 2`, `RC_TU_CAP 4`, `RC_NEO 6`, `RC_NOI_DUNG 8`, `RC_DA_DANG 9`, `RC_LOP 10`, `RC_DANG_GIU 11`,
-  `RC_KHONG_XAC_DINH 12` (`ops/lease_publish.py` dòng 44–52, tệp không đổi từ `6f121a3`). Mã `13` chưa dùng. Docstring `MÃ THOÁT`
-  dòng 18–25 thiếu 11, 12 (dòng 26 là dòng đóng docstring); `--help` in 0 dòng chứa `MÃ THOÁT` (00:03:51Z 16-10).
-- Lease (kịch bản chỉ-đọc `m_baseline.py` của reviewer lượt 2, `python3 -B -I m_baseline.py <clone> c522c17`, 23:31:20Z): **152** tệp
-  `ops/leases/*.yaml` (r2: 150; thêm `no-p3-ho-so-r2-g1-claude.yaml`, `wp741-r1-g1-claude-20261015.yaml`). **99** có `spec_path` + băm
-  (8 mang cả hai trường): **94** khớp blob tại `c522c17`, **5** lệch — đúng năm lease r2 đã kể (`gate-tach-job-cat-chi-phi-exec-1`,
-  `-1r2`, `-1r3` và `wp461-…-exec-1` mang `da_bi_thay_the`; `…-exec-1r4` không). **60** có `write_set` + `write_set_hash`: **6** khai
-  scope `sorted NFC casefold exact …`, khớp công thức (a) 6/6; **54** không scope, khớp (a) 0/54.
-- Trên toàn ref (bản bare, 540 nhánh `refs/remotes/origin/*` bỏ `claude/spec-no-p3`; `m_both.py`, `m_unexp.py`, `m_lease_shapes.py`, 23:33:44Z–23:33:51Z): **619**
-  blob lease khác nhau; **17** mang cả hai trường băm (15 bằng nhau; 2 khác nhau = `wp709-exec-g1/g2-codex`, `spec_hash f569b613…` ≠
-  `spec_sha256_required f739b4aa…`); 7 blob chưa hết hạn lúc 23:33:51Z. Hình dạng: `spec_path` + `spec_hash` hex64 354 · `spec_path` không
-  băm 56 ("băm" = `spec_hash` hoặc `spec_sha256_required`; `spec_sha256` không tính, xem Mục tiêu 1) · `spec_path` + `spec_sha256_required` hex64 55 · `spec_path: null` 27 · cả hai trường 17 · `spec_hash` không `spec_path` 15 ·
-  `spec_hash: null` 3 — **0** blob mang băm sai dạng.
+  `RC_KHONG_XAC_DINH 12` (`ops/lease_publish.py` dòng 44–52, tệp không đổi từ `6f121a3` tới `1d7e642`). Mã `13` chưa dùng. Docstring `MÃ THOÁT`
+  dòng 18–25 thiếu 11, 12 (dòng 26 là dòng đóng docstring); `--help` in 0 dòng chứa `MÃ THOÁT` (00:03:51Z 16-10; đo lại 13:20:07Z 23-10-2026: 0).
+- Lease (kịch bản chỉ-đọc `m_cay.py` dựng lại 23-10-2026 — `m_baseline.py` của reviewer lượt 2 không có trong kho —, đọc blob bằng git, không
+  checkout; `python3 -B m_cay.py 1d7e642`, 13:11:05Z–13:11:07Z 23-10-2026; cùng kịch bản trên `c522c17` (13:10:59Z 23-10-2026) tái lập ĐÚNG mọi số của
+  lần soạn r3 — 152 · 99 (8) · 94/5 cùng năm tên · 60 · 6 khớp 6/6 · 54 khớp 0/54 · `spec_sha256` 57 và 5 — nên hai lần đo cùng định nghĩa):
+  **171** tệp `ops/leases/*.yaml` (`c522c17`: 152; r2: 150). **118** có `spec_path` + băm (18 mang cả hai trường; `c522c17`: 99 và 8):
+  **113** khớp blob tại `1d7e642`, **5** lệch — vẫn đúng năm lease r2 đã kể (`gate-tach-job-cat-chi-phi-exec-1`,
+  `-1r2`, `-1r3` và `wp461-…-exec-1` mang `da_bi_thay_the`; `…-exec-1r4` không). **73** có `write_set` + `write_set_hash`: **6** khai
+  scope `sorted NFC casefold exact …`, khớp công thức (a) 6/6; **67** không scope, khớp (a) **4/67** (`c522c17`: 54, khớp 0/54 — bốn lease mới
+  tính đúng công thức (a) mà không khai scope, nên cổng vẫn không kiểm chúng, Mục tiêu 2). "Khớp blob" = sha256 của blob `<commit>:<spec_path>`
+  bằng trường quyết định (Mục tiêu 1 (vii)).
+- Trên toàn ref (bản bare, ảnh chụp ref lúc fetch 13:20:16Z 23-10-2026: 559 nhánh `refs/remotes/origin/*` bỏ nhánh của chính đặc tả
+  `claude/spec-no-p3-r3`; kịch bản dựng lại `m_ref.py` — ba kịch bản `m_both.py`, `m_unexp.py`, `m_lease_shapes.py` của lượt soạn r3 không có
+  trong kho —, 13:29:49Z–13:29:57Z 23-10-2026): **680** blob `ops/leases/*.yaml` khác nhau ở ĐẦU các nhánh ấy; **62** mang cả hai trường băm
+  (60 bằng nhau; 2 khác nhau, vẫn là `wp709-exec-g1/g2-codex`, `spec_hash f569b613…` ≠ `spec_sha256_required f739b4aa…`); 4 blob chưa hết hạn
+  lúc 13:29:51Z 23-10-2026 (theo `_phan_loai_lease`). Hình dạng, phân hoạch loại trừ theo thứ tự này, tổng 680: cả hai trường 62 · `spec_path` +
+  `spec_hash` hex64 370 · `spec_path` + `spec_sha256_required` hex64 55 · `spec_hash` không `spec_path` 15 (`spec_sha256_required` không
+  `spec_path`: 0) · `spec_path` không băm 56 ("băm" = `spec_hash` hoặc `spec_sha256_required`; `spec_sha256` không tính, xem Mục tiêu 1) ·
+  `spec_path: null` 27 (trong đó 3 blob mang `spec_hash: null`) · không `spec_path` không băm 95 — **0** blob mang băm sai dạng. Lần soạn r3
+  (540 nhánh bỏ `claude/spec-no-p3`, 23:33:44Z–23:33:51Z): 619 blob · cả hai 17 (15 bằng) · 7 chưa hết hạn · `spec_path` + `spec_hash` 354 ·
+  không băm 56 · `spec_path` + `spec_sha256_required` 55 · `spec_path: null` 27 · `spec_hash` không `spec_path` 15 · `spec_hash: null` 3 · sai
+  dạng 0; định nghĩa nhóm của ba kịch bản cũ không tra được, nên số từng nhóm của hai lần đo không bảo đảm cùng định nghĩa.
 - **Nguồn đọc của `check`** (kịch bản `do_nguon.py`, kho tạm `git init` + cấu hình cục bộ, gọi `ops/lease_publish.py` của `c522c17` như
   tiến trình con, 23:34:49Z; lease có `prompt_path` + `prompt_sha256_required`): (1) lease + prompt CHƯA commit, khớp ⇒ rc 0; (2) đã commit,
   sửa prompt trên đĩa ⇒ rc 6 ("băm prompt LỆCH"); (3) `HEAD` hợp lệ, lease trên đĩa đổi `granted_by: claude` ⇒ rc 4; (4) `HEAD` mang prompt
   SAI, đĩa đúng ⇒ rc 0; (5) thư mục không có `.git`, có `--root` ⇒ rc 0; (6) PATH trỏ thư mục rỗng (không có git) ⇒ rc 0. Kết luận đo
   được: trong `check`, tệp lease (`_doc_yaml(a.tep)`, dòng 2294) và `prompt_path` (`_kiem_neo_prompt`, đọc byte dưới `_goc_kho(tep, goc)`,
-  dòng 985–1001) đều đọc từ ĐĨA, không cần git.
+  dòng 985–1001) đều đọc từ ĐĨA, không cần git. Đo lại 13:24:54Z–13:24:55Z 23-10-2026 bằng kịch bản dựng lại `do_nguon.sh` (`do_nguon.py`
+  không có trong kho), gọi `ops/lease_publish.py` của `c3f6f5f` (byte-identical với `1d7e642` và `c522c17`) như tiến trình con, fixture là lease
+  `wp892-r1-g1-claude` cùng spec của nó chép từ nhánh máy chủ (`prompt_path` = `spec_path`, có `prompt_sha256_required`); riêng ca (6) lệch hợp
+  đồng đúng một biến, dựng nguyên văn `E="$(mktemp -d)"; PATH="$E" <đường dẫn tuyệt đối của python3> -B <lease_publish.py> check <lease> --root .`:
+  cùng sáu kết quả 0 · 6 · 4 · 0 · 0 · 0.
 - Hai người tiêu thụ TỰ ĐỘNG của `check` đều chạy trên cây checkout SẠCH của commit được xét, nên với họ đĩa = commit: `ops-publish-lease.yml`
   (`actions/checkout@v4`, `fetch-depth: 0`, 0 dòng `sparse`; `check "$tep" --root .` dòng 216; bộ kiểm lấy từ worktree rời của nhánh mặc
   định, dòng 82–99) và `ops/ci_duong_nhanh.py::kiem_lease` (`check duong --root .` với `cwd=kho`, dòng 541; lease hết hạn đi
   `MA_KIEM_HET_HAN` dòng 121, tức `kiem(bo_qua_han=True)`). Người tiêu thụ THỦ CÔNG (`ops/README.md` dòng 37–38) chạy `check` TRƯỚC khi commit, trên cây CHƯA sạch (đĩa ≠ commit) — đó là lý do `kiem_bam` đọc ĐĨA (luật nguồn, Mục tiêu 1).
 - `.gitattributes` dòng 8: `* text=auto eol=lf`. Đo 23:52:28Z trong kho tạm chép tệp ấy: spec CRLF trên đĩa, lease neo băm byte CRLF ⇒
   `check` trước commit rc 0; sau commit, blob là `73 70 65 63 20 41 0a` ⇒ clone sạch rc 13.
-- Bộ đo nền trên bản sao `c522c17` dựng dưới hợp đồng môi trường đo (`git clone --no-checkout` kho cục bộ,
-  `checkout --detach c522c17`, `config core.abbrev 7`, cả ba rc 0), đo lại 17-10-2026 dưới chính hợp đồng, cùng số với lượt soạn r3
-  (15-10, 23:31Z–23:38Z): `python3 -B ops/lease_publish_test.py` ⇒ `lease_publish: 265/265 đạt; đã chạy=265, bỏ qua=0`, rc 0
-  (13:59:19Z–14:05:48Z); `python3 -B .claude/dev/ci_dang_ky_test.py` (không `--chay`) ⇒ `ĐĂNG KÝ: 23/23`, `TRẠNG THÁI: chan=23 cach_ly=0`,
-  `PHẢN CHỨNG: 1025/1025 đỏ đúng`, `TỔNG: ĐẠT`, rc 0 (13:59:23Z–13:59:30Z); `python3 -B ops/ci_duong_nhanh_test.py` ⇒
-  `CA: 104/104 dat · 0 do · 0 hong`, `DOT BIEN: 383/383 bi giet dung ly do`, `TONG: DAT`, rc 0 (13:59:21Z–14:01:46Z);
-  `ruff check --isolated --select F ops/lease_publish.py` (ruff 0.15.8) ⇒ 2 F841 sẵn có ở dòng 198–199, rc 1 (14:03:45Z).
-- A6 nền (kịch bản `do_a6.py`, trong tiến trình, `kiem(bo_qua_han=True)` cho 152 lease trên clone làm việc ở trên, ref cục bộ đếm bằng `git for-each-ref refs/heads refs/remotes` bỏ `/HEAD`, 23:38:49Z–23:54:26Z):
-  `{rc 0: 143, rc 8: 4, rc 10: 5}`.
+- Bộ đo nền trên bản sao `c3f6f5f` dựng dưới hợp đồng môi trường đo (`git clone --no-checkout` worktree đặc tả,
+  `checkout --detach c3f6f5f`, `config core.abbrev 7`, cả ba rc 0), đo 23-10-2026, ba bộ chạy song song: `python3 -B ops/lease_publish_test.py` ⇒
+  `lease_publish: 267/267 đạt; đã chạy=267, bỏ qua=0`, rc 0 (12:56:27Z–13:03:11Z 23-10-2026); `python3 -B .claude/dev/ci_dang_ky_test.py` (không `--chay`) ⇒
+  `ĐĂNG KÝ: 24/24`, `TRẠNG THÁI: chan=24 cach_ly=0`, `PHẢN CHỨNG: 1064/1064 đỏ đúng`, `TỔNG: ĐẠT`, rc 0 (12:56:27Z–12:56:35Z 23-10-2026);
+  `python3 -B ops/ci_duong_nhanh_test.py` ⇒ `CA: 104/104 dat · 0 do · 0 hong`, `DOT BIEN: 384/384 bi giet dung ly do`, `TONG: DAT`, rc 0
+  (12:56:27Z–13:00:06Z 23-10-2026); cùng ba bộ trên bản sao `checkout --detach 1d7e642` ra đúng các số ấy (13:04:14Z–13:11:21Z 23-10-2026);
+  `ruff check --isolated --select F ops/lease_publish.py` (ruff 0.15.8) ⇒ 2 F841 sẵn có ở dòng 198–199, rc 1 (13:04:18Z 23-10-2026).
+  Trên `c522c17` (lượt soạn r3 15-10 23:31Z–23:38Z, đo lại 17-10-2026 13:59:19Z–14:05:48Z): 265/265 · 23/23, `chan=23`, 1025/1025 ·
+  104/104, 383/383 · cùng 2 F841.
+- A6 nền (kịch bản dựng lại `do_a6.py` — bản cũ cùng tên không có trong kho —, trong tiến trình, `kiem(bo_qua_han=True)` cho 171 lease trên
+  clone làm việc từ bản bare, `checkout --detach 1d7e642`, ref cục bộ đếm bằng `git for-each-ref refs/heads refs/remotes` bỏ `/HEAD`,
+  13:15:10Z–13:24:46Z 23-10-2026): `{rc 0: 157, rc 8: 9, rc 10: 5}`. Cùng kịch bản trên clone `checkout --detach c522c17` cùng tập ref
+  (13:15:10Z–13:23:11Z 23-10-2026) tái lập đúng số lần soạn r3: `{rc 0: 143, rc 8: 4, rc 10: 5}` cho 152 lease (lần soạn r3 23:38:49Z–23:54:26Z).
 
 ## Mục tiêu
 
 1. **[`ops/lease_publish.py`] Băm spec.** Hàm MỚI `kiem_bam(lease, tep, goc) -> list[str]` đặt NGOÀI thân `kiem()`; `lenh_check` gọi nó
    ngay sau dòng `lease, neo = kiem(...)` (dòng 2294), TRƯỚC mọi `print` của lệnh, nên rc 4/6/8/10 luôn thắng và rc 13 không bao giờ đi kèm
    dòng "ĐĂNG ĐƯỢC". `kiem-github` KHÔNG gọi nó (lease đã đăng vẫn ra rc 9). `kiem()` giữ BYTE-IDENTICAL thân và chữ ký trả 2 phần tử
-   (`t191` duyệt AST thân `kiem()` nhưng chỉ coi `raise Chan` và lời gọi tên `_kiem_*`/`_doc_*` là chốt (`_la_chot`, `ops/lease_publish_test.py` dòng 9541–9547), nên KHÔNG thấy `kiem_bam`; `t01` dòng 705 `checked, _ = mod.kiem(...)`; số đo của reviewer lượt 1–2 (tên `_kiem_bam_spec`): đúng chữ r1 ⇒
-   263/265, đỏ đúng hai ca ấy). Người gọi `kiem()`: `check` (2294), `body` (2314), `kiem-github` (1280, 1282); không gồm
+   (`t191` duyệt AST thân `kiem()` nhưng chỉ coi `raise Chan` và lời gọi tên `_kiem_*`/`_doc_*` là chốt (`_la_chot`, `ops/lease_publish_test.py` dòng 9869–9875 tại `1d7e642`, 9541–9547 tại `c522c17`), nên KHÔNG thấy `kiem_bam`; `t01` dòng 706 tại `1d7e642` (705 tại `c522c17`) `checked, _ = mod.kiem(...)`; thân `_la_chot`, `_liet_ke_chot_kiem`, `_dem_chot_tho`, `_mien_mot_chot`, `t191_…` và `t01_executor_assurance_target_is_not_review_verdict` giống hệt giữa hai nền — so nguồn từng hàm qua AST, 23-10-2026; số đo của reviewer lượt 1–2 (tên `_kiem_bam_spec`): đúng chữ r1 ⇒
+   263/265 trên nền 265 ca của `c522c17`, đỏ đúng hai ca ấy; chưa đo lại trên nền 267 ca). Người gọi `kiem()`: `check` (2294), `body` (2314), `kiem-github` (1280, 1282); không gồm
    `kiem-thu-hoi-github`. Mã của `lenh_body` và `kiem_github` không đổi.
    **Luật nguồn (đóng C1): spec đọc từ CÙNG NGUỒN với tệp lease trong từng lệnh.** `check` đọc lease từ ĐĨA (Số đo nền, ca 1–6), nên
    spec đọc từ ĐĨA: tệp `_goc_kho(tep, goc) / spec_path`, cùng gốc mà `_kiem_neo_prompt` dùng cho `prompt_path`, byte thô bằng
@@ -136,7 +161,7 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
    `spec_sha256_required`. Thứ tự chốt, mỗi chốt ném `Chan(RC_SPEC_LECH, …)` với `RC_SPEC_LECH = 13` mới trừ chỗ ghi khác:
    (i) **DẠNG trước**: MỌI trường băm có mặt (khác `null`) phải là chuỗi 64 hex thường, kiểm cho CẢ HAI trường trước khi chọn trường
    quyết định (B7) — thông điệp nêu tên trường và "phải là 64 ký tự hex thường" như `_kiem_neo_prompt` dòng 969–971; `null` = vắng.
-   Chốt (i) áp cho MỌI lease CHƯA bị thay thế (lease mang `da_bi_thay_the` đã trả ngay đầu hàm, Mục tiêu 5) có trường băm có mặt, kể cả khi thiếu `spec_path` (bản thăm dò làm vậy; 0/619 blob thật sai dạng, kể cả 15
+   Chốt (i) áp cho MỌI lease CHƯA bị thay thế (lease mang `da_bi_thay_the` đã trả ngay đầu hàm, Mục tiêu 5) có trường băm có mặt, kể cả khi thiếu `spec_path` (bản thăm dò làm vậy; 0/680 blob thật sai dạng lúc 13:29:49Z 23-10-2026 — 0/619 lúc soạn r3 —, kể cả 15
    blob `spec_hash` không `spec_path` — đều hex64 — nên không từ chối lease nào đã có).
    (ii) `spec_path` chứa NUL ⇒ 13, đứng TRƯỚC mọi thao tác hệ tệp (bảng thứ hai, hàng f).
    (iii) `spec_path` tuyệt đối, có thành phần `..`, hoặc chứa dấu chéo ngược ⇒ 13, thông điệp "phải là đường dẫn tương đối trong kho".
@@ -148,8 +173,8 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
    `spec_sha256_required` quyết định — khớp ⇒ qua bất kể GIÁ TRỊ `spec_hash`, lệch ⇒ 13 bất kể giá trị `spec_hash` (hình dạng wp709;
    PROTOCOL §3.2: `spec_hash` là băm của Packet Spec, không bắt buộc bằng băm byte của tệp). Lệch ⇒ 13, thông điệp nêu tên trường, giá trị
    khai, giá trị đo.
-   Thiếu `spec_path` (hoặc không phải chuỗi, rỗng, `null`) hoặc không có `spec_hash` lẫn `spec_sha256_required` ⇒ **không kiểm, không đỏ** (lease cũ, kể cả 15/619
-   blob mang `spec_hash` mà không `spec_path`); dòng kết quả của `check` nói "spec: không khai — không kiểm" (nghĩa là không khai `spec_hash` lẫn `spec_sha256_required`; tên thứ ba `spec_sha256` KHÔNG được đọc — đo tại `c522c17`: 57/152 lease mang nó, 5/152 mang nó mà thiếu cả hai tên kia, đều thuộc họ `plat-m4-*`, băm khớp tệp, đều đã hết hạn — muộn nhất 2026-08-22T07:10:00Z).
+   Thiếu `spec_path` (hoặc không phải chuỗi, rỗng, `null`) hoặc không có `spec_hash` lẫn `spec_sha256_required` ⇒ **không kiểm, không đỏ** (lease cũ, kể cả 15/680
+   blob mang `spec_hash` mà không `spec_path`, 13:29:49Z 23-10-2026; 15/619 lúc soạn r3); dòng kết quả của `check` nói "spec: không khai — không kiểm" (nghĩa là không khai `spec_hash` lẫn `spec_sha256_required`; tên thứ ba `spec_sha256` KHÔNG được đọc — đo tại `1d7e642` (13:11:05Z 23-10-2026): 61/171 lease mang nó, 5/171 mang nó mà thiếu cả hai tên kia — vẫn năm lease họ `plat-m4-*`, băm khớp tệp, đều đã hết hạn, muộn nhất 2026-08-22T07:10:00Z; tại `c522c17`: 57/152 và 5/152).
    **Chú thích phải sửa (B8):** dòng 2313 ("Đi qua ĐÚNG bộ kiểm THUẦN của `check`") thành SAI sau packet — phải nói `body` KHÔNG chạy
    `kiem_bam` (đo bản thăm dò: spec lệch ⇒ `check` 13 · `body` 0). Workflow vẫn an toàn vì `check` đứng trước `body` và rc ≠ 0 thì
    `continue` (`ops-publish-lease.yml` dòng 220–223). Dòng 2295–2296 giữ nguyên vì vẫn ĐÚNG (bảng thứ hai, hàng b). Docstring của `t135`
@@ -160,13 +185,13 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
    `sorted NFC casefold exact`: `write_set` phải là danh sách chuỗi (phần tử không phải chuỗi ⇒ 13, không để `TypeError`); tính (a) =
    `sha256(json.dumps(sorted(unicodedata.normalize("NFC", p).casefold() for p in write_set), ensure_ascii=False, separators=(",", ":")).encode("utf-8"))`
    và so; lệch ⇒ 13. Scope vắng hoặc giá trị khác ⇒ **không kiểm, không đỏ**, và `check` in "write_set_hash: scope không nhận ra — không
-   kiểm" (54 lease không scope ở trên).
+   kiểm" (67 lease không scope ở `1d7e642`, Số đo nền; 54 ở `c522c17`).
 3. **[`ops/lease_publish.py`] Dòng xác nhận là bằng chứng.** Khi kiểm đạt, `kiem_bam` TRẢ dòng bằng chứng mang 12 ký tự đầu băm ĐO cho spec
    và cho write set, `lenh_check` in chúng; KHÔNG `print` trong `kiem()` (stdout của `body` là thân comment). Thêm hàng `13` vào bảng
-   `MÃ THOÁT` ở docstring đầu tệp (dòng 18–25 tại `c522c17`); `--help` không in bảng ấy (`argparse` lấy DÒNG ĐẦU của `__doc__`, dòng 2413). Chỉ thêm
+   `MÃ THOÁT` ở docstring đầu tệp (dòng 18–25 tại `c522c17` và `1d7e642`, tệp không đổi); `--help` không in bảng ấy (`argparse` lấy DÒNG ĐẦU của `__doc__`, dòng 2413). Chỉ thêm
    hàng 13; bảng thiếu 11, 12 là nợ sẵn có, KHÔNG thuộc packet.
-4. **[`ops/lease_publish_spec_hash_test.py`] Phản chứng.** Bộ test MỚI, tự đứng (không import `ops/lease_publish_test.py`, tệp ấy thuộc
-   write set #748), DẠNG BẢNG (hàng `kich_thuoc`). Dựng kho tạm bằng `git init` trong thư mục tạm, gọi `lease_publish.py check` như tiến
+4. **[`ops/lease_publish_spec_hash_test.py`] Phản chứng.** Bộ test MỚI, tự đứng (không import `ops/lease_publish_test.py`, tệp ấy ngoài
+   write set; lúc soạn r3 nó thuộc write set #748, nay #748 đã land và `ai-dang-giu` cho nó `NGƯỜI_GIỮ 0` lúc 13:21:52Z 23-10-2026), DẠNG BẢNG (hàng `kich_thuoc`). Dựng kho tạm bằng `git init` trong thư mục tạm, gọi `lease_publish.py check` như tiến
    trình con, đọc rc + stdout + stderr. HERMETIC, bốn lớp: (a) xoá `GITHUB_ACTOR` và mọi `GIT_*` khỏi env con (số reviewer lượt 2:
    không xoá ⇒ 27/27 · 0/27 · 27/27 khi biến không đặt, `notebyme88`, `ducthangho`); (b) mọi lệnh `git` của bộ test chạy với
    `GIT_CONFIG_NOSYSTEM=1` và `GIT_CONFIG_GLOBAL` trỏ một tệp rỗng trong thư mục tạm; (c) mỗi kho tạm đặt cấu hình cục bộ
@@ -181,24 +206,27 @@ Lệch `HINT.patch` lượt 2, hoặc ngoài HINT:
 5. **[`ops/lease_publish.py`] Miễn bia mộ.** Lease mang `da_bi_thay_the` (chuỗi khác rỗng) ⇒ `kiem_bam` trả NGAY ĐẦU hàm — trước chốt dạng (i), đường dẫn (ii)–(vi) và kiểm write set —, KHÔNG so băm, và trả
    "spec/write_set: lease đã bị thay thế — bia mộ — không kiểm băm" (PHẢI chứa nguyên văn `bia mộ — không kiểm băm` mà A5b đo; bản có
    ngoặc "(bia mộ) — không kiểm băm" của r2 KHÔNG chứa chuỗi ấy — số reviewer lượt 2: 26/27 với chuỗi có ngoặc). Lý do (đo lại trên
-   `c522c17`, A6): chuỗi revision dùng LẠI `spec_path` với băm mới và ghi bia mộ cho lease tiền nhiệm KHI CÒN HẠN — 4/5 lease lệch là
+   `c522c17` rồi trên `1d7e642`, A6): chuỗi revision dùng LẠI `spec_path` với băm mới và ghi bia mộ cho lease tiền nhiệm KHI CÒN HẠN — 4/5 lease lệch là
    tiền nhiệm như vậy; `ops/ci_duong_nhanh.py::kiem_lease` đưa MỌI lease CÒN HẠN bị chạm trong PR qua `check` (dòng 541), nên một PR sửa
    spec tại chỗ và ghi bia mộ vào tiền nhiệm còn hạn (hình dạng commit `6635379`) sẽ đỏ `gate-ops` nếu không miễn. Lease HẾT HẠN đi
    `kiem(bo_qua_han=True)` (dòng 539) nên không chạm `kiem_bam`; `ops-publish-lease.yml` bỏ qua rc 9 trước `check` (dòng 204–207).
-6. **[`.claude/dev/ci_dang_ky_test.py`] Đăng ký bộ test mới.** Thêm ĐÚNG MỘT dòng vào dict `MOI` (dòng 37–53 ở `c522c17`): khoá
-   `"ops/lease_publish_spec_hash_test.py"`, giá trị CHÉP NGUYÊN chuỗi mẫu của dòng `"ops/nhanh_don_duoc_test.py"` (dòng 52; mẫu khớp một
-   dòng đứng một mình gồm hai nhóm số cách nhau dấu gạch chéo). Không sửa dòng nào khác. Lý do: `kiem()` của sổ (dòng 579) đòi mọi
-   `ops/*_test.py` mức đỉnh (`tim()`, dòng 83) nằm trong `DANG_KY` (dòng 80); sổ CHẠY các bộ `MOI` trong job `gate-registry`
-   (`chay_moi` dòng 967; `ci.yml` dòng 895 `--chay`), nên đây cũng là cách nối CI — không sửa `ci.yml`. Nếu #763 land trước, dòng của
+6. **[`.claude/dev/ci_dang_ky_test.py`] Đăng ký bộ test mới.** Thêm ĐÚNG MỘT dòng vào dict `MOI` (dòng 38–55 ở `1d7e642`, 10 khoá; dòng 37–53 và 9 khoá ở `c522c17`): khoá
+   `"ops/lease_publish_spec_hash_test.py"`, giá trị CHÉP NGUYÊN chuỗi mẫu của dòng `"ops/nhanh_don_duoc_test.py"` (dòng 53 ở `1d7e642`, 52 ở `c522c17`; mẫu khớp một
+   dòng đứng một mình gồm hai nhóm số cách nhau dấu gạch chéo). Không sửa dòng nào khác. Lý do: `kiem()` của sổ (dòng 640 ở `1d7e642`, 579 ở `c522c17`) đòi mọi
+   `ops/*_test.py` mức đỉnh (`tim()`, dòng 104 ở `1d7e642`, 83 ở `c522c17`) nằm trong `DANG_KY` (dòng 82, trước là 80); sổ CHẠY các bộ `MOI` trong job `gate-registry`
+   (`chay_moi` dòng 1055, trước là 967; `ci.yml` job mở ở dòng 937, `--chay` ở dòng 1008 — trước là 827 và 895), nên đây cũng là cách nối CI — không sửa `ci.yml`.
+   `tim()` tại `1d7e642` thêm một luật so với `c522c17`: tệp bị Git bỏ qua mà chưa tracked không được đếm (`_git_bo_qua`); tệp test mới
+   không bị bỏ qua (`git check-ignore` rc 1, 13:25:13Z 23-10-2026) nên vẫn bị đếm — đo được ở A7. Nếu #763 land trước, dòng của
    #751 đặt cạnh hai dòng của #763; vẫn đúng một dòng thêm.
 
 ## Nghiệm thu
 
 Ký hiệu "đo" = đo trên bản thăm dò của lượt soạn r3 (không giao, dựng từ chữ Mục tiêu 1–3, 5) bằng `do_dot_bien.py` (23:56:43Z–23:57:08Z:
 bản thăm dò 15/15 ca đạt; 10 đột biến, mỗi cái chạy trên bản sao riêng trong thư mục tạm) hoặc `do_a3.py` (23:37:35Z–23:37:39Z). Số khác
-ghi rõ là của reviewer. Executor phải tự đo lại trên bản dựng của mình.
+ghi rõ là của reviewer. Executor phải tự đo lại trên bản dựng của mình. Các số "đo" của A1–A5b chạy trên kho tạm với `ops/lease_publish.py`
+của `c522c17`, byte-identical tại `1d7e642`, nên không phụ thuộc lần dời nền; số của A0, A6, A7 đo lại trên `1d7e642` ngày 23-10-2026 (mục cuối).
 
-- **A0 (nền, L5):** trước khi cấp lease, chạy lại mọi phép ở Số đo nền trên `master` SAU khi #748 land, dưới hợp đồng môi trường đo (Số đo nền). ĐỎ khi: một số nào khác số ghi ở
+- **A0 (nền, L5):** trước khi cấp lease, chạy lại mọi phép ở Số đo nền trên `master` lúc cấp (#748 đã land; số ghi ở đây đo trên `1d7e642`), dưới hợp đồng môi trường đo (Số đo nền). ĐỎ khi: một số nào khác số ghi ở
   đây mà chưa có revision mới ghi số đo mới — khi đó KHÔNG cấp.
 - **A1 (khớp ⇒ qua):** lease có spec khớp ⇒ rc 0, stdout chứa 12 ký tự đầu băm đo VÀ dòng "ĐĂNG ĐƯỢC". ĐỎ khi: gỡ dòng in bằng chứng ⇒ ca
   ĐỎ (số reviewer lượt 2); tính gốc theo thư mục chứa lease thay vì `_goc_kho` ⇒ ca rc 13, ĐỎ (đo; đột biến ấy làm đỏ 6/15 ca).
@@ -241,66 +269,76 @@ ghi rõ là của reviewer. Executor phải tự đo lại trên bản dựng c�
   gỡ chốt dạng đường dẫn ⇒ (4)(5)(6) vẫn rc 13 nhưng sai thông điệp; gỡ `relative_to` ⇒ (7) rc 0; "vắng ⇒ không kiểm" ⇒ (8) rc 0; gộp 12
   vào 13 ⇒ (9) mã 13.
 - **A5 (lease cũ không đỏ):** (1) không `spec_path` ⇒ rc 0, "không khai — không kiểm"; (2) `write_set_hash` không scope ⇒ rc 0, "scope
-  không nhận ra"; (3) có `spec_path` mà không có `spec_hash` lẫn `spec_sha256_required` (56/619 blob thật — số của lượt soạn r3; lease chỉ mang `spec_sha256`, 5 lease ở `c522c17`, cũng rơi vào dạng này vì cổng không đọc `spec_sha256`) ⇒ rc 0, "không khai — không kiểm"; (4) `spec_hash: null`
+  không nhận ra"; (3) có `spec_path` mà không có `spec_hash` lẫn `spec_sha256_required` (56/680 blob thật lúc 13:29:49Z 23-10-2026, 56/619 lúc soạn r3; lease chỉ mang `spec_sha256` — 5 lease ở `1d7e642` cũng như ở `c522c17` — cũng rơi vào dạng này vì cổng không đọc `spec_sha256`) ⇒ rc 0, "không khai — không kiểm"; (4) `spec_hash: null`
   cạnh `spec_sha256_required` đúng ⇒ rc 0. ĐỎ khi: coi thiếu trường là lỗi ⇒ (1)(2) ĐỎ; "có `spec_path` mà không băm ⇒ 13" ⇒ (3) ĐỎ;
   "`null` là băm sai dạng" ⇒ (4) ĐỎ (hai đột biến sau sống sót bộ A của r2, số reviewer lượt 2).
 - **A5b (bia mộ):** lease CÒN HẠN mang `da_bi_thay_the`, spec sửa tại chỗ sau khi cấp ⇒ `check` rc 0, stdout chứa `bia mộ — không kiểm
   băm`, và vẫn rc 0 sau khi XOÁ tệp spec (cùng ca, không đổi số ca); cùng hình dạng KHÔNG mang `da_bi_thay_the` ⇒ 13. ĐỎ khi: bỏ miễn ⇒ ca đầu rc 13
   (đo, 1/15 ca); đặt miễn SAU chốt tệp ⇒ ca đầu rc 13 sau khi xoá spec (đo lượt 3, 16-10-2026, cửa sổ 02:12Z–02:55Z): bản thăm dò 40 ca thiếu bước xoá vẫn 40/40.
 - **A6 (không hồi quy):** (i) trên một `git clone` (KHÔNG `git archive`) ở nền lúc cấp, trong tiến trình: `kiem(bo_qua_han=True)` rồi
-  `kiem_bam(...)` cho mọi lease; TẬP lease đổi rc so với nền phải đúng tập đã khai. Đo trên `c522c17`, clone làm việc của Số đo nền (ref cục bộ đếm bằng `git for-each-ref refs/heads refs/remotes` bỏ `/HEAD`; 23:38:49Z–23:54:26Z):
-  nền `{0: 143, 8: 4, 10: 5}`, ứng viên `{0: 142, 8: 4, 10: 5, 13: 1}`, tập đổi = {`gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906`
-  0 → 13} (cuối chuỗi, spec sửa sau khi cấp); 38 lease được miễn bia mộ, 60 kiểm spec và khớp, 4 kiểm write set và khớp. Số tuyệt đối
+  `kiem_bam(...)` cho mọi lease; TẬP lease đổi rc so với nền phải đúng tập đã khai. Đo trên `1d7e642`, clone làm việc của Số đo nền (ref cục bộ đếm bằng `git for-each-ref refs/heads refs/remotes` bỏ `/HEAD`; 13:15:10Z–13:24:46Z 23-10-2026;
+  ứng viên = nền rồi `kiem_bam` THĂM DÒ dựng từ chữ Mục tiêu 1, 2, 5 trong kịch bản đo, không sửa `ops/lease_publish.py`):
+  nền `{0: 157, 8: 9, 10: 5}`, ứng viên `{0: 156, 8: 9, 10: 5, 13: 1}`, tập đổi = {`gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906`
+  0 → 13} (cuối chuỗi, spec sửa sau khi cấp) — CÙNG TẬP với lần đo trên `c522c17`; 46 lease được miễn bia mộ, 66 kiểm spec và khớp, 4 kiểm write set và khớp
+  (`c522c17`, lần soạn r3 23:38:49Z–23:54:26Z và cùng kịch bản 13:15:10Z–13:23:11Z 23-10-2026: nền `{0: 143, 8: 4, 10: 5}`, ứng viên `{0: 142, 8: 4, 10: 5, 13: 1}`, 38 · 60 · 4). Số tuyệt đối
   phụ thuộc tập ref cục bộ (`_quet_lease_toan_kho` dòng 694–754 đọc lease cũ của `thay_the_cho` trên MỌI ref cục bộ); tiêu chí là TẬP,
-  không phải số. (ii) `ops/lease_publish_test.py` trên ứng viên: số ca đạt bằng nền, delta 0 (nền 265/265; bản thăm dò 265/265,
-  23:36:50Z–23:43:02Z). ĐỎ khi: một ca của `lease_publish_test.py` từ đạt sang trượt, hoặc tập lease đổi rc khác tập đã khai; đột biến bỏ
-  miễn bia mộ ⇒ 5 lease đổi `0 → 13` thay vì 1 (đo: đúng bốn tiền nhiệm cộng `…-exec-1r4`).
+  không phải số. (ii) `ops/lease_publish_test.py` trên ứng viên: số ca đạt bằng nền, delta 0 (nền 267/267 tại `1d7e642`; bản thăm dò đo 23-10-2026 — `kiem_bam`
+  nối vào `lenh_check` trên bản sao `c3f6f5f` — 267/267, 13:17:17Z–13:26:53Z 23-10-2026; tại `c522c17`: nền 265/265, bản thăm dò 265/265, 23:36:50Z–23:43:02Z). ĐỎ khi: một ca của `lease_publish_test.py` từ đạt sang trượt, hoặc tập lease đổi rc khác tập đã khai; đột biến bỏ
+  miễn bia mộ ⇒ 5 lease đổi `0 → 13` thay vì 1 (đo trên cả hai nền: đúng bốn tiền nhiệm cộng `…-exec-1r4`).
 - **A6b (`kiem()` bất biến, chú thích đúng):** `git diff -U0 <nền> -- ops/lease_publish.py` (`<nền>` có trong clone và lệnh thoát rc 0 rồi mới đọc kết quả: clone nông không có `<nền>` cho rc 128, stdout rỗng — đo 17-10-2026, git 2.43.0) không có hunk nào trong thân `kiem()` (dòng
-  1009–1114) và `kiem()` vẫn trả 2 phần tử (bản thăm dò lượt soạn r3: 5 hunk, chưa gồm sửa chú thích `lenh_body` và docstring dòng 15–16; đủ cả hai là 7 hunk, đo lượt 4 — không hunk nào trong khoảng ấy); trong ứng viên, chú thích trong
+  1009–1114) và `kiem()` vẫn trả 2 phần tử (bản thăm dò lượt soạn r3: 5 hunk, chưa gồm sửa chú thích `lenh_body` và docstring dòng 15–16; đủ cả hai là 7 hunk, đo lượt 4 — không hunk nào trong khoảng ấy; bản thăm dò đo 23-10-2026 trên `c3f6f5f`, `git diff -U0 1d7e642` rc 0: 7 hunk, không hunk nào trong khoảng ấy, câu cũ 0 dòng, 13:33:40Z 23-10-2026; `ops/lease_publish.py` không đổi giữa hai nền nên khoảng 1009–1114 giữ nguyên); trong ứng viên, chú thích trong
   `lenh_body` không còn câu "Đi qua ĐÚNG bộ kiểm THUẦN của `check`" mà nói `body` KHÔNG chạy `kiem_bam`. ĐỎ khi: `git diff -U0` thoát rc ≠ 0 hoặc có hunk nằm trong
   1009–1114; trả 3 phần tử ⇒ `t01` ĐỎ (`ValueError: too many values to unpack`, đo lượt 3); `grep -c` câu cũ trong ứng viên ≥ 1 ⇒ ĐỎ. Lời gọi
   `kiem_bam(...)` đặt trong `kiem()` KHÔNG làm `t191` đỏ (đo lượt 3, 16-10-2026, cửa sổ 02:12Z–02:55Z): `t191` 1/1 XANH, vì `_la_chot` chỉ coi `raise Chan` và lời gọi
   tên `_kiem_*`/`_doc_*` là chốt; đổi tên hàm thành `_kiem_bam` hoặc thêm `raise Chan` thì `t191` ĐỎ (`KHONG_CHAM`). Thứ bắt lời gọi tên `kiem_bam` là
   `git diff -U0`, A3b (i) (đặt trước chốt hạn: 13 thay vì 8) và A3b (ii) (13 thay vì 9). Số "263/265, đỏ đúng `t01` và `t191`" của lượt 1–2 là của bản
-  dựng đặt `_kiem_bam_spec`.
+  dựng đặt `_kiem_bam_spec`, trên nền 265 ca. Các phép đo `t01`/`t191` của lượt 1–3 KHÔNG chạy lại trên `1d7e642`; thứ đo được là thân `t01_…`,
+  `t191_…` và bốn hàm `_la_chot`, `_liet_ke_chot_kiem`, `_dem_chot_tho`, `_mien_mot_chot` giống hệt giữa hai nền (so nguồn qua AST, 23-10-2026).
 - **A7 (cổng kho):** ruff F delta 0 (multiset) cho các tệp đổi (nền: 2 F841 ở `lease_publish.py`; bản thăm dò: vẫn 2, dời sang dòng
-  200–201 khi nối vào dòng 16, hoặc 201–202 khi bọc dòng, tuỳ cách sửa docstring dòng 15–16 — đo lượt 4, đo lại lượt 5). Sổ test sống: `python3 .claude/dev/ci_dang_ky_test.py` in `ĐĂNG KÝ: N+1/N+1` (hai số BẰNG NHAU) và `TỔNG: ĐẠT`, với N = số
-  đăng ký ở nền lúc cấp (tại `c522c17`: N = 23 ⇒ `24/24`; nếu #763 land trước: 25 ⇒ `26/26`). Bộ MỚI chạy qua chính `chay_moi` của sổ,
+  200–201 khi nối vào dòng 16, hoặc 201–202 khi bọc dòng, tuỳ cách sửa docstring dòng 15–16 — đo lượt 4, đo lại lượt 5; bản thăm dò 23-10-2026, nối vào dòng 16: 200–201, 13:16:26Z). Sổ test sống: `python3 .claude/dev/ci_dang_ky_test.py` in `ĐĂNG KÝ: N+1/N+1` (hai số BẰNG NHAU) và `TỔNG: ĐẠT`, với N = số
+  đăng ký ở nền lúc cấp (tại `1d7e642`: N = 24 ⇒ `25/25`; nếu #763 land trước: 26 ⇒ `27/27`; tại `c522c17` từng là 23 ⇒ `24/24`). Đo 13:17:04Z–13:17:11Z 23-10-2026 trên bản sao `c3f6f5f` có một tệp
+  THẾ CHỖ `ops/lease_publish_spec_hash_test.py` (một dòng `print("1/1")`, không phải bộ test thật) cộng dòng `MOI` chép bằng kịch bản từ dòng mẫu: `ĐĂNG KÝ: 25/25`,
+  `chan=25`, `PHẢN CHỨNG: 1064/1064 đỏ đúng`, `TỔNG: ĐẠT`, rc 0. Bộ MỚI chạy qua chính `chay_moi` của sổ,
   không cần `--chay` trọn bộ: `chay_moi(moi={<khoá mới>: MOI[<khoá mới>]})` trả 0 và in `ĐẠT rc=0` (số reviewer lượt 2: dòng cuối `27/27`
-  ⇒ `CI_DANG_KY ops/lease_publish_spec_hash_test.py: ĐẠT rc=0`). `ops/ci_duong_nhanh_test.py` (job `gate-ops`) cho số ca và số đột biến
-  bằng nền, `TONG: DAT` (nền 104/104 · 383/383; bản thăm dò KHÔNG có tệp test mới và dòng `MOI`: 104/104 · 383/383 · `TONG: DAT`,
-  23:49:03Z–23:51:17Z). Kích thước ≤ trần sensitive. ĐỎ khi: bỏ dòng `MOI` ⇒ `test sống chưa đăng ký`, `N+1/N`, `TỔNG: ĐỎ` và
-  `k01_so_dang_ky_nhan_muc_da_noi` ĐỎ (số reviewer lượt 2: `CA: 103/104`, `DOT BIEN: 382/383`, `TONG: DO`, rc 1); bộ mới in thêm một dòng
-  số/số đứng một mình trước dòng tổng ⇒ `bang_chung_xanh` đọc dòng ấy (đo hàm, bảng thứ hai hàng g); `git diff --numstat <nền>` (tệp mới đã `git add -N` hoặc đã commit: `git diff --numstat` trần không liệt kê tệp chưa theo dõi và rỗng sau khi commit, nên một ứng viên +302 dòng vẫn xanh — đo 17-10-2026, git 2.43.0) thoát rc ≠ 0 hoặc vượt 300 dòng
-  thêm hoặc 3 tệp.
+  ⇒ `CI_DANG_KY ops/lease_publish_spec_hash_test.py: ĐẠT rc=0`; trên tệp thế chỗ 13:17:11Z 23-10-2026: trả 0, in `CI_DANG_KY ops/lease_publish_spec_hash_test.py: ĐẠT rc=0`). `ops/ci_duong_nhanh_test.py` (job `gate-ops`) cho số ca và số đột biến
+  bằng nền, `TONG: DAT` (nền 104/104 · 384/384 tại `1d7e642`, 104/104 · 383/383 tại `c522c17`; bản thăm dò KHÔNG có tệp test mới và dòng `MOI`: 104/104 · 384/384 · `TONG: DAT`,
+  13:17:17Z–13:26:09Z 23-10-2026 — tại `c522c17`: 104/104 · 383/383, 23:49:03Z–23:51:17Z; tệp thế chỗ cộng dòng `MOI`: 104/104 · 384/384 · `TONG: DAT`, 13:17:17Z–13:26:08Z 23-10-2026). Kích thước ≤ trần sensitive. ĐỎ khi: bỏ dòng `MOI` ⇒ `test sống chưa đăng ký`, `N+1/N`, `TỔNG: ĐỎ` và
+  `k01_so_dang_ky_nhan_muc_da_noi` ĐỎ (số reviewer lượt 2 trên nền `c522c17`: `CA: 103/104`, `DOT BIEN: 382/383`, `TONG: DO`, rc 1; đo 23-10-2026 với tệp thế chỗ không dòng `MOI`:
+  sổ `ĐĂNG KÝ: 25/24`, `TỔNG: ĐỎ`, rc 1, 13:17:04Z 23-10-2026; `ci_duong_nhanh_test.py` `CA: 103/104`, `DOT BIEN: 383/384`, `TONG: DO`, rc 1, `k01_…` ĐỎ, 13:17:17Z–13:26:09Z 23-10-2026); bộ mới in thêm một dòng
+  số/số đứng một mình trước dòng tổng ⇒ `bang_chung_xanh` đọc dòng ấy (đo hàm, bảng thứ hai hàng g); `git diff --numstat <nền>` (tệp mới đã `git add -N` hoặc đã commit: `git diff --numstat` trần không liệt kê tệp chưa theo dõi và rỗng sau khi commit, nên một ứng viên +302 dòng vẫn xanh — đo 17-10-2026, git 2.43.0) thoát rc ≠ 0 hoặc vượt 450 dòng
+  thêm (trần ADR-0053 mà r3 áp, hàng `review_class`; lúc soạn r3 là 300) hoặc 3 tệp (write set).
 
 ## Ngoài phạm vi (cố ý)
 
 - `plan_hash`: không có quy ước chung về tệp plan (chủ kho chốt Q8).
-- Sửa `ops/lease_publish_test.py`, `ci.yml` (thuộc write set #748; lease r11 giữ chúng lúc 23:32Z 15-10, hạn `2026-10-16T04:27:21Z`). Đăng ký bằng MỘT dòng `MOI` là cách nối CI đúng,
-  không sửa `ci.yml`.
+- Sửa `ops/lease_publish_test.py`, `ci.yml` (lúc soạn r3 thuộc write set #748 — lease r11 giữ chúng lúc 23:32Z 15-10, hạn `2026-10-16T04:27:21Z`; #748 đã land;
+  đo lại `ai-dang-giu` 13:21:52Z–13:22:26Z 23-10-2026: `ops/lease_publish_test.py` `NGƯỜI_GIỮ 0`, `.github/workflows/ci.yml` `NGƯỜI_GIỮ 1: wp892-r1-g1-claude`, rc 11).
+  Hai tệp ở ngoài write set theo thiết kế: đăng ký bằng MỘT dòng `MOI` là cách nối CI đúng, không sửa `ci.yml`.
 - **`ops/README.md`.** Sau packet, bước 2 (dòng 37–38, `check` trước khi commit) vẫn ĐÚNG (A3 (i)). Hai nợ tài liệu: (1) bảng "Cổng chặn"
-  đã thiếu rc 10, 11, 12 (sẵn có, đo tại `c522c17`) và sẽ thiếu thêm rc 13 do CHÍNH packet này đưa vào (README ngoài write set) — nợ do packet
+  đã thiếu rc 10, 11, 12 (sẵn có, đo tại `c522c17`; `ops/README.md` không đổi tới `1d7e642`) và sẽ thiếu thêm rc 13 do CHÍNH packet này đưa vào (README ngoài write set) — nợ do packet
   thêm một hàng; (2) sẵn có, KHÔNG do packet này gây ra: bước 3 (dòng 43) chỉ `git add ops/leases`, bỏ sót tệp được neo — với `prompt_path` HIỆN NAY đã cho rc 6 ở đường đăng, với spec sẽ cho rc 13 (A3c), đều fail-close.
 - Lệch đĩa/blob do chuẩn hoá EOL (`.gitattributes` dòng 8): spec CRLF trên đĩa + lease neo băm CRLF ⇒ `check` trước commit 0, đường
   đăng 13 (Số đo nền). Lệch luôn rơi về phía ĐỎ ở đường đăng, không bao giờ xanh giả; người soạn lease băm tệp sau khi chuẩn hoá LF.
 - Người gọi TƯƠNG LAI đọc lease từ REF (blob) mà muốn kiểm băm spec: phải đọc spec từ blob CÙNG ref/tree với lease (luật nguồn,
   Mục tiêu 1) — không có mã trong packet này.
-- Windows của bộ test mới: tại `c522c17`, `ci.yml` dòng 50–53 chỉ thêm `windows-latest` cho `workflow_dispatch` hoặc PR gắn nhãn
-  `windows`; push `master` chỉ ubuntu (ADR-0049). Gắn nhãn lên PR đang mở KHÔNG tự sinh lượt chạy (`pull_request` không khai `types:`).
-  `launcher-windows.yml` không nhắc `ci_dang_ky_test` hay `lease_publish` (0 dòng, 00:03:51Z 16-10). Muốn có Windows trước merge:
+- Windows của bộ test mới: tại `1d7e642`, `ci.yml` dòng 65–70 (đầu ra `os` của job `chuan-bi`) cho `workflow_dispatch` với `runner_set`
+  `windows-only` (đầu vào mới của `workflow_dispatch`, dòng 25–34) chỉ `windows-latest`; `workflow_dispatch` khác hoặc PR gắn nhãn `windows` ⇒ `ubuntu-latest` + `windows-latest`;
+  còn lại, kể cả push `master`, chỉ ubuntu (ADR-0049); tại `c522c17` là dòng 50–53, chưa có `runner_set`. Gắn nhãn lên PR đang mở KHÔNG tự sinh
+  lượt chạy (`pull_request` ở dòng 13 vẫn không khai `types:`). `launcher-windows.yml` không nhắc `ci_dang_ky_test` hay `lease_publish` (0 dòng,
+  00:03:51Z 16-10; đo lại 13:25:13Z 23-10-2026: 0 dòng, dù tệp đổi +9/−11). Muốn có Windows trước merge:
   `workflow_dispatch` trên ref ứng viên (lease khai ngân sách CI tay), hoặc ghi `KHÔNG ĐO ĐƯỢC` và nợ có tên.
-- Sửa 54 lease không scope hay 5 lease lệch băm — không phải việc của cổng mới; Mục tiêu 5 (miễn bia mộ) và A5b là bắt buộc vì
+- Sửa 67 lease không scope (54 tại `c522c17`) hay 5 lease lệch băm — không phải việc của cổng mới; Mục tiêu 5 (miễn bia mộ) và A5b là bắt buộc vì
   `ops-publish-lease.yml` và `kiem_lease` đều đưa lease còn hạn qua `check`.
 
 ## Hình dạng kế thừa
 
 Chép từ lịch sử cổng `lease_publish.py` (CLAUDE.md các mục "BIA MỘ", "rc=8 che rc=9", `t32`): (a) **chốt chạy trước che chốt sau** — vị trí
 không còn để executor khai: `kiem_bam` sau `kiem()`, không ở nhánh đã đăng của `kiem-github`; A3b khoá; (b) **dòng xác nhận không đi kèm
-việc kiểm** (docstring `kiem`) — A1, A4 khoá. ĐẾM HÌNH DẠNG trong `ops/lease_publish.py` (tệp không đổi từ `6f121a3`, đo lại 00:03:51Z 16-10
-trên `c522c17`): (a) ≥ **4** — `#568`/`#566` (dòng 1228–1236), #589 (dòng 1238–1244, 1272–1280), slug `unposted-error-precedence-changes` hai
+việc kiểm** (docstring `kiem`) — A1, A4 khoá. ĐẾM HÌNH DẠNG trong `ops/lease_publish.py` (tệp không đổi từ `6f121a3` tới `1d7e642`, đo lại 00:03:51Z 16-10
+trên `c522c17`; các số dòng dưới đây vì thế vẫn đúng tại `1d7e642`): (a) ≥ **4** — `#568`/`#566` (dòng 1228–1236), #589 (dòng 1238–1244, 1272–1280), slug `unposted-error-precedence-changes` hai
 lượt (dòng 1160–1167 và 1198); (b) 1. BỘ ĐẾM TIỀN NHIỆM (L4, chép từ biên nhận): hình dạng A "lời khai rộng hơn phép đo" = 7
-(`ops/reviews/README.md` dòng **484** tại `c522c17`, dời từ 482) và 8 theo `ops/specs/t33-doi-shellcheck-r3.md` dòng 104, 266; E = 4;
+(`ops/reviews/README.md` dòng **484** tại `c522c17`, dời từ 482; vẫn dòng 484 và vẫn `A=7 · D=3 · E=4` tại `1d7e642` — tệp đổi +18/−0, cả ba
+hunk sau dòng 660, đo 23-10-2026) và 8 theo `ops/specs/t33-doi-shellcheck-r3.md` dòng 104, 266 (tệp không đổi tới `1d7e642`); E = 4;
 D = 3. Ghi thêm, KHÔNG tự tăng bộ đếm (người giữ kho quyết): lượt 2 bắt r2 mắc A ba lần (B5: số 15 ca áp cho 26 ca; B6: số tuyệt đối không
 ghi điều kiện ref; B8: chú thích khai rộng hơn mã sau packet; lượt 3 đo thêm hai ca của r3 — A6b khai `t191` đỏ với tên `kiem_bam` (xanh, đo), hàng B4 khai "mỗi yêu cầu có một ca và một đột biến" (sáu yêu cầu sống sót) — người giữ kho quyết có tính vào bộ đếm A hay không); Codex bắt một hình dạng MỚI — **(c) chốt đọc từ một nguồn khác nguồn của
 thứ nó ràng buộc**: r2 đã đo lease được đọc từ ĐĨA (r2 dòng 90) mà vẫn chọn `HEAD` cho spec, rồi khai nợ cho runbook mà chính lựa chọn
@@ -311,17 +349,25 @@ trước, cho rc 0 sai; chạy lại với tên riêng mới ra rc 13 (23:52:28Z
 ## Chưa đo được
 
 - Hành vi trên Windows (đường dẫn, NFC trên NTFS, symlink, `gh` giả, PATH rỗng) — chỉ đo Linux; không trigger tự động nào đo thay.
-- Lượt Codex có chạy được không: đo 15-10 sáng (`SAP_HET_HAN`, ảnh chụp cũ ~185 h); lượt soạn r3 KHÔNG đo lại.
+- Lượt Codex có chạy được không: đo 15-10 sáng (`SAP_HET_HAN`, ảnh chụp cũ ~185 h); lượt soạn r3 KHÔNG đo lại; lần đo lại nền 23-10-2026 cũng KHÔNG đo.
 - Đường dẫn comment của quyết định chủ kho 15-10 về sổ test sống và về đồng ý đi tiếp ở ngưỡng L4 (`depends_on` (5)).
+- Bằng chứng bền cho việc chủ kho duyệt đổi nền sang `1d7e642` và cho việc r3 áp trần ADR-0053 (dòng `tran_kich_thuoc_sensitive` dưới bảng đầu):
+  chỉ có chỉ thị của phiên điều phối ngày 23-10-2026, KHÔNG tra được từ kho; lần đo lại này cũng không tìm comment nào.
 - Các quyết định chủ kho nêu trong spec mà không kèm đường dẫn comment — Q7, Q8 (hàng `nguon_cap_viec`, mục Ngoài phạm vi); vòng vá P3 "thứ 2/2" và "thêm thứ 1/2" (mục Vá sau review lượt 4, 5); việc chủ kho "đọc chặt" hai lớp thành P2 (mục Vá sau review lượt 8): lời khai của phiên điều phối, KHÔNG tra được từ kho.
-- VERDICT lượt 5 r28 `d3f1d9db…` và hai vế "đột biến D2, D3, D5, D6, D7 cho rc=0" (nguồn ngoài kho: đo lượt 7 ở `0cfe253`, 0/3520 tệp khớp `d3f1d9db`).
+- VERDICT lượt 5 r28 `d3f1d9db…` và hai vế "đột biến D2, D3, D5, D6, D7 cho rc=0" (nguồn ngoài kho: đo lượt 7 ở `0cfe253`, 0/3520 tệp khớp `d3f1d9db`; đo lại 23-10-2026: 0/5049 mục cây ở `1d7e642`, 13:13:51Z, và 0/1240 blob tên chứa `verdict` trong lịch sử 557 nhánh, hàng `nguon_cap_viec`).
 - `VERDICT.md` và `HINT.patch` của mọi lượt review của packet này mà spec dẫn bằng băm (hàng `review của r2` và các mục `Vá sau review lượt N`), bản thăm dò 40 ca cùng ma trận đột biến của lượt 3 (nguồn của 239 dòng, 296 (298), 40/40, `t191` 1/1 ở trên), của lượt 4 (nguồn của 257 = 59 + 197 + 1, dư 43, +1/−1 và +2/−1, 7 hunk, 40/40 của nhóm (7)–(11); các số lượt 4 đo thẳng trên kho — 161/248 ký tự, 174/270 byte (dòng dài nhất của hai tệp ở `c522c17`, hàng `kich_thuoc`), 2765 mục cây dưới `ops/reviews`, `ops/specs`, `ops/land`, `ops/prompts` ở `00a97d3` (`git ls-tree -r --full-tree 00a97d3 -- ops/reviews ops/specs ops/land ops/prompts | wc -l`; toàn cây ở `00a97d3` là 3513 mục, đo 17-10-2026; mục cây = mục của `git ls-tree -r --full-tree <commit>`, không phải blob khác nhau; thiếu `--full-tree` thì lệnh chỉ liệt kê dưới thư mục làm việc — đo 17-10-2026 ở `3976c40`: 3520 mục từ gốc kho, 3123 từ `ops/`, 247 từ `ops/specs/`) — tái lập được từ kho) và của lượt 5 (nguồn của nhóm (12)–(16)), và các kịch bản đo của lượt soạn r3 (`do_nguon.py` `af6eb7dd…`, `dung_tham_do.py` `6dd87cc0…`,
   `do_a3.py` `56f1fbdc…`, `do_b2.py` `b27a6771…`, `do_dot_bien.py` `37bc0d71…`, `do_a6.py` `4b8b4ba6…` — sha256) KHÔNG có trong kho (đo lượt 7 ở `0cfe253`: 0/3520 tệp khớp sáu băm kịch bản và 0 tệp mang tên các kịch bản ấy; VERDICT/HINT: neo ở hàng `review của r2` và các mục `Vá sau review lượt N`); bốn công cụ đo ở Số đo nền (`m_baseline.py`, `m_both.py`, `m_unexp.py`, `m_lease_shapes.py`) cũng KHÔNG có trong kho (đo lượt 8 ở `2dd7f82`: 0 tệp mang các tên ấy); bên thứ
-  ba muốn tái lập phải dựng lại bản thăm dò từ chữ Mục tiêu 1–3, 5. Bản thăm dò không được giao (PROTOCOL §8 dòng 648).
+  ba muốn tái lập phải dựng lại bản thăm dò từ chữ Mục tiêu 1–3, 5. Bản thăm dò không được giao (PROTOCOL §8 dòng 655 tại `1d7e642`, 648 tại `c522c17`).
+  Đo lại ở `1d7e642` (13:13:51Z 23-10-2026, 5049 mục cây): 0 mục có sha256 bằng bất kỳ băm VERDICT/HINT nào ở trên hay `d3f1d9db…`, 0 mục khớp
+  tiền tố của sáu kịch bản, và 0 tệp mang mười tên kịch bản (sáu của lượt soạn r3, bốn `m_*`); các kịch bản dựng lại cho lần đo lại 23-10-2026
+  cũng KHÔNG có trong kho (mục cuối nêu tên và sha256).
 - A3b (ii) và các số "của reviewer" ở Nghiệm thu: không đo lại ở lượt soạn r3.
 - `python3 .claude/dev/ci_dang_ky_test.py --chay` trọn bộ (bước CI, nặng) — chỉ chạy bản không `--chay` trên nền; việc sổ CHẠY được bộ mới
   là số của reviewer lượt 2.
 - Nội dung cuối cùng của #763 và của #752 r3: hai đặc tả đang soạn, chưa đóng băng lúc đọc (23:57:40Z); `depends_on` (4) phải đo lại lúc cấp.
+  Lúc 13:08:55Z 23-10-2026 cả hai Issue vẫn `open`; bản trong `c3f6f5f` của hai đặc tả có commit cuối 17-10-2026 (#763) và 16-10-2026 (#752).
+- Các phép đo "đúng chữ r1/r2" và mọi đột biến của A1–A5b không chạy lại trên `1d7e642` (chúng chạy trên kho tạm với `ops/lease_publish.py`
+  byte-identical); `ci_dang_ky_test.py --chay` trọn bộ cũng không chạy ở lần đo lại.
 - Sáu yêu cầu của Mục tiêu 1–3, 5 mà A-list KHÔNG làm ĐỎ (đo lượt 3, 16-10-2026, cửa sổ 02:12Z–02:55Z), bản thăm dò 40 ca, mỗi đột biến một bản sao, cả sáu 40/40: (1) chốt DẠNG áp
   cả khi thiếu `spec_path`; (2) `spec_path` rỗng ⇒ không kiểm; (3) `spec_path` không phải chuỗi ⇒ không kiểm, không `TypeError`; (4) scope giá trị khác
   `sorted NFC casefold exact…` ⇒ không kiểm (A5 (2) chỉ đo scope vắng); (5) `da_bi_thay_the` rỗng hoặc không phải chuỗi KHÔNG miễn; (6) hàng 13 trong docstring
@@ -464,4 +510,76 @@ Review lượt 16 (`changes_requested, 0 P1 · 1 P2 · 1 P3`; reviewer Claude So
 `ac79a8b`: 0 trên 3520 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
 (`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 16")} f' <tệp spec> | wc -l` ra `9`). 2 lớp:
 `hang-c-home-moi-moi-lenh-theo-chu-tien-to-lenh-config-global-khong-toi-lenh-clone-day-byte-1-ra-0a-khong-0d-0a` · `pham-vi-hop-dong-liet-ke-ba-muc-hep-hon-vi-tu-moi-lenh-do-cua-spec-lenh-do-o-hang-bang-chua-do-duoc-va-gh-api-nam-ngoai-danh-sach-gh-rc-127`.
+
+## Đo lại nền sau #748 land (nền 1d7e642)
+
+Lần đo lại theo chỉ thị phiên điều phối ngày 23-10-2026 (chủ kho duyệt đổi nền; bằng chứng bền: mục Chưa đo được), do một subagent Claude
+thực hiện; đây KHÔNG phải một lượt review. Nền mới `1d7e642092fb3dda15967be44d095f37bb22ac5f` (`git rev-parse 1d7e642`). Bản sao đo
+`c3f6f5f` = `1d7e642` cộng đúng ba tệp `ops/specs/no-p3-*`; một bản sao `1d7e642` chạy lại ba bộ đo nền làm đối chứng và ra cùng số. Mọi
+lệnh chạy dưới hợp đồng môi trường đo nguyên văn (Số đo nền); bước cần mạng chỉ thêm biến `HTTPS_PROXY`; trạng thái Issue đọc bằng `gh api`
+(miễn trừ của hợp đồng). Giờ UTC; mọi mốc trong mục này là ngày 23-10-2026, trừ cột "cũ".
+
+Độ lệch so với chữ đặc tả, khai thẳng: (1) `ai-dang-giu` quét `refs/heads/*` của bản bare, nên lượt cuối fetch
+`'+refs/heads/*:refs/heads/*' '+refs/heads/*:refs/remotes/origin/*'` trong cùng một lệnh (`depends_on` (2)); (2) ca (6) của nguồn đọc
+`check` thay PATH bằng một thư mục rỗng, dựng nguyên văn ở Số đo nền; (3) A6 (i) dùng `kiem_bam` THĂM DÒ dựng từ chữ Mục tiêu 1, 2, 5 ngay
+trong kịch bản; A6 (ii), A6b và A7 dùng bản sao `ops/lease_publish.py` có `kiem_bam` chèn vào `lenh_check` (+61/−2, 7 hunk — bản dựng ĐỂ ĐO,
+không thay số của hàng `kich_thuoc`); A7 dùng một tệp THẾ CHỖ `ops/lease_publish_spec_hash_test.py` chỉ có một dòng `print("1/1")`; không bản
+nào được giao; (4) kịch bản đo của lượt soạn r3 không có trong kho nên được dựng lại, và mỗi kịch bản dựng lại có đáp án đã biết khi có thể:
+`m_cay.py` và `do_a6.py` chạy trên `c522c17` tái lập đúng số cũ, `do_dai.py` tái lập 161/248 và 174/270.
+
+| mục (đơn vị) | cũ, nền `c522c17` | mới, nền `1d7e642` | lúc đo | lệnh hoặc kịch bản |
+|---|---|---|---|---|
+| `master` máy chủ · nhánh máy chủ (nhánh) | `9fddb1d` · 541 (23:31:30Z 15-10) | `1d7e642` · 556, rồi 558, rồi 560 | 12:58:02Z · 13:02:47Z · 13:20:16Z | `git ls-remote --heads origin` so `git for-each-ref refs/remotes/origin` theo tên và OID: thiếu 0, thừa 0, lệch 0 mỗi lần |
+| Issue #748 · #751 · #763 | `open` · `open` · `open` (15-10) | `closed`/`completed` lúc 2026-10-20T01:19:38Z · `open` · `open` | 13:08:55Z | `gh api repos/ducthangho/tra-luat/issues/<số>` |
+| `ai-dang-giu` cho ba đường dẫn write set (rc) | 0 · 0 · 11, lease r11 của #748 | 0 · 0 · 11, lease `wp892-r1-g1-claude` | 13:20:18Z–13:21:52Z | `python3 -B ops/lease_publish.py ai-dang-giu <đường dẫn> --root <bản bare>` (`adg.sh`) |
+| kho cục bộ so máy chủ (nhánh) | thiếu 4 · lệch OID 3 | thiếu 91 · thừa 69 · lệch OID 1 (538 so 560) | 13:23:41Z | `git for-each-ref refs/remotes/origin` trên `/home/user/tra-luat`, chỉ đọc, so `ls-remote` |
+| `ops/lease_publish_test.py` (ca) | 265/265 | 267/267 | 12:56:27Z–13:03:11Z | `python3 -B ops/lease_publish_test.py` |
+| sổ: `ĐĂNG KÝ` (đường dẫn test) · `PHẢN CHỨNG` (ca phản chứng) | 23/23 · 1025/1025 | 24/24 · 1064/1064 | 12:56:27Z–12:56:35Z | `python3 -B .claude/dev/ci_dang_ky_test.py` |
+| `ci_duong_nhanh_test`: `CA` (ca) · `DOT BIEN` (đột biến) | 104/104 · 383/383 | 104/104 · 384/384 | 12:56:27Z–13:00:06Z | `python3 -B ops/ci_duong_nhanh_test.py` |
+| ruff F trên `ops/lease_publish.py` (lỗi) | 2 F841, dòng 198–199 | như cũ | 13:04:18Z | `ruff check --isolated --select F ops/lease_publish.py` |
+| phiên bản năm công cụ | Python 3.11.15 + PyYAML 6.0.1, git 2.43.0, actionlint 1.7.7, shellcheck 0.9.0, ruff 0.15.8 | như cũ | 13:04:19Z | lệnh in phiên bản của từng công cụ |
+| `ops/leases/*.yaml` (tệp) | 152 | 171 | 13:11:05Z | `m_cay.py` |
+| có `spec_path` + băm · cả hai trường · khớp · lệch (lease) | 99 · 8 · 94 · 5 | 118 · 18 · 113 · 5, cùng năm tên | 13:11:05Z | `m_cay.py` |
+| có `write_set_hash`: có scope, khớp (a) · không scope, khớp (a) (lease) | 6, 6/6 · 54, 0/54 | 6, 6/6 · 67, 4/67 | 13:11:05Z | `m_cay.py` |
+| mang `spec_sha256` · không kèm hai tên kia (lease) | 57/152 · 5/152 | 61/171 · 5/171 | 13:11:05Z | `m_cay.py` |
+| blob lease ở đầu nhánh (blob) | 619 trên 540 nhánh | 680 trên 559 nhánh | 13:29:49Z–13:29:57Z | `m_ref.py`, bỏ nhánh của chính đặc tả |
+| cả hai trường · bằng nhau · chưa hết hạn · sai dạng (blob) | 17 · 15 · 7 · 0 | 62 · 60 · 4 · 0 | 13:29:49Z–13:29:57Z | `m_ref.py` |
+| blob tên chứa `verdict`: khớp `d3f1d9db…` · trong lịch sử · ở đầu nhánh (blob) | 0 · 1102 · 831 | 0 · 1240 · 967 | 13:12:37Z–13:13:36Z | `m_verdict.py` |
+| mục cây toàn kho (mục) · mục khớp VERDICT/HINT r2 | 3510 · 0 (17-10) | 5049 · 0 | 13:13:51Z | `m_tree.py` |
+| A6 nền (lease theo rc) | `{0: 143, 8: 4, 10: 5}` | `{0: 157, 8: 9, 10: 5}` | 13:15:10Z–13:24:46Z | `do_a6.py` |
+| A6 ứng viên · tập đổi rc | `{0: 142, 8: 4, 10: 5, 13: 1}` · {`…-exec-1r4` 0 → 13} | `{0: 156, 8: 9, 10: 5, 13: 1}` · CÙNG tập | 13:15:10Z–13:24:46Z | `do_a6.py` |
+| A6 miễn bia mộ · kiểm spec khớp · kiểm write set khớp · đột biến bỏ miễn đổi rc (lease) | 38 · 60 · 4 · 5 | 46 · 66 · 4 · 5, cùng năm tên | 13:15:10Z–13:24:46Z | `do_a6.py` |
+| A6 (ii) bản thăm dò chạy `lease_publish_test.py` (ca) | 265/265 | 267/267 | 13:17:17Z–13:26:53Z | bản sao dựng bằng `dung_tham_do.py` |
+| A6b bản thăm dò: hunk · hunk trong 1009–1114 · dòng chứa câu cũ | 7 · 0 · không ghi | 7 · 0 · 0 | 13:33:40Z | `do_a6b.sh` |
+| A7 đích `ĐĂNG KÝ` (đường dẫn test) | N = 23 ⇒ 24/24; #763 trước ⇒ 26/26 | N = 24 ⇒ 25/25 (đo trên tệp thế chỗ + dòng `MOI`: 25/25, 1064/1064, `TỔNG: ĐẠT`); #763 trước ⇒ 27/27 | 13:17:04Z–13:17:11Z | `them_moi.py` rồi lệnh sổ |
+| A7 bỏ dòng `MOI`: sổ · `ci_duong_nhanh_test` | `N+1/N` · 103/104, 382/383, `TONG: DO` (số reviewer) | 25/24, `TỔNG: ĐỎ`, rc 1 · 103/104, 383/384, `TONG: DO`, rc 1, `k01_…` ĐỎ | 13:17:04Z · 13:17:17Z–13:26:09Z | tệp thế chỗ, không dòng `MOI` |
+| A7 `ci_duong_nhanh_test`: bản thăm dò không tệp mới · tệp thế chỗ + `MOI` | 104/104 · 383/383 · không đo | 104/104 · 384/384 · 104/104 · 384/384 | 13:17:17Z–13:26:09Z | `python3 -B ops/ci_duong_nhanh_test.py` |
+| A7 `chay_moi` cho khoá mới | `ĐẠT rc=0` (số reviewer) | trả 0, `ĐẠT rc=0` (tệp thế chỗ) | 13:17:11Z | `do_chay_moi.py` |
+| A7 ruff F bản thăm dò (lỗi) | 2 F841, 200–201 hoặc 201–202 | 2 F841, 200–201 (nối vào dòng 16) | 13:16:26Z | `ruff check --isolated --select F ops/lease_publish.py` |
+| hàng (g): `bang_chung_xanh` trên ba chuỗi | True · False · True | như cũ | 13:09:24Z | `do_g.py` |
+| nguồn đọc `check`, sáu ca (rc) | 0 · 6 · 4 · 0 · 0 · 0 | như cũ | 13:24:54Z–13:24:55Z | `do_nguon.sh` |
+| lớp write set · bộ chọn reviewer | `sensitive` · opus-5/xhigh "tổng=2", fable-5/xhigh "tổng=4" | như cũ | 13:14:21Z | `do_lop.py` |
+| trần `sensitive` (tệp · dòng thêm) | ADR-0044: 3 · 300 | ADR-0053: 6 · 450, qua dòng khai dưới bảng đầu; ba phép đo OID `8ab1007…`: rc 0 · rc 128 · rc 0 | 13:17:29Z–13:17:31Z | `git cat-file -e`, `git rev-list --first-parent` trên bản bare không nông |
+| dòng dài nhất `lease_publish.py` · `lease_publish_test.py` (ký tự; byte) | 161 · 248; 174 · 270 | như cũ | 13:28:58Z | `do_dai.py` |
+| `--help` chứa `MÃ THOÁT` · năm tên trong `lease_publish.py` · `launcher-windows.yml` nhắc hai bộ (dòng) | 0 · 0 · 0 | 0 · 0 · 0 | 13:20:07Z · 13:25:13Z | `grep -c` |
+
+Số dòng dẫn vào tệp đã đổi, cũ → mới (đọc tệp tại `1d7e642`; thân hàm so qua AST bằng `cmp_fn.py`):
+`.claude/dev/ci_dang_ky_test.py` — `MOI` 37–53 → 38–55, dòng mẫu `nhanh_don_duoc` 52 → 53, `DANG_KY` 80 → 82, `tim()` 83 → 104 (thân ĐỔI,
+thêm `_git_bo_qua`), `kiem()` 579 → 640, `bang_chung_xanh` 616–620 → 677–681 (`re.search` 617 → 678), `chay_moi` 967 → 1055 (ba thân sau
+giống hệt); `.github/workflows/ci.yml` — job `gate-registry` 827 → 937, `--chay` 895 → 1008, đầu ra `os` 50–53 → 65–70 (thêm `runner_set`);
+`ops/lease_publish_test.py` — `_la_chot` 9541–9547 → 9869–9875, `t01` 705 → 706 (thân giống hệt); `docs/PROTOCOL_DA_PHIEN.md` — 648 → 655,
+696 → 703, 705–707 → 712–714 (cùng chữ); `ops/reviews/README.md` — dòng 484 không dời. Mọi số dòng dẫn vào tệp KHÔNG đổi (hàng `base`) giữ nguyên.
+
+Kịch bản đo — KHÔNG có trong kho, chỉ nằm trong scratchpad của phiên đo và mất khi phiên đóng; sha256, 12 ký tự đầu: `chay.sh` `a1a2483e36a9…`
+(bọc tiền tố hợp đồng, ghi rc và mốc giờ) · `adg.sh` `4322af28b58c…` · `m_cay.py` `d84cd886125e…` · `m_ref.py` `e80f46eb9931…` ·
+`m_verdict.py` `9d791c301d40…` · `m_tree.py` `7c35311e25dc…` · `do_a6.py` `4ef113e3e605…` · `dung_tham_do.py` `1c869c4a3a14…` ·
+`them_moi.py` `8eada63afcfb…` · `do_chay_moi.py` `770a7682071d…` · `do_g.py` `8b9b3788adc8…` · `do_lop.py` `8dc11411bf81…` ·
+`do_nguon.sh` `19916b7a6149…` · `do_dai.py` `fc05b6958cc3…` · `do_nho.sh` `c2ae1abcc2d0…` · `do_a6b.sh` `464aef375afd…` ·
+`do_wp892.sh` `d52413f1ac6a…` · `cmp_fn.py` `093f96c4eac3…` · `smoke.sh` `ee306219e82f…`. Bên thứ ba muốn tái lập phải dựng lại từ định
+nghĩa ghi ở từng hàng của Số đo nền.
+
+Hệ quả đo được cho tiêu chí (ghi để người duyệt quyết, KHÔNG thiết kế lại ở đây): tập đổi rc của A6 (i) KHÔNG đổi, chỉ số tuyệt đối trôi;
+đích A7 thành `25/25`; `depends_on` (2) vẫn ĐỎ nhưng vì lease #892, và lease ấy giữ cả `ops/ci_duong_nhanh_test.py`, nên (3) mở lại nếu
+#892 land trước lúc cấp; trần dòng thêm 300 → 450 làm câu "chỉ đủ khi giữ kiểu dày" (hàng `kich_thuoc`) và lý do "vượt trần 3 tệp" (hàng
+`write_set`) hết đúng, ngưỡng ĐỎ dòng thêm của A7 nới tương ứng.
 

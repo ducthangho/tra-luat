@@ -93,8 +93,12 @@ trang_thai_packet:
     `khong_do_duoc` (§8), va §8.1: "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance
     khong gan theo ten cong cu. Cung lop voi connector P1 #867 r4355165076 (r21). Dinh chinh boi packet wp748 r23/g23 (chu kho
     #748 issuecomment-6355107238).
-    Mo lai khi: launcher do duoc model phuc vu (`do_may`), HOAC chu kho ghi xac nhan ben `khai_co_audit` tren 974859d (tu khai
-    yeu hon `do_may` tai cho dung), HOAC `human_audited`.
+    Mo lai (5) — Codex luot 1 r23 F01: (7) chi DAT khi co MOT trong ba, dung dinh nghia §8: (i) `cross_approved` `do_may` — mot lan
+    approve DOC LAP da hoan tat tren DUNG 974859d, kem bang chung may do cho CHINH lan chay approve ay rang ho model reviewer phuc vu
+    KHAC ho model executor (claude); nang cap launcher ve sau KHONG do nguoc cac luot cu, va mot lan do cung ho / khac luot / khac
+    SHA KHONG du; (ii) `khai_co_audit` — loi khai ho model cua luot approve tren 974859d KEM xac nhan ben cua mot auditor co ten,
+    tu khai yeu hon `do_may` ngay tai cho dung; loi khai cua chu kho khong kem auditor KHONG du; (iii) `human_audited` day du
+    §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 974859d.
     Lich su: ban truoc khai `landed: true` theo chi thi chu kho "Land và bookeeping" (#845 issuecomment-6264046882).
 
 uy_quyen_land:

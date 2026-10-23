@@ -28,7 +28,7 @@ authorization_url: https://github.com/ducthangho/tra-luat/pull/869
 authorization_lease_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6334796777
 authorization_ghi_chu: >-
   measured — readback-pr-869.json: merged_by ducthangho, merged_at 2026-10-23T01:11:56Z, head.sha b9318cc. Ghi THANG: KHONG co
-  ban ghi ben "duyet tren SHA b9318cc" truoc hay sau merge; chu kho chuyen PR ra khoi draft (01:10:27Z) roi bam merge
+  ban ghi ben "duyet tren SHA b9318cc" truoc hay sau merge; chu kho chuyen PR ra khoi draft (ready_for_review 01:10:26Z) roi bam merge
   (readback-events-869.json). Day la uy quyen bang hanh dong merge, khong phai duyet ben neo SHA.
 land_operator: 'loi_khai_co_neo — chu kho tu bam merge, executor khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential'
 merge_method: merge
@@ -39,10 +39,10 @@ pre_merge_checks:
   - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 39766018386, run_attempt: 3, sha: b9318cc26101d2697be19ac44be5700534ba0256, conclusion: success, ghi_chu: 'measured — readback-run-39766018386.json: attempt 3 completed success (2026-10-23T01:10:31Z, truoc merge 01:11:56Z); readback-jobs-39766018386.json: attempt 3 23/23 success. Attempt 1 va 2: gate-nhanh-gop, gate-registry, gate-cong-cu-gop failure voi runner_id 0, khong buoc nao (khong duoc cap runner, khong vao than test).', nguon: [readback-run-39766018386.json, readback-jobs-39766018386.json, readback-check-runs-b9318cc-all.json]}
   - {name: 'full_mutant_audit (ci-dot-bien-du.yml) tren head cuoi', run_id: 39768193731, sha: b9318cc26101d2697be19ac44be5700534ba0256, conclusion: 'failure (chi dot-bien-gop)', ghi_chu: 'measured — readback-jobs-39768193731.json: dot-bien-du + 8/8 dot-bien-manh success; dot-bien-gop attempt 1 va 2 failure voi runner_id 0, khong buoc nao. not_measured: phep GOP 8 manh chua tung chay.', nguon: [readback-run-39768193731.json, readback-jobs-39768193731.json]}
   - {name: 'executor cross-review Codex luot 5/5 tren head cuoi (launcher.py run 76825653)', sha: b9318cc26101d2697be19ac44be5700534ba0256, conclusion: 'approve; 0 P0-P3; pham vi hop dong hep (phuong an b chu kho chon sau luot 3)', nguon: [verdicts/wp748-r22-luot5-launcher-verdict.md, verdicts/run-76825653.json, verdicts/wp748-r22-luot5-launcher-prompt.md], ghi_chu: 'measured — run-76825653.json: trang_thai xong, ma_thoat 0, head b9318cc, provider openai_codex, execution_surface codex_cli, prompt_sha256 3842bc9c… = sha256 cua verdicts/wp748-r22-luot5-launcher-prompt.md; KHONG khoa nao mang model.'}
-  - {name: 'Codex connector', sha: b9318cc26101d2697be19ac44be5700534ba0256, conclusion: 'completed, has_any_findings=false', ghi_chu: 'measured — readback-comments-869.json: codex-review-state commit_sha b9318cc, status completed, has_any_findings false. Kich hoat luc chuyen ra khoi draft 01:10:34Z; ket qua co SAU merge 01:11:56Z.', nguon: readback-comments-869.json}
+  - {name: 'Codex connector', sha: b9318cc26101d2697be19ac44be5700534ba0256, conclusion: 'completed, has_any_findings=false', ghi_chu: 'measured — readback-comments-869.json: codex-review-state commit_sha b9318cc, status completed, has_any_findings false; comment tom tat tao 01:10:37Z, hoan tat 01:12:41Z — SAU merge 01:11:56Z. Moc kich hoat noi bo cua connector: not_measured.', nguon: readback-comments-869.json}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-869.json, readback-review-comments-869.json]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39882625690, sha: 7400df47cf626a92d34af5bf58b4862b49742fdd, conclusion: cancelled, ghi_chu: 'measured — readback-runs-master-7400df4.json + readback-run-39882625690.json: gate push cancelled 01:15:23Z (bi day boi push master ke tiep); readback-check-runs-7400df4-all.json: 0 check run. not_measured: gate tren DUNG merge SHA chua tung chay xong.', nguon: [readback-runs-master-7400df4.json, readback-run-39882625690.json, readback-check-runs-7400df4-all.json]}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39882625690, sha: 7400df47cf626a92d34af5bf58b4862b49742fdd, conclusion: cancelled, ghi_chu: 'measured — readback-runs-master-7400df4.json + readback-run-39882625690.json: gate push conclusion cancelled, updated_at 01:15:23Z; readback-check-runs-7400df4-all.json: 0 check run. Nguyen nhan va nguoi huy: not_measured (readback khong mang ly do/actor huy); chi co tuong quan thoi gian voi merge master ke tiep fdaad3f luc 01:15:18Z (git), khong phai bang chung nhan qua. not_measured: gate tren DUNG merge SHA chua tung chay xong.', nguon: [readback-runs-master-7400df4.json, readback-run-39882625690.json, readback-check-runs-7400df4-all.json]}
 bookkeeping:
   - {item: 'ho so land nay (landed false)', nhanh: agent/wp748-r23-claude}
   - {item: 'lease wp748-r22-g22-claude-remote-20261022', ket_qua: 'xem lease.thu_hoi_cuoi'}
@@ -92,9 +92,16 @@ trang_thai_packet:
     23/23 DAT; full_mutant_audit 8/8 manh + dot-bien-du DAT, GOP not_measured.
     (7) reviewer assurance §8.1: CHUA DAT — measured: verdicts/run-76825653.json khong khoa nao mang model; ho model reviewer
     `khong_do_duoc` (§8); §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4.
-    Mo lai khi: (1) gate push master xanh tren 7400df4 hoac ke thua do bang chung ma tuong duong; (5) chu kho ghi duyet ben neo
-    b9318cc; dot-bien-gop chay xanh tren b9318cc; VA (7) launcher do duoc model phuc vu (`do_may`), HOAC chu kho ghi xac nhan
-    ben `khai_co_audit` tren b9318cc (tu khai yeu hon `do_may` tai cho dung), HOAC `human_audited`.
+    Mo lai — TAT CA: (1) mot gate push master THANH CONG tren CHINH merge 7400df4 (vd chay lai run 39882625690), du bon chieu
+    provenance CI (run · checkout · dinh nghia workflow · output gate, PROTOCOL §10); bang tree/ma tuong duong KHONG thay duoc —
+    muon thay bang luot tren SHA ke tiep thi phai co uy quyen ghi ro SHA/run/attempt, ancestry, so sanh pham vi, du context bat
+    buoc va xu ly ro luot cancelled goc (Codex luot 1 r23 F02); (5) chu kho ghi duyet ben neo b9318cc; dot-bien-gop chay xanh
+    tren b9318cc; VA (7) chi DAT khi co MOT trong ba, dung dinh nghia §8: (i) `cross_approved` `do_may` — mot lan
+    approve DOC LAP da hoan tat tren DUNG b9318cc, kem bang chung may do cho CHINH lan chay approve ay rang ho model reviewer phuc vu
+    KHAC ho model executor (claude); nang cap launcher ve sau KHONG do nguoc cac luot cu, va mot lan do cung ho / khac luot / khac
+    SHA KHONG du; (ii) `khai_co_audit` — loi khai ho model cua luot approve tren b9318cc KEM xac nhan ben cua mot auditor co ten,
+    tu khai yeu hon `do_may` ngay tai cho dung; loi khai cua chu kho khong kem auditor KHONG du; (iii) `human_audited` day du
+    §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG b9318cc.
 
 uy_quyen_land:
   dang: >-

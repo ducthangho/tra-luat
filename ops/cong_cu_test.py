@@ -1953,6 +1953,8 @@ for _ten, _ca, _tim, _thay in (
     ('wp892_hau_to', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").endswith("duong_nhanh") and (\n'),
     ('wp892_bo_cr', 't52_', '    if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" and (\n', '    if (os.environ.get(_BIEN_GOP_CHE_DO) or "").rstrip("\\r") == "duong_nhanh" and (\n'),
     ('wp892_lo_tep_an', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(x for x in thu_muc_gom.iterdir() if not x.name.startswith(".")))):\n'),
+    # Codex lượt 1 P2: dispatcher `--gop` hỏng RIÊNG ở chế độ nhanh (thân `_main_gop` không đổi).
+    ('wp892_dispatcher_nhanh_rc1', 't52_', '    if cua == "--gop":\n        sys.exit(_main_gop())\n', '    if cua == "--gop":\n        sys.exit(1 if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" else _main_gop())\n'),
     ('wp892_dong_gia_giet', 't52_', '        print(f"GOM: KHÔNG ĐO — PR chỉ đổi hồ sơ ({_BIEN_GOP_CHE_DO}=duong_nhanh, 0 mảnh); {len(DOT_BIEN)} đột biến "\n', '        print(f"GOM MẢNH 0/0 — bị giết {len(DOT_BIEN)} ({_BIEN_GOP_CHE_DO}=duong_nhanh) "\n'),
     ('f7_cau_hinh_nuot', 't54_',
      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
@@ -7281,6 +7283,12 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
               if not (kq.get(t) and kq[t][0] >= 1 and kq[t][2] == 1 and "KHÔNG ĐO" not in kq[t][1]
                       and ("[G-rong]" in kq[t][1] or t in ("dn_tep", "dn_tep_an")))}
     bang(not thuong, f"chỉ ĐÚNG chuỗi `duong_nhanh` + thư mục vắng/rỗng mới được bỏ gom; còn lại phải ĐỎ: {thuong}")
+    cli_dn = {t: kq.get(t) for t, (rc, dau_ra) in (("cli_dn_rong", (0, "KHÔNG ĐO")), ("cli_dn_khong_co", (0, "KHÔNG ĐO")),
+                                                 ("cli_dn_day_du", (1, "[G-rong]")), ("cli_dn_vang", (1, "[G-rong]")))
+              if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1])}
+    cli_dn.update({"cli_dn_tep_an": kq.get("cli_dn_tep_an")} if not (kq.get("cli_dn_tep_an") and kq["cli_dn_tep_an"][0] >= 1
+                                                                  and "KHÔNG ĐO" not in kq["cli_dn_tep_an"][1]) else {})
+    bang(not cli_dn, f"đường nhanh qua CỬA CLI `--gop` (tiến trình con, env riêng) sai: {cli_dn}")
     # F16: bộ ĐÚNG cấu trúc, SAI kết quả (đích sống ở đầu mảnh 0, tín dụng giả ở giữa mảnh 1, bán kính 2 ở cuối mảnh 2)
     # ⇒ ĐÚNG 3 lỗi, bảng ĐỦ (N−3 dòng `ok` + 3 dòng ĐỎ), SỐ LIỆU nói đúng 3. F17: cùng thứ ấy qua CLI THẬT, cộng đường
     # DƯƠNG (rc=0, N dòng `ok`) trên kho git tạm có vân tay khớp.
@@ -8437,6 +8445,15 @@ def _in_tu_kiem_gom():
                          ("cli_tt_cua_sau", ["--gop", str(rong), "--tu-kiem-che-do"]), ("cli_tt_la", ["--khong-co"])):
             p = subprocess.run([sys.executable, str(TEP_TEST), *doi], capture_output=True, text=True,
                                timeout=120, cwd=str(GOC), env={**os.environ, _BIEN_BAN_KINH: "hong"})
+            kq[ten] = [p.returncode, (p.stdout.splitlines() or [""])[0], 0]
+        # wp892 (Codex lượt 1 P2 gom-duong-nhanh-chua-khoa-dispatcher-cli): đường nhanh đo qua CỬA CLI THẬT `TEP_TEST --gop`,
+        # env đặt cho CHÍNH tiến trình con — gọi `_main_gop` trong tiến trình không thấy một dispatcher hỏng riêng ở chế độ này.
+        # Chỉ đường KHÔNG cần vân tay (thư mục vắng/rỗng); đường có mảnh đã đo ở `cli_git_*`.
+        moi_truong = {k: v for k, v in os.environ.items() if k != _BIEN_GOP_CHE_DO}
+        for ten, thu, gt in (("cli_dn_rong", rong, "duong_nhanh"), ("cli_dn_khong_co", d / "khong_co_cli", "duong_nhanh"),
+                             ("cli_dn_day_du", rong, "day_du"), ("cli_dn_vang", rong, None), ("cli_dn_tep_an", an, "duong_nhanh")):
+            p = subprocess.run([sys.executable, str(TEP_TEST), "--gop", str(thu)], capture_output=True, text=True, timeout=120,
+                               cwd=str(GOC), env={**moi_truong, **({_BIEN_GOP_CHE_DO: gt} if gt is not None else {})})
             kq[ten] = [p.returncode, (p.stdout.splitlines() or [""])[0], 0]
         # F17 (Codex lượt 6): CLI THẬT trên đường DƯƠNG và trên bộ ≥ 2 lỗi. Vân tay phải khớp đúng tiến trình CLI được
         # đo, nên dựng một kho git TẠM từ CHÍNH tệp đang chạy (kể cả khi nó là bản đột biến) và lấy vân tay tại đó.

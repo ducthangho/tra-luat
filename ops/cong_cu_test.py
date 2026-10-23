@@ -7440,6 +7440,22 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
     so = kq["so1"]   # F27: closure đọc `so` lúc GỌI ⇒ hai kịch bản worker=1 dựng lại kỳ vọng với 1
     phong = [f"phong:True:[]:{so}"]
     mong.update({"manh_w1": [0, dau + phong + ghi_dung, ra(duoi=manh_ra())], "du_w1": [0, day(), ra(duoi=du_ra(0))]})
+    # wp879: kỳ vọng nhánh Windows dựng bằng CHUỖI ĐỘC LẬP, không gọi `dong_windows` — gọi thì đột biến vào hàm ấy thoả
+    # cả hai vế. Mảnh `nt`: đủ ca nền, KHÔNG `phong`/`ghi`; ĐỎ ⇔ ca đỏ hoặc tiền kiểm bỏ qua; ca BỎ QUA rời khỏi mẫu số.
+    win = lambda a, b: [f"TỔNG: CA {a}/{b} đạt · ĐỘT BIẾN {nd} mục KHÔNG ĐO TRÊN WINDOWS — "
+                        f"đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)"]
+    mong.update({"manh_nt": [0, dau, ra(duoi=win(n, n))], "manh_nt_ca_do": [1, dau, ra(do=[cn], duoi=win(n - 1, n))],
+                 "manh_nt_ca_bq": [0, dau, ra(bq=[c1], duoi=win(n - 1, n - 1))],
+                 "manh_nt_tk": [1, dau, ra(tk=[tb], duoi=win(n, n))],
+                 "du_nt": mong["du"], "gate_nt": mong["gate"]})
+    w = kq.get("windows") or {}
+    bang(w.get("vi_tu") == [True, False, False], f"vị từ nền: chỉ 'nt' mới bỏ vòng đột biến — thấy {w.get('vi_tu')}")
+    bang(w.get("dat") == [True, False, False, False],
+         f"dat_windows phải đòi SỐ DƯƠNG hai vế (ca > 0, đỏ = 0, bảng đột biến khác RỖNG #319) — thấy {w.get('dat')}")
+    dw = str(w.get("dong"))
+    bang("giết" not in dw.casefold() and "bi giet" not in dw.casefold() and "KHÔNG ĐO TRÊN WINDOWS" in dw
+         and "ubuntu-latest" in dw and dw.startswith("TỔNG: CA 60/61 đạt · ĐỘT BIẾN 470 mục "),
+         f"dòng Windows phải khai đột biến đo Ở ĐÂU và KHÔNG mang chữ giết: {dw!r}")
     sai = {t: str(kq.get(t))[:300] for t, m in mong.items() if kq.get(t) != m}
     bang(not sai, f"`main` nối SAI (kịch bản: thấy [rc, nhật ký, stdout]): {sai}")
     # F26 (Codex lượt 10): cửa CLI KHÔNG đối số — đúng thứ workflow chạy — phải VÀO `main` và TRUYỀN mã. Ở ĐÂY chứ không ở
@@ -7868,6 +7884,35 @@ _BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA = "CONG_CU_TEST_BAN_KINH", "CONG_CU_TE
 _TRAN_MANH = 16
 _PHIEN_BAN_MANH = 1
 _KHOA_DAU_MANH = frozenset({"phien_ban", "manh", "so_manh", "sha256_test", "head"})
+
+# wp879 (#879) — Windows KHÔNG đo bán kính đột biến, chỉ chạy ca nền. Đo 19→22-10-2026 (100 lượt `ci.yml`): Windows
+# 5.361 phút, 111/118 lượt mảnh không xanh; mảnh 0, 2–7 đỏ trên MỌI nhánh vì lý do của nền (#853: đích `t48`/`t51` BỎ
+# QUA khi thiếu `/bin/sh`, đột biến giết thêm/không giết). Đột biến đo BỘ TEST, không đo Windows ⇒ đo ở `ubuntu-latest`.
+# Khuôn #456 (`.claude/hooks/pretooluse_guard_test.py`): ba hàm THUẦN, nhận tên nền làm đối số, để ép CẢ HAI nhánh
+# trên Linux. `_TEN_NEN` là CỬA để giàn giáo `--tu-kiem-main` (t54) chọn nền cho từng kịch bản — đọc `os.name` thẳng
+# trong `main` thì kịch bản cũ đổi nhánh khi chính `t54` chạy trên Windows.
+_TEN_NEN = os.name
+
+
+def nen_bo_qua_dot_bien(ten_nen=None):
+    """Nền `nt` (Windows) thì KHÔNG chạy vòng bán kính ở chế độ mảnh. Vị từ THUẦN để đo được."""
+    return (_TEN_NEN if ten_nen is None else ten_nen) == "nt"
+
+
+def dat_windows(so_ca, do, so_dot_bien):
+    """Tiêu chí ĐẠT của nhánh Windows — đòi SỐ DƯƠNG hai vế.
+
+    `so_dot_bien > 0` là chốt tương đương "bảng đột biến khác rỗng" (#319: tập RỖNG thoả `not song`): không đo ở
+    đây thì càng phải đo rằng bảng còn thứ để đo ở chỗ khác.
+    """
+    return so_ca > 0 and do == 0 and so_dot_bien > 0
+
+
+def dong_windows(so_ca_dat, so_ca, so_dot_bien):
+    """Dòng bằng chứng của Windows: khai RÕ đột biến không đo ở đây, và đo Ở ĐÂU. KHÔNG mang chữ giết — ở đây không
+    giết cái nào; dòng kiểu "0/0 bị giết" chính là hình dạng #319 sinh ra để chặn."""
+    return (f"TỔNG: CA {so_ca_dat}/{so_ca} đạt · ĐỘT BIẾN {so_dot_bien} mục KHÔNG ĐO TRÊN WINDOWS — "
+            f"đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)")
 
 
 def _do_co_symlink():
@@ -8514,7 +8559,15 @@ def _in_tu_kiem_main():
         # để bỏ/gán đè BẤT KỲ nguồn nào cũng ra tổng khác.
         "manh_0": ({_BIEN_MANH: "0/8", _BIEN_MANH_RA: "x"}, {}), "manh_w1": ({**manh, tt: "1"}, {}),
         "du_w1": ({tt: "1"}, {}), "du_nhieu_nguon": ({}, {"ph_do": 2, "gg_do": 4, "ss_do": 16, "bk1": 32, "ca_do": {cn}}),
+        # wp879: nền `nt` — mảnh chỉ chạy ca nền (không phóng, không ghi); `du`/`gate` KHÔNG đổi trên `nt`.
+        "manh_nt": (manh, {"nen": "nt"}), "manh_nt_ca_do": (manh, {"nen": "nt", "ca_do": {cn}}),
+        "manh_nt_ca_bq": (manh, {"nen": "nt", "ca_bq": {c1}}), "manh_nt_tk": (manh, {"nen": "nt", "tk": {tb}}),
+        "du_nt": ({}, {"nen": "nt"}), "gate_nt": (gate, {"nen": "nt"}),
     }
+    # wp879: vị từ THUẦN đo ở đây (không trong `t54`) để đột biến TRÊN ĐĨA cắn được — cùng lý do với mọi cửa tự kiểm.
+    kq["windows"] = {"vi_tu": [nen_bo_qua_dot_bien(x) for x in ("nt", "posix", "java")],
+                     "dat": [dat_windows(*a) for a in ((61, 0, 470), (0, 0, 470), (61, 1, 470), (61, 0, 0))],
+                     "dong": dong_windows(60, 61, 470)}
     noi = {name: (mode, k, n, path, workers) for name, mode, k, n, path, workers in _luoi_noi_main()}
     for name, (mode, k, n, path, workers) in noi.items():
         env = {_BIEN_MANH: f"{k}/{n}", _BIEN_MANH_RA: path} if mode != "du" else {}
@@ -8533,7 +8586,8 @@ def _in_tu_kiem_main():
             os.environ.pop(bien, None)
         os.environ.update({tt: "3", **env})
         buf = io.StringIO()
-        cu_doc, cu_so = g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"]
+        cu_doc, cu_so, cu_nen = g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"], g["_TEN_NEN"]
+        g["_TEN_NEN"] = dat.get("nen", "posix")   # wp879: nền là DỮ LIỆU của kịch bản — chạy trên Windows vẫn ra cùng kết quả
         if ten in noi:
             mode, ki, ni, path, workers = noi[ten]
             g["_doc_che_do"] = lambda env: ("du", None) if mode == "du" else ("manh", (ki, ni, path))
@@ -8544,7 +8598,7 @@ def _in_tu_kiem_main():
         except BaseException as ex:  # noqa: BLE001 — #698 M6: ngoại lệ của `main` là DỮ LIỆU (mã thoát `NEM:`), không giết con
             rc = "NEM:" + type(ex).__name__
         finally:
-            g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"] = cu_doc, cu_so
+            g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"], g["_TEN_NEN"] = cu_doc, cu_so, cu_nen
         # F12/F15: stdout cũng là đầu ra — MỌI dòng mang nghĩa hợp đồng (chẩn đoán, đếm, giao mảnh, bảng, SỐ LIỆU),
         # nguyên văn và đúng thứ tự; dòng trống bỏ.
         kq[ten] = [rc, list(log), [x for x in buf.getvalue().splitlines() if x.strip()]]
@@ -8849,6 +8903,11 @@ def main() -> int:
 
     if che_do == "manh":
         # Mảnh CHỈ đo bán kính của phần mình. Cổng cây thật + các tự kiểm chạy ở job `gate` (chế độ `gate`), một lần.
+        if nen_bo_qua_dot_bien():
+            # wp879: Windows chỉ chạy ca nền (ở trên, ĐỦ) — không phóng con, không ghi tệp mảnh (job gom Windows đã bỏ).
+            so_ca = len(CA) - len(bo_qua)
+            print("\n" + dong_windows(qua, so_ca, len(DOT_BIEN)))
+            return 0 if dat_windows(so_ca, len(hong) + len(tien_kiem_bo_qua), len(DOT_BIEN)) else 1
         k, n, ra = tham_so
         ten = _phan_manh(k, n)
         if hong or tien_kiem_bo_qua:

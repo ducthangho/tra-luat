@@ -1170,12 +1170,15 @@ G5_LENH = {"gate": [G5_PROBE, G5_SELFTEST], JOB_G5_MANH: [G5_PROBE, G5_SELFTEST]
 G5_ENV = {"gate": {"CONG_CU_TEST_BAN_KINH": "manh"},
           JOB_G5_MANH: {"CONG_CU_TEST_MANH": f"${{{{ matrix.manh }}}}/{SO_MANH_G5}",
                         "CONG_CU_TEST_MANH_RA": "manh/manh-${{ matrix.manh }}.txt"}}
-G5_TAI_LEN = {"uses": "actions/upload-artifact@v4", "with": {
+# wp879 (#879): Windows chỉ còn mảnh 0 và chỉ chạy ca nền ⇒ không ghi tệp mảnh, không tải lên, không có job gom Windows.
+G5_MANH_LOAI = [{"os": "windows-latest", "manh": k} for k in range(1, SO_MANH_G5)]
+G5_TAI_LEN = {"if": "runner.os != 'Windows'", "uses": "actions/upload-artifact@v4", "with": {
     "name": "gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}", "path": "manh/manh-${{ matrix.manh }}.txt",
     "if-no-files-found": "error"}}
 G5_TAI_VE = {"uses": "actions/download-artifact@v4", "with": {
     "pattern": "gate-cong-cu-manh-${{ matrix.os }}-*", "path": "manh", "merge-multiple": True}}
-G5_GOP_IF, G5_GOP_NEEDS = "${{ !cancelled() }}", ["chuan-bi", JOB_G5_MANH]
+G5_GOP_IF = "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}"
+G5_GOP_NEEDS, G5_GOP_LOAI = ["chuan-bi", JOB_G5_MANH], [{"os": "windows-latest"}]
 G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
                           "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
                           "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
@@ -1213,8 +1216,9 @@ def _loi_thuc_thi_g5(j, v, buoc):
         than = str(b.get("run", ""))
         if "${{" in than or any(not (c == "\n" or c.isprintable()) for c in than):
             loi.append(f"{j}: bước {ten!r} có biểu thức GitHub hoặc ký tự không in được trong `run`")
-        if set(b) - G5_KHOA_BUOC or b.get("shell", "bash") != "bash":
-            loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - G5_KHOA_BUOC)} shell={b.get('shell')!r}")
+        khoa = G5_KHOA_BUOC | ({"if"} if b == G5_TAI_LEN else set())   # wp879: `if` CHỈ ở đúng bước tải lên đã ghim
+        if set(b) - khoa or b.get("shell", "bash") != "bash":
+            loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - khoa)} shell={b.get('shell')!r}")
         elif "uses" in b and b.get("with", {}) not in G5_WITH.get(b["uses"], (b.get("with", {}),)):
             loi.append(f"{j}: bước {ten!r} có `with` lệch ghim: {b.get('with')}")
         elif "env" in b and not re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", ""))) and set(b["env"]) != {"AL_VER"}:
@@ -1226,11 +1230,13 @@ def _loi_g5_manh_gop(j, v, buoc, i):
     """#668: phần RIÊNG của hai job mảnh/gom — matrix, `needs`, `if`, và bước artifact, mọi thứ so BẰNG ĐÚNG."""
     ma = ((v.get("strategy") or {}).get("matrix") or {})
     if j == JOB_G5_MANH:
-        loi = [] if ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh"} else [
-            f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))}, thấy {ma}"]
+        loi = [] if (ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh", "exclude"}
+                     and ma.get("exclude") == G5_MANH_LOAI) else [
+            f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))} + exclude {G5_MANH_LOAI}, thấy {ma}"]
         loi += [] if v.get("needs") == "chuan-bi" and "if" not in v else [f"{j}: needs/if lệch: {v.get('needs')!r}/{v.get('if')!r}"]
         return loi + ([] if buoc[i + 1:] == [G5_TAI_LEN] else [f"{j}: sau bước G5 phải đúng MỘT bước tải lên {G5_TAI_LEN}"])
-    loi = [] if set(ma) == {"os"} else [f"{j}: matrix chỉ được có os, thấy {ma}"]
+    loi = [] if set(ma) == {"os", "exclude"} and ma.get("exclude") == G5_GOP_LOAI else [
+        f"{j}: matrix phải đúng os + exclude {G5_GOP_LOAI}, thấy {ma}"]
     loi += [] if v.get("needs") == G5_GOP_NEEDS and v.get("if") == G5_GOP_IF else [
         f"{j}: needs/if phải đúng {G5_GOP_NEEDS}/{G5_GOP_IF!r}, thấy {v.get('needs')!r}/{v.get('if')!r}"]
     loi += [] if i + 1 == len(buoc) else [f"{j}: bước gom phải là bước CUỐI"]
@@ -2007,6 +2013,18 @@ def phan_chung():
             ("gop-hai-tai-ve", _G, lambda v, b, i: b.insert(i, dict(b[i - 1]))),
             ("gop-buoc-sau-gom", _G, lambda v, b, i: b.append({"run": "true"})),
             ("gop-matrix-them-manh", _G, lambda v, b, i: v["strategy"]["matrix"].update({"manh": [0]})),
+            # wp879 N4: Windows quay về 8 mảnh / chỉ loại một phần · Linux còn 1 mảnh · tải lên mất `if` · gom quay về os động
+            # hoặc mất điều kiện ubuntu (lượt `windows-only` sẽ ĐỎ oan vì thiếu mảnh).
+            ("wp879-windows-8-manh", _M, lambda v, b, i: v["strategy"]["matrix"].pop("exclude")),
+            ("wp879-windows-loai-thieu", _M, lambda v, b, i: v["strategy"]["matrix"]["exclude"].pop()),
+            ("wp879-linux-1-manh", _M, lambda v, b, i: v["strategy"]["matrix"]["exclude"].extend(
+                {"os": "ubuntu-latest", "manh": k} for k in range(1, SO_MANH_G5))),
+            ("wp879-tai-len-khong-if", _M, lambda v, b, i: b[i + 1].pop("if")),
+            ("wp879-gop-khong-loai-windows", _G, lambda v, b, i: v["strategy"]["matrix"].pop("exclude")),
+            ("wp879-gop-loai-ubuntu", _G, lambda v, b, i: v["strategy"]["matrix"].update({"exclude": [{"os": "ubuntu-latest"}]})),
+            ("wp879-gop-if-cu", _G, lambda v, b, i: v.update({"if": "${{ !cancelled() }}"})),
+            ("wp879-gop-if-windows", _G, lambda v, b, i: v.update(
+                {"if": "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'windows-latest') }}"})),
     ):
         _them(f"p668-A6-{_t}", _hong_job(_j, _f))
     for _j in (_M, _G):

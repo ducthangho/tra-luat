@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](VERDICT.md) và [HINT.patch](HINT.patch).
+
+Verdict: `changes_requested` — **1 P2**: Windows xanh vẫn có thể có ca nền bị bỏ qua.
+
+Hai cổng kiểm tra đều đạt. `cay-kho/` giữ nguyên.

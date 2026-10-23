@@ -1,0 +1,15 @@
+$ git rev-parse HEAD
+8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8
+rc=0
+$ git rev-parse HEAD^{tree}
+817f593f0d53e4e2e9546783d3b29216ac163692
+rc=0
+$ git rev-parse e63961f
+e63961f27b53e66db8e6600009f97d5706743063
+rc=0
+$ git diff --numstat e63961f HEAD
+9	0	CLAUDE.md
+rc=0
+$ git status --porcelain=v1
+(stdout rỗng)
+rc=0

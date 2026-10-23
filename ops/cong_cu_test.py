@@ -8216,6 +8216,11 @@ def _ghi698(d, n, vt, t1, ten_nen=os.name):
 
 def _in_tu_kiem_gom():
     """Cửa tiến trình con cho `t52`: dựng bộ mảnh bằng CHÍNH `_ket_thuc_manh`, làm hỏng từng cách, gom, in `KQ`."""
+    # #671-W (run 39887697306, windows-latest): bản ghi GIẢ ở đây mang tên đột biến THẬT, nên `NGOAI_LE_NEN` của nền
+    # `nt` áp lên chúng và đổi số lỗi ⇒ mảnh không được ghi ⇒ `FileNotFoundError`, t52 đỏ ở NỀN. Bảng ấy chỉ dành cho
+    # lượt ĐO thật; cửa này là tiến trình con riêng nên tắt nó ở đây không chạm tới đâu khác.
+    global NGOAI_LE_NEN
+    NGOAI_LE_NEN = {}
     n = 3
     # Vân tay CỐ ĐỊNH, không `_van_tay()`: dưới đột biến `GOC` là cây tạm, không phải kho git, nên HEAD đọc được
     # hay không là chuyện của RIG — mọi kịch bản sẽ ĐỎ vì `G-head` và ca "giết" mọi đột biến sai lý do.

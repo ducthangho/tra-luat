@@ -1,0 +1,50 @@
+2026-10-23T01:28:29Z
+ls-remote 548 ten; guong 548 ten; thieu 0; thua 0
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-dot-bien-chia-manh-r2-g1-claude	refs/heads/agent/wp710-g1-codex:ops/leases/ci-dot-bien-chia-manh-r2-g1-claude.yaml
+HẾT_HẠN	wp540-r1-g1-codex-windows	refs/heads/agent/wp710-g1-codex:ops/leases/wp540-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp540-r1-g1-codex-windows	refs/heads/claude/bia-mo-wp540-g1-20260916:ops/leases/wp540-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp540-r2-g2-claude-review	refs/heads/claude/bia-mo-wp540-g1-20260916:ops/leases/wp540-r2-g2-claude-review.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r1-g1-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r1-g1-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r1-g2-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r1-g2-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r2-g1-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r2-g1-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r3-g1-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r3-g1-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r4-g1-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r4-g1-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r5-g1-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r5-g1-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r6-g1-claude	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r6-g1-claude.yaml
+HẾT_HẠN	chan-doan-tin-dung-gia-r7-g2-codex	refs/heads/codex/wp568-r7-authority:ops/leases/chan-doan-tin-dung-gia-r7-g2-codex.yaml
+HẾT_HẠN	cham-dot-bien-mien-nhiem-ca-vo-can-exec-1-claude-20260911	refs/heads/ops/cap-lease-513:ops/leases/cham-dot-bien-mien-nhiem-ca-vo-can-exec-1-claude-20260911.yaml
+HẾT_HẠN	dau-phien-trung-lam-do-cong-r1-g1-claude	refs/heads/ops/cap-lease-593:ops/leases/dau-phien-trung-lam-do-cong-r1-g1-claude.yaml
+HẾT_HẠN	tien-de-ha-tang-khong-duoc-thanh-chot-r1-g1-fable	refs/heads/ops/cap-lease-593:ops/leases/tien-de-ha-tang-khong-duoc-thanh-chot-r1-g1-fable.yaml
+HẾT_HẠN	tien-de-ha-tang-khong-duoc-thanh-chot-r2-g1-claude	refs/heads/ops/cap-lease-593:ops/leases/tien-de-ha-tang-khong-duoc-thanh-chot-r2-g1-claude.yaml
+HẾT_HẠN	tien-de-ha-tang-khong-duoc-thanh-chot-r2-g2-claude	refs/heads/ops/cap-lease-593:ops/leases/tien-de-ha-tang-khong-duoc-thanh-chot-r2-g2-claude.yaml
+HẾT_HẠN	tien-de-ha-tang-khong-duoc-thanh-chot-r2-g3-claude	refs/heads/ops/cap-lease-593:ops/leases/tien-de-ha-tang-khong-duoc-thanh-chot-r2-g3-claude.yaml
+HẾT_HẠN	tien-de-ha-tang-khong-duoc-thanh-chot-r2-g4-claude	refs/heads/ops/cap-lease-593:ops/leases/tien-de-ha-tang-khong-duoc-thanh-chot-r2-g4-claude.yaml
+HẾT_HẠN	tien-de-ha-tang-khong-duoc-thanh-chot-r3-g1-claude	refs/heads/ops/cap-lease-593:ops/leases/tien-de-ha-tang-khong-duoc-thanh-chot-r3-g1-claude.yaml
+HẾT_HẠN	donref-xoa-an-toan-exec-1r2-codex-20260821	refs/heads/ops/lease-donref-exec-r2:ops/leases/donref-xoa-an-toan-exec-1r2-codex-20260821.yaml
+HẾT_HẠN	donref-xoa-an-toan-exec-1-codex-20260821	refs/heads/ops/lease-donref-xoa-an-toan:ops/leases/donref-xoa-an-toan-exec-1-codex-20260821.yaml
+HẾT_HẠN	wp748-r1-g1-antigravity-windows-20261013	refs/heads/ops/wp748-r1-g1-lease:ops/leases/wp748-r1-g1-antigravity-windows-20261013.yaml
+HẾT_HẠN	wp748-r10-g10-claude-windows-20261015	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r10-g10-claude-windows-20261015.yaml
+HẾT_HẠN	wp748-r2-g2-antigravity-windows-20261013	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r2-g2-antigravity-windows-20261013.yaml
+HẾT_HẠN	wp748-r3-g3-antigravity-windows-20261014	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r3-g3-antigravity-windows-20261014.yaml
+HẾT_HẠN	wp748-r4-g4-antigravity-windows-20261014	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r4-g4-antigravity-windows-20261014.yaml
+HẾT_HẠN	wp748-r5-g5-claude-windows-20261014	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r5-g5-claude-windows-20261014.yaml
+HẾT_HẠN	wp748-r6-g6-claude-windows-20261014	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r6-g6-claude-windows-20261014.yaml
+HẾT_HẠN	wp748-r7-g7-claude-windows-20261014	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r7-g7-claude-windows-20261014.yaml
+HẾT_HẠN	wp748-r8-g8-claude-windows-20261014	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r8-g8-claude-windows-20261014.yaml
+HẾT_HẠN	wp748-r9-g9-claude-windows-20261015	refs/heads/ops/wp748-r10-g10-lease:ops/leases/wp748-r9-g9-claude-windows-20261015.yaml
+HẾT_HẠN	wp748-r11-g11-claude-windows-20261015	refs/heads/ops/wp748-r11-g11-lease:ops/leases/wp748-r11-g11-claude-windows-20261015.yaml
+HẾT_HẠN	wp748-r11-g11-claude-windows-20261015	refs/heads/ops/wp748-r12-g12-lease:ops/leases/wp748-r11-g11-claude-windows-20261015.yaml
+HẾT_HẠN	wp748-r12-g12-claude-windows-20261016	refs/heads/ops/wp748-r12-g12-lease:ops/leases/wp748-r12-g12-claude-windows-20261016.yaml
+HẾT_HẠN	wp748-r13-g13-claude-windows-20261016	refs/heads/ops/wp748-r13-g13-lease:ops/leases/wp748-r13-g13-claude-windows-20261016.yaml
+HẾT_HẠN	wp748-r14-g14-claude-windows-20261016	refs/heads/ops/wp748-r14-g14-lease:ops/leases/wp748-r14-g14-claude-windows-20261016.yaml
+HẾT_HẠN	wp748-r15-g15-claude-windows-20261017	refs/heads/ops/wp748-r15-g15-lease:ops/leases/wp748-r15-g15-claude-windows-20261017.yaml
+HẾT_HẠN	wp748-r16-g16-claude-windows-20261017	refs/heads/ops/wp748-r16-g16-lease:ops/leases/wp748-r16-g16-claude-windows-20261017.yaml
+HẾT_HẠN	wp748-r17-g17-claude-windows-20261017	refs/heads/ops/wp748-r17-g17-lease:ops/leases/wp748-r17-g17-claude-windows-20261017.yaml
+HẾT_HẠN	wp748-r18-g18-claude-windows-20261018	refs/heads/ops/wp748-r18-g18-lease:ops/leases/wp748-r18-g18-claude-windows-20261018.yaml
+HẾT_HẠN	wp748-r19-g19-claude-windows-20261018	refs/heads/ops/wp748-r19-g19-lease:ops/leases/wp748-r19-g19-claude-windows-20261018.yaml
+HẾT_HẠN	wp748-r20-g20-claude-remote-20261019	refs/heads/ops/wp748-r20-g20-lease:ops/leases/wp748-r20-g20-claude-remote-20261019.yaml
+HẾT_HẠN	wp748-r22-g22-claude-remote-20261022	refs/heads/ops/wp748-r22-g22-lease:ops/leases/wp748-r22-g22-claude-remote-20261022.yaml
+HẾT_HẠN	wp748-r3-g3-antigravity-windows-20261014	refs/heads/ops/wp748-r3-g3-lease:ops/leases/wp748-r3-g3-antigravity-windows-20261014.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

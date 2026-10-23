@@ -1,0 +1,5 @@
+git show origin/ops/wp856-spec:ops/specs/wp856.md | sha256sum
+d50065e79fcb92c223fc1799418e266579e339b4033cc509ef22a083e6e8dd34  -
+ops/specs/wp856-dot-bien-r6.json
+6b1c41958fb36eaeef35d32bd03c424ef7a90e5ab2d8a32cc7d67bc8bea9e85d  -
+ref origin/ops/wp856-spec = 42343c18b8f20cb8f8459f627021ad1a786d62e3

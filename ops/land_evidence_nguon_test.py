@@ -65,12 +65,13 @@ def nap():
 @contextlib.contextmanager
 def cay(ho_so, prov=None):
     """Cây tạm: `ops/land/<TEN>` = `ho_so`; `prov` = {đường dẫn trong provenance: nội dung} (None ⇒ không tạo thư mục)."""
+    # wp871: newline="" — chế độ văn bản Windows đổi \n thành \r\n, mà c09 băm kỳ vọng trên byte LF (gate-registry windows đỏ).
     with tempfile.TemporaryDirectory(prefix="len_cay_") as thu:
         goc = Path(thu) / "kho"
         tep = {TEN: ho_so} | {f"{PROV}/{d}": nd for d, nd in (prov or {}).items()}
         for duong, nd in tep.items():
             (goc / "ops/land" / duong).parent.mkdir(parents=True, exist_ok=True)
-            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8")
+            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8", newline="")
         if prov is not None:
             (goc / "ops/land" / PROV).mkdir(exist_ok=True)
         yield goc
@@ -194,7 +195,7 @@ def c14_cli_moi_to_hop_duong_dan():
                           ("plat-y-provenance/readback-pr-1.json", RB_PR), ("plat-y-provenance/readback-pr-2.json",
                                                                           RB_PR.replace("02:58:26", "01:00:00"))):
             (goc / "ops/land" / duong).parent.mkdir(parents=True, exist_ok=True)
-            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8")
+            (goc / "ops/land" / duong).write_text(nd, encoding="utf-8", newline="")
         rc, ra = kiem(nap(), goc)
     bang(rc == 2 and "merged_at khác nhau" in ra, f"readback mâu thuẫn ⇒ rc=2: rc={rc} {ra[-200:]}")
 
@@ -244,10 +245,13 @@ def c09_l5_mien_tru_theo_bam():
         m.MIEN_TRU_CUTOVER[TEN] = hashlib.sha256(hs.encode()).hexdigest()
         rc, ra = kiem(m, goc)
         bang(rc == 0 and "1/1 miễn trừ" in ra, f"băm khớp ⇒ miễn trừ có ghi nhận: rc={rc} {ra[-200:]}")
-        (goc / "ops/land" / TEN).write_text(hs + " ", encoding="utf-8")
+        def ghi(nd):   # wp871 P3 (Codex lượt 1): CRLF cũng "lệch hash", nên đo chính byte đã ghi
+            (goc / "ops/land" / TEN).write_text(nd, encoding="utf-8", newline="")
+            bang((goc / "ops/land" / TEN).read_bytes() == nd.encode(), f"byte ghi phải đúng nguyên văn (LF): {nd!r}")
+        ghi(hs + " ")
         rc, ra = kiem(m, goc)
         bang(rc == 1 and "MẤT MIỄN TRỪ" in ra and "0/1 miễn trừ" in ra, f"lệch một byte ⇒ kiểm đủ luật: rc={rc} {ra[-300:]}")
-        (goc / "ops/land" / TEN).write_text("x: 'measured — a.json'\n", encoding="utf-8")
+        ghi("x: 'measured — a.json'\n")
         rc, ra = kiem(m, goc)
         bang(rc == 0 and "0/1 miễn trừ" in ra, f"mất miễn trừ mà vẫn ĐẠT luật ⇒ xanh: rc={rc} {ra[-300:]}")
 

@@ -8754,6 +8754,13 @@ def r886_n6_giai_ten_tinh_windows_va_posix():
             kq = {k: v and [os.path.normcase(v[0]), *v[1:]] for k, v in kq.items()}
             mong = {k: v and [os.path.normcase(v[0]), *v[1:]] for k, v in mong.items()}
         bang(kq == mong, f"giai ten python lech luat native: {kq} mong {mong}")
+        # Mục PATH RỖNG = cwd, như `command -v` của bash và `_ten_tran_giai_ra` (Codex wp886 lượt 1, H01): cwd `b` có
+        # `python`/`python.CMD` thắng `c` phía sau. So bằng `samefile` — Windows có thể trả tên 8.3 cho thư mục tạm.
+        with contextlib.chdir(b):
+            rong = {nen: m._python_theo_path(f"{sep}{c}", pe, nen == "win") for nen in ("win", "posix")}
+        dung = {"win": b / "python.CMD", "posix": b / "python"}
+        bang(all(v and os.path.samefile(v[0], dung[k]) for k, v in rong.items()),
+             f"muc PATH rong khong la cwd: {rong} mong {dung}")
 
 
 @ca
@@ -11443,6 +11450,10 @@ DOT_BIEN_HOOK = [
      ["r886_n4_khong_ten_nao_noi_ro_thieu_gi"], "cong_cu"),
     ("wp886_cc_windows_nhan_ten_tran", ('        duoi = ([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext',
                                         '        duoi = [""] + ext'),
+     ["r886_n6_giai_ten_tinh_windows_va_posix"], "cong_cu"),
+    ("wp886_cc_bo_muc_PATH_rong",
+     ('    for muc in (os.environ.get("PATH", "") if path is None else path).split(os.pathsep):\n        for d in duoi:',
+      '    for muc in filter(None, (os.environ.get("PATH", "") if path is None else path).split(os.pathsep)):\n        for d in duoi:'),
      ["r886_n6_giai_ten_tinh_windows_va_posix"], "cong_cu"),
     ("wp886_cc_path_truoc_ten",
      ('    for ten, *them in TEN_PYTHON:\n        p = _giai_ten_tran(ten, path, pathext, la_windows)\n',

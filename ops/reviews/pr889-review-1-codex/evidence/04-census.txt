@@ -1,0 +1,13 @@
+chuan-bi {"runs-on": "ubuntu-latest", "needs": null, "job.if": null, "matrix": null, "windows-only matrix rows": []}
+gate {"runs-on": "${{ matrix.os }}", "needs": "chuan-bi", "job.if": null, "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}, "windows-only matrix rows": [{"os": "windows-latest"}]}
+gate-cong-cu {"runs-on": "${{ matrix.os }}", "needs": "chuan-bi", "job.if": null, "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7], "exclude": [{"os": "windows-latest", "manh": 1}, {"os": "windows-latest", "manh": 2}, {"os": "windows-latest", "manh": 3}, {"os": "windows-latest", "manh": 4}, {"os": "windows-latest", "manh": 5}, {"os": "windows-latest", "manh": 6}, {"os": "windows-latest", "manh": 7}]}, "windows-only matrix rows": [{"os": "windows-latest", "manh": 0}]}
+gate-cong-cu-gop {"runs-on": "${{ matrix.os }}", "needs": ["chuan-bi", "gate-cong-cu"], "job.if": "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "exclude": [{"os": "windows-latest"}]}, "windows-only matrix rows": []}
+gate-ops {"runs-on": "${{ matrix.os }}", "needs": "chuan-bi", "job.if": null, "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}, "windows-only matrix rows": [{"os": "windows-latest"}]}
+gate-nhanh-manh {"runs-on": "${{ matrix.os }}", "needs": "chuan-bi", "job.if": null, "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7]}, "windows-only matrix rows": [{"os": "windows-latest", "manh": 0}, {"os": "windows-latest", "manh": 1}, {"os": "windows-latest", "manh": 2}, {"os": "windows-latest", "manh": 3}, {"os": "windows-latest", "manh": 4}, {"os": "windows-latest", "manh": 5}, {"os": "windows-latest", "manh": 6}, {"os": "windows-latest", "manh": 7}]}
+gate-nhanh-gop {"runs-on": "${{ matrix.os }}", "needs": ["chuan-bi", "gate-nhanh-manh"], "job.if": "${{ !cancelled() }}", "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}, "windows-only matrix rows": [{"os": "windows-latest"}]}
+gate-registry {"runs-on": "${{ matrix.os }}", "needs": ["chuan-bi", "gate-nhanh-gop"], "job.if": "${{ !cancelled() }}", "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}, "windows-only matrix rows": [{"os": "windows-latest"}]}
+gate-packet-loop {"runs-on": "${{ matrix.os }}", "needs": "chuan-bi", "job.if": null, "matrix": {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}, "windows-only matrix rows": [{"os": "windows-latest"}]}
+Job definitions: 9 ; gate* definitions: 8
+windows-only includes fixed Ubuntu chuan-bi; input removes Ubuntu MATRIX rows only.
+Declared job rows are not evidence of an allocated Windows runner or completed steps.
+probe_rc=0

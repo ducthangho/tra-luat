@@ -1,0 +1,97 @@
+matrix = {"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7], "exclude": [{"os": "windows-latest", "manh": 1}, {"os": "windows-latest", "manh": 2}, {"os": "windows-latest", "manh": 3}, {"os": "windows-latest", "manh": 4}, {"os": "windows-latest", "manh": 5}, {"os": "windows-latest", "manh": 6}, {"os": "windows-latest", "manh": 7}]}
+expanded ['windows-latest'] => [{'os': 'windows-latest', 'manh': 0}]
+expanded ['ubuntu-latest', 'windows-latest'] => [{'os': 'ubuntu-latest', 'manh': 0}, {'os': 'ubuntu-latest', 'manh': 1}, {'os': 'ubuntu-latest', 'manh': 2}, {'os': 'ubuntu-latest', 'manh': 3}, {'os': 'ubuntu-latest', 'manh': 4}, {'os': 'ubuntu-latest', 'manh': 5}, {'os': 'ubuntu-latest', 'manh': 6}, {'os': 'ubuntu-latest', 'manh': 7}, {'os': 'windows-latest', 'manh': 0}]
+AST exact ops/cong_cu_test.py:118-119 BoQuaMoiTruong
+AST exact ops/cong_cu_test.py:5989-6268 t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi
+AST exact ops/cong_cu_test.py:7900-7902 nen_bo_qua_dot_bien
+AST exact ops/cong_cu_test.py:7905-7911 dat_windows
+AST exact ops/cong_cu_test.py:7914-7918 dong_windows
+AST exact ops/cong_cu_test.py:7971-7997 _doc_che_do
+AST exact ops/cong_cu_test.py:8880-8974 main
+nen_bo_qua_dot_bien nt => True
+nen_bo_qua_dot_bien posix => False
+nen_bo_qua_dot_bien java => False
+dat_windows (61, 0, 470) => True
+dat_windows (0, 0, 470) => False
+dat_windows (61, 1, 470) => False
+dat_windows (61, 0, 0) => False
+dong_windows => TỔNG: CA 60/61 đạt · ĐỘT BIẾN 470 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+real shard env at Windows shard 0 = {'CONG_CU_TEST_MANH': '0/8', 'CONG_CU_TEST_MANH_RA': 'manh/manh-0.txt'} => ('manh', (0, 8, 'manh/manh-0.txt'))
+real gate env = {'CONG_CU_TEST_BAN_KINH': 'manh'} => ('gate', None)
+main AST, fake nt + real shard mode, real main/helpers, fake cases/prechecks; no native Windows execution:
+
+cong_cu_test: 2/2 đạt; tổng=2, bỏ qua=0, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario all-pass rc= 0 events= ['first', 'last']
+  BỎ QUA skipped_middle: fake missing capability
+
+cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario one-skipped rc= 0 events= ['first', 'middle', 'last']
+  ĐỎ  failed_middle: fake baseline failure
+
+cong_cu_test: 2/3 đạt; tổng=3, bỏ qua=0, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/3 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario one-failed rc= 1 events= ['first', 'middle-fail', 'last']
+  BỎ QUA skipped_middle: fake missing capability
+
+cong_cu_test: 0/0 đạt; tổng=1, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 0/0 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario all-skipped rc= 1 events= ['middle']
+  BỎ QUA t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi: nền này không có `/bin/sh` để dựng ứng viên giả — KHÔNG ĐO ĐƯỢC
+
+cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario REAL t51 absent-/bin/sh rc= 0 events= ['first', 'last']
+REAL t51 AST + fake absent /bin/sh => BoQuaMoiTruong nền này không có `/bin/sh` để dựng ứng viên giả — KHÔNG ĐO ĐƯỢC
+5996:     CẢ HAI CHIỀU trước khi vá:
+5997:       tốt → xấu: cache trả `/tmp/f1cache/bash` trong khi đo lại trả `None` ("phép argv: rc=7");
+5998:       xấu → tốt: cache trả `None` trong khi đo lại trả đúng đường ấy.
+5999:     Chiều THỨ HAI mới là chiều độc: cổng báo "KHÔNG CÓ bash" trên một máy ĐÃ CÓ, và người đọc
+6000:     log không có cách nào biết mình đang đọc một câu trả lời quá hạn.
+6001: 
+6002:     N94 (r26) — CACHE ĐÃ GỠ theo quyết định chủ kho, sau lần thứ SÁU cùng hình dạng (codex vòng 20:
+6003:     NỘI DUNG tệp mà `BASH_ENV` trỏ tới đổi, cache vẫn trả đường cũ). Đo trước khi chọn: trúng
+6004:     cache 3,0 ms, đo lại 5,7 ms. Chốt (3) nay ĐẢO CHIỀU: mọi lần gọi phải ĐO LẠI. Các chốt (1),
+6005:     (2), (4), (6), (7) giữ nguyên làm hàng rào: một cache dựng lại sẽ làm chúng đỏ. Chốt (8) đo
+6006:     đúng ca vòng 20. Tên ca giữ nguyên vì mỏ neo đột biến trỏ tới nó.
+6007:     """
+6008:     if not Path("/bin/sh").exists():
+6009:         raise BoQuaMoiTruong("nền này không có `/bin/sh` để dựng ứng viên giả — KHÔNG ĐO ĐƯỢC")
+6010:     m = runpy.run_path(str(BASH_NEN))
+6011:     tim = m["tim_bash"]
+8891:     # de to cao. In rieng, dem rieng.
+8892:     qua, hong, bo_qua = 0, [], []
+8893:     for fn in CA:
+8894:         try:
+8895:             fn()
+8896:             qua += 1
+8897:         except BoQuaMoiTruong as ex:
+8898:             bo_qua.append((fn.__name__, str(ex)))
+8899:         except AssertionError as ex:
+8900:             hong.append((fn.__name__, str(ex)))
+8901:         except Exception as ex:  # noqa: BLE001
+8902:             hong.append((fn.__name__, f"{type(ex).__name__}: {ex}"))
+8903:     for ten, ly in tien_kiem_bo_qua:
+8904:         print(f"  BỎ QUA (TIỀN KIỂM) {ten}: {ly}")
+8905:     for ten, ly in bo_qua:
+8906:         print(f"  BỎ QUA {ten}: {ly}")
+8907:     for ten, ly in hong:
+8908:         print(f"  ĐỎ  {ten}: {ly}")
+8909:     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, "
+8910:           f"bỏ qua={len(bo_qua)}, tiền kiểm bỏ qua={len(tien_kiem_bo_qua)}")
+8911: 
+8912:     if che_do == "manh":
+8913:         # Mảnh CHỈ đo bán kính của phần mình. Cổng cây thật + các tự kiểm chạy ở job `gate` (chế độ `gate`), một lần.
+8914:         if nen_bo_qua_dot_bien():
+8915:             # wp879: Windows chỉ chạy ca nền (ở trên, ĐỦ) — không phóng con, không ghi tệp mảnh (job gom Windows đã bỏ).
+8916:             so_ca = len(CA) - len(bo_qua)
+8917:             print("\n" + dong_windows(qua, so_ca, len(DOT_BIEN)))
+8918:             return 0 if dat_windows(so_ca, len(hong) + len(tien_kiem_bo_qua), len(DOT_BIEN)) else 1
+8919:         k, n, ra = tham_so
+probe_rc=0

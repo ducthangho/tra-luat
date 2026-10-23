@@ -1,0 +1,172 @@
+$ git show --no-patch --format=%H%n%aI%n%s%n%b 5585abe
+5585abe8499e920e2a6ae8236e70c4096f95e71d
+2026-10-22T16:09:14+00:00
+wp878(#878): ci.yml workflow_dispatch nhan runner_set=windows-only — bo cac job ma tran Ubuntu khi chi can do Windows
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01QFJQm8mNRrRmPUhkqciiC2
+
+rc= 0
+$ git show --no-patch --format=%H%n%aI%n%s%n%b 747f983
+747f983ccbcaf29a8e5228d09fd05b5a5ab6e479
+2026-10-23T08:19:34+07:00
+Merge pull request #880 from ducthangho/agent/wp878-g1-claude
+wp878(#878): ci.yml workflow_dispatch nhận runner_set=windows-only
+rc= 0
+$ git show --no-patch --format=%H%n%aI%n%s%n%b be00ef7
+be00ef723eca3fae90932e476d683f233588f2b3
+2026-10-23T01:32:16+00:00
+wp879: gate-cong-cu Windows chỉ chạy ca nền (một job), bán kính đột biến đo trên Ubuntu (#879)
+- ops/cong_cu_test.py: vị từ thuần nen_bo_qua_dot_bien / dat_windows / dong_windows
+  (khuôn #456); chế độ mảnh trên nền nt chạy ĐỦ ca nền rồi dừng, không phóng con,
+  không ghi tệp mảnh. _TEN_NEN là cửa để giàn giáo --tu-kiem-main (t54) ép cả hai
+  nhánh trên Linux; sáu kịch bản nt mới + bảng vị từ. CA vẫn 61, DOT_BIEN vẫn 470,
+  mọi mỏ neo đột biến giữ nguyên số lần xuất hiện.
+- ci.yml: gate-cong-cu loại windows mảnh 1..7 (Windows một job), tải lên chỉ khi
+  không phải Windows; gate-cong-cu-gop loại windows-latest, if theo output os của
+  chuan-bi (lượt windows-only thì skipped, không đỏ vì thiếu mảnh).
+- ci_dang_ky_test.py: ghim hình dạng mới + 8 phản chứng wp879.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01QFJQm8mNRrRmPUhkqciiC2
+
+rc= 0
+$ git show --no-patch --format=%H%n%aI%n%s%n%b e63961f
+e63961f27b53e66db8e6600009f97d5706743063
+2026-10-23T11:04:54+07:00
+Merge pull request #883 from ducthangho/agent/wp879-g1-claude
+wp879: gate-cong-cu Windows chỉ chạy ca nền (một job), bán kính đột biến đo trên Ubuntu (#879)
+rc= 0
+$ git show --no-patch --format=%H%n%aI%n%s%n%b 8d5cccb
+8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8
+2026-10-23T07:11:13+00:00
+docs(CLAUDE.md): (c) do lai 23-10 — nhanh runner_set=windows-only (#878) va Windows chi la MOT PHAN gate (#879)
+Dong 162 khai goi tay => [ubuntu, windows]; tu #878 runner_set=windows-only
+=> [windows-latest]. Them cau: tu #879 gate-cong-cu tren Windows chi con manh 0
+(ca nen roi dung, ban kinh dot bien chi do tren Ubuntu), gate-cong-cu-gop loai
+windows-latest va skipped voi windows-only; 6 buoc ci.yml co if theo runner.os.
+
+Do tren e63961f bang evaluator _danh_gia_bieu_thuc_chuan_bi tren bieu thuc that:
+push+master => [ubuntu]; dispatch windows-only => [windows];
+dispatch windows-and-ubuntu => [ubuntu, windows].
+Kiem: doctrine-scan rc=0; doc-claims-check ok=true; ai-dang-giu CLAUDE.md => NGUOI_GIU 0.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm
+
+rc= 0
+$ git merge-base --is-ancestor 5585abe e63961f
+rc= 0
+$ git show --format= 5585abe -- .github/workflows/ci.yml
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 685d6dc..bc0c240 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -16,7 +16,20 @@ on:
+   # từng chạy lần nào. `workflow_dispatch` cho phép soi gate theo yêu cầu trên BẤT KỲ ref nào, không
+   # phải mở PR mới biết. (GitHub đòi workflow có mặt ở nhánh mặc định thì nút này mới dùng được ⇒ chỉ
+   # hiệu lực SAU khi bản này lên master.)
++  #
++  # packet #878 (CI-DISPATCH-CHI-WINDOWS): dispatch hầu như luôn được gọi để đo WINDOWS cho một head ĐÃ có lượt PR
++  # Ubuntu, nên phần Ubuntu (250–330 phút/lượt, đo 19→22-10-2026) là lặp. `windows-only` bỏ phần ấy; mặc định
++  # GIỮ hành vi cũ (hai nền). Cùng từ vựng với `launcher-windows.yml` — ghim ở `.claude/dev/ci_dang_ky_test.py`.
+   workflow_dispatch:
++    inputs:
++      runner_set:
++        description: "windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)"
++        required: false
++        default: windows-and-ubuntu
++        type: choice
++        options:
++          - windows-and-ubuntu
++          - windows-only
+ 
+ # r245 — CẮT PHÚT ACTIONS. Đo ngày 13-08: gate chạy 6,6 phút tường, nhân hệ số
+ # Windows x2 thành ~20 phút TÍNH TIỀN mỗi lượt, x13,6 lượt/ngày = ~8.100 phút/tháng.
+@@ -47,7 +60,10 @@ jobs:
+     # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
+     timeout-minutes: 20
+     outputs:
+-      os: ${{ (github.event_name == 'workflow_dispatch'
++      # #878: vế đầu chỉ đúng khi dispatch CHỌN `windows-only`; dispatch không input (API cũ) rơi xuống vế hai như cũ.
++      os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')
++              && '["windows-latest"]'
++              || (github.event_name == 'workflow_dispatch'
+                || contains(github.event.pull_request.labels.*.name, 'windows'))
+               && '["ubuntu-latest","windows-latest"]'
+               || '["ubuntu-latest"]' }}
+rc= 0
+$ git merge-base --is-ancestor be00ef7 e63961f
+rc= 0
+$ git show --format= be00ef7 -- .github/workflows/ci.yml
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index d9e2e39..f618cdb 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -511,6 +511,8 @@ jobs:
+   # nên chỉ nhiều RUNNER mới rút được thời gian tường. Mỗi mảnh chạy lại ĐÚNG phần thiết lập G5 của `gate` (ca của
+   # mảnh cần đủ công cụ, thiếu thì ca đích bị BỎ QUA và bán kính KHÔNG ĐO ĐƯỢC). `loi_g5_workflow`
+   # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
++  # wp879 (#879): Windows chỉ còn MỘT job (mảnh 0) và `cong_cu_test.py` ở đó chạy ĐỦ ca nền rồi dừng (`nen_bo_qua_dot_bien`)
++  # — 111/118 lượt mảnh Windows không xanh vì lý do của nền (#853), mỗi lượt 570–650 phút. Bán kính đo trên ubuntu-latest.
+   gate-cong-cu:
+     needs: chuan-bi
+     strategy:
+@@ -518,6 +520,14 @@ jobs:
+       matrix:
+         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+         manh: [0, 1, 2, 3, 4, 5, 6, 7]
++        exclude:
++          - {os: windows-latest, manh: 1}
++          - {os: windows-latest, manh: 2}
++          - {os: windows-latest, manh: 3}
++          - {os: windows-latest, manh: 4}
++          - {os: windows-latest, manh: 5}
++          - {os: windows-latest, manh: 6}
++          - {os: windows-latest, manh: 7}
+     runs-on: ${{ matrix.os }}
+     # WP748 r20 (chu kho, PR #849): 45 -> 150. Do run 39304938900 tren 9983615: CA 8 manh Windows bi huy
+     # o dung phut 45 (18:45:15 -> 19:29:33), khong mot assertion nao do; Ubuntu cung dot xong trong 18-32 phut.
+@@ -561,7 +571,9 @@ jobs:
+         run: |
+           python ops/cong_cu.py kiem-tra --json
+           python ops/cong_cu_test.py
+-      - uses: actions/upload-artifact@v4
++      # wp879: Windows không ghi tệp mảnh (không đo bán kính) và không có job gom ⇒ không tải gì lên.
++      - if: runner.os != 'Windows'
++        uses: actions/upload-artifact@v4
+         with:
+           name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
+           path: manh/manh-${{ matrix.manh }}.txt
+@@ -571,13 +583,18 @@ jobs:
+   # cùng bộ nhận của đường song song, ĐỎ khi thiếu/trùng mảnh, lệch băm/HEAD, lệch tổng. `!cancelled()`: mảnh đỏ thì
+   # gom VẪN chạy và ĐỎ vì thiếu mảnh — `needs` mặc định sẽ cho nó `skipped`, mà `skipped` đọc như xanh ở check bắt buộc.
+   # Sau land: chủ kho thêm context `gate-cong-cu-gop (ubuntu-latest)` vào ruleset (spec #668 §7).
++  # wp879: gom CHỈ trên ubuntu-latest (Windows không còn mảnh để gom). `os` vẫn lấy từ `chuan-bi` (chốt nguồn duy nhất,
++  # `t161`) và loại `windows-latest`; `if` theo cùng output ⇒ lượt `runner_set=windows-only` (#878) thì job này `skipped`
++  # trước khi ma trận rỗng, không đỏ oan vì "thiếu mảnh 0..7".
+   gate-cong-cu-gop:
+     needs: [chuan-bi, gate-cong-cu]
+-    if: ${{ !cancelled() }}
++    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+     strategy:
+       fail-fast: false
+       matrix:
+         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
++        exclude:
++          - {os: windows-latest}
+     runs-on: ${{ matrix.os }}
+     timeout-minutes: 10
+     env:
+rc= 0
+base and reviewed blobs .github/workflows/ci.yml
+$ git rev-parse e63961f:.github/workflows/ci.yml HEAD:.github/workflows/ci.yml
+f618cdb469016ac585724d286b498b7e1dcc80ea
+f618cdb469016ac585724d286b498b7e1dcc80ea
+rc= 0
+base and reviewed blobs ops/cong_cu_test.py
+$ git rev-parse e63961f:ops/cong_cu_test.py HEAD:ops/cong_cu_test.py
+0053da2ca150f881235b604c833aa91430ca059c
+0053da2ca150f881235b604c833aa91430ca059c
+rc= 0
+No local exact-run receipt found under filenames wp878/wp879/pr880/pr883; commit comments are source claims, not independent Actions runtime evidence.
+probe_rc=0

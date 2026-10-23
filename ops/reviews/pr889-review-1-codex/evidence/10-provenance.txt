@@ -1,0 +1,73 @@
+All cong_cu_test.py workflow invocations and their mode env:
+gate step= G5 kiem ban ke cong cu + T1..T8 (packet step.if= None env= {'CONG_CU_TEST_BAN_KINH': 'manh'} run= 'python ops/cong_cu.py kiem-tra --json\npython ops/cong_cu_test.py\n'
+gate-cong-cu step= G5 manh ban kinh dot bien (#668) step.if= None env= {'CONG_CU_TEST_MANH': '${{ matrix.manh }}/8', 'CONG_CU_TEST_MANH_RA': 'manh/manh-${{ matrix.manh }}.txt'} run= 'python ops/cong_cu.py kiem-tra --json\npython ops/cong_cu_test.py\n'
+gate-cong-cu-gop step= G5 gom manh ban kinh dot bien (#668) step.if= None env= None run= 'python ops/cong_cu_test.py --gop manh'
+Main gate checkout (real YAML):
+{"uses": "actions/checkout@v4", "with": {"fetch-depth": 0}}
+.github/workflows/ci.yml
+130:     steps:
+131:       - name: Force LF checkout (hash parity với manifest)
+132:         run: |
+133:           git config --global core.autocrlf false
+134:           git config --global core.eol lf
+135:           # r226 — NGƯỠNG L2 CỦA doc-claims-check PHẢI TẤT ĐỊNH. `sha_lens` lấy từ `git rev-parse --short`,
+136:           # mà git tự nới độ dài viết tắt theo SỐ OBJECT của kho. ĐO trên chính kho này: clone `--depth 1`
+137:           # → 7 · clone đủ lịch sử (281 commit, 17.783 object) → 8. Mà 8 đúng bằng độ dài tiền tố UUID
+138:           # notebook (743ed200, 45739ff7, dbe706a0…) ⇒ ngưỡng trôi lên 8 thì 18 tiền tố UUID bị hô
+139:           # SHA_NOT_A_COMMIT và ca r218_docclaims_l2_sha_khong_ton_tai (mồi `deadbee`, 7 ký tự) cũng đỏ
+140:           # theo. Ghim 7 = giữ ĐÚNG ngưỡng mọi phép đo của r218 dựa vào, KHÔNG phải nới lỏng guard.
+141:           git config --global core.abbrev 7
+142:       - uses: actions/checkout@v4
+143:         with:
+144:           # r226 — `fetch-depth` mặc định (1) làm L2 MÙ: `cat-file -e` trượt với mọi SHA cũ nên trích dẫn
+145:           # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
+146:           # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
+147:           fetch-depth: 0
+148:       - uses: actions/setup-python@v5
+.github/workflows/ci.yml
+284:       #
+285:       # Không có cách nào làm đúng ở lượt PR mà không đổi thứ CI đang test: cây
+286:       # merge chính là thứ đáng test trước khi vào master. Nên bằng chứng chỉ sinh
+287:       # ở `push`/`workflow_dispatch`, đúng luồng `gate-targeted.md` mô tả ("T1
+288:       # push/handoff: chờ CI tạo full evidence exact-head"). Lượt PR vẫn chạy
+289:       # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử.
+290:       - name: tl selftest (luot PR — khong sinh bang chung)
+291:         if: ${{ github.event_name == 'pull_request' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
+292:         run: python scripts/tl.py --selftest
+293:       - name: tl selftest (co bang chung exact-identity)
+294:         if: ${{ github.event_name != 'pull_request' }}
+295:         shell: bash
+296:         run: |
+297:           set -euo pipefail
+298:           mkdir -p scripts/.tl_state/gate
+299:           # KHÔNG dùng `--depth`: checkout ở trên cố ý đặt `fetch-depth: 0` cho
+300:           # `doc-claims` L2 (`cat-file -e` trượt mọi SHA cũ trên clone nông). Một
+301:           # `--depth=50` ở đây có thể làm nông lại chính thứ bước kia cần, và tệ hơn
+302:           # là `merge-base` sẽ trượt khi nhánh rẽ xa hơn 50 commit (P2 review "#141").
+303:           # FAIL-CLOSE: `base_sha` sai làm bằng chứng vô dụng một cách IM LẶNG.
+304:           git fetch --no-tags origin master
+305:           # HEAD ĐÚNG LÀ HEAD CỦA PR, không phải `$GITHUB_SHA`. Trên `pull_request`,
+306:           # `$GITHUB_SHA` là commit MERGE TỔNG HỢP do GitHub dựng — dòng 73 của chính
+307:           # tệp này đã cảnh báo đúng điều đó, và tôi vẫn viết sai ở đây (P2 review
+308:           # "#141"). Evidence neo vào commit tổng hợp thì không ai validate lại được
+309:           # vì commit ấy không có trong lịch sử nhánh.
+310:           # `HEAD` của cây, không phải biến nào cả: bằng chứng phải khai ĐÚNG
+311:           # thứ vừa đo. Bước này chỉ chạy khi HEAD là commit thật (xem `if:` trên).
+312:           HEAD_SHA="$(git rev-parse HEAD)"
+313:           BASE_SHA="$(git merge-base FETCH_HEAD "$HEAD_SHA")"
+314:           echo "head_sha = $HEAD_SHA"
+315:           echo "base_sha = $BASE_SHA"
+316:           NEN="${RUNNER_OS}"
+317:           python .claude/dev/gate_lifecycle.py run \
+318:             --kind heavy --name tl-selftest --repo . \
+.github/workflows/ci.yml
+864:   # (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh
+865:   # ghi biên nhận (head, sha256, rc, mốc giờ, tiến độ, nhật ký có trần, RAM đỉnh, số lần chạy lại). Gom đòi đủ
+866:   # thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở
+867:   # `ci-dot-bien-du.yml` trên đúng SHA ứng viên, BẮT BUỘC trước merge/land/release.
+868:   gate-nhanh-manh:
+869:     needs: chuan-bi
+gate-nhanh-manh has Windows rows and targeted mutants: "no mutation radius" in the new text is scoped to cong_cu_test, not every mutation test in the repository.
+Same PR branch head alone does not establish same tested checkout: PR may test synthetic merge; dispatch tests selected ref. Need exact checkout/head/tree/runtime evidence per protocol 10.2.2.
+No current native Windows execution, GitHub API jobs/logs, actual Ubuntu mutant killing, or exact paired-run provenance was measured here (offline read-only review).
+probe_rc=0

@@ -1,0 +1,8 @@
+$ patch --dry-run -p0 < ../../HINT.patch (cwd=evidence/hint-check)
+checking file CLAUDE.md
+rc=0
+$ patch -p0 < ../../HINT.patch (cwd=evidence/hint-check)
+patching file CLAUDE.md
+rc=0
+scratch CLAUDE.md matches intended text=True
+patch_paths=[CLAUDE.md]; original cay-kho/CLAUDE.md unchanged=True

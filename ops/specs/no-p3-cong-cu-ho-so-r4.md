@@ -23,27 +23,30 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 Quyết định chủ kho 23-10-2026, neo [comment trên Issue #752](https://github.com/ducthangho/tra-luat/issues/752#issuecomment-6366519792).
 Đọc ngược bằng `gh api repos/ducthangho/tra-luat/issues/comments/6366519792` lúc 13:54:41Z 23-10-2026: tác giả
 `ducthangho`, `author_association` `OWNER`, `created_at` = `updated_at` = `2026-10-23T13:54:01Z`, thân sha256
-`0d600444084bc691a8c49dc41e52f781c8e1f2ffe45510c387a0e689bc1b7d57`. So với bản nháp phiên điều phối giao cho lượt
+`0d600444084bc691a8c49dc41e52f781c8e1f2ffe45510c387a0e689bc1b7d57` (băm chuỗi `body` UTF-8 không thêm LF cuối;
+`gh api … --jq .body | sha256sum` thêm LF nên ra `a19cd1f799649e326222c277e3f886040b7c1be9383441868acb3b0ef0e2a766`,
+số mà #763 r2 ghi; đo 15:40Z 23-10-2026). So với bản nháp phiên điều phối giao cho lượt
 soạn này: mọi con số trùng theo thứ tự (chỉ thêm dấu chấm của danh sách đánh số); khác định dạng — bản đăng viết "Kèm ba quyết định cùng đợt" thành danh
 sách đánh số, bản nháp viết "hai" rồi liệt kê ba. Thứ có thẩm quyền là comment đã đăng, không phải bản nháp.
 
 ```yaml
 nang_tran:
-  ai_nang: ducthangho
+  ai_nang: ducthangho (chủ kho, thẩm quyền §2 protocol)
   can_cu: >-
-    Hai công cụ mới + hai bộ test tự đứng, ước ~950 dòng thêm trong 4 tệp (ƯỚC, chưa phải numstat:
-    mã chưa có; số hạng 700 + ~200 + ~50 ở hàng kich_thuoc). Tách tiếp sẽ tách công cụ khỏi phản
-    chứng của chính nó. Bản tham chiếu gọn nhất của reviewer lượt 3 (ngoài kho, 4 tệp / ~350 dòng)
-    cho thấy nằm dưới 450 là có thể nhưng không bắt buộc; trần mới là trần, không phải mục tiêu.
-    Numstat thật đo trước review bằng git diff --numstat base..head.
-  tran_cu: ≤6 tệp / ≤450 dòng thêm (ADR-0053)
-  tran_moi: ≤4 tệp / ≤1.000 dòng thêm (git diff --numstat base..head)
+    hai công cụ mới + hai bộ test tự đứng, ước ~950 dòng thêm trong 4 tệp; tách tiếp sẽ tách
+    công cụ khỏi phản chứng của chính nó. Bản tham chiếu gọn nhất của reviewer (4 tệp / ~350
+    dòng) cho thấy nằm dưới 450 là có thể nhưng không bắt buộc; trần mới là trần, không phải
+    mục tiêu.
+  tran_cu: ≤ 6 tệp / ≤ 450 dòng thêm (ADR-0053)
+  tran_moi: ≤ 4 tệp / ≤ 1.000 dòng thêm, đo bằng `git diff --numstat` base..head
   neo: https://github.com/ducthangho/tra-luat/issues/752#issuecomment-6366519792
 ```
 
-Khối parse được bằng `yaml.safe_load` (đo trước khi đóng băng, xem "Thay đổi so với r3"). `ai_nang` theo thẩm
-quyền §2 của protocol (comment ghi "chủ kho, thẩm quyền §2 protocol"). Không cổng nào đọc khối này (hàng
-`kich_thuoc`): người cấp lease và reviewer đo `git diff --numstat` bằng tay và so với `tran_moi`.
+Khối parse được bằng `yaml.safe_load` (đo trước khi đóng băng, xem "Thay đổi so với r3"). Bốn trường đầu chép NGUYÊN VĂN
+từ thân comment đã đăng (chỉ đổi gạch đầu dòng thành khoá YAML và gấp cột `can_cu`); `neo` là trường duy nhất khối có mà
+comment không có. Ước ~950 là ƯỚC, chưa phải numstat (mã chưa có): số hạng 700 + ~200 + ~50 ở hàng `kich_thuoc`, không
+nằm trong khối vì comment không có; numstat thật đo trước review bằng `git diff --numstat` base..head. Không cổng nào
+đọc khối này (hàng `kich_thuoc`): người cấp lease và reviewer đo `git diff --numstat` bằng tay và so với `tran_moi`.
 
 ## Đường land — chủ kho chọn A (điều kiện (1) của `depends_on`)
 
@@ -98,7 +101,7 @@ phần chênh giữa bản r3 cuối trên nền cũ (`3456ab1`, sha256 `17e1f9c
 | `base` | "nền hiện hành" `1d7e642` | nền ĐÓNG BĂNG `1d7e642`; ghi `master` đã sang `8324567` (13:55:03Z); số phụ thuộc nền đo lại lúc cấp | comment mục 2 |
 | `depends_on` (3) | "#748 land vào `master`", hồ sơ `landed: false` để ngỏ cho chủ kho | #748 ĐÃ MERGE là đủ, không đòi `landed: true`; THOẢ (đo 13:26:45Z); lúc cấp đo lại: bốn merge là tổ tiên của `base_sha` | comment mục 1 |
 | `depends_on` (4), mục `nang_tran` mới, `review_class`, `kich_thuoc`, "Đường land" A | đề xuất 4 tệp / 1.000 dòng thêm, chưa có khối | khối đủ bốn trường cộng `neo`; trần áp cho #752 là `tran_moi` ≤ 4 tệp / ≤ 1.000 dòng thêm; ba vế khi cấp (chép khối, đọc ngược comment, neo `lease_id`/`spec_sha256`) | comment phần `nang_tran`; ADR-0053 dòng 32–38 |
-| B3 | số cứng `13/14 DAT` + `1 MIEN_TRU`, rc 0 — không đạt được trên `1d7e642` | vị từ trên `S`/`E`/`F` tại `base_sha` của lease, bốn vế (i)–(iv); `F` là finding dữ liệu: báo, ghi nợ, không sửa; đột biến công cụ cộng ca đỏ thật trên cây `1d7e642`; vế "gỡ miễn trừ" rời B3 | comment mục 3 |
+| B3 | số cứng `13/14 DAT` + `1 MIEN_TRU`, rc 0 — không đạt được trên `1d7e642` | vị từ trên `S`/`E`/`F` tại `base_sha` của lease, bốn vế (i)–(iv); `F` là finding dữ liệu: báo, ghi nợ, không sửa; đột biến công cụ cộng ca đỏ thật trên cây `1d7e642`; vế "gỡ miễn trừ" rời B3 (răng chuyển sang hai ghim ở ca đỏ thật và B2 không tiêm) | comment mục 3 — chỉ câu "vị từ, không số cứng"; S/E/F, báo-không-sửa và ca đỏ thật là thiết kế của đặc tả, chủ kho xác nhận khi cấp lease |
 | Mục tiêu 1 và 3, B3 (iii), B5 | "đầu ra chữ chứa chuỗi glob" | glob phải là một token riêng; thêm đột biến "glob dính hậu tố" | L6 (b), soát dưới |
 | `kich_thuoc`, lời khai "không cổng nào cưỡng chế trần" | đo hai tệp, bốn chuỗi | đo đủ sáu vị trí cổng của PROTOCOL §20, bảy chuỗi | L6 (e) |
 | trích chéo | #763 `no-p3-dang-ky-ci-r1.md`, #751 `no-p3-lease-spec-hash-r3.md` | `no-p3-dang-ky-ci-r2.md`, `no-p3-lease-spec-hash-r4.md`; trích dẫn neo commit (`@ 11134f2`, `@ c3f6f5f`) và các mục lịch sử giữ nguyên | comment mục 2 |
@@ -208,7 +211,7 @@ c522c17 1d7e642` cho land thêm 24 tệp và sửa 1 (`pr621-skill-bai-hoc`, v�
   36 là bản sao có băm — 29 có sha256 trong 281 tệp `ops/**/*.receipt.yaml`, 6 (`thu-hoi-lease-va-cap-lai-spec/luot{1,2,3,5,6,7}`)
   chỉ có sha256 trong `luot*-VERDICT.md`/`luot*-EVIDENCE.md` cùng thư mục; **1 không ở đâu**:
   `ops/reviews/pr690-advisory-opus55/HINT.patch` (sha256 `07b90fba7de726107fef2e529ab9421a181144d543068fc170d2ff3a63a6619e`;
-  `git grep` băm ấy trên `1d7e642` ra 0 tệp; commit đưa tệp vào, `97f818b`, tự khai "byte-exact" nhưng không ghi băm).
+  `git grep` băm ấy trên `1d7e642` ra 0 tệp; commit đưa tệp vào, `97f818b`, tự khai "byte-exact" kèm 21 610 byte và băm rút gọn `07b90fba...a6619e` — khớp tệp, nhưng không ghi băm đầy đủ).
   Packet vẫn không sửa tệp HINT nào (Ngoài phạm vi); lý do "có băm" nay không phủ tệp này. Chín tệp HINT mới so
   `c522c17` (sáu `pr690-*`, hai `pr838-*`, một `pr870-review-1-codex`): 8 có nhãn đầy đủ, 1 là tệp vừa nêu.
 
@@ -329,8 +332,15 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
   đúng chữ rc 3, đảo thứ tự rc 1, trong khi cây chỉ có hồ sơ trượt (rc 1) hay chỉ có YAML hỏng (rc 3) không phân biệt
   được hai bản; thẻ `!!python/object/apply:builtins.print` — đúng chữ rc 3 và tải trọng KHÔNG chạy, `unsafe_load` rc 1
   và tải trọng CHẠY (reviewer lượt 2 dùng hồ sơ có đủ hai khoá nên ghi rc 0; cả hai đều khác 3).
-- **B2 (miễn trừ):** hồ sơ trượt có trong danh sách miễn trừ ⇒ rc 0 và dòng `MIEN_TRU` kèm lý do; mục miễn trừ trỏ tệp
-  vắng ⇒ rc 3. ĐỎ khi: đột biến bỏ kiểm tồn tại ⇒ ca tệp vắng ĐỎ.
+- **B2 (miễn trừ — đo HẰNG CỦA BẢN GIAO, không tiêm):** chạy CLI thật, không tiêm danh sách, trên cây tạm chỉ có bản
+  sao nguyên byte của `ops/land/pr672-wp574-land-evidence.yaml` (`landed: true`, thiếu hai khoá ở mức gốc) ⇒ rc 0 và
+  đúng MỘT dòng `MIEN_TRU` kèm lý do khác rỗng; cùng lệnh trên cây tạm KHÔNG có tệp ấy ⇒ rc 3 (miễn trừ vắng). Hai ca
+  đọc hằng của bản giao nên đo luôn câu "đúng một mục" của mục tiêu 1; danh sách tiêm (B1, B1b, B2b) tắt hằng ấy và
+  KHÔNG đo nó. ĐỎ khi, MỖI đột biến làm đúng ca của nó ĐỎ: bỏ kiểm tồn tại ⇒ ca cây thiếu `pr672` (rc khác 3); gỡ mục
+  `pr672` khỏi hằng ⇒ ca cây có `pr672` ra `TRUOT`, rc 1; thêm một khoá thứ hai vào hằng ⇒ ca cây chỉ có `pr672` ra rc 3
+  (khoá thừa trỏ tệp vắng); lý do của mục `pr672` rỗng ⇒ ca cây có `pr672` (dòng `MIEN_TRU` không kèm lý do). Đo 15:44Z
+  23-10-2026 trên bản tham chiếu của reviewer lượt 7 (ngoài kho): cả bốn đột biến ĐỎ khi B2 đọc hằng bản giao; khi B2
+  chỉ tiêm danh sách thì chỉ đột biến đầu ĐỎ, ba đột biến sau qua.
 - **B2b (phạm vi quét — mệnh đề "không đệ quy, tên tệp là quy ước" của mục tiêu 1):** cây tạm (tiêm danh sách miễn trừ
   `{}` như B1: không tiêm thì rc 3 vì miễn trừ vắng, ở cả bản đúng lẫn hai đột biến — đo 16-10-2026 trên bản tham chiếu) có
   `ops/land/z-land-evidence.yaml` đủ hai khoá (⇒ `DAT`), `ops/land/x-provenance.yaml` và
@@ -342,7 +352,8 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
   `len(tep)` của B3, đột biến `*.yaml` chết ở B3 (`len(tep)` 28 khác 27); chỉ đột biến đệ quy còn sống tới B2b. Trên
   `1d7e642` (đo 13:28:09Z 23-10-2026, script ở "Số đo nền"): `*.yaml` vẫn chỉ thêm đúng tệp ấy (52 tệp thay vì 51; tệp ấy
   không có `trang_thai_packet` lẫn `landed` ⇒ `BO_QUA`), quét đệ quy vẫn không thêm tệp nào ⇒ cùng kết luận, với
-  `len(tep)` 52 khác 51.
+  `len(tep)` 52 khác 51 trên cây đầy đủ (40 khác 39 trên bản sao đã bỏ `F` mà B3 (ii) đo; 15:36Z 23-10-2026, bản tham
+  chiếu của reviewer lượt 7).
 - **B3 (trên kho thật — VỊ TỪ, không số cứng; quyết định chủ kho 23-10-2026,
   [comment trên Issue #752](https://github.com/ducthangho/tra-luat/issues/752#issuecomment-6366519792), mục 3):** đo trên
   cây `base_sha` của lease thực thi, đo lại lúc thi hành (L5 của `soan-spec`). Mọi tập tính theo ĐƯỜNG DẪN, không
@@ -353,13 +364,17 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
     `trang_thai_packet` sai kiểu). Phép đo độc lập = một script đúng chữ L-6 (`yaml.safe_load`), KHÔNG import mã của
     packet; băm script và đầu ra của nó ghi vào biên nhận.
   - `E` (miễn trừ trong mã) = các tệp công cụ in `MIEN_TRU`; một tệp chỉ tính vào `E` khi đo được cả ba: có mục trong
-    hằng miễn trừ (mục tiêu 1), lý do in ra khác rỗng, và phép đo độc lập cũng thấy nó trượt (miễn trừ không được che
+    hằng miễn trừ (mục tiêu 1: khoá duy nhất `ops/land/pr672-wp574-land-evidence.yaml`), lý do in ra khác rỗng, và phép đo độc lập cũng thấy nó trượt (miễn trừ không được che
     một hồ sơ đạt).
-  - "Hồ sơ có miễn trừ khai rõ" của quyết định chủ kho = `E` cộng `F`, mỗi tệp `F` do executor KHAI như dưới đây.
+  - Cụm "hồ sơ có miễn trừ khai rõ" KHÔNG có trong thân comment neo (0 lần "miễn trừ", 0 lần "khai rõ"; đo 15:38Z
+    23-10-2026): đặc tả đọc nó là `E` cộng `F`, mỗi tệp `F` do executor KHAI như dưới đây — cách đọc là thiết kế của đặc
+    tả, chủ kho xác nhận khi cấp lease.
 
   ⇒ ĐẠT khi đủ bốn vế: (i) trên cây đầy đủ — nếu `F` có tệp chạm điều kiện rc 3 thì rc 3 (danh sách `TRUOT` khi ấy
   không bị ràng buộc, vế (ii) gánh phần còn lại); nếu không thì tập đường dẫn công cụ in `TRUOT` bằng đúng `F`, `ly_do`
-  từng tệp nêu đúng mệnh đề mà phép đo độc lập thấy trượt, rc 1 khi `F` khác rỗng, rc 0 khi `F` rỗng; (ii) trên bản
+  từng tệp chứa tên khoá của MỖI mệnh đề mà phép đo độc lập thấy trượt (`authorized_head_sha` hoặc `authorization_url`),
+  `n_dat`, `n_landed`, `n_mien_tru` ở `--json` bằng số đếm cùng tên của phép đo độc lập (số tệp `DAT`, số tệp có `landed`
+  là `True`, và số tệp của `E`; như B5 so `dem`), rc 1 khi `F` khác rỗng, rc 0 khi `F` rỗng; (ii) trên bản
   sao cây ấy đã bỏ đúng các tệp `F` khỏi `ops/land/` (không sửa tệp nào khác): rc 0, `n_dat + n_mien_tru` bằng `n_landed`, `len(tep)` bằng số tệp khớp glob trên bản sao;
   (iii) đầu ra chữ có một dòng mà một TOKEN (tách theo khoảng trắng) BẰNG đúng chuỗi `ops/land/*-land-evidence.yaml` —
   khớp chuỗi con không tính; (iv) `--json` có `phamvi_glob` BẰNG đúng chuỗi ấy.
@@ -371,18 +386,28 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
   ⇒ ĐỎ khi (đột biến CÔNG CỤ, chạy trên bản sao, mỗi đột biến đổi màu vế ghi kèm): bỏ riêng kiểm mảnh URL ⇒ tệp `F`
   trượt mảnh thành `DAT` ⇒ (i) ĐỎ; tiền tố URL siết thành `https://github.com/ducthangho/tra-luat/pull/` ⇒ hồ sơ đạt
   dùng `/issues/` thành `TRUOT` ⇒ (ii) ĐỎ (trên `1d7e642`: 2 trong 16 hồ sơ đạt dùng `/issues/`, 14 dùng `/pull/`; đo
-  13:58:28Z 23-10-2026 bằng phép đo độc lập); quét `*.yaml` ⇒ `len(tep)` lệch số tệp khớp glob ⇒ (ii) ĐỎ (52 khác 51
-  trên `1d7e642`, 28 khác 27 trên `c522c17`); bỏ dòng in glob ở đầu ra chữ, hoặc in glob dính hậu tố (ví dụ
+  13:58:28Z 23-10-2026 bằng phép đo độc lập); quét `*.yaml` ⇒ `len(tep)` lệch số tệp khớp glob ⇒ (ii) ĐỎ (40 khác 39
+  trên bản sao đã bỏ `F` của `1d7e642` — 52 khác 51 chỉ trên cây đầy đủ, nơi vế (ii) không đo; 28 khác 27 trên `c522c17`,
+  nơi `F` rỗng nên bản sao trùng cây đầy đủ); bỏ dòng in glob ở đầu ra chữ, hoặc in glob dính hậu tố (ví dụ
   `ops/land/*-land-evidence.yaml.bak`) ⇒ (iii) ĐỎ (khoá JSON một mình không đo việc in ra màn hình — reviewer lượt 2 đo
   J2: bỏ dòng in giữ nguyên rc, đếm và khoá JSON); bỏ khoá `phamvi_glob` hoặc đổi giá trị ⇒ (iv) ĐỎ.
 
   **Ca đỏ thật (cây cố định, không trôi):** cây `git archive 1d7e642` — nền đóng băng của r4 — có `F` khác rỗng; công cụ
-  trên cây ấy phải ra rc 1 với tập `TRUOT` bằng đúng `F` của cùng cây, và đột biến "bỏ riêng kiểm mảnh URL" chạy trên cây
-  ấy phải làm (i) ĐỎ. Ca này giữ răng cho B3 kể cả khi `F` tại `base_sha` của lease rỗng; executor chạy cả hai cây.
+  trên cây ấy phải ra rc 1 với tập `TRUOT` bằng đúng `F` của cùng cây; tập đường dẫn in `MIEN_TRU` bằng đúng
+  {`ops/land/pr672-wp574-land-evidence.yaml`} (ghim hằng: `pr672` trượt trên cây này theo phép đo độc lập, nên tập này là
+  HẰNG BẢN GIAO của mục tiêu 1 chứ không phải thứ công cụ tự khai); và `n_dat`, `n_landed`, `n_mien_tru` ở `--json` bằng
+  số đếm cùng tên của phép đo độc lập (16, 29, 1 trên cây này; ghim bộ đếm). Đột biến chạy trên cây ấy, mỗi cái đổi màu
+  phép ghi kèm: "bỏ riêng kiểm mảnh URL" ⇒ (i) ĐỎ; "gỡ mục `pr672` khỏi hằng" ⇒ ghim hằng ĐỎ (tập `MIEN_TRU` rỗng); "thêm
+  12 tệp `F` vào hằng" ⇒ ghim hằng ĐỎ (13 phần tử) và (i) ĐỎ; "bỏ sót hai hồ sơ hợp lệ khỏi bộ đếm" ⇒ ghim bộ đếm ĐỎ
+  (`n_dat` 14 khác 16, `n_landed` 27 khác 29). Đo 15:36Z 23-10-2026 trên r4 CHƯA vá (bản tham chiếu của reviewer lượt 7,
+  ngoài kho): "gỡ mục" và "bỏ sót" đều ra B3 ĐẠT (vế (i)–(iv) xanh), "thêm 12 tệp" ra ĐẠT khi `E` đọc rộng (15:42Z: đỏ khi `E`
+  chỉ nhận khoá `pr672`) — nên hai ghim thuộc B3. Ca này giữ răng cho B3 kể cả khi `F` tại `base_sha` của lease rỗng;
+  executor chạy cả hai cây.
 
   Vế ĐỎ "gỡ miễn trừ ⇒ rc 1" của r3 RA KHỎI B3: dưới vị từ nó không đổi màu — gỡ mục `pr672` khỏi hằng thì tệp ấy rời
   `E` và vào `F` đúng theo định nghĩa (phép đo độc lập thấy nó trượt), nên (i) và (ii) vẫn đạt; còn nếu lát `wp748-r24`
-  vào `master` thì `pr672` thành `BO_QUA`. Răng của cơ chế miễn trừ nằm ở B2 (cây tạm, tiêm `{}`).
+  vào `master` thì `pr672` thành `BO_QUA`. Răng của hằng bản giao nằm ở HAI chỗ: hai ghim của "Ca đỏ thật" ngay
+  trên và B2 (CLI thật, không tiêm); B1, B1b, B2b tiêm `{}` nên không đo hằng.
 
   **Minh hoạ có giờ đo, KHÔNG phải đích** (script `l6_doc_lap.py` của lượt soạn r4, ngoài kho, đã xoá khi dọn thư mục
   đo — tái lập bằng bất kỳ script đúng chữ L-6; PyYAML 6.0.1, Python 3.11.15): trên `1d7e642` (13:54:38Z 23-10-2026) `S` 51 tệp, `F` 12 tệp (cả 12 chỉ trượt mảnh URL, danh sách ở
@@ -561,3 +586,13 @@ cục ở r4 ghi sau dấu ⇒, theo [comment chủ kho 23-10-2026](https://gith
    đổi đầu vào của B3 — chủ kho đã duyệt đổi nền, r3 ghi dữ kiện, không tự kết luận thêm. ⇒ r4: merge là đủ (mục 1 của
    comment); đổi nền là revision mới (mục 2).
 5. Required check của `master` đo được: `gate-ops (ubuntu-latest)` bắt buộc; đường A không đổi. ⇒ r4 không đổi.
+
+## Vá sau review lượt 7
+
+Bản trước vá: commit `7b03c0c`, sha256 `ac0d966da1c3d608ed429e4d377c68a94aefe2ecc3870f400f995a28dd854afb` (`git show 7b03c0c:ops/specs/no-p3-cong-cu-ho-so-r4.md` ra đúng băm này).
+Review lượt 7 (`changes_requested, 0 P1 · 2 P2 · 4 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `fe19221024f66cc9726c65e01049ec486571ac1d`; VERDICT sha256 `eb05eef9796fbf198b93848bcc9cd36ee6dd804f6912c50a8a19b7d7b5a795ab`, HINT sha256 `18a715adb291ad66ee5ef4f404cf0a529e17d170a2396bc3f034aa0900bdf0cd`; hai tệp KHÔNG có trong kho — đo 2026-10-23 ở
+`7b03c0c`: 0 trên 5052 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 7")} f' <tệp spec> | wc -l` ra `9`). 6 lớp:
+`b3-vi-tu-khong-ghim-hang-mien-tru-nen-rang-o-b2-khong-duoc-chung-minh` · `nang-tran-can-cu-them-so-ngoai-comment-nen-dieu-kien-khop-tung-so-khong-thoa` · `b3-so-len-tep-52-khac-51-khong-phai-cua-ve-ii` · `b3-bo-dem-va-ly-do-khong-doi-chieu-phep-do-doc-lap` · `b3-cum-trich-va-cot-can-cu-rong-hon-comment-muc-3` · `trich-dan-bam-commit-thieu-chinh-xac-97f818b-va-bam-than-comment`.
+

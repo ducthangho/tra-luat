@@ -1,0 +1,77 @@
+# HO SO LAND — packet #854 wp854 r1 g1, ma qua PR #877. Khuon: ops/land/pr873-wp868-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor;
+# not_measured = khong do duoc. Readback tho: ops/land/pr877-wp854-provenance/ (GET qua proxy phien bang GITHUB_PAT,
+# script thu_thap.py cua phien; SHA256SUMS kem).
+
+schema_version: 1
+mission_id: gh-854
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01QFJQm8mNRrRmPUhkqciiC2
+input_packet_generations:
+  - {packet_issue: 854, packet_id: wp854, revision: 1, generation: 1, lease_id: wp854-r1-g1-claude}
+authorized_head_sha: 4158ef63cad2aad9470f75863dc7549167695df1
+authorized_head_tree: 98f06ec0b066c9212d46a11d1a8ed141c1a956f6
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/877
+authorization_ghi_chu: >-
+  measured — readback-pr-877.json merged_by=ducthangho, merged_at 2026-10-23T07:52:53Z. Lease ghi uy_quyen_merge: false;
+  executor KHONG merge. Thao tac merge la cua tai khoan chu kho; KHONG_DO_DUOC bam tay hay qua phien khac.
+  Chi thi ghi so land: ghi ho issuecomment-6365282119 tren #879, nguyen van "Làm 4 rồi 1 theo gợi ý".
+land_operator: 'measured — readback-pr-877.json merged_by=ducthangho; readback-events-877.json (su kien merged/closed).'
+merge_method: merge
+merge_commit: daf89615efff9fde33039036ddf7f23ec9cb1c10
+merge_commit_tree: e7fb38978fdba89170459e35490282ea0cc1caef
+merge_commit_parents: [9d4cb6ad2b3a303e4c23e682a7da9a8af909d631, 4158ef63cad2aad9470f75863dc7549167695df1]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261023/merge-va-diff.txt: diff cha1..merge bang byte diff merge-base..head = True;
+  Head cuối 4158ef6 = b952c10 + merge origin/master; write set không đổi so với head được review (merge-va-diff.txt: 0 dòng).
+pre_merge_checks:
+  - {name: 'ci.yml pull_request — head cuoi', run_id: 39915869889, run_attempt: 1, sha: 4158ef63cad2aad9470f75863dc7549167695df1, conclusion: success, jobs: '23/23 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-daf8961-4158ef6.txt: run 39915869889 attempt 1 event pull_request conclusion success suite 108187001657 23 ten (bo skipped) rc=0', nguon: [readback-run-39915869889.json, readback-jobs-39915869889.json, readback-check-runs-4158ef6-all.json]}
+  - {name: 'ci.yml workflow_dispatch Windows — trước merge, trên head được review (không phải head cuối 4158ef6)', run_id: 39774472978, sha: b952c106ba6bbf94699bda5fe5fb2f6d7f7256fb, conclusion: failure, ghi_chu: 'measured — readback-jobs-39774472978.json: gate-registry (windows-latest): subagent_ghi_detect_test.py ĐẠT (#854); bộ đỏ còn lại là packet khác.'}
+  - {name: 'cross-review Codex (lop sensitive)', conclusion: 'luot1 (88dc1a9) changes_requested — P2 TMP con thoát, P3 callback; luot2 (b952c10) approve', nguon: [verdicts/wp854-g1-luot1-codex-verdict.md, verdicts/wp854-g1-luot2-codex-verdict.md], ghi_chu: 'measured — dong verdict/reviewed_sha o dau verdicts/wp854-g1-luot2-codex-verdict.md; ban chep nguyen byte tu nhanh ops/wp854-r1-g1-lease.'}
+  - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-877.json, readback-review-comments-877.json, readback-comments-877.json]}
+  - {name: 'dieu kien kich thuoc', conclusion: '1 tep, +69 -1', nguon: [readback-pr-877.json]}
+post_merge_checks:
+  - {name: 'ci.yml push — DUNG merge SHA', run_id: 39920754763, run_attempt: 2, sha: daf89615efff9fde33039036ddf7f23ec9cb1c10, conclusion: success, jobs: '23/23 success (attempt 2, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-daf8961-4158ef6.txt: run 39920754763 attempt 2 event push conclusion success suite 108200276209 23 ten (bo skipped) rc=0', nguon: [readback-run-39920754763.json, readback-jobs-39920754763.json, readback-check-runs-daf8961-all.json]}
+bookkeeping:
+  - {item: 'chi thi ghi so land (ghi ho)', ket_qua: 'loi_khai_co_neo — issuecomment-6365282119 tren #879'}
+  - {item: 'lease wp854-r1-g1-claude', ket_qua: 'HẾT HẠN tự nhiên 2026-10-23T10:15:00Z, sau merge 07:52:53Z; lease giữ đúng một tệp đã land, hết hạn trước khi ghi sổ.'}
+  - {item: 'chay lai luot push tren daf8961', ket_qua: 'measured — readback-jobs-39920754763.json: attempt 1 cac job cancelled (concurrency master, merge ke tiep chiem cho), attempt 2 xanh; phien ghi so goi rerun_workflow_run DUNG run 39920754763 thay vi muon luot cua merge sau.'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-871-854-878-879-land}
+# ---- het truong chuan
+packet_id: wp854
+packet_issue: 854
+generation: 1
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_01QFJQm8mNRrRmPUhkqciiC2 — CUNG phien la executor cua packet. Ghi so theo chi thi chu kho ghi ho issuecomment-6365282119.
+
+spec:
+  path: ops/specs/wp854.md (nhanh ops/wp854-spec)
+lease:
+  lease_id: wp854-r1-g1-claude
+  path: ops/leases/wp854-r1-g1-claude.yaml (nhanh ops/wp854-r1-g1-lease)
+  ban_chep: 'measured — do-lai-nguon-20261023/lease-wp854-r1-g1-claude.yaml.txt (ban tren nhanh lease luc thu readback)'
+  lease_until_ban_dau: '2026-10-23T10:15:00Z'
+  thu_hoi_cuoi: 'HẾT HẠN tự nhiên 2026-10-23T10:15:00Z, sau merge 07:52:53Z; lease giữ đúng một tệp đã land, hết hạn trước khi ghi sổ.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-877.json: merged true, merged_at 2026-10-23T07:52:53Z, merge_commit_sha daf8961, head.sha 4158ef6.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh, kiem-gate rc=0 (post_merge_checks); (2) lease khong con giu write set
+    (bookkeeping/lease.thu_hoi_cuoi); (3) review approve neo head cuoi hoac head co write set giong het; (4) noi dung merge = diff PR;
+    (5) merge boi tai khoan chu kho. `landed: true` hieu luc khi PR ghi so nay vao master.
+
+khong_do_duoc:
+  - 'Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).'
+  - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'

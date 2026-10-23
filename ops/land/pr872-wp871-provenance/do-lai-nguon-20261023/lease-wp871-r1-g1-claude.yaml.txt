@@ -1,0 +1,92 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 871
+packet_id: wp871
+revision: 1
+generation: 1
+lease_id: wp871-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: normal
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; verdict codex approve tren head cuoi (Q2 spec wp871).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp871.md
+spec_sha256_required: 48731f52ab75fd541b416c9aebc32231a05782d7754dec86b606aec580be48a8
+spec_hash: 48731f52ab75fd541b416c9aebc32231a05782d7754dec86b606aec580be48a8
+spec_ref: refs/heads/ops/wp871-spec@b296a75eb272f0ed0841e31b396be603f501081a
+prompt_path: ops/specs/wp871.md
+prompt_sha256_required: 48731f52ab75fd541b416c9aebc32231a05782d7754dec86b606aec580be48a8
+write_set:
+- ops/land_evidence_nguon_test.py
+write_set_hash: fd3b1e7405cc9193da406261ddde9b2b46f99311b941628b3af49122da767c69
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- ops/land_evidence_nguon_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'ci.yml XANH tren head cuoi doc bang check run'}
+- {id: M-2, dieu_kien: 'mot luot workflow_dispatch ci.yml tren dung head: job gate-registry (windows-latest) XANH'}
+- {id: M-3, dieu_kien: 'moi thread review (connector/nguoi) duoc tra loi'}
+- {id: M-4, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2 mo; toi da 3 loi goi codex'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: claude/wizardly-noether-zqqoae
+branch_ghi_chu: 'nhanh do moi truong phien chi dinh; protocol mac dinh agent/wp871-g1-claude.'
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 9e9a74b2a396ef458d25c51a5563efafbb45ba0c
+start_from_sha: 9e9a74b2a396ef458d25c51a5563efafbb45ba0c
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 9e9a74b2a396ef458d25c51a5563efafbb45ba0c
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/871#issuecomment-6335077593
+granted_on_instruction_readback: 'add_issue_comment (MCP) tra id 6335077593. Bam byte cua body KHONG DO DUOC (duong doc MCP chuan hoa thuc the HTML).'
+granted_on_instruction_note: >-
+  Chu kho chon "Open Issue + lease (Recommended)" (phien session_01QFJQm8mNRrRmPUhkqciiC2, 22-10-2026).
+  Ghi ho qua GitHub App (yeu hon comment tu tay).
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'cung phien la executor; chu kho duyet truc tiep trong phien qua AskUserQuestion.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-22T07:15:00Z'
+  goc_quet: 'master 9e9a74b2a396ef458d25c51a5563efafbb45ba0c, quet refs sau fetch day du (ls-remote <-> for-each-ref thieu 0)'
+  ket_qua: 'ops/land_evidence_nguon_test.py: NGUOI_GIU 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'khong co lease song nao giu duong dan nay (wp773/wp845 da HET_HAN) => khong viet bia mo vao tep da chet.'
+leased_at_utc: '2026-10-22T07:17:00Z'
+heartbeat_at: '2026-10-22T07:17:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-23T07:17:00Z'
+lease_expires_at_utc: '2026-10-23T07:17:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp871_g1: {used: 0, reserved: 0, limit: 3}
+  attempt:
+    packet_871_r1: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'push nhanh claude/wizardly-noether-zqqoae va mo PR draft'

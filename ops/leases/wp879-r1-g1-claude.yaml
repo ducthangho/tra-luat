@@ -79,8 +79,15 @@ thay_the_cho_ghi_chu: 'wp878-r1-g1-claude con han (toi 2026-10-23T15:49:00Z) va 
 leased_at_utc: '2026-10-23T01:22:00Z'
 heartbeat_at: '2026-10-23T01:22:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-24T01:22:00Z'
-lease_expires_at_utc: '2026-10-24T01:22:00Z'
+lease_until: '2026-10-23T12:51:00Z'
+lease_expires_at_utc: '2026-10-23T12:51:00Z'
+rut_han:
+  han_cu: '2026-10-24T01:22:00Z'
+  han_moi: '2026-10-23T12:51:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #879 da merge (PR #883, head ab2510624e82834159a6ad898185cb2b1d987206, merge e63961f27b53e66db8e6600009f97d5706743063, 2026-10-23T04:04:54Z, merged_by ducthangho); chu kho giao ghi so land va nha lease ("Làm 4 rồi 1 theo gợi ý", ghi ho issuecomment-6365282119).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp868-r1-g1-claude (323ca1c)'
+  ghi_boi: claude-executor-session session_01QFJQm8mNRrRmPUhkqciiC2 (theo chi thi chu kho ghi ho issuecomment-6365282119)
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0

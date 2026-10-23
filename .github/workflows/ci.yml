@@ -511,6 +511,8 @@ jobs:
   # nên chỉ nhiều RUNNER mới rút được thời gian tường. Mỗi mảnh chạy lại ĐÚNG phần thiết lập G5 của `gate` (ca của
   # mảnh cần đủ công cụ, thiếu thì ca đích bị BỎ QUA và bán kính KHÔNG ĐO ĐƯỢC). `loi_g5_workflow`
   # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
+  # wp879 (#879): Windows chỉ còn MỘT job (mảnh 0) và `cong_cu_test.py` ở đó chạy ĐỦ ca nền rồi dừng (`nen_bo_qua_dot_bien`)
+  # — 111/118 lượt mảnh Windows không xanh vì lý do của nền (#853), mỗi lượt 570–650 phút. Bán kính đo trên ubuntu-latest.
   gate-cong-cu:
     needs: chuan-bi
     strategy:
@@ -518,6 +520,14 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
         manh: [0, 1, 2, 3, 4, 5, 6, 7]
+        exclude:
+          - {os: windows-latest, manh: 1}
+          - {os: windows-latest, manh: 2}
+          - {os: windows-latest, manh: 3}
+          - {os: windows-latest, manh: 4}
+          - {os: windows-latest, manh: 5}
+          - {os: windows-latest, manh: 6}
+          - {os: windows-latest, manh: 7}
     runs-on: ${{ matrix.os }}
     # WP748 r20 (chu kho, PR #849): 45 -> 150. Do run 39304938900 tren 9983615: CA 8 manh Windows bi huy
     # o dung phut 45 (18:45:15 -> 19:29:33), khong mot assertion nao do; Ubuntu cung dot xong trong 18-32 phut.
@@ -561,7 +571,9 @@ jobs:
         run: |
           python ops/cong_cu.py kiem-tra --json
           python ops/cong_cu_test.py
-      - uses: actions/upload-artifact@v4
+      # wp879: Windows không ghi tệp mảnh (không đo bán kính) và không có job gom ⇒ không tải gì lên.
+      - if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
         with:
           name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
           path: manh/manh-${{ matrix.manh }}.txt
@@ -571,13 +583,18 @@ jobs:
   # cùng bộ nhận của đường song song, ĐỎ khi thiếu/trùng mảnh, lệch băm/HEAD, lệch tổng. `!cancelled()`: mảnh đỏ thì
   # gom VẪN chạy và ĐỎ vì thiếu mảnh — `needs` mặc định sẽ cho nó `skipped`, mà `skipped` đọc như xanh ở check bắt buộc.
   # Sau land: chủ kho thêm context `gate-cong-cu-gop (ubuntu-latest)` vào ruleset (spec #668 §7).
+  # wp879: gom CHỈ trên ubuntu-latest (Windows không còn mảnh để gom). `os` vẫn lấy từ `chuan-bi` (chốt nguồn duy nhất,
+  # `t161`) và loại `windows-latest`; `if` theo cùng output ⇒ lượt `runner_set=windows-only` (#878) thì job này `skipped`
+  # trước khi ma trận rỗng, không đỏ oan vì "thiếu mảnh 0..7".
   gate-cong-cu-gop:
     needs: [chuan-bi, gate-cong-cu]
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        exclude:
+          - {os: windows-latest}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:

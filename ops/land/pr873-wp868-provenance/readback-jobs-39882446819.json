@@ -1,0 +1,365 @@
+{
+  "jobs": [
+    {
+      "id": 120182750159,
+      "run_id": 39882446819,
+      "workflow_name": "launcher (Windows that)",
+      "head_branch": "master",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/39882446819",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAb-3M7zw",
+      "head_sha": "807859b210e3e82376d23a61cfd2a9d8594fd05a",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120182750159",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/39882446819/job/120182750159",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T01:10:08Z",
+      "started_at": "2026-10-23T01:10:10Z",
+      "completed_at": "2026-10-23T01:15:37Z",
+      "name": "launcher (ubuntu-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T01:10:11Z",
+          "completed_at": "2026-10-23T01:10:12Z"
+        },
+        {
+          "name": "Checkout LF",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T01:10:12Z",
+          "completed_at": "2026-10-23T01:10:12Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T01:10:12Z",
+          "completed_at": "2026-10-23T01:10:15Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T01:10:15Z",
+          "completed_at": "2026-10-23T01:10:15Z"
+        },
+        {
+          "name": "Su that ve nen chay",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T01:10:15Z",
+          "completed_at": "2026-10-23T01:10:26Z"
+        },
+        {
+          "name": "Install tool manifest dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T01:10:26Z",
+          "completed_at": "2026-10-23T01:10:29Z"
+        },
+        {
+          "name": "Install and verify test tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T01:10:29Z",
+          "completed_at": "2026-10-23T01:10:40Z"
+        },
+        {
+          "name": "Verify tool manifest and shellcheck canary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T01:10:40Z",
+          "completed_at": "2026-10-23T01:10:40Z"
+        },
+        {
+          "name": "doctor",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T01:10:40Z",
+          "completed_at": "2026-10-23T01:10:41Z"
+        },
+        {
+          "name": "Bo phan chung (day du, giu nguyen danh sach bo qua)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T01:10:41Z",
+          "completed_at": "2026-10-23T01:13:39Z"
+        },
+        {
+          "name": "Tu dot bien",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T01:13:39Z",
+          "completed_at": "2026-10-23T01:15:33Z"
+        },
+        {
+          "name": "Cay lam viec phai SACH sau khi chay test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-23T01:15:33Z",
+          "completed_at": "2026-10-23T01:15:35Z"
+        },
+        {
+          "name": "Probe: dut ong KHONG duoc nuot ma that",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-10-23T01:15:35Z",
+          "completed_at": "2026-10-23T01:15:35Z"
+        },
+        {
+          "name": "Probe: console cp1258 + duong dan co dau tieng Viet",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-23T01:15:35Z",
+          "completed_at": "2026-10-23T01:15:35Z"
+        },
+        {
+          "name": "Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-23T01:15:35Z",
+          "completed_at": "2026-10-23T01:15:35Z"
+        },
+        {
+          "name": "Probe: taskkill /T tren tien trinh do CHINH minh sinh",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-10-23T01:15:35Z",
+          "completed_at": "2026-10-23T01:15:35Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-23T01:15:35Z",
+          "completed_at": "2026-10-23T01:15:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32,
+          "started_at": "2026-10-23T01:15:35Z",
+          "completed_at": "2026-10-23T01:15:36Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33,
+          "started_at": "2026-10-23T01:15:36Z",
+          "completed_at": "2026-10-23T01:15:36Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/120182750159",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000017070,
+      "runner_name": "GitHub Actions 1000017070",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 120182750441,
+      "run_id": 39882446819,
+      "workflow_name": "launcher (Windows that)",
+      "head_branch": "master",
+      "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/39882446819",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTNeRjc8AAAAb-3M86Q",
+      "head_sha": "807859b210e3e82376d23a61cfd2a9d8594fd05a",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120182750441",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/39882446819/job/120182750441",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T01:10:08Z",
+      "started_at": "2026-10-23T01:10:13Z",
+      "completed_at": "2026-10-23T01:17:16Z",
+      "name": "launcher (windows-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-23T01:10:15Z",
+          "completed_at": "2026-10-23T01:10:20Z"
+        },
+        {
+          "name": "Checkout LF",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-23T01:10:20Z",
+          "completed_at": "2026-10-23T01:10:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-23T01:10:21Z",
+          "completed_at": "2026-10-23T01:10:32Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-23T01:10:32Z",
+          "completed_at": "2026-10-23T01:10:33Z"
+        },
+        {
+          "name": "Su that ve nen chay",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-23T01:10:33Z",
+          "completed_at": "2026-10-23T01:10:35Z"
+        },
+        {
+          "name": "Install tool manifest dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-23T01:10:35Z",
+          "completed_at": "2026-10-23T01:10:42Z"
+        },
+        {
+          "name": "Install and verify test tools",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-23T01:10:42Z",
+          "completed_at": "2026-10-23T01:11:15Z"
+        },
+        {
+          "name": "Verify tool manifest and shellcheck canary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-23T01:11:15Z",
+          "completed_at": "2026-10-23T01:11:17Z"
+        },
+        {
+          "name": "doctor",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-23T01:11:17Z",
+          "completed_at": "2026-10-23T01:11:31Z"
+        },
+        {
+          "name": "Bo phan chung (day du, giu nguyen danh sach bo qua)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-23T01:11:31Z",
+          "completed_at": "2026-10-23T01:15:31Z"
+        },
+        {
+          "name": "Tu dot bien",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-23T01:15:31Z",
+          "completed_at": "2026-10-23T01:16:54Z"
+        },
+        {
+          "name": "Cay lam viec phai SACH sau khi chay test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-23T01:16:54Z",
+          "completed_at": "2026-10-23T01:16:56Z"
+        },
+        {
+          "name": "Probe: dut ong KHONG duoc nuot ma that",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-23T01:16:56Z",
+          "completed_at": "2026-10-23T01:17:03Z"
+        },
+        {
+          "name": "Probe: console cp1258 + duong dan co dau tieng Viet",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-23T01:17:03Z",
+          "completed_at": "2026-10-23T01:17:04Z"
+        },
+        {
+          "name": "Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-23T01:17:04Z",
+          "completed_at": "2026-10-23T01:17:09Z"
+        },
+        {
+          "name": "Probe: taskkill /T tren tien trinh do CHINH minh sinh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-23T01:17:09Z",
+          "completed_at": "2026-10-23T01:17:11Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-23T01:17:12Z",
+          "completed_at": "2026-10-23T01:17:12Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32,
+          "started_at": "2026-10-23T01:17:12Z",
+          "completed_at": "2026-10-23T01:17:15Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33,
+          "started_at": "2026-10-23T01:17:15Z",
+          "completed_at": "2026-10-23T01:17:15Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/120182750441",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000017071,
+      "runner_name": "GitHub Actions 1000017071",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ],
+  "total_count": 2
+}

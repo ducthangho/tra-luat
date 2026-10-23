@@ -1,0 +1,13 @@
+# trich log job 120310087840 gate-packet-loop (windows-latest), run 39922122762, head f37da6c
+# log day du: GET actions/jobs/120310087840/logs; sha256 log tai luc do = f7e94c5c0ea3c00ec7abcea1221b7fa9bcb50565126d4219c90a21d07e927556, 2404 dong (trich da bo CR cuoi dong)
+# grep: BỎ QUA | 'nền:' | TỔNG | r812_r4_symlink_scope
+2026-10-23T08:56:16.0217172Z   BỎ QUA  bien_nhan_sha256_root_xuong_dong_dem_MOT: nền từ chối tên thư mục có xuống dòng: [WinError 123] The filename, directory name, or volume label syntax is incorrect: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\packet_loop_test_461c5it2\\baseline\\bien_nhan_sha256_root_xuong_dong_dem_MOT\\bnsha256\nroot'
+2026-10-23T08:56:16.0220728Z   BỎ QUA  bien_nhan_git_gia_duong_dan_nul_giu_fallback: nền từ chối thi hành git giả: [WinError 193] %1 is not a valid Win32 application
+2026-10-23T08:56:16.0222301Z   BỎ QUA  r812_nguoi_giu_dau_cheo_nguoc: đột biến bỏ thay dấu chéo ngược tương đương trên Windows
+2026-10-23T08:56:16.0223870Z   BỎ QUA  r812_r6_receipt_native: tên tệp byte native (surrogateescape) chỉ có trên POSIX
+2026-10-23T08:56:16.0224906Z nền: 862/862 đạt · BỎ QUA: 4
+2026-10-23T08:56:16.0287684Z   BỎ QUA  đột biến bien_nhan_root_xuong_dong_tach_tu_trai: ca ['bien_nhan_sha256_root_xuong_dong_dem_MOT'] không được tính là đã giết
+2026-10-23T08:56:16.0299522Z   BỎ QUA  đột biến bien_nhan_bo_nhanh_valueerror: ca ['bien_nhan_git_gia_duong_dan_nul_giu_fallback'] không được tính là đã giết
+2026-10-23T08:56:16.0301352Z   BỎ QUA  đột biến bien_nhan_valueerror_tai_indexing_phai_noi: ca ['bien_nhan_git_gia_duong_dan_nul_giu_fallback'] không được tính là đã giết
+2026-10-23T09:54:44.0116681Z   BỎ QUA  đột biến r812_bo_dau_cheo_nguoc: ca ['r812_nguoi_giu_dau_cheo_nguoc'] không được tính là đã giết
+2026-10-23T09:54:44.7798455Z TỔNG: ĐẠT

@@ -1,0 +1,106 @@
+{
+  "sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597",
+  "node_id": "C_kwDOTNeRjdoAKDVmMjg4ZWFmN2RkMjE3ZTkwNTdkMmY4NjRkYzE1Mjc4YmZkNGU1OTc",
+  "commit": {
+    "author": {
+      "name": "ducthangho",
+      "email": "ducthangho@gmail.com",
+      "date": "2026-10-22T09:05:33Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-22T09:05:33Z"
+    },
+    "message": "Merge pull request #870 from ducthangho/claude/gallant-fermat-34kgb9\n\ndocs(CLAUDE.md): bai hoc (c) — ma tran os cua ci.yml khong con ve master\n\nGate ci.yml run 39745387589 attempt 2 xanh tren 06a50c5 (attempt 1 hong vi billing Actions).\nCross-review codex tren b38fce8: changes_requested 0/0/1/0, P2 master-windows-bo-sot-dispatch da va o 06a50c5.",
+    "tree": {
+      "sha": "0fa694daf17e10c37fc3e61690531ade4bd528bf",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/0fa694daf17e10c37fc3e61690531ade4bd528bf"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/5f288eaf7dd217e9057d2f864dc15278bfd4e597",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2dHdCRC1aQ7uu5UhlAAAUv0QADWG8eztDGKnuUmHmmUk/wqF\naUG/dU7aU7Qy9sw9ywtmRhaWS/7Sh7R1qckdYBW2a9sGBb2fEcE1TtU45UiZeSVs\njJnJSCnYu7A4Lp8JYjdpwQDFEIniEM49cB7QmuLLI51Y0E6b1s9pCCt2TN9c0XDt\nM2l1ERBTvEtjGfI9yOBMseraDPkIpO21vSgdULx9ppXFolHGXwikwQ2vV+tCIGSD\nGaDTj98/3GmeVf/caqeoNHqbuLceJg4OQIHVvCvgL2+rdvbnufHmr28r8sdusWu/\nGOaBTYklHiOn95JItDrwUk8qU23VxVvtAS8KiPTK6vncVdIVEYkFBk5T/dhMBhaT\nhYJkMKgcqUq3R+ochnB1TA0QTMfO6AMb4vtopP7nKE8zsP7unq7d/Ovjk9jRu5Ns\npFI2EmC08YSIbA/6inHoHJrRQGQiXHbbu6q7ChA3H8KHqYoYB+zHWjOqbCjo+t0H\njOOqxZhWLlqf27Y/JPymw4v+hGDMGFGm1cp0P9Sf9TXXPkpKrKhqpefQm68Mq16e\nDMnZAndm5mmr5DOxWc7jiYzR2Di7oCcxiD9+G2WtJODLxsgMcUqb+SZssl0ODVqa\nVinQV0F2aa3fE5UC9tFrDP73HGbedF3P6F8UGShCWQnkFVtelxiFCX8tGZIvlj3r\naytwQp+hmiiGPYrZKtmm\n=XxyL\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 0fa694daf17e10c37fc3e61690531ade4bd528bf\nparent 9e9a74b2a396ef458d25c51a5563efafbb45ba0c\nparent 06a50c5feea77c2654f31edd26efeed7eeee62f5\nauthor ducthangho <ducthangho@gmail.com> 1792659933 +0700\ncommitter GitHub <noreply@github.com> 1792659933 +0700\n\nMerge pull request #870 from ducthangho/claude/gallant-fermat-34kgb9\n\ndocs(CLAUDE.md): bai hoc (c) — ma tran os cua ci.yml khong con ve master\n\nGate ci.yml run 39745387589 attempt 2 xanh tren 06a50c5 (attempt 1 hong vi billing Actions).\nCross-review codex tren b38fce8: changes_requested 0/0/1/0, P2 master-windows-bo-sot-dispatch da va o 06a50c5.",
+      "verified_at": "2026-10-22T09:05:34Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5f288eaf7dd217e9057d2f864dc15278bfd4e597",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/5f288eaf7dd217e9057d2f864dc15278bfd4e597",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5f288eaf7dd217e9057d2f864dc15278bfd4e597/comments",
+  "author": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "9e9a74b2a396ef458d25c51a5563efafbb45ba0c",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9e9a74b2a396ef458d25c51a5563efafbb45ba0c",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/9e9a74b2a396ef458d25c51a5563efafbb45ba0c"
+    },
+    {
+      "sha": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/06a50c5feea77c2654f31edd26efeed7eeee62f5",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/06a50c5feea77c2654f31edd26efeed7eeee62f5"
+    }
+  ],
+  "stats": {
+    "total": 30,
+    "additions": 21,
+    "deletions": 9
+  },
+  "files": [
+    {
+      "sha": "e6bbe1d6ce56d57e452be4ecce5ab18126118836",
+      "filename": "CLAUDE.md",
+      "status": "modified",
+      "additions": 21,
+      "deletions": 9,
+      "changes": 30,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/5f288eaf7dd217e9057d2f864dc15278bfd4e597/CLAUDE.md",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/5f288eaf7dd217e9057d2f864dc15278bfd4e597/CLAUDE.md",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/CLAUDE.md?ref=5f288eaf7dd217e9057d2f864dc15278bfd4e597",
+      "patch": "@@ -155,21 +155,33 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package \n   Hỏi `get_reviews`/`get_review_comments` thấy rỗng rồi đọc thành \"chưa review\" ⇒ đã báo sai rằng #103\n   là chỗ mù, và đăng thêm một lời gọi review với cái cớ sai — trong khi kết luận sạch đã có từ 20 phút\n   trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**\n-  · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,\n-  còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát\n-  hành). Nên **\"PR xanh\" không hàm ý \"master xanh\"**: với một PR THƯỜNG — không gắn nhãn `windows`,\n-  không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma\n-  trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện\n-  ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và\n-  trớ trêu là đoạn ngay trên đã trích đúng điều kiện đó rồi vẫn viết câu quên nó).\n-  **Muốn có Windows TRƯỚC khi merge thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**\n+  · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**\n+  Bản cũ của mục này viết: *\"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`\"*.\n+  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế\n+  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên\n+  `9e9a74b`: `os` = `[\"ubuntu-latest\",\"windows-latest\"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`\n+  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `[\"ubuntu-latest\"]`.\n+  Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,\n+  20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở\n+  `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên\n+  bản land (commit `3f6c694`) khai `jobs: '23/23 success (gom windows)'`; Codex connector bắt thành P1 trên PR #859 (comment\n+  `r4323607674`), sửa ở PR #865. Đúng bệnh mục này đang dạy: tin một câu GẦN TAY thay vì đọc nhãn job.\n+  **Windows tự động khi push master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: chỉ bắn\n+  khi đổi `.claude/dev/**` hoặc chính tệp workflow ấy (`paths:`), ma trận `windows-latest` + `ubuntu-latest`;\n+  PR chỉ chạy khi mang nhãn `windows` (workflow này CÓ khai `types: [..., labeled]`). Nó chỉ đo lane\n+  launcher, KHÔNG phải gate. Các workflow còn lại (`ci-dot-bien-du` `ops-*`) đều `ubuntu-latest`.\n+  Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge\n+  của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là \"lần đo Windows đầu tiên\" như bản cũ viết.\n+  Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.\n+  **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**\n   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai\n   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở\n   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt\n   chạy nào; ma trận chỉ đọc nhãn ở lượt bắn KẾ TIẾP. Người làm theo sẽ gắn nhãn, thấy vẫn đúng một\n   check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn\n   (đẩy thêm commit, hoặc đóng rồi mở lại PR) — hoặc khai `types: [..., labeled]` cho workflow.\n-  Đợt 14-08 không dùng đường nào, nên cả sáu lần merge của đợt đúng là sáu lần đo Windows đầu tiên.\n+  (Đợt 14-08 không dùng đường nào; khi ấy ma trận còn vế master nên sáu lần merge là sáu lần đo\n+  Windows đầu tiên — nay cùng tình huống thì là **không lần nào**.)\n   Kèm theo: trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có\n   `if: github.event_name == 'pull_request'` — nên tiêu chí \"không bước nào `skipped`\" chỉ đúng cho\n   lượt PR; bê nguyên sang lượt master là tự báo động giả."
+    }
+  ]
+}

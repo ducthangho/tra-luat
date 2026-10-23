@@ -861,6 +861,28 @@ không tra được.
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng
   `$CLAUDE_PROJECT_DIR`.
+- **`( eval … ) > tệp` KHÔNG tương đương `$( eval … )` — subshell `( )` KẾ THỪA `set -e`, command substitution
+  thì không** (bash, trừ khi bật `inherit_errexit`). Đo 22-10-2026, packet #868: đổi `KET_QUA_CAI="$(eval "$LENH")"`
+  sang `( eval "$LENH" ) > tệp` để khỏi chờ EOF stdout. Đổi xong, các `|| { …; return 1; }` tường minh trong
+  `chon_thu_muc_chay_duoc` thành THỪA: hàm đứng CUỐI chuỗi `&&` nên errexit vẫn áp vào thân nó. Hai mutant
+  wp858_sh_nuot_loi_cygpath_w · wp858_sh_nuot_loi_ghi_github_path (bảng đột biến của
+  `.claude/dev/launcher_test.py`) vì thế SỐNG, và bộ ca không nói gì.
+  Chữa: `( set +e; eval "$LENH" ) > tệp`, giữ đúng ngữ nghĩa cũ (mã thoát là của chuỗi `&&`, chốt là các `return 1`
+  tường minh). Đổi một dạng thực thi shell sang dạng "trông tương đương" là đổi NGỮ NGHĨA errexit. Không đọc
+  code mà thấy được: chỉ đột biến mới lộ, vì hành vi trên head vẫn đúng.
+- **Hàm bash EXPORT qua môi trường (`BASH_FUNC_<tên>%%`) che được BUILTIN — tiêm lỗi mà không sửa script.**
+  Bash nạp hàm từ biến `BASH_FUNC_printf%%` lúc khởi động, và hàm thắng builtin cùng tên. Packet #868 dùng cách
+  này cho ca r868_ghi_kenh_hong_thi_dung của `.claude/dev/launcher_test.py`: `printf` giả trả rc 74 đúng cho
+  payload kênh, ép đường "ghi kênh lỗi" vốn không dựng được bằng tệp/quyền (máy chạy root). Hai điều kèm theo. (a) `_wp802_bash_env` cố ý LỌC mọi
+  `BASH_FUNC_*` khỏi môi trường thừa kế để cô lập, nên fixture phải thêm lại TƯỜNG MINH. (b) Ca phải đòi DẤU HIỆU
+  của lỗi giả trong stderr ("ca có ĐO", không chỉ `rc != 0`): rc khác 0 vì một lý do khác thì không đo gì.
+- **`/tmp/.git` RỖNG do sandbox Codex để lại SAU khi lượt chạy KẾT THÚC vẫn làm đỏ 11 ca `r484_*`** (`Codex home
+  is inside a repository`). Đo 22-10-2026, packet #868: lượt Codex xong là mount gỡ, nhưng thư mục rỗng ở lại.
+  `launcher_test` ra 238/249 với đúng 11 ca ấy đỏ; `rmdir /tmp/.git` (CHỈ thư mục rỗng, của chính lượt mình gọi)
+  thì 4/4 ca thử lại xanh. Bản #858 chỉ ghi "đỏ KHI Codex chạy song song"; câu đúng rộng hơn: đỏ cả SAU khi Codex
+  thoát. Trước khi đo `launcher_test` sau một lượt cross-review, hỏi `ls -d /tmp/.git` trước. Còn thấy thì ghi
+  đo trong điều kiện ấy, đừng đọc 11 ca đỏ thành hồi quy. Gốc lỗi: chốt kho của credential
+  store coi một `.git` RỖNG ở thư mục tổ tiên là kho. Đây là nợ của packet khác, chưa vá.
 
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).

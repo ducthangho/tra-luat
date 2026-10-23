@@ -1,0 +1,131 @@
+# HO SO LAND — packet #748 wp748 r23 (lease g23), bookkeeping qua PR #882. Khuon: ops/land/pr869-wp748-r22-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+#
+# TRANG THAI: merged (8223fd2), `landed: false`. Ly do: (7) reviewer assurance §8.1 CHUA DAT — ba bien nhan launcher.py run
+# (c053c5b4, 3bbda050, f09938e8) KHONG mang model phuc vu => ho model reviewer `khong_do_duoc` (§8); va (5) khong co duyet ben
+# neo DUNG authorized_head_sha bab8702. Day CHINH la luat packet r23 vua ap cho #845 va r22 — ap nhat quan cho chinh no.
+# Gate push master tren DUNG merge SHA 8223fd2: ci.yml 39891899558 XANH 23/23, kiem-gate rc=0. Lease r23 rut han 7b4bbfb.
+# NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
+# review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr882-wp748-r23-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-10-23.
+
+schema_version: 1
+mission_id: gh-748
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_014eUnFtkty9fZicFG9T1Wei
+input_packet_generations:
+  - {packet_issue: 748, packet_id: wp748, revision: 23, generation: 23, lease_id: wp748-r23-g23-claude-remote-20261023}
+authorized_head_sha: bab8702692f1d723ac1a84b865660597aa6291e6
+authorized_head_tree: 8568aa04e0dfa1dbd014e7b4a3ebd215cb40b522
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/882
+authorization_lease_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6355107238
+authorization_ghi_chu: >-
+  measured — readback-pr-882.json: merged_by ducthangho, merged_at 2026-10-23T02:51:58Z, head.sha bab8702;
+  readback-events-882.json: ready_for_review 01:37:01Z roi merged 02:51:58Z, ca hai actor ducthangho. Ghi THANG: KHONG co ban
+  ghi ben "duyet tren SHA bab8702" truoc hay sau merge; chi thi "Đã merge #882, land r23 cho tôi" la trong phien, khong ben.
+  Day la uy quyen bang hanh dong merge, khong phai duyet ben neo SHA.
+land_operator: 'loi_khai_co_neo — chu kho tu bam merge, executor khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential'
+merge_method: merge
+merge_commit: 8223fd236f50013ce60b145ab46a8cabcfe38dee
+merge_commit_tree: 4779fe862206484082bb00db689cbc55e91a2090
+merge_commit_parents: [53acca148f47b937b53d2f16197d84d36d6b338f, bab8702692f1d723ac1a84b865660597aa6291e6]
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 39886591287, run_attempt: 1, sha: bab8702692f1d723ac1a84b865660597aa6291e6, conclusion: success, ghi_chu: 'measured — readback-run-39886591287.json: completed success, updated_at 02:40:16Z (truoc merge 02:51:58Z); readback-jobs-39886591287.json: 23/23 success, nhan ubuntu-latest; readback-check-runs-bab8702-all.json: 24 check (them thu-hoi) 24/24 success.', nguon: [readback-run-39886591287.json, readback-jobs-39886591287.json, readback-check-runs-bab8702-all.json, readback-runs-bab8702.json]}
+  - {name: 'executor cross-review Codex luot 3/3 tren head cuoi (launcher.py run f09938e8)', sha: bab8702692f1d723ac1a84b865660597aa6291e6, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/wp748-r23-luot3-launcher-verdict.md, verdicts/run-f09938e8.json, verdicts/wp748-r23-luot3-launcher-prompt.md], ghi_chu: 'measured — run-f09938e8.json: trang_thai xong, ma_thoat 0, head bab8702, prompt_sha256 = sha256 cua verdicts/wp748-r23-luot3-launcher-prompt.md; KHONG khoa nao mang model. VERDICT sha256 1c3aa81a…fa30 (tom tat dang o readback-comments-882.json, comment 6355625101).'}
+  - {name: 'Codex connector', sha: 8f12e02856eb130160c40188470f7e5911ab1687, conclusion: 'not_measured — status running, khong hoan tat', ghi_chu: 'measured — readback-comments-882.json comment 6355289774 (01:37:15Z): codex-review-state commit_sha 8f12e02 (head luot dau), status running; khong cap nhat ve sau, khong co ket qua cho 682c888 hay bab8702. Connector KHONG review head cuoi.', nguon: readback-comments-882.json}
+  - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-882.json, readback-review-comments-882.json]}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39891899558, run_attempt: 1, sha: 8223fd236f50013ce60b145ab46a8cabcfe38dee, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', luc: '2026-10-23T02:52:01Z -> 2026-10-23T03:58:33Z', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-8223fd2.txt: packet_loop.py kiem-gate suite cua run 39891899558, check-runs filter=all, 23 ten tu readback-jobs-39891899558.json, rc=0', nguon: [readback-run-39891899558.json, readback-jobs-39891899558.json, readback-check-runs-8223fd2-all.json, readback-runs-master-8223fd2.json], ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows khong thuoc luot nay. Log tho tung job: not_measured (khong tai log).'}
+bookkeeping:
+  - {item: 'rut han lease wp748-r23-g23-claude-remote-20261023', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: ccr-e425b16e-j9g9p7}
+# ---- het truong chuan
+packet_id: wp748
+packet_issue: 748
+generation: 23
+generation_nghia: 'Packet don so assurance §8.1: pr846 (#845) ve landed false va tao ho so land r22 (#869) landed false; write set ba duong dan duoi ops/land/.'
+pham_vi_land: ho_so
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session session_014eUnFtkty9fZicFG9T1Wei — CUNG phien la executor cua packet r23. Chu kho tu merge; phien nay ghi so
+  theo chi thi trong phien 23-10-2026 "Đã merge #882, land r23 cho tôi".
+
+spec:
+  path: ops/specs/wp748-r23-don-so-assurance-81.md (nhanh ops/wp748-r23-g23-lease, commit 928dcf0)
+  sha256: 6190ebbb943f1d017de32d9f316f85623906fded49379f4ce2540d957bee9584
+  nguon: 'measured — git show origin/ops/wp748-r23-g23-lease:ops/specs/wp748-r23-don-so-assurance-81.md | sha256sum = spec_hash cua lease (do-lai-nguon-20261023/lease-wp748-r23-g23.yaml.txt).'
+lease:
+  lease_id: wp748-r23-g23-claude-remote-20261023
+  path: ops/leases/wp748-r23-g23-claude-remote-20261023.yaml (nhanh ops/wp748-r23-g23-lease)
+  cap_boi: 'measured — readback-comment-6355107238.json: user ducthangho, author_association OWNER, 2026-10-23T01:22:44Z; granted_on_instruction trong lease tro dung comment nay. Luot dang lease 39883931483 success (readback-runs-ops-lease-r23.json).'
+  lease_until_ban_dau: '2026-10-23T13:25:25Z'
+  write_set: ['ops/land/pr846-wp845-land-evidence.yaml', 'ops/land/pr869-wp748-r22-land-evidence.yaml', 'ops/land/pr869-wp748-r22-provenance/']
+  write_set_hash: d9198f0ce1088b0f6bb2094d5d1adbbbeffea50044e3414014e9aa629acb44a9
+  thu_hoi_cuoi: >-
+    DA NHA bang RUT HAN (khong bia mo): commit 7b4bbfb tren ops/wp748-r23-g23-lease dua lease_until/lease_expires_at_utc ve
+    2026-10-23T03:59:31Z; ly do o khoi `rut_han` cua chinh tep lease (do-lai-nguon-20261023/lease-wp748-r23-g23.yaml.txt).
+    Luot dang lease cua commit rut han 39897919784 success (readback-run-39897919784.json). measured —
+    ai-dang-giu-sau-rut-han/luc-do.txt: ls-remote 551 ten = guong 551 ten (thieu 0, thua 0); ca ba duong dan write set
+    "NGƯỜI_GIỮ 0", wp748-r23-g23-claude-remote-20261023 ra HẾT_HẠN.
+  heartbeat_ghi_chu: 'not_measured — heartbeat_at khong cap nhat sau leased_at_utc.'
+  ghi_sau_het_han: 'measured — do-lai-nguon-20261023/merge-va-diff.txt: 4 commit 747f983..bab8702, commit cuoi 2026-10-23T01:53:58Z, truoc lease_until ban dau 13:25:25Z va truoc rut han 03:59:31Z.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-882.json: merged true, merged_at 2026-10-23T02:51:58Z, merged_by ducthangho, merge_commit_sha
+    8223fd2, head.sha bab8702, base.sha 747f983; cha va tree o do-lai-nguon-20261023/merge-va-diff.txt; merge commit; diff
+    747f983..bab8702 va 8223fd2^1..8223fd2 cung sha256 f538eef4… (33 tep, +24907 -4).
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 8223fd2: ci.yml 23/23 XANH, kiem-gate rc=0 DAT; (2) lease da nha: rut han,
+    3/3 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head_sha bab8702: Codex luot 3
+    approve 0 P0-P3 (noi dung; assurance xem (7)); Codex connector KHONG review head cuoi (not_measured); (5) uy quyen land neo
+    SHA: CHUA DAT — chi co hanh dong merge va chi thi trong phien, khong co duyet ben neo bab8702; (6) muc tieu packet: hai ho
+    so trong write set da vao master voi landed false DAT.
+    (7) reviewer assurance §8.1: CHUA DAT — measured: verdicts/run-c053c5b4.json, run-3bbda050.json, run-f09938e8.json khong
+    khoa nao mang model; ho model reviewer `khong_do_duoc` (§8); §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan
+    assurance"; AGENTS.md §4.
+    Mo lai — TAT CA: (5) chu kho ghi duyet ben neo bab8702; VA (7) chi DAT khi co (A) HOAC (B), dung dinh nghia §8.
+    (A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG bab8702, va voi CHINH lan chay approve
+    ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i)
+    `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du),
+    hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon
+    `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`.
+    (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG
+    bab8702.
+
+uy_quyen_land:
+  dang: >-
+    measured — readback-pr-882.json merged_by.login=ducthangho; readback-events-882.json ready_for_review roi merged boi
+    ducthangho. Chi chung minh tai khoan.
+  candidate_sha: bab8702692f1d723ac1a84b865660597aa6291e6
+  head_khong_doi: 'measured — readback-pr-882.json head.sha = bab8702 = cha thu hai cua 8223fd2.'
+  khong_xung_dot: 'loi_khai_co_neo — merge commit tao boi GitHub; base cua PR 747f983, cha thu nhat cua merge 53acca1 (PR #867 merge truoc, khac tep); khong luu readback mergeable.'
+
+review:
+  so_loi_goi_codex_cli: 3
+  luot_cuoi:
+    reviewer: 'measured — verdicts/run-f09938e8.json: launcher.py run, provider openai_codex, execution_surface codex_cli, head bab8702, ma_thoat 0, 563.543 s; model THUC phuc vu KHONG_DO_DUOC.'
+    hien_vat: ops/land/pr882-wp748-r23-provenance/verdicts/
+    ket_qua: 'thuat_lai — approve tren bab8702; F01 dong (6/6 phan chung van ban), F02-F04 van dong; land_evidence_nguon rc 0 (21/21 ho so, 49/49), sha256sum -c 30/30 (r22) va 36/36 (pr846), 33/33 duong dan doi nam trong write set; verdict tu khai KHONG chung thuc ho model cua reviewer.'
+  cac_luot_truoc:
+    - {luot: 1, run: c053c5b4, head: 8f12e02, ket_qua: 'thuat_lai — changes_requested: F01 P2, F02 P2, F03 P3, F04 P3', hien_vat: [verdicts/wp748-r23-luot1-launcher-verdict.md, verdicts/run-c053c5b4.json, verdicts/wp748-r23-luot1-launcher-prompt.md]}
+    - {luot: 2, run: 3bbda050, head: 682c888, ket_qua: 'thuat_lai — changes_requested: F01 P2 va ho; F02-F04 dong', hien_vat: [verdicts/wp748-r23-luot2-launcher-verdict.md, verdicts/run-3bbda050.json, verdicts/wp748-r23-luot2-launcher-prompt.md]}
+  thread: 'measured — readback-reviews-882.json: 0 review; readback-review-comments-882.json: 0.'
+
+no_ngoai_pham_vi:
+  - {ma: 'ho-so-landed-true-cung-muc-bang-chung', muc: P2, ghi_chu: 'thuat_lai — Codex r23 luot 1-3 liet ke (chi bao): pr779 pr792 pr818 pr823 pr832 pr836 pr848 pr864 van landed true voi model reviewer khong do; pr791 pr793 pr800 pr801 thieu bien nhan review. (pr849, pr862 da ve false qua PR #867.) Can packet rieng co uy quyen; chua mo issue.'}
+  - {ma: 'launcher-do-model-phuc-vu', muc: P2, ghi_chu: 'launcher.py run khong ghi model phuc vu => moi review Codex qua launcher o muc khong_do_duoc. Packet rieng, chua mo issue.'}
+
+khong_do_duoc:
+  - 'Model thuc phuc vu ca ba luot review KHONG_DO_DUOC.'
+  - 'Codex connector khong hoan tat review tren bat ky head nao cua PR #882.'
+  - 'Windows: khong luot gate nao cua packet nay chay Windows (pham vi chi tep YAML/provenance duoi ops/land/).'

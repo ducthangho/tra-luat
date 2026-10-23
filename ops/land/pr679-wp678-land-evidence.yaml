@@ -1,4 +1,6 @@
 # HO SO LAND — dac ta packet wp678 (#678) LEASE-ID-EP-KIEU-YAML, qua PR #679.
+# DINH CHINH 23-10-2026 — packet wp748 r24/g24 (chu kho #748 issuecomment-6365380273): `landed: true` -> `landed: false`.
+# Ly do va dieu kien mo lai: khoi `dinh_chinh_r24` cuoi tep. Moi cau khai `landed: true` ben duoi la LICH SU, khong con hieu luc.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # Duong dan ops/land/*-land-evidence.yaml la QUY UOC THUC TE (tien le pr554, pr594, pr666, pr672, pr680).
 #
@@ -64,7 +66,7 @@ mat_quan_sat_duoc_the_nao: >-
   Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua chinh no.
 trang_thai_packet:
   merged: true
-  landed: true
+  landed: false
   landed_hieu_luc_tu: 'merge commit cua PR bookkeeping #691 mang tep nay vao master (tep chi co tren master sau thoi diem ay).'
   landed_ghi_chu: >-
     PROTOCOL §10: `landed` = da vao canonical o exact SHA duoc duyet, HAU-MERGE GATE XANH va BOOKKEEPING XONG.
@@ -551,3 +553,21 @@ bookkeeping:
       VERDICT.md cua (i) nam trong goi review cua phien nay, NGOAI kho (sha256 do lai khop, 42670 byte); cua (ii) land
       operator khong doc duoc. Noi dung finding cua ca hai la (b): khong verdict nao cua PR #691 luot 1 nam trong kho.
       Model that phuc vu ca hai: KHONG DO DUOC (header tu khai).
+
+# ---- wp748 r24/g24: dinh chinh assurance §8.1 (them vao, khong sua du kien da do o tren)
+dinh_chinh_r24:
+  packet: {packet_issue: 748, packet_id: wp748, revision: 24, generation: 24, lease_id: wp748-r24-g24-claude-remote-20261023}
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6365380273
+  landed_truoc: true
+  landed_sau: false
+  lo: 'A — ho model reviewer khong_do_duoc (§8, §8.1)'
+  authorized_head_sha: 03a7219c9f3df4e6304f499b79df968aa7d386cb
+  reviewer_assurance_81: CHUA DAT
+  ly_do: 'doi_chieu — ho so khai `cross_approved` (:176) dua tren Codex luot 6 (launcher run aa0cc89f); bien nhan chi ghi model YEU CAU va header CLI, tu khai model thuc phuc vu KHONG do duoc; run.json/stderr.log khong luu trong kho => ho model reviewer `khong_do_duoc`.'
+  bang_chung:
+    - 'ops/land/pr679-wp678-land-evidence.yaml:176'
+    - 'ops/reviews/wp678-spec-review-6-codex-verdict.receipt.yaml:50-57'
+  do_duoc: 'measured — ops/reviews/wp678-spec-review-6-codex-verdict.receipt.yaml chi co model_yeu_cau + header_luot_chay va tu khai model thuc phuc vu KHONG do duoc; run.json cua launcher khong co trong kho.'
+  can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
+  dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 03a7219c9f3df4e6304f499b79df968aa7d386cb, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 03a7219c9f3df4e6304f499b79df968aa7d386cb; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.'
+  lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'

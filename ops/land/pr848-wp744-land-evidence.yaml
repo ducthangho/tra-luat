@@ -1,4 +1,6 @@
 # HO SO LAND — packet #744 wp744 r3 (lease g3), spec-only qua PR #848. Khuon: ops/land/pr846-wp845-land-evidence.yaml.
+# DINH CHINH 23-10-2026 — packet wp748 r24/g24 (chu kho #748 issuecomment-6365380273): `landed: true` -> `landed: false`.
+# Ly do va dieu kien mo lai: khoi `dinh_chinh_r24` cuoi tep. Moi cau khai `landed: true` ben duoi la LICH SU, khong con hieu luc.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
 # TRANG THAI: merged (3a3a3ca) va `landed: true` — hieu luc tu merge commit cua PR ghi so nay (claude/bookkeeping-744-land)
@@ -77,7 +79,7 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-848.json: merged true, merged_at 2026-10-20T01:34:07Z, merged_by ducthangho, merge_commit_sha
     3a3a3ca (cha 9422054 + 23bc189: do-lai-nguon-20261020/merge-va-diff.txt), merge commit (khong squash/rebase).
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 3a3a3ca: ci.yml 23/23 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
     3/3 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #744 closed/completed, #747 closed (da thay the) DAT; (4) review neo DUNG
@@ -111,3 +113,21 @@ khong_do_duoc:
   - 'launcher-windows/Windows KHONG chay cho push 3a3a3ca: ci.yml chi chon windows-latest cho workflow_dispatch hoac PR gan nhan windows; Windows khong phai dieu kien cua lease (M-3 chi doi ci.yml). Ban dau ho so ghi sai "gom windows" — connector P1 #859 r4323607674, dinh chinh o PR sau.'
   - 'Comment-id GitHub trich trong ba spec: reviewer Codex chay offline nen KHONG_DO_DUOC; phien executor da kiem ton tai 6091609833 6091612697 6091615222 6133771506 truoc khi push (khong luu tho).'
   - 'stderr/transcript luot review Codex KHONG luu ngoai run.json; model thuc chay KHONG_DO_DUOC tu run.json.'
+
+# ---- wp748 r24/g24: dinh chinh assurance §8.1 (them vao, khong sua du kien da do o tren)
+dinh_chinh_r24:
+  packet: {packet_issue: 748, packet_id: wp748, revision: 24, generation: 24, lease_id: wp748-r24-g24-claude-remote-20261023}
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6365380273
+  landed_truoc: true
+  landed_sau: false
+  lo: 'A — ho model reviewer khong_do_duoc (§8, §8.1)'
+  authorized_head_sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed
+  reviewer_assurance_81: CHUA DAT
+  ly_do: 'doi_chieu — reviewer la Codex qua launcher run f65e544e (verdicts/run-f65e544e.json, 35 khoa, KHONG khoa model, :102) va Codex connector (khong lo model) => ho model reviewer `khong_do_duoc`.'
+  bang_chung:
+    - 'ops/land/pr848-wp744-provenance/verdicts/run-f65e544e.json'
+    - 'ops/land/pr848-wp744-land-evidence.yaml:102'
+  do_duoc: 'measured — verdicts/run-f65e544e.json: 35 khoa, 0 khoa chua chuoi model, head 23bc189.'
+  can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
+  dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 23bc189f28ea60f04ca1634b6fe66d02babf12ed, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 23bc189f28ea60f04ca1634b6fe66d02babf12ed; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.'
+  lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'

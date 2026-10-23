@@ -3,8 +3,9 @@
 #
 # TRANG THAI: merged (8223fd2), `landed: false`. Ly do: (7) reviewer assurance §8.1 CHUA DAT — ba bien nhan launcher.py run
 # (c053c5b4, 3bbda050, f09938e8) KHONG mang model phuc vu => ho model reviewer `khong_do_duoc` (§8); va (5) khong co duyet ben
-# neo DUNG authorized_head_sha bab8702. Day CHINH la luat packet r23 vua ap cho #845 va r22 — ap nhat quan cho chinh no.
-# Gate push master tren DUNG merge SHA 8223fd2: ci.yml 39891899558 XANH 23/23, kiem-gate rc=0. Lease r23 rut han 7b4bbfb.
+# neo DUNG authorized_head_sha bab8702; va (1) provenance CI §10.2.2 cua gate hau merge chua du bon moc. Day CHINH la luat packet r23 vua ap cho #845 va r22 — ap nhat quan cho chinh no.
+# Gate push master tren DUNG merge SHA 8223fd2: ci.yml 39891899558 XANH 23/23 theo REST run/jobs/check-run, kiem-gate rc=0 — NHUNG
+# provenance CI §10.2.2 (checkout · dinh nghia workflow · output gate) CHUA DO => (1) CHUA DAT day du. Lease r23 rut han 7b4bbfb.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr882-wp748-r23-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-10-23.
@@ -41,7 +42,7 @@ pre_merge_checks:
   - {name: 'Codex connector', sha: 8f12e02856eb130160c40188470f7e5911ab1687, conclusion: 'not_measured — status running, khong hoan tat', ghi_chu: 'measured — readback-comments-882.json comment 6355289774 (01:37:15Z): codex-review-state commit_sha 8f12e02 (head luot dau), status running; khong cap nhat ve sau, khong co ket qua cho 682c888 hay bab8702. Connector KHONG review head cuoi.', nguon: readback-comments-882.json}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-882.json, readback-review-comments-882.json]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39891899558, run_attempt: 1, sha: 8223fd236f50013ce60b145ab46a8cabcfe38dee, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', luc: '2026-10-23T02:52:01Z -> 2026-10-23T03:58:33Z', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-8223fd2.txt: packet_loop.py kiem-gate suite cua run 39891899558, check-runs filter=all, 23 ten tu readback-jobs-39891899558.json, rc=0', nguon: [readback-run-39891899558.json, readback-jobs-39891899558.json, readback-check-runs-8223fd2-all.json, readback-runs-master-8223fd2.json], ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows khong thuoc luot nay. Log tho tung job: not_measured (khong tai log).'}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39891899558, run_attempt: 1, sha: 8223fd236f50013ce60b145ab46a8cabcfe38dee, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', luc: '2026-10-23T02:52:01Z -> 2026-10-23T03:58:33Z', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-8223fd2.txt: packet_loop.py kiem-gate suite cua run 39891899558, check-runs filter=all, 23 ten tu readback-jobs-39891899558.json, rc=0', nguon: [readback-run-39891899558.json, readback-jobs-39891899558.json, readback-check-runs-8223fd2-all.json, readback-runs-master-8223fd2.json], ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows khong thuoc luot nay. Day chi la moc Run cua §10.2.2 (REST head_sha + trang thai). Moc Checkout (SHA/parents/tree thuc chay), Workflow definition (commit/blob/sha256 qua WorkflowRun.file) va Gate output (command/rc/marker duong/artifact): not_measured — GraphQL tra 403 trong phien (do-lai-nguon-20261023/graphql-workflowrun-file-39891899558.txt), log job va artifact khong duoc luu; check-run output khong co tom tat test. KHONG suy cac moc ay tu REST head_sha.'}
 bookkeeping:
   - {item: 'rut han lease wp748-r23-g23-claude-remote-20261023', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: ccr-e425b16e-j9g9p7}
@@ -85,7 +86,8 @@ trang_thai_packet:
     747f983..bab8702 va 8223fd2^1..8223fd2 cung sha256 f538eef4… (33 tep, +24907 -4).
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 8223fd2: ci.yml 23/23 XANH, kiem-gate rc=0 DAT; (2) lease da nha: rut han,
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 8223fd2: CHUA DAT day du — measured: REST run/jobs/check-run 23/23 success va kiem-gate rc=0 (moc Run);
+    not_measured: moc Checkout, Workflow definition, Gate output cua §10.2.2/§10.2.3 (xem post_merge_checks); (2) lease da nha: rut han,
     3/3 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head_sha bab8702: Codex luot 3
     approve 0 P0-P3 (noi dung; assurance xem (7)); Codex connector KHONG review head cuoi (not_measured); (5) uy quyen land neo
     SHA: CHUA DAT — chi co hanh dong merge va chi thi trong phien, khong co duyet ben neo bab8702; (6) muc tieu packet: hai ho
@@ -93,7 +95,10 @@ trang_thai_packet:
     (7) reviewer assurance §8.1: CHUA DAT — measured: verdicts/run-c053c5b4.json, run-3bbda050.json, run-f09938e8.json khong
     khoa nao mang model; ho model reviewer `khong_do_duoc` (§8); §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan
     assurance"; AGENTS.md §4.
-    Mo lai — TAT CA: (5) chu kho ghi duyet ben neo bab8702; VA (7) chi DAT khi co (A) HOAC (B), dung dinh nghia §8.
+    Mo lai — TAT CA: (1) do du bon moc provenance CI §10.2.2 cho DUNG run 39891899558 attempt 1 tren 8223fd2 (checkout SHA/parents/tree
+    tu log/artifact cua job; workflow definition commit/blob/sha256 qua WorkflowRun.file hoac nguon tu chung minh cung run/attempt;
+    output gate co marker duong), hoac mot gate moi DUNG 8223fd2 co du bon moc — duyet + assurance mot minh KHONG du; VA (5) chu kho
+    ghi duyet ben neo bab8702; VA (7) chi DAT khi co (A) HOAC (B), dung dinh nghia §8.
     (A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG bab8702, va voi CHINH lan chay approve
     ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i)
     `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du),
@@ -128,4 +133,5 @@ no_ngoai_pham_vi:
 khong_do_duoc:
   - 'Model thuc phuc vu ca ba luot review KHONG_DO_DUOC.'
   - 'Codex connector khong hoan tat review tren bat ky head nao cua PR #882.'
+  - 'Provenance CI §10.2.2 cua gate hau merge 39891899558: moc Checkout, Workflow definition, Gate output KHONG_DO_DUOC (GraphQL 403, log/artifact khong luu).'
   - 'Windows: khong luot gate nao cua packet nay chay Windows (pham vi chi tep YAML/provenance duoi ops/land/).'

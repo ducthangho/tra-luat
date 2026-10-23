@@ -1,0 +1,25 @@
+# do luc 2026-10-23T01:51:35Z — merge PR #873 (first parent 4581cfa = master luc merge; PR head f07f88c, base PR 9e9a74b)
+$ git show -s --format="%H%n%T%n%P%n%an %aI%n%s" 807859b
+807859b210e3e82376d23a61cfd2a9d8594fd05a
+2b31150eed216867eb9dd4b1eeef0e1081a17611
+4581cfa5124ef803bfda10ce4de499b0ed31380e f07f88c75cabbef691c86ac8746317a6c0705162
+ducthangho 2026-10-23T08:10:04+07:00
+Merge pull request #873 from ducthangho/agent/wp868-g1-claude
+$ git rev-parse f07f88c^{tree}  # khac tree merge vi master da tien (4581cfa: #874, #875, #866, #870) — khong phai lech noi dung PR
+694e9b94c9625fee6df6322b40bc70c80169b7e7
+$ git diff --numstat 4581cfa 807859b   # thay doi merge dua vao master = 6 tep cua PR
+349	52	.claude/dev/launcher_test.py
+11	6	RELEASE_MANIFEST.json
+8	0	changelog.d/wp-868.md
+38	13	ops/cai_cong_cu.sh
+10	17	ops/cong_cu.yaml
+5	5	scripts/tl_selftest.py
+$ git diff --numstat 9e9a74b f07f88c   # diff PR
+349	52	.claude/dev/launcher_test.py
+11	6	RELEASE_MANIFEST.json
+8	0	changelog.d/wp-868.md
+38	13	ops/cai_cong_cu.sh
+10	17	ops/cong_cu.yaml
+5	5	scripts/tl_selftest.py
+$ cmp <(git diff 4581cfa 807859b) <(git diff 9e9a74b f07f88c); echo rc
+rc=0

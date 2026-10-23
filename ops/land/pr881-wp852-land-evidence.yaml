@@ -48,7 +48,10 @@ pre_merge_checks:
   - {name: 'review Codex connector', conclusion: 'sach — "Didn''t find any major issues", Reviewed commit f37da6c7b4', nguon: [readback-comments-881.json], ghi_chu: 'measured — readback-comments-881.json comment 6368651716 (codex-review-receipt) va 6368625688 (codex-review-state commit_sha f37da6c..., has_any_findings false, status completed). Goi bang comment 6368623925.'}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-881.json, readback-review-comments-881.json]}
   - {name: 'dieu kien kich thuoc', conclusion: '1 tep, +16 -1', nguon: [readback-pr-881.json]}
-post_merge_checks: CHO_DIEN
+post_merge_checks:
+  - {name: 'ci.yml push — DUNG merge SHA', run_id: 39980098954, run_attempt: 1, sha: b27c729dde77736f3509221b8a8622d0d92fe975, conclusion: success, jobs: '23/23 success (attempt 1, bỏ skipped; ca 23 nhan ubuntu-latest)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-b27c729.txt: run 39980098954 attempt 1 event push conclusion success suite 108366196246 23 ten (bo skipped) rc=0', nguon: [readback-run-39980098954.json, readback-jobs-39980098954.json, readback-check-runs-b27c729-all.json]}
+  - {name: 'launcher-windows.yml push — DUNG merge SHA', run_id: 39980099163, run_attempt: 1, sha: b27c729dde77736f3509221b8a8622d0d92fe975, conclusion: success, jobs: '2/2 success (windows-latest + ubuntu-latest)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-b27c729.txt: run 39980099163 attempt 1 event push conclusion success suite 108366196612 2 ten (bo skipped) rc=0', nguon: [readback-run-39980099163.json, readback-jobs-39980099163.json]}
+  - {name: 'Windows gate tren merge SHA', conclusion: 'KHONG chay', ghi_chu: 'measured — readback-jobs-39980098954.json: luot push ci.yml chi co nhan ubuntu-latest. Bang chung Windows cua gate la luot windows-only 39922122762 tren head f37da6c (pre_merge_checks); merge chi them dung diff PR (merge-va-diff.txt) len master 1ccc314, KHONG do lai Windows tren cay merge.'}
 bookkeeping:
   - {item: 'lease', ket_qua: 'measured — do-lai-nguon-20261023/ai-dang-giu-sau-merge.txt: ls-remote = for-each-ref 563, thieu 0; .claude/dev/packet_loop_test.py rc=0 NGƯỜI_GIỮ 0 sau merge.'}
   - {item: 'dong #852', ket_qua: 'dong sau khi PR ghi so nay mo, comment tro ve ho so nay'}
@@ -82,10 +85,10 @@ lech_tieu_chi:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-881.json: merged true, merged_at 2026-10-23T15:39:03Z, merge_commit_sha b27c729, head.sha f37da6c.'
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh (post_merge_checks); (2) khong lease nao giu write set
-    (bookkeeping); (3) review sach neo head cuoi; (4) noi dung merge = diff PR; (5) merge boi tai khoan chu kho.
+    (bookkeeping); (3) review sach neo head cuoi; (4) noi dung merge = diff PR; (5) merge boi tai khoan chu kho. `landed: true` hieu luc khi PR ghi so nay vao master.
 
 khong_do_duoc:
   - 'Model thuc phuc vu luot review cua Codex connector KHONG_DO_DUOC.'

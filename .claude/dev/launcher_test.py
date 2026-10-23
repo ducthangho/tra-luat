@@ -8034,6 +8034,8 @@ YAML_DANG_DUNG = LAUNCHER.parents[2] / "ops" / "cong_cu.yaml"
 # wp858: hai đích đột biến nữa, cùng luật con trỏ (phần tử thứ tư của DOT_BIEN_HOOK: "cai_sh" / "selftest").
 CAI_SH_DANG_DUNG = LAUNCHER.parents[2] / "ops" / "cai_cong_cu.sh"
 SELFTEST_DANG_DUNG = LAUNCHER.parents[2] / "scripts" / "tl_selftest.py"
+# wp886: đích đột biến thứ năm (phần tử thứ tư "cong_cu") — `ops/cong_cu.py`, cùng luật con trỏ.
+CONG_CU_DANG_DUNG = LAUNCHER.parents[2] / "ops" / "cong_cu.py"
 
 
 def _wp802_doctor(m, ten, cap, env=None):
@@ -8486,8 +8488,8 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
     `dau`: `"hong"`/`"tot"`/None ở ĐẦU PATH; `them`: tệp thêm ở thư mục đầu; `truc_tiep`: eval công thức (kênh kết quả
     tạm, wp868) rồi in như reader: kênh có nội dung ⇒ in kênh (dòng cuối là thư mục chọn hoặc `GIU_PATH`), rỗng ⇒ stdout; `cai_in`: stdout stub apt-get khi cài bash; `gp_thu_muc`: $GITHUB_PATH là thư mục. Trả (p, GITHUB_PATH, ứng viên, đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
-    for t in ("cong_cu.py", "bash_nen.py"):
-        shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+    shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", ops / "bash_nen.py")
+    shutil.copy2(CONG_CU_DANG_DUNG, ops / "cong_cu.py")   # wp886: đột biến `cong_cu` phải tới được ca r858
     shutil.copy2(CAI_SH_DANG_DUNG, ops / "cai_cong_cu.sh")
     if bang_ke:
         import yaml
@@ -8603,8 +8605,10 @@ def r858_cai_windows_chon_ban_chay_duoc():
 
 @ca
 def r858_cai_python_khong_in_thu_muc_ban_hong():
-    """N1/N3 cho python, thu hẹp theo chủ kho (#858 issuecomment-6312034981 (a)): chỉ rc 0 và KHÔNG in/ghi thư mục bản
-    hỏng. Nợ `python-probe-khong-theo-PATH`: checker đo bằng `sys.executable` nên python hỏng đầu PATH lọt."""
+    """N1/N3 ĐẦY ĐỦ của #858 cho python (wp886 N5 đóng nợ `python-probe-khong-theo-PATH`): bản thu hẹp theo (a)
+    (#858 issuecomment-6312034981) chỉ đòi rc 0 và KHÔNG in thư mục bản hỏng, vì checker đo `sys.executable` nên
+    tên trần luôn DAT. Nay checker đo bản shell gọi ⇒ python hỏng đầu PATH bị thấy: chọn ĐÚNG ứng viên tốt
+    (N1), không ứng viên nào tốt ⇒ rc ≠ 0 và không chọn gì (N3)."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()
@@ -8614,15 +8618,152 @@ def r858_cai_python_khong_in_thu_muc_ban_hong():
         with San() as s:
             p, gp, uv, dau_d = _wp858_chay_cai(s, "python", nen, "echo 'Python 3.12.3'", dau=None,
                                                them={"python": hong})
-            bang(p.returncode == 0 and '"DAT"' in p.stdout and str(dau_d) not in gp,
-                 f"{nen}/python: rc={p.returncode} GITHUB_PATH={gp!r} (thu muc ban hong {dau_d}) {p.stderr[-300:]}")
-        # Dòng công thức IN cuối (thứ lên đầu PATH); `python3` cũng hỏng vì Linux cũ in `dirname` của nó.
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == ("W:" if nen == "windows" else "") + str(uv),
+                 f"{nen}/python: ban hong dau PATH ma khong chon ban tot: rc={p.returncode} GITHUB_PATH={gp!r} "
+                 f"mong {uv} (thu muc ban hong {dau_d}) {p.stdout[-200:]} {p.stderr[-300:]}")
+        for xau in (_WP858_HONG, "exit 0"):
+            with San() as s:
+                p, gp, _uv, _d = _wp858_chay_cai(s, "python", nen, xau, dau=None, them={"python": hong})
+                bang(p.returncode != 0 and gp == "",
+                     f"{nen}/python: khong ung vien nao chay duoc ma van chon ({xau!r}): rc={p.returncode} "
+                     f"GITHUB_PATH={gp!r}")
+        # Dòng công thức IN cuối (thứ lên đầu PATH) là ỨNG VIÊN TỐT; `python3` cũng hỏng vì Linux cũ in `dirname` của nó.
         with San() as s:
-            p, _gp, _uv, dau_d = _wp858_chay_cai(s, "python", nen, "echo 'Python 3.12.3'", dau=None,
-                                                 them={"python": hong, "python3": hong}, truc_tiep=True)
+            p, _gp, uv, dau_d = _wp858_chay_cai(s, "python", nen, "echo 'Python 3.12.3'", dau=None,
+                                                them={"python": hong, "python3": hong}, truc_tiep=True)
             cuoi = (p.stdout.strip().splitlines() or [""])[-1]
-            bang(p.returncode == 0 and cuoi != str(dau_d),
-                 f"{nen}/python: cong thuc in thu muc ban hong: rc={p.returncode} in={cuoi!r} {p.stderr[-300:]}")
+            bang(p.returncode == 0 and cuoi == str(uv),
+                 f"{nen}/python: cong thuc khong in ung vien tot {uv}: rc={p.returncode} in={cuoi!r} "
+                 f"(thu muc ban hong {dau_d}) {p.stderr[-300:]}")
+
+
+# ---------------------------------------------------------------------------------------------
+# wp886 (#886, PYTHON-PROBE-THEO-PATH, spec ops/specs/wp886.md N1–N6): `ops/cong_cu.py` đo `python` bản SHELL gọi.
+# Ca hành vi chạy BẢN SAO `CONG_CU_DANG_DUNG` (đích đột biến "cong_cu"); Windows dựng `<tên>.cmd` thay script shebang.
+def _r886_python_gia(d, ten, ban=None):
+    """`<ten>` trong `d`: in `Python <ban>` khi `--version`; `ban=None` ⇒ hỏng (`exit 1`). Windows: `<ten>.cmd`."""
+    d.mkdir(parents=True, exist_ok=True)
+    if LA_WINDOWS:
+        f = d / f"{ten}.cmd"
+        f.write_text("@echo Python " + ban + "\r\n" if ban else "@exit /b 1\r\n", encoding="ascii")
+    else:
+        f = d / ten
+        f.write_text(f"#!/bin/sh\necho 'Python {ban}'\n" if ban else "#!/bin/sh\nexit 1\n", encoding="ascii")
+        f.chmod(0o755)
+    return f
+
+
+def _r886_kiem(s, chi, path, env_them=None):
+    """`kiem-tra --chi <chi> --json` của bản sao `cong_cu.py` với PATH đúng `path`; trả (rc, mục công cụ)."""
+    ops = s / "kho" / "ops"
+    ops.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(CONG_CU_DANG_DUNG, ops / "cong_cu.py")
+    shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", ops / "bash_nen.py")
+    env = dict(os.environ, PATH=os.pathsep.join(str(x) for x in path), **(env_them or {}))
+    p = subprocess.run([PY, str(ops / "cong_cu.py"), "kiem-tra", "--chi", chi, "--json", "--ban-ke", str(YAML_DANG_DUNG)],
+                       env=env, capture_output=True, text=True, timeout=60)
+    try:
+        return p.returncode, json.loads(p.stdout)["cong_cu"][0]
+    except (ValueError, KeyError, IndexError):
+        bang(False, f"kiem-tra --chi {chi} khong in JSON: rc={p.returncode} {p.stdout[-300:]} {p.stderr[-300:]}")
+
+
+def _r886_nap():
+    """Nạp BẢN SAO `CONG_CU_DANG_DUNG` (tên module riêng) cho ca tĩnh thuần Python."""
+    spec = importlib.util.spec_from_file_location(f"cong_cu_r886_{id(CONG_CU_DANG_DUNG)}", CONG_CU_DANG_DUNG)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+@ca
+def r886_n1_ten_tran_theo_path_moi_nen():
+    """N1: probe `python` chạy bản `python` ĐẦU PATH (không phải `sys.executable`) — đo được trên mọi nền."""
+    with San() as s:
+        _r886_python_gia(s / "a", "python", "0.0.1")
+        rc, cc = _r886_kiem(s, "python", [s / "a"])
+        bang(rc == 0 and cc["trang_thai"] == "DAT" and cc["ban_thay"] == {"mac_dinh": "0.0.1"},
+             f"probe python khong do ban dau PATH: rc={rc} {cc}")
+
+
+@ca
+def r886_n2_python_hong_dau_path_khong_DAT():
+    """N2: `python` hỏng đầu PATH, `python3` tốt phía sau ⇒ không DAT (ĐỎ trên nền `e63961f`: `sys.executable` ⇒ DAT)."""
+    with San() as s:
+        _r886_python_gia(s / "a", "python")
+        _r886_python_gia(s / "b", "python3", "3.99.0")
+        rc, cc = _r886_kiem(s, "python", [s / "a", s / "b"])
+        bang(rc != 0 and cc["trang_thai"] != "DAT" and cc["ban_thay"] == {"mac_dinh": None},
+             f"python hong dau PATH ma van DAT: rc={rc} {cc}")
+
+
+@ca
+def r886_n3_chi_python3_DAT_va_do_dung_interpreter():
+    """N3: chỉ có `python3` ⇒ `python` DAT; probe PyYAML đo ĐÚNG python3 ấy (gói giả 9.9.9 thấy, vắng thì không DAT)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        b = s / "b"; b.mkdir()
+        # `-S`: không site-packages ⇒ PyYAML THẬT vắng; chỉ thấy gói giả qua PYTHONPATH. Khác hẳn `sys.executable`.
+        (b / "python3").write_text(f"#!/bin/sh\nexec {shlex.quote(PY)} -S \"$@\"\n", encoding="ascii")
+        (b / "python3").chmod(0o755)
+        goi = s / "site" / "PyYAML-9.9.9.dist-info"; goi.mkdir(parents=True)
+        (goi / "METADATA").write_text("Metadata-Version: 2.1\nName: PyYAML\nVersion: 9.9.9\n", encoding="ascii")
+        rc, cc = _r886_kiem(s, "python", [b])
+        bang(rc == 0 and cc["trang_thai"] == "DAT", f"may chi co python3 bi chan: rc={rc} {cc}")
+        rc, cc = _r886_kiem(s, "PyYAML", [b], {"PYTHONPATH": str(s / "site")})
+        bang(rc == 0 and cc["ban_thay"] == {"mac_dinh": "9.9.9"}, f"PyYAML khong do python3 tren PATH: rc={rc} {cc}")
+        rc, cc = _r886_kiem(s, "PyYAML", [b], {"PYTHONPATH": ""})
+        bang(rc != 0 and cc["trang_thai"] != "DAT", f"PyYAML vang o python3 tren PATH ma van DAT: rc={rc} {cc}")
+
+
+@ca
+def r886_n4_khong_ten_nao_noi_ro_thieu_gi():
+    """N4: không `python`/`python3`/`py` trên PATH ⇒ không DAT, không ném, chi tiết nêu đủ ba tên."""
+    with San() as s:
+        (s / "rong").mkdir()
+        rc, cc = _r886_kiem(s, "python", [s / "rong"])
+        ct = cc.get("chi_tiet", "")
+        bang(rc == 3 and cc["trang_thai"] == "KHONG_DO_DUOC" and all(f"{t}," in ct or f"{t} " in ct
+                                                                       for t in ("python", "python3", "py")),
+             f"khong ten nao ma khong noi ro thieu gi: rc={rc} {cc}")
+
+
+@ca
+def r886_n6_giai_ten_tinh_windows_va_posix():
+    """N6 + N1 (thuần Python, mọi nền): luật native — Windows chỉ nhận đuôi PATHEXT (`python.CMD` hơn shim `python`);
+    TÊN đi trước PATH (`python` ở thư mục sau thắng `python3` ở thư mục trước); `py` mang `-3`; không tên nào ⇒ None."""
+    m = _r886_nap()
+    with San() as s:
+        a, b, c = s / "a", s / "b", s / "c"
+        for d, ten in ((a, "python3.EXE"), (b, "python"), (b, "python.CMD"), (c, "py.EXE"), (c, "python3")):
+            d.mkdir(exist_ok=True)
+            (d / ten).write_text("x")
+            (d / ten).chmod(0o755)
+        pe, sep = ".COM;.EXE;.BAT;.CMD", os.pathsep
+        kq = {
+            "win_ab": m._python_theo_path(f"{a}{sep}{b}", pe, True),
+            "win_c": m._python_theo_path(str(c), pe, True),
+            "win_rong": m._python_theo_path(str(s / "khong"), pe, True),
+            "posix_ab": m._python_theo_path(f"{a}{sep}{b}", pe, False),
+            "posix_c": m._python_theo_path(str(c), pe, False),
+        }
+        mong = {"win_ab": [str(b / "python.CMD")], "win_c": [str(c / "py.EXE"), "-3"], "win_rong": None,
+                "posix_ab": [str(b / "python")], "posix_c": [str(c / "python3")]}
+        if LA_WINDOWS:   # hệ tệp không phân biệt hoa thường: so theo normcase
+            kq = {k: v and [os.path.normcase(v[0]), *v[1:]] for k, v in kq.items()}
+            mong = {k: v and [os.path.normcase(v[0]), *v[1:]] for k, v in mong.items()}
+        bang(kq == mong, f"giai ten python lech luat native: {kq} mong {mong}")
+
+
+@ca
+def r886_ten_python_khop_cai_cong_cu_sh():
+    """Q1: `TEN_PYTHON` của cong_cu.py khớp ĐÚNG thứ tự + tập tên dòng chọn `PY` trong `ops/cai_cong_cu.sh`."""
+    sh = re.findall(r"^elif command -v (\S+) >/dev/null 2>&1; then PY=\(([^)]*)\)$",
+                    CAI_SH_DANG_DUNG.read_text(encoding="utf-8"), re.M)
+    bang([tuple(pha.split()) for _ten, pha in sh] == [tuple(x) for x in _r886_nap().TEN_PYTHON]
+         and all(pha.split()[0] == ten for ten, pha in sh),
+         f"TEN_PYTHON lech cai_cong_cu.sh: sh={sh} py={_r886_nap().TEN_PYTHON}")
 
 
 @ca
@@ -11283,6 +11424,31 @@ DOT_BIEN_HOOK = [
      ('sudo apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" "$(dirname "$(command -v rg || echo ./rg)")"',
       'sudo apt-get install -y ripgrep && RG_D="${CONG_CU_GOC:-}/usr/bin" && echo "$RG_D"'),
      ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r858_hinh_dang_cong_thuc_cai"], "yaml"),
+    # wp886 (N1–N6, Q1): đột biến BẢN SAO `ops/cong_cu.py`; mỗi đột biến có ít nhất một ca đích chạy được trên Windows.
+    ("wp886_cc_ve_sys_executable", ("        argv = [*py, *argv[1:]]", "        argv = [sys.executable, *argv[1:]]"),
+     ["r886_n1_ten_tran_theo_path_moi_nen", "r886_n2_python_hong_dau_path_khong_DAT",
+      "r858_cai_python_khong_in_thu_muc_ban_hong"], "cong_cu"),
+    ("wp886_cc_python3_truoc_python", ('TEN_PYTHON = (("python",), ("python3",), ("py", "-3"))',
+                                       'TEN_PYTHON = (("python3",), ("python",), ("py", "-3"))'),
+     ["r886_n2_python_hong_dau_path_khong_DAT", "r886_ten_python_khop_cai_cong_cu_sh"], "cong_cu"),
+    ("wp886_cc_bo_python3", ('TEN_PYTHON = (("python",), ("python3",), ("py", "-3"))', 'TEN_PYTHON = (("python",), ("py", "-3"))'),
+     ["r886_n3_chi_python3_DAT_va_do_dung_interpreter", "r886_ten_python_khop_cai_cong_cu_sh"], "cong_cu"),
+    ("wp886_cc_py_mat_tru_3", ('TEN_PYTHON = (("python",), ("python3",), ("py", "-3"))', 'TEN_PYTHON = (("python",), ("python3",), ("py",))'),
+     ["r886_n6_giai_ten_tinh_windows_va_posix", "r886_ten_python_khop_cai_cong_cu_sh"], "cong_cu"),
+    ("wp886_cc_khong_ten_roi_ve_sys_executable",
+     ('            return None, "", "khong_khoi_chay:khong co " + ", ".join(t[0] for t in TEN_PYTHON) + " tren PATH"',
+      '            py = [sys.executable]'),
+     ["r886_n4_khong_ten_nao_noi_ro_thieu_gi"], "cong_cu"),
+    ("wp886_cc_bo_ly_do_thieu_ten", ("cua '{ten}' ({'; '.join(ly_do)})\"}", "cua '{ten}'\"}"),
+     ["r886_n4_khong_ten_nao_noi_ro_thieu_gi"], "cong_cu"),
+    ("wp886_cc_windows_nhan_ten_tran", ('        duoi = ([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext',
+                                        '        duoi = [""] + ext'),
+     ["r886_n6_giai_ten_tinh_windows_va_posix"], "cong_cu"),
+    ("wp886_cc_path_truoc_ten",
+     ('    for ten, *them in TEN_PYTHON:\n        p = _giai_ten_tran(ten, path, pathext, la_windows)\n',
+      '    for muc in (os.environ.get("PATH", "") if path is None else path).split(os.pathsep):\n'
+      '      for ten, *them in TEN_PYTHON:\n        p = _giai_ten_tran(ten, muc, pathext, la_windows)\n'),
+     ["r886_n6_giai_ten_tinh_windows_va_posix"], "cong_cu"),
     ("wp858_selftest_editskill_ten_co_dinh",
      ('    _esd = Path(_tfx.mkdtemp(prefix="_selftest_editskill_"))\n    _esf = _esd / "_selftest_editskill.py"',
       '    _esd = Path(_tfx.gettempdir())\n    _esf = _esd / "_selftest_editskill.py"'),
@@ -11347,7 +11513,7 @@ def chay_dot_bien() -> int:
     Sửa ở TẦNG chứ không vá triệu chứng: tệp dưới quản lý phiên bản không bao giờ
     bị ghi, nên dù bị SIGKILL (không bắt được) cây làm việc vẫn nguyên.
     """
-    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG
+    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG
     goc = LAUNCHER.read_text(encoding="utf-8")
     goc_test = Path(__file__).read_text(encoding="utf-8")
     hong = 0
@@ -11432,11 +11598,12 @@ def chay_dot_bien() -> int:
 
         # wp802: đột biến HOOK — cùng luật bản sao tạm; chỉ `TinHieuChotCa` mới là giết.
         hook_goc, yaml_goc = HOOK_DANG_DUNG, YAML_DANG_DUNG   # F3: trả ĐÚNG con trỏ người gọi
-        cai_sh_goc, selftest_goc = CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG
+        cai_sh_goc, selftest_goc, cong_cu_goc = CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG
         for i, muc in enumerate(DOT_BIEN_HOOK):
             ten, (c, m), phai_chet = muc[:3]
             loai = muc[3] if muc[3:] else "hook"
-            dich = {"yaml": yaml_goc, "cai_sh": cai_sh_goc, "selftest": selftest_goc}.get(loai, hook_goc)
+            dich = {"yaml": yaml_goc, "cai_sh": cai_sh_goc, "selftest": selftest_goc,
+                    "cong_cu": cong_cu_goc}.get(loai, hook_goc)
             goc_dich = dich.read_text(encoding="utf-8")
             if goc_dich.count(c) != 1:
                 print(f"  {ten:<28} SAI - neo hook/yaml khong khop DUNG MOT cho")
@@ -11445,7 +11612,7 @@ def chay_dot_bien() -> int:
             ban = tam / f"hook_db_{i:02d}{dich.suffix}"
             ban.write_text(goc_dich.replace(c, m, 1), encoding="utf-8")
             globals()[{"yaml": "YAML_DANG_DUNG", "cai_sh": "CAI_SH_DANG_DUNG",
-                       "selftest": "SELFTEST_DANG_DUNG"}.get(loai, "HOOK_DANG_DUNG")] = ban
+                       "selftest": "SELFTEST_DANG_DUNG", "cong_cu": "CONG_CU_DANG_DUNG"}.get(loai, "HOOK_DANG_DUNG")] = ban
             chet, bo_qua, loi = [], [], []
             try:
                 for fn in [f for f in CA if f.__name__ in phai_chet]:
@@ -11459,7 +11626,7 @@ def chay_dot_bien() -> int:
                         loi.append(f"{fn.__name__}({type(e).__name__})")
             finally:
                 HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc
-                CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG = cai_sh_goc, selftest_goc
+                CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG = cai_sh_goc, selftest_goc, cong_cu_goc
             can_do = len(phai_chet) - len(bo_qua)
             if can_do == 0 and not loi:
                 khong_do += 1

@@ -108,11 +108,44 @@ def _bash_windows(path=None, system_root=None, program_files=None, git=None):
     duong, _ = bash_nen.tim_bash(**ep)
     return duong
 
+# wp886 (#886): thứ tự + tập tên của dòng chọn `PY` trong `ops/cai_cong_cu.sh` (python → python3 → py -3).
+# Đổi bên này thì đổi bên kia; `r886_ten_python_khop_cai_cong_cu_sh` canh hai bên khớp.
+TEN_PYTHON = (("python",), ("python3",), ("py", "-3"))
+
+def _giai_ten_tran(ten, path=None, pathext=None, la_windows=None):
+    """Bản nền gọi khi gõ TÊN TRẦN — cùng luật `_ten_tran_giai_ra` (.claude/dev/launcher.py) chế độ native:
+    PATH theo thứ tự, mục rỗng = cwd; Windows chỉ nhận tên trần khi đã mang đuôi PATHEXT, rồi nối từng đuôi."""
+    la_windows = os.name == "nt" if la_windows is None else la_windows
+    duoi = [""]
+    if la_windows:   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13
+        ext = [e.rstrip(".") for e in (pathext or os.environ.get("PATHEXT")
+                                       or ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";") if e]
+        duoi = ([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext
+    for muc in (os.environ.get("PATH", "") if path is None else path).split(os.pathsep):
+        for d in duoi:
+            p = os.path.join(muc or ".", ten + d)
+            if os.path.isfile(p) and os.access(p, os.X_OK):
+                return os.path.abspath(p)
+    return None
+
+def _python_theo_path(path=None, pathext=None, la_windows=None):
+    """argv tiền tố của python mà shell gọi, theo `TEN_PYTHON`; None khi không tên nào có trên PATH."""
+    for ten, *them in TEN_PYTHON:
+        p = _giai_ten_tran(ten, path, pathext, la_windows)
+        if p:
+            return [p, *them]
+    return None
+
 def _chay(argv, timeout=20):
     """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
-    # `cai_cong_cu.sh` chấp nhận python/python3/py. Probe module và probe `python`
-    # phải đo đúng interpreter đã chọn để máy chỉ có python3 không đỏ sau khi vừa cài.
-    argv = [sys.executable, *argv[1:]] if argv and argv[0] == "python" else argv
+    # wp886 (#886, nợ `python-probe-khong-theo-PATH` từ #858): probe `python` đo bản SHELL gọi — tên đầu tiên có
+    # trên PATH theo `TEN_PYTHON` — không đo `sys.executable`. Bản cũ (`e062b8e`) đo trình đang chạy checker nên
+    # `python` hỏng đầu PATH vẫn DAT. Máy chỉ có python3 vẫn DAT (ý đồ gốc của `e062b8e`), vì python3 đứng thứ hai.
+    if argv and argv[0] == "python":
+        py = _python_theo_path()
+        if py is None:   # không rơi về `sys.executable`: bản ấy không phải thứ shell gọi
+            return None, "", "khong_khoi_chay:khong co " + ", ".join(t[0] for t in TEN_PYTHON) + " tren PATH"
+        argv = [*py, *argv[1:]]
     if os.name == "nt" and argv and argv[0] == "bash":
         # Xem `_bash_windows`: đường dẫn TUYỆT ĐỐI để CreateProcess không rẽ vào System32.
         # Cửa gọi THỨ NHẤT trong hai cửa — cửa kia ở nhánh dự phòng dưới. Cả hai phải xử lý
@@ -165,13 +198,14 @@ def _cat_tien_to_token(ra, m):
 
 def kiem_tra_1(ten, dn):
     bat_buoc, ban_ghim, ban_thay = dn["bat_buoc"], dn.get("ban_ghim"), {}
-    khong_mo, hong = [], []
+    khong_mo, hong, ly_do = [], [], []
     for pb in dn.get("probe") or []:
         ten_pb = pb.get("ten", "mac_dinh")
         rc, ra, loi = _chay(pb["lenh"])
         ban_thay[ten_pb] = None
         if loi and loi.startswith("khong_khoi_chay"):
             khong_mo.append(ten_pb)
+            ly_do.append(loi)   # wp886 N4: nói rõ thiếu tên nào
             continue
         if loi == "qua_han":
             hong.append(f"probe '{ten_pb}' da chay nhung qua han")
@@ -191,7 +225,7 @@ def kiem_tra_1(ten, dn):
         return {**goc, "trang_thai": DO, "chi_tiet": "; ".join(hong)}
     if khong_mo:
         return {**goc, "trang_thai": KHONG_DO_DUOC,
-                "chi_tiet": f"khong khoi chay duoc probe {khong_mo} cua '{ten}'"}
+                "chi_tiet": f"khong khoi chay duoc probe {khong_mo} cua '{ten}' ({'; '.join(ly_do)})"}
     khac_nhau = set(ban_thay.values())
     if len(ban_thay) > 1 and len(khac_nhau) > 1:  # T7, độc lập ban_ghim
         return {**goc, "trang_thai": DO,

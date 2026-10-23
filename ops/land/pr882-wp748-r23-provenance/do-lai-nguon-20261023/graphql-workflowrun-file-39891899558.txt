@@ -1,7 +1,9 @@
-# Thu do WorkflowRun.file (PROTOCOL §10.2.2, moc "Workflow definition") cho run 39891899558, 2026-10-23T06:1xZ
+# Thu do WorkflowRun.file (PROTOCOL §10.2.2, moc "Workflow definition") cho run 39891899558, ngay 2026-10-23.
+# request_time_utc: not_measured — khong luu transcript co dau thoi gian cua yeu cau/phan hoi; KHONG suy tu gio commit.
 # Lenh: POST https://api.github.com/graphql, query node(id: WFR_kwLOTNeRjc8AAAAJSb4Upg){... on WorkflowRun{databaseId runAttempt event file{path repositoryFileUrl}}}
 # Token qua stdin (-H @-), khong in.
 HTTP 403
+# Than phan hoi — TRICH DOAN (cat sau cau dau, phan con lai thay bang "..."), khong phai nguyen van day du:
 {"message":"GitHub GraphQL is not available from Claude Code sessions; use the REST API (gh api repos/{owner}/{repo}/...). ..."}
 # Ket luan: not_measured cho moc Workflow definition (§10.2.2: 403/GraphQL errors la not_measured; KHONG thay bang REST head_sha).
 # Moc Checkout va Gate output: log job va artifact KHONG duoc tai/luu trong ho so nay => not_measured.

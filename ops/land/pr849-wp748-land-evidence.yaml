@@ -1,7 +1,8 @@
 # HO SO LAND — packet #748 wp748 r20 (lease g20), ma qua PR #849. Khuon: ops/land/pr846-wp845-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (9422054), `landed: true` tu PR ghi so thu hai (ccr-e425b16e-j9g9p7, sau #857): chu kho dang ban ghi
+# TRANG THAI: merged (9422054), `landed: false` tu PR dinh chinh (22-10-2026): THIEU reviewer assurance §8.1 (connector P1 #863
+# r4323596458, tien le #822). Truoc do landed true (03eef5a) vi chu kho dang ban ghi
 # BEN duyet 3818bd4 + chap nhan do Windows o #748 issuecomment-6281831890 (dong connector P1 #857 r4320578796). "merged" KHONG dong nghia "landed" (§10.2.4).
 # Gate push master tren DUNG merge SHA 9422054: ci.yml 39343232426 XANH 23/23. Review neo DUNG head merge 3818bd4: Codex luot 4
 # (0 P0-P3, blocked vi sandbox chan AF_UNIX) + luot 5 (do lai voi socket) approve.
@@ -87,15 +88,23 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-849.json: merged true, merged_at 2026-10-19T23:42:33Z, merged_by ducthangho, merge_commit_sha
     9422054, head.sha 3818bd4; cha va tree o do-lai-nguon-20261020/merge-va-diff.txt; merge commit (khong squash/rebase).
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 9422054: ci.yml 23/23 XANH (post_merge_checks) DAT; (2) lease da nha: rut han,
     12/12 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: #748 closed/completed DAT, do Windows san co tach #852-#855, R1 o #850.
-    (4) review neo DUNG authorized_head_sha 3818bd4: Codex luot 5 approve (luot 4 khong finding, blocked vi moi truong) DAT;
+    (4) review neo DUNG authorized_head_sha 3818bd4: Codex luot 5 approve (luot 4 khong finding, blocked vi moi truong) — noi dung; assurance xem (6);
     10/10 tep PR trung byte giua 3818bd4 va 9422054 (do-lai-nguon-20261020/merge-va-diff.txt).
     Windows full matrix tren head cuoi DO o cac bo do san/bi che; chu kho chap nhan bang ban ghi ben #748 issuecomment-6281831890.
     (5) uy quyen land neo DUNG 3818bd4: DAT — #748 issuecomment-6281831890 (readback-comment-6281831890.json), dang sau merge
-    (xem authorization_ghi_chu). `landed: true` hieu luc khi PR ghi so nay vao master.
+    (xem authorization_ghi_chu).
+    (6) reviewer assurance §8.1 (lop sensitive doi cross_approved/human_audited): CHUA DAT — luot review la codex exec TRUC TIEP,
+    KHONG co bien nhan launcher (run.json), model THUC phuc vu KHONG_DO_DUOC; header CLI chi chung minh model CLI cong bo
+    (§8.1). Duyet land cua chu kho khong phai audit hay ghi de assurance. Connector P1 #863 r4323596458; tien le #822 (cc26c8e).
+    Luot 6 qua launcher.py run 03c4f6be (verdicts/run-03c4f6be.json: xong, ma_thoat 0, head 3818bd4, codex_cli) tra
+    CHANGES_REQUESTED voi 2 P2 MOI (verdicts/wp748-r20-luot6-launcher-verdict.md): F01 timing-receipt-validation
+    (ops/nhanh_don_duoc_test.py:5849/5870 — bat_dau/ket_thuc chuoi tuy y, dao nguoc, lech 900 s voi giay=0 van DAT) va F02
+    timeout-descendant-containment (:405-411 — subprocess.run timeout chi giet con truc tiep, chau song tiep; Windows co the treo).
+    landed false toi khi hai P2 duoc va trong packet moi va co review co bien nhan approve.
 
 uy_quyen_land:
   dang: >-

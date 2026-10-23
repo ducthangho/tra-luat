@@ -143,11 +143,12 @@ dinh_chinh_r24:
   lo: 'A — ho model reviewer khong_do_duoc (§8, §8.1)'
   authorized_head_sha: d7b42d26f09dad0599dc0434dfad25b3897f3e51
   reviewer_assurance_81: CHUA DAT
-  ly_do: 'doi_chieu — approve cuoi tren head la Codex connector loi goi 10 (khong lo model, :38); cac luot Codex qua launcher (verdict/*/run.json, KHONG khoa model) deu changes_requested => ho model reviewer `khong_do_duoc`.'
+  ly_do: 'doi_chieu — approve cuoi tren head d7b42d2 la Codex connector luot 10 (khong lo model, :38, :122); cac luot Codex offline qua launcher (verdict/*/run.json, KHONG khoa model) hoan tat deu changes_requested, rieng luot 6 that bai khong co verdict (:117; verdict/wp812-r2-g3-exec-review-6-codex/run.json ma_thoat 1) => ho model reviewer `khong_do_duoc`.'
   bang_chung:
     - 'ops/land/pr836-wp812-land-evidence.yaml:38'
+    - 'ops/land/pr836-wp812-land-evidence.yaml:112-122'
     - 'ops/land/pr836-wp812-land-evidence.yaml:133'
-  do_duoc: 'measured — verdict/wp812-r2-g3-exec-review-*-codex/run.json (6 tep, luot 2-7): 36-37 khoa, 0 khoa chua chuoi model.'
+  do_duoc: 'measured — verdict/wp812-r2-g3-exec-review-*-codex/run.json (6 tep, luot 2-7): 36-37 khoa cap dau (48-49 moi cap), 0 khoa nao o moi cap chua chuoi model.'
   can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
   lo_ghi_them_khong_mo_rong_pham_vi:
     - 'gate ci.yml push master tren DUNG merge SHA f1979a5 la failure o release-verify strict (:40); chi xanh tren hau due 6842a62 va 062292b (:41-42)'

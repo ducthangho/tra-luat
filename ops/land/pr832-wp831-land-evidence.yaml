@@ -135,12 +135,12 @@ dinh_chinh_r24:
   lo: 'A — ho model reviewer khong_do_duoc (§8, §8.1)'
   authorized_head_sha: 51ae5c095972611d2c6045bd81786a4fc7e9ca62
   reviewer_assurance_81: CHUA DAT
-  ly_do: 'doi_chieu — reviewer la Codex qua launcher run 1ff81cba (verdict-luot7/run.json, 35 khoa, KHONG khoa model, :107) => ho model reviewer `khong_do_duoc`.'
+  ly_do: 'doi_chieu — reviewer la Codex qua launcher run 1ff81cba (verdict-luot7/run.json, 35 khoa cap dau, KHONG khoa model o moi cap, :107) => ho model reviewer `khong_do_duoc`.'
   bang_chung:
     - 'ops/land/pr832-wp831-provenance/verdict-luot7/run.json'
     - 'ops/land/pr832-wp831-land-evidence.yaml:107'
     - 'ops/land/pr832-wp831-land-evidence.yaml:126'
-  do_duoc: 'measured — verdict-luot7/run.json: 35 khoa, 0 khoa chua chuoi model, head 51ae5c0.'
+  do_duoc: 'measured — verdict-luot7/run.json: 35 khoa cap dau (47 moi cap), 0 khoa nao o moi cap chua chuoi model, head 51ae5c0.'
   can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
   lo_ghi_them_khong_mo_rong_pham_vi:
     - 'Codex connector chi tren head cu 6376cd3, khong tren head merge (:42)'

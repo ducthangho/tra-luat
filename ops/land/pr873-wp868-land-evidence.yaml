@@ -131,7 +131,7 @@ dinh_chinh_r24:
   bang_chung:
     - 'ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot5-run.json'
     - 'ops/land/pr873-wp868-land-evidence.yaml:106'
-  do_duoc: 'measured — verdicts/wp868-g1-luot5-run.json: 35 khoa, 0 khoa chua chuoi model, head f07f88c.'
+  do_duoc: 'measured — verdicts/wp868-g1-luot5-run.json: 35 khoa cap dau (47 moi cap), 0 khoa nao o moi cap chua chuoi model, head f07f88c.'
   can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
   dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG f07f88c75cabbef691c86ac8746317a6c0705162, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG f07f88c75cabbef691c86ac8746317a6c0705162; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.'
   lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'

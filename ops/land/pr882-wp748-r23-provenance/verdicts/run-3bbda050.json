@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "3bbda050bcfc42a49c13f550b9d55167",
+  "short_id": "3bbda050",
+  "ten": "wp748-l23b-launcher",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 16,
+    "van_tay": "f4ca5f823c3eb6b2"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-23T01:44:25.177938+00:00",
+  "ket_thuc_utc": "2026-10-23T01:53:07.425990+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 27266,
+  "khoa_danh_tinh": "linux:248503",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rvL/l23b/src",
+  "head": "682c8880e493e9b4019e599482a33081fa35576f",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "78098d4598cf7a896fca3446a63f96e075c07e0e087e0501e080121bb3bcdcff",
+  "deadline_utc": "2026-10-23T03:34:24+00:00",
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "ef25d56a3f65eea0adc1970176247e012aab3c57f693068c98d4f71966bc3cc6",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rvL/runs/3bbda050/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 522.248,
+  "stdout_byte": 535529,
+  "stdout_sha256": "aaceafc0c60ffbe93fbb4b32c6eda11b7e48d32772512d89da403ba608c06209",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

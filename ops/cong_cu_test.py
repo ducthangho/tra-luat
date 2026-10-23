@@ -7442,12 +7442,15 @@ def t54_main_chon_DUNG_vong_ban_kinh_theo_che_do():
     mong.update({"manh_w1": [0, dau + phong + ghi_dung, ra(duoi=manh_ra())], "du_w1": [0, day(), ra(duoi=du_ra(0))]})
     # wp879: kỳ vọng nhánh Windows dựng bằng CHUỖI ĐỘC LẬP, không gọi `dong_windows` — gọi thì đột biến vào hàm ấy thoả
     # cả hai vế. Mảnh `nt`: đủ ca nền, KHÔNG `phong`/`ghi`; ĐỎ ⇔ ca đỏ hoặc tiền kiểm bỏ qua; ca BỎ QUA rời khỏi mẫu số.
-    win = lambda a, b: [f"TỔNG: CA {a}/{b} đạt · ĐỘT BIẾN {nd} mục KHÔNG ĐO TRÊN WINDOWS — "
-                        f"đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)"]
+    win = lambda a, b, d=nd: [f"TỔNG: CA {a}/{b} đạt · ĐỘT BIẾN {d} mục KHÔNG ĐO TRÊN WINDOWS — "
+                              f"đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)"]
     mong.update({"manh_nt": [0, dau, ra(duoi=win(n, n))], "manh_nt_ca_do": [1, dau, ra(do=[cn], duoi=win(n - 1, n))],
                  "manh_nt_ca_bq": [0, dau, ra(bq=[c1], duoi=win(n - 1, n - 1))],
                  "manh_nt_tk": [1, dau, ra(tk=[tb], duoi=win(n, n))],
-                 "du_nt": mong["du"], "gate_nt": mong["gate"]})
+                 "du_nt": mong["du"], "gate_nt": mong["gate"],
+                 # Hai biên số không: ĐỎ dù không ca nào đỏ — "tập RỖNG thoả `not do`" là đúng hình dạng #319.
+                 "manh_nt_tat_ca_bq": [1, dau, ra(bq=cac, duoi=win(0, 0))],
+                 "manh_nt_bang_rong": [1, dau, ra(duoi=win(n, n, 0))]})
     w = kq.get("windows") or {}
     bang(w.get("vi_tu") == [True, False, False], f"vị từ nền: chỉ 'nt' mới bỏ vòng đột biến — thấy {w.get('vi_tu')}")
     bang(w.get("dat") == [True, False, False, False],
@@ -8563,6 +8566,9 @@ def _in_tu_kiem_main():
         "manh_nt": (manh, {"nen": "nt"}), "manh_nt_ca_do": (manh, {"nen": "nt", "ca_do": {cn}}),
         "manh_nt_ca_bq": (manh, {"nen": "nt", "ca_bq": {c1}}), "manh_nt_tk": (manh, {"nen": "nt", "tk": {tb}}),
         "du_nt": ({}, {"nen": "nt"}), "gate_nt": (gate, {"nen": "nt"}),
+        # wp879 (Codex lượt 1): hai BIÊN SỐ KHÔNG ở chính `main` — mọi ca BỎ QUA (`so_ca` = 0) và bảng đột biến RỖNG.
+        # Thiếu chúng thì `dat_windows(len(CA), …)` hay `dat_windows(…, 470)` sống sót: hai vế dương bị giả bằng hằng.
+        "manh_nt_tat_ca_bq": (manh, {"nen": "nt", "ca_bq": set(ten_ca)}), "manh_nt_bang_rong": (manh, {"nen": "nt", "bang_rong": 1}),
     }
     # wp879: vị từ THUẦN đo ở đây (không trong `t54`) để đột biến TRÊN ĐĨA cắn được — cùng lý do với mọi cửa tự kiểm.
     kq["windows"] = {"vi_tu": [nen_bo_qua_dot_bien(x) for x in ("nt", "posix", "java")],
@@ -8586,8 +8592,10 @@ def _in_tu_kiem_main():
             os.environ.pop(bien, None)
         os.environ.update({tt: "3", **env})
         buf = io.StringIO()
-        cu_doc, cu_so, cu_nen = g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"], g["_TEN_NEN"]
+        cu_doc, cu_so, cu_nen, cu_db = g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"], g["_TEN_NEN"], g["DOT_BIEN"]
         g["_TEN_NEN"] = dat.get("nen", "posix")   # wp879: nền là DỮ LIỆU của kịch bản — chạy trên Windows vẫn ra cùng kết quả
+        if dat.get("bang_rong"):
+            g["DOT_BIEN"] = {}
         if ten in noi:
             mode, ki, ni, path, workers = noi[ten]
             g["_doc_che_do"] = lambda env: ("du", None) if mode == "du" else ("manh", (ki, ni, path))
@@ -8598,7 +8606,7 @@ def _in_tu_kiem_main():
         except BaseException as ex:  # noqa: BLE001 — #698 M6: ngoại lệ của `main` là DỮ LIỆU (mã thoát `NEM:`), không giết con
             rc = "NEM:" + type(ex).__name__
         finally:
-            g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"], g["_TEN_NEN"] = cu_doc, cu_so, cu_nen
+            g["_doc_che_do"], g["_so_tien_trinh_ban_kinh"], g["_TEN_NEN"], g["DOT_BIEN"] = cu_doc, cu_so, cu_nen, cu_db
         # F12/F15: stdout cũng là đầu ra — MỌI dòng mang nghĩa hợp đồng (chẩn đoán, đếm, giao mảnh, bảng, SỐ LIỆU),
         # nguyên văn và đúng thứ tự; dòng trống bỏ.
         kq[ten] = [rc, list(log), [x for x in buf.getvalue().splitlines() if x.strip()]]

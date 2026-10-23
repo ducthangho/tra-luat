@@ -1,5 +1,5 @@
 # trich log job 120310087840 gate-packet-loop (windows-latest), run 39922122762, head f37da6c
-# log day du: GET actions/jobs/120310087840/logs; sha256 log tai luc do = f7e94c5c0ea3c00ec7abcea1221b7fa9bcb50565126d4219c90a21d07e927556, 2404 dong
+# log day du: GET actions/jobs/120310087840/logs; sha256 log tai luc do = f7e94c5c0ea3c00ec7abcea1221b7fa9bcb50565126d4219c90a21d07e927556, 2404 dong (trich da bo CR cuoi dong)
 # grep: BỎ QUA | 'nền:' | TỔNG | r812_r4_symlink_scope
 2026-10-23T08:56:16.0217172Z   BỎ QUA  bien_nhan_sha256_root_xuong_dong_dem_MOT: nền từ chối tên thư mục có xuống dòng: [WinError 123] The filename, directory name, or volume label syntax is incorrect: 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\packet_loop_test_461c5it2\\baseline\\bien_nhan_sha256_root_xuong_dong_dem_MOT\\bnsha256\nroot'
 2026-10-23T08:56:16.0220728Z   BỎ QUA  bien_nhan_git_gia_duong_dan_nul_giu_fallback: nền từ chối thi hành git giả: [WinError 193] %1 is not a valid Win32 application

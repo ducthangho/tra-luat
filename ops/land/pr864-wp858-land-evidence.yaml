@@ -111,3 +111,29 @@ no_co_ten:
 khong_do_duoc:
   - 'Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI).'
   - 'Cac ca r858_* hanh vi khong chay native Windows (BO QUA shell POSIX); cong thuc Windows do bang stub cygpath tren Linux.'
+
+# Bo sung 23-10-2026 sau khi PR #874 da merge (4581cfa). Codex connector P1 tren #874 (discussion_r4347061168):
+# ho so khai landed: true trong khi uy quyen rut han lease mau thuan, va ban ghi nay KHONG neu mau thuan ay.
+# Moi truong o tren GIU NGUYEN, khong viet lai bang chung lich su; khoi nay chi ghi mau thuan va cach giai.
+doi_chieu_uy_quyen:
+  mau_thuan: >-
+    measured — readback-comment-6334555250.json: ban ghi ho cua phien dieu phoi session_01B8U8TTEwfMS1u4u4E1VmRW chuyen y chu
+    kho thanh "Lease wp858-r1-g2-claude KHONG rut han; chi phien dieu phoi ghi vao tep lease ay". Phien executor van rut han
+    o 0f54226 (do-lai-nguon-20261022/lease-wp858-r1-g2-claude.yaml.txt) theo chi thi chu kho trong phien
+    "ghi sổ land và thu hồi lease luôn" — chi thi ay truoc day chi co trong ho so duoi dang loi_khai_co_neo (loi thuat cua
+    executor). Ban ghi dau cua ho so nay liet ke 6334555250 o bookkeeping ma KHONG neu mau thuan; do la thieu sot cua executor.
+  phien_dieu_phoi_ghi_nhan_rut_han: >-
+    measured — doi-chieu-uy-quyen-20261023/lease-wp868-r1-g1-claude-33e6eda.yaml.txt: chinh phien dieu phoi, khi cap lease
+    wp868-r1-g1-claude (commit 33e6eda, 2026-10-22T06:51Z), ghi thay_the_cho: [] kem ly do wp858-r1-g2-claude "da RUT HAN ...
+    @0f54226" nen khong viet bia mo — tuc bo bia mo hai chieu da dinh o doi-chieu-uy-quyen-20261023/readback-comment-6334586678.json.
+  phe_chuan_chu_kho:
+    url: https://github.com/ducthangho/tra-luat/issues/858#issuecomment-6368763710
+    nguon: 'measured — doi-chieu-uy-quyen-20261023/readback-comment-6368763710.json: user ducthangho, author_association OWNER, performed_via_github_app null (chu kho tu viet, khong qua GitHub App), created_at 2026-10-23T15:43:52Z.'
+    noi_dung: >-
+      thuat_lai — chu kho xac nhan chi thi truc tiep "ghi sổ land và thu hồi lease luôn"; viec rut han 0f54226 lam theo chi thi
+      ay; cau "KHONG rut han" trong 6334555250 la cach phien dieu phoi hieu, chi thi truc tiep thay cho no; phe chuan ho so nay
+      (master 4581cfa), giu landed: true, head da duyet 521efeb, merge 9e9a74b.
+  ket_luan: >-
+    Dieu kien (5) uy quyen cua landed_dieu_kien nay neo vao phe chuan chu kho tu viet o tren, khong con chi dua tren loi thuat
+    cua executor. landed: true giu nguyen. Thread P1: doi-chieu-uy-quyen-20261023/readback-review-comments-874.json.
+  bai_hoc: 'Executor merge PR #874 khi review Codex (kich hoat luc chuyen ready) con dang chay — trai CLAUDE.md "Gate xanh KHONG phai da duoc review".'

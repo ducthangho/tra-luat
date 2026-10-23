@@ -1955,6 +1955,12 @@ for _ten, _ca, _tim, _thay in (
     ('wp892_lo_tep_an', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(x for x in thu_muc_gom.iterdir() if not x.name.startswith(".")))):\n'),
     # Codex lượt 1 P2: dispatcher `--gop` hỏng RIÊNG ở chế độ nhanh (thân `_main_gop` không đổi).
     ('wp892_dispatcher_nhanh_rc1', 't52_', '    if cua == "--gop":\n        sys.exit(_main_gop())\n', '    if cua == "--gop":\n        sys.exit(1 if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" else _main_gop())\n'),
+    # Codex lượt 2: dispatcher bỏ gom khi CÓ mảnh dưới env nhanh · dispatcher coi env RỖNG là xanh · bỏ qua thư mục con ·
+    # tiến trình tự kiểm gom thừa kế env chế độ ngoài.
+    ('wp892_dispatcher_nhanh_bo_gom', 't52_', '    if cua == "--gop":\n        sys.exit(_main_gop())\n', '    if cua == "--gop":\n        sys.exit(0 if os.environ.get(_BIEN_GOP_CHE_DO) == "duong_nhanh" else _main_gop())\n'),
+    ('wp892_dispatcher_rong_xanh', 't52_', '    if cua == "--gop":\n        sys.exit(_main_gop())\n', '    if cua == "--gop":\n        sys.exit(0 if os.environ.get(_BIEN_GOP_CHE_DO) == "" else _main_gop())\n'),
+    ('wp892_bo_qua_thu_muc_con', 't52_', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(thu_muc_gom.iterdir()))):\n', '            not thu_muc_gom.exists() or (thu_muc_gom.is_dir() and not any(x.is_file() for x in thu_muc_gom.iterdir()))):\n'),
+    ('wp892_ro_env_ngoai', 't52_', '    os.environ.pop(_BIEN_GOP_CHE_DO, None)\n    with tempfile.TemporaryDirectory(prefix="gom668_") as d:\n', '    with tempfile.TemporaryDirectory(prefix="gom668_") as d:\n'),
     ('wp892_dong_gia_giet', 't52_', '        print(f"GOM: KHÔNG ĐO — PR chỉ đổi hồ sơ ({_BIEN_GOP_CHE_DO}=duong_nhanh, 0 mảnh); {len(DOT_BIEN)} đột biến "\n', '        print(f"GOM MẢNH 0/0 — bị giết {len(DOT_BIEN)} ({_BIEN_GOP_CHE_DO}=duong_nhanh) "\n'),
     ('f7_cau_hinh_nuot', 't54_',
      '        print(f"  ĐỎ  cấu hình chế độ: {ex}")\n        return 2\n',
@@ -7211,9 +7217,10 @@ def t39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai():
 
 
 
-def _doc_kq_tu_kiem(cua):
+def _doc_kq_tu_kiem(cua, env=None):
     """`KQ` của một cửa tự kiểm `--tu-kiem-…` chạy qua `TEP_TEST` (để đột biến trên đĩa cắn được)."""
-    p = subprocess.run([sys.executable, str(TEP_TEST), cua], cwd=GOC, capture_output=True, text=True, timeout=300)
+    p = subprocess.run([sys.executable, str(TEP_TEST), cua], cwd=GOC, capture_output=True, text=True, timeout=300,
+                       env=env)
     dong = [l for l in p.stdout.splitlines() if l.startswith("KQ ")]
     dung(p.returncode == 0 and dong, f"cửa {cua} hỏng: rc={p.returncode}\n{p.stdout[-600:]}\n{p.stderr[-600:]}")
     return json.loads(dong[-1][3:])
@@ -7228,7 +7235,9 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     hai đều ĐỎ ở đây. Đối chứng hai chiều: bộ ĐÚNG phải XANH (N=3 và N=1-bị-từ-chối), để "từ chối tất cả" cũng HỎNG.
     Phía ghi: mảnh không đạt KHÔNG để lại tệp, kể cả tệp cũ cùng tên — job gom không được thấy mảnh cũ.
     """
-    kq = _doc_kq_tu_kiem("--tu-kiem-gom")
+    # wp892 (Codex lượt 2): chạy dưới môi trường NGOÀI thù địch nhất (`duong_nhanh`) — kịch bản nào không tự cô lập biến
+    # chế độ gom sẽ rẽ nhầm vào đường nhanh và lệch kết quả mong đợi.
+    kq = _doc_kq_tu_kiem("--tu-kiem-gom", env={**os.environ, _BIEN_GOP_CHE_DO: "duong_nhanh"})
     loi, dau, cuoi = kq["dung"]
     bang(loi == 0 and dau == "GOM MẢNH 3/3" and "lỗi đột biến=0" in cuoi,
          f"bộ mảnh ĐÚNG phải gom XANH: {kq['dung']}")
@@ -7279,17 +7288,21 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     that = {t: (kq.get(t), kq.get(c)) for t, c in (("dn_dung", "cli_dung"), ("dn_thieu", "cli_thieu")) if kq.get(t) != kq.get(c)}
     bang(not that, f"duong_nhanh mà CÓ mảnh phải gom THẬT y hệt đường thường: {that}")
     thuong = {t: kq.get(t) for t in ("dn_tep", "dn_vang", "dn_trong", "dn_day_du", "dn_hoa", "dn_cach", "dn_tien_to",
-                                     "dn_dau", "dn_cr", "dn_tep_an")
-              if not (kq.get(t) and kq[t][0] >= 1 and kq[t][2] == 1 and "KHÔNG ĐO" not in kq[t][1]
-                      and ("[G-rong]" in kq[t][1] or t in ("dn_tep", "dn_tep_an")))}
+                                     "dn_dau", "dn_cr", "dn_tep_an", "dn_con")
+              if not (kq.get(t) and kq[t][0] >= 1 and kq[t][2] == 1 and "=duong_nhanh, 0 mảnh" not in kq[t][1]
+                      and ("[G-rong]" in kq[t][1] or t in ("dn_tep", "dn_tep_an", "dn_con")))}
     bang(not thuong, f"chỉ ĐÚNG chuỗi `duong_nhanh` + thư mục vắng/rỗng mới được bỏ gom; còn lại phải ĐỎ: {thuong}")
     cli_dn = {t: kq.get(t) for t, (rc, dau_ra) in (("cli_dn_rong", (0, "KHÔNG ĐO")), ("cli_dn_khong_co", (0, "KHÔNG ĐO")),
-                                                 ("cli_dn_day_du", (1, "[G-rong]")), ("cli_dn_vang", (1, "[G-rong]")))
+                                                 ("cli_dn_day_du", (1, "[G-rong]")), ("cli_dn_vang", (1, "[G-rong]")),
+                                                 ("cli_dn_trong", (1, "[G-rong]")), ("cli_dn_hoa", (1, "[G-rong]")),
+                                                 ("cli_dn_cach", (1, "[G-rong]")))
               if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1])}
     # Neo vào DẤU của đường nhanh, không vào "KHÔNG ĐO": dưới đột biến cây tạm không phải git nên gom thật đỏ `[G-head]
     # … KHÔNG ĐO ĐƯỢC` — đúng là ĐỎ, nhưng chuỗi con ấy làm ca chết dưới MỌI đột biến (CI #895, mảnh 1: 26 lỗi bán kính).
-    cli_dn.update({"cli_dn_tep_an": kq.get("cli_dn_tep_an")} if not (kq.get("cli_dn_tep_an") and kq["cli_dn_tep_an"][0] >= 1
-                                                                  and "=duong_nhanh, 0 mảnh" not in kq["cli_dn_tep_an"][1]) else {})
+    cli_dn.update({t: kq.get(t) for t in ("cli_dn_tep_an", "cli_dn_con", "cli_dn_dung", "cli_dn_thieu")
+                   if not (kq.get(t) and kq[t][0] >= 1 and "=duong_nhanh, 0 mảnh" not in kq[t][1])})
+    cli_dn.update({t: (kq.get(t), kq.get(c)) for t, c in (("cli_dn_dung", "cli_th_dung"), ("cli_dn_thieu", "cli_th_thieu"))
+                   if kq.get(t) != kq.get(c)})
     bang(not cli_dn, f"đường nhanh qua CỬA CLI `--gop` (tiến trình con, env riêng) sai: {cli_dn}")
     # F16: bộ ĐÚNG cấu trúc, SAI kết quả (đích sống ở đầu mảnh 0, tín dụng giả ở giữa mảnh 1, bán kính 2 ở cuối mảnh 2)
     # ⇒ ĐÚNG 3 lỗi, bảng ĐỦ (N−3 dòng `ok` + 3 dòng ĐỎ), SỐ LIỆU nói đúng 3. F17: cùng thứ ấy qua CLI THẬT, cộng đường
@@ -8231,6 +8244,9 @@ def _in_tu_kiem_gom():
     # hay không là chuyện của RIG — mọi kịch bản sẽ ĐỎ vì `G-head` và ca "giết" mọi đột biến sai lý do.
     vt = {"sha256_test": "a" * 64, "head": "b" * 40}
     kq = {}
+    # wp892 (Codex lượt 2 P2 gom-ca-cu-ke-thua-env-duong-nhanh): đây là tiến trình con riêng của `t52`, nên xoá biến chế
+    # độ gom ở GỐC — mọi kịch bản (kể cả F13/F17 sinh tiến trình con) chỉ thấy giá trị mà CHÍNH kịch bản ấy đặt.
+    os.environ.pop(_BIEN_GOP_CHE_DO, None)
     with tempfile.TemporaryDirectory(prefix="gom668_") as d:
         d = Path(d)
 
@@ -8415,6 +8431,8 @@ def _in_tu_kiem_gom():
             an = d / "chi_tep_an_dn"   # Codex lượt 1 P3: thư mục chỉ có tệp ẩn KHÔNG phải "rỗng"
             an.mkdir()
             (an / ".gitkeep").write_text("", encoding="utf-8")
+            con = d / "chi_thu_muc_con_dn"   # Codex lượt 2 P3: chỉ một thư mục con rỗng cũng KHÔNG phải "rỗng"
+            (con / "rong").mkdir(parents=True)
             cu_cd = os.environ.pop(_BIEN_GOP_CHE_DO, None)
             try:
                 for ten, thu, gt in (("dn_rong", rong, "duong_nhanh"), ("dn_khong_co", d / "khong_co", "duong_nhanh"),
@@ -8423,7 +8441,7 @@ def _in_tu_kiem_gom():
                                      ("dn_day_du", rong, "day_du"), ("dn_hoa", rong, "Duong_nhanh"),
                                      ("dn_cach", rong, "duong_nhanh "), ("dn_tien_to", rong, "duong_nhanh_x"),
                                      ("dn_dau", rong, "x_duong_nhanh"), ("dn_cr", rong, "duong_nhanh\r"),
-                                     ("dn_tep_an", an, "duong_nhanh")):
+                                     ("dn_tep_an", an, "duong_nhanh"), ("dn_con", con, "duong_nhanh")):
                     os.environ.pop(_BIEN_GOP_CHE_DO, None)
                     if gt is not None:
                         os.environ[_BIEN_GOP_CHE_DO] = gt
@@ -8453,7 +8471,14 @@ def _in_tu_kiem_gom():
         # Chỉ đường KHÔNG cần vân tay (thư mục vắng/rỗng); đường có mảnh đã đo ở `cli_git_*`.
         moi_truong = {k: v for k, v in os.environ.items() if k != _BIEN_GOP_CHE_DO}
         for ten, thu, gt in (("cli_dn_rong", rong, "duong_nhanh"), ("cli_dn_khong_co", d / "khong_co_cli", "duong_nhanh"),
-                             ("cli_dn_day_du", rong, "day_du"), ("cli_dn_vang", rong, None), ("cli_dn_tep_an", an, "duong_nhanh")):
+                             ("cli_dn_day_du", rong, "day_du"), ("cli_dn_vang", rong, None), ("cli_dn_tep_an", an, "duong_nhanh"),
+                             # Codex lượt 2 P2: cửa CLI cũng phải thấy giá trị âm (rỗng · hoa · khoảng trắng), thư mục chỉ
+                             # có thư mục con, và CÓ mảnh dưới env nhanh — cặp `cli_th_*` (không env) là đối chứng: cùng
+                             # thư mục, cùng tiến trình CLI ⇒ phải ra Y HỆT (dưới đột biến cả hai cùng ĐỎ `G-head`).
+                             ("cli_dn_trong", rong, ""), ("cli_dn_hoa", rong, "Duong_nhanh"),
+                             ("cli_dn_cach", rong, "duong_nhanh "), ("cli_dn_con", con, "duong_nhanh"),
+                             ("cli_dn_dung", d / "dung", "duong_nhanh"), ("cli_th_dung", d / "dung", None),
+                             ("cli_dn_thieu", d / "thieu", "duong_nhanh"), ("cli_th_thieu", d / "thieu", None)):
             p = subprocess.run([sys.executable, str(TEP_TEST), "--gop", str(thu)], capture_output=True, text=True, timeout=120,
                                cwd=str(GOC), env={**moi_truong, **({_BIEN_GOP_CHE_DO: gt} if gt is not None else {})})
             kq[ten] = [p.returncode, (p.stdout.splitlines() or [""])[0], 0]

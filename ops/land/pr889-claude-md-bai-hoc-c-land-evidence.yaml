@@ -1,0 +1,146 @@
+# HO SO LAND — PR #889 "docs(CLAUDE.md): bai hoc (c) do lai 23-10 — nhanh windows-only (#878) va Windows chi la mot phan
+# gate (#879)". KHONG phai packet: viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease).
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat: ops/land/pr759-no-p3-ho-so-land-evidence.yaml.
+#
+# TRANG THAI: merged (6ac385f), `landed: false` — CHO CHU KHO quyet o PR ghi so #891 (uy_quyen_head_cuoi).
+# Gate hau merge tren 6ac385f: run 39921552473 completed/success, 23/23 job success. "merged" KHONG dong nghia
+# "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do lai trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot
+# khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr889-claude-md-bai-hoc-c-provenance/ (SHA256SUMS.txt). Moi phep do REST: GET
+# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, do 2026-10-23 12:55Z–12:58Z.
+
+schema_version: 1
+mission_id: null
+packet_id: KHONG_AP_DUNG
+packet_issue: null
+pham_vi_land: tai_lieu_dev
+pham_vi_land_ghi_chu: 'Chi CLAUDE.md (dev-side, khong vao goi phat hanh, khong nam trong RELEASE_MANIFEST.json).'
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm
+  recorded_by: claude-session (chinh phien da soan, review cheo va merge PR #889)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua
+    chinh no. model_family tu khai. Ben ghi so TRUNG ben thi cong va ben merge: khong co tach vai.
+
+authorized_head_sha: 094e8d17ae4dfcf21dca63702c9262267bdc072c
+approver: ducthangho
+authorization_url: KHONG_AP_DUNG
+authorization_ghi_chu: >-
+  thuat_lai — chu kho duyet bang loi trong phien Claude Code ("lam PR dau, gate xanh thi merge"), KHONG co comment duyet tren
+  GitHub. Loi duyet khong neo SHA; phien merge bang `expectedHeadSha` 094e8d1 sau khi doc gate xanh va doi chieu master moi
+  (daf8961) khong cham .github/workflows/, ops/cong_cu_test.py, ops/lease_publish_test.py.
+land_operator: claude-session (thay mat chu kho)
+land_operator_nguon: >-
+  measured — readback-pr-889.json merged_by ducthangho: phien Claude goi MCP merge_pull_request bang credential cua chu kho,
+  nen GitHub ghi nguoi merge la chu kho. Nguoi BAM merge thuc te la phien (thuat_lai, khong do duoc tu GitHub).
+merge_method: merge
+merge_method_nguon: 'measured — readback-commit-6ac385f.json co hai cha (daf8961, 094e8d1) => merge commit, khong squash/rebase.'
+merge_commit: 6ac385fdd7325f532ac4b4b6eb861292bfa7e970
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-889.json: state closed, merged true, merged_at 2026-10-23T08:00:00Z, merge_commit_sha
+    6ac385fdd7325f532ac4b4b6eb861292bfa7e970, head 094e8d17ae4dfcf21dca63702c9262267bdc072c (claude/gallant-fermat-34kgb9),
+    base.sha e63961f27b53e66db8e6600009f97d5706743063, 2 commit, 1 tep +12/-0.
+  merge_commit:
+    sha: 6ac385fdd7325f532ac4b4b6eb861292bfa7e970
+    parents: [daf89615efff9fde33039036ddf7f23ec9cb1c10, 094e8d17ae4dfcf21dca63702c9262267bdc072c]
+    tree: e64cdd92b27a66cbc4f0a91e0f84a4400b83c097
+    nguon: >-
+      measured — readback-commit-6ac385f.json: parents, tree, files = [CLAUDE.md +12/-0]. Cha thu nhat daf8961 khac base.sha
+      e63961f cua PR: master da tien them luc merge (PR #872, #877), khong cham CLAUDE.md.
+  head_va_review:
+    reviewed_sha_cross_review: 8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8
+    reviewed_sha_codex_connector: KHONG_DO_DUOC
+    head_da_merge: 094e8d17ae4dfcf21dca63702c9262267bdc072c
+    doi_chieu: >-
+      measured — cross-review codex cham 8d5cccb (ops/reviews/pr889-review-1-codex-verdict.receipt.yaml); 094e8d1 = 8d5cccb +
+      commit va P2 (HINT.patch + mot cau). Codex connector KHONG xong tren 094e8d1: readback-comments-889.json comment 6360319005
+      status running tu 08:00:05Z, updated_at = created_at 08:00:09Z; readback-reactions-pr-889.json chi co eyes 08:00:12Z, khong +1.
+  landed: false
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so #891 — CHI KHI chu kho quyet `landed` bang comment tren #891. Comment quyet dinh la NEO, khong
+    phai moc hieu luc (tien le pr759, #685/PR #739).
+  quyet_dinh_chu_kho:
+    trang_thai: cho_chu_kho
+  uy_quyen_head_cuoi:
+    trang_thai: cho_chu_kho
+    quy_tac: >-
+      Theo tien le pr721/pr759: chu kho xac nhan `landed` bang mot comment tren PR ghi so #891, dang SAU commit cuoi cua
+      nhanh ghi so, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc. Readback comment ay
+      KHONG commit vao cay; nguoi merge doi chieu SHA head voi comment ngay truoc khi merge.
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-6AC385F
+      trang_thai: da_dong
+      mo_ta: 'measured — readback-run-39921552473.json + readback-jobs-39921552473.json; chi tiet post_merge_checks[0].'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+      mo_ta: 'Chu kho quyet `landed` tai PR ghi so #891 (uy_quyen_head_cuoi). Ho so nay KHONG tu goi landed.'
+
+review:
+  cross_review:
+    - luot: 1
+      provider: codex
+      verdict: changes_requested
+      reviewed_sha: 8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8
+      so_lop: 'P0 0 / P1 0 / P2 1 / P3 0'
+      hien_vat: ops/reviews/pr889-review-1-codex-verdict.md
+      bien_nhan: ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
+      assurance: cross_reviewed
+      xu_ly: 'P2 windows-green-does-not-prove-all-baselines va o 094e8d1 bang HINT.patch; KHONG review lai bang cross-review.'
+  codex_connector:
+    do_duoc: >-
+      measured — readback-comments-889.json comment 6360319005 (chatgpt-codex-connector[bot]): Code Review Running tu
+      08:00:05Z tren 094e8d1, trigger "Draft marked ready" — kich hoat 5 giay SAU merge 08:00:00Z (readback-pr-889.json
+      merged_at), vi PR duoc chuyen khoi draft ngay truoc merge. readback-reactions-pr-889.json: chi eyes, khong +1 => chua
+      xong luc do (12:55Z). readback-reviews-889.json = [], readback-review-comments-889.json = [].
+    gioi_han: 'Khong co ket qua connector nao tren head da merge; chi cross-review (tren 8d5cccb) la verdict co tep.'
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head 094e8d1 (pull_request)
+    run_id: 39917653371
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-39917653371.json: .github/workflows/ci.yml, event pull_request, head 094e8d1, run_attempt 1,
+      completed/success, updated_at 2026-10-23T07:59:29Z. readback-jobs-39917653371.json: 23 job, 23 success, moi job
+      ubuntu-latest, 0 job runner_id 0, job cuoi xong 2026-10-23T07:59:28Z.
+    check_runs: >-
+      measured — readback-check-runs-094e8d1.json: 26 check run = 23 gate success + 2 thu-hoi success + 1 mo skipped.
+
+post_merge_checks:
+  - ten: gate ci.yml tren merge 6ac385f (push master)
+    run_id: 39921552473
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-39921552473.json: .github/workflows/ci.yml, event push, head_branch master, head_sha 6ac385f,
+      run_attempt 1, completed/success, created 2026-10-23T08:00:02Z, updated 09:13:16Z. readback-jobs-39921552473.json:
+      23 job, 23 success, moi job ubuntu-latest, 0 job runner_id 0.
+
+bookkeeping:
+  - viec: luu verdict cross-review codex luot 1 vao ops/reviews
+    trang_thai: trong_pr_ghi_so
+    nguon: 'ops/reviews/pr889-review-1-codex-verdict.receipt.yaml — cung PR ghi so #891 (chua merge luc soan).'
+  - viec: ho so land nay
+    trang_thai: trong_pr_ghi_so
+    nguon: 'PR ghi so #891 (chua merge luc soan).'
+
+no_con_mo:
+  - id: DUYET-CHI-TRONG-PHIEN
+    mo_ta: 'Loi duyet merge chi co trong phien (authorization_ghi_chu); khong co comment GitHub neo SHA truoc merge.'
+  - id: HEAD-MERGE-KHONG-CO-REVIEW-HOAN-TAT
+    mo_ta: >-
+      094e8d1 khong co review nao HOAN TAT: cross-review cham 8d5cccb, connector chay tren 094e8d1 nhung chua xong luc ghi so
+      (do_duoc o review.codex_connector). Merge truoc khi doc ket qua connector — dung bai hoc (a) "gate xanh khong phai da
+      review" trong CLAUDE.md. Cach dong: doc lai comment 6360319005 khi connector xong; co finding thi vá bang PR moi.
+
+ghi_chu: >-
+  Ho so cua lan sua dau tien doan (c): ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.

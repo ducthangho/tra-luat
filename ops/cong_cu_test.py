@@ -7286,8 +7286,10 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
     cli_dn = {t: kq.get(t) for t, (rc, dau_ra) in (("cli_dn_rong", (0, "KHÔNG ĐO")), ("cli_dn_khong_co", (0, "KHÔNG ĐO")),
                                                  ("cli_dn_day_du", (1, "[G-rong]")), ("cli_dn_vang", (1, "[G-rong]")))
               if not (kq.get(t) and kq[t][0] == rc and dau_ra in kq[t][1])}
+    # Neo vào DẤU của đường nhanh, không vào "KHÔNG ĐO": dưới đột biến cây tạm không phải git nên gom thật đỏ `[G-head]
+    # … KHÔNG ĐO ĐƯỢC` — đúng là ĐỎ, nhưng chuỗi con ấy làm ca chết dưới MỌI đột biến (CI #895, mảnh 1: 26 lỗi bán kính).
     cli_dn.update({"cli_dn_tep_an": kq.get("cli_dn_tep_an")} if not (kq.get("cli_dn_tep_an") and kq["cli_dn_tep_an"][0] >= 1
-                                                                  and "KHÔNG ĐO" not in kq["cli_dn_tep_an"][1]) else {})
+                                                                  and "=duong_nhanh, 0 mảnh" not in kq["cli_dn_tep_an"][1]) else {})
     bang(not cli_dn, f"đường nhanh qua CỬA CLI `--gop` (tiến trình con, env riêng) sai: {cli_dn}")
     # F16: bộ ĐÚNG cấu trúc, SAI kết quả (đích sống ở đầu mảnh 0, tín dụng giả ở giữa mảnh 1, bán kính 2 ở cuối mảnh 2)
     # ⇒ ĐÚNG 3 lỗi, bảng ĐỦ (N−3 dòng `ok` + 3 dòng ĐỎ), SỐ LIỆU nói đúng 3. F17: cùng thứ ấy qua CLI THẬT, cộng đường

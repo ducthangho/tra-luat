@@ -1,0 +1,30 @@
+needs = ['chuan-bi', 'gate-cong-cu']
+job.if = ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+matrix = {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'exclude': [{'os': 'windows-latest'}]}
+os= ['windows-latest'] cancelled= False job-condition(!cancelled && ubuntu in os)= False expanded-if-forced= []
+os= ['windows-latest'] cancelled= True job-condition(!cancelled && ubuntu in os)= False expanded-if-forced= []
+os= ['ubuntu-latest'] cancelled= False job-condition(!cancelled && ubuntu in os)= True expanded-if-forced= [{'os': 'ubuntu-latest'}]
+os= ['ubuntu-latest'] cancelled= True job-condition(!cancelled && ubuntu in os)= False expanded-if-forced= [{'os': 'ubuntu-latest'}]
+os= ['ubuntu-latest', 'windows-latest'] cancelled= False job-condition(!cancelled && ubuntu in os)= True expanded-if-forced= [{'os': 'ubuntu-latest'}]
+os= ['ubuntu-latest', 'windows-latest'] cancelled= True job-condition(!cancelled && ubuntu in os)= False expanded-if-forced= [{'os': 'ubuntu-latest'}]
+582:   # Job GOM: KHÔNG tin phán quyết của mảnh — dựng lại phân hoạch từ `DOT_BIEN` của chính nó, kiểm từng bản ghi bằng
+583:   # cùng bộ nhận của đường song song, ĐỎ khi thiếu/trùng mảnh, lệch băm/HEAD, lệch tổng. `!cancelled()`: mảnh đỏ thì
+584:   # gom VẪN chạy và ĐỎ vì thiếu mảnh — `needs` mặc định sẽ cho nó `skipped`, mà `skipped` đọc như xanh ở check bắt buộc.
+585:   # Sau land: chủ kho thêm context `gate-cong-cu-gop (ubuntu-latest)` vào ruleset (spec #668 §7).
+586:   # wp879: gom CHỈ trên ubuntu-latest (Windows không còn mảnh để gom). `os` vẫn lấy từ `chuan-bi` (chốt nguồn duy nhất,
+587:   # `t161`) và loại `windows-latest`; `if` theo cùng output ⇒ lượt `runner_set=windows-only` (#878) thì job này `skipped`
+588:   # trước khi ma trận rỗng, không đỏ oan vì "thiếu mảnh 0..7".
+589:   gate-cong-cu-gop:
+590:     needs: [chuan-bi, gate-cong-cu]
+591:     if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+592:     strategy:
+593:       fail-fast: false
+594:       matrix:
+595:         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+596:         exclude:
+597:           - {os: windows-latest}
+598:     runs-on: ${{ matrix.os }}
+Measured: YAML condition false and forced matrix empty for windows-only.
+NOT MEASURED: GitHub server job.if-before-matrix scheduling, actual skipped state/run ID/attempt/runner.
+Reasoned expectation: job.if evaluated before strategy.matrix means skipped; exclude alone does not prove skipped.
+probe_rc=0

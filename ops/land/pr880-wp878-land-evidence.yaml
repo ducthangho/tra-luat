@@ -1,0 +1,78 @@
+# HO SO LAND — packet #878 wp878 r1 g1, ma qua PR #880. Khuon: ops/land/pr873-wp868-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor;
+# not_measured = khong do duoc. Readback tho: ops/land/pr880-wp878-provenance/ (GET qua proxy phien bang GITHUB_PAT,
+# script thu_thap.py cua phien; SHA256SUMS kem).
+
+schema_version: 1
+mission_id: gh-878
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01QFJQm8mNRrRmPUhkqciiC2
+input_packet_generations:
+  - {packet_issue: 878, packet_id: wp878, revision: 1, generation: 1, lease_id: wp878-r1-g1-claude}
+authorized_head_sha: ab2842378652cf03c1d5964c927abb2391f2834f
+authorized_head_tree: 0de09eee4329870875ab19b6aa2a60b7a5cf69f0
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/880
+authorization_ghi_chu: >-
+  measured — readback-pr-880.json merged_by=ducthangho, merged_at 2026-10-23T01:19:34Z. Lease ghi uy_quyen_merge: false;
+  executor KHONG merge. Thao tac merge la cua tai khoan chu kho; KHONG_DO_DUOC bam tay hay qua phien khac.
+  Chi thi ghi so land: ghi ho issuecomment-6365282119 tren #879, nguyen van "Làm 4 rồi 1 theo gợi ý".
+land_operator: 'measured — readback-pr-880.json merged_by=ducthangho; readback-events-880.json (su kien merged/closed).'
+merge_method: merge
+merge_commit: 747f983ccbcaf29a8e5228d09fd05b5a5ab6e479
+merge_commit_tree: e90538be053b07d47987932a7ca899c073fd4598
+merge_commit_parents: [fdaad3f78ab8355495f40fdd91d330b3416c0887, ab2842378652cf03c1d5964c927abb2391f2834f]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261023/merge-va-diff.txt: diff cha1..merge bang byte diff merge-base..head = True;
+  Head cuối = head được review (ab28423).
+pre_merge_checks:
+  - {name: 'ci.yml pull_request — head cuoi', run_id: 39820225138, run_attempt: 1, sha: ab2842378652cf03c1d5964c927abb2391f2834f, conclusion: success, jobs: '23/23 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-747f983-ab28423.txt: run 39820225138 attempt 1 event pull_request conclusion success suite 107924758988 23 ten (bo skipped) rc=0', nguon: [readback-run-39820225138.json, readback-jobs-39820225138.json, readback-check-runs-ab28423-all.json]}
+  - {name: 'launcher-windows.yml pull_request — head cuoi', run_id: 39820225170, conclusion: skipped, ghi_chu: 'measured — readback-run-39820225170.json: skipped vi PR khong mang nhan windows (paths/label); KHONG phai gate.'}
+  - {name: 'ci.yml workflow_dispatch Windows — trước merge, head TRƯỚC commit sửa review (N4 hình dạng: 22 job, 1 job Ubuntu là chuan-bi)', run_id: 39814923201, sha: 52e1f0b69d90247c6b7c90730b81ff8af3de3cba, conclusion: failure, ghi_chu: 'measured — readback-jobs-39814923201.json: đo hình dạng N4; job Windows đỏ đều là packet khác (#853/#854/#855, r812).'}
+  - {name: 'cross-review Codex (lop sensitive)', conclusion: 'luot1 (52e1f0b) changes_requested — P2 bộ tách cắt toán tử trong literal, P3 ngữ pháp tên input; luot2 (ab28423) approve; một P3 nợ có tên evaluator-accepts-non-actions-whitespace', nguon: [verdicts/wp878-g1-luot1-codex-verdict.md, verdicts/wp878-g1-luot2-codex-verdict.md], ghi_chu: 'measured — dong verdict/reviewed_sha o dau verdicts/wp878-g1-luot2-codex-verdict.md; ban chep nguyen byte tu nhanh ops/wp878-r1-g1-lease.'}
+  - {name: 'thread review', conclusion: '0 review, 0 review comment; comment 6355048652 (connector, Draft marked ready, không finding)', nguon: [readback-reviews-880.json, readback-review-comments-880.json, readback-comments-880.json]}
+  - {name: 'dieu kien kich thuoc', conclusion: '5 tep, +183 -52', nguon: [readback-pr-880.json]}
+post_merge_checks:
+  - {name: 'launcher-windows.yml push — DUNG merge SHA', run_id: 39883350733, run_attempt: 1, sha: 747f983ccbcaf29a8e5228d09fd05b5a5ab6e479, conclusion: success, jobs: '2/2 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-747f983-ab28423.txt: run 39883350733 attempt 1 event push conclusion success suite 108099784836 2 ten (bo skipped) rc=0', nguon: [readback-run-39883350733.json, readback-jobs-39883350733.json, readback-check-runs-747f983-all.json]}
+  - {name: 'ci.yml push — DUNG merge SHA', run_id: 39883350847, run_attempt: 1, sha: 747f983ccbcaf29a8e5228d09fd05b5a5ab6e479, conclusion: success, jobs: '23/23 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261023/kiem-gate-747f983-ab28423.txt: run 39883350847 attempt 1 event push conclusion success suite 108099785168 23 ten (bo skipped) rc=0', nguon: [readback-run-39883350847.json, readback-jobs-39883350847.json, readback-check-runs-747f983-all.json]}
+bookkeeping:
+  - {item: 'chi thi ghi so land (ghi ho)', ket_qua: 'loi_khai_co_neo — issuecomment-6365282119 tren #879'}
+  - {item: 'lease wp878-r1-g1-claude', ket_qua: 'ĐÃ BỊ THAY THẾ bằng bia mộ hai chiều: da_bi_thay_the wp879-r1-g1-claude (commit 96e8544 trên ops/wp878-r1-g1-lease), lease wp879 khai thay_the_cho; còn hạn tới 2026-10-23T15:49:00Z nhưng ai-dang-giu không tính là người giữ.'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-871-854-878-879-land}
+# ---- het truong chuan
+packet_id: wp878
+packet_issue: 878
+generation: 1
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_01QFJQm8mNRrRmPUhkqciiC2 — CUNG phien la executor cua packet. Ghi so theo chi thi chu kho ghi ho issuecomment-6365282119.
+
+spec:
+  path: ops/specs/wp878.md (nhanh ops/wp878-spec)
+lease:
+  lease_id: wp878-r1-g1-claude
+  path: ops/leases/wp878-r1-g1-claude.yaml (nhanh ops/wp878-r1-g1-lease)
+  ban_chep: 'measured — do-lai-nguon-20261023/lease-wp878-r1-g1-claude.yaml.txt (ban tren nhanh lease luc thu readback)'
+  lease_until_ban_dau: '2026-10-23T15:49:00Z'
+  thu_hoi_cuoi: 'ĐÃ BỊ THAY THẾ bằng bia mộ hai chiều: da_bi_thay_the wp879-r1-g1-claude (commit 96e8544 trên ops/wp878-r1-g1-lease), lease wp879 khai thay_the_cho; còn hạn tới 2026-10-23T15:49:00Z nhưng ai-dang-giu không tính là người giữ.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-880.json: merged true, merged_at 2026-10-23T01:19:34Z, merge_commit_sha 747f983, head.sha ab28423.'
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh, kiem-gate rc=0 (post_merge_checks); (2) lease khong con giu write set
+    (bookkeeping/lease.thu_hoi_cuoi); (3) review approve neo head cuoi hoac head co write set giong het; (4) noi dung merge = diff PR;
+    (5) merge boi tai khoan chu kho. `landed: true` hieu luc khi PR ghi so nay vao master.
+
+khong_do_duoc:
+  - 'Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).'
+  - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'

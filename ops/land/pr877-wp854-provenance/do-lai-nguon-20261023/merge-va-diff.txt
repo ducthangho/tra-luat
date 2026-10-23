@@ -1,0 +1,7 @@
+merge daf89615efff9fde33039036ddf7f23ec9cb1c10 cha1 9d4cb6ad2b3a303e4c23e682a7da9a8af909d631 head 4158ef63cad2aad9470f75863dc7549167695df1 merge-base(cha1,head) e63961f27b53e66db8e6600009f97d5706743063
+git diff cha1 merge   : sha256 7ff853f20e8d1178d5056ea57e876aa24fed8d37fa0460be034467da44f2e400 (89 dong)
+git diff mb head (PR) : sha256 7ff853f20e8d1178d5056ea57e876aa24fed8d37fa0460be034467da44f2e400 (89 dong)
+BANG BYTE: True
+tep doi trong merge: ['.claude/hooks/subagent_ghi_detect_test.py']
+git diff reviewed b952c106ba6bbf94699bda5fe5fb2f6d7f7256fb -> head 4158ef63cad2aad9470f75863dc7549167695df1 tren write set ['.claude/hooks/subagent_ghi_detect_test.py']: 0 dong
+tree merge e7fb38978fdba89170459e35490282ea0cc1caef · tree head 98f06ec0b066c9212d46a11d1a8ed141c1a956f6

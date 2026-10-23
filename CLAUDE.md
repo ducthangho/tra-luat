@@ -168,9 +168,11 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   **Nguồn sự thật, theo thứ tự hỏi:**
   · ma trận dự kiến = output `os` của job `chuan-bi` trong `.github/workflows/ci.yml`, cộng `exclude:` và
   `if:` mức job của TỪNG job `gate*` (một job có thể loại Windows dù `os` có Windows);
-  · hành vi ấy được khoá bằng `t161_M3_chot_nguon_duy_nhat_ma_tran_ci` trong `ops/lease_publish_test.py`
+  · hành vi ấy được khoá bằng `t162_M4_evaluator_toi_gian_chuan_bi` trong `ops/lease_publish_test.py`
   (đánh giá biểu thức thật bằng `_danh_gia_bieu_thuc_chuan_bi` cho push / PR thường / PR nhãn `windows` /
-  từng `runner_set`) — đổi ma trận mà quên ca ấy thì gate ĐỎ, nên đọc ca ấy là đọc ma trận HIỆN HÀNH;
+  từng `runner_set`) — đổi ma trận mà quên ca ấy thì gate ĐỎ, nên đọc ca ấy là đọc ma trận HIỆN HÀNH.
+  Ca liền trước, `t161_M3_chot_nguon_duy_nhat_ma_tran_ci`, chỉ khoá CẤU TRÚC (mọi job lấy `os` từ
+  `chuan-bi`, output không bọc `fromJSON`) — nó KHÔNG đánh giá biểu thức, nên đừng đọc nó thành ma trận;
   · một lượt chạy CỤ THỂ đã đo nền nào = trường `labels` của từng job trong `actions/runs/<id>/jobs`
   (kèm `runner_id` khác 0 — `runner_id 0` là job chưa từng chạy). Đừng suy từ tên sự kiện hay tên workflow.
   Ảnh chụp để định hướng, KHÔNG phải nguồn (đo 23-10-2026 trên `e63961f`, có thể đã cũ khi bạn đọc): push

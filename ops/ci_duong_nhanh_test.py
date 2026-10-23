@@ -2133,12 +2133,23 @@ def y03_buoc_nang_mang_if_bo_theo_che_do():
                  f"{job}/{ten}: `if:` phai la DUNG {mong!r} (giu dieu kien nen cu, them dieu kien che_do), duoc {b.get('if')!r}")
 
 
+# wp892 (#892, spec r2 — chu kho chon "Nới y04 hẹp, spec r2"): DUNG hai ngoai le, so NGUYEN VAN. Luat goc giu nguyen
+# cho moi cho khac: bo CA job theo che_do thi check VANG MAT. `gate-cong-cu` (8 manh) KHONG la context bat buoc; context
+# bat buoc `gate-cong-cu-gop` van chay va doc che_do qua DUNG mot bien env de noi KHONG DO thay vi `skipped`.
+Y04_IF_JOB_CHE_DO = {"gate-cong-cu": "needs.chuan-bi.outputs.che_do != 'duong_nhanh'"}
+Y04_ENV_BUOC_CHE_DO = {("gate-cong-cu-gop", "G5 gom manh ban kinh dot bien (#668)"):
+                       {"CONG_CU_TEST_GOP_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}}
+
+
 @ca
 def y04_tap_buoc_mang_if_che_do_khop_dung():
     wf = doc_wf()
     for job, cau_hinh in wf["jobs"].items():
-        bang("che_do" not in str(cau_hinh.get("if", "")) and "che_do" not in str(cau_hinh.get("strategy", "")),
-             f"{job}: `che_do` khong duoc xuat hien o `if:`/strategy cap JOB (bo ca job = check VANG MAT)")
+        if_job = str(cau_hinh.get("if", ""))
+        bang(("che_do" not in if_job or (job in Y04_IF_JOB_CHE_DO and chuan_hoa_if(cau_hinh["if"]) == Y04_IF_JOB_CHE_DO[job]))
+             and "che_do" not in str(cau_hinh.get("strategy", "")),
+             f"{job}: `che_do` khong duoc xuat hien o `if:`/strategy cap JOB (bo ca job = check VANG MAT) — ngoai le "
+             f"duy nhat {Y04_IF_JOB_CHE_DO}")
         thay = set()
         for b in cau_hinh.get("steps") or []:
             if "che_do" in str(b.get("if", "")):
@@ -2148,8 +2159,9 @@ def y04_tap_buoc_mang_if_che_do_khop_dung():
                     bang(BO_QUA.get(job, {}).get(ten_buoc(b)) == nd, f"{job}/{ten_buoc(b)}: dang `if:` khong thuoc danh sach cho phep: {nd!r}")
                 else:
                     bang(nd == NHANH, f"{job}/{ten_buoc(b)}: dang `if:` theo che_do khong thuoc danh sach cho phep: {nd!r}")
-            bang("che_do" not in str(b.get("env", "")) and "che_do" not in str(b.get("with", "")),
-                 f"{job}/{ten_buoc(b)}: che_do khong duoc chay vao env/with cua buoc")
+            env_ok = "che_do" not in str(b.get("env", "")) or b.get("env") == Y04_ENV_BUOC_CHE_DO.get((job, ten_buoc(b)))
+            bang(env_ok and "che_do" not in str(b.get("with", "")),
+                 f"{job}/{ten_buoc(b)}: che_do khong duoc chay vao env/with cua buoc — ngoai le duy nhat {Y04_ENV_BUOC_CHE_DO}")
         mong = set(BO_QUA.get(job, {}))
         bang(thay == mong, f"{job}: tap buoc bi bo theo che_do phai KHOP DUNG danh sach: thua {sorted(thay - mong)}, thieu {sorted(mong - thay)}")
 
@@ -3263,9 +3275,16 @@ DOT_BIEN = [
     ("yml_gop_bo_if", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}\n", "    needs: [chuan-bi, gate-cong-cu]\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     # wp879: bo dieu kien ubuntu khoi `if` cua gom ⇒ luot windows-only gom DO oan vi thieu manh.
     ("yml_gop_if_bo_ubuntu", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}\n", "    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() }}\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
-    ("yml_them_if_cung_bieu_thuc_vao_job_manh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ !cancelled() }}\n"),
-    # wp892: bo `if:` duong nhanh cua job manh ⇒ PR ho so van dot 8 manh.
-    ("yml_manh_bo_if_duong_nhanh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    ("yml_them_if_cung_bieu_thuc_vao_job_manh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ !cancelled() }}\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
+    # wp892: bo `if:` duong nhanh cua job manh ⇒ PR ho so van dot du cac manh.
+    # wp892 r2: nhung dang nam NGOAI hai ngoai le cua y04 — moi cai phai DO dung y04.
+    ("y04_if_che_do_vao_job_gate", _yml("  gate:\n    needs: chuan-bi\n", "  gate:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+    ("y04_if_che_do_vao_job_gom", _yml("    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}\n", "    needs: [chuan-bi, gate-cong-cu]\n    if: ${{ !cancelled() && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+    ("y04_if_manh_doi_dang", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do == 'day_du' }}\n"), ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+    ("y04_env_ten_khac", _yml("        env:\n          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n", "        env:\n          CONG_CU_TEST_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n"), ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+    ("y04_env_them_khoa", _yml("        env:\n          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n", "        env:\n          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n          PHU: ${{ needs.chuan-bi.outputs.che_do }}\n"), ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+    ("y04_env_vao_buoc_khac", _yml("      - name: G5 manh ban kinh dot bien (#668)\n        shell: bash\n", "      - name: G5 manh ban kinh dot bien (#668)\n        shell: bash\n        env:\n          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}\n"), ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
+    ("yml_manh_bo_if_duong_nhanh", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n", "  gate-cong-cu:\n    needs: chuan-bi\n"), ("y11_khong_job_nao_co_if_cap_job_ngoai_danh_sach_cho_phep",)),
     ("yml_them_if_false_vao_buoc_gom", _yml("      - name: G5 gom manh ban kinh dot bien (#668)\n", "      - name: G5 gom manh ban kinh dot bien (#668)\n        if: false\n"), ("y12_moi_if_cap_buoc_khop_dung_danh_sach_cho_phep",)),
     ("yml_bot_manh_g5", _yml("  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3, 4, 5, 6, 7]\n", "  gate-cong-cu:\n    needs: chuan-bi\n    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n    strategy:\n      fail-fast: false\n      matrix:\n        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}\n        manh: [0, 1, 2, 3]\n"), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),
     ("yml_g5_gate_bo_env_ban_kinh", _yml("        env:\n          CONG_CU_TEST_BAN_KINH: manh\n", ""), ("y13_khoa_topology_cua_ci_yml_ngoai_than_run",)),

@@ -1,0 +1,2 @@
+# sha256 spec, do 2026-10-24T10:09:10Z
+r1 683d648a678e93ec874d32e9d611aca88d756cd2088391ddbfb406d807452337  -  origin/ops/wp906-spec:ops/specs/wp906.md

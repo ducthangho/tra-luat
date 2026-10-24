@@ -87,6 +87,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -1586,6 +1587,63 @@ def _kiem_checkpoint(a, kq) -> str | None:
         raise Chan(MA_THAM_SO, "Checkpoint/HEAD/prompt không khớp; chưa materialize hoặc resume") from None
 
 
+# wp748 r25 (#748 issuecomment-6378484722; đo 24-10-2026, codex-cli 0.163.0) — MODEL DO MÁY CHỦ TRẢ cho từng
+# response của lượt codex. `--json`, rollout `~/.codex/sessions` và `logs_2.sqlite` đều KHÔNG có nó (rollout chỉ có
+# model CẤU HÌNH); chỉ khung `response.created`/`response.completed` mà máy chủ gửi về mới mang `response.model`, và
+# khung ấy chỉ lộ ra ở log trace của target `tungstenite::protocol`. Log trace thô chứa thông tin xác thực (đo được:
+# 13 dòng nhắc `authorization`), nên: dòng TRACE/DEBUG và mọi dòng nối tiếp của nó KHÔNG BAO GIỜ chạm đĩa — chỉ
+# {response_id, model} được giữ trong bộ nhớ. Bật trace hẹp là để giảm lượng đi qua ống; LỌC mới là chốt.
+_RUST_LOG_DO_MODEL = "tungstenite::protocol=trace"
+_RE_ANSI_B = re.compile(rb"\x1b\[[0-9;]*m")
+_RE_DAU_LOG = re.compile(rb"^\d{4}-\d\d-\d\dT\S*\s+(TRACE|DEBUG|INFO|WARN|ERROR)\b")
+_DAU_KHUNG = b"Received message "
+
+
+def _la_codex(lenh) -> bool:
+    return Path(lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")
+
+
+def _loc_stderr_codex(ong, f_err, ket: list, loi: list) -> None:
+    """Đọc stderr của con codex tới EOF. Dòng log mức TRACE/DEBUG, kèm mọi dòng không mở đầu bằng dấu thời gian đứng
+    ngay sau nó, bị BỎ; các dòng khác ghi nguyên byte vào `f_err`. Khung máy chủ hợp lệ thì thêm
+    {response_id, model, su_kien} vào `ket` (khử trùng theo response_id + model, giữ thứ tự đến). Bộ lọc hỏng thì
+    ghi tên lỗi vào `loi` rồi XẢ phần còn lại của ống không ghi gì: con không bị treo vì ống đầy, và không dòng chưa
+    lọc nào chạm đĩa (đo được lúc viết: một lỗi kiểu trong luồng làm sổ báo KHONG_DO_DUOC im lặng)."""
+    try:
+        _loc_tung_dong(ong, f_err, ket)
+    except Exception as e:
+        loi.append(type(e).__name__)
+        with contextlib.suppress(Exception):
+            for _ in iter(ong.readline, b""):
+                pass
+
+
+def _loc_tung_dong(ong, f_err, ket: list) -> None:
+    bo = False
+    for dong in iter(ong.readline, b""):
+        sach = _RE_ANSI_B.sub(b"", dong)
+        dau = _RE_DAU_LOG.match(sach)
+        if dau:
+            bo = dau.group(1) in (b"TRACE", b"DEBUG")
+        if bo:
+            i = sach.find(_DAU_KHUNG)
+            if dau and i >= 0:
+                try:
+                    ev = json.loads(sach[i + len(_DAU_KHUNG):].decode("utf-8", "replace"))
+                except ValueError:
+                    ev = None
+                r = ev.get("response") if isinstance(ev, dict) else None
+                if (ev and ev.get("type") in ("response.created", "response.completed") and isinstance(r, dict)
+                        and isinstance(r.get("id"), str) and isinstance(r.get("model"), str) and r["model"]):
+                    if not any(m["response_id"] == r["id"] and m["model"] == r["model"] for m in ket):
+                        ket.append({"response_id": r["id"], "model": r["model"], "su_kien": ev["type"]})
+            continue
+        try:
+            f_err.write(dong)
+        except ValueError:
+            pass                 # tệp đã đóng vì hậu duệ giữ ống quá hạn chờ: bỏ, không ghi lệch chỗ
+
+
 def lenh_run(a) -> int:
     # Git/probes must never inherit the snapshot, including rejected resumes.
     snapshot = os.environ.pop("CODEX_AUTH_JSON", "")
@@ -1598,7 +1656,7 @@ def lenh_run(a) -> int:
         snapshot = ""
         if not ket or not all(x.get("ok") for x in ket):
             raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
-    if Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd"):
+    if _la_codex(a.lenh):
         if _cho_snapshot_hoac_chan():
             raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
@@ -1706,8 +1764,17 @@ def lenh_run(a) -> int:
                    "con se nhan chuoi nguyen van")
 
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
-    f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")
+    do_model = _la_codex(a.lenh)
+    # Lượt codex: stderr đi qua ỐNG và bộ lọc, tệp mở nhị phân để ghi đúng byte dòng không phải trace.
+    f_err = (thu_muc / "stderr.log").open("wb" if do_model else "w", **({} if do_model else {"encoding": "utf-8"}))
     them = {}
+    model_ket: list = []
+    loi_loc: list = []
+    luong_loc = None
+    if do_model:
+        env = dict(os.environ)
+        env["RUST_LOG"] = (env["RUST_LOG"] + "," if env.get("RUST_LOG") else "") + _RUST_LOG_DO_MODEL
+        them["env"] = env
     if platform.system() == "Windows":
         them["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
@@ -1715,7 +1782,11 @@ def lenh_run(a) -> int:
         them["start_new_session"] = True
     try:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
-                             stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
+                             stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
+                             stdin=subprocess.DEVNULL, **them)
+        if do_model:
+            luong_loc = threading.Thread(target=_loc_stderr_codex, args=(p.stderr, f_err, model_ket, loi_loc), daemon=True)
+            luong_loc.start()
     except (OSError, ValueError) as e:
         if isinstance(e, ValueError):
             ban_ghi.pop("void_reason", None)
@@ -1780,7 +1851,20 @@ def lenh_run(a) -> int:
         ma = 130
     finally:
         f_out.close()
+        if luong_loc is not None:
+            # Hậu duệ còn giữ ống thì EOF không tới: chờ có hạn, rồi nói thẳng danh sách có thể thiếu.
+            luong_loc.join(timeout=10)
+            if luong_loc.is_alive():
+                ban_ghi["model_phuc_vu_ghi_chu"] = "ong stderr con mo sau 10s (hau due giu ong); danh sach co the thieu"
         f_err.close()
+    if do_model:
+        ban_ghi["model_phuc_vu"] = list(model_ket)
+        ban_ghi["model_phuc_vu_trang_thai"] = "DO_DUOC" if model_ket and not loi_loc else "KHONG_DO_DUOC"
+        if loi_loc:
+            ban_ghi["model_phuc_vu_ly_do"] = f"bo loc stderr hong ({loi_loc[0]}); phan con lai cua stderr da bi bo"
+        elif not model_ket:
+            ban_ghi["model_phuc_vu_ly_do"] = ("khong thay khung response.created/response.completed nao mang model "
+                                              "trong stderr cua con; KHONG suy tu -m hay cau hinh")
 
     if khoa is None and qua_han:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"

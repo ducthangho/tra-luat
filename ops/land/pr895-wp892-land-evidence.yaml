@@ -82,10 +82,14 @@ no_p3:
   - {id: gom-co-nhe-ke-thua-lam-do-main, owner: executor wp892, quyet_dinh: chap_nhan, nguon: verdicts/wp892-g1-luot4-codex-verdict.md}
   - {id: gom-ban-nhe-ghim-dinh-dang-ngoai-hop-dong, owner: executor wp892, quyet_dinh: chap_nhan, nguon: verdicts/wp892-g1-luot4-codex-verdict.md}
 n4b:
-  trang_thai: chua_do
-  cach_do: >-
-    PR ghi so nay chi doi ops/land/** nen la PR ho so that dau tien sau merge 76cf4c5: doi 8 manh gate-cong-cu skipped,
-    gate-cong-cu-gop success voi dong GOM: KHONG DO, phut runner tu jobs API. Ket qua ghi o commit sau cua chinh PR nay.
+  trang_thai: dat
+  pr_do: 900
+  run_id: 40045105383
+  sha: ee5556638af1af77da1979b8a55f341d6aefe741
+  manh_skipped: 'measured — n4b-pr900/readback-check-runs-ee55566-all.json: MOT check gate-cong-cu conclusion skipped; ma tran khong no khi bi bo o muc job nen khong co 8 check (ubuntu-latest, k).'
+  gom: 'measured — n4b-pr900/log-gate-cong-cu-gop-120724994766.txt: gate-cong-cu-gop (ubuntu-latest) success 11 s; Total of 0 artifact(s) downloaded; env CONG_CU_TEST_GOP_CHE_DO: duong_nhanh; dong GOM: KHÔNG ĐO — PR chỉ đổi hồ sơ (CONG_CU_TEST_GOP_CHE_DO=duong_nhanh, 0 mảnh); 490 đột biến không chạy ở lượt này.'
+  phut_runner: 'measured — n4b-pr900/do-phut.txt (do-phut.py tren readback jobs): PR ho so 900 tong 28,7 phut, gate-cong-cu* 0,2 phut, 16 job; PR ma 895 head cuoi (run 39995598909, day_du) tong 376,4 phut, gate-cong-cu* 280,6 phut, 23 job.'
+  download_artifact: 'measured — n4b-pr900/log-gate-cong-cu-gop-120724994766.txt: pattern khong khop ⇒ 0 artifact, buoc thanh cong, khong nem loi; xac nhan loi khai doc ma nguon cua cross-review luot 2.'
 khong_do_duoc:
   - 'Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).'
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'

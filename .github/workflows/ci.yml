@@ -513,8 +513,11 @@ jobs:
   # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
   # wp879 (#879): Windows chỉ còn MỘT job (mảnh 0) và `cong_cu_test.py` ở đó chạy ĐỦ ca nền rồi dừng (`nen_bo_qua_dot_bien`)
   # — 111/118 lượt mảnh Windows không xanh vì lý do của nền (#853), mỗi lượt 570–650 phút. Bán kính đo trên ubuntu-latest.
+  # wp892 (#892): PR chỉ đổi hồ sơ (`che_do == duong_nhanh`, #674) thì 8 mảnh `skipped` (0 phút runner). Chỉ ĐÚNG chuỗi ấy
+  # mới bỏ — rỗng/vắng/lạ ⇒ chạy; push master và `workflow_dispatch` luôn `day_du` ⇒ bán kính đủ trên master không đổi.
   gate-cong-cu:
     needs: chuan-bi
+    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
     strategy:
       fail-fast: false
       matrix:
@@ -621,6 +624,9 @@ jobs:
           merge-multiple: true
       - name: G5 gom manh ban kinh dot bien (#668)
         shell: bash
+        # wp892: gom là context BẮT BUỘC — với `duong_nhanh` + 0 mảnh nó in "KHÔNG ĐO" và XANH, không `skipped`.
+        env:
+          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}
         run: python ops/cong_cu_test.py --gop manh
 
   gate-ops:

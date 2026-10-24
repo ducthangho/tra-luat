@@ -43,7 +43,8 @@ nang_tran:
 ```
 
 Khối parse được bằng `yaml.safe_load` (đo trước khi đóng băng, xem "Thay đổi so với r3"). Bốn trường đầu chép NGUYÊN VĂN
-từ thân comment đã đăng (chỉ đổi gạch đầu dòng thành khoá YAML và gấp cột `can_cu`); `neo` là trường duy nhất khối có mà
+từ thân comment đã đăng (đổi gạch đầu dòng thành khoá YAML, gấp cột `can_cu`, và xếp `can_cu` lên trước `tran_cu` theo thứ tự
+ADR-0053 dòng 34–38; so từng trường sau `yaml.safe_load`: 4/4 trường bằng nhau từng ký tự, đo 17:14Z 23-10-2026); `neo` là trường duy nhất khối có mà
 comment không có. Ước ~950 là ƯỚC, chưa phải numstat (mã chưa có): số hạng 700 + ~200 + ~50 ở hàng `kich_thuoc`, không
 nằm trong khối vì comment không có; numstat thật đo trước review bằng `git diff --numstat` base..head. Không cổng nào
 đọc khối này (hàng `kich_thuoc`): người cấp lease và reviewer đo `git diff --numstat` bằng tay và so với `tran_moi`.
@@ -71,7 +72,9 @@ chỉ có `if:` chống huỷ ở dòng 950), và `pull_request:` (dòng 13) kh�
 
 Lịch sử, nền `c522c17` (23:33:41Z–23:33:57Z 15-10-2026; lặp trên `9fddb1d` y hệt): S0 `23/23`, S1 `25/23`, S2 `25/25`,
 S3 `23/25`, `PHẢN CHỨNG: 1025/1025` — cùng rc, cùng số dòng `ĐỎ:`, chỉ số hạng trôi. Đơn vị của `ĐĂNG KÝ: a/b`: a = tệp
-test sống trên cây, b = mục trong sổ; `PHẢN CHỨNG: n/n`: ca phản chứng. Chỉ S2 xanh, nên câu "#752 land trước" của Issue #763, nếu hiểu là merge vào `master`, làm
+test sống trên cây, b = mục trong sổ; `PHẢN CHỨNG: n/n`: ca phản chứng. Chỉ S2 xanh, nên thứ tự #752 trước #763 (câu mà `ops/specs/no-p3-dang-ky-ci-r2.md` dòng 16 @ `6c2fe9b` trích từ thân Issue #763;
+thân hiện tại, sửa lần cuối 2026-10-16T01:13:45Z, KHÔNG còn câu ấy — `#752 land trước` 0 lần và `#752 phải land trước` 0 lần, đo 17:02Z 23-10-2026 —,
+thân cũ KHÔNG ĐO ĐƯỢC lại), nếu hiểu là merge vào `master`, làm
 `gate-registry` VÀ `gate-ops (ubuntu-latest)` của `master` đỏ giữa hai lần merge (cùng một nguyên nhân, B6 d).
 Hai đường giữ được `master` xanh:
 
@@ -101,7 +104,7 @@ phần chênh giữa bản r3 cuối trên nền cũ (`3456ab1`, sha256 `17e1f9c
 | `base` | "nền hiện hành" `1d7e642` | nền ĐÓNG BĂNG `1d7e642`; ghi `master` đã sang `8324567` (13:55:03Z); số phụ thuộc nền đo lại lúc cấp | comment mục 2 |
 | `depends_on` (3) | "#748 land vào `master`", hồ sơ `landed: false` để ngỏ cho chủ kho | #748 ĐÃ MERGE là đủ, không đòi `landed: true`; THOẢ (đo 13:26:45Z); lúc cấp đo lại: bốn merge là tổ tiên của `base_sha` | comment mục 1 |
 | `depends_on` (4), mục `nang_tran` mới, `review_class`, `kich_thuoc`, "Đường land" A | đề xuất 4 tệp / 1.000 dòng thêm, chưa có khối | khối đủ bốn trường cộng `neo`; trần áp cho #752 là `tran_moi` ≤ 4 tệp / ≤ 1.000 dòng thêm; ba vế khi cấp (chép khối, đọc ngược comment, neo `lease_id`/`spec_sha256`) | comment phần `nang_tran`; ADR-0053 dòng 32–38 |
-| B3 | số cứng `13/14 DAT` + `1 MIEN_TRU`, rc 0 — không đạt được trên `1d7e642` | vị từ trên `S`/`E`/`F` tại `base_sha` của lease, bốn vế (i)–(iv); `F` là finding dữ liệu: báo, ghi nợ, không sửa; đột biến công cụ cộng ca đỏ thật trên cây `1d7e642`; vế "gỡ miễn trừ" rời B3 (răng chuyển sang hai ghim ở ca đỏ thật và B2 không tiêm) | comment mục 3 — chỉ câu "vị từ, không số cứng"; S/E/F, báo-không-sửa và ca đỏ thật là thiết kế của đặc tả, chủ kho xác nhận khi cấp lease |
+| B3 | số cứng `13/14 DAT` + `1 MIEN_TRU`, rc 0 — không đạt được trên `1d7e642` | vị từ trên `S`/`E`/`F` tại `base_sha` của lease, bốn vế (i)–(iv); `F` là finding dữ liệu: báo, ghi nợ, không sửa; đột biến công cụ cộng ca đỏ thật trên cây `1d7e642`; vế "gỡ miễn trừ" rời B3 (răng chuyển sang hai ghim ở ca đỏ thật và B2 không tiêm) | comment mục 3 — chỉ câu "Tiêu chí B3 của #752 viết theo vị từ trên tập hồ sơ land lúc cấp lease, không theo số cứng."; S/E/F, báo-không-sửa và ca đỏ thật là thiết kế của đặc tả, chủ kho xác nhận khi cấp lease |
 | Mục tiêu 1 và 3, B3 (iii), B5 | "đầu ra chữ chứa chuỗi glob" | glob phải là một token riêng; thêm đột biến "glob dính hậu tố" | L6 (b), soát dưới |
 | `kich_thuoc`, lời khai "không cổng nào cưỡng chế trần" | đo hai tệp, bốn chuỗi | đo đủ sáu vị trí cổng của PROTOCOL §20, bảy chuỗi | L6 (e) |
 | trích chéo | #763 `no-p3-dang-ky-ci-r1.md`, #751 `no-p3-lease-spec-hash-r3.md` | `no-p3-dang-ky-ci-r2.md`, `no-p3-lease-spec-hash-r4.md`; trích dẫn neo commit (`@ 11134f2`, `@ c3f6f5f`) và các mục lịch sử giữ nguyên | comment mục 2 |
@@ -131,7 +134,14 @@ tiêu chí khớp chuỗi:
   chữ số, và hàm đọc (`bang_chung_xanh`, dòng 677–678) lấy dòng khớp ĐẦU TIÊN — tiêu chí đã đếm số dòng khớp thay vì tin
   dòng đầu; (d) không áp dụng.
 - **`kich_thuoc`, "không cổng nào cưỡng chế trần":** (e) đo đủ sáu vị trí (hàng `kich_thuoc`); r3 chỉ đo hai.
-- Không tiêu chí nào của r4 khớp chuỗi trên TÀI LIỆU kho; tất cả đo đầu ra công cụ hoặc dữ liệu YAML.
+- **B2 (đếm dòng `MIEN_TRU`) và B3 (i) (`ly_do` chứa tên khoá):** (a) vế dương: ca A có đúng một dòng trạng thái `MIEN_TRU`, mỗi
+  tệp `F` có tên khoá trượt trong `ly_do`; vế âm: đột biến gỡ mục hoặc lý do rỗng (B2), `ly_do` rỗng / sai khoá / luôn nêu cả hai
+  khoá (B3). (b) đầu ra chương trình, không bị ngắt cột. (c) đếm theo VỊ TRÍ: dòng `MIEN_TRU` của B2 là dòng của MỘT tệp (cột trạng
+  thái), không phải mọi dòng chứa chữ ấy — mục tiêu 1 buộc in tổng và số `MIEN_TRU`, nên một cài đặt đúng chữ có thể in thêm một
+  dòng tổng kết chứa chữ ấy (đo 17:13Z 23-10-2026 trên bản tham chiếu: `grep -c MIEN_TRU` ra 2 còn đếm theo cột trạng thái ra 1;
+  đổi nhãn tổng kết sang `n_mien_tru` thì ra 1 và 1); `ly_do` kiểm theo từng tệp `F` và theo CẢ HAI chiều (chứa tên khoá trượt,
+  không chứa tên khoá đạt); hai tên khoá không là chuỗi con của nhau. (d) không áp dụng.
+- Ngoài hai tiêu chí trên, không tiêu chí nào của r4 khớp chuỗi trên TÀI LIỆU kho; tất cả đo đầu ra công cụ hoặc dữ liệu YAML.
 
 ## Thay đổi so với r2
 
@@ -332,15 +342,22 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
   đúng chữ rc 3, đảo thứ tự rc 1, trong khi cây chỉ có hồ sơ trượt (rc 1) hay chỉ có YAML hỏng (rc 3) không phân biệt
   được hai bản; thẻ `!!python/object/apply:builtins.print` — đúng chữ rc 3 và tải trọng KHÔNG chạy, `unsafe_load` rc 1
   và tải trọng CHẠY (reviewer lượt 2 dùng hồ sơ có đủ hai khoá nên ghi rc 0; cả hai đều khác 3).
-- **B2 (miễn trừ — đo HẰNG CỦA BẢN GIAO, không tiêm):** chạy CLI thật, không tiêm danh sách, trên cây tạm chỉ có bản
-  sao nguyên byte của `ops/land/pr672-wp574-land-evidence.yaml` (`landed: true`, thiếu hai khoá ở mức gốc) ⇒ rc 0 và
-  đúng MỘT dòng `MIEN_TRU` kèm lý do khác rỗng; cùng lệnh trên cây tạm KHÔNG có tệp ấy ⇒ rc 3 (miễn trừ vắng). Hai ca
+- **B2 (miễn trừ — đo HẰNG CỦA BẢN GIAO, không tiêm):** chạy CLI thật, không tiêm danh sách, trên cây tạm mà test tự DỰNG
+  (không chép tệp sống của kho) chỉ một tệp tên `ops/land/pr672-wp574-land-evidence.yaml` với đúng hai tính chất
+  `trang_thai_packet.landed: true` và không có hai khoá ở mức gốc (ca A) ⇒ rc 0 và đúng MỘT dòng trạng thái `MIEN_TRU` (dòng
+  của một tệp, cột trạng thái bằng `MIEN_TRU`; dòng tổng kết có chữ ấy không tính) kèm lý do khác rỗng; cùng lệnh trên cây
+  tạm KHÔNG có tệp ấy (ca B) ⇒ rc 3 (miễn trừ vắng). Không chép tệp sống vì lát `wp748-r24` hạ nó về `landed: false` (đo 16:58Z
+  23-10-2026: tip nhánh `agent/wp748-r24-claude` `f08efa1043680134e3534eef8ac95dd901ae7dab` có `pr672` ở `landed: False`; tip
+  `master` `d9ef666b3cbe5acb246c2bdfb0b6e294f2fdbffc` còn `True`, byte bằng `1d7e642`; ca A với tệp của nhánh ra `BO_QUA`, 0 dòng
+  `MIEN_TRU`, ĐỎ cả với bản đúng chữ). Hai ca
   đọc hằng của bản giao nên đo luôn câu "đúng một mục" của mục tiêu 1; danh sách tiêm (B1, B1b, B2b) tắt hằng ấy và
   KHÔNG đo nó. ĐỎ khi, MỖI đột biến làm đúng ca của nó ĐỎ: bỏ kiểm tồn tại ⇒ ca cây thiếu `pr672` (rc khác 3); gỡ mục
   `pr672` khỏi hằng ⇒ ca cây có `pr672` ra `TRUOT`, rc 1; thêm một khoá thứ hai vào hằng ⇒ ca cây chỉ có `pr672` ra rc 3
   (khoá thừa trỏ tệp vắng); lý do của mục `pr672` rỗng ⇒ ca cây có `pr672` (dòng `MIEN_TRU` không kèm lý do). Đo 15:44Z
   23-10-2026 trên bản tham chiếu của reviewer lượt 7 (ngoài kho): cả bốn đột biến ĐỎ khi B2 đọc hằng bản giao; khi B2
-  chỉ tiêm danh sách thì chỉ đột biến đầu ĐỎ, ba đột biến sau qua.
+  chỉ tiêm danh sách thì chỉ đột biến đầu ĐỎ, ba đột biến sau qua. Đo lại 17:14Z 23-10-2026 (lượt 8) với tệp do test dựng thay cho
+  bản sao nguyên byte: kết quả y hệt ở cả hai cách đọc (bản đúng chữ XANH; cách đọc hằng: cả bốn đột biến ĐỎ; cách tiêm: chỉ bỏ
+  kiểm tồn tại ĐỎ).
 - **B2b (phạm vi quét — mệnh đề "không đệ quy, tên tệp là quy ước" của mục tiêu 1):** cây tạm (tiêm danh sách miễn trừ
   `{}` như B1: không tiêm thì rc 3 vì miễn trừ vắng, ở cả bản đúng lẫn hai đột biến — đo 16-10-2026 trên bản tham chiếu) có
   `ops/land/z-land-evidence.yaml` đủ hai khoá (⇒ `DAT`), `ops/land/x-provenance.yaml` và
@@ -357,7 +374,8 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
 - **B3 (trên kho thật — VỊ TỪ, không số cứng; quyết định chủ kho 23-10-2026,
   [comment trên Issue #752](https://github.com/ducthangho/tra-luat/issues/752#issuecomment-6366519792), mục 3):** đo trên
   cây `base_sha` của lease thực thi, đo lại lúc thi hành (L5 của `soan-spec`). Mọi tập tính theo ĐƯỜNG DẪN, không
-  tên tệp nào ghi sẵn trong tiêu chí:
+  tên tệp nào ghi sẵn trong tiêu chí, trừ khoá miễn trừ duy nhất của mục tiêu 1 (`ops/land/pr672-wp574-land-evidence.yaml`)
+  ở `E` và ở hai ghim của "Ca đỏ thật":
   - `S` = các tệp khớp `ops/land/*-land-evidence.yaml` (không đệ quy) trên cây ấy.
   - `F` (finding của DỮ LIỆU) = các tệp trong `S`, ngoài `E`, mà một phép đo ĐỘC LẬP với công cụ thấy trượt L-6:
     `landed` `is True` và trượt ít nhất một mệnh đề, hoặc chạm một điều kiện rc 3 của L-6 (không đọc được, gốc hay
@@ -372,7 +390,8 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
 
   ⇒ ĐẠT khi đủ bốn vế: (i) trên cây đầy đủ — nếu `F` có tệp chạm điều kiện rc 3 thì rc 3 (danh sách `TRUOT` khi ấy
   không bị ràng buộc, vế (ii) gánh phần còn lại); nếu không thì tập đường dẫn công cụ in `TRUOT` bằng đúng `F`, `ly_do`
-  từng tệp chứa tên khoá của MỖI mệnh đề mà phép đo độc lập thấy trượt (`authorized_head_sha` hoặc `authorization_url`),
+  từng tệp chứa tên khoá của MỖI mệnh đề mà phép đo độc lập thấy trượt (`authorized_head_sha` hoặc `authorization_url`) và
+  KHÔNG chứa tên khoá của mệnh đề mà nó thấy đạt,
   `n_dat`, `n_landed`, `n_mien_tru` ở `--json` bằng số đếm cùng tên của phép đo độc lập (số tệp `DAT`, số tệp có `landed`
   là `True`, và số tệp của `E`; như B5 so `dem`), rc 1 khi `F` khác rỗng, rc 0 khi `F` rỗng; (ii) trên bản
   sao cây ấy đã bỏ đúng các tệp `F` khỏi `ops/land/` (không sửa tệp nào khác): rc 0, `n_dat + n_mien_tru` bằng `n_landed`, `len(tep)` bằng số tệp khớp glob trên bản sao;
@@ -390,7 +409,9 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
   trên bản sao đã bỏ `F` của `1d7e642` — 52 khác 51 chỉ trên cây đầy đủ, nơi vế (ii) không đo; 28 khác 27 trên `c522c17`,
   nơi `F` rỗng nên bản sao trùng cây đầy đủ); bỏ dòng in glob ở đầu ra chữ, hoặc in glob dính hậu tố (ví dụ
   `ops/land/*-land-evidence.yaml.bak`) ⇒ (iii) ĐỎ (khoá JSON một mình không đo việc in ra màn hình — reviewer lượt 2 đo
-  J2: bỏ dòng in giữ nguyên rc, đếm và khoá JSON); bỏ khoá `phamvi_glob` hoặc đổi giá trị ⇒ (iv) ĐỎ.
+  J2: bỏ dòng in giữ nguyên rc, đếm và khoá JSON); bỏ khoá `phamvi_glob` hoặc đổi giá trị ⇒ (iv) ĐỎ; `ly_do` rỗng, nêu sai khoá, hoặc luôn nêu cả hai khoá ⇒ (i) ĐỎ (đo 17:12Z
+  23-10-2026 trên bản tham chiếu của reviewer lượt 8, ngoài kho, vế `ly_do` đọc hai chiều: cả ba ĐỎ; đọc một chiều chứa thì
+  đột biến luôn nêu cả hai khoá vẫn ĐẠT, 12 tệp `F` chỉ trượt `authorization_url`).
 
   **Ca đỏ thật (cây cố định, không trôi):** cây `git archive 1d7e642` — nền đóng băng của r4 — có `F` khác rỗng; công cụ
   trên cây ấy phải ra rc 1 với tập `TRUOT` bằng đúng `F` của cùng cây; tập đường dẫn in `MIEN_TRU` bằng đúng
@@ -509,7 +530,8 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
   mã chưa có — đo trước review và so với `tran_moi` (điều kiện (4) của `depends_on`).
 - #748: điều kiện (3) ĐÃ ĐO theo nghĩa chủ kho chốt (merge vào `master`, không đòi `landed: true`); kết cục của lát
   `wp748-r24` vẫn chưa biết (13:55:03Z 23-10-2026: nhánh ở `77ec458`, chưa vào `master`) nhưng không còn chặn gì — B3 là
-  vị từ, lát ấy chỉ đổi số minh hoạ.
+  vị từ, lát ấy đổi số minh hoạ và hạ `pr672` về `landed: false` (đo 16:58Z 23-10-2026), nên B2 dựng tệp `pr672` thay vì
+  chép tệp sống.
 - Tập `F` của B3 tại `base_sha` của lease thực thi: chưa biết vì lease chưa cấp; số trên `1d7e642` và `8324567` chỉ là
   minh hoạ.
 - Required check của nhánh đích KHÁC `master` (nhánh tích hợp của đường A): chưa đo. Của `master` đã đo (B6 d); trước đó
@@ -523,8 +545,9 @@ Mục tiêu 5 của r2 (thêm hai mục `MOI`) KHÔNG còn ở đây: nó là m�
 - Mọi phép đo đột biến ở B1/B1b/B1c/B2b/B3/B4 chạy trên BẢN THAM CHIẾU của reviewer (ngoài kho), không trên mã thật — mã thật
   chưa có; executor phải chạy lại cùng các đột biến trên mã của mình. Lượt đo lại nền 23-10-2026 KHÔNG chạy lại các đột
   biến ấy (bản tham chiếu không có trong kho); chúng dựng trên cây tạm nên không phụ thuộc nền, trừ phần số tệp của B2b/B3
-  đã đo lại bằng script ở "Số đo nền". Bốn vế (i)–(iv) mới của B3 r4, vế token của B5, và các đột biến kèm theo CHƯA chạy
-  trên mã nào; lượt soạn r4 chỉ chạy phép đo độc lập trên cây thật (số minh hoạ ở B3, B5) và đo màu "chưa làm" trên nền.
+  đã đo lại bằng script ở "Số đo nền". Bốn vế (i)–(iv) của B3, B2 và các đột biến kèm theo đã chạy trên bản tham chiếu
+  của reviewer (lượt 7: 15:36Z–15:44Z; lượt 8: 16:50Z–17:14Z, 23-10-2026; ngoài kho), CHƯA chạy trên mã của executor; vế token
+  của B5 và các đột biến kèm theo CHƯA chạy trên mã nào; lượt soạn r4 chỉ chạy phép đo độc lập trên cây thật (số minh hoạ ở B3, B5) và đo màu "chưa làm" trên nền.
 
 ## Đo lại nền sau #748 land (nền 1d7e642)
 
@@ -593,6 +616,15 @@ Bản trước vá: commit `7b03c0c`, sha256 `ac0d966da1c3d608ed429e4d377c68a94a
 Review lượt 7 (`changes_requested, 0 P1 · 2 P2 · 4 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
 `reviewed_sha` `fe19221024f66cc9726c65e01049ec486571ac1d`; VERDICT sha256 `eb05eef9796fbf198b93848bcc9cd36ee6dd804f6912c50a8a19b7d7b5a795ab`, HINT sha256 `18a715adb291ad66ee5ef4f404cf0a529e17d170a2396bc3f034aa0900bdf0cd`; hai tệp KHÔNG có trong kho — đo 2026-10-23 ở
 `7b03c0c`: 0 trên 5052 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
-(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 7")} f' <tệp spec> | wc -l` ra `9`). 6 lớp:
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (10 dòng thêm tay, đo bằng `diff` bản đã áp HINT với bản này: một dòng trống ngăn cách đứng trước tiêu đề, cộng 9 dòng của chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm 9 dòng: `awk '/^## /{f=($0=="## Vá sau review lượt 7")} f' <tệp spec> | wc -l` ra `9`). 6 lớp:
 `b3-vi-tu-khong-ghim-hang-mien-tru-nen-rang-o-b2-khong-duoc-chung-minh` · `nang-tran-can-cu-them-so-ngoai-comment-nen-dieu-kien-khop-tung-so-khong-thoa` · `b3-so-len-tep-52-khac-51-khong-phai-cua-ve-ii` · `b3-bo-dem-va-ly-do-khong-doi-chieu-phep-do-doc-lap` · `b3-cum-trich-va-cot-can-cu-rong-hon-comment-muc-3` · `trich-dan-bam-commit-thieu-chinh-xac-97f818b-va-bam-than-comment`.
+
+## Vá sau review lượt 8
+
+Bản trước vá: commit `3d9f4f9`, sha256 `782bde1395de1fa284428bb99e684d391c7256d31c1899aa973a63b550253e4c` (`git show 3d9f4f9:ops/specs/no-p3-cong-cu-ho-so-r4.md` ra đúng băm này).
+Review lượt 8 (`changes_requested, 0 P1 · 1 P2 · 3 P3`; reviewer Claude Sonnet 5.5 subagent `review-sonnet-max`, tự khai, KHÔNG phải Codex;
+`reviewed_sha` `a578f6541d980ff1c29371f0a5c980b46fe8a9b5`; VERDICT sha256 `6ddd85dd36aefa7f69451635b4e94f86fc0895808440a00c1c73a1c213a39633`, HINT sha256 `beb2104a42ba4f91dd425d4b22b3880315fc03f0d0597f22eb5d4cc75bfabbcb`; hai tệp KHÔNG có trong kho — đo 2026-10-24 ở
+`3d9f4f9`: 0 trên 5052 mục cây có sha256 bằng một trong hai băm này; thứ định danh là băm). Áp NGUYÊN VĂN HINT
+(`patch -p0 --fuzz=0`, rc 0); không sửa gì ngoài HINT và chính mục này (9 dòng thêm tay = chính mục này, từ tiêu đề tới hết dòng trống cuối; đếm: `awk '/^## /{f=($0=="## Vá sau review lượt 8")} f' <tệp spec> | wc -l` ra `9`). 4 lớp:
+`b2-ban-sao-pr672-nguyen-byte-khong-ghim-nguon-lat-r24-ha-landed-lam-ca-a-khong-dat-duoc` · `b3-ly-do-chi-chan-thieu-va-dong-mien-tru-b2-khong-xac-dinh-soat-l6-chua-phu-hai-tieu-chi-chuoi-moi` · `trich-dan-ngoac-kep-khong-nguyen-van-vi-tu-khong-so-cung-va-752-land-truoc` · `loi-khai-tuyet-doi-ve-viec-da-lam-rong-hon-phep-do-chi-doi-9-dong-khong-ten-tep-nao`.
 

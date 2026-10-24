@@ -3,6 +3,8 @@
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor;
 # not_measured = khong do duoc. Readback tho: ops/land/pr895-wp892-provenance/ (GET qua proxy phien bang GITHUB_PAT,
 # script thu_thap.py cua phien; SHA256SUMS kem).
+# landed FALSE: gate hau merge 76cf4c5 xanh theo REST (moc Run) nhung provenance CI §10.2.2 (Checkout · Workflow definition ·
+# Gate output) CHUA DO — GraphQL WorkflowRun.file tra 403 trong phien. Khuon landed false: ops/land/pr882-wp748-r23-land-evidence.yaml.
 
 schema_version: 1
 mission_id: gh-892
@@ -38,8 +40,8 @@ pre_merge_checks:
   - {name: 'thread review', conclusion: '0 review, 0 review comment; comment 6376846539 (connector trên 9bad91e, Draft marked ready, has_any_findings false)', nguon: [readback-reviews-895.json, readback-review-comments-895.json, readback-comments-895.json]}
   - {name: 'dieu kien kich thuoc', conclusion: '4 tep, +225 -17', nguon: [readback-pr-895.json]}
 post_merge_checks:
-  - {name: 'ci.yml push — DUNG merge SHA', run_id: 40040747805, run_attempt: 1, sha: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138, conclusion: success, jobs: '23/23 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261024/kiem-gate-76cf4c5-9bad91e.txt: run 40040747805 attempt 1 event push conclusion success suite 108533773522 23 ten (bo skipped) rc=0', nguon: [readback-run-40040747805.json, readback-jobs-40040747805.json, readback-check-runs-76cf4c5-all.json]}
-  - {name: 'launcher-windows.yml push — DUNG merge SHA', run_id: 40040747833, run_attempt: 1, sha: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138, conclusion: success, jobs: '2/2 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261024/kiem-gate-76cf4c5-9bad91e.txt: run 40040747833 attempt 1 event push conclusion success suite 108533773604 2 ten (bo skipped) rc=0', nguon: [readback-run-40040747833.json, readback-jobs-40040747833.json, readback-check-runs-76cf4c5-all.json]}
+  - {name: 'ci.yml push — DUNG merge SHA', run_id: 40040747805, run_attempt: 1, sha: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138, conclusion: success, jobs: '23/23 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261024/kiem-gate-76cf4c5-9bad91e.txt: run 40040747805 attempt 1 event push conclusion success suite 108533773522 23 ten (bo skipped) rc=0', nguon: [readback-run-40040747805.json, readback-jobs-40040747805.json, readback-check-runs-76cf4c5-all.json], ghi_chu: 'Chi la moc Run cua §10.2.2 (REST head_sha + trang thai job/check-run). Moc Checkout (SHA/parents/tree thuc chay), Workflow definition (commit/blob/sha256 qua WorkflowRun.file) va Gate output (command/rc/marker duong/artifact): not_measured — GraphQL tra 403 trong phien (do-lai-nguon-20261024/graphql-workflowrun-file-40040747805.txt); log job va artifact cua run nay khong duoc luu; check-run output.summary/text null. KHONG suy cac moc ay tu REST head_sha.'}
+  - {name: 'launcher-windows.yml push — DUNG merge SHA', run_id: 40040747833, run_attempt: 1, sha: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138, conclusion: success, jobs: '2/2 success (attempt 1, bỏ skipped)', kiem_gate: 'measured — do-lai-nguon-20261024/kiem-gate-76cf4c5-9bad91e.txt: run 40040747833 attempt 1 event push conclusion success suite 108533773604 2 ten (bo skipped) rc=0', nguon: [readback-run-40040747833.json, readback-jobs-40040747833.json, readback-check-runs-76cf4c5-all.json], ghi_chu: 'Chi la moc Run cua §10.2.2 (REST head_sha + trang thai job/check-run). Moc Checkout (SHA/parents/tree thuc chay), Workflow definition (commit/blob/sha256 qua WorkflowRun.file) va Gate output (command/rc/marker duong/artifact): not_measured — GraphQL tra 403 trong phien (do-lai-nguon-20261024/graphql-workflowrun-file-40040747833.txt); log job va artifact cua run nay khong duoc luu; check-run output.summary/text null. KHONG suy cac moc ay tu REST head_sha.'}
 bookkeeping:
   - {item: 'chi thi ghi so land (ghi ho)', ket_qua: 'loi_khai_co_neo — issuecomment-6377309883 tren #892'}
   - {item: 'lease wp892-r2-g2-claude', ket_qua: 'measured — RÚT HẠN: commit e85cd20 trên ops/wp892-r2-g2-lease đưa lease_until về 2026-10-23T23:38:00Z, khối rut_han ghi lý do (quyết định chủ kho "Nhờ #892 nhả sớm", #886 issuecomment-6368359044); ops-publish-lease run 40040880498 success (readback-run-40040880498.json); ai-dang-giu-sau-rut-han/luc-do.txt: ls-remote = for-each-ref 566, thiếu 0; 4 đường dẫn của write set NGƯỜI_GIỮ 0, wp892-r2-g2-claude ra HẾT_HẠN, wp892-r1-g1-claude ĐÃ_BỊ_THAY_THẾ.'}
@@ -66,11 +68,14 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-895.json: merged true, merged_at 2026-10-23T23:37:50Z, merge_commit_sha 76cf4c5, head.sha 9bad91e.'
-  landed: true
+  landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh, kiem-gate rc=0 (post_merge_checks); (2) lease khong con giu write set
-    (bookkeeping/lease.thu_hoi_cuoi); (3) review approve neo head cuoi hoac head co write set giong het; (4) noi dung merge = diff PR;
-    (5) merge boi tai khoan chu kho. `landed: true` hieu luc khi PR ghi so nay vao master.
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 76cf4c5: CHUA DAT day du — measured: REST run/jobs/check-run ci.yml 23/23 va
+    launcher-windows 2/2 success, kiem-gate rc=0 (moc Run); not_measured: moc Checkout, Workflow definition, Gate output cua
+    §10.2.2/§10.2.3 (xem post_merge_checks; GraphQL 403). (2) lease da nha: rut han e85cd20, 4/4 duong dan NGƯỜI_GIỮ 0 DAT;
+    (3) review approve neo DUNG head cuoi 9bad91e: Codex luot 4 DAT, connector sach DAT; (4) noi dung merge = diff PR DAT;
+    (5) merge boi tai khoan chu kho DAT (merged_by). Nang len landed true chi khi co du bon moc §10.2.2 cho gate hau merge
+    (vd cong cu P-A cua #899 CI-PROVENANCE-REST-LOG) — chua ton tai luc ghi so.
 
 tran_codex:
   so_loi_goi: 5
@@ -93,3 +98,5 @@ n4b:
 khong_do_duoc:
   - 'Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).'
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
+  - 'Provenance CI §10.2.2 cua gate hau merge (Checkout, Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403, log/artifact khong luu.'
+  - 'Provenance CI §10.2.2 cua luot N4(b) (run 40045105383): chi co log job gom va REST; Workflow definition KHONG_DO_DUOC (cung ly do).'

@@ -122,7 +122,7 @@ jobs:
     # công cụ hiện có (`get_job_logs` trả `failed_jobs: 0` vì job bị huỷ không tính là
     # "failed"); quy cho `windows-latest` là SUY LUẬN từ chỗ ubuntu-only về đích.
     # NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang lớn dần là nợ riêng.
-    timeout-minutes: 60
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -644,7 +644,7 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -1027,7 +1027,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     # WP856 (chu kho, PR #866): 60 -> 120. Run 39722546630: Ubuntu 40,4 phut (truoc 22,4) sau khi
     # #856 them ma tran T1-T6; Windows van chay o phut ~46, sat tran 60.
-    timeout-minutes: 120
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

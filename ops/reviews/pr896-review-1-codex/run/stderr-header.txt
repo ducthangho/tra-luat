@@ -1,0 +1,14 @@
+Reading additional input from stdin...
+2026-10-24T16:37:15.213690Z ERROR codex_models_manager::manager: failed to load models cache: EOF while parsing a value at line 1 column 0
+OpenAI Codex v0.163.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 01a16ec6-03c0-72c0-ac25-dccfeef0cd62
+--------
+user

@@ -1,0 +1,12 @@
+$ python3 ../review_evidence/test_scope_probe.py
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+baseline t161:PASS; t162:PASS ; ci_dang_ky.loi_g5_workflow= []
+remove_windows_shard1_exclusion t161:PASS; t162:PASS ; ci_dang_ky.loi_g5_workflow= ["gate-cong-cu: matrix phải đúng os + manh [0, 1, 2, 3, 4, 5, 6, 7] + exclude [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}], thấy {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7], 'exclude': [{'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}]}"]
+remove_gop_if t161:PASS; t162:PASS ; ci_dang_ky.loi_g5_workflow= ['gate-cong-cu-gop: needs/if phải đúng [\'chuan-bi\', \'gate-cong-cu\']/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), \'ubuntu-latest\') }}", thấy [\'chuan-bi\', \'gate-cong-cu\']/None']
+Scope: t162 validates chuan-bi.outputs.os; exclude/job-if are separately checked by ci_dang_ky_test.py, not t162.
+No assertion that the complete gate remains green on these mutants.
+
+rc=0

@@ -1,0 +1,14 @@
+head_same=True
+tree_same=True
+status_same=True
+diff_same=True
+cached_diff_same=True
+final_HEAD=06a50c5feea77c2654f31edd26efeed7eeee62f5
+final_tree=0fa694daf17e10c37fc3e61690531ade4bd528bf
+final_status_with_ignored=''
+files_hashed=4843
+added=[]
+removed=[]
+changed=[]
+all_snapshot_equal=True
+rc=0

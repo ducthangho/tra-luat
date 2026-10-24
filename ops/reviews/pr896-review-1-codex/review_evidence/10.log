@@ -1,0 +1,50 @@
+$ python3 ../review_evidence/provenance_probe.py
+comment 6366307732: author=ducthangho; created_at=2026-10-23T13:43:34Z; updated_at=2026-10-23T13:43:34Z
+comment 6366338141: author=chatgpt-codex-connector[bot]; created_at=2026-10-23T13:45:03Z; updated_at=2026-10-23T13:45:03Z
+comment 6360319005: author=chatgpt-codex-connector[bot]; created_at=2026-10-23T08:00:09Z; updated_at=2026-10-23T13:45:05Z
+request body: @codex review
+
+Lượt connector trước trên head đã merge `094e8d1` (comment 6360319005) vẫn ở trạng thái `running` từ 08:00:05Z và chưa có kết quả. Nhờ chấm lại đúng `094e8d17ae4dfcf21dca63702c9262267bdc072c`. Hồ sơ land ghi khoảng trống này ở `ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml` (`HEAD-MERGE-KHONG-CO-REVIEW-HOAN-TAT`).
+receipt body: <!-- codex-review-receipt:v1 -->
+
+Codex Review: Didn't find any major issues. Bravo.
+
+**Reviewed commit:** `6ac385fdd7`
+old summary: {"commit_sha": "094e8d17ae4dfcf21dca63702c9262267bdc072c", "has_any_findings": null, "has_unresolved_findings": null, "status": "running"}
+new summary: {"commit_sha": "6ac385fdd7325f532ac4b4b6eb861292bfa7e970", "has_any_findings": false, "has_unresolved_findings": false, "status": "completed"}
+readback-reactions-pr-889.json [('chatgpt-codex-connector[bot]', 'eyes', '2026-10-23T08:00:12Z')]
+readback-reactions-pr-889-sau-review-lai.json [('chatgpt-codex-connector[bot]', '+1', '2026-10-23T13:45:08Z')]
+PR #891 merge in committed history:
+8324567788caab8dc332d45df458ef415fd305be
+1d7e642092fb3dda15967be44d095f37bb22ac5f 0390130f57c8f6fdd3b69de79ae49e6618ef3d3c
+2026-10-23T20:39:35+07:00
+Merge pull request #891 from ducthangho/claude/gallant-fermat-34kgb9
+
+ghi so(#870, #889): verdict cross-review #889 vao ops/reviews + ho so land cho #870 va #889
+
+Chu kho duyet landed cho #870 va #889 tren head 0390130 (comment 6366218495, OWNER, 13:39:08Z sau commit cuoi 13:01:10Z).
+Gate ci.yml run 39957796185 xanh tren 0390130; Codex connector review 0390130 khong co gop y.
+request after #891 merge: True
+CLAUDE.md blobs at 094e8d1 / 6ac385f: ['975cd94ff851a3a0ee3aa0493e90184e5f81c874', '975cd94ff851a3a0ee3aa0493e90184e5f81c874']
+$ git diff --stat 094e8d1 6ac385f
+ .claude/hooks/subagent_ghi_detect_test.py | 70 ++++++++++++++++++++++++++++++-
+ ops/land_evidence_nguon_test.py           | 12 ++++--
+ 2 files changed, 77 insertions(+), 5 deletions(-)
+blob readback stat byte-for-byte lines: True
+master changes #872/#877:
+9d4cb6a Merge pull request #872 from ducthangho/claude/wizardly-noether-zqqoae
+daf8961 Merge pull request #877 from ducthangho/agent/wp854-g1-claude
+land-evidence prefix unchanged from base and 0390130: True; old lines= 146 ; added lines= 27
+$ git diff --numstat <base> <head> -- ops/land/
+27	0	ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+3	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/SHA256SUMS.txt
+6	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-blob-claude-md-094e8d1-6ac385f.txt
+436	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-comments-889-sau-review-lai.json
+29	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-reactions-pr-889-sau-review-lai.json
+land diff: removed content lines=0
+6366218495 references available at reviewed SHA: ['816f43988eb3012726120ad00166a989cc2b9af6:ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml']
+comment #891 6366218495 body/authorization and measurement timestamp 15:16:09Z: KHÔNG ĐO ĐƯỢC independently; no raw readback in this tree.
+Current GitHub status: KHÔNG ĐO ĐƯỢC; observations limited to frozen before/after readbacks.
+All measured fields with cited readback: matched.
+
+rc=0

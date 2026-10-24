@@ -1,0 +1,104 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 899
+packet_id: wp899
+packet_alias: CI-PROVENANCE-REST-LOG
+mission_issue: 899
+revision: 2
+generation: 1
+lease_id: wp899-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp899-r2.md
+spec_sha256_required: d858c7c65a38a7f0fadda1cabf839c98ce70a881372d847c8979165925971707
+spec_hash: d858c7c65a38a7f0fadda1cabf839c98ce70a881372d847c8979165925971707
+prompt_path: ops/specs/wp899-r2.md
+prompt_sha256_required: d858c7c65a38a7f0fadda1cabf839c98ce70a881372d847c8979165925971707
+spec_nguon_note: >-
+  Dac ta o nhanh ops/wp899-spec (commit cf449ec); dinh danh tep la BAM, khong phai ten nhanh. r1
+  (ops/specs/wp899.md, 556ea0d6...) bi r2 thay, khong lease nao neo r1.
+write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+depends_on:
+- 892
+depends_on_ghi_chu: >-
+  #892 (PR #895) da merge 2026-10-23T23:37:50Z, merge 76cf4c5; gate push 40040747805 va launcher-windows
+  40040747833 tren 76cf4c5 deu success. Ho so land #892 ghi landed false (PR #900) — khong anh huong write set nay.
+branch: agent/wp899-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138
+start_from_sha: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138
+reviewed_sha_required: 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138
+reviewed_sha_note: >-
+  Chua co head code; neo base (merge PR #895 theo dac ta). Head da review ghi o bien nhan truoc lan day duy nhat.
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/899#issuecomment-6378071984
+granted_on_instruction_note: >-
+  Chu kho 24-10-2026 (phien session_01A68yvG8s7cjpbWp81QzppN): "Duyet, 72 gio, dang lease va mo phien executor".
+  Ban nhap soan theo yeu cau "Soan san tep lease cho wp899"; chu kho duyet nguyen ban, thoi han 72 gio.
+recorded_by: claude-dispatcher-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien soan spec (session_01A68yvG8s7cjpbWp81QzppN) khong thi cong #899; executor la phien cloud KHAC.'
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-24T01:17:56Z'
+  ref: refs/heads/agent/wp899-g1-claude
+  trang_thai: vang
+  ghi_chu: 'ls-remote rong; executor tao tu base_sha.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-24T01:17:56Z'
+  so_nhanh: 'fetch --prune +refs/heads/*; ls-remote 567 / cuc bo 567 (so TAP ten: thieu 0, thua 0)'
+  ket_qua: >-
+    ai-dang-giu ops/ci_provenance.py, ops/ci_provenance_test.py, .claude/dev/ci_dang_ky_test.py => ca ba NGUOI_GIU 0
+    (lease wp892-r2-g2-claude da het/nha sau khi #895 land).
+leased_at_utc: '2026-10-24T01:20:00Z'
+heartbeat_at: '2026-10-24T01:20:00Z'
+lease_until: '2026-10-27T01:20:00Z'
+lease_expires_at_utc: '2026-10-27T01:20:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Dac ta khai tran_loi_goi_codex: ADR-0052@8ab1007... => tran 8 loi goi la truc chan.
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: >-
+  Theo luat_vong_doi V1-V4 cua dac ta r2 (quyet dinh chu kho rieng wp899, KHONG ap ADR-0054): day nhanh MOT lan khi
+  du dieu kien merge; approve chi khi P0=P1=P2=0 va moi P3 co quyet dinh; review theo lop; connector P0-P2 sau khi
+  day thi DUNG hoi chu kho. Bien nhan moi luot Codex mang dinh_danh_reviewer muc 1-5.
+thay_the_cho: []
+thay_the_cho_note: >-
+  Khong lease nao con han giu write set luc do (NGUOI_GIU 0 ca ba duong dan) => khong bia mo.
+ngan_sach:
+  loi_goi_codex: {used: 0, reserved: 1, limit: 8}
+  vong_review_canon: {used: 0}
+  attempt: {used: 0, limit: 3}
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: 'dac ta r2 muc nang_tran (Q9 vong 2, Issue #899)'
+  tran_cu: '<= 6 tep / <= 450 dong them (ADR-0053)'
+  tran_moi: '<= 3 tep / <= 700 dong them'

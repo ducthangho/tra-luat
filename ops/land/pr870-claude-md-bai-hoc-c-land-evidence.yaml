@@ -147,3 +147,32 @@ no_con_mo:
 ghi_chu: >-
   Sau merge, doan (c) cua CLAUDE.md da troi them hai lan (#878 nhanh windows-only, #879 Windows mot phan gate) va duoc
   do lai o PR #889 — xem ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml.
+
+# DINH CHINH SAU QUYET DINH CHU KHO (2026-10-24 10:37Z) — chi THEM khoi duoi day; moi dong phia tren giu nguyen ban da duyet.
+# Ket luan: GHI NHAN quyet dinh chu kho tren #891, `landed` GIU `false` vi assurance §8.1 CHUA DAT (cung tieu chi r24 #748).
+# Chu kho chon phuong an nay trong phien (session_01V2PEqhkb91vD5PCBM5yXbm, 24-10-2026): "Chon 1".
+dinh_chinh_sau_quyet_dinh:
+  quyet_dinh_chu_kho:
+    trang_thai: da_quyet
+    comment: https://github.com/ducthangho/tra-luat/pull/891#issuecomment-6366218495
+    do_duoc: >-
+      measured — readback-comment-891-6366218495.json: ducthangho, author_association OWNER, created_at = updated_at
+      2026-10-23T13:39:08Z, than "Duyet landed cho #870 va #889 theo ho so ... Head: 0390130f57c8f6fdd3b69de79ae49e6618ef3d3c".
+      readback-pr-891.json: head.sha 0390130 (khop SHA trong comment), merged_at 13:39:36Z, merge_commit 8324567.
+  landed_truoc: false
+  landed_sau: false
+  reviewer_assurance_81: CHUA DAT
+  ly_do: >-
+    doi_chieu — (1) cross-review Codex goi `codex exec` TRAN, khong qua launcher.py run, khong run.json; model chi co loi khai
+    header CLI (ops/reviews/pr870-review-1-codex-verdict.receipt.yaml: model_da_chay KHONG_DO_DUOC); (2) Codex connector
+    (comment 6336996294, sach tren 06a50c5) khong lo model => ho model reviewer `khong_do_duoc` (§8, §8.1); (3) verdict
+    cross-review la `changes_requested` tren b38fce8, head da merge 06a50c5 khong duoc cross-review lai.
+  quyet_dinh_chu_kho_khong_thay_human_audited: >-
+    doi_chieu — comment 6366218495 dang SAU merge #870 (readback-pr-870.json merged_at 2026-10-22T09:05:34Z), khong co cau tu
+    doc diff, va tai khoan OWNER khong tach khoi phien agent (#566). Theo phan quyet #566 trong uy quyen r24 (#748
+    issuecomment-6365380273, khoi dinh_chinh_r24 o ops/land/pr848-wp744-land-evidence.yaml) comment ay KHONG dat §8 muc 2.
+  dieu_kien_mo_lai: >-
+    (A) `cross_approved`: mot lan approve DOC LAP hoan tat tren DUNG 06a50c5feea77c2654f31edd26efeed7eeee62f5, voi ho model
+    reviewer phuc vu CHINH lan chay ay xac lap KHAC claude (do_may, hoac khai_co_audit kem auditor co ten). HOAC (B)
+    `human_audited` §8 muc 2 neo DUNG 06a50c5; voi comment chu kho: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.
+  lich_su: 'quyet dinh 6366218495 va moi dong o tren giu nguyen de doi chieu; khoi nay chi ghi nhan quyet dinh va giu ket luan.'

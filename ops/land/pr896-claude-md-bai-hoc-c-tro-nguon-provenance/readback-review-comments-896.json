@@ -1,0 +1,149 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4361172684",
+    "pull_request_review_id": 5630477370,
+    "id": 4361172684,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABA_I2zA",
+    "diff_hunk": "@@ -155,46 +155,41 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package \n   Hỏi `get_reviews`/`get_review_comments` thấy rỗng rồi đọc thành \"chưa review\" ⇒ đã báo sai rằng #103\n   là chỗ mù, và đăng thêm một lời gọi review với cái cớ sai — trong khi kết luận sạch đã có từ 20 phút\n   trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**\n-  · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**\n-  Bản cũ của mục này viết: *\"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`\"*.\n-  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế\n-  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên\n-  `9e9a74b`: `os` = `[\"ubuntu-latest\",\"windows-latest\"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`\n-  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `[\"ubuntu-latest\"]`.\n-  **Đo lại 23-10-2026** trên `e63961f`: #878 thêm nhánh thứ ba — gọi tay với `runner_set=windows-only` ⇒\n-  `[\"windows-latest\"]` (KHÔNG có Ubuntu); gọi tay mặc định (`windows-and-ubuntu`) vẫn ra hai nền.\n-  Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,\n-  20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở\n-  `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên\n-  bản land (commit `3f6c694`) khai `jobs: '23/23 success (gom windows)'`; Codex connector bắt thành P1 trên PR #859 (comment\n-  `r4323607674`), sửa ở PR #865. Đúng bệnh mục này đang dạy: tin một câu GẦN TAY thay vì đọc nhãn job.\n-  **Windows tự động khi push master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: chỉ bắn\n-  khi đổi `.claude/dev/**` hoặc chính tệp workflow ấy (`paths:`), ma trận `windows-latest` + `ubuntu-latest`;\n-  PR chỉ chạy khi mang nhãn `windows` (workflow này CÓ khai `types: [..., labeled]`). Nó chỉ đo lane\n-  launcher, KHÔNG phải gate. Các workflow còn lại (`ci-dot-bien-du` `ops-*`) đều `ubuntu-latest`.\n-  Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge\n-  của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là \"lần đo Windows đầu tiên\" như bản cũ viết.\n-  Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.\n-  **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó** — kèm\n-  `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.\n-  **Nhưng \"gate trên Windows\" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên\n-  `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`\n-  duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:\n-  `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;\n-  `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi\n-  `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong\n-  `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên \"có job Windows\" chưa phải \"mọi\n-  bước chạy\". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —\n-  phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy\n-  từ lượt Ubuntu của CÙNG head.\n+  · **(c) Nền nào chạy gate KHÔNG được chép vào đây — đọc nó từ `ci.yml` và từ NHÃN JOB, mỗi lần.**\n+  Mục này từng chép ma trận `os` thành văn xuôi, và văn xuôi ấy đã lệch khỏi `ci.yml` BA lần: câu gốc\n+  *\"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`\"* đã chết từ packet #548\n+  (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế `github.ref == 'refs/heads/master'` khỏi output `os` của job\n+  `chuan-bi`) mà vẫn nằm đây; sửa ở PR #870 xong thì #878 (`runner_set=windows-only`) và #879 (Windows chỉ còn\n+  một phần gate) làm nó cũ tiếp, phải đo lại ở PR #889. Câu cũ đã kịp gây hại thật: biên bản land commit\n+  `3f6c694` khai `jobs: '23/23 success (gom windows)'` cho run **39354156843** (push `3a3a3ca` lên master) trong\n+  khi cả 23 job mang nhãn `ubuntu-latest` (`ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`) —\n+  Codex connector bắt thành P1 trên PR #859 (comment `r4323607674`), sửa ở PR #865. Đúng bệnh mục này dạy:\n+  tin một câu GẦN TAY thay vì đọc nhãn job.\n+  **Nguồn sự thật, theo thứ tự hỏi:**\n+  · ma trận dự kiến = output `os` của job `chuan-bi` trong `.github/workflows/ci.yml`, cộng `exclude:` và\n+  `if:` mức job của TỪNG job `gate*` (một job có thể loại Windows dù `os` có Windows);\n+  · hành vi ấy được khoá bằng `t161_M3_chot_nguon_duy_nhat_ma_tran_ci` trong `ops/lease_publish_test.py`\n+  (đánh giá biểu thức thật bằng `_danh_gia_bieu_thuc_chuan_bi` cho push / PR thường / PR nhãn `windows` /\n+  từng `runner_set`) — đổi ma trận mà quên ca ấy thì gate ĐỎ, nên đọc ca ấy là đọc ma trận HIỆN HÀNH;",
+    "path": "CLAUDE.md",
+    "commit_id": "0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "original_commit_id": "0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Point the matrix-behavior reference to t162 instead of t161**\n\nReaders following this new source-of-truth pointer will not find the event/input matrix described here: `t161_M3_chot_nguon_duy_nhat_ma_tran_ci` only checks that jobs share the `chuan-bi` output and that outputs avoid array-valued expressions. It never calls `_danh_gia_bieu_thuc_chuan_bi` or asserts the expected platforms, so changing the matrix does not necessarily fail that test. The actual push/PR/label/`runner_set` assertions are in `t162_M4_evaluator_toi_gian_chuan_bi` in the same file. Point to t162 for behavioral expectations, retaining t161 separately if the single-source structural check is also relevant.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-23T15:22:50Z",
+    "updated_at": "2026-10-23T15:22:50Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/896#discussion_r4361172684",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/896",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4361172684"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/896#discussion_r4361172684"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/896"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4361172684/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 171,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 173,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 51,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4361180757",
+    "pull_request_review_id": 5630487058,
+    "id": 4361180757,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABA_JWVQ",
+    "diff_hunk": "@@ -155,46 +155,41 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package \n   Hỏi `get_reviews`/`get_review_comments` thấy rỗng rồi đọc thành \"chưa review\" ⇒ đã báo sai rằng #103\n   là chỗ mù, và đăng thêm một lời gọi review với cái cớ sai — trong khi kết luận sạch đã có từ 20 phút\n   trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**\n-  · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**\n-  Bản cũ của mục này viết: *\"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`\"*.\n-  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế\n-  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên\n-  `9e9a74b`: `os` = `[\"ubuntu-latest\",\"windows-latest\"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`\n-  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `[\"ubuntu-latest\"]`.\n-  **Đo lại 23-10-2026** trên `e63961f`: #878 thêm nhánh thứ ba — gọi tay với `runner_set=windows-only` ⇒\n-  `[\"windows-latest\"]` (KHÔNG có Ubuntu); gọi tay mặc định (`windows-and-ubuntu`) vẫn ra hai nền.\n-  Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,\n-  20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở\n-  `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên\n-  bản land (commit `3f6c694`) khai `jobs: '23/23 success (gom windows)'`; Codex connector bắt thành P1 trên PR #859 (comment\n-  `r4323607674`), sửa ở PR #865. Đúng bệnh mục này đang dạy: tin một câu GẦN TAY thay vì đọc nhãn job.\n-  **Windows tự động khi push master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: chỉ bắn\n-  khi đổi `.claude/dev/**` hoặc chính tệp workflow ấy (`paths:`), ma trận `windows-latest` + `ubuntu-latest`;\n-  PR chỉ chạy khi mang nhãn `windows` (workflow này CÓ khai `types: [..., labeled]`). Nó chỉ đo lane\n-  launcher, KHÔNG phải gate. Các workflow còn lại (`ci-dot-bien-du` `ops-*`) đều `ubuntu-latest`.\n-  Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge\n-  của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là \"lần đo Windows đầu tiên\" như bản cũ viết.\n-  Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.\n-  **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó** — kèm\n-  `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.\n-  **Nhưng \"gate trên Windows\" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên\n-  `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`\n-  duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:\n-  `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;\n-  `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi\n-  `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong\n-  `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên \"có job Windows\" chưa phải \"mọi\n-  bước chạy\". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —\n-  phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy\n-  từ lượt Ubuntu của CÙNG head.\n+  · **(c) Nền nào chạy gate KHÔNG được chép vào đây — đọc nó từ `ci.yml` và từ NHÃN JOB, mỗi lần.**\n+  Mục này từng chép ma trận `os` thành văn xuôi, và văn xuôi ấy đã lệch khỏi `ci.yml` BA lần: câu gốc\n+  *\"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`\"* đã chết từ packet #548\n+  (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế `github.ref == 'refs/heads/master'` khỏi output `os` của job\n+  `chuan-bi`) mà vẫn nằm đây; sửa ở PR #870 xong thì #878 (`runner_set=windows-only`) và #879 (Windows chỉ còn\n+  một phần gate) làm nó cũ tiếp, phải đo lại ở PR #889. Câu cũ đã kịp gây hại thật: biên bản land commit\n+  `3f6c694` khai `jobs: '23/23 success (gom windows)'` cho run **39354156843** (push `3a3a3ca` lên master) trong\n+  khi cả 23 job mang nhãn `ubuntu-latest` (`ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`) —\n+  Codex connector bắt thành P1 trên PR #859 (comment `r4323607674`), sửa ở PR #865. Đúng bệnh mục này dạy:\n+  tin một câu GẦN TAY thay vì đọc nhãn job.\n+  **Nguồn sự thật, theo thứ tự hỏi:**\n+  · ma trận dự kiến = output `os` của job `chuan-bi` trong `.github/workflows/ci.yml`, cộng `exclude:` và\n+  `if:` mức job của TỪNG job `gate*` (một job có thể loại Windows dù `os` có Windows);\n+  · hành vi ấy được khoá bằng `t161_M3_chot_nguon_duy_nhat_ma_tran_ci` trong `ops/lease_publish_test.py`\n+  (đánh giá biểu thức thật bằng `_danh_gia_bieu_thuc_chuan_bi` cho push / PR thường / PR nhãn `windows` /\n+  từng `runner_set`) — đổi ma trận mà quên ca ấy thì gate ĐỎ, nên đọc ca ấy là đọc ma trận HIỆN HÀNH;",
+    "path": "CLAUDE.md",
+    "commit_id": "0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "original_commit_id": "0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đúng — đã kiểm: `t161` (ops/lease_publish_test.py:7927) chỉ gọi `_kiem_tra_nguon_duy_nhat_os_ci`; mọi lời gọi `_danh_gia_bieu_thuc_chuan_bi` nằm trong `t162` (dòng 8002–8021). Commit kế tiếp (chưa đẩy lúc viết) đổi con trỏ hành vi sang `t162_M4_evaluator_toi_gian_chuan_bi` và giữ `t161` kèm một câu nói rõ nó chỉ khoá cấu trúc. Chạy tại chỗ: `t162` QUA; `doctrine-scan` sạch; `doc-claims-check` ok.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-10-23T15:23:40Z",
+    "updated_at": "2026-10-23T15:23:40Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/896#discussion_r4361180757",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/896",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4361180757"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/896#discussion_r4361180757"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/896"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4361180757/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 171,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 173,
+    "side": "RIGHT",
+    "in_reply_to_id": 4361172684,
+    "author_association": "OWNER",
+    "original_position": 51,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  }
+]

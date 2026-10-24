@@ -1,0 +1,248 @@
+[
+  {
+    "sha": "90c1cb1a73e1872b2571a1625186b0275091f6a8",
+    "node_id": "C_kwDOTNeRjdoAKDkwYzFjYjFhNzNlMTg3MmIyNTcxYTE2MjUxODZiMDI3NTA5MWY2YTg",
+    "commit": {
+      "author": {
+        "name": "Claude",
+        "email": "noreply@anthropic.com",
+        "date": "2026-10-23T15:16:00Z"
+      },
+      "committer": {
+        "name": "Claude",
+        "email": "noreply@anthropic.com",
+        "date": "2026-10-23T15:16:00Z"
+      },
+      "message": "docs(CLAUDE.md): bai hoc (c) tro NGUON thay vi chep ma tran os\n\nDoan (c) da lech khoi ci.yml ba lan (#548, #878, #879) va phai sua hai\nlan (PR #870, #889). Thay ban chep ma tran bang con tro toi nguon su\nthat: outputs.os cua job chuan-bi + exclude:/if: muc job trong ci.yml,\nca t161_M3_chot_nguon_duy_nhat_ma_tran_ci (khoa hanh vi ma tran), va\ntruong labels/runner_id cua tung job trong mot luot chay. Giu bang\nchung 39354156843 / PR #859 r4323607674 / PR #865, ghi anh chup\n23-10-2026 tren e63961f la dinh huong chu khong phai nguon.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm",
+      "tree": {
+        "sha": "2497e63b48ac999be97e99ceecc2d8074aa57c0c",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/2497e63b48ac999be97e99ceecc2d8074aa57c0c"
+      },
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/90c1cb1a73e1872b2571a1625186b0275091f6a8",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQB71SP5G\nWaPTFDVEu92XXzj2faJ9xAjY+sTLVjF50Ud5rYKl4ZHKfm5z8r9+q3l3qofLZKglS36al2IBa6i5\nTAI=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 2497e63b48ac999be97e99ceecc2d8074aa57c0c\nparent 1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e\nauthor Claude <noreply@anthropic.com> 1792768560 +0000\ncommitter Claude <noreply@anthropic.com> 1792768560 +0000\n\ndocs(CLAUDE.md): bai hoc (c) tro NGUON thay vi chep ma tran os\n\nDoan (c) da lech khoi ci.yml ba lan (#548, #878, #879) va phai sua hai\nlan (PR #870, #889). Thay ban chep ma tran bang con tro toi nguon su\nthat: outputs.os cua job chuan-bi + exclude:/if: muc job trong ci.yml,\nca t161_M3_chot_nguon_duy_nhat_ma_tran_ci (khoa hanh vi ma tran), va\ntruong labels/runner_id cua tung job trong mot luot chay. Giu bang\nchung 39354156843 / PR #859 r4323607674 / PR #865, ghi anh chup\n23-10-2026 tren e63961f la dinh huong chu khong phai nguon.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm\n",
+        "verified_at": "2026-10-23T15:18:20Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/90c1cb1a73e1872b2571a1625186b0275091f6a8",
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/90c1cb1a73e1872b2571a1625186b0275091f6a8",
+    "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/90c1cb1a73e1872b2571a1625186b0275091f6a8/comments",
+    "author": {
+      "login": "claude",
+      "id": 81847,
+      "node_id": "MDQ6VXNlcjgxODQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/claude",
+      "html_url": "https://github.com/claude",
+      "followers_url": "https://api.github.com/users/claude/followers",
+      "following_url": "https://api.github.com/users/claude/following{/other_user}",
+      "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+      "organizations_url": "https://api.github.com/users/claude/orgs",
+      "repos_url": "https://api.github.com/users/claude/repos",
+      "events_url": "https://api.github.com/users/claude/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/claude/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "claude",
+      "id": 81847,
+      "node_id": "MDQ6VXNlcjgxODQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/claude",
+      "html_url": "https://github.com/claude",
+      "followers_url": "https://api.github.com/users/claude/followers",
+      "following_url": "https://api.github.com/users/claude/following{/other_user}",
+      "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+      "organizations_url": "https://api.github.com/users/claude/orgs",
+      "repos_url": "https://api.github.com/users/claude/repos",
+      "events_url": "https://api.github.com/users/claude/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/claude/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e"
+      }
+    ]
+  },
+  {
+    "sha": "0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "node_id": "C_kwDOTNeRjdoAKDBiYjc5MmI3NTg0N2UxYTViNDhlY2NmZWMxMGU3YTBjOTlhY2QwYzE",
+    "commit": {
+      "author": {
+        "name": "Claude",
+        "email": "noreply@anthropic.com",
+        "date": "2026-10-23T15:18:16Z"
+      },
+      "committer": {
+        "name": "Claude",
+        "email": "noreply@anthropic.com",
+        "date": "2026-10-23T15:18:16Z"
+      },
+      "message": "ops(land): pr889 bo sung luot Codex connector cham lai sach tren 6ac385f\n\nChi THEM khoi bo_sung_sau_landed (khong sua dong da duyet o #891):\n@codex review (6366307732) -> receipt 6366338141 \"Reviewed commit:\n6ac385fdd7\", state completed/has_any_findings false. CLAUDE.md tai\n094e8d1 va 6ac385f cung blob 975cd94, nen noi dung connector cham la\nnoi dung head da merge. Ba readback moi ten moi, SHA256SUMS +3 dong.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm",
+      "tree": {
+        "sha": "087375cf3284ffba62ba83bc57194991c68a6547",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/087375cf3284ffba62ba83bc57194991c68a6547"
+      },
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQAXFWBf5\n1DEyqkn+MToL20s3BBbQygi6+URcyYYW4tYEFycasjw/u2XKxSs7CluoVSSfiVJQOE0YZ1cjEMhK\nYgM=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 087375cf3284ffba62ba83bc57194991c68a6547\nparent 90c1cb1a73e1872b2571a1625186b0275091f6a8\nauthor Claude <noreply@anthropic.com> 1792768696 +0000\ncommitter Claude <noreply@anthropic.com> 1792768696 +0000\n\nops(land): pr889 bo sung luot Codex connector cham lai sach tren 6ac385f\n\nChi THEM khoi bo_sung_sau_landed (khong sua dong da duyet o #891):\n@codex review (6366307732) -> receipt 6366338141 \"Reviewed commit:\n6ac385fdd7\", state completed/has_any_findings false. CLAUDE.md tai\n094e8d1 va 6ac385f cung blob 975cd94, nen noi dung connector cham la\nnoi dung head da merge. Ba readback moi ten moi, SHA256SUMS +3 dong.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm\n",
+        "verified_at": "2026-10-23T15:18:20Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+    "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/0bb792b75847e1a5b48eccfec10e7a0c99acd0c1/comments",
+    "author": {
+      "login": "claude",
+      "id": 81847,
+      "node_id": "MDQ6VXNlcjgxODQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/claude",
+      "html_url": "https://github.com/claude",
+      "followers_url": "https://api.github.com/users/claude/followers",
+      "following_url": "https://api.github.com/users/claude/following{/other_user}",
+      "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+      "organizations_url": "https://api.github.com/users/claude/orgs",
+      "repos_url": "https://api.github.com/users/claude/repos",
+      "events_url": "https://api.github.com/users/claude/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/claude/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "claude",
+      "id": 81847,
+      "node_id": "MDQ6VXNlcjgxODQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/claude",
+      "html_url": "https://github.com/claude",
+      "followers_url": "https://api.github.com/users/claude/followers",
+      "following_url": "https://api.github.com/users/claude/following{/other_user}",
+      "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+      "organizations_url": "https://api.github.com/users/claude/orgs",
+      "repos_url": "https://api.github.com/users/claude/repos",
+      "events_url": "https://api.github.com/users/claude/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/claude/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "90c1cb1a73e1872b2571a1625186b0275091f6a8",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/90c1cb1a73e1872b2571a1625186b0275091f6a8",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/90c1cb1a73e1872b2571a1625186b0275091f6a8"
+      }
+    ]
+  },
+  {
+    "sha": "816f43988eb3012726120ad00166a989cc2b9af6",
+    "node_id": "C_kwDOTNeRjdoAKDgxNmY0Mzk4OGViMzAxMjcyNjEyMGFkMDAxNjZhOTg5Y2MyYjlhZjY",
+    "commit": {
+      "author": {
+        "name": "Claude",
+        "email": "noreply@anthropic.com",
+        "date": "2026-10-23T15:23:48Z"
+      },
+      "committer": {
+        "name": "Claude",
+        "email": "noreply@anthropic.com",
+        "date": "2026-10-23T15:23:48Z"
+      },
+      "message": "docs(CLAUDE.md): (c) tro hanh vi ma tran sang t162, t161 chi khoa cau truc\n\nCodex connector P2 tren PR #896 (r4361172684): t161 chi kiem moi job\nlay os tu chuan-bi va output khong boc fromJSON; cac phep danh gia\n_danh_gia_bieu_thuc_chuan_bi va gia tri ky vong nam o\nt162_M4_evaluator_toi_gian_chuan_bi.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm",
+      "tree": {
+        "sha": "3da0ce24590dfcf2e60805b2bef76687cdd64405",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/3da0ce24590dfcf2e60805b2bef76687cdd64405"
+      },
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/816f43988eb3012726120ad00166a989cc2b9af6",
+      "comment_count": 0,
+      "verification": {
+        "verified": true,
+        "reason": "valid",
+        "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQFGHbqs+\n819kWrp8p+pAU16QFkyay83QWNCN3VN4nTAzFKYdvWmaMtUzDB6EwN1TBqLX+X1nAanTXzk/zO1s\nKQo=\n-----END SSH SIGNATURE-----",
+        "payload": "tree 3da0ce24590dfcf2e60805b2bef76687cdd64405\nparent 0bb792b75847e1a5b48eccfec10e7a0c99acd0c1\nauthor Claude <noreply@anthropic.com> 1792769028 +0000\ncommitter Claude <noreply@anthropic.com> 1792769028 +0000\n\ndocs(CLAUDE.md): (c) tro hanh vi ma tran sang t162, t161 chi khoa cau truc\n\nCodex connector P2 tren PR #896 (r4361172684): t161 chi kiem moi job\nlay os tu chuan-bi va output khong boc fromJSON; cac phep danh gia\n_danh_gia_bieu_thuc_chuan_bi va gia tri ky vong nam o\nt162_M4_evaluator_toi_gian_chuan_bi.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm\n",
+        "verified_at": "2026-10-23T15:23:51Z"
+      }
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/816f43988eb3012726120ad00166a989cc2b9af6",
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/816f43988eb3012726120ad00166a989cc2b9af6",
+    "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/816f43988eb3012726120ad00166a989cc2b9af6/comments",
+    "author": {
+      "login": "claude",
+      "id": 81847,
+      "node_id": "MDQ6VXNlcjgxODQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/claude",
+      "html_url": "https://github.com/claude",
+      "followers_url": "https://api.github.com/users/claude/followers",
+      "following_url": "https://api.github.com/users/claude/following{/other_user}",
+      "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+      "organizations_url": "https://api.github.com/users/claude/orgs",
+      "repos_url": "https://api.github.com/users/claude/repos",
+      "events_url": "https://api.github.com/users/claude/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/claude/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "claude",
+      "id": 81847,
+      "node_id": "MDQ6VXNlcjgxODQ3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/claude",
+      "html_url": "https://github.com/claude",
+      "followers_url": "https://api.github.com/users/claude/followers",
+      "following_url": "https://api.github.com/users/claude/following{/other_user}",
+      "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+      "organizations_url": "https://api.github.com/users/claude/orgs",
+      "repos_url": "https://api.github.com/users/claude/repos",
+      "events_url": "https://api.github.com/users/claude/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/claude/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+        "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/0bb792b75847e1a5b48eccfec10e7a0c99acd0c1",
+        "html_url": "https://github.com/ducthangho/tra-luat/commit/0bb792b75847e1a5b48eccfec10e7a0c99acd0c1"
+      }
+    ]
+  }
+]

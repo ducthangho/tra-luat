@@ -1,0 +1,12 @@
+# do luc 2026-10-24T03:14:43Z
+git show -s --format='%H %P %T' 42143ad00154e1038bbecf820bc34d10761215b9:
+42143ad00154e1038bbecf820bc34d10761215b9 2c113964020a4e15073f73b7c029dcc21a7b9be2 99b354ca7bcc40ce0c4f7d9db445b852510b5809 c60271ced4270ddc3b4784404e5bb7196ce4abc3
+head 99b354c tree: a247775817d0bf1bec9a327a6a350975ca72e754
+cmp(git diff 2c11396 42143ad00154e1038bbecf820bc34d10761215b9, git diff 33e6d4c 99b354c) rc=0
+numstat merge:
+226	16	.claude/dev/launcher_test.py
+11	6	RELEASE_MANIFEST.json
+9	0	changelog.d/wp-886.md
+39	5	ops/cong_cu.py
+7	2	ops/cong_cu_test.py
+6	4	scripts/tl_selftest.py

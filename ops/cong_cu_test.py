@@ -3152,11 +3152,16 @@ def t64_phong_lai_KHONG_de_MO_COI_khi_bi_giet_va_ma_thoat_giu_TIN_HIEU():
 
 
 def python_alias_behavior_test() -> None:
-    """Probe `python` dùng interpreter chạy cong_cu.py, không đòi alias trên PATH."""
+    """Máy chỉ có `python3` vẫn DAT: probe `python` giải theo PATH (`python` → `python3` → `py -3`, wp886)."""
     with tempfile.TemporaryDirectory(prefix="cong-cu-python3-") as td:
         root = Path(td); only = root / "bin"; only.mkdir()
         try:
-            (only / "python3").symlink_to(sys.executable)
+            if os.name == "nt":
+                # wp886 r2: luật native PATHEXT (N6) không nhận tên không đuôi trên Windows; `.cmd` gọi đúng
+                # interpreter này (symlink `python3.exe` thì CHƯA ĐO: python có thể không tìm thấy DLL cạnh link).
+                (only / "python3.cmd").write_text(f'@"{sys.executable}" %*\r\n', encoding="utf-8")
+            else:
+                (only / "python3").symlink_to(sys.executable)
         except OSError as ex:
             # Windows doi SeCreateSymbolicLinkPrivilege (Developer Mode hoac shell nang quyen).
             # Thieu no thi day la KHONG DO DUOC, KHONG phai DO — va nhat dinh khong phai ly do

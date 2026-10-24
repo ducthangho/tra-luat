@@ -1,4 +1,6 @@
 # HO SO LAND — packet #878 wp878 r1 g1, ma qua PR #880. Khuon: ops/land/pr873-wp868-land-evidence.yaml.
+# DINH CHINH 24-10-2026 — chi thi chu kho ghi ho #892 issuecomment-6377931111: `landed: true` -> `landed: false`.
+# Ly do va dieu kien mo lai: khoi `dinh_chinh_20261024` cuoi tep. Moi cau khai `landed: true` ben duoi la LICH SU, khong con hieu luc.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor;
 # not_measured = khong do duoc. Readback tho: ops/land/pr880-wp878-provenance/ (GET qua proxy phien bang GITHUB_PAT,
@@ -67,7 +69,7 @@ lease:
 trang_thai_packet:
   merged: true
   merged_nguon: 'measured — readback-pr-880.json: merged true, merged_at 2026-10-23T01:19:34Z, merge_commit_sha 747f983, head.sha ab28423.'
-  landed: true
+  landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA xanh, kiem-gate rc=0 (post_merge_checks); (2) lease khong con giu write set
     (bookkeeping/lease.thu_hoi_cuoi); (3) review approve neo head cuoi hoac head co write set giong het; (4) noi dung merge = diff PR;
@@ -76,3 +78,17 @@ trang_thai_packet:
 khong_do_duoc:
   - 'Model thuc phuc vu cac luot review KHONG_DO_DUOC (chi co header CLI gpt-6.1-sol xhigh).'
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
+
+# ---- dinh chinh 24-10-2026 (them vao, khong sua du kien da do o tren)
+dinh_chinh_20261024:
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/892#issuecomment-6377931111
+  landed_truoc: true
+  landed_sau: false
+  authorized_head_sha: ab2842378652cf03c1d5964c927abb2391f2834f
+  merge_commit: 747f983ccbcaf29a8e5228d09fd05b5a5ab6e479
+  ly_do:
+    - 'gate hau merge chi co moc Run cua PROTOCOL §10.2.2 (REST run/jobs/check-run + kiem-gate rc=0, xem post_merge_checks). Moc Checkout (SHA/parents/tree thuc chay), Workflow definition (commit/blob/sha256 qua WorkflowRun.file) va Gate output (command/rc/marker duong/artifact): not_measured — measured: dinh-chinh-20261024/graphql-workflowrun-file-39883350733.txt · dinh-chinh-20261024/graphql-workflowrun-file-39883350847.txt: GraphQL tra HTTP 403 trong phien; log/artifact cua cac run ay khong duoc luu. KHONG suy cac moc ay tu REST head_sha.'
+    - 'reviewer assurance §8.1: ho model reviewer khong_do_duoc — chinh ho so nay tu ghi o khong_do_duoc (dong 77 ban goc, truoc hai dong dinh chinh dau tep): chi co header CLI, khong co do may cho lan chay approve. Cung lop voi lo A cua #748 r24 (PR #894).'
+  phat_hien_boi: 'Codex connector P1 tren PR #900 (r4365361919) cho ho so cung phien ghi #892; ap nhat quan cho bon ho so cung muc bang chung ghi qua PR #893.'
+  dieu_kien_mo_lai: '(1) du bon moc §10.2.2 cho gate hau merge tren DUNG merge commit 747f983ccbcaf29a8e5228d09fd05b5a5ab6e479 (vd cong cu cua #899 CI-PROVENANCE-REST-LOG); VA (2) assurance §8.1: mot lan approve doc lap tren DUNG ab2842378652cf03c1d5964c927abb2391f2834f voi ho model reviewer xac lap khac ho executor (do_may, hoac khai_co_audit kem auditor co ten), hoac human_audited day du §8 muc 2.'
+  lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'

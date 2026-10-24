@@ -90,6 +90,8 @@ push_policy_note: >-
   Theo luat_vong_doi V1-V4 cua dac ta r2 (quyet dinh chu kho rieng wp899, KHONG ap ADR-0054): day nhanh MOT lan khi
   du dieu kien merge; approve chi khi P0=P1=P2=0 va moi P3 co quyet dinh; review theo lop; connector P0-P2 sau khi
   day thi DUNG hoi chu kho. Bien nhan moi luot Codex mang dinh_danh_reviewer muc 1-5.
+da_bi_thay_the: wp899-r3-g2-claude
+ly_do_thu_hoi: 'r2 dung han o luot review 4 (F02 lap lan 4, issuecomment-6381144085); chu kho duyet spec r3 (dd1a997d) => lease r3 g2 thay.'
 thay_the_cho: []
 thay_the_cho_note: >-
   Khong lease nao con han giu write set luc do (NGUOI_GIU 0 ca ba duong dan) => khong bia mo.

@@ -1,0 +1,7 @@
+merge 76cf4c51a6b1a5a0f30621c73f9a6f03e7e68138 cha1 ffc4f80d6ac497315876872b43ae196539b83e3b head 9bad91e9261a9097b0924718db3333da624e01cf merge-base(cha1,head) 8324567788caab8dc332d45df458ef415fd305be
+git diff cha1 merge   : sha256 a3c50900d8ffab3cdbaae1c2b38f15fac8fb89c4c2a43d9535c3588c52e9a261 (433 dong)
+git diff mb head (PR) : sha256 a3c50900d8ffab3cdbaae1c2b38f15fac8fb89c4c2a43d9535c3588c52e9a261 (433 dong)
+BANG BYTE: True
+tep doi trong merge: ['.claude/dev/ci_dang_ky_test.py', '.github/workflows/ci.yml', 'ops/ci_duong_nhanh_test.py', 'ops/cong_cu_test.py']
+git diff reviewed 9bad91e9261a9097b0924718db3333da624e01cf -> head 9bad91e9261a9097b0924718db3333da624e01cf tren write set ['ops/cong_cu_test.py', '.github/workflows/ci.yml', '.claude/dev/ci_dang_ky_test.py', 'ops/ci_duong_nhanh_test.py']: 0 dong
+tree merge dff0a35a38e13031a1f0087aa93915d61172b01d · tree head 2f830513aee427ee385e8a07c2c1280e4e8060c9

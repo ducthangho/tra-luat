@@ -6430,7 +6430,9 @@ def _r25_codex_gia(s):
 def _r25_chay(s, noi_dung_err, sau="", them=()):
     repo = tao_repo(s); cli = _r25_codex_gia(s); rr = s / "runs"
     ma = ("import os,sys,time;print(os.environ.get('RUST_LOG',''));"
-          f"sys.stderr.write({noi_dung_err!r});sys.stderr.flush();{sau}")
+          f"sys.stderr.buffer.write({noi_dung_err.encode()!r});sys.stderr.buffer.flush();{sau}")
+    # byte THÔ như codex (Rust) ghi: sys.stderr.write ở chế độ văn bản đổi \n -> \r\n trên Windows (đo: lane
+    # Windows run 40082998930 đỏ đúng phép so byte stderr.log, còn bộ lọc vẫn chặn đủ dòng trace)
     r = chay("run", "--workspace", str(repo), "--run-root", str(rr), *them, "--", str(cli), "-c", ma, "-m", "gpt-mau")
     tm = next(p for p in rr.iterdir() if p.is_dir())
     return r, tm, json.loads((tm / "run.json").read_text(encoding="utf-8"))

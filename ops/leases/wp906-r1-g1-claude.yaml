@@ -75,8 +75,15 @@ thay_the_cho_ghi_chu: 'khong lease song nao giu write set nay => khong can bia m
 leased_at_utc: '2026-10-24T06:30:00Z'
 heartbeat_at: '2026-10-24T06:30:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-25T06:30:00Z'
-lease_expires_at_utc: '2026-10-25T06:30:00Z'
+lease_until: '2026-10-24T10:02:08Z'
+lease_expires_at_utc: '2026-10-24T10:02:08Z'
+rut_han:
+  han_cu: '2026-10-25T06:30:00Z'
+  han_moi: '2026-10-24T10:02:08Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #906 da merge (PR #907, head 35d87eb073ae8c6f79049c0097b4208cc2139c47, merge dc657149941f9db3ab2afc6fb6462ba4827bf18f, 2026-10-24T07:32:33Z, merged_by ducthangho); chu kho dong y land #906 va rut han lease (chon "Co" o cau hoi cua phien dieu phoi session_01B8U8TTEwfMS1u4u4E1VmRW, ghi ho #906 issuecomment-6382849456).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp886-r2-g2-claude (c629a62).'
+  ghi_boi: claude-executor-session session_01FLVLxi5gKZgtVvbuTCEqEn (theo chi thi chu kho ghi ho #906 issuecomment-6382849456)
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0

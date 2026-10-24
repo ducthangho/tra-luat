@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "9f946d714c2344fa9691c3d7d4f1b2d9",
+  "short_id": "9f946d71",
+  "ten": "pr889-review-1-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "51c2fcc4cb30f86c"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-23T07:12:38.515744+00:00",
+  "ket_thuc_utc": "2026-10-23T07:24:42.614780+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 3172,
+  "khoa_danh_tinh": "linux:22115",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr889.817P8X/cay-kho",
+  "head": "8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "712786040ec165a4a811593046fe9ef7224025677eaf02df5fa5aaca2efea618",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "a7acaaec78d568e38e8083691362c27cb154085042f0e7c16ee0720f39871c3c",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr889.817P8X/runs/9f946d71/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 724.099,
+  "stdout_byte": 229,
+  "stdout_sha256": "2ba3fa02eabdea2e68172df9d7bfb95a4ff58576fb5ddd64a439002611901cfe",
+  "stderr_byte": 763083,
+  "stderr_sha256": "4b41efc849ef205f0464f3aabd7a90466610fa8713d04cfb45be25fe19929cf1"
+}

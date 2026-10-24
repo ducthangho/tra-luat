@@ -1,0 +1,22 @@
+# do 2026-10-24T00:19:17Z sau rut han e85cd20
+ls-remote: 566 · for-each-ref: 566 · thieu cuc bo: 0
+== ai-dang-giu ops/cong_cu_test.py
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp892-r1-g1-claude	refs/heads/ops/wp892-r1-g1-lease:ops/leases/wp892-r1-g1-claude.yaml
+HẾT_HẠN	wp892-r2-g2-claude	refs/heads/ops/wp892-r2-g2-lease:ops/leases/wp892-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ai-dang-giu .github/workflows/ci.yml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp892-r1-g1-claude	refs/heads/ops/wp892-r1-g1-lease:ops/leases/wp892-r1-g1-claude.yaml
+HẾT_HẠN	wp892-r2-g2-claude	refs/heads/ops/wp892-r2-g2-lease:ops/leases/wp892-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ai-dang-giu .claude/dev/ci_dang_ky_test.py
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp892-r1-g1-claude	refs/heads/ops/wp892-r1-g1-lease:ops/leases/wp892-r1-g1-claude.yaml
+HẾT_HẠN	wp892-r2-g2-claude	refs/heads/ops/wp892-r2-g2-lease:ops/leases/wp892-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ai-dang-giu ops/ci_duong_nhanh_test.py
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp892-r1-g1-claude	refs/heads/ops/wp892-r1-g1-lease:ops/leases/wp892-r1-g1-claude.yaml
+HẾT_HẠN	wp892-r2-g2-claude	refs/heads/ops/wp892-r2-g2-lease:ops/leases/wp892-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

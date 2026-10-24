@@ -155,46 +155,43 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   Hỏi `get_reviews`/`get_review_comments` thấy rỗng rồi đọc thành "chưa review" ⇒ đã báo sai rằng #103
   là chỗ mù, và đăng thêm một lời gọi review với cái cớ sai — trong khi kết luận sạch đã có từ 20 phút
   trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**
-  · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**
-  Bản cũ của mục này viết: *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"*.
-  Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế
-  `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên
-  `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
-  HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
-  **Đo lại 23-10-2026** trên `e63961f`: #878 thêm nhánh thứ ba — gọi tay với `runner_set=windows-only` ⇒
-  `["windows-latest"]` (KHÔNG có Ubuntu); gọi tay mặc định (`windows-and-ubuntu`) vẫn ra hai nền.
-  Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,
-  20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở
-  `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên
-  bản land (commit `3f6c694`) khai `jobs: '23/23 success (gom windows)'`; Codex connector bắt thành P1 trên PR #859 (comment
-  `r4323607674`), sửa ở PR #865. Đúng bệnh mục này đang dạy: tin một câu GẦN TAY thay vì đọc nhãn job.
-  **Windows tự động khi push master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: chỉ bắn
-  khi đổi `.claude/dev/**` hoặc chính tệp workflow ấy (`paths:`), ma trận `windows-latest` + `ubuntu-latest`;
-  PR chỉ chạy khi mang nhãn `windows` (workflow này CÓ khai `types: [..., labeled]`). Nó chỉ đo lane
-  launcher, KHÔNG phải gate. Các workflow còn lại (`ci-dot-bien-du` `ops-*`) đều `ubuntu-latest`.
-  Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge
-  của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là "lần đo Windows đầu tiên" như bản cũ viết.
-  Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.
-  **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó** — kèm
-  `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.
-  **Nhưng "gate trên Windows" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên
-  `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`
-  duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:
-  `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;
-  `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi
-  `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong
-  `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên "có job Windows" chưa phải "mọi
-  bước chạy". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —
-  phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy
-  từ lượt Ubuntu của CÙNG head.
+  · **(c) Nền nào chạy gate KHÔNG được chép vào đây — đọc nó từ `ci.yml` và từ NHÃN JOB, mỗi lần.**
+  Mục này từng chép ma trận `os` thành văn xuôi, và văn xuôi ấy đã lệch khỏi `ci.yml` BA lần: câu gốc
+  *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"* đã chết từ packet #548
+  (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế `github.ref == 'refs/heads/master'` khỏi output `os` của job
+  `chuan-bi`) mà vẫn nằm đây; sửa ở PR #870 xong thì #878 (`runner_set=windows-only`) và #879 (Windows chỉ còn
+  một phần gate) làm nó cũ tiếp, phải đo lại ở PR #889. Câu cũ đã kịp gây hại thật: biên bản land commit
+  `3f6c694` khai `jobs: '23/23 success (gom windows)'` cho run **39354156843** (push `3a3a3ca` lên master) trong
+  khi cả 23 job mang nhãn `ubuntu-latest` (`ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`) —
+  Codex connector bắt thành P1 trên PR #859 (comment `r4323607674`), sửa ở PR #865. Đúng bệnh mục này dạy:
+  tin một câu GẦN TAY thay vì đọc nhãn job.
+  **Nguồn sự thật, theo thứ tự hỏi:**
+  · ma trận dự kiến = output `os` của job `chuan-bi` trong `.github/workflows/ci.yml`, cộng `exclude:` và
+  `if:` mức job của TỪNG job `gate*` (một job có thể loại Windows dù `os` có Windows);
+  · hành vi ấy được khoá bằng `t162_M4_evaluator_toi_gian_chuan_bi` trong `ops/lease_publish_test.py`
+  (đánh giá biểu thức thật bằng `_danh_gia_bieu_thuc_chuan_bi` cho push / PR thường / PR nhãn `windows` /
+  từng `runner_set`) — đổi ma trận mà quên ca ấy thì gate ĐỎ, nên đọc ca ấy là đọc ma trận HIỆN HÀNH.
+  Ca liền trước, `t161_M3_chot_nguon_duy_nhat_ma_tran_ci`, chỉ khoá CẤU TRÚC (mọi job lấy `os` từ
+  `chuan-bi`, output không bọc `fromJSON`) — nó KHÔNG đánh giá biểu thức, nên đừng đọc nó thành ma trận;
+  · một lượt chạy CỤ THỂ đã đo nền nào = trường `labels` của từng job trong `actions/runs/<id>/jobs`
+  (kèm `runner_id` khác 0 — `runner_id 0` là job chưa từng chạy). Đừng suy từ tên sự kiện hay tên workflow.
+  Ảnh chụp để định hướng, KHÔNG phải nguồn (đo 23-10-2026 trên `e63961f`, có thể đã cũ khi bạn đọc): push
+  master và PR thường ⇒ chỉ Ubuntu; gọi tay `workflow_dispatch` ⇒ hai nền, hoặc chỉ Windows với
+  `runner_set=windows-only`; Windows tự động khi push master chỉ đến từ `launcher-windows.yml` (có `paths:`, chỉ
+  đo lane launcher, không phải gate).
+  **"Có job Windows" chưa phải "gate đã đo trên Windows".** Từ #879, `gate-cong-cu` trên Windows chỉ chạy mảnh 0,
+  duyệt ca nền rồi DỪNG — bán kính đột biến chỉ đo trên Ubuntu, và ca thiếu năng lực bị `BỎ QUA` rồi trừ khỏi mẫu
+  số (`so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`); `gate-cong-cu-gop` loại hẳn Windows; nhiều bước
+  mang `if:` theo `runner.os`. Nên một lượt Windows xanh chỉ chứng minh **các ca KHÔNG bị bỏ qua đạt trên
+  Windows** — đọc riêng các dòng `BỎ QUA` trong log — còn bán kính đột biến phải lấy từ lượt Ubuntu của CÙNG head.
+  Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó (xem input
+  `runner_set` trong `ci.yml` để khỏi trả lại phút Ubuntu khi head đã có lượt PR Ubuntu).
   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt
   chạy nào; ma trận chỉ đọc nhãn ở lượt bắn KẾ TIẾP. Người làm theo sẽ gắn nhãn, thấy vẫn đúng một
   check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn
   (đẩy thêm commit, hoặc đóng rồi mở lại PR) — hoặc khai `types: [..., labeled]` cho workflow.
-  (Đợt 14-08 không dùng đường nào; khi ấy ma trận còn vế master nên sáu lần merge là sáu lần đo
-  Windows đầu tiên — nay cùng tình huống thì là **không lần nào**.)
   Kèm theo: trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
   `if: github.event_name == 'pull_request'` — nên tiêu chí "không bước nào `skipped`" chỉ đúng cho
   lượt PR; bê nguyên sang lượt master là tự báo động giả.
@@ -873,6 +870,28 @@ không tra được.
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng
   `$CLAUDE_PROJECT_DIR`.
+- **`( eval … ) > tệp` KHÔNG tương đương `$( eval … )` — subshell `( )` KẾ THỪA `set -e`, command substitution
+  thì không** (bash, trừ khi bật `inherit_errexit`). Đo 22-10-2026, packet #868: đổi `KET_QUA_CAI="$(eval "$LENH")"`
+  sang `( eval "$LENH" ) > tệp` để khỏi chờ EOF stdout. Đổi xong, các `|| { …; return 1; }` tường minh trong
+  `chon_thu_muc_chay_duoc` thành THỪA: hàm đứng CUỐI chuỗi `&&` nên errexit vẫn áp vào thân nó. Hai mutant
+  wp858_sh_nuot_loi_cygpath_w · wp858_sh_nuot_loi_ghi_github_path (bảng đột biến của
+  `.claude/dev/launcher_test.py`) vì thế SỐNG, và bộ ca không nói gì.
+  Chữa: `( set +e; eval "$LENH" ) > tệp`, giữ đúng ngữ nghĩa cũ (mã thoát là của chuỗi `&&`, chốt là các `return 1`
+  tường minh). Đổi một dạng thực thi shell sang dạng "trông tương đương" là đổi NGỮ NGHĨA errexit. Không đọc
+  code mà thấy được: chỉ đột biến mới lộ, vì hành vi trên head vẫn đúng.
+- **Hàm bash EXPORT qua môi trường (`BASH_FUNC_<tên>%%`) che được BUILTIN — tiêm lỗi mà không sửa script.**
+  Bash nạp hàm từ biến `BASH_FUNC_printf%%` lúc khởi động, và hàm thắng builtin cùng tên. Packet #868 dùng cách
+  này cho ca r868_ghi_kenh_hong_thi_dung của `.claude/dev/launcher_test.py`: `printf` giả trả rc 74 đúng cho
+  payload kênh, ép đường "ghi kênh lỗi" vốn không dựng được bằng tệp/quyền (máy chạy root). Hai điều kèm theo. (a) `_wp802_bash_env` cố ý LỌC mọi
+  `BASH_FUNC_*` khỏi môi trường thừa kế để cô lập, nên fixture phải thêm lại TƯỜNG MINH. (b) Ca phải đòi DẤU HIỆU
+  của lỗi giả trong stderr ("ca có ĐO", không chỉ `rc != 0`): rc khác 0 vì một lý do khác thì không đo gì.
+- **`/tmp/.git` RỖNG do sandbox Codex để lại SAU khi lượt chạy KẾT THÚC vẫn làm đỏ 11 ca `r484_*`** (`Codex home
+  is inside a repository`). Đo 22-10-2026, packet #868: lượt Codex xong là mount gỡ, nhưng thư mục rỗng ở lại.
+  `launcher_test` ra 238/249 với đúng 11 ca ấy đỏ; `rmdir /tmp/.git` (CHỈ thư mục rỗng, của chính lượt mình gọi)
+  thì 4/4 ca thử lại xanh. Bản #858 chỉ ghi "đỏ KHI Codex chạy song song"; câu đúng rộng hơn: đỏ cả SAU khi Codex
+  thoát. Trước khi đo `launcher_test` sau một lượt cross-review, hỏi `ls -d /tmp/.git` trước. Còn thấy thì ghi
+  đo trong điều kiện ấy, đừng đọc 11 ca đỏ thành hồi quy. Gốc lỗi: chốt kho của credential
+  store coi một `.git` RỖNG ở thư mục tổ tiên là kho. Đây là nợ của packet khác, chưa vá.
 
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).

@@ -80,6 +80,8 @@ xung_dot_write_set_do_luc_cap:
   do_luc: '2026-10-23T06:40:00Z'
   goc_quet: 'master e63961f27b53e66db8e6600009f97d5706743063, quet refs sau fetch day du (ls-remote <-> for-each-ref thieu 0)'
   ket_qua: 'ca 6 duong dan: NGUOI_GIU 0. ops/cong_cu_test.py (khong thuoc write set) NGUOI_GIU 1 wp879-r1-g1-claude.'
+da_bi_thay_the: wp886-r2-g2-claude
+ly_do_thu_hoi: 'r1 chan o fixture python_alias_behavior_test (ops/cong_cu_test.py ngoai write set); chu kho chon A (issuecomment-6359482987) => spec r2, lease r2 g2 thay.'
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'khong lease song nao giu write set nay => khong can bia mo.'
 leased_at_utc: '2026-10-23T06:42:00Z'

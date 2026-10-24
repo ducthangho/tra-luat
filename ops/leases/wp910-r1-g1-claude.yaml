@@ -74,6 +74,8 @@ xung_dot_write_set_do_luc_cap:
   do_luc: '2026-10-24T10:02:00Z'
   goc_quet: 'master e739ac1, quet refs sau fetch day du, nhanh cuc bo khong tut sau'
   ket_qua: 'ca 4 duong dan: NGUOI_GIU 0. .claude/dev/ci_dang_ky_test.py (ngoai write set) NGUOI_GIU 1 wp899-r3-g2-claude.'
+da_bi_thay_the: wp910-r2-g2-claude
+ly_do_thu_hoi: 'r1 dung vi ci_dang_ky_test.py bam tron gate-nhanh-manh; chu kho chon thu hep pha A (issuecomment-6383127937) => spec r2, lease r2 g2 thay.'
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'khong lease song nao giu write set nay => khong can bia mo.'
 leased_at_utc: '2026-10-24T10:04:00Z'

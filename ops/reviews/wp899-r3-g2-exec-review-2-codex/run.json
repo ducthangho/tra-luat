@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "d8a6aff9d8134e4799c855ef9c7c60ff",
+  "short_id": "d8a6aff9",
+  "ten": "wp899-r3-review-2",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "952d31713560901d"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-24T11:49:34.773426+00:00",
+  "ket_thuc_utc": "2026-10-24T12:08:52.794100+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 3354,
+  "khoa_danh_tinh": "linux:195225",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/9308dc27-721b-551c-82fd-e1c5d7d0a765/scratchpad/r3review2/ws",
+  "head": "7f5a02c9c2ff346484e10c2f5b4e94fcb0468b8b",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "cb5bf33b9fbd8630f36d63b7377da7276f1290c4f410bdb897b3c61492a9de6d",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "497c39355766404cd0ec2ea0f31483130d96f6ef0a1c08da9ea90edcb9b02414",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/9308dc27-721b-551c-82fd-e1c5d7d0a765/scratchpad/r3review2/runs/d8a6aff9/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 1158.021,
+  "stdout_byte": 1112401,
+  "stdout_sha256": "2727558e7179b8d1a6ad16c3cd1374973e1732bff6c445aa2029eff57505b6cf",
+  "stderr_byte": 295,
+  "stderr_sha256": "610f842c228bf3dfcc5902bd7b8dc485718f364a58f9a6ea72697e5484250dc4"
+}

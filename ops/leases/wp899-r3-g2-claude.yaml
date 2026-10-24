@@ -71,8 +71,8 @@ xung_dot_write_set_do_luc_cap:
     da dang o ops/wp899-spec 2a68ea0 (run 40081853937 success).'
 leased_at_utc: '2026-10-24T09:29:00Z'
 heartbeat_at: '2026-10-24T09:29:00Z'
-lease_until: '2026-10-27T09:29:00Z'
-lease_expires_at_utc: '2026-10-27T09:29:00Z'
+lease_until: '2026-10-24T17:30:00Z'
+lease_expires_at_utc: '2026-10-24T17:30:00Z'
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0
@@ -103,3 +103,22 @@ nang_tran:
   can_cu: 'dac ta r3 muc nang_tran (Q6 vong soan r3, #899)'
   tran_cu: <= 3 tep / <= 900 dong them
   tran_moi: <= 3 tep / <= 1000 dong them
+han_ghi_chu: >-
+  Goc 2026-10-27T09:29:00Z. RUT NGAN ve 2026-10-24T17:30:00Z — xem thu_hoi_bang_rut_han.
+lease_sua_lan_cuoi: '2026-10-24T16:31Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_until/lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-27T09:29:00Z'
+  han_moi_utc: '2026-10-24T17:30:00Z'
+  chi_thi: >-
+    Chu kho chon "Doi kien truc" tai checkpoint V5 (#899 issuecomment-6384048080), ghi ho o issuecomment-6386645558
+    (phien dieu phoi session_01B8U8TTEwfMS1u4u4E1VmRW); chu kho duyet TRUC TIEP viec rut han trong phien executor
+    session_01J5UVb6kiH9edF9McTVQvDT luc 2026-10-24T16:30Z.
+  ly_do: >-
+    r3 dung han theo V5 (F02 lap lop o luot 2, verdict tren 7f5a02c). Chu kho doi kien truc: ghep nhom log voi danh sach
+    buoc REST, can dac ta r4 moi (co the gop P-B). Nha write set, cu the .claude/dev/ci_dang_ky_test.py cho #910 pha B.
+    Ung vien 7f5a02c giu trong bundle tren ops/wp899-g2-luu-tru @ d1cb870; nhanh code agent/wp899-g2-claude chua tung day.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem (r4 chua soan). Theo tien le wp773: han moi dat SAU luc push de luot dang lease con thay lease
+    song, tranh rc=8 che rc=9.

@@ -8761,6 +8761,31 @@ def r886_n6_giai_ten_tinh_windows_va_posix():
         dung = {"win": b / "python.CMD", "posix": b / "python"}
         bang(all(v and os.path.samefile(v[0], dung[k]) for k, v in rong.items()),
              f"muc PATH rong khong la cwd: {rong} mong {dung}")
+        # Cùng TÊN ở hai thư mục ⇒ thư mục ĐẦU PATH thắng; POSIX còn đòi quyền thực thi (Codex wp886 lượt 2, H06/H07).
+        d, e = s / "d", s / "e"
+        for x in (d, e):
+            x.mkdir()
+            (x / "python").write_text("x")
+            (x / "python").chmod(0o755)
+        dau = m._python_theo_path(f"{d}{sep}{e}", pe, False)
+        bang(dau and os.path.samefile(dau[0], d / "python"), f"cung ten o hai thu muc ma khong lay thu muc dau PATH: {dau}")
+
+
+@ca
+def r886_n1_bo_qua_tep_khong_thuc_thi():
+    """N1 (POSIX): `python` KHÔNG thực thi được đứng đầu PATH thì bỏ qua, như `command -v` (Codex wp886 lượt 2, H06).
+    Windows: `os.access(X_OK)` luôn đúng với tệp có mặt ⇒ đột biến bỏ X_OK tương đương, nên BỎ QUA thay vì đo giả."""
+    if LA_WINDOWS:
+        return "BO QUA X_OK khong co nghia tren Windows"
+    m = _r886_nap()
+    with San() as s:
+        d, e = s / "d", s / "e"
+        for x, quyen in ((d, 0o644), (e, 0o755)):
+            x.mkdir()
+            (x / "python").write_text("x")
+            (x / "python").chmod(quyen)
+        xok = m._python_theo_path(f"{d}{os.pathsep}{e}", None, False)
+        bang(xok and os.path.samefile(xok[0], e / "python"), f"nhan tep khong thuc thi duoc: {xok}")
 
 
 @ca
@@ -11454,6 +11479,13 @@ DOT_BIEN_HOOK = [
     ("wp886_cc_bo_muc_PATH_rong",
      ('    for muc in (os.environ.get("PATH", "") if path is None else path).split(os.pathsep):\n        for d in duoi:',
       '    for muc in filter(None, (os.environ.get("PATH", "") if path is None else path).split(os.pathsep)):\n        for d in duoi:'),
+     ["r886_n6_giai_ten_tinh_windows_va_posix"], "cong_cu"),
+    ("wp886_cc_bo_X_OK", ("            if os.path.isfile(p) and os.access(p, os.X_OK):\n                return os.path.abspath(p)\n    return None\n\ndef _python_theo_path",
+                          "            if os.path.isfile(p):\n                return os.path.abspath(p)\n    return None\n\ndef _python_theo_path"),
+     ["r886_n1_bo_qua_tep_khong_thuc_thi"], "cong_cu"),
+    ("wp886_cc_dao_thu_tu_PATH",
+     ('    for muc in (os.environ.get("PATH", "") if path is None else path).split(os.pathsep):\n        for d in duoi:',
+      '    for muc in reversed((os.environ.get("PATH", "") if path is None else path).split(os.pathsep)):\n        for d in duoi:'),
      ["r886_n6_giai_ten_tinh_windows_va_posix"], "cong_cu"),
     ("wp886_cc_path_truoc_ten",
      ('    for ten, *them in TEN_PYTHON:\n        p = _giai_ten_tran(ten, path, pathext, la_windows)\n',

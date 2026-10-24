@@ -74,6 +74,8 @@ xung_dot_write_set_do_luc_cap:
   do_luc: '2026-10-24T10:34:00Z'
   goc_quet: 'master e739ac1, quet refs sau fetch day du, nhanh cuc bo khong tut sau'
   ket_qua: '4 duong dan: NGUOI_GIU 1 = wp910-r1-g1-claude (cung packet, thay bang bia mo hai chieu). .claude/dev/ci_dang_ky_test.py (ngoai write set) NGUOI_GIU 1 wp899-r3-g2-claude.'
+da_bi_thay_the: wp910-r3-g3-claude
+ly_do_thu_hoi: 'pha A xong (PR #913 merged e91a68a, so land PR #914); pha B mo sau khi wp899-r3-g2-claude nha .claude/dev/ci_dang_ky_test.py (chu kho chon Doi kien truc, #899 issuecomment-6386645558) => spec r3, lease r3 g3 thay.'
 thay_the_cho:
 - wp910-r1-g1-claude
 thay_the_cho_ghi_chu: 'wp910-r1-g1-claude con han toi 2026-10-25T22:04Z; spec r2 => bia mo hai chieu (da_bi_thay_the tren ops/wp910-r1-g1-lease).'

@@ -171,3 +171,34 @@ bo_sung_sau_landed:
     anh_huong_no_con_mo: >-
       HEAD-MERGE-KHONG-CO-REVIEW-HOAN-TAT duoc BU ve noi dung (connector sach tren cung blob CLAUDE.md, sau merge). Muc
       no_con_mo phia tren KHONG sua: thu tu "merge truoc review" van la thieu sot quy trinh da xay ra.
+
+# DINH CHINH SAU QUYET DINH CHU KHO (2026-10-24 10:37Z) — chi THEM khoi duoi day; moi dong phia tren (ke ca bo_sung_sau_landed)
+# giu nguyen. Ket luan: GHI NHAN quyet dinh chu kho tren #891, `landed` GIU `false` vi assurance §8.1 CHUA DAT (cung tieu chi
+# r24 #748). Ten khoi `bo_sung_sau_landed` o tren chi la ten moc thoi gian, KHONG khai ho so nay da landed.
+# Chu kho chon phuong an nay trong phien (session_01V2PEqhkb91vD5PCBM5yXbm, 24-10-2026): "Chon 1".
+dinh_chinh_sau_quyet_dinh:
+  quyet_dinh_chu_kho:
+    trang_thai: da_quyet
+    comment: https://github.com/ducthangho/tra-luat/pull/891#issuecomment-6366218495
+    do_duoc: >-
+      measured — readback-comment-891-6366218495.json: ducthangho, author_association OWNER, created_at = updated_at
+      2026-10-23T13:39:08Z, than "Duyet landed cho #870 va #889 theo ho so ... Head: 0390130f57c8f6fdd3b69de79ae49e6618ef3d3c".
+      readback-pr-891.json: head.sha 0390130 (khop SHA trong comment), merged_at 13:39:36Z, merge_commit 8324567.
+  landed_truoc: false
+  landed_sau: false
+  reviewer_assurance_81: CHUA DAT
+  ly_do: >-
+    doi_chieu — (1) cross-review Codex qua launcher.py run 9f946d71: ops/reviews/pr889-review-1-codex/run/run.json co 36 khoa
+    cap dau, 48 khoa moi cap, 0 khoa chua chuoi "model" (do trong phien ghi so) => khong do_may; (2) Codex connector (luot
+    6366338141, sach tren merge commit 6ac385f) khong lo model => ho model reviewer `khong_do_duoc` (§8, §8.1); (3) verdict
+    cross-review la `changes_requested` tren 8d5cccb, head da merge 094e8d1 khong duoc cross-review lai; connector cham
+    6ac385f chu khong cham 094e8d1 (tuong duong chi ve blob CLAUDE.md, xem bo_sung_sau_landed).
+  quyet_dinh_chu_kho_khong_thay_human_audited: >-
+    doi_chieu — comment 6366218495 dang SAU merge #889 (readback-pr-889.json merged_at 2026-10-23T08:00:00Z), khong co cau tu
+    doc diff, va tai khoan OWNER khong tach khoi phien agent (#566). Theo phan quyet #566 trong uy quyen r24 (#748
+    issuecomment-6365380273, khoi dinh_chinh_r24 o ops/land/pr848-wp744-land-evidence.yaml) comment ay KHONG dat §8 muc 2.
+  dieu_kien_mo_lai: >-
+    (A) `cross_approved`: mot lan approve DOC LAP hoan tat tren DUNG 094e8d17ae4dfcf21dca63702c9262267bdc072c, voi ho model
+    reviewer phuc vu CHINH lan chay ay xac lap KHAC claude (do_may, hoac khai_co_audit kem auditor co ten). HOAC (B)
+    `human_audited` §8 muc 2 neo DUNG 094e8d1; voi comment chu kho: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.
+  lich_su: 'quyet dinh 6366218495 va moi dong o tren giu nguyen de doi chieu; khoi nay chi ghi nhan quyet dinh va giu ket luan.'

@@ -1,0 +1,289 @@
+[
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4360957322",
+  "pull_request_review_id": 5630160093,
+  "id": 4360957322,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABA-7tig",
+  "diff_hunk": "@@ -108,11 +108,44 @@ def _bash_windows(path=None, system_root=None, program_files=None, git=None):\n     duong, _ = bash_nen.tim_bash(**ep)\n     return duong\n \n+# wp886 (#886): thứ tự + tập tên của dòng chọn `PY` trong `ops/cai_cong_cu.sh` (python → python3 → py -3).\n+# Đổi bên này thì đổi bên kia; `r886_ten_python_khop_cai_cong_cu_sh` canh hai bên khớp.\n+TEN_PYTHON = ((\"python\",), (\"python3\",), (\"py\", \"-3\"))\n+\n+def _giai_ten_tran(ten, path=None, pathext=None, la_windows=None):\n+    \"\"\"Bản nền gọi khi gõ TÊN TRẦN — cùng luật `_ten_tran_giai_ra` (.claude/dev/launcher.py) chế độ native:\n+    PATH theo thứ tự, mục rỗng = cwd; Windows chỉ nhận tên trần khi đã mang đuôi PATHEXT, rồi nối từng đuôi.\"\"\"\n+    la_windows = os.name == \"nt\" if la_windows is None else la_windows\n+    duoi = [\"\"]\n+    if la_windows:   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13\n+        ext = [e.rstrip(\".\") for e in (pathext or os.environ.get(\"PATHEXT\")\n+                                       or \".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC\").split(\";\") if e]\n+        duoi = ([\"\"] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext",
+  "path": "ops/cong_cu.py",
+  "commit_id": "99b354ca7bcc40ce0c4f7d9db445b852510b5809",
+  "original_commit_id": "efa6e8d6b1dc3f1eafff5aaad492dae055a5d784",
+  "user": {
+   "login": "chatgpt-codex-connector[bot]",
+   "id": 199175422,
+   "node_id": "BOT_kgDOC98s_g",
+   "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+   "html_url": "https://github.com/apps/chatgpt-codex-connector",
+   "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+   "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+   "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+   "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+   "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+   "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+   "type": "Bot",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Update the Python alias fixture for Windows native resolution**\n\nOn Windows runners where symlink creation succeeds, this extension-only lookup makes the existing `python_alias_behavior_test` fail: `ops/cong_cu_test.py:3126–3148` creates only an extensionless `python3` symlink and replaces PATH with that directory, so the new resolver returns no interpreter and the probe exits 3 instead of 0. This precheck runs before the suite, and `.github/workflows/ci.yml` invokes it in both `gate` and `gate-cong-cu`, breaking those Windows lanes. Update the fixture alongside this behavior change to provide a Windows-runnable `python3.cmd` or equivalent; retain the intended native-resolution rule.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+  "created_at": "2026-10-23T15:01:02Z",
+  "updated_at": "2026-10-23T15:01:02Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4360957322",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4360957322"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4360957322"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4360957322/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": 123,
+  "original_line": 123,
+  "side": "RIGHT",
+  "author_association": "NONE",
+  "original_position": 16,
+  "position": 16,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ },
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4360959595",
+  "pull_request_review_id": 5630163578,
+  "id": 4360959595,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABA-72aw",
+  "diff_hunk": "@@ -108,11 +108,44 @@ def _bash_windows(path=None, system_root=None, program_files=None, git=None):\n     duong, _ = bash_nen.tim_bash(**ep)\n     return duong\n \n+# wp886 (#886): thứ tự + tập tên của dòng chọn `PY` trong `ops/cai_cong_cu.sh` (python → python3 → py -3).\n+# Đổi bên này thì đổi bên kia; `r886_ten_python_khop_cai_cong_cu_sh` canh hai bên khớp.\n+TEN_PYTHON = ((\"python\",), (\"python3\",), (\"py\", \"-3\"))\n+\n+def _giai_ten_tran(ten, path=None, pathext=None, la_windows=None):\n+    \"\"\"Bản nền gọi khi gõ TÊN TRẦN — cùng luật `_ten_tran_giai_ra` (.claude/dev/launcher.py) chế độ native:\n+    PATH theo thứ tự, mục rỗng = cwd; Windows chỉ nhận tên trần khi đã mang đuôi PATHEXT, rồi nối từng đuôi.\"\"\"\n+    la_windows = os.name == \"nt\" if la_windows is None else la_windows\n+    duoi = [\"\"]\n+    if la_windows:   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13\n+        ext = [e.rstrip(\".\") for e in (pathext or os.environ.get(\"PATHEXT\")\n+                                       or \".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC\").split(\";\") if e]\n+        duoi = ([\"\"] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext",
+  "path": "ops/cong_cu.py",
+  "commit_id": "99b354ca7bcc40ce0c4f7d9db445b852510b5809",
+  "original_commit_id": "efa6e8d6b1dc3f1eafff5aaad492dae055a5d784",
+  "user": {
+   "login": "ducthangho",
+   "id": 12748935,
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/ducthangho",
+   "html_url": "https://github.com/ducthangho",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "Đồng ý, đây đúng là điểm chặn đã đo trên Windows thật (run 39913747351). Hướng sửa trùng với gợi ý ở trên:\n- giữ luật giải tên native (N6);\n- sửa fixture: trên Windows tạo `python3.cmd` gọi `sys.executable`, POSIX giữ symlink `python3`.\n\nChưa push được vì `ops/cong_cu_test.py` nằm ngoài write set của lease r1. Tệp ấy hiện do `wp892-r2-g2-claude` giữ tới 2026-10-24T13:46Z, nên bản sửa sẽ đi trong revision r2 của #886 (chủ kho chọn A, issuecomment-6359482987).\n\nBản nháp đã đo trên Linux: `cong_cu_test` 61/61, bán kính 470 đột biến, 0 lỗi. Phần chạy trên `windows-latest` sẽ đo khi có r2. Thread này để mở tới khi bản sửa được đẩy lên.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+  "created_at": "2026-10-23T15:01:16Z",
+  "updated_at": "2026-10-23T15:01:16Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4360959595",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4360959595"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4360959595"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4360959595/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": 123,
+  "original_line": 123,
+  "side": "RIGHT",
+  "in_reply_to_id": 4360957322,
+  "author_association": "OWNER",
+  "original_position": 16,
+  "position": 16,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ },
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4365467728",
+  "pull_request_review_id": 5636058410,
+  "id": 4365467728,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBDPAUA",
+  "diff_hunk": "@@ -108,11 +108,44 @@ def _bash_windows(path=None, system_root=None, program_files=None, git=None):\n     duong, _ = bash_nen.tim_bash(**ep)\n     return duong\n \n+# wp886 (#886): thứ tự + tập tên của dòng chọn `PY` trong `ops/cai_cong_cu.sh` (python → python3 → py -3).\n+# Đổi bên này thì đổi bên kia; `r886_ten_python_khop_cai_cong_cu_sh` canh hai bên khớp.\n+TEN_PYTHON = ((\"python\",), (\"python3\",), (\"py\", \"-3\"))\n+\n+def _giai_ten_tran(ten, path=None, pathext=None, la_windows=None):\n+    \"\"\"Bản nền gọi khi gõ TÊN TRẦN — cùng luật `_ten_tran_giai_ra` (.claude/dev/launcher.py) chế độ native:\n+    PATH theo thứ tự, mục rỗng = cwd; Windows chỉ nhận tên trần khi đã mang đuôi PATHEXT, rồi nối từng đuôi.\"\"\"\n+    la_windows = os.name == \"nt\" if la_windows is None else la_windows\n+    duoi = [\"\"]\n+    if la_windows:   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13\n+        ext = [e.rstrip(\".\") for e in (pathext or os.environ.get(\"PATHEXT\")\n+                                       or \".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC\").split(\";\") if e]\n+        duoi = ([\"\"] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext",
+  "path": "ops/cong_cu.py",
+  "commit_id": "99b354ca7bcc40ce0c4f7d9db445b852510b5809",
+  "original_commit_id": "efa6e8d6b1dc3f1eafff5aaad492dae055a5d784",
+  "user": {
+   "login": "ducthangho",
+   "id": 12748935,
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/ducthangho",
+   "html_url": "https://github.com/ducthangho",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "Đã push bản sửa ở `1c138c7`, theo revision r2 (lease `wp886-r2-g2-claude`, spec `ops/specs/wp886-r2.md` c019dbba):\n- `python_alias_behavior_test` trên Windows tạo `python3.cmd` gọi `sys.executable`; POSIX giữ symlink `python3`.\n- Luật native N6 giữ nguyên.\n\nĐo trên Linux: `cong_cu_test` 61/61, tiền kiểm bỏ qua 0. Trên Windows thật, lượt `runner_set=windows-only` run 40048563126 đang chạy job `gate-cong-cu (windows-latest, 0)`. Thread này sẽ resolve khi job ấy xanh.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+  "created_at": "2026-10-24T01:14:15Z",
+  "updated_at": "2026-10-24T01:14:15Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4365467728",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4365467728"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4365467728"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4365467728/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": 123,
+  "original_line": 123,
+  "side": "RIGHT",
+  "in_reply_to_id": 4360957322,
+  "author_association": "OWNER",
+  "original_position": 16,
+  "position": 16,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ },
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4365481615",
+  "pull_request_review_id": 5636089374,
+  "id": 4365481615,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBDP2jw",
+  "diff_hunk": "@@ -108,11 +108,44 @@ def _bash_windows(path=None, system_root=None, program_files=None, git=None):\n     duong, _ = bash_nen.tim_bash(**ep)\n     return duong\n \n+# wp886 (#886): thứ tự + tập tên của dòng chọn `PY` trong `ops/cai_cong_cu.sh` (python → python3 → py -3).\n+# Đổi bên này thì đổi bên kia; `r886_ten_python_khop_cai_cong_cu_sh` canh hai bên khớp.\n+TEN_PYTHON = ((\"python\",), (\"python3\",), (\"py\", \"-3\"))\n+\n+def _giai_ten_tran(ten, path=None, pathext=None, la_windows=None):\n+    \"\"\"Bản nền gọi khi gõ TÊN TRẦN — cùng luật `_ten_tran_giai_ra` (.claude/dev/launcher.py) chế độ native:\n+    PATH theo thứ tự, mục rỗng = cwd; Windows chỉ nhận tên trần khi đã mang đuôi PATHEXT, rồi nối từng đuôi.\"\"\"\n+    la_windows = os.name == \"nt\" if la_windows is None else la_windows\n+    duoi = [\"\"]\n+    if la_windows:   # PATHEXT rỗng ⇒ mặc định, như `which` CPython 3.13\n+        ext = [e.rstrip(\".\") for e in (pathext or os.environ.get(\"PATHEXT\")\n+                                       or \".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC\").split(\";\") if e]\n+        duoi = ([\"\"] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext",
+  "path": "ops/cong_cu.py",
+  "commit_id": "99b354ca7bcc40ce0c4f7d9db445b852510b5809",
+  "original_commit_id": "efa6e8d6b1dc3f1eafff5aaad492dae055a5d784",
+  "user": {
+   "login": "ducthangho",
+   "id": 12748935,
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/ducthangho",
+   "html_url": "https://github.com/ducthangho",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "Đã xác nhận trên Windows thật: run 40048563126, job `gate-cong-cu (windows-latest, 0)` **success** trên `1c138c7`. Log ghi `cong_cu_test: 59/59 đạt; tổng=61, bỏ qua=2, tiền kiểm bỏ qua=0`, nên tiền kiểm `python_alias_behavior_test` đã chạy và qua. Hai ca bỏ qua (`t51`, `t48`) là giới hạn của nền, master cũng bỏ qua y hệt. Fixture cũ đỏ ở run 39913747351. Resolve.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+  "created_at": "2026-10-24T01:18:19Z",
+  "updated_at": "2026-10-24T01:18:19Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4365481615",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4365481615"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/888#discussion_r4365481615"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/888"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4365481615/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": null,
+  "original_start_line": null,
+  "start_side": null,
+  "line": 123,
+  "original_line": 123,
+  "side": "RIGHT",
+  "in_reply_to_id": 4360957322,
+  "author_association": "OWNER",
+  "original_position": 16,
+  "position": 16,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ }
+]

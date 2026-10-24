@@ -557,6 +557,37 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   từng cổng, và `mergeable_state` cho khả năng merge. Cùng họ *"hỏi chỗ TIỆN TAY thay vì hỏi chỗ KẾT
   LUẬN ĐƯỢC GHI"*, và lần này chính ghi chú của sự kiện đã cảnh báo sẵn (*"legacy commit statuses are
   not covered"*) mà vẫn suýt đọc nhầm.
+- **CẤM MỘT CHUỖI CON để nhận diện "đường kia" là cấp tín dụng cho MỌI thông báo lỗi chứa chuỗi ấy.**
+  Đo 23-10-2026, packet #892 (PR #895). Ca `cli_dn_tep_an` của `t52` muốn nói *"không được đi đường
+  nhanh"* nên đòi dòng đầu **không chứa** `KHÔNG ĐO` — chuỗi con của dòng đường nhanh
+  `GOM: KHÔNG ĐO — …`. Nhưng dưới cây đột biến (không có `.git`) gom thật ĐỎ đúng như phải đỏ, bằng
+  `[G-head] … KHÔNG ĐO ĐƯỢC` — **cũng chứa chuỗi ấy**. Kết quả: `t52` chết dưới **MỌI** đột biến, CI đỏ
+  8/8 mảnh (26 và 28 lỗi bán kính ở hai mảnh đọc được), và con số *"13/13 giết đúng `t52`"* tôi đã báo
+  một phần là **tín dụng giả**. Bộ phân hạng không cứu được: assertion ĐÚNG là của `t52`, chỉ có ĐIỀU
+  nó kiểm là sai. Chữa: neo vào **dấu riêng** của đường cần loại (`=duong_nhanh, 0 mảnh`), không vào một
+  từ chung mà thông báo lỗi khác cũng dùng. Cùng họ *"danh sách CẤM không bao giờ đủ"*, đổi đối tượng:
+  ở đây không phải tên kẻ gian mà là **văn bản của chính mã mình** trên một nhánh mình không nghĩ tới.
+  Dấu hiệu rẻ để bắt trước khi đẩy: chạy bán kính của **vài đột biến CŨ có đích khác** sau khi sửa ca —
+  nếu chúng bỗng giết thêm ca của bạn, ca của bạn đang chết vì giàn chứ không vì chốt.
+- **TRẦN LỜI GỌI CODEX ĐỌC TỪ ĐẶC TẢ VÀ LEASE, KHÔNG TỪ ADR MỚI NHẤT.** Đo 23-10-2026, packet #892.
+  `ADR-0052` nâng trần lên tám, nhưng **chỉ áp khi đặc tả có dòng** `tran_loi_goi_codex: ADR-0052@<oid>`;
+  `wp892-r2` không có ⇒ trần cũ `ADR-0036`/`0037` là **hai**, và chính lease ghi `M-4: tối đa 3`. Phiên
+  gọi **bốn** lần (một lượt bị container cắt giữa chừng sau khi đã sinh output — vẫn tính một lời gọi
+  theo cách đếm của `ADR-0052`) rồi mới đọc trần, khi chủ kho hỏi. Đúng ra sau lượt hai chưa approve
+  phải vào Review Rescue Checkpoint. Không cổng nào đếm lời gọi (`ADR-0052` tự khai **0 cổng**), nên
+  đây thuần là kỷ luật: **trước MỖI lời gọi Codex, đếm số đã dùng và đọc trần trong lease + dòng khai
+  của đặc tả**; vượt thì dừng và xin `nang_tran` TRƯỚC khi gọi, không phải sau.
+- **GATE HẬU MERGE XANH THEO REST CHỈ LÀ MỐC RUN — `landed: true` đòi đủ BỐN mốc §10.2.2.** Đo
+  24-10-2026: Codex connector P1 trên PR #900 bắt hồ sơ land #892 khai `landed: true` từ run/jobs/
+  check-run + `kiem-gate` rc=0, trong khi Checkout (SHA/tree thật chạy), Workflow definition (blob/băm
+  qua `WorkflowRun.file`) và Gate output (command/rc/marker dương) đều chưa đo. Bốn hồ sơ cùng phiên
+  ghi trước đó (PR #893) mang đúng lỗi ấy và phải hạ ở PR #902. Trong phiên Claude Code trên web, đường
+  đo mốc Workflow definition **bị chặn**: GraphQL trả **403** *"GitHub GraphQL is not available from
+  Claude Code sessions"* (đo trên 8 run, lưu ở `ops/land/pr8{72,77,80,83,95}-*-provenance/`). Nên từ phiên
+  này, mặc định là `landed: false` + liệt kê ba mốc `not_measured`; khuôn đúng là
+  `ops/land/pr882-wp748-r23-land-evidence.yaml`. `land_evidence_nguon` **không** bắt được lỗi này — nó chỉ
+  đòi mỗi lời khai `measured` có tệp nguồn, không đòi đủ mốc — nên đừng đọc `TỔNG: ĐẠT` của nó thành
+  "đủ điều kiện landed".
 
 ## Đẩy ref từ phiên Claude Code trên web (đo 16-08-2026)
 Phiên web **KHÔNG xoá được ref** và **KHÔNG đẩy được `refs/tags/*`**. Cùng một `POST /git-receive-pack`:

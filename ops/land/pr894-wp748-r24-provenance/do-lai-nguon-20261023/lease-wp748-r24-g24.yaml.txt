@@ -1,0 +1,99 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 24
+generation: 24
+lease_id: wp748-r24-g24-claude-remote-20261023
+thay_the_cho: []
+thay_the_cho_ghi_chu: r23 g23 lease da rut han 2026-10-23T03:59:31Z (7b4bbfb); khong viet bia mo vao lease da chet
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6365380273
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6365380273
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-23T13:10:11Z'
+heartbeat_at: '2026-10-23T13:10:11Z'
+lease_until: '2026-10-23T17:40:59Z'
+lease_expires_at_utc: '2026-10-23T17:40:59Z'
+rut_han:
+  han_cu: '2026-10-24T01:10:11Z'
+  han_moi: '2026-10-23T17:40:59Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #748 r24 da merge (PR #894, head f08efa1043680134e3534eef8ac95dd901ae7dab, merge 0e0bc6319021598be76217d2e7409e458e209979, 2026-10-23T17:21:38Z). Chu kho yeu cau land r24 trong phien.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp748 r23 (7b4bbfb)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head
+spec_path: ops/specs/wp748-r24-don-so-assurance-81-lo2.md
+spec_ref: ops/wp748-r24-g24-lease
+spec_commit: b9771c4dd6371521275c5ba58c2dc143cb770162
+spec_hash: b139d8972f9f5ba6fcd3be35686de552f441b79cdb0267c1016ea83ce286fda2
+spec_sha256: b139d8972f9f5ba6fcd3be35686de552f441b79cdb0267c1016ea83ce286fda2
+branch: agent/wp748-r24-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1d7e642092fb3dda15967be44d095f37bb22ac5f
+start_from_sha: 1d7e642092fb3dda15967be44d095f37bb22ac5f
+reviewed_sha_required: 1d7e642092fb3dda15967be44d095f37bb22ac5f
+reviewed_sha_ghi_chu: neo base; review Codex cuoi phai neo dung head PR cuoi
+nang_tran:
+  ai_nang: ducthangho (chu kho)
+  can_cu: 'cung mot thay doi co hoc tren 18 ho so doc lap; tach thanh 3 packet chi nhan ba so luot review ma khong giam rui ro (#748 issuecomment-6365380273)'
+  tran_cu: '<= 6 tep / <= 450 dong them (ADR-0053)'
+  tran_moi: '<= 18 tep / <= 450 dong them'
+write_set:
+- ops/land/pr621-skill-bai-hoc-land-evidence.yaml
+- ops/land/pr672-wp574-land-evidence.yaml
+- ops/land/pr679-wp678-land-evidence.yaml
+- ops/land/pr696-wp668-land-evidence.yaml
+- ops/land/pr721-wp698-land-evidence.yaml
+- ops/land/pr779-wp775-land-evidence.yaml
+- ops/land/pr791-wp782-land-evidence.yaml
+- ops/land/pr792-wp484-land-evidence.yaml
+- ops/land/pr793-wp784-land-evidence.yaml
+- ops/land/pr800-wp794-land-evidence.yaml
+- ops/land/pr801-wp795-land-evidence.yaml
+- ops/land/pr818-wp788-land-evidence.yaml
+- ops/land/pr823-wp802-land-evidence.yaml
+- ops/land/pr832-wp831-land-evidence.yaml
+- ops/land/pr836-wp812-land-evidence.yaml
+- ops/land/pr848-wp744-land-evidence.yaml
+- ops/land/pr864-wp858-land-evidence.yaml
+- ops/land/pr873-wp868-land-evidence.yaml
+write_set_hash: 22f26297f559676f882087733f41c7e4d8488f2f4452d47d33654c692089d4a6
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan tren ban sao bare: 2026-10-23T13:03:28Z ls-remote 558 = guong 558, 16/18 NGUOI_GIU 0, 2 CHAN[12] vi nhanh moi xuat hien giua luot; quet lai 2 duong dan 13:09:13Z ls-remote 559 = guong 559 NGUOI_GIU 0'
+coordination_paths:
+- ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+run_minutes: 720
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

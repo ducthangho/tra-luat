@@ -1,0 +1,18 @@
+# Independent read-only review with execution receipt — WP748 r24/g24, PR #894, round 1
+
+You are an independent reviewer (OpenAI Codex), invoked through `launcher.py run` (execution receipt). Do NOT edit `src/`, commit, push, comment on GitHub, or use credentials. Scratch via `mktemp -d` here is fine. Write `VERDICT.md` in THIS directory, incrementally (create it early, update as you go).
+
+Identity (verify first; stop with `VERDICT: blocked` if different): `./src` detached at `d42713cc621cbd78d324a8b212749ff5c6199d1e`, tree `e545a9f95b2c945aa1588a21bd3038f9fb86f618`. Base `1d7e642092fb3dda15967be44d095f37bb22ac5f`. Review Class `sensitive`.
+
+Delta: `git -C src diff 1d7e642092fb3dda15967be44d095f37bb22ac5f d42713cc621cbd78d324a8b212749ff5c6199d1e` — 15 files under `ops/land/`. Spec: `ops/specs/wp748-r24-don-so-assurance-81-lo2.md` (look on `master` first; if absent `git -C src show origin/ops/wp748-r24-g24-lease:ops/specs/wp748-r24-don-so-assurance-81-lo2.md`; the identifier is sha256 `b139d8972f9f5ba6fcd3be35686de552f441b79cdb0267c1016ea83ce286fda2`, not the branch). Lease: `origin/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml` (18-path write set; this PR edits 15 — pr621, pr696, pr721 were deferred by the owner because editing them drops the L5 cutover exemption of `ops/land_evidence_nguon.py` and exposes 18 pre-existing unsourced `measured` claims). Precedent for the demotion wording: `ops/land/pr846-wp845-land-evidence.yaml` and `ops/land/pr882-wp748-r23-land-evidence.yaml`. Owner rulings are in the authority comment quoted in the spec (#566 ruling: owner human_audited accepted only with exact merged head, before merge, explicit self-read statement, full stored copy).
+
+Purpose: demote records whose reviewer assurance fails `docs/PROTOCOL_DA_PHIEN.md` §8/§8.1 from `landed: true` to `landed: false`, without changing measured facts.
+
+Tasks:
+1. For each of the 15 records: is the demotion justified (reviewer served-model family genuinely unmeasured, or human audit genuinely failing §8 item 2)? Is any record actually OK and wrongly demoted? Verify every cited `file:line` in the new `dinh_chinh_r24` block points at the claimed content (line numbers are post-edit), every `do_duoc` claim against the cited run.json (count keys recursively; check `head`), and every `lo_ghi_them` claim against the record.
+2. Is `authorized_head_sha` in each block the correct authorized/merged head for that record? Are the reopen conditions (A)/(B) consistent with §8 and the precedents, and complete given the extra gaps listed?
+3. Does the edit change anything other than: the 2 header lines, the single `landed` value, and the appended block? (`git diff` per file.) Any lingering statement in a record that now contradicts `landed: false` in a misleading way (beyond history clearly marked by the new header)?
+4. Is any record in the lease's 18-path write set that SHOULD have been demoted and wasn't (other than the 3 deferred) — or any record outside it that clearly belongs to the same class (report only)?
+5. From a `git archive` copy of the head: `python3 ops/land_evidence_nguon.py --root .` (report rc and counts), YAML parse of all 15, no lone CR, no secrets, no file outside `ops/land/` changed, `git diff --numstat` totals vs the `nang_tran` ceiling (≤ 18 files / ≤ 450 added lines).
+
+`VERDICT.md`: reviewer identity (as runtime reports; say what you cannot verify), reviewed SHA + tree, UTC; findings ID/severity/`file:line`/scenario/fix; commands with rc and N/N. Last line exactly one of `VERDICT: approve` (zero P0/P1/P2) · `VERDICT: changes_requested` · `VERDICT: blocked`.

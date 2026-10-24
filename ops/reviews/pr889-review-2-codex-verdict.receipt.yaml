@@ -1,0 +1,108 @@
+# BIEN NHAN GIAO HANG — cross-review luot 2 cua PR #889, cham HEAD DA MERGE 094e8d1 (merge 6ac385f).
+# Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run d955f9ef` tren 094e8d1. `approve` 0/0/0/0.
+# Tep verdict la BAN SAO NGUYEN BYTE cua ops/reviews/pr889-review-2-codex/VERDICT.md (thu muc ay giu PROMPT.md, bang chung reviewer, run/ = run.json +
+# checkpoint.json + stdout.log + 14 dong dau stderr.log, SHA256SUMS). Chu kho chon "Chay 3 cross-review" trong phien 24-10-2026.
+# Ghi so boi CHINH phien executor session_01V2PEqhkb91vD5PCBM5yXbm — phien ay KHONG viet verdict, chi dung sandbox va goi CLI.
+# Nhan: (a) DO tu kho/tep luc ghi so 2026-10-24 · (b) THUAT LAI · KHONG_DO_DUOC.
+# Khuon: ops/reviews/pr889-review-1-codex-verdict.receipt.yaml.
+
+schema_version: 2
+receipt_id: pr889-review-2-codex-c5fe298a
+kind: review_delivery_receipt
+packet_id: KHONG_AP_DUNG
+packet_ghi_chu: >-
+  (b) Viec chu kho giao truc tiep trong phien, KHONG phai work packet: khong Issue packet, khong lease, khong spec_hash.
+target_pull_request: 889
+land_merge_commit: 6ac385fdd7325f532ac4b4b6eb861292bfa7e970
+luot: 2
+luot_ghi_chu: '(a) Luot truoc: pr889-review-1-codex (changes_requested tren 8d5cccb; P2 da va o 094e8d1).'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: standard
+review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff tai reviewed_sha: CLAUDE.md +12/-0 (numstat.txt trong thu muc).'
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho (codex CLI, executor Claude), co run.json cua launcher, verdict `approve` tren DUNG head da merge
+  094e8d1. KHONG khai cross_approved vi ho model reviewer `khong_do_duoc` (run.json khong co khoa model, chi co loi khai
+  header CLI) — caveat HO-MODEL-REVIEWER-KHONG-DO-DUOC.
+verdict: approve
+verdict_nguon: '(a) dong 1 `verdict: approve`; dong 3 `Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.`'
+verdict_path: ops/reviews/pr889-review-2-codex-verdict.md
+verdict_sha256: c5fe298af73bb6081ecf44638b7fce7e7dd220c11c3ddcee5ba5fcc234a4b612
+verdict_bytes: 34167
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/pr889-review-2-codex/VERDICT.md, chep nguyen byte tu thu muc sandbox cua reviewer; tep phang nay la ban sao `cp`
+  cua no, cmp khop, cung sha256 (SHA256SUMS cua thu muc).
+reviewed_sha: 094e8d17ae4dfcf21dca63702c9262267bdc072c
+reviewed_tree: 55f5edf2f8601c976f390e8994193129a71203a1
+reviewed_sha_nguon: >-
+  (a) dong 2 tep verdict; run.json `head` = reviewed_sha; `git rev-parse 094e8d1^{tree}` = reviewed_tree; 094e8d1 la cha
+  thu hai cua merge 6ac385f tren master.
+base_sha: e63961f27b53e66db8e6600009f97d5706743063
+evidence_url: https://github.com/ducthangho/tra-luat/blob/7cfe06212cb43f92d5753940116079e671d9c385/ops/reviews/pr889-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim commit 7cfe062 cua nhanh claude/gallant-fermat-34kgb9 — commit CHI mang hien vat verdict; bien nhan di o
+  commit sau.
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict; (khong co finding).'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: d955f9efb3624041b86dcf97f2624175
+  run_json: ops/reviews/pr889-review-2-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 380.787, head 094e8d1,
+    worktree_sach true, prompt_sha256 00773f21… = sha256 PROMPT.md trong thu muc.
+  cli: >-
+    codex-cli 0.163.0, `launcher.py run ... -- codex exec -c model_reasoning_effort=xhigh --cd <sandbox> --sandbox
+    workspace-write --skip-git-repo-check "<chi thi tro {PROMPT_FILE}>"` (b — run.json chi ghi van tay lenh 4f5bee90d5c1511a, 9 doi so)
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model_loi_khai_cli: '(a) run/stderr-header.txt: `model: gpt-6.1-sol`, `reasoning effort: xhigh`, session id 01a16ec6-03c2-7890-927d-fe64aa125aa6 — LOI KHAI cua CLI, khong phai modelUsage.'
+  model_da_chay: KHONG_DO_DUOC
+  muc_bang_chung_model: khong_do_duoc
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua MCP github bang tai khoan chu kho.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+
+independent_from_executor_session: true
+independent_ghi_chu: >-
+  Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context executor); KHONG phai phien Claude Code rieng.
+review_axes: [spec, standards_security]
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) 094e8d1 la to tien cua merge 6ac385f tren master. Tep verdict/bien nhan nam tren nhanh claude/gallant-fermat-34kgb9,
+    CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
+
+verdict_usage_caveats:
+  - id: HO-MODEL-REVIEWER-KHONG-DO-DUOC
+    muc: P2
+    mo_ta: >-
+      run.json d955f9ef khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay d955f9ef, tu khai yeu hon do_may tai cho dung.
+  - id: STDERR-CHI-GIU-HEADER
+    muc: P3
+    mo_ta: >-
+      Chi luu 14 dong dau stderr.log; ban day du 2085807 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep.
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: >-
+      Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen.
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: >-
+      Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 094e8d1.
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

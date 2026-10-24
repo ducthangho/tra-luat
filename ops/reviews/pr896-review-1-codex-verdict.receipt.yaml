@@ -1,0 +1,112 @@
+# BIEN NHAN GIAO HANG — cross-review luot 1 cua PR #896, cham HEAD DA MERGE 816f439 (merge 27dcc3b).
+# Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run 64761d8e` tren 816f439. `changes_requested` 0/0/1/0.
+# Tep verdict la BAN SAO NGUYEN BYTE cua ops/reviews/pr896-review-1-codex/VERDICT.md (thu muc ay giu PROMPT.md, bang chung reviewer, run/ = run.json +
+# checkpoint.json + stdout.log + 14 dong dau stderr.log, SHA256SUMS). Chu kho chon "Chay 3 cross-review" trong phien 24-10-2026.
+# Ghi so boi CHINH phien executor session_01V2PEqhkb91vD5PCBM5yXbm — phien ay KHONG viet verdict, chi dung sandbox va goi CLI.
+# Nhan: (a) DO tu kho/tep luc ghi so 2026-10-24 · (b) THUAT LAI · KHONG_DO_DUOC.
+# Khuon: ops/reviews/pr889-review-1-codex-verdict.receipt.yaml.
+
+schema_version: 2
+receipt_id: pr896-review-1-codex-3feaad3e
+kind: review_delivery_receipt
+packet_id: KHONG_AP_DUNG
+packet_ghi_chu: >-
+  (b) Viec chu kho giao truc tiep trong phien, KHONG phai work packet: khong Issue packet, khong lease, khong spec_hash.
+target_pull_request: 896
+land_merge_commit: 27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc
+luot: 1
+luot_ghi_chu: '(a) Luot truoc: khong co cross-review CLI truoc; Codex connector P2 tren 0bb792b da va o 816f439.'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: standard
+review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff tai reviewed_sha: CLAUDE.md +31/-34 va 5 tep ops/land/pr889-* (numstat.txt trong thu muc).'
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho (codex CLI, executor Claude), co run.json cua launcher, verdict `changes_requested` tren DUNG head da merge
+  816f439. KHONG khai cross_approved vi ho model reviewer `khong_do_duoc` (run.json khong co khoa model, chi co loi khai
+  header CLI) — caveat HO-MODEL-REVIEWER-KHONG-DO-DUOC.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 3 `Kết quả: 0 P0, 0 P1, 1 P2, 0 P3.`'
+verdict_path: ops/reviews/pr896-review-1-codex-verdict.md
+verdict_sha256: 3feaad3e207ae2dea5323cb6f831ba2980546ec1d3febeead6d415baccbbb803
+verdict_bytes: 63341
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/pr896-review-1-codex/VERDICT.md, chep nguyen byte tu thu muc sandbox cua reviewer; tep phang nay la ban sao `cp`
+  cua no, cmp khop, cung sha256 (SHA256SUMS cua thu muc).
+reviewed_sha: 816f43988eb3012726120ad00166a989cc2b9af6
+reviewed_tree: 3da0ce24590dfcf2e60805b2bef76687cdd64405
+reviewed_sha_nguon: >-
+  (a) dong 2 tep verdict; run.json `head` = reviewed_sha; `git rev-parse 816f439^{tree}` = reviewed_tree; 816f439 la cha
+  thu hai cua merge 27dcc3b tren master.
+base_sha: 1ccc31498b7d37c12305e8f1b5bf2d1fc217b92e
+evidence_url: https://github.com/ducthangho/tra-luat/blob/7cfe06212cb43f92d5753940116079e671d9c385/ops/reviews/pr896-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim commit 7cfe062 cua nhanh claude/gallant-fermat-34kgb9 — commit CHI mang hien vat verdict; bien nhan di o
+  commit sau.
+so_p0: 0
+so_p1: 0
+so_p2: 1
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict; t162-khong-khoa-toan-bo-ma-tran-job [P2].'
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 64761d8e6164462d870c3d534d325dd2
+  run_json: ops/reviews/pr896-review-1-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 712.54, head 816f439,
+    worktree_sach true, prompt_sha256 27dbb858… = sha256 PROMPT.md trong thu muc.
+  cli: >-
+    codex-cli 0.163.0, `launcher.py run ... -- codex exec -c model_reasoning_effort=xhigh --cd <sandbox> --sandbox
+    workspace-write --skip-git-repo-check "<chi thi tro {PROMPT_FILE}>"` (b — run.json chi ghi van tay lenh 2abc89c910586650, 9 doi so)
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model_loi_khai_cli: '(a) run/stderr-header.txt: `model: gpt-6.1-sol`, `reasoning effort: xhigh`, session id 01a16ec6-03c0-72c0-ac25-dccfeef0cd62 — LOI KHAI cua CLI, khong phai modelUsage.'
+  model_da_chay: KHONG_DO_DUOC
+  muc_bang_chung_model: khong_do_duoc
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua MCP github bang tai khoan chu kho.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+
+independent_from_executor_session: true
+independent_ghi_chu: >-
+  Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context executor); KHONG phai phien Claude Code rieng.
+review_axes: [spec, standards_security]
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) 816f439 la to tien cua merge 27dcc3b tren master. Tep verdict/bien nhan nam tren nhanh claude/gallant-fermat-34kgb9,
+    CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
+
+verdict_usage_caveats:
+  - id: HO-MODEL-REVIEWER-KHONG-DO-DUOC
+    muc: P2
+    mo_ta: >-
+      run.json 64761d8e khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay 64761d8e, tu khai yeu hon do_may tai cho dung.
+  - id: STDERR-CHI-GIU-HEADER
+    muc: P3
+    mo_ta: >-
+      Chi luu 14 dong dau stderr.log; ban day du 1076780 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep.
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: >-
+      Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen.
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: >-
+      Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 816f439.
+  - id: P2-DA-VA-CHUA-REVIEW-LAI
+    muc: P2
+    mo_ta: >-
+      P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor.
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

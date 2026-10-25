@@ -1043,9 +1043,12 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
             [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n", "[" * 5000 + "]" * 5000)] + [   # lồng sâu ⇒ RecursionError
             m.doc_wf(f"name: {v}\njobs: {{j: {{}}}}\n") for v in ("2026-02-30", "2026-01-01T99:00:00Z", "!!int xyz", "!!float abc",
                                                             "!!bool maybe", "!!int ''", "!!float ''", "!!timestamp abc")]   # F12
+        for loi in (OverflowError, LookupError, TypeError):   # lượt 10: đo LỚP — `safe_load` ném lớp bất kỳ ⇒ None
+            m.yaml = types.SimpleNamespace(safe_load=lambda v, loi=loi: (_ for _ in ()).throw(loi("tiem")), YAMLError=yaml.YAMLError)
+            kieu.append(m.doc_wf("jobs: {}\n"))
     except Exception as e:   # ném ra ngoài CHÍNH LÀ điều vế này đo
         kieu = type(e).__name__
-    bang(not sai and not khoi_mau and kieu == [None] * 17,
+    bang(not sai and not khoi_mau and kieu == [None] * 20,
          f"{len(sai)}/{len(hang)} hàng lệch M4/dinh_nghia: {sai[:2]} · khối màu ra marker: {khoi_mau} · kiểu lạ: {kieu}")
 
 @ca
@@ -1138,7 +1141,9 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L9_D03_job_chi_tien_to", 'and "${{" not in x and', 'and not x.startswith("${{") and', "c52"),
     ("L9_D03_buoc_chi_tien_to", 'and "${{" not in s["name"] else', 'and not s["name"].startswith("${{") else', "c52"),
     ("L9_D04_dem_mot_buoc", "        so += 1\n", "        so = 1\n", "c51"),
-    ("A18_yaml_hong_nem", "except (yaml.YAMLError, RecursionError, ValueError,", "except (RecursionError, ValueError,", "c32"),
+    ("A18_yaml_hong_nem", "    except Exception:   # r4 lượt 8–10", "    except RecursionError:   # r4 lượt 8–10", "c32"),
+    ("L10_bat_lai_tuple_luot9", "    except Exception:   # r4 lượt 8–10",
+     "    except (yaml.YAMLError, RecursionError, ValueError, KeyError, IndexError, AttributeError):   # r4 lượt 8–10", "c52"),
     ("A19_moi_ung_vien_trung_chu", "chan = chan_buoc(wf, k, i) or", 'chan = any(chan_buoc(wf, kk, ii) for kk, jj in wf["jobs"].items() '
      'for ii, t in enumerate(jj["steps"]) if t.get("run") == run) or', "c33"),
     ("A19_chan_doc_job_khac", "chan = chan_buoc(wf, k, i) or", 'chan = chan_buoc(wf, next(kk for kk in wf["jobs"] if kk != k), i) or', "c33"),

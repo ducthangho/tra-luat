@@ -1,0 +1,7 @@
+# do luc 2026-10-25T06:48:51Z
+b306e15a96a4d9d05d2ba4191cbd071fa7820ee7 0dbb4c22aaaaf801e6c392e235391a35c1a6a268 7574c39d98459c9caf1365a7dd092747335ae4e8 5cb8812bc557885855e54c8821842f692fd07a86
+head 7574c39 tree: 43853cd8bbcd1d25a982d8ba26e4c4e28533d633
+merge-base cha1..head: 1a269f51120fd9b93bbf6a96a68d2840b7ac2b0e
+cmp(git diff cha1..merge, git diff merge-base..head) rc=0
+5	3	.claude/dev/chay-cong-windows.ps1
+3	2	.github/workflows/ci.yml

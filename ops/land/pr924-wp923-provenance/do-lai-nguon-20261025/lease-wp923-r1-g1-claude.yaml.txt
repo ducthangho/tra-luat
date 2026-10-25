@@ -1,0 +1,104 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 923
+packet_id: wp923
+revision: 1
+generation: 1
+lease_id: wp923-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: 'pha B (chu thich .claude/dev/ci_dang_ky_test.py) cho wp899-r4-g3-claude nha tep ay (han 2026-10-28T02:26Z); base origin/master 1a269f5.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'cham tep workflow CI => sensitive; executor ho claude, reviewer ho openai; toi da 2 loi goi Codex (spec Q1).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp923.md
+spec_sha256_required: 65db5e381ce9c7539f5bf9fb3b7d116ba3822a4914f3725e7a9ba98a484e4513
+spec_hash: 65db5e381ce9c7539f5bf9fb3b7d116ba3822a4914f3725e7a9ba98a484e4513
+spec_ref: refs/heads/ops/wp923-spec@480341d9a79c4f7792434740ed680059e02f1492
+prompt_path: ops/specs/wp923.md
+prompt_sha256_required: 65db5e381ce9c7539f5bf9fb3b7d116ba3822a4914f3725e7a9ba98a484e4513
+write_set:
+- .claude/dev/chay-cong-windows.ps1
+- .github/workflows/ci.yml
+- ops/handoff/wp923-g1-claude.md
+write_set_hash: 4e3ea9c3b93419110769010cab855e810c112dc2e709883598e0cff7bdafa1ad
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'pha A: chay-cong-windows.ps1 CHI mac dinh -HanGiay 6300->9000; ci.yml CHI dong chu thich (yaml.safe_load base == head); handoff chi tren nhanh lease; diff PR <= 2 tep. .claude/dev/ci_dang_ky_test.py va .claude/dev/chay-cong-windows_test.ps1 NGOAI write set.'
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/chay-cong-windows.ps1
+- .github/workflows/ci.yml
+- ops/handoff/wp923-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1; toi da 2 loi goi codex; moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; ci_dang_ky_test TONG DAT khong sua'}
+- {id: M-3, dieu_kien: 'N1/N2: yaml.safe_load ci.yml base == head, moi dong diff ci.yml la chu thich; N4: pwsh that, t9 DO tren base, DAT tren head, delta ca do chi la t9, dot bien 8999 => t9 DO (ghi vao handoff)'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp923-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1a269f51120fd9b93bbf6a96a68d2840b7ac2b0e
+start_from_sha: 1a269f51120fd9b93bbf6a96a68d2840b7ac2b0e
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 1a269f51120fd9b93bbf6a96a68d2840b7ac2b0e
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/923#issuecomment-6393128962
+granted_on_instruction_readback: 'chu kho chon "Ca (1)+(2)+(3)" va "Toi soan Issue+spec+lease, phien moi thi cong" (AskUserQuestion phien session_01FLVLxi5gKZgtVvbuTCEqEn, 25-10-2026); ghi ho tren Issue #923. Bam byte KHONG DO DUOC.'
+granted_on_instruction_note: >-
+  Chu kho chon don ca ba no ngoai packet cua #910; pha A (1)+(2) o lease nay, pha B (3) di revision r2 sau khi wp899
+  nha ci_dang_ky_test.py. Ghi ho qua GitHub App.
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (session_01FLVLxi5gKZgtVvbuTCEqEn) KHONG phai executor; executor la mot phien cloud MOI do phien nay tao.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-25T03:51:00Z'
+  goc_quet: 'master 1a269f5, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: thieu 0; nhanh cuc bo master khong tut sau'
+  ket_qua: 'ca 3 duong dan: NGUOI_GIU 0 (ci.yml: wp910-r1/r2 CON_HAN nhung DA_BI_THAY_THE, wp892-r2/wp910-r3 HET_HAN). .claude/dev/ci_dang_ky_test.py (ngoai write set) NGUOI_GIU 1 wp899-r4-g3-claude.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'khong lease song nao giu write set nay => khong can bia mo.'
+leased_at_utc: '2026-10-25T03:55:00Z'
+heartbeat_at: '2026-10-25T03:55:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-25T06:48:00Z'
+lease_expires_at_utc: '2026-10-25T06:48:00Z'
+rut_han:
+  han_cu: '2026-10-27T03:55:00Z'
+  han_moi: '2026-10-25T06:48:00Z'
+  rut_boi: ducthangho
+  ly_do: 'pha A cua packet #923 da merge: PR #924 (head 7574c39d98459c9caf1365a7dd092747335ae4e8, merge b306e15a96a4d9d05d2ba4191cbd071fa7820ee7, 2026-10-25T05:40:57Z, merged_by ducthangho); chu kho giao ghi so land va rut han lease ("Ghi sổ land, model reviewer là codex. Rút hạn lease", ghi ho #923 issuecomment-6394535788). Pha B di lease rieng.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp910-r3-g3-claude (45b5b42), wp906-r1-g1-claude (50709c1).'
+  ghi_boi: claude-orchestrator-session session_01FLVLxi5gKZgtVvbuTCEqEn (theo chi thi chu kho ghi ho #923 issuecomment-6394535788)
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'Q2 cua spec wp923.'
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp923_g1: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_923_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'push nhanh agent/wp923-g1-claude va mo PR draft'

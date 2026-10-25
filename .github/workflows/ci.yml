@@ -731,7 +731,7 @@ jobs:
       #
       # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
       # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
-      # không đáng kể so với trần 25 phút của job.
+      # không đáng kể so với trần job lúc đo (25 phút; #910 pha A, PR #913: `gate-ops` 60 → 150).
       # PyYAML đã được cài ở vùng setup trước G5. GHIM EXACT, không để spec trần.
       # Cross-review PR "#134" (codex) nêu
       # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
@@ -951,7 +951,8 @@ jobs:
     # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
     # #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 90 → 105 cùng trần một bộ 4500 → 5400 s — số đo và lý do ở
     # `GIAY_TOI_DA_MOT_BO` (.claude/dev/ci_dang_ky_test.py). 105 vẫn cỡ theo UBUNTU, KHÔNG bảo đảm Windows.
-    # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
+    # #910 pha B (PR #917, a7da463): 105 → 150. Trước #910 timeout KHÁC `gate` (60) và `gate-packet-loop` (120) có
+    # chủ đích; #910 (PR #913 + #917) đưa cả ba lên 150. Tiền tố 9 bước và ma trận vẫn chung.
     needs: [chuan-bi, gate-nhanh-gop]
     if: ${{ !cancelled() }}
     strategy:

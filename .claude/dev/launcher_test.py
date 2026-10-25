@@ -6755,7 +6755,13 @@ def r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC():
     khung = _r25_khung("response.created", "rk", "mk").encode()
     co_cach = khung.replace(b'"type": "response.created"', b'"type"   :    "response.created"')
     bang(co_cach != khung, "fixture sai: khong chen duoc khoang trang")
+    hoan = _r25_khung("response.completed", "rk", "mk").encode()
+    tab = khung.replace(b'"type": "response.created"', b'"type"\t:\t"response.created"')
+    ansi = khung.replace(b'"type": "response.created"', b'"type":' + bytes([27]) + b'[1m"response.created"')
+    bang(tab != khung and ansi != khung, "fixture sai: khong chen duoc tab/ANSI")
     for ten, sau in [("dem_truoc", b"x" * 256 + khung), ("dem_truoc_co_cach", b"x" * 256 + co_cach),
+                     ("dem_truoc_completed", b"x" * 256 + hoan), ("dem_truoc_tab", b"x" * 256 + tab),
+                     ("dem_truoc_ansi_trong_token", b"x" * 256 + ansi),
                      ("header_dau_hong", khung.rstrip(b"\n").replace(b'"id": "rk"', b'"id": ""') + b"y" * 300 + b"\n")]:
         du = dung + sau
         for tran in range(60, len(du) + 2):
@@ -6953,6 +6959,34 @@ def r926_ket_dong_tien_to_ung_vien_ma_khong_token_la_KHONG_RO():
     dem = {}
     m._ket_dong(dau + b'{"type":"response.created","pad":"', 2, True, False, [], dem)
     bang(dem.get("khong_ro") == 1 and not dem.get("mat"), f"tien to ung vien bi tha: {dem}")
+
+
+@ca
+def r926_ngu_phap_khung_tung_thanh_phan():
+    # Cross-review r26f R26-TEST-15: mỗi thành phần NGỮ PHÁP của header/khung một ca con, đi sau một khung ĐÚNG để
+    # việc thiếu bằng chứng dương không che được lỗi phân loại.
+    m = _tai_launcher_thu()
+    esc = bytes([27])
+    dung = _r25_khung("response.created", "r0", "m").encode()
+
+    def khung(rid):
+        return _r25_khung("response.created", rid, "m").encode()
+
+    for ten, dong, mong_id, mong_mat in [
+        ("ansi_hoi_trung_gian_cuoi_K", esc + b"[?25l" + esc + b"[1 q" + esc + b"[2K" + khung("r1"), ["r0", "r1"], 0),
+        ("muc_DEBUG", khung("r2").replace(b" TRACE ", b" DEBUG "), ["r0"], 1),
+        ("TRACE_dinh_moc_thoi_gian", khung("r3").replace(b"Z TRACE ", b"ZTRACE "), ["r0"], 1),
+        ("rac_sau_khung", khung("r4").rstrip(b"\n") + b" rac\n", ["r0"], 1),
+    ]:
+        ban_ghi, dem = _r26_trang_thai(m, dung + dong)
+        bang([x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == mong_id
+             and dem.get("mat", 0) == mong_mat and not dem.get("khong_ro"), f"{ten}: {dem} {ban_ghi}")
+    dau = b"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message "
+    for ten, dong in [("mang_json", dau + b"[1]\n"), ("chuoi_json", dau + b'"chuoi"\n'),
+                      ("dau_cham_bat_buoc", b'noi dung "type":"responseXcreated"\n')]:
+        ban_ghi, dem = _r26_trang_thai(m, dung + dong)
+        bang(ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC" and not dem.get("mat") and not dem.get("khong_ro"),
+             f"{ten}: khong phai khung ma bi tinh/loi: {dem} {ban_ghi}")
 
 
 @ca
@@ -10981,6 +11015,55 @@ DOT_BIEN = [
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
     ('r26_rv5_finish_object_guard', ('        if bo_loc is not None:\n            # Hậu duệ', '        if False:\n            # Hậu duệ'),
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
+    # r26 vòng 6 (cross-review r26f R26-TEST-15): kiểm kê MÁY từng thành phần regex/hằng chuẩn hoá của bộ lọc.
+    ('r26_rv6_a_ansi_bo_tham_so_hoi', ('_RE_ANSI_B = re.compile(rb"\\x1b\\[[0-9;?]*', '_RE_ANSI_B = re.compile(rb"\\x1b\\[[0-9;]*'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_a_ansi_bo_trung_gian', ('[0-9;?]*[ -/]*[@-~]")', '[0-9;?]*[@-~]")'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_a_ansi_chi_m', ('[0-9;?]*[ -/]*[@-~]")', '[0-9;?]*[ -/]*m")'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_b_bo_neo_dau', ('_DAU_NHAN = rb"^\\d{4}', '_DAU_NHAN = rb".*?\\d{4}'),
+     ['r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC']),
+    ('r26_rv6_b_moc_thoi_gian', ('^\\d{4}-\\d\\d-\\d\\dT\\S+\\s+TRACE', '^\\S+\\s+TRACE'),
+     ['r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC']),
+    ('r26_rv6_b_muc_TRACE', ('TRACE\\s+tungstenite::protocol: Received message', '\\S+\\s+tungstenite::protocol: Received message'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_b_khoang_truoc_TRACE', ('T\\S+\\s+TRACE', 'T\\S+\\s*TRACE'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_b_dau_cach_sau_message', ('protocol: Received message "', 'protocol: Received message"'),
+     ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
+    ('r26_rv6_c_neo_cuoi', ('_RE_KHUNG = re.compile(_DAU_NHAN + rb"(\\{.*\\})\\s*$")', '_RE_KHUNG = re.compile(_DAU_NHAN + rb"(\\{.*\\})")'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_c_doi_tuong_json', ('_RE_KHUNG = re.compile(_DAU_NHAN + rb"(\\{.*\\})\\s*$")', '_RE_KHUNG = re.compile(_DAU_NHAN + rb"(.*)\\s*$")'),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_d_khoa_type', ('rb\'\\{\\s*"type"\\s*:', 'rb\'\\{\\s*"[^" ]+"\\s*:'),
+     ['r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO']),
+    ('r26_rv6_d_khong_escape', ('\\s*"([^"\\\\]*)"\')', '\\s*"([^"]*)"\')'),
+     ['r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO']),
+    ('r26_rv6_d_dong_nhay', ('\\s*"([^"\\\\]*)"\')', '\\s*"([^"\\\\]*)\')'),
+     ['r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO']),
+    ('r26_rv6_d_khoang_sau_ngoac', ('rb\'\\{\\s*"type"\\s*:', 'rb\'\\{"type"\\s*:'),
+     ['r926_tien_to_dong_dai_co_tran_va_noi_qua_doan']),
+    ('r26_rv6_d_khoang_hai_cham', ('"type"\\s*:\\s*"(', '"type":"('),
+     ['r926_dong_NHAN_dai_su_kien_khac_khong_tinh_mat_moi_tran']),
+    ('r26_rv6_e_bo_completed', ('rb\'"type":"response\\.(?:created|completed)"\'', 'rb\'"type":"response\\.(?:created)"\''),
+     ['r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC']),
+    ('r26_rv6_e_cham_bat_ky', ('rb\'"type":"response\\.(?:created|completed)"\'', 'rb\'"type":"response.(?:created|completed)"\''),
+     ['r926_ngu_phap_khung_tung_thanh_phan']),
+    ('r26_rv6_f_chi_dau_cach', ('_RE_KHOANG_TRANG_B = re.compile(rb"\\s+")', '_RE_KHOANG_TRANG_B = re.compile(rb" +")'),
+     ['r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC']),
+    ('r26_rv6_g_duoi_ngan', ('_DUOI_UNG_VIEN = 64\n', '_DUOI_UNG_VIEN = 16\n'),
+     ['r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC']),
+    ('r26_rv6_h_luong_khong_ansi', ('gon = _RE_KHOANG_TRANG_B.sub(b"", _RE_ANSI_B.sub(b"", duoi + doan))', 'gon = _RE_KHOANG_TRANG_B.sub(b"", duoi + doan)'),
+     ['r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC']),
+    ('r26_rv6_i_tran_dau_nho', ('_TRAN_DAU_DONG = 4096', '_TRAN_DAU_DONG = 64'),
+     ['r926_dong_NHAN_dai_su_kien_khac_khong_tinh_mat_moi_tran']),
+    ('r26_rv6_j_bo_CRLF', ('for duoi in (b"\\n", b"\\r\\n"))', 'for duoi in (b"\\n",))'),
+     ['r926_cho_phep_chi_dung_LF_hoac_mot_CRLF']),
+    ('r26_rv6_l_su_kien_bo_completed', ('_SU_KIEN_KHUNG = ("response.created", "response.completed")', '_SU_KIEN_KHUNG = ("response.created",)'),
+     ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
+    ('r26_rv6_m_dau_json_bo_ngoac', ('_RE_DAU_JSON = re.compile(_DAU_NHAN + rb"\\{")', '_RE_DAU_JSON = re.compile(_DAU_NHAN)'),
+     ['r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO']),
     ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.

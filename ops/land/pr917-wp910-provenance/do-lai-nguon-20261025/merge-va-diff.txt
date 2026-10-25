@@ -1,0 +1,8 @@
+# do luc 2026-10-25T02:19:27Z
+ba222ffd1615f0d74b59985b9612f725211b62f5 1797c32530fba381afd4009340a3fa558b7e37b0 a7da46390177cdc2d64f516dedac19857bee86dd f26533b3a570204ce5d7cbb3fadaa7097ede8d46
+head a7da463 tree: f26533b3a570204ce5d7cbb3fadaa7097ede8d46
+cmp(git diff cha1..merge, git diff merge-base..head) rc=0
+3	3	.claude/dev/ci_dang_ky_test.py
+1	1	.github/workflows/ci-dot-bien-du.yml
+2	2	.github/workflows/ci.yml
+2	2	ops/ci_duong_nhanh_test.py

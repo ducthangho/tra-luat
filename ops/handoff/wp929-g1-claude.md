@@ -76,3 +76,14 @@ Finding lượt 1 và cách xử lý:
 ## Việc còn lại (không phải của executor)
 - N6: CI PR #933 xanh trên head cuối (executor theo dõi tới xanh).
 - Merge/land: chủ kho. `uy_quyen_merge: false`.
+
+## Cập nhật 25-10-2026 ~18:35Z — head drift
+- `thu-hoi` (ops-thu-hoi-admission.yml) đỏ trên `227dcde`: `CHAN [12]: S 7009ab9 không phải tổ tiên của H` — master tiến sau khi rẽ nhánh.
+- Theo chỉ thị chủ kho ("Xử lý head drift đi"): merge `origin/master` `36057e8` ⇒ head **`f3b54d260bcdecf5b6d2348730a958e168bf7330`**,
+  lần đẩy THỨ HAI (ngoài `push_policy` một-lần, có chỉ thị chủ kho). Hai tệp write set giống từng byte `227dcde` ↔ `f3b54d2`
+  (`git diff --stat` rỗng); diff PR so master vẫn 2 tệp.
+- Trên `f3b54d2`: doctrine-scan rc0 · adr-song rc0 (55/55) · diff --check rc0 · ruff F delta 0 · 160/160 ca `r812_*`/`r929_*`/`moc_dot_bien*`
+  đạt; suite đầy đủ tại chỗ: `nền: 875/875 đạt · BỎ QUA: 1` (phần đột biến chạy tiếp). Vẫn chỉ ADR-0054 chứa cụm ⇒ chưa kích hoạt.
+- **N6**: CI PR #933 trên `f3b54d2` — 24 check run success, 1 skipped (`launcher`); gồm `gate`, `gate-cong-cu-gop`, `gate-ops`,
+  `gate-packet-loop`, `gate-registry` (CHECK_BAT_BUOC) và `thu-hoi`. Codex connector: review `227dcde` xong, không finding.
+- **Chờ chủ kho**: verdict Codex lượt 2 neo `227dcde`; có tính cho head merge `f3b54d2` không (trần Codex 2/2 đã hết).

@@ -8027,7 +8027,7 @@ MUTANTS.update({
     "r812_bo_nguoi_giu": (("        if p.returncode != RC_DANG_GIU_LEASE or", "        if giao_nhau:\n            _die(RC_GUARD, f\"I2(Đ): lease khác"), ("        if False and", "        if False:\n            _die(RC_GUARD, f\"I2(Đ): lease khác"), ["r812_nguoi_giu_khac"]),  # phối hợp: hai lớp cùng chặn
     "r812_bo_shallow": ('_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\\n")', "True", ["r812_nong_la_false"]),
     "r812_nhan_nhieu_dong_khai": ("    if len(khai) != 1:", "    if not khai:", ["r812_hai_dong_khai_la_false"]),
-    "r812_bo_kich_hoat": ('            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])\n', "", ["r812_khong_kich_hoat_la_false"]),
+    "r812_bo_kich_hoat": ('            and ls[0] == 0 and all(rc == 0 for rc, _ in adr) and len(kich) == 1\n', "", ["r812_khong_kich_hoat_la_false"]),
     "r812_rc_falsy_thanh_rong": ('rc = l.get("required_checks", [])', 'rc = l.get("required_checks") or []', ["r812_required_checks_falsy"]),
     "r812_canon_suy_giam": ("if bnv.PROVIDER_NGUON_HONG is not None or ", "if False or ", ["r812_canon_thieu_nguon"]),
     "r812_bo_neo_git": ("+ neo[0] + neo[1] +", "+", ["r812_verdict_blob_khong_co"]),

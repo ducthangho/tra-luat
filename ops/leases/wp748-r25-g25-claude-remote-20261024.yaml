@@ -15,8 +15,15 @@ recorded_by: anthropic_claude_executor
 recorder_is_dispatcher: false
 leased_at_utc: '2026-10-24T06:34:06Z'
 heartbeat_at: '2026-10-24T06:34:06Z'
-lease_until: '2026-10-25T06:34:06Z'
-lease_expires_at_utc: '2026-10-25T06:34:06Z'
+lease_until: '2026-10-25T02:48:45Z'
+lease_expires_at_utc: '2026-10-25T02:48:45Z'
+rut_han:
+  han_cu: '2026-10-25T06:34:06Z'
+  han_moi: '2026-10-25T02:48:45Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #748 r25 da merge (PR #909, head b5b6aefa66a8ad037ff34430d0210f3b6873913f, merge 113e0d1beff2b037648681ee1fa59f678cef0eba, 2026-10-25T02:45:09Z). Chu kho yeu cau land r25 trong phien.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho (spec v2 0be5864 chua duoc cap lease); tien le wp748 r24 (189f43e)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

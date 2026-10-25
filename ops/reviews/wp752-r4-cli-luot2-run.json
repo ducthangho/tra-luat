@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "f8f838f0e7ba4ac3b7041f375939ad76",
+  "short_id": "f8f838f0",
+  "ten": "wp752-cli-luot2",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 13,
+    "van_tay": "237760c79bdbf6dc"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-25T03:57:12.354910+00:00",
+  "ket_thuc_utc": "2026-10-25T04:08:39.380593+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 496,
+  "khoa_danh_tinh": "linux:6779",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/8413b80e-5157-5812-ad93-3be1f70600c0/scratchpad/review752cli2/mirror",
+  "head": "fc1bb3add70b7e7a2f17cdf4f940d7ce484b7053",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "b6f78a91d8d44f577b80021edf0c437a19c6f8f664893f8945f94465406fa767",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "bcbc9ce00a29ed09a15f81cad5fdfe3cb55d3d58504ea78a463a1a9cde826e59",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/8413b80e-5157-5812-ad93-3be1f70600c0/scratchpad/review752cli2/runs/f8f838f0/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 687.026,
+  "stdout_byte": 85,
+  "stdout_sha256": "0b859efea4a32db6556f89898fa46b28fadc16f056a5afc9a0ea0dba2356e8e6",
+  "stderr_byte": 824871,
+  "stderr_sha256": "6a139e2a0bb564040e1a3be126c459006187dc7f0b0c558d89cbcfeddd84aebe"
+}

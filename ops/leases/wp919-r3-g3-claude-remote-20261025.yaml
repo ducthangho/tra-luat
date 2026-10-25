@@ -16,8 +16,15 @@ recorded_by: anthropic_claude_executor
 recorder_is_dispatcher: false
 leased_at_utc: '2026-10-25T11:35:17Z'
 heartbeat_at: '2026-10-25T11:35:17Z'
-lease_until: '2026-10-26T11:35:17Z'
-lease_expires_at_utc: '2026-10-26T11:35:17Z'
+lease_until: '2026-10-25T14:49:00Z'
+lease_expires_at_utc: '2026-10-25T14:49:00Z'
+rut_han:
+  han_cu: '2026-10-26T11:35:17Z'
+  han_moi: '2026-10-25T14:49:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #919 da merge: PR #926 (merge d2e3052); chu kho giao rut han de nha docs/PROTOCOL_DA_PHIEN.md cho #835 r3 ("Rút gạn phiên #919 cho #835 ngay", ghi ho #919 issuecomment-6399079847).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem cua #919 tro nguoc bang thay_the_cho; lease #835 r3 khong thay the lease nay (packet khac). Tien le wp910-r3-g3-claude (45b5b42), wp923-r1-g1-claude (aa8451a).'
+  ghi_boi: claude-orchestrator-session session_01FLVLxi5gKZgtVvbuTCEqEn (theo chi thi chu kho ghi ho #919 issuecomment-6399079847)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

@@ -32,3 +32,12 @@ Quét trước khi đẩy: giá trị của 20 biến môi trường bí mật �
 `access_token`/`refresh_token`/`id_token` của `~/.codex/auth.json` ⇒ 0. Trường `account_id` (UUID định danh tài khoản, không phải
 credential) có trong hai rollout, như trong cả bốn rollout r2 đã đẩy ở `ops/wp899-g1-luu-tru`. Không verdict nào ở đây là approve;
 không gì ở đây cấp quyền merge, land hay `cross_approved`.
+
+## Script phản chứng của reviewer (thêm 25-10-2026)
+
+`../wp899-r3-g2-exec-review-<n>-codex/review-scripts/` giữ các script `.py` (và `suite.stdout.txt` mà `emit.py` đọc) mà reviewer
+tự viết trong `.review/` của mỗi lượt. Đặc tả r4 (`ops/specs/wp899-r4.md`, mục `hinh_dang_ke_thua`) đòi giao chúng cho reviewer r4,
+đặc biệt `composite_case.py` và `boundary_case.py` của lượt 2. Chúng chạy từ gốc một workspace sau khi chép vào `.review/`; các thư mục con
+mà chúng tự sinh (`real/`, `composite/`…) không được lưu. Đo trên `7f5a02c` ngày 25-10: `composite_case.py` ⇒ rc 3
+`DO:F02_composite_origin_collision`, `boundary_case.py` ⇒ rc 3 `DO:F02_nested_incomplete_echo`. Quét trước khi đẩy: giá trị biến bí mật
+đang sống và token trong `~/.codex/auth.json` ⇒ 0 lần xuất hiện; `scripts/pkg_secret_scan.py` rc 0.

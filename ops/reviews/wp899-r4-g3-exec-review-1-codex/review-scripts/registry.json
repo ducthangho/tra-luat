@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/registry_check.py"
+  ],
+  "returncode": 0,
+  "seconds": 7.035598039627075,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/registry.stdout.txt",
+    "bytes": 1745,
+    "sha256": "abd833292208dfd8be1e5170dbd6302694475c8265917db143c04f12ffcbb298"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/registry.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

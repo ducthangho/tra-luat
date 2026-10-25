@@ -1,0 +1,10 @@
+r4_F02_env_metadata r2 gate passed → r3 gate not_measured
+r4_F02_mixed_color r2 gate passed → r3 gate not_measured
+mixed_other_after not_measured
+mixed_other_before not_measured
+mixed_same_job not_measured
+mixed_blocked_decoy not_measured
+metadata_other_after not_measured
+metadata_other_before not_measured
+metadata_same_job not_measured
+metadata_blocked_decoy not_measured

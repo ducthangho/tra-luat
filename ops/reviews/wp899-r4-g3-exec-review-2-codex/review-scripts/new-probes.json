@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/new_probes_r4.py"
+  ],
+  "returncode": 0,
+  "seconds": 2.0938382148742676,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/new-probes.stdout.txt",
+    "bytes": 4478,
+    "sha256": "7c33a12cb2d7f04f9b9da5f60f2f2c88e7a291cebb773a7d3d9a39b15084ba15"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/new-probes.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

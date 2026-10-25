@@ -1,0 +1,2 @@
+git_ignore_sha CHECK_OUTPUT 43 44
+git_always_unavailable CHECK_OUTPUT 43 44

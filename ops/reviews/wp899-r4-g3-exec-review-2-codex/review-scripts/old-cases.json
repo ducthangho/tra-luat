@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/run_old.py"
+  ],
+  "returncode": 0,
+  "seconds": 5.925091505050659,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/old-cases.stdout.txt",
+    "bytes": 1495,
+    "sha256": "92e34bf02a6c1bdf7052bbbe71758e63f705c1ede8bbb377d047ee42804667a8"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/old-cases.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "normal": [
+    [],
+    25,
+    25
+  ],
+  "removed": [
+    [
+      "test sống chưa đăng ký: ops/ci_provenance_test.py"
+    ],
+    25,
+    24
+  ],
+  "ruff_contract": [
+    [],
+    3
+  ],
+  "same_regex_precedent": true,
+  "accepts_suite": true,
+  "rejects_bad": {
+    "unequal": true,
+    "zero": true,
+    "red": true
+  },
+  "a9_inner_error": {
+    "command": [
+      "git",
+      "-C",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/tmp/tmprv5vjpl8",
+      "-c",
+      "user.name=t",
+      "-c",
+      "user.email=t@t",
+      "commit",
+      "-qm",
+      "0"
+    ],
+    "rc": 128,
+    "stdout": "",
+    "stderr": "error: Debug: Namespace set to \"git\" (ignored)\nDebug: Key file set to \"/home/claude/.ssh/commit_signing_key.pub\" (ignored, using server key)\nMCP server request failed (attempt 1/3), retrying in 110.206766ms: failed to send request: Post \"http://127.0.0.1:36227/mcp\": dial tcp 127.0.0.1:36227: socket: operation not permitted\nMCP server request failed (attempt 2/3), retrying in 225.573856ms: failed to send request: Post \"http://127.0.0.1:36227/mcp\": dial tcp 127.0.0.1:36227: socket: operation not permitted\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \"http://127.0.0.1:36227/mcp\": dial tcp 127.0.0.1:36227: socket: operation not permitted\nUsage:\n  environment-runner code-sign [flags]\n\nFlags:\n  -h, --help   help for code-sign\n\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \"http://127.0.0.1:36227/mcp\": dial tcp 127.0.0.1:36227: socket: operation not permitted\n\nfatal: failed to write commit object\n"
+  }
+}

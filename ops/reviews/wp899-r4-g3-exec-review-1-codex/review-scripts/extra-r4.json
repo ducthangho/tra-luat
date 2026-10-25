@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/extra_mutants_r4.py"
+  ],
+  "returncode": 0,
+  "seconds": 180.51445698738098,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/extra-r4.stdout.txt",
+    "bytes": 1380,
+    "sha256": "2c431d52d5e6ec174c0def8e184d526f98e9cbc0e6debe55a6f5f52e6427769d"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/extra-r4.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

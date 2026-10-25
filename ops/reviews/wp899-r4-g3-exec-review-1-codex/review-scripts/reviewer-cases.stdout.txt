@@ -1,0 +1,24 @@
+rest_order candidate 0 DAT:rest_order
+
+rest_order sort_bi_bo 3 DO:rest_order:sort REST by number, independent of response list order
+
+rest_duplicate candidate 0 DAT:rest_duplicate
+
+rest_duplicate kiem_number_bi_bo 3 DO:rest_duplicate:duplicate number invalid: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'],
+time_format candidate 0 DAT:time_format
+
+time_format gio_nhan_offset 3 DO:time_format:offset unsupported: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_
+time_missing_header candidate 0 DAT:time_missing_header
+
+time_missing_header gio_thieu_header_lay_rest 0 DAT:time_missing_header
+
+github_path candidate 0 DAT:github_path
+
+github_path env_bo_PATH 4 HONG:github_path:FileNotFoundError:[Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02
+expression_name candidate 0 DAT:expression_name
+
+expression_name ten_name_khong_kiem_bieu_thuc 4 HONG:expression_name:FileNotFoundError:[Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/eaf2a577-
+first_line candidate 0 DAT:first_line
+
+first_line ten_run_lstrip 4 HONG:first_line:FileNotFoundError:[Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-
+invalid_calendar candidate 3 DO:invalid_calendar:not a valid timestamp {'started_at': '2026-02-30T00:00:00Z'}: {'job_id': 1, 'name': 'j', 'check_run_

@@ -1,0 +1,15 @@
+gio_thieu_header_lay_rest GIET [('c38_ghep_lech_gio', 3)]
+gio_bo_can_duoi GIET [('c38_ghep_lech_gio', 3)]
+gio_bo_can_tren GIET [('c38_ghep_lech_gio', 3)]
+year0 True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}
+leap2024 True {'trang_thai': 'passed', 'so_buoc': 2}
+notleap2026 True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}
+century1900 True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}
+century2000 True {'trang_thai': 'passed', 'so_buoc': 2}
+minyear True {'trang_thai': 'passed', 'so_buoc': 2}
+maxyear True {'trang_thai': 'passed', 'so_buoc': 2}
+space_in_timestamp True {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 1}
+tab_after_timestamp True {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 1}
+double_space_after_timestamp True {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 1}
+longfraction True {'trang_thai': 'passed', 'so_buoc': 2}
+reversed_window True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}

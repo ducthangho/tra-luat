@@ -1,0 +1,6 @@
+{
+  "files": 6170,
+  "delta": [],
+  "git_equal": true,
+  "scope": "checkout outside .git and .review, including tracked, untracked, ignored; .git through HEAD/tree/status/index/diff"
+}

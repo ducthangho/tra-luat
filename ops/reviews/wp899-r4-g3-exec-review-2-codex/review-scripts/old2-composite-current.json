@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/old2/composite_current.py"
+  ],
+  "returncode": 0,
+  "seconds": 0.3719613552093506,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/old2-composite-current.stdout.txt",
+    "bytes": 35,
+    "sha256": "709e9d9ffd3e8739675eedfb97517a91d06e453e5344fe1ff753d22b9642435d"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/old2-composite-current.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

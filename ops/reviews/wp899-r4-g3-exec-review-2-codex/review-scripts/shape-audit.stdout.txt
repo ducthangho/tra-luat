@@ -1,0 +1,2 @@
+yaml_steps_bo_list_guard SONG_SOT []
+rest_steps_bo_list_guard GIET [('c22_thieu_dinh_danh_khong_passed', 3)]

@@ -1,0 +1,82 @@
+[
+  {
+    "round": 1,
+    "name": "git_ignore_sha",
+    "rank": "GIET",
+    "green": 42,
+    "target": [
+      {
+        "case": "c34_git_blob_that",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c34_git_blob_that"
+        ],
+        "rc": 3,
+        "output": "DO:c34_git_blob_that:git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: [None, None, None]\n"
+      }
+    ]
+  },
+  {
+    "round": 1,
+    "name": "git_always_unavailable",
+    "rank": "GIET",
+    "green": 42,
+    "target": [
+      {
+        "case": "c34_git_blob_that",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c34_git_blob_that"
+        ],
+        "rc": 3,
+        "output": "DO:c34_git_blob_that:git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: [None, None, None]\n"
+      }
+    ]
+  },
+  {
+    "round": 2,
+    "name": "git_ignore_sha",
+    "rank": "GIET",
+    "green": 42,
+    "target": [
+      {
+        "case": "c34_git_blob_that",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c34_git_blob_that"
+        ],
+        "rc": 3,
+        "output": "DO:c34_git_blob_that:git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: [None, None, None]\n"
+      }
+    ]
+  },
+  {
+    "round": 2,
+    "name": "git_always_unavailable",
+    "rank": "GIET",
+    "green": 42,
+    "target": [
+      {
+        "case": "c34_git_blob_that",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c34_git_blob_that"
+        ],
+        "rc": 3,
+        "output": "DO:c34_git_blob_that:git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: [None, None, None]\n"
+      }
+    ]
+  }
+]

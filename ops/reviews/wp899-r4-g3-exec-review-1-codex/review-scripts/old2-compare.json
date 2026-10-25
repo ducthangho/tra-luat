@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/old2/r4_compare.py"
+  ],
+  "returncode": 0,
+  "seconds": 0.7466537952423096,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/old2-compare.stdout.txt",
+    "bytes": 391,
+    "sha256": "db7acda2e653378d248b8b00a7b9a068c3f0a0b8b8e8828ab8b11c19fd38b1f8"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review1/ws/.review/old2-compare.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

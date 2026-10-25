@@ -1,0 +1,689 @@
+[
+  {
+    "name": "gio_thieu_header_lay_rest",
+    "old": "(h := _gio(b[\"gio\"], TS))",
+    "new": "(h := _gio(b[\"gio\"], TS) or a)",
+    "cases": [
+      {
+        "case": "c01_cli_du_co",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c02_attempt_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c03_checkout_linux",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c04_checkout_windows",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c05_checkout_khong_sha",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c06_checkout_hai_sha",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c07_checkout_push_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c08_checkout_pr_parents",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c09_checkout_pr_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c10_runner_id_0",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c11_job_skipped",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c12_marker_khong_khop",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c13_marker_buoc_khac",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c14_ngoai_moi",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c15_moi_mot_nguon",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c16_workflow_def_luon_not_measured",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c17_ghi_nguyen_tu",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c18_dem_not_measured",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c19_rest_loi",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c20_du_trang",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c22_thieu_dinh_danh_khong_passed",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c23_chi_loi_goi_that",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c24_goi_that_loi_va_chuyen_huong",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c25_f02_env_mang_mau",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c26_f02_dong_khong_mau",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c27_f02_yaml_khong_toi_gian",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c28_che_do_env_buoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c29_che_do_env_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c30_che_do_doi_so",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c31_che_do_duong_khac",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c32_workflow_khong_doc_duoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c33_trung_chu_khac_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c36_ghep_lech_so",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c37_ghep_lech_ten",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c38_ghep_lech_gio",
+        "rc": 3,
+        "output": "DO:c38_ghep_lech_gio:##[group]Run: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}"
+      },
+      {
+        "case": "c39_ghep_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c40_nhom_long",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c41_buoc_uses",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c42_github_env_cung_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c44_ghep_sai_dang",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c43_khoi_khac_buoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c34_git_blob_that",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c35_f02_khoi_khong_tron_ven",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c21_fixture_bam",
+        "rc": 0,
+        "output": ""
+      }
+    ],
+    "rc": 3,
+    "rank": "GIET"
+  },
+  {
+    "name": "gio_bo_can_duoi",
+    "old": "a <= h <= z",
+    "new": "h <= z",
+    "cases": [
+      {
+        "case": "c01_cli_du_co",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c02_attempt_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c03_checkout_linux",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c04_checkout_windows",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c05_checkout_khong_sha",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c06_checkout_hai_sha",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c07_checkout_push_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c08_checkout_pr_parents",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c09_checkout_pr_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c10_runner_id_0",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c11_job_skipped",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c12_marker_khong_khop",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c13_marker_buoc_khac",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c14_ngoai_moi",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c15_moi_mot_nguon",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c16_workflow_def_luon_not_measured",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c17_ghi_nguyen_tu",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c18_dem_not_measured",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c19_rest_loi",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c20_du_trang",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c22_thieu_dinh_danh_khong_passed",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c23_chi_loi_goi_that",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c24_goi_that_loi_va_chuyen_huong",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c25_f02_env_mang_mau",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c26_f02_dong_khong_mau",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c27_f02_yaml_khong_toi_gian",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c28_che_do_env_buoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c29_che_do_env_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c30_che_do_doi_so",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c31_che_do_duong_khac",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c32_workflow_khong_doc_duoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c33_trung_chu_khac_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c36_ghep_lech_so",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c37_ghep_lech_ten",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c38_ghep_lech_gio",
+        "rc": 3,
+        "output": "DO:c38_ghep_lech_gio:giờ {'started_at': '2026-10-19T23:45:05Z', 'completed_at': '2026-10-19T23:45:06Z'}: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}"
+      },
+      {
+        "case": "c39_ghep_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c40_nhom_long",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c41_buoc_uses",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c42_github_env_cung_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c44_ghep_sai_dang",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c43_khoi_khac_buoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c34_git_blob_that",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c35_f02_khoi_khong_tron_ven",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c21_fixture_bam",
+        "rc": 0,
+        "output": ""
+      }
+    ],
+    "rc": 3,
+    "rank": "GIET"
+  },
+  {
+    "name": "gio_bo_can_tren",
+    "old": "a <= h <= z",
+    "new": "a <= h",
+    "cases": [
+      {
+        "case": "c01_cli_du_co",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c02_attempt_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c03_checkout_linux",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c04_checkout_windows",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c05_checkout_khong_sha",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c06_checkout_hai_sha",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c07_checkout_push_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c08_checkout_pr_parents",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c09_checkout_pr_lech",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c10_runner_id_0",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c11_job_skipped",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c12_marker_khong_khop",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c13_marker_buoc_khac",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c14_ngoai_moi",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c15_moi_mot_nguon",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c16_workflow_def_luon_not_measured",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c17_ghi_nguyen_tu",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c18_dem_not_measured",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c19_rest_loi",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c20_du_trang",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c22_thieu_dinh_danh_khong_passed",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c23_chi_loi_goi_that",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c24_goi_that_loi_va_chuyen_huong",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c25_f02_env_mang_mau",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c26_f02_dong_khong_mau",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c27_f02_yaml_khong_toi_gian",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c28_che_do_env_buoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c29_che_do_env_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c30_che_do_doi_so",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c31_che_do_duong_khac",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c32_workflow_khong_doc_duoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c33_trung_chu_khac_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c36_ghep_lech_so",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c37_ghep_lech_ten",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c38_ghep_lech_gio",
+        "rc": 3,
+        "output": "DO:c38_ghep_lech_gio:giờ {'completed_at': '2026-10-19T23:45:03Z'}: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}"
+      },
+      {
+        "case": "c39_ghep_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c40_nhom_long",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c41_buoc_uses",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c42_github_env_cung_job",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c44_ghep_sai_dang",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c43_khoi_khac_buoc",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c34_git_blob_that",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c35_f02_khoi_khong_tron_ven",
+        "rc": 0,
+        "output": ""
+      },
+      {
+        "case": "c21_fixture_bam",
+        "rc": 0,
+        "output": ""
+      }
+    ],
+    "rc": 3,
+    "rank": "GIET"
+  }
+]

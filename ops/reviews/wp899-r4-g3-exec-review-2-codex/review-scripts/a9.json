@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/ci_dang_ky_test.py",
+    "--chay"
+  ],
+  "returncode": 1,
+  "seconds": 8.516367673873901,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/a9.stdout.txt",
+    "bytes": 114,
+    "sha256": "86b95348e595d217475697e77429800a9dbfc29ac51da6d604d8eabbcb1fdf4f"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review2/ws/.review/a9.stderr.txt",
+    "bytes": 1903,
+    "sha256": "9356fa97e54a6d73688d2a8d2acf1630bb2f4af337c015b23ef0a09203f9786b"
+  }
+}

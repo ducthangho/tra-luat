@@ -1,0 +1,1 @@
+{'rc': 1, 'stdout': 'CA: 43/43 dat\n[DOT BIEN KHONG BI GIET DUNG] vo_can_AttributeError_qua_except_doi_kieu: TIN_DUNG_GIA HONG:c03_checkout_linux:AssertionError: doi kieu AttributeError\nDOT BIEN: 0/1 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (0 dot bien)\nTONG: DO\n'}

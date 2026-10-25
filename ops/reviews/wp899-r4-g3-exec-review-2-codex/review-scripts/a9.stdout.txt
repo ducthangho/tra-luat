@@ -1,0 +1,4 @@
+ĐĂNG KÝ: 25/25
+TRẠNG THÁI: chan=25 cach_ly=0
+LAUNCHER WINDOWS: 4/4 hợp đồng
+RUFF CI: 3/3 hợp đồng

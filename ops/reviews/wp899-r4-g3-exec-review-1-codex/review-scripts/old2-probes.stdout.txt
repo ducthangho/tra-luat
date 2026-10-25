@@ -1,0 +1,8 @@
+PROBES 85
+r4_F02_env_metadata 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []
+r4_F02_mixed_color 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []
+F02_mixed_color_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []
+F02_env_metadata_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []
+block_missing_end 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []
+block_end_suffix 0 passed {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]
+block_nested 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []

@@ -1,0 +1,73 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 919
+packet_id: wp919
+mission_issue: 919
+revision: 1
+generation: 1
+lease_id: wp919-r1-g1-claude-remote-20261025
+thay_the_cho: []
+thay_the_cho_ghi_chu: packet moi, khong co lease tien nhiem
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/919#issuecomment-6393799783
+authority_url: https://github.com/ducthangho/tra-luat/issues/919#issuecomment-6393799783
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-25T05:15:09Z'
+heartbeat_at: '2026-10-25T05:15:09Z'
+lease_until: '2026-10-26T05:15:09Z'
+lease_expires_at_utc: '2026-10-26T05:15:09Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head, qua launcher.py run
+spec_path: ops/specs/wp919-adr-0055-tran-loi-goi-codex-muoi.md
+spec_ref: ops/wp919-r1-g1-lease
+spec_commit: 63d8c06e1cb7f77d66851380bf553b9fb2e69564
+spec_hash: f5148028dbff30e31f55afc2db91543feb2c1063e148cab5de9ae93ee446b8a5
+spec_sha256: f5148028dbff30e31f55afc2db91543feb2c1063e148cab5de9ae93ee446b8a5
+branch: agent/wp919-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 937162894e703dec9aa7c30163d913e2f83d276c
+start_from_sha: 937162894e703dec9aa7c30163d913e2f83d276c
+reviewed_sha_required: 937162894e703dec9aa7c30163d913e2f83d276c
+reviewed_sha_ghi_chu: neo base; review Codex cuoi phai neo dung head PR cuoi
+write_set:
+- docs/adr/0055-tran-loi-goi-codex-len-muoi.md
+- docs/PROTOCOL_DA_PHIEN.md
+write_set_hash: 0dddc70e2ac7a55db20f1bb9af2f4a26848f2caad15bf6f4897310ea20d6bef0
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: docs/PROTOCOL_DA_PHIEN.md chi bang §20 (them dong ADR-0055, sua o trang thai dong ADR-0052)
+closure_status: 'holder scan 2026-10-25T05:14:49Z tren ban sao bare: ls-remote 594 = guong 594 (thieu 0, thua 0), 2/2 duong dan NGUOI_GIU 0'
+tran_loi_goi_codex_ghi_chu: 'spec khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran 8 cho chinh packet nay; tran_kich_thuoc_sensitive: ADR-0053@8ab1007 => <= 6 tep / <= 450 dong them'
+coordination_paths:
+- ops/leases/wp919-r1-g1-claude-remote-20261025.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

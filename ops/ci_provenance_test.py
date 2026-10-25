@@ -1026,6 +1026,8 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
          [{"lenh": K, "duong_dan": "ops/khac.py", "trang_thai": "not_measured", "ly_do": "khong_co_trong_MOI"}]),
         ("chặn chế độ", lambda: g1(wf_tu(X, job_them={"defaults": {"run": {"shell": "bash"}}}), b),
          [mu | {"trang_thai": "not_measured", "ly_do": "che_do_khong_xac_dinh"}]),
+        ("marker không ở dòng đầu phần log (re.M)", lambda: g1(wf_tu(X), buoc(X, "khac", "THU: 4/4 dat")),
+         [mu | {"trang_thai": "passed", "dong_khop": ["THU: 4/4 dat"]}]),
         ("dòng `##[groupx` không phải `##[group]` lồng", lambda: g1(wf_tu(X), b[:3] + [f"{T} ##[groupx"] + b[3:]),
          [mu | {"trang_thai": "passed", "dong_khop": ["THU: 4/4 dat"]}])) if (kq := dd_tron(f)) != mong]
     bang(not dd_sai, f"dau_duong lệch M4: {dd_sai[:2]}")

@@ -6990,6 +6990,278 @@ def r926_ngu_phap_khung_tung_thanh_phan():
 
 
 @ca
+def r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi():
+    # r26 vòng 7 (cross-review r26g R26-TEST-16; chủ kho chọn "sinh đột biến tự động"): hợp đồng ngữ pháp của bộ lọc,
+    # đo bằng HÀNH VI (khung nhận/mất/không rõ), không bằng so regex. Mỗi dòng một biến thể lành tính mà bản gốc và
+    # một nới lỏng/siết chặt ngữ pháp phân loại KHÁC nhau. `r926_dot_bien_tu_sinh_moi_thanh_phan_regex` sinh đột biến
+    # và đòi mọi đột biến chết ở ca này (hoặc ca khác) hay nằm trong danh sách tương đương có lý do.
+    m = _tai_launcher_thu()
+    esc = bytes([27])
+    dau = b"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message "
+    dung = _r25_khung("response.created", "r0", "m").encode()
+
+    def khung(rid, mdl="m"):
+        return _r25_khung("response.created", rid, mdl).encode()
+
+    def doi(rid, cu, moi):
+        k = khung(rid)
+        bang(k.count(cu) == 1, f"fixture sai: {cu!r}")
+        return k.replace(cu, moi)
+
+    # (1) phải NHẬN — các biến thể ngữ pháp cho phép
+    for ten, dong, mong in [
+        ("tab_phan_cach", doi("r1", b"Z TRACE tungstenite", b"Z\tTRACE\ttungstenite"), "r1"),
+        ("hai_khoang_trang", doi("r2", b"Z TRACE tungstenite", b"Z  TRACE  tungstenite"), "r2"),
+        ("CRLF", khung("r3").rstrip(b"\n") + b"\r\n", "r3"),
+        ("ansi_nhieu_tham_so", esc + b"[1;32m" + khung("r4"), "r4"),
+        ("ansi_khong_tham_so", esc + b"[m" + khung("r5"), "r5"),
+        ("ansi_hai_trung_gian", esc + b"[1 !q" + khung("r6"), "r6"),
+    ]:
+        ban_ghi, dem = _r26_trang_thai(m, dung + dong)
+        bang([x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == ["r0", mong] and not dem.get("mat"),
+             f"nhan {ten}: {dem} {ban_ghi.get('model_phuc_vu')}")
+    ban_ghi, _ = _r26_trang_thai(m, khung("r7", "ga[1m"))
+    bang([x["model"] for x in ban_ghi.get("model_phuc_vu", [])] == ["ga[1m"], f"van ban giong ANSI bi go: {ban_ghi}")
+    # (2) KHÔNG được nhận — header sai nguồn/sai dạng; dòng mang token nên phải tính MẤT
+    for ten, cu, moi in [
+        ("nam_5_chu_so", b"2026-10-24T", b"20261-10-24T"), ("nam_chu", b"2026-10-24T", b"abcd-10-24T"),
+        ("thieu_nam", b"2026-10-24T", b"-10-24T"), ("gach_cheo_nam", b"2026-10", b"2026/10"),
+        ("thang_chu_1", b"-10-24T", b"-x0-24T"), ("thang_chu_2", b"-10-24T", b"-1x-24T"),
+        ("gach_cheo_ngay", b"10-24T", b"10/24T"), ("ngay_chu_1", b"-24T", b"-x4T"), ("ngay_chu_2", b"-24T", b"-2xT"),
+        ("thieu_T", b"24T01", b"24X01"), ("T_roi_khoang", b"T01:12:06.199773Z TRACE", b"T TRACE"),
+        ("gio_co_khoang", b"T01:12:06.199773Z TRACE", b"T0 1 TRACE"),
+        ("TRACE_dinh_target", b"TRACE tungstenite", b"TRACEtungstenite"),
+        ("TRACE_gach_target", b"TRACE tungstenite", b"TRACE-tungstenite"),
+        ("dau_hai_cham_gach", b"protocol: Received", b"protocol:-Received"),
+        ("Sent_message", b"protocol: Received message", b"protocol: Sent message"),
+        ("Received_gach", b"Received message", b"Received-message"),
+        ("Received_frame", b"Received message", b"Received frame"),
+        ("message_dinh_ngoac", b"Received message {", b"Received messageX{"),
+        ("khoang_truoc_ngoac", b"Received message {", b"Received message  {"),
+        ("ansi_khong_phai_CSI", b"2026-10-24T", esc + b"(B2026-10-24T"),
+    ]:
+        ban_ghi, dem = _r26_trang_thai(m, dung + doi("rx", cu, moi))
+        bang([x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == ["r0"] and dem.get("mat") == 1,
+             f"khong nhan {ten}: {dem} {ban_ghi.get('model_phuc_vu')}")
+    # (3) thân khung: object rỗng là khung parse được, sự kiện khác — không mất, không "không rõ"
+    _, _, _, dem = _r25_loc(m, dau + b"{}\n")
+    bang(not dem.get("mat") and not dem.get("khong_ro"), f"object rong bi tinh: {dem}")
+    # (4) token ứng viên: chỉ đúng `"type":"response.created|completed"` (sau gọn hoá), không gì rộng hơn
+    for dong in [b'x "xtype":"response.created" y\n', b'x "typeZ:"response.created" y\n',
+                 b'x "type"::"response.created" y\n', b'x "type":xresponse.created" y\n',
+                 b'x "type":"conversation.created" y\n', b'x "type":"response.created_x" y\n']:
+        _, _, _, dem = _r25_loc(m, dong)
+        bang(not dem.get("mat"), f"khong phai token ung vien ma tinh mat: {dong!r} {dem}")
+    # (5) tiền tố xác nhận loại của dòng NHẬN nhiều đoạn: `{` · khoảng trắng · `"type"` · `:` · chuỗi đóng, ĐÚNG khoá đầu
+    m._TRAN_DONG = 128
+    duoi = b',"p":"' + b"p" * 400 + b'"}\n'
+    for ten, than, mong in [
+        ("type_khong_dau", b'{"pad":1,"type":"x.delta"', 1), ("tab_moi_cho", b'{\t"type"\t:\t"x.delta"', 0),
+        ("gon", b'{"type":"x.delta"', 0), ("hai_khoang", b'{  "type"  :  "x.delta"', 0),
+        ("khoa_lech_1", b'{ztype":"x.delta"', 1), ("khoa_lech_2", b'{"typeZ:"x.delta"', 1), ("loai_rong", b'{"type":""', 0),
+    ]:
+        _, _, _, dem = _r25_loc(m, dau + than + duoi)
+        bang(dem.get("khong_ro", 0) == mong and not dem.get("mat"), f"tien to {ten}: {dem} (mong khong_ro={mong})")
+
+
+def _r26_token_regex(mau: str) -> list:
+    """Cắt NGUỒN một regex (văn bản giữa hai dấu nháy của literal rb"...") thành token (loại, văn bản)."""
+    i, ra = 0, []
+    while i < len(mau):
+        c = mau[i]
+        if c == "\\":
+            n = 4 if mau[i + 1:i + 2] == "x" else 2
+            ra.append(("thoat", mau[i:i + n])); i += n
+        elif c == "[":
+            j = i + 1
+            if mau[j:j + 1] == "^":
+                j += 1
+            if mau[j:j + 1] == "]":
+                j += 1
+            while mau[j] != "]":
+                j += 2 if mau[j] == "\\" else 1
+            ra.append(("lop", mau[i:j + 1])); i = j + 1
+        elif c == "{" and re.match(r"\{\d+(,\d*)?\}", mau[i:]):
+            k = re.match(r"\{\d+(,\d*)?\}", mau[i:]).group(0)
+            ra.append(("lap", k)); i += len(k)
+        elif c in "*+?":
+            ra.append(("lap", c)); i += 1
+        elif c in "^$":
+            ra.append(("neo", c)); i += 1
+        elif c == "(":
+            k = "(?:" if mau[i:i + 3] == "(?:" else "("
+            ra.append(("mo", k)); i += len(k)
+        elif c in ")|":
+            ra.append((c, c)); i += 1
+        elif re.match(r"[A-Za-z0-9_:]", c):
+            k = re.match(r"[A-Za-z0-9_:]+", mau[i:]).group(0)
+            ra.append(("chu", k)); i += len(k)
+        else:
+            ra.append(("ky", c)); i += 1
+    return ra
+
+
+def _r26_bien_the(mau: str) -> list:
+    """Mọi biến thể MỘT thao tác của nguồn regex: xoá từng token; nới lớp/thoát/ký tự thành `.`; `\\s` thành dấu
+    cách; nới chữ thành `\\S+`; đổi lượng từ; bỏ từng phần tử của lớp (và dấu phủ định); bỏ từng nhánh `|`. Chỉ giữ
+    biến thể biên dịch được và khác bản gốc."""
+    tk = _r26_token_regex(mau)
+
+    def ghep(xs):
+        return "".join(v for _, v in xs)
+
+    ra = []
+    for i, (loai, v) in enumerate(tk):
+        thay = []
+        if loai not in ("mo", ")"):
+            thay.append("")
+        if loai in ("thoat", "lop", "ky"):
+            thay.append(".")
+        if loai == "thoat" and v == "\\s":
+            thay.append(" ")
+        if loai == "chu":
+            thay.append("\\S+")
+        if loai == "lap":
+            thay += [x for x in ("*", "+", "?") if x != v]
+        if loai == "lop":
+            ben_trong = v[1:-1]
+            phu = ben_trong.startswith("^")
+            phan = re.findall(r"\\.|.-.|.", ben_trong[1:] if phu else ben_trong)
+            for k in range(len(phan)):
+                con = "".join(phan[:k] + phan[k + 1:])
+                if con:
+                    thay.append("[" + ("^" if phu else "") + con + "]")
+            if phu:
+                thay.append("[" + ben_trong[1:] + "]")
+        for t in thay:
+            ra.append(ghep(tk[:i]) + t + ghep(tk[i + 1:]))
+        if loai == "|":
+            j = i + 1
+            while j < len(tk) and tk[j][0] not in ("|", ")"):
+                j += 1
+            ra.append(ghep(tk[:i]) + ghep(tk[j:]))
+            j = i - 1
+            while j >= 0 and tk[j][0] not in ("|", "mo"):
+                j -= 1
+            ra.append(ghep(tk[:j + 1]) + ghep(tk[i + 1:]))
+    tot = []
+    for x in ra:
+        if x == mau or x in tot:
+            continue
+        try:
+            re.compile(x.encode())
+        except re.error:
+            continue
+        tot.append(x)
+    return tot
+
+
+# Biến thể regex SỐNG SÓT mọi ca mà vẫn chấp nhận được: (tên hằng, nguồn biến thể) -> lý do TƯƠNG ĐƯƠNG đo được.
+# Thêm dòng vào đây phải kèm lý do vì sao KHÔNG CÓ đầu vào nào phân biệt; dòng thừa (không còn sinh ra hoặc đã bị
+# giết) làm ca đỏ — danh sách không được phình ra âm thầm.
+_R26_TUONG_DUONG = {
+    ("_DAU_NHAN", r"\d{4}-\d\d-\d\dT\S+\s+TRACE\s+tungstenite::protocol: Received message "):
+        "neo ^ thua: moi cho dung _DAU_NHAN (_RE_KHUNG, _RE_LOAI_DAU, _RE_DAU_JSON) deu goi .match",
+    ("_RE_KHUNG", r"(\{.*)\s*$"): "thieu } thi json.loads tu choi o ca hai ve; json.loads khong nhan rac sau object",
+    ("_RE_KHUNG", r"(\{.*.)\s*$"): "nhu tren: cu phap JSON do json.loads quyet",
+    ("_RE_KHUNG", r"(\{.*\})\s$"): "dong doc tron luon ket thuc bang \\n (LF hoac CRLF) va $ khop truoc \\n cuoi",
+    ("_RE_KHUNG", r"(\{.*\})\s+$"): "nhu tren: luon co it nhat mot \\n",
+    ("_RE_KHUNG", r"(\{.*\})\s?$"): "nhu tren: \\s? an \\r cua CRLF, $ khop truoc \\n",
+    ("_RE_KHOANG_TRANG_B", r"\s"): "re.sub(..., b'') xoa moi khoang trang du khop tung ky tu hay ca chuoi",
+    ("_RE_KHOANG_TRANG_B", r"\s*"): "nhu tren: khop rong thay bang rong",
+    ("_RE_KHOANG_TRANG_B", r"\s?"): "nhu tren",
+    ("_RE_LOAI_DAU", r'.\s*"type"\s*:\s*"([^"\\]*)"'):
+        "tien to khong mo bang { thi nhanh khong_ro con doi _RE_DAU_JSON (dau + {) nen ket qua nhu nhau",
+}
+_R26_CA_CHAM = frozenset({"r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC",
+                          "r925_codex_qua_han_van_124_va_giu_khung_da_den",
+                          "r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC",
+                          "r926_dot_bien_tu_sinh_moi_thanh_phan_regex"})
+
+
+@ca
+def r926_dot_bien_tu_sinh_moi_thanh_phan_regex():
+    # Cross-review r26g R26-TEST-16, lần thứ tư cùng một lớp: danh sách đột biến VIẾT TAY luôn thiếu một thành phần.
+    # Chủ kho chọn đóng lớp này bằng kiến trúc: ca này TỰ SINH mọi biến thể một-thao-tác của MỌI literal regex trong
+    # khối bộ lọc (từ `_RUST_LOG_DO_MODEL` tới `def _la_codex` — regex mới thêm vào khối tự động bị đo) và đòi mỗi
+    # biến thể bị một ca r925/r926 giết bằng TinHieuChotCa, hoặc nằm trong `_R26_TUONG_DUONG` kèm lý do.
+    global LAUNCHER_DANG_DUNG
+    goc = LAUNCHER_DANG_DUNG
+    dong = Path(goc).read_text(encoding="utf-8").split("\n")
+    dau = next(i for i, d in enumerate(dong) if d.startswith("_RUST_LOG_DO_MODEL ="))
+    cuoi = next(i for i, d in enumerate(dong) if d.startswith("def _la_codex"))
+    ca_chay = [n for n in sorted(globals()) if n.startswith(("r925_", "r926_")) and n not in _R26_CA_CHAM]
+    ca_chay.sort(key=lambda n: n != "r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi")
+    song, khac, ten_hang, tong = {}, [], set(), 0
+    with San() as s:
+        try:
+            for so in range(dau, cuoi):
+                d = dong[so]
+                if not d.startswith(("_RE_", "_DAU_NHAN")):
+                    continue
+                ten = d.split(" =")[0]
+                for lit in re.finditer(r"""rb(["'])(.*?)\1""", d):
+                    ten_hang.add(ten)
+                    for k, bt in enumerate(_r26_bien_the(lit.group(2))):
+                        tong += 1
+                        p = s / f"launcher_rv7_{so}_{k}.py"
+                        p.write_text("\n".join(dong[:so] + [d[:lit.start(2)] + bt + d[lit.end(2):]] + dong[so + 1:]),
+                                     encoding="utf-8")
+                        LAUNCHER_DANG_DUNG = p
+                        chet = False
+                        for c in ca_chay:
+                            try:
+                                globals()[c]()
+                            except TinHieuChotCa:
+                                chet = True
+                                break
+                            except Exception as e:
+                                khac.append(f"{ten} {bt!r} -> {c}: {type(e).__name__}")
+                                chet = True
+                                break
+                        if not chet:
+                            song[(ten, bt)] = True
+        finally:
+            LAUNCHER_DANG_DUNG = goc
+    bang(len(ten_hang) >= 7 and tong >= 100, f"bo sinh gan nhu khong sinh gi: {sorted(ten_hang)} {tong} bien the")
+    bang(not khac, f"dot bien chet vi loi KHONG phai chot (tin dung gia): {khac[:5]}")
+    la = sorted(k for k in song if k not in _R26_TUONG_DUONG)
+    bang(not la, f"{len(la)} bien the regex SONG ma khong co ly do tuong duong: {la[:8]}")
+    thua = sorted(k for k in _R26_TUONG_DUONG if k not in song)
+    bang(not thua, f"danh sach tuong duong co dong khong con song/khong con sinh ra: {thua}")
+
+
+@ca
+def r926_ghi_so_chup_rieng_ket_loi_dem():
+    # Cross-review r26g: ba phép chép ảnh chụp trong `ghi_so` mỗi cái một ca con — luồng đọc vẫn đổi trạng thái SAU
+    # khi ảnh đã chụp thì sổ không được đổi theo.
+    m = _tai_launcher_thu()
+    a_ = {"response_id": "ra", "model": "m", "su_kien": "response.created"}
+    b_ = {"response_id": "rb", "model": "m", "su_kien": "response.created"}
+    bo = m._BoLocStderr(None, None)
+    bo.ket.append(a_)
+    bo.dem.update(dong_bo=1, byte_bo=5)
+    bo.con_doc = False
+    goc = m._ket_luan_model
+
+    def chen_giua(*a, **k):
+        bo.ket.append(b_)
+        bo.loi.append("RuntimeError")
+        bo.dem.update(dong_bo=99, byte_bo=999)
+        return goc(*a, **k)
+
+    m._ket_luan_model = chen_giua
+    try:
+        ban_ghi = {}
+        bo.ghi_so(ban_ghi)
+    finally:
+        m._ket_luan_model = goc
+    bang(ban_ghi.get("model_phuc_vu") == [a_], f"danh sach khung doi sau anh chup: {ban_ghi.get('model_phuc_vu')}")
+    bang(ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC", f"loi den sau anh chup doi ket luan: {ban_ghi}")
+    bang(ban_ghi.get("stderr_bo_dong") == 1 and ban_ghi.get("stderr_bo_byte") == 5, f"bo dem doi sau anh chup: {ban_ghi}")
+
+
+@ca
 def r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC():
     # Đường SẢN XUẤT (R26-EOF-10 vòng 2): luồng đọc chỉ xong khi stderr.log đang đóng — sau hạn chờ thật 10s. Kèm
     # hợp đồng của `_ghi_het`: tệp stderr của lượt codex phải KHÔNG ĐỆM.
@@ -11064,6 +11336,18 @@ DOT_BIEN = [
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
     ('r26_rv6_m_dau_json_bo_ngoac', ('_RE_DAU_JSON = re.compile(_DAU_NHAN + rb"\\{")', '_RE_DAU_JSON = re.compile(_DAU_NHAN)'),
      ['r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO']),
+    # r26 vòng 7 (cross-review r26g R26-TEST-16): phần KHÔNG phải regex — cờ luồng, chế độ tệp, ba phép chụp. Phần regex
+    # do `r926_dot_bien_tu_sinh_moi_thanh_phan_regex` tự sinh, không đăng ký tay ở đây.
+    ('r26_rv7_luong_doc_khong_daemon', ('                                      daemon=True)', '                                      daemon=False)'),
+     ['r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC']),
+    ('r26_rv7_tep_stderr_van_ban', ('stderr.log").open("wb" if do_model else "w",', 'stderr.log").open("w",'),
+     ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
+    ('r26_rv7_khong_chup_ket', ('ket_s, loi_s, dem_s = list(self.ket), list(self.loi), dict(self.dem)', 'ket_s, loi_s, dem_s = self.ket, list(self.loi), dict(self.dem)'),
+     ['r926_ghi_so_chup_rieng_ket_loi_dem']),
+    ('r26_rv7_khong_chup_loi', ('ket_s, loi_s, dem_s = list(self.ket), list(self.loi), dict(self.dem)', 'ket_s, loi_s, dem_s = list(self.ket), self.loi, dict(self.dem)'),
+     ['r926_ghi_so_chup_rieng_ket_loi_dem']),
+    ('r26_rv7_khong_chup_dem', ('ket_s, loi_s, dem_s = list(self.ket), list(self.loi), dict(self.dem)', 'ket_s, loi_s, dem_s = list(self.ket), list(self.loi), self.dem'),
+     ['r926_ghi_so_chup_rieng_ket_loi_dem']),
     ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.

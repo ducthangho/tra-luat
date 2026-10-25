@@ -7016,6 +7016,15 @@ def r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi():
         ("ansi_nhieu_tham_so", esc + b"[1;32m" + khung("r4"), "r4"),
         ("ansi_khong_tham_so", esc + b"[m" + khung("r5"), "r5"),
         ("ansi_hai_trung_gian", esc + b"[1 !q" + khung("r6"), "r6"),
+        # r26 vòng 8 (cross-review r26h R26-TEST-17): hậu tố khoảng trắng sau `}` và hai đầu mút của byte kết CSI.
+        ("hai_cach_LF", khung("r8").rstrip(b"\n") + b"  \n", "r8"),
+        ("tab_cach_CRLF", khung("r9").rstrip(b"\n") + b"\t \r\n", "r9"),
+        ("form_feed", khung("ra").rstrip(b"\n") + bytes([12]) + b"\n", "ra"),
+        ("vertical_tab", khung("rb").rstrip(b"\n") + bytes([11]) + b"\n", "rb"),
+        ("ansi_ket_at", esc + b"[1@" + khung("rc"), "rc"),
+        ("ansi_ket_nga", esc + b"[1~" + khung("rd"), "rd"),
+        ("ansi_tham_so_9", esc + b"[9m" + khung("re"), "re"),
+        ("ansi_trung_gian_gach_cheo", esc + b"[1/q" + khung("rf"), "rf"),
     ]:
         ban_ghi, dem = _r26_trang_thai(m, dung + dong)
         bang([x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == ["r0", mong] and not dem.get("mat"),
@@ -7039,6 +7048,16 @@ def r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi():
         ("message_dinh_ngoac", b"Received message {", b"Received messageX{"),
         ("khoang_truoc_ngoac", b"Received message {", b"Received message  {"),
         ("ansi_khong_phai_CSI", b"2026-10-24T", esc + b"(B2026-10-24T"),
+        # r26 vòng 8: mỗi nguyên tử BẮT BUỘC của header một ca thiếu đúng nguyên tử ấy
+        ("thieu_gach_nam", b"2026-10-24T", b"202610-24T"), ("thieu_gach_thang", b"2026-10-24T", b"2026-1024T"),
+        ("thang_mot_so", b"2026-10-24T", b"2026-1-24T"), ("ngay_mot_so", b"2026-10-24T", b"2026-10-4T"),
+        ("thieu_TRACE", b"Z TRACE tungstenite", b"Z  tungstenite"),
+        ("thieu_target", b"TRACE tungstenite::protocol: Received", b"TRACE  Received"),
+        ("dinh_hai_cham_Received", b"protocol: Received", b"protocol:Received"),
+        ("thieu_Received", b"protocol: Received message", b"protocol:  message"),
+        ("dinh_Received_message", b"Received message", b"Receivedmessage"),
+        ("thieu_message", b"Received message {", b"Received  {"),
+        ("dinh_message_ngoac", b"Received message {", b"Received message{"),
     ]:
         ban_ghi, dem = _r26_trang_thai(m, dung + doi("rx", cu, moi))
         bang([x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == ["r0"] and dem.get("mat") == 1,
@@ -7049,7 +7068,10 @@ def r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi():
     # (4) token ứng viên: chỉ đúng `"type":"response.created|completed"` (sau gọn hoá), không gì rộng hơn
     for dong in [b'x "xtype":"response.created" y\n', b'x "typeZ:"response.created" y\n',
                  b'x "type"::"response.created" y\n', b'x "type":xresponse.created" y\n',
-                 b'x "type":"conversation.created" y\n', b'x "type":"response.created_x" y\n']:
+                 b'x "type":"conversation.created" y\n', b'x "type":"response.created_x" y\n',
+                 b'x "":"response.created" y\n', b'x "type:"response.created" y\n', b'x "type""response.created" y\n',
+                 b'x "type":response.created" y\n', b'x "type":".created" y\n', b'x "type":"responsecreated" y\n',
+                 b'x "type":"response."" y\n', b'x "type":"response.completed_x" y\n']:
         _, _, _, dem = _r25_loc(m, dong)
         bang(not dem.get("mat"), f"khong phai token ung vien ma tinh mat: {dong!r} {dem}")
     # (5) tiền tố xác nhận loại của dòng NHẬN nhiều đoạn: `{` · khoảng trắng · `"type"` · `:` · chuỗi đóng, ĐÚNG khoá đầu
@@ -7059,6 +7081,8 @@ def r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi():
         ("type_khong_dau", b'{"pad":1,"type":"x.delta"', 1), ("tab_moi_cho", b'{\t"type"\t:\t"x.delta"', 0),
         ("gon", b'{"type":"x.delta"', 0), ("hai_khoang", b'{  "type"  :  "x.delta"', 0),
         ("khoa_lech_1", b'{ztype":"x.delta"', 1), ("khoa_lech_2", b'{"typeZ:"x.delta"', 1), ("loai_rong", b'{"type":""', 0),
+        ("khoa_thieu_nhay_dau", b'{type":"x.delta"', 1), ("khoa_rong", b'{"":"x.delta"', 1),
+        ("khoa_thieu_nhay_cuoi", b'{"type:"x.delta"', 1), ("thieu_hai_cham", b'{"type" "x.delta"', 1),
     ]:
         _, _, _, dem = _r25_loc(m, dau + than + duoi)
         bang(dem.get("khong_ro", 0) == mong and not dem.get("mat"), f"tien to {ten}: {dem} (mong khong_ro={mong})")
@@ -7133,8 +7157,19 @@ def _r26_bien_the(mau: str) -> list:
                     thay.append("[" + ("^" if phu else "") + con + "]")
             if phu:
                 thay.append("[" + ben_trong[1:] + "]")
+            # r26 vòng 8 (cross-review r26h R26-TEST-17): dời TỪNG đầu mút của mỗi khoảng `a-b` vào trong một ký tự.
+            for k, x in enumerate(phan):
+                if len(x) == 3 and x[1] == "-" and ord(x[0]) < ord(x[2]):
+                    for moi in (chr(ord(x[0]) + 1) + "-" + x[2], x[0] + "-" + chr(ord(x[2]) - 1)):
+                        thay.append("[" + ("^" if phu else "") + "".join(phan[:k] + [moi] + phan[k + 1:]) + "]")
+        # r26 vòng 8: biến một nguyên tử BẮT BUỘC thành tuỳ chọn (`\x1b` -> `\x1b?`), khi nó chưa có lượng từ.
+        if loai in ("thoat", "lop", "ky", "chu") and not (i + 1 < len(tk) and tk[i + 1][0] == "lap"):
+            thay.append(("(?:" + v + ")" if loai == "chu" and len(v) > 1 else v) + "?")
         for t in thay:
             ra.append(ghep(tk[:i]) + t + ghep(tk[i + 1:]))
+        # r26 vòng 8: xoá nguyên tử CÙNG lượng từ của nó (`\s*$` -> `$`); xoá riêng nguyên tử thì lượng từ mồ côi.
+        if loai in ("thoat", "lop", "ky", "chu") and i + 1 < len(tk) and tk[i + 1][0] == "lap":
+            ra.append(ghep(tk[:i]) + ghep(tk[i + 2:]))
         if loai == "|":
             j = i + 1
             while j < len(tk) and tk[j][0] not in ("|", ")"):
@@ -7162,21 +7197,37 @@ def _r26_bien_the(mau: str) -> list:
 _R26_TUONG_DUONG = {
     ("_DAU_NHAN", r"\d{4}-\d\d-\d\dT\S+\s+TRACE\s+tungstenite::protocol: Received message "):
         "neo ^ thua: moi cho dung _DAU_NHAN (_RE_KHUNG, _RE_LOAI_DAU, _RE_DAU_JSON) deu goi .match",
-    ("_RE_KHUNG", r"(\{.*)\s*$"): "thieu } thi json.loads tu choi o ca hai ve; json.loads khong nhan rac sau object",
-    ("_RE_KHUNG", r"(\{.*.)\s*$"): "nhu tren: cu phap JSON do json.loads quyet",
-    ("_RE_KHUNG", r"(\{.*\})\s$"): "dong doc tron luon ket thuc bang \\n (LF hoac CRLF) va $ khop truoc \\n cuoi",
-    ("_RE_KHUNG", r"(\{.*\})\s+$"): "nhu tren: luon co it nhat mot \\n",
-    ("_RE_KHUNG", r"(\{.*\})\s?$"): "nhu tren: \\s? an \\r cua CRLF, $ khop truoc \\n",
+    ("_RE_KHUNG", r"(\{.*\})\s+$"): "dong doc tron luon co LF that sau } (ANSI khong an LF), nen hau to luon >= 1 khoang trang",
     ("_RE_KHOANG_TRANG_B", r"\s"): "re.sub(..., b'') xoa moi khoang trang du khop tung ky tu hay ca chuoi",
     ("_RE_KHOANG_TRANG_B", r"\s*"): "nhu tren: khop rong thay bang rong",
     ("_RE_KHOANG_TRANG_B", r"\s?"): "nhu tren",
     ("_RE_LOAI_DAU", r'.\s*"type"\s*:\s*"([^"\\]*)"'):
         "tien to khong mo bang { thi nhanh khong_ro con doi _RE_DAU_JSON (dau + {) nen ket qua nhu nhau",
+    ("_RE_LOAI_DAU", r'\{?\s*"type"\s*:\s*"([^"\\]*)"'): "nhu tren: thieu { thi _RE_DAU_JSON van chan",
 }
+_R26_SO_BIEN_THE = {"_RE_ANSI_B": 29, "_DAU_NHAN": 67, "_RE_KHUNG": 19, "_RE_UNG_VIEN_GON": 33, "_RE_KHOANG_TRANG_B": 6,
+                    "_RE_LOAI_DAU": 50, "_RE_DAU_JSON": 3}
 _R26_CA_CHAM = frozenset({"r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC",
                           "r925_codex_qua_han_van_124_va_giu_khung_da_den",
                           "r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC",
                           "r926_dot_bien_tu_sinh_moi_thanh_phan_regex"})
+
+
+@ca
+def r926_bo_sinh_bien_the_co_du_phep():
+    # R26-TEST-17: đo CHÍNH bộ sinh trên đầu vào biết trước — mỗi phép (xoá, nới, đổi lượng từ, bỏ phần tử lớp, dời đầu
+    # mút khoảng, biến nguyên tử bắt buộc thành tuỳ chọn, bỏ nhánh) phải sinh ra đúng biến thể mong đợi.
+    for mau, phai_co in [
+        ("[@-~]", ["[A-~]", "[@-}]", ".", ""]),
+        (r"\x1b\[", [r"\x1b?\[", r"\x1b\[?", r"\[", r".\["]),
+        (r"\s*$", [r"\s+$", r"\s?$", r"\s$", r"$"]),
+        ("(?:ab|cd)", ["(?:ab)", "(?:cd)"]),
+        ("TRACE", [r"\S+", "(?:TRACE)?"]),
+        ("[^ab]", ["[^b]", "[^a]", "[ab]"]),
+    ]:
+        bt = _r26_bien_the(mau)
+        thieu = [x for x in phai_co if x not in bt]
+        bang(not thieu, f"bo sinh thieu phep tren {mau!r}: {thieu} (sinh ra: {bt})")
 
 
 @ca
@@ -7192,7 +7243,7 @@ def r926_dot_bien_tu_sinh_moi_thanh_phan_regex():
     cuoi = next(i for i, d in enumerate(dong) if d.startswith("def _la_codex"))
     ca_chay = [n for n in sorted(globals()) if n.startswith(("r925_", "r926_")) and n not in _R26_CA_CHAM]
     ca_chay.sort(key=lambda n: n != "r926_hop_dong_ngu_phap_bo_loc_theo_hanh_vi")
-    song, khac, ten_hang, tong = {}, [], set(), 0
+    song, khac, ten_hang, tong, so_moi_hang, thieu_lit = {}, [], set(), 0, {}, []
     with San() as s:
         try:
             for so in range(dau, cuoi):
@@ -7200,10 +7251,14 @@ def r926_dot_bien_tu_sinh_moi_thanh_phan_regex():
                 if not d.startswith(("_RE_", "_DAU_NHAN")):
                     continue
                 ten = d.split(" =")[0]
-                for lit in re.finditer(r"""rb(["'])(.*?)\1""", d):
+                lits = list(re.finditer(r"""rb(["'])(.*?)\1""", d))
+                if not lits:
+                    thieu_lit.append(ten)
+                for lit in lits:
                     ten_hang.add(ten)
                     for k, bt in enumerate(_r26_bien_the(lit.group(2))):
                         tong += 1
+                        so_moi_hang[ten] = so_moi_hang.get(ten, 0) + 1
                         p = s / f"launcher_rv7_{so}_{k}.py"
                         p.write_text("\n".join(dong[:so] + [d[:lit.start(2)] + bt + d[lit.end(2):]] + dong[so + 1:]),
                                      encoding="utf-8")
@@ -7224,6 +7279,10 @@ def r926_dot_bien_tu_sinh_moi_thanh_phan_regex():
         finally:
             LAUNCHER_DANG_DUNG = goc
     bang(len(ten_hang) >= 7 and tong >= 100, f"bo sinh gan nhu khong sinh gi: {sorted(ten_hang)} {tong} bien the")
+    # r26 vòng 8 (R26-TEST-17): đếm theo TỪNG hằng, không theo tổng — bỏ cả một họ biến thể thì tổng vẫn qua ngưỡng.
+    # Đổi regex của bộ lọc hay đổi bộ sinh thì cập nhật bảng này CÓ CHỦ ĐÍCH.
+    bang(so_moi_hang == _R26_SO_BIEN_THE, f"so bien the theo hang lech bang chot: {so_moi_hang} != {_R26_SO_BIEN_THE}")
+    bang(not thieu_lit, f"dong regex trong khoi loc khong co literal rb'...': {thieu_lit}")
     bang(not khac, f"dot bien chet vi loi KHONG phai chot (tin dung gia): {khac[:5]}")
     la = sorted(k for k in song if k not in _R26_TUONG_DUONG)
     bang(not la, f"{len(la)} bien the regex SONG ma khong co ly do tuong duong: {la[:8]}")

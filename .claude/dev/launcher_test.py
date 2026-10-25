@@ -30,6 +30,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -6404,6 +6405,318 @@ def r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh():
         bang(bool(re.fullmatch(r"[0-9a-f]{64}", contract[0][3])), "bam transport sai dang")
 
 
+# wp748 r25 (#748 issuecomment-6378484722): model do MÁY CHỦ trả cho từng response của lượt codex. Con GIẢ là
+# chính trình python đặt tên `codex` (như r15), in ra stderr đúng dạng log trace của codex-cli 0.163.0. Chuỗi bí mật
+# là chuỗi MẪU, không phải credential thật.
+_R25_BI_MAT = "Bearer r25-bi-mat-mau-KHONG-duoc-cham-dia"
+_R25_DONG_GIU = "Reading additional input from stdin...\n"
+_R25_KHUNG_THUA = "2026-10-24T01:12:05.000001Z  INFO codex: dong info sau dau hieu log\n"
+
+
+def _r25_khung(loai, rid, model, target="tungstenite::protocol", truoc=""):
+    ev = {"type": loai, "sequence_number": 0, "response": {"id": rid, "object": "response", "model": model}}
+    return f"2026-10-24T01:12:06.199773Z TRACE {target}: {truoc}Received message {json.dumps(ev)}\n"
+
+
+def _r25_codex_gia(s):
+    cli = s / ("codex.exe" if LA_WINDOWS else "codex")
+    try:
+        os.link(Path(PY).resolve(), cli)
+    except OSError:
+        shutil.copy2(Path(PY).resolve(), cli)
+    if not LA_WINDOWS:
+        cli.chmod(0o755)
+    return cli
+
+
+def _r25_chay(s, noi_dung_err, sau="", them=(), env=None):
+    repo = tao_repo(s); cli = _r25_codex_gia(s); rr = s / "runs"
+    ma = ("import os,sys,time;print(os.environ.get('RUST_LOG',''));"
+          f"sys.stderr.buffer.write({noi_dung_err.encode()!r});sys.stderr.buffer.flush();{sau}")
+    # byte THÔ như codex (Rust) ghi: sys.stderr.write ở chế độ văn bản đổi \n -> \r\n trên Windows (đo: lane
+    # Windows run 40082998930 đỏ đúng phép so byte stderr.log, còn bộ lọc vẫn chặn đủ dòng trace)
+    r = chay("run", "--workspace", str(repo), "--run-root", str(rr), *them, "--", str(cli), "-c", ma, "-m", "gpt-mau",
+             env=env)
+    tm = next(p for p in rr.iterdir() if p.is_dir())
+    return r, tm, json.loads((tm / "run.json").read_text(encoding="utf-8"))
+
+
+def _r25_loc(m, du_lieu: bytes):
+    import io
+    f, ket, loi, dem = io.BytesIO(), [], [], {}
+    m._loc_stderr_codex(io.BytesIO(du_lieu), f, ket, loi, dem)
+    return f.getvalue(), ket, loi, dem
+
+
+@ca
+def r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat():
+    err = (_R25_DONG_GIU
+           + f"2026-10-24T01:12:05.5Z TRACE tungstenite::protocol: authorization: {_R25_BI_MAT}\n"
+           + f"    noi tiep cua dong trace: {_R25_BI_MAT}\n"
+           + _r25_khung("response.created", "resp_1", "gpt-6-astra")
+           + _r25_khung("response.completed", "resp_1", "gpt-6-astra")
+           + f"2026-10-24T01:12:07Z DEBUG codex_core: {_R25_BI_MAT}\n"
+           + _r25_khung("response.completed", "resp_2", "gpt-6-luna")
+           + _r25_khung("response.completed", "resp_3", "gpt-6-astra")
+           + f"2026-10-24T01:12:08Z  WARN codex: {_R25_BI_MAT}\n")
+    with San() as s:
+        r, tm, d = _r25_chay(s, err)
+        bang(r.returncode == 0, f"launcher rc={r.returncode}: {r.stderr}")
+        bang(d.get("model_phuc_vu_trang_thai") == "DO_DUOC", f"trang thai sai: {d.get('model_phuc_vu_trang_thai')}")
+        bang([(m["response_id"], m["model"], m["su_kien"]) for m in d.get("model_phuc_vu", [])] == [
+            ("resp_1", "gpt-6-astra", "response.created"), ("resp_2", "gpt-6-luna", "response.completed"),
+            ("resp_3", "gpt-6-astra", "response.completed")], f"model_phuc_vu sai: {d.get('model_phuc_vu')}")
+        bang((tm / "stderr.log").read_bytes() == _R25_DONG_GIU.encode(),
+             f"stderr.log phai chi co dong trong danh sach cho phep: {(tm / 'stderr.log').read_bytes()!r}")
+        bang(d.get("stderr_bo_dong") == 8 and d.get("stderr_bo_byte") == len(err.encode()) - len(_R25_DONG_GIU),
+             f"so dem phan bi bo sai: {d.get('stderr_bo_dong')} {d.get('stderr_bo_byte')}")
+        bang((tm / "stdout.log").read_text(encoding="utf-8").splitlines()[0] == "tungstenite::protocol=trace",
+             "con khong duoc bat dung target trace")
+        lo = [str(p) for p in tm.rglob("*") if p.is_file() and b"r25-bi-mat-mau" in p.read_bytes()]
+        bang(not lo, f"chuoi bi mat cham dia: {lo}")
+
+
+@ca
+def r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace():
+    # R25-SEC-01 vong 2: dong KHONG nhan ra la trace dung TRUOC dau hieu log van tung cham dia
+    m = _tai_launcher_thu()
+    cho = _R25_DONG_GIU.encode()
+    bi = _R25_BI_MAT.encode()
+    for ten, du in [
+        ("dong_thuong_mang_bi_mat", b"loi gi do " + bi + b"\n"),
+        ("byte_khong_utf8", b"\xff\xfe\n"),
+        ("chi_CR", b"abc\r"),
+        ("dong_cho_phep_cut_o_EOF", cho.rstrip(b"\n")),
+        ("dong_cho_phep_them_hau_to", cho.rstrip(b"\n") + b" " + bi + b"\n"),
+        ("dong_cho_phep_them_tien_to", bi + cho),
+    ]:
+        ghi, _, loi, dem = _r25_loc(m, du)
+        bang(ghi == b"" and not loi and dem.get("byte_bo") == len(du), f"{ten}: dong ngoai danh sach cham dia: {ghi!r}")
+    ghi, _, _, _ = _r25_loc(m, _r25_khung("response.created", "r", "m").encode() + cho)
+    bang(ghi == cho, f"dong cho phep sau trace bi mat: {ghi!r}")
+
+
+@ca
+def r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien():
+    m = _tai_launcher_thu()
+    ansi = ("\x1b[2m2026-10-24T01:12:06.1Z\x1b[0m \x1b[35mTRACE\x1b[0m tungstenite::protocol: Received message "
+            + json.dumps({"type": "response.created", "response": {"id": "ra", "model": "ma"}}) + "\n")
+    du = "".join([
+        _r25_khung("response.created", "x1", "gia", target="codex_core"),
+        _r25_khung("response.created", "x2", "gia", truoc="echo "),
+        _r25_khung("response.output_text.delta", "x3", "gia"),
+        ansi,
+        _r25_khung("response.created", "rb", "m1"),
+        _r25_khung("response.completed", "rb", "m2"),
+    ]).encode()
+    _, ket, loi, dem = _r25_loc(m, du)
+    bang(not loi and [(k["response_id"], k["model"]) for k in ket] == [("ra", "ma"), ("rb", "m1"), ("rb", "m2")],
+         f"khung ghi sai nguon/su kien/khu trung: {ket}")
+    bang(dem.get("mat") == 2, f"khung created/completed sai nguon phai tinh la MAT: {dem}")
+    for ten, rid, mdl in [("id_rong", "", "m"), ("model_khoang_trang", "r", "  ")]:
+        _, ket, _, dem = _r25_loc(m, _r25_khung("response.created", rid, mdl).encode())
+        bang(not ket and dem.get("mat") == 1, f"{ten}: khung rong van duoc nhan hoac khong tinh mat: {ket} {dem}")
+
+
+@ca
+def r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han():
+    m = _tai_launcher_thu()
+    m._TRAN_DONG = 64
+    import io
+
+    class _Ong(io.BytesIO):
+        kich_thuoc = []
+
+        def readline(self, n=-1):
+            self.kich_thuoc.append(n)
+            return super().readline(n)
+
+    dai = b"x" * 200 + b"\n"
+    ong = _Ong(_R25_DONG_GIU.encode() + dai + b"sau\n" + _r25_khung("response.created", "r" * 80, "m").encode())
+    f, ket, loi, dem = io.BytesIO(), [], [], {}
+    m._loc_stderr_codex(ong, f, ket, loi, dem)
+    bang(f.getvalue() == _R25_DONG_GIU.encode(), f"dong vuot tran (hoac phan sau no) lot ra dia: {f.getvalue()!r}")
+    bang(not ket and dem.get("mat", 0) >= 1, f"khung vuot tran van duoc parse hoac khong tinh mat: {ket} {dem}")
+    bang(_Ong.kich_thuoc and all(n == 64 for n in _Ong.kich_thuoc), f"doc khong gioi han: {_Ong.kich_thuoc}")
+
+
+@ca
+def r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat():
+    m = _tai_launcher_thu()
+    khung = _r25_khung("response.created", "rk", "mk").encode()
+    _, ket, _, dem = _r25_loc(m, khung.rstrip(b"\n"))
+    bang(not ket and dem.get("mat") == 1, f"khung cut o EOF van duoc nhan: {ket} {dem}")
+    m._TRAN_DONG = 256
+    _, ket, _, dem = _r25_loc(m, b"x" * 256 + khung)
+    bang(not ket and dem.get("mat") == 1, f"khung o doan doc giua dong van duoc nhan: {ket} {dem}")
+
+
+@ca
+def r925_bo_loc_hong_xa_ong_co_gioi_han():
+    import io
+    m = _tai_launcher_thu()
+    m._TRAN_DONG = 32
+
+    class _Ong(io.BytesIO):
+        lan = 0
+        kich_thuoc = []
+
+        def readline(self, n=-1):
+            self.lan += 1
+            if self.lan > 1:
+                raise RuntimeError("ong hong")
+            return super().readline(n)
+
+        def read(self, n=-1):
+            self.kich_thuoc.append(n)
+            return super().read(n)
+
+    ong = _Ong(_R25_DONG_GIU.encode() + b"y" * 100)
+    loi = []
+    m._loc_stderr_codex(ong, io.BytesIO(), [], loi, {})
+    bang(loi == ["RuntimeError"] and ong.read() == b"", f"khong xa het ong sau khi hong: {loi}")
+    bang(_Ong.kich_thuoc[:-1] and all(n == 32 for n in _Ong.kich_thuoc[:-1]),
+         f"xa ong khong gioi han: {_Ong.kich_thuoc}")
+
+
+@ca
+def r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai():
+    import io
+    m = _tai_launcher_thu()
+
+    class _OngHong(io.BytesIO):
+        def readline(self, n=-1):
+            if self.tell():
+                raise RuntimeError("ong hong")
+            return super().readline(n)
+
+    for ten, ong, mong in [
+        ("loi_sau_khung", _OngHong(_r25_khung("response.created", "r1", "m1").encode() + b"sau\n"), "hong"),
+        ("mat_sau_khung", io.BytesIO(_r25_khung("response.created", "r1", "m1").encode()
+                                     + _r25_khung("response.completed", "", "m1").encode()), "khong doc duoc"),
+    ]:
+        ket, loi, dem, ban_ghi = [], [], {}, {}
+        lu = threading.Thread(target=m._loc_stderr_codex, args=(ong, io.BytesIO(), ket, loi, dem))
+        lu.start(); lu.join(10)
+        m._ghi_ket_qua_model(ban_ghi, lu, ket, loi, dem)
+        bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
+             and mong in (ban_ghi.get("model_phuc_vu_ly_do") or "")
+             and [x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == ["r1"], f"{ten}: {ban_ghi}")
+
+
+@ca
+def r925_ghi_ket_qua_chot_luong_TRUOC_roi_moi_chup():
+    m = _tai_launcher_thu()
+    a_ = {"response_id": "ra", "model": "m", "su_kien": "response.created"}
+    b_ = {"response_id": "rb", "model": "m", "su_kien": "response.completed"}
+    ket = [a_]
+
+    class _Luong:
+        def is_alive(self):
+            ket.append(b_)       # luong doc xong DUNG luc bi hoi
+            return False
+
+    ban_ghi = {}
+    m._ghi_ket_qua_model(ban_ghi, _Luong(), ket, [], {})
+    bang(ban_ghi.get("model_phuc_vu") == [a_, b_] and ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC",
+         f"so ghi danh sach khac voi danh sach da ket luan: {ban_ghi}")
+
+
+@ca
+def r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien():
+    m = _tai_launcher_thu()
+    k = [{"response_id": "r", "model": "m", "su_kien": "response.created"}]
+    bang(m._ket_luan_model(k, [], False) == ("DO_DUOC", None), "du dieu kien ma khong DO_DUOC")
+    for ten, doi in [("bo_loc_hong", (k, ["RuntimeError"], False)), ("ong_con_mo", (k, [], True)),
+                     ("khong_khung", ([], [], False)), ("mat_khung", (k, [], False, 1))]:
+        tt, ld = m._ket_luan_model(*doi)
+        bang(tt == "KHONG_DO_DUOC" and ld, f"{ten}: {tt} {ld}")
+
+
+@ca
+def r925_rust_log_thua_ke_bi_GHI_DE_khong_noi():
+    with San() as s:
+        env = dict(os.environ, RUST_LOG="reqwest=trace,hyper=debug")
+        r, tm, d = _r25_chay(s, _R25_DONG_GIU, env=env)
+        bang(r.returncode == 0, f"launcher rc={r.returncode}: {r.stderr}")
+        bang((tm / "stdout.log").read_text(encoding="utf-8").splitlines()[0] == "tungstenite::protocol=trace",
+             f"RUST_LOG thua ke con song: {(tm / 'stdout.log').read_text(encoding='utf-8')!r}")
+        bang(d.get("model_phuc_vu_rust_log_ke_thua_bi_ghi_de") is True, f"khong ghi so viec ghi de: {d}")
+
+
+@ca
+def r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m():
+    with San() as s:
+        r, tm, d = _r25_chay(s, _R25_DONG_GIU + _R25_KHUNG_THUA)
+        bang(r.returncode == 0, f"launcher rc={r.returncode}: {r.stderr}")
+        bang(d.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC" and d.get("model_phuc_vu") == []
+             and d.get("model_phuc_vu_ly_do"), f"khong co khung ma van ghi model: {d}")
+
+
+@ca
+def r925_khong_phai_codex_giu_nguyen_so_va_stderr():
+    with San() as s:
+        repo = tao_repo(s); rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c",
+                 f"import sys;sys.stderr.write({_r25_khung('response.created', 'r', 'm')!r})")
+        tm = next(p for p in rr.iterdir() if p.is_dir())
+        d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == 0 and not any(k.startswith(("model_phuc_vu", "stderr_bo")) for k in d),
+             f"luot khong phai codex co khoa model: {d}")
+        bang(b"Received message" in (tm / "stderr.log").read_bytes(), "stderr luot khong phai codex bi loc")
+
+
+@ca
+def r925_codex_qua_han_van_124_va_giu_khung_da_den():
+    with San() as s:
+        han = (datetime.now(timezone.utc) + timedelta(seconds=3)).isoformat()
+        r, tm, d = _r25_chay(s, _r25_khung("response.created", "resp_q", "gpt-6-astra"), sau="time.sleep(60)",
+                             them=("--deadline-utc", han))
+        bang(r.returncode == MA_QUA_HAN, f"mong doi {MA_QUA_HAN}, duoc {r.returncode}: {r.stderr}")
+        bang([m["response_id"] for m in d.get("model_phuc_vu", [])] == ["resp_q"], f"mat khung truoc khi giet: {d}")
+
+
+@ca
+def r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC():
+    if LA_WINDOWS:
+        return "bo qua tren Windows (chau thua ke handle stderr can fixture rieng; duong POSIX do o CI ubuntu)"
+    with San() as s:
+        sau = ("import subprocess;q=subprocess.Popen([sys.executable,'-c','import time;time.sleep(40)']);"
+               "print('CHAU',q.pid,flush=True)")
+        t0 = time.monotonic()
+        r, tm, d = _r25_chay(s, _r25_khung("response.created", "rc", "gpt-6-astra"), sau=sau)
+        mat = time.monotonic() - t0
+        for dong in (tm / "stdout.log").read_text(encoding="utf-8").splitlines():
+            if dong.startswith("CHAU "):
+                with contextlib.suppress(OSError):
+                    os.kill(int(dong.split()[1]), 9)
+        bang(r.returncode == 0 and mat < 35, f"launcher treo theo chau giu ong: rc={r.returncode} {mat:.1f}s")
+        bang(d.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC" and "con mo" in (d.get("model_phuc_vu_ly_do") or ""),
+             f"ong con mo ma van DO_DUOC: {d.get('model_phuc_vu_trang_thai')} {d.get('model_phuc_vu_ly_do')}")
+
+
+@ca
+def r925_bo_loc_hong_thi_ghi_loi_va_xa_ong_khong_ghi_dong_chua_loc():
+    import io
+    m = _tai_launcher_thu()
+
+    class _Hong:
+        def __init__(self):
+            self.da_ghi = []
+
+        def write(self, b):
+            self.da_ghi.append(b)
+            raise RuntimeError("dia hong")
+
+    ong = io.BytesIO(_R25_DONG_GIU.encode() + _r25_khung("response.created", "r", "m").encode()
+                     + _R25_DONG_GIU.encode())
+    f, ket, loi = _Hong(), [], []
+    m._loc_stderr_codex(ong, f, ket, loi)
+    bang(loi == ["RuntimeError"], f"loi bo loc khong duoc ghi: {loi}")
+    bang(ong.read() == b"", "ong chua duoc xa het: con co the treo vi ong day")
+    bang(f.da_ghi == [_R25_DONG_GIU.encode()], f"sau khi hong van ghi tiep: {f.da_ghi}")
+
+
 @ca
 def r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO():
     with San() as s:
@@ -10075,6 +10388,55 @@ def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
 
 
 DOT_BIEN = [
+    # wp748 r25: mỗi chốt đo model phục vụ một đột biến gỡ đúng chốt của nó.
+    # wp748 r25 vòng 3: mỗi chốt của bộ lọc danh-sách-CHO-PHÉP-NGUYÊN-VĂN một đột biến riêng.
+    ("r25_ghi_moi_dong_tron", ('if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:', 'if ca_dong:'), ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat", "r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
+    ("r25_cho_phep_theo_tien_to", ('if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:',
+                                   'if ca_dong and dong.startswith(_STDERR_CHO_PHEP):'), ["r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
+    ("r25_cho_phep_ca_dong_cut", ('if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:',
+                                  'if dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:'), ["r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
+    ("r25_bo_go_ansi", ('        sach = _RE_ANSI_B.sub(b"", dong)\n', '        sach = dong\n'), ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r25_khung_moi_target", ('TRACE\\s+tungstenite::protocol: Received message', 'TRACE\\s+\\S+: .*?Received message'),
+     ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r25_moi_su_kien", ('if not (isinstance(r, dict) and ev.get("type") in _SU_KIEN_KHUNG):',
+                         'if not isinstance(r, dict):'), ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r25_nhan_id_model_rong", ('if not (isinstance(rid, str) and rid.strip() and isinstance(mdl, str) and mdl.strip()):',
+                                'if not (isinstance(rid, str) and isinstance(mdl, str) and mdl):'), ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r25_gop_theo_id", ('elif not any(x["response_id"] == m["response_id"] and x["model"] == m["model"] for x in ket):',
+                         'elif not any(x["response_id"] == m["response_id"] for x in ket):'), ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r25_bo_dem_mat", ('                dem["mat"] = dem.get("mat", 0) + 1\n', '                pass\n'), ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien", "r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat", "r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han"]),
+    ("r25_parse_khong_can_ca_dong", ('        m = _nhan_khung(sach) if ca_dong else None\n', '        m = _nhan_khung(sach)\n'),
+     ["r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat"]),
+    ("r25_doc_khong_tran", ('    for dong in iter(lambda: ong.readline(_TRAN_DONG), b""):',
+                            '    for dong in iter(ong.readline, b""):'), ["r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han"]),
+    ("r25_xa_ong_khong_tran", ('            for _ in iter(lambda: ong.read(_TRAN_DONG), b""):',
+                               '            for _ in iter(ong.read, b""):'), ["r925_bo_loc_hong_xa_ong_co_gioi_han"]),
+    ("r25_noi_rust_log_thua_ke", ('        env["RUST_LOG"] = _RUST_LOG_DO_MODEL\n',
+                                  '        env["RUST_LOG"] = (rust_log_cu + "," if rust_log_cu else "") + _RUST_LOG_DO_MODEL\n'),
+     ["r925_rust_log_thua_ke_bi_GHI_DE_khong_noi"]),
+    ("r25_khong_bat_trace", ('_RUST_LOG_DO_MODEL = "tungstenite::protocol=trace"', '_RUST_LOG_DO_MODEL = "warn"'), ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat"]),
+    ("r25_DO_DUOC_khi_loc_hong", ('    if loi:\n        return "KHONG_DO_DUOC"', '    if False:\n        return "KHONG_DO_DUOC"'),
+     ["r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien", "r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai"]),
+    ("r25_DO_DUOC_khi_ong_con_mo", ('    if con_doc:\n', '    if False:\n'),
+     ["r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien", "r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC"]),
+    ("r25_DO_DUOC_khi_mat", ('    if mat:\n', '    if False:\n'), ["r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien", "r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai"]),
+    ("r25_DO_DUOC_khong_khung", ('    if not ket:\n        return "KHONG_DO_DUOC"', '    if False:\n        return "KHONG_DO_DUOC"'),
+     ["r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien", "r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m"]),
+    ("r25_so_khong_chuyen_loi", ('tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))',
+                                 'tt, ld = _ket_luan_model(ket_s, [], con_doc, dem_s.get("mat", 0))'), ["r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai"]),
+    ("r25_so_khong_chuyen_mat", ('tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))',
+                                 'tt, ld = _ket_luan_model(ket_s, loi_s, con_doc)'), ["r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai"]),
+    ("r25_chup_truoc_chot_luong", ('    con_doc = luong is not None and luong.is_alive()\n    ket_s, loi_s, dem_s = list(ket), list(loi), dict(dem)\n',
+                                   '    ket_s, loi_s, dem_s = list(ket), list(loi), dict(dem)\n    con_doc = luong is not None and luong.is_alive()\n'),
+     ["r925_ghi_ket_qua_chot_luong_TRUOC_roi_moi_chup"]),
+    ("r25_doc_ong_khong_han", ('            luong_loc.join(timeout=10)\n', '            luong_loc.join()\n'),
+     ["r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC"]),
+    ("r25_bo_loc_hong_khong_xa_ong", ('            for _ in iter(lambda: ong.read(_TRAN_DONG), b""):\n                pass\n', '            pass\n'),
+     ["r925_bo_loc_hong_thi_ghi_loi_va_xa_ong_khong_ghi_dong_chua_loc"]),
+    ("r25_bo_loc_hong_khong_ghi_loi", ('        loi.append(type(e).__name__)\n', ''),
+     ["r925_bo_loc_hong_thi_ghi_loi_va_xa_ong_khong_ghi_dong_chua_loc"]),
+    ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
+     ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.
     ("wp802_bo_nhanh_BI_CHE", ('        if thay is not None and hong_dau is not None:', '        if False:'),
      ["r802_doctor_rg_tran_hong_la_BI_CHE", "r802_doctor_git_tran_hong_la_BI_CHE"]),

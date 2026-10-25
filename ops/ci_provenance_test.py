@@ -1035,10 +1035,10 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
     sai = [(ten, kq, mong) for ten, f, mong in hang if (kq := gh(f)) != mong]
     try:
         kieu = [m.ten_du_kien(s) for s in ({"run": 5}, {"uses": None}, {}, {"run": ["a"]})] + \
-            [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n")]
+            [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n", "[" * 5000 + "]" * 5000)]   # lồng sâu ⇒ RecursionError
     except Exception as e:   # ném ra ngoài CHÍNH LÀ điều vế này đo
         kieu = type(e).__name__
-    bang(not sai and not khoi_mau and kieu == [None] * 8,
+    bang(not sai and not khoi_mau and kieu == [None] * 9,
          f"{len(sai)}/{len(hang)} hàng lệch M4/dinh_nghia: {sai[:2]} · khối màu ra marker: {khoi_mau} · kiểu lạ: {kieu}")
 
 @ca
@@ -1468,6 +1468,9 @@ def _toan_tu(n):   # bảng toán tử CỐ ĐỊNH của tập đóng: (tên, h
             yield f"bo_doi_so{k}", lambda x, k=k: x.args.pop(k)
     elif isinstance(n, ast.Return) and n.value is not None:
         yield "tra_None", lambda x: setattr(x, "value", ast.Constant(None))
+    elif isinstance(n, ast.ExceptHandler) and isinstance(n.type, ast.Tuple):   # lượt 8 P2: bỏ TỪNG lớp ngoại lệ được bắt
+        for k in range(len(n.type.elts)):
+            yield f"bo_ngoai_le{k}", lambda x, k=k: x.type.elts.pop(k)
 
 def sinh_dot_bien_dong(src):
     """TẬP ĐÓNG (quyết định chủ kho #899 sau lượt 7): MỌI đột biến bậc một của MỌI nút trong `HAM_DONG` theo `_toan_tu`, trừ

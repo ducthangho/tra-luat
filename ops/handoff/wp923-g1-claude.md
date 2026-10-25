@@ -56,7 +56,7 @@ từng khối quanh mọi `timeout-minutes:` cấp job. Giá trị trên base: `
   Codex đo độc lập (ba clone riêng, TMPDIR riêng) ra cùng delta, nhưng dòng tổng 32/33/32 vì **t15 ra `KHONG DO DUOC`**
   (*"khong dung duoc tep khong xoa duoc tren nen nay"*) ở cả ba vế của lượt Codex, còn lượt phiên này t15 ĐẠT ở cả ba.
   Không ảnh hưởng delta; ghi để người sau khỏi đọc 32/36 với 33/36 thành hồi quy — t15 phụ thuộc môi trường chạy.
-- **N5 CHƯA XONG** — xem mục cuối.
+- **N5 ĐẠT** — xem mục cuối.
 - **N6 ĐẠT.** `python3 -B .claude/dev/ci_dang_ky_test.py` (không `--chay`, không sửa) trên head: rc=0, `PHẢN CHỨNG:
   1070/1070 đỏ đúng`, `TỔNG: ĐẠT`.
 
@@ -83,6 +83,10 @@ Một lượt phóng TRƯỚC đó bị launcher chặn `CHAN [11]` (clone revie
 - `git rev-parse --is-shallow-repository` = `true` lúc mở phiên; đã `fetch --unshallow` trước mọi phép so lịch sử.
 - Pha B (chú thích `.claude/dev/ci_dang_ky_test.py:755`/`:804`) KHÔNG làm — tệp do `wp899-r4-g3-claude` giữ.
 
-## N5 — CI lượt PR (đo 25-10-2026 ~05:10Z, check run trên `7574c39`, không `get_status`)
-Run `40163483016`: 25 check run — 14 `success`, 1 `skipped` (`launcher`, có `paths:`), 10 `in_progress`
-(`gate-cong-cu` ×8, `gate-registry`, `gate-packet-loop`); 0 đỏ. **Chưa xanh** — cập nhật khi run xong.
+## N5 — CI lượt PR — ĐẠT (đo 25-10-2026 05:34Z, check run trên `7574c39`, không `get_status`)
+Workflow `gate` run `40163483016`, `head_sha 7574c39`, `completed/success` (04:52:42Z → 05:33:54Z). Check run trên head:
+26 — 25 `success`, 1 `skipped` (`launcher` của `launcher-windows.yml`, có `paths:`, không đụng). PR #924
+`mergeable_state: clean`. Nền đo: chỉ `ubuntu-latest` (nhãn job) — KHÔNG có lượt Windows; t9 là ca PowerShell nên
+bằng chứng PowerShell của packet là N4 (pwsh 7.4.6 trên Linux), không phải CI.
+Master tiến lên `0dbb4c2` (#922, chỉ thêm 10 tệp `ops/land/`, merge thử sạch) trong lúc chạy; KHÔNG merge vào nhánh
+vì không đụng write set và sẽ làm mất neo verdict `7574c39`.

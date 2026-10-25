@@ -1,0 +1,104 @@
+# HO SO LAND — ba dac ta no P3-b (#751 r4, #752 r4, #763 r2), ma qua PR #908. Khuon: ops/land/pr913-wp910-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
+# NHAN: measured = do trong phien ghi so (tep kem); thuat_lai = so cua luot review, KHONG tai chay; not_measured = khong do duoc.
+# Readback tho: ops/land/pr908-no-p3-spec-r4-provenance/ (GET qua proxy phien bang GITHUB_PAT, script readback.py + kiemgate.py
+# kem trong do-lai-nguon-20261024/; SHA256SUMS kem).
+# PR nay chi them DAC TA (ops/specs/), khong ma san pham, khong lease (nhanh dac ta la so sach — ADR-0054 muc 1, Pham vi).
+# landed FALSE, hai ly do doc lap (cung tien le #910/#906):
+#   (A) §8.1 — review offline la Claude Sonnet 5.5 subagent (cung nha cung cap voi executor du kien): toi da same_provider_approved;
+#       connector Codex sach tren head cuoi nhung ho model phuc vu KHONG_DO_DUOC.
+#   (B) §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition · Gate output chua do (GraphQL 403).
+# TEP VERDICT/HINT GOC CUA CAC LUOT REVIEW OFFLINE DA MAT cung container cu (scratchpad bi thay moi 2026-10-24); chi con bam
+# ghi trong cac muc "Va sau review luot N" cua chinh ba dac ta tren master. Chu kho chon "bookkeeping rut gon" trong phien.
+
+schema_version: 1
+mission_id: gh-751-752-763
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
+input_packet_generations:
+  - {packet_issue: 751, packet_id: no-p3-lease-spec-hash, revision: 4, generation: null, lease_id: null}
+  - {packet_issue: 752, packet_id: no-p3-cong-cu-ho-so, revision: 4, generation: null, lease_id: null}
+  - {packet_issue: 763, packet_id: no-p3-dang-ky-ci, revision: 2, generation: null, lease_id: null}
+authorized_head_sha: 77d4e0aa8412140a8198c9d6615537c95161ccbd
+authorized_head_tree: 5ada6a0e6caa17754877da8c87a8364cb9862006
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/908
+authorization_ghi_chu: >-
+  measured — readback-pr-908.json merged_by=ducthangho, merged_at 2026-10-24T16:22:50Z. Quyet dinh noi dung cua chu kho neo o
+  readback-comment-6366519792.json (#752); readback-comment-6378100710.json la BAN TRUNG cung than (sha256 than nhu nhau, do trong
+  phien truoc khi ghi so). Thao tac merge la cua tai khoan chu kho; KHONG_DO_DUOC bam tay hay qua phien khac.
+land_operator: 'measured — readback-pr-908.json merged_by=ducthangho; readback-events-908.json (su kien merged/closed).'
+merge_method: merge
+merge_commit: 50a59a945026a2ab2f97dc0e7ef7b5a540e17652
+merge_commit_tree: a02b8fb976a341b0489db1dfa3b9235bf7e9cf14
+merge_commit_parents: [57b444e124e84969aadead07ccd10eb51de0d55c, 77d4e0aa8412140a8198c9d6615537c95161ccbd]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261024/merge-va-diff.txt: diff cha1 (57b444e) .. merge bang BYTE diff merge-base (dc65714) .. head
+  77d4e0a (cmp rc=0), 3 tep them: no-p3-lease-spec-hash-r4.md 759/0, no-p3-cong-cu-ho-so-r4.md 675/0, no-p3-dang-ky-ci-r2.md 505/0.
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) — head cuoi', run_id: 40083613501, run_attempt: 1, sha: 77d4e0aa8412140a8198c9d6615537c95161ccbd, conclusion: success, jobs: '23 job khong skipped', kiem_gate: 'measured — do-lai-nguon-20261024/kiem-gate-pre-77d4e0a.txt: suite 108647286881, 23 ten, rc=0', nguon: [readback-run-40083613501.json, readback-jobs-40083613501.json, readback-check-runs-77d4e0a-all.json]}
+  - {name: 'ci.yml pull_request (ubuntu) — head dau', run_id: 40080764968, run_attempt: 1, sha: fda9c91195179fcc1295db6951d197b9f51440ce, conclusion: success, ghi_chu: 'measured — readback-run-40080764968.json; readback-check-runs-fda9c91-all.json. Head ay bi thay bang 77d4e0a sau finding Codex.'}
+  - {name: 'connector Codex GitHub tren fda9c91', conclusion: '1 finding P2 (trich dan rut gon bang dau luoc, #751 dong 58) — da va ca hang o 77d4e0a, thread da resolve', nguon: [readback-reviews-908.json, readback-review-comments-908.json]}
+  - {name: 'connector Codex GitHub tren 77d4e0a', conclusion: 'khong finding', nguon: [readback-comment-6382772266.json, readback-comment-6382356439.json], ghi_chu: 'measured — readback-comment-6382772266.json chua dong Reviewed commit 77d4e0aa84; readback-comment-6382356439.json ghi has_any_findings false cho 77d4e0a.'}
+  - {name: 'review offline (Claude Sonnet 5.5 subagent review-sonnet-max)', conclusion: '#751 r4 luot 26 approve 0/0/0 · #752 r4 luot 14 approve 0/0/0 · #763 r2 luot 19 approve 0/0/1', ghi_chu: 'thuat_lai — tep VERDICT goc da mat cung container cu; chuoi cac luot co ghi bam nam trong chinh ba dac ta: measured — do-lai-nguon-20261024/chuoi-review.txt (trich bang chuoi_review.py tu 50a59a9). Bam VERDICT luot approve cuoi KHONG ghi trong dac ta: #751 l26 05f75d22…, #752 l14 3fb38c62…, #763 l19 a533f37e… (thuat_lai, KHONG_DO_DUOC lai).'}
+  - {name: 'dieu kien kich thuoc', conclusion: '3 tep, +1939 -0, toan bo duoi ops/specs/', nguon: [readback-pr-908.json, do-lai-nguon-20261024/merge-va-diff.txt]}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40111291107, run_attempt: 1, sha: 50a59a945026a2ab2f97dc0e7ef7b5a540e17652, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', luc: '2026-10-24T16:22:53Z -> 2026-10-24T17:32:32Z', kiem_gate: 'measured — do-lai-nguon-20261024/kiem-gate-post-50a59a9.txt: suite 108721939525, 23 ten, rc=0', nguon: [readback-run-40111291107.json, readback-jobs-40111291107.json, readback-check-runs-50a59a9-all.json], ghi_chu: 'Chi la moc Run cua §10.2.2. Moc Checkout, Workflow definition, Gate output: not_measured — log job/artifact khong luu; GraphQL WorkflowRun.file 403 trong phien.'}
+bookkeeping:
+  - {item: 'quyet dinh chu kho (nang_tran #752, cho #748 = da merge, neo nen 1d7e642, B3 vi tu)', ket_qua: 'measured — readback-comment-6366519792.json tren #752'}
+  - {item: 'ban trung cua quyet dinh', ket_qua: 'measured — readback-comment-6378100710.json (cung than voi 6366519792)'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-908-land}
+# ---- het truong chuan
+packet_id: [no-p3-lease-spec-hash, no-p3-cong-cu-ho-so, no-p3-dang-ky-ci]
+packet_issue: [751, 752, 763]
+pham_vi_land: dac_ta
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT — CUNG phien soan va dieu phoi review ba dac ta.
+  Ghi so theo lua chon cua chu kho trong phien ("Bookkeeping rut gon").
+
+spec:
+  no-p3-lease-spec-hash-r4: {path: ops/specs/no-p3-lease-spec-hash-r4.md, sha256: 40c88b13806e285b1d85961ed9ff99ed89ed2108cdca94d0d8dd6177de0530fd}
+  no-p3-cong-cu-ho-so-r4: {path: ops/specs/no-p3-cong-cu-ho-so-r4.md, sha256: a98d09e86e32ee249668aaa114aed43e8a982e8bd7f9ef81fe61aa6a2a168791}
+  no-p3-dang-ky-ci-r2: {path: ops/specs/no-p3-dang-ky-ci-r2.md, sha256: 30776483ab40e57708c6b03ba0877bc3f40dd27edf334e7dceb0fe5629a113e2}
+  do_lai: 'measured — do-lai-nguon-20261024/spec-sha256.txt (doc tai 50a59a9; ca ba khop bam ban duyet).'
+lease:
+  ghi_chu: >-
+    Khong lease: PR chi them dac ta (so sach). Thuc thi tung packet can lease rieng; luc cap phai do lai depends_on cua
+    tung dac ta (#751 depends_on (3) da kich hoat boi PR #895; .claude/dev/ci_dang_ky_test.py dang bi lease khac giu).
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-908.json: merged true, merged_at 2026-10-24T16:22:50Z, merge_commit_sha 50a59a9, head.sha 77d4e0a.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 50a59a9: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow
+    definition, Gate output cua §10.2.2 not_measured. (2) lease: khong ap dung (khong lease). (3) bookkeeping: ho so nay DAT.
+    (4) review approve neo DUNG 77d4e0a: connector Codex khong finding; review offline same_provider; assurance §8.1 CHUA DAT.
+    (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
+assurance_81:
+  reviewer_assurance_81: CHUA DAT
+  ly_do: >-
+    Review offline cung ho model voi executor du kien (Claude) => toi da same_provider_approved. Connector Codex tren 77d4e0a sach
+    (measured — readback-comment-6382772266.json) nhung ho model phuc vu cua connector KHONG_DO_DUOC.
+  dieu_kien_mo_lai: >-
+    (A) `cross_approved` voi ho model reviewer duoc xac lap khac `claude` tren DUNG 77d4e0a; HOAC (B) `human_audited` neo dung SHA
+    ay. Cong them du bon moc §10.2.2 cho gate hau merge 50a59a9.
+
+no_co_ten:
+  - {ma: no-p3-751-r4-luot25-p3, trang_thai: mo, ghi_chu: '#751 luot 25: 2 P3 ve van xuoi mo ta bo do ngoai kho (thieu ten/bam hai script do; dang P5 chi bat so >= 2 chu so).'}
+  - {ma: no-p3-751-r4-luot26-quan-sat, trang_thai: mo, ghi_chu: '#751 luot 26: bo do moc moc_tu_spec.py do tren toan tep vi muc va moi; mot span backtick co dau luoc o dong 57; cum "nguyen van du" dong 757 hoi rong.'}
+  - {ma: no-p3-763-r2-luot19-git-grep, trang_thai: mo, ghi_chu: '#763 luot 19: 4 lenh git grep thieu cay/pathspec ngay trong lenh (so tai lap duoc tu loi van quanh lenh).'}
+  - {ma: no-p3-spec-dong-trong-cuoi-tep, trang_thai: mo, ghi_chu: 'git diff --check: "new blank line at EOF" o #752 va #763 (phan cu); cac phep dem awk trong dac ta da tinh dong ay nen giu nguyen.'}
+  - {ma: no-p3-review-offline-mat-tep, trang_thai: mo, ghi_chu: 'Tep VERDICT/HINT cua cac luot review offline (#751 l17-26, #752 l7-14, #763 l14-19) mat cung container cu; chi con bam trong dac ta. Bai hoc: chep VERDICT vao kho (ops/reviews/) ngay sau moi luot, khong de o scratchpad.'}
+khong_do_duoc:
+  - 'Tep VERDICT/HINT goc cua review offline: MAT (container cu bi thay moi); bam chi doc duoc tu dac ta.'
+  - 'Ho model phuc vu cua connector Codex GitHub: KHONG_DO_DUOC.'
+  - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
+  - 'Provenance CI §10.2.2 cua gate hau merge (Checkout, Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403, log/artifact khong luu.'

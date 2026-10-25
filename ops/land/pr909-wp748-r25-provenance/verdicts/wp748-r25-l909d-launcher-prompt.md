@@ -1,0 +1,19 @@
+# Independent read-only review with execution receipt — WP748 r25/g25, PR #909, round 2
+
+You are an independent reviewer (OpenAI Codex), invoked through `launcher.py run` (execution receipt). Do NOT edit `src/`, commit, push, comment on GitHub, or use credentials. Scratch via `mktemp -d` here is fine. Write `VERDICT.md` in THIS directory, incrementally (create it early, update as you go).
+
+Identity (verify first; stop with `VERDICT: blocked` if different): `./src` detached at `aaad9ab95ab170df4083e0c8203a88b5bd3b35a9`, tree `32b6a4394edcee06c3674904b512469f2030c17b`. Lease base `1c20f3bd6a7ed08114feaf1d91c0790360b8f581`; review delta base is master merge-base `e739ac1b74024a20949425c447fb6cf025317c0e`. Review Class `sensitive`.
+
+Delta: `git -C src diff e739ac1b74024a20949425c447fb6cf025317c0e aaad9ab95ab170df4083e0c8203a88b5bd3b35a9` — exactly `.claude/dev/launcher.py` and `.claude/dev/launcher_test.py` (verify). Round-2 change only: `git -C src diff 83d305fbf63d5978189a9796141e3d547a46b2c6 aaad9ab95ab170df4083e0c8203a88b5bd3b35a9`. Spec: `ops/specs/wp748-r25-launcher-model-phuc-vu.md` — look on `master` first; if absent `git -C src show origin/ops/wp748-r25-g25-lease:ops/specs/wp748-r25-launcher-model-phuc-vu.md`; the identifier is sha256 `5f85d350bc78a28693b1cb095bfa2fa62353975c3ba0e714a2a59c6e8e4dafa3`, not the branch. Authority: #748 issuecomment-6378484722.
+
+Round 1 verdict (your previous run, on `83d305f`): `./VERDICT_ROUND1.md` — findings R25-SEC-01 (P1), R25-MEAS-02, R25-TEST-03, R25-ROBUST-04 (P2). The executor's response, in the commit message of `aaad9ab`: the filter is now an ALLOW-list — only bytes BEFORE the first log sign reach `stderr.log`; after that it LOCKS for the rest of the stream (counts recorded as `stderr_bo_dong`/`stderr_bo_byte`); inherited `RUST_LOG` is REPLACED; frames accepted only from complete lines matching the exact target/position regex; bounded `readline`; `_ket_luan_model` requires frames + no filter error + reader reached EOF. Executor measurements (re-run what you can; do not trust): launcher_test 268/268 (2 Windows-only skips), 19/19 `r25_*` mutants killed by `TinHieuChotCa`; a real codex run had `DO_DUOC`, stderr.log 39 bytes, 305 lines/554182 bytes dropped, secret scan clean.
+
+Note on spec wording: the spec says non-trace lines still go to `stderr.log`; the new design is STRICTER (lines after the first log sign are dropped even if non-trace). Judge whether that is an acceptable tightening or a contract violation, and say which.
+
+Tasks (security first):
+1. For EACH round-1 finding: is it closed on `aaad9ab`? Measure (rc + output), do not just read. Then look for what round 1 did not list: any remaining path by which trace/credential content reaches disk (pre-lock lines, the lock trigger, partial lines, CR-only line endings, `\r` without `\n`, oversized first line, encoding, the error-drain path, writes after `f_err.close()`), and any path to `DO_DUOC` without positive, complete evidence. Do NOT author new exploit payloads; describe a direction in words if it needs new attack content.
+2. No regression: timeout/kill (124/125), Windows (`creationflags`, Job Object, `codex.cmd`, CRLF), non-codex runs unchanged, `stderr_byte`/`stderr_sha256` semantics, the 10 s join on a grandchild-held pipe.
+3. Tests: run every `r925_*` case (`python3 src/.claude/dev/launcher_test.py --lap-ca <name> --lan 1`) and the `r25_*` mutants (apply each replacement to a TEMP COPY of launcher.py only). Any guard still without a mutant?
+4. Size vs ADR-0053 sensitive ceiling (≤ 6 files, ≤ 450 added lines vs base).
+
+`VERDICT.md`: reviewer identity (as runtime reports; say what you cannot verify), reviewed SHA + tree, UTC; per-round-1-finding status; new findings ID/severity/`file:line`/scenario/fix; commands with rc and N/N. Last line exactly one of `VERDICT: approve` (zero P0/P1/P2) · `VERDICT: changes_requested` · `VERDICT: blocked`.

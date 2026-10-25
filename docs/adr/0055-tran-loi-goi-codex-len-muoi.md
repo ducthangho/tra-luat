@@ -49,9 +49,19 @@ Trần **mười** áp **khi và chỉ khi** đặc tả có **đúng một** d�
 | đúng một, hợp lệ | có nhưng không hợp lệ theo `ADR-0052` (trùng, sai mẫu, sai phép đo) | **hai** |
 | hai dòng trở lên, hoặc sai mẫu, hoặc một phép đo `rc` sai, hoặc **không đo được** | bất kỳ | **hai** |
 
-Hai luật giữ cho bảng **bảo thủ**: thêm một dòng khai, dù đúng hay sai, không bao giờ làm trần **tăng**; và
-đặc tả không nhắc `ADR-0055` thì kết quả y hệt trước ADR này. Hàng thứ ba là luật *"trần chạm trước thắng"*
-của `ADR-0043` áp cho hai khai báo trên cùng một trục.
+Bảng **bảo thủ** theo đúng ba nghĩa sau, và chỉ ba nghĩa ấy:
+
+1. Thêm một dòng khai `ADR-0055` **không hợp lệ** (trùng, sai mẫu, sai phép đo, không đo được) không bao giờ
+   làm trần tăng.
+2. Đặc tả đã chọn **tám** hoặc **mười**: thêm bất kỳ dòng khai nào, đúng hay sai, của ADR nào, không làm trần
+   tăng — nó giữ nguyên hoặc xuống.
+3. Đặc tả không có dòng khai `ADR-0055` nào thì kết quả y hệt trước ADR này, kể cả cách `ADR-0052` so khớp
+   nguyên văn dòng khai của nó.
+
+Trần **chỉ** đi lên khi người soạn thêm một dòng opt-in **hợp lệ** vào đặc tả đang ở trần thấp hơn: từ hai lên
+mười bằng đúng một dòng `ADR-0055`, hoặc từ hai lên tám theo luật của `ADR-0052`. Đó là chủ đích của opt-in,
+không phải lỗ. Hàng thứ ba của bảng là luật *"trần chạm trước thắng"* của `ADR-0043` áp cho hai khai báo trên
+cùng một trục.
 
 Không hồi tố: ADR này **không** sửa `ADR-0036`, `ADR-0037`, `ADR-0038`, `ADR-0041`, `ADR-0048`,
 `ADR-0052` hay đặc tả đóng băng nào. Đặc tả đã đóng băng mà muốn trần mười phải sửa thành revision mới

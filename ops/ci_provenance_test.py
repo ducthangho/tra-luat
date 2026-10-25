@@ -921,6 +921,68 @@ def c50_mien_luot6():   # F10 lượt 6: miền tên job · hình dạng REST ·
     bang(not sai, f"{len(sai)}/{len(hang)} hàng lệch định nghĩa: {sai[:3]}")
 
 @ca
+def c51_mien_luot7():   # F10 lượt 7: Unicode · lịch biên · metadata · env giá trị/khoá · nguồn chặn · NỘI DUNG bằng chứng · cấu trúc log
+    dd = lambda p: [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]  # noqa: E731
+    ok, b, c_gio, M3 = [("passed", None)], buoc(X, "THU: 4/4 dat"), "c_gio_header_ngoai_cua_so", ["START", "THU: 4/4 dat", "END"]
+    def gio(tem=T, sua=None):
+        return g1(wf_tu(X), [d.replace(T, tem) for d in b], sua=(lambda st: st[2].update(sua)) if sua else None)
+    def moi(*ra, mau):   # MOI regex nhiều dòng: đo NỘI DUNG + THỨ TỰ phần log, không chỉ trạng thái
+        return g1(wf_tu(X), buoc(X, *ra), them={DUONG_GIA: mau})
+    def post_dau(st):   # bước `Post …` mang number NHỎ NHẤT: lọc theo TÊN, không theo vị trí số
+        hau = next(x for x in st if x["name"].startswith("Post "))
+        for x in st:
+            x["number"] += 1
+        hau["number"] = 1
+    w_tr = yaml.safe_load(wf_tu("echo GITHUB_ENV", X))
+    w_tr["jobs"]["j"]["steps"][1]["uses"] = "./a"   # bước trước có CẢ uses: lẫn run: — nguồn chặn là run:
+    b_rong, b_shell2, b_ansi = b[:3] + [f"{T} "] + b[3:], b[:3] + [f"{T} shell: /other"] + b[3:], b[:3] + [f"{T} \x1b[31mNOTE\x1b[0m"] + b[3:]
+    hang = (("alias job Unicode", lambda: g1(wf_job(j=({"name": "Xây dựng"}, None)), b, ten="Xây dựng"), "passed", ok, None),
+            ("name: bước Unicode", lambda: g1(wf_tu(X, buoc_them={"name": "Xây dựng"}), b), "passed", ok, None),
+            ("hậu tố ma trận có dấu chấm", lambda: g1(wf_tu(X), b, ten="j (ubuntu-24.04)"), "passed", ok, None),
+            ("cửa sổ qua năm", lambda: gio("2026-12-31T23:45:04.8553236Z", {"started_at": "2026-12-30T00:00:00Z",
+                                                                          "completed_at": "2027-01-02T00:00:00Z"}), "passed", ok, None),
+            ("29/2/2000 (nhuận thế kỷ)", lambda: gio("2000-02-29T23:45:04.8553236Z"), "passed", ok, None),
+            ("năm 9999", lambda: gio("9999-12-31T23:45:04.8553236Z"), "passed", ok, None),
+            ("năm 0001", lambda: gio("0001-01-01T23:45:04.8553236Z"), "passed", ok, None),
+            ("cửa sổ cùng giờ, khác ngày", lambda: gio(sua={"started_at": "2026-10-20T23:45:04Z", "completed_at": "2026-10-21T23:45:04Z"}), c_gio, [], None),
+            ("giờ REST có khoảng trắng cuối", lambda: gio(sua={"started_at": "2026-10-19T23:45:04Z "}), c_gio, [], None),
+            ("giờ REST chữ số toàn chiều rộng", lambda: gio(sua={"started_at": "２０２６-10-19T23:45:04Z"}), c_gio, [], None),
+            ("giờ REST chữ số Ả Rập", lambda: gio(sua={"completed_at": "2026-10-19T23:45:0٤Z"}), c_gio, [], None),
+            ("29/2/1900 (không nhuận) ở REST", lambda: gio("1900-03-01T23:45:04.8553236Z", {"started_at": "1900-02-29T23:45:04Z"}), c_gio, [], None),
+            ("metadata không có giờ", lambda: g1(wf_tu(X), b, sua=lambda st: [x.update(started_at=None, completed_at=None) for x in st
+                                                                         if x["name"] in ("Set up job", "Complete job") or x["name"].startswith("Post ")]), "passed", ok, None),
+            ("bước Post có number nhỏ nhất", lambda: g1(wf_tu(X), b, sua=post_dau), "passed", ok, None),
+            ("env CI_DANG_KY_X: null", lambda: g1(wf_tu(X, job_them={"env": {"CI_DANG_KY_X": None}}), b), "passed", CHAN, None),
+            ("env khoá rỗng", lambda: g1(wf_tu(X, job_them={"env": {"": "abc"}}), b), "passed", ok, None),
+            ("env khoá Unicode", lambda: g1(wf_tu(X, job_them={"env": {"VIỆT": "abc"}}), b), "passed", ok, None),
+            ("bước trước uses:+run: nhắc GITHUB_ENV", lambda: g1(yaml.safe_dump(w_tr), buoc("echo GITHUB_ENV"), b), "passed", CHAN, None),
+            ("dòng khớp nhiều dòng giữ nguyên thứ tự", lambda: moi(*M3, mau=r"^START\nTHU: (\d+)/(\d+) dat\nEND$"), "passed", ok,
+             lambda p: [x["dong_khop"] for x in gate(p)["dau_duong"]] == [M3]),
+            ("dòng trống trong output", lambda: moi("START", "", "THU: 4/4 dat", "END", mau=r"^START\n\nTHU: (\d+)/(\d+) dat\nEND$"), "passed", ok, None),
+            ("output kết thúc bằng LF", lambda: moi("THU: 4/4 dat", mau=r"^THU: (\d+)/(\d+) dat\n\Z"), "passed", ok, None),
+            ("dòng output trùng", lambda: moi("START", "START", "THU: 4/4 dat", mau=r"^START\nSTART\nTHU: (\d+)/(\d+) dat$"), "passed", ok, None),
+            ("dòng ##[group] trong output", lambda: moi("##[group]details", "THU: 4/4 dat", mau=r"^##\[group\]details\nTHU: (\d+)/(\d+) dat$"), "passed", ok, None),
+            ("lenh/duong_dan của đúng bước", lambda: g1(wf_tu(X), b), "passed", ok,
+             lambda p: [(x["lenh"], x["duong_dan"]) for x in gate(p)["dau_duong"]] == [(X, DUONG_GIA)]),
+            ("hai bước cùng script, hai kết quả", lambda: g1(wf_tu(X, X), b, buoc(X, "THU: 3/4 dat")), "passed", ok + [("failed", None)], None),
+            ("marker có khoảng trắng cuối", lambda: g1(wf_tu(X), buoc(X, "THU: 4/4 dat  ")), "passed", [("failed", None)], None),
+            ("dòng rỗng sau shell:", lambda: g1(wf_tu(X), b_rong), "passed", ok, None),
+            ("shell: thứ hai", lambda: g1(wf_tu(X), b_shell2), "passed", ok, None),
+            ("metadata có ANSI khác sau shell:", lambda: g1(wf_tu(X), b_ansi), "passed", ok, None),
+            ("không có output", lambda: g1(wf_tu(X), buoc(X)), "passed", [("failed", None)], lambda p: kb(p)["buoc_xac_thuc"] == 1),
+            ("run: là 'shell: x'", lambda: g1(wf_tu("shell: x"), buoc("shell: x")), "passed", [], lambda p: kb(p)["buoc_xac_thuc"] == 1))
+    sai = []
+    for ten, f, g, m, them in hang:
+        try:
+            p = f()
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều hàng này đo
+            sai.append((ten, type(e).__name__))
+            continue
+        if (ghep(p), dd(p)) != (g, m) or them and not them(p):
+            sai.append((ten, ghep(p), dd(p), g, m))
+    bang(not sai, f"{len(sai)}/{len(hang)} hàng lệch định nghĩa: {sai[:3]}")
+
+@ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
     w = yaml.safe_load(wf_tu("echo a", X))
     w["jobs"]["j"]["steps"][2]["if"] = "false"
@@ -1092,7 +1154,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('N_endgroup_strip', 'if t == "##[endgroup]":', 'if t.strip() == "##[endgroup]":', 'c48'),
     ('N_run_join_rstrip', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.rstrip("\\n") == "\\n".join(b["in_lai"]).rstrip()', 'c47'),
     ('N_run_cr', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.replace("\\r", "").rstrip("\\n") == "\\n".join(b["in_lai"])', 'c48'),
-    ('N_gio_Z_tuy_chon', '\\d\\d:\\d\\d:\\d\\dZ")', '\\d\\d:\\d\\d:\\d\\dZ?")', 'c48'),
+    ('N_gio_Z_tuy_chon', '[0-9]{2}:[0-9]{2}:[0-9]{2}Z")', '[0-9]{2}:[0-9]{2}:[0-9]{2}Z?")', 'c48'),
     ('N_khoa_lower', 'or set(s) - KHOA_BUOC', 'or {str(x).lower() for x in s} - KHOA_BUOC', 'c48'),
     ('N_uses_rong', 'run = s.get("run") if "uses" not in s else None', 'run = s.get("run") if not s.get("uses") else None', 'c48'),
     ('N_uses_job_rong', 'if k is None or "uses" in wf["jobs"][k] or', 'if k is None or bool(wf["jobs"][k].get("uses")) or', 'c48'),
@@ -1164,6 +1226,39 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('L6_rest_also_skip_null', 's.get("conclusion") != "skipped"]', 's.get("conclusion") not in (None, "skipped")]', 'c50'),
     ('L6_yaml_empty_workflow_reject', 'type(wf.get("jobs")) is dict', 'type(wf.get("jobs")) is dict and bool(wf["jobs"])', 'c50'),
     ('L6_rest_number_order_contiguous', 'len({s["number"] for s in st}) == len(st)', 'len({s["number"] for s in st}) == len(st) and min(s["number"] for s in st) == 1', 'c50'),
+    ('A_gio_chu_so_unicode', '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z', '\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ', 'c51'),
+    ('L7_job_alias_unicode_reject', 'type(x) is str and x and "${{"', 'type(x) is str and x.isascii() and x and "${{"', 'c51'),
+    ('L7_name_explicit_unicode_reject', '_chuoi(s["name"]) and "${{"', '_chuoi(s["name"]) and s["name"].isascii() and "${{"', 'c51'),
+    ('L7_time_same_year', 'a <= h <= z', 'a <= h <= z and a.year == h.year == z.year', 'c51'),
+    ('L7_time_same_month', 'a <= h <= z', 'a <= h <= z and a.month == h.month == z.month', 'c51'),
+    ('L7_time_century_leap_reject', 'type(v) is str and RE_GIO.fullmatch(v)', 'type(v) is str and RE_GIO.fullmatch(v) and not (v[5:10] == "02-29" and int(v[:4]) % 100 == 0)', 'c51'),
+    ('L7_time_year_9999_reject', 'type(v) is str and RE_GIO.fullmatch(v)', 'type(v) is str and RE_GIO.fullmatch(v) and v[:4] != "9999"', 'c51'),
+    ('L7_time_year_0001_reject', 'type(v) is str and RE_GIO.fullmatch(v)', 'type(v) is str and RE_GIO.fullmatch(v) and v[:4] != "0001"', 'c51'),
+    ('L7_time_clock_only_compare', 'a <= h <= z', 'a.time() <= h.time() <= z.time()', 'c51'),
+    ('L7_time_whitespace_strip', 'RE_GIO.fullmatch(v)', 'RE_GIO.fullmatch(v.strip())', 'c51'),
+    ('L7_time_invalid_century_accept', 'except ValueError:\n        return None', 'except ValueError:\n        return datetime.datetime(1900, 2, 28) if type(v) is str and v[:10] == "1900-02-29" else None', 'c51'),
+    ('L7_rest_metadata_time_required', 'if not all((a := _gio(', 'if any(not _gio(s.get("started_at")) or not _gio(s.get("completed_at")) for s in st if s.get("name") in ("Set up job", "Complete job") or str(s.get("name")).startswith("Post ")) or not all((a := _gio(', 'c51'),
+    ('L7_rest_filter_post_number_order', 'and not str(s.get("name")).startswith("Post ")]', 'and not (str(s.get("name")).startswith("Post ") and s["number"] > 1)]', 'c51'),
+    ('L7_mode_env_present_values_only', 'any(str(k).startswith("CI_DANG_KY_") for k in d["env"])', 'any(str(k).startswith("CI_DANG_KY_") and d["env"][k] is not None for k in d["env"])', 'c51'),
+    ('L7_mode_env_empty_key_reject', '_env_chan(j) or', '(_env_chan(j) or (type(j.get("env")) is dict and "" in j["env"])) or', 'c51'),
+    ('L7_mode_env_unicode_key_reject', '_env_chan(j) or', '(_env_chan(j) or (type(j.get("env")) is dict and any(not str(k).isascii() for k in j["env"]))) or', 'c51'),
+    ('L7_mode_prior_skip_uses', 'for t in j["steps"][:i]))', 'for t in j["steps"][:i] if "uses" not in t))', 'c51'),
+    ('L7_dd_first_match_lines_only', 'k.group(0).splitlines() if k else []', 'k.group(0).splitlines()[:1] if k else []', 'c51'),
+    ('L7_dd_last_match_lines_only', 'k.group(0).splitlines() if k else []', 'k.group(0).splitlines()[-1:] if k else []', 'c51'),
+    ('L7_dd_blank_output_lines_remove', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(x for x in b["phan"] if x) + "\\n"', 'c51'),
+    ('L7_dd_no_output_final_newline', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(b["phan"])', 'c51'),
+    ('L7_dd_dedup_output_lines', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(dict.fromkeys(b["phan"])) + "\\n"', 'c51'),
+    ('L7_dd_sort_match_lines', 'k.group(0).splitlines() if k else []', 'sorted(k.group(0).splitlines()) if k else []', 'c51'),
+    ('L7_dd_wrong_lenh_first_call', '"lenh": b["lenh"], "duong_dan": duong', '"lenh": next(iter(moi)), "duong_dan": duong', 'c51'),
+    ('L7_dd_step_dedup_paths', 'for b, (k, i) in zip(buoc, ghep or []):', 'for b, (k, i) in zip(buoc, ghep or []):\n        if any(x["lenh"] == b["lenh"] for x in kq): continue', 'c51'),
+    ('L7_log_output_ignore_indented_blank', 'buoc[-1]["phan"].append(t)', 'buoc[-1]["phan"].append(t.rstrip())', 'c51'),
+    ('L7_log_empty_metadata_reject', 'not b["tien_to"] or t.startswith("shell: ")', '(not b["tien_to"] and bool(t)) or t.startswith("shell: ")', 'c51'),
+    ('L7_log_second_shell_reject', 'not b["tien_to"] or t.startswith("shell: ")', '(not b["tien_to"] and not t.startswith("shell: ")) or (b["tien_to"] and t.startswith("shell: "))', 'c51'),
+    ('L7_log_output_drop_group_lines', 'buoc[-1]["phan"].append(t)', 'buoc[-1]["phan"].extend([t] if not t.startswith("##[group]") else [])', 'c51'),
+    ('L7_log_require_output_nonempty', 'not b["mo"] and b["ok"]', 'not b["mo"] and bool(b["phan"]) and b["ok"]', 'c51'),
+    ('L7_log_require_metadata_no_ansi', 'b["ok"] and not mau', 'b["ok"] and not mau and "\\x1b[" not in d', 'c51'),
+    ('L7_log_color_run_not_contains_shell', 'elif mau and b["tien_to"]:', 'elif mau and b["tien_to"] and not t.startswith("shell: "):', 'c51'),
+    ('L7_job_suffix_no_dot_pure', 'r"(?: \\(.*\\))?"', 'r"(?: \\([^.\\n]*\\))?"', 'c51'),
     ("job_bo_x_str", 'type(x) is str and x and "${{"', 'x and "${{"', "c44"),
     ("so_number_0", '_so(s.get("number"), 1)', '_so(s.get("number"), 0)', "c44"),
     ("so_number_am", '_so(s.get("number"), 1)', '(type(s.get("number")) is int)', "c44"),
@@ -1172,7 +1267,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("A22_bo_kiem_gio", "    if not all((a := _gio(", "    if False and all((a := _gio(", "c38"),
     ("A22_khong_cat_giay", '"gio": d[:19] + "Z"})', '"gio": d.split(" ", 1)[0]})', "c38"),
     ("F09_bo_kiem_lich", 'datetime.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S")', "v[:19]", "c38"),
-    ("F09_nhan_offset", r'\d\d:\d\d:\d\dZ")', r'\d\d:\d\d:\d\d(?:Z|[+-]\d\d:\d\d)")', "c38"),
+    ("F09_nhan_offset", r'[0-9]{2}:[0-9]{2}:[0-9]{2}Z")', r'[0-9]{2}:[0-9]{2}:[0-9]{2}(?:Z|[+-][0-9]{2}:[0-9]{2})")', "c38"),
     ("F09_header_thieu_dung_rest", '(h := _gio(b["gio"]))', '(h := _gio(b["gio"]) or a)', "c38"),
     ("F10_bo_sort", 'sorted(st, key=lambda s: s["number"])', "st", "c37"),
     ("F10_bo_number_trung", '\n            and len({s["number"] for s in st}) == len(st)', "", "c37"),

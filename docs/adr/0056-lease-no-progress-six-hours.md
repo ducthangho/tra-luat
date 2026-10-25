@@ -38,9 +38,10 @@ Controller ngoài (dispatcher) **chưa đo được** từ phiên này. Nên ADR
 vận hành: chưa xác minh được controller đã đồng bộ thì không cấp lease 360 phút.
 
 `.github/coordination/change-impact.v1.json` (`ADR-0032`) vắng mặt ở cả hai base ấy. Write set của
-packet này (r3: tệp protocol, tệp ADR này, ratchet đếm tài liệu trong `scripts/tl_selftest.py` và
-`RELEASE_MANIFEST.json` tái sinh) là một ngoại lệ đóng tay một-packet do chủ kho duyệt trên Issue #835, không phải một
-closure tính từ policy.
+packet này là một ngoại lệ đóng tay một-packet do chủ kho duyệt trên Issue #835, không phải một closure tính từ
+policy. Bản vá chỉ chạm hai tệp: tệp protocol và tệp ADR này. Revision 4 (chủ kho duyệt 25-10-2026) bỏ hai tệp đi
+kèm của r3 (`scripts/tl_selftest.py` và `RELEASE_MANIFEST.json`), vì từ packet #794 `r291_docs_ngoai_goi` tính số
+tài liệu dưới `docs/` từ cây, không còn ratchet nào để kê khai, và không tệp nào trong gói đổi.
 
 ## Vì sao sáu giờ
 

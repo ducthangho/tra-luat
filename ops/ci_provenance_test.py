@@ -10,7 +10,7 @@ r4: REST giả giữ `steps[]` dựng MỘT lần từ log + workflow đang gi�
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`.
 """
-import contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
+import collections, contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 from unittest import mock
 
@@ -844,9 +844,11 @@ RE_GOI_ORACLE = re.compile(r"(A=1 )?python ops/g\d+_\d+_\d+_test\.py")   # lời
 
 @ca
 def c49_oracle_nhieu_truc():   # F10 đóng LỚP: 250 kịch bản ngẫu nhiên (hạt giống cố định) qua oracle độc lập; so TRỌN danh sách marker
-    rd, sai = random.Random(899), []
+    rd, sai, phu = random.Random(899), [], collections.Counter()
     for so in range(250):
         w, ten, st, lg, them, ghep_mong, mong = kich_ban(rd, so)
+        phu.update([f"ghep:{ghep_mong}"] + [x[0] if x[1] is None else x[1] for x in mong or []] + ["job_dich_khong_dau"] * (list(yaml.safe_load(w)["jobs"]).index(
+            ten.split(" (")[0]) > 0 if ten.split(" (")[0] in yaml.safe_load(w)["jobs"] else 0) + ["number>=10"] * (max(x["number"] for x in st) >= 10))
         if ghep_mong is None:   # tên REST trỏ DUY NHẤT một job KHÁC: ngoài phạm vi oracle, bỏ kịch bản (đếm ở dưới)
             continue
         try:
@@ -857,7 +859,66 @@ def c49_oracle_nhieu_truc():   # F10 đóng LỚP: 250 kịch bản ngẫu nhiê
         dd = [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]
         if (ghep(p), dd) != (ghep_mong, mong):
             sai.append((so, ten, ghep(p), ghep_mong, dd, mong))
-    bang(not sai, f"{len(sai)}/250 kịch bản lệch oracle; đầu tiên: {sai[:2]}")
+    thieu = [k for k in ("passed", "failed", "che_do_khong_xac_dinh", "ghep:passed", "ghep:d_job_yaml_khong_duy_nhat", "ghep:b_ten_buoc_lech",
+                         "ghep:c_gio_header_ngoai_cua_so", "ghep:steps_rest_sai_dang", "job_dich_khong_dau", "number>=10") if phu[k] < 5]
+    bang(not sai and not thieu, f"{len(sai)}/250 kịch bản lệch oracle; đầu tiên: {sai[:2]}; phân hoạch lấy mẫu < 5: {thieu} {dict(phu)}")
+
+@ca
+def c50_mien_luot6():   # F10 lượt 6: miền tên job · hình dạng REST · lịch · nguồn chặn · đầu ra log; mỗi hàng một đầu vào spec ĐỊNH NGHĨA
+    dd = lambda p: [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]  # noqa: E731
+    ok, b, c_gio, b_ten = [("passed", None)], buoc(X, "THU: 4/4 dat"), "c_gio_header_ngoai_cua_so", "b_ten_buoc_lech"
+    def gio(tem, sua=None):   # cùng khối, mọi dòng đổi sang timestamp `tem`; REST sinh lại từ log (cửa sổ = header) rồi `sua`
+        return g1(wf_tu(X), [d.replace(T, tem) for d in b], sua=(lambda st: st[2].update(sua)) if sua else None)
+    w_rong = yaml.safe_dump({"jobs": {"j": {"runs-on": "x", "steps": []}}})
+    w_sk = yaml.safe_load(wf_tu("echo bo", X))
+    w_sk["jobs"]["j"]["steps"][1]["if"] = "false"
+    w_uses = yaml.safe_load(wf_tu(X))
+    w_uses["jobs"]["j"]["steps"][0] = {"uses": "./GITHUB_PATH"}
+    lg_uses = log_voi(b).replace("Run actions/setup-python@v5", "Run ./GITHUB_PATH")
+    w_ten = yaml.safe_dump({"jobs": {"j": {"runs-on": "x", "steps": [{"uses": "actions/setup-python@v5"},
+                                                                     {"name": "set GITHUB_ENV", "run": "echo hi\n"}, {"run": X + "\n"}]}}})
+    m3 = [f"{T} ##[group]Run {X}", f"{T} \x1b[36;1m{X}\x1b[0m", f"{T} \x1b[36;1m##[endgroup]\x1b[0m", f"{T} shell: /usr/bin/bash -e {{0}}",
+          f"{T} ##[endgroup]", f"{T} THU: 4/4 dat"]
+    hang = (("job hậu tố Unicode", lambda: g1(wf_tu(X), b, ten="j (Việt Nam)"), "passed", ok),
+            ("job hậu tố lồng ngoặc", lambda: g1(wf_tu(X), b, ten="j (ubuntu (64))"), "passed", ok),
+            ("alias dài 46 ký tự", lambda: g1(wf_job(j=({"name": "Build " + "a" * 40}, None)), b, ten="Build " + "a" * 40), "passed", ok),
+            ("REST steps rỗng, YAML rỗng", lambda: chay([(job(1, steps=[]), LINUX_KHONG_SETUP)], wf=w_rong)[2], "passed", []),
+            ("number ≥ 100", lambda: g1(wf_tu(X), b, sua=lambda st: [x.update(number=x["number"] + 100) for x in st]), "passed", ok),
+            ("number không bắt đầu từ 1", lambda: g1(wf_tu(X), b, sua=lambda st: [x.update(number=x["number"] + 1) for x in st]), "passed", ok),
+            ("bước skipped thiếu giờ", lambda: g1(yaml.safe_dump(w_sk), b, sua=lambda st: st[2].update(conclusion="skipped", started_at=None,
+                                                                                                 completed_at=None)), "passed", ok),
+            ("cửa sổ qua hai ngày", lambda: gio(T, {"started_at": "2026-10-18T23:45:04Z", "completed_at": "2026-10-20T23:45:04Z"}), "passed", ok),
+            ("29/2 năm nhuận", lambda: gio("2024-02-29T23:45:04.8553236Z"), "passed", ok),
+            ("năm 1999", lambda: gio("1999-12-31T23:45:04.8553236Z"), "passed", ok),
+            ("29/2 năm không nhuận ở REST", lambda: gio("2026-03-01T23:45:04.8553236Z", {"started_at": "2026-02-29T23:45:04Z"}), c_gio, []),
+            ("name: null, REST 'None'", lambda: g1(wf_tu(X, buoc_them={"name": None}), b, sua=lambda st: st[2].update(name="None")), b_ten, []),
+            ("conclusion null vẫn là đã chạy", lambda: g1(wf_tu(X), b, sua=lambda st: st[2].update(conclusion=None)), "passed", ok),
+            ("uses: trước nhắc GITHUB_PATH (không phải run:)", lambda: chay([(job(1, steps=buoc_rest(lg_uses, yaml.safe_dump(w_uses))), lg_uses)],
+                                                                    wf=yaml.safe_dump(w_uses))[2], "passed", ok),
+            ("name: trước nhắc GITHUB_ENV, run: không", lambda: g1(w_ten, buoc("echo hi"), b), "passed", ok),
+            ("marker sau một dòng ghi chú", lambda: g1(wf_tu(X), buoc(X, "ghi chu", "THU: 4/4 dat")), "passed", ok),
+            ("marker trước một dòng ghi chú", lambda: g1(wf_tu(X), buoc(X, "THU: 4/4 dat", "ghi chu")), "passed", ok),
+            ("marker có khoảng trắng đầu", lambda: g1(wf_tu(X), buoc(X, "  THU: 4/4 dat")), "passed", [("failed", None)]),
+            ("MOI nhiều dòng theo thứ tự", lambda: g1(wf_tu(X), buoc(X, "START", "THU: 4/4 dat", "END"),
+                                              them={DUONG_GIA: r"^START\nTHU: (\d+)/(\d+) dat\nEND$"}), "passed", ok),
+            ("dòng không màu trước shell:", lambda: g1(wf_tu(X), b[:2] + [f"{T}   NOTE: x"] + b[2:]), "passed", []),
+            ("dòng không màu sau shell:", lambda: g1(wf_tu(X), b[:3] + [f"{T}   NOTE: x"] + b[3:]), "passed", ok),
+            ("##[endgroup] màu trong khối", lambda: g1(wf_tu(X + "\n##[endgroup]"), m3), "passed", []),
+            ("shell: rỗng", lambda: g1(wf_tu(X), b[:2] + [f"{T} shell: "] + b[3:]), "passed", ok),
+            ("mã màu không ở đầu dòng", lambda: g1(wf_tu(X), [b[0], f"{T} \x1b[0m\x1b[36;1m{X}\x1b[0m"] + b[2:]), "passed", ok),
+            ("dòng màu không timestamp", lambda: g1(wf_tu(X), [b[0], f"\x1b[36;1m{X}\x1b[0m"] + b[2:]), "passed", ok),
+            ("dòng trống giữa hai lời gọi", lambda: g1(wf_tu(X + "\n\n" + X), khoi([X, "", X], "THU: 4/4 dat")), "passed", ok),
+            ("jobs: {} rỗng", lambda: g1("jobs: {}", b, w_rest=wf_tu(X)), "d_job_yaml_khong_duy_nhat", []))
+    sai = []
+    for ten, f, g, m in hang:
+        try:
+            p = f()
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều hàng này đo
+            sai.append((ten, type(e).__name__))
+            continue
+        if (ghep(p), dd(p)) != (g, m) or ten == "##[endgroup] màu trong khối" and kb(p)["buoc_xac_thuc"] != 0:
+            sai.append((ten, ghep(p), dd(p), kb(p)["buoc_xac_thuc"], g, m))
+    bang(not sai, f"{len(sai)}/{len(hang)} hàng lệch định nghĩa: {sai[:3]}")
 
 @ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
@@ -1079,6 +1140,30 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('L5_uses_strip', 'v = s.get("run", s.get("uses"))', 'v = s.get("run", str(s.get("uses")).strip())', 'c48'),
     ('L5_goi_strip_toan_run', 'dong_logic(run.rstrip("\\n").split("\\n"))', 'dong_logic(run.strip().split("\\n"))', 'c48'),
     ('L5_D01_null_la_vang', 'return "env" in d and (', 'return d.get("env") is not None and (', 'c49'),
+    ('L6_job_ascii_suffix', 're.escape(x) + r"(?: \\(.*\\))?", ten)', 're.escape(x) + r"(?: \\([ -~]*\\))?", ten)', 'c50'),
+    ('L6_job_alias_truncate', 'for x in (k, j.get("name"))', 'for x in (k, str(j.get("name"))[:20])', 'c50'),
+    ('L6_job_nonempty_rest_required', 'type(st) is list and all(', 'type(st) is list and bool(st) and all(', 'c50'),
+    ('L6_rest_number_under_100', '_so(s.get("number"), 1)', '(_so(s.get("number"), 1) and s["number"] < 100)', 'c50'),
+    ('L6_rest_skipped_time_required', 'if not all((a := _gio(', 'if any(not _gio(s.get("started_at")) for s in ung) or not all((a := _gio(', 'c50'),
+    ('L6_time_require_same_day', 'a <= h <= z', 'a <= h <= z and a.date() == h.date() == z.date()', 'c50'),
+    ('L6_time_reject_year_before_2000', 'type(v) is str and RE_GIO.fullmatch(v)', 'type(v) is str and RE_GIO.fullmatch(v) and v[:4] >= "2000"', 'c50'),
+    ('L6_time_accept_invalid_leap_day', 'except ValueError:\n        return None', 'except ValueError:\n        return datetime.datetime(2026, 2, 28) if type(v) is str and v[:10] == "2026-02-29" else None', 'c50'),
+    ('L6_names_compare_as_strings', 's.get("name") != ten_du_kien(y)', 'str(s.get("name")) != str(ten_du_kien(y))', 'c50'),
+    ('L6_prior_entire_step_instead_run', 'str(t.get("run", ""))', 'str(t)', 'c50'),
+    ('L6_prior_uses_preferred', 'str(t.get("run", ""))', 'str(t.get("uses", t.get("run", "")))', 'c50'),
+    ('L6_log_first_output_line', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(b["phan"][:1]) + "\\n"', 'c50'),
+    ('L6_log_last_output_line', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(b["phan"][-1:]) + "\\n"', 'c50'),
+    ('L6_log_output_strip', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(b["phan"]).strip() + "\\n"', 'c50'),
+    ('L6_log_reverse_output', '"\\n".join(b["phan"]) + "\\n"', '"\\n".join(reversed(b["phan"])) + "\\n"', 'c50'),
+    ('L6_log_endgroup_need_shell_first', 'if t == "##[endgroup]":', 'if t == "##[endgroup]" and not b["tien_to"]:', 'c50'),
+    ('L6_log_uncolored_metadata_add_to_echo', 'elif mau and b["tien_to"]:', 'elif mau and b["tien_to"] or t.startswith("  NOTE:"):', 'c50'),
+    ('L6_log_shell_nonempty', 't.startswith("shell: ")', 't.startswith("shell: ") and len(t)>7', 'c50'),
+    ('L6_log_color_prefix_only', 'mau = "\\x1b[36;1m" in d', 'mau = d.split(" ", 1)[-1].startswith("\\x1b[36;1m")', 'c50'),
+    ('L6_log_color_without_timestamp', 'mau = "\\x1b[36;1m" in d', 'mau = "\\x1b[36;1m" in d and bool(RE_DONG.match(d))', 'c50'),
+    ('L6_run_blank_lines_disallowed', 'for d in dong_logic(run.rstrip("\\n").split("\\n")) if d]', 'for d in dong_logic(run.rstrip("\\n").split("\\n"))]', 'c50'),
+    ('L6_rest_also_skip_null', 's.get("conclusion") != "skipped"]', 's.get("conclusion") not in (None, "skipped")]', 'c50'),
+    ('L6_yaml_empty_workflow_reject', 'type(wf.get("jobs")) is dict', 'type(wf.get("jobs")) is dict and bool(wf["jobs"])', 'c50'),
+    ('L6_rest_number_order_contiguous', 'len({s["number"] for s in st}) == len(st)', 'len({s["number"] for s in st}) == len(st) and min(s["number"] for s in st) == 1', 'c50'),
     ("job_bo_x_str", 'type(x) is str and x and "${{"', 'x and "${{"', "c44"),
     ("so_number_0", '_so(s.get("number"), 1)', '_so(s.get("number"), 0)', "c44"),
     ("so_number_am", '_so(s.get("number"), 1)', '(type(s.get("number")) is int)', "c44"),

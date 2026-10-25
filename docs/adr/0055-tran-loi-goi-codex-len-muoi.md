@@ -24,24 +24,34 @@ con số. Một đặc tả không khai vẫn chịu trần **hai** sau ADR này
 
 ## Hiệu lực — luật OID land của `ADR-0052`, token riêng; không hồi tố
 
-Luật **y hệt** mục *"Hiệu lực"* của `ADR-0052` (vì sao không dùng ngày, thời điểm commit hay `base_sha`:
-xem ở đó), chỉ thay token và tệp. Trần **mười** áp cho một packet **khi và chỉ khi** blob đặc tả mà
-`spec_hash` của lease trỏ tới có **đúng một** dòng khớp `^tran_loi_goi_codex: ADR-0055@([0-9a-f]{40})$`
-(so trên byte gốc), và OID `<L>` bắt được thoả cả ba phép đo:
+Luật OID land **y hệt** mục *"Hiệu lực"* của `ADR-0052` (vì sao không dùng ngày, thời điểm commit hay
+`base_sha`: xem ở đó), chỉ thay token và tệp. Mọi phép so dưới đây làm trên **byte gốc** của blob đặc tả mà
+`spec_hash` của lease trỏ tới.
+
+**Dòng khai** của ADR này là mọi dòng bắt đầu bằng `tran_loi_goi_codex: ADR-0055@`. Một dòng khai **hợp lệ**
+khi nó khớp trọn `^tran_loi_goi_codex: ADR-0055@([0-9a-f]{40})$` và OID `<L>` bắt được thoả cả ba phép đo:
 
 1. `git cat-file -e <L>:docs/adr/0055-tran-loi-goi-codex-len-muoi.md` ⇒ `rc=0`;
 2. `git cat-file -e <L>^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md` ⇒ `rc≠0`;
 3. `git rev-list --first-parent origin/master | grep -qx <L>` trên clone **không shallow**, ref vừa fetch.
 
-Phân xử khi đặc tả mang token của cả hai ADR, hoặc chỉ một:
+Dòng khai của `ADR-0052` là mọi dòng bắt đầu bằng `tran_loi_goi_codex: ADR-0052@`; hợp lệ hay không theo
+đúng luật của `ADR-0052`.
 
-| đặc tả mang | kết luận |
-|---|---|
-| đúng một dòng `ADR-0055` hợp lệ, không dòng `ADR-0052` | **mười** |
-| đúng một dòng `ADR-0052` hợp lệ, không dòng `ADR-0055` | **tám** (`ADR-0052`, không đổi) |
-| cả hai, mỗi loại đúng một dòng và cả hai hợp lệ | **tám** — lấy trần THẤP hơn, fail-closed |
-| bất kỳ dòng nào trùng, sai một phép đo, clone shallow, hoặc **không đo được** | luật của dòng còn lại nếu nó hợp lệ; không còn dòng hợp lệ nào ⇒ **hai** |
-| không dòng nào | **hai** |
+Trần **mười** áp **khi và chỉ khi** đặc tả có **đúng một** dòng khai `ADR-0055`, dòng ấy hợp lệ, và đặc tả
+**không có** dòng khai `ADR-0052` nào. Bảng dưới là hệ quả của câu ấy, không phải luật thứ hai:
+
+| dòng khai `ADR-0055` | dòng khai `ADR-0052` | trần |
+|---|---|---:|
+| không có | — | theo `ADR-0052`, không đổi (tám hoặc hai) |
+| đúng một, hợp lệ | không có | **mười** |
+| đúng một, hợp lệ | đúng một, hợp lệ theo `ADR-0052` | **tám** — trần thấp hơn |
+| đúng một, hợp lệ | có nhưng không hợp lệ theo `ADR-0052` (trùng, sai mẫu, sai phép đo) | **hai** |
+| hai dòng trở lên, hoặc sai mẫu, hoặc một phép đo `rc` sai, hoặc **không đo được** | bất kỳ | **hai** |
+
+Hai luật giữ cho bảng **bảo thủ**: thêm một dòng khai, dù đúng hay sai, không bao giờ làm trần **tăng**; và
+đặc tả không nhắc `ADR-0055` thì kết quả y hệt trước ADR này. Hàng thứ ba là luật *"trần chạm trước thắng"*
+của `ADR-0043` áp cho hai khai báo trên cùng một trục.
 
 Không hồi tố: ADR này **không** sửa `ADR-0036`, `ADR-0037`, `ADR-0038`, `ADR-0041`, `ADR-0048`,
 `ADR-0052` hay đặc tả đóng băng nào. Đặc tả đã đóng băng mà muốn trần mười phải sửa thành revision mới
@@ -56,16 +66,20 @@ lease kiểm tay.
 `ADR-0052` viết: với reviewer Codex, trần tám lời gọi **luôn chạm trước** trần mười vòng của
 `ADR-0048`. Với mười lời gọi, hai trần **bằng nhau**. Lý lẽ của `ADR-0052` vẫn đứng — mọi lời gọi đều
 tính vào trục LỜI GỌI, còn trục VÒNG chỉ tính verdict có biên nhận hợp lệ, nên số vòng Codex của một PR
-không vượt được số lời gọi Codex của nó — chỉ đổi hệ quả: với reviewer Codex, trục LỜI GỌI vẫn chạm
-**trước hoặc cùng lúc** với trục VÒNG, không bao giờ sau. Trần mười vòng chạm **trước** chỉ khi PR có
-reviewer khác nền. Đây là luật *"trần chạm trước thắng"* của `ADR-0043`; ghi ra để không ai đọc thành
+không vượt được số lời gọi Codex của nó — chỉ đổi hệ quả: với PR **chỉ có** reviewer Codex, trục LỜI GỌI chạm
+**trước hoặc cùng lúc** với trục VÒNG, không bao giờ sau. PR có thêm reviewer khác nền (phiên Claude độc
+lập, human) thì trục VÒNG đếm **tổng** số vòng hợp lệ của mọi reviewer, nên nó có thể chạm trước — một vòng
+Codex cộng chín vòng khác là mười vòng với một lời gọi. Hai trần bằng số không có nghĩa hai bộ đếm bằng
+nhau hay cạn cùng lúc. Đây là luật *"trần chạm trước thắng"* của `ADR-0043`; ghi ra để không ai đọc thành
 *"mười lời gọi cộng mười vòng"*.
 
 ## Cổng: có bộ đếm, nhưng nó KHÔNG đọc dòng khai — sửa lời khai của `ADR-0052`
 
 `ADR-0052` (đo 17:01Z 16-10-2026) khai `codex_review_calls_used` có **0** dòng trong mã. Lời khai ấy
-**đã cũ** ngay trong ngày: packet #775 (`97291ab`, *"trần vòng review + lời gọi codex cưỡng chế Review
-Rescue Checkpoint"*) thêm bộ đếm vào state của `.claude/dev/packet_loop.py`. Đo lại 25-10-2026 trên
+**đúng lúc ADR-0052 land** (`8ab1007`, 07:45:01Z 17-10-2026: 0 dòng ở `packet_loop.py`) và **đã cũ** từ
+16:55:49Z cùng ngày, khi merge `d8b15cb` (PR #779) đưa vào master bộ đếm của packet #775 — commit triển khai
+`97291ab` (*"trần vòng review + lời gọi codex cưỡng chế Review Rescue Checkpoint"*, tạo trên nhánh riêng ngày
+16-10). Đếm nguyên từ ở `packet_loop.py`: `d8b15cb^1` **0** dòng, `d8b15cb` **8** dòng. Đo lại 25-10-2026 trên
 base `9371628`, khớp nguyên từ:
 
 | tên | `ops/lease_publish.py` | `.claude/dev/packet_loop.py` |
@@ -81,10 +95,14 @@ Cơ chế ấy làm được, và KHÔNG làm được:
   sửa mã.
 - `record-codex-call` **chặn TRƯỚC khi vượt** trần trong state; `nang-tran` ghi khối nâng trần (lời khai,
   không phải bằng chứng); `record-rescue --quyet-dinh nang_tran` là cửa ra khỏi checkpoint.
-- **Không gì đọc dòng `tran_loi_goi_codex:` của đặc tả** (0 dòng ở cả hai tệp). Trần mười chỉ vào state
-  khi người khởi tạo tự truyền `--codex-review-calls-limit 10` sau khi tự đo ba phép ở trên.
-- Bộ đếm chỉ đếm khi phiên **dùng** `packet_loop`. PR #909 không dùng, nên năm lời gọi không bị chặn lần
-  nào — cổng có thật nhưng **vắng mặt** ở đúng lượt cần nó.
+- **Không gì đọc dòng `tran_loi_goi_codex:` của đặc tả** (0 dòng ở cả hai tệp). Đường thường để trần mười
+  vào state là người khởi tạo tự truyền `--codex-review-calls-limit 10` sau khi tự áp luật chọn ở mục
+  *"Hiệu lực"*; đường kia là `nang-tran --tran-moi 10` trên state đã có, tức một lần nâng trần phải có thẩm
+  quyền riêng.
+- Bộ đếm chỉ đếm những lời gọi được **ghi** bằng `record-codex-call`; `launcher.py run` tự nó không cưỡng
+  chế trần nào. Với PR #909, hồ sơ trong kho chứng minh **năm** lời gọi trên trần **hai**, nhưng **không**
+  chứa state hay transcript nào cho biết bộ đếm lời gọi có được dùng hay không — `KHÔNG ĐO ĐƯỢC` từ kho. Lời
+  khai của chính executor trong phiên (chưa lưu thành hồ sơ): nó không gọi `record-codex-call` lần nào.
 
 Vì vậy: trước MỖI lời gọi Codex, người gọi đếm số đã dùng và đọc trần trong lease cùng dòng khai của đặc
 tả; vượt thì dừng và xin `nang_tran` TRƯỚC khi gọi. Phần ấy vẫn là kỷ luật, không phải cổng.
@@ -96,9 +114,10 @@ Chỗ ở duy nhất của con số **mười** là **tệp này**. `docs/PROTOC
 
 ## Nợ
 
-- **Không có con trỏ tiến** từ `ADR-0052` tới đây, và năm câu trong thân `docs/PROTOCOL_DA_PHIEN.md`
-  (ba câu ở §8, hai câu ở §12) vẫn trỏ `ADR-0052` làm nơi đặt con số. Câu ấy vẫn đúng cho packet khai
-  `ADR-0052`; với packet khai `ADR-0055` thì đường định tuyến duy nhất là bảng §20. Packet này giới hạn
+- **Không có con trỏ tiến** từ `ADR-0052` tới đây. Thân `docs/PROTOCOL_DA_PHIEN.md` nhắc `ADR-0052` năm lần:
+  **bốn** lần làm nơi đặt con số trần (§8 hai lần, §12 hai lần) và **một** lần cho điều kiện cấp lượt sau
+  lượt đầu (§8) — điều kiện ấy ADR này giữ nguyên, nên câu ấy vẫn đúng cho mọi packet. Bốn câu về con số vẫn
+  đúng cho packet khai `ADR-0052`; với packet khai `ADR-0055` thì đường định tuyến duy nhất là bảng §20. Packet này giới hạn
   ở §20 theo đặc tả, nên không sửa các câu ấy.
 - **Không có số đo nào biện hộ con số mười**, cũng như tám trước nó: kho chưa có giá trị bộ đếm cho đủ PR
   để biết một PR thường dùng bao nhiêu lời gọi. Mười là **quyết định của chủ kho**; đừng khai mạnh hơn thế.

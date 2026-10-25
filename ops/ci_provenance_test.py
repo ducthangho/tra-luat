@@ -991,6 +991,11 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
             return gate(p)["ghep_buoc"]
         except Exception as e:   # ném ra ngoài CHÍNH LÀ điều hàng này đo
             return type(e).__name__
+    def khong_dat(f):   # True ⇔ KHÔNG có dấu đầu đường `passed` (ném ⇒ False: lỗi lọt ra CHÍNH là điều hàng đo)
+        try:
+            return all(x["trang_thai"] != "passed" for x in gate(f())["dau_duong"])
+        except Exception:
+            return False
     w = yaml.safe_load(wf_tu(X, X))
     w["jobs"]["j"]["steps"][2]["env"] = {"A": "1"}
     hang = (("passed", lambda: g1(wf_tu(X), b), {"trang_thai": "passed", "so_buoc": 2}),
@@ -1005,13 +1010,33 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
             ("name: bước có `${` (không `${{`)", lambda: g1(wf_tu(X, buoc_them={"name": "a${b"}), b), {"trang_thai": "passed", "so_buoc": 2}),
             ("name: bước `${{x}}` không khoảng trắng", lambda: g1(wf_tu(X, buoc_them={"name": "${{x}}"}), b),
              {"trang_thai": "not_measured", "ly_do": "b_ten_buoc_lech", "so_buoc": 2}))
+    khoi_mau = [(ten, khong_dat(f)) for ten, f in (   # dinh_nghia `hop_le`: in lại = dòng `36;1m` LIỀN sau header; không màu sau `shell: `
+        ("SGR 36;10m không phải 36;1m", lambda: g1(wf_tu(X), [b[0], b[1].replace("36;1m", "36;10m")] + b[2:])),
+        ("dòng 36;1m SAU shell:", lambda: g1(wf_tu(X + "\n" + X), [b[0], b[1], b[2], b[1]] + b[3:]))) if not khong_dat(f)]
+    bang(not khong_dat(lambda: g1(wf_tu(X + "\n" + X), [b[0], b[1], b[1]] + b[2:])), "đối chứng: hai dòng 36;1m TRƯỚC shell: ⇒ passed")
+    K, mu = "python ops/khac.py", {"lenh": X, "duong_dan": DUONG_GIA}
+    def dd_tron(f):   # TRỌN danh sách `dau_duong` (M4: khoá lenh · duong_dan · trang_thai · ly_do | dong_khop); ném ⇒ tên lớp
+        try:
+            return gate(f())["dau_duong"]
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều hàng này đo
+            return type(e).__name__
+    dd_sai = [(ten, kq) for ten, f, mong in (
+        ("passed", lambda: g1(wf_tu(X), b), [mu | {"trang_thai": "passed", "dong_khop": ["THU: 4/4 dat"]}]),
+        ("không có trong MOI", lambda: g1(wf_tu(K), buoc(K, "THU: 4/4 dat")),
+         [{"lenh": K, "duong_dan": "ops/khac.py", "trang_thai": "not_measured", "ly_do": "khong_co_trong_MOI"}]),
+        ("chặn chế độ", lambda: g1(wf_tu(X, job_them={"defaults": {"run": {"shell": "bash"}}}), b),
+         [mu | {"trang_thai": "not_measured", "ly_do": "che_do_khong_xac_dinh"}]),
+        ("dòng `##[groupx` không phải `##[group]` lồng", lambda: g1(wf_tu(X), b[:3] + [f"{T} ##[groupx"] + b[3:]),
+         [mu | {"trang_thai": "passed", "dong_khop": ["THU: 4/4 dat"]}])) if (kq := dd_tron(f)) != mong]
+    bang(not dd_sai, f"dau_duong lệch M4: {dd_sai[:2]}")
     sai = [(ten, kq, mong) for ten, f, mong in hang if (kq := gh(f)) != mong]
     try:
         kieu = [m.ten_du_kien(s) for s in ({"run": 5}, {"uses": None}, {}, {"run": ["a"]})] + \
             [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n")]
     except Exception as e:   # ném ra ngoài CHÍNH LÀ điều vế này đo
         kieu = type(e).__name__
-    bang(not sai and kieu == [None] * 8, f"{len(sai)}/{len(hang)} hàng lệch M4/dinh_nghia: {sai[:2]} · kiểu lạ: {kieu}")
+    bang(not sai and not khoi_mau and kieu == [None] * 8,
+         f"{len(sai)}/{len(hang)} hàng lệch M4/dinh_nghia: {sai[:2]} · khối màu ra marker: {khoi_mau} · kiểu lạ: {kieu}")
 
 @ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
@@ -1393,6 +1418,10 @@ TUONG_DUONG = {   # mã đột biến tập đóng → chứng minh vì sao KHÔ
     "ghep_job#24:-1": "`khop[-1]` thay `khop[0]` chỉ được tính khi `len(khop) == 1`, mà danh sách một phần tử có [0] và [-1] là cùng một phần tử",
     "chan_buoc#103:bo_doi_so1": "`str(t.get('run'))` thay `str(t.get('run', ''))` chỉ khác ở bước KHÔNG có `run:`: chuỗi tìm là 'None' thay vì '' — "
                                 "cả hai đều không chứa `GITHUB_ENV`/`GITHUB_PATH`, nên `re.search` cùng trả None",
+    **{f"tach_buoc#173:chuoi{k}": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát "
+       "cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)" for k in (2, 3, 4)},
+    "do_dau_duong#127:bo_ve0": "bỏ vế `goi and`: khi `goi` rỗng thì `all(goi)` là True nhưng `[g[2] for g in goi]` cũng rỗng ⇒ vòng lặp "
+                               "không chạy lần nào, y như nhánh `else []`",
 }
 
 def _thay(x, y):   # đổi nút x thành nút y tại chỗ

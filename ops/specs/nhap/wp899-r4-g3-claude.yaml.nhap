@@ -1,0 +1,111 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 899
+packet_id: wp899
+packet_alias: CI-PROVENANCE-REST-LOG
+mission_issue: 899
+revision: 4
+generation: 3
+lease_id: wp899-r4-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp899-r4.md
+spec_sha256_required: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+spec_hash: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+prompt_path: ops/specs/wp899-r4.md
+prompt_sha256_required: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+spec_nguon_note: Dac ta o nhanh ops/wp899-spec (commit 8809f13, blob ce167d8); dinh
+  danh tep la BAM. r4 thay r3 (dd1a997d) sau khi r3 dung han theo V5 o luot 2.
+write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+depends_on:
+- 892
+- 910
+depends_on_ghi_chu: '#892 da land (merge 76cf4c5). #910 pha B phai LAND truoc (Q3 dac
+  ta r4): CHO_DIEN so PR, commit merge, thoi diem merge.'
+branch: agent/wp899-g3-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: CHO_DIEN_COMMIT_MERGE_910_PHA_B
+start_from_sha: CHO_DIEN_COMMIT_MERGE_910_PHA_B
+reviewed_sha_required: CHO_DIEN_COMMIT_MERGE_910_PHA_B
+reviewed_sha_note: 'Chua co head code; neo base. Diem xuat phat: 3 tep tai 7f5a02c
+  tu bundle tren ops/wp899-g2-luu-tru @ d1cb870 (sha256 e066aefd...7fd2); dong MOI
+  dat lai len ban cua base, khong chep de ca tep.'
+granted_by: ducthangho
+granted_on_instruction: CHO_DIEN_URL_COMMENT_DUYET_CAP_LEASE
+granted_on_instruction_note: CHO_DIEN (nguyen van loi duyet cua chu kho, phien nao).
+recorded_by: CHO_DIEN
+recorder_is_executor: CHO_DIEN
+recorder_ghi_chu: Ban nhap soan o phien session_01J5UVb6kiH9edF9McTVQvDT (executor r3,
+  da dung) theo yeu cau chu kho 25-10-2026; executor r4 la phien KHAC.
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: CHO_DIEN
+  ref: refs/heads/agent/wp899-g3-claude
+  trang_thai: CHO_DIEN
+  ghi_chu: CHO_DIEN (ls-remote phai rong; executor tao tu base_sha).
+xung_dot_write_set_do_luc_cap:
+  do_luc: CHO_DIEN
+  so_nhanh: CHO_DIEN (fetch --prune +refs/heads/*; ls-remote N / cuc bo N, so TAP ten
+    thieu 0 thua 0)
+  ket_qua: CHO_DIEN (ai-dang-giu ca ba duong dan phai NGUOI_GIU 0; wp910-r3-g3-claude
+    phai het han hoac da bi thay the; wp899-r1-g1-claude con han toi 2026-10-27T01:20:00Z
+    nhung DA_BI_THAY_THE nen khong tinh).
+leased_at_utc: CHO_DIEN
+heartbeat_at: CHO_DIEN
+lease_until: CHO_DIEN_LEASED_AT_CONG_72H
+lease_expires_at_utc: CHO_DIEN_LEASED_AT_CONG_72H
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: 'Dac ta khai tran_loi_goi_codex: ADR-0052@8ab1007... =>
+  tran 8 loi goi la truc chan; r4 dem lai tu 0 (Q4).'
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: 'Theo luat_vong_doi V1-V5 cua dac ta r4 (quyet dinh chu kho rieng
+  wp899, KHONG ap ADR-0054): V1-V4 nhu r2; V5 Codex dem lai 0/8, lap lop o luot 2
+  cua r4 thi dung han.'
+thay_the_cho: []
+thay_the_cho_note: wp899-r3-g2-claude da het han (rut han ve 2026-10-24T17:30:00Z,
+  commit d41db6f tren ops/wp899-r3-g2-lease); khong con lease nao cua wp899 giu write
+  set => khong bia mo.
+ngan_sach:
+  loi_goi_codex:
+    used: 0
+    reserved: 1
+    limit: 8
+    ghi_chu: dem lai tu 0 cho r4 (Q4 dac ta r4); r2+r3 da dung 6 loi goi, khong mo PR
+  vong_review_canon:
+    used: 0
+  attempt:
+    used: 0
+    limit: 3
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: 'dac ta r4 muc nang_tran (Q11 vong soan r4, #899)'
+  tran_cu: <= 8 tep / <= 1050 dong them
+  tran_moi: <= 3 tep / <= 1250 dong them

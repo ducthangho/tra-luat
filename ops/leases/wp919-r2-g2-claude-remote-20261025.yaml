@@ -73,3 +73,4 @@ prohibited_actions:
 - land
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+da_bi_thay_the: wp919-r3-g3-claude-remote-20261025

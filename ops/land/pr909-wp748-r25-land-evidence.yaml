@@ -6,7 +6,8 @@
 # (l909c 7aae60da, l909d 6863996f: gpt-6-astra, DO_DUOC) nam tren head CU va deu `changes_requested`. (5) khong co duyet ben neo
 # DUNG authorized_head_sha b5b6aef. (1) provenance CI §10.2.2 cua gate hau merge chua du bon moc. (8) spec v1 dong bang thieu
 # dong khai ADR-0052/ADR-0053 => tran thuc te 2 loi goi Codex / 3 tep 300 dong them, ca hai DA VUOT (xem tran_va_vi_pham).
-# Gate push master tren DUNG merge SHA 113e0d1: CHO_KET_QUA (attempt 2 dang chay).
+# Gate push master tren DUNG merge SHA 113e0d1: ci.yml 40155648667 attempt 2 XANH 23/23 + launcher-windows 40155648560 attempt 2 XANH 2/2 theo REST
+# run/jobs/check-run, kiem-gate rc=0 — chi la moc Run cua §10.2.2. Attempt 1 cua ca hai khong chay vi loi thanh toan Actions.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
 # review, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr909-wp748-r25-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-10-25.
@@ -42,7 +43,8 @@ pre_merge_checks:
   - {name: 'Codex connector tren head cuoi', sha: b5b6aefa66a8ad037ff34430d0210f3b6873913f, conclusion: 'completed, has_any_findings false', ghi_chu: 'measured — readback-comments-909.json comment 6392411114: codex-review-state commit_sha b5b6aef, status completed, has_any_findings false, trigger "Draft marked ready". KHONG di qua launcher.py run => khong bien nhan, khong model phuc vu.', nguon: readback-comments-909.json}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-909.json, readback-review-comments-909.json]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40155648667, sha: 113e0d1beff2b037648681ee1fa59f678cef0eba, conclusion: 'CHO_KET_QUA — attempt 1 khong chay (loi thanh toan Actions), attempt 2 dang chay; tep nay se cap nhat truoc khi xin merge'}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40155648667, run_attempt: 2, sha: 113e0d1beff2b037648681ee1fa59f678cef0eba, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', luc: '2026-10-25T02:48:22Z -> 2026-10-25T03:38:32Z', kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-113e0d1.txt: packet_loop.py kiem-gate suite 108838891531, check-runs filter=all, 23 ten tu readback-jobs-40155648667.json, rc=0', nguon: [readback-run-40155648667.json, readback-jobs-40155648667.json, readback-check-runs-113e0d1-all.json, readback-runs-master-113e0d1.json], ghi_chu: 'Attempt 1 ket pending 0 job vi loi thanh toan Actions; executor huy roi chay lai (attempt 2) sau khi chu kho bao da sua. Chi do Ubuntu. Day chi la moc Run cua §10.2.2. Moc Checkout, Workflow definition va Gate output: not_measured — log job va artifact khong luu; GraphQL WorkflowRun.file da tra 403 trong phien (ops/land/pr882-wp748-r23-provenance/do-lai-nguon-20261023/graphql-workflowrun-file-39891899558.txt), khong thu lai cho run nay. KHONG suy cac moc ay tu REST head_sha.'}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA', run_id: 40155648560, run_attempt: 2, sha: 113e0d1beff2b037648681ee1fa59f678cef0eba, conclusion: success, jobs: '2/2 success (windows-latest, ubuntu-latest), runner_id khac 0', luc: '2026-10-25T02:48:10Z -> 2026-10-25T02:53:27Z', nguon: [readback-run-40155648560.json, readback-jobs-40155648560.json, readback-check-runs-113e0d1-all.json], ghi_chu: 'measured — readback-check-runs-113e0d1-all.json: 27 check, 25 success + 2 failure; hai failure la job attempt 1 cua chinh run nay (check 121056372454, 121056372704; 02:45:12Z -> 02:45:14Z, annotation loi thanh toan Actions, runner_id 0) — khong job nao cua gate do.'}
 bookkeeping:
   - {item: 'rut han lease wp748-r25-g25-claude-remote-20261024', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'du lieu doc nguoc (PR #920, merge 632a967)', ket_qua: 'ops/land/pr909-wp748-r25-provenance/ vao master truoc tep nay; chu kho merge #920 khi tep nay chua co'}
@@ -108,7 +110,8 @@ trang_thai_packet:
     vi master da tien (9371628, gom #915 #917) — patch e739ac1..b5b6aef va 113e0d1^1..113e0d1 cung sha256 4ce19f40… (2 tep, +498/-3).
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 113e0d1: CHO_KET_QUA gate attempt 2;
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 113e0d1: CHUA DAT day du — measured: REST run/jobs/check-run 23/23 + 2/2 success va
+    kiem-gate rc=0 (moc Run); not_measured: moc Checkout, Workflow definition, Gate output cua §10.2.2/§10.2.3 (xem post_merge_checks);
     (2) lease da nha: rut han, 2/2 duong dan NGƯỜI_GIỮ 0 DAT; (3) bookkeeping: ho so nay; (4) review neo DUNG authorized_head_sha
     b5b6aef: chi Codex connector (0 finding); KHONG co luot launcher.py run nao tren b5b6aef; hai luot launcher tron (83d305f,
     aaad9ab) deu changes_requested (1 P1 + 3 P2; 1 P1 + 4 P2) va ban va vong 3 chua duoc reviewer nao do lai; (5) uy quyen land

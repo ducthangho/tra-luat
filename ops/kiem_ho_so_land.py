@@ -60,7 +60,8 @@ def _xet_mot_tep(tep, yaml):
         return "LOI", f"không phải UTF-8 (byte {e.start})", False
     try:
         doc = yaml.safe_load(van_ban)
-    except yaml.YAMLError as e:
+    except Exception as e:  # PR #918 (Codex P2): ngoài YAMLError, bộ dựng scalar còn ném ValueError
+        # (`2026-13-01`), AttributeError (`!!timestamp 'x'`), RecursionError (lồng sâu) — cả lớp là "không đọc được"
         return "LOI", f"YAML không đọc được ({type(e).__name__})", False
     if not isinstance(doc, dict):
         return "LOI", f"gốc tài liệu không phải ánh xạ ({type(doc).__name__})", False

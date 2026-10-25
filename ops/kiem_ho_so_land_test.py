@@ -243,8 +243,29 @@ def ca_b7_root_sai():
         shutil.rmtree(tam)
 
 
-CA = [ca_b1_rang_l6, ca_b1b_fail_close, ca_b1b_the_python, ca_b1b_thieu_pyyaml, ca_b2_mien_tru_hang,
-      ca_b2b_pham_vi, ca_glob_token, ca_b7_root_sai]
+def ca_b1b_scalar_hong():
+    """PR #918 (Codex P2): lỗi DỰNG scalar không phải YAMLError — phải ra LOI/rc 3, JSON hợp lệ, tệp khác vẫn báo."""
+    hong = {
+        "thang-13": "recorded_at: 2026-13-01\n",
+        "the-timestamp": "x: !!timestamp 'x'\n",
+        "the-int": "x: !!int 'x'\n",
+        "long-sau": "x: " + "[" * 3000 + "]" * 3000 + "\n",
+    }
+    for ten, nd in hong.items():
+        goc = _cay({_ld(ten): _ho_so(them=nd.rstrip("\n")) if ten != "long-sau" else nd, _ld("zz-tot"): _ho_so()})
+        try:
+            rc, kq, _, err = _chay(goc, tiem=True)
+            assert rc == 3, f"{ten}: rc {rc} (cần 3); {err[-200:]}"
+            assert "Traceback" not in err, f"{ten}: traceback"
+            assert kq is not None, f"{ten}: stdout không phải JSON"
+            theo = {t["duong_dan"]: t["trang_thai"] for t in kq["tep"]}
+            assert theo == {_ld(ten): "LOI", _ld("zz-tot"): "DAT"}, f"{ten}: {theo}"
+        finally:
+            shutil.rmtree(goc)
+
+
+CA = [ca_b1_rang_l6, ca_b1b_fail_close, ca_b1b_the_python, ca_b1b_scalar_hong, ca_b1b_thieu_pyyaml,
+      ca_b2_mien_tru_hang, ca_b2b_pham_vi, ca_glob_token, ca_b7_root_sai]
 
 
 def main():

@@ -22,10 +22,13 @@ depends_on_ghi_chu: >-
   nguoc con nguyen (ducthangho, OWNER).
 reviewer: codex
 reviewer_model_family: openai
-reviewer_execution_surface: codex_github_connector
+reviewer_execution_surface: codex_cli
 reviewer_transport: machine
 assurance_target: cross_approved
-assurance_ghi_chu: 'Dac ta: review thi hanh Codex cross_approved hoac human_audited; luot subagent Claude chi la review_deferred. Ho model connector KHONG_DO_DUOC => land co the con landed false (§8.1).'
+assurance_ghi_chu: >-
+  Dac ta: review thi hanh Codex cross_approved hoac human_audited; luot subagent Claude chi la review_deferred. Ho model
+  connector KHONG_DO_DUOC => land co the con landed false (§8.1). Reviewer thuc te co the la connector Codex GitHub tren PR
+  (bang capability khong co surface rieng cho connector); CLI codex can xac thuc lai (CODEX_AUTH_JSON vang trong container).
 access: read-write
 review_class: standard
 effective_review_class: sensitive

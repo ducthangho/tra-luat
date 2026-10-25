@@ -1600,9 +1600,16 @@ _RUST_LOG_DO_MODEL = "tungstenite::protocol=trace"
 # đều phải ĐOÁN dòng nào nguy hiểm; ở đây không đoán gì: thứ chạm đĩa là hằng số trong mã.
 # Đo 24-10-2026 (codex-cli 0.163.0, --json): phần không phải trace của stderr đúng bằng dòng này, 39 byte.
 _STDERR_CHO_PHEP = (b"Reading additional input from stdin...",)
+# v r26 (cross-review r26a R26-ALLOW-08): so NGUYÊN VĂN cả kết thúc dòng — đúng `\n` hoặc đúng một `\r\n`;
+# `rstrip(b"\r\n")` cũ cắt mọi CR/LF nên `…\r\r\n` lọt qua.
+_STDERR_CHO_PHEP_DONG = frozenset(x + duoi for x in _STDERR_CHO_PHEP for duoi in (b"\n", b"\r\n"))
 _RE_ANSI_B = re.compile(rb"\x1b\[[0-9;?]*[ -/]*[@-~]")
-_RE_KHUNG = re.compile(rb"^\d{4}-\d\d-\d\dT\S+\s+TRACE\s+tungstenite::protocol: Received message (\{.*\})\s*$")
+_DAU_NHAN = rb"^\d{4}-\d\d-\d\dT\S+\s+TRACE\s+tungstenite::protocol: Received message "
+_RE_KHUNG = re.compile(_DAU_NHAN + rb"(\{.*\})\s*$")
 _RE_UNG_VIEN = re.compile(rb'"type"\s*:\s*"response\.(?:created|completed)"')
+# v r26 (R25-EVID-05 tiếp): dòng NHẬN khung bị cắt thành nhiều đoạn đọc thì token `"type"` có thể rơi đúng chỗ cắt
+# và _RE_UNG_VIEN của từng đoạn không thấy gì; nên dòng mở đầu bằng header này mà không trọn vẹn thì tính là MẤT.
+_RE_DAU_NHAN = re.compile(_DAU_NHAN)
 _TRAN_DONG = 4 << 20          # trần một lần đọc (R25-ROBUST-04)
 _SU_KIEN_KHUNG = ("response.created", "response.completed")
 
@@ -1624,8 +1631,8 @@ def _loc_stderr_codex(ong, f_err, ket: list, loi: list, dem: dict | None = None)
     except Exception as e:
         loi.append(type(e).__name__)
         with contextlib.suppress(Exception):
-            for _ in iter(lambda: ong.read(_TRAN_DONG), b""):
-                pass
+            for doan in iter(lambda: ong.read(_TRAN_DONG), b""):
+                _dem_bo(dem, doan)   # R26-COUNT-09: byte xả đi vẫn là byte bị bỏ
 
 
 def _nhan_khung(sach: bytes):
@@ -1645,23 +1652,31 @@ def _nhan_khung(sach: bytes):
     return {"response_id": rid, "model": mdl, "su_kien": ev["type"]}
 
 
+def _dem_bo(dem: dict, doan: bytes) -> None:
+    """Một ĐOẠN ĐỌC bị bỏ (không phải một dòng vật lý: dòng dài hơn `_TRAN_DONG` là nhiều đoạn)."""
+    dem["dong_bo"] = dem.get("dong_bo", 0) + 1
+    dem["byte_bo"] = dem.get("byte_bo", 0) + len(doan)
+
+
 def _loc_tung_dong(ong, f_err, ket: list, dem: dict) -> None:
     tron = True                  # đầu đoạn đang đọc là đầu một dòng (lần đọc trước kết thúc bằng xuống dòng)
     for dong in iter(lambda: ong.readline(_TRAN_DONG), b""):
         dau_dong, tron = tron, dong.endswith(b"\n")
         ca_dong = dau_dong and tron
-        if ca_dong and dong.rstrip(b"\r\n") in _STDERR_CHO_PHEP:
+        if ca_dong and dong in _STDERR_CHO_PHEP_DONG:
             try:
                 f_err.write(dong)
             except ValueError:
-                pass             # tệp đã đóng vì hậu duệ giữ ống quá hạn chờ: bỏ, không ghi lệch chỗ
+                _dem_bo(dem, dong)   # tệp đã đóng vì hậu duệ giữ ống quá hạn chờ: bỏ, không ghi lệch chỗ
+            except Exception:
+                _dem_bo(dem, dong)
+                raise
             continue
-        dem["dong_bo"] = dem.get("dong_bo", 0) + 1
-        dem["byte_bo"] = dem.get("byte_bo", 0) + len(dong)
+        _dem_bo(dem, dong)
         sach = _RE_ANSI_B.sub(b"", dong)
         m = _nhan_khung(sach) if ca_dong else None
         if m is None:
-            if _RE_UNG_VIEN.search(sach):
+            if _RE_UNG_VIEN.search(sach) or (dau_dong and not tron and _RE_DAU_NHAN.match(sach)):
                 dem["mat"] = dem.get("mat", 0) + 1
         elif not any(x["response_id"] == m["response_id"] and x["model"] == m["model"] for x in ket):
             ket.append(m)
@@ -1681,18 +1696,38 @@ def _ket_luan_model(ket: list, loi: list, con_doc: bool, mat: int = 0) -> tuple:
     return "DO_DUOC", None
 
 
-def _ghi_ket_qua_model(ban_ghi: dict, luong, ket: list, loi: list, dem: dict) -> None:
-    """Chốt kết quả đo vào sổ từ MỘT ảnh chụp (R25-RACE-06): trạng thái luồng đọc được CHỐT TRƯỚC, rồi mới chụp
-    danh sách/lỗi/bộ đếm; trạng thái và các trường ghi sổ suy từ cùng ảnh chụp ấy."""
-    con_doc = luong is not None and luong.is_alive()
-    ket_s, loi_s, dem_s = list(ket), list(loi), dict(dem)
-    tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))
-    ban_ghi["model_phuc_vu"] = ket_s
-    ban_ghi["model_phuc_vu_trang_thai"] = tt
-    if ld:
-        ban_ghi["model_phuc_vu_ly_do"] = ld
-    ban_ghi["stderr_bo_dong"] = dem_s.get("dong_bo", 0)
-    ban_ghi["stderr_bo_byte"] = dem_s.get("byte_bo", 0)
+class _BoLocStderr:
+    """Toàn bộ trạng thái đo của một lượt codex trong MỘT đối tượng (R25-TEST-03 tiếp): `lenh_run` chỉ trao đối tượng,
+    nên không còn đối số rời nào (lỗi, bộ đếm) để một lời gọi lỡ tay thay bằng giá trị rỗng. Trạng thái luồng đọc được
+    CHỐT ngay ở ranh giới hạn chờ (R26-EOF-10), không lấy mẫu lại về sau."""
+
+    def __init__(self, ong, f_err):
+        self.ket: list = []
+        self.loi: list = []
+        self.dem: dict = {}
+        self.con_doc = None      # None = chưa chờ; True/False = chốt lúc join trả về
+        self.luong = threading.Thread(target=_loc_stderr_codex, args=(ong, f_err, self.ket, self.loi, self.dem),
+                                      daemon=True)
+
+    def bat_dau(self) -> None:
+        self.luong.start()
+
+    def cho(self, han: float) -> None:
+        self.luong.join(timeout=han)
+        self.con_doc = self.luong.is_alive()
+
+    def ghi_so(self, ban_ghi: dict) -> None:
+        """Chốt kết quả vào sổ từ MỘT ảnh chụp (R25-RACE-06): trạng thái luồng đã chốt ở `cho`, rồi mới chụp
+        danh sách/lỗi/bộ đếm; trạng thái và các trường ghi sổ suy từ cùng ảnh chụp ấy."""
+        con_doc = True if self.con_doc is None else self.con_doc
+        ket_s, loi_s, dem_s = list(self.ket), list(self.loi), dict(self.dem)
+        tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))
+        ban_ghi["model_phuc_vu"] = ket_s
+        ban_ghi["model_phuc_vu_trang_thai"] = tt
+        if ld:
+            ban_ghi["model_phuc_vu_ly_do"] = ld
+        ban_ghi["stderr_bo_dong"] = dem_s.get("dong_bo", 0)   # số ĐOẠN ĐỌC bị bỏ, xem _dem_bo
+        ban_ghi["stderr_bo_byte"] = dem_s.get("byte_bo", 0)
 
 
 def lenh_run(a) -> int:
@@ -1819,10 +1854,7 @@ def lenh_run(a) -> int:
     # Lượt codex: stderr đi qua ỐNG và bộ lọc danh sách cho phép, tệp mở nhị phân để ghi đúng byte.
     f_err = (thu_muc / "stderr.log").open("wb" if do_model else "w", **({} if do_model else {"encoding": "utf-8"}))
     them = {}
-    model_ket: list = []
-    loi_loc: list = []
-    dem_loc: dict = {}
-    luong_loc = None
+    bo_loc = None
     if do_model:
         env = dict(os.environ)
         # GHI ĐÈ, không nối: RUST_LOG thừa kế có thể bật target khác mang credential (R25-SEC-01).
@@ -1841,9 +1873,8 @@ def lenh_run(a) -> int:
                              stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
                              stdin=subprocess.DEVNULL, **them)
         if do_model:
-            luong_loc = threading.Thread(target=_loc_stderr_codex, args=(p.stderr, f_err, model_ket, loi_loc, dem_loc),
-                                         daemon=True)
-            luong_loc.start()
+            bo_loc = _BoLocStderr(p.stderr, f_err)
+            bo_loc.bat_dau()
     except (OSError, ValueError) as e:
         if isinstance(e, ValueError):
             ban_ghi.pop("void_reason", None)
@@ -1908,12 +1939,17 @@ def lenh_run(a) -> int:
         ma = 130
     finally:
         f_out.close()
-        if luong_loc is not None:
-            # Hậu duệ còn giữ ống thì EOF không tới: chờ có hạn, rồi nói thẳng danh sách có thể thiếu.
-            luong_loc.join(timeout=10)
+        if bo_loc is not None:
+            # Hậu duệ còn giữ ống thì EOF không tới: chờ có hạn, CHỐT trạng thái tại đây, rồi mới đóng tệp.
+            bo_loc.cho(10)
         f_err.close()
     if do_model:
-        _ghi_ket_qua_model(ban_ghi, luong_loc, model_ket, loi_loc, dem_loc)
+        if bo_loc is None:
+            ban_ghi["model_phuc_vu"] = []
+            ban_ghi["model_phuc_vu_trang_thai"] = "KHONG_DO_DUOC"
+            ban_ghi["model_phuc_vu_ly_do"] = "khong khoi dong duoc tien trinh"
+        else:
+            bo_loc.ghi_so(ban_ghi)
 
     if khoa is None and qua_han:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"

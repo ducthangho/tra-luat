@@ -30,7 +30,6 @@ import signal
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -6595,10 +6594,10 @@ def r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai():
         ("mat_sau_khung", io.BytesIO(_r25_khung("response.created", "r1", "m1").encode()
                                      + _r25_khung("response.completed", "", "m1").encode()), "khong doc duoc"),
     ]:
-        ket, loi, dem, ban_ghi = [], [], {}, {}
-        lu = threading.Thread(target=m._loc_stderr_codex, args=(ong, io.BytesIO(), ket, loi, dem))
-        lu.start(); lu.join(10)
-        m._ghi_ket_qua_model(ban_ghi, lu, ket, loi, dem)
+        ban_ghi = {}
+        bo = m._BoLocStderr(ong, io.BytesIO())
+        bo.bat_dau(); bo.cho(10)
+        bo.ghi_so(ban_ghi)
         bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
              and mong in (ban_ghi.get("model_phuc_vu_ly_do") or "")
              and [x["response_id"] for x in ban_ghi.get("model_phuc_vu", [])] == ["r1"], f"{ten}: {ban_ghi}")
@@ -6609,17 +6608,127 @@ def r925_ghi_ket_qua_chot_luong_TRUOC_roi_moi_chup():
     m = _tai_launcher_thu()
     a_ = {"response_id": "ra", "model": "m", "su_kien": "response.created"}
     b_ = {"response_id": "rb", "model": "m", "su_kien": "response.completed"}
-    ket = [a_]
+    bo = m._BoLocStderr(None, None)
+    bo.ket.append(a_)
 
     class _Luong:
+        def join(self, timeout=None):
+            pass
+
         def is_alive(self):
-            ket.append(b_)       # luong doc xong DUNG luc bi hoi
+            bo.ket.append(b_)    # luong doc xong DUNG luc bi hoi
             return False
 
+    bo.luong = _Luong()
     ban_ghi = {}
-    m._ghi_ket_qua_model(ban_ghi, _Luong(), ket, [], {})
+    bo.cho(10); bo.ghi_so(ban_ghi)
     bang(ban_ghi.get("model_phuc_vu") == [a_, b_] and ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC",
          f"so ghi danh sach khac voi danh sach da ket luan: {ban_ghi}")
+
+
+# wp748 r26 (cross-review r26a): mỗi phát hiện một ca, mỗi ca một đột biến riêng ở bảng DOT_BIEN.
+@ca
+def r926_chot_trang_thai_luong_O_RANH_GIOI_cho_khong_lay_mau_lai():
+    # R26-EOF-10: luồng còn đọc lúc hết hạn chờ rồi mới xong SAU ĐÓ (sau khi tệp đã đóng) — sổ vẫn phải ghi
+    # "ống còn mở", vì phần đọc muộn không còn chỗ ghi đúng.
+    m = _tai_launcher_thu()
+    bo = m._BoLocStderr(None, None)
+    trang = {"song": True}
+
+    class _Luong:
+        def join(self, timeout=None):
+            pass
+
+        def is_alive(self):
+            return trang["song"]
+
+    bo.luong = _Luong()
+    bo.cho(10)
+    trang["song"] = False                       # đọc xong muộn
+    bo.ket.append({"response_id": "r", "model": "m", "su_kien": "response.created"})
+    ban_ghi = {}
+    bo.ghi_so(ban_ghi)
+    bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
+         and "con mo" in (ban_ghi.get("model_phuc_vu_ly_do") or ""),
+         f"lay mau lai trang thai luong sau ranh gioi cho: {ban_ghi}")
+
+
+@ca
+def r926_dong_NHAN_cat_nhieu_doan_ma_token_roi_cho_cat_van_tinh_mat():
+    # R25-EVID-05 tiếp: token `"type"` rơi đúng chỗ cắt đoạn đọc nên không đoạn nào khớp _RE_UNG_VIEN.
+    m = _tai_launcher_thu()
+    m._TRAN_DONG = 128
+    dau = b"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message "
+    tok = b'"type":"response.created"'
+    dem_lap = 128 - len(dau) - len(b'{"x":"') - len(b'","') - 5
+    khung = dau + b'{"x":"' + b"p" * dem_lap + b'","' + tok + b',"response":{"id":"r","model":"m"}}' + b"\n"
+    vi_tri = khung.index(tok)
+    bang(vi_tri < 128 < vi_tri + len(tok), f"fixture sai: token khong vat qua cho cat ({vi_tri})")
+    _, ket, loi, dem = _r25_loc(m, khung)
+    bang(not ket and not loi and dem.get("mat", 0) >= 1, f"dong nhan cat nhieu doan khong tinh mat: {ket} {dem}")
+    for ten, du in [("dong_dai_khong_header", b"x" * 300 + b"\n"),
+                    ("header_giua_dong", b"x" * 128 + dau + b"q" * 300 + b"\n"),
+                    ("khung_tron_su_kien_khac", _r25_khung("response.output_text.delta", "r", "m").encode())]:
+        m._TRAN_DONG = 4096 if ten == "khung_tron_su_kien_khac" else 128   # khung ấy dài hơn 128: phải TRỌN một đoạn
+        _, ket, _, dem = _r25_loc(m, du)
+        bang(not dem.get("mat"), f"{ten}: dong khong phai khung nhan bi cat van bi tinh mat: {dem}")
+
+
+@ca
+def r926_model_khong_utf8_nghiem_khong_nhan_va_tinh_mat():
+    m = _tai_launcher_thu()
+    khung = _r25_khung("response.created", "r", "MODELX").encode().replace(b"MODELX", b"m" + bytes([0xFF]))
+    _, ket, loi, dem = _r25_loc(m, khung)
+    bang(not ket and not loi and dem.get("mat") == 1, f"model khong UTF-8 van duoc nhan: {ket} {dem}")
+
+
+@ca
+def r926_cho_phep_chi_dung_LF_hoac_mot_CRLF():
+    # R26-ALLOW-08: cắt MỌI CR/LF ở cuối dòng thì `…CR CR LF` lọt qua danh sách cho phép.
+    m = _tai_launcher_thu()
+    goc = _R25_DONG_GIU.rstrip("\n").encode()
+    for ten, du, mong in [("LF", goc + b"\n", goc + b"\n"), ("CRLF", goc + b"\r\n", goc + b"\r\n"),
+                          ("CR_CRLF", goc + b"\r\r\n", b""), ("LF_thua", goc + b"\n\n", goc + b"\n")]:
+        ghi, _, _, _ = _r25_loc(m, du)
+        bang(ghi == mong, f"{ten}: {ghi!r}")
+    m._TRAN_DONG = len(_R25_DONG_GIU)
+    ghi, _, _, dem = _r25_loc(m, b"x" * len(_R25_DONG_GIU) + _R25_DONG_GIU.encode())
+    bang(ghi == b"" and dem.get("dong_bo") == 2, f"doan cuoi cua dong dai trung dong cho phep van cham dia: {ghi!r}")
+
+
+@ca
+def r926_byte_xa_va_dong_khong_ghi_duoc_van_duoc_dem():
+    # R26-COUNT-09: byte xả đi sau khi bộ lọc hỏng, và dòng cho phép không ghi được vì tệp đã đóng, đều là BỎ.
+    import io
+    m = _tai_launcher_thu()
+
+    class _OngHong(io.BytesIO):
+        def readline(self, n=-1):
+            if self.tell():
+                raise RuntimeError("ong hong")
+            return super().readline(n)
+
+    du = b"dau\n" + b"y" * 100
+    dem, loi = {}, []
+    m._loc_stderr_codex(_OngHong(du), io.BytesIO(), [], loi, dem)
+    bang(loi == ["RuntimeError"] and dem.get("byte_bo") == len(du), f"byte xa di khong duoc dem: {dem}")
+    f = io.BytesIO()
+    f.close()
+    dem = {}
+    m._loc_stderr_codex(io.BytesIO(_R25_DONG_GIU.encode()), f, [], [], dem)
+    bang(dem.get("byte_bo") == len(_R25_DONG_GIU) and dem.get("dong_bo") == 1, f"dong khong ghi duoc khong dem: {dem}")
+
+
+@ca
+def r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC():
+    # R26-TEST-03: đường đầu-cuối qua `lenh_run` — khung mất phải tới được run.json.
+    with San() as s:
+        err = _r25_khung("response.created", "r1", "gpt-6-astra") + _r25_khung("response.completed", "", "gpt-6-astra")
+        r, tm, d = _r25_chay(s, err)
+        bang(r.returncode == 0, f"launcher rc={r.returncode}: {r.stderr}")
+        bang(d.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
+             and "khong doc duoc" in (d.get("model_phuc_vu_ly_do") or "")
+             and [x["response_id"] for x in d.get("model_phuc_vu", [])] == ["r1"], f"mat khung khong toi run.json: {d}")
 
 
 @ca
@@ -10390,11 +10499,11 @@ def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
 DOT_BIEN = [
     # wp748 r25: mỗi chốt đo model phục vụ một đột biến gỡ đúng chốt của nó.
     # wp748 r25 vòng 3: mỗi chốt của bộ lọc danh-sách-CHO-PHÉP-NGUYÊN-VĂN một đột biến riêng.
-    ("r25_ghi_moi_dong_tron", ('if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:', 'if ca_dong:'), ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat", "r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
-    ("r25_cho_phep_theo_tien_to", ('if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:',
+    ("r25_ghi_moi_dong_tron", ('if ca_dong and dong in _STDERR_CHO_PHEP_DONG:', 'if ca_dong:'), ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat", "r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
+    ("r25_cho_phep_theo_tien_to", ('if ca_dong and dong in _STDERR_CHO_PHEP_DONG:',
                                    'if ca_dong and dong.startswith(_STDERR_CHO_PHEP):'), ["r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
-    ("r25_cho_phep_ca_dong_cut", ('if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:',
-                                  'if dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:'), ["r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
+    ("r25_cho_phep_ca_dong_cut", ('if ca_dong and dong in _STDERR_CHO_PHEP_DONG:',
+                                  'if dong in _STDERR_CHO_PHEP_DONG:'), ["r926_cho_phep_chi_dung_LF_hoac_mot_CRLF"]),
     ("r25_bo_go_ansi", ('        sach = _RE_ANSI_B.sub(b"", dong)\n', '        sach = dong\n'), ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
     ("r25_khung_moi_target", ('TRACE\\s+tungstenite::protocol: Received message', 'TRACE\\s+\\S+: .*?Received message'),
      ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
@@ -10409,8 +10518,8 @@ DOT_BIEN = [
      ["r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat"]),
     ("r25_doc_khong_tran", ('    for dong in iter(lambda: ong.readline(_TRAN_DONG), b""):',
                             '    for dong in iter(ong.readline, b""):'), ["r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han"]),
-    ("r25_xa_ong_khong_tran", ('            for _ in iter(lambda: ong.read(_TRAN_DONG), b""):',
-                               '            for _ in iter(ong.read, b""):'), ["r925_bo_loc_hong_xa_ong_co_gioi_han"]),
+    ("r25_xa_ong_khong_tran", ('            for doan in iter(lambda: ong.read(_TRAN_DONG), b""):',
+                               '            for doan in iter(ong.read, b""):'), ["r925_bo_loc_hong_xa_ong_co_gioi_han"]),
     ("r25_noi_rust_log_thua_ke", ('        env["RUST_LOG"] = _RUST_LOG_DO_MODEL\n',
                                   '        env["RUST_LOG"] = (rust_log_cu + "," if rust_log_cu else "") + _RUST_LOG_DO_MODEL\n'),
      ["r925_rust_log_thua_ke_bi_GHI_DE_khong_noi"]),
@@ -10426,17 +10535,34 @@ DOT_BIEN = [
                                  'tt, ld = _ket_luan_model(ket_s, [], con_doc, dem_s.get("mat", 0))'), ["r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai"]),
     ("r25_so_khong_chuyen_mat", ('tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))',
                                  'tt, ld = _ket_luan_model(ket_s, loi_s, con_doc)'), ["r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai"]),
-    ("r25_chup_truoc_chot_luong", ('    con_doc = luong is not None and luong.is_alive()\n    ket_s, loi_s, dem_s = list(ket), list(loi), dict(dem)\n',
-                                   '    ket_s, loi_s, dem_s = list(ket), list(loi), dict(dem)\n    con_doc = luong is not None and luong.is_alive()\n'),
+    ("r25_chup_truoc_chot_luong", ('        self.luong.join(timeout=han)\n        self.con_doc = self.luong.is_alive()\n',
+                                   '        self.luong.join(timeout=han)\n'),
      ["r925_ghi_ket_qua_chot_luong_TRUOC_roi_moi_chup"]),
-    ("r25_doc_ong_khong_han", ('            luong_loc.join(timeout=10)\n', '            luong_loc.join()\n'),
+    ("r25_doc_ong_khong_han", ('        self.luong.join(timeout=han)\n', '        self.luong.join()\n'),
      ["r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC"]),
-    ("r25_bo_loc_hong_khong_xa_ong", ('            for _ in iter(lambda: ong.read(_TRAN_DONG), b""):\n                pass\n', '            pass\n'),
+    ("r25_bo_loc_hong_khong_xa_ong", ('            for doan in iter(lambda: ong.read(_TRAN_DONG), b""):\n                _dem_bo(dem, doan)   # R26-COUNT-09: byte xả đi vẫn là byte bị bỏ\n', '            pass\n'),
      ["r925_bo_loc_hong_thi_ghi_loi_va_xa_ong_khong_ghi_dong_chua_loc"]),
     ("r25_bo_loc_hong_khong_ghi_loi", ('        loi.append(type(e).__name__)\n', ''),
      ["r925_bo_loc_hong_thi_ghi_loi_va_xa_ong_khong_ghi_dong_chua_loc"]),
     ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
+    # wp748 r26: mỗi bản vá của cross-review r26a một đột biến gỡ đúng nó.
+    ("r26_lay_mau_lai_luong_muon", ('        con_doc = True if self.con_doc is None else self.con_doc\n',
+                                    '        con_doc = self.luong.is_alive()\n'), ["r926_chot_trang_thai_luong_O_RANH_GIOI_cho_khong_lay_mau_lai"]),
+    ("r26_bo_dau_nhan_cat_doan", (' or (dau_dong and not tron and _RE_DAU_NHAN.match(sach))', ''),
+     ["r926_dong_NHAN_cat_nhieu_doan_ma_token_roi_cho_cat_van_tinh_mat"]),
+    ("r26_dau_nhan_moi_doan", ('(dau_dong and not tron and _RE_DAU_NHAN.match(sach))', '(_RE_DAU_NHAN.search(sach))'),
+     ["r926_dong_NHAN_cat_nhieu_doan_ma_token_roi_cho_cat_van_tinh_mat"]),
+    ("r26_utf8_thay_the", ('ev = json.loads(k.group(1).decode("utf-8"))', 'ev = json.loads(k.group(1).decode("utf-8", "replace"))'),
+     ["r926_model_khong_utf8_nghiem_khong_nhan_va_tinh_mat"]),
+    ("r26_cho_phep_cat_moi_CRLF", ('if ca_dong and dong in _STDERR_CHO_PHEP_DONG:', 'if ca_dong and dong.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:'),
+     ["r926_cho_phep_chi_dung_LF_hoac_mot_CRLF"]),
+    ("r26_xa_khong_dem", ('                _dem_bo(dem, doan)   # R26-COUNT-09: byte xả đi vẫn là byte bị bỏ\n', '                pass\n'),
+     ["r926_byte_xa_va_dong_khong_ghi_duoc_van_duoc_dem"]),
+    ("r26_tep_dong_khong_dem", ('                _dem_bo(dem, dong)   # tệp đã đóng vì hậu duệ giữ ống quá hạn chờ: bỏ, không ghi lệch chỗ\n',
+                                '                pass\n'), ["r926_byte_xa_va_dong_khong_ghi_duoc_van_duoc_dem"]),
+    ("r26_so_bo_qua_mat_dau_cuoi", ('tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))',
+                                    'tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, 0)'), ["r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.
     ("wp802_bo_nhanh_BI_CHE", ('        if thay is not None and hong_dau is not None:', '        if False:'),
      ["r802_doctor_rg_tran_hong_la_BI_CHE", "r802_doctor_git_tran_hong_la_BI_CHE"]),

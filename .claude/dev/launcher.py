@@ -1659,8 +1659,7 @@ def _phan_loai_khung(sach: bytes):
         ev = json.loads(k.group(1).decode("utf-8"))
     except ValueError:
         return None, None
-    if not isinstance(ev, dict):
-        return None, None
+    # `_RE_KHUNG` bắt `{…}` trọn dòng nên json.loads hoặc trả dict hoặc ném — không cần kiểm kiểu ở đây.
     if ev.get("type") not in _SU_KIEN_KHUNG:
         return None, "khac"
     r = ev.get("response")
@@ -1716,6 +1715,8 @@ def _ket_dong(dau: bytes, so_doan: int, tron: bool, ung_vien: bool, ket: list, d
             loai = k.group(1).decode("utf-8")
         except UnicodeDecodeError:
             loai = None          # loại không đọc được chặt: KHÔNG xác nhận là sự kiện khác
+        # Tiền tố là sự kiện ứng viên thì token gọn thường đã bắt ở `ung_vien` phía trên; còn tới được đây (chỉ dựng
+        # được khi gọi thẳng) thì rơi xuống KHÔNG RÕ chứ không tha — chốt đóng, không mở.
         if loai is not None and loai not in _SU_KIEN_KHUNG:
             return
     if _RE_DAU_JSON.match(sach):
@@ -1730,14 +1731,14 @@ def _loc_tung_dong(ong, f_err, ket: list, dem: dict) -> None:
             dau, duoi, ung_vien, so_doan = b"", b"", False, 0
         het_dong = doan.endswith(b"\n")
         so_doan += 1
-        if so_doan == 1 and het_dong and doan in _STDERR_CHO_PHEP_DONG:
+        if so_doan == 1 and doan in _STDERR_CHO_PHEP_DONG:      # có trong tập ⇒ đã kết thúc bằng `\n`
             _ghi_het(f_err, doan, dem)
             continue
         _dem_bo(dem, doan)
         if so_doan == 1:
             dau = doan               # dòng một đoạn cần TRỌN đoạn để parse
-        elif len(dau) < _TRAN_DAU_DONG:
-            dau = (dau + doan)[:max(len(dau), _TRAN_DAU_DONG)]
+        else:
+            dau += doan[:max(0, _TRAN_DAU_DONG - len(dau))]     # tiền tố có trần, kể cả khi đoạn đầu đã vượt trần
         gon = _RE_KHOANG_TRANG_B.sub(b"", _RE_ANSI_B.sub(b"", duoi + doan))
         ung_vien = ung_vien or bool(_RE_UNG_VIEN_GON.search(gon))
         duoi = gon[-_DUOI_UNG_VIEN:]

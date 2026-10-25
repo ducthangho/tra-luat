@@ -6761,7 +6761,7 @@ def r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC():
         for tran in range(60, len(du) + 2):
             m._TRAN_DONG = tran
             ban_ghi, dem = _r26_trang_thai(m, du)
-            bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC" and (dem.get("mat") or dem.get("khong_ro")),
+            bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC" and dem.get("mat"),
                  f"{ten} tran={tran}: khung vat cho cat van DO_DUOC: {dem} {ban_ghi.get('model_phuc_vu_ly_do')}")
 
 
@@ -6912,6 +6912,47 @@ def r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC():
     bang(ong.closed, "ong stderr khong duoc dong khi khong co luong doc")
     bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC" and "RuntimeError" in (ban_ghi.get("model_phuc_vu_ly_do") or ""),
          f"khong co luong doc ma so khong ghi loi: {ban_ghi}")
+
+
+@ca
+def r926_response_hong_tung_vi_tu_tinh_mat_khong_loi():
+    # Mỗi vị từ của khung ứng viên (response là object, id/model là chuỗi khác rỗng sau strip) một ca: hỏng thì là MẤT,
+    # không được thành lỗi bộ lọc, không được nhận.
+    m = _tai_launcher_thu()
+    dau = b"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message "
+    for ten, r in [("response_chuoi", "x"), ("response_thieu", None), ("id_so", {"id": 5, "model": "m"}),
+                   ("id_rong", {"id": "", "model": "m"}), ("id_trang", {"id": "  ", "model": "m"}),
+                   ("model_so", {"id": "r", "model": 5}), ("model_rong", {"id": "r", "model": ""}),
+                   ("model_trang", {"id": "r", "model": "  "})]:
+        ev = {"type": "response.created"}
+        if r is not None:
+            ev["response"] = r
+        _, ket, loi, dem = _r25_loc(m, dau + json.dumps(ev).encode() + b"\n")
+        bang(not ket and not loi and dem.get("mat") == 1 and not dem.get("khong_ro"), f"{ten}: {ket} {loi} {dem}")
+
+
+@ca
+def r926_tien_to_dong_dai_co_tran_va_noi_qua_doan():
+    # Tiền tố dùng để xác nhận loại của dòng nhiều đoạn được NỐI qua các đoạn và có TRẦN `_TRAN_DAU_DONG`.
+    m = _tai_launcher_thu()
+    dau = b"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message "
+    dong = dau + b"{" + b" " * 60 + b'"type": "response.output_text.delta", "pad": "' + b"p" * 300 + b'"}\n'
+    m._TRAN_DONG = 120
+    for tran_dau, mong in [(4096, 0), (100, 1), (150, 1)]:
+        m._TRAN_DAU_DONG = tran_dau
+        _, _, _, dem = _r25_loc(m, dong)
+        bang(dem.get("khong_ro", 0) == mong and not dem.get("mat"), f"tran_dau={tran_dau}: {dem} (mong khong_ro={mong})")
+
+
+@ca
+def r926_ket_dong_tien_to_ung_vien_ma_khong_token_la_KHONG_RO():
+    # Nhánh chỉ dựng được khi gọi thẳng: dòng nhiều đoạn, tiền tố nói là sự kiện ỨNG VIÊN mà `ung_vien` chưa bật.
+    # Không được tha như "sự kiện khác".
+    m = _tai_launcher_thu()
+    dau = b"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message "
+    dem = {}
+    m._ket_dong(dau + b'{"type":"response.created","pad":"', 2, True, False, [], dem)
+    bang(dem.get("khong_ro") == 1 and not dem.get("mat"), f"tien to ung vien bi tha: {dem}")
 
 
 @ca
@@ -10737,15 +10778,15 @@ def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
 
 DOT_BIEN = [
     # wp748 r25/r26: mỗi chốt đo model phục vụ một đột biến gỡ đúng chốt của nó (r26 vòng 2: bộ lọc phân loại theo DÒNG).
-    ("r25_ghi_moi_dong_tron", ('if so_doan == 1 and het_dong and doan in _STDERR_CHO_PHEP_DONG:', 'if so_doan == 1 and het_dong:'),
+    ("r25_ghi_moi_dong_tron", ('if so_doan == 1 and doan in _STDERR_CHO_PHEP_DONG:', 'if so_doan == 1 and het_dong:'),
      ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat", "r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
-    ("r25_cho_phep_theo_tien_to", ('if so_doan == 1 and het_dong and doan in _STDERR_CHO_PHEP_DONG:',
-                                   'if so_doan == 1 and het_dong and doan.startswith(_STDERR_CHO_PHEP):'),
+    ("r25_cho_phep_theo_tien_to", ('if so_doan == 1 and doan in _STDERR_CHO_PHEP_DONG:',
+                                   'if so_doan == 1 and doan.startswith(_STDERR_CHO_PHEP):'),
      ["r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),
-    ("r25_cho_phep_ca_dong_cut", ('if so_doan == 1 and het_dong and doan in _STDERR_CHO_PHEP_DONG:', 'if doan in _STDERR_CHO_PHEP_DONG:'),
+    ("r25_cho_phep_ca_dong_cut", ('if so_doan == 1 and doan in _STDERR_CHO_PHEP_DONG:', 'if doan in _STDERR_CHO_PHEP_DONG:'),
      ["r926_cho_phep_chi_dung_LF_hoac_mot_CRLF"]),
-    ("r26_cho_phep_cat_moi_CRLF", ('if so_doan == 1 and het_dong and doan in _STDERR_CHO_PHEP_DONG:',
-                                   'if so_doan == 1 and het_dong and doan.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:'),
+    ("r26_cho_phep_cat_moi_CRLF", ('if so_doan == 1 and doan in _STDERR_CHO_PHEP_DONG:',
+                                   'if so_doan == 1 and doan.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:'),
      ["r926_cho_phep_chi_dung_LF_hoac_mot_CRLF"]),
     ("r25_bo_go_ansi", ('    sach = _RE_ANSI_B.sub(b"", dau)\n', '    sach = dau\n'),
      ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
@@ -10782,7 +10823,7 @@ DOT_BIEN = [
     ("r26_bo_xac_nhan_su_kien_khac", ('        if loai is not None and loai not in _SU_KIEN_KHUNG:\n            return\n',
                                       '        if False:\n            return\n'),
      ["r926_dong_NHAN_dai_su_kien_khac_khong_tinh_mat_moi_tran"]),
-    ("r26_dau_dong_khong_noi", ('            dau = (dau + doan)[:max(len(dau), _TRAN_DAU_DONG)]\n', '            pass\n'),
+    ("r26_dau_dong_khong_noi", ('            dau += doan[:max(0, _TRAN_DAU_DONG - len(dau))]', '            pass'),
      ["r926_dong_NHAN_dai_su_kien_khac_khong_tinh_mat_moi_tran"]),
     ("r26_loai_khong_utf8_thay_the", ('            loai = k.group(1).decode("utf-8")\n', '            loai = k.group(1).decode("utf-8", "replace")\n'),
      ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
@@ -10858,6 +10899,41 @@ DOT_BIEN = [
      ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
     ("r26_ghi_bo_chot_0_byte", ('            if not n:\n                raise OSError("write tra 0 byte")\n', ''),
      ["r926_ghi_het_dem_dung_phan_chua_ghi"]),
+    # r26 vòng 4 (cross-review r26d R26-TEST-13): rà TOÀN BỘ vị từ của bộ lọc, mỗi vị từ một đột biến riêng.
+    ("r26_mot_doan_bo_dieu_kien_so_doan", ('    if so_doan == 1 and tron:\n', '    if tron:\n'),
+     ["r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han"]),
+    ("r26_doc_tron_khong_ro_ca_su_kien_khac", ('        elif loai is None and _RE_DAU_JSON.match(sach):\n', '        elif _RE_DAU_JSON.match(sach):\n'),
+     ["r926_dong_NHAN_dai_su_kien_khac_khong_tinh_mat_moi_tran"]),
+    ("r26_doc_tron_khong_ro_khong_doi_json", ('        elif loai is None and _RE_DAU_JSON.match(sach):\n', '        elif loai is None:\n'),
+     ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
+    ("r26_doc_tron_bo_token", ('        elif loai == "ung_vien_hong" or ung_vien:', '        elif loai == "ung_vien_hong":'),
+     ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r26_tien_to_ung_vien_tha", ('        if loai is not None and loai not in _SU_KIEN_KHUNG:\n', '        if loai is not None:\n'),
+     ["r926_ket_dong_tien_to_ung_vien_ma_khong_token_la_KHONG_RO"]),
+    ("r26_tien_to_khong_tran", ('            dau += doan[:max(0, _TRAN_DAU_DONG - len(dau))]', '            dau += doan'),
+     ["r926_tien_to_dong_dai_co_tran_va_noi_qua_doan"]),
+    ("r26_tien_to_bo_max", ('            dau += doan[:max(0, _TRAN_DAU_DONG - len(dau))]', '            dau += doan[:_TRAN_DAU_DONG - len(dau)]'),
+     ["r926_tien_to_dong_dai_co_tran_va_noi_qua_doan"]),
+    ("r26_token_khong_dinh", ('        ung_vien = ung_vien or bool(_RE_UNG_VIEN_GON.search(gon))\n', '        ung_vien = bool(_RE_UNG_VIEN_GON.search(gon))\n'),
+     ["r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC"]),
+    ("r26_khong_dat_lai_moi_dong", ('        if het_dong:\n            dau, duoi, ung_vien, so_doan = b"", b"", False, 0\n', ''),
+     ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
+    ("r26_bo_dong_cut_EOF", ('    if not het_dong:\n        _ket_dong(dau, so_doan, False, ung_vien, ket, dem)\n', ''),
+     ["r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat"]),
+    ("r26_response_khong_kiem_object", ('(r.get("id"), r.get("model")) if isinstance(r, dict) else (None, None)', '(r.get("id"), r.get("model"))'),
+     ["r926_response_hong_tung_vi_tu_tinh_mat_khong_loi"]),
+    ("r26_id_khong_kiem_chuoi", ('if not (isinstance(rid, str) and rid.strip() and', 'if not (rid.strip() and'),
+     ["r926_response_hong_tung_vi_tu_tinh_mat_khong_loi"]),
+    ("r26_id_khong_strip", ('if not (isinstance(rid, str) and rid.strip() and', 'if not (isinstance(rid, str) and rid and'),
+     ["r926_response_hong_tung_vi_tu_tinh_mat_khong_loi"]),
+    ("r26_model_khong_kiem_chuoi", ('and isinstance(mdl, str) and mdl.strip()):', 'and mdl.strip()):'),
+     ["r926_response_hong_tung_vi_tu_tinh_mat_khong_loi"]),
+    ("r26_model_khong_strip", ('and isinstance(mdl, str) and mdl.strip()):', 'and isinstance(mdl, str) and mdl):'),
+     ["r926_response_hong_tung_vi_tu_tinh_mat_khong_loi"]),
+    ("r26_ket_thuc_khong_dong_tep", ('        self.f_err.close()\n\n    def ghi_so', '\n    def ghi_so'),
+     ["r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC"]),
+    ("r26_khong_ghi_so", ('    if bo_loc is not None:\n        bo_loc.ghi_so(ban_ghi)\n', ''),
+     ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat"]),
     ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.

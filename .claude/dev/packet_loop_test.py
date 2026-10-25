@@ -8434,9 +8434,16 @@ _R929_KICH = "docs/adr/0099-kich-hoat-adr-0054.md"
 _R929_ADR54 = "docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md"
 
 
-def _r929_adr(c, doi, muon, nen=True):
-    """Baseline lease (đã kích hoạt) rồi đổi `docs/adr/` trên master theo `doi` (None ⇒ xoá) và ghi lại lease qua đường thật.
-    `nen=False` khi ca đòi True: phép đo nền khi ấy không phân biệt được gì, mà lại che mất chỗ chết của đột biến đích."""
+def _r929_symlink(w):
+    """Symlink ghi THẲNG vào index (120000): đích là cụm khai, nên `git show` in ra đúng cụm ấy dù không có tệp ADR nào khai."""
+    o = subprocess.run(["git", "hash-object", "-w", "--stdin"], cwd=w, input="kích hoạt `ADR-0054`".encode(), capture_output=True, check=True)
+    _g(w, "update-index", "--add", "--cacheinfo", f"120000,{o.stdout.decode().strip()},docs/adr/0732-lien-ket.md")
+
+
+def _r929_adr(c, doi, muon, nen=True, index=None, sau=None):
+    """Baseline lease (đã kích hoạt) rồi đổi `docs/adr/` trên master theo `doi` (None ⇒ xoá; bytes ghi nguyên) và ghi lại lease qua
+    đường thật. `index(w)` sửa index sau `add` (mục không có trên đĩa); `sau(w)` chạy sau push. `nen=False` khi ca đòi True: phép
+    đo nền khi ấy không phân biệt được gì, mà lại che mất chỗ chết của đột biến đích."""
     rc, sd, e, before = _r812(c, "lease")
     _doi(0, rc, e, "baseline kích hoạt ADR-0054")
     if nen:
@@ -8444,8 +8451,10 @@ def _r929_adr(c, doi, muon, nen=True):
     (sd / "wp55.json").write_bytes(before)
     w = c.tmp / "kho/w"
     for p, nd in doi.items():
-        (w / p).unlink() if nd is None else (w / p).write_text(nd, encoding="utf-8")
-    _g(w, "add", "-A", "docs/adr"), _g(w, "commit", "-qm", "wp929 adr"), _g(w, "push", "-q", "origin", "master")
+        (w / p).parent.mkdir(parents=True, exist_ok=True)
+        (w / p).unlink() if nd is None else (w / p).write_bytes(nd if isinstance(nd, bytes) else nd.encode("utf-8"))
+    _g(w, "add", "-A", "docs/adr"), (index or (lambda w: None))(w), _g(w, "commit", "-qm", "wp929 adr"), _g(w, "push", "-q", "origin", "master")
+    (sau or (lambda w: None))(w)
     rc, _, e = _r812_r7_cmd(c, sd, w)
     _doi(0, rc, e, "lease hợp lệ dù chế độ đổi")
     _kiem(sd, f"wp929 {sorted(doi)}", luat_adr0054=muon)
@@ -8461,12 +8470,29 @@ CASES += [
     ("r929_hai_tep_kich_hoat", lambda c: _r929_adr(c, {"docs/adr/0100-kich-hoat-lai.md": "kích hoạt `ADR-0054`\n"}, False)),
     # (d) chỉ chính ADR-0054 nêu cụm (mục Hiệu lực của nó) ⇒ không tự kích hoạt
     ("r929_chi_adr0054_tu_neu_cum", lambda c: _r929_adr(c, {_R929_KICH: None, _R929_ADR54: "x\nđo bằng cụm kích hoạt `ADR-0054`\n"}, False)),
+    # review #1: thư mục đuôi `.md` / symlink — cụm chỉ nằm trong TÊN con hoặc ĐÍCH liên kết, không phải nội dung tệp
+    ("r929_thu_muc_ten_md", lambda c: _r929_adr(c, {_R929_KICH: None, "docs/adr/0731-thu-muc.md/kích hoạt `ADR-0054`": "ghi chú\n"}, False)),
+    ("r929_symlink_khong_tinh", lambda c: _r929_adr(c, {_R929_KICH: None}, False, index=_r929_symlink)),
+    # biên tên tệp: đúng bốn chữ số, đuôi `.md`
+    ("r929_ba_chu_so_khong_tinh", lambda c: _r929_adr(c, {_R929_KICH: None, "docs/adr/099-kich-hoat.md": "kích hoạt `ADR-0054`\n"}, False)),
+    ("r929_duoi_khac_md_khong_tinh", lambda c: _r929_adr(c, {_R929_KICH: None, "docs/adr/0099-kich-hoat.txt": "kích hoạt `ADR-0054`\n"}, False)),
+    # NFD trong blob phải được chuẩn hoá trước khi so cụm
+    ("r929_nfd_van_tinh", lambda c: _r929_adr(c, {_R929_KICH: __import__("unicodedata").normalize("NFD", "kích hoạt `ADR-0054`\n").encode()}, True, nen=False)),
+    # `git show` một ứng viên lỗi (blob mất khỏi kho) ⇒ False dù tệp kích hoạt khác vẫn hợp lệ
+    ("r929_show_loi_la_false", lambda c: _r929_adr(c, {"docs/adr/0100-ghi-chu.md": "ghi chú wp929\n"}, False, sau=lambda w: (
+        w / ".git/objects" / (o := _g(w, "rev-parse", "master:docs/adr/0100-ghi-chu.md"))[:2] / o[2:]).unlink())),
 ]
 MUTANTS.update({
     "r929_bo_loai_tru_adr0054": (' and t != ADR0054_TEP]', ']', ["r929_chi_adr0054_tu_neu_cum"]),
     "r929_mot_tro_len": ('and len(kich) == 1', 'and len(kich) >= 1', ["r929_hai_tep_kich_hoat"]),
     "r929_hai_chuoi_roi": ('"kích hoạt `ADR-0054`" in nfc(b)', '"kích hoạt" in nfc(b) and "ADR-0054" in nfc(b)', ["r929_hai_chuoi_roi_khong_tinh"]),
     "r929_duong_dan_co_dinh_0055": ('re.fullmatch(r"docs/adr/[0-9]{4}-[^/]+\\.md", t)', 't == "docs/adr/0055-kich-hoat-adr-0054.md"', ["r929_kich_hoat_so_bat_ky"]),
+    "r929_bo_kiem_loai_doi_tuong": ('k.split(" ")[:2] in (["100644", "blob"], ["100755", "blob"]) and ', '', ["r929_thu_muc_ten_md", "r929_symlink_khong_tinh"]),
+    "r929_nhan_symlink": ('(["100644", "blob"], ["100755", "blob"])', '(["100644", "blob"], ["100755", "blob"], ["120000", "blob"])', ["r929_symlink_khong_tinh"]),
+    "r929_so_chu_so_tuy_y": ('r"docs/adr/[0-9]{4}-', 'r"docs/adr/[0-9]+-', ["r929_ba_chu_so_khong_tinh"]),
+    "r929_bo_duoi_md": ('[^/]+\\.md", t)', '[^/]+", t)', ["r929_duoi_khac_md_khong_tinh"]),
+    "r929_bo_nfc": ('in nfc(b)]', 'in b.decode("utf-8", "replace")]', ["r929_nfd_van_tinh"]),
+    "r929_bo_rc_show": (' and all(rc == 0 for rc, _ in adr)', '', ["r929_show_loi_la_false"]),
 })
 # `_ten_provider` chuẩn hoá dùng chung: gỡ một trong hai phép strip của receipt là mutant tương đương.
 MUTANTS["r812_r5_raw_provider"] = ((MUTANTS["r812_r5_raw_provider"][0], "    p = p.strip()  # I8: bản chiếu identity lease"),

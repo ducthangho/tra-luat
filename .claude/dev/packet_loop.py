@@ -2561,12 +2561,13 @@ def _che_do_0054(root: Path, spec: bytes) -> bool:
     if len(khai) != 1:
         return False
     oid, m = khai[0].decode(), "refs/remotes/origin/master"
-    chuoi, ls, pr = _git_do(root, "rev-list", "--first-parent", m), _git_do(root, "ls-tree", "-z", "--name-only", m, "docs/adr/"), _git_do(root, "show", f"{m}:docs/PROTOCOL_DA_PHIEN.md")
+    chuoi, ls, pr = _git_do(root, "rev-list", "--first-parent", m), _git_do(root, "ls-tree", "-z", m, "docs/adr/"), _git_do(root, "show", f"{m}:docs/PROTOCOL_DA_PHIEN.md")
     nfc = lambda b: unicodedata.normalize("NFC", b.decode("utf-8", "replace"))  # noqa: E731
     dong20 = [d for d in nfc(pr[1]).splitlines() if re.match(r"^\|\s*`ADR-0054`\s*\|", d)]
-    # wp929 (số 0055 đã thuộc ADR trần lời gọi Codex, #919) — ADR kích hoạt nhận theo CỤM khai, không theo số tệp; đúng MỘT tệp
-    adr = [_git_do(root, "show", f"{m}:{t}") for t in ls[1].decode("utf-8", "replace").split("\0")
-           if re.fullmatch(r"docs/adr/[0-9]{4}-[^/]+\.md", t) and t != ADR0054_TEP]
+    # wp929 (số 0055 đã thuộc ADR trần lời gọi Codex, #919) — ADR kích hoạt nhận theo CỤM khai, không theo số tệp; đúng MỘT tệp.
+    # Chỉ blob tệp thường: `git show` của tree in tên con, của symlink in đích — cụm nằm trong TÊN không phải lời khai (review #1 P2)
+    adr = [_git_do(root, "show", f"{m}:{t}") for k, _, t in (e.partition("\t") for e in ls[1].decode("utf-8", "replace").split("\0"))
+           if k.split(" ")[:2] in (["100644", "blob"], ["100755", "blob"]) and re.fullmatch(r"docs/adr/[0-9]{4}-[^/]+\.md", t) and t != ADR0054_TEP]
     kich = [b for rc, b in adr if "kích hoạt `ADR-0054`" in nfc(b)]
     return (_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\n")
             and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0054_TEP}")[0] == 0

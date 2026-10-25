@@ -10,7 +10,7 @@ r4: REST giả giữ `steps[]` dựng MỘT lần từ log + workflow đang gi�
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`.
 """
-import collections, contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
+import ast, collections, contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 from unittest import mock
 
@@ -1355,13 +1355,126 @@ def chay_ca(ten):
         return 4, f"HONG:{ten}:{type(e).__name__}: {e}"
     return 0, ""
 
+HAM_DONG = ("_env_chan", "doc_wf", "ghep_job", "ten_du_kien", "_gio", "ghep_buoc", "chan_buoc", "tach_buoc", "do_dau_duong")
+DOI_SO_SANH = {ast.Eq: [ast.NotEq], ast.NotEq: [ast.Eq], ast.Lt: [ast.LtE, ast.Gt], ast.LtE: [ast.Lt, ast.GtE], ast.Gt: [ast.GtE, ast.Lt],
+               ast.GtE: [ast.Gt, ast.LtE], ast.In: [ast.NotIn], ast.NotIn: [ast.In], ast.Is: [ast.IsNot], ast.IsNot: [ast.Is]}
+TUONG_DUONG = {}   # mã đột biến tập đóng → chứng minh vì sao KHÔNG đầu vào nào phân biệt được (bị giết ⇒ lời khai SAI ⇒ ĐỎ)
+
+def _thay(x, y):   # đổi nút x thành nút y tại chỗ
+    x.__class__ = y.__class__
+    x.__dict__.clear()
+    x.__dict__.update(y.__dict__)
+
+def _toan_tu(n):   # bảng toán tử CỐ ĐỊNH của tập đóng: (tên, hàm sửa nút tại chỗ trên bản sao)
+    if isinstance(n, ast.Compare):
+        for k, op in enumerate(n.ops):
+            for moi in DOI_SO_SANH.get(type(op), []):
+                yield f"so{k}->{moi.__name__}", lambda x, k=k, moi=moi: x.ops.__setitem__(k, moi())
+    elif isinstance(n, ast.BoolOp):
+        yield "and<->or", lambda x: setattr(x, "op", ast.Or() if isinstance(x.op, ast.And) else ast.And())
+        for k in range(len(n.values)):
+            yield f"bo_ve{k}", lambda x, k=k: x.values.pop(k) if len(x.values) > 2 else _thay(x, x.values[1 - k])
+    elif isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
+        yield "bo_not", lambda x: _thay(x, x.operand)
+    elif isinstance(n, ast.Constant) and type(n.value) is bool:
+        yield "bool", lambda x: setattr(x, "value", not x.value)
+    elif isinstance(n, ast.Constant) and type(n.value) is int:
+        yield "+1", lambda x: setattr(x, "value", x.value + 1)
+        yield "-1", lambda x: setattr(x, "value", x.value - 1)
+    elif isinstance(n, ast.Constant) and type(n.value) is str and n.value:
+        for k, w in enumerate(bien_dang(n.value) + [""]):
+            yield f"chuoi{k}", lambda x, w=w: setattr(x, "value", w)
+    elif isinstance(n, ast.IfExp):
+        yield "ifexp_than", lambda x: _thay(x, x.body)
+        yield "ifexp_khac", lambda x: _thay(x, x.orelse)
+    elif isinstance(n, ast.If):
+        yield "if_dung", lambda x: setattr(x, "test", ast.Constant(True))
+        yield "if_sai", lambda x: setattr(x, "test", ast.Constant(False))
+    elif isinstance(n, ast.comprehension):
+        for k in range(len(n.ifs)):
+            yield f"bo_loc{k}", lambda x, k=k: x.ifs.pop(k)
+    elif isinstance(n, ast.Call) and len(n.args) > 1:
+        for k in range(len(n.args)):
+            yield f"bo_doi_so{k}", lambda x, k=k: x.args.pop(k)
+    elif isinstance(n, ast.Return) and n.value is not None:
+        yield "tra_None", lambda x: setattr(x, "value", ast.Constant(None))
+
+def sinh_dot_bien_dong(src):
+    """TẬP ĐÓNG (quyết định chủ kho #899 sau lượt 7): MỌI đột biến bậc một của MỌI nút trong `HAM_DONG` theo `_toan_tu`, trừ
+    docstring. Trả [(mã, nguồn)]; mã = `<hàm>#<thứ tự nút trong ast.walk>:<toán tử>` — ổn định khi mã NGOÀI hàm đổi."""
+    goc, ra = ast.parse(src), {}
+    for ham in [n for n in goc.body if isinstance(n, ast.FunctionDef) and n.name in HAM_DONG]:
+        doc = {id(x.value) for x in ast.walk(ham) if isinstance(x, ast.Expr) and isinstance(x.value, ast.Constant)}
+        for j, n in enumerate(list(ast.walk(ham))[1:]):
+            if id(n) in doc:
+                continue
+            for ten, sua in _toan_tu(n):
+                cay = ast.parse(src)
+                dich = list(ast.walk(next(h for h in cay.body if isinstance(h, ast.FunctionDef) and h.name == ham.name)))[1:][j]
+                sua(dich)
+                try:
+                    moi = ast.unparse(ast.fix_missing_locations(cay))
+                    compile(moi, "<db>", "exec")
+                except (SyntaxError, ValueError, TypeError, IndexError):
+                    continue
+                if moi != ast.unparse(goc):
+                    ra[f"{ham.name}#{j}:{ten}"] = moi
+    return list(ra.items())
+
+def _tat_ca_ca(ma):   # chạy MỌI ca trên bản `ma` trong một tiến trình con: [(ca, rc, dòng)]
+    r = subprocess.run([sys.executable, "-B", str(HERE / "ci_provenance_test.py"), "--tat-ca-ca"], capture_output=True, timeout=1800,
+                       env=dict(os.environ, CI_PROVENANCE_MA=str(ma), PYTHONDONTWRITEBYTECODE="1"))
+    try:
+        return json.loads(r.stdout.decode("utf-8", "replace").strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        return [("nap", 4, r.stderr.decode("utf-8", "replace")[-300:])]
+
+def chay_dot_bien_dong(song_song):
+    """Hạng mỗi đột biến: GIET (≥ 1 ca chết bởi `TinHieuChotCa` của CHÍNH nó) · SONG · TIN_DUNG_GIA (chỉ chết vì lỗi vô can).
+    Đạt ⇔ 0 SONG ngoài `TUONG_DUONG`, 0 TIN_DUNG_GIA, và KHÔNG mục `TUONG_DUONG` nào bị giết (giết ⇒ chứng minh sai)."""
+    from concurrent.futures import ThreadPoolExecutor
+    goc = (HERE / "ci_provenance.py").read_text(encoding="utf-8")
+    dsach = sinh_dot_bien_dong(goc)
+    with tempfile.TemporaryDirectory(prefix="cip_dong_") as thu:
+        nen = Path(thu) / "goc.py"
+        nen.write_text(goc, encoding="utf-8")
+        bad = [x for x in _tat_ca_ca(nen) if x[1] != 0]
+        if bad:
+            print(f"DOT BIEN DONG: KHONG DO DUOC — ca khong xanh tren ban goc: {bad[:2]}")
+            return 1
+        def mot(m):
+            ma, src = m
+            p = Path(thu) / f"db_{len(ma)}_{abs(hash(ma))}.py"
+            p.write_text(src, encoding="utf-8")
+            kq = _tat_ca_ca(p)
+            giet = [c for c, rc, d in kq if rc == 3 and d.startswith(f"DO:{c}:")]
+            return ma, "GIET" if giet else "TIN_DUNG_GIA" if any(rc for _, rc, _ in kq) else "SONG", giet[:2]
+        with ThreadPoolExecutor(song_song) as ex:
+            kq = list(ex.map(mot, dsach))
+    hang = collections.Counter(h for _, h, _ in kq)
+    song = [ma for ma, h, _ in kq if h == "SONG" and ma not in TUONG_DUONG]
+    tdg = [ma for ma, h, _ in kq if h == "TIN_DUNG_GIA"]
+    sai_td = [ma for ma, h, _ in kq if h == "GIET" and ma in TUONG_DUONG] + [ma for ma in TUONG_DUONG if ma not in dict((m, 1) for m, _ in dsach)]
+    for ma in song + tdg + sai_td:
+        print(f"[DOT BIEN DONG] {ma}: {dict((m, h) for m, h, _ in kq).get(ma, 'KHONG_CON_TRONG_TAP')}")
+    print(f"DOT BIEN DONG: {hang['GIET']}/{len(kq)} giet · {len(TUONG_DUONG)} tuong duong co chung minh · {len(song)} song · {len(tdg)} tin dung gia"
+          f" · {len(sai_td)} chung minh tuong duong sai")
+    ok = len(kq) > 0 and not song and not tdg and not sai_td
+    print(f"TONG DONG: {'DAT' if ok else 'DO'}")
+    return 0 if ok else 1
+
 def main(argv):
     if len(argv) == 2 and argv[0] == "--mot-ca" and argv[1] in CA:
         rc, dong = chay_ca(argv[1])
         print(dong)
         return rc
+    if argv == ["--tat-ca-ca"]:
+        print(json.dumps([(c, *chay_ca(c)) for c in CA], ensure_ascii=False))
+        return 0
+    if argv[:1] == ["--dot-bien-dong"] and len(argv) <= 2:
+        return chay_dot_bien_dong(int(argv[1]) if len(argv) == 2 else 8)
     if argv:
-        print("dung: ci_provenance_test.py [--mot-ca TEN]", file=sys.stderr)
+        print("dung: ci_provenance_test.py [--mot-ca TEN | --dot-bien-dong [SONG_SONG]]", file=sys.stderr)
         return 2
     kq = [chay_ca(ten) for ten in CA]
     print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")

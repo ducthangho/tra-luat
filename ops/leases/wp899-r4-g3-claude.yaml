@@ -94,6 +94,8 @@ push_policy: push_mot_lan_sau_review_cuc_bo
 push_policy_note: 'Theo luat_vong_doi V1-V5 cua dac ta r4 (quyet dinh chu kho rieng
   wp899, KHONG ap ADR-0054): V1-V4 nhu r2; V5 Codex dem lai 0/8, lap lop o luot 2
   cua r4 thi dung han.'
+da_bi_thay_the: wp899-r4-g4-claude
+ly_do_thu_hoi: 'chu kho chon "Thay lease #899" (ghi ho #899 issuecomment-6399500529): g4 giu nguyen moi thu tru write set bo .claude/dev/ci_dang_ky_test.py, de nha tep ay cho wp763-r2-g1-claude (#763).'
 thay_the_cho: []
 thay_the_cho_note: wp899-r3-g2-claude da het han (rut han ve 2026-10-24T17:30:00Z,
   commit d41db6f tren ops/wp899-r3-g2-lease); khong con lease nao cua wp899 giu write

@@ -1,0 +1,2 @@
+$ git show 0be5864:ops/specs/wp748-r25-launcher-model-phuc-vu-v2.md | sha256sum
+f20615ae559f377150cfd6a9cfd0bce4478bf28ae3d562a674588a9c6f9d4bdb  -

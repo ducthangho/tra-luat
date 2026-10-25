@@ -1,0 +1,144 @@
+# HO SO LAND — packet #748 wp748 r26 (lease g26), sua cac finding cross-review cua r25 qua PR #932.
+# Khuon: ops/land/pr926-wp919-land-evidence.yaml (sau sua #928) va ops/land/pr909-wp748-r25-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7.
+# NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor,
+# KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr932-wp748-r26-provenance/ (GET qua proxy phien bang
+# GITHUB_PAT, script readback.py + kiemgate.py chep tu ho so pr926 vao do-lai-nguon-20261025/; SHA256SUMS kem).
+# landed FALSE vi MOT ly do: §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition · Gate output chua
+# do (GraphQL 403 tu phien web). §8.1 DAT: luot review 11 (r26k) qua launcher.py run neo DUNG authorized_head_sha 0aaf143,
+# approve 0 P0–P3, model_phuc_vu DO_DUOC 28/28 gpt-6-astra. Lease wp748-r26-g26 DA nha (rut han 796a42f).
+
+schema_version: 1
+mission_id: gh-748
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_014eUnFtkty9fZicFG9T1Wei
+input_packet_generations:
+  - {packet_issue: 748, packet_id: wp748, revision: 26, generation: 26, lease_id: wp748-r26-g26-claude-remote-20261025}
+authorized_head_sha: 0aaf143ba6e8c4974492aa26e0082fd636077efd
+authorized_head_tree: 3dd8bd4cd7e634aade232176bc8b60566bea0210
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/932
+authorization_ghi_chu: >-
+  measured — readback-pr-932.json merged_by=ducthangho, merged_at 2026-10-25T17:48:08Z, head.sha 0aaf143;
+  readback-events-932.json (ready_for_review boi ducthangho 16:55:37Z, merged/closed 17:48:08Z). Lease khong uy quyen merge (land_authority_note); executor
+  (phien nay) KHONG merge. KHONG_DO_DUOC bam tay hay qua phien khac. KHONG co ban ghi ben "duyet tren SHA 0aaf143"; uy quyen
+  bang hanh dong merge. Chi thi ghi so land: trong phien (loi_khai — "Làm hồ sơ land r26"), KHONG co comment ben vung.
+land_operator: 'measured — readback-pr-932.json merged_by=ducthangho; readback-events-932.json (su kien merged/closed).'
+merge_method: merge
+merge_commit: 39f21b331a1f46d3c8d6ad3efba9371f1412fc08
+merge_commit_tree: 8184abf01ce3a7ff7778fe88c01fe6c832207b02
+merge_commit_parents: [36057e8292bcb3b27ceb64b461d7cf29057a8ba3, 0aaf143ba6e8c4974492aa26e0082fd636077efd]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261025/merge-va-diff.txt: diff cha1 (36057e8) .. merge co sha256 34784a08… BANG diff merge-base
+  (5775864) .. head 0aaf143; 2 tep, +1190 -103 (launcher.py 251, launcher_test.py 1042 dong doi). Tree merge 8184abf KHAC tree
+  head 3dd8bd4 vi master tien them (#930, #931) sau 5775864 — hai PR ay KHONG cham hai tep (diff --stat rong). Blob hai tep tai
+  merge == blob tai 0aaf143: 9c38fb1c… (launcher.py), f91ff954… (launcher_test.py).
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) — head cuoi', run_id: 40212660725, run_attempt: 1, sha: 0aaf143ba6e8c4974492aa26e0082fd636077efd, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-pre-0aaf143.txt: suite 108990008870, 23 ten, rc=0', nguon: [readback-run-40212660725.json, readback-jobs-40212660725.json, readback-check-runs-0aaf143-all.json]}
+  - {name: 'ops-thu-hoi-admission (thu-hoi) — head cuoi, hai lan', run_id: [40212660709, 40214007114], sha: 0aaf143ba6e8c4974492aa26e0082fd636077efd, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-pre-0aaf143.txt: suite 108990008832 va 108993545420, moi suite 1 ten, rc=0', nguon: [readback-run-40212660709.json, readback-jobs-40212660709.json, readback-run-40214007114.json, readback-jobs-40214007114.json], ghi_chu: 'Lan thu hai kich khi PR chuyen ready (16:55Z).'}
+  - {name: 'launcher-windows.yml pull_request — head cuoi', run_id: 40212660664, sha: 0aaf143ba6e8c4974492aa26e0082fd636077efd, conclusion: skipped, nguon: [readback-run-40212660664.json, readback-jobs-40212660664.json], ghi_chu: 'measured — 1 job skipped, runner_id 0: job chi chay voi push hoac PR mang nhan windows (.github/workflows/launcher-windows.yml dong 51-53); PR #932 khong mang nhan. Do Windows dau tien cua code r26 la luot push master (post_merge_checks).'}
+  - {name: 'executor cross-review Codex qua launcher.py run, luot 11 (r26k, lop sensitive) — DUNG head cuoi', sha: 0aaf143ba6e8c4974492aa26e0082fd636077efd, conclusion: 'approve; P0=P1=P2=P3=0', nguon: [verdicts/wp748-r26-r26k-verdict.md, verdicts/wp748-r26-r26k-prompt.md, verdicts/wp748-r26-r26k-run.json], ghi_chu: 'measured — verdicts/wp748-r26-r26k-verdict.md: "Disposition: approve. New/open findings: 0 P0, 0 P1, 0 P2, 0 P3", Reviewed SHA 0aaf143, tree 3dd8bd4; verdicts/wp748-r26-r26k-run.json run_id 3133eea6…, head 0aaf143, trang_thai xong, ma_thoat 0, 577.621 s, model_phuc_vu 28 response deu gpt-6-astra, DO_DUOC; sha256 tep prompt = prompt_sha256 cua run (8c7bb89f…).'}
+  - {name: 'connector Codex GitHub tren PR #932', conclusion: 'Completed tren 0aaf143, has_any_findings false (comment 6400464234, 16:55:47Z); 0 review, 0 review comment', nguon: [readback-comments-932.json, readback-reviews-932.json, readback-review-comments-932.json]}
+  - {name: 'dieu kien kich thuoc', conclusion: '2 tep, +1190 -103 tu master 5775864 (tran: <= 1300 dong them, #748 issuecomment-6399648861)', nguon: [readback-pr-932.json, do-lai-nguon-20261025/merge-va-diff.txt, readback-comment-6399648861.json]}
+  - {name: 'so loi goi Codex', conclusion: '12/15 (11 luot launcher r26a–r26k + 1 luot connector khi danh dau ready)', nguon: [verdicts/, readback-comment-6400117054.json], ghi_chu: 'measured — 11 tep run.json (verdicts/wp748-r26-r26a-run.json, verdicts/wp748-r26-r26b-run.json, verdicts/wp748-r26-r26c-run.json, verdicts/wp748-r26-r26d-run.json, verdicts/wp748-r26-r26e-run.json, verdicts/wp748-r26-r26f-run.json, verdicts/wp748-r26-r26g-run.json, verdicts/wp748-r26-r26h-run.json, verdicts/wp748-r26-r26i-run.json, verdicts/wp748-r26-r26j-run.json, verdicts/wp748-r26-r26k-run.json), moi tep trang_thai xong, ma_thoat 0. Tran: 8 (ADR-0052, lease nang_tran) -> 10 (#748 issuecomment-6399648861) -> 15 (#748 issuecomment-6400117054), ca hai comment cua ducthangho OWNER. KHONG co bo dem packet_loop cho packet nay.'}
+  - {name: 'cong tai cho tren head', conclusion: 'launcher_test 295/295 (2 ca chi Windows bo qua); dot bien tay 134/134; bo sinh 200/207 giet + 7 tuong duong co ly do; ruff delta 0', ghi_chu: 'thuat_lai — chay trong phien executor (mo ta PR #932). 11 ca r484_* do khi Codex chay song song (bay /tmp/.git, CLAUDE.md), chay lai 11/11 qua. Reviewer r26k chay lai tren 0aaf143 (verdict).'}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40218214211, sha: 39f21b331a1f46d3c8d6ad3efba9371f1412fc08, conclusion: CHO_DO, nguon: [readback-run-40218214211.json, readback-jobs-40218214211.json, readback-check-runs-39f21b3-all.json]}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA', run_id: 40218214292, sha: 39f21b331a1f46d3c8d6ad3efba9371f1412fc08, conclusion: CHO_DO, nguon: [readback-run-40218214292.json, readback-jobs-40218214292.json]}
+  - {name: 'ops-publish-lease.yml cho commit rut han 796a42f', run_id: 40218439572, sha: 796a42f03, conclusion: CHO_DO, nguon: [readback-run-40218439572.json, readback-jobs-40218439572.json]}
+bookkeeping:
+  - {item: 'duyet spec r25 v2 + cap lease r26 g26 (chu kho)', ket_qua: 'measured — readback-comment-6394503720.json tren #748 (ducthangho OWNER, 2026-10-25T06:42:57Z)'}
+  - {item: 'nang tran kich thuoc 1300 + loi goi 10, roi loi goi 15', ket_qua: 'measured — readback-comment-6399648861.json, readback-comment-6400117054.json (ducthangho OWNER)'}
+  - {item: 'chi thi ghi so land', ket_qua: 'loi_khai — trong phien ("Làm hồ sơ land r26"), khong co comment ben vung'}
+  - {item: 'rut han lease wp748-r26-g26', ket_qua: 'measured — do-lai-nguon-20261025/lease-wp748-r26-g26-sau-rut-han-796a42f.yaml.txt; xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: ccr-e425b16e-j9g9p7}
+# ---- het truong chuan
+packet_id: wp748
+packet_issue: 748
+generation: 26
+generation_nghia: >-
+  Sua cac finding cross-review r26a tren head da merge cua r25 (b5b6aef, PR #909): bo loc stderr cua luot codex phan loai
+  MOI DONG VAT LY mot lan sau khi doc het cac doan (bon duong: tron · token ung vien vat qua cho cat · tien to su kien khac ·
+  khong_ro chan DO_DUOC); ghi stderr khong dem + dem byte bo; ket_thuc gom cho/chot/dong; ca tu sinh dot bien cho moi thanh
+  phan regex cua khoi bo loc (207 bien the, so dem chot theo tung hang).
+pham_vi_land: ma
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_014eUnFtkty9fZicFG9T1Wei — CHINH phien executor cua wp748 r26 ghi so (khong
+  co phien dieu phoi rieng). Ghi so theo chi thi chu kho trong phien.
+
+spec:
+  r25_v2: {path: 'ops/specs/wp748-r25-launcher-model-phuc-vu-v2.md (nhanh ops/wp748-r25-g25-lease @ 0be5864)', sha256: f20615ae559f377150cfd6a9cfd0bce4478bf28ae3d562a674588a9c6f9d4bdb}
+  do_lai: 'measured — do-lai-nguon-20261025/spec-sha256.txt (khop spec_hash cua lease).'
+  duyet: 'measured — readback-comment-6394503720.json: chu kho duyet spec r25 v2 (sha256 tren) va cap lease.'
+lease:
+  lease_id: wp748-r26-g26-claude-remote-20261025
+  path: ops/leases/wp748-r26-g26-claude-remote-20261025.yaml (nhanh ops/wp748-r25-g25-lease)
+  ban_chep: 'measured — do-lai-nguon-20261025/lease-wp748-r26-g26-1f504f0.yaml.txt (1f504f0)'
+  lease_until_ban_dau: '2026-10-26T06:48:19Z'
+  write_set: [.claude/dev/launcher.py, .claude/dev/launcher_test.py]
+  write_set_hash: 5c33c0baee65d520313deebb38ac17f941b92cd189e47fe70ec72a175f51cbc7
+  write_set_khop: 'measured — do-lai-nguon-20261025/merge-va-diff.txt: PR sua dung hai tep cua write set.'
+  thu_hoi_cuoi: >-
+    measured — RUT HAN (khong bia mo): commit 796a42f tren ops/wp748-r25-g25-lease dua lease_until ve 2026-10-25T17:50:38Z;
+    ly do o khoi `rut_han` cua chinh tep lease (do-lai-nguon-20261025/lease-wp748-r26-g26-sau-rut-han-796a42f.yaml.txt).
+    ai-dang-giu-sau-rut-han/luc-do.txt: ls-remote = for-each-ref 607 (so TAP ten), thieu 0, thua 0; ca 2 duong dan write set
+    "NGƯỜI_GIỮ 0" rc=0, wp748-r26-g26 HẾT_HẠN.
+  ghi_sau_het_han: 'measured — do-lai-nguon-20261025/merge-va-diff.txt: commit cuoi cua nhanh 0aaf143 luc 2026-10-25T16:27:34Z, truoc rut han.'
+  heartbeat_ghi_chu: 'not_measured — heartbeat_at khong cap nhat sau leased_at_utc.'
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-932.json: merged true, merged_at 2026-10-25T17:48:08Z, merge_commit_sha 39f21b3, head.sha 0aaf143.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 39f21b3: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow
+    definition, Gate output cua §10.2.2 not_measured. (2) lease da nha: rut han 796a42f, 2/2 duong dan NGƯỜI_GIỮ 0 DAT.
+    (3) bookkeeping: ho so nay DAT. (4) review neo DUNG authorized_head_sha 0aaf143: DAT (assurance_81). (5) noi dung merge =
+    diff PR DAT. (6) merge boi tai khoan chu kho DAT.
+    Mo lai: du bon moc §10.2.2 cho DUNG run gate tren 39f21b3.
+assurance_81:
+  reviewer_assurance_81: DAT
+  ly_do: >-
+    measured — verdicts/wp748-r26-r26k-run.json: luot launcher.py run 3133eea6 approve 0 P0–P3 (verdicts/wp748-r26-r26k-verdict.md),
+    head cua run = 0aaf143 = authorized_head_sha (readback-pr-932.json head.sha) = cha thu hai cua merge 39f21b3;
+    model_phuc_vu DO_DUOC 28/28 gpt-6-astra (ho openai, khac ho claude cua executor); reviewer_independence theo lease: phien
+    moi, read-only, exact head. Connector Codex tren 0aaf143 (readback-comments-932.json) cung khong co finding.
+  gioi_han: >-
+    model_phuc_vu do tu su kien response.created/completed ma launcher ghi (#909 wp748
+    r25); do la model may chu tra ve trong luong su kien, khong phai chung thu ben thu ba.
+
+review:
+  so_loi_goi_codex: 12
+  cac_luot:
+    - {luot: r26a, run: e05b2d5c, head: b5b6aef, ket_qua: 'changes_requested — mo lai R25-SEC-01 P1, MEAS-02/TEST-03/ROBUST-04/EVID-05/RACE-06/CONTRACT-07 P2 cua r25 + R26-ALLOW-08 P3 moi; day la luot review tren head da merge cua PR #909 ma ho so r25 ghi la thieu'}
+    - {luot: r26b, run: 0f2bc855, head: 143d43f, ket_qua: 'changes_requested — moi: R26-COUNT-09 P3, R26-EOF-10 P3'}
+    - {luot: r26c, run: e15ba61d, head: 97bb4c5, ket_qua: 'changes_requested — moi: R26-CLASSIFY-11 P3'}
+    - {luot: r26d, run: 128d32ab, head: 0fe659e, ket_qua: 'changes_requested — moi: R26-TEST-12 P3'}
+    - {luot: r26e, run: d3cae0b6, head: 55a0afa, ket_qua: 'changes_requested — moi: R26-TEST-13 P3, R26-TEST-14 P3'}
+    - {luot: r26f, run: fe047b61, head: d5166b2, ket_qua: 'changes_requested — moi: R26-TEST-15 P3'}
+    - {luot: r26g, run: '31279617', head: be15ad5, ket_qua: 'changes_requested — moi: R26-TEST-16 P3 (danh sach dot bien viet tay thieu thanh phan; chu kho chon dong lop bang bo sinh dot bien tu dong)'}
+    - {luot: r26h, run: 1840b741, head: 41ada5f, ket_qua: 'changes_requested — moi: R26-TEST-17 P3 (bo sinh con cho lot hoi quy ngu phap)'}
+    - {luot: r26i, run: 9a250bfb, head: 3877d46, ket_qua: approve}
+    - {luot: r26j, run: 9ff2d5a4, head: 0a2ba0b, ket_qua: 'approve — head merge master 0a2ba0b; stale khi master tien them (#928), nen merge lai thanh 0aaf143'}
+    - {luot: r26k, run: 3133eea6, head: 0aaf143, ket_qua: 'approve 0 P0–P3 — DUNG head cuoi'}
+  ket_qua_nguon: >-
+    measured — dong VERDICT cua verdicts/wp748-r26-r26a-verdict.md, verdicts/wp748-r26-r26b-verdict.md, verdicts/wp748-r26-r26c-verdict.md, verdicts/wp748-r26-r26d-verdict.md, verdicts/wp748-r26-r26e-verdict.md, verdicts/wp748-r26-r26f-verdict.md, verdicts/wp748-r26-r26g-verdict.md, verdicts/wp748-r26-r26h-verdict.md, verdicts/wp748-r26-r26i-verdict.md, verdicts/wp748-r26-r26j-verdict.md, verdicts/wp748-r26-r26k-verdict.md; va verdicts/wp748-r26-r26a-run.json, verdicts/wp748-r26-r26b-run.json, verdicts/wp748-r26-r26c-run.json, verdicts/wp748-r26-r26d-run.json, verdicts/wp748-r26-r26e-run.json, verdicts/wp748-r26-r26f-run.json, verdicts/wp748-r26-r26g-run.json, verdicts/wp748-r26-r26h-run.json, verdicts/wp748-r26-r26i-run.json, verdicts/wp748-r26-r26j-run.json, verdicts/wp748-r26-r26k-run.json (run_id, head, xong,
+    ma_thoat 0, model_phuc_vu DO_DUOC, deu gpt-6-astra). Ma finding "moi" = ma xuat hien lan dau trong verdict cua luot ay
+    (thuat_lai cach doc, tep goc kem).
+  prompt_khop: 'measured — sha256 cua verdicts/wp748-r26-r26a-prompt.md, verdicts/wp748-r26-r26b-prompt.md, verdicts/wp748-r26-r26c-prompt.md, verdicts/wp748-r26-r26d-prompt.md, verdicts/wp748-r26-r26e-prompt.md, verdicts/wp748-r26-r26f-prompt.md, verdicts/wp748-r26-r26g-prompt.md, verdicts/wp748-r26-r26h-prompt.md, verdicts/wp748-r26-r26i-prompt.md, verdicts/wp748-r26-r26j-prompt.md, verdicts/wp748-r26-r26k-prompt.md = prompt_sha256 trong verdicts/wp748-r26-r26a-run.json, verdicts/wp748-r26-r26b-run.json, verdicts/wp748-r26-r26c-run.json, verdicts/wp748-r26-r26d-run.json, verdicts/wp748-r26-r26e-run.json, verdicts/wp748-r26-r26f-run.json, verdicts/wp748-r26-r26g-run.json, verdicts/wp748-r26-r26h-run.json, verdicts/wp748-r26-r26i-run.json, verdicts/wp748-r26-r26j-run.json, verdicts/wp748-r26-r26k-run.json tuong ung (11/11).'
+  thread: 'measured — readback-reviews-932.json: 0 review; readback-review-comments-932.json: 0.'
+
+no_co_ten:
+  - {ma: r25-review-vong-3, trang_thai: dong, bang_chung: 'r26a review b5b6aef qua launcher; cac finding da sua va r26k approve tren 0aaf143'}
+  - {ma: r25-spec-v2-chua-duyet, trang_thai: dong, bang_chung: 'readback-comment-6394503720.json'}
+  - {ma: adr-0055-trung-so, trang_thai: mo, ghi_chu: 'loi_khai_co_neo — docs/adr/0055 (PR #926) trung so voi hang ADR0055_TEP o .claude/dev/packet_loop.py (#816); cho chu kho quyet'}
+khong_do_duoc:
+  - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
+  - 'Provenance CI §10.2.2 cua gate hau merge (Checkout, Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403, log/artifact khong luu.'

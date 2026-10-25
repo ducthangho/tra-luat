@@ -1,0 +1,12 @@
+# kiem-gate offline tren readback-check-runs-<sha>-all.json (filter=all); ten bat buoc = moi job khong skipped cua attempt cuoi cua run do.
+== run 40212660725 attempt 1 event pull_request conclusion success suite 108990008870 23 ten (bo skipped)
+gate XANH trên 0aaf143ba6e8c4974492aa26e0082fd636077efd (suite 108990008870): chuan-bi id=121227044694 · gate (ubuntu-latest) id=121227105280 · gate-cong-cu (ubuntu-latest, 0) id=121227105442 · gate-cong-cu (ubuntu-latest, 1) id=121227105494 · gate-cong-cu (ubuntu-latest, 2) id=121227105436 · gate-cong-cu (ubuntu-latest, 3) id=121227105514 · gate-cong-cu (ubuntu-latest, 4) id=121227105479 · gate-cong-cu (ubuntu-latest, 5) id=121227105453 · gate-cong-cu (ubuntu-latest, 6) id=121227105407 · gate-cong-cu (ubuntu-latest, 7) id=121227105383 · gate-cong-cu-gop (ubuntu-latest) id=121236676534 · gate-nhanh-gop (ubuntu-latest) id=121227515767 · gate-nhanh-manh (ubuntu-latest, 0) id=121227105474 · gate-nhanh-manh (ubuntu-latest, 1) id=121227105477 · gate-nhanh-manh (ubuntu-latest, 2) id=121227105435 · gate-nhanh-manh (ubuntu-latest, 3) id=121227105384 · gate-nhanh-manh (ubuntu-latest, 4) id=121227105389 · gate-nhanh-manh (ubuntu-latest, 5) id=121227105449 · gate-nhanh-manh (ubuntu-latest, 6) id=121227105427 · gate-nhanh-manh (ubuntu-latest, 7) id=121227105448 · gate-ops (ubuntu-latest) id=121227105270 · gate-packet-loop (ubuntu-latest) id=121227105259 · gate-registry (ubuntu-latest) id=121227592788
+rc=0
+== run 40214007114 attempt 1 event pull_request_target conclusion success suite 108993545420 1 ten (bo skipped)
+gate XANH trên 0aaf143ba6e8c4974492aa26e0082fd636077efd (suite 108993545420): thu-hoi id=121231098306
+CẢNH BÁO: 'thu-hoi' có 1 run ở suite khác (121227044625) — bỏ qua
+rc=0
+== run 40212660709 attempt 1 event pull_request_target conclusion success suite 108990008832 1 ten (bo skipped)
+gate XANH trên 0aaf143ba6e8c4974492aa26e0082fd636077efd (suite 108990008832): thu-hoi id=121227044625
+CẢNH BÁO: 'thu-hoi' có 1 run ở suite khác (121231098306) — bỏ qua
+rc=0

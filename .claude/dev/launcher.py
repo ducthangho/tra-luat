@@ -1609,18 +1609,20 @@ _RE_KHUNG = re.compile(_DAU_NHAN + rb"(\{.*\})\s*$")
 # v r26 vòng 2 (cross-review r26b R25-EVID-05/R26-CLASSIFY-11): MỘT DÒNG VẬT LÝ được phân loại MỘT lần, khi đã đọc
 # hết mọi đoạn của nó — vá theo từng đường reviewer chỉ (token ở đầu dòng, rồi token vắt chỗ cắt, rồi sự kiện khác)
 # là đúng cái bẫy "vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba". Bốn đường của một dòng:
-#   (1) đọc TRỌN trong một đoạn: phân loại theo `type` ĐÃ PARSE (khoá viết bằng escape cũng bắt được), dòng không
-#       phải khung thì chỉ tính MẤT khi có token ứng viên;
+#   (1) đọc TRỌN trong một đoạn: phân loại theo `type` ĐÃ PARSE (khoá viết bằng escape cũng bắt được); dòng không
+#       parse được thì tính MẤT khi có token ứng viên, còn không thì rơi về đường (4) (cross-review r26c R25-EVID-05);
 #   (2) nhiều đoạn hoặc cụt ở EOF: token ứng viên ở BẤT KỲ đâu, kể cả vắt qua chỗ cắt, tính MẤT;
 #   (3) không có token mà dòng mở đầu bằng header NHẬN và tiền tố xác nhận một sự kiện KHÁC: không tính;
-#   (4) header NHẬN mà không xác nhận được loại: KHÔNG RÕ — không khai là "mất khung", nhưng vẫn chặn DO_DUOC.
+#   (4) header NHẬN có tải trọng JSON (`{` ngay sau header) mà không xác nhận được loại: KHÔNG RÕ — không khai là
+#       "mất khung", nhưng vẫn chặn DO_DUOC. Tải trọng KHÔNG mở bằng `{` (Ping/Binary…) không thể là khung response
+#       (khung đo được 24-10-2026 luôn là `Received message {…}`), nên không tính — ở CẢ HAI đường đọc trọn/nhiều đoạn.
 # Tìm token qua chỗ cắt: bỏ ANSI rồi bỏ MỌI khoảng trắng (token ứng viên khi ấy dài cố định, không còn `\s*` không
 # chặn), giữ đuôi `_DUOI_UNG_VIEN` byte của dạng đã gọn sang đoạn sau. Gọn hoá chỉ mở rộng tập khớp — bảo thủ.
 _RE_UNG_VIEN_GON = re.compile(rb'"type":"response\.(?:created|completed)"')
 _RE_KHOANG_TRANG_B = re.compile(rb"\s+")
 _DUOI_UNG_VIEN = 64
 _RE_LOAI_DAU = re.compile(_DAU_NHAN + rb'\{\s*"type"\s*:\s*"([^"\\]*)"')
-_RE_DAU_NHAN = re.compile(_DAU_NHAN)
+_RE_DAU_JSON = re.compile(_DAU_NHAN + rb"\{")
 _TRAN_DAU_DONG = 4096         # trần phần đầu dòng giữ lại để xác nhận loại sự kiện của dòng nhiều đoạn
 _TRAN_DONG = 4 << 20          # trần một lần đọc (R25-ROBUST-04)
 _SU_KIEN_KHUNG = ("response.created", "response.completed")
@@ -1694,18 +1696,20 @@ def _ghi_het(f_err, doan: bytes, dem: dict) -> None:
 
 def _ket_dong(dau: bytes, so_doan: int, tron: bool, ung_vien: bool, ket: list, dem: dict) -> None:
     """Phân loại MỘT dòng vật lý đã bị bỏ, khi đã đọc hết các đoạn của nó (bốn đường ở trên)."""
+    sach = _RE_ANSI_B.sub(b"", dau)
     if so_doan == 1 and tron:
-        m, loai = _phan_loai_khung(_RE_ANSI_B.sub(b"", dau))
+        m, loai = _phan_loai_khung(sach)
         if m is not None:
             if not any(x["response_id"] == m["response_id"] and x["model"] == m["model"] for x in ket):
                 ket.append(m)
         elif loai == "ung_vien_hong" or ung_vien:
             dem["mat"] = dem.get("mat", 0) + 1
+        elif loai is None and _RE_DAU_JSON.match(sach):
+            dem["khong_ro"] = dem.get("khong_ro", 0) + 1     # đường (4) của dòng đọc trọn mà không parse được
         return
     if ung_vien:
         dem["mat"] = dem.get("mat", 0) + 1
         return
-    sach = _RE_ANSI_B.sub(b"", dau)
     k = _RE_LOAI_DAU.match(sach)
     if k:
         try:
@@ -1714,7 +1718,7 @@ def _ket_dong(dau: bytes, so_doan: int, tron: bool, ung_vien: bool, ket: list, d
             loai = None          # loại không đọc được chặt: KHÔNG xác nhận là sự kiện khác
         if loai is not None and loai not in _SU_KIEN_KHUNG:
             return
-    if _RE_DAU_NHAN.match(sach):
+    if _RE_DAU_JSON.match(sach):
         dem["khong_ro"] = dem.get("khong_ro", 0) + 1
 
 
@@ -1753,7 +1757,7 @@ def _ket_luan_model(ket: list, loi: list, con_doc: bool, mat: int = 0, khong_ro:
     if mat:
         return "KHONG_DO_DUOC", f"{mat} dong giong khung response.created/completed khong doc duoc; danh sach thieu"
     if khong_ro:
-        return "KHONG_DO_DUOC", (f"{khong_ro} dong Received message vuot tran doc, khong xac dinh duoc loai su kien; "
+        return "KHONG_DO_DUOC", (f"{khong_ro} dong Received message (JSON) khong xac dinh duoc loai su kien; "
                                  "danh sach co the thieu")
     if not ket:
         return "KHONG_DO_DUOC", ("khong thay khung response.created/response.completed nao mang model "

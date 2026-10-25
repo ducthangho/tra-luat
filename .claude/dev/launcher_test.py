@@ -6792,11 +6792,25 @@ def r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO():
     dung = _r25_khung("response.created", "r", "m").encode()
     for ten, than in [("khoa_escape", b'{"' + xg + b'u0074ype":"x","pad":"' + b"p" * 400 + b'"}'),
                       ("gia_tri_escape", b'{"type":"x' + xg + b'u0041","pad":"' + b"p" * 400 + b'"}'),
-                      ("khong_phai_json", b"Binary(" + b"0" * 400 + b")"),
                       ("loai_khong_utf8", b'{"type":"x' + bytes([0xFF]) + b'","pad":"' + b"p" * 400 + b'"}')]:
         ban_ghi, dem = _r26_trang_thai(m, dung + dau + than + b"\n")
         bang(dem.get("khong_ro") == 1 and not dem.get("mat") and ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
              and "khong xac dinh" in (ban_ghi.get("model_phuc_vu_ly_do") or ""), f"{ten}: {dem} {ban_ghi}")
+    # Đường (1)→(4), cross-review r26c R25-EVID-05: dòng ĐỌC TRỌN, header NHẬN, tải trọng JSON không parse được, không
+    # có token gọn (khoá viết bằng escape) — đi sau một khung ĐÚNG — vẫn phải KHÔNG RÕ, không được DO_DUOC.
+    m._TRAN_DONG = 4096
+    for ten, than in [("escape_va_utf8_hong", b'{"' + xg + b'u0074ype":"response.created","response":{"id":"r2","model":"m'
+                       + bytes([0xFF]) + b'"}}'),
+                      ("escape_va_json_cut", b'{"' + xg + b'u0074ype":"response.created","response":{"id":"r2"')]:
+        ban_ghi, dem = _r26_trang_thai(m, dung + dau + than + b"\n")
+        bang(dem.get("khong_ro") == 1 and not dem.get("mat") and ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC",
+             f"doc tron {ten}: {dem} {ban_ghi}")
+    # Đối chứng: tải trọng KHÔNG mở bằng `{` không thể là khung response — không tính, ở cả hai đường đọc.
+    for tran in (256, 4096):
+        m._TRAN_DONG = tran
+        ban_ghi, dem = _r26_trang_thai(m, dung + dau + b"Binary(" + b"0" * 400 + b")\n" + dau + b"Ping([])\n")
+        bang(not dem.get("khong_ro") and not dem.get("mat") and ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC",
+             f"tran={tran}: tai trong khong phai JSON bi tinh: {dem} {ban_ghi}")
 
 
 @ca
@@ -10733,7 +10747,7 @@ DOT_BIEN = [
     ("r26_cho_phep_cat_moi_CRLF", ('if so_doan == 1 and het_dong and doan in _STDERR_CHO_PHEP_DONG:',
                                    'if so_doan == 1 and het_dong and doan.rstrip(b"\\r\\n") in _STDERR_CHO_PHEP:'),
      ["r926_cho_phep_chi_dung_LF_hoac_mot_CRLF"]),
-    ("r25_bo_go_ansi", ('m, loai = _phan_loai_khung(_RE_ANSI_B.sub(b"", dau))', 'm, loai = _phan_loai_khung(dau)'),
+    ("r25_bo_go_ansi", ('    sach = _RE_ANSI_B.sub(b"", dau)\n', '    sach = dau\n'),
      ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
     ("r25_khung_moi_target", ('TRACE\\s+tungstenite::protocol: Received message', 'TRACE\\s+\\S+: .*?Received message'),
      ["r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien"]),
@@ -10774,7 +10788,7 @@ DOT_BIEN = [
      ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
     ("r26_khong_ro_khong_dem", ('        dem["khong_ro"] = dem.get("khong_ro", 0) + 1\n', '        pass\n'),
      ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
-    ("r26_khong_ro_moi_dong_dai", ('    if _RE_DAU_NHAN.match(sach):\n', '    if True:\n'),
+    ("r26_khong_ro_moi_dong_dai", ('    if _RE_DAU_JSON.match(sach):\n', '    if True:\n'),
      ["r926_dong_NHAN_cat_nhieu_doan_ma_token_roi_cho_cat_van_tinh_mat"]),
     ("r26_utf8_thay_the", ('ev = json.loads(k.group(1).decode("utf-8"))', 'ev = json.loads(k.group(1).decode("utf-8", "replace"))'),
      ["r926_model_khong_utf8_nghiem_khong_nhan_va_tinh_mat"]),
@@ -10838,6 +10852,12 @@ DOT_BIEN = [
      ["r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC"]),
     ("r26_cho_luong_chua_chay", ('        if self.luong.ident is not None:     # luồng chưa từng chạy', '        if True:     # luồng chưa từng chạy'),
      ["r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC"]),
+    ("r26_khong_ro_khong_doi_json", ('_RE_DAU_JSON = re.compile(_DAU_NHAN + rb"\\{")', '_RE_DAU_JSON = re.compile(_DAU_NHAN)'),
+     ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
+    ("r26_doc_tron_khong_parse_bo_qua", ('        elif loai is None and _RE_DAU_JSON.match(sach):\n', '        elif False:\n'),
+     ["r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO"]),
+    ("r26_ghi_bo_chot_0_byte", ('            if not n:\n                raise OSError("write tra 0 byte")\n', ''),
+     ["r926_ghi_het_dem_dung_phan_chua_ghi"]),
     ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.

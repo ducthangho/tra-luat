@@ -1,0 +1,51 @@
+nen_bo_qua_dot_bien('nt')=True
+nen_bo_qua_dot_bien('posix')=False
+nen_bo_qua_dot_bien('java')=False
+dat_windows(2, 0, 1)=True
+dat_windows(0, 0, 1)=False
+dat_windows(2, 1, 1)=False
+dat_windows(2, 0, 0)=False
+CASE modes=['pass', 'pass', 'skip']; precheck_skip=False; mutant_table_nonempty=True; rc=0; visited=[0, 1, 2]
+BỎ QUA baseline_2_skip: capability unavailable (controlled fixture)
+
+cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+CASE modes=['skip', 'skip', 'skip']; precheck_skip=False; mutant_table_nonempty=True; rc=1; visited=[0, 1, 2]
+BỎ QUA baseline_0_skip: capability unavailable (controlled fixture)
+  BỎ QUA baseline_1_skip: capability unavailable (controlled fixture)
+  BỎ QUA baseline_2_skip: capability unavailable (controlled fixture)
+
+cong_cu_test: 0/0 đạt; tổng=3, bỏ qua=3, tiền kiểm bỏ qua=0
+
+TỔNG: CA 0/0 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+CASE modes=['pass', 'fail', 'skip']; precheck_skip=False; mutant_table_nonempty=True; rc=1; visited=[0, 1, 2]
+BỎ QUA baseline_2_skip: capability unavailable (controlled fixture)
+  ĐỎ  baseline_1_fail: controlled red baseline
+
+cong_cu_test: 1/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 1/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+CASE modes=['pass', 'error', 'skip']; precheck_skip=False; mutant_table_nonempty=True; rc=1; visited=[0, 1, 2]
+BỎ QUA baseline_2_skip: capability unavailable (controlled fixture)
+  ĐỎ  baseline_1_error: RuntimeError: controlled baseline exception
+
+cong_cu_test: 1/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 1/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+CASE modes=['pass', 'pass', 'skip']; precheck_skip=True; mutant_table_nonempty=True; rc=1; visited=[0, 1, 2]
+BỎ QUA (TIỀN KIỂM) precheck: controlled missing capability
+  BỎ QUA (TIỀN KIỂM) precheck: controlled missing capability
+  BỎ QUA baseline_2_skip: capability unavailable (controlled fixture)
+
+cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=2
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+CASE modes=['pass', 'pass', 'skip']; precheck_skip=False; mutant_table_nonempty=False; rc=1; visited=[0, 1, 2]
+BỎ QUA baseline_2_skip: capability unavailable (controlled fixture)
+
+cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 0 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+PASS: unmodified AST main visits all fixtures, skips deducted, zero executed cases/red/precheck/empty mutants fail, no mutation or shard write
+SCOPE: Linux controlled execution of Windows branch; real Windows baseline suite NOT RUN

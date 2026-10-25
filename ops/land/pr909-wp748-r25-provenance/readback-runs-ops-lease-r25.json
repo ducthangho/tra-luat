@@ -1,0 +1,30 @@
+{
+  "run": [
+    {
+      "id": 40070731092,
+      "name": "ops — đăng lease bằng git",
+      "event": "push",
+      "head_branch": "ops/wp748-r25-g25-lease",
+      "head_sha": "5fbfa29d6c6f4959cff915c4a90b4fae41ea7f22",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 2,
+      "created_at": "2026-10-24T06:34:20Z",
+      "updated_at": "2026-10-24T09:29:15Z",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40070731092"
+    },
+    {
+      "id": 40155888134,
+      "name": "ops — đăng lease bằng git",
+      "event": "push",
+      "head_branch": "ops/wp748-r25-g25-lease",
+      "head_sha": "9ea925bf0bccb0a59d90f942777ea9215a366833",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "created_at": "2026-10-25T02:49:03Z",
+      "updated_at": "2026-10-25T02:55:30Z",
+      "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40155888134"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+AST_EXTRACTED_FUNCTION_BEGIN
+def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
+    """Evaluator tối giản cho đúng hình biểu thức của chuan-bi.
+    Hình chuẩn: ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]'
+    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài).
+    """
+    import json
+    raw = expr_str.strip()
+    if raw.startswith("${{") and raw.endswith("}}"):
+        raw = raw[3:-2].strip()
+
+    m = re.fullmatch(
+        r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')",
+        raw,
+        re.DOTALL,
+    )
+    if not m:
+        msg = f"KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}"
+        print(msg)
+        raise ValueError(msg)
+
+    cond_str = m.group("cond").strip()
+    try:
+        true_arr = json.loads(m.group("t").strip("'"))
+        false_arr = json.loads(m.group("f").strip("'"))
+    except Exception as ex:
+        msg = f"KHÔNG ĐO ĐƯỢC: không parse được mảng JSON trong biểu thức: {ex}"
+        print(msg)
+        raise ValueError(msg)
+
+    ve_list = [v.strip() for v in cond_str.split("||")]
+    cond_true = False
+    for ve in ve_list:
+        m_eq = re.fullmatch(r"github\.event_name\s*==\s*'([^']+)'", ve)
+        if m_eq:
+            if ctx.get("event_name") == m_eq.group(1):
+                cond_true = True
+                break
+            continue
+
+        m_ref = re.fullmatch(r"github\.ref\s*==\s*'([^']+)'", ve)
+        if m_ref:
+            if ctx.get("ref") == m_ref.group(1):
+                cond_true = True
+                break
+            continue
+
+        m_contains = re.fullmatch(
+            r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", ve
+        )
+        if m_contains:
+            labels = ctx.get("labels") or []
+            if m_contains.group(1) in labels:
+                cond_true = True
+                break
+            continue
+
+        msg = f"KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: {ve!r}"
+        print(msg)
+        raise ValueError(msg)
+
+    return true_arr if cond_true else false_arr
+AST_EXTRACTED_FUNCTION_END
+REAL_EXPRESSION='${{ (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}'
+expression_same_as_9e9a74b=True
+push master: {"event_name": "push", "ref": "refs/heads/master", "labels": []} => ["ubuntu-latest"]
+PR thường: {"event_name": "pull_request", "ref": "refs/pull/870/merge", "labels": ["docs"]} => ["ubuntu-latest"]
+PR windows: {"event_name": "pull_request", "ref": "refs/pull/870/merge", "labels": ["windows"]} => ["ubuntu-latest", "windows-latest"]
+dispatch master: {"event_name": "workflow_dispatch", "ref": "refs/heads/master", "labels": []} => ["ubuntu-latest", "windows-latest"]
+dispatch feature: {"event_name": "workflow_dispatch", "ref": "refs/heads/review-probe", "labels": []} => ["ubuntu-latest", "windows-latest"]
+PR nhãn khác: {"event_name": "pull_request", "ref": "refs/pull/870/merge", "labels": ["windows-other"]} => ["ubuntu-latest"]
+ci_job=chuan-bi; runs-on=ubuntu-latest; matrix={}
+ci_job=gate; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+ci_job=gate-cong-cu; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7]}
+ci_job=gate-cong-cu-gop; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+ci_job=gate-ops; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+ci_job=gate-nhanh-manh; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}", "manh": [0, 1, 2, 3, 4, 5, 6, 7]}
+ci_job=gate-nhanh-gop; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+ci_job=gate-registry; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+ci_job=gate-packet-loop; runs-on=${{ matrix.os }}; matrix={"os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}
+rc=0

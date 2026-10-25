@@ -1,0 +1,30 @@
+{
+ "jobs": [
+  {
+   "id": 121079688699,
+   "run_id": 40163482982,
+   "workflow_name": "launcher (Windows that)",
+   "head_branch": "agent/wp923-g1-claude",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40163482982",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAcMOlt-w",
+   "head_sha": "7574c39d98459c9caf1365a7dd092747335ae4e8",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/121079688699",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40163482982/job/121079688699",
+   "status": "completed",
+   "conclusion": "skipped",
+   "created_at": "2026-10-25T04:52:43Z",
+   "started_at": "2026-10-25T04:52:43Z",
+   "completed_at": "2026-10-25T04:52:42Z",
+   "name": "launcher",
+   "steps": [],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/121079688699",
+   "labels": [],
+   "runner_id": null,
+   "runner_name": null,
+   "runner_group_id": null,
+   "runner_group_name": null
+  }
+ ],
+ "total_count": 1
+}

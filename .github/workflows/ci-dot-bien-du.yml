@@ -21,7 +21,7 @@ permissions:
 jobs:
   dot-bien-du:
     runs-on: ubuntu-latest
-    timeout-minutes: 105
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

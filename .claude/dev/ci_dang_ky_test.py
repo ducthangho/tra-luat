@@ -802,9 +802,9 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
-BAM_GATE_REGISTRY = "e2726e28ae7ecc869cd9df6c975e58f71c3c656594a509c9c2e4b9047c47bb4d"
+BAM_GATE_REGISTRY = "89516cf77c3ce734feadf348bfea8180254c67e8e8ec62a48e2f6ea1dc038452"
 # WP748 r16: hai job nay la `targeted_mutant_gate` (NHANH_DON_DUOC_DICH, gom `--gop-dich`, tran 30 phut).
-BAM_GATE_NHANH = "301d30a212b34bcff14390a3353084a9af0385fe917c76ab33a22cdc054e2e26"
+BAM_GATE_NHANH = "fe061a50668af83b6c9b6939f881ba37a30083bc72a27b52c2e02350835d626b"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -2296,7 +2296,7 @@ def phan_chung():
         _tho, _w = WF_DOT_BIEN_DU.read_text(encoding="utf-8"), pathlib.Path(_d, "w.yml")
         for _t, _a, _b in (("goc", "", ""), ("on-thanh-true", "\non:\n", "\ntrue:\n"), ("khoa-True-rac", "\npermissions:", '\n"True": rac\npermissions:'),
                            ("cron-trung", '    - cron: "17', '    - cron: "0 0 1 1 *"\n      cron: "17'),
-                           ("timeout-trung", "    timeout-minutes: 105\n", "    timeout-minutes: 5\n    timeout-minutes: 105\n")):
+                           ("timeout-trung", "    timeout-minutes: 150\n", "    timeout-minutes: 5\n    timeout-minutes: 150\n")):
             _w.write_text(_v := _tho.replace(_a, _b, 1) if _a else _tho, encoding="utf-8")
             _them(f"p651-M4-yaml-tho-{_t}", not loi_actionlint(_w) if not _a else (
                 _v != _tho and not loi_workflow_dot_bien_du(yaml.safe_load(_v), _wf0) and bool(loi_actionlint(_w))))

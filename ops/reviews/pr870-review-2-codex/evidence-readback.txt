@@ -1,0 +1,35 @@
+total_count=23; len(jobs)=23
+unique_job_ids=23
+labels={('ubuntu-latest',): 23}
+conclusions={'success': 23}
+windows_labels=0
+run_id=[39354156843]
+head_sha=['3a3a3caca5de4934ff53851feb6994c2c7b84ad5']
+head_branch=['master']
+workflow_name=['gate']
+run_attempt=[1]
+run_metadata={"id": 39354156843, "path": ".github/workflows/ci.yml", "event": "push", "head_sha": "3a3a3caca5de4934ff53851feb6994c2c7b84ad5", "head_branch": "master", "created_at": "2026-10-20T01:34:09Z", "run_started_at": "2026-10-20T01:34:09Z", "conclusion": "success", "run_attempt": 1}
+118404992707: chuan-bi: ['ubuntu-latest']: success
+118405023227: gate-packet-loop (ubuntu-latest): ['ubuntu-latest']: success
+118405023277: gate (ubuntu-latest): ['ubuntu-latest']: success
+118405023325: gate-ops (ubuntu-latest): ['ubuntu-latest']: success
+118405023336: gate-cong-cu (ubuntu-latest, 5): ['ubuntu-latest']: success
+118405023360: gate-cong-cu (ubuntu-latest, 3): ['ubuntu-latest']: success
+118405023366: gate-nhanh-manh (ubuntu-latest, 1): ['ubuntu-latest']: success
+118405023370: gate-cong-cu (ubuntu-latest, 7): ['ubuntu-latest']: success
+118405023391: gate-nhanh-manh (ubuntu-latest, 4): ['ubuntu-latest']: success
+118405023397: gate-nhanh-manh (ubuntu-latest, 5): ['ubuntu-latest']: success
+118405023408: gate-nhanh-manh (ubuntu-latest, 3): ['ubuntu-latest']: success
+118405023422: gate-nhanh-manh (ubuntu-latest, 7): ['ubuntu-latest']: success
+118405023423: gate-nhanh-manh (ubuntu-latest, 2): ['ubuntu-latest']: success
+118405023432: gate-cong-cu (ubuntu-latest, 0): ['ubuntu-latest']: success
+118405023442: gate-cong-cu (ubuntu-latest, 1): ['ubuntu-latest']: success
+118405023453: gate-cong-cu (ubuntu-latest, 4): ['ubuntu-latest']: success
+118405023470: gate-nhanh-manh (ubuntu-latest, 0): ['ubuntu-latest']: success
+118405023490: gate-cong-cu (ubuntu-latest, 2): ['ubuntu-latest']: success
+118405023510: gate-cong-cu (ubuntu-latest, 6): ['ubuntu-latest']: success
+118405023533: gate-nhanh-manh (ubuntu-latest, 6): ['ubuntu-latest']: success
+118405274418: gate-nhanh-gop (ubuntu-latest): ['ubuntu-latest']: success
+118405368195: gate-registry (ubuntu-latest): ['ubuntu-latest']: success
+118413934277: gate-cong-cu-gop (ubuntu-latest): ['ubuntu-latest']: success
+rc=0

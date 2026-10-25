@@ -87,6 +87,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -1586,6 +1587,114 @@ def _kiem_checkpoint(a, kq) -> str | None:
         raise Chan(MA_THAM_SO, "Checkpoint/HEAD/prompt không khớp; chưa materialize hoặc resume") from None
 
 
+# wp748 r25 (#748 issuecomment-6378484722; đo 24-10-2026, codex-cli 0.163.0) — MODEL DO MÁY CHỦ TRẢ cho từng
+# response của lượt codex. `--json`, rollout `~/.codex/sessions` và `logs_2.sqlite` đều KHÔNG có nó (rollout chỉ có
+# model CẤU HÌNH); chỉ khung `response.created`/`response.completed` mà máy chủ gửi về mới mang `response.model`, và
+# khung ấy chỉ lộ ra ở log trace của target `tungstenite::protocol`. Log trace thô chứa thông tin xác thực (đo được:
+# 13 dòng nhắc `authorization`), nên: dòng TRACE/DEBUG và mọi dòng nối tiếp của nó KHÔNG BAO GIỜ chạm đĩa — chỉ
+# {response_id, model} được giữ trong bộ nhớ. Bật trace hẹp là để giảm lượng đi qua ống; LỌC mới là chốt.
+_RUST_LOG_DO_MODEL = "tungstenite::protocol=trace"
+# v r25 vòng 3 (cross-review l909d R25-SEC-01/CONTRACT-07; chủ kho chọn 24-10-2026, spec r25 v2): stderr của lượt
+# codex là DANH SÁCH CHO PHÉP NGUYÊN VĂN — chỉ dòng trọn vẹn bằng đúng một mục dưới đây được ghi; mọi byte khác
+# bị bỏ và chỉ được ĐẾM. Vòng 1 (chặn dòng nhận ra là trace) và vòng 2 (ghi mọi thứ trước dấu hiệu log đầu tiên)
+# đều phải ĐOÁN dòng nào nguy hiểm; ở đây không đoán gì: thứ chạm đĩa là hằng số trong mã.
+# Đo 24-10-2026 (codex-cli 0.163.0, --json): phần không phải trace của stderr đúng bằng dòng này, 39 byte.
+_STDERR_CHO_PHEP = (b"Reading additional input from stdin...",)
+_RE_ANSI_B = re.compile(rb"\x1b\[[0-9;?]*[ -/]*[@-~]")
+_RE_KHUNG = re.compile(rb"^\d{4}-\d\d-\d\dT\S+\s+TRACE\s+tungstenite::protocol: Received message (\{.*\})\s*$")
+_RE_UNG_VIEN = re.compile(rb'"type"\s*:\s*"response\.(?:created|completed)"')
+_TRAN_DONG = 4 << 20          # trần một lần đọc (R25-ROBUST-04)
+_SU_KIEN_KHUNG = ("response.created", "response.completed")
+
+
+def _la_codex(lenh) -> bool:
+    return Path(lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")
+
+
+def _loc_stderr_codex(ong, f_err, ket: list, loi: list, dem: dict | None = None) -> None:
+    """Đọc stderr của con codex tới EOF, mỗi lần tối đa `_TRAN_DONG` byte. Chỉ dòng TRỌN VẸN (đầu dòng, có xuống
+    dòng) bằng nguyên văn một mục `_STDERR_CHO_PHEP` được ghi vào `f_err`; còn lại bỏ và đếm vào `dem`. Khung máy
+    chủ chỉ nhận từ dòng trọn vẹn khớp `_RE_KHUNG` (UTF-8 chặt, id và model khác rỗng): {response_id, model,
+    su_kien} vào `ket`, khử trùng theo response_id + model. Đoạn nào trông như khung response.created/completed
+    (`_RE_UNG_VIEN`) mà không nhận được thì đếm vào dem["mat"] — bằng chứng đã mất, sổ không được báo DO_DUOC.
+    Bộ lọc hỏng thì ghi tên lỗi vào `loi` rồi XẢ ống có giới hạn, không ghi gì."""
+    dem = {} if dem is None else dem
+    try:
+        _loc_tung_dong(ong, f_err, ket, dem)
+    except Exception as e:
+        loi.append(type(e).__name__)
+        with contextlib.suppress(Exception):
+            for _ in iter(lambda: ong.read(_TRAN_DONG), b""):
+                pass
+
+
+def _nhan_khung(sach: bytes):
+    k = _RE_KHUNG.match(sach)
+    if not k:
+        return None
+    try:
+        ev = json.loads(k.group(1).decode("utf-8"))
+    except ValueError:
+        return None
+    r = ev.get("response") if isinstance(ev, dict) else None
+    if not (isinstance(r, dict) and ev.get("type") in _SU_KIEN_KHUNG):
+        return None
+    rid, mdl = r.get("id"), r.get("model")
+    if not (isinstance(rid, str) and rid.strip() and isinstance(mdl, str) and mdl.strip()):
+        return None
+    return {"response_id": rid, "model": mdl, "su_kien": ev["type"]}
+
+
+def _loc_tung_dong(ong, f_err, ket: list, dem: dict) -> None:
+    tron = True                  # đầu đoạn đang đọc là đầu một dòng (lần đọc trước kết thúc bằng xuống dòng)
+    for dong in iter(lambda: ong.readline(_TRAN_DONG), b""):
+        dau_dong, tron = tron, dong.endswith(b"\n")
+        ca_dong = dau_dong and tron
+        if ca_dong and dong.rstrip(b"\r\n") in _STDERR_CHO_PHEP:
+            try:
+                f_err.write(dong)
+            except ValueError:
+                pass             # tệp đã đóng vì hậu duệ giữ ống quá hạn chờ: bỏ, không ghi lệch chỗ
+            continue
+        dem["dong_bo"] = dem.get("dong_bo", 0) + 1
+        dem["byte_bo"] = dem.get("byte_bo", 0) + len(dong)
+        sach = _RE_ANSI_B.sub(b"", dong)
+        m = _nhan_khung(sach) if ca_dong else None
+        if m is None:
+            if _RE_UNG_VIEN.search(sach):
+                dem["mat"] = dem.get("mat", 0) + 1
+        elif not any(x["response_id"] == m["response_id"] and x["model"] == m["model"] for x in ket):
+            ket.append(m)
+
+
+def _ket_luan_model(ket: list, loi: list, con_doc: bool, mat: int = 0) -> tuple:
+    """(trạng thái, lý do). DO_DUOC chỉ khi CÓ khung, bộ lọc KHÔNG hỏng, đã đọc tới EOF, và không mất khung nào."""
+    if loi:
+        return "KHONG_DO_DUOC", f"bo loc stderr hong ({loi[0]}); phan con lai cua stderr da bi bo"
+    if con_doc:
+        return "KHONG_DO_DUOC", "ong stderr con mo sau 10s (hau due giu ong); danh sach co the thieu"
+    if mat:
+        return "KHONG_DO_DUOC", f"{mat} doan giong khung response.created/completed khong doc duoc; danh sach thieu"
+    if not ket:
+        return "KHONG_DO_DUOC", ("khong thay khung response.created/response.completed nao mang model "
+                                 "trong stderr cua con; KHONG suy tu -m hay cau hinh")
+    return "DO_DUOC", None
+
+
+def _ghi_ket_qua_model(ban_ghi: dict, luong, ket: list, loi: list, dem: dict) -> None:
+    """Chốt kết quả đo vào sổ từ MỘT ảnh chụp (R25-RACE-06): trạng thái luồng đọc được CHỐT TRƯỚC, rồi mới chụp
+    danh sách/lỗi/bộ đếm; trạng thái và các trường ghi sổ suy từ cùng ảnh chụp ấy."""
+    con_doc = luong is not None and luong.is_alive()
+    ket_s, loi_s, dem_s = list(ket), list(loi), dict(dem)
+    tt, ld = _ket_luan_model(ket_s, loi_s, con_doc, dem_s.get("mat", 0))
+    ban_ghi["model_phuc_vu"] = ket_s
+    ban_ghi["model_phuc_vu_trang_thai"] = tt
+    if ld:
+        ban_ghi["model_phuc_vu_ly_do"] = ld
+    ban_ghi["stderr_bo_dong"] = dem_s.get("dong_bo", 0)
+    ban_ghi["stderr_bo_byte"] = dem_s.get("byte_bo", 0)
+
+
 def lenh_run(a) -> int:
     # Git/probes must never inherit the snapshot, including rejected resumes.
     snapshot = os.environ.pop("CODEX_AUTH_JSON", "")
@@ -1598,7 +1707,7 @@ def lenh_run(a) -> int:
         snapshot = ""
         if not ket or not all(x.get("ok") for x in ket):
             raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
-    if Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd"):
+    if _la_codex(a.lenh):
         if _cho_snapshot_hoac_chan():
             raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
@@ -1706,8 +1815,22 @@ def lenh_run(a) -> int:
                    "con se nhan chuoi nguyen van")
 
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
-    f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")
+    do_model = _la_codex(a.lenh)
+    # Lượt codex: stderr đi qua ỐNG và bộ lọc danh sách cho phép, tệp mở nhị phân để ghi đúng byte.
+    f_err = (thu_muc / "stderr.log").open("wb" if do_model else "w", **({} if do_model else {"encoding": "utf-8"}))
     them = {}
+    model_ket: list = []
+    loi_loc: list = []
+    dem_loc: dict = {}
+    luong_loc = None
+    if do_model:
+        env = dict(os.environ)
+        # GHI ĐÈ, không nối: RUST_LOG thừa kế có thể bật target khác mang credential (R25-SEC-01).
+        rust_log_cu = env.get("RUST_LOG")
+        env["RUST_LOG"] = _RUST_LOG_DO_MODEL
+        if rust_log_cu:
+            ban_ghi["model_phuc_vu_rust_log_ke_thua_bi_ghi_de"] = True
+        them["env"] = env
     if platform.system() == "Windows":
         them["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
@@ -1715,7 +1838,12 @@ def lenh_run(a) -> int:
         them["start_new_session"] = True
     try:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
-                             stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
+                             stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
+                             stdin=subprocess.DEVNULL, **them)
+        if do_model:
+            luong_loc = threading.Thread(target=_loc_stderr_codex, args=(p.stderr, f_err, model_ket, loi_loc, dem_loc),
+                                         daemon=True)
+            luong_loc.start()
     except (OSError, ValueError) as e:
         if isinstance(e, ValueError):
             ban_ghi.pop("void_reason", None)
@@ -1780,7 +1908,12 @@ def lenh_run(a) -> int:
         ma = 130
     finally:
         f_out.close()
+        if luong_loc is not None:
+            # Hậu duệ còn giữ ống thì EOF không tới: chờ có hạn, rồi nói thẳng danh sách có thể thiếu.
+            luong_loc.join(timeout=10)
         f_err.close()
+    if do_model:
+        _ghi_ket_qua_model(ban_ghi, luong_loc, model_ket, loi_loc, dem_loc)
 
     if khoa is None and qua_han:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"

@@ -80,8 +80,15 @@ thay_the_cho_ghi_chu: 'lease g3 con han toi 2026-10-27T14:58Z => bia mo hai chie
 leased_at_utc: '2026-10-25T15:46:00Z'
 heartbeat_at: '2026-10-25T15:46:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-27T15:46:00Z'
-lease_expires_at_utc: '2026-10-27T15:46:00Z'
+lease_until: '2026-10-25T17:35:00Z'
+lease_expires_at_utc: '2026-10-25T17:35:00Z'
+rut_han:
+  han_cu: '2026-10-27T15:46:00Z'
+  han_moi: '2026-10-25T17:35:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #835 da merge: PR #931 (merge 7009ab9, head 3e46a4b); chu kho chi thi "Land #931 va rut lease wp835-r4-g4" trong phien executor (ghi ho #835 issuecomment-6400747826).'
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem cua #835 tro nguoc bang thay_the_cho; viec da xong. Tien le be6f91b (wp919-r3-g3-claude-remote-20261025).'
+  ghi_boi: claude-executor-session session_016aK6Uy4CzUZFKnDmoHRQps (chinh executor cua lease nay, theo chi thi chu kho ghi ho #835 issuecomment-6400747826)
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 1

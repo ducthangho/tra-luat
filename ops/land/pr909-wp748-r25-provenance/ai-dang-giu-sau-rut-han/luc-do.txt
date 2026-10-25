@@ -1,0 +1,11 @@
+luc: 2026-10-25T03:05:59Z
+ls-remote 590 guong 590 thieu 0 thua 0
+== .claude/dev/launcher.py
+HẾT_HẠN	wp748-r25-g25-claude-remote-20261024	refs/heads/ops/wp748-r25-g25-lease:ops/leases/wp748-r25-g25-claude-remote-20261024.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== .claude/dev/launcher_test.py
+HẾT_HẠN	wp748-r25-g25-claude-remote-20261024	refs/heads/ops/wp748-r25-g25-lease:ops/leases/wp748-r25-g25-claude-remote-20261024.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp886-r1-g1-claude	refs/heads/ops/wp886-r1-g1-lease:ops/leases/wp886-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

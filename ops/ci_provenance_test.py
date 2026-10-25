@@ -10,7 +10,7 @@ r4: REST giả giữ `steps[]` dựng MỘT lần từ log + workflow đang gi�
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`.
 """
-import contextlib, hashlib, importlib.util, io, json, os, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
+import contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 from unittest import mock
 
@@ -639,7 +639,8 @@ def c45_buoc_skipped_giua():   # bước `skipped` ĐỨNG TRƯỚC: tên vẫn 
 def c46_mien_che_do():   # miền giá trị của chặn chế độ: mỗi biến thể đổi MỘT trục, có cả chặn lẫn đối chứng cho phép
     x, ok = f"python {DUONG_GIA}", [("passed", None)]
     for ten, w, mong in (("env job []", wf_tu(x, job_them={"env": []}), CHAN), ("env job list", wf_tu(x, job_them={"env": ["A"]}), CHAN),
-                         ("env job biểu thức", wf_tu(x, job_them={"env": "${{ x }}"}), CHAN), ("env job {}", wf_tu(x, job_them={"env": {}}), ok),
+                         ("env job biểu thức", wf_tu(x, job_them={"env": "${{ x }}"}), CHAN), ("env job {}", wf_tu(x, job_them={"env": {}}), ok), ("env job null (D01)", wf_tu(x, job_them={"env": None}), CHAN),
+                         ("env workflow null (D01)", wf_tu(x, goc_them={"env": None}), CHAN),
                          ("env workflow dict", wf_tu(x, goc_them={"env": {"A": "1"}}), ok),
                          ("defaults workflow {}", wf_tu(x, goc_them={"defaults": {}}), CHAN), ("defaults job {}", wf_tu(x, job_them={"defaults": {}}), CHAN),
                          ("shell null", wf_tu(x, buoc_them={"shell": None}), CHAN), ("shell sh", wf_tu(x, buoc_them={"shell": "sh"}), ok),
@@ -732,10 +733,131 @@ def c48_nguyen_van_va_mien():   # F10: MỖI hằng chuỗi / tập liệt kê c
             ("uses: rỗng ở bước", wf_tu(X, buoc_them={"uses": ""}), None, None, "passed", []),
             ("uses: rỗng ở job", wf_tu(X, job_them={"uses": ""}), None, None, d_job, []),
             ("name: null", wf_tu(X, buoc_them={"name": None}), None, None, b_ten, []),
-            ("run: rỗng kèm uses:", wf_tu(X, buoc_them={"run": "", "uses": "./a"}), None, lambda st: st[2].update(name="Run ./a"), b_ten, [])):
+            ("run: rỗng kèm uses:", wf_tu(X, buoc_them={"run": "", "uses": "./a"}), None, lambda st: st[2].update(name="Run ./a"), b_ten, []),
+            ("dấu cách sau dấu nối dòng cuối", wf_tu(X, buoc_them={"run": X + " \\ "}), [khoi([X + " \\ "], "THU: 4/4 dat")], None, "passed", []),
+            ("màu không có mã reset", wf_tu(X), [[b[0], f"{T} \x1b[36;1m{X}"] + b[2:]], None, "passed", ok),
+            ("run: hai \\n cuối, khối một dòng", wf_tu(X + "\n"), None, None, "passed", ok),
+            ("run: hai \\n cuối, khối có dòng màu rỗng", wf_tu(X + "\n"), [khoi([X, ""], "THU: 4/4 dat")], None, "passed", []),
+            ("uses: có khoảng trắng hai đầu", yaml.safe_dump({"jobs": {"j": {"runs-on": "x", "steps": [{"uses": "actions/setup-python@v5"},
+             {"uses": " ./a "}]}}}), [[f"{T} ##[group]Run  ./a ", f"{T} ##[endgroup]"]], None, "passed", [])):
         hang.append((ten, g1(w, *(dong or [b]), sua=sua), g, m))
     sai = [(ten, ghep(p), dd(p), g, m) for ten, p, g, m in hang if (ghep(p), dd(p)) != (g, m)]
     bang(not sai and len(hang) > 80, f"{len(sai)}/{len(hang)} biến dạng lệch định nghĩa: {sai[:3]}")
+
+ENV_MIEN = ("vang", None, {}, {"A": "1"}, {"CI_DANG_KY_X": ""}, {"A": "1", "CI_DANG_KY_": "x", "B": ""}, [], "${{ x }}", 0, False, "")
+GHI = ("echo A=1 >> $GITHUB_ENV", "echo /x >> $GITHUB_PATH", 'echo A=1 >> "$GITHUB_ENV"; true', "echo MYGITHUB_PATHX")
+SHELL_MIEN = ("vang", "bash", "pwsh", "sh", "zsh", None, " bash", "Bash")
+
+def oracle_chan(wf, job, i):   # đọc THẲNG định nghĩa "Chặn chế độ" của spec r4 (+ D01), không gọi hàm nào của công cụ
+    env_xau = lambda d: "env" in d and (not isinstance(d["env"], dict) or any(str(k)[:11] == "CI_DANG_KY_" for k in d["env"]))  # noqa: E731
+    s = job["steps"][i]
+    return ("defaults" in wf or env_xau(wf) or "defaults" in job or env_xau(job) or any(k not in ("name", "id", "if", "run", "shell",
+            "timeout-minutes", "continue-on-error") for k in s) or s.get("shell", "bash") not in ("bash", "pwsh", "sh")
+            or any("GITHUB_ENV" in str(t.get("run", "")) or "GITHUB_PATH" in str(t.get("run", "")) for t in job["steps"][:i]))
+
+def oracle_job(ten, wf):   # định nghĩa "Job YAML của job REST" bằng phép so CHUỖI (không regex): đúng một khoá ⇒ khoá, không thì None
+    khop = [k for k, j in wf["jobs"].items() if any(isinstance(x, str) and x and "${{" not in x and (ten == x or ten.startswith(x + " (")
+            and ten.endswith(")")) for x in (k, j.get("name")))]
+    return khop[0] if len(khop) == 1 else None
+
+def kich_ban(rd, so):   # một workflow nhiều job; job đích ở vị trí ngẫu nhiên; mỗi bước một kiểu; trả (wf, tên REST, steps REST, log, them MOI, mong)
+    gan = lambda d, k, v: d.update({k: v}) if v != "vang" else None  # noqa: E731
+    wf, them, jobs = {}, {}, {}
+    for jx in range(rd.randint(1, 3)):
+        ds, co_setup = [], rd.random() < 0.7
+        if co_setup:
+            ds.append({"uses": "actions/setup-python@v5"})
+        for bx in range(rd.randint(0 if not co_setup else 1, 9)):
+            kieu = rd.choices(("goi", "ghi", "khac", "ghi_list"), (0.68, 0.15, 0.13, 0.04))[0]
+            duong = f"ops/g{so}_{jx}_{bx}_test.py"
+            run = {"goi": ("A=1 " if rd.random() < 0.1 else "") + f"python {duong}" + (" --x" if rd.random() < 0.1 else ""),
+                   "ghi": rd.choice(GHI), "khac": "echo hi", "ghi_list": "echo"}[kieu]
+            b = {"name": f"N{bx}", "run": ["echo $GITHUB_ENV"]} if kieu == "ghi_list" else {"run": run + "\n"}   # run: không phải chuỗi
+            if rd.random() < 0.15:
+                b["if"] = "false"
+            if rd.random() < 0.1:
+                b["env"] = rd.choice(({}, {"A": "1"}))
+            if rd.random() < 0.15:
+                gan(b, "shell", rd.choice(SHELL_MIEN))
+            if rd.random() < 0.05:
+                b["working-directory"] = "."
+            ds.append(b)
+            them[duong] = r"^THU: (\d+)/(\d+) dat$"
+        j = {"runs-on": "x", "steps": ds}
+        if rd.random() < 0.2:
+            gan(j, "env", rd.choice(ENV_MIEN))
+        if rd.random() < 0.05:
+            j["defaults"] = rd.choice(({}, None))
+        jobs[f"j{jx}"] = j
+    for jx, j in enumerate(jobs.values()):   # alias `name:`: thường riêng, đôi khi TRÙNG khoá của job khác (đích không duy nhất)
+        if rd.random() < 0.25:
+            j["name"] = rd.choice([f"Build {jx}", f"j{rd.randrange(len(jobs))}"])
+    wf["jobs"] = jobs
+    if rd.random() < 0.15:
+        gan(wf, "env", rd.choice(ENV_MIEN))
+    if rd.random() < 0.04:
+        wf["defaults"] = {}
+    k = rd.choice(list(jobs))
+    job, lg, st, mong, n = jobs[k], (LINUX if jobs[k]["steps"][:1] == [{"uses": "actions/setup-python@v5"}] else LINUX_KHONG_SETUP), [], [], 1
+    st.append({"name": "Set up job", "number": 1, "conclusion": "success", "started_at": "2026-10-19T23:40:00Z", "completed_at": "2026-10-19T23:40:00Z"})
+    for i, b in enumerate(job["steps"]):
+        n += 1
+        ten = b.get("name") or "Run " + (b.get("run") or b["uses"]).split("\n")[0]
+        if b.get("if") == "false":
+            st.append({"name": ten, "number": n, "conclusion": "skipped", "started_at": "2026-10-19T23:00:00Z", "completed_at": "2026-10-19T23:00:00Z"})
+            continue
+        if not isinstance(b.get("run", ""), str):   # bước `name:` + `run:` list đã chạy: có nhóm log, không bao giờ xác thực
+            gio = f"2026-10-19T23:50:{n:02d}Z"
+            lg += "".join(f"{gio[:-1]}.5Z {x}\n" for x in ["##[group]Run echo", "\x1b[36;1mecho\x1b[0m", "shell: /usr/bin/bash -e {0}", "##[endgroup]"])
+            st.append({"name": ten, "number": n, "conclusion": "success", "started_at": gio, "completed_at": gio})
+            continue
+        if "uses" in b:
+            gio = "2026-10-19T23:40:18Z"
+        else:
+            gio, lenh = f"2026-10-19T23:50:{n:02d}Z", b["run"].rstrip("\n")
+            ra = rd.choice(("THU: 4/4 dat", "THU: 3/4 dat"))
+            lg += "".join(f"{gio[:-1]}.5Z {x}\n" for x in [f"##[group]Run {lenh}", f"\x1b[36;1m{lenh}\x1b[0m", "shell: /usr/bin/bash -e {0}",
+                                                            "##[endgroup]", ra])
+            g = RE_GOI_ORACLE.fullmatch(lenh)
+            if g:
+                mong.append(("not_measured", "che_do_khong_xac_dinh") if oracle_chan(wf, job, i) or g[1] else ("passed" if ra[5] == "4" else "failed", None))
+        st.append({"name": ten, "number": n, "conclusion": "success", "started_at": gio, "completed_at": gio})
+    st.append({"name": "Complete job", "number": n + 1, "conclusion": "success", "started_at": "2026-10-19T23:59:00Z", "completed_at": "2026-10-19T23:59:00Z"})
+    ghep, nhieu = "passed", rd.random()
+    vi = [x for x in st[1:-1] if x["conclusion"] != "skipped" and x["name"] != "Run actions/setup-python@v5"]
+    if nhieu < 0.08 and vi:   # cửa sổ giờ của MỘT bước đã chạy nằm SAU hoặc TRƯỚC header (bất kỳ vị trí nào, không chỉ bước cuối)
+        rd.choice(vi).update(rd.choice(({"started_at": "2026-10-19T23:58:00Z", "completed_at": "2026-10-19T23:58:01Z"},
+                                        {"started_at": "2026-10-19T23:01:00Z", "completed_at": "2026-10-19T23:01:01Z"})))
+        ghep, mong = "c_gio_header_ngoai_cua_so", []
+    elif nhieu < 0.16 and len(st) > 2:   # tên REST lệch ở MỘT vị trí bất kỳ (kể cả bước skipped)
+        rd.choice(st[1:-1])["name"] = "Run khac_x"
+        ghep, mong = "b_ten_buoc_lech", []
+    elif nhieu < 0.22:   # `number` float nguyên ⇒ không phải số nguyên REST
+        rd.choice(st)["number"] += 0.0
+        ghep, mong = "steps_rest_sai_dang", []
+    ten = rd.choice([k, f"{k} (ubuntu-latest, {so})", f"{k} ({'x' * 90})"] + ([job["name"]] if "name" in job else []))
+    if oracle_job(ten, wf) != k:   # tên REST không định danh DUY NHẤT job đích ⇒ vế d hỏng trước mọi vế khác
+        ghep, mong = ("d_job_yaml_khong_duy_nhat", []) if oracle_job(ten, wf) is None else (None, None)
+    return yaml.safe_dump(wf, allow_unicode=True), ten, st, lg, them, ghep, mong
+
+RE_GOI_ORACLE = re.compile(r"(A=1 )?python ops/g\d+_\d+_\d+_test\.py")   # lời gọi tối giản của bộ sinh: KHÔNG đối số sau script
+
+@ca
+def c49_oracle_nhieu_truc():   # F10 đóng LỚP: 250 kịch bản ngẫu nhiên (hạt giống cố định) qua oracle độc lập; so TRỌN danh sách marker
+    rd, sai = random.Random(899), []
+    for so in range(250):
+        w, ten, st, lg, them, ghep_mong, mong = kich_ban(rd, so)
+        if ghep_mong is None:   # tên REST trỏ DUY NHẤT một job KHÁC: ngoài phạm vi oracle, bỏ kịch bản (đếm ở dưới)
+            continue
+        try:
+            p = chay([(job(1, name=ten, steps=st), lg)], wf=w, them=them)[2]
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều ca này đo
+            sai.append((so, ten, type(e).__name__))
+            continue
+        dd = [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]
+        if (ghep(p), dd) != (ghep_mong, mong):
+            sai.append((so, ten, ghep(p), ghep_mong, dd, mong))
+    bang(not sai, f"{len(sai)}/250 kịch bản lệch oracle; đầu tiên: {sai[:2]}")
 
 @ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
@@ -805,10 +927,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("A16_bo_luat_toan_khoi", "[g[2] for g in goi] if goi and all(goi) else []", "[g[2] for g in goi if g]", "c27"),
     ("A16_bo_khop_nguyen_van", 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'True', "c25"),
     ("A17i_cho_env_buoc", '"timeout-minutes", "continue-on-error"}', '"timeout-minutes", "continue-on-error", "env"}', "c28"),
-    ("A17ii_bo_env_job", ' or _env_chan(j.get("env"))', '', "c29"),
+    ("A17ii_bo_env_job", ' or _env_chan(j)', '', "c29"),
     ("A17iii_cho_doi_so", r'\.py)$")', r'\.py)(?:\s+\S+)*$")', "c30"),
     ("che_do_bo_tien_to_VAR", " or any(g and g[1] for g in goi)", "", "c31"),
-    ("che_do_bo_env_workflow", ' or _env_chan(wf.get("env"))', "", "c31"),
+    ("che_do_bo_env_workflow", ' or _env_chan(wf)', "", "c31"),
     ("che_do_bo_defaults_workflow", 'return bool("defaults" in wf or', "return bool(", "c31"),
     ("che_do_bo_defaults_job", ' or "defaults" in j', "", "c31"),
     ("che_do_moi_shell", ' not in ("bash", "pwsh", "sh")', " is None", "c31"),
@@ -864,10 +986,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L3_shell_khong_cach", 't.startswith("shell: ")', 't.startswith("shell:")', "c47"),
     ("L3_truoc_bo_buoc_dau", 'for t in j["steps"][:i]))', 'for t in j["steps"][1:i]))', "c47"),
     ("L3_truoc_chi_lien_ke", 'for t in j["steps"][:i]))', 'for t in j["steps"][max(i - 1, 0):i]))', "c47"),
-    ("L3_env_bo_dang", "type(v) is not dict or any(str(k)", "False or any(str(k)", "c46"),
-    ("L3_env_truthy", "return v is not None and (type(v) is not dict", "return bool(v) and (type(v) is not dict", "c46"),
-    ("L3_env_chi_chuoi", "type(v) is not dict or any(str(k)", "type(v) is str or any(str(k)", "c46"),
-    ("L3_env_wf_co_mat", '_env_chan(wf.get("env"))', '("env" in wf)', "c46"),
+    ("L3_env_bo_dang", 'type(d["env"]) is not dict or any(str(k)', "False or any(str(k)", "c46"),
+    ("L3_env_truthy", 'return "env" in d and (', 'return bool(d.get("env")) and (', "c46"),
+    ("L3_env_chi_chuoi", 'type(d["env"]) is not dict or any(str(k)', 'type(d["env"]) is str or any(str(k)', "c46"),
+    ("L3_env_wf_co_mat", '_env_chan(wf) or', '("env" in wf) or', "c46"),
     ("L3_defaults_wf_truthy", 'return bool("defaults" in wf or', 'return bool(bool(wf.get("defaults")) or', "c46"),
     ("L3_defaults_job_truthy", ' or "defaults" in j or', ' or bool(j.get("defaults")) or', "c46"),
     ("L3_shell_bo_pwsh", '("bash", "pwsh", "sh")', '("bash", "sh")', "c46"),
@@ -895,7 +1017,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('N_concl_lower', 's.get("conclusion") != "skipped"]', 'str(s.get("conclusion")).lower() != "skipped"]', 'c48'),
     ('N_concl_timed_out', 's.get("conclusion") != "skipped"]', 's.get("conclusion") not in ("skipped", "timed_out")]', 'c48'),
     ('N_env_strip', 'str(k).startswith("CI_DANG_KY_")', 'str(k).strip().startswith("CI_DANG_KY_")', 'c48'),
-    ('N_env_v_truthy', 'return v is not None and (', 'return bool(v) and (', 'c46'),
+    ('D01_null_coi_nhu_vang', 'return "env" in d and (', 'return d.get("env") is not None and (', 'c46'),
     ('N_defaults_none', 'return bool("defaults" in wf or', 'return bool(wf.get("defaults") is not None or', 'c48'),
     ('N_github_re_I', 're.search("GITHUB_(ENV|PATH)",', 're.search("(?i)GITHUB_(ENV|PATH)",', 'c48'),
     ('N_github_dollar', 're.search("GITHUB_(ENV|PATH)",', 're.search(r"\\$GITHUB_(ENV|PATH)",', 'c48'),
@@ -935,6 +1057,28 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('L4_header_lstrip', 'b["in_lai"][:1] == [b["lenh"]]', 'b["in_lai"][:1] == [b["lenh"].lstrip()]', 'c48'),
     ('L4_shell_lstrip', 't.startswith("shell: ")', 't.lstrip().startswith("shell: ")', 'c48'),
     ('L4_number_contiguous', 'and len({s["number"] for s in st}) == len(st)', 'and {s["number"] for s in st} == set(range(1, len(st) + 1))', 'c36'),
+    ('L5_wf_env_dict_only', '_env_chan(wf) or', '(type(wf.get("env")) is dict and _env_chan(wf)) or', 'c49'),
+    ('L5_wf_env_nonempty_only', '_env_chan(wf) or', '(bool(wf.get("env")) and _env_chan(wf)) or', 'c49'),
+    ('L5_env_chi_khoa_dau', 'for k in d["env"]))', 'for k in list(d["env"])[:1]))', 'c49'),
+    ('L5_env_chi_khoa_cuoi', 'for k in d["env"]))', 'for k in list(d["env"])[-1:]))', 'c29'),
+    ('L5_env_false_cho_qua', 'return "env" in d and (', 'return "env" in d and d["env"] is not False and (', 'c49'),
+    ('L5_env_int_cho_qua', 'return "env" in d and (', 'return "env" in d and type(d["env"]) is not int and (', 'c49'),
+    ('L5_env_chuoi_rong_cho_qua', 'return "env" in d and (', 'return "env" in d and d["env"] != "" and (', 'c49'),
+    ('L5_env_gia_tri_rong_cho_qua', 'str(k).startswith("CI_DANG_KY_") for k in', '(str(k).startswith("CI_DANG_KY_") and bool(d["env"][k])) for k in', 'c49'),
+    ('L5_che_do_buoc_run_dau', 'j, s = wf["jobs"][k], wf["jobs"][k]["steps"][i]', 'j, s = wf["jobs"][k], wf["jobs"][k]["steps"][min(1, len(wf["jobs"][k]["steps"]) - 1)]', 'c49'),
+    ('L5_dd_job_dau', '        s = wf["jobs"][k]["steps"][i]\n', '        s = (next(iter(wf["jobs"].values()))["steps"] + [{}] * 99)[i]\n', 'c49'),
+    ('L5_job_uu_tien_khop_dung', 'return khop[0] if len(khop) == 1 else None', 'return ten if ten in khop else khop[0] if len(khop) == 1 else None', 'c49'),
+    ('L5_job_ten_dai_bo_hau_to', 'for x in (k, j.get("name")))]', 'for x in (k, j.get("name")) if ten == x or len(ten) < 80)]', 'c49'),
+    ('L5_gio_completed_cua_buoc_cuoi', '(z := _gio(ung[i].get("completed_at")))', '(z := _gio(ung[chay[-1]].get("completed_at")))', 'c49'),
+    ('L5_truoc_chi_run_chuoi', 'str(t.get("run", ""))', '(t.get("run", "") if type(t.get("run", "")) is str else "")', 'c49'),
+    ('L5_github_cuoi_chuoi', 're.search("GITHUB_(ENV|PATH)",', 're.search("GITHUB_(ENV|PATH)$",', 'c49'),
+    ('L5_github_ranh_gioi_tu', 're.search("GITHUB_(ENV|PATH)",', 're.search(r"\\bGITHUB_(ENV|PATH)\\b",', 'c49'),
+    ('L5_mau_doi_reset', 'mau = "\\x1b[36;1m" in d', 'mau = bool(re.search(r"\\x1b\\[36;1m.*\\x1b\\[0m$", d))', 'c48'),
+    ('L5_khoi_rstrip_ca_khoi', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.rstrip("\\n") == "\\n".join(b["in_lai"]).rstrip("\\n")', 'c48'),
+    ('L5_run_bo_mot_lf', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.removesuffix("\\n") == "\\n".join(b["in_lai"])', 'c48'),
+    ('L5_uses_strip', 'v = s.get("run", s.get("uses"))', 'v = s.get("run", str(s.get("uses")).strip())', 'c48'),
+    ('L5_goi_strip_toan_run', 'dong_logic(run.rstrip("\\n").split("\\n"))', 'dong_logic(run.strip().split("\\n"))', 'c48'),
+    ('L5_D01_null_la_vang', 'return "env" in d and (', 'return d.get("env") is not None and (', 'c49'),
     ("job_bo_x_str", 'type(x) is str and x and "${{"', 'x and "${{"', "c44"),
     ("so_number_0", '_so(s.get("number"), 1)', '_so(s.get("number"), 0)', "c44"),
     ("so_number_am", '_so(s.get("number"), 1)', '(type(s.get("number")) is int)', "c44"),

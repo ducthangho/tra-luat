@@ -150,8 +150,8 @@ def git_blob(sha, path, goc=ROOT):
     except (OSError, subprocess.SubprocessError, UnicodeDecodeError):
         return None
 
-def _env_chan(v):   # `env:` không phải dict (biểu thức) hoặc có khoá `CI_DANG_KY_*` ⇒ không biết chế độ
-    return v is not None and (type(v) is not dict or any(str(k).startswith("CI_DANG_KY_") for k in v))
+def _env_chan(d):   # CÓ khoá `env:` mà giá trị không phải dict (biểu thức, null — D01) hoặc có khoá `CI_DANG_KY_*` ⇒ không biết chế độ
+    return "env" in d and (type(d["env"]) is not dict or any(str(k).startswith("CI_DANG_KY_") for k in d["env"]))
 
 def doc_wf(van):
     """Workflow tại SHA (`yaml.safe_load`); hỏng, không phải dict hay `jobs` không phải dict ⇒ None."""
@@ -211,7 +211,7 @@ def chan_buoc(wf, k, i):
     """r4 Q7: chặn chế độ của CHÍNH bước `i` job `k`: khoá ngoài `KHOA_BUOC`, `shell:` lạ, `defaults:`/`env:` lạ mức job/workflow, `run:`
     ĐỨNG TRƯỚC trong CÙNG job nhắc `GITHUB_ENV`/`GITHUB_PATH`. Bước `uses:` đứng trước là giới hạn khai, không chặn."""
     j, s = wf["jobs"][k], wf["jobs"][k]["steps"][i]
-    return bool("defaults" in wf or _env_chan(wf.get("env")) or "defaults" in j or _env_chan(j.get("env")) or set(s) - KHOA_BUOC
+    return bool("defaults" in wf or _env_chan(wf) or "defaults" in j or _env_chan(j) or set(s) - KHOA_BUOC
                 or s.get("shell", "bash") not in ("bash", "pwsh", "sh")
                 or any(re.search("GITHUB_(ENV|PATH)", str(t.get("run", ""))) for t in j["steps"][:i]))
 

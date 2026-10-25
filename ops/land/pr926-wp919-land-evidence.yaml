@@ -4,8 +4,9 @@
 # KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr926-wp919-provenance/ (GET qua proxy phien bang
 # GITHUB_PAT, script readback.py + kiemgate.py chep tu ho so pr924 vao do-lai-nguon-20261025/; SHA256SUMS kem).
 # landed FALSE vi HAI ly do: (a) §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition · Gate
-# output chua do; (b) lease wp919-r3-g3 CHUA nha (chu kho chua chi thi rut han). §8.1 DAT: bien nhan launcher cua luot
-# review approve tren 4e4d482 ghi model_phuc_vu do may (27 response, deu gpt-6-astra, DO_DUOC).
+# output chua do; (b) §8.1 CHUA DAT — luot review approve qua launcher neo 4e4d482, KHONG neo head merge 607ba87; head doi
+# thi review cu stale (PROTOCOL dong 41, AGENTS.md §6). Sua sau land theo connector Codex P1 tren PR #927 (review comment
+# 4371233271); ban dau ghi §8.1 DAT la SAI. Lease wp919-r3-g3 DA nha (rut han be6f91b, phien khac; xem lease.thu_hoi_cuoi).
 # GHI CHU HEAD: head merge 607ba87 KHAC sha da review 4e4d482 — 607ba87 la commit merge master vao nhanh, them vi
 # `thu-hoi` doi master la to tien; blob hai tep giong het (xem merge_noi_dung).
 
@@ -55,7 +56,7 @@ bookkeeping:
   - {item: 'duyet spec r3 + cap lease g3 (chu kho)', ket_qua: 'measured — readback-comment-6396165849.json tren #919'}
   - {item: 'dang lease g3 (58151cf)', ket_qua: 'measured — readback-run-40189567492.json success'}
   - {item: 'chi thi ghi so land', ket_qua: 'loi_khai — trong phien, khong co comment ben vung'}
-  - {item: 'rut han lease wp919-r3-g3', ket_qua: 'CHUA — chu kho chua chi thi; xem lease.thu_hoi_cuoi'}
+  - {item: 'rut han lease wp919-r3-g3', ket_qua: 'measured — do-lai-nguon-20261025/lease-wp919-r3-g3-sau-rut-han-be6f91b.yaml.txt; xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-926-land}
 # ---- het truong chuan
 packet_id: wp919
@@ -76,7 +77,12 @@ lease:
   path: ops/leases/wp919-r3-g3-claude-remote-20261025.yaml (nhanh ops/wp919-r1-g1-lease)
   ban_chep: 'measured — do-lai-nguon-20261025/lease-wp919-r3-g3-claude-remote-20261025.yaml.txt (58151cf)'
   lease_until_ban_dau: '2026-10-26T11:35:17Z'
-  thu_hoi_cuoi: 'CHUA thu hoi — lease con han toi 2026-10-26T11:35:17Z; cho chi thi chu kho (rut han hoac de het han).'
+  thu_hoi_cuoi: >-
+    measured — RUT HAN (khong bia mo): commit be6f91b tren ops/wp919-r1-g1-lease (phien session_01FLVLxi5gKZgtVvbuTCEqEn, ghi
+    ho chi thi chu kho #919 issuecomment-6399079847, de nha docs/PROTOCOL_DA_PHIEN.md cho #835) dua lease_until ve
+    2026-10-25T14:49:00Z (do-lai-nguon-20261025/lease-wp919-r3-g3-sau-rut-han-be6f91b.yaml.txt). Chu kho cung chi thi rut han
+    trong phien nay; phien nay KHONG day ban trung. ai-dang-giu-sau-rut-han/luc-do.txt: ls-remote = for-each-ref 597 (so TAP
+    ten), thieu 0; ca 2 duong dan write set "NGƯỜI_GIỮ 0" rc=0, wp919-r3-g3 HẾT_HẠN.
 
 trang_thai_packet:
   merged: true
@@ -84,16 +90,22 @@ trang_thai_packet:
   landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA d2e3052: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow
-    definition, Gate output cua §10.2.2 not_measured. (2) lease CHUA nha (wp919-r3-g3 con han). (3) bookkeeping: ho so nay
-    DAT. (4) review approve neo 4e4d482 voi assurance §8.1 DAT; head merge 607ba87 khac 4e4d482 chi boi commit merge master,
-    blob hai tep giong het (xem merge_noi_dung). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
+    definition, Gate output cua §10.2.2 not_measured. (2) lease da nha: rut han be6f91b, 2/2 duong dan NGƯỜI_GIỮ 0 DAT.
+    (3) bookkeeping: ho so nay DAT. (4) review: CHUA DAT — approve qua launcher neo 4e4d482, head merge 607ba87 khac; connector
+    Codex tren 607ba87 khong co finding nhung khong co bien nhan model_phuc_vu nen khong thay duoc luot exact-SHA (xem
+    assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
+    Mo lai: mot luot review doc lap qua launcher tren DUNG 607ba87 (hoac d2e3052) + du bon moc §10.2.2.
 assurance_81:
-  reviewer_assurance_81: DAT
+  reviewer_assurance_81: CHUA_DAT
   ly_do: >-
-    measured — verdicts/wp919-r3-g3-claude-review-3-codex-run.json: luot launcher.py run 982ac414 tren 4e4d482 (khoa head),
-    ma_thoat 0, verdict approve 0 P0–P3; model_phuc_vu_trang_thai DO_DUOC, 27/27 response model gpt-6-astra (ho openai,
-    khac ho claude cua executor) => dieu kien (A) cross_approved cua ho so pr909-wp748-r25 DAT. Noi dung review = noi dung
-    merge (blob giong het).
+    measured — verdicts/wp919-r3-g3-claude-review-3-codex-run.json: luot launcher.py run 982ac414 approve 0 P0–P3 voi
+    model_phuc_vu DO_DUOC (27/27 gpt-6-astra), NHUNG head cua run la 4e4d482 trong khi authorized_head_sha la 607ba87
+    (readback-pr-926.json head.sha). PROTOCOL dong 41: head doi lam bang chung cu het hieu luc; AGENTS.md §6: head doi sau
+    review thi review stale. Blob hai tep giong het (merge_noi_dung) KHONG thay cho review exact-SHA. Connector Codex tren
+    607ba87 (readback-comment-6397384460.json) khong co finding nhung khong mang bien nhan model_phuc_vu do may.
+  lich_su: >-
+    Ban dau ghi DAT (PR #927, 497559e); connector Codex P1 (review comment 4371233271 tren #927) chi ra sai, sua o day. Luot
+    approve tren 4e4d482 giu lai lam bang chung lich su, khong xoa.
   gioi_han: >-
     model_phuc_vu do tu su kien response.created/completed ma launcher ghi (#909 wp748 r25); do la model may chu tra ve trong
     luong su kien, khong phai chung thu ben thu ba. Luot review neo 4e4d482, khong neo head merge 607ba87; tuong duong noi

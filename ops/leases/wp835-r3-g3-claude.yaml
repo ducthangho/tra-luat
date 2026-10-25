@@ -101,3 +101,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp835-g3-claude MOT lan khi N1-N5 dat va review approve; mo PR draft'
+da_bi_thay_the: wp835-r4-g4-claude
+ly_do_thu_hoi: 'P2 WP835-R3-01 (Codex luot 1/2): D3.3/N4 cua spec r3 doi ratchet docs da bo tu #794; chu kho chon "Soan r4, bo 2 tep thua" (#835 issuecomment-6399670937) => spec r4, lease r4 g4 thay.'

@@ -1449,8 +1449,18 @@ def chay_dot_bien_dong(song_song):
             kq = _tat_ca_ca(p)
             giet = [c for c, rc, d in kq if rc == 3 and d.startswith(f"DO:{c}:")]
             return ma, "GIET" if giet else "TIN_DUNG_GIA" if any(rc for _, rc, _ in kq) else "SONG", giet[:2]
+        tiep = {}   # `CIP_DONG_TIEP=<tệp stdout lượt trước>`: dùng lại hạng đã đo cho CÙNG mã + CÙNG băm nguồn đột biến
+        for d in Path(os.environ["CIP_DONG_TIEP"]).read_text(encoding="utf-8").splitlines() if os.environ.get("CIP_DONG_TIEP") else []:
+            if d.startswith("[KQ] "):
+                ma, bam, h = d[5:].rsplit(" ", 2)
+                tiep[(ma, bam)] = h
+        def mot_co_ghi(m):
+            bam = hashlib.sha256(m[1].encode()).hexdigest()[:16]
+            r = (m[0], tiep[(m[0], bam)], []) if (m[0], bam) in tiep else mot(m)
+            print(f"[KQ] {r[0]} {bam} {r[1]}", flush=True)
+            return r
         with ThreadPoolExecutor(song_song) as ex:
-            kq = list(ex.map(mot, dsach))
+            kq = list(ex.map(mot_co_ghi, dsach))
     hang = collections.Counter(h for _, h, _ in kq)
     song = [ma for ma, h, _ in kq if h == "SONG" and ma not in TUONG_DUONG]
     tdg = [ma for ma, h, _ in kq if h == "TIN_DUNG_GIA"]
@@ -1468,8 +1478,13 @@ def main(argv):
         rc, dong = chay_ca(argv[1])
         print(dong)
         return rc
-    if argv == ["--tat-ca-ca"]:
-        print(json.dumps([(c, *chay_ca(c)) for c in CA], ensure_ascii=False))
+    if argv == ["--tat-ca-ca"]:   # ca nhẹ trước, ca bảng/oracle sau; dừng ở ca ĐẦU TIÊN chết bởi `TinHieuChotCa` (đã đủ để xếp GIET)
+        kq = []
+        for c in sorted(CA, key=lambda c: c.split("_")[0] in ("c22", "c46", "c48", "c49")):
+            kq.append((c, *chay_ca(c)))
+            if kq[-1][1] == 3:
+                break
+        print(json.dumps(kq, ensure_ascii=False))
         return 0
     if argv[:1] == ["--dot-bien-dong"] and len(argv) <= 2:
         return chay_dot_bien_dong(int(argv[1]) if len(argv) == 2 else 8)

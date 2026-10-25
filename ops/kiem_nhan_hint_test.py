@@ -152,13 +152,21 @@ def ca_b7_root_sai():
         shutil.rmtree(tam)
 
 
+# Tự kiểm F752-02/F752-03: GIỮ NGUYÊN `_cho_phep_bo_qua` thật; chỉ thay `os` CỦA MODULE test bằng proxy cục bộ (đổi
+# `os.name` toàn cục làm hỏng pathlib/tempfile) mang `name` giả và `symlink` hoặc ném lỗi, hoặc VẮNG hẳn.
 _TU_KIEM = (
     "import importlib.util, os, sys\n"
     "s = importlib.util.spec_from_file_location('t', {tep!r}); m = importlib.util.module_from_spec(s)\n"
     "s.loader.exec_module(m)\n"
-    "def _hong(*a, **k): raise PermissionError('gia lap')\n"
-    "os.symlink = _hong\n"
-    "m._cho_phep_bo_qua = lambda: {tha}\n"
+    "class _Os:\n"
+    "    name = {ten!r}\n"
+    "    def __getattr__(self, k):\n"
+    "        if k == 'symlink':\n"
+    "            if {che_do!r} == 'vang': raise AttributeError(k)\n"
+    "            def _hong(*a, **kw): raise PermissionError('gia lap')\n"
+    "            return _hong\n"
+    "        return getattr(os, k)\n"
+    "m.os = _Os()\n"
     "goi = []\n"
     "_cu = m._chay\n"
     "m._chay = lambda *a, **k: (goi.append(1), _cu(*a, **k))[1]\n"
@@ -168,18 +176,26 @@ _TU_KIEM = (
     "sys.exit(rc)\n"
 )
 
+# Kỳ vọng ĐỘC LẬP với mã đang thử (không tính từ `_cho_phep_bo_qua`): (nền, dạng hỏng) → (rc, dòng N/N, nhãn dòng ca).
+_MA_TRAN_TU_KIEM = {
+    ("nt", "loi"): (0, "0/0", "BO QUA ca_symlink_treo:"),
+    ("nt", "vang"): (0, "0/0", "BO QUA ca_symlink_treo:"),
+    ("posix", "loi"): (1, "0/1", "DO ca_symlink_treo:"),
+    ("posix", "vang"): (1, "0/1", "DO ca_symlink_treo:"),
+}
+
 
 def ca_tu_kiem_bo_qua_symlink():
-    """Khoá F752-02: không tạo được symlink thì ca KHÔNG được tính đạt — bỏ qua tường minh (Windows) hoặc ĐỎ (POSIX)."""
-    for tha, rc_cho, dong_cho in ((True, 0, "0/0"), (False, 1, "0/1")):
-        p = subprocess.run([sys.executable, "-B", "-c", _TU_KIEM.format(tep=str(Path(__file__).resolve()), tha=tha)],
-                           capture_output=True, text=True, encoding="utf-8", timeout=60)
-        dong = p.stdout.splitlines()
-        assert p.returncode == rc_cho, f"tha={tha}: rc {p.returncode} (cần {rc_cho}); {p.stdout[-300:]}{p.stderr[-300:]}"
-        assert dong_cho in dong and "1/1" not in dong, f"tha={tha}: {dong}"
-        assert "GOI_CONG_CU 0" in dong, f"tha={tha}: công cụ bị gọi dù không tạo được symlink: {dong}"
-        nhan = "BO QUA ca_symlink_treo:" if tha else "DO ca_symlink_treo:"
-        assert sum(1 for d in dong if d.startswith(nhan)) == 1, f"tha={tha}: thiếu dòng {nhan!r}: {dong}"
+    """Khoá F752-02/F752-03: không tạo được symlink (ném lỗi HOẶC vắng API) thì ca KHÔNG được tính đạt và công cụ
+    không được gọi — Windows bỏ qua tường minh, POSIX ĐỎ; chính sách nền đo bằng hàm THẬT trên proxy `os.name`."""
+    for (ten, che_do), (rc_cho, dong_cho, nhan) in _MA_TRAN_TU_KIEM.items():
+        ma = _TU_KIEM.format(tep=str(Path(__file__).resolve()), ten=ten, che_do=che_do)
+        p = subprocess.run([sys.executable, "-B", "-c", ma], capture_output=True, text=True, encoding="utf-8", timeout=60)
+        dong, nhan_ca = p.stdout.splitlines(), f"{ten}/{che_do}"
+        assert p.returncode == rc_cho, f"{nhan_ca}: rc {p.returncode} (cần {rc_cho}); {p.stdout[-300:]}{p.stderr[-300:]}"
+        assert dong_cho in dong and "1/1" not in dong, f"{nhan_ca}: {dong}"
+        assert "GOI_CONG_CU 0" in dong, f"{nhan_ca}: công cụ bị gọi dù không tạo được symlink: {dong}"
+        assert sum(1 for d in dong if d.startswith(nhan)) == 1, f"{nhan_ca}: thiếu dòng {nhan!r}: {dong}"
 
 
 CA = [ca_b4_rang_l5, ca_symlink_treo, ca_doc_duoc_het_rc0, ca_glob_va_khong_ghi, ca_b7_root_sai,

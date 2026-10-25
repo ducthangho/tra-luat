@@ -7678,7 +7678,7 @@ def _kho812(c: Ctx, bien: str = "") -> Path:
             L = {"oid_khong_dua_vao": ghi({"docs/z.md": "z\n"}, "noop"), "oid_khong_chua": B0}.get(bien, L)
         spec = f"# spec\nluat_push_va_dung_va: ADR-0054@{L}\n" * (2 if bien == "hai_dong" else 1)
         V = ghi({"ops/specs/wp55.md": spec, "ops/specs/wp55-prompt.md": "prompt\n", "ops/reviews/v.md": "Verdict: approve\n", "docs/PROTOCOL_DA_PHIEN.md": pr.replace("chưa kích hoạt", "đã kích hoạt"),
-                 **({} if bien == "khong_kich_hoat" else {"docs/adr/0055-kich-hoat-adr-0054.md": "kích hoạt `ADR-0054`\n"})}, "act")
+                 **({} if bien == "khong_kich_hoat" else {"docs/adr/0099-kich-hoat-adr-0054.md": "kích hoạt `ADR-0054`\n"})}, "act")
         sh, han = __import__("hashlib").sha256(spec.encode()).hexdigest(), time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() + 6 * 3600))
         lease = {**_R812_LEASE, "spec_hash": sh, "prompt_sha256_required": __import__("hashlib").sha256(b"prompt\n").hexdigest(), "base_sha": L, "reviewed_sha_required": L, "lease_until": han,
                  "lease_expires_at_utc": han, **({"required_checks": False} if bien == "rc_falsy" else {})}
@@ -8358,7 +8358,7 @@ def _r812_r7_activation_name(c):
     _doi(0, rc, e, "baseline kích hoạt ADR-0054")
     (sd / "wp55.json").write_bytes(before)
     w = c.tmp / "kho/w"
-    p = w / "docs/adr/0055-kich-hoat-adr-0054.md"
+    p = w / "docs/adr/0099-kich-hoat-adr-0054.md"
     p.write_text(p.read_text().replace("ADR-0054", "ADR-0053"))
     _g(w, "add", p.relative_to(w).as_posix()), _g(w, "commit", "-qm", "different activation target")
     _g(w, "push", "-q", "origin", "master")
@@ -8423,10 +8423,51 @@ MUTANTS.update({
     "r812_r7_lease_packet": (' or l["packet_issue"] != st["packet"]', '', ["r812_r7_lease_packet"]),
     "r812_r7_instruction_packet": (' or mr[2].lstrip("0") != str(st["packet"])', '', ["r812_r7_instruction_packet"]),
     "r812_r7_lease_init_identity": ('if any(v is not None and nc[vai][k] != v for k, v in (st.get(f"{vai}_identity") or {}).items()):', 'if False:', ["r812_r7_lease_init_reviewer", "r812_r7_lease_init_ag_executor", "r812_r7_lease_init_ag_reviewer"]),
-    "r812_r7_activation_adr_name": (' and "ADR-0054" in nfc(a55[1])', '', ["r812_r7_activation_adr_name"]),
+    "r812_r7_activation_adr_name": ('"kích hoạt `ADR-0054`" in nfc(b)', '"kích hoạt `ADR-005" in nfc(b)', ["r812_r7_activation_adr_name"]),
     "r812_r7_reject_web_comment": ('f"https://github.com/{mr[1]}/issues/{st[\'packet\']}"', '"web-form-rejected"', ["r812_r7_comment_web"]),
 })
 MUTANTS["r812_r6_workflow_issue"] = (MUTANTS["r812_r7_comment_suffix"][0], "True", ["r812_r6_workflow_issue"])
+
+
+# wp929: ADR kích hoạt `ADR-0054` nhận theo CỤM khai trên mọi `docs/adr/NNNN-*.md` (trừ chính ADR-0054), đúng MỘT tệp — không theo số.
+_R929_KICH = "docs/adr/0099-kich-hoat-adr-0054.md"
+_R929_ADR54 = "docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md"
+
+
+def _r929_adr(c, doi, muon, nen=True):
+    """Baseline lease (đã kích hoạt) rồi đổi `docs/adr/` trên master theo `doi` (None ⇒ xoá) và ghi lại lease qua đường thật.
+    `nen=False` khi ca đòi True: phép đo nền khi ấy không phân biệt được gì, mà lại che mất chỗ chết của đột biến đích."""
+    rc, sd, e, before = _r812(c, "lease")
+    _doi(0, rc, e, "baseline kích hoạt ADR-0054")
+    if nen:
+        _kiem(sd, "baseline bật", luat_adr0054=True)
+    (sd / "wp55.json").write_bytes(before)
+    w = c.tmp / "kho/w"
+    for p, nd in doi.items():
+        (w / p).unlink() if nd is None else (w / p).write_text(nd, encoding="utf-8")
+    _g(w, "add", "-A", "docs/adr"), _g(w, "commit", "-qm", "wp929 adr"), _g(w, "push", "-q", "origin", "master")
+    rc, _, e = _r812_r7_cmd(c, sd, w)
+    _doi(0, rc, e, "lease hợp lệ dù chế độ đổi")
+    _kiem(sd, f"wp929 {sorted(doi)}", luat_adr0054=muon)
+
+
+CASES += [
+    # (a) số bất kỳ, tên bất kỳ — không neo 0055 hay 0099
+    ("r929_kich_hoat_so_bat_ky", lambda c: _r929_adr(c, {_R929_KICH: None, "docs/adr/0731-bat-ky.md": "Tệp này kích hoạt `ADR-0054`.\n"}, True, nen=False)),
+    # (b) giống ADR-0055 thật: có "kích hoạt" và "ADR-0054" nhưng không đúng cụm
+    ("r929_hai_chuoi_roi_khong_tinh", lambda c: _r929_adr(c, {_R929_KICH: None, "docs/adr/0055-tran-loi-goi-codex-len-muoi.md":
+                                                               "ADR-0054 chưa kích hoạt; trần Codex không phụ thuộc `ADR-0054`.\n"}, False)),
+    # (c) hai tệp cùng khai ⇒ mơ hồ ⇒ False
+    ("r929_hai_tep_kich_hoat", lambda c: _r929_adr(c, {"docs/adr/0100-kich-hoat-lai.md": "kích hoạt `ADR-0054`\n"}, False)),
+    # (d) chỉ chính ADR-0054 nêu cụm (mục Hiệu lực của nó) ⇒ không tự kích hoạt
+    ("r929_chi_adr0054_tu_neu_cum", lambda c: _r929_adr(c, {_R929_KICH: None, _R929_ADR54: "x\nđo bằng cụm kích hoạt `ADR-0054`\n"}, False)),
+]
+MUTANTS.update({
+    "r929_bo_loai_tru_adr0054": (' and t != ADR0054_TEP]', ']', ["r929_chi_adr0054_tu_neu_cum"]),
+    "r929_mot_tro_len": ('and len(kich) == 1', 'and len(kich) >= 1', ["r929_hai_tep_kich_hoat"]),
+    "r929_hai_chuoi_roi": ('"kích hoạt `ADR-0054`" in nfc(b)', '"kích hoạt" in nfc(b) and "ADR-0054" in nfc(b)', ["r929_hai_chuoi_roi_khong_tinh"]),
+    "r929_duong_dan_co_dinh_0055": ('re.fullmatch(r"docs/adr/[0-9]{4}-[^/]+\\.md", t)', 't == "docs/adr/0055-kich-hoat-adr-0054.md"', ["r929_kich_hoat_so_bat_ky"]),
+})
 # `_ten_provider` chuẩn hoá dùng chung: gỡ một trong hai phép strip của receipt là mutant tương đương.
 MUTANTS["r812_r5_raw_provider"] = ((MUTANTS["r812_r5_raw_provider"][0], "    p = p.strip()  # I8: bản chiếu identity lease"),
     (MUTANTS["r812_r5_raw_provider"][1], "    # bỏ strip dùng chung"), ["r812_r5_padded_provider"])

@@ -2384,7 +2384,6 @@ def cmd_kiem_gate(a, state_dir: Path) -> int:
 # --- #812 MAY-ADR-0054-a (r2 `ops/specs/wp812-r2.md` + phần chung, I1–I11; `accept`/I7 ở #834). Đ = git do CHÍNH tiến trình này
 # fetch/ls-remote · H = lease/biên nhận qua validator CANON (cả phụ thuộc) chép từ `origin/master` · R = readback người gọi lấy. I4: `_die` TRƯỚC `_save`.
 ADR0054_TEP = "docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md"
-ADR0055_TEP = "docs/adr/0055-kich-hoat-adr-0054.md"
 LUAT_0054_RE = re.compile(rb"^luat_push_va_dung_va: ADR-0054@([0-9a-f]{40})$", re.M)
 HANG_LOP = ("P0", "P1", "P2", "P3")
 CHECK_BAT_BUOC = tuple((".github/workflows/ci.yml", f"{j} (ubuntu-latest)") for j in ("gate", "gate-cong-cu-gop", "gate-ops", "gate-packet-loop", "gate-registry"))
@@ -2562,14 +2561,18 @@ def _che_do_0054(root: Path, spec: bytes) -> bool:
     if len(khai) != 1:
         return False
     oid, m = khai[0].decode(), "refs/remotes/origin/master"
-    chuoi, a55, pr = _git_do(root, "rev-list", "--first-parent", m), _git_do(root, "show", f"{m}:{ADR0055_TEP}"), _git_do(root, "show", f"{m}:docs/PROTOCOL_DA_PHIEN.md")
+    chuoi, ls, pr = _git_do(root, "rev-list", "--first-parent", m), _git_do(root, "ls-tree", "-z", "--name-only", m, "docs/adr/"), _git_do(root, "show", f"{m}:docs/PROTOCOL_DA_PHIEN.md")
     nfc = lambda b: unicodedata.normalize("NFC", b.decode("utf-8", "replace"))  # noqa: E731
     dong20 = [d for d in nfc(pr[1]).splitlines() if re.match(r"^\|\s*`ADR-0054`\s*\|", d)]
+    # wp929 (số 0055 đã thuộc ADR trần lời gọi Codex, #919) — ADR kích hoạt nhận theo CỤM khai, không theo số tệp; đúng MỘT tệp
+    adr = [_git_do(root, "show", f"{m}:{t}") for t in ls[1].decode("utf-8", "replace").split("\0")
+           if re.fullmatch(r"docs/adr/[0-9]{4}-[^/]+\.md", t) and t != ADR0054_TEP]
+    kich = [b for rc, b in adr if "kích hoạt `ADR-0054`" in nfc(b)]
     return (_git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\n")
             and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0054_TEP}")[0] == 0
             and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0054_TEP}")[0] != 0
             and chuoi[0] == 0 and oid.encode() in chuoi[1].split()
-            and a55[0] == 0 and "kích hoạt" in nfc(a55[1]) and "ADR-0054" in nfc(a55[1])
+            and ls[0] == 0 and all(rc == 0 for rc, _ in adr) and len(kich) == 1
             and pr[0] == 0 and len(dong20) == 1 and "chưa kích hoạt" not in dong20[0].casefold())
 
 

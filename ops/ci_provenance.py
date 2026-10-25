@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Thu provenance CI §10.2.2 từ REST và log job — packet #899 (wp899 P-A), đặc tả `ops/specs/wp899-r3.md` (thay r2).
+"""Thu provenance CI §10.2.2 từ REST và log job — packet #899 (wp899 P-A), đặc tả `ops/specs/wp899-r4.md` (thay r3).
 
 `thu --repo o/r --run ID --attempt N --out DIR` ghi bốn mốc TÁCH BẠCH (Run · Checkout · Gate output · Workflow definition)
 vào `DIR/provenance.yaml`. Chỉ REST; mọi lời gọi mạng đi qua MỘT hàm tiêm vào `goi(url) -> (mã HTTP, byte)` để test chạy
 offline. Năm trạng thái §10.2.3: thiếu dữ liệu là `not_measured`, không bao giờ là `passed`. Mốc Workflow definition luôn
 `not_measured` (GraphQL bị chặn trong phiên Claude; việc của P-B). SHA checkout đọc từ LOG, không lấy `head_sha` của REST.
-r3 (F02): kịch bản của bước lấy từ `run:` của workflow tại SHA checkout ĐÃ ĐO (`git cat-file blob <sha>:<path REST>`), log chỉ
-ĐỊNH VỊ bước. Gốc tin là nội dung tại SHA ấy — workflow tại SHA vốn quyết định được mọi output, công cụ không chống nó.
+r3 (F02): kịch bản của bước lấy từ `run:` của workflow tại SHA checkout ĐÃ ĐO (`git cat-file blob <sha>:<path REST>`). r4 (F02):
+bước của mỗi nhóm log được ĐỊNH DANH qua REST `steps[]` + vị trí (`ghep_buoc`), không tìm ứng viên trùng chữ trên toàn workflow. Gốc tin là nội dung tại SHA ấy — workflow tại SHA vốn quyết định được mọi output, công cụ không chống nó.
 Thoát: 0 không mốc nào `failed` · 12 có `failed` · 2 sai đối số · 3 REST khác 2xx (in nguyên mã). LUÔN in `NOT_MEASURED: <n>`;
 rc 2/3 không sinh provenance nên cả bốn mốc là chưa đo (`NOT_MEASURED: 4` kèm `PROVENANCE: khong_sinh`).
 """
@@ -27,6 +27,7 @@ TRANG_TOI_DA = 1000
 TS = r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z"
 RE_DONG = re.compile(rf"^({TS}) ?(.*)$")
 RE_SHA = re.compile(rf"^{TS} ([0-9a-f]{{40}})$")
+RE_GIO = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ")
 RE_ANSI = re.compile(r"\x1b\[[0-9;]*m")
 RE_HEX40 = re.compile(r"^[0-9a-f]{40}$")
 RE_REPO = re.compile(r"^[\w.-]+/[\w.-]+$")
@@ -152,22 +153,66 @@ def git_blob(sha, path, goc=ROOT):
 def _env_chan(v):   # `env:` không phải dict (biểu thức) hoặc có khoá `CI_DANG_KY_*` ⇒ không biết chế độ
     return v is not None and (type(v) is not dict or any(str(k).startswith("CI_DANG_KY_") for k in v))
 
-def ung_vien(van):
-    """[(run.rstrip("\n"), chặn chế độ)] cho MỌI bước có `run:` là chuỗi, mọi job; YAML hỏng/sai dạng ⇒ None. Chặn khi: bước có
-    khoá ngoài `KHOA_BUOC` (gồm `env:`) hay `shell:` ngoài bash/pwsh/sh; job/workflow có `defaults:` hay `env:` mang `CI_DANG_KY_*`;
-    một `run:` nhắc `GITHUB_ENV`/`GITHUB_PATH` (đổi môi trường bước SAU); có job gọi lại (`uses:`: bước thật nằm ở tệp khác)."""
+def doc_wf(van):
+    """Workflow tại SHA (`yaml.safe_load`); hỏng, không phải dict hay `jobs` không phải dict ⇒ None."""
     try:
         wf = yaml.safe_load(van)
     except (yaml.YAMLError, RecursionError):
         return None
-    if type(wf) is not dict or type(wf.get("jobs")) is not dict:
-        return None
-    ds = [(j, b) for j in wf["jobs"].values() if type(j) is dict and type(j.get("steps")) is list
-          for b in j["steps"] if type(b) is dict and type(b.get("run")) is str]
-    chan_wf = ("defaults" in wf or _env_chan(wf.get("env")) or any(type(j) is dict and "uses" in j for j in wf["jobs"].values())
-               or any(re.search("GITHUB_(ENV|PATH)", b["run"]) for _, b in ds))
-    return [(b["run"].rstrip("\n"), bool(chan_wf or "defaults" in j or _env_chan(j.get("env")) or set(b) - KHOA_BUOC
-             or b.get("shell", "bash") not in ("bash", "pwsh", "sh"))) for j, b in ds]
+    return wf if type(wf) is dict and type(wf.get("jobs")) is dict else None
+
+def ghep_job(ten, wf):
+    """r4 (d): khoá DUY NHẤT `k` mà tên job REST bằng `k`, bằng `name:` nguyên văn (không `${{`), hoặc là `<k|name> (<…>)`."""
+    khop = [k for k, j in wf["jobs"].items() if type(ten) is str and type(j) is dict and any(
+        type(x) is str and x and "${{" not in x and re.fullmatch(re.escape(x) + r"(?: \(.*\))?", ten, re.S) for x in (k, j.get("name")))]
+    return khop[0] if len(khop) == 1 else None
+
+def ten_du_kien(s):   # tên REST mà bước YAML phải mang: `name:` nguyên văn, không thì `Run <dòng đầu run:>` / `Run <uses>`
+    if "name" in s:
+        return s["name"] if _chuoi(s["name"]) and "${{" not in s["name"] else None
+    v = s.get("run", s.get("uses"))
+    return "Run " + v.split("\n")[0] if _chuoi(v) else None
+
+def _gio(v):   # REST tính tới giây: `YYYY-MM-DDTHH:MM:SSZ`; khác dạng ⇒ None (vế c hỏng, không ném)
+    return v[:19] if type(v) is str and RE_GIO.fullmatch(v) else None
+
+def ghep_buoc(job, buoc, wf, ly_do_wf):
+    """r4 F02: ĐỊNH DANH bước của từng nhóm log — job REST → MỘT job YAML (d); nhóm thứ i → bước REST đã chạy thứ i → bước YAML
+    cùng vị trí, kèm (a) số đếm ba mức · (b) tên · (c) giờ header cắt về giây ∈ [started_at, completed_at]. Vế nào hỏng ⇒ CẢ job
+    không marker. Trả ({trang_thai, ly_do?, so_buoc}, [(khoá job, vị trí bước YAML)] theo nhóm | None)."""
+    def hong(ly_do):
+        return {"trang_thai": "not_measured", "ly_do": ly_do, "so_buoc": len(buoc)}, None
+    if wf is None:
+        return hong(ly_do_wf)
+    k, st = ghep_job(job.get("name"), wf), job.get("steps")
+    sy = wf["jobs"][k].get("steps") if k else None
+    if k is None or "uses" in wf["jobs"][k] or type(sy) is not list or not all(type(s) is dict for s in sy):   # Q8: job gọi lại
+        return hong("d_job_yaml_khong_duy_nhat")
+    if not (type(st) is list and all(type(s) is dict and _so(s.get("number"), 1) for s in st)
+            and len({s["number"] for s in st}) == len(st)):
+        return hong("steps_rest_sai_dang")
+    ung = [s for s in sorted(st, key=lambda s: s["number"]) if s.get("name") not in ("Set up job", "Complete job")
+           and not str(s.get("name")).startswith("Post ")]
+    chay = [i for i, s in enumerate(ung) if s.get("conclusion") != "skipped"]
+    if len(buoc) != len(chay):
+        return hong("a_so_nhom_khac_so_buoc_rest_chay")
+    if len(ung) != len(sy):
+        return hong("a_so_buoc_rest_khac_so_buoc_yaml")
+    if any(s.get("name") != ten_du_kien(y) for s, y in zip(ung, sy)):
+        return hong("b_ten_buoc_lech")
+    if not all((a := _gio(ung[i].get("started_at"))) and (z := _gio(ung[i].get("completed_at"))) and a <= b["gio"][:19] <= z
+               for b, i in zip(buoc, chay)):
+        return hong("c_gio_header_ngoai_cua_so")
+    return {"trang_thai": "passed", "so_buoc": len(buoc)}, [(k, i) for i in chay]
+
+def chan_buoc(wf, k, i):
+    """r4 Q7: chặn chế độ của CHÍNH bước `i` của job `k`: khoá bước ngoài `KHOA_BUOC` (gồm `env:`), `shell:` ngoài bash/pwsh/sh,
+    `defaults:` hay `env:` (biểu thức / `CI_DANG_KY_*`) mức job hoặc workflow, một `run:` ĐỨNG TRƯỚC trong CÙNG job nhắc
+    `GITHUB_ENV`/`GITHUB_PATH`. Bước `uses:` đứng trước là giới hạn khai, không chặn."""
+    j, s = wf["jobs"][k], wf["jobs"][k]["steps"][i]
+    return bool("defaults" in wf or _env_chan(wf.get("env")) or "defaults" in j or _env_chan(j.get("env")) or set(s) - KHOA_BUOC
+                or s.get("shell", "bash") not in ("bash", "pwsh", "sh")
+                or any(type(t.get("run")) is str and re.search("GITHUB_(ENV|PATH)", t["run"]) for t in j["steps"][:i]))
 
 def than(dong):
     m = RE_DONG.match(dong)
@@ -205,15 +250,16 @@ def moc_checkout(sha_ds, event, head, git):
     return r | {"trang_thai": "failed", "ly_do": f"sha_checkout_lech_head_sha ({event})"}
 
 def tach_buoc(dong):
-    """[{lenh, in_lai, hop_le, phan}]: một bước = từ `##[group]Run <lệnh>` tới trước `##[group]Run` kế tiếp. `in_lai` = các dòng
-    `36;1m` LIỀN sau header, bỏ ANSI — CHỈ để định vị bước trong workflow, KHÔNG làm kịch bản (M10). `hop_le` = đúng cấu trúc đo
-    trên 226/226 nhóm thật (dòng màu đầu = header, kế khối màu là `shell: `, không màu nào sau đó, có `##[endgroup]`), để khối
-    thiếu/lẫn màu không thành tập con khớp `run:` của bước khác (F02 r3). `phan` = sau `##[endgroup]`, nơi duy nhất đo marker."""
+    """[{lenh, gio, in_lai, hop_le, phan}]: một nhóm = từ `##[group]Run <lệnh>` tới trước `##[group]Run` kế tiếp; `gio` = timestamp
+    header (vế c của `ghep_buoc`). `in_lai` = các dòng `36;1m` LIỀN sau header, bỏ ANSI — CHỈ để đối chiếu, KHÔNG làm kịch bản (M10).
+    `hop_le` = đúng cấu trúc đo trên 226/226 nhóm thật (dòng màu đầu = header, kế khối màu là `shell: `, không màu nào sau đó, có
+    `##[endgroup]`, r4: không `##[group]` nào khác trong vùng nhóm đang mở). `phan` = sau `##[endgroup]`, nơi duy nhất đo marker."""
     buoc = []
     for d in dong:
         t = than(d)
         if t.startswith("##[group]Run "):
-            buoc.append({"lenh": t[len("##[group]Run "):], "in_lai": [], "phan": [], "mo": True, "ok": True, "tien_to": True})
+            buoc.append({"lenh": t[len("##[group]Run "):], "in_lai": [], "phan": [], "mo": True, "ok": True, "tien_to": True,
+                         "gio": (RE_DONG.match(d) or [""] * 2)[1]})
         elif buoc and (b := buoc[-1])["mo"]:
             mau = "\x1b[36;1m" in d
             if t.startswith("##[endgroup]"):
@@ -221,7 +267,8 @@ def tach_buoc(dong):
             elif mau and b["tien_to"]:
                 b["in_lai"].append(t)
             else:
-                b["ok"], b["tien_to"] = b["ok"] and not mau and (not b["tien_to"] or t.startswith("shell: ")), False
+                b["ok"], b["tien_to"] = b["ok"] and not mau and not t.startswith("##[group]") and (  # r4 Q6: nhóm lồng ⇒ hỏng
+                    not b["tien_to"] or t.startswith("shell: ")), False
         elif buoc:
             buoc[-1]["phan"].append(t)
     return [b | {"hop_le": not b["mo"] and b["ok"] and not b["tien_to"] and b["in_lai"][:1] == [b["lenh"]]} for b in buoc]
@@ -236,17 +283,20 @@ def dong_logic(lenh):
             noi = ""
     return ra + ([noi.strip()] if noi else [])
 
-def do_dau_duong(buoc, moi, xanh, uv):
-    """(kết quả, số bước XÁC THỰC = khối in lại khác rỗng BẰNG NGUYÊN VĂN `run:` của ≥ 1 ứng viên `uv`). Kịch bản là `run:` YAML
-    ấy; TOÀN KHỐI phải là lời gọi tối giản, không thì cả bước không sinh bằng chứng. Ứng viên khớp nào bị chặn, hoặc có `VAR=`
-    ⇒ lời gọi `MOI` ra `not_measured` (`che_do_khong_xac_dinh`); còn lại áp ĐÚNG regex `MOI` lên phần log của CHÍNH bước ấy."""
+def do_dau_duong(buoc, moi, xanh, wf, ghep):
+    """(kết quả, số bước XÁC THỰC). Nhóm i chỉ được xét qua bước YAML mà `ghep` ĐỊNH DANH cho nó (r4): bước ấy có `run:` là chuỗi,
+    KHÔNG `uses:` (Q8), khối in lại hợp lệ và BẰNG NGUYÊN VĂN `run:` của CHÍNH bước ấy. Kịch bản là `run:` YAML; TOÀN KHỐI phải là
+    lời gọi tối giản. `chan_buoc` hoặc `VAR=` ⇒ lời gọi `MOI` ra `not_measured` (`che_do_khong_xac_dinh`); còn lại áp ĐÚNG regex
+    `MOI` lên phần log của CHÍNH nhóm ấy."""
     kq, so = [], 0
-    for b in buoc:
-        if not (khop := [(r, c) for r, c in uv if b["hop_le"] and r == "\n".join(b["in_lai"])]):
+    for b, (k, i) in zip(buoc, ghep or []):
+        s = wf["jobs"][k]["steps"][i]
+        run = s.get("run") if "uses" not in s else None
+        if not (type(run) is str and b["hop_le"] and run.rstrip("\n") == "\n".join(b["in_lai"])):
             continue
         so += 1
-        goi = [RE_LOI_GOI.fullmatch(d) for d in dong_logic(khop[0][0].split("\n")) if d]
-        chan = any(c for _, c in khop) or any(g and g[1] for g in goi)
+        goi = [RE_LOI_GOI.fullmatch(d) for d in dong_logic(run.rstrip("\n").split("\n")) if d]
+        chan = chan_buoc(wf, k, i) or any(g and g[1] for g in goi)
         for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):
             muc = {"lenh": b["lenh"], "duong_dan": duong}
             if duong not in moi or chan:
@@ -257,7 +307,7 @@ def do_dau_duong(buoc, moi, xanh, uv):
                 kq.append(muc | {"trang_thai": "passed" if ok else "failed", "dong_khop": k.group(0).splitlines()[-200:] if k else []})
     return kq, so
 
-def moc_gate(job, dong, moi, xanh, uv=None, ly_do_wf=""):
+def moc_gate(job, dong, moi, xanh, wf=None, ly_do_wf=""):
     hop = {k: hop_le(job.get(k)) for k, hop_le in JOB_BAT_BUOC.items()}   # chiếu CHỈ trường đã hợp lệ: không ném với kiểu lạ
     r = {"job_id": job["id"], "name": job.get("name"), "check_run_id": job["check_run_url"].rsplit("/", 1)[-1] if hop["check_run_url"]
          else None, "labels": job.get("labels"), "runner_id": job.get("runner_id"), "runner_name": job.get("runner_name"),
@@ -268,10 +318,11 @@ def moc_gate(job, dong, moi, xanh, uv=None, ly_do_wf=""):
     if job.get("runner_id") == 0:
         return r | {"trang_thai": "not_run"}
     anh = [than(d)[len("Image: "):] for d in dong if than(d).startswith("Image: ")]
-    dau, so = do_dau_duong(tach_buoc(dong), moi, xanh, uv or [])
+    gh, ghep = ghep_buoc(job, buoc := tach_buoc(dong), wf, ly_do_wf)
+    dau, so = do_dau_duong(buoc, moi, xanh, wf, ghep)
     thieu = [k for k, ok in hop.items() if not ok]
-    r |= {"image": anh[0] if anh else "not_measured", "dau_duong": dau, "thieu": thieu, "kich_ban": {"buoc_xac_thuc": so} | (
-        {"trang_thai": "not_measured", "ly_do": ly_do_wf} if uv is None else {"trang_thai": "passed", "nguon": "run_tai_sha_checkout"})}
+    r |= {"image": anh[0] if anh else "not_measured", "dau_duong": dau, "thieu": thieu, "ghep_buoc": gh, "kich_ban": {"buoc_xac_thuc": so} | (
+        {"trang_thai": "not_measured", "ly_do": ly_do_wf} if wf is None else {"trang_thai": "passed", "nguon": "run_tai_sha_checkout"})}
     tt = {x["trang_thai"] for x in dau}
     if job.get("conclusion") in LOI_JOB or "failed" in tt:
         return r | {"trang_thai": "failed"}
@@ -302,7 +353,7 @@ def thu(repo, run, attempt, goi, git, moi_tu=CI_DANG_KY, wf=git_blob):
         co.append({"job_id": j["id"], "name": j.get("name")} | moc_checkout(doc_sha_checkout(dong), r.get("event"), r.get("head_sha"), git))
         sha = co[-1].get("sha") if co[-1]["trang_thai"] == "passed" else None   # CHỈ SHA checkout đã đo, không `head_sha`
         van = wf(sha, r["path"]) if sha and RUN_BAT_BUOC["path"](r.get("path")) else None
-        g = moc_gate(j, dong, moi, xanh, ung_vien(van) if van is not None else None,
+        g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,
                      "sha_checkout_chua_do" if not sha else "workflow_tai_sha_khong_doc_duoc")
         gate.append(g)
         khop = {k for x in g.get("dau_duong", []) for k in x.get("dong_khop", [])}

@@ -77,8 +77,15 @@ thay_the_cho_ghi_chu: 'khong lease song nao giu write set nay => khong can bia m
 leased_at_utc: '2026-10-25T03:55:00Z'
 heartbeat_at: '2026-10-25T03:55:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-27T03:55:00Z'
-lease_expires_at_utc: '2026-10-27T03:55:00Z'
+lease_until: '2026-10-25T06:48:00Z'
+lease_expires_at_utc: '2026-10-25T06:48:00Z'
+rut_han:
+  han_cu: '2026-10-27T03:55:00Z'
+  han_moi: '2026-10-25T06:48:00Z'
+  rut_boi: ducthangho
+  ly_do: 'pha A cua packet #923 da merge: PR #924 (head 7574c39d98459c9caf1365a7dd092747335ae4e8, merge b306e15a96a4d9d05d2ba4191cbd071fa7820ee7, 2026-10-25T05:40:57Z, merged_by ducthangho); chu kho giao ghi so land va rut han lease ("Ghi sổ land, model reviewer là codex. Rút hạn lease", ghi ho #923 issuecomment-6394535788). Pha B di lease rieng.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp910-r3-g3-claude (45b5b42), wp906-r1-g1-claude (50709c1).'
+  ghi_boi: claude-orchestrator-session session_01FLVLxi5gKZgtVvbuTCEqEn (theo chi thi chu kho ghi ho #923 issuecomment-6394535788)
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0

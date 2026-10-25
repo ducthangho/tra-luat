@@ -4,9 +4,11 @@
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor,
 # KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr932-wp748-r26-provenance/ (GET qua proxy phien bang
 # GITHUB_PAT, script readback.py + kiemgate.py chep tu ho so pr926 vao do-lai-nguon-20261025/; SHA256SUMS kem).
-# landed FALSE vi MOT ly do: §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition · Gate output chua
-# do (GraphQL 403 tu phien web). §8.1 DAT: luot review 11 (r26k) qua launcher.py run neo DUNG authorized_head_sha 0aaf143,
-# approve 0 P0–P3, model_phuc_vu DO_DUOC 28/28 gpt-6-astra. Lease wp748-r26-g26 DA nha (rut han 796a42f).
+# landed FALSE vi HAI ly do: (a) §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition · Gate output
+# chua do (GraphQL 403 tu phien web); (b) §8.1/§8.2 assurance THUC THI CHUA_DAT — luot r26k qua launcher.py run neo DUNG
+# authorized_head_sha 0aaf143, approve 0 P0–P3, model_phuc_vu DO_DUOC 28/28 gpt-6-astra (review exact-SHA giu nguyen), NHUNG
+# effort va sandbox mode thuc te KHONG do duoc (chi co cau hinh yeu cau). Sua theo connector Codex P1 tren PR #934 (review
+# comment 4372912640); ban dau ghi §8.1 DAT la SAI. Lease wp748-r26-g26 DA nha (rut han 796a42f).
 
 schema_version: 1
 mission_id: gh-748
@@ -100,16 +102,35 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 39f21b3: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow
     definition, Gate output cua §10.2.2 not_measured. (2) lease da nha: rut han 796a42f, 2/2 duong dan NGƯỜI_GIỮ 0 DAT.
-    (3) bookkeeping: ho so nay DAT. (4) review neo DUNG authorized_head_sha 0aaf143: DAT (assurance_81). (5) noi dung merge =
-    diff PR DAT. (6) merge boi tai khoan chu kho DAT.
-    Mo lai: du bon moc §10.2.2 cho DUNG run gate tren 39f21b3.
+    (3) bookkeeping: ho so nay DAT. (4) review neo DUNG authorized_head_sha 0aaf143: review exact-SHA DAT, assurance thuc thi CHUA_DAT
+    (assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
+    Mo lai — CA HAI: du bon moc §10.2.2 cho DUNG run gate tren 39f21b3; VA bang chung runtime cho effort + sandbox mode thuc te
+    cua luot r26k (hoac mot luot review doc lap khac tren 0aaf143 co du cac phep do ay), da gan va kiem.
 assurance_81:
-  reviewer_assurance_81: DAT
-  ly_do: >-
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: DAT
+  review_exact_sha_nguon: >-
     measured — verdicts/wp748-r26-r26k-run.json: luot launcher.py run 3133eea6 approve 0 P0–P3 (verdicts/wp748-r26-r26k-verdict.md),
     head cua run = 0aaf143 = authorized_head_sha (readback-pr-932.json head.sha) = cha thu hai cua merge 39f21b3;
-    model_phuc_vu DO_DUOC 28/28 gpt-6-astra (ho openai, khac ho claude cua executor); reviewer_independence theo lease: phien
-    moi, read-only, exact head. Connector Codex tren 0aaf143 (readback-comments-932.json) cung khong co finding.
+    model_phuc_vu DO_DUOC 28/28 gpt-6-astra (ho openai, khac ho claude cua executor). Connector Codex tren 0aaf143
+    (readback-comments-932.json) cung khong co finding.
+  thuc_thi:
+    model: 'measured — verdicts/wp748-r26-r26k-run.json model_phuc_vu, DO_DUOC 28/28 gpt-6-astra'
+    effort: >-
+      not_measured — verdicts/wp748-r26-r26k-run.json khong co truong effort; `lenh` chi ghi chuong_trinh codex, so_doi_so 14,
+      van_tay 254bd8e1… (khong luu doi so). Cau hinh yeu cau model_reasoning_effort xhigh la cau hinh, KHONG phai runtime
+      evidence (§8.1). verdicts/wp748-r26-r26k-verdict.md dong 218: reviewer tu khai effort backend "not exposed or
+      independently attested".
+    sandbox_mode: >-
+      not_measured — verdicts/wp748-r26-r26k-run.json khong co truong sandbox thuc te; `-s workspace-write` la cau hinh yeu cau;
+      §8.2: prompt/cau hinh read-only khong thay co che sandbox.
+  ly_do: >-
+    §8.1 doi ghi cap Executor–Reviewer thuc te gom provider, model, effort, execution surface, transport, run ID va nguon do;
+    §8.2 doi ghi sandbox mode thuc te. Receipt cua r26k co model do duoc nhung thieu effort va sandbox mode do duoc, nen chua
+    nhan assurance. Approve exact-SHA giu nguyen lam bang chung review; sua nay KHONG doi them loi goi model nao.
+  lich_su: >-
+    Ban dau ghi DAT (PR #934, 184b270); connector Codex P1 (review comment 4372912640 tren #934) chi ra receipt thieu effort va
+    sandbox mode thuc te, sua o day.
   gioi_han: >-
     model_phuc_vu do tu su kien response.created/completed ma launcher ghi (#909 wp748
     r25); do la model may chu tra ve trong luong su kien, khong phai chung thu ben thu ba.

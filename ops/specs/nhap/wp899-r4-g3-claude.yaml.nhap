@@ -43,14 +43,15 @@ effective_write_set_nguon: khai_bao_trong_spec
 depends_on:
 - 892
 - 910
-depends_on_ghi_chu: '#892 da land (merge 76cf4c5). #910 pha B phai LAND truoc (Q3 dac
-  ta r4): CHO_DIEN so PR, commit merge, thoi diem merge.'
+depends_on_ghi_chu: '#892 da land (merge 76cf4c5). #910 pha B da merge: PR #917, merge
+  ba222ff (2026-10-25T02:16Z), lease wp910-r3-g3-claude rut han ve 2026-10-25T02:18:36Z
+  (45b5b42). Base r4 = ba222ff theo Q3 dac ta r4.'
 branch: agent/wp899-g3-claude
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: CHO_DIEN_COMMIT_MERGE_910_PHA_B
-start_from_sha: CHO_DIEN_COMMIT_MERGE_910_PHA_B
-reviewed_sha_required: CHO_DIEN_COMMIT_MERGE_910_PHA_B
+base_sha: ba222ffd1615f0d74b59985b9612f725211b62f5
+start_from_sha: ba222ffd1615f0d74b59985b9612f725211b62f5
+reviewed_sha_required: ba222ffd1615f0d74b59985b9612f725211b62f5
 reviewed_sha_note: 'Chua co head code; neo base. Diem xuat phat: 3 tep tai 7f5a02c
   tu bundle tren ops/wp899-g2-luu-tru @ d1cb870 (sha256 e066aefd...7fd2); dong MOI
   dat lai len ban cua base, khong chep de ca tep.'
@@ -62,17 +63,17 @@ recorder_is_executor: CHO_DIEN
 recorder_ghi_chu: Ban nhap soan o phien session_01J5UVb6kiH9edF9McTVQvDT (executor r3,
   da dung) theo yeu cau chu kho 25-10-2026; executor r4 la phien KHAC.
 nhanh_thi_hanh_do_luc_cap:
-  do_luc: CHO_DIEN
+  do_luc: '2026-10-25T02:20:24Z'
   ref: refs/heads/agent/wp899-g3-claude
-  trang_thai: CHO_DIEN
-  ghi_chu: CHO_DIEN (ls-remote phai rong; executor tao tu base_sha).
+  trang_thai: vang
+  ghi_chu: ls-remote rong luc SOAN; nguoi cap DO LAI va ghi de truoc khi commit.
 xung_dot_write_set_do_luc_cap:
-  do_luc: CHO_DIEN
-  so_nhanh: CHO_DIEN (fetch --prune +refs/heads/*; ls-remote N / cuc bo N, so TAP ten
-    thieu 0 thua 0)
-  ket_qua: CHO_DIEN (ai-dang-giu ca ba duong dan phai NGUOI_GIU 0; wp910-r3-g3-claude
-    phai het han hoac da bi thay the; wp899-r1-g1-claude con han toi 2026-10-27T01:20:00Z
-    nhung DA_BI_THAY_THE nen khong tinh).
+  do_luc: '2026-10-25T02:20:24Z'
+  so_nhanh: 'fetch --prune +refs/heads/*; ls-remote 587 / cuc bo 587 (so TAP ten: thieu
+    0, thua 0) luc SOAN; nguoi cap DO LAI va ghi de.'
+  ket_qua: 'ai-dang-giu ca ba duong dan => NGUOI_GIU 0 (wp910-r3-g3-claude het han 02:18:36Z;
+    wp899-r1-g1-claude con han toi 2026-10-27T01:20:00Z nhung DA_BI_THAY_THE). Dong MOI
+    cua 7f5a02c ap sach len ba222ff (git apply --check). Do luc SOAN; nguoi cap DO LAI.'
 leased_at_utc: CHO_DIEN
 heartbeat_at: CHO_DIEN
 lease_until: CHO_DIEN_LEASED_AT_CONG_72H

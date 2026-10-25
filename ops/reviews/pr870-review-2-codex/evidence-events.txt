@@ -1,0 +1,60 @@
+ci_events={"push": {"branches": ["master"]}, "pull_request": null, "workflow_dispatch": null}
+pull_request_types_explicit=False
+EOL_step={"name": "PR head contains required EOL base", "if": "${{ github.event_name == 'pull_request' }}", "shell": "bash", "env": {"PR_HEAD_SHA": "${{ github.event.pull_request.head.sha }}", "EOL_BASE_SHA": "1880346d2be3c0be9a93de7624ee108d99b6c88c"}, "run": "set -eu\ntest -n \"$PR_HEAD_SHA\"\ngit cat-file -e \"${PR_HEAD_SHA}^{commit}\"\ngit cat-file -e \"${EOL_BASE_SHA}^{commit}\"\ngit merge-base --is-ancestor \"$EOL_BASE_SHA\" \"$PR_HEAD_SHA\"\n"}
+EOL_in_push_readback=[["gate (ubuntu-latest)", "PR head contains required EOL base", "skipped"]]
+historical_PR109_commits:
+05170b4431b5d68632de2d9fc517b0eef9acb680 2026-08-14T12:48:03+00:00 docs: nói CÓ ĐIỀU KIỆN câu về đo Windows — ma trận có nhãn windows và workflow_dispatch
+ancestor_of_reviewed=True
+3736fc0a69f38019cd54f39273e44655f38d40f6 2026-08-14T12:54:19+00:00 docs: gắn nhãn windows KHÔNG đủ cho PR đang mở — phải có cò mới
+ancestor_of_reviewed=True
+9796f674c0b05fad04ff7b001ba1dcb25b7f0830 2026-08-14T20:01:28+07:00 Merge pull request #109 — ba lần đọc sai tín hiệu trong một phiên
+ancestor_of_reviewed=True
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 73a2dc2..3594a64 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -138,8 +138,15 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package 
+   trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**
+   · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,
+   còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
+-  hành). Nên **"PR xanh" không hàm ý "master xanh"**: mỗi lần merge là lần đo Windows ĐẦU TIÊN của mã
+-  đó. Kèm theo: trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
++  hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
++  không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
++  trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
++  ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
++  trớ trêu là đoạn ngay trên đã trích đúng điều kiện đó rồi vẫn viết câu quên nó).
++  **Muốn có Windows TRƯỚC khi merge thì có sẵn hai đường: gắn nhãn `windows`, hoặc gọi tay
++  `workflow_dispatch`.** Đợt 14-08 không dùng đường nào trong hai, nên cả sáu lần merge của đợt đúng
++  là sáu lần đo Windows đầu tiên. Kèm theo: trên lượt master, bước `PR head contains required EOL
++  base` LUÔN `skipped` vì nó có
+   `if: github.event_name == 'pull_request'` — nên tiêu chí "không bước nào `skipped`" chỉ đúng cho
+   lượt PR; bê nguyên sang lượt master là tự báo động giả.
+   Cả ba cùng họ với bài học "cổng không nói dối, nó VẮNG MẶT": **"vắng mặt vì sạch" và "vắng mặt vì
+
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 3594a64..c885bf1 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -143,10 +143,15 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package 
+   trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
+   ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
+   trớ trêu là đoạn ngay trên đã trích đúng điều kiện đó rồi vẫn viết câu quên nó).
+-  **Muốn có Windows TRƯỚC khi merge thì có sẵn hai đường: gắn nhãn `windows`, hoặc gọi tay
+-  `workflow_dispatch`.** Đợt 14-08 không dùng đường nào trong hai, nên cả sáu lần merge của đợt đúng
+-  là sáu lần đo Windows đầu tiên. Kèm theo: trên lượt master, bước `PR head contains required EOL
+-  base` LUÔN `skipped` vì nó có
++  **Muốn có Windows TRƯỚC khi merge thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
++  Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
++  trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
++  `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt
++  chạy nào; ma trận chỉ đọc nhãn ở lượt bắn KẾ TIẾP. Người làm theo sẽ gắn nhãn, thấy vẫn đúng một
++  check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn
++  (đẩy thêm commit, hoặc đóng rồi mở lại PR) — hoặc khai `types: [..., labeled]` cho workflow.
++  Đợt 14-08 không dùng đường nào, nên cả sáu lần merge của đợt đúng là sáu lần đo Windows đầu tiên.
++  Kèm theo: trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
+   `if: github.event_name == 'pull_request'` — nên tiêu chí "không bước nào `skipped`" chỉ đúng cho
+   lượt PR; bê nguyên sang lượt master là tự báo động giả.
+   Cả ba cùng họ với bài học "cổng không nói dối, nó VẮNG MẶT": **"vắng mặt vì sạch" và "vắng mặt vì
+
+rc=0

@@ -1,0 +1,25 @@
+$ git rev-parse HEAD
+094e8d17ae4dfcf21dca63702c9262267bdc072c
+rc=0
+$ git rev-parse HEAD^{tree}
+55f5edf2f8601c976f390e8994193129a71203a1
+rc=0
+$ git status --porcelain=v1 --untracked-files=all
+(stdout rỗng)
+rc=0
+$ git diff --exit-code
+(stdout rỗng)
+rc=0
+$ git diff --cached --exit-code
+(stdout rỗng)
+rc=0
+$ git hash-object CLAUDE.md
+975cd94ff851a3a0ee3aa0493e90184e5f81c874
+rc=0
+$ git rev-parse HEAD:CLAUDE.md
+975cd94ff851a3a0ee3aa0493e90184e5f81c874
+rc=0
+$ git show -s --format=%H %aI %cI %s e63961f
+e63961f27b53e66db8e6600009f97d5706743063 2026-10-23T11:04:54+07:00 2026-10-23T11:04:54+07:00 Merge pull request #883 from ducthangho/agent/wp879-g1-claude
+rc=0
+reviewed-source-byte-parity=PASS (4 files)

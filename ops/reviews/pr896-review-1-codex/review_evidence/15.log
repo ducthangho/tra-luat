@@ -1,0 +1,32 @@
+$ python3 ../review_evidence/final_integrity_probe.py
+HEAD: 816f43988eb3012726120ad00166a989cc2b9af6
+tree: 3da0ce24590dfcf2e60805b2bef76687cdd64405
+git status --porcelain=v1 --untracked-files=all --ignored: rc=0; output=''; stderr=''
+git diff --exit-code: rc=0; output=''; stderr=''
+git diff --cached --exit-code: rc=0; output=''; stderr=''
+tracked blob content compared to HEAD: 5203 ; mismatches= ['scripts/deploy-package.cmd', 'scripts/don-nhanh.cmd', 'tl-setup.cmd']
+scripts/deploy-package.cmd: text: set
+scripts/deploy-package.cmd: eol: crlf
+scripts/deploy-package.cmd: filter: unspecified
+scripts/deploy-package.cmd work CRLF= 59 blob CRLF= 0 normalize_CRLF_matches= True filtered_hash_matches= True
+scripts/don-nhanh.cmd: text: set
+scripts/don-nhanh.cmd: eol: crlf
+scripts/don-nhanh.cmd: filter: unspecified
+scripts/don-nhanh.cmd work CRLF= 72 blob CRLF= 0 normalize_CRLF_matches= True filtered_hash_matches= True
+tl-setup.cmd: text: set
+tl-setup.cmd: eol: crlf
+tl-setup.cmd: filter: unspecified
+tl-setup.cmd work CRLF= 6 blob CRLF= 0 normalize_CRLF_matches= True filtered_hash_matches= True
+5200 raw matches + 3 declared CRLF checkout matches = 5203 correct files
+provided diff.patch equals git diff base head: True
+actual numstat:
+31	34	CLAUDE.md
+27	0	ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+3	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/SHA256SUMS.txt
+6	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-blob-claude-md-094e8d1-6ac385f.txt
+436	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-comments-889-sau-review-lai.json
+29	0	ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-reactions-pr-889-sau-review-lai.json
+Reviewed source remains exact; only report/evidence/hint written outside cay-kho/.
+Snapshot equality does not prove absence of temporary historical writes; commands were constrained to read-only source and external scratch.
+
+rc=0

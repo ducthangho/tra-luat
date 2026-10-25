@@ -1,0 +1,175 @@
+$ git show -s --format="%H %cI %P %s" 3a3a3ca
+3a3a3caca5de4934ff53851feb6994c2c7b84ad5 2026-10-20T08:34:06+07:00 94220547cd155c73392e95726e8daf353888b3aa 23bc189f28ea60f04ca1634b6fe66d02babf12ed Merge pull request #848 from ducthangho/agent/wp744-g3-claude
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" 3f6c694
+3f6c6943ebcebc7799db6adae76f8540c07f1d7f 2026-10-20T02:09:02+00:00 db8e0cdab925bfe65b91a67414522f71ff2e45a7 land(#744): ho so land PR #848 (merge 3a3a3ca) — landed true
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" 9e9a74b
+9e9a74b2a396ef458d25c51a5563efafbb45ba0c 2026-10-22T13:38:57+07:00 637f78029f5a5fe56d35199dd0f75c50274f2c0f 521efebab226fe3a92b2ccce4a59c27dd638edff Merge pull request #864 from ducthangho/agent/wp858-g1-claude
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" b38fce8
+b38fce83d0e97981012072ca2a2023ac726e5b2e 2026-10-22T07:14:02+00:00 9e9a74b2a396ef458d25c51a5563efafbb45ba0c docs(CLAUDE.md): sua bai hoc (c) — ma tran os cua ci.yml khong con ve master
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" 06a50c5
+06a50c5feea77c2654f31edd26efeed7eeee62f5 2026-10-22T08:07:07+00:00 b38fce83d0e97981012072ca2a2023ac726e5b2e docs(CLAUDE.md): (c) gioi han 'Windows tren master' vao push tu dong — va P2 cross-review codex
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" d1258fe
+d1258fef203d6b1f87fa729775cd2d8a1b0cc552 2026-09-17T03:12:08+07:00 f27a28ffa3cc1923cf894fa12cc2758277814ce3 feat(#548): ma tran CI Windows xuat tu chuan-bi va doi tieu chuan gate (ADR-0049)
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" 6d46e6f
+6d46e6fc16cae3b5b490f5b6ee54ddb968b092fd 2026-09-17T23:30:21+07:00 93abdf2aeb9ca3f45aa959abe8c9c291fa904c53 fix(#548): xu ly P1 — go fromJSON o chuan-bi.outputs va them chot chan output sequence
+ancestor_of_reviewed_SHA_rc=0
+$ git show -s --format="%H %cI %P %s" 4ae43f0
+4ae43f0c1e0cf121246da64336763daa41beea57 2026-10-21T09:07:34+00:00 637f78029f5a5fe56d35199dd0f75c50274f2c0f land(#744): dinh chinh gate post-merge 3a3a3ca — chi ubuntu, khong gom windows (connector P1 #859)
+ancestor_of_reviewed_SHA_rc=1
+$ git show 3f6c694:ops/land/pr848-wp744-land-evidence.yaml [lọc run 39354156843]
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success (gom windows)', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
+$ git show 06a50c5feea77c2654f31edd26efeed7eeee62f5:ops/land/pr848-wp744-land-evidence.yaml [lọc run 39354156843]
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success (gom windows)', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
+$ git show 4ae43f0:ops/land/pr848-wp744-land-evidence.yaml [lọc run 39354156843]
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success, ca 23 job chi nhan ubuntu-latest (measured — readback-jobs-39354156843.json); Windows KHONG chay tren lan push nay', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
+  - 'launcher-windows/Windows KHONG chay cho push 3a3a3ca: ci.yml chi chon windows-latest cho workflow_dispatch hoac PR gan nhan windows; Windows khong phai dieu kien cua lease (M-3 chi doi ci.yml). Ban dau ho so ghi sai "gom windows" — connector P1 #859 r4323607674, dinh chinh o PR sau.'
+$ git show --format=short d1258fe -- .github/workflows/ci.yml
+commit d1258fef203d6b1f87fa729775cd2d8a1b0cc552
+Author: ducthangho <ducthangho@gmail.com>
+
+    feat(#548): ma tran CI Windows xuat tu chuan-bi va doi tieu chuan gate (ADR-0049)
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index cb025a5..cbdad03 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -32,20 +32,25 @@ concurrency:
+   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+ 
+ jobs:
++  chuan-bi:
++    # packet #548 (CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND): nguon duy nhat cho ma tran os.
++    # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
++    runs-on: ubuntu-latest
++    outputs:
++      os: ${{ fromJSON(
++            (github.event_name == 'workflow_dispatch'
++             || contains(github.event.pull_request.labels.*.name, 'windows'))
++            && '["ubuntu-latest","windows-latest"]'
++            || '["ubuntu-latest"]') }}
++    steps:
++      - run: 'true'
++
+   gate:
++    needs: chuan-bi
+     strategy:
+       fail-fast: false
+       matrix:
+-        # Windows tốn GẤP ĐÔI phút. Chạy nó ở nơi thật sự cần: trước khi vào master,
+-        # khi gọi tay, hoặc khi PR được gắn nhãn `windows` (dùng cho PR đụng đường
+-        # phụ thuộc nền). PR thường vẫn được Linux soi mỗi lần đẩy.
+-        # KHÔNG phải nới gate: master vẫn luôn qua CẢ HAI nền trước khi phát hành.
+-        os: ${{ fromJSON(
+-              (github.event_name == 'workflow_dispatch'
+-               || github.ref == 'refs/heads/master'
+-               || contains(github.event.pull_request.labels.*.name, 'windows'))
+-              && '["ubuntu-latest","windows-latest"]'
+-              || '["ubuntu-latest"]') }}
++        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+     runs-on: ${{ matrix.os }}
+     # r391 — NÂNG 25 -> 45 THEO CHỈ ĐẠO CHỦ KHO, và lý do phải ghi lại vì con số cũ
+     # KHÔNG sai lúc nó được đặt: gate đã chậm dần tới sát trần. Đo 29-08-2026:
+@@ -595,16 +600,11 @@ jobs:
+     # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
+     # Bước `test registry` (41,0 % tổng bước Windows) sống ở đây.
++    needs: chuan-bi
+     strategy:
+       fail-fast: false
+       matrix:
+-        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
+-        os: ${{ fromJSON(
+-              (github.event_name == 'workflow_dispatch'
+-               || github.ref == 'refs/heads/master'
+-               || contains(github.event.pull_request.labels.*.name, 'windows'))
+-              && '["ubuntu-latest","windows-latest"]'
+-              || '["ubuntu-latest"]') }}
++        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+     runs-on: ${{ matrix.os }}
+     timeout-minutes: 60
+     env:
+@@ -659,16 +659,11 @@ jobs:
+     # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
+     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
++    needs: chuan-bi
+     strategy:
+       fail-fast: false
+       matrix:
+-        # Vì sao Windows có điều kiện: xem chú thích cùng chỗ ở job `gate` (bản gốc).
+-        os: ${{ fromJSON(
+-              (github.event_name == 'workflow_dispatch'
+-               || github.ref == 'refs/heads/master'
+-               || contains(github.event.pull_request.labels.*.name, 'windows'))
+-              && '["ubuntu-latest","windows-latest"]'
+-              || '["ubuntu-latest"]') }}
++        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+     runs-on: ${{ matrix.os }}
+     timeout-minutes: 60
+     env:
+
+$ git show --format=short 6d46e6f -- .github/workflows/ci.yml
+commit 6d46e6fc16cae3b5b490f5b6ee54ddb968b092fd
+Author: ducthangho <ducthangho@gmail.com>
+
+    fix(#548): xu ly P1 — go fromJSON o chuan-bi.outputs va them chot chan output sequence
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index cbdad03..2ca2f9d 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -37,11 +37,10 @@ jobs:
+     # Chi ubuntu-latest, khong checkout ma nguon; bo github.ref == 'refs/heads/master'.
+     runs-on: ubuntu-latest
+     outputs:
+-      os: ${{ fromJSON(
+-            (github.event_name == 'workflow_dispatch'
+-             || contains(github.event.pull_request.labels.*.name, 'windows'))
+-            && '["ubuntu-latest","windows-latest"]'
+-            || '["ubuntu-latest"]') }}
++      os: ${{ (github.event_name == 'workflow_dispatch'
++               || contains(github.event.pull_request.labels.*.name, 'windows'))
++              && '["ubuntu-latest","windows-latest"]'
++              || '["ubuntu-latest"]' }}
+     steps:
+       - run: 'true'
+ 
+
+independent_comment_readback_at_reviewed_SHA:
+git grep -n -I -e 4323607674 SHA -- :!CLAUDE.md rc=1
+(không có bản đọc lại độc lập của comment này trong cây review)
+correction_diff_4ae43f0:
+commit 4ae43f0c1e0cf121246da64336763daa41beea57
+Author: Claude <noreply@anthropic.com>
+
+    land(#744): dinh chinh gate post-merge 3a3a3ca — chi ubuntu, khong gom windows (connector P1 #859)
+
+diff --git a/ops/land/pr848-wp744-land-evidence.yaml b/ops/land/pr848-wp744-land-evidence.yaml
+index ce05a96..e9ef051 100644
+--- a/ops/land/pr848-wp744-land-evidence.yaml
++++ b/ops/land/pr848-wp744-land-evidence.yaml
+@@ -36,7 +36,7 @@ pre_merge_checks:
+   - {name: 'Codex connector', sha: 23bc189f28ea60f04ca1634b6fe66d02babf12ed, conclusion: 'completed, has_any_findings=false', nguon: readback-comments-848.json, ghi_chu: 'measured — readback-comments-848.json comment 6276780956 (neo 23bc189, chay luc roi draft).'}
+   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-848.json, readback-review-comments-848.json]}
+ post_merge_checks:
+-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success (gom windows)', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
++  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 39354156843, sha: 3a3a3caca5de4934ff53851feb6994c2c7b84ad5, run_attempt: 1, conclusion: success, jobs: '23/23 success, ca 23 job chi nhan ubuntu-latest (measured — readback-jobs-39354156843.json); Windows KHONG chay tren lan push nay', luc: '2026-10-20T01:34:09Z -> 02:05:32Z', kiem_gate: 'measured — do-lai-nguon-20261020/kiem-gate-3a3a3ca.txt: packet_loop.py kiem-gate suite 106643757504, 23 ten, rc=0', nguon: [readback-run-39354156843.json, readback-jobs-39354156843.json, readback-check-runs-3a3a3ca-all.json]}
+ bookkeeping:
+   - {item: 'dong PR #747 la da thay the (khong merge)', ket_qua: 'measured — readback-pr-747.json: state closed, merged false; comment 6281281678 neu ly do wp728/#755 (readback-comment-6281281678.json)'}
+   - {item: 'rut han lease wp744-r3-g3-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+@@ -108,5 +108,6 @@ no_ngoai_pham_vi:
+ 
+ khong_do_duoc:
+   - 'Log day du cac job CI KHONG luu; chi readback run/job/check-run.'
++  - 'launcher-windows/Windows KHONG chay cho push 3a3a3ca: ci.yml chi chon windows-latest cho workflow_dispatch hoac PR gan nhan windows; Windows khong phai dieu kien cua lease (M-3 chi doi ci.yml). Ban dau ho so ghi sai "gom windows" — connector P1 #859 r4323607674, dinh chinh o PR sau.'
+   - 'Comment-id GitHub trich trong ba spec: reviewer Codex chay offline nen KHONG_DO_DUOC; phien executor da kiem ton tai 6091609833 6091612697 6091615222 6133771506 truoc khi push (khong luu tho).'
+   - 'stderr/transcript luot review Codex KHONG luu ngoai run.json; model thuc chay KHONG_DO_DUOC tu run.json.'
+
+LIMIT: 4ae43f0 là object sửa có trước thời điểm head, không phải ancestor của head. Không dùng nó thay nội dung HEAD. Không gọi mạng để xác minh PR865 hoặc comment r4323607674.
+rc=0

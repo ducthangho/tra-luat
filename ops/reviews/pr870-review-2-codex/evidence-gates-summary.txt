@@ -1,0 +1,17 @@
+python3 .claude/dev/packet_loop.py doctrine-scan --root .
+doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+rc=0; KẾT LUẬN: passed
+python3 scripts/tl.py doc-claims-check --json
+Các trường chọn từ JSON stdout gốc:
+{
+  "ok": true,
+  "schema": "doc_claims_check.v1",
+  "files_scanned": 113,
+  "flags": [],
+  "advisory_count": 381,
+  "layers_skipped": {},
+  "strict": false
+}
+rc=0; KẾT LUẬN: passed; ok=true; flags=[]
+stderr_cả_hai=''
+summary_rc=0

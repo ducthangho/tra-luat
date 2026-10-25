@@ -1,0 +1,130 @@
+FILE=CLAUDE.md
+36:    Windows: `.\scripts\deploy-package.ps1 -Pull -Push` · Linux/Cowork: `./scripts/deploy-package.sh --push`.
+158:   · **(c) Ma trận `os` của `ci.yml` KHÔNG phân biệt PR với master — và câu ngược lại từng nằm ở đây.**
+159:   Bản cũ của mục này viết: *"PR thường chỉ chạy `ubuntu`, còn master chạy CẢ `ubuntu` LẪN `windows`"*.
+160:   Câu ấy **ĐÃ CHẾT** từ packet #548 (`CI-MA-TRAN-WINDOWS-CHAY-MOI-LAN-LAND`, bỏ vế
+162:   `9e9a74b`: `os` = `["ubuntu-latest","windows-latest"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`
+163:   HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `["ubuntu-latest"]`.
+164:   Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,
+165:   20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở
+167:   bản land (commit `3f6c694`) khai `jobs: '23/23 success (gom windows)'`; Codex connector bắt thành P1 trên PR #859 (comment
+169:   **Windows tự động khi push master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: chỉ bắn
+170:   khi đổi `.claude/dev/**` hoặc chính tệp workflow ấy (`paths:`), ma trận `windows-latest` + `ubuntu-latest`;
+171:   PR chỉ chạy khi mang nhãn `windows` (workflow này CÓ khai `types: [..., labeled]`). Nó chỉ đo lane
+172:   launcher, KHÔNG phải gate. Các workflow còn lại (`ci-dot-bien-du` `ops-*`) đều `ubuntu-latest`.
+173:   Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge
+174:   của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là "lần đo Windows đầu tiên" như bản cũ viết.
+175:   Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.
+176:   **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+177:   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+178:   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
+181:   check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn
+184:   Windows đầu tiên — nay cùng tình huống thì là **không lần nào**.)
+211:   **160**. Ba ref đầu là `master` + hai nhánh `claude/**`; `ops/pkg-windows` **không** nằm trong đó, mà
+212:   đúng nhánh ấy giữ **cả ba** lease `LEASE-DANG-WINDOWS` đang chặn write set `PLAT-X8`. Bộ quét vẫn in
+344:   đường Windows từng mù hoàn toàn với secrets trong tệp ẩn. Nay quét cả tệp không mở rộng, tránh nhị
+367: - **Workflow chỉ chạy khi có người bấm là workflow KHÔNG có ai canh.** `workflow_dispatch` không chạy
+370:   workflow `workflow_dispatch` phải có phản chứng chạy được ở CI, và bộ ấy phải **trích thân bước TỪ
+560: Đường dùng được: `.github/workflows/ops-don-ref.yml` (`workflow_dispatch`, kích hoạt được từ phiên web
+652:   `actions_run_trigger`/`get_job_logs`. Đây là đường đã dùng để merge và gọi lượt Windows
+687:   Đo 06-09-2026 trên Windows: `run ... -- codex exec ...` với tên trần ⇒ `CHAN [15]: probe nang luc
+737: - **Không được giả định Windows có `python3`** (bản phổ biến chỉ có `python`, `py`).
+744: ## Bài học lớp "chạy được ở đây" (12-08-2026, codex đo trên Windows thật)
+803:   `windows-latest`, tức bộ test **chưa từng chạy** trên Windows kể từ lúc có chốt ấy.
+804:   Không ai biết, vì job Windows chỉ chạy khi PR có nhãn `windows`. Năm lượt cross-review
+810:   Gắn nhãn `windows` cho PR đụng `.claude/dev/**` — nó tốn ~40 phút và trả lại thứ mà
+905: cùng `.claude/dev/launcher_test.py`, CI 17-08-2026 đo được Linux bỏ qua 1 ca còn Windows bỏ qua 13. Packet nào
+907: Windows. Chọn nền theo thứ packet ĐO, đừng chọn theo nền nào đang rảnh.
+938:    - Windows: `deploy-package.ps1` bước 4 (gọi `scripts/deploy-guard.ps1`), từ v1.35.80. Ghi đè cố ý:
+948:    Và **lane PR KHÔNG bắt được**: `ci.yml` cho `release-verify strict (lane LAND)` điều kiện `if: github.ref == 'refs/heads/master'`, còn lane WORKER sinh manifest TẠM từ chính cây nên nó **hấp thụ** mọi thay đổi nội dung ⇒ PR xanh, master ĐỎ. Muốn biết trước khi merge thì chạy ĐÚNG lệnh của lane LAND tại chỗ: `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` (đòi `ok=true` và `expected == checked`).
+FILE=docs/PROTOCOL_DA_PHIEN.md
+18: - **Phạm vi:** Claude Code, Codex, Google Antigravity, Windows local, cloud worker và Android
+306: 4. case-fold để bắt va chạm trên Windows;
+410: `executor` và `environment` là hai trường độc lập. `cloud` là mặc định vì Windows host có thể tắt. `local` chỉ
+411: dùng khi cần tài nguyên cục bộ, parity Windows hoặc khi người dùng chọn rõ. Dispatcher không tự đổi môi trường;
+415: Windows trực tuyến. Controller Python chạy bằng Scheduled Task dưới tài khoản ít quyền, tạo worktree rồi gọi
+757: refs đã cấp. Bootstrapper xác minh path/trust trên đúng OS, longpaths nếu đường dẫn Windows
+856: (B) chỉ `git add --renormalize .`; (C) tái sinh manifest/golden/derived artifact và chạy parity Windows–Linux.
+866: Loader/generator ghi UTF-8 LF tường minh, không phụ thuộc newline mặc định của Windows.
+884: | T3 | integration freeze/`land prepare` | full selftest và release gates trên Windows + Linux cho frozen integration SHA |
+936: Windows host xanh không chứng minh WSL/Linux/container xanh; từng runtime cần probe riêng.
+937: Riêng admission hiện dùng bộ giải Git với PATH `/usr/bin:/bin`: native Windows chưa được
+959: test merge hoặc test Windows. Thiếu một mốc bắt buộc thì ghi thiếu, không suy để lấp receipt.
+977: Job `skipped` không được cấp runner là chưa thực thi, không là Windows execution dù tên job
+978: có Windows. `owner_waived` là disposition riêng chỉ khi có waiver bền của owner: nguồn/actor,
+1043: Windows–Linux. Land sinh bundled test module theo thứ tự tất định, kiểm cả chế độ dev có fragment lẫn topology
+1056: `/land apply <mission_id> <head_sha>` và typed `workflow_dispatch` có hai input đó. Vì vậy người dùng có thể đóng
+1057: mission từ GitHub trên Android khi Windows tắt, nhưng hệ thống vẫn dừng ở `awaiting_land` cho tới phê duyệt tường
+1086: | Phép đo được cấp | Có mục tiêu/phản chứng, scope và allowance hữu hạn công bố trước; ghi `used / reserved / limit`, rồi gắn kết quả với run ID/attempt và exact SHA. `workflow_dispatch` hợp lệ có thể thuộc loại này. |
+1153: `working_clock` và `timeout_clock=wall`. Trên Windows, chỉ được khai working-state time từ
+1291: Android trong cùng một hệ thống; GitHub Actions giữ chuỗi cloud chạy khi Windows tắt. Vì vậy registry phiên và
+1337:   và bundle, fragment bị loại đúng prefix còn bundled module là required file/tái sinh cùng byte Windows–Linux;
+1342: - path collision Unicode/case/separator bị bắt trên Windows lẫn Linux;
+1346: - Windows host tắt không làm mất packet local, bật lại tự tiếp tục đúng generation;
+1348:   không cần Windows host; stale head/actor lạ bị từ chối có audit;
+1349: - renormalize cho cùng blob EOL trên Windows/Linux, manifest và full gate xanh;
+1376: - GitHub hỗ trợ chạy `workflow_dispatch` thủ công và merge PR sau required checks; đây là các client mobile/web
+1386:   [GitHub Mobile workflow dispatch](https://github.blog/changelog/2024-07-30-run-workflows-set-as-workflow_dispatch-manually/).
+1396: - `.github/workflows/ci.yml` chưa có `permissions:` tối thiểu và đang chạy strict verify với manifest committed,
+1474:   `.claude/dev/launcher.py`, `.claude/dev/gate_lifecycle.py`, `ci.yml`, `ops-publish-lease.yml`) nhắc
+1488: | `ADR-0018` | EOL canonical theo loại tệp | Accepted | có nhắc: `ci.yml`×19 |
+1491: | `ADR-0021` | Local controller headless trên Windows | Accepted | chưa đo |
+1501: | `ADR-0031` | Test fragment thay khóa toàn cục selftest | Accepted | có nhắc: `ci.yml`×7 · `gate_lifecycle.py`×2 |
+1519: | `ADR-0049` | Cổng hai nền trước phát hành, không phải mỗi lần land | Accepted | có nhắc: `ci.yml` · `deploy-package.*` |
+PROTOCOL_L944-981:
+944: #### 10.2.2 Identity và provenance CI
+945: 
+946: Mỗi bằng chứng CI phải tách và dẫn nguồn cho bốn mốc:
+947: 
+948: | Mốc | Dữ liệu và nguồn kiểm |
+949: |---|---|
+950: | Run | repository, run ID, attempt, event, run head SHA từ API của đúng run |
+951: | Checkout | SHA thực sự chạy, parents và tree từ checkout/log/artifact của đúng job/attempt |
+952: | Workflow definition | repository/path, exact commit OID, blob OID và SHA-256 của bytes định nghĩa |
+953: | Gate output | job/check-run/context, runner/OS/runtime, command/rc, marker dương và artifact ID/hash |
+954: 
+955: Không đồng nhất REST run head với checkout hay workflow-definition SHA. Với synthetic merge,
+956: chứng minh parents trỏ đúng head/base và tree từ checkout/log/artifact tương ứng; chỉ đo
+957: `refs/pull/.../merge` hiện tại không chứng minh run cũ đã test ref ấy. Tree bằng nhau không
+958: đồng nhất commit, thời điểm, workflow, loại test hoặc runtime; không tự nâng test head thành
+959: test merge hoặc test Windows. Thiếu một mốc bắt buộc thì ghi thiếu, không suy để lấp receipt.
+960: 
+961: Trong lane GitHub, có thể đọc `WorkflowRun.file.repositoryFileUrl`, xác minh URL chứa đúng
+962: repository/path và exact OID, tải blob tại OID ấy rồi băm bytes. `file` là nullable: null,
+963: GraphQL errors, 403, URL chỉ chứa ref trôi hoặc không lấy được blob là `not_measured` cho
+964: provenance. Không lấy REST `head_sha` hay workflow ở HEAD hiện tại thay vào. Có thể dùng
+965: nguồn provenance khác chỉ khi tự chứng minh cùng run/attempt và exact definition identity.
+966: Xem [schema Actions của GitHub](https://docs.github.com/en/graphql/reference/actions).
+967: 
+968: #### 10.2.3 Evidence thiếu, skipped và tiêu chí riêng
+969: 
+970: Ghi `passed`, `failed`, `skipped`, `not_run` và `not_measured` riêng. API thiếu quyền chỉ
+971: cho biết endpoint/field ấy chưa đo được; giữ HTTP status và lỗi thực. Có thể thu tiếp theo
+972: chuỗi GraphQL aggregate → jobs/logs → commit statuses, nhưng mỗi nguồn chỉ chứng minh phần
+973: nó chứa. Paginate đủ, chọn đúng SHA/run/attempt/context/producer; statuses không tự có
+974: workflow/runner/command/output. Chỉ nhận khi tổng evidence đủ identity và nội dung dương,
+975: không đổi 403 hay list rỗng thành pass.
+976: 
+977: Job `skipped` không được cấp runner là chưa thực thi, không là Windows execution dù tên job
+978: có Windows. `owner_waived` là disposition riêng chỉ khi có waiver bền của owner: nguồn/actor,
+979: exact SHA, context/OS, lý do, phạm vi/hạn và điều kiện thay thế. Giữ nguyên kết quả skipped;
+980: waiver không viết lại nó thành passed, không tự gỡ branch protection. Không có waiver đúng
+981: scope thì required evidence còn thiếu và tiếp tục chặn gate.
+PROTOCOL_L988-995:
+988: #### 10.2.4 Worker gate và hoàn tất
+989: 
+990: Worker gate kiểm generation/spec/write-set, EOL, security paths, offline tests và manifest tạm ngoài repo. Gate
+991: dùng primitive hiện có theo nghĩa tương đương:
+992: 
+993: ```text
+994: release-manifest --root <worktree> --out <temporary-path>
+995: release-verify <temporary-path> --root <worktree> --strict
+PROTOCOL_L1040-1045:
+1040: cổng xanh"*, đổi đối tượng: **một phép thử đo đúng MỘT thứ, bị đọc thành đo CẢ GÓI.**
+1041: 
+1042: Land gate đóng băng mission, rebase/integrate lần cuối, gán version/changelog/manifest và chạy parity
+1043: Windows–Linux. Land sinh bundled test module theo thứ tự tất định, kiểm cả chế độ dev có fragment lẫn topology
+1044: bundle chỉ có module sinh. Bundle không chứa fragment và thiếu bundled module phải fail với lỗi đích danh;
+1045: behavior test dựng root giả để chứng minh exclusion đi qua đường release thật, không chỉ kiểm membership của một
+INTERPRETATION: protocol yêu cầu chứng cứ theo context/OS và parity Windows–Linux khi land; không khai mọi push master tự sinh full gate Windows. Chỉ chọn runner hoặc dispatch không tự chứng minh gate đã chạy/đã pass.
+rc=0

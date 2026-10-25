@@ -1,0 +1,10 @@
+job-if=${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+exclude=[{"os": "windows-latest"}]
+{"os": ["windows-latest"], "cancelled": false, "local_job_if": false, "expanded_matrix": []}
+{"os": ["windows-latest"], "cancelled": true, "local_job_if": false, "expanded_matrix": []}
+{"os": ["ubuntu-latest"], "cancelled": false, "local_job_if": true, "expanded_matrix": [{"os": "ubuntu-latest"}]}
+{"os": ["ubuntu-latest"], "cancelled": true, "local_job_if": false, "expanded_matrix": [{"os": "ubuntu-latest"}]}
+{"os": ["ubuntu-latest", "windows-latest"], "cancelled": false, "local_job_if": true, "expanded_matrix": [{"os": "ubuntu-latest"}]}
+{"os": ["ubuntu-latest", "windows-latest"], "cancelled": true, "local_job_if": false, "expanded_matrix": [{"os": "ubuntu-latest"}]}
+PASS: windows-only => if=false, no Ubuntu matrix cell; local inference: job skipped
+KHÔNG ĐO ĐƯỢC: actual GitHub check-run conclusion/runner/log at reviewed SHA (no network; no dispatch performed)

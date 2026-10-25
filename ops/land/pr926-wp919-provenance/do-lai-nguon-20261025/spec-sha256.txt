@@ -1,0 +1,1 @@
+7d0eb91dd35a36a547348dbc0370366975071c6b3ac3468c2bab7351edbf2987  ops/specs/wp919-adr-0055-tran-loi-goi-codex-muoi-r3.md @ origin/ops/wp919-r1-g1-lease (58151cf)

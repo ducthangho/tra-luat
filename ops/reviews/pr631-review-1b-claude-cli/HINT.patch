@@ -1,0 +1,117 @@
+NHÃN: chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- CLAUDE.md
++++ CLAUDE.md
+@@ -139,15 +139,24 @@
+   tức có **hai** lớp chồng nhau, và lớp JSON ấy KHÔNG phải thứ gây ra `&#39;`.
+   Chốt: `diff` bản-đã-đến qua MCP **chỉ dùng để tìm lệch VỀ KÝ TỰ THẬT** (kiểu `co` + `\u0308` + `dex`);
+   chênh lệch thực thể HTML ở đó là **tạo tác của công cụ đọc**, đừng ghi thành phát hiện. Muốn khẳng
+-  định byte trên GitHub thì phải có client thứ hai. Lúc viết (22-08) container KHÔNG có, nên câu ấy
+-  đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**. **NAY CÓ** — đo `2026-09-25`: REST tới `repos/…`
+-  trả **200 kèm `X-GitHub-*`** (xem mục REST ở §Gọi agent đa nền), nên phép đo ấy làm được.
+-  Đã chạy thử trên `issuecomment-5811128755` (bản chiếu lease, dày dấu nháy): REST trả **44 dấu `'`
+-  thật · 8 dấu `>` thật · 3 dấu `<` thật · 0 thực thể HTML**. **Nói cho ĐÚNG phạm vi:** cùng lúc ấy
+-  đọc CHÍNH comment đó qua MCP cũng ra ký tự thật ⇒ hiện tượng 22-08 **KHÔNG TÁI LẬP**. Nên thứ vừa
+-  đóng là **NĂNG LỰC ĐO**, KHÔNG phải ca cũ: comment của lượt 22-08 không còn để thử lại, ca ấy ở
+-  nguyên **KHÔNG ĐO ĐƯỢC**. Đừng đọc thành "đã bắt được MCP bóp méo" — chưa ai đo được điều đó.
+-  Chốt (a) *đăng xong đọc ngược rồi diff* GIỮ NGUYÊN, nay mạnh hơn vì đã có client thứ hai thật.
++  định byte trên GitHub thì phải có client thứ hai. Lúc viết (22-08) container KHÔNG có (dẫn mục REST
++  17-08: `repos/…` 403), nên câu ấy đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**. **Ở CÁC PHIÊN ĐÃ ĐO
++  THÌ CÓ** — `2026-09-25` và `2026-09-30`: REST tới `repos/…` trả **200 kèm `X-GitHub-*`** (mục REST ở
++  §Gọi agent đa nền; trạng thái ấy chỉ biết theo từng PHIÊN đã đo — `doctor` đo lại mỗi phiên), nên
++  phép đo ấy làm được. Chạy trên `issuecomment-5811128755` (bản chiếu lease, dày dấu nháy): REST trả
++  **44 dấu `'` thật · 8 dấu `>` thật · 3 dấu `<` thật · 0 thực thể HTML**; cùng lúc đọc chính comment
++  đó qua MCP (CHƯA ghi công cụ nào) cũng ra ký tự thật — tức trên comment ấy, lệch 22-08 **KHÔNG TÁI
++  LẬP**. **Và CA CŨ cũng đo được — comment lease 22-08 VẪN CÒN.** Bản trước của đoạn này khai
++  *"comment của lượt 22-08 không còn để thử lại"* mà không kèm phép đo nào; cross-review bác (P1 trên
++  PR #631): đủ **7** comment lease trên `#238` (`posted_comment_id` trong
++  `ops/leases/lease-dang-windows-*-20260822.yaml`) còn nguyên, `updated_at == created_at` (22-08), và
++  REST đọc ra **ký tự thật, 0 thực thể** (vd `5379124290`: 49 `'` · 6 `>` · 2 `<`; `curl` và `urllib`
++  khớp từng byte; đo 2026-09-30). Nên byte trên GitHub của ca comment lease 22-08 là ký tự thật ⇒
++  `&#39;` lúc ấy sinh ở **đường ĐỌC MCP** — trong giới hạn: đầu ra thô của MCP ngày 22-08 không thấy
++  lưu trong kho, hai client REST cùng đi qua một proxy, và tệp này chưa ghi lần đọc lại nào của chính
++  các comment ấy bằng `issue_read`/`list_issues`. "Không còn" là lời khai VẮNG MẶT không đo — đúng bệnh
++  *"hỏi chỗ tiện tay"*: chỗ kết luận được ghi là `posted_comment_id`, nằm ngay trong kho.
++  Chốt (a) *đăng xong đọc ngược rồi diff* GIỮ NGUYÊN, nay mạnh hơn ở phiên nào có client thứ hai.
+   Bài học gốc không đổi, chỉ chật hơn: **phải biết mình đang đứng ở LỚP NÀO** — kể cả khi cái lớp
+   đang lừa mình chính là cái chốt vừa dựng ra để chống bị lừa.
+ - **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
+@@ -551,6 +560,13 @@
+ credentials"*. `curl https://api.github.com` cũng 403; container không có `gh`; MCP GitHub không có tool
+ xoá nhánh/tạo tag. **Lỗ đã biết của chốt ấy:** nó chặn theo HÌNH DẠNG chứ không theo HẬU QUẢ —
+ `git push --force` (ép lùi) VẪN được phép, mà ép lùi cũng làm commit thành không tra được y như xoá.
++**Câu "`curl https://api.github.com` cũng 403" ĐÃ TRÔI** (đo 2026-09-30, phiên review PR #631, hai
++client): gốc `/` nay trả **200** thân `{}` (2 byte), **KHÔNG `Server: github.com`, KHÔNG `X-GitHub-*`**
++— proxy tự trả, không phải GitHub, nên đọc theo mã trạng thái là đọc sai; còn `/repos/<kho>/…` thì
++**200 CÓ `X-GitHub-*`** dưới một danh tính bị thay trên đường đi (xem §Gọi agent đa nền). Nên *"phiên web
++KHÔNG xoá được ref"* mới chỉ được ĐO cho `git-receive-pack` (16-08); qua REST (`DELETE /git/refs/…`)
++là **KHÔNG ĐO ĐƯỢC** — tệp này không ghi phép đo nào cho phương thức GHI qua đường ấy. Đừng coi chốt
++sandbox là đã phủ REST.
+ 
+ Đường dùng được: `.github/workflows/ops-don-ref.yml` (`workflow_dispatch`, kích hoạt được từ phiên web
+ qua MCP `actions_run_trigger`). Nó **cấp lại đúng quyền sandbox cố ý không cho**, nên mặc định là THỬ
+@@ -622,6 +638,10 @@
+   cũng 403 trong khi `/user` trả 200, tức chính sách theo ĐƯỜNG DẪN chứ không theo danh
+   tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
+   đi bằng **MCP github + git**, không bằng REST thẳng.
++  *(Trạng thái của PHIÊN 15-08 — ĐÃ TRÔI ở các phiên đo 2026-09-25/30, xem gạch "MỌI câu 403"
++  dưới: lý do "`gh` cài cũng vô ích" mất chân đỡ (còn `gh` thì tệp này chưa ghi phép đo lại), và chỉ
++  thị "không bằng REST thẳng" mất lý do cũ — giữ hay bỏ thì tệp này chưa ghi quyết định nào; đừng đọc
++  nó là luật còn đứng vì 403.)*
+   · **ĐO LẠI 17-08-2026 — dấu hiệu phân biệt là HEADER, không phải mã trạng thái.**
+   `/rate_limit` và `/user` → **200 CÓ `X-GitHub-*`** (tới GitHub thật); `/repos/<kho>` và
+   `/repos/<kho>/pulls/N` → **403 KHÔNG header GitHub nào** (proxy tự sinh, chưa từng tới
+@@ -634,19 +654,34 @@
+   người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
+   **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
+   câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
+-  · **HAI DÒNG 403 Ở TRÊN ĐÃ TRÔI — đo lại `2026-09-25T01:1xZ`, cùng container remote: tất cả
+-  **200 CÓ `X-GitHub-*`**, kể cả `/repos/<kho>` và `/repos/<kho>/pulls/N`.** Chạy hai vế **có
+-  token / không token: kết quả Y HỆT** (đúng phép đối chứng hai chiều của lượt 17-08). Nền đã đổi,
+-  KHÔNG phải lượt cũ đo sai. **Máy đã đúng sẵn, chỉ VĂN BẢN cũ**: `doctor` in `rest-kho=OK` từ
+-  trước khi mục này được sửa — đó chính là lý do §17-08 bắt `doctor` ĐO thay vì nối câu phỏng đoán.
+-  · **KHÔNG ĐO ĐƯỢC, khai thẳng:** vế **không token** vẫn 200 trên kho RIÊNG ⇒ có tầng nào đó cấp
+-  danh tính hộ. Không biết là tầng nào, **không đoán**. Hệ quả thực hành: `200` ở đây KHÔNG chứng
+-  minh token của bạn còn sống — đừng dùng đường này làm phép thử credential.
++  · **MỌI câu 403 Ở TRÊN ĐÃ TRÔI Ở CÁC PHIÊN ĐÃ ĐO** — của 15-08 (*"REST … 403 bất kể token"*,
++  *"`gh` cài cũng vô ích"*) lẫn của 17-08 (*`/repos/<kho>` · `/repos/<kho>/pulls/N` → 403*, *"REST bị
++  chặn ĐÚNG CHỖ làm việc"*, *"MỌI lệnh việc thật ăn 403"*). Đo `2026-09-25T01:1xZ` (một phiên remote)
++  và `2026-09-30T06:07–06:08Z` (phiên review PR #631, hai client `curl` + `urllib`): `/rate_limit` ·
++  `/user` · `/repos/<kho>` · `/repos/<kho>/pulls/N` đều **200 CÓ `X-GitHub-*`**, có token lẫn không
++  token. Không có dấu hiệu lượt cũ đo sai (17-08 ghi header, 15-08 ghi thân 403 của proxy); nhưng
++  **nguyên nhân KHÔNG ĐO ĐƯỢC** — nền đổi cho mọi phiên hay cấu hình THEO PHIÊN, chưa phép đo nào tách
++  được (thân 403 cũ chính nó ghi *"not enabled for this session"*). Nên coi nó là trạng thái của PHIÊN
++  ĐÃ ĐO: phiên nào gặp lại 403 KHÔNG header GitHub thì đó là proxy của phiên ấy, không phải token của
++  bạn, và thứ đo nó là `doctor` (`rest-kho`) mỗi phiên, không phải tệp này. `doctor` ĐO nên không phụ
++  thuộc văn bản; nhưng văn bản cũ KHÔNG chỉ nằm ở đây — docstring và chú thích của `_do_github` trong
++  `.claude/dev/launcher.py`, cùng khối "KHONG cai `gh`" trong `.claude/hooks/session-start.sh`, vẫn
++  khai 403.
++  · **Hai vế có/không token ở đây KHÔNG đối chứng được gì — danh tính bị THAY trên đường đi.** Đo
++  2026-09-30: gửi **token GIẢ** (`Bearer` lẫn `token`) vẫn **200**; `/user` ra cùng `login` và cùng
++  `Github-Authentication-Token-Expiration` như hai vế kia ⇒ header của người gọi bị THAY, kho RIÊNG
++  vẫn đọc được. Không phải cấu hình client (`curl` và `urllib` như nhau); tầng nào thay: KHÔNG ĐO
++  ĐƯỢC, **không đoán**. Hệ quả thực hành: `200` ở đây KHÔNG chứng minh token của bạn còn sống, cũng
++  KHÔNG cho biết GitHub thấy token nào — các lời gọi GET đã đo chạy dưới danh tính được thay vào
++  (phương thức GHI: KHÔNG ĐO ĐƯỢC); đừng dùng đường này làm phép thử credential. Muốn đối chứng thì
++  vế thứ ba là **token giả**, không phải "không token".
+   · **Bài học gốc KHÔNG đổi, và đừng đọc mục này thành "REST nay dùng thoải mái".** Bốn đường vẫn
+   hỏng ĐỘC LẬP; `gh auth status` hỏi `/user` nên nó vẫn xanh được trong khi việc thật hỏng; và
+   **vẫn phải thử ít nhất hai client trước khi gọi bất cứ thứ gì là chính sách**. Thứ hết hạn là
+-  TRẠNG THÁI, không phải cách đọc. Mục này ghi ĐIỀU KIỆN ĐO (ngày · container · hai vế token) đúng
+-  vì lượt 17-08 không ghi, nên nó trôi hơn một tháng mà không ai thấy.
++  TRẠNG THÁI, không phải cách đọc. Lượt 17-08 CÓ ghi ngày và hai vế token mà vẫn trôi hơn một tháng
++  không ai thấy: nó viết quan sát của MỘT phiên thành trạng thái chung; `doctor` có đo, nhưng không gì
++  đối chiếu văn bản với kết quả đo. Chữa: ghi PHẠM VI (phiên nào) và nói rõ `doctor` là nguồn trạng
++  thái — đừng chép trạng thái thành lời khai đứng yên, kể cả trạng thái mới.
+   · **`api.githubcopilot.com` (điểm cuối MCP github) GỌI ĐƯỢC TỪ TRONG CONTAINER** — và câu
+   này thay cho một câu SAI tôi vừa viết chính ở đây vài giờ trước ("bị chặn ngay ở tầng
+   CONNECT"). Nguồn của cái sai: probe bằng `curl` nhận `CONNECT tunnel failed, response 403`
+@@ -668,7 +703,8 @@
+   (`/rate_limit`, MỞ nhưng không đọc nổi PR nào) vào `any(...)` và `t103` đỏ ngay. Chỉ đường
+   **LÀM ĐƯỢC VIỆC** mới được tính vào `DUNG_DUOC`, và tập ấy là **`git` · `gh-kho` · `rest-kho`**
+   — KHÔNG có `gh-cli`. Đó là lần sửa thứ ba: `gh auth status` hỏi `/user`, tức đường proxy CHO
+-  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403. "Đã xác thực" không phải "làm được việc";
++  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403 (trạng thái 17-08, đã trôi ở các phiên đo
++  2026-09-25/30 — bài học đứng nguyên). "Đã xác thực" không phải "làm được việc";
+   `gh-kho` chạy thật `gh api repos/<slug>`. `gh-cli` và `rest-chung` vẫn được ĐO và IN ra làm
+   chẩn đoán, chỉ không còn quyền quyết định.
+ - **Refresh token của codex XOAY VÒNG ⇒ `CODEX_AUTH_JSON` là ảnh chụp CHẾT NHANH.** Mỗi lần

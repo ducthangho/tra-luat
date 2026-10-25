@@ -139,8 +139,24 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   tức có **hai** lớp chồng nhau, và lớp JSON ấy KHÔNG phải thứ gây ra `&#39;`.
   Chốt: `diff` bản-đã-đến qua MCP **chỉ dùng để tìm lệch VỀ KÝ TỰ THẬT** (kiểu `co` + `\u0308` + `dex`);
   chênh lệch thực thể HTML ở đó là **tạo tác của công cụ đọc**, đừng ghi thành phát hiện. Muốn khẳng
-  định byte trên GitHub thì phải có client thứ hai — container này KHÔNG có (REST tới `repos/…` bị
-  proxy chặn 403), nên câu ấy đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**, và nói thẳng như vậy.
+  định byte trên GitHub thì phải có client thứ hai. Lúc viết (22-08) container KHÔNG có (mục REST
+  17-08 ở §Gọi agent đa nền: `/repos/<kho>` · `/pulls/N` → 403 do proxy), nên câu ấy đứng ở trạng thái
+  thứ ba: **KHÔNG ĐO ĐƯỢC**. **Ở CÁC PHIÊN ĐÃ ĐO THÌ CÓ** — `2026-09-25` và `2026-09-30`: REST GET tới
+  `/repos/<kho>`, PR và comment trả **200 kèm `X-GitHub-*`** (KHÔNG phải mọi đường con, xem §Đẩy ref);
+  trạng thái ấy chỉ nói cho phiên đã đo, `doctor` (`rest-kho`, chỉ hỏi `/repos/<kho>`) đo lại mỗi phiên.
+  Đo 25-09 trên `issuecomment-5811128755` (bản chiếu lease, dày dấu nháy): REST trả **44 dấu `'`
+  thật · 8 dấu `>` thật · 3 dấu `<` thật · 0 thực thể HTML** (đo lại `2026-09-30T06:31–06:33Z`,
+  `urllib` và `curl` khớp băm thân: y hệt). Phiên 25-09 khai đọc chính comment ấy qua MCP cũng ra
+  ký tự thật (công cụ nào: không ghi; chưa đo lại) ⇒ trên comment ẤY, lệch 22-08 **KHÔNG TÁI LẬP**.
+  **CA CŨ CŨNG ĐO ĐƯỢC — bản trước khai ngược, cross-review bác** (P1 trên PR #631): *"comment của
+  lượt 22-08 không còn để thử lại"* là lời khai VẮNG MẶT không kèm phép đo, trong khi chỗ kết luận
+  được ghi nằm ngay trong kho: `posted_comment_id` của `ops/leases/lease-dang-windows-*-20260822.yaml`.
+  Đo `2026-09-30T06:31Z` (REST GET, `urllib` + `curl` khớp băm từng thân): **7/7** comment ấy còn trên
+  `#238`, `updated_at == created_at` (22-08, chưa ai sửa), dấu `'` thật (22/33/14/49/34/33/19), **0
+  thực thể HTML, 0 dấu `&`** ⇒ byte GitHub giữ là ký tự thật, `&#39;` hôm 22-08 sinh trên **đường ĐỌC
+  MCP**. Giới hạn: tệp không ghi comment NÀO đã bị đọc (cả 7 đều sạch), đầu ra thô của MCP 22-08
+  không lưu, hai client REST cùng đi qua một proxy, và chưa ai ghi lần đọc lại 7 comment ấy qua MCP.
+  Chốt (a) *đăng xong đọc ngược rồi diff* GIỮ NGUYÊN, nay mạnh hơn ở phiên nào có client thứ hai.
   Bài học gốc không đổi, chỉ chật hơn: **phải biết mình đang đứng ở LỚP NÀO** — kể cả khi cái lớp
   đang lừa mình chính là cái chốt vừa dựng ra để chống bị lừa.
 - **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
@@ -598,6 +614,15 @@ quyền token. Khớp tài liệu: credential git nằm ngoài sandbox, đi qua 
 credentials"*. `curl https://api.github.com` cũng 403; container không có `gh`; MCP GitHub không có tool
 xoá nhánh/tạo tag. **Lỗ đã biết của chốt ấy:** nó chặn theo HÌNH DẠNG chứ không theo HẬU QUẢ —
 `git push --force` (ép lùi) VẪN được phép, mà ép lùi cũng làm commit thành không tra được y như xoá.
+**Đoạn trên là trạng thái 16-08, và câu "`curl https://api.github.com` cũng 403" ĐÃ TRÔI** — đo
+`2026-09-30T06:31Z`, `urllib` + `curl`, ba vế không token · token thật · token giả: gốc `/` trả **200**
+thân `{}` (2 byte), **KHÔNG `Server: github.com`, KHÔNG `X-GitHub-*`** ⇒ proxy tự trả, đọc theo mã
+trạng thái là đọc sai; `/repos/<kho>`, PR và comment thì 200 CÓ `X-GitHub-*` dưới danh tính bị THAY
+(§Gọi agent đa nền), mà KHÔNG phải mọi đường con: đo `07:11Z` cùng ngày (`urllib`, ba vế y hệt), `/repos/<kho>/collaborators`
+403 do proxy, `/branches/master/protection` 403 do chính GitHub (*"Resource not accessible by integration"*).
+Nên *"phiên web KHÔNG xoá được ref"* chỉ mới ĐO cho `git-receive-pack` (16-08; chưa đo lại, vì
+phép đo là một lần xoá thật); qua REST (`DELETE /git/refs/…`) là **KHÔNG ĐO ĐƯỢC**. Đừng coi chốt
+sandbox là đã phủ REST.
 
 Đường dùng được: `.github/workflows/ops-don-ref.yml` (`workflow_dispatch`, kích hoạt được từ phiên web
 qua MCP `actions_run_trigger`). Nó **cấp lại đúng quyền sandbox cố ý không cho**, nên mặc định là THỬ
@@ -669,6 +694,10 @@ không tra được.
   cũng 403 trong khi `/user` trả 200, tức chính sách theo ĐƯỜNG DẪN chứ không theo danh
   tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
   đi bằng **MCP github + git**, không bằng REST thẳng.
+  *(Trạng thái PHIÊN 15-08 — trôi MỘT PHẦN: `/repos/<kho>`, PR, comment nay 200 (phiên đo 25-09,
+  30-09; KHÔNG chỉ ba loại ấy), còn "403 bất kể token, theo ĐƯỜNG DẪN" vẫn đúng ở `/graphql` và các đường khác liệt kê (gạch
+  "Câu 403 REST" dưới). "`gh` cài cũng vô ích" chỉ mất chân đỡ CŨ; `gh` thì phiên đo không có ⇒ KHÔNG ĐO
+  ĐƯỢC; chỉ thị "không bằng REST thẳng" mất lý do cũ — giữ hay bỏ thì tệp này chưa ghi quyết định.)*
   · **ĐO LẠI 17-08-2026 — dấu hiệu phân biệt là HEADER, không phải mã trạng thái.**
   `/rate_limit` và `/user` → **200 CÓ `X-GitHub-*`** (tới GitHub thật); `/repos/<kho>` và
   `/repos/<kho>/pulls/N` → **403 KHÔNG header GitHub nào** (proxy tự sinh, chưa từng tới
@@ -681,6 +710,52 @@ không tra được.
   người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
   **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
   câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
+  · **Câu 403 REST Ở TRÊN ĐÃ TRÔI ở các đường ĐÃ ĐO ra 200 (liệt kê dưới; đường chưa đo: KHÔNG ĐO ĐƯỢC), CHỈ ở các phiên đã đo** —
+  15-08 (*"REST … 403 bất kể token"*) và 17-08 (*`/repos/<kho>` · `/pulls/N` → 403*, *"REST bị chặn
+  ĐÚNG CHỖ làm việc"*). Đo `2026-09-25T01:1xZ` (một phiên remote, có/không token, bảng trong thân PR
+  #631: `/rate_limit` · `/user` · `/repos/<kho>` · `/pulls/623` đều 200, chỉ ghi `hdr_github=True`) và
+  `2026-09-30` (`06:30–06:31Z` `urllib` + `curl`; `07:10Z` `urllib`; ba vế không/thật/giả token): bốn
+  đường ấy, với `/pulls/631`, đều **200 CÓ `X-GitHub-*`**, `Server: github.com`. Đo thêm
+  `2026-09-30T07:51–07:57Z` (14 đường: `urllib` cả 14, `curl` 10; ba vế y hệt): comment `5811128755` và 10
+  đường con theo kho — `commits/<sha>` (biên nhận 200 từ 21-09, gạch "Bài học gốc" dưới) · `issues/631` ·
+  `issues` · `issues/238/comments` · `pulls` · `actions/runs` · `git/refs/heads/master` · `contents/VERSION` ·
+  `branches/master` · `rulesets` — cũng **200 CÓ `X-GitHub-*`**; `hooks` · `keys` · `actions/secrets` thì 403 do proxy như dưới. **Chính sách theo
+  ĐƯỜNG DẪN của proxy VẪN SỐNG** ở phiên đo 30-09: `07:10–07:11Z`, GET, ba vế y hệt, **403 không
+  `Server`, 0 `X-GitHub-*`** ở `/graphql` (*"GitHub GraphQL is not available from Claude Code sessions;
+  use the REST API (gh api repos/…)"*; GraphQL 403 cũng có biên nhận 21-09 · 28-09 · 29-09 trong
+  `ops/land/`), `/search/issues`, `/user/repos`, `/repos/cli/cli` (kho khác), `/repos/<kho>/collaborators`. Nên
+  các câu SUY về `gh` — *"cài cũng vô ích"*, *"MỌI lệnh việc thật ăn 403"*, *"mọi thao tác kho trả 403"* (gạch `t103`
+  dưới) — chỉ mất chân đỡ CŨ; lệnh `gh` nào đi GraphQL, và chính `gh`: phiên đo không có ⇒ KHÔNG ĐO ĐƯỢC.
+  **Nguyên nhân KHÔNG ĐO ĐƯỢC** — nền đổi cho mọi phiên hay
+  cấu hình THEO PHIÊN, chưa phép đo nào tách được (thân 403 cũ tự ghi *"not enabled for this
+  session"*); không thấy dấu hiệu lượt cũ đo sai, nhưng thế chưa phải chứng minh. Nên đây là trạng
+  thái của CÁC PHIÊN ĐÃ ĐO: phiên nào gặp lại 403 KHÔNG header GitHub thì đó là proxy của phiên ấy,
+  không phải token của bạn, và nguồn trạng thái của `/repos/<kho>` (CHỈ đường ấy; `doctor` không hỏi
+  GraphQL) là `doctor` (`rest-kho`) mỗi phiên, không phải tệp này. Hook phiên 30-09 in `rest-kho=OK` lúc 06:29Z; còn
+  "in `OK` từ trước khi mục này được sửa" thì KHÔNG có biên nhận. Văn bản 403 cũ cũng KHÔNG chỉ nằm
+  ở đây. Quét `rg --hidden` bằng mẫu chữ ngoài `ops/` (30-09; mẫu có thể sót), chỗ vẫn rút KẾT LUẬN
+  hiện tại từ 403 cũ: `.claude/dev/launcher.py` (`_do_github` cùng chú thích quanh nó; mục `gh` trong
+  `CONG_CU`, chỗ đỡ `bat_buoc.remote: False`), khối "KHONG cai `gh`" trong `.claude/hooks/session-start.sh`,
+  bảng "GitHub: bốn đường" trong `docs/GOI_AGENT_DA_NEN.md`. (`_do_rest_github`, `t110`: 403 17-08 chỉ là ví dụ.)
+  · **Ở phiên 30-09, hai vế có/không token KHÔNG đối chứng được gì — danh tính bị THAY trên đường
+  đi** (phiên 25-09, 17-08 có bị thay không: KHÔNG ĐO ĐƯỢC). Thêm vế thứ ba **token GIẢ**:
+  `/rate_limit` · `/user` · `/repos/<kho>` · `/pulls/631` vẫn 200, `/user` ra cùng `login` (chủ kho), cả ba vế
+  mang cùng `Github-Authentication-Token-Expiration` (`2026-09-30 08:22:21 UTC`, chưa tới 2h sau lúc
+  đo) ⇒ header của người gọi bị THAY, không chỉ được "cấp hộ" khi thiếu; kho RIÊNG vẫn đọc được. Hai
+  client như nhau nên không phải cấu hình client; tầng nào thay: KHÔNG ĐO ĐƯỢC, **không đoán**. Hệ
+  quả: `200` ở đây — kể cả `rest-kho=OK`, vốn chỉ đòi 2xx kèm `X-GitHub-*` — KHÔNG chứng minh token
+  của bạn còn sống, cũng không cho biết GitHub thấy danh tính nào; phương thức GHI dưới danh tính ấy:
+  KHÔNG ĐO ĐƯỢC. Đừng dùng đường này làm phép thử credential; muốn đối chứng thì vế thứ ba phải là
+  **token giả**, không phải "không token".
+  · **Bài học gốc KHÔNG đổi, và đừng đọc mục này thành "REST nay dùng thoải mái".** Bốn đường vẫn
+  hỏng ĐỘC LẬP; `gh auth status` hỏi `/user` nên nó vẫn xanh được trong khi việc thật hỏng; và
+  **vẫn phải thử ít nhất hai client trước khi gọi bất cứ thứ gì là chính sách**. Thứ hết hạn là
+  TRẠNG THÁI, không phải cách đọc. Lượt 17-08 CÓ ghi ngày và hai vế token mà vẫn trôi, dù trạng thái
+  MỚI đã có người DÙNG: ngày 21-09 một phiên lập hồ sơ land (#594) đã GỌI REST GET `/repos/<kho>/commits/…` và
+  nhận 200 (`ops/land/pr594-wp578-land-evidence.yaml`, dòng thêm ở `b94182b`), mà tệp này đứng nguyên;
+  văn bản sai từ LÚC NÀO thì KHÔNG ĐO ĐƯỢC. Nó chép quan sát của MỘT phiên thành trạng thái chung, và
+  không gì đối chiếu văn bản với phép đo sống. Chữa: ghi PHẠM VI (phiên nào, ĐƯỜNG nào) và trỏ nguồn
+  trạng thái (`doctor`) — kể cả cho trạng thái MỚI ở hai gạch trên.
   · **`api.githubcopilot.com` (điểm cuối MCP github) GỌI ĐƯỢC TỪ TRONG CONTAINER** — và câu
   này thay cho một câu SAI tôi vừa viết chính ở đây vài giờ trước ("bị chặn ngay ở tầng
   CONNECT"). Nguồn của cái sai: probe bằng `curl` nhận `CONNECT tunnel failed, response 403`
@@ -702,9 +777,12 @@ không tra được.
   (`/rate_limit`, MỞ nhưng không đọc nổi PR nào) vào `any(...)` và `t103` đỏ ngay. Chỉ đường
   **LÀM ĐƯỢC VIỆC** mới được tính vào `DUNG_DUOC`, và tập ấy là **`git` · `gh-kho` · `rest-kho`**
   — KHÔNG có `gh-cli`. Đó là lần sửa thứ ba: `gh auth status` hỏi `/user`, tức đường proxy CHO
-  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403. "Đã xác thực" không phải "làm được việc";
+  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403 ("mọi" đã rộng hơn phép đo 17-08 ghi ở trên — 2 đường kho; ở phiên đo 25-09/30-09
+  `/repos/<kho>` và PR trả 200, GraphQL vẫn 403 do proxy (đo 30-09), `gh` KHÔNG ĐO ĐƯỢC — bài học
+  đứng nguyên). "Đã xác thực" không phải "làm được việc";
   `gh-kho` chạy thật `gh api repos/<slug>`. `gh-cli` và `rest-chung` vẫn được ĐO và IN ra làm
-  chẩn đoán, chỉ không còn quyền quyết định.
+  chẩn đoán, chỉ không còn quyền quyết định. Nhưng `gh-kho` cũng chỉ là MỘT đường REST: `gh-kho=OK`
+  KHÔNG nói lệnh `gh` đi GraphQL làm được — đúng hình dạng trên, lùi một tầng.
 - **Refresh token của codex XOAY VÒNG ⇒ `CODEX_AUTH_JSON` là ảnh chụp CHẾT NHANH.** Mỗi lần
   codex làm mới token, bản cũ bị vô hiệu — kể cả bản đang nằm trong biến. Đo 16-08: chuỗi
   vừa dán xong, đưa xuống đĩa khớp từng byte, vẫn `refresh_token_invalidated`. Chép base64

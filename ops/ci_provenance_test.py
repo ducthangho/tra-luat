@@ -983,6 +983,37 @@ def c51_mien_luot7():   # F10 lượt 7: Unicode · lịch biên · metadata · 
     bang(not sai, f"{len(sai)}/{len(hang)} hàng lệch định nghĩa: {sai[:3]}")
 
 @ca
+def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` của M4 ({trang_thai, ly_do?, so_buoc}) · `${{` nguyên văn · kiểu lạ
+    m, b = nap(), buoc(X, "THU: 4/4 dat")
+    def gh(f):   # trọn dict `ghep_buoc` + số nhóm `##[group]Run` đếm ĐỘC LẬP trên log; ném ⇒ tên lớp (chính là điều hàng đo)
+        try:
+            p = f()
+            return gate(p)["ghep_buoc"]
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều hàng này đo
+            return type(e).__name__
+    w = yaml.safe_load(wf_tu(X, X))
+    w["jobs"]["j"]["steps"][2]["env"] = {"A": "1"}
+    hang = (("passed", lambda: g1(wf_tu(X), b), {"trang_thai": "passed", "so_buoc": 2}),
+            ("a nhóm ≠ REST chạy", lambda: g1(wf_tu(X, X), b), {"trang_thai": "not_measured", "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+                                                                "so_buoc": 2}),
+            ("a REST ≠ YAML", lambda: g1(yaml.safe_dump(w), b, sua=lambda st: st.pop(3)),
+             {"trang_thai": "not_measured", "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml", "so_buoc": 2}),
+            ("name: job có `${` (không `${{`)", lambda: g1(wf_job(j=({"name": "a${b"}, None)), b, ten="a${b"),
+             {"trang_thai": "passed", "so_buoc": 2}),
+            ("name: job `${{x}}` không khoảng trắng", lambda: g1(wf_job(j=({"name": "${{x}}"}, None)), b, ten="${{x}}"),
+             {"trang_thai": "not_measured", "ly_do": "d_job_yaml_khong_duy_nhat", "so_buoc": 2}),
+            ("name: bước có `${` (không `${{`)", lambda: g1(wf_tu(X, buoc_them={"name": "a${b"}), b), {"trang_thai": "passed", "so_buoc": 2}),
+            ("name: bước `${{x}}` không khoảng trắng", lambda: g1(wf_tu(X, buoc_them={"name": "${{x}}"}), b),
+             {"trang_thai": "not_measured", "ly_do": "b_ten_buoc_lech", "so_buoc": 2}))
+    sai = [(ten, kq, mong) for ten, f, mong in hang if (kq := gh(f)) != mong]
+    try:
+        kieu = [m.ten_du_kien(s) for s in ({"run": 5}, {"uses": None}, {}, {"run": ["a"]})] + \
+            [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n")]
+    except Exception as e:   # ném ra ngoài CHÍNH LÀ điều vế này đo
+        kieu = type(e).__name__
+    bang(not sai and kieu == [None] * 8, f"{len(sai)}/{len(hang)} hàng lệch M4/dinh_nghia: {sai[:2]} · kiểu lạ: {kieu}")
+
+@ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
     w = yaml.safe_load(wf_tu("echo a", X))
     w["jobs"]["j"]["steps"][2]["if"] = "false"
@@ -1358,7 +1389,11 @@ def chay_ca(ten):
 HAM_DONG = ("_env_chan", "doc_wf", "ghep_job", "ten_du_kien", "_gio", "ghep_buoc", "chan_buoc", "tach_buoc", "do_dau_duong")
 DOI_SO_SANH = {ast.Eq: [ast.NotEq], ast.NotEq: [ast.Eq], ast.Lt: [ast.LtE, ast.Gt], ast.LtE: [ast.Lt, ast.GtE], ast.Gt: [ast.GtE, ast.Lt],
                ast.GtE: [ast.Gt, ast.LtE], ast.In: [ast.NotIn], ast.NotIn: [ast.In], ast.Is: [ast.IsNot], ast.IsNot: [ast.Is]}
-TUONG_DUONG = {}   # mã đột biến tập đóng → chứng minh vì sao KHÔNG đầu vào nào phân biệt được (bị giết ⇒ lời khai SAI ⇒ ĐỎ)
+TUONG_DUONG = {   # mã đột biến tập đóng → chứng minh vì sao KHÔNG đầu vào nào phân biệt được (bị giết ⇒ lời khai SAI ⇒ ĐỎ)
+    "ghep_job#24:-1": "`khop[-1]` thay `khop[0]` chỉ được tính khi `len(khop) == 1`, mà danh sách một phần tử có [0] và [-1] là cùng một phần tử",
+    "chan_buoc#103:bo_doi_so1": "`str(t.get('run'))` thay `str(t.get('run', ''))` chỉ khác ở bước KHÔNG có `run:`: chuỗi tìm là 'None' thay vì '' — "
+                                "cả hai đều không chứa `GITHUB_ENV`/`GITHUB_PATH`, nên `re.search` cùng trả None",
+}
 
 def _thay(x, y):   # đổi nút x thành nút y tại chỗ
     x.__class__ = y.__class__

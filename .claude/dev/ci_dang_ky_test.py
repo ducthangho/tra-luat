@@ -51,6 +51,8 @@ MOI = {
     ".claude/hooks/pretooluse_guard_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
+    "ops/kiem_ho_so_land_test.py": r"^(\d+)/(\d+)$",
+    "ops/kiem_nhan_hint_test.py": r"^(\d+)/(\d+)$",
     "ops/land_evidence_nguon_test.py": r"(?ms)\A(?!.*^(?:TONG|TU KIEM PHAN HANG): DO\b).*^CA: ([1-9]\d*)/(\1) dat\nDOT BIEN: ([1-9]\d*)/\3 bi giet dung ly do\nTU KIEM PHAN HANG: DAT \(\d+ dot bien\)\nTONG: DAT\n?\Z",
 }
 # Tap mau THAY THE, chi dung khi nen dang chay la Windows. Windows nhan HAI dang:

@@ -1028,6 +1028,7 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
          [mu | {"trang_thai": "not_measured", "ly_do": "che_do_khong_xac_dinh"}]),
         ("marker không ở dòng đầu phần log (re.M)", lambda: g1(wf_tu(X), buoc(X, "khac", "THU: 4/4 dat")),
          [mu | {"trang_thai": "passed", "dong_khop": ["THU: 4/4 dat"]}]),
+        ("dòng cuối `run:` không phải lời gọi", lambda: g1(wf_tu(X + "\nx"), khoi([X, "x"], "THU: 4/4 dat")), []),
         ("dòng `##[groupx` không phải `##[group]` lồng", lambda: g1(wf_tu(X), b[:3] + [f"{T} ##[groupx"] + b[3:]),
          [mu | {"trang_thai": "passed", "dong_khop": ["THU: 4/4 dat"]}])) if (kq := dd_tron(f)) != mong]
     bang(not dd_sai, f"dau_duong lệch M4: {dd_sai[:2]}")
@@ -1424,6 +1425,9 @@ TUONG_DUONG = {   # mã đột biến tập đóng → chứng minh vì sao KHÔ
        "cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)" for k in (2, 3, 4)},
     "do_dau_duong#127:bo_ve0": "bỏ vế `goi and`: khi `goi` rỗng thì `all(goi)` là True nhưng `[g[2] for g in goi]` cũng rỗng ⇒ vòng lặp "
                                "không chạy lần nào, y như nhánh `else []`",
+    **{f"do_dau_duong#306:chuoi{k}": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm "
+       "đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và "
+       "`if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi" for k in (1, 4)},
 }
 
 def _thay(x, y):   # đổi nút x thành nút y tại chỗ

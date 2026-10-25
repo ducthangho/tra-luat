@@ -164,7 +164,7 @@ def doc_wf(van):
 def ghep_job(ten, wf):
     """r4 (d): khoá DUY NHẤT `k` mà tên job REST bằng `k`, bằng `name:` nguyên văn (không `${{`), hoặc là `<k|name> (<…>)`."""
     khop = [k for k, j in wf["jobs"].items() if type(ten) is str and type(j) is dict and any(
-        type(x) is str and x and "${{" not in x and re.fullmatch(re.escape(x) + r"(?: \(.*\))?", ten, re.S) for x in (k, j.get("name")))]
+        type(x) is str and x and "${{" not in x and re.fullmatch(re.escape(x) + r"(?: \(.*\))?", ten) for x in (k, j.get("name")))]
     return khop[0] if len(khop) == 1 else None
 
 def ten_du_kien(s):   # tên REST mà bước YAML phải mang: `name:` nguyên văn, không thì `Run <dòng đầu run:>` / `Run <uses>`
@@ -173,9 +173,9 @@ def ten_du_kien(s):   # tên REST mà bước YAML phải mang: `name:` nguyên 
     v = s.get("run", s.get("uses"))
     return "Run " + v.split("\n")[0] if _chuoi(v) else None
 
-def _gio(v, mau=RE_GIO):   # REST `YYYY-MM-DDTHH:MM:SSZ` (header: `TS`) → datetime cắt về giây; sai dạng HAY sai lịch ⇒ None
+def _gio(v):   # `YYYY-MM-DDTHH:MM:SSZ` → datetime; sai dạng HAY sai lịch ⇒ None. Header log cắt về giây TRƯỚC khi gọi
     try:
-        return datetime.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S") if type(v) is str and re.fullmatch(mau, v) else None
+        return datetime.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S") if type(v) is str and RE_GIO.fullmatch(v) else None
     except ValueError:
         return None
 
@@ -200,10 +200,10 @@ def ghep_buoc(job, buoc, wf, ly_do_wf):
         return hong("a_so_nhom_khac_so_buoc_rest_chay")
     if len(ung) != len(sy):
         return hong("a_so_buoc_rest_khac_so_buoc_yaml")
-    if any(s.get("name") != ten_du_kien(y) for s, y in zip(ung, sy)):
+    if any(not _chuoi(s.get("name")) or s.get("name") != ten_du_kien(y) for s, y in zip(ung, sy)):
         return hong("b_ten_buoc_lech")
     if not all((a := _gio(ung[i].get("started_at"))) and (z := _gio(ung[i].get("completed_at")))
-               and (h := _gio(b["gio"], TS)) and a <= h <= z for b, i in zip(buoc, chay)):
+               and (h := _gio(b["gio"][:19] + "Z")) and a <= h <= z for b, i in zip(buoc, chay)):
         return hong("c_gio_header_ngoai_cua_so")
     return {"trang_thai": "passed", "so_buoc": len(buoc)}, [(k, i) for i in chay]
 
@@ -213,7 +213,7 @@ def chan_buoc(wf, k, i):
     j, s = wf["jobs"][k], wf["jobs"][k]["steps"][i]
     return bool("defaults" in wf or _env_chan(wf.get("env")) or "defaults" in j or _env_chan(j.get("env")) or set(s) - KHOA_BUOC
                 or s.get("shell", "bash") not in ("bash", "pwsh", "sh")
-                or any(type(t.get("run")) is str and re.search("GITHUB_(ENV|PATH)", t["run"]) for t in j["steps"][:i]))
+                or any(re.search("GITHUB_(ENV|PATH)", str(t.get("run", ""))) for t in j["steps"][:i]))
 
 def than(dong):
     m = RE_DONG.match(dong)

@@ -677,6 +677,66 @@ def c47_bien_ghep():   # biên của ghép + xác thực khối: mỗi biến th
         bang(False, f"run: 5 ⇒ công cụ ném {type(ex).__name__}")
     bang(dd(p) == [] and ghep(p) == "passed", f"run: 5: {dd(p)}")
 
+def bien_dang(x):   # mọi biến dạng "gần" của một hằng chuỗi: hậu tố, bớt ký tự cuối, hoa/thường, khoảng trắng hai đầu
+    return list(dict.fromkeys(v for v in (x + "x", x[:-1], x.upper(), x.lower(), x.swapcase(), " " + x, x + " ") if v != x))
+
+@ca
+def c48_nguyen_van_va_mien():   # F10: MỖI hằng chuỗi / tập liệt kê của r4 qua bảng biến dạng; kỳ vọng = định nghĩa NGUYÊN VĂN của spec
+    dd = lambda p: [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]  # noqa: E731
+    ok, b, a_so, d_job, b_ten = [("passed", None)], buoc(X, "THU: 4/4 dat"), "a_so_nhom_khac_so_buoc_rest_chay", "d_job_yaml_khong_duy_nhat", "b_ten_buoc_lech"
+    hang = []   # (tên, p, ghép mong, marker mong)
+    for t in ["Set up job", "Complete job"] + [v for x in ("Set up job", "Complete job") for v in bien_dang(x)]:
+        hang.append((f"bước tên {t!r}", g1(wf_tu(X, buoc_them={"name": t}), b), *((a_so, []) if t in ("Set up job", "Complete job") else ("passed", ok))))
+    for t in ("Post x", "Post  x", "Postx", "post x", " Post x", "POST x", "Post"):
+        hang.append((f"bước tên {t!r}", g1(wf_tu(X, buoc_them={"name": t}), b), *((a_so, []) if t.startswith("Post ") else ("passed", ok))))
+    for t in ["K"] + bien_dang("K k"):
+        hang.append((f"name: {t!r} REST lệch", g1(wf_tu(X, buoc_them={"name": "K k"}), b, sua=lambda st, t=t: st[2].update(name=t)),
+                     *(("passed", ok) if t == "K k" else (b_ten, []))))
+    for t in bien_dang("Run " + X):
+        hang.append((f"tên REST {t!r}", g1(wf_tu(X), b, sua=lambda st, t=t: st[2].update(name=t)), b_ten, []))
+    for c in ("success", "failure", "neutral", "cancelled", "timed_out", "Skipped", "SKIPPED"):
+        hang.append((f"conclusion {c}", g1(wf_tu(X), b, sua=lambda st, c=c: st[2].update(conclusion=c)), "passed", ok))
+    hang.append(("skipped mà có nhóm", g1(wf_tu(X), b, sua=lambda st: st[2].update(conclusion="skipped")), a_so, []))
+    for ten in ["Build", "B.ild (1)", "Build (1)", "Build ()"] + bien_dang("Build") + ["Build(1)", "Build  (1)", "Build (1) ", "Bxild"]:
+        al = "B.ild" if "." in ten or ten == "Bxild" else "Build"
+        hang.append((f"job {ten!r} / alias {al!r}", g1(wf_job(j=({"name": al}, None)), b, ten=ten),
+                     *(("passed", ok) if re.fullmatch(r"(Build|B\.ild)( \(.*\))?", ten) else (d_job, []))))
+    for ten, mong in ((" Build ", ("passed", ok)), ("Build", (d_job, []))):   # alias có khoảng trắng hai đầu: so NGUYÊN VĂN, không strip
+        hang.append((f"alias ' Build ' / REST {ten!r}", g1(wf_job(j=({"name": " Build "}, None)), b, ten=ten), *mong))
+    for k in ["CI_DANG_KY_", "CI_DANG_KY_X"] + bien_dang("CI_DANG_KY_") + ["XCI_DANG_KY_X"]:
+        hang.append((f"env job khoá {k!r}", g1(wf_tu(X, job_them={"env": {k: "1"}}), b), "passed", CHAN if k.startswith("CI_DANG_KY_") else ok))
+    for sh in ["bash", "pwsh", "sh", None] + [v for x in ("bash", "pwsh", "sh") for v in bien_dang(x)]:
+        hang.append((f"shell {sh!r}", g1(wf_tu(X, buoc_them={"shell": sh}), b), "passed", ok if sh in ("bash", "pwsh", "sh") else CHAN))
+    for k, v in (("id", "a"), ("if", "true"), ("timeout-minutes", 5), ("continue-on-error", False), ("env", {}), ("with", {}),
+                 ("working-directory", "."), ("Name", "n"), ("ID", "a")):
+        hang.append((f"khoá bước {k!r}", g1(wf_tu(X, buoc_them={k: v}), b), "passed", ok if k in ("id", "if", "timeout-minutes", "continue-on-error") else CHAN))
+    w = yaml.safe_load(wf_tu("echo A=1 >> $GITHUB_ENV", X))
+    w["jobs"]["j"]["steps"][1]["if"] = "false"   # bước nhắc GITHUB_ENV đứng trước mà SKIPPED: Q7 không đòi "đã chạy"
+    hang.append(("GITHUB_ENV trước, skipped", g1(yaml.safe_dump(w), b, sua=lambda st: st[2].update(conclusion="skipped")), "passed", CHAN))
+    for ten, dong in (("header 2 dấu cách", [f"{T} ##[group]Run  {X}"] + b[1:]), ("shell: đầu có cách", b[:2] + [f"{T}  shell: /usr/bin/bash -e {{0}}"] + b[3:]),
+                      ("endgroup đầu có cách", b[:3] + [f"{T}  ##[endgroup]"] + b[4:]), ("shell: hoa", b[:2] + [f"{T} Shell: /usr/bin/bash"] + b[3:])):
+        hang.append((ten, g1(wf_tu(X), dong), "passed", []))
+    hang.append(("run: dòng đầu rỗng", g1(wf_tu("\n" + X), b), "passed", []))
+    e, w1 = "echo A=1 >> ", lambda them: yaml.safe_dump(yaml.safe_load(wf_tu(X)) | them)  # noqa: E731
+    for ten, w, dong, sua, g, m in (
+            ("dòng đầu có \\r", wf_tu(X, buoc_them={"run": "a\rb\n" + X}), None, None, "passed", []),
+            ("defaults: null workflow", w1({"defaults": None}), None, None, "passed", CHAN),
+            ("defaults: null job", wf_tu(X, job_them={"defaults": None}), None, None, "passed", CHAN),
+            ("github_env chữ thường đứng trước", wf_tu(e + "$github_env", X), [buoc(e + "$github_env"), b], None, "passed", ok),
+            ("GITHUB_PATH không có $", wf_tu("echo GITHUB_PATH", X), [buoc("echo GITHUB_PATH"), b], None, "passed", CHAN),
+            ("mã màu 36m (không ;1m)", wf_tu(X), [[b[0], f"{T} \x1b[36m{X}\x1b[0m"] + b[2:]], None, "passed", []),
+            ("header ##[group]run thường", wf_tu(X), [[f"{T} ##[group]run {X}"] + b[1:]], None, a_so, []),
+            ("##[GROUP] hoa sau shell:", wf_tu(X), [b[:3] + [f"{T} ##[GROUP]x"] + b[3:]], None, "passed", ok),
+            ("run: có \\r cuối", wf_tu(X, buoc_them={"run": X + "\r"}), None, None, "passed", []),
+            ("giờ REST thiếu Z", wf_tu(X), None, lambda st: st[2].update(started_at="2026-10-19T23:45:04"), "c_gio_header_ngoai_cua_so", []),
+            ("uses: rỗng ở bước", wf_tu(X, buoc_them={"uses": ""}), None, None, "passed", []),
+            ("uses: rỗng ở job", wf_tu(X, job_them={"uses": ""}), None, None, d_job, []),
+            ("name: null", wf_tu(X, buoc_them={"name": None}), None, None, b_ten, []),
+            ("run: rỗng kèm uses:", wf_tu(X, buoc_them={"run": "", "uses": "./a"}), None, lambda st: st[2].update(name="Run ./a"), b_ten, [])):
+        hang.append((ten, g1(w, *(dong or [b]), sua=sua), g, m))
+    sai = [(ten, ghep(p), dd(p), g, m) for ten, p, g, m in hang if (ghep(p), dd(p)) != (g, m)]
+    bang(not sai and len(hang) > 80, f"{len(sai)}/{len(hang)} biến dạng lệch định nghĩa: {sai[:3]}")
+
 @ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
     w = yaml.safe_load(wf_tu("echo a", X))
@@ -821,6 +881,60 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("O_var_mot_dong_all", "chan = chan_buoc(wf, k, i) or any(g and g[1] for g in goi)", "chan = chan_buoc(wf, k, i) or all(g and g[1] for g in goi)", "c46"),
     ("O_goi_or", "if goi and all(goi) else []):", "if goi or all(goi) else []):", "c23"),
     ("O_goi_any", "if goi and all(goi) else []):", "if goi and any(goi) else []):", "c23"),
+    ('N_ten_strip', 'if type(ten) is str and type(j) is dict and any(', 'if type(ten) is str and (ten := ten.strip()) is not None and type(j) is dict and any(', 'c48'),
+    ('N_ten_lower', 're.fullmatch(re.escape(x) + r"(?: \\(.*\\))?", ten)', 're.fullmatch(re.escape(x.lower()) + r"(?: \\(.*\\))?", ten.lower())', 'c48'),
+    ('N_job_match', 're.fullmatch(re.escape(x)', 're.match(re.escape(x)', 'c48'),
+    ('N_job_khoang_trang_ngoac', 'r"(?: \\(.*\\))?"', 'r"(?:\\s*\\(.*\\))?"', 'c48'),
+    ('N_ten_run_strip', '"Run " + v.split("\\n")[0]', '"Run " + v.strip().split("\\n")[0]', 'c48'),
+    ('N_ten_splitlines', 'v.split("\\n")[0]', '(v.splitlines() or [""])[0]', 'c48'),
+    ('N_ten_name_lower', 'return s["name"] if _chuoi(s["name"])', 'return s["name"].lower() if _chuoi(s["name"])', 'c48'),
+    ('N_rest_ten_lower', 's.get("name") != ten_du_kien(y)', 'str(s.get("name")).lower() != str(ten_du_kien(y)).lower()', 'c48'),
+    ('N_meta_lower', 's.get("name") not in ("Set up job", "Complete job")', 'str(s.get("name")).lower() not in ("set up job", "complete job")', 'c48'),
+    ('N_post_lower', 'str(s.get("name")).startswith("Post ")', 'str(s.get("name")).lower().startswith("post ")', 'c48'),
+    ('N_post_strip', 'str(s.get("name")).startswith("Post ")', 'str(s.get("name")).strip().startswith("Post ")', 'c48'),
+    ('N_concl_lower', 's.get("conclusion") != "skipped"]', 'str(s.get("conclusion")).lower() != "skipped"]', 'c48'),
+    ('N_concl_timed_out', 's.get("conclusion") != "skipped"]', 's.get("conclusion") not in ("skipped", "timed_out")]', 'c48'),
+    ('N_env_strip', 'str(k).startswith("CI_DANG_KY_")', 'str(k).strip().startswith("CI_DANG_KY_")', 'c48'),
+    ('N_env_v_truthy', 'return v is not None and (', 'return bool(v) and (', 'c46'),
+    ('N_defaults_none', 'return bool("defaults" in wf or', 'return bool(wf.get("defaults") is not None or', 'c48'),
+    ('N_github_re_I', 're.search("GITHUB_(ENV|PATH)",', 're.search("(?i)GITHUB_(ENV|PATH)",', 'c48'),
+    ('N_github_dollar', 're.search("GITHUB_(ENV|PATH)",', 're.search(r"\\$GITHUB_(ENV|PATH)",', 'c48'),
+    ('N_mau_rong', 'mau = "\\x1b[36;1m" in d', 'mau = "\\x1b[36" in d', 'c48'),
+    ('N_header_strip', '"lenh": t[len("##[group]Run "):]', '"lenh": t[len("##[group]Run "):].strip()', 'c48'),
+    ('N_in_lai_strip', 'b["in_lai"].append(t)', 'b["in_lai"].append(t.strip())', 'c47'),
+    ('N_in_lai_rstrip', 'b["in_lai"].append(t)', 'b["in_lai"].append(t.rstrip())', 'c47'),
+    ('N_group_lower', 'if t.startswith("##[group]Run "):', 'if t.lower().startswith("##[group]run "):', 'c48'),
+    ('N_long_lower', 'and not t.startswith("##[group]") and (', 'and not t.lower().startswith("##[group]") and (', 'c48'),
+    ('N_shell_lower', 'not b["tien_to"] or t.startswith("shell: ")', 'not b["tien_to"] or t.lower().startswith("shell: ")', 'c48'),
+    ('N_endgroup_strip', 'if t == "##[endgroup]":', 'if t.strip() == "##[endgroup]":', 'c48'),
+    ('N_run_join_rstrip', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.rstrip("\\n") == "\\n".join(b["in_lai"]).rstrip()', 'c47'),
+    ('N_run_cr', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.replace("\\r", "").rstrip("\\n") == "\\n".join(b["in_lai"])', 'c48'),
+    ('N_gio_Z_tuy_chon', '\\d\\d:\\d\\d:\\d\\dZ")', '\\d\\d:\\d\\d:\\d\\dZ?")', 'c48'),
+    ('N_khoa_lower', 'or set(s) - KHOA_BUOC', 'or {str(x).lower() for x in s} - KHOA_BUOC', 'c48'),
+    ('N_uses_rong', 'run = s.get("run") if "uses" not in s else None', 'run = s.get("run") if not s.get("uses") else None', 'c48'),
+    ('N_uses_job_rong', 'if k is None or "uses" in wf["jobs"][k] or', 'if k is None or bool(wf["jobs"][k].get("uses")) or', 'c48'),
+    ('N_name_present_none', '    if "name" in s:\n', '    if s.get("name") is not None:\n', 'c48'),
+    ('N_run_truoc_uses', 'v = s.get("run", s.get("uses"))', 'v = s.get("run") or s.get("uses")', 'c48'),
+    ('L4_job_escape_alias', 're.escape(x)', 'x', 'c48'),
+    ('L4_job_alias_strip', 're.escape(x)', 're.escape(x.strip())', 'c48'),
+    ('L4_job_casefold', 'ten) for x in (k, j.get("name"))', 'ten, re.I) for x in (k, j.get("name"))', 'c48'),
+    ('L4_name_explicit_strip', 'return s["name"] if _chuoi(s["name"])', 'return s["name"].strip() if _chuoi(s["name"])', 'c48'),
+    ('L4_name_explicit_casefold', 'return s["name"] if _chuoi(s["name"])', 'return s["name"].casefold() if _chuoi(s["name"])', 'c48'),
+    ('L4_metadata_setup_prefix', 's.get("name") not in ("Set up job", "Complete job")', 'not str(s.get("name")).startswith("Set up job") and s.get("name") != "Complete job"', 'c48'),
+    ('L4_metadata_complete_prefix', 's.get("name") not in ("Set up job", "Complete job")', 's.get("name") != "Set up job" and not str(s.get("name")).startswith("Complete job")', 'c48'),
+    ('L4_metadata_post_suffix', 'str(s.get("name")).startswith("Post ")', 'str(s.get("name")).endswith("Post ")', 'c48'),
+    ('L4_ran_neutral_excluded', 's.get("conclusion") != "skipped"]', 's.get("conclusion") not in ("skipped", "neutral")]', 'c48'),
+    ('L4_ran_cancelled_excluded', 's.get("conclusion") != "skipped"]', 's.get("conclusion") not in ("skipped", "cancelled")]', 'c48'),
+    ('L4_env_prefix_empty_suffix', 'str(k).startswith("CI_DANG_KY_")', '(str(k).startswith("CI_DANG_KY_") and len(str(k)) > len("CI_DANG_KY_"))', 'c48'),
+    ('L4_env_prefix_casefold', 'str(k).startswith("CI_DANG_KY_")', 'str(k).upper().startswith("CI_DANG_KY_")', 'c48'),
+    ('L4_mode_step_key_truthy', 'set(s) - KHOA_BUOC', '{key for key in s if s[key]} - KHOA_BUOC', 'c48'),
+    ('L4_mode_shell_strip', 's.get("shell", "bash") not in', 'str(s.get("shell", "bash")).strip() not in', 'c48'),
+    ('L4_mode_shell_casefold', 's.get("shell", "bash") not in', 'str(s.get("shell", "bash")).lower() not in', 'c48'),
+    ('L4_mode_prior_requires_ran', 'for t in j["steps"][:i]))', 'for t in j["steps"][:i] if t.get("if") != "false"))', 'c48'),
+    ('L4_run_compare_strip_newlines', 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.strip("\\n") == "\\n".join(b["in_lai"])', 'c48'),
+    ('L4_header_lstrip', 'b["in_lai"][:1] == [b["lenh"]]', 'b["in_lai"][:1] == [b["lenh"].lstrip()]', 'c48'),
+    ('L4_shell_lstrip', 't.startswith("shell: ")', 't.lstrip().startswith("shell: ")', 'c48'),
+    ('L4_number_contiguous', 'and len({s["number"] for s in st}) == len(st)', 'and {s["number"] for s in st} == set(range(1, len(st) + 1))', 'c36'),
     ("job_bo_x_str", 'type(x) is str and x and "${{"', 'x and "${{"', "c44"),
     ("so_number_0", '_so(s.get("number"), 1)', '_so(s.get("number"), 0)', "c44"),
     ("so_number_am", '_so(s.get("number"), 1)', '(type(s.get("number")) is int)', "c44"),

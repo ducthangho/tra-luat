@@ -2,7 +2,8 @@
 """Bộ test tự đứng cho `ops/kiem_nhan_hint.py` (packet #752, đặc tả `ops/specs/no-p3-cong-cu-ho-so-r4.md`).
 
 Dựng cây tạm, gọi CLI trong tiến trình con. In ĐÚNG MỘT dòng chỉ gồm `đạt/tổng` (đơn vị: ca test) — mẫu
-`^(\\d+)/(\\d+)$` mà #763 đăng ký; ca đỏ in dòng `DO <ca>: …`. Chạy: python -B ops/kiem_nhan_hint_test.py
+`^(\\d+)/(\\d+)$` mà #763 đăng ký; ca đỏ in dòng `DO <ca>: …`; ca không đo được trên nền này (chỉ Windows thiếu
+symlink) in `BO QUA <ca>: …`, không tính đạt và bị trừ khỏi tổng. Chạy: python -B ops/kiem_nhan_hint_test.py
 Phủ nghiệm thu B4 · B5 (glob, không ghi tệp) trên cây tạm · B7.
 """
 import json
@@ -74,15 +75,29 @@ def ca_b4_rang_l5():
         shutil.rmtree(goc)
 
 
+class BoQua(Exception):
+    """Ca không đo được trên nền này: in riêng, KHÔNG tính đạt, trừ khỏi tổng (PR #918, F752-02)."""
+
+
+def _cho_phep_bo_qua():
+    """Chỉ Windows được tha thiếu symlink (thiếu quyền tạo); POSIX mà không tạo được là ĐỎ."""
+    return os.name == "nt"
+
+
 def ca_symlink_treo():
+    def _khong_tao_duoc(ly_do):
+        if _cho_phep_bo_qua():
+            raise BoQua(ly_do)
+        raise AssertionError(f"nền POSIX không tạo được symlink: {ly_do}")
+
     if not hasattr(os, "symlink"):
-        return
+        _khong_tao_duoc("os.symlink vắng")
     goc = _cay({})
     try:
         try:
             os.symlink(goc / "khong-co", goc / "ops/reviews/treo-HINT.patch")
-        except OSError:
-            return  # nền không cho tạo symlink (Windows thiếu quyền): ca không áp dụng
+        except OSError as e:
+            _khong_tao_duoc(f"{type(e).__name__}: {e}")
         rc, kq, _, _ = _chay(goc)
         assert rc == 3 and [t["loai"] for t in kq["tep"]] == ["KHONG_DOC_DUOC"], (rc, kq and kq["tep"])
     finally:
@@ -99,17 +114,23 @@ def ca_doc_duoc_het_rc0():
         shutil.rmtree(goc)
 
 
+def _anh_chup(goc):
+    """{đường dẫn: byte | None (= thư mục)} — so cả NỘI DUNG, không chỉ tập tên (PR #918, F752-01)."""
+    return {p.relative_to(goc).as_posix(): (None if p.is_dir() else p.read_bytes()) for p in goc.rglob("*")}
+
+
 def ca_glob_va_khong_ghi():
-    goc = _cay({"ops/reviews/a/HINT.patch": f"{NHAN}\n"})
+    goc = _cay({"ops/reviews/a/HINT.patch": f"{NHAN}\n", "ops/reviews/b/x-HINT.patch": "--- a\n+++ b\n"})
     try:
-        truoc = sorted(p.relative_to(goc).as_posix() for p in goc.rglob("*"))
+        truoc = _anh_chup(goc)
         rc, _, out, _ = _chay(goc, json_out=False)
         assert rc == 0, f"rc {rc}"
         assert sum(1 for d in out.splitlines() if GLOB in d.split()) == 1, "không có đúng một dòng mang token glob"
+        assert _anh_chup(goc) == truoc, "công cụ đã ghi/sửa tệp (lượt đầu ra chữ)"
         _, kq, _, _ = _chay(goc)
         assert kq["phamvi_glob"] == GLOB, kq["phamvi_glob"]
-        sau = sorted(p.relative_to(goc).as_posix() for p in goc.rglob("*"))
-        assert truoc == sau, f"công cụ đã ghi tệp: {sorted(set(sau) - set(truoc))}"
+        sau = _anh_chup(goc)
+        assert sau == truoc, f"công cụ đã ghi/sửa tệp (lượt --json): {sorted(k for k in set(sau) | set(truoc) if sau.get(k) != truoc.get(k))}"
     finally:
         shutil.rmtree(goc)
 
@@ -131,19 +152,54 @@ def ca_b7_root_sai():
         shutil.rmtree(tam)
 
 
-CA = [ca_b4_rang_l5, ca_symlink_treo, ca_doc_duoc_het_rc0, ca_glob_va_khong_ghi, ca_b7_root_sai]
+_TU_KIEM = (
+    "import importlib.util, os, sys\n"
+    "s = importlib.util.spec_from_file_location('t', {tep!r}); m = importlib.util.module_from_spec(s)\n"
+    "s.loader.exec_module(m)\n"
+    "def _hong(*a, **k): raise PermissionError('gia lap')\n"
+    "os.symlink = _hong\n"
+    "m._cho_phep_bo_qua = lambda: {tha}\n"
+    "goi = []\n"
+    "_cu = m._chay\n"
+    "m._chay = lambda *a, **k: (goi.append(1), _cu(*a, **k))[1]\n"
+    "m.CA = [m.ca_symlink_treo]\n"
+    "rc = m.main()\n"
+    "print('GOI_CONG_CU', len(goi))\n"
+    "sys.exit(rc)\n"
+)
+
+
+def ca_tu_kiem_bo_qua_symlink():
+    """Khoá F752-02: không tạo được symlink thì ca KHÔNG được tính đạt — bỏ qua tường minh (Windows) hoặc ĐỎ (POSIX)."""
+    for tha, rc_cho, dong_cho in ((True, 0, "0/0"), (False, 1, "0/1")):
+        p = subprocess.run([sys.executable, "-B", "-c", _TU_KIEM.format(tep=str(Path(__file__).resolve()), tha=tha)],
+                           capture_output=True, text=True, encoding="utf-8", timeout=60)
+        dong = p.stdout.splitlines()
+        assert p.returncode == rc_cho, f"tha={tha}: rc {p.returncode} (cần {rc_cho}); {p.stdout[-300:]}{p.stderr[-300:]}"
+        assert dong_cho in dong and "1/1" not in dong, f"tha={tha}: {dong}"
+        assert "GOI_CONG_CU 0" in dong, f"tha={tha}: công cụ bị gọi dù không tạo được symlink: {dong}"
+        nhan = "BO QUA ca_symlink_treo:" if tha else "DO ca_symlink_treo:"
+        assert sum(1 for d in dong if d.startswith(nhan)) == 1, f"tha={tha}: thiếu dòng {nhan!r}: {dong}"
+
+
+CA = [ca_b4_rang_l5, ca_symlink_treo, ca_doc_duoc_het_rc0, ca_glob_va_khong_ghi, ca_b7_root_sai,
+      ca_tu_kiem_bo_qua_symlink]
 
 
 def main():
-    dat = 0
+    dat, bo_qua = 0, 0
     for ca in CA:
         try:
             ca()
             dat += 1
+        except BoQua as e:  # không đo được trên nền này: in riêng, trừ khỏi tổng, KHÔNG tính đạt
+            bo_qua += 1
+            print(f"BO QUA {ca.__name__}: {e}")
         except Exception as e:  # ca đỏ vì bất kỳ lý do nào đều là đỏ; in tên ca và lý do
             print(f"DO {ca.__name__}: {type(e).__name__}: {e}")
-    print(f"{dat}/{len(CA)}")
-    return 0 if dat == len(CA) else 1
+    tong = len(CA) - bo_qua
+    print(f"{dat}/{tong}")
+    return 0 if dat == tong else 1
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ bước của mỗi nhóm log được ĐỊNH DANH qua REST `steps[]` + vị tr
 Thoát: 0 không mốc nào `failed` · 12 có `failed` · 2 sai đối số · 3 REST khác 2xx (in nguyên mã). LUÔN in `NOT_MEASURED: <n>`;
 rc 2/3 không sinh provenance nên cả bốn mốc là chưa đo (`NOT_MEASURED: 4` kèm `PROVENANCE: khong_sinh`).
 """
-import argparse, hashlib, importlib.util, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
+import argparse, datetime, hashlib, importlib.util, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.request
 from pathlib import Path
 
 import yaml
@@ -173,13 +173,15 @@ def ten_du_kien(s):   # tên REST mà bước YAML phải mang: `name:` nguyên 
     v = s.get("run", s.get("uses"))
     return "Run " + v.split("\n")[0] if _chuoi(v) else None
 
-def _gio(v):   # REST tính tới giây: `YYYY-MM-DDTHH:MM:SSZ`; khác dạng ⇒ None (vế c hỏng, không ném)
-    return v[:19] if type(v) is str and RE_GIO.fullmatch(v) else None
+def _gio(v, mau=RE_GIO):   # REST `YYYY-MM-DDTHH:MM:SSZ` (header: `TS`) → datetime cắt về giây; sai dạng HAY sai lịch ⇒ None
+    try:
+        return datetime.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S") if type(v) is str and re.fullmatch(mau, v) else None
+    except ValueError:
+        return None
 
 def ghep_buoc(job, buoc, wf, ly_do_wf):
-    """r4 F02: ĐỊNH DANH bước của từng nhóm log — job REST → MỘT job YAML (d); nhóm thứ i → bước REST đã chạy thứ i → bước YAML
-    cùng vị trí, kèm (a) số đếm ba mức · (b) tên · (c) giờ header cắt về giây ∈ [started_at, completed_at]. Vế nào hỏng ⇒ CẢ job
-    không marker. Trả ({trang_thai, ly_do?, so_buoc}, [(khoá job, vị trí bước YAML)] theo nhóm | None)."""
+    """r4 F02: ĐỊNH DANH bước của nhóm log — job REST → MỘT job YAML (d); nhóm i → bước REST đã chạy thứ i → bước YAML cùng vị trí,
+    kèm (a) số đếm ba mức · (b) tên · (c) giờ cắt về giây ∈ [started_at, completed_at]. Vế hỏng ⇒ CẢ job không marker (`None`)."""
     def hong(ly_do):
         return {"trang_thai": "not_measured", "ly_do": ly_do, "so_buoc": len(buoc)}, None
     if wf is None:
@@ -200,15 +202,14 @@ def ghep_buoc(job, buoc, wf, ly_do_wf):
         return hong("a_so_buoc_rest_khac_so_buoc_yaml")
     if any(s.get("name") != ten_du_kien(y) for s, y in zip(ung, sy)):
         return hong("b_ten_buoc_lech")
-    if not all((a := _gio(ung[i].get("started_at"))) and (z := _gio(ung[i].get("completed_at"))) and a <= b["gio"][:19] <= z
-               for b, i in zip(buoc, chay)):
+    if not all((a := _gio(ung[i].get("started_at"))) and (z := _gio(ung[i].get("completed_at")))
+               and (h := _gio(b["gio"], TS)) and a <= h <= z for b, i in zip(buoc, chay)):
         return hong("c_gio_header_ngoai_cua_so")
     return {"trang_thai": "passed", "so_buoc": len(buoc)}, [(k, i) for i in chay]
 
 def chan_buoc(wf, k, i):
-    """r4 Q7: chặn chế độ của CHÍNH bước `i` của job `k`: khoá bước ngoài `KHOA_BUOC` (gồm `env:`), `shell:` ngoài bash/pwsh/sh,
-    `defaults:` hay `env:` (biểu thức / `CI_DANG_KY_*`) mức job hoặc workflow, một `run:` ĐỨNG TRƯỚC trong CÙNG job nhắc
-    `GITHUB_ENV`/`GITHUB_PATH`. Bước `uses:` đứng trước là giới hạn khai, không chặn."""
+    """r4 Q7: chặn chế độ của CHÍNH bước `i` job `k`: khoá ngoài `KHOA_BUOC`, `shell:` lạ, `defaults:`/`env:` lạ mức job/workflow, `run:`
+    ĐỨNG TRƯỚC trong CÙNG job nhắc `GITHUB_ENV`/`GITHUB_PATH`. Bước `uses:` đứng trước là giới hạn khai, không chặn."""
     j, s = wf["jobs"][k], wf["jobs"][k]["steps"][i]
     return bool("defaults" in wf or _env_chan(wf.get("env")) or "defaults" in j or _env_chan(j.get("env")) or set(s) - KHOA_BUOC
                 or s.get("shell", "bash") not in ("bash", "pwsh", "sh")
@@ -250,10 +251,10 @@ def moc_checkout(sha_ds, event, head, git):
     return r | {"trang_thai": "failed", "ly_do": f"sha_checkout_lech_head_sha ({event})"}
 
 def tach_buoc(dong):
-    """[{lenh, gio, in_lai, hop_le, phan}]: một nhóm = từ `##[group]Run <lệnh>` tới trước `##[group]Run` kế tiếp; `gio` = timestamp
-    header (vế c của `ghep_buoc`). `in_lai` = các dòng `36;1m` LIỀN sau header, bỏ ANSI — CHỈ để đối chiếu, KHÔNG làm kịch bản (M10).
-    `hop_le` = đúng cấu trúc đo trên 226/226 nhóm thật (dòng màu đầu = header, kế khối màu là `shell: `, không màu nào sau đó, có
-    `##[endgroup]`, r4: không `##[group]` nào khác trong vùng nhóm đang mở). `phan` = sau `##[endgroup]`, nơi duy nhất đo marker."""
+    """[{lenh, gio, in_lai, hop_le, phan}]: nhóm = từ `##[group]Run <lệnh>` tới trước `##[group]Run` kế; `gio` = timestamp header.
+    `in_lai` = dòng `36;1m` LIỀN sau header, bỏ ANSI — CHỈ để đối chiếu, KHÔNG làm kịch bản (M10). `hop_le` = cấu trúc đo trên 226/226
+    nhóm thật (màu đầu = header, kế khối màu là `shell: `, không màu sau đó, có `##[endgroup]`, r4: không `##[group]` lồng trong vùng
+    nhóm đang mở). `phan` = sau `##[endgroup]`, nơi duy nhất đo marker."""
     buoc = []
     for d in dong:
         t = than(d)
@@ -284,10 +285,9 @@ def dong_logic(lenh):
     return ra + ([noi.strip()] if noi else [])
 
 def do_dau_duong(buoc, moi, xanh, wf, ghep):
-    """(kết quả, số bước XÁC THỰC). Nhóm i chỉ được xét qua bước YAML mà `ghep` ĐỊNH DANH cho nó (r4): bước ấy có `run:` là chuỗi,
-    KHÔNG `uses:` (Q8), khối in lại hợp lệ và BẰNG NGUYÊN VĂN `run:` của CHÍNH bước ấy. Kịch bản là `run:` YAML; TOÀN KHỐI phải là
-    lời gọi tối giản. `chan_buoc` hoặc `VAR=` ⇒ lời gọi `MOI` ra `not_measured` (`che_do_khong_xac_dinh`); còn lại áp ĐÚNG regex
-    `MOI` lên phần log của CHÍNH nhóm ấy."""
+    """(kết quả, số bước XÁC THỰC). Nhóm i chỉ xét qua bước YAML `ghep` ĐỊNH DANH cho nó (r4): `run:` là chuỗi, KHÔNG `uses:` (Q8),
+    khối in lại hợp lệ BẰNG NGUYÊN VĂN `run:` của CHÍNH bước ấy, TOÀN KHỐI là lời gọi tối giản. `chan_buoc` hoặc `VAR=` ⇒ lời gọi
+    `MOI` ra `not_measured` (`che_do_khong_xac_dinh`); còn lại áp ĐÚNG regex `MOI` lên phần log của CHÍNH nhóm ấy."""
     kq, so = [], 0
     for b, (k, i) in zip(buoc, ghep or []):
         s = wf["jobs"][k]["steps"][i]

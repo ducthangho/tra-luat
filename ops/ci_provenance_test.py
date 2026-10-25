@@ -499,9 +499,9 @@ def c33_trung_chu_khac_job():   # A19: run: giống hệt ở job khác; chặn 
     bang(che_do(wf_job(j=({}, None), k=({}, {"env": {"A": "1"}}))) == [("passed", None)], "job khác có env ⇒ job đích vẫn đo được")
     bang(che_do(wf_job(j=({}, {"env": {"A": "1"}}), k=({}, None))) == CHAN, "job đích có env ⇒ chặn")
 
-def g1(w, *cac_buoc, sua=None, ten="j"):   # một job `ten` trên workflow `w`; `sua(steps)` đổi REST steps sinh từ log + `w` trước khi giữ
-    lg = log_voi(*cac_buoc)
-    st = buoc_rest(lg, w, ten)
+def g1(w, *cac_buoc, sua=None, ten="j", w_rest=None):   # một job `ten` trên workflow `w`; `sua(steps)` đổi REST steps sinh từ log
+    lg = log_voi(*cac_buoc)   # + `w_rest or w` trước khi giữ
+    st = buoc_rest(lg, w_rest or w, ten)
     if sua:
         sua(st)
     return chay([(job(1, name=ten, steps=st), lg)], wf=w)[2]
@@ -523,17 +523,24 @@ def c36_ghep_lech_so():   # A20 (a): (i) output in thêm một nhóm `Run python
 
 @ca
 def c37_ghep_lech_ten():   # A21 (b): tên REST ≠ tên dự kiến; đối chứng `name:` khác `Run <…>` vẫn khớp
-    p = g1(wf_tu(X), buoc(X, "THU: 4/4 dat"), sua=lambda st: st[2].update(name="Run python ops/khac.py"))
-    khong_marker(p, "tên lệch", ghep="not_measured")
+    khong_marker(g1(wf_tu(X), buoc(X, "THU: 4/4 dat"), sua=lambda st: st[2].update(name="Run khac")), "tên lệch", ghep="not_measured")
     p = g1(wf_tu(X, buoc_them={"name": "Kiem tra"}), buoc(X, "THU: 4/4 dat"))
     bang(gate(p)["trang_thai"] == "passed" and ghep(p) == "passed", f"`name:` khớp REST: {gate(p)}")
+    for w, sua, mong in ((wf_tu(X), list.reverse, "passed"), (wf_tu(X), lambda st: st[2].update(number=2), "steps_rest_sai_dang"),
+                         (wf_tu("\n" + X), None, "passed"), (wf_tu(X, buoc_them={"name": "${{ x }}"}), None, "b_ten_buoc_lech")):
+        bang(ghep(g1(w, buoc(X, "THU: 4/4 dat"), sua=sua)) == mong, f"F10 thứ tự/number trùng/dòng đầu rỗng/`${{{{`: mong {mong}")
 
 @ca
 def c38_ghep_lech_gio():   # A22 (c): giờ header ngoài cửa sổ, hoặc started_at/completed_at thiếu/sai dạng ⇒ not_measured, không ném
     for sua in ({"started_at": "2026-10-19T23:45:05Z", "completed_at": "2026-10-19T23:45:06Z"}, {"started_at": None},
-                {"completed_at": "2026-10-19T23:45:04.9Z"}, {"started_at": 5}, {"completed_at": "2026-10-19T23:45:03Z"}):
+                {"completed_at": "2026-10-19T23:45:04.9Z"}, {"started_at": 5}, {"completed_at": "2026-10-19T23:45:03Z"},
+                {"started_at": "2026-02-30T00:00:00Z"}, {"completed_at": "2026-13-01T00:00:00Z"}, {"completed_at": "2026-10-19T24:00:00Z"},
+                {"completed_at": "2026-10-19T23:99:00Z"}, {"completed_at": "2026-10-19T23:45:99Z"}, {"completed_at": "2026-10-19T23:45:04+00:00"}):
         p = g1(wf_tu(X), buoc(X, "THU: 4/4 dat"), sua=lambda st, d=sua: st[2].update(d))
         khong_marker(p, f"giờ {sua}", ghep="not_measured")
+    cua_so = {"started_at": "2026-02-28T00:00:00Z", "completed_at": "2026-10-20T00:00:00Z"}   # F09: header thiếu giờ / sai lịch
+    for hd in (f"##[group]Run {X}", f"2026-02-30T23:45:04.1Z ##[group]Run {X}"):
+        khong_marker(g1(wf_tu(X), [hd] + buoc(X, "THU: 4/4 dat")[1:], sua=lambda st: st[2].update(cua_so)), hd[:12], ghep="not_measured")
     p = g1(wf_tu(X), buoc(X, "THU: 4/4 dat"))   # header 23:45:04.855…Z, cửa sổ [23:45:04Z, 23:45:04Z]: cắt về giây ⇒ trong
     bang(gate(p)["trang_thai"] == "passed", f"đối chứng cắt về giây: {gate(p)['ghep_buoc']}")
 
@@ -562,14 +569,28 @@ def c41_buoc_uses():   # A25 (Q8): bước `uses:` không bao giờ sinh marker;
         khong_marker(g1(yaml.safe_dump(w), c, buoc(X, "THU: 4/4 dat"), *cuoi), f"composite + {len(cuoi)} bước sau", ghep="not_measured")
 
 @ca
-def c42_github_env_cung_job():   # A26 (Q7): chỉ `run:` ĐỨNG TRƯỚC trong CÙNG job nhắc GITHUB_ENV mới chặn
-    e = "echo A=1 >> $GITHUB_ENV"
+def c42_github_env_cung_job():   # A26 (Q7): chỉ `run:` ĐỨNG TRƯỚC trong CÙNG job nhắc GITHUB_ENV/GITHUB_PATH mới chặn
     dd = lambda p: [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]  # noqa: E731
-    bang(dd(g1(wf_tu(e, X), buoc(e), buoc(X, "THU: 4/4 dat"))) == CHAN, "đứng trước, cùng job ⇒ chặn")
-    w = yaml.safe_load(wf_job(j=({}, None), k=({}, None)))
-    w["jobs"]["k"]["steps"].insert(1, {"run": e + "\n"})
-    bang(dd(g1(yaml.safe_dump(w), buoc(X, "THU: 4/4 dat"))) == [("passed", None)], "job khác ⇒ đo được")
-    bang(dd(g1(wf_tu(X, e), buoc(X, "THU: 4/4 dat"), buoc(e))) == [("passed", None)], "đứng sau ⇒ đo được")
+    for e in ("echo A=1 >> $GITHUB_ENV", "echo /x >> $GITHUB_PATH"):
+        bang(dd(g1(wf_tu(e, X), buoc(e), buoc(X, "THU: 4/4 dat"))) == CHAN, f"{e}: đứng trước, cùng job ⇒ chặn")
+        w = yaml.safe_load(wf_job(j=({}, None), k=({}, None)))
+        w["jobs"]["k"]["steps"].insert(1, {"run": e + "\n"})
+        bang(dd(g1(yaml.safe_dump(w), buoc(X, "THU: 4/4 dat"))) == [("passed", None)], f"{e}: job khác ⇒ đo được")
+        bang(dd(g1(wf_tu(X, e), buoc(X, "THU: 4/4 dat"), buoc(e))) == [("passed", None)], f"{e}: đứng sau ⇒ đo được")
+
+@ca
+def c44_ghep_sai_dang():   # mọi chốt DẠNG của ghép: steps REST / bước YAML / job lạ ⇒ not_measured (job lạ khác: bỏ qua), KHÔNG ném
+    w0, sai = wf_tu(X), "steps_rest_sai_dang"
+    for sua, them, mong in ((lambda st: st[2].pop("number"), {}, sai), (lambda st: st[2].update(number=True), {}, sai),
+                            (lambda st: st.append(1), {}, sai), (None, {"z": "x"}, "passed"), (None, {"j": 0}, "d_job_yaml_khong_duy_nhat")):
+        w = yaml.safe_load(w0)
+        w["jobs"] |= {k: v for k, v in them.items() if k != "j"}
+        w["jobs"]["j"]["steps"] += ["chuoi"] * ("j" in them)   # bước YAML không phải dict
+        try:
+            p = g1(yaml.safe_dump(w), buoc(X, "THU: 4/4 dat"), sua=sua, w_rest=w0)
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều ca này đo
+            bang(False, f"{them or mong}: công cụ ném {type(e).__name__}")
+        bang(ghep(p) == mong, f"{them}: {ghep(p)} ≠ {mong}")
 
 @ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
@@ -647,6 +668,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("che_do_bo_defaults_job", ' or "defaults" in j', "", "c31"),
     ("che_do_moi_shell", ' not in ("bash", "pwsh", "sh")', " is None", "c31"),
     ("A26_bo_GITHUB_ENV", 'or any(type(t.get("run")) is str and re.search("GITHUB_(ENV|PATH)", t["run"]) for t in j["steps"][:i]))', "or False)", "c42"),
+    ("F11_bo_GITHUB_PATH", 're.search("GITHUB_(ENV|PATH)", t["run"])', 're.search("GITHUB_ENV", t["run"])', "c42"),
     ("A26_GITHUB_ENV_toan_workflow", 'for t in j["steps"][:i]))', 'for jj in wf["jobs"].values() for t in jj["steps"]))', "c42"),
     ("F08_git_bo_sha", 'f"{sha}:{path}"', 'f"HEAD:{path}"', "c34"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
@@ -664,7 +686,18 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("A20ii_zip_bo_dem_yaml", "    if len(ung) != len(sy):\n", "    if False:\n", "c36"),
     ("A21_bo_kiem_ten", "if any(s.get(\"name\") != ten_du_kien(y)", "if False and any(s.get(\"name\") != ten_du_kien(y)", "c37"),
     ("A22_bo_kiem_gio", "    if not all((a := _gio(", "    if False and all((a := _gio(", "c38"),
-    ("A22_khong_cat_giay", 'a <= b["gio"][:19] <= z', 'a <= b["gio"] <= z', "c38"),
+    ("A22_khong_cat_giay", 'strptime(v[:19], "%Y-%m-%dT%H:%M:%S")', 'strptime(v[:-1], "%Y-%m-%dT%H:%M:%S.%f" if "." in v else "%Y-%m-%dT%H:%M:%S")', "c38"),
+    ("F09_bo_kiem_lich", 'datetime.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S")', "v[:19]", "c38"),
+    ("F09_nhan_offset", r'\d\d:\d\d:\d\dZ")', r'\d\d:\d\d:\d\d(?:Z|[+-]\d\d:\d\d)")', "c38"),
+    ("F09_header_thieu_dung_rest", '(h := _gio(b["gio"], TS))', '(h := _gio(b["gio"], TS) or a)', "c38"),
+    ("F10_bo_sort", 'sorted(st, key=lambda s: s["number"])', "st", "c37"),
+    ("F10_bo_number_trung", '\n            and len({s["number"] for s in st}) == len(st)', "", "c37"),
+    ("F10_ten_lstrip", '"Run " + v.split("\\n")[0]', '"Run " + v.lstrip().split("\\n")[0]', "c37"),
+    ("F10_name_bieu_thuc", '_chuoi(s["name"]) and "${{" not in s["name"]', '_chuoi(s["name"])', "c37"),
+    ("dang_bo_number", 'type(s) is dict and _so(s.get("number"), 1) for s in st', "type(s) is dict for s in st", "c44"),
+    ("dang_buoc_rest_khong_dict", 'all(type(s) is dict and _so(s.get("number"), 1)', 'all(_so(s.get("number"), 1)', "c44"),
+    ("dang_buoc_yaml_khong_dict", "or not all(type(s) is dict for s in sy):", "or False:", "c44"),
+    ("dang_job_khong_dict", "if type(ten) is str and type(j) is dict and any(", "if type(ten) is str and any(", "c44"),
     ("A23_lay_khoa_dau", "return khop[0] if len(khop) == 1 else None", "return khop[0] if khop else None", "c39"),
     ("A23_nhan_job_goi_lai", 'if k is None or "uses" in wf["jobs"][k] or', "if k is None or", "c39"),
     ("A23_nhan_bieu_thuc", 'x and "${{" not in x and re.fullmatch', "x and re.fullmatch", "c39"),

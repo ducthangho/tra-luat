@@ -203,7 +203,7 @@ def ghep_buoc(job, buoc, wf, ly_do_wf):
     if any(not _chuoi(s.get("name")) or s.get("name") != ten_du_kien(y) for s, y in zip(ung, sy)):
         return hong("b_ten_buoc_lech")
     if not all((a := _gio(ung[i].get("started_at"))) and (z := _gio(ung[i].get("completed_at")))
-               and (h := _gio(b["gio"][:19] + "Z")) and a <= h <= z for b, i in zip(buoc, chay)):
+               and (h := _gio(b["gio"])) and a <= h <= z for b, i in zip(buoc, chay)):
         return hong("c_gio_header_ngoai_cua_so")
     return {"trang_thai": "passed", "so_buoc": len(buoc)}, [(k, i) for i in chay]
 
@@ -252,7 +252,7 @@ def moc_checkout(sha_ds, event, head, git):
 
 def tach_buoc(dong):
     """[{lenh, gio, in_lai, hop_le, phan}]: nhóm = từ `##[group]Run <lệnh>` tới trước `##[group]Run` kế; `gio` = timestamp header.
-    `in_lai` = dòng `36;1m` LIỀN sau header, bỏ ANSI — CHỈ để đối chiếu, KHÔNG làm kịch bản (M10). `hop_le` = cấu trúc đo trên 226/226
+    `gio` cắt về giây. `in_lai` = dòng `36;1m` LIỀN sau header, bỏ ANSI — CHỈ để đối chiếu, KHÔNG làm kịch bản (M10). `hop_le` = cấu trúc đo trên 226/226
     nhóm thật (màu đầu = header, kế khối màu là `shell: `, không màu sau đó, có `##[endgroup]`, r4: không `##[group]` lồng trong vùng
     nhóm đang mở). `phan` = sau `##[endgroup]`, nơi duy nhất đo marker."""
     buoc = []
@@ -260,10 +260,10 @@ def tach_buoc(dong):
         t = than(d)
         if t.startswith("##[group]Run "):
             buoc.append({"lenh": t[len("##[group]Run "):], "in_lai": [], "phan": [], "mo": True, "ok": True, "tien_to": True,
-                         "gio": (RE_DONG.match(d) or [""] * 2)[1]})
+                         "gio": d[:19] + "Z"})
         elif buoc and (b := buoc[-1])["mo"]:
             mau = "\x1b[36;1m" in d
-            if t.startswith("##[endgroup]"):
+            if t == "##[endgroup]":   # nguyên văn: 753/753 dòng đóng trên 37 log thật (đo 25-10-2026)
                 b["mo"] = False
             elif mau and b["tien_to"]:
                 b["in_lai"].append(t)
@@ -304,7 +304,7 @@ def do_dau_duong(buoc, moi, xanh, wf, ghep):
             else:
                 van = "\n".join(b["phan"]) + "\n"
                 k = re.search(moi[duong], van, re.M) if (ok := xanh(van, moi[duong])) else None
-                kq.append(muc | {"trang_thai": "passed" if ok else "failed", "dong_khop": k.group(0).splitlines()[-200:] if k else []})
+                kq.append(muc | {"trang_thai": "passed" if ok else "failed", "dong_khop": k.group(0).splitlines() if k else []})
     return kq, so
 
 def moc_gate(job, dong, moi, xanh, wf=None, ly_do_wf=""):

@@ -34,6 +34,7 @@ LINUX = r"""2026-10-19T23:40:06.0485589Z ##[group]Runner Image
 2026-10-19T23:40:18.3020458Z b27fe85c9e9593ddbb059808fe4347fe1bd267be
 2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5
 """
+LINUX_KHONG_SETUP = "".join(LINUX.splitlines(True)[:-1])   # bỏ nhóm `Run actions/setup-python@v5`: workflow không có bước `uses:`
 WINDOWS = r"""2026-10-19T23:40:00.8741298Z ##[group]Runner Image
 2026-10-19T23:40:00.8742264Z Image: windows-2025-vs2026
 2026-10-19T23:40:12.5725422Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
@@ -392,7 +393,10 @@ def c23_chi_loi_goi_that():
                ["python .\\ops\\thu_gia_test.py"], ["printf a \\", f"  python {DUONG_GIA}"], ["if false; then", f"  python {DUONG_GIA}", "fi"],
                ["f() {", f"  python {DUONG_GIA}", "}"], ["cat <<EOF", f"python {DUONG_GIA}", "EOF"], ['echo "a', f"python {DUONG_GIA}", 'b"'],
                ["# python ops/khac.py", f"python {DUONG_GIA}"]):
-        p = chay([(job(1), log_voi(khoi(kb, "THU: 4/4 dat")))])[2]
+        try:
+            p = chay([(job(1), log_voi(khoi(kb, "THU: 4/4 dat")))])[2]
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều ca này đo
+            bang(False, f"{kb!r}: công cụ ném {type(e).__name__}")
         bang(gate(p)["dau_duong"] == [] and gate(p)["trang_thai"] == "not_measured", f"{kb!r} không sinh bằng chứng: {gate(p)['dau_duong']}")
     rc, _, p, _ = chay([(job(1), log_voi(buoc(f"/usr/bin/python3.13 -B ./{DUONG_GIA}", "THU: 4/4 dat")))])
     bang(gate(p)["trang_thai"] == "passed" and [x["duong_dan"] for x in gate(p)["dau_duong"]] == [DUONG_GIA], f"{gate(p)['dau_duong']}")
@@ -500,8 +504,8 @@ def c33_trung_chu_khac_job():   # A19: run: giống hệt ở job khác; chặn 
     bang(che_do(wf_job(j=({}, None), k=({}, {"env": {"A": "1"}}))) == [("passed", None)], "job khác có env ⇒ job đích vẫn đo được")
     bang(che_do(wf_job(j=({}, {"env": {"A": "1"}}), k=({}, None))) == CHAN, "job đích có env ⇒ chặn")
 
-def g1(w, *cac_buoc, sua=None, ten="j", w_rest=None, **kw):   # một job `ten` trên workflow `w`; `sua(steps)` đổi REST steps sinh từ log
-    lg = log_voi(*cac_buoc)   # + `w_rest or w` trước khi giữ
+def g1(w, *cac_buoc, sua=None, ten="j", w_rest=None, nen=LINUX, **kw):   # một job `ten` trên workflow `w`; `sua(steps)` đổi REST steps sinh từ log
+    lg = log_voi(*cac_buoc, nen=nen)   # + `w_rest or w` trước khi giữ
     st = buoc_rest(lg, w_rest or w, ten)
     if sua:
         sua(st)
@@ -564,7 +568,10 @@ def c39_ghep_job():   # A23 (d): tên job REST khớp 0 / ≥ 2 khoá, `name:` c
     for ten, w in (("khac", wf_job(j=({}, None))), ("x (1)", wf_job(x=({}, None), y=({"name": "x"}, None))),
                    ("${{ matrix.n }}", wf_job(j=({"name": "${{ matrix.n }}"}, None))), ("j", wf_job(j=({"uses": "./w.yml"}, None))),
                    ("jx", wf_job(j=({}, None))), ("j x", wf_job(j=({}, None))), (" (1)", wf_job(j=({"name": ""}, None)))):
-        p = g1(w, buoc(X, "THU: 4/4 dat"), ten=ten)
+        try:
+            p = g1(w, buoc(X, "THU: 4/4 dat"), ten=ten)
+        except Exception as e:   # ném ra ngoài CHÍNH LÀ điều ca này đo
+            bang(False, f"job {ten!r}: công cụ ném {type(e).__name__}")
         khong_marker(p, f"job {ten!r}", ghep="not_measured")
         bang(ghep(p) == "d_job_yaml_khong_duy_nhat", f"{ten!r}: {ghep(p)}")
     for ten, w in (("k (ubuntu-latest, 5)", wf_job(k=({}, None), kk=({}, None))), ("j", wf_job(j=({"name": "Build"}, None)))):
@@ -627,6 +634,48 @@ def c45_buoc_skipped_giua():   # bước `skipped` ĐỨNG TRƯỚC: tên vẫn 
     bang(gate(p)["trang_thai"] == "passed" and [x["trang_thai"] for x in gate(p)["dau_duong"]] == ["passed"], f"skipped trước: {gate(p)}")
     p = g1(yaml.safe_dump(w), buoc(X, "THU: 4/4 dat"), sua=lambda st: (bo(st), st[2].update(name="Run khac")))
     bang(ghep(p) == "b_ten_buoc_lech", f"bước skipped sai tên vẫn phải làm hỏng vế b: {ghep(p)}")
+
+@ca
+def c46_mien_che_do():   # miền giá trị của chặn chế độ: mỗi biến thể đổi MỘT trục, có cả chặn lẫn đối chứng cho phép
+    x, ok = f"python {DUONG_GIA}", [("passed", None)]
+    for ten, w, mong in (("env job []", wf_tu(x, job_them={"env": []}), CHAN), ("env job list", wf_tu(x, job_them={"env": ["A"]}), CHAN),
+                         ("env job biểu thức", wf_tu(x, job_them={"env": "${{ x }}"}), CHAN), ("env job {}", wf_tu(x, job_them={"env": {}}), ok),
+                         ("env workflow dict", wf_tu(x, goc_them={"env": {"A": "1"}}), ok),
+                         ("defaults workflow {}", wf_tu(x, goc_them={"defaults": {}}), CHAN), ("defaults job {}", wf_tu(x, job_them={"defaults": {}}), CHAN),
+                         ("shell null", wf_tu(x, buoc_them={"shell": None}), CHAN), ("shell sh", wf_tu(x, buoc_them={"shell": "sh"}), ok),
+                         ("shell pwsh", wf_tu(x, buoc_them={"shell": "pwsh"}), ok)) + tuple(
+            (f"khoá {k}", wf_tu(x, buoc_them={k: v}), ok) for k, v in (("id", "a"), ("if", "true"), ("timeout-minutes", 5), ("continue-on-error", False))):
+        bang(che_do(w) == mong, f"{ten}: {che_do(w)} ≠ {mong}")
+    kb = ["A=1 " + x, "python ops/khac.py"]
+    p = g1(wf_tu("\n".join(kb)), khoi(kb, "THU: 4/4 dat"))
+    bang([x.get("ly_do") for x in gate(p)["dau_duong"]] == ["che_do_khong_xac_dinh", "khong_co_trong_MOI"], f"VAR= một dòng: {gate(p)['dau_duong']}")
+
+@ca
+def c47_bien_ghep():   # biên của ghép + xác thực khối: mỗi biến thể một chốt; ca cần marker thì đòi MARKER, không chỉ đòi ghép
+    dd = lambda p: [(x["trang_thai"], x.get("ly_do")) for x in gate(p)["dau_duong"]]  # noqa: E731
+    ok, e, b = [("passed", None)], "echo A=1 >> $GITHUB_ENV", buoc(X, "THU: 4/4 dat")
+    for ten, p, mong in (("number bool", g1(wf_tu(X), b, sua=lambda st: st[0].update(number=True)), "steps_rest_sai_dang"),
+                         ("number float", g1(wf_tu(X), b, sua=lambda st: st[2].update(number=2.5)), "steps_rest_sai_dang"),
+                         ("alias name:", g1(wf_job(j=({"name": "Build"}, None)), b, ten="Build"), "passed"),
+                         ("ma trận rỗng", g1(wf_tu(X), b, ten="j ()"), "passed"),
+                         ("ma trận xuống dòng", g1(wf_tu(X), b, ten="j (a\nb)"), "d_job_yaml_khong_duy_nhat"),
+                         ("Post ở giữa tên", g1(wf_tu(X, buoc_them={"name": "Chay Post x"}), b), "passed")):
+        bang(ghep(p) == mong, f"{ten}: {ghep(p)} ≠ {mong}")
+    w0 = yaml.safe_dump({"jobs": {"j": {"runs-on": "x", "steps": [{"run": e + "\n"}, {"run": X + "\n"}]}}})
+    for ten, p, mong in (("khoảng trắng cuối run:", g1(wf_tu(X + "  "), buoc(X + "  ", "THU: 4/4 dat")), ok),
+                         ("hai dòng trùng", g1(wf_tu(X + "\n" + X), khoi([X, X], "THU: 4/4 dat")), ok),
+                         ("GITHUB_ENV ở bước ĐẦU", g1(w0, buoc(e), b, nen=LINUX_KHONG_SETUP), CHAN),
+                         ("GITHUB_ENV cách một bước", g1(wf_tu(e, "echo b", X), buoc(e), buoc("echo b"), b), CHAN),
+                         ("##[endgroup] có đuôi", g1(wf_tu(X), b[:3] + [f"{T} ##[endgroup]x"] + b[4:]), []),
+                         ("shell: thiếu dấu cách", g1(wf_tu(X), b[:2] + [f"{T} shell:/usr/bin/bash"] + b[3:]), [])):
+        bang(dd(p) == mong and ghep(p) == "passed", f"{ten}: {dd(p)} ≠ {mong} (ghép {ghep(p)})")
+    w = yaml.safe_load(wf_tu(X))
+    w["jobs"]["j"]["steps"][1] = {"name": "K", "run": 5}
+    try:   # `run:` không phải chuỗi mà khối in lại trùng str(run) ⇒ không marker, KHÔNG ném
+        p = g1(yaml.safe_dump(w), buoc("5", "THU: 4/4 dat"), sua=lambda st: st[2].update(name="K"), w_rest=wf_tu(X))
+    except Exception as ex:   # ném ra ngoài CHÍNH LÀ điều vế này đo
+        bang(False, f"run: 5 ⇒ công cụ ném {type(ex).__name__}")
+    bang(dd(p) == [] and ghep(p) == "passed", f"run: 5: {dd(p)}")
 
 @ca
 def c43_khoi_khac_buoc():   # A27 (Q6): khối của nhóm i bằng `run:` của bước KHÁC (bước sau, skipped) ⇒ không marker
@@ -742,16 +791,46 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("gio_bo_kiem_str", 'if type(v) is str and RE_GIO.fullmatch(v) else None', 'if RE_GIO.fullmatch(v) else None', "c38"),
     ("gio_bo_bat_ValueError", "    except ValueError:\n        return None", "    except KeyError:\n        return None", "c38"),
     ("job_chi_name_khi_co_name", 'for x in (k, j.get("name"))', 'for x in (j.get("name") or k,)', "c39"),
+    ("L3_number_bool", '_so(s.get("number"), 1)', '(isinstance(s.get("number"), int) and s["number"] >= 1)', "c47"),
+    ("L3_number_float", '_so(s.get("number"), 1)', '(isinstance(s.get("number"), (int, float)) and not isinstance(s.get("number"), bool) and s["number"] >= 1)', "c47"),
+    ("L3_alias_name_bo", 'type(x) is str and x and "${{" not in x and re.fullmatch', 'type(x) is str and x and ten != j.get("name") and "${{" not in x and re.fullmatch', "c47"),
+    ("L3_ma_tran_khac_rong", r'r"(?: \(.*\))?"', r'r"(?: \(.+\))?"', "c47"),
+    ("L3_ma_tran_dotall", r'r"(?: \(.*\))?", ten)', r'r"(?: \(.*\))?", ten, re.S)', "c47"),
+    ("L3_post_o_giua", 'str(s.get("name")).startswith("Post ")', '("Post " in str(s.get("name")))', "c47"),
+    ("L3_run_rstrip_het", 'run.rstrip("\\n") == "\\n".join(b["in_lai"])', 'run.rstrip() == "\\n".join(b["in_lai"])', "c47"),
+    ("L3_run_ep_chuoi", 'type(run) is str and b["hop_le"] and run.rstrip', 'b["hop_le"] and str(run).rstrip', "c47"),
+    ("L3_bo_dedupe", "for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):", "for duong in ([g[2] for g in goi] if goi and all(goi) else []):", "c47"),
+    ("L3_endgroup_startswith", 'if t == "##[endgroup]":', 'if t.startswith("##[endgroup]"):', "c47"),
+    ("L3_shell_khong_cach", 't.startswith("shell: ")', 't.startswith("shell:")', "c47"),
+    ("L3_truoc_bo_buoc_dau", 'for t in j["steps"][:i]))', 'for t in j["steps"][1:i]))', "c47"),
+    ("L3_truoc_chi_lien_ke", 'for t in j["steps"][:i]))', 'for t in j["steps"][max(i - 1, 0):i]))', "c47"),
+    ("L3_env_bo_dang", "type(v) is not dict or any(str(k)", "False or any(str(k)", "c46"),
+    ("L3_env_truthy", "return v is not None and (type(v) is not dict", "return bool(v) and (type(v) is not dict", "c46"),
+    ("L3_env_chi_chuoi", "type(v) is not dict or any(str(k)", "type(v) is str or any(str(k)", "c46"),
+    ("L3_env_wf_co_mat", '_env_chan(wf.get("env"))', '("env" in wf)', "c46"),
+    ("L3_defaults_wf_truthy", 'return bool("defaults" in wf or', 'return bool(bool(wf.get("defaults")) or', "c46"),
+    ("L3_defaults_job_truthy", ' or "defaults" in j or', ' or bool(j.get("defaults")) or', "c46"),
+    ("L3_shell_bo_pwsh", '("bash", "pwsh", "sh")', '("bash", "sh")', "c46"),
+    ("L3_shell_bo_sh", '("bash", "pwsh", "sh")', '("bash", "pwsh")', "c46"),
+    ("L3_shell_null_mac_dinh", 's.get("shell", "bash")', '(s.get("shell") or "bash")', "c46"),
+    ("L3_khoa_bo_id", '{"name", "id", "if", "run", "shell",', '{"name", "if", "run", "shell",', "c46"),
+    ("L3_khoa_bo_if", '{"name", "id", "if", "run", "shell",', '{"name", "id", "run", "shell",', "c46"),
+    ("L3_khoa_bo_timeout", '"timeout-minutes", "continue-on-error"}', '"continue-on-error"}', "c46"),
+    ("L3_khoa_bo_coe", '"timeout-minutes", "continue-on-error"}', '"timeout-minutes"}', "c46"),
+    ("O_job_none_and", 'if k is None or "uses" in wf["jobs"][k] or', 'if k is None and "uses" in wf["jobs"][k] or', "c39"),
+    ("O_var_mot_dong_all", "chan = chan_buoc(wf, k, i) or any(g and g[1] for g in goi)", "chan = chan_buoc(wf, k, i) or all(g and g[1] for g in goi)", "c46"),
+    ("O_goi_or", "if goi and all(goi) else []):", "if goi or all(goi) else []):", "c23"),
+    ("O_goi_any", "if goi and all(goi) else []):", "if goi and any(goi) else []):", "c23"),
     ("job_bo_x_str", 'type(x) is str and x and "${{"', 'x and "${{"', "c44"),
     ("so_number_0", '_so(s.get("number"), 1)', '_so(s.get("number"), 0)', "c44"),
     ("so_number_am", '_so(s.get("number"), 1)', '(type(s.get("number")) is int)', "c44"),
     ("sy_khong_list", " or type(sy) is not list or", " or", "c44"),
     ("dd_run_khong_chuoi", "if not (type(run) is str and b[\"hop_le\"]", "if not (run and b[\"hop_le\"]", "c44"),
     ("A22_bo_kiem_gio", "    if not all((a := _gio(", "    if False and all((a := _gio(", "c38"),
-    ("A22_khong_cat_giay", '(h := _gio(b["gio"][:19] + "Z"))', '(h := _gio(b["gio"]))', "c38"),
+    ("A22_khong_cat_giay", '"gio": d[:19] + "Z"})', '"gio": d.split(" ", 1)[0]})', "c38"),
     ("F09_bo_kiem_lich", 'datetime.datetime.strptime(v[:19], "%Y-%m-%dT%H:%M:%S")', "v[:19]", "c38"),
     ("F09_nhan_offset", r'\d\d:\d\d:\d\dZ")', r'\d\d:\d\d:\d\d(?:Z|[+-]\d\d:\d\d)")', "c38"),
-    ("F09_header_thieu_dung_rest", '(h := _gio(b["gio"][:19] + "Z"))', '(h := _gio(b["gio"][:19] + "Z") or a)', "c38"),
+    ("F09_header_thieu_dung_rest", '(h := _gio(b["gio"]))', '(h := _gio(b["gio"]) or a)', "c38"),
     ("F10_bo_sort", 'sorted(st, key=lambda s: s["number"])', "st", "c37"),
     ("F10_bo_number_trung", '\n            and len({s["number"] for s in st}) == len(st)', "", "c37"),
     ("F10_ten_lstrip", '"Run " + v.split("\\n")[0]', '"Run " + v.lstrip().split("\\n")[0]', "c37"),

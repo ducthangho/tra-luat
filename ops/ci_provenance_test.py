@@ -964,7 +964,8 @@ def c51_mien_luot7():   # F10 lượt 7: Unicode · lịch biên · metadata · 
             ("dòng ##[group] trong output", lambda: moi("##[group]details", "THU: 4/4 dat", mau=r"^##\[group\]details\nTHU: (\d+)/(\d+) dat$"), "passed", ok, None),
             ("lenh/duong_dan của đúng bước", lambda: g1(wf_tu(X), b), "passed", ok,
              lambda p: [(x["lenh"], x["duong_dan"]) for x in gate(p)["dau_duong"]] == [(X, DUONG_GIA)]),
-            ("hai bước cùng script, hai kết quả", lambda: g1(wf_tu(X, X), b, buoc(X, "THU: 3/4 dat")), "passed", ok + [("failed", None)], None),
+            ("hai bước cùng script, hai kết quả", lambda: g1(wf_tu(X, X), b, buoc(X, "THU: 3/4 dat")), "passed", ok + [("failed", None)],
+             lambda p: kb(p)["buoc_xac_thuc"] == 2),   # lượt 9 D04: đếm MỌI bước xác thực, không chỉ bước cuối
             ("marker có khoảng trắng cuối", lambda: g1(wf_tu(X), buoc(X, "THU: 4/4 dat  ")), "passed", [("failed", None)], None),
             ("dòng rỗng sau shell:", lambda: g1(wf_tu(X), b_rong), "passed", ok, None),
             ("shell: thứ hai", lambda: g1(wf_tu(X), b_shell2), "passed", ok, None),
@@ -1009,6 +1010,10 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
              {"trang_thai": "not_measured", "ly_do": "d_job_yaml_khong_duy_nhat", "so_buoc": 2}),
             ("name: bước có `${` (không `${{`)", lambda: g1(wf_tu(X, buoc_them={"name": "a${b"}), b), {"trang_thai": "passed", "so_buoc": 2}),
             ("name: bước `${{x}}` không khoảng trắng", lambda: g1(wf_tu(X, buoc_them={"name": "${{x}}"}), b),
+             {"trang_thai": "not_measured", "ly_do": "b_ten_buoc_lech", "so_buoc": 2}),
+            ("lượt 9 D03: name: job có `${{` ở GIỮA", lambda: g1(wf_job(j=({"name": "Build ${{x}}"}, None)), b, ten="Build ${{x}}"),
+             {"trang_thai": "not_measured", "ly_do": "d_job_yaml_khong_duy_nhat", "so_buoc": 2}),
+            ("lượt 9 D03: name: bước có `${{` ở GIỮA", lambda: g1(wf_tu(X, buoc_them={"name": "Build ${{x}}"}), b),
              {"trang_thai": "not_measured", "ly_do": "b_ten_buoc_lech", "so_buoc": 2}))
     khoi_mau = [(ten, khong_dat(f)) for ten, f in (   # dinh_nghia `hop_le`: in lại = dòng `36;1m` LIỀN sau header; không màu sau `shell: `
         ("SGR 36;10m không phải 36;1m", lambda: g1(wf_tu(X), [b[0], b[1].replace("36;1m", "36;10m")] + b[2:])),
@@ -1035,10 +1040,12 @@ def c52_tap_dong():   # tập đột biến đóng: HÌNH DẠNG `ghep_buoc` c�
     sai = [(ten, kq, mong) for ten, f, mong in hang if (kq := gh(f)) != mong]
     try:
         kieu = [m.ten_du_kien(s) for s in ({"run": 5}, {"uses": None}, {}, {"run": ["a"]})] + \
-            [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n", "[" * 5000 + "]" * 5000)]   # lồng sâu ⇒ RecursionError
+            [m.doc_wf(v) for v in ("jobs: [1]\n", "jobs: null\n", "jobs: x\n", "- 1\n", "[" * 5000 + "]" * 5000)] + [   # lồng sâu ⇒ RecursionError
+            m.doc_wf(f"name: {v}\njobs: {{j: {{}}}}\n") for v in ("2026-02-30", "2026-01-01T99:00:00Z", "!!int xyz", "!!float abc",
+                                                            "!!bool maybe", "!!int ''", "!!float ''", "!!timestamp abc")]   # F12
     except Exception as e:   # ném ra ngoài CHÍNH LÀ điều vế này đo
         kieu = type(e).__name__
-    bang(not sai and not khoi_mau and kieu == [None] * 9,
+    bang(not sai and not khoi_mau and kieu == [None] * 17,
          f"{len(sai)}/{len(hang)} hàng lệch M4/dinh_nghia: {sai[:2]} · khối màu ra marker: {khoi_mau} · kiểu lạ: {kieu}")
 
 @ca
@@ -1128,7 +1135,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F02_bo_het_tien_to", ' and not b["tien_to"] and b["in_lai"][:1]', " and b[\"in_lai\"][:1]", "c35"),
     ("F02_bo_doi_header", ' and b["in_lai"][:1] == [b["lenh"]]}', "}", "c35"),
     ("A18_head_sha_thay_sha_checkout", 'sha = co[-1].get("sha") if co[-1]["trang_thai"] == "passed" else None', 'sha = r.get("head_sha")', "c32"),
-    ("A18_yaml_hong_nem", "    except (yaml.YAMLError, RecursionError):\n        return None\n", "    except RecursionError:\n        return None\n", "c32"),
+    ("L9_D03_job_chi_tien_to", 'and "${{" not in x and', 'and not x.startswith("${{") and', "c52"),
+    ("L9_D03_buoc_chi_tien_to", 'and "${{" not in s["name"] else', 'and not s["name"].startswith("${{") else', "c52"),
+    ("L9_D04_dem_mot_buoc", "        so += 1\n", "        so = 1\n", "c51"),
+    ("A18_yaml_hong_nem", "except (yaml.YAMLError, RecursionError, ValueError,", "except (RecursionError, ValueError,", "c32"),
     ("A19_moi_ung_vien_trung_chu", "chan = chan_buoc(wf, k, i) or", 'chan = any(chan_buoc(wf, kk, ii) for kk, jj in wf["jobs"].items() '
      'for ii, t in enumerate(jj["steps"]) if t.get("run") == run) or', "c33"),
     ("A19_chan_doc_job_khac", "chan = chan_buoc(wf, k, i) or", 'chan = chan_buoc(wf, next(kk for kk in wf["jobs"] if kk != k), i) or', "c33"),

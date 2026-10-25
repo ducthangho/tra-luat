@@ -157,8 +157,8 @@ def doc_wf(van):
     """Workflow tại SHA (`yaml.safe_load`); hỏng, không phải dict hay `jobs` không phải dict ⇒ None."""
     try:
         wf = yaml.safe_load(van)
-    except (yaml.YAMLError, RecursionError):
-        return None
+    except (yaml.YAMLError, RecursionError, ValueError, KeyError, IndexError, AttributeError):   # r4 lượt 9 F12: SafeLoader dựng scalar
+        return None   # hỏng (ngày/giờ sai, `!!int xyz`, `!!bool maybe`, `!!int ''`, `!!timestamp abc`) ném lớp ngoài YAMLError
     return wf if type(wf) is dict and type(wf.get("jobs")) is dict else None
 
 def ghep_job(ten, wf):

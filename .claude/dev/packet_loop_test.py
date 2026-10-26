@@ -8559,7 +8559,7 @@ _CN834, _API834 = "chatgpt-codex-connector[bot]", "https://api.github.com/repos/
 _J834 = [f"{j} (ubuntu-latest)" for j in ("gate", "gate-cong-cu-gop", "gate-ops", "gate-packet-loop", "gate-registry")]
 
 
-def _r834(c: Ctx, doi=None, lop=(), p3_cn=False, env=None):
+def _r834(c: Ctx, doi=None, lop=(), p3_cn=False, env=None, vo=False):
     rc, sd, e, _ = _r812(c, "review", lop=lop, env=env)
     _doi(0, rc, e, "r834 nền approved_pending")
     w, f, h = c.tmp / "kho" / "w", c.tmp, _st(sd)["pending_sha"]
@@ -8571,7 +8571,7 @@ def _r834(c: Ctx, doi=None, lop=(), p3_cn=False, env=None):
          "cr": [{"id": 300 + i, "name": j, "head_sha": h, "status": "completed", "conclusion": "success", "check_suite": {"id": 500},
                  "app": {"slug": "github-actions"}, "url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
          "reviews": [], "review_comments": [], "qd": [qd("offline", s) for s, g in lop if g == "P3"], "bnc": None, "qdf": qd, "sd": sd, "jobs2": None,
-         "issue_comments": [{"id": 20, "user": {"login": _CN834}, "body": f"Didn't find any major issues.\n\nReviewed commit: `{h[:10]}`", "issue_url": f"{_API834}issues/55"}]}
+         "issue_comments": [{"id": 20, "user": {"login": _CN834}, "body": f"Codex Review: Didn't find any major issues.\n\n**Reviewed commit:** `{h[:10]}`\n\n<details>x</details>", "issue_url": f"{_API834}issues/55"}]}
     if p3_cn:
         x["review_comments"] = [{"id": 11, "user": {"login": _CN834}, "body": "![P3 Badge] nit", "commit_id": h, "pull_request_url": f"{_API834}pulls/55"}]
         x["bnc"], x["qd"] = {"bang_lop": [{"slug": "c-d", "hang": "P3", "connector_refs": [["review_comments", 11]]}]}, [*x["qd"], qd("connector", "c-d")]
@@ -8584,7 +8584,9 @@ def _r834(c: Ctx, doi=None, lop=(), p3_cn=False, env=None):
             *(("--quyet-dinh-p3", ghi("qd.json", x["qd"])) if x["qd"] else ()),
             *(("--bien-nhan-connector", ghi("bnc.yaml", __import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn=x["bnc"])))) if x["bnc"] else ())]
     truoc = (sd / "wp55.json").read_bytes()
-    rc, o, e = run(c.script, args, sd, env)
+    if vo:
+        (f / "vo.py").write_text(_VO834)
+    rc, o, e = run(f / "vo.py", [c.script, *args], sd, env) if vo else run(c.script, args, sd, env)
     return rc, sd, e, truoc, o
 
 
@@ -8715,14 +8717,15 @@ MUTANTS.update({
                                  '(j.get("run_id"), j.get("head_sha"), j.get("name")) == (run["id"], h, ten_j)', ["r834_attempt_moi_job_cu"]),
     "r834_run_cu_nhat": ("run = max(ung, key=lambda r: r[\"id\"])", "run = min(ung, key=lambda r: r[\"id\"])", ["r834_run_moi_nhat_do"]),
     "r834_bo_kho_url_job": ("re.escape(API_GH + nc['repo'])", "'https://api\\\\.github\\\\.com/repos/[^/]+/[^/]+'", ["r834_job_url_kho_khac"]),
-    "r834_noi_check_theo_ten": ("            r = cr.get(int(m[1])) if m else None", '            r = next((x for x in cr.values() if x["name"] == ten_j), None)', ["r834_job_tro_check_khong_co"]),
+    "r834_noi_check_theo_ten": ("            r = next((x for i, x in cr.items() if str(i) == m[1]), None) if m else None", '            r = next((x for x in cr.values() if x["name"] == ten_j), None)',
+                                ["r834_job_tro_check_khong_co", "r834_job_url_qua_dai"]),
     "r834_jobs_total_toan_cuc": ('    jobs = _trang_du({"total_count": len({j["id"] for j in moi_tep}), "jobs": moi_tep}, "jobs", "workflow_jobs (gộp các tệp)")',
                                  '    jobs = _trang_du([_doc_json(f, RC_GATE)[0] for f in a.workflow_jobs], "jobs", "workflow_jobs")', ["r834_hai_tep_jobs"]),
     "r834_badge_chi_P": ('BADGE_RE = re.compile(r"!\\[([^\\]]*?)\\s*Badge\\]", re.I)', 'BADGE_RE = re.compile(r"!\\[(P[^\\]\\s]*) Badge\\]")', ["r834_badge_ngoai_mien_review"]),
     "r834_changes_khong_hang_lot": (' or x.get("state") == "CHANGES_REQUESTED"):', "):", ["r834_review_changes_khong_hang"]),
     "r834_commit_thieu_la_cu": ('"hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"', '"hien" if c == head else "cu"', ["r834_review_comment_thieu_commit"]),
-    "r834_reviewed_commit_tim_dau": ('    khai = [t.strip("`") for t in re.findall(r"Reviewed commit:[ \\t]*(\\S*)", x["body"])]',
-                                     '    khai = re.findall(r"Reviewed commit:\\s*`?([0-9a-f]{7,40})\\b", x["body"])[:1]', ["r834_reviewed_commit_sai_dang", "r834_reviewed_commit_mau_thuan"]),
+    "r834_reviewed_commit_tim_dau": ('    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])]',
+                                     '    khai = [re.search(r"`?([0-9a-f]{7,40})", t) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])][:1]', ["r834_reviewed_commit_sai_dang", "r834_reviewed_commit_mau_thuan"]),
     "r834_head_cu_van_chan": ("            if n is None and hang:", "            if n != \"hien\" and hang:", ["r834_issue_comment_head_cu_khong_chan"]),
     "r834_bo_envelope": ('    if not isinstance(d, dict) or (d.get("repo"), d.get("pr"), d.get("head_sha")) != (repo, pr, head):', "    if not isinstance(d, dict):",
                          ["r834_envelope_head_khac"]),
@@ -8730,6 +8733,44 @@ MUTANTS.update({
     "r834_bo_phu_dung_refs": (" or sorted(refs) != sorted(p3):", ":", ["r834_refs_thua"]),
     "r834_bo_luoc_do_state": ('    if not {tuple(x) for x in CHECK_BAT_BUOC} <= {tuple(x) for x in nc["required_checks"]} or type(p3_off) is not list \\',
                               "    if False \\", ["r834_state_required_checks_rong", "r834_state_p3_sai_kieu"]),
+})
+
+
+# #834 lượt 3 — Codex lượt 2: F1 neo head (trường trọn, tiền tố mơ hồ) · F2 độ phủ (I5 gọi `_xet_dung` sau đầu vào, repo/head run,
+# head job, quyết định P3 trùng, generation H connector) · F3 lược đồ job. `_VO834` bọc CLI, thay `_xet_dung` bằng cọc đo lời gọi.
+_VO834 = ("import sys, importlib.util as u\nfrom pathlib import Path\nkb = sys.argv.pop(next(i for i, x in enumerate(sys.argv) if x.endswith('packet_loop.py')))\n"
+          "sys.path.insert(0, str(Path(kb).parent)); s = u.spec_from_file_location('pl', kb); m = u.module_from_spec(s); s.loader.exec_module(m)\n"
+          "def coc(sd, st, cua, *a, **k):\n    if cua == 'accept':\n        print('COC_XET_DUNG', file=sys.stderr); sys.exit(3)\n"
+          "m._xet_dung = coc\nsys.exit(m.main(sys.argv[1:]))\n")
+CASES += [
+    ("r834_reviewed_commit_span_thua", _r834_ca(12, lambda x, w, h: x["issue_comments"][0].update(body=f"Reviewed commit: `{h[:10]} invalid`"), "thiếu/sai/mơ hồ")),
+    ("r834_tien_to_mo_ho", _r834_ca(12, lambda x, w, h: _R834_RV("CHANGES_REQUESTED", "![P1 Badge] bug")(x, w, h) or x["reviews"][-1].update(
+        commit_id=h[:10] + ("f" * 30 if h[10:] != "f" * 30 else "e" * 30)), "thiếu/sai/mơ hồ")),
+    ("r834_xet_dung_duoc_goi", _r834_ca(3, None, "COC_XET_DUNG", vo=True)),
+    ("r834_xet_dung_sau_dau_vao", _r834_ca(12, lambda x, w, h: x.update(hong=True), "KHÔNG ĐO ĐƯỢC", vo=True)),
+    ("r834_run_kho_khac", _r834_ca(12, _S834("runs", 0, repository={"full_name": "x/r"}), "VẮNG")),
+    ("r834_run_head_khac", _r834_ca(12, _S834("runs", 0, head_sha="0" * 40), "VẮNG")),
+    ("r834_job_head_khac", _r834_ca(12, _S834("jobs", 1, head_sha="0" * 40), "VẮNG")),
+    ("r834_qd_trung", _r834_ca(2, lambda x, w, h: x["qd"].append(dict(x["qd"][0])), "P3 còn mở", lop=(("a-b", "P3"),))),
+    ("r834_bnc_lech_generation", _r834_ca(11, lambda x, w, h: x["bnc"].update(generation=2), "generation", p3_cn=True)),
+    ("r834_job_attempt_bool", _r834_ca(12, _S834("jobs", 0, run_attempt=True), "int thật")),
+    ("r834_job_run_id_float", _r834_ca(12, _S834("jobs", 0, run_id=100.0), "int thật")),
+    ("r834_job_url_qua_dai", _r834_ca(12, _S834("jobs", 0, check_run_url=f"{_API834}check-runs/" + "3" * 5000), "không trỏ check-run")),
+]
+MUTANTS["r812_bo_generation"][2].append("r834_bnc_lech_generation")
+MUTANTS.update({
+    "r834_bo_dau_hang_tron": ('    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\\1", t.strip())', '    khai = [re.match(r"`?()([0-9a-f]{7,40})", t.strip())', ["r834_reviewed_commit_span_thua"]),
+    "r834_bo_tien_to_mo_ho": (" or any(head.startswith(t[2]) and any(b != head and b.startswith(t[2]) for b in biet) for t in khai):", ":", ["r834_tien_to_mo_ho"]),
+    "r834_bo_goi_xet_dung": ('    _xet_dung(state_dir, st, "accept")\n', "", ["r834_xet_dung_duoc_goi"]),
+    "r834_xet_dung_truoc_dau_vao": (('    sha_ci = _kiem_ci(a, nc, h, state_dir)\n', '    _xet_dung(state_dir, st, "accept")\n'),
+                                    ('    _xet_dung(state_dir, st, "accept")\n    sha_ci = _kiem_ci(a, nc, h, state_dir)\n', ""), ["r834_xet_dung_sau_dau_vao"]),
+    "r834_bo_kho_run": (' and isinstance(r.get("repository"), dict) and r["repository"].get("full_name") == nc["repo"]]', "]", ["r834_run_kho_khac"]),
+    "r834_bo_head_run": ('r.get("path") == wf and r.get("head_sha") == h and ', 'r.get("path") == wf and ', ["r834_run_head_khac"]),
+    "r834_bo_head_job": ('(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)',
+                         '(j.get("run_id"), j.get("run_attempt"), j.get("name")) == (run["id"], run["run_attempt"], ten_j)', ["r834_job_head_khac"]),
+    "r834_qd_theo_tap": ('or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):', 'or {(q["nguon"], q["khoa"]) for q in qd} != con_mo):', ["r834_qd_trung"]),
+    "r834_bo_kieu_job": ('    if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int and j["run_attempt"] > 0\n', "    if False and all(True\n",
+                         ["r834_job_attempt_bool", "r834_job_run_id_float"]),
 })
 
 

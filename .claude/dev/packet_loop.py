@@ -2777,17 +2777,20 @@ def _trang_du(d, khoa: str, nhan: str) -> list:
     return list(moi.values())
 
 
-def _neo_connector(k: str, x: dict, head: str):
+def _neo_connector(k: str, x: dict, head: str, biet: set):
     """I7 neo head theo endpoint: 'hien' · 'cu' (neo head KHÁC hợp lệ) · 'hong' (thiếu/sai/mơ hồ) · None (issue comment không khai).
-    Issue comment: MỌI dòng `Reviewed commit:` phải là token trọn 7–40 hex và cùng một phía (tiền tố head hoặc không)."""
+    Issue comment (dạng connector `**Reviewed commit:** `sha``): phần còn lại của DÒNG sau MỖI nhãn phải đúng một SHA 7–40 hex (backtick
+    đủ cặp hoặc không), mọi khai cùng một phía; tiền tố chỉ là head khi không SHA nào khác đã biết trong readback (`biet`) cùng tiền tố."""
     if k != "issue_comments":
         c = x.get("commit_id")
         return "hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"
-    khai = [t.strip("`") for t in re.findall(r"Reviewed commit:[ \t]*(\S*)", x["body"])]
+    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\*\*)?([^\n]*)", x["body"])]
     if not khai:
         return None
-    phia = {head.startswith(t) for t in khai}
-    return "hong" if len(phia) > 1 or not all(re.fullmatch(r"[0-9a-f]{7,40}", t) for t in khai) else "hien" if phia == {True} else "cu"
+    if not all(khai) or any(head.startswith(t[2]) and any(b != head and b.startswith(t[2]) for b in biet) for t in khai):
+        return "hong"
+    phia = {head.startswith(t[2]) for t in khai}
+    return "hong" if len(phia) > 1 else "hien" if phia == {True} else "cu"
 
 
 def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
@@ -2803,7 +2806,8 @@ def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
         url, dung = ("issue_url", f"{API_GH}{repo}/issues/{pr}") if k == "issue_comments" else ("pull_request_url", f"{API_GH}{repo}/pulls/{pr}")
         if not all(x.get(url) == dung and isinstance(x.get("user"), dict) and type(x.get("body")) is str for x in v):
             _die(RC_GATE, f"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body")
-    cua = {k: [(x, _neo_connector(k, x, head)) for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
+    biet = {c for v in ep.values() for x in v for c in [x.get("commit_id"), *re.findall(r"\b[0-9a-f]{40}\b", x["body"])] if type(c) is str and SHA_RE.fullmatch(c)}
+    cua = {k: [(x, _neo_connector(k, x, head, biet)) for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
     if hong := [(k, x["id"]) for k, v in cua.items() for x, n in v if n == "hong"]:
         _die(RC_GATE, f"connector: mục của {BOT_CONNECTOR} có neo head thiếu/sai/mơ hồ {hong}")
     if not (any(n == "hien" for _, n in cua["issue_comments"])
@@ -2831,6 +2835,9 @@ def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:
     runs = _trang_du(wr, "workflow_runs", "workflow_runs")
     moi_tep = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], "jobs", f"workflow_jobs {f}")]  # đủ trang THEO TỪNG tệp
     jobs = _trang_du({"total_count": len({j["id"] for j in moi_tep}), "jobs": moi_tep}, "jobs", "workflow_jobs (gộp các tệp)")
+    if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int and j["run_attempt"] > 0
+               and all(type(j.get(k)) is str for k in ("name", "head_sha", "status", "check_run_url")) for j in jobs):  # bool/float ≠ int (I3)
+        _die(RC_GATE, "KHÔNG ĐO ĐƯỢC: workflow_jobs: run_id/run_attempt phải là int thật (> 0), name/head_sha/status/check_run_url là chuỗi")
     _doc_check_runs(a.check_runs)  # lược đồ + đủ trang của `kiem-gate`; dưới đây thêm: cùng id ⇒ CÙNG nội dung (app, url…)
     cr = {r["id"]: r for r in _trang_du(_doc_json(a.check_runs, RC_GATE)[0], "check_runs", "check_runs")}
     for wf in sorted({w for w, _ in nc["required_checks"]}):
@@ -2846,8 +2853,8 @@ def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:
             if not jj:
                 _die(RC_GATE, f"VẮNG: {wf} / {ten_j!r} không có job trên attempt {run['run_attempt']} của run {run['id']}")
             job = max(jj, key=lambda j: j["id"])
-            m = re.fullmatch(rf"{re.escape(API_GH + nc['repo'])}/check-runs/([1-9][0-9]*)", str(job.get("check_run_url")))
-            r = cr.get(int(m[1])) if m else None
+            m = re.fullmatch(rf"{re.escape(API_GH + nc['repo'])}/check-runs/([1-9][0-9]*)", job["check_run_url"])
+            r = next((x for i, x in cr.items() if str(i) == m[1]), None) if m else None  # so CHUỖI: không `int()` trên số chữ số tuỳ ý
             if (job.get("status"), job.get("conclusion")) != ("completed", "success") or r is None or r["name"] != ten_j or r["check_suite"]["id"] != suite:
                 _die(RC_GATE, f"{wf} / {ten_j!r}: job attempt mới nhất chưa xanh hoặc không trỏ check-run của suite {suite} trong {nc['repo']}")
             if r.get("url") != f"{API_GH}{nc['repo']}/check-runs/{r['id']}":

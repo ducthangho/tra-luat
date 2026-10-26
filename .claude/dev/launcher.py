@@ -1848,18 +1848,39 @@ class _BoLocStderr:
 # tương đối với workspace. Giới hạn (ghi vào sổ): lấy mẫu từ ngoài nên lệnh ngắn hơn chu kỳ có thể lọt, và argv[0]
 # do tiến trình tự khai.
 _SANDBOX_TEN = ("bwrap", "codex-linux-sandbox")
-_BWRAP_GAN = ("--ro-bind", "--bind", "--ro-bind-try", "--bind-try")
-_BWRAP_CO = ("--unshare-net", "--unshare-pid", "--unshare-user", "--unshare-ipc", "--new-session", "--die-with-parent")
+# v r27 vòng 2 (cross-review r27a R27-ALLOW-01/R27-PARSE-02): danh sách cho phép theo NGỮ NGHĨA, không theo cách viết —
+# regex nhận mọi chuỗi "trông hợp lệ", nên tên thư mục hay giá trị riêng tư viết bằng chữ thường vẫn lọt. Mọi giá trị ra
+# sổ thuộc một tập CỐ ĐỊNH dưới đây; phần còn lại thành "khac". Cú pháp đọc theo BẢNG SỐ ĐỐI SỐ: cờ không có trong bảng
+# thì không đoán được giá trị của nó tới đâu ⇒ ngừng và ghi `khong_ro` (chặn DO_DUOC) thay vì suy cờ từ giá trị.
+_BWRAP_ARITY = {
+    **dict.fromkeys(("--unshare-user", "--unshare-user-try", "--unshare-ipc", "--unshare-pid", "--unshare-net",
+                     "--unshare-uts", "--unshare-cgroup", "--unshare-cgroup-try", "--unshare-all", "--share-net",
+                     "--new-session", "--die-with-parent", "--as-pid-1", "--clearenv", "--disable-userns",
+                     "--assert-userns-disabled"), 0),
+    **dict.fromkeys(("--args", "--argv0", "--userns", "--userns2", "--pidns", "--uid", "--gid", "--hostname",
+                     "--chdir", "--unsetenv", "--lock-file", "--sync-fd", "--remount-ro", "--exec-label",
+                     "--file-label", "--proc", "--dev", "--tmpfs", "--mqueue", "--dir", "--seccomp",
+                     "--add-seccomp-fd", "--block-fd", "--userns-block-fd", "--info-fd", "--json-status-fd",
+                     "--cap-add", "--cap-drop", "--perms", "--size"), 1),
+    **dict.fromkeys(("--setenv", "--bind", "--bind-try", "--dev-bind", "--dev-bind-try", "--ro-bind", "--ro-bind-try",
+                     "--bind-fd", "--ro-bind-fd", "--file", "--bind-data", "--ro-bind-data", "--symlink", "--chmod"), 2),
+}
+_BWRAP_GHI_CO = ("--unshare-user", "--unshare-ipc", "--unshare-pid", "--unshare-net", "--unshare-all", "--share-net",
+                 "--new-session", "--die-with-parent")
+_BWRAP_GAN = ("--ro-bind", "--bind", "--ro-bind-try", "--bind-try", "--dev-bind", "--dev-bind-try")
+_CLS_ARITY = {"--apply-seccomp-then-exec": 0, "--sandbox-policy-cwd": 1, "--command-cwd": 1,
+              "--permission-profile": 1}
 _DUONG_GIU = ("/", "/tmp", "/dev", "/proc")
-_RE_TOKEN_SB = re.compile(r"[a-z][a-z0-9_]{0,31}")
-_RE_CO_SB = re.compile(r"--[a-z0-9][a-z0-9-]{0,39}")
-_RE_TEN_CON_SB = re.compile(r"[A-Za-z0-9_.-]{1,32}")
+_HO_SO_GIA_TRI = {"loai": ("managed", "disabled", "external"), "file_system": ("restricted", "unrestricted"),
+                  "access": ("read", "write", "none"), "network": ("restricted", "enabled"),
+                  "kind": ("root", "slash_tmp", "tmpdir", "minimal", "current_working_directory")}
 _CHU_KY_SANDBOX = 0.2
 _SANDBOX_GIOI_HAN = ("lay mau /proc tu ben ngoai moi %ss: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. "
                      "DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no")
 
 
 def _nhan_duong_sb(p, ws: str) -> str:
+    """Nhãn CỐ ĐỊNH, không bao giờ chép tên: một trong `_DUONG_GIU`, workspace, trong/tổ tiên workspace, khac."""
     if not isinstance(p, str):
         return "khac"
     if p in _DUONG_GIU:
@@ -1867,15 +1888,14 @@ def _nhan_duong_sb(p, ws: str) -> str:
     if p == ws:
         return "workspace"
     if p.startswith(ws + "/"):
-        con = p[len(ws) + 1:]
-        return "workspace/" + con if _RE_TEN_CON_SB.fullmatch(con) and con not in (".", "..") else "workspace/khac"
+        return "trong_workspace"
     if ws.startswith(p.rstrip("/") + "/"):
         return "to_tien_workspace"
     return "khac"
 
 
-def _token_sb(x) -> str:
-    return x if isinstance(x, str) and _RE_TOKEN_SB.fullmatch(x) else "khac"
+def _gia_tri_sb(loai: str, x) -> str:
+    return x if x in _HO_SO_GIA_TRI[loai] else "khac"
 
 
 def _tom_tat_ho_so_sb(js: str, ws: str) -> dict:
@@ -1891,54 +1911,61 @@ def _tom_tat_ho_so_sb(js: str, ws: str) -> dict:
         p = e.get("path") if isinstance(e, dict) else None
         p = p if isinstance(p, dict) else {}
         if p.get("type") == "special":
-            nhan = _token_sb((p.get("value") if isinstance(p.get("value"), dict) else {}).get("kind"))
+            nhan = _gia_tri_sb("kind", (p.get("value") if isinstance(p.get("value"), dict) else {}).get("kind"))
         elif p.get("type") == "path":
             nhan = _nhan_duong_sb(p.get("path"), ws)
         else:
             nhan = "khac"
-        muc.append([nhan, _token_sb(e.get("access") if isinstance(e, dict) else None)])
-    return {"loai": _token_sb(d.get("type")), "file_system": _token_sb(fs.get("type")), "muc": muc,
-            "network": _token_sb(d.get("network"))}
+        muc.append([nhan, _gia_tri_sb("access", e.get("access") if isinstance(e, dict) else None)])
+    return {"loai": _gia_tri_sb("loai", d.get("type")), "file_system": _gia_tri_sb("file_system", fs.get("type")),
+            "muc": muc, "network": _gia_tri_sb("network", d.get("network"))}
+
+
+def _doc_tuy_chon(a: list, arity: dict):
+    """[(cờ, [đối số])] tới RANH GIỚI LỆNH (`--` hoặc token không phải cờ, ở vị trí cờ), hoặc None khi gặp cờ lạ,
+    thiếu đối số, hay không thấy ranh giới. `--` nằm ở vị trí ĐỐI SỐ là giá trị, không phải ranh giới."""
+    ra, i = [], 0
+    while i < len(a):
+        x = a[i]
+        if x == "--" or not x.startswith("--"):
+            return ra
+        n = arity.get(x)
+        if n is None or i + n >= len(a):
+            return None
+        ra.append((x, a[i + 1:i + 1 + n]))
+        i += 1 + n
+    return None
 
 
 def _tom_tat_sandbox(argv: list, ws: str):
-    """None nếu argv không phải tiến trình sandbox; còn lại bản tóm tắt CHỈ gồm phần tử thuộc danh sách cho phép."""
+    """None nếu argv không phải tiến trình sandbox; còn lại bản tóm tắt CHỈ gồm giá trị thuộc tập cố định."""
     if not argv:
         return None
     ten = argv[0].replace("\\", "/").rsplit("/", 1)[-1]
     if ten not in _SANDBOX_TEN:
         return None
-    a = argv[1:argv.index("--")] if "--" in argv else argv[1:]     # sau `--` là lệnh của mô hình: không đọc
-    co, i = [], 0
+    tuy = _doc_tuy_chon(argv[1:], _BWRAP_ARITY if ten == "bwrap" else _CLS_ARITY)
+    if tuy is None:
+        return {"chuong_trinh": ten, "khong_ro": True}
+    co = []
     if ten == "bwrap":
         gan = []
-        while i < len(a):
-            x = a[i]
-            if x in _BWRAP_GAN and i + 2 < len(a):
-                gan.append([x, _nhan_duong_sb(a[i + 2], ws)])
-                i += 3
-                continue
-            if x in _BWRAP_CO:
+        for x, gt in tuy:
+            if x in _BWRAP_GAN:
+                gan.append([x, _nhan_duong_sb(gt[1], ws)])
+            elif x in _BWRAP_GHI_CO:
                 co.append(x)
-            elif x == "--cap-drop" and i + 1 < len(a):
-                co.append("--cap-drop=" + ("ALL" if a[i + 1] == "ALL" else "khac"))
-                i += 1
-            i += 1
+            elif x == "--cap-drop":
+                co.append("--cap-drop=" + ("ALL" if gt[0] == "ALL" else "khac"))
         return {"chuong_trinh": ten, "gan": gan, "co": sorted(set(co))}
     ho_so = None
-    while i < len(a):
-        x = a[i]
-        if not _RE_CO_SB.fullmatch(x):
-            i += 1
-            continue
-        gt = a[i + 1] if i + 1 < len(a) and not a[i + 1].startswith("--") else None
-        if x == "--permission-profile" and gt is not None:
-            ho_so = _tom_tat_ho_so_sb(gt, ws)
-        elif gt is None:
-            co.append(x)
+    for x, gt in tuy:
+        if x == "--permission-profile":
+            ho_so = _tom_tat_ho_so_sb(gt[0], ws)
+        elif gt:
+            co.append(x + "=" + _nhan_duong_sb(gt[0], ws))
         else:
-            co.append(x + "=" + (_nhan_duong_sb(gt, ws) if gt.startswith("/") else _token_sb(gt)))
-        i += 1 if gt is None else 2
+            co.append(x)
     return {"chuong_trinh": ten, "co": sorted(set(co)), "permission_profile": ho_so}
 
 
@@ -1975,6 +2002,7 @@ class _LayMauSandbox:
         self.dung = threading.Event()
         self.luong = (threading.Thread(target=self._chay, daemon=True)
                       if platform.system() == "Linux" else None)
+        self.goc_bd = None           # starttime của gốc, ghim ở lần quét đầu (R27-PID-04)
 
     def bat_dau(self) -> None:
         if self.luong is None:
@@ -1984,24 +2012,47 @@ class _LayMauSandbox:
         except Exception as e:
             self.loi.append(type(e).__name__)
 
+    @staticmethod
+    def _stat(pid):
+        """(ppid, starttime) hoặc None khi tiến trình ĐÃ THOÁT. Lỗi khác (quyền, I/O) NÉM — R27-PROC-03: chỉ biến mất
+        mới là bình thường, đọc bị từ chối là không đo được."""
+        try:
+            st = Path(f"/proc/{pid}/stat").read_bytes()
+        except (FileNotFoundError, ProcessLookupError):
+            return None
+        f = st[st.rindex(b")") + 2:].split()
+        return int(f[1]), f[19]
+
     def _quet(self) -> None:
+        goc = self._stat(self.pid)
+        if goc is None:
+            return                       # gốc đã thoát
+        if self.goc_bd is None:
+            self.goc_bd = goc[1]
+        elif goc[1] != self.goc_bd:
+            raise RuntimeError("pid goc da bi tai dung")
         con: dict = {}
         for d in os.listdir("/proc"):
-            if not d.isdigit():
-                continue
-            try:
-                st = Path(f"/proc/{d}/stat").read_bytes()
-            except OSError:
-                continue                 # tiến trình thoát giữa chừng: bình thường
-            f = st[st.rindex(b")") + 2:].split()
-            con.setdefault(int(f[1]), []).append((int(d), f[19]))
+            if d.isdigit():
+                st = self._stat(d)
+                if st is not None:
+                    con.setdefault(st[0], []).append((int(d), st[1]))
         hang = [self.pid]
         while hang:
-            for c, bd in con.get(hang.pop(), ()):
+            cha = hang.pop()
+            for c, bd in con.get(cha, ()):
                 hang.append(c)
                 try:
                     tho = Path(f"/proc/{c}/cmdline").read_bytes()
-                except OSError:
+                except (FileNotFoundError, ProcessLookupError):
+                    continue             # thoát giữa chừng: bình thường
+                # R27-PID-04: đọc lại stat SAU cmdline — pid bị tái dùng giữa hai lần đọc thì cmdline không thuộc
+                # tiến trình đã thấy trong đồ thị; bỏ và ghi không đo được. Đã thoát thì chỉ bỏ.
+                sau = self._stat(c)
+                if sau is None:
+                    continue
+                if sau != (cha, bd):
+                    self.loi.append("DanhTinhDoi")
                     continue
                 # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
                 if (c, bd, tho) in self.da:
@@ -2035,6 +2086,8 @@ class _LayMauSandbox:
             tt, ld = "KHONG_DO_DUOC", f"luong lay mau sandbox hong ({loi[0]})"
         elif self.con_chay:
             tt, ld = "KHONG_DO_DUOC", "luong lay mau sandbox chua dung khi chot so"
+        elif any(json.loads(k).get("khong_ro") for k in thay):
+            tt, ld = "KHONG_DO_DUOC", "argv tien trinh sandbox khong phan tich duoc theo bang so doi so"
         elif thay:
             tt, ld = "DO_DUOC", None
         else:

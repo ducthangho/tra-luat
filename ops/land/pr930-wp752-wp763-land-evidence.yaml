@@ -1,0 +1,100 @@
+# HO SO LAND — packet #752 (NO-P3-CONG-CU-HO-SO, r4) va #763 (NO-P3-DANG-KY-CI, r2), land GOP qua PR #930 theo duong A
+# (PR #918 cua #752 khong merge rieng; GitHub danh dau merged cung commit vi head cua no da nam trong #930).
+# Khuon: ops/land/pr931-wp835-land-evidence.yaml (rut gon theo lua chon "bookkeeping rut gon" cua chu kho).
+# NHAN: measured = do trong phien ghi so (tep kem); thuat_lai = so cua luot review/executor, KHONG tai chay;
+# not_measured = khong do duoc. Readback tho: ops/land/pr930-wp752-wp763-provenance/ (GET qua proxy phien bang GITHUB_PAT,
+# readback.py + kiemgate.py chep tu ho so pr931; SHA256SUMS kem).
+# landed FALSE: §10.2.2 — gate hau merge chi co moc Run (REST/kiem-gate); Checkout · Workflow definition · Gate output
+# not_measured (GraphQL WorkflowRun.file 403 trong phien web). Them: gate tren DUNG merge SHA 36057e8 bi huy truoc khi chay
+# (luot cho bi thay trong nhom concurrency); bang chung xanh hau merge lay tu commit first-parent ke tiep 39f21b3.
+
+schema_version: 1
+mission_id: gh-752-763
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT
+input_packet_generations:
+  - {packet_issue: 752, packet_id: no-p3-cong-cu-ho-so, revision: 4, generation: 1, lease_id: wp752-r4-g1-claude}
+  - {packet_issue: 763, packet_id: no-p3-dang-ky-ci, revision: 2, generation: 1, lease_id: wp763-r2-g1-claude}
+authorized_head_sha: b0fadc96366115d3545b9c723b30f04281898d94
+authorized_head_tree: 0f37ccea8563d543e239e77dd371ee293313736f
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/930
+authorization_ghi_chu: >-
+  measured — readback-pr-930.json merged_by=ducthangho, merged_at 2026-10-25T17:30:17Z, head.sha b0fadc9;
+  readback-events-930.json. Hai lease deu uy_quyen_merge false; executor (phien nay) KHONG merge. Khong co comment chu kho
+  rieng "cho phep merge"; hanh vi merge cua tai khoan chu kho la moc duy nhat (KHONG_DO_DUOC bam tay hay qua phien khac).
+land_operator: 'measured — readback-pr-930.json merged_by=ducthangho.'
+merge_method: merge
+merge_commit: 36057e8292bcb3b27ceb64b461d7cf29057a8ba3
+merge_commit_tree: 45dff0244ab39a54d3cde40dc5530e236dbcc2d5
+merge_commit_parents: [7009ab94f814fa19d3dc148f1ce074f40fd9031b, b0fadc96366115d3545b9c723b30f04281898d94]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261026/merge-va-diff.txt: diff cha1 7009ab9 .. merge BANG BYTE diff PR cdc4e80 .. head b0fadc9
+  (34984 byte, so bang python); 5 tep: .claude/dev/ci_dang_ky_test.py +2 (#763), ops/kiem_ho_so_land.py +141,
+  ops/kiem_ho_so_land_test.py +284, ops/kiem_nhan_hint.py +78, ops/kiem_nhan_hint_test.py +222 (#752). Blob bon tep #752 tai
+  merge == blob tai 9d34a8e (head #752 da duyet); blob so tai merge == tai b0fadc9 (head #763 da duyet). Tree merge KHAC tree
+  head vi cha 1 7009ab9 mang #928/#931 (docs/, ops/land/) — khong cham 5 tep. Lan do dau so sai (cha1..merge vs cha1..head)
+  da ghi lai trong cung tep.
+pr_918: >-
+  measured — readback-pr-918.json merged true, merge_commit_sha 36057e8, merged_by null (GitHub tu danh dau vi head 9d34a8e
+  da la to tien cua master qua #930; khong ai bam merge #918).
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) — head cuoi b0fadc9', run_id: 40208988593, run_attempt: 1, sha: b0fadc96366115d3545b9c723b30f04281898d94, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261026/kiem-gate-pre-b0fadc9.txt rc=0', nguon: [readback-run-40208988593.json, readback-jobs-40208988593.json, readback-check-runs-b0fadc9-all.json]}
+  - {name: 'C6 trong log gate-registry (job 121216491297)', conclusion: 'hai dong CI_DANG_KY ...: ĐẠT rc=0 moi dong mot lan; DANG KY 26/26; PHAN CHUNG 1070/1070; JSON thoi gian 12/12 khoa', ghi_chu: 'thuat_lai — phien executor tai log va dem; log KHONG luu trong ho so nay (job id de tai lai).'}
+  - {name: 'C8 trong log gate-ops (job 121216017879)', conclusion: 'CA 104/104 · DOT BIEN 392/392 · TONG DAT', ghi_chu: 'thuat_lai — nhu tren.'}
+  - {name: 'cross-review #752 (Codex CLI qua launcher.py run, lop sensitive)', sha: 9d34a8e7e97fdc8ac178fc209219cea067e4c279, conclusion: 'luot 3: approve 0/0/0/0 (run aedfc579); luot 1 f9b3dc1 va luot 2 fc1bb3a changes_requested (F752-01..03, deu DA VA THAT)', nguon: [verdicts/wp752-r4-cli-luot3-codex-verdict.md, verdicts/wp752-r4-cli-luot3-codex-verdict.receipt.yaml, verdicts/wp752-r4-cli-luot3-codex-run.json, verdicts/wp752-r4-cli-luot1-codex-verdict.md, verdicts/wp752-r4-cli-luot2-codex-verdict.md], ghi_chu: 'measured — bien nhan cross_approved, reviewed_sha 9d34a8e; ban goc tren ops/wp752-r4-g1-lease @ 01486f1.'}
+  - {name: 'cross-review #763 (Codex CLI qua launcher.py run, lop sensitive)', sha: b0fadc96366115d3545b9c723b30f04281898d94, conclusion: 'luot 2: approve 0/0/0/0 (run 553f19e0), C6/C8 cham tu log CI; luot 1 changes_requested 0 finding (sandbox chan Unix socket nen khong tai lap C8)', nguon: [verdicts/wp763-r2-cli-luot2-codex-verdict.md, verdicts/wp763-r2-cli-luot2-codex-verdict.receipt.yaml, verdicts/wp763-r2-cli-luot2-codex-run.json, verdicts/wp763-r2-cli-luot1-codex-verdict.md], ghi_chu: 'measured — bien nhan cross_approved, reviewed_sha = authorized_head_sha b0fadc9 (EXACT head); ban goc tren ops/wp763-r2-g1-lease @ cebe5a2.'}
+  - {name: 'connector Codex GitHub', conclusion: 'PR #918: f9b3dc1 (2 luot) va tu chay khi roi draft — khong finding sau khi va P2 4369279124; PR #930: b0fadc9 tu chay khi roi draft — khong finding', nguon: [readback-comments-930.json, readback-reviews-930.json, readback-review-comments-930.json]}
+  - {name: 'so loi goi Codex', conclusion: '#752: 6/10 (3 connector + 3 CLI); #763: 3/3 (1 connector + 2 CLI)', ghi_chu: 'measured — tran neo readback-comment-6392567946/6393045515/6393725163 (#752) va 6392570670/6400666225 (#763).'}
+  - {name: 'dieu kien kich thuoc', conclusion: '#752: 4 tep +725 (tran nang_tran <= 4 tep / <= 1000 dong); #763: 1 tep +2 (numstat 2 0)', nguon: [do-lai-nguon-20261026/merge-va-diff.txt]}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA 36057e8', run_id: 40216784693, run_attempt: 1, sha: 36057e8292bcb3b27ceb64b461d7cf29057a8ba3, conclusion: cancelled, jobs: '0 job', nguon: [readback-run-40216784693.json, readback-jobs-40216784693.json], ghi_chu: 'measured — luot cho trong nhom concurrency master bi thay boi push moi hon truoc khi chay; khong phai luot do.'}
+  - {name: 'ci.yml push master — commit first-parent ke tiep 39f21b3 (merge #932)', run_id: 40218214211, run_attempt: 1, sha: 39f21b3, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261026/kiem-gate-post-39f21b3.txt rc=0', nguon: [readback-run-40218214211.json, readback-jobs-40218214211.json], ghi_chu: 'measured — 36057e8 la to tien cua 39f21b3; 5 tep cua PR khong doi tu 36057e8 toi master ab344da (merge-va-diff.txt). Chi la moc Run cua §10.2.2; Checkout, Workflow definition, Gate output not_measured.'}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA 36057e8', run_id: 40216784577, sha: 36057e8292bcb3b27ceb64b461d7cf29057a8ba3, conclusion: success, jobs: '2/2 success', nguon: [readback-run-40216784577.json, readback-jobs-40216784577.json]}
+bookkeeping:
+  - {item: 'cap lease #752', ket_qua: 'measured — readback-comment-6392359706.json (chu kho tu viet xac nhan cap lease wp752-r4-g1-claude)'}
+  - {item: 'cap lease #763', ket_qua: 'measured — readback-comment-6392570670.json va dinh chinh base readback-comment-6393049538.json'}
+  - {item: 'rut han hai lease', ket_qua: 'measured — xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-930-land}
+# ---- het truong chuan
+pham_vi_land: cong_cu_ops
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_01CSM7GNazhN6uGJb4v1TqBT — CHINH phien executor cua ca hai lease ghi so.
+
+spec:
+  no_p3_cong_cu_ho_so_r4: {path: ops/specs/no-p3-cong-cu-ho-so-r4.md, sha256: a98d09e86e32ee249668aaa114aed43e8a982e8bd7f9ef81fe61aa6a2a168791}
+  no_p3_dang_ky_ci_r2: {path: ops/specs/no-p3-dang-ky-ci-r2.md, sha256: 30776483ab40e57708c6b03ba0877bc3f40dd27edf334e7dceb0fe5629a113e2}
+  do_lai: 'measured — do-lai-nguon-20261026/spec-sha256.txt (ca hai khop).'
+lease:
+  - lease_id: wp752-r4-g1-claude
+    path: ops/leases/wp752-r4-g1-claude.yaml (nhanh ops/wp752-r4-g1-lease)
+    lease_until_ban_dau: '2026-10-26T13:40:00Z'
+    ban_chep: 'measured — do-lai-nguon-20261026/lease-wp752-r4-g1-claude-sau-rut-han-fdbab14.yaml.txt'
+  - lease_id: wp763-r2-g1-claude
+    path: ops/leases/wp763-r2-g1-claude.yaml (nhanh ops/wp763-r2-g1-lease)
+    lease_until_ban_dau: '2026-10-27T15:40:00Z'
+    ban_chep: 'measured — do-lai-nguon-20261026/lease-wp763-r2-g1-claude-sau-rut-han-dedd7f3.yaml.txt'
+  thu_hoi_cuoi: CHO_DO
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-930.json merged true, merge_commit_sha 36057e8; readback-pr-918.json merged true cung commit.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate hau merge: CHUA DAT day du — luot tren dung 36057e8 bi huy (0 job); luot xanh 23/23 tren
+    39f21b3 (con, chua 5 tep khong doi) chi la moc Run; Checkout, Workflow definition, Gate output cua §10.2.2 not_measured.
+    (2) lease da nha: xem lease.thu_hoi_cuoi. (3) bookkeeping: ho so nay DAT. (4) review: DAT cho ca hai — bien nhan
+    cross_approved, #763 neo DUNG authorized_head_sha b0fadc9; #752 neo 9d34a8e va blob bon tep tai merge == tai 9d34a8e.
+    (5) noi dung merge = diff PR DAT (bang byte). (6) merge boi tai khoan chu kho DAT.
+    Mo lai: du bon moc §10.2.2 tren 36057e8 hoac con chua 5 tep khong doi.
+
+no_co_ten:
+  - {ma: pr881-authorization-url-l6, trang_thai: mo, ghi_chu: 'ops/land/pr881-wp852-land-evidence.yaml truot L-6 o authorization_url (do bang ops/kiem_ho_so_land.py khi thi cong #752); ho so cua packet khac, sua o packet rieng.'}
+  - {ma: gate-hau-merge-bi-thay-trong-concurrency, trang_thai: mo, ghi_chu: 'luot gate push master dang cho bi huy khi co push moi hon; merge SHA co the khong bao gio co luot gate rieng. Can quy uoc doc bang chung tu commit first-parent ke tiep.'}

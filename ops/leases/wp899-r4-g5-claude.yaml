@@ -73,8 +73,15 @@ xung_dot_write_set_do_luc_cap:
   ket_qua: 'ops/ci_provenance.py, ops/ci_provenance_test.py: NGUOI_GIU 1 = wp899-r4-g4-claude (cung packet, thay bang bia mo hai chieu); .claude/dev/ci_dang_ky_test.py: NGUOI_GIU 0 (wp763-r2-g1-claude het han 01:35Z). Master aa5c117 luc do; base giu ba222ff theo dac ta r4.'
 leased_at_utc: '2026-10-26T02:12:00Z'
 heartbeat_at: '2026-10-26T02:12:00Z'
-lease_until: '2026-10-28T02:26:00Z'
-lease_expires_at_utc: '2026-10-28T02:26:00Z'
+lease_until: '2026-10-26T04:40:00Z'
+lease_expires_at_utc: '2026-10-26T04:40:00Z'
+rut_han:
+  han_cu: '2026-10-28T02:26:00Z'
+  han_moi: '2026-10-26T04:40:00Z'
+  rut_boi: claude-executor-session session_016tvvQ5sRaicKZ6rs93GTmK (chinh executor cua lease nay)
+  ly_do: 'packet #899 r4 da merge qua PR #945 (merge cebb5b2, head 4511b1e); viec cua lease da xong.'
+  tham_quyen: 'chu kho yeu cau truc tiep trong phien executor 26-10-2026 ("Rut han lease g5 di"); chi thu hep quyen ghi, khong mo rong.'
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem tro nguoc bang thay_the_cho; viec da xong. Tien le dedd7f3 (wp763-r2-g1-claude).'
 run_minutes: 120
 heartbeat_minutes: 30
 attempts_used: 0

@@ -1,0 +1,183 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- ops/reviews/README.md
++++ ops/reviews/README.md
+@@ -701,13 +701,13 @@
+ | `wp773-r1-g1-exec-review-9-codex-verdict.md` | `DRIVER-DO-DOC-CAY-TAM` | evidence/*.py cua reviewer doc /tmp/* va duong dan tuyet doi cua phien executor, khong co trong kho; chua co TAI_LAP.sh. Tai lap can dung lai ban sao tai 8b496f9. Chua chay lai driver tu kho luc ghi so. |
+ | `wp773-r3-g3-exec-review-3-codex-verdict.md` | `CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY` | Checkout review /home/user/rv773 (ban sao detached o 6f69f9d) nam ngoai vung ghi sandbox codex mot cach DUOC KHAI, khong duoc kiem chung bang co che; "read-only" chi la CHI THI. Do sau luot: HEAD khong doi, `git status --porcelain` 0 dong — khong loai tru ghi-roi-hoan-nguyen. |
+ | `wp773-r3-g3-exec-review-3-codex-verdict.md` | `DRIVER-DO-DOC-CAY-TAM` | evidence/*.py cua reviewer doc /tmp/* va duong dan tuyet doi cua phien executor, khong co trong kho; chua co TAI_LAP.sh. Tai lap can dung lai ban sao tai 6f69f9d. Chua chay lai driver tu kho luc ghi so. |
+-| `pr870-review-1-codex-verdict.md` | `HEAD-MERGE-CHUA-REVIEW-LAI` | Verdict cham `b38fce8`; head da merge la `06a50c5` (va P2 bang dung HINT.patch, 3 dong CLAUDE.md) va KHONG duoc review lai. "Da va" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check), khong phai verdict. |
++| `pr870-review-1-codex-verdict.md` | `HEAD-MERGE-CHUA-REVIEW-LAI` | Anh chup lich su tai commit ghi bien nhan 600b6ce90d97d5f606272af137d7153b7b32133c: Verdict cham b38fce8; head da merge la 06a50c5 (them commit va P2 bang dung HINT.patch, 3 dong CLAUDE.md). Khong co luot review nao tren 06a50c5 — "da va" la loi khai cua executor, kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check, khong phai verdict cua reviewer. Sau moc ay, pr870-review-2-codex-verdict.md va pr870-review-3-codex-verdict.md da review dung 06a50c5feea77c2654f31edd26efeed7eeee62f5 (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land. |
+ | `pr870-review-1-codex-verdict.md` | `CODEX-EXEC-TRAN-KHONG-RUN-JSON` | Goi `codex exec` tran, khong qua `launcher.py run`: khong run.json, khong neo prompt_sha256 boi launcher. sha256 PROMPT.md `83c27e94…` chi do boi phien dieu phoi truoc khi phong. |
+ | `pr870-review-1-codex-verdict.md` | `STDERR-CHI-GIU-HEADER` | Chi luu 12 dong dau stderr.log (header CLI); transcript day du 578332 byte KHONG vao kho — output trong VERDICT.md la reviewer tu chep, khong doi chieu lai duoc tu kho. |
+ | `pr870-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | `cay-kho/` nam TRONG vung ghi sandbox codex (workspace-write); "read-only" chi la CHI THI. Reviewer do sau luot: sach — khong loai tru ghi-roi-hoan-nguyen. |
+ | `pr870-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | evidence/*.py doc duong dan tuyet doi cua sandbox phien, khong co trong kho; tai lap can dung lai mirror tai `b38fce8`. Chua chay lai tu kho luc ghi so. |
+ | `pr889-review-1-codex-verdict.md` | `VERDICT-KHAI-SAI-EXECUTION-SURFACE` | Verdict dong 7 tu khai `execution_surface: codex_service` (va noi phien "khong di qua `codex exec` hay Desktop"), nhung run.json 9f946d71 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Thieu sot nay do pr896-review-2-codex bat (P1 dong mot phan cua pr915-review-1); khong phai chung thuc model/effort da phuc vu. |
+-| `pr889-review-1-codex-verdict.md` | `HEAD-MERGE-CHUA-REVIEW-LAI` | Verdict cham `8d5cccb`; head da merge la `094e8d1` (va P2 bang HINT.patch + sua them mot cau) va KHONG duoc review lai. "Da va" la loi khai executor (`patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma `ops/cong_cu_test.py:8916`), khong phai verdict. |
++| `pr889-review-1-codex-verdict.md` | `HEAD-MERGE-CHUA-REVIEW-LAI` | Anh chup lich su tai commit ghi bien nhan e02d0c31986f6ba5019fef21311a939f2d9c2f17: Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG duoc review lai. "Da va" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma ops/cong_cu_test.py:8916), khong phai verdict cua reviewer. Sau moc ay, pr889-review-2-codex-verdict.md va pr889-review-3-codex-verdict.md da review dung 094e8d17ae4dfcf21dca63702c9262267bdc072c (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land. |
+ | `pr889-review-1-codex-verdict.md` | `STDERR-CHI-GIU-HEADER` | Chi luu 13 dong dau stderr.log (header CLI); ban day du 763083 byte (sha256 trong `run/run.json`) KHONG vao kho — output trong VERDICT.md la reviewer tu chep. |
+ | `pr889-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | `cay-kho/` nam TRONG vung ghi sandbox codex; "read-only" chi la CHI THI. `worktree_sach true` luc phong + reviewer do sau luot sach — khong loai tru ghi-roi-hoan-nguyen. |
+ | `pr889-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | `audit_review.py`/`evidence/*.txt` tham chieu duong dan tuyet doi cua sandbox; `evidence/hint-check/` khong vao kho. Tai lap can dung lai mirror tai `8d5cccb`. |
+@@ -1043,8 +1043,8 @@
+ | [`wp766-r1-g1-exec-review-1-codex-verdict.md`](wp766-r1-g1-exec-review-1-codex-verdict.md) | [`.receipt.yaml`](wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml) | `wp766-r1-g1-claude-20261016` (gen **1**, revision **1**, spec_hash `da3095b4…`) | **`approve`** · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 5d4f7321`, run.json trong kho; model thuc chay KHONG DO DUOC) · 0/0/0 · review THI HANH luot 1 · ban phang nguyen byte cua `wp766-r1-g1-exec-review-1-codex/VERDICT.md` · khong HINT. Head `701f41c` = head da merge (`e03d4bf`). | `701f41c6` | 29832 |
+ | [`wp773-r1-g1-exec-review-9-codex-verdict.md`](wp773-r1-g1-exec-review-9-codex-verdict.md) | [`.receipt.yaml`](wp773-r1-g1-exec-review-9-codex-verdict.receipt.yaml) | `wp773-r1-g1-claude-20261016` (gen **1**, revision **1**, spec_hash `063ccaa6…`) | **`approve`** · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 66dbfee5`, run.json trong kho; model thuc chay KHONG DO DUOC) · 0/0/0 · review THI HANH g1 luot 9 (luot 1–8 request_changes, da va) · ban phang nguyen byte cua `wp773-r1-g1-exec-review-9-codex/VERDICT.md` · khong HINT. Ma g1 doi sau luot nay (c11/c15), duoc phu boi g3 luot 3. | `8b496f9e` | 9698 |
+ | [`wp773-r3-g3-exec-review-3-codex-verdict.md`](wp773-r3-g3-exec-review-3-codex-verdict.md) | [`.receipt.yaml`](wp773-r3-g3-exec-review-3-codex-verdict.receipt.yaml) | `wp773-r3-g3-claude-20261018` (gen **3**, revision **3**, spec_hash `81543d80…`) | **`approve`** · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run f76cb02b`, run.json trong kho; model thuc chay KHONG DO DUOC) · 0/0/0 · review THI HANH g3 luot 3 tren toan PR #778 (luot 1 P2=2, luot 2 P3=1, da va) · ban phang nguyen byte cua `wp773-r3-g3-exec-review-3-codex/VERDICT.md` · khong HINT. Head `6f69f9d` = head da merge (`dba7fae`). | `6f69f9de` | 7459 |
+-| [`pr870-review-1-codex-verdict.md`](pr870-review-1-codex-verdict.md) | [`.receipt.yaml`](pr870-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `codex exec` tran, khong run.json; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `master-windows-bo-sot-dispatch` da va o `06a50c5` bang dung HINT.patch, KHONG review lai · ban phang nguyen byte cua `pr870-review-1-codex/VERDICT.md`. Merge `5f288ea`. | `b38fce83` | 104880 |
+-| [`pr889-review-1-codex-verdict.md`](pr889-review-1-codex-verdict.md) | [`.receipt.yaml`](pr889-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 9f946d71`, run.json trong kho; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `windows-green-does-not-prove-all-baselines` da va o `094e8d1`, KHONG review lai · ban phang nguyen byte cua `pr889-review-1-codex/VERDICT.md`. Merge `6ac385f`. | `8d5cccbb` | 75193 |
++| [`pr870-review-1-codex-verdict.md`](pr870-review-1-codex-verdict.md) | [`.receipt.yaml`](pr870-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `codex exec` tran, khong run.json; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `master-windows-bo-sot-dispatch` da va o `06a50c5` bang dung HINT.patch, CHUA review tai moc 600b6ce90d97d5f606272af137d7153b7b32133c; sau do luot 2 va 3 da review dung 06a50c5feea77c2654f31edd26efeed7eeee62f5 (deu approve 0/0/0/0); giu ket qua/assurance luot 1, khong suy quyen land · ban phang nguyen byte cua `pr870-review-1-codex/VERDICT.md`. Merge `5f288ea`. | `b38fce83` | 104880 |
++| [`pr889-review-1-codex-verdict.md`](pr889-review-1-codex-verdict.md) | [`.receipt.yaml`](pr889-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 9f946d71`, run.json trong kho; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `windows-green-does-not-prove-all-baselines` da va o `094e8d1`, CHUA review tai moc e02d0c31986f6ba5019fef21311a939f2d9c2f17; sau do luot 2 va 3 da review dung 094e8d17ae4dfcf21dca63702c9262267bdc072c (deu approve 0/0/0/0); giu ket qua/assurance luot 1, khong suy quyen land · ban phang nguyen byte cua `pr889-review-1-codex/VERDICT.md`. Merge `6ac385f`. | `8d5cccbb` | 75193 |
+ | [`pr870-review-2-codex-verdict.md`](pr870-review-2-codex-verdict.md) | [`.receipt.yaml`](pr870-review-2-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | `approve` 0/0/0/0 tren DUNG head da merge `06a50c5` (luot 1 cham `b38fce8`) · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 2699e2d8`, run.json trong kho; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · ban phang nguyen byte cua `pr870-review-2-codex/VERDICT.md`. Merge `5f288ea`. | `06a50c5f` | 79752 |
+ | [`pr889-review-2-codex-verdict.md`](pr889-review-2-codex-verdict.md) | [`.receipt.yaml`](pr889-review-2-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | `approve` 0/0/0/0 tren DUNG head da merge `094e8d1` (luot 1 cham `8d5cccb`) · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run d955f9ef`, run.json trong kho; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · ban phang nguyen byte cua `pr889-review-2-codex/VERDICT.md`. Merge `6ac385f`. | `094e8d17` | 34167 |
+ | [`pr896-review-1-codex-verdict.md`](pr896-review-1-codex-verdict.md) | [`.receipt.yaml`](pr896-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** 0/0/1/0 tren head da merge `816f439` · P2 `t162-khong-khoa-toan-bo-ma-tran-job` va o `3bc4244`; CHUA review tai moc ghi so 2789cbb, sau do DA DONG theo pr896-review-2 tai 8d56009; giu verdict lich su · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 64761d8e`, run.json trong kho; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · ban phang nguyen byte cua `pr896-review-1-codex/VERDICT.md`. Merge `27dcc3b`. | `816f4398` | 63341 |
+--- ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml
++++ ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml
+@@ -67,11 +67,7 @@
+     sha: c2f6898
+     verdict: approve
+     verdict_sha256: 8babf9a85dc856bb4ba171e94b745e9fe13bbed2f14db033ac889619aa2f8995
+-chuoi_verdict_ghi_chu: >-
+-  Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va
+-  KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG).
+-  `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5.
+-
++chuoi_verdict_ghi_chu: "Anh chup lich su tai commit ghi bien nhan e32c5643111e001dc0c655c568b445c897ade450: Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG). `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor c2f68987b3f298de12b84cf29a934c7b844c8558 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ no_da_khai_trong_chuoi_nay:
+   - id: REVIEW-KHONG-DOC-CHECK-RUN
+     khai_o: 'verdict luot 3'
+--- ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml
++++ ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml
+@@ -135,10 +135,7 @@
+   loai: canonical_ancestry
+   cuong_do: thap
+   mo_ta: "Anh chup lich su tai commit ghi bien nhan 86169c00beff045b0faed63e39d1a67b9acd1fc1: Blob verdict ghim tren nhanh claude/review-543-luot1-20260916, commit bc5d0c6 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+-  gioi_han: >-
+-    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi
+-    #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.
+-
++  gioi_han: "Anh chup lich su tai commit ghi bien nhan 86169c00beff045b0faed63e39d1a67b9acd1fc1: cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ pham_vi_changes_requested: >-
+   5 LOP MO. LOP 1 va LOP 2 la P1 va co HINT ap duoc. LOP 3, 4, 5 can executor quyet. VERDICT
+   KHONG noi co che n-gram vo dung — no CO RANG THAT (chep 25 tu -> rc=6; con tro thuan tuy ->
+--- ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml
++++ ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml
+@@ -135,10 +135,7 @@
+   loai: canonical_ancestry
+   cuong_do: thap
+   mo_ta: "Anh chup lich su tai commit ghi bien nhan de0ecd0f912bb131b63ada866672af00129eefd0: Blob verdict ghim tren nhanh claude/review-543-luot2-20260916, commit 80d8161 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 80d816130fda69af75dc1d9ae76f3fc83b837773 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+-  gioi_han: >-
+-    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543
+-    land bang merge commit hoac fast-forward; squash pha quan he to tien.
+-
++  gioi_han: "Anh chup lich su tai commit ghi bien nhan de0ecd0f912bb131b63ada866672af00129eefd0: cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor 80d816130fda69af75dc1d9ae76f3fc83b837773 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ pham_vi_changes_requested: >-
+   2 LOP MO. LOP 6 (P2) la vi pham PHAM VI chu khong phai loi ma — khong lam cong nao do, va
+   reviewer co phan trach nhiem gay ra no. LOP 4 (P3) la mot so hang sai trong mot khoi khai ma
+--- ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml
++++ ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml
+@@ -117,10 +117,7 @@
+   loai: canonical_ancestry
+   cuong_do: thap
+   mo_ta: "Anh chup lich su tai commit ghi bien nhan 6d59a4394f0e51ace4e02c8f4be13cb649e6871e: Blob verdict ghim tren nhanh claude/review-543-luot3-20260916, commit 7d8bb69 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 7d8bb69ac02b54075d63a9915e12e6d2bf28b513 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+-  gioi_han: >-
+-    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543
+-    land bang merge commit hoac fast-forward; squash pha quan he to tien.
+-
++  gioi_han: "Anh chup lich su tai commit ghi bien nhan 6d59a4394f0e51ace4e02c8f4be13cb649e6871e: cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor 7d8bb69ac02b54075d63a9915e12e6d2bf28b513 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ pham_vi_approve: >-
+   `approve` nay la DIEU KIEN DUNG cua vong va->review, KHONG phai merge authorization. No noi:
+   moi lop da neu deu dong, va khong tim them duoc lop nao. No KHONG noi "da duoc xac nhan doc lap"
+--- ops/reviews/pr870-review-1-codex-verdict.receipt.yaml
++++ ops/reviews/pr870-review-1-codex-verdict.receipt.yaml
+@@ -24,10 +24,7 @@
+ review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff chi tai lieu dev-side (CLAUDE.md +21/-9).'
+ assurance: cross_reviewed
+ assurance_KHONG_dat: cross_approved
+-assurance_ghi_chu: >-
+-  Khac ho (codex CLI, executor Claude) nhung verdict la `changes_requested`, va KHONG khai cross_approved: (1) head da merge
+-  06a50c5 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong
+-  modelUsage; (3) goi codex tran, khong run.json; (4) checkout review khong bi cuong che read-only.
++assurance_ghi_chu: "Anh chup lich su tai commit ghi bien nhan 600b6ce90d97d5f606272af137d7153b7b32133c: Khac ho (codex CLI, executor Claude) nhung verdict la `changes_requested`, va KHONG khai cross_approved: (1) head da merge 06a50c5 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) goi codex tran, khong run.json; (4) checkout review khong bi cuong che read-only. Sau moc ay, pr870-review-2-codex-verdict.md va pr870-review-3-codex-verdict.md da review dung 06a50c5feea77c2654f31edd26efeed7eeee62f5 (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land."
+ verdict: changes_requested
+ verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 10 `Kết quả: 0 P0, 0 P1, 1 P2, 0 P3.`'
+ verdict_path: ops/reviews/pr870-review-1-codex-verdict.md
+@@ -94,10 +91,7 @@
+ verdict_usage_caveats:
+   - id: HEAD-MERGE-CHUA-REVIEW-LAI
+     muc: P2
+-    mo_ta: >-
+-      Verdict cham b38fce8; head da merge la 06a50c5 (them commit va P2 bang dung HINT.patch, 3 dong CLAUDE.md). Khong co luot
+-      review nao tren 06a50c5 — "da va" la loi khai cua executor, kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check,
+-      khong phai verdict cua reviewer.
++    mo_ta: "Anh chup lich su tai commit ghi bien nhan 600b6ce90d97d5f606272af137d7153b7b32133c: Verdict cham b38fce8; head da merge la 06a50c5 (them commit va P2 bang dung HINT.patch, 3 dong CLAUDE.md). Khong co luot review nao tren 06a50c5 — \"da va\" la loi khai cua executor, kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check, khong phai verdict cua reviewer. Sau moc ay, pr870-review-2-codex-verdict.md va pr870-review-3-codex-verdict.md da review dung 06a50c5feea77c2654f31edd26efeed7eeee62f5 (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land."
+   - id: CODEX-EXEC-TRAN-KHONG-RUN-JSON
+     muc: P2
+     mo_ta: >-
+--- ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
++++ ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
+@@ -25,10 +25,7 @@
+ review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff chi tai lieu dev-side (CLAUDE.md +9/-0 tai reviewed_sha).'
+ assurance: cross_reviewed
+ assurance_KHONG_dat: cross_approved
+-assurance_ghi_chu: >-
+-  Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai
+-  cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi
+-  co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only.
++assurance_ghi_chu: "Anh chup lich su tai commit ghi bien nhan e02d0c31986f6ba5019fef21311a939f2d9c2f17: Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only. Sau moc ay, pr889-review-2-codex-verdict.md va pr889-review-3-codex-verdict.md da review dung 094e8d17ae4dfcf21dca63702c9262267bdc072c (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land."
+ verdict: changes_requested
+ verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 5 `Kết quả: 0 P0, 0 P1, 1 P2, 0 P3.`'
+ verdict_path: ops/reviews/pr889-review-1-codex-verdict.md
+@@ -101,10 +98,7 @@
+       Verdict dong 7 tu khai `execution_surface: codex_service` (va noi phien "khong di qua `codex exec` hay Desktop"), nhung run.json 9f946d71 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Thieu sot nay do pr896-review-2-codex bat (P1 dong mot phan cua pr915-review-1); khong phai chung thuc model/effort da phuc vu.
+   - id: HEAD-MERGE-CHUA-REVIEW-LAI
+     muc: P2
+-    mo_ta: >-
+-      Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG
+-      duoc review lai. "Da va" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma
+-      ops/cong_cu_test.py:8916), khong phai verdict cua reviewer.
++    mo_ta: "Anh chup lich su tai commit ghi bien nhan e02d0c31986f6ba5019fef21311a939f2d9c2f17: Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG duoc review lai. \"Da va\" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma ops/cong_cu_test.py:8916), khong phai verdict cua reviewer. Sau moc ay, pr889-review-2-codex-verdict.md va pr889-review-3-codex-verdict.md da review dung 094e8d17ae4dfcf21dca63702c9262267bdc072c (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land."
+   - id: STDERR-CHI-GIU-HEADER
+     muc: P3
+     mo_ta: >-
+--- ops/reviews/wp538-review-1-claude-verdict.receipt.yaml
++++ ops/reviews/wp538-review-1-claude-verdict.receipt.yaml
+@@ -152,11 +152,7 @@
+   loai: canonical_ancestry
+   cuong_do: thap
+   mo_ta: "Anh chup lich su tai commit ghi bien nhan ab27f786a45de5df7aae23f7df7b4c4fb8eecb92: Blob verdict ghim tren nhanh `claude/review-wp538-20260916`, tao tu `f2aa1f9f` — dung head da review. Quan he to tien voi `master` CHUA CO: WP538 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor ab27f786a45de5df7aae23f7df7b4c4fb8eecb92 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+-  gioi_han: >-
+-    `cuong_do: thap` vi mo neo hien CHI la mot nhanh, khong phai tag `luu-tru/*` va khong phai
+-    to tien cua `master`. Nhanh xoa duoc va SHA se thanh khong tra duoc. Manh len `cao` khi
+-    WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.
+-
++  gioi_han: "Anh chup lich su tai commit ghi bien nhan ab27f786a45de5df7aae23f7df7b4c4fb8eecb92: `cuong_do: thap` vi mo neo hien CHI la mot nhanh, khong phai tag `luu-tru/*` va khong phai to tien cua `master`. Nhanh xoa duoc va SHA se thanh khong tra duoc. Manh len `cao` khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor ab27f786a45de5df7aae23f7df7b4c4fb8eecb92 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ verdict_usage_caveats:
+   - id: HIEN-VAT-TRONG-THU-MUC-CON-NAM-NGOAI-TAM-BA-CONG
+     muc: P2
+--- ops/reviews/wp538-review-2-claude-verdict.receipt.yaml
++++ ops/reviews/wp538-review-2-claude-verdict.receipt.yaml
+@@ -155,10 +155,7 @@
+   loai: canonical_ancestry
+   cuong_do: thap
+   mo_ta: "Anh chup lich su tai commit ghi bien nhan ab27f786a45de5df7aae23f7df7b4c4fb8eecb92: Blob verdict ghim tren nhanh claude/review-wp538-luot2-20260916, tao tu 7c21bf60 — dung head da review. Quan he to tien voi master CHUA CO: WP538 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor ab27f786a45de5df7aae23f7df7b4c4fb8eecb92 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+-  gioi_han: >-
+-    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi
+-    WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.
+-
++  gioi_han: "Anh chup lich su tai commit ghi bien nhan ab27f786a45de5df7aae23f7df7b4c4fb8eecb92: cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor ab27f786a45de5df7aae23f7df7b4c4fb8eecb92 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ pham_vi_approve: >-
+   CHI PHU THU DO DUOC: doc ma, mot dot bien co rang (M-b), bay cong tai cho, va BON check CI da
+   xong. KHONG phu `gate (windows)` va `gate-registry` con chay luc cham. KHONG phu hanh vi that
+--- ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
++++ ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
+@@ -162,11 +162,7 @@
+   loai: canonical_ancestry
+   cuong_do: thap
+   mo_ta: "Anh chup lich su tai commit ghi bien nhan ab27f786a45de5df7aae23f7df7b4c4fb8eecb92: Blob verdict ghim tren nhanh claude/review-wp540-20260916, tao tu 7c7ad450 — dung head da review. Quan he to tien voi master CHUA CO: WP540 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor ab27f786a45de5df7aae23f7df7b4c4fb8eecb92 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
+-  gioi_han: >-
+-    cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/* va khong phai to tien
+-    cua master. Manh len cao khi WP540 land bang merge commit hoac fast-forward; squash pha quan
+-    he to tien.
+-
++  gioi_han: "Anh chup lich su tai commit ghi bien nhan ab27f786a45de5df7aae23f7df7b4c4fb8eecb92: cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/* va khong phai to tien cua master. Manh len cao khi WP540 land bang merge commit hoac fast-forward; squash pha quan he to tien. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor ab27f786a45de5df7aae23f7df7b4c4fb8eecb92 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
+ pham_vi_approve: >-
+   APPROVE NAY CHI PHU THU TOI DO DUOC: doc ma, mot dot bien co rang, sau cong, va bo test cua
+   packet chay TRON tren LINUX. No KHONG xac nhan cac so do Windows cua executor (8/8 base,

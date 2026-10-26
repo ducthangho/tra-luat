@@ -1,0 +1,30 @@
+{
+  "yaml_parsed": 293,
+  "receipts": 291,
+  "verdict_hashes_match": 291,
+  "flat_directory_pairs": 15,
+  "allowlist_counts": {
+    "ALLOWLIST_CUTOVER": 11,
+    "NO_DA_DO": 42
+  },
+  "allowlist_matches": 53,
+  "parent_changed_verdicts": [],
+  "master_modified_old_verdicts": [],
+  "supplementary": [
+    {
+      "path": "ops/reviews/don-nhanh-base-review-1-codex-verdict.receipt.yaml",
+      "hash_matches": true,
+      "readme_rows": 1,
+      "description_matches": true,
+      "receipt_same_as_parent": true
+    },
+    {
+      "path": "ops/reviews/slice-b-c-review-2-codex-verdict.receipt.yaml",
+      "hash_matches": true,
+      "readme_rows": 1,
+      "description_matches": true,
+      "receipt_same_as_parent": true
+    }
+  ],
+  "errors": []
+}

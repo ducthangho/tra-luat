@@ -3,8 +3,7 @@
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor,
 # KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr924-wp923-provenance/ (GET qua proxy phien bang
 # GITHUB_PAT, script readback.py + kiemgate.py kem trong do-lai-nguon-20261025/; SHA256SUMS kem).
-# landed FALSE vi MOT ly do: §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition · Gate output
-# chua do. KHAC cac ho so #888/#906/#910: §8.1 lan nay DAT — bien nhan launcher cua luot review approve tren DUNG head
+# landed FALSE vi MOT ly do: §10.2.2 — gate hau merge moc Workflow definition chua do (GraphQL 403); Run, Checkout, Gate output measured (cap nhat 26-10-2026, do-1026-b306e15/). KHAC cac ho so #888/#906/#910: §8.1 lan nay DAT — bien nhan launcher cua luot review approve tren DUNG head
 # 7574c39 ghi model_phuc_vu do may (28 response, deu gpt-6.1-sol, DO_DUOC), khop loi khai chu kho "model reviewer là codex".
 # Pha B (chu thich .claude/dev/ci_dang_ky_test.py) chua mo: cho wp899-r4-g3-claude nha tep ay.
 
@@ -45,7 +44,7 @@ pre_merge_checks:
   - {name: 'dieu kien kich thuoc', conclusion: '2 tep, +8 -5 (tran spec: <= 2 tep, <= 60 dong them)', nguon: [readback-pr-924.json, do-lai-nguon-20261025/merge-va-diff.txt]}
   - {name: 'cong tai cho tren 7574c39 (N1–N4, N6)', conclusion: 'N1 yaml.safe_load ci.yml base == head True, hai hang bam khop; N2 5 dong diff ci.yml deu chu thich; N3 actionlint rc0 ca hai ve (shellcheck vang); N4 pwsh 7.4.6 that: base 33/36 (do t9 t30 t32), head 34/36 (do t30 t32), dot bien 8999 33/36 (do t9 t30 t32) => delta chi t9; N6 ci_dang_ky_test TONG DAT', ghi_chu: 'thuat_lai — handoff ops/wp923-r1-g1-lease:ops/handoff/wp923-g1-claude.md (3333ae0); bao cao executor readback-comment-6393748189.json.'}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40166417941, run_attempt: 1, sha: b306e15a96a4d9d05d2ba4191cbd071fa7820ee7, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-post-b306e15.txt: suite 108867119228, 23 ten, rc=0', nguon: [readback-run-40166417941.json, readback-jobs-40166417941.json, readback-check-runs-b306e15-all.json], ghi_chu: 'Chi la moc Run cua §10.2.2. Moc Checkout, Workflow definition, Gate output: not_measured — log job/artifact khong luu; GraphQL WorkflowRun.file 403 trong phien.'}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40166417941, run_attempt: 1, sha: b306e15a96a4d9d05d2ba4191cbd071fa7820ee7, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-post-b306e15.txt: suite 108867119228, 23 ten, rc=0', nguon: [readback-run-40166417941.json, readback-jobs-40166417941.json, readback-check-runs-b306e15-all.json], ghi_chu: 'Bon moc §10.2.2 (do 2026-10-26, do-1026-b306e15/bon-moc-10-2-2.txt, cach do theo ho so pr931 PR #937): Run measured (readback-run-40166417941.json). Checkout measured — do-1026-b306e15/log-gate-121090319255-trich.txt: buoc checkout in git log -1 = b306e15, buoc gate in head_sha = b306e15; artifact json identity head b306e15, tree 5cb8812, cay sach. Gate output measured — artifact 12587909812 gate-evidence-ubuntu-latest-1 (sha256 zip 20a50907… = digest REST, do-1026-b306e15/readback-artifacts-40166417941.json; tep giai nen do-1026-b306e15/artifact-12587909812/): python scripts/tl.py --selftest rc 0, marker == tl selftest 1731/1731 ==, output sha256 42beb4b9… khop; Linux 6.17.0-1022-azure, CPython 3.12.15. Workflow definition NOT_MEASURED — GraphQL WorkflowRun.file 403 trong phien; bang chung phu khong thay the: blob ci.yml 82d9f239 giong het tai b306e15 va hai cha.'}
   - {name: 'launcher-windows.yml push master — DUNG merge SHA', run_id: 40166417957, run_attempt: 1, sha: b306e15a96a4d9d05d2ba4191cbd071fa7820ee7, conclusion: success, jobs: '2/2 success (ubuntu-latest, windows-latest)', kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-post-b306e15.txt: suite 108867119245, 2 ten, rc=0', nguon: [readback-run-40166417957.json, readback-jobs-40166417957.json, readback-check-runs-b306e15-all.json], ghi_chu: 'Chi la moc Run cua §10.2.2 (cung gioi han nhu tren). Lane launcher KHONG chay chay-cong-windows_test.ps1.'}
   - {name: 'ops-publish-lease.yml cho commit rut han aa8451a', run_id: 40170358213, sha: aa8451a, conclusion: success, nguon: [readback-run-40170358213.json, readback-jobs-40170358213.json]}
 bookkeeping:
@@ -86,8 +85,7 @@ trang_thai_packet:
   merged_nguon: 'measured — readback-pr-924.json: merged true, merged_at 2026-10-25T05:40:57Z, merge_commit_sha b306e15, head.sha 7574c39.'
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA b306e15: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow
-    definition, Gate output cua §10.2.2 not_measured. (2) lease da nha: rut han aa8451a, 3/3 duong dan NGƯỜI_GIỮ 0 DAT.
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA b306e15: CHUA DAT day du — 3/4 moc §10.2.2 measured (Run, Checkout, Gate output — do-1026-b306e15/, do 2026-10-26); Workflow definition not_measured (GraphQL 403). (2) lease da nha: rut han aa8451a, 3/3 duong dan NGƯỜI_GIỮ 0 DAT.
     (3) bookkeeping: ho so nay + comment tren #923 DAT. (4) review approve neo DUNG 7574c39 voi assurance §8.1 DAT (xem
     assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
     Mo lai: du bon moc provenance CI §10.2.2 cho DUNG run gate tren b306e15 (hoac gate moi dung b306e15).
@@ -115,5 +113,5 @@ no_co_ten:
   - {ma: chay-cong-windows-t15-moi-truong, trang_thai: mo, ghi_chu: 'thuat_lai — t15 ra KHONG DO DUOC trong sandbox reviewer, DAT trong phien executor; phu thuoc moi truong'}
 khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
-  - 'Provenance CI §10.2.2 cua gate hau merge (Checkout, Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403, log/artifact khong luu.'
+  - 'Moc Workflow definition §10.2.2 cua gate hau merge b306e15: KHONG_DO_DUOC — GraphQL WorkflowRun.file 403 trong phien (do-1026-b306e15/bon-moc-10-2-2.txt). Checkout va Gate output nay measured qua artifact + log (cap nhat 26-10-2026, xem post_merge_checks).'
   - 'chay-cong-windows_test.ps1 KHONG chay o workflow CI nao; N4 chi do bang pwsh tren Linux (executor + reviewer), khong do tren Windows.'

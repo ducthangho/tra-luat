@@ -1,0 +1,31 @@
+# 4 moc §10.2.2 cho ci.yml push master run 40215856274 attempt 1 tren 7009ab9 — do 2026-10-26 trong phien ghi so
+
+## Checkout (git, ban sao day du, core.abbrev 7)
+$ git rev-parse 7009ab9^{commit} 7009ab9^{tree} 7009ab9^1 7009ab9^2
+7009ab94f814fa19d3dc148f1ce074f40fd9031b
+11f0c80b6ca510bcf6d0d6fce6c2afdd531842f2
+5775864b04a18c5afe1aafcbb23e54525ce8a3d8
+3e46a4b790b770e513ab05b0b3faf0dc88796903
+
+## Gate output — artifact
+$ sha256sum <zip tai tu REST /actions/artifacts/12607492265/zip> (so voi digest REST cua artifact 12607492265)
+ee9d01a5341d2685fc414b16d09e879f9e2df6964d8b7845c6af17cf37477295  gate-evidence-ubuntu-latest-1.zip
+digest REST: sha256:ee9d01a5341d2685fc414b16d09e879f9e2df6964d8b7845c6af17cf37477295 (readback-artifacts-40215856274.json)
+zip KHONG kem (cong duong nhanh tu choi tep nhi phan trong ho so); hai tep ben trong giai nen nguyen byte vao
+artifact-12607492265/ (tl-selftest-Linux.json, tl-selftest-Linux.out).
+tl-selftest-Linux.out sha256 b765833c19938b9f67c9bcd1c72681a03c2ab2dd6e2187f89fb98901bb7d68ba == output_sha256 trong json: True
+json: {'status': 'pass', 'returncode': 0, 'positive_verified': True, 'positive_match': '== tl selftest 1731/1731 ==\n', 'command': ['python', 'scripts/tl.py', '--selftest']}
+json.identity: {'head_sha': '7009ab94f814fa19d3dc148f1ce074f40fd9031b', 'tree_sha': '11f0c80b6ca510bcf6d0d6fce6c2afdd531842f2', 'tracked_clean': True, 'worktree_clean': True, 'system': 'Linux', 'system_release': '6.17.0-1022-azure', 'python_version': '3.12.15'}
+identity_after == identity: True
+
+## Workflow definition
+$ GraphQL node(WFR_kwLOTNeRjc8AAAAJXQ1Ekg){... on WorkflowRun{file{path repositoryFileUrl}}}
+HTTP 403, khong co header X-GitHub-*: "GitHub GraphQL is not available from Claude Code sessions; ..." => not_measured theo §10.2.2
+Bang chung phu (KHONG thay cho exact definition OID):
+$ REST run path: .github/workflows/ci.yml, referenced_workflows: []
+blob ci.yml tai 7009ab9 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+blob ci.yml tai 7009ab9^1 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+blob ci.yml tai 7009ab9^2 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+blob ci.yml tai d2e3052 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+sha256 bytes blob 82d9f239… = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+dong script buoc 'run' in trong log job 121236721787: 72 ; khong co trong blob 82d9f239: 0

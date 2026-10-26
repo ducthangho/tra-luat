@@ -1,0 +1,8 @@
+# kiem-gate offline tren readback-check-runs-<sha>-all.json (filter=all); ten bat buoc = moi job khong skipped cua attempt cuoi cua run do.
+== run 40210997887 attempt 1 event pull_request conclusion success suite 108985617901 23 ten (bo skipped)
+gate XANH trên 3e46a4b790b770e513ab05b0b3faf0dc88796903 (suite 108985617901): chuan-bi id=121222150831 · gate (ubuntu-latest) id=121222216960 · gate-cong-cu (ubuntu-latest, 0) id=121222217133 · gate-cong-cu (ubuntu-latest, 1) id=121222217092 · gate-cong-cu (ubuntu-latest, 2) id=121222217069 · gate-cong-cu (ubuntu-latest, 3) id=121222217154 · gate-cong-cu (ubuntu-latest, 4) id=121222217156 · gate-cong-cu (ubuntu-latest, 5) id=121222217063 · gate-cong-cu (ubuntu-latest, 6) id=121222217052 · gate-cong-cu (ubuntu-latest, 7) id=121222217096 · gate-cong-cu-gop (ubuntu-latest) id=121231729179 · gate-nhanh-gop (ubuntu-latest) id=121222607365 · gate-nhanh-manh (ubuntu-latest, 0) id=121222217050 · gate-nhanh-manh (ubuntu-latest, 1) id=121222217040 · gate-nhanh-manh (ubuntu-latest, 2) id=121222217053 · gate-nhanh-manh (ubuntu-latest, 3) id=121222217054 · gate-nhanh-manh (ubuntu-latest, 4) id=121222217085 · gate-nhanh-manh (ubuntu-latest, 5) id=121222217117 · gate-nhanh-manh (ubuntu-latest, 6) id=121222217081 · gate-nhanh-manh (ubuntu-latest, 7) id=121222217042 · gate-ops (ubuntu-latest) id=121222217035 · gate-packet-loop (ubuntu-latest) id=121222216992 · gate-registry (ubuntu-latest) id=121222689529
+rc=0
+== run 40211851626 attempt 1 event pull_request_target conclusion success suite 108987890079 1 ten (bo skipped)
+gate XANH trên 3e46a4b790b770e513ab05b0b3faf0dc88796903 (suite 108987890079): thu-hoi id=121224563455
+CẢNH BÁO: 'thu-hoi' có 1 run ở suite khác (121221987899) — bỏ qua
+rc=0

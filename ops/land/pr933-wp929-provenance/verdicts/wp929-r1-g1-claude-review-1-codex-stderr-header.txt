@@ -1,0 +1,14 @@
+# 13 dong dau stderr.log cua luot launcher 0d78fe11 (header CLI codex; nguyen van); stderr_sha256 trong run.json la cua TOAN tep
+Reading additional input from stdin...
+OpenAI Codex v0.164.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/0bb822e5-dd23-5f92-b8a2-d02d38536cc7/scratchpad/rv
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 01a173d6-7c83-7b71-8119-0bfc7ba17c98
+--------
+user

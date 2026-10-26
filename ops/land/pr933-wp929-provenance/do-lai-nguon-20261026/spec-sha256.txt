@@ -1,0 +1,1 @@
+79251bee45fc39003d13438d741c4e6319dc80ea6b480dc1b931c93d0c6a7ae6  ops/specs/wp929.md @ origin/ops/wp929-r1-g1-lease

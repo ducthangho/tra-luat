@@ -240,7 +240,10 @@ proposed → ready → leased → running → reviewing → accepted → integra
 
 Packet áp `ADR-0054` (chế độ chỉ xác định ở `record-lease` đường lease ref của `.claude/dev/packet_loop.py`) có thêm
 `approved_pending` giữa `reviewing` và `accepted`: `approve` có biên nhận ghi sổ rồi vào `approved_pending`; chỉ
-cửa `accept` (packet #834) đưa sang `accepted` khi các điều kiện của ADR ấy đo được. Packet chưa áp giữ đường `reviewing → accepted`.
+cửa `accept` (packet #834) đưa sang `accepted`, và chỉ khi packet áp `ADR-0054`, đo được đủ: đầu nhánh lease trên remote
+bằng SHA đang chờ; mọi check bắt buộc xanh trên attempt mới nhất của run mới nhất (§10.2); connector xong trên đúng kho,
+PR và head, không còn P0–P2; mỗi P3 còn mở (offline và connector, slug lấy từ biên nhận) có đúng một quyết định. Thiếu
+một điều kiện thì state giữ nguyên. Packet chưa áp giữ đường `reviewing → accepted`.
 
 Mỗi phiên chỉ thực hiện một chuyển động có trách nhiệm rõ: execute một Packet, review một PR hoặc land một exact
 head. “Một đơn vị công việc” không có nghĩa một micro-step: Executor được hoàn thành mọi substep cần thiết trong

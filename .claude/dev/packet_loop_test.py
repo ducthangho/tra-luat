@@ -1785,12 +1785,13 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--since", "%040x" % 0 if False else "HEAD~1",
           "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
-    if _r812(c, "review", env=env)[0]:  # #812: `record-lease` đường ref + `record-review` có biên nhận in tiếng Việt; rc khác 0 ⇒ ĐỎ
-        raise AssertionError(f"[{codepage}] chuỗi r812 lease → review không rc=0")
+    rc, _, e, _, o = _r834(c, env=env)  # #812 lease ref → review có biên nhận, rồi #834 `accept`: đều in tiếng Việt; rc khác 0 ⇒ ĐỎ
+    if rc or not o.strip():
+        raise AssertionError(f"[{codepage}] chuỗi r812 lease → review → accept phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
     sd_r = _reviewing(c, "--codex-review-calls-limit", 1)  # #775: rescue cần state đã chạm trần, dựng ngoài kịch bản
     _pl(c, sd_r, _goi("r1", _H1), _goi("r2", _H1, 3))
     buoc += [([b[1], "--packet", 55, *b[2:]], sd_r) for b in (_nang(0, tran=2), _rescue(0, "nang_tran"))]
-    da_phu = set()
+    da_phu = {"accept"}
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
@@ -8550,6 +8551,264 @@ MUTANTS.update({
     "r812_r8_du_lop_ca_approve": ('a.verdict == "approve" or {x["slug"]', 'False or {x["slug"]', ["r812_r8_approve_no_p3"]),
     "r812_r8_runtime_bo_lease": ('    if isinstance(lease, dict) and any(', '    if False and any(', ["r812_r8_runtime_trai_lease"]),
 })
+
+
+# --- #834 MAY-ADR-0054-a2 `accept`: baseline DƯƠNG = approved_pending thật (`_r812`) + 5 job bắt buộc xanh trên attempt mới nhất của run
+# mới nhất + connector sạch neo head; mỗi ca đổi ĐÚNG một yếu tố qua `doi(x, w, h)`, đòi rc + lý do; ca âm đòi state nguyên byte (I4).
+_CN834, _API834 = "chatgpt-codex-connector[bot]", "https://api.github.com/repos/o/r/"
+_J834 = [f"{j} (ubuntu-latest)" for j in ("gate", "gate-cong-cu-gop", "gate-ops", "gate-packet-loop", "gate-registry")]
+
+
+def _r834(c: Ctx, doi=None, lop=(), p3_cn=False, env=None, vo=False):
+    rc, sd, e, _ = _r812(c, "review", lop=lop, env=env)
+    _doi(0, rc, e, "r834 nền approved_pending")
+    w, f, h = c.tmp / "kho" / "w", c.tmp, _st(sd)["pending_sha"]
+    qd = lambda nguon, khoa: {"nguon": nguon, "khoa": khoa, "ten_no": "no-x", "owner": "ducthangho", "huong": "#814", "ly_do": "nit"}  # noqa: E731
+    x = {"runs": [{"id": 100, "path": ".github/workflows/ci.yml", "head_sha": h, "repository": {"full_name": "o/r"}, "run_attempt": 1,
+                   "status": "completed", "conclusion": "success", "check_suite_id": 500}],
+         "jobs": [{"id": 200 + i, "run_id": 100, "run_attempt": 1, "name": j, "head_sha": h, "status": "completed", "conclusion": "success",
+                   "check_run_url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
+         "cr": [{"id": 300 + i, "name": j, "head_sha": h, "status": "completed", "conclusion": "success", "check_suite": {"id": 500},
+                 "app": {"slug": "github-actions"}, "url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
+         "reviews": [], "review_comments": [], "qd": [qd("offline", s) for s, g in lop if g == "P3"], "bnc": None, "qdf": qd, "sd": sd, "jobs2": None,
+         "issue_comments": [{"id": 20, "user": {"login": _CN834}, "body": f"Codex Review: Didn't find any major issues.\n\n**Reviewed commit:** `{h[:10]}`\n\n<details>x</details>", "issue_url": f"{_API834}issues/55"}]}
+    if p3_cn:
+        x["review_comments"] = [{"id": 11, "user": {"login": _CN834}, "body": "![P3 Badge] nit", "commit_id": h, "pull_request_url": f"{_API834}pulls/55"}]
+        x["bnc"], x["qd"] = {"bang_lop": [{"slug": "c-d", "hang": "P3", "connector_refs": [["review_comments", 11]]}]}, [*x["qd"], qd("connector", "c-d")]
+    (doi or (lambda *_: None))(x, w, h)
+    trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: v}  # noqa: E731
+    ghi = lambda ten, d: ((f / ten).write_text(d if isinstance(d, str) else json.dumps(d)), f / ten)[1]  # noqa: E731
+    cn = "{" if x.get("hong") else {"repo": "o/r", "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}, **x.get("env", {})}
+    args = ["accept", "--packet", 55, "--root", w, "--pr", 55, "--workflow-runs", ghi("wr.json", trang("workflow_runs", x["runs"])),
+            "--workflow-jobs", ghi("wj.json", trang("jobs", x["jobs"])), *(("--workflow-jobs", ghi("wj2.json", trang("jobs", x["jobs2"]))) if x["jobs2"] else ()), "--check-runs", ghi("cr.json", trang("check_runs", x["cr"])), "--connector", ghi("cn.json", cn),
+            *(("--quyet-dinh-p3", ghi("qd.json", x["qd"])) if x["qd"] else ()),
+            *(("--bien-nhan-connector", ghi("bnc.yaml", __import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn=x["bnc"])))) if x["bnc"] else ())]
+    truoc = (sd / "wp55.json").read_bytes()
+    if vo:
+        (f / "vo.py").write_text(_VO834)
+    rc, o, e = run(f / "vo.py", [c.script, *args], sd, env) if vo else run(c.script, args, sd, env)
+    return rc, sd, e, truoc, o
+
+
+def _r834_ca(rc_doi, doi=None, phai="", **kw):
+    def ca(c):
+        rc, sd, e, truoc, o = _r834(c, doi, **kw)
+        if _co_banner(o) or _co_banner(e):  # CLI sập ⇒ TÍN DỤNG GIẢ (#822 M6), không phải giết — fixture r834 không mang banner
+            raise CliSapDo(f"r834 accept SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
+        _doi(rc_doi, rc, e, "r834 accept")
+        if phai not in _txt(e):
+            raise AssertionError(f"r834: rc đúng mà lý do khác — đòi {phai!r}, stderr={_txt(e)!r}")
+        if rc_doi == 0:
+            _kiem(sd, "r834 accepted", state="accepted", accepted_sha=_st(sd)["pending_sha"])
+        elif (sd / "wp55.json").read_bytes() != truoc:
+            raise AssertionError("I4: state đổi sau khi accept từ chối")
+    return ca
+
+
+def _r834_day_nhanh(x, w, h):
+    _g(w, "checkout", "-q", "-b", "t834", "refs/remotes/origin/agent/wp55-g1-claude"), (w / "x/b.py").write_text("b = 2\n")
+    _g(w, "add", "-A"), _g(w, "commit", "-qm", "sau approve"), _g(w, "push", "-q", "origin", "HEAD:agent/wp55-g1-claude")
+
+
+_S834 = lambda k, i=0, **v: lambda x, w, h: x[k][i].update(v)  # noqa: E731
+_R834_RV = lambda trang_thai, than="": lambda x, w, h: x["reviews"].append({"id": 30, "user": {"login": _CN834}, "state": trang_thai, "commit_id": h,  # noqa: E731
+                                                                            "body": than, "pull_request_url": f"{_API834}pulls/55"})
+CASES += [
+    ("r834_sach_accepted", _r834_ca(0)),
+    ("r834_p3_du_quyet_dinh", _r834_ca(0, lop=(("a-b", "P3"),), p3_cn=True)),
+    ("r834_dau_nhanh_lech", _r834_ca(5, _r834_day_nhanh, "≠ pending_sha")),
+    ("r834_check_vang", _r834_ca(12, lambda x, w, h: x["jobs"].pop(2), "VẮNG")),
+    ("r834_check_app_khac", _r834_ca(12, _S834("cr", 1, app={"slug": "evil-app"}), "không từ app")),
+    ("r834_check_workflow_khac", _r834_ca(12, _S834("runs", 0, path=".github/workflows/khac.yml"), "VẮNG")),
+    ("r834_rerun_dang_chay", _r834_ca(12, _S834("runs", 0, run_attempt=2, status="in_progress", conclusion=None), "chưa xanh")),
+    ("r834_check_kho_khac", _r834_ca(12, _S834("cr", 0, url="https://api.github.com/repos/x/r/check-runs/300"), "kho khác")),
+    ("r834_pr_khac_cung_head", _r834_ca(12, _S834("issue_comments", 0, issue_url=f"{_API834}issues/56"), "không thuộc")),
+    ("r834_review_pending", _r834_ca(12, lambda x, w, h: (x["issue_comments"].clear(), _R834_RV("PENDING")(x, w, h)), "chưa xong")),
+    ("r834_review_changes_p1", _r834_ca(12, _R834_RV("CHANGES_REQUESTED", "![P1 Badge] bug"), "còn ['P1']")),
+    ("r834_issue_comment_p1", _r834_ca(12, lambda x, w, h: x["issue_comments"].append(
+        {**x["issue_comments"][0], "id": 21, "body": f"![P1 Badge] bug\nReviewed commit: `{h[:10]}`"}), "còn ['P1']")),
+    ("r834_cung_id_hai_noi_dung", _r834_ca(12, lambda x, w, h: x["review_comments"].insert(0, {**x["review_comments"][0], "body": "![P1 Badge] bug"}),
+                                           "hai nội dung", p3_cn=True)),
+    ("r834_run_cung_id_khac_path", _r834_ca(12, lambda x, w, h: x["runs"].insert(0, {**x["runs"][0], "path": ".github/workflows/khac.yml"}), "hai nội dung")),
+    ("r834_p3_offline_thieu_qd", _r834_ca(2, lambda x, w, h: x["qd"].clear(), "P3 còn mở", lop=(("a-b", "P3"),))),
+    ("r834_p3_connector_thieu_qd", _r834_ca(2, lambda x, w, h: x["qd"].clear(), "P3 còn mở", p3_cn=True)),
+    ("r834_p3_connector_khong_slug", _r834_ca(11, lambda x, w, h: x.update(bnc=None, qd=[x["qdf"]("connector", "review_comments:11")]),
+                                              "--bien-nhan-connector", p3_cn=True)),
+    ("r834_bang_chung_duong_rong", _r834_ca(12, lambda x, w, h: x["issue_comments"].clear(), "chưa xong")),
+    ("r834_dau_vao_hong_state_nguyen", _r834_ca(12, lambda x, w, h: x.update(hong=True), "KHÔNG ĐO ĐƯỢC")),
+]
+_M834_EP = "    for k in EP_CONNECTOR:\n        for x, n in cua[k]:"
+MUTANTS.update({
+    "r834_bo_ket_luan_issue_comment": ('    if not (any(n == "hien" for _, n in cua["issue_comments"])', "    if not (False", ["r834_sach_accepted"]),
+    "r834_bo_ref_connector_h": ('    lop = [x for x in lop if "connector_refs" in x]', "    lop = []", ["r834_p3_du_quyet_dinh"]),
+    "r834_bo_dau_nhanh_remote": ("    if xa[0] or xa[1].split() != [h.encode(), f\"refs/heads/{nc['branch']}\".encode()]:", "    if xa[0]:", ["r834_dau_nhanh_lech"]),
+    "r834_job_vang_bo_qua": ("            if not jj:\n", "            if not jj:\n                continue\n            if False:\n", ["r834_check_vang"]),
+    "r834_bo_app": ("get(\"slug\") != APP_CHECK:", "get(\"slug\") != APP_CHECK and False:", ["r834_check_app_khac"]),
+    "r834_bo_path_workflow": ('r.get("path") == wf and ', "", ["r834_check_workflow_khac"]),
+    "r834_bo_attempt_moi_nhat": (('        if (run.get("status"), run.get("conclusion")) != ("completed", "success") or any(',
+                                  '(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)'),
+                                 ("        if False and any(", '(j.get("run_id"), j.get("head_sha"), j.get("name")) == (run["id"], h, ten_j)'),
+                                 ["r834_rerun_dang_chay"]),  # phối hợp: run mới nhất chưa xanh VÀ job phải thuộc attempt mới nhất — hai lớp cùng chặn
+    "r834_bo_kho_check_run": ("            if r.get(\"url\") != f\"{API_GH}{nc['repo']}/check-runs/{r['id']}\":", "            if False:", ["r834_check_kho_khac"]),
+    "r834_bo_neo_pr_phan_tu": ("if not all(x.get(url) == dung and", "if not all(", ["r834_pr_khac_cung_head"]),
+    "r834_pending_la_xong": (' and x.get("state") in ("APPROVED", "COMMENTED", "CHANGES_REQUESTED")', "", ["r834_review_pending"]),
+    "r834_bo_finding_review": (_M834_EP, '    for k in ("review_comments", "issue_comments"):\n        for x, n in cua[k]:', ["r834_review_changes_p1"]),
+    "r834_bo_finding_issue_comment": (_M834_EP, '    for k in ("reviews", "review_comments"):\n        for x, n in cua[k]:', ["r834_issue_comment_p1"]),
+    "r834_bo_nhat_quan_id": ('        if json.dumps(moi.setdefault(x["id"], x), sort_keys=True) != json.dumps(x, sort_keys=True):', '        if moi.update({x["id"]: x}):',
+                             ["r834_cung_id_hai_noi_dung", "r834_run_cung_id_khac_path"]),
+    "r834_bo_p3_offline": ('{("offline", s) for s in p3_off} | ', "", ["r834_p3_offline_thieu_qd"]),
+    "r834_bo_p3_connector": (' | {("connector", s) for s in slug_cn}', "", ["r834_p3_connector_thieu_qd"]),
+    "r834_khoa_id_so": ("slug_cn = _slug_connector(st, a, h, p3_cn) if p3_cn else []", 'slug_cn = [f"{k}:{i}" for k, i in p3_cn]', ["r834_p3_connector_khong_slug"]),
+    "r834_bo_bang_chung_duong": ('    if not (any(n == "hien" for _, n in cua["issue_comments"])', '    if False and (any(n == "hien" for _, n in cua["issue_comments"])', ["r834_bang_chung_duong_rong"]),
+    "r834_ghi_truoc_khi_doc": ("    p3_cn, moc = _doc_connector(", '    _save(state_dir, {**st, "state": "accepted"})\n    p3_cn, moc = _doc_connector(', ["r834_dau_vao_hong_state_nguyen"]),
+})
+
+
+# #834 lượt 2 — mỗi chốt Codex lượt 1 chỉ ra (gồm 8 đột biến sống của reviewer) có ca đổi đúng một yếu tố + đột biến riêng.
+def _r834_run_cu_xanh(x, w, h):  # run 90 cũ, đủ job/check-run xanh ở suite 490; run 100 mới nhất ĐỎ
+    x["runs"][0]["conclusion"] = "failure"
+    x["runs"].append({**x["runs"][0], "id": 90, "check_suite_id": 490, "conclusion": "success"})
+    x["jobs"] += [{**j, "id": j["id"] + 400, "run_id": 90, "check_run_url": f"{_API834}check-runs/{j['id'] + 500}"} for j in x["jobs"]]
+    x["cr"] += [{**r, "id": r["id"] + 400, "check_suite": {"id": 490}, "url": f"{_API834}check-runs/{r['id'] + 400}"} for r in x["cr"]]
+
+
+def _r834_state(**doi):
+    def f(x, w, h):
+        st = _st(x["sd"])
+        for k, v in doi.items():
+            st[k] = {**st[k], **v}
+        (x["sd"] / "wp55.json").write_text(json.dumps(st))
+    return f
+
+
+_IC834 = lambda than, i=21: lambda x, w, h: x["issue_comments"].append({**x["issue_comments"][0], "id": i, "body": than.format(h=h)})  # noqa: E731
+CASES += [
+    ("r834_check_noi_do", _r834_ca(12, _S834("cr", 0, conclusion="failure"), "KHÔNG xanh")),
+    ("r834_check_noi_do_bi_che", _r834_ca(12, lambda x, w, h: (x["cr"][0].update(conclusion="failure"), x["cr"].append(
+        {**x["cr"][0], "id": 999, "conclusion": "success", "app": {"slug": "evil-app"}, "url": "https://api.github.com/repos/x/r/check-runs/999"})), "mới hơn")),
+    ("r834_check_cung_id_khac_app", _r834_ca(12, lambda x, w, h: x["cr"].insert(0, {**x["cr"][0], "app": {"slug": "evil-app"}}), "hai nội dung")),
+    ("r834_attempt_moi_job_cu", _r834_ca(12, _S834("runs", 0, run_attempt=2), "VẮNG")),
+    ("r834_run_moi_nhat_do", _r834_ca(12, _r834_run_cu_xanh, "chưa xanh")),
+    ("r834_job_url_kho_khac", _r834_ca(12, _S834("jobs", 0, check_run_url="https://api.github.com/repos/x/r/check-runs/300"), "không trỏ check-run")),
+    ("r834_job_tro_check_khong_co", _r834_ca(12, _S834("jobs", 0, check_run_url=f"{_API834}check-runs/399"), "không trỏ check-run")),
+    ("r834_hai_tep_jobs", _r834_ca(0, lambda x, w, h: (x["runs"].append({**x["runs"][0], "id": 101, "path": ".github/workflows/khac.yml", "check_suite_id": 501}),
+                                                        x.update(jobs2=[{**x["jobs"][0], "id": 250, "run_id": 101, "name": "khac"}])))),
+    ("r834_badge_ngoai_mien_review", _r834_ca(12, _R834_RV("COMMENTED", "![Q1 Badge] x"), "ngoài miền")),
+    ("r834_review_changes_khong_hang", _r834_ca(12, _R834_RV("CHANGES_REQUESTED", "cần sửa"), "ngoài miền")),
+    ("r834_review_comment_thieu_commit", _r834_ca(12, lambda x, w, h: x["review_comments"].append(
+        {"id": 12, "user": {"login": _CN834}, "body": "![P1 Badge] bug", "pull_request_url": f"{_API834}pulls/55"}), "thiếu/sai/mơ hồ")),
+    ("r834_reviewed_commit_sai_dang", _r834_ca(12, lambda x, w, h: x["issue_comments"][0].update(body=f"Reviewed commit: `{h[:10]}-invalid`"), "thiếu/sai/mơ hồ")),
+    ("r834_reviewed_commit_mau_thuan", _r834_ca(12, lambda x, w, h: x["issue_comments"][0].update(
+        body=f"Reviewed commit: `{h[:10]}`\nReviewed commit: `{'0' * 10}`"), "thiếu/sai/mơ hồ")),
+    ("r834_issue_comment_head_cu_khong_chan", _r834_ca(0, _IC834("![P1 Badge] bug\nReviewed commit: `" + "0" * 10 + "`"))),
+    ("r834_envelope_head_khac", _r834_ca(12, lambda x, w, h: x.update(env={"head_sha": "0" * 40}), "không neo đúng")),
+    ("r834_trang_thieu", _r834_ca(12, lambda x, w, h: x["issue_comments"].append({**x["issue_comments"][0], "id": 22, "body": "x"})
+                                  or x.update(env={"issue_comments": {"total_count": 2, "items": x["issue_comments"][:1]}}), "total_count")),
+    ("r834_refs_thua", _r834_ca(11, lambda x, w, h: x["bnc"]["bang_lop"][0]["connector_refs"].append(["review_comments", 12]), "phủ ĐÚNG", p3_cn=True)),
+    ("r834_state_required_checks_rong", _r834_ca(8, _r834_state(ngu_canh_lease={"required_checks": []}), "state hỏng")),
+    ("r834_state_p3_sai_kieu", _r834_ca(8, _r834_state(bien_nhan_approve={"p3": ""}), "state hỏng")),
+]
+MUTANTS.update({
+    "r834_bo_kiem_gate": ("        cmd_kiem_gate(argparse.Namespace(head=h, check_suite=str(suite), bat_buoc=ten_bb, check_runs=a.check_runs), state_dir)", "        pass",
+                          ["r834_check_noi_do"]),
+    "r834_bo_check_moi_nhat": ('            if r["id"] != max(x["id"] for x in cr.values() if x["name"] == ten_j and x["check_suite"]["id"] == suite):', "            if False:",
+                               ["r834_check_noi_do_bi_che"]),
+    "r834_check_run_khong_nhat_quan": ('    cr = {r["id"]: r for r in _trang_du(_doc_json(a.check_runs, RC_GATE)[0], "check_runs", "check_runs")}',
+                                       '    cr = {r["id"]: r for r in _doc_check_runs(a.check_runs)}', ["r834_check_cung_id_khac_app"]),
+    "r834_bo_khop_attempt_job": ('(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)',
+                                 '(j.get("run_id"), j.get("head_sha"), j.get("name")) == (run["id"], h, ten_j)', ["r834_attempt_moi_job_cu"]),
+    "r834_run_cu_nhat": ("run = max(ung, key=lambda r: r[\"id\"])", "run = min(ung, key=lambda r: r[\"id\"])", ["r834_run_moi_nhat_do"]),
+    "r834_bo_kho_url_job": ("re.escape(API_GH + nc['repo'])", "'https://api\\\\.github\\\\.com/repos/[^/]+/[^/]+'", ["r834_job_url_kho_khac"]),
+    "r834_noi_check_theo_ten": ("            r = next((x for i, x in cr.items() if str(i) == m[1]), None) if m else None", '            r = next((x for x in cr.values() if x["name"] == ten_j), None)',
+                                ["r834_job_tro_check_khong_co", "r834_job_url_qua_dai"]),
+    "r834_jobs_total_toan_cuc": ('    jobs = _trang_du({"total_count": len({j["id"] for j in moi_tep}), "jobs": moi_tep}, "jobs", "workflow_jobs (gộp các tệp)")',
+                                 '    jobs = _trang_du([_doc_json(f, RC_GATE)[0] for f in a.workflow_jobs], "jobs", "workflow_jobs")', ["r834_hai_tep_jobs"]),
+    "r834_badge_chi_P": ('BADGE_RE = re.compile(r"!\\[([^\\]]*?)\\s*Badge\\]", re.I)', 'BADGE_RE = re.compile(r"!\\[(P[^\\]\\s]*) Badge\\]")', ["r834_badge_ngoai_mien_review"]),
+    "r834_changes_khong_hang_lot": (' or x.get("state") == "CHANGES_REQUESTED"):', "):", ["r834_review_changes_khong_hang"]),
+    "r834_commit_thieu_la_cu": ('"hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"', '"hien" if c == head else "cu"', ["r834_review_comment_thieu_commit"]),
+    "r834_reviewed_commit_tim_dau": ('    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])]',
+                                     '    khai = [re.search(r"`?()([0-9a-f]{7,40})", t) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])][:1]', ["r834_reviewed_commit_sai_dang", "r834_reviewed_commit_mau_thuan"]),
+    "r834_head_cu_van_chan": ("            if n is None and hang:", "            if n != \"hien\" and hang:", ["r834_issue_comment_head_cu_khong_chan"]),
+    "r834_bo_envelope": ('    if not isinstance(d, dict) or (d.get("repo"), d.get("pr"), d.get("head_sha")) != (repo, pr, head):', "    if not isinstance(d, dict):",
+                         ["r834_envelope_head_khac"]),
+    "r834_bo_total_count": (' or {t["total_count"] for t in cac} != {len({x["id"] for x in ds})}', "", ["r834_trang_thieu"]),
+    "r834_bo_phu_dung_refs": (" or sorted(refs) != sorted(p3):", ":", ["r834_refs_thua"]),
+    "r834_bo_luoc_do_state": ('    if not {tuple(x) for x in CHECK_BAT_BUOC} <= {tuple(x) for x in nc["required_checks"]} or type(p3_off) is not list \\',
+                              "    if False \\", ["r834_state_required_checks_rong", "r834_state_p3_sai_kieu"]),
+})
+
+
+# #834 lượt 3 — Codex lượt 2: F1 neo head (trường trọn, tiền tố mơ hồ) · F2 độ phủ (I5 gọi `_xet_dung` sau đầu vào, repo/head run,
+# head job, quyết định P3 trùng, generation H connector) · F3 lược đồ job. `_VO834` bọc CLI, thay `_xet_dung` bằng cọc đo lời gọi.
+_VO834 = ("import sys, importlib.util as u\nfrom pathlib import Path\nkb = sys.argv.pop(next(i for i, x in enumerate(sys.argv) if x.endswith('packet_loop.py')))\n"
+          "sys.path.insert(0, str(Path(kb).parent)); s = u.spec_from_file_location('pl', kb); m = u.module_from_spec(s); s.loader.exec_module(m)\n"
+          "def coc(sd, st, cua, *a, **k):\n    if cua == 'accept':\n        print('COC_XET_DUNG', file=sys.stderr); sys.exit(3)\n"
+          "m._xet_dung = coc\nsys.exit(m.main(sys.argv[1:]))\n")
+CASES += [
+    ("r834_reviewed_commit_span_thua", _r834_ca(12, lambda x, w, h: x["issue_comments"][0].update(body=f"Reviewed commit: `{h[:10]} invalid`"), "thiếu/sai/mơ hồ")),
+    ("r834_tien_to_mo_ho", _r834_ca(12, lambda x, w, h: _R834_RV("CHANGES_REQUESTED", "![P1 Badge] bug")(x, w, h) or x["reviews"][-1].update(
+        commit_id=h[:10] + ("f" * 30 if h[10:] != "f" * 30 else "e" * 30)), "thiếu/sai/mơ hồ")),
+    ("r834_xet_dung_duoc_goi", _r834_ca(3, None, "COC_XET_DUNG", vo=True)),
+    ("r834_xet_dung_sau_dau_vao", _r834_ca(12, lambda x, w, h: x.update(hong=True), "KHÔNG ĐO ĐƯỢC", vo=True)),
+    ("r834_run_kho_khac", _r834_ca(12, _S834("runs", 0, repository={"full_name": "x/r"}), "VẮNG")),
+    ("r834_run_head_khac", _r834_ca(12, _S834("runs", 0, head_sha="0" * 40), "VẮNG")),
+    ("r834_job_head_khac", _r834_ca(12, _S834("jobs", 1, head_sha="0" * 40), "VẮNG")),
+    ("r834_qd_trung", _r834_ca(2, lambda x, w, h: x["qd"].append(dict(x["qd"][0])), "P3 còn mở", lop=(("a-b", "P3"),))),
+    ("r834_bnc_lech_generation", _r834_ca(11, lambda x, w, h: x["bnc"].update(generation=2), "generation", p3_cn=True)),
+    ("r834_job_attempt_bool", _r834_ca(12, _S834("jobs", 0, run_attempt=True), "int thật")),
+    ("r834_job_run_id_float", _r834_ca(12, _S834("jobs", 0, run_id=100.0), "int thật")),
+    ("r834_job_url_qua_dai", _r834_ca(12, _S834("jobs", 0, check_run_url=f"{_API834}check-runs/" + "3" * 5000), "không trỏ check-run")),
+]
+MUTANTS["r812_bo_generation"][2].append("r834_bnc_lech_generation")
+MUTANTS.update({
+    "r834_bo_dau_hang_tron": ('    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\\1", t.strip())', '    khai = [re.match(r"`?()([0-9a-f]{7,40})", t.strip())', ["r834_reviewed_commit_span_thua"]),
+    "r834_bo_tien_to_mo_ho": (" or any(head.startswith(t[2]) and any(b != head and b.startswith(t[2]) for b in biet) for t in khai):", ":", ["r834_tien_to_mo_ho"]),
+    "r834_bo_goi_xet_dung": ('    _xet_dung(state_dir, st, "accept")\n', "", ["r834_xet_dung_duoc_goi"]),
+    "r834_xet_dung_truoc_dau_vao": (('    _xet_dung(state_dir, st, "accept")\n', '    sha_ci = _kiem_ci(a, nc, h, state_dir)\n'),  # gỡ lời gọi gốc TRƯỚC, rồi chèn
+                                    ("", '    _xet_dung(state_dir, st, "accept")\n    sha_ci = _kiem_ci(a, nc, h, state_dir)\n'), ["r834_xet_dung_sau_dau_vao"]),
+    "r834_bo_kho_run": (' and isinstance(r.get("repository"), dict) and r["repository"].get("full_name") == nc["repo"]]', "]", ["r834_run_kho_khac"]),
+    "r834_bo_head_run": ('r.get("path") == wf and r.get("head_sha") == h and ', 'r.get("path") == wf and ', ["r834_run_head_khac"]),
+    "r834_bo_head_job": ('(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)',
+                         '(j.get("run_id"), j.get("run_attempt"), j.get("name")) == (run["id"], run["run_attempt"], ten_j)', ["r834_job_head_khac"]),
+    "r834_qd_theo_tap": ('or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):', 'or {(q["nguon"], q["khoa"]) for q in qd} != con_mo):', ["r834_qd_trung"]),
+    "r834_bo_kieu_job": ('    if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int and j["run_attempt"] > 0\n', "    if False and all(True\n",
+                         ["r834_job_attempt_bool", "r834_job_run_id_float"]),
+})
+
+
+# #834 lượt 4 — Codex lượt 3: F2 ba chốt còn sống (dừng trước H/P3, job chưa xanh, P1 ở review comment) · F5 state dự kiến
+# phải mã hoá được TRƯỚC `_xet_dung`. F4 (đột biến parser sập) vá ở `_r834_ca` (CLI sập ⇒ tín dụng giả) + giữ cấu trúc nhóm regex.
+CASES += [
+    ("r834_xet_dung_sau_h", _r834_ca(11, lambda x, w, h: x["bnc"].update(generation=2), "generation", p3_cn=True, vo=True)),
+    ("r834_job_chua_xanh", _r834_ca(12, _S834("jobs", 0, status="in_progress", conclusion=None), "chưa xanh")),
+    ("r834_review_comment_p1", _r834_ca(12, lambda x, w, h: x["review_comments"].append(
+        {"id": 13, "user": {"login": _CN834}, "body": "![P1 Badge] bug", "commit_id": h, "pull_request_url": f"{_API834}pulls/55"}), "còn ['P1']")),
+    ("r834_qd_khong_ma_hoa", _r834_ca(2, lambda x, w, h: x["qd"][0].update(ly_do="\ud800"), "không mã hoá được", lop=(("a-b", "P3"),), vo=True)),
+]
+MUTANTS.update({
+    "r834_xet_dung_truoc_h": (('    _xet_dung(state_dir, st, "accept")\n', "    slug_cn = _slug_connector("),
+                              ("", '    _xet_dung(state_dir, st, "accept")\n    slug_cn = _slug_connector('), ["r834_xet_dung_sau_h"]),
+    "r834_bo_job_xanh": ('(job.get("status"), job.get("conclusion")) != ("completed", "success") or r is None', "r is None", ["r834_job_chua_xanh"]),
+    "r834_bo_p1_review_comment": (('                if hang != {"P3"}:\n', '                p3.append((k, x["id"]))\n'),
+                                  ('                if hang != {"P3"} and k != "review_comments":\n', '                p3 += [(k, x["id"])] * (hang == {"P3"})\n'),
+                                  ["r834_review_comment_p1"]),  # hai hunk cùng một ngữ nghĩa: bỏ chặn P1 VÀ không biến P1 thành P3
+    "r834_bo_ma_hoa_truoc": ('        json.dumps(moi, ensure_ascii=False).encode("utf-8")\n', "        pass\n", ["r834_qd_khong_ma_hoa"]),
+})
+CASES += [  # #834 lượt 5 — Codex lượt 4 (F2): check lease ngoài hằng · id riêng TỪNG endpoint · review hoàn tất đơn độc là "xong"
+    ("r834_check_lease_them", _r834_ca(12, _r834_state(ngu_canh_lease={"required_checks": [[".github/workflows/ci.yml", j] for j in _J834] + [[".github/workflows/khac.yml", "khac"]]}), "VẮNG")),
+    ("r834_id_trung_khac_endpoint", _r834_ca(0, lambda x, w, h: _R834_RV("COMMENTED")(x, w, h) or x["reviews"][-1].update(id=20))),
+    ("r834_review_hoan_tat_don_doc", _r834_ca(0, lambda x, w, h: (x["issue_comments"].clear(), _R834_RV("APPROVED")(x, w, h)))),
+]
+MUTANTS.update({
+    "r834_bo_check_lease": ('    for wf in sorted({w for w, _ in nc["required_checks"]}):', "    for wf in sorted({w for w, _ in CHECK_BAT_BUOC}):", ["r834_check_lease_them"]),
+    "r834_id_so_cheo_endpoint": ('    ep = {k: _trang_du(d.get(k), "items", f"connector {k}") for k in EP_CONNECTOR}\n', '    ep = {k: _trang_du(d.get(k), "items", f"connector {k}") for k in EP_CONNECTOR}\n'
+                                 '    _trang_du({"total_count": sum(map(len, ep.values())), "items": [x for v in ep.values() for x in v]}, "items", "gop")\n', ["r834_id_trung_khac_endpoint"]),
+    "r834_bo_review_xong": ('            or any(n == "hien" and x.get("state")', '            or False and any(n == "hien" and x.get("state")', ["r834_review_hoan_tat_don_doc"]),
+})
+CASES += [("r834_job_run_id_khac", _r834_ca(12, _S834("jobs", 1, run_id=90), "VẮNG")), ("r834_refs_phan_tu_hong", _r834_ca(11, lambda x, w, h: x["bnc"]["bang_lop"][0]["connector_refs"].append(["invalid_endpoint", 11]), "phủ ĐÚNG", p3_cn=True)), ("r834_qd_gia_tri_khong_chuoi", _r834_ca(2, lambda x, w, h: x["qd"][0].update(owner=123), "P3 còn mở", lop=(("a-b", "P3"),))), ("r834_jobs_attempt_moi_hon", _r834_ca(12, lambda x, w, h: x.update(jobs2=[{**x["jobs"][0], "id": 260, "run_attempt": 2, "status": "in_progress", "conclusion": None}]), "attempt mới hơn")),
+          ("r834_refs_lap", _r834_ca(11, lambda x, w, h: x["bnc"]["bang_lop"][0]["connector_refs"].append(["review_comments", 11]), "phủ ĐÚNG", p3_cn=True)), ("r834_qd_thieu_truong", _r834_ca(2, lambda x, w, h: x["qd"][0].pop("owner"), "P3 còn mở", lop=(("a-b", "P3"),)))]
+MUTANTS.update({"r834_bo_attempt_jobs_moi": (' or any(j["run_id"] == run["id"] and j["run_attempt"] > run["run_attempt"] for j in jobs):', ":", ["r834_jobs_attempt_moi_hon"]),  # Codex lượt 5: run cũ ↔ jobs mới
+                "r834_refs_theo_tap": (" or sorted(refs) != sorted(p3):", " or set(refs) != set(p3):", ["r834_refs_lap"]), "r834_qd_thieu_truong_lot": ("set(q) == truong", "set(q) <= truong", ["r834_qd_thieu_truong"]), "r834_bo_run_id_job": ('(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)', '(j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["run_attempt"], h, ten_j)', ["r834_job_run_id_khac"]), "r834_bo_ref_hong": (' or len(refs) != sum(len(x["connector_refs"]) for x in lop)', "", ["r834_refs_phan_tu_hong"]), "r834_bo_kieu_gia_tri_qd": ("all(type(v) is str and v.strip() for v in q.values())", "True", ["r834_qd_gia_tri_khong_chuoi"])})  # Codex lượt 6 (F2)
 
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):

@@ -25,3 +25,6 @@ $ blob tai 227dcdebc62c9275f9df09056f66e2124ed5f14c (sha da review) vs merge ab9
 .claude/dev/packet_loop_test.py cab94608e7d5d56e22a99745790575c39267b7b0 cab94608e7d5d56e22a99745790575c39267b7b0
 $ quet docs/adr/*.md tai ab94c4fb01d0d122d2f00a1f2c386c6a191349c5: tep chua cum khai kich hoat ADR-0054
 docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md
+
+$ git diff --name-only ab94c4fb01d0d122d2f00a1f2c386c6a191349c5 ab344da5f07cce673d97056b70b002911c4d5082 | cut -d/ -f1-2 | sort -u
+ops/land

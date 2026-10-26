@@ -3,10 +3,27 @@
 - Packet #834 `MAY-ADR-0054-a2` r1 g1 · lease `ops/leases/wp834-r1-g1-claude.yaml` @ `02235f9` (nhánh `ops/wp834-r1-g1-lease`).
 - Đặc tả `ops/specs/wp834.md` sha256 `c57ef4d86592218729b811efede7909803d75b6d18ca0d0c3e5059848b44a9d2` và phần chung
   `ops/specs/may-adr-0054-chung.md` sha256 `4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0` — băm lại trên master: khớp.
-- **TRẠNG THÁI: DỪNG — chạm điều kiện dừng same-failure (protocol: `same_failure_limit: 2`), chờ chủ kho.** Nhánh code
+- **TRẠNG THÁI (cập nhật): APPROVE lượt 7, đã đẩy, PR #950** — xem mục CẬP NHẬT ngay dưới. Lịch sử dừng same-failure giữ nguyên bên dưới. Nhánh code
   `agent/wp834-g1-claude` **CHƯA ĐẨY** (chưa có approve; `push_policy` chỉ cho một lần đẩy sau approve). Chưa có PR.
 - Packet này **KHÔNG kích hoạt ADR-0054** và không chạm `_che_do_0054`.
 - Không merge/land/deploy. Không force-push, rebase, xoá ref.
+
+## CẬP NHẬT 26-10-2026 ~07:00Z — APPROVE, đã đẩy một lần, PR #950
+
+- Chủ kho chọn (a) (#834 issuecomment-6408783497): `same_failure_limit` của `required-mutation-coverage-missing` 2 → 3, chỉ lease
+  này; lượt 7 có luật phân hạng (đột biến độ phủ MỚI do reviewer tự dựng mà sản phẩm từ chối đúng ⇒ P3).
+- `742ba39`: ba ca + ba đột biến cho mutant sống lượt 6 (`ignore_job_run_id`, `ignore_invalid_ref_entries`,
+  `ignore_p3_value_types`), ghép vào dòng sẵn có ⇒ diff giữ **447/450**. `8ac10ce`: merge `origin/master` `356eb26`
+  (55 commit, không chạm write set) TRƯỚC lượt 7 để head được duyệt = head đẩy.
+- **Codex lượt 7 (7/8)** — run `945ef0f9`, `8ac10ce`, prompt sha256 `1982e8d4…`, 732 s rc0, `model_phuc_vu: gpt-6-astra`:
+  **approve — 0 P0 · 0 P1 · 0 P2 · 1 P3**. Hiện vật `ops/reviews/wp834-g1-codex-luot7/`, VERDICT sha256 `37f009b8…`.
+  Nợ P3 có tên `required-mutation-coverage-missing`: thiếu ca bảo vệ neo head của finding issue comment (`if n is None and hang`)
+  và kiểu id trang (`type(x.get("id")) is int`); sản phẩm từ chối đúng ở A/B. Owner gợi ý: executor #834, chủ kho theo dõi.
+- Suite đầy đủ trên `8ac10ce` (clone ghim): `nền: 938/938 đạt · BỎ QUA: 1` · ca 939 · đột biến 1306 · `TỔNG: ĐẠT` · rc0 · 51m31s.
+  63/63 ca `r834_*`; 59/59 đột biến `r834_*` + `r812_bo_generation` giết đúng ca. `ci_dang_ky_test.py` `1070/1070 · TỔNG: ĐẠT`.
+- **Đẩy MỘT lần** `agent/wp834-g1-claude` = `8ac10ce47d2587c91637d74d299e3c781025be1e` (ls-remote xác nhận). **PR draft #950.**
+  Master sau đó tiến tới `9372ecd` (chỉ `ops/land`, merge sạch) — không merge thêm (hết lượt Codex để xác minh lại).
+- Việc còn lại: CI PR #950 xanh trên head cuối (executor theo dõi); merge/land: chủ kho.
 
 ## Nhánh code cục bộ (rẽ từ `ab344da`), head `394d24787aaa5b4e4638b0820b42fe25b6f0432c`
 

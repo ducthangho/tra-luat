@@ -2077,7 +2077,7 @@ class _LayMauSandbox:
         # theo vòng đời bình thường — đều là KHÔNG ĐO ĐƯỢC, không phân biệt "êm" với "lỗi". Giá phải trả: một lượt bình
         # thường đôi khi bị hạ thành KHONG_DO_DUOC; đổi lại sổ không bao giờ khai mạnh hơn phép đo. Chỉ một trường hợp
         # được coi là bình thường: chính tiến trình đang đọc đã biến mất khỏi /proc.
-        hang = [((self.pid, self.goc_bd),)]
+        hang = [((self.pid, goc),)]          # (pid, (ppid, starttime)): R27-PID-04e so NGUYÊN bộ, cả cạnh cha
         while hang:
             chuoi = hang.pop()
             cha = chuoi[-1][0]
@@ -2089,10 +2089,10 @@ class _LayMauSandbox:
                 sau = self._stat(c)
                 if sau is None:
                     continue
-                if sau != (cha, bd) or any((st := self._stat(p)) is None or st[1] != pbd for p, pbd in chuoi):
+                if sau != (cha, bd) or any(self._stat(p) != bo for p, bo in chuoi):
                     self.loi.append("DanhTinhDoi")
                     return
-                hang.append(chuoi + ((c, bd),))
+                hang.append(chuoi + ((c, sau),))
                 # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
                 if (c, bd, tho) in self.da:
                     continue

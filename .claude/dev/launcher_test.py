@@ -11401,7 +11401,7 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
     con, chau = _r27_cay_cha_chau()
     try:
         for ten, mong in [("quyen", "PermissionError"), ("danh_tinh_con", "DanhTinhDoi"),
-                          ("goc_tai_dung", "RuntimeError"), ("to_tien_doi", "DanhTinhDoi"), ("cha_zombie", "DanhTinhDoi"),
+                          ("goc_tai_dung", "RuntimeError"), ("to_tien_doi", "DanhTinhDoi"), ("cha_zombie", "DanhTinhDoi"), ("to_tien_doi_cha", "DanhTinhDoi"),
                           ("goc_khong_ghim", "GocKhongGhimDuoc")]:
             vet = {"cmd": False, "goc": 0}
 
@@ -11423,8 +11423,10 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
                         vet["goc"] += 1          # lần 1 = ghim lúc khởi tạo; đổi ngay từ lần đọc trong lượt quét đầu
                         if vet["goc"] > 1:
                             return _r27_sua_stat(b, bd=b"1")
-                    elif ten in ("to_tien_doi", "cha_zombie") and x == f"/proc/{chau}/cmdline":
+                    elif ten in ("to_tien_doi", "cha_zombie", "to_tien_doi_cha") and x == f"/proc/{chau}/cmdline":
                         vet["cmd"] = True
+                    elif ten == "to_tien_doi_cha" and vet["cmd"] and x == f"/proc/{con.pid}/stat":
+                        return _r27_sua_stat(b, ppid=b"1")      # R27-PID-04e: tổ tiên chỉ đổi CẠNH cha, starttime giữ
                     elif ten == "cha_zombie" and vet["cmd"] and x == f"/proc/{chau}/stat":
                         return _r27_sua_stat(b, ppid=b"1")      # vòng đời BÌNH THƯỜNG: cha thành zombie, cháu bị
                     elif ten == "cha_zombie" and vet["cmd"] and x == f"/proc/{con.pid}/stat":
@@ -11497,14 +11499,10 @@ _R27_TU_VUNG = {"bwrap", "codex-linux-sandbox", "/", "/tmp", "/dev", "/proc", "w
 
 def _r27_moi_chuoi(x):
     if isinstance(x, dict):
-        for k, v in x.items():
-            yield k
-            yield from _r27_moi_chuoi(v)
-    elif isinstance(x, list):
-        for v in x:
-            yield from _r27_moi_chuoi(v)
-    elif isinstance(x, str):
-        yield x
+        return [c for k, v in x.items() for c in [k, *_r27_moi_chuoi(v)]]
+    if isinstance(x, list):
+        return [c for v in x for c in _r27_moi_chuoi(v)]
+    return [x] if isinstance(x, str) else []
 
 
 @ca
@@ -11529,13 +11527,15 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
 
 DOT_BIEN = [
     # wp748 r27: mỗi chốt đo effort/sandbox một đột biến gỡ đúng chốt của nó.
+    ("r27_to_tien_chi_so_bd", ('any(self._stat(p) != bo for p, bo in chuoi)', 'any((self._stat(p) or (0, 0))[1] != bo[1] for p, bo in chuoi)'),
+     ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_goc_ghim_tre", ('        if goc is None or self.goc_bd is None:\n            return',
                           '        if goc is not None and self.goc_bd is None:\n            self.goc_bd = goc[1]\n        if goc is None:\n            return'),
      ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_cmdline_bo_doi_so_rong", ('return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0")]',
                                     'return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0") if x]'), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
     ("r27_cmdline_khong_nul_van_tin", ('    if not tho.endswith(b"\\0"):\n        return None\n', ''), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
-    ("r27_khong_xac_thuc_to_tien", (' or any((st := self._stat(p)) is None or st[1] != pbd for p, pbd in chuoi)', ''),
+    ("r27_khong_xac_thuc_to_tien", (' or any(self._stat(p) != bo for p, bo in chuoi)', ''),
      ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_goc_ghim_muon", ('            else:\n                self.goc_bd = goc[1]\n', '            else:\n                pass\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_trong_ws_chep_ten", ('        return "trong_workspace"\n', '        return "workspace/" + p[len(ws) + 1:]\n'), ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),

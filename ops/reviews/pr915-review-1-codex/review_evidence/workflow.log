@@ -1,0 +1,26 @@
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr3-pr915.iS5d/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr3-pr915.iS5d/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+actual_gate_cong_cu_prefix_jobs=['gate-cong-cu', 'gate-cong-cu-gop']
+g5_shard=gate-cong-cu; g5_aggregate=gate-cong-cu-gop; all_prefix_jobs_covered=True
+chuan_bi.outputs.os='${{ (github.event_name == \'workflow_dispatch\' && inputs.runner_set == \'windows-only\') && \'["windows-latest"]\' || (github.event_name == \'workflow_dispatch\' || contains(github.event.pull_request.labels.*.name, \'windows\')) && \'["ubuntu-latest","windows-latest"]\' || \'["ubuntu-latest"]\' }}'
+gate-cong-cu: {"if": "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", "needs": "chuan-bi", "strategy": {"fail-fast": false, "matrix": {"exclude": [{"manh": 1, "os": "windows-latest"}, {"manh": 2, "os": "windows-latest"}, {"manh": 3, "os": "windows-latest"}, {"manh": 4, "os": "windows-latest"}, {"manh": 5, "os": "windows-latest"}, {"manh": 6, "os": "windows-latest"}, {"manh": 7, "os": "windows-latest"}], "manh": [0, 1, 2, 3, 4, 5, 6, 7], "os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}}
+gate-cong-cu-gop: {"if": "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", "needs": ["chuan-bi", "gate-cong-cu"], "strategy": {"fail-fast": false, "matrix": {"exclude": [{"os": "windows-latest"}], "os": "${{ fromJson(needs.chuan-bi.outputs.os) }}"}}}
+baseline: t162=PASS; loi_g5_workflow_errors=0
+gate-cong-cu__remove_exclude: t162=PASS; loi_g5_workflow_errors=1
+  gate-cong-cu: matrix phải đúng os + manh [0, 1, 2, 3, 4, 5, 6, 7] + exclude [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}], thấy {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}
+gate-cong-cu__remove_needs: t162=PASS; loi_g5_workflow_errors=1
+  gate-cong-cu: needs/if phải đúng 'chuan-bi'/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", thấy None/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
+gate-cong-cu__remove_if: t162=PASS; loi_g5_workflow_errors=1
+  gate-cong-cu: needs/if phải đúng 'chuan-bi'/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", thấy 'chuan-bi'/None
+gate-cong-cu-gop__remove_exclude: t162=PASS; loi_g5_workflow_errors=1
+  gate-cong-cu-gop: matrix phải đúng os + exclude [{'os': 'windows-latest'}], thấy {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}
+gate-cong-cu-gop__remove_needs: t162=PASS; loi_g5_workflow_errors=1
+  gate-cong-cu-gop: needs/if phải đúng ['chuan-bi', 'gate-cong-cu']/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", thấy None/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}"
+gate-cong-cu-gop__remove_if: t162=PASS; loi_g5_workflow_errors=1
+  gate-cong-cu-gop: needs/if phải đúng ['chuan-bi', 'gate-cong-cu']/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", thấy ['chuan-bi', 'gate-cong-cu']/None
+output_os__remove_windows_only_branch: t162=FAIL; loi_g5_workflow_errors=0
+  t162_assertion=dispatch windows-only phải chỉ chạy windows-latest, nhận được: ['ubuntu-latest', 'windows-latest']
+KET_LUAN: t162 chi doc outputs.os tu workflow; exclude/needs/if cua CA HAI job manh/gom co chot rieng. Khong khai moi gate* deu duoc loi_g5_workflow bao phu.
+rc=0

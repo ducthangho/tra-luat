@@ -1,0 +1,32 @@
+ancestor: e63961f27b53e66db8e6600009f97d5706743063 rc= 0
+ancestor: 5585abe8499e920e2a6ae8236e70c4096f95e71d rc= 0
+ancestor: 747f983ccbcaf29a8e5228d09fd05b5a5ab6e479 rc= 0
+ancestor: be00ef723eca3fae90932e476d683f233588f2b3 rc= 0
+base timestamp: 2026-10-23T11:04:54+07:00 | 2026-10-23T11:04:54+07:00 | Merge pull request #883 from ducthangho/agent/wp879-g1-claude
+history <= reviewed_sha #878:
+8d5cccb 2026-10-23 docs(CLAUDE.md): (c) do lai 23-10 — nhanh runner_set=windows-only (#878) va Windows chi la MOT PHAN gate (#879)
+747f983 2026-10-23 Merge pull request #880 from ducthangho/agent/wp878-g1-claude
+ab28423 2026-10-22 wp878(#878): review Codex luot 1 — evaluator tach toan tu ngoai literal/ngoac (P2), ten input theo ngu phap Actions (P3)
+52e1f0b 2026-10-22 wp878(#878): ghim topo ci.yml (y13) theo input runner_set; chu thich ra khoi outputs de giu neo dot bien chuan-bi
+5585abe 2026-10-22 wp878(#878): ci.yml workflow_dispatch nhan runner_set=windows-only — bo cac job ma tran Ubuntu khi chi can do Windows
+history <= reviewed_sha #879:
+8d5cccb 2026-10-23 docs(CLAUDE.md): (c) do lai 23-10 — nhanh runner_set=windows-only (#878) va Windows chi la MOT PHAN gate (#879)
+e63961f 2026-10-23 Merge pull request #883 from ducthangho/agent/wp879-g1-claude
+ab25106 2026-10-23 wp879: t54 khoá hai biên số không của nhánh Windows (Codex lượt 1) (#879)
+bc16655 2026-10-23 wp879: neo lại hai đột biến if của gate-cong-cu-gop + đột biến bỏ điều kiện ubuntu (#879)
+0c5c4a9 2026-10-23 wp879: cập nhật ghim y11/y12/y13 của ci_duong_nhanh_test cho gate-cong-cu* (#879)
+be00ef7 2026-10-23 wp879: gate-cong-cu Windows chỉ chạy ca nền (một job), bán kính đột biến đo trên Ubuntu (#879)
+literal branches before #878: 2
+literal branches at HEAD: 3
+before #878 vs HEAD windows-only : ['ubuntu-latest', 'windows-latest'] -> ['windows-latest']
+before #878 vs HEAD windows-and-ubuntu : ['ubuntu-latest', 'windows-latest'] -> ['ubuntu-latest', 'windows-latest']
+before #878 vs HEAD unknown : ['ubuntu-latest', 'windows-latest'] -> ['ubuntu-latest', 'windows-latest']
+before #879 gate-cong-cu exclude= None job-if= None
+at HEAD gate-cong-cu exclude= [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}] job-if= None
+before #879 gate-cong-cu-gop exclude= None job-if= ${{ !cancelled() }}
+at HEAD gate-cong-cu-gop exclude= [{'os': 'windows-latest'}] job-if= ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+All history used above is reachable from reviewed_sha; no later file version used.
+ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ

@@ -1,0 +1,53 @@
+base full: e63961f27b53e66db8e6600009f97d5706743063
+base ancestor rc: 0
+tree: 55f5edf2f8601c976f390e8994193129a71203a1
+patch matches: True
+.github/workflows/ci.yml base=head: True
+ops/cong_cu_test.py base=head: True
+ops/lease_publish_test.py base=head: True
+commits base..HEAD:
+094e8d1 2026-10-23 docs(CLAUDE.md): (c) thu hep 'ca nen dat tren Windows' — ca BO QUA bi tru khoi mau so (va P2 cross-review codex)
+8d5cccb 2026-10-23 docs(CLAUDE.md): (c) do lai 23-10 — nhanh runner_set=windows-only (#878) va Windows chi la MOT PHAN gate (#879)
+extra change over 8d5cccb:
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 44b0bd1..975cd94 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -179,11 +179,14 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package 
+   `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.
+   **Nhưng "gate trên Windows" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên
+   `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`
+-  chạy đủ ca nền rồi DỪNG — **bán kính đột biến chỉ đo trên Ubuntu**; `gate-cong-cu-gop` loại hẳn
+-  `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi `ubuntu-latest` trong `os`). Các job
+-  `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong `ci.yml` mang `if:` theo
+-  `runner.os` (tắt hoặc thay riêng trên Windows), nên "có job Windows" chưa phải "mọi bước chạy". Nên một lượt `windows-only` xanh chứng minh **ca nền đạt trên Windows**,
+-  KHÔNG chứng minh bán kính đột biến — phần đó phải lấy từ lượt Ubuntu của CÙNG head.
++  duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:
++  `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;
++  `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi
++  `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong
++  `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên "có job Windows" chưa phải "mọi
++  bước chạy". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —
++  phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy
++  từ lượt Ubuntu của CÙNG head.
+   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
+   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt
+history #878:
+2c11396 2026-10-24 Merge pull request #902 from ducthangho/claude/wizardly-noether-zqqoae
+d5a775a 2026-10-24 land(#871 #854 #878 #879): ha bon ho so landed true -> false (provenance §10.2.2 + assurance §8.1)
+90c1cb1 2026-10-23 docs(CLAUDE.md): bai hoc (c) tro NGUON thay vi chep ma tran os
+1ccc314 2026-10-23 Merge pull request #893 from ducthangho/claude/bookkeeping-871-854-878-879-land
+caa178e 2026-10-23 land(#871 #878 #879): ho so land PR #872 (9d4cb6a), #880 (747f983), #883 (e63961f) — landed true
+6ac385f 2026-10-23 Merge pull request #889 from ducthangho/claude/gallant-fermat-34kgb9
+8d5cccb 2026-10-23 docs(CLAUDE.md): (c) do lai 23-10 — nhanh runner_set=windows-only (#878) va Windows chi la MOT PHAN gate (#879)
+747f983 2026-10-23 Merge pull request #880 from ducthangho/agent/wp878-g1-claude
+history #879:
+2c11396 2026-10-24 Merge pull request #902 from ducthangho/claude/wizardly-noether-zqqoae
+d5a775a 2026-10-24 land(#871 #854 #878 #879): ha bon ho so landed true -> false (provenance §10.2.2 + assurance §8.1)
+90c1cb1 2026-10-23 docs(CLAUDE.md): bai hoc (c) tro NGUON thay vi chep ma tran os
+1ccc314 2026-10-23 Merge pull request #893 from ducthangho/claude/bookkeeping-871-854-878-879-land
+caa178e 2026-10-23 land(#871 #878 #879): ho so land PR #872 (9d4cb6a), #880 (747f983), #883 (e63961f) — landed true
+f37da6c 2026-10-23 win(#671): go NGOAI_LE_NEN — master #879 (be00ef7) da bo do ban kinh dot bien tren Windows
+6ac385f 2026-10-23 Merge pull request #889 from ducthangho/claude/gallant-fermat-34kgb9
+8d5cccb 2026-10-23 docs(CLAUDE.md): (c) do lai 23-10 — nhanh runner_set=windows-only (#878) va Windows chi la MOT PHAN gate (#879)

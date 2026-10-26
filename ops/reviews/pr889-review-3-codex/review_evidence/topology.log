@@ -1,0 +1,22 @@
+gate-cong-cu exclude: [{"os": "windows-latest", "manh": 1}, {"os": "windows-latest", "manh": 2}, {"os": "windows-latest", "manh": 3}, {"os": "windows-latest", "manh": 4}, {"os": "windows-latest", "manh": 5}, {"os": "windows-latest", "manh": 6}, {"os": "windows-latest", "manh": 7}]
+gate-cong-cu job-if: None
+gate-cong-cu ["windows-latest"] -> [{"os":"windows-latest","manh":0}]
+gate-cong-cu ["ubuntu-latest", "windows-latest"] -> [{"os":"ubuntu-latest","manh":0},{"os":"ubuntu-latest","manh":1},{"os":"ubuntu-latest","manh":2},{"os":"ubuntu-latest","manh":3},{"os":"ubuntu-latest","manh":4},{"os":"ubuntu-latest","manh":5},{"os":"ubuntu-latest","manh":6},{"os":"ubuntu-latest","manh":7},{"os":"windows-latest","manh":0}]
+gate-cong-cu-gop exclude: [{"os": "windows-latest"}]
+gate-cong-cu-gop job-if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+gate-cong-cu-gop ["windows-latest"] -> []
+gate-cong-cu-gop ["ubuntu-latest", "windows-latest"] -> [{"os":"ubuntu-latest"}]
+gop predicate os=['windows-latest'] cancelled=False -> False
+gop predicate os=['windows-latest'] cancelled=True -> False
+gop predicate os=['ubuntu-latest'] cancelled=False -> True
+gop predicate os=['ubuntu-latest'] cancelled=True -> False
+gop predicate os=['ubuntu-latest', 'windows-latest'] cancelled=False -> True
+gop predicate os=['ubuntu-latest', 'windows-latest'] cancelled=True -> False
+MEASURED: YAML exclusions and job predicate false for windows-only, regardless of cancellation.
+NOT MEASURED: actual GitHub scheduler conclusion=skipped at this SHA (offline; no API calls).
+other gate: windows_rows=1 job-if=None runs-on=${{ matrix.os }}
+other gate-ops: windows_rows=1 job-if=None runs-on=${{ matrix.os }}
+other gate-nhanh-manh: windows_rows=8 job-if=None runs-on=${{ matrix.os }}
+other gate-nhanh-gop: windows_rows=1 job-if=${{ !cancelled() }} runs-on=${{ matrix.os }}
+other gate-registry: windows_rows=1 job-if=${{ !cancelled() }} runs-on=${{ matrix.os }}
+other gate-packet-loop: windows_rows=1 job-if=None runs-on=${{ matrix.os }}

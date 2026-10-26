@@ -1,0 +1,19 @@
+pr870-review-2-codex: VERDICT.md:9: execution_surface: codex_service (agent có công cụ shell; không phải ChatGPT Web)
+  run.json:47 execution_surface=codex_cli; lenh={"chuong_trinh": "codex", "so_doi_so": 9, "van_tay": "b1e1e9e45b5742c2"}
+  receipt model_reviewer_identity.surface=codex_cli
+  caveat_ids=['HO-MODEL-REVIEWER-KHONG-DO-DUOC', 'STDERR-CHI-GIU-HEADER', 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'SCRIPT-DO-DOC-DUONG-DAN-SANDBOX', 'SNAPSHOT-CAY-KHONG-VAO-KHO']
+  service_in_caveat=False
+pr889-review-2-codex: VERDICT.md:9: Quyền và phạm vi theo chỉ thị trực tiếp `runs/d955f9ef/prompt.snapshot`. Reviewer: Codex, họ model OpenAI/GPT-6; provider `openai_codex`, execution surface `codex_service`, transport `machine` theo phân loại repository cho agent có shell không chạy qua `codex exec`/Desktop. Không có receipt máy để chứng nhận biến thể model/effort hoặc assurance. Không gọi mạng, không push, không sửa `cay-kho/`; chỉ ghi artifact ở thư mục cha.
+  run.json:47 execution_surface=codex_cli; lenh={"chuong_trinh": "codex", "so_doi_so": 9, "van_tay": "4f5bee90d5c1511a"}
+  receipt model_reviewer_identity.surface=codex_cli
+  caveat_ids=['HO-MODEL-REVIEWER-KHONG-DO-DUOC', 'STDERR-CHI-GIU-HEADER', 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'SCRIPT-DO-DOC-DUONG-DAN-SANDBOX']
+  service_in_caveat=False
+pr896-review-1-codex: VERDICT.md:7: Reviewer `codex`; provider `openai_codex`; execution_surface `codex_cli`; transport `machine`. Run `64761d8e6164462d870c3d534d325dd2`; header CLI khai `gpt-6.1-sol`, effort `xhigh`, session `01a16ec6-03c0-72c0-ac25-dccfeef0cd62` (đọc `runs/64761d8e/run.json` và đầu `stderr.log`; header không chứng minh model phục vụ ở máy chủ). Không có GitHub submitter vì không đăng/push. Sandbox khai `workspace-write`; read-only đối với `cay-kho/` được giữ bằng phạm vi lệnh, bytecode bị tắt. Không gọi mạng, không dùng subagent, không sửa nguồn review.
+  run.json:47 execution_surface=codex_cli; lenh={"chuong_trinh": "codex", "so_doi_so": 9, "van_tay": "2abc89c910586650"}
+  receipt model_reviewer_identity.surface=codex_cli
+  caveat_ids=['HO-MODEL-REVIEWER-KHONG-DO-DUOC', 'STDERR-CHI-GIU-HEADER', 'CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY', 'SCRIPT-DO-DOC-DUONG-DAN-SANDBOX', 'P2-DA-VA-CHUA-REVIEW-LAI']
+  service_in_caveat=False
+policy: ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:39-51 phan biet codex_cli va codex_service; lich su codex exec giu codex_cli.
+README:5-11 giu nguyen verdict co bam, dua dinh chinh vao verdict_usage_caveats va bang canh bao.
+KET_LUAN: LOI — pr870 luot2 va pr889 luot2 khai sai codex_service trong ca ban phang va ban thu muc; pr889 con phu nhan chay qua codex exec; chua co caveat dinh chinh surface. Mot lop loi, hai hien vat review.
+rc=0

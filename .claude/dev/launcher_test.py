@@ -11141,7 +11141,262 @@ def t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong():
             me.wait()
 
 
+# ------------------------------------------------------------- wp748 r27: effort + sandbox thực tế (spec r27)
+
+def _r27_khung(loai, rid, effort=..., reasoning=...):
+    r = {"id": rid, "object": "response", "model": "gpt-mau"}
+    if reasoning is not ...:
+        r["reasoning"] = reasoning
+    elif effort is not ...:
+        r["reasoning"] = {"effort": effort, "summary": None}
+    ev = {"type": loai, "sequence_number": 0, "response": r}
+    return f"2026-10-24T01:12:06.199773Z TRACE tungstenite::protocol: Received message {json.dumps(ev)}\n".encode()
+
+
+@ca
+def r927_effort_do_duoc_tu_khung_may_chu():
+    m = _tai_launcher_thu()
+    ban_ghi, _ = _r26_trang_thai(m, _r27_khung("response.created", "r1", "xhigh")
+                                 + _r27_khung("response.completed", "r1", "xhigh")
+                                 + _r27_khung("response.created", "r2", "low"))
+    bang(ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC", f"model: {ban_ghi}")
+    bang(ban_ghi.get("effort_phuc_vu") == ["xhigh", "low"] and ban_ghi.get("effort_phuc_vu_trang_thai") == "DO_DUOC"
+         and "effort_phuc_vu_ly_do" not in ban_ghi, f"effort: {ban_ghi}")
+    bang(all(set(x) == {"response_id", "model", "su_kien"} for x in ban_ghi["model_phuc_vu"]),
+         f"effort ro vao muc model_phuc_vu: {ban_ghi['model_phuc_vu']}")
+
+
+@ca
+def r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC():
+    m = _tai_launcher_thu()
+    tot = _r27_khung("response.created", "r0", "xhigh")
+    for ten, hong in [("thieu_reasoning", _r27_khung("response.completed", "r0")),
+                      ("reasoning_chuoi", _r27_khung("response.completed", "r0", reasoning="xhigh")),
+                      ("effort_so", _r27_khung("response.completed", "r0", 5)),
+                      ("effort_rong", _r27_khung("response.completed", "r0", "  ")),
+                      ("effort_null", _r27_khung("response.completed", "r0", None))]:
+        ban_ghi, _ = _r26_trang_thai(m, tot + hong)
+        bang(ban_ghi.get("model_phuc_vu_trang_thai") == "DO_DUOC", f"{ten}: khung van phai nhan cho model: {ban_ghi}")
+        bang(ban_ghi.get("effort_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
+             and "1 khung" in ban_ghi.get("effort_phuc_vu_ly_do", "") and ban_ghi.get("effort_phuc_vu") == ["xhigh"],
+             f"{ten}: {ban_ghi}")
+
+
+@ca
+def r927_effort_khong_do_duoc_khi_model_khong_do_duoc():
+    m = _tai_launcher_thu()
+    for ten, du in [("khong_khung", b"Reading additional input from stdin...\n"),
+                    ("khung_mat", _r27_khung("response.created", "r1", "xhigh")
+                     + b"2026-10-24T01:12:06Z TRACE tungstenite::protocol: Received message {\"type\":\"response.created\"\n")]:
+        ban_ghi, _ = _r26_trang_thai(m, du)
+        bang(ban_ghi.get("model_phuc_vu_trang_thai") == "KHONG_DO_DUOC", f"{ten}: fixture: {ban_ghi}")
+        bang(ban_ghi.get("effort_phuc_vu_trang_thai") == "KHONG_DO_DUOC"
+             and "model" in ban_ghi.get("effort_phuc_vu_ly_do", ""), f"{ten}: {ban_ghi}")
+
+
+_R27_BWRAP = ["bwrap", "--as-pid-1", "--new-session", "--die-with-parent", "--ro-bind", "/", "/", "--dev", "/dev",
+              "--bind", "/w", "/w", "--ro-bind-try", "/w/src/.git", "/w/src/.git", "--tmpfs", "/tmp/bi-mat-tmpfs",
+              "--unshare-user", "--unshare-pid", "--unshare-net", "--proc", "/proc", "--cap-drop", "ALL",
+              "--setenv", "TOKEN", "bi-mat-setenv", "--argv0", "codex-linux-sandbox", "--", "bash", "--unshare-ipc",
+              "--bind", "/", "/w/src", "-c", "bi-mat-lenh"]
+_R27_HO_SO = {"type": "managed", "network": "restricted", "file_system": {"type": "restricted", "entries": [
+    {"path": {"type": "special", "value": {"kind": "root"}}, "access": "read"},
+    {"path": {"type": "path", "path": "/w"}, "access": "write"},
+    {"path": {"type": "path", "path": "/w/src/.git"}, "access": "read", "missing_path_behavior": "skip"},
+    {"path": {"type": "path", "path": "/home/bi-mat-home"}, "access": "read"},
+    {"path": {"type": "special", "value": {"kind": "Bi Mat Kind"}}, "access": "bi mat access"},
+    "bi-mat-muc-khong-phai-object"]}}
+_R27_CLS = ["/root/.codex/tmp/arg0-linux/x/codex-linux-sandbox", "--sandbox-policy-cwd", "/w", "--command-cwd",
+            "/w/src", "--permission-profile", json.dumps(_R27_HO_SO), "--la", "Bi Mat Gia Tri",
+            "--apply-seccomp-then-exec", "--", "sh", "--lenh-mo-hinh", "-c", "bi-mat-lenh"]
+
+
+@ca
+def r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep():
+    m = _tai_launcher_thu()
+    bw = m._tom_tat_sandbox(_R27_BWRAP, "/w/src")
+    bang(bw == {"chuong_trinh": "bwrap",
+                "gan": [["--ro-bind", "/"], ["--bind", "to_tien_workspace"], ["--ro-bind-try", "workspace/.git"]],
+                "co": ["--cap-drop=ALL", "--die-with-parent", "--new-session", "--unshare-net", "--unshare-pid",
+                       "--unshare-user"]}, f"bwrap: {bw}")
+    cl = m._tom_tat_sandbox(_R27_CLS, "/w/src")
+    bang(cl == {"chuong_trinh": "codex-linux-sandbox",
+                "co": ["--apply-seccomp-then-exec", "--command-cwd=workspace", "--la=khac",
+                       "--sandbox-policy-cwd=to_tien_workspace"],
+                "permission_profile": {"loai": "managed", "file_system": "restricted", "network": "restricted",
+                                       "muc": [["root", "read"], ["to_tien_workspace", "write"],
+                                               ["workspace/.git", "read"], ["khac", "read"], ["khac", "khac"],
+                                               ["khac", "khac"]]}}, f"codex-linux-sandbox: {cl}")
+    tho = json.dumps([bw, cl])
+    bang("bi-mat" not in tho.lower() and "bi mat" not in tho.lower() and "/w" not in tho, f"ro chuoi ngoai danh sach: {tho}")
+    bang(m._tom_tat_sandbox(["python3", "bwrap", "--unshare-net"], "/w") is None
+         and m._tom_tat_sandbox([], "/w") is None, "khong phai sandbox ma van tom tat")
+    hong = m._tom_tat_sandbox(["codex-linux-sandbox", "--permission-profile", "{khong-json"], "/w")
+    bang(hong["permission_profile"] == {"loai": "khac"}, f"ho so hong: {hong}")
+    try:
+        mang = m._tom_tat_sandbox(["codex-linux-sandbox", "--permission-profile", "[1]"], "/w")
+    except Exception as e:
+        mang = {"permission_profile": f"nem {type(e).__name__}"}
+    bang(mang["permission_profile"] == {"loai": "khac"}, f"ho so khong phai object: {mang}")
+    bang(m._tom_tat_sandbox(["bwrap", "--cap-drop", "SYS_ADMIN"], "/w")["co"] == ["--cap-drop=khac"], "cap-drop la")
+    bang(m._nhan_duong_sb("/w/src/..", "/w/src") == "workspace/khac"
+         and m._nhan_duong_sb("/w/src/a b", "/w/src") == "workspace/khac", "ten con ngoai danh sach")
+
+
+def _r27_so(m, lay, stdout: str):
+    with San() as s:
+        p = s / "stdout.log"
+        p.write_text(stdout, encoding="utf-8")
+        ban_ghi = {}
+        lay.ghi_so(ban_ghi, p)
+        return ban_ghi
+
+
+@ca
+def r927_trang_thai_sandbox_moi_nhanh():
+    m = _tai_launcher_thu()
+    lenh = json.dumps({"type": "item.completed", "item": {"id": "item_1", "type": "command_execution"}}) + "\n"
+    bat = json.dumps({"type": "thread.started"}) + "\n"
+
+    def moi(nen_linux=True):
+        lay = m._LayMauSandbox(os.getpid(), "/w")
+        if not nen_linux:
+            lay.luong = None
+        return lay
+    lay = moi()
+    lay.thay['{"chuong_trinh": "bwrap"}'] = 2
+    d = _r27_so(m, lay, "khong json\n")
+    bang(d["sandbox_trang_thai"] == "DO_DUOC" and d["sandbox_quan_sat"] == [{"chuong_trinh": "bwrap", "so_lan": 2}]
+         and "sandbox_ly_do" not in d and d.get("sandbox_gioi_han"), f"do_duoc: {d}")
+    tin = json.dumps({"type": "item.completed", "item": {"id": "item_0", "type": "agent_message"}}) + "\n"
+    d = _r27_so(m, moi(), bat + tin)
+    bang(d["sandbox_trang_thai"] == "KHONG_THAY_LENH" and d["sandbox_quan_sat"] == [], f"khong lenh: {d}")
+    for ten, lay, out, mau in [("co_lenh_khong_thay", moi(), bat + lenh, "1 command_execution"),
+                               ("stdout_khong_json", moi(), "Reading...\n", "--json"),
+                               ("khong_linux", moi(False), bat, "chi Linux")]:
+        d = _r27_so(m, lay, out)
+        bang(d["sandbox_trang_thai"] == "KHONG_DO_DUOC" and mau in d.get("sandbox_ly_do", ""), f"{ten}: {d}")
+    lay = moi()
+    lay.thay['{"chuong_trinh": "bwrap"}'] = 1
+    lay.loi.append("PermissionError")
+    d = _r27_so(m, lay, bat)
+    bang(d["sandbox_trang_thai"] == "KHONG_DO_DUOC" and "PermissionError" in d["sandbox_ly_do"], f"loi: {d}")
+    lay = moi()
+    lay.thay['{"chuong_trinh": "bwrap"}'] = 1
+    lay.con_chay = True
+    d = _r27_so(m, lay, bat)
+    bang(d["sandbox_trang_thai"] == "KHONG_DO_DUOC" and "chua dung" in d["sandbox_ly_do"], f"con chay: {d}")
+
+
+@ca
+def r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ():
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    doc = []
+    goc = m.Path
+
+    class PathGhi(type(Path())):
+        def read_bytes(self):
+            doc.append(str(self))
+            return super().read_bytes()
+    # con: chạy với argv của python, 0,6s sau mới exec thành argv0 `bwrap` (giống fork-rồi-exec)
+    ma = ("import os,sys,time;time.sleep(0.6);"
+          "os.execv(sys.executable,['bwrap','-c','import time;time.sleep(1.5)','--unshare-net','--ro-bind','/','/'])")
+    p = subprocess.Popen([PY, "-c", ma])
+    m.Path = PathGhi
+    try:
+        lay = m._LayMauSandbox(p.pid, "/w")
+        lay.pid = os.getpid()
+        lay.bat_dau()
+        p.wait(timeout=20)
+        lay.ket_thuc(5)
+    finally:
+        m.Path = goc
+    d = {}
+    lay.ghi_so(d, Path(os.devnull))
+    bang(d["sandbox_trang_thai"] == "DO_DUOC"
+         and {"chuong_trinh": "bwrap", "gan": [["--ro-bind", "/"]], "co": ["--unshare-net"], "so_lan": 1}
+         in d["sandbox_quan_sat"], f"khong thay tien trinh sau exec: {d}")
+    bang(doc and not any("environ" in x for x in doc)
+         and all(x.endswith(("/stat", "/cmdline")) for x in doc), f"doc tep ngoai stat/cmdline: {sorted(set(doc))[:5]}")
+
+
+@ca
+def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
+    with San() as s:
+        err = _r27_khung("response.created", "r1", "xhigh").decode()
+        sau = ("import subprocess;subprocess.run([sys.executable,'-c','import os,sys;"
+               "os.execv(sys.executable,[\\'bwrap\\',\\'-c\\',\\'import time;time.sleep(1)\\',\\'--unshare-net\\'])'])")
+        r, tm, so = _r25_chay(s, err, sau)
+        bang(r.returncode == 0 and so.get("effort_phuc_vu") == ["xhigh"]
+             and so.get("effort_phuc_vu_trang_thai") == "DO_DUOC", f"effort: {r.stderr[-300:]} {so}")
+        if platform.system() == "Linux":
+            bang(so.get("sandbox_trang_thai") == "DO_DUOC"
+                 and any(x.get("chuong_trinh") == "bwrap" for x in so.get("sandbox_quan_sat", [])), f"sandbox: {so}")
+        else:
+            bang(so.get("sandbox_trang_thai") == "KHONG_DO_DUOC", f"sandbox ngoai Linux: {so}")
+
+
 DOT_BIEN = [
+    # wp748 r27: mỗi chốt đo effort/sandbox một đột biến gỡ đúng chốt của nó.
+    ("r27_effort_khong_kiem_kieu", ('eff = eff if isinstance(eff, str) and eff.strip() else None', 'eff = eff'),
+     ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
+    ("r27_effort_khong_kiem_rong", ('eff = eff if isinstance(eff, str) and eff.strip() else None',
+                                    'eff = eff if isinstance(eff, str) else None'),
+     ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
+    ("r27_reasoning_khong_kiem_dict", ('eff = ly.get("effort") if isinstance(ly, dict) else None',
+                                       'eff = ly.get("effort") if ly else None'),
+     ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
+    ("r27_bo_dem_effort", ('            _dem_effort(dem, m.pop("effort", None))\n', '            m.pop("effort", None)\n'),
+     ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
+    ("r27_effort_o_lai_muc_model", ('            _dem_effort(dem, m.pop("effort", None))\n',
+                                    '            _dem_effort(dem, m.get("effort"))\n'),
+     ["r927_effort_do_duoc_tu_khung_may_chu"]),
+    ("r27_effort_chi_gia_tri_dau", ('elif eff not in dem.get("effort", ()):', 'elif not dem.get("effort"):'),
+     ["r927_effort_do_duoc_tu_khung_may_chu"]),
+    ("r27_effort_khong_xet_model", ('    if tt_model != "DO_DUOC":\n', '    if False:\n'),
+     ["r927_effort_khong_do_duoc_khi_model_khong_do_duoc"]),
+    ("r27_effort_khong_xet_thieu", ('    if dem.get("effort_thieu"):\n', '    if False:\n'),
+     ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
+    ("r27_khong_cat_sau_hai_gach", ('a = argv[1:argv.index("--")] if "--" in argv else argv[1:]', 'a = argv[1:]'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_ten_khong_basename", ('ten = argv[0].replace("\\\\", "/").rsplit("/", 1)[-1]', 'ten = argv[0]'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_nhan_duong_tra_tho", ('        return "to_tien_workspace"\n    return "khac"\n', '        return "to_tien_workspace"\n    return p\n'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_ten_con_khong_loc", ('_RE_TEN_CON_SB.fullmatch(con) and con not in (".", "..")', 'con not in (".", "..")'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_ten_con_nhan_cham_cham", ('_RE_TEN_CON_SB.fullmatch(con) and con not in (".", "..")', '_RE_TEN_CON_SB.fullmatch(con)'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_token_khong_loc", ('return x if isinstance(x, str) and _RE_TOKEN_SB.fullmatch(x) else "khac"',
+                             'return x if isinstance(x, str) else "khac"'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_cap_drop_khong_loc", ('("ALL" if a[i + 1] == "ALL" else "khac")', 'a[i + 1]'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_ho_so_khong_loc_duong", ('nhan = _nhan_duong_sb(p.get("path"), ws)', 'nhan = p.get("path")'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_ho_so_khong_kiem_dict", ('    if type(d) is not dict:\n', '    if False:\n'),
+     ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
+    ("r27_tt_khong_xet_nen", ('        if self.luong is None:\n            tt, ld', '        if False:\n            tt, ld'),
+     ["r927_trang_thai_sandbox_moi_nhanh"]),
+    ("r27_tt_bo_qua_loi", ('        elif loi:\n            tt, ld = "KHONG_DO_DUOC", f"luong lay mau',
+                           '        elif False:\n            tt, ld = "KHONG_DO_DUOC", f"luong lay mau'),
+     ["r927_trang_thai_sandbox_moi_nhanh"]),
+    ("r27_tt_bo_qua_con_chay", ('        elif self.con_chay:\n', '        elif False:\n'), ["r927_trang_thai_sandbox_moi_nhanh"]),
+    ("r27_tt_khong_doi_json", ('            if not co_json:\n', '            if False:\n'), ["r927_trang_thai_sandbox_moi_nhanh"]),
+    ("r27_tt_bo_qua_so_lenh", ('            elif so_lenh:\n', '            elif False:\n'), ["r927_trang_thai_sandbox_moi_nhanh"]),
+    ("r27_dem_moi_item", ('if isinstance(it, dict) and it.get("type") == "command_execution":', 'if isinstance(it, dict):'),
+     ["r927_trang_thai_sandbox_moi_nhanh"]),
+    ("r27_khoa_khong_gom_cmdline", ('                if (c, bd, tho) in self.da:\n                    continue\n                self.da.add((c, bd, tho))\n',
+                                    '                if (c, bd) in self.da:\n                    continue\n                self.da.add((c, bd))\n'),
+     ["r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ"]),
+    ("r27_quet_doc_environ", ('                    tho = Path(f"/proc/{c}/cmdline").read_bytes()\n',
+                              '                    tho = Path(f"/proc/{c}/cmdline").read_bytes()\n                    Path(f"/proc/{c}/environ").read_bytes()\n'),
+     ["r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ"]),
+    ("r27_lenh_run_khong_lay_mau", ('            sandbox.bat_dau()\n', ''), ["r927_lenh_run_ghi_effort_va_sandbox_vao_run_json"]),
+    ("r27_lenh_run_khong_ghi_so", ('        sandbox.ghi_so(ban_ghi, thu_muc / "stdout.log")\n', '        pass\n'),
+     ["r927_lenh_run_ghi_effort_va_sandbox_vao_run_json"]),
     # wp748 r25/r26: mỗi chốt đo model phục vụ một đột biến gỡ đúng chốt của nó (r26 vòng 2: bộ lọc phân loại theo DÒNG).
     ("r25_ghi_moi_dong_tron", ('if so_doan == 1 and doan in _STDERR_CHO_PHEP_DONG:', 'if so_doan == 1 and het_dong:'),
      ["r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat", "r925_chi_ghi_dong_cho_phep_nguyen_van_ke_ca_truoc_trace"]),

@@ -2904,10 +2904,14 @@ def cmd_accept(a, state_dir: Path) -> int:
     if (type(qd) is not list or not all(type(q) is dict and set(q) == truong and all(type(v) is str and v.strip() for v in q.values()) for q in qd)
             or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):
         _die(RC_ARG, f"P3 còn mở {sorted(con_mo)} phải có ĐÚNG một quyết định {sorted(truong)} mỗi mục")
+    moi = {**st, "state": "accepted", "accepted_sha": h, "moc_connector": moc, "quyet_dinh_p3": qd, "history": [*st["history"], {
+        "event": "accept", "accepted_sha": h, "pr": a.pr, "moc_connector": moc, "connector_sha256": _doc_json(a.connector, RC_GATE)[1], **sha_ci}]}
+    try:  # state dự kiến phải mã hoá được TRƯỚC `_xet_dung` (I5: mọi đầu vào xác thực xong) — vd surrogate đơn trong quyết định P3
+        json.dumps(moi, ensure_ascii=False).encode("utf-8")
+    except (ValueError, TypeError, UnicodeError) as ex:
+        _die(RC_ARG, f"quyết định P3 / state dự kiến không mã hoá được UTF-8: {type(ex).__name__}")
     _xet_dung(state_dir, st, "accept")
-    st.update(state="accepted", accepted_sha=h, moc_connector=moc, quyet_dinh_p3=qd)
-    st["history"].append({"event": "accept", "accepted_sha": h, "pr": a.pr, "moc_connector": moc, "connector_sha256": _doc_json(a.connector, RC_GATE)[1], **sha_ci})
-    _save(state_dir, st)
+    _save(state_dir, moi)
     print(f"accepted {h} — {len(qd)} quyết định P3, mốc connector {moc}")
     return RC_OK
 

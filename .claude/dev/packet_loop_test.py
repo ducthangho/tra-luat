@@ -8592,7 +8592,9 @@ def _r834(c: Ctx, doi=None, lop=(), p3_cn=False, env=None, vo=False):
 
 def _r834_ca(rc_doi, doi=None, phai="", **kw):
     def ca(c):
-        rc, sd, e, truoc, _ = _r834(c, doi, **kw)
+        rc, sd, e, truoc, o = _r834(c, doi, **kw)
+        if _co_banner(o) or _co_banner(e):  # CLI sập ⇒ TÍN DỤNG GIẢ (#822 M6), không phải giết — fixture r834 không mang banner
+            raise CliSapDo(f"r834 accept SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
         _doi(rc_doi, rc, e, "r834 accept")
         if phai not in _txt(e):
             raise AssertionError(f"r834: rc đúng mà lý do khác — đòi {phai!r}, stderr={_txt(e)!r}")
@@ -8725,7 +8727,7 @@ MUTANTS.update({
     "r834_changes_khong_hang_lot": (' or x.get("state") == "CHANGES_REQUESTED"):', "):", ["r834_review_changes_khong_hang"]),
     "r834_commit_thieu_la_cu": ('"hien" if c == head else "cu" if type(c) is str and SHA_RE.fullmatch(c) else "hong"', '"hien" if c == head else "cu"', ["r834_review_comment_thieu_commit"]),
     "r834_reviewed_commit_tim_dau": ('    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\\1", t.strip()) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])]',
-                                     '    khai = [re.search(r"`?([0-9a-f]{7,40})", t) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])][:1]', ["r834_reviewed_commit_sai_dang", "r834_reviewed_commit_mau_thuan"]),
+                                     '    khai = [re.search(r"`?()([0-9a-f]{7,40})", t) for t in re.findall(r"Reviewed commit:(?:\\*\\*)?([^\\n]*)", x["body"])][:1]', ["r834_reviewed_commit_sai_dang", "r834_reviewed_commit_mau_thuan"]),
     "r834_head_cu_van_chan": ("            if n is None and hang:", "            if n != \"hien\" and hang:", ["r834_issue_comment_head_cu_khong_chan"]),
     "r834_bo_envelope": ('    if not isinstance(d, dict) or (d.get("repo"), d.get("pr"), d.get("head_sha")) != (repo, pr, head):', "    if not isinstance(d, dict):",
                          ["r834_envelope_head_khac"]),
@@ -8771,6 +8773,26 @@ MUTANTS.update({
     "r834_qd_theo_tap": ('or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):', 'or {(q["nguon"], q["khoa"]) for q in qd} != con_mo):', ["r834_qd_trung"]),
     "r834_bo_kieu_job": ('    if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int and j["run_attempt"] > 0\n', "    if False and all(True\n",
                          ["r834_job_attempt_bool", "r834_job_run_id_float"]),
+})
+
+
+# #834 lượt 4 — Codex lượt 3: F2 ba chốt còn sống (dừng trước H/P3, job chưa xanh, P1 ở review comment) · F5 state dự kiến
+# phải mã hoá được TRƯỚC `_xet_dung`. F4 (đột biến parser sập) vá ở `_r834_ca` (CLI sập ⇒ tín dụng giả) + giữ cấu trúc nhóm regex.
+CASES += [
+    ("r834_xet_dung_sau_h", _r834_ca(11, lambda x, w, h: x["bnc"].update(generation=2), "generation", p3_cn=True, vo=True)),
+    ("r834_job_chua_xanh", _r834_ca(12, _S834("jobs", 0, status="in_progress", conclusion=None), "chưa xanh")),
+    ("r834_review_comment_p1", _r834_ca(12, lambda x, w, h: x["review_comments"].append(
+        {"id": 13, "user": {"login": _CN834}, "body": "![P1 Badge] bug", "commit_id": h, "pull_request_url": f"{_API834}pulls/55"}), "còn ['P1']")),
+    ("r834_qd_khong_ma_hoa", _r834_ca(2, lambda x, w, h: x["qd"][0].update(ly_do="\ud800"), "không mã hoá được", lop=(("a-b", "P3"),), vo=True)),
+]
+MUTANTS.update({
+    "r834_xet_dung_truoc_h": (('    _xet_dung(state_dir, st, "accept")\n', "    slug_cn = _slug_connector("),
+                              ("", '    _xet_dung(state_dir, st, "accept")\n    slug_cn = _slug_connector('), ["r834_xet_dung_sau_h"]),
+    "r834_bo_job_xanh": ('(job.get("status"), job.get("conclusion")) != ("completed", "success") or r is None', "r is None", ["r834_job_chua_xanh"]),
+    "r834_bo_p1_review_comment": (('                if hang != {"P3"}:\n', '                p3.append((k, x["id"]))\n'),
+                                  ('                if hang != {"P3"} and k != "review_comments":\n', '                p3 += [(k, x["id"])] * (hang == {"P3"})\n'),
+                                  ["r834_review_comment_p1"]),  # hai hunk cùng một ngữ nghĩa: bỏ chặn P1 VÀ không biến P1 thành P3
+    "r834_bo_ma_hoa_truoc": ('        json.dumps(moi, ensure_ascii=False).encode("utf-8")\n', "        pass\n", ["r834_qd_khong_ma_hoa"]),
 })
 
 

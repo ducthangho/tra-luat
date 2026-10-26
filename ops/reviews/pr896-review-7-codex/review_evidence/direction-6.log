@@ -1,0 +1,12 @@
+round6_historical_fields=4 all_text_and_anchor_match=True
+round6_v1_corrections=3 all_frozen_hash_row_match=True
+older_historical_fields=48 all_anchor_adds_receipt=True
+all_ancestry_measurements=176 all_rc0=True
+ops/reviews/wp461-review-1-codex-verdict.receipt.yaml / anchor.cuong_do anchor=77f272d435b0c23369b2348efa821c760d653036 source=ef72264cb268643a89df3e15cf6cb840da92307b rc=[0, 0, 0, 0]
+ops/reviews/wp461-review-1-codex-verdict.receipt.yaml / lich_su_ban_ung_vien.ghi_chu anchor=77f272d435b0c23369b2348efa821c760d653036 source=ef72264cb268643a89df3e15cf6cb840da92307b rc=[0, 0, 0, 0]
+ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml / anchor.cuong_do anchor=62c2fceecac4d3e114f0ecfcb0980dc67514e0ee source=b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc rc=[0, 0, 0, 0]
+ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml / lich_su_ban_ung_vien.ghi_chu anchor=62c2fceecac4d3e114f0ecfcb0980dc67514e0ee source=b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc rc=[0, 0, 0, 0]
+ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml / receipt_khong_khai.0 anchor=b9d6a8199d343e4c0458501f636d4b39e423c950 source=4920113a639d81385c0f98b1488c0f497776d2ff rc=[0, 0, 0, 0]
+ops/reviews/don-nhanh-base-review-4-claude-verdict.receipt.yaml / truy_xuat_ghi_chu anchor=f99c6f172a8bc7bb641a07d6499299bca906c611 source=03f12ac63284dd814dcf14664968af4872ef7f8a rc=[0, 0, 0, 0]
+ops/reviews/don-nhanh-base-review-5-claude-verdict.receipt.yaml / truy_xuat_ghi_chu anchor=f99c6f172a8bc7bb641a07d6499299bca906c611 source=03f12ac63284dd814dcf14664968af4872ef7f8a rc=[0, 0, 0, 0]
+

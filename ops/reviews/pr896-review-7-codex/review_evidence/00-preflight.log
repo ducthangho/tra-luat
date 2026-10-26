@@ -1,0 +1,147 @@
+$ git rev-parse HEAD HEAD^{tree} refs/remotes/origin/master
+05bc12e2b9008071ca28edbd4574e58644d48220
+3412a314b129d1ee1473e528a5ec438378ccebe5
+3e973a03b151e37cd402e0a723816eeaa8247193
+rc=0
+
+$ git status --porcelain
+rc=0
+
+$ git log --oneline 22382d8..05bc12e
+05bc12e ops: bien nhan cross-review luot 6 #896 + ap HINT luot 6 + khoi luot 6 ho so land
+825dab1 ops/reviews: hien vat cross-review luot 6 #896 (codex, cham 22382d8)
+rc=0
+
+$ git diff --name-status 22382d8..05bc12e
+M	ops/land/pr832-wp831-land-evidence.yaml
+M	ops/land/pr848-wp744-land-evidence.yaml
+M	ops/land/pr862-wp748-r21-land-evidence.yaml
+M	ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml
+M	ops/reviews/README.md
+A	ops/reviews/pr896-review-6-codex-verdict.md
+A	ops/reviews/pr896-review-6-codex-verdict.receipt.yaml
+A	ops/reviews/pr896-review-6-codex/HINT.patch
+A	ops/reviews/pr896-review-6-codex/OMITTED.txt
+A	ops/reviews/pr896-review-6-codex/PROMPT.md
+A	ops/reviews/pr896-review-6-codex/SHA256SUMS
+A	ops/reviews/pr896-review-6-codex/VERDICT.md
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/VERDICT.partial.md
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/launcher-void.err
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/launcher-void.out
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/launcher.err
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/launcher.out
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/loi-may-chu.txt
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/checkpoint.json
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/run.json
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/stderr.log
+A	ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/stdout.log
+A	ops/reviews/pr896-review-6-codex/numstat-pr947.txt
+A	ops/reviews/pr896-review-6-codex/numstat.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/VERDICT.progress.md
+A	ops/reviews/pr896-review-6-codex/review_evidence/all-runtime-index.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/audit.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/bien_nhan_v2.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/bien_nhan_v2.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/bien_nhan_v2.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/build_hint.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/checks.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/clone.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/copy-path.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-10.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-11.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-12.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-13.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-2.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-3.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-5.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-6.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-7.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-8.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/direction-9.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/doc_claims.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/doc_claims.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/doc_claims.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/doctrine.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/doctrine.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/doctrine.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/final-state.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/finalize.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-apply.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-dry-run.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-parent-apply.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-parent-path.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-paths.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-readme-extra.diff
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/bien_nhan_v2.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/bien_nhan_v2.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/checks.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/doc_claims.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/doc_claims.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/doctrine.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/doctrine.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/land.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/land.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/t138.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/t138.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/t26.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/t26.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/t27.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint-validation/t27.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/hint_checks.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/integrity.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/inventory.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/land-surfaces.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/land.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/land.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/land.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/land_surfaces.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/mutations.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/mutations.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/negative-ancestry.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/negative_ancestry.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/new-claims.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/new_claims.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/prepare_clone.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-caveat-readme-t138.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-caveat-readme-t26.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-caveat-readme-t27.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-index-t138.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-index-t26.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-index-t27.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-receipt-caveat-t138.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-receipt-caveat-t26.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/remove-round5-receipt-caveat-t27.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/residual-status.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/residuals.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/round5-sha256sums.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/run_checks.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/runtime_index.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/states-ancestry.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/states-reviews.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/states.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/status-anchored.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/status-readme.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/status-unanchored.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/surface-text.log
+A	ops/reviews/pr896-review-6-codex/review_evidence/surfaces.json
+A	ops/reviews/pr896-review-6-codex/review_evidence/surfaces.py
+A	ops/reviews/pr896-review-6-codex/review_evidence/t138.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/t138.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/t138.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/t26.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/t26.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/t26.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/t27.rc
+A	ops/reviews/pr896-review-6-codex/review_evidence/t27.stderr
+A	ops/reviews/pr896-review-6-codex/review_evidence/t27.stdout
+A	ops/reviews/pr896-review-6-codex/review_evidence/targeted-anchored_candidates.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/targeted-readme.txt
+A	ops/reviews/pr896-review-6-codex/review_evidence/targeted-unanchored_candidates.txt
+A	ops/reviews/pr896-review-6-codex/run/checkpoint.json
+A	ops/reviews/pr896-review-6-codex/run/run.json
+A	ops/reviews/pr896-review-6-codex/run/stderr.log
+A	ops/reviews/pr896-review-6-codex/run/stdout.log
+A	ops/reviews/pr896-review-6-legacy-caveats.yaml
+M	ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+M	ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+rc=0

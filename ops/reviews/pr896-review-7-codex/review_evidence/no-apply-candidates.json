@@ -1,0 +1,328 @@
+[
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026.cross_review_moi.do_duoc",
+    "line": 186,
+    "text": "measured — run.json 0f8ecb85: head 2789cbb (head da merge cua #915, chua 3bc4244), model_phuc_vu DO_DUOC `gpt-6.1-sol`. Bang do cua verdict khop cau CLAUDE.md da sua voi t162/loi_g5_workflow (hang \"t162 doc tu workflow\" ... \"Chot G5 kiem needs/if\" deu \"Co\"). P1 duy nhat nam o bien nhan luot 2 #870/#889 (surface tu khai `codex_service`), KHONG o CLAUDE.md; HINT.patch da ap trong PR ghi so nay, CHUA review lai.",
+    "group": "unanchored_candidates",
+    "matches": [
+      "odex_service`), KHONG o CLAUDE.md; HINT.patch da ap trong PR ghi so nay, CHUA review lai."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot2.cross_review_moi.hint",
+    "line": 234,
+    "text": "ops/reviews/pr896-review-2-codex/HINT.patch — CHUA ap.",
+    "group": "unanchored_candidates",
+    "matches": [
+      "/pr896-review-2-codex/HINT.patch — CHUA ap.",
+      "ops/reviews/pr896-review-2-codex/HINT.patch — CHUA ap."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot3.cross_review_moi.hint",
+    "line": 266,
+    "text": "ops/reviews/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep).",
+    "group": "unanchored_candidates",
+    "matches": [
+      "/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep).",
+      "ops/reviews/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep)."
+    ]
+  },
+  {
+    "path": "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.receipt.yaml",
+    "field": "bon_P3_doi_chieu.1.ly_do_chua_va",
+    "line": 86,
+    "text": "Tại reviewed head 9a99dd8, đã sửa INDEX nhưng còn câu sai trong receipt lượt 2 và land evidence. Gói gợi ý PR489 lượt 1 sửa nốt; chưa tính là executor đã áp.",
+    "group": "unanchored_candidates",
+    "matches": [
+      "e. Gói gợi ý PR489 lượt 1 sửa nốt; chưa tính là executor đã áp."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp710-exec-review-3-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.2.mo_ta",
+    "line": 119,
+    "text": "HINT luot 3 la ban chep NGUYEN BYTE tu reviewer va THIEU nhan bat buoc PROTOCOL §8.4 dong 644 (\"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit\"; luot 1-2 co nhan o dong 1). Giu nguyen byte de khong lam sai hint_patch_sha256; tep nay KHONG du dieu kien dung lam patch-as-hint — chi la hien vat lich su (connector Codex PR #722, pull/722#discussion_r4231959151).",
+    "group": "unanchored_candidates",
+    "matches": [
+      " bat buoc PROTOCOL §8.4 dong 644 (\"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit\"; luot 1-2 co nhan o dong 1). Giu nguyen byte de khong lam sai hint_patch_sha256; te"
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot3.hint_luot2.ghi_chu",
+    "line": 251,
+    "text": "Cau \"HINT.patch CHUA ap\" trong khoi luot 2 dung tai 765ae89, KHONG con dung tu 82359c4.",
+    "group": "anchored_candidates",
+    "matches": [
+      "Cau \"HINT.patch CHUA ap\" trong khoi luot 2 dung tai 765ae89, KHONG con dung tu 82359c4.",
+      "Cau \"HINT.patch CHUA ap\" trong khoi luot 2 dung tai 765ae89, KHONG con dung tu 82359c4."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_sau_82359c4.moc_lich_su",
+    "line": 277,
+    "text": "Khoi cap_nhat_20261026_luot2 o tren la anh chup tai moc ghi so 765ae89, chua co ban va 82359c4. Cac cau \"receipt va README chua co caveat\", \"HINT.patch ... CHUA ap\" va \"caveat con thieu ... neu ... duoc ap\" trong khoi do chi dung tai moc lich su ay, khong phai trang thai sau 82359c4.",
+    "group": "anchored_candidates",
+    "matches": [
+      "E chua co caveat\", \"HINT.patch ... CHUA ap\" va \"caveat con thieu ... neu ... duoc ap\" trong khoi do chi dung tai moc lich su ay, khong phai trang thai sau 82359c4",
+      "eceipt va README chua co caveat\", \"HINT.patch ... CHUA ap\" va \"caveat con thieu ... neu ... duoc ap\" trong khoi do chi dung tai moc lich su ay, khong phai trang thai sau 8235"
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_sau_82359c4.ghi_chu_luot3",
+    "line": 293,
+    "text": "Khoi cap_nhat_20261026_luot3 o tren (ghi tai 8879165) noi HINT.patch luot 3 \"CHUA ap\"; cau ay dung tai 8879165 va c8c1ee0. HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex (xem git log), theo yeu cau chu kho \"va cho toi khi het P1, P2, P3\".",
+    "group": "anchored_candidates",
+    "matches": [
+      "ai 8879165) noi HINT.patch luot 3 \"CHUA ap\"; cau ay dung tai 8879165 va c8c1ee0. HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-re",
+      "luot3 o tren (ghi tai 8879165) noi HINT.patch luot 3 \"CHUA ap\"; cau ay dung tai 8879165 va c8c1ee0. HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896"
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_20261026_luot4.cross_review_moi.hint",
+    "line": 317,
+    "text": "ops/reviews/pr896-review-4-codex/HINT.patch — tai moc ghi so CHUA ap (34 tep).",
+    "group": "anchored_candidates",
+    "matches": [
+      "-codex/HINT.patch — tai moc ghi so CHUA ap (34 tep).",
+      "ops/reviews/pr896-review-4-codex/HINT.patch — tai moc ghi so CHUA ap (34 tep)."
+    ]
+  },
+  {
+    "path": "ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml",
+    "field": "cap_nhat_review_4_moc_lich_su.ghi_chu_luot4",
+    "line": 329,
+    "text": "Khoi cap_nhat_20261026_luot4 o tren (ghi tai ff4ab57) noi HINT.patch luot 4 \"CHUA ap\"; cau ay dung tai ff4ab57 va 77a0a45. HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896-review-2-codex (xem git log), theo lua chon cua chu kho \"Ap nguyen HINT luot 4\".",
+    "group": "anchored_candidates",
+    "matches": [
+      "ai ff4ab57) noi HINT.patch luot 4 \"CHUA ap\"; cau ay dung tai ff4ab57 va 77a0a45. HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896-re",
+      "luot4 o tren (ghi tai ff4ab57) noi HINT.patch luot 4 \"CHUA ap\"; cau ay dung tai ff4ab57 va 77a0a45. HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896"
+    ]
+  },
+  {
+    "path": "ops/reviews/pr896-review-1-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.4.mo_ta",
+    "line": 110,
+    "text": "Anh chup lich su tai commit ghi bien nhan 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f: P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai 8d56009a09af7b3ef93801df105f9483de212cc7. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land.",
+    "group": "anchored_candidates",
+    "matches": [
+      "gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai "
+    ]
+  },
+  {
+    "path": "ops/reviews/pr896-review-2-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.0.mo_ta",
+    "line": 113,
+    "text": "Verdict lich su tren 8d56009 la changes_requested 1 P1 (verdict-surface-bo-sot-pr889-luot1). Tai moc ghi so 765ae89 va cha 578fb4b, receipt pr889-review-1/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu verdict moi tren exact SHA ung vien; khong suy approve/land tu viec ap patch, khong doi ket qua hay byte verdict lich su.",
+    "group": "anchored_candidates",
+    "matches": [
+      "/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu ver",
+      "89-review-1/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu "
+    ]
+  },
+  {
+    "path": "ops/reviews/pr896-review-3-codex-verdict.receipt.yaml",
+    "field": "finding_moi.1.tom_tat",
+    "line": 75,
+    "text": "Caveat HINT-P1-CHUA-AP cua receipt luot 2, hai hang README va khoi land luot 2 van noi HINT.patch luot 2 chua ap, trong khi 82359c4 da ap. Dung tai 765ae89/578fb4b, cu tai 82359c4. Phien ghi so tu do lai: receipt luot 2 co 1 lan \"CHUA ap\".",
+    "group": "anchored_candidates",
+    "matches": [
+      "u do lai: receipt luot 2 co 1 lan \"CHUA ap\".",
+      "Caveat HINT-P1-CHUA-AP cua receipt luot 2, hai hang README va khoi land luot 2 van noi HINT.patch luot 2 chua ap, trong khi 82359c4 da ap. "
+    ]
+  },
+  {
+    "path": "ops/reviews/pr896-review-3-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.0.mo_ta",
+    "line": 126,
+    "text": "Verdict lich su tren 82359c4 la changes_requested 2 P1 + 1 P2. Tai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su.",
+    "group": "anchored_candidates",
+    "matches": [
+      "165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SH",
+      "ai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict mo"
+    ]
+  },
+  {
+    "path": "ops/reviews/pr896-review-4-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.0.mo_ta",
+    "line": 126,
+    "text": "Verdict lich su tren 2e4183b la changes_requested 3 P1 + 1 P2. Tai moc ghi so ff4ab57 (va 77a0a45) HINT.patch luot 4 (34 tep, phan lon receipt NGOAI chuoi #896) CHUA ap; chu kho chon ap nguyen, va no duoc ap o commit ke tiep sau 77a0a45. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su.",
+    "group": "anchored_candidates",
+    "matches": [
+      "phan lon receipt NGOAI chuoi #896) CHUA ap; chu kho chon ap nguyen, va no duoc ap o commit ke tiep sau 77a0a45. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su."
+    ]
+  },
+  {
+    "path": "ops/reviews/pr915-review-1-codex-verdict.receipt.yaml",
+    "field": "verdict_usage_caveats.0.mo_ta",
+    "line": 93,
+    "text": "Anh chup lich su tai commit ghi bien nhan a9bc9349103adfc971f4a1f7431a9655aecaaefb: changes_requested 1 P1 (VERDICT-KHAI-SAI-EXECUTION-SURFACE tren bien nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai 8d56009a09af7b3ef93801df105f9483de212cc7. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land.",
+    "group": "anchored_candidates",
+    "matches": [
+      "en nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao. Sau moc ay, pr896-review-2-codex-verdict.md"
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-12-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-13-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-14-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 57,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-2-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-3-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-4-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-5-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-6-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "path": "ops/reviews/wp698-spec-review-7-claude-verdict.receipt.yaml",
+    "field": "evidence_url_ghi_chu",
+    "line": 58,
+    "text": "Neo BLOB ghim commit 2de112e cua nhanh bookkeeping claude/bookkeeping-698-land, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash).",
+    "group": "anchored_candidates",
+    "matches": [
+      "d, commit CHI mang ban sao verdict/HINT; bien nhan di o commit sau. Luc ghi so commit ay CHUA day; link chi song sau khi phien chinh push nhanh nguyen ven (khong rebase/squash)."
+    ]
+  },
+  {
+    "line": 127,
+    "text": "| `doctrine-scan-review-1-claude-verdict.md` | `HINT-DA-CHAY-NHUNG-CHUA-QUA-CI` | HINT patch (`ops/reviews/doctrine-scan/HINT-543-luot1.patch`, sha256 `fde1b894…`, +62/−15, 7 hunk) **đã chạy tại chỗ**: `packet_loop_test` 287/287 `rc=0`, và bốn cửa fail-open chuyển từ `rc=0` sang `rc=2` + `KHÔNG ĐO ĐƯỢC`. Nhưng nó **chưa qua CI**, và lượt này chưa chạy `doc-claims-check --strict`, `release-verify --strict`, `bien_nhan_v2` trên head agy — chúng thuộc A7, nghĩa vụ của executor. Áp hint là việc của executor, kèm trách nhiệm chạy đủ A7. |",
+    "group": "readme",
+    "matches": [
+      "can-review-1-claude-verdict.md` | `HINT-DA-CHAY-NHUNG-CHUA-QUA-CI` | HINT patch (`ops/reviews/doctrine-scan/HINT-543-luot1.patch`, sha256 `fde1b894…`, +62/−15, 7 hunk) **đã chạy "
+    ]
+  },
+  {
+    "line": 668,
+    "text": "| `wp710-exec-review-3-codex-verdict.md` | `HINT-LUOT-3-THIEU-NHAN-PATCH-AS-HINT` | HINT luot 3 la ban chep NGUYEN BYTE tu reviewer va THIEU nhan bat buoc PROTOCOL §8.4 dong 644 (\"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit\"; luot 1-2 co nhan o dong 1). Giu nguyen byte de khong lam sai hint_patch_sha256; tep nay KHONG du dieu kien dung lam patch-as-hint — chi la hien vat lich su (connector Codex PR #722, pull/722#discussion_r4231959151). |",
+    "group": "readme",
+    "matches": [
+      " bat buoc PROTOCOL §8.4 dong 644 (\"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit\"; luot 1-2 co nhan o dong 1). Giu nguyen byte de khong lam sai hint_patch_sha256; te"
+    ]
+  },
+  {
+    "line": 729,
+    "text": "| `pr896-review-1-codex-verdict.md` | `P2-DA-VA-CHUA-REVIEW-LAI` | Anh chup lich su tai commit ghi bien nhan 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f: P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai 8d56009a09af7b3ef93801df105f9483de212cc7. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land. |",
+    "group": "readme",
+    "matches": [
+      "gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai "
+    ]
+  },
+  {
+    "line": 739,
+    "text": "| `pr915-review-1-codex-verdict.md` | `HEAD-CHUA-SACH-CAN-REVIEW-LAI` | Anh chup lich su tai commit ghi bien nhan a9bc9349103adfc971f4a1f7431a9655aecaaefb: changes_requested 1 P1 (VERDICT-KHAI-SAI-EXECUTION-SURFACE tren bien nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai 8d56009a09af7b3ef93801df105f9483de212cc7. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land. |",
+    "group": "readme",
+    "matches": [
+      "en nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao. Sau moc ay, pr896-review-2-codex-verdict.md"
+    ]
+  },
+  {
+    "line": 743,
+    "text": "| `pr896-review-2-codex-verdict.md` | `HINT-P1-DA-AP-CAN-VERDICT-MOI` | Verdict lich su tren 8d56009 la changes_requested 1 P1 (verdict-surface-bo-sot-pr889-luot1). Tai moc ghi so 765ae89 va cha 578fb4b, receipt pr889-review-1/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu verdict moi tren exact SHA ung vien; khong suy approve/land tu viec ap patch, khong doi ket qua hay byte verdict lich su. |",
+    "group": "readme",
+    "matches": [
+      "/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu ver",
+      "89-review-1/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu "
+    ]
+  },
+  {
+    "line": 749,
+    "text": "| `pr896-review-3-codex-verdict.md` | `HINT-LUOT3-DA-AP-CAN-VERDICT-MOI` | Verdict lich su tren 82359c4 la changes_requested 2 P1 + 1 P2. Tai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |",
+    "group": "readme",
+    "matches": [
+      "165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SH",
+      "ai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict mo"
+    ]
+  },
+  {
+    "line": 756,
+    "text": "| `pr896-review-4-codex-verdict.md` | `HINT-LUOT4-DA-AP-CAN-VERDICT-MOI` | Verdict lich su tren 2e4183b la changes_requested 3 P1 + 1 P2. Tai moc ghi so ff4ab57 (va 77a0a45) HINT.patch luot 4 (34 tep, phan lon receipt NGOAI chuoi #896) CHUA ap; chu kho chon ap nguyen, va no duoc ap o commit ke tiep sau 77a0a45. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |",
+    "group": "readme",
+    "matches": [
+      "phan lon receipt NGOAI chuoi #896) CHUA ap; chu kho chon ap nguyen, va no duoc ap o commit ke tiep sau 77a0a45. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |"
+    ]
+  },
+  {
+    "line": 1059,
+    "text": "| [`pr870-review-1-codex-verdict.md`](pr870-review-1-codex-verdict.md) | [`.receipt.yaml`](pr870-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `codex exec` tran, khong run.json; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `master-windows-bo-sot-dispatch` da va o `06a50c5` bang dung HINT.patch, CHUA review tai moc 600b6ce90d97d5f606272af137d7153b7b32133c; sau do luot 2 va 3 da review dung 06a50c5feea77c2654f31edd26efeed7eeee62f5 (deu approve 0/0/0/0); giu ket qua/assurance luot 1, khong suy quyen land · ban phang nguyen byte cua `pr870-review-1-codex/VERDICT.md`. Merge `5f288ea`. | `b38fce83` | 104880 |",
+    "group": "readme",
+    "matches": [
+      "patch` da va o `06a50c5` bang dung HINT.patch, CHUA review tai moc 600b6ce90d97d5f606272af137d7153b7b32133c; sau do luot 2 va 3 da review dung 06a50c5feea77c2654f31edd26ef"
+    ]
+  }
+]

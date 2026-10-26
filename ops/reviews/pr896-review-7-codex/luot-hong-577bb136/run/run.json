@@ -1,0 +1,85 @@
+{
+  "version": "1.5.0",
+  "run_id": "577bb13646ce4d458fa5ca650dc6c1af",
+  "short_id": "577bb136",
+  "ten": "pr896-review-7-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "e43b537930fbf453"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-26T14:37:50.649461+00:00",
+  "ket_thuc_utc": "2026-10-26T14:38:35.594756+00:00",
+  "ma_thoat": 1,
+  "ly_do_dung": null,
+  "pid": 11674,
+  "khoa_danh_tinh": "linux:623630",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/cay-kho",
+  "head": "05bc12e2b9008071ca28edbd4574e58644d48220",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "bea02a894d7dae04713c9672b60588ea1bd8a7a73750a03e03e4f645f29f166a",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "878bede30b3629a4fc541ed4da48e7cf90fb8e96816a176a7e986d63887fd871",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r7/runs/577bb136/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "failure_class": "unknown",
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_0f7ac33145d265be016adf65c0857c8196a4c41df9adcc6c32",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0f7ac33145d265be016adf65c152d48196bb04d7d7a3cc3c2d",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0f7ac33145d265be016adf65c770808196b6f198b8a4ccb533",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_0f7ac33145d265be016adf65d46d348196914280dc183aa014",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "stderr_bo_dong": 10478,
+  "stderr_bo_byte": 1442151,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 44.945,
+  "stdout_byte": 0,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_byte": 39,
+  "stderr_sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721"
+}

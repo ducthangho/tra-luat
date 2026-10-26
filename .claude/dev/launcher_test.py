@@ -11363,11 +11363,31 @@ def r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ():
          and all(x.endswith(("/stat", "/cmdline")) for x in doc), f"doc tep ngoai stat/cmdline: {sorted(set(doc))[:5]}")
 
 
-def _r27_doi_bd(b: bytes) -> bytes:
+def _r27_sua_stat(b: bytes, trang_thai=None, ppid=None, bd=None) -> bytes:
     k = b.rindex(b")") + 2
     f = b[k:].split()
-    f[19] = b"1"
+    for vi_tri, gt in ((0, trang_thai), (1, ppid), (19, bd)):
+        if gt is not None:
+            f[vi_tri] = gt
     return b[:k] + b" ".join(f) + b"\n"
+
+
+def _r27_cay_cha_chau():
+    """(cha, pid cháu): cha là con trực tiếp của tiến trình test, cháu là con của cha."""
+    cha = subprocess.Popen([PY, "-c", "import subprocess,sys,time;"
+                            "subprocess.Popen([sys.executable,'-c','import time;time.sleep(6)']);time.sleep(6)"])
+    han = time.monotonic() + 10
+    while time.monotonic() < han:
+        for d in os.listdir("/proc"):
+            if d.isdigit():
+                with contextlib.suppress(OSError, IndexError):
+                    b = Path(f"/proc/{d}/stat").read_bytes()
+                    if int(b[b.rindex(b")") + 2:].split()[1]) == cha.pid:
+                        return cha, int(d)
+        time.sleep(0.05)
+    cha.kill()
+    cha.wait()
+    raise TinHieuChotCa("fixture: khong thay tien trinh chau")
 
 
 @ca
@@ -11378,20 +11398,8 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
         return "can /proc cua Linux"
     m = _tai_launcher_thu()
     goc = m.Path
-    con = subprocess.Popen([PY, "-c", "import subprocess,sys,time;"
-                            "subprocess.Popen([sys.executable,'-c','import time;time.sleep(6)']);time.sleep(6)"])
+    con, chau = _r27_cay_cha_chau()
     try:
-        han = time.monotonic() + 10
-        chau = None
-        while chau is None and time.monotonic() < han:
-            for d in os.listdir("/proc"):
-                if d.isdigit():
-                    with contextlib.suppress(OSError, IndexError):
-                        b = Path(f"/proc/{d}/stat").read_bytes()
-                        if int(b[b.rindex(b")") + 2:].split()[1]) == con.pid:
-                            chau = int(d)
-            time.sleep(0.05)
-        bang(chau is not None, "fixture: khong thay tien trinh chau")
         for ten, mong in [("quyen", "PermissionError"), ("danh_tinh_con", "DanhTinhDoi"),
                           ("goc_tai_dung", "RuntimeError"), ("to_tien_doi", "DanhTinhDoi")]:
             vet = {"cmd": False, "goc": 0}
@@ -11406,15 +11414,15 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
                         vet["cmd"] = True
                     elif ten == "danh_tinh_con" and x == f"/proc/{con.pid}/stat" and vet["cmd"]:
                         vet["cmd"] = False       # MỘT lần, đúng lần đọc lại liền sau cmdline: chốt chuỗi tổ tiên
-                        return _r27_doi_bd(b)    # của cháu không được thay chốt đọc-lại-stat của chính con
+                        return _r27_sua_stat(b, bd=b"1")    # của cháu không được thay chốt đọc-lại-stat của chính con
                     elif ten == "goc_tai_dung" and x == f"/proc/{os.getpid()}/stat":
                         vet["goc"] += 1          # lần 1 = ghim lúc khởi tạo; đổi ngay từ lần đọc trong lượt quét đầu
                         if vet["goc"] > 1:
-                            return _r27_doi_bd(b)
+                            return _r27_sua_stat(b, bd=b"1")
                     elif ten == "to_tien_doi" and x == f"/proc/{chau}/cmdline":
                         vet["cmd"] = True
                     elif ten == "to_tien_doi" and x == f"/proc/{con.pid}/stat" and vet["cmd"]:
-                        return _r27_doi_bd(b)    # cha trung gian đổi danh tính SAU khi đã đọc argv của cháu
+                        return _r27_sua_stat(b, bd=b"1")    # cha trung gian đổi danh tính SAU khi đã đọc argv của cháu
                     return b
             m.Path = PathGia
             try:
@@ -11430,6 +11438,81 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
     finally:
         con.kill()
         con.wait()
+
+
+@ca
+def r927_cha_zombie_chuyen_cha_khong_hong_so_cha_song_thi_hong():
+    # R27-PID-04c: cha thoát mà chưa được thu hồi (Z) và cháu bị chuyển cha là vòng đời BÌNH THƯỜNG — không được hạ
+    # một quan sát hợp lệ thành KHONG_DO_DUOC. Đối chứng: cha CÒN SỐNG mà ppid của cháu đổi thì vẫn là đổi danh tính.
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc = m.Path
+    cha, chau = _r27_cay_cha_chau()
+    try:
+        for ten, trang_thai_cha, mong_loi in [("cha_zombie", b"Z", []), ("cha_song", None, ["DanhTinhDoi"])]:
+            vet = {"cmd": False}
+
+            class PathGia(type(Path())):
+                def read_bytes(self):
+                    x = str(self)
+                    b = super().read_bytes()
+                    if x == f"/proc/{chau}/cmdline":
+                        vet["cmd"] = True
+                    elif vet["cmd"] and x == f"/proc/{chau}/stat":
+                        return _r27_sua_stat(b, ppid=b"1")              # đã bị chuyển cha, starttime giữ nguyên
+                    elif vet["cmd"] and x == f"/proc/{cha.pid}/stat" and trang_thai_cha:
+                        return _r27_sua_stat(b, trang_thai=trang_thai_cha)
+                    return b
+            m.Path = PathGia
+            try:
+                lay = m._LayMauSandbox(os.getpid(), "/w")
+                lay.thay['{"chuong_trinh": "bwrap"}'] = 1
+                lay.dung.set()
+                lay._chay()
+            finally:
+                m.Path = goc
+            d = {}
+            lay.ghi_so(d, Path(os.devnull))
+            mong_tt = "KHONG_DO_DUOC" if mong_loi else "DO_DUOC"
+            bang(lay.loi == mong_loi and d["sandbox_trang_thai"] == mong_tt, f"{ten}: loi={lay.loi} {d}")
+    finally:
+        cha.kill()
+        cha.wait()
+
+
+@ca
+def r927_goc_khong_ghim_duoc_luc_khoi_tao_thi_khong_ghim_muon():
+    # R27-PID-04d: lần ghim lúc khởi tạo không thấy gốc ⇒ không được nhận chủ mới của pid ở lượt quét sau.
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc = m.Path
+    vet = {"n": 0}
+
+    class PathGia(type(Path())):
+        def read_bytes(self):
+            if str(self) == f"/proc/{os.getpid()}/stat":
+                vet["n"] += 1
+                if vet["n"] == 1:
+                    raise FileNotFoundError(2, "chua thay")
+            return super().read_bytes()
+    con = subprocess.Popen([PY, "-c", "import os,sys,time;time.sleep(0.3);"
+                            "os.execv(sys.executable,['bwrap','-c','import time;time.sleep(1.5)'])"])
+    m.Path = PathGia
+    try:
+        lay = m._LayMauSandbox(os.getpid(), "/w")
+        lay.bat_dau()
+        time.sleep(1.2)
+        lay.ket_thuc(5)
+    finally:
+        m.Path = goc
+        con.kill()
+        con.wait()
+    d = {}
+    lay.ghi_so(d, Path(os.devnull))
+    bang(lay.goc_bd is None and "GocKhongGhimDuoc" in lay.loi and lay.thay == {}
+         and d["sandbox_trang_thai"] == "KHONG_DO_DUOC", f"ghim muon: goc_bd={lay.goc_bd} loi={lay.loi} {d}")
 
 
 @ca
@@ -11512,11 +11595,15 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
 
 DOT_BIEN = [
     # wp748 r27: mỗi chốt đo effort/sandbox một đột biến gỡ đúng chốt của nó.
+    ("r27_zombie_la_song", ('        if f[0] in (b"Z", b"X"):\n            return None\n', ''), ["r927_cha_zombie_chuyen_cha_khong_hong_so_cha_song_thi_hong"]),
+    ("r27_goc_ghim_tre", ('        if goc is None or self.goc_bd is None:\n            return',
+                          '        if goc is not None and self.goc_bd is None:\n            self.goc_bd = goc[1]\n        if goc is None:\n            return'),
+     ["r927_goc_khong_ghim_duoc_luc_khoi_tao_thi_khong_ghim_muon"]),
     ("r27_cmdline_bo_doi_so_rong", ('return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0")]',
                                     'return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0") if x]'), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
     ("r27_cmdline_khong_nul_van_tin", ('    if not tho.endswith(b"\\0"):\n        return None\n', ''), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
     ("r27_khong_xac_thuc_to_tien", ('                    if st[1] != pbd:\n', '                    if False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
-    ("r27_goc_ghim_muon", ('                self.goc_bd = goc[1] if goc else None', '                pass'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r27_goc_ghim_muon", ('            else:\n                self.goc_bd = goc[1]\n', '            else:\n                pass\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_trong_ws_chep_ten", ('        return "trong_workspace"\n', '        return "workspace/" + p[len(ws) + 1:]\n'), ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
     ("r27_gia_tri_khong_loc", ('return x if x in _HO_SO_GIA_TRI[loai] else "khac"', 'return x if isinstance(x, str) else "khac"'),
      ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
@@ -11532,7 +11619,7 @@ DOT_BIEN = [
     ("r27_cmdline_nuot_moi_loi", ('                except (FileNotFoundError, ProcessLookupError):\n                    continue',
                                   '                except OSError:\n                    continue'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_khong_doc_lai_stat", ('                if sau != (cha, bd):\n', '                if False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
-    ("r27_goc_khong_ghim", ('        elif goc[1] != self.goc_bd:\n', '        elif False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r27_goc_khong_ghim", ('        if goc[1] != self.goc_bd:\n', '        if False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_effort_khong_kiem_kieu", ('eff = eff if isinstance(eff, str) and eff.strip() else None', 'eff = eff'),
      ["r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC"]),
     ("r27_effort_khong_kiem_rong", ('eff = eff if isinstance(eff, str) and eff.strip() else None',

@@ -2026,9 +2026,15 @@ class _LayMauSandbox:
         if self.luong is not None:
             try:
                 goc = self._stat(pid)
-                self.goc_bd = goc[1] if goc else None   # ghim NGAY sau khi sinh con, không đợi lượt quét (R27-PID-04b)
             except Exception as e:
+                goc = None
                 self.loi.append(type(e).__name__)
+            # ghim NGAY sau khi sinh con (R27-PID-04b). Không ghim được thì KHÔNG BAO GIỜ ghim muộn: pid ấy về sau có
+            # thể đã có chủ mới (R27-PID-04d) — ghi không đo được và không quy argv cho ai.
+            if goc is None:
+                self.loi.append("GocKhongGhimDuoc")
+            else:
+                self.goc_bd = goc[1]
 
     def bat_dau(self) -> None:
         if self.luong is None:
@@ -2040,13 +2046,16 @@ class _LayMauSandbox:
 
     @staticmethod
     def _stat(pid):
-        """(ppid, starttime) hoặc None khi tiến trình ĐÃ THOÁT. Lỗi khác (quyền, I/O) NÉM — R27-PROC-03: chỉ biến mất
-        mới là bình thường, đọc bị từ chối là không đo được."""
+        """(ppid, starttime) hoặc None khi tiến trình ĐÃ THOÁT — kể cả zombie (`Z`/`X`) chưa được thu hồi: con của nó
+        đã được chuyển cha, đó là vòng đời bình thường chứ không phải đổi danh tính (R27-PID-04c). Lỗi khác (quyền,
+        I/O) NÉM — R27-PROC-03: chỉ biến mất mới là bình thường, đọc bị từ chối là không đo được."""
         try:
             st = Path(f"/proc/{pid}/stat").read_bytes()
         except (FileNotFoundError, ProcessLookupError):
             return None
         f = st[st.rindex(b")") + 2:].split()
+        if f[0] in (b"Z", b"X"):
+            return None
         return int(f[1]), f[19]
 
     def _quet(self) -> None:
@@ -2057,11 +2066,9 @@ class _LayMauSandbox:
                 if st is not None:
                     info[int(d)] = st
         goc = info.get(self.pid)
-        if goc is None:
-            return                       # gốc đã thoát
-        if self.goc_bd is None:
-            self.goc_bd = goc[1]
-        elif goc[1] != self.goc_bd:
+        if goc is None or self.goc_bd is None:
+            return                       # gốc đã thoát, hoặc chưa từng ghim được (đã ghi ở __init__)
+        if goc[1] != self.goc_bd:
             raise RuntimeError("pid goc da bi tai dung")
         con: dict = {}
         for c, (pp, bd) in info.items():

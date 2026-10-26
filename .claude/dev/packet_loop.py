@@ -2745,7 +2745,141 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
             ("thieu-lop-am", lop_ok and (a.verdict == "approve" or {x["slug"] for x in lop} <= set(a.finding_id or [])))) if not dung]
     if loi:
         _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}")
-    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3")}
+    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3"), "lop": lop}
+
+
+# --- #834 MAY-ADR-0054-a2 (`ops/specs/wp834.md` + phần chung): cửa `accept` (approved_pending → accepted), I7 readback CI/connector, I11.
+APP_CHECK, BOT_CONNECTOR, EP_CONNECTOR = "github-actions", "chatgpt-codex-connector[bot]", ("reviews", "review_comments", "issue_comments")
+API_GH = "https://api.github.com/repos/"
+
+
+def _doc_json(duong: str, rc: int) -> tuple:
+    try:
+        b = Path(duong).read_bytes()
+        return json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode(b.decode("utf-8")), hashlib.sha256(b).hexdigest()
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError) as ex:
+        _die(rc, f"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}")
+
+
+def _trang_du(d, khoa: str, nhan: str) -> list:
+    """I7: một lần lấy (mọi trang cùng `total_count`) · id int · tập id PHÂN BIỆT = `total_count` · cùng id thì CÙNG nội dung
+    (bản mâu thuẫn bị từ chối trước mọi lọc/lập map, không tự chọn một vế). Trả một bản mỗi id."""
+    trang = d if isinstance(d, list) else [d]
+    ok = bool(trang) and all(isinstance(t, dict) and isinstance(t.get(khoa), list) and type(t.get("total_count")) is int for t in trang)
+    ds = [x for t in trang for x in t[khoa]] if ok else []
+    if not ok or not all(isinstance(x, dict) and type(x.get("id")) is int for x in ds) or {t["total_count"] for t in trang} != {len({x["id"] for x in ds})}:
+        _die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: {nhan}: cần trang {{`{khoa}`, `total_count`}} cùng một lần lấy, id int, tập id phân biệt = total_count")
+    moi = {}
+    for x in ds:
+        if json.dumps(moi.setdefault(x["id"], x), sort_keys=True) != json.dumps(x, sort_keys=True):
+            _die(RC_GATE, f"{nhan}: id {x['id']} mang hai nội dung — bằng chứng mâu thuẫn")
+    return list(moi.values())
+
+
+def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
+    """I7 — neo MỘT kho + MỘT PR + MỘT head; đủ trang theo tập id của TỪNG endpoint. Dạng: {"repo","pr","head_sha", <endpoint>: trang
+    {"total_count","items"}}. Xong = review hoàn tất (không PENDING) trên head, hoặc kết luận `Reviewed commit:` neo head; finding đọc ở
+    CẢ BA endpoint, hạng miền đóng (I3). Trả ((endpoint, id) P3 còn mở, mốc id lớn nhất theo endpoint)."""
+    d, _ = _doc_json(duong, RC_GATE)
+    if not isinstance(d, dict) or (d.get("repo"), d.get("pr"), d.get("head_sha")) != (repo, pr, head):
+        _die(RC_GATE, f"readback connector không neo đúng ({repo}, PR {pr}, {head})")
+    ep = {k: _trang_du(d.get(k), "items", f"connector {k}") for k in EP_CONNECTOR}
+    for k, v in ep.items():
+        url, dung = ("issue_url", f"{API_GH}{repo}/issues/{pr}") if k == "issue_comments" else ("pull_request_url", f"{API_GH}{repo}/pulls/{pr}")
+        if not all(x.get(url) == dung and isinstance(x.get("user"), dict) and type(x.get("body")) is str for x in v):
+            _die(RC_GATE, f"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body")
+    neo = lambda x: bool((m := re.search(r"Reviewed commit:\s*`?([0-9a-f]{7,40})\b", x["body"])) and head.startswith(m[1]))  # noqa: E731
+    cua = {k: [x for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
+    if not (any(neo(x) for x in cua["issue_comments"])
+            or any(x.get("commit_id") == head and x.get("state") in ("APPROVED", "COMMENTED", "CHANGES_REQUESTED") for x in cua["reviews"])):
+        _die(RC_GATE, f"connector chưa xong trên {head}: không review hoàn tất/kết luận nào của {BOT_CONNECTOR}")  # I3: bằng chứng dương rỗng
+    p3 = []
+    for k in EP_CONNECTOR:
+        for x in cua[k]:
+            hang = set(re.findall(r"!\[(P[^\]\s]*) Badge\]", x["body"]))
+            if k == "issue_comments" and hang and not neo(x):
+                _die(RC_GATE, f"connector issue comment {x['id']} có finding mà không neo head")
+            if (neo(x) if k == "issue_comments" else x.get("commit_id") == head) and (hang or k == "review_comments"):
+                if len(hang) != 1 or not hang <= set(HANG_LOP):
+                    _die(RC_GATE, f"connector {k} {x['id']}: hạng ngoài miền {HANG_LOP}: {sorted(hang)}")
+                if hang != {"P3"}:
+                    _die(RC_GATE, f"connector {k} {x['id']} còn {sorted(hang)} trên {head} — DỪNG, hỏi chủ kho")
+                p3.append((k, x["id"]))
+    return p3, {k: max((x["id"] for x in v), default=None) for k, v in ep.items()}
+
+
+def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:
+    """I7 — CI: check bắt buộc = (app, workflow, job); chỉ attempt MỚI NHẤT của run MỚI NHẤT trên head, đúng kho; job của attempt ấy
+    trỏ đúng check-run (cùng kho, app, suite) và luật `kiem-gate` xanh trong suite ấy."""
+    wr, sha_wr = _doc_json(a.workflow_runs, RC_GATE)
+    runs = _trang_du(wr, "workflow_runs", "workflow_runs")
+    jobs = _trang_du([t for f in a.workflow_jobs for t in (lambda d: d if isinstance(d, list) else [d])(_doc_json(f, RC_GATE)[0])], "jobs", "workflow_jobs")
+    cr = {r["id"]: r for r in _doc_check_runs(a.check_runs)}
+    for wf in sorted({w for w, _ in nc["required_checks"]}):
+        ung = [r for r in runs if r.get("path") == wf and r.get("head_sha") == h and isinstance(r.get("repository"), dict) and r["repository"].get("full_name") == nc["repo"]]
+        run = max(ung, key=lambda r: r["id"]) if ung else {}
+        suite, ten_bb = run.get("check_suite_id"), [j for w, j in nc["required_checks"] if w == wf]
+        if type(suite) is not int or type(run.get("run_attempt")) is not int or run["run_attempt"] < 1:
+            _die(RC_GATE, f"VẮNG: không run {wf} nào trên {h} trong {nc['repo']} (hoặc thiếu check_suite_id/run_attempt)")
+        if (run.get("status"), run.get("conclusion")) != ("completed", "success"):
+            _die(RC_GATE, f"{wf}: run {run['id']} attempt {run['run_attempt']} (mới nhất) chưa xanh: {run.get('status')}/{run.get('conclusion')}")
+        for ten in ten_bb:
+            jj = [j for j in jobs if (j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten)]
+            if not jj:
+                _die(RC_GATE, f"VẮNG: {wf} / {ten!r} không có job trên attempt {run['run_attempt']} của run {run['id']}")
+            job = max(jj, key=lambda j: j["id"])
+            m = re.fullmatch(rf"{re.escape(API_GH + nc['repo'])}/check-runs/([1-9][0-9]*)", str(job.get("check_run_url")))
+            r = cr.get(int(m[1])) if m else None
+            if (job.get("status"), job.get("conclusion")) != ("completed", "success") or r is None or r["name"] != ten or r["check_suite"]["id"] != suite:
+                _die(RC_GATE, f"{wf} / {ten!r}: job attempt mới nhất chưa xanh hoặc không trỏ check-run của suite {suite}")
+            if r.get("url") != f"{API_GH}{nc['repo']}/check-runs/{r['id']}":
+                _die(RC_GATE, f"{wf} / {ten!r}: check-run {r['id']} thuộc kho khác {nc['repo']}")
+            if (r.get("app") if isinstance(r.get("app"), dict) else {}).get("slug") != APP_CHECK:
+                _die(RC_GATE, f"{wf} / {ten!r}: check-run {r['id']} không từ app {APP_CHECK!r}")
+        cmd_kiem_gate(argparse.Namespace(head=h, check_suite=str(suite), bat_buoc=ten_bb, check_runs=a.check_runs), state_dir)
+    return {"workflow_runs_sha256": sha_wr, "check_runs_sha256": _doc_json(a.check_runs, RC_GATE)[1],
+            "workflow_jobs_sha256": [_doc_json(f, RC_GATE)[1] for f in a.workflow_jobs]}
+
+
+def _slug_connector(st: dict, a, h: str, p3: list) -> list:
+    """I11: slug của finding connector lấy từ bảng lớp biên nhận H (ứng viên: packet, generation, pending_sha, spec_hash), mỗi lớp P3
+    khai `connector_refs` [[endpoint, id], ...] phủ ĐÚNG tập (endpoint, id) P3 — không khoá bằng id số do executor đặt."""
+    if not a.bien_nhan_connector:
+        _die(RC_BIEN_NHAN, f"connector có P3 {p3} — cần --bien-nhan-connector (bảng lớp do reviewer ký)")
+    lop = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan_connector, verdict="approve", reviewed_sha=h, finding_id=None))["lop"]
+    lop = [x for x in lop if "connector_refs" in x]
+    refs = [tuple(r) for x in lop for r in (x["connector_refs"] if type(x["connector_refs"]) is list else [None])
+            if type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int]
+    if any(x["hang"] != "P3" or type(x["connector_refs"]) is not list or not x["connector_refs"] for x in lop) \
+            or len(refs) != sum(len(x["connector_refs"]) for x in lop) or sorted(refs) != sorted(p3):
+        _die(RC_BIEN_NHAN, f"bảng lớp H phải phủ ĐÚNG từng (endpoint, id) P3 của connector {sorted(p3)}, mỗi cặp một lần")
+    return sorted({x["slug"] for x in lop})
+
+
+def cmd_accept(a, state_dir: Path) -> int:
+    """M1: (Đ) đầu nhánh lease trên remote = `pending_sha`; CI bắt buộc xanh (I7); connector xong, không P0–P2; mọi P3 còn mở (offline +
+    connector, slug từ H) có ĐÚNG một quyết định đủ trường + lý do. Mọi đầu vào xác thực TRƯỚC `_xet_dung` và trước lần ghi duy nhất (I4/I5)."""
+    st = _load(state_dir, a.packet)
+    if st["state"] != "approved_pending" or st.get("luat_adr0054") is not True:
+        _die(RC_STATE, f"accept chỉ chạy từ 'approved_pending' của packet áp ADR-0054 (đang {st['state']!r})")
+    nc, h, root = st["ngu_canh_lease"], st["pending_sha"], Path(a.root)
+    xa = _git_do(root, "ls-remote", "origin", f"refs/heads/{nc['branch']}")
+    if xa[0] or xa[1].split() != [h.encode(), f"refs/heads/{nc['branch']}".encode()]:
+        _die(RC_TRACE, f"đầu nhánh {nc['branch']} trên remote ≠ pending_sha {h}")
+    sha_ci = _kiem_ci(a, nc, h, state_dir)
+    p3_cn, moc = _doc_connector(a.connector, nc["repo"], a.pr, h)
+    slug_cn = _slug_connector(st, a, h, p3_cn) if p3_cn else []
+    con_mo = {("offline", s) for s in st["bien_nhan_approve"]["p3"]} | {("connector", s) for s in slug_cn}
+    qd, truong = (_doc_json(a.quyet_dinh_p3, RC_ARG)[0] if a.quyet_dinh_p3 else []), {"nguon", "khoa", "ten_no", "owner", "huong", "ly_do"}
+    if (type(qd) is not list or not all(type(q) is dict and set(q) == truong and all(type(v) is str and v.strip() for v in q.values()) for q in qd)
+            or sorted((q["nguon"], q["khoa"]) for q in qd) != sorted(con_mo)):
+        _die(RC_ARG, f"P3 còn mở {sorted(con_mo)} phải có ĐÚNG một quyết định {sorted(truong)} mỗi mục")
+    _xet_dung(state_dir, st, "accept")
+    st.update(state="accepted", accepted_sha=h, moc_connector=moc, quyet_dinh_p3=qd)
+    st["history"].append({"event": "accept", "accepted_sha": h, "pr": a.pr, "moc_connector": moc, "connector_sha256": _doc_json(a.connector, RC_GATE)[1], **sha_ci})
+    _save(state_dir, st)
+    print(f"accepted {h} — {len(qd)} quyết định P3, mốc connector {moc}")
+    return RC_OK
 
 
 def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None:
@@ -2966,6 +3100,18 @@ def build_parser() -> argparse.ArgumentParser:
                         "`check_suite_id`; chỉ run thuộc suite này được xét. Tệp check-runs lấy với "
                         "`filter=all` (mọi lần chạy lại, không chỉ lần mới nhất)")
     q.set_defaults(fn=cmd_kiem_gate)
+
+    q = sub.add_parser("accept", help="#834: approved_pending → accepted (packet áp ADR-0054); readback R do người gọi lấy trên pending_sha")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--root", default=".")
+    q.add_argument("--pr", type=int, required=True)
+    q.add_argument("--workflow-runs", required=True, help="trang `actions/runs?head_sha=` (`workflow_runs`, `total_count`)")
+    q.add_argument("--workflow-jobs", required=True, action="append", help="trang `actions/runs/<id>/attempts/<n>/jobs` (`jobs`, `total_count`); lặp mỗi run")
+    q.add_argument("--check-runs", required=True, help="trang check-runs của head, `filter=all`")
+    q.add_argument("--connector", required=True, help="JSON {repo, pr, head_sha, reviews|review_comments|issue_comments: trang {total_count, items}}")
+    q.add_argument("--bien-nhan-connector", help="biên nhận H: bang_lop[].connector_refs = [[endpoint, id], ...] (bắt buộc khi connector có P3)")
+    q.add_argument("--quyet-dinh-p3", help="JSON list {nguon: offline|connector, khoa: slug, ten_no, owner, huong, ly_do}")
+    q.set_defaults(fn=cmd_accept)
 
     q = sub.add_parser("bien-nhan",
                        help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")

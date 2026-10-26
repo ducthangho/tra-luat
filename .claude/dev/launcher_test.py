@@ -11452,6 +11452,39 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
 
 
 @ca
+def r927_canh_cha_doi_giua_hai_luot_quet():
+    # R27-PID-04f: MỘT sampler qua hai lượt quét; lượt 2 cháu (còn sống, starttime giữ) đổi ppid ra ngoài cây hoặc vào
+    # gốc ⇒ DanhTinhDoi. Đối chứng: lượt 2 sạch thì không lỗi.
+    if platform.system() != "Linux":
+        return "can /proc cua Linux"
+    m = _tai_launcher_thu()
+    goc = m.Path
+    cha, chau = _r27_cay_cha_chau()
+    try:
+        for ten, ppid_moi in [("ra_ngoai", b"1"), ("vao_goc", str(os.getpid()).encode()), ("doi_chung", None)]:
+            vet = {"luot": 0}
+
+            class PathGia(type(Path())):
+                def read_bytes(self):
+                    b = super().read_bytes()
+                    if ppid_moi and vet["luot"] == 2 and str(self) == f"/proc/{chau}/stat":
+                        return _r27_sua_stat(b, ppid=ppid_moi)
+                    return b
+            m.Path = PathGia
+            try:
+                lay = m._LayMauSandbox(os.getpid(), "/w")
+                lay.dung.set()
+                for vet["luot"] in (1, 2):
+                    lay._chay()
+            finally:
+                m.Path = goc
+            bang(lay.loi == (["DanhTinhDoi"] if ppid_moi else []) and chau in lay.canh, f"{ten}: loi={lay.loi}")
+    finally:
+        cha.kill()
+        cha.wait()
+
+
+@ca
 def r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that():
     # R27-PARSE-02b: đi từ BYTE cmdline thô qua đúng bộ giải mã `_quet` dùng, tới trạng thái trong sổ.
     m = _tai_launcher_thu()
@@ -11527,6 +11560,8 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
 
 DOT_BIEN = [
     # wp748 r27: mỗi chốt đo effort/sandbox một đột biến gỡ đúng chốt của nó.
+    ("r27_canh_khong_doi_chieu", ('            elif hien != bo:\n', '            elif False:\n'), ["r927_canh_cha_doi_giua_hai_luot_quet"]),
+    ("r27_canh_khong_ghi", ('                self.canh[c] = sau\n', ''), ["r927_canh_cha_doi_giua_hai_luot_quet"]),
     ("r27_to_tien_chi_so_bd", ('any(self._stat(p) != bo for p, bo in chuoi)', 'any((self._stat(p) or (0, 0))[1] != bo[1] for p, bo in chuoi)'),
      ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_goc_ghim_tre", ('        if goc is None or self.goc_bd is None:\n            return',

@@ -2019,6 +2019,7 @@ class _LayMauSandbox:
         self.pid, self.ws = pid, os.path.realpath(ws)
         self.thay: dict = {}
         self.da: set = set()
+        self.canh: dict = {}         # pid -> (ppid, starttime) đã xác thực, giữ XUYÊN lượt quét (R27-PID-04f)
         self.loi: list = []
         self.con_chay = False
         self.dung = threading.Event()
@@ -2068,6 +2069,13 @@ class _LayMauSandbox:
             return                       # gốc đã thoát, hoặc chưa từng ghim được (đã ghi ở __init__)
         if goc[1] != self.goc_bd:
             raise RuntimeError("pid goc da bi tai dung")
+        for c, bo in list(self.canh.items()):          # cùng tiến trình (starttime giữ) mà đổi cạnh cha ⇒ lệch
+            hien = info.get(c)
+            if hien is None or hien[1] != bo[1]:
+                del self.canh[c]                         # đã biến mất (pid có thể đã có chủ mới): ngoại lệ duy nhất
+            elif hien != bo:
+                self.loi.append("DanhTinhDoi")
+                return
         con: dict = {}
         for c, (pp, bd) in info.items():
             con.setdefault(pp, []).append((c, bd))
@@ -2093,6 +2101,7 @@ class _LayMauSandbox:
                     self.loi.append("DanhTinhDoi")
                     return
                 hang.append(chuoi + ((c, sau),))
+                self.canh[c] = sau
                 # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
                 if (c, bd, tho) in self.da:
                     continue

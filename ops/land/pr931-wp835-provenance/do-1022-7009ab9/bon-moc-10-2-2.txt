@@ -29,3 +29,5 @@ blob ci.yml tai 7009ab9^2 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
 blob ci.yml tai d2e3052 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
 sha256 bytes blob 82d9f239… = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
 dong script buoc 'run' in trong log job 121236721787: 72 ; khong co trong blob 82d9f239: 0
+
+## Cap nhat 2026-10-26 (sau): moc Workflow definition DA DO — xem workflow-definition-7009ab9.txt (chu kho doc WorkflowRun.file ngoai phien, #835 issuecomment-6406559882).

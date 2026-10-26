@@ -392,3 +392,27 @@ cap_nhat_20261026_luot7:
     hint: 'ops/reviews/pr896-review-7-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
   reviewer_assurance_81: CHUA DAT
   landed: false
+
+cap_nhat_20261026_luot8:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 8
+    target_pull_request: 947
+    provider: codex
+    verdict: approve
+    reviewed_sha: fb87110cfab832406984f893e6a4c79fbb932aef
+    so_lop: 'P0 0 / P1 0 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-8-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-8-codex-verdict.receipt.yaml
+    assurance: cross_approved
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-8-codex/run/run.json (1d140267): ma_thoat 0, head fb87110, model_phuc_vu DO_DUOC
+      (38 su kien, 38 response_id, `gpt-6.1-sol`, ho khac executor claude). Ba finding luot 7 DA DONG; khong finding moi.
+      Chuoi luot 2..8 khong co finding nao o CLAUDE.md; CLAUDE.md khong doi tu 3bc4244.
+  reviewer_assurance_81: >-
+    doi_chieu — CO verdict approve khac ho, model do_may, tren fb87110 (head PR ghi so #947). fb87110 KHONG phai 816f439
+    (authorized_head cua #896); viec dung verdict nay cho land #896 phu thuoc chu kho chap nhan don vi land ben duoi.
+  don_vi_land_de_xuat: >-
+    De xuat (CAN chu kho chap nhan, ho so nay KHONG tu chon): 816f439 (head #896) + 3bc4244 (ban va P2 qua #915), kem caveat
+    cua a9bc934 (#946), 7a01b3e (#951) va chuoi HINT luot 2..7 tren nhanh claude/pr896-review-2-codex (#947).
+  landed: false

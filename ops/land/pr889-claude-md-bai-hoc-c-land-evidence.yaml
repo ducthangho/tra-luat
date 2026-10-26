@@ -284,3 +284,19 @@ pr_ghi_so_duyet_landed_20261026:
       nhan o PR ke tiep.
   landed: false
   landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'
+
+pr_ghi_so_duyet_landed_lan2_20261026:
+  bo_canh: 'Chu kho yeu cau "lam PR gop: ghi so landed + caveat pr889-review-1" (phien 26-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  pr949_khong_co_duyet: >-
+    measured — readback-pr-949.json: merged_at 2026-10-26T06:15:18Z, merge 9372ecd, head 0e54e23; readback-comments-949.json
+    chi co comment cua chatgpt-codex-connector[bot]; readback-reviews-949.json = []. Khong co comment/review duyet landed
+    cua chu kho truoc merge => khoi pr_ghi_so_duyet_landed_20261026 KHONG co hieu luc; landed van false.
+  dieu_kien_da_dat: 'Khong doi so voi pr_ghi_so_duyet_landed_20261026 (§8.1 cross_approved do_may; §10.2.2 4/4 measured).'
+  dieu_kien_con_lai:
+    id: QUYET-DINH-LANDED-CHU-KHO-MOI
+    trang_thai: cho_chu_kho
+    quy_tac: >-
+      Chu kho duyet `landed` cho #889 (authorized_head_sha 094e8d17ae4dfcf21dca63702c9262267bdc072c) bang mot comment tren PR ghi so CHUA khoi nay,
+      dang SAU commit cuoi va TRUOC merge, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.
+  landed: false
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'

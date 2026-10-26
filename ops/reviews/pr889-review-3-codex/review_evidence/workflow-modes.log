@@ -1,0 +1,13 @@
+callsite: gate step-if= None continue-on-error= False
+ command: python ops/cong_cu.py kiem-tra --json ; python ops/cong_cu_test.py
+ mode: ('gate', None)
+callsite: gate-cong-cu step-if= None continue-on-error= False
+ command: python ops/cong_cu.py kiem-tra --json ; python ops/cong_cu_test.py
+ mode: ('manh', (0, 8, 'manh/manh-0.txt'))
+callsite: gate-cong-cu-gop step-if= None continue-on-error= False
+ command: python ops/cong_cu_test.py --gop manh
+ mode: gop (artifact consumer)
+actual fingerprint: {"head": "094e8d17ae4dfcf21dca63702c9262267bdc072c", "sha256_test": "23dbdeada416cfa960ff4d2d4a85d7cb4bf29d84240a3fe6274edde7b1b5cf76"}
+foreign-head artifact:   ĐỎ  gom [G-van-tay]: manh-0.txt đo trên mã KHÁC tiến trình gom (0000000000000000000000000000000000000000/23dbdeada416 ≠ 094e8d17ae4dfcf21dca63702c9262267bdc072c/23dbdeada416) errors= 1
+PROVEN: CI main gate delegates full mutation radius; Windows shard stops after baseline; gom uses exact HEAD+test hash.
+NOT MEASURED: full Ubuntu mutation pass or Windows runner pass at this SHA; no live CI readback.

@@ -1,0 +1,43 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- ops/reviews/README.md
++++ ops/reviews/README.md
+@@ -698,11 +698,13 @@
+ | `pr889-review-1-codex-verdict.md` | `STDERR-CHI-GIU-HEADER` | Chi luu 13 dong dau stderr.log (header CLI); ban day du 763083 byte (sha256 trong `run/run.json`) KHONG vao kho — output trong VERDICT.md la reviewer tu chep. |
+ | `pr889-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | `cay-kho/` nam TRONG vung ghi sandbox codex; "read-only" chi la CHI THI. `worktree_sach true` luc phong + reviewer do sau luot sach — khong loai tru ghi-roi-hoan-nguyen. |
+ | `pr889-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | `audit_review.py`/`evidence/*.txt` tham chieu duong dan tuyet doi cua sandbox; `evidence/hint-check/` khong vao kho. Tai lap can dung lai mirror tai `8d5cccb`. |
++| `pr870-review-2-codex-verdict.md` | `VERDICT-KHAI-SAI-EXECUTION-SURFACE` | Verdict dong 9 tu khai `codex_service`, nhung run.json 2699e2d8 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu. |
+ | `pr870-review-2-codex-verdict.md` | `HO-MODEL-REVIEWER-KHONG-DO-DUOC` | run.json 2699e2d8 khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay 2699e2d8, tu khai yeu hon do_may tai cho dung. |
+ | `pr870-review-2-codex-verdict.md` | `STDERR-CHI-GIU-HEADER` | Chi luu 14 dong dau stderr.log; ban day du 1287629 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep. |
+ | `pr870-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen. |
+ | `pr870-review-2-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 06a50c5. |
+ | `pr870-review-2-codex-verdict.md` | `SNAPSHOT-CAY-KHONG-VAO-KHO` | review-snapshot-before.json va -after.json (672374 byte moi tep) KHONG vao kho; ca hai cung sha256 5b88623b2e743352db80c82f9ca4224df7e46d36e7cd95be2c28765b56fcf748 (do luc ghi so), tuc anh truoc/sau luot trung nhau. |
++| `pr889-review-2-codex-verdict.md` | `VERDICT-KHAI-SAI-EXECUTION-SURFACE` | Verdict dong 9 tu khai `codex_service`, nhung run.json d955f9ef ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Cau "khong chay qua codex exec/Desktop" trong verdict khong khop hien vat launcher. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu. |
+ | `pr889-review-2-codex-verdict.md` | `HO-MODEL-REVIEWER-KHONG-DO-DUOC` | run.json d955f9ef khong co khoa model; header CLI (run/stderr-header.txt) khai `gpt-6.1-sol`/`xhigh` la LOI KHAI cua CLI, khong phai do_may. Assurance chi len cross_approved khi chu ko ghi xac nhan ben `khai_co_audit` cho CHINH lan chay d955f9ef, tu khai yeu hon do_may tai cho dung. |
+ | `pr889-review-2-codex-verdict.md` | `STDERR-CHI-GIU-HEADER` | Chi luu 14 dong dau stderr.log; ban day du 2085807 byte (sha256 trong run/run.json) KHONG vao kho — output trong VERDICT.md la reviewer tu chep. |
+ | `pr889-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; reviewer tu do sau luot — khong loai tru ghi-roi-hoan-nguyen. |
+--- ops/reviews/pr870-review-2-codex-verdict.receipt.yaml
++++ ops/reviews/pr870-review-2-codex-verdict.receipt.yaml
+@@ -89,6 +89,10 @@
+     CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
+ 
+ verdict_usage_caveats:
++  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
++    muc: P1
++    mo_ta: >-
++      Verdict dong 9 tu khai `codex_service`, nhung run.json 2699e2d8 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu.
+   - id: HO-MODEL-REVIEWER-KHONG-DO-DUOC
+     muc: P2
+     mo_ta: >-
+--- ops/reviews/pr889-review-2-codex-verdict.receipt.yaml
++++ ops/reviews/pr889-review-2-codex-verdict.receipt.yaml
+@@ -89,6 +89,10 @@
+     CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
+ 
+ verdict_usage_caveats:
++  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
++    muc: P1
++    mo_ta: >-
++      Verdict dong 9 tu khai `codex_service`, nhung run.json d955f9ef ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Cau "khong chay qua codex exec/Desktop" trong verdict khong khop hien vat launcher. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu.
+   - id: HO-MODEL-REVIEWER-KHONG-DO-DUOC
+     muc: P2
+     mo_ta: >-

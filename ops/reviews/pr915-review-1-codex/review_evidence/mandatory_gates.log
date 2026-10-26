@@ -1,0 +1,7 @@
+command=python3 ops/bien_nhan_v2.py --root .; rc=0
+  stdout_tail=['', 'bien_nhan_v2: 232 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 285', 'TỔNG: ĐẠT']; stderr_tail=[]
+command=python3 .claude/dev/packet_loop.py doctrine-scan --root .; rc=0
+  stdout_tail=['doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine']; stderr_tail=[]
+command=python3 scripts/tl.py doc-claims-check --json; rc=0
+  ok=true; JSON_keys=['ok', 'schema', 'roots', 'files_scanned', 'claims_flagged', 'flags', 'advisories', 'by_layer', 'advisory_count', 'layers', 'layers_skipped', 'basis', 'strict']
+rc=0

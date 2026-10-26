@@ -1,0 +1,2 @@
+# Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. diff.patch tai lap bang git diff base..head.
+053a841624d10d1413e49d82416a9f3f724b8e8d0f7a064298920293e0579ac0  652715  review_evidence/checkout-before.json

@@ -9060,6 +9060,33 @@ def r484_g7_khong_ghi_duoc_trang_thai_tu_choi_phai_noi_ra():
 
 
 @ca
+def r952_auth_json_truong_la_kieu_object_van_doc_duoc():
+    """codex-cli 0.164 (đo 26-10-2026) thêm `tokens.oauth_provenance` kiểu OBJECT ⇒ `_doc_auth_bytes` từng từ chối
+    credential vừa đúc (`token fields must be strings`), `chuan-bi` HONG dù `codex exec` chạy được. Trường LẠ được
+    bỏ qua; trường credential ta đọc (`refresh_token`…) mà không phải chuỗi thì VẪN bị từ chối."""
+    m = _tai_launcher_thu()
+    moi = {"auth_mode": "chatgpt", "OPENAI_API_KEY": None, "last_refresh": "2026-10-26T09:45:00Z",
+           "tokens": {"id_token": "INERT.ID.T", "access_token": "INERT.AC.T", "refresh_token": "INERT-RT",
+                      "account_id": "INERT-ACC", "login_owner_id": "INERT-OWN",
+                      "oauth_provenance": {"issuer": "INERT", "n": 1}}}
+    try:
+        d = m._doc_auth_bytes(json.dumps(moi).encode("utf-8"))
+        cid = m._credential_id(json.dumps(moi).encode("utf-8"))
+    except ValueError as e:
+        raise TinHieuChotCa(f"auth.json dang codex 0.164 bi tu choi: {e}")
+    bang(isinstance(d["tokens"]["oauth_provenance"], dict) and len(cid) == 64,
+         f"doc duoc nhung sai noi dung: {sorted(d['tokens'])} cid={cid!r}")
+    for k in ("refresh_token", "access_token", "id_token", "account_id"):
+        hong = json.loads(json.dumps(moi))
+        hong["tokens"][k] = {"khong": "phai chuoi"}
+        try:
+            m._doc_auth_bytes(json.dumps(hong).encode("utf-8"))
+        except ValueError:
+            continue
+        raise TinHieuChotCa(f"{k} kieu object van duoc nhan — chot kieu chuoi da mat")
+
+
+@ca
 def r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi():
     """P2 thread XLy (THU HẸP, không đóng): đích đổi giữa lúc kiểm và `os.replace` ⇒
     từ chối, giữ nguyên bản của tiến trình kia. Codex CLI không tôn trọng khoá của kho
@@ -11559,6 +11586,14 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
 
 
 DOT_BIEN = [
+    ("r952_bo_ep_kieu_truong_credential",
+     ('           for k in _TRUONG_TOKEN_CHUOI):',
+      '           for k in ()):'),
+     ["r952_auth_json_truong_la_kieu_object_van_doc_duoc"]),
+    ("r952_quay_ve_ep_moi_truong_la_chuoi",
+     ('_TRUONG_TOKEN_CHUOI = ("id_token", "access_token", "refresh_token", "account_id")',
+      '_TRUONG_TOKEN_CHUOI = ("id_token", "access_token", "refresh_token", "account_id", "oauth_provenance")'),
+     ["r952_auth_json_truong_la_kieu_object_van_doc_duoc"]),
     # wp748 r27: mỗi chốt đo effort/sandbox một đột biến gỡ đúng chốt của nó.
     ("r27_canh_khong_doi_chieu", ('            elif hien != bo:\n', '            elif False:\n'), ["r927_canh_cha_doi_giua_hai_luot_quet"]),
     ("r27_canh_khong_ghi", ('                self.canh[c] = sau\n', ''), ["r927_canh_cha_doi_giua_hai_luot_quet"]),

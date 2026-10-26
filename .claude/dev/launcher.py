@@ -3486,13 +3486,20 @@ class _KhoCodex:
             self.k.LocalFree(sd)
 
 
+_TRUONG_TOKEN_CHUOI = ("id_token", "access_token", "refresh_token", "account_id")
+
+
 def _doc_auth_bytes(data: bytes) -> dict:
     if len(data) > _KhoCodex.MAX_BYTES:
         raise ValueError("snapshot too large")
     parsed = json.loads(data.decode("utf-8"))
     if not isinstance(parsed, dict) or not isinstance(parsed.get("tokens"), dict):
         raise ValueError("tokens must be an object")
-    if any(v is not None and not isinstance(v, str) for v in parsed["tokens"].values()):
+    # codex-cli 0.164 (đo 26-10-2026) thêm `tokens.oauth_provenance` kiểu OBJECT — bản cũ đòi MỌI trường
+    # là chuỗi nên từ chối cả credential vừa đúc bằng `--device-auth` (`chuan-bi` HONG, doctor CHUA_XAC_THUC
+    # trong khi `codex exec` chạy được). Chỉ ép kiểu cho các trường credential ta THẬT SỰ đọc; trường lạ thì để yên.
+    if any(parsed["tokens"].get(k) is not None and not isinstance(parsed["tokens"][k], str)
+           for k in _TRUONG_TOKEN_CHUOI):
         raise ValueError("token fields must be strings")
     return parsed
 

@@ -89,6 +89,10 @@ anchor:
     CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
 
 verdict_usage_caveats:
+  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
+    muc: P1
+    mo_ta: >-
+      Verdict dong 9 tu khai `codex_service`, nhung run.json d955f9ef ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Cau "khong chay qua codex exec/Desktop" trong verdict khong khop hien vat launcher. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu.
   - id: HO-MODEL-REVIEWER-KHONG-DO-DUOC
     muc: P2
     mo_ta: >-

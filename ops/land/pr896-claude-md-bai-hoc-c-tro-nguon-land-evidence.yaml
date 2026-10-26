@@ -166,3 +166,46 @@ no_con_mo:
 
 ghi_chu: >-
   Chuoi viec cung doan (c): ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml, ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml.
+
+cap_nhat_20261026:
+  bo_canh: 'Chu kho yeu cau "Chay 3 cross-review voi launcher moi" (phien 26-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  dinh_chinh_cross_review_ghi_chu: >-
+    measured — review.cross_review `[]` da cu: PR #915 (merge 9371628) them ops/reviews/pr896-review-1-codex-verdict.md,
+    cross-review codex qua launcher tren DUNG 816f439, `changes_requested` 0/0/1/0 (P2: CLAUDE.md mo ta t162 rong hon pham
+    vi do). Ban va P2 la commit 3bc4244, vao master qua #915 — KHONG qua #896.
+  cross_review_moi:
+    luot: 1
+    pull_request: 915
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f
+    so_lop: 'P0 0 / P1 1 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr915-review-1-codex-verdict.md
+    bien_nhan: ops/reviews/pr915-review-1-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — run.json 0f8ecb85: head 2789cbb (head da merge cua #915, chua 3bc4244), model_phuc_vu DO_DUOC `gpt-6.1-sol`.
+      Bang do cua verdict khop cau CLAUDE.md da sua voi t162/loi_g5_workflow (hang "t162 doc tu workflow" ... "Chot G5 kiem
+      needs/if" deu "Co"). P1 duy nhat nam o bien nhan luot 2 #870/#889 (surface tu khai `codex_service`), KHONG o CLAUDE.md;
+      HINT.patch da ap trong PR ghi so nay, CHUA review lai.
+  reviewer_assurance_81: CHUA DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — (1) tren authorized_head_sha 816f439 lan cross-review duy nhat la `changes_requested` (P2 co that, da va o
+    3bc4244), nen dieu kien (A) "approve tren DUNG 816f439" khong the dat nhu da viet; (2) lan review cua trang thai da sua
+    (2789cbb) la `changes_requested` vi P1 ngoai CLAUDE.md. Chua co approve sach nao cho noi dung CLAUDE.md cuoi cung.
+  de_xuat_cho_chu_kho: >-
+    Hai loi ra: (i) review lai PR ghi so nay (mang HINT P1) — neu approve, chu kho quyet co chap nhan don vi land la
+    "816f439 + 3bc4244" (master tai 9371628) thay cho 816f439 hay khong; (ii) `human_audited` §8 muc 2 theo phan quyet #566.
+    Ho so nay KHONG tu chon.
+  bon_moc_10_2_2:
+    nguon: ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1026-27dcc3b/bon-moc-10-2-2.txt
+    run: 'measured — run 39983914661 attempt 1, push master, head 27dcc3b, success, path .github/workflows/ci.yml.'
+    checkout: 'measured — log job 120524600728 (log-gate-120524600728-trich.txt): git log -1 sau checkout = merge 27dcc3b.'
+    gate_output: >-
+      measured — artifact 12515154206 (zip sha256 = digest REST trong readback-artifacts-39983914661.json), giai nen nguyen
+      byte: tl-selftest status pass, returncode 0, positive_verified true, identity head = 27dcc3b, output_sha256 khop.
+    workflow_definition: >-
+      not_measured — GraphQL WorkflowRun.file tra 403 trong phien Claude Code tren web; can chu kho chay `gh api graphql`
+      ngoai phien va dan output.
+  provenance_ci_10_2_2_trang_thai: 'mo — 3/4 moc measured (truoc: chi moc Run); con Workflow definition.'
+  landed: false

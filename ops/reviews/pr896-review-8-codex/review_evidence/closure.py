@@ -1,0 +1,15 @@
+from measure import *
+lines=[]; results=[]
+land='ops/land/pr491-r358-ghi-so-land-evidence.yaml'; anchor='cdd0b1d19439e286fb7a86020ce2d258bafc2102'; source=blob(anchor,land).decode(); lines.append(f'{land} anchor_blob_has_old_claim={"PR #479 và #490 chưa merge" in source}')
+merge='8cee9410e958a6b9d956e080c11878fbd80d9f5f'; lines.append(git('show','-s','--format=%H %P %s',merge).decode().strip())
+for target in [MASTER,PREV,SHA,anchor]:
+ p=subprocess.run(['git','-C',str(ROOT),'merge-base','--is-ancestor',merge,target],capture_output=True,text=True);lines.append(f'git merge-base --is-ancestor {merge} {target} rc={p.returncode}')
+for n,run in [(6,'c0fa33fa'),(7,'577bb136')]:
+ prefix=f'ops/reviews/pr896-review-{n}-codex'; partial=ROOT/prefix/f'luot-hong-{run}/VERDICT.partial.md'; text=partial.read_text(); headings=[l for l in text.splitlines() if l.startswith('#')]; runj=json.loads((ROOT/prefix/f'luot-hong-{run}/run/run.json').read_text()); receipt=yaml.safe_load((ROOT/f'ops/reviews/pr896-review-{n}-codex-verdict.receipt.yaml').read_text()); caveat=next(c for c in receipt['verdict_usage_caveats'] if c['id']=='LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI'); row=[s for s in (ROOT/'ops/reviews/README.md').read_text().splitlines() if s.startswith(f'| `pr896-review-{n}-codex-verdict.md` | `'+caveat['id']+'` |')]; main=json.loads((ROOT/prefix/'run/run.json').read_text())
+ measured=dict(round=n,bytes=partial.stat().st_size,lines=len(text.splitlines()),headings=len(headings),measurement_sections=sum(bool(re.match('## [0-9]+[.)]',l)) for l in headings),first=text.splitlines()[0],run_id=runj['run_id'],rc=runj['ma_thoat'],duration=runj['thoi_luong_giay'],same_head=runj['head']==main['head'],same_prompt=runj['prompt_sha256']==main['prompt_sha256'],readme_description_match=len(row)==1 and caveat['mo_ta'] in row[0]); results.append(measured); lines.append(json.dumps(measured,ensure_ascii=False));lines.append('headings='+repr(headings));lines.append('caveat='+caveat['mo_ta'])
+for name,path,expected_line in [('pr823','ops/land/pr823-wp802-provenance/verdict-luot5/wp802-g1-luot5-codex-verdict.md',6),('pr877','ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md',11)]:
+ p=ROOT/path; lines.append(f'{path}:{expected_line}: {p.read_text().splitlines()[expected_line-1]} sha256={hashlib.sha256(p.read_bytes()).hexdigest()}'); d=yaml.safe_load(next((ROOT/'ops/land').glob(name+'*-land-evidence.yaml')).read_text());lines.append(f'{name} caveat='+json.dumps(d['verdict_usage_caveats'],ensure_ascii=False))
+lines.append('pr823 review='+json.dumps(yaml.safe_load((ROOT/'ops/land/pr823-wp802-land-evidence.yaml').read_text())['review'],ensure_ascii=False))
+lines.append('pr877 khong_do_duoc='+json.dumps(yaml.safe_load((ROOT/'ops/land/pr877-wp854-land-evidence.yaml').read_text())['khong_do_duoc'],ensure_ascii=False))
+(OUT/'partials.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))
+record(6,'Đóng ba finding cũ và đo lại partial lượt 6/7','Đính chính sai SHA/cha merge, dòng surface hoặc số byte/heading.','python3 review_evidence/closure.py',lines)

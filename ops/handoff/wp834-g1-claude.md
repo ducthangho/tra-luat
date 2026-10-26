@@ -29,7 +29,7 @@ Write set: diff `ab344da..394d247` đúng 3 tệp — `packet_loop.py` +181/−1
   (đọc tên ca + lớp ngoại lệ + thông điệp; ca đích nhận rc=0/accepted, rc=3 của cọc `_xet_dung`, hoặc state đổi byte).
 - `moc_dot_bien_phai_khop_DUNG_MOT_CHO`, `stdout_cp1252`, `stdout_cp1258` xanh. `doctrine-scan` rc0 · `adr-song` rc0 (55/55) ·
   `git diff --check` rc0 · ruff `--select F`: 3 (2 F541 + 1 F841) = nền 3 ⇒ delta 0.
-- Suite đầy đủ `python .claude/dev/packet_loop_test.py`: xem mục "Suite đầy đủ" cuối tệp.
+- Suite đầy đủ `python .claude/dev/packet_loop_test.py`: **935/935 · BỎ QUA 1 · 1303 đột biến · TỔNG: ĐẠT** (mục cuối tệp).
 
 ## Cross-review Codex — 6/8 lời gọi (ADR-0052), mỗi lượt qua `.claude/dev/launcher.py run`
 `codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh -s workspace-write`, sandbox = clone detached tại head + `tham-chieu/`
@@ -84,4 +84,4 @@ Ba ca vá đã được reviewer chạy (CONFIRM) và giết đúng; thêm vào 
 - Nợ P3 của #929 (ca `ls[0] == 0` của `_che_do_0054`) không thuộc đặc tả wp834; chưa làm.
 
 ## Suite đầy đủ trên `394d247`
-ĐANG CHẠY lúc ghi tệp này — cập nhật ở commit kế tiếp của nhánh lease.
+Clone thường ghim đúng `394d247` (`.git` thư mục, `core.abbrev 7`, `autocrlf false`, `eol lf`, không nông), `python .claude/dev/packet_loop_test.py`: `nền: 935/935 đạt · BỎ QUA: 1` (`luong_canonical_chay_that`, chỉ Windows — đột biến `luong_canonical_chay_that_dao_os_name` theo đó không tính là giết) · SỐ LIỆU máy đếm: ca **936**, đột biến **1303**, lớp lách 78, ca bắt-oan 35, ngoại lệ AC 18 = 0 · `TỔNG: ĐẠT` · rc=0 · 49m03s.

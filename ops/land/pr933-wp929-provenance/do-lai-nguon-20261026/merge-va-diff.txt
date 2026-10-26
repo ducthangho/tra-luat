@@ -1,0 +1,27 @@
+# do 2026-10-26 trong phien ghi so (git, core.abbrev 7)
+$ git rev-parse ab94c4fb01d0d122d2f00a1f2c386c6a191349c5^{tree} ab94c4fb01d0d122d2f00a1f2c386c6a191349c5^1 ab94c4fb01d0d122d2f00a1f2c386c6a191349c5^2
+97dca882b092cbc554cb358539f8da405a1a2fa0
+8d4638eb8695c7f5628eda7d258f66067e141803
+f3b54d260bcdecf5b6d2348730a958e168bf7330
+$ git rev-parse f3b54d260bcdecf5b6d2348730a958e168bf7330^{tree}
+4318f11054c40f10dfb9abc9b2592a8b5a1de186
+$ git diff --numstat ab94c4fb01d0d122d2f00a1f2c386c6a191349c5^1 ab94c4fb01d0d122d2f00a1f2c386c6a191349c5
+7	3	.claude/dev/packet_loop.py
+71	4	.claude/dev/packet_loop_test.py
+$ git merge-base ab94c4fb01d0d122d2f00a1f2c386c6a191349c5^1 f3b54d260bcdecf5b6d2348730a958e168bf7330
+36057e8292bcb3b27ceb64b461d7cf29057a8ba3
+$ git diff --numstat 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 f3b54d260bcdecf5b6d2348730a958e168bf7330
+7	3	.claude/dev/packet_loop.py
+71	4	.claude/dev/packet_loop_test.py
+$ cmp <(git diff ab94c4fb01d0d122d2f00a1f2c386c6a191349c5^1 ab94c4fb01d0d122d2f00a1f2c386c6a191349c5) <(git diff 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 f3b54d260bcdecf5b6d2348730a958e168bf7330)   (noi dung merge vs diff nhanh ke tu merge-base)
+cmp rc=0
+# ghi chu: tree merge != tree head vi master tien 36057e8 -> 8d4638e giua luc merge master vao nhanh va luc merge PR:
+#   #932 (39f21b3: .claude/dev/launcher.py +183/-68, launcher_test.py +1007/-35) + #934 (ops/land/**). KHONG cham write set
+#   wp929, NHUNG packet_loop_test.py import launcher va chep launcher.py vao fixture => to hop chua CI PR nao do.
+$ git diff --stat 227dcdebc62c9275f9df09056f66e2124ed5f14c f3b54d260bcdecf5b6d2348730a958e168bf7330 -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py   (sha da review vs head merge, write set)
+(rong = giong byte)
+$ blob tai 227dcdebc62c9275f9df09056f66e2124ed5f14c (sha da review) vs merge ab94c4fb01d0d122d2f00a1f2c386c6a191349c5
+.claude/dev/packet_loop.py a753d178dd023da1f1ae03b39bb2685ae21275a3 a753d178dd023da1f1ae03b39bb2685ae21275a3
+.claude/dev/packet_loop_test.py cab94608e7d5d56e22a99745790575c39267b7b0 cab94608e7d5d56e22a99745790575c39267b7b0
+$ quet docs/adr/*.md tai ab94c4fb01d0d122d2f00a1f2c386c6a191349c5: tep chua cum khai kich hoat ADR-0054
+docs/adr/0054-push-mot-lan-dung-va-theo-hang-va-review-theo-lop.md

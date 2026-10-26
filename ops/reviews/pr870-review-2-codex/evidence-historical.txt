@@ -1,0 +1,40 @@
+PR109_original_text:
+36:    Windows: `.\scripts\deploy-package.ps1 -Pull -Push` · Linux/Cowork: `./scripts/deploy-package.sh --push`.
+127: - **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
+140:   còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
+141:   hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
+142:   không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
+143:   trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
+146:   **Muốn có Windows TRƯỚC khi merge thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+147:   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+151:   check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn
+153:   Đợt 14-08 không dùng đường nào, nên cả sáu lần merge của đợt đúng là sáu lần đo Windows đầu tiên.
+164:   đường Windows từng mù hoàn toàn với secrets trong tệp ẩn. Nay quét cả tệp không mở rộng, tránh nhị
+179: - **Không được giả định Windows có `python3`** (bản phổ biến chỉ có `python`, `py`).
+186: ## Bài học lớp "chạy được ở đây" (12-08-2026, codex đo trên Windows thật)
+253:    - Windows: `deploy-package.ps1` bước 4 (gọi `scripts/deploy-guard.ps1`), từ v1.35.80. Ghi đè cố ý:
+merge_commits_14Aug_on_first_parent_of_PR109:
+4dd1d6f 2026-08-14T14:46:34+07:00 Merge pull request #98 — v1.36.68: đăng lease bằng git, lease neo prompt kiểm được, ops/ ra khỏi kiểm kê gói
+changed_paths=['.github/workflows/ops-open-pr.yml', '.github/workflows/ops-publish-lease.yml', '.mcp.json', 'CHANGELOG.md', 'RELEASE_MANIFEST.json', 'SKILL.md', 'VERSION', 'ops/README.md', 'ops/lease_publish.py', 'ops/lease_publish_test.py', 'ops/leases/wp55-r2-review-3-codex-20260814.yaml', 'ops/prompts/wp55-r2-review-3-codex-20260814.md', 'scripts/tl.py', 'scripts/tl_core/release.py']
+464124d 2026-08-14T15:11:54+07:00 Merge pull request #100 — lease #4 cho wp55 vào master, t23 quét mọi lease
+changed_paths=['ops/lease_publish_test.py', 'ops/leases/wp55-r2-review-4-codex-20260814.yaml', 'ops/prompts/wp55-r2-review-4-codex-20260814.md']
+8492380 2026-08-14T15:41:03+07:00 Merge pull request #101 — chốt chống lặp ra khỏi commit, vào lượt chạy
+changed_paths=['.github/workflows/ops-publish-lease.yml', 'CLAUDE.md', 'ops/lease_publish_test.py']
+438fc34 2026-08-14T16:26:11+07:00 Merge pull request #102 — khôi phục xác thực codex qua nhiều môi trường
+changed_paths=['.claude/hooks/session-start.sh', 'docs/GOI_AGENT_DA_NEN.md']
+e344e7c 2026-08-14T18:35:28+07:00 Merge pull request #104 — đảo danh sách CẤM thành danh sách CHO PHÉP ở cổng đăng lease
+changed_paths=['ops/README.md', 'ops/lease_publish.py', 'ops/lease_publish_test.py']
+05692fe 2026-08-14T18:41:12+07:00 Merge pull request #105 — lưu verdict cross-review wp55 lượt 4 vào kho, neo băm
+changed_paths=['ops/reviews/wp55-r2-review-4-codex-verdict.md']
+bbbaf8f 2026-08-14T18:43:31+07:00 Merge pull request #103 — năm bài học đo được của đợt 14-08
+changed_paths=['CLAUDE.md', 'docs/GOI_AGENT_DA_NEN.md']
+92783f6 2026-08-14T18:54:15+07:00 Merge pull request #106 — bài học tầng vận chuyển cũng chuẩn hoá chuỗi
+changed_paths=['CLAUDE.md']
+624cdc0 2026-08-14T19:18:22+07:00 Merge pull request #107 — neo bộ kiểm lease vào nhánh mặc định, biên nhận cho verdict
+changed_paths=['.github/workflows/ops-publish-lease.yml', 'ops/README.md', 'ops/lease_publish_test.py', 'ops/reviews/wp55-r2-review-4-codex-verdict.receipt.yaml']
+3d67128 2026-08-14T19:27:57+07:00 Merge pull request #108 — sửa chốt (b) và mô hình lớp của bài học tầng vận chuyển
+changed_paths=['CLAUDE.md']
+ci_os_at_9796f67=${{ fromJSON( (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]') }}
+ci_os_at_06a50c5feea77c2654f31edd26efeed7eeee62f5=${{ (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+LIMIT: Git tree không lưu mọi lần dispatch, nhãn PR hoặc sáu run cụ thể của phiên 14-08. Không suy sáu merge = sáu Windows execution từ matrix. Câu sáu lần vốn có từ PR109; diff mới đặt nó vào bối cảnh lịch sử.
+rc=0

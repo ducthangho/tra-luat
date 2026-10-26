@@ -1,0 +1,11 @@
+_TEN_NEN source=os.name
+gate: mode=('gate', None); command='python ops/cong_cu.py kiem-tra --json\npython ops/cong_cu_test.py'
+gate-cong-cu: mode=('manh', (0, 8, 'manh/manh-0.txt')); command='python ops/cong_cu.py kiem-tra --json\npython ops/cong_cu_test.py'
+gate-cong-cu-gop: mode=--gop; command='python ops/cong_cu_test.py --gop manh'
+fixed chuan-bi runner=ubuntu-latest
+actual local fingerprint={"head": "094e8d17ae4dfcf21dca63702c9262267bdc072c", "sha256_test": "23dbdeada416cfa960ff4d2d4a85d7cb4bf29d84240a3fe6274edde7b1b5cf76"}
+Scope: windows-only removes Ubuntu from os output; chuan-bi itself still uses Ubuntu.
+Scope: mutation radius claim concerns cong_cu_test.py; other suites may run their own mutants on Windows.
+Same head requires exact tested checkout identity. A PR synthetic merge and a dispatch of its branch may differ.
+KHÔNG ĐO ĐƯỢC: paired native Ubuntu/Windows runs and exact checkout identities at this SHA (offline).
+PASS: only Ubuntu shards retain the full G5 mutation-radius path in this CI configuration.

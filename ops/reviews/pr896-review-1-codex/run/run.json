@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "64761d8e6164462d870c3d534d325dd2",
+  "short_id": "64761d8e",
+  "ten": "pr896-review-2-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "2abc89c910586650"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-24T16:37:09.067317+00:00",
+  "ket_thuc_utc": "2026-10-24T16:49:01.606950+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 892,
+  "khoa_danh_tinh": "linux:32447",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/cay-kho",
+  "head": "816f43988eb3012726120ad00166a989cc2b9af6",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "27dbb8587c61127252703aac2f1737e38f36e2839f8022763ada9818c5f091c7",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "fe3fd5904cc1a4fde1e1b527497add3abbcfc984f0f4a95a93ff9ebb7a3d31a2",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/runs/64761d8e/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 712.54,
+  "stdout_byte": 467,
+  "stdout_sha256": "994ba8338974dfd6e6c731a18eab47490a51298725660d4804aea6b92a3f6d5b",
+  "stderr_byte": 1076780,
+  "stderr_sha256": "ce38ba2901d0798aee6c94de29947c512a1b8b6c98768d213fa4effa03aa6fa9"
+}

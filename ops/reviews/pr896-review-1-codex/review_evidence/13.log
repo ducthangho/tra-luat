@@ -1,0 +1,11 @@
+$ python3 ../review_evidence/hint_probe.py
+$ patch -p0 --dry-run -i /tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/HINT.patch
+checking file CLAUDE.md
+rc=0
+$ patch -p0 -i /tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr896.9C93/HINT.patch
+patching file CLAUDE.md
+rc=0
+patched scratch content matches intended wording; source CLAUDE.md unchanged: True
+HINT.patch only changes CLAUDE.md; no workflow/test/runtime hunks.
+
+rc=0

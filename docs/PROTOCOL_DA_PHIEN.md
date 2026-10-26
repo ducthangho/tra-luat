@@ -265,6 +265,7 @@ write_set_hash: <sha256>
 generation: <integer>
 heartbeat_at: <timestamp>
 lease_until: <timestamp>
+heartbeat_required_minutes: 360   # lease MỚI cấp sau khi ADR-0056 kích hoạt; lease đã cấp giữ số đã đóng dấu
 ```
 
 Lease `role: reviewer` khai `provider: claude | codex | google_antigravity | human`
@@ -275,13 +276,19 @@ không mang họ model. Lease Executor dự kiến Reviewer AG còn khai
 `reviewer_model_family`, `reviewer_execution_surface`, `reviewer_transport` khi
 đã định tuyến. `cross_approved` nghiêm ngặt cần cả hai actor và họ model xác định.
 
-Sau 30 phút không có tiến triển, dispatcher thu hồi lease, tăng generation rồi mới reroute. Worker cũ sống lại
+Sau 6 giờ (360 phút) không có tiến triển, dispatcher thu hồi lease, tăng generation rồi mới reroute
+(`ADR-0056`; ngưỡng cũ 30 phút của `ADR-0017`). Ngưỡng này chỉ áp cho lease MỚI cấp sau khi `ADR-0056`
+kích hoạt vận hành; lease đã cấp — kể cả WP748 g19 — giữ nguyên byte và giữ `heartbeat_required_minutes`
+đã đóng dấu trong chính nó. Muốn một packet đang chạy hưởng 360 phút thì phải có lease kế nhiệm được
+cấp quyền riêng. `lease_until` tuyệt đối, fencing theo generation, bia mộ hai chiều và vô hiệu theo
+exact head KHÔNG đổi: hết `lease_until` thì lease hết dù còn trong 6 giờ. Worker cũ sống lại
 không thể heartbeat, push hợp lệ hoặc handoff. Branch/PR cũ chuyển `stale`; generation mới được đọc diff cũ nhưng
 không tự cherry-pick. Commit SHA cuối được giữ trong state projection và event journal.
 
 Khi packet vào state `reviewing`, `review_sla` là absolute timestamp do dispatcher/người giữ ghi vào lease/state
 bằng audit bền; mặc định khi đo được là thời điểm vào `reviewing` + 2 giờ. Thiếu trường, không parse được
-hoặc cơ sở giờ mơ hồ thì KHÔNG treo lease; đồng hồ thu-hồi-30-phút tiếp tục chạy theo xử lý fail-closed. Với
+hoặc cơ sở giờ mơ hồ thì KHÔNG treo lease; đồng hồ thu-hồi-6-giờ (360 phút, cùng ngưỡng không tiến triển
+ở trên) tiếp tục chạy theo xử lý fail-closed. Với
 `review_sla` hợp lệ, lease vào chế độ *treo theo review* tối đa tới timestamp đó. Verdict `changes_requested`
 đổ về thì executor phải heartbeat trong 15 phút, không thì thu hồi như thường. Quá `review_sla` mà chưa có verdict:
 lease trở lại đồng hồ thường — phiên ấm là TỐI ƯU HOÁ, không phải quyền.
@@ -1484,7 +1491,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 
 | ADR | luật | trạng thái | cổng đã ĐO (22-08-2026) |
 |---|---|---|---|
-| `ADR-0017` | GitHub PR là bàn giao chính; canonical độc quyền phát hành | Accepted | có nhắc: rải khắp — chưa tách được cổng riêng |
+| `ADR-0017` | GitHub PR là bàn giao chính; canonical độc quyền phát hành | Accepted — câu ngưỡng thu hồi *"30 phút không có tiến triển"* **đã bị thay** bởi `ADR-0056` (2026-10-19) cho lease mới; phần còn lại vẫn hiệu lực | có nhắc: rải khắp — chưa tách được cổng riêng |
 | `ADR-0018` | EOL canonical theo loại tệp | Accepted | có nhắc: `ci.yml`×19 |
 | `ADR-0019` | Ba skill, hai adapter, một protocol | Accepted | có nhắc: `packet_loop.py`×31 (`doctrine-scan`) |
 | `ADR-0020` | Ranh giới an ninh cho worker cloud | Accepted | chưa đo |
@@ -1518,9 +1525,11 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0048` | Trần trục VÒNG nâng theo chỉ thị chủ kho 12-09-2026, thay số của `ADR-0043`; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — `so-canon` vẫn chưa tồn tại (nợ cùng tên) |
 | `ADR-0049` | Cổng hai nền trước phát hành, không phải mỗi lần land | Accepted | có nhắc: `ci.yml` · `deploy-package.*` |
 | `ADR-0050` | `cross_approved` neo vào họ model, không vào hãng công cụ; ba mức bằng chứng model | Accepted | `ops/bien_nhan_v2.py` (`_NEO_LUAT_CHEP_TAY` + chốt tách họ model) |
-| `ADR-0052` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 16-10-2026, thay số của `ADR-0036`/`0037`; lượt sau lượt đầu phải có lý do; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** — `codex_review_calls_used` không có bộ đếm trong mã |
+| `ADR-0052` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 16-10-2026, thay số của `ADR-0036`/`0037`; lượt sau lượt đầu phải có lý do; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted — con số trục LỜI GỌI **đã bị thay** bởi `ADR-0055` (2026-10-25) cho đặc tả khai `ADR-0055`; đặc tả khai `ADR-0052` giữ con số của nó | `packet_loop.py`: bộ đếm trong state từ #775 (`init --codex-review-calls-limit`, mặc định hai; `record-codex-call` chặn trước khi vượt) — không gì đọc dòng khai của đặc tả |
 | `ADR-0053` | Trần kích thước packet `sensitive` nâng theo chỉ thị chủ kho 16-10-2026, thay cặp số `sensitive` của `ADR-0044`; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | **0 cổng** |
 | `ADR-0054` | Đẩy nhánh code packet khi đủ điều kiện merge, review offline neo SHA cục bộ, dừng vá khi hết P0/P1/P2 ở mọi class, review tìm theo lớp; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted — chưa kích hoạt, chờ packet máy `MAY-ADR-0054` | **0 cổng** — không bộ đếm số lần đẩy |
+| `ADR-0055` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 25-10-2026, thay số của `ADR-0052`; trục LỜI GỌI nay bằng trục VÒNG; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | `packet_loop.py`: cùng bộ đếm trong state như `ADR-0052` — người khởi tạo tự truyền trần; không gì đọc dòng khai `tran_loi_goi_codex:` |
+| `ADR-0056` | Ngưỡng thu hồi lease vì không tiến triển nâng từ 30 lên 360 phút theo chỉ thị chủ kho 19-10-2026, thay đúng câu 30 phút của `ADR-0017`; chỉ áp lease mới, không hồi tố; `lease_until`, generation, bia mộ, exact head và heartbeat 15 phút sau `changes_requested` giữ nguyên | Accepted — chưa kích hoạt vận hành, chờ controller ngoài được đồng bộ và xác minh | **0 cổng** — không controller trong kho mang hằng 30 phút; controller ngoài chưa đo |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

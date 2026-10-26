@@ -1,0 +1,20 @@
+# do 2026-10-25 trong phien ghi so (git trong ban sao day du, core.abbrev 7)
+$ git rev-parse d2e3052d479d140b7e7b91df41ec4914fab7d544^{tree} d2e3052d479d140b7e7b91df41ec4914fab7d544^1 d2e3052d479d140b7e7b91df41ec4914fab7d544^2
+bf2449d9ab695a6ddfdd75575d75186e9ac981b3
+b168290226d4ae9829f7cc45badf2bce4ba8457c
+607ba872ea9f68a98576d285ffc89419cc0cfa86
+$ git merge-base d2e3052d479d140b7e7b91df41ec4914fab7d544^1 d2e3052d479d140b7e7b91df41ec4914fab7d544^2
+b168290226d4ae9829f7cc45badf2bce4ba8457c
+$ git diff --numstat d2e3052d479d140b7e7b91df41ec4914fab7d544^1 d2e3052d479d140b7e7b91df41ec4914fab7d544
+2	1	docs/PROTOCOL_DA_PHIEN.md
+135	0	docs/adr/0055-tran-loi-goi-codex-len-muoi.md
+$ git diff --numstat 0dbb4c22aaaaf801e6c392e235391a35c1a6a268 607ba872ea9f68a98576d285ffc89419cc0cfa86 -- docs/  (diff PR theo merge-base cu)
+2	1	docs/PROTOCOL_DA_PHIEN.md
+135	0	docs/adr/0055-tran-loi-goi-codex-len-muoi.md
+$ cmp <(git diff d2e3052d479d140b7e7b91df41ec4914fab7d544^1 d2e3052d479d140b7e7b91df41ec4914fab7d544) <(git diff d2e3052d479d140b7e7b91df41ec4914fab7d544^1 607ba872ea9f68a98576d285ffc89419cc0cfa86)
+cmp rc=0
+$ tree merge == tree head 607ba87?
+bang nhau
+$ blob hai tep tai 4e4d482 (sha da review) vs merge
+docs/adr/0055-tran-loi-goi-codex-len-muoi.md 91456530ee28ed773c64f6a1ddee3a3e425e0155 91456530ee28ed773c64f6a1ddee3a3e425e0155
+docs/PROTOCOL_DA_PHIEN.md 2f4853fe0dd5365e2691103b949d7b16d0627cad 2f4853fe0dd5365e2691103b949d7b16d0627cad

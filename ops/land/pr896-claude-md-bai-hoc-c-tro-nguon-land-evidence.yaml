@@ -241,3 +241,34 @@ cap_nhat_20261026_luot2:
     vao master qua #915), kem caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE cua `a9bc934` (vao master qua #946) va caveat con
     thieu cho pr889-review-1 neu HINT.patch luot nay duoc ap va review lai.
   landed: false
+
+cap_nhat_20261026_luot3:
+  bo_canh: >-
+    Chu kho giao "ap HINT.patch roi chay review lai" (26-10-2026). Ghi so boi phien dieu phoi review
+    session_01WZT2MvvoQV8QGF1vX9STrJ. Khoi nay KHONG sua dong nao o tren; khoi cap_nhat_20261026_luot2 la anh luc 765ae89.
+  hint_luot2:
+    trang_thai: 'measured — ops/reviews/pr896-review-3-codex/diff.patch (578fb4b..82359c4): ap nguyen HINT.patch luot 2 tai commit 82359c4.'
+    ghi_chu: 'Cau "HINT.patch CHUA ap" trong khoi luot 2 dung tai 765ae89, KHONG con dung tu 82359c4.'
+  cross_review_moi:
+    luot: 3
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 82359c4deec90edebbaebf9ab9d094902120b567
+    so_lop: 'P0 0 / P1 2 / P2 1 / P3 0'
+    hien_vat: ops/reviews/pr896-review-3-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-3-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — run.json ops/reviews/pr896-review-3-codex/run/run.json (513131e0): ma_thoat 0, head 82359c4, model_phuc_vu DO_DUOC
+      (29 su kien, 29 response_id, `gpt-6.1-sol`). P1 cua luot 2 DA DONG. Finding moi deu o so review, KHONG o CLAUDE.md:
+      P1 wp766 tu khai `codex_service` chua caveat; P1 ho so luot 2 van khai HINT chua ap; P2 13 verdict service/API lech receipt CLI.
+    hint: 'ops/reviews/pr896-review-3-codex/HINT.patch — CHUA ap (17 tep).'
+  reviewer_assurance_81: CHUA DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — chua co approve nao. Noi dung CLAUDE.md cuoi cung (3bc4244) khong con finding qua luot 2 va 3, nhung ca hai luot
+    deu changes_requested vi finding o so review; ho so nay KHONG tach verdict de tu nang assurance.
+  tran_loi_goi_codex: 'measured — 2/2 da dung: ops/reviews/pr896-review-2-codex/run/run.json (b3269a02) va ops/reviews/pr896-review-3-codex/run/run.json (513131e0). Goi them can chu kho cho phep.'
+  don_vi_land_de_xuat: >-
+    Giu nguyen de xuat cua khoi luot 2 (816f439 + 3bc4244, kem caveat cua a9bc934 va 82359c4); CAN chu kho chap nhan.
+  landed: false

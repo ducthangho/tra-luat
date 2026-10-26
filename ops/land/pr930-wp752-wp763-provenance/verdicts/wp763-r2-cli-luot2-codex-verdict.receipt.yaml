@@ -1,0 +1,88 @@
+# BIEN NHAN GIAO HANG — cross-review Codex CLI LUOT 2 packet #763 (PR #930), KHAC NEN (codex review ma do claude viet).
+
+schema_version: 2
+receipt_id: wp763-r2-cli-luot2-codex-553f19e0
+kind: review_delivery_receipt
+packet_id: no-p3-dang-ky-ci
+packet_issue: 763
+revision_reviewed: 2
+spec_path: ops/specs/no-p3-dang-ky-ci-r2.md
+spec_sha256: 30776483ab40e57708c6b03ba0877bc3f40dd27edf334e7dceb0fe5629a113e2
+lease_id: wp763-r2-g1-claude
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  C1-C5, C7 va toan ven merge do lai trong sandbox. C6/C8 cham tu log CI that tai ve (gate-registry job 121216491297,
+  gate-ops job 121216017879, run 40208988593, attempt 1, head_sha b0fadc9) theo authority issuecomment-6400666225;
+  CI checkout commit merge do GitHub dung e909953 (Merge b0fadc9 into cdc4e80) — reviewer do cdc4e80 la to tien
+  b0fadc9 (rc 0) va SUY RA cay bang nhau; e909953 khong co trong mirror. Log khong kiem duoc chu ky GitHub.
+nang_tran_codex:
+  neo: https://github.com/ducthangho/tra-luat/issues/763#issuecomment-6400666225
+  tran_cu: 2
+  tran_moi: 3
+  loi_goi_nay: 3
+  khoi_nay_co_truoc_khi_phong: true
+verdict: approve
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: tieu_de_finding
+so_dem_ghi_chu: dem bang grep tieu de `### ... [P1|P2|P3]` tren chinh tep verdict luc ghi so.
+verdict_path: ops/reviews/wp763-r2-cli-luot2-codex-verdict.md
+verdict_sha256: 953b0d413ba19cc5b663406087cdf529c97996981591c95264fc26458d71e12a
+verdict_bytes: 19676
+reviewed_sha: b0fadc96366115d3545b9c723b30f04281898d94
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e0c93e6fb051ea1c99e0df344cac9873924d936f/ops/reviews/wp763-r2-cli-luot2-codex-verdict.md
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 553f19e0df944de099dca500d7df5ab3
+  prompt_path: ops/reviews/wp763-r2-cli-luot2-prompt.md
+  prompt_sha256: 70a1b8ff62c6d140afbfa815cbc791bffe324195d51470ee2f54a995948f3d42
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 588.674
+  ma_thoat: 0
+  model_yeu_cau: gpt-6-astra
+  effort_yeu_cau: xhigh
+  neo_boi_launcher: >-
+    `launcher.py run` boc `codex exec` trong mirror RIENG (detached dung reviewed_sha), prompt qua {PROMPT_FILE},
+    --expected-head, --expected-repo, --expected-root-commit, --require-clean. run.json luu canh verdict.
+  KHONG_do_duoc: >-
+    Model thuc su phuc vu moi yeu cau. codex-cli khong xuat modelUsage; header stderr khong luu trong kho.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia day len KHONG thanh required check hay merge authorization. Truong nay ghi
+    AI VAN CHUYEN (phien agent bang credential chu kho), khong cap tham quyen.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang verdict_sha256 + commit dau tien chua tep verdict (e0c93e6f) tren nhanh lease ops/wp763-r2-g1-lease.
+    Nhanh lease CHUA vao master; khong tag luu-tru/*, khong protected ref ⇒ TRUNG BINH.
+
+run_neo:
+  run_id: 553f19e0df944de099dca500d7df5ab3
+  prompt_sha256: 70a1b8ff62c6d140afbfa815cbc791bffe324195d51470ee2f54a995948f3d42
+  worktree_sach: true
+  thoi_luong_giay: 588.674
+  stdout_byte: 85
+  stderr_byte: 39
+  ma_thoat: 0
+
+verdict_usage_caveats:
+  - id: GOI-BANG-CHUNG-KHONG-LUU-TRONG-KHO
+    muc: P3
+    mo_ta: >-
+      Verdict tro toi artifact cua goi review (audit_luot2.py, ci-parsed.json, log CI tai ve) bang duong dan tuong doi;
+      goi ay nam ngoai kho va KHONG duoc luu. Log CI tai lai duoc tu GitHub theo job id khi con han luu giu.

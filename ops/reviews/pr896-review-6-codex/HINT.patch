@@ -1,0 +1,164 @@
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- ops/land/pr832-wp831-land-evidence.yaml
++++ ops/land/pr832-wp831-land-evidence.yaml
+@@ -146,3 +146,14 @@
+     - 'Codex connector chi tren head cu 6376cd3, khong tren head merge (:42)'
+   dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 51ae5c095972611d2c6045bd81786a4fc7e9ca62, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 51ae5c095972611d2c6045bd81786a4fc7e9ca62; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho. Kem theo: moi lo trong lo_ghi_them_khong_mo_rong_pham_vi phai duoc dong bang bang chung duong rieng.'
+   lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'
++
++verdict_usage_caveats:
++- id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
++  muc: P1
++  verdict_path: ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md
++  verdict_sha256: 1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28
++  mo_ta: Verdict dong 6 tu khai execution_surface codex_service, nhung ops/land/pr832-wp831-provenance/verdict-luot7/run.json
++    (run 1ff81cba41874a218b53275d3cdc1418, head 51ae5c095972611d2c6045bd81786a4fc7e9ca62,
++    lenh.chuong_trinh=codex) ghi execution_surface=codex_cli, transport=machine. Dinh
++    chinh be mat cua CHINH luot nay thanh codex_cli. Giu nguyen byte verdict lich
++    su; khong chung thuc model/effort hay nang assurance/quyen merge/land.
+--- ops/land/pr848-wp744-land-evidence.yaml
++++ ops/land/pr848-wp744-land-evidence.yaml
+@@ -131,3 +131,14 @@
+   can_cu: 'PROTOCOL §8 (dinh nghia cross_approved/human_audited), §8.1 "Evidence fallback hoac khong du nhan dang thi chua nhan assurance"; AGENTS.md §4: assurance khong gan theo ten cong cu; tien le pr846 (r23) va pr882.'
+   dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 23bc189f28ea60f04ca1634b6fe66d02babf12ed, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 23bc189f28ea60f04ca1634b6fe66d02babf12ed; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.'
+   lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'
++
++verdict_usage_caveats:
++- id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
++  muc: P1
++  verdict_path: ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md
++  verdict_sha256: af2b5fa426a7d53755148f4f9711712246afadc91e1d75e5267f8c8023bc3911
++  mo_ta: Verdict dong 36 tu khai execution_surface codex_service, nhung ops/land/pr848-wp744-provenance/verdicts/run-f65e544e.json
++    (run f65e544ef5d64ba7a1e0edb607edcf0a, head 23bc189f28ea60f04ca1634b6fe66d02babf12ed,
++    lenh.chuong_trinh=codex) ghi execution_surface=codex_cli, transport=machine. Dinh
++    chinh be mat cua CHINH luot nay thanh codex_cli. Giu nguyen byte verdict lich
++    su; khong chung thuc model/effort hay nang assurance/quyen merge/land.
+--- ops/land/pr862-wp748-r21-land-evidence.yaml
++++ ops/land/pr862-wp748-r21-land-evidence.yaml
+@@ -136,3 +136,15 @@
+   - 'Race khong tai hien tai cho (git 2.43); bang chung la ba luot do truoc ban va va mot luot xanh sau ban va tren runner git 2.55.'
+   - 'Windows khong thuoc dieu kien lease r21 (spec chi doi Linux + ops-publish-lease).'
+   - 'Model thuc phuc vu luot review KHONG_DO_DUOC.'
++
++verdict_usage_caveats:
++- id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
++  muc: P1
++  verdict_path: ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md
++  verdict_sha256: 95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87
++  mo_ta: Verdict luot 1 dong 3 tu khai codex_service, nhung ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-transcript.txt
++    bat dau bang OpenAI Codex v0.163.0, session 01a157da-2170-7be2-b6d0-053fa8f91aec;
++    review.luot_1.reviewer cua ho so nay ghi codex exec truc tiep. Dinh chinh be mat
++    luot 1 thanh codex_cli. Khong dung run-f0909b38.json cua LUOT 2 de chung minh
++    luot 1. Giu nguyen byte verdict lich su; khong chung thuc model/effort hay nang
++    assurance/quyen merge/land.
+--- ops/reviews/README.md
++++ ops/reviews/README.md
+@@ -763,6 +763,10 @@
+ | `pr896-review-5-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer (review_evidence/) tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 1a276a1. |
+ | `pr896-review-5-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | diff-pr947.patch va review_evidence/receipt-status-all.log (>500 KB) KHONG vao kho; sha256/so byte o OMITTED.txt. |
+ 
++| `doctor-github-mcp-review-6-codex-verdict.md` | `ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU` | Dinh chinh receipt_khong_khai.0 cua receipt v1 dong bang (loi khai trong blob b9d6a8199d343e4c0458501f636d4b39e423c950). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor 4920113a639d81385c0f98b1488c0f497776d2ff 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau 'hien chi duoc nhanh giu'/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml. |
++| `don-nhanh-base-review-4-claude-verdict.md` | `ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU` | Dinh chinh truy_xuat_ghi_chu cua receipt v1 dong bang (loi khai trong blob f99c6f172a8bc7bb641a07d6499299bca906c611). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor 03f12ac63284dd814dcf14664968af4872ef7f8a 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau 'hien chi duoc nhanh giu'/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml. |
++| `don-nhanh-base-review-5-claude-verdict.md` | `ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU` | Dinh chinh truy_xuat_ghi_chu cua receipt v1 dong bang (loi khai trong blob f99c6f172a8bc7bb641a07d6499299bca906c611). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor 03f12ac63284dd814dcf14664968af4872ef7f8a 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau 'hien chi duoc nhanh giu'/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml. |
++
+ ## Mục lục
+ 
+ | tệp verdict | biên nhận | lease | kết luận | head đã review | byte |
+--- /dev/null
++++ ops/reviews/pr896-review-6-legacy-caveats.yaml
+@@ -0,0 +1,41 @@
++kind: supplementary_historical_caveats
++measured_at_sha: 22382d8c800bed7b995d093cdcfdc206360d7fd4
++ghi_chu: Dinh chinh tai lieu; khong phai review delivery receipt hay authority. Giu
++  nguyen byte cac receipt v1 dong bang.
++caveats:
++- receipt_path: ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml
++  verdict_path: ops/reviews/doctor-github-mcp-review-6-codex-verdict.md
++  verdict_sha256: 9a43439d16aade70697704d7caaec99a331cf625b1e302d382431410c87fd169
++  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
++  muc: P1
++  mo_ta: 'Dinh chinh receipt_khong_khai.0 cua receipt v1 dong bang (loi khai trong
++    blob b9d6a8199d343e4c0458501f636d4b39e423c950). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4:
++    git merge-base --is-ancestor 4920113a639d81385c0f98b1488c0f497776d2ff 3e973a03b151e37cd402e0a723816eeaa8247193
++    va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau ''hien chi duoc
++    nhanh giu''/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang
++    thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance
++    lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml.'
++- receipt_path: ops/reviews/don-nhanh-base-review-4-claude-verdict.receipt.yaml
++  verdict_path: ops/reviews/don-nhanh-base-review-4-claude-verdict.md
++  verdict_sha256: f4e1f5351e03d302013a4a10c05a3e7e0d237b5f028adb29276515e9578be256
++  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
++  muc: P1
++  mo_ta: 'Dinh chinh truy_xuat_ghi_chu cua receipt v1 dong bang (loi khai trong blob
++    f99c6f172a8bc7bb641a07d6499299bca906c611). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4:
++    git merge-base --is-ancestor 03f12ac63284dd814dcf14664968af4872ef7f8a 3e973a03b151e37cd402e0a723816eeaa8247193
++    va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau ''hien chi duoc
++    nhanh giu''/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang
++    thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance
++    lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml.'
++- receipt_path: ops/reviews/don-nhanh-base-review-5-claude-verdict.receipt.yaml
++  verdict_path: ops/reviews/don-nhanh-base-review-5-claude-verdict.md
++  verdict_sha256: 9f26f53484511f1fef8e40cdeb2818b22bf1a717cc747ea99c323c1bffd9d023
++  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
++  muc: P1
++  mo_ta: 'Dinh chinh truy_xuat_ghi_chu cua receipt v1 dong bang (loi khai trong blob
++    f99c6f172a8bc7bb641a07d6499299bca906c611). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4:
++    git merge-base --is-ancestor 03f12ac63284dd814dcf14664968af4872ef7f8a 3e973a03b151e37cd402e0a723816eeaa8247193
++    va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau ''hien chi duoc
++    nhanh giu''/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang
++    thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance
++    lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml.'
+--- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
++++ ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+@@ -98,12 +98,7 @@
+   model_identity_not_inferred_from_actor: true
+ anchor:
+   loai: canonical_ancestry
+-  cuong_do: >-
+-    candidate ancestry only; canonical inclusion pending — commit verdict ef72264cb268643a89df3e15cf6cb840da92307b (evidence_url)
+-    là tổ tiên của head ứng viên hiện hành (nhánh agent/wp461-g8-claude, PR của g8; trước đó #633 head
+-    155bbaa47e6936a81e16537e44e8a9b0c8e8fa60). #625 chỉ còn là nguồn gốc lịch sử. Đường land đang chờ = PR g8, CHỈ bằng merge
+-    commit; squash làm mất commit ef72264c nên neo này KHÔNG sống qua squash. Riêng reviewed_sha 5e2851881e810b39ebee6884371e5b3e229a01d7 ĐÃ
+-    canonical qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617)
++  cuong_do: "Loi khai lich su trong blob tai 77f272d435b0c23369b2348efa821c760d653036: candidate ancestry only; canonical inclusion pending — commit verdict ef72264cb268643a89df3e15cf6cb840da92307b (evidence_url) là tổ tiên của head ứng viên hiện hành (nhánh agent/wp461-g8-claude, PR của g8; trước đó #633 head 155bbaa47e6936a81e16537e44e8a9b0c8e8fa60). #625 chỉ còn là nguồn gốc lịch sử. Đường land đang chờ = PR g8, CHỈ bằng merge commit; squash làm mất commit ef72264c nên neo này KHÔNG sống qua squash. Riêng reviewed_sha 5e2851881e810b39ebee6884371e5b3e229a01d7 ĐÃ canonical qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617) Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0; git ls-tree 3e973a03b151e37cd402e0a723816eeaa8247193 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml co blob cua receipt. Vi vay 'canonical inclusion pending'/chi-tren-PR/CHUA giao/chua o master o tren chi la loi khai lich su cua blob duoc neo, khong phai trang thai hien hanh. Chi dinh chinh quan he Git, khong nang assurance/cuong_do hay suy Packet da landed."
+   gioi_han: >-
+     Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
+     commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b
+@@ -469,10 +464,7 @@
+   write set bien nhan nay ngoai spec r3 §4 (A12): da dong bang revision — spec r4/r5 §3 chua dung 3 duong write set
+   (write_set_hash 021c0f52957836d5c7ea66de4bb3b1a5a48d3b25fcaff95c69b88eec61faaed8); truoc do hop thuc bang chi thi 5820263820.
+ lich_su_ban_ung_vien:
+-  ghi_chu: >-
+-    Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu
+-    `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..c026693d3b0cec663e09f02a5cd195e92d26bb60 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` (DIEM CUOI GHIM = ban ung vien lien truoc ban nay; ban sua sau PHAI chu dong doi diem cuoi, khong dung HEAD^; Codex 4101132071) + sha256 cua
+-    `git show <commit>:ops/reviews/wp461-review-1-codex-verdict.receipt.yaml`; ban hien tai khong co mat (tu tham chieu). Thread 4100299339.
++  ghi_chu: "Loi khai lich su trong blob tai 77f272d435b0c23369b2348efa821c760d653036: Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..c026693d3b0cec663e09f02a5cd195e92d26bb60 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` (DIEM CUOI GHIM = ban ung vien lien truoc ban nay; ban sua sau PHAI chu dong doi diem cuoi, khong dung HEAD^; Codex 4101132071) + sha256 cua `git show <commit>:ops/reviews/wp461-review-1-codex-verdict.receipt.yaml`; ban hien tai khong co mat (tu tham chieu). Thread 4100299339. Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0; git ls-tree 3e973a03b151e37cd402e0a723816eeaa8247193 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml co blob cua receipt. Vi vay 'canonical inclusion pending'/chi-tren-PR/CHUA giao/chua o master o tren chi la loi khai lich su cua blob duoc neo, khong phai trang thai hien hanh. Chi dinh chinh quan he Git, khong nang assurance/cuong_do hay suy Packet da landed."
+   cac_ban:
+   - {commit: 78d9b74fc059d93bdb7ecb172427d5a78647c0b6, luc: '2026-09-24T19:01:28+00:00', receipt_sha256: 77e751e3cf60e6b1c499e133213988e603eb00da76a43efab7702721fea48fed}
+   - {commit: ea7711a61239e6845f73ffd92d7c20de97c0a667, luc: '2026-09-24T19:31:19+00:00', receipt_sha256: 73600a343a0bb94ede4284fe7973a027942fd78e85b97c6cdc5dfbf3f05df500}
+--- ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
++++ ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+@@ -85,10 +85,7 @@
+   model_identity_not_inferred_from_actor: true
+ anchor:
+   loai: canonical_ancestry
+-  cuong_do: >-
+-    candidate ancestry only; canonical inclusion pending — commit verdict b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc (evidence_url)
+-    chỉ ở tổ tiên PR #623, vào master khi PR land bằng merge commit; riêng reviewed_sha 92adc711 ĐÃ
+-    canonical qua merge commit c10487410cc502e96e9dd43639f2ddb6af104922 (PR #613)
++  cuong_do: "Loi khai lich su trong blob tai 62c2fceecac4d3e114f0ecfcb0980dc67514e0ee: candidate ancestry only; canonical inclusion pending — commit verdict b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc (evidence_url) chỉ ở tổ tiên PR #623, vào master khi PR land bằng merge commit; riêng reviewed_sha 92adc711 ĐÃ canonical qua merge commit c10487410cc502e96e9dd43639f2ddb6af104922 (PR #613) Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0; git ls-tree 3e973a03b151e37cd402e0a723816eeaa8247193 -- ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml co blob cua receipt. Vi vay 'canonical inclusion pending'/chi-tren-PR/CHUA giao/chua o master o tren chi la loi khai lich su cua blob duoc neo, khong phai trang thai hien hanh. Chi dinh chinh quan he Git, khong nang assurance/cuong_do hay suy Packet da landed."
+   gioi_han: >-
+     Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
+     commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc
+@@ -354,10 +351,7 @@
+ - human audit A7 còn placeholder dòng `tự đo` ở hai comment audit
+ - nợ bookkeeping CHANGELOG r376 + RELEASE_MANIFEST (wp461 r3)
+ lich_su_ban_ung_vien:
+-  ghi_chu: >-
+-    Receipt nay CHUA duoc giao (chua o master: `git ls-tree origin/master ops/reviews/wp523-r15-*` rong) — moi ban
+-    la ban UNG VIEN trong PR #623; sua truoc khi land khong phai 'sua receipt da giao' (S5 r15 / §8 dong 461-462).
+-    Lich su cac ban ung vien ghi o day de noi nguon (thread 4100014487); ban hien hanh la dong cuoi (truoc commit nay).
++  ghi_chu: "Loi khai lich su trong blob tai 62c2fceecac4d3e114f0ecfcb0980dc67514e0ee: Receipt nay CHUA duoc giao (chua o master: `git ls-tree origin/master ops/reviews/wp523-r15-*` rong) — moi ban la ban UNG VIEN trong PR #623; sua truoc khi land khong phai 'sua receipt da giao' (S5 r15 / §8 dong 461-462). Lich su cac ban ung vien ghi o day de noi nguon (thread 4100014487); ban hien hanh la dong cuoi (truoc commit nay). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0; git ls-tree 3e973a03b151e37cd402e0a723816eeaa8247193 -- ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml co blob cua receipt. Vi vay 'canonical inclusion pending'/chi-tren-PR/CHUA giao/chua o master o tren chi la loi khai lich su cua blob duoc neo, khong phai trang thai hien hanh. Chi dinh chinh quan he Git, khong nang assurance/cuong_do hay suy Packet da landed."
+   cac_ban:
+   - {commit: b78c2a01a286e930a30fa4499662fc897ba8a7ce, luc: '2026-09-24T18:41:24+00:00', receipt_sha256: 1335549153e9ecb571d1d1a377263af8fa8969ada582af41cc71c353b482c84b}
+   - {commit: 9777651940148aabcbd54445933c43acf9db83ff, luc: '2026-09-24T19:18:43+00:00', receipt_sha256: fbc85ad565ffa4e4dcb94c16dede50859958b8bf005514c4dc4132c052395e19}

@@ -1,0 +1,17 @@
+patch_paths=7 dry_run_rc=0 apply_rc=0
+checking file ops/land/pr832-wp831-land-evidence.yaml
+checking file ops/land/pr848-wp744-land-evidence.yaml
+checking file ops/land/pr862-wp748-r21-land-evidence.yaml
+checking file ops/reviews/README.md
+checking file ops/reviews/pr896-review-6-legacy-caveats.yaml
+checking file ops/reviews/wp461-review-1-codex-verdict.receipt.yaml
+checking file ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml
+clone=/tmp/pr896-r6-mutations-bwmr16mi/copy
+ ops/land/pr832-wp831-land-evidence.yaml                   | 11 +++++++++++
+ ops/land/pr848-wp744-land-evidence.yaml                   | 11 +++++++++++
+ ops/land/pr862-wp748-r21-land-evidence.yaml               | 12 ++++++++++++
+ ops/reviews/README.md                                     |  4 ++++
+ ops/reviews/wp461-review-1-codex-verdict.receipt.yaml     | 12 ++----------
+ ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml | 10 ++--------
+ 6 files changed, 42 insertions(+), 18 deletions(-)
+

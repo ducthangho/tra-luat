@@ -1,0 +1,74 @@
+clone=/tmp/pr896-r6-mutations-bwmr16mi/copy
+checkout=22382d8c800bed7b995d093cdcfdc206360d7fd4
+[
+  {
+    "mutation": "remove-round5-index",
+    "removed_bytes": 736,
+    "cases": {
+      "t26": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      },
+      "t27": {
+        "rc": 1,
+        "summary": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": [
+          "!!! do t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc README.md: verdict 'pr896-review-5-codex-verdict.md' KHÔNG có trong CỘT 'tệp verdict' của bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột mô tả nào đó thì bảng render ra vẫn thiếu nó.",
+          "  ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: verdict 'pr896-review-5-codex-verdict.md' KHÔNG có trong CỘT 'tệp verdict' của bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột mô tả nào đó thì bảng render ra vẫn thiếu nó."
+        ]
+      },
+      "t138": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      }
+    }
+  },
+  {
+    "mutation": "remove-round5-caveat-readme",
+    "removed_bytes": 366,
+    "cases": {
+      "t26": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      },
+      "t27": {
+        "rc": 1,
+        "summary": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": [
+          "!!! do t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc README.md: caveat 'HINT-LUOT5-AP-CUNG-COMMIT-GHI-SO' của pr896-review-5-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr896-review-5-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.",
+          "  ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: caveat 'HINT-LUOT5-AP-CUNG-COMMIT-GHI-SO' của pr896-review-5-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr896-review-5-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó."
+        ]
+      },
+      "t138": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      }
+    }
+  },
+  {
+    "mutation": "remove-round5-receipt-caveat",
+    "removed_bytes": 362,
+    "cases": {
+      "t26": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      },
+      "t27": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      },
+      "t138": {
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "error": []
+      }
+    }
+  }
+]
+status_after_restore=''

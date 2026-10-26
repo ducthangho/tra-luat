@@ -219,3 +219,26 @@ cap_nhat_20261026:
     - id: QUYET-DINH-LANDED-CHU-KHO-MOI
       trang_thai: cho_chu_kho
       mo_ta: 'Chu kho duyet `landed` bang comment tren PR ghi so moi, ghi du SHA head cuoi (40 hex), dang SAU commit cuoi.'
+
+moc_workflow_definition_20261026:
+  bo_canh: 'Chu kho chay gh api graphql ngoai phien va dan output vao hoi thoai phien 26-10-2026. Khoi nay KHONG sua dong nao o tren.'
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 39752735359 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID 5f288ea (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST run 39752735359 (head_sha, path,
+    attempt 1) va tai blob qua contents?ref=OID: blob 55d06ab452a060b836fdf6fa45ba3408fc44c90c, sha256 b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0, khop `git rev-parse 5f288ea:.github/workflows/ci.yml`.
+  nguon:
+    - ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/workflow-definition-5f288ea.txt
+    - ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/graphql-output-chu-kho-dan-pr870.json
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai (khong co comment tren GitHub
+    nhu tien le pr931). URL va blob tai OID da duoc phien doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o cap_nhat_20261026; Workflow definition o khoi nay).'
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+    - id: QUYET-DINH-LANDED-CHU-KHO-MOI
+      trang_thai: cho_chu_kho
+      mo_ta: >-
+        Chu kho duyet `landed` cho #870 (authorized_head_sha 06a50c5feea77c2654f31edd26efeed7eeee62f5) bang comment tren PR ghi so nay, ghi du SHA
+        head cuoi cua PR ghi so (40 hex), dang SAU commit cuoi.
+  landed: false

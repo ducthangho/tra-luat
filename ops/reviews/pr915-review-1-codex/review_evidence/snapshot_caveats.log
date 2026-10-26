@@ -1,0 +1,14 @@
+tracked_snapshot_files=[]
+exact_hash_mentions=['ops/reviews/README.md', 'ops/reviews/pr870-review-2-codex-verdict.receipt.yaml']
+artifact_with_claimed_hash=[]
+ops/reviews/pr870-review-2-codex/VERDICT.incremental.md:68: snapshot_hashed_files=4843
+ops/reviews/pr870-review-2-codex/VERDICT.md:89: snapshot_hashed_files=4843
+ops/reviews/pr870-review-2-codex/VERDICT.md:973: Snapshot [trước](review-snapshot-before.json) / [sau](review-snapshot-after.json) bao gồm hash nội dung mọi tệp trong checkout, symlink và HEAD/index/config/packed-refs, cùng diff/index và trạng thái tracked/untracked/ig
+ops/reviews/pr870-review-2-codex/evidence-preflight.txt:6: snapshot_hashed_files=4843
+ops/reviews/pr870-review-2-codex/review_finalize.py:128:             content += 'Snapshot [trước](review-snapshot-before.json) / [sau](review-snapshot-after.json) bao gồm hash nội dung mọi tệp trong checkout, symlink và HEAD/index/config/packed-refs, cùng diff/index và trạng t
+ops/reviews/pr870-review-2-codex/review_probe.py:51:     (OUT / 'review-snapshot-before.json').write_text(json.dumps(snap, ensure_ascii=False, indent=2))
+ops/reviews/pr870-review-2-codex/review_probe.py:57:     print('snapshot_hashed_files=' + str(len(snap['files'])))
+ops/reviews/pr870-review-2-codex/review_probe.py:304:     before = json.loads((OUT / 'review-snapshot-before.json').read_text())
+ops/reviews/pr870-review-2-codex/review_probe.py:306:     (OUT / 'review-snapshot-after.json').write_text(json.dumps(after, ensure_ascii=False, indent=2))
+KET_LUAN: KHONG DO DUOC hash/672374 bytes cua hai snapshot goc vi KHONG co byte goc trong hien vat; chi do duoc loi khai + transcript tu chep. Caveat da khai ro KHONG vao kho.
+rc=0

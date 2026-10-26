@@ -85,6 +85,8 @@ push_policy: push_mot_lan_sau_review_cuc_bo
 push_policy_note: 'Theo luat_vong_doi V1-V5 cua dac ta r4 (quyet dinh chu kho rieng
   wp899, KHONG ap ADR-0054): V1-V4 nhu r2; V5 Codex dem lai 0/8, lap lop o luot 2
   cua r4 thi dung han.'
+da_bi_thay_the: wp899-r4-g5-claude
+ly_do_thu_hoi: 'chu kho duyet truc tiep "Cap lease g5, khong tinh lan connector vua roi" (#899 issuecomment-6406649866): g5 giu nguyen moi thu cua g4, them lai .claude/dev/ci_dang_ky_test.py vao write set (#763 da merge PR #930, lease wp763-r2-g1-claude rut han 01:35Z), ngan sach Codex 11/12, nang_tran 2050 dong.'
 thay_the_cho:
 - wp899-r4-g3-claude
 thay_the_cho_note: 'wp899-r4-g3-claude con han toi 2026-10-28T02:26Z => bia mo hai chieu (da_bi_thay_the tren ops/wp899-r4-g3-lease).'

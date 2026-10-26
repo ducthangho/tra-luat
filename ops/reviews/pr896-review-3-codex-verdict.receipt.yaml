@@ -121,10 +121,10 @@ anchor:
     (a) 82359c4 nam tren nhanh claude/pr896-review-2-codex (PR #947), CHUA la to tien master luc ghi so; len trung_binh khi #947 merge bang merge commit.
 
 verdict_usage_caveats:
-  - id: HINT-LUOT3-CHUA-AP
+  - id: HINT-LUOT3-DA-AP-CAN-VERDICT-MOI
     muc: P1
     mo_ta: >-
-      changes_requested 2 P1 + 1 P2. HINT.patch luot 3 (17 tep: receipt wp766 + 13 receipt service/API + receipt luot 2 + README + khoi land) CHUA ap; da cham tran 2 loi goi codex, cho chu kho quyet.
+      Verdict lich su tren 82359c4 la changes_requested 2 P1 + 1 P2. Tai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su.
   - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
     muc: P3
     mo_ta: >-

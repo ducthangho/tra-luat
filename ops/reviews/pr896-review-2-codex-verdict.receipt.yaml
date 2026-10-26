@@ -108,10 +108,10 @@ anchor:
     CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
 
 verdict_usage_caveats:
-  - id: HINT-P1-CHUA-AP
+  - id: HINT-P1-DA-AP-CAN-VERDICT-MOI
     muc: P1
     mo_ta: >-
-      changes_requested 1 P1 (verdict-surface-bo-sot-pr889-luot1: receipt pr889-review-1 thieu caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE). HINT.patch trong thu muc CHUA ap; phien dieu phoi khong va, cho chu kho quyet.
+      Verdict lich su tren 8d56009 la changes_requested 1 P1 (verdict-surface-bo-sot-pr889-luot1). Tai moc ghi so 765ae89 va cha 578fb4b, receipt pr889-review-1/README chua co caveat; HINT.patch CHUA ap luc ay. Commit 82359c4deec90edebbaebf9ab9d094902120b567 da ap HINT.patch, them caveat va hang README. Can doi chieu verdict moi tren exact SHA ung vien; khong suy approve/land tu viec ap patch, khong doi ket qua hay byte verdict lich su.
   - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
     muc: P3
     mo_ta: >-

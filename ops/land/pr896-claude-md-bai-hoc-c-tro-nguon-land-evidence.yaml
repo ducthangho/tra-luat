@@ -272,3 +272,25 @@ cap_nhat_20261026_luot3:
   don_vi_land_de_xuat: >-
     Giu nguyen de xuat cua khoi luot 2 (816f439 + 3bc4244, kem caveat cua a9bc934 va 82359c4); CAN chu kho chap nhan.
   landed: false
+
+cap_nhat_20261026_sau_82359c4:
+  moc_lich_su: >-
+    Khoi cap_nhat_20261026_luot2 o tren la anh chup tai moc ghi so 765ae89, chua co ban va 82359c4.
+    Cac cau "receipt va README chua co caveat", "HINT.patch ... CHUA ap" va "caveat con thieu ... neu ... duoc ap"
+    trong khoi do chi dung tai moc lich su ay, khong phai trang thai sau 82359c4.
+  hint_da_ap_commit: 82359c4deec90edebbaebf9ab9d094902120b567
+  do_duoc: >-
+    Diff 578fb4b..82359c4 them 4 dong vao receipt pr889-review-1 va 1 hang README:
+    caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE cho verdict dong 7, run 9f946d71 ghi codex_cli.
+    Byte verdict lich su giu nguyen. Viec ap patch khong tu tao verdict approve tren SHA ung vien moi.
+  can_verdict_moi_tren_exact_sha: true
+  reviewer_assurance_81: CHUA DAT
+  don_vi_land_de_xuat: >-
+    De xuat (CAN chu kho chap nhan, ho so nay KHONG tu chon): don vi land = 816f439 (head #896) +
+    3bc4244 (ban va P2 qua #915), kem caveat cua a9bc934 (qua #946) va caveat pr889-review-1 da them o 82359c4;
+    van can doi chieu verdict moi va dieu kien land tren exact SHA ung vien.
+  landed: false
+  ghi_chu_luot3: >-
+    Khoi cap_nhat_20261026_luot3 o tren (ghi tai 8879165) noi HINT.patch luot 3 "CHUA ap"; cau ay dung tai 8879165 va c8c1ee0.
+    HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex (xem git log), theo yeu cau
+    chu kho "va cho toi khi het P1, P2, P3".

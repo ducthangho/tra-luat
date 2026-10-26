@@ -93,6 +93,10 @@ verdict_doi_chieu: >-
   KHONG CHUNG MINH: model nao da phuc vu (xem KHONG_do_duoc o tren). KHONG DO DUOC.
 
 verdict_usage_caveats:
+  - id: SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC
+    muc: P2
+    mo_ta: >-
+      Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 035d3cac9f2e4b7188d6a0c53e1b74af). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay.
   - id: R7-02-la-CHAN-QUA-RONG-khong-phai-lo-bao-mat
     noi_dung: >-
       R7-02 khac loai voi moi finding truoc cua PR nay: bon vong dau deu la CHAN THIEU (cong

@@ -8794,6 +8794,17 @@ MUTANTS.update({
                                   ["r834_review_comment_p1"]),  # hai hunk cùng một ngữ nghĩa: bỏ chặn P1 VÀ không biến P1 thành P3
     "r834_bo_ma_hoa_truoc": ('        json.dumps(moi, ensure_ascii=False).encode("utf-8")\n', "        pass\n", ["r834_qd_khong_ma_hoa"]),
 })
+CASES += [  # #834 lượt 5 — Codex lượt 4 (F2): check lease ngoài hằng · id riêng TỪNG endpoint · review hoàn tất đơn độc là "xong"
+    ("r834_check_lease_them", _r834_ca(12, _r834_state(ngu_canh_lease={"required_checks": [[".github/workflows/ci.yml", j] for j in _J834] + [[".github/workflows/khac.yml", "khac"]]}), "VẮNG")),
+    ("r834_id_trung_khac_endpoint", _r834_ca(0, lambda x, w, h: _R834_RV("COMMENTED")(x, w, h) or x["reviews"][-1].update(id=20))),
+    ("r834_review_hoan_tat_don_doc", _r834_ca(0, lambda x, w, h: (x["issue_comments"].clear(), _R834_RV("APPROVED")(x, w, h)))),
+]
+MUTANTS.update({
+    "r834_bo_check_lease": ('    for wf in sorted({w for w, _ in nc["required_checks"]}):', "    for wf in sorted({w for w, _ in CHECK_BAT_BUOC}):", ["r834_check_lease_them"]),
+    "r834_id_so_cheo_endpoint": ('    ep = {k: _trang_du(d.get(k), "items", f"connector {k}") for k in EP_CONNECTOR}\n', '    ep = {k: _trang_du(d.get(k), "items", f"connector {k}") for k in EP_CONNECTOR}\n'
+                                 '    _trang_du({"total_count": sum(map(len, ep.values())), "items": [x for v in ep.values() for x in v]}, "items", "gop")\n', ["r834_id_trung_khac_endpoint"]),
+    "r834_bo_review_xong": ('            or any(n == "hien" and x.get("state")', '            or False and any(n == "hien" and x.get("state")', ["r834_review_hoan_tat_don_doc"]),
+})
 
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):

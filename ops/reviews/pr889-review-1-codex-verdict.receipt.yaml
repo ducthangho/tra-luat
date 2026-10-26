@@ -95,6 +95,10 @@ anchor:
     CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
 
 verdict_usage_caveats:
+  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
+    muc: P1
+    mo_ta: >-
+      Verdict dong 7 tu khai `execution_surface: codex_service` va phu nhan di qua `codex exec`, nhung run.json 9f946d71 dong 47 ghi execution_surface=codex_cli, lenh.chuong_trinh=codex; run/stderr-header.txt ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Dinh chinh nay KHONG chung thuc model/effort da phuc vu va KHONG doi assurance cross_reviewed.
   - id: HEAD-MERGE-CHUA-REVIEW-LAI
     muc: P2
     mo_ta: >-

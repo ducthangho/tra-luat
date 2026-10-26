@@ -294,3 +294,26 @@ cap_nhat_20261026_sau_82359c4:
     Khoi cap_nhat_20261026_luot3 o tren (ghi tai 8879165) noi HINT.patch luot 3 "CHUA ap"; cau ay dung tai 8879165 va c8c1ee0.
     HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex (xem git log), theo yeu cau
     chu kho "va cho toi khi het P1, P2, P3".
+
+cap_nhat_20261026_luot4:
+  bo_canh: >-
+    Chu kho giao "va cho toi khi het P1, P2, P3" (26-10-2026). Ghi so boi phien dieu phoi review
+    session_01WZT2MvvoQV8QGF1vX9STrJ. Khoi nay KHONG sua dong nao o tren.
+  cross_review_moi:
+    luot: 4
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0
+    so_lop: 'P0 0 / P1 3 / P2 1 / P3 0'
+    hien_vat: ops/reviews/pr896-review-4-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-4-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-4-codex/run/run.json (9b8d9a76): ma_thoat 0, head 2e4183b, model_phuc_vu DO_DUOC
+      (49 su kien, 49 response_id, `gpt-6.1-sol`). Ba finding luot 3 DA DONG. Finding moi deu o so review, KHONG o CLAUDE.md;
+      trong chuoi #896 chi co: hang muc luc luot 3 con khai HINT chua ap, va receipt pr896-review-1/pr915-review-1 con noi "chua review".
+      Con lai (6 receipt pr455, 23 receipt phu nhan ancestry, pr526-review-3, slice-b-c-review-2) co tu truoc, ngoai chuoi #896.
+    hint: 'ops/reviews/pr896-review-4-codex/HINT.patch — tai moc ghi so CHUA ap (34 tep).'
+  reviewer_assurance_81: CHUA DAT
+  landed: false

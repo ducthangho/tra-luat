@@ -209,3 +209,35 @@ cap_nhat_20261026:
       ngoai phien va dan output.
   provenance_ci_10_2_2_trang_thai: 'mo — 3/4 moc measured (truoc: chi moc Run); con Workflow definition.'
   landed: false
+
+cap_nhat_20261026_luot2:
+  bo_canh: >-
+    Chu kho giao "cross-review lai phan va cua #896" (26-10-2026). Ghi so boi phien dieu phoi review
+    session_01WZT2MvvoQV8QGF1vX9STrJ, KHONG phai phien executor. Khoi nay KHONG sua dong nao o tren.
+  cross_review_moi:
+    luot: 2
+    target_pull_request: 896
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 8d56009a09af7b3ef93801df105f9483de212cc7
+    reviewed_sha_ghi_chu: 'measured — ops/reviews/pr896-review-2-codex/run/run.json `head`; la head da merge cua #946 (merge 21fe565), mang ca 3bc4244 lan a9bc934.'
+    so_lop: 'P0 0 / P1 1 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-2-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-2-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — run.json b3269a02: ma_thoat 0, head 8d56009, worktree_sach true, model_phuc_vu DO_DUOC (25 su kien,
+      25 response_id, moi su kien `gpt-6.1-sol`). P2 cua pr896-review-1 (t162) DA DONG theo verdict (dot bien
+      exclude/if/needs/output os). P1 cua pr915-review-1 DONG MOT PHAN: ops/reviews/pr889-review-1-codex-verdict.md dong 7
+      tu khai `codex_service` (run.json 9f946d71 ghi codex_cli) nhung receipt va README chua co caveat
+      VERDICT-KHAI-SAI-EXECUTION-SURFACE. Finding nay nam o so review, KHONG o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-2-codex/HINT.patch — CHUA ap.'
+  reviewer_assurance_81: CHUA DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — chua co approve nao cho trang thai da va. Noi dung CLAUDE.md cuoi cung (3bc4244) khong con finding, nhung
+    verdict cua luot nay la changes_requested vi P1 o so review; ho so nay KHONG tach verdict de tu nang assurance.
+  don_vi_land_de_xuat: >-
+    De xuat (CAN chu kho chap nhan, ho so nay KHONG tu chon): don vi land = `816f439` (head #896) + `3bc4244` (ban va P2,
+    vao master qua #915), kem caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE cua `a9bc934` (vao master qua #946) va caveat con
+    thieu cho pr889-review-1 neu HINT.patch luot nay duoc ap va review lai.
+  landed: false

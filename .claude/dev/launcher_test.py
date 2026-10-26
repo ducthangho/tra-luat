@@ -11405,7 +11405,8 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
                     if ten == "danh_tinh_con" and x == f"/proc/{con.pid}/cmdline":
                         vet["cmd"] = True
                     elif ten == "danh_tinh_con" and x == f"/proc/{con.pid}/stat" and vet["cmd"]:
-                        return _r27_doi_bd(b)
+                        vet["cmd"] = False       # MỘT lần, đúng lần đọc lại liền sau cmdline: chốt chuỗi tổ tiên
+                        return _r27_doi_bd(b)    # của cháu không được thay chốt đọc-lại-stat của chính con
                     elif ten == "goc_tai_dung" and x == f"/proc/{os.getpid()}/stat":
                         vet["goc"] += 1          # lần 1 = ghim lúc khởi tạo; đổi ngay từ lần đọc trong lượt quét đầu
                         if vet["goc"] > 1:

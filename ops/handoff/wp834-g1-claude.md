@@ -3,10 +3,21 @@
 - Packet #834 `MAY-ADR-0054-a2` r1 g1 · lease `ops/leases/wp834-r1-g1-claude.yaml` @ `02235f9` (nhánh `ops/wp834-r1-g1-lease`).
 - Đặc tả `ops/specs/wp834.md` sha256 `c57ef4d86592218729b811efede7909803d75b6d18ca0d0c3e5059848b44a9d2` và phần chung
   `ops/specs/may-adr-0054-chung.md` sha256 `4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0` — băm lại trên master: khớp.
-- **TRẠNG THÁI (cập nhật): APPROVE lượt 7, đã đẩy, PR #950** — xem mục CẬP NHẬT ngay dưới. Lịch sử dừng same-failure giữ nguyên bên dưới. Nhánh code
+- **TRẠNG THÁI (cập nhật): APPROVE lượt 7 + lượt 8/8 trên head merge `294f0eb`, đã đẩy LẦN HAI (cuối), PR #950** — xem mục CẬP NHẬT ngay dưới. Lịch sử dừng same-failure giữ nguyên bên dưới. Nhánh code
   `agent/wp834-g1-claude` **CHƯA ĐẨY** (chưa có approve; `push_policy` chỉ cho một lần đẩy sau approve). Chưa có PR.
 - Packet này **KHÔNG kích hoạt ADR-0054** và không chạm `_che_do_0054`.
 - Không merge/land/deploy. Không force-push, rebase, xoá ref.
+
+## CẬP NHẬT 26-10-2026 ~08:10Z — head drift, ngoại lệ một lần, đẩy LẦN HAI (cuối)
+
+- `thu-hoi` đỏ trên `8ac10ce`: `S 9372ecd không phải tổ tiên của H` (master tiến qua #949, chỉ `ops/land`).
+- Chủ kho chọn (ii) (#834 issuecomment-6409611375): merge master + chứng minh write set + suite + Codex 8/8 + đẩy lần hai.
+- Merge `origin/master` `9372ecd` ⇒ head **`294f0eb7eaae7b142bd6a3e89a18f512c4b819d0`**. Ba tệp write set giống TỪNG BYTE `8ac10ce`
+  (`git diff --stat` rỗng; blob `9b2410e1…` · `fda3b94f…` · `5d107a4b…` khớp cả hai commit). Diff PR vẫn 3 tệp, 447/450.
+- Suite đầy đủ trên `294f0eb` (clone ghim): `nền: 938/938 đạt · BỎ QUA: 1` · ca 939 · đột biến 1306 · `TỔNG: ĐẠT` · rc0 · 54m57s.
+- **Codex lượt 8/8** — run `f5ff20ab`, `294f0eb`, 719 s rc0, `model_phuc_vu: gpt-6-astra`: **approve**, không finding mới do merge, giữ
+  1 P3 lượt 7. Hiện vật `ops/reviews/wp834-g1-codex-luot8/` (VERDICT sha256 `de854601…`).
+- **Đẩy lần hai (cuối)** `8ac10ce..294f0eb`; ls-remote xác nhận `294f0eb`. Không đẩy thêm lần nào nữa. Trần Codex: 8/8 đã dùng hết.
 
 ## CẬP NHẬT 26-10-2026 ~07:00Z — APPROVE, đã đẩy một lần, PR #950
 

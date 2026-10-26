@@ -1876,7 +1876,9 @@ _HO_SO_GIA_TRI = {"loai": ("managed", "disabled", "external"), "file_system": ("
                   "kind": ("root", "slash_tmp", "tmpdir", "minimal", "current_working_directory")}
 _CHU_KY_SANDBOX = 0.2
 _SANDBOX_GIOI_HAN = ("lay mau /proc tu ben ngoai moi %ss: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. "
-                     "DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no")
+                     "DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. "
+                     "Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: "
+                     "co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do")
 
 
 def _nhan_duong_sb(p, ws: str) -> str:
@@ -2029,8 +2031,7 @@ class _LayMauSandbox:
             except Exception as e:
                 goc = None
                 self.loi.append(type(e).__name__)
-            # ghim NGAY sau khi sinh con (R27-PID-04b). Không ghim được thì KHÔNG BAO GIỜ ghim muộn: pid ấy về sau có
-            # thể đã có chủ mới (R27-PID-04d) — ghi không đo được và không quy argv cho ai.
+            # ghim NGAY khi sinh con; không ghim được thì KHÔNG ghim muộn (pid có thể đã có chủ mới) — R27-PID-04b/d
             if goc is None:
                 self.loi.append("GocKhongGhimDuoc")
             else:
@@ -2046,16 +2047,13 @@ class _LayMauSandbox:
 
     @staticmethod
     def _stat(pid):
-        """(ppid, starttime) hoặc None khi tiến trình ĐÃ THOÁT — kể cả zombie (`Z`/`X`) chưa được thu hồi: con của nó
-        đã được chuyển cha, đó là vòng đời bình thường chứ không phải đổi danh tính (R27-PID-04c). Lỗi khác (quyền,
-        I/O) NÉM — R27-PROC-03: chỉ biến mất mới là bình thường, đọc bị từ chối là không đo được."""
+        """(ppid, starttime) hoặc None khi tiến trình không còn trong /proc. Lỗi khác (quyền, I/O) NÉM — R27-PROC-03:
+        chỉ biến mất mới là bình thường, đọc bị từ chối là không đo được."""
         try:
             st = Path(f"/proc/{pid}/stat").read_bytes()
         except (FileNotFoundError, ProcessLookupError):
             return None
         f = st[st.rindex(b")") + 2:].split()
-        if f[0] in (b"Z", b"X"):
-            return None
         return int(f[1]), f[19]
 
     def _quet(self) -> None:
@@ -2073,9 +2071,12 @@ class _LayMauSandbox:
         con: dict = {}
         for c, (pp, bd) in info.items():
             con.setdefault(pp, []).append((c, bd))
-        # R27-PID-04b: mỗi mục hàng đợi là CHUỖI TỔ TIÊN đã xác thực (gốc trước); con chỉ vào hàng SAU khi chính nó và
-        # cả chuỗi được xác thực lại sau lúc đọc cmdline. Tổ tiên đã thoát ⇒ kết thúc lượt êm (không quy argv cho ai);
-        # tổ tiên đổi danh tính ⇒ phạm vi lượt quét đã đổi, bỏ cả lượt và ghi không đo được.
+        # R27-PID-04b/c/d — chủ kho chọn THU HẸP (26-10-2026, sau bốn lượt cùng một lớp lỗi): mỗi mục hàng đợi là chuỗi
+        # tổ tiên đã xác thực (gốc trước); con chỉ vào hàng SAU khi chính nó và cả chuỗi được đọc lại khớp ảnh chụp.
+        # Mọi chỗ lệch — con đổi ppid/starttime, tổ tiên biến mất hay đổi, kể cả cha thành zombie rồi con bị chuyển cha
+        # theo vòng đời bình thường — đều là KHÔNG ĐO ĐƯỢC, không phân biệt "êm" với "lỗi". Giá phải trả: một lượt bình
+        # thường đôi khi bị hạ thành KHONG_DO_DUOC; đổi lại sổ không bao giờ khai mạnh hơn phép đo. Chỉ một trường hợp
+        # được coi là bình thường: chính tiến trình đang đọc đã biến mất khỏi /proc.
         hang = [((self.pid, self.goc_bd),)]
         while hang:
             chuoi = hang.pop()
@@ -2088,17 +2089,9 @@ class _LayMauSandbox:
                 sau = self._stat(c)
                 if sau is None:
                     continue
-                if sau != (cha, bd):
-                    if self._stat(cha) is not None:     # cha còn (hay pid cha đã có chủ mới) mà con lệch: danh tính đổi
-                        self.loi.append("DanhTinhDoi")
-                    continue
-                for p, pbd in chuoi:
-                    st = self._stat(p)
-                    if st is None:
-                        return
-                    if st[1] != pbd:
-                        self.loi.append("DanhTinhDoi")
-                        return
+                if sau != (cha, bd) or any((st := self._stat(p)) is None or st[1] != pbd for p, pbd in chuoi):
+                    self.loi.append("DanhTinhDoi")
+                    return
                 hang.append(chuoi + ((c, bd),))
                 # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
                 if (c, bd, tho) in self.da:

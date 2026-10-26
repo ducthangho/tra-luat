@@ -123,7 +123,7 @@ verdict_usage_caveats:
   - id: LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI
     muc: P3
     mo_ta: >-
-      Run c0fa33fa (cung prompt, cung head) ma_thoat 1 sau 349.795 s: transcript codex ghi server_overloaded "Selected model is at capacity". VERDICT.partial.md chi co dong dang_lam + mot phep do t26; KHONG duoc tinh la verdict. Hien vat o luot-hong-c0fa33fa/.
+      Run c0fa33fa (cung prompt, cung head) ma_thoat 1 sau 349.795 s: transcript codex ghi server_overloaded "Selected model is at capacity". VERDICT.partial.md (28214 byte) van dang_lam, da ghi 14 muc phep do/doi chieu (gom t26, t27, t138, bon cong va cac huong Git/dot bien); KHONG duoc tinh la verdict hoan tat. Hien vat o luot-hong-c0fa33fa/.
   - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
     muc: P3
     mo_ta: >-

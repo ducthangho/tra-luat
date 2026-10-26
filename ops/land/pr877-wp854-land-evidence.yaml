@@ -91,3 +91,17 @@ dinh_chinh_20261024:
   phat_hien_boi: 'Codex connector P1 tren PR #900 (r4365361919) cho ho so cung phien ghi #892; ap nhat quan cho bon ho so cung muc bang chung ghi qua PR #893.'
   dieu_kien_mo_lai: '(1) du bon moc §10.2.2 cho gate hau merge tren DUNG merge commit daf89615efff9fde33039036ddf7f23ec9cb1c10 (vd cong cu cua #899 CI-PROVENANCE-REST-LOG); VA (2) assurance §8.1: mot lan approve doc lap tren DUNG 4158ef63cad2aad9470f75863dc7549167695df1 voi ho model reviewer xac lap khac ho executor (do_may, hoac khai_co_audit kem auditor co ten), hoac human_audited day du §8 muc 2.'
   lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'
+
+verdict_usage_caveats:
+- id: SURFACE-TU-KHAI-KHAC-HO-SO-RUNTIME-CHUA-DO-DUOC
+  muc: P2
+  verdict_path: ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md
+  verdict_sha256: 612e86d854f4a7aad84a5f8e8d5986f58677e1b789d6ad3f176fefd1435cf277
+  mo_ta: >-
+    Verdict luot 2 dong 11 tu khai codex_service; khong_do_duoc.0 cua ho so nay
+    lai thuat lai cac luot review co header CLI gpt-6.1-sol xhigh. Tai
+    05bc12e2b9008071ca28edbd4574e58644d48220 khong co run.json/transcript cua
+    chinh luot 2 tren b952c106ba6bbf94699bda5fe5fb2f6d7f7256fb de phan xu
+    hai loi khai surface; cau noi ve header CLI chi la nguon thu cap.
+    Be mat thuc chay KHONG_DO_DUOC; khong tu chon codex_cli hay codex_service.
+    Giu byte verdict, khong chung thuc model/effort hay nang assurance/quyen merge/land.

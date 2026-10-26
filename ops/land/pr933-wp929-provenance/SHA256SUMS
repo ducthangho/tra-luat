@@ -6,6 +6,7 @@ e7736c2a582df7233cfbcf2b80f577f19f5b6a5701124a158bf26a4da1382f3f  ./do-lai-nguon
 79e255c5860a55c92583998c4c39e170539100bddfc00d3e688e25cdba5362cd  ./do-lai-nguon-20261026/lease-wp929-r1-g1-claude-7ff0f27.yaml.txt
 79e255c5860a55c92583998c4c39e170539100bddfc00d3e688e25cdba5362cd  ./do-lai-nguon-20261026/lease-wp929-r1-g1-claude-sau-rut-han-b713173.yaml.txt
 8466f5af081b753b96825599cb664537446536cd3c9f8ead0020f5aa1e96f6af  ./do-lai-nguon-20261026/merge-va-diff.txt
+3ddd580466b9c63b61e750e2626112f2fdcaea38c5256a1e8308b41452e57a5f  ./do-lai-nguon-20261026/packet-loop-test-ab94c4f-tom-tat.txt
 03e2aead3e4d18a60cdb2132f1c11968274b14c6379ddadd4c19d7dbc7f044aa  ./do-lai-nguon-20261026/readback.py
 04a0d21b22b23096f2da942e3cb346f4e4de2598ad296579f7f8da13dd945113  ./do-lai-nguon-20261026/spec-sha256.txt
 e1eafc750ae2aa2b85b81c789fd0040efe00c51c897a26e2603b2d33ce1fd1f3  ./readback-check-runs-ab344da-all.json

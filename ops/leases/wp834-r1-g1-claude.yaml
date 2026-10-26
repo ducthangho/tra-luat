@@ -82,8 +82,15 @@ thay_the_cho_ghi_chu: 'packet chua tung co lease.'
 leased_at_utc: '2026-10-26T00:50:00Z'
 heartbeat_at: '2026-10-26T00:50:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-10-28T00:50:00Z'
-lease_expires_at_utc: '2026-10-28T00:50:00Z'
+lease_until: '2026-10-26T12:51:00Z'
+lease_expires_at_utc: '2026-10-26T12:51:00Z'
+rut_han:
+  han_cu: '2026-10-28T00:50:00Z'
+  han_moi: '2026-10-26T12:51:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #834 da merge: PR #950 (head 294f0eb7eaae7b142bd6a3e89a18f512c4b819d0, merge 3e973a03b151e37cd402e0a723816eeaa8247193, 2026-10-26T12:47:58Z, merged_by ducthangho); chu kho giao ghi so land, rut han lease va cap lease #943 (ghi ho #834 issuecomment-6416394171).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem cua #834 tro nguoc bang thay_the_cho; lease #943 la packet khac. Tien le wp929-r1-g1-claude (b713173), wp923-r1-g1-claude (aa8451a).'
+  ghi_boi: claude-orchestrator-session session_01FLVLxi5gKZgtVvbuTCEqEn (theo ghi ho #834 issuecomment-6416394171)
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0

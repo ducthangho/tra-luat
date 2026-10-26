@@ -1,0 +1,89 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 748
+packet_id: wp748
+mission_issue: 748
+revision: 26
+generation: 26
+lease_id: wp748-r26-g26-claude-remote-20261025
+revision_ghi_chu: spec r25 v2 (thay spec v1 cua r25); dem revision tang 25 -> 26 de khong trung lease r25
+thay_the_cho: []
+thay_the_cho_ghi_chu: lease r25 g25 da rut han 2026-10-25T02:48:45Z (9ea925b); khong viet bia mo vao lease da chet
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6394503720
+authority_url: https://github.com/ducthangho/tra-luat/issues/748#issuecomment-6394503720
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-25T06:48:19Z'
+heartbeat_at: '2026-10-25T06:48:19Z'
+lease_until: '2026-10-25T17:50:38Z'
+lease_expires_at_utc: '2026-10-25T17:50:38Z'
+rut_han:
+  han_cu: '2026-10-26T06:48:19Z'
+  han_moi: '2026-10-25T17:50:38Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #748 r26 da merge (PR #932, head 0aaf143ba6e8c4974492aa26e0082fd636077efd, merge 39f21b331a1f46d3c8d6ad3efba9371f1412fc08, 2026-10-25T17:48:08Z). Chu kho yeu cau lam ho so land r26 trong phien.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp748 r25 (9ea925b)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact head, qua launcher.py run
+spec_path: ops/specs/wp748-r25-launcher-model-phuc-vu-v2.md
+spec_ref: ops/wp748-r25-g25-lease
+spec_commit: 0be5864849d27ef0b3fbcf57e4946f688e49f022
+spec_hash: f20615ae559f377150cfd6a9cfd0bce4478bf28ae3d562a674588a9c6f9d4bdb
+spec_sha256: f20615ae559f377150cfd6a9cfd0bce4478bf28ae3d562a674588a9c6f9d4bdb
+branch: agent/wp748-r26-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 0dbb4c22aaaaf801e6c392e235391a35c1a6a268
+start_from_sha: 0dbb4c22aaaaf801e6c392e235391a35c1a6a268
+reviewed_sha_required: b5b6aefa66a8ad037ff34430d0210f3b6873913f
+reviewed_sha_ghi_chu: 'luot review dau neo b5b6aef (head da merge cua PR #909, code dang tren master); moi ban va sau do review tren head cuc bo cua agent/wp748-r26-claude'
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+write_set_hash: 5c33c0baee65d520313deebb38ac17f941b92cd189e47fe70ec72a175f51cbc7
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-10-25T06:48:19Z tren ban sao bare: ls-remote 594 = guong 594; 2/2 duong dan NGUOI_GIU 0 (r25 g25 HET_HAN)'
+nang_tran:
+- truc: kich_thuoc
+  ai_nang: ducthangho (#748 issuecomment-6394503720 duyet spec v2)
+  tran_cu: 'ADR-0053: <= 6 tep / <= 450 dong them'
+  tran_moi: '<= 2 tep / <= 550 dong them (tinh tu base e739ac1 cua PR #909, gom ca phan da merge)'
+- truc: loi_goi_codex
+  ai_nang: ducthangho (#748 issuecomment-6394503720 duyet spec v2)
+  tran_cu: 'ADR-0052: 8'
+  tran_moi: '10 cho PR #909 (da dung 5); PR sua moi tinh rieng theo ADR-0052 (8) — spec v2 khai ADR-0052'
+cach_lam: 'review offline neo SHA cuc bo toi khi 0 P0-P3; KHONG push nhanh code, KHONG gate cho toi khi du dieu kien merge (chi thi chu kho)'
+coordination_paths:
+- ops/leases/wp748-r26-g26-claude-remote-20261025.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

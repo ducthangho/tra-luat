@@ -1,0 +1,20 @@
+# Independent read-only review with execution receipt — WP748 r26 (spec r25 v2), fix branch, round 2
+
+You are an independent reviewer (OpenAI Codex), invoked through `launcher.py run` (execution receipt). Do NOT edit `src/`, commit, push, comment on GitHub, or use credentials. Scratch via `mktemp -d` here is fine. Write `VERDICT.md` in THIS directory, incrementally.
+
+Identity (verify first; stop with `VERDICT: blocked` if different): `./src` is a full clone detached at `143d43fcfe9f2a4b116afd169014ed3d6d598403`, tree `da2d70cc9d0cd3ed104813851be3b7a4d5b19ffd`. This is a LOCAL, UNPUSHED commit on branch `agent/wp748-r26-claude`, parent `b306e15a96a4d9d05d2ba4191cbd071fa7820ee7` (master). It is not on GitHub; the hash is the identifier, not the branch name. Review Class `sensitive`.
+
+Delta under review: `git -C src diff b306e15a96a4d9d05d2ba4191cbd071fa7820ee7 143d43fcfe9f2a4b116afd169014ed3d6d598403` — exactly `.claude/dev/launcher.py` and `.claude/dev/launcher_test.py`. The code it modifies was merged via PR #909 (head `b5b6aefa66a8ad037ff34430d0210f3b6873913f`, merge `113e0d1`); the master commits between `113e0d1` and `b306e15a96a4d9d05d2ba4191cbd071fa7820ee7` do not touch these two files (check: `git -C src log --oneline 113e0d1..b306e15a96a4d9d05d2ba4191cbd071fa7820ee7 -- .claude/dev/launcher.py .claude/dev/launcher_test.py` is empty).
+
+Spec in force: v2 `ops/specs/wp748-r25-launcher-model-phuc-vu-v2.md` — on `master` first, else `git -C src show origin/ops/wp748-r25-g25-lease:ops/specs/wp748-r25-launcher-model-phuc-vu-v2.md`; identifier sha256 `f20615ae559f377150cfd6a9cfd0bce4478bf28ae3d562a674588a9c6f9d4bdb`. stderr of codex runs is an EXACT allow-list; everything else is dropped and only counted. Lease: `git -C src show origin/ops/wp748-r25-g25-lease:ops/leases/wp748-r26-g26-claude-remote-20261025.yaml`. Authority: #748 issuecomment-6394503720 (cannot read GitHub; say so).
+
+Previous round on `b5b6aef`: `./VERDICT_R26A.md` (R25-EVID-05 still open, R25-TEST-03 still open, R26-ALLOW-08, R26-COUNT-09, R26-EOF-10). The owner requires rounds until ZERO P1, P2 and P3.
+
+Tasks (security first):
+1. For EACH round-1 finding: closed on `143d43fcfe9f2a4b116afd169014ed3d6d598403`? Measure (command + real output). Each fix is claimed to have its own mutant (`r26_*` in `DOT_BIEN`) and test (`r926_*`); check that each mutant removes exactly that fix and is killed by its target for the RIGHT reason (`TinHieuChotCa` raised by the target case, not an unrelated error).
+2. Any remaining path for trace/credential content to reach disk (allow-list comparison, partial lines, CR handling, oversized lines, error-drain, writes after close, run directory), and any path to `DO_DUOC` without complete positive evidence (loss counter, reader still alive / latched at the join boundary, snapshot ordering, header-prefix heuristic false negatives/positives). Do NOT author new exploit payloads; describe a direction in words if it needs new attack content.
+3. No regression: timeout/kill (124/125), Windows (`creationflags`, Job Object, `codex.cmd`, CRLF), non-codex runs unchanged, `stderr_byte`/`stderr_sha256` semantics, the 10 s join, the new `Popen` failure path (`bo_loc is None`).
+4. Tests: run every `r925_*` and `r926_*` case (`python3 src/.claude/dev/launcher_test.py --lap-ca <name> --lan 1`) and every `r25_*`/`r26_*` mutant (apply each replacement to a TEMP COPY of launcher.py only). Any guard without its own mutant?
+5. Size vs the v2 `nang_tran` (≤ 2 files, ≤ 550 added lines counted from `e739ac1b74024a20949425c447fb6cf025317c0e`, merged part included). Report the cumulative number AND the new-delta-only number; do not judge it as a code finding — the executor already flagged it to the owner.
+
+`VERDICT.md`: reviewer identity (as runtime reports; say what you cannot verify), reviewed SHA + tree, UTC; per-earlier-finding status; new findings ID/severity P0–P3/`file:line`/scenario/fix; commands with rc and N/N. Last line exactly one of `VERDICT: approve` (zero P0, P1, P2 AND P3) · `VERDICT: changes_requested` · `VERDICT: blocked`.

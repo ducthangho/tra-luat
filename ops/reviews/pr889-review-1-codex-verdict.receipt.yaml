@@ -25,10 +25,7 @@ review_class: standard
 review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff chi tai lieu dev-side (CLAUDE.md +9/-0 tai reviewed_sha).'
 assurance: cross_reviewed
 assurance_KHONG_dat: cross_approved
-assurance_ghi_chu: >-
-  Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai
-  cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi
-  co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only.
+assurance_ghi_chu: "Anh chup lich su tai commit ghi bien nhan e02d0c31986f6ba5019fef21311a939f2d9c2f17: Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only. Sau moc ay, pr889-review-2-codex-verdict.md va pr889-review-3-codex-verdict.md da review dung 094e8d17ae4dfcf21dca63702c9262267bdc072c (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land."
 verdict: changes_requested
 verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 5 `Kết quả: 0 P0, 0 P1, 1 P2, 0 P3.`'
 verdict_path: ops/reviews/pr889-review-1-codex-verdict.md
@@ -101,10 +98,7 @@ verdict_usage_caveats:
       Verdict dong 7 tu khai `execution_surface: codex_service` (va noi phien "khong di qua `codex exec` hay Desktop"), nhung run.json 9f946d71 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Thieu sot nay do pr896-review-2-codex bat (P1 dong mot phan cua pr915-review-1); khong phai chung thuc model/effort da phuc vu.
   - id: HEAD-MERGE-CHUA-REVIEW-LAI
     muc: P2
-    mo_ta: >-
-      Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG
-      duoc review lai. "Da va" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma
-      ops/cong_cu_test.py:8916), khong phai verdict cua reviewer.
+    mo_ta: "Anh chup lich su tai commit ghi bien nhan e02d0c31986f6ba5019fef21311a939f2d9c2f17: Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG duoc review lai. \"Da va\" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma ops/cong_cu_test.py:8916), khong phai verdict cua reviewer. Sau moc ay, pr889-review-2-codex-verdict.md va pr889-review-3-codex-verdict.md da review dung 094e8d17ae4dfcf21dca63702c9262267bdc072c (deu approve 0/0/0/0). Cau chua/khong review lai chi thuoc moc lich su; khong doi verdict, byte hay assurance cua luot 1, khong suy quyen merge/land."
   - id: STDERR-CHI-GIU-HEADER
     muc: P3
     mo_ta: >-

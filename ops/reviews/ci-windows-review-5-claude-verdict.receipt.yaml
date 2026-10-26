@@ -67,11 +67,7 @@ chuoi_verdict_cua_packet:
     sha: c2f6898
     verdict: approve
     verdict_sha256: 8babf9a85dc856bb4ba171e94b745e9fe13bbed2f14db033ac889619aa2f8995
-chuoi_verdict_ghi_chu: >-
-  Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va
-  KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG).
-  `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5.
-
+chuoi_verdict_ghi_chu: "Anh chup lich su tai commit ghi bien nhan e32c5643111e001dc0c655c568b445c897ade450: Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG). `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5. Do lai tai 1a276a15192013fdb1e472db409133b53ac57944: git merge-base --is-ancestor c2f68987b3f298de12b84cf29a934c7b844c8558 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 1a276a15192013fdb1e472db409133b53ac57944 deu rc=0. Vi vay menh de phu nhan ancestry/chi-tren-nhanh cua moc cu o tren khong con la trang thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu cuong_do/assurance lich su, khong suy Packet da landed hay trang thai cac verdict khac."
 no_da_khai_trong_chuoi_nay:
   - id: REVIEW-KHONG-DOC-CHECK-RUN
     khai_o: 'verdict luot 3'

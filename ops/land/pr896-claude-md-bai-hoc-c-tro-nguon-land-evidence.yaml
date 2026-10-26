@@ -330,3 +330,23 @@ cap_nhat_review_4_moc_lich_su:
     Khoi cap_nhat_20261026_luot4 o tren (ghi tai ff4ab57) noi HINT.patch luot 4 "CHUA ap"; cau ay dung tai ff4ab57 va 77a0a45.
     HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896-review-2-codex (xem git log), theo lua chon
     cua chu kho "Ap nguyen HINT luot 4".
+
+cap_nhat_20261026_luot5:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 5
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 1a276a15192013fdb1e472db409133b53ac57944
+    so_lop: 'P0 0 / P1 2 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-5-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-5-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-5-codex/run/run.json (453628b5): ma_thoat 0, head 1a276a1, model_phuc_vu DO_DUOC
+      (36 su kien, 36 response_id, `gpt-6.1-sol`). Muc luc luot 3 va P2 surface DA DONG; con 2 P1 cung lop trang thai cu
+      (7 truong ancestry; pr870/pr889-review-1 "khong duoc review lai"). Khong finding nao o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-5-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
+  reviewer_assurance_81: CHUA DAT
+  landed: false

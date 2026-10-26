@@ -33,3 +33,7 @@ $ is-ancestor
 b0fadc96366115d3545b9c723b30f04281898d94 rc=0
 $ git diff --stat 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 origin/master -- (5 tep cua PR)
 (rong = khong doi)
+$ git merge-base --is-ancestor 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 39f21b331a1f46d3c8d6ad3efba9371f1412fc08   (39f21b3 = merge #932)
+rc=0
+$ git rev-parse 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^1
+36057e8292bcb3b27ceb64b461d7cf29057a8ba3

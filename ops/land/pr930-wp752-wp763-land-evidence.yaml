@@ -47,19 +47,19 @@ pre_merge_checks:
   - {name: 'ci.yml pull_request (ubuntu) — head cuoi b0fadc9', run_id: 40208988593, run_attempt: 1, sha: b0fadc96366115d3545b9c723b30f04281898d94, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261026/kiem-gate-pre-b0fadc9.txt rc=0', nguon: [readback-run-40208988593.json, readback-jobs-40208988593.json, readback-check-runs-b0fadc9-all.json]}
   - {name: 'C6 trong log gate-registry (job 121216491297)', conclusion: 'hai dong CI_DANG_KY ...: ĐẠT rc=0 moi dong mot lan; DANG KY 26/26; PHAN CHUNG 1070/1070; JSON thoi gian 12/12 khoa', ghi_chu: 'thuat_lai — phien executor tai log va dem; log KHONG luu trong ho so nay (job id de tai lai).'}
   - {name: 'C8 trong log gate-ops (job 121216017879)', conclusion: 'CA 104/104 · DOT BIEN 392/392 · TONG DAT', ghi_chu: 'thuat_lai — nhu tren.'}
-  - {name: 'cross-review #752 (Codex CLI qua launcher.py run, lop sensitive)', sha: 9d34a8e7e97fdc8ac178fc209219cea067e4c279, conclusion: 'luot 3: approve 0/0/0/0 (run aedfc579); luot 1 f9b3dc1 va luot 2 fc1bb3a changes_requested (F752-01..03, deu DA VA THAT)', nguon: [verdicts/wp752-r4-cli-luot3-codex-verdict.md, verdicts/wp752-r4-cli-luot3-codex-verdict.receipt.yaml, verdicts/wp752-r4-cli-luot3-codex-run.json, verdicts/wp752-r4-cli-luot1-codex-verdict.md, verdicts/wp752-r4-cli-luot2-codex-verdict.md], ghi_chu: 'measured — bien nhan cross_approved, reviewed_sha 9d34a8e; ban goc tren ops/wp752-r4-g1-lease @ 01486f1.'}
-  - {name: 'cross-review #763 (Codex CLI qua launcher.py run, lop sensitive)', sha: b0fadc96366115d3545b9c723b30f04281898d94, conclusion: 'luot 2: approve 0/0/0/0 (run 553f19e0), C6/C8 cham tu log CI; luot 1 changes_requested 0 finding (sandbox chan Unix socket nen khong tai lap C8)', nguon: [verdicts/wp763-r2-cli-luot2-codex-verdict.md, verdicts/wp763-r2-cli-luot2-codex-verdict.receipt.yaml, verdicts/wp763-r2-cli-luot2-codex-run.json, verdicts/wp763-r2-cli-luot1-codex-verdict.md], ghi_chu: 'measured — bien nhan cross_approved, reviewed_sha = authorized_head_sha b0fadc9 (EXACT head); ban goc tren ops/wp763-r2-g1-lease @ cebe5a2.'}
+  - {name: 'cross-review #752 (Codex CLI qua launcher.py run, lop sensitive)', sha: 9d34a8e7e97fdc8ac178fc209219cea067e4c279, conclusion: 'luot 3: approve 0/0/0/0 (run aedfc579); luot 1 f9b3dc1 va luot 2 fc1bb3a changes_requested (F752-01..03, deu DA VA THAT)', nguon: [verdicts/wp752-r4-cli-luot3-codex-verdict.md, verdicts/wp752-r4-cli-luot3-codex-verdict.receipt.yaml, verdicts/wp752-r4-cli-luot3-codex-run.json, verdicts/wp752-r4-cli-luot1-codex-verdict.md, verdicts/wp752-r4-cli-luot2-codex-verdict.md], ghi_chu: 'measured — verdicts/wp752-r4-cli-luot3-codex-verdict.receipt.yaml: bien nhan cross_approved, reviewed_sha 9d34a8e; ban goc tren ops/wp752-r4-g1-lease @ 01486f1.'}
+  - {name: 'cross-review #763 (Codex CLI qua launcher.py run, lop sensitive)', sha: b0fadc96366115d3545b9c723b30f04281898d94, conclusion: 'luot 2: approve 0/0/0/0 (run 553f19e0), C6/C8 cham tu log CI; luot 1 changes_requested 0 finding (sandbox chan Unix socket nen khong tai lap C8)', nguon: [verdicts/wp763-r2-cli-luot2-codex-verdict.md, verdicts/wp763-r2-cli-luot2-codex-verdict.receipt.yaml, verdicts/wp763-r2-cli-luot2-codex-run.json, verdicts/wp763-r2-cli-luot1-codex-verdict.md], ghi_chu: 'measured — verdicts/wp763-r2-cli-luot2-codex-verdict.receipt.yaml: bien nhan cross_approved, reviewed_sha = authorized_head_sha b0fadc9 (EXACT head); ban goc tren ops/wp763-r2-g1-lease @ cebe5a2.'}
   - {name: 'connector Codex GitHub', conclusion: 'PR #918: f9b3dc1 (2 luot) va tu chay khi roi draft — khong finding sau khi va P2 4369279124; PR #930: b0fadc9 tu chay khi roi draft — khong finding', nguon: [readback-comments-930.json, readback-reviews-930.json, readback-review-comments-930.json]}
-  - {name: 'so loi goi Codex', conclusion: '#752: 6/10 (3 connector + 3 CLI); #763: 3/3 (1 connector + 2 CLI)', ghi_chu: 'measured — tran neo readback-comment-6392567946/6393045515/6393725163 (#752) va 6392570670/6400666225 (#763).'}
+  - {name: 'so loi goi Codex', conclusion: '#752: 6/10 (3 connector + 3 CLI); #763: 3/3 (1 connector + 2 CLI)', ghi_chu: 'measured — tran neo readback-comment-6392567946.json, readback-comment-6393045515.json, readback-comment-6393725163.json (#752) va readback-comment-6392570670.json, readback-comment-6400666225.json (#763).'}
   - {name: 'dieu kien kich thuoc', conclusion: '#752: 4 tep +725 (tran nang_tran <= 4 tep / <= 1000 dong); #763: 1 tep +2 (numstat 2 0)', nguon: [do-lai-nguon-20261026/merge-va-diff.txt]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA 36057e8', run_id: 40216784693, run_attempt: 1, sha: 36057e8292bcb3b27ceb64b461d7cf29057a8ba3, conclusion: cancelled, jobs: '0 job', nguon: [readback-run-40216784693.json, readback-jobs-40216784693.json], ghi_chu: 'measured — luot cho trong nhom concurrency master bi thay boi push moi hon truoc khi chay; khong phai luot do.'}
-  - {name: 'ci.yml push master — commit first-parent ke tiep 39f21b3 (merge #932)', run_id: 40218214211, run_attempt: 1, sha: 39f21b3, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261026/kiem-gate-post-39f21b3.txt rc=0', nguon: [readback-run-40218214211.json, readback-jobs-40218214211.json], ghi_chu: 'measured — 36057e8 la to tien cua 39f21b3; 5 tep cua PR khong doi tu 36057e8 toi master ab344da (merge-va-diff.txt). Chi la moc Run cua §10.2.2; Checkout, Workflow definition, Gate output not_measured.'}
+  - {name: 'ci.yml push master — DUNG merge SHA 36057e8', run_id: 40216784693, run_attempt: 1, sha: 36057e8292bcb3b27ceb64b461d7cf29057a8ba3, conclusion: cancelled, jobs: '0 job', nguon: [readback-run-40216784693.json, readback-jobs-40216784693.json], ghi_chu: 'measured — readback-run-40216784693.json conclusion cancelled, readback-jobs-40216784693.json 0 job: luot cho trong nhom concurrency master bi thay boi push moi hon truoc khi chay; khong phai luot do.'}
+  - {name: 'ci.yml push master — commit first-parent ke tiep 39f21b3 (merge #932)', run_id: 40218214211, run_attempt: 1, sha: 39f21b3, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261026/kiem-gate-post-39f21b3.txt rc=0', nguon: [readback-run-40218214211.json, readback-jobs-40218214211.json], ghi_chu: 'measured — do-lai-nguon-20261026/merge-va-diff.txt: 5 tep cua PR khong doi tu 36057e8 toi master ab344da; cung tep: 36057e8 la to tien va la cha 1 cua 39f21b3 (merge-base --is-ancestor rc 0). Chi la moc Run cua §10.2.2; Checkout, Workflow definition, Gate output not_measured.'}
   - {name: 'launcher-windows.yml push master — DUNG merge SHA 36057e8', run_id: 40216784577, sha: 36057e8292bcb3b27ceb64b461d7cf29057a8ba3, conclusion: success, jobs: '2/2 success', nguon: [readback-run-40216784577.json, readback-jobs-40216784577.json]}
 bookkeeping:
   - {item: 'cap lease #752', ket_qua: 'measured — readback-comment-6392359706.json (chu kho tu viet xac nhan cap lease wp752-r4-g1-claude)'}
   - {item: 'cap lease #763', ket_qua: 'measured — readback-comment-6392570670.json va dinh chinh base readback-comment-6393049538.json'}
-  - {item: 'rut han hai lease', ket_qua: 'measured — xem lease.thu_hoi_cuoi'}
+  - {item: 'rut han hai lease', ket_qua: 'measured — readback-run-40253760586.json va readback-run-40253762779.json success; xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-930-land}
 # ---- het truong chuan
 pham_vi_land: cong_cu_ops
@@ -73,6 +73,7 @@ spec:
   no_p3_dang_ky_ci_r2: {path: ops/specs/no-p3-dang-ky-ci-r2.md, sha256: 30776483ab40e57708c6b03ba0877bc3f40dd27edf334e7dceb0fe5629a113e2}
   do_lai: 'measured — do-lai-nguon-20261026/spec-sha256.txt (ca hai khop).'
 lease:
+  cac_lease:
   - lease_id: wp752-r4-g1-claude
     path: ops/leases/wp752-r4-g1-claude.yaml (nhanh ops/wp752-r4-g1-lease)
     lease_until_ban_dau: '2026-10-26T13:40:00Z'
@@ -81,7 +82,12 @@ lease:
     path: ops/leases/wp763-r2-g1-claude.yaml (nhanh ops/wp763-r2-g1-lease)
     lease_until_ban_dau: '2026-10-27T15:40:00Z'
     ban_chep: 'measured — do-lai-nguon-20261026/lease-wp763-r2-g1-claude-sau-rut-han-dedd7f3.yaml.txt'
-  thu_hoi_cuoi: CHO_DO
+  thu_hoi_cuoi: >-
+    measured — RUT HAN ca hai (khong bia mo, khong co lease ke nhiem): fdbab14 tren ops/wp752-r4-g1-lease va dedd7f3 tren
+    ops/wp763-r2-g1-lease dua lease_until ve 2026-10-26T01:35:00Z (executor tu nha lease cua chinh minh sau khi land; khong co
+    comment chu kho rieng); ops-publish-lease run 40253760586 va 40253762779 success (readback-run-*.json).
+    ai-dang-giu-sau-rut-han/luc-do.txt (do 01:36:15Z): ls-remote = for-each-ref 613 (so TAP cap ten+OID), thieu 0 thua 0;
+    ca 5 duong dan write set "NGƯỜI_GIỮ 0" rc=0, hai lease HẾT_HẠN.
 
 trang_thai_packet:
   merged: true
@@ -90,7 +96,7 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate hau merge: CHUA DAT day du — luot tren dung 36057e8 bi huy (0 job); luot xanh 23/23 tren
     39f21b3 (con, chua 5 tep khong doi) chi la moc Run; Checkout, Workflow definition, Gate output cua §10.2.2 not_measured.
-    (2) lease da nha: xem lease.thu_hoi_cuoi. (3) bookkeeping: ho so nay DAT. (4) review: DAT cho ca hai — bien nhan
+    (2) lease da nha DAT: rut han fdbab14/dedd7f3, 5/5 duong dan NGƯỜI_GIỮ 0. (3) bookkeeping: ho so nay DAT. (4) review: DAT cho ca hai — bien nhan
     cross_approved, #763 neo DUNG authorized_head_sha b0fadc9; #752 neo 9d34a8e va blob bon tep tai merge == tai 9d34a8e.
     (5) noi dung merge = diff PR DAT (bang byte). (6) merge boi tai khoan chu kho DAT.
     Mo lai: du bon moc §10.2.2 tren 36057e8 hoac con chua 5 tep khong doi.

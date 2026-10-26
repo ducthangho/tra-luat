@@ -90,10 +90,7 @@ verdict_usage_caveats:
     mo_ta: >-
       Verdict dong 7 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai ea42cb4174e54db8a581f4a66f43bd2f). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay.
   - id: BON-FINDING-DA-VA-nhung-VA-CAN-REVIEW-LAI
-    noi_dung: >-
-      Ca bon finding da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Chinh dot nay
-      da do duoc rang mot ban va chong "tin dung giet gia" tu dinh benh no chua (R5-01), nen
-      dung doc "da va" thanh "da dong". Chua dong.
+    noi_dung: "Anh chup lich su tai commit ghi bien nhan c595292cb63fb8c09d7d7b482cda20f9d5f0917f: Ca bon finding da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Chinh dot nay da do duoc rang mot ban va chong \"tin dung giet gia\" tu dinh benh no chua (R5-01), nen dung doc \"da va\" thanh \"da dong\". Chua dong. Sau moc ay, pr455-bien-nhan-v2-review-2-codex-verdict.md da review ban va tai c595292cb63fb8c09d7d7b482cda20f9d5f0917f. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land."
   - id: cross_approved-dua-tren-PROVIDER-khong-phai-MODEL
     noi_dung: >-
       Nhu luot 5 cua PR #452: muc cross_approved phan biet PROVIDER (claude thi cong · codex

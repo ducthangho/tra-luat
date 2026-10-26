@@ -88,9 +88,7 @@ verdict_usage_caveats:
       Lop loi chet theo CAU TRUC chu khong theo mot ban va, nen KHONG co ca canh rieng cho no.
       Doc "da dong" o day nghia la "duong ay khong con ton tai", khong phai "da them mot chot".
   - id: HAI-P2-VONG-6-DA-VA-nhung-VA-CAN-REVIEW-LAI
-    noi_dung: >-
-      Ca hai P2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu BAY lien
-      tiep. Dung doc "da va" thanh "da dong".
+    noi_dung: "Anh chup lich su tai commit ghi bien nhan e4d8ecce7e583503b5205a038707ea667a81ed43: Ca hai P2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu BAY lien tiep. Dung doc \"da va\" thanh \"da dong\". Sau moc ay, pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md da review ban va tai ca960160b477cd16346a293aaa8752772a9921d4. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land."
   - id: 48-48-la-so-mutant-DUOC-CHON-khong-phai-khong-gian-loi
     noi_dung: >-
       Nguyen van reviewer: "42/42 la so mutant DUOC CHON, khong phai toan bo khong gian loi".

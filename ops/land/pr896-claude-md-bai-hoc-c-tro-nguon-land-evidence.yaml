@@ -317,3 +317,16 @@ cap_nhat_20261026_luot4:
     hint: 'ops/reviews/pr896-review-4-codex/HINT.patch — tai moc ghi so CHUA ap (34 tep).'
   reviewer_assurance_81: CHUA DAT
   landed: false
+
+cap_nhat_review_4_moc_lich_su:
+  measured_at_sha: 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0
+  ghi_chu: 'Cau CHUA review lai trong cap_nhat_20261026.cross_review_moi.do_duoc la
+    anh chup luc ghi so truoc luot 2, khong phai trang thai tai 2e4183b. pr896-review-2
+    da review ban va P2 3bc4244 va caveat a9bc934 tai 8d56009; P2 t162 va hai the
+    hien P1 luot 2 #870/#889 DA DONG. Luot 3 tai 82359c4 kiem them caveat pr889 luot
+    1. Ket qua cac verdict van changes_requested; khong suy approve/land hay thay
+    don vi land de xuat.'
+  ghi_chu_luot4: >-
+    Khoi cap_nhat_20261026_luot4 o tren (ghi tai ff4ab57) noi HINT.patch luot 4 "CHUA ap"; cau ay dung tai ff4ab57 va 77a0a45.
+    HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896-review-2-codex (xem git log), theo lua chon
+    cua chu kho "Ap nguyen HINT luot 4".

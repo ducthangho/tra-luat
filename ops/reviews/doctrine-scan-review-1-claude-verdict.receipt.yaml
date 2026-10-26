@@ -134,9 +134,7 @@ github_submitter_identity:
 anchor:
   loai: canonical_ancestry
   cuong_do: thap
-  mo_ta: >-
-    Blob verdict ghim tren nhanh claude/review-543-luot1-20260916, commit bc5d0c6 — to tien cua
-    HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land.
+  mo_ta: "Anh chup lich su tai commit ghi bien nhan 86169c00beff045b0faed63e39d1a67b9acd1fc1: Blob verdict ghim tren nhanh claude/review-543-luot1-20260916, commit bc5d0c6 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
   gioi_han: >-
     cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi
     #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.

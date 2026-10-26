@@ -121,10 +121,10 @@ anchor:
 
 
 verdict_usage_caveats:
-  - id: HINT-LUOT4-CHUA-AP
+  - id: HINT-LUOT4-DA-AP-CAN-VERDICT-MOI
     muc: P1
     mo_ta: >-
-      Tai moc ghi so (commit sau a5f1c5e) changes_requested 3 P1 + 1 P2; HINT.patch luot 4 (34 tep, phan lon receipt NGOAI chuoi #896) CHUA ap, cho chu kho quyet pham vi.
+      Verdict lich su tren 2e4183b la changes_requested 3 P1 + 1 P2. Tai moc ghi so ff4ab57 (va 77a0a45) HINT.patch luot 4 (34 tep, phan lon receipt NGOAI chuoi #896) CHUA ap; chu kho chon ap nguyen, va no duoc ap o commit ke tiep sau 77a0a45. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su.
   - id: CREDENTIAL-QUA-CODEX-HOME-TAM
     muc: P3
     mo_ta: >-

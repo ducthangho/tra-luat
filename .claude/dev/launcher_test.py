@@ -11348,8 +11348,7 @@ def r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ():
     p = subprocess.Popen([PY, "-c", ma])
     m.Path = PathGhi
     try:
-        lay = m._LayMauSandbox(p.pid, "/w")
-        lay.pid = os.getpid()
+        lay = m._LayMauSandbox(os.getpid(), "/w")     # gốc = tiến trình test: `p` là hậu duệ của nó
         lay.bat_dau()
         p.wait(timeout=20)
         lay.ket_thuc(5)
@@ -11379,9 +11378,22 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
         return "can /proc cua Linux"
     m = _tai_launcher_thu()
     goc = m.Path
-    con = subprocess.Popen([PY, "-c", "import time;time.sleep(5)"])
+    con = subprocess.Popen([PY, "-c", "import subprocess,sys,time;"
+                            "subprocess.Popen([sys.executable,'-c','import time;time.sleep(6)']);time.sleep(6)"])
     try:
-        for ten, mong in [("quyen", "PermissionError"), ("danh_tinh_con", "DanhTinhDoi"), ("goc_tai_dung", "RuntimeError")]:
+        han = time.monotonic() + 10
+        chau = None
+        while chau is None and time.monotonic() < han:
+            for d in os.listdir("/proc"):
+                if d.isdigit():
+                    with contextlib.suppress(OSError, IndexError):
+                        b = Path(f"/proc/{d}/stat").read_bytes()
+                        if int(b[b.rindex(b")") + 2:].split()[1]) == con.pid:
+                            chau = int(d)
+            time.sleep(0.05)
+        bang(chau is not None, "fixture: khong thay tien trinh chau")
+        for ten, mong in [("quyen", "PermissionError"), ("danh_tinh_con", "DanhTinhDoi"),
+                          ("goc_tai_dung", "RuntimeError"), ("to_tien_doi", "DanhTinhDoi")]:
             vet = {"cmd": False, "goc": 0}
 
             class PathGia(type(Path())):
@@ -11395,18 +11407,20 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
                     elif ten == "danh_tinh_con" and x == f"/proc/{con.pid}/stat" and vet["cmd"]:
                         return _r27_doi_bd(b)
                     elif ten == "goc_tai_dung" and x == f"/proc/{os.getpid()}/stat":
-                        vet["goc"] += 1
+                        vet["goc"] += 1          # lần 1 = ghim lúc khởi tạo; đổi ngay từ lần đọc trong lượt quét đầu
                         if vet["goc"] > 1:
                             return _r27_doi_bd(b)
+                    elif ten == "to_tien_doi" and x == f"/proc/{chau}/cmdline":
+                        vet["cmd"] = True
+                    elif ten == "to_tien_doi" and x == f"/proc/{con.pid}/stat" and vet["cmd"]:
+                        return _r27_doi_bd(b)    # cha trung gian đổi danh tính SAU khi đã đọc argv của cháu
                     return b
             m.Path = PathGia
             try:
                 lay = m._LayMauSandbox(os.getpid(), "/w")
                 lay.thay['{"chuong_trinh": "bwrap"}'] = 1
                 lay.dung.set()
-                lay._chay()
-                if ten == "goc_tai_dung":
-                    lay._chay()
+                lay._chay()              # MỘT lượt quét: lỗi phải lộ ngay trong chính lượt ấy
             finally:
                 m.Path = goc
             d = {}
@@ -11415,6 +11429,43 @@ def r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot():
     finally:
         con.kill()
         con.wait()
+
+
+@ca
+def r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that():
+    # R27-PARSE-02b: đi từ BYTE cmdline thô qua đúng bộ giải mã `_quet` dùng, tới trạng thái trong sổ.
+    m = _tai_launcher_thu()
+    tho = b"bwrap\0--setenv\0X\0\0--unshare-net\0--\0cmd\0"
+    bang(m._tach_cmdline(tho) == ["bwrap", "--setenv", "X", "", "--unshare-net", "--", "cmd"],
+         f"doi so rong bi bo: {m._tach_cmdline(tho)}")
+    bang(m._tom_tat_cmdline(tho, "/w") == {"chuong_trinh": "bwrap", "gan": [], "co": ["--unshare-net"]},
+         f"tom tat sau giai ma: {m._tom_tat_cmdline(tho, '/w')}")
+    for ten, x in [("khong_nul_cuoi", b"bwrap --unshare-net -- x"), ("cat_giua", b"/usr/bin/codex-linux-sandbox\0--x")]:
+        t = m._tom_tat_cmdline(x, "/w")
+        bang(t is not None and t.get("khong_ro") is True and set(t) == {"chuong_trinh", "khong_ro"}, f"{ten}: {t}")
+    bang(m._tom_tat_cmdline(b"", "/w") is None and m._tom_tat_cmdline(b"sleep 5", "/w") is None, "khong phai sandbox")
+    if platform.system() != "Linux":
+        return "phan _quet can /proc cua Linux"
+    goc = m.Path
+    con = subprocess.Popen([PY, "-c", "import time;time.sleep(5)"])
+
+    class PathGia(type(Path())):
+        def read_bytes(self):
+            return tho if str(self) == f"/proc/{con.pid}/cmdline" else super().read_bytes()
+    m.Path = PathGia
+    try:
+        lay = m._LayMauSandbox(os.getpid(), "/w")
+        lay.dung.set()
+        lay._chay()
+    finally:
+        m.Path = goc
+        con.kill()
+        con.wait()
+    d = {}
+    lay.ghi_so(d, Path(os.devnull))
+    bang(d["sandbox_trang_thai"] == "DO_DUOC"
+         and {"chuong_trinh": "bwrap", "gan": [], "co": ["--unshare-net"], "so_lan": 1} in d["sandbox_quan_sat"],
+         f"so tu cmdline tho: {d}")
 
 
 _R27_TU_VUNG = {"bwrap", "codex-linux-sandbox", "/", "/tmp", "/dev", "/proc", "workspace", "trong_workspace",
@@ -11460,6 +11511,11 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
 
 DOT_BIEN = [
     # wp748 r27: mỗi chốt đo effort/sandbox một đột biến gỡ đúng chốt của nó.
+    ("r27_cmdline_bo_doi_so_rong", ('return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0")]',
+                                    'return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\\0") if x]'), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
+    ("r27_cmdline_khong_nul_van_tin", ('    if not tho.endswith(b"\\0"):\n        return None\n', ''), ["r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that"]),
+    ("r27_khong_xac_thuc_to_tien", ('                    if st[1] != pbd:\n', '                    if False:\n'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
+    ("r27_goc_ghim_muon", ('                self.goc_bd = goc[1] if goc else None', '                pass'), ["r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot"]),
     ("r27_trong_ws_chep_ten", ('        return "trong_workspace"\n', '        return "workspace/" + p[len(ws) + 1:]\n'), ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),
     ("r27_gia_tri_khong_loc", ('return x if x in _HO_SO_GIA_TRI[loai] else "khac"', 'return x if isinstance(x, str) else "khac"'),
      ["r927_tom_tat_sandbox_chi_giu_danh_sach_cho_phep"]),

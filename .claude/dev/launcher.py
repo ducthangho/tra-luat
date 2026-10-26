@@ -1969,6 +1969,26 @@ def _tom_tat_sandbox(argv: list, ws: str):
     return {"chuong_trinh": ten, "co": sorted(set(co)), "permission_profile": ho_so}
 
 
+def _tach_cmdline(tho: bytes):
+    """argv từ `/proc/<pid>/cmdline`: mỗi đối số KẾT THÚC bằng NUL, nên đối số RỖNG ở giữa vẫn là một đối số
+    (R27-PARSE-02b — lọc bỏ chuỗi rỗng làm lệch vị trí trước bảng số đối số). Không kết thúc bằng NUL (argv bị
+    tiến trình ghi đè hay bị cắt) ⇒ None: ranh giới đối số không tin được."""
+    if not tho:
+        return []
+    if not tho.endswith(b"\0"):
+        return None
+    return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\0")]
+
+
+def _tom_tat_cmdline(tho: bytes, ws: str):
+    argv = _tach_cmdline(tho)
+    if argv is not None:
+        return _tom_tat_sandbox(argv, ws)
+    # argv bị ghi đè kiểu setproctitle thường nối bằng dấu cách: chỉ dùng TÊN để nhận ra tiến trình sandbox
+    t = _tom_tat_sandbox([tho.split(b"\0")[0].split(b" ")[0].decode("utf-8", "replace")], ws)
+    return None if t is None else {"chuong_trinh": t["chuong_trinh"], "khong_ro": True}
+
+
 def _dem_lenh_stdout(duong) -> tuple:
     """(số command_execution khác nhau, stdout có sự kiện --json nào không). Đọc hỏng ⇒ (0, False)."""
     ids, co_json = set(), False
@@ -2002,7 +2022,13 @@ class _LayMauSandbox:
         self.dung = threading.Event()
         self.luong = (threading.Thread(target=self._chay, daemon=True)
                       if platform.system() == "Linux" else None)
-        self.goc_bd = None           # starttime của gốc, ghim ở lần quét đầu (R27-PID-04)
+        self.goc_bd = None           # starttime của gốc (R27-PID-04)
+        if self.luong is not None:
+            try:
+                goc = self._stat(pid)
+                self.goc_bd = goc[1] if goc else None   # ghim NGAY sau khi sinh con, không đợi lượt quét (R27-PID-04b)
+            except Exception as e:
+                self.loi.append(type(e).__name__)
 
     def bat_dau(self) -> None:
         if self.luong is None:
@@ -2024,7 +2050,13 @@ class _LayMauSandbox:
         return int(f[1]), f[19]
 
     def _quet(self) -> None:
-        goc = self._stat(self.pid)
+        info: dict = {}
+        for d in os.listdir("/proc"):
+            if d.isdigit():
+                st = self._stat(d)
+                if st is not None:
+                    info[int(d)] = st
+        goc = info.get(self.pid)
         if goc is None:
             return                       # gốc đã thoát
         if self.goc_bd is None:
@@ -2032,33 +2064,40 @@ class _LayMauSandbox:
         elif goc[1] != self.goc_bd:
             raise RuntimeError("pid goc da bi tai dung")
         con: dict = {}
-        for d in os.listdir("/proc"):
-            if d.isdigit():
-                st = self._stat(d)
-                if st is not None:
-                    con.setdefault(st[0], []).append((int(d), st[1]))
-        hang = [self.pid]
+        for c, (pp, bd) in info.items():
+            con.setdefault(pp, []).append((c, bd))
+        # R27-PID-04b: mỗi mục hàng đợi là CHUỖI TỔ TIÊN đã xác thực (gốc trước); con chỉ vào hàng SAU khi chính nó và
+        # cả chuỗi được xác thực lại sau lúc đọc cmdline. Tổ tiên đã thoát ⇒ kết thúc lượt êm (không quy argv cho ai);
+        # tổ tiên đổi danh tính ⇒ phạm vi lượt quét đã đổi, bỏ cả lượt và ghi không đo được.
+        hang = [((self.pid, self.goc_bd),)]
         while hang:
-            cha = hang.pop()
+            chuoi = hang.pop()
+            cha = chuoi[-1][0]
             for c, bd in con.get(cha, ()):
-                hang.append(c)
                 try:
                     tho = Path(f"/proc/{c}/cmdline").read_bytes()
                 except (FileNotFoundError, ProcessLookupError):
                     continue             # thoát giữa chừng: bình thường
-                # R27-PID-04: đọc lại stat SAU cmdline — pid bị tái dùng giữa hai lần đọc thì cmdline không thuộc
-                # tiến trình đã thấy trong đồ thị; bỏ và ghi không đo được. Đã thoát thì chỉ bỏ.
                 sau = self._stat(c)
                 if sau is None:
                     continue
                 if sau != (cha, bd):
-                    self.loi.append("DanhTinhDoi")
+                    if self._stat(cha) is not None:     # cha còn (hay pid cha đã có chủ mới) mà con lệch: danh tính đổi
+                        self.loi.append("DanhTinhDoi")
                     continue
+                for p, pbd in chuoi:
+                    st = self._stat(p)
+                    if st is None:
+                        return
+                    if st[1] != pbd:
+                        self.loi.append("DanhTinhDoi")
+                        return
+                hang.append(chuoi + ((c, bd),))
                 # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
                 if (c, bd, tho) in self.da:
                     continue
                 self.da.add((c, bd, tho))
-                t = _tom_tat_sandbox([x.decode("utf-8", "replace") for x in tho.split(b"\0") if x], self.ws)
+                t = _tom_tat_cmdline(tho, self.ws)
                 if t is not None:
                     k = json.dumps(t, sort_keys=True)
                     self.thay[k] = self.thay.get(k, 0) + 1

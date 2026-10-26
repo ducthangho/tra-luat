@@ -1,0 +1,14 @@
+{
+  "databaseId": 39921552473,
+  "runNumber": 3082,
+  "createdAt": "2026-10-23T08:00:02Z",
+  "file": {
+    "path": ".github/workflows/ci.yml",
+    "repositoryFileUrl": "https://github.com/ducthangho/tra-luat/blob/6ac385fdd7325f532ac4b4b6eb861292bfa7e970/.github/workflows/ci.yml"
+  },
+  "checkSuite": {
+    "commit": {
+      "oid": "6ac385fdd7325f532ac4b4b6eb861292bfa7e970"
+    }
+  }
+}

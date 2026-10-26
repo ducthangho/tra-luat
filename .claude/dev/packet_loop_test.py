@@ -8762,8 +8762,8 @@ MUTANTS.update({
     "r834_bo_dau_hang_tron": ('    khai = [re.fullmatch(r"(`?)([0-9a-f]{7,40})\\1", t.strip())', '    khai = [re.match(r"`?()([0-9a-f]{7,40})", t.strip())', ["r834_reviewed_commit_span_thua"]),
     "r834_bo_tien_to_mo_ho": (" or any(head.startswith(t[2]) and any(b != head and b.startswith(t[2]) for b in biet) for t in khai):", ":", ["r834_tien_to_mo_ho"]),
     "r834_bo_goi_xet_dung": ('    _xet_dung(state_dir, st, "accept")\n', "", ["r834_xet_dung_duoc_goi"]),
-    "r834_xet_dung_truoc_dau_vao": (('    sha_ci = _kiem_ci(a, nc, h, state_dir)\n', '    _xet_dung(state_dir, st, "accept")\n'),
-                                    ('    _xet_dung(state_dir, st, "accept")\n    sha_ci = _kiem_ci(a, nc, h, state_dir)\n', ""), ["r834_xet_dung_sau_dau_vao"]),
+    "r834_xet_dung_truoc_dau_vao": (('    _xet_dung(state_dir, st, "accept")\n', '    sha_ci = _kiem_ci(a, nc, h, state_dir)\n'),  # gỡ lời gọi gốc TRƯỚC, rồi chèn
+                                    ("", '    _xet_dung(state_dir, st, "accept")\n    sha_ci = _kiem_ci(a, nc, h, state_dir)\n'), ["r834_xet_dung_sau_dau_vao"]),
     "r834_bo_kho_run": (' and isinstance(r.get("repository"), dict) and r["repository"].get("full_name") == nc["repo"]]', "]", ["r834_run_kho_khac"]),
     "r834_bo_head_run": ('r.get("path") == wf and r.get("head_sha") == h and ', 'r.get("path") == wf and ', ["r834_run_head_khac"]),
     "r834_bo_head_job": ('(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)',

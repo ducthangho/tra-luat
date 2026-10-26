@@ -1,0 +1,67 @@
+[
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "--show-toplevel"
+    ],
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}"
+    ],
+    "rc": 0,
+    "stdout": "9b329bfab0b38a821992a7105d479ca44bed389b\nf107d82b2fd68d432f1298621d729de7ec2dd62e\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "ba222ffd1615f0d74b59985b9612f725211b62f5",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,6 @@
+ĐỎ: test sống chưa đăng ký: ops/ci_provenance_test.py
+ĐĂNG KÝ: 25/24
+TRẠNG THÁI: chan=24 cach_ly=0
+LAUNCHER WINDOWS: 4/4 hợp đồng
+RUFF CI: 3/3 hợp đồng
+TỔNG: ĐỎ

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/audit9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 126.23557734489441,
+  "stdout_sha256": "91d8450e472ad03ca98644ac0984538251de5dae19ccc6f105517f8fee4de38a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

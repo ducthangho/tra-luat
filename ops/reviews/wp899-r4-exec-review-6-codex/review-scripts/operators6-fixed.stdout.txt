@@ -1,0 +1,131 @@
+L154c17:'in'->'not in' GIET+NEM
+L154c22:'and'->'or' GIET+NEM
+L154c42:'is not'->'is' GIET
+L154c54:'or'->'and' GIET
+L154c57:'any'->'all' GIET
+L162c26:'is'->'is not' GIET
+L162c34:'and'->'or' GIET
+L162c59:'is'->'is not' GIET
+L166c58:'is'->'is not' GIET
+L166c65:'and'->'or' GIET
+L166c77:'is'->'is not' GIET
+L166c85:'and'->'or' GIET
+L166c89:'any'->'all' GIET
+L167c16:'is'->'is not' GIET
+L167c23:'and'->'or' GIET
+L167c29:'and'->'or' GIET
+L167c39:'not in'->'in' GIET
+L167c48:'and'->'or' GIET
+L168c16:'0'->'1' GIET
+L168c32:'=='->'!=' GIET
+L168c35:'1'->'2' GIET
+L168c35:'1'->'0' GIET
+L171c14:'in'->'not in' GIET
+L172c46:'and'->'or' GIET
+L172c56:'not in'->'in' GIET
+L174c34:'0'->'1' GIET
+L178c45:'19'->'20' GIET
+L178c45:'19'->'18' GIET
+L178c82:'is'->'is not' GIET
+L178c89:'and'->'or' GIET
+L187c10:'is'->'is not' GIET
+L191c9:'is'->'is not' GIET
+L191c17:'or'->'and' GIET
+L191c27:'in'->'not in' GIET
+L191c44:'or'->'and' GIET
+L191c56:'is not'->'is' GIET
+L191c68:'or'->'and' GIET
+L191c71:'not'->'' GIET
+L191c75:'all'->'any' GIET
+L191c87:'is'->'is not' GIET
+L193c7:'not'->'' GIET
+L193c21:'is'->'is not' GIET
+L193c29:'and'->'or' GIET
+L193c33:'all'->'any' GIET
+L193c45:'is'->'is not' GIET
+L193c53:'and'->'or' GIET
+L193c78:'1'->'2' GIET
+L193c78:'1'->'0' GIET
+L194c12:'and'->'or' GIET
+L194c47:'=='->'!=' GIET
+L196c77:'not in'->'in' GIET
+L197c11:'and'->'or' GIET
+L197c15:'not'->'' GIET
+L198c64:'!='->'==' GIET
+L199c17:'!='->'==' GIET
+L201c16:'!='->'==' GIET
+L203c7:'any'->'all' GIET
+L203c11:'not'->'' GIET
+L203c37:'or'->'and' GIET
+L203c54:'!='->'==' GIET
+L205c7:'not'->'' GIET
+L205c11:'all'->'any' GIET
+L205c53:'and'->'or' GIET
+L206c15:'and'->'or' GIET
+L206c41:'and'->'or' GIET
+L206c47:'<='->'<' GIET
+L206c52:'<='->'<' GIET
+L214c27:'in'->'not in' GIET
+L214c33:'or'->'and' GIET
+L214c50:'or'->'and' GIET
+L214c64:'in'->'not in' GIET
+L214c69:'or'->'and' GIET
+L214c85:'or'->'and' GIET
+L215c16:'or'->'and' GIET
+L215c42:'not in'->'in' GIET
+L216c16:'or'->'and' GIET
+L216c19:'any'->'all' GIET
+L262c91:'True'->'False' GIET
+L262c103:'True'->'False' GIET
+L262c120:'True'->'False' GIET
+L263c35:'19'->'20' GIET
+L263c35:'19'->'18' GIET
+L264c18:'and'->'or' GIET
+L264c34:'1'->'2' GIET
+L264c34:'1'->'0' GIET
+L265c31:'in'->'not in' GIET
+L266c17:'=='->'!=' GIET
+L267c26:'False'->'True' GIET
+L268c21:'and'->'or' GIET
+L271c48:'and'->'or' GIET
+L271c52:'not'->'' GIET
+L271c60:'and'->'or' GIET
+L271c64:'not'->'' GIET
+L271c94:'and'->'or' GIET
+L272c20:'not'->'' GIET
+L272c37:'or'->'and' GIET
+L272c66:'False'->'True' GIET
+L274c18:'1'->'2' GIET
+L274c18:'1'->'0' GIET
+L275c27:'not'->'' GIET
+L275c39:'and'->'or' GIET
+L275c51:'and'->'or' GIET
+L275c55:'not'->'' GIET
+L275c72:'and'->'or' GIET
+L275c89:'1'->'2' GIET
+L275c89:'1'->'0' GIET
+L275c92:'=='->'!=' GIET
+L291c17:'0'->'1' GIET
+L292c36:'or'->'and' GIET
+L294c37:'not in'->'in' GIET
+L295c11:'not'->'' GIET
+L295c26:'is'->'is not' GIET
+L295c33:'and'->'or' GIET
+L295c49:'and'->'or' GIET
+L295c70:'=='->'!=' GIET
+L297c14:'1'->'2' GIET
+L297c14:'1'->'0' GIET
+L299c35:'or'->'and' GIET
+L299c38:'any'->'all' GIET
+L299c44:'and'->'or' GIET
+L299c50:'1'->'2' GIET
+L299c50:'1'->'0' GIET
+L300c38:'2'->'3' GIET
+L300c38:'2'->'1' GIET
+L300c62:'and'->'or' GIET
+L300c66:'all'->'any' GIET
+L302c21:'not in'->'in' GIET
+L302c32:'or'->'and' GIET
+L303c102:'not in'->'in' GIET
+L307c98:'0'->'1' GIET
+Counter({'GIET': 128, 'GIET+NEM': 2})

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/product8.py"
+  ],
+  "rc": 0,
+  "elapsed": 0.2842435836791992,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/product.stdout.txt",
+    "size": 7982,
+    "sha256": "0d974a6932efdd1256f68ca1feec79c9debf9679de3852a23da07af34a5b691d"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/product.stderr.txt",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

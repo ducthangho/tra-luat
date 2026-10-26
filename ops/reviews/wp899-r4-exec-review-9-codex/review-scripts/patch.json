@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/patch9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 7.690384864807129,
+  "stdout_sha256": "adf1515a045c6675b034b800d2cae25fa0255fc643805e5c541cf9309f52b97a",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

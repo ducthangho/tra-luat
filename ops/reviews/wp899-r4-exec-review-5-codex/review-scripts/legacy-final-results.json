@@ -1,0 +1,79 @@
+[
+  {
+    "label": "prior1-run_old.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prior1/run_old.py"
+    ],
+    "rc": 0,
+    "stdout": "r4_F02_env_metadata 1 0 DAT:r4_F02_env_metadata\n\nr4_F02_mixed_color 1 0 DAT:r4_F02_mixed_color\n\nF02_collision_other_job 1 0 DAT:F02_collision_other_job\n\nF02_missing_endgroup 1 0 DAT:F02_missing_endgroup\n\ngit_workflow_source 1 0 DAT:git_workflow_source\n\ncontrol_simple 1 0 DAT:control_simple\n\nr4_compare_current.py 1 0  not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n\nr4_F02_env_metadata 2 0 DAT:r4_F02_env_metadata\n\nr4_F02_mixed_color 2 0 DAT:r4_F02_mixed_color\n\nF02_collision_other_job 2 0 DAT:F02_collision_other_job\n\nF02_missing_endgroup 2 0 DAT:F02_missing_endgroup\n\ngit_workflow_source 2 0 DAT:git_workflow_source\n\ncontrol_simple 2 0 DAT:control_simple\n\nr4_compare.py 2 0  not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n\ncomposite_current.py 2 0 DAT:F02_composite_origin_collision\n\nboundary_current.py 2 0 DAT:F02_nested_incomplete_echo\n\n",
+    "stderr": ""
+  },
+  {
+    "label": "prior1-registry_check.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prior1/registry_check.py"
+    ],
+    "rc": 0,
+    "stdout": "\": true,\n  \"rejects_bad\": {\n    \"unequal\": true,\n    \"zero\": true,\n    \"red\": true\n  },\n  \"a9_inner_error\": {\n    \"command\": [\n      \"git\",\n      \"-C\",\n      \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/tmp/tmp_t952q3v\",\n      \"-c\",\n      \"user.name=t\",\n      \"-c\",\n      \"user.email=t@t\",\n      \"commit\",\n      \"-qm\",\n      \"0\"\n    ],\n    \"rc\": 128,\n    \"stdout\": \"\",\n    \"stderr\": \"error: Debug: Namespace set to \\\"git\\\" (ignored)\\nDebug: Key file set to \\\"/home/claude/.ssh/commit_signing_key.pub\\\" (ignored, using server key)\\nMCP server request failed (attempt 1/3), retrying in 121.466838ms: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\nMCP server request failed (attempt 2/3), retrying in 253.55284ms: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\nUsage:\\n  environment-runner code-sign [flags]\\n\\nFlags:\\n  -h, --help   help for code-sign\\n\\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\n\\nfatal: failed to write commit object\\n\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "prior2-run_old.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prior2/run_old.py"
+    ],
+    "rc": 0,
+    "stdout": "r4_F02_env_metadata 1 0 DAT:r4_F02_env_metadata\n\nr4_F02_mixed_color 1 0 DAT:r4_F02_mixed_color\n\nF02_collision_other_job 1 0 DAT:F02_collision_other_job\n\nF02_missing_endgroup 1 0 DAT:F02_missing_endgroup\n\ngit_workflow_source 1 0 DAT:git_workflow_source\n\ncontrol_simple 1 0 DAT:control_simple\n\nr4_compare_current.py 1 0  not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n\nr4_F02_env_metadata 2 0 DAT:r4_F02_env_metadata\n\nr4_F02_mixed_color 2 0 DAT:r4_F02_mixed_color\n\nF02_collision_other_job 2 0 DAT:F02_collision_other_job\n\nF02_missing_endgroup 2 0 DAT:F02_missing_endgroup\n\ngit_workflow_source 2 0 DAT:git_workflow_source\n\ncontrol_simple 2 0 DAT:control_simple\n\nr4_compare_current.py 2 0  not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n\ncomposite_current.py 2 0 DAT:F02_composite_origin_collision\n\nboundary_current.py 2 0 DAT:F02_nested_incomplete_echo\n\n",
+    "stderr": ""
+  },
+  {
+    "label": "prior2-registry_check.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prior2/registry_check.py"
+    ],
+    "rc": 0,
+    "stdout": ": true,\n  \"rejects_bad\": {\n    \"unequal\": true,\n    \"zero\": true,\n    \"red\": true\n  },\n  \"a9_inner_error\": {\n    \"command\": [\n      \"git\",\n      \"-C\",\n      \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/tmp/tmp4p7roxew\",\n      \"-c\",\n      \"user.name=t\",\n      \"-c\",\n      \"user.email=t@t\",\n      \"commit\",\n      \"-qm\",\n      \"0\"\n    ],\n    \"rc\": 128,\n    \"stdout\": \"\",\n    \"stderr\": \"error: Debug: Namespace set to \\\"git\\\" (ignored)\\nDebug: Key file set to \\\"/home/claude/.ssh/commit_signing_key.pub\\\" (ignored, using server key)\\nMCP server request failed (attempt 1/3), retrying in 100.563179ms: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\nMCP server request failed (attempt 2/3), retrying in 239.898627ms: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\nUsage:\\n  environment-runner code-sign [flags]\\n\\nFlags:\\n  -h, --help   help for code-sign\\n\\nError: failed to call MCP server: MCP server request failed after 2 retries: failed to send request: Post \\\"http://127.0.0.1:36373/mcp\\\": dial tcp 127.0.0.1:36373: socket: operation not permitted\\n\\nfatal: failed to write commit object\\n\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "label": "prove-frontier",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prove_frontier.py"
+    ],
+    "rc": 0,
+    "stdout": "ly env_wf_list HEAD 0\nmode_env_string_only env_wf_list mutant 3\nrest_number_bool number_bool_metadata HEAD 0\nrest_number_bool number_bool_metadata mutant 3\nrest_number_float number_float HEAD 0\nrest_number_float number_float mutant 3\njob_alias_exact_drop job_alias_exact HEAD 0\njob_alias_exact_drop job_alias_exact mutant 3\njob_matrix_nonempty matrix_empty HEAD 0\njob_matrix_nonempty matrix_empty mutant 3\njob_dotall_add job_suffix_newline HEAD 0\njob_dotall_add job_suffix_newline mutant 3\nmode_shell_no_pwsh shell_pwsh HEAD 0\nmode_shell_no_pwsh shell_pwsh mutant 3\nmode_shell_no_sh shell_sh HEAD 0\nmode_shell_no_sh shell_sh mutant 3\nmode_shell_null_default shell_null HEAD 0\nmode_shell_null_default shell_null mutant 3\nmode_env_shape_drop env_job_string HEAD 0\nmode_env_shape_drop env_job_string mutant 3\nmode_env_shape_drop env_wf_string HEAD 0\nmode_env_shape_drop env_wf_string mutant 3\nmode_env_presence_not_value env_wf_empty HEAD 0\nmode_env_presence_not_value env_wf_empty mutant 3\nmode_key_id_drop key_id HEAD 0\nmode_key_id_drop key_id mutant 3\nmode_key_if_drop key_if HEAD 0\nmode_key_if_drop key_if mutant 3\nmode_key_timeout_drop key_timeout-minutes HEAD 0\nmode_key_timeout_drop key_timeout-minutes mutant 3\nmode_key_coe_drop key_continue-on-error HEAD 0\nmode_key_coe_drop key_continue-on-error mutant 3\nmode_prior_skip_first prior_first_step HEAD 0\nmode_prior_skip_first prior_first_step mutant 3\nmode_prior_only_last prior_nonadjacent HEAD 0\nmode_prior_only_last prior_nonadjacent mutant 3\n",
+    "stderr": ""
+  },
+  {
+    "label": "prove-last",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prove_last.py"
+    ],
+    "rc": 0,
+    "stdout": "run_type_coerce nonstr_no_throw HEAD 0\nrun_type_coerce nonstr_no_throw mutant 3\nnumber_type_bool_guard_drop number_bool_metadata HEAD 0\nnumber_type_bool_guard_drop number_bool_metadata mutant 3\n",
+    "stderr": ""
+  },
+  {
+    "label": "prove-new",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/prove_new.py"
+    ],
+    "rc": 0,
+    "stdout": "job_escape_alias HEAD 0\njob_escape_alias mutant 3\njob_alias_strip HEAD 0\njob_alias_strip mutant 3\njob_casefold HEAD 0\njob_casefold mutant 3\nname_explicit_strip HEAD 0\nname_explicit_strip mutant 3\nmetadata_setup_prefix HEAD 0\nmetadata_setup_prefix mutant 3\nmetadata_complete_prefix HEAD 0\nmetadata_complete_prefix mutant 3\nran_neutral_excluded HEAD 0\nran_neutral_excluded mutant 3\nran_cancelled_excluded HEAD 0\nran_cancelled_excluded mutant 3\nenv_prefix_empty_suffix HEAD 0\nenv_prefix_empty_suffix mutant 3\nenv_prefix_casefold HEAD 0\nenv_prefix_casefold mutant 3\nmode_step_key_truthy HEAD 0\nmode_step_key_truthy mutant 3\nmode_shell_strip HEAD 0\nmode_shell_strip mutant 3\nmode_shell_casefold HEAD 0\nmode_shell_casefold mutant 3\nmode_prior_requires_ran HEAD 0\nmode_prior_requires_ran mutant 3\nrun_compare_strip_newlines HEAD 0\nrun_compare_strip_newlines mutant 3\nheader_lstrip HEAD 0\nheader_lstrip mutant 3\nshell_lstrip HEAD 0\nshell_lstrip mutant 3\nnumber_contiguous HEAD 0\nnumber_contiguous mutant 3\n",
+    "stderr": ""
+  }
+]

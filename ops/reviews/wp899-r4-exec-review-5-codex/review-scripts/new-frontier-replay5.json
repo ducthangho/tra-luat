@@ -1,0 +1,9 @@
+{
+  "raw_path": ".review-input/r4-luot4/new_frontier.py",
+  "scratch_path": ".review/new_frontier.py",
+  "raw_sha256": "706958451bac54bd09c2678cea2371660a295b2d24edc704616f0fe577519b3a",
+  "scratch_sha256": "e219585c70078808d6bb3eb4322a5751791caaea8b3cea640131c3db95a54615",
+  "M_unchanged": true,
+  "M_count": 20,
+  "scaffolding_change": "baseline expected case count 47 -> 48 only; run from scratch to keep root correct"
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/preflight11.py",
+    "end"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 1.9955179691314697,
+  "stdout_sha256": "bcaa5ce6155f33ebd2306deffdc5b6c74fdedcce5854e5d2b427924f38fedd4e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

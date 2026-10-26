@@ -1,0 +1,54 @@
+{
+  "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review-input/r4-luot5",
+  "changes": [
+    "absolute paths -> current root",
+    "baseline cases 48->49; mutation total209->231",
+    "env helper anchors -> parent dict signature"
+  ],
+  "env_replacements": [
+    [
+      "_env_chan(wf.get(\"env\"))",
+      "_env_chan(wf)"
+    ],
+    [
+      "any(str(k).startswith(\"CI_DANG_KY_\") for k in v)",
+      "any(str(k).startswith(\"CI_DANG_KY_\") for k in d[\"env\"])"
+    ],
+    [
+      "list(v)[:1]",
+      "list(d[\"env\"])[:1]"
+    ],
+    [
+      "list(v)[-1:]",
+      "list(d[\"env\"])[-1:]"
+    ],
+    [
+      "return v is not None and (type(v) is not dict",
+      "return \"env\" in d and (type(d[\"env\"]) is not dict"
+    ],
+    [
+      "return v not in (None, False) and (type(v) is not dict",
+      "return \"env\" in d and d[\"env\"] not in (None, False) and (type(d[\"env\"]) is not dict"
+    ],
+    [
+      "return v is not None and type(v) is not int and (type(v) is not dict",
+      "return \"env\" in d and type(d[\"env\"]) is not int and (type(d[\"env\"]) is not dict"
+    ],
+    [
+      "return v not in (None, \"\") and (type(v) is not dict",
+      "return \"env\" in d and d[\"env\"] not in (None, \"\") and (type(d[\"env\"]) is not dict"
+    ],
+    [
+      "return bool(v) and (type(v) is not dict",
+      "return \"env\" in d and bool(d[\"env\"]) and (type(d[\"env\"]) is not dict"
+    ],
+    [
+      "type(v) is not dict or any(str(k)",
+      "type(d[\"env\"]) is not dict or any(str(k)"
+    ],
+    [
+      "type(v) is str or any(str(k)",
+      "type(d[\"env\"]) is str or any(str(k)"
+    ]
+  ]
+}

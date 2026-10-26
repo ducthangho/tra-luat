@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/extra6c.py"
+  ],
+  "returncode": 0,
+  "seconds": 59.86056137084961,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/extra6c-run.stdout.txt",
+    "bytes": 41,
+    "sha256": "7a1d4baa94f6cd76ede202940004e054aa01ab38b38e59d02440181f67c86949"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/extra6c-run.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

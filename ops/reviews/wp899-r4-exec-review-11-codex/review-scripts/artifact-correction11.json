@@ -1,0 +1,12 @@
+{
+  "failed_command": [
+    "python",
+    "-B",
+    ".review/finalize11.py"
+  ],
+  "rc_observed_from_exec_tool": 1,
+  "exception": "KeyError: files",
+  "cause": "run11 label snapshot-end overwrote the snapshot-end.json data with a command receipt",
+  "remediation": "rerun preflight end under the distinct wrapper label preflight-end; then rerun finalizer",
+  "product_or_test_failure": false
+}

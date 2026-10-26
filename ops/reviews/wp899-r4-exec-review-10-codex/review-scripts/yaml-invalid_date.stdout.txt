@@ -1,0 +1,5 @@
+RUN: passed (run_attempt 1, yeu cau 1)
+JOB 1 j: checkout=passed 9accd521630ae97038524d97fd1d430e089dc1cc gate=not_measured
+WORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)
+provenance.yaml sha256 be1b0f96f20206198cae4d05150a954dd4aa1c001d825886efec5702ad59bbf7
+NOT_MEASURED: 2

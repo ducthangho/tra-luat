@@ -1,0 +1,485 @@
+{
+  "sha256sums": [
+    {
+      "path": ".review-input/log-that/39342960764/118368688427.log",
+      "bytes": 3519,
+      "expected": "fa630531f3c12887912e8e1270daf4cedb235d494bcf673dd44efc74a9cdebba",
+      "actual": "fa630531f3c12887912e8e1270daf4cedb235d494bcf673dd44efc74a9cdebba",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368717941.log",
+      "bytes": 666316,
+      "expected": "60ad91c56317704a5dff4173a8c737758ea66503710af0030a5523e7d0748513",
+      "actual": "60ad91c56317704a5dff4173a8c737758ea66503710af0030a5523e7d0748513",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368717984.log",
+      "bytes": 212656,
+      "expected": "2c3e90b746e3a7dfd89e0ffc3f25604efaa012f27e5e5ac2fba6137b70bfcf14",
+      "actual": "2c3e90b746e3a7dfd89e0ffc3f25604efaa012f27e5e5ac2fba6137b70bfcf14",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368717985.log",
+      "bytes": 106138,
+      "expected": "bb5796dc58d3c46ab87b7197cb3aaaabc7090a7d98e20cfd493913c4047cb122",
+      "actual": "bb5796dc58d3c46ab87b7197cb3aaaabc7090a7d98e20cfd493913c4047cb122",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718000.log",
+      "bytes": 106011,
+      "expected": "797dc16e35d99f7b2a42e3587eb115beac23f921b7e2944e68065cb8baab95d2",
+      "actual": "797dc16e35d99f7b2a42e3587eb115beac23f921b7e2944e68065cb8baab95d2",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718039.log",
+      "bytes": 106092,
+      "expected": "fe36838806258767301a51f9fca484c40eb21c871e17521e3bd5e6ce839a1fdd",
+      "actual": "fe36838806258767301a51f9fca484c40eb21c871e17521e3bd5e6ce839a1fdd",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718087.log",
+      "bytes": 344316,
+      "expected": "af57801e74ce866c6acebbc540af54aa66cabb2c7d564092d7e30172f0cc1b18",
+      "actual": "af57801e74ce866c6acebbc540af54aa66cabb2c7d564092d7e30172f0cc1b18",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718096.log",
+      "bytes": 106038,
+      "expected": "0989d92e47482bec202cc485dfbaab5abf2de17950363f0864829097777ea2bd",
+      "actual": "0989d92e47482bec202cc485dfbaab5abf2de17950363f0864829097777ea2bd",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718099.log",
+      "bytes": 106221,
+      "expected": "83bb2babf3b8be5a140aa524d96fdca93b26641eea085c7eaeb14ddc88be7805",
+      "actual": "83bb2babf3b8be5a140aa524d96fdca93b26641eea085c7eaeb14ddc88be7805",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718105.log",
+      "bytes": 106029,
+      "expected": "a990d2218584fef24af5f33a2e27b83ee8e12314e771fb2923ede72a7e4087ef",
+      "actual": "a990d2218584fef24af5f33a2e27b83ee8e12314e771fb2923ede72a7e4087ef",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718106.log",
+      "bytes": 106076,
+      "expected": "62b6df15398f64ffa75b06250602b76adab8960d0a7acee4f5b7478b56970f14",
+      "actual": "62b6df15398f64ffa75b06250602b76adab8960d0a7acee4f5b7478b56970f14",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718118.log",
+      "bytes": 166472,
+      "expected": "bcb9a26f4878b1af461df4bdbd77a41779bbee3cde508b0c0cf2703362f2e916",
+      "actual": "bcb9a26f4878b1af461df4bdbd77a41779bbee3cde508b0c0cf2703362f2e916",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118368718171.log",
+      "bytes": 105927,
+      "expected": "97d61e0ba439199e3e27d55e17c3184947fde505de987a4215ee85f35a673d0a",
+      "actual": "97d61e0ba439199e3e27d55e17c3184947fde505de987a4215ee85f35a673d0a",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/39342960764/118379100524.log",
+      "bytes": 94817,
+      "expected": "8926fd2af000604ff920467c281d7b280746301c9a65177db65c35defe6e1647",
+      "actual": "8926fd2af000604ff920467c281d7b280746301c9a65177db65c35defe6e1647",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815015460.log",
+      "bytes": 3519,
+      "expected": "8ea2ebb3f493bba9781724ecb442d58e645bfeaf360afc6f41666f3bcf31259d",
+      "actual": "8ea2ebb3f493bba9781724ecb442d58e645bfeaf360afc6f41666f3bcf31259d",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038052.log",
+      "bytes": 353842,
+      "expected": "cae156b7a74ca389b28c3ad867cbd293ca9529cb0e7d4a439b5eee2fc2a43dac",
+      "actual": "cae156b7a74ca389b28c3ad867cbd293ca9529cb0e7d4a439b5eee2fc2a43dac",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038068.log",
+      "bytes": 102479,
+      "expected": "1384e27d27c3d7b21e9163ea3b1875761eba38bf4a76bcf339ab6697926af571",
+      "actual": "1384e27d27c3d7b21e9163ea3b1875761eba38bf4a76bcf339ab6697926af571",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038071.log",
+      "bytes": 113487,
+      "expected": "bfc7baec7fe485e2c0a51e8704713fc870ce219bdf0a6308b237aaa257310dbd",
+      "actual": "bfc7baec7fe485e2c0a51e8704713fc870ce219bdf0a6308b237aaa257310dbd",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038080.log",
+      "bytes": 674051,
+      "expected": "347c7dd8106242238e70527ab7080361c5889631b587e612d9e06096eb6b7c80",
+      "actual": "347c7dd8106242238e70527ab7080361c5889631b587e612d9e06096eb6b7c80",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038082.log",
+      "bytes": 113652,
+      "expected": "80f2f9eed002a55fe6389166359937e13b39c0b1aed6260b04e975aff70a6530",
+      "actual": "80f2f9eed002a55fe6389166359937e13b39c0b1aed6260b04e975aff70a6530",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038083.log",
+      "bytes": 113648,
+      "expected": "cedc6dd782bef21174466703f5dacaaa396e655568a8d93d703fb238334cb534",
+      "actual": "cedc6dd782bef21174466703f5dacaaa396e655568a8d93d703fb238334cb534",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038092.log",
+      "bytes": 101365,
+      "expected": "4d065f3e63c4d4f65a7c6f7284754cf839fd2325b243164856791d752907cd92",
+      "actual": "4d065f3e63c4d4f65a7c6f7284754cf839fd2325b243164856791d752907cd92",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038095.log",
+      "bytes": 101570,
+      "expected": "f6b5a8e780290db5a65b9862905503cf09a338e62be35e75a90166addbbace63",
+      "actual": "f6b5a8e780290db5a65b9862905503cf09a338e62be35e75a90166addbbace63",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038104.log",
+      "bytes": 101676,
+      "expected": "cf998500ecaf24619c07292644a1903f0938e26e647602535929cfa5884931ef",
+      "actual": "cf998500ecaf24619c07292644a1903f0938e26e647602535929cfa5884931ef",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038105.log",
+      "bytes": 102237,
+      "expected": "24948190ac71ff051123a462ffc1099fae4e7946ed542191b3cc96b3419c89b4",
+      "actual": "24948190ac71ff051123a462ffc1099fae4e7946ed542191b3cc96b3419c89b4",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038107.log",
+      "bytes": 113416,
+      "expected": "32ee7fb899ad98259bbb749a0a871cebffd591d918ca25bd2c6889c42bbf3b74",
+      "actual": "32ee7fb899ad98259bbb749a0a871cebffd591d918ca25bd2c6889c42bbf3b74",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038110.log",
+      "bytes": 101480,
+      "expected": "1db85cd9160eb908106d1dc133b5d93b29d872d58c57e57ce9e45a9bf5972591",
+      "actual": "1db85cd9160eb908106d1dc133b5d93b29d872d58c57e57ce9e45a9bf5972591",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038111.log",
+      "bytes": 270413,
+      "expected": "18e2570a63beaa678569ac027adc29cb6e1c7cb326bd7b429408ae3d366d6b37",
+      "actual": "18e2570a63beaa678569ac027adc29cb6e1c7cb326bd7b429408ae3d366d6b37",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038126.log",
+      "bytes": 113340,
+      "expected": "84b0b7aeb14b3816c7ee50e3d9c8aea48634c7a3c350081fc4b397c163df90d0",
+      "actual": "84b0b7aeb14b3816c7ee50e3d9c8aea48634c7a3c350081fc4b397c163df90d0",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038135.log",
+      "bytes": 113433,
+      "expected": "68f3a180504dc00964335d8b875821553fd382482ac26c15e8ac6860128b1e5b",
+      "actual": "68f3a180504dc00964335d8b875821553fd382482ac26c15e8ac6860128b1e5b",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038152.log",
+      "bytes": 113462,
+      "expected": "e99d8abab1839c3c97d5b2a643bd88f3b05ef933f01ce6e483a64331c8154eab",
+      "actual": "e99d8abab1839c3c97d5b2a643bd88f3b05ef933f01ce6e483a64331c8154eab",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038170.log",
+      "bytes": 101783,
+      "expected": "06bbad75e22517e17a6f19cbea636f1c2c30f45c1544c3712de2617db299a826",
+      "actual": "06bbad75e22517e17a6f19cbea636f1c2c30f45c1544c3712de2617db299a826",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038260.log",
+      "bytes": 113321,
+      "expected": "e63025f30910e512be3241fe0310cf1269676f17d79b6a5f64a2b69559095bb0",
+      "actual": "e63025f30910e512be3241fe0310cf1269676f17d79b6a5f64a2b69559095bb0",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815038286.log",
+      "bytes": 102095,
+      "expected": "ac92d8276dae073e65a294829ac38a106665cb42957fff083f52baf400e375ae",
+      "actual": "ac92d8276dae073e65a294829ac38a106665cb42957fff083f52baf400e375ae",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815371862.log",
+      "bytes": 97187,
+      "expected": "b206c39a48bc1eaa37e9ecac894bef9152c3ea3d0011b83bd158e834bd6c87c9",
+      "actual": "b206c39a48bc1eaa37e9ecac894bef9152c3ea3d0011b83bd158e834bd6c87c9",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120815421176.log",
+      "bytes": 236855,
+      "expected": "084a07aaf0711443d191301aa1c9b6597c2e2478d127b9cd7e1a7f3a9d359902",
+      "actual": "084a07aaf0711443d191301aa1c9b6597c2e2478d127b9cd7e1a7f3a9d359902",
+      "equal": true
+    },
+    {
+      "path": ".review-input/log-that/40074551995/120822740899.log",
+      "bytes": 98295,
+      "expected": "b55d7196882822b8a21d7b25f56e279abd19aa04a6f35167b113d0109396292a",
+      "actual": "b55d7196882822b8a21d7b25f56e279abd19aa04a6f35167b113d0109396292a",
+      "equal": true
+    }
+  ],
+  "runs": [
+    {
+      "run": 39342960764,
+      "workflow_sha256": "226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0",
+      "workflow_git_command": [
+        "git",
+        "cat-file",
+        "blob",
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be:.github/workflows/ci.yml"
+      ],
+      "rc": 0,
+      "null_env_scopes": [],
+      "labels": [
+        [
+          "ubuntu-latest"
+        ]
+      ],
+      "run_state": "passed",
+      "gate_states": {
+        "not_measured": 14
+      },
+      "checkout_states": {
+        "not_measured": 1,
+        "passed": 13
+      },
+      "ghep_states": {
+        "not_measured": 1,
+        "passed": 13
+      },
+      "all_markers": [
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".claude/dev/codex_cred_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".claude/dev/idiom_py_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".githooks/eol_policy_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".githooks/pre_push_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": "scripts/tl_core/command_registry_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".github/checks/ci_phamvi_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-ops (ubuntu-latest)",
+          "path": "ops/ci_duong_nhanh_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-ops (ubuntu-latest)",
+          "path": "ops/bien_nhan_v2_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-packet-loop (ubuntu-latest)",
+          "path": ".claude/dev/packet_loop_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        }
+      ],
+      "provenance_sha256": "5ad9afeafb5312101ae326d738855e8adb1e46e7e4240944c2b21e12ed2bafe0"
+    },
+    {
+      "run": 40074551995,
+      "workflow_sha256": "db1f3d9c4b618d46ab31f79fb8c63dd0466a50fd1c32740daf01e1e7ee4ba25b",
+      "workflow_git_command": [
+        "git",
+        "cat-file",
+        "blob",
+        "dc657149941f9db3ab2afc6fb6462ba4827bf18f:.github/workflows/ci.yml"
+      ],
+      "rc": 0,
+      "null_env_scopes": [],
+      "labels": [
+        [
+          "ubuntu-latest"
+        ]
+      ],
+      "run_state": "passed",
+      "gate_states": {
+        "not_measured": 23
+      },
+      "checkout_states": {
+        "not_measured": 1,
+        "passed": 22
+      },
+      "ghep_states": {
+        "not_measured": 1,
+        "passed": 22
+      },
+      "all_markers": [
+        {
+          "job": "gate-ops (ubuntu-latest)",
+          "path": "ops/ci_duong_nhanh_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-ops (ubuntu-latest)",
+          "path": "ops/bien_nhan_v2_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".claude/dev/codex_cred_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".claude/dev/idiom_py_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".githooks/eol_policy_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".githooks/pre_push_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": "scripts/tl_core/command_registry_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate (ubuntu-latest)",
+          "path": ".github/checks/ci_phamvi_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate-packet-loop (ubuntu-latest)",
+          "path": ".claude/dev/packet_loop_test.py",
+          "state": "not_measured",
+          "reason": "khong_co_trong_MOI"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        },
+        {
+          "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+          "path": "ops/nhanh_don_duoc_test.py",
+          "state": "not_measured",
+          "reason": "che_do_khong_xac_dinh"
+        }
+      ],
+      "provenance_sha256": "24ffa770ff268876c030f12f59fee1010956138ba2ca3fa4370710456ffd185b"
+    }
+  ]
+}

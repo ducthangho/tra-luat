@@ -1,0 +1,12 @@
+mode_defaults_wf_truthy SONG_SOT [] OTHER 0
+mode_defaults_job_truthy SONG_SOT [] OTHER 0
+mode_env_truthy SONG_SOT [] OTHER 0
+mode_env_string_only SONG_SOT [] OTHER 0
+number_type_bool_guard_drop SONG_SOT [] OTHER 0
+number_min_strict GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c36_ghep_lech_so', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+header_time_other_group GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+header_window_other_step GIET ['c38_ghep_lech_gio'] OTHER 0
+time_current_end_other_step GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+name_only_first_rest GIET ['c37_ghep_lech_ten', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua'] OTHER 0
+name_only_last_rest GIET ['c45_buoc_skipped_giua'] OTHER 0
+Counter({'GIET': 6, 'SONG_SOT': 5})

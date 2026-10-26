@@ -1,0 +1,35 @@
+{
+  "session_id": "01a171df-f8f0-7b11-84d1-0ab8f928ddf4",
+  "rollout_path": "/root/.codex/sessions/2026/10/25/rollout-2026-10-25T07-04-27-01a171df-f8f0-7b11-84d1-0ab8f928ddf4.jsonl",
+  "observed_metadata": [
+    {
+      "type": "session_meta",
+      "payload": {
+        "id": "01a171df-f8f0-7b11-84d1-0ab8f928ddf4",
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws",
+        "originator": "codex_exec",
+        "cli_version": "0.164.0",
+        "model_provider": "openai"
+      }
+    },
+    {
+      "type": "turn_context",
+      "payload": {
+        "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws",
+        "model": "gpt-6.1-sol",
+        "effort": "xhigh",
+        "sandbox_policy": {
+          "type": "workspace-write",
+          "network_access": false,
+          "exclude_tmpdir_env_var": false,
+          "exclude_slash_tmp": false
+        },
+        "approval_policy": "never"
+      }
+    }
+  ],
+  "python": "3.13.17",
+  "os": "Linux-6.18.44-fc-v153-x86_64-with-glibc2.39",
+  "yaml": "6.0.3",
+  "limits": "CLI-published only; rollout is still being written; per-request serving and final launcher receipt not measured"
+}

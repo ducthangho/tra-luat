@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/prove6.py",
+    "job_ascii_suffix"
+  ],
+  "returncode": 0,
+  "seconds": 0.5568809509277344,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof6-ascii.stdout.txt",
+    "bytes": 26,
+    "sha256": "2791cf49236262ba3556fbc059f11987924d6415fffb3f34a3ecea6728b04375"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof6-ascii.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

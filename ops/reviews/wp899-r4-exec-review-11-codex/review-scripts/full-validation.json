@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/validate11.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 0.03669929504394531,
+  "stdout_sha256": "8bd9336c693b8f86710ee6c96aa4ebc5c86b5d69c1b0f30453590d19a9132820",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

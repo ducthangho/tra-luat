@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "adr-song",
+    "--root",
+    "."
+  ],
+  "rc": 0,
+  "elapsed_seconds": 0.3164637088775635,
+  "stdout_sha256": "8c8b947e7dfdd7c8251b3df225c5b9522e8723a6b2dad635f685823b39465c9c",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

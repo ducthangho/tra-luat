@@ -1,0 +1,12 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "-c",
+    "import platform,sys,yaml,subprocess; print(sys.version); print(platform.platform()); print(\"PyYAML\", yaml.__version__); subprocess.run([\"git\",\"--version\"],check=True); subprocess.run([sys.executable,\"-m\",\"ruff\",\"--version\"],check=True)"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 0.07500457763671875,
+  "stdout_sha256": "ede258f8fd181f32315b80ab59088247916504da66d700809e4a3d2060b99049",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,24 @@
+{
+  "reviewer_cases": 15,
+  "baseline_cases": 8,
+  "mutant_cases": 7,
+  "result": "passed",
+  "close_legacy_components": [
+    [
+      "frontier-proofs-final",
+      0
+    ],
+    [
+      "prove-last-final",
+      0
+    ],
+    [
+      "remaining-survivors-final",
+      0
+    ],
+    [
+      "trace-final",
+      0
+    ]
+  ]
+}

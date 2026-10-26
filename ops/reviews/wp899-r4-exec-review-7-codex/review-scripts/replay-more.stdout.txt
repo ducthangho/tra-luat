@@ -1,0 +1,11 @@
+historical-targets 0
+operators 0
+operator-errors 0
+normalization 0
+frontier5 0
+signatures 0
+reanchors 0
+legacy-cli 0
+legacy-remaining 0
+after-suite 0
+a10-details 0

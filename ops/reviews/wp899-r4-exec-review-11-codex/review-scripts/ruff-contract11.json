@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "import ci_dang_ky_test; loi_ruff_ci()"
+  ],
+  "errors": [],
+  "contracts": 3,
+  "code_path": ".claude/dev/ci_dang_ky_test.py"
+}

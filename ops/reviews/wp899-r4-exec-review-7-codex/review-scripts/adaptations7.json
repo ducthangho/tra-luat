@@ -1,0 +1,24 @@
+{
+  "source": "r4-luot6 + r4-luot5 legacy copies",
+  "changes": [
+    "absolute root only",
+    "baseline case/mutant count 49->50,231->255"
+  ],
+  "files": [
+    "frontier5_current.py",
+    "extra6.py",
+    "extra6b.py",
+    "run_remaining_current.py",
+    "operators5_target.py",
+    "frontier6.py",
+    "after_suite6.py",
+    "new_frontier.py",
+    "extra6c.py",
+    "frontier5.py",
+    "remaining_prior.py",
+    "norm5.py",
+    "operators.py",
+    "prior1/registry_check.py",
+    "prior2/registry_check.py"
+  ]
+}

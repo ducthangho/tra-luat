@@ -1,0 +1,68 @@
+[
+  {
+    "name": "n_env_v_truthy_current",
+    "old": "return \"env\" in d and (",
+    "new": "return bool(d.get(\"env\")) and (",
+    "case": "c46_mien_che_do",
+    "rank": "GIET",
+    "pair": [
+      {
+        "source": "baseline",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c46_mien_che_do"
+        ],
+        "rc": 0,
+        "output": "\n"
+      },
+      {
+        "source": "mutant",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c46_mien_che_do"
+        ],
+        "rc": 3,
+        "output": "DO:c46_mien_che_do:env job []: [('passed', None)] ≠ [('not_measured', 'che_do_khong_xac_dinh')]\n"
+      }
+    ]
+  },
+  {
+    "name": "env_prefix_value_only_current",
+    "old": "str(k).startswith(\"CI_DANG_KY_\")",
+    "new": "str(k).startswith(\"CI_DANG_KY_\") and bool(d[\"env\"][k])",
+    "case": "c49_oracle_nhieu_truc",
+    "rank": "GIET",
+    "pair": [
+      {
+        "source": "baseline",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c49_oracle_nhieu_truc"
+        ],
+        "rc": 0,
+        "output": "\n"
+      },
+      {
+        "source": "mutant",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c49_oracle_nhieu_truc"
+        ],
+        "rc": 3,
+        "output": "DO:c49_oracle_nhieu_truc:2/250 kịch bản lệch oracle; đầu tiên: [(14, 'j0 (ubuntu-latest, 14)', 'passed', 'passed', [('not_measured', 'che_do_khong_xac_dinh'), ('failed', None)], [('not_measured', 'che_do_khong_xac_dinh'), ('not_measured', 'che_do_khong_xac_dinh')]), (16, 'j0', 'passed', 'passed', [('not_measured', 'che_do_khong_xac_dinh'), ('failed', None)], [('not_measured', 'che_do_khong_xac_dinh'), ('not_measured', 'che_do_khong_xac_dinh')])]; phân hoạch lấy mẫu < 5: [] {'ghep:passed': 189, 'failed': 75, 'che_do_khong_xac_dinh': 338, 'ghep:d_job_yaml_khong_duy_nhat': 22, 'passed': 74, 'job_dich_khong_dau': 85, 'number>=10': 63, 'ghep:c_gio_header_ngoai_cua_so': 14, 'ghep:steps_rest_sai_dang': 10, 'ghep:b_ten_buoc_lech': 15}\n"
+      }
+    ]
+  }
+]

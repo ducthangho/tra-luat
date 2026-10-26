@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/audit8.py"
+  ],
+  "rc": 0,
+  "elapsed": 106.7279760837555,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/ast-audit.stdout.txt",
+    "size": 8622,
+    "sha256": "4f820f9f925c2f27e908794b48f7bf277d0c86dc0060b5fabe7c6bda6266583e"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/ast-audit.stderr.txt",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

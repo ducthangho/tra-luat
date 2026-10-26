@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/cases7.py",
+    "name_run_strip_cr"
+  ],
+  "returncode": 0,
+  "seconds": 0.7298233509063721,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/proof-crlf.stdout.txt",
+    "bytes": 22,
+    "sha256": "da648c28fdc7b8344989240a719561fab6845acb571d310b1c8bb7e013ada53c"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/proof-crlf.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

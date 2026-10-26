@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/ci_dang_ky_test.py"
+  ],
+  "rc": 1,
+  "elapsed": 1.2230877876281738,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/registry.stdout.txt",
+    "size": 191,
+    "sha256": "d65e08635f4023ac9f1f2baa5a178b41e0a3de05f631b596ae2a8d32cfed094e"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/registry.stderr.txt",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

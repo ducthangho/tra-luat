@@ -1,0 +1,646 @@
+[
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/audit_mutants.py",
+    "sha256": "304585432c4544eafa66942890ca0ce1a0bef1c159770a2c2dd588f651865d29",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/calendar_cases.py",
+    "sha256": "135a296ea9f0786fba50d0de264d257043bd5bafa6acafc48fff18c4e9fbcd0d",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/classifier_negative.py",
+    "sha256": "33ceafda0438faebfb2e4f0a7bb5c2ac8ef17eeaeed47113410bf0be228a0f36",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/emit.py",
+    "sha256": "a282fb3ccde0f69dcfcbb930ed3b0572f031bc7a35fa260d5449ea706895aba7",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/extra_mutants_r4.py",
+    "sha256": "30cd3b7bbb29a8bb372057c5768a2098625d0d81d2c044ecac36c76c7b3920ec",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/final_check.py",
+    "sha256": "d98158da8904007fd97abb007663cf7c4048ed6661a89b988a2fcfe021020ef4",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/new_probes_r4.py",
+    "sha256": "ae72cda19101a978f2fc4effe11cd9cb923ca6f05e5e0de89f9df293dd499ce9",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/preflight.py",
+    "sha256": "51542b9a9edcf0613878f4b6148d34d587f3e34aed32c42eb53f5ff8b82a5b30",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/prepare.py",
+    "sha256": "9a8cee889ad0812feeae792fde7748c3ba19290d968484d8e944d2a3e7179d80",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/q1_time_detail.py",
+    "sha256": "5a57aebbd16a68bb50d7a90b32bd0b082abc41c3906ddf4fd0cb4a346bd64463",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/registry_check.py",
+    "sha256": "f80cbd619cf9d07f5bc820d73ddf0048a37debbaa68258817015e97288f6b078",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/replay_q1.py",
+    "sha256": "2b136897b82388e69639cf2c26734e9cd8765ae5c5a166c90edf433b8c78b7f7",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/reviewer_cases_r4.py",
+    "sha256": "50f2c539f70f25b56fbfdaec35feb54ff052ba49335ddf80b94f65cd2fa2dec3",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/run.py",
+    "sha256": "c3bb62262f8b042c910860cb2ee2f0bb88565a7f9ed506dea9a03a9c444104ab",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/run_old.py",
+    "sha256": "181763ce8cbf08c4058704b262e8cdbcce6e4a0ae63b83d86324562b5774ffb2",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/snapshot.py",
+    "sha256": "f3e4238f8e471a40a565834f154dd65748a8fb44f18808240bef6807bdcdef47",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/verify_new_cases.py",
+    "sha256": "ad5a7f108169417e1c60621dca9897cc7b88f3647e6d42ff38d6431dd121ba45",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/write_verdict.py",
+    "sha256": "b28ceecd925e4bc46e918b05e8fc108d157fd53fb79e47b208b4ed35ceb9230e",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/audit_mutants.py",
+    "sha256": "304585432c4544eafa66942890ca0ce1a0bef1c159770a2c2dd588f651865d29",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/calendar_cases.py",
+    "sha256": "135a296ea9f0786fba50d0de264d257043bd5bafa6acafc48fff18c4e9fbcd0d",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/classifier_negative.py",
+    "sha256": "33ceafda0438faebfb2e4f0a7bb5c2ac8ef17eeaeed47113410bf0be228a0f36",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/emit.py",
+    "sha256": "a282fb3ccde0f69dcfcbb930ed3b0572f031bc7a35fa260d5449ea706895aba7",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/extra_mutants_r4.py",
+    "sha256": "30cd3b7bbb29a8bb372057c5768a2098625d0d81d2c044ecac36c76c7b3920ec",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/final_check.py",
+    "sha256": "95706d66aac37a5c241f417e37fde7d431ef98dc2e8e65ad9d9698bc7143fcdf",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/finish_probes.py",
+    "sha256": "bb5a6648e1a5e7d37e04944b8ba0cdf319016b06d0c28b1a9561ed31eb6f1a09",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/new_probes_r4.py",
+    "sha256": "ae72cda19101a978f2fc4effe11cd9cb923ca6f05e5e0de89f9df293dd499ce9",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/preflight.py",
+    "sha256": "51542b9a9edcf0613878f4b6148d34d587f3e34aed32c42eb53f5ff8b82a5b30",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/prepare.py",
+    "sha256": "9a8cee889ad0812feeae792fde7748c3ba19290d968484d8e944d2a3e7179d80",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/q1_time_detail.py",
+    "sha256": "5a57aebbd16a68bb50d7a90b32bd0b082abc41c3906ddf4fd0cb4a346bd64463",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/registry_check.py",
+    "sha256": "c6520920d1c2e09a3d191e0c5cd0cd0deeb8eaf0d97fd21a9cd8346ac2f50b1d",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/replay_q1.py",
+    "sha256": "2b136897b82388e69639cf2c26734e9cd8765ae5c5a166c90edf433b8c78b7f7",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/reviewer_cases_r4.py",
+    "sha256": "50f2c539f70f25b56fbfdaec35feb54ff052ba49335ddf80b94f65cd2fa2dec3",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/run.py",
+    "sha256": "c3bb62262f8b042c910860cb2ee2f0bb88565a7f9ed506dea9a03a9c444104ab",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/run_old.py",
+    "sha256": "181763ce8cbf08c4058704b262e8cdbcce6e4a0ae63b83d86324562b5774ffb2",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/shape_audit.py",
+    "sha256": "02913674ee116db1d3a53d46f153ee934f38d42b199770040f079ed996db8e81",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/snapshot.py",
+    "sha256": "f3e4238f8e471a40a565834f154dd65748a8fb44f18808240bef6807bdcdef47",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/trace_c44.py",
+    "sha256": "9b5a6834520ac5a7e5e42cf6f8c1b486a5c218264b9ddcfe5b6817c836031149",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/verify_new_cases.py",
+    "sha256": "ad5a7f108169417e1c60621dca9897cc7b88f3647e6d42ff38d6431dd121ba45",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/write_verdict.py",
+    "sha256": "365bc0ad7034acff16940b8c9131245b8f1878ba1efc9a1268d9db1dff59f75b",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/adapt_prior.py",
+    "sha256": "584a18441112368ad1d779b9ab02e666f1fd5e073692e47fb611ef28131fc4d4",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/audit_mutants.py",
+    "sha256": "304585432c4544eafa66942890ca0ce1a0bef1c159770a2c2dd588f651865d29",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/bootstrap.py",
+    "sha256": "8651fb2290f0c97c0d42a0164ca2d85987679c2b478c41984c48a179e8c82d30",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/close_prior.py",
+    "sha256": "28e6a2f5475639a00d197ed24a18a7c1337b9095b42bd02f06ce031306f35377",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/emit.py",
+    "sha256": "07841fb07b26040e8c2318019e0701f466c52c39cd83c2fb5628ea749563bece",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/extend_cases.py",
+    "sha256": "694341ca155d9ba9a9ea30cf101ba50313cd2c9b5f0f36469276f54187ffaff0",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/finalize_current.py",
+    "sha256": "5c1fdf52ef4d4f35a3d37a8c23a66f9e18345cf6e129349718d6e78986bdb60c",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/frontier.py",
+    "sha256": "91987ff1b4f07fe7d1a99961114815add25eb335a0dbeec4ddcb65095ba8c713",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/frontier2.py",
+    "sha256": "ef1203d22a8f654cab724f5b0e56daa7aa4a4bee9ceea6842fcdc7008282cc13",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/frontier_cases.py",
+    "sha256": "03ecb332a05bd9cd1fa7fdf4c734d86f6cc6adf5bb3b61e3c2ea8383a37228a9",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/make_frontier2.py",
+    "sha256": "cbcfe98e14d147e50a7344ac0250e2b66418ec3be2d9f6902bc70da8cbdab1b5",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/mode_probe.py",
+    "sha256": "1c2525a70101de4af5a155f1446736c1d4661015d04a70aebcd6ddd89e53f551",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/prove_frontier.py",
+    "sha256": "629844462c28b921db203f48ab8be549904ff17ad1d7aa51147d5e9efcab3ab7",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/prove_last.py",
+    "sha256": "5d17c42a3ae323ab74d376531598667bf66b4a5b3cc683e19d5a93cefb6f8456",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/remaining_prior.py",
+    "sha256": "056016ce7b1b78286e66ca0e75fde95f151bbfc4741f12f956a09cdb8089488b",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/remaining_survivors.py",
+    "sha256": "97e9c808292f946da25aa96e4d50e8ceb2684119c099ce463d1a088e688818cd",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/repair_legacy_anchors.py",
+    "sha256": "d3b0476cc85c2fc236061adec018c82bd44be40e3a96fb18810bbe74b0507ee6",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/replay_prior_all.py",
+    "sha256": "66cc9a9891a7001ef8aa3459ed1295ed5a1293dd12634903bb3c1b6a085c44e8",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/run.py",
+    "sha256": "c3bb62262f8b042c910860cb2ee2f0bb88565a7f9ed506dea9a03a9c444104ab",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/snapshot.py",
+    "sha256": "f3e4238f8e471a40a565834f154dd65748a8fb44f18808240bef6807bdcdef47",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 3,
+    "path": ".review-input/r4-luot3/write_current_verdict.py",
+    "sha256": "863f5d8c83d41248c9520fd91682d9f8a18ce1a205e0481542653a708b3cc53c",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/adapt_operators.py",
+    "sha256": "be790a3e5ed69b2d181e54efad110038485283c44248450f6833ce426b836999",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/adapt_prior.py",
+    "sha256": "753f8718f03e0d6997d12e137760ac225e9f5baadeca86ba88625b24db0e33e9",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/audit_mutants.py",
+    "sha256": "304585432c4544eafa66942890ca0ce1a0bef1c159770a2c2dd588f651865d29",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/bootstrap.py",
+    "sha256": "8651fb2290f0c97c0d42a0164ca2d85987679c2b478c41984c48a179e8c82d30",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/boundary_cases.py",
+    "sha256": "2f695eb025b885de933ff9ba1f49fb87f647ec4ab916104fbac8fbde2964b23a",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/close_legacy_current.py",
+    "sha256": "26d7f5e976bb4f92e56831c05bb5ee92eb3d6968cbd4e876141ac8fc11df0ccd",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/close_prior.py",
+    "sha256": "1d050fd1c53eb91965c2d16cd187bd1ebe37959e457c53554374afe01837a534",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/emit.py",
+    "sha256": "07841fb07b26040e8c2318019e0701f466c52c39cd83c2fb5628ea749563bece",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/finalize_review.py",
+    "sha256": "9e6f5d10043d8f7df16aa1034ecc2d3a872a1a375134e0ef1ed60e17adfafb02",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/finish_legacy_current.py",
+    "sha256": "9d9e7d547258bd7f651bad82379e2e3c8227b041889f2568c9bebd098848f536",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/frontier.py",
+    "sha256": "91987ff1b4f07fe7d1a99961114815add25eb335a0dbeec4ddcb65095ba8c713",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/frontier2.py",
+    "sha256": "0bd154bc1840d76e32589bb09a373c140873c4883ebacf4f521ec829d40abc6e",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/frontier_cases.py",
+    "sha256": "03ecb332a05bd9cd1fa7fdf4c734d86f6cc6adf5bb3b61e3c2ea8383a37228a9",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/legacy_manifest.py",
+    "sha256": "97a111ab8fc5f4ffc4ddb3279a6dd07db8c451e6c3289705303ca4cdbcac9c38",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/mode_probe.py",
+    "sha256": "1c2525a70101de4af5a155f1446736c1d4661015d04a70aebcd6ddd89e53f551",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/nested_after_equivalent.py",
+    "sha256": "751bfd0f883e8e1abc5e16a06cd6c9dfbf3d3880ad0691d299c0bb155a395f0b",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/new_frontier.py",
+    "sha256": "706958451bac54bd09c2678cea2371660a295b2d24edc704616f0fe577519b3a",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/operators.py",
+    "sha256": "481a2b53d5bc4caf0f8d5ad62c06871372e081e2151921b56f72b2be8f715c24",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/prove_frontier.py",
+    "sha256": "629844462c28b921db203f48ab8be549904ff17ad1d7aa51147d5e9efcab3ab7",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/prove_last.py",
+    "sha256": "5d17c42a3ae323ab74d376531598667bf66b4a5b3cc683e19d5a93cefb6f8456",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/prove_new.py",
+    "sha256": "65ff1ec7cdf5c9b6ce01306776d8a32c4008d77d8ff1c061b908107852c35d84",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/remaining_prior.py",
+    "sha256": "76a0904d48895bf1a161db46134a1cfa4f5d5ed0208180868b1875a84ac7c232",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/remaining_survivors.py",
+    "sha256": "97e9c808292f946da25aa96e4d50e8ceb2684119c099ce463d1a088e688818cd",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/remaining_survivors_current.py",
+    "sha256": "3fb2121c11bcbd378076e8075e2a4b749eb1c0329d45527df493b10ccd6af943",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/repair_legacy_anchors.py",
+    "sha256": "227fa09f1bd09a7ff4c859cc8181c7e1cab85781c5275704fb643d72b0042b81",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/replay_prior_all.py",
+    "sha256": "66cc9a9891a7001ef8aa3459ed1295ed5a1293dd12634903bb3c1b6a085c44e8",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/run.py",
+    "sha256": "c3bb62262f8b042c910860cb2ee2f0bb88565a7f9ed506dea9a03a9c444104ab",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/run_remaining_current.py",
+    "sha256": "785a63f5ad75c609d9152c51380c1f280f05578c3641104bb9670248f0ca739d",
+    "role": "verification",
+    "current_mapping": "prior-reruns.json, remaining5-results.json, legacy-final-results.json and direct receipts; duplicate orchestration/proofs mapped to those producers"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/setup_current.py",
+    "sha256": "91c2f55dfdf19240f284db81822065ef6b6a331d2598e70b89a6bc75638983c2",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/snapshot.py",
+    "sha256": "f3e4238f8e471a40a565834f154dd65748a8fb44f18808240bef6807bdcdef47",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/verify_equivalence.py",
+    "sha256": "8a50b76c3588f4a85ab8114fd2a5a2bba40737263cdaffaed069a0916b8a389d",
+    "role": "verification",
+    "current_mapping": "same-named scratch measurement; operators.py uses operators5_target.py with declared target selection"
+  },
+  {
+    "round": 4,
+    "path": ".review-input/r4-luot4/write_verdict_current.py",
+    "sha256": "46e56eb7d8f7e28f938b9932ccc4869cec51a62d154b151125bacdd0531cf841",
+    "role": "historical_setup_or_rendering",
+    "current_mapping": "preflight5.json, snapshot start/end, current run.py and write_verdict5.py; no standalone historical verdict execution"
+  }
+]

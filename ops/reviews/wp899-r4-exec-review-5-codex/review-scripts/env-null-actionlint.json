@@ -1,0 +1,20 @@
+{
+  "command": [
+    "actionlint",
+    "-no-color",
+    ".review/env-null-workflow.yml",
+    ".review/env-null-job.yml"
+  ],
+  "returncode": 1,
+  "seconds": 0.02383708953857422,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/env-null-actionlint.stdout.txt",
+    "bytes": 370,
+    "sha256": "0e74c91a69bc11d79053702ad3c99d215e17cb7b1a0539d259ae83817d5552ed"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/env-null-actionlint.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/preflight8.py"
+  ],
+  "rc": 0,
+  "elapsed": 0.11208772659301758,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/preflight.stdout.txt",
+    "size": 54,
+    "sha256": "97fa7fbca8fbbf11861c3bbcb298ed37268c7847704d7f2086982b915ed2ac2e"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/preflight.stderr.txt",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

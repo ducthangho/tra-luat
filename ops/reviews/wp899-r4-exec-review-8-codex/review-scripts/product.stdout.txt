@@ -1,0 +1,315 @@
+PRODUCT 300 mismatches 5
+{'none': 106, 'bad_time': 39, 'bad_name': 39, 'bad_number': 31, 'bad_job': 48, 'bad_count': 37}
+[
+  {
+    "case": 37,
+    "workflow": {
+      "jobs": {
+        "job37": {
+          "runs-on": "ubuntu-latest",
+          "steps": [
+            {
+              "run": "python ops/p0.py\n",
+              "name": "Xây dựng",
+              "continue-on-error": false
+            },
+            {
+              "run": "python ops/p1.py\n"
+            },
+            {
+              "run": "echo GITHUB_PATH\n",
+              "env": {}
+            }
+          ],
+          "name": "Build (release)",
+          "env": {
+            "A": "1"
+          }
+        }
+      },
+      "env": {
+        "A": "1"
+      }
+    },
+    "rest_job": {
+      "id": 1,
+      "name": "Build (release)",
+      "run_attempt": 1,
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "conclusion": "success",
+      "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+      "steps": [
+        {
+          "name": "Complete job",
+          "number": 11,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/p1.py",
+          "number": 4,
+          "conclusion": "success",
+          "started_at": "2026-10-19T23:45:04Z",
+          "completed_at": "2026-10-19T23:45:04Z"
+        },
+        {
+          "name": "Set up job",
+          "number": 1,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post cleanup",
+          "number": 10,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run echo GITHUB_PATH",
+          "number": 9,
+          "conclusion": "success",
+          "started_at": "2026-10-19T23:45:04Z",
+          "completed_at": "2026-10-19T23:45:04Z"
+        },
+        {
+          "name": "Xây dựng",
+          "number": 3,
+          "conclusion": "success",
+          "started_at": "2026-10-19T23:45:04Z",
+          "completed_at": "2026-10-19T23:45:04Z"
+        }
+      ]
+    },
+    "log": [
+      "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+      "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+      "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+      "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+      "2026-10-19T23:45:04.8553236Z THU: 4/4 dat",
+      "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p1.py",
+      "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p1.py\u001b[0m",
+      "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+      "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+      "2026-10-19T23:45:04.8553236Z THU: 3/4 dat",
+      "2026-10-19T23:45:04.8553236Z ##[group]Run echo GITHUB_PATH",
+      "2026-10-19T23:45:04.8553236Z \u001b[36;1mecho GITHUB_PATH\u001b[0m",
+      "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+      "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+      "2026-10-19T23:45:04.8553236Z THU: 4/4 dat"
+    ],
+    "expected": {
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 3
+      },
+      "markers": [
+        {
+          "lenh": "python ops/p0.py",
+          "duong_dan": "ops/p0.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python ops/p1.py",
+          "duong_dan": "ops/p1.py",
+          "trang_thai": "failed",
+          "dong_khop": [
+            "THU: 3/4 dat"
+          ]
+        }
+      ],
+      "count": 3,
+      "gate": "failed"
+    },
+    "actual": {
+      "job_id": 1,
+      "name": "Build (release)",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/p1.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post cleanup",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run echo GITHUB_PATH",
+          "conclusion": "success"
+        },
+        {
+          "name": "Xây dựng",
+          "conclusion": "success"
+        }
+      ],
+      "image": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/p0.py",
+          "duong_dan": "ops/p0.py",
+          "trang_thai": "not_measured",
+          "ly_do": "khong_co_trong_MOI"
+        },
+        {
+          "lenh": "python ops/p1.py",
+          "duong_dan": "ops/p1.py",
+          "trang_thai": "failed",
+          "dong_khop": []
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 3
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 3,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "failed"
+    }
+  },
+  {
+    "case": 106,
+    "workflow": {
+      "jobs": {
+        "job106": {
+          "runs-on": "ubuntu-latest",
+          "steps": [
+            {
+              "run": "python ops/p0.py\n"
+            }
+          ],
+          "name": "A+B.*"
+        }
+      }
+    },
+    "rest_job": {
+      "id": 1,
+      "name": "job106",
+      "run_attempt": 1,
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "conclusion": "success",
+      "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+      "steps": [
+        {
+          "name": "Run python ops/p0.py",
+          "number": 4,
+          "conclusion": "success",
+          "started_at": "2026-10-19T23:45:04Z",
+          "completed_at": "2026-10-19T23:45:04Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 6,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post cleanup",
+          "number": 5,
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up job",
+          "number": 1,
+          "conclusion": "success"
+        }
+      ]
+    },
+    "log": [
+      "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+      "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+      "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+      "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+      "2026-10-19T23:45:04.8553236Z THU: 3/4 dat"
+    ],
+    "expected": {
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 1
+      },
+      "markers": [
+        {
+          "lenh": "python ops/p0.py",
+          "duong_dan": "ops/p0.py",
+          "trang_thai": "failed",
+          "dong_khop": [
+            "THU: 3/4 dat"
+          ]
+        }
+      ],
+      "count": 1,
+      "gate": "failed"
+    },
+    "actual": {
+      "job_id": 1,
+      "name": "job106",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Run python ops/p0.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post cleanup",
+          "conclusion": "success"
+        },
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "not_measured",
+      "dau_duong": [
+        {
+          "lenh": "python ops/p0.py",
+          "duong_dan": "ops/p0.py",
+          "trang_thai": "failed",
+          "dong_khop": []
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 1
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "failed"
+    }
+  }
+]

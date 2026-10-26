@@ -1,0 +1,101 @@
+[
+  {
+    "name": "time_drop_type",
+    "old": "if type(v) is str and RE_GIO.fullmatch(v) else None",
+    "new": "if RE_GIO.fullmatch(v) else None",
+    "case": "c38_ghep_lech_gio",
+    "pair": [
+      {
+        "source": "baseline",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c38_ghep_lech_gio"
+        ],
+        "rc": 0,
+        "output": "\n"
+      },
+      {
+        "source": "mutant",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c38_ghep_lech_gio"
+        ],
+        "rc": 3,
+        "output": "DO:c38_ghep_lech_gio:giờ {'started_at': None}: công cụ ném TypeError\n"
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "mode_env_job_presence",
+    "old": "_env_chan(j) or",
+    "new": "(\"env\" in j) or",
+    "case": "c46_mien_che_do",
+    "pair": [
+      {
+        "source": "baseline",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c46_mien_che_do"
+        ],
+        "rc": 0,
+        "output": "\n"
+      },
+      {
+        "source": "mutant",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c46_mien_che_do"
+        ],
+        "rc": 3,
+        "output": "DO:c46_mien_che_do:env job {}: [('not_measured', 'che_do_khong_xac_dinh')] ≠ [('passed', None)]\n"
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "log_group_close_exact_backward",
+    "old": "if t == \"##[endgroup]\":",
+    "new": "if t.startswith(\"##[endgroup]\"):",
+    "case": "c47_bien_ghep",
+    "pair": [
+      {
+        "source": "baseline",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c47_bien_ghep"
+        ],
+        "rc": 0,
+        "output": "\n"
+      },
+      {
+        "source": "mutant",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+          "--mot-ca",
+          "c47_bien_ghep"
+        ],
+        "rc": 3,
+        "output": "DO:c47_bien_ghep:##[endgroup] có đuôi: [('passed', None)] ≠ [] (ghép passed)\n"
+      }
+    ],
+    "rank": "GIET"
+  }
+]

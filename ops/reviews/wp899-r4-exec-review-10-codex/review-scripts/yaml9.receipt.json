@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/product_yaml9.py"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review10/ws",
+  "rc": 0,
+  "started_utc": "2026-10-25T23:55:52.536025+00:00",
+  "seconds": 2.2824883460998535,
+  "stdout_sha256": "6fd69f090ed76b3eeb7ce77968e973d54751a65e9ecc20bb3a79bbd3657a8ed3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 3985,
+  "stderr_bytes": 0
+}

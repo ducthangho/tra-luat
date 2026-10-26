@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/prove6.py",
+    "time_reject_leap_day_safe"
+  ],
+  "returncode": 0,
+  "seconds": 0.5379340648651123,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-leap6-run.stdout.txt",
+    "bytes": 35,
+    "sha256": "fa2d2538bfc5c757c58828aba6e801fc5e5600a471e57b160388d2946f059082"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-leap6-run.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

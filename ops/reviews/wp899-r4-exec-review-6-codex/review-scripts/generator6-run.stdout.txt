@@ -1,0 +1,18 @@
+{
+  "scenarios": 250,
+  "ghep": {
+    "passed": 189,
+    "d_job_yaml_khong_duy_nhat": 22,
+    "c_gio_header_ngoai_cua_so": 14,
+    "steps_rest_sai_dang": 10,
+    "b_ten_buoc_lech": 15
+  },
+  "markers": {
+    "failed": 75,
+    "not_measured/che_do_khong_xac_dinh": 338,
+    "passed": 74
+  },
+  "max_yaml_job_alias_length": 7,
+  "non_ascii_rest_names": 0,
+  "skipped_steps_with_missing_times": 0
+}

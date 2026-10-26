@@ -1,0 +1,40 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "stdout": "75d0f6b5fe01611dda0b8768e50f5826657135e7\nd07a624425fff37d998ff0369345537b263ec3c1\n",
+      "stderr": ""
+    }
+  ],
+  "snapshot_files_unchanged": 7911,
+  "verdict_bytes": 60649,
+  "verdict_sha256": "941ae572c084c3a5277984f11de8b8bfbdd5054ffa6fcb98a5a773d22cac3105",
+  "validation": "passed",
+  "new_survivors_proven": 17
+}

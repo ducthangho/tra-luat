@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "ops/ci_provenance_test.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 2423.8297469615936,
+  "stdout_sha256": "4765c8c2170198573fb64f814f65d67a81beac2e918e2a03d524b25cbb64fed0",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

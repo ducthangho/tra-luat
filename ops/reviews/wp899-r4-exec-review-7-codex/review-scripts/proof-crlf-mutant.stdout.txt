@@ -1,0 +1,1 @@
+DO:name_run_strip_cr:ghep=b_ten_buoc_lech marker=[]; expected=('passed', [])

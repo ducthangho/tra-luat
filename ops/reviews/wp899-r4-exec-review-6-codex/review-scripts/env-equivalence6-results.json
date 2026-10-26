@@ -1,0 +1,117 @@
+{
+  "rows": [
+    {
+      "key_type": "str",
+      "key_repr": "'A'",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "str",
+      "key_repr": "'CI_DANG_KY_'",
+      "head": true,
+      "mutant": true,
+      "equal": true
+    },
+    {
+      "key_type": "str",
+      "key_repr": "'CI_DANG_KY_X'",
+      "head": true,
+      "mutant": true,
+      "equal": true
+    },
+    {
+      "key_type": "str",
+      "key_repr": "'ci_dang_ky_X'",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "NoneType",
+      "key_repr": "None",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "bool",
+      "key_repr": "True",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "bool",
+      "key_repr": "False",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "int",
+      "key_repr": "1",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "int",
+      "key_repr": "0",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "int",
+      "key_repr": "-1",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "float",
+      "key_repr": "1.5",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "float",
+      "key_repr": "inf",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "float",
+      "key_repr": "nan",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "bytes",
+      "key_repr": "b'CI_DANG_KY_X'",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "date",
+      "key_repr": "datetime.date(2026, 10, 25)",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    },
+    {
+      "key_type": "datetime",
+      "key_repr": "datetime.datetime(2026, 10, 25, 10, 0, tzinfo=datetime.timezone.utc)",
+      "head": false,
+      "mutant": false,
+      "equal": true
+    }
+  ],
+  "argument": "yaml.safe_load standard hashable mapping keys are plain str, bool, int, float, None, bytes, date/datetime; collections are unhashable and arbitrary Python objects are not constructed. For non-str keys, str(key) cannot start CI_DANG_KY_; for str keys both predicates are identical. The outer non-dict and key-presence guards are unchanged. This is a semantic argument on the YAML input domain, not a claim based only on these16 samples."
+}

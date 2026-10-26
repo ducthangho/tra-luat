@@ -1,0 +1,1584 @@
+[
+ {
+  "id": "_env_chan_13_drop_single_arg",
+  "function": "_env_chan",
+  "before": "any((str(k).startswith('CI_DANG_KY_') for k in d['env']))",
+  "after": "any()",
+  "rank": "GIET",
+  "kill": [
+   "c49_oracle_nhieu_truc"
+  ],
+  "cases_measured": 45
+ },
+ {
+  "id": "_env_chan_15_drop_single_arg",
+  "function": "_env_chan",
+  "before": "type(d['env'])",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c49_oracle_nhieu_truc"
+  ],
+  "cases_measured": 45
+ },
+ {
+  "id": "_env_chan_24_drop_single_arg",
+  "function": "_env_chan",
+  "before": "str(k).startswith('CI_DANG_KY_')",
+  "after": "str(k).startswith()",
+  "rank": "GIET",
+  "kill": [
+   "c49_oracle_nhieu_truc"
+  ],
+  "cases_measured": 45
+ },
+ {
+  "id": "_env_chan_35_drop_single_arg",
+  "function": "_env_chan",
+  "before": "str(k)",
+  "after": "str()",
+  "rank": "GIET",
+  "kill": [
+   "c29_che_do_env_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "doc_wf_11_drop_single_arg",
+  "function": "doc_wf",
+  "before": "yaml.safe_load(van)",
+  "after": "yaml.safe_load()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "doc_wf_12_drop_elt_0",
+  "function": "doc_wf",
+  "before": "(yaml.YAMLError, RecursionError)",
+  "after": "(RecursionError,)",
+  "rank": "GIET",
+  "kill": [
+   "c32_workflow_khong_doc_duoc"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "doc_wf_12_drop_elt_1",
+  "function": "doc_wf",
+  "before": "(yaml.YAMLError, RecursionError)",
+  "after": "(yaml.YAMLError,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "doc_wf_34_drop_single_arg",
+  "function": "doc_wf",
+  "before": "type(wf)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "doc_wf_37_drop_single_arg",
+  "function": "doc_wf",
+  "before": "type(wf.get('jobs'))",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "doc_wf_46_drop_single_arg",
+  "function": "doc_wf",
+  "before": "wf.get('jobs')",
+  "after": "wf.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_21_drop_single_arg",
+  "function": "ghep_job",
+  "before": "len(khop)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_34_drop_single_arg",
+  "function": "ghep_job",
+  "before": "any((type(x) is str and x and ('${{' not in x) and re.fullmatch(re.escape(x) + '(?: \\\\(.*\\\\))?', ten) for x in (k, j.get('name'))))",
+  "after": "any()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_42_drop_single_arg",
+  "function": "ghep_job",
+  "before": "type(ten)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_45_drop_single_arg",
+  "function": "ghep_job",
+  "before": "type(j)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_75_drop_elt_0",
+  "function": "ghep_job",
+  "before": "(k, j.get('name'))",
+  "after": "(j.get('name'),)",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_75_drop_elt_1",
+  "function": "ghep_job",
+  "before": "(k, j.get('name'))",
+  "after": "(k,)",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_76_drop_single_arg",
+  "function": "ghep_job",
+  "before": "type(x)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_88_drop_single_arg",
+  "function": "ghep_job",
+  "before": "j.get('name')",
+  "after": "j.get()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_96_drop_single_arg",
+  "function": "ghep_job",
+  "before": "re.escape(x)",
+  "after": "re.escape()",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ten_du_kien_18_drop_single_arg",
+  "function": "ten_du_kien",
+  "before": "s.get('uses')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ten_du_kien_19_drop_single_arg",
+  "function": "ten_du_kien",
+  "before": "_chuoi(v)",
+  "after": "_chuoi()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ten_du_kien_36_drop_single_arg",
+  "function": "ten_du_kien",
+  "before": "_chuoi(s['name'])",
+  "after": "_chuoi()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ten_du_kien_46_drop_single_arg",
+  "function": "ten_du_kien",
+  "before": "v.split('\\n')",
+  "after": "v.split()",
+  "rank": "GIET",
+  "kill": [
+   "c37_ghep_lech_ten"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "_gio_16_drop_single_arg",
+  "function": "_gio",
+  "before": "RE_GIO.fullmatch(v)",
+  "after": "RE_GIO.fullmatch()",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "_gio_20_drop_single_arg",
+  "function": "_gio",
+  "before": "type(v)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_26_drop_elt_0",
+  "function": "ghep_buoc",
+  "before": "(ghep_job(job.get('name'), wf), job.get('steps'))",
+  "after": "(job.get('steps'),)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_26_drop_elt_1",
+  "function": "ghep_buoc",
+  "before": "(ghep_job(job.get('name'), wf), job.get('steps'))",
+  "after": "(ghep_job(job.get('name'), wf),)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_41_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "any((not _chuoi(s.get('name')) or s.get('name') != ten_du_kien(y) for s, y in zip(ung, sy)))",
+  "after": "any()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_45_drop_elt_0",
+  "function": "ghep_buoc",
+  "before": "({'trang_thai': 'passed', 'so_buoc': len(buoc)}, [(k, i) for i in chay])",
+  "after": "([(k, i) for i in chay],)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_45_drop_elt_1",
+  "function": "ghep_buoc",
+  "before": "({'trang_thai': 'passed', 'so_buoc': len(buoc)}, [(k, i) for i in chay])",
+  "after": "({'trang_thai': 'passed', 'so_buoc': len(buoc)},)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_47_drop_elt_0",
+  "function": "ghep_buoc",
+  "before": "({'trang_thai': 'not_measured', 'ly_do': ly_do, 'so_buoc': len(buoc)}, None)",
+  "after": "(None,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_47_drop_elt_1",
+  "function": "ghep_buoc",
+  "before": "({'trang_thai': 'not_measured', 'ly_do': ly_do, 'so_buoc': len(buoc)}, None)",
+  "after": "({'trang_thai': 'not_measured', 'ly_do': ly_do, 'so_buoc': len(buoc)},)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_51_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong(ly_do_wf)",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c32_workflow_khong_doc_duoc"
+  ],
+  "cases_measured": 39
+ },
+ {
+  "id": "ghep_buoc_56_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "job.get('steps')",
+  "after": "job.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_60_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "wf['jobs'][k].get('steps')",
+  "after": "wf['jobs'][k].get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_67_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong('d_job_yaml_khong_duy_nhat')",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_70_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong('steps_rest_sai_dang')",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c44_ghep_sai_dang"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ghep_buoc_77_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(buoc)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_79_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(chay)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_80_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong('a_so_nhom_khac_so_buoc_rest_chay')",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_81_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(ung)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_83_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(sy)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_84_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong('a_so_buoc_rest_khac_so_buoc_yaml')",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_87_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong('b_ten_buoc_lech')",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_89_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "all(((a := _gio(ung[i].get('started_at'))) and (z := _gio(ung[i].get('completed_at'))) and (h := _gio(b['gio'])) and (a <= h <= z) for b, i in zip(buoc, chay)))",
+  "after": "all()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_90_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "hong('c_gio_header_ngoai_cua_so')",
+  "after": "hong()",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 5
+ },
+ {
+  "id": "ghep_buoc_91_drop_dict_0",
+  "function": "ghep_buoc",
+  "before": "{'trang_thai': 'passed', 'so_buoc': len(buoc)}",
+  "after": "{'so_buoc': len(buoc)}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_91_drop_dict_1",
+  "function": "ghep_buoc",
+  "before": "{'trang_thai': 'passed', 'so_buoc': len(buoc)}",
+  "after": "{'trang_thai': 'passed'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_94_drop_dict_0",
+  "function": "ghep_buoc",
+  "before": "{'trang_thai': 'not_measured', 'ly_do': ly_do, 'so_buoc': len(buoc)}",
+  "after": "{'ly_do': ly_do, 'so_buoc': len(buoc)}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_94_drop_dict_1",
+  "function": "ghep_buoc",
+  "before": "{'trang_thai': 'not_measured', 'ly_do': ly_do, 'so_buoc': len(buoc)}",
+  "after": "{'trang_thai': 'not_measured', 'so_buoc': len(buoc)}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_94_drop_dict_2",
+  "function": "ghep_buoc",
+  "before": "{'trang_thai': 'not_measured', 'ly_do': ly_do, 'so_buoc': len(buoc)}",
+  "after": "{'trang_thai': 'not_measured', 'ly_do': ly_do}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_103_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "job.get('name')",
+  "after": "job.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_116_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "type(sy)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_120_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "all((type(s) is dict for s in sy))",
+  "after": "all()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_125_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "all((type(s) is dict and _so(s.get('number'), 1) for s in st))",
+  "after": "all()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_131_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "sorted(st, key=lambda s: s['number'])",
+  "after": "sorted(key=lambda s: s['number'])",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_131_drop_keywords",
+  "function": "ghep_buoc",
+  "before": "sorted(st, key=lambda s: s['number'])",
+  "after": "sorted(st)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_135_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "enumerate(ung)",
+  "after": "enumerate()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_161_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(buoc)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_162_drop_elt_0",
+  "function": "ghep_buoc",
+  "before": "(k, i)",
+  "after": "(i,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_162_drop_elt_1",
+  "function": "ghep_buoc",
+  "before": "(k, i)",
+  "after": "(k,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_169_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(buoc)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_190_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "type(st)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_195_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len({s['number'] for s in st})",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_197_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "len(st)",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_211_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "s.get('conclusion')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_272_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "s.get('name')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_274_drop_elt_0",
+  "function": "ghep_buoc",
+  "before": "('Set up job', 'Complete job')",
+  "after": "('Complete job',)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_274_drop_elt_1",
+  "function": "ghep_buoc",
+  "before": "('Set up job', 'Complete job')",
+  "after": "('Set up job',)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_276_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "str(s.get('name')).startswith('Post ')",
+  "after": "str(s.get('name')).startswith()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_284_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "_chuoi(s.get('name'))",
+  "after": "_chuoi()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_285_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "s.get('name')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_287_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "ten_du_kien(y)",
+  "after": "ten_du_kien()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_315_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "type(s)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_344_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "s.get('name')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_355_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "_gio(ung[i].get('started_at'))",
+  "after": "_gio()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_357_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "_gio(ung[i].get('completed_at'))",
+  "after": "_gio()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_359_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "_gio(b['gio'])",
+  "after": "_gio()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_377_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "type(s)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_381_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "s.get('number')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_396_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "str(s.get('name'))",
+  "after": "str()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_408_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "ung[i].get('started_at')",
+  "after": "ung[i].get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_411_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "ung[i].get('completed_at')",
+  "after": "ung[i].get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_437_drop_single_arg",
+  "function": "ghep_buoc",
+  "before": "s.get('name')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_10_drop_elt_0",
+  "function": "chan_buoc",
+  "before": "(wf['jobs'][k], wf['jobs'][k]['steps'][i])",
+  "after": "(wf['jobs'][k]['steps'][i],)",
+  "rank": "GIET",
+  "kill": [
+   "c23_chi_loi_goi_that"
+  ],
+  "cases_measured": 27
+ },
+ {
+  "id": "chan_buoc_10_drop_elt_1",
+  "function": "chan_buoc",
+  "before": "(wf['jobs'][k], wf['jobs'][k]['steps'][i])",
+  "after": "(wf['jobs'][k],)",
+  "rank": "GIET",
+  "kill": [
+   "c23_chi_loi_goi_that"
+  ],
+  "cases_measured": 27
+ },
+ {
+  "id": "chan_buoc_11_drop_single_arg",
+  "function": "chan_buoc",
+  "before": "bool('defaults' in wf or _env_chan(wf) or 'defaults' in j or _env_chan(j) or set(s) - KHOA_BUOC or (s.get('shell', 'bash') not in ('bash', 'pwsh', 'sh')) or any((re.search('GITHUB_(ENV|PATH)', str(t.get('run', ''))) for t in j['steps'][:i])))",
+  "after": "bool()",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_31_drop_single_arg",
+  "function": "chan_buoc",
+  "before": "_env_chan(wf)",
+  "after": "_env_chan()",
+  "rank": "GIET",
+  "kill": [
+   "c23_chi_loi_goi_that"
+  ],
+  "cases_measured": 27
+ },
+ {
+  "id": "chan_buoc_33_drop_single_arg",
+  "function": "chan_buoc",
+  "before": "_env_chan(j)",
+  "after": "_env_chan()",
+  "rank": "GIET",
+  "kill": [
+   "c23_chi_loi_goi_that"
+  ],
+  "cases_measured": 27
+ },
+ {
+  "id": "chan_buoc_34_set_intersection",
+  "function": "chan_buoc",
+  "before": "set(s) - KHOA_BUOC",
+  "after": "set(s) & KHOA_BUOC",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_36_drop_single_arg",
+  "function": "chan_buoc",
+  "before": "any((re.search('GITHUB_(ENV|PATH)', str(t.get('run', ''))) for t in j['steps'][:i]))",
+  "after": "any()",
+  "rank": "GIET",
+  "kill": [
+   "c23_chi_loi_goi_that"
+  ],
+  "cases_measured": 27
+ },
+ {
+  "id": "chan_buoc_55_drop_single_arg",
+  "function": "chan_buoc",
+  "before": "set(s)",
+  "after": "set()",
+  "rank": "GIET",
+  "kill": [
+   "c31_che_do_duong_khac"
+  ],
+  "cases_measured": 3
+ },
+ {
+  "id": "chan_buoc_60_drop_elt_0",
+  "function": "chan_buoc",
+  "before": "('bash', 'pwsh', 'sh')",
+  "after": "('pwsh', 'sh')",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_60_drop_elt_1",
+  "function": "chan_buoc",
+  "before": "('bash', 'pwsh', 'sh')",
+  "after": "('bash', 'sh')",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_60_drop_elt_2",
+  "function": "chan_buoc",
+  "before": "('bash', 'pwsh', 'sh')",
+  "after": "('bash', 'pwsh')",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_96_drop_single_arg",
+  "function": "chan_buoc",
+  "before": "str(t.get('run', ''))",
+  "after": "str()",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "tach_buoc_4_reverse_iter",
+  "function": "tach_buoc",
+  "before": "for d in dong:\n    t = than(d)\n    if t.startswith('##[group]Run '):\n        buoc.append({'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'})\n    elif buoc and (b := buoc[-1])['mo']:\n        mau = '\\x1b[36;1m' in d\n        if t == '##[endgroup]':\n            b['mo'] = False\n        elif mau and b['tien_to']:\n            b['in_lai'].append(t)\n        else:\n            b['ok'], b['tien_to'] = (b['ok'] and (not mau) and (not t.startswith('##[group]')) and (not b['tien_to'] or t.startswith('shell: ')), False)\n    elif buoc:\n        buoc[-1]['phan'].append(t)",
+  "after": "for d in reversed(dong):\n    t = than(d)\n    if t.startswith('##[group]Run '):\n        buoc.append({'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'})\n    elif buoc and (b := buoc[-1])['mo']:\n        mau = '\\x1b[36;1m' in d\n        if t == '##[endgroup]':\n            b['mo'] = False\n        elif mau and b['tien_to']:\n            b['in_lai'].append(t)\n        else:\n            b['ok'], b['tien_to'] = (b['ok'] and (not mau) and (not t.startswith('##[group]')) and (not b['tien_to'] or t.startswith('shell: ')), False)\n    elif buoc:\n        buoc[-1]['phan'].append(t)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_20_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "than(d)",
+  "after": "than()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_21_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "t.startswith('##[group]Run ')",
+  "after": "t.startswith()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_31_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "buoc.append({'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'})",
+  "after": "buoc.append()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_38_drop_dict_0",
+  "function": "tach_buoc",
+  "before": "{'hop_le': not b['mo'] and b['ok'] and (not b['tien_to']) and (b['in_lai'][:1] == [b['lenh']])}",
+  "after": "{}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_0",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_1",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'lenh': t[len('##[group]Run '):], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_2",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_3",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_4",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_5",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'gio': d[:19] + 'Z'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_46_drop_dict_6",
+  "function": "tach_buoc",
+  "before": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'}",
+  "after": "{'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_96_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "buoc[-1]['phan'].append(t)",
+  "after": "buoc[-1]['phan'].append()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_121_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "b['in_lai'].append(t)",
+  "after": "b['in_lai'].append()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_123_drop_elt_0",
+  "function": "tach_buoc",
+  "before": "(b['ok'] and (not mau) and (not t.startswith('##[group]')) and (not b['tien_to'] or t.startswith('shell: ')), False)",
+  "after": "(False,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_123_drop_elt_1",
+  "function": "tach_buoc",
+  "before": "(b['ok'] and (not mau) and (not t.startswith('##[group]')) and (not b['tien_to'] or t.startswith('shell: ')), False)",
+  "after": "(b['ok'] and (not mau) and (not t.startswith('##[group]')) and (not b['tien_to'] or t.startswith('shell: ')),)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_135_drop_elt_0",
+  "function": "tach_buoc",
+  "before": "[b['lenh']]",
+  "after": "[]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_137_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "len('##[group]Run ')",
+  "after": "len()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_219_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "t.startswith('##[group]')",
+  "after": "t.startswith()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_222_drop_single_arg",
+  "function": "tach_buoc",
+  "before": "t.startswith('shell: ')",
+  "after": "t.startswith()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_4_reverse_iter",
+  "function": "do_dau_duong",
+  "before": "for b, (k, i) in zip(buoc, ghep or []):\n    s = wf['jobs'][k]['steps'][i]\n    run = s.get('run') if 'uses' not in s else None\n    if not (type(run) is str and b['hop_le'] and (run.rstrip('\\n') == '\\n'.join(b['in_lai']))):\n        continue\n    so += 1\n    goi = [RE_LOI_GOI.fullmatch(d) for d in dong_logic(run.rstrip('\\n').split('\\n')) if d]\n    chan = chan_buoc(wf, k, i) or any((g and g[1] for g in goi))\n    for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):\n        muc = {'lenh': b['lenh'], 'duong_dan': duong}\n        if duong not in moi or chan:\n            kq.append(muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'})\n        else:\n            van = '\\n'.join(b['phan']) + '\\n'\n            k = re.search(moi[duong], van, re.M) if (ok := xanh(van, moi[duong])) else None\n            kq.append(muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []})",
+  "after": "for b, (k, i) in reversed(zip(buoc, ghep or [])):\n    s = wf['jobs'][k]['steps'][i]\n    run = s.get('run') if 'uses' not in s else None\n    if not (type(run) is str and b['hop_le'] and (run.rstrip('\\n') == '\\n'.join(b['in_lai']))):\n        continue\n    so += 1\n    goi = [RE_LOI_GOI.fullmatch(d) for d in dong_logic(run.rstrip('\\n').split('\\n')) if d]\n    chan = chan_buoc(wf, k, i) or any((g and g[1] for g in goi))\n    for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):\n        muc = {'lenh': b['lenh'], 'duong_dan': duong}\n        if duong not in moi or chan:\n            kq.append(muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'})\n        else:\n            van = '\\n'.join(b['phan']) + '\\n'\n            k = re.search(moi[duong], van, re.M) if (ok := xanh(van, moi[duong])) else None\n            kq.append(muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []})",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_13_drop_elt_0",
+  "function": "do_dau_duong",
+  "before": "([], 0)",
+  "after": "(0,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_13_drop_elt_1",
+  "function": "do_dau_duong",
+  "before": "([], 0)",
+  "after": "([],)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_22_reverse_iter",
+  "function": "do_dau_duong",
+  "before": "for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):\n    muc = {'lenh': b['lenh'], 'duong_dan': duong}\n    if duong not in moi or chan:\n        kq.append(muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'})\n    else:\n        van = '\\n'.join(b['phan']) + '\\n'\n        k = re.search(moi[duong], van, re.M) if (ok := xanh(van, moi[duong])) else None\n        kq.append(muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []})",
+  "after": "for duong in reversed(dict.fromkeys([g[2] for g in goi] if goi and all(goi) else [])):\n    muc = {'lenh': b['lenh'], 'duong_dan': duong}\n    if duong not in moi or chan:\n        kq.append(muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'})\n    else:\n        van = '\\n'.join(b['phan']) + '\\n'\n        k = re.search(moi[duong], van, re.M) if (ok := xanh(van, moi[duong])) else None\n        kq.append(muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []})",
+  "rank": "GIET",
+  "kill": [
+   "c27_f02_yaml_khong_toi_gian"
+  ],
+  "cases_measured": 3
+ },
+ {
+  "id": "do_dau_duong_23_drop_elt_0",
+  "function": "do_dau_duong",
+  "before": "(kq, so)",
+  "after": "(so,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_23_drop_elt_1",
+  "function": "do_dau_duong",
+  "before": "(kq, so)",
+  "after": "(kq,)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_41_continue_to_pass",
+  "function": "do_dau_duong",
+  "before": "continue",
+  "after": "pass",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_50_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "dict.fromkeys([g[2] for g in goi] if goi and all(goi) else [])",
+  "after": "dict.fromkeys()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_74_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "s.get('run')",
+  "after": "s.get()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_80_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "RE_LOI_GOI.fullmatch(d)",
+  "after": "RE_LOI_GOI.fullmatch()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_85_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "any((g and g[1] for g in goi))",
+  "after": "any()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_90_drop_dict_0",
+  "function": "do_dau_duong",
+  "before": "{'lenh': b['lenh'], 'duong_dan': duong}",
+  "after": "{'duong_dan': duong}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_90_drop_dict_1",
+  "function": "do_dau_duong",
+  "before": "{'lenh': b['lenh'], 'duong_dan': duong}",
+  "after": "{'lenh': b['lenh']}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_118_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "dong_logic(run.rstrip('\\n').split('\\n'))",
+  "after": "dong_logic()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_139_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "kq.append(muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'})",
+  "after": "kq.append()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_144_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "kq.append(muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []})",
+  "after": "kq.append()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_151_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "type(run)",
+  "after": "type()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_157_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "run.rstrip('\\n')",
+  "after": "run.rstrip()",
+  "rank": "GIET",
+  "kill": [
+   "c48_nguyen_van_va_mien"
+  ],
+  "cases_measured": 5
+ },
+ {
+  "id": "do_dau_duong_159_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "'\\n'.join(b['in_lai'])",
+  "after": "'\\n'.join()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_165_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "run.rstrip('\\n').split('\\n')",
+  "after": "run.rstrip('\\n').split()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_177_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "all(goi)",
+  "after": "all()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_192_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "'\\n'.join(b['phan'])",
+  "after": "'\\n'.join()",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_238_drop_dict_0",
+  "function": "do_dau_duong",
+  "before": "{'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+  "after": "{'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_238_drop_dict_1",
+  "function": "do_dau_duong",
+  "before": "{'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+  "after": "{'trang_thai': 'not_measured'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_251_drop_dict_0",
+  "function": "do_dau_duong",
+  "before": "{'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+  "after": "{'dong_khop': k.group(0).splitlines() if k else []}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_251_drop_dict_1",
+  "function": "do_dau_duong",
+  "before": "{'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+  "after": "{'trang_thai': 'passed' if ok else 'failed'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_262_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "run.rstrip('\\n')",
+  "after": "run.rstrip()",
+  "rank": "GIET",
+  "kill": [
+   "c48_nguyen_van_va_mien"
+  ],
+  "cases_measured": 5
+ },
+ {
+  "id": "do_dau_duong_342_drop_single_arg",
+  "function": "do_dau_duong",
+  "before": "k.group(0)",
+  "after": "k.group()",
+  "rank": "SONG",
+  "kill": [],
+  "cases_measured": 52
+ }
+]

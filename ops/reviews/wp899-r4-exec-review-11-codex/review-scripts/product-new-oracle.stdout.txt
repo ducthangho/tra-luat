@@ -1,0 +1,3 @@
+PRODUCT 2000 mismatches 0
+{'bad_name': 243, 'none': 776, 'bad_count': 243, 'bad_number': 256, 'bad_job': 236, 'bad_time': 246}
+[]

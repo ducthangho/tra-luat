@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/equivalence_new7.py"
+  ],
+  "returncode": 0,
+  "seconds": 2.652278184890747,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/equivalence-new.stdout.txt",
+    "bytes": 76,
+    "sha256": "6ce67ff3f07dc1636ea67f4b57678cdca87264de95a8dd890cc7ea85260471d0"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/equivalence-new.stderr.txt",
+    "bytes": 120,
+    "sha256": "f03df7c79df1582302efb73b1c41924e7770c2a818ae79400ce129a05da2e47a"
+  }
+}

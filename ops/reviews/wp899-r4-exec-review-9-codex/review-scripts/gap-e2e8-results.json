@@ -1,0 +1,21 @@
+[
+  {
+    "source": "head",
+    "answer": {
+      "gate": "not_measured",
+      "ghep_buoc": {
+        "trang_thai": "not_measured",
+        "ly_do": "workflow_tai_sha_khong_doc_duoc",
+        "so_buoc": 2
+      },
+      "markers": []
+    }
+  },
+  {
+    "source": "mutant",
+    "answer": {
+      "exception": "RecursionError",
+      "message": "maximum recursion depth exceeded"
+    }
+  }
+]

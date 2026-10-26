@@ -1,0 +1,37 @@
+CURRENT_SESSION_MEASURED 207 REMAINING 804
+_duong#300:chuoi2 f0d51126db554a32 GIET
+[KQ] do_dau_duong#302:ifexp_than f413cb48907dc51c GIET
+[KQ] do_dau_duong#300:chuoi5 b5e5ccbf78129dd2 GIET
+[KQ] do_dau_duong#300:chuoi4 56d54c60ead1d008 GIET
+[KQ] do_dau_duong#300:chuoi3 a2df667493327b83 GIET
+[KQ] do_dau_duong#309:chuoi0 407d7ef869d35b21 GIET
+[KQ] do_dau_duong#309:chuoi1 aeee777606867c00 GIET
+[KQ] do_dau_duong#309:chuoi2 5a49ba2e8d9df26f GIET
+[KQ] do_dau_duong#310:chuoi0 615f5763711dfc34 GIET
+[KQ] do_dau_duong#310:chuoi1 0dca6f22478c61a7 GIET
+[KQ] do_dau_duong#309:chuoi3 689a20a238bce1be GIET
+[KQ] do_dau_duong#309:chuoi5 ee52e9bcd7a9e7cb GIET
+[KQ] do_dau_duong#309:chuoi4 8794c838d9e13d47 GIET
+[KQ] do_dau_duong#309:chuoi7 c81cbf651d612045 GIET
+[KQ] do_dau_duong#309:chuoi6 177bdebbbeae0660 GIET
+[KQ] do_dau_duong#322:chuoi0 c6797454ac09fab5 GIET
+[KQ] do_dau_duong#322:chuoi1 aa9a2ef93bc6b750 GIET
+[KQ] do_dau_duong#322:chuoi2 76c78d4cda42812c GIET
+[KQ] do_dau_duong#322:chuoi3 cc6bb4a0f2dbb54e GIET
+[KQ] do_dau_duong#310:chuoi2 dd408454b902a886 GIET
+[KQ] do_dau_duong#322:chuoi4 fb10a330b0d8b13b GIET
+[KQ] do_dau_duong#322:chuoi5 d7fecf6612c4fe3c GIET
+[KQ] do_dau_duong#310:chuoi3 bf42864d982f4b74 GIET
+[KQ] do_dau_duong#323:chuoi0 9925d74445f95598 GIET
+[KQ] do_dau_duong#310:chuoi4 0d3cebe2f534cc72 GIET
+[KQ] do_dau_duong#323:chuoi1 4fdcf5ea095a2c36 GIET
+[KQ] do_dau_duong#323:chuoi2 504eb5acdb04fbf6 GIET
+[KQ] do_dau_duong#323:chuoi3 52a089ca2c852c7c GIET
+[KQ] do_dau_duong#323:chuoi4 eec5597e68239704 GIET
+[KQ] do_dau_duong#323:chuoi5 e5f5365e13dcf633 GIET
+[KQ] do_dau_duong#310:chuoi5 d06526fc242e21aa GIET
+[KQ] do_dau_duong#344:+1 3fa5ab2b9bfacda5 GIET
+[KQ] do_dau_duong#344:-1 ed4e9999b4d9289e GIET
+DOT BIEN DONG: 1003/1011 giet · 8 tuong duong co chung minh · 0 song · 0 tin dung gia · 0 chung minh tuong duong sai
+TONG DONG: DAT
+

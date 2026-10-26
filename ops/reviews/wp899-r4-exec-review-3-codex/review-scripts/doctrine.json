@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "doctrine-scan",
+    "--root",
+    "."
+  ],
+  "returncode": 0,
+  "seconds": 0.40940117835998535,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/doctrine.stdout.txt",
+    "bytes": 70,
+    "sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/doctrine.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

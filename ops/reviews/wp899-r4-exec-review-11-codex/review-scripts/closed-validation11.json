@@ -1,0 +1,13 @@
+{
+  "records": 1009,
+  "rank_counts": {
+    "GIET": 1001,
+    "SONG": 8
+  },
+  "all_hashes_match": true,
+  "frontier_measured": 57,
+  "frontier_ranks": {
+    "SONG": 8,
+    "GIET": 49
+  }
+}

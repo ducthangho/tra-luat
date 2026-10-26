@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/close_legacy_current.py"
+  ],
+  "returncode": 1,
+  "seconds": 14.047966241836548,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/close-legacy.stdout.txt",
+    "bytes": 85,
+    "sha256": "5899099f33b089f17e2cbca11ed5c775c499af8571ced11c1cacf9c25cd4e7e1"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/close-legacy.stderr.txt",
+    "bytes": 544,
+    "sha256": "7b1947611f8bc8eba57983c67adabb9c1f5cb04b5bdceb71a50554c0399a9063"
+  }
+}

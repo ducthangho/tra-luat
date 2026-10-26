@@ -1,0 +1,1570 @@
+{
+  "rc": 0,
+  "output": "",
+  "count": 119,
+  "rows": [
+    {
+      "case": "bước tên 'Set up job'",
+      "expected_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "actual_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "bước tên 'Complete job'",
+      "expected_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "actual_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "bước tên 'Set up jobx'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Set up jo'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'SET UP JOB'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'set up job'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'sET UP JOB'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên ' Set up job'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Set up job '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Complete jobx'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Complete jo'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'COMPLETE JOB'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'complete job'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'cOMPLETE JOB'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên ' Complete job'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Complete job '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Post x'",
+      "expected_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "actual_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "bước tên 'Post  x'",
+      "expected_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "actual_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "bước tên 'Postx'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'post x'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên ' Post x'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'POST x'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "bước tên 'Post'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "name: 'K' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: 'K kx' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: 'K ' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: 'K K' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: 'k k' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: 'k K' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: ' K k' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: 'K k ' REST lệch",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST 'Run python ops/thu_gia_test.pyx'",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST 'Run python ops/thu_gia_test.p'",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST 'RUN PYTHON OPS/THU_GIA_TEST.PY'",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST 'run python ops/thu_gia_test.py'",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST 'rUN PYTHON OPS/THU_GIA_TEST.PY'",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST ' Run python ops/thu_gia_test.py'",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "tên REST 'Run python ops/thu_gia_test.py '",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "conclusion success",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "conclusion failure",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "conclusion neutral",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "conclusion cancelled",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "conclusion timed_out",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "conclusion Skipped",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "conclusion SKIPPED",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "skipped mà có nhóm",
+      "expected_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "actual_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Build' / alias 'Build'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "job 'B.ild (1)' / alias 'B.ild'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "job 'Build (1)' / alias 'Build'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "job 'Build ()' / alias 'Build'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "job 'Buildx' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Buil' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'BUILD' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'build' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'bUILD' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job ' Build' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Build ' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Build(1)' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Build  (1)' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Build (1) ' / alias 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "job 'Bxild' / alias 'B.ild'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "alias ' Build ' / REST ' Build '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "alias ' Build ' / REST 'Build'",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "env job khoá 'CI_DANG_KY_'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá 'CI_DANG_KY_X'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá 'CI_DANG_KY_x'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá 'CI_DANG_KY'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá 'ci_dang_ky_'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá ' CI_DANG_KY_'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá 'CI_DANG_KY_ '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "env job khoá 'XCI_DANG_KY_X'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "shell 'bash'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "shell 'pwsh'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "shell 'sh'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "shell None",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'bashx'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'bas'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'BASH'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell ' bash'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'bash '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'pwshx'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'pws'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'PWSH'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell ' pwsh'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'pwsh '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'shx'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 's'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'SH'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell ' sh'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "shell 'sh '",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'id'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'if'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'timeout-minutes'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'continue-on-error'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'env'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'with'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'working-directory'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'Name'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "khoá bước 'ID'",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "GITHUB_ENV trước, skipped",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "header 2 dấu cách",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "shell: đầu có cách",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "endgroup đầu có cách",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "shell: hoa",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "run: dòng đầu rỗng",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "dòng đầu có \\r",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "defaults: null workflow",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "defaults: null job",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "github_env chữ thường đứng trước",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "GITHUB_PATH không có $",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ],
+      "actual_markers": [
+        [
+          "not_measured",
+          "che_do_khong_xac_dinh"
+        ]
+      ]
+    },
+    {
+      "case": "mã màu 36m (không ;1m)",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "header ##[group]run thường",
+      "expected_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "actual_ghep": "a_so_nhom_khac_so_buoc_rest_chay",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "##[GROUP] hoa sau shell:",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [
+        [
+          "passed",
+          null
+        ]
+      ],
+      "actual_markers": [
+        [
+          "passed",
+          null
+        ]
+      ]
+    },
+    {
+      "case": "run: có \\r cuối",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "giờ REST thiếu Z",
+      "expected_ghep": "c_gio_header_ngoai_cua_so",
+      "actual_ghep": "c_gio_header_ngoai_cua_so",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "uses: rỗng ở bước",
+      "expected_ghep": "passed",
+      "actual_ghep": "passed",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "uses: rỗng ở job",
+      "expected_ghep": "d_job_yaml_khong_duy_nhat",
+      "actual_ghep": "d_job_yaml_khong_duy_nhat",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "name: null",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    },
+    {
+      "case": "run: rỗng kèm uses:",
+      "expected_ghep": "b_ten_buoc_lech",
+      "actual_ghep": "b_ten_buoc_lech",
+      "expected_markers": [],
+      "actual_markers": []
+    }
+  ]
+}

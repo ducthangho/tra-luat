@@ -1,0 +1,222 @@
+{
+  "single_parse_call": true,
+  "baseline": [
+    0,
+    "\n"
+  ],
+  "injections_and_types": [
+    {
+      "test": "parse_exception",
+      "class": "OverflowError",
+      "answer": null
+    },
+    {
+      "test": "parse_exception",
+      "class": "LookupError",
+      "answer": null
+    },
+    {
+      "test": "parse_exception",
+      "class": "TypeError",
+      "answer": null
+    },
+    {
+      "test": "parse_exception",
+      "class": "RuntimeError",
+      "answer": null
+    },
+    {
+      "test": "parse_exception",
+      "class": "OSError",
+      "answer": null
+    },
+    {
+      "test": "parse_exception",
+      "class": "ParserFault",
+      "answer": null
+    },
+    {
+      "test": "base_exception",
+      "class": "KeyboardInterrupt",
+      "answer": "KeyboardInterrupt"
+    },
+    {
+      "test": "base_exception",
+      "class": "SystemExit",
+      "answer": "SystemExit"
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "None",
+      "input_type": "NoneType",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "[]",
+      "input_type": "list",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "'jobs'",
+      "input_type": "str",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "4",
+      "input_type": "int",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "{}",
+      "input_type": "dict",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "{'jobs': []}",
+      "input_type": "dict",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "{'jobs': None}",
+      "input_type": "dict",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "{'jobs': {}}",
+      "input_type": "DictSubclass",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "{'jobs': {}}",
+      "input_type": "dict",
+      "answer": null
+    },
+    {
+      "test": "type_gate",
+      "input_repr": "{'jobs': {}}",
+      "input_type": "dict",
+      "answer": {
+        "jobs": {}
+      }
+    }
+  ],
+  "mutants": [
+    {
+      "catch": "yaml.YAMLError",
+      "path": "patch-catch-0.py",
+      "source_sha256": "74eec4fb712c5d30e5c364ddacecec189754cc2e558e4fe8c658797543a0af01",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "RecursionError",
+      "path": "patch-catch-1.py",
+      "source_sha256": "a9b6d50daae9e583919df68720b9b9c818d9a953f6639f06ad0f16bf248dd065",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: ValueError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "ValueError",
+      "path": "patch-catch-2.py",
+      "source_sha256": "12edb06101449381d822cf45735bff3fd8f78793b9ed8f9a198651cd976dd5e8",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "KeyError",
+      "path": "patch-catch-3.py",
+      "source_sha256": "eb1ccd1b18d098f62ab1011b0f02cf2cc5bed63299aee69f0038f4b9fee8dba2",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "IndexError",
+      "path": "patch-catch-4.py",
+      "source_sha256": "a6aadf388aa833ab6bc419cc37794bb3555353985659016d31e14d7c3342b853",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "AttributeError",
+      "path": "patch-catch-5.py",
+      "source_sha256": "50a0206c9bfda3e6f027f771cf0c5be583cead833894d3e98b13d51445ac5b7f",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "OverflowError",
+      "path": "patch-catch-6.py",
+      "source_sha256": "309742b80a294efc759663d202c4205e99ddfaf9246e4ca0badbf754b018987c",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "LookupError",
+      "path": "patch-catch-7.py",
+      "source_sha256": "8ee59300ff68e90e90d091b0b074c2dbe7b33076f598d2eb4206cbb30c70757c",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "TypeError",
+      "path": "patch-catch-8.py",
+      "source_sha256": "a298cb5bcc85ebdea6c18eaf330d8a57b5cc9241c3558731a044b5c67097d97f",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+      "rank": "GIET"
+    },
+    {
+      "catch": "(yaml.YAMLError, RecursionError, ValueError, KeyError, IndexError, AttributeError)",
+      "path": "patch-catch-9.py",
+      "source_sha256": "a56f46659cc3a916f4554024190da8b816ea4afd0775c6f9ab68383084f93e41",
+      "case": "c52_tap_dong",
+      "rc": 3,
+      "output": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: OverflowError\n",
+      "rank": "GIET"
+    },
+    {
+      "mutation": "widen try to include the type gate",
+      "path": "patch-wide-try.py",
+      "case": "r11_scope_outside_parse",
+      "case_rc": 3,
+      "output": "DO:r11_scope_outside_parse:validation exception swallowed",
+      "rank": "GIET",
+      "independent_test_not_repository_case": true,
+      "observations": [
+        {
+          "source": "head",
+          "answer": "ValidationFault"
+        },
+        {
+          "source": "mutant",
+          "answer": null
+        }
+      ]
+    }
+  ]
+}

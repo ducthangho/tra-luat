@@ -1,0 +1,429 @@
+[
+  {
+    "name": "job_rest_type",
+    "old": "if type(ten) is str and type(j) is dict and any(",
+    "new": "if type(j) is dict and any(",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "job_match_search",
+    "old": "and re.fullmatch(re.escape(x)",
+    "new": "and re.search(re.escape(x)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "job_matrix_nonempty",
+    "old": "r\"(?: \\(.*\\))?\"",
+    "new": "r\"(?: \\(.+\\))?\"",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "job_dotall_add",
+    "old": "ten) for x in (k, j.get(\"name\"))",
+    "new": "ten, re.S) for x in (k, j.get(\"name\"))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "job_alias_exact_drop",
+    "old": "type(x) is str and x and \"${{\" not in x and re.fullmatch",
+    "new": "type(x) is str and x and ten != j.get(\"name\") and \"${{\" not in x and re.fullmatch",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "name_use_last_line",
+    "old": "v.split(\"\\n\")[0] if _chuoi(v)",
+    "new": "v.rstrip(\"\\n\").split(\"\\n\")[-1] if _chuoi(v)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "name_rest_strip",
+    "old": "s.get(\"name\") != ten_du_kien(y)",
+    "new": "s.get(\"name\").strip() != ten_du_kien(y)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_drop_type",
+    "old": "if type(v) is str and RE_GIO.fullmatch(v) else None",
+    "new": "if RE_GIO.fullmatch(v) else None",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_year0_drop",
+    "old": "    except ValueError:\n        return None",
+    "new": "    except KeyError:\n        return None",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_calendar_date_only",
+    "old": "strptime(v[:19], \"%Y-%m-%dT%H:%M:%S\")",
+    "new": "strptime(v[:10], \"%Y-%m-%d\")",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_low_strict",
+    "old": "a <= h <= z",
+    "new": "a < h <= z",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_hi_strict",
+    "old": "a <= h <= z",
+    "new": "a <= h < z",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_or_bounds",
+    "old": "a <= h <= z",
+    "new": "(a <= h or h <= z)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_low_only",
+    "old": "a <= h <= z",
+    "new": "a <= h",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_hi_only",
+    "old": "a <= h <= z",
+    "new": "h <= z",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "rest_number_float",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "(isinstance(s.get(\"number\"), (int, float)) and not isinstance(s.get(\"number\"), bool) and s[\"number\"] >= 1)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "rest_number_bool",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "(isinstance(s.get(\"number\"), int) and s[\"number\"] >= 1)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "rest_steps_list_drop",
+    "old": "type(st) is list and all(",
+    "new": "all(",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "rest_steps_all_any",
+    "old": "all(type(s) is dict and _so(s.get(\"number\"), 1)",
+    "new": "any(type(s) is dict and _so(s.get(\"number\"), 1)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "yaml_steps_all_any",
+    "old": "not all(type(s) is dict for s in sy)",
+    "new": "not any(type(s) is dict for s in sy)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "number_sort_desc",
+    "old": "key=lambda s: s[\"number\"])",
+    "new": "key=lambda s: -s[\"number\"])",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "metadata_keep_setup",
+    "old": "not in (\"Set up job\", \"Complete job\")",
+    "new": "not in (\"Complete job\",)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "metadata_keep_complete",
+    "old": "not in (\"Set up job\", \"Complete job\")",
+    "new": "not in (\"Set up job\",)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "metadata_post_anywhere",
+    "old": "str(s.get(\"name\")).startswith(\"Post \")",
+    "new": "(\"Post \" in str(s.get(\"name\")))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_env_shape_drop",
+    "old": "type(v) is not dict or any(str(k)",
+    "new": "False or any(str(k)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_env_prefix_exact",
+    "old": "str(k).startswith(\"CI_DANG_KY_\")",
+    "new": "str(k) == \"CI_DANG_KY_\"",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_shell_no_pwsh",
+    "old": "(\"bash\", \"pwsh\", \"sh\")",
+    "new": "(\"bash\", \"sh\")",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_shell_no_sh",
+    "old": "(\"bash\", \"pwsh\", \"sh\")",
+    "new": "(\"bash\", \"pwsh\")",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_shell_null_default",
+    "old": "s.get(\"shell\", \"bash\")",
+    "new": "(s.get(\"shell\") or \"bash\")",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_env_presence_not_value",
+    "old": "_env_chan(wf.get(\"env\"))",
+    "new": "(\"env\" in wf)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_env_job_presence",
+    "old": "_env_chan(j.get(\"env\"))",
+    "new": "(\"env\" in j)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_key_id_drop",
+    "old": "{\"name\", \"id\", \"if\", \"run\", \"shell\",",
+    "new": "{\"name\", \"if\", \"run\", \"shell\",",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_key_if_drop",
+    "old": "{\"name\", \"id\", \"if\", \"run\", \"shell\",",
+    "new": "{\"name\", \"id\", \"run\", \"shell\",",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_key_timeout_drop",
+    "old": "\"timeout-minutes\", \"continue-on-error\"}",
+    "new": "\"continue-on-error\"}",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_key_coe_drop",
+    "old": "\"timeout-minutes\", \"continue-on-error\"}",
+    "new": "\"timeout-minutes\"}",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_prior_skip_first",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][1:i]))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_prior_only_first",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][:1]))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_prior_only_last",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][max(i-1,0):i]))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_prior_include_current",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][:i+1]))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "run_rstrip_all",
+    "old": "run.rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "new": "run.rstrip() == \"\\n\".join(b[\"in_lai\"])",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "run_type_coerce",
+    "old": "type(run) is str and b[\"hop_le\"] and run.rstrip",
+    "new": "b[\"hop_le\"] and str(run).rstrip",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "dd_group_reverse",
+    "old": "for b, (k, i) in zip(buoc, ghep or []):",
+    "new": "for b, (k, i) in zip(reversed(buoc), ghep or []):",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "dd_map_reverse",
+    "old": "for b, (k, i) in zip(buoc, ghep or []):",
+    "new": "for b, (k, i) in zip(buoc, list(reversed(ghep or []))):",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "dd_output_dedupe",
+    "old": "for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):",
+    "new": "for duong in ([g[2] for g in goi] if goi and all(goi) else []):",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "log_group_close_exact",
+    "old": "if t.startswith(\"##[endgroup]\"):",
+    "new": "if t == \"##[endgroup]\":",
+    "raw_anchor_count": 0,
+    "replacement_equal_current": true
+  },
+  {
+    "name": "log_shell_suffix",
+    "old": "t.startswith(\"shell: \")",
+    "new": "t.startswith(\"shell:\")",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "log_nested_before_only",
+    "old": "and not t.startswith(\"##[group]\") and (",
+    "new": "and not (t.startswith(\"##[group]\") and b[\"tien_to\"]) and (",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "log_nested_after_only",
+    "old": "and not t.startswith(\"##[group]\") and (",
+    "new": "and not (t.startswith(\"##[group]\") and not b[\"tien_to\"]) and (",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "log_prefix_drop_ok",
+    "old": "b[\"ok\"] and not mau and",
+    "new": "not mau and",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "log_close_ignore_prefix",
+    "old": "not b[\"tien_to\"] and b[\"in_lai\"][:1]",
+    "new": "b[\"in_lai\"][:1]",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_defaults_wf_truthy",
+    "old": "\"defaults\" in wf or",
+    "new": "bool(wf.get(\"defaults\")) or",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_defaults_job_truthy",
+    "old": "or \"defaults\" in j or",
+    "new": "or bool(j.get(\"defaults\")) or",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_env_truthy",
+    "old": "return v is not None and (type(v) is not dict",
+    "new": "return bool(v) and (type(v) is not dict",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "mode_env_string_only",
+    "old": "type(v) is not dict or any(str(k)",
+    "new": "type(v) is str or any(str(k)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "number_type_bool_guard_drop",
+    "old": "type(s) is dict and _so(s.get(\"number\"), 1)",
+    "new": "type(s) is dict and isinstance(s.get(\"number\"), int) and s[\"number\"] >= 1",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "number_min_strict",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "_so(s.get(\"number\"), 2)",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "header_time_other_group",
+    "old": "(h := _gio(b[\"gio\"][:19] + \"Z\"))",
+    "new": "(h := _gio(buoc[0][\"gio\"][:19] + \"Z\"))",
+    "raw_anchor_count": 0,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "header_window_other_step",
+    "old": "_gio(ung[i].get(\"started_at\"))",
+    "new": "_gio(ung[0].get(\"started_at\"))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "time_current_end_other_step",
+    "old": "_gio(ung[i].get(\"completed_at\"))",
+    "new": "_gio(ung[0].get(\"completed_at\"))",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "name_only_first_rest",
+    "old": "for s, y in zip(ung, sy)):",
+    "new": "for s, y in list(zip(ung, sy))[:1]):",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  },
+  {
+    "name": "name_only_last_rest",
+    "old": "for s, y in zip(ung, sy)):",
+    "new": "for s, y in list(zip(ung, sy))[-1:]):",
+    "raw_anchor_count": 1,
+    "replacement_equal_current": false
+  }
+]

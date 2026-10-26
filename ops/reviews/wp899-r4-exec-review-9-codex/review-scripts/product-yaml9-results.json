@@ -1,0 +1,504 @@
+{
+  "git_commands": [
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "init",
+        "-q"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "5de99fc7a0392221fef9e988a604c58c3d062933\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "f8419716f4cb3357992d2ce508c3dfa46710b70f\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "f8419716f4cb3357992d2ce508c3dfa46710b70f",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "21b972c769aee4aeff516dcc1f47c20888a1b4b7\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "17c91e55b3c5a35216f0816bf087a969f317499c\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "05be7a06e2035a63a36b8593789ff3ef660a6190\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "05be7a06e2035a63a36b8593789ff3ef660a6190",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "9accd521630ae97038524d97fd1d430e089dc1cc\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "946fbd5ee97015ac11027da734fcf1d712146a92\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "ae778f347f70678ebcf283bf82e79ea586397ebc\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "ae778f347f70678ebcf283bf82e79ea586397ebc",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "1eea551efb4db9f8452016e5f9824ea638235ba3\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "f82266168acbf02b059992bce136e0109815c663\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "fd2a0ee02977f0649faabb3109f0e86b8140bb4e\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "fd2a0ee02977f0649faabb3109f0e86b8140bb4e",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "a61962aa55469ffdbc98ba5dd96957d41b428bab\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "a12d8d4aad56738333f1fabbde69dce04d2f076d\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "79fd162bc8abdf6e4121b69e817f1510e982030d\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "79fd162bc8abdf6e4121b69e817f1510e982030d",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "8dbf20db43f26e34179ad83388776e7bdc49fe2e\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "01bf6ccacd006b0be61a673027b533e6f7f3a1e6\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "1f0f0b250486469432f0c8e0c1b2ad0f8bd30829\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "1f0f0b250486469432f0c8e0c1b2ad0f8bd30829",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "ee17acaa3419c1267afa9e300675bd7ceca93423\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "e1e35938ccb49acaa50805bc60d55038f22b92a5\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "843ffee7d51131c211db9a05985cfc19af160863\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "843ffee7d51131c211db9a05985cfc19af160863",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "0ca1734dfcb9c702f85ffe44a68c471d203ebfd8\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "b6a86603f412b15da11958637849a84f5c03039f\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "7344859d3e831701ef9c9fb57b5e3a3ca6886c41\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "7344859d3e831701ef9c9fb57b5e3a3ca6886c41",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "f2f482465d7a331f5b884909ec820bd69e7ae737\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "hash-object",
+        "-w",
+        "--stdin"
+      ],
+      "rc": 0,
+      "stdout": "ac2e5bad9a55512e45c2f2afa3b935aed2c3c995\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "mktree"
+      ],
+      "rc": 0,
+      "stdout": "1393cb88d1a4bbf85b7ce49eda1b785000852f19\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/yaml-git",
+        "commit-tree",
+        "1393cb88d1a4bbf85b7ce49eda1b785000852f19",
+        "-m",
+        "Offline reader fixture"
+      ],
+      "rc": 0,
+      "stdout": "3feedde199097eb3bc3ec8ebaf832eb60a25097d\n",
+      "stderr": ""
+    }
+  ],
+  "results": [
+    {
+      "case": "valid_quoted",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "valid_quoted"
+      ],
+      "rc": 0,
+      "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 21b972c769aee4aeff516dcc1f47c20888a1b4b7 gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 995e49aab02c25cf968d16f87feb6c92a3cb84f47800226bb2003e9a7ebc8059\nNOT_MEASURED: 1\n",
+      "stderr": "",
+      "workflow_sha256": "bbd17b0d970edd2c8abaac92b4a9c9f87a18f37a76011d9b4417e198fde12e96",
+      "checkout_sha": "21b972c769aee4aeff516dcc1f47c20888a1b4b7",
+      "blob_oid": "5de99fc7a0392221fef9e988a604c58c3d062933"
+    },
+    {
+      "case": "invalid_date",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "invalid_date"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 330, in construct_yaml_timestamp\n    return datetime.date(year, month, day)\n           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^\nValueError: day is out of range for month\n",
+      "workflow_sha256": "e7618c4a0ee5815c9a08d05fdc4841eb5594074af5879635aa5290fac0baed31",
+      "checkout_sha": "9accd521630ae97038524d97fd1d430e089dc1cc",
+      "blob_oid": "17c91e55b3c5a35216f0816bf087a969f317499c"
+    },
+    {
+      "case": "invalid_hour",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "invalid_hour"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 350, in construct_yaml_timestamp\n    return datetime.datetime(year, month, day, hour, minute, second, fraction,\n           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                             tzinfo=tzinfo)\n                             ^^^^^^^^^^^^^^\nValueError: hour must be in 0..23\n",
+      "workflow_sha256": "c9699985be0e96b0726cffc2334fdcef7967ae820d51b3c636c995491a5cdd57",
+      "checkout_sha": "1eea551efb4db9f8452016e5f9824ea638235ba3",
+      "blob_oid": "946fbd5ee97015ac11027da734fcf1d712146a92"
+    },
+    {
+      "case": "invalid_int",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "invalid_int"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 263, in construct_yaml_int\n    return sign*int(value)\n                ~~~^^^^^^^\nValueError: invalid literal for int() with base 10: 'xyz'\n",
+      "workflow_sha256": "99b7ad5932fd7e232ee0e311ebf6e75e3d95abfbb3342c9ec2dcdac662edca05",
+      "checkout_sha": "a61962aa55469ffdbc98ba5dd96957d41b428bab",
+      "blob_oid": "f82266168acbf02b059992bce136e0109815c663"
+    },
+    {
+      "case": "invalid_float",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "invalid_float"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 292, in construct_yaml_float\n    return sign*float(value)\n                ~~~~~^^^^^^^\nValueError: could not convert string to float: 'abc'\n",
+      "workflow_sha256": "dfa95f4f00d0a8822509cc47ead0c0874543a7e3ded9454d5453b70c0ac15a80",
+      "checkout_sha": "8dbf20db43f26e34179ad83388776e7bdc49fe2e",
+      "blob_oid": "a12d8d4aad56738333f1fabbde69dce04d2f076d"
+    },
+    {
+      "case": "invalid_bool",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "invalid_bool"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 235, in construct_yaml_bool\n    return self.bool_values[value.lower()]\n           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^\nKeyError: 'maybe'\n",
+      "workflow_sha256": "10b457b24c531851219d1a19e9ee9a57cbb9c628fc91e30db05889327499ffc2",
+      "checkout_sha": "ee17acaa3419c1267afa9e300675bd7ceca93423",
+      "blob_oid": "01bf6ccacd006b0be61a673027b533e6f7f3a1e6"
+    },
+    {
+      "case": "empty_int",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "empty_int"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 241, in construct_yaml_int\n    if value[0] == '-':\n       ~~~~~^^^\nIndexError: string index out of range\n",
+      "workflow_sha256": "e64865a94efd1e8b54692bfa2abbe1558e3cfbc68a52ccc17ea85863e4790ba8",
+      "checkout_sha": "0ca1734dfcb9c702f85ffe44a68c471d203ebfd8",
+      "blob_oid": "e1e35938ccb49acaa50805bc60d55038f22b92a5"
+    },
+    {
+      "case": "empty_float",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "empty_float"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 274, in construct_yaml_float\n    if value[0] == '-':\n       ~~~~~^^^\nIndexError: string index out of range\n",
+      "workflow_sha256": "6fcb3a7fb11ba0b201bc9eebcd4ccaa9bb0890ca6d374b6d00364c57914f3411",
+      "checkout_sha": "f2f482465d7a331f5b884909ec820bd69e7ae737",
+      "blob_oid": "b6a86603f412b15da11958637849a84f5c03039f"
+    },
+    {
+      "case": "invalid_timestamp",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py",
+        "child",
+        "invalid_timestamp"
+      ],
+      "rc": 1,
+      "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/product_yaml9.py\", line 11, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(R/('yaml-out-'+key))],\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=m.ROOT),wf=lambda sha,path:m.git_blob(sha,path,goc=m.ROOT),moi_tu=moi))\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 356, in thu\n    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,\n                                     ~~~~~~^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance.py\", line 159, in doc_wf\n    wf = yaml.safe_load(van)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 125, in safe_load\n    return load(stream, SafeLoader)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/__init__.py\", line 81, in load\n    return loader.get_single_data()\n           ~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 51, in get_single_data\n    return self.construct_document(node)\n           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 60, in construct_document\n    for dummy in generator:\n                 ^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 413, in construct_yaml_map\n    value = self.construct_mapping(node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 218, in construct_mapping\n    return super().construct_mapping(node, deep=deep)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 143, in construct_mapping\n    value = self.construct_object(value_node, deep=deep)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 100, in construct_object\n    data = constructor(self, node)\n  File \"/root/.local/lib/python3.13/site-packages/yaml/constructor.py\", line 325, in construct_yaml_timestamp\n    values = match.groupdict()\n             ^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'groupdict'\n",
+      "workflow_sha256": "570a048147210977c3e8a9d263861ff14cd11812563f644eff232621d6e46fc3",
+      "checkout_sha": "3feedde199097eb3bc3ec8ebaf832eb60a25097d",
+      "blob_oid": "ac2e5bad9a55512e45c2f2afa3b935aed2c3c995"
+    }
+  ]
+}

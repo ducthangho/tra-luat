@@ -1,0 +1,113 @@
+[
+  {
+    "label": "extra2",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/extra_mutants_r4.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "baseline SONG_SOT []\nsort_bi_bo GIET ['c37_ghep_lech_ten']\nkiem_number_bi_bo GIET ['c37_ghep_lech_ten']\nsap_xep_theo_ten GIET ['c13_marker_buoc_khac']\ngio_nhan_offset GIET ['c38_ghep_lech_gio']\na_bo_dem_nhom GIET ['c36_ghep_lech_so']\na_bo_dem_yaml GIET ['c36_ghep_lech_so']\nd_lay_dau GIET ['c39_ghep_job']\nenv_quet_ca_job GIET ['c42_github_env_cung_job']\nnumber_missing_tu_sinh TIN_DUNG_GIA ['c44_ghep_sai_dang']\njob_ten_name_bi_bo GIET ['c39_ghep_job']\njob_khoa_bi_bo GIET ['c12_marker_khong_khop']\nten_run_lstrip GIET ['c37_ghep_lech_ten']\nten_name_khong_kiem_bieu_thuc GIET ['c37_ghep_lech_ten']\nCounter({'GIET': 12, 'HONG_NEO': 5, 'SONG_SOT': 1, 'TIN_DUNG_GIA': 1})\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "shapezero",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/shape_audit.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "rest_number_cho_zero GIET [('c44_ghep_sai_dang', 3)]\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "shapecontainers",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/shape_audit.py",
+      "--containers"
+    ],
+    "rc": 0,
+    "stdout_tail": "yaml_steps_bo_list_guard GIET [('c44_ghep_sai_dang', 3)]\nrest_steps_bo_list_guard GIET [('c22_thieu_dinh_danh_khong_passed', 3)]\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "finishprobes",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/finish_probes.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "gio_thieu_header_lay_rest GIET [('c38_ghep_lech_gio', 3)]\ngio_bo_can_duoi GIET [('c38_ghep_lech_gio', 3), ('c49_oracle_nhieu_truc', 3)]\ngio_bo_can_tren GIET [('c38_ghep_lech_gio', 3), ('c49_oracle_nhieu_truc', 3)]\nyear0 True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}\nleap2024 True {'trang_thai': 'passed', 'so_buoc': 2}\nnotleap2026 True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}\ncentury1900 True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}\ncentury2000 True {'trang_thai': 'passed', 'so_buoc': 2}\nminyear True {'trang_thai': 'passed', 'so_buoc': 2}\nmaxyear True {'trang_thai': 'passed', 'so_buoc': 2}\nspace_in_timestamp True {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 1}\ntab_after_timestamp True {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 1}\ndouble_space_after_timestamp True {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 1}\nlongfraction True {'trang_thai': 'passed', 'so_buoc': 2}\nreversed_window True {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "reanchor",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/repair_legacy_anchors.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "gio_thieu_header_lay_rest GIET c38_ghep_lech_gio\ngio_bo_can_duoi GIET c38_ghep_lech_gio\ngio_bo_can_tren GIET c38_ghep_lech_gio\nb_bo_ten GIET c37_ghep_lech_ten\nenv_bo_PATH GIET c42_github_env_cung_job\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "reviewercases",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/verify_new_cases.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "rest_order candidate 0 DAT:rest_order\n\nrest_order sort_bi_bo 3 DO:rest_order:sort REST by number, independent of response list order\n\nrest_duplicate candidate 0 DAT:rest_duplicate\n\nrest_duplicate kiem_number_bi_bo 3 DO:rest_duplicate:duplicate number invalid: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'],\ntime_format candidate 0 DAT:time_format\n\ntime_format gio_nhan_offset 3 DO:time_format:offset unsupported: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_\ntime_missing_header candidate 0 DAT:time_missing_header\n\ntime_missing_header gio_thieu_header_lay_rest 3 DO:time_missing_header:header timestamp missing: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-late\ngithub_path candidate 0 DAT:github_path\n\ngithub_path env_bo_PATH 3 DO:github_path:preceding run mentions GITHUB_PATH => block mode\n\nexpression_name candidate 0 DAT:expression_name\n\nexpression_name ten_name_khong_kiem_bieu_thuc 3 DO:expression_name:expression step name cannot authenticate: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': [\nfirst_line candidate 0 DAT:first_line\n\nfirst_line ten_run_lstrip 3 DO:first_line:name derives from first raw run line, including blank\n\ninvalid_calendar candidate 0 DAT:invalid_calendar\n\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-boundary_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/old2/boundary_current.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "DAT:F02_nested_incomplete_echo\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-composite_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/old2/composite_current.py"
+    ],
+    "rc": 1,
+    "stdout_tail": "",
+    "stderr_tail": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/old2/composite_current.py\", line 39, in <module>\n    assert proc.returncode==0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  {
+    "label": "prior2-boundary_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/old2/boundary_current.py"
+    ],
+    "rc": 0,
+    "stdout_tail": "DAT:F02_nested_incomplete_echo\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-composite_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/old2/composite_current.py"
+    ],
+    "rc": 1,
+    "stdout_tail": "",
+    "stderr_tail": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/old2/composite_current.py\", line 39, in <module>\n    assert proc.returncode==0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  }
+]

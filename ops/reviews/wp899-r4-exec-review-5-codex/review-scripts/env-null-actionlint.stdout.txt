@@ -1,0 +1,8 @@
+.review/env-null-workflow.yml:3:6: expecting a single ${{...}} expression or mapping value for "env" section, but found plain text node [syntax-check]
+  |
+3 | env: null
+  |      ^~~~
+.review/env-null-job.yml:5:10: expecting a single ${{...}} expression or mapping value for "env" section, but found plain text node [syntax-check]
+  |
+5 |     env: null
+  |          ^~~~

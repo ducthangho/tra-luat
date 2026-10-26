@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/criteria11.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 2.157356023788452,
+  "stdout_sha256": "23b87b957cf66443aeebe53dc8eddfc579524c71e08603c6d990554e75b46775",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

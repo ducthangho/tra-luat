@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/operators5_target.py", line 56, in <module>
+    for r in ex.map(mot,M):
+             ~~~~~~^^^^^^^
+  File "/usr/lib/python3.13/concurrent/futures/_base.py", line 625, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/usr/lib/python3.13/concurrent/futures/_base.py", line 318, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/concurrent/futures/_base.py", line 460, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/concurrent/futures/_base.py", line 402, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.13/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/operators5_target.py", line 50, in mot
+    kq = cases(p, ten); giet = [c for c, rc, o in kq if rc == 3 and o.startswith(f"DO:{c}:")]; vo = [c for c, rc, o in kq if rc not in (0, 3)]
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/operators5_target.py", line 43, in cases
+    code = code.replace("CASE_TARGET", repr(TARGETS[name]))
+                                            ~~~~~~~^^^^^^
+KeyError: "L154c17:'in'->'not in'"

@@ -1,0 +1,35 @@
+[
+  {
+    "command": [
+      "git",
+      "status",
+      "--short"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "ba222ffd1615f0d74b59985b9612f725211b62f5",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}"
+    ],
+    "rc": 0,
+    "stdout": "35453ff30170998ffea663801299db5876cc8e0c\nc5985dae1248e3e57cffdb580133e318ed27d64c\n",
+    "stderr": ""
+  }
+]

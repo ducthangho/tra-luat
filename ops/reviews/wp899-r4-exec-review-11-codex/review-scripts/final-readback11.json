@@ -1,0 +1,34 @@
+{
+  "verdict_sha256": "061a93cd038e156c0d37576b121cc6a35643e97c745a6531cffb57be8962f049",
+  "verdict_size": 31566,
+  "render_command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/render11.py"
+  ],
+  "render_rc": 0,
+  "render_stdout": "VERDICT written 31566 bytes\n",
+  "positive_receipt_hashes_verified": [
+    "suite",
+    "closed",
+    "patch",
+    "yaml-fixtures",
+    "generator-audit",
+    "equivalences",
+    "operators",
+    "criteria",
+    "classifier-pipeline",
+    "replay",
+    "history",
+    "product-new-oracle"
+  ],
+  "snapshot_comparison": {
+    "files_start": 16771,
+    "files_end": 16771,
+    "changed_paths": [],
+    "commands_equal": true,
+    "scope": "assigned checkout, all files except .git internals and .review scratch; boundary snapshots only",
+    "head": "1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986",
+    "tree": "13843e747b31df410a56e83b1dbc2f98a76e7d2d"
+  }
+}

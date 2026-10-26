@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/criteria8.py"
+  ],
+  "rc": 0,
+  "elapsed": 1.4219999313354492,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/criteria.stdout.txt",
+    "size": 3128,
+    "sha256": "11461896d85590a6171e1e7a04668d1d564509b603619df2d42c6f9f8ea3cb50"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/.review/criteria.stderr.txt",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

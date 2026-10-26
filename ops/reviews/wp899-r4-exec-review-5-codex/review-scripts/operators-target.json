@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/operators5_target.py"
+  ],
+  "returncode": 0,
+  "seconds": 64.20646381378174,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/operators-target.stdout.txt",
+    "bytes": 3277,
+    "sha256": "38841f2df5964a6842d1605975fdaccedbb5ad8b6545b35b466b03ac39131ca1"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/operators-target.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

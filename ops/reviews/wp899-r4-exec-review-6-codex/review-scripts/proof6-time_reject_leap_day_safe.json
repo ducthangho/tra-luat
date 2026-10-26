@@ -1,0 +1,32 @@
+[
+  {
+    "name": "time_reject_leap_day_safe",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_reject_leap_day_safe"
+        ],
+        "rc": 0,
+        "output": "DAT:time_reject_leap_day_safe\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/frontier6-extra3/time_reject_leap_day_safe.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_reject_leap_day_safe"
+        ],
+        "rc": 3,
+        "output": "DO:time_reject_leap_day_safe:ghep=c_gio_header_ngoai_cua_so markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  }
+]

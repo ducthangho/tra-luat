@@ -1,0 +1,96 @@
+START c01_cli_du_co
+{"case": "c01_cli_du_co", "rc": 0, "seconds": 0.19312047958374023, "output": ""}
+START c02_attempt_lech
+{"case": "c02_attempt_lech", "rc": 0, "seconds": 0.8842594623565674, "output": ""}
+START c03_checkout_linux
+{"case": "c03_checkout_linux", "rc": 0, "seconds": 0.3529820442199707, "output": ""}
+START c04_checkout_windows
+{"case": "c04_checkout_windows", "rc": 0, "seconds": 0.17996907234191895, "output": ""}
+START c05_checkout_khong_sha
+{"case": "c05_checkout_khong_sha", "rc": 0, "seconds": 0.5879306793212891, "output": ""}
+START c06_checkout_hai_sha
+{"case": "c06_checkout_hai_sha", "rc": 0, "seconds": 0.6279516220092773, "output": ""}
+START c07_checkout_push_lech
+{"case": "c07_checkout_push_lech", "rc": 0, "seconds": 0.23195576667785645, "output": ""}
+START c08_checkout_pr_parents
+{"case": "c08_checkout_pr_parents", "rc": 0, "seconds": 0.33191370964050293, "output": ""}
+START c09_checkout_pr_lech
+{"case": "c09_checkout_pr_lech", "rc": 0, "seconds": 0.17195963859558105, "output": ""}
+START c10_runner_id_0
+{"case": "c10_runner_id_0", "rc": 0, "seconds": 0.12789702415466309, "output": ""}
+START c11_job_skipped
+{"case": "c11_job_skipped", "rc": 0, "seconds": 0.276050329208374, "output": ""}
+START c12_marker_khong_khop
+{"case": "c12_marker_khong_khop", "rc": 0, "seconds": 0.5563168525695801, "output": ""}
+START c13_marker_buoc_khac
+{"case": "c13_marker_buoc_khac", "rc": 0, "seconds": 0.3636336326599121, "output": ""}
+START c14_ngoai_moi
+{"case": "c14_ngoai_moi", "rc": 0, "seconds": 0.3998739719390869, "output": ""}
+START c15_moi_mot_nguon
+{"case": "c15_moi_mot_nguon", "rc": 0, "seconds": 0.20041632652282715, "output": ""}
+START c16_workflow_def_luon_not_measured
+{"case": "c16_workflow_def_luon_not_measured", "rc": 0, "seconds": 0.27022576332092285, "output": ""}
+START c17_ghi_nguyen_tu
+{"case": "c17_ghi_nguyen_tu", "rc": 0, "seconds": 0.04044175148010254, "output": ""}
+START c18_dem_not_measured
+{"case": "c18_dem_not_measured", "rc": 0, "seconds": 0.17946767807006836, "output": ""}
+START c19_rest_loi
+{"case": "c19_rest_loi", "rc": 0, "seconds": 1.125213861465454, "output": ""}
+START c20_du_trang
+{"case": "c20_du_trang", "rc": 0, "seconds": 2.3241305351257324, "output": ""}
+START c22_thieu_dinh_danh_khong_passed
+{"case": "c22_thieu_dinh_danh_khong_passed", "rc": 0, "seconds": 11.839851140975952, "output": ""}
+START c23_chi_loi_goi_that
+{"case": "c23_chi_loi_goi_that", "rc": 0, "seconds": 5.183492660522461, "output": ""}
+START c24_goi_that_loi_va_chuyen_huong
+{"case": "c24_goi_that_loi_va_chuyen_huong", "rc": 0, "seconds": 0.031013011932373047, "output": ""}
+START c25_f02_env_mang_mau
+{"case": "c25_f02_env_mang_mau", "rc": 0, "seconds": 0.6013219356536865, "output": ""}
+START c26_f02_dong_khong_mau
+{"case": "c26_f02_dong_khong_mau", "rc": 0, "seconds": 0.42792177200317383, "output": ""}
+START c27_f02_yaml_khong_toi_gian
+{"case": "c27_f02_yaml_khong_toi_gian", "rc": 0, "seconds": 0.27037620544433594, "output": ""}
+START c28_che_do_env_buoc
+{"case": "c28_che_do_env_buoc", "rc": 0, "seconds": 0.5500249862670898, "output": ""}
+START c29_che_do_env_job
+{"case": "c29_che_do_env_job", "rc": 0, "seconds": 0.7554457187652588, "output": ""}
+START c30_che_do_doi_so
+{"case": "c30_che_do_doi_so", "rc": 0, "seconds": 0.12398409843444824, "output": ""}
+START c31_che_do_duong_khac
+{"case": "c31_che_do_duong_khac", "rc": 0, "seconds": 3.3639087677001953, "output": ""}
+START c32_workflow_khong_doc_duoc
+{"case": "c32_workflow_khong_doc_duoc", "rc": 0, "seconds": 1.3320086002349854, "output": ""}
+START c33_trung_chu_khac_job
+{"case": "c33_trung_chu_khac_job", "rc": 0, "seconds": 0.5839664936065674, "output": ""}
+START c36_ghep_lech_so
+{"case": "c36_ghep_lech_so", "rc": 0, "seconds": 0.7506077289581299, "output": ""}
+START c37_ghep_lech_ten
+{"case": "c37_ghep_lech_ten", "rc": 0, "seconds": 3.260739326477051, "output": ""}
+START c38_ghep_lech_gio
+{"case": "c38_ghep_lech_gio", "rc": 0, "seconds": 4.582611322402954, "output": ""}
+START c39_ghep_job
+{"case": "c39_ghep_job", "rc": 0, "seconds": 2.0263116359710693, "output": ""}
+START c40_nhom_long
+{"case": "c40_nhom_long", "rc": 0, "seconds": 0.24227213859558105, "output": ""}
+START c41_buoc_uses
+{"case": "c41_buoc_uses", "rc": 0, "seconds": 0.5851614475250244, "output": ""}
+START c42_github_env_cung_job
+{"case": "c42_github_env_cung_job", "rc": 0, "seconds": 2.2922301292419434, "output": ""}
+START c44_ghep_sai_dang
+{"case": "c44_ghep_sai_dang", "rc": 0, "seconds": 3.2761194705963135, "output": ""}
+START c45_buoc_skipped_giua
+{"case": "c45_buoc_skipped_giua", "rc": 0, "seconds": 0.7640514373779297, "output": ""}
+START c46_mien_che_do
+{"case": "c46_mien_che_do", "rc": 0, "seconds": 7.799381971359253, "output": ""}
+START c47_bien_ghep
+{"case": "c47_bien_ghep", "rc": 0, "seconds": 3.5880110263824463, "output": ""}
+START c48_nguyen_van_va_mien
+{"case": "c48_nguyen_van_va_mien", "rc": 0, "seconds": 31.685484170913696, "output": ""}
+START c43_khoi_khac_buoc
+{"case": "c43_khoi_khac_buoc", "rc": 0, "seconds": 0.25931715965270996, "output": ""}
+START c34_git_blob_that
+{"case": "c34_git_blob_that", "rc": 0, "seconds": 0.27894020080566406, "output": ""}
+START c35_f02_khoi_khong_tron_ven
+{"case": "c35_f02_khoi_khong_tron_ven", "rc": 0, "seconds": 1.328519582748413, "output": ""}
+START c21_fixture_bam
+{"case": "c21_fixture_bam", "rc": 0, "seconds": 2.956390380859375e-05, "output": ""}

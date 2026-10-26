@@ -1,0 +1,58 @@
+[
+  {
+    "id": "ghep_job#24:-1",
+    "source_sha256": "96cb9be3ceef5620c756583a151c68844c16925ca8fc47d1586d77c79d07a67a",
+    "proof": "`khop[-1]` thay `khop[0]` chỉ được tính khi `len(khop) == 1`, mà danh sách một phần tử có [0] và [-1] là cùng một phần tử",
+    "pairs": 25,
+    "unequal": []
+  },
+  {
+    "id": "chan_buoc#103:bo_doi_so1",
+    "source_sha256": "313dc2ab8272a22e8795960d40657e6b4846417bcdd8064a291dfcfb0b39d89e",
+    "proof": "`str(t.get('run'))` thay `str(t.get('run', ''))` chỉ khác ở bước KHÔNG có `run:`: chuỗi tìm là 'None' thay vì '' — cả hai đều không chứa `GITHUB_ENV`/`GITHUB_PATH`, nên `re.search` cùng trả None",
+    "pairs": 7,
+    "unequal": []
+  },
+  {
+    "id": "tach_buoc#173:chuoi2",
+    "source_sha256": "bf83f62c157229bdbfcdba471e85533aa01cb9b7652d51c8ae43bc881875e4bb",
+    "proof": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "pairs": 5,
+    "unequal": []
+  },
+  {
+    "id": "tach_buoc#173:chuoi3",
+    "source_sha256": "7a051db53b285d7f4ce07a85657bdee02ce23223a1e1ff83fcddfa1766f59561",
+    "proof": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "pairs": 5,
+    "unequal": []
+  },
+  {
+    "id": "tach_buoc#173:chuoi4",
+    "source_sha256": "f55de306c4b0aa1a9204217cf35cfd142f2eaba4a265070bdb1d6b7acb977274",
+    "proof": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "pairs": 5,
+    "unequal": []
+  },
+  {
+    "id": "do_dau_duong#127:bo_ve0",
+    "source_sha256": "016c7f4398c3d1d9ad56bb37a75d4ee8117172f62ebf02ae0936612c5d6d5e75",
+    "proof": "bỏ vế `goi and`: khi `goi` rỗng thì `all(goi)` là True nhưng `[g[2] for g in goi]` cũng rỗng ⇒ vòng lặp không chạy lần nào, y như nhánh `else []`",
+    "pairs": 351,
+    "unequal": []
+  },
+  {
+    "id": "do_dau_duong#306:chuoi1",
+    "source_sha256": "fbef43dd058562a57e4157304a206936f48d3d3253941bd820e2bf3ce227b3d2",
+    "proof": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và `if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi",
+    "pairs": 351,
+    "unequal": []
+  },
+  {
+    "id": "do_dau_duong#306:chuoi4",
+    "source_sha256": "fbef43dd058562a57e4157304a206936f48d3d3253941bd820e2bf3ce227b3d2",
+    "proof": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và `if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi",
+    "pairs": 351,
+    "unequal": []
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "adr-song",
+    "--root",
+    "."
+  ],
+  "returncode": 0,
+  "seconds": 0.36852431297302246,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/adr.stdout.txt",
+    "bytes": 113,
+    "sha256": "8c8b947e7dfdd7c8251b3df225c5b9522e8723a6b2dad635f685823b39465c9c"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/adr.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

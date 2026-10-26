@@ -1,0 +1,1422 @@
+[
+  {
+    "name": "L154c17:'in'->'not in'",
+    "case": "c12_marker_khong_khop",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/0.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c12_marker_khong_khop"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c12_marker_khong_khop:KeyError: 'env'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L154c17:'in'->'not in'",
+    "case": "c13_marker_buoc_khac",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/0.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c13_marker_buoc_khac"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c13_marker_buoc_khac:KeyError: 'env'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L154c17:'in'->'not in'",
+    "case": "c14_ngoai_moi",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/0.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c14_ngoai_moi"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c14_ngoai_moi:KeyError: 'env'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L154c22:'and'->'or'",
+    "case": "c12_marker_khong_khop",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/1.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c12_marker_khong_khop"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c12_marker_khong_khop:KeyError: 'env'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L154c22:'and'->'or'",
+    "case": "c13_marker_buoc_khac",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/1.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c13_marker_buoc_khac"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c13_marker_buoc_khac:KeyError: 'env'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L154c22:'and'->'or'",
+    "case": "c14_ngoai_moi",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/1.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c14_ngoai_moi"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c14_ngoai_moi:KeyError: 'env'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c16:'0'->'1'",
+    "case": "c02_attempt_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/18.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c02_attempt_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c02_attempt_lech:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c16:'0'->'1'",
+    "case": "c03_checkout_linux",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/18.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c03_checkout_linux"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c03_checkout_linux:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c16:'0'->'1'",
+    "case": "c04_checkout_windows",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/18.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c04_checkout_windows"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c04_checkout_windows:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c32:'=='->'!='",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/19.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c22_thieu_dinh_danh_khong_passed:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c32:'=='->'!='",
+    "case": "c47_bien_ghep",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/19.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c47_bien_ghep"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c47_bien_ghep:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c32:'=='->'!='",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/19.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c35:'1'->'0'",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/21.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c22_thieu_dinh_danh_khong_passed:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c35:'1'->'0'",
+    "case": "c47_bien_ghep",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/21.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c47_bien_ghep"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c47_bien_ghep:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L168c35:'1'->'0'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/21.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L171c14:'in'->'not in'",
+    "case": "c02_attempt_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/22.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c02_attempt_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c02_attempt_lech:KeyError: 'name'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L171c14:'in'->'not in'",
+    "case": "c03_checkout_linux",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/22.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c03_checkout_linux"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c03_checkout_linux:KeyError: 'name'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L171c14:'in'->'not in'",
+    "case": "c04_checkout_windows",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/22.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c04_checkout_windows"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c04_checkout_windows:KeyError: 'name'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L172c46:'and'->'or'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/23.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:TypeError: argument of type 'NoneType' is not iterable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L174c34:'0'->'1'",
+    "case": "c02_attempt_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/25.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c02_attempt_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c02_attempt_lech:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L174c34:'0'->'1'",
+    "case": "c03_checkout_linux",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/25.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c03_checkout_linux"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c03_checkout_linux:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L174c34:'0'->'1'",
+    "case": "c04_checkout_windows",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/25.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c04_checkout_windows"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c04_checkout_windows:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L187c10:'is'->'is not'",
+    "case": "c05_checkout_khong_sha",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/30.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c05_checkout_khong_sha"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c05_checkout_khong_sha:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L187c10:'is'->'is not'",
+    "case": "c06_checkout_hai_sha",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/30.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c06_checkout_hai_sha"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c06_checkout_hai_sha:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L187c10:'is'->'is not'",
+    "case": "c07_checkout_push_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/30.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c07_checkout_push_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c07_checkout_push_lech:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L191c9:'is'->'is not'",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/31.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c22_thieu_dinh_danh_khong_passed:KeyError: None\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L191c9:'is'->'is not'",
+    "case": "c47_bien_ghep",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/31.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c47_bien_ghep"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c47_bien_ghep:KeyError: None\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L191c9:'is'->'is not'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/31.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:KeyError: None\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L191c17:'or'->'and'",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/32.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c22_thieu_dinh_danh_khong_passed:KeyError: None\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L191c17:'or'->'and'",
+    "case": "c47_bien_ghep",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/32.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c47_bien_ghep"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c47_bien_ghep:KeyError: None\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L191c17:'or'->'and'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/32.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:KeyError: None\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L193c53:'and'->'or'",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/45.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c22_thieu_dinh_danh_khong_passed:KeyError: 'number'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L205c53:'and'->'or'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/62.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:TypeError: '<=' not supported between instances of 'NoneType' and 'datetime.datetime'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L206c15:'and'->'or'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/63.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:TypeError: '<=' not supported between instances of 'NoneType' and 'datetime.datetime'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L206c41:'and'->'or'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/64.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:TypeError: '<=' not supported between instances of 'NoneType' and 'datetime.datetime'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L264c18:'and'->'or'",
+    "case": "c02_attempt_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/82.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c02_attempt_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c02_attempt_lech:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L264c18:'and'->'or'",
+    "case": "c03_checkout_linux",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/82.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c03_checkout_linux"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c03_checkout_linux:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L264c18:'and'->'or'",
+    "case": "c04_checkout_windows",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/82.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c04_checkout_windows"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c04_checkout_windows:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L264c34:'1'->'2'",
+    "case": "c06_checkout_hai_sha",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/83.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c06_checkout_hai_sha"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c06_checkout_hai_sha:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L264c34:'1'->'2'",
+    "case": "c47_bien_ghep",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/83.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c47_bien_ghep"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c47_bien_ghep:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L264c34:'1'->'2'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/83.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L274c18:'1'->'2'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/97.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:IndexError: list index out of range\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L292c36:'or'->'and'",
+    "case": "c05_checkout_khong_sha",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/108.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c05_checkout_khong_sha"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c05_checkout_khong_sha:TypeError: 'NoneType' object is not iterable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L292c36:'or'->'and'",
+    "case": "c06_checkout_hai_sha",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/108.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c06_checkout_hai_sha"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c06_checkout_hai_sha:TypeError: 'NoneType' object is not iterable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L292c36:'or'->'and'",
+    "case": "c07_checkout_push_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/108.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c07_checkout_push_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c07_checkout_push_lech:TypeError: 'NoneType' object is not iterable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c11:'not'->''",
+    "case": "c02_attempt_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/110.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c02_attempt_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c02_attempt_lech:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c11:'not'->''",
+    "case": "c03_checkout_linux",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/110.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c03_checkout_linux"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c03_checkout_linux:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c11:'not'->''",
+    "case": "c04_checkout_windows",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/110.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c04_checkout_windows"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c04_checkout_windows:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c26:'is'->'is not'",
+    "case": "c41_buoc_uses",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/111.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c41_buoc_uses"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c41_buoc_uses:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c26:'is'->'is not'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/111.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c33:'and'->'or'",
+    "case": "c41_buoc_uses",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/112.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c41_buoc_uses"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c41_buoc_uses:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c33:'and'->'or'",
+    "case": "c48_nguyen_van_va_mien",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/112.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c48_nguyen_van_va_mien"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c48_nguyen_van_va_mien:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c49:'and'->'or'",
+    "case": "c02_attempt_lech",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/113.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c02_attempt_lech"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c02_attempt_lech:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c49:'and'->'or'",
+    "case": "c03_checkout_linux",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/113.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c03_checkout_linux"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c03_checkout_linux:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L295c49:'and'->'or'",
+    "case": "c04_checkout_windows",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/113.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c04_checkout_windows"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c04_checkout_windows:AttributeError: 'NoneType' object has no attribute 'rstrip'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L299c44:'and'->'or'",
+    "case": "c30_che_do_doi_so",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/119.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c30_che_do_doi_so"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c30_che_do_doi_so:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L299c44:'and'->'or'",
+    "case": "c42_github_env_cung_job",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/119.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c42_github_env_cung_job"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c42_github_env_cung_job:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L299c44:'and'->'or'",
+    "case": "c47_bien_ghep",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/119.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c47_bien_ghep"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c47_bien_ghep:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c38:'2'->'3'",
+    "case": "c12_marker_khong_khop",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/122.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c12_marker_khong_khop"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c12_marker_khong_khop:IndexError: no such group\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c38:'2'->'3'",
+    "case": "c13_marker_buoc_khac",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/122.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c13_marker_buoc_khac"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c13_marker_buoc_khac:IndexError: no such group\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c38:'2'->'3'",
+    "case": "c14_ngoai_moi",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/122.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c14_ngoai_moi"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c14_ngoai_moi:IndexError: no such group\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c62:'and'->'or'",
+    "case": "c27_f02_yaml_khong_toi_gian",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/124.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c27_f02_yaml_khong_toi_gian"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c27_f02_yaml_khong_toi_gian:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c62:'and'->'or'",
+    "case": "c30_che_do_doi_so",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/124.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c30_che_do_doi_so"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c30_che_do_doi_so:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c62:'and'->'or'",
+    "case": "c42_github_env_cung_job",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/124.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c42_github_env_cung_job"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c42_github_env_cung_job:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L300c66:'all'->'any'",
+    "case": "c27_f02_yaml_khong_toi_gian",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/125.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c27_f02_yaml_khong_toi_gian"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c27_f02_yaml_khong_toi_gian:TypeError: 'NoneType' object is not subscriptable\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L302c21:'not in'->'in'",
+    "case": "c13_marker_buoc_khac",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/126.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c13_marker_buoc_khac"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c13_marker_buoc_khac:KeyError: 'ops/khac.py'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L302c21:'not in'->'in'",
+    "case": "c14_ngoai_moi",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/126.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c14_ngoai_moi"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c14_ngoai_moi:KeyError: 'ops/khong_dang_ky_test.py'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L302c21:'not in'->'in'",
+    "case": "c27_f02_yaml_khong_toi_gian",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/126.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c27_f02_yaml_khong_toi_gian"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c27_f02_yaml_khong_toi_gian:KeyError: 'ops/khac.py'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L302c32:'or'->'and'",
+    "case": "c13_marker_buoc_khac",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/127.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c13_marker_buoc_khac"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c13_marker_buoc_khac:KeyError: 'ops/khac.py'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L302c32:'or'->'and'",
+    "case": "c14_ngoai_moi",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/127.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c14_ngoai_moi"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c14_ngoai_moi:KeyError: 'ops/khong_dang_ky_test.py'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  },
+  {
+    "name": "L302c32:'or'->'and'",
+    "case": "c27_f02_yaml_khong_toi_gian",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/operators6/127.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c27_f02_yaml_khong_toi_gian"
+    ],
+    "baseline": {
+      "source": "frontier6/baseline.json",
+      "rc": 0
+    },
+    "rc": 4,
+    "output": "HONG:c27_f02_yaml_khong_toi_gian:KeyError: 'ops/khac.py'\n",
+    "rank": "TIN_DUNG_GIA",
+    "scope": "only error cases listed in supplied kq8.txt, max3 per operator"
+  }
+]

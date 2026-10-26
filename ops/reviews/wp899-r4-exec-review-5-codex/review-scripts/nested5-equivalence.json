@@ -1,0 +1,6 @@
+{
+  "name": "nested_only_after_shell",
+  "ast_equal_previously_proved_mutant": true,
+  "source": "frontier5/nested_only_after_shell.py",
+  "proof": "equivalence.json: 6/6 measured positions; algebraic reason in that artifact; semantic duplicate of log_nested_after_only"
+}

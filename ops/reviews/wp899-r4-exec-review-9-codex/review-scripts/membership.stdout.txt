@@ -1,0 +1,102 @@
+{
+  "mutants": [
+    {
+      "function": "ghep_job",
+      "rank": "SONG",
+      "before": "'${{' not in x",
+      "after": "not x.startswith('${{')",
+      "n": 52
+    },
+    {
+      "function": "ten_du_kien",
+      "rank": "SONG",
+      "before": "'${{' not in s['name']",
+      "after": "not s['name'].startswith('${{')",
+      "n": 52
+    }
+  ],
+  "proof": [
+    {
+      "source": "head",
+      "axis": "job",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "d_job_yaml_khong_duy_nhat",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "head",
+      "axis": "step",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "b_ten_buoc_lech",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "ghep_job",
+      "axis": "job",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "gate": "passed",
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "ghep_job",
+      "axis": "step",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "b_ten_buoc_lech",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "ten_du_kien",
+      "axis": "job",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "d_job_yaml_khong_duy_nhat",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "ten_du_kien",
+      "axis": "step",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "gate": "passed",
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    }
+  ]
+}

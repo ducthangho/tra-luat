@@ -1,0 +1,113 @@
+{
+  "A7": [
+    {
+      "criterion": "A7",
+      "name": "A7_bo_dong_dem",
+      "case": "c18_dem_not_measured",
+      "source": "head",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/ops/ci_provenance_test.py",
+        "--mot-ca",
+        "c18_dem_not_measured"
+      ],
+      "rc": 0,
+      "output": "\n",
+      "rank": "SONG_SOT"
+    },
+    {
+      "criterion": "A7",
+      "name": "A7_bo_dong_dem",
+      "case": "c18_dem_not_measured",
+      "source": "mutant",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/ops/ci_provenance_test.py",
+        "--mot-ca",
+        "c18_dem_not_measured"
+      ],
+      "rc": 3,
+      "output": "DO:c18_dem_not_measured:chỉ Workflow definition not_measured ⇒ `NOT_MEASURED: 1`: RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed b27fe85c9e9593ddbb059808fe4347fe1bd267be gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 2280fbcefee3c5ad942316b4085c7fd48ada13226733519f5e14777c4918af4c\n\n",
+      "rank": "GIET"
+    },
+    {
+      "criterion": "A7",
+      "name": "A7_gop_rest_vao_12",
+      "case": "c19_rest_loi",
+      "source": "head",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/ops/ci_provenance_test.py",
+        "--mot-ca",
+        "c19_rest_loi"
+      ],
+      "rc": 0,
+      "output": "\n",
+      "rank": "SONG_SOT"
+    },
+    {
+      "criterion": "A7",
+      "name": "A7_gop_rest_vao_12",
+      "case": "c19_rest_loi",
+      "source": "mutant",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review8/ws/ops/ci_provenance_test.py",
+        "--mot-ca",
+        "c19_rest_loi"
+      ],
+      "rc": 3,
+      "output": "DO:c19_rest_loi:REST 403 ở /runs/5 ⇒ rc 3, 403, dòng đếm: REST_LOI: HTTP 403 https://api.github.com/repos/o/r/actions/runs/5\nNOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n\n",
+      "rank": "GIET"
+    }
+  ],
+  "classifier": [
+    {
+      "rc": 0,
+      "output": "",
+      "target": "c",
+      "rank": "SONG_SOT"
+    },
+    {
+      "rc": 4,
+      "output": "HONG:c:AttributeError",
+      "target": "c",
+      "rank": "TIN_DUNG_GIA"
+    },
+    {
+      "rc": 3,
+      "output": "DO:other:failed",
+      "target": "c",
+      "rank": "TIN_DUNG_GIA"
+    },
+    {
+      "rc": 3,
+      "output": "DO:c:failed",
+      "target": "c",
+      "rank": "GIET"
+    }
+  ],
+  "stop_after_first_rc3": {
+    "main_rc": 0,
+    "calls": [
+      "c01_cli_du_co",
+      "c02_attempt_lech"
+    ],
+    "json": [
+      [
+        "c01_cli_du_co",
+        4,
+        "HONG:c01_cli_du_co:AttributeError"
+      ],
+      [
+        "c02_attempt_lech",
+        3,
+        "DO:c02_attempt_lech:intentional"
+      ]
+    ]
+  }
+}

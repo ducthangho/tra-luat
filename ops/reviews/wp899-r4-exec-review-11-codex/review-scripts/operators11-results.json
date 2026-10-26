@@ -1,0 +1,866 @@
+{
+ "rows": [
+  {
+   "id": "doc_wf_7_delete_statement",
+   "function": "doc_wf",
+   "node_before": "wf = yaml.safe_load(van)",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/doc_wf_7_delete_statement.py",
+    "doc_wf"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "474d568aa8bb26fca3a098e3f245813c86733720b977d6eeb055e5f20a6e3a88"
+  },
+  {
+   "id": "doc_wf_8_catch_runtime_only",
+   "function": "doc_wf",
+   "node_before": "except Exception:\n    return None",
+   "node_after": "except RuntimeError:\n    return None",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/doc_wf_8_catch_runtime_only.py",
+    "doc_wf"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "eb1389a883c173ddc0191a8de735cb1be547b27a1b831677dde8f14704070bb0"
+  },
+  {
+   "id": "ghep_job_3_delete_statement",
+   "function": "ghep_job",
+   "node_before": "khop = [k for k, j in wf['jobs'].items() if type(ten) is str and type(j) is dict and any((type(x) is str and x and ('${{' not in x) and re.fullmatch(re.escape(x) + '(?: \\\\(.*\\\\))?', ten) for x in (k, j.get('name'))))]",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_job_3_delete_statement.py",
+    "ghep_job"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c39_ghep_job"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "837219e072344dc2a8d4b0726520afb270fcda7b867189c07ca76b661a2c590d"
+  },
+  {
+   "id": "ten_du_kien_3_delete_statement",
+   "function": "ten_du_kien",
+   "node_before": "v = s.get('run', s.get('uses'))",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ten_du_kien_3_delete_statement.py",
+    "ten_du_kien"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 2,
+   "source_sha256": "8e639c5f85a89693597f494cedb1683e4cdedeeccdacf736a1a45ce2915b4b42"
+  },
+  {
+   "id": "_gio_5_catch_runtime_only",
+   "function": "_gio",
+   "node_before": "except ValueError:\n    return None",
+   "node_after": "except RuntimeError:\n    return None",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/_gio_5_catch_runtime_only.py",
+    "_gio"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c38_ghep_lech_gio"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "497aa8a232bd32b901b679b7a8695924db1ef93510c9a00e4692ec6f7edd2116"
+  },
+  {
+   "id": "ghep_buoc_5_delete_statement",
+   "function": "ghep_buoc",
+   "node_before": "k, st = (ghep_job(job.get('name'), wf), job.get('steps'))",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_5_delete_statement.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "78c0e7877d5ae7c7780c244149efdc663c5b435f25df93ca3baad4588e4c37ed"
+  },
+  {
+   "id": "ghep_buoc_6_delete_statement",
+   "function": "ghep_buoc",
+   "node_before": "sy = wf['jobs'][k].get('steps') if k else None",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_6_delete_statement.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "c418e638053f6e14f1bd3f33e02def4ba790502aac49c90f760b3d8f90af8384"
+  },
+  {
+   "id": "ghep_buoc_9_delete_statement",
+   "function": "ghep_buoc",
+   "node_before": "ung = [s for s in sorted(st, key=lambda s: s['number']) if s.get('name') not in ('Set up job', 'Complete job') and (not str(s.get('name')).startswith('Post '))]",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_9_delete_statement.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "5b8946e6d3d6b10ce6b4ccca9e5d5dccc2979d327b38ea91a48bcc3cb6fe5324"
+  },
+  {
+   "id": "ghep_buoc_10_delete_statement",
+   "function": "ghep_buoc",
+   "node_before": "chay = [i for i, s in enumerate(ung) if s.get('conclusion') != 'skipped']",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_10_delete_statement.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "e0bd681f6a82ab734994a5f66fb7190236e0d090f556a325ffa0595974e2bd6e"
+  },
+  {
+   "id": "ghep_buoc_295_drop_binding",
+   "function": "ghep_buoc",
+   "node_before": "(a := _gio(ung[i].get('started_at')))",
+   "node_after": "_gio(ung[i].get('started_at'))",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_295_drop_binding.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "11415d68ab4882c42e74aa51ea161d00fc73c9ef3bd293b74021d13e4cccefd9"
+  },
+  {
+   "id": "ghep_buoc_296_drop_binding",
+   "function": "ghep_buoc",
+   "node_before": "(z := _gio(ung[i].get('completed_at')))",
+   "node_after": "_gio(ung[i].get('completed_at'))",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_296_drop_binding.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "854820da64074d881b43266e2f087301509bf92ed2a0f0cf773a6f75c779b657"
+  },
+  {
+   "id": "ghep_buoc_297_drop_binding",
+   "function": "ghep_buoc",
+   "node_before": "(h := _gio(b['gio']))",
+   "node_after": "_gio(b['gio'])",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/ghep_buoc_297_drop_binding.py",
+    "ghep_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "b195b3b48c1fada7bcb8bf24e714d7e079765848d79c7e9b1ac7fc66133fd2d6"
+  },
+  {
+   "id": "chan_buoc_3_delete_statement",
+   "function": "chan_buoc",
+   "node_before": "j, s = (wf['jobs'][k], wf['jobs'][k]['steps'][i])",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/chan_buoc_3_delete_statement.py",
+    "chan_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c23_chi_loi_goi_that"
+   ],
+   "cases_measured": 27,
+   "source_sha256": "b4345bf9dbb2b543eb1cc66f291b22728e09b1e6d81b82a05ffae77c00bf80be"
+  },
+  {
+   "id": "chan_buoc_107_upper-1",
+   "function": "chan_buoc",
+   "node_before": ":i",
+   "node_after": ":i + -1",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/chan_buoc_107_upper-1.py",
+    "chan_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c42_github_env_cung_job"
+   ],
+   "cases_measured": 2,
+   "source_sha256": "3d45c29f20bd880ce849f341965e8d5568c2a957901839a0462ab057be34692d"
+  },
+  {
+   "id": "chan_buoc_107_upper1",
+   "function": "chan_buoc",
+   "node_before": ":i",
+   "node_after": ":i + 1",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/chan_buoc_107_upper1.py",
+    "chan_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c42_github_env_cung_job"
+   ],
+   "cases_measured": 2,
+   "source_sha256": "42123672d7da81780c405b544711a49b8def197f8451ab282d97442f52d7de72"
+  },
+  {
+   "id": "tach_buoc_3_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "buoc = []",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_3_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "f3372578b6f2ca727492a90c60a6e4c5f816fbceedc31fc85b30d574cfd6dc5b"
+  },
+  {
+   "id": "tach_buoc_12_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "t = than(d)",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_12_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "cd87317fb366cf48f349aae973185f7dbd4ca413d46546d1c46ac34db8d36936"
+  },
+  {
+   "id": "tach_buoc_22_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "buoc.append({'lenh': t[len('##[group]Run '):], 'in_lai': [], 'phan': [], 'mo': True, 'ok': True, 'tien_to': True, 'gio': d[:19] + 'Z'})",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_22_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "6a7b64bc03c883669783bc49faa2f2752c59c3cd1c8dbb02c60f67c8d3e5e54c"
+  },
+  {
+   "id": "tach_buoc_24_dict_intersection",
+   "function": "tach_buoc",
+   "node_before": "b | {'hop_le': not b['mo'] and b['ok'] and (not b['tien_to']) and (b['in_lai'][:1] == [b['lenh']])}",
+   "node_after": "b & {'hop_le': not b['mo'] and b['ok'] and (not b['tien_to']) and (b['in_lai'][:1] == [b['lenh']])}",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_24_dict_intersection.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "37f5c3ffb87659dd0d902cc352b8fb9614cc9e871feea595b0f2554f5a0d6746"
+  },
+  {
+   "id": "tach_buoc_33_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "mau = '\\x1b[36;1m' in d",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_33_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "74d3178c082548d3ccb0c8977d0306759c2d421498aec6e096763191c932c2ec"
+  },
+  {
+   "id": "tach_buoc_53_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "b['mo'] = False",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_53_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "3795b6de8c7fc5bc52ed95766a3aeb97c61dad32de44a4bcdc9b8f88e6c7e360"
+  },
+  {
+   "id": "tach_buoc_56_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "buoc[-1]['phan'].append(t)",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_56_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "532fa8b0da6cfb8b79a659441c3951027435bff8f9965c3c89a6f685f92c0dfd"
+  },
+  {
+   "id": "tach_buoc_80_drop_binding",
+   "function": "tach_buoc",
+   "node_before": "(b := buoc[-1])",
+   "node_after": "buoc[-1]",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_80_drop_binding.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "7902f267822cefe949a3a15fdcf2aee366923495a50fd8114590830c60fa6b2c"
+  },
+  {
+   "id": "tach_buoc_93_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "b['in_lai'].append(t)",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_93_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "78966a6d8d4cd5e0d1415e16b204fb9dafbef939986dfa15d9df653c242ac12a"
+  },
+  {
+   "id": "tach_buoc_94_delete_statement",
+   "function": "tach_buoc",
+   "node_before": "b['ok'], b['tien_to'] = (b['ok'] and (not mau) and (not t.startswith('##[group]')) and (not b['tien_to'] or t.startswith('shell: ')), False)",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_94_delete_statement.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "d13f6aa8afa7c9569c16f063e52f38348ae2651503e275731f55bc4c87bedd05"
+  },
+  {
+   "id": "tach_buoc_143_unary_plus",
+   "function": "tach_buoc",
+   "node_before": "-1",
+   "node_after": "+1",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_143_unary_plus.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c13_marker_buoc_khac"
+   ],
+   "cases_measured": 18,
+   "source_sha256": "df2ead10b6bf92112bd582fefe0988d2e3c567b93966c4d55338726b3f47c108"
+  },
+  {
+   "id": "tach_buoc_224_unary_plus",
+   "function": "tach_buoc",
+   "node_before": "-1",
+   "node_after": "+1",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/tach_buoc_224_unary_plus.py",
+    "tach_buoc"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c13_marker_buoc_khac"
+   ],
+   "cases_measured": 18,
+   "source_sha256": "7107f85fda8f81fa45f898a8b4cc20d79756f675f0c2e8e61b6baf8e15ba42ab"
+  },
+  {
+   "id": "do_dau_duong_3_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "kq, so = ([], 0)",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_3_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "06979fb6269aee7b9741d5336496835bd4a7bf2dcfba7b4780e2722cd32d8059"
+  },
+  {
+   "id": "do_dau_duong_16_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "s = wf['jobs'][k]['steps'][i]",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_16_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "73aa56b9f45df2cc568c1a9c953b14bde4522380116fe5d1fdc6fbbaa260994c"
+  },
+  {
+   "id": "do_dau_duong_17_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "run = s.get('run') if 'uses' not in s else None",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_17_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "010c8adb6350a69d32288a1f81ff8875631060ffce220030add84c63e4b5f8cc"
+  },
+  {
+   "id": "do_dau_duong_19_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "so += 1",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_19_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c51_mien_luot7"
+   ],
+   "cases_measured": 2,
+   "source_sha256": "51dbb8c6796db2a805815ed934dfe6c2ac5deb8b77f03132ecd6e373e8a86634"
+  },
+  {
+   "id": "do_dau_duong_20_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "goi = [RE_LOI_GOI.fullmatch(d) for d in dong_logic(run.rstrip('\\n').split('\\n')) if d]",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_20_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "17b1596dabdfe9599daa1a3ccb9ad57e08fff5ae13033794bb99e266811f71e6"
+  },
+  {
+   "id": "do_dau_duong_21_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "chan = chan_buoc(wf, k, i) or any((g and g[1] for g in goi))",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_21_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "d243149fae31c9acc9dabb5fa72ddfe98fb1f622990d4a3c5d8c76fd91edd8a4"
+  },
+  {
+   "id": "do_dau_duong_51_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "muc = {'lenh': b['lenh'], 'duong_dan': duong}",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_51_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "1c0b0145b75a13dcf1a2ec3296ca8bfc6bdb88dce4a9ec7932573b416f94bf58"
+  },
+  {
+   "id": "do_dau_duong_92_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "kq.append(muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'})",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_92_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "911937448e7faa1a1998968737a5b3ca3cf316cc57d1075d062d690e5fd77587"
+  },
+  {
+   "id": "do_dau_duong_93_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "van = '\\n'.join(b['phan']) + '\\n'",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_93_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "f57ae2d50941920d7db136ea8f6494421645804524d31ae3dd1f552c904b3acc"
+  },
+  {
+   "id": "do_dau_duong_94_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "k = re.search(moi[duong], van, re.M) if (ok := xanh(van, moi[duong])) else None",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_94_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "440deb338f8b272ec4172bab6f559354fa207ee36cff1763b44419b26837bc48"
+  },
+  {
+   "id": "do_dau_duong_95_delete_statement",
+   "function": "do_dau_duong",
+   "node_before": "kq.append(muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []})",
+   "node_after": "pass",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_95_delete_statement.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "34ec36323824132ad975ce9d5481f3a09f56db09c30c5b96f343c8be9b52dfc8"
+  },
+  {
+   "id": "do_dau_duong_190_dict_intersection",
+   "function": "do_dau_duong",
+   "node_before": "muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+   "node_after": "muc & {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_190_dict_intersection.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "90d24caa5499800f29fbaf907d06375c27a6a76cdb0664063021f5f36585bec9"
+  },
+  {
+   "id": "do_dau_duong_196_drop_binding",
+   "function": "do_dau_duong",
+   "node_before": "(ok := xanh(van, moi[duong]))",
+   "node_after": "xanh(van, moi[duong])",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_196_drop_binding.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "2f55561fab44c63d142e6bf2efc97daf85744044823a89f6c5cf5bf7f8753fa7"
+  },
+  {
+   "id": "do_dau_duong_200_dict_intersection",
+   "function": "do_dau_duong",
+   "node_before": "muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+   "node_after": "muc & {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+   "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws/.review/operators11/do_dau_duong_200_dict_intersection.py",
+    "do_dau_duong"
+   ],
+   "process_rc": 0,
+   "rank": "GIET",
+   "kills": [
+    "c52_tap_dong"
+   ],
+   "cases_measured": 1,
+   "source_sha256": "30482f7ffd56d9a748263043b7274f6a81f43bca3ed221cbafc53367e1e9b282"
+  }
+ ],
+ "invalid": []
+}

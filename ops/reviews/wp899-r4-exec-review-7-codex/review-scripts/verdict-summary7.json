@@ -1,0 +1,43 @@
+{
+  "frontier_items_including_replays": 59,
+  "survivors": 35,
+  "p1_survivors": [
+    "job_alias_unicode_reject",
+    "name_explicit_unicode_reject",
+    "time_same_year",
+    "time_same_month",
+    "time_century_leap_reject",
+    "time_year_9999_reject",
+    "time_year_0001_reject",
+    "time_clock_only_compare",
+    "time_whitespace_strip",
+    "time_invalid_century_accept",
+    "rest_metadata_time_required",
+    "rest_filter_post_number_order",
+    "mode_env_present_values_only",
+    "mode_env_empty_key_reject",
+    "mode_env_unicode_key_reject",
+    "mode_prior_skip_uses",
+    "dd_first_match_lines_only",
+    "dd_last_match_lines_only",
+    "dd_blank_output_lines_remove",
+    "dd_no_output_final_newline",
+    "dd_dedup_output_lines",
+    "dd_sort_match_lines",
+    "dd_wrong_lenh_first_call",
+    "dd_step_dedup_paths",
+    "log_output_ignore_indented_blank",
+    "log_empty_metadata_reject",
+    "log_second_shell_reject",
+    "log_output_drop_group_lines",
+    "log_require_output_nonempty",
+    "log_require_metadata_no_ansi",
+    "log_color_run_not_contains_shell",
+    "job_suffix_no_dot_pure"
+  ],
+  "p3_survivors": [
+    "name_uses_whole_value",
+    "mode_prior_strip_empty_run",
+    "log_header_full_timestamp_required"
+  ]
+}

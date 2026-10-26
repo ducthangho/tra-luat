@@ -1,0 +1,23 @@
+[
+  {
+    "id": "tach_buoc_169_slice_step2",
+    "function": "tach_buoc",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/tach_buoc_169_slice_step2.py",
+    "before": ":1",
+    "after": ":1:2"
+  },
+  {
+    "id": "do_dau_duong_115_attribute_match",
+    "function": "do_dau_duong",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/do_dau_duong_115_attribute_match.py",
+    "before": "RE_LOI_GOI.fullmatch",
+    "after": "RE_LOI_GOI.match"
+  },
+  {
+    "id": "do_dau_duong_306_attribute_lstrip",
+    "function": "do_dau_duong",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/do_dau_duong_306_attribute_lstrip.py",
+    "before": "run.rstrip",
+    "after": "run.lstrip"
+  }
+]

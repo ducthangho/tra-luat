@@ -1,0 +1,5 @@
+trace-current 0 c44: 13/13 nhánh có gọi công cụ; gồm zero/âm/bool và YAML absent/null/int
+ 
+registry-current 0
+legacy reviewer baseline [('rest_order', 0), ('rest_duplicate', 0), ('time_format', 0), ('time_missing_header', 0), ('github_path', 0), ('expression_name', 0), ('first_line', 0), ('invalid_calendar', 0)]
+legacy reviewer mutant [('rest_order', 'sort_bi_bo', 3), ('rest_duplicate', 'kiem_number_bi_bo', 3), ('time_format', 'gio_nhan_offset', 3), ('time_missing_header', 'gio_thieu_header_lay_rest', 4), ('github_path', 'env_bo_PATH', 3), ('expression_name', 'ten_name_khong_kiem_bieu_thuc', 3), ('first_line', 'ten_run_lstrip', 3)]

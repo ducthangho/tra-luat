@@ -1,0 +1,20 @@
+{
+  "command": [
+    "actionlint",
+    "-no-color",
+    ".review/env-map-workflow.yml",
+    ".review/env-map-job.yml"
+  ],
+  "returncode": 1,
+  "seconds": 0.006411075592041016,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/env-map-actionlint.stdout.txt",
+    "bytes": 302,
+    "sha256": "0321f535dc04dfaf3b04469a6b6f5ae2b3259ac688a53f3f6f885e3566b9437c"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/env-map-actionlint.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

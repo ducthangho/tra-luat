@@ -1,0 +1,1049 @@
+[
+  {
+    "name": "n_ten_strip",
+    "old": "if type(ten) is str and type(j) is dict and any(",
+    "new": "if type(ten) is str and (ten := ten.strip()) is not None and type(j) is dict and any(",
+    "catalogue": [
+      "N_ten_strip",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:4/124 biến dạng lệch định nghĩa: [(\"job ' Build' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'Build ' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'Build (1) ' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_ten_lower",
+    "old": "re.fullmatch(re.escape(x) + r\"(?: \\(.*\\))?\", ten)",
+    "new": "re.fullmatch(re.escape(x.lower()) + r\"(?: \\(.*\\))?\", ten.lower())",
+    "catalogue": [
+      "N_ten_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:3/124 biến dạng lệch định nghĩa: [(\"job 'BUILD' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'build' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'bUILD' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_job_match",
+    "old": "re.fullmatch(re.escape(x)",
+    "new": "re.match(re.escape(x)",
+    "catalogue": [
+      "N_job_match",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:5/124 biến dạng lệch định nghĩa: [(\"job 'Buildx' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'Build ' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'Build(1)' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_job_khoang_trang_ngoac",
+    "old": "r\"(?: \\(.*\\))?\"",
+    "new": "r\"(?:\\s*\\(.*\\))?\"",
+    "catalogue": [
+      "N_job_khoang_trang_ngoac",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:2/124 biến dạng lệch định nghĩa: [(\"job 'Build(1)' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', []), (\"job 'Build  (1)' / alias 'Build'\", 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_ten_run_strip",
+    "old": "\"Run \" + v.split(\"\\n\")[0]",
+    "new": "\"Run \" + v.strip().split(\"\\n\")[0]",
+    "catalogue": [
+      "N_ten_run_strip",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:4/124 biến dạng lệch định nghĩa: [('run: dòng đầu rỗng', 'b_ten_buoc_lech', [], 'passed', []), ('run: có \\\\r cuối', 'b_ten_buoc_lech', [], 'passed', []), ('dấu cách sau dấu nối dòng cuối', 'b_ten_buoc_lech', [], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_ten_splitlines",
+    "old": "v.split(\"\\n\")[0]",
+    "new": "(v.splitlines() or [\"\"])[0]",
+    "catalogue": [
+      "N_ten_splitlines",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:2/124 biến dạng lệch định nghĩa: [('dòng đầu có \\\\r', 'b_ten_buoc_lech', [], 'passed', []), ('run: có \\\\r cuối', 'b_ten_buoc_lech', [], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_ten_name_lower",
+    "old": "return s[\"name\"] if _chuoi(s[\"name\"])",
+    "new": "return s[\"name\"].lower() if _chuoi(s[\"name\"])",
+    "catalogue": [
+      "N_ten_name_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:17/124 biến dạng lệch định nghĩa: [(\"bước tên 'Set up jobx'\", 'b_ten_buoc_lech', [], 'passed', [('passed', None)]), (\"bước tên 'Set up jo'\", 'b_ten_buoc_lech', [], 'passed', [('passed', None)]), (\"bước tên 'SET UP JOB'\", 'b_ten_buoc_lech', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_rest_ten_lower",
+    "old": "s.get(\"name\") != ten_du_kien(y)",
+    "new": "str(s.get(\"name\")).lower() != str(ten_du_kien(y)).lower()",
+    "catalogue": [
+      "N_rest_ten_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:6/124 biến dạng lệch định nghĩa: [(\"name: 'K K' REST lệch\", 'passed', [('passed', None)], 'b_ten_buoc_lech', []), (\"name: 'k k' REST lệch\", 'passed', [('passed', None)], 'b_ten_buoc_lech', []), (\"name: 'k K' REST lệch\", 'passed', [('passed', None)], 'b_ten_buoc_lech', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_meta_lower",
+    "old": "s.get(\"name\") not in (\"Set up job\", \"Complete job\")",
+    "new": "str(s.get(\"name\")).lower() not in (\"set up job\", \"complete job\")",
+    "catalogue": [
+      "N_meta_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:6/124 biến dạng lệch định nghĩa: [(\"bước tên 'SET UP JOB'\", 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)]), (\"bước tên 'set up job'\", 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)]), (\"bước tên 'sET UP JOB'\", 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_post_lower",
+    "old": "str(s.get(\"name\")).startswith(\"Post \")",
+    "new": "str(s.get(\"name\")).lower().startswith(\"post \")",
+    "catalogue": [
+      "N_post_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:2/124 biến dạng lệch định nghĩa: [(\"bước tên 'post x'\", 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)]), (\"bước tên 'POST x'\", 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_post_strip",
+    "old": "str(s.get(\"name\")).startswith(\"Post \")",
+    "new": "str(s.get(\"name\")).strip().startswith(\"Post \")",
+    "catalogue": [
+      "N_post_strip",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [(\"bước tên ' Post x'\", 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_concl_lower",
+    "old": "s.get(\"conclusion\") != \"skipped\"]",
+    "new": "str(s.get(\"conclusion\")).lower() != \"skipped\"]",
+    "catalogue": [
+      "N_concl_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:2/124 biến dạng lệch định nghĩa: [('conclusion Skipped', 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)]), ('conclusion SKIPPED', 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_concl_timed_out",
+    "old": "s.get(\"conclusion\") != \"skipped\"]",
+    "new": "s.get(\"conclusion\") not in (\"skipped\", \"timed_out\")]",
+    "catalogue": [
+      "N_concl_timed_out",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('conclusion timed_out', 'a_so_nhom_khac_so_buoc_rest_chay', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_env_strip",
+    "old": "str(k).startswith(\"CI_DANG_KY_\")",
+    "new": "str(k).strip().startswith(\"CI_DANG_KY_\")",
+    "catalogue": [
+      "N_env_strip",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [(\"env job khoá ' CI_DANG_KY_'\", 'passed', [('not_measured', 'che_do_khong_xac_dinh')], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_env_v_truthy",
+    "old": "return \"env\" in d and (",
+    "new": "return bool(d[\"env\"]) and (",
+    "catalogue": null,
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          4,
+          "HONG:c48_nguyen_van_va_mien:KeyError: 'env'"
+        ]
+      }
+    ],
+    "rank": "TIN_DUNG_GIA"
+  },
+  {
+    "name": "n_defaults_none",
+    "old": "return bool(\"defaults\" in wf or",
+    "new": "return bool(wf.get(\"defaults\") is not None or",
+    "catalogue": [
+      "N_defaults_none",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('defaults: null workflow', 'passed', [('passed', None)], 'passed', [('not_measured', 'che_do_khong_xac_dinh')])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_github_re_I",
+    "old": "re.search(\"GITHUB_(ENV|PATH)\",",
+    "new": "re.search(\"(?i)GITHUB_(ENV|PATH)\",",
+    "catalogue": [
+      "N_github_re_I",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('github_env chữ thường đứng trước', 'passed', [('not_measured', 'che_do_khong_xac_dinh')], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_github_dollar",
+    "old": "re.search(\"GITHUB_(ENV|PATH)\",",
+    "new": "re.search(r\"\\$GITHUB_(ENV|PATH)\",",
+    "catalogue": [
+      "N_github_dollar",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('GITHUB_PATH không có $', 'passed', [('passed', None)], 'passed', [('not_measured', 'che_do_khong_xac_dinh')])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_mau_rong",
+    "old": "mau = \"\\x1b[36;1m\" in d",
+    "new": "mau = \"\\x1b[36\" in d",
+    "catalogue": [
+      "N_mau_rong",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('mã màu 36m (không ;1m)', 'passed', [('passed', None)], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_header_strip",
+    "old": "\"lenh\": t[len(\"##[group]Run \"):]",
+    "new": "\"lenh\": t[len(\"##[group]Run \"):].strip()",
+    "catalogue": [
+      "N_header_strip",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('header 2 dấu cách', 'passed', [('passed', None)], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_in_lai_strip",
+    "old": "b[\"in_lai\"].append(t)",
+    "new": "b[\"in_lai\"].append(t.strip())",
+    "catalogue": [
+      "N_in_lai_strip",
+      "c47"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c47_bien_ghep",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c47_bien_ghep",
+          3,
+          "DO:c47_bien_ghep:khoảng trắng cuối run:: [] ≠ [('passed', None)] (ghép passed)"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_in_lai_rstrip",
+    "old": "b[\"in_lai\"].append(t)",
+    "new": "b[\"in_lai\"].append(t.rstrip())",
+    "catalogue": [
+      "N_in_lai_rstrip",
+      "c47"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c47_bien_ghep",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c47_bien_ghep",
+          3,
+          "DO:c47_bien_ghep:khoảng trắng cuối run:: [] ≠ [('passed', None)] (ghép passed)"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_group_lower",
+    "old": "if t.startswith(\"##[group]Run \"):",
+    "new": "if t.lower().startswith(\"##[group]run \"):",
+    "catalogue": [
+      "N_group_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('header ##[group]run thường', 'c_gio_header_ngoai_cua_so', [], 'a_so_nhom_khac_so_buoc_rest_chay', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_long_lower",
+    "old": "and not t.startswith(\"##[group]\") and (",
+    "new": "and not t.lower().startswith(\"##[group]\") and (",
+    "catalogue": [
+      "N_long_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('##[GROUP] hoa sau shell:', 'passed', [], 'passed', [('passed', None)])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_shell_lower",
+    "old": "not b[\"tien_to\"] or t.startswith(\"shell: \")",
+    "new": "not b[\"tien_to\"] or t.lower().startswith(\"shell: \")",
+    "catalogue": [
+      "N_shell_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('shell: hoa', 'passed', [('passed', None)], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_endgroup_strip",
+    "old": "if t == \"##[endgroup]\":",
+    "new": "if t.strip() == \"##[endgroup]\":",
+    "catalogue": [
+      "N_endgroup_strip",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('endgroup đầu có cách', 'passed', [('passed', None)], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_run_join_rstrip",
+    "old": "run.rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "new": "run.rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"]).rstrip()",
+    "catalogue": [
+      "N_run_join_rstrip",
+      "c47"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c47_bien_ghep",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c47_bien_ghep",
+          3,
+          "DO:c47_bien_ghep:khoảng trắng cuối run:: [] ≠ [('passed', None)] (ghép passed)"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_run_cr",
+    "old": "run.rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "new": "run.replace(\"\\r\", \"\").rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "catalogue": [
+      "N_run_cr",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('run: có \\\\r cuối', 'passed', [('passed', None)], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_goi_strip_run",
+    "old": "dong_logic(run.rstrip(\"\\n\").split(\"\\n\"))",
+    "new": "dong_logic(run.strip().split(\"\\n\"))",
+    "catalogue": [
+      "L5_goi_strip_toan_run",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('dấu cách sau dấu nối dòng cuối', 'passed', [('passed', None)], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_gio_Z_tuy_chon",
+    "old": "\\d\\d:\\d\\d:\\d\\dZ\")",
+    "new": "\\d\\d:\\d\\d:\\d\\dZ?\")",
+    "catalogue": [
+      "N_gio_Z_tuy_chon",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('giờ REST thiếu Z', 'passed', [('passed', None)], 'c_gio_header_ngoai_cua_so', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_khoa_lower",
+    "old": "or set(s) - KHOA_BUOC",
+    "new": "or {str(x).lower() for x in s} - KHOA_BUOC",
+    "catalogue": [
+      "N_khoa_lower",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:2/124 biến dạng lệch định nghĩa: [(\"khoá bước 'Name'\", 'passed', [('passed', None)], 'passed', [('not_measured', 'che_do_khong_xac_dinh')]), (\"khoá bước 'ID'\", 'passed', [('passed', None)], 'passed', [('not_measured', 'che_do_khong_xac_dinh')])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_uses_rong",
+    "old": "run = s.get(\"run\") if \"uses\" not in s else None",
+    "new": "run = s.get(\"run\") if not s.get(\"uses\") else None",
+    "catalogue": [
+      "N_uses_rong",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('uses: rỗng ở bước', 'passed', [('not_measured', 'che_do_khong_xac_dinh')], 'passed', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_uses_job_rong",
+    "old": "if k is None or \"uses\" in wf[\"jobs\"][k] or",
+    "new": "if k is None or bool(wf[\"jobs\"][k].get(\"uses\")) or",
+    "catalogue": [
+      "N_uses_job_rong",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('uses: rỗng ở job', 'passed', [('passed', None)], 'd_job_yaml_khong_duy_nhat', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_name_present_none",
+    "old": "    if \"name\" in s:\n",
+    "new": "    if s.get(\"name\") is not None:\n",
+    "catalogue": [
+      "N_name_present_none",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('name: null', 'passed', [('passed', None)], 'b_ten_buoc_lech', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  },
+  {
+    "name": "n_run_truoc_uses",
+    "old": "v = s.get(\"run\", s.get(\"uses\"))",
+    "new": "v = s.get(\"run\") or s.get(\"uses\")",
+    "catalogue": [
+      "N_run_truoc_uses",
+      "c48"
+    ],
+    "pair": [
+      {
+        "source": "baseline",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ]
+      },
+      {
+        "source": "mutant",
+        "rc": 0,
+        "case": [
+          "c48_nguyen_van_va_mien",
+          3,
+          "DO:c48_nguyen_van_va_mien:1/124 biến dạng lệch định nghĩa: [('run: rỗng kèm uses:', 'passed', [], 'b_ten_buoc_lech', [])]"
+        ]
+      }
+    ],
+    "rank": "GIET"
+  }
+]

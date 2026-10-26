@@ -1,0 +1,129 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "rc": 0,
+      "stdout": "https://github.com/ducthangho/tra-luat.git\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "stdout": "431681270298ffab8edcd316bdf26670157b4b4e\n9e88f11b3ead6c32ea664546ef6e8124e56eb37f\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-status",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "A\tops/ci_provenance.py\nA\tops/ci_provenance_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "444\t0\tops/ci_provenance.py\n1582\t0\tops/ci_provenance_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "config",
+        "--get",
+        "core.abbrev"
+      ],
+      "rc": 0,
+      "stdout": "7\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "--is-shallow-repository"
+      ],
+      "rc": 0,
+      "stdout": "true\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "specs": {
+    "wp899-r3.md": {
+      "bytes": 18402,
+      "sha256": "dd1a997d1f3682e23bb4b5577264076b7d9a12aeff5d9823f491cdda05e4f36f"
+    },
+    "wp899-r4.md": {
+      "bytes": 23860,
+      "sha256": "be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45"
+    },
+    "wp899-r2.md": {
+      "bytes": 23189,
+      "sha256": "d858c7c65a38a7f0fadda1cabf839c98ce70a881372d847c8979165925971707"
+    }
+  }
+}

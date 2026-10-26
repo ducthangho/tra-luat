@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/after_suite6.py"
+  ],
+  "returncode": 0,
+  "seconds": 1731.2634344100952,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/after-suite6-run.stdout.txt",
+    "bytes": 209,
+    "sha256": "298eeca6b99917001a7c5c1dc7f1d4bffb024e59659c4a107d1025a1b6c1aa1a"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/after-suite6-run.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

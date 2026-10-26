@@ -1,0 +1,51 @@
+{
+  "platform": "Linux-6.18.44-fc-v153-x86_64-with-glibc2.39",
+  "python": "3.13.17 (main, Oct 22 2026, 14:06:04) [GCC 13.3.0]",
+  "pyyaml": "6.0.3",
+  "environment_status": "not available in ALL_TOOLS",
+  "CODEX_THREAD_ID": "01a171ad-5e4e-7f01-bd04-5e65557baf40",
+  "CODEX_SESSION_ID": "01a171ad-5e4e-7f01-bd04-5e65557baf40",
+  "CODEX_VERSION": "0.164.0",
+  "git --version": {
+    "rc": 0,
+    "stdout": "git version 2.43.0\n",
+    "stderr": ""
+  },
+  "codex --version": {
+    "rc": 0,
+    "stdout": "codex-cli 0.164.0\n",
+    "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\n"
+  },
+  "/usr/bin/python -m ruff --version": {
+    "rc": 0,
+    "stdout": "ruff 0.15.15\n",
+    "stderr": ""
+  },
+  "runtime_metadata": [
+    {
+      "path": "/root/.codex/sessions/2026/10/25/rollout-2026-10-25T06-09-10-01a171ad-5e4e-7f01-bd04-5e65557baf40.jsonl",
+      "session_meta": [
+        {
+          "id": "01a171ad-5e4e-7f01-bd04-5e65557baf40",
+          "cli_version": "0.164.0",
+          "originator": "codex_exec",
+          "model_provider": "openai",
+          "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws"
+        }
+      ],
+      "turn_context": [
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "xhigh",
+          "sandbox_policy": {
+            "type": "workspace-write",
+            "network_access": false,
+            "exclude_tmpdir_env_var": false,
+            "exclude_slash_tmp": false
+          },
+          "approval_policy": "never"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/frontier6.py"
+  ],
+  "returncode": 0,
+  "seconds": 473.2348732948303,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/frontier6-targeted.stdout.txt",
+    "bytes": 3297,
+    "sha256": "2f99cdc2d31b35b4da36cb2892b855e111b24796e95e359a3fa14e6b1cb95c7a"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/frontier6-targeted.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

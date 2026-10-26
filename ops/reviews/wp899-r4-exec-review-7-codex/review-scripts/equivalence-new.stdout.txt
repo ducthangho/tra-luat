@@ -1,0 +1,1 @@
+{'mode_prior_strip_empty_run': 15, 'log_header_full_timestamp_required': 8}

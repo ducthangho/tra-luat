@@ -1,0 +1,599 @@
+{
+  "git_root": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review10/ws/.review/yaml-git",
+  "cases": {
+    "valid_quoted": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "21b972c769aee4aeff516dcc1f47c20888a1b4b7",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z 21b972c769aee4aeff516dcc1f47c20888a1b4b7\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: \"2026-02-30\"\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "5de99fc7a0392221fef9e988a604c58c3d062933",
+      "checkout_sha": "21b972c769aee4aeff516dcc1f47c20888a1b4b7",
+      "workflow_sha256": "bbd17b0d970edd2c8abaac92b4a9c9f87a18f37a76011d9b4417e198fde12e96"
+    },
+    "invalid_date": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "9accd521630ae97038524d97fd1d430e089dc1cc",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z 9accd521630ae97038524d97fd1d430e089dc1cc\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: 2026-02-30\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "17c91e55b3c5a35216f0816bf087a969f317499c",
+      "checkout_sha": "9accd521630ae97038524d97fd1d430e089dc1cc",
+      "workflow_sha256": "e7618c4a0ee5815c9a08d05fdc4841eb5594074af5879635aa5290fac0baed31"
+    },
+    "invalid_hour": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "1eea551efb4db9f8452016e5f9824ea638235ba3",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z 1eea551efb4db9f8452016e5f9824ea638235ba3\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: 2026-01-01T99:00:00Z\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "946fbd5ee97015ac11027da734fcf1d712146a92",
+      "checkout_sha": "1eea551efb4db9f8452016e5f9824ea638235ba3",
+      "workflow_sha256": "c9699985be0e96b0726cffc2334fdcef7967ae820d51b3c636c995491a5cdd57"
+    },
+    "invalid_int": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "a61962aa55469ffdbc98ba5dd96957d41b428bab",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z a61962aa55469ffdbc98ba5dd96957d41b428bab\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: !!int xyz\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "f82266168acbf02b059992bce136e0109815c663",
+      "checkout_sha": "a61962aa55469ffdbc98ba5dd96957d41b428bab",
+      "workflow_sha256": "99b7ad5932fd7e232ee0e311ebf6e75e3d95abfbb3342c9ec2dcdac662edca05"
+    },
+    "invalid_float": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "8dbf20db43f26e34179ad83388776e7bdc49fe2e",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z 8dbf20db43f26e34179ad83388776e7bdc49fe2e\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: !!float abc\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "a12d8d4aad56738333f1fabbde69dce04d2f076d",
+      "checkout_sha": "8dbf20db43f26e34179ad83388776e7bdc49fe2e",
+      "workflow_sha256": "dfa95f4f00d0a8822509cc47ead0c0874543a7e3ded9454d5453b70c0ac15a80"
+    },
+    "invalid_bool": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "ee17acaa3419c1267afa9e300675bd7ceca93423",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z ee17acaa3419c1267afa9e300675bd7ceca93423\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: !!bool maybe\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "01bf6ccacd006b0be61a673027b533e6f7f3a1e6",
+      "checkout_sha": "ee17acaa3419c1267afa9e300675bd7ceca93423",
+      "workflow_sha256": "10b457b24c531851219d1a19e9ee9a57cbb9c628fc91e30db05889327499ffc2"
+    },
+    "empty_int": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "0ca1734dfcb9c702f85ffe44a68c471d203ebfd8",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z 0ca1734dfcb9c702f85ffe44a68c471d203ebfd8\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: !!int ''\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "e1e35938ccb49acaa50805bc60d55038f22b92a5",
+      "checkout_sha": "0ca1734dfcb9c702f85ffe44a68c471d203ebfd8",
+      "workflow_sha256": "e64865a94efd1e8b54692bfa2abbe1558e3cfbc68a52ccc17ea85863e4790ba8"
+    },
+    "empty_float": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "f2f482465d7a331f5b884909ec820bd69e7ae737",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z f2f482465d7a331f5b884909ec820bd69e7ae737\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: !!float ''\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "b6a86603f412b15da11958637849a84f5c03039f",
+      "checkout_sha": "f2f482465d7a331f5b884909ec820bd69e7ae737",
+      "workflow_sha256": "6fcb3a7fb11ba0b201bc9eebcd4ccaa9bb0890ca6d374b6d00364c57914f3411"
+    },
+    "invalid_timestamp": {
+      "run": {
+        "id": 5,
+        "run_attempt": 1,
+        "event": "push",
+        "head_sha": "3feedde199097eb3bc3ec8ebaf832eb60a25097d",
+        "path": "wf.yml",
+        "check_suite_id": 9
+      },
+      "jobs": [
+        {
+          "id": 1,
+          "name": "j",
+          "run_attempt": 1,
+          "runner_id": 7,
+          "runner_name": "GitHub Actions 7",
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "conclusion": "success",
+          "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 2,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:40:18Z",
+              "completed_at": "2026-10-19T23:40:18Z"
+            },
+            {
+              "name": "Run python ops/thu_gia_test.py",
+              "number": 3,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 4,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            },
+            {
+              "name": "Complete job",
+              "number": 5,
+              "conclusion": "success",
+              "started_at": "2026-10-19T23:45:04Z",
+              "completed_at": "2026-10-19T23:45:04Z"
+            }
+          ]
+        }
+      ],
+      "log": "2026-10-19T23:40:06.0485589Z ##[group]Runner Image\n2026-10-19T23:40:06.0486422Z Image: ubuntu-24.04\n2026-10-19T23:40:18.2994760Z [command]/usr/bin/git log -1 --format=%H\n2026-10-19T23:40:18.3020458Z 3feedde199097eb3bc3ec8ebaf832eb60a25097d\n2026-10-19T23:40:18.3206929Z ##[group]Run actions/setup-python@v5\n2026-10-19T23:45:04.8553236Z ##[group]Run python ops/thu_gia_test.py\n2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/thu_gia_test.py\u001b[0m\n2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}\n2026-10-19T23:45:04.8553236Z ##[endgroup]\n2026-10-19T23:45:04.8553236Z THU: 4/4 dat\n",
+      "workflow": "name: !!timestamp abc\njobs:\n  j:\n    runs-on: x\n    steps:\n    - uses: actions/setup-python@v5\n    - run: 'python ops/thu_gia_test.py\n\n        '\n",
+      "blob_oid": "ac2e5bad9a55512e45c2f2afa3b935aed2c3c995",
+      "checkout_sha": "3feedde199097eb3bc3ec8ebaf832eb60a25097d",
+      "workflow_sha256": "570a048147210977c3e8a9d263861ff14cd11812563f644eff232621d6e46fc3"
+    }
+  }
+}

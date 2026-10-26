@@ -1,0 +1,40 @@
+{
+  "node_type": "Call (one positional argument)",
+  "mutation": "delete the optional argument of the second run.rstrip",
+  "before": "run.rstrip('\\n')",
+  "after": "run.rstrip()",
+  "source_sha256": "b324dcb2418dedcf9be0ce46b85e988ea4fc7fe5bc97593a18b6f4d2bcfe6790",
+  "closed_operator_available": false,
+  "input_run_repr": "'python ops/thu_gia_test.py\\\\ \\n'",
+  "input_run_utf8_sha256": "be5e1bbedd967b0b53343378380317af67878533ccc8ef9d3fbd822792e8d614",
+  "proof": [
+    {
+      "source": "head",
+      "gate": "not_measured",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "markers": []
+    },
+    {
+      "source": "mutant",
+      "gate": "passed",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py\\ ",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    }
+  ]
+}
+ALL 51 GREEN 50

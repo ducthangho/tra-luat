@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "-c",
+    "import runpy,sys; m=runpy.run_path(\".claude/dev/ci_dang_ky_test.py\"); errors,count=m[\"loi_ruff_ci\"](); print(\"RUFF_CONTRACT\",count,errors); sys.exit(bool(errors) or count == 0)"
+  ],
+  "returncode": 0,
+  "seconds": 0.4076247215270996,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/ruff-contract.stdout.txt",
+    "bytes": 19,
+    "sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/ruff-contract.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

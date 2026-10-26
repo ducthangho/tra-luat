@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/full9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 1325.4319458007812,
+  "stdout_sha256": "d796afc9594f44540a781f532dde23a68222500c8bfc0e92224ee6c2ff8cf913",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

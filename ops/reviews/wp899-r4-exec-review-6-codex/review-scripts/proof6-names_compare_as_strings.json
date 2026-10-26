@@ -1,0 +1,32 @@
+[
+  {
+    "name": "names_compare_as_strings",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "names_compare_as_strings"
+        ],
+        "rc": 0,
+        "output": "DAT:names_compare_as_strings\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/frontier6/names_compare_as_strings.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "names_compare_as_strings"
+        ],
+        "rc": 4,
+        "output": "HONG:names_compare_as_strings:FileNotFoundError:[Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/frontier6/names_compare_as_strings.py'\n"
+      }
+    ],
+    "proven": false
+  }
+]

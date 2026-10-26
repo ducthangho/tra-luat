@@ -1,0 +1,25 @@
+{
+  "command": [
+    "python",
+    "-m",
+    "ruff",
+    "check",
+    "--no-cache",
+    "--select",
+    "F",
+    "ops/ci_provenance.py",
+    "ops/ci_provenance_test.py"
+  ],
+  "returncode": 0,
+  "seconds": 0.05215907096862793,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/ruff.stdout.txt",
+    "bytes": 19,
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/ruff.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

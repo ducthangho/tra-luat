@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    "-"
+  ],
+  "returncode": 0,
+  "seconds": 1.057246208190918,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/registry-probe.stdout.txt",
+    "bytes": 229,
+    "sha256": "fe00a60c11ec197b1dd6b607be3ec821d018a64a4631111132621b0d234094cf"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/registry-probe.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

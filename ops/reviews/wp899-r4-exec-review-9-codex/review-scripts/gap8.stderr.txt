@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/gap8.py", line 19, in <module>
+    assert report['all_green']
+           ~~~~~~^^^^^^^^^^^^^
+AssertionError

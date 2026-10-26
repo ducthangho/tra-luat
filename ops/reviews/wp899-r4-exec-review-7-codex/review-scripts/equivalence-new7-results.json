@@ -1,0 +1,237 @@
+{
+  "mode_prior_strip_empty_run": {
+    "rows": [
+      {
+        "value_type": "NoneType",
+        "value": "None",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "bool",
+        "value": "False",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "int",
+        "value": "0",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "float",
+        "value": "0.0",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "str",
+        "value": "''",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "list",
+        "value": "[]",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "dict",
+        "value": "{}",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "set",
+        "value": "set()",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "bytes",
+        "value": "b''",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "bool",
+        "value": "True",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "int",
+        "value": "1",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "str",
+        "value": "'echo hi'",
+        "head": false,
+        "mutant": false,
+        "equal": true
+      },
+      {
+        "value_type": "str",
+        "value": "'echo GITHUB_ENV'",
+        "head": true,
+        "mutant": true,
+        "equal": true
+      },
+      {
+        "value_type": "str",
+        "value": "'echo GITHUB_PATH'",
+        "head": true,
+        "mutant": true,
+        "equal": true
+      },
+      {
+        "value_type": "list",
+        "value": "['GITHUB_ENV']",
+        "head": true,
+        "mutant": true,
+        "equal": true
+      }
+    ],
+    "argument": "All changed values are falsy safe YAML values. Their string forms contain neither source token; every truthy value is unchanged."
+  },
+  "log_header_full_timestamp_required": {
+    "rows": [
+      {
+        "prefix": "2026-10-19T23:45:04.8553236Z ",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          },
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          }
+        ]
+      },
+      {
+        "prefix": "2026-10-19T23:45:04.8553236Z",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          },
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          }
+        ]
+      },
+      {
+        "prefix": "",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "c_gio_header_ngoai_cua_so",
+            "so_buoc": 2
+          },
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "c_gio_header_ngoai_cua_so",
+            "so_buoc": 2
+          }
+        ]
+      },
+      {
+        "prefix": "2026-10-19T23:45:04Z ",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          },
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          }
+        ]
+      },
+      {
+        "prefix": "2026-10-19T23:45:04.0Z ",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          },
+          {
+            "trang_thai": "passed",
+            "so_buoc": 2
+          }
+        ]
+      },
+      {
+        "prefix": "2026-10-19T23:45:04 ",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+            "so_buoc": 1
+          },
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+            "so_buoc": 1
+          }
+        ]
+      },
+      {
+        "prefix": "2026-10-19T23:45:04ZZ ",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+            "so_buoc": 1
+          },
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+            "so_buoc": 1
+          }
+        ]
+      },
+      {
+        "prefix": "2026-10-19T23:45:04+00:00 ",
+        "equal": true,
+        "ghep": [
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+            "so_buoc": 1
+          },
+          {
+            "trang_thai": "not_measured",
+            "ly_do": "a_so_nhom_khac_so_buoc_rest_chay",
+            "so_buoc": 1
+          }
+        ]
+      }
+    ],
+    "argument": "A recognized valid timestamp gives the same gio. A raw non-timestamp Run header has an invalid first19 timestamp and already fails M12(c); a malformed timestamp that cannot be stripped does not open a Run group. Internal invalid gio values can differ, public output remains unchanged."
+  }
+}

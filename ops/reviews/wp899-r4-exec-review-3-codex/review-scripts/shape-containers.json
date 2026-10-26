@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/prior2/shape_audit.py",
+    "--containers"
+  ],
+  "returncode": 1,
+  "seconds": 0.05988717079162598,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/shape-containers.stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/shape-containers.stderr.txt",
+    "bytes": 266,
+    "sha256": "4b28ec2c4c6d01fcf6555f6c4368d9a5227a666a535d666b91481294d00febdd"
+  }
+}

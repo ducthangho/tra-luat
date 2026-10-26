@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/remaining_survivors.py"
+  ],
+  "returncode": 0,
+  "seconds": 1.0094728469848633,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/survivor-details-final2.stdout.txt",
+    "bytes": 780,
+    "sha256": "5e0e897ee00634c0294e8ca6bfb69e04e311bcd3d6e127906573f081c4441b21"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/survivor-details-final2.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/equivalence11.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 0.4694960117340088,
+  "stdout_sha256": "8f5228a8576865208652c8d24e396b60a40f3ad4ada624c0e71959e873ae0577",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

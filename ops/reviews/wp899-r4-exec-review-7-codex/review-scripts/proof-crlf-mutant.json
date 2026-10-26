@@ -1,0 +1,22 @@
+{
+  "command": [
+    "env",
+    "CI_PROVENANCE_MA=/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/proof7/name_run_strip_cr.py",
+    "python",
+    "-B",
+    ".review/cases7.py",
+    "name_run_strip_cr"
+  ],
+  "returncode": 3,
+  "seconds": 0.9774034023284912,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/proof-crlf-mutant.stdout.txt",
+    "bytes": 77,
+    "sha256": "85a91578c1de63871a7c98a50587aa2595edf7bf2101f69f190284425a2538bd"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/proof-crlf-mutant.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

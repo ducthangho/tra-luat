@@ -1,0 +1,46 @@
+[
+  {
+    "label": "frontier-proofs-final",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/prove_frontier.py"
+    ],
+    "rc": 0,
+    "stdout": "run_rstrip_all run_trailing_space HEAD 0\nrun_rstrip_all run_trailing_space mutant 3\nmetadata_post_anywhere metadata_post_infix HEAD 0\nmetadata_post_anywhere metadata_post_infix mutant 3\nlog_shell_suffix shell_prefix_space_missing HEAD 0\nlog_shell_suffix shell_prefix_space_missing mutant 3\nmode_defaults_job_truthy defaults_job_empty HEAD 0\nmode_defaults_job_truthy defaults_job_empty mutant 3\nmode_defaults_wf_truthy defaults_wf_empty HEAD 0\nmode_defaults_wf_truthy defaults_wf_empty mutant 3\nmode_env_truthy env_job_false HEAD 0\nmode_env_truthy env_job_false mutant 3\nmode_env_string_only env_wf_list HEAD 0\nmode_env_string_only env_wf_list mutant 3\nrest_number_bool number_bool_metadata HEAD 0\nrest_number_bool number_bool_metadata mutant 3\nrest_number_float number_float HEAD 0\nrest_number_float number_float mutant 3\njob_alias_exact_drop job_alias_exact HEAD 0\njob_alias_exact_drop job_alias_exact mutant 3\njob_matrix_nonempty matrix_empty HEAD 0\njob_matrix_nonempty matrix_empty mutant 3\njob_dotall_add job_suffix_newline HEAD 0\njob_dotall_add job_suffix_newline mutant 3\nmode_shell_no_pwsh shell_pwsh HEAD 0\nmode_shell_no_pwsh shell_pwsh mutant 3\nmode_shell_no_sh shell_sh HEAD 0\nmode_shell_no_sh shell_sh mutant 3\nmode_shell_null_default shell_null HEAD 0\nmode_shell_null_default shell_null mutant 3\nmode_env_shape_drop env_job_string HEAD 0\nmode_env_shape_drop env_job_string mutant 3\nmode_env_shape_drop env_wf_string HEAD 0\nmode_env_shape_drop env_wf_string mutant 3\nmode_env_presence_not_value env_wf_empty HEAD 0\nmode_env_presence_not_value env_wf_empty mutant 3\nmode_key_id_drop key_id HEAD 0\nmode_key_id_drop key_id mutant 3\nmode_key_if_drop key_if HEAD 0\nmode_key_if_drop key_if mutant 3\nmode_key_timeout_drop key_timeout-minutes HEAD 0\nmode_key_timeout_drop key_timeout-minutes mutant 3\nmode_key_coe_drop key_continue-on-error HEAD 0\nmode_key_coe_drop key_continue-on-error mutant 3\nmode_prior_skip_first prior_first_step HEAD 0\nmode_prior_skip_first prior_first_step mutant 3\nmode_prior_only_last prior_nonadjacent HEAD 0\nmode_prior_only_last prior_nonadjacent mutant 3\n",
+    "stderr": ""
+  },
+  {
+    "label": "prove-last-final",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/prove_last.py"
+    ],
+    "rc": 0,
+    "stdout": "run_type_coerce nonstr_no_throw HEAD 0\nrun_type_coerce nonstr_no_throw mutant 3\nnumber_type_bool_guard_drop number_bool_metadata HEAD 0\nnumber_type_bool_guard_drop number_bool_metadata mutant 3\n",
+    "stderr": ""
+  },
+  {
+    "label": "remaining-survivors-final",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/remaining_survivors_current.py"
+    ],
+    "rc": 0,
+    "stdout": "dd_output_dedupe [({'trang_thai': 'passed', 'so_buoc': 2}, 1, [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]), ({'trang_thai': 'passed', 'so_buoc': 2}, 1, [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}, {'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}])]\nL3_endgroup_startswith [({'trang_thai': 'passed', 'so_buoc': 2}, 0, []), ({'trang_thai': 'passed', 'so_buoc': 2}, 1, [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}])]\nnested equivalence 6 / 6\n",
+    "stderr": ""
+  },
+  {
+    "label": "trace-final",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/prior2/trace_c44_current.py"
+    ],
+    "rc": 0,
+    "stdout": "c44: 13/13 nhánh gọi công cụ và assertion; có zero/âm/bool/container\n",
+    "stderr": ""
+  }
+]

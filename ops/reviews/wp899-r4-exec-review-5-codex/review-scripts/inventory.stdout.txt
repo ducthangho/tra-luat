@@ -1,0 +1,1 @@
+script inventory 92 raw anchors 61 obsolete ['log_group_close_exact', 'header_time_other_group']

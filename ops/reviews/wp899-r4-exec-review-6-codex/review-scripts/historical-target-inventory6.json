@@ -1,0 +1,569 @@
+[
+  {
+    "producer": "frontier.py",
+    "name": "job_rest_type",
+    "old": "if type(ten) is str and type(j) is dict and any(",
+    "new": "if type(j) is dict and any(",
+    "previous_target": "c22_thieu_dinh_danh_khong_passed"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "job_match_search",
+    "old": "and re.fullmatch(re.escape(x)",
+    "new": "and re.search(re.escape(x)",
+    "previous_target": "c39_ghep_job"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "job_matrix_nonempty",
+    "old": "r\"(?: \\(.*\\))?\"",
+    "new": "r\"(?: \\(.+\\))?\"",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "job_dotall_add",
+    "old": "ten) for x in (k, j.get(\"name\"))",
+    "new": "ten, re.S) for x in (k, j.get(\"name\"))",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "job_alias_exact_drop",
+    "old": "type(x) is str and x and \"${{\" not in x and re.fullmatch",
+    "new": "type(x) is str and x and ten != j.get(\"name\") and \"${{\" not in x and re.fullmatch",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "name_use_last_line",
+    "old": "v.split(\"\\n\")[0] if _chuoi(v)",
+    "new": "v.rstrip(\"\\n\").split(\"\\n\")[-1] if _chuoi(v)",
+    "previous_target": "c26_f02_dong_khong_mau"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "name_rest_strip",
+    "old": "s.get(\"name\") != ten_du_kien(y)",
+    "new": "s.get(\"name\").strip() != ten_du_kien(y)",
+    "previous_target": "c37_ghep_lech_ten"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_drop_type",
+    "old": "if type(d[\"env\"]) is str and RE_GIO.fullmatch(v) else None",
+    "new": "if RE_GIO.fullmatch(v) else None",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_year0_drop",
+    "old": "    except ValueError:\n        return None",
+    "new": "    except KeyError:\n        return None",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_calendar_date_only",
+    "old": "strptime(v[:19], \"%Y-%m-%dT%H:%M:%S\")",
+    "new": "strptime(v[:10], \"%Y-%m-%d\")",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_low_strict",
+    "old": "a <= h <= z",
+    "new": "a < h <= z",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_hi_strict",
+    "old": "a <= h <= z",
+    "new": "a <= h < z",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_or_bounds",
+    "old": "a <= h <= z",
+    "new": "(a <= h or h <= z)",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_low_only",
+    "old": "a <= h <= z",
+    "new": "a <= h",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "time_hi_only",
+    "old": "a <= h <= z",
+    "new": "h <= z",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "rest_number_float",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "(isinstance(s.get(\"number\"), (int, float)) and not isinstance(s.get(\"number\"), bool) and s[\"number\"] >= 1)",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "rest_number_bool",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "(isinstance(s.get(\"number\"), int) and s[\"number\"] >= 1)",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "rest_steps_list_drop",
+    "old": "type(st) is list and all(",
+    "new": "all(",
+    "previous_target": "c22_thieu_dinh_danh_khong_passed"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "rest_steps_all_any",
+    "old": "all(type(s) is dict and _so(s.get(\"number\"), 1)",
+    "new": "any(type(s) is dict and _so(s.get(\"number\"), 1)",
+    "previous_target": "c44_ghep_sai_dang"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "yaml_steps_all_any",
+    "old": "not all(type(s) is dict for s in sy)",
+    "new": "not any(type(s) is dict for s in sy)",
+    "previous_target": "c44_ghep_sai_dang"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "number_sort_desc",
+    "old": "key=lambda s: s[\"number\"])",
+    "new": "key=lambda s: -s[\"number\"])",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "metadata_keep_setup",
+    "old": "not in (\"Set up job\", \"Complete job\")",
+    "new": "not in (\"Complete job\",)",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "metadata_keep_complete",
+    "old": "not in (\"Set up job\", \"Complete job\")",
+    "new": "not in (\"Set up job\",)",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "metadata_post_anywhere",
+    "old": "str(s.get(\"name\")).startswith(\"Post \")",
+    "new": "(\"Post \" in str(s.get(\"name\")))",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_env_shape_drop",
+    "old": "type(d[\"env\"]) is not dict or any(str(k)",
+    "new": "False or any(str(k)",
+    "previous_target": null
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_env_prefix_exact",
+    "old": "str(k).startswith(\"CI_DANG_KY_\")",
+    "new": "str(k) == \"CI_DANG_KY_\"",
+    "previous_target": "c29_che_do_env_job"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_shell_no_pwsh",
+    "old": "(\"bash\", \"pwsh\", \"sh\")",
+    "new": "(\"bash\", \"sh\")",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_shell_no_sh",
+    "old": "(\"bash\", \"pwsh\", \"sh\")",
+    "new": "(\"bash\", \"pwsh\")",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_shell_null_default",
+    "old": "s.get(\"shell\", \"bash\")",
+    "new": "(s.get(\"shell\") or \"bash\")",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_env_presence_not_value",
+    "old": "_env_chan(wf)",
+    "new": "(\"env\" in wf)",
+    "previous_target": null
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_env_job_presence",
+    "old": "_env_chan(j.get(\"env\"))",
+    "new": "(\"env\" in j)",
+    "previous_target": "c29_che_do_env_job"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_key_id_drop",
+    "old": "{\"name\", \"id\", \"if\", \"run\", \"shell\",",
+    "new": "{\"name\", \"if\", \"run\", \"shell\",",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_key_if_drop",
+    "old": "{\"name\", \"id\", \"if\", \"run\", \"shell\",",
+    "new": "{\"name\", \"id\", \"run\", \"shell\",",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_key_timeout_drop",
+    "old": "\"timeout-minutes\", \"continue-on-error\"}",
+    "new": "\"continue-on-error\"}",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_key_coe_drop",
+    "old": "\"timeout-minutes\", \"continue-on-error\"}",
+    "new": "\"timeout-minutes\"}",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_prior_skip_first",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][1:i]))",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_prior_only_first",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][:1]))",
+    "previous_target": "c42_github_env_cung_job"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_prior_only_last",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][max(i-1,0):i]))",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "mode_prior_include_current",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][:i+1]))",
+    "previous_target": "c42_github_env_cung_job"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "run_rstrip_all",
+    "old": "run.rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "new": "run.rstrip() == \"\\n\".join(b[\"in_lai\"])",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "run_type_coerce",
+    "old": "type(run) is str and b[\"hop_le\"] and run.rstrip",
+    "new": "b[\"hop_le\"] and str(run).rstrip",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "dd_group_reverse",
+    "old": "for b, (k, i) in zip(buoc, ghep or []):",
+    "new": "for b, (k, i) in zip(reversed(buoc), ghep or []):",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "dd_map_reverse",
+    "old": "for b, (k, i) in zip(buoc, ghep or []):",
+    "new": "for b, (k, i) in zip(buoc, list(reversed(ghep or []))):",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "dd_output_dedupe",
+    "old": "for duong in dict.fromkeys([g[2] for g in goi] if goi and all(goi) else []):",
+    "new": "for duong in ([g[2] for g in goi] if goi and all(goi) else []):",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "log_group_close_exact",
+    "old": "if t.startswith(\"##[endgroup]\"):",
+    "new": "if t == \"##[endgroup]\":",
+    "previous_target": null
+  },
+  {
+    "producer": "frontier.py",
+    "name": "log_shell_suffix",
+    "old": "t.startswith(\"shell: \")",
+    "new": "t.startswith(\"shell:\")",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "log_nested_before_only",
+    "old": "and not t.startswith(\"##[group]\") and (",
+    "new": "and not (t.startswith(\"##[group]\") and b[\"tien_to\"]) and (",
+    "previous_target": "c40_nhom_long"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "log_nested_after_only",
+    "old": "and not t.startswith(\"##[group]\") and (",
+    "new": "and not (t.startswith(\"##[group]\") and not b[\"tien_to\"]) and (",
+    "previous_target": null
+  },
+  {
+    "producer": "frontier.py",
+    "name": "log_prefix_drop_ok",
+    "old": "b[\"ok\"] and not mau and",
+    "new": "not mau and",
+    "previous_target": "c35_f02_khoi_khong_tron_ven"
+  },
+  {
+    "producer": "frontier.py",
+    "name": "log_close_ignore_prefix",
+    "old": "not b[\"tien_to\"] and b[\"in_lai\"][:1]",
+    "new": "b[\"in_lai\"][:1]",
+    "previous_target": "c35_f02_khoi_khong_tron_ven"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "mode_defaults_wf_truthy",
+    "old": "\"defaults\" in wf or",
+    "new": "bool(wf.get(\"defaults\")) or",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "mode_defaults_job_truthy",
+    "old": "or \"defaults\" in j or",
+    "new": "or bool(j.get(\"defaults\")) or",
+    "previous_target": "c46_mien_che_do"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "mode_env_truthy",
+    "old": "return \"env\" in d and (type(d[\"env\"]) is not dict",
+    "new": "return \"env\" in d and bool(d[\"env\"]) and (type(d[\"env\"]) is not dict",
+    "previous_target": null
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "mode_env_string_only",
+    "old": "type(d[\"env\"]) is not dict or any(str(k)",
+    "new": "type(d[\"env\"]) is str or any(str(k)",
+    "previous_target": null
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "number_type_bool_guard_drop",
+    "old": "type(s) is dict and _so(s.get(\"number\"), 1)",
+    "new": "type(s) is dict and isinstance(s.get(\"number\"), int) and s[\"number\"] >= 1",
+    "previous_target": "c47_bien_ghep"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "number_min_strict",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "_so(s.get(\"number\"), 2)",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "header_time_other_group",
+    "old": "(h := _gio(b[\"gio\"]))",
+    "new": "(h := _gio(buoc[0][\"gio\"]))",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "header_window_other_step",
+    "old": "_gio(ung[i].get(\"started_at\"))",
+    "new": "_gio(ung[0].get(\"started_at\"))",
+    "previous_target": "c38_ghep_lech_gio"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "time_current_end_other_step",
+    "old": "_gio(ung[i].get(\"completed_at\"))",
+    "new": "_gio(ung[0].get(\"completed_at\"))",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "name_only_first_rest",
+    "old": "for s, y in zip(ung, sy)):",
+    "new": "for s, y in list(zip(ung, sy))[:1]):",
+    "previous_target": "c37_ghep_lech_ten"
+  },
+  {
+    "producer": "frontier2.py",
+    "name": "name_only_last_rest",
+    "old": "for s, y in zip(ung, sy)):",
+    "new": "for s, y in list(zip(ung, sy))[-1:]):",
+    "previous_target": "c45_buoc_skipped_giua"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "job_escape_alias",
+    "old": "re.escape(x)",
+    "new": "x",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "job_alias_strip",
+    "old": "re.escape(x)",
+    "new": "re.escape(x.strip())",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "job_casefold",
+    "old": "ten) for x in (k, j.get(\"name\"))",
+    "new": "ten, re.I) for x in (k, j.get(\"name\"))",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "name_explicit_strip",
+    "old": "return s[\"name\"] if _chuoi(s[\"name\"])",
+    "new": "return s[\"name\"].strip() if _chuoi(s[\"name\"])",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "name_explicit_casefold",
+    "old": "return s[\"name\"] if _chuoi(s[\"name\"])",
+    "new": "return s[\"name\"].casefold() if _chuoi(s[\"name\"])",
+    "previous_target": "c37_ghep_lech_ten"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "metadata_setup_prefix",
+    "old": "s.get(\"name\") not in (\"Set up job\", \"Complete job\")",
+    "new": "not str(s.get(\"name\")).startswith(\"Set up job\") and s.get(\"name\") != \"Complete job\"",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "metadata_complete_prefix",
+    "old": "s.get(\"name\") not in (\"Set up job\", \"Complete job\")",
+    "new": "s.get(\"name\") != \"Set up job\" and not str(s.get(\"name\")).startswith(\"Complete job\")",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "metadata_post_suffix",
+    "old": "str(s.get(\"name\")).startswith(\"Post \")",
+    "new": "str(s.get(\"name\")).endswith(\"Post \")",
+    "previous_target": "c12_marker_khong_khop"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "ran_neutral_excluded",
+    "old": "s.get(\"conclusion\") != \"skipped\"]",
+    "new": "s.get(\"conclusion\") not in (\"skipped\", \"neutral\")]",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "ran_cancelled_excluded",
+    "old": "s.get(\"conclusion\") != \"skipped\"]",
+    "new": "s.get(\"conclusion\") not in (\"skipped\", \"cancelled\")]",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "env_prefix_empty_suffix",
+    "old": "str(k).startswith(\"CI_DANG_KY_\")",
+    "new": "(str(k).startswith(\"CI_DANG_KY_\") and len(str(k)) > len(\"CI_DANG_KY_\"))",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "env_prefix_casefold",
+    "old": "str(k).startswith(\"CI_DANG_KY_\")",
+    "new": "str(k).upper().startswith(\"CI_DANG_KY_\")",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "mode_step_key_truthy",
+    "old": "set(s) - KHOA_BUOC",
+    "new": "{key for key in s if s[key]} - KHOA_BUOC",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "mode_shell_strip",
+    "old": "s.get(\"shell\", \"bash\") not in",
+    "new": "str(s.get(\"shell\", \"bash\")).strip() not in",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "mode_shell_casefold",
+    "old": "s.get(\"shell\", \"bash\") not in",
+    "new": "str(s.get(\"shell\", \"bash\")).lower() not in",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "mode_prior_requires_ran",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][:i] if t.get(\"if\") != \"false\"))",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "run_compare_strip_newlines",
+    "old": "run.rstrip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "new": "run.strip(\"\\n\") == \"\\n\".join(b[\"in_lai\"])",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "header_lstrip",
+    "old": "b[\"in_lai\"][:1] == [b[\"lenh\"]]",
+    "new": "b[\"in_lai\"][:1] == [b[\"lenh\"].lstrip()]",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "shell_lstrip",
+    "old": "t.startswith(\"shell: \")",
+    "new": "t.lstrip().startswith(\"shell: \")",
+    "previous_target": "c48_nguyen_van_va_mien"
+  },
+  {
+    "producer": "new_frontier.py",
+    "name": "number_contiguous",
+    "old": "and len({s[\"number\"] for s in st}) == len(st)",
+    "new": "and {s[\"number\"] for s in st} == set(range(1, len(st) + 1))",
+    "previous_target": "c36_ghep_lech_so"
+  }
+]

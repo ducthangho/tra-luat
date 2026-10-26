@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/ci_dang_ky_test.py"
+  ],
+  "rc": 1,
+  "elapsed_seconds": 1.4586303234100342,
+  "stdout_sha256": "d65e08635f4023ac9f1f2baa5a178b41e0a3de05f631b596ae2a8d32cfed094e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

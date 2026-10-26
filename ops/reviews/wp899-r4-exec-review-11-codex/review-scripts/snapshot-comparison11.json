@@ -1,0 +1,9 @@
+{
+  "files_start": 16771,
+  "files_end": 16771,
+  "changed_paths": [],
+  "commands_equal": true,
+  "scope": "assigned checkout, all files except .git internals and .review scratch; boundary snapshots only",
+  "head": "1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986",
+  "tree": "13843e747b31df410a56e83b1dbc2f98a76e7d2d"
+}

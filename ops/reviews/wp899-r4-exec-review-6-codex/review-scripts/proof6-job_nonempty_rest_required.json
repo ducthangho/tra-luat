@@ -1,0 +1,32 @@
+[
+  {
+    "name": "job_nonempty_rest_required",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_nonempty_rest_required"
+        ],
+        "rc": 0,
+        "output": "DAT:job_nonempty_rest_required\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/frontier6/job_nonempty_rest_required.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_nonempty_rest_required"
+        ],
+        "rc": 3,
+        "output": "DO:job_nonempty_rest_required:ghep=steps_rest_sai_dang markers=[]; expected=('passed', [])\n"
+      }
+    ],
+    "proven": true
+  }
+]

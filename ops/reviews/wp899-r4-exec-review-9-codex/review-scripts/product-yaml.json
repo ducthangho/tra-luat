@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/product_yaml9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 2.561854839324951,
+  "stdout_sha256": "74e71fcdd8e7ff9b2eb62057921c0df5188381f46085b6d5f75ca2cb956409b5",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

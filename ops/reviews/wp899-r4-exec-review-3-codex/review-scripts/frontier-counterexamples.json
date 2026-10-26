@@ -1,0 +1,678 @@
+[
+  {
+    "mutant": "run_rstrip_all",
+    "case": "run_trailing_space",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "run_trailing_space"
+    ],
+    "rc": 0,
+    "output": "DAT:run_trailing_space:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py  \", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py  \", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "run_rstrip_all",
+    "case": "run_trailing_space",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/run_rstrip_all.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "run_trailing_space"
+    ],
+    "rc": 3,
+    "output": "DO:run_trailing_space:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py  ', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "metadata_post_anywhere",
+    "case": "metadata_post_infix",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "metadata_post_infix"
+    ],
+    "rc": 0,
+    "output": "DAT:metadata_post_infix:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Check Post result\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "metadata_post_anywhere",
+    "case": "metadata_post_infix",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/metadata_post_anywhere.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "metadata_post_infix"
+    ],
+    "rc": 3,
+    "output": "DO:metadata_post_infix:ghep passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Check Post result', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [], 'thieu': [], 'ghep_buoc': {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "log_shell_suffix",
+    "case": "shell_prefix_space_missing",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_prefix_space_missing"
+    ],
+    "rc": 0,
+    "output": "DAT:shell_prefix_space_missing:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 0, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "log_shell_suffix",
+    "case": "shell_prefix_space_missing",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/log_shell_suffix.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_prefix_space_missing"
+    ],
+    "rc": 3,
+    "output": "DO:shell_prefix_space_missing:no marker {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_defaults_job_truthy",
+    "case": "defaults_job_empty",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "defaults_job_empty"
+    ],
+    "rc": 0,
+    "output": "DAT:defaults_job_empty:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_defaults_job_truthy",
+    "case": "defaults_job_empty",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier2/mode_defaults_job_truthy.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "defaults_job_empty"
+    ],
+    "rc": 3,
+    "output": "DO:defaults_job_empty:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_defaults_wf_truthy",
+    "case": "defaults_wf_empty",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "defaults_wf_empty"
+    ],
+    "rc": 0,
+    "output": "DAT:defaults_wf_empty:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_defaults_wf_truthy",
+    "case": "defaults_wf_empty",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier2/mode_defaults_wf_truthy.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "defaults_wf_empty"
+    ],
+    "rc": 3,
+    "output": "DO:defaults_wf_empty:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_env_truthy",
+    "case": "env_job_false",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_job_false"
+    ],
+    "rc": 0,
+    "output": "DAT:env_job_false:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_env_truthy",
+    "case": "env_job_false",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier2/mode_env_truthy.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_job_false"
+    ],
+    "rc": 3,
+    "output": "DO:env_job_false:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_env_string_only",
+    "case": "env_wf_list",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_wf_list"
+    ],
+    "rc": 0,
+    "output": "DAT:env_wf_list:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_env_string_only",
+    "case": "env_wf_list",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier2/mode_env_string_only.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_wf_list"
+    ],
+    "rc": 3,
+    "output": "DO:env_wf_list:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "rest_number_bool",
+    "case": "number_bool_metadata",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "number_bool_metadata"
+    ],
+    "rc": 0,
+    "output": "DAT:number_bool_metadata:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"not_measured\", \"ly_do\": \"steps_rest_sai_dang\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 0, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "rest_number_bool",
+    "case": "number_bool_metadata",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/rest_number_bool.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "number_bool_metadata"
+    ],
+    "rc": 3,
+    "output": "DO:number_bool_metadata:ghep steps_rest_sai_dang got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "rest_number_float",
+    "case": "number_float",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "number_float"
+    ],
+    "rc": 0,
+    "output": "DAT:number_float:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"not_measured\", \"ly_do\": \"steps_rest_sai_dang\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 0, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "rest_number_float",
+    "case": "number_float",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/rest_number_float.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "number_float"
+    ],
+    "rc": 3,
+    "output": "DO:number_float:ghep steps_rest_sai_dang got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "job_alias_exact_drop",
+    "case": "job_alias_exact",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "job_alias_exact"
+    ],
+    "rc": 0,
+    "output": "DAT:job_alias_exact:{\"job_id\": 1, \"name\": \"Build\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "job_alias_exact_drop",
+    "case": "job_alias_exact",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/job_alias_exact_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "job_alias_exact"
+    ],
+    "rc": 3,
+    "output": "DO:job_alias_exact:ghep passed got {'job_id': 1, 'name': 'Build', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [], 'thieu': [], 'ghep_buoc': {'trang_thai': 'not_measured', 'ly_do': 'd_job_yaml_khong_duy_nhat', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "job_matrix_nonempty",
+    "case": "matrix_empty",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "matrix_empty"
+    ],
+    "rc": 0,
+    "output": "DAT:matrix_empty:{\"job_id\": 1, \"name\": \"j ()\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "job_matrix_nonempty",
+    "case": "matrix_empty",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/job_matrix_nonempty.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "matrix_empty"
+    ],
+    "rc": 3,
+    "output": "DO:matrix_empty:ghep passed got {'job_id': 1, 'name': 'j ()', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [], 'thieu': [], 'ghep_buoc': {'trang_thai': 'not_measured', 'ly_do': 'd_job_yaml_khong_duy_nhat', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "job_dotall_add",
+    "case": "job_suffix_newline",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "job_suffix_newline"
+    ],
+    "rc": 0,
+    "output": "DAT:job_suffix_newline:{\"job_id\": 1, \"name\": \"j (a\\nb)\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"not_measured\", \"ly_do\": \"d_job_yaml_khong_duy_nhat\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 0, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "job_dotall_add",
+    "case": "job_suffix_newline",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/job_dotall_add.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "job_suffix_newline"
+    ],
+    "rc": 3,
+    "output": "DO:job_suffix_newline:ghep d_job_yaml_khong_duy_nhat got {'job_id': 1, 'name': 'j (a\\nb)', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_shell_no_pwsh",
+    "case": "shell_pwsh",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_pwsh"
+    ],
+    "rc": 0,
+    "output": "DAT:shell_pwsh:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_shell_no_pwsh",
+    "case": "shell_pwsh",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_shell_no_pwsh.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_pwsh"
+    ],
+    "rc": 3,
+    "output": "DO:shell_pwsh:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_shell_no_sh",
+    "case": "shell_sh",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_sh"
+    ],
+    "rc": 0,
+    "output": "DAT:shell_sh:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_shell_no_sh",
+    "case": "shell_sh",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_shell_no_sh.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_sh"
+    ],
+    "rc": 3,
+    "output": "DO:shell_sh:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_shell_null_default",
+    "case": "shell_null",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_null"
+    ],
+    "rc": 0,
+    "output": "DAT:shell_null:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_shell_null_default",
+    "case": "shell_null",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_shell_null_default.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "shell_null"
+    ],
+    "rc": 3,
+    "output": "DO:shell_null:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_env_shape_drop",
+    "case": "env_job_string",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_job_string"
+    ],
+    "rc": 0,
+    "output": "DAT:env_job_string:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_env_shape_drop",
+    "case": "env_job_string",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_env_shape_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_job_string"
+    ],
+    "rc": 3,
+    "output": "DO:env_job_string:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_env_shape_drop",
+    "case": "env_wf_string",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_wf_string"
+    ],
+    "rc": 0,
+    "output": "DAT:env_wf_string:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_env_shape_drop",
+    "case": "env_wf_string",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_env_shape_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_wf_string"
+    ],
+    "rc": 3,
+    "output": "DO:env_wf_string:marker not_measured got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_env_presence_not_value",
+    "case": "env_wf_empty",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_wf_empty"
+    ],
+    "rc": 0,
+    "output": "DAT:env_wf_empty:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_env_presence_not_value",
+    "case": "env_wf_empty",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_env_presence_not_value.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "env_wf_empty"
+    ],
+    "rc": 3,
+    "output": "DO:env_wf_empty:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_key_id_drop",
+    "case": "key_id",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_id"
+    ],
+    "rc": 0,
+    "output": "DAT:key_id:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_key_id_drop",
+    "case": "key_id",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_key_id_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_id"
+    ],
+    "rc": 3,
+    "output": "DO:key_id:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_key_if_drop",
+    "case": "key_if",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_if"
+    ],
+    "rc": 0,
+    "output": "DAT:key_if:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_key_if_drop",
+    "case": "key_if",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_key_if_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_if"
+    ],
+    "rc": 3,
+    "output": "DO:key_if:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_key_timeout_drop",
+    "case": "key_timeout-minutes",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_timeout-minutes"
+    ],
+    "rc": 0,
+    "output": "DAT:key_timeout-minutes:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_key_timeout_drop",
+    "case": "key_timeout-minutes",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_key_timeout_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_timeout-minutes"
+    ],
+    "rc": 3,
+    "output": "DO:key_timeout-minutes:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_key_coe_drop",
+    "case": "key_continue-on-error",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_continue-on-error"
+    ],
+    "rc": 0,
+    "output": "DAT:key_continue-on-error:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"passed\", \"dong_khop\": [\"THU: 4/4 dat\"]}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 1, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"passed\"}\n"
+  },
+  {
+    "mutant": "mode_key_coe_drop",
+    "case": "key_continue-on-error",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_key_coe_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "key_continue-on-error"
+    ],
+    "rc": 3,
+    "output": "DO:key_continue-on-error:marker passed got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'not_measured', 'ly_do': 'che_do_khong_xac_dinh'}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n"
+  },
+  {
+    "mutant": "mode_prior_skip_first",
+    "case": "prior_first_step",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "prior_first_step"
+    ],
+    "rc": 0,
+    "output": "DAT:prior_first_step:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run echo $GITHUB_PATH\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 2, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_prior_skip_first",
+    "case": "prior_first_step",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_prior_skip_first.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "prior_first_step"
+    ],
+    "rc": 3,
+    "output": "DO:prior_first_step:{'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run echo $GITHUB_PATH', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 2, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "mode_prior_only_last",
+    "case": "prior_nonadjacent",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "prior_nonadjacent"
+    ],
+    "rc": 0,
+    "output": "DAT:prior_nonadjacent:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run echo $GITHUB_ENV\", \"conclusion\": \"success\"}, {\"name\": \"Run echo x\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [{\"lenh\": \"python ops/thu_gia_test.py\", \"duong_dan\": \"ops/thu_gia_test.py\", \"trang_thai\": \"not_measured\", \"ly_do\": \"che_do_khong_xac_dinh\"}], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 4}, \"kich_ban\": {\"buoc_xac_thuc\": 3, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "mode_prior_only_last",
+    "case": "prior_nonadjacent",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/mode_prior_only_last.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "prior_nonadjacent"
+    ],
+    "rc": 3,
+    "output": "DO:prior_nonadjacent:{'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run echo $GITHUB_ENV', 'conclusion': 'success'}, {'name': 'Run echo x', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 4}, 'kich_ban': {'buoc_xac_thuc': 3, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "mutant": "run_type_coerce",
+    "case": "nonstr_no_throw",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "nonstr_no_throw"
+    ],
+    "rc": 0,
+    "output": "DAT:nonstr_no_throw:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"K\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"passed\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 0, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "run_type_coerce",
+    "case": "nonstr_no_throw",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/run_type_coerce.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "nonstr_no_throw"
+    ],
+    "rc": 3,
+    "output": "DO:nonstr_no_throw:non-string run must remain unverified without throwing: AttributeError\n"
+  },
+  {
+    "mutant": "number_type_bool_guard_drop",
+    "case": "number_bool_metadata",
+    "source": "HEAD",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "number_bool_metadata"
+    ],
+    "rc": 0,
+    "output": "DAT:number_bool_metadata:{\"job_id\": 1, \"name\": \"j\", \"check_run_id\": \"1\", \"labels\": [\"ubuntu-latest\"], \"runner_id\": 7, \"runner_name\": \"GitHub Actions 7\", \"conclusion\": \"success\", \"buoc\": [{\"name\": \"Set up job\", \"conclusion\": \"success\"}, {\"name\": \"Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Run python ops/thu_gia_test.py\", \"conclusion\": \"success\"}, {\"name\": \"Post Run actions/setup-python@v5\", \"conclusion\": \"success\"}, {\"name\": \"Complete job\", \"conclusion\": \"success\"}], \"image\": \"ubuntu-24.04\", \"dau_duong\": [], \"thieu\": [], \"ghep_buoc\": {\"trang_thai\": \"not_measured\", \"ly_do\": \"steps_rest_sai_dang\", \"so_buoc\": 2}, \"kich_ban\": {\"buoc_xac_thuc\": 0, \"trang_thai\": \"passed\", \"nguon\": \"run_tai_sha_checkout\"}, \"trang_thai\": \"not_measured\"}\n"
+  },
+  {
+    "mutant": "number_type_bool_guard_drop",
+    "case": "number_bool_metadata",
+    "source": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier2/number_type_bool_guard_drop.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier_cases.py",
+      "number_bool_metadata"
+    ],
+    "rc": 3,
+    "output": "DO:number_bool_metadata:ghep steps_rest_sai_dang got {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  }
+]

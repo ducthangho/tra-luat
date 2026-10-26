@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/classifier11.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 22.812333345413208,
+  "stdout_sha256": "692bd565788b7d6d3d95f7173d534dd1256fc0276d72c76f91daa9855682200c",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,4726 @@
+{
+  "total": 1011,
+  "raw_valid": 1011,
+  "invalid_skipped": [],
+  "no_effect": [
+    "doc_wf#12:tra_None",
+    "_gio#7:tra_None"
+  ],
+  "id_collisions": 0,
+  "source_duplicates": [
+    [
+      "doc_wf#3:tra_None",
+      "doc_wf#8:ifexp_khac"
+    ],
+    [
+      "ghep_job#3:tra_None",
+      "ghep_job#9:ifexp_khac"
+    ],
+    [
+      "ten_du_kien#3:tra_None",
+      "ten_du_kien#9:ifexp_khac"
+    ],
+    [
+      "ten_du_kien#6:tra_None",
+      "ten_du_kien#13:ifexp_khac"
+    ],
+    [
+      "ten_du_kien#56:chuoi1",
+      "ten_du_kien#56:chuoi4"
+    ],
+    [
+      "_gio#3:tra_None",
+      "_gio#5:ifexp_khac"
+    ],
+    [
+      "tach_buoc#109:chuoi1",
+      "tach_buoc#109:chuoi5"
+    ],
+    [
+      "do_dau_duong#193:chuoi1",
+      "do_dau_duong#193:chuoi4"
+    ],
+    [
+      "do_dau_duong#210:chuoi1",
+      "do_dau_duong#210:chuoi4"
+    ],
+    [
+      "do_dau_duong#216:chuoi1",
+      "do_dau_duong#216:chuoi4"
+    ],
+    [
+      "do_dau_duong#256:chuoi1",
+      "do_dau_duong#256:chuoi4"
+    ],
+    [
+      "do_dau_duong#280:chuoi1",
+      "do_dau_duong#280:chuoi4"
+    ],
+    [
+      "do_dau_duong#306:chuoi1",
+      "do_dau_duong#306:chuoi4"
+    ]
+  ],
+  "ids_stable_outside_functions": true,
+  "counts": {
+    "FunctionDef": 10,
+    "arguments": 11,
+    "Return": 20,
+    "arg": 21,
+    "BoolOp": 25,
+    "And": 17,
+    "Compare": 37,
+    "Constant": 159,
+    "In": 6,
+    "Name": 321,
+    "Or": 8,
+    "Call": 109,
+    "Load": 391,
+    "IsNot": 2,
+    "GeneratorExp": 8,
+    "Subscript": 57,
+    "comprehension": 16,
+    "Attribute": 49,
+    "Store": 66,
+    "Expr": 11,
+    "Try": 2,
+    "Assign": 21,
+    "ExceptHandler": 2,
+    "IfExp": 12,
+    "Tuple": 22,
+    "Is": 12,
+    "ListComp": 7,
+    "Eq": 5,
+    "NotIn": 7,
+    "BinOp": 8,
+    "Add": 5,
+    "If": 15,
+    "Slice": 5,
+    "UnaryOp": 13,
+    "Not": 11,
+    "NotEq": 4,
+    "Dict": 7,
+    "keyword": 1,
+    "SetComp": 1,
+    "Lambda": 1,
+    "NamedExpr": 5,
+    "LtE": 2,
+    "Sub": 1,
+    "For": 3,
+    "List": 8,
+    "BitOr": 3,
+    "USub": 2,
+    "AugAssign": 1,
+    "Continue": 1
+  },
+  "per_function": {
+    "_env_chan": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Return": 1,
+      "arg": 1,
+      "BoolOp": 2,
+      "And": 1,
+      "Compare": 2,
+      "Constant": 4,
+      "In": 1,
+      "Name": 9,
+      "Or": 1,
+      "Call": 4,
+      "Load": 11,
+      "IsNot": 1,
+      "GeneratorExp": 1,
+      "Subscript": 2,
+      "comprehension": 1,
+      "Attribute": 1,
+      "Store": 1
+    },
+    "doc_wf": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Expr": 1,
+      "Try": 1,
+      "Return": 2,
+      "arg": 1,
+      "Constant": 4,
+      "Assign": 1,
+      "ExceptHandler": 1,
+      "IfExp": 1,
+      "Name": 12,
+      "Call": 4,
+      "Tuple": 1,
+      "BoolOp": 1,
+      "Store": 1,
+      "Attribute": 3,
+      "Load": 15,
+      "And": 1,
+      "Compare": 2,
+      "Is": 2
+    },
+    "ghep_job": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Expr": 1,
+      "Assign": 1,
+      "Return": 1,
+      "arg": 2,
+      "Constant": 8,
+      "Name": 27,
+      "ListComp": 1,
+      "IfExp": 1,
+      "Store": 5,
+      "comprehension": 2,
+      "Compare": 5,
+      "Subscript": 2,
+      "Load": 30,
+      "Tuple": 2,
+      "Call": 9,
+      "BoolOp": 2,
+      "Eq": 1,
+      "Attribute": 4,
+      "And": 2,
+      "Is": 3,
+      "GeneratorExp": 1,
+      "NotIn": 1,
+      "BinOp": 1,
+      "Add": 1
+    },
+    "ten_du_kien": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "If": 1,
+      "Assign": 1,
+      "Return": 2,
+      "arg": 1,
+      "Compare": 2,
+      "Name": 11,
+      "Call": 5,
+      "IfExp": 2,
+      "Constant": 12,
+      "In": 1,
+      "Store": 1,
+      "Attribute": 3,
+      "BinOp": 1,
+      "Load": 17,
+      "BoolOp": 1,
+      "Subscript": 4,
+      "Add": 1,
+      "And": 1,
+      "NotIn": 1
+    },
+    "_gio": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Try": 1,
+      "arg": 1,
+      "Return": 2,
+      "ExceptHandler": 1,
+      "IfExp": 1,
+      "Name": 8,
+      "BoolOp": 1,
+      "Call": 3,
+      "Constant": 4,
+      "Load": 12,
+      "And": 1,
+      "Compare": 1,
+      "Attribute": 3,
+      "Subscript": 1,
+      "Is": 1,
+      "Slice": 1
+    },
+    "ghep_buoc": {
+      "FunctionDef": 2,
+      "arguments": 3,
+      "Expr": 1,
+      "If": 7,
+      "Assign": 4,
+      "Return": 9,
+      "arg": 6,
+      "Constant": 40,
+      "Compare": 14,
+      "Tuple": 9,
+      "Name": 112,
+      "IfExp": 1,
+      "BoolOp": 6,
+      "UnaryOp": 5,
+      "ListComp": 3,
+      "Call": 47,
+      "Is": 5,
+      "Store": 23,
+      "Load": 119,
+      "Or": 2,
+      "Not": 5,
+      "comprehension": 8,
+      "NotEq": 4,
+      "GeneratorExp": 4,
+      "Dict": 2,
+      "Attribute": 12,
+      "In": 1,
+      "Subscript": 9,
+      "IsNot": 1,
+      "And": 4,
+      "Eq": 1,
+      "keyword": 1,
+      "SetComp": 1,
+      "Lambda": 1,
+      "NotIn": 1,
+      "NamedExpr": 3,
+      "LtE": 2
+    },
+    "chan_buoc": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Expr": 1,
+      "Assign": 1,
+      "Return": 1,
+      "arg": 3,
+      "Constant": 15,
+      "Tuple": 3,
+      "Call": 9,
+      "Name": 25,
+      "Store": 4,
+      "Subscript": 8,
+      "Load": 35,
+      "BoolOp": 1,
+      "Or": 1,
+      "Compare": 3,
+      "BinOp": 1,
+      "In": 2,
+      "Sub": 1,
+      "NotIn": 1,
+      "GeneratorExp": 1,
+      "Attribute": 3,
+      "comprehension": 1,
+      "Slice": 1
+    },
+    "tach_buoc": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Expr": 4,
+      "Assign": 5,
+      "For": 1,
+      "Return": 1,
+      "arg": 1,
+      "Constant": 39,
+      "Name": 40,
+      "List": 4,
+      "If": 5,
+      "ListComp": 1,
+      "Store": 10,
+      "Load": 61,
+      "Call": 8,
+      "BinOp": 2,
+      "comprehension": 1,
+      "Attribute": 6,
+      "BoolOp": 5,
+      "BitOr": 1,
+      "Dict": 2,
+      "And": 4,
+      "Subscript": 19,
+      "Compare": 3,
+      "NamedExpr": 1,
+      "In": 1,
+      "Eq": 2,
+      "UnaryOp": 7,
+      "Slice": 3,
+      "Add": 1,
+      "Tuple": 2,
+      "Not": 5,
+      "USub": 2,
+      "Or": 1
+    },
+    "do_dau_duong": {
+      "FunctionDef": 1,
+      "arguments": 1,
+      "Expr": 3,
+      "Assign": 8,
+      "For": 2,
+      "Return": 1,
+      "arg": 5,
+      "Constant": 33,
+      "Tuple": 5,
+      "Call": 20,
+      "If": 2,
+      "AugAssign": 1,
+      "Name": 77,
+      "Store": 21,
+      "List": 4,
+      "Load": 91,
+      "BoolOp": 6,
+      "Subscript": 12,
+      "IfExp": 6,
+      "UnaryOp": 1,
+      "Continue": 1,
+      "Add": 2,
+      "ListComp": 2,
+      "Or": 3,
+      "Compare": 5,
+      "Not": 1,
+      "comprehension": 3,
+      "Attribute": 14,
+      "Dict": 3,
+      "NotIn": 3,
+      "And": 3,
+      "GeneratorExp": 1,
+      "BinOp": 3,
+      "Is": 1,
+      "Eq": 1,
+      "NamedExpr": 1,
+      "BitOr": 2
+    }
+  },
+  "types": {
+    "arguments": {
+      "nodes": 11,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Return": {
+      "nodes": 20,
+      "with_operator": 20,
+      "operators": [
+        "tra_None"
+      ]
+    },
+    "arg": {
+      "nodes": 21,
+      "with_operator": 0,
+      "operators": []
+    },
+    "BoolOp": {
+      "nodes": 25,
+      "with_operator": 25,
+      "operators": [
+        "and<->or",
+        "bo_ve0",
+        "bo_ve1",
+        "bo_ve2",
+        "bo_ve3",
+        "bo_ve4",
+        "bo_ve5",
+        "bo_ve6"
+      ]
+    },
+    "And": {
+      "nodes": 17,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Compare": {
+      "nodes": 37,
+      "with_operator": 37,
+      "operators": [
+        "so0->Eq",
+        "so0->GtE",
+        "so0->In",
+        "so0->Is",
+        "so0->IsNot",
+        "so0->Lt",
+        "so0->NotEq",
+        "so0->NotIn",
+        "so1->GtE",
+        "so1->Lt"
+      ]
+    },
+    "Constant": {
+      "nodes": 153,
+      "with_operator": 139,
+      "operators": [
+        "+1",
+        "-1",
+        "bool",
+        "chuoi0",
+        "chuoi1",
+        "chuoi2",
+        "chuoi3",
+        "chuoi4",
+        "chuoi5",
+        "chuoi6",
+        "chuoi7"
+      ]
+    },
+    "In": {
+      "nodes": 6,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Name": {
+      "nodes": 321,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Or": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Call": {
+      "nodes": 109,
+      "with_operator": 14,
+      "operators": [
+        "bo_doi_so0",
+        "bo_doi_so1",
+        "bo_doi_so2"
+      ]
+    },
+    "Load": {
+      "nodes": 391,
+      "with_operator": 0,
+      "operators": []
+    },
+    "IsNot": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "GeneratorExp": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Subscript": {
+      "nodes": 57,
+      "with_operator": 0,
+      "operators": []
+    },
+    "comprehension": {
+      "nodes": 16,
+      "with_operator": 4,
+      "operators": [
+        "bo_loc0"
+      ]
+    },
+    "Attribute": {
+      "nodes": 49,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Store": {
+      "nodes": 66,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Expr": {
+      "nodes": 11,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Try": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Assign": {
+      "nodes": 21,
+      "with_operator": 0,
+      "operators": []
+    },
+    "ExceptHandler": {
+      "nodes": 2,
+      "with_operator": 1,
+      "operators": [
+        "bo_ngoai_le0",
+        "bo_ngoai_le1"
+      ]
+    },
+    "IfExp": {
+      "nodes": 12,
+      "with_operator": 12,
+      "operators": [
+        "ifexp_khac",
+        "ifexp_than"
+      ]
+    },
+    "Tuple": {
+      "nodes": 22,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Is": {
+      "nodes": 12,
+      "with_operator": 0,
+      "operators": []
+    },
+    "ListComp": {
+      "nodes": 7,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Eq": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "NotIn": {
+      "nodes": 7,
+      "with_operator": 0,
+      "operators": []
+    },
+    "BinOp": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Add": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "If": {
+      "nodes": 15,
+      "with_operator": 15,
+      "operators": [
+        "if_dung",
+        "if_sai"
+      ]
+    },
+    "Slice": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "FunctionDef": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "UnaryOp": {
+      "nodes": 13,
+      "with_operator": 11,
+      "operators": [
+        "bo_not"
+      ]
+    },
+    "Not": {
+      "nodes": 11,
+      "with_operator": 0,
+      "operators": []
+    },
+    "NotEq": {
+      "nodes": 4,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Dict": {
+      "nodes": 7,
+      "with_operator": 0,
+      "operators": []
+    },
+    "keyword": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "SetComp": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Lambda": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "NamedExpr": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "LtE": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Sub": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "For": {
+      "nodes": 3,
+      "with_operator": 0,
+      "operators": []
+    },
+    "List": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "BitOr": {
+      "nodes": 3,
+      "with_operator": 0,
+      "operators": []
+    },
+    "USub": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "AugAssign": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Continue": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    }
+  },
+  "mutants": [
+    {
+      "id": "_env_chan#1:tra_None",
+      "sha256": "35a837e91e6098a47d5884a933e5b51b23de6ab26eb87c1895ef01b5d72da7c7"
+    },
+    {
+      "id": "_env_chan#3:and<->or",
+      "sha256": "2d897ddbed77de74fb4350d62e3d88fd263a1294515fbbb1497aa5dd2492bbb6"
+    },
+    {
+      "id": "_env_chan#3:bo_ve0",
+      "sha256": "dcfbe7361aa8c0583cf9e54d7e7a7f667eec0937c7675f9c7cd8c98c370f44d6"
+    },
+    {
+      "id": "_env_chan#3:bo_ve1",
+      "sha256": "0c1988284a083d011addc7fbf35b5bffb39713940af324a37e863eca859afd4e"
+    },
+    {
+      "id": "_env_chan#5:so0->NotIn",
+      "sha256": "40551914f291f7ea58e571484e087021aa5fb4b2b9b589168a6288486c0fdba2"
+    },
+    {
+      "id": "_env_chan#6:and<->or",
+      "sha256": "8452b4b21164279086932f50b7bd1cc55e46a72ea9ce6accf6fd14b5ae2f52ba"
+    },
+    {
+      "id": "_env_chan#6:bo_ve0",
+      "sha256": "db8d6c6b6e0aea6cb7139bde585dcbd92a828a8ae50e4ffd6ebb7b1a2d6010cc"
+    },
+    {
+      "id": "_env_chan#6:bo_ve1",
+      "sha256": "e3165740364bfdf796da8dbaa72bde954432e8bd060002bd1185923b30e4f99a"
+    },
+    {
+      "id": "_env_chan#7:chuoi0",
+      "sha256": "27de691f136e3ae1f375765952bbf7150924751785de83445c95af0249a5318c"
+    },
+    {
+      "id": "_env_chan#7:chuoi1",
+      "sha256": "b8237c518988f793f573efb407dfd3ba3f0e1b3a8ef2e30a11341d6078d911e8"
+    },
+    {
+      "id": "_env_chan#7:chuoi2",
+      "sha256": "64e6be30f97ee6795b632885806422dc9fb3b60485208a81a68108dd53036870"
+    },
+    {
+      "id": "_env_chan#7:chuoi3",
+      "sha256": "cfb6e6ae5e807f3ef8885b56b2e3ca3709f11ceff96b1a5683f634262853eb10"
+    },
+    {
+      "id": "_env_chan#7:chuoi4",
+      "sha256": "8e183489e15fd784485906e33b3833e74e10104d3a44094e97582d303465564a"
+    },
+    {
+      "id": "_env_chan#7:chuoi5",
+      "sha256": "655818d30ca5319dd5ee424ec47309ffdde80a7f69c31ea717ca41148e002553"
+    },
+    {
+      "id": "_env_chan#11:so0->Is",
+      "sha256": "d46627cc925cbc9e66d7feec4b980511875ca8980aba578c8fcb6786029c117a"
+    },
+    {
+      "id": "_env_chan#27:chuoi0",
+      "sha256": "d480d46e6d634a3ccf465b6d9546f042ea46d42118fbec9bfffd8c4b2b5522c4"
+    },
+    {
+      "id": "_env_chan#27:chuoi1",
+      "sha256": "195731599de081b23f5d2a2a8eaca30ae23a58c1267e03faa6e83de22b1994c1"
+    },
+    {
+      "id": "_env_chan#27:chuoi2",
+      "sha256": "ccd0eac3a5578b988d47fd938f42f39d52d2d81d06b3c986fd9b4a459ce47033"
+    },
+    {
+      "id": "_env_chan#27:chuoi3",
+      "sha256": "de9a7365f9ad7b36f6ad519ab82695901c22136dbbaa028be5312146e826af26"
+    },
+    {
+      "id": "_env_chan#27:chuoi4",
+      "sha256": "22e1ef9e5a23fa1a3858e19cf86d6e35ce1a2a4bcd658d347613b953e2179e61"
+    },
+    {
+      "id": "_env_chan#27:chuoi5",
+      "sha256": "b2fc08c310a20561a72376c86cbeabcf43f69f8cc69f70ff32d3d4f12b1bf40f"
+    },
+    {
+      "id": "_env_chan#30:chuoi0",
+      "sha256": "c055c4d47d9ff854350936d91ddede0eb11c313fa3780201de1ae4f32ed656a7"
+    },
+    {
+      "id": "_env_chan#30:chuoi1",
+      "sha256": "da32bdf41aa108dfe29b828bc00afecf03a37eeeae2a86d05fc39b2de6ff36d3"
+    },
+    {
+      "id": "_env_chan#30:chuoi2",
+      "sha256": "8f0be4b8373df6f98ac3322d8ed5314b773abd0a8a1b034a03e45296461d2ae0"
+    },
+    {
+      "id": "_env_chan#30:chuoi3",
+      "sha256": "ba90bc634fab216112647d7f01f4960897e9ab04e545a6a617d18ab4c815e118"
+    },
+    {
+      "id": "_env_chan#30:chuoi4",
+      "sha256": "d76a3ab90aa272ba103757238916ddf43dddd2e637f68d090d929af0fdd870ca"
+    },
+    {
+      "id": "_env_chan#30:chuoi5",
+      "sha256": "53d63e3d67cffbd338d6e9f2eabb368a5b529252638a437c07f96078f93fdcd7"
+    },
+    {
+      "id": "_env_chan#38:chuoi0",
+      "sha256": "1f4016c8902b0d20ed1501451a0b3840dd54a6fd831b9c8e4cd55c5155511db6"
+    },
+    {
+      "id": "_env_chan#38:chuoi1",
+      "sha256": "b124d957c3159871340d541303f142e5bd8f8768355fa5f736938450e40795bc"
+    },
+    {
+      "id": "_env_chan#38:chuoi2",
+      "sha256": "a16f692c186631d6ddd3a1f3cdc16db746b4709a70a6b3ab2f70733704ef3c48"
+    },
+    {
+      "id": "_env_chan#38:chuoi3",
+      "sha256": "1e4f2af0c61d6e1ef07ec92db5c981e5c364cdd00f7e9a2b5c25794fe7b13e27"
+    },
+    {
+      "id": "_env_chan#38:chuoi4",
+      "sha256": "1c260ea7e6f730e6f8037f0665d731e9d692d4d8458b74e07955060c1032ad4f"
+    },
+    {
+      "id": "_env_chan#38:chuoi5",
+      "sha256": "e6bd386eef9f487f1af8b3d66fbd9331477dba4ea2123959ddc0b66c5eec8815"
+    },
+    {
+      "id": "doc_wf#3:tra_None",
+      "sha256": "bef8c2e4a60b81fe41701a15cbf1aab11c1af26e06e46ffef98bba0cd59ed241"
+    },
+    {
+      "id": "doc_wf#7:bo_ngoai_le0",
+      "sha256": "3fd7df76dcf741b8618a7b4def2dca574bb092a7a4763039a60b75d76ebe6b57"
+    },
+    {
+      "id": "doc_wf#7:bo_ngoai_le1",
+      "sha256": "321d2374d0fc228b386238c77c2e04db37aa2a84e8e7b3b1a79765eb7455f934"
+    },
+    {
+      "id": "doc_wf#8:ifexp_than",
+      "sha256": "76d084431354fdea3a7aaae2b60173b24973d07deb73f666b6eb2ad5005db12c"
+    },
+    {
+      "id": "doc_wf#8:ifexp_khac",
+      "sha256": "bef8c2e4a60b81fe41701a15cbf1aab11c1af26e06e46ffef98bba0cd59ed241"
+    },
+    {
+      "id": "doc_wf#13:and<->or",
+      "sha256": "e22482ddf3028eb480dd6948063e2866cea9937a1c31ed89e48caed94cd48689"
+    },
+    {
+      "id": "doc_wf#13:bo_ve0",
+      "sha256": "f0af276dd5c56421835dd789f75baa718a34da6c61ee7c5b4f9d095a0380827f"
+    },
+    {
+      "id": "doc_wf#13:bo_ve1",
+      "sha256": "d620088c478cdfe596ed57378560a4be643d75256d91ad73f31ba88439cdfecc"
+    },
+    {
+      "id": "doc_wf#24:so0->IsNot",
+      "sha256": "713273e28b499845b7405a750d4ec8eb1fbd918a510fcd0ecf9082fdc911cadd"
+    },
+    {
+      "id": "doc_wf#25:so0->IsNot",
+      "sha256": "96ab5f39e38644eba64d6458b434c29ada5afcafd6a7850893f5d1a106e72c78"
+    },
+    {
+      "id": "doc_wf#51:chuoi0",
+      "sha256": "d1ba01f8589d021c44afb8ad0cc50c30dc6e0e1327cdb65aa19938b4dcc033c3"
+    },
+    {
+      "id": "doc_wf#51:chuoi1",
+      "sha256": "e7ac0ed3f41f17eea53ce8a2a1dcff59029faeab1900b8683f494b348081a7f8"
+    },
+    {
+      "id": "doc_wf#51:chuoi2",
+      "sha256": "cda9752e6702f0ad16148bddf9cc4abe49bdd2810156b7f52d193a34dc3e4f57"
+    },
+    {
+      "id": "doc_wf#51:chuoi3",
+      "sha256": "e9ba04cbaa411084676c5c245f1b6d86a5fc734cb969d5b4844210e56608b141"
+    },
+    {
+      "id": "doc_wf#51:chuoi4",
+      "sha256": "37594cb5d8a275f195c52da8cc08e26b27358dbeed9d051fe95ffd9ef67764c0"
+    },
+    {
+      "id": "doc_wf#51:chuoi5",
+      "sha256": "9694d574694dc6ffe228433a7d0ce4edf67a102b3fbb9005d134e2cd423f4fdb"
+    },
+    {
+      "id": "ghep_job#3:tra_None",
+      "sha256": "962896089775ec067aa0a6c497bf1cf3830a2476e8067f0180a23f2c9ecb7793"
+    },
+    {
+      "id": "ghep_job#9:ifexp_than",
+      "sha256": "0e848acb220d8b26028e58185afe101dbfc0088ee3b9fc09cbb2ab7b312ee613"
+    },
+    {
+      "id": "ghep_job#9:ifexp_khac",
+      "sha256": "962896089775ec067aa0a6c497bf1cf3830a2476e8067f0180a23f2c9ecb7793"
+    },
+    {
+      "id": "ghep_job#12:bo_loc0",
+      "sha256": "10930fb7ff6318d5d4e3fba481b75b5944640793460fe7e699bd134efa5a7d0a"
+    },
+    {
+      "id": "ghep_job#13:so0->NotEq",
+      "sha256": "2b2ffe76505cc0b00dc5a417cfd961c83e819cde30ef2e889dd143e3e8d9c0d7"
+    },
+    {
+      "id": "ghep_job#19:and<->or",
+      "sha256": "7c224beed8908cb60889f837bf179c2cf97e62c28d5a5cfd4a0883c90ade4f24"
+    },
+    {
+      "id": "ghep_job#19:bo_ve0",
+      "sha256": "136ba3cf7215db9fd3a5389da461be4f4e397b3d3ded9f9c96dfae42b5797a6d"
+    },
+    {
+      "id": "ghep_job#19:bo_ve1",
+      "sha256": "c4f44c63630f8061964dfadf3ec134cb4052dee52363fae07401d22891147617"
+    },
+    {
+      "id": "ghep_job#19:bo_ve2",
+      "sha256": "6fedf32bc54dbca464a5e5005bf6e35067bea86d5d0e8b3c2123ad23c10786d0"
+    },
+    {
+      "id": "ghep_job#22:+1",
+      "sha256": "2389404de485612b29c8450a20fb5765535ccd6168e64d4bdbca4bf036939bfe"
+    },
+    {
+      "id": "ghep_job#22:-1",
+      "sha256": "71ae6100040e298d98d010f7e816b7767f01ee1f057069c6028add1356504c79"
+    },
+    {
+      "id": "ghep_job#24:+1",
+      "sha256": "c101a71da9b99cea98ed2316b3424243d684d9f183fc0f10198c21b151da3b4c"
+    },
+    {
+      "id": "ghep_job#24:-1",
+      "sha256": "96cb9be3ceef5620c756583a151c68844c16925ca8fc47d1586d77c79d07a67a"
+    },
+    {
+      "id": "ghep_job#31:so0->IsNot",
+      "sha256": "d9b9124d682caab0be8a45169e731e7a5407eb05cb282e0db17b7c681dc742b8"
+    },
+    {
+      "id": "ghep_job#32:so0->IsNot",
+      "sha256": "1e3e74234a893215af15d8b488a152345d751451ce53568ea7eb0ffed5cbc972"
+    },
+    {
+      "id": "ghep_job#52:chuoi0",
+      "sha256": "03de83c5fd2b6064a2572788348972fe1b3396cdc7f5a49fa3dbf74279aa88f9"
+    },
+    {
+      "id": "ghep_job#52:chuoi1",
+      "sha256": "4ab719d741adf21255ad0b1be9845a12c1cbd072fa30586478964d26121675f4"
+    },
+    {
+      "id": "ghep_job#52:chuoi2",
+      "sha256": "5c1e0ce9e4d0fb31893a18ca0f319ad8b7f31ab4674c16a4435f729f98dfe638"
+    },
+    {
+      "id": "ghep_job#52:chuoi3",
+      "sha256": "c8205e21b133fd12703727a8e0e5ca4409983176ef3a540ed9ea5789faec7b71"
+    },
+    {
+      "id": "ghep_job#52:chuoi4",
+      "sha256": "26c15750fb3f304bbce355dde1974f3b1a03659f41eb1bd9716983858c56dea4"
+    },
+    {
+      "id": "ghep_job#52:chuoi5",
+      "sha256": "2b7fac247885c6ec731dc53f4e1a34a5f06b8493faca63d68624e8cfc4a4c5a0"
+    },
+    {
+      "id": "ghep_job#61:and<->or",
+      "sha256": "d2b68adc9e6172e506faaab8309363edddac1249f538d6f742d7a39bd316cf39"
+    },
+    {
+      "id": "ghep_job#61:bo_ve0",
+      "sha256": "693470164867fac1a082e2f85b30944ac26e77c5b2d961cc855ac8cd3299ed51"
+    },
+    {
+      "id": "ghep_job#61:bo_ve1",
+      "sha256": "75196378a9793bd2fda1e146d6d93fb3e37fcf01f27b201f9447f527891b5c54"
+    },
+    {
+      "id": "ghep_job#61:bo_ve2",
+      "sha256": "003df08853db310f9281cc17a528d1cdf977894f31918cb4f7abc4af204d1e10"
+    },
+    {
+      "id": "ghep_job#61:bo_ve3",
+      "sha256": "31ef49be2669ac0518263facc62b7833df9be39a72ab3ef10c2c76cf812943f6"
+    },
+    {
+      "id": "ghep_job#69:so0->IsNot",
+      "sha256": "e6e7b5962c3ebe79c664eeb7023ba22af0862ed8d1744b729dca76ccd588bbb7"
+    },
+    {
+      "id": "ghep_job#71:so0->In",
+      "sha256": "c26035265341f9a20810686c13595e895cdec4958372f312c5ae13e5ea24389f"
+    },
+    {
+      "id": "ghep_job#72:bo_doi_so0",
+      "sha256": "f4401b799d978e2f1c453722c4f4a614141672885a231b360dd0f6964a37f850"
+    },
+    {
+      "id": "ghep_job#72:bo_doi_so1",
+      "sha256": "a7c4c5b139b5376ddd99da87d0b3d0cd9dd6b89cb9ad53873d4fb0d4c3df72ac"
+    },
+    {
+      "id": "ghep_job#79:chuoi0",
+      "sha256": "5419b41c92976fbf033557bb1cec8d7d9736c935327959fc6debcb08e1175961"
+    },
+    {
+      "id": "ghep_job#79:chuoi1",
+      "sha256": "a6bac016b1825586607c458df08f8fe1ff89f6b30121707ff493fd4922205329"
+    },
+    {
+      "id": "ghep_job#79:chuoi2",
+      "sha256": "2412ec5af338fee0f53cf5cea1c7fdb4d0147056407ba51024cc01dd589a1dad"
+    },
+    {
+      "id": "ghep_job#79:chuoi3",
+      "sha256": "2454e2d6ffa803f1a42ebe00b595cad995ebe922fd80bce562beae521197561b"
+    },
+    {
+      "id": "ghep_job#79:chuoi4",
+      "sha256": "4041c20e6aee930aabff402fc324002af4dd100f4a5d704cb55c2c89cbbfd9b7"
+    },
+    {
+      "id": "ghep_job#97:chuoi0",
+      "sha256": "58400e9157150cd8b85b64276507e2609d71f058b4c0a056eca6ca63ee154a76"
+    },
+    {
+      "id": "ghep_job#97:chuoi1",
+      "sha256": "241e7c519bb20d3438231d68aff89a5f03b0161c4b3e0ad95cc0359da3bab7b5"
+    },
+    {
+      "id": "ghep_job#97:chuoi2",
+      "sha256": "b73a89f42cfb5ab5066cd279374866ca8e297c4f58f9cced1bc5cbe178f9e929"
+    },
+    {
+      "id": "ghep_job#97:chuoi3",
+      "sha256": "e99c75925677debfe30ad99917501ed38e4b8a890cb95ec8dce0e26d42ea1cad"
+    },
+    {
+      "id": "ghep_job#97:chuoi4",
+      "sha256": "f701ea7f441b47be147eda68c17e5c772176fe4de1fd6cb28f1921edd0b14615"
+    },
+    {
+      "id": "ghep_job#101:chuoi0",
+      "sha256": "6dd54a75424a02baba0fd3dd5c1b0365efefc94261f8428d42852510baeddaeb"
+    },
+    {
+      "id": "ghep_job#101:chuoi1",
+      "sha256": "57ed43e275ce4fa5c5017349e43ae8dc3e8723948db76849b192e222f7a28152"
+    },
+    {
+      "id": "ghep_job#101:chuoi2",
+      "sha256": "8dc6d573f53b5e2af32bf4abba042164435d9e6810e1e21746b339f6fa6449d8"
+    },
+    {
+      "id": "ghep_job#101:chuoi3",
+      "sha256": "316fdb275c06cfc51c6736afe404b55996c276acb9100b334ffc9fb6816e9411"
+    },
+    {
+      "id": "ghep_job#101:chuoi4",
+      "sha256": "707d183c1b5a8374c655da4065a0bfe777f31f0ade160d8b9039bdd3055310c4"
+    },
+    {
+      "id": "ghep_job#101:chuoi5",
+      "sha256": "3893209451a7408ae825a40eb5e3fb5bd5e9e1dcf643905abba0c70b75bc9ed2"
+    },
+    {
+      "id": "ten_du_kien#1:if_dung",
+      "sha256": "18218c1bdd5b498b81fd16dac6df9c27ba656d4d565a9d5621d4d8effcbe1432"
+    },
+    {
+      "id": "ten_du_kien#1:if_sai",
+      "sha256": "fce57bb1a1692a10db10a419d46e598641c43ef77f14fd0af1a8d1970f360e66"
+    },
+    {
+      "id": "ten_du_kien#3:tra_None",
+      "sha256": "7dddb0affdd1f76602a83ad15999623c07fcec9eb3e335ab976a4bc3b69de98b"
+    },
+    {
+      "id": "ten_du_kien#5:so0->NotIn",
+      "sha256": "ea56ee8964d6b26e849903833b86a2496574da7728b5f6feeab996fcd2862358"
+    },
+    {
+      "id": "ten_du_kien#6:tra_None",
+      "sha256": "2ebf2c936b68501ae03c8cd9e96ea0a2060716c105622e850ea0f976828a65e6"
+    },
+    {
+      "id": "ten_du_kien#8:bo_doi_so0",
+      "sha256": "d06ce60bb4fd81058ccf3a7503bc235e191b67a58f669d4e4fd74775e482a235"
+    },
+    {
+      "id": "ten_du_kien#8:bo_doi_so1",
+      "sha256": "a9c288511eb83f891331d8ea6c910221cc2002d89239fefee472103352c4a461"
+    },
+    {
+      "id": "ten_du_kien#9:ifexp_than",
+      "sha256": "3a7c9224774bb1e645b535ddac73ecbeb118d9754b62f78ff6645d567e39dec4"
+    },
+    {
+      "id": "ten_du_kien#9:ifexp_khac",
+      "sha256": "7dddb0affdd1f76602a83ad15999623c07fcec9eb3e335ab976a4bc3b69de98b"
+    },
+    {
+      "id": "ten_du_kien#10:chuoi0",
+      "sha256": "76f9594713262e201622aea771dc6df5bf51aa578d3ef56ca045e955d20d6dee"
+    },
+    {
+      "id": "ten_du_kien#10:chuoi1",
+      "sha256": "4e027bc0de3effcc288f77ae0e6db9442a4f2c575dc7bd1eb3f50ff4971ab7e8"
+    },
+    {
+      "id": "ten_du_kien#10:chuoi2",
+      "sha256": "0fa9f38ca878a3c643093d937558659be4825abccda1f90698f4a0a1b80e3795"
+    },
+    {
+      "id": "ten_du_kien#10:chuoi3",
+      "sha256": "39aee6e13a9f60d612158b399fe77cc928426d7870d1cd3cf79eb0bac4a9e9ec"
+    },
+    {
+      "id": "ten_du_kien#10:chuoi4",
+      "sha256": "ad621890d2779122f401ebd99a009be52ed3f9219ffbbfc9948b093be29a0b8f"
+    },
+    {
+      "id": "ten_du_kien#10:chuoi5",
+      "sha256": "7c13955f4080607099d963ba055cd64c848cdd278632c1964f95fd710e1b4224"
+    },
+    {
+      "id": "ten_du_kien#13:ifexp_than",
+      "sha256": "f03684b80e6a8e68bb68c84072abbe0a29f44d66bdd260adef42ff57661de20b"
+    },
+    {
+      "id": "ten_du_kien#13:ifexp_khac",
+      "sha256": "2ebf2c936b68501ae03c8cd9e96ea0a2060716c105622e850ea0f976828a65e6"
+    },
+    {
+      "id": "ten_du_kien#16:chuoi0",
+      "sha256": "cbc0cedc895a06b46736c8927f152ab6a96035a36c5bd422c9086215a523ec4e"
+    },
+    {
+      "id": "ten_du_kien#16:chuoi1",
+      "sha256": "f5c477db9072dc9bda8157b8156edca2ec11b1519d0d02d61c69a5725ac33be1"
+    },
+    {
+      "id": "ten_du_kien#16:chuoi2",
+      "sha256": "376414b16cdc227a1fcd7a958298c742049465997db7d85dfa3a386cf0916d48"
+    },
+    {
+      "id": "ten_du_kien#16:chuoi3",
+      "sha256": "b0167df9bfb9c9f62c9b1aedba4698ccd741f2ffadf5e8d4c776acc533543f27"
+    },
+    {
+      "id": "ten_du_kien#16:chuoi4",
+      "sha256": "a6f0de7c13586c4e781a3cbb22ac5deee489a4623d1e057dbf214dc11644552f"
+    },
+    {
+      "id": "ten_du_kien#16:chuoi5",
+      "sha256": "99f9e66c23bfeb6e7da2bebb060d3227a49a2d95b059bc0a2aad966e60eb932b"
+    },
+    {
+      "id": "ten_du_kien#22:and<->or",
+      "sha256": "3afa6baaee11853bb72d556c3464efc00d5a3baa5a0e65b92898d34b3299d1d4"
+    },
+    {
+      "id": "ten_du_kien#22:bo_ve0",
+      "sha256": "36c52a6a77e33a8be6cbc6d476cd4271874363979053618576b7fd978bf80625"
+    },
+    {
+      "id": "ten_du_kien#22:bo_ve1",
+      "sha256": "21a581acbdb18021fe85e2fa4c25c83dd3475bb86aca9cb8ce8085808169a7c0"
+    },
+    {
+      "id": "ten_du_kien#28:chuoi0",
+      "sha256": "e87911a02dd65868471077c608677f3922266a4a47a16cd3ae0fe3907822f50e"
+    },
+    {
+      "id": "ten_du_kien#28:chuoi1",
+      "sha256": "bb4b2a587bfbbb2742c86f3eb98a19ea51adeeb388db8f012d8a675dfd321509"
+    },
+    {
+      "id": "ten_du_kien#28:chuoi2",
+      "sha256": "b2e326371fc61ead73025436b342c9f20b423c52809967643c3dade976d5bcd6"
+    },
+    {
+      "id": "ten_du_kien#28:chuoi3",
+      "sha256": "78f56ee9b95e88abfd67a8140b5980bd284b31413ad8ffa98e2fba6c9e74dd88"
+    },
+    {
+      "id": "ten_du_kien#28:chuoi4",
+      "sha256": "c6cbeaf07e2fa54a97589792c3c033b86b7445161b7c84bc414a4711eb9f9639"
+    },
+    {
+      "id": "ten_du_kien#28:chuoi5",
+      "sha256": "2cd5afed046d609a987d5341e9aa993ff08fd78abbaad0a51b6c0d2dcf6a3bff"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi0",
+      "sha256": "75925ec7510e772b6ccf398aebb9d626fb5e641d3889652ba049881159ddfd8f"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi1",
+      "sha256": "5ead12e3d983ad50579a42f365bd0979939301ae5ccd9c206ed2e5cf712a2fa3"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi2",
+      "sha256": "df72623f84b18859ae87ac0aa57233bb2b2b7200f70cd2ddf1ed03bb982a8fc5"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi3",
+      "sha256": "51785e01970721b7009ab076468257c99ed637fe391e876602c926e8026a8dfe"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi4",
+      "sha256": "23ed66daa45c52c649cb787c448ab26911e24f642ec87b5b1d60c9ad19ce69e1"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi5",
+      "sha256": "3d3a71f44b7e12ae63467c7ee811ae4fc6be0cc1df062bb8b9e4310813593552"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi6",
+      "sha256": "d740730ed1edf2913c36ef147f6f0a30094a8c18d9999804c67797cb216990bb"
+    },
+    {
+      "id": "ten_du_kien#31:chuoi7",
+      "sha256": "e1168c685d0f64719ef457e6b1ab5dc3804f82c9390366ab13bab543adaab2c0"
+    },
+    {
+      "id": "ten_du_kien#36:so0->In",
+      "sha256": "9c8139367d492837dc670ce005c79a01533096c136a87f23006ed1210fca0b2c"
+    },
+    {
+      "id": "ten_du_kien#38:chuoi0",
+      "sha256": "ce9f92ec59482198be3c1c80a90008a6610d4fe67b2552df6cb9a008a2eb0483"
+    },
+    {
+      "id": "ten_du_kien#38:chuoi1",
+      "sha256": "6732008dbc04ef56e5186a04c7a937d09051644b5e8f10f34a4d7c7b0946116d"
+    },
+    {
+      "id": "ten_du_kien#38:chuoi2",
+      "sha256": "291599c562368a22070ee122e9168dfcb44907f6d78ec4d4a0da65d27b78d0d2"
+    },
+    {
+      "id": "ten_du_kien#38:chuoi3",
+      "sha256": "6be058831856432057867c5a127205564ed0c25b3e2dcee1fd29a3c9e3b500f5"
+    },
+    {
+      "id": "ten_du_kien#38:chuoi4",
+      "sha256": "57c13db48142e13f054ca6afeccacca54c6c229b27a9a7b792fa647de09d17a3"
+    },
+    {
+      "id": "ten_du_kien#38:chuoi5",
+      "sha256": "625b11f43653f7e3f1d487b1093b5d16aac320b0f86f9648891773f5dd6986e2"
+    },
+    {
+      "id": "ten_du_kien#46:+1",
+      "sha256": "fd939e25916ef893a6833205e44c016474f9a9b294cad96de8065806b8a5aa4c"
+    },
+    {
+      "id": "ten_du_kien#46:-1",
+      "sha256": "64446389cb0e33d16966dd0086ce6191c6ad47ce67c5695c88b24c195ee3260b"
+    },
+    {
+      "id": "ten_du_kien#50:chuoi0",
+      "sha256": "0a80b8d7c9ac4bdb77cd37bec419eef13c10310613784e41d2892ffba38699a5"
+    },
+    {
+      "id": "ten_du_kien#50:chuoi1",
+      "sha256": "1dd4f43653b3f13e5944fefe26a732bbe4f3fe3d20f1d2da165f89eb427b50fa"
+    },
+    {
+      "id": "ten_du_kien#50:chuoi2",
+      "sha256": "da27c270a1fc5d3fba8e7a29e187f06431263feaaaeee5fff95f98748bdff9a2"
+    },
+    {
+      "id": "ten_du_kien#50:chuoi3",
+      "sha256": "cb802e13be069e6b2a0b482400acea29e1e1419d83fff160b66f03eb486db612"
+    },
+    {
+      "id": "ten_du_kien#50:chuoi4",
+      "sha256": "4f9a79583e67a1bcd8185c2b57868935d6081d95d864d10e1d8ae71ef2f4ed44"
+    },
+    {
+      "id": "ten_du_kien#56:chuoi0",
+      "sha256": "d581c40c61fb42a7b74e8668e2a4faae47d37741904429cc6b994e2e7365f118"
+    },
+    {
+      "id": "ten_du_kien#56:chuoi1",
+      "sha256": "1c4505aada2d238b5b6951f29732312d028797b23ab2cae5a7e2dc42d14da879"
+    },
+    {
+      "id": "ten_du_kien#56:chuoi2",
+      "sha256": "390eb3852cd2f16c92eb6595430f50b4b757406c8ce167fd3e3b304036d89f2c"
+    },
+    {
+      "id": "ten_du_kien#56:chuoi3",
+      "sha256": "abe63b3c8229dbe739e528f4ecffb4a74f012bae986ab17d3b996a36c6541327"
+    },
+    {
+      "id": "ten_du_kien#56:chuoi4",
+      "sha256": "1c4505aada2d238b5b6951f29732312d028797b23ab2cae5a7e2dc42d14da879"
+    },
+    {
+      "id": "ten_du_kien#59:chuoi0",
+      "sha256": "157724d92ac12c09cc5ec06d38fd9586494f65ae78258309602a8a8b19ab1e40"
+    },
+    {
+      "id": "ten_du_kien#59:chuoi1",
+      "sha256": "15f70a83e871734b0e901aa153efcc25beb0e550ccf7f6d9686d7a8945fc24e5"
+    },
+    {
+      "id": "ten_du_kien#59:chuoi2",
+      "sha256": "5a2d49b099d4c2de05869425c9f66edc997a194c18c5bdb62706a7eb7aa6f7b3"
+    },
+    {
+      "id": "ten_du_kien#59:chuoi3",
+      "sha256": "97078aa4a03379ec21dded23077fd677893074738ce9c2351c4776327e676954"
+    },
+    {
+      "id": "ten_du_kien#59:chuoi4",
+      "sha256": "5cc0faf3778a99a93568ab8de780e30813fe71ec1effd03789b5adaa377ad188"
+    },
+    {
+      "id": "ten_du_kien#59:chuoi5",
+      "sha256": "35920b6b6b49994c964e9d6c94f03f1a34389c00cd40ea6229edde19386d4d06"
+    },
+    {
+      "id": "ten_du_kien#62:chuoi0",
+      "sha256": "2f7bd19f80bc2b1b3869df209ae65a473039eb2b2f8007532ab7b795c63d43bd"
+    },
+    {
+      "id": "ten_du_kien#62:chuoi1",
+      "sha256": "7236ac428c5e073b31d022afcd47b4c949f85ba439423907e4b7f66f5e5357d2"
+    },
+    {
+      "id": "ten_du_kien#62:chuoi2",
+      "sha256": "73d652523c22a1b2560d65edebc7b426c378d498f264ee96f5a9c95ec96ed860"
+    },
+    {
+      "id": "ten_du_kien#62:chuoi3",
+      "sha256": "bd10cd11cc59f2a996c02d6df195b163be3cf8694349cde5337efd9b67e0612b"
+    },
+    {
+      "id": "ten_du_kien#62:chuoi4",
+      "sha256": "df79fb37a64c5dd9e16ea43d107ee8cb9a61b86eb8e1931619ec5353e4ece4a4"
+    },
+    {
+      "id": "ten_du_kien#62:chuoi5",
+      "sha256": "8beb1ab340bc39e49bcea47bf1221d1244c93c4b6136405a18a9427ecf6ab6b7"
+    },
+    {
+      "id": "_gio#3:tra_None",
+      "sha256": "ce065934eceb554560ecb437b66d07702c3620e1a8c4c83ce97ee1fef5e1a53a"
+    },
+    {
+      "id": "_gio#5:ifexp_than",
+      "sha256": "69f4f79485fe33de783f8c1d00ab2482b81c27d0dad9c0bb12a2c6d492ef3144"
+    },
+    {
+      "id": "_gio#5:ifexp_khac",
+      "sha256": "ce065934eceb554560ecb437b66d07702c3620e1a8c4c83ce97ee1fef5e1a53a"
+    },
+    {
+      "id": "_gio#8:and<->or",
+      "sha256": "22f73c07993783a2f0c6209689b6cd0d0a1bfc8e6e5149bdf1797fcc35f23d64"
+    },
+    {
+      "id": "_gio#8:bo_ve0",
+      "sha256": "2688a336443e683f0e57230bea22cef1fc00eb0ed5415feeaf2dd85f455fd08b"
+    },
+    {
+      "id": "_gio#8:bo_ve1",
+      "sha256": "c18ca5bdf5f82d7e7240ad6ece44716303536b5f42808c65ec1dad8eb650b5ac"
+    },
+    {
+      "id": "_gio#9:bo_doi_so0",
+      "sha256": "b62bac5c2be729474ff424474a15dc94f693a832d50a7adac807026f91cd8c6a"
+    },
+    {
+      "id": "_gio#9:bo_doi_so1",
+      "sha256": "38698eff84c5a720b028c37e3409661b0378307ea5727ad9af10366a2b4a2db8"
+    },
+    {
+      "id": "_gio#14:so0->IsNot",
+      "sha256": "58d4766e3078fa632dfe5744dee4538764eefee5eab261a1ddf20a9e3a72b8de"
+    },
+    {
+      "id": "_gio#18:chuoi0",
+      "sha256": "ee50c72fe4ae476482512c89bde50b2e98e3a625100c74b3bae86f07e869ece6"
+    },
+    {
+      "id": "_gio#18:chuoi1",
+      "sha256": "69e43b81453bbaf9a91c25c4c740d0e89c3a30bb5f12cac3a9445f4934993108"
+    },
+    {
+      "id": "_gio#18:chuoi2",
+      "sha256": "96b8c5db52b0fce3451867bf1c9019495143d358ad8d5ca0758cdc3d95501ce2"
+    },
+    {
+      "id": "_gio#18:chuoi3",
+      "sha256": "00cd29eabc87712ace818723133d54e0a765780ad2f7d76aa5758ee703ce95d9"
+    },
+    {
+      "id": "_gio#18:chuoi4",
+      "sha256": "339ac5b98ca7b8f4c7599004f5e0968e6f127bb56eb817dc80faa5387e2c3182"
+    },
+    {
+      "id": "_gio#18:chuoi5",
+      "sha256": "7c6cd6c5ceb1f7c3161498857ea82c1d2ff58ef9c586a7b3adb1266ffb1acd31"
+    },
+    {
+      "id": "_gio#18:chuoi6",
+      "sha256": "26e98f255f882922b2b85492e6cc7fe02a6483f96f109281eeffe6952bb64692"
+    },
+    {
+      "id": "_gio#18:chuoi7",
+      "sha256": "dee5cc9d7d928b75d3d35ff023d6f0b2209fabd3118d3fe28e1f0e682bb70e72"
+    },
+    {
+      "id": "_gio#38:+1",
+      "sha256": "59fb332dff9cfbfd180a5710b714876aa6ad759a4e51797852839837fb7f5a60"
+    },
+    {
+      "id": "_gio#38:-1",
+      "sha256": "7b25b7687a208dad10a01fa479909ff55801c705222a6a25c991a7040a211a71"
+    },
+    {
+      "id": "ghep_buoc#3:if_dung",
+      "sha256": "da02facc2c4bf09ce689efb04e3916cde61e61e50161a6a121908a449db5ea1c"
+    },
+    {
+      "id": "ghep_buoc#3:if_sai",
+      "sha256": "2023b877f5bb55dc993d2bffaab25c9da6eafcbbd553192dfc819f4fe8356b43"
+    },
+    {
+      "id": "ghep_buoc#6:if_dung",
+      "sha256": "48dc4416e688280725bb94b3c28b728a9a6a8f0654afd84e7def85a8e861e16a"
+    },
+    {
+      "id": "ghep_buoc#6:if_sai",
+      "sha256": "9b7b464613aca01da7d236f2fb7fe83479aa920a1fb04edd6b5443b455b50f70"
+    },
+    {
+      "id": "ghep_buoc#7:if_dung",
+      "sha256": "ff72bcae5436608d4cc115c0edece6920b617a0301c4b09ceae83040678b3d7f"
+    },
+    {
+      "id": "ghep_buoc#7:if_sai",
+      "sha256": "caf5ff713bc79e95bcfc43fca6c1385e9658f764cfd66b78ea1aa2bd03dabcd1"
+    },
+    {
+      "id": "ghep_buoc#10:if_dung",
+      "sha256": "5bb17ed4fa40b0409cc0ddb996a8b4ba0ca52a1bf2d89147b18c26046019529f"
+    },
+    {
+      "id": "ghep_buoc#10:if_sai",
+      "sha256": "c38d2c747f6c9b592a15c6450f6d3273a737b969537c2d6217a7c5eee8c62fc2"
+    },
+    {
+      "id": "ghep_buoc#11:if_dung",
+      "sha256": "eb00c9e00cfbc54d4b7c8d52972324c0cde603093e085c490ecc77d8efd4be5d"
+    },
+    {
+      "id": "ghep_buoc#11:if_sai",
+      "sha256": "ca01d958ef60e88951e3e2060b3c359a9bc3e0790ded840586c65d4cf00c2341"
+    },
+    {
+      "id": "ghep_buoc#12:if_dung",
+      "sha256": "f591bd7f92952f21524fb8cf681bb5d1b60b21a58374f32865487d7a50a0d6fb"
+    },
+    {
+      "id": "ghep_buoc#12:if_sai",
+      "sha256": "7d147ab65c71bcd065198ade9115eac212bc3531b587139ef367389e56338833"
+    },
+    {
+      "id": "ghep_buoc#13:if_dung",
+      "sha256": "fea2874f80720be6f7b8599ddd41ade07ec23ea841c05ba90b42e78f6c8410b2"
+    },
+    {
+      "id": "ghep_buoc#13:if_sai",
+      "sha256": "b6b1aaa0c3f43121ec3dab19dc4fdbe946f939a79ef570edc8aca0a02cf9a932"
+    },
+    {
+      "id": "ghep_buoc#14:tra_None",
+      "sha256": "fc96dd44d830a86babef08d53d87a815c30ca2816f79864ab97cfcc9d4587ca7"
+    },
+    {
+      "id": "ghep_buoc#21:tra_None",
+      "sha256": "5a8a66066de84e512e74ba8bc2e5017df6aa64fc47eb71a8cf8d7d78181dea08"
+    },
+    {
+      "id": "ghep_buoc#22:so0->IsNot",
+      "sha256": "e7ca410a64e157a15d9614af748160a9ddfba96669d5af0f57a0d7bfa3928944"
+    },
+    {
+      "id": "ghep_buoc#23:tra_None",
+      "sha256": "351e927bd2c273044ba5cfaeb382c3ffffd93bb37c27175b2c5b4f30adfd6aab"
+    },
+    {
+      "id": "ghep_buoc#27:ifexp_than",
+      "sha256": "e373b7e127d4685547363b527eba3caa36c2ed4317fb7253a0b5cdfcb3e74182"
+    },
+    {
+      "id": "ghep_buoc#27:ifexp_khac",
+      "sha256": "e896e3f585e2452ee11f426cd83ec824fe0e83f99578d5cf7d2db45d04ceec76"
+    },
+    {
+      "id": "ghep_buoc#28:and<->or",
+      "sha256": "a377aef0c596d88696872c0c9fdc81d40a5d964da2cbeb044a123479f2ab319d"
+    },
+    {
+      "id": "ghep_buoc#28:bo_ve0",
+      "sha256": "371432df1559b02f3f9e4c8aedd9b4da3a87da66614997d13bd22e7de9366b68"
+    },
+    {
+      "id": "ghep_buoc#28:bo_ve1",
+      "sha256": "38c24f21f96b2887713175031eaf4a8255c5beba52b1b77aa2d13d424aad5c93"
+    },
+    {
+      "id": "ghep_buoc#28:bo_ve2",
+      "sha256": "bf31844dcf78fa7d8c8aea77ab881485eb51d507eb9355768312cbdf453c5cc0"
+    },
+    {
+      "id": "ghep_buoc#28:bo_ve3",
+      "sha256": "700470643f248f3af391ac8ef12247e434e8c6acddabd430c479dc0cdef95f35"
+    },
+    {
+      "id": "ghep_buoc#29:tra_None",
+      "sha256": "61def61817d287d90716835306973d3ee97ed2dd0a300ca65fa796f66f59c6c2"
+    },
+    {
+      "id": "ghep_buoc#30:bo_not",
+      "sha256": "f94b42ac7bfb7e96902e0e27d12f21427ce1e48e90ed8561a8e33551efa64bb7"
+    },
+    {
+      "id": "ghep_buoc#31:tra_None",
+      "sha256": "fb3cabd5e54228db05888a23095e3849f935a33ac94592daabf997ea8bfccac3"
+    },
+    {
+      "id": "ghep_buoc#36:so0->Eq",
+      "sha256": "e58969599c83ae30208414ad9ee8ff96e1daca52ef34d169f9ccc76ef5fd2aaf"
+    },
+    {
+      "id": "ghep_buoc#37:tra_None",
+      "sha256": "d67fe532dd37693cc7760b6c5dfaa4e21adfa924b5cd6a603e93eb0ee4bf2560"
+    },
+    {
+      "id": "ghep_buoc#38:so0->Eq",
+      "sha256": "ba47d130544513a40027a9cd333b873947c3f3894b340465aedb9a4e7e4a1628"
+    },
+    {
+      "id": "ghep_buoc#39:tra_None",
+      "sha256": "83be042dd8006e7ad933dc2f9b94726a0d51edf97a1d22a213a1670ab1ce35d2"
+    },
+    {
+      "id": "ghep_buoc#41:tra_None",
+      "sha256": "2963b3704dd31870028e9b52059467cff372a7d690a2a25d69fa15ccaaac1071"
+    },
+    {
+      "id": "ghep_buoc#42:bo_not",
+      "sha256": "630547b7a164e23acfb3afba93aa1123e745105582a6e02bbb00cc41eb82ee23"
+    },
+    {
+      "id": "ghep_buoc#43:tra_None",
+      "sha256": "90788aa94ee09717c4fe5cd8a093e1bcb27bf958cd653c051eb1ff92f6f61867"
+    },
+    {
+      "id": "ghep_buoc#54:bo_doi_so0",
+      "sha256": "07064c7cee24b4761c49c7fbf3811e4981e6e1a2fb0c711f8978806bd03ae2d8"
+    },
+    {
+      "id": "ghep_buoc#54:bo_doi_so1",
+      "sha256": "5f1a5ba30f7dbe796ee63bc33be060c1777b10a6521c05309d75dfac68a5e395"
+    },
+    {
+      "id": "ghep_buoc#62:so0->IsNot",
+      "sha256": "2d1f3a88ace74a35b8ee5de27b09adee4f5a1948aab617061cf0d22cec4bef29"
+    },
+    {
+      "id": "ghep_buoc#63:so0->NotIn",
+      "sha256": "285c98c90235b72cbfca3a846f1511f66ad5d5442c97028da8381c57e096417a"
+    },
+    {
+      "id": "ghep_buoc#64:so0->Is",
+      "sha256": "6adc783103c12958559044f1879a326710d2f7ab1a4296e796f1afd9e0d2fcbe"
+    },
+    {
+      "id": "ghep_buoc#65:bo_not",
+      "sha256": "608a83f0644557fd999392a67ceba7af326f72d501b3f3915dcd37ea6ccab40e"
+    },
+    {
+      "id": "ghep_buoc#68:and<->or",
+      "sha256": "83a798afe9175391640432d832bc73e2bf9edf173c47b94c27fbfa3892a14ca2"
+    },
+    {
+      "id": "ghep_buoc#68:bo_ve0",
+      "sha256": "259dd7155c0ba79de9a30d3cdcd8d080519be37324a6b83841991f65af6b331d"
+    },
+    {
+      "id": "ghep_buoc#68:bo_ve1",
+      "sha256": "ed0802c2d282c49fafddeb3ea5d6997389378d1f41545212620c0d20921b2455"
+    },
+    {
+      "id": "ghep_buoc#68:bo_ve2",
+      "sha256": "4e2f0d90629f81152ae7df78a3ee5a099184003f01b8404a8d8ea0037703b167"
+    },
+    {
+      "id": "ghep_buoc#72:bo_loc0",
+      "sha256": "932f21d252f1010478484f1510d7af9446a4e6df98ad26bbfd53e725a5269ac4"
+    },
+    {
+      "id": "ghep_buoc#75:bo_loc0",
+      "sha256": "de86eea222ccd20e8f0be6e80a88b4e57e1fcbeb71fd805d6519bf7dc04d3c03"
+    },
+    {
+      "id": "ghep_buoc#105:chuoi0",
+      "sha256": "81c5fb2d0509fdb036238fab0080bfa973713add640256e94a05fcaa41338d36"
+    },
+    {
+      "id": "ghep_buoc#105:chuoi1",
+      "sha256": "42a5a70d4af25045864405cc15e554c0cb23aeb69074e096a02ca4861b47e406"
+    },
+    {
+      "id": "ghep_buoc#105:chuoi2",
+      "sha256": "5ad68c187d3219adbb2782df1e017b683964c5414314cc0a935b4916d27ef184"
+    },
+    {
+      "id": "ghep_buoc#105:chuoi3",
+      "sha256": "95f598dd4ca9acec5a82b8d47efe3b5063895238d04ab3e6a9585c8278b8fd00"
+    },
+    {
+      "id": "ghep_buoc#105:chuoi4",
+      "sha256": "0c331a584b1a77b83c911380a36dad3583bc91b6c340b6a74e3a52d0bee531dc"
+    },
+    {
+      "id": "ghep_buoc#105:chuoi5",
+      "sha256": "ca2c0b10834986effa549ece8b3d68771d3ad7f9825f1012b9ab2392e374dc18"
+    },
+    {
+      "id": "ghep_buoc#108:chuoi0",
+      "sha256": "bb619e9d141813015911c4ff0d7c569959be5234089dac4907fcbdc4137a0592"
+    },
+    {
+      "id": "ghep_buoc#108:chuoi1",
+      "sha256": "15571056faafea48e82c3a77bd76d0d28e6fc3e74511b640d2de51916fe29e19"
+    },
+    {
+      "id": "ghep_buoc#108:chuoi2",
+      "sha256": "4ca8304e3501566882821809e98a5beccdb956ba75d8f5d6f90cfaf313c122a7"
+    },
+    {
+      "id": "ghep_buoc#108:chuoi3",
+      "sha256": "5d71e3d9cd0334754f1a8a41b0dd15ed496f2d89deb22ae8fc79d2b8360d41fd"
+    },
+    {
+      "id": "ghep_buoc#108:chuoi4",
+      "sha256": "c05cbf6d5971dc1a5960010c3b5f021151599a879c3274ab6cfde04bef9567ef"
+    },
+    {
+      "id": "ghep_buoc#108:chuoi5",
+      "sha256": "6fc0302f708dcdbb655ef1802abb925b5d11ca7c2d0bcb06036246555cb85984"
+    },
+    {
+      "id": "ghep_buoc#112:chuoi0",
+      "sha256": "f8c7036ac47bb88336ece6a8f86d3a72ca7a4c1ca6d7effacd957e5ad7f97195"
+    },
+    {
+      "id": "ghep_buoc#112:chuoi1",
+      "sha256": "37427150e528b6e11e299b175d1a4210ab106782d74f9fd8f1e723fa245c6795"
+    },
+    {
+      "id": "ghep_buoc#112:chuoi2",
+      "sha256": "002e79d5ec3739d5861d20a36d864413d69569dd40e4ae2f752a8e301bfa7f93"
+    },
+    {
+      "id": "ghep_buoc#112:chuoi3",
+      "sha256": "19034c7d4c338686e7bde75b1d1167b95700ea77bcf1e2f79078d11b29f53cdf"
+    },
+    {
+      "id": "ghep_buoc#112:chuoi4",
+      "sha256": "189bd747cbf2c467edc6f94d7ec3ad4147d281b19128a6fe10a8ab2de4d25d31"
+    },
+    {
+      "id": "ghep_buoc#112:chuoi5",
+      "sha256": "d5f28f29cf727d1a2e3edc51d4bdf79b61ad63e28549b13b7f257e138626e6a3"
+    },
+    {
+      "id": "ghep_buoc#121:chuoi0",
+      "sha256": "b1390190686799e1526b3d8e4879891ce4387184bfc1892f9d3d84d919c8ed0e"
+    },
+    {
+      "id": "ghep_buoc#121:chuoi1",
+      "sha256": "68478e123a8fa6a2c2a55ea6c6eff34ca557905a2d7f81103ed004cd57aa77d7"
+    },
+    {
+      "id": "ghep_buoc#121:chuoi2",
+      "sha256": "3335fe3aab3e021084571ffcac172629c401ba5a3d6ccb611457e7f6ccb3c9c1"
+    },
+    {
+      "id": "ghep_buoc#121:chuoi3",
+      "sha256": "6d83c8e68e2c7018e48d356f0d00dd07982865021be750210bf47a9a71e7847d"
+    },
+    {
+      "id": "ghep_buoc#121:chuoi4",
+      "sha256": "8bcc94b54e85b831ad07d5a94c940a16fdd513a44c4cb9e6a0c2ab460f5e38ad"
+    },
+    {
+      "id": "ghep_buoc#121:chuoi5",
+      "sha256": "cb72cae9d4cd316c608f7f2a09da96d71e8009d6bb3acf6affe8addd6b599497"
+    },
+    {
+      "id": "ghep_buoc#123:so0->IsNot",
+      "sha256": "740197d7164f2577d972d3421508eeea9c1d5d77546e14f17ed28484cecd4969"
+    },
+    {
+      "id": "ghep_buoc#125:so0->NotEq",
+      "sha256": "c4ac467f6629239aab131f27fbd8a573e75e7a192627aeec4030d5b1bfd8910f"
+    },
+    {
+      "id": "ghep_buoc#127:chuoi0",
+      "sha256": "80d0171940a79d8109c9a8c215832b714f31ddc42e4a29e435e0c23da42f73f8"
+    },
+    {
+      "id": "ghep_buoc#127:chuoi1",
+      "sha256": "d82b868c5a5b47a08246b070492860beea882c5672e905fa2b028a5d97c76004"
+    },
+    {
+      "id": "ghep_buoc#127:chuoi2",
+      "sha256": "da35af45d671e72f68e4530f5e0123a278d6b46c05b53ed81254cd6c1965622e"
+    },
+    {
+      "id": "ghep_buoc#127:chuoi3",
+      "sha256": "3e26cf21571c55593f128ebcd8d231988afc8bf8e32ce8063bfa12def6372e58"
+    },
+    {
+      "id": "ghep_buoc#127:chuoi4",
+      "sha256": "19dcc8e8c93cda3a5348db8134b7489ce0a435395b90d488bb1dd6b44a1ab2dd"
+    },
+    {
+      "id": "ghep_buoc#127:chuoi5",
+      "sha256": "53e0bf68821d1c2bb7403d4f145245626555043e6f5881054b218ea721d627ff"
+    },
+    {
+      "id": "ghep_buoc#131:and<->or",
+      "sha256": "c089087541f1465f6b948db475928c60b3c0d37dece8ce775eefe0235288e872"
+    },
+    {
+      "id": "ghep_buoc#131:bo_ve0",
+      "sha256": "1567337d68c0b97370fa83d2205e1e552857a9698ceaac6b3ac285d6032c37f2"
+    },
+    {
+      "id": "ghep_buoc#131:bo_ve1",
+      "sha256": "7732961c3da09b9d8cafe8816466b570690626e74cc706b84c72b9e5d5a449f0"
+    },
+    {
+      "id": "ghep_buoc#135:so0->Eq",
+      "sha256": "47d24e07af2d414a43d8656d3ff293d559a656afa5f97bf55d3b011962275f06"
+    },
+    {
+      "id": "ghep_buoc#141:chuoi0",
+      "sha256": "2ee3c2824f4ec3308a6b07631117b9c41a18ff88735003cf7f8751289b89396d"
+    },
+    {
+      "id": "ghep_buoc#141:chuoi1",
+      "sha256": "4d008f67ebc3d7d7f3725012d8343372b1a4fc3a253bbcf0f3ee931493afe4f1"
+    },
+    {
+      "id": "ghep_buoc#141:chuoi2",
+      "sha256": "ca4b53e6f4764bb3dfe2883dcdbce63181431c28257f02e246e6663c1c288768"
+    },
+    {
+      "id": "ghep_buoc#141:chuoi3",
+      "sha256": "c1465914939f6c87195370173bc7846a8dffe19145b9d377a00330d2b1320741"
+    },
+    {
+      "id": "ghep_buoc#141:chuoi4",
+      "sha256": "549a14b01844863a47fa374d1b0e8c926175dc53e03507dbabf76fa3aa2f4042"
+    },
+    {
+      "id": "ghep_buoc#141:chuoi5",
+      "sha256": "8176cb62078a66a571c9c653fcce8b351ac101c701666c9d0ac0f3ad50be89f1"
+    },
+    {
+      "id": "ghep_buoc#147:chuoi0",
+      "sha256": "87d715f783ad09fbd9bcb510b198b227ba1abc09f55a04d246d6b6f27da54a5b"
+    },
+    {
+      "id": "ghep_buoc#147:chuoi1",
+      "sha256": "0b8e5718bd0886fcc877673ce4afec901afa82181cd4f33e8490757303df2544"
+    },
+    {
+      "id": "ghep_buoc#147:chuoi2",
+      "sha256": "2d8b79caa91cddf65ce39d65e1d61ad5d22bf9a26155913bb14751a5784c2d94"
+    },
+    {
+      "id": "ghep_buoc#147:chuoi3",
+      "sha256": "b66d850556c997809d308b5063acfec4071a2981297a204fbfe1e7315106861f"
+    },
+    {
+      "id": "ghep_buoc#147:chuoi4",
+      "sha256": "1f4c69dc6b7c53a40c771ea46a2c30ce639f39dddbd2ce83fbb9abb968eacfb3"
+    },
+    {
+      "id": "ghep_buoc#147:chuoi5",
+      "sha256": "5952203aed3c411a3594b99ebbe5e03808b6b3b8792f320fa501ba7bd3d04c3c"
+    },
+    {
+      "id": "ghep_buoc#149:and<->or",
+      "sha256": "ef6089adefaa92aa6ca57ce8efff9b5693be3b6be255ed1cd9a94520e3cb00f6"
+    },
+    {
+      "id": "ghep_buoc#149:bo_ve0",
+      "sha256": "9c9fcef275e237af173dd9769fd0c738725c01c35812e404b0b15acafd389931"
+    },
+    {
+      "id": "ghep_buoc#149:bo_ve1",
+      "sha256": "7d5ffd77d158e952f7ca611f31b2c0de00887dd85cc28634d5ca88c9ef300dc2"
+    },
+    {
+      "id": "ghep_buoc#152:chuoi0",
+      "sha256": "84d7b22099a1bce64250c8db91883c841379c4b4d2c541f5cf1bbb79aa8af845"
+    },
+    {
+      "id": "ghep_buoc#152:chuoi1",
+      "sha256": "96d848a88f591a7491156861dea5b9982a06262e720b08a3db1494d939e56457"
+    },
+    {
+      "id": "ghep_buoc#152:chuoi2",
+      "sha256": "1adb70a2b583b7654c1b712e7aa0cc390bff60fdcd3497ea8d315faa777ee455"
+    },
+    {
+      "id": "ghep_buoc#152:chuoi3",
+      "sha256": "fcaa54ea0ba07b7a3c2f00aa8ec59b461fca74d30daee09549b4c3093fb17c14"
+    },
+    {
+      "id": "ghep_buoc#152:chuoi4",
+      "sha256": "6819179a40ac7043965b52c7285b7adb486607a54a79123fe5917972b6a3807f"
+    },
+    {
+      "id": "ghep_buoc#152:chuoi5",
+      "sha256": "54cb8e599082714a684d745cb324412c573e94d639e7c77d68fcbd6d4dcda2a5"
+    },
+    {
+      "id": "ghep_buoc#156:chuoi0",
+      "sha256": "f8d21ff5590d5e32836716de015094dec0015ae0cf595d17e832e3f13e827be4"
+    },
+    {
+      "id": "ghep_buoc#156:chuoi1",
+      "sha256": "957a782680b02f4284fc1cf0d6da47627420f543abfa8f3ca1bb9936c6e9ca61"
+    },
+    {
+      "id": "ghep_buoc#156:chuoi2",
+      "sha256": "d795d273b6f8775836ff8795b302158f4ad68313e0f7bb0ef5b4207d65fb6002"
+    },
+    {
+      "id": "ghep_buoc#156:chuoi3",
+      "sha256": "f92e7959308e6719af4d4a1b4ff91d9ff140df5d4168b23175f6b9051a645fe9"
+    },
+    {
+      "id": "ghep_buoc#156:chuoi4",
+      "sha256": "92371c625d8073e7fec63867e5ef781aabbfa382ff95886bbf22c0e398a29293"
+    },
+    {
+      "id": "ghep_buoc#156:chuoi5",
+      "sha256": "00e557d85136d5f616eb36bb85b63b32f0f1a326089a8d6c3eef3f4298d83775"
+    },
+    {
+      "id": "ghep_buoc#157:chuoi0",
+      "sha256": "fd2fe42896c226d0b3be0af2559d729c35d90f048abb61946a06b29a2d5d26ad"
+    },
+    {
+      "id": "ghep_buoc#157:chuoi1",
+      "sha256": "62f30b3ddf042d59c2c1e23ae17e97a186d787f492f02b125649ab2d0e35ce01"
+    },
+    {
+      "id": "ghep_buoc#157:chuoi2",
+      "sha256": "def3b07840b984d7cabf909e4c12104eea36bb263fcad37aac34ca997e0b8783"
+    },
+    {
+      "id": "ghep_buoc#157:chuoi3",
+      "sha256": "093c7db7b5787870edcf8b444b25a324bb1b082c6daa08d2538327395447ec76"
+    },
+    {
+      "id": "ghep_buoc#157:chuoi4",
+      "sha256": "6c03c604ae8c15fc7ba325d1c6bc2bcc4b06a42cd7ff1003125edc8a67c2096b"
+    },
+    {
+      "id": "ghep_buoc#157:chuoi5",
+      "sha256": "23e7f08fa7b7712638ad19a3fbf0a85fbd72c8c2a98ee0e20f2a80be9d5dfd23"
+    },
+    {
+      "id": "ghep_buoc#158:chuoi0",
+      "sha256": "f34d3f84ea3e40958c233b5bcd3be89d6bf46e8c66c4ac257b1094dbec56cbf9"
+    },
+    {
+      "id": "ghep_buoc#158:chuoi1",
+      "sha256": "88a6db9ad6e964d5c05f8b6be1020ab0bbf3f720d0a189434401459586eb76db"
+    },
+    {
+      "id": "ghep_buoc#158:chuoi2",
+      "sha256": "3ed58bf31a882c93ce788bf357b903da360099019084b14142e0b71f692390e3"
+    },
+    {
+      "id": "ghep_buoc#158:chuoi3",
+      "sha256": "3c9e4b45cec8e06fd5e37f5d895cea715bd32f9aa19b38e66c46e498998100cf"
+    },
+    {
+      "id": "ghep_buoc#158:chuoi4",
+      "sha256": "9b84107ef28a06f5cf24dbb6539c5a0f157289df8c17d1ac0a27f2bea7ccd330"
+    },
+    {
+      "id": "ghep_buoc#158:chuoi5",
+      "sha256": "de98402562a6d6127d6412d35369a354a410ba62e884d800154dbdd4de43d1eb"
+    },
+    {
+      "id": "ghep_buoc#159:chuoi0",
+      "sha256": "6ec0c6c012d87c885954bff2a5227fffea87ffff988fbeead3105b0069261d67"
+    },
+    {
+      "id": "ghep_buoc#159:chuoi1",
+      "sha256": "86c64bbe3464cc771e0c0995a463e175dd5d724b942c87d7291f28aaae6a4edc"
+    },
+    {
+      "id": "ghep_buoc#159:chuoi2",
+      "sha256": "3df3e5d7eee73bb4ee636a3cc6b797855a217ecf9517eb6ecc7a0e9d899c5200"
+    },
+    {
+      "id": "ghep_buoc#159:chuoi3",
+      "sha256": "e534a0a60b204f64d2480aa19ff951f5b7089f4d00ec78c511def07c9e30cae9"
+    },
+    {
+      "id": "ghep_buoc#159:chuoi4",
+      "sha256": "8ce233f200810d600458345d7301750712ed198e71fdcffdaabd470bf578b398"
+    },
+    {
+      "id": "ghep_buoc#159:chuoi5",
+      "sha256": "0589db68c14c2001fd836394af3ebe9f5ff97cb53664c3120e288c02c3b46d57"
+    },
+    {
+      "id": "ghep_buoc#163:chuoi0",
+      "sha256": "1a80d8318885981253a3d0bae73a0465a7a9ec24a45417f1cd7cce5131a55c10"
+    },
+    {
+      "id": "ghep_buoc#163:chuoi1",
+      "sha256": "063133381994d714d2f75f0b76f0a5bb540672ae129eefbf55c4a220fb02441b"
+    },
+    {
+      "id": "ghep_buoc#163:chuoi2",
+      "sha256": "edb554f7319f9cfde9b63787ff199a4ebe0a325c8805971b2f3ef21705afa6f2"
+    },
+    {
+      "id": "ghep_buoc#163:chuoi3",
+      "sha256": "b3a4cc1cef57eda86eb69a80ea7968f82f2641b6ad309ab2f09f064b286656ac"
+    },
+    {
+      "id": "ghep_buoc#163:chuoi4",
+      "sha256": "e08ef7623c64b95b2f7effe22f00320ff5a69a52c2134695abac9c5838bf4310"
+    },
+    {
+      "id": "ghep_buoc#163:chuoi5",
+      "sha256": "cda2c743b0814a078a2ceefae0d1a1144d0192c8db1482226e90088b574040c1"
+    },
+    {
+      "id": "ghep_buoc#164:chuoi0",
+      "sha256": "1bcb804054fbe84d590b1291cd451a648c682afe9819c04e8623cd6f3b7e07bd"
+    },
+    {
+      "id": "ghep_buoc#164:chuoi1",
+      "sha256": "b5011aafc3cb0415a566cdd1f6e205097dcecbcc2a137e9d2df1acaef6f310b1"
+    },
+    {
+      "id": "ghep_buoc#164:chuoi2",
+      "sha256": "93118f4971d5262eab4986a94c91716e354161e448d43867d81445f1bae593d7"
+    },
+    {
+      "id": "ghep_buoc#164:chuoi3",
+      "sha256": "ac6d6e16187c4e10f1c0c6055190e23a69a5d32fda173ab305079dbc831bb697"
+    },
+    {
+      "id": "ghep_buoc#164:chuoi4",
+      "sha256": "f037161bfc8db846e1879e3205ae6b26e4b220dcf89e0f62fc94ef46b7238d26"
+    },
+    {
+      "id": "ghep_buoc#164:chuoi5",
+      "sha256": "5b4e240c7c13bd166203df9800060fcf5a36431e3e7ed1b436e58a7efa6212a8"
+    },
+    {
+      "id": "ghep_buoc#165:chuoi0",
+      "sha256": "d38dc48ff7f8b92bb62a7639c37c3161f584918432eda754993602e16d3d83b7"
+    },
+    {
+      "id": "ghep_buoc#165:chuoi1",
+      "sha256": "d3a61103286dbff23b95539fa88314612e741f5269f541fea2ba1896c2b00fcb"
+    },
+    {
+      "id": "ghep_buoc#165:chuoi2",
+      "sha256": "2a3835669984e2afc6794c8f74e49b7e1232e7c3f162ad0e1a01020cfb93b357"
+    },
+    {
+      "id": "ghep_buoc#165:chuoi3",
+      "sha256": "72472cc5d49ad2888a335295118df0aac23356ec39a0c5b4a7a0ec816ef1c116"
+    },
+    {
+      "id": "ghep_buoc#165:chuoi4",
+      "sha256": "22157c0761645744927087bb5eb9cb71be7145abdb045986f8b8e99560e4f292"
+    },
+    {
+      "id": "ghep_buoc#165:chuoi5",
+      "sha256": "91773978e9d007bc6b4dc3151eb89e15a3f648d6885b2a16893e4926d89699da"
+    },
+    {
+      "id": "ghep_buoc#166:chuoi0",
+      "sha256": "0668bd040a85b22f64992ebd509d67c583191c3a051e9ae5669969042c03c865"
+    },
+    {
+      "id": "ghep_buoc#166:chuoi1",
+      "sha256": "c5da4084442a49c95766326b3bd6a85f214e2505ace937119092d7a4eb80b7a8"
+    },
+    {
+      "id": "ghep_buoc#166:chuoi2",
+      "sha256": "87346235c0f43162f78d51af099c9013a65007a487d2e8e2c47edb789dca2709"
+    },
+    {
+      "id": "ghep_buoc#166:chuoi3",
+      "sha256": "c25302d8cff9b3dd4cb3d999670b368d51e606626962189e1ee04386c3e24b12"
+    },
+    {
+      "id": "ghep_buoc#166:chuoi4",
+      "sha256": "41ea4b46c0b29ae17e84bd40438a704753352f2440208a8d5aab4cbce89d7ac0"
+    },
+    {
+      "id": "ghep_buoc#166:chuoi5",
+      "sha256": "50495928b8127b7e65fef483810fc2a8d9b100005dadd03e0f9a917b43b0b198"
+    },
+    {
+      "id": "ghep_buoc#173:chuoi0",
+      "sha256": "577a4c6cbde1a9e7ae464e198438bc3ef32a34f8ef7054c083384e39033b29d7"
+    },
+    {
+      "id": "ghep_buoc#173:chuoi1",
+      "sha256": "44213979d6ad649ca093393c355532dba97abd3bee5acaceb9a51060b0fbac29"
+    },
+    {
+      "id": "ghep_buoc#173:chuoi2",
+      "sha256": "230203123952968125bc9c4af58265f912717e16ebaa907cb0ce4bc4e01142f3"
+    },
+    {
+      "id": "ghep_buoc#173:chuoi3",
+      "sha256": "c3530910138e9c5685f2791dd5c34c5998836e87f45ee7fd36f996e18be09114"
+    },
+    {
+      "id": "ghep_buoc#173:chuoi4",
+      "sha256": "5a307f6a529b2bbaec7b3d95b5b97b05f28c24a914701c26a7303a0395f67caf"
+    },
+    {
+      "id": "ghep_buoc#173:chuoi5",
+      "sha256": "688e1abdf5976c7029baec233f7e7c3a27ecb6f2f5774dba887d5148fcfb7209"
+    },
+    {
+      "id": "ghep_buoc#203:so0->In",
+      "sha256": "229b3952fa2fbcd5d0e195ded6702c873af57fb19c2e4c5d960ea5d713d00ffe"
+    },
+    {
+      "id": "ghep_buoc#204:bo_not",
+      "sha256": "5c87631eaa8398e145ebe4d6b9d56ed2bfd1967474aecd0e653d57d73473d0cd"
+    },
+    {
+      "id": "ghep_buoc#212:chuoi0",
+      "sha256": "1996215e2cbf9d9eaa58a738677871cc63f82e6d6b76b76e8a2a35a5f779d076"
+    },
+    {
+      "id": "ghep_buoc#212:chuoi1",
+      "sha256": "0de06b163e4bec551523f890491e1e8418252545cc93d4bd220614e912b388d9"
+    },
+    {
+      "id": "ghep_buoc#212:chuoi2",
+      "sha256": "1519cd2169e6f86b854133f3ea4b7381b4b7e93e6e79d5bc02f87cfbbc205522"
+    },
+    {
+      "id": "ghep_buoc#212:chuoi3",
+      "sha256": "eb6aab40e81d48312c93ffa908ef6b81c91a97e7295c6ad7fe5c529042332f74"
+    },
+    {
+      "id": "ghep_buoc#212:chuoi4",
+      "sha256": "42e783254e7bc5e90599a970f402f666e9fe98b0d707e9771cadf12039531c51"
+    },
+    {
+      "id": "ghep_buoc#212:chuoi5",
+      "sha256": "cd0212c42fb9ca83e30af3d66738c1ef83c4d917a26025feefd0cc9e688f7166"
+    },
+    {
+      "id": "ghep_buoc#224:bo_not",
+      "sha256": "bb7692b9fc456724b7b41f287a7eb5d61f8e2c7fd6365c374717d1e183cddc1c"
+    },
+    {
+      "id": "ghep_buoc#225:so0->Eq",
+      "sha256": "771b5ff14b997560874454360c6b3315e6c7f165f5912a0d56e138d97d28a1a1"
+    },
+    {
+      "id": "ghep_buoc#227:bo_doi_so0",
+      "sha256": "f85236db5f95e7e8809d59897e159e5d583031af2cec07cdc8f85d5af01e33bd"
+    },
+    {
+      "id": "ghep_buoc#227:bo_doi_so1",
+      "sha256": "97409c97e48978d26c3d67051b14a0f574a346da487ff961291cf2f9aa16eda0"
+    },
+    {
+      "id": "ghep_buoc#230:and<->or",
+      "sha256": "4c0c19c32128a24750a5cbe3b47820b29e86838659be00ffa6f6b0ce1ca9ee17"
+    },
+    {
+      "id": "ghep_buoc#230:bo_ve0",
+      "sha256": "b37bb483a98c48b799e95b25d0ea83e6f2de72bd1116682195668b190cde5336"
+    },
+    {
+      "id": "ghep_buoc#230:bo_ve1",
+      "sha256": "0a97601573d3dcdbf4786448a0b1a09403846699d3363559e0c703f06b053d9d"
+    },
+    {
+      "id": "ghep_buoc#230:bo_ve2",
+      "sha256": "86c2f57114cd23eea0916bc2688b35df02ab3185d4d6b14c20c10aed112ceee2"
+    },
+    {
+      "id": "ghep_buoc#230:bo_ve3",
+      "sha256": "7373ba7dbdfa0d645867df9d3be7cca7a51a48fa50b9bf178d5f9fe77a361e0f"
+    },
+    {
+      "id": "ghep_buoc#250:chuoi0",
+      "sha256": "b44a3800632ff30808d98f9892e327d6b7004aa55f9631d06279ea858434ff4d"
+    },
+    {
+      "id": "ghep_buoc#250:chuoi1",
+      "sha256": "e49b017e555b0b44efbdabfacba4f3a469640a4449216b11fe3667731d3b0904"
+    },
+    {
+      "id": "ghep_buoc#250:chuoi2",
+      "sha256": "096b535f4e9904888cd83d986b42101f173b6eef7eb37cb8ad79dd0373814e0d"
+    },
+    {
+      "id": "ghep_buoc#250:chuoi3",
+      "sha256": "363704bd8f6969c204448820a9ae662bb23d27f880bf4f0a61ade8932846bc17"
+    },
+    {
+      "id": "ghep_buoc#250:chuoi4",
+      "sha256": "7ec5f27bfe94817ac15651192fad576c58297b04a227b7c1b4e236d05d02e63c"
+    },
+    {
+      "id": "ghep_buoc#250:chuoi5",
+      "sha256": "d7593bf9c7e15c07bea622a6f3454d8a791eab8f9edb28b97e795f569906962e"
+    },
+    {
+      "id": "ghep_buoc#256:so0->IsNot",
+      "sha256": "f9125aa99e14d8d6391f8268ff8fb3bdc2a6edf9e7b94f2baf71d2b0b9bbb67b"
+    },
+    {
+      "id": "ghep_buoc#262:and<->or",
+      "sha256": "08f849aee9d8511123b93d52ec4cd954a7d46c3f7a74a9eef90f67c3c38f8092"
+    },
+    {
+      "id": "ghep_buoc#262:bo_ve0",
+      "sha256": "fc4be25b209c294863bf5715efdc8ebb853b1e3bcfa3095a02958d52f218b3db"
+    },
+    {
+      "id": "ghep_buoc#262:bo_ve1",
+      "sha256": "2f900ca7f54c6bd61de56bb78c7c36ecf7e6e3fc210b33b336d845dc19402eb7"
+    },
+    {
+      "id": "ghep_buoc#281:chuoi0",
+      "sha256": "35e03a52e99179ca1120534e5b5ade66b14f09cde3d7f86fc21da5c7c5d67741"
+    },
+    {
+      "id": "ghep_buoc#281:chuoi1",
+      "sha256": "de3413f8a9c72db807318c3e11647f514c27ae3038364de4080b392564143912"
+    },
+    {
+      "id": "ghep_buoc#281:chuoi2",
+      "sha256": "7cbd4f355164c37c28f7c2b5b60b7192161164df8b376fe0c4a9838ed006acd1"
+    },
+    {
+      "id": "ghep_buoc#281:chuoi3",
+      "sha256": "7d81113edcd7f18ad63ac26c633736d59fb842732916e9726b3d3b1c3dc1e9a5"
+    },
+    {
+      "id": "ghep_buoc#281:chuoi4",
+      "sha256": "7110ac74e056f646b45a798f055eaf8bf7f7a5cecb061e4a2fdb1742804ed454"
+    },
+    {
+      "id": "ghep_buoc#281:chuoi5",
+      "sha256": "507d5c3f6b63cd27f9ec23428f40197e36ac401a8f66d953e1455b60fb0c631c"
+    },
+    {
+      "id": "ghep_buoc#297:so0->Lt",
+      "sha256": "f496553433e5d5ad95865823188f1d646b486bc9175194e16b6c0fd53eca86b4"
+    },
+    {
+      "id": "ghep_buoc#297:so0->GtE",
+      "sha256": "7117a411d3f42c19a55e1fbc5d7b607db6a9c992f67f0eb9857cf8bda4715b2b"
+    },
+    {
+      "id": "ghep_buoc#297:so1->Lt",
+      "sha256": "9bea0b6111ab12dcbc92fb056c54c73615e9dbd4efea5266f71b423d0c3f1e72"
+    },
+    {
+      "id": "ghep_buoc#297:so1->GtE",
+      "sha256": "9c7621c8ea148d3e7e9fe013227d346f32de2cd265921718eb406e9e26cfbc0b"
+    },
+    {
+      "id": "ghep_buoc#299:bo_doi_so0",
+      "sha256": "ed82128beab674488cec075f238d4bd52239975faf1239c4953b2244431bc302"
+    },
+    {
+      "id": "ghep_buoc#299:bo_doi_so1",
+      "sha256": "8a69c4a110f810b0f20f0249bed773867ff32244814d986da995dd5b53a62f6e"
+    },
+    {
+      "id": "ghep_buoc#310:chuoi0",
+      "sha256": "4a73452b0fb38e5c13484bf071ea1609155a8eec1778956bf15506f7335d6678"
+    },
+    {
+      "id": "ghep_buoc#310:chuoi1",
+      "sha256": "7b5e9f654b00dc7a3d55afb5e4c04b9dc35df39e24fc26cf8884eb8c66dcbf60"
+    },
+    {
+      "id": "ghep_buoc#310:chuoi2",
+      "sha256": "7b7a74460b5364f62c37f4871cd038dd5bf5409112d19ea5019fdbebcd93dc2f"
+    },
+    {
+      "id": "ghep_buoc#310:chuoi3",
+      "sha256": "61410efa357f58921661d7899c18e12ec3382b0f291f1e00e149f7985f9ba170"
+    },
+    {
+      "id": "ghep_buoc#310:chuoi4",
+      "sha256": "80044ff050c97d7be30e4a86ae5e3e28f8fffc0b7033f329ace8f675de2f09b4"
+    },
+    {
+      "id": "ghep_buoc#310:chuoi5",
+      "sha256": "cc4e1683a2f227d27e8ee725e9f0ae23a2eafed1d0c718c1d62aaf3cd3a38500"
+    },
+    {
+      "id": "ghep_buoc#322:so0->IsNot",
+      "sha256": "7a5153f25b5db7bfe71b4e49d4c7b6ebb2911bfbf66198eabf6d7a1a53c53e55"
+    },
+    {
+      "id": "ghep_buoc#323:bo_doi_so0",
+      "sha256": "19d3599b4d824eae535510465e1693a761b279a7b12c1a86e5fb7ec2dd27fd0a"
+    },
+    {
+      "id": "ghep_buoc#323:bo_doi_so1",
+      "sha256": "212caefbf4963336c9b940241f0567cbb837b368fd7ce887fdf26bfbf12511b3"
+    },
+    {
+      "id": "ghep_buoc#334:chuoi0",
+      "sha256": "3f900fee7513670ceebac08cf05cbb37640c60d94c6da80f6d86ec8c8df6687a"
+    },
+    {
+      "id": "ghep_buoc#334:chuoi1",
+      "sha256": "d2a1c8a71a870d4848472ccbdba7cd471a1403850ed8c0ad9252914eb88631bd"
+    },
+    {
+      "id": "ghep_buoc#334:chuoi2",
+      "sha256": "b75dcdd87964162b7e0f736694169dac73674b9acaecd05c470b013e7254bd4d"
+    },
+    {
+      "id": "ghep_buoc#334:chuoi3",
+      "sha256": "abf39bd68f874608812a422f70ae629214414fb11241f407797e110f676eb7ab"
+    },
+    {
+      "id": "ghep_buoc#334:chuoi4",
+      "sha256": "358edd866b2f16292b87ae397e72690e9787a15a1c59a85b862fa7109e031d31"
+    },
+    {
+      "id": "ghep_buoc#334:chuoi5",
+      "sha256": "bbfe0b3b15daa0ffec85cb3a0d8ff47db91c55db423675ffc58531f259748a7b"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi0",
+      "sha256": "0f0a91600d71b05e860bb5a32d25782597c1594a64aade1d041969c8614b599c"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi1",
+      "sha256": "894c1f91b19f234877657335995db3ae242d8e0f0768bdbc98c805ae5fd949be"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi2",
+      "sha256": "6bc5f40dffa9a3b79dda89dadb1efa9eaf1f179a0db2924a0733a6696d56d9cf"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi3",
+      "sha256": "5f3d3677a9c58f6c5a3d66528d363105edca0100528dbcc554fbf78e86ce99db"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi4",
+      "sha256": "49f835c9d95632d0d1ef5753822674146f3f5e676776189935ca0a513edbd8fe"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi5",
+      "sha256": "2f5190118d63382ee00cc0401b88e3922fbd3a59812c2d0138ceb5dfd185393a"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi6",
+      "sha256": "af6868c5f638ac5e860c2d203b1a7c5d5b180779a75e9033e2a174bb944a77e2"
+    },
+    {
+      "id": "ghep_buoc#335:chuoi7",
+      "sha256": "c144d33daf174ef27d07c46877e487a551356a566c069a9316534c2041e30940"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi0",
+      "sha256": "5cbfb05b7eee038d95fe96fd33c94bb3d4770b4c3a9d28a1cab0de4f85c5ff87"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi1",
+      "sha256": "0a937cf63dfd3df1e02437a980c795a2a2259d1e055862d95c102607c6f02f4a"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi2",
+      "sha256": "fde5e92fa38abfa8513f13a315edb5b089b66f36a4e86498a2bb6a95de76c4a7"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi3",
+      "sha256": "b3afcd7cd5a24dfa8c9b1f57b8d7097180cd548be0bdadf9bcc443e5d8411417"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi4",
+      "sha256": "a37d03a55996845f2e5e8d16e6161871546bce023e08eb9e129a92e1d0d97cbd"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi5",
+      "sha256": "ebeeb5530d22c2826ba702e2dd7f1bb54a719cf2032ecb586ae5945312f4e518"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi6",
+      "sha256": "e404489faa7b13d73db76dd725b3a635a200f1f13b1b403f4d88ad9eebba6dc2"
+    },
+    {
+      "id": "ghep_buoc#336:chuoi7",
+      "sha256": "b1b17b3ccf49ea2ebd3841d774b87a089c6e1e96526a4a3951e08f2fddccc8e0"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi0",
+      "sha256": "f0299e1b1d1b7aeec87474bf6919785775e33fdc781838e418f8c8681b445909"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi1",
+      "sha256": "e8ea777ac207b0656ca39a80068458b8c98b80029b8b4f155e8fc661cc52a3d5"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi2",
+      "sha256": "ebdd2ffe948bce87bbf15dfee336d97050e6ddd2d1a24d7e70fbc123822f039d"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi3",
+      "sha256": "2bb0ec0ef0512de096e702eae0fc30eed29c1b22db04dbfb7aa876981b9e37e8"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi4",
+      "sha256": "25dda2b92acd6f005f9cbb53c47e29eab3afca50e79931894274e3a51cbf1f78"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi5",
+      "sha256": "3b59e027574c95b803e75bf35d0807dca764b516f5a265b2663b3670ba0ca6cb"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi6",
+      "sha256": "116a1937ab7c7928d0f644eab326e7b80cd682816f89fbc3298910c02a4db2d9"
+    },
+    {
+      "id": "ghep_buoc#339:chuoi7",
+      "sha256": "536a8814e585a8866cbbe179902e72548f93e6b26de5faf4dcf986aedb2a5466"
+    },
+    {
+      "id": "ghep_buoc#345:chuoi0",
+      "sha256": "029e597bf5726d079224bfb4eadf6c28b5c29b5728289401e1c14cc0e3c8c8e5"
+    },
+    {
+      "id": "ghep_buoc#345:chuoi1",
+      "sha256": "ccc61d7735ebe4060e2b898ff32939a630946b5c249fa05de7eab8ef618e69f7"
+    },
+    {
+      "id": "ghep_buoc#345:chuoi2",
+      "sha256": "22efde5f9103713d2c3b55d1749e9849cb2fc89ce60a53ff90397d0cff175cf2"
+    },
+    {
+      "id": "ghep_buoc#345:chuoi3",
+      "sha256": "d773efaadbbaef3b7f5059c24e936351f2f31769bd1d2a9dfd0fd1bea20e9c4e"
+    },
+    {
+      "id": "ghep_buoc#345:chuoi4",
+      "sha256": "5841152de5abcc8d413316e3a0e28b9cfaa41afd0b387b1f874784389c1da797"
+    },
+    {
+      "id": "ghep_buoc#345:chuoi5",
+      "sha256": "ea7f7035aedb9ba301ce9335b05409bebf1b0090e44866daa84db516f448a63a"
+    },
+    {
+      "id": "ghep_buoc#381:+1",
+      "sha256": "83d62c0771f344a9d53704a78102bd2e65d6f6d41eb0dcbfa1a966f2aa418d1d"
+    },
+    {
+      "id": "ghep_buoc#381:-1",
+      "sha256": "a139f416e3c4fd5bebac0ad2ff4eb3ecaf417cecaef313b596713f35d5832fe9"
+    },
+    {
+      "id": "ghep_buoc#385:chuoi0",
+      "sha256": "39564132ec10b3838ba4d3a1b431f8d30caa9c703969b2df021a763f67d89412"
+    },
+    {
+      "id": "ghep_buoc#385:chuoi1",
+      "sha256": "d47286a25af617a994fdc881ba56c4375bcd3740a5d6f841cdd303f4bf29c921"
+    },
+    {
+      "id": "ghep_buoc#385:chuoi2",
+      "sha256": "3c52a053c40829cfe8bae88008175c2c2247aa95b28acb592d476aef4ec477ae"
+    },
+    {
+      "id": "ghep_buoc#385:chuoi3",
+      "sha256": "36baccfda9b84509d14bfd28c35658a9a7b212e35ee2abc372f73e7f37a4d858"
+    },
+    {
+      "id": "ghep_buoc#385:chuoi4",
+      "sha256": "6bce2f4421f423e2faf6989c57776058e8b9368562370416483f4e6b53a038ef"
+    },
+    {
+      "id": "ghep_buoc#385:chuoi5",
+      "sha256": "d33f7c2053ace2b7e37200ef0b7b2bd185c65d31ab3231bc625aba2fe5be6118"
+    },
+    {
+      "id": "ghep_buoc#391:chuoi0",
+      "sha256": "56a6add68868827e33942a8d1ef468078f380b0dd8f047d3e0a4fa9b36570c89"
+    },
+    {
+      "id": "ghep_buoc#391:chuoi1",
+      "sha256": "dd34f27d1d7f7fcf94c5cbfbacccb57daa63db576ac2961db5b8f10d4924e5b9"
+    },
+    {
+      "id": "ghep_buoc#391:chuoi2",
+      "sha256": "0a61c69fc41ba6d4182de8086916a7940637bb3b378e1bfef8f3de09525b37f4"
+    },
+    {
+      "id": "ghep_buoc#391:chuoi3",
+      "sha256": "398dddf22c936acc78e4686ff36487c4f62fff8897722a612cc458c631b6c0cc"
+    },
+    {
+      "id": "ghep_buoc#391:chuoi4",
+      "sha256": "b08c45b86c903fee4a1481f9cb2f09b066354886e5c6031d4426b833b45f6644"
+    },
+    {
+      "id": "ghep_buoc#391:chuoi5",
+      "sha256": "5d7ef7256f9a2e1a5bc2fbdf8fdc3c937cb9d96af41b584bf406c604a57dd48d"
+    },
+    {
+      "id": "ghep_buoc#400:chuoi0",
+      "sha256": "2b491c4ebeea1193e34de199065c0a326a520c12d517428a4174118eace22645"
+    },
+    {
+      "id": "ghep_buoc#400:chuoi1",
+      "sha256": "27f78fad8f66de142ad1bc32e0d95339bf270cfb422862b473e20cf83ae0410b"
+    },
+    {
+      "id": "ghep_buoc#400:chuoi2",
+      "sha256": "f782ab537c85829903eff0e2065e956e94b71401aee33f7657ce823ae899771d"
+    },
+    {
+      "id": "ghep_buoc#400:chuoi3",
+      "sha256": "b71d9787eb360286a7daad2f6b03f6dc506227e8002d537e0049024122436fd6"
+    },
+    {
+      "id": "ghep_buoc#400:chuoi4",
+      "sha256": "9c7ecd8a84b139d709ce521d54cb4e969222e10c62c5c279593d88160175943f"
+    },
+    {
+      "id": "ghep_buoc#400:chuoi5",
+      "sha256": "ba026be8001eb86acb2684d27d80b2fa168d926efe9121469b077e0fdd73902d"
+    },
+    {
+      "id": "ghep_buoc#429:chuoi0",
+      "sha256": "5c2bb27b6398240c2587e277d84cc414c38fa99e10b0e101d5b5895bf663fd14"
+    },
+    {
+      "id": "ghep_buoc#429:chuoi1",
+      "sha256": "e2297681d317eed7a78a62f11ad9aaf2038a5e6be11812f60a1b37eab3e646af"
+    },
+    {
+      "id": "ghep_buoc#429:chuoi2",
+      "sha256": "dc67f20d098532b8aaadf6baa617a85d85d37bcb0be7c3491a91680e8f21143a"
+    },
+    {
+      "id": "ghep_buoc#429:chuoi3",
+      "sha256": "94dec7c5aea85e2cc0d9bed864e76be966392ccc4fc80b53cb3d5b529889ee86"
+    },
+    {
+      "id": "ghep_buoc#429:chuoi4",
+      "sha256": "481e5a5c35b4ec2ebfe5b9f63eca03e1ff0b403198826c00cb7b8777fd43d0c0"
+    },
+    {
+      "id": "ghep_buoc#429:chuoi5",
+      "sha256": "698193dafb08571c33defda5bf1a45720ffd24bd092c84d249db16b2bb17698c"
+    },
+    {
+      "id": "ghep_buoc#442:chuoi0",
+      "sha256": "fafa248752d98b98564aa6b9c693c30316344359b5c6ca24aa0e1d96a718e38b"
+    },
+    {
+      "id": "ghep_buoc#442:chuoi1",
+      "sha256": "25e02a559eab9a573e0c187bac7c07e41715c3e18c9fa42b543e721c995a53fc"
+    },
+    {
+      "id": "ghep_buoc#442:chuoi2",
+      "sha256": "3b2d3905d7ca88f5023d5fb9da6cb93e42613efe44939ec00bebdc33f2672dcb"
+    },
+    {
+      "id": "ghep_buoc#442:chuoi3",
+      "sha256": "72c9f571104dbcecf1c6fbffe9c0bd1ce3df1cf1cd812acfb08d5953f5bf39c2"
+    },
+    {
+      "id": "ghep_buoc#442:chuoi4",
+      "sha256": "05863a0ce7bd194a3787b5802fb68e83c5a24a7c224631a2c1462ce5e79cbbc0"
+    },
+    {
+      "id": "ghep_buoc#442:chuoi5",
+      "sha256": "979383381dbd38df8f28b32d9b2cf38d5687863496c9fb5bdbc38b3cb07ff4be"
+    },
+    {
+      "id": "ghep_buoc#445:chuoi0",
+      "sha256": "f61dc50be212fbd118d7c58f56b0ef971e9b532deb8dbf349bf5c1e1cd0d15af"
+    },
+    {
+      "id": "ghep_buoc#445:chuoi1",
+      "sha256": "04c8cfc5837f3ecc3a1d3a9a622bfdee7a0bd6685fedb454af71e2541824aed6"
+    },
+    {
+      "id": "ghep_buoc#445:chuoi2",
+      "sha256": "1481f5e25355d9e09cb85a21fa82aff202efba504efbe115b2435687feafd911"
+    },
+    {
+      "id": "ghep_buoc#445:chuoi3",
+      "sha256": "8943e2d57d265efa7570b75c88d704ef119762c619aff054953eedc126cec15d"
+    },
+    {
+      "id": "ghep_buoc#445:chuoi4",
+      "sha256": "471c6a1763e588396c7a8b2318df184c7cd736839a4e65426a59710cf0b31bc4"
+    },
+    {
+      "id": "ghep_buoc#445:chuoi5",
+      "sha256": "bde6796f2bbfec827e6324fa5128a35068b1326c0adb1c2c0884c93e1d190eb5"
+    },
+    {
+      "id": "ghep_buoc#448:chuoi0",
+      "sha256": "664a4800cd9729a5f86d90f6ae576a2650539335301148e7c641929f1c56bd7e"
+    },
+    {
+      "id": "ghep_buoc#448:chuoi1",
+      "sha256": "3910c10466261321bf748be5067785a886ecfeaf5b86f755f7bdcf737ca1dcc6"
+    },
+    {
+      "id": "ghep_buoc#448:chuoi2",
+      "sha256": "ec234b138cc7fa8b2f8aa8dbcd5936d517fff4ed51070ea28972b45abfe686a5"
+    },
+    {
+      "id": "ghep_buoc#448:chuoi3",
+      "sha256": "70454f266187923d97df8b8f98880d9d6f8bdfed4cbb5cc4ce2e1b31e8aac8f2"
+    },
+    {
+      "id": "ghep_buoc#448:chuoi4",
+      "sha256": "d62629b47eb5091fb979e342c93a3c5f1c4214881a3d9b351cbecb37d00eae5f"
+    },
+    {
+      "id": "ghep_buoc#448:chuoi5",
+      "sha256": "865a41102babc3e07ea1e0c98444c0edb2d3dc46214a5adddcd37144e9640a72"
+    },
+    {
+      "id": "ghep_buoc#456:chuoi0",
+      "sha256": "2df6fdf8ec363a31861b840578d3883d23b8181c0e60f541936e8ef9e054589e"
+    },
+    {
+      "id": "ghep_buoc#456:chuoi1",
+      "sha256": "49ec59dba1befea8b37a9b9a4430f2ab6f49455b2472e3dfdb8c8bc774bfaa7d"
+    },
+    {
+      "id": "ghep_buoc#456:chuoi2",
+      "sha256": "ea52d3266dbcc45b6608ff1e5b1b55e031a7ac2b143f5f3b36441bbf0ca96d94"
+    },
+    {
+      "id": "ghep_buoc#456:chuoi3",
+      "sha256": "0e984240dd2b72262fb2adac996d72d02b7cded5387ff33e78f325aa98f2b025"
+    },
+    {
+      "id": "ghep_buoc#456:chuoi4",
+      "sha256": "d328d4b784d32fbdcaccc13ad09e9461f57e992186ebf719c371499ae0c5373f"
+    },
+    {
+      "id": "ghep_buoc#456:chuoi5",
+      "sha256": "f843afdf3fb46354a9219fbfee2f0bdf6a1ee0a96193141454567923d877ac83"
+    },
+    {
+      "id": "chan_buoc#3:tra_None",
+      "sha256": "f416bca02d91e55eb8057e0d489f5dcbf8f145a3fabdaa224d2ff1d12df973fa"
+    },
+    {
+      "id": "chan_buoc#18:and<->or",
+      "sha256": "ab7d7351b3ab2a1bcfd27feb7adf12ec46ad592bba35797a71b1c7c0c48b5ba0"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve0",
+      "sha256": "6ddc6810ebe4b8d586916a0adc77198fe77efae6ad559ccaecef9f5b7cf90822"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve1",
+      "sha256": "9bf2a7a2dfe0340ec4ad64dc193ea747b94a435a6a78df806033f0d6bde903e2"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve2",
+      "sha256": "8edb2eca71285a0553802acc6a743063827c5706a9c044e25e1d7cca7ed23208"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve3",
+      "sha256": "6b25e90eacd434295a35c6e1453c68e284593cf9fb9f9be331cad6d85a82477f"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve4",
+      "sha256": "dfee23149ae6b9eac7f8ca5c00fdc68669ba8b1e4b7e8d49bfd135309d07135c"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve5",
+      "sha256": "904b0b025c820ad8455572d23c7365ac50150c1beacfd53ca4474d5656c16406"
+    },
+    {
+      "id": "chan_buoc#18:bo_ve6",
+      "sha256": "109c5a011987b63aa79a08095319b5a20f9f699154a5c0616694ab7daf721e98"
+    },
+    {
+      "id": "chan_buoc#29:so0->NotIn",
+      "sha256": "eacd253552f048f9caded8584baf0b45e7261ec9d7b43e0f2d4af472dad2bbb9"
+    },
+    {
+      "id": "chan_buoc#31:so0->NotIn",
+      "sha256": "6da6a4de9d47be138ccd7148f2b944ccd1f3c8bf871b06ba457f884516d4c442"
+    },
+    {
+      "id": "chan_buoc#34:so0->In",
+      "sha256": "7ef125084ee71ac2a863ce76873dd04747253ce7550f3f27d00fedc79e148b4a"
+    },
+    {
+      "id": "chan_buoc#37:chuoi0",
+      "sha256": "a45a38ad3549afe7959ce7acd76ca7bee823d53c321be7f38ae311dd004f417d"
+    },
+    {
+      "id": "chan_buoc#37:chuoi1",
+      "sha256": "053d05920a9e1879f41bc0146016f3e077fcb71a8920e5dfd01b9009afe265ba"
+    },
+    {
+      "id": "chan_buoc#37:chuoi2",
+      "sha256": "594555033a9db570a4a8fbbee3258ea20c407d6365b70d830f0b9dacd1bb9fa7"
+    },
+    {
+      "id": "chan_buoc#37:chuoi3",
+      "sha256": "e8e3c8570fd3a61526ca1104f76f140295d8c5ed54ea5a4598c5ead41d9f632e"
+    },
+    {
+      "id": "chan_buoc#37:chuoi4",
+      "sha256": "a2cce256b343f96a4be7471bd85ef5408a41aab7a76a0b0808105d486d301efe"
+    },
+    {
+      "id": "chan_buoc#37:chuoi5",
+      "sha256": "496924e61084fc1e7b683cc64309bfce2c417e6c1b21040358011787622b7107"
+    },
+    {
+      "id": "chan_buoc#41:chuoi0",
+      "sha256": "368da9436302ef135c875f33e313b5cb9330e690d0242da15f02bf9eca1d633c"
+    },
+    {
+      "id": "chan_buoc#41:chuoi1",
+      "sha256": "901653bd97d42d6e65f998ef7b5e8fb115e669745b61c435c7b8dd1269c7e10b"
+    },
+    {
+      "id": "chan_buoc#41:chuoi2",
+      "sha256": "0f50c8b9022ca7ddfae8f5dc4948f60d1f6f944ee8b01a23e6f181e3bb9dda07"
+    },
+    {
+      "id": "chan_buoc#41:chuoi3",
+      "sha256": "5b24f8536fd59546877bef63136f78cf0ef2aa1b204e81ab677ca5a4c095ff4c"
+    },
+    {
+      "id": "chan_buoc#41:chuoi4",
+      "sha256": "892e9743ce4ebbad5ce73a5c1e7abfbe6614d761edf74e144caefe0a7560c717"
+    },
+    {
+      "id": "chan_buoc#41:chuoi5",
+      "sha256": "4967cf2d08b925a1d0c1333cb8c09c44a079dd1a8e3de4003dcc6b2c4b2a1ace"
+    },
+    {
+      "id": "chan_buoc#44:chuoi0",
+      "sha256": "79faa44d73a1cca838bc229d54c22e3ec5525fbe82543f63d2e32ddb7de703cd"
+    },
+    {
+      "id": "chan_buoc#44:chuoi1",
+      "sha256": "081b0f42c06f21e88975dca69979cd3b2d98db7677cd098f8170370710aec832"
+    },
+    {
+      "id": "chan_buoc#44:chuoi2",
+      "sha256": "e3d278a4e7a32fbbb2c7e043073a0a9daf1e8cbeea3e321c80896015015e3697"
+    },
+    {
+      "id": "chan_buoc#44:chuoi3",
+      "sha256": "6666a6f6c98ddc84d8e45604a72e93e5f250be2d4168f739653d2cc1b5453e40"
+    },
+    {
+      "id": "chan_buoc#44:chuoi4",
+      "sha256": "dfe3f969474b72dada87153aa941397a4a2e2c0347664d28a51571671c6ca5c1"
+    },
+    {
+      "id": "chan_buoc#44:chuoi5",
+      "sha256": "9b62cd0996cbec7f7292dc8216de93c44e0cfa0a5b08d9fd7672b2035e882b0f"
+    },
+    {
+      "id": "chan_buoc#49:chuoi0",
+      "sha256": "73db0e15dbaad02b7ca1c9974044f1bbea4d709a256b3273ae50ca1e0d5eee02"
+    },
+    {
+      "id": "chan_buoc#49:chuoi1",
+      "sha256": "9d10bb282ac9113b595a66080e1c03ed14782f019e0888150ef6f1f736553970"
+    },
+    {
+      "id": "chan_buoc#49:chuoi2",
+      "sha256": "e3a7d3f4698a1fcd91a85b545d02440ae0bdf7186873436fb9ae4f61c8b4f2e3"
+    },
+    {
+      "id": "chan_buoc#49:chuoi3",
+      "sha256": "9c2701f98a07cfb17e5a908b07e85f55d1fe39caacb7244048826f40de1e8318"
+    },
+    {
+      "id": "chan_buoc#49:chuoi4",
+      "sha256": "784d1116b289423cfa5f96e65cc7e834048aa1731f4f457b0f279d891eedde7e"
+    },
+    {
+      "id": "chan_buoc#49:chuoi5",
+      "sha256": "933a6b517dc6b737bda56ccb5c2870f5cf1925c84f5f98449dcba83debedc7e0"
+    },
+    {
+      "id": "chan_buoc#57:bo_doi_so0",
+      "sha256": "7edaabf78382f1a8d7c4fd1a794b9ebb49785a1716f12780baa68937499ab9c8"
+    },
+    {
+      "id": "chan_buoc#57:bo_doi_so1",
+      "sha256": "cba87e7d0001e0c0f1071589df73b81241043840684d619fd8c5ea0c9c2c5851"
+    },
+    {
+      "id": "chan_buoc#76:chuoi0",
+      "sha256": "1a9ca964cc3c9be804d962ded644ff0df170b4ca5bad03b07df98b96f65f2e62"
+    },
+    {
+      "id": "chan_buoc#76:chuoi1",
+      "sha256": "0fd3c59f5e4666027499da5d59fa53a91e55dd736cf8b25efe5fc4ca1ceb7dc2"
+    },
+    {
+      "id": "chan_buoc#76:chuoi2",
+      "sha256": "bed169d623546c5492a3082f4df052d7ce2a4c5317b5bb66947a9ec20008a0d7"
+    },
+    {
+      "id": "chan_buoc#76:chuoi3",
+      "sha256": "061c3e422d15bfead5914ee1bf72faca4594a7982d1bf0b4c6f61acfa3a48948"
+    },
+    {
+      "id": "chan_buoc#76:chuoi4",
+      "sha256": "0d3cbbf477124dec4e66415d441eae7f5b8ee8f4b440a1a860c5eef7eb607347"
+    },
+    {
+      "id": "chan_buoc#76:chuoi5",
+      "sha256": "3e3fb63dcc0b652940175b9b737eedc90fbee0c40a20bfe335a17e28654e89a5"
+    },
+    {
+      "id": "chan_buoc#77:chuoi0",
+      "sha256": "a90110e7612e564f39464683aa0c07c0f714f32c6cf967380195f1644c0f3e75"
+    },
+    {
+      "id": "chan_buoc#77:chuoi1",
+      "sha256": "ebe6c035e82032a94c7efedb9114537267f2c6fbb3192d2084c16ddbdbae305c"
+    },
+    {
+      "id": "chan_buoc#77:chuoi2",
+      "sha256": "a808bbcdce5b8bab2a57f2e9632fdfcf40b0d3e2cf6b8b15bf87698c15509ec2"
+    },
+    {
+      "id": "chan_buoc#77:chuoi3",
+      "sha256": "d67c5954abf8c1ecff6ed4534a9505452c2304d55dfdf8b481247ca224df7471"
+    },
+    {
+      "id": "chan_buoc#77:chuoi4",
+      "sha256": "1414670698bc3e7ff45783bc0189f48224301ed694f3b7de2fafc7fd300801da"
+    },
+    {
+      "id": "chan_buoc#77:chuoi5",
+      "sha256": "4cbf0f371c58d961dac0b54f19cf61dfe95eea8fca4647af7853c805ac40f9ef"
+    },
+    {
+      "id": "chan_buoc#78:chuoi0",
+      "sha256": "3e58755bf347249fd5283964d619b24e16b50bbb54edea1ae8eefdd8695a7cc1"
+    },
+    {
+      "id": "chan_buoc#78:chuoi1",
+      "sha256": "190ad539eb3953873e70aa172f50bccc91c25ee29e49984a7a12af9d51ef60e6"
+    },
+    {
+      "id": "chan_buoc#78:chuoi2",
+      "sha256": "6564112c42cb991e69f12787e0de7d042b8068cf4c3d1716b0b4a88c91ba594f"
+    },
+    {
+      "id": "chan_buoc#78:chuoi3",
+      "sha256": "e7112054640fa111b5939bce8b98e70cc229bd49cc2baaeef0f7dd025cb0ebdf"
+    },
+    {
+      "id": "chan_buoc#78:chuoi4",
+      "sha256": "6550f0d50a000619f6fa64409d5b03f116a9330af730c0f17042068d4ad54675"
+    },
+    {
+      "id": "chan_buoc#78:chuoi5",
+      "sha256": "52e85215e01a95b1fe04df8b98b47be2b941b54c813c87a0394a888c07572eea"
+    },
+    {
+      "id": "chan_buoc#79:chuoi0",
+      "sha256": "e63fc213b9a40a20d0ba68385cf73fb70e217d120b9f008a26fd6ef5183c234a"
+    },
+    {
+      "id": "chan_buoc#79:chuoi1",
+      "sha256": "220e6e78001df8e4293ed6fb087e6691f89a3b8558c8408658ea5367140716e7"
+    },
+    {
+      "id": "chan_buoc#79:chuoi2",
+      "sha256": "e9651d4ba21526be0e6701cc6649be2aa14f06af91f1ce1009d6872e8b3d0646"
+    },
+    {
+      "id": "chan_buoc#79:chuoi3",
+      "sha256": "a9b071ffc7889eded0c4c43b6252d74f5e43cedaa7f82502ea606545d3e89a7b"
+    },
+    {
+      "id": "chan_buoc#79:chuoi4",
+      "sha256": "9cb1aba45a0cde0d0d5560771d73d7a13b49862450514b7dc9c71c3ff91dbac8"
+    },
+    {
+      "id": "chan_buoc#79:chuoi5",
+      "sha256": "177de0aa50285882428344c99f08bd75e6edb6cb63100dfbcff509fb66700322"
+    },
+    {
+      "id": "chan_buoc#80:chuoi0",
+      "sha256": "9bab6cdd494d968d991bf09c191827e1d7ff13b2a5807f801f7c29aaeeb77ba4"
+    },
+    {
+      "id": "chan_buoc#80:chuoi1",
+      "sha256": "af2b59f3da549a9a62a16dda8731b37fe3c79b60250b2bddfefa634caa9efb10"
+    },
+    {
+      "id": "chan_buoc#80:chuoi2",
+      "sha256": "06581cbec083f1136c13d4b43c041f7978decaf1228d83fe71b3ce884cc83a85"
+    },
+    {
+      "id": "chan_buoc#80:chuoi3",
+      "sha256": "33c4a7af8364e3d9792b07be8eb3614a366f508996d0dc7ece0c9b0a1851aa6d"
+    },
+    {
+      "id": "chan_buoc#80:chuoi4",
+      "sha256": "bbe2aeac22391d5479015717cebfaf4b2d2eec82e8d40de424226943d1d5dcf4"
+    },
+    {
+      "id": "chan_buoc#80:chuoi5",
+      "sha256": "075365ce7327570eef377ec9bbe36f24313b5017c646bc99d9e6f4990f614129"
+    },
+    {
+      "id": "chan_buoc#83:bo_doi_so0",
+      "sha256": "ef587759906442979eeeb128ad262c38e9787f78feec56020d87fb6be047cd7a"
+    },
+    {
+      "id": "chan_buoc#83:bo_doi_so1",
+      "sha256": "3884aac1964ddada1ab6a98e5850934b1fde2dc311a3acebc3fee412700c0efb"
+    },
+    {
+      "id": "chan_buoc#86:chuoi0",
+      "sha256": "a94a801bf083903755fc8bfccf5a60774952ddccb310ac9793bfc51dcf5f2ad8"
+    },
+    {
+      "id": "chan_buoc#86:chuoi1",
+      "sha256": "e5ba10b25cf0d7935bc7c68e0f9e51461a94335ad363d010944f506ac000f7f6"
+    },
+    {
+      "id": "chan_buoc#86:chuoi2",
+      "sha256": "f1079a25a2a9089c2ebd440a975863287d949c09e09b0a79ccf69b9810e72607"
+    },
+    {
+      "id": "chan_buoc#86:chuoi3",
+      "sha256": "2196451af278e764c5e6acf9d9e07c1a5a412437edd441ff6c804e000dd13215"
+    },
+    {
+      "id": "chan_buoc#86:chuoi4",
+      "sha256": "1f031dba9079faff1647c678e352126a4fd93d26040ea0a0612d994427650df3"
+    },
+    {
+      "id": "chan_buoc#86:chuoi5",
+      "sha256": "7b167b00e8e41583a60665e63863bf1f32aef57917b50a3ed12db637985e9a9b"
+    },
+    {
+      "id": "chan_buoc#94:chuoi0",
+      "sha256": "235f639d0944001ead9a55df551c5d89824d821dad5fb295b4fd2340751234af"
+    },
+    {
+      "id": "chan_buoc#94:chuoi1",
+      "sha256": "7854c003cc02d1620ab07c31949759f68a0a41ebcf9f011cc9a0017730dc7797"
+    },
+    {
+      "id": "chan_buoc#94:chuoi2",
+      "sha256": "96641b2542ca10c89ddecb2cd878931adf276d1fac7f23917886854574a7940f"
+    },
+    {
+      "id": "chan_buoc#94:chuoi3",
+      "sha256": "899412b6c898f7fa35cca96c4e984996ed019ccc9d0cca3adbb653adf1bdd91a"
+    },
+    {
+      "id": "chan_buoc#94:chuoi4",
+      "sha256": "75d5ba7ed4d2673dc429f3b6f022272a17f7b0f753c15691b8a357b16b0bc183"
+    },
+    {
+      "id": "chan_buoc#94:chuoi5",
+      "sha256": "db077ab65d28c3e407e61084dfb6248ef0f869b2a0a5f6fba83e8a5cd4032525"
+    },
+    {
+      "id": "chan_buoc#103:bo_doi_so0",
+      "sha256": "c9cdc9435774132ba83390903c017cc07e3258ce40a11e524b397b7c8e988e3d"
+    },
+    {
+      "id": "chan_buoc#103:bo_doi_so1",
+      "sha256": "313dc2ab8272a22e8795960d40657e6b4846417bcdd8064a291dfcfb0b39d89e"
+    },
+    {
+      "id": "chan_buoc#111:chuoi0",
+      "sha256": "96479ee846e2ef6ecda02c9330a2977194fcce00049be7235ce3e65f7b8ce398"
+    },
+    {
+      "id": "chan_buoc#111:chuoi1",
+      "sha256": "f3791ec6157b86f57d9f3a88ed231f3ebb240f402d26e26a64ca7c1a2f1daddc"
+    },
+    {
+      "id": "chan_buoc#111:chuoi2",
+      "sha256": "caed92c9d83613ae9e291d84dad6e83a81ea320898b63f6897194a17c6af72b7"
+    },
+    {
+      "id": "chan_buoc#111:chuoi3",
+      "sha256": "9f1175edef83fdb507491545c037897825fd4311e0442f649db78954aa5ab4ba"
+    },
+    {
+      "id": "chan_buoc#111:chuoi4",
+      "sha256": "3bae6a5f0258c0646769051833a96b86f004a92be2af7f41f50d00721f1ca508"
+    },
+    {
+      "id": "chan_buoc#111:chuoi5",
+      "sha256": "099ebeece90e9c5e34710545ba000655eb10efd65ba05f58fd935c14d59576eb"
+    },
+    {
+      "id": "chan_buoc#114:chuoi0",
+      "sha256": "ae100c073fb5442a4307f1a11d43b32545b2cb9b315461272051ae024a44220b"
+    },
+    {
+      "id": "chan_buoc#114:chuoi1",
+      "sha256": "bbda7c77f8974335c2bbcbce03cd576d2a7f76ed4f759ff6f77d90075b3f702f"
+    },
+    {
+      "id": "chan_buoc#114:chuoi2",
+      "sha256": "628d85faf40d2be3f276b85d056871633fa0a7778f3c7abbd62eba9bc401d74b"
+    },
+    {
+      "id": "chan_buoc#114:chuoi3",
+      "sha256": "233fa783e3292466775b0ee9ed5e94fb069640e705cb9f8a76a64bcd3d818bd0"
+    },
+    {
+      "id": "chan_buoc#114:chuoi4",
+      "sha256": "4071b42d679fb3d5000e1520d8771afaa7ac9055d2c7c6d3b0f33a06662aa41d"
+    },
+    {
+      "id": "chan_buoc#114:chuoi5",
+      "sha256": "239a95d145759aa0f1a567cadfc7e48b02c4699c7c9b60003f1a1871c0425081"
+    },
+    {
+      "id": "tach_buoc#4:tra_None",
+      "sha256": "c61944a79e60fdd20f2525ae9137bba538e2d82a7caac8df185a69ade4016e7c"
+    },
+    {
+      "id": "tach_buoc#12:if_dung",
+      "sha256": "274043b806ce4ea4adcf00ab46a06c93cc54e8f160766fdb56ef277623396f9e"
+    },
+    {
+      "id": "tach_buoc#12:if_sai",
+      "sha256": "dc5f137de6ac987c270528d124d6d31f8c84036210d999e1fd1d97d943dcf9ae"
+    },
+    {
+      "id": "tach_buoc#22:if_dung",
+      "sha256": "fce26b49f15f11b3e915ca4c554fe719280abf2ca45d13940773c19886217cea"
+    },
+    {
+      "id": "tach_buoc#22:if_sai",
+      "sha256": "e95142784896e66670d4c061f2ba4edfc1cc24f55bcb2dbabf559792a0aef12b"
+    },
+    {
+      "id": "tach_buoc#29:chuoi0",
+      "sha256": "d67a542b286805e5f812a28c6faea17c33a967ff25b3aed99b9c3115128ed5f0"
+    },
+    {
+      "id": "tach_buoc#29:chuoi1",
+      "sha256": "dda5f6d3862edabe0080c645a30db297d3b5de44807780f3a762d2900b22a4f8"
+    },
+    {
+      "id": "tach_buoc#29:chuoi2",
+      "sha256": "be66ada44e46585ebed6181bdc00a7d563220099451b196f120536c61c6130fc"
+    },
+    {
+      "id": "tach_buoc#29:chuoi3",
+      "sha256": "e385c57c77f06ea633333ecf99c2461318f00e690b16bed00a0ceffd5ddb7e8a"
+    },
+    {
+      "id": "tach_buoc#29:chuoi4",
+      "sha256": "9d8e037ef4beb6410106aa935a5a21e70566877135e58f7145d5eed0c60df61c"
+    },
+    {
+      "id": "tach_buoc#29:chuoi5",
+      "sha256": "18d6c1e6842a04f32c4bb4070e34eeb8a2db18d55c747ddda4298c555fbbecb5"
+    },
+    {
+      "id": "tach_buoc#29:chuoi6",
+      "sha256": "b3bd59a01658e8473f6969165b59b103259f51229a4afedf495d1d711351cf73"
+    },
+    {
+      "id": "tach_buoc#29:chuoi7",
+      "sha256": "1844c42ec01df2cccbafc65ec407cd67e36baf9f8993bc0108630c1180492b2b"
+    },
+    {
+      "id": "tach_buoc#31:and<->or",
+      "sha256": "de12611b308f88f9702cc5f71f05f4c0a06cfb5b1a975cd752d65d234e36a908"
+    },
+    {
+      "id": "tach_buoc#31:bo_ve0",
+      "sha256": "6f53e4eb892e4a4c502dcd51628ac7a9d51158651134f4bdda30d239dbb00e0f"
+    },
+    {
+      "id": "tach_buoc#31:bo_ve1",
+      "sha256": "d90b6e28a951c026d0b7bc906c55e73df869669b0f9cbca529d276d787a06ebc"
+    },
+    {
+      "id": "tach_buoc#33:if_dung",
+      "sha256": "70a860773bf5299db904b780072ce85b58e6d67d3e3b11ee222260177b0e3942"
+    },
+    {
+      "id": "tach_buoc#33:if_sai",
+      "sha256": "111bd5b7b973069e7092ec51ad8c05794bcc7b47d024333bbee86b977966550d"
+    },
+    {
+      "id": "tach_buoc#34:if_dung",
+      "sha256": "45f3e352456e66bc1132370e8380cff9931b96921bb4dd77fd3d21316e38aaaa"
+    },
+    {
+      "id": "tach_buoc#34:if_sai",
+      "sha256": "7fce6deaffe048e755c88ee7b25e253230b7fa844e42878f9b497110543e50e0"
+    },
+    {
+      "id": "tach_buoc#50:so0->NotIn",
+      "sha256": "ad5a9f780d9ef23761fbfc0e20abc999ffcd59a5390fc679b4b5aa6673c9aca1"
+    },
+    {
+      "id": "tach_buoc#51:so0->NotEq",
+      "sha256": "46aeda7227a4f4f12dacf4140f2e78b9094a9487eaae5c03dc0d120a166c2b19"
+    },
+    {
+      "id": "tach_buoc#53:if_dung",
+      "sha256": "bd20086978d383fc2f68f9baf77801b866acf4fe5695bd6e3b76b01b180d7577"
+    },
+    {
+      "id": "tach_buoc#53:if_sai",
+      "sha256": "8c769c1874a561bf6c991ff10190a71bf9553fee237ce19f9d7ad65dd4586e78"
+    },
+    {
+      "id": "tach_buoc#57:chuoi0",
+      "sha256": "76ff1083cb3d46cf44422eb79534ad63a01f8df89ac35522b2624a3f08da9121"
+    },
+    {
+      "id": "tach_buoc#57:chuoi1",
+      "sha256": "2177df5923f61b06a837f0a859407dd8a1487ca33eee95694ff77fd66ef70476"
+    },
+    {
+      "id": "tach_buoc#57:chuoi2",
+      "sha256": "ba694c3fb18fb7dd401c69f209ae6c525435c82ee3cd5437b459d3f8c8fbf44b"
+    },
+    {
+      "id": "tach_buoc#57:chuoi3",
+      "sha256": "1713f1d7cb6aef4c04cb071372856fbaac616678a94b44a569a6fb4ae3810d8a"
+    },
+    {
+      "id": "tach_buoc#57:chuoi4",
+      "sha256": "34ccb111e470baca7157a1c85de8db8b869baa4ffd3d7a107873ca7285cbba9f"
+    },
+    {
+      "id": "tach_buoc#57:chuoi5",
+      "sha256": "bcdf10fa2faea8ca7926a9445d7f3d1ead2cedae1fb633b05497dd5f3eac17ac"
+    },
+    {
+      "id": "tach_buoc#58:and<->or",
+      "sha256": "a7480ea538ac4b323199deb970077bccb69fe046066079748218aab3072feead"
+    },
+    {
+      "id": "tach_buoc#58:bo_ve0",
+      "sha256": "a8bd18775cbb453db0144f037eea4c58c0fc966f6be5213e11a546ae07961601"
+    },
+    {
+      "id": "tach_buoc#58:bo_ve1",
+      "sha256": "79d5720ea086255f2ca8ebd7b8796a25554877bdbe7d3df4a4dca996789f7757"
+    },
+    {
+      "id": "tach_buoc#58:bo_ve2",
+      "sha256": "2a8baff4c4f82eaca69b16d59674477d29ffe1b06527b7cf7853d80388a15870"
+    },
+    {
+      "id": "tach_buoc#58:bo_ve3",
+      "sha256": "4796c704f89d648ac44477f84214bdb8a76f0e7a2a0fc9c3932108dff4752d84"
+    },
+    {
+      "id": "tach_buoc#64:chuoi0",
+      "sha256": "1a477fc669870453600f4046e30e5a14e4bcbb3182fa2c91f318f73429c71a98"
+    },
+    {
+      "id": "tach_buoc#64:chuoi1",
+      "sha256": "05b61d766163928fb6fab28ea5efa2ec8920affe41633c4c9e1f30a48027ca72"
+    },
+    {
+      "id": "tach_buoc#64:chuoi2",
+      "sha256": "1650de8b1426af7e90c36c9c2cb63143e03d9a6513ace3cc9897b5bb38fcb920"
+    },
+    {
+      "id": "tach_buoc#64:chuoi3",
+      "sha256": "966fdde1ae63c71281224f2505bfc3ac07ff0695d7cc0526e6062d75a1aae881"
+    },
+    {
+      "id": "tach_buoc#64:chuoi4",
+      "sha256": "955933d1050892ffd10f798f3a655b44f7c8772ae0663b61eb8ec452d58aee7d"
+    },
+    {
+      "id": "tach_buoc#64:chuoi5",
+      "sha256": "0f87f76537190afbe8a2373dabe2ab0e400c0b9e8fef8110fd266f6e6ff9d4fd"
+    },
+    {
+      "id": "tach_buoc#65:chuoi0",
+      "sha256": "7e29876bf4ab91a4319a0f58169477ca81d7647811632f5089273a5630d36404"
+    },
+    {
+      "id": "tach_buoc#65:chuoi1",
+      "sha256": "f60b09e7fd0f55c2ea2edc98c3acb942abe354beea209f933c93ae2a68539472"
+    },
+    {
+      "id": "tach_buoc#65:chuoi2",
+      "sha256": "c920634fc3c8d275c2ae39844b58d766c2580e44d468ddb84add58eff0453923"
+    },
+    {
+      "id": "tach_buoc#65:chuoi3",
+      "sha256": "b9dd66359505475ef9bc7841a56a9e050158a670e13d97e3856bcebfd18e919e"
+    },
+    {
+      "id": "tach_buoc#65:chuoi4",
+      "sha256": "3094e01aa49bd5fcaff31cd5820a4193e3b28c7f330814416a69487a903d748b"
+    },
+    {
+      "id": "tach_buoc#65:chuoi5",
+      "sha256": "9191d2520d07dfcb890b528bfbab5ae1411cbc9036c63772f13960069ffcbff1"
+    },
+    {
+      "id": "tach_buoc#66:chuoi0",
+      "sha256": "63c8fda09cf4bdf69e27b122cb25a5d2e8c485f3de982e55d20c7bb4dd5fc517"
+    },
+    {
+      "id": "tach_buoc#66:chuoi1",
+      "sha256": "b1fd3a940c5eaea2428b9990b98302e1e06a2ee70af145382a2271ed59a7b112"
+    },
+    {
+      "id": "tach_buoc#66:chuoi2",
+      "sha256": "56bdeaae111a92de957994161c36c323595329b0888443ac876e34e23466e261"
+    },
+    {
+      "id": "tach_buoc#66:chuoi3",
+      "sha256": "872d7ad122a4fb9acd04f7e09fb868b83d57a352db78c9591e90cae2be7eb608"
+    },
+    {
+      "id": "tach_buoc#66:chuoi4",
+      "sha256": "16285da7621d34f113365d6c8fc1db38a28c625b06961d8a0d2ec0d6d8b1cc69"
+    },
+    {
+      "id": "tach_buoc#66:chuoi5",
+      "sha256": "9da76bd0f215c4323f81184f2a4cff3085a8745cc3b8c311e6bd8cf4e0d79813"
+    },
+    {
+      "id": "tach_buoc#67:chuoi0",
+      "sha256": "6b05dcb5144588ef9e4d2cf775711cb5bb616c3f9ab08f9e043a8d9ff352e4ce"
+    },
+    {
+      "id": "tach_buoc#67:chuoi1",
+      "sha256": "2adb7a704af50425376a8105c62325a4a83ff67a7837a7bfa945718e16f2d5f7"
+    },
+    {
+      "id": "tach_buoc#67:chuoi2",
+      "sha256": "ef37f430d2e72cec2961ea13f94844244e751ce196e9c4425131abf11b40c8c7"
+    },
+    {
+      "id": "tach_buoc#67:chuoi3",
+      "sha256": "c3ef7a8ac820e9157e834ecf86f713f6077ab65df1d642602729883db7c99911"
+    },
+    {
+      "id": "tach_buoc#67:chuoi4",
+      "sha256": "c14d3acb5c5bc8a75254da05c691a3eee4f087fe88fedc9ed9d94d0aa3c0927e"
+    },
+    {
+      "id": "tach_buoc#67:chuoi5",
+      "sha256": "9eec035469fc21fb57d8a70aef7c666fd0ebbed2269a5ad319f89d890d0bbe22"
+    },
+    {
+      "id": "tach_buoc#68:chuoi0",
+      "sha256": "1c67fc326f825cfb3a37762f3f5573ec18df8498f5c52a30236e2e9fd7d70e72"
+    },
+    {
+      "id": "tach_buoc#68:chuoi1",
+      "sha256": "373cd261de73d1d2fb25ae3151034e04be59035cc5ed8de97a3c48efa79b8deb"
+    },
+    {
+      "id": "tach_buoc#68:chuoi2",
+      "sha256": "dbcf146447bcb10ee003fbac7cc1770028801d92f97d39965a000f6fdca37369"
+    },
+    {
+      "id": "tach_buoc#68:chuoi3",
+      "sha256": "5ad180ae7a4e412ded5f67535bc8519123bf97eb78f955c5b099fe2828cea4aa"
+    },
+    {
+      "id": "tach_buoc#68:chuoi4",
+      "sha256": "3072532e9146c04d953a563e1f869e6fbea7d04a369a84e2512d562dbeeca170"
+    },
+    {
+      "id": "tach_buoc#68:chuoi5",
+      "sha256": "ca45265afa2628666bc3b1c543bc903dcc6ec9f1c3eee97d403c3a307d3b8eb8"
+    },
+    {
+      "id": "tach_buoc#69:chuoi0",
+      "sha256": "ac5cc5eb2bffabbc8d1a7c3aa8970062c6c8f661f7a8904224cfa0599d177d6e"
+    },
+    {
+      "id": "tach_buoc#69:chuoi1",
+      "sha256": "ee2411c9ad67689eff5190865c09a3cfe2c83170a16cf2db631cd51c3026bcb1"
+    },
+    {
+      "id": "tach_buoc#69:chuoi2",
+      "sha256": "1cb0e25a4f5dc77e767d743cde57ffa765f9bd8e94e02a968f5e999c65bdf0b7"
+    },
+    {
+      "id": "tach_buoc#69:chuoi3",
+      "sha256": "193cbff47c253be8b8809ef096f0b8bc20ce0d67b24b86bed9f2ab376568f0a4"
+    },
+    {
+      "id": "tach_buoc#69:chuoi4",
+      "sha256": "a2adec868e8407547792535b605bb54d9cc5d00c702d75f86474a83a1db93a9b"
+    },
+    {
+      "id": "tach_buoc#69:chuoi5",
+      "sha256": "e990c522a40cfe48b0b917063e45d07443c69a485ee65a6c63c48a8bf9a8b8aa"
+    },
+    {
+      "id": "tach_buoc#70:chuoi0",
+      "sha256": "ed3d4184781c311977888a8d4ecb1f4c20c1ff32e880437719cdacdaf751d444"
+    },
+    {
+      "id": "tach_buoc#70:chuoi1",
+      "sha256": "01d74d8236f4177c3a1238c5e877cd5ac61a1f8756712a0557986b7d8b150a50"
+    },
+    {
+      "id": "tach_buoc#70:chuoi2",
+      "sha256": "8f318407ea5623c5556a83f67437215b4add5495d20b9608258b97feaae2d196"
+    },
+    {
+      "id": "tach_buoc#70:chuoi3",
+      "sha256": "77bf48c7a28b4fe86ae8af2e9f6d65b7d44ac84ed5af00a39ad3d0d2600e42cf"
+    },
+    {
+      "id": "tach_buoc#70:chuoi4",
+      "sha256": "c992b004b1be1e6935004d35c783bbd976d2f949b57d1f0c0d9afcaa8b31b9d3"
+    },
+    {
+      "id": "tach_buoc#70:chuoi5",
+      "sha256": "3db955727936fe772e977dc1c38e573b40b861b4221c0f56e1397f73a251d636"
+    },
+    {
+      "id": "tach_buoc#74:bool",
+      "sha256": "926c8de3be004e294e678c4bc2a20bdba25694849194dd9533c7cdf2e1323e38"
+    },
+    {
+      "id": "tach_buoc#75:bool",
+      "sha256": "e52bb6fdf6dff346e97083f4cbb1811327a22faba9f3b8fc7b12a19ea1c9f896"
+    },
+    {
+      "id": "tach_buoc#76:bool",
+      "sha256": "148794016ed810abf01f1de4e50bca4397766447440c1db783ccfd6ca50f2c05"
+    },
+    {
+      "id": "tach_buoc#80:chuoi0",
+      "sha256": "29fa1d711e36a18f47035089fb62126f990551c119d2b3183da60ba569de2e68"
+    },
+    {
+      "id": "tach_buoc#80:chuoi1",
+      "sha256": "f99d88005f08c7ad81bb085e7a0ea086487e051a5e1de9fa9bc6a3b8f6edf446"
+    },
+    {
+      "id": "tach_buoc#80:chuoi2",
+      "sha256": "7d760e866628fed975a6fe7ac8a063fcad89b26bfbd0a080df27c37a2bf90d6e"
+    },
+    {
+      "id": "tach_buoc#80:chuoi3",
+      "sha256": "b613a07433b68650d9a58e092d122fb82598c775867839bff1ad965d8d0feb14"
+    },
+    {
+      "id": "tach_buoc#80:chuoi4",
+      "sha256": "02bec43371d39ce4dc64a025ff1e745479b63e385aec58f10e4714e4d3e92c1e"
+    },
+    {
+      "id": "tach_buoc#80:chuoi5",
+      "sha256": "93a4aad73465abb4cbb86f3e6c81496015fe84c3677fbe1dfadb8666b72110d2"
+    },
+    {
+      "id": "tach_buoc#83:chuoi0",
+      "sha256": "3d8b4847ec329fcfcbb2a7f16b22ffb8ad0b91ee776981fc23c8bb7230fb2409"
+    },
+    {
+      "id": "tach_buoc#83:chuoi1",
+      "sha256": "3048349be05dccab7221cf53f6aab7b7af03dadf89c828e9c7a827d030ef6d69"
+    },
+    {
+      "id": "tach_buoc#83:chuoi2",
+      "sha256": "0a11068a6c5f6d866f7feca22c8529ca4c99754c864686942fceaad808e8ee2a"
+    },
+    {
+      "id": "tach_buoc#83:chuoi3",
+      "sha256": "b6f0efb519b291d4e6662232c9d888d06d519497687421b98a122cb03d739512"
+    },
+    {
+      "id": "tach_buoc#83:chuoi4",
+      "sha256": "c4d875cd09b8b854a8f6615050efbd84f2d0730707226a21e7a0b12b92dccc9f"
+    },
+    {
+      "id": "tach_buoc#83:chuoi5",
+      "sha256": "6ce3c33382fc1a81b0c3459ad810842d799aeb7ab64276bc53bac240ceb88351"
+    },
+    {
+      "id": "tach_buoc#88:chuoi0",
+      "sha256": "545c8948072c5858193d375b3d3c10787439fc59c7989976a02e308be87c7ae3"
+    },
+    {
+      "id": "tach_buoc#88:chuoi1",
+      "sha256": "50e40bbbb7acb4784eb4c6a9bfbb09006baecc667855a945ecd873b44ecc4805"
+    },
+    {
+      "id": "tach_buoc#88:chuoi2",
+      "sha256": "3db736f9c2159bba09f084f0caf6b6f052a6ea0698d60b5d0f71233126ae9911"
+    },
+    {
+      "id": "tach_buoc#88:chuoi3",
+      "sha256": "617fe27a88082904cd79464dbdcb120809c8b24099201e87d1d7e34b1c80631a"
+    },
+    {
+      "id": "tach_buoc#88:chuoi4",
+      "sha256": "635695765817b3f5305acebcce8049f67af7d295e0423ee7001ab004ac2da152"
+    },
+    {
+      "id": "tach_buoc#88:chuoi5",
+      "sha256": "d06935f96b6ed7c52b948f1c2696a33769c6692e9130a8b934bc73d069ec33b3"
+    },
+    {
+      "id": "tach_buoc#90:bool",
+      "sha256": "6ad3ab6d36f8e74f47acac15952d6b9d000c2ca580bd5d7492a2ad1dd7825bd0"
+    },
+    {
+      "id": "tach_buoc#91:and<->or",
+      "sha256": "21c3eff2e2bce1838a2ead3842c1a98ccbbecdc304dd9ccfebef3376ce2ec838"
+    },
+    {
+      "id": "tach_buoc#91:bo_ve0",
+      "sha256": "3a87b2b9ce9c0d8e169ea28197c1b5e8d17b4849607f4cd2c9d9e49c6a916512"
+    },
+    {
+      "id": "tach_buoc#91:bo_ve1",
+      "sha256": "a8e9a8969353dab590973702ab4a2480b534df147336107f38dc1589a5951e00"
+    },
+    {
+      "id": "tach_buoc#97:bo_not",
+      "sha256": "9da5d9babff991fee96a0393d1dee4cfdbd3e7e5c026aab395195af1a4867dba"
+    },
+    {
+      "id": "tach_buoc#99:bo_not",
+      "sha256": "49ea49ced92112952a90cef4c377cd17c958cb4fa0c77e02b8f6d768c2797c9f"
+    },
+    {
+      "id": "tach_buoc#100:so0->NotEq",
+      "sha256": "67ce15cd694b8fe9a7f9193bdabcd45d819c99440f427c17e5f20a5a0b8c30ff"
+    },
+    {
+      "id": "tach_buoc#109:chuoi0",
+      "sha256": "baaf28173e978f2daf2328554ad9f388781a3afc03d886803b09951ec895f2a6"
+    },
+    {
+      "id": "tach_buoc#109:chuoi1",
+      "sha256": "39d7437e3341b57b6864cbd609b89e5c16869d2472d1d897e21370fe78f6e419"
+    },
+    {
+      "id": "tach_buoc#109:chuoi2",
+      "sha256": "2ddc02715454e46a546e72301f23317d1c64e1d2bd608c1f34e1281d9f7af953"
+    },
+    {
+      "id": "tach_buoc#109:chuoi3",
+      "sha256": "cbf3e44ec184adf8f77c4c02f0f38aa82fd4367d8a0c1bff6955122dc098f524"
+    },
+    {
+      "id": "tach_buoc#109:chuoi4",
+      "sha256": "117575ec61b0bb82b25143e985b2256c5f30cf990584646b8562511460733d89"
+    },
+    {
+      "id": "tach_buoc#109:chuoi5",
+      "sha256": "39d7437e3341b57b6864cbd609b89e5c16869d2472d1d897e21370fe78f6e419"
+    },
+    {
+      "id": "tach_buoc#115:chuoi0",
+      "sha256": "73c5494ebf550f584bae4554a0980d5356dd77f7148e0671febb4f1a30d21130"
+    },
+    {
+      "id": "tach_buoc#115:chuoi1",
+      "sha256": "21bac25ba578bbbdedb88f9d24203fb8329a819b250699bd7d2b7abe634de82d"
+    },
+    {
+      "id": "tach_buoc#115:chuoi2",
+      "sha256": "405c6bcaf4695ca11e6df1ca180682199a7e44735cdebbddd2cab60debcd9e46"
+    },
+    {
+      "id": "tach_buoc#115:chuoi3",
+      "sha256": "06c3af1dd067a61580ed086198be8d9daf77cd890c6a19c0ae659e34fee29def"
+    },
+    {
+      "id": "tach_buoc#115:chuoi4",
+      "sha256": "b2feb6084dcf604ddf443cc911d3102c6c6f3640c216aecae61380766f01839a"
+    },
+    {
+      "id": "tach_buoc#115:chuoi5",
+      "sha256": "6886cf8b4fd3be61831ce345a108ba4d73f5d73690ad0ebc0e7e0ea80a5d94d9"
+    },
+    {
+      "id": "tach_buoc#128:chuoi0",
+      "sha256": "5482722b8a36a3494584fb6862e55fcdc624731218d30d7a75bd194a4a2eb0a5"
+    },
+    {
+      "id": "tach_buoc#128:chuoi1",
+      "sha256": "852b93d2e63fc366818cd613390095080e7098e3f0458924475a57d40f0cf9a0"
+    },
+    {
+      "id": "tach_buoc#128:chuoi2",
+      "sha256": "622949f88e7be4d84a0330bb2bfc3bc48df7989f72bb5e4e9cba3bee086160a5"
+    },
+    {
+      "id": "tach_buoc#128:chuoi3",
+      "sha256": "c3132e7f889fcaf3afdd0c39ca5a3fcb3779d56f1a68b32661301a002f248d16"
+    },
+    {
+      "id": "tach_buoc#128:chuoi4",
+      "sha256": "be9f94d436a0adeb7f03877409f2fecd5741cb22598fbcc802e3c2e6facf5cad"
+    },
+    {
+      "id": "tach_buoc#128:chuoi5",
+      "sha256": "d610a1ad8ae76e82f70ee5d862676d5d89b59f4aad280c17d4231493f7f792bd"
+    },
+    {
+      "id": "tach_buoc#147:chuoi0",
+      "sha256": "022514eb4a57a8b5141657ccffcf85e19e8dae476f3d0911b03df5007e533590"
+    },
+    {
+      "id": "tach_buoc#147:chuoi1",
+      "sha256": "bb63c25bf3de4f9ddec97bfb95b9bcef5df1fdea4c50c40181bc98910926df58"
+    },
+    {
+      "id": "tach_buoc#147:chuoi2",
+      "sha256": "b752bb81d6e41376fd22e143b6cf957d1f03c78889af7cea554fbb8dc05c7b80"
+    },
+    {
+      "id": "tach_buoc#147:chuoi3",
+      "sha256": "187d1ac8d9781d25f6b58bcdd30c0d439494bd9ea20e7c7ab78491db98a1b58d"
+    },
+    {
+      "id": "tach_buoc#147:chuoi4",
+      "sha256": "8883a1203a2b21cdf84b3cd1221bf00750e0fe6f869b73aa0026f564ba74753c"
+    },
+    {
+      "id": "tach_buoc#147:chuoi5",
+      "sha256": "62a0bd8d2b8184b83d1285e9ea59745c0f7b17fc6abd946057e1791d26b28965"
+    },
+    {
+      "id": "tach_buoc#154:and<->or",
+      "sha256": "dc0c44a9b04a7a83e7d3640cdd01cf6339db4b45fe12235c450e38d9866b30e6"
+    },
+    {
+      "id": "tach_buoc#154:bo_ve0",
+      "sha256": "30e26b2458377d9d5c105a0b82d06b6724d14d31adb3506598b69d56995c9e44"
+    },
+    {
+      "id": "tach_buoc#154:bo_ve1",
+      "sha256": "3e10adf956b7871544c6506125886d2357716f77cd460c54b52d37607fb6cdcd"
+    },
+    {
+      "id": "tach_buoc#154:bo_ve2",
+      "sha256": "a1fa26d7436b188370057f70ae1f66110dd04be91b01a409d851b779f1616ed1"
+    },
+    {
+      "id": "tach_buoc#154:bo_ve3",
+      "sha256": "1d2641c633726cfbd8d38ee1d08c4b3ff08b22051c2c5191f49c75c600f91c07"
+    },
+    {
+      "id": "tach_buoc#155:bool",
+      "sha256": "3db6cdcac8ae606ac26dee4746b3a0a754006c769086eea502f05df75e579ec0"
+    },
+    {
+      "id": "tach_buoc#161:chuoi0",
+      "sha256": "746d7bdbfe82d83f148be87a62adfcb4ca079cb2f285554e1f4929f2b3c1db47"
+    },
+    {
+      "id": "tach_buoc#161:chuoi1",
+      "sha256": "537e4703d0a42601e478a038ecfad5b843a98680f458212b4041dcbe435043e9"
+    },
+    {
+      "id": "tach_buoc#161:chuoi2",
+      "sha256": "61945536d92305e48daaa2a2398321e7aa5791637f937b4ac68c69f761135a63"
+    },
+    {
+      "id": "tach_buoc#161:chuoi3",
+      "sha256": "d029a9cbf83835abb952c13dc0d122b32e9bba9a089d1e40c6276b3cde3c6a4b"
+    },
+    {
+      "id": "tach_buoc#161:chuoi4",
+      "sha256": "5f787b02949d92691a05d35edd1b6b775721f0cf46aac0f18b6bcd7a41600600"
+    },
+    {
+      "id": "tach_buoc#161:chuoi5",
+      "sha256": "912784b5fa13cf4c4e1a48f144214286cc51ca233aa7a3e13f8282fe2b6b04cd"
+    },
+    {
+      "id": "tach_buoc#165:chuoi0",
+      "sha256": "88198a48366c95ac10f13783e50ad48f27844bccdedadbc41f8f652fa1f6b9a4"
+    },
+    {
+      "id": "tach_buoc#165:chuoi1",
+      "sha256": "61686a1eb77862643b366da5aa489ef910e24bdd8477eded1c788e0459b53d50"
+    },
+    {
+      "id": "tach_buoc#165:chuoi2",
+      "sha256": "1cff097299aac88258f5b57961c2f073e434c54772b2289a65129dd751807d36"
+    },
+    {
+      "id": "tach_buoc#165:chuoi3",
+      "sha256": "38e82f7210024eae9ab3efda8bfc6a9b3076aeaba538fc754e7341b358e7f5d0"
+    },
+    {
+      "id": "tach_buoc#165:chuoi4",
+      "sha256": "50c0bd3291fc25c15a989d14e054948ca70dffba88b573460f9ca30befec9d50"
+    },
+    {
+      "id": "tach_buoc#165:chuoi5",
+      "sha256": "fb45557f14dd8c8aaaa1c1ae70c4519fa59300bc8038d41fbde35d509defb627"
+    },
+    {
+      "id": "tach_buoc#173:chuoi0",
+      "sha256": "b6fd5645a95f1221d3d35fc302085dc0b84335097c59ef0721824efa737e3b57"
+    },
+    {
+      "id": "tach_buoc#173:chuoi1",
+      "sha256": "6e37c0ad397aa60b2391536bc37ffacc95e6e66321a102e71352988ada37c6af"
+    },
+    {
+      "id": "tach_buoc#173:chuoi2",
+      "sha256": "bf83f62c157229bdbfcdba471e85533aa01cb9b7652d51c8ae43bc881875e4bb"
+    },
+    {
+      "id": "tach_buoc#173:chuoi3",
+      "sha256": "7a051db53b285d7f4ce07a85657bdee02ce23223a1e1ff83fcddfa1766f59561"
+    },
+    {
+      "id": "tach_buoc#173:chuoi4",
+      "sha256": "f55de306c4b0aa1a9204217cf35cfd142f2eaba4a265070bdb1d6b7acb977274"
+    },
+    {
+      "id": "tach_buoc#173:chuoi5",
+      "sha256": "45c4408b5939592cd86ec7ce8c95589ba20e36e33fe7434a89163fc31c4ea95f"
+    },
+    {
+      "id": "tach_buoc#173:chuoi6",
+      "sha256": "c47c9f272f7aa2964fd03ccd812bd466770a8cee329bbec25656823d67f20c67"
+    },
+    {
+      "id": "tach_buoc#173:chuoi7",
+      "sha256": "bc2e75ecd6d8f0bb16a045935bbaf74add1608815674715feaa6b1ca17c11362"
+    },
+    {
+      "id": "tach_buoc#175:+1",
+      "sha256": "813e3062465d6d4bbafb2448ee257535fdd1fa64301958d36d7c71037b6717d6"
+    },
+    {
+      "id": "tach_buoc#175:-1",
+      "sha256": "916f6e60c2fea931cda1d2113a34eb313922ff057f9c88a82e5907a88d7d1c93"
+    },
+    {
+      "id": "tach_buoc#178:+1",
+      "sha256": "72d03ded97b8281a7ec225123f403ecae4bf7265313420d011bfee9c9d968d78"
+    },
+    {
+      "id": "tach_buoc#178:-1",
+      "sha256": "4b648e3b80e4603a3fbb0d518a9fd47f547836988c5268bbc63f3cdc3145a7af"
+    },
+    {
+      "id": "tach_buoc#184:chuoi0",
+      "sha256": "0ea8b09a41083c1c75399ccebe1e6af63ad35ee4f40ad17db6a969891792a137"
+    },
+    {
+      "id": "tach_buoc#184:chuoi1",
+      "sha256": "69cdd438fa06809b8c317e19ba1ebb51a651179f1ea15a936e73f2260695db81"
+    },
+    {
+      "id": "tach_buoc#184:chuoi2",
+      "sha256": "bccc36e093b33a0cae4e7e1d3e5f24fa802cc54b68aeb2467817d4ea694eb2a3"
+    },
+    {
+      "id": "tach_buoc#184:chuoi3",
+      "sha256": "9d2cbcc4938c5d2864423b92533fde8bdeedf8a56cb66b21932290f90202ecba"
+    },
+    {
+      "id": "tach_buoc#184:chuoi4",
+      "sha256": "0cdc34850c0ee60eeff6dcb6e434e255676b17e655fc1f94b14d031bc71e4e62"
+    },
+    {
+      "id": "tach_buoc#184:chuoi5",
+      "sha256": "160b4b855297e3aa0659fe85ad66cac1d84804b585f8d43ee4f618ed5cd39ed7"
+    },
+    {
+      "id": "tach_buoc#187:chuoi0",
+      "sha256": "ed00a7005973a2f8a0ba8e3c112fae3e0b1f34a72d955219faaa2005b9bbe64a"
+    },
+    {
+      "id": "tach_buoc#187:chuoi1",
+      "sha256": "d165f6eee456befb246bdecf55a16b9493d51f70cee311ec68f20f77c0e74c27"
+    },
+    {
+      "id": "tach_buoc#187:chuoi2",
+      "sha256": "6a53c629cd77d98c02ac54748df0b61b6888226d7f8e33036521eb085c03ccf1"
+    },
+    {
+      "id": "tach_buoc#187:chuoi3",
+      "sha256": "f8553816d3b84a8ece1e0db905174161370ce6859033bceb79e51629bbab11a8"
+    },
+    {
+      "id": "tach_buoc#187:chuoi4",
+      "sha256": "57468934e13ba5404ca53c3bbe4488e655559037a08b0b92ad4e0fa95f4c4838"
+    },
+    {
+      "id": "tach_buoc#187:chuoi5",
+      "sha256": "fa328b6b23aa016130d5b8ba4a48a797e8e6587cb2274aa765906dbfccc0aa9f"
+    },
+    {
+      "id": "tach_buoc#191:bo_not",
+      "sha256": "79be788e58e79c1a0d06ab81e4edc6492ab2216c2ca122446ea3049071a66af2"
+    },
+    {
+      "id": "tach_buoc#192:bo_not",
+      "sha256": "4b29fcee21368400f2603f7a938ba8597cf64b5f3beb65889bdec0aa3aec1cb7"
+    },
+    {
+      "id": "tach_buoc#193:and<->or",
+      "sha256": "d098c0406db1ae106af5c7cbf9347a867fb0a08bed0edcebcae63784825accb6"
+    },
+    {
+      "id": "tach_buoc#193:bo_ve0",
+      "sha256": "797dcf307030e0e905df5ee613d0bbf79ef202f320cd3735fac3e45f9b895fa0"
+    },
+    {
+      "id": "tach_buoc#193:bo_ve1",
+      "sha256": "47657dd5dc36852203f5f72cdd15eb9e2f0ec6073661ece23bfc3e207a44c9b8"
+    },
+    {
+      "id": "tach_buoc#195:chuoi0",
+      "sha256": "02d1b53fe89ca33657299bdf0fe420c90f67480eb78c13155f26559ae93beb1c"
+    },
+    {
+      "id": "tach_buoc#195:chuoi1",
+      "sha256": "65242f50617758e2abae69886f2f115576ea3c1332dbdbfe8ce84ad355ae5f80"
+    },
+    {
+      "id": "tach_buoc#195:chuoi2",
+      "sha256": "ecc6f4fb97dfcec40cd36682bec1a76baa6fdf8b5e6f5a55b1ab0b36a3e31e28"
+    },
+    {
+      "id": "tach_buoc#195:chuoi3",
+      "sha256": "2857f921831276a814696e21e78fd0f5a382a68643227b9c810cd2707d85f07c"
+    },
+    {
+      "id": "tach_buoc#195:chuoi4",
+      "sha256": "cc60b7eba9321391a2c7e7ce6c1d8b5f715f87b319176e8479455768392cb2d4"
+    },
+    {
+      "id": "tach_buoc#195:chuoi5",
+      "sha256": "04d330129fe2e7ec5b382ccb48a90545058e0525e45c249b438192dbfff95f7a"
+    },
+    {
+      "id": "tach_buoc#200:chuoi0",
+      "sha256": "3836b2e0e079d3998e6402856ad6ac4a83ff7cd615f9e26b8d93453161873916"
+    },
+    {
+      "id": "tach_buoc#200:chuoi1",
+      "sha256": "c7a3d0d5bbac25b18db9e10b107148d03af327c79738200f1c9a578df8944b26"
+    },
+    {
+      "id": "tach_buoc#200:chuoi2",
+      "sha256": "a6e682db771b7363ae46dd48e94b851edc6683851fab528290de7f5bc7563d16"
+    },
+    {
+      "id": "tach_buoc#200:chuoi3",
+      "sha256": "2587a7a308dbce645089130d31f0fbcff52ad93ebc5ea0a84845e7d27991356f"
+    },
+    {
+      "id": "tach_buoc#200:chuoi4",
+      "sha256": "6ebe98ede48dc03fed233bdb2e55bce3f326e89e8fd91c6f4a8b8a5c3e9efe1e"
+    },
+    {
+      "id": "tach_buoc#200:chuoi5",
+      "sha256": "1f3de4049cd13c609dcc2ca82badbf7be5ad022913f85ea9eb67ef8a3277e523"
+    },
+    {
+      "id": "tach_buoc#202:+1",
+      "sha256": "4754863a1022d120f90b8d0210af36714b07821cb79fad2f59190a3fa513f5a2"
+    },
+    {
+      "id": "tach_buoc#202:-1",
+      "sha256": "56cf239880fed5c73d92770fc9b3b9b43b684c91bc13f4789f18d79824feb396"
+    },
+    {
+      "id": "tach_buoc#204:chuoi0",
+      "sha256": "c14cfd852a2a1abaaf9820f6a2661687ab58f73bfb64a693077c7f26cb02ceac"
+    },
+    {
+      "id": "tach_buoc#204:chuoi1",
+      "sha256": "ddbd68d7ae500699e4235a054d07005822d26d6b64fdd4ef00d5b25a13896806"
+    },
+    {
+      "id": "tach_buoc#204:chuoi2",
+      "sha256": "da51b14a84274749abba4447d6715c1c9dcc5a1478cc04268e73cad6078001ef"
+    },
+    {
+      "id": "tach_buoc#204:chuoi3",
+      "sha256": "9c6f3d16cade07ace13e34f6528ae3885811ec748c4fb534fa04a9be220f6936"
+    },
+    {
+      "id": "tach_buoc#204:chuoi4",
+      "sha256": "c90defb6fe4693dc9428bb857a2093d5c25a1ce803d90607e85f3ddc66f215bd"
+    },
+    {
+      "id": "tach_buoc#204:chuoi5",
+      "sha256": "4d5146c1febfd69550a14b2aabd20feb33ad228c78f4ce429f987b3c66879f48"
+    },
+    {
+      "id": "tach_buoc#208:chuoi0",
+      "sha256": "8a4cf5dd391c3fd5d0bc6e88162284984b9856a133bd1fe7f6c7ef90936eb505"
+    },
+    {
+      "id": "tach_buoc#208:chuoi1",
+      "sha256": "26a0765a019bf3d1be2baf689e271a3e22d1810585bf2abecf720b6d427a9029"
+    },
+    {
+      "id": "tach_buoc#208:chuoi2",
+      "sha256": "0f0aea9c072d947be1e24c9e0ce9c36d30cf14f35663955099a74d6e6f7716cf"
+    },
+    {
+      "id": "tach_buoc#208:chuoi3",
+      "sha256": "465c2d981d1865591fb2780b7f8bde845c52b498bdee6a6042032593d7263609"
+    },
+    {
+      "id": "tach_buoc#208:chuoi4",
+      "sha256": "a37b88020d8cc65d11df83f8071ad5556294f77ce614d0583c4e2e2f60e7e095"
+    },
+    {
+      "id": "tach_buoc#208:chuoi5",
+      "sha256": "7558c49bb2e9ae80a3ed7a9c0dfaf1ab40e4464016c60ee870f29a5a4caea3da"
+    },
+    {
+      "id": "tach_buoc#213:chuoi0",
+      "sha256": "eeceac492388c611f96d611c2ec1d1fc2d8e267f92c59802210bb3f06f4db5ac"
+    },
+    {
+      "id": "tach_buoc#213:chuoi1",
+      "sha256": "86132825fae06ea9aad2450847b28baab61c6b78cb9e3ebb446dcf6660389f14"
+    },
+    {
+      "id": "tach_buoc#213:chuoi2",
+      "sha256": "219d2ba27844f3620a211e569accaab3c47422c74da6571d745ee57d0dc89d56"
+    },
+    {
+      "id": "tach_buoc#213:chuoi3",
+      "sha256": "1204839616015012674916ea4b11e233c478ca02292eee2f5a27af2ddaa4f8b2"
+    },
+    {
+      "id": "tach_buoc#213:chuoi4",
+      "sha256": "3acea20e07d282cb446dacf51acd2c84e48ba19bafaf1172776fdcebd88a147f"
+    },
+    {
+      "id": "tach_buoc#213:chuoi5",
+      "sha256": "633b28d23cabe25dabc1c2a89dce9bcce3515fae10e07da477a58a2e3f5a8dc5"
+    },
+    {
+      "id": "tach_buoc#220:bo_not",
+      "sha256": "c6c4643340a01c4a3c468e4592b989c3cce2c22123d9dd84980a1fed492e2155"
+    },
+    {
+      "id": "tach_buoc#231:chuoi0",
+      "sha256": "8a7eec37e171ef24f1e6bed989334f5fd2f42a5485dd4d5870cf634c38e621cd"
+    },
+    {
+      "id": "tach_buoc#231:chuoi1",
+      "sha256": "770108b906fd96b1a2539371b50eeb68e98c8596a63d79398b1f315de59ea250"
+    },
+    {
+      "id": "tach_buoc#231:chuoi2",
+      "sha256": "2433b340b1e6b87124789064ea5df3e93b25d1652b60c167804acca5ca1429e0"
+    },
+    {
+      "id": "tach_buoc#231:chuoi3",
+      "sha256": "6ed2a42affc771085a9eeaa7c0ca9ff8c1326c75100bfbbc19d8ba0d42759be0"
+    },
+    {
+      "id": "tach_buoc#231:chuoi4",
+      "sha256": "2a9efab02f64f7daa7478743befd1a554e527ab62a4ca2176826112e682339ec"
+    },
+    {
+      "id": "tach_buoc#231:chuoi5",
+      "sha256": "1125f848ee60382106696cf53043a2e51c35fa9f9060ff81bb8df4da344c4242"
+    },
+    {
+      "id": "tach_buoc#235:chuoi0",
+      "sha256": "a877e824c6338e9ef83c24f072667ff95a55efd16e85fcc1b8297e8b37d51d83"
+    },
+    {
+      "id": "tach_buoc#235:chuoi1",
+      "sha256": "0a0114722d830f97328c17376ec18319807f6658cfa50e93af368bc9e4389139"
+    },
+    {
+      "id": "tach_buoc#235:chuoi2",
+      "sha256": "3cb29330cc09f9447e005e09a06ed7a62742d4c3f3770e16c592f66e8fa2dcec"
+    },
+    {
+      "id": "tach_buoc#235:chuoi3",
+      "sha256": "1712c1109a487822cd12667b76f40548733ef8e7ec284191e3635b5dfb4fd5ea"
+    },
+    {
+      "id": "tach_buoc#235:chuoi4",
+      "sha256": "9c8b389c7f18e37e05d4f70213551b089b47afd40f7bea2d752ecd2877eeb6d8"
+    },
+    {
+      "id": "tach_buoc#235:chuoi5",
+      "sha256": "b7ee44bdf7241509ae8851701852df5702055c4a350a9f14a407459a9b1d09ea"
+    },
+    {
+      "id": "tach_buoc#238:+1",
+      "sha256": "87b19f9c247a1f86e2c425f9e685e55314e3604d1126b339b65e700b309665fa"
+    },
+    {
+      "id": "tach_buoc#238:-1",
+      "sha256": "e1328456c394b551387988a7fb95c2c948f8df97907f3875845b89bbddccac91"
+    },
+    {
+      "id": "tach_buoc#242:chuoi0",
+      "sha256": "b07941da2f2a6547ac6db05f571d3bafbb856a83a922b26070fbd72100ab10bf"
+    },
+    {
+      "id": "tach_buoc#242:chuoi1",
+      "sha256": "c88e68c26c8dcc725c280b1e455124cc77f04e91a45e297a3799255f25024639"
+    },
+    {
+      "id": "tach_buoc#242:chuoi2",
+      "sha256": "8b091f1c81f245de92b551fe31af019ad515dc0d3c52d4511ba7c781108cb39a"
+    },
+    {
+      "id": "tach_buoc#242:chuoi3",
+      "sha256": "18b351c800dd8b022bbb4d7de7f0123e6ab945737e7590ecc99f6ca3c4a3be2b"
+    },
+    {
+      "id": "tach_buoc#242:chuoi4",
+      "sha256": "2e1dbeff04c34c545f89b2e975c4d94afac03efe184219faef9a95af9f0d1e9e"
+    },
+    {
+      "id": "tach_buoc#242:chuoi5",
+      "sha256": "79ac6556e6334a1030ccf3a6905abb7f2b837931cdac43a6b4ac322b7eafc3bf"
+    },
+    {
+      "id": "do_dau_duong#4:tra_None",
+      "sha256": "918aaa6fbe7e2d512a180e0c9c2eea3da3b6ba39f4d7713dfefb9e80e87e6cc2"
+    },
+    {
+      "id": "do_dau_duong#14:bo_doi_so0",
+      "sha256": "7dd5a551a6e11cfb7a773bbeb1d1a2fdb245b29fe8fe620022d71560770ea08d"
+    },
+    {
+      "id": "do_dau_duong#14:bo_doi_so1",
+      "sha256": "b9c77f8503f03f7d0e060858c36bde6ce86fb6a6fe6a2b514c81dc69babe9207"
+    },
+    {
+      "id": "do_dau_duong#17:if_dung",
+      "sha256": "18a36326256d7ca9dbb9474a84cfc3c4e1c9375494d16b2aefa5eb21fb4df3b8"
+    },
+    {
+      "id": "do_dau_duong#17:if_sai",
+      "sha256": "f31b3c70897afe35188fac62c232e7ad671829199e5ec241159b53bea79bcb5b"
+    },
+    {
+      "id": "do_dau_duong#27:+1",
+      "sha256": "1ce7a5740c6bc609b5c1f4e47375ca2d4b538fae980d35ad84470626346c04e2"
+    },
+    {
+      "id": "do_dau_duong#27:-1",
+      "sha256": "1b6e6b8dd3184313e5cc36a3b838176bd54c54b2cf1ee9185824fe8508d11459"
+    },
+    {
+      "id": "do_dau_duong#34:and<->or",
+      "sha256": "70865aee262af3c07346c8c0aa750ac14cce911aebdcc049985e10516f117776"
+    },
+    {
+      "id": "do_dau_duong#34:bo_ve0",
+      "sha256": "292308ad14d9a09a6887e26c4b29b8714c8f9492828c4bbe7dc0e4c7dc5ba83b"
+    },
+    {
+      "id": "do_dau_duong#34:bo_ve1",
+      "sha256": "b0ff73dc6088b7aa2dbe875912ff3ae03e8ef3a5fbe06ff37143efd09da263c6"
+    },
+    {
+      "id": "do_dau_duong#38:ifexp_than",
+      "sha256": "faeaa0684a58f876a9687302a8da27272362829a80abf6a7c25a0054373a6a88"
+    },
+    {
+      "id": "do_dau_duong#38:ifexp_khac",
+      "sha256": "6e12569bf01dd09db025fd31122a3eca6e19d15634d9120923c749865ce9793e"
+    },
+    {
+      "id": "do_dau_duong#39:bo_not",
+      "sha256": "11fc974acafdbddd853f0f30b04b71f5c254ea43764a5bea136e2b9ff58d9f6f"
+    },
+    {
+      "id": "do_dau_duong#43:+1",
+      "sha256": "1c6b7f9a4a82f4ae81793465fa4594554504e76027037205cd6f7fb499c13ac1"
+    },
+    {
+      "id": "do_dau_duong#43:-1",
+      "sha256": "b991bdc4e94a43c6e211902904f696041efd431045df0726fe1ea5fa70172804"
+    },
+    {
+      "id": "do_dau_duong#47:and<->or",
+      "sha256": "66870ed3eae1b22550c2fca5354663b006ea5bb5f78a45f23cb2f06958801fe8"
+    },
+    {
+      "id": "do_dau_duong#47:bo_ve0",
+      "sha256": "991ada599924be0f3d22c1b5b0598e3352bd4449b923e03da902cd0bde513621"
+    },
+    {
+      "id": "do_dau_duong#47:bo_ve1",
+      "sha256": "bcd78021c9e4421dd73b35e58b110a2ed8d152e39eae65be2f8cd9542b4eaa78"
+    },
+    {
+      "id": "do_dau_duong#51:if_dung",
+      "sha256": "fde732ec9bdc9a0c21cae36e2a4d861508ef1042832953232b5fab1fd9271e1d"
+    },
+    {
+      "id": "do_dau_duong#51:if_sai",
+      "sha256": "862c1999db7b053574fe1ae189639114c3f3324e5f0d8854abf9822d1b896714"
+    },
+    {
+      "id": "do_dau_duong#72:so0->In",
+      "sha256": "605b6f21b781b980374e8a7aa2cbee5d805b5a51003e5ab11f392dd476c887bd"
+    },
+    {
+      "id": "do_dau_duong#76:and<->or",
+      "sha256": "4a8ba2ed62e8eb7561ceaa56bef848be42b72b60b626901fa9a47824e92b4e05"
+    },
+    {
+      "id": "do_dau_duong#76:bo_ve0",
+      "sha256": "502565331145f4be6cde3dda0a22c33f5a1567f6630044ab00e9707eebe9fb66"
+    },
+    {
+      "id": "do_dau_duong#76:bo_ve1",
+      "sha256": "68ac496ddb9997302afcfc25cfd18de6235730ccd28c31419a82980f7c310f33"
+    },
+    {
+      "id": "do_dau_duong#76:bo_ve2",
+      "sha256": "d45269c1ceaa9fc4abba47e0cc414a2716771a1365c53d2b5c1ac42ffc1e2596"
+    },
+    {
+      "id": "do_dau_duong#80:bo_loc0",
+      "sha256": "63415b67755418aa99e1310c1f9497110d7e5a9aeca3eeb59943ee0cdf0fa838"
+    },
+    {
+      "id": "do_dau_duong#83:bo_doi_so0",
+      "sha256": "44fca555b2023e99b6b620dc76dac2220507cfa536386a2f02281a6d0cdc3917"
+    },
+    {
+      "id": "do_dau_duong#83:bo_doi_so1",
+      "sha256": "91106c49189d3fe9ba6cf804928f5537de1ff5f20b283c9c93b702d03ce72670"
+    },
+    {
+      "id": "do_dau_duong#83:bo_doi_so2",
+      "sha256": "c3af5fbe7349a0e6f9d9da09755c0a57d0f41b373715ce33aa5fd91b05161782"
+    },
+    {
+      "id": "do_dau_duong#87:ifexp_than",
+      "sha256": "c7116117cb223590a6e8c734e82fa46c99d83083896e099693a578d40f235ea2"
+    },
+    {
+      "id": "do_dau_duong#87:ifexp_khac",
+      "sha256": "4d8e096c3fb693b45de57d956c5f7dd90b7c72f117295622d803d5bc2a6615d8"
+    },
+    {
+      "id": "do_dau_duong#90:and<->or",
+      "sha256": "4a2d4e34b152bee9819507661599273795d2d590e99d8fa18b8f4d5d5d8f6b67"
+    },
+    {
+      "id": "do_dau_duong#90:bo_ve0",
+      "sha256": "ee5f2939f0b5d3fecdae8c545c42f47bc58e92df7b862599df08e8571396658f"
+    },
+    {
+      "id": "do_dau_duong#90:bo_ve1",
+      "sha256": "a882f8523c9a5be8827d3ab525c9f37b995055efc31e0c4afe0ff403c5577efe"
+    },
+    {
+      "id": "do_dau_duong#102:chuoi0",
+      "sha256": "ec5a083217fa4bfb457897e8aac1686c794628f010d056f9303a934ec89c3476"
+    },
+    {
+      "id": "do_dau_duong#102:chuoi1",
+      "sha256": "3796e56fc439c5f5f9405471004d25d09200dc413257e93d9cae26c73d712be2"
+    },
+    {
+      "id": "do_dau_duong#102:chuoi2",
+      "sha256": "2a5e002d2fa8d2d97b69f40c78aa9cc87dae3b2945ab2ca844ed7c6193be9d61"
+    },
+    {
+      "id": "do_dau_duong#102:chuoi3",
+      "sha256": "06cc7441c048f732aa9fda24312432a5dafb76f34b8f1710881caea3a5ea0d94"
+    },
+    {
+      "id": "do_dau_duong#102:chuoi4",
+      "sha256": "4e157fa27fe1336ffa8e55c447cac87fd5be59a41e4a9ab26df1d650135042e0"
+    },
+    {
+      "id": "do_dau_duong#102:chuoi5",
+      "sha256": "746bb9ad19cb9bd3792bbf3daf453e8385a62ad8e51bc93e5667d500bbeb0260"
+    },
+    {
+      "id": "do_dau_duong#105:chuoi0",
+      "sha256": "61d4fe526cf26712a7f22e52391acfcabc4ea6ac221520b4c48b0986ff934259"
+    },
+    {
+      "id": "do_dau_duong#105:chuoi1",
+      "sha256": "0219ccbfb042a168f89f28acd7072e8a62641754b5be2daeb53540394560db25"
+    },
+    {
+      "id": "do_dau_duong#105:chuoi2",
+      "sha256": "caa0baeb607601944f59dcf0daf88f310bfdf6bf6a362a000e5d300539ad2650"
+    },
+    {
+      "id": "do_dau_duong#105:chuoi3",
+      "sha256": "1b0f3626de01c9e939168cd6ef20c22f94a15feece229dc4e65faa23be4dfe65"
+    },
+    {
+      "id": "do_dau_duong#105:chuoi4",
+      "sha256": "fd361de32264e04d59f7942e0f80dddccde6c37014c24366867c65a1fb1572a6"
+    },
+    {
+      "id": "do_dau_duong#105:chuoi5",
+      "sha256": "6f166c11c1b8e23bcbaaf1c7045e05bb6c78499be6ead2884272336e03d1c5e2"
+    },
+    {
+      "id": "do_dau_duong#109:chuoi0",
+      "sha256": "498aaa4801be2568d8c29042761e105f5daba6b3c791eb4dc7fef777aa31790f"
+    },
+    {
+      "id": "do_dau_duong#109:chuoi1",
+      "sha256": "a62f263b20d70d211d55d40a47a6081011bd7a82262cfb9a70d8640a79d26f05"
+    },
+    {
+      "id": "do_dau_duong#109:chuoi2",
+      "sha256": "6e44f51924f29c54b4776c88c0a8c8129fdd064f9f573bdd596a2ad0b1bddeb7"
+    },
+    {
+      "id": "do_dau_duong#109:chuoi3",
+      "sha256": "0fc38f27ceb084eccc4136ec418fd7fd1104c74e5a2dbd7f8d6e0b5562afa1ec"
+    },
+    {
+      "id": "do_dau_duong#109:chuoi4",
+      "sha256": "4ce7ce2b56eaff4d856b034b5ea0217cff8d0edf9701bbea9b38cfd81a120a1f"
+    },
+    {
+      "id": "do_dau_duong#109:chuoi5",
+      "sha256": "f5682f978a384bae31af06b9e314bc401f5b73af2b586353ad3d0ddeccdd7cd4"
+    },
+    {
+      "id": "do_dau_duong#111:so0->IsNot",
+      "sha256": "13b60c39cf1ef41cfedc5105fd145b242c24952d153e87b7ab141fa1ca029536"
+    },
+    {
+      "id": "do_dau_duong#113:so0->NotEq",
+      "sha256": "ddb2b4c2c7dd361d5df66531889068ad156b71d403096eb66df03ad67ee9531b"
+    },
+    {
+      "id": "do_dau_duong#127:and<->or",
+      "sha256": "d9e559b5ad1a6681d9edf24619326d38182cf1f32251b72224f029e9de795711"
+    },
+    {
+      "id": "do_dau_duong#127:bo_ve0",
+      "sha256": "016c7f4398c3d1d9ad56bb37a75d4ee8117172f62ebf02ae0936612c5d6d5e75"
+    },
+    {
+      "id": "do_dau_duong#127:bo_ve1",
+      "sha256": "76ef4fa8fd14c8134306896929446a616cec2d7d43edec2e543f5302f6e6e2fb"
+    },
+    {
+      "id": "do_dau_duong#131:chuoi0",
+      "sha256": "5309643d78b048eccaaeef0e1f9ad5f75af6192cd6451ab3939b90fd28b35313"
+    },
+    {
+      "id": "do_dau_duong#131:chuoi1",
+      "sha256": "84f9c5c3a3963a3073223ce9887021d13b3bd4bd161ad85e30ee9b936afd2f25"
+    },
+    {
+      "id": "do_dau_duong#131:chuoi2",
+      "sha256": "48e1bfcf4005f9b4753c69393f94396680a2ccf9a4b5f1fd1bc1ea790831c04d"
+    },
+    {
+      "id": "do_dau_duong#131:chuoi3",
+      "sha256": "28aac9b7a84d7fa6d9e8a961b1eed1628a5bc591b4b7fb9da35aeb44e8adabaa"
+    },
+    {
+      "id": "do_dau_duong#131:chuoi4",
+      "sha256": "3d485735f10f853c3958b315af25837477ffcdd6220ab23380c10e403ddf1021"
+    },
+    {
+      "id": "do_dau_duong#131:chuoi5",
+      "sha256": "58b996ec41abcd0cf22a6523407c532de998704ea605f6c781a1e6752d86b58d"
+    },
+    {
+      "id": "do_dau_duong#132:chuoi0",
+      "sha256": "9b578cd224e5601d886eec41c7216d08a669512707d532cdb6e98c23d2f4a7e4"
+    },
+    {
+      "id": "do_dau_duong#132:chuoi1",
+      "sha256": "af1f9ab7cedf738c4f3b2b4a03c07849c86640efc36ddaa995aca4f0bc17a080"
+    },
+    {
+      "id": "do_dau_duong#132:chuoi2",
+      "sha256": "b8aa8edcd1f67c14a1cac3a4a0196acc4d6f036c78496dd2a9171c4fce218c25"
+    },
+    {
+      "id": "do_dau_duong#132:chuoi3",
+      "sha256": "6888a742af7b28368f7891b710526408fcd8089f3a6a13ec28acd05c05d835a5"
+    },
+    {
+      "id": "do_dau_duong#132:chuoi4",
+      "sha256": "5a438437c046722f06c49d634b8d8a2997bb869b2b212b4242d3449b447a7749"
+    },
+    {
+      "id": "do_dau_duong#132:chuoi5",
+      "sha256": "604912d02ed7cc16a360213fc7d5f4126306a358665121d774b220f0bc2bbae7"
+    },
+    {
+      "id": "do_dau_duong#136:so0->In",
+      "sha256": "ad9b5bf6900c85acce165086f6e47935c93d97112858c56e1512ba30e1f8a789"
+    },
+    {
+      "id": "do_dau_duong#142:ifexp_than",
+      "sha256": "469ade4dfe9dabd7371353fc20e1eda8e2e7ab6c1c460a6b0e82ad11594ed8fb"
+    },
+    {
+      "id": "do_dau_duong#142:ifexp_khac",
+      "sha256": "5d70f3b48965bac779f78e9f20d50bfa3a643148acb88d21b74a515354985328"
+    },
+    {
+      "id": "do_dau_duong#154:chuoi0",
+      "sha256": "3eb9dd9f0241079ce1cb5b3f12211526e5ea1a96c550c14d1e9071cfb047f0c6"
+    },
+    {
+      "id": "do_dau_duong#154:chuoi1",
+      "sha256": "da18745b3ca04bb9c7441c37bcdc9b2eba970f45a288ed465aed24de0f6e3e86"
+    },
+    {
+      "id": "do_dau_duong#154:chuoi2",
+      "sha256": "ffca5f7cde2860de3141e6ca7554ea346b22f1104f8226d666a929a9dc2591da"
+    },
+    {
+      "id": "do_dau_duong#154:chuoi3",
+      "sha256": "1cc25e060757fd5940ec766243e9691e45f873acd141d3c90a8dca34777070c7"
+    },
+    {
+      "id": "do_dau_duong#154:chuoi4",
+      "sha256": "6da70eae78e1e5681ca8c6dbb345a657399e9082d41e10ddc282f354d5107458"
+    },
+    {
+      "id": "do_dau_duong#154:chuoi5",
+      "sha256": "de441d94e1e5ab9634f50e93cec37e7c42ea96e81c5004bb4268ce82daaad9fb"
+    },
+    {
+      "id": "do_dau_duong#171:and<->or",
+      "sha256": "50b065ab9c7ba544c45a1f394cf07767558f3b84a23fb5c92914669cc218299b"
+    },
+    {
+      "id": "do_dau_duong#171:bo_ve0",
+      "sha256": "e3f67ed4b6f4ae895fe55a3235b53c382436eb6778946f4426e558dee495fbfb"
+    },
+    {
+      "id": "do_dau_duong#171:bo_ve1",
+      "sha256": "d8eeb71d64d0b928ec227f105d981a3981929bf9b0e2c391c069627925aeecb7"
+    },
+    {
+      "id": "do_dau_duong#181:chuoi0",
+      "sha256": "e84e4487261816d5aa1febf3b24a79dd4d21d94bb8710847ef9901bfdc2efe71"
+    },
+    {
+      "id": "do_dau_duong#181:chuoi1",
+      "sha256": "fa2cbce4afecd8dcba49bcbc32d62278f4b5ea6df95d5ff24d6d240657504262"
+    },
+    {
+      "id": "do_dau_duong#181:chuoi2",
+      "sha256": "343d8cc95986fe970dc8a0ce47d99b6d2c2867d858e3b135200f0e538f90496d"
+    },
+    {
+      "id": "do_dau_duong#181:chuoi3",
+      "sha256": "802edd2c1d45c120898aff9cd07e2ac112c974f67c9e62bb0039b06a00a54ead"
+    },
+    {
+      "id": "do_dau_duong#181:chuoi4",
+      "sha256": "968dabf191b421398da6de46df392a00b21f1877b985613a138dfdb8174c4285"
+    },
+    {
+      "id": "do_dau_duong#181:chuoi5",
+      "sha256": "7dbba9908e0a6594044ce74dce2edba440e767e5901d6379b52e077598778f53"
+    },
+    {
+      "id": "do_dau_duong#193:chuoi0",
+      "sha256": "1150a7a3bceb74a927f4a8bc47a2feb12cac90135d89400b89117b80d0af1977"
+    },
+    {
+      "id": "do_dau_duong#193:chuoi1",
+      "sha256": "b5f09315c4ef4c31718004176a7cf49565645a025e0c2ebc63cdcd2c1880cc7d"
+    },
+    {
+      "id": "do_dau_duong#193:chuoi2",
+      "sha256": "4619a8bbccaac013d3e5e7397d6eba00c4eafef9924d9f878000a8f2c4e6c1f4"
+    },
+    {
+      "id": "do_dau_duong#193:chuoi3",
+      "sha256": "accf5c2995e5e9445dd1fdd591bdb895c0f4eb59536371edfc52efaa4a270b32"
+    },
+    {
+      "id": "do_dau_duong#193:chuoi4",
+      "sha256": "b5f09315c4ef4c31718004176a7cf49565645a025e0c2ebc63cdcd2c1880cc7d"
+    },
+    {
+      "id": "do_dau_duong#196:bo_doi_so0",
+      "sha256": "cec886977d06bd666e63b0fab120806c3173073cac18dd16047182dd6c7fcdd4"
+    },
+    {
+      "id": "do_dau_duong#196:bo_doi_so1",
+      "sha256": "1a2b80c952c6e9d58fc62dae7df7d6fea20c6e4520a666ff94f8e6489a105ec9"
+    },
+    {
+      "id": "do_dau_duong#196:bo_doi_so2",
+      "sha256": "6a8ebc4df800c17a12b7f9a6707bfdae82f793f44ee533ecd16afc003b46d29f"
+    },
+    {
+      "id": "do_dau_duong#201:chuoi0",
+      "sha256": "9deaa53d7c1f7a25b014b48ac6b67bbd6982e52a9123ad6171a5edb85256e7e3"
+    },
+    {
+      "id": "do_dau_duong#201:chuoi1",
+      "sha256": "48744e92f135b7d5e4db18778162f2c003136a648aba4ec17ccc9efd6f776d78"
+    },
+    {
+      "id": "do_dau_duong#201:chuoi2",
+      "sha256": "d4d02a77fc99cc0f8716b92374fb79c54a322c9ac9a78be663522d7cac5e785a"
+    },
+    {
+      "id": "do_dau_duong#201:chuoi3",
+      "sha256": "c81438e694530136ae6daccd4a50f6dc2722fe0c791d34478027ee4d2121a447"
+    },
+    {
+      "id": "do_dau_duong#201:chuoi4",
+      "sha256": "9546c4e5c1b466751641b75c847c2f522f6fbd323e7b5f5b147f44034641890c"
+    },
+    {
+      "id": "do_dau_duong#201:chuoi5",
+      "sha256": "eda6ed10368ce6ed84277fc1966e559fd101a04a1c593dd72f33f260d64e1774"
+    },
+    {
+      "id": "do_dau_duong#210:chuoi0",
+      "sha256": "7fca360b68c77e4c9e67f47d643f03c903ba5119dfda859ce7b266789e1e3cb7"
+    },
+    {
+      "id": "do_dau_duong#210:chuoi1",
+      "sha256": "888370319193a27f404c743a34f951c673f48dc083e435a2eb5bf3d63b2e3166"
+    },
+    {
+      "id": "do_dau_duong#210:chuoi2",
+      "sha256": "01ec81dfe7b30bd415ecddaef59643b34c7ce1ff17289a157471287eb1bc33bf"
+    },
+    {
+      "id": "do_dau_duong#210:chuoi3",
+      "sha256": "679bc1123b7bf5f866223138cbd8326a4f12c65e4032eb45122865aea65488ef"
+    },
+    {
+      "id": "do_dau_duong#210:chuoi4",
+      "sha256": "888370319193a27f404c743a34f951c673f48dc083e435a2eb5bf3d63b2e3166"
+    },
+    {
+      "id": "do_dau_duong#216:chuoi0",
+      "sha256": "348af701637cdbdea200776588989c067f6a6685b997a3c7bca5861bda410d30"
+    },
+    {
+      "id": "do_dau_duong#216:chuoi1",
+      "sha256": "e0c503715b83b7e8acce7477104a16dc2a617954527138e8a8801bb902c5714d"
+    },
+    {
+      "id": "do_dau_duong#216:chuoi2",
+      "sha256": "1ccb06c840d6bbae947263ebdb2159fe64347d50df5e4ef05e7027e964f02803"
+    },
+    {
+      "id": "do_dau_duong#216:chuoi3",
+      "sha256": "b7a9a9be845600a403f205be94b58fc1b4a6d0de63a04bdddfd6e7db07a21cbb"
+    },
+    {
+      "id": "do_dau_duong#216:chuoi4",
+      "sha256": "e0c503715b83b7e8acce7477104a16dc2a617954527138e8a8801bb902c5714d"
+    },
+    {
+      "id": "do_dau_duong#226:+1",
+      "sha256": "d429e1df11780e2a629a98336f698d70220d7ed8926f0f786509198d67bb95a3"
+    },
+    {
+      "id": "do_dau_duong#226:-1",
+      "sha256": "3d923bf7206c680ae391ce3d00e11a1a9c0ef61756a6a600697701f17a169eee"
+    },
+    {
+      "id": "do_dau_duong#241:bo_doi_so0",
+      "sha256": "5fb7904f7dad0b9dbb39cbb33fd040e91c49c29b49276bd6f7d76c316c349f08"
+    },
+    {
+      "id": "do_dau_duong#241:bo_doi_so1",
+      "sha256": "78cca1e3f4338ffd7e35ca924385d1a0c870f7473b020e3078f3390420fb8ba0"
+    },
+    {
+      "id": "do_dau_duong#256:chuoi0",
+      "sha256": "e8f84d1d2ac4ceee2c66af1840926c7d0479f413831f3d0089fd82cd0ce9ad4b"
+    },
+    {
+      "id": "do_dau_duong#256:chuoi1",
+      "sha256": "4ebb3e1e1e891edbec2ae68840ec6a35cb120e56c5af90cbe61d725f802f0c9c"
+    },
+    {
+      "id": "do_dau_duong#256:chuoi2",
+      "sha256": "dff7857d99b2b5b5c8c09ed75ba555c3bdec26b86e139acbaf57143531ccd396"
+    },
+    {
+      "id": "do_dau_duong#256:chuoi3",
+      "sha256": "2f7f90f2b2614d6f394cb16cdef1f995a71532843ab2166103dcedb3ba3edb26"
+    },
+    {
+      "id": "do_dau_duong#256:chuoi4",
+      "sha256": "4ebb3e1e1e891edbec2ae68840ec6a35cb120e56c5af90cbe61d725f802f0c9c"
+    },
+    {
+      "id": "do_dau_duong#259:chuoi0",
+      "sha256": "6f82c03ae25ec0fae2e17963cecf90bb7bf58da427bf0a711ff97c88725dbf64"
+    },
+    {
+      "id": "do_dau_duong#259:chuoi1",
+      "sha256": "181db7437e38861967d8e579bce7e6a5dd7a3d7b3bed8a3dd6eaf9f35d45c0fc"
+    },
+    {
+      "id": "do_dau_duong#259:chuoi2",
+      "sha256": "31b4d5df3385526ce24e58871985a8a8907a6643223d95d00fbcbf541c92f0d3"
+    },
+    {
+      "id": "do_dau_duong#259:chuoi3",
+      "sha256": "14439576f00c2f5371dce63fea61cb74b20c2794360e870ea48638bfad7bd2cd"
+    },
+    {
+      "id": "do_dau_duong#259:chuoi4",
+      "sha256": "1d2b2dd2b16424bf0896359b6e93e330a47d2b55dca7b970c641116de52c79cc"
+    },
+    {
+      "id": "do_dau_duong#259:chuoi5",
+      "sha256": "41002f8224cf0fdfb8e61898a451e28669aad9ca53cf5cffbad8434fe1def9c6"
+    },
+    {
+      "id": "do_dau_duong#265:+1",
+      "sha256": "8769fb600628747f3a98d7c668e3503b71c44b4e975c0afc9a7d26bfdade9704"
+    },
+    {
+      "id": "do_dau_duong#265:-1",
+      "sha256": "4e6d953d824cf04d7032e3fbad37ec9a0021cd6857bb78c6a162edbedc8b0ead"
+    },
+    {
+      "id": "do_dau_duong#276:chuoi0",
+      "sha256": "d25815ad28c59991ba0e4590644d9f73e2f324dede548c5f3a37ba2b7eba43b8"
+    },
+    {
+      "id": "do_dau_duong#276:chuoi1",
+      "sha256": "848998228ec04d73ac56027e1d9fbb6e7f63ec98210615adb50949cf24ef32bd"
+    },
+    {
+      "id": "do_dau_duong#276:chuoi2",
+      "sha256": "71bca949c0591b7aaa62f513faf1df007b95a34c5dcd08260b5d179637dab426"
+    },
+    {
+      "id": "do_dau_duong#276:chuoi3",
+      "sha256": "d78340ed9176f164dd955c061e23f72d22461be72e1dc392f7f61457dc323d89"
+    },
+    {
+      "id": "do_dau_duong#276:chuoi4",
+      "sha256": "f05c196d99c57d2ade69f72564c7f96fe77e4a9b69c3ff98fec0bec1df340012"
+    },
+    {
+      "id": "do_dau_duong#276:chuoi5",
+      "sha256": "36231e0ba37fe3c5437874a1bab73eb375a153723d6e2775eb046c422920ec83"
+    },
+    {
+      "id": "do_dau_duong#277:chuoi0",
+      "sha256": "33de93574d54317cfcb9843adbb97310b3b8d712ea4aa219564386fa866f94f5"
+    },
+    {
+      "id": "do_dau_duong#277:chuoi1",
+      "sha256": "bebe3ffe71b5af40473ef6736331caf881f8f27b889406d115022a2de5770dd2"
+    },
+    {
+      "id": "do_dau_duong#277:chuoi2",
+      "sha256": "d6f764f1ea8076bd137f8efb01bc1dca1b70b48ddf9590dfaa79c090969b7667"
+    },
+    {
+      "id": "do_dau_duong#277:chuoi3",
+      "sha256": "4886c6f082bbcaa7a633175872dea1da78f2d82331e681aa0d8c2a54ca8d8ed2"
+    },
+    {
+      "id": "do_dau_duong#277:chuoi4",
+      "sha256": "e686f6fdeac8c6ae2a9b6b0834e1160a7c8139659e71305730743f087d567b5d"
+    },
+    {
+      "id": "do_dau_duong#277:chuoi5",
+      "sha256": "e527804bb44ad7c9fb8278c467e57e4d2bbca1f60cb659b28abe726553f40df8"
+    },
+    {
+      "id": "do_dau_duong#278:chuoi0",
+      "sha256": "967201f216954b3a3565db5a3f48f1623d62ea64fc6e855a4cc77e0850aa8d59"
+    },
+    {
+      "id": "do_dau_duong#278:chuoi1",
+      "sha256": "0c3faf88f76f92b49bfe9d5b7fe7f00bc6ac83f97498fff44bfb187318306c9e"
+    },
+    {
+      "id": "do_dau_duong#278:chuoi2",
+      "sha256": "347840040125e97ef093c08584ae7de5ae63b92644911de4a409bf2b81f604e5"
+    },
+    {
+      "id": "do_dau_duong#278:chuoi3",
+      "sha256": "54eae988d655ca02ada0f6522df1ad6af8e7f72344021333a3b850e24f77926f"
+    },
+    {
+      "id": "do_dau_duong#278:chuoi4",
+      "sha256": "c1be189f898dbdac93bd4d289114dcbb37e80ca67a32dcb870c272d267a5bb92"
+    },
+    {
+      "id": "do_dau_duong#278:chuoi5",
+      "sha256": "d39f4e0e78e94a2e9139b32dd2e7afacc36644fbd2c20c8ad048b974890215b5"
+    },
+    {
+      "id": "do_dau_duong#279:ifexp_than",
+      "sha256": "61baa77e14bafd81c7067f6d7783d4012b633b7cda02b63fd45248dbbbf508e7"
+    },
+    {
+      "id": "do_dau_duong#279:ifexp_khac",
+      "sha256": "969b468ab3e0ada5fb1768295cb0296e39ac14d66b59766df16e263b161aeff2"
+    },
+    {
+      "id": "do_dau_duong#280:chuoi0",
+      "sha256": "85bf14342a15160723940e0daf528425c0d881b06a4805be3c888fe11a792144"
+    },
+    {
+      "id": "do_dau_duong#280:chuoi1",
+      "sha256": "b3dabcd3e0cae3bb9a1608eccb3fe01389b206b088d95faa8b43fe6c949e374d"
+    },
+    {
+      "id": "do_dau_duong#280:chuoi2",
+      "sha256": "b779b6a6bb6dfa4467e2217cf62d3a9694189f8a076a7fcf49a23b27faa7c21c"
+    },
+    {
+      "id": "do_dau_duong#280:chuoi3",
+      "sha256": "e0d4f54cdc7db14f7a603491067a50010bf0745e83a6ddee503453ed1e76bd34"
+    },
+    {
+      "id": "do_dau_duong#280:chuoi4",
+      "sha256": "b3dabcd3e0cae3bb9a1608eccb3fe01389b206b088d95faa8b43fe6c949e374d"
+    },
+    {
+      "id": "do_dau_duong#283:chuoi0",
+      "sha256": "11a2e9b61880c09823bbd94390af31ec6014b49429064573a1a865be34351de5"
+    },
+    {
+      "id": "do_dau_duong#283:chuoi1",
+      "sha256": "93139b1c928e996b4f12100a18ea10029d981458e1cc9264b64fd48d305c54fb"
+    },
+    {
+      "id": "do_dau_duong#283:chuoi2",
+      "sha256": "9d88e4179cd5c06d8b17282640d13071dd01cf2fb81fc0d854aa66a4c6762a32"
+    },
+    {
+      "id": "do_dau_duong#283:chuoi3",
+      "sha256": "2b2fa789309df986e9501f43410a798ae1968fb66d602bc7c9ec4da2c19849f3"
+    },
+    {
+      "id": "do_dau_duong#283:chuoi4",
+      "sha256": "2e5f1114b4c674d74b1c8d86ec6390a63f74b2c1633ce7de80750fe6c4d134d1"
+    },
+    {
+      "id": "do_dau_duong#283:chuoi5",
+      "sha256": "00e37438b83732b81abeaeb80d7515ee4e073af65c0cf697a81a10e503fd8be9"
+    },
+    {
+      "id": "do_dau_duong#299:chuoi0",
+      "sha256": "3f44fc7e424648ca741d84fbc7c162d49ab6cff1f6d8f25473c7dc410700b932"
+    },
+    {
+      "id": "do_dau_duong#299:chuoi1",
+      "sha256": "60a3cd4bb99d36fe4552a5f1c5d0f39e444d4a7a1b2a2e063480d71a3cf538f7"
+    },
+    {
+      "id": "do_dau_duong#299:chuoi2",
+      "sha256": "ecd20051e05beffd27691351c25cea54a619aeca6e755230353c98060a42a9be"
+    },
+    {
+      "id": "do_dau_duong#299:chuoi3",
+      "sha256": "54c6a5939a4e77f32c65cdf1100500a140514fd07dfe1573b25c41c01900e91d"
+    },
+    {
+      "id": "do_dau_duong#299:chuoi4",
+      "sha256": "4cf32d945162afd3fdbaa40d08da786ce1f96c503377274010ee96a587568646"
+    },
+    {
+      "id": "do_dau_duong#299:chuoi5",
+      "sha256": "84c4aff7d52dfef851827fd041dbd1c65a6ef7854922eb2961751234d436219a"
+    },
+    {
+      "id": "do_dau_duong#300:chuoi0",
+      "sha256": "e801cdfdf2c06acfbe6e0e02813fa10537a40c1c7cfb3bbafcef64d3c0e9ac39"
+    },
+    {
+      "id": "do_dau_duong#300:chuoi1",
+      "sha256": "c21dea8f74bc5c1f629e49a2d06a40e386ffae93674d692065d7b3aeebf30b17"
+    },
+    {
+      "id": "do_dau_duong#300:chuoi2",
+      "sha256": "f0d51126db554a3231376522b02318d91ebadd9c905125f41a8d3c2fe0c0eefe"
+    },
+    {
+      "id": "do_dau_duong#300:chuoi3",
+      "sha256": "a2df667493327b83b147a8a5938bcfe9c2bcd30f3c18bbdaa2c519a1fa770dc9"
+    },
+    {
+      "id": "do_dau_duong#300:chuoi4",
+      "sha256": "56d54c60ead1d00853902e8a4bded52071d887af7180acba2986e33edc1a4451"
+    },
+    {
+      "id": "do_dau_duong#300:chuoi5",
+      "sha256": "b5e5ccbf78129dd2c47472faff3d39c58d465482abac63d1ccc3c3916e3fc292"
+    },
+    {
+      "id": "do_dau_duong#301:ifexp_than",
+      "sha256": "7be844335a928a8921b855da00cf9159176d400bfb1a58046985454137afa000"
+    },
+    {
+      "id": "do_dau_duong#301:ifexp_khac",
+      "sha256": "91faa472b987469e64cd86f8dbf92041dcc028e3d3465ffcdb5d65acd738aa14"
+    },
+    {
+      "id": "do_dau_duong#302:ifexp_than",
+      "sha256": "f413cb48907dc51c1952cf77c39c80db94475d820a664d4a2d410d763029d101"
+    },
+    {
+      "id": "do_dau_duong#302:ifexp_khac",
+      "sha256": "fcf72402f8ebc7ba4170e701d4efdf73117c49be569582b6de3147cc1326e7c8"
+    },
+    {
+      "id": "do_dau_duong#306:chuoi0",
+      "sha256": "1ee0d2258f567b597a50acd3e7aea63fc72a9157f8a5feff926a01afed4cb833"
+    },
+    {
+      "id": "do_dau_duong#306:chuoi1",
+      "sha256": "fbef43dd058562a57e4157304a206936f48d3d3253941bd820e2bf3ce227b3d2"
+    },
+    {
+      "id": "do_dau_duong#306:chuoi2",
+      "sha256": "499607cfb02075d92f97b0a49b34e9434a9e38709b2230189d56a9005e27ff3a"
+    },
+    {
+      "id": "do_dau_duong#306:chuoi3",
+      "sha256": "ce33a37264a5d9bfeeb54306004955af87b4a60cd64f9e28df41ca894a5e65c0"
+    },
+    {
+      "id": "do_dau_duong#306:chuoi4",
+      "sha256": "fbef43dd058562a57e4157304a206936f48d3d3253941bd820e2bf3ce227b3d2"
+    },
+    {
+      "id": "do_dau_duong#308:so0->In",
+      "sha256": "d72d04e75f9216865c7930312cc231e921fe35dcc2810f5731b2518555861bc7"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi0",
+      "sha256": "407d7ef869d35b219f22ad6598f899d82a6013a86cea57f9d7c732555f08a041"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi1",
+      "sha256": "aeee777606867c00137508e6cb70893f1337cc786ded71ae26e8454b3422cc07"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi2",
+      "sha256": "5a49ba2e8d9df26f9b6817c20055b61289930dec9ac4aa6e9227a324155e95c6"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi3",
+      "sha256": "689a20a238bce1be0fbe33af7e6de64dee89ee6e7a2b4c46ac08eaaba17c3fa1"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi4",
+      "sha256": "8794c838d9e13d4748d2aa65e03deebbcece6fbeb612cd093ec9029129ae8285"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi5",
+      "sha256": "ee52e9bcd7a9e7cb538a9bdefcbf5ee0f060653c2ae79bf3d30801180730c3af"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi6",
+      "sha256": "177bdebbbeae0660d5917546140b11fb16fe190520f45eed2d3ca5224ffb9709"
+    },
+    {
+      "id": "do_dau_duong#309:chuoi7",
+      "sha256": "c81cbf651d6120451b898360b2268988dd1d0ea90f89a22993a94723bcd0f4c3"
+    },
+    {
+      "id": "do_dau_duong#310:chuoi0",
+      "sha256": "615f5763711dfc349b0e2a6aafcf78cc5f2b3e22e64a65e8ab30b57f26f3ac5f"
+    },
+    {
+      "id": "do_dau_duong#310:chuoi1",
+      "sha256": "0dca6f22478c61a7f389b74c6839901a6da31e8d50540526dbec52a5c5ddd91e"
+    },
+    {
+      "id": "do_dau_duong#310:chuoi2",
+      "sha256": "dd408454b902a886628670e06e2c46d0059680fd467ff2be0e4dc6d3d2dc4509"
+    },
+    {
+      "id": "do_dau_duong#310:chuoi3",
+      "sha256": "bf42864d982f4b741526dbbd1aa346482921a2c78f1c5f21c9dd27b44498d6ce"
+    },
+    {
+      "id": "do_dau_duong#310:chuoi4",
+      "sha256": "0d3cebe2f534cc72ac1beb0ab4fe70bc6e0130240c19eb3521c5939dc4b421de"
+    },
+    {
+      "id": "do_dau_duong#310:chuoi5",
+      "sha256": "d06526fc242e21aa10a32a20d668cc010776d2d07b7a584805b1646f017f9a03"
+    },
+    {
+      "id": "do_dau_duong#322:chuoi0",
+      "sha256": "c6797454ac09fab576bc3c96d92c8a0cdfaba1494737f88224458c83a9bfad91"
+    },
+    {
+      "id": "do_dau_duong#322:chuoi1",
+      "sha256": "aa9a2ef93bc6b750ad9cc671ec4dbf0e0f0b33d94ce332d3b9d6fccc5c0edc1c"
+    },
+    {
+      "id": "do_dau_duong#322:chuoi2",
+      "sha256": "76c78d4cda42812c3214292faddc6d851689a63252debee1940fe7910e40d5a2"
+    },
+    {
+      "id": "do_dau_duong#322:chuoi3",
+      "sha256": "cc6bb4a0f2dbb54e078aefd4802d50789ce9d70eff77a75d7fa1437a4b0986a7"
+    },
+    {
+      "id": "do_dau_duong#322:chuoi4",
+      "sha256": "fb10a330b0d8b13b962f032ce527ccc4250f8fa009ca8b0bfd16e278725ec85b"
+    },
+    {
+      "id": "do_dau_duong#322:chuoi5",
+      "sha256": "d7fecf6612c4fe3c7da3fb62e48fd012d8154801acd143a628949fe25377c128"
+    },
+    {
+      "id": "do_dau_duong#323:chuoi0",
+      "sha256": "9925d74445f9559858b4e4aaad960d8e824442c5fdac9b5ab95823c0b8cea91a"
+    },
+    {
+      "id": "do_dau_duong#323:chuoi1",
+      "sha256": "4fdcf5ea095a2c36f880d3434666c288022bfd235e4762769388028a8ecdf0a4"
+    },
+    {
+      "id": "do_dau_duong#323:chuoi2",
+      "sha256": "504eb5acdb04fbf65160c1cdef2bd8b3dd009a24d7b84ee977a2ae0e61f3dae6"
+    },
+    {
+      "id": "do_dau_duong#323:chuoi3",
+      "sha256": "52a089ca2c852c7c907fdbfa6e3f6696b0db56d3ddde9cb186237257bf151cea"
+    },
+    {
+      "id": "do_dau_duong#323:chuoi4",
+      "sha256": "eec5597e68239704d4cae67b15b76bd970340ee43f6163c379c9741cd792c478"
+    },
+    {
+      "id": "do_dau_duong#323:chuoi5",
+      "sha256": "e5f5365e13dcf6332b4bb9ff0ff1583dd2f9fb71dfb456d95171e2003d4a10bb"
+    },
+    {
+      "id": "do_dau_duong#344:+1",
+      "sha256": "3fa5ab2b9bfacda56cd9e5e4ac78a0654c7b34cb3af666fa2f8d6441d054ca1d"
+    },
+    {
+      "id": "do_dau_duong#344:-1",
+      "sha256": "ed4e9999b4d9289e10125d145da2b17b24f5e320d6774e027e65341f737d9dd9"
+    }
+  ],
+  "equivalence": {
+    "ghep_job#24:-1": "`khop[-1]` thay `khop[0]` chỉ được tính khi `len(khop) == 1`, mà danh sách một phần tử có [0] và [-1] là cùng một phần tử",
+    "chan_buoc#103:bo_doi_so1": "`str(t.get('run'))` thay `str(t.get('run', ''))` chỉ khác ở bước KHÔNG có `run:`: chuỗi tìm là 'None' thay vì '' — cả hai đều không chứa `GITHUB_ENV`/`GITHUB_PATH`, nên `re.search` cùng trả None",
+    "tach_buoc#173:chuoi2": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "tach_buoc#173:chuoi3": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "tach_buoc#173:chuoi4": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "do_dau_duong#127:bo_ve0": "bỏ vế `goi and`: khi `goi` rỗng thì `all(goi)` là True nhưng `[g[2] for g in goi]` cũng rỗng ⇒ vòng lặp không chạy lần nào, y như nhánh `else []`",
+    "do_dau_duong#306:chuoi1": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và `if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi",
+    "do_dau_duong#306:chuoi4": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và `if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi"
+  }
+}

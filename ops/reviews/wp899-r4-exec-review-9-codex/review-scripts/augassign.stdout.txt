@@ -1,0 +1,78 @@
+{
+  "before": "so += 1",
+  "after": "so = 1",
+  "node": "AugAssign",
+  "source_sha256": "490936274f35690880369a0fc36eff74a64c453f8999d6defd766ecf1dd652ea",
+  "rank": "SONG",
+  "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/closed8.py",
+    "child",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/augassign9-mutant.py",
+    "do_dau_duong"
+  ],
+  "rc": 0,
+  "proof": [
+    {
+      "source": "head",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 3
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 2,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        },
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "mutant",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 3
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        },
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "ast_node": "ExceptHandler.type Tuple",
+  "before": "(yaml.YAMLError, RecursionError)",
+  "after": "(yaml.YAMLError,)",
+  "first_order": "delete one handled exception",
+  "source_sha256": "321d2374d0fc228b386238c77c2e04db37aa2a84e8e7b3b1a79765eb7455f934",
+  "all_cases": 44,
+  "all_green": false,
+  "proof": [
+    {
+      "source": "head",
+      "input": "nested_yaml",
+      "input_bytes": 1201,
+      "input_sha256": "250f8f81de72fe62fb3c3202430524b7a6938c02969b8be425e8b265d6899eea",
+      "answer": {
+        "return": null
+      }
+    },
+    {
+      "source": "head",
+      "input": "invalid_yaml",
+      "input_bytes": 7,
+      "input_sha256": "8bf066a6b971f4d00ae3b2367c48ae20ff06d6998927e8c90cc9e61f64f43f37",
+      "answer": {
+        "return": null
+      }
+    },
+    {
+      "source": "mutant",
+      "input": "nested_yaml",
+      "input_bytes": 1201,
+      "input_sha256": "250f8f81de72fe62fb3c3202430524b7a6938c02969b8be425e8b265d6899eea",
+      "answer": {
+        "exception": "RecursionError",
+        "message": "maximum recursion depth exceeded"
+      }
+    },
+    {
+      "source": "mutant",
+      "input": "invalid_yaml",
+      "input_bytes": 7,
+      "input_sha256": "8bf066a6b971f4d00ae3b2367c48ae20ff06d6998927e8c90cc9e61f64f43f37",
+      "answer": {
+        "return": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+prior1-run_old.py 0
+prior1-registry_check.py 0
+prior2-run_old.py 0
+prior2-registry_check.py 0
+prove-frontier 0
+prove-last 0
+prove-new 0
+legacy F02 24/24 cases; composite/boundary current, registry+negative+regex DAT; signer not measured if denied

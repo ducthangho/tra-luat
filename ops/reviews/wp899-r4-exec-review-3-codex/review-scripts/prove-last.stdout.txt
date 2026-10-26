@@ -1,0 +1,4 @@
+run_type_coerce nonstr_no_throw HEAD 0
+run_type_coerce nonstr_no_throw mutant 3
+number_type_bool_guard_drop number_bool_metadata HEAD 0
+number_type_bool_guard_drop number_bool_metadata mutant 3

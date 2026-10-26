@@ -1,0 +1,4 @@
+frontier-proofs-final 0
+prove-last-final 0
+remaining-survivors-final 0
+trace-final 0

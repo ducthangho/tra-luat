@@ -1,0 +1,24 @@
+{
+  "measured": 221,
+  "ranks": {
+    "GIET": 213,
+    "SONG": 8
+  },
+  "per_function": {
+    "_env_chan": 32,
+    "doc_wf": 14,
+    "ten_du_kien": 20,
+    "do_dau_duong": 35,
+    "ghep_job": 20,
+    "ghep_buoc": 42,
+    "_gio": 17,
+    "tach_buoc": 23,
+    "chan_buoc": 18
+  },
+  "sample_count": 150,
+  "sample_missing": [],
+  "initial_not_killed": 57,
+  "initial_missing": [],
+  "unmeasured_count": 788,
+  "zero_process_failures": true
+}

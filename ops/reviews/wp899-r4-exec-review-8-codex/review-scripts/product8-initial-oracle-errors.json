@@ -1,0 +1,4393 @@
+{
+ "seed": 899008,
+ "coverage": {
+  "none": 106,
+  "bad_time": 39,
+  "bad_name": 39,
+  "bad_number": 31,
+  "bad_job": 48,
+  "bad_count": 37
+ },
+ "rows": [
+  {
+   "case": 0,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 1,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 2,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 3,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 4,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 5,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 6,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 7,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 8,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 9,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 10,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 11,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 12,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 13,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 14,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 15,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 16,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 17,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 18,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 19,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 20,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 21,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 22,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 23,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 24,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 25,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 26,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 27,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 28,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 29,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 30,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 31,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 32,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 33,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 34,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 35,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 36,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 37,
+   "perturbation": "none",
+   "passed": false,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "failed"
+   ]
+  },
+  {
+   "case": 38,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 39,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 40,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 41,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 42,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 43,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 44,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 45,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 46,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 47,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 48,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 49,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 50,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 51,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 52,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 53,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 54,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 55,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "passed"
+   ]
+  },
+  {
+   "case": 56,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 57,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 58,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 59,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 60,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 61,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 62,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 63,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 64,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 65,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 66,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 67,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 68,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 69,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 70,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 71,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 72,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 73,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 74,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 75,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 76,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 77,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 78,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 79,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 80,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 81,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 82,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 83,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 84,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 85,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 86,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 87,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 88,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 89,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 90,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 91,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 92,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 93,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 94,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 95,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 96,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 97,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "passed"
+   ]
+  },
+  {
+   "case": 98,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 99,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 100,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 101,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 102,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 103,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 104,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 105,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 106,
+   "perturbation": "none",
+   "passed": false,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "failed"
+   ]
+  },
+  {
+   "case": 107,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 108,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 109,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 110,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 111,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 112,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 113,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 114,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 115,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 116,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 117,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 118,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "passed",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 119,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 120,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 121,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 122,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 123,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 124,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 125,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 126,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 127,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 128,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 129,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 130,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 131,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 132,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 133,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 134,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 135,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 136,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 137,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 138,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 139,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 140,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 141,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 142,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 143,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 144,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 145,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 146,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 147,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 148,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 149,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 150,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 151,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 152,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 153,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 154,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 155,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 156,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 157,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 158,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 159,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 6
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 160,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 161,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 162,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 163,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 164,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 165,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 166,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 167,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 168,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 169,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 170,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 171,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 172,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 173,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 174,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 175,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 176,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 177,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 178,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 179,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 180,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 181,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 182,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 183,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 184,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 185,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 186,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 187,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 188,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 189,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 190,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 191,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 192,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 193,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 194,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 195,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 196,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 197,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 198,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 199,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 200,
+   "perturbation": "none",
+   "passed": false,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "passed",
+    "not_measured",
+    "failed",
+    "passed"
+   ]
+  },
+  {
+   "case": 201,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 202,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 203,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 204,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 205,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 206,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 207,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 208,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 209,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 210,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 211,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 212,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 213,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 214,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 215,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 216,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 217,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 218,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 219,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 220,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 221,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 222,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 223,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 224,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 225,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 226,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 227,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 228,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 229,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 230,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 231,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 232,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 233,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 234,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 235,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 236,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "passed",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 237,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 238,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 239,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 240,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 241,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 242,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 243,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 244,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 245,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 246,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 247,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 248,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 249,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 250,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 251,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "passed"
+   ]
+  },
+  {
+   "case": 252,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 253,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 254,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 255,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 256,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 257,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 258,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 259,
+   "perturbation": "bad_count",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "a_so_buoc_rest_khac_so_buoc_yaml",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 260,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 261,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 6
+   },
+   "marker_states": []
+  },
+  {
+   "case": 262,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 263,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 6
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 264,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 265,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 266,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 267,
+   "perturbation": "none",
+   "passed": false,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "failed"
+   ]
+  },
+  {
+   "case": 268,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 269,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 270,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 271,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 272,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 273,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 274,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 275,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 2
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 276,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 277,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 278,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 279,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 280,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 281,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 282,
+   "perturbation": "bad_time",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "c_gio_header_ngoai_cua_so",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 283,
+   "perturbation": "none",
+   "passed": false,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "failed"
+   ]
+  },
+  {
+   "case": 284,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 6
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 285,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 3
+   },
+   "marker_states": []
+  },
+  {
+   "case": 286,
+   "perturbation": "bad_name",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "b_ten_buoc_lech",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 287,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 5
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 288,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 289,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 290,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 3
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 291,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  },
+  {
+   "case": 292,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 4
+   },
+   "marker_states": [
+    "not_measured",
+    "not_measured"
+   ]
+  },
+  {
+   "case": 293,
+   "perturbation": "bad_number",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "steps_rest_sai_dang",
+    "so_buoc": 4
+   },
+   "marker_states": []
+  },
+  {
+   "case": 294,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 295,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 1
+   },
+   "marker_states": []
+  },
+  {
+   "case": 296,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 2
+   },
+   "marker_states": []
+  },
+  {
+   "case": 297,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 5
+   },
+   "marker_states": []
+  },
+  {
+   "case": 298,
+   "perturbation": "bad_job",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "not_measured",
+    "ly_do": "d_job_yaml_khong_duy_nhat",
+    "so_buoc": 0
+   },
+   "marker_states": []
+  },
+  {
+   "case": 299,
+   "perturbation": "none",
+   "passed": true,
+   "ghep": {
+    "trang_thai": "passed",
+    "so_buoc": 1
+   },
+   "marker_states": [
+    "not_measured"
+   ]
+  }
+ ],
+ "mismatches": [
+  {
+   "case": 37,
+   "workflow": {
+    "jobs": {
+     "job37": {
+      "runs-on": "ubuntu-latest",
+      "steps": [
+       {
+        "run": "python ops/p0.py\n",
+        "name": "Xây dựng",
+        "continue-on-error": false
+       },
+       {
+        "run": "python ops/p1.py\n"
+       },
+       {
+        "run": "echo GITHUB_PATH\n",
+        "env": {}
+       }
+      ],
+      "name": "Build (release)",
+      "env": {
+       "A": "1"
+      }
+     }
+    },
+    "env": {
+     "A": "1"
+    }
+   },
+   "rest_job": {
+    "id": 1,
+    "name": "Build (release)",
+    "run_attempt": 1,
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "conclusion": "success",
+    "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+    "steps": [
+     {
+      "name": "Complete job",
+      "number": 11,
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p1.py",
+      "number": 4,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Set up job",
+      "number": 1,
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "number": 10,
+      "conclusion": "success"
+     },
+     {
+      "name": "Run echo GITHUB_PATH",
+      "number": 9,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Xây dựng",
+      "number": 3,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     }
+    ]
+   },
+   "log": [
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 4/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p1.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p1.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 3/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run echo GITHUB_PATH",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mecho GITHUB_PATH\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 4/4 dat"
+   ],
+   "expected": {
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 3
+    },
+    "markers": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "not_measured",
+      "ly_do": "khong_co_trong_MOI"
+     },
+     {
+      "lenh": "python ops/p1.py",
+      "duong_dan": "ops/p1.py",
+      "trang_thai": "failed",
+      "dong_khop": [
+       "THU: 3/4 dat"
+      ]
+     }
+    ],
+    "count": 3,
+    "gate": "failed"
+   },
+   "actual": {
+    "job_id": 1,
+    "name": "Build (release)",
+    "check_run_id": "1",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "conclusion": "success",
+    "buoc": [
+     {
+      "name": "Complete job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p1.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Set up job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run echo GITHUB_PATH",
+      "conclusion": "success"
+     },
+     {
+      "name": "Xây dựng",
+      "conclusion": "success"
+     }
+    ],
+    "image": "not_measured",
+    "dau_duong": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "not_measured",
+      "ly_do": "khong_co_trong_MOI"
+     },
+     {
+      "lenh": "python ops/p1.py",
+      "duong_dan": "ops/p1.py",
+      "trang_thai": "failed",
+      "dong_khop": []
+     }
+    ],
+    "thieu": [],
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 3
+    },
+    "kich_ban": {
+     "buoc_xac_thuc": 3,
+     "trang_thai": "passed",
+     "nguon": "run_tai_sha_checkout"
+    },
+    "trang_thai": "failed"
+   }
+  },
+  {
+   "case": 106,
+   "workflow": {
+    "jobs": {
+     "job106": {
+      "runs-on": "ubuntu-latest",
+      "steps": [
+       {
+        "run": "python ops/p0.py\n"
+       }
+      ],
+      "name": "A+B.*"
+     }
+    }
+   },
+   "rest_job": {
+    "id": 1,
+    "name": "job106",
+    "run_attempt": 1,
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "conclusion": "success",
+    "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+    "steps": [
+     {
+      "name": "Run python ops/p0.py",
+      "number": 4,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Complete job",
+      "number": 6,
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "number": 5,
+      "conclusion": "success"
+     },
+     {
+      "name": "Set up job",
+      "number": 1,
+      "conclusion": "success"
+     }
+    ]
+   },
+   "log": [
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 3/4 dat"
+   ],
+   "expected": {
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 1
+    },
+    "markers": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "failed",
+      "dong_khop": [
+       "THU: 3/4 dat"
+      ]
+     }
+    ],
+    "count": 1,
+    "gate": "failed"
+   },
+   "actual": {
+    "job_id": 1,
+    "name": "job106",
+    "check_run_id": "1",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "conclusion": "success",
+    "buoc": [
+     {
+      "name": "Run python ops/p0.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Complete job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "conclusion": "success"
+     },
+     {
+      "name": "Set up job",
+      "conclusion": "success"
+     }
+    ],
+    "image": "not_measured",
+    "dau_duong": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "failed",
+      "dong_khop": []
+     }
+    ],
+    "thieu": [],
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 1
+    },
+    "kich_ban": {
+     "buoc_xac_thuc": 1,
+     "trang_thai": "passed",
+     "nguon": "run_tai_sha_checkout"
+    },
+    "trang_thai": "failed"
+   }
+  },
+  {
+   "case": 200,
+   "workflow": {
+    "jobs": {
+     "job200": {
+      "runs-on": "ubuntu-latest",
+      "steps": [
+       {
+        "run": "python ops/p0.py\n",
+        "env": {}
+       },
+       {
+        "run": "python ops/p1.py\n"
+       },
+       {
+        "uses": "actions/setup-python@v5",
+        "continue-on-error": false
+       },
+       {
+        "run": "python ops/p3.py\n",
+        "shell": "zsh"
+       },
+       {
+        "run": "python ops/p4.py\n"
+       },
+       {
+        "run": "python ops/p5.py\n",
+        "shell": "pwsh"
+       }
+      ],
+      "name": " Build ",
+      "env": {
+       "A": "1"
+      }
+     }
+    }
+   },
+   "rest_job": {
+    "id": 1,
+    "name": " Build ",
+    "run_attempt": 1,
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "conclusion": "success",
+    "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+    "steps": [
+     {
+      "name": "Run python ops/p1.py",
+      "number": 7,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Complete job",
+      "number": 23,
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p5.py",
+      "number": 21,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Set up job",
+      "number": 1,
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p4.py",
+      "number": 17,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Run python ops/p3.py",
+      "number": 15,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Post cleanup",
+      "number": 22,
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p0.py",
+      "number": 4,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Run actions/setup-python@v5",
+      "number": 11,
+      "conclusion": "skipped",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     }
+    ]
+   },
+   "log": [
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 4/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p1.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p1.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 4/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p3.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p3.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 3/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p4.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p4.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 3/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p5.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p5.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 4/4 dat"
+   ],
+   "expected": {
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 5
+    },
+    "markers": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "not_measured",
+      "ly_do": "che_do_khong_xac_dinh"
+     },
+     {
+      "lenh": "python ops/p1.py",
+      "duong_dan": "ops/p1.py",
+      "trang_thai": "passed",
+      "dong_khop": [
+       "THU: 4/4 dat"
+      ]
+     },
+     {
+      "lenh": "python ops/p3.py",
+      "duong_dan": "ops/p3.py",
+      "trang_thai": "not_measured",
+      "ly_do": "khong_co_trong_MOI"
+     },
+     {
+      "lenh": "python ops/p4.py",
+      "duong_dan": "ops/p4.py",
+      "trang_thai": "failed",
+      "dong_khop": [
+       "THU: 3/4 dat"
+      ]
+     },
+     {
+      "lenh": "python ops/p5.py",
+      "duong_dan": "ops/p5.py",
+      "trang_thai": "passed",
+      "dong_khop": [
+       "THU: 4/4 dat"
+      ]
+     }
+    ],
+    "count": 5,
+    "gate": "failed"
+   },
+   "actual": {
+    "job_id": 1,
+    "name": " Build ",
+    "check_run_id": "1",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "conclusion": "success",
+    "buoc": [
+     {
+      "name": "Run python ops/p1.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Complete job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p5.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Set up job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p4.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p3.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run python ops/p0.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "skipped"
+     }
+    ],
+    "image": "not_measured",
+    "dau_duong": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "not_measured",
+      "ly_do": "che_do_khong_xac_dinh"
+     },
+     {
+      "lenh": "python ops/p1.py",
+      "duong_dan": "ops/p1.py",
+      "trang_thai": "passed",
+      "dong_khop": [
+       "THU: 4/4 dat"
+      ]
+     },
+     {
+      "lenh": "python ops/p3.py",
+      "duong_dan": "ops/p3.py",
+      "trang_thai": "not_measured",
+      "ly_do": "khong_co_trong_MOI"
+     },
+     {
+      "lenh": "python ops/p4.py",
+      "duong_dan": "ops/p4.py",
+      "trang_thai": "failed",
+      "dong_khop": []
+     },
+     {
+      "lenh": "python ops/p5.py",
+      "duong_dan": "ops/p5.py",
+      "trang_thai": "passed",
+      "dong_khop": [
+       "THU: 4/4 dat"
+      ]
+     }
+    ],
+    "thieu": [],
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 5
+    },
+    "kich_ban": {
+     "buoc_xac_thuc": 5,
+     "trang_thai": "passed",
+     "nguon": "run_tai_sha_checkout"
+    },
+    "trang_thai": "failed"
+   }
+  },
+  {
+   "case": 267,
+   "workflow": {
+    "jobs": {
+     "job267": {
+      "runs-on": "ubuntu-latest",
+      "steps": [
+       {
+        "run": "python ops/p0.py\n",
+        "shell": "zsh"
+       },
+       {
+        "run": "A=1 python ops/p1.py\n",
+        "name": "check 1"
+       },
+       {
+        "uses": "actions/setup-python@v5",
+        "continue-on-error": false
+       },
+       {
+        "run": "A=1 python ops/p3.py\n"
+       },
+       {
+        "run": "python ops/p4.py\n",
+        "name": "check 4",
+        "env": {}
+       },
+       {
+        "run": "python ops/p5.py\n",
+        "name": "check 5"
+       }
+      ],
+      "name": " Build "
+     }
+    },
+    "env": {
+     "A": "1"
+    }
+   },
+   "rest_job": {
+    "id": 1,
+    "name": "job267 (ubuntu-24.04)",
+    "run_attempt": 1,
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "conclusion": "success",
+    "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+    "steps": [
+     {
+      "name": "Complete job",
+      "number": 25,
+      "conclusion": "success"
+     },
+     {
+      "name": "Run actions/setup-python@v5",
+      "number": 13,
+      "conclusion": "skipped",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Run A=1 python ops/p3.py",
+      "number": 18,
+      "conclusion": "skipped",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Set up job",
+      "number": 1,
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "number": 24,
+      "conclusion": "success"
+     },
+     {
+      "name": "check 1",
+      "number": 9,
+      "conclusion": "skipped",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "check 4",
+      "number": 21,
+      "conclusion": "skipped",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Run python ops/p0.py",
+      "number": 7,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "check 5",
+      "number": 23,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     }
+    ]
+   },
+   "log": [
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 4/4 dat",
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p5.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p5.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 3/4 dat"
+   ],
+   "expected": {
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 2
+    },
+    "markers": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "not_measured",
+      "ly_do": "khong_co_trong_MOI"
+     },
+     {
+      "lenh": "python ops/p5.py",
+      "duong_dan": "ops/p5.py",
+      "trang_thai": "failed",
+      "dong_khop": [
+       "THU: 3/4 dat"
+      ]
+     }
+    ],
+    "count": 2,
+    "gate": "failed"
+   },
+   "actual": {
+    "job_id": 1,
+    "name": "job267 (ubuntu-24.04)",
+    "check_run_id": "1",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "conclusion": "success",
+    "buoc": [
+     {
+      "name": "Complete job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "skipped"
+     },
+     {
+      "name": "Run A=1 python ops/p3.py",
+      "conclusion": "skipped"
+     },
+     {
+      "name": "Set up job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "conclusion": "success"
+     },
+     {
+      "name": "check 1",
+      "conclusion": "skipped"
+     },
+     {
+      "name": "check 4",
+      "conclusion": "skipped"
+     },
+     {
+      "name": "Run python ops/p0.py",
+      "conclusion": "success"
+     },
+     {
+      "name": "check 5",
+      "conclusion": "success"
+     }
+    ],
+    "image": "not_measured",
+    "dau_duong": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "not_measured",
+      "ly_do": "khong_co_trong_MOI"
+     },
+     {
+      "lenh": "python ops/p5.py",
+      "duong_dan": "ops/p5.py",
+      "trang_thai": "failed",
+      "dong_khop": []
+     }
+    ],
+    "thieu": [],
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 2
+    },
+    "kich_ban": {
+     "buoc_xac_thuc": 2,
+     "trang_thai": "passed",
+     "nguon": "run_tai_sha_checkout"
+    },
+    "trang_thai": "failed"
+   }
+  },
+  {
+   "case": 283,
+   "workflow": {
+    "jobs": {
+     "job283": {
+      "runs-on": "ubuntu-latest",
+      "steps": [
+       {
+        "run": "python ops/p0.py\n",
+        "name": "Xây dựng"
+       }
+      ],
+      "name": "A+B.*"
+     }
+    }
+   },
+   "rest_job": {
+    "id": 1,
+    "name": "A+B.* (linux, 5)",
+    "run_attempt": 1,
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "conclusion": "success",
+    "check_run_url": "https://api.github.com/repos/o/r/check-runs/1",
+    "steps": [
+     {
+      "name": "Set up job",
+      "number": 1,
+      "conclusion": "success"
+     },
+     {
+      "name": "Xây dựng",
+      "number": 7,
+      "conclusion": "success",
+      "started_at": "2026-10-19T23:45:04Z",
+      "completed_at": "2026-10-19T23:45:04Z"
+     },
+     {
+      "name": "Post cleanup",
+      "number": 8,
+      "conclusion": "success"
+     },
+     {
+      "name": "Complete job",
+      "number": 9,
+      "conclusion": "success"
+     }
+    ]
+   },
+   "log": [
+    "2026-10-19T23:45:04.8553236Z ##[group]Run python ops/p0.py",
+    "2026-10-19T23:45:04.8553236Z \u001b[36;1mpython ops/p0.py\u001b[0m",
+    "2026-10-19T23:45:04.8553236Z shell: /usr/bin/bash -e {0}",
+    "2026-10-19T23:45:04.8553236Z ##[endgroup]",
+    "2026-10-19T23:45:04.8553236Z THU: 3/4 dat"
+   ],
+   "expected": {
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 1
+    },
+    "markers": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "failed",
+      "dong_khop": [
+       "THU: 3/4 dat"
+      ]
+     }
+    ],
+    "count": 1,
+    "gate": "failed"
+   },
+   "actual": {
+    "job_id": 1,
+    "name": "A+B.* (linux, 5)",
+    "check_run_id": "1",
+    "labels": [
+     "ubuntu-latest"
+    ],
+    "runner_id": 7,
+    "runner_name": "GitHub Actions 7",
+    "conclusion": "success",
+    "buoc": [
+     {
+      "name": "Set up job",
+      "conclusion": "success"
+     },
+     {
+      "name": "Xây dựng",
+      "conclusion": "success"
+     },
+     {
+      "name": "Post cleanup",
+      "conclusion": "success"
+     },
+     {
+      "name": "Complete job",
+      "conclusion": "success"
+     }
+    ],
+    "image": "not_measured",
+    "dau_duong": [
+     {
+      "lenh": "python ops/p0.py",
+      "duong_dan": "ops/p0.py",
+      "trang_thai": "failed",
+      "dong_khop": []
+     }
+    ],
+    "thieu": [],
+    "ghep_buoc": {
+     "trang_thai": "passed",
+     "so_buoc": 1
+    },
+    "kich_ban": {
+     "buoc_xac_thuc": 1,
+     "trang_thai": "passed",
+     "nguon": "run_tai_sha_checkout"
+    },
+    "trang_thai": "failed"
+   }
+  }
+ ]
+}

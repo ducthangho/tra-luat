@@ -1,0 +1,371 @@
+{
+  "total": 1011,
+  "raw_valid": 1011,
+  "invalid_skipped": [],
+  "no_effect": [
+    "doc_wf#12:tra_None",
+    "_gio#7:tra_None"
+  ],
+  "id_collisions": 0,
+  "ids_stable_outside_functions": true,
+  "counts": {
+    "FunctionDef": 10,
+    "arguments": 11,
+    "Return": 20,
+    "arg": 21,
+    "BoolOp": 25,
+    "And": 17,
+    "Compare": 37,
+    "Constant": 159,
+    "In": 6,
+    "Name": 321,
+    "Or": 8,
+    "Call": 109,
+    "Load": 391,
+    "IsNot": 2,
+    "GeneratorExp": 8,
+    "Subscript": 57,
+    "comprehension": 16,
+    "Attribute": 49,
+    "Store": 66,
+    "Expr": 11,
+    "Try": 2,
+    "Assign": 21,
+    "ExceptHandler": 2,
+    "IfExp": 12,
+    "Tuple": 22,
+    "Is": 12,
+    "ListComp": 7,
+    "Eq": 5,
+    "NotIn": 7,
+    "BinOp": 8,
+    "Add": 5,
+    "If": 15,
+    "Slice": 5,
+    "UnaryOp": 13,
+    "Not": 11,
+    "NotEq": 4,
+    "Dict": 7,
+    "keyword": 1,
+    "SetComp": 1,
+    "Lambda": 1,
+    "NamedExpr": 5,
+    "LtE": 2,
+    "Sub": 1,
+    "For": 3,
+    "List": 8,
+    "BitOr": 3,
+    "USub": 2,
+    "AugAssign": 1,
+    "Continue": 1
+  },
+  "types": {
+    "arguments": {
+      "nodes": 11,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Return": {
+      "nodes": 20,
+      "with_operator": 20,
+      "operators": [
+        "tra_None"
+      ]
+    },
+    "arg": {
+      "nodes": 21,
+      "with_operator": 0,
+      "operators": []
+    },
+    "BoolOp": {
+      "nodes": 25,
+      "with_operator": 25,
+      "operators": [
+        "and<->or",
+        "bo_ve0",
+        "bo_ve1",
+        "bo_ve2",
+        "bo_ve3",
+        "bo_ve4",
+        "bo_ve5",
+        "bo_ve6"
+      ]
+    },
+    "And": {
+      "nodes": 17,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Compare": {
+      "nodes": 37,
+      "with_operator": 37,
+      "operators": [
+        "so0->Eq",
+        "so0->GtE",
+        "so0->In",
+        "so0->Is",
+        "so0->IsNot",
+        "so0->Lt",
+        "so0->NotEq",
+        "so0->NotIn",
+        "so1->GtE",
+        "so1->Lt"
+      ]
+    },
+    "Constant": {
+      "nodes": 153,
+      "with_operator": 139,
+      "operators": [
+        "+1",
+        "-1",
+        "bool",
+        "chuoi0",
+        "chuoi1",
+        "chuoi2",
+        "chuoi3",
+        "chuoi4",
+        "chuoi5",
+        "chuoi6",
+        "chuoi7"
+      ]
+    },
+    "In": {
+      "nodes": 6,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Name": {
+      "nodes": 321,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Or": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Call": {
+      "nodes": 109,
+      "with_operator": 14,
+      "operators": [
+        "bo_doi_so0",
+        "bo_doi_so1",
+        "bo_doi_so2"
+      ]
+    },
+    "Load": {
+      "nodes": 391,
+      "with_operator": 0,
+      "operators": []
+    },
+    "IsNot": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "GeneratorExp": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Subscript": {
+      "nodes": 57,
+      "with_operator": 0,
+      "operators": []
+    },
+    "comprehension": {
+      "nodes": 16,
+      "with_operator": 4,
+      "operators": [
+        "bo_loc0"
+      ]
+    },
+    "Attribute": {
+      "nodes": 49,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Store": {
+      "nodes": 66,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Expr": {
+      "nodes": 11,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Try": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Assign": {
+      "nodes": 21,
+      "with_operator": 0,
+      "operators": []
+    },
+    "ExceptHandler": {
+      "nodes": 2,
+      "with_operator": 1,
+      "operators": [
+        "bo_ngoai_le0",
+        "bo_ngoai_le1"
+      ]
+    },
+    "IfExp": {
+      "nodes": 12,
+      "with_operator": 12,
+      "operators": [
+        "ifexp_khac",
+        "ifexp_than"
+      ]
+    },
+    "Tuple": {
+      "nodes": 22,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Is": {
+      "nodes": 12,
+      "with_operator": 0,
+      "operators": []
+    },
+    "ListComp": {
+      "nodes": 7,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Eq": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "NotIn": {
+      "nodes": 7,
+      "with_operator": 0,
+      "operators": []
+    },
+    "BinOp": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Add": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "If": {
+      "nodes": 15,
+      "with_operator": 15,
+      "operators": [
+        "if_dung",
+        "if_sai"
+      ]
+    },
+    "Slice": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "FunctionDef": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "UnaryOp": {
+      "nodes": 13,
+      "with_operator": 11,
+      "operators": [
+        "bo_not"
+      ]
+    },
+    "Not": {
+      "nodes": 11,
+      "with_operator": 0,
+      "operators": []
+    },
+    "NotEq": {
+      "nodes": 4,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Dict": {
+      "nodes": 7,
+      "with_operator": 0,
+      "operators": []
+    },
+    "keyword": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "SetComp": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Lambda": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "NamedExpr": {
+      "nodes": 5,
+      "with_operator": 0,
+      "operators": []
+    },
+    "LtE": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Sub": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "For": {
+      "nodes": 3,
+      "with_operator": 0,
+      "operators": []
+    },
+    "List": {
+      "nodes": 8,
+      "with_operator": 0,
+      "operators": []
+    },
+    "BitOr": {
+      "nodes": 3,
+      "with_operator": 0,
+      "operators": []
+    },
+    "USub": {
+      "nodes": 2,
+      "with_operator": 0,
+      "operators": []
+    },
+    "AugAssign": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    },
+    "Continue": {
+      "nodes": 1,
+      "with_operator": 0,
+      "operators": []
+    }
+  },
+  "equivalence": {
+    "ghep_job#24:-1": "`khop[-1]` thay `khop[0]` chỉ được tính khi `len(khop) == 1`, mà danh sách một phần tử có [0] và [-1] là cùng một phần tử",
+    "chan_buoc#103:bo_doi_so1": "`str(t.get('run'))` thay `str(t.get('run', ''))` chỉ khác ở bước KHÔNG có `run:`: chuỗi tìm là 'None' thay vì '' — cả hai đều không chứa `GITHUB_ENV`/`GITHUB_PATH`, nên `re.search` cùng trả None",
+    "tach_buoc#173:chuoi2": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "tach_buoc#173:chuoi3": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "tach_buoc#173:chuoi4": "chuỗi chỉ đứng trong `len('##[group]Run ')`: biến dạng hoa/thường/đảo hoa giữ NGUYÊN độ dài 13 nên lát cắt `lenh` không đổi (biến dạng đổi độ dài — hậu tố, bớt ký tự, khoảng trắng, rỗng — bị giết)",
+    "do_dau_duong#127:bo_ve0": "bỏ vế `goi and`: khi `goi` rỗng thì `all(goi)` là True nhưng `[g[2] for g in goi]` cũng rỗng ⇒ vòng lặp không chạy lần nào, y như nhánh `else []`",
+    "do_dau_duong#306:chuoi1": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và `if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi",
+    "do_dau_duong#306:chuoi4": "`run.rstrip('')` (cả hai mã cùng một nguồn đột biến) chỉ để lại các `\\n` cuối ⇒ `split` sinh thêm đoạn RỖNG ở đuôi; `dong_logic` biến đoạn rỗng thành '' (hoặc nối vào dòng `\\` đang dở rồi `strip()` ra cùng chuỗi), và `if d` bỏ ''. Phép so khối `run.rstrip(\"\\n\") == …` đứng TRƯỚC không đổi"
+  }
+}
+duplicate source groups 13

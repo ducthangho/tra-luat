@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/norm_counterexample5.py"
+  ],
+  "returncode": 3,
+  "seconds": 0.6896376609802246,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/norm-mutant.stdout.txt",
+    "bytes": 1007,
+    "sha256": "b535e6b1a11c9153254e227bdc0ac11e189fd716366a5284db2a5aea496eca60"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review5/ws/.review/norm-mutant.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

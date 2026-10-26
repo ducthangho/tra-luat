@@ -1,0 +1,236 @@
+[
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/write_verdict.py",
+    "sha256": "b28ceecd925e4bc46e918b05e8fc108d157fd53fb79e47b208b4ed35ceb9230e",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/registry_check.py",
+    "sha256": "f80cbd619cf9d07f5bc820d73ddf0048a37debbaa68258817015e97288f6b078",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/q1_time_detail.py",
+    "sha256": "5a57aebbd16a68bb50d7a90b32bd0b082abc41c3906ddf4fd0cb4a346bd64463",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/extra_mutants_r4.py",
+    "sha256": "30cd3b7bbb29a8bb372057c5768a2098625d0d81d2c044ecac36c76c7b3920ec",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/classifier_negative.py",
+    "sha256": "33ceafda0438faebfb2e4f0a7bb5c2ac8ef17eeaeed47113410bf0be228a0f36",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/verify_new_cases.py",
+    "sha256": "ad5a7f108169417e1c60621dca9897cc7b88f3647e6d42ff38d6431dd121ba45",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/calendar_cases.py",
+    "sha256": "135a296ea9f0786fba50d0de264d257043bd5bafa6acafc48fff18c4e9fbcd0d",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/reviewer_cases_r4.py",
+    "sha256": "50f2c539f70f25b56fbfdaec35feb54ff052ba49335ddf80b94f65cd2fa2dec3",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/final_check.py",
+    "sha256": "d98158da8904007fd97abb007663cf7c4048ed6661a89b988a2fcfe021020ef4",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/new_probes_r4.py",
+    "sha256": "ae72cda19101a978f2fc4effe11cd9cb923ca6f05e5e0de89f9df293dd499ce9",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/run.py",
+    "sha256": "c3bb62262f8b042c910860cb2ee2f0bb88565a7f9ed506dea9a03a9c444104ab",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/run_old.py",
+    "sha256": "181763ce8cbf08c4058704b262e8cdbcce6e4a0ae63b83d86324562b5774ffb2",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/preflight.py",
+    "sha256": "51542b9a9edcf0613878f4b6148d34d587f3e34aed32c42eb53f5ff8b82a5b30",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/prepare.py",
+    "sha256": "9a8cee889ad0812feeae792fde7748c3ba19290d968484d8e944d2a3e7179d80",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/emit.py",
+    "sha256": "a282fb3ccde0f69dcfcbb930ed3b0572f031bc7a35fa260d5449ea706895aba7",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/audit_mutants.py",
+    "sha256": "304585432c4544eafa66942890ca0ce1a0bef1c159770a2c2dd588f651865d29",
+    "role": "verification"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/snapshot.py",
+    "sha256": "f3e4238f8e471a40a565834f154dd65748a8fb44f18808240bef6807bdcdef47",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 1,
+    "path": ".review-input/r4-luot1/replay_q1.py",
+    "sha256": "2b136897b82388e69639cf2c26734e9cd8765ae5c5a166c90edf433b8c78b7f7",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/write_verdict.py",
+    "sha256": "365bc0ad7034acff16940b8c9131245b8f1878ba1efc9a1268d9db1dff59f75b",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/registry_check.py",
+    "sha256": "c6520920d1c2e09a3d191e0c5cd0cd0deeb8eaf0d97fd21a9cd8346ac2f50b1d",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/q1_time_detail.py",
+    "sha256": "5a57aebbd16a68bb50d7a90b32bd0b082abc41c3906ddf4fd0cb4a346bd64463",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/extra_mutants_r4.py",
+    "sha256": "30cd3b7bbb29a8bb372057c5768a2098625d0d81d2c044ecac36c76c7b3920ec",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/classifier_negative.py",
+    "sha256": "33ceafda0438faebfb2e4f0a7bb5c2ac8ef17eeaeed47113410bf0be228a0f36",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/verify_new_cases.py",
+    "sha256": "ad5a7f108169417e1c60621dca9897cc7b88f3647e6d42ff38d6431dd121ba45",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/finish_probes.py",
+    "sha256": "bb5a6648e1a5e7d37e04944b8ba0cdf319016b06d0c28b1a9561ed31eb6f1a09",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/calendar_cases.py",
+    "sha256": "135a296ea9f0786fba50d0de264d257043bd5bafa6acafc48fff18c4e9fbcd0d",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/trace_c44.py",
+    "sha256": "9b5a6834520ac5a7e5e42cf6f8c1b486a5c218264b9ddcfe5b6817c836031149",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/reviewer_cases_r4.py",
+    "sha256": "50f2c539f70f25b56fbfdaec35feb54ff052ba49335ddf80b94f65cd2fa2dec3",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/final_check.py",
+    "sha256": "95706d66aac37a5c241f417e37fde7d431ef98dc2e8e65ad9d9698bc7143fcdf",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/new_probes_r4.py",
+    "sha256": "ae72cda19101a978f2fc4effe11cd9cb923ca6f05e5e0de89f9df293dd499ce9",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/run.py",
+    "sha256": "c3bb62262f8b042c910860cb2ee2f0bb88565a7f9ed506dea9a03a9c444104ab",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/run_old.py",
+    "sha256": "181763ce8cbf08c4058704b262e8cdbcce6e4a0ae63b83d86324562b5774ffb2",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/preflight.py",
+    "sha256": "51542b9a9edcf0613878f4b6148d34d587f3e34aed32c42eb53f5ff8b82a5b30",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/prepare.py",
+    "sha256": "9a8cee889ad0812feeae792fde7748c3ba19290d968484d8e944d2a3e7179d80",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/emit.py",
+    "sha256": "a282fb3ccde0f69dcfcbb930ed3b0572f031bc7a35fa260d5449ea706895aba7",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/audit_mutants.py",
+    "sha256": "304585432c4544eafa66942890ca0ce1a0bef1c159770a2c2dd588f651865d29",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/snapshot.py",
+    "sha256": "f3e4238f8e471a40a565834f154dd65748a8fb44f18808240bef6807bdcdef47",
+    "role": "historical_infrastructure"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/shape_audit.py",
+    "sha256": "02913674ee116db1d3a53d46f153ee934f38d42b199770040f079ed996db8e81",
+    "role": "verification"
+  },
+  {
+    "round": 2,
+    "path": ".review-input/r4-luot2/replay_q1.py",
+    "sha256": "2b136897b82388e69639cf2c26734e9cd8765ae5c5a166c90edf433b8c78b7f7",
+    "role": "verification"
+  }
+]

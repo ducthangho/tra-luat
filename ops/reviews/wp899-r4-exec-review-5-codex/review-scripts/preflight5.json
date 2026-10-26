@@ -1,0 +1,168 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "rc": 0,
+      "stdout": "https://github.com/ducthangho/tra-luat.git\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}",
+        "HEAD^"
+      ],
+      "rc": 0,
+      "stdout": "22da28c738e651361274c1264e681a52461dad1e\n22da0a84e0a0f908664ceec22fe917f3166c29be\n75d0f6b5fe01611dda0b8768e50f5826657135e7\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "1\t0\t.claude/dev/ci_dang_ky_test.py\n444\t0\tops/ci_provenance.py\n1060\t0\tops/ci_provenance_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "HEAD^",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "114\t0\tops/ci_provenance_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "config",
+        "--get",
+        "core.abbrev"
+      ],
+      "rc": 0,
+      "stdout": "7\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "--is-shallow-repository"
+      ],
+      "rc": 0,
+      "stdout": "true\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "Python 3.13.17\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "git version 2.43.0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "codex",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "codex-cli 0.164.0\n",
+      "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\n"
+    },
+    {
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "ruff 0.15.15\n",
+      "stderr": ""
+    }
+  ],
+  "specs": {
+    "wp899-r3.md": {
+      "bytes": 18402,
+      "sha256": "dd1a997d1f3682e23bb4b5577264076b7d9a12aeff5d9823f491cdda05e4f36f"
+    },
+    "wp899-r4.md": {
+      "bytes": 23860,
+      "sha256": "be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45"
+    },
+    "wp899-r2.md": {
+      "bytes": 23189,
+      "sha256": "d858c7c65a38a7f0fadda1cabf839c98ce70a881372d847c8979165925971707"
+    }
+  }
+}

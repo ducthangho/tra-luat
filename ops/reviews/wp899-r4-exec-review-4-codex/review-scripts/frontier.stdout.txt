@@ -1,0 +1,51 @@
+job_rest_type GIET ['c22_thieu_dinh_danh_khong_passed'] OTHER 0
+job_match_search GIET ['c39_ghep_job', 'c47_bien_ghep'] OTHER 0
+job_matrix_nonempty GIET ['c47_bien_ghep'] OTHER 0
+job_dotall_add GIET ['c47_bien_ghep'] OTHER 0
+job_alias_exact_drop GIET ['c47_bien_ghep'] OTHER 0
+name_use_last_line GIET ['c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c37_ghep_lech_ten', 'c46_mien_che_do'] OTHER 0
+name_rest_strip GIET ['c37_ghep_lech_ten', 'c47_bien_ghep'] OTHER 0
+time_drop_type GIET ['c38_ghep_lech_gio'] OTHER 0
+time_year0_drop GIET ['c38_ghep_lech_gio'] OTHER 0
+time_calendar_date_only GIET ['c38_ghep_lech_gio'] OTHER 0
+time_low_strict GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+time_hi_strict GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+time_or_bounds GIET ['c38_ghep_lech_gio'] OTHER 0
+time_low_only GIET ['c38_ghep_lech_gio'] OTHER 0
+time_hi_only GIET ['c38_ghep_lech_gio'] OTHER 0
+rest_number_float GIET ['c47_bien_ghep'] OTHER 0
+rest_number_bool GIET ['c47_bien_ghep'] OTHER 0
+rest_steps_list_drop GIET ['c22_thieu_dinh_danh_khong_passed'] OTHER 0
+rest_steps_all_any GIET ['c44_ghep_sai_dang', 'c47_bien_ghep'] OTHER 0
+yaml_steps_all_any GIET ['c44_ghep_sai_dang'] OTHER 0
+number_sort_desc GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+metadata_keep_setup GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c36_ghep_lech_so', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+metadata_keep_complete GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c25_f02_env_mang_mau', 'c26_f02_dong_khong_mau', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c36_ghep_lech_so', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c40_nhom_long', 'c41_buoc_uses', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep', 'c43_khoi_khac_buoc', 'c35_f02_khoi_khong_tron_ven'] OTHER 0
+metadata_post_anywhere GIET ['c47_bien_ghep'] OTHER 0
+mode_env_shape_drop GIET ['c46_mien_che_do'] OTHER 0
+mode_env_prefix_exact GIET ['c29_che_do_env_job', 'c31_che_do_duong_khac'] OTHER 0
+mode_shell_no_pwsh GIET ['c46_mien_che_do'] OTHER 0
+mode_shell_no_sh GIET ['c46_mien_che_do'] OTHER 0
+mode_shell_null_default GIET ['c46_mien_che_do'] OTHER 0
+mode_env_presence_not_value GIET ['c46_mien_che_do'] OTHER 0
+mode_env_job_presence GIET ['c29_che_do_env_job', 'c46_mien_che_do'] OTHER 0
+mode_key_id_drop GIET ['c46_mien_che_do'] OTHER 0
+mode_key_if_drop GIET ['c46_mien_che_do'] OTHER 0
+mode_key_timeout_drop GIET ['c46_mien_che_do'] OTHER 0
+mode_key_coe_drop GIET ['c46_mien_che_do'] OTHER 0
+mode_prior_skip_first GIET ['c47_bien_ghep'] OTHER 0
+mode_prior_only_first GIET ['c42_github_env_cung_job', 'c47_bien_ghep'] OTHER 0
+mode_prior_only_last GIET ['c47_bien_ghep'] OTHER 0
+mode_prior_include_current GIET ['c42_github_env_cung_job'] OTHER 0
+run_rstrip_all GIET ['c47_bien_ghep'] OTHER 0
+run_type_coerce GIET ['c47_bien_ghep'] OTHER 0
+dd_group_reverse GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep'] OTHER 0
+dd_map_reverse GIET ['c12_marker_khong_khop', 'c13_marker_buoc_khac', 'c14_ngoai_moi', 'c15_moi_mot_nguon', 'c18_dem_not_measured', 'c20_du_trang', 'c22_thieu_dinh_danh_khong_passed', 'c23_chi_loi_goi_that', 'c27_f02_yaml_khong_toi_gian', 'c28_che_do_env_buoc', 'c29_che_do_env_job', 'c31_che_do_duong_khac', 'c33_trung_chu_khac_job', 'c37_ghep_lech_ten', 'c38_ghep_lech_gio', 'c39_ghep_job', 'c42_github_env_cung_job', 'c44_ghep_sai_dang', 'c45_buoc_skipped_giua', 'c46_mien_che_do', 'c47_bien_ghep'] OTHER 0
+dd_output_dedupe GIET ['c47_bien_ghep'] OTHER 0
+log_group_close_exact HONG_NEO None OTHER 0
+log_shell_suffix GIET ['c47_bien_ghep'] OTHER 0
+log_nested_before_only GIET ['c40_nhom_long'] OTHER 0
+log_nested_after_only SONG_SOT [] OTHER 0
+log_prefix_drop_ok GIET ['c35_f02_khoi_khong_tron_ven'] OTHER 0
+log_close_ignore_prefix GIET ['c35_f02_khoi_khong_tron_ven'] OTHER 0
+Counter({'GIET': 48, 'HONG_NEO': 1, 'SONG_SOT': 1})

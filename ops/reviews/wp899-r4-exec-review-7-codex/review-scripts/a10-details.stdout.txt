@@ -1,0 +1,223 @@
+37/37 SHA256SUMS DAT
+[
+  {
+    "run": 39342960764,
+    "workflow_sha256": "226495bd42feb7bf1098317a0164e0556fa99b42b9c23789a7825f7255a56ba0",
+    "workflow_git_command": [
+      "git",
+      "cat-file",
+      "blob",
+      "b27fe85c9e9593ddbb059808fe4347fe1bd267be:.github/workflows/ci.yml"
+    ],
+    "rc": 0,
+    "null_env_scopes": [],
+    "labels": [
+      [
+        "ubuntu-latest"
+      ]
+    ],
+    "run_state": "passed",
+    "gate_states": {
+      "not_measured": 14
+    },
+    "checkout_states": {
+      "not_measured": 1,
+      "passed": 13
+    },
+    "ghep_states": {
+      "not_measured": 1,
+      "passed": 13
+    },
+    "all_markers": [
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".claude/dev/codex_cred_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".claude/dev/idiom_py_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".githooks/eol_policy_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".githooks/pre_push_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": "scripts/tl_core/command_registry_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".github/checks/ci_phamvi_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "path": "ops/ci_duong_nhanh_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "path": "ops/bien_nhan_v2_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-packet-loop (ubuntu-latest)",
+        "path": ".claude/dev/packet_loop_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      }
+    ],
+    "provenance_sha256": "5ad9afeafb5312101ae326d738855e8adb1e46e7e4240944c2b21e12ed2bafe0"
+  },
+  {
+    "run": 40074551995,
+    "workflow_sha256": "db1f3d9c4b618d46ab31f79fb8c63dd0466a50fd1c32740daf01e1e7ee4ba25b",
+    "workflow_git_command": [
+      "git",
+      "cat-file",
+      "blob",
+      "dc657149941f9db3ab2afc6fb6462ba4827bf18f:.github/workflows/ci.yml"
+    ],
+    "rc": 0,
+    "null_env_scopes": [],
+    "labels": [
+      [
+        "ubuntu-latest"
+      ]
+    ],
+    "run_state": "passed",
+    "gate_states": {
+      "not_measured": 23
+    },
+    "checkout_states": {
+      "not_measured": 1,
+      "passed": 22
+    },
+    "ghep_states": {
+      "not_measured": 1,
+      "passed": 22
+    },
+    "all_markers": [
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "path": "ops/ci_duong_nhanh_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "path": "ops/bien_nhan_v2_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".claude/dev/codex_cred_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".claude/dev/idiom_py_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".githooks/eol_policy_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".githooks/pre_push_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": "scripts/tl_core/command_registry_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "path": ".github/checks/ci_phamvi_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-packet-loop (ubuntu-latest)",
+        "path": ".claude/dev/packet_loop_test.py",
+        "state": "not_measured",
+        "reason": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+        "path": "ops/nhanh_don_duoc_test.py",
+        "state": "not_measured",
+        "reason": "che_do_khong_xac_dinh"
+      }
+    ],
+    "provenance_sha256": "24ffa770ff268876c030f12f59fee1010956138ba2ca3fa4370710456ffd185b"
+  }
+]

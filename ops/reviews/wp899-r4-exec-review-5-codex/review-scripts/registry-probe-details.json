@@ -1,0 +1,19 @@
+{
+  "normal": [
+    [],
+    25,
+    25
+  ],
+  "removed": [
+    [
+      "test sống chưa đăng ký: ops/ci_provenance_test.py"
+    ],
+    25,
+    24
+  ],
+  "ruff_contract": [
+    [],
+    3
+  ],
+  "same_regex_precedent": true
+}

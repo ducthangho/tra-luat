@@ -1,0 +1,434 @@
+[
+  {
+    "label": "prior1-preflight.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/preflight.py"
+    ],
+    "rc": 0,
+    "seconds": 0.3680155277252197,
+    "stdout_tail": "r\": \"\"\n    },\n    {\n      \"command\": [\n        \"codex\",\n        \"--version\"\n      ],\n      \"rc\": 0,\n      \"stdout\": \"codex-cli 0.164.0\\n\",\n      \"stderr\": \"WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\\n\"\n    },\n    {\n      \"command\": [\n        \"/usr/bin/python\",\n        \"-B\",\n        \"-m\",\n        \"ruff\",\n        \"--version\"\n      ],\n      \"rc\": 0,\n      \"stdout\": \"ruff 0.15.15\\n\",\n      \"stderr\": \"\"\n    }\n  ],\n  \"specs\": {},\n  \"thread_id\": \"01a17181-66a4-7513-aa98-0f337e5a6438\",\n  \"identity\": {\n    \"source\": \"/root/.codex/sessions/2026/10/25/rollout-2026-10-25T05-21-09-01a17181-66a4-7513-aa98-0f337e5a6438.jsonl\",\n    \"metadata\": [\n      {\n        \"id\": \"01a17181-66a4-7513-aa98-0f337e5a6438\",\n        \"originator\": \"codex_exec\",\n        \"cli_version\": \"0.164.0\",\n        \"model_provider\": \"openai\"\n      },\n      {\n        \"model\": \"gpt-6.1-sol\",\n        \"effort\": \"xhigh\",\n        \"model_reasoning_effort\": null\n      }\n    ]\n  }\n}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-calendar_cases.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/calendar_cases.py"
+    ],
+    "rc": 0,
+    "seconds": 0.9679806232452393,
+    "stdout_tail": "[('invalid_day_start', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_month_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_hour_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_minute_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_second_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('year_zero_start', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured')]\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-new_probes_r4.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/new_probes_r4.py"
+    ],
+    "rc": 0,
+    "seconds": 2.919646978378296,
+    "stdout_tail": "a_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'failed', 'dong_khop': []}]\nnested_before_shell  {'trang_thai': 'passed', 'so_buoc': 2} not_measured []\nnested_after_shell  {'trang_thai': 'passed', 'so_buoc': 2} not_measured []\nnested_in_output  {'trang_thai': 'passed', 'so_buoc': 2} passed [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]\ncomposite_outerTrue_followFalse  {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 3} not_measured []\ncomposite_outerTrue_followTrue  {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 4} not_measured []\ncomposite_outerFalse_followFalse  {'trang_thai': 'passed', 'so_buoc': 2} not_measured []\ncomposite_outerFalse_followTrue  {'trang_thai': 'passed', 'so_buoc': 3} failed [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'failed', 'dong_khop': []}]\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-classifier_negative.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/classifier_negative.py"
+    ],
+    "rc": 0,
+    "seconds": 18.772706031799316,
+    "stdout_tail": "{'rc': 1, 'stdout': 'CA: 45/45 dat\\n[DOT BIEN KHONG BI GIET DUNG] vo_can_AttributeError_qua_except_doi_kieu: TIN_DUNG_GIA HONG:c03_checkout_linux:AssertionError: doi kieu AttributeError\\nDOT BIEN: 0/1 bi giet dung ly do\\nTU KIEM PHAN HANG: DAT (0 dot bien)\\nTONG: DO\\n'}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-q1_time_detail.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/q1_time_detail.py"
+    ],
+    "rc": 0,
+    "seconds": 0.17294049263000488,
+    "stdout_tail": "{39342960764: {'raw_unique': 138, 'raw_zero': 2, 'floor_unique': 4, 'floor_zero': 0}, 40074551995: {'raw_unique': 185, 'raw_zero': 0, 'floor_unique': 6, 'floor_zero': 0}}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-run_old.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/run_old.py"
+    ],
+    "rc": 0,
+    "seconds": 7.572624444961548,
+    "stdout_tail": "ot_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n\nr4_F02_env_metadata 2 3 DO:r4_F02_env_metadata:r4 env must not authenticate\n\nr4_F02_mixed_color 2 3 DO:r4_F02_mixed_color:shell must succeed without executing target\n\nF02_collision_other_job 2 3 DO:F02_collision_other_job:shell must succeed without executing target\n\nF02_missing_endgroup 2 0 DAT:F02_missing_endgroup\n\ngit_workflow_source 2 0 DAT:git_workflow_source\n\ncontrol_simple 2 0 DAT:control_simple\n\nr4_compare.py 2 0  not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n\ncomposite_case.py 2 1 =0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n\nboundary_case.py 2 3 c_rest_chay', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old1-probes.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old1/probes.py"
+    ],
+    "rc": 0,
+    "seconds": 8.866532325744629,
+    "stdout_tail": "PROBES 85\nr4_F02_env_metadata 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nr4_F02_mixed_color 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_mixed_color_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_env_metadata_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_missing_end 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_end_suffix 0 passed {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]\nblock_nested 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old1-r4_compare.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old1/r4_compare.py"
+    ],
+    "rc": 0,
+    "seconds": 0.8861889839172363,
+    "stdout_tail": "r4_F02_env_metadata r2 gate failed → r3 gate not_measured\nr4_F02_mixed_color r2 gate failed → r3 gate not_measured\nmixed_other_after not_measured\nmixed_other_before not_measured\nmixed_same_job not_measured\nmixed_blocked_decoy not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old1-r4_compare_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old1/r4_compare_current.py"
+    ],
+    "rc": 0,
+    "seconds": 1.1263935565948486,
+    "stdout_tail": "r4_F02_env_metadata r2 gate failed → r3 gate not_measured\nr4_F02_mixed_color r2 gate failed → r3 gate not_measured\nmixed_other_after not_measured\nmixed_other_before not_measured\nmixed_same_job not_measured\nmixed_blocked_decoy not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old1-extra_mutants.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old1/extra_mutants.py"
+    ],
+    "rc": 0,
+    "seconds": 49.16028046607971,
+    "stdout_tail": "git_ignore_sha CHECK_OUTPUT 44 45\ngit_always_unavailable CHECK_OUTPUT 44 45\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old2-probes.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/probes.py"
+    ],
+    "rc": 0,
+    "seconds": 7.738327503204346,
+    "stdout_tail": "PROBES 85\nr4_F02_env_metadata 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nr4_F02_mixed_color 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_mixed_color_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_env_metadata_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_missing_end 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_end_suffix 0 passed {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]\nblock_nested 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old2-r4_compare.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/r4_compare.py"
+    ],
+    "rc": 0,
+    "seconds": 1.0271203517913818,
+    "stdout_tail": "r4_F02_env_metadata r2 gate failed → r3 gate not_measured\nr4_F02_mixed_color r2 gate failed → r3 gate not_measured\nmixed_other_after not_measured\nmixed_other_before not_measured\nmixed_same_job not_measured\nmixed_blocked_decoy not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old2-extra_mutants.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/extra_mutants.py"
+    ],
+    "rc": 0,
+    "seconds": 49.64512801170349,
+    "stdout_tail": "git_ignore_sha CHECK_OUTPUT 44 45\ngit_always_unavailable CHECK_OUTPUT 44 45\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old2-boundary_case.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/boundary_case.py"
+    ],
+    "rc": 3,
+    "seconds": 0.22794723510742188,
+    "stdout_tail": "DO:F02_nested_incomplete_echo:child endgroup cannot prove the unclosed parent echo complete, and late color must not be discarded: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [], 'thieu': [], 'ghep_buoc': {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior1-old2-composite_case.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/composite_case.py"
+    ],
+    "rc": 1,
+    "seconds": 0.5964465141296387,
+    "stdout_tail": "",
+    "stderr_tail": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/composite_case.py\", line 38, in <module>\n    assert proc.returncode==0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  {
+    "label": "prior1-old2-new_probes.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior1/old2/new_probes.py"
+    ],
+    "rc": 0,
+    "seconds": 2.2694449424743652,
+    "stdout_tail": "ell 0 passed 1\nnested_before_shell 0 not_measured 0\nnested_after_shell_no_outer_close 0 not_measured 0\nnested_after_shell_with_outer_close 0 not_measured 0\nendgroup_suffix 0 passed 1\nno_endgroup 0 not_measured 0\nno_reset_ANSI 0 passed 1\nlate_color_before_real_close 0 not_measured 0\ncomposite_other_job_after 0 not_measured 0\ncomposite_no_collision_other_job_after 0 not_measured 0\ncomposite_hidden_mode_other_job_after 0 not_measured 0\ncomposite_other_job_before 0 not_measured 0\ncomposite_no_collision_other_job_before 0 not_measured 0\ncomposite_hidden_mode_other_job_before 0 not_measured 0\ncomposite_same_job_skipped 0 not_measured 0\ncomposite_no_collision_same_job_skipped 0 not_measured 0\ncomposite_hidden_mode_same_job_skipped 0 not_measured 0\nlong_header_exact 0 not_measured 1\nlong_header_truncated 0 not_measured 0\nreal_log_extra_stats {'files': 37, 'groups_Run': 325, 'valid': 226, 'nested_in_metadata': 0, 'color_blank': 0, 'CRLF_files': 0, 'close_with_suffix': 0, 'env_before_shell': 0}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-preflight.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/preflight.py"
+    ],
+    "rc": 0,
+    "seconds": 0.26659393310546875,
+    "stdout_tail": "r\": \"\"\n    },\n    {\n      \"command\": [\n        \"codex\",\n        \"--version\"\n      ],\n      \"rc\": 0,\n      \"stdout\": \"codex-cli 0.164.0\\n\",\n      \"stderr\": \"WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\\n\"\n    },\n    {\n      \"command\": [\n        \"/usr/bin/python\",\n        \"-B\",\n        \"-m\",\n        \"ruff\",\n        \"--version\"\n      ],\n      \"rc\": 0,\n      \"stdout\": \"ruff 0.15.15\\n\",\n      \"stderr\": \"\"\n    }\n  ],\n  \"specs\": {},\n  \"thread_id\": \"01a17181-66a4-7513-aa98-0f337e5a6438\",\n  \"identity\": {\n    \"source\": \"/root/.codex/sessions/2026/10/25/rollout-2026-10-25T05-21-09-01a17181-66a4-7513-aa98-0f337e5a6438.jsonl\",\n    \"metadata\": [\n      {\n        \"id\": \"01a17181-66a4-7513-aa98-0f337e5a6438\",\n        \"originator\": \"codex_exec\",\n        \"cli_version\": \"0.164.0\",\n        \"model_provider\": \"openai\"\n      },\n      {\n        \"model\": \"gpt-6.1-sol\",\n        \"effort\": \"xhigh\",\n        \"model_reasoning_effort\": null\n      }\n    ]\n  }\n}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-calendar_cases.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/calendar_cases.py"
+    ],
+    "rc": 0,
+    "seconds": 0.6326122283935547,
+    "stdout_tail": "[('invalid_day_start', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_month_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_hour_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_minute_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('invalid_second_end', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured'), ('year_zero_start', 0, 0, {'trang_thai': 'not_measured', 'ly_do': 'c_gio_header_ngoai_cua_so', 'so_buoc': 2}, 'not_measured')]\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-new_probes_r4.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/new_probes_r4.py"
+    ],
+    "rc": 0,
+    "seconds": 3.024674654006958,
+    "stdout_tail": "a_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'failed', 'dong_khop': []}]\nnested_before_shell  {'trang_thai': 'passed', 'so_buoc': 2} not_measured []\nnested_after_shell  {'trang_thai': 'passed', 'so_buoc': 2} not_measured []\nnested_in_output  {'trang_thai': 'passed', 'so_buoc': 2} passed [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]\ncomposite_outerTrue_followFalse  {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 3} not_measured []\ncomposite_outerTrue_followTrue  {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 4} not_measured []\ncomposite_outerFalse_followFalse  {'trang_thai': 'passed', 'so_buoc': 2} not_measured []\ncomposite_outerFalse_followTrue  {'trang_thai': 'passed', 'so_buoc': 3} failed [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'failed', 'dong_khop': []}]\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-classifier_negative.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/classifier_negative.py"
+    ],
+    "rc": 0,
+    "seconds": 17.870593786239624,
+    "stdout_tail": "{'rc': 1, 'stdout': 'CA: 45/45 dat\\n[DOT BIEN KHONG BI GIET DUNG] vo_can_AttributeError_qua_except_doi_kieu: TIN_DUNG_GIA HONG:c03_checkout_linux:AssertionError: doi kieu AttributeError\\nDOT BIEN: 0/1 bi giet dung ly do\\nTU KIEM PHAN HANG: DAT (0 dot bien)\\nTONG: DO\\n'}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-q1_time_detail.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/q1_time_detail.py"
+    ],
+    "rc": 0,
+    "seconds": 0.09182047843933105,
+    "stdout_tail": "{39342960764: {'raw_unique': 138, 'raw_zero': 2, 'floor_unique': 4, 'floor_zero': 0}, 40074551995: {'raw_unique': 185, 'raw_zero': 0, 'floor_unique': 6, 'floor_zero': 0}}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-run_old.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/run_old.py"
+    ],
+    "rc": 0,
+    "seconds": 4.240208387374878,
+    "stdout_tail": "f2165569c3281cba3b5:ops/ci_provenance.py']' returned non-zero exit status 128.\n\nr4_F02_env_metadata 2 3 DO:r4_F02_env_metadata:r4 env must not authenticate\n\nr4_F02_mixed_color 2 3 DO:r4_F02_mixed_color:shell must succeed without executing target\n\nF02_collision_other_job 2 3 DO:F02_collision_other_job:shell must succeed without executing target\n\nF02_missing_endgroup 2 0 DAT:F02_missing_endgroup\n\ngit_workflow_source 2 0 DAT:git_workflow_source\n\ncontrol_simple 2 0 DAT:control_simple\n\nr4_compare.py 2 1 ess.CalledProcessError: Command '['git', 'show', '9e5019ef2e3b8d59345fff2165569c3281cba3b5:ops/ci_provenance.py']' returned non-zero exit status 128.\n\ncomposite_case.py 2 1 =0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n\nboundary_case.py 2 3 c_rest_chay', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old1-probes.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old1/probes.py"
+    ],
+    "rc": 0,
+    "seconds": 7.4080798625946045,
+    "stdout_tail": "PROBES 85\nr4_F02_env_metadata 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nr4_F02_mixed_color 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_mixed_color_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_env_metadata_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_missing_end 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_end_suffix 0 passed {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]\nblock_nested 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old1-r4_compare.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old1/r4_compare.py"
+    ],
+    "rc": 1,
+    "seconds": 0.1884171962738037,
+    "stdout_tail": "",
+    "stderr_tail": "d1/r4_compare.py\", line 8, in <module>\n    p=subprocess.run(['git','show','9e5019ef2e3b8d59345fff2165569c3281cba3b5:ops/ci_provenance.py'],capture_output=True,check=True)\n  File \"/usr/lib/python3.13/subprocess.py\", line 578, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['git', 'show', '9e5019ef2e3b8d59345fff2165569c3281cba3b5:ops/ci_provenance.py']' returned non-zero exit status 128.\n"
+  },
+  {
+    "label": "prior2-old1-r4_compare_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old1/r4_compare_current.py"
+    ],
+    "rc": 0,
+    "seconds": 1.0008563995361328,
+    "stdout_tail": "r4_F02_env_metadata r2 gate failed → r3 gate not_measured\nr4_F02_mixed_color r2 gate failed → r3 gate not_measured\nmixed_other_after not_measured\nmixed_other_before not_measured\nmixed_same_job not_measured\nmixed_blocked_decoy not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old1-extra_mutants.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old1/extra_mutants.py"
+    ],
+    "rc": 0,
+    "seconds": 43.746602058410645,
+    "stdout_tail": "git_ignore_sha CHECK_OUTPUT 44 45\ngit_always_unavailable CHECK_OUTPUT 44 45\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-probes.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/probes.py"
+    ],
+    "rc": 0,
+    "seconds": 7.2858476638793945,
+    "stdout_tail": "PROBES 85\nr4_F02_env_metadata 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nr4_F02_mixed_color 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_mixed_color_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nF02_env_metadata_other_job 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_missing_end 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\nblock_end_suffix 0 passed {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]\nblock_nested 0 not_measured {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'} []\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-r4_compare.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/r4_compare.py"
+    ],
+    "rc": 1,
+    "seconds": 0.15592718124389648,
+    "stdout_tail": "",
+    "stderr_tail": "d2/r4_compare.py\", line 8, in <module>\n    p=subprocess.run(['git','show','9e5019ef2e3b8d59345fff2165569c3281cba3b5:ops/ci_provenance.py'],capture_output=True,check=True)\n  File \"/usr/lib/python3.13/subprocess.py\", line 578, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['git', 'show', '9e5019ef2e3b8d59345fff2165569c3281cba3b5:ops/ci_provenance.py']' returned non-zero exit status 128.\n"
+  },
+  {
+    "label": "prior2-old2-r4_compare_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/r4_compare_current.py"
+    ],
+    "rc": 0,
+    "seconds": 0.9263942241668701,
+    "stdout_tail": "r4_F02_env_metadata r2 gate failed → r3 gate not_measured\nr4_F02_mixed_color r2 gate failed → r3 gate not_measured\nmixed_other_after not_measured\nmixed_other_before not_measured\nmixed_same_job not_measured\nmixed_blocked_decoy not_measured\nmetadata_other_after not_measured\nmetadata_other_before not_measured\nmetadata_same_job not_measured\nmetadata_blocked_decoy not_measured\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-extra_mutants.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/extra_mutants.py"
+    ],
+    "rc": 0,
+    "seconds": 41.37775158882141,
+    "stdout_tail": "git_ignore_sha CHECK_OUTPUT 44 45\ngit_always_unavailable CHECK_OUTPUT 44 45\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-boundary_case.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/boundary_case.py"
+    ],
+    "rc": 3,
+    "seconds": 0.31043100357055664,
+    "stdout_tail": "DO:F02_nested_incomplete_echo:child endgroup cannot prove the unclosed parent echo complete, and late color must not be discarded: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [], 'thieu': [], 'ghep_buoc': {'trang_thai': 'not_measured', 'ly_do': 'a_so_nhom_khac_so_buoc_rest_chay', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 0, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'not_measured'}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-boundary_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/boundary_current.py"
+    ],
+    "rc": 0,
+    "seconds": 0.24417757987976074,
+    "stdout_tail": "DAT:F02_nested_incomplete_echo\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-composite_case.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/composite_case.py"
+    ],
+    "rc": 1,
+    "seconds": 0.5043847560882568,
+    "stdout_tail": "",
+    "stderr_tail": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/composite_case.py\", line 38, in <module>\n    assert proc.returncode==0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  {
+    "label": "prior2-old2-composite_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/composite_current.py"
+    ],
+    "rc": 1,
+    "seconds": 0.49721837043762207,
+    "stdout_tail": "",
+    "stderr_tail": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/composite_current.py\", line 39, in <module>\n    assert proc.returncode==0 and '+ python '+target not in proc.stderr.decode()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+  },
+  {
+    "label": "prior2-old2-new_probes.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/new_probes.py"
+    ],
+    "rc": 0,
+    "seconds": 2.263984203338623,
+    "stdout_tail": "er_shell 0 passed 1\nnested_before_shell 0 not_measured 0\nnested_after_shell_no_outer_close 0 not_measured 0\nnested_after_shell_with_outer_close 0 not_measured 0\nendgroup_suffix 0 passed 1\nno_endgroup 0 not_measured 0\nno_reset_ANSI 0 passed 1\nlate_color_before_real_close 0 not_measured 0\ncomposite_other_job_after 0 not_measured 0\ncomposite_no_collision_other_job_after 0 not_measured 0\ncomposite_hidden_mode_other_job_after 0 not_measured 0\ncomposite_other_job_before 0 not_measured 0\ncomposite_no_collision_other_job_before 0 not_measured 0\ncomposite_hidden_mode_other_job_before 0 not_measured 0\ncomposite_same_job_skipped 0 not_measured 0\ncomposite_no_collision_same_job_skipped 0 not_measured 0\ncomposite_hidden_mode_same_job_skipped 0 not_measured 0\nlong_header_exact 0 not_measured 1\nlong_header_truncated 0 not_measured 0\nreal_log_extra_stats {'files': 0, 'groups_Run': 0, 'valid': 0, 'nested_in_metadata': 0, 'color_blank': 0, 'CRLF_files': 0, 'close_with_suffix': 0, 'env_before_shell': 0}\n",
+    "stderr_tail": ""
+  },
+  {
+    "label": "prior2-old2-new_probes_current.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/prior2/old2/new_probes_current.py"
+    ],
+    "rc": 0,
+    "seconds": 2.4794020652770996,
+    "stdout_tail": "ell 0 passed 1\nnested_before_shell 0 not_measured 0\nnested_after_shell_no_outer_close 0 not_measured 0\nnested_after_shell_with_outer_close 0 not_measured 0\nendgroup_suffix 0 passed 1\nno_endgroup 0 not_measured 0\nno_reset_ANSI 0 passed 1\nlate_color_before_real_close 0 not_measured 0\ncomposite_other_job_after 0 not_measured 0\ncomposite_no_collision_other_job_after 0 not_measured 0\ncomposite_hidden_mode_other_job_after 0 not_measured 0\ncomposite_other_job_before 0 not_measured 0\ncomposite_no_collision_other_job_before 0 not_measured 0\ncomposite_hidden_mode_other_job_before 0 not_measured 0\ncomposite_same_job_skipped 0 not_measured 0\ncomposite_no_collision_same_job_skipped 0 not_measured 0\ncomposite_hidden_mode_same_job_skipped 0 not_measured 0\nlong_header_exact 0 not_measured 1\nlong_header_truncated 0 not_measured 0\nreal_log_extra_stats {'files': 37, 'groups_Run': 325, 'valid': 226, 'nested_in_metadata': 0, 'color_blank': 0, 'CRLF_files': 0, 'close_with_suffix': 0, 'env_before_shell': 0}\n",
+    "stderr_tail": ""
+  }
+]

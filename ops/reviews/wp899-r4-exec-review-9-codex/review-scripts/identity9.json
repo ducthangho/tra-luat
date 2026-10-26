@@ -1,0 +1,42 @@
+{
+  "CODEX_THREAD_ID": "01a17439-142b-7672-8469-99a80fbc0a66",
+  "CODEX_SESSION_ID": "01a17439-142b-7672-8469-99a80fbc0a66",
+  "CODEX_VERSION": "0.164.0",
+  "cli": {
+    "command": [
+      "codex",
+      "--version"
+    ],
+    "rc": 0,
+    "stdout": "codex-cli 0.164.0\n",
+    "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\n"
+  },
+  "sources": [
+    {
+      "path": "/root/.codex/sessions/2026/10/25/rollout-2026-10-25T18-01-01-01a17439-142b-7672-8469-99a80fbc0a66.jsonl",
+      "records": [
+        {
+          "id": "01a17439-142b-7672-8469-99a80fbc0a66",
+          "cli_version": "0.164.0",
+          "originator": "codex_exec",
+          "model_provider": "openai",
+          "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws"
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "effort": "xhigh",
+          "reasoning_effort": null,
+          "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws",
+          "sandbox_policy": {
+            "type": "workspace-write",
+            "network_access": false,
+            "exclude_tmpdir_env_var": false,
+            "exclude_slash_tmp": false
+          },
+          "approval_policy": "never"
+        }
+      ]
+    }
+  ],
+  "per_request_identity": "KHONG_DO_DUOC"
+}

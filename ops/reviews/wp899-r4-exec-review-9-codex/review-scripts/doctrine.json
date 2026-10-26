@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".claude/dev/packet_loop.py",
+    "doctrine-scan",
+    "--root",
+    "."
+  ],
+  "rc": 0,
+  "elapsed_seconds": 1.3406903743743896,
+  "stdout_sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

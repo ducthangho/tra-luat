@@ -1,0 +1,46 @@
+[
+  {
+    "input": "jobs: {}\nnote: 2026-02-30\n",
+    "doc_wf": {
+      "exception": "ValueError",
+      "message": "day is out of range for month"
+    },
+    "thu": {
+      "exception": "ValueError",
+      "message": "day is out of range for month"
+    }
+  },
+  {
+    "input": "jobs: {}\nnote: !!int xyz\n",
+    "doc_wf": {
+      "exception": "ValueError",
+      "message": "invalid literal for int() with base 10: 'xyz'"
+    },
+    "thu": {
+      "exception": "ValueError",
+      "message": "invalid literal for int() with base 10: 'xyz'"
+    }
+  },
+  {
+    "input": "jobs: {}\nnote: !!float abc\n",
+    "doc_wf": {
+      "exception": "ValueError",
+      "message": "could not convert string to float: 'abc'"
+    },
+    "thu": {
+      "exception": "ValueError",
+      "message": "could not convert string to float: 'abc'"
+    }
+  },
+  {
+    "input": "jobs: {}\nnote: 2026-01-01T99:00:00Z\n",
+    "doc_wf": {
+      "exception": "ValueError",
+      "message": "hour must be in 0..23"
+    },
+    "thu": {
+      "exception": "ValueError",
+      "message": "hour must be in 0..23"
+    }
+  }
+]

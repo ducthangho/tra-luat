@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/augassign9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 51.73831868171692,
+  "stdout_sha256": "844bb5f3734427099ea046622170025faab28467d901a849edeb7ab83b3cd2e3",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

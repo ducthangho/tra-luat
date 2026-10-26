@@ -1,0 +1,72 @@
+L154c17:'in'->'not in' c12_marker_khong_khop TIN_DUNG_GIA
+L154c17:'in'->'not in' c13_marker_buoc_khac TIN_DUNG_GIA
+L154c17:'in'->'not in' c14_ngoai_moi TIN_DUNG_GIA
+L154c22:'and'->'or' c12_marker_khong_khop TIN_DUNG_GIA
+L154c22:'and'->'or' c13_marker_buoc_khac TIN_DUNG_GIA
+L154c22:'and'->'or' c14_ngoai_moi TIN_DUNG_GIA
+L168c16:'0'->'1' c02_attempt_lech TIN_DUNG_GIA
+L168c16:'0'->'1' c03_checkout_linux TIN_DUNG_GIA
+L168c16:'0'->'1' c04_checkout_windows TIN_DUNG_GIA
+L168c32:'=='->'!=' c22_thieu_dinh_danh_khong_passed TIN_DUNG_GIA
+L168c32:'=='->'!=' c47_bien_ghep TIN_DUNG_GIA
+L168c32:'=='->'!=' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L168c35:'1'->'0' c22_thieu_dinh_danh_khong_passed TIN_DUNG_GIA
+L168c35:'1'->'0' c47_bien_ghep TIN_DUNG_GIA
+L168c35:'1'->'0' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L171c14:'in'->'not in' c02_attempt_lech TIN_DUNG_GIA
+L171c14:'in'->'not in' c03_checkout_linux TIN_DUNG_GIA
+L171c14:'in'->'not in' c04_checkout_windows TIN_DUNG_GIA
+L172c46:'and'->'or' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L174c34:'0'->'1' c02_attempt_lech TIN_DUNG_GIA
+L174c34:'0'->'1' c03_checkout_linux TIN_DUNG_GIA
+L174c34:'0'->'1' c04_checkout_windows TIN_DUNG_GIA
+L187c10:'is'->'is not' c05_checkout_khong_sha TIN_DUNG_GIA
+L187c10:'is'->'is not' c06_checkout_hai_sha TIN_DUNG_GIA
+L187c10:'is'->'is not' c07_checkout_push_lech TIN_DUNG_GIA
+L191c9:'is'->'is not' c22_thieu_dinh_danh_khong_passed TIN_DUNG_GIA
+L191c9:'is'->'is not' c47_bien_ghep TIN_DUNG_GIA
+L191c9:'is'->'is not' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L191c17:'or'->'and' c22_thieu_dinh_danh_khong_passed TIN_DUNG_GIA
+L191c17:'or'->'and' c47_bien_ghep TIN_DUNG_GIA
+L191c17:'or'->'and' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L193c53:'and'->'or' c22_thieu_dinh_danh_khong_passed TIN_DUNG_GIA
+L205c53:'and'->'or' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L206c15:'and'->'or' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L206c41:'and'->'or' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L264c18:'and'->'or' c02_attempt_lech TIN_DUNG_GIA
+L264c18:'and'->'or' c03_checkout_linux TIN_DUNG_GIA
+L264c18:'and'->'or' c04_checkout_windows TIN_DUNG_GIA
+L264c34:'1'->'2' c06_checkout_hai_sha TIN_DUNG_GIA
+L264c34:'1'->'2' c47_bien_ghep TIN_DUNG_GIA
+L264c34:'1'->'2' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L274c18:'1'->'2' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L292c36:'or'->'and' c05_checkout_khong_sha TIN_DUNG_GIA
+L292c36:'or'->'and' c06_checkout_hai_sha TIN_DUNG_GIA
+L292c36:'or'->'and' c07_checkout_push_lech TIN_DUNG_GIA
+L295c11:'not'->'' c02_attempt_lech TIN_DUNG_GIA
+L295c11:'not'->'' c03_checkout_linux TIN_DUNG_GIA
+L295c11:'not'->'' c04_checkout_windows TIN_DUNG_GIA
+L295c26:'is'->'is not' c41_buoc_uses TIN_DUNG_GIA
+L295c26:'is'->'is not' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L295c33:'and'->'or' c41_buoc_uses TIN_DUNG_GIA
+L295c33:'and'->'or' c48_nguyen_van_va_mien TIN_DUNG_GIA
+L295c49:'and'->'or' c02_attempt_lech TIN_DUNG_GIA
+L295c49:'and'->'or' c03_checkout_linux TIN_DUNG_GIA
+L295c49:'and'->'or' c04_checkout_windows TIN_DUNG_GIA
+L299c44:'and'->'or' c30_che_do_doi_so TIN_DUNG_GIA
+L299c44:'and'->'or' c42_github_env_cung_job TIN_DUNG_GIA
+L299c44:'and'->'or' c47_bien_ghep TIN_DUNG_GIA
+L300c38:'2'->'3' c12_marker_khong_khop TIN_DUNG_GIA
+L300c38:'2'->'3' c13_marker_buoc_khac TIN_DUNG_GIA
+L300c38:'2'->'3' c14_ngoai_moi TIN_DUNG_GIA
+L300c62:'and'->'or' c27_f02_yaml_khong_toi_gian TIN_DUNG_GIA
+L300c62:'and'->'or' c30_che_do_doi_so TIN_DUNG_GIA
+L300c62:'and'->'or' c42_github_env_cung_job TIN_DUNG_GIA
+L300c66:'all'->'any' c27_f02_yaml_khong_toi_gian TIN_DUNG_GIA
+L302c21:'not in'->'in' c13_marker_buoc_khac TIN_DUNG_GIA
+L302c21:'not in'->'in' c14_ngoai_moi TIN_DUNG_GIA
+L302c21:'not in'->'in' c27_f02_yaml_khong_toi_gian TIN_DUNG_GIA
+L302c32:'or'->'and' c13_marker_buoc_khac TIN_DUNG_GIA
+L302c32:'or'->'and' c14_ngoai_moi TIN_DUNG_GIA
+L302c32:'or'->'and' c27_f02_yaml_khong_toi_gian TIN_DUNG_GIA
+OPERATORS 29 CASES 71 Counter({'TIN_DUNG_GIA': 71})

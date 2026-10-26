@@ -1,0 +1,22 @@
+{
+  "sample_counts": {
+    "ghep:passed": 189,
+    "failed": 75,
+    "che_do_khong_xac_dinh": 338,
+    "ghep:d_job_yaml_khong_duy_nhat": 22,
+    "passed": 74,
+    "job_dich_khong_dau": 85,
+    "number>=10": 63,
+    "ghep:c_gio_header_ngoai_cua_so": 14,
+    "ghep:steps_rest_sai_dang": 10,
+    "ghep:b_ten_buoc_lech": 15
+  },
+  "sample_count_min": 10,
+  "number_sequences_with_gaps": 0,
+  "jobs_with_alias_equal_key": 27,
+  "rest_names_with_matrix_on_alias": 20,
+  "rest_time_years": [
+    "2026"
+  ],
+  "absence_of_generated_a_count_failures": "ghep:a_so_nhom_khac_so_buoc_rest_chay not generated; c36 separately measures count failures"
+}

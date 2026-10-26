@@ -1,0 +1,11 @@
+{
+  "frontier6-replay": {
+    "status": "interrupted",
+    "rc": 130
+  },
+  "frontier7": {
+    "status": "interrupted",
+    "rc": 130
+  },
+  "reason": "Replace full suite on already killed mutants by exact-target replay; surviving new mutants still run every case."
+}

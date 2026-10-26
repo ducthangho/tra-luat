@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/prove_frontier.py"
+  ],
+  "returncode": 0,
+  "seconds": 16.40608859062195,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/frontier-proofs.stdout.txt",
+    "bytes": 1636,
+    "sha256": "bc54bfaf30c332343c8437e4a5665e3fbed4bc1029891e815e60f81045ff196c"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review4/ws/.review/frontier-proofs.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,650 @@
+{
+  "mutants": [
+    {
+      "function": "ghep_job",
+      "before": "'${{' not in x",
+      "after": "not x.startswith('${{')",
+      "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/ghep_job-membership9.py",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/closed8.py",
+        "child",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/ghep_job-membership9.py",
+        "ghep_job"
+      ],
+      "rc": 0,
+      "cases": [
+        [
+          "c39_ghep_job",
+          0,
+          ""
+        ],
+        [
+          "c52_tap_dong",
+          0,
+          ""
+        ],
+        [
+          "c47_bien_ghep",
+          0,
+          ""
+        ],
+        [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ],
+        [
+          "c01_cli_du_co",
+          0,
+          ""
+        ],
+        [
+          "c02_attempt_lech",
+          0,
+          ""
+        ],
+        [
+          "c03_checkout_linux",
+          0,
+          ""
+        ],
+        [
+          "c04_checkout_windows",
+          0,
+          ""
+        ],
+        [
+          "c05_checkout_khong_sha",
+          0,
+          ""
+        ],
+        [
+          "c06_checkout_hai_sha",
+          0,
+          ""
+        ],
+        [
+          "c07_checkout_push_lech",
+          0,
+          ""
+        ],
+        [
+          "c08_checkout_pr_parents",
+          0,
+          ""
+        ],
+        [
+          "c09_checkout_pr_lech",
+          0,
+          ""
+        ],
+        [
+          "c10_runner_id_0",
+          0,
+          ""
+        ],
+        [
+          "c11_job_skipped",
+          0,
+          ""
+        ],
+        [
+          "c12_marker_khong_khop",
+          0,
+          ""
+        ],
+        [
+          "c13_marker_buoc_khac",
+          0,
+          ""
+        ],
+        [
+          "c14_ngoai_moi",
+          0,
+          ""
+        ],
+        [
+          "c15_moi_mot_nguon",
+          0,
+          ""
+        ],
+        [
+          "c16_workflow_def_luon_not_measured",
+          0,
+          ""
+        ],
+        [
+          "c17_ghi_nguyen_tu",
+          0,
+          ""
+        ],
+        [
+          "c18_dem_not_measured",
+          0,
+          ""
+        ],
+        [
+          "c19_rest_loi",
+          0,
+          ""
+        ],
+        [
+          "c20_du_trang",
+          0,
+          ""
+        ],
+        [
+          "c22_thieu_dinh_danh_khong_passed",
+          0,
+          ""
+        ],
+        [
+          "c23_chi_loi_goi_that",
+          0,
+          ""
+        ],
+        [
+          "c24_goi_that_loi_va_chuyen_huong",
+          0,
+          ""
+        ],
+        [
+          "c25_f02_env_mang_mau",
+          0,
+          ""
+        ],
+        [
+          "c26_f02_dong_khong_mau",
+          0,
+          ""
+        ],
+        [
+          "c27_f02_yaml_khong_toi_gian",
+          0,
+          ""
+        ],
+        [
+          "c28_che_do_env_buoc",
+          0,
+          ""
+        ],
+        [
+          "c29_che_do_env_job",
+          0,
+          ""
+        ],
+        [
+          "c30_che_do_doi_so",
+          0,
+          ""
+        ],
+        [
+          "c31_che_do_duong_khac",
+          0,
+          ""
+        ],
+        [
+          "c32_workflow_khong_doc_duoc",
+          0,
+          ""
+        ],
+        [
+          "c33_trung_chu_khac_job",
+          0,
+          ""
+        ],
+        [
+          "c36_ghep_lech_so",
+          0,
+          ""
+        ],
+        [
+          "c37_ghep_lech_ten",
+          0,
+          ""
+        ],
+        [
+          "c38_ghep_lech_gio",
+          0,
+          ""
+        ],
+        [
+          "c40_nhom_long",
+          0,
+          ""
+        ],
+        [
+          "c41_buoc_uses",
+          0,
+          ""
+        ],
+        [
+          "c42_github_env_cung_job",
+          0,
+          ""
+        ],
+        [
+          "c44_ghep_sai_dang",
+          0,
+          ""
+        ],
+        [
+          "c45_buoc_skipped_giua",
+          0,
+          ""
+        ],
+        [
+          "c46_mien_che_do",
+          0,
+          ""
+        ],
+        [
+          "c49_oracle_nhieu_truc",
+          0,
+          ""
+        ],
+        [
+          "c50_mien_luot6",
+          0,
+          ""
+        ],
+        [
+          "c51_mien_luot7",
+          0,
+          ""
+        ],
+        [
+          "c43_khoi_khac_buoc",
+          0,
+          ""
+        ],
+        [
+          "c34_git_blob_that",
+          0,
+          ""
+        ],
+        [
+          "c35_f02_khoi_khong_tron_ven",
+          0,
+          ""
+        ],
+        [
+          "c21_fixture_bam",
+          0,
+          ""
+        ]
+      ],
+      "rank": "SONG",
+      "source_sha256": "f6801b814e6009a69ee16c0c2b52bdefb5094d881e9327564927a95db026f9d6",
+      "stdout": "{\"cases\": [[\"c39_ghep_job\", 0, \"\"], [\"c52_tap_dong\", 0, \"\"], [\"c47_bien_ghep\", 0, \"\"], [\"c48_nguyen_van_va_mien\", 0, \"\"], [\"c01_cli_du_co\", 0, \"\"], [\"c02_attempt_lech\", 0, \"\"], [\"c03_checkout_linux\", 0, \"\"], [\"c04_checkout_windows\", 0, \"\"], [\"c05_checkout_khong_sha\", 0, \"\"], [\"c06_checkout_hai_sha\", 0, \"\"], [\"c07_checkout_push_lech\", 0, \"\"], [\"c08_checkout_pr_parents\", 0, \"\"], [\"c09_checkout_pr_lech\", 0, \"\"], [\"c10_runner_id_0\", 0, \"\"], [\"c11_job_skipped\", 0, \"\"], [\"c12_marker_khong_khop\", 0, \"\"], [\"c13_marker_buoc_khac\", 0, \"\"], [\"c14_ngoai_moi\", 0, \"\"], [\"c15_moi_mot_nguon\", 0, \"\"], [\"c16_workflow_def_luon_not_measured\", 0, \"\"], [\"c17_ghi_nguyen_tu\", 0, \"\"], [\"c18_dem_not_measured\", 0, \"\"], [\"c19_rest_loi\", 0, \"\"], [\"c20_du_trang\", 0, \"\"], [\"c22_thieu_dinh_danh_khong_passed\", 0, \"\"], [\"c23_chi_loi_goi_that\", 0, \"\"], [\"c24_goi_that_loi_va_chuyen_huong\", 0, \"\"], [\"c25_f02_env_mang_mau\", 0, \"\"], [\"c26_f02_dong_khong_mau\", 0, \"\"], [\"c27_f02_yaml_khong_toi_gian\", 0, \"\"], [\"c28_che_do_env_buoc\", 0, \"\"], [\"c29_che_do_env_job\", 0, \"\"], [\"c30_che_do_doi_so\", 0, \"\"], [\"c31_che_do_duong_khac\", 0, \"\"], [\"c32_workflow_khong_doc_duoc\", 0, \"\"], [\"c33_trung_chu_khac_job\", 0, \"\"], [\"c36_ghep_lech_so\", 0, \"\"], [\"c37_ghep_lech_ten\", 0, \"\"], [\"c38_ghep_lech_gio\", 0, \"\"], [\"c40_nhom_long\", 0, \"\"], [\"c41_buoc_uses\", 0, \"\"], [\"c42_github_env_cung_job\", 0, \"\"], [\"c44_ghep_sai_dang\", 0, \"\"], [\"c45_buoc_skipped_giua\", 0, \"\"], [\"c46_mien_che_do\", 0, \"\"], [\"c49_oracle_nhieu_truc\", 0, \"\"], [\"c50_mien_luot6\", 0, \"\"], [\"c51_mien_luot7\", 0, \"\"], [\"c43_khoi_khac_buoc\", 0, \"\"], [\"c34_git_blob_that\", 0, \"\"], [\"c35_f02_khoi_khong_tron_ven\", 0, \"\"], [\"c21_fixture_bam\", 0, \"\"]], \"other_output\": \"\"}\n",
+      "stderr": ""
+    },
+    {
+      "function": "ten_du_kien",
+      "before": "'${{' not in s['name']",
+      "after": "not s['name'].startswith('${{')",
+      "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/ten_du_kien-membership9.py",
+      "command": [
+        "/usr/bin/python",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/closed8.py",
+        "child",
+        "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/.review/ten_du_kien-membership9.py",
+        "ten_du_kien"
+      ],
+      "rc": 0,
+      "cases": [
+        [
+          "c37_ghep_lech_ten",
+          0,
+          ""
+        ],
+        [
+          "c52_tap_dong",
+          0,
+          ""
+        ],
+        [
+          "c47_bien_ghep",
+          0,
+          ""
+        ],
+        [
+          "c48_nguyen_van_va_mien",
+          0,
+          ""
+        ],
+        [
+          "c01_cli_du_co",
+          0,
+          ""
+        ],
+        [
+          "c02_attempt_lech",
+          0,
+          ""
+        ],
+        [
+          "c03_checkout_linux",
+          0,
+          ""
+        ],
+        [
+          "c04_checkout_windows",
+          0,
+          ""
+        ],
+        [
+          "c05_checkout_khong_sha",
+          0,
+          ""
+        ],
+        [
+          "c06_checkout_hai_sha",
+          0,
+          ""
+        ],
+        [
+          "c07_checkout_push_lech",
+          0,
+          ""
+        ],
+        [
+          "c08_checkout_pr_parents",
+          0,
+          ""
+        ],
+        [
+          "c09_checkout_pr_lech",
+          0,
+          ""
+        ],
+        [
+          "c10_runner_id_0",
+          0,
+          ""
+        ],
+        [
+          "c11_job_skipped",
+          0,
+          ""
+        ],
+        [
+          "c12_marker_khong_khop",
+          0,
+          ""
+        ],
+        [
+          "c13_marker_buoc_khac",
+          0,
+          ""
+        ],
+        [
+          "c14_ngoai_moi",
+          0,
+          ""
+        ],
+        [
+          "c15_moi_mot_nguon",
+          0,
+          ""
+        ],
+        [
+          "c16_workflow_def_luon_not_measured",
+          0,
+          ""
+        ],
+        [
+          "c17_ghi_nguyen_tu",
+          0,
+          ""
+        ],
+        [
+          "c18_dem_not_measured",
+          0,
+          ""
+        ],
+        [
+          "c19_rest_loi",
+          0,
+          ""
+        ],
+        [
+          "c20_du_trang",
+          0,
+          ""
+        ],
+        [
+          "c22_thieu_dinh_danh_khong_passed",
+          0,
+          ""
+        ],
+        [
+          "c23_chi_loi_goi_that",
+          0,
+          ""
+        ],
+        [
+          "c24_goi_that_loi_va_chuyen_huong",
+          0,
+          ""
+        ],
+        [
+          "c25_f02_env_mang_mau",
+          0,
+          ""
+        ],
+        [
+          "c26_f02_dong_khong_mau",
+          0,
+          ""
+        ],
+        [
+          "c27_f02_yaml_khong_toi_gian",
+          0,
+          ""
+        ],
+        [
+          "c28_che_do_env_buoc",
+          0,
+          ""
+        ],
+        [
+          "c29_che_do_env_job",
+          0,
+          ""
+        ],
+        [
+          "c30_che_do_doi_so",
+          0,
+          ""
+        ],
+        [
+          "c31_che_do_duong_khac",
+          0,
+          ""
+        ],
+        [
+          "c32_workflow_khong_doc_duoc",
+          0,
+          ""
+        ],
+        [
+          "c33_trung_chu_khac_job",
+          0,
+          ""
+        ],
+        [
+          "c36_ghep_lech_so",
+          0,
+          ""
+        ],
+        [
+          "c38_ghep_lech_gio",
+          0,
+          ""
+        ],
+        [
+          "c39_ghep_job",
+          0,
+          ""
+        ],
+        [
+          "c40_nhom_long",
+          0,
+          ""
+        ],
+        [
+          "c41_buoc_uses",
+          0,
+          ""
+        ],
+        [
+          "c42_github_env_cung_job",
+          0,
+          ""
+        ],
+        [
+          "c44_ghep_sai_dang",
+          0,
+          ""
+        ],
+        [
+          "c45_buoc_skipped_giua",
+          0,
+          ""
+        ],
+        [
+          "c46_mien_che_do",
+          0,
+          ""
+        ],
+        [
+          "c49_oracle_nhieu_truc",
+          0,
+          ""
+        ],
+        [
+          "c50_mien_luot6",
+          0,
+          ""
+        ],
+        [
+          "c51_mien_luot7",
+          0,
+          ""
+        ],
+        [
+          "c43_khoi_khac_buoc",
+          0,
+          ""
+        ],
+        [
+          "c34_git_blob_that",
+          0,
+          ""
+        ],
+        [
+          "c35_f02_khoi_khong_tron_ven",
+          0,
+          ""
+        ],
+        [
+          "c21_fixture_bam",
+          0,
+          ""
+        ]
+      ],
+      "rank": "SONG",
+      "source_sha256": "bf0ed5302a4d575d3208a2ba4ecb5ffeb3b84773986214c02fbf4fc28aebbff6",
+      "stdout": "{\"cases\": [[\"c37_ghep_lech_ten\", 0, \"\"], [\"c52_tap_dong\", 0, \"\"], [\"c47_bien_ghep\", 0, \"\"], [\"c48_nguyen_van_va_mien\", 0, \"\"], [\"c01_cli_du_co\", 0, \"\"], [\"c02_attempt_lech\", 0, \"\"], [\"c03_checkout_linux\", 0, \"\"], [\"c04_checkout_windows\", 0, \"\"], [\"c05_checkout_khong_sha\", 0, \"\"], [\"c06_checkout_hai_sha\", 0, \"\"], [\"c07_checkout_push_lech\", 0, \"\"], [\"c08_checkout_pr_parents\", 0, \"\"], [\"c09_checkout_pr_lech\", 0, \"\"], [\"c10_runner_id_0\", 0, \"\"], [\"c11_job_skipped\", 0, \"\"], [\"c12_marker_khong_khop\", 0, \"\"], [\"c13_marker_buoc_khac\", 0, \"\"], [\"c14_ngoai_moi\", 0, \"\"], [\"c15_moi_mot_nguon\", 0, \"\"], [\"c16_workflow_def_luon_not_measured\", 0, \"\"], [\"c17_ghi_nguyen_tu\", 0, \"\"], [\"c18_dem_not_measured\", 0, \"\"], [\"c19_rest_loi\", 0, \"\"], [\"c20_du_trang\", 0, \"\"], [\"c22_thieu_dinh_danh_khong_passed\", 0, \"\"], [\"c23_chi_loi_goi_that\", 0, \"\"], [\"c24_goi_that_loi_va_chuyen_huong\", 0, \"\"], [\"c25_f02_env_mang_mau\", 0, \"\"], [\"c26_f02_dong_khong_mau\", 0, \"\"], [\"c27_f02_yaml_khong_toi_gian\", 0, \"\"], [\"c28_che_do_env_buoc\", 0, \"\"], [\"c29_che_do_env_job\", 0, \"\"], [\"c30_che_do_doi_so\", 0, \"\"], [\"c31_che_do_duong_khac\", 0, \"\"], [\"c32_workflow_khong_doc_duoc\", 0, \"\"], [\"c33_trung_chu_khac_job\", 0, \"\"], [\"c36_ghep_lech_so\", 0, \"\"], [\"c38_ghep_lech_gio\", 0, \"\"], [\"c39_ghep_job\", 0, \"\"], [\"c40_nhom_long\", 0, \"\"], [\"c41_buoc_uses\", 0, \"\"], [\"c42_github_env_cung_job\", 0, \"\"], [\"c44_ghep_sai_dang\", 0, \"\"], [\"c45_buoc_skipped_giua\", 0, \"\"], [\"c46_mien_che_do\", 0, \"\"], [\"c49_oracle_nhieu_truc\", 0, \"\"], [\"c50_mien_luot6\", 0, \"\"], [\"c51_mien_luot7\", 0, \"\"], [\"c43_khoi_khac_buoc\", 0, \"\"], [\"c34_git_blob_that\", 0, \"\"], [\"c35_f02_khoi_khong_tron_ven\", 0, \"\"], [\"c21_fixture_bam\", 0, \"\"]], \"other_output\": \"\"}\n",
+      "stderr": ""
+    }
+  ],
+  "proof": [
+    {
+      "source": "head",
+      "axis": "job",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "d_job_yaml_khong_duy_nhat",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "head",
+      "axis": "step",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "b_ten_buoc_lech",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "ghep_job",
+      "axis": "job",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "gate": "passed",
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "ghep_job",
+      "axis": "step",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "b_ten_buoc_lech",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "ten_du_kien",
+      "axis": "job",
+      "ghep": {
+        "trang_thai": "not_measured",
+        "ly_do": "d_job_yaml_khong_duy_nhat",
+        "so_buoc": 2
+      },
+      "gate": "not_measured",
+      "markers": []
+    },
+    {
+      "source": "ten_du_kien",
+      "axis": "step",
+      "ghep": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "gate": "passed",
+      "markers": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ]
+    }
+  ]
+}

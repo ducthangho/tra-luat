@@ -1,0 +1,66 @@
+{
+  "pipeline": [
+    {
+      "fixture": {
+        "rc": 0,
+        "output": "",
+        "target": "c",
+        "rank": "SONG_SOT"
+      },
+      "runner_rc": 1,
+      "output": "[KQ] review_fixture d8b2541fe8cac61e SONG\n[DOT BIEN DONG] review_fixture: SONG\nDOT BIEN DONG: 0/1 giet · 0 tuong duong co chung minh · 1 song · 0 tin dung gia · 0 chung minh tuong duong sai\nTONG DONG: DO\n"
+    },
+    {
+      "fixture": {
+        "rc": 4,
+        "output": "HONG:c:AttributeError",
+        "target": "c",
+        "rank": "TIN_DUNG_GIA"
+      },
+      "runner_rc": 1,
+      "output": "[KQ] review_fixture d8b2541fe8cac61e TIN_DUNG_GIA\n[DOT BIEN DONG] review_fixture: TIN_DUNG_GIA\nDOT BIEN DONG: 0/1 giet · 0 tuong duong co chung minh · 0 song · 1 tin dung gia · 0 chung minh tuong duong sai\nTONG DONG: DO\n"
+    },
+    {
+      "fixture": {
+        "rc": 3,
+        "output": "DO:other:failed",
+        "target": "c",
+        "rank": "TIN_DUNG_GIA"
+      },
+      "runner_rc": 1,
+      "output": "[KQ] review_fixture d8b2541fe8cac61e TIN_DUNG_GIA\n[DOT BIEN DONG] review_fixture: TIN_DUNG_GIA\nDOT BIEN DONG: 0/1 giet · 0 tuong duong co chung minh · 0 song · 1 tin dung gia · 0 chung minh tuong duong sai\nTONG DONG: DO\n"
+    },
+    {
+      "fixture": {
+        "rc": 3,
+        "output": "DO:c:failed",
+        "target": "c",
+        "rank": "GIET"
+      },
+      "runner_rc": 0,
+      "output": "[KQ] review_fixture d8b2541fe8cac61e GIET\nDOT BIEN DONG: 1/1 giet · 0 tuong duong co chung minh · 0 song · 0 tin dung gia · 0 chung minh tuong duong sai\nTONG DONG: DAT\n"
+    }
+  ],
+  "previous_round_mutants": [
+    {
+      "name": "L9_D03_job_chi_tien_to",
+      "rank": "GIET",
+      "detail": "d_job_yaml_khong_duy_nhat', 'so_buoc': 2})] · khối màu ra marker: [] · kiểu lạ: [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]"
+    },
+    {
+      "name": "L9_D03_buoc_chi_tien_to",
+      "rank": "GIET",
+      "detail": "'ly_do': 'b_ten_buoc_lech', 'so_buoc': 2})] · khối màu ra marker: [] · kiểu lạ: [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]"
+    },
+    {
+      "name": "L9_D04_dem_mot_buoc",
+      "rank": "GIET",
+      "detail": "DO:c51_mien_luot7:1/31 hàng lệch định nghĩa: [('hai bước cùng script, hai kết quả', 'passed', [('passed', None), ('failed', None)], 'passed', [('passed', None), ('failed', None)])]"
+    },
+    {
+      "name": "L10_bat_lai_tuple_luot9",
+      "rank": "GIET",
+      "detail": "DO:c52_tap_dong:0/9 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: OverflowError"
+    }
+  ]
+}

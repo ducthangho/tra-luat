@@ -1,0 +1,32 @@
+[
+  {
+    "name": "job_ascii_suffix",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_ascii_suffix"
+        ],
+        "rc": 0,
+        "output": "DAT:job_ascii_suffix\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/frontier6/job_ascii_suffix.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_ascii_suffix"
+        ],
+        "rc": 3,
+        "output": "DO:job_ascii_suffix:ghep=d_job_yaml_khong_duy_nhat markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  }
+]

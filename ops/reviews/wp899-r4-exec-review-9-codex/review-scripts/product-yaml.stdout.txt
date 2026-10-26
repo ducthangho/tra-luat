@@ -1,0 +1,32 @@
+[
+  {
+    "case": "valid_quoted",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 21b972c769aee4aeff516dcc1f47c20888a1b4b7 gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 995e49aab02c25cf968d16f87feb6c92a3cb84f47800226bb2003e9a7ebc8059\nNOT_MEASURED: 1\n",
+    "checkout_sha": "21b972c769aee4aeff516dcc1f47c20888a1b4b7"
+  },
+  {
+    "case": "invalid_date",
+    "rc": 1,
+    "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+    "checkout_sha": "9accd521630ae97038524d97fd1d430e089dc1cc"
+  },
+  {
+    "case": "invalid_hour",
+    "rc": 1,
+    "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+    "checkout_sha": "1eea551efb4db9f8452016e5f9824ea638235ba3"
+  },
+  {
+    "case": "invalid_int",
+    "rc": 1,
+    "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+    "checkout_sha": "a61962aa55469ffdbc98ba5dd96957d41b428bab"
+  },
+  {
+    "case": "invalid_float",
+    "rc": 1,
+    "stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+    "checkout_sha": "8dbf20db43f26e34179ad83388776e7bdc49fe2e"
+  }
+]

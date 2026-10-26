@@ -1,0 +1,2 @@
+round 1 [('prior1-run_old.py', 0), ('prior1-registry_check.py', 0)]
+round 2 [('prior1-run_old.py', 0), ('prior1-registry_check.py', 0), ('prior2-run_old.py', 0), ('prior2-registry_check.py', 0), ('prior2-composite-current', 0)]

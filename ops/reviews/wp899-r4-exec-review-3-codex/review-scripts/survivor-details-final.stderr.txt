@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/remaining_survivors.py", line 24, in <module>
+    p=t.g1(w,t.buoc('5','THU: 4/4 dat'),sua=lambda st:st[2].update(name='K'),w_rest=t.wf_tu(t.X))
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/ops/ci_provenance_test.py", line 508, in g1
+    return chay([(job(1, name=ten, steps=st), lg)], wf=w, **kw)[2]
+           ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/ops/ci_provenance_test.py", line 164, in chay
+    rc = m.main(["thu", "--repo", "o/r", "--run", "5", "--attempt", str(attempt), "--out", str(o)], goi=rest,
+                git=git.get, moi_tu=moi, wf=lambda sha, path: wf.get((sha, path)))
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/run_type_coerce.py", line 421, in main
+    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)
+                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/run_type_coerce.py", line 356, in thu
+    g = moc_gate(j, dong, moi, xanh, doc_wf(van) if van is not None else None,
+                 "sha_checkout_chua_do" if not sha else "workflow_tai_sha_khong_doc_duoc")
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/run_type_coerce.py", line 322, in moc_gate
+    dau, so = do_dau_duong(buoc, moi, xanh, wf, ghep)
+              ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review3/ws/.review/frontier/run_type_coerce.py", line 298, in do_dau_duong
+    goi = [RE_LOI_GOI.fullmatch(d) for d in dong_logic(run.rstrip("\n").split("\n")) if d]
+                                                       ^^^^^^^^^^
+AttributeError: 'int' object has no attribute 'rstrip'

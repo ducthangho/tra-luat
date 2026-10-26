@@ -1,0 +1,42 @@
+[
+  {
+    "name": "gio_thieu_header_lay_rest",
+    "old": "(h := _gio(b[\"gio\"]))",
+    "new": "(h := _gio(b[\"gio\"]) or a)",
+    "case": "c38_ghep_lech_gio",
+    "rc": 3,
+    "output": "DO:c38_ghep_lech_gio:##[group]Run: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "name": "gio_bo_can_duoi",
+    "old": "a <= h <= z",
+    "new": "h <= z",
+    "case": "c38_ghep_lech_gio",
+    "rc": 3,
+    "output": "DO:c38_ghep_lech_gio:giờ {'started_at': '2026-10-19T23:45:05Z', 'completed_at': '2026-10-19T23:45:06Z'}: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "name": "gio_bo_can_tren",
+    "old": "a <= h <= z",
+    "new": "a <= h",
+    "case": "c38_ghep_lech_gio",
+    "rc": 3,
+    "output": "DO:c38_ghep_lech_gio:giờ {'completed_at': '2026-10-19T23:45:03Z'}: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run python ops/thu_gia_test.py', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "name": "b_bo_ten",
+    "old": "if any(not _chuoi(s.get(\"name\")) or",
+    "new": "if False and any(not _chuoi(s.get(\"name\")) or",
+    "case": "c37_ghep_lech_ten",
+    "rc": 3,
+    "output": "DO:c37_ghep_lech_ten:tên lệch: {'job_id': 1, 'name': 'j', 'check_run_id': '1', 'labels': ['ubuntu-latest'], 'runner_id': 7, 'runner_name': 'GitHub Actions 7', 'conclusion': 'success', 'buoc': [{'name': 'Set up job', 'conclusion': 'success'}, {'name': 'Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Run khac', 'conclusion': 'success'}, {'name': 'Post Run actions/setup-python@v5', 'conclusion': 'success'}, {'name': 'Complete job', 'conclusion': 'success'}], 'image': 'ubuntu-24.04', 'dau_duong': [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}], 'thieu': [], 'ghep_buoc': {'trang_thai': 'passed', 'so_buoc': 2}, 'kich_ban': {'buoc_xac_thuc': 1, 'trang_thai': 'passed', 'nguon': 'run_tai_sha_checkout'}, 'trang_thai': 'passed'}\n"
+  },
+  {
+    "name": "env_bo_PATH",
+    "old": "re.search(\"GITHUB_(ENV|PATH)\",",
+    "new": "re.search(\"GITHUB_ENV\",",
+    "case": "c42_github_env_cung_job",
+    "rc": 3,
+    "output": "DO:c42_github_env_cung_job:echo /x >> $GITHUB_PATH: đứng trước, cùng job ⇒ chặn\n"
+  }
+]

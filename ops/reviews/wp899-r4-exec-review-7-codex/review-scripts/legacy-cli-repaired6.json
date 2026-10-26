@@ -1,0 +1,162 @@
+[
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "rest_order"
+    ],
+    "rc": 0,
+    "output": "DAT:rest_order\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "rest_duplicate"
+    ],
+    "rc": 0,
+    "output": "DAT:rest_duplicate\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "time_format"
+    ],
+    "rc": 0,
+    "output": "DAT:time_format\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "time_missing_header"
+    ],
+    "rc": 0,
+    "output": "DAT:time_missing_header\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "invalid_calendar"
+    ],
+    "rc": 0,
+    "output": "DAT:invalid_calendar\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "github_path"
+    ],
+    "rc": 0,
+    "output": "DAT:github_path\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "expression_name"
+    ],
+    "rc": 0,
+    "output": "DAT:expression_name\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior1/reviewer_cases_r4.py",
+      "first_line"
+    ],
+    "rc": 0,
+    "output": "DAT:first_line\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "rest_order"
+    ],
+    "rc": 0,
+    "output": "DAT:rest_order\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "rest_duplicate"
+    ],
+    "rc": 0,
+    "output": "DAT:rest_duplicate\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "time_format"
+    ],
+    "rc": 0,
+    "output": "DAT:time_format\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "time_missing_header"
+    ],
+    "rc": 0,
+    "output": "DAT:time_missing_header\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "invalid_calendar"
+    ],
+    "rc": 0,
+    "output": "DAT:invalid_calendar\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "github_path"
+    ],
+    "rc": 0,
+    "output": "DAT:github_path\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "expression_name"
+    ],
+    "rc": 0,
+    "output": "DAT:expression_name\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/prior2/reviewer_cases_r4.py",
+      "first_line"
+    ],
+    "rc": 0,
+    "output": "DAT:first_line\n"
+  }
+]

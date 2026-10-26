@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/membership9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 83.42945837974548,
+  "stdout_sha256": "73920d2d96c797dd9e70b19e48bb9084fe6a741c6578d4d1f87577e2b0124498",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

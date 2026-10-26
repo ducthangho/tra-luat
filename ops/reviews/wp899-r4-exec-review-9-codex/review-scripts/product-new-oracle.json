@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/product9.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 0.42702293395996094,
+  "stdout_sha256": "18b23ca4e9d93c0b65e0905b29ceedc1b6d55156b7bb68d16cd9404fdb523215",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

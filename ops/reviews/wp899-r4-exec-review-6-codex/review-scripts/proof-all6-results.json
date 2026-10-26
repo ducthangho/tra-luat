@@ -1,0 +1,866 @@
+[
+  {
+    "name": "job_ascii_suffix",
+    "old": "re.escape(x) + r\"(?: \\(.*\\))?\", ten)",
+    "new": "re.escape(x) + r\"(?: \\([ -~]*\\))?\", ten)",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_ascii_suffix"
+        ],
+        "rc": 0,
+        "output": "DAT:job_ascii_suffix\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/job_ascii_suffix.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_ascii_suffix"
+        ],
+        "rc": 3,
+        "output": "DO:job_ascii_suffix:ghep=d_job_yaml_khong_duy_nhat markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "job_alias_truncate",
+    "old": "for x in (k, j.get(\"name\"))",
+    "new": "for x in (k, str(j.get(\"name\"))[:20])",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_alias_truncate"
+        ],
+        "rc": 0,
+        "output": "DAT:job_alias_truncate\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/job_alias_truncate.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_alias_truncate"
+        ],
+        "rc": 3,
+        "output": "DO:job_alias_truncate:ghep=d_job_yaml_khong_duy_nhat markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "job_requires_nonempty_steps",
+    "old": "type(sy) is not list or",
+    "new": "(type(sy) is not list or not sy) or",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_requires_nonempty_steps"
+        ],
+        "rc": 0,
+        "output": "DAT:job_requires_nonempty_steps\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/job_requires_nonempty_steps.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_requires_nonempty_steps"
+        ],
+        "rc": 3,
+        "output": "DO:job_requires_nonempty_steps:ghep=d_job_yaml_khong_duy_nhat markers=[]; expected=('passed', [])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "job_nonempty_rest_required",
+    "old": "type(st) is list and all(",
+    "new": "type(st) is list and bool(st) and all(",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_nonempty_rest_required"
+        ],
+        "rc": 0,
+        "output": "DAT:job_nonempty_rest_required\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/job_nonempty_rest_required.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "job_nonempty_rest_required"
+        ],
+        "rc": 3,
+        "output": "DO:job_nonempty_rest_required:{'trang_thai': 'not_measured', 'ly_do': 'steps_rest_sai_dang', 'so_buoc': 0}\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "rest_number_under_100",
+    "old": "_so(s.get(\"number\"), 1)",
+    "new": "(_so(s.get(\"number\"), 1) and s[\"number\"] < 100)",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_number_under_100"
+        ],
+        "rc": 0,
+        "output": "DAT:rest_number_under_100\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/rest_number_under_100.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_number_under_100"
+        ],
+        "rc": 3,
+        "output": "DO:rest_number_under_100:ghep=steps_rest_sai_dang markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "rest_number_order_contiguous",
+    "old": "len({s[\"number\"] for s in st}) == len(st)",
+    "new": "len({s[\"number\"] for s in st}) == len(st) and min(s[\"number\"] for s in st) == 1",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_number_order_contiguous"
+        ],
+        "rc": 0,
+        "output": "DAT:rest_number_order_contiguous\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/rest_number_order_contiguous.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_number_order_contiguous"
+        ],
+        "rc": 3,
+        "output": "DO:rest_number_order_contiguous:ghep=steps_rest_sai_dang markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "rest_skipped_time_required",
+    "old": "if not all((a := _gio(",
+    "new": "if any(not _gio(s.get(\"started_at\")) for s in ung) or not all((a := _gio(",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_skipped_time_required"
+        ],
+        "rc": 0,
+        "output": "DAT:rest_skipped_time_required\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/rest_skipped_time_required.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_skipped_time_required"
+        ],
+        "rc": 3,
+        "output": "DO:rest_skipped_time_required:ghep=c_gio_header_ngoai_cua_so markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "time_require_same_day",
+    "old": "a <= h <= z",
+    "new": "a <= h <= z and a.date() == h.date() == z.date()",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_require_same_day"
+        ],
+        "rc": 0,
+        "output": "DAT:time_require_same_day\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/time_require_same_day.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_require_same_day"
+        ],
+        "rc": 3,
+        "output": "DO:time_require_same_day:ghep=c_gio_header_ngoai_cua_so markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "time_reject_leap_day",
+    "old": "return datetime.datetime.strptime(v[:19], \"%Y-%m-%dT%H:%M:%S\") if",
+    "new": "return datetime.datetime.strptime(v[:19], \"%Y-%m-%dT%H:%M:%S\") if v[5:10] != \"02-29\" and",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_reject_leap_day"
+        ],
+        "rc": 0,
+        "output": "DAT:time_reject_leap_day\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/time_reject_leap_day.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_reject_leap_day"
+        ],
+        "rc": 3,
+        "output": "DO:time_reject_leap_day:ghep=c_gio_header_ngoai_cua_so markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "time_reject_year_before_2000",
+    "old": "type(v) is str and RE_GIO.fullmatch(v)",
+    "new": "type(v) is str and RE_GIO.fullmatch(v) and v[:4] >= \"2000\"",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_reject_year_before_2000"
+        ],
+        "rc": 0,
+        "output": "DAT:time_reject_year_before_2000\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/time_reject_year_before_2000.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_reject_year_before_2000"
+        ],
+        "rc": 3,
+        "output": "DO:time_reject_year_before_2000:ghep=c_gio_header_ngoai_cua_so markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "time_accept_invalid_leap_day",
+    "old": "except ValueError:\n        return None",
+    "new": "except ValueError:\n        return datetime.datetime(2026, 2, 28) if type(v) is str and v[:10] == \"2026-02-29\" else None",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_accept_invalid_leap_day"
+        ],
+        "rc": 0,
+        "output": "DAT:time_accept_invalid_leap_day\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/time_accept_invalid_leap_day.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "time_accept_invalid_leap_day"
+        ],
+        "rc": 3,
+        "output": "DO:time_accept_invalid_leap_day:ghep=passed markers=[('passed', None)]; expected=('c_gio_header_ngoai_cua_so', [])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "prior_entire_step_instead_run",
+    "old": "str(t.get(\"run\", \"\"))",
+    "new": "str(t)",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_entire_step_instead_run"
+        ],
+        "rc": 0,
+        "output": "DAT:prior_entire_step_instead_run\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/prior_entire_step_instead_run.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_entire_step_instead_run"
+        ],
+        "rc": 3,
+        "output": "DO:prior_entire_step_instead_run:ghep=passed markers=[('not_measured', 'che_do_khong_xac_dinh')]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "prior_uses_preferred",
+    "old": "str(t.get(\"run\", \"\"))",
+    "new": "str(t.get(\"uses\", t.get(\"run\", \"\")))",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_uses_preferred"
+        ],
+        "rc": 0,
+        "output": "DAT:prior_uses_preferred\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/prior_uses_preferred.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_uses_preferred"
+        ],
+        "rc": 3,
+        "output": "DO:prior_uses_preferred:ghep=passed markers=[('not_measured', 'che_do_khong_xac_dinh')]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "prior_ignore_if_empty_env",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][:i] if \"env\" not in t))",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_ignore_if_empty_env"
+        ],
+        "rc": 0,
+        "output": "DAT:prior_ignore_if_empty_env\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/prior_ignore_if_empty_env.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_ignore_if_empty_env"
+        ],
+        "rc": 3,
+        "output": "DO:prior_ignore_if_empty_env:ghep=passed markers=[('passed', None)]; expected=('passed', [('not_measured', 'che_do_khong_xac_dinh')])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "prior_only_last_two",
+    "old": "for t in j[\"steps\"][:i]))",
+    "new": "for t in j[\"steps\"][max(0,i-2):i]))",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_only_last_two"
+        ],
+        "rc": 0,
+        "output": "DAT:prior_only_last_two\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/prior_only_last_two.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "prior_only_last_two"
+        ],
+        "rc": 3,
+        "output": "DO:prior_only_last_two:ghep=passed markers=[('passed', None)]; expected=('passed', [('not_measured', 'che_do_khong_xac_dinh')])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_first_output_line",
+    "old": "\"\\n\".join(b[\"phan\"]) + \"\\n\"",
+    "new": "\"\\n\".join(b[\"phan\"][:1]) + \"\\n\"",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_first_output_line"
+        ],
+        "rc": 0,
+        "output": "DAT:log_first_output_line\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_first_output_line.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_first_output_line"
+        ],
+        "rc": 3,
+        "output": "DO:log_first_output_line:ghep=passed markers=[('failed', None)]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_last_output_line",
+    "old": "\"\\n\".join(b[\"phan\"]) + \"\\n\"",
+    "new": "\"\\n\".join(b[\"phan\"][-1:]) + \"\\n\"",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_last_output_line"
+        ],
+        "rc": 0,
+        "output": "DAT:log_last_output_line\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_last_output_line.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_last_output_line"
+        ],
+        "rc": 3,
+        "output": "DO:log_last_output_line:ghep=passed markers=[('failed', None)]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_output_strip",
+    "old": "\"\\n\".join(b[\"phan\"]) + \"\\n\"",
+    "new": "\"\\n\".join(b[\"phan\"]).strip() + \"\\n\"",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_output_strip"
+        ],
+        "rc": 0,
+        "output": "DAT:log_output_strip\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_output_strip.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_output_strip"
+        ],
+        "rc": 3,
+        "output": "DO:log_output_strip:ghep=passed markers=[('passed', None)]; expected=('passed', [('failed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_reverse_output",
+    "old": "\"\\n\".join(b[\"phan\"]) + \"\\n\"",
+    "new": "\"\\n\".join(reversed(b[\"phan\"])) + \"\\n\"",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_reverse_output"
+        ],
+        "rc": 0,
+        "output": "DAT:log_reverse_output\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_reverse_output.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_reverse_output"
+        ],
+        "rc": 3,
+        "output": "DO:log_reverse_output:ghep=passed markers=[('failed', None)]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_reject_metadata_after_shell",
+    "old": "not b[\"tien_to\"] or t.startswith(\"shell: \")",
+    "new": "b[\"tien_to\"] and t.startswith(\"shell: \")",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_reject_metadata_after_shell"
+        ],
+        "rc": 0,
+        "output": "DAT:log_reject_metadata_after_shell\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_reject_metadata_after_shell.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_reject_metadata_after_shell"
+        ],
+        "rc": 3,
+        "output": "DO:log_reject_metadata_after_shell:ghep=passed markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_uncolored_metadata_add_to_echo",
+    "old": "elif mau and b[\"tien_to\"]:",
+    "new": "elif mau and b[\"tien_to\"] or t.startswith(\"  NOTE:\"):",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_uncolored_metadata_add_to_echo"
+        ],
+        "rc": 0,
+        "output": "DAT:log_uncolored_metadata_add_to_echo\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_uncolored_metadata_add_to_echo.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_uncolored_metadata_add_to_echo"
+        ],
+        "rc": 3,
+        "output": "DO:log_uncolored_metadata_add_to_echo:ghep=passed markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_shell_nonempty",
+    "old": "t.startswith(\"shell: \")",
+    "new": "t.startswith(\"shell: \") and len(t)>7",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_shell_nonempty"
+        ],
+        "rc": 0,
+        "output": "DAT:log_shell_nonempty\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_shell_nonempty.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_shell_nonempty"
+        ],
+        "rc": 3,
+        "output": "DO:log_shell_nonempty:ghep=passed markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_color_prefix_only",
+    "old": "mau = \"\\x1b[36;1m\" in d",
+    "new": "mau = d.split(\" \", 1)[-1].startswith(\"\\x1b[36;1m\")",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_color_prefix_only"
+        ],
+        "rc": 0,
+        "output": "DAT:log_color_prefix_only\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_color_prefix_only.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_color_prefix_only"
+        ],
+        "rc": 3,
+        "output": "DO:log_color_prefix_only:ghep=passed markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "log_color_without_timestamp",
+    "old": "mau = \"\\x1b[36;1m\" in d",
+    "new": "mau = \"\\x1b[36;1m\" in d and bool(RE_DONG.match(d))",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_color_without_timestamp"
+        ],
+        "rc": 0,
+        "output": "DAT:log_color_without_timestamp\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/log_color_without_timestamp.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "log_color_without_timestamp"
+        ],
+        "rc": 3,
+        "output": "DO:log_color_without_timestamp:ghep=passed markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "run_blank_lines_disallowed",
+    "old": "for d in dong_logic(run.rstrip(\"\\n\").split(\"\\n\")) if d]",
+    "new": "for d in dong_logic(run.rstrip(\"\\n\").split(\"\\n\"))]",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "run_blank_lines_disallowed"
+        ],
+        "rc": 0,
+        "output": "DAT:run_blank_lines_disallowed\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/run_blank_lines_disallowed.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "run_blank_lines_disallowed"
+        ],
+        "rc": 3,
+        "output": "DO:run_blank_lines_disallowed:ghep=passed markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "rest_also_skip_null",
+    "old": "s.get(\"conclusion\") != \"skipped\"]",
+    "new": "s.get(\"conclusion\") not in (None, \"skipped\")]",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_also_skip_null"
+        ],
+        "rc": 0,
+        "output": "DAT:rest_also_skip_null\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/rest_also_skip_null.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "rest_also_skip_null"
+        ],
+        "rc": 3,
+        "output": "DO:rest_also_skip_null:ghep=a_so_nhom_khac_so_buoc_rest_chay markers=[]; expected=('passed', [('passed', None)])\n"
+      }
+    ],
+    "proven": true
+  },
+  {
+    "name": "yaml_empty_workflow_reject",
+    "old": "type(wf.get(\"jobs\")) is dict",
+    "new": "type(wf.get(\"jobs\")) is dict and bool(wf[\"jobs\"])",
+    "pair": [
+      {
+        "source": "head",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/ops/ci_provenance.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "yaml_empty_workflow_reject"
+        ],
+        "rc": 0,
+        "output": "DAT:yaml_empty_workflow_reject\n"
+      },
+      {
+        "source": "mutant",
+        "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/proof-mutants6/yaml_empty_workflow_reject.py",
+        "command": [
+          "/usr/bin/python",
+          "-B",
+          "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/cases6.py",
+          "yaml_empty_workflow_reject"
+        ],
+        "rc": 3,
+        "output": "DO:yaml_empty_workflow_reject:ghep=workflow_tai_sha_khong_doc_duoc markers=[]; expected=('d_job_yaml_khong_duy_nhat', [])\n"
+      }
+    ],
+    "proven": true
+  }
+]

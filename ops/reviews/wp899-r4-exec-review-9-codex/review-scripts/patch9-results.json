@@ -1,0 +1,38 @@
+[
+  {
+    "mutant_id": "doc_wf#7:bo_ngoai_le0",
+    "case": "c32_workflow_khong_doc_duoc",
+    "source": "head",
+    "source_sha256": "346a436b5593dbaae8d079103b6fce891981a6d0f1f23348ff4439270968b707",
+    "rc": 0,
+    "output": "\n",
+    "rank": "SONG_SOT"
+  },
+  {
+    "mutant_id": "doc_wf#7:bo_ngoai_le0",
+    "case": "c32_workflow_khong_doc_duoc",
+    "source": "mutant",
+    "source_sha256": "3fd7df76dcf741b8618a7b4def2dca574bb092a7a4763039a60b75d76ebe6b57",
+    "rc": 3,
+    "output": "DO:c32_workflow_khong_doc_duoc:YAML hỏng: công cụ ném ParserError\n",
+    "rank": "GIET"
+  },
+  {
+    "mutant_id": "doc_wf#7:bo_ngoai_le1",
+    "case": "c52_tap_dong",
+    "source": "head",
+    "source_sha256": "346a436b5593dbaae8d079103b6fce891981a6d0f1f23348ff4439270968b707",
+    "rc": 0,
+    "output": "\n",
+    "rank": "SONG_SOT"
+  },
+  {
+    "mutant_id": "doc_wf#7:bo_ngoai_le1",
+    "case": "c52_tap_dong",
+    "source": "mutant",
+    "source_sha256": "321d2374d0fc228b386238c77c2e04db37aa2a84e8e7b3b1a79765eb7455f934",
+    "rc": 3,
+    "output": "DO:c52_tap_dong:0/7 hàng lệch M4/dinh_nghia: [] · khối màu ra marker: [] · kiểu lạ: RecursionError\n",
+    "rank": "GIET"
+  }
+]

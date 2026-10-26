@@ -1,0 +1,5 @@
+gio_thieu_header_lay_rest GIET c38_ghep_lech_gio
+gio_bo_can_duoi GIET c38_ghep_lech_gio
+gio_bo_can_tren GIET c38_ghep_lech_gio
+b_bo_ten GIET c37_ghep_lech_ten
+env_bo_PATH GIET c42_github_env_cung_job

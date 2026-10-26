@@ -1,0 +1,656 @@
+[
+ {
+  "id": "_env_chan_13_quantifier",
+  "function": "_env_chan",
+  "before": "any((str(k).startswith('CI_DANG_KY_') for k in d['env']))",
+  "after": "all((str(k).startswith('CI_DANG_KY_') for k in d['env']))",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "_env_chan_30_attribute_endswith",
+  "function": "_env_chan",
+  "before": "str(k).startswith",
+  "after": "str(k).endswith",
+  "rank": "GIET",
+  "kill": [
+   "c29_che_do_env_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ghep_job_34_quantifier",
+  "function": "ghep_job",
+  "before": "any((type(x) is str and x and ('${{' not in x) and re.fullmatch(re.escape(x) + '(?: \\\\(.*\\\\))?', ten) for x in (k, j.get('name'))))",
+  "after": "all((type(x) is str and x and ('${{' not in x) and re.fullmatch(re.escape(x) + '(?: \\\\(.*\\\\))?', ten) for x in (k, j.get('name'))))",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_83_attribute_match",
+  "function": "ghep_job",
+  "before": "re.fullmatch",
+  "after": "re.match",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_84_keep_left",
+  "function": "ghep_job",
+  "before": "re.escape(x) + '(?: \\\\(.*\\\\))?'",
+  "after": "re.escape(x)",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_job_84_keep_right",
+  "function": "ghep_job",
+  "before": "re.escape(x) + '(?: \\\\(.*\\\\))?'",
+  "after": "'(?: \\\\(.*\\\\))?'",
+  "rank": "GIET",
+  "kill": [
+   "c39_ghep_job"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ten_du_kien_20_keep_left",
+  "function": "ten_du_kien",
+  "before": "'Run ' + v.split('\\n')[0]",
+  "after": "'Run '",
+  "rank": "GIET",
+  "kill": [
+   "c37_ghep_lech_ten"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ten_du_kien_20_keep_right",
+  "function": "ten_du_kien",
+  "before": "'Run ' + v.split('\\n')[0]",
+  "after": "v.split('\\n')[0]",
+  "rank": "GIET",
+  "kill": [
+   "c37_ghep_lech_ten"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "_gio_23_attribute_match",
+  "function": "_gio",
+  "before": "RE_GIO.fullmatch",
+  "after": "RE_GIO.match",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "_gio_28_slice_step2",
+  "function": "_gio",
+  "before": ":19",
+  "after": ":19:2",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "_gio_28_slice_reverse",
+  "function": "_gio",
+  "before": ":19",
+  "after": ":19:-1",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_41_quantifier",
+  "function": "ghep_buoc",
+  "before": "any((not _chuoi(s.get('name')) or s.get('name') != ten_du_kien(y) for s, y in zip(ung, sy)))",
+  "after": "all((not _chuoi(s.get('name')) or s.get('name') != ten_du_kien(y) for s, y in zip(ung, sy)))",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_89_quantifier",
+  "function": "ghep_buoc",
+  "before": "all(((a := _gio(ung[i].get('started_at'))) and (z := _gio(ung[i].get('completed_at'))) and (h := _gio(b['gio'])) and (a <= h <= z) for b, i in zip(buoc, chay)))",
+  "after": "any(((a := _gio(ung[i].get('started_at'))) and (z := _gio(ung[i].get('completed_at'))) and (h := _gio(b['gio'])) and (a <= h <= z) for b, i in zip(buoc, chay)))",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 5
+ },
+ {
+  "id": "ghep_buoc_120_quantifier",
+  "function": "ghep_buoc",
+  "before": "all((type(s) is dict for s in sy))",
+  "after": "any((type(s) is dict for s in sy))",
+  "rank": "GIET",
+  "kill": [
+   "c44_ghep_sai_dang"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ghep_buoc_125_quantifier",
+  "function": "ghep_buoc",
+  "before": "all((type(s) is dict and _so(s.get('number'), 1) for s in st))",
+  "after": "any((type(s) is dict and _so(s.get('number'), 1) for s in st))",
+  "rank": "GIET",
+  "kill": [
+   "c44_ghep_sai_dang"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "ghep_buoc_297_walrus_a",
+  "function": "ghep_buoc",
+  "before": "(h := _gio(b['gio']))",
+  "after": "(h := a)",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 5
+ },
+ {
+  "id": "ghep_buoc_297_walrus_z",
+  "function": "ghep_buoc",
+  "before": "(h := _gio(b['gio']))",
+  "after": "(h := z)",
+  "rank": "GIET",
+  "kill": [
+   "c38_ghep_lech_gio"
+  ],
+  "cases_measured": 5
+ },
+ {
+  "id": "ghep_buoc_339_attribute_endswith",
+  "function": "ghep_buoc",
+  "before": "str(s.get('name')).startswith",
+  "after": "str(s.get('name')).endswith",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_459_index-1",
+  "function": "ghep_buoc",
+  "before": "ung[i]",
+  "after": "ung[i + -1]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_459_index1",
+  "function": "ghep_buoc",
+  "before": "ung[i]",
+  "after": "ung[i + 1]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_461_index-1",
+  "function": "ghep_buoc",
+  "before": "ung[i]",
+  "after": "ung[i + -1]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "ghep_buoc_461_index1",
+  "function": "ghep_buoc",
+  "before": "ung[i]",
+  "after": "ung[i + 1]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_16_index-1",
+  "function": "chan_buoc",
+  "before": "wf['jobs'][k]['steps'][i]",
+  "after": "wf['jobs'][k]['steps'][i + -1]",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_16_index1",
+  "function": "chan_buoc",
+  "before": "wf['jobs'][k]['steps'][i]",
+  "after": "wf['jobs'][k]['steps'][i + 1]",
+  "rank": "GIET",
+  "kill": [
+   "c23_chi_loi_goi_that"
+  ],
+  "cases_measured": 27
+ },
+ {
+  "id": "chan_buoc_34_keep_left",
+  "function": "chan_buoc",
+  "before": "set(s) - KHOA_BUOC",
+  "after": "set(s)",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_34_keep_right",
+  "function": "chan_buoc",
+  "before": "set(s) - KHOA_BUOC",
+  "after": "KHOA_BUOC",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "chan_buoc_36_quantifier",
+  "function": "chan_buoc",
+  "before": "any((re.search('GITHUB_(ENV|PATH)', str(t.get('run', ''))) for t in j['steps'][:i]))",
+  "after": "all((re.search('GITHUB_(ENV|PATH)', str(t.get('run', ''))) for t in j['steps'][:i]))",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "chan_buoc_94_attribute_match",
+  "function": "chan_buoc",
+  "before": "re.search",
+  "after": "re.match",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "chan_buoc_107_slice_step2",
+  "function": "chan_buoc",
+  "before": ":i",
+  "after": ":i:2",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "chan_buoc_107_slice_reverse",
+  "function": "chan_buoc",
+  "before": ":i",
+  "after": ":i:-1",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "chan_buoc_107_slice_upper-1",
+  "function": "chan_buoc",
+  "before": ":i",
+  "after": ":i + -1",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "chan_buoc_107_slice_upper1",
+  "function": "chan_buoc",
+  "before": ":i",
+  "after": ":i + 1",
+  "rank": "GIET",
+  "kill": [
+   "c42_github_env_cung_job"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "tach_buoc_24_keep_left",
+  "function": "tach_buoc",
+  "before": "b | {'hop_le': not b['mo'] and b['ok'] and (not b['tien_to']) and (b['in_lai'][:1] == [b['lenh']])}",
+  "after": "b",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_24_keep_right",
+  "function": "tach_buoc",
+  "before": "b | {'hop_le': not b['mo'] and b['ok'] and (not b['tien_to']) and (b['in_lai'][:1] == [b['lenh']])}",
+  "after": "{'hop_le': not b['mo'] and b['ok'] and (not b['tien_to']) and (b['in_lai'][:1] == [b['lenh']])}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_29_attribute_endswith",
+  "function": "tach_buoc",
+  "before": "t.startswith",
+  "after": "t.endswith",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_78_keep_left",
+  "function": "tach_buoc",
+  "before": "d[:19] + 'Z'",
+  "after": "d[:19]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_78_keep_right",
+  "function": "tach_buoc",
+  "before": "d[:19] + 'Z'",
+  "after": "'Z'",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_104_slice_step2",
+  "function": "tach_buoc",
+  "before": "len('##[group]Run '):",
+  "after": "len('##[group]Run ')::2",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_104_slice_reverse",
+  "function": "tach_buoc",
+  "before": "len('##[group]Run '):",
+  "after": "len('##[group]Run ')::-1",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_139_slice_step2",
+  "function": "tach_buoc",
+  "before": ":19",
+  "after": ":19:2",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_139_slice_reverse",
+  "function": "tach_buoc",
+  "before": ":19",
+  "after": ":19:-1",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_169_slice_step2",
+  "function": "tach_buoc",
+  "before": ":1",
+  "after": ":1:2",
+  "rank": "SONG",
+  "kill": [],
+  "cases_measured": 52
+ },
+ {
+  "id": "tach_buoc_169_slice_reverse",
+  "function": "tach_buoc",
+  "before": ":1",
+  "after": ":1:-1",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "tach_buoc_231_attribute_endswith",
+  "function": "tach_buoc",
+  "before": "t.startswith",
+  "after": "t.endswith",
+  "rank": "GIET",
+  "kill": [
+   "c40_nhom_long"
+  ],
+  "cases_measured": 3
+ },
+ {
+  "id": "tach_buoc_235_attribute_endswith",
+  "function": "tach_buoc",
+  "before": "t.startswith",
+  "after": "t.endswith",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_19_subtract",
+  "function": "do_dau_duong",
+  "before": "so += 1",
+  "after": "so -= 1",
+  "rank": "GIET",
+  "kill": [
+   "c51_mien_luot7"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "do_dau_duong_37_index-1",
+  "function": "do_dau_duong",
+  "before": "wf['jobs'][k]['steps'][i]",
+  "after": "wf['jobs'][k]['steps'][i + -1]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_37_index1",
+  "function": "do_dau_duong",
+  "before": "wf['jobs'][k]['steps'][i]",
+  "after": "wf['jobs'][k]['steps'][i + 1]",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_85_quantifier",
+  "function": "do_dau_duong",
+  "before": "any((g and g[1] for g in goi))",
+  "after": "all((g and g[1] for g in goi))",
+  "rank": "GIET",
+  "kill": [
+   "c46_mien_che_do"
+  ],
+  "cases_measured": 4
+ },
+ {
+  "id": "do_dau_duong_115_attribute_match",
+  "function": "do_dau_duong",
+  "before": "RE_LOI_GOI.fullmatch",
+  "after": "RE_LOI_GOI.match",
+  "rank": "SONG",
+  "kill": [],
+  "cases_measured": 52
+ },
+ {
+  "id": "do_dau_duong_141_keep_left",
+  "function": "do_dau_duong",
+  "before": "'\\n'.join(b['phan']) + '\\n'",
+  "after": "'\\n'.join(b['phan'])",
+  "rank": "GIET",
+  "kill": [
+   "c51_mien_luot7"
+  ],
+  "cases_measured": 2
+ },
+ {
+  "id": "do_dau_duong_141_keep_right",
+  "function": "do_dau_duong",
+  "before": "'\\n'.join(b['phan']) + '\\n'",
+  "after": "'\\n'",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_177_quantifier",
+  "function": "do_dau_duong",
+  "before": "all(goi)",
+  "after": "any(goi)",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_190_keep_left",
+  "function": "do_dau_duong",
+  "before": "muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+  "after": "muc",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_190_keep_right",
+  "function": "do_dau_duong",
+  "before": "muc | {'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+  "after": "{'trang_thai': 'not_measured', 'ly_do': 'khong_co_trong_MOI' if duong not in moi else 'che_do_khong_xac_dinh'}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_200_keep_left",
+  "function": "do_dau_duong",
+  "before": "muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+  "after": "muc",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_200_keep_right",
+  "function": "do_dau_duong",
+  "before": "muc | {'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+  "after": "{'trang_thai': 'passed' if ok else 'failed', 'dong_khop': k.group(0).splitlines() if k else []}",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_210_attribute_lstrip",
+  "function": "do_dau_duong",
+  "before": "run.rstrip",
+  "after": "run.lstrip",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_243_attribute_match",
+  "function": "do_dau_duong",
+  "before": "re.search",
+  "after": "re.match",
+  "rank": "GIET",
+  "kill": [
+   "c52_tap_dong"
+  ],
+  "cases_measured": 1
+ },
+ {
+  "id": "do_dau_duong_306_attribute_lstrip",
+  "function": "do_dau_duong",
+  "before": "run.rstrip",
+  "after": "run.lstrip",
+  "rank": "SONG",
+  "kill": [],
+  "cases_measured": 52
+ }
+]

@@ -1,0 +1,2 @@
+ENV EQUIVALENCE 16 / 16
+yaml.safe_load standard hashable mapping keys are plain str, bool, int, float, None, bytes, date/datetime; collections are unhashable and arbitrary Python objects are not constructed. For non-str keys, str(key) cannot start CI_DANG_KY_; for str keys both predicates are identical. The outer non-dict and key-presence guards are unchanged. This is a semantic argument on the YAML input domain, not a claim based only on these16 samples.

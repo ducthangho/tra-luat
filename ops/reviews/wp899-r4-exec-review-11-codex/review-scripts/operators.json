@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/operators11.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 44.7584433555603,
+  "stdout_sha256": "d1fd374c65227dd263e0539e389f18134f85bec3f8841827de451f4ffc7ed3eb",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

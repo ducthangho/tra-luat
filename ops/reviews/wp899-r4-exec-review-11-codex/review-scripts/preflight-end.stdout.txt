@@ -1,0 +1,152 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "rc": 0,
+      "stdout": "https://github.com/ducthangho/tra-luat.git\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}",
+        "HEAD^"
+      ],
+      "rc": 0,
+      "stdout": "1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986\n13843e747b31df410a56e83b1dbc2f98a76e7d2d\n4ee92cf49534baa54f9e842d4e80f9635c515a0e\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "cat-file",
+        "-t",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5"
+      ],
+      "rc": 0,
+      "stdout": "commit\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "config",
+        "--get",
+        "core.abbrev"
+      ],
+      "rc": 0,
+      "stdout": "7\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "444\t0\tops/ci_provenance.py\n1600\t0\tops/ci_provenance_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--name-status",
+        "431681270298ffab8edcd316bdf26670157b4b4e",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "M\tops/ci_provenance.py\nM\tops/ci_provenance_test.py\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "ba222ffd1615f0d74b59985b9612f725211b62f5",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--exit-code"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "Python 3.13.17\n",
+      "stderr": ""
+    }
+  ],
+  "spec_sha256": "be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45",
+  "platform": "Linux-6.18.44-fc-v153-x86_64-with-glibc2.39",
+  "executable": "/usr/bin/python"
+}
+FILES 16771

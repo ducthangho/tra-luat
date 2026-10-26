@@ -1,0 +1,12 @@
+remaining1-registry_check.py 0
+remaining1-replay_q1.py 0
+remaining2-registry_check.py 0
+remaining2-replay_q1.py 0
+remaining2-boundary_current.py 0
+remaining2-composite_current.py 1
+remaining2-extra_mutants_r4.py 0
+remaining2-shape_audit.py 0
+remaining2-shape_audit.pycontainers 0
+remaining2-finish_probes.py 0
+remaining2-verify_new_cases.py 0
+remaining2-trace_c44.py 1

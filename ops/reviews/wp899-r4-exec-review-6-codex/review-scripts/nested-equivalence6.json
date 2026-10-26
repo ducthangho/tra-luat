@@ -1,0 +1,19 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/verify_equivalence.py"
+  ],
+  "returncode": 0,
+  "seconds": 12.08970308303833,
+  "stdout": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/nested-equivalence6.stdout.txt",
+    "bytes": 45,
+    "sha256": "286efd9770fa3dd1fd6f939af3983947b9c4a63e9132b06e5fac83d3481ee064"
+  },
+  "stderr": {
+    "path": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws/.review/nested-equivalence6.stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

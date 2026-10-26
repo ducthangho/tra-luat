@@ -1,0 +1,56 @@
+[
+  {
+    "case": "valid_quoted",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 21b972c769aee4aeff516dcc1f47c20888a1b4b7 gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 995e49aab02c25cf968d16f87feb6c92a3cb84f47800226bb2003e9a7ebc8059\nNOT_MEASURED: 1\n",
+    "checkout_sha": "21b972c769aee4aeff516dcc1f47c20888a1b4b7"
+  },
+  {
+    "case": "invalid_date",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 9accd521630ae97038524d97fd1d430e089dc1cc gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 be1b0f96f20206198cae4d05150a954dd4aa1c001d825886efec5702ad59bbf7\nNOT_MEASURED: 2\n",
+    "checkout_sha": "9accd521630ae97038524d97fd1d430e089dc1cc"
+  },
+  {
+    "case": "invalid_hour",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 1eea551efb4db9f8452016e5f9824ea638235ba3 gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 5eb0e3f4275c76afd0234b0bc887215e295f4336a235614ba78a152fc1d02700\nNOT_MEASURED: 2\n",
+    "checkout_sha": "1eea551efb4db9f8452016e5f9824ea638235ba3"
+  },
+  {
+    "case": "invalid_int",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed a61962aa55469ffdbc98ba5dd96957d41b428bab gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 5c196644bf4c8e96bcc3ec978e9f3932344003eadc8412a04c41e543f1784705\nNOT_MEASURED: 2\n",
+    "checkout_sha": "a61962aa55469ffdbc98ba5dd96957d41b428bab"
+  },
+  {
+    "case": "invalid_float",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 8dbf20db43f26e34179ad83388776e7bdc49fe2e gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 29b610d87784180793adb8f52bf2abcd98c2e47e98b8b028b9f4fa583e725037\nNOT_MEASURED: 2\n",
+    "checkout_sha": "8dbf20db43f26e34179ad83388776e7bdc49fe2e"
+  },
+  {
+    "case": "invalid_bool",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed ee17acaa3419c1267afa9e300675bd7ceca93423 gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 6b3934c82ee4031003fbd9260885dedad53c6e7da8c6d7295d22d49dedd7178e\nNOT_MEASURED: 2\n",
+    "checkout_sha": "ee17acaa3419c1267afa9e300675bd7ceca93423"
+  },
+  {
+    "case": "empty_int",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 0ca1734dfcb9c702f85ffe44a68c471d203ebfd8 gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 91f9c84601ede16e2c18b2b499b4aa7d33a262f55b6a667ff670da6101d4b513\nNOT_MEASURED: 2\n",
+    "checkout_sha": "0ca1734dfcb9c702f85ffe44a68c471d203ebfd8"
+  },
+  {
+    "case": "empty_float",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed f2f482465d7a331f5b884909ec820bd69e7ae737 gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 09548d7158898fea6f78c3b3b5e9c906efbd06ec02a17141a18a4b68fdcb34aa\nNOT_MEASURED: 2\n",
+    "checkout_sha": "f2f482465d7a331f5b884909ec820bd69e7ae737"
+  },
+  {
+    "case": "invalid_timestamp",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 3feedde199097eb3bc3ec8ebaf832eb60a25097d gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 8fc2e611e0eccab9612094e460d2caeda559c011d4eb98681dbff2b3176e8359\nNOT_MEASURED: 2\n",
+    "checkout_sha": "3feedde199097eb3bc3ec8ebaf832eb60a25097d"
+  }
+]

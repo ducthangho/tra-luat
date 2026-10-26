@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/closed8.py",
+    "child",
+    ".review/patch-wide-try.py",
+    "doc_wf"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 65.87905597686768,
+  "stdout_sha256": "7eb5b85d6cdc69104228a7023bf0a7adb7cad232af05c3a260277d53bb8a513d",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,8 @@
+.review/env-map-workflow.yml:3:6: env should not be empty. please remove this section if it's unnecessary [syntax-check]
+  |
+3 | env: {}
+  |      ^~
+.review/env-map-job.yml:5:10: env should not be empty. please remove this section if it's unnecessary [syntax-check]
+  |
+5 |     env: {}
+  |          ^~

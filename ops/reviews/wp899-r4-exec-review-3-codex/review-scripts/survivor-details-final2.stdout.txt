@@ -1,0 +1,3 @@
+dd_output_dedupe [({'trang_thai': 'passed', 'so_buoc': 2}, 1, [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]), ({'trang_thai': 'passed', 'so_buoc': 2}, 1, [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}, {'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}])]
+log_group_close_exact [({'trang_thai': 'passed', 'so_buoc': 2}, 1, [{'lenh': 'python ops/thu_gia_test.py', 'duong_dan': 'ops/thu_gia_test.py', 'trang_thai': 'passed', 'dong_khop': ['THU: 4/4 dat']}]), ({'trang_thai': 'passed', 'so_buoc': 2}, 0, [])]
+nested equivalence 6 / 6

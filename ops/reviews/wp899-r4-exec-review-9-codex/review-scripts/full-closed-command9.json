@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/python",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review9/ws/ops/ci_provenance_test.py",
+    "--dot-bien-dong",
+    "8"
+  ],
+  "rc": 0,
+  "reused_own_current_session": 207,
+  "resume_sha256": "e3e170ecb86db17cf97f8b555a89005d024374e9c62d627e0aa712ff9e9b8523",
+  "total": 1011
+}

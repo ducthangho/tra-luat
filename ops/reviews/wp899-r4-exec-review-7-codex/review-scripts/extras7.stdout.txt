@@ -1,0 +1,91 @@
+[
+  {
+    "name": "extra6.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/extra6.py"
+    ],
+    "rc": 0,
+    "stdout": "rest_number_min_one_safe GIET ['c50_mien_luot6'] []\n",
+    "stderr": ""
+  },
+  {
+    "name": "extra6b.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/extra6b.py"
+    ],
+    "rc": 0,
+    "stdout": "job_nested_suffix_pure GIET ['c50_mien_luot6'] []\n",
+    "stderr": ""
+  },
+  {
+    "name": "extra6c.py",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/.review/extra6c.py"
+    ],
+    "rc": 0,
+    "stdout": "time_reject_leap_day_safe GIET ['c50_mien_luot6'] []\n",
+    "stderr": ""
+  },
+  {
+    "name": "contiguous-c22-c50",
+    "source": "head",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "name": "contiguous-c22-c50",
+    "source": "mutant",
+    "case": "c22_thieu_dinh_danh_khong_passed",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c22_thieu_dinh_danh_khong_passed"
+    ],
+    "rc": 4,
+    "output": "HONG:c22_thieu_dinh_danh_khong_passed:ValueError: min() iterable argument is empty\n"
+  },
+  {
+    "name": "contiguous-c22-c50",
+    "source": "head",
+    "case": "c50_mien_luot6",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c50_mien_luot6"
+    ],
+    "rc": 0,
+    "output": "\n"
+  },
+  {
+    "name": "contiguous-c22-c50",
+    "source": "mutant",
+    "case": "c50_mien_luot6",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review7/ws/ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c50_mien_luot6"
+    ],
+    "rc": 3,
+    "output": "DO:c50_mien_luot6:3/27 hàng lệch định nghĩa: [('REST steps rỗng, YAML rỗng', 'ValueError'), ('number ≥ 100', 'steps_rest_sai_dang', [], 0, 'passed', [('passed', None)]), ('number không bắt đầu từ 1', 'steps_rest_sai_dang', [], 0, 'passed', [('passed', None)])]\n"
+  }
+]

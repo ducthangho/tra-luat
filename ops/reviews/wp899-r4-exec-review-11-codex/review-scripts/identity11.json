@@ -1,0 +1,64 @@
+{
+  "provider": "openai_codex",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "thread_id_environment": "01a175b4-e325-74b1-b29d-14552f553759",
+  "platform": "Linux-6.18.44-fc-v153-x86_64-with-glibc2.39",
+  "python": "3.13.17 (main, Oct 22 2026, 14:06:04) [GCC 13.3.0]",
+  "sandbox": "workspace-write; approval never; network restricted / assignment offline",
+  "session_context": "independent reviewer per fresh assignment; no executor turns inherited",
+  "runtime_request_model": "KHONG_DO_DUOC",
+  "matching_rollout_paths": [
+    "/root/.codex/sessions/2026/10/26/rollout-2026-10-26T00-55-52-01a175b4-e325-74b1-b29d-14552f553759.jsonl"
+  ],
+  "cli_published_metadata": [
+    {
+      "id": "01a175b4-e325-74b1-b29d-14552f553759",
+      "cli_version": "0.164.0",
+      "originator": "codex_exec",
+      "model_provider": "openai",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws"
+    }
+  ],
+  "cli_published_turn_contexts": [
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review11/ws"
+    }
+  ],
+  "rollout_status": "active; final size/hash and launcher receipts must be collected by owner after this process exits",
+  "versions": [
+    {
+      "command": [
+        "git",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "git version 2.43.0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "ruff 0.15.15\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "codex",
+        "--version"
+      ],
+      "rc": 0,
+      "stdout": "codex-cli 0.164.0\n",
+      "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Read-only file system (os error 30)\n"
+    }
+  ],
+  "pyyaml_version": "6.0.3"
+}

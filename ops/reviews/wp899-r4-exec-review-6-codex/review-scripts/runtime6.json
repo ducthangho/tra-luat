@@ -1,0 +1,25 @@
+[
+  {
+    "path": "/root/.codex/sessions/2026/10/25/rollout-2026-10-25T09-44-18-01a17272-4f51-7ae1-8291-9e3e599a67e8.jsonl",
+    "session_meta": {
+      "id": "01a17272-4f51-7ae1-8291-9e3e599a67e8",
+      "cli_version": "0.164.0",
+      "originator": "codex_exec",
+      "model_provider": "openai",
+      "source": "exec",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws"
+    },
+    "turn_context": {
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/eaf2a577-1c02-5642-8186-a4b48145f1ca/scratchpad/r4review6/ws",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "approval_policy": "never",
+      "sandbox_policy": {
+        "type": "workspace-write",
+        "network_access": false,
+        "exclude_tmpdir_env_var": false,
+        "exclude_slash_tmp": false
+      }
+    }
+  }
+]

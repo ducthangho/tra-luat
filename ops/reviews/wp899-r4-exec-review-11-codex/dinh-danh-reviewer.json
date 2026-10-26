@@ -1,0 +1,20 @@
+{
+ "thread_id_tu_stdout_json": "01a175b4-e325-74b1-b29d-14552f553759",
+ "rollout": {
+  "duong_dan": "/root/.codex/sessions/2026/10/26/rollout-2026-10-26T00-55-52-01a175b4-e325-74b1-b29d-14552f553759.jsonl",
+  "bytes": 3054874,
+  "sha256": "5492f1e88cbdcf4632394c8973740fb979e69e68d7bb7da28f9651d026aa2603"
+ },
+ "session_meta_id": "01a175b4-e325-74b1-b29d-14552f553759",
+ "khop_thread_id": true,
+ "cli_version": "0.164.0",
+ "model": [
+  "gpt-6.1-sol"
+ ],
+ "effort": [
+  "xhigh"
+ ],
+ "run_json_sha256": "bb7ee55bf67baa32493f4893bfd52cdeabe9711a0d1c1700038d1cd83276a1bb",
+ "reviewed_commit": "1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986",
+ "nhan": "model do CLI cong bo (turn_context); model phuc vu tung request: KHONG DO DUOC"
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python",
+    "-B",
+    ".review/closed8.py"
+  ],
+  "rc": 0,
+  "elapsed_seconds": 621.073805809021,
+  "stdout_sha256": "7d7cfaf7be7660387e136b05b625db724a547ba52436f0a9585cb831a7d86cbf",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

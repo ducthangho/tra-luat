@@ -1,0 +1,282 @@
+LOG HASHES 37 / 37
+[
+  {
+    "run": 39342960764,
+    "byte_equal": true,
+    "new_sha256": "5ad9afeafb5312101ae326d738855e8adb1e46e7e4240944c2b21e12ed2bafe0",
+    "old_sha256": "5ad9afeafb5312101ae326d738855e8adb1e46e7e4240944c2b21e12ed2bafe0",
+    "run_state": "passed",
+    "checkout": {
+      "not_measured": 1,
+      "passed": 13
+    },
+    "ghep": {
+      "not_measured": 1,
+      "passed": 13
+    },
+    "gate": {
+      "not_measured": 14
+    },
+    "markers": [
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .claude/dev/codex_cred_test.py",
+        "duong_dan": ".claude/dev/codex_cred_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .claude/dev/idiom_py_test.py",
+        "duong_dan": ".claude/dev/idiom_py_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .githooks/eol_policy_test.py",
+        "duong_dan": ".githooks/eol_policy_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .githooks/pre_push_test.py",
+        "duong_dan": ".githooks/pre_push_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python scripts/tl_core/command_registry_test.py",
+        "duong_dan": "scripts/tl_core/command_registry_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .github/checks/ci_phamvi_test.py",
+        "duong_dan": ".github/checks/ci_phamvi_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "lenh": "python ops/ci_duong_nhanh_test.py",
+        "duong_dan": "ops/ci_duong_nhanh_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "lenh": "python ops/bien_nhan_v2_test.py",
+        "duong_dan": "ops/bien_nhan_v2_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-packet-loop (ubuntu-latest)",
+        "lenh": "python .claude/dev/packet_loop_test.py",
+        "duong_dan": ".claude/dev/packet_loop_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      }
+    ],
+    "labels": [
+      [
+        "ubuntu-latest"
+      ]
+    ],
+    "calls": [
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/39342960764",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/39342960764/attempts/1/jobs?per_page=100&page=1",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/39342960764/artifacts?per_page=100&page=1",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368688427/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368717941/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368717984/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368717985/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718000/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718039/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718087/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718096/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718099/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718105/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718106/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718118/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118368718171/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/118379100524/logs"
+    ]
+  },
+  {
+    "run": 40074551995,
+    "byte_equal": true,
+    "new_sha256": "24ffa770ff268876c030f12f59fee1010956138ba2ca3fa4370710456ffd185b",
+    "old_sha256": "24ffa770ff268876c030f12f59fee1010956138ba2ca3fa4370710456ffd185b",
+    "run_state": "passed",
+    "checkout": {
+      "not_measured": 1,
+      "passed": 22
+    },
+    "ghep": {
+      "not_measured": 1,
+      "passed": 22
+    },
+    "gate": {
+      "not_measured": 23
+    },
+    "markers": [
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "lenh": "python ops/ci_duong_nhanh_test.py",
+        "duong_dan": "ops/ci_duong_nhanh_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-ops (ubuntu-latest)",
+        "lenh": "python ops/bien_nhan_v2_test.py",
+        "duong_dan": "ops/bien_nhan_v2_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 7)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .claude/dev/codex_cred_test.py",
+        "duong_dan": ".claude/dev/codex_cred_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .claude/dev/idiom_py_test.py",
+        "duong_dan": ".claude/dev/idiom_py_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .githooks/eol_policy_test.py",
+        "duong_dan": ".githooks/eol_policy_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .githooks/pre_push_test.py",
+        "duong_dan": ".githooks/pre_push_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python scripts/tl_core/command_registry_test.py",
+        "duong_dan": "scripts/tl_core/command_registry_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate (ubuntu-latest)",
+        "lenh": "python .github/checks/ci_phamvi_test.py",
+        "duong_dan": ".github/checks/ci_phamvi_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 0)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 2)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 6)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 5)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 4)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-packet-loop (ubuntu-latest)",
+        "lenh": "python .claude/dev/packet_loop_test.py",
+        "duong_dan": ".claude/dev/packet_loop_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "khong_co_trong_MOI"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 3)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      },
+      {
+        "job": "gate-nhanh-manh (ubuntu-latest, 1)",
+        "lenh": "python ops/nhanh_don_duoc_test.py",
+        "duong_dan": "ops/nhanh_don_duoc_test.py",
+        "trang_thai": "not_measured",
+        "ly_do": "che_do_khong_xac_dinh"
+      }
+    ],
+    "labels": [
+      [
+        "ubuntu-latest"
+      ]
+    ],
+    "calls": [
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40074551995",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40074551995/attempts/1/jobs?per_page=100&page=1",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40074551995/artifacts?per_page=100&page=1",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815015460/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038052/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038068/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038071/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038080/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038082/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038083/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038092/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038095/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038104/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038105/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038107/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038110/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038111/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038126/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038135/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038152/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038170/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038260/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815038286/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815371862/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120815421176/logs",
+      "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120822740899/logs"
+    ]
+  }
+]

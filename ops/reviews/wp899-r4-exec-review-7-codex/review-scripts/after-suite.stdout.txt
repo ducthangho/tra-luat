@@ -1,0 +1,7 @@
+prior1-old2/composite_current.py 0
+prior1-run_old.py 0
+prior1-registry_check.py 0
+prior2-old2/composite_current.py 0
+prior2-run_old.py 0
+prior2-registry_check.py 0
+legacy composites + registry + old cases DAT

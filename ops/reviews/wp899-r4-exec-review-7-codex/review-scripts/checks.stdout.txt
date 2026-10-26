@@ -1,0 +1,7 @@
+['/usr/bin/python', '-m', 'ruff', 'check', '--no-cache', '--select', 'F', 'ops/ci_provenance.py', 'ops/ci_provenance_test.py'] rc 0 All checks passed!
+ 
+['/usr/bin/python', '-B', '.claude/dev/packet_loop.py', 'doctrine-scan', '--root', '.'] rc 0 doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+ 
+['/usr/bin/python', '-B', '.claude/dev/packet_loop.py', 'adr-song', '--root', '.'] rc 0 adr-song: sạch — 53 ADR trên đĩa, 53 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+ 
+RUFF_CONTRACT 3 []

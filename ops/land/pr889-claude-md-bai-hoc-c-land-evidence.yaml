@@ -268,3 +268,19 @@ moc_workflow_definition_20261026:
         Chu kho duyet `landed` cho #889 (authorized_head_sha 094e8d17ae4dfcf21dca63702c9262267bdc072c) bang comment tren PR ghi so nay, ghi du SHA
         head cuoi cua PR ghi so (40 hex), dang SAU commit cuoi.
   landed: false
+
+pr_ghi_so_duyet_landed_20261026:
+  bo_canh: 'Chu kho yeu cau "mo PR ghi so moi de toi duyet landed #870 #889" (phien 26-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  dieu_kien_da_dat:
+    - 'reviewer_assurance_81 DAT — cap_nhat_20261026 (cross_approved do_may tren 094e8d17ae4dfcf21dca63702c9262267bdc072c).'
+    - '§10.2.2 4/4 measured — cap_nhat_20261026 + moc_workflow_definition_20261026 (merge 6ac385f).'
+  dieu_kien_con_lai:
+    id: QUYET-DINH-LANDED-CHU-KHO-MOI
+    trang_thai: cho_chu_kho
+    quy_tac: >-
+      Theo tien le pr721/pr759: chu kho duyet `landed` cho #889 bang mot comment tren PR ghi so CHUA khoi nay, dang SAU
+      commit cuoi cua nhanh ghi so, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.
+      Nguoi merge doi chieu SHA head voi comment ngay truoc khi merge. Readback comment KHONG commit vao cay; ho so ghi
+      nhan o PR ke tiep.
+  landed: false
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'

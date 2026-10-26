@@ -350,3 +350,24 @@ cap_nhat_20261026_luot5:
     hint: 'ops/reviews/pr896-review-5-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
   reviewer_assurance_81: CHUA DAT
   landed: false
+
+cap_nhat_20261026_luot6:
+  bo_canh: 'Chu kho giao "va cho toi khi het P1, P2, P3". Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 6
+    target_pull_request: 947
+    provider: codex
+    verdict: changes_requested
+    reviewed_sha: 22382d8c800bed7b995d093cdcfdc206360d7fd4
+    so_lop: 'P0 0 / P1 2 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr896-review-6-codex-verdict.md
+    bien_nhan: ops/reviews/pr896-review-6-codex-verdict.receipt.yaml
+    assurance: cross_reviewed
+    do_duoc: >-
+      measured — ops/reviews/pr896-review-6-codex/run/run.json (7a86ed4f): ma_thoat 0, head 22382d8, model_phuc_vu DO_DUOC
+      (39 su kien, 39 response_id, `gpt-6.1-sol`). Lan dau ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/run.json
+      ma_thoat 1 vi may chu qua tai. Hai finding luot 5 DA DONG; con 2 P1 (7 truong ancestry o 5 receipt khac; 3 verdict
+      provenance land tu khai codex_service). Khong finding nao o CLAUDE.md.
+    hint: 'ops/reviews/pr896-review-6-codex/HINT.patch — ap nguyen trong CHINH commit ghi so khoi nay.'
+  reviewer_assurance_81: CHUA DAT
+  landed: false

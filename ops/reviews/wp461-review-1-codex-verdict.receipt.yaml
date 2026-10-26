@@ -98,12 +98,7 @@ github_submitter_identity:
   model_identity_not_inferred_from_actor: true
 anchor:
   loai: canonical_ancestry
-  cuong_do: >-
-    candidate ancestry only; canonical inclusion pending — commit verdict ef72264cb268643a89df3e15cf6cb840da92307b (evidence_url)
-    là tổ tiên của head ứng viên hiện hành (nhánh agent/wp461-g8-claude, PR của g8; trước đó #633 head
-    155bbaa47e6936a81e16537e44e8a9b0c8e8fa60). #625 chỉ còn là nguồn gốc lịch sử. Đường land đang chờ = PR g8, CHỈ bằng merge
-    commit; squash làm mất commit ef72264c nên neo này KHÔNG sống qua squash. Riêng reviewed_sha 5e2851881e810b39ebee6884371e5b3e229a01d7 ĐÃ
-    canonical qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617)
+  cuong_do: "Loi khai lich su trong blob tai 77f272d435b0c23369b2348efa821c760d653036: candidate ancestry only; canonical inclusion pending — commit verdict ef72264cb268643a89df3e15cf6cb840da92307b (evidence_url) là tổ tiên của head ứng viên hiện hành (nhánh agent/wp461-g8-claude, PR của g8; trước đó #633 head 155bbaa47e6936a81e16537e44e8a9b0c8e8fa60). #625 chỉ còn là nguồn gốc lịch sử. Đường land đang chờ = PR g8, CHỈ bằng merge commit; squash làm mất commit ef72264c nên neo này KHÔNG sống qua squash. Riêng reviewed_sha 5e2851881e810b39ebee6884371e5b3e229a01d7 ĐÃ canonical qua merge commit 6980e5bf04e4e5b8b75e5817578f1aba13f2f5ab (PR #617) Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0; git ls-tree 3e973a03b151e37cd402e0a723816eeaa8247193 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml co blob cua receipt. Vi vay 'canonical inclusion pending'/chi-tren-PR/CHUA giao/chua o master o tren chi la loi khai lich su cua blob duoc neo, khong phai trang thai hien hanh. Chi dinh chinh quan he Git, khong nang assurance/cuong_do hay suy Packet da landed."
   gioi_han: >-
     Validator đo tổ tiên trên checkout hiện hành, không chứng minh canonical inclusion của
     commit evidence_url; kiểm sau land bằng `git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b
@@ -469,10 +464,7 @@ no_da_dong:
   write set bien nhan nay ngoai spec r3 §4 (A12): da dong bang revision — spec r4/r5 §3 chua dung 3 duong write set
   (write_set_hash 021c0f52957836d5c7ea66de4bb3b1a5a48d3b25fcaff95c69b88eec61faaed8); truoc do hop thuc bang chi thi 5820263820.
 lich_su_ban_ung_vien:
-  ghi_chu: >-
-    Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu
-    `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..c026693d3b0cec663e09f02a5cd195e92d26bb60 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` (DIEM CUOI GHIM = ban ung vien lien truoc ban nay; ban sua sau PHAI chu dong doi diem cuoi, khong dung HEAD^; Codex 4101132071) + sha256 cua
-    `git show <commit>:ops/reviews/wp461-review-1-codex-verdict.receipt.yaml`; ban hien tai khong co mat (tu tham chieu). Thread 4100299339.
+  ghi_chu: "Loi khai lich su trong blob tai 77f272d435b0c23369b2348efa821c760d653036: Receipt CHUA duoc giao (chua o master). Danh sach = cac ban UNG VIEN truoc commit nay, cu -> moi, sinh tu `git log --reverse --format=%H 541fa6ca9ba78d2669261b528572dbc05b53ea87..c026693d3b0cec663e09f02a5cd195e92d26bb60 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml` (DIEM CUOI GHIM = ban ung vien lien truoc ban nay; ban sua sau PHAI chu dong doi diem cuoi, khong dung HEAD^; Codex 4101132071) + sha256 cua `git show <commit>:ops/reviews/wp461-review-1-codex-verdict.receipt.yaml`; ban hien tai khong co mat (tu tham chieu). Thread 4100299339. Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4: git merge-base --is-ancestor ef72264cb268643a89df3e15cf6cb840da92307b 3e973a03b151e37cd402e0a723816eeaa8247193 va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0; git ls-tree 3e973a03b151e37cd402e0a723816eeaa8247193 -- ops/reviews/wp461-review-1-codex-verdict.receipt.yaml co blob cua receipt. Vi vay 'canonical inclusion pending'/chi-tren-PR/CHUA giao/chua o master o tren chi la loi khai lich su cua blob duoc neo, khong phai trang thai hien hanh. Chi dinh chinh quan he Git, khong nang assurance/cuong_do hay suy Packet da landed."
   cac_ban:
   - {commit: 78d9b74fc059d93bdb7ecb172427d5a78647c0b6, luc: '2026-09-24T19:01:28+00:00', receipt_sha256: 77e751e3cf60e6b1c499e133213988e603eb00da76a43efab7702721fea48fed}
   - {commit: ea7711a61239e6845f73ffd92d7c20de97c0a667, luc: '2026-09-24T19:31:19+00:00', receipt_sha256: 73600a343a0bb94ede4284fe7973a027942fd78e85b97c6cdc5dfbf3f05df500}

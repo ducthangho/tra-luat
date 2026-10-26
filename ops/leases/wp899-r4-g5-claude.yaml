@@ -1,0 +1,108 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 899
+packet_id: wp899
+packet_alias: CI-PROVENANCE-REST-LOG
+mission_issue: 899
+revision: 4
+generation: 5
+lease_id: wp899-r4-g5-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp899-r4.md
+spec_sha256_required: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+spec_hash: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+prompt_path: ops/specs/wp899-r4.md
+prompt_sha256_required: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+spec_nguon_note: Dac ta o nhanh ops/wp899-spec (commit 8809f13, blob ce167d8); dinh
+  danh tep la BAM. r4 thay r3 (dd1a997d) sau khi r3 dung han theo V5 o luot 2.
+write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+- .claude/dev/ci_dang_ky_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+write_set_ghi_chu: 'g5 tra .claude/dev/ci_dang_ky_test.py ve write set nhu spec r4: #763 da merge (PR #930), lease wp763-r2-g1-claude rut han 2026-10-26T01:35Z (dedd7f3). Cach lam theo #899 issuecomment-6399500529: merge origin/master vao agent/wp899-g3-claude (KHONG rebase), them lai DUNG MOT dong MOI cho ops/ci_provenance_test.py, chay ci_dang_ky_test.py va bo ca tren head da merge, roi day MOT lan.'
+depends_on:
+- 892
+- 910
+depends_on_ghi_chu: '#892 da land (merge 76cf4c5). #910 pha B da merge: PR #917, merge
+  ba222ff (2026-10-25T02:16Z), lease wp910-r3-g3-claude rut han ve 2026-10-25T02:18:36Z
+  (45b5b42). Base r4 = ba222ff theo Q3 dac ta r4.'
+branch: agent/wp899-g3-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ba222ffd1615f0d74b59985b9612f725211b62f5
+start_from_sha: ba222ffd1615f0d74b59985b9612f725211b62f5
+reviewed_sha_required: ba222ffd1615f0d74b59985b9612f725211b62f5
+reviewed_sha_note: 'Chua co head code; neo base. Diem xuat phat: 3 tep tai 7f5a02c
+  tu bundle tren ops/wp899-g2-luu-tru @ d1cb870 (sha256 e066aefd...7fd2); dong MOI
+  dat lai len ban cua base, khong chep de ca tep.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/899#issuecomment-6406649866
+granted_on_instruction_note: 'Chu kho duyet TRUC TIEP trong phien session_01J5UVb6kiH9edF9McTVQvDT (26-10-2026 ~02:1xZ): "Cap lease g5, khong tinh lan connector vua roi". Lan connector ngoai y muon luc 01:48Z (issuecomment-6406427886) KHONG tinh vao ngan sach; thay doi no khai (lease g5, PR) khong co tren ref nao.'
+recorded_by: claude-spec-session-r4
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease g5 (session_01J5UVb6kiH9edF9McTVQvDT, phien soan spec r4) KHONG phai executor; executor giu nguyen (session_016tvvQ5sRaicKZ6rs93GTmK).'
+nhanh_thi_hanh_do_luc_cap:
+  do_luc: '2026-10-26T02:09:05Z'
+  ref: refs/heads/agent/wp899-g3-claude
+  trang_thai: vang
+  ghi_chu: 'ls-remote rong; executor giu code cuc bo (approve luot 11 tren 1f731c7, #899 issuecomment-6406341349).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-26T02:09:05Z'
+  so_nhanh: 'fetch --prune +refs/heads/*; ls-remote 615 / cuc bo 615 (so TAP ten: thieu 0, thua 0).'
+  ket_qua: 'ops/ci_provenance.py, ops/ci_provenance_test.py: NGUOI_GIU 1 = wp899-r4-g4-claude (cung packet, thay bang bia mo hai chieu); .claude/dev/ci_dang_ky_test.py: NGUOI_GIU 0 (wp763-r2-g1-claude het han 01:35Z). Master aa5c117 luc do; base giu ba222ff theo dac ta r4.'
+leased_at_utc: '2026-10-26T02:12:00Z'
+heartbeat_at: '2026-10-26T02:12:00Z'
+lease_until: '2026-10-28T02:26:00Z'
+lease_expires_at_utc: '2026-10-28T02:26:00Z'
+run_minutes: 120
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: null
+review_rounds_limit_basis: 'Dac ta khai tran_loi_goi_codex: ADR-0052@8ab1007... =>
+  tran 8 loi goi la truc chan; r4 dem lai tu 0 (Q4).'
+ci_policy: hoan_trong_vong_va_bat_buoc_xanh_tren_head_cuoi_truoc_merge
+push_policy: push_mot_lan_sau_review_cuc_bo
+push_policy_note: 'Theo luat_vong_doi V1-V5 cua dac ta r4 (quyet dinh chu kho rieng
+  wp899, KHONG ap ADR-0054): V1-V4 nhu r2; V5 Codex dem lai 0/8, lap lop o luot 2
+  cua r4 thi dung han.'
+thay_the_cho:
+- wp899-r4-g4-claude
+thay_the_cho_note: 'wp899-r4-g4-claude con han toi 2026-10-28T02:26Z => bia mo hai chieu (da_bi_thay_the tren ops/wp899-r4-g4-lease).'
+ngan_sach:
+  loi_goi_codex:
+    used: 11
+    reserved: 1
+    limit: 12
+    ghi_chu: 'so that: 11 loi goi offline (gom luot 10 bi cat), loi 12 danh cho connector tren PR; tran 12 theo quyet dinh chu kho #899 issuecomment-6405441749. Lan connector 01:48Z (issuecomment-6406427886) KHONG tinh theo issuecomment-6406649866.'
+  vong_review_canon:
+    used: 0
+  attempt:
+    used: 0
+    limit: 3
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: 'quyet dinh chu kho tra loi checkpoint luot 7 (#899 issuecomment-6400403263): tran dong ~2050; numstat du kien 1 + 444 + 1600 = 2045'
+  tran_cu: <= 3 tep / <= 1250 dong them (dac ta r4, Q11)
+  tran_moi: <= 3 tep / <= 2050 dong them

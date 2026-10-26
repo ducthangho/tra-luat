@@ -77,8 +77,15 @@ nhanh_thi_hanh_do_luc_cap:
   ghi_chu: 'executor tao tu base_sha.'
 leased_at_utc: '2026-10-25T15:40:00Z'
 heartbeat_at: '2026-10-25T15:40:00Z'
-lease_until: '2026-10-27T15:40:00Z'
-lease_expires_at_utc: '2026-10-27T15:40:00Z'
+lease_until: '2026-10-26T01:35:00Z'
+lease_expires_at_utc: '2026-10-26T01:35:00Z'
+rut_han:
+  han_cu: '2026-10-27T15:40:00Z'
+  han_moi: '2026-10-26T01:35:00Z'
+  rut_boi: claude-executor-session session_01CSM7GNazhN6uGJb4v1TqBT (chinh executor cua lease nay)
+  ly_do: 'packet #752 va #763 da merge qua PR #930 (merge 36057e8, cha 7009ab9 + b0fadc9; PR #918 tu dong merged cung commit); viec cua lease da xong.'
+  tham_quyen: 'executor TU NHA lease cua chinh minh sau khi packet land — chi thu hep quyen ghi, khong mo rong; KHONG co comment chu kho rieng cho viec rut han nay.'
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem tro nguoc bang thay_the_cho; viec da xong. Tien le a0d703c (wp835-r4-g4-claude), be6f91b (wp919-r3-g3).'
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0

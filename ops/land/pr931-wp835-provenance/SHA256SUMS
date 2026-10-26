@@ -14,6 +14,7 @@ c49e84f074720403ff3e8229f2cc57c811b4a11c1329ba3a13b1ba53eaf240dc  ./readback-com
 defe37edcce5d796b1701b928da547551abb2b619472c6506690d1176bb18fb1  ./readback-comment-6399753752.json
 ac92ae7b4d355e55abeade4a61e96f6283d03b8b0066333a7b4eea46da5ad9d6  ./readback-comment-6400186095.json
 31c9e961f861fe9467d80c3c585c9c88bc34942d7183788432501ff71489c6fe  ./readback-comment-6400747826.json
+5d0a1dfe64a2c7a99b8cfeab771215714dc5be984ad7e8898fb41c522ab1c359  ./readback-comment-6406009892.json
 75e0f3d6a006ef48fe85ad5ca6422ad5456e24be6a7ae14257d18f482c465610  ./readback-comments-835.json
 9b7d87104dfa2c9cedc0cb6238dd75c04bd3400db418d1060e4f1c34c3460a9a  ./readback-comments-931.json
 6c4f664aee6ad899fa1fc7c5aa0b496f0cde60c8718b5ea8084dfcc4872745d0  ./readback-events-931.json
@@ -39,6 +40,9 @@ bffad43d95ea5872ca16df11617413a97cd25554e46e5f9b344f426cefd860ae  ./readback-run
 089c072c5d72464a39be4bcec6ba83a8139de29498f44e7a698515da469335e6  ./readback-run-40211851626.json
 ab84c5646c9ec4d2a3c841484d6ae25766a803e79edb7e8150f8e0574244be96  ./readback-run-40215856274.json
 7008f4096f5acd1ad2d6eebdf11a328bc0326882cea0a01ad758470426c94913  ./readback-run-40216205823.json
+d5842cf0e1d2d6ed4f3c17c0edc6302cd92a2f4586f69ed7f276d8cc89298874  ./verdicts/wp835-postmerge-review-3-codex-prompt.md
+70ae46c0f9ba70a5416a76c45cd1002764f67f5d3290d6ddccb98555fc4e2655  ./verdicts/wp835-postmerge-review-3-codex-run.json
+b6133e428230c101ffc98d68e41559bb7786773f4f6c296106e6025be862f67b  ./verdicts/wp835-postmerge-review-3-codex-verdict.md
 f9138336ffa5c0f7ad720ccc858d86e81194237e63c49b6604ec54abe98476b0  ./verdicts/wp835-r3-g3-claude-review-1-codex-prompt.md
 487774389624e4d4e619e885100a86b72f7de0b0765835c78064c1c6cec67534  ./verdicts/wp835-r3-g3-claude-review-1-codex-run.json
 8f56beff1830cf42c133b3517ef865c417881e4a9a440ad401e02d5b493dc5d6  ./verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md

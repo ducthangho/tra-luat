@@ -4,9 +4,10 @@
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor,
 # KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr931-wp835-provenance/ (GET qua proxy phien bang
 # GITHUB_PAT, readback.py + kiemgate.py chep tu ho so pr926 vao do-lai-nguon-20261025/; SHA256SUMS kem).
-# landed FALSE vi HAI ly do, cung hinh dang ho so pr926 da sua o PR #928: (a) §10.2.2 — gate hau merge chi co moc Run
-# (REST); Checkout · Workflow definition · Gate output chua do; (b) §8.1 CHUA DAT — luot review approve qua launcher neo
-# 87fd761, KHONG neo head merge 3e46a4b; head doi thi review cu stale (PROTOCOL dong 41, AGENTS.md §6).
+# landed FALSE vi MOT ly do con lai: §10.2.2 — gate hau merge chi co moc Run (REST); Checkout · Workflow definition ·
+# Gate output chua do. §8.1 nay DAT (cap nhat 26-10-2026): luot Codex 3 qua launcher review DUNG exact head 3e46a4b, approve
+# 0 P0–P3 (chu kho nang tran Codex 2 -> 3, #835 issuecomment-6406009892). Ban ghi dau (PR #935) ghi §8.1 CHUA DAT vi luot 2
+# neo 87fd761 khac head merge — giu lai lam lich su trong assurance_81.lich_su.
 # GHI CHU HEAD: head merge 3e46a4b KHAC sha da review 87fd761 — 3e46a4b la commit merge master 5775864 vao nhanh, them vi
 # `thu-hoi` doi master la to tien (chu kho duyet day lan 2); blob hai tep giong het (xem merge_noi_dung).
 # Lease wp835-r4-g4 DA nha (rut han a0d703c, chinh phien nay theo chi thi chu kho; xem lease.thu_hoi_cuoi).
@@ -48,9 +49,10 @@ pre_merge_checks:
   - {name: 'lan do tren 87fd761 truoc merge master', run_id: 40209990286, sha: 87fd7611001ebffd20a87c934fcf578644984b4b, conclusion: failure, nguon: [readback-run-40209990286.json, readback-jobs-40209990286.json, readback-run-40209990233.json, readback-jobs-40209990233.json], ghi_chu: 'measured — readback-run-40209990286.json: thu-hoi do CHAN [12] (master 5775864 khong phai to tien cua 87fd761); readback-run-40209990233.json: gate tren 87fd761 cancelled khi day 3e46a4b. Chua bang merge master (3e46a4b), khong doi noi dung; chu kho duyet day lan 2 trong phien (loi_khai, khong co comment ben vung).'}
   - {name: 'executor cross-review Codex qua launcher.py run, luot 2/2 (lop sensitive)', sha: 87fd7611001ebffd20a87c934fcf578644984b4b, conclusion: 'approve; P0=P1=P2=P3=0; WP835-R3-01 dong', nguon: [verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md, verdicts/wp835-r4-g4-claude-review-2-codex-prompt.md, verdicts/wp835-r4-g4-claude-review-2-codex-run.json], ghi_chu: 'measured — verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md dong dau VERDICT: approve, Reviewed commit 87fd7611001ebffd20a87c934fcf578644984b4b; verdicts/wp835-r4-g4-claude-review-2-codex-run.json head 87fd761, trang_thai xong, ma_thoat 0, 932.087 s, model_phuc_vu deu gpt-6.1-sol (DO_DUOC).'}
   - {name: 'executor cross-review Codex qua launcher.py run, luot 1/2 (lop sensitive)', sha: 3785f9535398db04fb36a5eaa095166a8e048f1e, conclusion: 'changes_requested; mot P2 WP835-R3-01 (dac ta r3 doi ratchet docs da bo tu #794) => chu kho duyet r4', nguon: [verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md, verdicts/wp835-r3-g3-claude-review-1-codex-prompt.md, verdicts/wp835-r3-g3-claude-review-1-codex-run.json]}
+  - {name: 'review exact-SHA hau merge: Codex qua launcher.py run, luot 3 (lop sensitive, nang tran 2 -> 3)', sha: 3e46a4b790b770e513ab05b0b3faf0dc88796903, conclusion: 'approve; P0=P1=P2=P3=0', nguon: [verdicts/wp835-postmerge-review-3-codex-verdict.md, verdicts/wp835-postmerge-review-3-codex-prompt.md, verdicts/wp835-postmerge-review-3-codex-run.json, readback-comment-6406009892.json], ghi_chu: 'measured — verdicts/wp835-postmerge-review-3-codex-verdict.md dong dau VERDICT: approve, Reviewed commit 3e46a4b790b770e513ab05b0b3faf0dc88796903; verdicts/wp835-postmerge-review-3-codex-run.json run_id 7f235b78590a47819fcd14273553e1c0, head 3e46a4b, trang_thai xong, ma_thoat 0, 737.038 s; sha256 tep prompt = prompt_sha256 cua run (d5842cf0…); model_phuc_vu 35 response deu gpt-6.1-sol, DO_DUOC. Nang tran: readback-comment-6406009892.json (ghi ho chi thi chu kho).'}
   - {name: 'connector Codex GitHub tren PR #931', conclusion: 'Completed tren 3e46a4b (trigger: Draft marked ready), has_any_findings false; 0 review, 0 review comment', nguon: [readback-comment-6400186095.json, readback-reviews-931.json, readback-review-comments-931.json]}
   - {name: 'dieu kien kich thuoc', conclusion: '2 tep, +62 -3 (spec r4 E1: <= 2 tep, <= 150 dong them)', nguon: [readback-pr-931.json, do-lai-nguon-20261025/merge-va-diff.txt]}
-  - {name: 'so loi goi Codex', conclusion: '3: 2 luot launcher (tran lease 2/2) + 1 luot connector tu chay khi chu kho danh dau ready', ghi_chu: 'thuat_lai — dem tay trong phien; KHONG co bo dem packet_loop cho packet nay. Luot connector khong do executor goi; van ghi ra vi no tieu thu mot luot Codex.'}
+  - {name: 'so loi goi Codex', conclusion: '4: 3 luot launcher (2 theo tran lease + 1 hau merge sau khi chu kho nang tran len 3) + 1 luot connector tu chay khi chu kho danh dau ready', ghi_chu: 'thuat_lai — dem tay trong phien; KHONG co bo dem packet_loop cho packet nay. Luot connector khong do executor goi; van ghi ra vi no tieu thu mot luot Codex. Nang tran: readback-comment-6406009892.json.'}
   - {name: 'cong tai cho tren 3e46a4b', conclusion: 'tl selftest 1731/1731 (r291 OK); adr-song 55/55 khop 1–1; doctrine-scan 0 cho; git diff --check rc 0; release-verify --strict ok 192 == 192; doc-claims-check delta 0 so base', ghi_chu: 'thuat_lai — chay trong phien executor truoc lan day 3e46a4b; ghi o handoff g4 va mo ta PR #931.'}
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40215856274, run_attempt: 1, sha: 7009ab94f814fa19d3dc148f1ce074f40fd9031b, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261025/kiem-gate-post-7009ab9.txt: suite 108998541386, 23 ten, rc=0', nguon: [readback-run-40215856274.json, readback-jobs-40215856274.json, readback-check-runs-7009ab9-all.json], ghi_chu: 'Chi la moc Run cua §10.2.2. Moc Checkout, Workflow definition, Gate output: not_measured — log job/artifact khong luu; GraphQL WorkflowRun.file 403 trong phien. launcher-windows.yml khong chay tren 7009ab9 (bo loc paths; PR chi doi docs/).'}
@@ -61,8 +63,10 @@ bookkeeping:
   - {item: 'quyet dinh chu kho r4 + cap lease g4', ket_qua: 'measured — readback-comment-6399670937.json (ghi ho quyet dinh) va readback-comment-6399753752.json (lease g4 dang tu dong) tren #835'}
   - {item: 'dang lease g4 (e2ff789)', ket_qua: 'measured — readback-run-40208371980.json success'}
   - {item: 'chi thi ghi so land + rut lease', ket_qua: 'measured — readback-comment-6400747826.json (ghi ho; loi chi thi goc nam trong hoi thoai)'}
+  - {item: 'nang tran Codex 2 -> 3 cho review exact-SHA 3e46a4b', ket_qua: 'measured — readback-comment-6406009892.json (ghi ho chi thi chu kho)'}
   - {item: 'rut han lease wp835-r4-g4', ket_qua: 'measured — do-lai-nguon-20261025/lease-wp835-r4-g4-claude-sau-rut-han-a0d703c.yaml.txt; xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/bookkeeping-931-land}
+  - {item: 'PR cap nhat §8.1 sau luot 3', nhanh: claude/bookkeeping-931-land-81}
 # ---- het truong chuan
 packet_id: wp835
 packet_issue: 835
@@ -98,19 +102,22 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 7009ab9: CHUA DAT day du — REST/kiem-gate chi la moc Run; Checkout, Workflow
     definition, Gate output cua §10.2.2 not_measured. (2) lease da nha: rut han a0d703c, 3/3 duong dan NGƯỜI_GIỮ 0 DAT.
-    (3) bookkeeping: ho so nay DAT. (4) review: CHUA DAT — approve qua launcher neo 87fd761, head merge 3e46a4b khac; connector
-    Codex tren 3e46a4b khong co finding nhung khong co bien nhan model_phuc_vu nen khong thay duoc luot exact-SHA (xem
-    assurance_81). (5) noi dung merge = diff PR = diff da review DAT. (6) merge boi tai khoan chu kho DAT.
-    Mo lai: mot luot review doc lap qua launcher tren DUNG 3e46a4b (hoac 7009ab9) + du bon moc §10.2.2.
+    (3) bookkeeping: ho so nay DAT. (4) review: DAT — luot 3 qua launcher (7f235b78) approve 0 P0–P3 tren DUNG authorized head
+    3e46a4b, model_phuc_vu DO_DUOC (xem assurance_81). (5) noi dung merge = diff PR = diff da review DAT. (6) merge boi tai
+    khoan chu kho DAT.
+    Mo lai: du bon moc §10.2.2 cho gate hau merge tren 7009ab9 (can duong doc WorkflowRun.file ngoai phien Claude Code tren web).
 assurance_81:
-  reviewer_assurance_81: CHUA_DAT
+  reviewer_assurance_81: DAT
   ly_do: >-
-    measured — verdicts/wp835-r4-g4-claude-review-2-codex-run.json: luot launcher.py run 6c5f75a9 approve 0 P0–P3 voi
-    model_phuc_vu DO_DUOC (gpt-6.1-sol), NHUNG head cua run la 87fd761 trong khi authorized_head_sha la 3e46a4b
-    (readback-pr-931.json head.sha). PROTOCOL dong 41: head doi lam bang chung cu het hieu luc; AGENTS.md §6: head doi sau
-    review thi review stale. Blob hai tep giong het (merge_noi_dung) KHONG thay cho review exact-SHA. Connector Codex tren
-    3e46a4b (readback-comment-6400186095.json) khong co finding nhung khong mang bien nhan model_phuc_vu do may. Ngan sach
-    Codex cua lease (2/2) da het nen phien nay KHONG goi them luot exact-SHA.
+    measured — verdicts/wp835-postmerge-review-3-codex-run.json: luot launcher.py run 7f235b78 (provider openai_codex, ho
+    openai, khac ho executor claude) approve 0 P0–P3 voi head cua run = 3e46a4b = authorized_head_sha (readback-pr-931.json
+    head.sha); model_phuc_vu DO_DUOC (35/35 gpt-6.1-sol); ma_thoat 0. Verdict tu khai N4 trong sandbox reviewer van failed (ky
+    commit qua MCP localhost bi chan, cung tao tac hai luot truoc) va N6 khong do — hai tieu chi ay da co bang chung rieng
+    (selftest tai cho 1731/1731 cua executor; CI pre_merge 23/23).
+  lich_su: >-
+    Ban ghi dau (PR #935, 659ef0b/d77b62d) ghi CHUA_DAT: luot 2 (6c5f75a9) approve neo 87fd761, khac head merge 3e46a4b;
+    connector Codex tren 3e46a4b (readback-comment-6400186095.json) khong co finding nhung khong mang bien nhan model_phuc_vu.
+    Chu kho nang tran Codex 2 -> 3 (readback-comment-6406009892.json) de chay luot 3 exact-SHA; cap nhat sang DAT o day.
   gioi_han: >-
     model_phuc_vu do tu su kien response.created ma launcher ghi; do la model may chu tra ve trong luong su kien, khong phai
     chung thu ben thu ba.
@@ -122,4 +129,4 @@ no_co_ten:
 khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
   - 'Provenance CI §10.2.2 cua gate hau merge (Checkout, Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403 trong phien Claude Code tren web, log/artifact khong luu.'
-  - 'Bam byte cua chi thi chu kho trong hoi thoai (duyet r4 cua phien nay, duyet day lan 2, chi thi land/rut lease): KHONG_DO_DUOC.'
+  - 'Bam byte cua chi thi chu kho trong hoi thoai (duyet r4 cua phien nay, duyet day lan 2, chi thi land/rut lease, nang tran Codex len 3): KHONG_DO_DUOC.'

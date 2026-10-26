@@ -8645,9 +8645,9 @@ MUTANTS.update({
     "r834_job_vang_bo_qua": ("            if not jj:\n", "            if not jj:\n                continue\n            if False:\n", ["r834_check_vang"]),
     "r834_bo_app": ("get(\"slug\") != APP_CHECK:", "get(\"slug\") != APP_CHECK and False:", ["r834_check_app_khac"]),
     "r834_bo_path_workflow": ('r.get("path") == wf and ', "", ["r834_check_workflow_khac"]),
-    "r834_bo_attempt_moi_nhat": (('        if (run.get("status"), run.get("conclusion")) != ("completed", "success"):',
+    "r834_bo_attempt_moi_nhat": (('        if (run.get("status"), run.get("conclusion")) != ("completed", "success") or any(',
                                   '(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)'),
-                                 ("        if False:", '(j.get("run_id"), j.get("head_sha"), j.get("name")) == (run["id"], h, ten_j)'),
+                                 ("        if False and any(", '(j.get("run_id"), j.get("head_sha"), j.get("name")) == (run["id"], h, ten_j)'),
                                  ["r834_rerun_dang_chay"]),  # phối hợp: run mới nhất chưa xanh VÀ job phải thuộc attempt mới nhất — hai lớp cùng chặn
     "r834_bo_kho_check_run": ("            if r.get(\"url\") != f\"{API_GH}{nc['repo']}/check-runs/{r['id']}\":", "            if False:", ["r834_check_kho_khac"]),
     "r834_bo_neo_pr_phan_tu": ("if not all(x.get(url) == dung and", "if not all(", ["r834_pr_khac_cung_head"]),
@@ -8805,6 +8805,10 @@ MUTANTS.update({
                                  '    _trang_du({"total_count": sum(map(len, ep.values())), "items": [x for v in ep.values() for x in v]}, "items", "gop")\n', ["r834_id_trung_khac_endpoint"]),
     "r834_bo_review_xong": ('            or any(n == "hien" and x.get("state")', '            or False and any(n == "hien" and x.get("state")', ["r834_review_hoan_tat_don_doc"]),
 })
+CASES += [("r834_jobs_attempt_moi_hon", _r834_ca(12, lambda x, w, h: x.update(jobs2=[{**x["jobs"][0], "id": 260, "run_attempt": 2, "status": "in_progress", "conclusion": None}]), "attempt mới hơn")),
+          ("r834_refs_lap", _r834_ca(11, lambda x, w, h: x["bnc"]["bang_lop"][0]["connector_refs"].append(["review_comments", 11]), "phủ ĐÚNG", p3_cn=True)), ("r834_qd_thieu_truong", _r834_ca(2, lambda x, w, h: x["qd"][0].pop("owner"), "P3 còn mở", lop=(("a-b", "P3"),)))]
+MUTANTS.update({"r834_bo_attempt_jobs_moi": (' or any(j["run_id"] == run["id"] and j["run_attempt"] > run["run_attempt"] for j in jobs):', ":", ["r834_jobs_attempt_moi_hon"]),  # Codex lượt 5: run cũ ↔ jobs mới
+                "r834_refs_theo_tap": (" or sorted(refs) != sorted(p3):", " or set(refs) != set(p3):", ["r834_refs_lap"]), "r834_qd_thieu_truong_lot": ("set(q) == truong", "set(q) <= truong", ["r834_qd_thieu_truong"])})
 
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):

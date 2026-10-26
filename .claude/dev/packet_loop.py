@@ -2846,8 +2846,8 @@ def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:
         suite, ten_bb = run.get("check_suite_id"), [j for w, j in nc["required_checks"] if w == wf]
         if type(suite) is not int or type(run.get("run_attempt")) is not int or run["run_attempt"] < 1:
             _die(RC_GATE, f"VẮNG: không run {wf} nào trên {h} trong {nc['repo']} (hoặc thiếu check_suite_id/run_attempt)")
-        if (run.get("status"), run.get("conclusion")) != ("completed", "success"):
-            _die(RC_GATE, f"{wf}: run {run['id']} attempt {run['run_attempt']} (mới nhất) chưa xanh: {run.get('status')}/{run.get('conclusion')}")
+        if (run.get("status"), run.get("conclusion")) != ("completed", "success") or any(j["run_id"] == run["id"] and j["run_attempt"] > run["run_attempt"] for j in jobs):
+            _die(RC_GATE, f"{wf}: run {run['id']} attempt {run['run_attempt']} chưa xanh hoặc jobs có attempt mới hơn: {run.get('status')}/{run.get('conclusion')}")
         for ten_j in ten_bb:
             jj = [j for j in jobs if (j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)]
             if not jj:

@@ -54,6 +54,7 @@ MOI = {
     "ops/kiem_ho_so_land_test.py": r"^(\d+)/(\d+)$",
     "ops/kiem_nhan_hint_test.py": r"^(\d+)/(\d+)$",
     "ops/land_evidence_nguon_test.py": r"(?ms)\A(?!.*^(?:TONG|TU KIEM PHAN HANG): DO\b).*^CA: ([1-9]\d*)/(\1) dat\nDOT BIEN: ([1-9]\d*)/\3 bi giet dung ly do\nTU KIEM PHAN HANG: DAT \(\d+ dot bien\)\nTONG: DAT\n?\Z",
+    "ops/ci_provenance_test.py": r"(?ms)\A(?!.*^(?:TONG|TU KIEM PHAN HANG): DO\b).*^CA: ([1-9]\d*)/(\1) dat\nDOT BIEN: ([1-9]\d*)/\3 bi giet dung ly do\nTU KIEM PHAN HANG: DAT \(\d+ dot bien\)\nTONG: DAT\n?\Z",
 }
 # Tap mau THAY THE, chi dung khi nen dang chay la Windows. Windows nhan HAI dang:
 #   (a) dong da cat dot bien;  (b) dong Linux day du — ai do chay tay do du van DAT (A3).

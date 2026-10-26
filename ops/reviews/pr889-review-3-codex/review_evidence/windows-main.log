@@ -1,0 +1,34 @@
+nen_bo_qua_dot_bien(nt,posix,java): [True, False, False]
+dat_windows(cases,errors,mutants): [((2, 0, 3), True), ((0, 0, 3), False), ((2, 1, 3), False), ((2, 0, 0), False)]
+scenario=all-pass rc=0 visited=['passing', 'second']
+cong_cu_test: 2/2 đạt; tổng=2, bỏ qua=0, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 3 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario=one-skip rc=0 visited=['passing', 'second']
+BỎ QUA second: fixture missing capability
+
+cong_cu_test: 1/1 đạt; tổng=2, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 1/1 đạt · ĐỘT BIẾN 3 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario=one-fail rc=1 visited=['passing', 'second']
+ĐỎ  second: fixture assertion
+
+cong_cu_test: 1/2 đạt; tổng=2, bỏ qua=0, tiền kiểm bỏ qua=0
+
+TỔNG: CA 1/2 đạt · ĐỘT BIẾN 3 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario=all-skip rc=1 visited=['first_skip', 'second']
+BỎ QUA first_skip: fixture missing capability
+  BỎ QUA second: fixture missing capability
+
+cong_cu_test: 0/0 đạt; tổng=2, bỏ qua=2, tiền kiểm bỏ qua=0
+
+TỔNG: CA 0/0 đạt · ĐỘT BIẾN 3 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+scenario=precheck-skip rc=1 visited=['passing', 'second']
+BỎ QUA (TIỀN KIỂM) precheck: fixture missing
+  BỎ QUA (TIỀN KIỂM) precheck: fixture missing
+
+cong_cu_test: 2/2 đạt; tổng=2, bỏ qua=0, tiền kiểm bỏ qua=2
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 3 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+AST source main: so_ca = len(CA) - len(bo_qua) present: True
+SCOPE: executes exact AST control flow with synthetic CA on Linux; does not run real Windows CA.

@@ -1,0 +1,13 @@
+pr870-review-2-codex: run=2699e2d8b1a54b8e86bfa3efb9a4b61b duration=496.137 timestamps=496.137080 rc=0 state=xong worktree_sach=True
+  prompt_sha256=2c58af0d239a7c590e30c346a719cbcde8cdb124f49ecac9bcb8e094c2dcd5a9; checks={"checkpoint_hash": true, "duration_note": true, "duration_timestamps": true, "ma_thoat": true, "prompt_note": true, "prompt_sha256": true, "run_id": true, "stdout_bytes": true, "stdout_hash": true, "trang_thai": true, "version": true, "worktree_sach": true}
+  model_keys=[]; assurance=cross_reviewed assurance_KHONG_dat=cross_approved
+  stderr_header_lines=14 full_stderr_declared_bytes=1287629 model/session=['OpenAI Codex v0.163.0', 'model: gpt-6.1-sol', 'reasoning effort: xhigh', 'session id: 01a16ec6-03be-7c62-b0ec-c81586ab4b57']
+pr889-review-2-codex: run=d955f9efb3624041b86dcf97f2624175 duration=380.787 timestamps=380.787461 rc=0 state=xong worktree_sach=True
+  prompt_sha256=00773f21a7131d479374c5f8bf74b0d9dd65790a030aa731d36d97374daeb8b0; checks={"checkpoint_hash": true, "duration_note": true, "duration_timestamps": true, "ma_thoat": true, "prompt_note": true, "prompt_sha256": true, "run_id": true, "stdout_bytes": true, "stdout_hash": true, "trang_thai": true, "version": true, "worktree_sach": true}
+  model_keys=[]; assurance=cross_reviewed assurance_KHONG_dat=cross_approved
+  stderr_header_lines=14 full_stderr_declared_bytes=2085807 model/session=['OpenAI Codex v0.163.0', 'model: gpt-6.1-sol', 'reasoning effort: xhigh', 'session id: 01a16ec6-03c2-7890-927d-fe64aa125aa6']
+pr896-review-1-codex: run=64761d8e6164462d870c3d534d325dd2 duration=712.54 timestamps=712.539633 rc=0 state=xong worktree_sach=True
+  prompt_sha256=27dbb8587c61127252703aac2f1737e38f36e2839f8022763ada9818c5f091c7; checks={"checkpoint_hash": true, "duration_note": true, "duration_timestamps": true, "ma_thoat": true, "prompt_note": true, "prompt_sha256": true, "run_id": true, "stdout_bytes": true, "stdout_hash": true, "trang_thai": true, "version": true, "worktree_sach": true}
+  model_keys=[]; assurance=cross_reviewed assurance_KHONG_dat=cross_approved
+  stderr_header_lines=14 full_stderr_declared_bytes=1076780 model/session=['OpenAI Codex v0.163.0', 'model: gpt-6.1-sol', 'reasoning effort: xhigh', 'session id: 01a16ec6-03c0-72c0-ac25-dccfeef0cd62']
+rc=0

@@ -176,3 +176,69 @@ dinh_chinh_sau_quyet_dinh:
     reviewer phuc vu CHINH lan chay ay xac lap KHAC claude (do_may, hoac khai_co_audit kem auditor co ten). HOAC (B)
     `human_audited` §8 muc 2 neo DUNG 06a50c5; voi comment chu kho: dang truoc merge, co cau tu doc diff, ban luu day du trong kho.
   lich_su: 'quyet dinh 6366218495 va moi dong o tren giu nguyen de doi chieu; khoi nay chi ghi nhan quyet dinh va giu ket luan.'
+
+cap_nhat_20261026:
+  bo_canh: 'Chu kho yeu cau "Chay 3 cross-review voi launcher moi" (phien 26-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  cross_review_moi:
+    luot: 3
+    provider: codex
+    verdict: approve
+    reviewed_sha: 06a50c5feea77c2654f31edd26efeed7eeee62f5
+    so_lop: 'P0 0 / P1 0 / P2 0 / P3 0'
+    hien_vat: ops/reviews/pr870-review-3-codex-verdict.md
+    bien_nhan: ops/reviews/pr870-review-3-codex-verdict.receipt.yaml
+    assurance: cross_approved
+    do_duoc: >-
+      measured — ops/reviews/pr870-review-3-codex/run/run.json: launcher 1.5.0 run 94125115, ma_thoat 0, head 06a50c5
+      (DUNG authorized_head_sha), thoi_luong_giay 741.994, model_phuc_vu_trang_thai DO_DUOC, 21 su kien model_phuc_vu
+      deu `gpt-6.1-sol` => ho model reviewer gpt (do_may), khac executor claude.
+  reviewer_assurance_81: DAT
+  reviewer_assurance_81_ly_do: >-
+    doi_chieu — dieu kien (A) cua dinh_chinh_sau_quyet_dinh.dieu_kien_mo_lai: approve DOC LAP, hoan tat, tren DUNG
+    06a50c5feea77c2654f31edd26efeed7eeee62f5, ho model reviewer phuc vu CHINH lan chay xac lap bang do_may (model_phuc_vu), khac claude. Gioi han: ho model
+    executor suy theo provider, KHONG do_may (caveat HO-MODEL-EXECUTOR-THEO-PROVIDER trong bien nhan). Verdict tu khai
+    surface `codex_service`, run.json ghi codex_cli (caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE); khong doi ho model.
+  bon_moc_10_2_2:
+    nguon: ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/bon-moc-10-2-2.txt
+    run: 'measured — run 39752735359 attempt 1, push master, head 5f288ea, success, path .github/workflows/ci.yml.'
+    checkout: 'measured — log job 119738461348 (log-gate-119738461348-trich.txt): git log -1 sau checkout = merge 5f288ea; tree khop git rev-parse.'
+    gate_output: >-
+      measured — artifact 12415205903 (zip sha256 = digest REST trong readback-artifacts-39752735359.json), giai nen nguyen byte:
+      tl-selftest status pass, returncode 0, positive_verified true, identity head = 5f288ea, output_sha256 khop.
+    workflow_definition: >-
+      not_measured — GraphQL WorkflowRun.file tra 403 trong phien Claude Code tren web. Bang chung phu (blob ci.yml tai merge
+      va hai cha) KHONG thay cho exact definition OID. Can chu kho chay `gh api graphql` ngoai phien va dan output.
+  landed: false
+  landed_ly_do: >-
+    §10.2.2 moi dat 3/4 moc (thieu Workflow definition), va chua co phe duyet `landed` cua chu kho neo DUNG SHA head cuoi
+    cua PR ghi so moi (comment 6366218495 tren #891 dang truoc khi reviewer_assurance_81 dat, va theo #566 khong dat §8 muc 2).
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: cho_chu_kho
+      mo_ta: 'Output GraphQL WorkflowRun.file cho run 39752735359 do chu kho dan; phien doi chieu blob tai OID qua REST contents?ref=OID.'
+    - id: QUYET-DINH-LANDED-CHU-KHO-MOI
+      trang_thai: cho_chu_kho
+      mo_ta: 'Chu kho duyet `landed` bang comment tren PR ghi so moi, ghi du SHA head cuoi (40 hex), dang SAU commit cuoi.'
+
+moc_workflow_definition_20261026:
+  bo_canh: 'Chu kho chay gh api graphql ngoai phien va dan output vao hoi thoai phien 26-10-2026. Khoi nay KHONG sua dong nao o tren.'
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 39752735359 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID 5f288ea (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST run 39752735359 (head_sha, path,
+    attempt 1) va tai blob qua contents?ref=OID: blob 55d06ab452a060b836fdf6fa45ba3408fc44c90c, sha256 b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0, khop `git rev-parse 5f288ea:.github/workflows/ci.yml`.
+  nguon:
+    - ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/workflow-definition-5f288ea.txt
+    - ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/graphql-output-chu-kho-dan-pr870.json
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai (khong co comment tren GitHub
+    nhu tien le pr931). URL va blob tai OID da duoc phien doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o cap_nhat_20261026; Workflow definition o khoi nay).'
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+    - id: QUYET-DINH-LANDED-CHU-KHO-MOI
+      trang_thai: cho_chu_kho
+      mo_ta: >-
+        Chu kho duyet `landed` cho #870 (authorized_head_sha 06a50c5feea77c2654f31edd26efeed7eeee62f5) bang comment tren PR ghi so nay, ghi du SHA
+        head cuoi cua PR ghi so (40 hex), dang SAU commit cuoi.
+  landed: false

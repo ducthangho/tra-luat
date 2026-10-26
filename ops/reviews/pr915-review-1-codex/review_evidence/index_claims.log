@@ -1,0 +1,24 @@
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr3-pr915.iS5d/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr3-pr915.iS5d/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+pr870-review-2-codex: caveat_rows=5; index_rows=1; receipt_caveats=5
+  HO-MODEL-REVIEWER-KHONG-DO-DUOC: text_matches_receipt=True
+  STDERR-CHI-GIU-HEADER: text_matches_receipt=True
+  CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY: text_matches_receipt=True
+  SCRIPT-DO-DOC-DUONG-DAN-SANDBOX: text_matches_receipt=True
+  SNAPSHOT-CAY-KHONG-VAO-KHO: text_matches_receipt=True
+pr889-review-2-codex: caveat_rows=4; index_rows=1; receipt_caveats=4
+  HO-MODEL-REVIEWER-KHONG-DO-DUOC: text_matches_receipt=True
+  STDERR-CHI-GIU-HEADER: text_matches_receipt=True
+  CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY: text_matches_receipt=True
+  SCRIPT-DO-DOC-DUONG-DAN-SANDBOX: text_matches_receipt=True
+pr896-review-1-codex: caveat_rows=5; index_rows=1; receipt_caveats=5
+  HO-MODEL-REVIEWER-KHONG-DO-DUOC: text_matches_receipt=True
+  STDERR-CHI-GIU-HEADER: text_matches_receipt=True
+  CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY: text_matches_receipt=True
+  SCRIPT-DO-DOC-DUONG-DAN-SANDBOX: text_matches_receipt=True
+  P2-DA-VA-CHUA-REVIEW-LAI: text_matches_receipt=True
+new_caveat_rows=14; new_index_rows=3; total=17
+KET_LUAN: 17 hang khop bien nhan; t27 chi kiem cac id DA KHAI, khong phat hien caveat can them cho sai surface (Huong11).
+rc=0

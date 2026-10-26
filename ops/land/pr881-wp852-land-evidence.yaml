@@ -24,8 +24,12 @@ input_packet_generations_ghi_chu: 'Khong co packet/lease cho PR #881 — xem aut
 authorized_head_sha: f37da6c7b4031f0a33ee11b762e34e823968edea
 authorized_head_tree: ccdae5ce88c203ec19cb60779480e2ea2db6cc18
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/881
+authorization_url: https://github.com/ducthangho/tra-luat/issues/852#issuecomment-6406975191
+authorization_pr_url: https://github.com/ducthangho/tra-luat/pull/881
 authorization_ghi_chu: >-
+  loi_khai_co_neo — authorization_url la ban ghi ho ben dang 26-10-2026 (SAU merge, readback-comment-6406975191.json) de dap
+  luat L-6 (ops/kiem_ho_so_land.py, #752): chu kho TU merge PR #881 tai head f37da6c; ban dau truong nay tro URL PR nen L-6
+  TRUOT. Ghi ho khong mo rong tham quyen — bang chung goc van la su kien merge duoi day.
   measured — readback-pr-881.json merged_by=ducthangho, merged_at 2026-10-23T15:39:03Z. Executor KHONG merge; thao tac
   merge la cua tai khoan chu kho, KHONG_DO_DUOC bam tay hay qua phien khac. Tham quyen lam viec: than PR trong
   readback-pr-881.json trich chi thi chu kho trong phien ngay 23-10-2026 "b, làm luôn trên nhánh claude/win-lanes"

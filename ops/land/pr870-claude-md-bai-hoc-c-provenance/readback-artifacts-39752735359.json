@@ -1,0 +1,345 @@
+{
+ "total_count": 17,
+ "artifacts": [
+  {
+   "id": 12417556966,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNzU1Njk2Ng==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-5",
+   "size_in_bytes": 24896,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417556966",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417556966/zip",
+   "expired": false,
+   "digest": "sha256:3dd6aa8bc011bedf9864adece66ab10b6611fc047e02a3653725b0c8a37f8d80",
+   "created_at": "2026-10-22T10:01:33Z",
+   "updated_at": "2026-10-22T10:01:33Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12417430103,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNzQzMDEwMw==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-3",
+   "size_in_bytes": 16303,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417430103",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417430103/zip",
+   "expired": false,
+   "digest": "sha256:8176b8ee9e12755308827c925f9af53664b5e6d6207f6c2597cdf99b31088eef",
+   "created_at": "2026-10-22T09:45:28Z",
+   "updated_at": "2026-10-22T09:45:28Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12417336406,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNzMzNjQwNg==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-0",
+   "size_in_bytes": 22742,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417336406",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417336406/zip",
+   "expired": false,
+   "digest": "sha256:90cc2cb17bddc088baf1f7c7f5a5b736b1fb8b44dc7f26bdffd702e7c48161d6",
+   "created_at": "2026-10-22T09:51:31Z",
+   "updated_at": "2026-10-22T09:51:31Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12417228325,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNzIyODMyNQ==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-2",
+   "size_in_bytes": 15931,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417228325",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12417228325/zip",
+   "expired": false,
+   "digest": "sha256:397bce9e2b852ab46d6e1777a7ca840e38d68c5c7c4f0df55e368bb5ed7d55f9",
+   "created_at": "2026-10-22T10:02:45Z",
+   "updated_at": "2026-10-22T10:02:45Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12416388277,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNjM4ODI3Nw==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-4",
+   "size_in_bytes": 23401,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416388277",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416388277/zip",
+   "expired": false,
+   "digest": "sha256:2405b86864313123d2af5a9185f7661c8422924e8582e75418267b5e74f525d6",
+   "created_at": "2026-10-22T09:48:20Z",
+   "updated_at": "2026-10-22T09:48:20Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12416296181,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNjI5NjE4MQ==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-1",
+   "size_in_bytes": 25976,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416296181",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416296181/zip",
+   "expired": false,
+   "digest": "sha256:d9fccdcacca0b476020e0aaf1598987dfb55f55657dfc1e27c5c33694af4b4e5",
+   "created_at": "2026-10-22T09:33:12Z",
+   "updated_at": "2026-10-22T09:33:12Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12416188752,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNjE4ODc1Mg==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-6",
+   "size_in_bytes": 15218,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416188752",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416188752/zip",
+   "expired": false,
+   "digest": "sha256:50b610149a9b85e5ce78bcef90c5b358f598ebe814f1ca1933ed1cc7de32e9a5",
+   "created_at": "2026-10-22T09:42:39Z",
+   "updated_at": "2026-10-22T09:42:39Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12416042425,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNjA0MjQyNQ==",
+   "name": "gate-cong-cu-manh-ubuntu-latest-7",
+   "size_in_bytes": 29673,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416042425",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12416042425/zip",
+   "expired": false,
+   "digest": "sha256:3a9e07a6968ce2dda783bc54d2840cadab28555f38fdd64fb17b84c7175833fd",
+   "created_at": "2026-10-22T09:34:04Z",
+   "updated_at": "2026-10-22T09:34:04Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12415557531,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNTU1NzUzMQ==",
+   "name": "gate-nhanh-ubuntu-latest-3",
+   "size_in_bytes": 2307,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12415557531",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12415557531/zip",
+   "expired": false,
+   "digest": "sha256:aac772ca29bd0f50972479b16e373191d31826749fc90502c984f7251dec2bff",
+   "created_at": "2026-10-22T09:30:19Z",
+   "updated_at": "2026-10-22T09:30:19Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12415240377,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNTI0MDM3Nw==",
+   "name": "gate-nhanh-ubuntu-latest-1",
+   "size_in_bytes": 2334,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12415240377",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12415240377/zip",
+   "expired": false,
+   "digest": "sha256:2184ff3c4a163b633eb44f7d0add9fe736ce82ccad8c85121aff297ad326da95",
+   "created_at": "2026-10-22T09:16:12Z",
+   "updated_at": "2026-10-22T09:16:12Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12415205903,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNTIwNTkwMw==",
+   "name": "gate-evidence-ubuntu-latest-1",
+   "size_in_bytes": 24401,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12415205903",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12415205903/zip",
+   "expired": false,
+   "digest": "sha256:e6ad6f0d8e46f57abe24d3768a8d0e9ea9cb218061a88713b9294b4823ca37b9",
+   "created_at": "2026-10-22T09:18:47Z",
+   "updated_at": "2026-10-22T09:18:47Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12414886657,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNDg4NjY1Nw==",
+   "name": "gate-nhanh-ubuntu-latest-4",
+   "size_in_bytes": 2387,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414886657",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414886657/zip",
+   "expired": false,
+   "digest": "sha256:0e2242cf56ba76aebe7d264ced268417b23f0d8a8e1e819c3fdb592c3a990032",
+   "created_at": "2026-10-22T09:15:23Z",
+   "updated_at": "2026-10-22T09:15:23Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12414882688,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNDg4MjY4OA==",
+   "name": "gate-nhanh-ubuntu-latest-6",
+   "size_in_bytes": 2241,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414882688",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414882688/zip",
+   "expired": false,
+   "digest": "sha256:00070300deb78d39f009ad44c4449b21b4b3258cdaa69e1ebe96273cfe94c816",
+   "created_at": "2026-10-22T09:16:05Z",
+   "updated_at": "2026-10-22T09:16:05Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12414872620,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNDg3MjYyMA==",
+   "name": "gate-nhanh-ubuntu-latest-0",
+   "size_in_bytes": 2335,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414872620",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414872620/zip",
+   "expired": false,
+   "digest": "sha256:fce36fb0f7b1bc1a56c4256840035c0572d098a733814803933a46e69ce550fa",
+   "created_at": "2026-10-22T09:16:20Z",
+   "updated_at": "2026-10-22T09:16:20Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12414702365,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNDcwMjM2NQ==",
+   "name": "gate-nhanh-ubuntu-latest-5",
+   "size_in_bytes": 2314,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414702365",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414702365/zip",
+   "expired": false,
+   "digest": "sha256:a9b882020d9e1232671877f0a5e3a0217de8d5569a5af1d251a53b36b9e0cc81",
+   "created_at": "2026-10-22T09:16:02Z",
+   "updated_at": "2026-10-22T09:16:02Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12414364445,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxNDM2NDQ0NQ==",
+   "name": "gate-nhanh-ubuntu-latest-7",
+   "size_in_bytes": 2332,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414364445",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12414364445/zip",
+   "expired": false,
+   "digest": "sha256:9c447b7f59fe468ff25d1122f5a6d73cedeadcf1d849bad8b7a9f6052dad2c8c",
+   "created_at": "2026-10-22T09:16:18Z",
+   "updated_at": "2026-10-22T09:16:18Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  },
+  {
+   "id": 12413824686,
+   "node_id": "MDg6QXJ0aWZhY3QxMjQxMzgyNDY4Ng==",
+   "name": "gate-nhanh-ubuntu-latest-2",
+   "size_in_bytes": 2453,
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12413824686",
+   "archive_download_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/artifacts/12413824686/zip",
+   "expired": false,
+   "digest": "sha256:067fb0e6f20b64dbc7b821edd45ac99378e02209f9aeb57bb1da86c7e3632f93",
+   "created_at": "2026-10-22T09:13:16Z",
+   "updated_at": "2026-10-22T09:13:16Z",
+   "expires_at": "2027-01-20T09:05:37Z",
+   "workflow_run": {
+    "id": 39752735359,
+    "repository_id": 1289195917,
+    "head_repository_id": 1289195917,
+    "head_branch": "master",
+    "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"
+   }
+  }
+ ]
+}

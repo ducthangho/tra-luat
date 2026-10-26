@@ -97,6 +97,10 @@ anchor:
     claude/bookkeeping-766-land, CHUA la to tien master luc ghi so; len trung_binh khi PR ghi so merge bang merge commit.
 
 verdict_usage_caveats:
+  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
+    muc: P2
+    mo_ta: >-
+      Verdict dong 12 tu khai execution surface `codex_service`, nhung run.json 5d4f7321 (ops/reviews/wp766-r1-g1-exec-review-1-codex/run.json) ghi lenh.chuong_trinh=codex va execution_surface=codex_cli. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Khong phai chung thuc model/effort da phuc vu.
   - id: CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY
     muc: P2
     mo_ta: >-

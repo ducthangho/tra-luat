@@ -21224,20 +21224,15 @@ def run() -> int:
             _env110_restore(_sav_env)
     _t110("r202_profile_delete_backup_ngoai_cay", _c202_profile_delete_backup_ngoai_cay)
 
-    # v1.36.69 (#972): đích backup mặc định KHÔNG được rơi vào cây skill khi kho clone ở ~/tra-luat
-    # (r202 đỏ trên máy chủ kho HOME=/home/agent). Cây skill GIẢ qua `_goc_cay_skill`; mỗi ca đo
-    # đúng MỘT nhánh của `_config_backup_dir` hoặc một nơi gọi.
+    # v1.36.69 (#972): backup config KHÔNG rơi vào cây skill (kho ở ~/tra-luat). Cây GIẢ qua `_goc_cay_skill`.
     _tlm972, _os972 = globals()["_TL_MODULE"], globals()["os"]   # review l972a F03: tên tĩnh cho ruff
-    _ENV972 = ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME")
-
     def _cay972(fn):
         _sav_goc = _tlm972._goc_cay_skill
-        _sav_env = _env110({k: None for k in _ENV972})
+        _sav_env = _env110({k: None for k in ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME")})
         try:
             with _tf110.TemporaryDirectory() as _d:
                 _t = _P110(_d).resolve()
-                _goc = _t / "tra-luat"
-                _goc.mkdir()
+                (_goc := _t / "tra-luat").mkdir()
                 (_goc / "SKILL.md").write_text("x", encoding="utf-8")
                 _os972.environ["HOME"] = str(_t)
                 _tlm972._goc_cay_skill = lambda: _goc
@@ -21283,9 +21278,8 @@ def run() -> int:
         import types as _ty972
         def _f(t, goc):
             _cfgp = goc / "tra_luat_config.v2.json"
-            _cfgp.write_text(json.dumps({"defaultProfile": "vbqppl", "profiles": {
-                "vbqppl": {"rootFolderId": "r0"}, "XoaThu": {"rootFolderId": "r1", "notebookId": "nb1"}}}),
-                encoding="utf-8")
+            _cfgp.write_text(json.dumps({"defaultProfile": "vbqppl", "profiles": {"vbqppl": {"rootFolderId": "r0"},
+                "XoaThu": {"rootFolderId": "r1", "notebookId": "nb1"}}}), encoding="utf-8")
             _truoc = _cfgp.read_bytes()
             _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
             _sav_pme = _tlm972._profile_manifest_entries_for
@@ -21322,11 +21316,9 @@ def run() -> int:
     _t110("r972_init_config_dung_truoc_ghi", _c972_init_config_dung_truoc_ghi)
 
     def _c972_bi_danh_cung_danh_tinh_he_tep():
-        # review l972a F01: volume không phân biệt hoa thường (APFS) cho `package/` trỏ CÙNG thư mục `Package/` mà
-        # phép so PosixPath bỏ lọt. Linux không dựng được volume ấy ⇒ giả lập "cùng danh tính" qua samestat.
+        # l972a F01: volume không phân biệt hoa thường — Linux không dựng được ⇒ giả lập "cùng danh tính" qua samestat.
         def _f(t, goc):
-            bi_danh = t / "PACKAGE-ALIAS"
-            bi_danh.mkdir()
+            (bi_danh := t / "PACKAGE-ALIAS").mkdir()
             ino_bd, ino_goc = bi_danh.stat().st_ino, goc.stat().st_ino
             _goc_ss = _os972.path.samestat
             _os972.path.samestat = lambda a, b: {a.st_ino, b.st_ino} <= {ino_bd, ino_goc} or _goc_ss(a, b)
@@ -21343,9 +21335,11 @@ def run() -> int:
     _t110("r972_bi_danh_cung_danh_tinh_he_tep_bi_tu_choi", _c972_bi_danh_cung_danh_tinh_he_tep)
 
     def _c972_init_config_khong_di_theo_bi_danh_dich():
-        # review l972a F02: TÊN tệp backup (đoán được, có giờ) đã là bí danh trỏ VÀO cây — hard link (không cần quyền
-        # symlink trên Windows, review l972b F04). l972b F05: đích là THƯ MỤC ⇒ replace lỗi, không được sót `.tmp` chứa token.
+        # l972a F02 tên backup là hard link vào cây (l972b F04: không cần quyền symlink) · l972b F05 đích là thư mục · l972c F06
         import types as _ty972
+        def _fd_mo972(fd):
+            try: return bool(_os972.fstat(fd))
+            except OSError: return False
         def _f(t, goc):
             ngoai, _cfgp, ten = t / "ngoai", t / "cfg.json", "cfg.json.init-config.20261027T000000.bak.json"
             ngoai.mkdir()
@@ -21353,18 +21347,27 @@ def run() -> int:
             try:
                 _tlm972.time = _ty972.SimpleNamespace(**{k: getattr(_sav_time, k) for k in dir(_sav_time) if not k.startswith("_")})
                 _tlm972.time.strftime = lambda *a, **k: "20261027T000000"
-                for dung in ("hardlink", "thu_muc"):
+                for dung in ("hardlink", "thu_muc", "fdopen_loi"):
                     _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
                     _cu, moc = _cfgp.read_bytes(), goc / "moc.json"
                     moc.write_text("moc", encoding="utf-8")
-                    _os972.link(moc, ngoai / ten) if dung == "hardlink" else (ngoai / ten).mkdir()
-                    _tlm972.save_local_config(json.dumps({"webappUrl": "https://moi", "token": "moi"}), out=str(_cfgp))
+                    _os972.link(moc, ngoai / ten) if dung == "hardlink" else (ngoai / ten).mkdir() if dung == "thu_muc" else None
+                    fd_thay, _sav_fdopen = [], _os972.fdopen   # l972c F06: fdopen ĐẦU TIÊN lỗi ⇒ descriptor thô phải được đóng
+                    def _fdopen_loi(fd, *a, **k):
+                        if fd_thay or dung != "fdopen_loi": return _sav_fdopen(fd, *a, **k)
+                        fd_thay.append(fd); raise OSError("fdopen gia")
+                    _os972.fdopen = _fdopen_loi
+                    try:
+                        _tlm972.save_local_config(json.dumps({"webappUrl": "https://moi", "token": "moi"}), out=str(_cfgp))
+                    finally:
+                        _os972.fdopen = _sav_fdopen
                     kq.append(moc.read_text(encoding="utf-8") == "moc" and not list(ngoai.glob("*.tmp"))
-                              and (dung == "thu_muc" or (ngoai / ten).read_bytes() == _cu))
-                    (ngoai / ten).rmdir() if dung == "thu_muc" else (ngoai / ten).unlink()
+                              and not any(_fd_mo972(f) for f in fd_thay)
+                              and (dung != "hardlink" or (ngoai / ten).read_bytes() == _cu) and (dung != "fdopen_loi" or bool(fd_thay)))
+                    (ngoai / ten).rmdir() if dung == "thu_muc" else (ngoai / ten).unlink() if dung == "hardlink" else None
             finally:
                 _tlm972.time = _sav_time
-            return kq == [True, True]
+            return kq == [True, True, True]
         return _cay972(_f)
     _t110("r972_init_config_khong_di_theo_bi_danh_dich", _c972_init_config_khong_di_theo_bi_danh_dich)
 

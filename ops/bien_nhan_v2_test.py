@@ -3079,43 +3079,80 @@ def _commit_trung_tien_to(tmp: Path, k: dict):
 
 @ca
 def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
-    """r2 B2 (M2) + review r2 lượt 1: MỖI nguồn hỏng × {không nợ, có nợ trúng khoá} chạy QUA CLI ⇒ rc=2,
+    """r2 B2 (M2) + review r2 lượt 1–2: MỖI nguồn hỏng × {không nợ, có nợ trúng khoá} chạy QUA CLI ⇒ rc=2,
     không ngoại lệ, không `NỢ CHẾT`, và stderr nêu đúng nguồn (ca có ĐO, không chỉ rc). Nguồn: receipt là
-    thư mục · receipt byte UTF-8 hỏng · alias vòng · `origin/master` là TREE (ref thật, không tiêm) ·
-    `run.json` là thư mục · git vắng với OID thật thuần chữ không ngữ cảnh · tiền tố OID MƠ HỒ (hai commit)."""
+    thư mục · receipt byte UTF-8 hỏng · alias vòng · `origin/master` là TREE (ref thật, không tiêm) · loose ref
+    hỏng · symref `origin/HEAD` gãy · `run.json` là thư mục / symlink gãy / tên quá dài (lstat lỗi khác ENOENT) ·
+    git vắng · tiền tố OID MƠ HỒ (hai commit) · object commit RỖNG · kho nông · kho partial clone."""
     import json as _j
     k_anc = ("r.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY)
+    k_sf = ("r.receipt.yaml", "verdict_path", bnv2.LUAT_SURFACE)
+
+    def _anc(tmp):
+        k = _kho_cau(tmp)
+        return k, _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
 
     def receipt_thu_muc(tmp):
         k = _kho_cau(tmp)
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, "x: 1\n")})
         (tmp / bnv2.THU_MUC / "hong.receipt.yaml").mkdir()
-        return al, ("hong.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY), None, "hong.receipt.yaml"
+        return tmp, al, ("hong.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY), None, "hong.receipt.yaml"
 
     def receipt_utf8(tmp):
         k = _kho_cau(tmp)
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, "x: 1\n")})
         (tmp / bnv2.THU_MUC / "hong.receipt.yaml").write_bytes(b"schema_version: 1\nx: \xff\n")
-        return al, ("hong.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY), None, "UnicodeDecodeError"
+        return tmp, al, ("hong.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY), None, "UnicodeDecodeError"
 
     def alias_vong(tmp):
         k = _kho_cau(tmp)
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, "cycle: &self [*self]\n")})
-        return al, k_anc, None, "alias"
+        return tmp, al, k_anc, None, "alias"
 
     def nhanh_la_tree(tmp):
-        k = _kho_cau(tmp)
-        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
+        k, al = _anc(tmp)
         k["g"]("update-ref", "refs/remotes/origin/master", k["g"]("rev-parse", "HEAD^{tree}"))
-        return al, k_anc, None, "refs/remotes/origin/master"
+        return tmp, al, k_anc, None, "refs/remotes/origin/master"
+
+    def ref_hong(tmp):
+        k, al = _anc(tmp)
+        (tmp / ".git/refs/remotes/origin").mkdir(parents=True)
+        (tmp / ".git/refs/remotes/origin/master").write_text("this-is-not-an-oid\n", encoding="utf-8")
+        return tmp, al, k_anc, None, "broken ref"
+
+    def symref_gay(tmp):
+        k, al = _anc(tmp)
+        k["g"]("symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/gone")
+        return tmp, al, k_anc, None, "dangling symref"
+
+    def _surface(tmp, rj):
+        d, _ = _bn_surface(rj, "")
+        return _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}),
+                            "provider: openai_codex\nexecution_surface: codex_service\n")
 
     def run_json_thu_muc(tmp):
-        d, _ = _bn_surface("ops/reviews/v/run.json", "")
-        al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}),
-                          "provider: openai_codex\nexecution_surface: codex_service\n")
+        al = _surface(tmp, "ops/reviews/v/run.json")
         (tmp / "ops/reviews/v/run.json").unlink()
         (tmp / "ops/reviews/v/run.json").mkdir()
-        return al, ("r.receipt.yaml", "verdict_path", bnv2.LUAT_SURFACE), None, "run.json"
+        return tmp, al, k_sf, None, "run.json"
+
+    def run_json_symlink_gay(tmp):
+        al = _surface(tmp, "ops/reviews/v/run.json")
+        (tmp / "ops/reviews/v/run.json").unlink()
+        (tmp / "ops/reviews/v/run.json").symlink_to("khong-co.json")
+        return tmp, al, k_sf, None, "run.json"
+
+    def run_json_ten_qua_dai(tmp):
+        rj = "ops/reviews/" + "a" * 300 + "/run.json"
+        al = _surface(tmp, rj)
+        try:                                        # kiểm ĐỘC LẬP với `_vang` (đột biến m116 nhắm hàm ấy)
+            os.lstat(tmp / rj)
+            dung(False, "fixture: lstat tên quá dài lại thành công")
+        except (FileNotFoundError, NotADirectoryError):
+            dung(False, "fixture: lstat tên quá dài báo ENOENT/ENOTDIR, không phải lỗi khác")
+        except OSError:
+            pass
+        return tmp, al, k_sf, None, "a" * 40
 
     def git_vang(tmp):
         k = _kho_cau(tmp)
@@ -3124,33 +3161,62 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Ban {sha[:7]} chua vao master.\n")})
         trong = tmp / "_khong_co_git"
         trong.mkdir()
-        return al, k_anc, str(trong), "không tra được OID"
+        return tmp, al, k_anc, str(trong), "không gọi được `git"
 
     def tien_to_mo_ho(tmp):
         k = _kho_cau(tmp)
         tt = _commit_trung_tien_to(tmp, k)
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Ban {tt} chua vao master.\n")})
-        return al, k_anc, None, "mơ hồ"
+        return tmp, al, k_anc, None, "mơ hồ"
 
-    for nguon in (receipt_thu_muc, receipt_utf8, alias_vong, nhanh_la_tree, run_json_thu_muc, git_vang,
-                  tien_to_mo_ho):
+    def object_rong(tmp):
+        k = _kho_cau(tmp)
+        sha = _commit_tien_to_so(tmp, k, str.isalpha, "chu", 30000)
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Ban {sha[:7]} chua vao master.\n")})
+        f = tmp / ".git/objects" / sha[:2] / sha[2:]
+        dung(f.is_file(), f"fixture: object {sha} không phải loose")
+        f.chmod(0o644)
+        f.write_bytes(b"")
+        return tmp, al, k_anc, None, "is empty"
+
+    def kho_nong(tmp):
+        nguon_ = tmp / "nguon"
+        nguon_.mkdir()
+        k = _kho_cau(nguon_)
+        al = _ghi_bn_cau(nguon_, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
+        dich = tmp / "nong"
+        r = subprocess.run(["git", "clone", "-q", "--depth", "1", f"file://{nguon_}", str(dich)],
+                           capture_output=True, text=True)
+        dung(r.returncode == 0, f"fixture: clone nông hỏng: {r.stderr[:200]}")
+        return dich, al, k_anc, None, "kho nông"
+
+    def kho_partial(tmp):
+        k, al = _anc(tmp)
+        k["g"]("config", "extensions.partialclone", "origin")
+        return tmp, al, k_anc, None, "partial clone"
+
+    for nguon in (receipt_thu_muc, receipt_utf8, alias_vong, nhanh_la_tree, ref_hong, symref_gay, run_json_thu_muc,
+                  run_json_symlink_gay, run_json_ten_qua_dai, git_vang, tien_to_mo_ho, object_rong, kho_nong,
+                  kho_partial):
         for ten_no in ("khong-no", "co-no"):
             ten = f"{nguon.__name__}/{ten_no}"
             with tempfile.TemporaryDirectory() as t:
-                tmp = Path(t)
-                al, khoa, path, dau = nguon(tmp)
-                rc, loi_ra = _chay_cli(tmp, al, {khoa} if ten_no == "co-no" else (), path=path)
+                goc, al, khoa, path, dau = nguon(Path(t))
+                rc, loi_ra = _chay_cli(goc, al, {khoa} if ten_no == "co-no" else (), path=path)
                 bang(rc == 2 and "NỢ CHẾT" not in loi_ra and "Traceback" not in loi_ra and dau in loi_ra,
                      f"{ten}: đòi rc=2, không NỢ CHẾT, stderr nêu `{dau}`; được rc={rc}: {loi_ra[-400:]!r}")
 
 
 @ca
 def c92_B2_co_SINH_NO_cung_bien_voi_cong():
-    """Review r2 lượt 1 (`sinh-no-ngoai-bien-doc-receipt`): `--sinh-no` và `--sinh-no-cau-lich-su` trên receipt
-    là thư mục / byte UTF-8 hỏng / YAML hỏng ⇒ rc=2 nêu tên tệp, không ngoại lệ; dữ liệu lành ⇒ rc=0."""
+    """Review r2 lượt 1–2 (`sinh-no-ngoai-bien-doc-receipt`, `sinh-no-van-thoat-loi-yaml`): `--sinh-no` và
+    `--sinh-no-cau-lich-su` trên receipt là thư mục / byte UTF-8 hỏng / YAML hỏng / timestamp sai (`ValueError`)
+    / lồng sâu (`RecursionError`) ⇒ rc=2 nêu tên tệp, không ngoại lệ; dữ liệu lành ⇒ rc=0."""
     for hong, ghi in (("thu-muc", lambda p: p.mkdir()),
                       ("utf8", lambda p: p.write_bytes(b"schema_version: 1\nx: \xff\n")),
                       ("yaml", lambda p: p.write_text("a: [\n", encoding="utf-8")),
+                      ("timestamp", lambda p: p.write_text("date: 2026-99-99\n", encoding="utf-8")),
+                      ("long-sau", lambda p: p.write_text("a: " + "[" * 3000 + "]" * 3000 + "\n", encoding="utf-8")),
                       (None, None)):
         for co in ("--sinh-no", "--sinh-no-cau-lich-su"):
             ten = f"{hong}/{co}"
@@ -3166,6 +3232,75 @@ def c92_B2_co_SINH_NO_cung_bien_voi_cong():
                          f"{ten}: đòi rc=2 nêu tệp hỏng, được rc={rc}: {loi_ra[-300:]!r}")
                 else:
                     bang(rc == 0, f"{ten}: dữ liệu lành phải rc=0, được rc={rc}: {loi_ra[-300:]!r}")
+
+
+# Một commit rẽ từ B0 (thông điệp `cb32615`) và một blob (nội dung `bl5361\n`) chung tiền tố `e4a3f5d` — tìm ngoại
+# tuyến bằng băm đối tượng (đo 27-10-2026).
+_COMMIT_BLOB_TRUNG = ("cb32615", "bl5361\n")
+
+
+@ca
+def c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho():
+    """Review r2 lượt 2 (`loc-ung-vien-commit-chua-co-rang`): tiền tố chung giữa MỘT commit và một blob vẫn trỏ
+    đúng commit ấy — commit đã vào master ⇒ đúng một L-ANCESTRY (rc=1), không phải "mơ hồ" (rc=2)."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        cay = k["g"]("rev-parse", f"{k['B0']}^{{tree}}")
+        E = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+             "GIT_COMMITTER_EMAIL": "t@t", "PATH": os.environ.get("PATH", ""),
+             "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
+             "GIT_AUTHOR_DATE": "2026-01-01T00:00:00Z", "GIT_COMMITTER_DATE": "2026-01-01T00:00:00Z"}
+        c = subprocess.run(["git", "-C", str(tmp), "commit-tree", cay, "-p", k["B0"], "-m", _COMMIT_BLOB_TRUNG[0]],
+                           capture_output=True, text=True, env=E).stdout.strip()
+        b = subprocess.run(["git", "-C", str(tmp), "hash-object", "-w", "--stdin"], input=_COMMIT_BLOB_TRUNG[1],
+                           capture_output=True, text=True, env=E).stdout.strip()
+        dung(c[:7] == b[:7] and len(c) == 40, f"fixture: commit/blob không chung tiền tố: {c} {b}")
+        k["g"]("merge", "-q", "--no-ff", c, "-m", "merge")
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {c[:7]} chua vao master.\n")})
+        rc, loi, tk = _kiem_cau(tmp, al)
+        bang(rc == 1 and len(loi) == 1 and loi[0].startswith("[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta`"),
+             f"đòi đúng một L-ANCESTRY, được rc={rc} loi={loi} chua={tk['chua_do']}")
+
+
+@ca
+def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
+    """Kiến trúc tra git (r2, sau review lượt 2): stdout của `--disambiguate` / `cat-file --batch-check` /
+    `for-each-ref` mà KHÔNG đúng dạng giao thức ⇒ `KhongDoDuoc`, không được lọc bỏ thành "không có"; ứng viên
+    `--disambiguate` liệt kê mà `cat-file` nói `missing` ⇒ `KhongDoDuoc`. Đồ giả thay `_git_do` theo lệnh."""
+    that = bnv2._git_do
+    h = "a" * 40
+
+    def gia(bang_ra):
+        def _g(root, *args, **kw):
+            for khoa, ra in bang_ra.items():
+                if khoa in args[0] + " " + " ".join(args[1:]):
+                    return 0, ra
+            return that(root, *args, **kw)
+        return _g
+
+    for ten, fn, bang_ra in (
+            ("disambiguate-dong-la", lambda r: bnv2._commit_cua(r, "abcdef1"), {"rev-parse --disambiguate": "khong-phai-oid\n"}),
+            ("batch-check-dang-la", lambda r: bnv2._commit_cua(r, "abcdef1"),
+             {"rev-parse --disambiguate": h + "\n", "cat-file": h + " commit thua\n"}),
+            ("ung-vien-missing", lambda r: bnv2._commit_cua(r, "abcdef1"),
+             {"rev-parse --disambiguate": h + "\n", "cat-file": h + " missing\n"}),
+            ("for-each-ref-dong-la", lambda r: bnv2._nhanh_mac_dinh(r), {"for-each-ref": "refs/heads/master khong-phai-oid commit\n"})):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            _kho_cau(tmp)
+            bnv2._git_do = gia(bang_ra)
+            try:
+                kq = fn(tmp)
+                bang(False, f"{ten}: dạng lạ mà không ném KhongDoDuoc, trả {kq!r}")
+            except bnv2.KhongDoDuoc:
+                pass
+            except TinHieuChotCa:
+                raise
+            except Exception as ex:                                   # noqa: BLE001
+                bang(False, f"{ten}: chết bằng {type(ex).__name__}: {ex}, không phải KhongDoDuoc")
+            finally:
+                bnv2._git_do = that
 
 
 def _chay_1(fn):
@@ -3772,9 +3907,9 @@ def _dot_bien():
        "c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet", "run.json hỏng đọc thành 'không áp'",
        doi_chung=DC)
     do("m84_bo_OID_toan_chu_so", lambda: _dot_bien_tep(
-        "                            try:\n                                c = _commit_cua(root, x)\n",
+        "                            try:\n                                c = _tra(x)\n",
         "                            if not _oid_tron(x):\n                                continue\n"
-        "                            try:\n                                c = _commit_cua(root, x)\n"),
+        "                            try:\n                                c = _tra(x)\n"),
        "c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra", "loại token toàn chữ số trước khi tra", doi_chung=DC)
     do("m88_bo_chot_alias_vong", lambda: _dot_bien_tep(
         '        if id(node) in _dang:\n            raise _AliasVong(duong or "<gốc>")\n', ""),
@@ -3788,7 +3923,9 @@ def _dot_bien():
         "if luot_nay is None or any(lu is None for _, lu in sau):", "if luot_nay is None:"),
        "c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC", "r2: `luot` thiếu ở biên nhận khác", doi_chung=DC)
     do("m92_merge_base_loi_thanh_vi_pham", lambda: _dot_bien_tep(
-        '                            if rc != 0:\n                                chua.setdefault(k, f"{ten}: `{duong}` — `merge-base` rc={rc} cho `{x}`")\n                                continue\n', ""),
+        '                                chua.setdefault(k, f"{ten}: `{duong}` — `merge-base` cho `{x}`: {ex}")\n'
+        '                                continue\n',
+        '                                rc = 0\n'),
        "c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham", "r3: merge-base hỏng thành vi phạm", doi_chung=DC)
     # --- r2 B1–B4 (`ops/specs/NO-CAU-LICH-SU-BIEN-NHAN-r2.md`): mỗi chốt mới một đột biến.
     do("m94_B1_chen_lai_mien_tru_dung_tai", lambda: _dot_bien_tep(
@@ -3833,17 +3970,17 @@ def _dot_bien():
        doi_chung=DC)
     # --- review r2 lượt 1: mỗi đường vào của lỗi đo + mỗi ranh giới bộ chọn một đột biến riêng.
     C91 = "c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no"
-    do("m103_git_khong_tra_loi_thanh_khong_co", lambda: _dot_bien_tep(
-        '    if rc != 0:\n        raise KhongDoDuoc(f"không tra được OID',
-        '    if rc != 0:\n        return None\n        raise KhongDoDuoc(f"không tra được OID'),
-       C91, "git vắng/hỏng khi tra OID đọc thành 'không có commit'", doi_chung=DC)
+    do("m103_git_khong_goi_duoc_thanh_rong", lambda: _dot_bien_tep(
+        '        raise KhongDoDuoc(f"không gọi được `git {args[0]}`: {type(ex).__name__}: {ex}") from ex\n',
+        '        return 127, ""\n'),
+       C91, "git vắng/hỏng đọc thành stdout rỗng", doi_chung=DC)
     do("m104_ref_mac_dinh_khong_phai_commit_lui_ref_ke", lambda: _dot_bien_tep(
-        "        if c is None:\n            raise KhongDoDuoc(f\"ref mặc định",
-        "        if c is None:\n            continue\n            raise KhongDoDuoc(f\"ref mặc định"),
+        '            if lo != "commit":\n                raise KhongDoDuoc(f"ref mặc định',
+        '            if lo != "commit":\n                continue\n                raise KhongDoDuoc(f"ref mặc định'),
        C91, "`origin/master` là tree mà lùi về `master` cục bộ", doi_chung=DC)
-    do("m105_tien_to_mo_ho_thanh_khong_co", lambda: _dot_bien_tep(
-        "    if len(ung) > 1:\n", "    if False:\n"),
-       C91, "tiền tố trỏ hai commit đọc thành một/không", doi_chung=DC)
+    do("m105_tien_to_mo_ho_thanh_mot", lambda: _dot_bien_tep(
+        "    if len(commit) > 1:\n", "    if False:\n"),
+       C91, "tiền tố trỏ hai commit đọc thành một", doi_chung=DC)
     do("m106_run_json_thu_muc_thanh_vang", lambda: _dot_bien_tep(
         "or _vang(p_rj):", "or not p_rj.is_file():"),
        C91, "run.json là thư mục bị coi như vắng (không áp)", doi_chung=DC)
@@ -3856,8 +3993,8 @@ def _dot_bien():
         "    if a.sinh_no:\n        return _sinh_no(root)\n    try:\n        # Hai cờ sinh nợ đi qua CÙNG biên với cổng"),
        "c92_B2_co_SINH_NO_cung_bien_voi_cong", "`--sinh-no` gọi ngoài biên CLI", doi_chung=DC)
     do("m109_sinh_no_khong_doi_loi_doc", lambda: _dot_bien_tep(
-        "        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:\n            raise KhongDoDuoc(f\"{p.name}: không sinh",
-        "        except ZeroDivisionError as ex:\n            raise KhongDoDuoc(f\"{p.name}: không sinh"),
+        "        except Exception as ex:                                  # noqa: BLE001 — như `kiem`",
+        "        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:  # noqa: BLE001 — như `kiem`"),
        "c92_B2_co_SINH_NO_cung_bien_voi_cong", "`_sinh_no` không đổi lỗi đọc thành KHÔNG ĐO ĐƯỢC", doi_chung=DC)
     do("m110_B3_bo_ranh_gioi_tu_commit", lambda: _dot_bien_tep(
         'r"\\bcommit\\s*\\Z"', 'r"commit\\s*\\Z"'),
@@ -3872,6 +4009,48 @@ def _dot_bien():
     do("m113_B4_cua_so_bo_dong_sau", lambda: _dot_bien_tep(
         "        cua = dong_tep[max(0, j - 1):j + 2]\n", "        cua = dong_tep[max(0, j - 1):j + 1]\n"),
        "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "B4: cửa sổ bỏ dòng sau", doi_chung=DC)
+    # --- review r2 lượt 2 + kiến trúc tra git (stderr rỗng mới tin): mỗi chốt một đột biến.
+    do("m114_bo_qua_STDERR_cua_git", lambda: _dot_bien_tep(
+        "    if p.returncode not in sach or p.stderr.strip():\n", "    if p.returncode not in sach:\n"),
+       C91, "tin kết quả git dù stderr báo ref/object hỏng", doi_chung=DC)
+    do("m115_vang_dung_stat_khong_lstat", lambda: _dot_bien_tep(
+        "        p.lstat()\n", "        p.stat()\n"),
+       C91, "symlink gãy của run.json bị coi như vắng", doi_chung=DC)
+    do("m116_vang_loi_stat_khac_thanh_vang", lambda: _dot_bien_tep(
+        "    except OSError:\n        return False\n    return False\n", "    except OSError:\n        return True\n    return False\n"),
+       C91, "lỗi lstat khác ENOENT/ENOTDIR bị coi như vắng", doi_chung=DC)
+    do("m117_bo_chot_kho_NONG", lambda: _dot_bien_tep(
+        '    if nong != "false":\n', "    if False:\n"),
+       C91, "kho nông vẫn đo tổ tiên", doi_chung=DC)
+    do("m118_bo_chot_kho_PARTIAL", lambda: _dot_bien_tep(
+        '    if _git_do(root, "config", "--get", "extensions.partialclone", sach=(0, 1))[1].strip():\n',
+        "    if False:\n"),
+       C91, "kho partial clone vẫn đo", doi_chung=DC)
+    do("m119_bo_chot_SYMREF_gay", lambda: _dot_bien_tep(
+        "        if rc == 0 and ref not in co:\n", "        if False:\n"),
+       C91, "symref `origin/HEAD` gãy bị coi như vắng", doi_chung=DC)
+    do("m120_tinh_MOI_loai_object_la_ung_vien", lambda: _dot_bien_tep(
+        '    commit = sorted(x for x, lo in loai.items() if lo == "commit")\n',
+        "    commit = sorted(loai)\n"),
+       "c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho", "blob chung tiền tố đẩy commit thành mơ hồ",
+       doi_chung=DC)
+    C94 = "c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC"
+    do("m121_disambiguate_loc_bo_dong_la", lambda: _dot_bien_tep(
+        '    if len(loai) != len(ung) or "missing" in loai.values():\n',
+        '    if "missing" in loai.values():\n'),
+       C94, "dòng lạ của `--disambiguate` bị lọc bỏ", doi_chung=DC)
+    do("m122_ung_vien_missing_thanh_khong_phai_commit", lambda: _dot_bien_tep(
+        '    if len(loai) != len(ung) or "missing" in loai.values():\n',
+        "    if len(loai) != len(ung):\n"),
+       C94, "ứng viên được liệt kê mà `missing` bị coi là không phải commit", doi_chung=DC)
+    do("m123_batch_check_dang_la_thanh_khac", lambda: _dot_bien_tep(
+        '    if len(ra) != 2 or ra[0] != oid40 or ra[1] not in ("commit", "tag", "tree", "blob"):\n',
+        "    if len(ra) < 2:\n"),
+       C94, "dòng lạ của `cat-file --batch-check` được tin", doi_chung=DC)
+    do("m124_for_each_ref_dong_la_duoc_tin", lambda: _dot_bien_tep(
+        "        if len(t) != 3 or t[0] not in _REF_MAC_DINH or not _HEX40.match(t[1]):\n",
+        "        if len(t) != 3:\n"),
+       C94, "dòng lạ của `for-each-ref` được tin", doi_chung=DC)
     return ra
 
 

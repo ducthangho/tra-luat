@@ -72,6 +72,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import re
 import subprocess
 import sys
@@ -1112,52 +1113,90 @@ class _MoHo(Exception):
     """Tiền tố OID ứng với NHIỀU commit — không kết luận được token trỏ commit nào."""
 
 
+# TRA GIT CHO BA LUẬT CÂU LỊCH SỬ (r2, quyết định chủ kho 27-10 trên #960: đổi kiến trúc sau review r2 lượt 2).
+# Hai lượt review tìm năm nghĩa khác nhau của CÙNG một `rc=1` (vắng · tiền tố mơ hồ · ref hỏng · symref gãy ·
+# object rỗng); mỗi bản vá đóng một nghĩa, lượt sau tìm nghĩa kế. Đo 27-10 cho thấy git báo MỌI tình trạng hỏng
+# ấy trên STDERR, còn stdout chỉ nói `missing` và rc vẫn 0/1. Nên luật đổi từ "diễn giải rc" sang: kết quả chỉ
+# được TIN khi rc thuộc tập sạch đã định cho lệnh ấy VÀ stderr RỖNG; mọi thứ khác là KHÔNG ĐO ĐƯỢC. "Không có"
+# chỉ được đọc từ STDOUT của lệnh có giao thức nói ra điều đó (`cat-file --batch-check` in `missing`,
+# `for-each-ref` không in ref vắng, `--disambiguate` không in ứng viên).
 _RE_HEX_TOKEN = re.compile(r"[0-9a-f]{4,40}")
+_ENV_GIT = {"LC_ALL": "C", "LANG": "C", "GIT_TERMINAL_PROMPT": "0", "GIT_NO_LAZY_FETCH": "1"}
 
 
-def _peel_commit(root: Path, x: str):
-    """`x^{commit}`: commit 40 hex · None khi git TRẢ LỜI là không có (rc=1) · ném khi git không trả lời được."""
-    rc, ra = _git(root, "rev-parse", "--verify", "--quiet", f"{x}^{{commit}}")
-    if rc == 1:
-        return None
-    if rc != 0 or not _HEX40.match(ra):
-        raise KhongDoDuoc(f"không tra được commit `{x}`: git rev-parse rc={rc}: {ra[:200]}")
-    return ra
+def _git_do(root: Path, *args, vao=None, sach=(0,), timeout=60) -> tuple[int, str]:
+    """Chạy git, trả (rc, STDOUT). Ném `KhongDoDuoc` khi không chạy được, rc ngoài `sach`, hoặc stderr KHÔNG rỗng."""
+    try:
+        p = subprocess.run(["git", "-C", str(root), *args], input=vao, capture_output=True, text=True,
+                           timeout=timeout, env={**os.environ, **_ENV_GIT})
+    except (OSError, subprocess.SubprocessError) as ex:      # noqa: BLE001
+        raise KhongDoDuoc(f"không gọi được `git {args[0]}`: {type(ex).__name__}: {ex}") from ex
+    if p.returncode not in sach or p.stderr.strip():
+        raise KhongDoDuoc(f"`git {' '.join(args)[:120]}` rc={p.returncode}: {p.stderr.strip()[:300]}")
+    return p.returncode, p.stdout
+
+
+def _kho_lanh(root: Path) -> None:
+    """Kho đủ để đo tổ tiên: KHÔNG nông (merge-base trên kho nông trả sai mà không báo lỗi — bài học CLAUDE.md)
+    và KHÔNG partial clone (object vắng có thể là chưa tải, không phải không có)."""
+    nong = _git_do(root, "rev-parse", "--is-shallow-repository")[1].strip()
+    if nong != "false":
+        raise KhongDoDuoc(f"kho nông (`--is-shallow-repository` = {nong!r}) — không đo được quan hệ tổ tiên")
+    if _git_do(root, "config", "--get", "extensions.partialclone", sach=(0, 1))[1].strip():
+        raise KhongDoDuoc("kho partial clone — object vắng có thể là chưa tải, không đo được")
+
+
+def _loai_object(root: Path, oid40: str) -> str:
+    """Loại của object ĐỦ 40 hex: `commit` / `tag` / `tree` / `blob`; `missing` chỉ khi git nói thế mà stderr rỗng."""
+    ra = _git_do(root, "cat-file", "--batch-check=%(objectname) %(objecttype)", vao=f"{oid40}\n")[1].split()
+    if ra == [oid40, "missing"]:
+        return "missing"
+    if len(ra) != 2 or ra[0] != oid40 or ra[1] not in ("commit", "tag", "tree", "blob"):
+        raise KhongDoDuoc(f"`cat-file --batch-check` trả dạng lạ cho `{oid40}`: {ra}")
+    return ra[1]
 
 
 def _commit_cua(root: Path, oid: str):
-    """OID/ref → commit 40 hex · None khi CHẮC CHẮN không commit nào ứng · ném khi KHÔNG ĐO ĐƯỢC.
-
-    BA trạng thái, phân ở ĐÂY chứ không để người gọi đoán từ None (r2 review 1, `git-hong-thanh-token-thuong`):
-    bản trước gộp MỌI rc khác 0 thành None, nên git vắng/hỏng (rc=127/128) biến một OID thuần chữ/số thành
-    "không phải OID" và lỗi ĐO ra SẠCH. Git không trả lời ⇒ `KhongDoDuoc` (cả lượt rc=2). Token hex tra bằng
-    `--disambiguate` rồi ĐẾM commit ứng viên, vì `rev-parse --quiet` trả rc=1 cho cả "không có" LẪN tiền tố
-    MƠ HỒ (đo 27-10-2026) — hai commit chung tiền tố ⇒ `_MoHo`, không phải "không có"."""
+    """Token hex → commit 40 hex · None khi CHẮC CHẮN không commit nào ứng · `_MoHo` khi >1 commit ·
+    `KhongDoDuoc` khi git không trả lời sạch. Ứng viên lấy bằng `--disambiguate` (stdout), từng ứng viên đo
+    loại bằng `cat-file --batch-check`; chỉ object loại `commit` được tính (tag/tree/blob không phải commit)."""
     if not _RE_HEX_TOKEN.fullmatch(oid):
-        return _peel_commit(root, oid)
-    rc, ra = _git(root, "rev-parse", f"--disambiguate={oid}")
-    if rc != 0:
-        raise KhongDoDuoc(f"không tra được OID `{oid}`: git rev-parse --disambiguate rc={rc}: {ra[:200]}")
-    ung = {c for c in (_peel_commit(root, x) for x in ra.split()) if c}
-    if len(ung) > 1:
-        raise _MoHo(f"OID `{oid}` mơ hồ — {len(ung)} commit chung tiền tố")
-    return next(iter(ung), None)
+        raise KhongDoDuoc(f"`{oid}` không phải token hex")
+    ung = _git_do(root, "rev-parse", f"--disambiguate={oid}")[1].split()
+    loai = {x: _loai_object(root, x) for x in ung if _HEX40.match(x)}
+    if len(loai) != len(ung) or "missing" in loai.values():
+        raise KhongDoDuoc(f"ứng viên của `{oid}` không đo được loại: {loai or ung}")
+    commit = sorted(x for x, lo in loai.items() if lo == "commit")
+    if len(commit) > 1:
+        raise _MoHo(f"OID `{oid}` mơ hồ — {len(commit)} commit chung tiền tố")
+    return commit[0] if commit else None
+
+
+_REF_MAC_DINH = ("refs/remotes/origin/HEAD", "refs/remotes/origin/master", "refs/heads/master")
 
 
 def _nhanh_mac_dinh(root: Path):
-    """Commit của nhánh mặc định. Ref VẮNG ⇒ thử ref kế (CI `pull_request` không có `origin/HEAD`); ref CÓ mà
-    không trỏ commit ⇒ `KhongDoDuoc` — không lùi về ref kế, vì `master` cục bộ không phải nhánh chính tắc
-    (r2 review 1, `nhanh-mac-dinh-tree-bi-bo-qua`: `origin/master` là tree ⇒ bản trước so với `master`)."""
-    for ref in ("refs/remotes/origin/HEAD", "refs/remotes/origin/master", "refs/heads/master"):
-        rc, ra = _git(root, "show-ref", "--verify", "--quiet", ref)
-        if rc == 1:
-            continue
-        if rc != 0:
-            raise KhongDoDuoc(f"không kiểm được ref mặc định `{ref}`: git show-ref rc={rc}: {ra[:200]}")
-        c = _commit_cua(root, ref)
-        if c is None:
-            raise KhongDoDuoc(f"ref mặc định `{ref}` có mà không trỏ commit")
-        return c
+    """Commit của nhánh mặc định theo thứ tự `_REF_MAC_DINH`. Ref VẮNG ⇒ thử ref kế (CI `pull_request` không có
+    `origin/HEAD`). Ref hỏng / symref gãy (git cảnh báo trên stderr) ⇒ `KhongDoDuoc`; ref có mà không trỏ commit
+    ⇒ `KhongDoDuoc` — không lùi về ref kế, vì `master` cục bộ không phải nhánh chính tắc."""
+    ra = _git_do(root, "for-each-ref", "--format=%(refname) %(objectname) %(objecttype)", *_REF_MAC_DINH)[1]
+    co = {}
+    for dong in ra.splitlines():
+        t = dong.split()
+        if len(t) != 3 or t[0] not in _REF_MAC_DINH or not _HEX40.match(t[1]):
+            raise KhongDoDuoc(f"`for-each-ref` trả dòng lạ: {dong!r}")
+        co[t[0]] = (t[1], t[2])
+    for ref in _REF_MAC_DINH:
+        # `for-each-ref` BỎ IM LẶNG symref gãy (không stderr — đo 27-10), nên hỏi riêng: symref trỏ ref không có
+        # ⇒ nguồn chính tắc hỏng, không phải vắng.
+        rc, dich = _git_do(root, "symbolic-ref", "-q", ref, sach=(0, 1))
+        if rc == 0 and ref not in co:
+            raise KhongDoDuoc(f"`{ref}` là dangling symref (trỏ `{dich.strip()}` không có)")
+        if ref in co:
+            sha, lo = co[ref]
+            if lo != "commit":
+                raise KhongDoDuoc(f"ref mặc định `{ref}` trỏ {lo}, không phải commit")
+            return sha
     return None
 
 
@@ -1232,6 +1271,14 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
             nhanh_md[0] = _nhanh_mac_dinh(root) or ""
         return nhanh_md[0]
 
+    da_kiem_kho = []
+
+    def _tra(x):
+        if not da_kiem_kho:                 # MỘT lần, trước phép tra đầu tiên: kho nông/partial ⇒ cả lượt rc=2
+            _kho_lanh(root)
+            da_kiem_kho.append(True)
+        return _commit_cua(root, x)
+
     for ten, (d, van) in tep.items():
         # MỘT BIÊN cho lỗi đo (r2 M2): mọi ngoại lệ không lường trước khi đo MỘT biên nhận ⇒ KHÔNG ĐO
         # ĐƯỢC cho cả tệp (khoá trường `*`), và `kiem` không kết luận nợ nào của tệp ấy là nợ chết. Ba lượt
@@ -1271,7 +1318,7 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                         for mo in _RE_OID.finditer(cau):
                             x = mo.group(0)
                             try:
-                                c = _commit_cua(root, x)
+                                c = _tra(x)
                             except _MoHo as ex:
                                 chua.setdefault(k, f"{ten}: `{duong}` — {ex}, KHÔNG kết luận được quan hệ tổ tiên")
                                 continue
@@ -1285,11 +1332,12 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                             if not md:
                                 chua.setdefault(k, f"{ten}: `{duong}` — không tìm được nhánh mặc định để so")
                                 continue
-                            rc, _ = _git(root, "merge-base", "--is-ancestor", c, md)
-                            if rc == 1:
+                            try:
+                                rc, _ = _git_do(root, "merge-base", "--is-ancestor", c, md, sach=(0, 1))
+                            except KhongDoDuoc as ex:
+                                chua.setdefault(k, f"{ten}: `{duong}` — `merge-base` cho `{x}`: {ex}")
                                 continue
-                            if rc != 0:
-                                chua.setdefault(k, f"{ten}: `{duong}` — `merge-base` rc={rc} cho `{x}`")
+                            if rc == 1:
                                 continue
                             vp.setdefault(k, f"{ten}: `{duong}` nói `{x}` chưa vào / không là tổ tiên nhánh "
                                              f"mặc định, nhưng nay `{x}` ĐÃ là tổ tiên — câu đã cũ; sửa câu")
@@ -1519,7 +1567,8 @@ def _sinh_no(root: Path) -> int:
         try:
             d = yaml.safe_load(p.read_text(encoding="utf-8"))
             b = _bam(p)
-        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:
+        except Exception as ex:                                  # noqa: BLE001 — như `kiem`: SafeLoader còn ném
+            # ValueError (timestamp `2026-99-99`) và RecursionError (lồng sâu) — review r2 lượt 2
             raise KhongDoDuoc(f"{p.name}: không sinh được nợ ({type(ex).__name__}: {ex})") from ex
         if isinstance(d, dict) and not _thieu(d):
             continue

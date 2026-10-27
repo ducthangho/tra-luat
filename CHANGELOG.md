@@ -12,6 +12,10 @@ skill, mà backup config chứa token (doctrine r193/r202). Đo: `HOME=/home/use
   nguồn kể cả `TL_CONFIG_BACKUP_DIR`, kiểm TRƯỚC `mkdir`. Gốc cây = tổ tiên gần nhất có `SKILL.md`.
 - `profile-delete --apply` và `init-config` gặp chốt ⇒ dừng TRƯỚC mọi mutation, rc 2, JSON
   `CONFIG_BACKUP_TRONG_CAY_SKILL`. Trước đây hai nơi nuốt mọi lỗi backup rồi vẫn sửa config.
+- Review l972a (Codex): (F01) chốt so thêm DANH TÍNH hệ tệp (`os.path.samestat` trên tổ tiên đang tồn tại) —
+  volume không phân biệt hoa thường cho `package/` trỏ `Package/` mà phép so đường dẫn để lọt; (F02) backup của
+  `init-config` ghi tệp tạm + `os.replace` thay vì `shutil.copyfile` (đi THEO symlink ở tên đích đoán được);
+  (F03) ca `r972_*` không thêm F821 cho ruff. +2 ca `r972_*`, mỗi chốt một đột biến bị giết đúng ca đích.
 - Lớp ngoại lệ re-export trực tiếp trong `tl.py` (stub `_STUB_MAP` chỉ bọc HÀM — bẫy I11).
 - Ngoài phạm vi (nợ `NO-972-BACKUP-NUOT-LOI`): các lỗi backup KHÁC vẫn bị nuốt như cũ.
 

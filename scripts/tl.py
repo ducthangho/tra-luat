@@ -1597,7 +1597,7 @@ _STUB_MAP = {
         '_doc_dep_probe',   # r319 — bẫy I11 LẶP LẠI: `bind()` re-home __globals__, helper mới không khai ở đây = NameError LÚC CHẠY
     ],
     "profile_env": [
-        '_active_profile', '_apply_profile_env', '_apply_unconfigured_profile_env', '_config_backup_dir', '_goc_cay_skill', '_config_candidates', '_doctor_check_profile', '_download_link_plan', '_download_link_rank',   # r202: +_config_backup_dir (bẫy I11 — symbol mới PHẢI re-export)
+        '_active_profile', '_apply_profile_env', '_apply_unconfigured_profile_env', '_config_backup_dir', '_goc_cay_skill', '_trong_cay_skill', '_config_candidates', '_doctor_check_profile', '_download_link_plan', '_download_link_rank',   # r202: +_config_backup_dir (bẫy I11 — symbol mới PHẢI re-export)
         '_emit_profile_policy_error', '_gas', '_gas_get_retry', '_gws_nlm_note', '_hopnap_upload_md', '_mutable_config_target',
         '_path_exists_safe', '_persist_profile_config', '_persist_profiles_config_bulk', '_profile_asset_ids', '_profile_asset_owners', '_profile_cache_component', '_profile_cache_dir', '_profile_config_rows', '_profile_deletable_sources',
         '_profile_file_slug', '_profile_live_source_ids', '_profile_lookup', '_profile_policy_error', '_profiles_from_config', '_read_config_record',

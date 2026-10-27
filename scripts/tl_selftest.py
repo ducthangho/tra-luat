@@ -21227,10 +21227,11 @@ def run() -> int:
     # v1.36.69 (#972): đích backup mặc định KHÔNG được rơi vào cây skill khi kho clone ở ~/tra-luat
     # (r202 đỏ trên máy chủ kho HOME=/home/agent). Cây skill GIẢ qua `_goc_cay_skill`; mỗi ca đo
     # đúng MỘT nhánh của `_config_backup_dir` hoặc một nơi gọi.
+    _tlm972, _os972 = globals()["_TL_MODULE"], globals()["os"]   # review l972a F03: tên tĩnh cho ruff
     _ENV972 = ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME")
 
     def _cay972(fn):
-        _sav_goc = _TL_MODULE._goc_cay_skill
+        _sav_goc = _tlm972._goc_cay_skill
         _sav_env = _env110({k: None for k in _ENV972})
         try:
             with _tf110.TemporaryDirectory() as _d:
@@ -21238,18 +21239,18 @@ def run() -> int:
                 _goc = _t / "tra-luat"
                 _goc.mkdir()
                 (_goc / "SKILL.md").write_text("x", encoding="utf-8")
-                os.environ["HOME"] = str(_t)
-                _TL_MODULE._goc_cay_skill = lambda: _goc
+                _os972.environ["HOME"] = str(_t)
+                _tlm972._goc_cay_skill = lambda: _goc
                 return fn(_t, _goc)
         finally:
-            _TL_MODULE._goc_cay_skill = _sav_goc
+            _tlm972._goc_cay_skill = _sav_goc
             _env110_restore(_sav_env)
 
     _MAY_CHUAN972 = _P110("D:/Quốc hội/_config_backups").is_dir()   # máy chuẩn Windows: nhánh ấy thắng
 
     def _c972_mac_dinh_ngoai_cay():
         def _f(t, goc):
-            d = _P110(str(_TL_MODULE._config_backup_dir())).resolve()
+            d = _P110(str(_tlm972._config_backup_dir())).resolve()
             mong = (_P110("D:/Quốc hội/_config_backups").resolve() if _MAY_CHUAN972
                     else t / ".local" / "state" / "tra-luat" / "_config_backups")
             return d == mong and goc not in d.parents and not (goc / "_config_backups").exists()
@@ -21258,8 +21259,8 @@ def run() -> int:
 
     def _c972_xdg_state_home():
         def _f(t, goc):
-            os.environ["XDG_STATE_HOME"] = str(t / "xdg")
-            d = _P110(str(_TL_MODULE._config_backup_dir())).resolve()
+            _os972.environ["XDG_STATE_HOME"] = str(t / "xdg")
+            d = _P110(str(_tlm972._config_backup_dir())).resolve()
             return _MAY_CHUAN972 or d == t / "xdg" / "tra-luat" / "_config_backups"
         return _cay972(_f)
     _t110("r972_ton_trong_xdg_state_home", _c972_xdg_state_home)
@@ -21268,11 +21269,11 @@ def run() -> int:
         def _f(t, goc):
             ok = []
             for dich in (goc / "bk", goc):
-                os.environ["TL_CONFIG_BACKUP_DIR"] = str(dich)
+                _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(dich)
                 try:
-                    _TL_MODULE._config_backup_dir()
+                    _tlm972._config_backup_dir()
                     ok.append(False)
-                except _TL_MODULE.BackupTrongCaySkill:
+                except _tlm972.BackupTrongCaySkill:
                     ok.append(not (goc / "bk").exists())
             return all(ok) and len(ok) == 2
         return _cay972(_f)
@@ -21286,17 +21287,17 @@ def run() -> int:
                 "vbqppl": {"rootFolderId": "r0"}, "XoaThu": {"rootFolderId": "r1", "notebookId": "nb1"}}}),
                 encoding="utf-8")
             _truoc = _cfgp.read_bytes()
-            os.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
-            _sav_pme = _TL_MODULE._profile_manifest_entries_for
-            _TL_MODULE._profile_manifest_entries_for = lambda *a, **k: ([], None)
+            _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
+            _sav_pme = _tlm972._profile_manifest_entries_for
+            _tlm972._profile_manifest_entries_for = lambda *a, **k: ([], None)
             try:
                 _ns = _ty972.SimpleNamespace(name="XoaThu", config=str(_cfgp), refresh=False, apply=True,
                                              confirm="yes", delete_nlm_sources=False, trash_assets=False)
                 _be, _bo = _io110.StringIO(), _io110.StringIO()
                 with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_bo):
-                    _rc = _TL_MODULE.cmd_profile_delete(_ns)
+                    _rc = _tlm972.cmd_profile_delete(_ns)
             finally:
-                _TL_MODULE._profile_manifest_entries_for = _sav_pme
+                _tlm972._profile_manifest_entries_for = _sav_pme
             return (_rc == 2 and "CONFIG_BACKUP_TRONG_CAY_SKILL" in _be.getvalue()
                     and _cfgp.read_bytes() == _truoc and not (goc / "bk").exists())
         return _cay972(_f)
@@ -21308,17 +21309,62 @@ def run() -> int:
             _cfgp = goc / "tra_luat_config.json"
             _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
             _truoc = _cfgp.read_bytes()
-            os.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
+            _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
             _ns = _ty972.SimpleNamespace(config_json=json.dumps({"webappUrl": "https://moi", "token": "moi"}),
                                          from_public=False, file=None, from_drive=False, webapp=None, token=None,
                                          manifest_id=None, out=str(_cfgp), replace=False, no_gws=True)
             _be, _bo = _io110.StringIO(), _io110.StringIO()
             with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_bo):
-                _rc = _TL_MODULE.cmd_init_config(_ns)
+                _rc = _tlm972.cmd_init_config(_ns)
             return (_rc == 2 and "CONFIG_BACKUP_TRONG_CAY_SKILL" in _be.getvalue()
                     and _cfgp.read_bytes() == _truoc and not (goc / "bk").exists())
         return _cay972(_f)
     _t110("r972_init_config_dung_truoc_ghi", _c972_init_config_dung_truoc_ghi)
+
+    def _c972_bi_danh_cung_danh_tinh_he_tep():
+        # review l972a F01: volume không phân biệt hoa thường (APFS) cho `package/` trỏ CÙNG thư mục `Package/` mà
+        # phép so PosixPath bỏ lọt. Linux không dựng được volume ấy ⇒ giả lập "cùng danh tính" qua samestat.
+        def _f(t, goc):
+            bi_danh = t / "PACKAGE-ALIAS"
+            bi_danh.mkdir()
+            ino_bd, ino_goc = bi_danh.stat().st_ino, goc.stat().st_ino
+            _goc_ss = _os972.path.samestat
+            _os972.path.samestat = lambda a, b: {a.st_ino, b.st_ino} <= {ino_bd, ino_goc} or _goc_ss(a, b)
+            try:
+                _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(bi_danh / "bk")
+                try:
+                    _tlm972._config_backup_dir()
+                    return False
+                except _tlm972.BackupTrongCaySkill:
+                    return not (bi_danh / "bk").exists()
+            finally:
+                _os972.path.samestat = _goc_ss
+        return _cay972(_f)
+    _t110("r972_bi_danh_cung_danh_tinh_he_tep_bi_tu_choi", _c972_bi_danh_cung_danh_tinh_he_tep)
+
+    def _c972_init_config_khong_di_theo_symlink_dich():
+        # review l972a F02: thư mục backup NGOÀI cây nhưng TÊN tệp backup (đoán được, có giờ) là symlink trỏ VÀO cây.
+        import types as _ty972
+        def _f(t, goc):
+            ngoai = t / "ngoai"
+            ngoai.mkdir()
+            _cfgp = t / "cfg.json"
+            _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
+            _cu = _cfgp.read_bytes()
+            _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(ngoai)
+            _sav_time = _tlm972.time
+            _tlm972.time = _ty972.SimpleNamespace(**{k: getattr(_sav_time, k) for k in dir(_sav_time) if not k.startswith("_")})
+            _tlm972.time.strftime = lambda *a, **k: "20261027T000000"
+            ten = f"{_cfgp.name}.init-config.20261027T000000.bak.json"
+            (ngoai / ten).symlink_to(goc / "ro-ri.json")
+            try:
+                _tlm972.save_local_config(json.dumps({"webappUrl": "https://moi", "token": "moi"}), out=str(_cfgp))
+            finally:
+                _tlm972.time = _sav_time
+            return (not (goc / "ro-ri.json").exists() and not (ngoai / ten).is_symlink()
+                    and (ngoai / ten).read_bytes() == _cu)
+        return _cay972(_f)
+    _t110("r972_init_config_khong_di_theo_symlink_dich", _c972_init_config_khong_di_theo_symlink_dich)
 
     def _c208b_auth_fix_chain_dung_thu_tu():
         # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill

@@ -8651,7 +8651,7 @@ MUTANTS.update({
     "r834_job_vang_bo_qua": ("            if not jj:\n", "            if not jj:\n                continue\n            if False:\n", ["r834_check_vang"]),
     "r834_bo_app": ("get(\"slug\") != APP_CHECK:", "get(\"slug\") != APP_CHECK and False:", ["r834_check_app_khac"]),
     "r834_bo_path_workflow": ('r.get("path") == wf and ', "", ["r834_check_workflow_khac"]),
-    "r834_bo_attempt_moi_nhat": (('        if (run.get("status"), run.get("conclusion")) != ("completed", "success") or any(',
+    "r834_bo_attempt_moi_nhat": (('        if run.get("status") != "completed" or run.get("conclusion") not in ket or any(',
                                   '(j.get("run_id"), j.get("run_attempt"), j.get("head_sha"), j.get("name")) == (run["id"], run["run_attempt"], h, ten_j)'),
                                  ("        if False and any(", '(j.get("run_id"), j.get("head_sha"), j.get("name")) == (run["id"], h, ten_j)'),
                                  ["r834_rerun_dang_chay"]),  # phối hợp: run mới nhất chưa xanh VÀ job phải thuộc attempt mới nhất — hai lớp cùng chặn
@@ -8794,7 +8794,7 @@ CASES += [
 MUTANTS.update({
     "r834_xet_dung_truoc_h": (('    _xet_dung(state_dir, st, "accept")\n', "    slug_cn = _slug_connector("),
                               ("", '    _xet_dung(state_dir, st, "accept")\n    slug_cn = _slug_connector('), ["r834_xet_dung_sau_h"]),
-    "r834_bo_job_xanh": ('(job.get("status"), job.get("conclusion")) != ("completed", "success") or r is None', "r is None", ["r834_job_chua_xanh"]),
+    "r834_bo_job_xanh": ('job.get("status") != "completed" or job.get("conclusion") not in ket or r is None', "r is None", ["r834_job_chua_xanh"]),
     "r834_bo_p1_review_comment": (('                if hang != {"P3"}:\n', '                p3.append((k, x["id"]))\n'),
                                   ('                if hang != {"P3"} and k != "review_comments":\n', '                p3 += [(k, x["id"])] * (hang == {"P3"})\n'),
                                   ["r834_review_comment_p1"]),  # hai hunk cùng một ngữ nghĩa: bỏ chặn P1 VÀ không biến P1 thành P3
@@ -8820,7 +8820,20 @@ MUTANTS.update({"r834_bo_attempt_jobs_moi": (' or any(j["run_id"] == run["id"] a
 # --- #813 MAY-ADR-0054-b: nền approved_pending THẬT (`_r812`), rồi chuỗi lệnh thật (`mo-lai`, `chu-kho-duyet`, begin/review); readback R
 # và biên nhận H dựng ở mỗi bước. Mỗi ca đổi ĐÚNG một yếu tố so với nền dương; ca âm đòi rc + lý do + state nguyên byte (I4).
 _N813, _G813 = __import__("itertools").count(), "gate (ubuntu-latest)"
-CI813, LCI813, P1_813, LCN813 = [(_G813, "failure")], [("ci-gate", "P1", [_G813])], [(11, "P1")], [("cn-bug", "P1", [["review_comments", 11]])]
+_W813 = ".github/workflows/ci.yml"
+LCI813, P1_813, LCN813 = [("ci-gate", "P1", [[_W813, _G813]])], [(11, "P1")], [("cn-bug", "P1", [["review_comments", 11]])]
+
+
+def _ci813(x, h, run=100, suite=500, wf=_W813, ket="failure", n=0):
+    """Một run (đủ 5 job bắt buộc, check-run trỏ đúng suite) trên head; job `gate` mang kết luận `ket`, run cũng vậy."""
+    x["runs"].append({"id": run, "path": wf, "head_sha": h, "repository": {"full_name": "o/r"}, "run_attempt": 1, "status": "completed",
+                      "conclusion": ket, "check_suite_id": suite})
+    for i, j in enumerate(_J834):
+        k, cid = ket if j == _G813 else "success", 300 + n + i
+        x["jobs"].append({"id": 200 + n + i, "run_id": run, "run_attempt": 1, "name": j, "head_sha": h, "status": "completed", "conclusion": k,
+                          "check_run_url": f"{_API834}check-runs/{cid}"})
+        x["cr"].append({"id": cid, "name": j, "head_sha": h, "status": "completed", "conclusion": k, "check_suite": {"id": suite},
+                        "app": {"slug": "github-actions"}, "url": f"{_API834}check-runs/{cid}"})
 
 
 def _h813(sd):
@@ -8828,20 +8841,21 @@ def _h813(sd):
     return st["mo_lai_tu"]["sha"] if st["state"] in ("running", "cho_chu_kho") and st.get("mo_lai_tu") else st["pending_sha"]
 
 
-def _ml813(c, sd, nn, lop, cn=(), xong=True, cr=(), ids=None, env=None):
-    """`mo-lai` thật trên head hiện hành. lop [(slug, hạng, refs)] · cn [(id, hạng)] review comment connector · cr [(tên, kết luận)]."""
+def _ml813(c, sd, nn, lop, cn=(), xong=True, ci=None, ids=None, env=None):
+    """`mo-lai` thật trên head hiện hành. lop [(slug, hạng, refs)] · cn [(id, hạng)] review comment connector · ci(x, h) dựng readback CI."""
     w, h, n = c.tmp / "kho" / "w", _h813(sd), next(_N813)
     trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: list(v)}  # noqa: E731
     ghi = lambda ten, d: ((c.tmp / f"{n}{ten}").write_text(d if isinstance(d, str) else json.dumps(d)), c.tmp / f"{n}{ten}")[1]  # noqa: E731
     bn = {"verdict": "changes_requested", "bang_lop": [{"slug": s, "hang": g, "connector_refs" if nn == "connector" else "check_refs": r} for s, g, r in lop]}
     ic = [{"id": 20, "user": {"login": _CN834}, "body": f"Reviewed commit: `{h[:10]}`", "issue_url": f"{_API834}issues/55"}][:int(xong)]
     rcm = [{"id": i, "user": {"login": _CN834}, "body": f"![{g} Badge] x", "commit_id": hh or h, "pull_request_url": f"{_API834}pulls/55"} for i, g, *hh in cn for hh in [hh[0] if hh else None]]
-    crs = [{"id": 300 + i, "name": t, "head_sha": h, "status": "completed", "conclusion": k, "check_suite": {"id": 500}, "app": {"slug": "github-actions"},
-            "url": f"{_API834}check-runs/{300 + i}", **(x[0] if x else {})} for i, (t, k, *x) in enumerate(cr)]
+    x = {"runs": [], "jobs": [], "cr": []}
+    (ci or (lambda *_: None))(x, h)
     return _buoc813(c, sd, "mo-lai", "--pr", 55, "--nguyen-nhan", nn, "--bien-nhan", ghi("bn.yaml", __import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn=bn))),
                     *(x for s in ([s for s, *_ in lop] if ids is None else ids) for x in ("--finding-id", s)),
                     "--connector", ghi("cn.json", {"repo": "o/r", "pr": 55, "head_sha": h, "reviews": trang("items", []), "review_comments": trang("items", rcm),
-                                                   "issue_comments": trang("items", ic)}), *(("--check-runs", ghi("cr.json", trang("check_runs", crs))) if cr else ()), env=env)
+                                                   "issue_comments": trang("items", ic)}), *(("--workflow-runs", ghi("wr.json", trang("workflow_runs", x["runs"])), "--workflow-jobs", ghi("wj.json", trang("jobs", x["jobs"])),
+                        "--check-runs", ghi("cr.json", trang("check_runs", x["cr"]))) if ci else ()), env=env)
 
 
 def _buoc813(c, sd, lenh, *args, root=True, env=None):
@@ -8855,7 +8869,7 @@ def _buoc813(c, sd, lenh, *args, root=True, env=None):
 def _ck813(c, sd, pham_vi, nhanh="master", env=None, **doi):
     """Hiện vật checkpoint đúng mọi trường (`doi` đổi một) đẩy lên `nhanh` của origin; HEAD cục bộ GIỮ commit ấy (đột biến đọc ref tuỳ ý thấy nó)."""
     w, n = c.tmp / "kho" / "w", next(_N813)
-    d = {"packet_issue": 55, "generation": 1, "head_sha": _h813(sd), "pham_vi": pham_vi, "nguoi_quyet": "ducthangho",
+    d = {"packet_issue": 55, "generation": 1, "spec_hash": _st(sd)["ngu_canh_lease"]["spec_hash"], "head_sha": _h813(sd), "pham_vi": pham_vi, "nguoi_quyet": "ducthangho",
          "neo": "https://github.com/o/r/issues/55#issuecomment-6432755983", **doi}
     _g(w, "checkout", "-qf", "-B", f"t813-{n}", "refs/remotes/origin/master"), (w / "ops/checkpoints").mkdir(parents=True, exist_ok=True)
     (w / f"ops/checkpoints/c{n}.yaml").write_text(json.dumps(d)), _g(w, "add", "-A"), _g(w, "commit", "-qm", "ck"), _g(w, "push", "-q", "origin", f"HEAD:{nhanh}")
@@ -8883,7 +8897,7 @@ def _approve813(c, sd):
     return _buoc813(c, sd, "record-review", "--provider", "codex", "--verdict", "approve", "--reviewed-sha", h, "--codex-call", g, "--bien-nhan", c.tmp / f"{g}.yaml")
 
 
-def _ca813(*buoc, rc_doi=0, phai="", **muon):
+def _ca813(*buoc, rc_doi=0, phai="", kiem=None, **muon):
     """Mỗi bước nhận (c, sd) — bước giữa phải rc=0; bước CUỐI đòi `rc_doi` + `phai`; `muon` kiểm state, vắng ⇒ ca âm đòi state nguyên byte."""
     def ca(c):
         rc, sd, e, _ = _r812(c, "review")
@@ -8893,6 +8907,8 @@ def _ca813(*buoc, rc_doi=0, phai="", **muon):
             _doi(rc_doi if i == len(buoc) - 1 else 0, rc, e, f"r813 bước {i}")
         if phai not in _txt(e):
             raise AssertionError(f"r813: rc đúng mà lý do khác — đòi {phai!r}, stderr={_txt(e)!r}")
+        if kiem and not kiem(_st(sd)):
+            raise AssertionError(f"r813: nội dung quyền sai: {_st(sd)}")
         if muon:
             _kiem(sd, "r813", **muon)
         elif truoc is not None and (sd / "wp55.json").read_bytes() != truoc:
@@ -8900,7 +8916,8 @@ def _ca813(*buoc, rc_doi=0, phai="", **muon):
     return ca
 
 
-_CI813 = lambda c, sd, **k: _ml813(c, sd, "ci-do", LCI813, cr=CI813, **k)  # noqa: E731
+_CI813 = lambda c, sd, **k: _ml813(c, sd, "ci-do", LCI813, ci=_ci813, **k)  # noqa: E731
+_CIX813 = lambda f: lambda c, sd: _ml813(c, sd, "ci-do", LCI813, ci=f)  # noqa: E731
 _CN813 = lambda c, sd, **k: _ml813(c, sd, "connector", LCN813, cn=P1_813, **k)  # noqa: E731
 _GH813 = lambda lim: lambda c, sd: _sua813(sd, same_failure_limit=lim)  # noqa: E731
 _VA813 = lambda c, sd: _ck813(c, sd, ["cho_phep_va"])  # noqa: E731
@@ -8910,8 +8927,8 @@ CASES += [
     ("r813_khong_finding", _ca813(lambda c, sd: _ml813(c, sd, "connector", [], ids=[]), rc_doi=2, phai="ít nhất một")),
     ("r813_slug_ngoai_bien_nhan", _ca813(lambda c, sd: _CI813(c, sd, ids=["ci-gate", "tu-dat"]), rc_doi=11, phai="slug-ngoai-bang")),
     ("r813_connector_tap_con", _ca813(lambda c, sd: _ml813(c, sd, "connector", LCN813, cn=[(11, "P1"), (12, "P2")]), rc_doi=11, phai="BẰNG ĐÚNG")),
-    ("r813_ci_va_p1_cung_head", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", LCI813, cr=CI813, cn=P1_813), rc_doi=12, phai="dùng --nguyen-nhan connector")),
-    ("r813_ci_khong_do", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", LCI813, cr=[(_G813, "success")]), rc_doi=12, phai="không phải check đỏ thật")),
+    ("r813_ci_va_p1_cung_head", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", LCI813, ci=_ci813, cn=P1_813), rc_doi=12, phai="dùng --nguyen-nhan connector")),
+    ("r813_ci_khong_do", _ca813(_CIX813(lambda x, h: _ci813(x, h, ket="success")), rc_doi=12, phai="không đỏ thật")),
     ("r813_connector_sau_ci", _ca813(lambda c, sd: _CI813(c, sd, xong=False), _CN813, state="cho_chu_kho", finding_counts={"ci-gate": 1, "cn-bug": 1})),
     ("r813_cham_tran_mo_lai", _ca813(_GH813(1), _CI813, rc_doi=3, state="blocked", finding_counts={"ci-gate": 1})),
     ("r813_xet_dung_sau_dau_vao", _ca813(_CI813, _GH813(1), lambda c, sd: _ml813(c, sd, "connector", LCN813, cn=[(11, "P1"), (12, "P2")]), rc_doi=11, phai="BẰNG ĐÚNG")),
@@ -8927,11 +8944,21 @@ CASES += [
     ("r813_checkpoint_nhanh_khac", _ca813(_CN813, lambda c, sd: _ck813(c, sd, ["cho_phep_va"], nhanh="ops/x"), rc_doi=7, phai="không có trên origin/master")),
     ("r813_checkpoint_packet_khac", _ca813(_CN813, lambda c, sd: _ck813(c, sd, ["cho_phep_va"], packet_issue=56), rc_doi=7, phai="['packet']")),
     ("r813_va_lam_quyen_day", _ca813(_VA813, rc_doi=7, phai="['pham_vi']")),
-    ("r813_checkpoint_day", _ca813(lambda c, sd: _ck813(c, sd, ["cho_phep_day"]), state="approved_pending")),
+    ("r813_checkpoint_day", _ca813(lambda c, sd: _ck813(c, sd, ["cho_phep_day"]), state="approved_pending", kiem=lambda st: set(st.get("checkpoint_day") or {}) == {"sha256", "generation", "sha"}
+                                   and (st["checkpoint_day"]["generation"], st["checkpoint_day"]["sha"]) == (1, st["pending_sha"]) and len(st["checkpoint_day"]["sha256"]) == 64)),
     ("r813_checkpoint_day_dung_lai", _ca813(lambda c, sd: _ck813(c, sd, ["cho_phep_day"]), lambda c, sd: _ck813(c, sd, ["cho_phep_day"]), rc_doi=7, phai="['da_dung']")),
     ("r813_chu_kho_cham_tran", _ca813(_CN813, _GH813(1), _VA813, rc_doi=3, state="blocked")),
-    ("r813_ci_do_app_khac", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", LCI813, cr=[(_G813, "failure", {"app": {"slug": "evil-app"}})]), rc_doi=12, phai="không phải check đỏ thật")),
-    ("r813_ci_do_chay_lai_xanh", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", LCI813, cr=[*CI813, (_G813, "success")]), rc_doi=12, phai="không phải check đỏ thật")),
+    ("r813_ci_do_app_khac", _ca813(_CIX813(lambda x, h: _ci813(x, h) or x["cr"][0].update(app={"slug": "evil-app"})), rc_doi=12, phai="không từ app")),
+    ("r813_ci_do_run_moi_xanh", _ca813(_CIX813(lambda x, h: (_ci813(x, h), _ci813(x, h, run=101, suite=501, ket="success", n=50))), rc_doi=12, phai="không đỏ thật")),
+    ("r813_ci_do_workflow_khac", _ca813(_CIX813(lambda x, h: (_ci813(x, h, ket="success"), _ci813(x, h, run=101, suite=501, wf=".github/workflows/khac.yml", n=50))),
+                                        rc_doi=12, phai="không đỏ thật")),
+    ("r813_ci_do_check_xanh_job_do", _ca813(_CIX813(lambda x, h: _ci813(x, h) or x["cr"][0].update(conclusion="success")), rc_doi=12, phai="không đỏ thật")),
+    ("r813_quyen_ci_khac_generation", _ca813(_CI813, lambda c, sd: _sua813(sd, mo_lai_tu={**_st(sd)["mo_lai_tu"], "generation": 2}), _CN813, rc_doi=8, phai="cùng generation")),
+    ("r813_refs_lap", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", [("ci-gate", "P1", [[_W813, _G813]] * 2)], ci=_ci813), rc_doi=11, phai="không lặp")),
+    ("r813_checkpoint_spec_lech", _ca813(_CN813, lambda c, sd: _ck813(c, sd, ["cho_phep_va"], spec_hash="0" * 64), rc_doi=7, phai="['spec_hash']")),
+    ("r813_checkpoint_pham_vi_la", _ca813(_CN813, lambda c, sd: _ck813(c, sd, ["cho_phep_va", "la"]), rc_doi=7, phai="sai lược đồ")),
+    ("r813_checkpoint_pham_vi_long", _ca813(_CN813, lambda c, sd: _ck813(c, sd, [["cho_phep_va"]]), rc_doi=7, phai="sai lược đồ")),
+    ("r813_m5_run_path_sai_kieu", _r834_ca(12, lambda x, w, h: x["runs"].append({**x["runs"][0], "id": 101, "path": 5}), "KHÔNG ĐO ĐƯỢC: workflow_runs")),
     ("r813_connector_lop_p3", _ca813(lambda c, sd: _ml813(c, sd, "connector", [("cn-bug", "P3", [["review_comments", 11]])], cn=P1_813), rc_doi=11, phai="hạng P0–P2")),
     ("r813_checkpoint_head_lech", _ca813(_CN813, lambda c, sd: _ck813(c, sd, ["cho_phep_va"], head_sha="0" * 40), rc_doi=7, phai="['head_sha']")),
     ("r813_checkpoint_generation", _ca813(_CN813, lambda c, sd: _ck813(c, sd, ["cho_phep_va"], generation=2), rc_doi=7, phai="['generation']")),
@@ -8941,11 +8968,21 @@ CASES += [
         {**{k: v for k, v in x["runs"][0].items() if k != "repository"}, "id": 101, "status": "in_progress", "conclusion": None}), "KHÔNG ĐO ĐƯỢC: workflow_runs")),
     ("r813_m5_run_head_sai_kieu", _r834_ca(12, lambda x, w, h: x["runs"].append({**x["runs"][0], "id": 101, "head_sha": None}), "KHÔNG ĐO ĐƯỢC: workflow_runs")),
 ]
+for _m, _t in (("r812_bo_slug_trong_bang", "r813_slug_ngoai_bien_nhan"), ("r834_bo_app", "r813_ci_do_app_khac"), ("r834_run_cu_nhat", "r813_ci_do_run_moi_xanh"),
+               ("r834_bo_path_workflow", "r813_ci_do_workflow_khac")):  # cùng chốt dùng chung ở cửa mới: đột biến gỡ chốt ấy phải giết cả ca #813
+    MUTANTS[_m][2].append(_t)
 MUTANTS.update({
     "r813_bo_ci_do": ('    if not connector and p02:\n', '    if False:\n', ["r813_ci_va_p1_cung_head"]),
-    "r813_ci_do_nhan_xanh": ('            if r.get("status") != "completed" or r.get("conclusion") not in CI_DO_THAT:', '            if False:', ["r813_ci_khong_do"]),
+    "r813_ci_do_nhan_xanh": ('h, state_dir, CI_DO_THAT)  # I7', 'h, state_dir, (*CI_DO_THAT, "success"))  # I7', ["r813_ci_khong_do"]),
+    "r813_ci_do_bo_check_do": ('            if do and (r["status"] != "completed" or r["conclusion"] not in ket):', '            if False:', ["r813_ci_do_check_xanh_job_do"]),
+    "r813_gop_nguyen_nhan": ('    slugs = sorted({x["slug"] for x in bn["lop"]})', '    slugs = ["gop"] * bool(bn["lop"])', ["r813_hai_slug_doc_lap"]),
+    "r813_bo_ghi_quyen_day": ('{"checkpoint_day": {"sha256": sha, "generation": d["generation"], "sha": h}}', "{}", ["r813_checkpoint_day"]),
+    "r813_bo_generation_quyen_ci": (' and ml["generation"] == (nc or {}).get("generation")', "", ["r813_quyen_ci_khac_generation"]),
+    "r813_bo_refs_duy_nhat": (" or len(set(refs)) != len(refs):", ":", ["r813_refs_lap"]),
+    "r813_bo_spec_hash_checkpoint": ('("spec_hash", d["spec_hash"] == st["ngu_canh_lease"]["spec_hash"])', '("spec_hash", True)', ["r813_checkpoint_spec_lech"]),
+    "r813_bo_mien_pham_vi": (' \\\n            or not d["pham_vi"] or not all(type(x) is str and x in PHAM_VI_CHECKPOINT for x in d["pham_vi"]):', ":", ["r813_checkpoint_pham_vi_la"]),
+    "r813_m5_bo_path": ('    if not all(type(r.get("path")) is str and type(r.get("head_sha"))', '    if not all(type(r.get("head_sha"))', ["r813_m5_run_path_sai_kieu"]),
     "r813_bo_tap_rong": ('    if not a.finding_id:\n        _die(RC_ARG, "mo-lai', '    if False:\n        _die(RC_ARG, "mo-lai', ["r813_khong_finding"]),
-    "r813_slug_tu_dat": ('reviewed_sha=h, finding_id=a.finding_id))', 'reviewed_sha=h, finding_id=None))', ["r813_slug_ngoai_bien_nhan"]),
     "r813_tap_con_lot": ("    if connector and sorted(refs) != sorted(p02):", "    if connector and not set(refs) <= set(p02):", ["r813_connector_tap_con"]),
     "r813_chi_tu_approved": ('    tu_ci = connector and st["state"] == "running"', '    tu_ci = False and st["state"] == "running"', ["r813_connector_sau_ci"]),
     "r813_ci_do_doi_connector_xong": (' for x, n in cua["reviews"])) and p0p2 is None:', ' for x, n in cua["reviews"])):', ["r813_connector_sau_ci"]),
@@ -8959,21 +8996,18 @@ MUTANTS.update({
     "r813_checkpoint_ref_tuy_y": ('    rc, raw = _git_do(root, "show", f"{gan[1].decode().strip()}:{a.checkpoint_path}")', '    rc, raw = _git_do(root, "show", f"HEAD:{a.checkpoint_path}")',
                                   ["r813_checkpoint_nhanh_khac"]),
     "r813_bo_packet_checkpoint": ('("packet", d["packet_issue"] == st["packet"])', '("packet", True)', ["r813_checkpoint_packet_khac"]),
-    "r813_moi_pham_vi_la_du": (' and pv in d["pham_vi"]),', '),', ["r813_va_lam_quyen_day"]),
+    "r813_moi_pham_vi_la_du": ('("pham_vi", pv in d["pham_vi"])', '("pham_vi", True)', ["r813_va_lam_quyen_day"]),
     "r813_checkpoint_dung_lai": ('        ("da_dung", not any(', '        ("da_dung", True or not any(', ["r813_checkpoint_day_dung_lai"]),
     "r813_va_ve_running_khong_tieu": ('{"state": "running", "mo_lai_tu": None}', '{"state": "running"}', ["r813_checkpoint_va"]),
     "r813_m5_bo_repository": (' and isinstance(r.get("repository"), dict)\n               and type(r["repository"].get("full_name")) is str for r in runs):', " for r in runs):",
                               ["r813_m5_run_moi_thieu_repository"]),
-    "r813_ci_do_bo_app": (' and (r.get("app") if isinstance(r.get("app"), dict) else {}).get("slug") == APP_CHECK), key=lambda r: r["id"], default={})', '), key=lambda r: r["id"], default={})',
-                          ["r813_ci_do_app_khac"]),
-    "r813_ci_do_luot_cu": ('APP_CHECK), key=lambda r: r["id"], default={})', 'APP_CHECK), key=lambda r: -r["id"], default={})', ["r813_ci_do_chay_lai_xanh"]),
     "r813_lop_bo_hang": (' or connector and x["hang"] not in HANG_LOP[:3] for x in bn["lop"])', ' for x in bn["lop"])', ["r813_connector_lop_p3"]),
     "r813_bo_head_checkpoint": ('("head_sha", d["head_sha"] == h)', '("head_sha", True)', ["r813_checkpoint_head_lech"]),
     "r813_bo_generation_checkpoint": ('("generation", d["generation"] == st["ngu_canh_lease"]["generation"])', '("generation", True)', ["r813_checkpoint_generation"]),
     "r813_bo_nguoi_quyet": ('("nguoi_quyet", d["nguoi_quyet"] in NGUOI_CO_THAM_QUYEN)', '("nguoi_quyet", True)', ["r813_checkpoint_nguoi_quyet"]),
     "r813_cho_chu_kho_khong_quyen": (' and (st["state"] != "cho_chu_kho" or st.get("luat_adr0054") is True and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),', '),',
                                      ["r813_state_cho_chu_kho_mat_quyen"]),
-    "r813_m5_bo_head_sha": ('    if not all(type(r.get("path")) is str and type(r.get("head_sha")) is str and ', '    if not all(type(r.get("path")) is str and ', ["r813_m5_run_head_sai_kieu"]),
+    "r813_m5_bo_head_sha": ('is str and type(r.get("head_sha")) is str and isinstance', 'is str and isinstance', ["r813_m5_run_head_sai_kieu"]),
 })
 
 

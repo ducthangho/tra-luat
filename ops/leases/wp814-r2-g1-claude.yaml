@@ -101,3 +101,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp814-g1-claude MOT lan khi nghiem thu dat va review approve; mo PR draft. Merge origin/master TRUOC luot Codex cuoi de head duoc duyet = head day. Master tien sau approve lam thu-hoi do => merge master + mot luot Codex xac minh (tien le #813 luot 5), khong day merge commit chua xac minh.'
+da_bi_thay_the: wp814-r3-g2-claude
+ly_do_thu_hoi: 'chu kho chon "Gộp vào #814" cho no P3 r813-mutation-evidence-incomplete (#814 issuecomment-6440900564) => spec r3 (M4), lease r3 g2 thay. Executor r2 chua bat dau: 0 commit, 0/8 loi goi Codex (dung o preflight vi Codex het xac thuc, #814 issuecomment-6438376433).'

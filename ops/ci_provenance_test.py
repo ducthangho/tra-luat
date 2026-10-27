@@ -1111,9 +1111,10 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         ca += [(cm(dau + ai(b"A") + x + b"\n\nm1\n"), None) for x in (b"tree ", b"x-review v\r\n\r\ntree " + oid)]   # M1: >1 dòng `tree `
         # lượt 6 (V3): MA TRẬN parent × dòng mở rộng × thân. Kỳ vọng tính ĐỘC LẬP với sản phẩm: phần đầu (tới LF-LF đầu tiên) có
         # ≠ 1 dòng bắt đầu `tree ` ⇒ None (M1), ngược lại ⇒ Git native (`log --no-walk`, kiểm ở vòng oracle dưới)
-        bo_cha = ([], [P1], [P1, P1], [P2, P1, "0" * 39 + "1"], [f"{i:040x}" for i in range(1, 258)])   # rỗng · một · TRÙNG · 3 · 257
+        bo_cha = ([], [P1], [P1, P1], [P1, P2, P1], [P1, P1, P1], [P2, P1, "0" * 39 + "1"], [f"{i:040x}" for i in range(1, 258)])   # trùng: AA·ABA·AAA
         pha = (b"", b"x-review start\n \ntree " + oid + b"\n", b"x-review start\n\t\ntree " + oid + b"\n",
-               b"x-review start\n \t\ntree " + oid + b"\n", b"tree \n", b"x-review first\n \n tree " + oid + b"\n parent " + P1.encode() + b"\n")
+               b"x-review start\n \t\ntree " + oid + b"\n", b"tree \n", b"x-review first\n \n tree " + oid + b"\n parent " + P1.encode() + b"\n",
+               b"tree\t " + oid + b"\n", b"tree\r\n " + oid + b"\n", b"tree\n\t" + oid + b"\n", b"tree\r\n\t" + oid + b"\n")   # lượt 7: TAB+SP, gập CRLF/TAB
         than = (None, b"m\n", b"first\n\ntree " + oid + b"\nparent " + P1.encode() + b"\n\nlast\n", b"tree " + oid + b"\n\nlast\n",
                 b"\n\ntree " + oid + b"\nparent " + P1.encode() + b"\n")   # None = không có dòng trống, không thân
         for bc in bo_cha:
@@ -1260,6 +1261,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F13_strip_payload", "dong = than[:int(loai[2])].split(", "dong = than[:int(loai[2])].strip().split(", "c53"),
     ("F13_gop_cha_trung", '"parents": [x.decode("ascii") for x in cha]}', '"parents": list(dict.fromkeys(x.decode("ascii") for x in cha))}', "c53"),
     ("F13_cha_toi_da_256", '"parents": [x.decode("ascii") for x in cha]}', '"parents": [x.decode("ascii") for x in cha[:256]]}', "c53"),
+    *[(f"F13_gap_{ten}", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = b"\\n".join(dong).replace(' + gap + ', b" ").split(b"\\n")\n', "c53")
+      for ten, gap in (("crlf_sp", 'b"\\r\\n "'), ("lf_tab", 'b"\\n\\t"'), ("crlf_tab", 'b"\\r\\n\\t"'))],
+    ("F13_gop_cha_lech_mot", "        cha.append(x[7:])\n", "        if x[7:] not in cha[:-1]:\n            cha.append(x[7:])\n", "c53"),
+    ("F13_rstrip_ten_truong", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.split(b" ", 1)[0].rstrip() + b" " + x.split(b" ", 1)[1] if b" " in x else x for x in dong]\n', "c53"),
     ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),

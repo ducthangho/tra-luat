@@ -1,0 +1,16 @@
+./OMITTED.txt: OK
+./PROMPT.md: OK
+./VERDICT.md: OK
+./diff.patch: OK
+./numstat.txt: OK
+./review_evidence/measure_august.py: OK
+./review_evidence/measure_history.py: OK
+./review_evidence/measure_matrix.py: OK
+./review_evidence/measure_readback.py: OK
+./review_evidence/measure_workflows.py: OK
+./review_evidence/snapshot.py: OK
+./review_evidence/tree-ops.txt: OK
+./run/checkpoint.json: OK
+./run/run.json: OK
+./run/stderr.log: OK
+./run/stdout.log: OK

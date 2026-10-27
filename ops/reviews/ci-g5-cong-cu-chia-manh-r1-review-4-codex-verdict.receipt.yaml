@@ -125,6 +125,10 @@ anchor:
     tien. Nhanh ops/** xoa duoc: truoc khi xoa phai co tag luu-tru/* giu commit neo, neu khong SHA thanh khong tra
     duoc.
 verdict_usage_caveats:
+  - id: SURFACE-MAU-THUAN-KHONG-DO-DUOC
+    muc: P2
+    mo_ta: >-
+      Verdict dong 194 tu khai execution surface `codex_service`; bien nhan ghi `surface: codex_cli` chi tu loi khai cua lease g1 (b — THUAT LAI). Luot nay KHONG co run.json/stderr nen be mat thuc chay KHONG_DO_DUOC: khong duoc trich ben nao nhu da do. Cung lop loi tu khai surface ma pr915-review-1/pr896-review-2 bat o #870/#889; giu nguyen byte verdict.
   - id: KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC
     muc: P3
     mo_ta: >-

@@ -1,0 +1,25 @@
+{
+  "path": "ops/land/pr491-r358-ghi-so-land-evidence.yaml",
+  "field": "bookkeeping.4",
+  "line": 244,
+  "text": "NỢ CŨ KHÔNG ĐỘNG TỚI: `_kiem_bia_mo` dùng `any(...)` trong `ops/lease_publish.py:606` vẫn nguyên trên master · nợ A9 (bốn lease GATE cấp trước hạn #456, `generation` giữ 1, lệch `ADR-0034`) chờ quyết định chủ kho · Issue #463–#467 còn `open` · PR #479 và #490 chưa merge. Bốn câu này là THUẬT LẠI theo hồ sơ chuỗi #468→#489, trừ câu về `any(...)` đã đo lại trên `origin/master`; trạng thái Issue/PR chưa hỏi lại API trong đợt này.",
+  "original_anchor": "cdd0b1d19439e286fb7a86020ce2d258bafc2102",
+  "same_scalar_at_original": true,
+  "merge490": "8cee9410e958a6b9d956e080c11878fbd80d9f5f 00e017af102bc8355e0c276d2d813e20620ddb42 01e7f77d707cb093b5ba6d9b9d8577f40d025488 Merge pull request #490 from ducthangho/claude/handoff-tra-luat-repo-2ak5th",
+  "ancestry": [
+    {
+      "target": "cdd0b1d19439e286fb7a86020ce2d258bafc2102",
+      "rc": 1
+    },
+    {
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "target": "05bc12e2b9008071ca28edbd4574e58644d48220",
+      "rc": 0
+    }
+  ],
+  "current_original_has_history_marker": false,
+  "master_blob": "100644 blob 1d97784146c8c031e1dbba14c8db5ea560d58bff\tops/land/pr491-r358-ghi-so-land-evidence.yaml"
+}

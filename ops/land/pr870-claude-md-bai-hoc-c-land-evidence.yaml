@@ -274,3 +274,25 @@ pr_ghi_so_duyet_landed_lan2_20261026:
       dang SAU commit cuoi va TRUOC merge, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.
   landed: false
   landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'
+
+landed_20261026:
+  bo_canh: 'Chu kho dong y ghi readback duyet landed (phien 26-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/951#issuecomment-6411410063
+    do_duoc: >-
+      measured — readback-comment-951-6411410063.json: ducthangho, author_association OWNER, created_at = updated_at
+      2026-10-26T08:19:17Z; than ghi day du authorized_head_sha 06a50c5feea77c2654f31edd26efeed7eeee62f5 va "Head PR ghi so:
+      7a01b3e4e96d332f587c161d92b2ca2a2e7ef790". readback-commit-7a01b3e.json: commit cuoi cua nhanh ghi so luc
+      2026-10-26T06:20:27Z (truoc comment). readback-pr-951.json: head.sha 7a01b3e (= SHA trong comment), merged_at
+      2026-10-26T08:19:34Z (sau comment), merge_commit 101263f, merged_by ducthangho.
+  landed: true
+  landed_hieu_luc_tu: 101263fa3be19af46b7dbc2f7fbaebe957cda0ed
+  landed_dieu_kien: >-
+    (1) gate tren merge 5f288ea: DAT — 4/4 moc §10.2.2 (cap_nhat_20261026 + moc_workflow_definition_20261026). (2) lease:
+    KHONG_AP_DUNG — viec chu kho giao truc tiep, khong packet/lease. (3) review: DAT — pr870-review-3-codex approve 0 P0–P3 tren DUNG
+    authorized_head_sha 06a50c5feea77c2654f31edd26efeed7eeee62f5, model_phuc_vu DO_DUOC (cross_approved, cap_nhat_20261026). (4) noi dung merge = diff da review:
+    DAT — 06a50c5feea77c2654f31edd26efeed7eeee62f5 la cha thu hai cua merge 5f288ea. (5) duyet chu kho neo dung head PR ghi so, dang sau commit cuoi va truoc merge: DAT.
+  gioi_han: >-
+    Ho model executor (claude) suy theo provider, KHONG do_may (caveat HO-MODEL-EXECUTOR-THEO-PROVIDER trong bien nhan
+    pr870-review-3-codex). Tai khoan chu kho khong tach khoi phien agent (#566) — comment la duyet landed, KHONG phai human_audited.

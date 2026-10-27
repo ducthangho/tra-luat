@@ -80,13 +80,12 @@ verdict_doi_chieu: >-
   do la phan biet dung ma tep nay dan. KHONG CHUNG MINH: identity model. KHONG DO DUOC.
 
 verdict_usage_caveats:
+  - id: SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC
+    muc: P2
+    mo_ta: >-
+      Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 32fca3390491423c83e84d37f9904a3b). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay.
   - id: HAI-P2-VONG-3-DA-VA-nhung-VA-CAN-REVIEW-LAI
-    noi_dung: >-
-      Ca hai P2 vong 3 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu TU
-      lien tiep trong mot PR ma ban va sinh ra phat hien moi — va lan nay chinh CHOT DOI
-      CHUNG VUA SIET da bat duoc mot loi cua GIAN DO (ban sao dot bien dat phang trong /tmp
-      lam PROVIDER_CHO_PHEP tut ve {anthropic, human}, khien ba dot bien that bi bao oan la
-      "pha ca cong"). Dung doc "da va" thanh "da dong". Chua dong.
+    noi_dung: "Anh chup lich su tai commit ghi bien nhan dc92839520092a95f097464f4b9a2a252f0d9132: Ca hai P2 vong 3 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu TU lien tiep trong mot PR ma ban va sinh ra phat hien moi — va lan nay chinh CHOT DOI CHUNG VUA SIET da bat duoc mot loi cua GIAN DO (ban sao dot bien dat phang trong /tmp lam PROVIDER_CHO_PHEP tut ve {anthropic, human}, khien ba dot bien that bi bao oan la \"pha ca cong\"). Dung doc \"da va\" thanh \"da dong\". Chua dong. Sau moc ay, pr455-bien-nhan-v2-review-4-codex-verdict.md da review ban va tai 4ef73e69d5f3c419634118983723355e25e38305. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land."
   - id: approve_with_findings-KHONG-phai-du-dieu-kien-LAND
     noi_dung: >-
       Reviewer noi thang: "Khong tao cross_approved, approval GitHub hoac land authorization

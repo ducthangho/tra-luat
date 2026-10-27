@@ -1,0 +1,7 @@
+ops/land/pr823-wp802-provenance/readback-comment-6247520447.json id=6247520447 round5=True head5c6c7a8=True runb3d8a108=True
+**Codex lượt 5/5: APPROVE** trên exact head `5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456` (PR #823). Không còn P0/P1/P2/P3 mở; F2 và F6 của lượt 4 đóng.
+- Verdict: nhánh lease `ops/wp802-r1-g1-lease` @ `c25d0f8`, `ops/reviews/wp802-g1-luot5-codex-verdict.md` (launcher run `b3d8a108`, 1092s, `ma_thoat=0`). Lượt 1–4 ở cùng thư mục. Ghi chú: thông điệp commit `c25d0f8` ghi nhầm id run — id đúng là `b3d8a108`.
+pr870 luot2: head=06a50c5feea77c2654f31edd26efeed7eeee62f5 expected_match=True verdict=approve header_match=True hash_match=True absent_at_anchor_rc=128
+pr870 luot3: head=06a50c5feea77c2654f31edd26efeed7eeee62f5 expected_match=True verdict=approve header_match=True hash_match=True absent_at_anchor_rc=128
+pr889 luot2: head=094e8d17ae4dfcf21dca63702c9262267bdc072c expected_match=True verdict=approve header_match=True hash_match=True absent_at_anchor_rc=128
+pr889 luot3: head=094e8d17ae4dfcf21dca63702c9262267bdc072c expected_match=True verdict=approve header_match=True hash_match=True absent_at_anchor_rc=128

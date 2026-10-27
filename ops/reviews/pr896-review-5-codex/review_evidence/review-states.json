@@ -1,0 +1,164 @@
+{
+  "old_eight": [
+    {
+      "receipt": "pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml",
+      "anchor": "c595292cb63fb8c09d7d7b482cda20f9d5f0917f",
+      "next_verdict": "pr455-bien-nhan-v2-review-2-codex-verdict.md",
+      "next_reviewed_sha": "c595292cb63fb8c09d7d7b482cda20f9d5f0917f",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml",
+      "anchor": "1cd8ec78e42e32e6ff5af8edcc4660b1e601fd93",
+      "next_verdict": "pr455-bien-nhan-v2-review-3-codex-verdict.md",
+      "next_reviewed_sha": "cb212847375c2319fe0ccad3f7c00c90b870e3ba",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml",
+      "anchor": "dc92839520092a95f097464f4b9a2a252f0d9132",
+      "next_verdict": "pr455-bien-nhan-v2-review-4-codex-verdict.md",
+      "next_reviewed_sha": "4ef73e69d5f3c419634118983723355e25e38305",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml",
+      "anchor": "3cff891b81f02dc22cc7ed8b05799c94ade0fc63",
+      "next_verdict": "pr455-bien-nhan-v2-review-5-codex-verdict.md",
+      "next_reviewed_sha": "670071b700bd97a893d64393ffded0257957d0b3",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml",
+      "anchor": "020198a437b7ae0008f466959950d3994adba716",
+      "next_verdict": "pr455-bien-nhan-v2-review-6-codex-verdict.md",
+      "next_reviewed_sha": "5a78c150106ae381461354c77ba2023834330bbd",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml",
+      "anchor": "e4d8ecce7e583503b5205a038707ea667a81ed43",
+      "next_verdict": "pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md",
+      "next_reviewed_sha": "ca960160b477cd16346a293aaa8752772a9921d4",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr896-review-1-codex-verdict.receipt.yaml",
+      "anchor": "2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f",
+      "next_verdict": "pr896-review-2-codex-verdict.md",
+      "next_reviewed_sha": "8d56009a09af7b3ef93801df105f9483de212cc7",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    },
+    {
+      "receipt": "pr915-review-1-codex-verdict.receipt.yaml",
+      "anchor": "a9bc9349103adfc971f4a1f7431a9655aecaaefb",
+      "next_verdict": "pr896-review-2-codex-verdict.md",
+      "next_reviewed_sha": "8d56009a09af7b3ef93801df105f9483de212cc7",
+      "receipt_sha_matches": true,
+      "verdict_sha_matches": true,
+      "hash_matches": true,
+      "next_verdict_at_anchor_rc": 128
+    }
+  ],
+  "residual": [
+    {
+      "receipt": "pr870-review-1-codex-verdict.receipt.yaml",
+      "locations": {
+        "assurance_ghi_chu": {
+          "line": 27,
+          "text": "Khac ho (codex CLI, executor Claude) nhung verdict la `changes_requested`, va KHONG khai cross_approved: (1) head da merge 06a50c5 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) goi codex tran, khong run.json; (4) checkout review khong bi cuong che read-only."
+        },
+        "verdict_usage_caveats.0.mo_ta": {
+          "line": 97,
+          "text": "Verdict cham b38fce8; head da merge la 06a50c5 (them commit va P2 bang dung HINT.patch, 3 dong CLAUDE.md). Khong co luot review nao tren 06a50c5 — \"da va\" la loi khai cua executor, kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check, khong phai verdict cua reviewer."
+        }
+      },
+      "readme": [
+        {
+          "line": 704,
+          "text": "| `pr870-review-1-codex-verdict.md` | `HEAD-MERGE-CHUA-REVIEW-LAI` | Verdict cham `b38fce8`; head da merge la `06a50c5` (va P2 bang dung HINT.patch, 3 dong CLAUDE.md) va KHONG duoc review lai. \"Da va\" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check), khong phai verdict. |"
+        },
+        {
+          "line": 1046,
+          "text": "| [`pr870-review-1-codex-verdict.md`](pr870-review-1-codex-verdict.md) | [`.receipt.yaml`](pr870-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `codex exec` tran, khong run.json; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `master-windows-bo-sot-dispatch` da va o `06a50c5` bang dung HINT.patch, KHONG review lai · ban phang nguyen byte cua `pr870-review-1-codex/VERDICT.md`. Merge `5f288ea`. | `b38fce83` | 104880 |"
+        }
+      ],
+      "later_reviews": [
+        {
+          "path": "ops/reviews/pr870-review-2-codex-verdict.md",
+          "reviewed_sha": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+          "matches_oid": true,
+          "verdict": "approve",
+          "hash_matches": true
+        },
+        {
+          "path": "ops/reviews/pr870-review-3-codex-verdict.md",
+          "reviewed_sha": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+          "matches_oid": true,
+          "verdict": "approve",
+          "hash_matches": true
+        }
+      ]
+    },
+    {
+      "receipt": "pr889-review-1-codex-verdict.receipt.yaml",
+      "locations": {
+        "assurance_ghi_chu": {
+          "line": 28,
+          "text": "Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only."
+        },
+        "verdict_usage_caveats.1.mo_ta": {
+          "line": 104,
+          "text": "Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG duoc review lai. \"Da va\" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma ops/cong_cu_test.py:8916), khong phai verdict cua reviewer."
+        }
+      },
+      "readme": [
+        {
+          "line": 710,
+          "text": "| `pr889-review-1-codex-verdict.md` | `HEAD-MERGE-CHUA-REVIEW-LAI` | Verdict cham `8d5cccb`; head da merge la `094e8d1` (va P2 bang HINT.patch + sua them mot cau) va KHONG duoc review lai. \"Da va\" la loi khai executor (`patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma `ops/cong_cu_test.py:8916`), khong phai verdict. |"
+        },
+        {
+          "line": 1047,
+          "text": "| [`pr889-review-1-codex-verdict.md`](pr889-review-1-codex-verdict.md) | [`.receipt.yaml`](pr889-review-1-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | **`changes_requested`** · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 9f946d71`, run.json trong kho; header CLI khai `gpt-6.1-sol`/`xhigh`, model thuc chay KHONG DO DUOC) · 0/0/1/0 · P2 `windows-green-does-not-prove-all-baselines` da va o `094e8d1`, KHONG review lai · ban phang nguyen byte cua `pr889-review-1-codex/VERDICT.md`. Merge `6ac385f`. | `8d5cccbb` | 75193 |"
+        }
+      ],
+      "later_reviews": [
+        {
+          "path": "ops/reviews/pr889-review-2-codex-verdict.md",
+          "reviewed_sha": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+          "matches_oid": true,
+          "verdict": "approve",
+          "hash_matches": true
+        },
+        {
+          "path": "ops/reviews/pr889-review-3-codex-verdict.md",
+          "reviewed_sha": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+          "matches_oid": true,
+          "verdict": "approve",
+          "hash_matches": true
+        }
+      ]
+    }
+  ]
+}

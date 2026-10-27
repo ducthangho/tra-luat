@@ -1,0 +1,2 @@
+loi_g5_workflow errors=1
+gate-cong-cu: needs/if phải đúng 'chuan-bi'/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", thấy []/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"

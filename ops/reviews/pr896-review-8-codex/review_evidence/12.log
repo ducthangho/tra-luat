@@ -1,0 +1,24 @@
+git merge-base --is-ancestor bc57bca 423b4ba rc=1 stderr=''
+git merge-base --is-ancestor cc78b33 3ddda02 rc=0 stderr=''
+git merge-base --is-ancestor cc78b33 refs/remotes/origin/ops/cap-lease-ci-g5-cong-cu-chia-manh rc=128 stderr='fatal: Not a valid object name refs/remotes/origin/ops/cap-lease-ci-g5-cong-cu-chia-manh'
+pr896-review-4-legacy-caveats.yaml => don-nhanh-base-review-1-codex-verdict.receipt.yaml README rows=1 exact_description=True
+pr896-review-6-legacy-caveats.yaml => doctor-github-mcp-review-6-codex-verdict.receipt.yaml README rows=1 exact_description=True
+pr896-review-6-legacy-caveats.yaml => don-nhanh-base-review-4-claude-verdict.receipt.yaml README rows=1 exact_description=True
+pr896-review-6-legacy-caveats.yaml => don-nhanh-base-review-5-claude-verdict.receipt.yaml README rows=1 exact_description=True
+ops/land/pr714-wp710-provenance/readback-comment-6080353250.json: created_at=2026-10-09T11:55:41Z body_sha256=8bb668db60cc53e6676a712de1d7dd7dbf7a9689f786c8b4f6eda9e5bbc42bb8
+VERDICT — human_audited · approve (ghi sau merge)
+Reviewed commit: 888c0d9b68136f384068ecad8e286819bb175044
+Review: Codex cross-review g3 lượt 1–3 (changes_requested) rồi g5 lượt 4–9; lượt 9 approve trên 6a8c8b5, 0/0/0 trong sáu tệp (pull/714#issuecomment-6078803297, VERDICT sha256 3524df2f…57fd). Bot Codex trên 888c0d9 hoàn tất 11:09:19Z, không góp ý.
+PR đã merge lúc 11:08:11Z TRƯỚC khi có chữ ký này và trước khi bot Codex review xong 888c0d9 — tôi nhận đây là lệch quy trình, ghi lại thay vì coi như chưa xảy ra.
+Còn mở: P3 huong-dan-cu-con-lech-sau-va-ngoai-write-set (bốn tệp ngoài write set, packet khác); linux-subreaper-khong-thu-hoi-zombie chưa có phép đo Linux độc lập executor; verdict/HINT lượt 4–9 gốc chưa nằm trong kho (phiên Windows đẩy lên ops/wp710-g5-hien-vat-review).
+Khai thẳng phạm vi chữ ký: nó xác nhận "tôi đã đọc và chấp nhận", không phải một lượt dò tìm độc lập.
+VERDICT: approve
+new land block reviewed_sha=05bc12e2b9008071ca28edbd4574e58644d48220 verdict=changes_requested score=P0 0 / P1 2 / P2 1 / P3 0; con P1/P2 describes that historical review, with hint applied in same block
+historical_descriptions_not_verbatim=13; 12 wp678, 1 pr508
+pr508 anchor at a639e48: {"loai": "canonical_ancestry", "cuong_do": "trung_binh", "mo_ta": "Blob verdict ghim `9196eaf`. Head đã review là TỔ TIÊN của head nhánh packet (đo `git merge-base --is-ancestor`, cả 5/5 ⇒ CÓ).", "gioi_han": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.", "pr": 508, "branch": "claude/handoff-tra-luat-repo-2ak5th", "reviewed_sha": "d81f1553c3bc340d1817e3247cdf3292691b720a", "reviewed_base": "b98531e256ea91e20f31b74ac6b9046e8fac8eed", "verdict_blob_commit": "9196eaf70ca0d908b8d23ff26512c4e395e1e997"}
+3c7df6d678e11090a1623f871dcd484250a4b68b 2026-09-12T14:16:05+07:00 Merge pull request #508 — dac ta lane CI + packet #513 CHAM-DOT-BIEN-MIEN-NHIEM-CA-VO-CAN
+ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md readme_rows=1 both_surface_names=True missing_run_json=True
+ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md readme_rows=1 both_surface_names=True missing_run_json=True
+ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md readme_rows=1 both_surface_names=True missing_run_json=True
+ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md readme_rows=1 both_surface_names=True missing_run_json=True
+non_verbatim_README_caveats=['ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md', 'ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md', 'ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md', 'ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md']

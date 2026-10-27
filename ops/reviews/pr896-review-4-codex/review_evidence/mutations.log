@@ -1,0 +1,9 @@
+remove_readme_row removed_lines=1 removed_bytes= 443
+{"mode": "remove_readme_row", "command": "python3 ops/lease_publish_test.py --chi-ca=t26_", "rc": 0, "summary": ["lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"], "reason": []}
+{"mode": "remove_readme_row", "command": "python3 ops/lease_publish_test.py --chi-ca=t27_", "rc": 1, "summary": ["lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0"], "reason": ["  ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: caveat 'VERDICT-KHAI-SAI-EXECUTION-SURFACE' của wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'wp766-r1-g1-exec-review-1-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó."]}
+{"mode": "remove_readme_row", "command": "python3 ops/lease_publish_test.py --chi-ca=t138_", "rc": 0, "summary": ["lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"], "reason": []}
+remove_receipt_caveat removed_lines=4 removed_bytes= 428
+{"mode": "remove_receipt_caveat", "command": "python3 ops/lease_publish_test.py --chi-ca=t26_", "rc": 0, "summary": ["lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"], "reason": []}
+{"mode": "remove_receipt_caveat", "command": "python3 ops/lease_publish_test.py --chi-ca=t27_", "rc": 0, "summary": ["lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"], "reason": []}
+{"mode": "remove_receipt_caveat", "command": "python3 ops/lease_publish_test.py --chi-ca=t138_", "rc": 0, "summary": ["lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"], "reason": []}
+copy_status_after_restore= 

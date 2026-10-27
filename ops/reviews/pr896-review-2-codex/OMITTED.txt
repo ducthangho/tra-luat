@@ -1,0 +1,3 @@
+# Tep KHONG vao kho (>500 KB) cua thu muc bang chung reviewer /tmp/pr896-r2-audit-b3269a02 (chi tep muc 1; thu muc con copy/ = ban sao kho dot bien, khong luu): sha256  byte  ten
+fca16267b398120bdb79a51237f78ea216949039968c1dcedbae6a9b900932ff  1056144  review_evidence/original-snapshot.json
+thu_muc_con_khong_luu: /tmp/pr896-r2-audit-b3269a02/copy

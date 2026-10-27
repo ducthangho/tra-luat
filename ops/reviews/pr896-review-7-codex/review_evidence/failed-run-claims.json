@@ -1,0 +1,32 @@
+{
+  "failed_run_id": "c0fa33fa91f34a3db8450d2e75dd6071",
+  "same_head_as_counted_run": true,
+  "same_prompt_as_counted_run": true,
+  "rc": 1,
+  "duration": 349.795,
+  "partial_first_line": "verdict: dang_lam",
+  "partial_bytes": 28214,
+  "partial_sha256": "1d3f44f96f638c8224656b33385acf074ea2b168286a819dca4acbd0763ef869",
+  "partial_h3_count": 14,
+  "partial_h3_titles": [
+    "Tiến độ phép đo t26",
+    "Tiến độ phép đo t27",
+    "Tiến độ phép đo t138",
+    "Tiến độ phép đo bien_nhan",
+    "Tiến độ phép đo land",
+    "Tiến độ phép đo doctrine",
+    "Tiến độ phép đo doc_claims",
+    "H1-history",
+    "H2-integrity",
+    "H4-review-states",
+    "H5-remove_new_readme_row",
+    "H5-remove_new_receipt_caveat",
+    "H3-ancestry",
+    "H4-review-states"
+  ],
+  "error_excerpt": "\"error\":{\"message\":\"Selected model is at capacity. Please try a different model.\",\"codex_error_info\":\"server_overloaded\"}\n",
+  "receipt_description": "Run c0fa33fa (cung prompt, cung head) ma_thoat 1 sau 349.795 s: transcript codex ghi server_overloaded \"Selected model is at capacity\". VERDICT.partial.md chi co dong dang_lam + mot phep do t26; KHONG duoc tinh la verdict. Hien vat o luot-hong-c0fa33fa/.",
+  "readme_lines": [
+    766
+  ]
+}

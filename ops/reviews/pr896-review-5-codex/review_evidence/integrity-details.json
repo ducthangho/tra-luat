@@ -1,0 +1,267 @@
+[
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/doctor-github-mcp-review-9-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/pr134-ci-lease-gate-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r2-review-4-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r2-review-5-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r4-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r4-review-2-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r4-review-di-tru-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r4-review-rebase-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "ALLOWLIST_CUTOVER",
+    "path": "ops/reviews/wp55-r4-review-viet-lai-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/bien-nhan-review-s2-review-4-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-2-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-4-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-5-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-6-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-base-review-7-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/don-nhanh-kien-truc-gh-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/donref-xoa-an-toan-review-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/donref-xoa-an-toan-review-2-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-review-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-review-2-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-review-4-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-review-5-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-windows-review-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-windows-review-2-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-dang-windows-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-hoi-toan-kho-review-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-hoi-toan-kho-review-2-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/lease-hoi-toan-kho-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/n5-lenh-hook-windows-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/n5-lenh-hook-windows-review-2-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-m4-human-audit-ducthangho-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-m4-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-m4-review-2-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-m4-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-x5-review-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-x5-review-2-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-x5-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-x8-review-1-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-x8-review-2-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/plat-x8-review-3-claude-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/slice-b-c-human-audit-ducthangho-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/slice-b-c-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/slice-b-c-review-2-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/t33-doi-shellcheck-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/t33-doi-shellcheck-review-2-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/t33-doi-shellcheck-review-3-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/t33-doi-shellcheck-review-4-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  },
+  {
+    "group": "NO_DA_DO",
+    "path": "ops/reviews/tri-thuc-review-1-codex-verdict.receipt.yaml",
+    "unchanged_and_hash_matches": true
+  }
+]

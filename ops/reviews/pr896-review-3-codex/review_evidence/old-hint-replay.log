@@ -1,0 +1,4 @@
+patching file ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/README.md
+target_blob_match ops/reviews/README.md True
+target_blob_match ops/reviews/pr889-review-1-codex-verdict.receipt.yaml True

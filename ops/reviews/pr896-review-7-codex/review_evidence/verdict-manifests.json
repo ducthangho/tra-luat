@@ -1,0 +1,969 @@
+{
+  "summary": {
+    "manifest_verdict_entries": 137,
+    "all_match": true,
+    "missing": [],
+    "mismatches": []
+  },
+  "rows": [
+    {
+      "manifest": "cay-kho/ops/reviews/pr896-review-5-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr896-review-5-codex/VERDICT.md",
+      "match": true,
+      "expected": "968ebc3859538e79b53bd9ead8e3c9464a0db8c8e83e62a4b7ac7437f0480e9e",
+      "actual": "968ebc3859538e79b53bd9ead8e3c9464a0db8c8e83e62a4b7ac7437f0480e9e"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr896-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr896-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "3feaad3e207ae2dea5323cb6f831ba2980546ec1d3febeead6d415baccbbb803",
+      "actual": "3feaad3e207ae2dea5323cb6f831ba2980546ec1d3febeead6d415baccbbb803"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-8-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-8-codex/VERDICT.md",
+      "match": true,
+      "expected": "43489c1fd5db8c17b27d875af6fef46e2f0de35cc4e9489c7d5d0ffff3f6d84a",
+      "actual": "43489c1fd5db8c17b27d875af6fef46e2f0de35cc4e9489c7d5d0ffff3f6d84a"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr787-bookkeeping-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr787-bookkeeping-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "5943ba998b11a9ff762de36a47393715085c93fc7b66a45fffd08be81a22ec0f",
+      "actual": "5943ba998b11a9ff762de36a47393715085c93fc7b66a45fffd08be81a22ec0f"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr889-review-3-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr889-review-3-codex/VERDICT.md",
+      "match": true,
+      "expected": "c05bc41d9232d99a9e0c49199e022a9a64b01227674144da73bf50b9b7ce445f",
+      "actual": "c05bc41d9232d99a9e0c49199e022a9a64b01227674144da73bf50b9b7ce445f"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-5-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-5-codex/VERDICT.md",
+      "match": true,
+      "expected": "c8d349740b97302ea4fff2d8fda652540e4412fc449f0094f03e89dcf91d2b48",
+      "actual": "c8d349740b97302ea4fff2d8fda652540e4412fc449f0094f03e89dcf91d2b48"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp743-r1-g1-exec-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp743-r1-g1-exec-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "812ebb2254fa0df25a82529c1c27ffb9c64df074b3ac847cd0d78b28e763853e",
+      "actual": "812ebb2254fa0df25a82529c1c27ffb9c64df074b3ac847cd0d78b28e763853e"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr870-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr870-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "174af6667b62fbaed1056ca2b0a6f18863021a5e9e41f95184cb9bfd42af4e7e",
+      "actual": "174af6667b62fbaed1056ca2b0a6f18863021a5e9e41f95184cb9bfd42af4e7e"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr889-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr889-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "6aa03cacbde6f33a41ba4af60e408b2c742da5959390f28a9cf8420b5cb098f5",
+      "actual": "6aa03cacbde6f33a41ba4af60e408b2c742da5959390f28a9cf8420b5cb098f5"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r3-g3-exec-review-3-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r3-g3-exec-review-3-codex/VERDICT.md",
+      "match": true,
+      "expected": "8b0996d0bf382d973c4d6ce129bca5dcb3abea7dd8ef333538b932c19801f577",
+      "actual": "8b0996d0bf382d973c4d6ce129bca5dcb3abea7dd8ef333538b932c19801f577"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-6-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-6-codex/VERDICT.md",
+      "match": true,
+      "expected": "6129129a86a6baaad4a48ad572495e62e474cbbb981155b93454d0392f12c1c5",
+      "actual": "6129129a86a6baaad4a48ad572495e62e474cbbb981155b93454d0392f12c1c5"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr896-review-6-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr896-review-6-codex/VERDICT.md",
+      "match": true,
+      "expected": "d36248f584d4a3fb2c55a677587ee003ba1e338dd1701a50e48b4c59e2f0e346",
+      "actual": "d36248f584d4a3fb2c55a677587ee003ba1e338dd1701a50e48b4c59e2f0e346"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr896-review-4-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr896-review-4-codex/VERDICT.md",
+      "match": true,
+      "expected": "7357b499ae543c7e80feebae18495e46ce819a3bff5fd3f25cbccb9933e357e8",
+      "actual": "7357b499ae543c7e80feebae18495e46ce819a3bff5fd3f25cbccb9933e357e8"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-4-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-4-codex/VERDICT.md",
+      "match": true,
+      "expected": "bbe177f68da712bb7445343b21f539f92da2631736cc73c7ec8a04da89b3ccdf",
+      "actual": "bbe177f68da712bb7445343b21f539f92da2631736cc73c7ec8a04da89b3ccdf"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-7-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-7-codex/VERDICT.md",
+      "match": true,
+      "expected": "da8825c456ac1d64e21ff5353f6c0a101cc6ce010a8054cca682bd97ac5aea28",
+      "actual": "da8825c456ac1d64e21ff5353f6c0a101cc6ce010a8054cca682bd97ac5aea28"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r3-g3-exec-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r3-g3-exec-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "482a520ebc76219aa2cd38a0337adfeb90f6a328a8850305eeef5f362ec05fc4",
+      "actual": "482a520ebc76219aa2cd38a0337adfeb90f6a328a8850305eeef5f362ec05fc4"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp685-r28-g5-exec-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp685-r28-g5-exec-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "99096c2631826c2513eaa6dfee33943c5c547e4e88f00ecf5b5dc284548ef1fa",
+      "actual": "99096c2631826c2513eaa6dfee33943c5c547e4e88f00ecf5b5dc284548ef1fa"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr787-bookkeeping-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr787-bookkeeping-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "6dde14b6b92b42f121b69af9bc287533d4a44429c7fb09fa051452a38be3db0a",
+      "actual": "6dde14b6b92b42f121b69af9bc287533d4a44429c7fb09fa051452a38be3db0a"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-9-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-9-codex/VERDICT.md",
+      "match": true,
+      "expected": "d39ce1512f657452bffd5341895bdf4785fcb86d054b744fc4df817cb6fca4ea",
+      "actual": "d39ce1512f657452bffd5341895bdf4785fcb86d054b744fc4df817cb6fca4ea"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr896-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr896-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "a2b588b64535203f9e481240e7f014ae0f34f84b8a776e646b573666e5bd689f",
+      "actual": "a2b588b64535203f9e481240e7f014ae0f34f84b8a776e646b573666e5bd689f"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr896-review-3-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr896-review-3-codex/VERDICT.md",
+      "match": true,
+      "expected": "39eabe6ef4e169e39e4650f91a045f3c21079f8f8745baf3e2957f002184fdfb",
+      "actual": "39eabe6ef4e169e39e4650f91a045f3c21079f8f8745baf3e2957f002184fdfb"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr821-bookkeeping-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr821-bookkeeping-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "c775593264e00a74a985f66043e4c3dc628ff5dea23ebd722d4b8cb57c1071a8",
+      "actual": "c775593264e00a74a985f66043e4c3dc628ff5dea23ebd722d4b8cb57c1071a8"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "1b39813c128390b3a0f59595586dd2f62478181f5a0c4b60269c016e8887bc9d",
+      "actual": "1b39813c128390b3a0f59595586dd2f62478181f5a0c4b60269c016e8887bc9d"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "51a5610f11e4cac4f38bb574be79d5a5a514a7ff2f504d8e1eba592901e8308a",
+      "actual": "51a5610f11e4cac4f38bb574be79d5a5a514a7ff2f504d8e1eba592901e8308a"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp685-r28-g5-exec-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp685-r28-g5-exec-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "3c06c0fe04550743eb34f0befa37febce031ba75b884cf999047e8705bc8dd43",
+      "actual": "3c06c0fe04550743eb34f0befa37febce031ba75b884cf999047e8705bc8dd43"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr821-bookkeeping-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr821-bookkeeping-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "48cf47a95cb50651a67b9cce17976380af2da137440530316da46c2632d945fa",
+      "actual": "48cf47a95cb50651a67b9cce17976380af2da137440530316da46c2632d945fa"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr870-review-3-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr870-review-3-codex/VERDICT.md",
+      "match": true,
+      "expected": "0021b5b2f90e0da39a92c11041c3236980acfbbd0b22f46d0044ac8334f16e81",
+      "actual": "0021b5b2f90e0da39a92c11041c3236980acfbbd0b22f46d0044ac8334f16e81"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-3-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r1-g1-exec-review-3-codex/VERDICT.md",
+      "match": true,
+      "expected": "0256f22b4fa3689d7f3ad6fa4af920fbff6076531e76a557f8e04667a2f22667",
+      "actual": "0256f22b4fa3689d7f3ad6fa4af920fbff6076531e76a557f8e04667a2f22667"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp766-r1-g1-exec-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp766-r1-g1-exec-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "e6e59c2a9958f454ec010ca2b60d102ff30e0d11378d061a106d07d1ffaba515",
+      "actual": "e6e59c2a9958f454ec010ca2b60d102ff30e0d11378d061a106d07d1ffaba515"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr889-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr889-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "c5fe298af73bb6081ecf44638b7fce7e7dd220c11c3ddcee5ba5fcc234a4b612",
+      "actual": "c5fe298af73bb6081ecf44638b7fce7e7dd220c11c3ddcee5ba5fcc234a4b612"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr915-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr915-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "839757cc4bdbba080e93f920740e10814e184d8a553b75f43936fd36c5339a23",
+      "actual": "839757cc4bdbba080e93f920740e10814e184d8a553b75f43936fd36c5339a23"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/wp773-r3-g3-exec-review-1-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/wp773-r3-g3-exec-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "ba242648829058cd21be8a0276c7d37f720072fbb5577e3729e287798546c5ca",
+      "actual": "ba242648829058cd21be8a0276c7d37f720072fbb5577e3729e287798546c5ca"
+    },
+    {
+      "manifest": "cay-kho/ops/reviews/pr870-review-2-codex/SHA256SUMS",
+      "verdict": "cay-kho/ops/reviews/pr870-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "8b222ab37b7de41499829abb52d1958043ee8fd2969212596277aacc211026a6",
+      "actual": "8b222ab37b7de41499829abb52d1958043ee8fd2969212596277aacc211026a6"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr888-wp886-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr888-wp886-provenance/verdicts/wp886-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "b7dde20fd21a6d38ff18293a4f302e7e6817c1183e5713161aba1c56a5d24126",
+      "actual": "b7dde20fd21a6d38ff18293a4f302e7e6817c1183e5713161aba1c56a5d24126"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr888-wp886-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr888-wp886-provenance/verdicts/wp886-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "847983667f435890f544d5ab561a7d5821cadd80b380a25be36f567327b43cc0",
+      "actual": "847983667f435890f544d5ab561a7d5821cadd80b380a25be36f567327b43cc0"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr888-wp886-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr888-wp886-provenance/verdicts/wp886-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "663029ae568e3b1b38c0738b560f49d52d4f39187daa4ea83f87be1e38bc7635",
+      "actual": "663029ae568e3b1b38c0738b560f49d52d4f39187daa4ea83f87be1e38bc7635"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr877-wp854-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "0d2206834345866c0d1f918525c90cb638f41dfa92c1f7fa77192be3e48a648a",
+      "actual": "0d2206834345866c0d1f918525c90cb638f41dfa92c1f7fa77192be3e48a648a"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr877-wp854-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "612e86d854f4a7aad84a5f8e8d5986f58677e1b789d6ad3f176fefd1435cf277",
+      "actual": "612e86d854f4a7aad84a5f8e8d5986f58677e1b789d6ad3f176fefd1435cf277"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr931-wp835-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-postmerge-review-3-codex-verdict.md",
+      "match": true,
+      "expected": "b6133e428230c101ffc98d68e41559bb7786773f4f6c296106e6025be862f67b",
+      "actual": "b6133e428230c101ffc98d68e41559bb7786773f4f6c296106e6025be862f67b"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr931-wp835-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md",
+      "match": true,
+      "expected": "8f56beff1830cf42c133b3517ef865c417881e4a9a440ad401e02d5b493dc5d6",
+      "actual": "8f56beff1830cf42c133b3517ef865c417881e4a9a440ad401e02d5b493dc5d6"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr931-wp835-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md",
+      "match": true,
+      "expected": "1f38d44ca0dfe7dbb28bece08562f1d495c3ab464e4d5af92090674106567973",
+      "actual": "1f38d44ca0dfe7dbb28bece08562f1d495c3ab464e4d5af92090674106567973"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr909-wp748-r25-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr909-wp748-r25-provenance/verdicts/wp748-r25-l909c-launcher-verdict.md",
+      "match": true,
+      "expected": "a0d922f58c5c5c66a2c12325749d0ec06f7da058a253ac7a63ef25bd293967c2",
+      "actual": "a0d922f58c5c5c66a2c12325749d0ec06f7da058a253ac7a63ef25bd293967c2"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr909-wp748-r25-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr909-wp748-r25-provenance/verdicts/wp748-r25-l909d-launcher-verdict.md",
+      "match": true,
+      "expected": "be6f03c648d290e62597ca7d46ec333a4bb8b6b98585d2a4589a4acd2478e7a5",
+      "actual": "be6f03c648d290e62597ca7d46ec333a4bb8b6b98585d2a4589a4acd2478e7a5"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr924-wp923-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr924-wp923-provenance/verdicts/wp923-g1-claude-review-1-codex-verdict.md",
+      "match": true,
+      "expected": "b2b3bbcf5556ab19adb3eec600dc43bdb178805745e75b3d8d6afcb26f093e91",
+      "actual": "b2b3bbcf5556ab19adb3eec600dc43bdb178805745e75b3d8d6afcb26f093e91"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+      "match": true,
+      "expected": "c73799aee4c4a27dbb8389571cac2e6532f17aea4afb5d7e5e2ecc2c0322f5cf",
+      "actual": "c73799aee4c4a27dbb8389571cac2e6532f17aea4afb5d7e5e2ecc2c0322f5cf"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-10-codex/VERDICT.md",
+      "match": true,
+      "expected": "37891d1859f2e0ce4176b4aa6197532cb9d8c34c9bffbb532c8544a0adf73637",
+      "actual": "37891d1859f2e0ce4176b4aa6197532cb9d8c34c9bffbb532c8544a0adf73637"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-8-codex/VERDICT.md",
+      "match": true,
+      "expected": "77f55c1a2327eb4f42973c0ac1f8696620623068f559cccf351e675718872742",
+      "actual": "77f55c1a2327eb4f42973c0ac1f8696620623068f559cccf351e675718872742"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-9-codex-ready/VERDICT.md",
+      "match": true,
+      "expected": "eb54d771f8f943fcb53e505599ca51b2456924e2bd8d8c979e3b76ab2faa429c",
+      "actual": "eb54d771f8f943fcb53e505599ca51b2456924e2bd8d8c979e3b76ab2faa429c"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-9-codex/VERDICT.md",
+      "match": true,
+      "expected": "d64dbf3fadedd14b41dfb94ea657ec1c2e046d1ef65da228b35edb420ad5138b",
+      "actual": "d64dbf3fadedd14b41dfb94ea657ec1c2e046d1ef65da228b35edb420ad5138b"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-2-codex/VERDICT.md",
+      "match": true,
+      "expected": "98f7d1a4027f3705bae4d8d162eb067f8467c1ab814f7c78f2ba595ab372076f",
+      "actual": "98f7d1a4027f3705bae4d8d162eb067f8467c1ab814f7c78f2ba595ab372076f"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-3-codex/VERDICT.md",
+      "match": true,
+      "expected": "8decb518ab0de44f1ab1fbfd24bb8d744b6eda3b906c5fa3e9179045c1f34048",
+      "actual": "8decb518ab0de44f1ab1fbfd24bb8d744b6eda3b906c5fa3e9179045c1f34048"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/VERDICT.md",
+      "match": true,
+      "expected": "0e62e9e18c5535a28e3d0cd727126550e76ad14e2cd862e45e2171d2e6936bbf",
+      "actual": "0e62e9e18c5535a28e3d0cd727126550e76ad14e2cd862e45e2171d2e6936bbf"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-5-codex/VERDICT.md",
+      "match": true,
+      "expected": "52835cb95af076419fcc89b15558d9f061678a452835280093698dbd41b9e6b2",
+      "actual": "52835cb95af076419fcc89b15558d9f061678a452835280093698dbd41b9e6b2"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr836-wp812-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-7-codex/VERDICT.md",
+      "match": true,
+      "expected": "6cb9ce1017a92697414c9831837d7030dd9ef7e556dc8490cb1dc6b7d0652a52",
+      "actual": "6cb9ce1017a92697414c9831837d7030dd9ef7e556dc8490cb1dc6b7d0652a52"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr849-wp748-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "62e22341fa7fc5386c664213209277bc1f582011c2bc9d8d7d4b800499c339db",
+      "actual": "62e22341fa7fc5386c664213209277bc1f582011c2bc9d8d7d4b800499c339db"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr849-wp748-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "6781cf628cae567f0dac44b089bfff45b489592928849f25c6059a337c2bff47",
+      "actual": "6781cf628cae567f0dac44b089bfff45b489592928849f25c6059a337c2bff47"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr849-wp748-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "d0b1bb467308fe7392615be15fa6832a7af2a6bf7e7bfc0377a1d17e6b51c145",
+      "actual": "d0b1bb467308fe7392615be15fa6832a7af2a6bf7e7bfc0377a1d17e6b51c145"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr849-wp748-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot4-codex-verdict.md",
+      "match": true,
+      "expected": "2c170cfb3fc8fe2db73c1f62a525519f49a9f585b9aa0ea73db30f69d671ff87",
+      "actual": "2c170cfb3fc8fe2db73c1f62a525519f49a9f585b9aa0ea73db30f69d671ff87"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr849-wp748-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot5-codex-verdict.md",
+      "match": true,
+      "expected": "4acc6e98cada5695176c81da01765e8a5aed8a407a0403d3b4cbcf6a9f42cd70",
+      "actual": "4acc6e98cada5695176c81da01765e8a5aed8a407a0403d3b4cbcf6a9f42cd70"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr849-wp748-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot6-launcher-verdict.md",
+      "match": true,
+      "expected": "5a4fa3b2825c89c9f934f8d2c3ceae40a3723f7288afc2c3bbe30bd414907ae9",
+      "actual": "5a4fa3b2825c89c9f934f8d2c3ceae40a3723f7288afc2c3bbe30bd414907ae9"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr894-wp748-r24-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot1-launcher-verdict.md",
+      "match": true,
+      "expected": "4b999eaf48ebb20d219447d54c186b0f00afcbb7f5ac10ab01549b3f4bfceb43",
+      "actual": "4b999eaf48ebb20d219447d54c186b0f00afcbb7f5ac10ab01549b3f4bfceb43"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr894-wp748-r24-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot2-launcher-verdict.md",
+      "match": true,
+      "expected": "87f4a353949deeb497260cd73547aa6f1ef18160e7229265e838c93661072380",
+      "actual": "87f4a353949deeb497260cd73547aa6f1ef18160e7229265e838c93661072380"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr894-wp748-r24-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot3-launcher-verdict.md",
+      "match": true,
+      "expected": "29a942217bd013392587fd5dcb3059b8e14a8abf29cacf4752439cfd971de245",
+      "actual": "29a942217bd013392587fd5dcb3059b8e14a8abf29cacf4752439cfd971de245"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26a-verdict.md",
+      "match": true,
+      "expected": "70d4baf0a3a42b14d807d14b6cff3f2a2c319178799f98b59929ffea0361a059",
+      "actual": "70d4baf0a3a42b14d807d14b6cff3f2a2c319178799f98b59929ffea0361a059"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26b-verdict.md",
+      "match": true,
+      "expected": "c818ba6c24158688ed947292c4227ff21576ed50ae8f0c110e8bbaa74cc47877",
+      "actual": "c818ba6c24158688ed947292c4227ff21576ed50ae8f0c110e8bbaa74cc47877"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26c-verdict.md",
+      "match": true,
+      "expected": "cbd67b5cf0054aad8a0633b57796a715f417d7f253f3ba64c403b85c2cdee26c",
+      "actual": "cbd67b5cf0054aad8a0633b57796a715f417d7f253f3ba64c403b85c2cdee26c"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26d-verdict.md",
+      "match": true,
+      "expected": "0c11f587c1b65fda76ba8179075ef90d6e45059e17bb4b91cc37e376c177ff2a",
+      "actual": "0c11f587c1b65fda76ba8179075ef90d6e45059e17bb4b91cc37e376c177ff2a"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26e-verdict.md",
+      "match": true,
+      "expected": "5e2ac872a9d908f5c128ff399924c9408de6b14ce409256458f5e09eca3084cd",
+      "actual": "5e2ac872a9d908f5c128ff399924c9408de6b14ce409256458f5e09eca3084cd"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26f-verdict.md",
+      "match": true,
+      "expected": "a60a5ba4f27e4f49994c63dd7f7426d46a2d9af606a369d05686a10533ec632c",
+      "actual": "a60a5ba4f27e4f49994c63dd7f7426d46a2d9af606a369d05686a10533ec632c"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26g-verdict.md",
+      "match": true,
+      "expected": "ac8b81db4745297850835e5d57f6d721e16eccb69837d1ecbb1dd73f4207d33b",
+      "actual": "ac8b81db4745297850835e5d57f6d721e16eccb69837d1ecbb1dd73f4207d33b"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26h-verdict.md",
+      "match": true,
+      "expected": "a50e914827c816ae3208a44c665944af1d62e8220169dd05c4ce6c0a3842bc29",
+      "actual": "a50e914827c816ae3208a44c665944af1d62e8220169dd05c4ce6c0a3842bc29"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26i-verdict.md",
+      "match": true,
+      "expected": "440e90e487bec0bf17e8342c99172435b949b9bb12cae55fb0052e2d51a41f17",
+      "actual": "440e90e487bec0bf17e8342c99172435b949b9bb12cae55fb0052e2d51a41f17"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26j-verdict.md",
+      "match": true,
+      "expected": "1d9f58099e528d29b0231d1d76fbb55edba601f9f00b8f5d406f78b8b3c5062d",
+      "actual": "1d9f58099e528d29b0231d1d76fbb55edba601f9f00b8f5d406f78b8b3c5062d"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr932-wp748-r26-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26k-verdict.md",
+      "match": true,
+      "expected": "afe4ab398682e4c4ab709d240f112f77465d6f9ae33530ae6ecfc44bbc15c406",
+      "actual": "afe4ab398682e4c4ab709d240f112f77465d6f9ae33530ae6ecfc44bbc15c406"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr907-wp906-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr907-wp906-provenance/verdicts/wp906-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "a0afa7b44efb98113d13cf9e33443f329a814570e2668c3c170e074d53a675b2",
+      "actual": "a0afa7b44efb98113d13cf9e33443f329a814570e2668c3c170e074d53a675b2"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr851-wp822-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "be90bf84e5644063d65c8b2d573a48ca9fca8499cce8dd5625f6f9b0b697f3bc",
+      "actual": "be90bf84e5644063d65c8b2d573a48ca9fca8499cce8dd5625f6f9b0b697f3bc"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr851-wp822-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "095767116a3ee3c7e3a920c451368675b2dd2cbb16c2a31307b309b50fed7bc1",
+      "actual": "095767116a3ee3c7e3a920c451368675b2dd2cbb16c2a31307b309b50fed7bc1"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr851-wp822-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "235f4d9c1ca11647b7ddfab747fbb20c78140654a5edf4536807a7412ff6df49",
+      "actual": "235f4d9c1ca11647b7ddfab747fbb20c78140654a5edf4536807a7412ff6df49"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr851-wp822-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot4-codex-verdict.md",
+      "match": true,
+      "expected": "d6ab29047061b40c427e61869578ebe53330c7fd3aa2a77757e3a6b7dd79965f",
+      "actual": "d6ab29047061b40c427e61869578ebe53330c7fd3aa2a77757e3a6b7dd79965f"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr851-wp822-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot5-codex-verdict.md",
+      "match": true,
+      "expected": "4076c609673ee51cdbb879bb076158193dfa6c3a51669e04481134b80af96da1",
+      "actual": "4076c609673ee51cdbb879bb076158193dfa6c3a51669e04481134b80af96da1"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr851-wp822-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot6-codex-verdict.md",
+      "match": true,
+      "expected": "62ef80bbe73a6a5e9db2aa67c0cdeb82d2df58f647a728306441feb72de78827",
+      "actual": "62ef80bbe73a6a5e9db2aa67c0cdeb82d2df58f647a728306441feb72de78827"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr873-wp868-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "0a2e05421e5f304331ca3eff2786bb2e4c05399d37886fd97db7ab0b4c9889b7",
+      "actual": "0a2e05421e5f304331ca3eff2786bb2e4c05399d37886fd97db7ab0b4c9889b7"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr873-wp868-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "667af2a30eafeb57fb29ff594c578f46ca8f275e7deca1dc718f7195d55207d8",
+      "actual": "667af2a30eafeb57fb29ff594c578f46ca8f275e7deca1dc718f7195d55207d8"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr873-wp868-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "d327dacae9d32651b7f213421e4c4ac910bc642b3fda504f26d0c131b7734e36",
+      "actual": "d327dacae9d32651b7f213421e4c4ac910bc642b3fda504f26d0c131b7734e36"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr873-wp868-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot4-codex-verdict.md",
+      "match": true,
+      "expected": "bf0dd45fa0d29e8d9a63c9897914113c5481070c97488a61201db13d2712d5d5",
+      "actual": "bf0dd45fa0d29e8d9a63c9897914113c5481070c97488a61201db13d2712d5d5"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr873-wp868-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot5-codex-verdict.md",
+      "match": true,
+      "expected": "fc42378a86cc385ce5b46f554b0ac1b24ea35877b20c1fbb297e1f7135ee62f7",
+      "actual": "fc42378a86cc385ce5b46f554b0ac1b24ea35877b20c1fbb297e1f7135ee62f7"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr913-wp910-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr913-wp910-provenance/verdicts/wp910-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "8c0262244dfa34ce513d727a900f8d0e4376a26e51aa84490598aff7abaad51f",
+      "actual": "8c0262244dfa34ce513d727a900f8d0e4376a26e51aa84490598aff7abaad51f"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr869-wp748-r22-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot1-launcher-verdict.md",
+      "match": true,
+      "expected": "ddb85df464bc90c77e1364070c678804cf145b83994700714883724d52bddcce",
+      "actual": "ddb85df464bc90c77e1364070c678804cf145b83994700714883724d52bddcce"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr869-wp748-r22-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot2-launcher-verdict.md",
+      "match": true,
+      "expected": "75183da7f033e5e562851e6eca26084319f0f91fe103698538bfc55cd06fb437",
+      "actual": "75183da7f033e5e562851e6eca26084319f0f91fe103698538bfc55cd06fb437"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr869-wp748-r22-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot3-launcher-verdict.md",
+      "match": true,
+      "expected": "1c86f509fb89cca91c77dc72d74f33c5c6bda0acb59bc9b49e89953518580da9",
+      "actual": "1c86f509fb89cca91c77dc72d74f33c5c6bda0acb59bc9b49e89953518580da9"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr869-wp748-r22-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot4-launcher-verdict.md",
+      "match": true,
+      "expected": "0f7e3b974c972492944d2c306ebe4b5f835fd6b62d484814d0af16994e4baba7",
+      "actual": "0f7e3b974c972492944d2c306ebe4b5f835fd6b62d484814d0af16994e4baba7"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr869-wp748-r22-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot5-launcher-verdict.md",
+      "match": true,
+      "expected": "6a60f9c7cfb16a7292995c1d1325de32f0f94d3bf8166eb5505046ce0c4ba99b",
+      "actual": "6a60f9c7cfb16a7292995c1d1325de32f0f94d3bf8166eb5505046ce0c4ba99b"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr930-wp752-wp763-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "97b0770b08ec40889c65737163ce7dcfc55cb3740dc1abc5f009d6e529ee53e6",
+      "actual": "97b0770b08ec40889c65737163ce7dcfc55cb3740dc1abc5f009d6e529ee53e6"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr930-wp752-wp763-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "8410d08121342ee97c2e8f0fc8b1f7819b5f38d576f3ccfaf63d710a30163a28",
+      "actual": "8410d08121342ee97c2e8f0fc8b1f7819b5f38d576f3ccfaf63d710a30163a28"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr930-wp752-wp763-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "d132a22964fd50e37b30a346f378beb2411311a19e51ee0923355d7fe18c1b3d",
+      "actual": "d132a22964fd50e37b30a346f378beb2411311a19e51ee0923355d7fe18c1b3d"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr930-wp752-wp763-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "dfe0dda1b5adf68aab940d222e69d288440bcc278d6e499371d2311cf985dd52",
+      "actual": "dfe0dda1b5adf68aab940d222e69d288440bcc278d6e499371d2311cf985dd52"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr930-wp752-wp763-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "953b0d413ba19cc5b663406087cdf529c97996981591c95264fc26458d71e12a",
+      "actual": "953b0d413ba19cc5b663406087cdf529c97996981591c95264fc26458d71e12a"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr895-wp892-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "c8dab7d8ecace258b59f5710a2c2b2b006aa95adaa8f40ddf485600e16393020",
+      "actual": "c8dab7d8ecace258b59f5710a2c2b2b006aa95adaa8f40ddf485600e16393020"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr895-wp892-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "cd3dee13f6cd5d9c46ed3d58eba7e93d948b07b24b663452d9b0783ce85351d7",
+      "actual": "cd3dee13f6cd5d9c46ed3d58eba7e93d948b07b24b663452d9b0783ce85351d7"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr895-wp892-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "15716cb77ded87a23e50c0ab76d7fd6bd9172b7c3d3585faf3b5ceabe4eb5fdc",
+      "actual": "15716cb77ded87a23e50c0ab76d7fd6bd9172b7c3d3585faf3b5ceabe4eb5fdc"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr895-wp892-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot4-codex-verdict.md",
+      "match": true,
+      "expected": "47972b3d3ff104b79edc9e3c9b5b0b2e74ca6c659d29401109b758c537086131",
+      "actual": "47972b3d3ff104b79edc9e3c9b5b0b2e74ca6c659d29401109b758c537086131"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr883-wp879-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr883-wp879-provenance/verdicts/wp879-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "5ea6e32b68138b34ea781c73c187e58b07744aa6655202f9038097d328932c7a",
+      "actual": "5ea6e32b68138b34ea781c73c187e58b07744aa6655202f9038097d328932c7a"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr883-wp879-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr883-wp879-provenance/verdicts/wp879-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "4ea69764289eef82bdc651c788de1ac4fcdcd19d01409c428df3c08f8ad2a17e",
+      "actual": "4ea69764289eef82bdc651c788de1ac4fcdcd19d01409c428df3c08f8ad2a17e"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr818-wp788-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot1/VERDICT.md",
+      "match": true,
+      "expected": "a56b90bafebf4e1669b60d148b359ed5e88b6b345ac650d42c3bac44be4208d3",
+      "actual": "a56b90bafebf4e1669b60d148b359ed5e88b6b345ac650d42c3bac44be4208d3"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr818-wp788-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot2/VERDICT.md",
+      "match": true,
+      "expected": "12d77d786cfe7af5ec915c1c48c76a0583d5b78191bdb69243c6dbcc1d05f3c4",
+      "actual": "12d77d786cfe7af5ec915c1c48c76a0583d5b78191bdb69243c6dbcc1d05f3c4"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr818-wp788-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot3/VERDICT.md",
+      "match": true,
+      "expected": "376c2d8cb91a73be9d74cad10ff97ef88db22bf15294cfb7819a673adc0b845f",
+      "actual": "376c2d8cb91a73be9d74cad10ff97ef88db22bf15294cfb7819a673adc0b845f"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr818-wp788-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot4/VERDICT.md",
+      "match": true,
+      "expected": "ebfddfb6e6fdc03b4c53e5989061864b14680967700821072ce7b54889aa5f75",
+      "actual": "ebfddfb6e6fdc03b4c53e5989061864b14680967700821072ce7b54889aa5f75"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr818-wp788-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot5/VERDICT.md",
+      "match": true,
+      "expected": "baa93ac2ff22c17351313971db16980abbe9ee730fa0a389e49ebabf53baf759",
+      "actual": "baa93ac2ff22c17351313971db16980abbe9ee730fa0a389e49ebabf53baf759"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr882-wp748-r23-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot1-launcher-verdict.md",
+      "match": true,
+      "expected": "7eba71e768d2eff9651f365e93e32ab37ba53cef477319eb8ccd548143d0c4d4",
+      "actual": "7eba71e768d2eff9651f365e93e32ab37ba53cef477319eb8ccd548143d0c4d4"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr882-wp748-r23-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot2-launcher-verdict.md",
+      "match": true,
+      "expected": "4fe1bf3bf593b1136bf58e9f01ce9eb36e47cd3c4f0c58f833ca83320e210016",
+      "actual": "4fe1bf3bf593b1136bf58e9f01ce9eb36e47cd3c4f0c58f833ca83320e210016"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr882-wp748-r23-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot3-launcher-verdict.md",
+      "match": true,
+      "expected": "1c3aa81ad6ca1a63ca6b17d4bb3c6cc040df0041327ce1905b44511fbe72fa30",
+      "actual": "1c3aa81ad6ca1a63ca6b17d4bb3c6cc040df0041327ce1905b44511fbe72fa30"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr880-wp878-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "86c274efa14ffc4e053f1d747692c7a6016e80b82efb4177b2f17d80bb238e8a",
+      "actual": "86c274efa14ffc4e053f1d747692c7a6016e80b82efb4177b2f17d80bb238e8a"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr880-wp878-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "4ef15ede64b4465144358a1f0ca5215bdbf742e811ca39057c02eb00ed1660aa",
+      "actual": "4ef15ede64b4465144358a1f0ca5215bdbf742e811ca39057c02eb00ed1660aa"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr846-wp845-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "14dff9526d6ab599b007a9e5e3dedccd9642ee679bbf9a0fc7f676a8d382497b",
+      "actual": "14dff9526d6ab599b007a9e5e3dedccd9642ee679bbf9a0fc7f676a8d382497b"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr846-wp845-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "8b326994185af1829fbaa4402777c0cc93b59bef5554b0567a1a3837eaf9b242",
+      "actual": "8b326994185af1829fbaa4402777c0cc93b59bef5554b0567a1a3837eaf9b242"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr846-wp845-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "45a7ddfe68cd39cc733181a6591741b1525aa455b8c13304037b220a9a5c67de",
+      "actual": "45a7ddfe68cd39cc733181a6591741b1525aa455b8c13304037b220a9a5c67de"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr846-wp845-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot4-codex-verdict.md",
+      "match": true,
+      "expected": "4fbebb391fbef159d859121c4137effb621a9574de5d2cef864a834cbd0aefb0",
+      "actual": "4fbebb391fbef159d859121c4137effb621a9574de5d2cef864a834cbd0aefb0"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr846-wp845-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot5-codex-verdict.md",
+      "match": true,
+      "expected": "50ebdabc5819cb8b6a894f41c1254fea675694578938542969cc7ee0776494df",
+      "actual": "50ebdabc5819cb8b6a894f41c1254fea675694578938542969cc7ee0776494df"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr872-wp871-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "197f8539ccdeea5e1f50bbf2b80b81a34548ec23302492ad21aad08b9cf1b290",
+      "actual": "197f8539ccdeea5e1f50bbf2b80b81a34548ec23302492ad21aad08b9cf1b290"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr872-wp871-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "a4fb234a69b1d9fb33ef9a16c49bd87f3b26b639eec3ee2706921870b139dfc0",
+      "actual": "a4fb234a69b1d9fb33ef9a16c49bd87f3b26b639eec3ee2706921870b139dfc0"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr933-wp929-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-1-codex-verdict.md",
+      "match": true,
+      "expected": "8a392561044c0ae6b9d504260149ff441fb8ec81cfe828fd8e06bd8f27c80bbf",
+      "actual": "8a392561044c0ae6b9d504260149ff441fb8ec81cfe828fd8e06bd8f27c80bbf"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr933-wp929-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-verdict.md",
+      "match": true,
+      "expected": "40d42d53d7b30f7e703eced0376803907aa3b3a57d1d62dd697adcac25c30e49",
+      "actual": "40d42d53d7b30f7e703eced0376803907aa3b3a57d1d62dd697adcac25c30e49"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr823-wp802-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr823-wp802-provenance/verdict-luot5/wp802-g1-luot5-codex-verdict.md",
+      "match": true,
+      "expected": "b6ee86d0c9e523dfbe87718d12b4d646464e7a8720e9789f071f4aa04d6e3f01",
+      "actual": "b6ee86d0c9e523dfbe87718d12b4d646464e7a8720e9789f071f4aa04d6e3f01"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr862-wp748-r21-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87",
+      "actual": "95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr862-wp748-r21-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot2-launcher-verdict.md",
+      "match": true,
+      "expected": "a8a0670fd06cd4847f754f235735cf972fbad8f3f2cb1351103c292d436ca020",
+      "actual": "a8a0670fd06cd4847f754f235735cf972fbad8f3f2cb1351103c292d436ca020"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr926-wp919-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr926-wp919-provenance/verdicts/wp919-r3-g3-claude-review-3-codex-verdict.md",
+      "match": true,
+      "expected": "1c3b2d6b0c65ce731ce8ce44ccc2334569209c4ad1a0a9a5d7022bfe4e3df619",
+      "actual": "1c3b2d6b0c65ce731ce8ce44ccc2334569209c4ad1a0a9a5d7022bfe4e3df619"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr779-wp775-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr779-wp775-provenance/verdict-luot17/VERDICT.md",
+      "match": true,
+      "expected": "a1957436163a0d921b5c29523bd278c82a570307279e0c23e4bf1cf15b62234f",
+      "actual": "a1957436163a0d921b5c29523bd278c82a570307279e0c23e4bf1cf15b62234f"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr848-wp744-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "af2b5fa426a7d53755148f4f9711712246afadc91e1d75e5267f8c8023bc3911",
+      "actual": "af2b5fa426a7d53755148f4f9711712246afadc91e1d75e5267f8c8023bc3911"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr917-wp910-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr917-wp910-provenance/verdicts/wp910-g3-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "b5315b44322c96ae9fac82b43ec07b87457687108ba959081d8634b58fb6706d",
+      "actual": "b5315b44322c96ae9fac82b43ec07b87457687108ba959081d8634b58fb6706d"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr864-wp858-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md",
+      "match": true,
+      "expected": "7446cb639ec82ebf19e8ec48a19300c3695bb5539be4f4d24845298cdd862a88",
+      "actual": "7446cb639ec82ebf19e8ec48a19300c3695bb5539be4f4d24845298cdd862a88"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr864-wp858-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot2-codex-verdict.md",
+      "match": true,
+      "expected": "af2b6196b5ab589408dcc546136f224429e53d7346b6476493fd4dad2a840b01",
+      "actual": "af2b6196b5ab589408dcc546136f224429e53d7346b6476493fd4dad2a840b01"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr864-wp858-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot3-codex-verdict.md",
+      "match": true,
+      "expected": "79c5f24d9b73008f104bed2238dbc7a9838702f27455aef9faaf545a98a811ad",
+      "actual": "79c5f24d9b73008f104bed2238dbc7a9838702f27455aef9faaf545a98a811ad"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr864-wp858-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot4-codex-verdict.md",
+      "match": true,
+      "expected": "9990e3aea7ac858cba1de7d2eb7a02be1f35c7a400b9e1cc90343ba9cc0fdbc9",
+      "actual": "9990e3aea7ac858cba1de7d2eb7a02be1f35c7a400b9e1cc90343ba9cc0fdbc9"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr864-wp858-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot5-codex-verdict.md",
+      "match": true,
+      "expected": "44bc30cca0bfe8646eb2cd0046a5d9b1b3d670c9355b52dd11f4f8ef30973187",
+      "actual": "44bc30cca0bfe8646eb2cd0046a5d9b1b3d670c9355b52dd11f4f8ef30973187"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr792-wp484-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr792-wp484-provenance/verdict-luot5/VERDICT.md",
+      "match": true,
+      "expected": "fe12729fb40a2ad3f07f4f24d227b16289bab8a01136fdf1a59b2d151280ef20",
+      "actual": "fe12729fb40a2ad3f07f4f24d227b16289bab8a01136fdf1a59b2d151280ef20"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr832-wp831-provenance/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md",
+      "match": true,
+      "expected": "1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28",
+      "actual": "1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28"
+    },
+    {
+      "manifest": "cay-kho/ops/land/pr792-wp484-provenance/verdict-luot5/SHA256SUMS",
+      "verdict": "cay-kho/ops/land/pr792-wp484-provenance/verdict-luot5/VERDICT.md",
+      "match": true,
+      "expected": "fe12729fb40a2ad3f07f4f24d227b16289bab8a01136fdf1a59b2d151280ef20",
+      "actual": "fe12729fb40a2ad3f07f4f24d227b16289bab8a01136fdf1a59b2d151280ef20"
+    }
+  ]
+}

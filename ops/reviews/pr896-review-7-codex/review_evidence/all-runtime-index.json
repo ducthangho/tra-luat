@@ -1,0 +1,856 @@
+[
+  {
+    "path": "ops/land/pr832-wp831-provenance/verdict-luot7/run.json",
+    "run_id": "1ff81cba41874a218b53275d3cdc1418",
+    "head": "51ae5c095972611d2c6045bd81786a4fc7e9ca62",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr792-wp484-provenance/verdict-luot5/run.json",
+    "run_id": "b28e8193b7c046829b2e2ca877e53efa",
+    "head": "907214d2cd0b67ff444b3adf734811eab39bfc71",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-run.json",
+    "run_id": "b229621980404e3f8cf35c5807dd2bed",
+    "head": "bfbd2732a0e5359cbeb2a4d5336fc3dc7d2a7121",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot2-run.json",
+    "run_id": "0ecfade95c0d4d08a2dee0029a00d62f",
+    "head": "97544b576392540ce316b2d61e5cc0de3a4a88eb",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot3-run.json",
+    "run_id": "631922626b43489b85dbb7e84c86f509",
+    "head": "8733f0ae7df5d9a1c704c31e6051e8cb5f439fe5",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot4-run.json",
+    "run_id": "b31b149abcc3416a9fea16cbcc47b7cc",
+    "head": "93fd69fb958527ba738f882391956311972de60b",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot5-run.json",
+    "run_id": "0265f9641e964cbe82b29d14a9813fc7",
+    "head": "521efebab226fe3a92b2ccce4a59c27dd638edff",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr917-wp910-provenance/verdicts/wp910-g3-luot1-run.json",
+    "run_id": "55874d0034204bca8412b6d49bd7eac0",
+    "head": "a7da46390177cdc2d64f516dedac19857bee86dd",
+    "surface": "subprocess",
+    "program": "codex.js"
+  },
+  {
+    "path": "ops/land/pr848-wp744-provenance/verdicts/run-f65e544e.json",
+    "run_id": "f65e544ef5d64ba7a1e0edb607edcf0a",
+    "head": "23bc189f28ea60f04ca1634b6fe66d02babf12ed",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr779-wp775-provenance/verdict-luot17/run.json",
+    "run_id": "39ab7867c1f647cd8b17c5ef8ae05269",
+    "head": "f9d84d70fb46540bbecfae963c9afb4a2b48984d",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr926-wp919-provenance/verdicts/wp919-r3-g3-claude-review-3-codex-run.json",
+    "run_id": "982ac4146d034785a4d06391c1fecf30",
+    "head": "4e4d482e46cccc6b5e7e6c4f8cf4af636b63e070",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr862-wp748-r21-provenance/verdicts/run-f0909b38.json",
+    "run_id": "f0909b3813784cd3885f2b64f5eb808b",
+    "head": "28e35fd9206cdc8b2b44a39999421934f8437192",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-1-codex-run.json",
+    "run_id": "0d78fe118c6340fda716921de68a5d06",
+    "head": "8a6d795c982fc7e9da2fbfd28a75ca25d5f3eb95",
+    "surface": "subprocess",
+    "program": "bash"
+  },
+  {
+    "path": "ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json",
+    "run_id": "3536a415068645adab6cfed3e3de5f03",
+    "head": "227dcdebc62c9275f9df09056f66e2124ed5f14c",
+    "surface": "subprocess",
+    "program": "bash"
+  },
+  {
+    "path": "ops/land/pr846-wp845-provenance/verdicts/run-964888d9.json",
+    "run_id": "964888d964f24e3e9715b5f38b908457",
+    "head": "974859d67a8062f869cb49e8d3be75db44ef4d58",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr846-wp845-provenance/verdicts/run-8b928d5e.json",
+    "run_id": "8b928d5e57c046b8a4d191aa5c03417b",
+    "head": "c95bd7f80a45a592f3cb089149c0c23fb4df2317",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr846-wp845-provenance/verdicts/run-6df1d601.json",
+    "run_id": "6df1d601ff094205bb976d98ac1356f5",
+    "head": "ecebffe9675d0952f3a0ab65eaa44087853a26bc",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr846-wp845-provenance/verdicts/run-c6000a68.json",
+    "run_id": "c6000a68f98144da9ca5e655dfc9f186",
+    "head": "fa4fb7ce98c56b56a2523bf8c2b6a6bc2fb98181",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr846-wp845-provenance/verdicts/run-620b7047.json",
+    "run_id": "620b7047bb964f7c93676348f87c9ffe",
+    "head": "7a39463e8b6c25d4811bcc9cd544b164e7ce53a7",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr882-wp748-r23-provenance/verdicts/run-3bbda050.json",
+    "run_id": "3bbda050bcfc42a49c13f550b9d55167",
+    "head": "682c8880e493e9b4019e599482a33081fa35576f",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr882-wp748-r23-provenance/verdicts/run-f09938e8.json",
+    "run_id": "f09938e877ce40c19bb1d539d0e4121b",
+    "head": "bab8702692f1d723ac1a84b865660597aa6291e6",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr882-wp748-r23-provenance/verdicts/run-c053c5b4.json",
+    "run_id": "c053c5b4a4144a1c9adf2d232f769f9a",
+    "head": "8f12e02856eb130160c40188470f7e5911ab1687",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr818-wp788-provenance/verdict-luot1/run.json",
+    "run_id": "7e93895a065d4545aaca0d31fd7bca35",
+    "head": "e995730464da03223cf636e49ad32e220c6ec720",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr818-wp788-provenance/verdict-luot5/run.json",
+    "run_id": "b8b00f3d9d0a4a96911df056671375d9",
+    "head": "984032f375aa0c8fe6039dfd35f6842acd49c926",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr818-wp788-provenance/verdict-luot4/run.json",
+    "run_id": "77982f5bffe44943877903b9a3aa0083",
+    "head": "47591ebc51af917523e67191b2e96939506b78fe",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr818-wp788-provenance/verdict-luot2/run.json",
+    "run_id": "b211e5387ca246dc9ba646e14f7a6a4d",
+    "head": "4ffae005eb1c434d660cbfb713ad21ed92115a8a",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr818-wp788-provenance/verdict-luot3/run.json",
+    "run_id": "15a18a971a124d12b448af1971c7f112",
+    "head": "8264089a14f79867091da2629edbf45a22854c39",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot3-run.json",
+    "run_id": "aedfc5797b3544ae953e35cea273fc3f",
+    "head": "9d34a8e7e97fdc8ac178fc209219cea067e4c279",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot2-run.json",
+    "run_id": "553f19e0df944de099dca500d7df5ab3",
+    "head": "b0fadc96366115d3545b9c723b30f04281898d94",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot1-run.json",
+    "run_id": "c4103982ae4c4a8b9a98e308d7b7beb1",
+    "head": "b0fadc96366115d3545b9c723b30f04281898d94",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot1-run.json",
+    "run_id": "43502ccabe86403f8e7c2e1545e7e945",
+    "head": "f9b3dc1ec11a5089b06d67a658e0f840742466eb",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot2-run.json",
+    "run_id": "f8f838f0e7ba4ac3b7041f375939ad76",
+    "head": "fc1bb3add70b7e7a2f17cdf4f940d7ce484b7053",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr866-wp856-provenance/verdicts/luot3-run.json",
+    "run_id": "57a68b60e8fb48378eb256e4548f3165",
+    "head": "bf671b0524a8472eb0b0fcd1d75ea3a89d1f6973",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr866-wp856-provenance/verdicts/luot1-run.json",
+    "run_id": "e70a09d24e3d4d74a92f263bbf4ad522",
+    "head": "7302ea3623ebb7a0250a6c5090985807753cc031",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr866-wp856-provenance/verdicts/luot2-run.json",
+    "run_id": "c6d082a55eb64559ac2e7d3a739338b6",
+    "head": "19fdfa6e48c8b203bd89362c18bd198ba81e9793",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr869-wp748-r22-provenance/verdicts/run-a2bdfa38.json",
+    "run_id": "a2bdfa38e7454f5b8b74c8904d468cb4",
+    "head": "c435b790a4c026174e40e54c9738bb462a6c482e",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr869-wp748-r22-provenance/verdicts/run-76825653.json",
+    "run_id": "768256536c964edc86f076dd64c608f8",
+    "head": "b9318cc26101d2697be19ac44be5700534ba0256",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr869-wp748-r22-provenance/verdicts/run-9c7b585c.json",
+    "run_id": "9c7b585cd09b4a4eba7e916262e0f75b",
+    "head": "a56a3219e58ddf4c87cafac1e7357962d643e3db",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr869-wp748-r22-provenance/verdicts/run-708fa9e9.json",
+    "run_id": "708fa9e96cab4152b2e80b1ec40cec33",
+    "head": "6e96fefa2353158ba4b9eb405923c044922b56c6",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr869-wp748-r22-provenance/verdicts/run-d02a9c47.json",
+    "run_id": "d02a9c4728f649609f040197dd865ed1",
+    "head": "056b316c414d35791a6dce00532d4e905c9d17d8",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr913-wp910-provenance/verdicts/wp910-luot1-run.json",
+    "run_id": "2073ebe8ffc34d17a3667e49f8634f4d",
+    "head": "6e09f4b013629ae3d8d6e75f1a1c8e10aaa960b4",
+    "surface": "subprocess",
+    "program": "codex.js"
+  },
+  {
+    "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot3-run.json",
+    "run_id": "1f61bfda29944082a1e2a14082930171",
+    "head": "93d33b406d596b7245c69aa0a1fe80cf7e49748e",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot5-run.json",
+    "run_id": "684d95a7b1164a41bbfb5c7ddd499f13",
+    "head": "f07f88c75cabbef691c86ac8746317a6c0705162",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot2-run.json",
+    "run_id": "d675fb8367d047419b1e6cf9e6be75bb",
+    "head": "ac4a6cb78a136b5e7f55abfac90b75ddd3cd080d",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot4-run.json",
+    "run_id": "6427f21387dc49b6ac9b53e385707b69",
+    "head": "0bfc73d6f7a810dc3716bb40f0193eae9cd3f888",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot1-run.json",
+    "run_id": "fe6f5debfab14881826bd40c791585ca",
+    "head": "1965b71fecc5c936c2e342b109fa88a260943920",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr851-wp822-provenance/verdicts/run-3ddc50b6.json",
+    "run_id": "3ddc50b650d64326890d5d23050629d4",
+    "head": "c1f7fddc8adc16df025efa96e3ca2f59e7a6a9e0",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr851-wp822-provenance/verdicts/run-3c46248e.json",
+    "run_id": "3c46248e67654b9c8ab36bbcc3858e9d",
+    "head": "ba96fc6cfb2f0b21f4814fd6bf5e7431b727029b",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr851-wp822-provenance/verdicts/run-3979431d.json",
+    "run_id": "3979431d3d37469d87c151fca6638d43",
+    "head": "ee853d32e2e55592a1d7caf4c5f16714cd25dad2",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr851-wp822-provenance/verdicts/run-b85fb5cb.json",
+    "run_id": "b85fb5cb7f7143a8a6f95a27e7175c2e",
+    "head": "cffd44e75ba97af4c99d790704e7478945344ada",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr851-wp822-provenance/verdicts/run-63570626.json",
+    "run_id": "63570626d22246d1a78d17ad4f3a72b9",
+    "head": "039dbe3c25e6148606227107d143f960f552bfe6",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr851-wp822-provenance/verdicts/run-f64b71ab.json",
+    "run_id": "f64b71ab283a4fb0a486fb71db32430b",
+    "head": "08aa09610b346edbe64dd2a397de6645e87f2276",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr907-wp906-provenance/verdicts/wp906-luot1-run.json",
+    "run_id": "ca68315e136048fa941acc04620a5446",
+    "head": "35d87eb073ae8c6f79049c0097b4208cc2139c47",
+    "surface": "subprocess",
+    "program": "codex.js"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26g-run.json",
+    "run_id": "3127961764a242048f71e79913d161e4",
+    "head": "be15ad5187c2f501a8682366804363e54860590e",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26a-run.json",
+    "run_id": "e05b2d5c798743a78440101a8a39f822",
+    "head": "b5b6aefa66a8ad037ff34430d0210f3b6873913f",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26d-run.json",
+    "run_id": "128d32ab587948069b5e480f7674cd09",
+    "head": "0fe659e30e151f4ce3dce13789fa6622ca6c6b47",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26e-run.json",
+    "run_id": "d3cae0b6ee3c40f6a438a5d1d44c1a3c",
+    "head": "55a0afa796c1012c5551cd620bbdb5ab505dec3f",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26f-run.json",
+    "run_id": "fe047b6127e14edba9b6828ba5f8e449",
+    "head": "d5166b2b4d5f2427a7e29d3ab28005f90b52beab",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26c-run.json",
+    "run_id": "e15ba61ddf334d95872f74fffd65708b",
+    "head": "97bb4c54b5bd925b88a5fcae03178f79c93a45f5",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26i-run.json",
+    "run_id": "9a250bfb130d4907869cf8a4a2ae962c",
+    "head": "3877d463c0d9b7a0757d051d547c824814601370",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26k-run.json",
+    "run_id": "3133eea6e7054d59a215568dc755a160",
+    "head": "0aaf143ba6e8c4974492aa26e0082fd636077efd",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26b-run.json",
+    "run_id": "0f2bc855666a493cb82807661ab1e8c3",
+    "head": "143d43fcfe9f2a4b116afd169014ed3d6d598403",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26h-run.json",
+    "run_id": "1840b741c8534de2b6a74053a858c925",
+    "head": "41ada5f7e0a0bf34fbd4488c6ec412ff81fe5fff",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26j-run.json",
+    "run_id": "9ff2d5a419f5409da2c8f8bcc082dd02",
+    "head": "0a2ba0bdc2038d0ddf3a5e4dc7af459ebe5afd4f",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr894-wp748-r24-provenance/verdicts/run-5931ed43.json",
+    "run_id": "5931ed43be4f48c8ab6a257c51a637fd",
+    "head": "f08efa1043680134e3534eef8ac95dd901ae7dab",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr894-wp748-r24-provenance/verdicts/run-7181d4b1.json",
+    "run_id": "7181d4b119764c1a8c567a05e0d71a9e",
+    "head": "d42713cc621cbd78d324a8b212749ff5c6199d1e",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr894-wp748-r24-provenance/verdicts/run-3992ea40.json",
+    "run_id": "3992ea40794f4981a4ff1861a2791f55",
+    "head": "77ec458d78d302ba89b317bd04a7282d4493c75b",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr849-wp748-provenance/verdicts/run-03c4f6be.json",
+    "run_id": "03c4f6bed0ec4d089a4959e35a7a669d",
+    "head": "3818bd4a9685e1782afdd7e8a593482f74b663ff",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/run.json",
+    "run_id": "d0b47bc4a1874d2f87ad73eb86260d25",
+    "head": "4504b80e67e4c3c8e967be92212842eb835c6e85",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-6-codex/run.json",
+    "run_id": "2be266f9de534102abfdbb62c7f681b5",
+    "head": "e93dad700a7d2274dbcca5a0f5069b4a358639dc",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/run.json",
+    "run_id": "de4a6762705b448eb5573eccd2687fa6",
+    "head": "783463b5d62efbc43c6a6116e32c43accbc485f7",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-5-codex/run.json",
+    "run_id": "e29b9d3594fa40b28473a1b48c9b8f0d",
+    "head": "77393f6b5d9b04070567ec999e0137b9024b04f1",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-7-codex/run.json",
+    "run_id": "0d0a2d52d25a474e9649aebe60b34ae1",
+    "head": "91c6d8c31190f5f9ea08e4da42ecafd898ee8935",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-2-codex/run.json",
+    "run_id": "0af594b8a7f847329e225ec3f55f59a9",
+    "head": "97f3bc18a937c251f9ee639279e2ca818bce9a58",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-3-codex/run.json",
+    "run_id": "0f78b5d53cc44b6387f782a0c56d0709",
+    "head": "468667238e53e77580e4be62e0b8ed5753a75cd9",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr924-wp923-provenance/verdicts/wp923-g1-claude-review-1-codex-run.json",
+    "run_id": "fd021cb7f99e44379524879f3f43516b",
+    "head": "7574c39d98459c9caf1365a7dd092747335ae4e8",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr909-wp748-r25-provenance/verdicts/run-89b08462.json",
+    "run_id": "89b08462e2cb4570895fcd2a575a350f",
+    "head": "fea07f15b777d64419879ba5250e4e3125a10339",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr909-wp748-r25-provenance/verdicts/run-6863996f.json",
+    "run_id": "6863996f77674965b1a13450ed4dd27d",
+    "head": "aaad9ab95ab170df4083e0c8203a88b5bd3b35a9",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr909-wp748-r25-provenance/verdicts/run-7aae60da.json",
+    "run_id": "7aae60dabce248738dac30eb4853b6f0",
+    "head": "83d305fbf63d5978189a9796141e3d547a46b2c6",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr909-wp748-r25-provenance/verdicts/run-c4c47cce.json",
+    "run_id": "c4c47cce0bd44d429dd8c49268e7b123",
+    "head": "56263ec4a8f271e876a08709d3d7969110855f09",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr931-wp835-provenance/verdicts/wp835-r4-g4-claude-review-2-codex-run.json",
+    "run_id": "6c5f75a9b0ee4b3292bf232418a47eec",
+    "head": "87fd7611001ebffd20a87c934fcf578644984b4b",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr931-wp835-provenance/verdicts/wp835-r3-g3-claude-review-1-codex-run.json",
+    "run_id": "958a0a8a12954c9f9fbfc8175b5c4c95",
+    "head": "3785f9535398db04fb36a5eaa095166a8e048f1e",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr931-wp835-provenance/verdicts/wp835-postmerge-review-3-codex-run.json",
+    "run_id": "7f235b78590a47819fcd14273553e1c0",
+    "head": "3e46a4b790b770e513ab05b0b3faf0dc88796903",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/land/pr888-wp886-provenance/verdicts/wp886-luot2-run.json",
+    "run_id": "cd636453810044549a1918ce9f1be9a8",
+    "head": "1c138c714f9c192ea730b65c5d18ff5eda1ca660",
+    "surface": "subprocess",
+    "program": "codex.js"
+  },
+  {
+    "path": "ops/land/pr888-wp886-provenance/verdicts/wp886-luot1-run.json",
+    "run_id": "883f685ca73c43398707c4ff921e87c7",
+    "head": "a9be5828fb7b937ec8c9f7f1dc6b5a48babbafa5",
+    "surface": "subprocess",
+    "program": "codex.js"
+  },
+  {
+    "path": "ops/land/pr888-wp886-provenance/verdicts/wp886-luot3-run.json",
+    "run_id": "a94adf40415a481bb71b8256807eb314",
+    "head": "99b354ca7bcc40ce0c4f7d9db445b852510b5809",
+    "surface": "subprocess",
+    "program": "codex.js"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-8-codex/run.json",
+    "run_id": "8140fcefe5774eb2b7b77bdbe2e68ae4",
+    "head": "93ef97e8b03dd1b2e344cdfe4afc660edd899ac8",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr787-bookkeeping-review-1-codex/run.json",
+    "run_id": "9f3800fdec6e4a5ab6e578ab26a78a82",
+    "head": "fafbe1556ebc73b81252737cbdec9de4b00860ad",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-5-codex/run.json",
+    "run_id": "45238dcd06314eaabdafbdca72da19a5",
+    "head": "a5dc392b0ad2bec3b1277f5f41665ca176982c43",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp743-r1-g1-exec-review-1-codex/run.json",
+    "run_id": "2b102bb761ad4950bc5cdd1cbccbddc7",
+    "head": "80e0fac0a4ab8c74486cf3bab1a73e1dec600994",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r3-g3-exec-review-3-codex/run.json",
+    "run_id": "f76cb02b0ddf4f79b77cd2eada6405bf",
+    "head": "6f69f9de6675058a22f70697634f833b9a193f20",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-6-codex/run.json",
+    "run_id": "ec7611c031904066973504710a68602f",
+    "head": "f9045bff735937e7f00ea009f6811ce8b5494ffc",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-4-codex/run.json",
+    "run_id": "5a3aef71e85547db99ea9a251e37f390",
+    "head": "a3cfc53b00cf2476ebef202201e416c01ad9b637",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-7-codex/run.json",
+    "run_id": "76eba47025904b3fbb2df30936f53f45",
+    "head": "98d7d2501f0c35f6a150bdd41eaf610bc1bc92ed",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r3-g3-exec-review-2-codex/run.json",
+    "run_id": "ab827a2a851a42f6b739075ebbdd656f",
+    "head": "92df2756e2018f833da34211afbf8b20ebbdcc6e",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp685-r28-g5-exec-review-2-codex/run.json",
+    "run_id": "21561ce1714e4d39952045bebd12fe73",
+    "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr787-bookkeeping-review-2-codex/run.json",
+    "run_id": "88da61050cbc40869a0ede5153a2c14a",
+    "head": "ab4cd428f5a01d69ead7825108593f1092fe78fd",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-9-codex/run.json",
+    "run_id": "66dbfee5b2e843ada735d93369fe05b2",
+    "head": "8b496f9e9909496ab6a66e502ed334e31b24c3b1",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr821-bookkeeping-review-2-codex/run.json",
+    "run_id": "3177d04e825d4f56abcf5aed13dca32d",
+    "head": "a982787024a953a6266aa33c842453deadafd1f3",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr468-hoso-4-packet-review-15-codex/run.json",
+    "run_id": "7c97249031ff41d79f9a0461328ae6b4",
+    "head": "745d8889d0d6468785f26003876ba823c8b2db99",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr468-hoso-4-packet-review-14-codex/run.json",
+    "run_id": "229ddb1478434432b3c46d26353ac27a",
+    "head": "922956a7048fd23eea1c9f88aeb986e076f10e24",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-1-codex/run.json",
+    "run_id": "be308e4f97e84b4c9feef755c67d4eb2",
+    "head": "8ff40b14c241c506bdcafbed414fe6edf9544c28",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-2-codex/run.json",
+    "run_id": "4e69b8c44bce443eb6ac4789db732ecb",
+    "head": "bf5993aaf81a2af72dc533c0d640485f8e47f2ec",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp685-r28-g5-exec-review-1-codex/run.json",
+    "run_id": "2bf7c916d30548348e95afac3180f52f",
+    "head": "3089b54455a44b8cfcf2fd27b01894bc2a5d764d",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr821-bookkeeping-review-1-codex/run.json",
+    "run_id": "e7a27a3e02a74c7abc882d420b98993d",
+    "head": "8e150cf0d9f046a761c49448c8173ad501f53a1c",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r1-g1-exec-review-3-codex/run.json",
+    "run_id": "0021541ff14543c9b1953e792d798cb4",
+    "head": "5250883f3222a277df7c0eba50f2f9a3e0b45fa1",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp766-r1-g1-exec-review-1-codex/run.json",
+    "run_id": "5d4f7321d9a04ee1a87934e41fcf45c8",
+    "head": "701f41c686cef8456d43528ab9556a6b867cd7d6",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp773-r3-g3-exec-review-1-codex/run.json",
+    "run_id": "719761aa113e43bfab375e0dac7ae35f",
+    "head": "128b2e892f91dd353367c082bfc9cf2c300ecfb7",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr870-review-2-codex/run/run.json",
+    "run_id": "2699e2d8b1a54b8e86bfa3efb9a4b61b",
+    "head": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr915-review-1-codex/run/run.json",
+    "run_id": "0f8ecb8517184aaf8b685a46b29f9fe6",
+    "head": "2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr889-review-2-codex/run/run.json",
+    "run_id": "d955f9efb3624041b86dcf97f2624175",
+    "head": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr870-review-3-codex/run/run.json",
+    "run_id": "941251157e4b4a35be82d6daefb390b2",
+    "head": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/wp685-r28-g5-exec-review-1-codex/evidence/reviewer/runtime-launcher.json",
+    "run_id": "2bf7c916d30548348e95afac3180f52f",
+    "head": null,
+    "surface": "codex_cli",
+    "program": null
+  },
+  {
+    "path": "ops/reviews/pr896-review-3-codex/run/run.json",
+    "run_id": "513131e0c0f84982a73f8bd1a0c25a68",
+    "head": "82359c4deec90edebbaebf9ab9d094902120b567",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr896-review-2-codex/run/run.json",
+    "run_id": "b3269a02045c4e178b1c5c328b671273",
+    "head": "8d56009a09af7b3ef93801df105f9483de212cc7",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr896-review-4-codex/run/run.json",
+    "run_id": "9b8d9a7639784126b03a791cc2b92a43",
+    "head": "2e4183bc2dc40e6bc306e377fc442ff0f405bbe0",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr896-review-6-codex/run/run.json",
+    "run_id": "7a86ed4f591e4a50954f81d550f4d437",
+    "head": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/run/run.json",
+    "run_id": "c0fa33fa91f34a3db8450d2e75dd6071",
+    "head": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr889-review-1-codex/run/run.json",
+    "run_id": "9f946d714c2344fa9691c3d7d4f1b2d9",
+    "head": "8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr889-review-3-codex/run/run.json",
+    "run_id": "4764bd6fee0645728143c3eb4f1a417b",
+    "head": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr896-review-1-codex/run/run.json",
+    "run_id": "64761d8e6164462d870c3d534d325dd2",
+    "head": "816f43988eb3012726120ad00166a989cc2b9af6",
+    "surface": "codex_cli",
+    "program": "codex"
+  },
+  {
+    "path": "ops/reviews/pr896-review-5-codex/run/run.json",
+    "run_id": "453628b5eeef497eb4505bed3c8247ec",
+    "head": "1a276a15192013fdb1e472db409133b53ac57944",
+    "surface": "codex_cli",
+    "program": "codex"
+  }
+]

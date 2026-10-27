@@ -1666,7 +1666,21 @@ def _phan_loai_khung(sach: bytes):
     rid, mdl = (r.get("id"), r.get("model")) if isinstance(r, dict) else (None, None)
     if not (isinstance(rid, str) and rid.strip() and isinstance(mdl, str) and mdl.strip()):
         return None, "ung_vien_hong"
-    return {"response_id": rid, "model": mdl, "su_kien": ev["type"]}, "nhan"
+    # v r27 (connector P1 #934 r4372912640): effort do MÁY CHỦ trả trong cùng khung; thiếu/sai kiểu ⇒ None, khung
+    # vẫn được nhận cho model nhưng chặn DO_DUOC của effort.
+    ly = r.get("reasoning")
+    eff = ly.get("effort") if isinstance(ly, dict) else None
+    eff = eff if isinstance(eff, str) and eff.strip() else None
+    return {"response_id": rid, "model": mdl, "su_kien": ev["type"], "effort": eff}, "nhan"
+
+
+def _dem_effort(dem: dict, eff) -> None:
+    """Effort của MỖI khung nhận (kể cả khung trùng id): thiếu thì đếm; giá trị khác nhau giữ theo thứ tự gặp, dạng
+    tuple để ảnh chụp `dict(self.dem)` của `ghi_so` không chia sẻ đối tượng đổi được với luồng đọc."""
+    if eff is None:
+        dem["effort_thieu"] = dem.get("effort_thieu", 0) + 1
+    elif eff not in dem.get("effort", ()):
+        dem["effort"] = dem.get("effort", ()) + (eff,)
 
 
 def _dem_bo(dem: dict, doan: bytes) -> None:
@@ -1699,6 +1713,7 @@ def _ket_dong(dau: bytes, so_doan: int, tron: bool, ung_vien: bool, ket: list, d
     if so_doan == 1 and tron:
         m, loai = _phan_loai_khung(sach)
         if m is not None:
+            _dem_effort(dem, m.pop("effort", None))
             if not any(x["response_id"] == m["response_id"] and x["model"] == m["model"] for x in ket):
                 ket.append(m)
         elif loai == "ung_vien_hong" or ung_vien:
@@ -1766,6 +1781,16 @@ def _ket_luan_model(ket: list, loi: list, con_doc: bool, mat: int = 0, khong_ro:
     return "DO_DUOC", None
 
 
+def _ket_luan_effort(tt_model: str, dem: dict) -> tuple:
+    """(trạng thái, lý do) của effort (spec r27 §3.1): DO_DUOC chỉ khi model DO_DUOC và MỌI khung nhận mang effort.
+    Không suy từ `-c model_reasoning_effort` hay cấu hình — đó là cấu hình yêu cầu, không phải runtime evidence."""
+    if tt_model != "DO_DUOC":
+        return "KHONG_DO_DUOC", "model phuc vu khong do duoc nen effort khong neo duoc vao khung nao"
+    if dem.get("effort_thieu"):
+        return "KHONG_DO_DUOC", f"{dem['effort_thieu']} khung khong mang response.reasoning.effort hop le"
+    return "DO_DUOC", None
+
+
 class _BoLocStderr:
     """Toàn bộ trạng thái đo của một lượt codex trong MỘT đối tượng (R25-TEST-03): `lenh_run` chỉ trao đối tượng, nên
     không còn đối số rời nào để một lời gọi lỡ tay thay bằng giá trị rỗng. `ket_thuc` làm ĐÚNG THỨ TỰ chờ có hạn →
@@ -1809,6 +1834,324 @@ class _BoLocStderr:
             ban_ghi["model_phuc_vu_ly_do"] = ld
         ban_ghi["stderr_bo_dong"] = dem_s.get("dong_bo", 0)   # số ĐOẠN ĐỌC bị bỏ, xem _dem_bo
         ban_ghi["stderr_bo_byte"] = dem_s.get("byte_bo", 0)
+        tt_e, ld_e = _ket_luan_effort(tt, dem_s)
+        ban_ghi["effort_phuc_vu"] = list(dem_s.get("effort", ()))
+        ban_ghi["effort_phuc_vu_trang_thai"] = tt_e
+        if ld_e:
+            ban_ghi["effort_phuc_vu_ly_do"] = ld_e
+
+
+# v r27 (spec r27 §3.2) — SANDBOX THỰC TẾ của lượt codex. Trace không có (đo 25-10-2026); cây tiến trình thì có: lệnh
+# của mô hình chạy dưới `bwrap … codex-linux-sandbox --permission-profile <JSON> … -- <lệnh>`. Luồng lấy mẫu chỉ đọc
+# `/proc/<pid>/stat` (ppid, starttime) và `/proc/<pid>/cmdline` của HẬU DUỆ — KHÔNG BAO GIỜ `environ` (chứa credential).
+# argv chứa lệnh và có thể chứa prompt, nên sổ chỉ giữ phần tử thuộc danh sách cho phép; mọi đường dẫn thành NHÃN
+# tương đối với workspace. Giới hạn (ghi vào sổ): lấy mẫu từ ngoài nên lệnh ngắn hơn chu kỳ có thể lọt, và argv[0]
+# do tiến trình tự khai.
+_SANDBOX_TEN = ("bwrap", "codex-linux-sandbox")
+# v r27 vòng 2 (cross-review r27a R27-ALLOW-01/R27-PARSE-02): danh sách cho phép theo NGỮ NGHĨA, không theo cách viết —
+# regex nhận mọi chuỗi "trông hợp lệ", nên tên thư mục hay giá trị riêng tư viết bằng chữ thường vẫn lọt. Mọi giá trị ra
+# sổ thuộc một tập CỐ ĐỊNH dưới đây; phần còn lại thành "khac". Cú pháp đọc theo BẢNG SỐ ĐỐI SỐ: cờ không có trong bảng
+# thì không đoán được giá trị của nó tới đâu ⇒ ngừng và ghi `khong_ro` (chặn DO_DUOC) thay vì suy cờ từ giá trị.
+_BWRAP_ARITY = {
+    **dict.fromkeys(("--unshare-user", "--unshare-user-try", "--unshare-ipc", "--unshare-pid", "--unshare-net",
+                     "--unshare-uts", "--unshare-cgroup", "--unshare-cgroup-try", "--unshare-all", "--share-net",
+                     "--new-session", "--die-with-parent", "--as-pid-1", "--clearenv", "--disable-userns",
+                     "--assert-userns-disabled"), 0),
+    **dict.fromkeys(("--args", "--argv0", "--userns", "--userns2", "--pidns", "--uid", "--gid", "--hostname",
+                     "--chdir", "--unsetenv", "--lock-file", "--sync-fd", "--remount-ro", "--exec-label",
+                     "--file-label", "--proc", "--dev", "--tmpfs", "--mqueue", "--dir", "--seccomp",
+                     "--add-seccomp-fd", "--block-fd", "--userns-block-fd", "--info-fd", "--json-status-fd",
+                     "--cap-add", "--cap-drop", "--perms", "--size"), 1),
+    **dict.fromkeys(("--setenv", "--bind", "--bind-try", "--dev-bind", "--dev-bind-try", "--ro-bind", "--ro-bind-try",
+                     "--bind-fd", "--ro-bind-fd", "--file", "--bind-data", "--ro-bind-data", "--symlink", "--chmod"), 2),
+}
+_BWRAP_GHI_CO = ("--unshare-user", "--unshare-ipc", "--unshare-pid", "--unshare-net", "--unshare-all", "--share-net",
+                 "--new-session", "--die-with-parent")
+_BWRAP_GAN = ("--ro-bind", "--bind", "--ro-bind-try", "--bind-try", "--dev-bind", "--dev-bind-try")
+_CLS_ARITY = {"--apply-seccomp-then-exec": 0, "--sandbox-policy-cwd": 1, "--command-cwd": 1,
+              "--permission-profile": 1}
+_DUONG_GIU = ("/", "/tmp", "/dev", "/proc")
+_HO_SO_GIA_TRI = {"loai": ("managed", "disabled", "external"), "file_system": ("restricted", "unrestricted"),
+                  "access": ("read", "write", "none"), "network": ("restricted", "enabled"),
+                  "kind": ("root", "slash_tmp", "tmpdir", "minimal", "current_working_directory")}
+_CHU_KY_SANDBOX = 0.2
+_SANDBOX_GIOI_HAN = ("lay mau /proc tu ben ngoai moi %ss: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. "
+                     "DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. "
+                     "Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: "
+                     "co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do")
+
+
+def _nhan_duong_sb(p, ws: str) -> str:
+    """Nhãn CỐ ĐỊNH, không bao giờ chép tên: một trong `_DUONG_GIU`, workspace, trong/tổ tiên workspace, khac."""
+    if not isinstance(p, str):
+        return "khac"
+    if p in _DUONG_GIU:
+        return p
+    if p == ws:
+        return "workspace"
+    if p.startswith(ws + "/"):
+        return "trong_workspace"
+    if ws.startswith(p.rstrip("/") + "/"):
+        return "to_tien_workspace"
+    return "khac"
+
+
+def _gia_tri_sb(loai: str, x) -> str:
+    return x if x in _HO_SO_GIA_TRI[loai] else "khac"
+
+
+def _tom_tat_ho_so_sb(js: str, ws: str) -> dict:
+    try:
+        d = json.loads(js)
+    except ValueError:
+        return {"loai": "khac"}
+    if type(d) is not dict:
+        return {"loai": "khac"}
+    fs = d.get("file_system") if isinstance(d.get("file_system"), dict) else {}
+    muc = []
+    for e in fs.get("entries") if isinstance(fs.get("entries"), list) else []:
+        p = e.get("path") if isinstance(e, dict) else None
+        p = p if isinstance(p, dict) else {}
+        if p.get("type") == "special":
+            nhan = _gia_tri_sb("kind", (p.get("value") if isinstance(p.get("value"), dict) else {}).get("kind"))
+        elif p.get("type") == "path":
+            nhan = _nhan_duong_sb(p.get("path"), ws)
+        else:
+            nhan = "khac"
+        muc.append([nhan, _gia_tri_sb("access", e.get("access") if isinstance(e, dict) else None)])
+    return {"loai": _gia_tri_sb("loai", d.get("type")), "file_system": _gia_tri_sb("file_system", fs.get("type")),
+            "muc": muc, "network": _gia_tri_sb("network", d.get("network"))}
+
+
+def _doc_tuy_chon(a: list, arity: dict):
+    """[(cờ, [đối số])] tới RANH GIỚI LỆNH (`--` hoặc token không phải cờ, ở vị trí cờ), hoặc None khi gặp cờ lạ,
+    thiếu đối số, hay không thấy ranh giới. `--` nằm ở vị trí ĐỐI SỐ là giá trị, không phải ranh giới."""
+    ra, i = [], 0
+    while i < len(a):
+        x = a[i]
+        if x == "--" or not x.startswith("--"):
+            return ra
+        n = arity.get(x)
+        if n is None or i + n >= len(a):
+            return None
+        ra.append((x, a[i + 1:i + 1 + n]))
+        i += 1 + n
+    return None
+
+
+def _tom_tat_sandbox(argv: list, ws: str):
+    """None nếu argv không phải tiến trình sandbox; còn lại bản tóm tắt CHỈ gồm giá trị thuộc tập cố định."""
+    if not argv:
+        return None
+    ten = argv[0].replace("\\", "/").rsplit("/", 1)[-1]
+    if ten not in _SANDBOX_TEN:
+        return None
+    tuy = _doc_tuy_chon(argv[1:], _BWRAP_ARITY if ten == "bwrap" else _CLS_ARITY)
+    if tuy is None:
+        return {"chuong_trinh": ten, "khong_ro": True}
+    co = []
+    if ten == "bwrap":
+        gan = []
+        for x, gt in tuy:
+            if x in _BWRAP_GAN:
+                gan.append([x, _nhan_duong_sb(gt[1], ws)])
+            elif x in _BWRAP_GHI_CO:
+                co.append(x)
+            elif x == "--cap-drop":
+                co.append("--cap-drop=" + ("ALL" if gt[0] == "ALL" else "khac"))
+        return {"chuong_trinh": ten, "gan": gan, "co": sorted(set(co))}
+    ho_so = None
+    for x, gt in tuy:
+        if x == "--permission-profile":
+            ho_so = _tom_tat_ho_so_sb(gt[0], ws)
+        elif gt:
+            co.append(x + "=" + _nhan_duong_sb(gt[0], ws))
+        else:
+            co.append(x)
+    return {"chuong_trinh": ten, "co": sorted(set(co)), "permission_profile": ho_so}
+
+
+def _tach_cmdline(tho: bytes):
+    """argv từ `/proc/<pid>/cmdline`: mỗi đối số KẾT THÚC bằng NUL, nên đối số RỖNG ở giữa vẫn là một đối số
+    (R27-PARSE-02b — lọc bỏ chuỗi rỗng làm lệch vị trí trước bảng số đối số). Không kết thúc bằng NUL (argv bị
+    tiến trình ghi đè hay bị cắt) ⇒ None: ranh giới đối số không tin được."""
+    if not tho:
+        return []
+    if not tho.endswith(b"\0"):
+        return None
+    return [x.decode("utf-8", "replace") for x in tho[:-1].split(b"\0")]
+
+
+def _tom_tat_cmdline(tho: bytes, ws: str):
+    argv = _tach_cmdline(tho)
+    if argv is not None:
+        return _tom_tat_sandbox(argv, ws)
+    # argv bị ghi đè kiểu setproctitle thường nối bằng dấu cách: chỉ dùng TÊN để nhận ra tiến trình sandbox
+    t = _tom_tat_sandbox([tho.split(b"\0")[0].split(b" ")[0].decode("utf-8", "replace")], ws)
+    return None if t is None else {"chuong_trinh": t["chuong_trinh"], "khong_ro": True}
+
+
+def _dem_lenh_stdout(duong) -> tuple:
+    """(số command_execution khác nhau, stdout có sự kiện --json nào không). Đọc hỏng ⇒ (0, False)."""
+    ids, co_json = set(), False
+    try:
+        with open(duong, encoding="utf-8", errors="replace") as f:
+            for dong in f:
+                try:
+                    ev = json.loads(dong)
+                except ValueError:
+                    continue
+                if not isinstance(ev, dict) or not isinstance(ev.get("type"), str):
+                    continue
+                co_json = True
+                it = ev.get("item")
+                if isinstance(it, dict) and it.get("type") == "command_execution":
+                    ids.add(str(it.get("id")))
+    except OSError:
+        return 0, False
+    return len(ids), co_json
+
+
+class _LayMauSandbox:
+    """Lấy mẫu hậu duệ của con codex trong lúc chạy (chỉ Linux). `ghi_so` kết luận từ MỘT ảnh chụp."""
+
+    def __init__(self, pid: int, ws: str):
+        self.pid, self.ws = pid, os.path.realpath(ws)
+        self.thay: dict = {}
+        self.da: set = set()
+        self.canh: dict = {}         # pid -> (ppid, starttime) đã xác thực, giữ XUYÊN lượt quét (R27-PID-04f)
+        self.loi: list = []
+        self.con_chay = False
+        self.dung = threading.Event()
+        self.luong = (threading.Thread(target=self._chay, daemon=True)
+                      if platform.system() == "Linux" else None)
+        self.goc_bd = None           # starttime của gốc (R27-PID-04)
+        if self.luong is not None:
+            try:
+                goc = self._stat(pid)
+            except Exception as e:
+                goc = None
+                self.loi.append(type(e).__name__)
+            # ghim NGAY khi sinh con; không ghim được thì KHÔNG ghim muộn (pid có thể đã có chủ mới) — R27-PID-04b/d
+            if goc is None:
+                self.loi.append("GocKhongGhimDuoc")
+            else:
+                self.goc_bd = goc[1]
+
+    def bat_dau(self) -> None:
+        if self.luong is None:
+            return
+        try:
+            self.luong.start()       # không sinh được luồng ⇒ không đo được, KHÔNG được thành DO_DUOC
+        except Exception as e:
+            self.loi.append(type(e).__name__)
+
+    @staticmethod
+    def _stat(pid):
+        """(ppid, starttime) hoặc None khi tiến trình không còn trong /proc. Lỗi khác (quyền, I/O) NÉM — R27-PROC-03:
+        chỉ biến mất mới là bình thường, đọc bị từ chối là không đo được."""
+        try:
+            st = Path(f"/proc/{pid}/stat").read_bytes()
+        except (FileNotFoundError, ProcessLookupError):
+            return None
+        f = st[st.rindex(b")") + 2:].split()
+        return int(f[1]), f[19]
+
+    def _quet(self) -> None:
+        info: dict = {}
+        for d in os.listdir("/proc"):
+            if d.isdigit():
+                st = self._stat(d)
+                if st is not None:
+                    info[int(d)] = st
+        for c, bo in list(self.canh.items()):   # TRƯỚC return vì gốc vắng (04g); cùng starttime, đổi cha ⇒ lệch
+            hien = info.get(c)
+            if hien is None or hien[1] != bo[1]:
+                del self.canh[c]                         # đã biến mất (pid có thể đã có chủ mới): ngoại lệ duy nhất
+            elif hien != bo:
+                self.loi.append("DanhTinhDoi")
+                return
+        goc = info.get(self.pid)
+        if goc is None or self.goc_bd is None:
+            return                       # gốc đã thoát, hoặc chưa từng ghim được (đã ghi ở __init__)
+        if goc[1] != self.goc_bd:
+            raise RuntimeError("pid goc da bi tai dung")
+        con: dict = {}
+        for c, (pp, bd) in info.items():
+            con.setdefault(pp, []).append((c, bd))
+        # R27-PID-04b/c/d — chủ kho chọn THU HẸP (26-10-2026, sau bốn lượt cùng một lớp lỗi): mỗi mục hàng đợi là chuỗi
+        # tổ tiên đã xác thực (gốc trước); con chỉ vào hàng SAU khi chính nó và cả chuỗi được đọc lại khớp ảnh chụp.
+        # Mọi chỗ lệch — con đổi ppid/starttime, tổ tiên biến mất hay đổi, kể cả cha thành zombie rồi con bị chuyển cha
+        # theo vòng đời bình thường — đều là KHÔNG ĐO ĐƯỢC, không phân biệt "êm" với "lỗi". Giá phải trả: một lượt bình
+        # thường đôi khi bị hạ thành KHONG_DO_DUOC; đổi lại sổ không bao giờ khai mạnh hơn phép đo. Chỉ một trường hợp
+        # được coi là bình thường: chính tiến trình đang đọc đã biến mất khỏi /proc.
+        hang = [((self.pid, goc),)]          # (pid, (ppid, starttime)): R27-PID-04e so NGUYÊN bộ, cả cạnh cha
+        while hang:
+            chuoi = hang.pop()
+            cha = chuoi[-1][0]
+            for c, bd in con.get(cha, ()):
+                try:
+                    tho = Path(f"/proc/{c}/cmdline").read_bytes()
+                except (FileNotFoundError, ProcessLookupError):
+                    continue             # thoát giữa chừng: bình thường
+                sau = self._stat(c)
+                if sau is None:
+                    continue
+                if sau != (cha, bd) or any(self._stat(p) != bo for p, bo in chuoi):
+                    self.loi.append("DanhTinhDoi")
+                    return
+                hang.append(chuoi + ((c, sau),))
+                self.canh[c] = sau
+                # khoá gồm cả cmdline: tiến trình vừa fork chưa exec mang argv của cha, phải xét lại sau exec
+                if (c, bd, tho) in self.da:
+                    continue
+                self.da.add((c, bd, tho))
+                t = _tom_tat_cmdline(tho, self.ws)
+                if t is not None:
+                    k = json.dumps(t, sort_keys=True)
+                    self.thay[k] = self.thay.get(k, 0) + 1
+
+    def _chay(self) -> None:
+        try:
+            while True:
+                self._quet()
+                if self.dung.wait(_CHU_KY_SANDBOX):
+                    break
+        except Exception as e:
+            self.loi.append(type(e).__name__)
+
+    def ket_thuc(self, han: float) -> None:
+        self.dung.set()
+        if self.luong is not None and self.luong.ident is not None:
+            self.luong.join(han)
+            self.con_chay = self.luong.is_alive()
+
+    def ghi_so(self, ban_ghi: dict, stdout_log) -> None:
+        thay, loi = dict(self.thay), list(self.loi)
+        if self.luong is None:
+            tt, ld = "KHONG_DO_DUOC", f"nen {platform.system()} khong do sandbox (chi Linux /proc)"
+        elif loi:
+            tt, ld = "KHONG_DO_DUOC", f"luong lay mau sandbox hong ({loi[0]})"
+        elif self.con_chay:
+            tt, ld = "KHONG_DO_DUOC", "luong lay mau sandbox chua dung khi chot so"
+        elif any(json.loads(k).get("khong_ro") for k in thay):
+            tt, ld = "KHONG_DO_DUOC", "argv tien trinh sandbox khong phan tich duoc theo bang so doi so"
+        elif thay:
+            tt, ld = "DO_DUOC", None
+        else:
+            so_lenh, co_json = _dem_lenh_stdout(stdout_log)
+            if not co_json:
+                tt, ld = "KHONG_DO_DUOC", "stdout khong co su kien --json nao: khong biet co lenh hay khong"
+            elif so_lenh:
+                tt, ld = "KHONG_DO_DUOC", (f"{so_lenh} command_execution ma khong thay tien trinh sandbox nao "
+                                           "(chay ngoai sandbox, hoac ngan hon chu ky lay mau)")
+            else:
+                tt, ld = "KHONG_THAY_LENH", "stdout khong co command_execution nao"
+        ban_ghi["sandbox_quan_sat"] = [dict(json.loads(k), so_lan=n) for k, n in thay.items()]
+        ban_ghi["sandbox_trang_thai"] = tt
+        if ld:
+            ban_ghi["sandbox_ly_do"] = ld
+        ban_ghi["sandbox_gioi_han"] = _SANDBOX_GIOI_HAN % _CHU_KY_SANDBOX
 
 
 def lenh_run(a) -> int:
@@ -1938,6 +2281,7 @@ def lenh_run(a) -> int:
                                           **({"buffering": 0} if do_model else {"encoding": "utf-8"}))
     them = {}
     bo_loc = None
+    sandbox = None
     if do_model:
         env = dict(os.environ)
         # GHI ĐÈ, không nối: RUST_LOG thừa kế có thể bật target khác mang credential (R25-SEC-01).
@@ -1958,6 +2302,8 @@ def lenh_run(a) -> int:
         if do_model:
             bo_loc = _BoLocStderr(p.stderr, f_err)
             bo_loc.bat_dau()
+            sandbox = _LayMauSandbox(p.pid, str(kq["workspace"]))
+            sandbox.bat_dau()
     except (OSError, ValueError) as e:
         if isinstance(e, ValueError):
             ban_ghi.pop("void_reason", None)
@@ -2022,6 +2368,8 @@ def lenh_run(a) -> int:
         ma = 130
     finally:
         f_out.close()
+        if sandbox is not None:
+            sandbox.ket_thuc(5)
         if bo_loc is not None:
             # Hậu duệ còn giữ ống thì EOF không tới: chờ có hạn, CHỐT trạng thái, rồi mới đóng tệp — trong một lời gọi.
             bo_loc.ket_thuc(10)
@@ -2029,6 +2377,8 @@ def lenh_run(a) -> int:
             f_err.close()
     if bo_loc is not None:
         bo_loc.ghi_so(ban_ghi)
+    if sandbox is not None:
+        sandbox.ghi_so(ban_ghi, thu_muc / "stdout.log")
 
     if khoa is None and qua_han:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"

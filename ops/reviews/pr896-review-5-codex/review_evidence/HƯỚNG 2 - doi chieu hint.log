@@ -1,0 +1,55 @@
+diff.patch: byte_match=True
+diff-pr947.patch: byte_match=True
+numstat.txt: byte_match=True
+numstat-pr947.txt: byte_match=True
+hint_paths=34 apply_to_parent_rc=1
+Hunk #1 FAILED at 294.
+1 out of 1 hunk FAILED -- saving rejects to file ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml.rej
+Hunk #6 FAILED at 750.
+Hunk #7 FAILED at 1039.
+2 out of 7 hunks FAILED -- saving rejects to file ops/reviews/README.md.rej
+exact_hint_blob_matches=32
+EXACT ops/reviews/assurance-ho-model-review-1-claude-verdict.receipt.yaml
+EXACT ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml
+EXACT ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml
+EXACT ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml
+EXACT ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml
+EXACT ops/reviews/pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr508-review-1-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr508-review-2-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr508-review-3-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr508-review-4-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr508-review-5-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr526-review-3-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr896-review-1-codex-verdict.receipt.yaml
+EXACT ops/reviews/pr896-review-4-legacy-caveats.yaml
+EXACT ops/reviews/pr915-review-1-codex-verdict.receipt.yaml
+EXACT ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml
+EXACT ops/reviews/wp538-review-1-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp538-review-2-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp541-review-1-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp541-review-2-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml
+EXACT ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml
+MANUAL ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml: missing_hint_lines=0 extra_delta_lines=4
+EXTRA +  ghi_chu_luot4: >-
+EXTRA +    Khoi cap_nhat_20261026_luot4 o tren (ghi tai ff4ab57) noi HINT.patch luot 4 "CHUA ap"; cau ay dung tai ff4ab57 va 77a0a45.
+EXTRA +    HINT.patch luot 4 duoc ap o commit ke tiep sau 77a0a45 tren nhanh claude/pr896-review-2-codex (xem git log), theo lua chon
+EXTRA +    cua chu kho "Ap nguyen HINT luot 4".
+MANUAL ops/reviews/README.md: missing_hint_lines=0 extra_delta_lines=4
+EXTRA -| `pr896-review-4-codex-verdict.md` | `HINT-LUOT4-CHUA-AP` | Tai moc ghi so (commit sau a5f1c5e) changes_requested 3 P1 + 1 P2; HINT.patch luot 4 (34 tep, phan lon receipt NGOAI chuoi #896) CHUA ap, cho chu kho quyet pham vi. |
+EXTRA +| `pr896-review-4-codex-verdict.md` | `HINT-LUOT4-DA-AP-CAN-VERDICT-MOI` | Verdict lich su tren 2e4183b la changes_requested 3 P1 + 1 P2. Tai moc ghi so ff4ab57 (va 77a0a45) HINT.patch luot 4 (34 tep, phan lon receipt NGOAI chuoi #896) CHUA ap; chu kho chon ap nguyen, va no duoc ap o commit ke tiep sau 77a0a45. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |
+EXTRA -| [`pr896-review-4-codex-verdict.md`](pr896-review-4-codex-verdict.md) | [`.receipt.yaml`](pr896-review-4-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | `changes_requested` 0/3/1/0 tren `2e4183b` (head PR #947, mang HINT luot 3) · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 9b8d9a76`; model_phuc_vu DO_DUOC `gpt-6.1-sol` = do_may) · ba finding luot 3 DA DONG (P2 dong 13/13 the hien cu); moi: P1 hang muc luc luot 3 con khai HINT chua ap, P1 8 receipt con noi 'chua review', P1 23 receipt phu nhan ancestry da co, P2 pr526-review-3/slice-b-c-review-2 — phan lon NGOAI chuoi #896; tai moc ghi so HINT.patch luot 4 chua ap · ban phang nguyen byte cua `pr896-review-4-codex/VERDICT.md`. Chua merge. | `2e4183bc` | 39386 |
+EXTRA +| [`pr896-review-4-codex-verdict.md`](pr896-review-4-codex-verdict.md) | [`.receipt.yaml`](pr896-review-4-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | `changes_requested` 0/3/1/0 tren `2e4183b` (head PR #947, mang HINT luot 3) · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 9b8d9a76`; model_phuc_vu DO_DUOC `gpt-6.1-sol` = do_may) · ba finding luot 3 DA DONG (P2 dong 13/13 the hien cu); moi: P1 hang muc luc luot 3 con khai HINT chua ap, P1 8 receipt con noi 'chua review', P1 23 receipt phu nhan ancestry da co, P2 pr526-review-3/slice-b-c-review-2 — phan lon NGOAI chuoi #896; HINT.patch luot 4 chua ap tai ff4ab57, da ap o commit ke tiep sau 77a0a45 · ban phang nguyen byte cua `pr896-review-4-codex/VERDICT.md`. Chua merge. | `2e4183bc` | 39386 |
+outside_hint=["ops/reviews/pr896-review-4-codex-verdict.receipt.yaml"]
+commit_after_77a0a45=1a276a15192013fdb1e472db409133b53ac57944

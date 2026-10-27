@@ -1,0 +1,23 @@
+kind: supplementary_historical_caveats
+measured_at_sha: 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0
+ghi_chu: Dinh chinh tai lieu; khong phai review delivery receipt hay authority. Khong
+  sua receipt v1 dong bang.
+caveats:
+- receipt_path: ops/reviews/don-nhanh-base-review-1-codex-verdict.receipt.yaml
+  verdict_path: ops/reviews/don-nhanh-base-review-1-codex-verdict.md
+  verdict_sha256: 79ddef62b62da4c4cebf382a1e33b146577927486231c66ccbfc4a8e0f2e4376
+  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
+  mo_ta: 'Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor
+    e872e98e7b3612baf71fc177b54ce8b3bafd033d 101263f va voi 2e4183b deu rc=0. Cau
+    phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh.
+    Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet
+    da landed.'
+- receipt_path: ops/reviews/slice-b-c-review-2-codex-verdict.receipt.yaml
+  verdict_path: ops/reviews/slice-b-c-review-2-codex-verdict.md
+  verdict_sha256: c18e65c24cc0e74942fef1c4211d175fdb96a973294816ffdd1d0335b3bb8e00
+  id: SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC
+  muc: P2
+  mo_ta: Verdict dong 19 tu khai Codex service; dong 6 va verdict_nguon cua receipt
+    v1 ghi codex exec qua launcher, run ID khai 8ddb0c6f. Khong co run.json dung run
+    trong checkout tai 2e4183b de phan xu hai loi khai. Khong chon be mat, khong chung
+    thuc model/effort hay nang assurance; giu byte verdict va receipt v1 dong bang.

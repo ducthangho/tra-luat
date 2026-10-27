@@ -60,6 +60,23 @@ Băm prompt: lượt 1 `5b3a09c5…0772`, lượt 2 `217924c1…46c2` (khớp `p
   để không phụ thuộc cấu hình ký của máy. Chưa đo trên máy khác; thuộc packet khác.
 - `launcher.py run` để lại `run.json` `dang_chay` sau khi container chết (đã biết, adapter cross-review có ghi).
 
+## Nâng trần và merge master (sau lượt 2)
+- `ci.yml` lượt PR trên `eb5e5bf`: 23/23 check run `success` (run 40445232251). Riêng check `thu-hoi`
+  (`ops-thu-hoi-admission.yml`) đỏ `CHAN [12]`: master `f577ab5` không phải tổ tiên của head. Đã báo ở #963
+  issuecomment-6433151192.
+- Chủ kho chọn *"(a) +1 lượt Codex"* (#943 issuecomment-6434092559): `nang_tran` `codex_review_calls.pr_wp943_g1`
+  từ 2 lên **3**, chỉ cho lease này, kèm một ngoại lệ push_policy với 4 bước theo thứ tự.
+- Bước 1: merge `origin/master` `a268bcc0e956f010eb4e06633676aafe1f386c37` (`--no-ff`, không rebase, không force)
+  ⇒ head `fb2bbcbf5ba456756df28701f97eb2ce67cd574c`. `git log 3e973a0..a268bcc -- <write set>` cho 0 commit. Blob của
+  hai tệp write set ở `fb2bbcb` bằng blob ở `eb5e5bf`. `git diff a268bcc fb2bbcb` chỉ còn 2 tệp, +12/−5.
+- Bước 2 (trên `fb2bbcb`): `adr-song` rc 0 (55/55), `doctrine-scan` rc 0, `git diff --check a268bcc HEAD` rc 0;
+  N3 `rg` rc 1, không dòng nào; `tl --selftest` `1731/1731` rc 0; `doc-claims-check --strict --json` ở `a268bcc` và
+  `fb2bbcb` cho JSON giống hệt (flags 0, advisories 379).
+- Bước 3: Codex lượt **3/3** ở `ops/reviews/wp943-g1-review-3-codex/` ⇒ **approve** trên `fb2bbcb`, 0 finding,
+  4 hướng săn về merge (H14–H17). `run.json` `xong`, `ma_thoat` 0, 649 s, `model_phuc_vu` `gpt-6.1-sol` (`DO_DUOC`).
+  Prompt sha256 `f8b4a329…c90a`. Selftest độc lập 1729/1731 vẫn do ký commit trong sandbox, tái hiện trên master.
+- Bước 4: đẩy lần 2 (chỉ merge commit) `eb5e5bf..fb2bbcb`. CI trên head mới ghi ở comment kết quả trên #943.
+
 ## Trạng thái
-Chờ CI trên PR #963 và chủ kho duyệt. Không merge/land/deploy. Không còn lượt Codex: sau approve không đẩy thêm
-merge commit.
+Đã dùng 3/3 lời gọi Codex. Không đẩy thêm lần nào. Chờ CI trên `fb2bbcb` (gồm `thu-hoi`) và chủ kho duyệt.
+Không merge/land/deploy.

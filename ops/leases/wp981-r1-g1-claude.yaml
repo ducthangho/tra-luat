@@ -97,3 +97,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp981-g1-claude MOT lan khi N1-N3 dat va review approve; mo PR draft. Sau approve khong day merge commit them neu khong con luot Codex de xac minh lai.'
+da_bi_thay_the: wp981-r2-g2-claude
+ly_do_thu_hoi: 'spec r1 sai voi pr870/pr889 (authorization_url muc goc KHONG_AP_DUNG); chu kho chon "Noi cho kieu (b)" (#981 issuecomment-6438946331) => spec r2 + lease g2. Executor chua sua tep nao, Codex 0/2.'

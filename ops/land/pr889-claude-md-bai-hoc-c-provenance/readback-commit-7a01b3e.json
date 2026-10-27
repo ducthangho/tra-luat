@@ -1,0 +1,37 @@
+{
+ "sha": "7a01b3e4e96d332f587c161d92b2ca2a2e7ef790",
+ "commit": {
+  "author": {
+   "name": "Claude",
+   "email": "noreply@anthropic.com",
+   "date": "2026-10-26T06:20:27Z"
+  },
+  "committer": {
+   "name": "Claude",
+   "email": "noreply@anthropic.com",
+   "date": "2026-10-26T06:20:27Z"
+  },
+  "message": "ops: PR ghi so duyet landed #870/#889 (lan 2) + caveat surface cho pr889-review-1\n\n- Bien nhan pr889-review-1-codex: them caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE\n  (verdict dong 7 khai codex_service, run.json 9f946d71 ghi codex_cli) va hang\n  README. Day la the hien con sot ma pr896-review-2-codex bat.\n- Ho so land #870/#889: khoi pr_ghi_so_duyet_landed_lan2_20261026. Ghi readback\n  #949 (merge 9372ecd khong co comment/review duyet nao) nen khoi lan 1 khong\n  co hieu luc; landed van false, cho comment duyet tren PR nay.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm",
+  "tree": {
+   "sha": "f418cc8b206e82ad7d7c93cad4de0d5f922b9c8e",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/f418cc8b206e82ad7d7c93cad4de0d5f922b9c8e"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/7a01b3e4e96d332f587c161d92b2ca2a2e7ef790",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQEFQk6ff\nUjhqVQXmxtF1J54BQbJd6TrgQjpcwPfLSynwweEvxQRxzAh8ys3nuC30ooLaY9oUtRwzgjHW+8XK\nwwU=\n-----END SSH SIGNATURE-----",
+   "payload": "tree f418cc8b206e82ad7d7c93cad4de0d5f922b9c8e\nparent 9372ecd93bd95350c90dfc75d3f0d014b4f932ed\nauthor Claude <noreply@anthropic.com> 1792995627 +0000\ncommitter Claude <noreply@anthropic.com> 1792995627 +0000\n\nops: PR ghi so duyet landed #870/#889 (lan 2) + caveat surface cho pr889-review-1\n\n- Bien nhan pr889-review-1-codex: them caveat VERDICT-KHAI-SAI-EXECUTION-SURFACE\n  (verdict dong 7 khai codex_service, run.json 9f946d71 ghi codex_cli) va hang\n  README. Day la the hien con sot ma pr896-review-2-codex bat.\n- Ho so land #870/#889: khoi pr_ghi_so_duyet_landed_lan2_20261026. Ghi readback\n  #949 (merge 9372ecd khong co comment/review duyet nao) nen khoi lan 1 khong\n  co hieu luc; landed van false, cho comment duyet tren PR nay.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01V2PEqhkb91vD5PCBM5yXbm\n",
+   "verified_at": "2026-10-26T06:20:30Z"
+  }
+ },
+ "parents": [
+  {
+   "sha": "9372ecd93bd95350c90dfc75d3f0d014b4f932ed",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9372ecd93bd95350c90dfc75d3f0d014b4f932ed",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/9372ecd93bd95350c90dfc75d3f0d014b4f932ed"
+  }
+ ],
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/7a01b3e4e96d332f587c161d92b2ca2a2e7ef790"
+}

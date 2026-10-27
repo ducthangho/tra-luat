@@ -29,8 +29,9 @@ LUẬT:
       chuỗi `CHO_DIEN`, connector P1 4309577154), và không chuỗi nào chứa `CHO_DIEN`. `landed: false` (bản nháp) ⇒ không đòi.
   L7  (#748, `ops/specs/land-evidence-l7-assurance-thuc-thi-r1.md`) `assurance_81.reviewer_assurance_81` chuẩn hoá (bỏ khoảng
       trắng hai đầu, viết hoa, khoảng trắng ⇒ `_`) bằng `DAT` ⇒ `assurance_81.thuc_thi` phải là mapping có `model`, `effort`,
-      `sandbox_mode`, mỗi khoá là lời khai `measured` (cùng `RE_KHAI_DO`, nên L1 tự đòi nguồn). Chặt hơn chữ đặc tả: bỏ dấu
-      tiếng Việt khi chuẩn hoá, nên `ĐẠT` cũng áp. Giá trị khác ⇒ không đòi. Connector P1 PR #934 (4372912640): hồ sơ khai ĐẠT
+      `sandbox_mode`, mỗi khoá là lời khai `measured` (cùng `RE_KHAI_DO`, nên L1 tự đòi nguồn). Chặt hơn chữ đặc tả: chuẩn hoá
+      thêm NFC và nhận cả cách viết có dấu `ĐẠT` — chỉ đúng hai cách viết ấy, KHÔNG bỏ dấu đại trà (review l7a P2: `ĐẤT`, `DẠT`
+      là giá trị khác, phải để L7 không áp). Giá trị khác ⇒ không đòi. Connector P1 PR #934 (4372912640): hồ sơ khai ĐẠT
       khi biên nhận chỉ đo model. `MIEN_TRU_L7` = 3 hồ sơ đã khai như thế (nợ `NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO`), cơ chế như L5.
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
@@ -99,6 +100,7 @@ RE_MOC = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:[
 L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")   # cây thật 19-10-2026: mọi hồ sơ landed true đã có cả hai
 L6_DAU_GIU_CHO = "CHO_DIEN"
 L7_KHOA = ("model", "effort", "sandbox_mode")
+L7_MUC_DAT = ("DAT", "ĐẠT")   # sau `_chuan_hoa_81`; dạng NFC
 # L7 — đo 2026-10-27 trên `f577ab5`: 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới.
 MIEN_TRU_L7 = {
     "pr924-wp923-land-evidence.yaml": "067df625f496a13703931d84c3a76858406b08b60d221007701ecdfa74562721",
@@ -299,7 +301,7 @@ def kiem_ho_so(tep, byte, goc, yaml):
             vp += [f"L6 {d}: landed true mà còn dấu giữ chỗ {L6_DAU_GIU_CHO} — {v[:60]!r}"
                    for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]
     a81 = du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None
-    if isinstance(a81, dict) and _chuan_hoa_81(a81.get("reviewer_assurance_81")) == "DAT":   # L7
+    if isinstance(a81, dict) and _chuan_hoa_81(a81.get("reviewer_assurance_81")) in L7_MUC_DAT:   # L7
         bam, tt7 = MIEN_TRU_L7.get(tep.name), a81.get("thuc_thi")
         mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam
         if bam is not None:
@@ -314,11 +316,10 @@ def kiem_ho_so(tep, byte, goc, yaml):
 
 
 def _chuan_hoa_81(v):
-    """`' Đạt '` ⇒ `DAT`, `'chua dat'` ⇒ `CHUA_DAT`; không phải chuỗi ⇒ None (L7 không áp)."""
+    """`' đạt '` (NFC hay NFD) ⇒ `ĐẠT`, `'chua dat'` ⇒ `CHUA_DAT`; không phải chuỗi ⇒ None (L7 không áp)."""
     if not isinstance(v, str):
         return None
-    v = "".join(c for c in unicodedata.normalize("NFD", v.replace("đ", "d").replace("Đ", "D")) if not unicodedata.combining(c))
-    return re.sub(r"\s+", "_", v.strip().upper())
+    return re.sub(r"\s+", "_", unicodedata.normalize("NFC", v).strip().upper())
 
 
 def main(argv=None):

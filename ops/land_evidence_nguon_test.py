@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import unicodedata
 from unittest import mock
 from pathlib import Path
 
@@ -368,10 +369,15 @@ def c17_l7_khai_dat_phai_do_thuc_thi():
         ky(hs7("DAT", {x: v for x, v in DU7.items() if x != k}), P7, 1, f"thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
         for sai in ("not_measured — run.json", "da do — run.json", "measuredx run.json"):
             ky(hs7("DAT", DU7 | {k: sai}), P7, 1, f"{k} = {sai!r}", f"L7 $.assurance_81.thuc_thi.{k}:")
+        for tho in ("null", "true", "3", "['measured — run.json']", "{a: 'measured — run.json'}"):   # review l7a P3: có mặt, không phải chuỗi
+            hs = hs7("DAT", {x: v for x, v in DU7.items() if x != k}) + f"    {k}: {tho}\n"
+            ky(hs, P7, 1, f"{k} = {tho} (không phải chuỗi)", f"L7 $.assurance_81.thuc_thi.{k}:")
     ky(hs7("DAT", DU7 | {"model": "measured — khong-co.json"}), P7, 1, "measured không nguồn thì L1 bắt", "L1 $.assurance_81")
-    for muc in ("Dat", "' DAT '", "dat", "ĐẠT", "Đạt", "'  đạt  '"):   # chuẩn hoá: hoa thường, khoảng trắng, dấu tiếng Việt
+    nfd = unicodedata.normalize("NFD", "đạt")
+    for muc in ("Dat", "' DAT '", "dat", "ĐẠT", "Đạt", "'  đạt  '", nfd):   # chuẩn hoá: hoa thường, khoảng trắng, NFC/NFD
         ky(hs7(muc), P7, 1, f"biến thể {muc!r}", "L7 $.assurance_81.thuc_thi:")
-    for muc in ("CHUA_DAT", "CHUA DAT", "'chua dat'", "CHƯA ĐẠT", "DAT_MOT_PHAN", "1", "true", "null", "[DAT]"):
+    for muc in ("CHUA_DAT", "CHUA DAT", "'chua dat'", "CHƯA ĐẠT", "DAT_MOT_PHAN", "1", "true", "null", "[DAT]",
+                "ĐẤT", "DẠT", "ĐAT", "dát"):   # review l7a P2: chữ khác dấu là giá trị KHÁC, không phải DAT
         ky(hs7(muc), P7, 0, f"{muc!r} không phải DAT ⇒ L7 không áp")
     for hs in ("assurance_81: DAT\n", "assurance_81: [{reviewer_assurance_81: DAT}]\n", "x: {reviewer_assurance_81: DAT}\n"):
         ky(hs, P7, 0, f"không phải mapping assurance_81 ở gốc ⇒ L7 không áp: {hs.strip()!r}")
@@ -485,13 +491,20 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L6_P_phan_tu_so", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, (dict, int, float)) for x in ds)", "c16"),
     ("L6_Q_list_la_trang_thai", 'if isinstance(tt, dict) and "landed" in tt:   # L6',
      'if isinstance(tt, (dict, list)) and "landed" in tt:   # L6', "c16"),
-    ("L7_bo_ca_luat", '== "DAT":   # L7', '== "KHONG_BAO_GIO":   # L7', "c17"),
-    ("L7_bo_strip", "v.strip().upper()", "v.upper()", "c17"),
+    ("L7_bo_ca_luat", 'in L7_MUC_DAT:   # L7', 'in ():   # L7', "c17"),
+    ("L7_bo_strip", 'normalize("NFC", v).strip().upper()', 'normalize("NFC", v).upper()', "c17"),
     ("L7_bo_viet_hoa", ".strip().upper())", ".strip())", "c17"),
-    ("L7_bo_bo_dau", 'v = "".join(c for c in unicodedata.normalize(', 'v = v or "".join(c for c in unicodedata.normalize(', "c17"),
+    ("L7_bo_nfc", 'unicodedata.normalize("NFC", v).strip()', 'v.strip()', "c17"),
+    ("L7_bo_cach_viet_co_dau", 'L7_MUC_DAT = ("DAT", "ĐẠT")', 'L7_MUC_DAT = ("DAT",)', "c17"),
+    ("L7_bo_dau_dai_tra", 'unicodedata.normalize("NFC", v).strip()',
+     '"".join(c for c in unicodedata.normalize("NFD", v.replace("đ", "d").replace("Đ", "D")) if not unicodedata.combining(c)).strip()', "c17"),
     ("L7_thieu_thuc_thi_chi_ghi_chu", 'vp.append(f"L7 $.assurance_81.thuc_thi: khai', 'ghi.append(f"L7 $.assurance_81.thuc_thi: khai', "c17"),
     ("L7_bo_kiem_khoa", "        elif not mien:\n", "        elif False:\n", "c17"),
     ("L7_khong_doi_measured", " and RE_KHAI_DO.match(tt7[k]))]", ")]", "c17"),
+    ("L7_nhan_khong_phai_chuoi", "if not (isinstance(tt7.get(k), str) and RE_KHAI_DO.match(tt7[k]))]",
+     "if not (k in tt7 and (not isinstance(tt7[k], str) or RE_KHAI_DO.match(tt7[k])))]", "c17"),
+    ("L7_bo_model", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("effort", "sandbox_mode")', "c17"),
+    ("L7_bo_effort", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "sandbox_mode")', "c17"),
     ("L7_bo_sandbox_mode", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "effort")', "c17"),
     ("L7_mien_tru_bo_so_bam", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = bam is not None", "c18"),
     ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),

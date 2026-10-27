@@ -45,7 +45,11 @@ Các liên kết `evidence/…` trong hai verdict trỏ vào sandbox của revie
   - `ruff --select F` trên hai tệp: sạch;
   - `tl --selftest` **1731/1731** trên đúng `2c70821`, tree sạch.
 - Diff: 2 tệp, +184/−14 (trần 200).
-- **N4**: check run `ci.yml` trên head cuối `afd3a86` — chờ, đọc bằng check run (cả `thu-hoi`).
+- **Drift lần 2** (chủ kho yêu cầu trực tiếp trong phiên executor, #981 issuecomment-6445122489): merge `origin/master` thành **`0eb66e513f2736f0bfc342ddbcbc70b84f773b3b`** (cha `afd3a86` + `4488444`). Write set có blob giống `2c70821`; `diff-tree --cc` rỗng. N1–N3 chạy lại: 11/11; 23/23; `ci_dang_ky` ĐẠT; `doctrine-scan` rc 0; ruff F sạch; selftest 1738/1738. Không có lượt Codex (đã 3/3).
+- **N4 — ĐẠT trên head cuối `0eb66e5`**: 24/24 check run `success` (`filter=latest`), gồm `thu-hoi` (run 40524815562) và `ci.yml` run 40524821956.
+  - `gate-cong-cu-gop` attempt 1 đỏ vì không được cấp runner: `runner_id 0`, 0 step, 2 s, log `BlobNotFound`; cả 8 mảnh nó gom đều `success`.
+  - Đã chạy lại đúng một lần (`rerun-failed-jobs`, attempt 2) ⇒ `success`. Lý do ghi ở PR #990 issuecomment-6446157438.
+- Head cuối đứng sau master vài commit (master tiếp tục tiến). Theo đề xuất với chủ kho: không đuổi drift thêm, merge master lúc land.
 
 ## Giới hạn và việc để lại (Q5 — ghi, không vá)
 - Trong sandbox reviewer, `ci_dang_ky_test.py` và 2 ca selftest (`r226_*`, `r268_*`) đỏ vì dịch vụ ký commit cục bộ trả `socket: operation not permitted`. Đây là giới hạn môi trường. Ở container executor cả hai đều xanh.

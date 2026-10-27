@@ -1095,21 +1095,30 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         hop_le = [cm(dau + x) for x in (ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
                                          ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
                                          ai(b"A") + f"\ntree {P1}\nparent {P1}\n".encode())]   # body giống header: chỉ đọc PHẦN ĐẦU
+        ba = [P2, P1, "0" * 39 + "1"]   # 3 parent, thứ tự KHÔNG sắp xếp
         ca = [(x, dung) for x in hop_le] + [(cm(f"tree {cay}\n".encode() + ai(b"A") + b"\ngoc\n"), goc),   # commit gốc
-              (cm(f"tree {cay}\n".encode() + ai(f"A\rparent {P1}\r".encode()) + b"\ncr\n"), goc)]   # CR trong author ≠ dòng mới
+              (cm(f"tree {cay}\n".encode() + ai(f"A\rparent {P1}\r".encode()) + b"\ncr\n"), goc),   # CR trong author ≠ dòng mới
+              (cm(f"tree {cay}\n".encode() + b"".join(f"parent {x}\n".encode() for x in ba) + ai(b"A") + b"\nba\n"), {"tree": cay, "parents": ba})]
+        ca += [(cm(f"tree {cay}\n".encode() + ai(b"A") + x + b"\nmo rong\n"), goc)   # `parent` SAU committer / sau header mở rộng ≠ cha
+               for x in (f"parent {P1}\n".encode(), f"x-review v\nparent {P1}\n".encode())]
         hong = [b"tree %s\ntree %s\n" % (cay.encode(), cay.encode()), b"parent %s\n" % P1.encode(), b"tree %s1\n" % cay.encode(),
                 b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
-                f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n"]
+                f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
         ca += [(cm(x + ai(b"A") + b"\nh\n", ("--literally",)), None) for x in hong]
         ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
         g("tag", "-a", "-m", "t", "the", hop_le[0])
         ca += [(cay, None), (g("rev-parse", "the"), None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None), ("\udc80", None)]   # tree · tag · thiếu · rỗng · 2 dòng · không str · không mã hoá được
         d2, g2 = kho("sha256", "--object-format=sha256")
         cay2 = g2("mktree", i=f"100644 blob {g2('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
-        c2 = g2("hash-object", "-t", "commit", "-w", "--stdin", i=f"tree {cay2}\n".encode() + ai(b"Jos\xe9") + b"\nm\xe9ssage\n")
+        ba2 = ["f" * 64, "0" * 63 + "1", "a" * 64]
+        c2 = g2("hash-object", "-t", "commit", "-w", "--stdin", i=f"tree {cay2}\n".encode() + b"".join(f"parent {x}\n".encode() for x in ba2)
+                + ai(b"Jos\xe9") + b"\nm\xe9ssage\n")
         kq = [doc(x, d1) for x, _ in ca] + [doc(c2, d2)]
-        mong = [k for _, k in ca] + [{"tree": cay2, "parents": []}]
+        mong = [k for _, k in ca] + [{"tree": cay2, "parents": ba2}]
         bang(kq == mong, f"git_cuc_bo lệch ở {[(i, a) for i, (a, b) in enumerate(zip(kq, mong)) if a != b]}")
+        for x, d, gg in [(x, d1, g) for x, k in ca if type(k) is dict] + [(c2, d2, g2)]:   # oracle Git NATIVE cho mọi commit hợp lệ
+            t, _, p = gg("log", "-1", "--no-walk", "--format=%T%n%P", x).partition("\n")
+            bang(doc(x, d) == {"tree": t, "parents": p.split()}, f"lệch Git native ở {x}: {doc(x, d)} ≠ {t} {p.split()}")
         with mock.patch.dict(os.environ, {"PATH": thu}):
             bang(doc(hop_le[0], d1) is None, "không có git trên PATH ⇒ None")
         ra_that = subprocess.run(["git", "-C", d1, "cat-file", "--batch"], input=hop_le[0].encode() + b"\n", capture_output=True, check=True).stdout
@@ -1192,7 +1201,11 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F08_git_bo_sha", 'f"{sha}:{path}"', 'f"HEAD:{path}"', "c34"),
     ("F13_giai_ma_toan_stdout", 'dau, _, than = r.stdout.partition(b"\\n")', 'dau, _, than = r.stdout.decode("utf-8").encode().partition(b"\\n")', "c53"),
     ("F13_giai_ma_ca_phan_dau", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n\\n", 1)[0].decode("utf-8").encode().split(b"\\n")', "c53"),
-    ("F13_bo_kiem_oid", "if len(tree) != 1 or not all(RE_OID_B.fullmatch(x) for x in tree + cha):", "if len(tree) != 1:", "c53"),
+    ("F13_bo_kiem_oid", " or not all(RE_OID_B.fullmatch(x) for x in tree + cha):", ":", "c53"),
+    ("F13_cha_quet_ca_dau", "            break\n        cha.append(x[7:])", "            continue\n        cha.append(x[7:])", "c53"),
+    ("F13_bo_tree_dong_dau", ' or not dong[0].startswith(b"tree ")', "", "c53"),
+    ("F13_cha_chi_hai", '"parents": [x.decode("ascii") for x in cha]}', '"parents": [x.decode("ascii") for x in cha[:2]]}', "c53"),
+    ("F13_cha_chi_40", "fullmatch(x) for x in tree + cha)", 'fullmatch(x) for x in tree) and all(re.fullmatch(rb"[0-9a-f]{40}", x) for x in cha)', "c53"),
     ("F13_bo_kiem_loai", ' or loai[1] != b"commit"', "", "c53"),
     ("F13_tach_splitlines", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n\\n", 1)[0].splitlines()', "c53"),
     ("F13_oid_khoang", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40,64}")', "c53"),

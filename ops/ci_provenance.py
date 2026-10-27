@@ -149,8 +149,12 @@ def git_cuc_bo(sha, goc=ROOT):
     if r.returncode != 0 or len(loai) != 3 or loai[1] != b"commit" or not loai[2].isdigit() or len(than) != int(loai[2]) + 1:
         return None
     dong = than[:int(loai[2])].split(b"\n\n", 1)[0].split(b"\n")
-    tree, cha = [x[5:] for x in dong if x.startswith(b"tree ")], [x[7:] for x in dong if x.startswith(b"parent ")]
-    if len(tree) != 1 or not all(RE_OID_B.fullmatch(x) for x in tree + cha):
+    tree, cha = [x[5:] for x in dong if x.startswith(b"tree ")], []
+    for x in dong[1:]:   # lượt 3: ngữ pháp Git — `parent` là dãy LIỀN SAU dòng `tree` đầu; `parent` sau committer/header mở rộng không phải cha
+        if not x.startswith(b"parent "):
+            break
+        cha.append(x[7:])
+    if len(tree) != 1 or not dong[0].startswith(b"tree ") or not all(RE_OID_B.fullmatch(x) for x in tree + cha):
         return None
     return {"tree": tree[0].decode("ascii"), "parents": [x.decode("ascii") for x in cha]}
 

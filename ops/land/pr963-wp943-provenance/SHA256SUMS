@@ -42,3 +42,6 @@ d2c8fc3702a28a047b3d3294e6442ba8fff2d3336b2ed038f2115f1b8776701b  ./verdicts/wp9
 f8b4a329aa591bd6855007289af81a1c6be3524e610464d4805036cb3716c90a  ./verdicts/wp943-g1-claude-review-3-codex-prompt.md
 f2644bb8c67892f51c0b6c1db464da7a5e3cba27850d1c63115ff5b021d41d72  ./verdicts/wp943-g1-claude-review-3-codex-run.json
 5095ef737386f52ab99ebe8ee2079ef131c6a6a76d7723e7a419667bae69ae87  ./verdicts/wp943-g1-claude-review-3-codex-verdict.md
+03de8fd0b78909fffc272c238b9b2f617e770def5f49f786135a7f98c48bac73  ./do-1027-7129f7d/graphql-output-chu-kho-dan-pr963.json
+bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-1027-7129f7d/moc_wd.py
+e7c6e60b5c8e90cfd5fda18dcf22afc857805575f5954db2730eb4f77d653bc4  ./do-1027-7129f7d/workflow-definition-7129f7d.txt

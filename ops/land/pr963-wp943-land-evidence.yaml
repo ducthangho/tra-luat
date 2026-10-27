@@ -106,3 +106,36 @@ khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
   - 'Moc Workflow definition §10.2.2 cua gate hau merge 7129f7d: KHONG_DO_DUOC trong phien — GraphQL WorkflowRun.file 403.'
   - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'
+
+moc_workflow_definition_20261027:
+  bo_canh: 'Chu kho chay gh api graphql ngoai phien (cmd Windows) va dan output vao hoi thoai phien session_01FLVLxi5gKZgtVvbuTCEqEn 27-10-2026. Khoi nay KHONG sua dong nao o tren.'
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 40459598250 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID 7129f7de204a6f92db8e29e8a5a79383d4907029 (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST
+    run 40459598250 (head_sha, path, node_id = gia tri -f id= cua lenh) va tai blob qua contents?ref=OID: blob
+    82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, khop byte voi git rev-parse 7129f7d:.github/workflows/ci.yml.
+  nguon:
+    - ops/land/pr963-wp943-provenance/do-1027-7129f7d/workflow-definition-7129f7d.txt
+    - ops/land/pr963-wp943-provenance/do-1027-7129f7d/graphql-output-chu-kho-dan-pr963.json
+    - ops/land/pr963-wp943-provenance/do-1027-7129f7d/moc_wd.py
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai. URL va blob tai OID da duoc
+    phien doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o post_merge_checks / do-1027-7129f7d; Workflow definition o khoi nay).'
+  landed: false
+
+pr_ghi_so_duyet_landed_20261027:
+  bo_canh: 'Sau khi co moc Workflow definition. Khoi nay KHONG sua dong nao o tren.'
+  dieu_kien_da_dat:
+    - '§10.2.2 4/4 measured — post_merge_checks + moc_workflow_definition_20261027 (merge 7129f7de204a6f92db8e29e8a5a79383d4907029).'
+    - 'reviewer_assurance_81 DAT — assurance_81 (Codex luot 3/3 approve, 35/35 response gpt-6.1-sol DO_DUOC, tren DUNG authorized_head_sha fb2bbcbf5ba456756df28701f97eb2ce67cd574c).'
+    - 'lease da nha (lease.thu_hoi_cuoi); noi dung merge = diff PR (merge_noi_dung).'
+  dieu_kien_con_lai:
+    id: QUYET-DINH-LANDED-CHU-KHO-MOI
+    trang_thai: cho_chu_kho
+    quy_tac: >-
+      Theo tien le PR #951/#962: chu kho duyet landed bang mot comment tren PR ghi so CHUA khoi nay, dang SAU commit cuoi
+      cua nhanh ghi so va TRUOC merge, ghi day du SHA head cuoi cua PR ghi so (40 hex). Commit nao den sau comment lam no
+      het hieu luc. Readback comment KHONG commit vao cay; ho so ghi nhan o PR ke tiep.
+  landed: false
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'

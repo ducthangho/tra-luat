@@ -1,0 +1,18 @@
+BEGIN r1-moc-khong-doi-oid40
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+RESULT r1-moc-khong-doi-oid40 {"passed": 76, "total": 76, "red": []}
+BEGIN r2-luot-bien-nhan-khac-thieu
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+RESULT r2-luot-bien-nhan-khac-thieu {"passed": 76, "total": 76, "red": []}
+BEGIN r3-merge-base-loi-thanh-vi-pham
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+RESULT r3-merge-base-loi-thanh-vi-pham {"passed": 76, "total": 76, "red": []}
+BEGIN r4-run-json-thieu-surface-thanh-vi-pham
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+RESULT r4-run-json-thieu-surface-thanh-vi-pham {"passed": 76, "total": 76, "red": []}
+BEGIN r5-moc-blame-hong-thanh-vi-pham
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+RESULT r5-moc-blame-hong-thanh-vi-pham {"passed": 76, "total": 76, "red": []}
+BEGIN r6-chi-so-origin-HEAD
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+RESULT r6-chi-so-origin-HEAD {"passed": 70, "total": 76, "red": [["c40_R7_01_nguon_hong_tren_bien_nhan_THAT_khong_ket_toi_bien_nhan_nao", "giet_that", "đủ nguồn (đối chứng): thiếu bằng chứng dương 'TỔNG: ĐẠT': 'Y] wp538-review-2-claude-verdict.receipt.yaml: `anchor.gioi_han` — không tìm được nhánh mặc định để so\\n  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] wp540-review-1-claude-verdict.receipt.yaml: `anchor.gioi_han` — không tìm được nhánh mặc định để so\\n  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] wp541-review-1-claude-verdict.receipt.yaml: `ci_tu_dong_tren_ung_vien.thu_hoi` — không tìm được nhánh mặc định để so\\nTỔNG: KHÔNG ĐO ĐƯỢC\\n'"], ["c14_cli_ba_trang_thai", "giet_that", "kho thật: đòi rc=0, được 2\n  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml: `anchor.mo_ta` — không tìm được nhánh mặc định để so\n  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml: `evidence_url_ghi_chu` — không tìm được nhánh mặc định để so\n  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.receipt.yaml: `an"], ["c71_A2_cau_ancestry_do_bang_merge_base", "giet_that", "da-to-tien: đòi rc=1, được 2: loi=[] chua=['[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — không tìm được nhánh mặc định để so']"], ["c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan", "giet_that", "đòi đúng bốn trường bị nhận (không có `chi_trich`), được []: []"], ["c74_A5_no_cau_lich_su_chi_co_va_no_chet_la_vi_pham", "giet_that", "trong-no: đòi rc=0, được 2: []"], ["c76_A6_kho_that_voi_no_RONG_phai_DO_dung_bang_so_no", "giet_that", "đòi rc=1 không KHÔNG ĐO ĐƯỢC, được rc=2 chua=['[L-ANCESTRY] ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml: `anchor.mo_ta` — không tìm được nhánh mặc định để so', '[L-ANCESTRY] ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml: `evidence_url_ghi_chu` — không tìm được nhánh mặc định để so', '[L-ANCESTRY] ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.receipt.yaml: `anchor.mo_ta` — không tìm được nhánh mặc định để so']"]]}

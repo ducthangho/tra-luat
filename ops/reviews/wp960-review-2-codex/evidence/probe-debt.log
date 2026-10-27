@@ -1,0 +1,6 @@
+head-frozen {"rc": 0, "n_errors": 0, "unknown": [], "counts": {"L-REVIEW": 1, "L-ANCESTRY": 60, "L-SURFACE": 3}, "n_violations": 64, "equals_frozen": true, "extra": [], "missing": []}
+head-empty {"rc": 1, "n_errors": 64, "unknown": [], "counts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}, "n_violations": 64, "equals_frozen": true, "extra": [], "missing": []}
+base-frozen {"rc": 0, "n_errors": 0, "unknown": [], "counts": {"L-REVIEW": 1, "L-ANCESTRY": 60, "L-SURFACE": 3}, "n_violations": 64, "equals_frozen": true, "extra": [], "missing": []}
+base-empty {"rc": 1, "n_errors": 64, "unknown": [], "counts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}, "n_violations": 64, "equals_frozen": true, "extra": [], "missing": []}
+base-head-parity {"equal": true}
+A7 {"new_law_exists": false, "new_debt_exists": false, "new_A1_exists": false}

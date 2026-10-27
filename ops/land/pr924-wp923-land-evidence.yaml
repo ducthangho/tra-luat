@@ -90,7 +90,13 @@ trang_thai_packet:
     assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
     Mo lai: du bon moc provenance CI §10.2.2 cho DUNG run gate tren b306e15 (hoac gate moi dung b306e15).
 assurance_81:
-  reviewer_assurance_81: DAT
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: DAT
+  review_exact_sha_nguon: 'measured — verdicts/wp923-g1-claude-review-1-codex-run.json: luot launcher.py run fd021cb7 approve tren DUNG authorized_head_sha 7574c39, ma_thoat 0 (verdicts/wp923-g1-claude-review-1-codex-verdict.md)'
+  thuc_thi:
+    model: 'measured — verdicts/wp923-g1-claude-review-1-codex-run.json model_phuc_vu DO_DUOC, 28/28 response gpt-6.1-sol'
+    effort: 'not_measured — verdicts/wp923-g1-claude-review-1-codex-run.json khong co truong effort nao; `lenh` chi ghi chuong_trinh codex, so_doi_so 11, van_tay (khong luu doi so). Cau hinh yeu cau khong phai runtime evidence (§8.1).'
+    sandbox_mode: 'not_measured — verdicts/wp923-g1-claude-review-1-codex-run.json khong co truong sandbox nao; cau hinh yeu cau khong thay phep do (§8.2).'
   ly_do: >-
     measured — verdicts/wp923-g1-claude-review-1-codex-run.json: luot launcher.py run fd021cb7 tren DUNG authorized_head_sha
     7574c39 (khoa head), ma_thoat 0, verdict approve 0 P0–P3; model_phuc_vu_trang_thai DO_DUOC, 28/28 response model
@@ -104,6 +110,9 @@ assurance_81:
     model_phuc_vu do tu su kien response.created ma launcher ghi (tinh nang #909 wp748 r25); do la model may chu TRA VE trong
     luong su kien, khong phai chung thu ben thu ba. Verdict tu viet "khong co bien nhan runtime trong bundle" — dung voi
     sandbox reviewer, khong mau thuan voi bien nhan launcher nam ngoai sandbox.
+  lich_su: >-
+    Ha DAT -> CHUA_DAT (27-10-2026, packet land-81-ha-cap r1, ops/specs/land-81-ha-cap-3-ho-so-r1.md (nhanh ops/land-81-ha-cap-lease @ 6485c05, sha256 c28456b6…)): bien nhan chi do model, thieu effort va sandbox
+    mode thuc te ma §8.1/§8.2 doi — cung loi connector Codex P1 tren PR #934 (review comment 4372912640) bat o pr932-wp748-r26.
 
 no_co_ten:
   - {ma: chay-cong-windows-t9-han-giay, trang_thai: dong, bang_chung: 'PR #924; N4 pwsh 7.4.6: t9 do tren base, dat tren head, dot bien 8999 do'}
@@ -170,3 +179,14 @@ landed_20261027:
     Connector Codex tren PR #962 dung o "running" toi luc merge, khong co ket luan (readback-comments-962.json,
     readback-reviews-962.json = []); PR #962 chi them tep ops/land/**. Tai khoan chu kho khong tach khoi phien agent (#566)
     — comment la duyet landed, KHONG phai human_audited. Bam byte output GraphQL goc cua chu kho KHONG_DO_DUOC.
+
+ha_cap_assurance_81_20261027:
+  bo_canh: >-
+    Packet land-81-ha-cap r1 (ops/specs/land-81-ha-cap-3-ho-so-r1.md (nhanh ops/land-81-ha-cap-lease @ 6485c05, sha256 c28456b6…)), lease land-81-ha-cap-r1-g1-claude-remote-20261027 (#748 issuecomment-6436010699).
+    Khoi nay va khoi assurance_81 la hai cho DUY NHAT sua; moi dong khac giu nguyen lam lich su.
+  thay_the: >-
+    Moi cau khac trong tep nhac "§8.1 DAT", "assurance §8.1 DAT", "reviewer_assurance_81 DAT" hay "assurance_81 DAT" da bi
+    khoi assurance_81 thay the: nay CHUA_DAT (thieu do effort va sandbox mode thuc te).
+  landed_ghi_chu: >-
+    GIU NGUYEN. §10.2.4 dinh nghia landed la "vao canonical o exact SHA duoc duyet, hau-merge gate xanh va bookkeeping xong",
+    khong doi §8.1. Ghi nhan: comment duyet landed 6432778847 cua chu kho tren PR ghi so #962 (khoi landed_20261027) dan dieu kien (3) review DAT voi assurance_81. Rut landed la quyet dinh rieng cua chu kho; packet nay khong tu lam.

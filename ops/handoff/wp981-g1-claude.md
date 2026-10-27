@@ -2,8 +2,8 @@
 
 - Packet: #981 · revision 2 · generation 2 · lớp `sensitive` · reviewer `codex`
 - Spec: `ops/specs/wp981-r2.md` sha256 `3d026415193d3f3b1ceef005cdc99fcc73871b0c7539697f82b4b0198f578079` (tự băm lại từ `cba4675`, khớp)
-- Nhánh code: `agent/wp981-g1-claude` · base `74132ce20cb1f9f74e163717908eca384f672dd0` · head `2c70821245f777ede564c79e4e4abade0de53ae6`
-- PR: #990 (draft). Đẩy nhánh code MỘT lần, sau khi lượt 2 approve.
+- Nhánh code: `agent/wp981-g1-claude` · base `74132ce20cb1f9f74e163717908eca384f672dd0` · head bản vá `2c70821245f777ede564c79e4e4abade0de53ae6` · **head cuối (merge) `afd3a861bdaed63ada0f24ee8dbf2af166e86178`** (cha `2c70821` + `20a2e2b` = origin/master)
+- PR: #990 (draft). Đẩy lần 1 sau khi lượt 2 approve (`2c70821`). Đẩy lần 2 (merge `afd3a86`) theo ngoại lệ chủ kho cho (#981 issuecomment-6443331447), sau khi lượt 3 approve.
 - Phiên executor: `session_015GtxrZzBGcXvGc8CLjEsNh` · phiên điều phối: `session_01FLVLxi5gKZgtVvbuTCEqEn`
 
 ## Diễn tiến
@@ -13,14 +13,19 @@
 4. Codex lượt 1 trên `a75d3ec` ra `changes_requested`, P2 `mutant-crash-counted-as-kill`.
 5. `2c70821`: sửa bộ chấm đột biến và thêm 3 ca/mutant cho 3 mutant reviewer sống.
 6. Codex lượt 2 trên `2c70821`: **approve**.
+7. `thu-hoi` trên PR #990 đỏ `CHAN [12]` vì base trôi: master tiến `74132ce` → `20a2e2b`, 12 commit. Executor DỪNG và báo (#981 issuecomment-6443278429).
+8. Chủ kho chọn "+1 lượt Codex, merge master" (ghi hộ issuecomment-6443331447) và nâng trần `codex_review_calls.pr_wp981_g2` từ 2 lên 3.
+9. Merge `origin/master` thành `afd3a86`, không rebase, không force-push. Hai tệp write set có blob giống `2c70821`; master không chạm write set. N1–N3 chạy lại trên `afd3a86`: 11/11; 23/23 (6 hồ sơ kiểu b `DAT`); `ci_dang_ky` `TỔNG: ĐẠT`; `doctrine-scan` rc 0; `diff --check` rc 0; ruff F sạch; selftest 1731/1731.
+10. Codex lượt 3 trên `afd3a86`: **approve**, không finding.
 
-## Codex — 2/2 lời gọi (trần spec Q1 + lease)
+## Codex — 3/3 lời gọi (trần spec Q1 = 2, nâng lên 3 bởi chủ kho)
 Qua `.claude/dev/launcher.py run`: `codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh -s workspace-write`. Theo `run.json`, `model_phuc_vu` = `gpt-6-astra` và `effort_phuc_vu` = `xhigh` (`DO_DUOC`). Sandbox là clone thường detached, kèm SPEC và diff, không mạng.
 
 | lượt | run_id | prompt sha256 | head | thời lượng | verdict | tệp verdict (sha256) | run.json (sha256) |
 |---|---|---|---|---|---|---|---|
 | 1 | `6ba35607b470450ca5e89a102614efb8` | `b8b8a558d7ae0a381a8903e923cf1c9da4af9811212bda7ad1b1fb6da8bd2f8c` | `a75d3ec` | 1008,2 s, rc 0 | changes_requested | `ops/reviews/wp981-g2-codex-luot1-VERDICT.md` `b3dfeb52…c95ca` | `ops/reviews/wp981-g2-codex-luot1-run.json` `a7804751…52e89` |
 | 2 | `6a612229180b458fa3c24f34e513df4d` | `79054ab363f0151d82de8ce9ad583faf409f0c1940b6ca089b1fa2117cbee6cd` | `2c70821` | 699,5 s, rc 0 | **approve** | `ops/reviews/wp981-g2-codex-luot2-VERDICT.md` `d0ebb5e6…1f25e` | `ops/reviews/wp981-g2-codex-luot2-run.json` `a04642ab…10416` |
+| 3 | `6018070aa2c7424bb53fd4827cb37f5c` | `658342ff3cf002d1634e56b1bae8f0ab6876a043b60d2413f2783e7a6bfe103e` | `afd3a86` | 526,7 s, rc 0 | **approve** (phạm vi: merge) | `ops/reviews/wp981-g2-codex-luot3-VERDICT.md` `480712d0…35fe4e` | `ops/reviews/wp981-g2-codex-luot3-run.json` `5595aec1…18001` |
 
 Các liên kết `evidence/…` trong hai verdict trỏ vào sandbox của reviewer. Sandbox ấy không được commit, nên các liên kết này không mở được từ kho.
 
@@ -40,7 +45,7 @@ Các liên kết `evidence/…` trong hai verdict trỏ vào sandbox của revie
   - `ruff --select F` trên hai tệp: sạch;
   - `tl --selftest` **1731/1731** trên đúng `2c70821`, tree sạch.
 - Diff: 2 tệp, +184/−14 (trần 200).
-- **N4**: check run `ci.yml` của PR #990 — chờ, đọc bằng check run.
+- **N4**: check run `ci.yml` trên head cuối `afd3a86` — chờ, đọc bằng check run (cả `thu-hoi`).
 
 ## Giới hạn và việc để lại (Q5 — ghi, không vá)
 - Trong sandbox reviewer, `ci_dang_ky_test.py` và 2 ca selftest (`r226_*`, `r268_*`) đỏ vì dịch vụ ký commit cục bộ trả `socket: operation not permitted`. Đây là giới hạn môi trường. Ở container executor cả hai đều xanh.

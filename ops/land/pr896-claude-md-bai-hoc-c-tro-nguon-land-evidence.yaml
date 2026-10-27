@@ -508,3 +508,29 @@ landed_20261027:
     Verdict approve KHONG nam tren dung authorized_head_sha 816f439 — chi hop le qua quyet dinh chap nhan don vi land cua chu kho.
     Ho model executor (claude) suy theo provider, KHONG do_may. Tai khoan chu kho khong tach khoi phien agent (#566) — comment
     la duyet landed, KHONG phai human_audited. Bam byte output GraphQL cua moc Workflow definition KHONG_DO_DUOC (ban chep tu hoi thoai).
+
+no_con_mo_20261027:
+  bo_canh: 'Chu kho yeu cau "Ghi no vao ho so land #896" (phien 27-10-2026). Khoi nay KHONG sua dong nao o tren va KHONG doi landed_20261027.'
+  no:
+    - id: NO-CAU-LICH-SU-BIEN-NHAN
+      trang_thai: mo
+      issue: https://github.com/ducthangho/tra-luat/issues/960
+      issue_trang_thai: 'thuat_lai — de_xuat, chua dac ta dong bang, chua spec_hash, chua lease (than Issue #960).'
+      mo_ta: >-
+        Cau trong bien nhan/caveat/ho so land dung luc ghi so nhung cu sau do (tu khai be mat chay; "chua review lai";
+        "chi la mot nhanh"/"khong phai to tien master"/"chua merge"), nam o PR/packet KHAC #896. Khong co cong nao bat:
+        bien_nhan_v2, land_evidence_nguon, t26/t27/t138 deu xanh khi cau ay con sai.
+      da_va_trong_chuoi_review_896: >-
+        thuat_lai — theo verdict ops/reviews/pr896-review-3-codex-verdict.md .. pr896-review-7-codex-verdict.md, va bang HINT ap
+        trong #947: caveat surface cho wp766, 13 verdict service/API, pr526-review-3, slice-b-c-review-2 (dinh chinh v1),
+        3 verdict provenance land (#832/#848/#862) va #823/#877; neo moc ancestry o 23 + 7 + 7 truong; neo moc "chua review"
+        o 8 + 2 receipt; neo moc "#490 chua merge" o ho so land #491. Luot 8 (ops/reviews/pr896-review-8-codex-verdict.md)
+        approve 0/0/0/0 tren fb87110 voi pham vi hai lop nay.
+      con_lai: >-
+        KHONG_DO_DUOC day du — luot 8 khong tim them, nhung moi luot 3..7 deu tim duoc the hien moi khi mo rong cach quet,
+        nen "khong con" chua duoc chung minh. Loi giai de xuat (Issue #960): cong quet doi moc thoi diem cho khang dinh phu
+        thuoc trang thai, doi chieu bang merge-base/su ton tai verdict, kem dot bien.
+      ghi_chu_issue: >-
+        Than Issue #960 (luc ghi khoi nay) mo ta chuoi review #896 nhu "5 luot deu changes_requested"; chuoi thuc te da toi
+        luot 8 approve va #947 da merge (7471f95). Cac so 8/23/7 trong Issue la cua luot 3..5; cac luot 5..7 da va them.
+      khong_anh_huong_landed: 'No nay o so review cua PR khac; KHONG phai dieu kien land #896 va khong doi landed_20261027.'

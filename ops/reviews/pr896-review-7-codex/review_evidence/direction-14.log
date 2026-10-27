@@ -1,0 +1,12 @@
+python3 ops/lease_publish_test.py --chi-ca=t26_ | rc=0 | 
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+python3 ops/lease_publish_test.py --chi-ca=t27_ | rc=0 | 
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+python3 ops/lease_publish_test.py --chi-ca=t138_ | rc=0 | 
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+python3 ops/bien_nhan_v2.py --root . | rc=0 | bien_nhan_v2: 240 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 293
+TỔNG: ĐẠT
+python3 ops/land_evidence_nguon.py --root . | rc=0 | land_evidence_nguon: 48 ĐẠT · 25/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73
+TỔNG: ĐẠT
+python3 .claude/dev/packet_loop.py doctrine-scan --root . | rc=0 | doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+python3 scripts/tl.py doc-claims-check --json | rc=0 | {"ok": true, "strict": false}

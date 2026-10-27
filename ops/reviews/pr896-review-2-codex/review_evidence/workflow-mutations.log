@@ -1,0 +1,41 @@
+gate-cong-cu* jobs=['gate-cong-cu', 'gate-cong-cu-gop']
+MUTANT baseline
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=0; loi_g5_workflow errors=0
+MUTANT gate-cong-cu__exclude
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate-cong-cu: matrix phải đúng os + manh [0, 1, 2, 3, 4, 5, 6, 7] + exclude [{'os': 'windows-latest', 'manh': 1}, {'os': 'windows-latest', 'manh': 2}, {'os': 'windows-latest', 'manh': 3}, {'os': 'windows-latest', 'manh': 4}, {'os': 'windows-latest', 'manh': 5}, {'os': 'windows-latest', 'manh': 6}, {'os': 'windows-latest', 'manh': 7}], thấy {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}', 'manh': [0, 1, 2, 3, 4, 5, 6, 7]}
+MUTANT gate-cong-cu__if
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate-cong-cu: bước G5 có điều kiện hoặc được phép bỏ qua lỗi
+MUTANT gate-cong-cu__needs
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate-cong-cu: needs/if phải đúng 'chuan-bi'/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}", thấy []/"${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
+MUTANT gate-cong-cu-gop__exclude
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate-cong-cu-gop: matrix phải đúng os + exclude [{'os': 'windows-latest'}], thấy {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}
+MUTANT gate-cong-cu-gop__if
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate-cong-cu-gop: needs/if phải đúng ['chuan-bi', 'gate-cong-cu']/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", thấy ['chuan-bi', 'gate-cong-cu']/'${{ false }}'
+MUTANT gate-cong-cu-gop__needs
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate-cong-cu-gop: needs/if phải đúng ['chuan-bi', 'gate-cong-cu']/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}", thấy []/"${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}"
+MUTANT output_os__windows_only_returns_two
+t162 rc=1;   ĐỎ  t162_M4_evaluator_toi_gian_chuan_bi: dispatch windows-only phải chỉ chạy windows-latest, nhận được: ['ubuntu-latest', 'windows-latest'] | lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=0; loi_g5_workflow errors=0
+MUTANT output_os__wrapped_fromJSON
+t162 rc=1;   ĐỎ  t162_M4_evaluator_toi_gian_chuan_bi: ValueError: KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: 'fromJSON(\'["ubuntu-latest"]\')' | lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=1;   ĐỎ  t161_M3_chot_nguon_duy_nhat_ma_tran_ci: ci.yml thật có output bọc fromJson: ['job \'chuan-bi\' output \'os\' bọc fromJson/fromJSON: \'${{ fromJSON(\\\'["ubuntu-latest"]\\\') }}\' (outputs chỉ nhận chuỗi)'] | lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=0; loi_g5_workflow errors=0
+MUTANT gate__independent_os
+t162 rc=0; lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+t161 rc=1;   ĐỎ  t161_M3_chot_nguon_duy_nhat_ma_tran_ci: ci.yml thật có job lén khai os: riêng: ["job 'gate' khai 'os:' riêng bằng danh sách tĩnh: ['ubuntu-latest'] (không tham chiếu needs.chuan-bi.outputs.os)"] | lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0
+loi_g5_workflow rc=1; loi_g5_workflow errors=1 | gate: env/runs-on/strategy cấp job lệch hình dạng ghim

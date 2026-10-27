@@ -1,0 +1,10 @@
+{
+  "head": "1a276a15192013fdb1e472db409133b53ac57944",
+  "tree": "8ec1b64d4b399303680723bb99d1619ad43485db",
+  "status_including_ignored": "",
+  "shallow": "false",
+  "head_parents": "77a0a458c6c06f3aafa118953e8e2771daaed911",
+  "base": "3e973a03b151e37cd402e0a723816eeaa8247193",
+  "hint_bytes": 30930,
+  "hint_sha256": "9c400529c2a4026be3049b9b3494221c9961c662d5768b3769a5687cdf52daff"
+}

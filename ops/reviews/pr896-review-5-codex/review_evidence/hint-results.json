@@ -1,0 +1,104 @@
+[
+  {
+    "name": "hint-dry-run",
+    "command": [
+      "patch",
+      "--dry-run",
+      "--batch",
+      "--fuzz=0",
+      "-p0",
+      "-i",
+      "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r5/HINT.patch"
+    ],
+    "rc": 0,
+    "conclusion": "checking file ops/reviews/wp538-review-2-claude-verdict.receipt.yaml / checking file ops/reviews/wp540-review-1-claude-verdict.receipt.yaml"
+  },
+  {
+    "name": "hint-apply",
+    "command": [
+      "patch",
+      "--batch",
+      "--fuzz=0",
+      "-p0",
+      "-i",
+      "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r5/HINT.patch"
+    ],
+    "rc": 0,
+    "conclusion": "patching file ops/reviews/wp538-review-2-claude-verdict.receipt.yaml / patching file ops/reviews/wp540-review-1-claude-verdict.receipt.yaml"
+  },
+  {
+    "name": "hint-t26_",
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t26_"
+    ],
+    "rc": 0,
+    "conclusion": " / lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+  },
+  {
+    "name": "hint-t27_",
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t27_"
+    ],
+    "rc": 0,
+    "conclusion": " / lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+  },
+  {
+    "name": "hint-t138_",
+    "command": [
+      "python3",
+      "ops/lease_publish_test.py",
+      "--chi-ca=t138_"
+    ],
+    "rc": 0,
+    "conclusion": " / lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+  },
+  {
+    "name": "hint-bien-nhan-v2",
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "conclusion": "bien_nhan_v2: 238 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 291 / TỔNG: ĐẠT"
+  },
+  {
+    "name": "hint-land",
+    "command": [
+      "python3",
+      "ops/land_evidence_nguon.py",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "conclusion": "land_evidence_nguon: 47 ĐẠT · 26/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73 / TỔNG: ĐẠT"
+  },
+  {
+    "name": "hint-doctrine",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "rc": 0,
+    "conclusion": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+  },
+  {
+    "name": "hint-doc-claims",
+    "command": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ],
+    "rc": 0,
+    "conclusion": "JSON ok=True"
+  }
+]

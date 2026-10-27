@@ -1,0 +1,75 @@
+pr870-review-3-codex
+model_phuc_vu events=21; distinct response_id=21; event_types=['response.created']; models=['gpt-6.1-sol']; status=DO_DUOC
+sha256 actual=0021b5b2f90e0da39a92c11041c3236980acfbbd0b22f46d0044ac8334f16e81; receipt=0021b5b2f90e0da39a92c11041c3236980acfbbd0b22f46d0044ac8334f16e81; bytes=45798/45798; flat==original=True
+reviewed_sha=06a50c5feea77c2654f31edd26efeed7eeee62f5; run.head=06a50c5feea77c2654f31edd26efeed7eeee62f5; verdict.line2=reviewed_sha: 06a50c5feea77c2654f31edd26efeed7eeee62f5
+reviewed_tree git=0fa694daf17e10c37fc3e61690531ade4bd528bf; receipt=0fa694daf17e10c37fc3e61690531ade4bd528bf; match=True
+base_sha=9e9a74b2a396ef458d25c51a5563efafbb45ba0c; head.parents=b38fce83d0e97981012072ca2a2023ac726e5b2e; base_is_parent=False; merge.parents=9e9a74b2a396ef458d25c51a5563efafbb45ba0c 06a50c5feea77c2654f31edd26efeed7eeee62f5
+duration run=741.994; timestamp_delta=741.994; ma_thoat=0; trang_thai=xong
+prompt_sha256 actual=5e69b5fef7d5d51b7dc86a9946ede84bc4943248ace0145518282fc94f6a1d15; run=5e69b5fef7d5d51b7dc86a9946ede84bc4943248ace0145518282fc94f6a1d15; match=True
+Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.; receipt.so_p=[0, 0, 0, 0]; verdict=approve; assurance=cross_approved; executor_provider=claude
+evidence_commit=cc0a3c98ff8fee7aefa0e64982fa3532da2877d8; blob_matches_current=True; changed_files=106; all_under_reviews=True; yaml_receipts_changed=[]
+sha256sum -c SHA256SUMS: rc=0; OK=16; lines=16; stderr=
+numstat.txt: 21	9	CLAUDE.md
+OMITTED.txt: # Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. diff.patch tai lap bang git diff base..head.
+053a841624d10d1413e49d82416a9f3f724b8e8d0f7a064298920293e0579ac0  652715  review_evidence/checkout-before.json
+pr889-review-3-codex
+model_phuc_vu events=19; distinct response_id=19; event_types=['response.created']; models=['gpt-6.1-sol']; status=DO_DUOC
+sha256 actual=c05bc41d9232d99a9e0c49199e022a9a64b01227674144da73bf50b9b7ce445f; receipt=c05bc41d9232d99a9e0c49199e022a9a64b01227674144da73bf50b9b7ce445f; bytes=28705/28705; flat==original=True
+reviewed_sha=094e8d17ae4dfcf21dca63702c9262267bdc072c; run.head=094e8d17ae4dfcf21dca63702c9262267bdc072c; verdict.line2=reviewed_sha: 094e8d17ae4dfcf21dca63702c9262267bdc072c
+reviewed_tree git=55f5edf2f8601c976f390e8994193129a71203a1; receipt=55f5edf2f8601c976f390e8994193129a71203a1; match=True
+base_sha=e63961f27b53e66db8e6600009f97d5706743063; head.parents=8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8; base_is_parent=False; merge.parents=daf89615efff9fde33039036ddf7f23ec9cb1c10 094e8d17ae4dfcf21dca63702c9262267bdc072c
+duration run=533.139; timestamp_delta=533.139; ma_thoat=0; trang_thai=xong
+prompt_sha256 actual=a7e97c9391c2d52c4632cac505f946b496be4b6b3544404dab7f600d0cca0064; run=a7e97c9391c2d52c4632cac505f946b496be4b6b3544404dab7f600d0cca0064; match=True
+Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.; receipt.so_p=[0, 0, 0, 0]; verdict=approve; assurance=cross_approved; executor_provider=claude
+evidence_commit=cc0a3c98ff8fee7aefa0e64982fa3532da2877d8; blob_matches_current=True; changed_files=106; all_under_reviews=True; yaml_receipts_changed=[]
+sha256sum -c SHA256SUMS: rc=0; OK=30; lines=30; stderr=
+numstat.txt: 12	0	CLAUDE.md
+pr915-review-1-codex
+model_phuc_vu events=26; distinct response_id=26; event_types=['response.created']; models=['gpt-6.1-sol']; status=DO_DUOC
+sha256 actual=839757cc4bdbba080e93f920740e10814e184d8a553b75f43936fd36c5339a23; receipt=839757cc4bdbba080e93f920740e10814e184d8a553b75f43936fd36c5339a23; bytes=46455/46455; flat==original=True
+reviewed_sha=2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f; run.head=2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f; verdict.line2=reviewed_sha: 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f
+reviewed_tree git=6f299d7f70269ec32522fc4ea28c9d2d70c5424b; receipt=6f299d7f70269ec32522fc4ea28c9d2d70c5424b; match=True
+base_sha=50a59a945026a2ab2f97dc0e7ef7b5a540e17652; head.parents=7cfe06212cb43f92d5753940116079e671d9c385; base_is_parent=False; merge.parents=ba222ffd1615f0d74b59985b9612f725211b62f5 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f
+duration run=690.678; timestamp_delta=690.678; ma_thoat=0; trang_thai=xong
+prompt_sha256 actual=29eba9065f370e29962bc520d6b3331669cfe3ef43ea646b29c76c004717ccab; run=29eba9065f370e29962bc520d6b3331669cfe3ef43ea646b29c76c004717ccab; match=True
+Kết quả: 0 P0, 1 P1, 0 P2, 0 P3.; receipt.so_p=[0, 1, 0, 0]; verdict=changes_requested; assurance=cross_reviewed; executor_provider=claude
+evidence_commit=cc0a3c98ff8fee7aefa0e64982fa3532da2877d8; blob_matches_current=True; changed_files=106; all_under_reviews=True; yaml_receipts_changed=[]
+sha256sum -c SHA256SUMS: rc=0; OK=54; lines=54; stderr=
+numstat.txt: 3	2	CLAUDE.md
+17	0	ops/reviews/README.md
+987	0	ops/reviews/pr870-review-2-codex-verdict.md
+112	0	ops/reviews/pr870-review-2-codex-verdict.receipt.yaml
+49	0	ops/reviews/pr870-review-2-codex/PROMPT.md
+31	0	ops/reviews/pr870-review-2-codex/SHA256SUMS
+3816	0	ops/reviews/pr870-review-2-codex/VERDICT.incremental.md
+987	0	ops/reviews/pr870-review-2-codex/VERDICT.md
+47	0	ops/reviews/pr870-review-2-codex/diff.patch
+0	0	ops/reviews/pr870-review-2-codex/doc-claims-check.stderr
+2821	0	ops/reviews/pr870-review-2-codex/doc-claims-check.stdout
+0	0	ops/reviews/pr870-review-2-codex/doctrine-scan.stderr
+1	0	ops/reviews/pr870-review-2-codex/doctrine-scan.stdout
+130	0	ops/reviews/pr870-review-2-codex/evidence-consistency.txt
+2883	0	ops/reviews/pr870-review-2-codex/evidence-events-setup.md
+60	0	ops/reviews/pr870-review-2-codex/evidence-events.txt
+12	0	ops/reviews/pr870-review-2-codex/evidence-gate_scope.txt
+17	0	ops/reviews/pr870-review-2-codex/evidence-gates-summary.txt
+2837	0	ops/reviews/pr870-review-2-codex/evidence-gates.txt
+40	0	ops/reviews/pr870-review-2-codex/evidence-historical.txt
+175	0	ops/reviews/pr870-review-2-codex/evidence-history.txt
+22	0	ops/reviews/pr870-review-2-codex/evidence-launcher.txt
+81	0	ops/reviews/pr870-review-2-codex/evidence-matrix.txt
+10	0	ops/reviews/pr870-review-2-codex/evidence-preflight.txt
+35	0	ops/reviews/pr870-review-2-codex/evidence-readback.txt
+14	0	ops/reviews/pr870-review-2-codex/evidence-sandbox_end.txt
+46	0	ops/reviews/pr870-review-2-codex/evidence-scope.txt
+27	0	ops/reviews/pr870-review-2-codex/evidence-workflows.txt
+61	0	ops/reviews/pr870-review-2-codex/extracted-evaluator.py
+1	0	ops/reviews/pr870-review-2-codex/numstat.txt
+148	0	ops/reviews/pr870-review-2-codex/review_finalize.py
+391	0	ops/reviews/pr870-review-2-codex/review_probe.py
+1	0	ops/rev
+OMITTED.txt: # Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. diff.patch tai lap bang git diff base..head.
+14bfd8ec9bb561d2ed4b395acbf044cb573bf251b7b9a4190e109ea02b6bb592  1334705  diff.patch
+f900abf33bbb9e22035df6e3d41088577265f1bc42e8c85edf45f1ce037c92d2  987298  review_evidence/snapshot-after.json
+f900abf33bbb9e22035df6e3d41088577265f1bc42e8c85edf45f1ce037c92d2  987298  review_evidence/snapshot-before.json
+cc0a3c9 changed top roots=['ops/reviews', 'ops/reviews/pr870-review-3-codex', 'ops/reviews/pr870-review-3-codex/review_evidence', 'ops/reviews/pr870-review-3-codex/run', 'ops/reviews/pr889-review-3-codex', 'ops/reviews/pr889-review-3-codex/review_evidence', 'ops/reviews/pr889-review-3-codex/run', 'ops/reviews/pr915-review-1-codex', 'ops/reviews/pr915-review-1-codex/review_evidence', 'ops/reviews/pr915-review-1-codex/run']

@@ -1,0 +1,105 @@
+[
+  {
+    "mutation": "remove-new-pr526-readme-row",
+    "path": "ops/reviews/README.md",
+    "removed_bytes": 480,
+    "tests": [
+      {
+        "case": "t26_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t27_",
+        "rc": 1,
+        "summary": "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": [
+          "!!! do t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc README.md: caveat 'SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC' của pr526-review-3-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr526-review-3-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.",
+          "  ĐỎ  t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: README.md: caveat 'SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC' của pr526-review-3-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr526-review-3-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó."
+        ]
+      },
+      {
+        "case": "t138_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      }
+    ]
+  },
+  {
+    "mutation": "remove-new-pr526-receipt-caveat",
+    "path": "ops/reviews/pr526-review-3-codex-verdict.receipt.yaml",
+    "removed_bytes": 474,
+    "tests": [
+      {
+        "case": "t26_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t27_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t138_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      }
+    ]
+  },
+  {
+    "mutation": "remove-new-slice-legacy-readme-row",
+    "path": "ops/reviews/README.md",
+    "removed_bytes": 473,
+    "tests": [
+      {
+        "case": "t26_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t27_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t138_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      }
+    ]
+  },
+  {
+    "mutation": "remove-new-slice-supplementary-caveat",
+    "path": "ops/reviews/pr896-review-4-legacy-caveats.yaml",
+    "removed_bytes": 627,
+    "tests": [
+      {
+        "case": "t26_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t27_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      },
+      {
+        "case": "t138_",
+        "rc": 0,
+        "summary": "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0",
+        "details": []
+      }
+    ]
+  }
+]

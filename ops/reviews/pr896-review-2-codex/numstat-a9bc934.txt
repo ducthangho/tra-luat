@@ -1,0 +1,9 @@
+43	0	ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml
+43	0	ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+43	0	ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml
+18	0	ops/reviews/README.md
+4	0	ops/reviews/pr870-review-2-codex-verdict.receipt.yaml
+111	0	ops/reviews/pr870-review-3-codex-verdict.receipt.yaml
+4	0	ops/reviews/pr889-review-2-codex-verdict.receipt.yaml
+107	0	ops/reviews/pr889-review-3-codex-verdict.receipt.yaml
+107	0	ops/reviews/pr915-review-1-codex-verdict.receipt.yaml

@@ -1,0 +1,60 @@
+PR #870; provenance=ops/land/pr870-claude-md-bai-hoc-c-provenance
+ops/land/pr870-claude-md-bai-hoc-c-provenance/do-1026-5f288ea/bon-moc-10-2-2.txt: exists=True
+ops/land/pr870-claude-md-bai-hoc-c-provenance/readback-run-39752735359.json: exists=True
+ops/land/pr870-claude-md-bai-hoc-c-provenance/readback-jobs-39752735359.json: exists=True
+ops/land/pr870-claude-md-bai-hoc-c-provenance/log-gate-119738461348-trich.txt: exists=True
+ops/land/pr870-claude-md-bai-hoc-c-provenance/readback-artifacts-39752735359.json: exists=True
+ops/land/pr870-claude-md-bai-hoc-c-provenance/artifact-12415205903/tl-selftest-Linux.json: exists=True
+ops/land/pr870-claude-md-bai-hoc-c-provenance/artifact-12415205903/tl-selftest-Linux.out: exists=True
+Run: {"id": 39752735359, "run_attempt": 1, "event": "push", "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597", "conclusion": "success", "path": ".github/workflows/ci.yml"}; head_matches_git=True
+Checkout: git.sha=5f288eaf7dd217e9057d2f864dc15278bfd4e597; tree=0fa694daf17e10c37fc3e61690531ade4bd528bf; parents=9e9a74b2a396ef458d25c51a5563efafbb45ba0c 06a50c5feea77c2654f31edd26efeed7eeee62f5; checkout_log_sha_present=True; gate.identity.head_match=True; tree_match=True; identity_after_equal=True
+Job: {"id": 119738461348, "name": "gate (ubuntu-latest)", "conclusion": "success", "run_id": 39752735359, "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597", "runner_id": 1000016456, "labels": ["ubuntu-latest"]}
+Gate: status=pass; returncode=0; positive_verified=True; actual_positive_match='== tl selftest 1731/1731 ==\n'; matches_claimed_positive=True; command=['python', 'scripts/tl.py', '--selftest']; runtime={'system': 'Linux', 'machine': 'x86_64', 'python_version': '3.12.15'}
+Output: sha256 actual=fff9645aa9d62ab43a5a9c1ee92e4c00540f699ae3fb16a1169941f99b86f8d5; receipt=fff9645aa9d62ab43a5a9c1ee92e4c00540f699ae3fb16a1169941f99b86f8d5; matches=True
+Artifact: id=12415205903; digest=sha256:e6ad6f0d8e46f57abe24d3768a8d0e9ea9cb218061a88713b9294b4823ca37b9; workflow_run={"id": 39752735359, "repository_id": 1289195917, "head_repository_id": 1289195917, "head_branch": "master", "head_sha": "5f288eaf7dd217e9057d2f864dc15278bfd4e597"}; summary_has_digest=True; zip_preserved=False
+Workflow definition: not_measured — GraphQL WorkflowRun.file tra 403 trong phien Claude Code tren web. Bang chung phu (blob ci.yml tai merge va hai cha) KHONG thay cho exact definition OID. Can chu kho chay `gh api graphql` ngoai phien va dan output.
+supplement 5f288ea: blob=55d06ab452a060b836fdf6fa45ba3408fc44c90c; sha256=b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0; recorded_blob_present=True
+supplement 5f288ea^1: blob=55d06ab452a060b836fdf6fa45ba3408fc44c90c; sha256=b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0; recorded_blob_present=True
+supplement 5f288ea^2: blob=55d06ab452a060b836fdf6fa45ba3408fc44c90c; sha256=b65940388af27074eb36d9874563482d3aa41ddcd625b1f07bf512e0a28936a0; recorded_blob_present=True
+sha256sum -c SHA256SUMS.txt: rc=0; OK=18; stderr=
+landed=False; assurance_81=DAT
+PR #889; provenance=ops/land/pr889-claude-md-bai-hoc-c-provenance
+ops/land/pr889-claude-md-bai-hoc-c-provenance/do-1026-6ac385f/bon-moc-10-2-2.txt: exists=True
+ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-run-39921552473.json: exists=True
+ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-jobs-39921552473.json: exists=True
+ops/land/pr889-claude-md-bai-hoc-c-provenance/log-gate-120319840559-trich.txt: exists=True
+ops/land/pr889-claude-md-bai-hoc-c-provenance/readback-artifacts-39921552473.json: exists=True
+ops/land/pr889-claude-md-bai-hoc-c-provenance/artifact-12488609174/tl-selftest-Linux.json: exists=True
+ops/land/pr889-claude-md-bai-hoc-c-provenance/artifact-12488609174/tl-selftest-Linux.out: exists=True
+Run: {"id": 39921552473, "run_attempt": 1, "event": "push", "head_sha": "6ac385fdd7325f532ac4b4b6eb861292bfa7e970", "conclusion": "success", "path": ".github/workflows/ci.yml"}; head_matches_git=True
+Checkout: git.sha=6ac385fdd7325f532ac4b4b6eb861292bfa7e970; tree=e64cdd92b27a66cbc4f0a91e0f84a4400b83c097; parents=daf89615efff9fde33039036ddf7f23ec9cb1c10 094e8d17ae4dfcf21dca63702c9262267bdc072c; checkout_log_sha_present=True; gate.identity.head_match=True; tree_match=True; identity_after_equal=True
+Job: {"id": 120319840559, "name": "gate (ubuntu-latest)", "conclusion": "success", "run_id": 39921552473, "head_sha": "6ac385fdd7325f532ac4b4b6eb861292bfa7e970", "runner_id": 1000017936, "labels": ["ubuntu-latest"]}
+Gate: status=pass; returncode=0; positive_verified=True; actual_positive_match='== tl selftest 1731/1731 ==\n'; matches_claimed_positive=True; command=['python', 'scripts/tl.py', '--selftest']; runtime={'system': 'Linux', 'machine': 'x86_64', 'python_version': '3.12.15'}
+Output: sha256 actual=1bee4b7ad0128f67820f1e5053635543cd16304647d808efa891a1a0846d3ba6; receipt=1bee4b7ad0128f67820f1e5053635543cd16304647d808efa891a1a0846d3ba6; matches=True
+Artifact: id=12488609174; digest=sha256:6334f7215ad4400247081ae9e1c4cf1e6ce24e8a3bf8bb9bdf2507e62f622ba9; workflow_run={"id": 39921552473, "repository_id": 1289195917, "head_repository_id": 1289195917, "head_branch": "master", "head_sha": "6ac385fdd7325f532ac4b4b6eb861292bfa7e970"}; summary_has_digest=True; zip_preserved=False
+Workflow definition: not_measured — GraphQL WorkflowRun.file tra 403 trong phien Claude Code tren web. Bang chung phu (blob ci.yml tai merge va hai cha) KHONG thay cho exact definition OID. Can chu kho chay `gh api graphql` ngoai phien va dan output.
+supplement 6ac385f: blob=f618cdb469016ac585724d286b498b7e1dcc80ea; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06; recorded_blob_present=True
+supplement 6ac385f^1: blob=f618cdb469016ac585724d286b498b7e1dcc80ea; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06; recorded_blob_present=True
+supplement 6ac385f^2: blob=f618cdb469016ac585724d286b498b7e1dcc80ea; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06; recorded_blob_present=True
+sha256sum -c SHA256SUMS.txt: rc=0; OK=21; stderr=
+landed=False; assurance_81=DAT
+PR #896; provenance=ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1026-27dcc3b/bon-moc-10-2-2.txt: exists=True
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/readback-run-39983914661.json: exists=True
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/readback-jobs-39983914661.json: exists=True
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/log-gate-120524600728-trich.txt: exists=True
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/readback-artifacts-39983914661.json: exists=True
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/artifact-12515154206/tl-selftest-Linux.json: exists=True
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/artifact-12515154206/tl-selftest-Linux.out: exists=True
+Run: {"id": 39983914661, "run_attempt": 1, "event": "push", "head_sha": "27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc", "conclusion": "success", "path": ".github/workflows/ci.yml"}; head_matches_git=True
+Checkout: git.sha=27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc; tree=e3ddbe87b8c58b5c193d296a4eadcb7321e37bed; parents=b27c729dde77736f3509221b8a8622d0d92fe975 816f43988eb3012726120ad00166a989cc2b9af6; checkout_log_sha_present=True; gate.identity.head_match=True; tree_match=True; identity_after_equal=True
+Job: {"id": 120524600728, "name": "gate (ubuntu-latest)", "conclusion": "success", "run_id": 39983914661, "head_sha": "27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc", "runner_id": 1000018501, "labels": ["ubuntu-latest"]}
+Gate: status=pass; returncode=0; positive_verified=True; actual_positive_match='== tl selftest 1731/1731 ==\n'; matches_claimed_positive=True; command=['python', 'scripts/tl.py', '--selftest']; runtime={'system': 'Linux', 'machine': 'x86_64', 'python_version': '3.12.15'}
+Output: sha256 actual=d5e7ef8450cd6101d40ca2d4f7bde216ff4567b29cbb407826bf2940270ebb56; receipt=d5e7ef8450cd6101d40ca2d4f7bde216ff4567b29cbb407826bf2940270ebb56; matches=True
+Artifact: id=12515154206; digest=sha256:b52c9765c5403eb58691fde04b7b3abe0e0ee0bf835a494b0b1066a3253d0464; workflow_run={"id": 39983914661, "repository_id": 1289195917, "head_repository_id": 1289195917, "head_branch": "master", "head_sha": "27dcc3bb67f6115608688a265bd8dcd3aa2a6ecc"}; summary_has_digest=True; zip_preserved=False
+Workflow definition: not_measured — GraphQL WorkflowRun.file tra 403 trong phien Claude Code tren web; can chu kho chay `gh api graphql` ngoai phien va dan output.
+supplement 27dcc3b: blob=f618cdb469016ac585724d286b498b7e1dcc80ea; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06; recorded_blob_present=True
+supplement 27dcc3b^1: blob=f618cdb469016ac585724d286b498b7e1dcc80ea; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06; recorded_blob_present=True
+supplement 27dcc3b^2: blob=f618cdb469016ac585724d286b498b7e1dcc80ea; sha256=b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06; recorded_blob_present=True
+sha256sum -c SHA256SUMS.txt: rc=0; OK=25; stderr=
+landed=False; assurance_81=CHUA DAT

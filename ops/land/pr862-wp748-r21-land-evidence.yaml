@@ -136,3 +136,15 @@ khong_do_duoc:
   - 'Race khong tai hien tai cho (git 2.43); bang chung la ba luot do truoc ban va va mot luot xanh sau ban va tren runner git 2.55.'
   - 'Windows khong thuoc dieu kien lease r21 (spec chi doi Linux + ops-publish-lease).'
   - 'Model thuc phuc vu luot review KHONG_DO_DUOC.'
+
+verdict_usage_caveats:
+- id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
+  muc: P1
+  verdict_path: ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md
+  verdict_sha256: 95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87
+  mo_ta: Verdict luot 1 dong 3 tu khai codex_service, nhung ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-transcript.txt
+    bat dau bang OpenAI Codex v0.163.0, session 01a157da-2170-7be2-b6d0-053fa8f91aec;
+    review.luot_1.reviewer cua ho so nay ghi codex exec truc tiep. Dinh chinh be mat
+    luot 1 thanh codex_cli. Khong dung run-f0909b38.json cua LUOT 2 de chung minh
+    luot 1. Giu nguyen byte verdict lich su; khong chung thuc model/effort hay nang
+    assurance/quyen merge/land.

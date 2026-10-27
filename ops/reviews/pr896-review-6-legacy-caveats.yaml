@@ -1,0 +1,41 @@
+kind: supplementary_historical_caveats
+measured_at_sha: 22382d8c800bed7b995d093cdcfdc206360d7fd4
+ghi_chu: Dinh chinh tai lieu; khong phai review delivery receipt hay authority. Giu
+  nguyen byte cac receipt v1 dong bang.
+caveats:
+- receipt_path: ops/reviews/doctor-github-mcp-review-6-codex-verdict.receipt.yaml
+  verdict_path: ops/reviews/doctor-github-mcp-review-6-codex-verdict.md
+  verdict_sha256: 9a43439d16aade70697704d7caaec99a331cf625b1e302d382431410c87fd169
+  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
+  muc: P1
+  mo_ta: 'Dinh chinh receipt_khong_khai.0 cua receipt v1 dong bang (loi khai trong
+    blob b9d6a8199d343e4c0458501f636d4b39e423c950). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4:
+    git merge-base --is-ancestor 4920113a639d81385c0f98b1488c0f497776d2ff 3e973a03b151e37cd402e0a723816eeaa8247193
+    va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau ''hien chi duoc
+    nhanh giu''/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang
+    thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance
+    lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml.'
+- receipt_path: ops/reviews/don-nhanh-base-review-4-claude-verdict.receipt.yaml
+  verdict_path: ops/reviews/don-nhanh-base-review-4-claude-verdict.md
+  verdict_sha256: f4e1f5351e03d302013a4a10c05a3e7e0d237b5f028adb29276515e9578be256
+  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
+  muc: P1
+  mo_ta: 'Dinh chinh truy_xuat_ghi_chu cua receipt v1 dong bang (loi khai trong blob
+    f99c6f172a8bc7bb641a07d6499299bca906c611). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4:
+    git merge-base --is-ancestor 03f12ac63284dd814dcf14664968af4872ef7f8a 3e973a03b151e37cd402e0a723816eeaa8247193
+    va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau ''hien chi duoc
+    nhanh giu''/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang
+    thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance
+    lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml.'
+- receipt_path: ops/reviews/don-nhanh-base-review-5-claude-verdict.receipt.yaml
+  verdict_path: ops/reviews/don-nhanh-base-review-5-claude-verdict.md
+  verdict_sha256: 9f26f53484511f1fef8e40cdeb2818b22bf1a717cc747ea99c323c1bffd9d023
+  id: ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU
+  muc: P1
+  mo_ta: 'Dinh chinh truy_xuat_ghi_chu cua receipt v1 dong bang (loi khai trong blob
+    f99c6f172a8bc7bb641a07d6499299bca906c611). Do lai tai 22382d8c800bed7b995d093cdcfdc206360d7fd4:
+    git merge-base --is-ancestor 03f12ac63284dd814dcf14664968af4872ef7f8a 3e973a03b151e37cd402e0a723816eeaa8247193
+    va voi 22382d8c800bed7b995d093cdcfdc206360d7fd4 deu rc=0. Cau ''hien chi duoc
+    nhanh giu''/chi-song-tren-nhanh/KHONG-trong-lich-su-master khong con la trang
+    thai hien hanh. Chi xac nhan quan he Git cua OID nay; giu byte, verdict va assurance
+    lich su, khong suy Packet da landed. Dinh chinh o ops/reviews/pr896-review-6-legacy-caveats.yaml.'

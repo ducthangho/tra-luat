@@ -146,3 +146,18 @@ dinh_chinh_r24:
     - 'thieu run.json cua luot Codex b3d8a108'
   dieu_kien_mo_lai: '(A) `cross_approved`: dieu kien CHUNG — mot lan approve DOC LAP da hoan tat tren DUNG 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456, va voi CHINH lan chay approve ay ho model reviewer phuc vu duoc xac lap KHAC ho model executor (claude); bang chung ho model o mot trong hai muc: (i) `do_may` — may do cho chinh lan chay ay (nang cap launcher ve sau KHONG do nguoc cac luot cu; do o luot/SHA khac KHONG du), hoac (ii) `khai_co_audit` — loi khai ho model cua chinh lan chay ay KEM xac nhan ben cua mot auditor co ten, tu khai yeu hon `do_may` ngay tai cho dung (loi khai khong kem auditor KHONG du). Cung ho, du co auditor, KHONG thanh `cross_approved`. HOAC (B) `human_audited` day du §8 muc 2 — auditor doc lap, danh tinh ben, tu doc spec/diff, evidence + verdict ben neo DUNG 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456; voi comment cua chu kho thi theo phan quyet #566 trong uy quyen r24: dang truoc merge, co cau tu doc diff, ban luu day du trong kho. Kem theo: moi lo trong lo_ghi_them_khong_mo_rong_pham_vi phai duoc dong bang bang chung duong rieng.'
   lich_su: 'ket luan `landed: true` truoc day va can cu cua no giu nguyen o tren de doi chieu; khoi nay chi doi ket luan.'
+
+verdict_usage_caveats:
+- id: SURFACE-TU-KHAI-KHAC-HO-SO-RUNTIME-CHUA-DO-DUOC
+  muc: P2
+  verdict_path: ops/land/pr823-wp802-provenance/verdict-luot5/wp802-g1-luot5-codex-verdict.md
+  verdict_sha256: b6ee86d0c9e523dfbe87718d12b4d646464e7a8720e9789f071f4aa04d6e3f01
+  mo_ta: >-
+    Verdict luot 5 dong 6 tu khai codex_service; review.so_loi_goi_codex_cli cua
+    ho so nay ghi 5, va review.luot_cuoi.reviewer thuat lai launcher run b3d8a108
+    cho CHINH luot 5 tren 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456
+    (readback-comment-6247520447.json). Tai 05bc12e2b9008071ca28edbd4574e58644d48220
+    khong co run.json/transcript cua dung run de phan xu hai loi khai surface.
+    So luot CLI va loi thuat lai khong thay bang chung runtime. Be mat thuc chay
+    KHONG_DO_DUOC; khong tu chon codex_cli hay codex_service. Giu byte verdict,
+    khong chung thuc model/effort hay nang assurance/quyen merge/land.

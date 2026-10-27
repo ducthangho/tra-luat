@@ -1,0 +1,26 @@
+yaml_paths=368 inventory_counts={'unanchored_candidates': 1759, 'anchored_candidates': 398, 'readme': 517}
+No-review negatives checked against flat receipts AND verdict headers in ops/reviews + land provenance:
+17f4a1b85b8d5146c5e6dddbdc40f11111a659f7 receipts=0 verdict_headers=0
+efa397eb2515658a1e3e9b4cdfd6e887b492b957 receipts=0 verdict_headers=0
+99aef141796ebce7044c9f5c0c8a1a3b3d673d8e receipts=0 verdict_headers=0
+5a96c1ac8cec1c9958094f92e716941faa47aac5 receipts=0 verdict_headers=0
+888c0d9b68136f384068ecad8e286819bb175044 receipts=0 verdict_headers=0
+bf10fab792473bc69dd377c7445978950c4d77a0 receipts=0 verdict_headers=0
+288ad3ea79ef94e061b649effe7bee2c7e2a0a9b receipts=0 verdict_headers=0
+b5b6aefa66a8ad037ff34430d0210f3b6873913f receipts=0 verdict_headers=0
+3ddda026da41b0bb162a3785b93dbb953a298203 receipts=0 verdict_headers=0
+4bc94325e647ee5e32373f3af30b8f83b98a90fa ancestry rc(master,candidate)=[1, 1]
+604b8d9a7c5948a9c0690312f1220830d545b52c ancestry rc(master,candidate)=[1, 1]
+82359c4deec90edebbaebf9ab9d094902120b567 ancestry rc(master,candidate)=[1, 0]
+2e4183bc2dc40e6bc306e377fc442ff0f405bbe0 ancestry rc(master,candidate)=[1, 0]
+1a276a15192013fdb1e472db409133b53ac57944 ancestry rc(master,candidate)=[1, 0]
+d308b0b1bbcb0db2e1624e4eda6431f73ace453f ancestry rc(master,candidate)=[1, 0]
+22382d8c800bed7b995d093cdcfdc206360d7fd4 ancestry rc(master,candidate)=[1, 0]
+825dab1c8771113caeb3c5b77c61e89e27d7e292 ancestry rc(master,candidate)=[1, 0]
+05bc12e2b9008071ca28edbd4574e58644d48220 ancestry rc(master,candidate)=[1, 0]
+ops/specs/wp775.md ls-tree master='' candidate=''
+ops/specs/wp484-r8.md ls-tree master='' candidate=''
+HINT history {'historical': 'c8c1ee015f78fdb143a18cf926f9f3481c2a3dd1', 'apply_commit': '2e4183bc2dc40e6bc306e377fc442ff0f405bbe0', 'apply_parent': 'c8c1ee015f78fdb143a18cf926f9f3481c2a3dd1', 'direct_child': True}
+HINT history {'historical': '77a0a458c6c06f3aafa118953e8e2771daaed911', 'apply_commit': '1a276a15192013fdb1e472db409133b53ac57944', 'apply_parent': '77a0a458c6c06f3aafa118953e8e2771daaed911', 'direct_child': True}
+Land provenance status scan: 415 distinct paths; supplementary matches classified with context. pr696.do_luc pins bc57bca and 2026-09-30; pr684.packet_landed_ghi_chu explicitly says TAI THOI DIEM merge #684 and current #689 state must not be read from that file. Findings narrated under reviewed_sha are historical; absent CI or land authority is not a claim of unmerged Git state.
+

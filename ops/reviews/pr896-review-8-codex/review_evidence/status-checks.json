@@ -1,0 +1,1332 @@
+{
+  "unreviewed": [
+    {
+      "oid": "17f4a1b85b8d5146c5e6dddbdc40f11111a659f7",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "99aef141796ebce7044c9f5c0c8a1a3b3d673d8e",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "5a96c1ac8cec1c9958094f92e716941faa47aac5",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "888c0d9b68136f384068ecad8e286819bb175044",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "bf10fab792473bc69dd377c7445978950c4d77a0",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "b5b6aefa66a8ad037ff34430d0210f3b6873913f",
+      "receipts": [],
+      "verdicts": []
+    },
+    {
+      "oid": "3ddda026da41b0bb162a3785b93dbb953a298203",
+      "receipts": [],
+      "verdicts": []
+    }
+  ],
+  "heads": {
+    "f9d84d70fb46540bbecfae963c9afb4a2b48984d": [
+      "ops/land/pr779-wp775-provenance/verdict-luot17/VERDICT.md"
+    ],
+    "907214d2cd0b67ff444b3adf734811eab39bfc71": [
+      "ops/land/pr792-wp484-provenance/verdict-luot5/VERDICT.md"
+    ],
+    "e995730464da03223cf636e49ad32e220c6ec720": [
+      "ops/land/pr818-wp788-provenance/verdict-luot1/VERDICT.md"
+    ],
+    "4ffae005eb1c434d660cbfb713ad21ed92115a8a": [
+      "ops/land/pr818-wp788-provenance/verdict-luot2/VERDICT.md"
+    ],
+    "8264089a14f79867091da2629edbf45a22854c39": [
+      "ops/land/pr818-wp788-provenance/verdict-luot3/VERDICT.md",
+      "ops/land/pr818-wp788-provenance/verdict-luot3/VERDICT.md"
+    ],
+    "47591ebc51af917523e67191b2e96939506b78fe": [
+      "ops/land/pr818-wp788-provenance/verdict-luot4/VERDICT.md"
+    ],
+    "984032f375aa0c8fe6039dfd35f6842acd49c926": [
+      "ops/land/pr818-wp788-provenance/verdict-luot5/VERDICT.md"
+    ],
+    "5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456": [
+      "ops/land/pr823-wp802-provenance/verdict-luot5/wp802-g1-luot5-codex-verdict.md"
+    ],
+    "51ae5c095972611d2c6045bd81786a4fc7e9ca62": [
+      "ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md"
+    ],
+    "783463b5d62efbc43c6a6116e32c43accbc485f7": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md"
+    ],
+    "d7b42d26f09dad0599dc0434dfad25b3897f3e51": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-10-codex/VERDICT.md"
+    ],
+    "f4ab8b6cec07d2ce0d68b9efab660c73ca364395": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-8-codex/VERDICT.md",
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-9-codex-ready/VERDICT.md"
+    ],
+    "be792d1da1f015e04eee1f784edd902c523378e2": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-connector-review-9-codex/VERDICT.md"
+    ],
+    "97f3bc18a937c251f9ee639279e2ca818bce9a58": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-2-codex/VERDICT.md"
+    ],
+    "468667238e53e77580e4be62e0b8ed5753a75cd9": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-3-codex/VERDICT.md"
+    ],
+    "4504b80e67e4c3c8e967be92212842eb835c6e85": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/VERDICT.md"
+    ],
+    "77393f6b5d9b04070567ec999e0137b9024b04f1": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-5-codex/VERDICT.md"
+    ],
+    "91c6d8c31190f5f9ea08e4da42ecafd898ee8935": [
+      "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-7-codex/VERDICT.md"
+    ],
+    "c95bd7f80a45a592f3cb089149c0c23fb4df2317": [
+      "ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot1-codex-verdict.md"
+    ],
+    "fa4fb7ce98c56b56a2523bf8c2b6a6bc2fb98181": [
+      "ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot2-codex-verdict.md"
+    ],
+    "ecebffe9675d0952f3a0ab65eaa44087853a26bc": [
+      "ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot3-codex-verdict.md"
+    ],
+    "7a39463e8b6c25d4811bcc9cd544b164e7ce53a7": [
+      "ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot4-codex-verdict.md"
+    ],
+    "974859d67a8062f869cb49e8d3be75db44ef4d58": [
+      "ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot5-codex-verdict.md"
+    ],
+    "23bc189f28ea60f04ca1634b6fe66d02babf12ed": [
+      "ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md"
+    ],
+    "9d471d90b959d98142373085e1a504ba1d9a58c3": [
+      "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot1-codex-verdict.md"
+    ],
+    "1e5522383433d1c544ec89585c9ef874aed0138e": [
+      "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot2-codex-verdict.md"
+    ],
+    "99836157fdffe2681280a8302c8c7396ac5fe4de": [
+      "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot3-codex-verdict.md"
+    ],
+    "3818bd4a9685e1782afdd7e8a593482f74b663ff": [
+      "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot4-codex-verdict.md",
+      "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot5-codex-verdict.md",
+      "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot6-launcher-verdict.md"
+    ],
+    "08aa09610b346edbe64dd2a397de6645e87f2276": [
+      "ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot1-codex-verdict.md"
+    ],
+    "cffd44e75ba97af4c99d790704e7478945344ada": [
+      "ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot2-codex-verdict.md"
+    ],
+    "ee853d32e2e55592a1d7caf4c5f16714cd25dad2": [
+      "ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot3-codex-verdict.md"
+    ],
+    "ba96fc6cfb2f0b21f4814fd6bf5e7431b727029b": [
+      "ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot4-codex-verdict.md"
+    ],
+    "c1f7fddc8adc16df025efa96e3ca2f59e7a6a9e0": [
+      "ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot5-codex-verdict.md"
+    ],
+    "039dbe3c25e6148606227107d143f960f552bfe6": [
+      "ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot6-codex-verdict.md"
+    ],
+    "28e35fd9206cdc8b2b44a39999421934f8437192": [
+      "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md",
+      "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot2-launcher-verdict.md"
+    ],
+    "bfbd2732a0e5359cbeb2a4d5336fc3dc7d2a7121": [
+      "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md"
+    ],
+    "97544b576392540ce316b2d61e5cc0de3a4a88eb": [
+      "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot2-codex-verdict.md"
+    ],
+    "8733f0ae7df5d9a1c704c31e6051e8cb5f439fe5": [
+      "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot3-codex-verdict.md"
+    ],
+    "93fd69fb958527ba738f882391956311972de60b": [
+      "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot4-codex-verdict.md"
+    ],
+    "521efebab226fe3a92b2ccce4a59c27dd638edff": [
+      "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot5-codex-verdict.md"
+    ],
+    "7302ea3623ebb7a0250a6c5090985807753cc031": [
+      "ops/land/pr866-wp856-provenance/verdicts/luot1-VERDICT.md"
+    ],
+    "19fdfa6e48c8b203bd89362c18bd198ba81e9793": [
+      "ops/land/pr866-wp856-provenance/verdicts/luot2-VERDICT.md"
+    ],
+    "bf671b0524a8472eb0b0fcd1d75ea3a89d1f6973": [
+      "ops/land/pr866-wp856-provenance/verdicts/luot3-VERDICT.md"
+    ],
+    "a56a3219e58ddf4c87cafac1e7357962d643e3db": [
+      "ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot2-launcher-verdict.md"
+    ],
+    "c435b790a4c026174e40e54c9738bb462a6c482e": [
+      "ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot3-launcher-verdict.md"
+    ],
+    "6e96fefa2353158ba4b9eb405923c044922b56c6": [
+      "ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot4-launcher-verdict.md"
+    ],
+    "b9318cc26101d2697be19ac44be5700534ba0256": [
+      "ops/land/pr869-wp748-r22-provenance/verdicts/wp748-r22-luot5-launcher-verdict.md"
+    ],
+    "d6b1e2d27cadc1d985ad2868aeae444598a6b97a": [
+      "ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot1-codex-verdict.md"
+    ],
+    "a789dc8db0785f4c3a9066288356b884aee54501": [
+      "ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot2-codex-verdict.md"
+    ],
+    "1965b71fecc5c936c2e342b109fa88a260943920": [
+      "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot1-codex-verdict.md"
+    ],
+    "ac4a6cb78a136b5e7f55abfac90b75ddd3cd080d": [
+      "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot2-codex-verdict.md"
+    ],
+    "93d33b406d596b7245c69aa0a1fe80cf7e49748e": [
+      "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot3-codex-verdict.md"
+    ],
+    "0bfc73d6f7a810dc3716bb40f0193eae9cd3f888": [
+      "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot4-codex-verdict.md"
+    ],
+    "f07f88c75cabbef691c86ac8746317a6c0705162": [
+      "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot5-codex-verdict.md"
+    ],
+    "88dc1a92d8af8ec7072897921ef3960250d3a660": [
+      "ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot1-codex-verdict.md"
+    ],
+    "b952c106ba6bbf94699bda5fe5fb2f6d7f7256fb": [
+      "ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md"
+    ],
+    "52e1f0b69d90247c6b7c90730b81ff8af3de3cba": [
+      "ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot1-codex-verdict.md"
+    ],
+    "ab2842378652cf03c1d5964c927abb2391f2834f": [
+      "ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot2-codex-verdict.md"
+    ],
+    "682c8880e493e9b4019e599482a33081fa35576f": [
+      "ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot2-launcher-verdict.md"
+    ],
+    "be00ef723eca3fae90932e476d683f233588f2b3": [
+      "ops/land/pr883-wp879-provenance/verdicts/wp879-g1-luot1-codex-verdict.md"
+    ],
+    "ab2510624e82834159a6ad898185cb2b1d987206": [
+      "ops/land/pr883-wp879-provenance/verdicts/wp879-g1-luot2-codex-verdict.md"
+    ],
+    "a9be5828fb7b937ec8c9f7f1dc6b5a48babbafa5": [
+      "ops/land/pr888-wp886-provenance/verdicts/wp886-luot1-codex-verdict.md"
+    ],
+    "1c138c714f9c192ea730b65c5d18ff5eda1ca660": [
+      "ops/land/pr888-wp886-provenance/verdicts/wp886-luot2-codex-verdict.md"
+    ],
+    "99b354ca7bcc40ce0c4f7d9db445b852510b5809": [
+      "ops/land/pr888-wp886-provenance/verdicts/wp886-luot3-codex-verdict.md"
+    ],
+    "d42713cc621cbd78d324a8b212749ff5c6199d1e": [
+      "ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot1-launcher-verdict.md"
+    ],
+    "77ec458d78d302ba89b317bd04a7282d4493c75b": [
+      "ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot2-launcher-verdict.md"
+    ],
+    "f08efa1043680134e3534eef8ac95dd901ae7dab": [
+      "ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot3-launcher-verdict.md"
+    ],
+    "70172ec590dc1eefd414d8aa951a8cb4fc82a86c": [
+      "ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot1-codex-verdict.md"
+    ],
+    "d3fba0c8e5411002540078312a9ccd979a984b84": [
+      "ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot2-codex-verdict.md"
+    ],
+    "7849d1cdbab50b3b4a1a296a3867ce0939732b02": [
+      "ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot3-codex-verdict.md"
+    ],
+    "9bad91e9261a9097b0924718db3333da624e01cf": [
+      "ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot4-codex-verdict.md"
+    ],
+    "35d87eb073ae8c6f79049c0097b4208cc2139c47": [
+      "ops/land/pr907-wp906-provenance/verdicts/wp906-luot1-codex-verdict.md"
+    ],
+    "aaad9ab95ab170df4083e0c8203a88b5bd3b35a9": [
+      "ops/land/pr909-wp748-r25-provenance/verdicts/wp748-r25-l909d-launcher-verdict.md"
+    ],
+    "6e09f4b013629ae3d8d6e75f1a1c8e10aaa960b4": [
+      "ops/land/pr913-wp910-provenance/verdicts/wp910-luot1-codex-verdict.md"
+    ],
+    "a7da46390177cdc2d64f516dedac19857bee86dd": [
+      "ops/land/pr917-wp910-provenance/verdicts/wp910-g3-luot1-codex-verdict.md"
+    ],
+    "7574c39d98459c9caf1365a7dd092747335ae4e8": [
+      "ops/land/pr924-wp923-provenance/verdicts/wp923-g1-claude-review-1-codex-verdict.md"
+    ],
+    "4e4d482e46cccc6b5e7e6c4f8cf4af636b63e070": [
+      "ops/land/pr926-wp919-provenance/verdicts/wp919-r3-g3-claude-review-3-codex-verdict.md"
+    ],
+    "f9b3dc1ec11a5089b06d67a658e0f840742466eb": [
+      "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot1-codex-verdict.md"
+    ],
+    "fc1bb3add70b7e7a2f17cdf4f940d7ce484b7053": [
+      "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot2-codex-verdict.md"
+    ],
+    "9d34a8e7e97fdc8ac178fc209219cea067e4c279": [
+      "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot3-codex-verdict.md"
+    ],
+    "b0fadc96366115d3545b9c723b30f04281898d94": [
+      "ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot1-codex-verdict.md",
+      "ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot2-codex-verdict.md"
+    ],
+    "3e46a4b790b770e513ab05b0b3faf0dc88796903": [
+      "ops/land/pr931-wp835-provenance/verdicts/wp835-postmerge-review-3-codex-verdict.md"
+    ],
+    "3785f9535398db04fb36a5eaa095166a8e048f1e": [
+      "ops/land/pr931-wp835-provenance/verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md"
+    ],
+    "87fd7611001ebffd20a87c934fcf578644984b4b": [
+      "ops/land/pr931-wp835-provenance/verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md"
+    ],
+    "143d43fcfe9f2a4b116afd169014ed3d6d598403": [
+      "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26b-verdict.md"
+    ],
+    "0fe659e30e151f4ce3dce13789fa6622ca6c6b47": [
+      "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26d-verdict.md"
+    ],
+    "be15ad5187c2f501a8682366804363e54860590e": [
+      "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26g-verdict.md"
+    ],
+    "3877d463c0d9b7a0757d051d547c824814601370": [
+      "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26i-verdict.md"
+    ],
+    "8a6d795c982fc7e9da2fbfd28a75ca25d5f3eb95": [
+      "ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-1-codex-verdict.md"
+    ],
+    "227dcdebc62c9275f9df09056f66e2124ed5f14c": [
+      "ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-verdict.md"
+    ],
+    "8b627e843a3be87f2ceac97f2f147bbadcaa3cdc": [
+      "ops/reviews/bien-nhan-review-s2-review-4-codex-verdict.md"
+    ],
+    "392199dc50cfab941c2c85e225d4a82ac5feff3a": [
+      "ops/reviews/bookkeeping-650-pr667/luot1-verdict-day-du.md"
+    ],
+    "900fbbee7b26b09b7d8a7d73c3a4a210768ffd6f": [
+      "ops/reviews/bookkeeping-650-pr667/luot2-verdict-day-du.md"
+    ],
+    "9a6f48f548df453e0348af0d877707c8540b6938": [
+      "ops/reviews/bookkeeping-650-pr667/luot3-verdict-day-du.md"
+    ],
+    "80076c6ed5aa87f2e0a7a28262f78a015e0f2dc6": [
+      "ops/reviews/bookkeeping-650-pr667/luot4-verdict-day-du.md"
+    ],
+    "5fe6f25066636be50256450a1202fa39d8dd45df": [
+      "ops/reviews/bookkeeping-650-pr667/luot5-verdict-day-du.md"
+    ],
+    "d535cf64d5f676819f2fe734f9fa4cb83470613f": [
+      "ops/reviews/bookkeeping-650-pr670/luot1-verdict-day-du.md"
+    ],
+    "6ea84629657bd728db238188e1fb5ffdf15585fe": [
+      "ops/reviews/bookkeeping-650-pr670/luot2-verdict-day-du.md"
+    ],
+    "b2981a0c7a26c486ef5d1356186f9da609a8f6db": [
+      "ops/reviews/bookkeeping-650-pr670/luot3-verdict-day-du.md"
+    ],
+    "41d03d8c0ab3374adef6e3d159ac568ae67bc429": [
+      "ops/reviews/cai-cong-cu-sigpipe-r1-review-1-codex-verdict.md"
+    ],
+    "41d52ae461b267f7f5291a0794c5328cc00dc360": [
+      "ops/reviews/cai-cong-cu-sigpipe-r2-human-audit-verdict.md",
+      "ops/reviews/cai-cong-cu-sigpipe-r2-review-5-codex-verdict.md"
+    ],
+    "1ea9c1c16b4b731b457c8436c4c88c0eb69f4ce0": [
+      "ops/reviews/cai-cong-cu-sigpipe-r2-review-2-codex-verdict.md"
+    ],
+    "5138faae91d2e9fb0fa36be8137326afb8f526a8": [
+      "ops/reviews/cai-cong-cu-sigpipe-r2-review-3-codex-verdict.md"
+    ],
+    "e311bbffaa820f3a12f2e2f8316582e312e344ea": [
+      "ops/reviews/cai-cong-cu-sigpipe-r2-review-4-codex-verdict.md"
+    ],
+    "57b6578398a63c2afe4e583061440b3156aec155": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot08-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot08-claude-VERDICT.md"
+    ],
+    "fc610c2ee2a4ab424a566bb9b267ccc676be6340": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot09-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot09-claude-VERDICT.md"
+    ],
+    "e73b266111141543cd48775c28fb0de8a20622ee": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot10-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot10-claude-VERDICT.md"
+    ],
+    "712ef9bef610b00a6cc2574712b52ad4e23a355b": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot11-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot11-claude-VERDICT.md"
+    ],
+    "9f5cb77a87c528b90783c14292e2fcf498d886c6": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot12-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot12-claude-VERDICT.md"
+    ],
+    "8e204f38b0f5435066ade75a01e8876e1acf5afb": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot13-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot13-claude-VERDICT.md"
+    ],
+    "5ec951c007c48fb88efb6b261973be54e293c4a4": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot14-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot14-claude-VERDICT.md"
+    ],
+    "3569472cb9b11e71b3c791725a2ffb416802f975": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot15-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot15-claude-VERDICT.md"
+    ],
+    "91cd2f78942aec423c1a003c65e81b474bfc7fc9": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot16-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot16-claude-VERDICT.md"
+    ],
+    "41508cdead6e2b000626ca0260707d5056eff83f": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot17-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot17-claude-VERDICT.md"
+    ],
+    "46bc11de82fab227e29e1bc0e057fcf3895e5fe1": [
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot18-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so/review-luot18-claude-VERDICT.md",
+      "ops/reviews/ci-duong-nhanh-ho-so-human-audit-ducthangho-verdict.md"
+    ],
+    "c8f52b6c89fcc62ed63b6e358892d7bbaf5be73b": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.md"
+    ],
+    "0acd3a943e6ffc3fb0bfc88f98e757a978549d3a": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-10-codex-verdict.md"
+    ],
+    "e4b7bdb2214fa6351c5ff58c686e871d6291beb2": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-11-codex-verdict-bi-cat.md"
+    ],
+    "0b22f55d36f2090db9900328354ec821f6128727": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-12-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-12-codex-verdict.md"
+    ],
+    "19c0e3043357d7058727e92c90e4fb41e750be3e": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-13-codex-verdict-bi-cat.md"
+    ],
+    "9440dc111fa06682d9f82276fbc0cce7cfaed63a": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-14-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-14-codex-verdict.md"
+    ],
+    "b3863e2af32cc8892144d9c573667a98701ab614": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-15-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-15-codex-verdict.md"
+    ],
+    "54b4a01412e1d0240a1474258096ad64a4cbf0b9": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-16-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-16-codex-verdict.md"
+    ],
+    "161c4b6ea1df3bb9749f039ad84ed9c4976b5942": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-17-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-17-codex-verdict.md"
+    ],
+    "42f74db160762dcb6248e98e1ceb17a148194d28": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-18-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-18-codex-verdict.md"
+    ],
+    "9aaeb032556dbaae925316f4fe8d06d83cddbc1b": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-19-codex-verdict-bi-ngat.md"
+    ],
+    "c454ee9984a287fe06b1446b827850cade261007": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md"
+    ],
+    "0842283e86ef8f575b0c4423a340d8ac300198d0": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-20-claude-verdict.md"
+    ],
+    "cc78b33bd04d158d92c14eca01ad58d6d1dfe146": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-21-claude-verdict.md"
+    ],
+    "2b501efaab39f5820aae50cd28d0515b6b05ff5a": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-3-codex-verdict-bi-cat.md"
+    ],
+    "971e14c1550bcbc3d1523791f8174f78a45edbf9": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md"
+    ],
+    "ef01112604ef47096daf99ee2470125c3ca0f0b3": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-5-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-5-codex-verdict.md"
+    ],
+    "b6e05980f4a9cc13e2e565129637f784de0d8bd0": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md"
+    ],
+    "2bb11df16f0b35d611e8650f384d3c5b421295e5": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-7-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-7-codex-verdict.md"
+    ],
+    "320475292649a9bf985edccf8e9e35f78243c2e4": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md",
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md"
+    ],
+    "3c7bddc17bbcdd0002d049003bb726097abb587f": [
+      "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-9-codex-verdict-bi-cat.md"
+    ],
+    "f9c8dbd53a21d4048d26572f3147893f6c57e95b": [
+      "ops/reviews/ci-registry-nang-tran-bo-day-du/review-luot1-codex-VERDICT.md"
+    ],
+    "36190a35db647e65d7c6fd4b684d5178dfd82544": [
+      "ops/reviews/ci-registry-nang-tran-bo-day-du/review-luot2-codex-VERDICT.md",
+      "ops/reviews/ci-registry-nang-tran-bo-day-du-human-audit-ducthangho-verdict.md"
+    ],
+    "dff2ec14ed5b54551bbacfcba2313208c07efe56": [
+      "ops/reviews/ci-windows-review-5-claude-verdict.md"
+    ],
+    "45a06e4872d165aabc1a7078edaf3281490d6b0d": [
+      "ops/reviews/doctor-github-mcp-review-6-codex-verdict.md"
+    ],
+    "0826629a9e550ea97f3ae46259e40772d32abc76": [
+      "ops/reviews/doctor-github-mcp-review-9-codex-verdict.md"
+    ],
+    "5bc635d2ea64bcedd41378cc33c6b4cdbf03f164": [
+      "ops/reviews/don-nhanh-base-review-1-codex-verdict.md"
+    ],
+    "1511dd75a5a4f65c623738f2dc91e384b96bad9a": [
+      "ops/reviews/don-nhanh-base-review-2-codex-verdict.md"
+    ],
+    "0ce4d4917afb955c76b17df44657e88eccc6a39f": [
+      "ops/reviews/don-nhanh-base-review-3-claude-verdict.md"
+    ],
+    "05568de6ad054a5f0c9991ecac7e38805d1227c3": [
+      "ops/reviews/don-nhanh-base-review-4-claude-verdict.md"
+    ],
+    "12dd16ea6d92a177898a78fb9a547bda1d601dbb": [
+      "ops/reviews/don-nhanh-base-review-5-claude-verdict.md"
+    ],
+    "99e9383e9ff60bb8850f41242beb607808a821e9": [
+      "ops/reviews/don-nhanh-base-review-6-claude-verdict.md"
+    ],
+    "a66cad6940516fe339af83cac645e3ac15d8afae": [
+      "ops/reviews/don-nhanh-base-review-7-claude-verdict.md"
+    ],
+    "fa4b0dd879f0cf7ae589989863670d2a8200839c": [
+      "ops/reviews/donref-xoa-an-toan-review-1-claude-verdict.md"
+    ],
+    "5f2ff8573ed259c1a4df3030428a4ec9b0f99e2e": [
+      "ops/reviews/donref-xoa-an-toan-review-2-claude-verdict.md"
+    ],
+    "85124dceb17b63b867dc2fb322d06925c67fff07": [
+      "ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-4-claude-VERDICT.md"
+    ],
+    "66ec303effa344e1e3a3ed60bf2920a2bd8e76fe": [
+      "ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-5-claude-VERDICT.md"
+    ],
+    "4dc226bc7d256472fa5354089825a342835d2ccc": [
+      "ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-6-claude-VERDICT.md"
+    ],
+    "3c308b304d9bed46afba2ca698d94d7c31a77a01": [
+      "ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-7-claude-VERDICT.md"
+    ],
+    "adad5f5f8f22263120edb1d80b64164159f041ab": [
+      "ops/reviews/dot-bien-l-bien-cong-khai/pr689-review-8-claude-VERDICT.md"
+    ],
+    "0614f7f3781799ebacded4dff67aa9354cbb52d3": [
+      "ops/reviews/dot-bien-l-bien-cong-khai-human-audit-ducthangho-verdict.md"
+    ],
+    "cc6657e826d90bebe61ea59983fa83c27db42c34": [
+      "ops/reviews/handoff-264-review-1-claude-verdict.md"
+    ],
+    "1badac86d8b2982d59d6130d77f74ed97607671a": [
+      "ops/reviews/handoff-264-review-2-claude-verdict.md"
+    ],
+    "96a93226109038331fb09d2a35bd71b73e6e43be": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot1-VERDICT.md"
+    ],
+    "8378f331aff651e32496b02589d674239fbd92f7": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot2-VERDICT.md",
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot2-verdict-day-du.md"
+    ],
+    "fb8ccff8bcf88aad011016afff3936c2fb4877c7": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot3-VERDICT.md",
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot3-verdict-day-du.md"
+    ],
+    "a004a23628a13bc1add0ae40b0318063406e3bad": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot4-VERDICT.md",
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot4-verdict-day-du.md"
+    ],
+    "de927ca4a6e6b516edd68a5df43678a1832aba13": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot5-verdict-day-du.md"
+    ],
+    "a212059c5a2ea7379e08c3081f777583dcaa5f62": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot6-verdict-day-du.md"
+    ],
+    "55619d8e9ddc9dd4e7ad3ab9ba6c43d64679a45a": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot7-verdict-day-du.md"
+    ],
+    "cb9ecc8606a7d4b237a5b20702c04f096af2d0e6": [
+      "ops/reviews/land-doc-receipt-thu-hoi-c1a1a/luot8-verdict-day-du.md"
+    ],
+    "fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9": [
+      "ops/reviews/lease-dang-review-1-claude-verdict.md"
+    ],
+    "90015a53c7407400f87c9f5a018067849fa1e842": [
+      "ops/reviews/lease-dang-review-2-claude-verdict.md"
+    ],
+    "9f5b08e81a131a1c22d15b6d5809885eae11413f": [
+      "ops/reviews/lease-dang-review-3-claude-verdict.md"
+    ],
+    "6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5": [
+      "ops/reviews/lease-dang-review-4-claude-verdict.md"
+    ],
+    "ba82b06f9df81fc2f13786fec590ec2110d046b7": [
+      "ops/reviews/lease-dang-review-5-claude-verdict.md"
+    ],
+    "edc1906cf01fcceb15c646e1fdc4fcd8957644ed": [
+      "ops/reviews/lease-dang-windows-review-1-claude-verdict.md"
+    ],
+    "b0c8fb368d70f17bce5eb7e3d1fe02d810db8e19": [
+      "ops/reviews/lease-dang-windows-review-2-claude-verdict.md"
+    ],
+    "7f91ea1cffe17af391362a91b83907c32b16f3b2": [
+      "ops/reviews/lease-dang-windows-review-3-claude-verdict.md"
+    ],
+    "13e3a9cfdac763a317252e68fa91571fee942bd0": [
+      "ops/reviews/lease-hoi-toan-kho-review-1-claude-verdict.md"
+    ],
+    "babceec2399169f968664b82c096b41b8b8db78b": [
+      "ops/reviews/lease-hoi-toan-kho-review-2-claude-verdict.md"
+    ],
+    "f12736dfbbb9760da4ce164988f3ee97784d0475": [
+      "ops/reviews/lease-hoi-toan-kho-review-3-claude-verdict.md"
+    ],
+    "f721fb43629a054d2adbc96b3cc748da17481bea": [
+      "ops/reviews/lease-publish-windows-do/review-r3-claude-VERDICT.md"
+    ],
+    "9d7a523e80e91ef6aca2c7935f3ee1813fc369f9": [
+      "ops/reviews/lease-publish-windows-do/review-r3-luot2-claude-VERDICT.md",
+      "ops/reviews/lease-publish-windows-do-human-audit-ducthangho-verdict.md"
+    ],
+    "472f11bd96e7e10779a0681fa1b52a93df85ee9d": [
+      "ops/reviews/n5-lenh-hook-windows-review-1-codex-verdict.md",
+      "ops/reviews/n5-lenh-hook-windows-review-2-codex-verdict.md"
+    ],
+    "6616026caff45771c417e61a1cf4a9b87eefcb95": [
+      "ops/reviews/no-p3-ho-so-exec-review-1-claude-verdict.md"
+    ],
+    "55bd0d24d299d20ff32a8b2dd42deb200295462e": [
+      "ops/reviews/no-p3-ho-so-spec-review-1-claude-verdict.md"
+    ],
+    "a9ef33c24665dedc70f2c839e2357353bd4054af": [
+      "ops/reviews/no-p3-ho-so-spec-review-2-claude-verdict.md"
+    ],
+    "76318fa106019611fbd5ea9ec6e2553bb7773faf": [
+      "ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.md"
+    ],
+    "a9e021de28d03e7edc9077b42678f6af22a3b684": [
+      "ops/reviews/plat-m4-human-audit-ducthangho-verdict.md",
+      "ops/reviews/plat-m4-human-audit-ducthangho-verdict.md"
+    ],
+    "5813fc450efe3cb349b082044708d27a589b69fb": [
+      "ops/reviews/plat-m4-review-1-codex-verdict.md"
+    ],
+    "7a2320fe13b4aad3e7b298d070125a01762a8e54": [
+      "ops/reviews/plat-m4-review-2-codex-verdict.md"
+    ],
+    "825e97042b86f5e200c2ab8a00b58d8642510353": [
+      "ops/reviews/plat-m4-review-3-claude-verdict.md"
+    ],
+    "e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa": [
+      "ops/reviews/plat-x5-review-1-claude-verdict.md"
+    ],
+    "2284b4657304d0229e95d1f64ebd0c22035d201d": [
+      "ops/reviews/plat-x5-review-2-claude-verdict.md"
+    ],
+    "117e0c4258c5029c7a330611786733c5a583e1c5": [
+      "ops/reviews/plat-x5-review-3-claude-verdict.md"
+    ],
+    "ae755d10856991db7577974a2e8464005f84c940": [
+      "ops/reviews/pr134-ci-lease-gate-codex-verdict.md"
+    ],
+    "2d5fb722a3d4f43d4e884cca6f80825cc84f6d4e": [
+      "ops/reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.md"
+    ],
+    "c43347d1e2c2f76bb21dc2d9d28bd6bfa153d355": [
+      "ops/reviews/pr468-hoso-4-packet-review-10-codex-verdict.md",
+      "ops/reviews/pr468-hoso-4-packet-review-11-codex-verdict.md"
+    ],
+    "02b0b86bf64a89b561a75ff060164332792fb73d": [
+      "ops/reviews/pr468-hoso-4-packet-review-12-codex-verdict.md"
+    ],
+    "f77f19895e00835d71644d82f1c54e9b519ccfe6": [
+      "ops/reviews/pr468-hoso-4-packet-review-13-codex-verdict.md"
+    ],
+    "922956a7048fd23eea1c9f88aeb986e076f10e24": [
+      "ops/reviews/pr468-hoso-4-packet-review-14-codex-verdict.md"
+    ],
+    "745d8889d0d6468785f26003876ba823c8b2db99": [
+      "ops/reviews/pr468-hoso-4-packet-review-15-codex-verdict.md"
+    ],
+    "2adb6819caee0225d7b7e4f0c4e8c16f2faa7e73": [
+      "ops/reviews/pr468-hoso-4-packet-review-6-codex-verdict.md"
+    ],
+    "b2ea0f24576275014e8124bfd3e0b6a16c3ca8b5": [
+      "ops/reviews/pr468-hoso-4-packet-review-7-codex-verdict.md"
+    ],
+    "4d0ead5591a58463423754cc93a84ce744c3a50b": [
+      "ops/reviews/pr468-hoso-4-packet-review-8-codex-verdict.md"
+    ],
+    "0bc6e56e1a1fd21cedfc18557320941d51db866c": [
+      "ops/reviews/pr468-hoso-4-packet-review-9-codex-verdict.md"
+    ],
+    "5a4dd859ef791ca046aea3af4bab2731883323ec": [
+      "ops/reviews/pr478-land-review-4-codex-verdict.md"
+    ],
+    "9337779b7d61d3b08947982383081de127e7d632": [
+      "ops/reviews/pr478-land-review-5-codex-verdict.md"
+    ],
+    "ff3431f11bc0ba3ffa0c3616003f833c3cfc3ebb": [
+      "ops/reviews/pr478-land-review-6-codex-verdict.md"
+    ],
+    "afddf7efe21e784fd22ed6b5aed399bc9d04a67d": [
+      "ops/reviews/pr480-land-review-1-codex-verdict.md"
+    ],
+    "5b96ddc91593e9704ac3265b4e0b688059478cc8": [
+      "ops/reviews/pr480-land-review-2-codex-verdict.md"
+    ],
+    "da481f94eee0adf1fe5fc4260a535a9b48fc2627": [
+      "ops/reviews/pr486-hau-kiem-review-1-codex-verdict.md"
+    ],
+    "3873173094a3e294b069998ed21dc117d8ad659a": [
+      "ops/reviews/pr487-hau-kiem-head-review-1-codex-verdict.md"
+    ],
+    "bcbca7bbcea968a662b1ac69bfc9f2a329ed8ae7": [
+      "ops/reviews/pr487-review-1-codex-verdict.md"
+    ],
+    "5c05778219e293ff929e8cb1f1c31aea4120d967": [
+      "ops/reviews/pr487-review-2-codex-verdict.md"
+    ],
+    "9a99dd8aa137ef118a00671482c29ea2438cbdbb": [
+      "ops/reviews/pr489-review-1-codex-verdict.md"
+    ],
+    "98ef1f1629a2ac786ff91e352dd02da9b693e81e": [
+      "ops/reviews/pr489-review-2-codex-verdict.md"
+    ],
+    "9238606b21344fedae8d9c191834193b4bbee582": [
+      "ops/reviews/pr490-review-1-codex-verdict.md"
+    ],
+    "63c639ac1604f7c6bb8b734a556bdf68891f8046": [
+      "ops/reviews/pr490-review-2-codex-verdict.md"
+    ],
+    "f7872ac6876b0675ae549dfac279ef238b24d58d": [
+      "ops/reviews/pr490-review-3-codex-verdict.md"
+    ],
+    "c42fc74cca04720627836e187f81a71ab44e9b76": [
+      "ops/reviews/pr490-review-4-codex-verdict.md"
+    ],
+    "dccce0a54efdd687c20e128b64de1e355089c261": [
+      "ops/reviews/pr490-review-5-codex-verdict.md"
+    ],
+    "13ba87d8e6054ec4e35a5a6ada1eec66afffb545": [
+      "ops/reviews/pr490-review-6-codex-verdict.md"
+    ],
+    "01e7f77d707cb093b5ba6d9b9d8577f40d025488": [
+      "ops/reviews/pr490-review-7-codex-verdict.md"
+    ],
+    "ba4a258d4e7d13ce8630c94023ae2cbeedb2fb3a": [
+      "ops/reviews/pr491-review-1-codex-verdict.md"
+    ],
+    "2ec6171f7a2e21ae950633f9e328329a355f7a6d": [
+      "ops/reviews/pr491-review-2-codex-verdict.md"
+    ],
+    "d5a980e9a214992c38112e603de6724728857be2": [
+      "ops/reviews/pr492-review-1-codex-verdict.md"
+    ],
+    "bd4ecd4fffb389f6f9dfde9dee5b6a8250a80459": [
+      "ops/reviews/pr492-review-2-claude-verdict.md"
+    ],
+    "457affd49fabb8f6d891b93460e93255170c8784": [
+      "ops/reviews/pr492-review-3-claude-verdict.md"
+    ],
+    "826bc36fd1801bf828f21bf9580897899f16a299": [
+      "ops/reviews/pr492-review-4-claude-verdict.md"
+    ],
+    "4af7e2907e86cfcad10c0d097c4678a800d32c04": [
+      "ops/reviews/pr493-review-1-codex-verdict.md"
+    ],
+    "9e78e19e5e3247d910c061a1171f4783ee0a3e10": [
+      "ops/reviews/pr493-review-10-codex-verdict.md"
+    ],
+    "b43d4ab118c31d2387e4fc6104bb783e5c6521a5": [
+      "ops/reviews/pr493-review-11-codex-verdict.md"
+    ],
+    "e9211317dadd365ed3efdb9a43eabe479ef54380": [
+      "ops/reviews/pr493-review-12-codex-verdict.md"
+    ],
+    "89d938efbc03a50a3efbc163d0f1ade29f66de08": [
+      "ops/reviews/pr493-review-13-codex-verdict.md"
+    ],
+    "f618e0190e9649f3a59f735465960acca70fa050": [
+      "ops/reviews/pr493-review-14-codex-verdict.md"
+    ],
+    "d47ea5949366c8d470ef0b1538e0fafa725bd35e": [
+      "ops/reviews/pr493-review-15-codex-verdict.md"
+    ],
+    "95071a19670dee33630286a84af6caf5a47d8524": [
+      "ops/reviews/pr493-review-16-codex-verdict.md"
+    ],
+    "61b4c24936a478b80f124ac11dea0ce126c842a0": [
+      "ops/reviews/pr493-review-17-codex-verdict.md"
+    ],
+    "9484970f269e09fd9cace3432c19cb90e854c93c": [
+      "ops/reviews/pr493-review-2-codex-verdict.md"
+    ],
+    "fae2fb77fc2121af9f94cd026db0179b4e8ed9bc": [
+      "ops/reviews/pr493-review-3-codex-verdict.md"
+    ],
+    "b004da995d664343bb1b62125ed49281f2371360": [
+      "ops/reviews/pr493-review-4-codex-verdict.md"
+    ],
+    "f5098dd69e1f998f81165734340b500f0940034b": [
+      "ops/reviews/pr493-review-5-codex-verdict.md"
+    ],
+    "2c57e99a35c542b3098cf701be12809e44b0b5dd": [
+      "ops/reviews/pr493-review-6-codex-verdict.md"
+    ],
+    "a4bc01dc45520629cb889da506a10925a3ecd2b0": [
+      "ops/reviews/pr493-review-7-codex-verdict.md"
+    ],
+    "025c6b2d2e89e71ea2bf5b2d0167fdd04566428e": [
+      "ops/reviews/pr493-review-8-codex-verdict.md"
+    ],
+    "dd4a3ae8e551ea07445c79fa3274249285f15e42": [
+      "ops/reviews/pr493-review-9-codex-verdict.md"
+    ],
+    "e82673014baefca23b50663cecad80fdbde79b3b": [
+      "ops/reviews/pr497-review-1-codex-verdict.md"
+    ],
+    "a6dcdbe57e823da297cc7d38f89a95c569190d27": [
+      "ops/reviews/pr497-review-10-codex-verdict.md"
+    ],
+    "5271e997a22282d9f840ab8d54470022fc610f02": [
+      "ops/reviews/pr497-review-11-codex-verdict.md"
+    ],
+    "1d58500b2ecaf7ccd38dcc6f8ad9bf0dbf13c77e": [
+      "ops/reviews/pr497-review-2-codex-verdict.md"
+    ],
+    "4e6a2d59386335f966bfb7160e98af02ae30d1ec": [
+      "ops/reviews/pr497-review-3-codex-verdict.md"
+    ],
+    "25974e78ac4dbeb67db5f797b08b4dd276d0d666": [
+      "ops/reviews/pr497-review-4-codex-verdict.md"
+    ],
+    "f6ec9c0650de2716776e8b58a63b3141095097fa": [
+      "ops/reviews/pr497-review-5-codex-verdict.md"
+    ],
+    "e27d839602e6691227181188886f07e2a446ff7d": [
+      "ops/reviews/pr497-review-6-codex-verdict.md"
+    ],
+    "df09f3eebf88a148f6bedfe5e5f5bf3ea8433519": [
+      "ops/reviews/pr497-review-7-codex-verdict.md"
+    ],
+    "c912945c0bcbec5e602ff931d2490d18c2a0d47d": [
+      "ops/reviews/pr497-review-8-codex-verdict.md"
+    ],
+    "8de21bee0460bfe89b13ece2bafaa3a113593441": [
+      "ops/reviews/pr497-review-9-codex-verdict.md"
+    ],
+    "5a29d358649c9d70632cd2aa2e5cb8ac53884dc8": [
+      "ops/reviews/pr500-review-1-codex-verdict.md"
+    ],
+    "aad3d017b087c5c029e33e1b8d96b7b79d634d73": [
+      "ops/reviews/pr500-review-2-codex-verdict.md"
+    ],
+    "62c299aa9674aade08263504399539eb60eb89b7": [
+      "ops/reviews/pr505-review-1-codex-verdict.md"
+    ],
+    "de49fa0d077a2a00e9f936240378979a8ebc080c": [
+      "ops/reviews/pr505-review-10-codex-verdict.md"
+    ],
+    "6254570b0604b42f9474091b9818dba9cd2b8704": [
+      "ops/reviews/pr505-review-2-codex-verdict.md"
+    ],
+    "c851f8005c0493799df87f87e3e4d586e2746634": [
+      "ops/reviews/pr505-review-3-codex-verdict.md"
+    ],
+    "2b52173529365ea04c854c738a1578a97c55a65a": [
+      "ops/reviews/pr505-review-4-codex-verdict.md"
+    ],
+    "19337fad89ff7fdb47475105d7bdde6e910aedf0": [
+      "ops/reviews/pr505-review-5-codex-verdict.md"
+    ],
+    "301aac8e09b2195e0a8e53426d302c910b2a2484": [
+      "ops/reviews/pr505-review-6-codex-verdict.md"
+    ],
+    "8726a1c91ac913da041ed021cc787c71ab57ffc6": [
+      "ops/reviews/pr505-review-7-codex-verdict.md"
+    ],
+    "81af1c90f21e7a7d861200f3a18b3707e0879162": [
+      "ops/reviews/pr505-review-8-codex-verdict.md"
+    ],
+    "3ae4f6157636949b2941a218deba5dbaa7df1d30": [
+      "ops/reviews/pr505-review-9-codex-verdict.md"
+    ],
+    "1e36bb42e42a34751feae4d312d9cc48a466bc3f": [
+      "ops/reviews/pr506-review-1-codex-verdict.md"
+    ],
+    "88e89b3afcb547326ad4233c2b806538ddaeb37b": [
+      "ops/reviews/pr506-review-2-codex-verdict.md"
+    ],
+    "4918d5f073464b5136c4c0c6a3d538347fec2baa": [
+      "ops/reviews/pr508-review-1-codex-verdict.md"
+    ],
+    "c1bfabc52616dc37b086e5462424aed0be3439f9": [
+      "ops/reviews/pr508-review-2-codex-verdict.md"
+    ],
+    "0236ca705aebc46a82428d7b23ccd1b0a2cdb647": [
+      "ops/reviews/pr508-review-3-codex-verdict.md"
+    ],
+    "3349c8b2e2b544ce98c2ea088e6c09d71b1092f0": [
+      "ops/reviews/pr510-review-1-codex-verdict.md"
+    ],
+    "656f2dcb0424867fd68185e54354f86f5d97ec5d": [
+      "ops/reviews/pr510-review-2-codex-verdict.md"
+    ],
+    "51466e6e468f0b92997baadb1f64dfa55a926859": [
+      "ops/reviews/pr511-review-1-codex-verdict.md"
+    ],
+    "6adb7ffbb82507b936e1bd6a7b922c237d8f6f3c": [
+      "ops/reviews/pr511-review-2-codex-verdict.md"
+    ],
+    "899f305997544dc78947af6dd58aa490ed3538f3": [
+      "ops/reviews/pr516-review-1-codex-verdict.md"
+    ],
+    "a41fc69f1d06a2976968a2830c19623eb2e8fd29": [
+      "ops/reviews/pr516-review-2-codex-verdict.md"
+    ],
+    "5f45e6e99bcd4cf8a410b99031d4a600bf5e83bb": [
+      "ops/reviews/pr516-review-3-codex-verdict.md"
+    ],
+    "c98c33eb3e3260a10cd98dc0a6118981a45b7639": [
+      "ops/reviews/pr516-review-4-codex-verdict.md",
+      "ops/reviews/pr516-review-5-codex-verdict.md"
+    ],
+    "86f87b2004f6054572cc787ae660518763b29b95": [
+      "ops/reviews/pr517-review-1-codex-verdict.md"
+    ],
+    "458314a9c4792c96c513d62e462f68b13c1b3d63": [
+      "ops/reviews/pr517-review-2-codex-verdict.md"
+    ],
+    "da04323199331bf9de1d05f3feb233db9afb57f8": [
+      "ops/reviews/pr517-review-3-codex-verdict.md"
+    ],
+    "36acc5235057779d861eff08988a9469b17e513a": [
+      "ops/reviews/pr521-review-5-codex-verdict.md"
+    ],
+    "e849e2eb341801155cd20341b9f77b5116329dcc": [
+      "ops/reviews/pr521-review-6-codex-verdict.md"
+    ],
+    "aaef55bf77f061015d46b14411475d7f448beb05": [
+      "ops/reviews/pr521-review-7-codex-verdict.md"
+    ],
+    "91bbc824e017268629b77308e1027a0a0a462fe0": [
+      "ops/reviews/pr521-review-8-codex-verdict.md"
+    ],
+    "7bdd8ad60ba257ea3a80848846ef82d85a17d870": [
+      "ops/reviews/pr526-review-3-codex-verdict.md"
+    ],
+    "e46f5693461ee2ffffc8e58f13f5c37ea934791e": [
+      "ops/reviews/pr690-luot3-opus55-max/VERDICT.md"
+    ],
+    "b137bd809b1eaf5a06372703bb0a580ea967689d": [
+      "ops/reviews/pr690-luot4-opus55-max-b137bd8/VERDICT.md"
+    ],
+    "8757a8406489a306736c8257a7933546b8c81042": [
+      "ops/reviews/pr690-luot5-opus55-max-8757a84/VERDICT.md"
+    ],
+    "0ce1ad3903321f5e45a753eb1d0714ea9ee2aed8": [
+      "ops/reviews/pr690-luot6-opus55-max-0ce1ad3/VERDICT.md"
+    ],
+    "302a15dd56c58918a4ca9e4965eb54907204a9f9": [
+      "ops/reviews/pr690-luot7-opus55-max-302a15d/VERDICT.md"
+    ],
+    "fafbe1556ebc73b81252737cbdec9de4b00860ad": [
+      "ops/reviews/pr787-bookkeeping-review-1-codex/VERDICT.md"
+    ],
+    "ab4cd428f5a01d69ead7825108593f1092fe78fd": [
+      "ops/reviews/pr787-bookkeeping-review-2-codex/VERDICT.md"
+    ],
+    "8e150cf0d9f046a761c49448c8173ad501f53a1c": [
+      "ops/reviews/pr821-bookkeeping-review-1-codex/VERDICT.md"
+    ],
+    "a982787024a953a6266aa33c842453deadafd1f3": [
+      "ops/reviews/pr821-bookkeeping-review-2-codex/VERDICT.md"
+    ],
+    "c9c8a8247b102e51a550b9b5356d9e6f33e39eb8": [
+      "ops/reviews/pr838-luot9-sonnet55-max-c9c8a82/VERDICT.md"
+    ],
+    "b38fce83d0e97981012072ca2a2023ac726e5b2e": [
+      "ops/reviews/pr870-review-1-codex/VERDICT.md"
+    ],
+    "06a50c5feea77c2654f31edd26efeed7eeee62f5": [
+      "ops/reviews/pr870-review-2-codex/VERDICT.incremental.md",
+      "ops/reviews/pr870-review-2-codex/VERDICT.md",
+      "ops/reviews/pr870-review-3-codex/VERDICT.md",
+      "ops/reviews/pr896-review-2-codex/VERDICT.md",
+      "ops/reviews/pr915-review-1-codex/VERDICT.md",
+      "ops/reviews/pr915-review-1-codex/VERDICT.md"
+    ],
+    "8d5cccbb13b0b2c5ba1c9bbc4f8af410a19f87b8": [
+      "ops/reviews/pr889-review-1-codex/VERDICT.md"
+    ],
+    "094e8d17ae4dfcf21dca63702c9262267bdc072c": [
+      "ops/reviews/pr889-review-2-codex/VERDICT.md",
+      "ops/reviews/pr889-review-3-codex/VERDICT.md",
+      "ops/reviews/pr896-review-2-codex/VERDICT.md",
+      "ops/reviews/pr915-review-1-codex/VERDICT.md",
+      "ops/reviews/pr915-review-1-codex/VERDICT.md"
+    ],
+    "816f43988eb3012726120ad00166a989cc2b9af6": [
+      "ops/reviews/pr896-review-1-codex/VERDICT.md",
+      "ops/reviews/pr915-review-1-codex/VERDICT.md"
+    ],
+    "8d56009a09af7b3ef93801df105f9483de212cc7": [
+      "ops/reviews/pr896-review-2-codex/VERDICT.md"
+    ],
+    "2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f": [
+      "ops/reviews/pr896-review-2-codex/VERDICT.md",
+      "ops/reviews/pr915-review-1-codex/VERDICT.md"
+    ],
+    "82359c4deec90edebbaebf9ab9d094902120b567": [
+      "ops/reviews/pr896-review-3-codex/VERDICT.md"
+    ],
+    "2e4183bc2dc40e6bc306e377fc442ff0f405bbe0": [
+      "ops/reviews/pr896-review-4-codex/VERDICT.md"
+    ],
+    "1a276a15192013fdb1e472db409133b53ac57944": [
+      "ops/reviews/pr896-review-5-codex/VERDICT.md",
+      "ops/reviews/pr896-review-5-codex/review_evidence/VERDICT.progress.md"
+    ],
+    "22382d8c800bed7b995d093cdcfdc206360d7fd4": [
+      "ops/reviews/pr896-review-6-codex/VERDICT.md",
+      "ops/reviews/pr896-review-6-codex/luot-hong-c0fa33fa/VERDICT.partial.md",
+      "ops/reviews/pr896-review-6-codex/review_evidence/VERDICT.progress.md"
+    ],
+    "05bc12e2b9008071ca28edbd4574e58644d48220": [
+      "ops/reviews/pr896-review-7-codex/VERDICT.md",
+      "ops/reviews/pr896-review-7-codex/luot-hong-577bb136/VERDICT.partial.md",
+      "ops/reviews/pr896-review-7-codex/review_evidence/VERDICT.progress.md"
+    ],
+    "8c425b1934ec416dc9001da19b5f30eedcebd7d5": [
+      "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.md"
+    ],
+    "867dd8585770a6d9e63bfe6feb870bca92d2aecb": [
+      "ops/reviews/r356-fixture-phu-thuoc-nen-review-1-codex-verdict.md"
+    ],
+    "581afd26b2d8d990385fc82f5a4d9f6e916bbd8c": [
+      "ops/reviews/r356-fixture-phu-thuoc-nen-review-2-codex-verdict.md"
+    ],
+    "15f824d29b6e72b0b8f0bcc14328ba85531280ef": [
+      "ops/reviews/slice-b-c-human-audit-ducthangho-verdict.md"
+    ],
+    "181bd7f822f84a528da4cfde810d240bcc726dbf": [
+      "ops/reviews/slice-b-c-review-1-codex-verdict.md"
+    ],
+    "175e95bd68556d38a7dde517ce858cb27e821097": [
+      "ops/reviews/slice-b-c-review-2-codex-verdict.md"
+    ],
+    "0b1ca263c83bc42b8da517b1c92cde3fdb39b530": [
+      "ops/reviews/spec-kg-rang-test/luot1-VERDICT.md"
+    ],
+    "5e34b5d439cc4759f038091899f4b74d5ea2e4c5": [
+      "ops/reviews/spec-kg-rang-test/luot2-VERDICT.md"
+    ],
+    "435dd91ac6db79fe681daf213412723d40a82571": [
+      "ops/reviews/spec-kg-rang-test/luot3-VERDICT.md"
+    ],
+    "a5305449893109a62fe04f9a7f4ae2d7fd27534e": [
+      "ops/reviews/spec-kg-rang-test/luot4-VERDICT.md"
+    ],
+    "efcf5757403bd989c0ebbd388fa7a7180171b49f": [
+      "ops/reviews/t33-doi-shellcheck-review-1-codex-verdict.md",
+      "ops/reviews/t33-doi-shellcheck-review-2-codex-verdict.md"
+    ],
+    "3239279b8763b8950bc2f3289f680e5fb25d993d": [
+      "ops/reviews/t33-doi-shellcheck-review-3-codex-verdict.md"
+    ],
+    "ee545cf5afaa0b3286b3cf7fe13dd12ee1ec94f3": [
+      "ops/reviews/t33-doi-shellcheck-review-4-codex-verdict.md"
+    ],
+    "525c824e29cdf035af5b4061ffd492be0a783f4a": [
+      "ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.md"
+    ],
+    "f8a37c046f37f1b094d125b3a0c9f833bd0e83a7": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot1-VERDICT.md"
+    ],
+    "8eb076b6d5ff41feafa723829d126e2c34c8ba3b": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot10-VERDICT.md"
+    ],
+    "981b9ea1d4bfaa0511cfbc8d9bdee9d8c151c86f": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot2-VERDICT.md"
+    ],
+    "79b8ec7b71b04f7b9bdaffebe930fbb9965cd118": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot3-VERDICT.md"
+    ],
+    "33e19c4121d32aeb4497c28214d7d3ffa20c9c08": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot4-VERDICT.md"
+    ],
+    "43a17e1e30a570b26e50eecbf00dab1ec1875f8d": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot5-VERDICT.md"
+    ],
+    "635e9a23a3bc7106adbc7af862cb505277b6312c": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot6-VERDICT.md"
+    ],
+    "7fc28680dd79fd5088555cd393bda380581e4aac": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot7-VERDICT.md"
+    ],
+    "4abfdeb596c7e5e744e0354a7bad1b775da54c38": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot8-VERDICT.md"
+    ],
+    "3f1bf2e2e5a77ec2bb1a40bb65b8c26410a3ff12": [
+      "ops/reviews/thu-hoi-lease-a1a-r2/luot9-VERDICT.md"
+    ],
+    "1503ca8c076c466dbc560c6b6e146d3958b7271e": [
+      "ops/reviews/thu-hoi-lease-a1b/luot3-VERDICT.md"
+    ],
+    "52831cca2335a9237bcd846f72f72fabcc913caf": [
+      "ops/reviews/thu-hoi-lease-a1b/luot4-VERDICT.md"
+    ],
+    "b124b64be5fdc3ae1dbe77acbfd7a9742ec7745c": [
+      "ops/reviews/thu-hoi-lease-a1b/luot5-VERDICT.md"
+    ],
+    "7af8e0a7d7b2a35dc8b1db964d574112d235ffc1": [
+      "ops/reviews/thu-hoi-lease-a1b/luot6-VERDICT.md"
+    ],
+    "f5a6b1d222179f9a00d4a6331037e059d25353d8": [
+      "ops/reviews/thu-hoi-lease-a1b/luot7-VERDICT.md"
+    ],
+    "b416830ef2a509d60203d55552ce17950afcf67c": [
+      "ops/reviews/thu-hoi-lease-va-cap-lai-spec/luot5-VERDICT.md",
+      "ops/reviews/thu-hoi-lease-va-cap-lai-spec/luot6-VERDICT.md",
+      "ops/reviews/thu-hoi-lease-va-cap-lai-spec/luot7-VERDICT.md",
+      "ops/reviews/thu-hoi-lease-va-cap-lai-spec/luot8-VERDICT.md"
+    ],
+    "825558a59fd93623dd2f2c9123577361e9e3abca": [
+      "ops/reviews/tri-thuc-review-1-codex-verdict.md"
+    ],
+    "15d1b103e8d4dec60f96049eb5ad9b16d436d63f": [
+      "ops/reviews/wp523-r14-review-1-codex-verdict.md"
+    ],
+    "f2aa1f9fd0dc0d7914c2f5ce34563f60fdec3f72": [
+      "ops/reviews/wp538-review-1-claude-verdict.md"
+    ],
+    "7c21bf60f062d0076370fc8144e382962cd817ba": [
+      "ops/reviews/wp538-review-2-claude-verdict.md"
+    ],
+    "7c7ad450258c640bc207c17f7f5a60077081419c": [
+      "ops/reviews/wp540-review-1-claude-verdict.md"
+    ],
+    "2170a4a4ce93fba8e7ba316da1ca51a0104dba96": [
+      "ops/reviews/wp541-review-1-claude-verdict.md"
+    ],
+    "e60c757aa5353b4ca770beb83db25090597d9503": [
+      "ops/reviews/wp541-review-2-claude-verdict.md"
+    ],
+    "cf39109c9e5167516c53f2071e5fa7ec5c6afff5": [
+      "ops/reviews/wp55-r2-review-4-codex-verdict.md",
+      "ops/reviews/wp55-r2-review-4-codex-verdict.md"
+    ],
+    "546ecf9fd4dfe889d0cd3ee77b9589d8bed0465f": [
+      "ops/reviews/wp55-r2-review-5-codex-verdict.md"
+    ],
+    "2432e3f64f05739741dfe6f49081e9aaa140799f": [
+      "ops/reviews/wp55-r4-review-1-codex-verdict.md"
+    ],
+    "817598e2a3101c1e550dcba59bd7caea093264f6": [
+      "ops/reviews/wp55-r4-review-2-codex-verdict.md"
+    ],
+    "9a5b05cfd8804455dd785b8fe710736773dc78cf": [
+      "ops/reviews/wp55-r4-review-di-tru-codex-verdict.md",
+      "ops/reviews/wp55-r4-review-di-tru-codex-verdict.md"
+    ],
+    "c44b2d4c351cbe7f519e1b46aadf68d45e98af86": [
+      "ops/reviews/wp55-r4-review-rebase-codex-verdict.md"
+    ],
+    "c47a439997e0191427d775636ebadbf3be7e1481": [
+      "ops/reviews/wp55-r4-review-viet-lai-codex-verdict.md",
+      "ops/reviews/wp55-r4-review-viet-lai-codex-verdict.md"
+    ],
+    "57bb4b369639167f04d8dff06454ead0eaa76f62": [
+      "ops/reviews/wp678-exec-human-audit-ducthangho-verdict.md"
+    ],
+    "f80924940c706626902090269a4f81b7e5b12da6": [
+      "ops/reviews/wp678-exec-review-1-claude-verdict.md"
+    ],
+    "7a3a2f6a51aef316c2fe36b5e8559d5d6acd49ee": [
+      "ops/reviews/wp678-exec-review-2-claude-verdict.md"
+    ],
+    "0dd86c6687ff3906f67649798b65650277d34204": [
+      "ops/reviews/wp678-exec-review-3-claude-verdict.md"
+    ],
+    "6a7220a6b4d11b3c173ce20812825b57dd706668": [
+      "ops/reviews/wp678-exec-review-4-claude-verdict.md"
+    ],
+    "342e62c7a23fe03780539e2395c1e24832648c91": [
+      "ops/reviews/wp678-spec-review-1-codex-verdict.md"
+    ],
+    "42292b4219901137607d3fd9adda26d49f7cfd5e": [
+      "ops/reviews/wp678-spec-review-10-claude-verdict.md"
+    ],
+    "e48423a2719f64a5dfa2f85363874dfadf6c10f8": [
+      "ops/reviews/wp678-spec-review-11-claude-verdict.md"
+    ],
+    "d5a57c1ac152c344eef1c3b2cfdee310bba35200": [
+      "ops/reviews/wp678-spec-review-12-claude-verdict.md"
+    ],
+    "35e7f9c8940295d0e0d50eb676fb34394e7acd2d": [
+      "ops/reviews/wp678-spec-review-13-claude-verdict.md"
+    ],
+    "284a03fa6eff0356a79cca2926b889a6a98896f0": [
+      "ops/reviews/wp678-spec-review-14-claude-verdict.md"
+    ],
+    "b53362159766f51c1a03c5eac65efd94544d8ce9": [
+      "ops/reviews/wp678-spec-review-15-claude-verdict.md"
+    ],
+    "e39b73ed6f054178211c228e7d886eb9ed981f43": [
+      "ops/reviews/wp678-spec-review-16-claude-verdict.md"
+    ],
+    "cd25aba0fab9831dd7e87ba378b7429fa0602166": [
+      "ops/reviews/wp678-spec-review-17-codex-verdict.md"
+    ],
+    "aecdccd32b748fd5694231976193ade2e34ea10d": [
+      "ops/reviews/wp678-spec-review-2-codex-verdict.md"
+    ],
+    "4c1915c9d5cd1008699499d0aff13914f390f06c": [
+      "ops/reviews/wp678-spec-review-3-codex-verdict.md"
+    ],
+    "a9019a911a4fe2770ede5abafebc41afbd97aa16": [
+      "ops/reviews/wp678-spec-review-4-codex-verdict.md"
+    ],
+    "00d2ee3e911fbc0ef1978a19eab3da91580f3fa6": [
+      "ops/reviews/wp678-spec-review-5-codex-verdict.md"
+    ],
+    "03a7219c9f3df4e6304f499b79df968aa7d386cb": [
+      "ops/reviews/wp678-spec-review-6-codex-verdict.md"
+    ],
+    "088511f1fd75faf9bf01f0cf8da037a14fa6d22d": [
+      "ops/reviews/wp678-spec-review-7-claude-verdict.md"
+    ],
+    "f958e147754bed8e9e7034dd28450681f19c3db0": [
+      "ops/reviews/wp678-spec-review-8-claude-verdict.md"
+    ],
+    "2469f3ebed51dc228319cf375d7912bf7dbc0947": [
+      "ops/reviews/wp678-spec-review-9-claude-verdict.md"
+    ],
+    "3089b54455a44b8cfcf2fd27b01894bc2a5d764d": [
+      "ops/reviews/wp685-r28-g5-exec-review-1-codex/VERDICT.md",
+      "ops/reviews/wp685-r28-g5-exec-review-2-codex/VERDICT.md"
+    ],
+    "3b3d64422adb9a6200071244bfe2a14e42d0dd4a": [
+      "ops/reviews/wp698-exec-review-g2-1-claude-verdict.md"
+    ],
+    "5d889bab2ad227d31b1ff800c3158967c65d1ef0": [
+      "ops/reviews/wp698-exec-review-g2-2-claude-verdict.md"
+    ],
+    "786bf3baf5afa9a5735d79cc06e8f2ca23cda6bd": [
+      "ops/reviews/wp698-spec-review-12-claude-verdict.md"
+    ],
+    "a2734e5c6ad88a9789ed8d5426c1ac08cc2964a4": [
+      "ops/reviews/wp698-spec-review-13-claude-verdict.md"
+    ],
+    "d17ec09088acf674a05638345f7b3ec28ff03c6d": [
+      "ops/reviews/wp698-spec-review-14-claude-verdict.md"
+    ],
+    "c54b502bff2aaf3e9a40f8b0b37a657fa09174c1": [
+      "ops/reviews/wp698-spec-review-2-claude-verdict.md"
+    ],
+    "276a65f4514034f359ae55c13caa5e0a6d7db1c4": [
+      "ops/reviews/wp698-spec-review-3-claude-verdict.md"
+    ],
+    "42cd314ca070e8e542fbd291b398690c2e5e54fd": [
+      "ops/reviews/wp698-spec-review-4-claude-verdict.md"
+    ],
+    "0927794a3b43b431c363fe96cfe7c7c07758dd76": [
+      "ops/reviews/wp698-spec-review-5-claude-verdict.md"
+    ],
+    "e3e3e264b6bc025a8cb27884c4a8752787758c1c": [
+      "ops/reviews/wp698-spec-review-6-claude-verdict.md"
+    ],
+    "de337db6c4bafe1b202e02d70f4a2fb27ce87173": [
+      "ops/reviews/wp698-spec-review-7-claude-verdict.md"
+    ],
+    "80947fc16bee1d4ae0571986bcfecbfcb52223b2": [
+      "ops/reviews/wp710-exec-review-1-codex-verdict.md"
+    ],
+    "3903e705d230da3a3d7efb2d6bbfd780899d6f40": [
+      "ops/reviews/wp710-exec-review-2-codex-verdict.md"
+    ],
+    "cc020e02607bc27eb2a815e1ac282380a155820d": [
+      "ops/reviews/wp710-exec-review-3-codex-verdict.md"
+    ],
+    "6a8c8b593d9538864e53ac5f7f495ff2f1b7c379": [
+      "ops/reviews/wp710-exec-review-9-codex-verdict.md"
+    ],
+    "80e0fac0a4ab8c74486cf3bab1a73e1dec600994": [
+      "ops/reviews/wp743-r1-g1-exec-review-1-codex/VERDICT.md"
+    ],
+    "701f41c686cef8456d43528ab9556a6b867cd7d6": [
+      "ops/reviews/wp766-r1-g1-exec-review-1-codex/VERDICT.md"
+    ],
+    "8ff40b14c241c506bdcafbed414fe6edf9544c28": [
+      "ops/reviews/wp773-r1-g1-exec-review-1-codex/VERDICT.md"
+    ],
+    "bf5993aaf81a2af72dc533c0d640485f8e47f2ec": [
+      "ops/reviews/wp773-r1-g1-exec-review-2-codex/VERDICT.md"
+    ],
+    "5250883f3222a277df7c0eba50f2f9a3e0b45fa1": [
+      "ops/reviews/wp773-r1-g1-exec-review-3-codex/VERDICT.md"
+    ],
+    "a3cfc53b00cf2476ebef202201e416c01ad9b637": [
+      "ops/reviews/wp773-r1-g1-exec-review-4-codex/VERDICT.md"
+    ],
+    "a5dc392b0ad2bec3b1277f5f41665ca176982c43": [
+      "ops/reviews/wp773-r1-g1-exec-review-5-codex/VERDICT.md"
+    ],
+    "f9045bff735937e7f00ea009f6811ce8b5494ffc": [
+      "ops/reviews/wp773-r1-g1-exec-review-6-codex/VERDICT.md"
+    ],
+    "98d7d2501f0c35f6a150bdd41eaf610bc1bc92ed": [
+      "ops/reviews/wp773-r1-g1-exec-review-7-codex/VERDICT.md"
+    ],
+    "93ef97e8b03dd1b2e344cdfe4afc660edd899ac8": [
+      "ops/reviews/wp773-r1-g1-exec-review-8-codex/VERDICT.md"
+    ],
+    "8b496f9e9909496ab6a66e502ed334e31b24c3b1": [
+      "ops/reviews/wp773-r1-g1-exec-review-9-codex/VERDICT.md"
+    ],
+    "128b2e892f91dd353367c082bfc9cf2c300ecfb7": [
+      "ops/reviews/wp773-r3-g3-exec-review-1-codex/VERDICT.md"
+    ],
+    "92df2756e2018f833da34211afbf8b20ebbdcc6e": [
+      "ops/reviews/wp773-r3-g3-exec-review-2-codex/VERDICT.md"
+    ],
+    "6f69f9de6675058a22f70697634f833b9a193f20": [
+      "ops/reviews/wp773-r3-g3-exec-review-3-codex/VERDICT.md"
+    ]
+  }
+}

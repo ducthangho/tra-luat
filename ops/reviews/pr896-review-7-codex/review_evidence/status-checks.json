@@ -1,0 +1,140 @@
+{
+  "yaml_paths": 368,
+  "inventory_counts": {
+    "unanchored_candidates": 1759,
+    "anchored_candidates": 398,
+    "readme": 517
+  },
+  "unreviewed_heads": [
+    {
+      "oid": "17f4a1b85b8d5146c5e6dddbdc40f11111a659f7",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "efa397eb2515658a1e3e9b4cdfd6e887b492b957",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "99aef141796ebce7044c9f5c0c8a1a3b3d673d8e",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "5a96c1ac8cec1c9958094f92e716941faa47aac5",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "888c0d9b68136f384068ecad8e286819bb175044",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "bf10fab792473bc69dd377c7445978950c4d77a0",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "288ad3ea79ef94e061b649effe7bee2c7e2a0a9b",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "b5b6aefa66a8ad037ff34430d0210f3b6873913f",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    },
+    {
+      "oid": "3ddda026da41b0bb162a3785b93dbb953a298203",
+      "receipt_matches": [],
+      "verdict_header_matches": []
+    }
+  ],
+  "nonancestors": [
+    {
+      "oid": "4bc94325e647ee5e32373f3af30b8f83b98a90fa",
+      "master_rc": 1,
+      "candidate_rc": 1
+    },
+    {
+      "oid": "604b8d9a7c5948a9c0690312f1220830d545b52c",
+      "master_rc": 1,
+      "candidate_rc": 1
+    },
+    {
+      "oid": "82359c4deec90edebbaebf9ab9d094902120b567",
+      "master_rc": 1,
+      "candidate_rc": 0
+    },
+    {
+      "oid": "2e4183bc2dc40e6bc306e377fc442ff0f405bbe0",
+      "master_rc": 1,
+      "candidate_rc": 0
+    },
+    {
+      "oid": "1a276a15192013fdb1e472db409133b53ac57944",
+      "master_rc": 1,
+      "candidate_rc": 0
+    },
+    {
+      "oid": "d308b0b1bbcb0db2e1624e4eda6431f73ace453f",
+      "master_rc": 1,
+      "candidate_rc": 0
+    },
+    {
+      "oid": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "master_rc": 1,
+      "candidate_rc": 0
+    },
+    {
+      "oid": "825dab1c8771113caeb3c5b77c61e89e27d7e292",
+      "master_rc": 1,
+      "candidate_rc": 0
+    },
+    {
+      "oid": "05bc12e2b9008071ca28edbd4574e58644d48220",
+      "master_rc": 1,
+      "candidate_rc": 0
+    }
+  ],
+  "unmerged_specs": [
+    {
+      "path": "ops/specs/wp775.md",
+      "master_ls_tree": "",
+      "candidate_ls_tree": ""
+    },
+    {
+      "path": "ops/specs/wp484-r8.md",
+      "master_ls_tree": "",
+      "candidate_ls_tree": ""
+    }
+  ],
+  "archival_contexts": [
+    {
+      "path": "ops/land/pr696-wp668-land-evidence.yaml",
+      "field": "do_luc",
+      "anchor_text": "2026-09-30T10:53Z..11:37Z (worktree claude/bookkeeping-668 @ bc57bca, core.abbrev 7)"
+    },
+    {
+      "path": "ops/land/pr684-wp677-land-evidence.yaml",
+      "field": "trang_thai_packet.packet_landed_ghi_chu",
+      "anchor_text": "PROTOCOL §10: `landed` la trang thai cua PACKET (ma o exact SHA duoc duyet + hau-merge gate xanh + bookkeeping). PR #684 chi dua SPEC vao master; ma cua packet nam o PR #689 (TAI THOI DIEM merge #684: chua review xong, chua merge). Trang thai hien tai cua #689 KHONG doc tu tep nay. Packet #677 MO tai thoi diem ay. TAI THAO TAC MERGE #684 (~12:39Z): lease thi cong hieu luc la g3 (dot-bien-l-bien-cong-khai-exec-3-claude-20260929, commit d957b90), giu ops/lease_publish_test.py cho executor; ho so nay KHONG thu hoi lease nao. Sau merge (b): g3 bi thay bang g4 luc ~16:5xZ (ops/cap-lease-677-g2 c27a0a2, issues/677#issuecomment-5894685680). Ho so nay KHONG phai readback trang thai lease hien tai — hoi `ai-dang-giu`."
+    }
+  ],
+  "hint_history": [
+    {
+      "historical": "c8c1ee015f78fdb143a18cf926f9f3481c2a3dd1",
+      "apply_commit": "2e4183bc2dc40e6bc306e377fc442ff0f405bbe0",
+      "apply_parent": "c8c1ee015f78fdb143a18cf926f9f3481c2a3dd1",
+      "direct_child": true
+    },
+    {
+      "historical": "77a0a458c6c06f3aafa118953e8e2771daaed911",
+      "apply_commit": "1a276a15192013fdb1e472db409133b53ac57944",
+      "apply_parent": "77a0a458c6c06f3aafa118953e8e2771daaed911",
+      "direct_child": true
+    }
+  ]
+}

@@ -107,6 +107,5 @@ verdict_usage_caveats:
       Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 816f439.
   - id: P2-DA-VA-CHUA-REVIEW-LAI
     muc: P2
-    mo_ta: >-
-      P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor.
+    mo_ta: "Anh chup lich su tai commit ghi bien nhan 2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f: P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor. Sau moc ay, pr896-review-2-codex-verdict.md da review ban va tai 8d56009a09af7b3ef93801df105f9483de212cc7. Vi vay cau CHUA review/Chua dong o tren chi thuoc moc lich su; doc ket qua dong/mot phan/loi moi trong verdict ke tiep, khong suy thanh approve hay quyen land."
 nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

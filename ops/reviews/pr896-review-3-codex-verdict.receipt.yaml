@@ -1,0 +1,140 @@
+# BIEN NHAN GIAO HANG — cross-review luot 3 cua PR #896, cham ban va P1 cua luot 2 tai 82359c4 (head PR #947, CHUA merge).
+# Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run 513131e0` (ghi model_phuc_vu). `changes_requested` 0/2/1/0.
+# Tep verdict la BAN SAO NGUYEN BYTE cua ops/reviews/pr896-review-3-codex/VERDICT.md. Chu kho giao "ap HINT.patch roi chay review lai" ngay 26-10-2026.
+# Ghi so boi phien DIEU PHOI review session_01WZT2MvvoQV8QGF1vX9STrJ — KHONG phai phien executor cua #896/#915/#946;
+# phien dieu phoi KHONG viet verdict, chi dung sandbox, goi CLI, va ap HINT.patch luot 2 (commit 82359c4) theo yeu cau chu kho.
+# Nhan: (a) DO tu kho/tep luc ghi so 2026-10-26 · (b) THUAT LAI · KHONG_DO_DUOC.
+# Khuon: ops/reviews/pr896-review-2-codex-verdict.receipt.yaml.
+
+schema_version: 2
+receipt_id: pr896-review-3-codex-39eabe6e
+kind: review_delivery_receipt
+packet_id: KHONG_AP_DUNG
+packet_ghi_chu: >-
+  (b) Viec chu kho giao truc tiep trong phien, KHONG phai work packet: khong Issue packet, khong lease, khong spec_hash.
+target_pull_request: 947
+target_pull_request_ghi_chu: >-
+  (a) Chuoi review cua #896: luot 1 (816f439), luot 2 (8d56009), luot 3 (82359c4). Luot 3 cham head cua PR ghi so #947,
+  noi ban va P1 cua luot 2 duoc ap.
+land_merge_commit: KHONG_AP_DUNG
+land_merge_commit_ghi_chu: '(a) 82359c4 chua merge luc ghi so.'
+luot: 3
+luot_ghi_chu: >-
+  (a) Luot 2: pr896-review-2-codex (changes_requested 0/1/0/0 tren 8d56009, P1 verdict-surface-bo-sot-pr889-luot1).
+  Prompt dua verdict luot 2 de doi chieu.
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: standard
+review_class_ghi_chu: >-
+  (b) Khong co lease/Issue khai Review Class. Ban va duoc giao: 578fb4b..82359c4 2 tep +5/-0 (numstat.txt); toan PR #947 so master
+  356eb26: numstat-pr947.txt.
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Verdict `changes_requested` (2 P1, 1 P2) nen khong len cross_approved du ho model reviewer do_may.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 3 `Kết quả: 0 P0, 2 P1, 1 P2, 0 P3.`'
+verdict_path: ops/reviews/pr896-review-3-codex-verdict.md
+verdict_sha256: 39eabe6ef4e169e39e4650f91a045f3c21079f8f8745baf3e2957f002184fdfb
+verdict_bytes: 34175
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/pr896-review-3-codex/VERDICT.md, chep nguyen byte tu sandbox reviewer; tep phang la ban sao `cp`, cmp khop, cung sha256 (SHA256SUMS cua thu muc).
+reviewed_sha: 82359c4deec90edebbaebf9ab9d094902120b567
+reviewed_tree: 32cf81c2614a91c7ced8fc77781b01dcb12fc8a7
+reviewed_sha_nguon: >-
+  (a) dong 2 tep verdict; run.json `head` = reviewed_sha; `git rev-parse 82359c4^{tree}` = reviewed_tree; 82359c4 la commit tren
+  nhanh claude/pr896-review-2-codex (PR #947).
+base_sha: 356eb262cbd491b9599b56d5f7c41c93dd9a28a1
+base_sha_ghi_chu: '(a) master tai luc dung sandbox (merge #948); diff-pr947.patch = git diff 356eb26..82359c4.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/cca89d51cdd430a180c28626cd0f030f9bbdc738/ops/reviews/pr896-review-3-codex-verdict.md
+evidence_url_ghi_chu: >-
+  (a) Neo BLOB ghim commit cca89d5 cua nhanh claude/pr896-review-2-codex — commit CHI mang hien vat verdict; bien nhan di o commit sau.
+so_p0: 0
+so_p1: 2
+so_p2: 1
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict.'
+
+ket_luan_finding_cu:
+  p1_pr896_review_2: >-
+    (a) DA DONG theo verdict muc "KET LUAN VE FINDING CU": receipt pr889-review-1 co caveat va README co hang, dung dong 7, run
+    9f946d71, run.json dong 47 codex_cli; byte verdict pr889-review-1 giu nguyen; tai ap nguyen HINT luot 2 tren 578fb4b ra dung
+    hai blob cua 82359c4.
+finding_moi:
+  - id: verdict-surface-bo-sot-wp766
+    muc: P1
+    tom_tat: >-
+      ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.md dong 12 tu khai `codex_service`; run.json cua no dong 78 ghi
+      codex_cli; receipt khong co caveat surface. Phien ghi so tu do lai: dong 12 co chuoi, run.json dong 78 `codex_cli`, receipt 0 lan "SURFACE".
+  - id: ho-so-luot2-van-khai-hint-chua-ap
+    muc: P1
+    tom_tat: >-
+      Caveat HINT-P1-CHUA-AP cua receipt luot 2, hai hang README va khoi land luot 2 van noi HINT.patch luot 2 chua ap, trong khi
+      82359c4 da ap. Dung tai 765ae89/578fb4b, cu tai 82359c4. Phien ghi so tu do lai: receipt luot 2 co 1 lan "CHUA ap".
+  - id: surface-service-cli-thieu-dieu-kien-nguon
+    muc: P2
+    tom_tat: >-
+      13 verdict (phan-bien-quy-trinh-review-3..5, pr455-bien-nhan-v2-review-1..8, pr460-...-review-9, pr493-review-5) tu khai
+      service/API trong khi receipt ghi codex_cli, khong co runtime evidence de phan xu va khong co caveat. Phien ghi so CHUA tu do lai 13 ca.
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 513131e0c0f84982a73f8bd1a0c25a68
+  run_json: ops/reviews/pr896-review-3-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 562.082, head 82359c4, worktree_sach true,
+    execution_surface codex_cli, prompt_sha256 306b1a26… = sha256 PROMPT.md trong thu muc.
+  cli: >-
+    codex-cli 0.164.0, `launcher.py run --expected-head 82359c4… --require-clean --prompt-file … --expected-prompt-sha256 … --
+    codex exec -c model_reasoning_effort=xhigh --cd <sandbox> --sandbox workspace-write --skip-git-repo-check "<chi thi tro {PROMPT_FILE}>"`
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model: gpt-6.1-sol
+  model_da_chay: gpt-6.1-sol
+  model_evidence: do_may
+  muc_bang_chung_model: do_may
+  model_evidence_ref: ops/reviews/pr896-review-3-codex/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: >-
+    (a) run.json model_phuc_vu_trang_thai DO_DUOC; 29 su kien, 29 response_id khac nhau, moi su kien model `gpt-6.1-sol`
+    (launcher ghi tu trace websocket cua chinh lan chay). Effort `xhigh` la doi so yeu cau, KHONG do duoc phia may chu.
+
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua git push bang credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+
+independent_from_executor_session: true
+independent_ghi_chu: >-
+  Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context). Ban va 82359c4 do CHINH phien dieu phoi ap
+  (nguyen HINT cua reviewer luot 2), nen voi ban va nay phien dieu phoi dong vai nguoi ap, khong phai nguoi viet.
+review_axes: [spec, standards_security]
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: >-
+    (a) 82359c4 nam tren nhanh claude/pr896-review-2-codex (PR #947), CHUA la to tien master luc ghi so; len trung_binh khi #947 merge bang merge commit.
+
+verdict_usage_caveats:
+  - id: HINT-LUOT3-DA-AP-CAN-VERDICT-MOI
+    muc: P1
+    mo_ta: >-
+      Verdict lich su tren 82359c4 la changes_requested 2 P1 + 1 P2. Tai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su.
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: >-
+      Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; phien ghi so do sau luot: HEAD 82359c4, git status rong.
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: >-
+      Script/bang chung cua reviewer (review_evidence/) tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 82359c4.
+  - id: TEP-LON-KHONG-VAO-KHO
+    muc: P3
+    mo_ta: >-
+      review_evidence/start-snapshot.json (>500 KB) KHONG vao kho; sha256/so byte o OMITTED.txt.
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

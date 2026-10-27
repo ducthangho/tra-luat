@@ -1,0 +1,30 @@
+{
+  "original": {
+    "head": {
+      "rc": 0,
+      "output": "22382d8c800bed7b995d093cdcfdc206360d7fd4"
+    },
+    "tree": {
+      "rc": 0,
+      "output": "2424259c815d962a485bbbc52751499ed93ace34"
+    },
+    "status_with_ignored": {
+      "rc": 0,
+      "output": ""
+    }
+  },
+  "copy_restored": {
+    "head": {
+      "rc": 0,
+      "output": "22382d8c800bed7b995d093cdcfdc206360d7fd4"
+    },
+    "tree": {
+      "rc": 0,
+      "output": "2424259c815d962a485bbbc52751499ed93ace34"
+    },
+    "status_with_ignored": {
+      "rc": 0,
+      "output": ""
+    }
+  }
+}

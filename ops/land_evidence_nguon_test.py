@@ -365,6 +365,10 @@ def c17_l7_khai_dat_phai_do_thuc_thi():
     ky(hs7("DAT", DU7), P7, 0, "DAT đủ ba khoá measured có nguồn")
     ky(hs7("DAT"), P7, 1, "DAT thiếu thuc_thi", "L7 $.assurance_81.thuc_thi:")
     ky(hs7("DAT", "measured — run.json"), P7, 1, "thuc_thi vô hướng", "L7 $.assurance_81.thuc_thi:")
+    for k in L7_KHOA:   # review l7d P3: mapping RỖNG vẫn phải kiểm đủ ba khoá
+        ky(hs7("DAT") + "  thuc_thi: {}\n", P7, 1, f"thuc_thi {{}} thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
+    ky(hs7("DAT") + "thuc_thi:\n" + "".join(f"  {k}: '{v}'\n" for k, v in DU7.items()), P7, 1,
+       "thuc_thi ở GỐC không thay được thuc_thi dưới assurance_81", "L7 $.assurance_81.thuc_thi:")
     for k in L7_KHOA:
         ky(hs7("DAT", {x: v for x, v in DU7.items() if x != k}), P7, 1, f"thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
         for sai in ("not_measured — run.json", "da do — run.json", "measuredx run.json"):
@@ -400,6 +404,17 @@ def c18_l7_mien_tru_theo_bam():
         vp, ghi = m.kiem_ho_so(goc / "ops/land" / TEN, (hs + " ").encode(), goc, __import__("yaml"))
         bang(any(x.startswith("L7 $.assurance_81.thuc_thi:") for x in vp) and "L7 mất miễn trừ" in " ".join(ghi),
              f"băm miễn trừ phải đo CHÍNH ảnh byte đã nạp, không đọc lại đĩa: {vp} {ghi}")
+        tep, yml = goc / "ops/land" / TEN, __import__("yaml")   # review l7d P3: miễn trừ gắn TÊN + băm, và chỉ bỏ qua L7
+        m.MIEN_TRU_L7.clear()
+        m.MIEN_TRU_L7["pr9999-khac-land-evidence.yaml"] = hashlib.sha256(hs.encode()).hexdigest()
+        vp, ghi = m.kiem_ho_so(tep, hs.encode(), goc, yml)
+        bang(any(x.startswith("L7 $.assurance_81.thuc_thi:") for x in vp) and not ghi,
+             f"cùng byte dưới TÊN khác không được miễn trừ: {vp} {ghi}")
+        for them, luat in (("x: 'measured — khong-co.json'\n", "L1"), ("trang_thai_packet: {landed: true}\n", "L6")):
+            m.MIEN_TRU_L7[TEN] = hashlib.sha256((hs + them).encode()).hexdigest()
+            vp, ghi = m.kiem_ho_so(tep, (hs + them).encode(), goc, yml)
+            bang(any(x.startswith(luat) for x in vp) and not any(x.startswith("L7") for x in vp)
+                 and "L7 miễn trừ" in " ".join(ghi), f"miễn trừ L7 không được xoá vi phạm {luat}: {vp} {ghi}")
 
 
 @ca
@@ -512,6 +527,13 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7_bo_sandbox_mode", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "effort")', "c17"),
     ("L7_mien_tru_bo_so_bam", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = bam is not None", "c18"),
     ("L7_bam_doc_lai_dia", "and hashlib.sha256(byte).hexdigest() == bam", "and hashlib.sha256(tep.read_bytes()).hexdigest() == bam", "c18"),
+    ("L7_map_rong_bo_kiem", "        elif not mien:\n", "        elif not mien and tt7:\n", "c17"),
+    ("L7_thuc_thi_o_goc", 'a81.get("thuc_thi")', '(du_lieu.get("thuc_thi") or a81.get("thuc_thi"))', "c17"),
+    ("L7_bam_bo_ten", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam",
+     "mien = hashlib.sha256(byte).hexdigest() in MIEN_TRU_L7.values()", "c18"),
+    ("L7_mien_xoa_vi_pham_truoc", "        if not mien and not isinstance(tt7, dict):\n",
+     "        if mien:\n            vp.clear()\n        if not mien and not isinstance(tt7, dict):\n", "c18"),
+    ("L7_mien_tru_khong_ghi", '"L7 miễn trừ (băm khớp ảnh chụp, nợ NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO)" if mien', '"" if mien', "c18"),
     ("L7_khong_bao_gio_mien", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = False", "c18"),
     ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
     ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),

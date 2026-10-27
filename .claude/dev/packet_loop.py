@@ -2877,7 +2877,7 @@ def _kiem_ci(a, nc: dict, h: str, state_dir: Path, ket=("success",)) -> dict:
                 _die(RC_GATE, f"{wf} / {ten_j!r}: check-run {r['id']} không từ app {APP_CHECK!r}")
             if r["id"] != max(x["id"] for x in cr.values() if x["name"] == ten_j and x["check_suite"]["id"] == suite):
                 _die(RC_GATE, f"{wf} / {ten_j!r}: suite {suite} có check-run mới hơn {r['id']} không thuộc job của attempt mới nhất")
-            if do and (r["status"] != "completed" or r["conclusion"] not in ket):
+            if do and (r["status"] != "completed" or r["conclusion"] not in ket or r["head_sha"] != h):  # nhánh đỏ không qua `kiem-gate` ⇒ tự so head
                 _die(RC_GATE, f"{wf} / {ten_j!r}: check-run {r['id']} {nhan}: {r['status']}/{r['conclusion']}")
         if do:
             continue

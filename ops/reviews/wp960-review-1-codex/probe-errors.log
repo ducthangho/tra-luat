@@ -1,0 +1,6 @@
+git-fails {"rc": 2, "loi": [], "chua_do": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `42580a1` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "surface_chua_do": []}
+merge-base-fails {"rc": 2, "loi": [], "chua_do": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — `merge-base` rc=128 cho `42580a1`"], "surface_chua_do": []}
+branch-missing {"rc": 2, "loi": [], "chua_do": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — không tìm được nhánh mặc định để so"], "surface_chua_do": []}
+moc-missing-object {"rc": 2, "loi": [], "chua_do": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — KHÔNG ĐO ĐƯỢC mốc `dung_tai`"], "surface_chua_do": []}
+yaml-cycle RecursionError maximum recursion depth exceeded
+yaml-cycle-CLI {"rc": 1, "stderr_tail": ["    yield from _duyet_scalar(v, f\"{duong}[{i}]\", cha)", "  [Previous line repeated 992 more times]", "RecursionError: maximum recursion depth exceeded"]}

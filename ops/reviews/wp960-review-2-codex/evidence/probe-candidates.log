@@ -1,0 +1,10 @@
+resolve-1234abc {"commit": null}
+candidate-1234abc {"rc": 2, "loi": [], "chua_do": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `1234abc` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "surface_chua_do": []}
+resolve-deadbeef {"commit": null}
+candidate-deadbeef {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+resolve-1111111 {"commit": null}
+candidate-1111111 {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+resolve-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa {"commit": null}
+candidate-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+resolve-1111111111111111111111111111111111111111 {"commit": null}
+candidate-1111111111111111111111111111111111111111 {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}

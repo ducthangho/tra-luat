@@ -1108,18 +1108,70 @@ def _duyet_scalar(node, duong="", cha=None, _dang=()):
         yield duong, node, cha
 
 
+class _MoHo(Exception):
+    """Tiền tố OID ứng với NHIỀU commit — không kết luận được token trỏ commit nào."""
+
+
+_RE_HEX_TOKEN = re.compile(r"[0-9a-f]{4,40}")
+
+
+def _peel_commit(root: Path, x: str):
+    """`x^{commit}`: commit 40 hex · None khi git TRẢ LỜI là không có (rc=1) · ném khi git không trả lời được."""
+    rc, ra = _git(root, "rev-parse", "--verify", "--quiet", f"{x}^{{commit}}")
+    if rc == 1:
+        return None
+    if rc != 0 or not _HEX40.match(ra):
+        raise KhongDoDuoc(f"không tra được commit `{x}`: git rev-parse rc={rc}: {ra[:200]}")
+    return ra
+
+
 def _commit_cua(root: Path, oid: str):
-    """OID → commit 40 hex, hoặc None khi KHÔNG tra được (trạng thái thứ ba, không phải 'không tổ tiên')."""
-    rc, ra = _git(root, "rev-parse", "--verify", "--quiet", f"{oid}^{{commit}}")
-    return ra if rc == 0 and _HEX40.match(ra) else None
+    """OID/ref → commit 40 hex · None khi CHẮC CHẮN không commit nào ứng · ném khi KHÔNG ĐO ĐƯỢC.
+
+    BA trạng thái, phân ở ĐÂY chứ không để người gọi đoán từ None (r2 review 1, `git-hong-thanh-token-thuong`):
+    bản trước gộp MỌI rc khác 0 thành None, nên git vắng/hỏng (rc=127/128) biến một OID thuần chữ/số thành
+    "không phải OID" và lỗi ĐO ra SẠCH. Git không trả lời ⇒ `KhongDoDuoc` (cả lượt rc=2). Token hex tra bằng
+    `--disambiguate` rồi ĐẾM commit ứng viên, vì `rev-parse --quiet` trả rc=1 cho cả "không có" LẪN tiền tố
+    MƠ HỒ (đo 27-10-2026) — hai commit chung tiền tố ⇒ `_MoHo`, không phải "không có"."""
+    if not _RE_HEX_TOKEN.fullmatch(oid):
+        return _peel_commit(root, oid)
+    rc, ra = _git(root, "rev-parse", f"--disambiguate={oid}")
+    if rc != 0:
+        raise KhongDoDuoc(f"không tra được OID `{oid}`: git rev-parse --disambiguate rc={rc}: {ra[:200]}")
+    ung = {c for c in (_peel_commit(root, x) for x in ra.split()) if c}
+    if len(ung) > 1:
+        raise _MoHo(f"OID `{oid}` mơ hồ — {len(ung)} commit chung tiền tố")
+    return next(iter(ung), None)
 
 
 def _nhanh_mac_dinh(root: Path):
+    """Commit của nhánh mặc định. Ref VẮNG ⇒ thử ref kế (CI `pull_request` không có `origin/HEAD`); ref CÓ mà
+    không trỏ commit ⇒ `KhongDoDuoc` — không lùi về ref kế, vì `master` cục bộ không phải nhánh chính tắc
+    (r2 review 1, `nhanh-mac-dinh-tree-bi-bo-qua`: `origin/master` là tree ⇒ bản trước so với `master`)."""
     for ref in ("refs/remotes/origin/HEAD", "refs/remotes/origin/master", "refs/heads/master"):
+        rc, ra = _git(root, "show-ref", "--verify", "--quiet", ref)
+        if rc == 1:
+            continue
+        if rc != 0:
+            raise KhongDoDuoc(f"không kiểm được ref mặc định `{ref}`: git show-ref rc={rc}: {ra[:200]}")
         c = _commit_cua(root, ref)
-        if c:
-            return c
+        if c is None:
+            raise KhongDoDuoc(f"ref mặc định `{ref}` có mà không trỏ commit")
+        return c
     return None
+
+
+def _vang(p: Path) -> bool:
+    """Đường dẫn VẮNG thật — không mục nào, kể cả symlink gãy. Có mục (thư mục, symlink gãy) hoặc lỗi
+    stat khác ⇒ KHÔNG vắng: người gọi phải thử đọc và báo KHÔNG ĐO ĐƯỢC (r2 review 1,
+    `run-json-thu-muc-thanh-khong-ap`: `is_file()` gộp thư mục với vắng)."""
+    try:
+        p.lstat()
+    except (FileNotFoundError, NotADirectoryError):
+        return True
+    except OSError:
+        return False
+    return False
 
 
 def _luot(d):
@@ -1218,7 +1270,11 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                         k = (ten, duong, LUAT_ANCESTRY)
                         for mo in _RE_OID.finditer(cau):
                             x = mo.group(0)
-                            c = _commit_cua(root, x)
+                            try:
+                                c = _commit_cua(root, x)
+                            except _MoHo as ex:
+                                chua.setdefault(k, f"{ten}: `{duong}` — {ex}, KHÔNG kết luận được quan hệ tổ tiên")
+                                continue
                             if c is None and not _oid_bat_buoc(cau, mo):
                                 continue                 # số / từ thường không ngữ cảnh, không phải OID
                             if c is None:
@@ -1248,7 +1304,7 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                     f"{ten}: KHÔNG ĐO ĐƯỢC L-SURFACE — không có từ vựng execution surface của kho")
                 continue
             p_rj = root / rj
-            if rj.startswith("/") or ".." in Path(rj).parts or not p_rj.is_file():
+            if rj.startswith("/") or ".." in Path(rj).parts or _vang(p_rj):
                 sf_chua.append(f"{ten}: `run_json` {rj} không có trong kho — L-SURFACE không áp")
                 continue
             # TỆP CÓ mà đọc/phân tích hỏng ⇒ KHÔNG ĐO ĐƯỢC (rc=2), không phải "không áp": miễn trừ của
@@ -1403,11 +1459,12 @@ def main(argv=None) -> int:
                          "như `--sinh-no`: KHÔNG ghi đè tệp")
     a = ap.parse_args(argv)
     root = Path(a.root).resolve()
-    if a.sinh_no:
-        return _sinh_no(root)
-    if a.sinh_no_cau_lich_su:
-        return _sinh_no_cau(root)
     try:
+        # Hai cờ sinh nợ đi qua CÙNG biên với cổng (r2 review 1, `sinh-no-ngoai-bien-doc-receipt`).
+        if a.sinh_no:
+            return _sinh_no(root)
+        if a.sinh_no_cau_lich_su:
+            return _sinh_no_cau(root)
         loi, tk = kiem(root)
     except KhongDoDuoc as ex:
         print(f"KHÔNG ĐO ĐƯỢC: {ex}", file=sys.stderr)
@@ -1450,16 +1507,23 @@ def main(argv=None) -> int:
 
 
 def _sinh_no(root: Path) -> int:
-    import yaml
+    try:
+        import yaml
+    except ImportError as ex:                                   # pragma: no cover
+        raise KhongDoDuoc(f"thiếu PyYAML: {ex}") from ex
     tm = root / THU_MUC
     ra = {}
     for p in sorted(tm.glob("*.receipt.yaml")):
         if p.name in ALLOWLIST_CUTOVER:
             continue
-        d = yaml.safe_load(p.read_text(encoding="utf-8"))
+        try:
+            d = yaml.safe_load(p.read_text(encoding="utf-8"))
+            b = _bam(p)
+        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:
+            raise KhongDoDuoc(f"{p.name}: không sinh được nợ ({type(ex).__name__}: {ex})") from ex
         if isinstance(d, dict) and not _thieu(d):
             continue
-        ra[p.name] = _bam(p)
+        ra[p.name] = b
     print("NO_DA_DO: dict[str, str] = {")
     for k, v in ra.items():
         print(f'    "{k}":\n        "{v}",')

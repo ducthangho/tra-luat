@@ -3,8 +3,10 @@
 - **Trạng thái:** Accepted (2026-10-19, chỉ thị chủ kho `ducthangho`; thi hành bằng packet `wp835`
   revision 3 · generation 3 (bản vá r2/g2 port lên base mới, đổi số từ 0055 sang 0056 vì 0055 đã thuộc
   `docs/adr/0055-tran-loi-goi-codex-len-muoi.md`), Issue #835 — không phải một phiên tự nới ngưỡng) ·
-  **CHƯA KÍCH HOẠT VẬN HÀNH**: chờ controller ngoài được đồng bộ và xác minh, xem mục *Hiệu lực*. Tới lúc ấy mọi lease vẫn chịu ngưỡng
-  đã đóng dấu trong chính nó.
+  **ĐÃ KÍCH HOẠT VẬN HÀNH** — mốc kích hoạt là merge của PR thi công `wp943` vào `master` (Issue #943).
+  Căn cứ: chủ kho xác nhận không có controller ngoài (#835 issuecomment-6407154789) cộng phép quét mã
+  của chính mục *Hiệu lực*; thi hành bằng packet `wp943`. Lease cấp trước mốc ấy vẫn chịu ngưỡng đã
+  đóng dấu trong chính nó.
 
 Lease không có tiến triển trong **6 giờ (360 phút)** thì dispatcher thu hồi, tăng generation rồi mới
 reroute. ADR này thay **đúng một câu** của `ADR-0017` — câu *"Sau 30 phút không có tiến triển"* — và
@@ -34,8 +36,13 @@ kế nhiệm được cấp quyền riêng sau khi ADR này kích hoạt; không
 của revision 2, đo lại 25-10-2026 tại base `d2e3052d479d140b7e7b91df41ec4914fab7d544` của revision 3:
 không có controller nào **trong kho** mang hằng 30 phút cho việc thu hồi;
 ngưỡng ấy sống trong văn bản protocol và trong trường `heartbeat_required_minutes` của từng lease.
-Controller ngoài (dispatcher) **chưa đo được** từ phiên này. Nên ADR này chưa được khai là đã kích hoạt
-vận hành: chưa xác minh được controller đã đồng bộ thì không cấp lease 360 phút.
+
+Mốc 26-10-2026: chủ kho xác nhận **không có controller ngoài** (dispatcher) — *"Không có, phiên điều
+phối làm tay"* (#835 issuecomment-6407154789). Thu hồi lease do phiên điều phối làm tay theo protocol,
+nên "đồng bộ controller" nghĩa là phiên điều phối áp ngưỡng 360 phút khi xét thu hồi. Luật áp dụng:
+chỉ lease cấp SAU mốc kích hoạt (merge của PR thi công `wp943`) khai `heartbeat_required_minutes: 360`;
+lease cấp trước mốc ấy giữ nguyên byte và số đã đóng dấu — kể cả lease `wp943-r1-g1-claude` của chính
+packet kích hoạt, vẫn khai 30.
 
 `.github/coordination/change-impact.v1.json` (`ADR-0032`) vắng mặt ở cả hai base ấy. Write set của
 packet này là một ngoại lệ đóng tay một-packet do chủ kho duyệt trên Issue #835, không phải một closure tính từ

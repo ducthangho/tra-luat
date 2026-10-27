@@ -27,3 +27,6 @@ bac87bf15dc12d21bfec7fc9bd193a76648a920b61bf82a738534cd58095265f  readback-runs-
 571fdcd4b779c7c148997edf7178777c8d9fbc744e5441e15915cd4929d9fc66  do-1027-27dcc3b/workflow-definition-rest-27dcc3b.txt
 4582a21e70e4d157ed91af22b2fe078c22ce6b5c7f018c92d7b3feeed7398472  do-1027-27dcc3b/graphql-output-chu-kho-dan-pr896.json
 5e1d0acdc086a28a0b46a876ec534e280367caa997efaa67914f42e810035d5c  do-1027-27dcc3b/workflow-definition-27dcc3b.txt
+ef7f5f6603c8fed98c24d5355d8478df4d9649c37655bca995adbaf3c2b65cc5  do-1027-157241c/readback-comment-956-6431407190.json
+aa2fbcbd57ce221b5ed95778e369cf3cadac20e7b9ab1e59370e4d12986fad7b  do-1027-157241c/readback-commit-3e62ac5.json
+39854c58c29e3b07f06c96c3dfe37437dec7baf47533f43d3e04a56ceb2615f3  do-1027-157241c/readback-pr-956.json

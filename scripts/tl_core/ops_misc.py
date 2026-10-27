@@ -477,13 +477,15 @@ def save_local_config(config_json=None, webapp=None, token=None, manifest_id=Non
     if path.is_file():
         try:
             _bkp = _config_backup_dir() / f"{path.name}.init-config.{time.strftime('%Y%m%dT%H%M%S')}.bak.json"
-            # copy BYTE — giữ nguyên cả file cũ không parse được. v1.36.69 (#972, review l972a F02): KHÔNG
-            # shutil.copyfile (đi THEO symlink đích ⇒ tên đoán được trỏ vào cây skill là lọt token); ghi tệp tạm
-            # trong thư mục đã kiểm rồi os.replace — thay CHÍNH mục thư mục, không đi theo symlink.
+            # copy BYTE. v1.36.69 (#972, l972a F02): tệp tạm + os.replace, KHÔNG copyfile (đi theo bí danh ở tên đích)
             _fd, _tmp = tempfile.mkstemp(prefix=_bkp.name + ".", suffix=".tmp", dir=str(_bkp.parent))
-            with os.fdopen(_fd, "wb") as _f:
-                _f.write(path.read_bytes())
-            os.replace(_tmp, str(_bkp))
+            try:   # review l972b F05: replace lỗi thì KHÔNG để sót `.tmp` mang token cũ
+                with os.fdopen(_fd, "wb") as _f:
+                    _f.write(path.read_bytes())
+                os.replace(_tmp, str(_bkp))
+            finally:
+                if os.path.lexists(_tmp):
+                    os.unlink(_tmp)
             backup = str(_bkp)
         except BackupTrongCaySkill:   # v1.36.69 (#972): KHÔNG ghi đè config khi không backup được ra ngoài cây
             raise

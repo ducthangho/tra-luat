@@ -609,8 +609,7 @@ class BackupTrongCaySkill(RuntimeError):
 
 
 def _goc_cay_skill() -> Path:
-    """Gốc cây skill = thư mục tổ tiên gần nhất có SKILL.md, tính từ tệp mã đang chạy; không thấy thì
-    lùi về cha của thư mục chứa tệp (quy ước ca r202: `tl.py` → `scripts/` → gốc)."""
+    """Tổ tiên gần nhất có SKILL.md của tệp mã đang chạy; không thấy thì cha của thư mục chứa tệp (quy ước r202)."""
     tep = Path(__file__).resolve()
     for d in tep.parents:
         if (d / "SKILL.md").is_file():
@@ -619,9 +618,7 @@ def _goc_cay_skill() -> Path:
 
 
 def _trong_cay_skill(dich: Path, goc: Path) -> bool:
-    """`dich` (đã resolve) nằm trong `goc` theo ĐƯỜNG DẪN, hoặc có một tổ tiên đang tồn tại CÙNG danh tính hệ tệp
-    với `goc` — review l972a F01: volume không phân biệt hoa thường (APFS) cho `package/` trỏ `Package/` mà phép so
-    PosixPath phân biệt hoa thường để lọt."""
+    """Trong cây theo ĐƯỜNG DẪN, hoặc theo DANH TÍNH hệ tệp (l972a F01: volume không phân biệt hoa thường)."""
     if dich == goc or goc in dich.parents:
         return True
     try:
@@ -643,9 +640,8 @@ def _config_backup_dir() -> Path:
     config. Ưu tiên TL_CONFIG_BACKUP_DIR (test/override) → `D:\\Quốc hội\\_config_backups` (máy chuẩn,
     chỉ khi ĐÃ tồn tại — không tự dựng cây ngoài) → `%LOCALAPPDATA%\\tra-luat\\_config_backups` →
     (POSIX) `$XDG_STATE_HOME/tra-luat/_config_backups`, mặc định `~/.local/state/...`.
-    v1.36.69 (#972): bỏ nhánh `~/tra-luat/_config_backups` — kho clone ở `~/tra-luat` thì đích ấy NẰM TRONG
-    cây skill (selftest r202 đỏ trên máy chủ kho, HOME=/home/agent). Chốt cứng sau cùng áp cho MỌI nguồn,
-    kể cả env, và chạy TRƯỚC mkdir: đích trong cây ⇒ BackupTrongCaySkill, không dựng gì."""
+    v1.36.69 (#972): bỏ nhánh `~/tra-luat/...` (kho clone ở `~/tra-luat` ⇒ đích TRONG cây). Chốt cứng áp MỌI
+    nguồn kể cả env, chạy TRƯỚC mkdir: đích trong cây ⇒ BackupTrongCaySkill."""
     env = (os.environ.get("TL_CONFIG_BACKUP_DIR") or "").strip()
     if env:
         target = Path(env).expanduser()

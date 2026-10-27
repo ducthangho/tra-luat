@@ -21342,29 +21342,31 @@ def run() -> int:
         return _cay972(_f)
     _t110("r972_bi_danh_cung_danh_tinh_he_tep_bi_tu_choi", _c972_bi_danh_cung_danh_tinh_he_tep)
 
-    def _c972_init_config_khong_di_theo_symlink_dich():
-        # review l972a F02: thư mục backup NGOÀI cây nhưng TÊN tệp backup (đoán được, có giờ) là symlink trỏ VÀO cây.
+    def _c972_init_config_khong_di_theo_bi_danh_dich():
+        # review l972a F02: TÊN tệp backup (đoán được, có giờ) đã là bí danh trỏ VÀO cây — hard link (không cần quyền
+        # symlink trên Windows, review l972b F04). l972b F05: đích là THƯ MỤC ⇒ replace lỗi, không được sót `.tmp` chứa token.
         import types as _ty972
         def _f(t, goc):
-            ngoai = t / "ngoai"
+            ngoai, _cfgp, ten = t / "ngoai", t / "cfg.json", "cfg.json.init-config.20261027T000000.bak.json"
             ngoai.mkdir()
-            _cfgp = t / "cfg.json"
-            _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
-            _cu = _cfgp.read_bytes()
-            _os972.environ["TL_CONFIG_BACKUP_DIR"] = str(ngoai)
-            _sav_time = _tlm972.time
-            _tlm972.time = _ty972.SimpleNamespace(**{k: getattr(_sav_time, k) for k in dir(_sav_time) if not k.startswith("_")})
-            _tlm972.time.strftime = lambda *a, **k: "20261027T000000"
-            ten = f"{_cfgp.name}.init-config.20261027T000000.bak.json"
-            (ngoai / ten).symlink_to(goc / "ro-ri.json")
+            _os972.environ["TL_CONFIG_BACKUP_DIR"], _sav_time, kq = str(ngoai), _tlm972.time, []
             try:
-                _tlm972.save_local_config(json.dumps({"webappUrl": "https://moi", "token": "moi"}), out=str(_cfgp))
+                _tlm972.time = _ty972.SimpleNamespace(**{k: getattr(_sav_time, k) for k in dir(_sav_time) if not k.startswith("_")})
+                _tlm972.time.strftime = lambda *a, **k: "20261027T000000"
+                for dung in ("hardlink", "thu_muc"):
+                    _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
+                    _cu, moc = _cfgp.read_bytes(), goc / "moc.json"
+                    moc.write_text("moc", encoding="utf-8")
+                    _os972.link(moc, ngoai / ten) if dung == "hardlink" else (ngoai / ten).mkdir()
+                    _tlm972.save_local_config(json.dumps({"webappUrl": "https://moi", "token": "moi"}), out=str(_cfgp))
+                    kq.append(moc.read_text(encoding="utf-8") == "moc" and not list(ngoai.glob("*.tmp"))
+                              and (dung == "thu_muc" or (ngoai / ten).read_bytes() == _cu))
+                    (ngoai / ten).rmdir() if dung == "thu_muc" else (ngoai / ten).unlink()
             finally:
                 _tlm972.time = _sav_time
-            return (not (goc / "ro-ri.json").exists() and not (ngoai / ten).is_symlink()
-                    and (ngoai / ten).read_bytes() == _cu)
+            return kq == [True, True]
         return _cay972(_f)
-    _t110("r972_init_config_khong_di_theo_symlink_dich", _c972_init_config_khong_di_theo_symlink_dich)
+    _t110("r972_init_config_khong_di_theo_bi_danh_dich", _c972_init_config_khong_di_theo_bi_danh_dich)
 
     def _c208b_auth_fix_chain_dung_thu_tu():
         # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill

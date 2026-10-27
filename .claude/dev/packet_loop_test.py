@@ -1797,7 +1797,13 @@ def _kich_ban_in(c: Ctx, codepage: str):
     for ten, (rc, e, _, o) in (("mo-lai", _ml813(c2, sd2, "connector", LCN813, cn=P1_813, env=env)), ("chu-kho-duyet", _ck813(c2, sd2, ["cho_phep_va"], env=env))):
         if rc or not o.strip():
             raise AssertionError(f"[{codepage}] {ten} phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
-    da_phu = {"accept", "mo-lai", "chu-kho-duyet"}
+    c3 = Ctx(c.script, c.tmp / "cp814")  # #814: `vua-p3` in tiếng Việt lúc thành công — nền approved_pending mang lớp P3
+    c3.tmp.mkdir(parents=True, exist_ok=True)
+    rc, sd3, e, _ = _r812(c3, "review", lop=(("a-x", "P3"),), env=env)
+    rc, e, _, o = _buoc813(c3, sd3, "vua-p3", "--finding-id", "a-x", root=False, env=env)
+    if rc or not o.strip():
+        raise AssertionError(f"[{codepage}] vua-p3 phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
+    da_phu = {"accept", "mo-lai", "chu-kho-duyet", "vua-p3"}
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
@@ -8841,12 +8847,12 @@ def _h813(sd):
     return st["mo_lai_tu"]["sha"] if st["state"] in ("running", "cho_chu_kho") and st.get("mo_lai_tu") else st["pending_sha"]
 
 
-def _ml813(c, sd, nn, lop, cn=(), xong=True, ci=None, ids=None, env=None):
+def _ml813(c, sd, nn, lop, cn=(), xong=True, ci=None, ids=None, env=None, them=None):
     """`mo-lai` thật trên head hiện hành. lop [(slug, hạng, refs)] · cn [(id, hạng)] review comment connector · ci(x, h) dựng readback CI."""
     w, h, n = c.tmp / "kho" / "w", _h813(sd), next(_N813)
     trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: list(v)}  # noqa: E731
     ghi = lambda ten, d: ((c.tmp / f"{n}{ten}").write_text(d if isinstance(d, str) else json.dumps(d)), c.tmp / f"{n}{ten}")[1]  # noqa: E731
-    bn = {"verdict": "changes_requested", "bang_lop": [{"slug": s, "hang": g, "connector_refs" if nn == "connector" else "check_refs": r} for s, g, r in lop]}
+    bn = {"verdict": "changes_requested", "bang_lop": [{"slug": s, "hang": g, "connector_refs" if nn == "connector" else "check_refs": r} for s, g, r in lop], **(them or {})}
     ic = [{"id": 20, "user": {"login": _CN834}, "body": f"Reviewed commit: `{h[:10]}`", "issue_url": f"{_API834}issues/55"}][:int(xong)]
     rcm = [{"id": i, "user": {"login": _CN834}, "body": f"![{g} Badge] x", "commit_id": hh or h, "pull_request_url": f"{_API834}pulls/55"} for i, g, *hh in cn for hh in [hh[0] if hh else None]]
     x = {"runs": [], "jobs": [], "cr": []}
@@ -9058,7 +9064,7 @@ CASES += [
     ("r814_moc_vong1_khong_giam", _ca813(_V814("a-x"), _rv814(_N1_814["lop"]), nen=_N1_814, rc_doi=3, state="blocked")),
     ("r814_doi_ten_khong_noi", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),)), nen=_N2_814, rc_doi=11, phai="không qua bảng nối")),
     ("r814_gop_qua_noi", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),), _NOI814()), nen=_N2_814, rc_doi=3, state="blocked")),
-    ("r814_noi_sai_luoc_do", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),), _NOI814(ly_do=" ")), nen=_N2_814, rc_doi=11, phai="sai lược đồ")),
+    ("r814_noi_sai_luoc_do", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),), _NOI814(ly_do=" ")), nen=_N2_814, rc_doi=11, phai="bang-noi")),
     ("r814_noi_tro_slug_khong_co", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),), _NOI814(tu=["a-x", "z-x"])), nen=_N2_814, rc_doi=11, phai="trỏ slug không có")),
     ("r814_vong_3", _ca813(lambda c, sd: _sua813(sd, attempts_limit=9), _V814("a-x"), _rv814((("b-x", "P3"), ("c-x", "P3"))), _V814("b-x"),
                            _rv814((("c-x", "P3"),)), _V814("c-x"), _rv814(()), nen={"lop": (("a-x", "P3"), ("b-x", "P3"), ("c-x", "P3"))}, rc_doi=3, state="blocked")),
@@ -9073,6 +9079,17 @@ CASES += [
     ("r814_am_generation_khac", _r812_ca("review", 11, **{**_AM814("P2"), "bn": {**BN_AM, "generation": 2}})),
     # M4 — nợ P3 `r813-mutation-evidence-incomplete` của #813: (a) check_refs trộn cặp hợp lệ với phần tử sai hình dạng; (b) ci-do → begin → void → connector.
     ("r814_check_refs_tron_null", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", [("ci-gate", "P1", [[_W813, _G813], None])], ci=_ci813), rc_doi=11, phai="đúng dạng")),
+    # lượt 1 Codex: nối chuỗi/mơ hồ · nối lớp P0–P2 · nguồn lặp · bảng nối hỏng ở cửa khác · mo-lai P3 · state trước #814 · thay quyền ci-do
+    ("r814_noi_chuoi", _ca813(_V814("a-x"), _rv814((("b-x", "P3"), ("c-x", "P3")), [{"tu": ["a-x"], "den": "b-x", "ly_do": "đổi tên"}, {"tu": ["b-x"], "den": "c-x", "ly_do": "đổi tên"}]),
+                              nen=_N2_814, rc_doi=11, phai="trỏ slug không có")),
+    ("r814_noi_lop_p2", _ca813(_rv814((("c-b", "P2"),), [{"tu": ["a-b"], "den": "c-b", "ly_do": "đổi tên"}], am=True), nen=_AM814("P2"), rc_doi=11, phai="trỏ slug không có")),
+    ("r814_noi_nguon_lap", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),), _NOI814(tu=["a-x", "a-x"])), nen=_N2_814, rc_doi=11, phai="bang-noi")),
+    ("r814_mo_lai_noi_hong", _ca813(lambda c, sd: _CI813(c, sd, them={"bang_noi": {"tu": "a"}}), rc_doi=11, phai="bang-noi")),
+    ("r814_mo_lai_p3_khong_dem", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", [("ci-gate", "P3", [[_W813, _G813]])], ci=_ci813), state="running", finding_counts={})),
+    ("r814_state_cu_giu_moc", _ca813(lambda c, sd: _sua813(sd, reviews=[{k: v for k, v in r.items() if k not in ("lop", "bang_noi", "vong_p3")} for r in _st(sd)["reviews"]]),
+                                     _V814("a-x"), _rv814(_N1_814["lop"]), nen=_N1_814, rc_doi=3, state="blocked")),
+    ("r814_vua_thay_quyen_ci", _ca813(_CI813, _rv814(_N1_814["lop"]), _V814("a-x"), nen=_N1_814, state="running",
+                                      kiem=lambda st: st.get("mo_lai_tu") == {"nguyen_nhan": "p3", "generation": 1, "sha": st["pending_sha"]})),  # pending đã sang B ≠ A của ci-do
     ("r814_ci_void_connector", _ca813(_CI813, lambda c, sd: _buoc813(c, sd, "begin-attempt", "--provider", EXECUTOR, root=False),
                                       lambda c, sd: _buoc813(c, sd, "void-attempt", "--reason", "quota", *VOID_DUYET, root=False), _CN813, rc_doi=8, phai="chưa mở lượt mới")),
 ]
@@ -9082,10 +9099,18 @@ MUTANTS.update({
     "r814_giam_hai_lop": (' or v["sau"] >= v["truoc"]):', ' or v["sau"] >= v["truoc"] - 1):', ["r814_ab_b_hop_le"]),
     "r814_khong_giam_van_qua": (' or v["sau"] >= v["truoc"]):', ' or v["sau"] > v["truoc"]):', ["r814_bieu_hien_trung"]),
     "r814_vong1_mien_so": (' or v["sau"] >= v["truoc"]):', ' or v["k"] > 1 and v["sau"] >= v["truoc"]):', ["r814_moc_vong1_khong_giam"]),
-    "r814_doi_ten_tu_do": (' - cu - {x["den"] for x in noi}:', " - cu - nay:", ["r814_doi_ten_khong_noi"]),
+    "r814_doi_ten_tu_do": (" - set(cu) - set(den):", " - set(cu) - set(nay):", ["r814_doi_ten_khong_noi"]),
     "r814_noi_chi_vong_nay": ('"truoc": len(p3(truoc))', '"truoc": len(truoc)', ["r814_gop_qua_noi"]),
-    "r814_noi_bo_ly_do": (' or not all(type(x["ly_do"]) is str and x["ly_do"].strip() for x in noi):', ":", ["r814_noi_sai_luoc_do"]),
-    "r814_noi_bo_nguon": ("    if not set(tu) <= cu or not", "    if not", ["r814_noi_tro_slug_khong_co"]),
+    "r814_noi_bo_ly_do": ('\n            and all(type(x["ly_do"]) is str and x["ly_do"].strip() for x in noi))', ")", ["r814_noi_sai_luoc_do"]),
+    "r814_noi_bo_nguon": ('cu.get(s) == "P3" and s not in nay', "s not in nay", ["r814_noi_tro_slug_khong_co"]),
+    "r814_noi_chuoi_lot": ('cu.get(s) == "P3" and s not in nay', 'cu.get(s) == "P3"', ["r814_noi_chuoi"]),
+    "r814_noi_moi_hang": ('cu.get(s) == "P3" and s not in nay for s in tu) or not all(nay.get(s) == "P3" for s in den)',
+                          "s in cu and s not in nay for s in tu) or not all(s in nay for s in den)", ["r814_noi_lop_p2"]),
+    "r814_noi_nguon_lap_lot": ("and len(set(tu)) == len(tu) and", "and", ["r814_noi_nguon_lap"]),
+    "r814_noi_chi_record_review": ('("bang-noi", "bang_noi" not in d or _noi_hop_le(d["bang_noi"]))', '("bang-noi", True)', ["r814_mo_lai_noi_hong"]),
+    "r814_mo_lai_dem_p3": ('    slugs = [s for s in slugs if s not in bn["p3"]]', "    pass", ["r814_mo_lai_p3_khong_dem"]),
+    "r814_state_cu_mat_moc": ('truoc = r.get("lop") if "lop" in r else [', 'truoc = r.get("lop", []) if True else [', ["r814_state_cu_giu_moc"]),
+    "r814_vua_giu_quyen_cu": ('"mo_lai_tu": {"nguyen_nhan": "p3",', '"mo_lai_tu": st.get("mo_lai_tu") or {"nguyen_nhan": "p3",', ["r814_vua_thay_quyen_ci"]),
     "r814_vong_3_lot": ('    if v and (v["k"] > 2 or', '    if v and (v["k"] > 3 or', ["r814_vong_3"]),
     "r814_p3_vao_dem": ('dem = sorted(set(ids) - set(bn["p3"]))', "dem = sorted(set(ids))", ["r814_p3_khong_dem"]),
     "r814_bo_ca_p2": ('dem = sorted(set(ids) - set(bn["p3"]))', 'dem = sorted(set(ids) - {x["slug"] for x in bn["lop"]})', ["r814_p2_van_dem"]),

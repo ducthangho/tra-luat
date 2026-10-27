@@ -1101,6 +1101,8 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
               (cm(f"tree {cay}\n".encode() + b"".join(f"parent {x}\n".encode() for x in ba) + ai(b"A") + b"\nba\n"), {"tree": cay, "parents": ba})]
         ca += [(cm(f"tree {cay}\n".encode() + ai(b"A") + x + b"\nmo rong\n"), goc)   # `parent` SAU committer / sau header mở rộng ≠ cha
                for x in (f"parent {P1}\n".encode(), f"x-review v\nparent {P1}\n".encode())]
+        tag = f"object {P1}\ntype commit\ntag v1\ntagger A <a@b> 1700000000 +0000\n\ntree {P2}\nparent {P2}\n".encode()   # header nhiều dòng:
+        ca += [(cm(dau + ai(b"A") + b"mergetag " + tag.replace(b"\n", b"\n ").rstrip(b" ") + b"\nnoi\n"), dung)]   # dòng tiếp nối GIỮ dấu cách
         hong = [b"tree %s\ntree %s\n" % (cay.encode(), cay.encode()), b"parent %s\n" % P1.encode(), b"tree %s1\n" % cay.encode(),
                 b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
                 f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
@@ -1224,6 +1226,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F13_nhan_than_cut", "len(than) != int(loai[2]) + 1", "len(than) > int(loai[2]) + 1", "c53"),
     ("F13_bo_unicodeencode", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, subprocess.SubprocessError):", "c53"),
     ("F13_bo_subprocesserror", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, UnicodeEncodeError):", "c53"),
+    ("F13_lstrip_dau_dong", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.lstrip() for x in dong]\n', "c53"),
     ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),

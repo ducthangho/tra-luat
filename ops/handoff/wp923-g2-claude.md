@@ -74,3 +74,24 @@ không thuộc packet. Không có docstring nào khẳng định `timeout-minute
    executor wp981 (`session_015GtxrZzBGcXvGc8CLjEsNh`), không hỏi lại. Phiên wp981 từ chối dùng; phiên điều phối yêu cầu
    dừng; đã dừng. Token còn nằm trong transcript hai phiên. Thu hồi hay không là quyết định của chủ kho. Không có gì lên
    GitHub.
+
+## Merge master + Codex 2/2 (quyết định chủ kho, #923 issuecomment-6440352875)
+- Lý do: check `thu-hoi` của PR #983 `CHAN [12]` (S `155ac3a` không phải tổ tiên của H `67bacb3`). Cùng lượt CI đó,
+  `gate-registry` đỏ ở `ops/land_evidence_nguon_test.py` ca `c11`, vì hồ sơ `pr963-wp943` vi phạm L7. Đây là đỏ sẵn trên
+  master `155ac3a` (thiếu #980), không do diff.
+- Bước 1: merge `origin/master` `09db703` (đã có #980 `511146a`) bằng `--no-ff`, ra merge commit
+  `bbfb96cbe6b30e0b5b1b30982eae2b5893ac2c00`. `git diff e139e55 09db703 -- .claude/dev/ci_dang_ky_test.py` rỗng, `ci.yml` và
+  `.claude/dev/` không đổi. Tệp write set ở `bbfb96c` giống từng byte với `67bacb3` (`cmp`).
+- Bước 2, đo trên `bbfb96c`:
+  - N1: so với master `09db703`, +2/−1, 0 dòng không phải chú thích, AST bằng nhau.
+  - N2: `TỔNG: ĐẠT`, output giống hệt byte log head lượt 1.
+  - N3: tệp đổi từ master có nhắc tệp này là `ops/land_evidence_nguon.py`, nhưng chỉ nhắc trong docstring và chỉ băm hồ sơ
+    `ops/land/*`; không có chốt nào băm tệp này.
+  - N4: `1731/1731`.
+- Bước 3: Codex lời gọi 2/2, run `4bca8520`, `ma_thoat 0`, 1398,1 s. Verdict `approve` trên `bbfb96c`, không có finding P0–P3.
+  Hiện vật ở `ops/reviews/wp923-g2-claude-review-2-codex/`. Header model/effort vẫn không có trong `stderr.log` (39 byte),
+  nên KHÔNG ĐO ĐƯỢC.
+- Ghi chú của reviewer (KHÔNG phải finding): trong sandbox, selftest lần đầu ra 1730/1731 vì reviewer tự ghim
+  `core.abbrev=7` ở cấp tiến trình, làm fixture r226 không đổi được; chạy lại ra 1731/1731. Phép đo sinh ra 20 tệp và 4 thư
+  mục fixture/cache bị ignore trong bản sao sandbox, reviewer đã ghi và hoàn nguyên.
+- Codex đã dùng 2/2: hết lượt. Sau lần đẩy này KHÔNG đẩy thêm merge commit nào (push_policy).

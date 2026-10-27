@@ -15,8 +15,15 @@ recorded_by: anthropic_claude_executor
 recorder_is_dispatcher: false
 leased_at_utc: '2026-10-27T09:13:48Z'
 heartbeat_at: '2026-10-27T09:13:48Z'
-lease_until: '2026-10-28T09:13:48Z'
-lease_expires_at_utc: '2026-10-28T09:13:48Z'
+lease_until: '2026-10-27T16:11:55Z'
+lease_expires_at_utc: '2026-10-27T16:11:55Z'
+rut_han:
+  han_cu: '2026-10-28T09:13:48Z'
+  han_moi: '2026-10-27T16:11:55Z'
+  rut_boi: ducthangho
+  ly_do: 'packet wp972 r1 da merge: PR #989 (head 66e797ed12249d323b41f55e87a446cc92ccb8de, merge 44884446f71c89e25f9a72ac58e4f597db63c1ba) va PR #993 tiep noi P2 connector (head 013e2558d4aafa91af62770cefc2fc2749971eb4, merge c2d84ea7c20e835968b630a4fb1b8daa29ac12c7, 2026-10-27T16:11:25Z).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp748 r28 (188d456)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

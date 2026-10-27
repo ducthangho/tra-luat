@@ -49,3 +49,16 @@ Không có `tag`, `merge`, `commit-tree` nào khác trên kho tạm trong tệp.
    chung để không phải vá lặp lại từng chỗ.
 2. Reviewer ghi rằng các lượt chạy kế thừa cấu hình đã vô tình kích hoạt signer `/tmp/code-sign`, signer này thử kết nối dịch vụ
    ký loopback và bị sandbox chặn. Lộ cùng lỗi 1: fixture git kế thừa cấu hình ký của máy.
+
+## Base trôi → merge master + Codex 2/10 (spec Q3)
+- `thu-hoi` của PR #992 trên `4ea2ae5`: `CHAN [12]`, S `44884446` không phải tổ tiên của H (run 40525579648).
+- Merge `origin/master` `44884446f71c89e25f9a72ac58e4f597db63c1ba` bằng `--no-ff`, ra `5a05d472227d8c14ffa9eedfb516aa4c494108e6`.
+  `git diff --stat 7f19424 44884446 -- .claude/dev/ci_dang_ky_test.py .github/workflows/ci.yml` rỗng. Write set ở `5a05d47`
+  giống từng byte với `4ea2ae5` (`cmp`).
+- Đo trên `5a05d47`:
+  - N1: phản chứng `TỔNG: ĐẠT`.
+  - N2: `TỔNG: ĐẠT`.
+  - N3: `doctrine-scan` rc 0, `git diff --check` rc 0.
+  - N4: `1738/1738`. Master đã thêm ca mới, nên số ca khác lần trước.
+- Codex lời gọi 2/10, run `53809abd`, `ma_thoat 0`, 502,7 s: `approve` trên `5a05d47`, không có finding. Reviewer tái hiện N1 hai
+  chiều (master đỏ, head xanh) và xác nhận tree của merge bằng `merge-tree`. Hiện vật ở `ops/reviews/wp923-g3-claude-review-2-codex/`.

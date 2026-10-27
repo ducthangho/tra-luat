@@ -135,13 +135,21 @@ def doc_moi(duong=CI_DANG_KY):
 
 def git_cuc_bo(sha, goc=ROOT):
     """parents/tree của commit trong kho cục bộ; không có object (hoặc không phải commit) ⇒ None.
-    F13 (#955 review A): đọc BYTES — message/author không phải UTF-8 là commit HỢP LỆ; chỉ giải mã dòng tree/parent, và chỉ khi là OID hex."""
-    try:
-        r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, timeout=60)
-    except (OSError, subprocess.SubprocessError):
+    F13 (#955 review A): đọc BYTES — message/author không phải UTF-8 là commit HỢP LỆ; chỉ giải mã dòng tree/parent, và chỉ khi là OID hex.
+    #978 review lượt 1: loại object đọc từ CHÍNH lời gọi `--batch` (không peel tag; blob dạng commit ⇒ None), và tách
+    header theo LF của định dạng Git — `splitlines()` tách cả CR nằm TRONG author thành một dòng `parent` giả."""
+    if type(sha) is not str:   # nhiều dòng (`a\nb`) ⇒ `--batch` trả nhiều object ⇒ lệch kích thước bên dưới ⇒ None
         return None
-    dau = r.stdout.split(b"\n\n", 1)[0].splitlines() if r.returncode == 0 else []
-    tree, cha = [x[5:] for x in dau if x.startswith(b"tree ")], [x[7:] for x in dau if x.startswith(b"parent ")]
+    try:
+        r = subprocess.run(["git", "-C", str(goc), "cat-file", "--batch"], input=sha.encode() + b"\n", capture_output=True, timeout=60)
+    except (OSError, subprocess.SubprocessError, UnicodeEncodeError):
+        return None
+    dau, _, than = r.stdout.partition(b"\n")
+    loai = dau.split(b" ")
+    if r.returncode != 0 or len(loai) != 3 or loai[1] != b"commit" or not loai[2].isdigit() or len(than) != int(loai[2]) + 1:
+        return None
+    dong = than[:int(loai[2])].split(b"\n\n", 1)[0].split(b"\n")
+    tree, cha = [x[5:] for x in dong if x.startswith(b"tree ")], [x[7:] for x in dong if x.startswith(b"parent ")]
     if len(tree) != 1 or not all(RE_OID_B.fullmatch(x) for x in tree + cha):
         return None
     return {"tree": tree[0].decode("ascii"), "parents": [x.decode("ascii") for x in cha]}

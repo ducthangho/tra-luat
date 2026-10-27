@@ -1068,29 +1068,56 @@ def c34_git_blob_that():   # F08: reader THẬT trên kho tạm; đối tượng
     bang(kq == ["jobs: {}\n", None, None], f"git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: {kq}")
 
 @ca
-def c53_git_commit_khong_utf8():   # F13 (#955 review A): commit HỢP LỆ có message/author ISO-8859-1 ⇒ cùng tree/parents như bản UTF-8, và
-    m = nap()   # `main` sinh provenance rc 0 qua reader Git THẬT. Object dựng bằng `hash-object -t commit` ⇒ đúng byte, không cần ký
+def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reader THẬT trên kho tạm, object dựng đúng byte bằng `hash-object`
+    m = nap()   # (`--literally` cho object cố ý hỏng). Hợp đồng `git_cuc_bo`: dict hoặc None, KHÔNG ném (main không bắt) ⇒ ném là sai
+    def doc(sha, goc):
+        try:
+            return m.git_cuc_bo(sha, goc=goc)
+        except Exception as e:   # noqa: BLE001 — ghi LỚP lỗi làm giá trị để phép so dưới báo đúng chỗ; không nuốt thành None
+            return f"NEM:{type(e).__name__}"
     with tempfile.TemporaryDirectory(prefix="cip_f13_") as thu:
-        g = lambda *a, i=None: subprocess.run(["git", "-C", thu, *a], input=i, capture_output=True, check=True).stdout.decode().strip()  # noqa: E731
-        g("init", "-q")
+        def kho(ten, *co):
+            d = str(Path(thu) / ten)
+            subprocess.run(["git", "init", "-q", *co, d], capture_output=True, check=True)
+            g = lambda *a, i=None: subprocess.run(["git", "-C", d, *a], input=i, capture_output=True, check=True).stdout.decode().strip()  # noqa: E731
+            return d, g
+        d1, g = kho("sha1")
         cay = g("mktree", i=f"100644 blob {g('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
         dau = f"tree {cay}\nparent {P1}\nparent {P2}\n".encode()
         ai = lambda ten: b"author " + ten + b" <a@b> 1700000000 +0000\ncommitter " + ten + b" <a@b> 1700000000 +0000\n"  # noqa: E731
-        cm = [g("hash-object", "-t", "commit", "-w", "--stdin", i=dau + x) for x in (
-            ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
-            ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n")]
-        blob = [g("hash-object", "-w", "--stdin", i=v) for v in (b"\xff\n", f"tree zz\nparent {P1}\n".encode())]
-        try:
-            kq = [m.git_cuc_bo(x, goc=thu) for x in cm + blob + ["0" * 40]]
-        except UnicodeDecodeError as e:   # ĐÚNG lỗi F13 (chỉ lớp này) ⇒ tín hiệu chốt; lỗi khác vẫn là vô can
-            bang(False, f"metadata commit không được phụ thuộc mã hoá message/author: {type(e).__name__}: {e}")
-        dung = {"tree": cay, "parents": [P1, P2]}
-        bang(kq == [dung] * 3 + [None] * 3, f"git_cuc_bo: 3 commit cùng tree/parents; blob/không phải OID/thiếu ⇒ None: {kq}")
-        doc = types.SimpleNamespace(get=lambda sha: m.git_cuc_bo(sha, goc=thu))
-        rc, ra, prov, _ = chay([(job(1), LINUX.replace(H, cm[1]))], run={"event": "pull_request", "head_sha": P2}, git=doc,
-                               wf={(cm[1], ".github/workflows/ci.yml"): wf_tu_log(LINUX)})
-    bang(rc == 0 and prov and co(prov) == {"job_id": 1, "name": "j", "dong_sha": [cm[1]], "sha": cm[1], "parents": [P1, P2], "tree": cay, "trang_thai": "passed",
-                                            "doi_chieu": "head_sha_trong_parents_merge_tong_hop"}, f"main trên commit ISO-8859-1: rc={rc} {prov and co(prov)} {ra[-300:]}")
+        cm = lambda b, lit=(): g("hash-object", "-t", "commit", "-w", *lit, "--stdin", i=b)  # noqa: E731
+        dung, goc = {"tree": cay, "parents": [P1, P2]}, {"tree": cay, "parents": []}
+        hop_le = [cm(dau + x) for x in (ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
+                                         ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
+                                         ai(b"A") + f"\ntree {P1}\nparent {P1}\n".encode())]   # body giống header: chỉ đọc PHẦN ĐẦU
+        ca = [(x, dung) for x in hop_le] + [(cm(f"tree {cay}\n".encode() + ai(b"A") + b"\ngoc\n"), goc),   # commit gốc
+              (cm(f"tree {cay}\n".encode() + ai(f"A\rparent {P1}\r".encode()) + b"\ncr\n"), goc)]   # CR trong author ≠ dòng mới
+        hong = [b"tree %s\ntree %s\n" % (cay.encode(), cay.encode()), b"parent %s\n" % P1.encode(), b"tree %s1\n" % cay.encode(),
+                b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
+                f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n"]
+        ca += [(cm(x + ai(b"A") + b"\nh\n", ("--literally",)), None) for x in hong]
+        ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
+        g("tag", "-a", "-m", "t", "the", hop_le[0])
+        ca += [(cay, None), (g("rev-parse", "the"), None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None)]   # tree · tag · thiếu · rỗng · 2 dòng · không phải str
+        d2, g2 = kho("sha256", "--object-format=sha256")
+        cay2 = g2("mktree", i=f"100644 blob {g2('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
+        c2 = g2("hash-object", "-t", "commit", "-w", "--stdin", i=f"tree {cay2}\n".encode() + ai(b"Jos\xe9") + b"\nm\xe9ssage\n")
+        kq = [doc(x, d1) for x, _ in ca] + [doc(c2, d2)]
+        mong = [k for _, k in ca] + [{"tree": cay2, "parents": []}]
+        bang(kq == mong, f"git_cuc_bo lệch ở {[(i, a) for i, (a, b) in enumerate(zip(kq, mong)) if a != b]}")
+        with mock.patch.dict(os.environ, {"PATH": thu}):
+            bang(doc(hop_le[0], d1) is None, "không có git trên PATH ⇒ None")
+        ra_that = subprocess.run(["git", "-C", d1, "cat-file", "--batch"], input=hop_le[0].encode() + b"\n", capture_output=True, check=True).stdout
+        with mock.patch.object(m.subprocess, "run", return_value=subprocess.CompletedProcess([], 128, ra_that, b"")):   # git chết SAU khi in
+            bang(doc(hop_le[0], d1) is None, "git rc ≠ 0 dù stdout trông như commit ⇒ None")
+        with mock.patch.object(m.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, b"x commit zz\n\n", b"")):
+            bang(doc(hop_le[0], d1) is None, "kích thước không phải số ⇒ None, không ném")
+        tt = types.SimpleNamespace(get=lambda sha: m.git_cuc_bo(sha, goc=d1))
+        rc, ra, prov, _ = chay([(job(1), LINUX.replace(H, hop_le[1]))], run={"event": "pull_request", "head_sha": P2}, git=tt,
+                               wf={(hop_le[1], ".github/workflows/ci.yml"): wf_tu_log(LINUX)})
+    bang(rc == 0 and prov and co(prov) == {"job_id": 1, "name": "j", "dong_sha": [hop_le[1]], "sha": hop_le[1], "parents": [P1, P2], "tree": cay,
+                                            "trang_thai": "passed", "doi_chieu": "head_sha_trong_parents_merge_tong_hop"},
+         f"main trên commit ISO-8859-1: rc={rc} {prov and co(prov)} {ra[-300:]}")
 
 @ca
 def c35_f02_khoi_khong_tron_ven():   # F02 r3: khối thiếu/lẫn màu không được thành tập con khớp run: của bước KHÁC
@@ -1156,10 +1183,23 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("A26_tinh_ca_buoc_i", 'for t in j["steps"][:i]))', 'for t in j["steps"][:i + 1]))', "c42"),
     ("A26_GITHUB_ENV_toan_workflow", 'for t in j["steps"][:i]))', 'for jj in wf["jobs"].values() for t in jj["steps"]))', "c42"),
     ("F08_git_bo_sha", 'f"{sha}:{path}"', 'f"HEAD:{path}"', "c34"),
-    ("F13_doc_text_true", 'r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, timeout=60)',
-     'r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, text=True, timeout=60)\n        r.stdout = r.stdout.encode()', "c53"),
-    ("F13_giai_ma_ca_phan_dau", 'dau = r.stdout.split(b"\\n\\n", 1)[0].splitlines()', 'dau = r.stdout.split(b"\\n\\n", 1)[0].decode("utf-8").encode().splitlines()', "c53"),
+    ("F13_giai_ma_toan_stdout", 'dau, _, than = r.stdout.partition(b"\\n")', 'dau, _, than = r.stdout.decode("utf-8").encode().partition(b"\\n")', "c53"),
+    ("F13_giai_ma_ca_phan_dau", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n\\n", 1)[0].decode("utf-8").encode().split(b"\\n")', "c53"),
     ("F13_bo_kiem_oid", "if len(tree) != 1 or not all(RE_OID_B.fullmatch(x) for x in tree + cha):", "if len(tree) != 1:", "c53"),
+    ("F13_bo_kiem_loai", ' or loai[1] != b"commit"', "", "c53"),
+    ("F13_tach_splitlines", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n\\n", 1)[0].splitlines()', "c53"),
+    ("F13_oid_khoang", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40,64}")', "c53"),
+    ("F13_oid_chu_so", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-z]{40}|[0-9a-z]{64}")', "c53"),
+    ("F13_nhieu_tree", "if len(tree) != 1 or", "if not tree or", "c53"),
+    ("F13_chi_kiem_tree", "fullmatch(x) for x in tree + cha)", "fullmatch(x) for x in tree)", "c53"),
+    ("F13_bo_tach_dau_than", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n")', "c53"),
+    ("F13_dao_cha", '"parents": [x.decode("ascii") for x in cha]}', '"parents": [x.decode("ascii") for x in cha][::-1]}', "c53"),
+    ("F13_bo_oserror", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (subprocess.SubprocessError, UnicodeEncodeError):", "c53"),
+    ("F13_bo_kiem_kieu", "    if type(sha) is not str:", "    if False:", "c53"),
+    ("F13_bo_kiem_rc", "if r.returncode != 0 or len(loai) != 3", "if len(loai) != 3", "c53"),
+    ("F13_bo_isdigit", " or not loai[2].isdigit()", "", "c53"),
+    ("F13_bo_kiem_kich_thuoc", " or len(than) != int(loai[2]) + 1", "", "c53"),
+    ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),
     ("F02_bo_doi_shell", 'not b["tien_to"] or t.startswith("shell: ")', "True", "c35"),

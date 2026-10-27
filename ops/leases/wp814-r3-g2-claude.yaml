@@ -1,0 +1,104 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 814
+packet_id: wp814
+packet_alias: MAY-ADR-0054-c
+mission_issue: 796
+revision: 3
+generation: 2
+lease_id: wp814-r3-g2-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [812, 834, 813]
+depends_on_ghi_chu: '#812 da land (PR #836); #834 da land (PR #950); #813 r2 da merge (PR #969, merge 1af1593), lease wp813-r2-g1-claude rut han (abfd648).'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'may trang thai protocol => sensitive; executor ho claude, reviewer ho openai; tran Codex theo dong khai ADR-0052 cua spec (8 loi goi, luot thu hai tro di phai co ly do); luat phan hang P3 tu luot 1 (spec r3 muc Khac r1 diem 4).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp814-r3.md
+spec_sha256_required: 39b4288959f3889c6c3aad2d24b355c1c02b1462a8854c6a5b00677e81a7ce73
+spec_hash: 39b4288959f3889c6c3aad2d24b355c1c02b1462a8854c6a5b00677e81a7ce73
+spec_ref: refs/heads/ops/wp814-r3-spec@07a6eec8e2e42f4095164bfd468a7148457e6f09
+spec_chung: 'ops/specs/may-adr-0054-chung.md (sha256 4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0) — rang buoc, doc kem'
+spec_thay_the: 'ops/specs/wp814-r2.md r2 (sha256 dc901ab2c5bca062f2d9ad5a8b6ebc7e7cf62b5f94fc037a53921191aa5ab8ee), thay r1 ops/specs/wp814.md (sha256 5d98edfef69825d7f8d605580a24eeb293e727c96ac05694ef1b450268df5fca)'
+prompt_path: ops/specs/wp814-r3.md
+prompt_sha256_required: 39b4288959f3889c6c3aad2d24b355c1c02b1462a8854c6a5b00677e81a7ce73
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- ops/handoff/wp814-g2-claude.md
+write_set_hash: c17283905c756f33a09ba83ecff0ef935fa909ab487e1bf587dfa439bd8d094b
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'theo spec wp814 r3 (r2 + M4 no P3 #813); handoff chi tren nhanh lease; diff PR <= 2 duong dan, <= 450 dong them.'
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- ops/handoff/wp814-g2-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 8 loi goi codex (ADR-0052), luot thu hai tro di co ly do; commit run.json; moi thread connector duoc tra loi VA connector da xong tren head cuoi truoc khi bao du dieu kien (bai hoc #950)'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run (gate-packet-loop, thu-hoi); packet_loop_test N/N tai cho tren dung commit day'}
+- {id: M-3, dieu_kien: 'nghiem_thu spec r3: moi ca r814_* (gom M4) bat buoc co mat va moi ca co dot bien go dung chot lam ca DO; doctrine-scan, adr-song rc0; numstat <= 2 duong dan, <= 450 dong them'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp814-g2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 09db70350414d767b793a71cb630e643f216a1b1
+start_from_sha: 09db70350414d767b793a71cb630e643f216a1b1
+start_from_ghi_chu: 'origin/master luc cap lease r3 (da co #834, #943, #813 r2, #973, #980).'
+reviewed_sha_required: 09db70350414d767b793a71cb630e643f216a1b1
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/814#issuecomment-6440900564
+granted_on_instruction_readback: 'chu kho tra loi AskUserQuestion "Gộp vào #814" (no P3 #813) va "Đặt CODEX_AUTH_JSON" (phien session_01KkDLBwdpZ9RMeaPMjeUaht, 27-10-2026); ghi ho #814 issuecomment-6440900564, #813 issuecomment-6440901762. Bam byte KHONG DO DUOC.'
+granted_on_instruction_note: >-
+  Gop no P3 r813-mutation-evidence-incomplete vao #814 (M4 spec r3), tien le no #834 gop vao #813. Lease r2 g1 thay bang bia mo
+  hai chieu truoc khi executor bat dau. Executor la phien Claude cloud MOI, mo sau khi chu kho dat CODEX_AUTH_JSON.
+recorded_by: claude-session-01KkDLBwdpZ9RMeaPMjeUaht
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (session_01KkDLBwdpZ9RMeaPMjeUaht, phien dieu phoi #813) KHONG phai executor #814; executor la mot phien cloud MOI do phien nay tao.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-27T11:40:00Z'
+  goc_quet: 'master 09db703, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref'
+  ket_qua: 'packet_loop.py, packet_loop_test.py: nguoi giu duy nhat la wp814-r2-g1-claude, da mang da_bi_thay_the -> lease nay (783b080). Do lai sau khi dang, ghi o comment #814.'
+thay_the_cho:
+- wp814-r2-g1-claude
+thay_the_cho_ghi_chu: 'lease r2 g1 con han toi 2026-10-29T09:30Z => bia mo hai chieu; r2 mang da_bi_thay_the tro ve lease nay (commit 783b080 tren ops/wp814-r2-g1-lease).'
+leased_at_utc: '2026-10-27T11:40:00Z'
+heartbeat_at: '2026-10-27T11:40:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'ADR-0056 da kich hoat van hanh (merge 7129f7d) => lease moi cap khai 360 phut.'
+lease_until: '2026-10-29T11:40:00Z'
+lease_expires_at_utc: '2026-10-29T11:40:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh protocol; spec wp814 r3 khong khai.'
+review_rounds_limit: 8
+budget:
+  codex_review_calls:
+    pr_wp814_g2: {used: 0, reserved: 0, limit: 8}
+  attempt:
+    packet_814_r3: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp814-g2-claude MOT lan khi nghiem thu dat va review approve; mo PR draft. Merge origin/master TRUOC luot Codex cuoi de head duoc duyet = head day. Master tien sau approve lam thu-hoi do => merge master + mot luot Codex xac minh (tien le #813 luot 5), khong day merge commit chua xac minh.'

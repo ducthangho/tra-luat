@@ -451,3 +451,30 @@ pr_ghi_so_duyet_landed_20261027:
         sau comment lam no het hieu luc.
   landed: false
   landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI ca ba dieu kien con lai dong truoc merge.'
+
+moc_workflow_definition_20261027:
+  bo_canh: 'Chu kho chay gh api graphql ngoai phien (Windows cmd) va dan output vao hoi thoai phien 27-10-2026. Khoi nay KHONG sua dong nao o tren.'
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 39983914661 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID 27dcc3b (40 hex trong URL), checkSuite.commit.oid cung OID, runNumber 3105 va createdAt khop REST. Phien doi chieu
+    REST run 39983914661 (head_sha, path, attempt 1) va tai blob qua contents?ref=OID: blob f618cdb469016ac585724d286b498b7e1dcc80ea,
+    sha256 b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06, khop `git rev-parse 27dcc3b:.github/workflows/ci.yml`.
+  nguon:
+    - ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/workflow-definition-27dcc3b.txt
+    - ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/graphql-output-chu-kho-dan-pr896.json
+    - ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-27dcc3b/workflow-definition-rest-27dcc3b.txt
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai. URL va blob tai OID da duoc phien
+    doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o cap_nhat_20261026; Workflow definition o khoi nay).'
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+    - id: CHAP-NHAN-DON-VI-LAND
+      trang_thai: cho_chu_kho
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+      mo_ta: >-
+        Chu kho duyet `landed` cho #896 bang comment tren PR ghi so nay, ghi du SHA head cuoi (40 hex) va chap nhan don vi land,
+        dang SAU commit cuoi va TRUOC merge.
+  landed: false

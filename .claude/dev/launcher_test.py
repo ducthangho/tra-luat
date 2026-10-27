@@ -11587,6 +11587,9 @@ def r927_lenh_run_ghi_effort_va_sandbox_vao_run_json():
             bang(not la, f"run.json co chuoi ngoai tu vung co dinh: {la[:5]}")
         else:
             bang(so.get("sandbox_trang_thai") == "KHONG_DO_DUOC", f"sandbox ngoai Linux: {so}")
+            # r28: trên nền này sampler không có luồng nên bỏ `bat_dau()` không đổi kết quả — đột biến phụ thuộc
+            # /proc phải thành KHÔNG ĐO ĐƯỢC chứ không phải "sống" (đo: launcher-windows run 40437650224 trên 0615234).
+            return "phan sandbox can /proc cua Linux (effort va KHONG_DO_DUOC ngoai Linux da do o tren)"
 
 
 DOT_BIEN = [

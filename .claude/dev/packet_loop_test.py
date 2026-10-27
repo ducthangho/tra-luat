@@ -9084,12 +9084,19 @@ CASES += [
                               nen=_N2_814, rc_doi=11, phai="trỏ slug không có")),
     ("r814_noi_lop_p2", _ca813(_rv814((("c-b", "P2"),), [{"tu": ["a-b"], "den": "c-b", "ly_do": "đổi tên"}], am=True), nen=_AM814("P2"), rc_doi=11, phai="trỏ slug không có")),
     ("r814_noi_nguon_lap", _ca813(_V814("a-x"), _rv814((("c-x", "P3"),), _NOI814(tu=["a-x", "a-x"])), nen=_N2_814, rc_doi=11, phai="bang-noi")),
-    ("r814_mo_lai_noi_hong", _ca813(lambda c, sd: _CI813(c, sd, them={"bang_noi": {"tu": "a"}}), rc_doi=11, phai="bang-noi")),
+    ("r814_mo_lai_noi_hong", _ca813(lambda c, sd: _CI813(c, sd, them={"bang_noi": [{"tu": [], "den": "ci-gate", "ly_do": " "}]}), rc_doi=11, phai="bang-noi")),
     ("r814_mo_lai_p3_khong_dem", _ca813(lambda c, sd: _ml813(c, sd, "ci-do", [("ci-gate", "P3", [[_W813, _G813]])], ci=_ci813), state="running", finding_counts={})),
     ("r814_state_cu_giu_moc", _ca813(lambda c, sd: _sua813(sd, reviews=[{k: v for k, v in r.items() if k not in ("lop", "bang_noi", "vong_p3")} for r in _st(sd)["reviews"]]),
                                      _V814("a-x"), _rv814(_N1_814["lop"]), nen=_N1_814, rc_doi=3, state="blocked")),
     ("r814_vua_thay_quyen_ci", _ca813(_CI813, _rv814(_N1_814["lop"]), _V814("a-x"), nen=_N1_814, state="running",
                                       kiem=lambda st: st.get("mo_lai_tu") == {"nguyen_nhan": "p3", "generation": 1, "sha": st["pending_sha"]})),  # pending đã sang B ≠ A của ci-do
+    # Codex lượt 2 (chủ kho chọn A, #814 issuecomment-6443725220): MỌI cửa tiêu thụ biên nhận H — mỗi cửa một ca, một đột biến
+    ("r814_mo_lai_ci_noi_lai", _ca813(lambda c, sd: _CI813(c, sd, them={"bang_noi": [{"tu": ["a-b"], "den": "ci-gate", "ly_do": "đổi tên"}]}), rc_doi=11, phai="đổi tên/gộp")),
+    ("r814_mo_lai_cn_noi_lai", _ca813(lambda c, sd: _CN813(c, sd, them={"bang_noi": [{"tu": ["a-b"], "den": "cn-bug", "ly_do": "đổi tên"}]}), rc_doi=11, phai="đổi tên/gộp")),
+    ("r814_accept_noi_lai", _r834_ca(11, lambda x, w, h: x["bnc"].update(bang_noi=[{"tu": ["a-b"], "den": "c-d", "ly_do": "đổi tên"}]), "đổi tên/gộp", p3_cn=True)),
+    ("r814_noi_nguon_p2", _ca813(_rv814((("c-b", "P3"),), [{"tu": ["a-b"], "den": "c-b", "ly_do": "đổi tên"}]), nen=_AM814("P2"), rc_doi=11, phai="trỏ slug không có")),
+    ("r814_noi_dich_p2", _ca813(_V814("a-x"), _rv814((("c-x", "P2"), ("b-x", "P3")), [{"tu": ["a-x"], "den": "c-x", "ly_do": "đổi tên"}], am=True),
+                                nen=_N2_814, rc_doi=11, phai="trỏ slug không có")),
     ("r814_ci_void_connector", _ca813(_CI813, lambda c, sd: _buoc813(c, sd, "begin-attempt", "--provider", EXECUTOR, root=False),
                                       lambda c, sd: _buoc813(c, sd, "void-attempt", "--reason", "quota", *VOID_DUYET, root=False), _CN813, rc_doi=8, phai="chưa mở lượt mới")),
 ]
@@ -9120,6 +9127,11 @@ MUTANTS.update({
     "r814_rong_la_khong_giam": ('"sau": len(p3(lop))}', '"sau": len(p3(lop)) or len(p3(truoc))}', ["r814_xoa_het_p3"]),
     "r814_vua_khong_xet": ('CUA_DI_TIEP += ("vua-p3",)', "CUA_DI_TIEP += ()", ["r814_vua_p3_xet_dung"]),
     "r814_refs_bo_do_dai": (' or len(refs) != sum(len(x[khoa]) for x in bn["lop"])', "", ["r814_check_refs_tron_null"]),
+    "r814_mo_lai_ci_bo_chan_noi": ('    _khong_noi_lai(bn, f"mo-lai {a.nguyen_nhan}")', '    connector and _khong_noi_lai(bn, f"mo-lai {a.nguyen_nhan}")', ["r814_mo_lai_ci_noi_lai"]),
+    "r814_mo_lai_cn_bo_chan_noi": ('    _khong_noi_lai(bn, f"mo-lai {a.nguyen_nhan}")', '    connector or _khong_noi_lai(bn, f"mo-lai {a.nguyen_nhan}")', ["r814_mo_lai_cn_noi_lai"]),
+    "r814_accept_bo_chan_noi": ('    _khong_noi_lai(bnc, "accept")', "    pass", ["r814_accept_noi_lai"]),
+    "r814_noi_nguon_hang": ('cu.get(s) == "P3" and s not in nay', "s in cu and s not in nay", ["r814_noi_nguon_p2"]),
+    "r814_noi_dich_hang": ('all(nay.get(s) == "P3" for s in den)', "all(s in nay for s in den)", ["r814_noi_dich_p2"]),
     "r814_void_khoi_phuc_quyen_ci": ('        and not any(x.get("event") == "begin_attempt" for x in sau_ml)',
                                      '        and not sum((x.get("event") == "begin_attempt") - (x.get("event") == "void_attempt") for x in sau_ml) > 0', ["r814_ci_void_connector"]),
 })

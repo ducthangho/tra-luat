@@ -2896,7 +2896,9 @@ def _slug_connector(st: dict, a, h: str, p3: list) -> list:
     khai `connector_refs` [[endpoint, id], ...] phủ ĐÚNG tập (endpoint, id) P3 — không khoá bằng id số do executor đặt."""
     if not a.bien_nhan_connector:
         _die(RC_BIEN_NHAN, f"connector có P3 {p3} — cần --bien-nhan-connector (bảng lớp do reviewer ký)")
-    lop = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan_connector, verdict="approve", reviewed_sha=h, finding_id=None))["lop"]
+    bnc = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan_connector, verdict="approve", reviewed_sha=h, finding_id=None))
+    _khong_noi_lai(bnc, "accept")
+    lop = bnc["lop"]
     lop = [x for x in lop if "connector_refs" in x]
     refs = [tuple(r) for x in lop for r in (x["connector_refs"] if type(x["connector_refs"]) is list else [None])
             if type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int]
@@ -2969,6 +2971,7 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
     if not a.finding_id:
         _die(RC_ARG, "mo-lai phải có ít nhất một --finding-id (I3: tập bằng chứng dương rỗng ⇒ không đạt)")
     bn = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan, verdict="changes_requested", reviewed_sha=h, finding_id=a.finding_id))
+    _khong_noi_lai(bn, f"mo-lai {a.nguyen_nhan}")
     khoa = "connector_refs" if connector else "check_refs"
     dung = (lambda r: type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int) if connector else (
         lambda r: type(r) is list and len(r) == 2 and all(type(y) is str and y.strip() for y in r))  # ci-do: [workflow, job] — định danh I7
@@ -3057,6 +3060,13 @@ def _noi_hop_le(noi) -> bool:
     tu, den = [s for x in noi for s in x["tu"]], [x["den"] for x in noi]
     return (all(type(s) is str and SLUG_RE.fullmatch(s) for s in tu + den) and len(set(tu)) == len(tu) and len(set(den)) == len(den)
             and all(type(x["ly_do"]) is str and x["ly_do"].strip() for x in noi))
+
+
+def _khong_noi_lai(bn: dict, cua: str) -> None:
+    """M1 (I11): ngoài vòng vá P3 của `record-review` không có vòng trước để đối chiếu ⇒ bảng nối đổi tên/gộp (`tu` khác rỗng) bị từ chối
+    TRƯỚC `_xet_dung`, kẻo một lớp tái diễn đổi slug mà tách bộ đếm same-failure. `tu: []` (khai lớp mới) vô hại."""
+    if nguon := sorted(s for x in bn.get("noi", []) for s in x["tu"]):
+        _die(RC_BIEN_NHAN, f"{cua}: bảng nối H đổi tên/gộp {nguon} — chỉ nhận ở vòng vá P3 của record-review")
 
 
 def _vong_p3(st: dict, bn: dict):

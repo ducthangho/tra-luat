@@ -2953,10 +2953,12 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
     same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5)."""
     st = _load(state_dir, a.packet)
     nc, ml, connector = st.get("ngu_canh_lease"), st.get("mo_lai_tu"), a.nguyen_nhan == "connector"
-    tu_ci = connector and st["state"] == "running" and ml is not None and ml["nguyen_nhan"] == "ci-do" and ml["generation"] == (nc or {}).get("generation")
+    sau_ml = next((st["history"][i:] for i in range(len(st["history"]) - 1, -1, -1) if st["history"][i].get("event") == "mo_lai"), [])
+    tu_ci = connector and st["state"] == "running" and ml is not None and ml["nguyen_nhan"] == "ci-do" and ml["generation"] == (nc or {}).get("generation") \
+        and not any(x.get("event") == "begin_attempt" for x in sau_ml)  # connector PR #969: quyền ci-do hết dùng được khi đã mở lượt mới
     if st.get("luat_adr0054") is not True or not (st["state"] == "approved_pending" or tu_ci):
         _die(RC_STATE, f"mo-lai {a.nguyen_nhan} không chạy từ {st['state']!r} (đòi approved_pending của packet áp ADR-0054"
-                       + (", hoặc running mở lại bằng ci-do cùng generation)" if connector else ")"))
+                       + (", hoặc running mở lại bằng ci-do cùng generation, chưa mở lượt mới)" if connector else ")"))
     h = ml["sha"] if tu_ci else st["pending_sha"]
     if not a.finding_id:
         _die(RC_ARG, "mo-lai phải có ít nhất một --finding-id (I3: tập bằng chứng dương rỗng ⇒ không đạt)")

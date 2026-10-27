@@ -8889,12 +8889,14 @@ def _vao_review813(c, sd, moi=True):
     c.den_reviewing(sd, 55, 2, head=_g(w, "rev-parse", "refs/remotes/origin/agent/wp55-g1-claude"))
 
 
-def _approve813(c, sd):
-    """Cửa KHÉP lượt: approve bằng biên nhận H thật trên head đang review ⇒ approved_pending."""
+def _approve813(c, sd, am=False):
+    """Cửa KHÉP lượt bằng biên nhận H thật trên head đang review: approve ⇒ approved_pending · `am` (changes_requested) ⇒ running."""
     w, h, g = c.tmp / "kho" / "w", _st(sd)["reviewing_head_sha"], f"g{next(_N813)}"
-    (c.tmp / f"{g}.yaml").write_text(__import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"])))
+    bn = {"verdict": "changes_requested", "bang_lop": [{"slug": "x-b", "hang": "P1"}]} if am else None
+    (c.tmp / f"{g}.yaml").write_text(__import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn=bn)))
     _doi(0, *run(c.script, ["record-codex-call", "--packet", 55, "--head", h, "--run-id", g], sd)[::2], "r813 codex-call")
-    return _buoc813(c, sd, "record-review", "--provider", "codex", "--verdict", "approve", "--reviewed-sha", h, "--codex-call", g, "--bien-nhan", c.tmp / f"{g}.yaml")
+    return _buoc813(c, sd, "record-review", "--provider", "codex", "--verdict", "changes_requested" if am else "approve", "--reviewed-sha", h, "--codex-call", g,
+                    "--bien-nhan", c.tmp / f"{g}.yaml", *(("--finding-id", "x-b") if am else ()))
 
 
 def _ca813(*buoc, rc_doi=0, phai="", kiem=None, **muon):
@@ -8931,6 +8933,7 @@ CASES += [
     ("r813_ci_khong_do", _ca813(_CIX813(lambda x, h: _ci813(x, h, ket="success")), rc_doi=12, phai="không đỏ thật")),
     ("r813_connector_sau_ci", _ca813(lambda c, sd: _CI813(c, sd, xong=False), _CN813, state="cho_chu_kho", finding_counts={"ci-gate": 1, "cn-bug": 1},
                                      kiem=lambda st: st.get("mo_lai_tu") == {"nguyen_nhan": "connector", "generation": 1, "sha": st["pending_sha"]})),  # I6: quyền ci-do bị THAY
+    ("r813_quyen_ci_sau_luot_moi", _ca813(_CI813, _vao_review813, lambda c, sd: _approve813(c, sd, am=True), _CN813, rc_doi=8, phai="chưa mở lượt mới")),  # connector PR #969
     ("r813_connector_sau_ci_roi_duyet", _ca813(lambda c, sd: _CI813(c, sd, xong=False), _CN813, _VA813, state="running", mo_lai_tu=None)),
     ("r813_cham_tran_mo_lai", _ca813(_GH813(1), _CI813, rc_doi=3, state="blocked", finding_counts={"ci-gate": 1})),
     ("r813_xet_dung_sau_dau_vao", _ca813(_CI813, _GH813(1), lambda c, sd: _ml813(c, sd, "connector", LCN813, cn=[(11, "P1"), (12, "P2")]), rc_doi=11, phai="BẰNG ĐÚNG")),
@@ -8990,6 +8993,7 @@ MUTANTS.update({
     "r813_quyen_mo_lai_giu_cu": ('"mo_lai_tu": {"nguyen_nhan": a.nguyen_nhan, "generation": nc["generation"], "sha": h},',
                                  '"mo_lai_tu": st.get("mo_lai_tu") or {"nguyen_nhan": a.nguyen_nhan, "generation": nc["generation"], "sha": h},',
                                  ["r813_connector_sau_ci", "r813_connector_sau_ci_roi_duyet"]),
+    "r813_quyen_ci_qua_luot_moi": (' \\\n        and not any(x.get("event") == "begin_attempt" for x in sau_ml)', "", ["r813_quyen_ci_sau_luot_moi"]),
     "r813_gop_nguyen_nhan": ('    slugs = sorted({x["slug"] for x in bn["lop"]})', '    slugs = ["gop"] * bool(bn["lop"])', ["r813_hai_slug_doc_lap"]),
     "r813_bo_ghi_quyen_day": ('{"checkpoint_day": {"sha256": sha, "generation": d["generation"], "sha": h}}', "{}", ["r813_checkpoint_day"]),
     "r813_bo_generation_quyen_ci": (' and ml["generation"] == (nc or {}).get("generation")', "", ["r813_quyen_ci_khac_generation"]),

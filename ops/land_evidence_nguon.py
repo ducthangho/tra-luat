@@ -102,7 +102,8 @@ L6_DAU_GIU_CHO = "CHO_DIEN"
 L7_KHOA = ("model", "effort", "sandbox_mode")
 L7_MUC_DAT = ("DAT", "ĐẠT")   # sau `_chuan_hoa_81`; dạng NFC
 # L7 — đo 2026-10-27 trên `7129f7d` (băm chụp lại sau #962/#966 sửa pr924, pr950; tên giữ nguyên như ở `f577ab5`):
-# 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới.
+# 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới; chụp lại băm chỉ khi có comment chủ kho cho phép —
+# tự chụp lại mỗi lần hồ sơ đổi là xoá đúng tín hiệu "băm lệch ⇒ mất miễn trừ".
 MIEN_TRU_L7 = {
     "pr924-wp923-land-evidence.yaml": "f246000294972947543a1afb3d9122b43ea11f8e540c4927ebda8d7a202d8f5b",
     "pr931-wp835-land-evidence.yaml": "31c8ce908aa08631a58993b1e431d4653b01b23b87ed59926181f2df4df485da",

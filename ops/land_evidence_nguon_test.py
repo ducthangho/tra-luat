@@ -396,6 +396,10 @@ def c18_l7_mien_tru_theo_bam():
             rc, ra = kiem(m, goc)
             bang(rc == mong and "L7 mất miễn trừ" in ra and "L7 miễn trừ" not in ra,
                  f"băm lệch ⇒ mất miễn trừ, kiểm đủ (mong rc={mong}): rc={rc} {ra[-300:]}")
+        (goc / "ops/land" / TEN).write_text(hs, encoding="utf-8", newline="")   # review l7c P3: đĩa giữ byte được miễn trừ
+        vp, ghi = m.kiem_ho_so(goc / "ops/land" / TEN, (hs + " ").encode(), goc, __import__("yaml"))
+        bang(any(x.startswith("L7 $.assurance_81.thuc_thi:") for x in vp) and "L7 mất miễn trừ" in " ".join(ghi),
+             f"băm miễn trừ phải đo CHÍNH ảnh byte đã nạp, không đọc lại đĩa: {vp} {ghi}")
 
 
 @ca
@@ -507,6 +511,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7_bo_effort", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "sandbox_mode")', "c17"),
     ("L7_bo_sandbox_mode", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "effort")', "c17"),
     ("L7_mien_tru_bo_so_bam", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = bam is not None", "c18"),
+    ("L7_bam_doc_lai_dia", "and hashlib.sha256(byte).hexdigest() == bam", "and hashlib.sha256(tep.read_bytes()).hexdigest() == bam", "c18"),
+    ("L7_khong_bao_gio_mien", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = False", "c18"),
     ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
     ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),
 )

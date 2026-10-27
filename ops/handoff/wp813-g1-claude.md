@@ -1,6 +1,10 @@
 # Handoff — wp813-r2-g1-claude (`MAY-ADR-0054-b`), packet #813 r2 g1
 
-Trạng thái: **DỪNG lần 2** sau Codex lượt 3/10 — `r813-mutation-evidence-incomplete` lặp lần ba (chủ kho đã miễn một lần, issuecomment-6434351773; trần Codex nâng lên 10). Lần dừng 1: sau lượt 2/8. Hỏi chủ kho trên #813. Nhánh code `agent/wp813-g1-claude`
+Trạng thái (cuối): **Codex lượt 4/10 APPROVE trên `25bd151727b5be2574594cf104658048816c4942`** (0 P0–P2, 1 P3). Suite đầy đủ trong
+clone ghim `25bd151`: nền 980/980 (981 ca, BỎ QUA 1), 1342 đột biến, `TỔNG: ĐẠT`, 55,5 phút. Đã đẩy `agent/wp813-g1-claude` MỘT lần, PR draft #969.
+Nợ P3 `r813-mutation-evidence-incomplete` (biểu hiện mới lượt 4): chưa có ca `check_refs` trộn phần tử sai hình dạng (mã từ chối đúng rc=11);
+owner executor #813, hướng: thêm ca + đột biến bỏ phép so độ dài refs. Lịch sử dừng: sau lượt 2 và lượt 3 (same-failure), chủ kho duyệt A
+cả hai lần (issuecomment-6434345039, -6434351773, -6434981875); trần Codex 10.
 **chưa đẩy** (chỉ đẩy một lần khi approve); bản vá đầy đủ nằm cuối tệp này (`git am` được), sha256 `fe9b4cc5bcbe75f22a13bec88b2d05f4ae7a89f574f3949b4f20864c9f175a75`.
 
 - Base `f577ab5b467510f3fa7ed27107dc2eab539d3bef` (= `origin/master` lúc làm). Head ứng viên `79bbbdc16bd873f319ab70885039413735ee2fb3`.
@@ -11,17 +15,18 @@ Trạng thái: **DỪNG lần 2** sau Codex lượt 3/10 — `r813-mutation-evid
 - Có chọn lọc trên head: `r813_*` + `r834_*` + codepage + mốc đột biến 103/103; mọi đột biến `r813_*` và các đột biến #812/#834 có mốc đổi hoặc
   thêm ca đích: lỗi 0.
 
-## Cross-review Codex (`gpt-6-astra`, xhigh, qua `launcher.py run`) — 3/10 lời gọi (trần nâng 8 → 10 theo chủ kho)
+## Cross-review Codex (`gpt-6-astra`, xhigh, qua `launcher.py run`) — 4/10 lời gọi (trần nâng 8 → 10 theo chủ kho)
 
 | lượt | head | thời lượng | verdict | lớp |
 |---|---|---|---|---|
 | 1 | `d789393` | 1046 s rc0 | request_changes | 4 P2: `ci-reopen-run-context-unbound`, `checkpoint-spec-context-unbound`, `checkpoint-nested-scope-unvalidated`, `r813-mutation-evidence-incomplete` |
 | 2 | `79bbbdc` | 885 s rc0 | request_changes | 2 P2 còn mở, CÙNG slug: `ci-reopen-run-context-unbound`, `r813-mutation-evidence-incomplete`; 2 lớp đã đóng |
+| 4 | `25bd151` (merge `a917673`) | 994 s rc0 | **approve** | 0 P0–P2; 1 P3 mới (check_refs sai hình dạng chưa có ca) |
 | 3 | `71c19c9` (merge `a268bcc`) | 846 s rc0 | request_changes | 1 P2 còn mở: `r813-mutation-evidence-incomplete` (đột biến giữ `mo_lai_tu` cũ sống — thiếu oracle quyền sau CI → connector); `ci-reopen-run-context-unbound` đã đóng |
 
 Ngoài ra có MỘT lời gọi `codex exec "Reply with exactly: OK"` lúc chủ kho đăng nhập (03:24Z), chỉ để chứng minh xác thực, không phải review.
 
-Hiện vật: `ops/reviews/wp813-g1-codex-luot{1,2,3}/{PROMPT.md,VERDICT.md,run.json}`.
+Hiện vật: `ops/reviews/wp813-g1-codex-luot{1,2,3,4}/{PROMPT.md,VERDICT.md,run.json}`.
 
 ## Hai lớp còn mở (hướng vá executor đề xuất, CHƯA làm)
 

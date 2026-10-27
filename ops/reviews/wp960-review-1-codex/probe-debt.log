@@ -1,0 +1,5 @@
+empty-debt {"rc": 1, "errors": 66, "rules": {"[L-ANCESTRY]": 60, "[L-REVIEW]": 1, "[L-SURFACE]": 5}, "unknown": [], "set_equal": true}
+generate {"rc": 0, "exact_block_equal": true, "stderr": "# 66 mục"}
+base-before {"has_new_rules": false, "has_debt": false, "new_cases_found": []}
+base-with-head-code-default {"rc": 0, "errors": 0, "debt": {"L-REVIEW": 1, "L-ANCESTRY": 60, "L-SURFACE": 5}, "unknown": [], "violations": 66, "set_equal_head": true}
+base-with-head-code-empty {"rc": 1, "errors": 66, "debt": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}, "unknown": [], "violations": 66, "set_equal_head": true}

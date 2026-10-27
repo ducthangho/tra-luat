@@ -1,0 +1,5 @@
+$ git show 1f9376f:ops/specs/wp748-r27-launcher-effort-sandbox.md | sha256sum
+7b8b51ffc355540d70df3e897082a498a62d95d285482f2117192b29f19d6fcd  -
+lease-wp748-r27-g27-a97940e.yaml.txt: spec_hash: 7b8b51ffc355540d70df3e897082a498a62d95d285482f2117192b29f19d6fcd
+lease-wp748-r27-g28-96b0b6b.yaml.txt: spec_hash: 7b8b51ffc355540d70df3e897082a498a62d95d285482f2117192b29f19d6fcd
+lease-wp748-r27-g28-sau-rut-han-d4cbde3.yaml.txt: spec_hash: 7b8b51ffc355540d70df3e897082a498a62d95d285482f2117192b29f19d6fcd

@@ -6,8 +6,9 @@
 # GATE HAU MERGE: run push 40515148391 tren 7f19424 bi HUY truoc khi co job (hai push master lien sau). Phien dieu phoi
 # tao ref claude/gate-pr983-7f19424 tro 7f19424 va dispatch ci.yml (run 40523295711, chu kho duyet); 23/23 job Ubuntu
 # success, roi phien HUY run de dung tieu phut Windows khi tai khoan cham tran billing — run ket luan `cancelled`, 3/4 moc
-# §10.2.2 do theo JOB `gate (ubuntu-latest)` success. landed FALSE: moc Workflow definition chua do (GraphQL 403) + chua
-# co duyet landed cua chu kho.
+# §10.2.2 do theo JOB `gate (ubuntu-latest)` success. landed FALSE: moc Workflow definition chua do (GraphQL 403) + buoc
+# release-verify lane LAND bi SKIPPED tren run dispatch (ref khong phai master) + §8.1 CHUA_DAT (reviewer luot 2 ghi vao
+# checkout duoc review roi hoan nguyen) + chua co duyet landed cua chu kho. Hai muc giua do Codex connector bat tren PR #996.
 
 schema_version: 1
 mission_id: gh-923
@@ -91,15 +92,27 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 7f19424: CHUA DAT day du — run push bi huy (0 job); run dispatch 40523295711
     co 23/23 job Ubuntu success va 3/4 moc §10.2.2 do theo job gate (ubuntu-latest); Workflow definition not_measured.
-    (2) lease da nha: bia mo 2ab92ee, ke nhiem g3 DAT. (3) bookkeeping: ho so nay DAT. (4) review approve neo DUNG bbfb96c
-    voi §8.1 DAT. (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
-    Mo lai: chu kho doc WorkflowRun.file cua run 40523295711 ngoai phien, roi duyet landed bang comment neo head PR ghi so.
+    Buoc 'release-verify strict (lane LAND — manifest committed)' cua job gate (ubuntu-latest) la SKIPPED
+    (readback-jobs-40523295711.json) vi ci.yml dat if github.ref == refs/heads/master, ma run dispatch chay tren ref
+    claude/gate-pr983-7f19424; buoc WORKER (manifest TAM) success duoc giu rieng, KHONG thay cho lane LAND.
+    Lane LAND tren 7f19424: not_measured. (2) lease da nha: bia mo 2ab92ee, ke nhiem g3 DAT. (3) bookkeeping: ho so nay
+    DAT. (4) review approve neo DUNG bbfb96c, nhung §8.1 CHUA_DAT (xem assurance_81: nghia vu checkout read-only cua
+    reviewer khong dat). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
+    Mo lai — can CA BA: (a) chu kho doc WorkflowRun.file cua run gate dung; (b) bang chung duong release-verify strict
+    lane LAND (manifest committed) tren DUNG 7f19424 trong CI; (c) mot luot review tuan thu read-only (artifact sinh
+    ra ngoai repo duoc review) approve bbfb96c, hoac chu kho quyet dinh rieng ve §8.1. Sau do chu kho duyet landed
+    bang comment neo head PR ghi so.
 assurance_81:
-  reviewer_assurance_81: DAT
+  reviewer_assurance_81: CHUA_DAT
   ly_do: >-
     measured — verdicts/wp923-g2-claude-review-2-codex-run.json: luot launcher.py run 4bca8520 tren DUNG authorized_head_sha
     bbfb96c, ma_thoat 0, verdict approve 0 finding; model_phuc_vu_trang_thai DO_DUOC 43/43 gpt-6.1-sol (ho openai, khac ho
-    claude cua executor) => cross_approved.
+    claude cua executor). Giu verdict lam bang chung NOI DUNG. NHUNG nghia vu read-only cua reviewer (AGENTS.md §Reviewer:
+    checkout duoc review la read-only, scratch nam ngoai repo) KHONG DAT: verdict tu khai (dong 18, HUONG 5, HUONG 10)
+    test sinh artifact ignored trong cay-kho va Git freshen mtime object co san, roi don/hoan nguyen; snapshot cuoi khop
+    7910 muc chi chung minh khong co delta o hai moc, khong chung minh khong ghi (PROTOCOL §8.2). Nen KHONG cross_approved
+    theo §8.1 — phat hien boi Codex connector tren PR #996 (review comment 4391255153).
+  # thuc_thi giu lai: la phep do thuc thi cua luot (model/effort/sandbox), khong phai loi khai DAT.
   thuc_thi:
     model: 'measured — verdicts/wp923-g2-claude-review-2-codex-run.json model_phuc_vu DO_DUOC, 43/43 response gpt-6.1-sol'
     effort: 'measured — verdicts/wp923-g2-claude-review-2-codex-run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC'
@@ -114,4 +127,5 @@ no_co_ten:
 khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
   - 'Moc Workflow definition §10.2.2 cua run 40523295711: KHONG_DO_DUOC trong phien — GraphQL WorkflowRun.file 403.'
+  - 'release-verify strict lane LAND (manifest committed) tren 7f19424 trong CI: not_measured — buoc SKIPPED o run 40523295711 (if github.ref == refs/heads/master).'
   - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'

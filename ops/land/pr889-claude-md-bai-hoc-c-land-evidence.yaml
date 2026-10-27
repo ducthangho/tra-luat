@@ -354,6 +354,7 @@ ha_cap_assurance_81_20261027:
     - '$.pr_ghi_so_duyet_landed_20261026.dieu_kien_da_dat[0] (reviewer_assurance_81 DAT, cross_approved)'
     - '$.pr_ghi_so_duyet_landed_lan2_20261026.dieu_kien_da_dat (§8.1 cross_approved)'
     - '$.landed_20261026.landed_dieu_kien muc (3) (review DAT, cross_approved)'
+    - '$.cap_nhat_20261026.landed_ly_do (chi ve van xuoi "truoc khi reviewer_assurance_81 dat"; phan §10.2.2 va landed cua cau giu nguyen)'
   thay_the_ghi_chu: >-
     Moi duong dan tren dang khai §8.1 DAT hoac cross_approved; khoi assurance_81 cap goc da thay the chung: nay
     reviewer_assurance_81 CHUA_DAT (thieu do effort va sandbox mode thuc te).

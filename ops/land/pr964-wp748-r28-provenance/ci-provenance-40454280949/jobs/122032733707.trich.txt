@@ -1,0 +1,2 @@
+2026-10-27T05:44:51.6927884Z Image: ubuntu-24.04
+2026-10-27T05:44:52.3656065Z ##[group]Run echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"

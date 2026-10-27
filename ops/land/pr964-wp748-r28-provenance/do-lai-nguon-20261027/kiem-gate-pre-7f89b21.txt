@@ -1,0 +1,19 @@
+# kiem-gate offline tren readback-check-runs-<sha>-all.json (filter=all); ten bat buoc = moi job khong skipped cua attempt cuoi cua run do.
+== run 40446478674 attempt 1 event pull_request conclusion success suite 109623766733 23 ten (bo skipped)
+gate XANH trên 7f89b21867e0c62aea21947e6f9da91ca0750742 (suite 109623766733): chuan-bi id=121998872089 · gate (ubuntu-latest) id=121998960831 · gate-cong-cu (ubuntu-latest, 0) id=121998960890 · gate-cong-cu (ubuntu-latest, 1) id=121998960931 · gate-cong-cu (ubuntu-latest, 2) id=121998960934 · gate-cong-cu (ubuntu-latest, 3) id=121998960895 · gate-cong-cu (ubuntu-latest, 4) id=121998961067 · gate-cong-cu (ubuntu-latest, 5) id=121998960881 · gate-cong-cu (ubuntu-latest, 6) id=121998960889 · gate-cong-cu (ubuntu-latest, 7) id=121998960912 · gate-cong-cu-gop (ubuntu-latest) id=122010732642 · gate-nhanh-gop (ubuntu-latest) id=121999457760 · gate-nhanh-manh (ubuntu-latest, 0) id=121998960870 · gate-nhanh-manh (ubuntu-latest, 1) id=121998960923 · gate-nhanh-manh (ubuntu-latest, 2) id=121998960887 · gate-nhanh-manh (ubuntu-latest, 3) id=121998960919 · gate-nhanh-manh (ubuntu-latest, 4) id=121998960940 · gate-nhanh-manh (ubuntu-latest, 5) id=121998960969 · gate-nhanh-manh (ubuntu-latest, 6) id=121998960958 · gate-nhanh-manh (ubuntu-latest, 7) id=121998961146 · gate-ops (ubuntu-latest) id=121998960873 · gate-packet-loop (ubuntu-latest) id=121998960876 · gate-registry (ubuntu-latest) id=121999546612
+rc=0
+== run 40446478652 attempt 1 event pull_request_target conclusion success suite 109623766684 1 ten (bo skipped)
+gate XANH trên 7f89b21867e0c62aea21947e6f9da91ca0750742 (suite 109623766684): thu-hoi id=121998871783
+CẢNH BÁO: 'thu-hoi' có 2 run ở suite khác (122008244879, 122023270672) — bỏ qua
+rc=0
+== run 40449375558 attempt 1 event pull_request_target conclusion success suite 109631467265 1 ten (bo skipped)
+gate XANH trên 7f89b21867e0c62aea21947e6f9da91ca0750742 (suite 109631467265): thu-hoi id=122008244879
+CẢNH BÁO: 'thu-hoi' có 2 run ở suite khác (121998871783, 122023270672) — bỏ qua
+rc=0
+== run 40454096209 attempt 1 event pull_request_target conclusion success suite 109643961449 1 ten (bo skipped)
+gate XANH trên 7f89b21867e0c62aea21947e6f9da91ca0750742 (suite 109643961449): thu-hoi id=122023270672
+CẢNH BÁO: 'thu-hoi' có 2 run ở suite khác (121998871783, 122008244879) — bỏ qua
+rc=0
+== run 40446486332 attempt 1 event workflow_dispatch conclusion success suite 109623787698 1 ten (bo skipped)
+gate XANH trên 7f89b21867e0c62aea21947e6f9da91ca0750742 (suite 109623787698): launcher (windows-latest) id=121998899364
+rc=0

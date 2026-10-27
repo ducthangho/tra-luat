@@ -604,11 +604,29 @@ def _write_json_atomic(target: Path, data: dict) -> None:
     os.replace(_tmp, str(target))
 
 
+class BackupTrongCaySkill(RuntimeError):
+    """v1.36.69 (#972): đích backup config nằm trong cây skill — từ chối, KHÔNG dựng thư mục nào."""
+
+
+def _goc_cay_skill() -> Path:
+    """Gốc cây skill = thư mục tổ tiên gần nhất có SKILL.md, tính từ tệp mã đang chạy; không thấy thì
+    lùi về cha của thư mục chứa tệp (quy ước ca r202: `tl.py` → `scripts/` → gốc)."""
+    tep = Path(__file__).resolve()
+    for d in tep.parents:
+        if (d / "SKILL.md").is_file():
+            return d
+    return tep.parent.parent
+
+
 def _config_backup_dir() -> Path:
     """r202 (doctrine r193 — backup config CHỨA token KHÔNG BAO GIỜ nằm trong cây skill; sự cố token
     lọt bundle 23-07 + profile-delete để `.bak.json` ở gốc cây 25-07): thư mục đích cho MỌI backup
     config. Ưu tiên TL_CONFIG_BACKUP_DIR (test/override) → `D:\\Quốc hội\\_config_backups` (máy chuẩn,
-    chỉ khi ĐÃ tồn tại — không tự dựng cây ngoài) → `%LOCALAPPDATA%\\tra-luat\\_config_backups`."""
+    chỉ khi ĐÃ tồn tại — không tự dựng cây ngoài) → `%LOCALAPPDATA%\\tra-luat\\_config_backups` →
+    (POSIX) `$XDG_STATE_HOME/tra-luat/_config_backups`, mặc định `~/.local/state/...`.
+    v1.36.69 (#972): bỏ nhánh `~/tra-luat/_config_backups` — kho clone ở `~/tra-luat` thì đích ấy NẰM TRONG
+    cây skill (selftest r202 đỏ trên máy chủ kho, HOME=/home/agent). Chốt cứng sau cùng áp cho MỌI nguồn,
+    kể cả env, và chạy TRƯỚC mkdir: đích trong cây ⇒ BackupTrongCaySkill, không dựng gì."""
     env = (os.environ.get("TL_CONFIG_BACKUP_DIR") or "").strip()
     if env:
         target = Path(env).expanduser()
@@ -616,9 +634,16 @@ def _config_backup_dir() -> Path:
         preferred = Path("D:/Quốc hội/_config_backups")
         if preferred.is_dir():
             target = preferred
+        elif os.environ.get("LOCALAPPDATA"):
+            target = Path(os.environ["LOCALAPPDATA"]) / "tra-luat" / "_config_backups"
         else:
-            base = os.environ.get("LOCALAPPDATA") or str(Path.home())
-            target = Path(base) / "tra-luat" / "_config_backups"
+            state = (os.environ.get("XDG_STATE_HOME") or "").strip()
+            target = Path(state).expanduser() if state else Path.home() / ".local" / "state"
+            target = target / "tra-luat" / "_config_backups"
+    goc, dich = _goc_cay_skill().resolve(), target.resolve()
+    if dich == goc or goc in dich.parents:
+        raise BackupTrongCaySkill(f"đích backup config {dich} nằm trong cây skill {goc} — backup chứa token; "
+                                  "đặt TL_CONFIG_BACKUP_DIR ra NGOÀI cây rồi chạy lại")
     target.mkdir(parents=True, exist_ok=True)
     return target
 

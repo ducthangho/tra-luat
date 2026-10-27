@@ -1,3 +1,20 @@
+# ★ v1.36.69 — r376: backup config không bao giờ rơi vào cây skill (#972) (2026-10-27)
+
+Selftest `r202_profile_delete_backup_ngoai_cay` đỏ trên máy chủ kho (`HOME=/home/agent`). Nguyên nhân:
+`_config_backup_dir()` lùi về `Path.home()/tra-luat/_config_backups` khi không có `TL_CONFIG_BACKUP_DIR`,
+`D:\Quốc hội\_config_backups` hay `LOCALAPPDATA` — kho clone ở `~/tra-luat` thì đích ấy NẰM TRONG cây
+skill, mà backup config chứa token (doctrine r193/r202). Đo: `HOME=/home/user` + kho `/home/user/tra-luat`
+⇒ đích trong cây; `HOME=/root` ⇒ ngoài cây.
+
+- Đích mặc định POSIX: `$XDG_STATE_HOME/tra-luat/_config_backups`, mặc định `~/.local/state/…`. Windows
+  giữ `LOCALAPPDATA`. Bỏ hẳn nhánh `~/tra-luat`.
+- Chốt cứng `BackupTrongCaySkill`: đích (đã resolve) bằng hoặc nằm dưới gốc cây skill ⇒ từ chối, áp cho MỌI
+  nguồn kể cả `TL_CONFIG_BACKUP_DIR`, kiểm TRƯỚC `mkdir`. Gốc cây = tổ tiên gần nhất có `SKILL.md`.
+- `profile-delete --apply` và `init-config` gặp chốt ⇒ dừng TRƯỚC mọi mutation, rc 2, JSON
+  `CONFIG_BACKUP_TRONG_CAY_SKILL`. Trước đây hai nơi nuốt mọi lỗi backup rồi vẫn sửa config.
+- Lớp ngoại lệ re-export trực tiếp trong `tl.py` (stub `_STUB_MAP` chỉ bọc HÀM — bẫy I11).
+- Ngoài phạm vi (nợ `NO-972-BACKUP-NUOT-LOI`): các lỗi backup KHÁC vẫn bị nuốt như cũ.
+
 # ★ dev-side — r375: land packet #543 (doctrine-scan đảo sang danh sách CHO PHÉP) và ghi sổ ba lượt review (2026-09-16)
 
 Nối tiếp r374 (ghi sổ #540 và #538). Mục này là vế bookkeeping ADR-0034 của packet **#543**

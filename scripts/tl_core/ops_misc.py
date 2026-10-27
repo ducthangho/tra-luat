@@ -479,6 +479,8 @@ def save_local_config(config_json=None, webapp=None, token=None, manifest_id=Non
             _bkp = _config_backup_dir() / f"{path.name}.init-config.{time.strftime('%Y%m%dT%H%M%S')}.bak.json"
             shutil.copyfile(str(path), str(_bkp))    # copy BYTE — giữ nguyên cả file cũ không parse được
             backup = str(_bkp)
+        except BackupTrongCaySkill:   # v1.36.69 (#972): KHÔNG ghi đè config khi không backup được ra ngoài cây
+            raise
         except Exception:  # noqa: BLE001
             backup = None
     _write_json_atomic(path, merged)
@@ -663,6 +665,11 @@ def cmd_init_config(a) -> int:
     try:
         path, _cfg_info = save_local_config(config_json, a.webapp, a.token, a.manifest_id, a.out,
                                             replace=getattr(a, "replace", False))
+    except BackupTrongCaySkill as e:   # v1.36.69 (#972): config CHƯA bị ghi
+        print(_json_dumps({"ok": False, "error": "CONFIG_BACKUP_TRONG_CAY_SKILL", "detail": str(e),
+                           "note": "CHƯA ghi config. Đặt TL_CONFIG_BACKUP_DIR ra NGOÀI cây skill rồi chạy lại."}),
+              file=sys.stderr)
+        return 2
     except Exception as e:  # noqa: BLE001
         print(f"[tl] init-config lỗi: {e}", file=sys.stderr); return 1
     # r280 (P16-F01): NÓI RA đã giữ/xoá gì — im lặng chính là cách bản cũ làm mất block profiles.

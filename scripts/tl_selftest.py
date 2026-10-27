@@ -21224,6 +21224,102 @@ def run() -> int:
             _env110_restore(_sav_env)
     _t110("r202_profile_delete_backup_ngoai_cay", _c202_profile_delete_backup_ngoai_cay)
 
+    # v1.36.69 (#972): đích backup mặc định KHÔNG được rơi vào cây skill khi kho clone ở ~/tra-luat
+    # (r202 đỏ trên máy chủ kho HOME=/home/agent). Cây skill GIẢ qua `_goc_cay_skill`; mỗi ca đo
+    # đúng MỘT nhánh của `_config_backup_dir` hoặc một nơi gọi.
+    _ENV972 = ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME")
+
+    def _cay972(fn):
+        _sav_goc = _TL_MODULE._goc_cay_skill
+        _sav_env = _env110({k: None for k in _ENV972})
+        try:
+            with _tf110.TemporaryDirectory() as _d:
+                _t = _P110(_d).resolve()
+                _goc = _t / "tra-luat"
+                _goc.mkdir()
+                (_goc / "SKILL.md").write_text("x", encoding="utf-8")
+                os.environ["HOME"] = str(_t)
+                _TL_MODULE._goc_cay_skill = lambda: _goc
+                return fn(_t, _goc)
+        finally:
+            _TL_MODULE._goc_cay_skill = _sav_goc
+            _env110_restore(_sav_env)
+
+    _MAY_CHUAN972 = _P110("D:/Quốc hội/_config_backups").is_dir()   # máy chuẩn Windows: nhánh ấy thắng
+
+    def _c972_mac_dinh_ngoai_cay():
+        def _f(t, goc):
+            d = _P110(str(_TL_MODULE._config_backup_dir())).resolve()
+            mong = (_P110("D:/Quốc hội/_config_backups").resolve() if _MAY_CHUAN972
+                    else t / ".local" / "state" / "tra-luat" / "_config_backups")
+            return d == mong and goc not in d.parents and not (goc / "_config_backups").exists()
+        return _cay972(_f)
+    _t110("r972_mac_dinh_ngoai_cay_khi_kho_o_home_tra_luat", _c972_mac_dinh_ngoai_cay)
+
+    def _c972_xdg_state_home():
+        def _f(t, goc):
+            os.environ["XDG_STATE_HOME"] = str(t / "xdg")
+            d = _P110(str(_TL_MODULE._config_backup_dir())).resolve()
+            return _MAY_CHUAN972 or d == t / "xdg" / "tra-luat" / "_config_backups"
+        return _cay972(_f)
+    _t110("r972_ton_trong_xdg_state_home", _c972_xdg_state_home)
+
+    def _c972_env_trong_cay_bi_tu_choi():
+        def _f(t, goc):
+            ok = []
+            for dich in (goc / "bk", goc):
+                os.environ["TL_CONFIG_BACKUP_DIR"] = str(dich)
+                try:
+                    _TL_MODULE._config_backup_dir()
+                    ok.append(False)
+                except _TL_MODULE.BackupTrongCaySkill:
+                    ok.append(not (goc / "bk").exists())
+            return all(ok) and len(ok) == 2
+        return _cay972(_f)
+    _t110("r972_env_trong_cay_bi_tu_choi_khong_dung_thu_muc", _c972_env_trong_cay_bi_tu_choi)
+
+    def _c972_profile_delete_dung_truoc_mutation():
+        import types as _ty972
+        def _f(t, goc):
+            _cfgp = goc / "tra_luat_config.v2.json"
+            _cfgp.write_text(json.dumps({"defaultProfile": "vbqppl", "profiles": {
+                "vbqppl": {"rootFolderId": "r0"}, "XoaThu": {"rootFolderId": "r1", "notebookId": "nb1"}}}),
+                encoding="utf-8")
+            _truoc = _cfgp.read_bytes()
+            os.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
+            _sav_pme = _TL_MODULE._profile_manifest_entries_for
+            _TL_MODULE._profile_manifest_entries_for = lambda *a, **k: ([], None)
+            try:
+                _ns = _ty972.SimpleNamespace(name="XoaThu", config=str(_cfgp), refresh=False, apply=True,
+                                             confirm="yes", delete_nlm_sources=False, trash_assets=False)
+                _be, _bo = _io110.StringIO(), _io110.StringIO()
+                with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_bo):
+                    _rc = _TL_MODULE.cmd_profile_delete(_ns)
+            finally:
+                _TL_MODULE._profile_manifest_entries_for = _sav_pme
+            return (_rc == 2 and "CONFIG_BACKUP_TRONG_CAY_SKILL" in _be.getvalue()
+                    and _cfgp.read_bytes() == _truoc and not (goc / "bk").exists())
+        return _cay972(_f)
+    _t110("r972_profile_delete_dung_truoc_mutation", _c972_profile_delete_dung_truoc_mutation)
+
+    def _c972_init_config_dung_truoc_ghi():
+        import types as _ty972
+        def _f(t, goc):
+            _cfgp = goc / "tra_luat_config.json"
+            _cfgp.write_text(json.dumps({"webappUrl": "https://cu", "token": "cu"}), encoding="utf-8")
+            _truoc = _cfgp.read_bytes()
+            os.environ["TL_CONFIG_BACKUP_DIR"] = str(goc / "bk")
+            _ns = _ty972.SimpleNamespace(config_json=json.dumps({"webappUrl": "https://moi", "token": "moi"}),
+                                         from_public=False, file=None, from_drive=False, webapp=None, token=None,
+                                         manifest_id=None, out=str(_cfgp), replace=False, no_gws=True)
+            _be, _bo = _io110.StringIO(), _io110.StringIO()
+            with _ctx110.redirect_stderr(_be), _ctx110.redirect_stdout(_bo):
+                _rc = _TL_MODULE.cmd_init_config(_ns)
+            return (_rc == 2 and "CONFIG_BACKUP_TRONG_CAY_SKILL" in _be.getvalue()
+                    and _cfgp.read_bytes() == _truoc and not (goc / "bk").exists())
+        return _cay972(_f)
+    _t110("r972_init_config_dung_truoc_ghi", _c972_init_config_dung_truoc_ghi)
+
     def _c208b_auth_fix_chain_dung_thu_tu():
         # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill
         # chỉ hô `nlm login` — lệnh TƯƠNG TÁC, KHÔNG chạy được ở Cowork/headless; đường đúng

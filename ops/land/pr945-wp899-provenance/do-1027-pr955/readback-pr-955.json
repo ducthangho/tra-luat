@@ -1,0 +1,12 @@
+{
+ "nguon": "MCP github pull_request_read get #955, doc 2026-10-27T12:49Z",
+ "number": 955,
+ "state": "closed",
+ "merged": true,
+ "merged_by": "ducthangho",
+ "merged_at": "2026-10-27T09:38:34Z",
+ "head_sha": "5c271ead310e68aeea0bcf03a679fbe77bfc7e87",
+ "base_sha": "3e973a03b151e37cd402e0a723816eeaa8247193",
+ "commits": 3,
+ "changed_files": 54
+}

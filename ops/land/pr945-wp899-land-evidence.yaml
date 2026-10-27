@@ -195,3 +195,29 @@ no_con_mo:
     mo_ta: >-
       Moc Workflow definition va logic che do chay cua so dang ky (marker Gate) la viec cua P-B; chua co Issue. Moi ho so land
       ve sau van can chu kho dan GraphQL tay cho toi khi P-B land.
+
+moc_workflow_definition_20261027:
+  bo_canh: >-
+    Chu kho chay `gh api graphql` (node WFR_kwLOTNeRjc8AAAAJYDHUBA) ngoai phien va dan output vao hoi thoai phien ghi so
+    27-10-2026. Khoi nay KHONG sua dong nao o tren.
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 40268583940 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID cebb5b2 (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST run 40268583940 (head_sha, path,
+    attempt 1, run_number 3224, node_id) va tai blob qua contents?ref=OID: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc,
+    sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, khop `git rev-parse cebb5b2:.github/workflows/ci.yml`.
+  nguon:
+    - ops/land/pr945-wp899-provenance/do-1026-cebb5b2/workflow-definition-cebb5b2.txt
+    - ops/land/pr945-wp899-provenance/do-1026-cebb5b2/graphql-output-chu-kho-dan-pr945.json
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai (khong co comment tren GitHub).
+    URL va blob tai OID da duoc phien doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o bon_moc_10_2_2; Workflow definition o khoi nay).'
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+    - id: REVIEWER-ASSURANCE-81
+      trang_thai: cho_chu_kho
+      mo_ta: 'Khong doi — xem review.assurance_81 va review.dieu_kien_mo_lai.'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+  landed: false

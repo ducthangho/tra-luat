@@ -547,6 +547,11 @@ def cmd_profile_delete(a) -> int:
             _bkp_name = Path(path).with_suffix(f".{_profile_file_slug(name)}.bak.json").name
             bkp = str(_config_backup_dir() / _bkp_name)
             _write_json_atomic(Path(bkp), cfg)
+    except BackupTrongCaySkill as e:   # v1.36.69 (#972): dừng TRƯỚC mọi mutation — không xoá profile thiếu backup
+        out = {**plan, "ok": False, "error": "CONFIG_BACKUP_TRONG_CAY_SKILL", "detail": str(e),
+               "note": "CHƯA xoá gì. Đặt TL_CONFIG_BACKUP_DIR ra NGOÀI cây skill rồi chạy lại."}
+        print(_json_dumps(out, deterministic=_deterministic_enabled(a)), file=sys.stderr)
+        return 2
     except Exception:
         bkp = None
     nlm_results = []

@@ -99,6 +99,10 @@ assurance_81:
     fb2bbcb (khoa head), ma_thoat 0, verdict approve 0 finding; model_phuc_vu_trang_thai DO_DUOC, 35/35 response gpt-6.1-sol
     (ho openai, khac ho claude cua executor); effort xhigh va sandbox do may (DO_DUOC) => cross_approved.
   gioi_han: 'model_phuc_vu do tu su kien response.created ma launcher ghi; la model may chu TRA VE, khong phai chung thu ben thu ba.'
+  thuc_thi:
+    model: 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json model_phuc_vu DO_DUOC, 35/35 response gpt-6.1-sol (run 58e19716, head fb2bbcb, ma_thoat 0)'
+    effort: 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC'
+    sandbox_mode: 'measured — verdicts/wp943-g1-claude-review-3-codex-run.json sandbox_trang_thai DO_DUOC; sandbox_quan_sat: codex-linux-sandbox (permission_profile managed, file_system restricted, network restricted) va bwrap (--unshare-net --unshare-pid --unshare-user --cap-drop=ALL)'
 
 no_co_ten:
   - {ma: adr-0056-kich-hoat-van-hanh, trang_thai: dong, bang_chung: 'PR #963 merge 7129f7d = moc kich hoat; lease cap SAU moc nay khai heartbeat_required_minutes 360'}

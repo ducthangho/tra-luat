@@ -27,6 +27,12 @@ LUẬT:
       `landed` không phải bool ⇒ ĐỎ. `landed: true` ⇒ `post_merge_checks` và `bookkeeping` phải là list KHÁC RỖNG mà mọi
       phần tử là mapping (kiểm KIỂU, không đoán chuỗi giữ chỗ — PR #840 merge suýt mang `landed: true` với hai trường ấy là
       chuỗi `CHO_DIEN`, connector P1 4309577154), và không chuỗi nào chứa `CHO_DIEN`. `landed: false` (bản nháp) ⇒ không đòi.
+  L7  (#748, `ops/specs/land-evidence-l7-assurance-thuc-thi-r1.md`) `assurance_81.reviewer_assurance_81` chuẩn hoá (bỏ khoảng
+      trắng hai đầu, viết hoa, khoảng trắng ⇒ `_`) bằng `DAT` ⇒ `assurance_81.thuc_thi` phải là mapping có `model`, `effort`,
+      `sandbox_mode`, mỗi khoá là lời khai `measured` (cùng `RE_KHAI_DO`, nên L1 tự đòi nguồn). Chặt hơn chữ đặc tả: chuẩn hoá
+      thêm NFC và nhận cả cách viết có dấu `ĐẠT` — chỉ đúng hai cách viết ấy, KHÔNG bỏ dấu đại trà (review l7a P2: `ĐẤT`, `DẠT`
+      là giá trị khác, phải để L7 không áp). Giá trị khác ⇒ không đòi. Connector P1 PR #934 (4372912640): hồ sơ khai ĐẠT
+      khi biên nhận chỉ đo model. `MIEN_TRU_L7` = 3 hồ sơ đã khai như thế (nợ `NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO`), cơ chế như L5.
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
 văn — một tệp vô can vẫn làm L1 qua. Chỉ L2 đọc NỘI DUNG, và chỉ cho token số. Hồ sơ cũ đi qua miễn trừ, không được kiểm.
@@ -42,6 +48,7 @@ import hashlib
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 for _s in (sys.stdout, sys.stderr):
@@ -92,6 +99,16 @@ RE_SO_POS = re.compile(r"(?<!\d)\d+/\d+(?!\d)|(?<![A-Za-z0-9_])hong \d+(?!\d)")
 RE_MOC = re.compile(r"\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:[Zz]|[+-]\d{2}:?\d{2})?(?![\d:])")
 L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")   # cây thật 19-10-2026: mọi hồ sơ landed true đã có cả hai
 L6_DAU_GIU_CHO = "CHO_DIEN"
+L7_KHOA = ("model", "effort", "sandbox_mode")
+L7_MUC_DAT = ("DAT", "ĐẠT")   # sau `_chuan_hoa_81`; dạng NFC
+# L7 — đo 2026-10-27 trên `7129f7d` (băm chụp lại sau #962/#966 sửa pr924, pr950; tên giữ nguyên như ở `f577ab5`):
+# 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới; chụp lại băm chỉ khi có comment chủ kho cho phép —
+# tự chụp lại mỗi lần hồ sơ đổi là xoá đúng tín hiệu "băm lệch ⇒ mất miễn trừ".
+MIEN_TRU_L7 = {
+    "pr924-wp923-land-evidence.yaml": "f246000294972947543a1afb3d9122b43ea11f8e540c4927ebda8d7a202d8f5b",
+    "pr931-wp835-land-evidence.yaml": "31c8ce908aa08631a58993b1e431d4653b01b23b87ed59926181f2df4df485da",
+    "pr950-wp834-land-evidence.yaml": "b0ae6da9f1f919d1f6ae785ad6950b94dd37f99c0a2852d31d5aaee645a6a080",
+}
 
 
 class KhongDoDuoc(Exception):
@@ -285,7 +302,26 @@ def kiem_ho_so(tep, byte, goc, yaml):
                     vp.append(f"L6 $.{khoa}: landed true mà không phải danh sách mapping khác rỗng — {str(ds)[:60]!r}")
             vp += [f"L6 {d}: landed true mà còn dấu giữ chỗ {L6_DAU_GIU_CHO} — {v[:60]!r}"
                    for d, v in nut if isinstance(v, str) and L6_DAU_GIU_CHO in v]
+    a81 = du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None
+    if isinstance(a81, dict) and _chuan_hoa_81(a81.get("reviewer_assurance_81")) in L7_MUC_DAT:   # L7
+        bam, tt7 = MIEN_TRU_L7.get(tep.name), a81.get("thuc_thi")
+        mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam
+        if bam is not None:
+            ghi.append("L7 miễn trừ (băm khớp ảnh chụp, nợ NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO)" if mien
+                       else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")
+        if not mien and not isinstance(tt7, dict):
+            vp.append(f"L7 $.assurance_81.thuc_thi: khai DAT mà không có mapping đo thực thi — {str(tt7)[:60]!r}")
+        elif not mien:
+            vp += [f"L7 $.assurance_81.thuc_thi.{k}: khai DAT mà không phải lời khai measured — {str(tt7.get(k))[:60]!r}"
+                   for k in L7_KHOA if not (isinstance(tt7.get(k), str) and RE_KHAI_DO.match(tt7[k]))]
     return vp, ghi
+
+
+def _chuan_hoa_81(v):
+    """`' đạt '` (NFC hay NFD) ⇒ `ĐẠT`, `'chua dat'` ⇒ `CHUA_DAT`; không phải chuỗi ⇒ None (L7 không áp)."""
+    if not isinstance(v, str):
+        return None
+    return re.sub(r"\s+", "_", unicodedata.normalize("NFC", v).strip().upper())
 
 
 def main(argv=None):

@@ -45,3 +45,8 @@ f2644bb8c67892f51c0b6c1db464da7a5e3cba27850d1c63115ff5b021d41d72  ./verdicts/wp9
 03de8fd0b78909fffc272c238b9b2f617e770def5f49f786135a7f98c48bac73  ./do-1027-7129f7d/graphql-output-chu-kho-dan-pr963.json
 bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-1027-7129f7d/moc_wd.py
 e7c6e60b5c8e90cfd5fda18dcf22afc857805575f5954db2730eb4f77d653bc4  ./do-1027-7129f7d/workflow-definition-7129f7d.txt
+a4d06b3d99b3aa9a0f211387ce1f4adaa3a170992b2a80283b54c1c47a3d2884  ./do-1027-landed/readback-comment-970-6437175210.json
+04097f784eac6c5413da454892d5aa372de496e625e9113843f914c3fd08d0e0  ./do-1027-landed/readback-comments-970.json
+1e3192aeb76eb32d88384bcb3b158c6fc9582b76fe56087f3094b0ad5bf9a9c4  ./do-1027-landed/readback-commit-8aafb6e.json
+b6c7e4b85473944c3cb79a8a0ab73645fd0c0aa32b37b8399a312de7334d87eb  ./do-1027-landed/readback-pr-970.json
+37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570  ./do-1027-landed/readback-reviews-970.json

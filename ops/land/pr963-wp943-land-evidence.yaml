@@ -139,3 +139,27 @@ pr_ghi_so_duyet_landed_20261027:
       het hieu luc. Readback comment KHONG commit vao cay; ho so ghi nhan o PR ke tiep.
   landed: false
   landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'
+
+landed_20261027:
+  bo_canh: 'Chu kho duyet landed tren PR ghi so #970 roi merge (27-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/970#issuecomment-6437175210
+    do_duoc: >-
+      measured — ops/land/pr963-wp943-provenance/do-1027-landed/readback-comment-970-6437175210.json: ducthangho,
+      author_association OWNER, created_at = updated_at 2026-10-27T08:29:15Z; than nguyen van "Duyệt landed #943 (PR #963).
+      Head PR ghi sổ: 8aafb6eb95ba543a51cecf4623c7fc36a96ecf3d". readback-commit-8aafb6e.json: commit cuoi cua nhanh ghi so luc
+      2026-10-27T07:22:19Z (truoc comment). readback-pr-970.json: head.sha 8aafb6e (= SHA trong comment), merged_at
+      2026-10-27T08:29:27Z (sau comment), merge_commit e149e4a, merged_by ducthangho. Connector Codex tren #970: completed,
+      has_any_findings false tren 8aafb6e (readback-comments-970.json).
+  landed: true
+  landed_hieu_luc_tu: e149e4aa03e0e23c78592ec4a9557965f820e8fd
+  landed_dieu_kien: >-
+    (1) gate tren merge 7129f7de204a6f92db8e29e8a5a79383d4907029: DAT — 4/4 moc §10.2.2 (post_merge_checks +
+    moc_workflow_definition_20261027). (2) lease da nha: DAT (lease.thu_hoi_cuoi). (3) review: DAT — Codex luot 3/3 approve,
+    35/35 response gpt-6.1-sol DO_DUOC, tren DUNG authorized_head_sha fb2bbcbf5ba456756df28701f97eb2ce67cd574c (assurance_81).
+    (4) noi dung merge = diff da review: DAT (merge_noi_dung). (5) duyet chu kho neo dung head PR ghi so, dang sau commit cuoi
+    va truoc merge: DAT.
+  gioi_han: >-
+    Tai khoan chu kho khong tach khoi phien agent (#566) — comment la duyet landed, KHONG phai human_audited. Bam byte output
+    GraphQL goc cua chu kho KHONG_DO_DUOC.

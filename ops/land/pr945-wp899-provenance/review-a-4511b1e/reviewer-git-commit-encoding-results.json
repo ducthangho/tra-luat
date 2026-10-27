@@ -1,0 +1,85 @@
+[
+  {
+    "case": "utf8",
+    "sha": "45d02e4eccf3ae9f8ed8284f1082044116592e72",
+    "git_type": "commit",
+    "declared_encoding": "UTF-8",
+    "native_git_metadata": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "native_git_message_utf8_hex": "666978747572650a0a",
+    "expected": {
+      "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "parents": []
+    },
+    "actual": {
+      "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "parents": []
+    },
+    "error": null,
+    "test_rc": 0,
+    "test_output": "",
+    "main_rc": 0,
+    "main_error": null,
+    "main_stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 45d02e4eccf3ae9f8ed8284f1082044116592e72 gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 5d43a3e90b47d39baa381bd9ef31a8457ce0250837f3208ce09e0d5f10095aa4\nNOT_MEASURED: 2\n",
+    "child_command": [
+      "/usr/bin/python",
+      "-B",
+      ".review/encoding_child.py",
+      "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/.review/tmp/review_commit_encoding_3toh7dx9",
+      "45d02e4eccf3ae9f8ed8284f1082044116592e72"
+    ],
+    "child_rc": 0,
+    "child_stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed 45d02e4eccf3ae9f8ed8284f1082044116592e72 gate=not_measured\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 5d43a3e90b47d39baa381bd9ef31a8457ce0250837f3208ce09e0d5f10095aa4\nNOT_MEASURED: 2\n",
+    "child_stderr": "",
+    "criterion_command": [
+      "/usr/bin/python",
+      "-B",
+      ".review/encoding_criterion.py",
+      "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/.review/tmp/review_commit_encoding_3toh7dx9",
+      "45d02e4eccf3ae9f8ed8284f1082044116592e72",
+      "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+    ],
+    "criterion_rc": 0,
+    "criterion_stdout": "CA: 1/1 dat\n",
+    "criterion_stderr": ""
+  },
+  {
+    "case": "latin1",
+    "sha": "a2949846d47f5e484f0609141ae1ab030f7cd551",
+    "git_type": "commit",
+    "declared_encoding": "ISO-8859-1",
+    "native_git_metadata": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "native_git_message_utf8_hex": "c3bf0a0a",
+    "expected": {
+      "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "parents": []
+    },
+    "actual": null,
+    "error": "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 168: invalid start byte",
+    "test_rc": 3,
+    "test_output": "DO:r955_git_commit_message_encoding:latin1: parents/tree must not depend on commit-message encoding; UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 168: invalid start byte",
+    "main_rc": null,
+    "main_error": "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 168: invalid start byte",
+    "main_stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+    "child_command": [
+      "/usr/bin/python",
+      "-B",
+      ".review/encoding_child.py",
+      "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/.review/tmp/review_commit_encoding_3toh7dx9",
+      "a2949846d47f5e484f0609141ae1ab030f7cd551"
+    ],
+    "child_rc": 1,
+    "child_stdout": "NOT_MEASURED: 4\nPROVENANCE: khong_sinh (ca bon moc chua do)\n",
+    "child_stderr": "Traceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/.review/encoding_child.py\", line 6, in <module>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(pathlib.Path(d)/'child_out')],goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=d),moi_tu=moi,wf=lambda sha,path:None))\n                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/ops/ci_provenance.py\", line 421, in main\n    prov, tep = thu(a.repo, a.run, a.attempt, goi, git, moi_tu, wf)\n                ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/ops/ci_provenance.py\", line 353, in thu\n    co.append({\"job_id\": j[\"id\"], \"name\": j.get(\"name\")} | moc_checkout(doc_sha_checkout(dong), r.get(\"event\"), r.get(\"head_sha\"), git))\n                                                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/ops/ci_provenance.py\", line 240, in moc_checkout\n    obj = git(sha)\n  File \"/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/.review/encoding_child.py\", line 6, in <lambda>\n    raise SystemExit(m.main(['thu','--repo','o/r','--run','5','--attempt','1','--out',str(pathlib.Path(d)/'child_out')],goi=rest,git=lambda sha:m.git_cuc_bo(sha,goc=d),moi_tu=moi,wf=lambda sha,path:None))\n                                                                                                                                                ~~~~~~~~~~~~^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/ops/ci_provenance.py\", line 138, in git_cuc_bo\n    r = subprocess.run([\"git\", \"-C\", str(goc), \"cat-file\", \"-p\", sha], capture_output=True, text=True, timeout=60)\n  File \"/usr/lib/python3.13/subprocess.py\", line 557, in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/subprocess.py\", line 1223, in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/subprocess.py\", line 2196, in _communicate\n    stdout = self._translate_newlines(stdout,\n                                      self.stdout.encoding,\n                                      self.stdout.errors)\n  File \"/usr/lib/python3.13/subprocess.py\", line 1100, in _translate_newlines\n    data = data.decode(encoding, errors)\nUnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 168: invalid start byte\n",
+    "criterion_command": [
+      "/usr/bin/python",
+      "-B",
+      ".review/encoding_criterion.py",
+      "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws/.review/tmp/review_commit_encoding_3toh7dx9",
+      "a2949846d47f5e484f0609141ae1ab030f7cd551",
+      "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+    ],
+    "criterion_rc": 3,
+    "criterion_stdout": "DO:r955_git_commit_message_encoding:Git commit metadata must not depend on message encoding: UnicodeDecodeError\n",
+    "criterion_stderr": ""
+  }
+]

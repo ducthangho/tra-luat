@@ -221,3 +221,53 @@ moc_workflow_definition_20261027:
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: cho_chu_kho
   landed: false
+review_doc_lap_a_20261027:
+  bo_canh: >-
+    Chu kho chon phuong an (A) cua review.dieu_kien_mo_lai: mot luot review Codex doc lap tren 4511b1e qua launcher co do
+    model phuc vu (#952). Khoi nay KHONG sua dong nao o tren.
+  reviewed_commit: 4511b1eb6168904da117791cea178aa0c80e0e47
+  pham_vi_diff: 'git diff f9f4a8d6da2d351fbcf5203256aba4e1bbf027b7 4511b1e (3 tep cua write set, dung diff PR #945).'
+  launcher: >-
+    measured — ops/land/pr945-wp899-provenance/review-a-4511b1e/run.json: launcher 1.5.0 tu clone master 7471f95 (gom #952 2bcf466), ma_thoat 0,
+    2313.124 giay, workspace sach truoc/sau (ops/land/pr945-wp899-provenance/review-a-4511b1e/reviewer-snapshot-comparison.json: same true, 6026 tep).
+  model_phuc_vu: >-
+    measured — ops/land/pr945-wp899-provenance/review-a-4511b1e/run.json model_phuc_vu_trang_thai DO_DUOC, 62 su kien, tap model {gpt-6.1-sol}; turn_context cong bo
+    gpt-6.1-sol effort xhigh (ops/land/pr945-wp899-provenance/review-a-4511b1e/dinh-danh-reviewer.json). Ho model openai, khac ho executor (claude).
+  dinh_danh: >-
+    measured — ops/land/pr945-wp899-provenance/review-a-4511b1e/dinh-danh-reviewer.json: thread_id tu stdout khop session_meta.id 01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4,
+    codex-cli 0.164.0, rollout 2956981 byte sha256 8f3f2ef7c05535f63dff93a0c96c8c88518b0a4f542d8a6991af58b026c4e869
+    (rollout KHONG luu trong kho, chi luu bam).
+  verdict: changes_requested
+  dem: 'P0=0 P1=0 P2=1 (moi) P3=2 lop (ke thua)'
+  phat_hien:
+    - id: F13
+      hang: P2
+      bieu_hien: >-
+        ops/ci_provenance.py:138 git_cuc_bo doc toan commit voi text=True; commit hop le co message khong phai UTF-8
+        (ISO-8859-1) nem UnicodeDecodeError qua :425 => rc1, khong sinh provenance. Blob khong UTF-8 cung nem thay vi None.
+      tai_hien: 'reviewer-git_commit_encoding.py, reviewer-git-commit-encoding-results.json (Git that, hai commit cung tree/parents).'
+      huong_va: 'Doc bytes, chi giai ma truong tree/parent; khoa bang commit UTF-8 va ISO-8859-1 cung tree/parents.'
+    - id: D02
+      hang: P3
+      bieu_hien: 'ops/ci_provenance.py:174 uses nhieu dong — no da ghi, giu nguyen.'
+    - id: F10-D05
+      hang: P3
+      bieu_hien: 'ops/ci_provenance.py:158, test :1044 — mutant mo rong try song c52; no test da ghi, giu nguyen.'
+  nguon:
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/VERDICT.md
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/run.json
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/dinh-danh-reviewer.json
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/prompt.md
+  ket_luan_assurance_81: >-
+    CHUA DAT. Model phuc vu nay da DO DUOC (khoang trong cu da dong), nhung verdict la changes_requested voi mot P2,
+    nen chua co approve doc lap tren 4511b1e. Khong gi o day cap quyen landed hay cross_approved.
+  lua_chon_cho_chu_kho:
+    - 'Mo packet sua F13 (lease moi, write set ops/ci_provenance.py + test), roi review lai head moi.'
+    - 'Hoac chu kho chap nhan F13 la no co ghi ten nguoi quyet dinh; khi do assurance_81 van khong phai approve.'
+  con_thieu_de_goi_landed:
+    - id: REVIEWER-ASSURANCE-81
+      trang_thai: cho_chu_kho
+      mo_ta: 'Do duoc model phuc vu; verdict changes_requested (F13 P2).'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+  landed: false

@@ -1,0 +1,14 @@
+{
+  "name": "D05_wide_try",
+  "severity": "P3",
+  "catalogue_target": "c52_tap_dong",
+  "rc": 0,
+  "stdout": "\n",
+  "stderr": "",
+  "head_fault_injection": {
+    "raised": "OutsideParseError"
+  },
+  "mutant_fault_injection": {
+    "returned": null
+  }
+}

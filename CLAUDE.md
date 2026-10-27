@@ -925,6 +925,32 @@ không tra được.
   đo trong điều kiện ấy, đừng đọc 11 ca đỏ thành hồi quy. Gốc lỗi: chốt kho của credential
   store coi một `.git` RỖNG ở thư mục tổ tiên là kho. Đây là nợ của packet khác, chưa vá.
 
+## Lệnh `gh api graphql` đưa cho chủ kho chạy — máy chủ kho là Windows `cmd` (đo 27-10-2026)
+GraphQL bị chặn trong phiên Claude Code trên web (403), nên mốc Workflow definition §10.2.2 phải nhờ chủ kho chạy
+`gh api graphql` trên máy mình rồi dán output. Chủ kho báo lần nào cũng phải chạy lại lần hai vì lệnh đầu sai cú pháp.
+Gốc lỗi: máy chủ kho chạy **`cmd` của Windows** (dấu nhắc `D:\Quốc hội\tra-luat>`), không phải PowerShell hay bash.
+`cmd` không coi nháy đơn là một khối, nên lệnh viết kiểu bash/PowerShell vỡ thành nhiều đối số
+(đo 27-10, hồ sơ #945: `accepts 1 arg(s), received 27`). Nháy kép lồng nhau có dấu chéo ngược đứng trước
+cũng là chỗ dễ vỡ thứ hai.
+
+Mẫu ĐÃ CHẠY ĐÚNG trên `cmd` (27-10-2026, run 40268583940): **một dòng**, node id truyền qua biến `-f id=`, nên câu
+truy vấn chỉ có đúng một cặp nháy kép ngoài cùng, không nháy đơn, không nháy lồng:
+
+```
+gh api graphql -f id=<NODE_ID> -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+```
+
+- `<NODE_ID>` (dạng `WFR_…`) phiên TỰ lấy từ REST `GET repos/<kho>/actions/runs/<id>`, trường `node_id`, rồi
+  điền sẵn. Đừng bắt chủ kho tra số run hay tra node id.
+- Đưa **đúng một** lệnh, viết cho `cmd`. Chỉ đưa bản khác khi chủ kho nói đang dùng shell khác.
+- Phiên không chạy thử được (GraphQL 403), nên trước khi đưa lệnh phải SOÁT CHUỖI: không có nháy đơn, không có dấu
+  chéo ngược, đúng một cặp nháy kép. `$id` trong `cmd` không bị shell thay thế; `gh` nhận nguyên văn.
+- Nhận output thì đối chiếu như tiền lệ `ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml`
+  (`moc_workflow_definition_20261026`): REST run (`head_sha`, `path`, `node_id`) và blob tại OID qua
+  `contents?ref=<OID>` so với `git rev-parse <OID>:<path>`.
+- Muốn chủ kho khỏi phải chạy tay: mở phiên Claude Code ngay trên máy chủ kho (Claude Desktop, hoặc
+  `claude remote-control` trong thư mục kho), hoặc chuyển phép đo vào một workflow Actions chỉ đọc (việc của P-B, #899).
+
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).
 - Không đọc/ghi secrets (`*.enc`, `tl_secrets*`, `*cookie*`, `*token*`, `credentials*`) ngoài đúng quy trình

@@ -1,0 +1,26 @@
+[
+  {
+    "object": "f28cde363d8a011b2fc6e2265caaee224391f24d:ops/specs/wp899-r2.md",
+    "rc": 0,
+    "sha256": "d858c7c65a38a7f0fadda1cabf839c98ce70a881372d847c8979165925971707",
+    "size": 23189
+  },
+  {
+    "object": "f28cde363d8a011b2fc6e2265caaee224391f24d:ops/specs/wp899-r3.md",
+    "rc": 0,
+    "sha256": "dd1a997d1f3682e23bb4b5577264076b7d9a12aeff5d9823f491cdda05e4f36f",
+    "size": 18402
+  },
+  {
+    "object": "f28cde363d8a011b2fc6e2265caaee224391f24d:ops/specs/wp899-r4.md",
+    "rc": 0,
+    "sha256": "be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45",
+    "size": 23860
+  },
+  {
+    "object": "237e71ac850ddbe56e11d5a28f4a7036f7cf4264:ops/leases/wp899-r4-g5-claude.yaml",
+    "rc": 0,
+    "sha256": "6fff505f04ce7455f6135a54c8d8ae534b363edb5f6dc66a55441021e6fac2a3",
+    "size": 5917
+  }
+]

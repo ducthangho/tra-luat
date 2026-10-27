@@ -1,0 +1,16 @@
+[
+  {
+    "case": "utf8_blob",
+    "sha": "ee8c1ee49b4799bbd170233915a897c19e3b55e1",
+    "expected": null,
+    "actual": null,
+    "error": null
+  },
+  {
+    "case": "non_utf8_blob",
+    "sha": "29e181ebb88626236ef10f2af5bc94781c8061f1",
+    "expected": null,
+    "actual": null,
+    "error": "UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte"
+  }
+]

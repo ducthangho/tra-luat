@@ -1,0 +1,19 @@
+# Moc Workflow definition §10.2.2 — run 40268583940 attempt 1 (ci.yml push master, merge cebb5b2)
+# do 2026-10-27: (1) chu kho chay `gh api graphql` NGOAI phien Claude Code tren web (GraphQL bi chan trong phien) tren may Windows (cmd),
+#   truy van node(id: WFR_kwLOTNeRjc8AAAAJYDHUBA) — node_id lay tu REST run — va dan output vao hoi thoai phien ghi so;
+#   ban chep nguyen van: graphql-output-chu-kho-dan-pr945.json. Bam byte output goc KHONG DO DUOC.
+# (2) phien ghi so doi chieu REST run va tai blob tai DUNG OID qua REST contents?ref=<OID>.
+WorkflowRun.databaseId: 40268583940 · runNumber 3224 · createdAt 2026-10-26T04:20:37Z
+WorkflowRun.file.path: .github/workflows/ci.yml
+WorkflowRun.file.repositoryFileUrl: https://github.com/ducthangho/tra-luat/blob/cebb5b22e1ebf369a70234662b7e9355bdd5095e/.github/workflows/ci.yml
+  repo khop: ducthangho/tra-luat · path khop: .github/workflows/ci.yml · OID cu the (40 hex, khong phai ref troi): cebb5b22e1ebf369a70234662b7e9355bdd5095e
+WorkflowRun.checkSuite.commit.oid: cebb5b22e1ebf369a70234662b7e9355bdd5095e (= OID trong URL)
+$ GET repos/ducthangho/tra-luat/actions/runs/40268583940
+  head_sha cebb5b22e1ebf369a70234662b7e9355bdd5095e · path .github/workflows/ci.yml · run_attempt 1 · conclusion success · run_number 3224
+  created_at 2026-10-26T04:20:37Z · node_id WFR_kwLOTNeRjc8AAAAJYDHUBA (= node GraphQL da hoi)
+$ GET repos/ducthangho/tra-luat/contents/.github/workflows/ci.yml?ref=cebb5b22e1ebf369a70234662b7e9355bdd5095e
+  sha (blob OID): 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc  size: 69161
+  sha256(bytes giai base64): ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+  bam git cua chinh bytes (sha1 cua 'blob <N>' + byte NUL + bytes): 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+$ git rev-parse cebb5b22e1ebf369a70234662b7e9355bdd5095e:.github/workflows/ci.yml -> 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+KET LUAN: definition commit cebb5b2 · blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc · sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb — khop moi nguon.

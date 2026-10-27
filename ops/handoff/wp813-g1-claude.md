@@ -1,11 +1,12 @@
 # Handoff — wp813-r2-g1-claude (`MAY-ADR-0054-b`), packet #813 r2 g1
 
-Trạng thái (cuối): **Codex lượt 4/10 APPROVE trên `25bd151727b5be2574594cf104658048816c4942`** (0 P0–P2, 1 P3). Suite đầy đủ trong
-clone ghim `25bd151`: nền 980/980 (981 ca, BỎ QUA 1), 1342 đột biến, `TỔNG: ĐẠT`, 55,5 phút. Đã đẩy `agent/wp813-g1-claude` MỘT lần, PR draft #969.
-Nợ P3 `r813-mutation-evidence-incomplete` (biểu hiện mới lượt 4): chưa có ca `check_refs` trộn phần tử sai hình dạng (mã từ chối đúng rc=11);
-owner executor #813, hướng: thêm ca + đột biến bỏ phép so độ dài refs. Lịch sử dừng: sau lượt 2 và lượt 3 (same-failure), chủ kho duyệt A
-cả hai lần (issuecomment-6434345039, -6434351773, -6434981875); trần Codex 10.
-**chưa đẩy** (chỉ đẩy một lần khi approve); bản vá đầy đủ nằm cuối tệp này (`git am` được), sha256 `fe9b4cc5bcbe75f22a13bec88b2d05f4ae7a89f574f3949b4f20864c9f175a75`.
+Trạng thái (cuối, 27-10 ~09:07Z): **PR #969 đủ điều kiện merge** trên head `be88cafd7bdaee556c0ec3e60b3cba0d22efbb7e`:
+CI xanh toàn bộ (ci.yml + thu-hoi), `mergeable_state: clean`; connector Codex SẠCH trên `be88caf`; Codex offline lượt 6/10 approve;
+suite đầy đủ trong clone ghim `be88caf` nền 981/981 (982 ca, BỎ QUA 1), 1343 đột biến, TỔNG: ĐẠT. Diff 2 tệp, 377 dòng thêm.
+Chuỗi sau lượt 4: `thu-hoi` đỏ (master tiến) ⇒ merge `7129f7d` (lượt 5 approve) + `e3ea139` (chỉ ops/specs) ⇒ đẩy `f8d7167`; connector
+báo P2 (quyền ci-do cũ dùng lại sau lượt mới, `discussion_r4386084066`) ⇒ chủ kho duyệt A (issuecomment-6436510218) ⇒ vá `be88caf`, lượt 6 approve.
+Nợ P3 `r813-mutation-evidence-incomplete` (owner executor #813): ca `check_refs` trộn phần tử sai hình dạng; ca ci-do → begin → void → connector.
+Merge/land do chủ kho.
 
 - Base `f577ab5b467510f3fa7ed27107dc2eab539d3bef` (= `origin/master` lúc làm). Head ứng viên `79bbbdc16bd873f319ab70885039413735ee2fb3`.
 - Diff: `.claude/dev/packet_loop.py` 153+/11−, `.claude/dev/packet_loop_test.py` 203+/3− ⇒ 2 đường dẫn, 356 dòng thêm (≤ 450).
@@ -15,7 +16,7 @@ cả hai lần (issuecomment-6434345039, -6434351773, -6434981875); trần Codex
 - Có chọn lọc trên head: `r813_*` + `r834_*` + codepage + mốc đột biến 103/103; mọi đột biến `r813_*` và các đột biến #812/#834 có mốc đổi hoặc
   thêm ca đích: lỗi 0.
 
-## Cross-review Codex (`gpt-6-astra`, xhigh, qua `launcher.py run`) — 4/10 lời gọi (trần nâng 8 → 10 theo chủ kho)
+## Cross-review Codex (`gpt-6-astra`, xhigh, qua `launcher.py run`) — 6/10 lời gọi (trần nâng 8 → 10 theo chủ kho)
 
 | lượt | head | thời lượng | verdict | lớp |
 |---|---|---|---|---|
@@ -26,7 +27,7 @@ cả hai lần (issuecomment-6434345039, -6434351773, -6434981875); trần Codex
 
 Ngoài ra có MỘT lời gọi `codex exec "Reply with exactly: OK"` lúc chủ kho đăng nhập (03:24Z), chỉ để chứng minh xác thực, không phải review.
 
-Hiện vật: `ops/reviews/wp813-g1-codex-luot{1,2,3,4}/{PROMPT.md,VERDICT.md,run.json}`.
+Hiện vật: `ops/reviews/wp813-g1-codex-luot{1..6}/{PROMPT.md,VERDICT.md,run.json}`.
 
 ## Hai lớp còn mở (hướng vá executor đề xuất, CHƯA làm)
 

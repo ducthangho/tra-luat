@@ -40,8 +40,21 @@ cai_deb() {
   chmod +x "$BIN/$lenh"
 }
 
+# ghi_bashrc: các dòng shell của agent cần, mỗi dòng đúng MỘT lần (chạy lại setup không nhân bản).
+# Đo 27-10-2026: lúc agent chạy task, Codex Cloud gắn $HOME CHỈ ĐỌC — `_config_backup_dir()` mặc định là
+# `${LOCALAPPDATA:-$HOME}/tra-luat/_config_backups` nên mkdir ném EROFS và selftest đỏ đúng
+# r202_profile_delete_backup_ngoai_cay (1730/1731). Trỏ LOCALAPPDATA ra thư mục tạm GHI ĐƯỢC, NGOÀI cây kho
+# (luật r202 vẫn giữ); tái hiện tại chỗ với HOME chỉ đọc: thiếu dòng này 1730/1731, có thì 1731/1731.
+ghi_bashrc() {
+  local dong
+  for dong in 'export PATH="$HOME/.local/bin:$PATH"' \
+              'export LOCALAPPDATA="${LOCALAPPDATA:-${TMPDIR:-/tmp}/tra-luat-localappdata}"'; do
+    grep -qxF "$dong" "$HOME/.bashrc" 2>/dev/null || printf '%s\n' "$dong" >> "$HOME/.bashrc"
+  done
+}
+
 main() {
-  local PY d dong t GP
+  local PY d t GP
   PY="$(command -v python3 || command -v python)"
   mkdir -p "$BIN"
   export PATH="$BIN:$PATH"
@@ -62,9 +75,9 @@ main() {
   while IFS= read -r d; do [ -x "$d/actionlint" ] && ln -sf "$d/actionlint" "$BIN/actionlint"; done < "$GP"
   rm -f "$GP"
 
-  # 4. PATH bền cho shell của agent + core.abbrev = 7 cho gate golden/determinism (CLAUDE.md, Quy ước deploy mục 6).
-  dong='export PATH="$HOME/.local/bin:$PATH"'
-  grep -qxF "$dong" "$HOME/.bashrc" 2>/dev/null || printf '%s\n' "$dong" >> "$HOME/.bashrc"
+  # 4. PATH + LOCALAPPDATA bền cho shell của agent + core.abbrev = 7 cho gate golden/determinism
+  #    (CLAUDE.md, Quy ước deploy mục 6).
+  ghi_bashrc
   git config --global core.abbrev 7
 
   # 5. Bằng chứng DƯƠNG — đừng tin rc của trình cài. Thiếu thứ nào thì script ĐỎ.

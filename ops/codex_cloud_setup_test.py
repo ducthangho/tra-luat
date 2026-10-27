@@ -170,6 +170,26 @@ def ca_sudo_khong_mat_khau_dung_sudo():
     bang(not any(" download " in d for d in log), f"có sudo mà vẫn đi đường tải .deb: {log}")
 
 
+def ca_bashrc_localappdata_ngoai_home():
+    """Codex Cloud gắn $HOME CHỈ ĐỌC lúc agent chạy (đo 27-10-2026) ⇒ thư mục sao lưu config mặc định phải đi
+    qua LOCALAPPDATA ra thư mục tạm GHI ĐƯỢC, ngoài $HOME. Chạy `ghi_bashrc` HAI lần: mỗi dòng đúng một lần,
+    và một shell mới nạp ~/.bashrc thấy PATH có ~/.local/bin cùng LOCALAPPDATA dưới TMPDIR."""
+    _posix()
+    goc, env = _san()
+    env = {**env, "TMPDIR": str(goc / "tmp")}
+    p = subprocess.run([_bash(), "-c", 'source "$1"; ghi_bashrc; ghi_bashrc', "_", str(SCRIPT_DANG_DUNG)],
+                       capture_output=True, text=True, env=env, timeout=60)
+    bang(p.returncode == 0, f"ghi_bashrc rc={p.returncode} {p.stderr}")
+    dong = (goc / "home/.bashrc").read_text(encoding="utf-8").splitlines()
+    bang(len(dong) == len(set(dong)) == 2, f"~/.bashrc phải có đúng 2 dòng không trùng: {dong}")
+    r = subprocess.run([_bash(), "-c", 'source "$HOME/.bashrc"; printf "%s\\n%s\\n" "$LOCALAPPDATA" "$PATH"'],
+                       capture_output=True, text=True, env=env, timeout=60)
+    lad, path = (r.stdout.splitlines() + ["", ""])[:2]
+    bang(lad == str(goc / "tmp/tra-luat-localappdata"), f"LOCALAPPDATA phải dưới TMPDIR, được {lad!r}")
+    bang(not lad.startswith(env["HOME"]), f"LOCALAPPDATA nằm dưới $HOME chỉ đọc: {lad!r}")
+    bang(f"{env['HOME']}/.local/bin" in path.split(":"), f"PATH thiếu ~/.local/bin: {path!r}")
+
+
 # (tên, chuỗi gốc, chuỗi đột biến, ca phải ĐỎ)
 DOT_BIEN = [
     ("tai_ca_goi_da_cai", '    dpkg -s "$p" >/dev/null 2>&1 && continue\n', "", "ca_khong_root_tai_deb_bo_goi_da_cai"),
@@ -178,6 +198,11 @@ DOT_BIEN = [
     ("bo_nhanh_root", '[ "$(id -u)" = 0 ]', "false", "ca_root_dung_apt_get_install"),
     ("source_cung_chay_main", 'if [ "${BASH_SOURCE[0]}" = "$0" ]; then main "$@"; fi', 'main "$@"',
      "ca_source_khong_chay_main"),
+    ("bo_dong_localappdata",
+     "              'export LOCALAPPDATA=\"${LOCALAPPDATA:-${TMPDIR:-/tmp}/tra-luat-localappdata}\"'; do",
+     "; do", "ca_bashrc_localappdata_ngoai_home"),
+    ("bashrc_ghi_trung", 'grep -qxF "$dong" "$HOME/.bashrc" 2>/dev/null || printf', "printf",
+     "ca_bashrc_localappdata_ngoai_home"),
 ]
 
 
@@ -208,7 +233,7 @@ def ca_dot_bien():
 
 CA = [ca_tep_lf_khong_crlf, ca_khong_nang_cap_pip, ca_cu_phap_bash, ca_source_khong_chay_main,
       ca_co_san_khong_goi_apt, ca_khong_root_tai_deb_bo_goi_da_cai, ca_root_dung_apt_get_install,
-      ca_sudo_khong_mat_khau_dung_sudo, ca_dot_bien]
+      ca_sudo_khong_mat_khau_dung_sudo, ca_bashrc_localappdata_ngoai_home, ca_dot_bien]
 
 
 def main():

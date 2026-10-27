@@ -1,12 +1,12 @@
 # Đặc tả packet — `NO-CAU-LICH-SU-BIEN-NHAN` (revision 1)
 
 - `packet_id`: **NO-CAU-LICH-SU-BIEN-NHAN** · `packet_issue`: **#960** · `revision`: **1** · soạn 27-10-2026 bằng skill `soan-spec`
-  (phiên `session_01WZT2MvvoQV8QGF1vX9STrJ`; chủ kho chốt Q1–Q12 "theo khuyến nghị") · executor/reviewer: **chưa định tuyến**,
+  (phiên `session_01WZT2MvvoQV8QGF1vX9STrJ`; chủ kho chốt Q1–Q12 "theo khuyến nghị" và xác nhận đã hiểu giống nhau, đóng băng 27-10-2026) · executor/reviewer: **chưa định tuyến**,
   do chủ kho chọn lúc cấp lease. Reviewer khác họ executor ⇒ `assurance_target: cross_approved`.
 - `nguon_cap_viec`: khắc phục — nợ `NO-CAU-LICH-SU-BIEN-NHAN` ghi ở khối `no_con_mo_20261027` của
   `ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml` (master `597a6cb`, merge #959); đề xuất ở Issue #960.
 - `review_class`: **systemic** — cổng mới chạm cách đọc toàn bộ sổ biên nhận, không chạm `ci.yml`, credential, hay gói phát hành.
-- Base dự kiến: nhánh mặc định lúc cấp lease (đo 06:24Z 27-10: `a195b95`; gate run 40454280949 xanh 23/23, đọc khi run xong).
+- Base dự kiến: nhánh mặc định lúc cấp lease (đo lại 06:35Z 27-10: `7129f7d`; gate trên `a195b95` run 40454280949 xanh 23/23).
 
 tran_loi_goi_codex: ADR-0052@8ab100793df9831505f495543a74044b91c2c9ab
 luat_push_va_dung_va: ADR-0054@7cc384ec9e02ed79b429ac6ee2455d3bfbb75b16
@@ -23,13 +23,13 @@ PHÉP ĐO trong cổng sẵn có.
 
 `ops/bien_nhan_v2.py` · `ops/bien_nhan_v2_test.py`
 
-(Đo 06:26Z 27-10: `ai-dang-giu` cả hai ⇒ `NGƯỜI_GIỮ 0`. Đo lại trước khi cấp lease.)
+(Đo lại 06:35Z 27-10: `ai-dang-giu` cả hai ⇒ `NGƯỜI_GIỮ 0`. Đo lại trước khi cấp lease.)
 
 ## `ngoai_pham_vi`
 
 | thứ | vì sao |
 |---|---|
-| `ops/land/*-land-evidence.yaml` | YAML tự do, mỗi hồ sơ một khuôn; `ops/land_evidence_nguon.py` đang bị lease `land-evidence-l7-r1-g1-claude-remote-20261027` giữ (đo 06:26Z 27-10). Ghi thành nợ con `NO-CAU-LICH-SU-LAND-EVIDENCE` (Q1). |
+| `ops/land/*-land-evidence.yaml` | YAML tự do, mỗi hồ sơ một khuôn; `ops/land_evidence_nguon.py` đang bị lease `land-evidence-l7-r1-g1-claude-remote-20261027` giữ (đo lại 06:35Z 27-10). Ghi thành nợ con `NO-CAU-LICH-SU-LAND-EVIDENCE` (Q1). |
 | `.github/workflows/ci.yml` | `bien_nhan_v2` đã chạy trong CI (ci.yml dòng 666, 712); không thêm bước (Q2). |
 | `_TRANSPORT_CONTRACTS`, hợp đồng surface | thuộc #461 (Q5). |
 | Sửa byte của verdict/biên nhận lịch sử | hiện vật neo băm; nợ tồn đi qua danh sách đóng băng (Q4). |

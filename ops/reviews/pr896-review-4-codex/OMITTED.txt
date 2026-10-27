@@ -1,0 +1,2 @@
+# Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. diff-pr947.patch tai lap bang git diff 101263f..2e4183b.
+656229c3283cb1e8b90c70e1043a416c3b66a7f2a8a43d733c753c377ad5e05e  1491443  diff-pr947.patch

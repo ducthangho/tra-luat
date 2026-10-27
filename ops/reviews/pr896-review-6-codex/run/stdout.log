@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](VERDICT.md): **changes_requested — 2 P1**.
+
+[HINT.patch](HINT.patch) đã qua `patch --dry-run --fuzz=0` trên bản sao. Các ca và cổng bắt buộc đều đạt; giới hạn răng của test được ghi rõ. `cay-kho/` giữ nguyên.

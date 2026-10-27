@@ -1,0 +1,1792 @@
+{
+  "fields": [
+    {
+      "path": "ops/reviews/assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 180,
+      "anchor": "673e0541e104aac07b64c02ad565e159ba44144c",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*.",
+      "claimed": "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "chuoi_verdict_ghi_chu",
+      "line": 70,
+      "anchor": "e32c5643111e001dc0c655c568b445c897ade450",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG). `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5.",
+      "claimed": "Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG). `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5."
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 268,
+      "anchor": "e32c5643111e001dc0c655c568b445c897ade450",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do THAP vi chinh tep verdict CHUA land: `merge-base --is-ancestor c2f6898 origin/master` tra KHONG. San pham cua packet DA land (d705623) nhung ho so review thi chua — hai chuyen khac nhau, khong duoc doc lan. Manh len khi nam verdict nay land, hoac khi co tag luu-tru/*.",
+      "claimed": "cuong_do THAP vi chinh tep verdict CHUA land: `merge-base --is-ancestor c2f6898 origin/master` tra KHONG. San pham cua packet DA land (d705623) nhung ho so review thi chua — hai chuyen khac nhau, khong duoc doc lan. Manh len khi nam verdict nay land, hoac khi co tag luu-tru/*."
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "line": 137,
+      "anchor": "86169c00beff045b0faed63e39d1a67b9acd1fc1",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Blob verdict ghim tren nhanh claude/review-543-luot1-20260916, commit bc5d0c6 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land.",
+      "claimed": "Blob verdict ghim tren nhanh claude/review-543-luot1-20260916, commit bc5d0c6 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land."
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 138,
+      "anchor": "86169c00beff045b0faed63e39d1a67b9acd1fc1",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "claimed": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien."
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "line": 137,
+      "anchor": "de0ecd0f912bb131b63ada866672af00129eefd0",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Blob verdict ghim tren nhanh claude/review-543-luot2-20260916, commit 80d8161 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land.",
+      "claimed": "Blob verdict ghim tren nhanh claude/review-543-luot2-20260916, commit 80d8161 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land."
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 138,
+      "anchor": "de0ecd0f912bb131b63ada866672af00129eefd0",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "claimed": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien."
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "line": 119,
+      "anchor": "6d59a4394f0e51ace4e02c8f4be13cb649e6871e",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Blob verdict ghim tren nhanh claude/review-543-luot3-20260916, commit 7d8bb69 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land.",
+      "claimed": "Blob verdict ghim tren nhanh claude/review-543-luot3-20260916, commit 7d8bb69 — to tien cua HEAD dang kiem. Quan he to tien voi master CHUA CO: #543 chua land."
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 120,
+      "anchor": "6d59a4394f0e51ace4e02c8f4be13cb649e6871e",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "claimed": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien."
+    },
+    {
+      "path": "ops/reviews/pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.1.noi_dung",
+      "line": 93,
+      "anchor": "c595292cb63fb8c09d7d7b482cda20f9d5f0917f",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Ca bon finding da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Chinh dot nay da do duoc rang mot ban va chong \"tin dung giet gia\" tu dinh benh no chua (R5-01), nen dung doc \"da va\" thanh \"da dong\". Chua dong.",
+      "claimed": "Ca bon finding da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Chinh dot nay da do duoc rang mot ban va chong \"tin dung giet gia\" tu dinh benh no chua (R5-01), nen dung doc \"da va\" thanh \"da dong\". Chua dong."
+    },
+    {
+      "path": "ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.1.noi_dung",
+      "line": 88,
+      "anchor": "1cd8ec78e42e32e6ff5af8edcc4660b1e601fd93",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Ca bon finding vong 2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Day la lan thu BA trong cung mot PR mot ban va sinh ra finding moi, nen dung doc \"da va\" thanh \"da dong\". Chua dong.",
+      "claimed": "Ca bon finding vong 2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Day la lan thu BA trong cung mot PR mot ban va sinh ra finding moi, nen dung doc \"da va\" thanh \"da dong\". Chua dong."
+    },
+    {
+      "path": "ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.1.noi_dung",
+      "line": 88,
+      "anchor": "dc92839520092a95f097464f4b9a2a252f0d9132",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Ca hai P2 vong 3 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu TU lien tiep trong mot PR ma ban va sinh ra phat hien moi — va lan nay chinh CHOT DOI CHUNG VUA SIET da bat duoc mot loi cua GIAN DO (ban sao dot bien dat phang trong /tmp lam PROVIDER_CHO_PHEP tut ve {anthropic, human}, khien ba dot bien that bi bao oan la \"pha ca cong\"). Dung doc \"da va\" thanh \"da dong\". Chua dong.",
+      "claimed": "Ca hai P2 vong 3 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu TU lien tiep trong mot PR ma ban va sinh ra phat hien moi — va lan nay chinh CHOT DOI CHUNG VUA SIET da bat duoc mot loi cua GIAN DO (ban sao dot bien dat phang trong /tmp lam PROVIDER_CHO_PHEP tut ve {anthropic, human}, khien ba dot bien that bi bao oan la \"pha ca cong\"). Dung doc \"da va\" thanh \"da dong\". Chua dong."
+    },
+    {
+      "path": "ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.1.noi_dung",
+      "line": 92,
+      "anchor": "3cff891b81f02dc22cc7ed8b05799c94ade0fc63",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Ca ba phat hien da duoc va trong cung PR (vong va 5), nhung BAN VA CHUA duoc review. Lan thu NAM lien tiep. Va chinh ban va nay lai bi doi chung bat mot loi GIAN DO (`_cay_guong` chep ban THAT thay vi ban dang hieu luc ⇒ hai dot bien bi bao KHONG RANG oan) — lan thu HAI lien tiep rig tu de ra ket luan sai. Dung doc \"da va\" thanh \"da dong\". Chua dong.",
+      "claimed": "Ca ba phat hien da duoc va trong cung PR (vong va 5), nhung BAN VA CHUA duoc review. Lan thu NAM lien tiep. Va chinh ban va nay lai bi doi chung bat mot loi GIAN DO (`_cay_guong` chep ban THAT thay vi ban dang hieu luc ⇒ hai dot bien bi bao KHONG RANG oan) — lan thu HAI lien tiep rig tu de ra ket luan sai. Dung doc \"da va\" thanh \"da dong\". Chua dong."
+    },
+    {
+      "path": "ops/reviews/pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.1.noi_dung",
+      "line": 85,
+      "anchor": "020198a437b7ae0008f466959950d3994adba716",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Ca nam phat hien cua LUOT NAY (hai P2 launcher + mot P1 hai P2 connector) da duoc va trong cung PR (vong va 7), nhung BAN VA CHUA duoc review. Lan thu SAU lien tiep. Va chinh ban va ay lai bi chot moi bat HAI fixture cua chinh bo test — lan thu ba va thu tu trong dot, ca bon lan fixture moi la thu sai. Dung doc \"da va\" thanh \"da dong\".",
+      "claimed": "Ca nam phat hien cua LUOT NAY (hai P2 launcher + mot P1 hai P2 connector) da duoc va trong cung PR (vong va 7), nhung BAN VA CHUA duoc review. Lan thu SAU lien tiep. Va chinh ban va ay lai bi chot moi bat HAI fixture cua chinh bo test — lan thu ba va thu tu trong dot, ca bon lan fixture moi la thu sai. Dung doc \"da va\" thanh \"da dong\"."
+    },
+    {
+      "path": "ops/reviews/pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.2.noi_dung",
+      "line": 91,
+      "anchor": "e4d8ecce7e583503b5205a038707ea667a81ed43",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Ca hai P2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu BAY lien tiep. Dung doc \"da va\" thanh \"da dong\".",
+      "claimed": "Ca hai P2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Lan thu BAY lien tiep. Dung doc \"da va\" thanh \"da dong\"."
+    },
+    {
+      "path": "ops/reviews/pr508-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 72,
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.",
+      "claimed": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+    },
+    {
+      "path": "ops/reviews/pr508-review-2-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 72,
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.",
+      "claimed": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+    },
+    {
+      "path": "ops/reviews/pr508-review-3-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 72,
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.",
+      "claimed": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+    },
+    {
+      "path": "ops/reviews/pr508-review-4-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 72,
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.",
+      "claimed": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 72,
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.",
+      "claimed": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách."
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 81,
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.",
+      "claimed": "Năm biên nhận khai `anchor.cuong_do: trung_binh`, yếu hơn các biên nhận `cao` cùng thư mục: PR #508 chưa merge nên quan hệ tổ tiên mới ở trong NHÁNH."
+    },
+    {
+      "path": "ops/reviews/pr870-review-1-codex-verdict.receipt.yaml",
+      "field": "assurance_ghi_chu",
+      "line": 27,
+      "anchor": "600b6ce90d97d5f606272af137d7153b7b32133c",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Khac ho (codex CLI, executor Claude) nhung verdict la `changes_requested`, va KHONG khai cross_approved: (1) head da merge 06a50c5 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) goi codex tran, khong run.json; (4) checkout review khong bi cuong che read-only.",
+      "claimed": "Khac ho (codex CLI, executor Claude) nhung verdict la `changes_requested`, va KHONG khai cross_approved: (1) head da merge 06a50c5 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) goi codex tran, khong run.json; (4) checkout review khong bi cuong che read-only."
+    },
+    {
+      "path": "ops/reviews/pr870-review-1-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 94,
+      "anchor": "600b6ce90d97d5f606272af137d7153b7b32133c",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Verdict cham b38fce8; head da merge la 06a50c5 (them commit va P2 bang dung HINT.patch, 3 dong CLAUDE.md). Khong co luot review nao tren 06a50c5 — \"da va\" la loi khai cua executor, kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check, khong phai verdict cua reviewer.",
+      "claimed": "Verdict cham b38fce8; head da merge la 06a50c5 (them commit va P2 bang dung HINT.patch, 3 dong CLAUDE.md). Khong co luot review nao tren 06a50c5 — \"da va\" la loi khai cua executor, kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check, khong phai verdict cua reviewer."
+    },
+    {
+      "path": "ops/reviews/pr889-review-1-codex-verdict.receipt.yaml",
+      "field": "assurance_ghi_chu",
+      "line": 28,
+      "anchor": "e02d0c31986f6ba5019fef21311a939f2d9c2f17",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only.",
+      "claimed": "Khac ho (codex CLI, executor Claude), co run.json cua launcher, nhung verdict la `changes_requested` va KHONG khai cross_approved: (1) head da merge 094e8d1 KHONG duoc review lai (caveat HEAD-MERGE-CHUA-REVIEW-LAI); (2) model thuc chay chi co loi khai header CLI, khong modelUsage; (3) checkout review khong bi cuong che read-only."
+    },
+    {
+      "path": "ops/reviews/pr889-review-1-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.1.mo_ta",
+      "line": 101,
+      "anchor": "e02d0c31986f6ba5019fef21311a939f2d9c2f17",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG duoc review lai. \"Da va\" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma ops/cong_cu_test.py:8916), khong phai verdict cua reviewer.",
+      "claimed": "Verdict cham 8d5cccb; head da merge la 094e8d1 (va P2 bang HINT.patch + sua them mot cau, CLAUDE.md +8/-5 theo `git diff --numstat 8d5cccb 094e8d1`) va KHONG duoc review lai. \"Da va\" la loi khai executor (kiem bang `patch --fuzz=0` + doctrine-scan/doc-claims-check + doc ma ops/cong_cu_test.py:8916), khong phai verdict cua reviewer."
+    },
+    {
+      "path": "ops/reviews/pr896-review-1-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.4.mo_ta",
+      "line": 110,
+      "anchor": "2789cbb6a0c7ded65fc4e448de7f24b7fe4b425f",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor.",
+      "claimed": "P2 t162-khong-khoa-toan-bo-ma-tran-job va o commit 3bc4244 (nhanh claude/gallant-fermat-34kgb9) bang nguyen HINT.patch (patch -p0 --fuzz=0); ban va CHUA duoc cross-review lai — 'da va' la loi khai executor."
+    },
+    {
+      "path": "ops/reviews/pr915-review-1-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 93,
+      "anchor": "a9bc9349103adfc971f4a1f7431a9655aecaaefb",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "changes_requested 1 P1 (VERDICT-KHAI-SAI-EXECUTION-SURFACE tren bien nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao.",
+      "claimed": "changes_requested 1 P1 (VERDICT-KHAI-SAI-EXECUTION-SURFACE tren bien nhan pr870/pr889 luot 2). Da ap HINT.patch o commit ghi so sau; ban va CHUA duoc review lai, nen 3bc4244 (sua P2 cua #896) chua co lan review sach nao."
+    },
+    {
+      "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 168,
+      "anchor": "615b98d77ced83be11cd2f90dcf34817019ba453",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Mỏ neo này trỏ vào BẢN CHIẾU, KHÔNG vào nguồn có thẩm quyền (comment 5747352008). Lược đồ v2 có đúng loại cho nó — `protected_evidence_ref` — nhưng cổng `bien_nhan_v2` trên master CHƯA có đường đo cho loại ấy nên nó rơi vào trạng thái thứ ba và làm cổng ĐỎ. Bản vá cho đúng khe này đang nằm ở packet #566 (`claude/human-audited-khai-ai-dang-r1`, `604b8d9`) và CHƯA land. Nên lượt này neo `canonical_ancestry` cho ĐO ĐƯỢC, và khai thẳng rằng thứ được neo yếu hơn thứ có thẩm quyền. Thêm: commit 5c71329 CHƯA phải tổ tiên của master, nên `cuong_do: thap`.",
+      "claimed": "Mỏ neo này trỏ vào BẢN CHIẾU, KHÔNG vào nguồn có thẩm quyền (comment 5747352008). Lược đồ v2 có đúng loại cho nó — `protected_evidence_ref` — nhưng cổng `bien_nhan_v2` trên master CHƯA có đường đo cho loại ấy nên nó rơi vào trạng thái thứ ba và làm cổng ĐỎ. Bản vá cho đúng khe này đang nằm ở packet #566 (`claude/human-audited-khai-ai-dang-r1`, `604b8d9`) và CHƯA land. Nên lượt này neo `canonical_ancestry` cho ĐO ĐƯỢC, và khai thẳng rằng thứ được neo yếu hơn thứ có thẩm quyền. Thêm: commit 5c71329 CHƯA phải tổ tiên của master, nên `cuong_do: thap`."
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "line": 154,
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Blob verdict ghim tren nhanh `claude/review-wp538-20260916`, tao tu `f2aa1f9f` — dung head da review. Quan he to tien voi `master` CHUA CO: WP538 chua land.",
+      "claimed": "Blob verdict ghim tren nhanh `claude/review-wp538-20260916`, tao tu `f2aa1f9f` — dung head da review. Quan he to tien voi `master` CHUA CO: WP538 chua land."
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 155,
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "`cuong_do: thap` vi mo neo hien CHI la mot nhanh, khong phai tag `luu-tru/*` va khong phai to tien cua `master`. Nhanh xoa duoc va SHA se thanh khong tra duoc. Manh len `cao` khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "claimed": "`cuong_do: thap` vi mo neo hien CHI la mot nhanh, khong phai tag `luu-tru/*` va khong phai to tien cua `master`. Nhanh xoa duoc va SHA se thanh khong tra duoc. Manh len `cao` khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien."
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "line": 157,
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Blob verdict ghim tren nhanh claude/review-wp538-luot2-20260916, tao tu 7c21bf60 — dung head da review. Quan he to tien voi master CHUA CO: WP538 chua land.",
+      "claimed": "Blob verdict ghim tren nhanh claude/review-wp538-luot2-20260916, tao tu 7c21bf60 — dung head da review. Quan he to tien voi master CHUA CO: WP538 chua land."
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 158,
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "claimed": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien."
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "line": 164,
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "Blob verdict ghim tren nhanh claude/review-wp540-20260916, tao tu 7c7ad450 — dung head da review. Quan he to tien voi master CHUA CO: WP540 chua land.",
+      "claimed": "Blob verdict ghim tren nhanh claude/review-wp540-20260916, tao tu 7c7ad450 — dung head da review. Quan he to tien voi master CHUA CO: WP540 chua land."
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 165,
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/* va khong phai to tien cua master. Manh len cao khi WP540 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "claimed": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/* va khong phai to tien cua master. Manh len cao khi WP540 land bang merge commit hoac fast-forward; squash pha quan he to tien."
+    },
+    {
+      "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 154,
+      "anchor": "1af97acae891ac48aeb8df7d98dcbaad06ab062c",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*.",
+      "claimed": "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+    },
+    {
+      "path": "ops/reviews/wp541-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 167,
+      "anchor": "517f6a8041a128220cae094cbb28bc33e3209075",
+      "text_matches": true,
+      "added_at_anchor": true,
+      "original": "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*.",
+      "claimed": "cuong_do THAP vi tep verdict CHUA land: quan he to tien voi master chua co. Manh len khi luot nay land hoac khi co tag luu-tru/*."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "line": 16,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "(a) sha256 cua `git show 42292b4:ops/specs/lease-id-ep-kieu-yaml-r10.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r10 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.",
+      "claimed": "(a) sha256 cua `git show 42292b4:ops/specs/lease-id-ep-kieu-yaml-r10.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r10 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f)."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 95,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "reviewed_sha 42292b4 chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.",
+      "claimed": "reviewed_sha 42292b4 chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "line": 16,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "(a) sha256 cua `git show e48423a:ops/specs/lease-id-ep-kieu-yaml-r11.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r11 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.",
+      "claimed": "(a) sha256 cua `git show e48423a:ops/specs/lease-id-ep-kieu-yaml-r11.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r11 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f)."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 95,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "reviewed_sha e48423a chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.",
+      "claimed": "reviewed_sha e48423a chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "line": 16,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "(a) sha256 cua `git show d5a57c1:ops/specs/lease-id-ep-kieu-yaml-r12.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r12 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.",
+      "claimed": "(a) sha256 cua `git show d5a57c1:ops/specs/lease-id-ep-kieu-yaml-r12.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r12 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f)."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 95,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "reviewed_sha d5a57c1 chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.",
+      "claimed": "reviewed_sha d5a57c1 chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "line": 16,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "(a) sha256 cua `git show 088511f:ops/specs/lease-id-ep-kieu-yaml-r7.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r7 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.",
+      "claimed": "(a) sha256 cua `git show 088511f:ops/specs/lease-id-ep-kieu-yaml-r7.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r7 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f)."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 95,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "reviewed_sha 088511f chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.",
+      "claimed": "reviewed_sha 088511f chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "line": 16,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "(a) sha256 cua `git show f958e14:ops/specs/lease-id-ep-kieu-yaml-r8.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r8 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.",
+      "claimed": "(a) sha256 cua `git show f958e14:ops/specs/lease-id-ep-kieu-yaml-r8.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r8 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f)."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 95,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "reviewed_sha f958e14 chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.",
+      "claimed": "reviewed_sha f958e14 chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "line": 16,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "(a) sha256 cua `git show 2469f3e:ops/specs/lease-id-ep-kieu-yaml-r9.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r9 CHUA co tren master; chi o commit cuc bo cua nhanh claude/spec-wp678-r7.",
+      "claimed": "(a) sha256 cua `git show 2469f3e:ops/specs/lease-id-ep-kieu-yaml-r9.md` = spec_sha256 dong 3 tep verdict = so trong comment ban chieu. Dac ta r9 CHUA co tren master; chi o nhanh claude/spec-wp678-r7 (luc review: commit cuc bo; da day len origin 2026-10-07 17:49Z, head luc do 284a03f)."
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "line": 95,
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "text_matches": false,
+      "added_at_anchor": true,
+      "original": "reviewed_sha 2469f3e chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 ~17:5xZ (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do.",
+      "claimed": "reviewed_sha 2469f3e chi nam tren nhanh claude/spec-wp678-r7 (khong phai master). Nhanh da DAY len origin 2026-10-07 17:49Z (head 284a03f) TRUOC commit bien nhan, nen tra duoc tu clone day du. Nhanh spec la ref TRUOT: xoa nhanh truoc khi r* vao master hoac co ref luu-tru thi bien_nhan_v2 se tra KHONG DO DUOC (rc=2). Comment ban chieu luc review tu khai 'CUC BO, CHUA DAY' — dung o thoi diem do."
+    }
+  ],
+  "measurements": [
+    {
+      "path": "ops/reviews/assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d7f12249696e80238967c9ae2a8f360337db80e",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d7f12249696e80238967c9ae2a8f360337db80e",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d7f12249696e80238967c9ae2a8f360337db80e",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d7f12249696e80238967c9ae2a8f360337db80e",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "chuoi_verdict_ghi_chu",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "chuoi_verdict_ghi_chu",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "chuoi_verdict_ghi_chu",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "chuoi_verdict_ghi_chu",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-2-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-2-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-2-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-2-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-3-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-3-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-3-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-3-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-4-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-4-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-4-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-4-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr508-review-5-codex-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp461-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "ef72264cb268643a89df3e15cf6cb840da92307b",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "anchor.cuong_do",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp523-r15-review-1-codex-verdict.receipt.yaml",
+      "field": "lich_su_ban_ung_vien.ghi_chu",
+      "source": "b2134a40243e5cb3ea6d64eaf49a4c9f26794cbc",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.mo_ta",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "1a276a15192013fdb1e472db409133b53ac57944",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "820aebc767e20f00ff2ef86d0a4d09d9e680c31d",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "820aebc767e20f00ff2ef86d0a4d09d9e680c31d",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "820aebc767e20f00ff2ef86d0a4d09d9e680c31d",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp541-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "source": "820aebc767e20f00ff2ef86d0a4d09d9e680c31d",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "spec_ghi_chu",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "field": "verdict_usage_caveats.0.mo_ta",
+      "source": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "4920113a639d81385c0f98b1488c0f497776d2ff",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "4920113a639d81385c0f98b1488c0f497776d2ff",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "4920113a639d81385c0f98b1488c0f497776d2ff",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "4920113a639d81385c0f98b1488c0f497776d2ff",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-6-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "03f12ac63284dd814dcf14664968af4872ef7f8a",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-4-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+      "target": "101263f",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-4-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+      "target": "2e4183b",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-4-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+      "target": "3e973a03b151e37cd402e0a723816eeaa8247193",
+      "rc": 0
+    },
+    {
+      "path": "ops/reviews/pr896-review-4-legacy-caveats.yaml",
+      "field": "ANCESTRY-CHI-TREN-NHANH-LA-TRANG-THAI-LICH-SU",
+      "source": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+      "target": "fb87110cfab832406984f893e6a4c79fbb932aef",
+      "rc": 0
+    }
+  ],
+  "reviews": [
+    {
+      "source": "ops/reviews/pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml",
+      "next": "pr455-bien-nhan-v2-review-2-codex-verdict.md",
+      "sha": "c595292cb63fb8c09d7d7b482cda20f9d5f0917f",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml",
+      "next": "pr455-bien-nhan-v2-review-3-codex-verdict.md",
+      "sha": "cb212847375c2319fe0ccad3f7c00c90b870e3ba",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml",
+      "next": "pr455-bien-nhan-v2-review-4-codex-verdict.md",
+      "sha": "4ef73e69d5f3c419634118983723355e25e38305",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml",
+      "next": "pr455-bien-nhan-v2-review-5-codex-verdict.md",
+      "sha": "670071b700bd97a893d64393ffded0257957d0b3",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml",
+      "next": "pr455-bien-nhan-v2-review-6-codex-verdict.md",
+      "sha": "5a78c150106ae381461354c77ba2023834330bbd",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml",
+      "next": "pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md",
+      "sha": "ca960160b477cd16346a293aaa8752772a9921d4",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr896-review-1-codex-verdict.receipt.yaml",
+      "next": "pr896-review-2-codex-verdict.md",
+      "sha": "8d56009a09af7b3ef93801df105f9483de212cc7",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    },
+    {
+      "source": "ops/reviews/pr915-review-1-codex-verdict.receipt.yaml",
+      "next": "pr896-review-2-codex-verdict.md",
+      "sha": "8d56009a09af7b3ef93801df105f9483de212cc7",
+      "receipt_sha_match": true,
+      "header_sha_match": true,
+      "hash_match": true,
+      "absent_at_anchor_rc": 128
+    }
+  ]
+}

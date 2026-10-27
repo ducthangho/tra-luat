@@ -1,0 +1,14 @@
+phan-bien-quy-trinh-review-3-codex-verdict.md:15 receipt.surface:codex_cli@31; run_id=4f5341d473c8442380dc2182f9cde013; surface_caveats=0
+phan-bien-quy-trinh-review-4-codex-verdict.md:13 receipt.surface:codex_cli@31; run_id=06ceaec97a1e454a970cda425836dcf1; surface_caveats=0
+phan-bien-quy-trinh-review-5-codex-verdict.md:12 receipt.surface:codex_cli@35; run_id=12574e98d66c4875b2333fa1adc0bf4c; surface_caveats=0
+pr455-bien-nhan-v2-review-1-codex-verdict.md:7 receipt.surface:codex_cli@32; run_id=ea42cb4174e54db8a581f4a66f43bd2f; surface_caveats=0
+pr455-bien-nhan-v2-review-2-codex-verdict.md:9 receipt.surface:codex_cli@28; run_id=0bc966b1409f4ca39f0f3707bdcb20d8; surface_caveats=0
+pr455-bien-nhan-v2-review-3-codex-verdict.md:9 receipt.surface:codex_cli@27; run_id=32fca3390491423c83e84d37f9904a3b; surface_caveats=0
+pr455-bien-nhan-v2-review-4-codex-verdict.md:9 receipt.surface:codex_cli@27; run_id=d0266c01c4a24dd8a55d02b4ffbdd6b2; surface_caveats=0
+pr455-bien-nhan-v2-review-5-codex-verdict.md:9 receipt.surface:codex_cli@27; run_id=d86357ad0e4b4a6b96a7f5b2e3c1d9f4; surface_caveats=0
+pr455-bien-nhan-v2-review-6-codex-verdict.md:9 receipt.surface:codex_cli@31; run_id=c7af46a4a1e34b0d9d3c86f5b0a2e7d1; surface_caveats=2
+pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md:9 receipt.surface:codex_cli@29; run_id=035d3cac9f2e4b7188d6a0c53e1b74af; surface_caveats=0
+pr455-bien-nhan-v2-review-8-gpt6astra-verdict.md:8 receipt.surface:codex_cli@28; run_id=b7384eee92a045a1b145718ac5310081; surface_caveats=0
+pr460-bien-nhan-v2-review-9-gpt6astra-verdict.md:5 receipt.surface:codex_cli@28; run_id=3bfdc70ca03647139a3da914246acd20; surface_caveats=0
+pr493-review-5-codex-verdict.md:8 receipt.surface:codex_cli@36; run_id=5f5c24ba; surface_caveats=0
+TOTAL_EXPLICIT_SERVICE_WITH_CLI_RECEIPT 13

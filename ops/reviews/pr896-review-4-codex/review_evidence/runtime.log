@@ -1,0 +1,12 @@
+pr896-review-2-codex version= 1.5.0 status= xong rc= 0 clean= True elapsed= 600.539266 stored_duration= 600.539 checks= {'head_matches': True, 'run_id_matches': True, 'surface_matches': True, 'prompt_hash_matches': True, 'elapsed_matches': True}
+events= 25 distinct_response_ids= 25 event_types= ['response.created'] stored_models= ['gpt-6.1-sol'] model_state= DO_DUOC
+stdout bytes= 254 metadata_bytes_match= True metadata_hash_match= True
+stderr bytes= 78 metadata_bytes_match= True metadata_hash_match= True
+SHA256SUMS_rc= 0 OK_count= 106
+omitted_metadata= # Tep KHONG vao kho (>500 KB) cua thu muc bang chung reviewer /tmp/pr896-r2-audit-b3269a02 (chi tep muc 1; thu muc con copy/ = ban sao kho dot bien, khong luu): sha256  byte  ten | fca16267b398120bdb79a51237f78ea216949039968c1dcedbae6a9b900932ff  1056144  review_evidence/original-snapshot.json | thu_muc_con_khong_luu: /tmp/pr896-r2-audit-b3269a02/copy
+pr896-review-3-codex version= 1.5.0 status= xong rc= 0 clean= True elapsed= 562.081953 stored_duration= 562.082 checks= {'head_matches': True, 'run_id_matches': True, 'surface_matches': True, 'prompt_hash_matches': True, 'elapsed_matches': True}
+events= 29 distinct_response_ids= 29 event_types= ['response.created'] stored_models= ['gpt-6.1-sol'] model_state= DO_DUOC
+stdout bytes= 540 metadata_bytes_match= True metadata_hash_match= True
+stderr bytes= 195 metadata_bytes_match= True metadata_hash_match= True
+SHA256SUMS_rc= 0 OK_count= 63
+omitted_metadata= # Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. | 5213368f459616573aef6d9dfc418c00d665fe20d58e8e57160ea254f3d98bd7  849290  review_evidence/start-snapshot.json

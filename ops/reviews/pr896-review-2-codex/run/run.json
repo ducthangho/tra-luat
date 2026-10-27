@@ -1,0 +1,189 @@
+{
+  "version": "1.5.0",
+  "run_id": "b3269a02045c4e178b1c5c328b671273",
+  "short_id": "b3269a02",
+  "ten": "pr896-review-2-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "b35215a920fe6867"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-26T04:25:21.060174+00:00",
+  "ket_thuc_utc": "2026-10-26T04:35:21.599440+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 13975,
+  "khoa_danh_tinh": "linux:27857",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/cay-kho",
+  "head": "8d56009a09af7b3ef93801df105f9483de212cc7",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "64404d73a93d9f43878adc436e1cbe761a5f930cdf011a793e31b896b166812a",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "9bd93032d01fbb6e7ff4bf024bec7b878f4657bee064423449bc4feece44fcf6",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/runs/b3269a02/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "model_phuc_vu": [
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded63770188194a524afebbaaa97f1",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded638ec9481948eb51165967e9055",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6404c14819492797c21801d2daf",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded64a515081948055b9e49cacb504",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded650c1c081949dfd14b8791ace30",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded65968b081949296d41dd777737b",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded66fbd7c8194b6af0433ca1f2384",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6731bc481949a64fd8b789623d5",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6837ee88194bd9e7885ad9ef622",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded68d51388194896845cf07239194",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6af55188194861d40ef8dde2b1e",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6b5a86481948d25aa5980d616a2",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6c1a7e881948f623343f60a825f",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6da0c28819491b8c839b7672440",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded6ebe8e4819499c7fbd07e684e50",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded70ad0d88194a13d3447554b4dbb",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded73562b08194acd8ee682defd7e2",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded741a59c8194bd58b1c88826592a",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded77867a48194930d956a298e9812",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded791986c8194a42acb46e653c2b3",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded7b62ccc81949b3d0bda22f629d3",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded7dd60008194b81d71a606c2d23d",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded7f99c748194a40b706a8421f0c9",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded86e79b481949d398f62f8f87b3c",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    },
+    {
+      "response_id": "resp_00d0c29f8ed06186016aded8850bc48194a9a698b4987c1ddd",
+      "model": "gpt-6.1-sol",
+      "su_kien": "response.created"
+    }
+  ],
+  "model_phuc_vu_trang_thai": "DO_DUOC",
+  "stderr_bo_dong": 320518,
+  "stderr_bo_byte": 27643975,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 600.539,
+  "stdout_byte": 254,
+  "stdout_sha256": "26de49a6a2f8c3874bb5a014df9b545621636a523ae6dda8257e9aa9e29a0f62",
+  "stderr_byte": 78,
+  "stderr_sha256": "730529f6e0d97fdeb369050e841c7e3258632d374c13577c9ca6db80ad3c6d01"
+}

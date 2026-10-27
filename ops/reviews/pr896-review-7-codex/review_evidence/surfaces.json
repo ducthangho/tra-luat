@@ -1,0 +1,2095 @@
+{
+  "runtime_files": 50,
+  "parse_errors": [],
+  "pairs": [
+    {
+      "receipt": "pr468-hoso-4-packet-review-14-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr468-hoso-4-packet-review-14-codex/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr468-hoso-4-packet-review-15-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr468-hoso-4-packet-review-15-codex/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr870-review-2-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr870-review-2-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr870-review-3-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr870-review-3-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr889-review-1-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr889-review-1-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr889-review-2-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr889-review-2-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr889-review-3-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr889-review-3-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr896-review-1-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr896-review-1-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr896-review-2-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr896-review-2-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr896-review-3-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr896-review-3-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr896-review-4-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr896-review-4-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr896-review-5-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr896-review-5-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr896-review-6-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr896-review-6-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "pr915-review-1-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/pr915-review-1-codex/run/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "wp743-r1-g1-exec-review-1-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/wp743-r1-g1-exec-review-1-codex/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/wp766-r1-g1-exec-review-1-codex/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "wp773-r1-g1-exec-review-9-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/wp773-r1-g1-exec-review-9-codex/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    },
+    {
+      "receipt": "wp773-r3-g3-exec-review-3-codex-verdict.receipt.yaml",
+      "run": "ops/reviews/wp773-r3-g3-exec-review-3-codex/run.json",
+      "receipt_surface": "codex_cli",
+      "run_surface": "codex_cli",
+      "same": true
+    }
+  ],
+  "service_claims": [
+    {
+      "verdict": "ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md",
+      "hits": [
+        [
+          130,
+          "- Reviewer: OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution_surface=codex_service (API + công cụ terminal),"
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": false,
+          "description": "(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo c8b5c4e, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service (API + cong cu terminal). Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so."
+        }
+      ]
+    },
+    {
+      "verdict": "ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md",
+      "hits": [
+        [
+          194,
+          "- Reviewer OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution_surface=codex_service qua API/công cụ terminal,"
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": false,
+          "description": "(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 59aeafc, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service qua API/cong cu terminal. Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so."
+        }
+      ]
+    },
+    {
+      "verdict": "ci-g5-cong-cu-chia-manh-r1-review-6-codex-verdict.md",
+      "hits": [
+        [
+          125,
+          "- Reviewer OpenAI Codex, họ GPT-6 theo cấu hình phiên; bề mặt dịch vụ/API + terminal tools (`codex_service`), transport machine/local. Không có bằng chứng độc lập về exact model ID/effort đã phục vụ, không tự nhận Codex CLI gpt-6-astra hay human_audited. Verdict không cấp quyền land."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": false,
+          "description": "(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 4152bf4, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service (dich vu/API + terminal tools). Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so."
+        }
+      ]
+    },
+    {
+      "verdict": "ci-g5-cong-cu-chia-manh-r1-review-8-codex-verdict.md",
+      "hits": [
+        [
+          14,
+          "Reviewer: OpenAI Codex, họ GPT-6 theo cấu hình phiên; công cụ terminal qua dịch vụ/API (`codex_service`, machine/local), không tự khai CLI hay exact model ID/effort đã đo được. Verdict này không cấp human_audited/quyền land."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": false,
+          "description": "(a) DO DUOC tu kho luc ghi so: verdict_sha256/verdict_bytes, reviewed_sha va quan he to tien, blob neo 0987403, so P1/P2/P3 dem tu bang finding cuoi, comment tom tat khai dung bam + commit. (b) THUAT LAI: be mat Codex CLI va model gpt-6-astra (lease, thong diep commit neo, comment executor), effort high (comment executor). (c) KHONG DO DUOC: run_id, prompt_sha256, thoi luong, ma thoat, byte stdout/stderr, model/effort thuc phuc vu — phien ghi so khong co run.json cua luot. Chinh verdict tu mo ta be mat: codex_service (terminal qua dich vu/API). Ket qua sandbox trong verdict la cua luot review luc ay, khong phai phep chay lai luc ghi so."
+        }
+      ]
+    },
+    {
+      "verdict": "phan-bien-quy-trinh-review-3-codex-verdict.md",
+      "hits": [
+        [
+          15,
+          "- Role: reviewer độc lập; provider `openai_codex`; model GPT-6 / Codex theo danh tính phiên; execution surface Codex service qua API và công cụ shell; transport `machine`. Không chạy qua launcher, không có launcher receipt xác minh danh tính; không tự cấp approval/land authority."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "4f5341d473c8442380dc2182f9cde013"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 15 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 4f5341d473c8442380dc2182f9cde013). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "phan-bien-quy-trinh-review-4-codex-verdict.md",
+      "hits": [
+        [
+          13,
+          "- Vai trò reviewer; provider `openai_codex`; model GPT-6/Codex theo danh tính phiên; execution surface **Codex service qua API, công cụ shell**; transport `machine`. Không phải ChatGPT Web. Không có receipt độc lập xác minh model/session của lượt này; không tự cấp land authority."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "06ceaec97a1e454a970cda425836dcf1"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 13 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 06ceaec97a1e454a970cda425836dcf1). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "phan-bien-quy-trinh-review-5-codex-verdict.md",
+      "hits": [
+        [
+          12,
+          "- Role: reviewer độc lập; provider `openai_codex`; model GPT-6/Codex theo danh tính phiên; execution surface: **Codex service qua API, có công cụ shell**; transport `machine`. Không phải ChatGPT Web. Không có receipt độc lập chứng thực model/session của lượt này; không tự cấp approval/land authority."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "12574e98d66c4875b2333fa1adc0bf4c"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 12 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 12574e98d66c4875b2333fa1adc0bf4c). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-1-codex-verdict.md",
+      "hits": [
+        [
+          7,
+          "- Provider: `openai_codex`; execution surface: Codex service/API với công cụ shell trong container; transport: `machine`. Không phải ChatGPT Web/human-mediated. Model được chỉ thị hệ thống định danh là GPT-6; không có chứng thực độc lập backend/model version."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "ea42cb4174e54db8a581f4a66f43bd2f"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 7 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai ea42cb4174e54db8a581f4a66f43bd2f). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-2-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "- Provider `openai_codex`; execution surface **Codex service/API, shell trong Linux container**; transport `machine`. Model được chỉ thị hệ thống định danh GPT-6; không có chứng thực độc lập backend/version. Không khai đây là ChatGPT Web hay một run Codex CLI được launcher chứng thực."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "0bc966b1409f4ca39f0f3707bdcb20d8"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 0bc966b1409f4ca39f0f3707bdcb20d8). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-3-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "- Provider `openai_codex`; execution surface Codex service/API với shell trong Linux container; transport `machine`. Chỉ thị phiên định danh GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận là ChatGPT Web hay một Codex CLI run đã được launcher chứng thực."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "32fca3390491423c83e84d37f9904a3b"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 32fca3390491423c83e84d37f9904a3b). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-4-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "- Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự khai là ChatGPT Web hoặc Codex CLI được launcher chứng thực."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "d0266c01c4a24dd8a55d02b4ffbdd6b2"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai d0266c01c4a24dd8a55d02b4ffbdd6b2). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-5-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "- Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị phiên định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận là ChatGPT Web hay Codex CLI run được launcher chứng thực."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "d86357ad0e4b4a6b96a7f5b2e3c1d9f4"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai d86357ad0e4b4a6b96a7f5b2e3c1d9f4). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-6-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "- Provider `openai_codex`; execution surface **Codex service/API với shell trong Linux container**; transport `machine`. Chỉ thị định danh agent GPT-6; không có chứng thực độc lập backend/model version. Không tự nhận ChatGPT Web hoặc một run CLI có launcher attestation."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "c7af46a4a1e34b0d9d3c86f5b0a2e7d1"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai c7af46a4a1e34b0d9d3c86f5b0a2e7d1). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md",
+      "hits": [
+        [
+          9,
+          "- Reviewer: `openai_codex`, Codex service/API với shell trong Linux container, transport `machine`. Chỉ thị phiên định danh agent GPT-6; backend/model version không có chứng thực độc lập. Không khai một run CLI đã được launcher chứng thực. Context độc lập với Executor Claude."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "035d3cac9f2e4b7188d6a0c53e1b74af"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 035d3cac9f2e4b7188d6a0c53e1b74af). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr455-bien-nhan-v2-review-8-gpt6astra-verdict.md",
+      "hits": [
+        [
+          8,
+          "- Reviewer độc lập với Executor Claude; provider `openai_codex`, bề mặt Codex service/API có shell Linux, transport `machine`. Chỉ thị phiên định danh GPT-6; không có chứng thực độc lập backend/model version hay launcher run của phiên này."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "b7384eee92a045a1b145718ac5310081"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 8 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai b7384eee92a045a1b145718ac5310081). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr460-bien-nhan-v2-review-9-gpt6astra-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer: Codex, provider OpenAI, bề mặt service/API có shell Linux, transport `machine`; không có chứng thực độc lập model/backend hay launcher run của phiên này. Authority là chỉ thị review trực tiếp trong đề bài; không tự cấp Packet/lease/approval. **Verdict này không cấp quyền land.** Không có finding P1."
+        ],
+        [
+          60,
+          "| Năm hàng §2 | Antigravity duy nhất lệch | Trước vá: **1/5 lệch transport**; sau vá: **0/5**. Kiểm execution surface có caveat Codex service | Khớp riêng transport; F05 |"
+        ],
+        [
+          152,
+          "VẤN ĐỀ: Đã kiểm cả năm hàng, không chỉ Antigravity. Transport bốn hàng còn lại khớp. Nhưng hàng Codex của §2 cho **codex_cli hoặc Codex service**, còn bảng/ oracle chỉ biểu diễn codex_cli. Tầng (b) bỏ qua biến `_be_mat`, chỉ so ô transport. Vì vậy “Antigravity là hàng duy nhất lệch §2” rộng hơn phép đối chiếu thực sự; chưa có phép kiểm đầy đủ các surface của nguồn kế hoạch."
+        ],
+        [
+          154,
+          "ĐÃ THỬ NGHIỆM: `history.py` ghi cả năm hàng ở base/head trong `provider-five-rows.json`. `finish_measurements.py` đổi riêng ô surface Antigravity trong **bản sao kế hoạch** thành một surface đã có sẵn trong cây ⇒ **c44 vẫn qua** (`c44-source-surface-drift.json`). Phép substring layer (b) cũng đã tái hiện độc lập: so chính xác đỏ, so substring qua. Không coi cụm prose “Codex service” là một tên máy hợp lệ đã được đặc tả, không tự bịa receipt service để báo chặn nhầm."
+        ],
+        [
+          156,
+          "GỢI Ý VÁ: Thu hẹp lời khai thành “duy nhất lệch cột transport trong năm hàng đã đối chiếu”. Nếu muốn khóa bộ ba, đối chiếu cả tập execution surface và xác định cách biểu diễn Codex service trong hợp đồng dữ liệu."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "3bfdc70ca03647139a3da914246acd20"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 5 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 3bfdc70ca03647139a3da914246acd20). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr493-review-5-codex-verdict.md",
+      "hits": [
+        [
+          8,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI (`openai_codex`); execution surface API/Codex service có shell cục bộ; transport machine. Phiên reviewer độc lập với executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Phân loại cặp provider theo §8 là cross-provider; không tự ghi state `cross_approved` hoặc biên nhận vào kho."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "5f5c24ba",
+        "5f5c24ba292a47d09c3a5d6b66f3b772"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 8 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 5f5c24ba). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay."
+        }
+      ]
+    },
+    {
+      "verdict": "pr526-review-3-codex-verdict.md",
+      "hits": [
+        [
+          151,
+          "Reviewer: Codex/OpenAI, model GPT-6 theo cấu hình phiên; execution surface Codex service qua công cụ shell, transport machine; executor Claude là nền khác. Không suy identity từ tài khoản GitHub. Chỉ dùng sandbox được chỉ định, không tra cứu mạng/GitHub, không đọc transcript phiên, không sửa branch executor, không tạo commit trong cay-kho. Các commit fixture do selftest tự tạo chỉ nằm trong thư mục tạm của sandbox. Không soạn payload tấn công hoặc đường thoát cây."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "f466d135",
+        "f466d135534244c1b888c9c0c44811b9"
+      ],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 151 tu khai Codex service, receipt model_reviewer_identity.surface ghi codex_cli (run ID khai f466d135 / f466d135534244c1b888c9c0c44811b9). Day la hai loi khai khac nhau; checkout tai 2e4183b khong kem run.json cua chinh luot de phan xu runtime. Khong chon be mat truoc khi co bang chung dung run; giu nguyen byte verdict, khong chung thuc model/effort hay nang assurance."
+        }
+      ]
+    },
+    {
+      "verdict": "pr870-review-2-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "execution_surface: codex_service (agent có công cụ shell; không phải ChatGPT Web)"
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "2699e2d8b1a54b8e86bfa3efb9a4b61b"
+      ],
+      "runtime": [
+        "ops/reviews/pr870-review-2-codex/run/run.json"
+      ],
+      "corrections": [
+        {
+          "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu khai `codex_service`, nhung run.json 2699e2d8 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu."
+        }
+      ]
+    },
+    {
+      "verdict": "pr870-review-3-codex-verdict.md",
+      "hits": [
+        [
+          444,
+          "Approve về nội dung diff tại exact SHA đã nêu, với 10 hướng săn và bảng đo; không phải merge/land authorization hoặc xác nhận assurance danh tính model của launcher. Provider `openai_codex`, execution surface `codex_service` (agent dùng shell tool trong môi trường cloud, không suy thành codex CLI/Desktop), transport `machine`. Model/effort thực phục vụ từng request và cặp danh tính executor–reviewer không được đo từ công cụ trong checkout này; launcher/chủ thể vận chuyển tự giữ bằng chứng runtime của lượt này."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "941251157e4b4a35be82d6daefb390b2"
+      ],
+      "runtime": [
+        "ops/reviews/pr870-review-3-codex/run/run.json"
+      ],
+      "corrections": [
+        {
+          "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 444 tu khai execution surface `codex_service`, nhung run.json 94125115 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may."
+        }
+      ]
+    },
+    {
+      "verdict": "pr889-review-1-codex-verdict.md",
+      "hits": [
+        [
+          7,
+          "Phạm vi: chỉ đọc/đo `cay-kho/`; không mạng, không push, không sửa cây reviewed. Các script và evidence đều ở thư mục cha. Provider `openai_codex`, model family `openai`; phiên Codex có shell cục bộ, không đi qua `codex exec` hay Desktop nên theo phân loại của kho là `execution_surface: codex_service`, `transport: machine`. Không có runtime receipt để machine-verify model/effort/session identity; không tự cấp assurance/approval land. Authority cho review và artifact là chỉ thị trực tiếp trong `runs/9f946d71/prompt.snapshot`."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "9f946d714c2344fa9691c3d7d4f1b2d9"
+      ],
+      "runtime": [
+        "ops/reviews/pr889-review-1-codex/run/run.json"
+      ],
+      "corrections": [
+        {
+          "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 7 tu khai `execution_surface: codex_service` (va noi phien \"khong di qua `codex exec` hay Desktop\"), nhung run.json 9f946d71 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Thieu sot nay do pr896-review-2-codex bat (P1 dong mot phan cua pr915-review-1); khong phai chung thuc model/effort da phuc vu."
+        }
+      ]
+    },
+    {
+      "verdict": "pr889-review-2-codex-verdict.md",
+      "hits": [
+        [
+          9,
+          "Quyền và phạm vi theo chỉ thị trực tiếp `runs/d955f9ef/prompt.snapshot`. Reviewer: Codex, họ model OpenAI/GPT-6; provider `openai_codex`, execution surface `codex_service`, transport `machine` theo phân loại repository cho agent có shell không chạy qua `codex exec`/Desktop. Không có receipt máy để chứng nhận biến thể model/effort hoặc assurance. Không gọi mạng, không push, không sửa `cay-kho/`; chỉ ghi artifact ở thư mục cha."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "d955f9efb3624041b86dcf97f2624175"
+      ],
+      "runtime": [
+        "ops/reviews/pr889-review-2-codex/run/run.json"
+      ],
+      "corrections": [
+        {
+          "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 9 tu khai `codex_service`, nhung run.json d955f9ef ghi lenh.chuong_trinh=codex va execution_surface=codex_cli; header CLI cung ghi OpenAI Codex v0.163.0. Cau \"khong chay qua codex exec/Desktop\" trong verdict khong khop hien vat launcher. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Day khong phai chung thuc model/effort da phuc vu."
+        }
+      ]
+    },
+    {
+      "verdict": "pr889-review-3-codex-verdict.md",
+      "hits": [
+        [
+          309,
+          "Định danh: reviewer Codex; provider `openai_codex`; execution_surface `codex_service` (có công cụ shell trực tiếp, không phải ChatGPT Web human-mediated); transport `machine`. Không suy model thực tế từ tác giả commit hoặc tên launcher; định danh model máy chủ trả không được kiểm độc lập trong phép đo repo này. Không tự cấp assurance/approval cho state machine hay thao tác land."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "4764bd6fee0645728143c3eb4f1a417b"
+      ],
+      "runtime": [
+        "ops/reviews/pr889-review-3-codex/run/run.json"
+      ],
+      "corrections": [
+        {
+          "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 309 tu khai execution surface `codex_service`, nhung run.json 4764bd6f ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may."
+        }
+      ]
+    },
+    {
+      "verdict": "slice-b-c-review-2-codex-verdict.md",
+      "hits": [
+        [
+          19,
+          "- Execution surface: Codex service; transport: machine."
+        ]
+      ],
+      "receipt_surface": null,
+      "ids": [],
+      "runtime": [],
+      "corrections": [
+        {
+          "id": "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 19 tu khai Codex service; dong 6 va verdict_nguon cua receipt v1 ghi codex exec qua launcher, run ID khai 8ddb0c6f. Khong co run.json dung run trong checkout tai 2e4183b de phan xu hai loi khai. Khong chon be mat, khong chung thuc model/effort hay nang assurance; giu byte verdict va receipt v1 dong bang."
+        }
+      ]
+    },
+    {
+      "verdict": "wp766-r1-g1-exec-review-1-codex-verdict.md",
+      "hits": [
+        [
+          12,
+          "- Reviewer độc lập với executor theo chỉ thị phiên: Codex, họ GPT-6 theo thông tin hệ thống; provider `openai_codex`, execution surface `codex_service`, transport `machine`. Không có phép đo độc lập exact serving model/effort hoặc receipt xác thực họ model. Không tự nhận Human Audit hay đã hoàn tất assurance `human_audited`."
+        ]
+      ],
+      "receipt_surface": "codex_cli",
+      "ids": [
+        "5d4f7321d9a04ee1a87934e41fcf45c8"
+      ],
+      "runtime": [
+        "ops/reviews/wp766-r1-g1-exec-review-1-codex/run.json"
+      ],
+      "corrections": [
+        {
+          "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+          "rows": 1,
+          "exact_description_in_row": true,
+          "description": "Verdict dong 12 tu khai execution surface `codex_service`, nhung run.json 5d4f7321d9a04ee1a87934e41fcf45c8 dong 78 ghi execution_surface=codex_cli, lenh.chuong_trinh=codex; receipt cung ghi surface=codex_cli. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict. Dinh chinh nay KHONG chung thuc model/effort da phuc vu va KHONG tu nang assurance."
+        }
+      ]
+    }
+  ],
+  "other_identity_mentions": [
+    {
+      "verdict": "cai-cong-cu-sigpipe-r1-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          8,
+          "provider: OpenAI; execution_surface: Codex qua API với shell cục bộ; transport: công cụ trực tiếp."
+        ],
+        [
+          139,
+          "Model/effort đang chạy: GPT-6 / effort KHÔNG ĐO ĐƯỢC — tự khai theo chỉ dẫn phiên; không có attestation runtime độc lập để chứng nhận biến thể model hay mức effort. Provider OpenAI; bề mặt thực quan sát được là Codex qua API với công cụ shell, transport machine/tool trực tiếp; không tự nhận ChatGPT Web hoặc danh tính tài khoản đăng GitHub. Không đăng verdict lên GitHub."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "cai-cong-cu-sigpipe-r2-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          7,
+          "Reviewer độc lập, provider OpenAI; execution surface: Codex qua API với shell cục bộ; transport: machine/tool trực tiếp. Không sửa hai cây nguồn, không push, không đăng GitHub. Bản sao và phép đo nằm trong `tam/tmp.dcbYQp7XH2/`; log và mã tái lập được giữ làm bằng chứng, thư mục tạm do test sinh được dọn riêng."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "cai-cong-cu-sigpipe-r2-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          9,
+          "Provider: OpenAI. Bề mặt quan sát: Codex qua API với công cụ shell cục bộ; transport: machine/tool trực tiếp. Model: GPT-6 theo chỉ dẫn phiên (tự khai); biến thể/effort/attestation runtime độc lập: **KHÔNG ĐO ĐƯỢC**. Không suy danh tính từ actor GitHub. Executor theo vật liệu: Claude Sonnet 5.5; chưa có attestation độc lập của executor."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "cai-cong-cu-sigpipe-r2-review-4-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          7,
+          "Provider OpenAI; execution surface Codex qua API với công cụ shell cục bộ; transport machine/tool trực tiếp. Model GPT-6 theo chỉ dẫn phiên (tự khai); effort/biến thể và attestation runtime độc lập: **KHÔNG ĐO ĐƯỢC**. Executor theo vật liệu: Claude Sonnet 5.5; không suy model từ actor GitHub."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "cai-cong-cu-sigpipe-r2-review-5-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          7,
+          "Provider OpenAI; execution surface Codex qua API, công cụ shell cục bộ; transport trực tiếp. Model GPT-6 theo chỉ dẫn phiên (tự khai); effort/biến thể và attestation runtime độc lập: **KHÔNG ĐO ĐƯỢC**. Executor được khai trong vật liệu là Claude Sonnet 5.5. Vai trò reviewer độc lập, hai trục Spec và Standards/Security."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "review-luot1-codex-VERDICT.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: codex_cli"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "review-luot2-codex-VERDICT.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: codex_cli"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "don-nhanh-kien-truc-gh-1-claude-verdict.md",
+      "surface": null,
+      "claims": [
+        [
+          20,
+          "**4. Ranh giới credential** — hiện `don-nhanh.ps1` KHÔNG cầm token nào; dựa vào `gh auth login` (out-of-band, lưu trong credential manager của hệ điều hành, không đi qua biến môi trường của script). B và C đều đòi đưa một PAT phạm vi phù hợp cho listing PR/branch vào môi trường của một script XOÁ NHÁNH. Đo hôm nay cho thấy token \"tiện tay nhất\" trong container này KHÔNG đủ phạm vi cho đúng việc đó (mục 6) — nghĩa là \"đưa PAT vào script\" không phải một bước rẻ, nó đòi cấp phát MỘT token MỚI, đúng scope, và giữ nó sống — thêm một bề mặt rủi ro cho công cụ xoá ref, đúng thứ CLAUDE.md cảnh báo ở bài học `inherit=\"all\"`."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "lease-hoi-toan-kho-review-1-claude-verdict.md",
+      "surface": null,
+      "claims": [
+        [
+          128,
+          "ĐỘ TIN: vừa — lỗ có thật nhưng bề mặt tấn công thực tế gần như bằng không."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "no-p3-ho-so-exec-review-1-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "no-p3-ho-so-spec-review-1-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "no-p3-ho-so-spec-review-2-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr468-hoso-4-packet-review-7-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          20,
+          "- `hint-provenance-bon-hunk-khong-co-de-kiem` [P1]: **ĐÃ VÁ THẬT bằng cách rút lời khai không có căn cứ**, không phải đã kiểm được bốn lý do. LO:261–271 rút rõ 40 hunk/4 hunk bị bác và lời khai tái dẫn xuất từng hunk; không còn dùng chúng làm chứng cứ hiện hành. Bề mặt nguồn còn dùng là hai khối H, tự trích và băm khớp nguyên bản gói reviewer (**c23bcd01…**, **bde441a0…**). Mã thi công tương lai vẫn phải khai provenance riêng theo §7. Bốn lý do lịch sử **KHÔNG ĐO ĐƯỢC**, không xác nhận chúng đúng."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr489-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          9,
+          "Reviewer: Codex/OpenAI, bề mặt agent API có công cụ shell cục bộ, transport machine; độc lập với executor Claude theo nhiệm vụ được giao. Không suy danh tính model thực phục vụ từ tài khoản đăng GitHub hoặc metadata runtime do điều phối thuật lại. Quan sát **0 lần** chết/phóng lại reviewer."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr490-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          10,
+          "Reviewer: Codex/OpenAI, model GPT-6 theo cấu hình phiên; execution surface: agent API có shell cục bộ; transport: `machine`; phiên review độc lập với executor Claude. Không suy identity từ tài khoản GitHub. Phạm vi/authority là `PROMPT.md` của gói: review offline, kho chỉ đọc, đầu ra ngoài `cay-kho/`. Tree đã review: `9a0c02809425c9ba44b7e70fb660d3387a3e194c`. Không phải phiên land."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr490-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          10,
+          "Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; execution surface: agent API có shell cục bộ; transport: `machine`; phiên độc lập với executor Claude. Authority/phạm vi là `PROMPT.md`: review offline, chỉ đọc `cay-kho/`, ghi verdict và hiện vật đo ngoài cây. Tree: `68b98d1174918994be8646d721d5dadff23f1176`. Không phải phiên land."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr490-review-4-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          8,
+          "Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; phiên độc lập với executor Claude. Authority và phạm vi là `PROMPT.md` của gói: review offline, chỉ đọc `cay-kho/`, ghi verdict/hiện vật ngoài cây. Không cấp quyền merge hoặc land. Head đã xác minh như trên, tree `980317c9c01b5d5b46844000de14f78fd12425c5`."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr490-review-5-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          8,
+          "Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Phiên độc lập với executor Claude; không có GitHub submitter vì không đăng gì lên mạng. Authority là yêu cầu đọc `PROMPT.md` và thực hiện review offline của gói này. Phạm vi ghi chỉ là `VERDICT.md` và `phep-do/` ngoài cây được review; không commit hoặc cấp quyền land. Tree được review: `c57aaf5a2e19271d128c005cbfab8c3f44d11590`."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr490-review-6-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          10,
+          "Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell Linux, transport `machine`. Phiên độc lập với executor Claude. Authority/phạm vi là `PROMPT.md`: review offline, chỉ ghi đầu ra ngoài `cay-kho/`. Tree được review: `de63dea60cf89f105078644639b6130e62539b43`. Không có GitHub submitter trong lượt này."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr490-review-7-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          10,
+          "Reviewer: Codex/OpenAI, GPT-6 theo cấu hình phiên; provider `openai_codex`, bề mặt agent API có shell Linux, transport `machine`, phiên độc lập với executor Claude. Không suy thêm model/effort từ tên gói. Authority/phạm vi: `PROMPT.md` do người dùng giao. Tree: `d9d4cc1f2edae522463899a86ebdbf0891531622`. Không có GitHub submitter trong lượt này."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr491-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer độc lập theo chỉ thị lượt 1; tự khai model GPT-6, provider OpenAI, bề mặt Codex/API có shell cục bộ, transport machine. Không có chứng thực độc lập model/build. Không truy cập mạng, không thao tác kho thật. Tree đã đo: `a80a73d6b0af958878e96187508a2edd614f22a2`. Mọi đường dẫn dưới đây tính từ thư mục làm việc; đường dẫn `ops/...`, `CHANGELOG.md` và `CLAUDE.md` trong finding tính trong `cay-kho/` nếu không nói khác."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr491-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: GPT-6/Codex theo danh tính được cấp trong phiên; provider OpenAI, execution_surface Codex/API có shell cục bộ, transport machine; không có chứng thực độc lập variant/build/effort. Reviewer độc lập với executor, loại đối chiếu khác provider theo chỉ thị người dùng/§8; không tự tạo receipt hoặc transition `cross_approved`. Tree tự đo: `5b8c1bed8b754f7b6fdf1004743368b5fcdba85f`."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr492-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          9,
+          "execution_surface: codex_agent_with_local_tools"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-10-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Phiên độc lập với executor Claude theo hồ sơ được giao; không có chứng thực độc lập backend/model thực phục vụ. Review khác nền theo §8 và chỉ thị trực tiếp lượt 10; không tự ghi state `cross_approved`, không cấp quyền merge. Hai trục đã xét: yêu cầu/phạm vi và tính đúng/nhất quán của hồ sơ cùng các cổng liên quan."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-11-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Review độc lập với executor Claude theo chỉ thị người dùng; không có chứng thực độc lập model/backend phục vụ. Không tự ghi transition `cross_approved` hoặc cấp quyền merge. Đã xét tính đúng/phạm vi yêu cầu và tính nhất quán của hồ sơ/cổng."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-12-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Review độc lập với executor Claude theo chỉ thị được giao; không có chứng thực độc lập backend/model thực phục vụ. Không tự ghi transition `cross_approved` hoặc cấp quyền merge."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-13-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên, provider OpenAI, execution surface agent API có shell, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập model backend, không tự ghi transition `cross_approved`, không cấp quyền merge."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-14-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên, provider OpenAI, execution surface agent API có shell, transport machine; khác provider executor Claude theo giao việc. Không chứng thực độc lập backend/model đã phục vụ, không ghi transition `cross_approved`, không cấp quyền merge."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-15-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên, provider OpenAI, execution surface agent API có shell, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập backend/model phục vụ; không ghi transition `cross_approved`, không cấp quyền merge."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-16-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI, execution surface agent API có shell cục bộ, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập backend/model phục vụ; không ghi transition `cross_approved` hoặc cấp quyền merge. Authority là chỉ thị trực tiếp cho lượt 16, điều kiện dừng tới P3 và ngoại lệ hai nợ D."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-17-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên; provider OpenAI, execution surface agent API có shell cục bộ, transport machine; khác provider executor Claude theo chỉ thị giao việc. Không chứng thực độc lập backend/model phục vụ, không tự ghi transition `cross_approved` hoặc cấp quyền merge. Chỉ thị trực tiếp lượt 17 là authority cho phạm vi và điều kiện dừng này."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: GPT-6/Codex theo chỉ dẫn phiên; provider OpenAI; execution surface API có shell cục bộ; transport machine. Khác provider executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Review trên exact SHA nhánh nháp được người dùng chỉ định; không giả nhận đây đã là head nhánh PR thật. Tree: `5ada023a62738ab69026ccb1ce521b377ab1a5d7`. Không mạng, không push/commit/merge, không tự soạn payload đường dẫn. `cay-kho/` giữ sạch; cổng và đột biến chạy ở `review-current/`, `review-before/`, tệp tạm trong workspace. `actionlint 1.7.7` được thêm bằng THƯ MỤC vào CUỐI PATH; `core.abbrev=7` trên hai bản sao."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo chỉ dẫn phiên; provider OpenAI; execution surface API với shell cục bộ; transport machine. Khác provider executor Claude theo hồ sơ được giao; không có chứng thực độc lập model/backend. Authority review và write set là chỉ thị trực tiếp của người dùng: review exact SHA nhánh nháp, ghi kết quả trong workspace. Không tự chuyển trạng thái kho thành `cross_approved`."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-4-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo chỉ dẫn phiên; provider OpenAI; execution surface API có shell cục bộ; transport machine. Khác provider executor Claude theo hồ sơ được giao; không có chứng thực độc lập biến thể model/backend. Authority và phạm vi là chỉ thị trực tiếp của người dùng cho lượt 4 này. Không tự ghi trạng thái `cross_approved` vào kho."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-6-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; độc lập với executor Claude theo hồ sơ được giao. Không chứng thực độc lập model/backend. Đây là cross-provider review theo §8, không tự ghi state `cross_approved`, không cấp quyền merge. Authority và điều kiện dừng lấy từ chỉ thị trực tiếp của người dùng lượt 6."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-7-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex/GPT-6 theo cấu hình phiên, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; khác executor Claude theo hồ sơ được giao. Không chứng thực độc lập model/backend. Authority và điều kiện dừng lấy từ chỉ thị trực tiếp lượt 7. Đây là cross-provider review theo §8, không tự ghi state `cross_approved`, không cấp quyền merge."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-8-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex theo cấu hình phiên; provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`. Khác executor Claude theo hồ sơ được giao; không chứng thực độc lập backend/model. Review theo §8 và chỉ thị trực tiếp lượt 8, không tự ghi state `cross_approved`, không cấp quyền merge."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr493-review-9-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex, provider `openai_codex`, execution surface agent API có shell cục bộ, transport `machine`; độc lập với executor Claude theo hồ sơ được giao. Không có chứng cứ độc lập về backend/model thực phục vụ. Review khác nền theo §8 và chỉ thị trực tiếp lượt 9; không tự ghi state `cross_approved`, không cấp quyền merge. Hai trục đã kiểm: phạm vi/yêu cầu và tính đúng/nhất quán của hồ sơ cùng hành vi các cổng liên quan."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr497-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          4,
+          "Review độc lập bằng Codex/GPT-6, provider OpenAI, execution surface API với công cụ shell tại sandbox, transport trực tiếp trong phiên này. Không dùng connector GitHub. Tree đã đo: `67df2efa7e6f6c7b23bedfb43da647b395800a37`. Kết luận có **1 P2 còn tồn tại và 1 P3**; không phát hiện hồi quy runtime trong thay đổi chỉ thêm chú thích."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr497-review-10-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          8,
+          "Reviewer: Codex/OpenAI, bề mặt API có công cụ shell, transport machine. Tree tự đo: `6f841f69861e50798e6b92c7566358d16f746cec`. Mọi phép chạy và đột biến thực hiện trên bản sao trong sandbox; `cay-kho/` chỉ đọc. Môi trường chạy: Linux, Python 3.11.15, PyYAML 6.0.1, actionlint 1.7.7, shellcheck 0.9.0, jsonschema 4.26.0. Không cài thêm công cụ."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr497-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          4,
+          "Review lượt 3 bằng OpenAI Codex, bề mặt API với công cụ shell trực tiếp trong sandbox; không dùng connector GitHub. Tree tự đo: `115b1835be0a14c63669357a4c8e05a0ad542c4a`. **0 P1 / 6 P2 / 0 P3.** Cả 12 lệnh trong EVIDENCE chạy lại đều đạt. Các finding dưới đây thuộc lời khai và giới hạn bằng chứng; không phát hiện thay đổi runtime trong 16 dòng chú thích được thêm vào `ops/cong_cu.py`."
+        ],
+        [
+          270,
+          "ĐÃ THỬ VÁ: có — trên bản chép gọi đúng “finding hạng P2 tăng 1→7”, và ghi 6/7 kèm trường hợp thứ sáu trong receipt/mục lục/CHANGELOG. Cũng có thể bỏ tỷ lệ phân loại nếu không cần; nếu giữ thì liệt kê tập và tiêu chí. Kiểm khóa bằng đếm tiêu đề theo từng hạng, rồi kiểm thời điểm xuất hiện đoạn bị chấm. Rủi ro: số P2, tổng finding, số hàng và số bề mặt mới bị dùng thay nhau."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr497-review-4-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          281,
+          "ĐÃ THỬ VÁ: có — trên bản chép sửa chính hàng ML2 thành “P2 tăng 1→7; tổng tăng 2→7; 6/7 theo tiêu chí bề mặt mới”, giữ các mức P1/P2/P3 và neo verdict đúng. Kiểm khóa: lấy hàng theo liên kết verdict, so cả hai số/cách gọi với tổng tiêu đề và danh sách sáu trường hợp; không chỉ grep thấy câu đúng ở một hàng khác. Không dùng tổng finding để khẳng định chất lượng tăng hoặc giảm."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr497-review-5-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          10,
+          "- `dem-finding-doi-mau-va-bo-sot-phan-moi`: **ĐÃ VÁ THẬT** — README:275 đã sửa cả hai số: P2 **1→7**, tổng **2→7**, bề mặt phát sinh sau lượt 1 **6/7**. Đếm tiêu đề V1/V2 được `0/1/1` và `0/7/0`; `git log -S 'Không cổng nào' f6ec9c0 -- CHANGELOG.md` xác nhận câu của finding thứ bảy được thêm tại `52b36d1`, sau `e826730`. Tiêu chí “phát sinh sau lượt 1” ở đây khác tiêu chí đường dẫn của bảng mới §4; không dùng hai mẫu số thay nhau."
+        ],
+        [
+          270,
+          "- Phiên này dùng công cụ thực thi cục bộ của Codex/OpenAI; không suy danh tính model của các phiên cũ từ nhãn model yêu cầu. Không áp quy định bề mặt phiên cũ thay cho khả năng công cụ đang có trong phiên này."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr508-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          4,
+          "Reviewer: Codex, OpenAI; bề mặt API, transport machine, shell cục bộ; khác nền với executor Claude. Tree: `4bb6d2cfe506331de14ade7bc3872e666c538fc8`. Chỉ đọc/ghi trong thư mục được giao, không mạng, không sửa `cay-kho/`, không dựng payload hay đường thoát cây. Chỉ xuất tệp này; không soạn cây vá thay executor."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr508-review-4-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          5,
+          "Reviewer: Codex / OpenAI, bề mặt API, transport machine, shell cục bộ; khác nền với executor Claude theo phân công trong PROMPT.md. `reviewed_sha`: `41e83b54fffc0672268b9512aef1afd4fff57cc7`; tree: `77accc7530e5b920cf379f130d94d9e9c419b2e9`."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr521-review-5-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent Codex có shell sandbox, transport `machine`. Không có chứng cứ độc lập về backend model/effort viết verdict. CLI Codex 0.154.0 và Claude Code 2.1.269 là công cụ đã thử, không chứng nhận danh tính reviewer."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr521-review-6-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent Codex có shell sandbox qua API, transport `machine`. Không có chứng cứ độc lập về backend model/effort viết verdict. Các phiên bản CLI được thử là Codex 0.154.0 và Claude Code 2.1.269; chúng không chứng nhận danh tính reviewer."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr521-review-7-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent có shell sandbox qua API, transport `machine`. Không có bằng chứng độc lập về backend model/effort tạo verdict. CLI cục bộ Codex 0.154.0 và Claude Code 2.1.269 là công cụ được thử, không chứng nhận danh tính reviewer."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr521-review-8-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex, dựa trên GPT-6 theo chỉ thị phiên; provider OpenAI (`openai_codex`), execution surface agent qua API có shell sandbox, transport `machine`. Không có attestation độc lập về backend model/effort thực thi verdict. CLI Codex/Claude cục bộ là công cụ được thử, không chứng nhận danh tính reviewer. Không dùng sub-agent hoặc context Executor."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr870-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          7,
+          "execution_surface: Codex agent + local shell tools"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "pr896-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          7,
+          "Reviewer `codex`; provider `openai_codex`; execution_surface `codex_cli`; transport `machine`. Run `64761d8e6164462d870c3d534d325dd2`; header CLI khai `gpt-6.1-sol`, effort `xhigh`, session `01a16ec6-03c0-72c0-ac25-dccfeef0cd62` (đọc `runs/64761d8e/run.json` và đầu `stderr.log`; header không chứng minh model phục vụ ở máy chủ). Không có GitHub submitter vì không đăng/push. Sandbox khai `workspace-write`; read-only đối với `cay-kho/` được giữ bằng phạm vi lệnh, bytecode bị tắt. Không gọi mạng, không dùng subagent, không sửa nguồn review."
+        ]
+      ],
+      "runtime": [
+        "ops/reviews/pr896-review-1-codex/run/run.json"
+      ]
+    },
+    {
+      "verdict": "wp523-r14-review-1-codex-verdict.md",
+      "surface": "codex_desktop",
+      "claims": [
+        [
+          14,
+          "execution_surface: codex_desktop"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-exec-review-1-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-exec-review-2-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-exec-review-3-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-exec-review-4-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: API agent có công cụ shell cục bộ; không tự nhận đã đo Codex CLI/Desktop"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-17-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: codex_cli"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: API agent có shell cục bộ (không tự nhận Codex CLI/Desktop)"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          9,
+          "execution_surface: API agent với shell cục bộ"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-4-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          9,
+          "execution_surface: API agent có công cụ shell cục bộ (không phải ChatGPT Web)"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-5-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          16,
+          "execution_surface: API agent có công cụ shell cục bộ"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp678-spec-review-6-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: API agent có shell cục bộ"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp698-exec-review-g2-1-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp698-exec-review-g2-2-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          6,
+          "execution_surface: claude_code_subagent"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp698-spec-review-13-claude-verdict.md",
+      "surface": "claude_code",
+      "claims": [
+        [
+          14,
+          "- **Điểm mơ hồ có thành lỗ không (Q3): có một cây sai-nhưng-thoả-chữ, nhưng xếp P3, không phải P2.** `W1c` (g1 cộng 3 thêm/2 xoá: `_luoi_byte` còn 12 trong 17 ô, `kq[\"byte\"][\"luoi\"]` thành chuỗi nối các băm, cha đọc chuỗi ấy) cho suite 56/56, `kq[\"m1\"]`, (iv), (v) của r12 xanh, 13/13 đột biến đích `t53` GIẾT đúng, và phép so khoá XANH nếu đọc theo \"danh sách của g2\" hay `len()`, ĐỎ nếu xét loại. Lý do không P2: cây lọt phải sửa hình dạng `KQ` ở cả con và cha, cùng bậc và cùng chi phí với `Wpad` (thêm 5 phần tử rỗng cho đủ số, 3 thêm/2 xoá, 56/56) — cây này XANH ở MỌI cách đọc và chính là giới hạn \"thêm ô giả cho đủ số\" mà r13 đã khai; chốt cách đọc nghiêm thu hẹp bề mặt (bỏ lối \"đổi hình dạng trông vô tội\") chứ không thêm bảo đảm chống giả. Mọi cây thu hẹp tự nhiên đo được (`P1a`, `B1`, `Ga`, `Gb`, `Gc`, `Gd`, `T1b`, `T2`, `T3`) ĐỎ ở cả ba cách đọc. Câu chữ đóng nằm ở HINT."
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp710-exec-review-1-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: codex_cli"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp710-exec-review-2-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: codex_cli"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp710-exec-review-3-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "execution_surface: codex_cli"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp710-exec-review-9-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          7,
+          "reviewer_execution_surface: Codex local sandbox (tự khai)"
+        ]
+      ],
+      "runtime": []
+    },
+    {
+      "verdict": "wp773-r1-g1-exec-review-9-codex-verdict.md",
+      "surface": "codex_cli",
+      "claims": [
+        [
+          6,
+          "Reviewer: Codex, họ model OpenAI, provider `openai_codex`; execution surface coding-agent sandbox, transport shell/tool trực tiếp (`machine`). Phiên độc lập với executor Claude. Không tự chứng nhận launcher, receipt hoặc assurance `human_audited`. Tree: `a7269e1451ab25b3236ba8874fc95eccbb02ac3f`. Review g1, lượt 9, trên exact head nêu trên; KHO chỉ đọc."
+        ]
+      ],
+      "runtime": [
+        "ops/reviews/wp773-r1-g1-exec-review-9-codex/run.json"
+      ]
+    }
+  ],
+  "unknown_verdict_content_with_surface": [
+    {
+      "path": "ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md",
+      "hits": [
+        [
+          6,
+          "Reviewer độc lập OpenAI Codex, họ GPT-6 theo chỉ dẫn runtime; `provider: openai_codex`, `execution_surface: codex_service` (API agent có shell), `transport: machine`. Không đo model variant/effort, launcher receipt hoặc assurance live. Executor Claude theo assignment. Agent `tl_auditor` chỉ đọc hướng dẫn, mã và log theo `CLAUDE.md` §Quy trình sửa code/5; không chạy test hay sửa tệp."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot2-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot4-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot3-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot5-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr917-wp910-provenance/verdicts/wp910-g3-luot1-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md",
+      "hits": [
+        [
+          36,
+          "- Reviewer: Codex/OpenAI, `model_family: openai`, phiên API có công cụ shell (`execution_surface: codex_service`, `transport: machine`). Họ model theo định danh hệ thống của phiên; không có header CLI/metadata backend riêng để máy đối chứng tên model chi tiết, effort hoặc session ID. Executor Claude theo assignment/commit, không đo lại runtime Executor. Verdict nội dung này không tự ghi transition hay receipt `cross_approved`."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr926-wp919-provenance/verdicts/wp919-r3-g3-claude-review-3-codex-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer: OpenAI Codex, described by runtime instructions as based on GPT-6; provider `openai_codex`, model family `openai` as declared by the runtime role. Observed execution surface is tool-mediated local subprocess execution; transport is machine/tool-mediated. Invocation through `launcher.py run` is supplied by the user. Exact serving model/effort, launcher session ID, final execution receipt and CLI-versus-service identity are not independently visible; `launcher.out` is empty. No Executor conversation was supplied. Runtime instructions are not a serving-model attestation."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md",
+      "hits": [
+        [
+          3,
+          "- Reviewer: OpenAI Codex (GPT-6 family as identified by session instructions); provider `openai_codex`; execution surface `codex_service` with local shell tools; transport machine/tool-mediated. Exact serving-model/effort attestation is not independently measured. Independent reviewer in this session; no executor role."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot2-launcher-verdict.md",
+      "hits": [
+        [
+          7,
+          "to this session. Provider: OpenAI (runtime identification); execution surface:"
+        ],
+        [
+          15,
+          "`CODEX_EXECUTION_SURFACE`, `CODEX_RUN_ID`, `LAUNCHER_RUN_ID`, and `OPENAI_MODEL`"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr823-wp802-provenance/verdict-luot5/wp802-g1-luot5-codex-verdict.md",
+      "hits": [
+        [
+          6,
+          "Reviewer OpenAI Codex; provider `openai_codex`, execution surface `codex_service` (API agent có shell), transport `machine`. Model ID/effort/session ID và danh tính executor thực chạy chưa có receipt độc lập: **KHÔNG ĐO ĐƯỢC**. Không suy surface từ lease, không tự cấp assurance hoặc quyền merge/land. Áp ngưỡng assignment: hết P0/P1 và mọi P2 đóng; P3 mở cần quyết định chủ kho."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot1-codex-verdict.md",
+      "hits": [
+        [
+          8,
+          "Reviewer: Codex, provider `openai_codex`, model family `openai`, role `reviewer`, phiên độc lập với executor. `runs/d7f23a04/run.json` ghi `execution_surface=codex_cli`, `transport=machine`, run ID `d7f23a040cae4fa6b514b49dd6b2e2d0`; exact serving-model/effort không có attestation riêng trong packet. Không đăng GitHub (`github_submitter_identity: null`), không sửa `cay-kho/`, không merge/land/deploy. Không tự tạo receipt `cross_approved`."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot2-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "Reviewer độc lập: Codex, provider `openai_codex`, model family `openai`, role `reviewer`. [run.json](runs/427d0ecb/run.json) ghi `execution_surface=codex_cli`, `transport=machine`, run ID `427d0ecb47384eee9f22aab84ff83f02`; packet không có attestation riêng cho exact serving-model/effort nên không suy từ cấu hình yêu cầu. Không tái sử dụng context executor; không gọi reviewer phụ. Không dùng mạng, không đăng GitHub (`github_submitter_identity: null`), không sửa `cay-kho/`, không tạo receipt/merge/land/deploy."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot3-codex-verdict.md",
+      "hits": [
+        [
+          134,
+          "Neo cuối và giới hạn: head/tree tại đầu báo cáo, base `9f4a539b12d1d948817123d117f4bf2aedb1898f`; spec khớp SHA-256 đã giao. Python 3.13.16, PyYAML 6.0.1, Linux. Provider theo context phiên là OpenAI/Codex, có công cụ shell `exec_command`, transport machine; không suy model/effort hoặc execution surface CLI từ tên công cụ. Không có attestation độc lập của model/effort hay invocation `.claude/dev/launcher.py run`; Q4 về bề mặt gọi không tự xác minh được từ checkout. Không gọi Codex lồng, không tự tạo receipt, `cross_approved` hay quyền land. `cloud_environment.environment_status` không có trong danh sách công cụ khả dụng; không có thao tác mạng."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot2-codex-verdict.md",
+      "hits": [
+        [
+          11,
+          "Reviewer độc lập: OpenAI Codex; provider `openai_codex`, execution_surface `codex_cli`, transport `machine`,"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot2-launcher-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer identity: runtime instructions identify this assistant as OpenAI Codex, based on GPT-6; the system reports an API interface. Observed execution surface/transport: local shell through `functions.exec` / `exec_command`. The user reports invocation through `launcher.py run`; no enclosing receipt or independently verifiable served-model identifier has been exposed to this session. Actual served model/family therefore remains `khong_do_duoc` for independent assurance; the tool name is not identity evidence."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot1-launcher-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer identity: this session identifies the assistant as OpenAI Codex, based on GPT-6 (runtime instruction). Provider self-identification: OpenAI. System-reported interface: API; observed execution surface/transport: machine access to local shell through `functions.exec` / `exec_command`. The enclosing `launcher.py run` / `codex_cli` invocation is supplied by the user, not independently attested by an accessible receipt in this session. No independently verifiable served-model identifier or launcher execution receipt for this reviewer has yet been exposed; the actual served model/family cannot be independently measured here. This statement is not assurance inferred from a tool name."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot4-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "Reviewer độc lập: Codex/OpenAI, họ GPT-6 theo cấu hình phiên; execution surface agent API với `exec_command`, transport machine/local, session/run `523d11cc`. Không có attestation model/effort từng request hay xác nhận riêng launcher/CLI; không suy identity từ tài khoản GitHub. Không gọi subagent, không kế thừa context executor, không đăng GitHub. Mục tiêu assurance theo packet là cross-provider; biên nhận/delivery và identity gate không được tự tạo bởi file offline này. Hai trục review: spec và standards/security."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot1-codex-verdict.md",
+      "hits": [
+        [
+          23,
+          "- Provider `openai_codex`, model family `openai`, execution surface `codex_cli`, transport `machine`; run `c4103982ae4c4a8b9a98e308d7b7beb1`. Nguồn surface/transport: `runs/c4103982/run.json`. Model cụ thể/effort chưa có header để đo; không suy từ actor GitHub. Executor khai Claude Opus 5.5 trong lease, không có thống kê runtime độc lập trong gói này."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot2-codex-verdict.md",
+      "hits": [
+        [
+          18,
+          "- **Reviewer:** provider `openai_codex`, họ model `openai`, execution surface `codex_cli`, transport `machine`; header CLI khai `gpt-6-astra`, effort `xhigh`, CLI `0.164.0`, session `01a17134-98cd-7561-8493-f7600cfb4044`, run `f8f838f0`. Nguồn: `runs/f8f838f0/stderr.log`, header dòng 2–13. Đây là cấu hình CLI công bố, không chứng minh model từng request. Executor Claude theo assignment; không có runtime receipt Executor để tự xác minh."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot2-codex-verdict.md",
+      "hits": [
+        [
+          21,
+          "Provider openai_codex; model_family openai; execution_surface codex_cli; transport machine; run 553f19e0df944de099dca500d7df5ab3 (run.json). GPT-6 theo runtime instruction; model slug/effort không đo được từ header hiện trống. Executor Claude theo assignment/lease, không suy danh tính từ actor GitHub. Không đăng GitHub, không merge/land."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr913-wp910-provenance/verdicts/wp910-luot1-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot2-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot1-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot5-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot3-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot4-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr907-wp906-provenance/verdicts/wp906-luot1-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26k-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer: OpenAI Codex, as identified by the session instructions, GPT-6 family. Execution surface: local tool-executed shell through this API session; transport: machine/local. The exact backend model identifier, launcher invocation/receipt, and independent provider attestation are not exposed in the supplied runtime context and are not independently verified. This is a fresh review context; no executor context was supplied."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26d-verdict.md",
+      "hits": [
+        [
+          5,
+          "Review class: sensitive. Reviewer: OpenAI Codex; runtime developer context identifies this agent as Codex based on GPT-6. Provider: `openai_codex`; model family: OpenAI. Observed execution surface: tool-mediated shell in managed Linux; transport: machine; GitHub submitter: none. Exact serving model/build/effort/session ID, enclosing CLI-versus-service surface, launcher invocation, and outer execution receipt are not independently visible or attested. The invocation is requester-reported. No GitHub access or credentials used; authority #748 issuecomment-6394503720 cannot be independently read here."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26g-verdict.md",
+      "hits": [
+        [
+          242,
+          "Runtime observed: **Linux x86_64, Python 3.13.16**. Runtime instructions identify this reviewer as **OpenAI Codex, based on GPT-6**; provider `openai_codex`, model family `openai`. Observable execution surface: tool-mediated local shell in this managed workspace; transport `machine`. Exact serving model/build/effort, session independence attestation, enclosing CLI-versus-service identity and the outer `launcher.py run` execution receipt are **not independently visible or verified**. The requester reports launcher invocation; this report does not turn that statement into a verified receipt. GitHub authority comments, live publication/merge status and CI were not accessed. No credentials, source edit, source commit, push or GitHub comment; no subagents. Supplied tests create disposable fixture Git repositories and fixture commits outside src. Read-only source handling is a review procedure, not an independently attested mount property."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26b-verdict.md",
+      "hits": [
+        [
+          3,
+          "Disposition: **changes requested — 0 P0, 0 P1, 2 P2, 2 P3 open**. Reviewer: OpenAI Codex, declared by runtime instructions as based on GPT-6; provider `openai_codex`. Observed execution surface: tool-mediated shell in managed Linux; transport: machine. This is not an independently attested serving-model identifier. The exact model build/effort/session ID, enclosing launcher receipt, and whether the outer surface is CLI or service cannot be independently verified from the evidence supplied here. Invocation through `launcher.py run` is requester-reported. Review class: sensitive. Started: 2026-10-25 09:06:12 UTC."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26c-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer: OpenAI Codex, as identified by this session's runtime instructions (GPT-6 based). Provider: `openai_codex`; model family: OpenAI. Observed execution surface: tool-mediated local shell in managed Linux; transport: machine; GitHub submitter: none. Exact serving model/build/effort/session ID, enclosing CLI-versus-service surface, `launcher.py run` invocation, and outer execution receipt are not independently visible or verified. Runtime identity is a declaration, not serving-model attestation. The invocation is requester-reported. No credentials or GitHub authority/CI content were accessed; authority issue #748 issuecomment-6394503720 cannot be read from GitHub in this review."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26f-verdict.md",
+      "hits": [
+        [
+          185,
+          "Runtime observed: Linux x86_64, Python **3.13.16**. Runtime instructions identify the reviewer as **OpenAI Codex, a GPT-6-based agent**; provider **openai_codex**, model family **openai**. Actual observed execution surface is a tool-mediated local shell in this managed Linux workspace; transport **machine**. Exact serving-model/build/effort/session attestation, enclosing CLI-versus-service identity and the outer `launcher.py run` execution receipt are **not independently visible or verified**. User-reported launcher invocation is not silently upgraded into a verified receipt. GitHub authority, live push/merge status and CI are not verified. No GitHub submitter, credential use, source edit, source commit, push or GitHub comment. No subagents used. Supplied tests create their own disposable fixture Git repositories; no commit is made in the reviewed source. Source read-only behavior is a review procedure here, not a separately attested mount constraint."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr932-wp748-r26-provenance/verdicts/wp748-r26-r26a-verdict.md",
+      "hits": [
+        [
+          5,
+          "Reviewer: OpenAI Codex. Runtime instructions identify this agent as Codex based on GPT-6; that declaration is not an independent serving-model attestation. Provider: `openai_codex`; execution surface: tool-mediated local shell in managed Linux; transport: machine. The user reports invocation via `launcher.py run`; its enclosing execution receipt and exact serving model are not independently visible/verified. Fresh reviewer context; no executor work. No GitHub submitter."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot3-launcher-verdict.md",
+      "hits": [
+        [
+          7,
+          "- Reviewer: OpenAI Codex. Runtime instructions describe this agent as based on GPT-6; the exact backend model/version and enclosing execution receipt cannot be independently verified from the supplied artifacts. Provider: OpenAI. Execution surface: tool-enabled Codex agent with local shell; transport: direct tool execution. The user reports invocation through `launcher.py run`; the enclosing launcher terminal result and run ID are unavailable inside this turn."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr894-wp748-r24-provenance/verdicts/wp748-r24-luot2-launcher-verdict.md",
+      "hits": [
+        [
+          9,
+          "Reviewer identity: OpenAI Codex, described by the session's runtime instructions as GPT-6-based. This is an instruction-level identity declaration, not independent measurement of the served model. Exact model build, effort, provider-side routing and per-request model telemetry are unavailable. Observed execution surface: API/tool session with local Linux Bash/Python/Git execution; transport: machine tool calls. The user states this review was invoked through `launcher.py run`; the enclosing launcher's final run.json, run ID and child/launcher terminal rc are not available inside this review. I cannot independently attest `codex_cli` or the enclosing execution receipt. No Executor context or subagents were used. This content verdict alone does not establish `cross_approved` or authorize merge/land."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot5-codex-verdict.md",
+      "hits": [
+        [
+          3,
+          "- Reviewer: OpenAI Codex, GPT-6 family as identified by runtime; exact served model identifier is not exposed. Provider `openai_codex`; execution surface hosted Codex shell tools (`codex_service`); transport `machine`."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot4-codex-verdict.md",
+      "hits": [
+        [
+          3,
+          "- Reviewer: OpenAI Codex, GPT-6 family as identified by the runtime; exact served model identifier is not exposed. Provider `openai_codex`; execution surface hosted Codex shell tools (`codex_service` in the repository taxonomy); transport `machine`."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot3-codex-verdict.md",
+      "hits": [
+        [
+          3,
+          "- Reviewer: OpenAI Codex, GPT-6 family as identified by this runtime; exact served model identifier is not exposed. Provider `openai_codex`, execution surface local Codex shell tools, transport `machine`."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot2-codex-verdict.md",
+      "hits": [
+        [
+          3,
+          "- Reviewer: OpenAI Codex, GPT-6 family as identified by the agent runtime; exact served model identifier is not exposed. Provider `openai_codex`, execution surface local Codex shell tools, transport `machine`."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot1-codex-verdict.md",
+      "hits": [
+        [
+          4,
+          "- CLI: `codex-cli 0.163.0`; no model argument was exposed by the ancestor CLI process. Provider `openai_codex`, execution surface `codex_cli`, transport `machine` (local shell tools)."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr931-wp835-provenance/verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md",
+      "hits": [
+        [
+          119,
+          "Reviewer: `provider=openai_codex`, `model_family=openai`, `execution_surface=codex_cli`, `transport=machine`; role reviewer; context độc lập với executor Claude. Run `958a0a8a12954c9f9fbfc8175b5c4c95`, đối chiếu `runs/958a0a8a/run.json`; `codex --version` rc 0 cho `codex-cli 0.164.0` (có cảnh báo không tạo được PATH aliases vì read-only filesystem). Header `stderr.log` rỗng tại lúc kiểm: không suy exact model/effort từ tên CLI hay submitter. Executor theo lease là claude/claude-opus-5-5, claude_code, machine/local, cloud; đây là khai báo lease, chưa có receipt runtime độc lập. Không cấp `cross_approved` hoặc merge authority trong verdict changes_requested này. GitHub submitter: null, chưa đăng."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr931-wp835-provenance/verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md",
+      "hits": [
+        [
+          95,
+          "Reviewer: `provider=openai_codex`, `model_family=openai`, `execution_surface=codex_cli`, `transport=machine`; run `6c5f75a9b0ee4b3292bf232418a47eec`; context độc lập với Executor. `run.json` của chính lượt này xác nhận provider/surface/transport; `codex --version` rc 0 là `codex-cli 0.164.0` (cảnh báo không tạo được PATH aliases trên filesystem read-only). Header `stderr.log` rỗng khi đọc; exact model variant/effort phục vụ chưa đo bằng header. Executor theo lease: claude / claude-opus-5-5 / họ claude / claude_code / machine/local / cloud; đây là thông tin lease, chưa kiểm bằng receipt runtime độc lập. Assurance target là cross_approved; verdict không tự ghi state assurance hoặc thay receipt identity/vận chuyển. GitHub submitter: null, chưa đăng. Terminal receipt của chính run cần caller hoàn tất sau khi tiến trình kết thúc."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr931-wp835-provenance/verdicts/wp835-postmerge-review-3-codex-verdict.md",
+      "hits": [
+        [
+          89,
+          "- Reviewer: `provider=openai_codex`, `model_family=openai`, `execution_surface=codex_cli`, `transport=machine`, run `7f235b78590a47819fcd14273553e1c0`, context mới độc lập với Executor. `run.json` của lượt này xác nhận provider/surface/transport; `codex --version` rc 0: `codex-cli 0.164.0`. Header hiện chỉ có “Reading additional input from stdin...”; exact model variant/effort phục vụ **not_measured**. Executor theo lease: claude / claude-opus-5-5 / họ claude / claude_code / machine/local / cloud, session `session_016aK6Uy4CzUZFKnDmoHRQps`; đây là khai báo lease, chưa kiểm receipt runtime độc lập. Assurance target là `cross_approved`; verdict không tự ghi state assurance hoặc thay receipt identity/vận chuyển. GitHub submitter: null. Caller cần hoàn tất terminal receipt sau khi run kết thúc."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md",
+      "hits": [
+        [
+          11,
+          "Provider: OpenAI/Codex, model_family=openai; công cụ shell Linux trong phiên agent (`codex_service`, transport=machine). Không tự xác nhận served-model, launcher attestation, GitHub submitter hoặc cấp receipt/assurance. Review theo hai trục spec và standards/security, lớp sensitive; không merge, push, deploy hoặc gọi LIVE."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr888-wp886-provenance/verdicts/wp886-luot3-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr888-wp886-provenance/verdicts/wp886-luot1-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr888-wp886-provenance/verdicts/wp886-luot2-codex-verdict.md",
+      "hits": [
+        [
+          10,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr792-wp484-provenance/verdict-luot5/VERDICT.md",
+      "hits": [
+        [
+          10,
+          "Reviewer Codex/OpenAI, context độc lập với executor Claude g7. Run `b28e8193b7c046829b2e2ca877e53efa` tại thư mục ra ghi chương trình `codex`, `transport=machine`; khai `provider=openai_codex`, `execution_surface=codex_cli`, `model_family=openai`. Không tự xác nhận tên model/effort hoặc receipt nhận diện chưa đo được. Linux, Python 3.13.16, Git 2.43.0, Ruff 0.16.8; sandbox workspace-write, approval never. Không truy cập GitHub, không dùng credential thật, không chạy installer thật. Đây là lời gọi review cuối được assignment cấp, không đề nghị tự động gọi thêm."
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr818-wp788-provenance/verdict-luot1/VERDICT.md",
+      "hits": [
+        [
+          5,
+          "Preflight: HEAD `e995730464da03223cf636e49ad32e220c6ec720`, tree `a0729f20a384f197a2b3a9590d4348714e455dee`; spec r1 sha256 `82dc170446c3a4431739a3effbec8cb55adadc13d69f5c510f8782a2b45eb54e` khớp. Checkout detached; trước review chỉ có `.review/` untracked do người giao cung cấp. Provider `openai_codex`, execution_surface `codex_cli`, transport `machine`; model được khai trong session là GPT-6, không có selector cụ thể hơn được đo. Review Class `sensitive`."
+        ],
+        [
+          102,
+          "Runtime identity đo từ HEADER KHỞI TẠO của đúng `runs/7e93895a/stderr.log` (không lấy từ prompt): Codex v0.163.0; model `gpt-6.1-sol`; effort `xhigh`; provider `openai`; approval `never`; sandbox `workspace-write [workdir, /tmp, $TMPDIR]`; session `01a14b06-aa9f-74f0-91d2-7b50e21ceb12`. `run.json`: run_id `7e93895a065d4545aaca0d31fd7bca35`, provider `openai_codex`, execution_surface `codex_cli`, transport `machine`. Header chỉ chứng minh CLI công bố model/effort, không chứng minh mọi request; executor identity là routing trong spec, chưa có runtime receipt executor trong phạm vi offline."
+        ],
+        [
+          534,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr818-wp788-provenance/verdict-luot5/VERDICT.md",
+      "hits": [
+        [
+          5,
+          "- Vai trò: Reviewer độc lập; provider: openai_codex; model_family: openai; execution_surface: codex_cli; transport: machine."
+        ],
+        [
+          152,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr818-wp788-provenance/verdict-luot4/VERDICT.md",
+      "hits": [
+        [
+          201,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr818-wp788-provenance/verdict-luot2/VERDICT.md",
+      "hits": [
+        [
+          6,
+          "Provider: OpenAI; execution surface: Codex agent với công cụ shell cục bộ; transport: tool-mediated. Không phải ChatGPT Web/human-mediated."
+        ],
+        [
+          288,
+          "Nhận dạng contract cuối thay mô tả sơ bộ “tool-mediated” đầu artifact: **provider `openai_codex`, model_family `openai`, execution_surface `codex_cli`, transport `machine`**, nguồn run.json/header đúng run. Không tạo approval, receipt hoặc GitHub state. Theo ngưỡng sensitive của assignment, còn P2 ⇒ **changes_requested**; HINT có thể xử lý trong write set hiện hành. H3 giữ **4**, không có finding H3 mới kích hoạt dừng ở 5."
+        ],
+        [
+          298,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr818-wp788-provenance/verdict-luot3/VERDICT.md",
+      "hits": [
+        [
+          228,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-7-codex/VERDICT.md",
+      "hits": [
+        [
+          23,
+          "| `required-mutation-coverage-missing` | P2 | test:6219, test:6231, test:6375, test:6505; các chốt ở pl:947, pl:2531, pl:2556, pl:2614 | Các mutant kiểm toán bỏ riêng so packet lease, loại trừ hai đường lease, so identity lease với init, và tên ADR trong kích hoạt đều sống **115/115** ca r812. Đây là chốt đúng của sản phẩm nhưng thiếu ca bảo vệ. | Thêm ca H/Đ/R thật chỉ sai từng yếu tố; khoá mutant r812 cho từng chốt. HINT có cả hai vai AG khi so family với init, cùng ca reviewer surface. |"
+        ]
+      ]
+    },
+    {
+      "path": "ops/reviews/wp773-r1-g1-exec-review-8-codex/VERDICT.md",
+      "hits": [
+        [
+          6,
+          "Reviewer: Codex (GPT-6), provider OpenAI, execution surface coding-agent sandbox, transport shell/tool trực tiếp; độc lập với executor Claude. Không tự xác nhận launcher/receipt hay assurance `human_audited`. Tree: `021dde3d0180fdb8bb95b3bb5cd397d8bbc5ce30`. KHO được giữ read-only. Trần 750 lấy từ chỉ thị trực tiếp trong prompt lượt 8."
+        ]
+      ]
+    },
+    {
+      "path": "ops/reviews/pr787-bookkeeping-review-1-codex/VERDICT.md",
+      "hits": [
+        [
+          4,
+          "Reviewer: Codex, họ GPT/OpenAI, execution surface công cụ local shell qua API, transport machine/local. Review độc lập với executor Claude; không suy danh tính từ tài khoản GitHub. KHO=/home/user/rv773 được giữ read-only. Head tree: f50622a5ecd921e579982cda6bcd8acc46ffd736."
+        ]
+      ]
+    },
+    {
+      "path": "ops/reviews/wp773-r1-g1-exec-review-7-codex/VERDICT.md",
+      "hits": [
+        [
+          6,
+          "Reviewer: Codex, provider OpenAI, phiên độc lập với executor Claude; execution surface là coding-agent sandbox, transport là shell/tool trực tiếp. Không tự chứng nhận launcher, receipt hay assurance `human_audited`. Tree: `7ff5d359534bb769771b47880ffb491959efd0f4`. KHO read-only; chỉ ghi thư mục ra và cây tạm `/tmp`. Ngưỡng lượt 7 áp dụng cả P3. Trần ngoại lệ 700 lấy từ chỉ thị trực tiếp của chủ kho trong prompt."
+        ]
+      ]
+    },
+    {
+      "path": "ops/reviews/wp685-r28-g5-exec-review-2-codex/VERDICT.md",
+      "hits": [
+        [
+          11,
+          "reviewer_surface: codex_cli"
+        ],
+        [
+          153,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    },
+    {
+      "path": "ops/reviews/wp685-r28-g5-exec-review-1-codex/VERDICT.md",
+      "hits": [
+        [
+          8,
+          "reviewer_surface: codex_cli"
+        ],
+        [
+          126,
+          "execution_surface: codex_cli"
+        ]
+      ]
+    }
+  ]
+}

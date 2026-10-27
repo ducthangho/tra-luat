@@ -1,0 +1,6 @@
+# Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. diff = git diff 05bc12e..fb87110; diff-pr947 = git diff 3e973a0..fb87110.
+5d1f9eb4395a90724b035e95ad68a81047f5e70029e5d6f8ced47deb85d3b439  2233740  diff.patch
+aae825a319df80c1ff84377ac75721036cc53f47639f05fe87c245c4331844be  8374335  diff-pr947.patch
+5a94245d4c5bca740cbd46efb07e98f7d5cc4a1e6d5bbd6b7f68d6bfc0773483  2694498  review_evidence/inventory.json
+870c753a0188c818b5269c864047d11791d346eeb86ec2e50d2302aadef3adc5  718790  review_evidence/status-unanchored.txt
+ac7ecdbcbce28356d2cde879bd86a0566262d0d47feca351136fa2abffefbd5f  592079  review_evidence/surface-audit.json

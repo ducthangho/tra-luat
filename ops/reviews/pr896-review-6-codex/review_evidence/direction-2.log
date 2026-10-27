@@ -1,0 +1,35 @@
+diff.patch: byte_match=True
+numstat.txt: byte_match=True
+diff-pr947.patch: byte_match=True
+numstat-pr947.txt: byte_match=True
+hint_paths=10 apply_rc=0
+patching file ops/reviews/README.md
+patching file ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml
+patching file ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml
+patching file ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml
+patching file ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml
+patching file ops/reviews/pr870-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/wp538-review-1-claude-verdict.receipt.yaml
+patching file ops/reviews/wp538-review-2-claude-verdict.receipt.yaml
+patching file ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
+byte_for_byte_matches=9/10
+ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml
+ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml
+ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml
+ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml
+ops/reviews/pr870-review-1-codex-verdict.receipt.yaml
+ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
+ops/reviews/wp538-review-1-claude-verdict.receipt.yaml
+ops/reviews/wp538-review-2-claude-verdict.receipt.yaml
+ops/reviews/wp540-review-1-claude-verdict.receipt.yaml
+README delta beyond hint: 5 added/removed lines
++| `pr896-review-5-codex-verdict.md` | `HINT-LUOT5-AP-CUNG-COMMIT-GHI-SO` | Verdict lich su tren 1a276a1 la changes_requested 2 P1. HINT.patch luot 5 (10 tep) duoc ap NGUYEN (--fuzz=0) trong CHINH commit ghi so bien nhan nay, theo yeu cau chu kho "va cho toi khi het P1, P2, P3". Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |
++| `pr896-review-5-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong; phien ghi so do sau luot: HEAD 1a276a1, git status rong. |
++| `pr896-review-5-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer (review_evidence/) tham chieu duong dan tuyet doi cua sandbox phien; tai lap can dung lai mirror tai 1a276a1. |
++| `pr896-review-5-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | diff-pr947.patch va review_evidence/receipt-status-all.log (>500 KB) KHONG vao kho; sha256/so byte o OMITTED.txt. |
++| [`pr896-review-5-codex-verdict.md`](pr896-review-5-codex-verdict.md) | [`.receipt.yaml`](pr896-review-5-codex-verdict.receipt.yaml) | KHONG_AP_DUNG (viec chu kho giao truc tiep, khong packet/lease) | `changes_requested` 0/2/0/0 tren `1a276a1` (head PR #947, mang HINT luot 4) · `cross_reviewed` (codex CLI khac ho executor, `launcher.py run 453628b5`; model_phuc_vu DO_DUOC `gpt-6.1-sol` = do_may) · muc luc luot 3 va P2 surface DA DONG; con: P1 7 truong ancestry sot trong chinh cac receipt luot 4 da neo, P1 pr870/pr889-review-1 con noi head 'khong duoc review lai' — HINT.patch luot 5 ap trong chinh commit ghi so bien nhan nay · ban phang nguyen byte cua `pr896-review-5-codex/VERDICT.md`. Chua merge. | `1a276a15` | 36138 |
+outside_hint_non_artifact=['ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml', 'ops/reviews/README.md']
+d308b0b_paths=99 only_round5_artifacts=True
+verdict-cu/pr896-review-5-codex-VERDICT.md: stored_byte_match=True
+verdict-cu/pr896-review-5-codex-HINT.patch: stored_byte_match=True

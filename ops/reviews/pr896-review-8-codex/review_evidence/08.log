@@ -1,0 +1,23 @@
+pr832-wp831: runtime=1ff81cba41874a218b53275d3cdc1418 head=51ae5c095972611d2c6045bd81786a4fc7e9ca62 surface=codex_cli source_head_run_in_caveat=True
+pr848-wp744: runtime=f65e544ef5d64ba7a1e0edb607edcf0a head=23bc189f28ea60f04ca1634b6fe66d02babf12ed surface=codex_cli source_head_run_in_caveat=True
+pr862-wp748-r21: transcript=['OpenAI Codex v0.163.0', '--------', 'workdir: /tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rv21', 'model: gpt-6-astra', 'provider: openai', 'approval: never', 'sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)', 'reasoning effort: xhigh', 'reasoning summaries: none', 'session id: 01a157da-2170-7be2-b6d0-053fa8f91aec', '--------'] source_path_in_caveat=True
+pr849 correction=measured — verdicts/wp748-r20-luot4-codex-transcript.txt va verdicts/wp748-r20-luot5-codex-transcript.txt (stderr day du cua CLI): dau tep "OpenAI Codex v0.163.0", model gpt-6-astra (model YEU CAU qua -m, CLI tu in; model THUC PHUC VU KHONG_DO_DUOC), provider openai, sandbox workspace-write, session id 01a15690-… (luot 4) / 01a15698-… (luot 5); prompt o verdicts/wp748-r20-luot4-prompt.md va verdicts/wp748-r20-luot5-prompt.md. Be mat THUC: Codex CLI (codex exec) chay trong container cloud cua phien executor, provider openai_codex; KHONG qua bo chot launcher nen KHONG co bien nhan run. Verdict tu ghi "hosted Codex shell tools (codex_service)" la LOI TU PHAN LOAI cua model, mau thuan voi dau tep CLI; ghi ca hai, tin dau tep (connector P1 #857 r4320578811).
+pr849 luot4 header=['OpenAI Codex v0.163.0', '--------', 'workdir: /tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rv4', 'model: gpt-6-astra', 'provider: openai', 'approval: never', 'sandbox: workspace-write [workdir, /tmp, $TMPDIR]', 'reasoning effort: xhigh', 'reasoning summaries: none', 'session id: 01a15690-01c4-7483-bef6-3b1788213468', '--------']
+pr849 luot5 header=['OpenAI Codex v0.163.0', '--------', 'workdir: /tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rv4/l5', 'model: gpt-6-astra', 'provider: openai', 'approval: never', 'sandbox: workspace-write [workdir, /tmp, $TMPDIR, /tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rv4/src] (network access enabled)', 'reasoning effort: high', 'reasoning summaries: none', 'session id: 01a15698-9be5-7e30-800f-5db0cba8de91', '--------']
+runtime_with_head_5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456=[]
+runtime_with_head_b952c106ba6bbf94699bda5fe5fb2f6d7f7256fb=[]
+runtime_with_head_981b9ea1d4bfaa0511cfbc8d9bdee9d8c151c86f=[]
+thu-hoi-lease-a1a-r2/luot2-VERDICT.md: no linked receipt and no runtime for its head in the 124 JSON records; cannot establish CLI-versus-service contradiction. Not counted as a mismatch finding.
+ci-g5 luot5: surface=codex_cli self=dich vu Codex qua API va terminal tools caveats=['KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC']
+no-p3-ho-so-exec-review-1-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+no-p3-ho-so-spec-review-1-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+no-p3-ho-so-spec-review-2-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+wp523-r14-review-1-codex-verdict.receipt.yaml desktop_receipt_surface=codex_desktop
+wp678-exec-review-1-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+wp678-exec-review-2-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+wp678-exec-review-3-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+wp678-exec-review-4-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+wp698-exec-review-g2-1-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+wp698-exec-review-g2-2-claude-verdict.receipt.yaml subagent_declared_in_mode=True caveat=['SUBAGENT-CUNG-HO-REVIEW-DEFERRED']
+receipt_surface_caveat_readme_pairs=24 all_exact_description_rows=False
+direct_runtime_or_other_surface_checks=15 all_match=True

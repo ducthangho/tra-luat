@@ -1,0 +1,145 @@
+[
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4377376759",
+  "pull_request_review_id": 5652208622,
+  "id": 4377376759,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBOl39w",
+  "diff_hunk": "@@ -2745,7 +2745,175 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:\n             (\"thieu-lop-am\", lop_ok and (a.verdict == \"approve\" or {x[\"slug\"] for x in lop} <= set(a.finding_id or [])))) if not dung]\n     if loi:\n         _die(RC_BIEN_NHAN, f\"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}\")\n-    return {\"tep\": str(a.bien_nhan), \"sha256\": hashlib.sha256(raw).hexdigest(), \"p3\": sorted(x[\"slug\"] for x in lop if x[\"hang\"] == \"P3\")}\n+    return {\"tep\": str(a.bien_nhan), \"sha256\": hashlib.sha256(raw).hexdigest(), \"p3\": sorted(x[\"slug\"] for x in lop if x[\"hang\"] == \"P3\"), \"lop\": lop}\n+\n+\n+# --- #834 MAY-ADR-0054-a2 (`ops/specs/wp834.md` + phần chung): cửa `accept` (approved_pending → accepted), I7 readback CI/connector, I11.\n+APP_CHECK, BOT_CONNECTOR, EP_CONNECTOR = \"github-actions\", \"chatgpt-codex-connector[bot]\", (\"reviews\", \"review_comments\", \"issue_comments\")\n+API_GH = \"https://api.github.com/repos/\"\n+BADGE_RE = re.compile(r\"!\\[([^\\]]*?)\\s*Badge\\]\", re.I)  # nhận diện TRƯỜNG badge độc lập với miền giá trị — `Q1`, `P 1` vẫn là badge (I3)\n+\n+\n+def _doc_json(duong: str, rc: int) -> tuple:\n+    try:\n+        b = Path(duong).read_bytes()\n+        return json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode(b.decode(\"utf-8\")), hashlib.sha256(b).hexdigest()\n+    except (OSError, ValueError, RecursionError) as ex:  # UnicodeDecodeError là ValueError\n+        _die(rc, f\"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}\")\n+\n+\n+def _trang_du(d, khoa: str, nhan: str) -> list:\n+    \"\"\"I7: một lần lấy (mọi trang cùng `total_count`) · id int · tập id PHÂN BIỆT = `total_count` · cùng id thì CÙNG nội dung\n+    (bản mâu thuẫn bị từ chối trước mọi lọc/lập map, không tự chọn một vế). Trả một bản mỗi id.\"\"\"\n+    cac = d if type(d) is list else [d]\n+    ok = bool(cac) and all(isinstance(t, dict) and isinstance(t.get(khoa), list) and type(t.get(\"total_count\")) is int for t in cac)\n+    ds = [x for t in cac for x in t[khoa]] if ok else []\n+    if not ok or not all(isinstance(x, dict) and type(x.get(\"id\")) is int for x in ds) or {t[\"total_count\"] for t in cac} != {len({x[\"id\"] for x in ds})}:\n+        _die(RC_GATE, f\"KHÔNG ĐO ĐƯỢC: {nhan}: cần trang {{`{khoa}`, `total_count`}} cùng một lần lấy, id int, tập id phân biệt = total_count\")\n+    moi = {}\n+    for x in ds:\n+        if json.dumps(moi.setdefault(x[\"id\"], x), sort_keys=True) != json.dumps(x, sort_keys=True):\n+            _die(RC_GATE, f\"{nhan}: id {x['id']} mang hai nội dung — bằng chứng mâu thuẫn\")\n+    return list(moi.values())\n+\n+\n+def _neo_connector(k: str, x: dict, head: str, biet: set):\n+    \"\"\"I7 neo head theo endpoint: 'hien' · 'cu' (neo head KHÁC hợp lệ) · 'hong' (thiếu/sai/mơ hồ) · None (issue comment không khai).\n+    Issue comment (dạng connector `**Reviewed commit:** `sha``): phần còn lại của DÒNG sau MỖI nhãn phải đúng một SHA 7–40 hex (backtick\n+    đủ cặp hoặc không), mọi khai cùng một phía; tiền tố chỉ là head khi không SHA nào khác đã biết trong readback (`biet`) cùng tiền tố.\"\"\"\n+    if k != \"issue_comments\":\n+        c = x.get(\"commit_id\")\n+        return \"hien\" if c == head else \"cu\" if type(c) is str and SHA_RE.fullmatch(c) else \"hong\"\n+    khai = [re.fullmatch(r\"(`?)([0-9a-f]{7,40})\\1\", t.strip()) for t in re.findall(r\"Reviewed commit:(?:\\*\\*)?([^\\n]*)\", x[\"body\"])]\n+    if not khai:\n+        return None\n+    if not all(khai) or any(head.startswith(t[2]) and any(b != head and b.startswith(t[2]) for b in biet) for t in khai):\n+        return \"hong\"\n+    phia = {head.startswith(t[2]) for t in khai}\n+    return \"hong\" if len(phia) > 1 else \"hien\" if phia == {True} else \"cu\"\n+\n+\n+def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:\n+    \"\"\"I7 — neo MỘT kho + MỘT PR + MỘT head; đủ trang theo tập id của TỪNG endpoint. Dạng: {\"repo\",\"pr\",\"head_sha\", <endpoint>: trang\n+    {\"total_count\",\"items\"}}. Xong = review hoàn tất (không PENDING) trên head, hoặc kết luận `Reviewed commit:` neo head; finding đọc ở\n+    CẢ BA endpoint, hạng miền đóng (I3); mục của head cũ hợp lệ được bỏ qua, neo thiếu/sai/mơ hồ thì không đạt.\n+    Trả ((endpoint, id) P3 còn mở, mốc id lớn nhất theo endpoint).\"\"\"\n+    d, _ = _doc_json(duong, RC_GATE)\n+    if not isinstance(d, dict) or (d.get(\"repo\"), d.get(\"pr\"), d.get(\"head_sha\")) != (repo, pr, head):\n+        _die(RC_GATE, f\"readback connector không neo đúng ({repo}, PR {pr}, {head})\")\n+    ep = {k: _trang_du(d.get(k), \"items\", f\"connector {k}\") for k in EP_CONNECTOR}\n+    for k, v in ep.items():\n+        url, dung = (\"issue_url\", f\"{API_GH}{repo}/issues/{pr}\") if k == \"issue_comments\" else (\"pull_request_url\", f\"{API_GH}{repo}/pulls/{pr}\")\n+        if not all(x.get(url) == dung and isinstance(x.get(\"user\"), dict) and type(x.get(\"body\")) is str for x in v):\n+            _die(RC_GATE, f\"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body\")\n+    biet = {c for v in ep.values() for x in v for c in [x.get(\"commit_id\"), *re.findall(r\"\\b[0-9a-f]{40}\\b\", x[\"body\"])] if type(c) is str and SHA_RE.fullmatch(c)}\n+    cua = {k: [(x, _neo_connector(k, x, head, biet)) for x in v if x[\"user\"].get(\"login\") == BOT_CONNECTOR] for k, v in ep.items()}\n+    if hong := [(k, x[\"id\"]) for k, v in cua.items() for x, n in v if n == \"hong\"]:\n+        _die(RC_GATE, f\"connector: mục của {BOT_CONNECTOR} có neo head thiếu/sai/mơ hồ {hong}\")\n+    if not (any(n == \"hien\" for _, n in cua[\"issue_comments\"])\n+            or any(n == \"hien\" and x.get(\"state\") in (\"APPROVED\", \"COMMENTED\", \"CHANGES_REQUESTED\") for x, n in cua[\"reviews\"])):\n+        _die(RC_GATE, f\"connector chưa xong trên {head}: không review hoàn tất/kết luận nào của {BOT_CONNECTOR}\")  # I3: bằng chứng dương rỗng\n+    p3 = []\n+    for k in EP_CONNECTOR:\n+        for x, n in cua[k]:\n+            hang = set(BADGE_RE.findall(x[\"body\"]))\n+            if n is None and hang:\n+                _die(RC_GATE, f\"connector issue comment {x['id']} có finding mà không neo head\")\n+            if n == \"hien\" and (hang or k == \"review_comments\" or x.get(\"state\") == \"CHANGES_REQUESTED\"):\n+                if len(hang) != 1 or not hang <= set(HANG_LOP):\n+                    _die(RC_GATE, f\"connector {k} {x['id']}: hạng ngoài miền {HANG_LOP}: {sorted(hang)}\")\n+                if hang != {\"P3\"}:\n+                    _die(RC_GATE, f\"connector {k} {x['id']} còn {sorted(hang)} trên {head} — DỪNG, hỏi chủ kho\")\n+                p3.append((k, x[\"id\"]))\n+    return p3, {k: max((x[\"id\"] for x in v), default=None) for k, v in ep.items()}\n+\n+\n+def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:\n+    \"\"\"I7 — CI: check bắt buộc = (app, workflow, job); chỉ attempt MỚI NHẤT của run MỚI NHẤT trên head, đúng kho; job của attempt ấy\n+    trỏ đúng check-run (cùng kho, app, suite), check-run ấy là bản MỚI NHẤT cùng tên trong suite, và luật `kiem-gate` xanh trên nó.\"\"\"\n+    wr, sha_wr = _doc_json(a.workflow_runs, RC_GATE)\n+    runs = _trang_du(wr, \"workflow_runs\", \"workflow_runs\")\n+    moi_tep = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], \"jobs\", f\"workflow_jobs {f}\")]  # đủ trang THEO TỪNG tệp\n+    jobs = _trang_du({\"total_count\": len({j[\"id\"] for j in moi_tep}), \"jobs\": moi_tep}, \"jobs\", \"workflow_jobs (gộp các tệp)\")\n+    if not all(type(j.get(\"run_id\")) is int and type(j.get(\"run_attempt\")) is int and j[\"run_attempt\"] > 0\n+               and all(type(j.get(k)) is str for k in (\"name\", \"head_sha\", \"status\", \"check_run_url\")) for j in jobs):  # bool/float ≠ int (I3)\n+        _die(RC_GATE, \"KHÔNG ĐO ĐƯỢC: workflow_jobs: run_id/run_attempt phải là int thật (> 0), name/head_sha/status/check_run_url là chuỗi\")\n+    _doc_check_runs(a.check_runs)  # lược đồ + đủ trang của `kiem-gate`; dưới đây thêm: cùng id ⇒ CÙNG nội dung (app, url…)\n+    cr = {r[\"id\"]: r for r in _trang_du(_doc_json(a.check_runs, RC_GATE)[0], \"check_runs\", \"check_runs\")}\n+    for wf in sorted({w for w, _ in nc[\"required_checks\"]}):\n+        ung = [r for r in runs if r.get(\"path\") == wf and r.get(\"head_sha\") == h and isinstance(r.get(\"repository\"), dict) and r[\"repository\"].get(\"full_name\") == nc[\"repo\"]]\n+        run = max(ung, key=lambda r: r[\"id\"]) if ung else {}",
+  "path": ".claude/dev/packet_loop.py",
+  "commit_id": "294f0eb7eaae7b142bd6a3e89a18f512c4b819d0",
+  "original_commit_id": "294f0eb7eaae7b142bd6a3e89a18f512c4b819d0",
+  "user": {
+   "login": "chatgpt-codex-connector[bot]",
+   "id": 199175422,
+   "node_id": "BOT_kgDOC98s_g",
+   "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+   "html_url": "https://github.com/apps/chatgpt-codex-connector",
+   "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+   "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+   "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+   "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+   "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+   "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+   "type": "Bot",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Validate workflow-run scoping fields before filtering**\n\nWhen a readback contains an older successful run and a newer in-progress run whose `repository` metadata is missing, this filter silently discards the newer run and accepts the older success. `_trang_du` validates IDs and pagination but does not reject the incomplete run. I reproduced this through the CLI by appending run 101 with `status=\"in_progress\"` and no `repository` to the existing `r834` baseline: `accept` returned 0 and saved `state=\"accepted\"` using run 100. Validate the workflow-run scoping fields before filtering so incomplete evidence cannot bypass the latest-run requirement.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+  "created_at": "2026-10-26T12:50:02Z",
+  "updated_at": "2026-10-26T12:50:02Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/950#discussion_r4377376759",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/950",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4377376759"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/950#discussion_r4377376759"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/950"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4377376759/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": 2844,
+  "original_start_line": 2844,
+  "start_side": "RIGHT",
+  "line": 2845,
+  "original_line": 2845,
+  "side": "RIGHT",
+  "author_association": "NONE",
+  "original_position": 102,
+  "position": 102,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ },
+ {
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4377418456",
+  "pull_request_review_id": 5652274431,
+  "id": 4377418456,
+  "node_id": "PRRC_kwDOTNeRjc8AAAABBOoa2A",
+  "diff_hunk": "@@ -2745,7 +2745,175 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:\n             (\"thieu-lop-am\", lop_ok and (a.verdict == \"approve\" or {x[\"slug\"] for x in lop} <= set(a.finding_id or [])))) if not dung]\n     if loi:\n         _die(RC_BIEN_NHAN, f\"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}\")\n-    return {\"tep\": str(a.bien_nhan), \"sha256\": hashlib.sha256(raw).hexdigest(), \"p3\": sorted(x[\"slug\"] for x in lop if x[\"hang\"] == \"P3\")}\n+    return {\"tep\": str(a.bien_nhan), \"sha256\": hashlib.sha256(raw).hexdigest(), \"p3\": sorted(x[\"slug\"] for x in lop if x[\"hang\"] == \"P3\"), \"lop\": lop}\n+\n+\n+# --- #834 MAY-ADR-0054-a2 (`ops/specs/wp834.md` + phần chung): cửa `accept` (approved_pending → accepted), I7 readback CI/connector, I11.\n+APP_CHECK, BOT_CONNECTOR, EP_CONNECTOR = \"github-actions\", \"chatgpt-codex-connector[bot]\", (\"reviews\", \"review_comments\", \"issue_comments\")\n+API_GH = \"https://api.github.com/repos/\"\n+BADGE_RE = re.compile(r\"!\\[([^\\]]*?)\\s*Badge\\]\", re.I)  # nhận diện TRƯỜNG badge độc lập với miền giá trị — `Q1`, `P 1` vẫn là badge (I3)\n+\n+\n+def _doc_json(duong: str, rc: int) -> tuple:\n+    try:\n+        b = Path(duong).read_bytes()\n+        return json.JSONDecoder(parse_constant=_cam_hang_ngoai_json, object_pairs_hook=_cam_khoa_trung).decode(b.decode(\"utf-8\")), hashlib.sha256(b).hexdigest()\n+    except (OSError, ValueError, RecursionError) as ex:  # UnicodeDecodeError là ValueError\n+        _die(rc, f\"KHÔNG ĐO ĐƯỢC: {duong}: {type(ex).__name__}: {ex}\")\n+\n+\n+def _trang_du(d, khoa: str, nhan: str) -> list:\n+    \"\"\"I7: một lần lấy (mọi trang cùng `total_count`) · id int · tập id PHÂN BIỆT = `total_count` · cùng id thì CÙNG nội dung\n+    (bản mâu thuẫn bị từ chối trước mọi lọc/lập map, không tự chọn một vế). Trả một bản mỗi id.\"\"\"\n+    cac = d if type(d) is list else [d]\n+    ok = bool(cac) and all(isinstance(t, dict) and isinstance(t.get(khoa), list) and type(t.get(\"total_count\")) is int for t in cac)\n+    ds = [x for t in cac for x in t[khoa]] if ok else []\n+    if not ok or not all(isinstance(x, dict) and type(x.get(\"id\")) is int for x in ds) or {t[\"total_count\"] for t in cac} != {len({x[\"id\"] for x in ds})}:\n+        _die(RC_GATE, f\"KHÔNG ĐO ĐƯỢC: {nhan}: cần trang {{`{khoa}`, `total_count`}} cùng một lần lấy, id int, tập id phân biệt = total_count\")\n+    moi = {}\n+    for x in ds:\n+        if json.dumps(moi.setdefault(x[\"id\"], x), sort_keys=True) != json.dumps(x, sort_keys=True):\n+            _die(RC_GATE, f\"{nhan}: id {x['id']} mang hai nội dung — bằng chứng mâu thuẫn\")\n+    return list(moi.values())\n+\n+\n+def _neo_connector(k: str, x: dict, head: str, biet: set):\n+    \"\"\"I7 neo head theo endpoint: 'hien' · 'cu' (neo head KHÁC hợp lệ) · 'hong' (thiếu/sai/mơ hồ) · None (issue comment không khai).\n+    Issue comment (dạng connector `**Reviewed commit:** `sha``): phần còn lại của DÒNG sau MỖI nhãn phải đúng một SHA 7–40 hex (backtick\n+    đủ cặp hoặc không), mọi khai cùng một phía; tiền tố chỉ là head khi không SHA nào khác đã biết trong readback (`biet`) cùng tiền tố.\"\"\"\n+    if k != \"issue_comments\":\n+        c = x.get(\"commit_id\")\n+        return \"hien\" if c == head else \"cu\" if type(c) is str and SHA_RE.fullmatch(c) else \"hong\"\n+    khai = [re.fullmatch(r\"(`?)([0-9a-f]{7,40})\\1\", t.strip()) for t in re.findall(r\"Reviewed commit:(?:\\*\\*)?([^\\n]*)\", x[\"body\"])]\n+    if not khai:\n+        return None\n+    if not all(khai) or any(head.startswith(t[2]) and any(b != head and b.startswith(t[2]) for b in biet) for t in khai):\n+        return \"hong\"\n+    phia = {head.startswith(t[2]) for t in khai}\n+    return \"hong\" if len(phia) > 1 else \"hien\" if phia == {True} else \"cu\"\n+\n+\n+def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:\n+    \"\"\"I7 — neo MỘT kho + MỘT PR + MỘT head; đủ trang theo tập id của TỪNG endpoint. Dạng: {\"repo\",\"pr\",\"head_sha\", <endpoint>: trang\n+    {\"total_count\",\"items\"}}. Xong = review hoàn tất (không PENDING) trên head, hoặc kết luận `Reviewed commit:` neo head; finding đọc ở\n+    CẢ BA endpoint, hạng miền đóng (I3); mục của head cũ hợp lệ được bỏ qua, neo thiếu/sai/mơ hồ thì không đạt.\n+    Trả ((endpoint, id) P3 còn mở, mốc id lớn nhất theo endpoint).\"\"\"\n+    d, _ = _doc_json(duong, RC_GATE)\n+    if not isinstance(d, dict) or (d.get(\"repo\"), d.get(\"pr\"), d.get(\"head_sha\")) != (repo, pr, head):\n+        _die(RC_GATE, f\"readback connector không neo đúng ({repo}, PR {pr}, {head})\")\n+    ep = {k: _trang_du(d.get(k), \"items\", f\"connector {k}\") for k in EP_CONNECTOR}\n+    for k, v in ep.items():\n+        url, dung = (\"issue_url\", f\"{API_GH}{repo}/issues/{pr}\") if k == \"issue_comments\" else (\"pull_request_url\", f\"{API_GH}{repo}/pulls/{pr}\")\n+        if not all(x.get(url) == dung and isinstance(x.get(\"user\"), dict) and type(x.get(\"body\")) is str for x in v):\n+            _die(RC_GATE, f\"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body\")\n+    biet = {c for v in ep.values() for x in v for c in [x.get(\"commit_id\"), *re.findall(r\"\\b[0-9a-f]{40}\\b\", x[\"body\"])] if type(c) is str and SHA_RE.fullmatch(c)}\n+    cua = {k: [(x, _neo_connector(k, x, head, biet)) for x in v if x[\"user\"].get(\"login\") == BOT_CONNECTOR] for k, v in ep.items()}\n+    if hong := [(k, x[\"id\"]) for k, v in cua.items() for x, n in v if n == \"hong\"]:\n+        _die(RC_GATE, f\"connector: mục của {BOT_CONNECTOR} có neo head thiếu/sai/mơ hồ {hong}\")\n+    if not (any(n == \"hien\" for _, n in cua[\"issue_comments\"])\n+            or any(n == \"hien\" and x.get(\"state\") in (\"APPROVED\", \"COMMENTED\", \"CHANGES_REQUESTED\") for x, n in cua[\"reviews\"])):\n+        _die(RC_GATE, f\"connector chưa xong trên {head}: không review hoàn tất/kết luận nào của {BOT_CONNECTOR}\")  # I3: bằng chứng dương rỗng\n+    p3 = []\n+    for k in EP_CONNECTOR:\n+        for x, n in cua[k]:\n+            hang = set(BADGE_RE.findall(x[\"body\"]))\n+            if n is None and hang:\n+                _die(RC_GATE, f\"connector issue comment {x['id']} có finding mà không neo head\")\n+            if n == \"hien\" and (hang or k == \"review_comments\" or x.get(\"state\") == \"CHANGES_REQUESTED\"):\n+                if len(hang) != 1 or not hang <= set(HANG_LOP):\n+                    _die(RC_GATE, f\"connector {k} {x['id']}: hạng ngoài miền {HANG_LOP}: {sorted(hang)}\")\n+                if hang != {\"P3\"}:\n+                    _die(RC_GATE, f\"connector {k} {x['id']} còn {sorted(hang)} trên {head} — DỪNG, hỏi chủ kho\")\n+                p3.append((k, x[\"id\"]))\n+    return p3, {k: max((x[\"id\"] for x in v), default=None) for k, v in ep.items()}\n+\n+\n+def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:\n+    \"\"\"I7 — CI: check bắt buộc = (app, workflow, job); chỉ attempt MỚI NHẤT của run MỚI NHẤT trên head, đúng kho; job của attempt ấy\n+    trỏ đúng check-run (cùng kho, app, suite), check-run ấy là bản MỚI NHẤT cùng tên trong suite, và luật `kiem-gate` xanh trên nó.\"\"\"\n+    wr, sha_wr = _doc_json(a.workflow_runs, RC_GATE)\n+    runs = _trang_du(wr, \"workflow_runs\", \"workflow_runs\")\n+    moi_tep = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], \"jobs\", f\"workflow_jobs {f}\")]  # đủ trang THEO TỪNG tệp\n+    jobs = _trang_du({\"total_count\": len({j[\"id\"] for j in moi_tep}), \"jobs\": moi_tep}, \"jobs\", \"workflow_jobs (gộp các tệp)\")\n+    if not all(type(j.get(\"run_id\")) is int and type(j.get(\"run_attempt\")) is int and j[\"run_attempt\"] > 0\n+               and all(type(j.get(k)) is str for k in (\"name\", \"head_sha\", \"status\", \"check_run_url\")) for j in jobs):  # bool/float ≠ int (I3)\n+        _die(RC_GATE, \"KHÔNG ĐO ĐƯỢC: workflow_jobs: run_id/run_attempt phải là int thật (> 0), name/head_sha/status/check_run_url là chuỗi\")\n+    _doc_check_runs(a.check_runs)  # lược đồ + đủ trang của `kiem-gate`; dưới đây thêm: cùng id ⇒ CÙNG nội dung (app, url…)\n+    cr = {r[\"id\"]: r for r in _trang_du(_doc_json(a.check_runs, RC_GATE)[0], \"check_runs\", \"check_runs\")}\n+    for wf in sorted({w for w, _ in nc[\"required_checks\"]}):\n+        ung = [r for r in runs if r.get(\"path\") == wf and r.get(\"head_sha\") == h and isinstance(r.get(\"repository\"), dict) and r[\"repository\"].get(\"full_name\") == nc[\"repo\"]]\n+        run = max(ung, key=lambda r: r[\"id\"]) if ung else {}",
+  "path": ".claude/dev/packet_loop.py",
+  "commit_id": "294f0eb7eaae7b142bd6a3e89a18f512c4b819d0",
+  "original_commit_id": "294f0eb7eaae7b142bd6a3e89a18f512c4b819d0",
+  "user": {
+   "login": "ducthangho",
+   "id": 12748935,
+   "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+   "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+   "gravatar_id": "",
+   "url": "https://api.github.com/users/ducthangho",
+   "html_url": "https://github.com/ducthangho",
+   "followers_url": "https://api.github.com/users/ducthangho/followers",
+   "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+   "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+   "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+   "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+   "repos_url": "https://api.github.com/users/ducthangho/repos",
+   "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+   "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+   "type": "User",
+   "user_view_type": "public",
+   "site_admin": false
+  },
+  "body": "**Đã tái hiện, finding đúng (P2, lỗi hành vi).** Tôi chạy fixture `_r834` trên `294f0eb`, thêm run 101 cùng path/head nhưng `status=in_progress`, `conclusion=null` và không có `repository`. Kết quả `accept` trả rc=0 và ghi `state=accepted` bằng run 100.\n\nNguyên nhân: bộ lọc `ung` ở `packet_loop.py:2844` đòi `repository.full_name == repo`. Run thiếu trường này bị bỏ qua mà không báo gì, nên run mới nhất không còn được xét.\n\n**Không vá được trong PR này.** PR đã merge lúc 12:47Z, trước khi review này xong (12:50Z). Lease cũng đã dùng hết lần đẩy và hết lượt Codex. Bản vá đề xuất là kiểm lược đồ trước khi lọc, để readback thiếu trường bị từ chối là KHÔNG ĐO ĐƯỢC:\n\n```python\nif not all(type(r.get(\"path\")) is str and type(r.get(\"head_sha\")) is str and isinstance(r.get(\"repository\"), dict)\n           and type(r[\"repository\"].get(\"full_name\")) is str for r in runs):\n    _die(RC_GATE, \"KHÔNG ĐO ĐƯỢC: workflow_runs: path/head_sha/repository.full_name phải có và là chuỗi\")\n```\n\nKèm theo bản vá cần ca `r834_run_moi_thieu_repository` (baseline cộng run 101 như trên, đòi rc=12) và một đột biến gỡ đúng chốt này. Đã báo chủ kho trên #834 để quyết packet nào nhận việc vá.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+  "created_at": "2026-10-26T12:54:40Z",
+  "updated_at": "2026-10-26T12:54:40Z",
+  "html_url": "https://github.com/ducthangho/tra-luat/pull/950#discussion_r4377418456",
+  "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/950",
+  "_links": {
+   "self": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4377418456"
+   },
+   "html": {
+    "href": "https://github.com/ducthangho/tra-luat/pull/950#discussion_r4377418456"
+   },
+   "pull_request": {
+    "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/950"
+   }
+  },
+  "reactions": {
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4377418456/reactions",
+   "total_count": 0,
+   "+1": 0,
+   "-1": 0,
+   "laugh": 0,
+   "hooray": 0,
+   "confused": 0,
+   "heart": 0,
+   "rocket": 0,
+   "eyes": 0
+  },
+  "start_line": 2844,
+  "original_start_line": 2844,
+  "start_side": "RIGHT",
+  "line": 2845,
+  "original_line": 2845,
+  "side": "RIGHT",
+  "in_reply_to_id": 4377376759,
+  "author_association": "OWNER",
+  "original_position": 102,
+  "position": 102,
+  "subject_type": "line",
+  "is_copilot_code_review": false,
+  "copilot_code_review_sources": []
+ }
+]

@@ -1,0 +1,70 @@
+{
+  "receipt_verdict_bytes_sha256": {
+    "bytes": 32324,
+    "hash": "d36248f584d4a3fb2c55a677587ee003ba1e338dd1701a50e48b4c59e2f0e346",
+    "matches": true
+  },
+  "run_id_head_surface": {
+    "run_id": "7a86ed4f591e4a50954f81d550f4d437",
+    "head": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+    "ref": "HEAD",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "ma_thoat": 0,
+    "trang_thai": "xong",
+    "worktree_sach": true,
+    "thoi_luong_giay": 1457.827
+  },
+  "prompt_sha256_match": true,
+  "reviewed_tree_match": true,
+  "model_events": {
+    "count": 39,
+    "response_ids": 39,
+    "models": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "stdout_run_hash_and_byte_match": true,
+  "stderr_run_hash_and_byte_match": true,
+  "evidence_blob_matches": true,
+  "evidence_oid": "825dab1c8771113caeb3c5b77c61e89e27d7e292",
+  "receipt_addition_commit": [
+    "05bc12e2b9008071ca28edbd4574e58644d48220"
+  ],
+  "artifact_commit_parent": "22382d8c800bed7b995d093cdcfdc206360d7fd4",
+  "receipt_commit_parent": "825dab1c8771113caeb3c5b77c61e89e27d7e292",
+  "new_caveats_rows": [
+    {
+      "id": "HINT-LUOT6-AP-CUNG-COMMIT-GHI-SO",
+      "rows": 1,
+      "exact_description": true
+    },
+    {
+      "id": "LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI",
+      "rows": 1,
+      "exact_description": true
+    },
+    {
+      "id": "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "rows": 1,
+      "exact_description": true
+    },
+    {
+      "id": "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "rows": 1,
+      "exact_description": true
+    },
+    {
+      "id": "TEP-LON-KHONG-VAO-KHO",
+      "rows": 1,
+      "exact_description": true
+    }
+  ],
+  "artifact_sha256sums": {
+    "rc": 0,
+    "ok_count": 120,
+    "failed": [],
+    "stderr": ""
+  },
+  "land_round6_sha_and_receipt_match": true
+}

@@ -1,0 +1,272 @@
+[
+  {
+    "verdict": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-2-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        130,
+        "codex_service",
+        "- Reviewer: OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution_surface=codex_service (API + công cụ terminal),"
+      ]
+    ],
+    "caveat_ids": [
+      "KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/ci-g5-cong-cu-chia-manh-r1-review-4-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        194,
+        "codex_service",
+        "- Reviewer OpenAI Codex, họ GPT-6 theo cấu hình phiên; execution_surface=codex_service qua API/công cụ terminal,"
+      ]
+    ],
+    "caveat_ids": [
+      "KHONG-CO-run.json-RUNTIME-KHONG-DO-DUOC"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr455-bien-nhan-v2-review-6-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        53,
+        "chatgpt_web",
+        "**Bằng chứng chạy được:** dùng nguyên `_cay_guong` và receipt Git hợp lệ có sẵn, không đổi receipt. Chỉ **xóa dòng hiện có** `execution_surface: chatgpt_web` khỏi bản sao `AGENTS.md`:"
+      ],
+      [
+        135,
+        "chatgpt_web",
+        "   ap=r/'AGENTS.md';v=ap.read_text();old='execution_surface: chatgpt_web';assert v.count(old)==1;ap.write_text(v.replace(old,''))"
+      ]
+    ],
+    "caveat_ids": [
+      "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+      "R6-02-DONG-THEO-KIEN-TRUC-khong-theo-ban-va",
+      "HAI-P2-VONG-6-DA-VA-nhung-VA-CAN-REVIEW-LAI",
+      "48-48-la-so-mutant-DUOC-CHON-khong-phai-khong-gian-loi",
+      "approve_with_findings-KHONG-phai-du-dieu-kien-LAND",
+      "cross_approved-dua-tren-PROVIDER-khong-phai-MODEL",
+      "phan-cong-CAM-tu-soan-phan-chung"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        23,
+        "chatgpt_web",
+        "| R6-02: xóa riêng dòng surface Web | **ĐÃ VÁ THẬT phản chứng cũ.** Replay `sources.py` của R6, thích nghi tên bản đồ: xóa `execution_surface: chatgpt_web` khỏi AGENTS vẫn giữ 5 hợp đồng, rc=0, 1 đạt/0 vi phạm/0 chưa đo. **Bản vá sinh lỗi mới ở xử lý nguồn cấu trúc:** R7-01; chưa khóa hết đường đối chiếu mới: R7-03. |"
+      ]
+    ],
+    "caveat_ids": [
+      "SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC",
+      "R7-02-la-CHAN-QUA-RONG-khong-phai-lo-bao-mat",
+      "R7-02-CHUA-DO-DUOC-end-to-end",
+      "MODEL-YEU-CAU-khac-MODEL-DA-PHUC-VU",
+      "NAM-PHAT-HIEN-VONG-7-CHUA-VA-luc-ghi-bien-nhan",
+      "approve_with_findings-KHONG-phai-du-dieu-kien-LAND",
+      "phan-cong-CAM-tu-soan-phan-chung"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr870-review-2-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        9,
+        "codex_service",
+        "execution_surface: codex_service (agent có công cụ shell; không phải ChatGPT Web)"
+      ]
+    ],
+    "caveat_ids": [
+      "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "HO-MODEL-REVIEWER-KHONG-DO-DUOC",
+      "STDERR-CHI-GIU-HEADER",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "SNAPSHOT-CAY-KHONG-VAO-KHO"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr870-review-3-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        444,
+        "codex_service",
+        "Approve về nội dung diff tại exact SHA đã nêu, với 10 hướng săn và bảng đo; không phải merge/land authorization hoặc xác nhận assurance danh tính model của launcher. Provider `openai_codex`, execution surface `codex_service` (agent dùng shell tool trong môi trường cloud, không suy thành codex CLI/Desktop), transport `machine`. Model/effort thực phục vụ từng request và cặp danh tính executor–reviewer không được đo từ "
+      ]
+    ],
+    "caveat_ids": [
+      "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "HO-MODEL-EXECUTOR-THEO-PROVIDER",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr889-review-1-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        7,
+        "codex_service",
+        "Phạm vi: chỉ đọc/đo `cay-kho/`; không mạng, không push, không sửa cây reviewed. Các script và evidence đều ở thư mục cha. Provider `openai_codex`, model family `openai`; phiên Codex có shell cục bộ, không đi qua `codex exec` hay Desktop nên theo phân loại của kho là `execution_surface: codex_service`, `transport: machine`. Không có runtime receipt để machine-verify model/effort/session identity; không tự cấp assuranc"
+      ]
+    ],
+    "caveat_ids": [
+      "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "HEAD-MERGE-CHUA-REVIEW-LAI",
+      "STDERR-CHI-GIU-HEADER",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr889-review-2-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        9,
+        "codex_service",
+        "Quyền và phạm vi theo chỉ thị trực tiếp `runs/d955f9ef/prompt.snapshot`. Reviewer: Codex, họ model OpenAI/GPT-6; provider `openai_codex`, execution surface `codex_service`, transport `machine` theo phân loại repository cho agent có shell không chạy qua `codex exec`/Desktop. Không có receipt máy để chứng nhận biến thể model/effort hoặc assurance. Không gọi mạng, không push, không sửa `cay-kho/`; chỉ ghi artifact ở thư"
+      ]
+    ],
+    "caveat_ids": [
+      "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "HO-MODEL-REVIEWER-KHONG-DO-DUOC",
+      "STDERR-CHI-GIU-HEADER",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr889-review-3-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        309,
+        "codex_service",
+        "Định danh: reviewer Codex; provider `openai_codex`; execution_surface `codex_service` (có công cụ shell trực tiếp, không phải ChatGPT Web human-mediated); transport `machine`. Không suy model thực tế từ tác giả commit hoặc tên launcher; định danh model máy chủ trả không được kiểm độc lập trong phép đo repo này. Không tự cấp assurance/approval cho state machine hay thao tác land."
+      ]
+    ],
+    "caveat_ids": [
+      "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "HO-MODEL-EXECUTOR-THEO-PROVIDER",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr896-review-2-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        395,
+        "codex_service",
+        "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/cay-kho/ops/reviews/pr870-review-2-codex-verdict.md:9:execution_surface: codex_service (agent có công cụ shell; không phải ChatGPT Web)"
+      ],
+      [
+        396,
+        "codex_service",
+        "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/cay-kho/ops/reviews/pr870-review-3-codex-verdict.md:444:Approve về nội dung diff tại exact SHA đã nêu, với 10 hướng săn và bảng đo; không phải merge/land authorization hoặc xác nhận assurance danh tính model của launcher. Provider `openai_codex`, execution surface `codex_service` (agent dùng shell tool trong môi trường clou"
+      ],
+      [
+        397,
+        "codex_service",
+        "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/cay-kho/ops/reviews/pr889-review-1-codex-verdict.md:7:Phạm vi: chỉ đọc/đo `cay-kho/`; không mạng, không push, không sửa cây reviewed. Các script và evidence đều ở thư mục cha. Provider `openai_codex`, model family `openai`; phiên Codex có shell cục bộ, không đi qua `codex exec` hay Desktop nên theo phân loại của kho là `exe"
+      ],
+      [
+        398,
+        "codex_service",
+        "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/cay-kho/ops/reviews/pr889-review-2-codex-verdict.md:9:Quyền và phạm vi theo chỉ thị trực tiếp `runs/d955f9ef/prompt.snapshot`. Reviewer: Codex, họ model OpenAI/GPT-6; provider `openai_codex`, execution surface `codex_service`, transport `machine` theo phân loại repository cho agent có shell không chạy qua `codex exec`/Deskt"
+      ],
+      [
+        399,
+        "codex_service",
+        "/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/cr-pr896-r2b/cay-kho/ops/reviews/pr889-review-3-codex-verdict.md:309:Định danh: reviewer Codex; provider `openai_codex`; execution_surface `codex_service` (có công cụ shell trực tiếp, không phải ChatGPT Web human-mediated); transport `machine`. Không suy model thực tế từ tác giả commit hoặc tên launcher; định danh model máy chủ trả khôn"
+      ],
+      [
+        407,
+        "codex_service",
+        "caveat.mo_ta=Verdict dong 444 tu khai execution surface `codex_service`, nhung run.json 94125115 ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may."
+      ],
+      [
+        418,
+        "codex_service",
+        "caveat.mo_ta=Verdict dong 309 tu khai execution surface `codex_service`, nhung run.json 4764bd6f ghi lenh.chuong_trinh=codex va execution_surface=codex_cli (launcher.py run -- codex exec). Cung loi pr915-review-1-codex bat o luot 2; dinh chinh be mat thanh codex_cli, giu nguyen byte verdict. Khong anh huong ho model: model_phuc_vu do_may."
+      ],
+      [
+        730,
+        "codex_service",
+        "VẤN ĐỀ: Ở đúng `8d56009a09af7b3ef93801df105f9483de212cc7`, không chỉ hai lượt 2 và hai lượt 3 mang lời tự khai `codex_service`. Verdict #889 lượt 1 cũng ghi ở dòng 7 rằng phiên \"không đi qua `codex exec` hay Desktop\" và là `execution_surface: codex_service`. Nhưng run `9f946d714c2344fa9691c3d7d4f1b2d9` có `lenh.chuong_trinh=codex`, `execution_surface=codex_cli` (dòng 47); sidecar cũng ghi `surface: codex_cli`; header"
+      ]
+    ],
+    "caveat_ids": [
+      "HINT-P1-DA-AP-CAN-VERDICT-MOI",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr896-review-3-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        213,
+        "codex_service",
+        "VẤN ĐỀ: Verdict tự khai `execution surface codex_service`. Run `5d4f7321d9a04ee1a87934e41fcf45c8` ghi chương trình `codex`, `execution_surface=codex_cli`; biên nhận cũng ghi CLI, nhưng chỉ có hai caveat về quyền ghi checkout và driver đọc cây tạm, không caveat đối chiếu surface. P1 lượt 2 đích danh pr889-review-1 đã đóng; cùng lớp lỗi vẫn còn tại wp766, được tìm khi mở glob ra toàn bộ 267 verdict. Đây là sự thật đo đ"
+      ]
+    ],
+    "caveat_ids": [
+      "HINT-LUOT3-DA-AP-CAN-VERDICT-MOI",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/pr915-review-1-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        353,
+        "codex_service",
+        "pr870-review-2-codex: VERDICT.md:9: execution_surface: codex_service (agent có công cụ shell; không phải ChatGPT Web)"
+      ],
+      [
+        358,
+        "codex_service",
+        "pr889-review-2-codex: VERDICT.md:9: Quyền và phạm vi theo chỉ thị trực tiếp `runs/d955f9ef/prompt.snapshot`. Reviewer: Codex, họ model OpenAI/GPT-6; provider `openai_codex`, execution surface `codex_service`, transport `machine` theo phân loại repository cho agent có shell không chạy qua `codex exec`/Desktop. Không có receipt máy để chứng nhận biến thể model/effort hoặc assurance. Không gọi mạng, không push, không sử"
+      ]
+    ],
+    "caveat_ids": [
+      "HEAD-CHUA-SACH-CAN-REVIEW-LAI",
+      "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "TEP-LON-KHONG-VAO-KHO"
+    ]
+  },
+  {
+    "verdict": "ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.md",
+    "expected": "codex_cli",
+    "hits": [
+      [
+        12,
+        "codex_service",
+        "- Reviewer độc lập với executor theo chỉ thị phiên: Codex, họ GPT-6 theo thông tin hệ thống; provider `openai_codex`, execution surface `codex_service`, transport `machine`. Không có phép đo độc lập exact serving model/effort hoặc receipt xác thực họ model. Không tự nhận Human Audit hay đã hoàn tất assurance `human_audited`."
+      ]
+    ],
+    "caveat_ids": [
+      "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "CHECKOUT-GHI-DUOC-KHONG-CUONG-CHE-READ-ONLY",
+      "DRIVER-DO-DOC-CAY-TAM"
+    ]
+  }
+]

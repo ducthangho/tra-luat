@@ -161,3 +161,12 @@ receipt_khong_khai:
   - 'Không khai CI live xanh: `gate` trên `7bdd8ad` được ĐO RIÊNG, không suy từ approve này. Reviewer tự khai đúng điều đó trong VERDICT.md.'
   - 'Không khai packet đã terminal: approve là điều kiện DỪNG của vòng vá→review, KHÔNG phải merge authorization.'
   - 'Không khai hai nợ SO-CANON-CHUA-TON-TAI và R291-DAM-SO-CUNG đã được xoá — chúng còn nguyên đúng như spec r3 tự khai.'
+
+verdict_usage_caveats:
+- id: SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC
+  muc: P2
+  mo_ta: Verdict dong 151 tu khai Codex service, receipt model_reviewer_identity.surface
+    ghi codex_cli (run ID khai f466d135 / f466d135534244c1b888c9c0c44811b9). Day la
+    hai loi khai khac nhau; checkout tai 2e4183b khong kem run.json cua chinh luot
+    de phan xu runtime. Khong chon be mat truoc khi co bang chung dung run; giu nguyen
+    byte verdict, khong chung thuc model/effort hay nang assurance.

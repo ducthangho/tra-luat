@@ -1,0 +1,12 @@
+>>> vao t162_M4_evaluator_toi_gian_chuan_bi 2026-10-26T04:27:27Z
+KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: "inputs.123 == 'x'"
+KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: ''
+KHÔNG ĐO ĐƯỢC: literal/ngoặc không cân trong điều kiện: "github.ref == 'a"
+KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: 'fromJSON(\'["ubuntu-latest"]\')'
+<<< ra t162_M4_evaluator_toi_gian_chuan_bi 0.051s QUA
+
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+/tmp/pr896-r2-audit-b3269a02/copy/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/pr896-r2-audit-b3269a02/copy/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ

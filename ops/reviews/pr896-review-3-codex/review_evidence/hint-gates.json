@@ -1,0 +1,39 @@
+[
+  {
+    "cmd": "python3 ops/lease_publish_test.py --chi-ca=t26_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "cmd": "python3 ops/lease_publish_test.py --chi-ca=t27_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "cmd": "python3 ops/lease_publish_test.py --chi-ca=t138_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "cmd": "python3 ops/bien_nhan_v2.py --root .",
+    "rc": 0,
+    "summary": [
+      "bien_nhan_v2: 236 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 289",
+      "TỔNG: ĐẠT"
+    ]
+  },
+  {
+    "cmd": "python3 ops/land_evidence_nguon.py --root .",
+    "rc": 0,
+    "summary": [
+      "land_evidence_nguon: 47 ĐẠT · 26/28 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 73",
+      "TỔNG: ĐẠT"
+    ]
+  }
+]

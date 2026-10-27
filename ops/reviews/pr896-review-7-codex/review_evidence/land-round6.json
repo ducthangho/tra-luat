@@ -1,0 +1,88 @@
+[
+  {
+    "land": "ops/land/pr832-wp831-land-evidence.yaml",
+    "verdict": "ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md",
+    "self_claim_line": 6,
+    "self_claim": "Reviewer độc lập OpenAI Codex, họ GPT-6 theo chỉ dẫn runtime; `provider: openai_codex`, `execution_surface: codex_service` (API agent có shell), `transport: machine`. Không đo model variant/effort, launcher receipt hoặc assurance live. Executor Claude theo assignment. Agent `tl_auditor` chỉ đọc hướng dẫn, mã và log theo `CLAUDE.md` §Quy trình sửa code/5; không chạy test hay sửa tệp.",
+    "hash": "1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28",
+    "hash_matches_caveat": true,
+    "same_prev": true,
+    "same_master": true,
+    "source": "ops/land/pr832-wp831-provenance/verdict-luot7/run.json",
+    "caveat": {
+      "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "muc": "P1",
+      "verdict_path": "ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md",
+      "verdict_sha256": "1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28",
+      "mo_ta": "Verdict dong 6 tu khai execution_surface codex_service, nhung ops/land/pr832-wp831-provenance/verdict-luot7/run.json (run 1ff81cba41874a218b53275d3cdc1418, head 51ae5c095972611d2c6045bd81786a4fc7e9ca62, lenh.chuong_trinh=codex) ghi execution_surface=codex_cli, transport=machine. Dinh chinh be mat cua CHINH luot nay thanh codex_cli. Giu nguyen byte verdict lich su; khong chung thuc model/effort hay nang assurance/quyen merge/land."
+    },
+    "run_id": "1ff81cba41874a218b53275d3cdc1418",
+    "head": "51ae5c095972611d2c6045bd81786a4fc7e9ca62",
+    "surface": "codex_cli",
+    "transport": "machine",
+    "program": "codex",
+    "same_round_head": true,
+    "caveat_source_head_run_match": true
+  },
+  {
+    "land": "ops/land/pr848-wp744-land-evidence.yaml",
+    "verdict": "ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md",
+    "self_claim_line": 36,
+    "self_claim": "- Reviewer: Codex/OpenAI, `model_family: openai`, phiên API có công cụ shell (`execution_surface: codex_service`, `transport: machine`). Họ model theo định danh hệ thống của phiên; không có header CLI/metadata backend riêng để máy đối chứng tên model chi tiết, effort hoặc session ID. Executor Claude theo assignment/commit, không đo lại runtime Executor. Verdict nội dung này không tự ghi transition hay receipt `cross_approved`.",
+    "hash": "af2b5fa426a7d53755148f4f9711712246afadc91e1d75e5267f8c8023bc3911",
+    "hash_matches_caveat": true,
+    "same_prev": true,
+    "same_master": true,
+    "source": "ops/land/pr848-wp744-provenance/verdicts/run-f65e544e.json",
+    "caveat": {
+      "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "muc": "P1",
+      "verdict_path": "ops/land/pr848-wp744-provenance/verdicts/wp744-g3-luot1-codex-verdict.md",
+      "verdict_sha256": "af2b5fa426a7d53755148f4f9711712246afadc91e1d75e5267f8c8023bc3911",
+      "mo_ta": "Verdict dong 36 tu khai execution_surface codex_service, nhung ops/land/pr848-wp744-provenance/verdicts/run-f65e544e.json (run f65e544ef5d64ba7a1e0edb607edcf0a, head 23bc189f28ea60f04ca1634b6fe66d02babf12ed, lenh.chuong_trinh=codex) ghi execution_surface=codex_cli, transport=machine. Dinh chinh be mat cua CHINH luot nay thanh codex_cli. Giu nguyen byte verdict lich su; khong chung thuc model/effort hay nang assurance/quyen merge/land."
+    },
+    "run_id": "f65e544ef5d64ba7a1e0edb607edcf0a",
+    "head": "23bc189f28ea60f04ca1634b6fe66d02babf12ed",
+    "surface": "codex_cli",
+    "transport": "machine",
+    "program": "codex",
+    "same_round_head": true,
+    "caveat_source_head_run_match": true
+  },
+  {
+    "land": "ops/land/pr862-wp748-r21-land-evidence.yaml",
+    "verdict": "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md",
+    "self_claim_line": 3,
+    "self_claim": "- Reviewer: OpenAI Codex (GPT-6 family as identified by session instructions); provider `openai_codex`; execution surface `codex_service` with local shell tools; transport machine/tool-mediated. Exact serving-model/effort attestation is not independently measured. Independent reviewer in this session; no executor role.",
+    "hash": "95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87",
+    "hash_matches_caveat": true,
+    "same_prev": true,
+    "same_master": true,
+    "source": "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-transcript.txt",
+    "caveat": {
+      "id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE",
+      "muc": "P1",
+      "verdict_path": "ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-verdict.md",
+      "verdict_sha256": "95438373ee2f04a8431e6b10cfd2111144f9744bc54ac114c5670e0652e1ce87",
+      "mo_ta": "Verdict luot 1 dong 3 tu khai codex_service, nhung ops/land/pr862-wp748-r21-provenance/verdicts/wp748-r21-luot1-codex-transcript.txt bat dau bang OpenAI Codex v0.163.0, session 01a157da-2170-7be2-b6d0-053fa8f91aec; review.luot_1.reviewer cua ho so nay ghi codex exec truc tiep. Dinh chinh be mat luot 1 thanh codex_cli. Khong dung run-f0909b38.json cua LUOT 2 de chung minh luot 1. Giu nguyen byte verdict lich su; khong chung thuc model/effort hay nang assurance/quyen merge/land."
+    },
+    "transcript_header": [
+      "OpenAI Codex v0.163.0",
+      "--------",
+      "workdir: /tmp/claude-0/-home-user-tra-luat/90305cb1-2842-509b-9816-acb554eadd20/scratchpad/rv21",
+      "model: gpt-6-astra",
+      "provider: openai",
+      "approval: never",
+      "sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)",
+      "reasoning effort: xhigh",
+      "reasoning summaries: none",
+      "session id: 01a157da-2170-7be2-b6d0-053fa8f91aec",
+      "--------",
+      "user",
+      "# Independent read-only review — WP748 r21/g21, PR #862, exact head"
+    ],
+    "land_luot1_reviewer": "verdicts/wp748-r21-luot1-codex-transcript.txt: codex exec truc tiep, KHONG bien nhan launcher — KHONG tinh assurance.",
+    "source_and_session_in_caveat": true,
+    "cli_header": true
+  }
+]

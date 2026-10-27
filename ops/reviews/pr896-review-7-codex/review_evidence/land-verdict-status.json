@@ -1,0 +1,412 @@
+[
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot4-codex-verdict.md",
+    "line": 22,
+    "text": "Không phát hiện P0/P1 trong phạm vi đã đo. Còn **2 finding P2 mở: F858-03 và F858-07**, không có quyết định chủ kho chấp nhận chúng trong nguồn được cấp. Áp điều kiện sensitive và lease M-1, chưa đủ để approve. Verdict này không cấp quyền merge/land/deploy."
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot3-codex-verdict.md",
+    "line": 20,
+    "text": "Không thấy P0/P1 trong phạm vi đã đo. Còn hai finding P2 mở, chưa có quyết định chấp nhận chúng trong nguồn được cấp; chưa đủ điều kiện approve lớp sensitive. Verdict không cấp quyền merge/land/deploy."
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot3-codex-verdict.md",
+    "line": 145,
+    "text": "Snapshot sạch chứng minh không có delta ở hai mốc quan sát, không chứng minh lịch sử chưa từng ghi rồi hoàn nguyên. Các hiện vật review đều dưới `out/`; không có patch sản phẩm, commit, push hoặc liên lạc GitHub. Hash verdict, driver, shell mutant và evidence nằm trong [SHA256SUMS](SHA256SUMS); bản clone/fixture không nằm trong danh mục băm này."
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md",
+    "line": 104,
+    "text": "| t86-parallel-clean (head) | `/usr/bin/python .claude/dev/launcher_test.py --lap-ca t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac --lan 10` | 1 | LAP t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac: 0/10 qua, 0 bo qua, 10 hong · [log](evidence/t86-parallel-clean.log) |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md",
+    "line": 105,
+    "text": "| t86-parallel-inert (head) | `CODEX_AUTH_JSON=<INERT-REVIEW-WP858> /usr/bin/python .claude/dev/launcher_test.py --lap-ca t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac --lan 10` | 1 | LAP t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac: 0/10 qua, 0 bo qua, 10 hong · [log](evidence/t86-parallel-inert.log) |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md",
+    "line": 106,
+    "text": "| t86-solo-base (base-full) | `/usr/bin/python .claude/dev/launcher_test.py --lap-ca t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac --lan 1` | 1 | LAP t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac: 0/1 qua, 0 bo qua, 1 hong · [log](evidence/t86-solo-base.log) |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot1-codex-verdict.md",
+    "line": 107,
+    "text": "| t86-solo-head (head) | `/usr/bin/python .claude/dev/launcher_test.py --lap-ca t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac --lan 1` | 1 | LAP t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac: 0/1 qua, 0 bo qua, 1 hong · [log](evidence/t86-solo-head.log) |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr864-wp858-provenance/verdicts/wp858-g1-luot5-codex-verdict.md",
+    "line": 130,
+    "text": "- **GitHub/CI/heartbeat/lease live, check-run `ci.yml`, dispatch `launcher-windows.yml`, thread resolution**: không gọi mạng/GitHub theo assignment. Snapshot lease và authority chép lại không xác nhận các trạng thái live này. Chưa chứng nhận M-2/M-3 hoặc quyền merge/land/deploy."
+  },
+  {
+    "path": "cay-kho/ops/land/pr917-wp910-provenance/verdicts/wp910-g3-luot1-codex-verdict.md",
+    "line": 18,
+    "text": "**N4 chưa đạt đầy đủ trong sandbox:** bộ đường nhanh ở cả BASE và HEAD cùng rc 1, `CA: 103/104`, `DOT BIEN: 387/392`, `TONG: DO` vì socket bị chặn; delta BASE/HEAD = 0. Registry gốc cũng bị signer loopback chặn; lượt bổ sung tắt ký riêng commit fixture đạt `1070/1070`, `TỔNG: ĐẠT` ở cả hai. Không chuyển lỗi môi trường thành kết quả xanh. Approval này là kết luận review diff; chưa xác nhận các gate CI/Windows thực hoặc đủ điều kiện merge/land."
+  },
+  {
+    "path": "cay-kho/ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-verdict.md",
+    "line": 78,
+    "text": "**Giới hạn và tính toàn vẹn phép đo.** Không chạy toàn bộ N1 gồm 876 ca/1.249 mutant; không suy full-suite PASS từ tập đích. N6 check run CI chưa đo vì bundle offline. Lượt đầu script probe reviewer rc=1 do mỏ neo TAB quá ngắn trúng dòng 2507 thay vì `_che_do_0054` dòng 2569; kết quả 159 ca cho mutant rc đã hoàn tất trước lỗi đó. Đã giữ log gốc, sửa mỏ neo thành duy nhất, chạy lại nhóm probe bằng `--focused` rc=0 và kiểm trace đầy đủ; không tính mutant TAB neo sai là bằng chứng về sản phẩm."
+  },
+  {
+    "path": "cay-kho/ops/land/pr872-wp871-provenance/verdicts/wp871-g1-luot2-codex-verdict.md",
+    "line": 195,
+    "text": "**N4 do executor đo riêng**: đọc check run/log của đúng workflow_dispatch, đúng head, xác minh job `gate-registry (windows-latest)` thực sự chạy và success; ghi run/check URL + head SHA + kết luận cạnh verdict mã này. Không `blocked` chỉ vì chưa đo được N4. Verdict này không cấp quyền merge/land/deploy."
+  },
+  {
+    "path": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot3-codex-verdict.md",
+    "line": 55,
+    "text": "| Guard/phạm vi | 13 ca: status vắng/null/bool/số/list/chuỗi/mapping thiếu landed; root list, status lồng sai chỗ; khoá int/ngày/null; dấu trong chú thích | Các guard mapping thiếu landed và chuỗi đã có chốt; status list chứa từ landed chưa có (Q sống). Không yêu cầu L6 áp cho status không-mapping. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr846-wp845-provenance/verdicts/wp845-g1-luot3-codex-verdict.md",
+    "line": 126,
+    "text": "Các đầu vào phản chứng, stdout/stderr và rc nằm dưới `counterexamples/RV_I_bool_or_zero` đến `counterexamples/RV_Q_nonstring_status_list` và trong `mutation-results.json`; không chỉ có hướng tấn công chưa chạy. Các fixture được mô tả bằng lời ở đây, không cung cấp bản vá gate để áp mù."
+  },
+  {
+    "path": "cay-kho/ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot2-codex-verdict.md",
+    "line": 249,
+    "text": "Patch là dữ liệu minh họa: **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot2-codex-verdict.md",
+    "line": 250,
+    "text": "Chưa đo toàn gate cho thử nghiệm này; không áp vào checkout được review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr880-wp878-provenance/verdicts/wp878-g1-luot2-codex-verdict.md",
+    "line": 262,
+    "text": "Bảng model, actionlint và mô phỏng DAG lượt 1 không thay N4. M-1/M-2 và CI thật chưa được xác nhận bởi lượt review này."
+  },
+  {
+    "path": "cay-kho/ops/land/pr882-wp748-r23-provenance/verdicts/wp748-r23-luot3-launcher-verdict.md",
+    "line": 5,
+    "text": "Reviewer identity: OpenAI Codex, as identified by the session instructions. The session describes the agent as based on GPT-6, but exposes no independently verifiable served-model receipt, exact model version, or model-family attestation. The launcher invocation is stated by the requester; its execution receipt has not yet been independently checked. Tool/product names do not establish reviewer model family (`khong_do_duoc` unless measured runtime evidence is found)."
+  },
+  {
+    "path": "cay-kho/ops/land/pr883-wp879-provenance/verdicts/wp879-g1-luot1-codex-verdict.md",
+    "line": 20,
+    "text": "| CA nền chưa đột biến | `python3 review_evidence/baseline_cas.py`, gọi thật toàn CA qua `_chay_1_ca` ở cả hai vế trong một lệnh | **61/61 qua, rc=0/0**, không bỏ ca | Positive control: không cấp kill cho ca đỏ sẵn |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr883-wp879-provenance/verdicts/wp879-g1-luot1-codex-verdict.md",
+    "line": 100,
+    "text": "Đã hoàn tất **101/101 cặp**; **0** cặp khác toàn vector status/phán quyết. Không suy rộng ra phần chưa đo trong 470. `python3 review_evidence/validate_radii.py` **rc=0**: đủ **202/202** bản ghi, mỗi bản có **61/61** tên ca; đúng đích `giet_that`, **60 ca khác đều qua**, không skip/tín dụng giả/collateral; verdict lỗi=0. So toàn vector giữa hai vế: **101/101 bằng nhau**, radius **1/61** từng mutant. Coverage A/B là **101/470**, không suy thành toàn 470. Ký hiệu G = `giet_that`, Q = `qua`, TDG = `tin_dung_gia`, BQ = `bo_qua`."
+  },
+  {
+    "path": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot1-codex-verdict.md",
+    "line": 197,
+    "text": "**VẤN ĐỀ:** Các ca mới khóa dư khoảng trắng/hoa-thường/hậu tố nhưng chưa có tiền tố trước mode, CR và thư mục chỉ có tệp ẩn. Ba mutation sai hợp đồng ở bảng reviewer đều sống qua cả tập CA. Không nâng thành lỗi runtime vì head xử lý đúng cả ba; đây là nợ kiểm thử bổ sung ngoài chín mutant đăng ký, không phải tự tuyên bố N1 đã đo toàn miền đầu vào."
+  },
+  {
+    "path": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot1-codex-verdict.md",
+    "line": 205,
+    "text": "**KHÔNG ĐO ĐƯỢC offline.** Không có số phút từ jobs API, không có bằng chứng 8 shard chạy trên PR mã/day_du, không có lượt PR hồ sơ cho shard skipped + required gom success + dòng KHÔNG ĐO. Cũng chưa so từng dòng conclusion của job gom PR/master thật ngoài 9 mục mới. Không lấy actionlint hoặc fixture tổng hợp thay N4. Khi có lượt thật cần giữ exact head/run/attempt, jobs API và log download/gom để đóng riêng các câu hỏi Actions (a)–(d). Không đăng gì lên GitHub trong lượt review này."
+  },
+  {
+    "path": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot3-codex-verdict.md",
+    "line": 132,
+    "text": "**N4 GitHub thật: KHÔNG ĐO ĐƯỢC offline.** Chưa có jobs API/log trên reviewed_sha để đo 8 shard day_du chạy và gom xanh, hoặc PR hồ sơ với shard skipped/gom xanh/KHÔNG ĐO/phút runner; chưa so từng conclusion PR head/master thật. Không dùng lời khai CI của executor hoặc CI d3fba0c cho head này. Scheduler Actions, output thiếu→env rỗng và side effect download-artifact không được fixture Python xác thực."
+  },
+  {
+    "path": "cay-kho/ops/land/pr895-wp892-provenance/verdicts/wp892-g1-luot4-codex-verdict.md",
+    "line": 149,
+    "text": "**N4 lượt thật GitHub: KHÔNG ĐO ĐƯỢC offline.** Không có jobs API/log trên exact reviewed_sha để xác nhận 8 shard day_du/gom xanh, PR hồ sơ với shard skipped/gom xanh/KHÔNG ĐO hoặc phút runner, và chưa so từng conclusion PR head/master thật. Scheduler Actions, ruleset đang hoạt động, output thiếu→env rỗng, download-artifact và branch head GitHub hiện tại không được fixture local xác thực. Các điều kiện merge N4/CI thật còn thuộc approver/operator, không biến thành pass từ approval mã."
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot1-codex-verdict.md",
+    "line": 137,
+    "text": "| h01-short-label | `if NHAN in van_ban:` → `if \"chưa chạy\" in van_ban:` | 1 · DO ca_b4_rang_l5: AssertionError: ops/reviews/b/x-HINT.patch: CO_NHAN (cần KHONG_DU_DIEU_KIEN_PATCH_AS_HINT); 4/5 | GIẾT |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot1-codex-verdict.md",
+    "line": 71,
+    "text": "| M1 | Gỡ riêng mục `ops/kiem_nhan_hint_test.py` | rc 1; đúng `ĐỎ: test sống chưa đăng ký: ops/kiem_nhan_hint_test.py`; `26/25`; `TỔNG: ĐỎ` |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot1-codex-verdict.md",
+    "line": 73,
+    "text": "| M2 | Đổi khoá hint thành `ops/kiem_nhan_hint_tests.py` | rc 1; đúng một dòng chưa đăng ký tên thật và một dòng mục đăng ký không có tệp tên sai; `26/26`; `TỔNG: ĐỎ` |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot2-codex-verdict.md",
+    "line": 152,
+    "text": "| h01-short-label | `if NHAN in van_ban: → if \"chưa chạy\" in van_ban:` | 1 · 5/6 · DO ca_b4_rang_l5: AssertionError: ops/reviews/b/x-HINT.patch: CO_NHAN (cần KHONG_DU_DIEU_KIEN_PATCH_AS_HINT) | GIẾT |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot2-codex-verdict.md",
+    "line": 234,
+    "text": "- **Giới hạn identity:** header CLI chỉ công bố model/effort, không đo từng request; runtime Executor và GitHub submitter chưa xác minh. Verdict này là kết quả review offline exact SHA, không là merge/land authorization."
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp763-r2-cli-luot2-codex-verdict.md",
+    "line": 115,
+    "text": "| M1 | Gỡ mục hint | rc 1, 26/25, đúng một dòng chưa đăng ký hint, TỔNG: ĐỎ |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot3-codex-verdict.md",
+    "line": 19,
+    "text": "Reviewer `openai_codex / codex_cli / machine`, họ `openai`, header khai `gpt-6-astra`, effort `xhigh`, CLI `0.164.0`, session `01a17173-016f-7640-b4a3-7e572553b6a6`, run `aedfc579` (nguồn `runs/aedfc579/stderr.log`, dòng 2–13). Header không chứng minh model từng request. Executor Claude theo assignment; runtime receipt Executor chưa có. Class khai routine / hiệu lực sensitive theo spec. Không tìm được lease #752 trong mirror; generation/lease/state server chưa đo, không chứng nhận authority land. Thực hiện chỉ thị review offline exact SHA của người dùng; không chuyển state assurance. Sandbox khai workspace-write; mirror được đối xử read-only."
+  },
+  {
+    "path": "cay-kho/ops/land/pr930-wp752-wp763-provenance/verdicts/wp752-r4-cli-luot3-codex-verdict.md",
+    "line": 159,
+    "text": "| h01-short-label | `if NHAN in van_ban:` → `if \"chưa chạy\" in van_ban:` | 1 · 5/6 · DO ca_b4_rang_l5: AssertionError: ops/reviews/b/x-HINT.patch: CO_NHAN (cần KHONG_DU_DIEU_KIEN_PATCH_AS_HINT) | GIẾT |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr913-wp910-provenance/verdicts/wp910-luot1-codex-verdict.md",
+    "line": 47,
+    "text": "Kiểm kê SHA-256 toàn bộ 5.385 tệp mỗi checkout (không gồm `.git`) tại mốc giữa lượt và cuối lượt giống nhau; không có tệp mới/đổi, gồm cả ignored. Hai mốc sạch không chứng minh lịch sử chưa từng ghi rồi hoàn nguyên; các thao tác review không sửa checkout. Chứng cứ [anchors-start.json](anchors-start.json), [anchors-end.json](anchors-end.json), [content-snapshot.json](content-snapshot.json), [actual.diff](actual.diff)."
+  },
+  {
+    "path": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot2-codex-verdict.md",
+    "line": 175,
+    "text": "Snapshot toàn vẹn chỉ chứng minh không có delta giữa hai mốc, không chứng minh lịch sử chưa từng ghi rồi hoàn nguyên. Tất cả sản phẩm review, fixture và mutant đặt dưới out/ hoặc VERDICT.md; không commit/push/merge/land/deploy. Danh mục băm verdict/driver/evidence: [SHA256SUMS](out/SHA256SUMS)."
+  },
+  {
+    "path": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot3-codex-verdict.md",
+    "line": 169,
+    "text": "Fingerprint bằng nhau chỉ chứng minh không có delta ở hai mốc, không chứng minh lịch sử chưa từng ghi rồi hoàn nguyên. Không có patch/commit/push/merge/land/deploy. Danh mục băm các artifact review: [SHA256SUMS](out/SHA256SUMS)."
+  },
+  {
+    "path": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot4-codex-verdict.md",
+    "line": 20,
+    "text": "M-1 của lease yêu cầu P2/P3 mở có quyết định chủ kho kèm link; dữ liệu offline chưa có quyết định cho nhánh tái mở này. Verdict không cấp quyền merge/land/deploy. Không gọi mạng/GitHub, không sửa hai cây nguồn, không viết patch sản phẩm."
+  },
+  {
+    "path": "cay-kho/ops/land/pr873-wp868-provenance/verdicts/wp868-g1-luot4-codex-verdict.md",
+    "line": 147,
+    "text": "| `python3 -B .claude/dev/launcher_test.py --nhat-ky … / full-mutant-clear-trap` | rc=1; 229/242 ca DA CHAY QUA (tong 252, bo qua 10, hong 13) - KHONG DU: 10 ca BO QUA, chua do gi; 220.883s — [output](out/evidence/additional-full-clear-trap.stdout), [argv/env/cwd/rc](out/evidence/additional-full-clear-trap.json) |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot5-codex-verdict.md",
+    "line": 122,
+    "text": "**chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot5-codex-verdict.md",
+    "line": 126,
+    "text": "HINT cuối: **187/187 nền xanh** (186 kg + chốt mỏ neo), **58/58 mutant mới GIẾT đúng ca đích**, **44/44 mutant kiểm toán sống được phát lại đều GIẾT**, mọi đối chứng khác họ xanh; không tín dụng giả. Bare Ruff vẫn chỉ hai F541 có sẵn. [Kết quả HINT đúng hash](evidence/hint-results-complete.json), [Ruff HINT](evidence/ruff-hint-final.json). Chưa chạy full suite trên HINT; full gate phía trên thuộc SHA đang review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot3-codex-verdict.md",
+    "line": 97,
+    "text": "**chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot3-codex-verdict.md",
+    "line": 104,
+    "text": "- **Cause-only chưa được HINT đóng**, đúng giới hạn cấm reviewer tự viết mã bọc traceback. Executor phải tự thêm fixture và mutant riêng như mô tả M6, đồng thời tạo thêm chỗ dưới trần. Không giả vờ diff hiện tại là bản vá hoàn tất mọi lớp."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot3-codex-verdict.md",
+    "line": 106,
+    "text": "Biên nhận: [hint-build.json](evidence/hint-build.json), [hint-results.json](evidence/hint-results.json), [hint-amendment.json](evidence/hint-amendment.json), [hint-M6-final.json](evidence/hint-M6-final.json), [ruff-hint-final.json](evidence/ruff-hint-final.json). HINT cuối vẫn cho mutant bỏ cause SONG, được ghi rõ trong biên nhận. Chưa chạy full suite trên HINT; gate đầy đủ ở trên là trên head đang review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot6-codex-verdict.md",
+    "line": 107,
+    "text": "**Chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit.**"
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot1-codex-verdict.md",
+    "line": 68,
+    "text": "`HINT.patch` chỉ chạm `.claude/dev/packet_loop_test.py`; đã `git apply --check` trên bản sao exact head. Nhãn bắt buộc nằm trong tệp: **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot1-codex-verdict.md",
+    "line": 70,
+    "text": "Đã đo trên bản sao HINT: 129/129 ca kg xanh; các đột biến mới K24/K31 và mutant rc0 đều giết đúng ca; gỡ classifier TÍN_DỤNG_GIẢ làm tự kiểm M6 đỏ. Sau bổ sung nhận diện traceback repr và đối chứng tên check hợp lệ, chạy lại M5/M6 và chốt mỏ neo đúng-một-chỗ đều xanh (`hint-final-self.log`). Ruff HINT vẫn chỉ hai F541 như base/head. Tổng diff HINT so base +327/-19, đúng một tệp, dưới trần 450 dòng thêm. Chưa chạy gate đầy đủ trên HINT; đây là gợi ý test có thể áp, không phải ứng viên đã được review/approve."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot4-codex-verdict.md",
+    "line": 113,
+    "text": "**chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr851-wp822-provenance/verdicts/wp822-g1-luot4-codex-verdict.md",
+    "line": 119,
+    "text": "Trên HINT cuối: **190/190 ca xanh** (189 kg + chốt mỏ neo), **34/34 mutant mới GIẾT đúng ca đích**, ba đối chứng mỗi mutant xanh. Ruff cuối vẫn hai F541. [Kết quả HINT cuối](evidence/hint-results-last.json), [Ruff](evidence/ruff-hint-final.json). Các mutant chọn đầu/chọn cuối/bỏ giữa và đếm hằng cũng đã đo. Chưa chạy full suite trên HINT; gate đầy đủ ở trên chỉ thuộc head đang review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr907-wp906-provenance/verdicts/wp906-luot1-codex-verdict.md",
+    "line": 18,
+    "text": "Cổng công cụ đỏ sẵn vì thiếu `shellcheck`, delta base/head bằng 0. Suite chế độ gate kết thúc rc=0 trên cả hai, 60/60 ca đo được đạt và một ca môi trường bỏ qua; **toàn bộ 490 đột biến, Windows native và CI/check run trên exact head: KHÔNG ĐO ĐƯỢC**. Chưa xác nhận hoàn thành toàn bộ điều kiện merge của spec. Đã giữ review offline, không sửa sản phẩm, không merge/land/deploy; mọi hiện vật phát sinh nằm trong `out/`."
+  },
+  {
+    "path": "cay-kho/ops/land/pr907-wp906-provenance/verdicts/wp906-luot1-codex-verdict.md",
+    "line": 64,
+    "text": "| H3 — nợ vẫn mở / neo #886–#888 sai | Kho hiện vẫn coi nợ Python là mở, hoặc #888 chưa chứa sửa code. | `rg -n --max-columns 350 --max-columns-preview 'python-probe-khong-theo-PATH' --hidden -g '!.git/**' cay-kho` (lưu `out/debt-references.txt`); `git show -s --format='%H%n%P%n%B' 42143ad`; `git merge-base --is-ancestor 42143ad 1c20f3bd6a7ed08114feaf1d91c0790360b8f581`; `git diff 42143ad HEAD -- ops/cong_cu.py ops/cai_cong_cu.sh`. | 30 dòng tham chiếu: 4 ở code/test/changelog/chú thích hiện tại, 26 ở hồ sơ lịch sử `ops/land/`. Changelog wp886 ghi closing debt; `pr888-wp886-land-evidence.yaml:109` là `trang_thai: dong`; dòng 110 mở riêng nợ chú thích lỗi thời. Commit merge ghi đúng PR #888, #886; ancestor rc=0; diff hai tệp code rỗng. Readback offline #888: merged=true, merge SHA `42143ad…`, merged_at `2026-10-24T03:01:16Z`. | KHÔNG PHẢI LỖI. Các chữ “mở” ở snapshot #858/#868 là lịch sử, không phải một nợ mới do patch. `landed: false` trong hồ sơ #888 nói về assurance/provenance, không phủ định code đã sửa hay nợ kỹ thuật đã đóng; không suy trạng thái live. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr849-wp748-provenance/verdicts/wp748-r20-luot6-launcher-verdict.md",
+    "line": 64,
+    "text": "`git -C src merge-base --is-ancestor 5618020a67709ca6f2c93138905df0aa8d9c2df6 origin/master`: rc=0. Runtime tool subprocesses are enclosed by executable `codex-linux-sandbox`; this does not reveal the serving model or conclusively distinguish the user-facing Codex surface. `launcher.out` and `launcher.err` are presently empty. The parent launcher's final receipt/rc cannot yet be independently verified from inside this still-running review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md",
+    "line": 115,
+    "text": "- **Lịch sử:** spec r2 kể review g1 chưa approve vì master drift; r3 ghi patch r2 chưa từng approve. Không có verdict/receipt g1 trong các ref wp835 được cấp để đối chiếu từng finding trước; không coi bản r2 là approved và không tự reset ngân sách bằng revision này."
+  },
+  {
+    "path": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-r3-g3-claude-review-1-codex-verdict.md",
+    "line": 119,
+    "text": "Reviewer: `provider=openai_codex`, `model_family=openai`, `execution_surface=codex_cli`, `transport=machine`; role reviewer; context độc lập với executor Claude. Run `958a0a8a12954c9f9fbfc8175b5c4c95`, đối chiếu `runs/958a0a8a/run.json`; `codex --version` rc 0 cho `codex-cli 0.164.0` (có cảnh báo không tạo được PATH aliases vì read-only filesystem). Header `stderr.log` rỗng tại lúc kiểm: không suy exact model/effort từ tên CLI hay submitter. Executor theo lease là claude/claude-opus-5-5, claude_code, machine/local, cloud; đây là khai báo lease, chưa có receipt runtime độc lập. Không cấp `cross_approved` hoặc merge authority trong verdict changes_requested này. GitHub submitter: null, chưa đăng."
+  },
+  {
+    "path": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md",
+    "line": 14,
+    "text": "Nguồn: verdict lượt 1 trên `3785f9535398db04fb36a5eaa095166a8e048f1e`, tree `fd0c97ff1ae2f5e595502ada69dc2d449fdebbcd`. Ref g3 trong checkout được giao chưa có verdict; `git show origin/ops/wp835-r3-g3-lease:ops/reviews/wp835-r3-g3-claude-review-1-codex-verdict.md` trả rc 128. Đã đọc cùng đường dẫn từ bản kho cục bộ `../lz`, ref g3 tại `d3c6a5e9ab34e809550607945ad6a08bd9e594ae`, không fetch mạng. Verdict nguồn SHA-256: `8f56beff1830cf42c133b3517ef865c417881e4a9a440ad401e02d5b493dc5d6`."
+  },
+  {
+    "path": "cay-kho/ops/land/pr931-wp835-provenance/verdicts/wp835-r4-g4-claude-review-2-codex-verdict.md",
+    "line": 64,
+    "text": "| N7: đọc ADR :6, :26–38 và dòng ADR-0056 §20 | 0 | **passed trong phạm vi tài liệu**: giữ “CHƯA KÍCH HOẠT VẬN HÀNH”; chỉ áp lease mới sau xác minh controller |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr877-wp854-provenance/verdicts/wp854-g1-luot2-codex-verdict.md",
+    "line": 104,
+    "text": "- **N5 Windows thật: KHÔNG ĐO ĐƯỢC.** Không đọc log GitHub trong phiên offline. Executor phải đo riêng bằng log `gate-registry (windows-latest)` trên exact head; Linux sim không thay thế N5. Không dùng phần chưa đo này để đổi verdict mã theo chỉ thị review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr888-wp886-provenance/verdicts/wp886-luot3-codex-verdict.md",
+    "line": 75,
+    "text": "Không cấp F886-NN cho hạn chế nền, ca chưa đo trọn, đột biến reviewer cố ý tạo, hoặc job vốn chỉ dành Ubuntu bị skipped khi chạy windows-only."
+  },
+  {
+    "path": "cay-kho/ops/land/pr888-wp886-provenance/verdicts/wp886-luot3-codex-verdict.md",
+    "line": 300,
+    "text": "M-3 (Ubuntu CI + launcher Windows) và M-5 (gate-cong-cu Windows N8 + N7) có bằng chứng dương theo yêu cầu review lượt này; M-4 đạt 6/450. Không biến job skipped, ca bỏ qua hoặc giới hạn chưa chạy thành màu xanh. Không merge, land, deploy, push hay viết patch sản phẩm."
+  },
+  {
+    "path": "cay-kho/ops/land/pr888-wp886-provenance/verdicts/wp886-luot2-codex-verdict.md",
+    "line": 66,
+    "text": "Không gán F886-NN cho hạn chế nền, CI chưa đọc được, mutant do reviewer tự tạo, hoặc lời đếm sai ngoài diff. Prompt và lời khai executor ghi 10 `wp886_cc_*`; tự đếm AST danh sách chỉ có **9**. Báo đúng 9/9, không tạo một mutant “có sẵn” thứ mười. N8 thiếu bằng chứng là lý do pending, không phải kết luận mã Windows hỏng."
+  },
+  {
+    "path": "cay-kho/ops/land/pr779-wp775-provenance/verdict-luot17/VERDICT.md",
+    "line": 127,
+    "text": "| M2 | Chỉ reviewing/đúng head/run_id đúng dạng/chưa trùng; call vượt trần bị3 trước tăng used/sổ. Caller reviewer khác Codex bị4 trước state. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot1/VERDICT.md",
+    "line": 165,
+    "text": "HINT TEST thuần đã được tạo ngoài kho: `/tmp/wp788-review-8ixnugpw/HINT-check-run-id-identity-conflict.patch`. **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**. Chỉ chạy test bản sao với sản phẩm HEAD không sửa: `PYTHONDONTWRITEBYTECODE=1 python -B -W ignore /tmp/wp788-review-8ixnugpw/hint_checks.py \"$PWD\"` rc harness=0 (harness in dữ liệu, không phải gate pass). Output `HINT_TARGETS 5 RED 4 GREEN 1`: bốn ca mâu thuẫn chết trực tiếp `đòi rc=12, được rc=0`, một đối chứng trùng ID nhất quán xanh. Đây là bằng chứng tái hiện lỗi, KHÔNG phải bằng chứng đã vá."
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot1/VERDICT.md",
+    "line": 313,
+    "text": "- HINT test — diff gợi ý nằm dưới và tại `/tmp/wp788-review-8ixnugpw/HINT-check-run-id-identity-conflict.patch`; **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**. Đã chạy test bản sao trên sản phẩm HEAD: 4 đỏ / 1 xanh như trên. Sau sửa phải bổ sung mutant bỏ kiểm identity; nó phải làm đúng bốn ca mâu thuẫn xanh (test đỏ), trong khi ca duplicate nhất quán và fixture CI thật vẫn xanh. Chưa áp bản vá sản phẩm, chưa chứng minh mutant hậu sửa."
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot1/VERDICT.md",
+    "line": 365,
+    "text": "HINT test F02 (test thuần, chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit):"
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot5/VERDICT.md",
+    "line": 16,
+    "text": "- Runtime Linux, Python 3.13.16, Ruff 0.15.15; core.abbrev=7. Sandbox thực workspace-write, không giả OS read-only. Header đúng run: Codex 0.163.0, model `gpt-6.1-sol`, effort `xhigh`, session `01a14ca3-86eb-7023-906e-1602c6522634`; header chỉ chứng minh CLI công bố. Executor họ Claude theo spec, runtime receipt executor chưa được cấp. GitHub submitter null, context reviewer độc lập."
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot5/VERDICT.md",
+    "line": 86,
+    "text": "Suite nền session 99742 vẫn đang chạy, chưa nhận pass trước terminal rc và marker tổng. `python -B /tmp/wp788-review5.DEwL1y7g/gates.py` rc=0, dựng hai clone ngoài repo trong MỘT lượt với cùng bootstrap, core.abbrev=7 và origin endpoint thật, chỉ clone từ đường dẫn local, không gọi remote. `gates-delta.json` lưu từng command/cwd/rc/output và identity."
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot2/VERDICT.md",
+    "line": 14,
+    "text": "- Cặp khai báo: executor `anthropic_claude / claude-opus-5-5 / claude_code / machine/local`, họ `claude` (spec; chưa được cấp runtime receipt executor để đo lại). Reviewer `openai_codex / codex_cli / machine`, họ `openai`; header đúng run `b211e5387ca246dc9ba646e14f7a6a4d`: Codex v0.163.0, `model: gpt-6.1-sol`, `reasoning effort: xhigh`, session `01a14c65-44bf-7641-a8fe-e3d60a4c942d`. Header chỉ là CLI công bố, không chứng minh model từng request. Context reviewer mới; không dùng context executor."
+  },
+  {
+    "path": "cay-kho/ops/land/pr818-wp788-provenance/verdict-luot2/VERDICT.md",
+    "line": 194,
+    "text": "HINT thuần TEST — **chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit**. Bản sao scratch đã chạy kiểm targeted như trên; checkout được review không bị sửa. File `/tmp/wp788-r2.AITtnb/HINT-F03.patch`:"
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/VERDICT.md",
+    "line": 22,
+    "text": "| `required-mutation-coverage-missing` | P2 | test:6003, test:6102, test:6153, test:6166, test:6169, test:6174 | Nền có **63 ca r812**; **61 mutant r812** khai báo đều giết đúng ca đích. Nhưng mutant bỏ uniqueness slug **sống 63/63**. Bảng candidate vẫn không có mutant r812 nhắm init; ca dependency thực sự vắng, verdict path vắng và verdict âm hợp lệ chưa có mutant chọn làm đích. Reviewer đã chạy ba mutant bổ sung: các ca ấy đỏ đúng chốt. | Khóa từng mục nghiệm thu bằng mutant r812 đúng yếu tố; thêm ca slug trùng và các biểu hiện scope/schema ở trên. Dùng baseline H/CLI thật cho nghiệm thu. HINT bổ sung ca/mutant và điều chỉnh mutant khi có hai chốt cùng bảo vệ một yếu tố. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/VERDICT.md",
+    "line": 112,
+    "text": "| Verdict âm, slug ngoài H | `slug_ngoai_bang_lop` | Đạt; baseline âm đúng bảng ở `verdict_am_dung_bang_lop`, nhưng **ca dương ấy chưa có mutant candidate chọn làm đích**. Mutant reviewer chặn âm hợp lệ làm đỏ đúng membership. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/VERDICT.md",
+    "line": 158,
+    "text": "[HINT.patch](HINT.patch) là diff gợi ý trên exact head, chỉ chạm hai tệp Python trong write set. Sinh và chạy trong cây riêng của reviewer; **chưa áp/chạy trên cây thật**. Executor cần tự tái dẫn xuất, tự đo và chịu trách nhiệm tích hợp. Không có nội dung pháp lý hoặc payload nhạy cảm được soạn để thử."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-4-codex/VERDICT.md",
+    "line": 160,
+    "text": "`git apply --check` trên bản sao đúng SHA dòng 1: **rc=0**, không áp vào KHO ([HINT_APPLY_CHECK.json](HINT_APPLY_CHECK.json)). Trên cây hint, **74/74 ca r812 xanh**; **73 mutant r812 đầu tiên** đều giết đúng target, sau đó thêm và chạy riêng mutant parser sâu thứ **74**, cũng bị giết vì quay lại đúng RecursionError của chỗ parse lease. Bằng chứng: [HINT_FINAL.jsonl](HINT_FINAL.jsonl), [HINT_PARSER.json](HINT_PARSER.json). Việc thêm mutant cuối chỉ thêm mục trong bảng test, không đổi mã sản phẩm hay 74 ca nền đã đo. Chưa chạy lại toàn bộ suite legacy trên hint; kết quả toàn suite ở trên thuộc exact head được review."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+    "line": 25,
+    "text": "| stop-validation-order | P2 | pl:1014, pl:1160, pl:1213, pl:1225, pl:2607 | Ở trần vòng, review có `--codex-call`/receipt không tồn tại trả rc=3 và **đổi state**, còn `attempt_open=true`, chưa ghi review. Ở trần attempt, doctor path không tồn tại cũng đổi state thành `blocked` trước kiểm input. | Tách pha xác thực khỏi pha ghi sổ/dừng; cửa khép lượt ghi đủ kết quả trước xét trần. Gom same-failure và rescue vào `_xet_dung`. HINT minh hoạ. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+    "line": 44,
+    "text": "`stop-validation-order`: `_xet_dung(record-review)` được gọi trước xác minh codex-call và receipt, có thể ghi rescue rồi mới thấy input hỏng. Ở cửa begin, nó chạy trước xác minh doctor. Ngoài lỗi I4, cửa đóng review bị trần vòng chặn trước khi ghi kết quả đang mở (I5). M4 cũng chưa thực hiện việc gom mọi stop: same-failure và post-review budget vẫn nằm ngoài helper. Hành vi legacy cần giữ riêng theo I9; các phản chứng này dùng `luat_adr0054=true`. Trường hợp invalid review đã đo: review count giữ 1, attempt đang mở vẫn true, nhưng state chuyển blocked."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+    "line": 97,
+    "text": "- Đã đo `_che_do_0054` với Git thật: baseline true; thiếu khai, khai hai dòng, OID chứa ADR nhưng không đưa ADR vào, thiếu cụm kích hoạt, protocol còn chưa kích hoạt, clone shallow đều false (`EXTRA.jsonl`). Đây là phép đo reviewer, không lấp phần thiếu test/mutant trong candidate."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+    "line": 112,
+    "text": "**HINT và phần chưa xác minh**"
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+    "line": 116,
+    "text": "HINT **chưa phải bản sửa đủ nghiệm thu**: bổ sung hợp đồng readback jobs/biên nhận connector cần fixture, schema và mutant tương ứng; cần kiểm đủ mọi kiểu dữ liệu mới và dọn snapshot tạm. Chưa chạy suite sản phẩm trên HINT và không khai các finding đã đóng. HINT không tối ưu theo ngân sách 450 dòng; executor phải thiết kế/refactor trong trần hoặc xin chủ kho điều chỉnh scope, không nhập nguyên xi rồi coi là đạt. Đặc biệt phải sửa fixture dương để có H và provenance thật trước khi đánh giá bản vá."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r1-g2-exec-review-1-codex/VERDICT.md",
+    "line": 118,
+    "text": "Ngoài phạm vi, không tính hạng: `mo-lai`, `cho_chu_kho`, checkpoint mới (#813), vòng vá P3 (#814), generation kế tiếp (#815), ghi số lần đẩy và kích hoạt (#816). Các lỗi ở cửa hiện hữu #812 được phân hạng ở trên; không đưa việc chưa làm các packet sau vào số finding. Không merge/push/đăng verdict ra dịch vụ ngoài."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-5-codex/VERDICT.md",
+    "line": 163,
+    "text": "[HINT.patch](HINT.patch) là diff gợi ý từ cây riêng trên exact head dòng 1, chỉ chạm hai tệp Python trong write set; **chưa áp/chạy trên KHO**. Executor tự tái dẫn xuất, tự đo và chịu trách nhiệm tích hợp. Không có payload nhạy cảm được soạn để thử."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-7-codex/VERDICT.md",
+    "line": 157,
+    "text": "[HINT.patch](HINT.patch) là diff gợi ý từ cây riêng trên exact head dòng 1, chỉ chạm hai tệp Python trong write set. **Chưa áp/chạy trên KHO.** Executor tự tái dẫn xuất, tự đo và chịu trách nhiệm tích hợp. `git apply --check` trên bản sao exact head: **rc=0**. [HINT_APPLY_CHECK.log](HINT_APPLY_CHECK.log)."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-2-codex/VERDICT.md",
+    "line": 128,
+    "text": "Đúng **3 đường dẫn**, **435 ≤ 450**, đạt ADR-0053. HINT là dữ liệu gợi ý, chưa phải diff sản phẩm đủ nghiệm thu hay phương án bảo đảm nằm trong trần nếu chép nguyên vào candidate."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-2-codex/VERDICT.md",
+    "line": 134,
+    "text": "Nhãn: **“chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit”**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-3-codex/VERDICT.md",
+    "line": 90,
+    "text": "| Executor AG/Gemini hợp lệ | `executor_antigravity_hop_le` | **Chưa đủ baseline luồng**: predicate nội bộ, context tự dựng, spec hash không thật. Reviewer đã đo CLI AG/Gemini xanh và AG/openai đỏ như trên. |"
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-3-codex/VERDICT.md",
+    "line": 145,
+    "text": "Nhãn: **“chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit”**."
+  },
+  {
+    "path": "cay-kho/ops/land/pr836-wp812-provenance/verdict/wp812-r2-g3-exec-review-3-codex/VERDICT.md",
+    "line": 149,
+    "text": "`HINT_CHECK.jsonl`: 12 ca gợi ý chạy trên head, **8 đỏ** đúng lỗi sản phẩm và **4 xanh**. Bốn ca xanh (SHA receipt, lease ID, transport executor, dependency vắng) lần lượt **đỏ đúng rc/state** khi gỡ riêng chốt của chúng. Không có lỗi import/setup vô can. `HINT_TESTS.py` là nội dung test được chèn; `HINT_RUN.py` là runner phép đo. Patch chưa phải bản sửa sản phẩm đủ nghiệm thu; hướng sửa nằm trong bảng lớp. Executor cần tái dẫn xuất, thêm mutant mục tiêu và chạy lại gate."
+  }
+]

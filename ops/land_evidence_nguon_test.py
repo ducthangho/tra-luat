@@ -36,6 +36,10 @@ PROV = "pr9001-thu-provenance"
 L6_TRUONG = ("post_merge_checks", "bookkeeping")   # chép riêng, không đọc từ bộ kiểm: bỏ một trường ở đó ⇒ c16 ĐỎ
 KY_VONG_SO_MIEN_TRU = 28
 KY_VONG_VAN_TAY_MIEN_TRU = "5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257"
+# L7 — cùng cách chép riêng, đo trên `f577ab5` (27-10-2026): 3 hồ sơ khai DAT thiếu `thuc_thi`. Đổi danh sách ⇒ c19 ĐỎ.
+L7_KHOA = ("model", "effort", "sandbox_mode")   # chép riêng: bỏ một khoá ở bộ kiểm ⇒ c17 ĐỎ
+KY_VONG_SO_MIEN_TRU_L7 = 3
+KY_VONG_VAN_TAY_MIEN_TRU_L7 = "f70596f243a6da93b79e01c50cee6f4ae9932bf04d399fb674cbc12c44aa5e78"
 
 
 class TinHieuChotCa(AssertionError):
@@ -342,6 +346,60 @@ def c16_l6_landed_true_phai_co_phan_hoan_tat():
     ky("post_merge_checks: 'CHO_DIEN'\n", None, 0, "không có trang_thai_packet.landed ⇒ L6 không áp")
 
 
+P7 = {"run.json": "{}"}
+DU7 = {k: "measured — run.json" for k in L7_KHOA}
+
+
+def hs7(muc, thuc_thi=None):
+    """Hồ sơ L7: `assurance_81.reviewer_assurance_81 = muc`; `thuc_thi` dict ⇒ mapping, chuỗi ⇒ vô hướng, None ⇒ không có."""
+    hs = f"assurance_81:\n  reviewer_assurance_81: {muc}\n"
+    if isinstance(thuc_thi, dict):
+        return hs + "  thuc_thi:\n" + "".join(f"    {k}: '{v}'\n" for k, v in thuc_thi.items())
+    return hs + (f"  thuc_thi: '{thuc_thi}'\n" if thuc_thi is not None else "")
+
+
+@ca
+def c17_l7_khai_dat_phai_do_thuc_thi():
+    """#748 L7: khai §8.1 DAT đòi `thuc_thi.{model,effort,sandbox_mode}` là lời khai measured (connector P1 PR #934)."""
+    ky(hs7("DAT", DU7), P7, 0, "DAT đủ ba khoá measured có nguồn")
+    ky(hs7("DAT"), P7, 1, "DAT thiếu thuc_thi", "L7 $.assurance_81.thuc_thi:")
+    ky(hs7("DAT", "measured — run.json"), P7, 1, "thuc_thi vô hướng", "L7 $.assurance_81.thuc_thi:")
+    for k in L7_KHOA:
+        ky(hs7("DAT", {x: v for x, v in DU7.items() if x != k}), P7, 1, f"thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
+        for sai in ("not_measured — run.json", "da do — run.json", "measuredx run.json"):
+            ky(hs7("DAT", DU7 | {k: sai}), P7, 1, f"{k} = {sai!r}", f"L7 $.assurance_81.thuc_thi.{k}:")
+    ky(hs7("DAT", DU7 | {"model": "measured — khong-co.json"}), P7, 1, "measured không nguồn thì L1 bắt", "L1 $.assurance_81")
+    for muc in ("Dat", "' DAT '", "dat", "ĐẠT", "Đạt", "'  đạt  '"):   # chuẩn hoá: hoa thường, khoảng trắng, dấu tiếng Việt
+        ky(hs7(muc), P7, 1, f"biến thể {muc!r}", "L7 $.assurance_81.thuc_thi:")
+    for muc in ("CHUA_DAT", "CHUA DAT", "'chua dat'", "CHƯA ĐẠT", "DAT_MOT_PHAN", "1", "true", "null", "[DAT]"):
+        ky(hs7(muc), P7, 0, f"{muc!r} không phải DAT ⇒ L7 không áp")
+    for hs in ("assurance_81: DAT\n", "assurance_81: [{reviewer_assurance_81: DAT}]\n", "x: {reviewer_assurance_81: DAT}\n"):
+        ky(hs, P7, 0, f"không phải mapping assurance_81 ở gốc ⇒ L7 không áp: {hs.strip()!r}")
+
+
+@ca
+def c18_l7_mien_tru_theo_bam():
+    hs = hs7("DAT")
+    with cay(hs, P7) as goc:
+        m = nap()
+        m.MIEN_TRU_L7[TEN] = hashlib.sha256(hs.encode()).hexdigest()
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and "L7 miễn trừ" in ra, f"băm khớp ⇒ miễn trừ L7 có ghi nhận: rc={rc} {ra[-200:]}")
+        for nd, mong in ((hs + " ", 1), (hs7("DAT", DU7), 0)):
+            (goc / "ops/land" / TEN).write_text(nd, encoding="utf-8", newline="")
+            rc, ra = kiem(m, goc)
+            bang(rc == mong and "L7 mất miễn trừ" in ra and "L7 miễn trừ" not in ra,
+                 f"băm lệch ⇒ mất miễn trừ, kiểm đủ (mong rc={mong}): rc={rc} {ra[-300:]}")
+
+
+@ca
+def c19_l7_danh_sach_dong_bang():
+    ds = nap().MIEN_TRU_L7
+    van_tay = hashlib.sha256(json.dumps(sorted(ds.items())).encode()).hexdigest()
+    bang(len(ds) == KY_VONG_SO_MIEN_TRU_L7 and van_tay == KY_VONG_VAN_TAY_MIEN_TRU_L7,
+         f"MIEN_TRU_L7 trôi khỏi ảnh chụp: {len(ds)} tên, vân tay {van_tay[:12]}…")
+
+
 @ca
 def c12_dong_cuoi_dung_dinh_dang():
     import re
@@ -427,6 +485,17 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L6_P_phan_tu_so", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, (dict, int, float)) for x in ds)", "c16"),
     ("L6_Q_list_la_trang_thai", 'if isinstance(tt, dict) and "landed" in tt:   # L6',
      'if isinstance(tt, (dict, list)) and "landed" in tt:   # L6', "c16"),
+    ("L7_bo_ca_luat", '== "DAT":   # L7', '== "KHONG_BAO_GIO":   # L7', "c17"),
+    ("L7_bo_strip", "v.strip().upper()", "v.upper()", "c17"),
+    ("L7_bo_viet_hoa", ".strip().upper())", ".strip())", "c17"),
+    ("L7_bo_bo_dau", 'v = "".join(c for c in unicodedata.normalize(', 'v = v or "".join(c for c in unicodedata.normalize(', "c17"),
+    ("L7_thieu_thuc_thi_chi_ghi_chu", 'vp.append(f"L7 $.assurance_81.thuc_thi: khai', 'ghi.append(f"L7 $.assurance_81.thuc_thi: khai', "c17"),
+    ("L7_bo_kiem_khoa", "        elif not mien:\n", "        elif False:\n", "c17"),
+    ("L7_khong_doi_measured", " and RE_KHAI_DO.match(tt7[k]))]", ")]", "c17"),
+    ("L7_bo_sandbox_mode", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "effort")', "c17"),
+    ("L7_mien_tru_bo_so_bam", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = bam is not None", "c18"),
+    ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
+    ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),

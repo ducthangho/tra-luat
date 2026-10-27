@@ -2558,10 +2558,14 @@ NO_CAU_DONG_BANG = frozenset({
 
 
 def _kho_cau(tmp: Path):
-    """Kho git có lịch sử: master `B0 → M`; nhánh rẽ `re` từ `B0` có `X` (KHÔNG vào master)."""
+    """Kho git có lịch sử: master `B0 → M`; nhánh rẽ `re` từ `B0` có `X` (KHÔNG vào master).
+
+    Ngày commit GHIM ⇒ SHA tất định. Bản trước để ngày trôi, nên tiền tố 7 ký tự của `M` có lúc toàn chữ
+    số và `c74` đỏ trên CI (run 40479809106) mà xanh tại chỗ — một ca chập chờn theo SHA ngẫu nhiên."""
     E = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
          "GIT_COMMITTER_EMAIL": "t@t", "PATH": os.environ.get("PATH", ""),
-         "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull}
+         "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
+         "GIT_AUTHOR_DATE": "2026-01-01T00:00:00Z", "GIT_COMMITTER_DATE": "2026-01-01T00:00:00Z"}
 
     def g(*a):
         r = subprocess.run(["git", "-C", str(tmp), *a], capture_output=True, text=True, env=E)

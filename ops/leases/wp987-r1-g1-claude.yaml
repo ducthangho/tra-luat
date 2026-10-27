@@ -79,8 +79,15 @@ heartbeat_at: '2026-10-27T13:15:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat van hanh ADR-0056 (7129f7d) => 360 phut.'
-lease_until: '2026-10-29T13:15:00Z'
-lease_expires_at_utc: '2026-10-29T13:15:00Z'
+lease_until: '2026-10-27T15:14:00Z'
+lease_expires_at_utc: '2026-10-27T15:14:00Z'
+rut_han:
+  han_cu: '2026-10-29T13:15:00Z'
+  han_moi: '2026-10-27T15:14:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #987 da merge: PR #991 (head a2e2ebf812f57254affe9344fd02530efa1a0130, merge 2bcd8f31111d354e1e72934a3c22aba8b14675f0, 2026-10-27T15:11:26Z, merged_by ducthangho); ghi ho #987 issuecomment-6445705447.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem cua #987. Tien le wp834-r1-g1-claude (388ec45).'
+  ghi_boi: claude-orchestrator-session session_01FLVLxi5gKZgtVvbuTCEqEn (theo ghi ho #987 issuecomment-6445705447)
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0

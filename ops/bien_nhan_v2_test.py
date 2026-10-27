@@ -2487,7 +2487,7 @@ def c68_service_xoa_hang_doi_hanh_vi_cli_desktop_van_qua():
 # Đặc tả `ops/specs/NO-CAU-LICH-SU-BIEN-NHAN.md` A1–A6. Mỗi ca dựng kho git THẬT có lịch sử rồi đổi
 # đúng MỘT yếu tố; mỗi chốt có đột biến riêng trong `_dot_bien`. Biên nhận fixture đi qua `allowlist`
 # tiêm vào (băm đúng) nên chỉ ba luật mới lên tiếng — lược đồ v2 có ca riêng ở trên.
-# CHÉP TAY từ `--sinh-no-cau-lich-su` trên base `e3ea139` (27-10-2026, 66 mục). KHÔNG import từ cổng:
+# CHÉP TAY từ `--sinh-no-cau-lich-su` trên base `e3ea139` (27-10-2026, 66 mục; bỏ 2 L-SURFACE trích dẫn sau review connector PR #976 ⇒ 64). KHÔNG import từ cổng:
 # một oracle sinh từ chính thứ nó kiểm thì co theo mỗi lần cổng bị nới.
 NO_CAU_DONG_BANG = frozenset({
     ("ci-g5-cong-cu-chia-manh-r1-review-1-codex-verdict.receipt.yaml", "anchor.mo_ta", "L-ANCESTRY"),
@@ -2544,8 +2544,6 @@ NO_CAU_DONG_BANG = frozenset({
     ("pr896-review-7-codex-verdict.receipt.yaml", "anchor.mo_ta", "L-ANCESTRY"),
     ("pr896-review-7-codex-verdict.receipt.yaml", "verdict_path", "L-SURFACE"),
     ("pr896-review-8-codex-verdict.receipt.yaml", "anchor.mo_ta", "L-ANCESTRY"),
-    ("pr896-review-8-codex-verdict.receipt.yaml", "verdict_path", "L-SURFACE"),
-    ("pr915-review-1-codex-verdict.receipt.yaml", "verdict_path", "L-SURFACE"),
     ("r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml", "anchor.gioi_han", "L-ANCESTRY"),
     ("r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml", "land.head_da_doi_TRUOC_merge.vi_sao", "L-ANCESTRY"),
     ("wp461-review-1-codex-verdict.receipt.yaml", "anchor.cuong_do", "L-ANCESTRY"),
@@ -2685,6 +2683,22 @@ def c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan():
              f"đòi đúng bốn trường bị nhận (không có `chi_trich`), được {truong}: {loi}")
 
 
+def _kho_surface(tmp: Path, d: dict, run_json, verdict: str):
+    """Kho git THẬT cho L-SURFACE (đặc tả: mọi ca có lịch sử thật — codex CLI lượt 1, P2): commit
+    biên nhận + `run.json` (None = không tạo) + verdict, rồi đòi HEAD chứa đúng các tệp ấy."""
+    import yaml as _y
+    k = _kho_cau(tmp)
+    (tmp / "ops/reviews/v").mkdir(parents=True, exist_ok=True)
+    if run_json is not None:
+        (tmp / "ops/reviews/v/run.json").write_text(run_json, encoding="utf-8")
+    (tmp / "ops/reviews/v.md").write_text(verdict, encoding="utf-8")
+    al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _y.safe_dump(d, allow_unicode=True)})
+    co = k["g"]("ls-tree", "-r", "--name-only", "HEAD", "--", "ops/reviews").split()
+    dung("ops/reviews/v.md" in co and "ops/reviews/r.receipt.yaml" in co
+         and (run_json is None) == ("ops/reviews/v/run.json" not in co), f"fixture: HEAD thiếu tệp: {co}")
+    return al
+
+
 def _bn_surface(rj, dong_verdict, caveat=False):
     d = {"schema_version": 1, "verdict_path": "ops/reviews/v.md",
          "model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli", "run_json": rj}}
@@ -2698,7 +2712,6 @@ def c73_A4_surface_verdict_doi_chieu_run_json():
     """A4 (M3): run.json `codex_cli` + verdict khai `codex_service` + thiếu caveat ⇒ rc=1; có caveat
     ⇒ rc=0; verdict khai đúng ⇒ rc=0; `run_json` trỏ tệp không có ⇒ không áp, đếm vào `chua_do_duoc`."""
     import json as _j
-    import hashlib as _h
     for ten, rj, dong, cv, rc_doi, sf in (
             ("khai-sai-thieu-caveat", "ops/reviews/v/run.json", "execution_surface: codex_service", False, 1, 0),
             ("khai-sai-co-caveat", "ops/reviews/v/run.json", "execution_surface: codex_service", True, 0, 0),
@@ -2707,12 +2720,7 @@ def c73_A4_surface_verdict_doi_chieu_run_json():
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             d, _ = _bn_surface(rj, dong, cv)
-            _cay(tmp, {"r.receipt.yaml": d})
-            (tmp / "ops/reviews/v").mkdir(parents=True, exist_ok=True)
-            (tmp / "ops/reviews/v/run.json").write_text(_j.dumps({"execution_surface": "codex_cli"}),
-                                                        encoding="utf-8")
-            (tmp / "ops/reviews/v.md").write_text(f"verdict: approve\n{dong}\n", encoding="utf-8")
-            al = {"r.receipt.yaml": _h.sha256((tmp / bnv2.THU_MUC / "r.receipt.yaml").read_bytes()).hexdigest()}
+            al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}), f"verdict: approve\n{dong}\n")
             rc, loi, tk = _kiem_cau(tmp, al)
             bang(rc == rc_doi, f"{ten}: đòi rc={rc_doi}, được {rc}: {loi} {tk['chua_do']}")
             bang(len(tk["surface_chua_do"]) == sf,
@@ -2762,6 +2770,166 @@ def c76_A6_kho_that_voi_no_RONG_phai_DO_dung_bang_so_no():
          f"đòi {len(bnv2.NO_CAU_LICH_SU)} dòng ba luật và không dòng nào khác, được {len(cau)}/{len(loi)}")
     for lu in (bnv2.LUAT_REVIEW, bnv2.LUAT_ANCESTRY, bnv2.LUAT_SURFACE):
         bang(any(x.startswith(f"[{lu}]") for x in cau), f"luật {lu} không bắt được gì trên kho thật")
+
+
+@ca
+def c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet():
+    """Connector PR #976 (P2) + codex CLI lượt 1 (P1): `run.json` CÓ mà hỏng (JSON lỗi / không phải
+    ánh xạ / thiếu trường) hoặc verdict không giải mã được ⇒ rc=2, kể cả khi mục ấy đang là NỢ — không
+    được thành `NỢ CHẾT`. Miễn trừ "không áp" của A4 chỉ dành cho tệp VẮNG (`c73` giữ ca ấy)."""
+    khoa = ("r.receipt.yaml", "verdict_path", bnv2.LUAT_SURFACE)
+    for ten_hong, rj_text, verdict in (("json-loi", "{khong phai json", "execution_surface: codex_service\n"),
+                                       ("khong-phai-anh-xa", "[]", "execution_surface: codex_service\n"),
+                                       ("thieu-truong", "{}", "execution_surface: codex_service\n"),
+                                       ("verdict-byte-hong", '{"execution_surface": "codex_cli"}', None)):
+        for ten_no, no in (("khong-no", frozenset()), ("dang-la-no", frozenset({khoa}))):
+            ten = f"{ten_hong}/{ten_no}"
+            with tempfile.TemporaryDirectory() as t:
+                tmp = Path(t)
+                d, _ = _bn_surface("ops/reviews/v/run.json", "")
+                al = _kho_surface(tmp, d, rj_text, verdict or "x\n")
+                if verdict is None:
+                    (tmp / "ops/reviews/v.md").write_bytes(b"execution_surface: \xff\n")
+                rc, loi, tk = _kiem_cau(tmp, al, no)
+                bang(rc == 2 and not loi and any(x.startswith("[L-SURFACE]") for x in tk["chua_do"]),
+                     f"{ten}: đòi rc=2 + KHÔNG ĐO ĐƯỢC L-SURFACE, không dòng ĐỎ; được rc={rc} loi={loi} "
+                     f"chua={tk['chua_do']}")
+
+
+def _commit_tien_to_so(tmp: Path, k: dict, dk=str.isdigit, nhan="so", tran=2000):
+    """Commit rẽ từ B0 có 7 ký tự đầu thoả `dk` (toàn chữ số / toàn chữ cái) — tìm bằng `commit-tree` với
+    ngày GHIM, nên tất định."""
+    E = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+         "GIT_COMMITTER_EMAIL": "t@t", "PATH": os.environ.get("PATH", ""),
+         "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
+         "GIT_AUTHOR_DATE": "2026-01-01T00:00:00Z", "GIT_COMMITTER_DATE": "2026-01-01T00:00:00Z"}
+    cay = k["g"]("rev-parse", f"{k['B0']}^{{tree}}")
+    for i in range(tran):
+        r = subprocess.run(["git", "-C", str(tmp), "commit-tree", cay, "-p", k["B0"], "-m", f"{nhan}{i}"],
+                           capture_output=True, text=True, env=E)
+        dung(r.returncode == 0, f"commit-tree hỏng: {r.stderr[:200]}")
+        sha = r.stdout.strip()
+        if dk(sha[:7]):
+            return sha
+    dung(False, f"không tìm được commit tiền tố `{nhan}` trong {tran} lượt")
+
+
+@ca
+def c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra():
+    """Connector PR #976 (P2) + codex CLI lượt 1 (P1): OID viết tắt toàn chữ số / toàn chữ cái là OID thật
+    — phải tra; số run Actions hay từ hex thường không tra ra commit thì KHÔNG phải ứng viên (không vi phạm,
+    không KHÔNG ĐO ĐƯỢC)."""
+    for nhan, dk, tran in (("so", str.isdigit, 2000), ("chu", str.isalpha, 30000)):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            k = _kho_cau(tmp)
+            sha = _commit_tien_to_so(tmp, k, dk, nhan, tran)
+            k["g"]("merge", "-q", "--no-ff", sha, "-m", "merge")
+            dung(bnv2._commit_cua(tmp, sha[:7]) == sha, f"{nhan}: fixture tiền tố không tra ra đúng commit")
+            al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
+                1, f"anchor:\n    mo_ta: Commit {sha[:7]} chua vao master.\n"
+                   "run:\n    ghi_chu: Run 40268583940 va deadbeef khong phai to tien cua master.\n")})
+            rc, loi, tk = _kiem_cau(tmp, al)
+            bang(rc == 1 and len(loi) == 1 and loi[0].startswith("[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta`"),
+                 f"{nhan}: đòi đúng một vi phạm ở `anchor.mo_ta`, số run/từ hex không tính; được rc={rc} "
+                 f"loi={loi} chua={tk['chua_do']}")
+
+
+@ca
+def c79_dong_TRICH_DAN_hien_vat_khac_khong_phai_tu_khai_surface():
+    """Connector PR #976 (P2): verdict tự khai ĐÚNG `codex_cli` và TRÍCH dòng `tệp.md:6:` của hiện vật
+    khác có `codex_service` ⇒ không vi phạm (pr896-review-8 dòng 215 là ca thật). Trích dẫn đứng SAU một
+    khai báo sai thì KHÔNG miễn khai báo ấy."""
+    import json as _j
+    for ten, verdict, rc_doi in (
+            ("trich-dan-truoc", "execution_surface: codex_cli\n"
+             "ops/land/khac/luot5-verdict.md:6: Reviewer; execution surface `codex_service` (API agent)\n", 0),
+            ("trich-dan-sau", "execution_surface: codex_service (so ops/land/khac/luot5-verdict.md:6)\n", 1)):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            d, _ = _bn_surface("ops/reviews/v/run.json", "")
+            al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}), verdict)
+            rc, loi, tk = _kiem_cau(tmp, al)
+            bang(rc == rc_doi, f"{ten}: đòi rc={rc_doi}, được {rc}: loi={loi}")
+
+
+@ca
+def c80_moc_chi_blame_DUNG_cau_duoc_mien():
+    """Connector PR #976 (P2): câu CŨ nhắc cùng OID ở commit trước mốc không được kéo commit ấy vào phép
+    kiểm mốc của câu MỚI. Commit C1 nhắc X; commit D; commit C2 thêm câu "X chưa vào master" + `dung_tai: D`;
+    rồi merge X. Câu mới có mốc hợp lệ ⇒ rc=0."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        x = k["X"][:7]
+        _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
+            1, f"anchor:\n    mo_ta: >-\n        Truoc het, nhanh re co commit {x}.\n")})
+        (tmp / "d.txt").write_text("d\n", encoding="utf-8"); k["g"]("add", "-A"); k["g"]("commit", "-qm", "D")
+        d_sha = k["g"]("rev-parse", "HEAD")
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
+            1, f"anchor:\n    mo_ta: >-\n        Truoc het, nhanh re co commit {x}.\n"
+               f"        Commit {x} chua vao master.\n    dung_tai: {d_sha}\n")})
+        k["g"]("merge", "-q", "--no-ff", "re", "-m", "merge re")
+        rc, loi, tk = _kiem_cau(tmp, al)
+        bang(rc == 0 and not loi, f"mốc hợp lệ của câu mới bị bác vì câu cũ: rc={rc} loi={loi} chua={tk['chua_do']}")
+
+
+@ca
+def c81_moc_muon_KHONG_tay_trang_duoc_cau_cu_bang_khoang_trang():
+    """codex CLI lượt 1 (P1): câu có từ commit A; commit B về sau; commit C chỉ GẤP LẠI dòng/thêm khoảng
+    trắng cho câu cũ + `dung_tai: B` ⇒ vẫn rc=1 — mốc phải là tổ tiên của commit ĐẦU TIÊN có câu (A)."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        m = k["M"][:7]
+        _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {m} chua vao master.\n")})
+        (tmp / "b.txt").write_text("b\n", encoding="utf-8"); k["g"]("add", "-A"); k["g"]("commit", "-qm", "B")
+        b_sha = k["g"]("rev-parse", "HEAD")
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
+            1, f"anchor:\n    mo_ta: >-\n        Commit {m}  chua\n        vao master.\n    dung_tai: {b_sha}\n")})
+        rc, loi, tk = _kiem_cau(tmp, al)
+        bang(rc == 1 and len(loi) == 1 and loi[0].startswith("[L-ANCESTRY]"),
+             f"mốc muộn + đổi khoảng trắng tẩy trắng được câu cũ: rc={rc} loi={loi} chua={tk['chua_do']}")
+
+
+@ca
+def c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet():
+    """codex CLI lượt 1 (P1): alias vòng (`&a [*a]`, `safe_load` nhận) ⇒ `KhongDoDuoc`, không traceback;
+    alias DÙNG LẠI không vòng vẫn được duyệt theo từng đường (câu vi phạm ở cả hai chỗ đều bị bắt)."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, "cycle: &self [*self]\n")})
+        try:
+            bnv2.kiem(tmp, allowlist=al, no_da_do={}, no_cau_lich_su=frozenset())
+            bang(False, "alias vòng mà `kiem` không ném KhongDoDuoc")
+        except bnv2.KhongDoDuoc as ex:
+            bang("alias" in str(ex), f"KHÔNG ĐO ĐƯỢC sai lý do: {ex}")
+        except Exception as ex:                                   # noqa: BLE001
+            bang(False, f"alias vòng làm `kiem` chết bằng {type(ex).__name__}, không phải KhongDoDuoc")
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
+            1, f"a: &c\n    mo_ta: Commit {k['M'][:7]} chua vao master.\nb: *c\n")})
+        rc, loi, _ = _kiem_cau(tmp, al)
+        truong = sorted(x.split("`")[1] for x in loi)
+        bang(truong == ["a.mo_ta", "b.mo_ta"], f"alias dùng lại phải được duyệt theo cả hai đường: {truong}")
+
+
+@ca
+def c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet():
+    """codex CLI lượt 1 (P1): `execution_surface: codex_cli; execution_surface: codex_service` — theo cả
+    hai thứ tự — vẫn là verdict khai sai ⇒ rc=1."""
+    import json as _j
+    for ten, dong in (("dung-truoc", "execution_surface: codex_cli; execution_surface: codex_service"),
+                      ("sai-truoc", "execution_surface: codex_service; execution_surface: codex_cli")):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            d, _ = _bn_surface("ops/reviews/v/run.json", "")
+            al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}), dong + "\n")
+            rc, loi, _ = _kiem_cau(tmp, al)
+            bang(rc == 1, f"{ten}: khai báo sai trên cùng dòng bị che: rc={rc} loi={loi}")
 
 
 def _chay_1(fn):
@@ -3363,6 +3531,36 @@ def _dot_bien():
         'NO_CAU_LICH_SU: frozenset = frozenset({\n    ("tep-moi.receipt.yaml", "anchor.mo_ta", LUAT_ANCESTRY),\n',
         bo_qua_parity=("NO_CAU_LICH_SU",)),
        "c75_no_cau_lich_su_CHI_CO_LAI_va_tro_tep_co_that", "M4: danh sách nợ nở thêm", doi_chung=DC)
+    # --- connector PR #976 (bốn P2): mỗi bản vá một đột biến trả nó về hành vi cũ.
+    do("m83_run_json_hong_thanh_khong_ap", lambda: _dot_bien_tep(
+        "        if not s_that:\n            chua[k_sf]",
+        "        if not s_that:\n            sf_chua.append(rj)\n            continue\n            chua[k_sf]"),
+       "c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet", "run.json hỏng đọc thành 'không áp'",
+       doi_chung=DC)
+    do("m84_bo_OID_toan_chu_so", lambda: _dot_bien_tep(
+        "                        c = _commit_cua(root, x)\n",
+        "                        if not _oid_tron(x):\n                            continue\n"
+        "                        c = _commit_cua(root, x)\n"),
+       "c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra", "loại token toàn chữ số trước khi tra", doi_chung=DC)
+    do("m85_quet_ca_dong_trich_dan", lambda: _dot_bien_tep(
+        "            if _RE_TRICH_DAN.search(dong[:m.start()]):\n                continue\n", ""),
+       "c79_dong_TRICH_DAN_hien_vat_khac_khong_phai_tu_khai_surface", "quét cả dòng trích dẫn", doi_chung=DC)
+    do("m86_lay_commit_CUOI_co_cau", lambda: _dot_bien_tep(
+        '"log", "--format=%H", "--reverse", "--", rel', '"log", "--format=%H", "--", rel'),
+       "c81_moc_muon_KHONG_tay_trang_duoc_cau_cu_bang_khoang_trang",
+       "commit thêm câu = commit GẦN NHẤT có câu (như blame)", doi_chung=DC)
+    do("m87_lay_commit_DAU_cua_TEP", lambda: _dot_bien_tep(
+        "        if _co_cau(van, cau):\n", "        if True:\n"),
+       "c80_moc_chi_blame_DUNG_cau_duoc_mien", "commit thêm câu = commit đầu của tệp (câu cũ kéo vào)",
+       doi_chung=DC)
+    do("m88_bo_chot_alias_vong", lambda: _dot_bien_tep(
+        '        if id(node) in _dang:\n            raise _AliasVong(duong or "<gốc>")\n', ""),
+       "c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet", "alias vòng chết bằng RecursionError",
+       doi_chung=DC)
+    do("m89_chi_xet_khai_bao_dau_tren_dong", lambda: _dot_bien_tep(
+        "        ms = list(_RE_DONG_SURFACE.finditer(dong))\n",
+        "        ms = list(_RE_DONG_SURFACE.finditer(dong))[:1]\n"),
+       "c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet", "chỉ khai báo đầu tiên trên dòng", doi_chung=DC)
     return ra
 
 

@@ -965,9 +965,15 @@ LUAT_SURFACE = "L-SURFACE"
 CAVEAT_SURFACE = "VERDICT-KHAI-SAI-EXECUTION-SURFACE"
 # Câu = đoạn giữa hai dấu kết câu, đo trên scalar ĐÃ NỐI (YAML gấp `>-`, khối `|` thì gộp khoảng trắng).
 _RE_CAU = re.compile(r"(?<=[.;!?])\s+")
-# OID 7–40 hex thường, có ít nhất một chữ số VÀ một chữ cái: số run Actions (toàn chữ số) và từ hex
-# toàn chữ (`deadbeef`) không phải ứng viên. Sha256 64 hex không lọt vì ranh giới hai đầu.
-_RE_OID = re.compile(r"(?<![0-9A-Za-z_])(?=[0-9a-f]*[0-9])(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9A-Za-z_])")
+# Ứng viên OID = MỌI token 7–40 hex thường (sha256 64 hex không lọt vì ranh giới hai đầu). Token TRỘN chữ
+# số và chữ cái mà không tra được commit ⇒ KHÔNG ĐO ĐƯỢC. Token THUẦN chữ số (số run Actions) hoặc thuần
+# chữ (`deadbeef`) vẫn được TRA — một OID viết tắt toàn chữ số là OID thật (connector PR #976, P2) — nhưng
+# tra không ra thì coi là số/từ thường, không phải OID thiếu.
+_RE_OID = re.compile(r"(?<![0-9A-Za-z_])[0-9a-f]{7,40}(?![0-9A-Za-z_])")
+
+
+def _oid_tron(x: str) -> bool:
+    return any(c.isdigit() for c in x) and any(c.isalpha() for c in x)
 # Khớp trên câu ĐÃ BỎ DẤU và hạ chữ thường, nên biến thể có dấu / không dấu cùng một mẫu.
 _RE_CHUA_REVIEW = re.compile(
     r"\b(?:chua|khong)\s+(?:tung\s+)?(?:duoc\s+)?(?:re-?)?review"
@@ -980,6 +986,7 @@ _RE_ANCESTRY = re.compile(
     r"|\bnot\s+(?:yet\s+)?(?:an?\s+)?ancestor")
 _RE_DONG_SURFACE = re.compile(r"execution[_ ]surface", re.IGNORECASE)
 _RE_TU = re.compile(r"[a-z][a-z0-9_]*")
+_RE_TRICH_DAN = re.compile(r"[\w./-]+\.[A-Za-z0-9]+:\d+")
 
 # NỢ ĐÃ ĐO của ba luật — (tệp, đường dẫn trường, luật), sinh bằng `--sinh-no-cau-lich-su` trên base
 # `e3ea139` của packet, nhánh mặc định `origin/master` lúc đo. CHỈ ĐƯỢC CO LẠI: mục ngoài danh sách là
@@ -1039,8 +1046,6 @@ NO_CAU_LICH_SU: frozenset = frozenset({
     ("pr896-review-7-codex-verdict.receipt.yaml", "anchor.mo_ta", LUAT_ANCESTRY),
     ("pr896-review-7-codex-verdict.receipt.yaml", "verdict_path", LUAT_SURFACE),
     ("pr896-review-8-codex-verdict.receipt.yaml", "anchor.mo_ta", LUAT_ANCESTRY),
-    ("pr896-review-8-codex-verdict.receipt.yaml", "verdict_path", LUAT_SURFACE),
-    ("pr915-review-1-codex-verdict.receipt.yaml", "verdict_path", LUAT_SURFACE),
     ("r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml", "anchor.gioi_han", LUAT_ANCESTRY),
     ("r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml", "land.head_da_doi_TRUOC_merge.vi_sao", LUAT_ANCESTRY),
     ("wp461-review-1-codex-verdict.receipt.yaml", "anchor.cuong_do", LUAT_ANCESTRY),
@@ -1066,17 +1071,27 @@ def _cac_cau(van: str):
     return [c for c in _RE_CAU.split(" ".join(van.split())) if c]
 
 
-def _duyet_scalar(node, duong="", cha=None):
-    """(đường dẫn trường, scalar chuỗi, mapping gần nhất chứa nó) trên cây ĐÃ COMPOSE — cần node để
-    biết DÒNG của câu (blame) và mapping cha (mốc)."""
+class _AliasVong(Exception):
+    """Đồ thị YAML có alias VÒNG — không duyệt hết được; người gọi chuyển thành KHÔNG ĐO ĐƯỢC."""
+
+
+def _duyet_scalar(node, duong="", cha=None, _dang=()):
+    """(đường dẫn trường, scalar chuỗi, mapping gần nhất chứa nó) trên cây ĐÃ COMPOSE — cần node để biết
+    mapping cha (mốc). `_dang` = danh tính các node TRÊN ĐƯỜNG đang duyệt: alias dùng lại mà không vòng
+    vẫn được duyệt theo từng đường; alias vòng (`&a [*a]`, `safe_load` nhận) thì ném `_AliasVong` thay vì
+    `RecursionError` ngoài bộ phân ba trạng thái (codex CLI lượt 1, P1)."""
     import yaml
+    if isinstance(node, (yaml.MappingNode, yaml.SequenceNode)):
+        if id(node) in _dang:
+            raise _AliasVong(duong or "<gốc>")
+        _dang = _dang + (id(node),)
     if isinstance(node, yaml.MappingNode):
         for k, v in node.value:
             ten = k.value if isinstance(k, yaml.ScalarNode) else "?"
-            yield from _duyet_scalar(v, f"{duong}.{ten}" if duong else ten, node)
+            yield from _duyet_scalar(v, f"{duong}.{ten}" if duong else ten, node, _dang)
     elif isinstance(node, yaml.SequenceNode):
         for i, v in enumerate(node.value):
-            yield from _duyet_scalar(v, f"{duong}[{i}]", cha)
+            yield from _duyet_scalar(v, f"{duong}[{i}]", cha, _dang)
     elif isinstance(node, yaml.ScalarNode) and node.tag.endswith(":str"):
         yield duong, node, cha
 
@@ -1106,37 +1121,52 @@ def _nhanh_mac_dinh(root: Path):
     return None
 
 
-def _commit_them_cau(root: Path, rel: str, node, oid: str):
-    """Tập commit đã thêm các dòng của câu (blame cây làm việc). `None` = KHÔNG ĐO ĐƯỢC.
+def _co_cau(van: str, cau: str) -> bool:
+    """`van` (một phiên bản tệp biên nhận) có scalar chuỗi nào chứa câu `cau` (so trên câu ĐÃ CHUẨN HOÁ)."""
+    import yaml
+    try:
+        cay = yaml.compose(van, Loader=yaml.SafeLoader)
+    except yaml.YAMLError:
+        return False
+    return any(cau in _cac_cau(n.value) for _, n, _ in _duyet_scalar(cay))
 
-    Lấy dòng TRONG phạm vi scalar có chứa `oid`; không dòng nào chứa (chuỗi thoát) thì lấy cả phạm vi.
-    Dòng chưa commit (blame trả 40 số 0) ⇒ đòi mốc là tổ tiên của HEAD."""
-    a = node.start_mark.line + 1
-    b = max(a, node.end_mark.line + (0 if node.end_mark.column == 0 else 1))
-    rc, ra = _git(root, "blame", "--porcelain", "-L", f"{a},{b}", "--", rel)
+
+def _commit_them_cau(root: Path, rel: str, cau: str):
+    """Commit ĐẦU TIÊN trong lịch sử tệp có chứa câu `cau` (đã chuẩn hoá). `None` = KHÔNG ĐO ĐƯỢC.
+
+    Không dùng `git blame` dòng hiện tại. Hai lượt review của PR #976 bác hai mặt của nó: (a) blame mọi
+    dòng scalar có OID kéo commit của một câu CŨ khác vào (connector, P2); (b) blame chỉ nói ai sửa dòng
+    GẦN NHẤT, nên đổi một khoảng trắng / gấp lại dòng là đẩy "commit thêm câu" lên HEAD và mốc muộn được
+    công nhận — tẩy trắng câu cũ (codex CLI lượt 1, P1). Nay so trên câu ĐÃ CHUẨN HOÁ ở từng phiên bản tệp,
+    cũ nhất trước. Câu chỉ có ở cây làm việc ⇒ `{"HEAD"}`. Không theo dõi đổi tên tệp: lịch sử trước khi
+    đổi tên không thấy, nên commit đổi tên bị coi là commit thêm câu (chặt hơn, không lỏng hơn)."""
+    rc, ra = _git(root, "log", "--format=%H", "--reverse", "--", rel, timeout=60)
     if rc != 0:
         return None
-    dong, hien = [], None
-    for x in ra.splitlines():
-        m = re.match(r"([0-9a-f]{40}) \d+ \d+", x)
-        if m:
-            hien = m.group(1)
-        elif x.startswith("\t") and hien:
-            dong.append((hien, x[1:]))
-    chon = [c for c, v in dong if oid in v] or [c for c, _ in dong]
-    if not chon:
-        return None
-    return {"HEAD" if c == "0" * 40 else c for c in chon}
+    for c in ra.split():
+        try:
+            p = subprocess.run(["git", "-C", str(root), "show", f"{c}:{rel}"], capture_output=True, timeout=20)
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if p.returncode != 0:
+            continue                       # commit xoá tệp: phiên bản ấy không có câu
+        try:
+            van = p.stdout.decode("utf-8")
+        except UnicodeDecodeError:
+            return None
+        if _co_cau(van, cau):
+            return {c}
+    return {"HEAD"}
 
 
-def _moc_hop_le(root: Path, rel: str, node, cha, oid: str):
+def _moc_hop_le(root: Path, rel: str, cha, cau: str):
     """True: mốc hợp lệ · False: không mốc / mốc sai · None: KHÔNG ĐO ĐƯỢC."""
     moc = _moc_cua(cha)
     if not moc or not _HEX40.match(moc):
         return False
     if not _commit_cua(root, moc):
         return None
-    them = _commit_them_cau(root, rel, node, oid)
+    them = _commit_them_cau(root, rel, cau)
     if them is None:
         return None
     for c in them:
@@ -1164,12 +1194,18 @@ def _surface_cua_verdict(root: Path, d: dict, s_that: str, be_mat: frozenset):
         return None
     sai = set()
     for dong in van.splitlines():
-        m = _RE_DONG_SURFACE.search(dong)
-        if not m:
-            continue
-        tu = next((t for t in _RE_TU.findall(dong[m.end():]) if t in be_mat), None)
-        if tu and tu != s_that:
-            sai.add(tu)
+        # MỌI khai báo trên dòng, mỗi cái lấy giá trị trong đoạn tới khai báo kế (codex CLI lượt 1, P1: một
+        # khai báo đúng đứng trước từng che khai báo sai đứng sau). Khai báo đứng SAU một trích dẫn
+        # `đường/dẫn.md:6:` (kiểu output `rg -n`) là lời của hiện vật KHÁC, không phải tự khai của lượt này
+        # (connector PR #976, P2: pr896-review-8 dòng 215); trích dẫn đứng SAU khai báo thì không miễn nó.
+        ms = list(_RE_DONG_SURFACE.finditer(dong))
+        for i, m in enumerate(ms):
+            if _RE_TRICH_DAN.search(dong[:m.start()]):
+                continue
+            doan = dong[m.end():ms[i + 1].start() if i + 1 < len(ms) else len(dong)]
+            tu = next((t for t in _RE_TU.findall(doan) if t in be_mat), None)
+            if tu and tu != s_that:
+                sai.add(tu)
     return sai
 
 
@@ -1178,7 +1214,7 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
 
     `tep`: tên → (dict, văn bản). Trả (vi_pham: {(tên, trường, luật): lý do},
     chua: {(tên, trường, luật): lý do}, surface_chua_do: [lý do]) — `chua` là trạng thái thứ ba
-    (rc=2), `surface_chua_do` là ca luật KHÔNG ÁP (run_json khai mà không có tệp) theo đặc tả A4."""
+    (rc=2), `surface_chua_do` là ca luật KHÔNG ÁP (run_json khai mà KHÔNG CÓ tệp) theo đặc tả A4."""
     import json
     import yaml
     vp, chua, sf_chua = {}, {}, []
@@ -1200,7 +1236,11 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
         rel = f"{THU_MUC}/{ten}"
         cay = yaml.compose(van, Loader=yaml.SafeLoader)
         luot_nay = _luot(d)
-        for duong, node, cha in _duyet_scalar(cay):
+        try:
+            scalar = list(_duyet_scalar(cay))
+        except _AliasVong as ex:
+            raise KhongDoDuoc(f"{ten}: YAML có alias VÒNG ở `{ex}` — không duyệt được câu") from ex
+        for duong, node, cha in scalar:
             for cau in _cac_cau(node.value):
                 chuan = _bo_dau(cau)
                 oids = _RE_OID.findall(cau)
@@ -1220,7 +1260,7 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                         lon = sorted(t for t, lu in sau if lu > luot_nay)
                         if not lon:
                             continue
-                        moc = _moc_hop_le(root, rel, node, cha, h)
+                        moc = _moc_hop_le(root, rel, cha, cau)
                         if moc is None:
                             chua.setdefault(k, f"{ten}: `{duong}` — KHÔNG ĐO ĐƯỢC mốc `dung_tai`")
                         elif not moc:
@@ -1231,6 +1271,8 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                     k = (ten, duong, LUAT_ANCESTRY)
                     for x in oids:
                         c = _commit_cua(root, x)
+                        if c is None and not _oid_tron(x):
+                            continue                 # số / từ thường, không phải OID
                         if c is None:
                             chua.setdefault(k, f"{ten}: `{duong}` — OID `{x}` không tra được commit, "
                                                f"KHÔNG kết luận được quan hệ tổ tiên")
@@ -1245,7 +1287,7 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
                         if rc != 0:
                             chua.setdefault(k, f"{ten}: `{duong}` — `merge-base` rc={rc} cho `{x}`")
                             continue
-                        moc = _moc_hop_le(root, rel, node, cha, x)
+                        moc = _moc_hop_le(root, rel, cha, cau)
                         if moc is None:
                             chua.setdefault(k, f"{ten}: `{duong}` — KHÔNG ĐO ĐƯỢC mốc `dung_tai`")
                         elif not moc:
@@ -1266,21 +1308,25 @@ def _kiem_cau_lich_su(root: Path, tep: dict, nhanh=None):
         if rj.startswith("/") or ".." in Path(rj).parts or not p_rj.is_file():
             sf_chua.append(f"{ten}: `run_json` {rj} không có trong kho — L-SURFACE không áp")
             continue
+        # TỆP CÓ mà đọc/phân tích hỏng ⇒ KHÔNG ĐO ĐƯỢC (rc=2), không phải "không áp": miễn trừ của
+        # đặc tả A4 chỉ dành cho tệp VẮNG. Bản trước gộp hai ca nên một run.json hỏng làm nợ L-SURFACE
+        # thành "NỢ CHẾT" — lỗi ĐO thành VI PHẠM, lớp `R4-02` (connector PR #976, P2).
+        k_sf = (ten, "verdict_path", LUAT_SURFACE)
         try:
             s_that = _chuoi(json.loads(p_rj.read_text(encoding="utf-8")).get("execution_surface"))
         except (OSError, UnicodeDecodeError, ValueError, AttributeError):
             s_that = None
         if not s_that:
-            sf_chua.append(f"{ten}: `{rj}` không đọc được `execution_surface` — L-SURFACE không áp")
+            chua[k_sf] = f"{ten}: `{rj}` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"
             continue
         sai = _surface_cua_verdict(root, d, s_that, be_mat)
         if sai is None:
-            sf_chua.append(f"{ten}: verdict không đọc được — L-SURFACE không áp")
+            chua[k_sf] = f"{ten}: verdict không đọc được — KHÔNG ĐO ĐƯỢC L-SURFACE"
             continue
         cv = d.get("verdict_usage_caveats")
         ids = {_chuoi(c.get("id")) for c in cv if isinstance(c, dict)} if isinstance(cv, list) else set()
         if sai and CAVEAT_SURFACE not in ids:
-            vp[(ten, "verdict_path", LUAT_SURFACE)] = (
+            vp[k_sf] = (
                 f"{ten}: verdict khai execution surface {sorted(sai)} khác `run.json` "
                 f"(`{s_that}`) mà thiếu caveat `{CAVEAT_SURFACE}`")
     return vp, chua, sf_chua

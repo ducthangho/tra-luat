@@ -21228,13 +21228,13 @@ def run() -> int:
     _tlm972, _os972 = globals()["_TL_MODULE"], globals()["os"]   # review l972a F03: tên tĩnh cho ruff
     def _cay972(fn):
         _sav_goc = _tlm972._goc_cay_skill
-        _sav_env = _env110({k: None for k in ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME")})
+        _sav_env = _env110({k: None for k in ("TL_CONFIG_BACKUP_DIR", "LOCALAPPDATA", "XDG_STATE_HOME", "HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH")})
         try:
             with _tf110.TemporaryDirectory() as _d:
                 _t = _P110(_d).resolve()
                 (_goc := _t / "tra-luat").mkdir()
                 (_goc / "SKILL.md").write_text("x", encoding="utf-8")
-                _os972.environ["HOME"] = str(_t)
+                _os972.environ["HOME"] = _os972.environ["USERPROFILE"] = str(_t)   # PR #989 P2: Windows Path.home() đọc USERPROFILE
                 _tlm972._goc_cay_skill = lambda: _goc
                 return fn(_t, _goc)
         finally:

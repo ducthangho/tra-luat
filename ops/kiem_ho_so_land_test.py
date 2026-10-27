@@ -293,12 +293,20 @@ WP981 = [
     ("b-kad-cmt-vang", _b(goc_url="KHONG_AP_DUNG", comment=None), "TRUOT", (KB + ".comment",)),
     ("ten-7so", _b(ten="landed_2026102"), "BO_QUA", ()),                                      # (vii)
     ("ten-x", _b(ten="landed_x"), "BO_QUA", ()),
+    ("b-sha-hong", _b().replace(f"'{SHA}'", "'bad'"), "TRUOT", ("authorized_head_sha",)),           # lượt 1
+    ("b-hai-khoi", _b() + "landed_20261028:\n  landed: true\n  quyet_dinh_chu_kho:\n    trang_thai: da_duyet\n",
+     "TRUOT", ("landed_20261028.quyet_dinh_chu_kho.comment",)),
+    ("ab-khong-manh", _b(tp="true"), "TRUOT", ("authorization_url",)),
 ]
 WP981_LOI = {"khoi-chuoi": "landed_20261027: xong\n", "khoi-ds": "landed_20261027:\n- landed: true\n"}  # (v)
 
 
 def _wp981_ket_qua(tool):
-    """Trả {tên ca con: None (đạt) | lý do đỏ}. Dùng chung cho bản thật và bản đột biến."""
+    """Trả {tên ca con: None (đạt) | ("SAI", lý do) | ("CRASH", lý do)}. Dùng chung cho bản thật và bản đột biến.
+    PR wp981 lượt 1 (Codex P2 mutant-crash-counted-as-kill): tiến trình chết (rc ngoài 0/1/3, thiếu JSON, Traceback)
+    là CRASH cho MỌI ca con của lô đó — không phải bằng chứng một chốt đã bắt sai khác hành vi."""
+    def _crash(rc, j, err):
+        return rc not in (0, 1, 3) or j is None or "Traceback" in err
     kq = {}
     goc = _cay({_ld(t): nd for t, nd, *_ in WP981})
     try:
@@ -306,10 +314,10 @@ def _wp981_ket_qua(tool):
         theo = {t["duong_dan"]: t for t in (j or {}).get("tep", [])}
         for ten, _, cho, phai in WP981:
             t = theo.get(_ld(ten))
-            if t is None:
-                kq[ten] = f"vắng (rc {rc}; {err[-200:]})"
+            if _crash(rc, j, err) or t is None:
+                kq[ten] = ("CRASH", f"rc {rc}; {err[-200:]}")
             elif t["trang_thai"] != cho or not all(k in t["ly_do"] for k in phai):
-                kq[ten] = f"{t['trang_thai']} (cần {cho}, phải nêu {phai}) — {t['ly_do']}"
+                kq[ten] = ("SAI", f"{t['trang_thai']} (cần {cho}, phải nêu {phai}) — {t['ly_do']}")
             else:
                 kq[ten] = None
     finally:
@@ -318,8 +326,12 @@ def _wp981_ket_qua(tool):
         goc = _cay({_ld(ten): f"authorized_head_sha: '{SHA}'\n" + nd})
         try:
             rc, j, _, err = _chay(goc, tiem=True, tool=tool)
-            ok = rc == 3 and "Traceback" not in err and j and j["tep"][0]["trang_thai"] == "LOI"
-            kq[ten] = None if ok else f"rc {rc} (cần 3, LOI); {err[-200:]}"
+            if _crash(rc, j, err) or len(j["tep"]) != 1:
+                kq[ten] = ("CRASH", f"rc {rc}; {err[-200:]}")
+            elif rc != 3 or j["tep"][0]["trang_thai"] != "LOI":
+                kq[ten] = ("SAI", f"rc {rc}, {j['tep'][0]['trang_thai']} (cần 3, LOI)")
+            else:
+                kq[ten] = None
         finally:
             shutil.rmtree(goc)
     return kq
@@ -330,7 +342,7 @@ def ca_wp981_kieu_b():
     assert not do, do
 
 
-# Đột biến trên BẢN SAO TẠM (CLAUDE.md: không ghi tệp thật); mỗi đột biến phải làm ĐỎ đúng ca con đích.
+# Đột biến trên BẢN SAO TẠM (CLAUDE.md: không ghi tệp thật). Giết ĐÚNG = ca con đích ra "SAI" và KHÔNG ca nào CRASH.
 DOT_BIEN_WP981 = [
     ("bo_nhanh_b", 'khoi_true = [k for k in khoi if doc[k].get("landed") is True]', "khoi_true = []", "b-du"),
     ("bo_da_duyet", 'if not (isinstance(tt, str) and tt == "da_duyet"):', "if False:", "b-tt"),
@@ -338,23 +350,50 @@ DOT_BIEN_WP981 = [
     ("doi_url_goc_kieu_b", "doi_url_goc=landed is True)", "doi_url_goc=True)", "b-kad"),
     ("bo_kiem_comment", 'if not _url_hop_le(q.get("comment")):', "if False:", "b-cmt-manh"),
     ("ep_kieu_landed_khoi", '.get("landed") is True]', '.get("landed")]', "b-landed-chuoi"),
-    ("bo_loi_khoi", "if not isinstance(doc[k], dict):", "if False:", "khoi-chuoi"),
+    ("khoi_sai_kieu_bo_qua", 'return "LOI", f"{k} không phải ánh xạ', 'return "BO_QUA", f"{k} không phải ánh xạ', "khoi-chuoi"),
     ("noi_ten_khoi", 'RE_KHOI = re.compile(r"landed_\\d{8}")', 'RE_KHOI = re.compile(r"landed_\\w+")', "ten-x"),
+    # lượt 1, ba mutant reviewer SỐNG:
+    ("bo_sha_kieu_b", "if not (isinstance(sha, str) and RE_SHA.fullmatch(sha)):",
+     "if doi_url_goc and not (isinstance(sha, str) and RE_SHA.fullmatch(sha)):", "b-sha-hong"),
+    ("chi_khoi_dau", "for k in khoi_true:\n", "for k in khoi_true[:1]:\n", "b-hai-khoi"),
+    ("noi_a_khi_co_b", "doi_url_goc=landed is True)", "doi_url_goc=landed is True and not khoi_true)", "ab-khong-manh"),
 ]
+# Phản chứng cho CHÍNH bộ chấm: lỗi vô can KHÔNG được tính là giết.
+LOI_VO_CAN_WP981 = [
+    ("nem_khi_doc_trang_thai", 'if not (isinstance(tt, str) and tt == "da_duyet"):',
+     'if not (isinstance(tt, str) and tt == "da_duyet") or 1 / 0:', "b-tt"),
+    ("chet_luc_nap", "RE_KHOI = re.compile(", "1 / 0\nRE_KHOI = re.compile(", "b-du"),
+    # đích ra SAI thật nhưng lô khác CRASH ⇒ vẫn không được tính (khoá vế "không ca nào CRASH")
+    ("sai_kem_crash", (('if not (isinstance(tt, str) and tt == "da_duyet"):', "if False:"),
+                       ('return "LOI", f"{k} không phải ánh xạ', 'return 1 / 0, f"{k} không phải ánh xạ')), None, "b-tt"),
+]
+
+
+def _giet_dung(kq, dich):
+    return isinstance(kq.get(dich), tuple) and kq[dich][0] == "SAI" and \
+        not any(isinstance(v, tuple) and v[0] == "CRASH" for v in kq.values())
 
 
 def ca_wp981_dot_bien():
     goc_ma = TOOL.read_text(encoding="utf-8")
     tam = Path(tempfile.mkdtemp(prefix="kiem-ho-so-land-dot-bien-"))
     try:
-        song = []
-        for ten, cu, moi, dich in DOT_BIEN_WP981:
-            assert goc_ma.count(cu) == 1, f"{ten}: mẫu không khớp đúng một lần"
-            ban = tam / f"kiem_ho_so_land_{ten}.py"
-            ban.write_text(goc_ma.replace(cu, moi), encoding="utf-8")
-            if _wp981_ket_qua(ban).get(dich) is None:
-                song.append(f"{ten} (đích {dich})")
-        assert not song, f"đột biến sống: {song}"
+        song, gia = [], []
+        for nhom, ds in (("dot_bien", DOT_BIEN_WP981), ("vo_can", LOI_VO_CAN_WP981)):
+            for ten, cu, moi, dich in ds:
+                ma = goc_ma
+                for c, m in (cu if isinstance(cu, tuple) else ((cu, moi),)):
+                    assert ma.count(c) == 1, f"{ten}: mẫu không khớp đúng một lần"
+                    ma = ma.replace(c, m)
+                ban = tam / f"kiem_ho_so_land_{ten}.py"
+                ban.write_text(ma, encoding="utf-8")
+                giet = _giet_dung(_wp981_ket_qua(ban), dich)
+                if nhom == "dot_bien" and not giet:
+                    song.append(f"{ten} (đích {dich})")
+                if nhom == "vo_can" and giet:
+                    gia.append(f"{ten} (đích {dich})")
+        assert not song, f"đột biến sống/chết sai lý do: {song}"
+        assert not gia, f"bộ chấm cấp tín dụng giả cho lỗi vô can: {gia}"
     finally:
         shutil.rmtree(tam)
 

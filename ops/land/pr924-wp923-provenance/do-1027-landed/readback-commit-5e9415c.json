@@ -1,0 +1,209 @@
+{
+ "sha": "5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+ "node_id": "C_kwDOTNeRjdoAKDVlOTQxNWM4ZTBmYzZiMTVkMWYyZDc4Yzk5ZDdhNDM4Y2YwNWI1MzU",
+ "commit": {
+  "author": {
+   "name": "Claude",
+   "email": "noreply@anthropic.com",
+   "date": "2026-10-27T03:08:16Z"
+  },
+  "committer": {
+   "name": "Claude",
+   "email": "noreply@anthropic.com",
+   "date": "2026-10-27T03:08:16Z"
+  },
+  "message": "ops/land: moc Workflow definition §10.2.2 cho #834 (PR #950) va #923 (PR #924) — 4/4 measured\n\n- chu kho chay gh api graphql ngoai phien (cmd) cho run 40325315312 (3e973a0) va 40166417941 (b306e15)\n- doi chieu REST run (head_sha, path, node_id) + blob ci.yml tai OID qua contents?ref: 82d9f239, khop byte voi git\n- them khoi moc_workflow_definition_20261027 + pr_ghi_so_duyet_landed_20261027; landed van false cho toi khi chu kho\n  duyet bang comment neo head PR nay (tien le PR #951)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01FLVLxi5gKZgtVvbuTCEqEn",
+  "tree": {
+   "sha": "968f18673bbb2ed7a9f0c96923ecba2c46e8a7ab",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/968f18673bbb2ed7a9f0c96923ecba2c46e8a7ab"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQNMduu9t\n+2/6yUrby4ofSn4a2jaXHelhOUBWvaWj23ZyhN0lcM0u1FYqw80NJqh0lCYPZV/lDP4gyluqjYaz\nswQ=\n-----END SSH SIGNATURE-----",
+   "payload": "tree 968f18673bbb2ed7a9f0c96923ecba2c46e8a7ab\nparent f577ab5b467510f3fa7ed27107dc2eab539d3bef\nauthor Claude <noreply@anthropic.com> 1793070496 +0000\ncommitter Claude <noreply@anthropic.com> 1793070496 +0000\n\nops/land: moc Workflow definition §10.2.2 cho #834 (PR #950) va #923 (PR #924) — 4/4 measured\n\n- chu kho chay gh api graphql ngoai phien (cmd) cho run 40325315312 (3e973a0) va 40166417941 (b306e15)\n- doi chieu REST run (head_sha, path, node_id) + blob ci.yml tai OID qua contents?ref: 82d9f239, khop byte voi git\n- them khoi moc_workflow_definition_20261027 + pr_ghi_so_duyet_landed_20261027; landed van false cho toi khi chu kho\n  duyet bang comment neo head PR nay (tien le PR #951)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01FLVLxi5gKZgtVvbuTCEqEn\n",
+   "verified_at": "2026-10-27T03:08:21Z"
+  }
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/comments",
+ "author": {
+  "login": "claude",
+  "id": 81847,
+  "node_id": "MDQ6VXNlcjgxODQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/claude",
+  "html_url": "https://github.com/claude",
+  "followers_url": "https://api.github.com/users/claude/followers",
+  "following_url": "https://api.github.com/users/claude/following{/other_user}",
+  "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+  "organizations_url": "https://api.github.com/users/claude/orgs",
+  "repos_url": "https://api.github.com/users/claude/repos",
+  "events_url": "https://api.github.com/users/claude/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/claude/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "committer": {
+  "login": "claude",
+  "id": 81847,
+  "node_id": "MDQ6VXNlcjgxODQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/claude",
+  "html_url": "https://github.com/claude",
+  "followers_url": "https://api.github.com/users/claude/followers",
+  "following_url": "https://api.github.com/users/claude/following{/other_user}",
+  "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+  "organizations_url": "https://api.github.com/users/claude/orgs",
+  "repos_url": "https://api.github.com/users/claude/repos",
+  "events_url": "https://api.github.com/users/claude/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/claude/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "parents": [
+  {
+   "sha": "f577ab5b467510f3fa7ed27107dc2eab539d3bef",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f577ab5b467510f3fa7ed27107dc2eab539d3bef",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/f577ab5b467510f3fa7ed27107dc2eab539d3bef"
+  }
+ ],
+ "stats": {
+  "total": 218,
+  "additions": 218,
+  "deletions": 0
+ },
+ "files": [
+  {
+   "sha": "1982652fdec512fc21d5cd2f8773e3c8801f72c3",
+   "filename": "ops/land/pr924-wp923-land-evidence.yaml",
+   "status": "modified",
+   "additions": 33,
+   "deletions": 0,
+   "changes": 33,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-land-evidence.yaml",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-land-evidence.yaml",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr924-wp923-land-evidence.yaml?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -115,3 +115,36 @@ khong_do_duoc:\n   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'\n   - 'Moc Workflow definition §10.2.2 cua gate hau merge b306e15: KHONG_DO_DUOC — GraphQL WorkflowRun.file 403 trong phien (do-1026-b306e15/bon-moc-10-2-2.txt). Checkout va Gate output nay measured qua artifact + log (cap nhat 26-10-2026, xem post_merge_checks).'\n   - 'chay-cong-windows_test.ps1 KHONG chay o workflow CI nao; N4 chi do bang pwsh tren Linux (executor + reviewer), khong do tren Windows.'\n+\n+moc_workflow_definition_20261027:\n+  bo_canh: 'Chu kho chay gh api graphql ngoai phien (cmd Windows) va dan output vao hoi thoai phien session_01FLVLxi5gKZgtVvbuTCEqEn 27-10-2026. Khoi nay KHONG sua dong nao o tren.'\n+  workflow_definition: >-\n+    measured — WorkflowRun.file cua run 40166417941 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl\n+    neo OID b306e15a96a4d9d05d2ba4191cbd071fa7820ee7 (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST run 40166417941 (head_sha, path,\n+    node_id = gia tri -f id= cua lenh) va tai blob qua contents?ref=OID: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc,\n+    sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, khop byte voi git rev-parse b306e15:.github/workflows/ci.yml.\n+  nguon:\n+    - ops/land/pr924-wp923-provenance/do-1027-b306e15/workflow-definition-b306e15.txt\n+    - ops/land/pr924-wp923-provenance/do-1027-b306e15/graphql-output-chu-kho-dan-pr924.json\n+    - ops/land/pr924-wp923-provenance/do-1027-b306e15/moc_wd.py\n+  gioi_han: >-\n+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai. URL va blob tai OID da duoc\n+    phien doi chieu doc lap qua REST.\n+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o post_merge_checks / do-1026-b306e15; Workflow definition o khoi nay).'\n+  landed: false\n+\n+pr_ghi_so_duyet_landed_20261027:\n+  bo_canh: 'Chu kho chi thi \"Tu xu ly cho toi\" (phien 27-10-2026) va dan output GraphQL. Khoi nay KHONG sua dong nao o tren.'\n+  dieu_kien_da_dat:\n+    - '§10.2.2 4/4 measured — post_merge_checks + moc_workflow_definition_20261027 (merge b306e15a96a4d9d05d2ba4191cbd071fa7820ee7).'\n+    - 'reviewer_assurance_81 DAT — assurance_81 (Codex luot 1/2 approve, 28/28 response gpt-6.1-sol DO_DUOC, tren DUNG authorized_head_sha 7574c39d98459c9caf1365a7dd092747335ae4e8).'\n+    - 'lease da nha (lease.thu_hoi_cuoi); noi dung merge = diff PR (merge_noi_dung).'\n+  dieu_kien_con_lai:\n+    id: QUYET-DINH-LANDED-CHU-KHO-MOI\n+    trang_thai: cho_chu_kho\n+    quy_tac: >-\n+      Theo tien le pr870/pr889 (PR #951): chu kho duyet landed bang mot comment tren PR ghi so CHUA khoi nay, dang SAU\n+      commit cuoi cua nhanh ghi so va TRUOC merge, ghi day du SHA head cuoi cua PR ghi so (40 hex). Commit nao den sau\n+      comment lam no het hieu luc. Readback comment KHONG commit vao cay; ho so ghi nhan o PR ke tiep.\n+  landed: false\n+  landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'"
+  },
+  {
+   "sha": "57982eda13ef5c13ca59be1deabaae5a1126988d",
+   "filename": "ops/land/pr924-wp923-provenance/SHA256SUMS",
+   "status": "modified",
+   "additions": 3,
+   "deletions": 0,
+   "changes": 3,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2FSHA256SUMS",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2FSHA256SUMS",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr924-wp923-provenance%2FSHA256SUMS?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -40,3 +40,6 @@ b75d0ddad1687eef5438b5d6adbfbb73bc49ec81543ee2a6092a7f6335f575a6  ./readback-run\n 0db9f7535f6fba547c3c44d5c63f3e2fc2e3e2cc771f56e0951aab3548152239  ./verdicts/wp923-g1-claude-review-1-codex-prompt.md\n d04eb69fd605aceec2ae47bacb24bfe3e3395386355df33f1c9c3f9f87653776  ./verdicts/wp923-g1-claude-review-1-codex-run.json\n b2b3bbcf5556ab19adb3eec600dc43bdb178805745e75b3d8d6afcb26f093e91  ./verdicts/wp923-g1-claude-review-1-codex-verdict.md\n+3f2761d156f4dff908547515547cdbc17f6d3ea679bb53ab8b8315b222fe9af7  ./do-1027-b306e15/graphql-output-chu-kho-dan-pr924.json\n+bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-1027-b306e15/moc_wd.py\n+601a0435d743f20a2267b68497e7e50159ab3fa2935d44f341d78f21a93036ad  ./do-1027-b306e15/workflow-definition-b306e15.txt"
+  },
+  {
+   "sha": "d5a14753874d1be7695d763ace758ea5640ff827",
+   "filename": "ops/land/pr924-wp923-provenance/do-1027-b306e15/graphql-output-chu-kho-dan-pr924.json",
+   "status": "added",
+   "additions": 18,
+   "deletions": 0,
+   "changes": 18,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fgraphql-output-chu-kho-dan-pr924.json",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fgraphql-output-chu-kho-dan-pr924.json",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fgraphql-output-chu-kho-dan-pr924.json?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -0,0 +1,18 @@\n+{\n+  \"data\": {\n+    \"node\": {\n+      \"databaseId\": 40166417941,\n+      \"runNumber\": 3174,\n+      \"createdAt\": \"2026-10-25T05:40:59Z\",\n+      \"file\": {\n+        \"path\": \".github/workflows/ci.yml\",\n+        \"repositoryFileUrl\": \"https://github.com/ducthangho/tra-luat/blob/b306e15a96a4d9d05d2ba4191cbd071fa7820ee7/.github/workflows/ci.yml\"\n+      },\n+      \"checkSuite\": {\n+        \"commit\": {\n+          \"oid\": \"b306e15a96a4d9d05d2ba4191cbd071fa7820ee7\"\n+        }\n+      }\n+    }\n+  }\n+}"
+  },
+  {
+   "sha": "739a83cac54d445f883e2a8e2b4756aab998712b",
+   "filename": "ops/land/pr924-wp923-provenance/do-1027-b306e15/moc_wd.py",
+   "status": "added",
+   "additions": 40,
+   "deletions": 0,
+   "changes": 40,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fmoc_wd.py",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fmoc_wd.py",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fmoc_wd.py?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -0,0 +1,40 @@\n+\"\"\"Doi chieu output GraphQL WorkflowRun.file do chu kho dan voi REST run + blob tai OID.\n+Dung: python3 -I moc_wd.py <thu_muc_do> <run_id> <oid> <tep_graphql_json>\"\"\"\n+import base64, hashlib, json, os, subprocess, sys, urllib.request\n+D, RUN, OID, G = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]\n+API = \"https://api.github.com/repos/ducthangho/tra-luat/\"\n+H = {\"Authorization\": \"Bearer \" + os.environ[\"GITHUB_PAT\"], \"Accept\": \"application/vnd.github+json\"}\n+KHO = \"/home/user/tra-luat\"\n+\n+\n+def get(p):\n+    with urllib.request.urlopen(urllib.request.Request(API + p, headers=H)) as r:\n+        return json.loads(r.read())\n+\n+\n+g = json.load(open(G, encoding=\"utf-8\"))[\"data\"][\"node\"]\n+run = get(f\"actions/runs/{RUN}\")\n+path = g[\"file\"][\"path\"]\n+c = get(f\"contents/{path}?ref={OID}\")\n+blob_rest = c[\"sha\"]\n+raw = base64.b64decode(c[\"content\"])\n+blob_git = subprocess.run([\"git\", \"-C\", KHO, \"rev-parse\", f\"{OID}:{path}\"], capture_output=True, text=True, check=True).stdout.strip()\n+git_bytes = subprocess.run([\"git\", \"-C\", KHO, \"cat-file\", \"blob\", blob_git], capture_output=True, check=True).stdout\n+url_oid = g[\"file\"][\"repositoryFileUrl\"].split(\"/blob/\")[1].split(\"/\")[0]\n+r = {\n+    \"graphql_databaseId_khop_run\": g[\"databaseId\"] == RUN,\n+    \"graphql_url_neo_oid\": url_oid == OID,\n+    \"graphql_checksuite_oid\": g[\"checkSuite\"][\"commit\"][\"oid\"] == OID,\n+    \"rest_head_sha\": run[\"head_sha\"] == OID,\n+    \"rest_path\": run[\"path\"] == path,\n+    \"blob_rest_bang_git\": blob_rest == blob_git,\n+    \"bytes_rest_bang_git\": raw == git_bytes,\n+}\n+with open(os.path.join(D, f\"workflow-definition-{OID[:7]}.txt\"), \"w\", encoding=\"utf-8\") as f:\n+    f.write(f\"# Moc Workflow definition §10.2.2 cho run {RUN} — doi chieu 2026-10-27 (cach do theo tien le pr870 moc_workflow_definition_20261026)\\n\\n\")\n+    f.write(f\"GraphQL (chu kho chay ngoai phien, ban chep: {os.path.basename(G)}): databaseId {g['databaseId']}, runNumber {g['runNumber']}, createdAt {g['createdAt']}\\n\")\n+    f.write(f\"  file.path {path}\\n  file.repositoryFileUrl {g['file']['repositoryFileUrl']} (OID trong URL: {url_oid})\\n  checkSuite.commit.oid {g['checkSuite']['commit']['oid']}\\n\\n\")\n+    f.write(f\"REST GET actions/runs/{RUN}: head_sha {run['head_sha']}, path {run['path']}, run_attempt {run['run_attempt']}, node_id {run['node_id']} (= gia tri -f id= trong lenh dua chu kho chay), conclusion {run['conclusion']}\\n\")\n+    f.write(f\"REST GET contents/{path}?ref={OID}: blob {blob_rest}, sha256 bytes {hashlib.sha256(raw).hexdigest()}\\n\")\n+    f.write(f\"$ git rev-parse {OID}:{path}\\n{blob_git}\\nsha256 bytes git = {hashlib.sha256(git_bytes).hexdigest()}\\n\\n## Ket qua\\n{json.dumps(r)}\\n\")\n+print(OID[:7], \"OK\" if all(r.values()) else \"LECH\", json.dumps(r), blob_git, hashlib.sha256(git_bytes).hexdigest(), run[\"node_id\"])"
+  },
+  {
+   "sha": "03d6d0fdacbcf908b243a667a6e999c3e7a9e92c",
+   "filename": "ops/land/pr924-wp923-provenance/do-1027-b306e15/workflow-definition-b306e15.txt",
+   "status": "added",
+   "additions": 15,
+   "deletions": 0,
+   "changes": 15,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fworkflow-definition-b306e15.txt",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fworkflow-definition-b306e15.txt",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr924-wp923-provenance%2Fdo-1027-b306e15%2Fworkflow-definition-b306e15.txt?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -0,0 +1,15 @@\n+# Moc Workflow definition §10.2.2 cho run 40166417941 — doi chieu 2026-10-27 (cach do theo tien le pr870 moc_workflow_definition_20261026)\n+\n+GraphQL (chu kho chay ngoai phien, ban chep: graphql-output-chu-kho-dan-pr924.json): databaseId 40166417941, runNumber 3174, createdAt 2026-10-25T05:40:59Z\n+  file.path .github/workflows/ci.yml\n+  file.repositoryFileUrl https://github.com/ducthangho/tra-luat/blob/b306e15a96a4d9d05d2ba4191cbd071fa7820ee7/.github/workflows/ci.yml (OID trong URL: b306e15a96a4d9d05d2ba4191cbd071fa7820ee7)\n+  checkSuite.commit.oid b306e15a96a4d9d05d2ba4191cbd071fa7820ee7\n+\n+REST GET actions/runs/40166417941: head_sha b306e15a96a4d9d05d2ba4191cbd071fa7820ee7, path .github/workflows/ci.yml, run_attempt 1, node_id WFR_kwLOTNeRjc8AAAAJWhrmFQ (= gia tri -f id= trong lenh dua chu kho chay), conclusion success\n+REST GET contents/.github/workflows/ci.yml?ref=b306e15a96a4d9d05d2ba4191cbd071fa7820ee7: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 bytes ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb\n+$ git rev-parse b306e15a96a4d9d05d2ba4191cbd071fa7820ee7:.github/workflows/ci.yml\n+82d9f239ff311bd1ba3d3021119b5a2f7f699ffc\n+sha256 bytes git = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb\n+\n+## Ket qua\n+{\"graphql_databaseId_khop_run\": true, \"graphql_url_neo_oid\": true, \"graphql_checksuite_oid\": true, \"rest_head_sha\": true, \"rest_path\": true, \"blob_rest_bang_git\": true, \"bytes_rest_bang_git\": true}"
+  },
+  {
+   "sha": "b03adb78457ec868deac5048e6eee696337dc48e",
+   "filename": "ops/land/pr950-wp834-land-evidence.yaml",
+   "status": "modified",
+   "additions": 33,
+   "deletions": 0,
+   "changes": 33,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-land-evidence.yaml",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-land-evidence.yaml",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr950-wp834-land-evidence.yaml?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -118,3 +118,36 @@ khong_do_duoc:\n   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'\n   - 'Moc Workflow definition §10.2.2 cua gate hau merge 3e973a0: KHONG_DO_DUOC — GraphQL WorkflowRun.file 403 trong phien.'\n   - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'\n+\n+moc_workflow_definition_20261027:\n+  bo_canh: 'Chu kho chay gh api graphql ngoai phien (cmd Windows) va dan output vao hoi thoai phien session_01FLVLxi5gKZgtVvbuTCEqEn 27-10-2026. Khoi nay KHONG sua dong nao o tren.'\n+  workflow_definition: >-\n+    measured — WorkflowRun.file cua run 40325315312 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl\n+    neo OID 3e973a03b151e37cd402e0a723816eeaa8247193 (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST run 40325315312 (head_sha, path,\n+    node_id = gia tri -f id= cua lenh) va tai blob qua contents?ref=OID: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc,\n+    sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, khop byte voi git rev-parse 3e973a0:.github/workflows/ci.yml.\n+  nguon:\n+    - ops/land/pr950-wp834-provenance/do-1027-3e973a0/workflow-definition-3e973a0.txt\n+    - ops/land/pr950-wp834-provenance/do-1027-3e973a0/graphql-output-chu-kho-dan-pr950.json\n+    - ops/land/pr950-wp834-provenance/do-1027-3e973a0/moc_wd.py\n+  gioi_han: >-\n+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai. URL va blob tai OID da duoc\n+    phien doi chieu doc lap qua REST.\n+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o post_merge_checks / do-1026-3e973a0; Workflow definition o khoi nay).'\n+  landed: false\n+\n+pr_ghi_so_duyet_landed_20261027:\n+  bo_canh: 'Chu kho chi thi \"Tu xu ly cho toi\" (phien 27-10-2026) va dan output GraphQL. Khoi nay KHONG sua dong nao o tren.'\n+  dieu_kien_da_dat:\n+    - '§10.2.2 4/4 measured — post_merge_checks + moc_workflow_definition_20261027 (merge 3e973a03b151e37cd402e0a723816eeaa8247193).'\n+    - 'reviewer_assurance_81 DAT — assurance_81 (Codex luot 8/8 approve, 29/29 response gpt-6-astra DO_DUOC, tren DUNG authorized_head_sha 294f0eb7eaae7b142bd6a3e89a18f512c4b819d0).'\n+    - 'lease da nha (lease.thu_hoi_cuoi); noi dung merge = diff PR (merge_noi_dung).'\n+  dieu_kien_con_lai:\n+    id: QUYET-DINH-LANDED-CHU-KHO-MOI\n+    trang_thai: cho_chu_kho\n+    quy_tac: >-\n+      Theo tien le pr870/pr889 (PR #951): chu kho duyet landed bang mot comment tren PR ghi so CHUA khoi nay, dang SAU\n+      commit cuoi cua nhanh ghi so va TRUOC merge, ghi day du SHA head cuoi cua PR ghi so (40 hex). Commit nao den sau\n+      comment lam no het hieu luc. Readback comment KHONG commit vao cay; ho so ghi nhan o PR ke tiep.\n+  landed: false\n+  landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'"
+  },
+  {
+   "sha": "d7a896f602df00c15240c11f9300d0ee26996417",
+   "filename": "ops/land/pr950-wp834-provenance/SHA256SUMS",
+   "status": "modified",
+   "additions": 3,
+   "deletions": 0,
+   "changes": 3,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2FSHA256SUMS",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2FSHA256SUMS",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr950-wp834-provenance%2FSHA256SUMS?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -64,3 +64,6 @@ cd6967ff14af4cb9f7d4360f367409974eecc00082f305b2cff7d77740c78990  ./verdicts/wp8\n 0c98a9e6d39be71370a7ff5bf9d2c3355044014869918536fd9e45c33ec80dde  ./verdicts/wp834-g1-claude-review-8-codex-prompt.md\n 3bb07593aaf8721ce781db857bc98e41cb6a4db560b912e78790f67c34ab21cb  ./verdicts/wp834-g1-claude-review-8-codex-run.json\n de854601d274e4fc597c0b56b2674331a2903a5aba3b6d6dd1bce0d2e4b49111  ./verdicts/wp834-g1-claude-review-8-codex-verdict.md\n+ea0ef57cf0b47896f90190a9356566fc99db92c4f62f65b5995b558b68bf9819  ./do-1027-3e973a0/graphql-output-chu-kho-dan-pr950.json\n+bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-1027-3e973a0/moc_wd.py\n+ba83f82da085a629fe6b69c4dd25d01cf3f90c7bc72846f25a6d83ba30d34cb7  ./do-1027-3e973a0/workflow-definition-3e973a0.txt"
+  },
+  {
+   "sha": "e474a0b9fbadff309b9970f1dddcb0ca44781d24",
+   "filename": "ops/land/pr950-wp834-provenance/do-1027-3e973a0/graphql-output-chu-kho-dan-pr950.json",
+   "status": "added",
+   "additions": 18,
+   "deletions": 0,
+   "changes": 18,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fgraphql-output-chu-kho-dan-pr950.json",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fgraphql-output-chu-kho-dan-pr950.json",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fgraphql-output-chu-kho-dan-pr950.json?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -0,0 +1,18 @@\n+{\n+  \"data\": {\n+    \"node\": {\n+      \"databaseId\": 40325315312,\n+      \"runNumber\": 3240,\n+      \"createdAt\": \"2026-10-26T12:48:01Z\",\n+      \"file\": {\n+        \"path\": \".github/workflows/ci.yml\",\n+        \"repositoryFileUrl\": \"https://github.com/ducthangho/tra-luat/blob/3e973a03b151e37cd402e0a723816eeaa8247193/.github/workflows/ci.yml\"\n+      },\n+      \"checkSuite\": {\n+        \"commit\": {\n+          \"oid\": \"3e973a03b151e37cd402e0a723816eeaa8247193\"\n+        }\n+      }\n+    }\n+  }\n+}"
+  },
+  {
+   "sha": "739a83cac54d445f883e2a8e2b4756aab998712b",
+   "filename": "ops/land/pr950-wp834-provenance/do-1027-3e973a0/moc_wd.py",
+   "status": "added",
+   "additions": 40,
+   "deletions": 0,
+   "changes": 40,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fmoc_wd.py",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fmoc_wd.py",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fmoc_wd.py?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -0,0 +1,40 @@\n+\"\"\"Doi chieu output GraphQL WorkflowRun.file do chu kho dan voi REST run + blob tai OID.\n+Dung: python3 -I moc_wd.py <thu_muc_do> <run_id> <oid> <tep_graphql_json>\"\"\"\n+import base64, hashlib, json, os, subprocess, sys, urllib.request\n+D, RUN, OID, G = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]\n+API = \"https://api.github.com/repos/ducthangho/tra-luat/\"\n+H = {\"Authorization\": \"Bearer \" + os.environ[\"GITHUB_PAT\"], \"Accept\": \"application/vnd.github+json\"}\n+KHO = \"/home/user/tra-luat\"\n+\n+\n+def get(p):\n+    with urllib.request.urlopen(urllib.request.Request(API + p, headers=H)) as r:\n+        return json.loads(r.read())\n+\n+\n+g = json.load(open(G, encoding=\"utf-8\"))[\"data\"][\"node\"]\n+run = get(f\"actions/runs/{RUN}\")\n+path = g[\"file\"][\"path\"]\n+c = get(f\"contents/{path}?ref={OID}\")\n+blob_rest = c[\"sha\"]\n+raw = base64.b64decode(c[\"content\"])\n+blob_git = subprocess.run([\"git\", \"-C\", KHO, \"rev-parse\", f\"{OID}:{path}\"], capture_output=True, text=True, check=True).stdout.strip()\n+git_bytes = subprocess.run([\"git\", \"-C\", KHO, \"cat-file\", \"blob\", blob_git], capture_output=True, check=True).stdout\n+url_oid = g[\"file\"][\"repositoryFileUrl\"].split(\"/blob/\")[1].split(\"/\")[0]\n+r = {\n+    \"graphql_databaseId_khop_run\": g[\"databaseId\"] == RUN,\n+    \"graphql_url_neo_oid\": url_oid == OID,\n+    \"graphql_checksuite_oid\": g[\"checkSuite\"][\"commit\"][\"oid\"] == OID,\n+    \"rest_head_sha\": run[\"head_sha\"] == OID,\n+    \"rest_path\": run[\"path\"] == path,\n+    \"blob_rest_bang_git\": blob_rest == blob_git,\n+    \"bytes_rest_bang_git\": raw == git_bytes,\n+}\n+with open(os.path.join(D, f\"workflow-definition-{OID[:7]}.txt\"), \"w\", encoding=\"utf-8\") as f:\n+    f.write(f\"# Moc Workflow definition §10.2.2 cho run {RUN} — doi chieu 2026-10-27 (cach do theo tien le pr870 moc_workflow_definition_20261026)\\n\\n\")\n+    f.write(f\"GraphQL (chu kho chay ngoai phien, ban chep: {os.path.basename(G)}): databaseId {g['databaseId']}, runNumber {g['runNumber']}, createdAt {g['createdAt']}\\n\")\n+    f.write(f\"  file.path {path}\\n  file.repositoryFileUrl {g['file']['repositoryFileUrl']} (OID trong URL: {url_oid})\\n  checkSuite.commit.oid {g['checkSuite']['commit']['oid']}\\n\\n\")\n+    f.write(f\"REST GET actions/runs/{RUN}: head_sha {run['head_sha']}, path {run['path']}, run_attempt {run['run_attempt']}, node_id {run['node_id']} (= gia tri -f id= trong lenh dua chu kho chay), conclusion {run['conclusion']}\\n\")\n+    f.write(f\"REST GET contents/{path}?ref={OID}: blob {blob_rest}, sha256 bytes {hashlib.sha256(raw).hexdigest()}\\n\")\n+    f.write(f\"$ git rev-parse {OID}:{path}\\n{blob_git}\\nsha256 bytes git = {hashlib.sha256(git_bytes).hexdigest()}\\n\\n## Ket qua\\n{json.dumps(r)}\\n\")\n+print(OID[:7], \"OK\" if all(r.values()) else \"LECH\", json.dumps(r), blob_git, hashlib.sha256(git_bytes).hexdigest(), run[\"node_id\"])"
+  },
+  {
+   "sha": "66e84c2009643bc9b3ad2652939f9e6cb0667789",
+   "filename": "ops/land/pr950-wp834-provenance/do-1027-3e973a0/workflow-definition-3e973a0.txt",
+   "status": "added",
+   "additions": 15,
+   "deletions": 0,
+   "changes": 15,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fworkflow-definition-3e973a0.txt",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fworkflow-definition-3e973a0.txt",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fland%2Fpr950-wp834-provenance%2Fdo-1027-3e973a0%2Fworkflow-definition-3e973a0.txt?ref=5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535",
+   "patch": "@@ -0,0 +1,15 @@\n+# Moc Workflow definition §10.2.2 cho run 40325315312 — doi chieu 2026-10-27 (cach do theo tien le pr870 moc_workflow_definition_20261026)\n+\n+GraphQL (chu kho chay ngoai phien, ban chep: graphql-output-chu-kho-dan-pr950.json): databaseId 40325315312, runNumber 3240, createdAt 2026-10-26T12:48:01Z\n+  file.path .github/workflows/ci.yml\n+  file.repositoryFileUrl https://github.com/ducthangho/tra-luat/blob/3e973a03b151e37cd402e0a723816eeaa8247193/.github/workflows/ci.yml (OID trong URL: 3e973a03b151e37cd402e0a723816eeaa8247193)\n+  checkSuite.commit.oid 3e973a03b151e37cd402e0a723816eeaa8247193\n+\n+REST GET actions/runs/40325315312: head_sha 3e973a03b151e37cd402e0a723816eeaa8247193, path .github/workflows/ci.yml, run_attempt 1, node_id WFR_kwLOTNeRjc8AAAAJY5N68A (= gia tri -f id= trong lenh dua chu kho chay), conclusion success\n+REST GET contents/.github/workflows/ci.yml?ref=3e973a03b151e37cd402e0a723816eeaa8247193: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 bytes ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb\n+$ git rev-parse 3e973a03b151e37cd402e0a723816eeaa8247193:.github/workflows/ci.yml\n+82d9f239ff311bd1ba3d3021119b5a2f7f699ffc\n+sha256 bytes git = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb\n+\n+## Ket qua\n+{\"graphql_databaseId_khop_run\": true, \"graphql_url_neo_oid\": true, \"graphql_checksuite_oid\": true, \"rest_head_sha\": true, \"rest_path\": true, \"blob_rest_bang_git\": true, \"bytes_rest_bang_git\": true}"
+  }
+ ]
+}

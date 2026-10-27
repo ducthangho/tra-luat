@@ -64,3 +64,11 @@ cd6967ff14af4cb9f7d4360f367409974eecc00082f305b2cff7d77740c78990  ./verdicts/wp8
 0c98a9e6d39be71370a7ff5bf9d2c3355044014869918536fd9e45c33ec80dde  ./verdicts/wp834-g1-claude-review-8-codex-prompt.md
 3bb07593aaf8721ce781db857bc98e41cb6a4db560b912e78790f67c34ab21cb  ./verdicts/wp834-g1-claude-review-8-codex-run.json
 de854601d274e4fc597c0b56b2674331a2903a5aba3b6d6dd1bce0d2e4b49111  ./verdicts/wp834-g1-claude-review-8-codex-verdict.md
+ea0ef57cf0b47896f90190a9356566fc99db92c4f62f65b5995b558b68bf9819  ./do-1027-3e973a0/graphql-output-chu-kho-dan-pr950.json
+bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-1027-3e973a0/moc_wd.py
+ba83f82da085a629fe6b69c4dd25d01cf3f90c7bc72846f25a6d83ba30d34cb7  ./do-1027-3e973a0/workflow-definition-3e973a0.txt
+26eaaf4105b70a5a9891c6ca7e96339379e87dab9b51c0700190c85da85fd8bf  ./do-1027-landed/readback-comment-962-6432778847.json
+50fa9437655b07fa8f2c4703c8fd302e09a596f565382913cce5129bc67cb33c  ./do-1027-landed/readback-comments-962.json
+dd2da2bd8105df700fb461e7befa23659def6166fd5eef743977bfb4a059e2ea  ./do-1027-landed/readback-commit-5e9415c.json
+662577854e14ffc94e0365290f1dd64142047daa02f80cd012fe85b2515addad  ./do-1027-landed/readback-pr-962.json
+37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570  ./do-1027-landed/readback-reviews-962.json

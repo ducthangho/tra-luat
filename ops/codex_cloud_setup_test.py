@@ -15,6 +15,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import bash_nen  # noqa: E402 — MỘT bộ giải `bash` dùng chung (#570); `bash` trần trên Windows có thể là WSL
+
 for _s in (sys.stdout, sys.stderr):
     if hasattr(_s, "reconfigure"):
         _s.reconfigure(encoding="utf-8", errors="backslashreplace")
@@ -57,6 +60,13 @@ def _posix():
         raise BoQua("đồ giả là script POSIX; script đích chỉ chạy trên Linux (Codex Cloud)")
 
 
+def _bash():
+    duong, chan_doan = bash_nen.tim_bash()
+    if not duong:
+        raise BoQua("không `bash` nào làm được việc: " + "; ".join(f"{c['duong']}: {c['ly_do']}" for c in chan_doan))
+    return duong
+
+
 def _san(them_lenh=False):
     """Thư mục tạm: bin giả + HOME. Trả (gốc, env)."""
     goc = Path(tempfile.mkdtemp(prefix="codex-cloud-setup-"))
@@ -79,7 +89,7 @@ def _san(them_lenh=False):
 
 def _cai_deb(env, **them):
     env = {**env, **them}
-    return subprocess.run(["bash", "-c", 'source "$1"; cai_deb goi-a mycmd', "_", str(SCRIPT_DANG_DUNG)],
+    return subprocess.run([_bash(), "-c", 'source "$1"; cai_deb goi-a mycmd', "_", str(SCRIPT_DANG_DUNG)],
                           capture_output=True, text=True, env=env, timeout=60)
 
 
@@ -100,14 +110,14 @@ def ca_khong_nang_cap_pip():
 
 def ca_cu_phap_bash():
     _posix()
-    p = subprocess.run(["bash", "-n", str(SCRIPT_DANG_DUNG)], capture_output=True, text=True, timeout=60)
+    p = subprocess.run([_bash(), "-n", str(SCRIPT_DANG_DUNG)], capture_output=True, text=True, timeout=60)
     bang(p.returncode == 0, f"bash -n rc={p.returncode}: {p.stderr}")
 
 
 def ca_source_khong_chay_main():
     _posix()
     goc, env = _san()
-    p = subprocess.run(["bash", "-c", 'source "$1"; echo DA_SOURCE', "_", str(SCRIPT_DANG_DUNG)],
+    p = subprocess.run([_bash(), "-c", 'source "$1"; echo DA_SOURCE', "_", str(SCRIPT_DANG_DUNG)],
                        capture_output=True, text=True, env=env, timeout=60)
     bang(p.returncode == 0 and "DA_SOURCE" in p.stdout, f"source hỏng: rc={p.returncode} {p.stderr}")
     bang(_log(goc) == [], f"source mà main vẫn chạy: {_log(goc)}")

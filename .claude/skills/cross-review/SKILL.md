@@ -748,6 +748,10 @@ query($id: ID!) {
 gh api graphql -F query=@"$SCRATCH/query.graphql" -f id="$RUN_NODE_ID" > "$SCRATCH/workflow-run.json"
 ```
 
+Mẫu trên chạy trong phiên có GraphQL. Phiên Claude Code trên web bị 403 nên phải nhờ chủ kho chạy; lệnh đưa
+cho chủ kho theo mục *"Lệnh `gh api graphql` đưa cho chủ kho chạy"* của `CLAUDE.md` (máy chủ kho là `cmd`, mẫu
+trên vỡ ở đó). Đọc mục ấy từ `origin/master` ngay trước khi soạn lệnh — phiên mở từ trước có thể đang giữ bản cũ.
+
 `WorkflowRun.file` nullable; cấu trúc tham chiếu ở [GitHub Actions GraphQL](https://docs.github.com/en/graphql/reference/actions).
 Phân loại missing/errors và kiểm OID của URL theo §10.2.2. Khi đã xác minh repo/path/OID,
 dùng `git -C "$SOURCE" cat-file blob "$DEFINITION_OID:$WORKFLOW_PATH"` lấy bytes và SHA-256 bằng Python;

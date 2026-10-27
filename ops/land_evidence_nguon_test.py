@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import unicodedata
 from unittest import mock
 from pathlib import Path
 
@@ -36,6 +37,10 @@ PROV = "pr9001-thu-provenance"
 L6_TRUONG = ("post_merge_checks", "bookkeeping")   # chép riêng, không đọc từ bộ kiểm: bỏ một trường ở đó ⇒ c16 ĐỎ
 KY_VONG_SO_MIEN_TRU = 28
 KY_VONG_VAN_TAY_MIEN_TRU = "5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257"
+# L7 — cùng cách chép riêng, đo trên `7129f7d` (27-10-2026): 3 hồ sơ khai DAT thiếu `thuc_thi`. Đổi danh sách ⇒ c19 ĐỎ.
+L7_KHOA = ("model", "effort", "sandbox_mode")   # chép riêng: bỏ một khoá ở bộ kiểm ⇒ c17 ĐỎ
+KY_VONG_SO_MIEN_TRU_L7 = 3
+KY_VONG_VAN_TAY_MIEN_TRU_L7 = "6b5ef08603e37239742fe5d7fe8cbe933b24e33174cf3af04c453b0e7be83574"
 
 
 class TinHieuChotCa(AssertionError):
@@ -342,6 +347,90 @@ def c16_l6_landed_true_phai_co_phan_hoan_tat():
     ky("post_merge_checks: 'CHO_DIEN'\n", None, 0, "không có trang_thai_packet.landed ⇒ L6 không áp")
 
 
+P7 = {"run.json": "{}"}
+DU7 = {k: "measured — run.json" for k in L7_KHOA}
+
+
+def hs7(muc, thuc_thi=None):
+    """Hồ sơ L7: `assurance_81.reviewer_assurance_81 = muc`; `thuc_thi` dict ⇒ mapping, chuỗi ⇒ vô hướng, None ⇒ không có."""
+    hs = f"assurance_81:\n  reviewer_assurance_81: {muc}\n"
+    if isinstance(thuc_thi, dict):
+        return hs + "  thuc_thi:\n" + "".join(f"    {k}: '{v}'\n" for k, v in thuc_thi.items())
+    return hs + (f"  thuc_thi: '{thuc_thi}'\n" if thuc_thi is not None else "")
+
+
+@ca
+def c17_l7_khai_dat_phai_do_thuc_thi():
+    """#748 L7: khai §8.1 DAT đòi `thuc_thi.{model,effort,sandbox_mode}` là lời khai measured (connector P1 PR #934)."""
+    ky(hs7("DAT", DU7), P7, 0, "DAT đủ ba khoá measured có nguồn")
+    ky(hs7("DAT"), P7, 1, "DAT thiếu thuc_thi", "L7 $.assurance_81.thuc_thi:")
+    ky(hs7("DAT", "measured — run.json"), P7, 1, "thuc_thi vô hướng", "L7 $.assurance_81.thuc_thi:")
+    for k in L7_KHOA:   # review l7d P3: mapping RỖNG vẫn phải kiểm đủ ba khoá
+        ky(hs7("DAT") + "  thuc_thi: {}\n", P7, 1, f"thuc_thi {{}} thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
+    ky(hs7("DAT") + "thuc_thi:\n" + "".join(f"  {k}: '{v}'\n" for k, v in DU7.items()), P7, 1,
+       "thuc_thi ở GỐC không thay được thuc_thi dưới assurance_81", "L7 $.assurance_81.thuc_thi:")
+    for k in L7_KHOA:
+        ky(hs7("DAT", {x: v for x, v in DU7.items() if x != k}), P7, 1, f"thiếu {k}", f"L7 $.assurance_81.thuc_thi.{k}:")
+        for sai in ("not_measured — run.json", "da do — run.json", "measuredx run.json"):
+            ky(hs7("DAT", DU7 | {k: sai}), P7, 1, f"{k} = {sai!r}", f"L7 $.assurance_81.thuc_thi.{k}:")
+        for tho in ("null", "true", "3", "['measured — run.json']", "{a: 'measured — run.json'}"):   # review l7a P3: có mặt, không phải chuỗi
+            hs = hs7("DAT", {x: v for x, v in DU7.items() if x != k}) + f"    {k}: {tho}\n"
+            ky(hs, P7, 1, f"{k} = {tho} (không phải chuỗi)", f"L7 $.assurance_81.thuc_thi.{k}:")
+    ky(hs7("DAT", DU7 | {"model": "measured — khong-co.json"}), P7, 1, "measured không nguồn thì L1 bắt", "L1 $.assurance_81")
+    nfd = unicodedata.normalize("NFD", "đạt")
+    for muc in ("Dat", "' DAT '", "dat", "ĐẠT", "Đạt", "'  đạt  '", nfd):   # chuẩn hoá: hoa thường, khoảng trắng, NFC/NFD
+        ky(hs7(muc), P7, 1, f"biến thể {muc!r}", "L7 $.assurance_81.thuc_thi:")
+    for muc in ("CHUA_DAT", "CHUA DAT", "'chua dat'", "CHƯA ĐẠT", "DAT_MOT_PHAN", "1", "true", "null", "[DAT]",
+                "ĐẤT", "DẠT", "ĐAT", "dát"):   # review l7a P2: chữ khác dấu là giá trị KHÁC, không phải DAT
+        ky(hs7(muc), P7, 0, f"{muc!r} không phải DAT ⇒ L7 không áp")
+    for hs in ("assurance_81: DAT\n", "assurance_81: [{reviewer_assurance_81: DAT}]\n", "x: {reviewer_assurance_81: DAT}\n",
+               "reviewer_assurance_81: DAT\n", "assurance_81: {}\n", "DAT\n", "null\n",
+               "- {assurance_81: {reviewer_assurance_81: DAT}}\n"):   # review l7e P3: phạm vi áp — vị trí, có mặt, hình dạng gốc
+        try:
+            rc, ra = chay(hs, P7)
+        except Exception as e:   # traceback không phải ĐẠT
+            rc, ra = -1, f"{type(e).__name__}: {e}"
+        bang(rc == 0 and "L7" not in ra, f"L7 không áp cho {hs.strip()!r}: rc={rc} {ra[-200:]}")
+
+
+@ca
+def c18_l7_mien_tru_theo_bam():
+    hs = hs7("DAT")
+    with cay(hs, P7) as goc:
+        m = nap()
+        m.MIEN_TRU_L7[TEN] = hashlib.sha256(hs.encode()).hexdigest()
+        rc, ra = kiem(m, goc)
+        bang(rc == 0 and "L7 miễn trừ" in ra, f"băm khớp ⇒ miễn trừ L7 có ghi nhận: rc={rc} {ra[-200:]}")
+        for nd, mong in ((hs + " ", 1), (hs7("DAT", DU7), 0)):
+            (goc / "ops/land" / TEN).write_text(nd, encoding="utf-8", newline="")
+            rc, ra = kiem(m, goc)
+            bang(rc == mong and "L7 mất miễn trừ" in ra and "L7 miễn trừ" not in ra,
+                 f"băm lệch ⇒ mất miễn trừ, kiểm đủ (mong rc={mong}): rc={rc} {ra[-300:]}")
+        (goc / "ops/land" / TEN).write_text(hs, encoding="utf-8", newline="")   # review l7c P3: đĩa giữ byte được miễn trừ
+        vp, ghi = m.kiem_ho_so(goc / "ops/land" / TEN, (hs + " ").encode(), goc, __import__("yaml"))
+        bang(any(x.startswith("L7 $.assurance_81.thuc_thi:") for x in vp) and "L7 mất miễn trừ" in " ".join(ghi),
+             f"băm miễn trừ phải đo CHÍNH ảnh byte đã nạp, không đọc lại đĩa: {vp} {ghi}")
+        tep, yml = goc / "ops/land" / TEN, __import__("yaml")   # review l7d P3: miễn trừ gắn TÊN + băm, và chỉ bỏ qua L7
+        m.MIEN_TRU_L7.clear()
+        m.MIEN_TRU_L7["pr9999-khac-land-evidence.yaml"] = hashlib.sha256(hs.encode()).hexdigest()
+        vp, ghi = m.kiem_ho_so(tep, hs.encode(), goc, yml)
+        bang(any(x.startswith("L7 $.assurance_81.thuc_thi:") for x in vp) and not ghi,
+             f"cùng byte dưới TÊN khác không được miễn trừ: {vp} {ghi}")
+        for them, luat in (("x: 'measured — khong-co.json'\n", "L1"), ("trang_thai_packet: {landed: true}\n", "L6")):
+            m.MIEN_TRU_L7[TEN] = hashlib.sha256((hs + them).encode()).hexdigest()
+            vp, ghi = m.kiem_ho_so(tep, (hs + them).encode(), goc, yml)
+            bang(any(x.startswith(luat) for x in vp) and not any(x.startswith("L7") for x in vp)
+                 and "L7 miễn trừ" in " ".join(ghi), f"miễn trừ L7 không được xoá vi phạm {luat}: {vp} {ghi}")
+
+
+@ca
+def c19_l7_danh_sach_dong_bang():
+    ds = nap().MIEN_TRU_L7
+    van_tay = hashlib.sha256(json.dumps(sorted(ds.items())).encode()).hexdigest()
+    bang(len(ds) == KY_VONG_SO_MIEN_TRU_L7 and van_tay == KY_VONG_VAN_TAY_MIEN_TRU_L7,
+         f"MIEN_TRU_L7 trôi khỏi ảnh chụp: {len(ds)} tên, vân tay {van_tay[:12]}…")
+
+
 @ca
 def c12_dong_cuoi_dung_dinh_dang():
     import re
@@ -427,6 +516,48 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L6_P_phan_tu_so", "all(isinstance(x, dict) for x in ds)", "all(isinstance(x, (dict, int, float)) for x in ds)", "c16"),
     ("L6_Q_list_la_trang_thai", 'if isinstance(tt, dict) and "landed" in tt:   # L6',
      'if isinstance(tt, (dict, list)) and "landed" in tt:   # L6', "c16"),
+    ("L7_bo_ca_luat", 'in L7_MUC_DAT:   # L7', 'in ():   # L7', "c17"),
+    ("L7_bo_strip", 'normalize("NFC", v).strip().upper()', 'normalize("NFC", v).upper()', "c17"),
+    ("L7_bo_viet_hoa", ".strip().upper())", ".strip())", "c17"),
+    ("L7_bo_nfc", 'unicodedata.normalize("NFC", v).strip()', 'v.strip()', "c17"),
+    ("L7_bo_cach_viet_co_dau", 'L7_MUC_DAT = ("DAT", "ĐẠT")', 'L7_MUC_DAT = ("DAT",)', "c17"),
+    ("L7_bo_dau_dai_tra", 'unicodedata.normalize("NFC", v).strip()',
+     '"".join(c for c in unicodedata.normalize("NFD", v.replace("đ", "d").replace("Đ", "D")) if not unicodedata.combining(c)).strip()', "c17"),
+    ("L7_thieu_thuc_thi_chi_ghi_chu", 'vp.append(f"L7 $.assurance_81.thuc_thi: khai', 'ghi.append(f"L7 $.assurance_81.thuc_thi: khai', "c17"),
+    ("L7_bo_kiem_khoa", "        elif not mien:\n", "        elif False:\n", "c17"),
+    ("L7_khong_doi_measured", " and RE_KHAI_DO.match(tt7[k]))]", ")]", "c17"),
+    ("L7_nhan_khong_phai_chuoi", "if not (isinstance(tt7.get(k), str) and RE_KHAI_DO.match(tt7[k]))]",
+     "if not (k in tt7 and (not isinstance(tt7[k], str) or RE_KHAI_DO.match(tt7[k])))]", "c17"),
+    ("L7_bo_model", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("effort", "sandbox_mode")', "c17"),
+    ("L7_bo_effort", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "sandbox_mode")', "c17"),
+    ("L7_bo_sandbox_mode", 'L7_KHOA = ("model", "effort", "sandbox_mode")', 'L7_KHOA = ("model", "effort")', "c17"),
+    ("L7_mien_tru_bo_so_bam", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = bam is not None", "c18"),
+    ("L7_bam_doc_lai_dia", "and hashlib.sha256(byte).hexdigest() == bam", "and hashlib.sha256(tep.read_bytes()).hexdigest() == bam", "c18"),
+    ("L7_map_rong_bo_kiem", "        elif not mien:\n", "        elif not mien and tt7:\n", "c17"),
+    ("L7_thuc_thi_o_goc", 'a81.get("thuc_thi")', '(du_lieu.get("thuc_thi") or a81.get("thuc_thi"))', "c17"),
+    ("L7_bam_bo_ten", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam",
+     "mien = hashlib.sha256(byte).hexdigest() in MIEN_TRU_L7.values()", "c18"),
+    ("L7_mien_xoa_vi_pham_truoc", "        if not mien and not isinstance(tt7, dict):\n",
+     "        if mien:\n            vp.clear()\n        if not mien and not isinstance(tt7, dict):\n", "c18"),
+    ("L7_mien_tru_khong_ghi", '"L7 miễn trừ (băm khớp ảnh chụp, nợ NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO)" if mien', '"" if mien', "c18"),
+    # review l7e P3: phạm vi áp. Tương đương (reviewer đo, không cấp mutant): bỏ riêng `bam is not None`, bỏ thay khoảng
+    # trắng bằng `_`, thu `elif not mien` thành `elif isinstance(tt7, dict)` (mọi ảnh miễn trừ thật đều thiếu thuc_thi).
+    ("L7_dat_o_goc", 'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None',
+     'du_lieu.get("assurance_81", du_lieu) if isinstance(du_lieu, dict) else None', "c17"),
+    ("L7_thieu_khoa_mac_dinh_dat", 'a81.get("reviewer_assurance_81")', 'a81.get("reviewer_assurance_81", "DAT")', "c17"),
+    ("L7_goc_list_mo_goi", 'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None',
+     'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else (du_lieu[0].get("assurance_81") if isinstance(du_lieu, list)'
+     ' and du_lieu and isinstance(du_lieu[0], dict) else None)', "c17"),
+    ("L7_bo_kiem_goc_mapping", 'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None', 'du_lieu.get("assurance_81")', "c17"),
+    ("L7_a81_list_mo_goi", '    if isinstance(a81, dict) and _chuan_hoa_81(',
+     '    a81 = a81[0] if isinstance(a81, list) and a81 and isinstance(a81[0], dict) else a81\n    if isinstance(a81, dict) and _chuan_hoa_81(', "c17"),
+    ("L7_moi_muc_deu_ap", 'in L7_MUC_DAT:   # L7', 'in L7_MUC_DAT or True:   # L7', "c17"),
+    ("L7_khong_chuoi_thanh_dat", "    if not isinstance(v, str):\n        return None\n",
+     "    if not isinstance(v, str):\n        return \"DAT\" if v is True or v == 1 else None\n", "c17"),
+    ("L7_ghi_chu_khong_can_ten", "        if bam is not None:\n            ghi.append(", "        if True:\n            ghi.append(", "c18"),
+    ("L7_khong_bao_gio_mien", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = False", "c18"),
+    ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
+    ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def token_nguon(chuoi):\n", "def token_nguon(chuoi):\n    raise KeyError('vo can')\n", "c01", "TIN_DUNG_GIA"),

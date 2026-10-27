@@ -1,0 +1,23 @@
+[
+  {
+    "command": [
+      "git",
+      "--version"
+    ],
+    "rc": 0,
+    "stdout": "git version 2.43.0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python",
+      "-B",
+      "-m",
+      "ruff",
+      "--version"
+    ],
+    "rc": 0,
+    "stdout": "ruff 0.15.15\n",
+    "stderr": ""
+  }
+]

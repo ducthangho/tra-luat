@@ -1103,6 +1103,12 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
                for x in (f"parent {P1}\n".encode(), f"x-review v\nparent {P1}\n".encode())]
         tag = f"object {P1}\ntype commit\ntag v1\ntagger A <a@b> 1700000000 +0000\n\ntree {P2}\nparent {P2}\n".encode()   # header nhiều dòng:
         ca += [(cm(dau + ai(b"A") + b"mergetag " + tag.replace(b"\n", b"\n ").rstrip(b" ") + b"\nnoi\n"), dung)]   # dòng tiếp nối GIỮ dấu cách
+        oid = cay.encode()   # lượt 5 (V3, cả lớp "chuẩn hoá dòng header"): `tree <oid>` ngụy trang — Git đọc là NỘI DUNG, không phải trường
+        ca += [(cm(dau + ai(b"A" + k + b"tree " + oid + k + b"B") + b"\nsep\n"), dung)   # phân cách lạ trong author
+               for k in (b"\x0b", b"\x0c", b"\x1c", b"\x1d", b"\x1e", b"\x85", "\u2028".encode(), "\u2029".encode(), "\u0085".encode())]
+        ca += [(cm(dau + ai(b"A") + x + b"\n\nmo rong\n"), dung) for x in (   # dòng sau committer: TAB/CR đầu, TAB giữa, hoa, gập, NFKC
+            b"\ttree " + oid, b"\rtree " + oid, b"tree\t" + oid, b"Tree " + oid, b"tree\n " + oid, "ｔｒｅｅ ".encode() + oid)]
+        ca += [(cm(dau + ai(b"A") + x + b"\n\nm1\n"), None) for x in (b"tree ", b"x-review v\r\n\r\ntree " + oid)]   # M1: >1 dòng `tree `
         hong = [b"tree %s\ntree %s\n" % (cay.encode(), cay.encode()), b"parent %s\n" % P1.encode(), b"tree %s1\n" % cay.encode(),
                 b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
                 f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
@@ -1227,6 +1233,15 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F13_bo_unicodeencode", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, subprocess.SubprocessError):", "c53"),
     ("F13_bo_subprocesserror", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, UnicodeEncodeError):", "c53"),
     ("F13_lstrip_dau_dong", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.lstrip() for x in dong]\n', "c53"),
+    *[(f"F13_bien_doi_{ten}", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = ' + bd + "\n", "c53") for ten, bd in (
+        ("lstrip_tab", '[x.lstrip(b"\\t") for x in dong]'), ("tab_thanh_sp", '[x.replace(b"\\t", b" ") for x in dong]'),
+        ("ha_ten", '[x[:4].lower() + x[4:] for x in dong]'), ("rstrip", '[x.rstrip() for x in dong]'),
+        ("xoa_cr", '[x.replace(b"\\r", b"") for x in dong]'), ("xoa_dieu_khien", '[bytes(c for c in x if c >= 32) for x in dong]'),
+        ("gap_dong", 'b"\\n".join(dong).replace(b"\\n ", b" ").split(b"\\n")'),
+        ("nfkc", '[__import__("unicodedata").normalize("NFKC", x.decode("utf-8", "replace")).encode() for x in dong]'),
+        ("tach_unicode", '[y.encode() for x in dong for y in x.decode("utf-8", "replace").splitlines()]'),
+        *[(f"tach_{h:02x}", f'[y for x in dong for y in x.split(bytes([{h}]))]') for h in (0x0b, 0x0c, 0x1c, 0x1d, 0x1e, 0x85)])],
+    ("F13_crlf_truoc_tach", "dong = than[:int(loai[2])].split(", 'dong = than[:int(loai[2])].replace(b"\\r\\n", b"\\n").split(', "c53"),
     ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),

@@ -2628,17 +2628,23 @@ def c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA():
 
 @ca
 def c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC():
-    """`luot` của câu không phải số ⇒ không so được "lớn hơn" ⇒ trạng thái thứ ba, không phải sạch."""
-    with tempfile.TemporaryDirectory() as t:
-        tmp = Path(t)
-        k = _kho_cau(tmp)
-        h = k["M"]
-        al = _ghi_bn_cau(tmp, k, {
-            "r1.receipt.yaml": f"schema_version: 1\nanchor:\n    mo_ta: Ban va tai {h} chua duoc review lai.\n",
-            "r2.receipt.yaml": _bn_cau(2, "", h)})
-        rc, loi, tk = _kiem_cau(tmp, al)
-        bang(rc == 2 and not loi and any(x.startswith("[L-REVIEW]") for x in tk["chua_do"]),
-             f"đòi rc=2 + một mục L-REVIEW KHÔNG ĐO ĐƯỢC, được rc={rc} loi={loi} chua={tk['chua_do']}")
+    """`luot` không phải số — của CHÍNH biên nhận chứa câu, hoặc của biên nhận KHÁC cùng `reviewed_sha` —
+    ⇒ không so được "lớn hơn" ⇒ trạng thái thứ ba, không phải sạch và không phải crash."""
+    for ten, r1, r2 in (("luot-cau-thieu", "schema_version: 1\n", "luot: 2\n"),
+                        ("luot-bien-nhan-khac-thieu", "schema_version: 1\nluot: 1\n", "")):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            k = _kho_cau(tmp)
+            h = k["M"]
+            al = _ghi_bn_cau(tmp, k, {
+                "r1.receipt.yaml": f"{r1}anchor:\n    mo_ta: Ban va tai {h} chua duoc review lai.\n",
+                "r2.receipt.yaml": f"schema_version: 1\n{r2}reviewed_sha: {h}\n"})
+            try:
+                rc, loi, tk = _kiem_cau(tmp, al)
+            except Exception as ex:                                   # noqa: BLE001
+                bang(False, f"{ten}: `kiem` chết bằng {type(ex).__name__}: {ex}")
+            bang(rc == 2 and not loi and any(x.startswith("[L-REVIEW]") for x in tk["chua_do"]),
+                 f"{ten}: đòi rc=2 + một mục L-REVIEW KHÔNG ĐO ĐƯỢC, được rc={rc} loi={loi} chua={tk['chua_do']}")
 
 
 @ca
@@ -2647,14 +2653,16 @@ def c71_A2_cau_ancestry_do_bang_merge_base():
     + `dung_tai` hợp lệ ⇒ rc=0 · `dung_tai` KHÔNG là tổ tiên của commit thêm câu ⇒ rc=1."""
     for ten, oid, moc, rc_doi in (("da-to-tien", "M", "", 1), ("chua-to-tien", "X", "", 0),
                                    ("khong-ton-tai", None, "", 2), ("moc-hop-le", "M", "B0", 0),
-                                   ("moc-khong-to-tien", "M", "X", 1)):
+                                   ("moc-khong-to-tien", "M", "X", 1), ("moc-7-hex", "M", "B0:7", 1)):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             k = _kho_cau(tmp)
             o = k[oid][:7] if oid else "1234abc"
             if oid is None:
                 dung(bnv2._commit_cua(tmp, o) is None, f"fixture: `{o}` lại tra được commit")
-            dong_moc = f"    dung_tai: {k[moc]}\n" if moc else ""
+            # `B0:7` = mốc viết tắt 7 ký tự của một commit HỢP LỆ: mốc đòi đủ 40 hex (đặc tả Q7).
+            gia_tri_moc = (k[moc.split(":")[0]][:7] if ":" in moc else k[moc]) if moc else ""
+            dong_moc = f"    dung_tai: {gia_tri_moc}\n" if moc else ""
             al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
                 1, f"anchor:\n    mo_ta: Commit {o} chua vao master.\n{dong_moc}")})
             rc, loi, tk = _kiem_cau(tmp, al)
@@ -2682,9 +2690,14 @@ def c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan():
                 "chi_trich: 'Finding cu noi \"chi la mot nhanh\" va \"khong phai to tien\".'\n")
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, than)})
         rc, loi, _ = _kiem_cau(tmp, al)
-        truong = sorted(x.split("`")[1] for x in loi)
-        bang(truong == ["co_dau", "khoi_gap", "khoi_lit", "khong_dau"],
-             f"đòi đúng bốn trường bị nhận (không có `chi_trich`), được {truong}: {loi}")
+        truong = {x.split("`")[1] for x in loi}
+        # MỖI trường một assertion riêng, để một đột biến giết ca chỉ ra ĐÚNG biến thể nó làm mù. `>-`
+        # được bộ phân tích YAML gấp TRƯỚC khi cổng thấy, nên cổng không có chốt riêng cho nó; trường
+        # ấy ở đây là hồi quy, còn chốt "gộp dòng" của cổng chỉ có răng với khối `|` (`m78`).
+        for tr, vi_sao in (("khoi_lit", "khối `|` gãy dòng"), ("khoi_gap", "khối `>-` gãy dòng"),
+                           ("co_dau", "có dấu"), ("khong_dau", "không dấu")):
+            bang(tr in truong, f"biến thể {vi_sao} (`{tr}`) không bị nhận: {sorted(truong)}")
+        bang("chi_trich" not in truong, f"câu chỉ trích cụm từ, không OID, bị nhận nhầm: {loi}")
 
 
 def _kho_surface(tmp: Path, d: dict, run_json, verdict: str):
@@ -2934,6 +2947,38 @@ def c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet():
             al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}), dong + "\n")
             rc, loi, _ = _kiem_cau(tmp, al)
             bang(rc == 1, f"{ten}: khai báo sai trên cùng dòng bị che: rc={rc} loi={loi}")
+
+
+@ca
+def c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham():
+    """codex CLI lượt 1 (P1, r3): `merge-base` trả mã ngoài 0/1 (đây: nhánh mặc định là một TREE) ⇒ rc=2,
+    không phải vi phạm."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
+        cay = k["g"]("rev-parse", "HEAD^{tree}")
+        loi, tk = bnv2.kiem(tmp, allowlist=al, no_da_do={}, no_cau_lich_su=frozenset(), nhanh_mac_dinh=cay)
+        loi = [x for x in loi if x.startswith("[L-")]
+        bang(bnv2._ma_thoat(loi, tk) == 2 and not loi and any("merge-base" in x for x in tk["chua_do"]),
+             f"merge-base hỏng phải là KHÔNG ĐO ĐƯỢC: loi={loi} chua={tk['chua_do']}")
+
+
+@ca
+def c85_lich_su_tep_KHONG_DOC_DUOC_thi_moc_la_KHONG_DO_DUOC():
+    """codex CLI lượt 1 (P1, r5): phiên bản cũ của tệp không giải mã được ⇒ không biết câu có từ trước hay
+    không ⇒ mốc KHÔNG ĐO ĐƯỢC (rc=2), không phải "mốc sai" (rc=1)."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        (tmp / bnv2.THU_MUC).mkdir(parents=True, exist_ok=True)
+        (tmp / bnv2.THU_MUC / "r.receipt.yaml").write_bytes(b"schema_version: 1\nx: \xff\n")
+        k["g"]("add", "-A"); k["g"]("commit", "-qm", "ban hong")
+        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(
+            1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n    dung_tai: {k['B0']}\n")})
+        rc, loi, tk = _kiem_cau(tmp, al)
+        bang(rc == 2 and not loi and any("mốc" in x for x in tk["chua_do"]),
+             f"lịch sử không đọc được phải là KHÔNG ĐO ĐƯỢC mốc: rc={rc} loi={loi} chua={tk['chua_do']}")
 
 
 def _chay_1(fn):
@@ -3565,6 +3610,19 @@ def _dot_bien():
         "        ms = list(_RE_DONG_SURFACE.finditer(dong))\n",
         "        ms = list(_RE_DONG_SURFACE.finditer(dong))[:1]\n"),
        "c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet", "chỉ khai báo đầu tiên trên dòng", doi_chung=DC)
+    # --- codex CLI lượt 1, finding `chot-moi-chua-duoc-ca-nao-khoa`: đúng các cặp r1/r2/r3/r5 reviewer gỡ.
+    do("m90_moc_khong_doi_oid40", lambda: _dot_bien_tep(
+        "    if not moc or not _HEX40.match(moc):\n", "    if not moc:\n"),
+       "c71_A2_cau_ancestry_do_bang_merge_base", "r1: mốc viết tắt 7 ký tự được nhận", doi_chung=DC)
+    do("m91_luot_bien_nhan_khac_thieu", lambda: _dot_bien_tep(
+        "if luot_nay is None or any(lu is None for _, lu in sau):", "if luot_nay is None:"),
+       "c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC", "r2: `luot` thiếu ở biên nhận khác", doi_chung=DC)
+    do("m92_merge_base_loi_thanh_vi_pham", lambda: _dot_bien_tep(
+        '                        if rc != 0:\n                            chua.setdefault(k, f"{ten}: `{duong}` — `merge-base` rc={rc} cho `{x}`")\n                            continue\n', ""),
+       "c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham", "r3: merge-base hỏng thành vi phạm", doi_chung=DC)
+    do("m93_lich_su_hong_thanh_moc_sai", lambda: _dot_bien_tep(
+        "    if them is None:\n        return None\n", "    if them is None:\n        return False\n"),
+       "c85_lich_su_tep_KHONG_DOC_DUOC_thi_moc_la_KHONG_DO_DUOC", "r5: lịch sử hỏng thành mốc sai", doi_chung=DC)
     return ra
 
 

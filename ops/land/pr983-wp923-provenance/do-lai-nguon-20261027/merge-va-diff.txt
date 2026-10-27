@@ -1,0 +1,10 @@
+# do 2026-10-27: noi dung merge PR #983 = diff PR
+cdd431b37db08464aa24526efc912e8d57ce33cd
+2044ee914c9855f431d1fd81bea3529933962536
+bbfb96cbe6b30e0b5b1b30982eae2b5893ac2c00
+merge-base(cha1, head) = 09db70350414d767b793a71cb630e643f216a1b1
+2	1	.claude/dev/ci_dang_ky_test.py
+2	1	.claude/dev/ci_dang_ky_test.py
+cmp byte rc=0
+write set giong tung byte ban review luot 1 (67bacb3):
+(rong = giong)

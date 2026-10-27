@@ -1,0 +1,3 @@
+# trich log job 121998899364 launcher (windows-latest), run 40446486332 attempt 1, runner 1000021834; GET actions/jobs/121998899364/logs (redirect tai khong kem token); so dong goc / noi dung giu nguyen
+581: 2026-10-27T03:56:40.8966915Z   r27_lenh_run_khong_lay_mau   KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lenh_run_ghi_effort_va_sandbox_vao_run_json)
+582: 2026-10-27T03:56:40.8967542Z   r27_lenh_run_khong_ghi_so    OK  giet 1/1: r927_lenh_run_ghi_effort_va_sandbox_vao_run_json

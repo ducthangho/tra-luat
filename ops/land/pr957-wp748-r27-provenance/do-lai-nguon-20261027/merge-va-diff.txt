@@ -1,0 +1,28 @@
+$ git rev-list --parents -n1 06152341f461eedd97f1b95a2ae7bd9cb2f2e174
+06152341f461eedd97f1b95a2ae7bd9cb2f2e174 157241c350e85d2b59959b7ea7d636672da19d8d 8575a16afd0ec07af1e78af7af9594dd47c6cb54
+$ git rev-parse 06152341f461eedd97f1b95a2ae7bd9cb2f2e174^{tree} 8575a16afd0ec07af1e78af7af9594dd47c6cb54^{tree}
+d9ac2d45787ec1c81da8649460deb1cf400cf892
+955f60055aa2e60b4fa636a92e512dd5ee575f89
+$ git merge-base 8575a16afd0ec07af1e78af7af9594dd47c6cb54 06152341f461eedd97f1b95a2ae7bd9cb2f2e174^1
+7471f95f75d4ed37591e307b281cda55aa0cd6fd
+$ git diff --stat 06152341f461eedd97f1b95a2ae7bd9cb2f2e174^1 06152341f461eedd97f1b95a2ae7bd9cb2f2e174
+ .claude/dev/launcher.py      | 352 +++++++++++++++++++++++++++++-
+ .claude/dev/launcher_test.py | 499 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 850 insertions(+), 1 deletion(-)
+$ git diff 06152341f461eedd97f1b95a2ae7bd9cb2f2e174^1 06152341f461eedd97f1b95a2ae7bd9cb2f2e174 | sha256sum
+9eb0b584aa6105e7257cf062380fbc0a73a3a6369f9645a6d45e121533dfb9e2  -
+$ git diff 7471f95f75d4ed37591e307b281cda55aa0cd6fd 8575a16afd0ec07af1e78af7af9594dd47c6cb54 | sha256sum
+9eb0b584aa6105e7257cf062380fbc0a73a3a6369f9645a6d45e121533dfb9e2  -
+$ git diff --stat 7471f95f75d4ed37591e307b281cda55aa0cd6fd 8575a16afd0ec07af1e78af7af9594dd47c6cb54
+ .claude/dev/launcher.py      | 352 +++++++++++++++++++++++++++++-
+ .claude/dev/launcher_test.py | 499 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 850 insertions(+), 1 deletion(-)
+$ git diff --stat 7471f95f75d4ed37591e307b281cda55aa0cd6fd 06152341f461eedd97f1b95a2ae7bd9cb2f2e174^1 -- .claude/dev/launcher.py .claude/dev/launcher_test.py  (master tien sau merge-base: khong cham hai tep)
+[het]
+$ git rev-parse 06152341f461eedd97f1b95a2ae7bd9cb2f2e174:.claude/dev/launcher.py 8575a16afd0ec07af1e78af7af9594dd47c6cb54:.claude/dev/launcher.py 06152341f461eedd97f1b95a2ae7bd9cb2f2e174:.claude/dev/launcher_test.py 8575a16afd0ec07af1e78af7af9594dd47c6cb54:.claude/dev/launcher_test.py
+b81e78ba86b9cec7a9bced6cbedbc2da2507af24
+b81e78ba86b9cec7a9bced6cbedbc2da2507af24
+2da53ede2e1dff78d0348bcf9c8b06d99e17f1e8
+2da53ede2e1dff78d0348bcf9c8b06d99e17f1e8
+$ git log -1 --format='%H %cI' 8575a16afd0ec07af1e78af7af9594dd47c6cb54
+8575a16afd0ec07af1e78af7af9594dd47c6cb54 2026-10-27T00:50:17+00:00

@@ -1,0 +1,18 @@
+# Independent read-only review with execution receipt — WP748 r28, round 1
+
+You are an independent reviewer (OpenAI Codex), invoked through `launcher.py run` (execution receipt). Do NOT edit `src/`, commit, push, comment on GitHub, or use credentials. Scratch via `mktemp -d` here is fine. Write `VERDICT.md` in THIS directory, incrementally.
+
+Identity (verify first; stop with `VERDICT: blocked` if different): `./src` is a full clone detached at `7f89b21867e0c62aea21947e6f9da91ca0750742`, tree `9182b0f519852d588cf0053763945499ab514c52`, a LOCAL, UNPUSHED commit on branch `agent/wp748-r28-claude`, single parent `origin/master` `f577ab5b467510f3fa7ed27107dc2eab539d3bef`. The hash is the identifier, not the branch name. Review Class `sensitive`.
+
+Spec (frozen): `git -C src show origin/ops/wp748-r28-l7-lease:ops/specs/wp748-r28-windows-dot-bien-khong-do-duoc.md`, sha256 `07e058391eb9b592d384c8eb7a8136f7ff49fed6dbc9847a1588d02e6c0814a3` (verify). Lease: same branch, `ops/leases/wp748-r28-g1-claude-remote-20261027.yaml`. Owner approval: #748 issuecomment-6432555871 (you cannot read GitHub; say so).
+
+Context: after PR #957 merged at `0615234`, the push run of `launcher-windows.yml` (run 40437650224) failed step `Tu dot bien`: mutant `r27_lenh_run_khong_lay_mau` (removes `sandbox.bat_dau()`) reported `SAI giet 0/1`. The change adds 3 lines in the non-Linux branch of `r927_lenh_run_ghi_effort_va_sandbox_vao_run_json` returning a skip reason after the existing checks, so per the mutant runner contract a mutant whose only target is that case becomes "KHONG DO DUOC tren nen nay".
+
+This container is Linux; Windows cannot be run here. `./sim2.py` is the executor's simulation (copies a tree to a temp dir, forces the two platform branches — sampler construction in launcher.py and the case's `if platform.system() == "Linux"` — to the non-Linux side, optionally applies a mutant, runs the case once). Read it critically before trusting it; you may write your own.
+
+Tasks:
+1. Substantive review against the spec §2/§3: does the early return skip any check that still has meaning off Linux? Does any OTHER mutant (in the whole `DOT_BIEN`, not only r27) list this case as a target, and does the change turn any of them from measured into "KHONG DO DUOC" on Windows, losing a real measurement? In particular confirm `r27_lenh_run_khong_ghi_so` still dies off Linux (and how: its target list). Is the simulation faithful to what the Windows runner does (look at `chay_dot_bien` and how a string return is classified)? Any other platform branch the simulation missed?
+2. Re-measure ON THIS SHA: `python3 src/.claude/dev/launcher_test.py` (expect 307/307 with 2 skipped, 0 broken — check `ls -d /tmp/.git` first; a leftover empty `/tmp/.git` from a Codex sandbox reddens 11 `r484_*` cases, record it rather than calling it a regression), the target case alone via `--lap-ca r927_lenh_run_ghi_effort_va_sandbox_vao_run_json --lan 1`, and every `r25_*`/`r26_*`/`r27_*`/`r952_*` mutant on a TEMP COPY of launcher.py with a kill counted ONLY via `TinHieuChotCa` from the named target (executor measured 178 killed / 0 not). Then the off-Linux simulation both ways: on this SHA and on master `f577ab5` (expect the mutant to pass the case on master = the Windows failure reproduced, and to be skipped on this SHA).
+3. Size: added lines vs master (cap ≤ 1 file / ≤ 20 added; expected 3) and Codex calls (this is call 1 of 10).
+
+`VERDICT.md`: reviewer identity (as runtime reports; say what you cannot verify), reviewed SHA + tree, UTC; re-measured counts; findings ID/severity P0–P3/`file:line`/scenario/fix; commands with rc. Last line exactly one of `VERDICT: approve` (zero P0, P1, P2 AND P3) · `VERDICT: changes_requested` · `VERDICT: blocked`.

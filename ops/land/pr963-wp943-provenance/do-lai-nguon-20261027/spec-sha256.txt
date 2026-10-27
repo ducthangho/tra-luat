@@ -1,0 +1,3 @@
+$ git show 80ebcfb:ops/specs/wp943.md | sha256sum
+22729e93eec0e1c4677a5d6529b81f9f0c46c47f3f605017b7abb337b5e1e270  -
+yeu cau lease: 22729e93eec0e1c4677a5d6529b81f9f0c46c47f3f605017b7abb337b5e1e270

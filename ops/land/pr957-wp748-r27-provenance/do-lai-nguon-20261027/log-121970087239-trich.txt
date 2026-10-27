@@ -1,0 +1,3 @@
+# trich log job 121970087239 launcher (windows-latest), run 40437650224 attempt 1; GET actions/jobs/121970087239/logs (redirect tai khong kem token); so dong goc / noi dung giu nguyen
+600: 2026-10-27T02:26:24.8037596Z   r27_lenh_run_khong_lay_mau   SAI  giet 0/1: (khong ca nao chet)
+1100: 2026-10-27T02:28:37.6336163Z ##[error]Process completed with exit code 1.

@@ -148,3 +148,25 @@ pr_ghi_so_duyet_landed_20261027:
       comment lam no het hieu luc. Readback comment KHONG commit vao cay; ho so ghi nhan o PR ke tiep.
   landed: false
   landed_hieu_luc_tu: 'merge commit cua PR ghi so chua khoi nay — CHI KHI comment duyet hop le ton tai truoc merge.'
+
+landed_20261027:
+  bo_canh: 'Chu kho duyet landed tren PR ghi so #962 roi merge (27-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/962#issuecomment-6432778847
+    do_duoc: >-
+      measured — ops/land/pr924-wp923-provenance/do-1027-landed/readback-comment-962-6432778847.json: ducthangho, author_association OWNER,
+      created_at = updated_at 2026-10-27T03:09:56Z; than nguyen van "Duyệt landed #834 (PR #950) và #923 (PR #924). Head PR ghi sổ:
+      5e9415c8e0fc6b15d1f2d78c99d7a438cf05b535". readback-commit-5e9415c.json: commit cuoi cua nhanh ghi so luc
+      2026-10-27T03:08:16Z (truoc comment). readback-pr-962.json: head.sha 5e9415c (= SHA trong comment), merged_at
+      2026-10-27T05:13:44Z (sau comment), merge_commit b68d4fc, merged_by ducthangho.
+  landed: true
+  landed_hieu_luc_tu: b68d4fce80935ed292f2e59630e0f697d847cd35
+  landed_dieu_kien: >-
+    (1) gate tren merge b306e15a96a4d9d05d2ba4191cbd071fa7820ee7: DAT — 4/4 moc §10.2.2 (post_merge_checks + moc_workflow_definition_20261027). (2) lease da nha:
+    DAT (lease.thu_hoi_cuoi). (3) review: DAT — Codex luot 1/2 approve, 28/28 response gpt-6.1-sol DO_DUOC tren DUNG authorized_head_sha 7574c39d98459c9caf1365a7dd092747335ae4e8 (assurance_81). (4) noi dung merge = diff
+    da review: DAT (merge_noi_dung). (5) duyet chu kho neo dung head PR ghi so, dang sau commit cuoi va truoc merge: DAT.
+  gioi_han: >-
+    Connector Codex tren PR #962 dung o "running" toi luc merge, khong co ket luan (readback-comments-962.json,
+    readback-reviews-962.json = []); PR #962 chi them tep ops/land/**. Tai khoan chu kho khong tach khoi phien agent (#566)
+    — comment la duyet landed, KHONG phai human_audited. Bam byte output GraphQL goc cua chu kho KHONG_DO_DUOC.

@@ -1068,6 +1068,106 @@ def c34_git_blob_that():   # F08: reader THẬT trên kho tạm; đối tượng
     bang(kq == ["jobs: {}\n", None, None], f"git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: {kq}")
 
 @ca
+def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reader THẬT trên kho tạm, object dựng đúng byte bằng `hash-object`
+    m = nap()   # (`--literally` cho object cố ý hỏng). Hợp đồng `git_cuc_bo`: dict hoặc None, KHÔNG ném (main không bắt) ⇒ ném là sai
+    def doc(sha, goc):   # chỉ lỗi NỔI TỪ khung `git_cuc_bo` mới thành giá trị `NEM:` (vi phạm hợp đồng không-ném); lỗi khác ném tiếp = vô can
+        try:
+            return m.git_cuc_bo(sha, goc=goc)
+        except Exception as e:   # noqa: BLE001
+            tb = e.__traceback__
+            while tb and tb.tb_frame.f_code is not m.git_cuc_bo.__code__:
+                tb = tb.tb_next
+            if tb is None:
+                raise
+            return f"NEM:{type(e).__name__}"
+    with tempfile.TemporaryDirectory(prefix="cip_f13_") as thu:
+        def kho(ten, *co):
+            d = str(Path(thu) / ten)
+            subprocess.run(["git", "init", "-q", *co, d], capture_output=True, check=True)
+            g = lambda *a, i=None: subprocess.run(["git", "-C", d, *a], input=i, capture_output=True, check=True).stdout.decode().strip()  # noqa: E731
+            return d, g
+        d1, g = kho("sha1")
+        cay = g("mktree", i=f"100644 blob {g('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
+        dau = f"tree {cay}\nparent {P1}\nparent {P2}\n".encode()
+        ai = lambda ten: b"author " + ten + b" <a@b> 1700000000 +0000\ncommitter " + ten + b" <a@b> 1700000000 +0000\n"  # noqa: E731
+        cm = lambda b, lit=(): g("hash-object", "-t", "commit", "-w", *lit, "--stdin", i=b)  # noqa: E731
+        dung, goc = {"tree": cay, "parents": [P1, P2]}, {"tree": cay, "parents": []}
+        hop_le = [cm(dau + x) for x in (ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
+                                         ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
+                                         ai(b"A") + f"\ntree {P1}\nparent {P1}\n".encode())]   # body giống header: chỉ đọc PHẦN ĐẦU
+        ba = [P2, P1, "0" * 39 + "1"]   # 3 parent, thứ tự KHÔNG sắp xếp
+        ca = [(x, dung) for x in hop_le] + [(cm(f"tree {cay}\n".encode() + ai(b"A") + b"\ngoc\n"), goc),   # commit gốc
+              (cm(f"tree {cay}\n".encode() + ai(f"A\rparent {P1}\r".encode()) + b"\ncr\n"), goc),   # CR trong author ≠ dòng mới
+              (cm(f"tree {cay}\n".encode() + b"".join(f"parent {x}\n".encode() for x in ba) + ai(b"A") + b"\nba\n"), {"tree": cay, "parents": ba})]
+        ca += [(cm(f"tree {cay}\n".encode() + ai(b"A") + x + b"\nmo rong\n"), goc)   # `parent` SAU committer / sau header mở rộng ≠ cha
+               for x in (f"parent {P1}\n".encode(), f"x-review v\nparent {P1}\n".encode())]
+        tag = f"object {P1}\ntype commit\ntag v1\ntagger A <a@b> 1700000000 +0000\n\ntree {P2}\nparent {P2}\n".encode()   # header nhiều dòng:
+        ca += [(cm(dau + ai(b"A") + b"mergetag " + tag.replace(b"\n", b"\n ").rstrip(b" ") + b"\nnoi\n"), dung)]   # dòng tiếp nối GIỮ dấu cách
+        oid = cay.encode()   # lượt 5 (V3, cả lớp "chuẩn hoá dòng header"): `tree <oid>` ngụy trang — Git đọc là NỘI DUNG, không phải trường
+        ca += [(cm(dau + ai(b"A" + k + b"tree " + oid + k + b"B") + b"\nsep\n"), dung)   # phân cách lạ trong author
+               for k in (b"\x0b", b"\x0c", b"\x1c", b"\x1d", b"\x1e", b"\x85", "\u2028".encode(), "\u2029".encode(), "\u0085".encode())]
+        ca += [(cm(dau + ai(b"A") + x + b"\n\nmo rong\n"), dung) for x in (   # dòng sau committer: TAB/CR đầu, TAB giữa, hoa, gập, NFKC
+            b"\ttree " + oid, b"\rtree " + oid, b"tree\t" + oid, b"Tree " + oid, b"tree\n " + oid, "ｔｒｅｅ ".encode() + oid)]
+        ca += [(cm(dau + ai(b"A") + x + b"\n\nm1\n"), None) for x in (b"tree ", b"x-review v\r\n\r\ntree " + oid)]   # M1: >1 dòng `tree `
+        # lượt 6 (V3): MA TRẬN parent × dòng mở rộng × thân. Kỳ vọng tính ĐỘC LẬP với sản phẩm: phần đầu (tới LF-LF đầu tiên) có
+        # ≠ 1 dòng bắt đầu `tree ` ⇒ None (M1), ngược lại ⇒ Git native (`log --no-walk`, kiểm ở vòng oracle dưới)
+        bo_cha = ([], [P1], [P1, P1], [P1, P2, P1], [P1, P1, P1], [P2, P1, "0" * 39 + "1"], [f"{i:040x}" for i in range(1, 258)])   # trùng: AA·ABA·AAA
+        pha = (b"", b"x-review start\n \ntree " + oid + b"\n", b"x-review start\n\t\ntree " + oid + b"\n",
+               b"x-review start\n \t\ntree " + oid + b"\n", b"tree \n", b"x-review first\n \n tree " + oid + b"\n parent " + P1.encode() + b"\n",
+               b"tree\t " + oid + b"\n", b"tree\r\n " + oid + b"\n", b"tree\n\t" + oid + b"\n", b"tree\r\n\t" + oid + b"\n",   # lượt 7: TAB+SP, gập
+               b"tree: " + oid + b"\n", b"tree\\\n " + oid + b"\n")   # lượt 8: S01 `tree:` · S02 gập backslash-LF
+        than = (None, b"m\n", b"first\n\ntree " + oid + b"\nparent " + P1.encode() + b"\n\nlast\n", b"tree " + oid + b"\n\nlast\n",
+                b"\n\ntree " + oid + b"\nparent " + P1.encode() + b"\n")   # None = không có dòng trống, không thân
+        for bc in bo_cha:
+            for ph in pha:
+                for th in than:
+                    raw = f"tree {cay}\n".encode() + b"".join(f"parent {x}\n".encode() for x in bc) + ai(b"A") + ph + (b"" if th is None else b"\n" + th)
+                    so_tree = sum(x.startswith(b"tree ") for x in raw.split(b"\n\n", 1)[0].split(b"\n"))
+                    ca.append((cm(raw), {"tree": cay, "parents": bc} if so_tree == 1 else None))
+        # nợ `wp978-git-reader-differential-fuzz`: vi sai NGẪU NHIÊN (seed cố định) — dòng mở rộng ghép từ token bẫy; kỳ vọng như ma trận
+        bay = (b"tree", b"parent", b"Tree", "ｔｒｅｅ".encode(), b" ", b"\t", b"\r", b":", b"\\", b"\x0b", b"\x0c", b"\x85", b"\n", b"\n ", b"\r\n",
+               oid, P1.encode(), b"x")
+        ngau = random.Random(978)
+        for _ in range(150):
+            raw = dau[:-len(f"parent {P2}\n")] + ai(b"A") + b"".join(ngau.choice(bay) for _ in range(ngau.randint(1, 8))) + b"\n\nm\n"
+            so_tree = sum(x.startswith(b"tree ") for x in raw.split(b"\n\n", 1)[0].split(b"\n"))
+            ca.append((cm(raw), {"tree": cay, "parents": [P1]} if so_tree == 1 else None))
+        hong = [b"tree %s\ntree %s\n" % (cay.encode(), cay.encode()), b"parent %s\n" % P1.encode(), b"tree %s1\n" % cay.encode(),
+                b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
+                f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
+        ca += [(cm(x + ai(b"A") + b"\nh\n", ("--literally",)), None) for x in hong]
+        ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
+        the = g("hash-object", "-t", "tag", "-w", "--stdin",   # tag annotated dựng đúng byte: `git tag -a` đòi danh tính (runner CI không có)
+                i=f"object {hop_le[0]}\ntype commit\ntag the\ntagger A <a@b> 1700000000 +0000\n\nt\n".encode())
+        ca += [(cay, None), (the, None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None), ("\udc80", None)]   # tree · tag · thiếu · rỗng · 2 dòng · không str · không mã hoá được
+        d2, g2 = kho("sha256", "--object-format=sha256")
+        cay2 = g2("mktree", i=f"100644 blob {g2('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
+        ba2 = ["f" * 64, "0" * 63 + "1", "a" * 64]
+        c2 = g2("hash-object", "-t", "commit", "-w", "--stdin", i=f"tree {cay2}\n".encode() + b"".join(f"parent {x}\n".encode() for x in ba2)
+                + ai(b"Jos\xe9") + b"\nm\xe9ssage\n")
+        kq = [doc(x, d1) for x, _ in ca] + [doc(c2, d2)]
+        mong = [k for _, k in ca] + [{"tree": cay2, "parents": ba2}]
+        bang(kq == mong, f"git_cuc_bo lệch ở {[(i, a) for i, (a, b) in enumerate(zip(kq, mong)) if a != b]}")
+        for x, d, gg in [(x, d1, g) for x, k in ca if type(k) is dict] + [(c2, d2, g2)]:   # oracle Git NATIVE cho mọi commit hợp lệ
+            t, _, p = gg("log", "-1", "--no-walk", "--format=%T%n%P", x).partition("\n")
+            bang(doc(x, d) == {"tree": t, "parents": p.split()}, f"lệch Git native ở {x}: {doc(x, d)} ≠ {t} {p.split()}")
+        with mock.patch.dict(os.environ, {"PATH": thu}):
+            bang(doc(hop_le[0], d1) is None, "không có git trên PATH ⇒ None")
+        ra_that = subprocess.run(["git", "-C", d1, "cat-file", "--batch"], input=hop_le[0].encode() + b"\n", capture_output=True, check=True).stdout
+        with mock.patch.object(m.subprocess, "run", return_value=subprocess.CompletedProcess([], 128, ra_that, b"")):   # git chết SAU khi in
+            bang(doc(hop_le[0], d1) is None, "git rc ≠ 0 dù stdout trông như commit ⇒ None")
+        for gia in (b"x commit zz\n\n", b"", ra_that.replace(b"\n", b" y\n", 1), ra_that[:-2], subprocess.TimeoutExpired("git", 60)):   # đầu ra/lỗi git TIÊM:
+            tiem = {"side_effect": gia} if isinstance(gia, Exception) else {"return_value": subprocess.CompletedProcess([], 0, gia, b"")}
+            with mock.patch.object(m.subprocess, "run", **tiem):   # kích thước không số · rỗng · thừa trường · thân cụt · quá hạn
+                bang(doc(hop_le[0], d1) is None, f"đầu ra git tiêm {gia!r:.40} ⇒ None, không ném")
+        tt = types.SimpleNamespace(get=lambda sha: m.git_cuc_bo(sha, goc=d1))
+        rc, ra, prov, _ = chay([(job(1), LINUX.replace(H, hop_le[1]))], run={"event": "pull_request", "head_sha": P2}, git=tt,
+                               wf={(hop_le[1], ".github/workflows/ci.yml"): wf_tu_log(LINUX)})
+    bang(rc == 0 and prov and co(prov) == {"job_id": 1, "name": "j", "dong_sha": [hop_le[1]], "sha": hop_le[1], "parents": [P1, P2], "tree": cay,
+                                            "trang_thai": "passed", "doi_chieu": "head_sha_trong_parents_merge_tong_hop"},
+         f"main trên commit ISO-8859-1: rc={rc} {prov and co(prov)} {ra[-300:]}")
+
+@ca
 def c35_f02_khoi_khong_tron_ven():   # F02 r3: khối thiếu/lẫn màu không được thành tập con khớp run: của bước KHÁC
     x, hd, sh = f"python {DUONG_GIA}", f"{T} ##[group]Run python {DUONG_GIA}", f"{T} shell: /usr/bin/bash -e {{0}}"
     mau, ra = f"{T} \x1b[36;1mpython {DUONG_GIA}\x1b[0m", [f"{T} ##[endgroup]", f"{T} THU: 4/4 dat"]
@@ -1131,6 +1231,53 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("A26_tinh_ca_buoc_i", 'for t in j["steps"][:i]))', 'for t in j["steps"][:i + 1]))', "c42"),
     ("A26_GITHUB_ENV_toan_workflow", 'for t in j["steps"][:i]))', 'for jj in wf["jobs"].values() for t in jj["steps"]))', "c42"),
     ("F08_git_bo_sha", 'f"{sha}:{path}"', 'f"HEAD:{path}"', "c34"),
+    ("F13_giai_ma_toan_stdout", 'dau, _, than = r.stdout.partition(b"\\n")', 'dau, _, than = r.stdout.decode("utf-8").encode().partition(b"\\n")', "c53"),
+    ("F13_giai_ma_ca_phan_dau", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n\\n", 1)[0].decode("utf-8").encode().split(b"\\n")', "c53"),
+    ("F13_bo_kiem_oid", " or not all(RE_OID_B.fullmatch(x) for x in tree + cha):", ":", "c53"),
+    ("F13_cha_quet_ca_dau", "            break\n        cha.append(x[7:])", "            continue\n        cha.append(x[7:])", "c53"),
+    ("F13_bo_tree_dong_dau", ' or not dong[0].startswith(b"tree ")', "", "c53"),
+    ("F13_cha_chi_hai", '"parents": [x.decode("ascii") for x in cha]}', '"parents": [x.decode("ascii") for x in cha[:2]]}', "c53"),
+    ("F13_cha_chi_40", "fullmatch(x) for x in tree + cha)", 'fullmatch(x) for x in tree) and all(re.fullmatch(rb"[0-9a-f]{40}", x) for x in cha)', "c53"),
+    ("F13_bo_kiem_loai", ' or loai[1] != b"commit"', "", "c53"),
+    ("F13_tach_splitlines", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n\\n", 1)[0].splitlines()', "c53"),
+    ("F13_oid_khoang", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40,64}")', "c53"),
+    ("F13_oid_chu_so", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-z]{40}|[0-9a-z]{64}")', "c53"),
+    ("F13_nhieu_tree", "if len(tree) != 1 or", "if not tree or", "c53"),
+    ("F13_chi_kiem_tree", "fullmatch(x) for x in tree + cha)", "fullmatch(x) for x in tree)", "c53"),
+    ("F13_bo_tach_dau_than", '.split(b"\\n\\n", 1)[0].split(b"\\n")', '.split(b"\\n")', "c53"),
+    ("F13_dao_cha", '"parents": [x.decode("ascii") for x in cha]}', '"parents": [x.decode("ascii") for x in cha][::-1]}', "c53"),
+    ("F13_bo_oserror", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (subprocess.SubprocessError, UnicodeEncodeError):", "c53"),
+    ("F13_bo_kiem_kieu", "    if type(sha) is not str:", "    if False:", "c53"),
+    ("F13_bo_kiem_rc", "if r.returncode != 0 or len(loai) != 3", "if len(loai) != 3", "c53"),
+    ("F13_bo_isdigit", " or not loai[2].isdigit()", "", "c53"),
+    ("F13_bo_kiem_kich_thuoc", " or len(than) != int(loai[2]) + 1", "", "c53"),
+    ("F13_bo_dem_truong_dau", "if r.returncode != 0 or len(loai) != 3 or", "if r.returncode != 0 or", "c53"),
+    ("F13_nhan_truong_thua", "or len(loai) != 3 or", "or len(loai) < 3 or", "c53"),
+    ("F13_nhan_than_cut", "len(than) != int(loai[2]) + 1", "len(than) > int(loai[2]) + 1", "c53"),
+    ("F13_bo_unicodeencode", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, subprocess.SubprocessError):", "c53"),
+    ("F13_bo_subprocesserror", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, UnicodeEncodeError):", "c53"),
+    ("F13_lstrip_dau_dong", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.lstrip() for x in dong]\n', "c53"),
+    *[(f"F13_bien_doi_{ten}", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = ' + bd + "\n", "c53") for ten, bd in (
+        ("lstrip_tab", '[x.lstrip(b"\\t") for x in dong]'), ("tab_thanh_sp", '[x.replace(b"\\t", b" ") for x in dong]'),
+        ("ha_ten", '[x[:4].lower() + x[4:] for x in dong]'), ("rstrip", '[x.rstrip() for x in dong]'),
+        ("xoa_cr", '[x.replace(b"\\r", b"") for x in dong]'), ("xoa_dieu_khien", '[bytes(c for c in x if c >= 32) for x in dong]'),
+        ("gap_dong", 'b"\\n".join(dong).replace(b"\\n ", b" ").split(b"\\n")'),
+        ("nfkc", '[__import__("unicodedata").normalize("NFKC", x.decode("utf-8", "replace")).encode() for x in dong]'),
+        ("tach_unicode", '[y.encode() for x in dong for y in x.decode("utf-8", "replace").splitlines()]'),
+        *[(f"tach_{h:02x}", f'[y for x in dong for y in x.split(bytes([{h}]))]') for h in (0x0b, 0x0c, 0x1c, 0x1d, 0x1e, 0x85)])],
+    ("F13_crlf_truoc_tach", "dong = than[:int(loai[2])].split(", 'dong = than[:int(loai[2])].replace(b"\\r\\n", b"\\n").split(', "c53"),
+    ("F13_tach_dau_cuoi", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.rsplit(b"\\n\\n", 1)[0].split(b"\\n")\n', "c53"),
+    ("F13_dong_trang_la_ranh_gioi", "dong = than[:int(loai[2])].split(b", 'dong = re.split(rb"\\n[ \\t]*\\n", than[:int(loai[2])], maxsplit=1)[0].split(b"\\n")  # ', "c53"),
+    ("F13_strip_payload", "dong = than[:int(loai[2])].split(", "dong = than[:int(loai[2])].strip().split(", "c53"),
+    ("F13_gop_cha_trung", '"parents": [x.decode("ascii") for x in cha]}', '"parents": list(dict.fromkeys(x.decode("ascii") for x in cha))}', "c53"),
+    ("F13_cha_toi_da_256", '"parents": [x.decode("ascii") for x in cha]}', '"parents": [x.decode("ascii") for x in cha[:256]]}', "c53"),
+    *[(f"F13_gap_{ten}", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = b"\\n".join(dong).replace(' + gap + ', b" ").split(b"\\n")\n', "c53")
+      for ten, gap in (("crlf_sp", 'b"\\r\\n "'), ("lf_tab", 'b"\\n\\t"'), ("crlf_tab", 'b"\\r\\n\\t"'))],
+    ("F13_gop_cha_lech_mot", "        cha.append(x[7:])\n", "        if x[7:] not in cha[:-1]:\n            cha.append(x[7:])\n", "c53"),
+    ("F13_rstrip_ten_truong", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.split(b" ", 1)[0].rstrip() + b" " + x.split(b" ", 1)[1] if b" " in x else x for x in dong]\n', "c53"),
+    ("F13_bo_hai_cham_ten", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.split(b" ", 1)[0].rstrip(b":") + b" " + x.split(b" ", 1)[1] if b" " in x else x for x in dong]\n', "c53"),
+    ("F13_gap_backslash", "dong = than[:int(loai[2])].split(", 'dong = than[:int(loai[2])].replace(b"\\\\\\n", b"").split(', "c53"),
+    ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),
     ("F02_bo_doi_shell", 'not b["tien_to"] or t.startswith("shell: ")', "True", "c35"),

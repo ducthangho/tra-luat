@@ -1,0 +1,190 @@
+schema: ci_provenance/1
+cong_cu: ops/ci_provenance.py
+nguon: REST
+attempt_yeu_cau: 1
+moc:
+  run:
+    repo: ducthangho/tra-luat
+    run_id: 40268583877
+    run_attempt: 1
+    event: push
+    head_sha: cebb5b22e1ebf369a70234662b7e9355bdd5095e
+    loi_khai_rest_path: .github/workflows/launcher-windows.yml
+    check_suite_id: 109137079816
+    nguon: https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40268583877
+    thieu: []
+    lech: []
+    trang_thai: passed
+  checkout:
+  - job_id: 121396258362
+    name: launcher (windows-latest)
+    dong_sha:
+    - cebb5b22e1ebf369a70234662b7e9355bdd5095e
+    sha: cebb5b22e1ebf369a70234662b7e9355bdd5095e
+    parents:
+    - 21fe565633b0fba269f6ab4e2c9df5b70d98ddb2
+    - 4511b1eb6168904da117791cea178aa0c80e0e47
+    tree: 482e5edd0ac66925a3f60b60b0540df99c4067e3
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 121396258477
+    name: launcher (ubuntu-latest)
+    dong_sha:
+    - cebb5b22e1ebf369a70234662b7e9355bdd5095e
+    sha: cebb5b22e1ebf369a70234662b7e9355bdd5095e
+    parents:
+    - 21fe565633b0fba269f6ab4e2c9df5b70d98ddb2
+    - 4511b1eb6168904da117791cea178aa0c80e0e47
+    tree: 482e5edd0ac66925a3f60b60b0540df99c4067e3
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  gate_output:
+    jobs:
+    - job_id: 121396258362
+      name: launcher (windows-latest)
+      check_run_id: '121396258362'
+      labels:
+      - windows-latest
+      runner_id: 1000020943
+      runner_name: GitHub Actions 1000020943
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Checkout LF
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: Su that ve nen chay
+        conclusion: success
+      - name: Install tool manifest dependencies
+        conclusion: success
+      - name: Install and verify test tools
+        conclusion: success
+      - name: Verify tool manifest and shellcheck canary
+        conclusion: success
+      - name: doctor
+        conclusion: success
+      - name: Bo phan chung (day du, giu nguyen danh sach bo qua)
+        conclusion: success
+      - name: Tu dot bien
+        conclusion: success
+      - name: Cay lam viec phai SACH sau khi chay test
+        conclusion: success
+      - name: 'Probe: dut ong KHONG duoc nuot ma that'
+        conclusion: success
+      - name: 'Probe: console cp1258 + duong dan co dau tieng Viet'
+        conclusion: success
+      - name: 'Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)'
+        conclusion: success
+      - name: 'Probe: taskkill /T tren tien trinh do CHINH minh sinh'
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: windows-2025-vs2026
+      dau_duong:
+      - lenh: python .claude/dev/launcher_test.py
+        duong_dan: .claude/dev/launcher_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 15
+      kich_ban:
+        buoc_xac_thuc: 13
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 121396258477
+      name: launcher (ubuntu-latest)
+      check_run_id: '121396258477'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000020944
+      runner_name: GitHub Actions 1000020944
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Checkout LF
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: Su that ve nen chay
+        conclusion: success
+      - name: Install tool manifest dependencies
+        conclusion: success
+      - name: Install and verify test tools
+        conclusion: success
+      - name: Verify tool manifest and shellcheck canary
+        conclusion: success
+      - name: doctor
+        conclusion: success
+      - name: Bo phan chung (day du, giu nguyen danh sach bo qua)
+        conclusion: success
+      - name: Tu dot bien
+        conclusion: success
+      - name: Cay lam viec phai SACH sau khi chay test
+        conclusion: success
+      - name: 'Probe: dut ong KHONG duoc nuot ma that'
+        conclusion: skipped
+      - name: 'Probe: console cp1258 + duong dan co dau tieng Viet'
+        conclusion: skipped
+      - name: 'Probe: t62 chay rieng (ca CHUA TUNG chay o bat ky vong nao)'
+        conclusion: skipped
+      - name: 'Probe: taskkill /T tren tien trinh do CHINH minh sinh'
+        conclusion: skipped
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-24.04
+      dau_duong:
+      - lenh: python .claude/dev/launcher_test.py
+        duong_dan: .claude/dev/launcher_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 11
+      kich_ban:
+        buoc_xac_thuc: 9
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    tap_jobs:
+      trang_thai: passed
+      total_count: 2
+      so_id: 2
+      truong_sai: []
+    tap_artifacts:
+      trang_thai: passed
+      total_count: 0
+      so_id: 0
+      truong_sai: []
+    artifacts: []
+  workflow_definition:
+    trang_thai: not_measured
+    ly_do: graphql_bi_chan_trong_phien_claude; cho P-B
+    loi_khai_rest_path: .github/workflows/launcher-windows.yml
+log_day_du:
+  121396258362:
+    sha256: b708c688b40c48399c3c3050a817af9cc015284a6cac669caa71dd525f1afa73
+    bytes: 123354
+    trich: jobs/121396258362.trich.txt
+  121396258477:
+    sha256: a2490c2530abd04d5fc98ac348a94e6e57b80efd4ca4e843472f3cb8ad02f470
+    bytes: 96411
+    trich: jobs/121396258477.trich.txt

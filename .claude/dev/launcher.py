@@ -2064,18 +2064,18 @@ class _LayMauSandbox:
                 st = self._stat(d)
                 if st is not None:
                     info[int(d)] = st
-        goc = info.get(self.pid)
-        if goc is None or self.goc_bd is None:
-            return                       # gốc đã thoát, hoặc chưa từng ghim được (đã ghi ở __init__)
-        if goc[1] != self.goc_bd:
-            raise RuntimeError("pid goc da bi tai dung")
-        for c, bo in list(self.canh.items()):          # cùng tiến trình (starttime giữ) mà đổi cạnh cha ⇒ lệch
+        for c, bo in list(self.canh.items()):   # TRƯỚC return vì gốc vắng (04g); cùng starttime, đổi cha ⇒ lệch
             hien = info.get(c)
             if hien is None or hien[1] != bo[1]:
                 del self.canh[c]                         # đã biến mất (pid có thể đã có chủ mới): ngoại lệ duy nhất
             elif hien != bo:
                 self.loi.append("DanhTinhDoi")
                 return
+        goc = info.get(self.pid)
+        if goc is None or self.goc_bd is None:
+            return                       # gốc đã thoát, hoặc chưa từng ghim được (đã ghi ở __init__)
+        if goc[1] != self.goc_bd:
+            raise RuntimeError("pid goc da bi tai dung")
         con: dict = {}
         for c, (pp, bd) in info.items():
             con.setdefault(pp, []).append((c, bd))

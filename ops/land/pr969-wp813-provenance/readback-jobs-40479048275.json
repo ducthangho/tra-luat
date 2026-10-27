@@ -1,0 +1,105 @@
+{
+ "jobs": [
+  {
+   "id": 122104431063,
+   "run_id": 40479048275,
+   "workflow_name": "ops — đăng lease bằng git",
+   "head_branch": "ops/wp813-r2-g1-lease",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40479048275",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAcbf3B1w",
+   "head_sha": "abfd648a22f0fb068a1554a8d579e77c01ec507a",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/122104431063",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40479048275/job/122104431063",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-27T09:12:38Z",
+   "started_at": "2026-10-27T09:15:54Z",
+   "completed_at": "2026-10-27T09:22:02Z",
+   "name": "dang",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-10-27T09:15:55Z",
+     "completed_at": "2026-10-27T09:15:55Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-10-27T09:15:55Z",
+     "completed_at": "2026-10-27T09:16:06Z"
+    },
+    {
+     "name": "cài PyYAML",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-10-27T09:16:06Z",
+     "completed_at": "2026-10-27T09:16:07Z"
+    },
+    {
+     "name": "neo bộ kiểm vào nhánh mặc định",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-10-27T09:16:07Z",
+     "completed_at": "2026-10-27T09:16:09Z"
+    },
+    {
+     "name": "tự kiểm cổng trước khi tin nó (cài công cụ + chạy cổng)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-10-27T09:16:09Z",
+     "completed_at": "2026-10-27T09:21:58Z"
+    },
+    {
+     "name": "tìm lease vừa đổi",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-10-27T09:21:58Z",
+     "completed_at": "2026-10-27T09:21:58Z"
+    },
+    {
+     "name": "đăng",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-10-27T09:21:58Z",
+     "completed_at": "2026-10-27T09:21:59Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-10-27T09:21:59Z",
+     "completed_at": "2026-10-27T09:22:00Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-10-27T09:22:00Z",
+     "completed_at": "2026-10-27T09:22:00Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/122104431063",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000022380,
+   "runner_name": "GitHub Actions 1000022380",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  }
+ ],
+ "total_count": 1
+}

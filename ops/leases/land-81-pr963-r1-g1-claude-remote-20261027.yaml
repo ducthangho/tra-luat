@@ -15,8 +15,15 @@ recorded_by: anthropic_claude_executor
 recorder_is_dispatcher: false
 leased_at_utc: '2026-10-27T09:00:20Z'
 heartbeat_at: '2026-10-27T09:00:20Z'
-lease_until: '2026-10-28T09:00:20Z'
-lease_expires_at_utc: '2026-10-28T09:00:20Z'
+lease_until: '2026-10-27T11:11:45Z'
+lease_expires_at_utc: '2026-10-27T11:11:45Z'
+rut_han:
+  han_cu: '2026-10-28T09:00:20Z'
+  han_moi: '2026-10-27T11:11:45Z'
+  rut_boi: ducthangho
+  ly_do: 'packet land-81-pr963 r1 khong land: PR #979 dong khong merge vi #980 (merge 09db70350414d767b793a71cb630e643f216a1b1) da dua cung khoi assurance_81.thuc_thi vao master; diff #979 so master sau giai xung dot = 0 dong.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp748 r28 (188d456)'
+  ghi_boi: claude-executor-session (theo chi thi chu kho trong phien)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

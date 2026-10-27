@@ -1068,6 +1068,31 @@ def c34_git_blob_that():   # F08: reader THẬT trên kho tạm; đối tượng
     bang(kq == ["jobs: {}\n", None, None], f"git_blob: đúng byte tại object; thiếu path / không UTF-8 ⇒ None: {kq}")
 
 @ca
+def c53_git_commit_khong_utf8():   # F13 (#955 review A): commit HỢP LỆ có message/author ISO-8859-1 ⇒ cùng tree/parents như bản UTF-8, và
+    m = nap()   # `main` sinh provenance rc 0 qua reader Git THẬT. Object dựng bằng `hash-object -t commit` ⇒ đúng byte, không cần ký
+    with tempfile.TemporaryDirectory(prefix="cip_f13_") as thu:
+        g = lambda *a, i=None: subprocess.run(["git", "-C", thu, *a], input=i, capture_output=True, check=True).stdout.decode().strip()  # noqa: E731
+        g("init", "-q")
+        cay = g("mktree", i=f"100644 blob {g('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
+        dau = f"tree {cay}\nparent {P1}\nparent {P2}\n".encode()
+        ai = lambda ten: b"author " + ten + b" <a@b> 1700000000 +0000\ncommitter " + ten + b" <a@b> 1700000000 +0000\n"  # noqa: E731
+        cm = [g("hash-object", "-t", "commit", "-w", "--stdin", i=dau + x) for x in (
+            ai("Nguyễn".encode()) + "\nthông điệp UTF-8\n".encode(), ai(b"A") + b"encoding ISO-8859-1\n\nm\xe9ssage\n",
+            ai(b"Jos\xe9") + b"encoding ISO-8859-1\n\nm\xe9ssage\n")]
+        blob = [g("hash-object", "-w", "--stdin", i=v) for v in (b"\xff\n", f"tree zz\nparent {P1}\n".encode())]
+        try:
+            kq = [m.git_cuc_bo(x, goc=thu) for x in cm + blob + ["0" * 40]]
+        except UnicodeDecodeError as e:   # ĐÚNG lỗi F13 (chỉ lớp này) ⇒ tín hiệu chốt; lỗi khác vẫn là vô can
+            bang(False, f"metadata commit không được phụ thuộc mã hoá message/author: {type(e).__name__}: {e}")
+        dung = {"tree": cay, "parents": [P1, P2]}
+        bang(kq == [dung] * 3 + [None] * 3, f"git_cuc_bo: 3 commit cùng tree/parents; blob/không phải OID/thiếu ⇒ None: {kq}")
+        doc = types.SimpleNamespace(get=lambda sha: m.git_cuc_bo(sha, goc=thu))
+        rc, ra, prov, _ = chay([(job(1), LINUX.replace(H, cm[1]))], run={"event": "pull_request", "head_sha": P2}, git=doc,
+                               wf={(cm[1], ".github/workflows/ci.yml"): wf_tu_log(LINUX)})
+    bang(rc == 0 and prov and co(prov) == {"job_id": 1, "name": "j", "dong_sha": [cm[1]], "sha": cm[1], "parents": [P1, P2], "tree": cay, "trang_thai": "passed",
+                                            "doi_chieu": "head_sha_trong_parents_merge_tong_hop"}, f"main trên commit ISO-8859-1: rc={rc} {prov and co(prov)} {ra[-300:]}")
+
+@ca
 def c35_f02_khoi_khong_tron_ven():   # F02 r3: khối thiếu/lẫn màu không được thành tập con khớp run: của bước KHÁC
     x, hd, sh = f"python {DUONG_GIA}", f"{T} ##[group]Run python {DUONG_GIA}", f"{T} shell: /usr/bin/bash -e {{0}}"
     mau, ra = f"{T} \x1b[36;1mpython {DUONG_GIA}\x1b[0m", [f"{T} ##[endgroup]", f"{T} THU: 4/4 dat"]
@@ -1131,6 +1156,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("A26_tinh_ca_buoc_i", 'for t in j["steps"][:i]))', 'for t in j["steps"][:i + 1]))', "c42"),
     ("A26_GITHUB_ENV_toan_workflow", 'for t in j["steps"][:i]))', 'for jj in wf["jobs"].values() for t in jj["steps"]))', "c42"),
     ("F08_git_bo_sha", 'f"{sha}:{path}"', 'f"HEAD:{path}"', "c34"),
+    ("F13_doc_text_true", 'r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, timeout=60)',
+     'r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, text=True, timeout=60)\n        r.stdout = r.stdout.encode()', "c53"),
+    ("F13_giai_ma_ca_phan_dau", 'dau = r.stdout.split(b"\\n\\n", 1)[0].splitlines()', 'dau = r.stdout.split(b"\\n\\n", 1)[0].decode("utf-8").encode().splitlines()', "c53"),
+    ("F13_bo_kiem_oid", "if len(tree) != 1 or not all(RE_OID_B.fullmatch(x) for x in tree + cha):", "if len(tree) != 1:", "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),
     ("F02_bo_doi_shell", 'not b["tien_to"] or t.startswith("shell: ")', "True", "c35"),

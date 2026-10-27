@@ -30,6 +30,7 @@ RE_SHA = re.compile(rf"^{TS} ([0-9a-f]{{40}})$")
 RE_GIO = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
 RE_ANSI = re.compile(r"\x1b\[[0-9;]*m")
 RE_HEX40 = re.compile(r"^[0-9a-f]{40}$")
+RE_OID_B = re.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")   # F13: OID SHA-1/SHA-256 dạng bytes (dòng tree/parent của commit)
 RE_REPO = re.compile(r"^[\w.-]+/[\w.-]+$")
 LY_DO_WD = "graphql_bi_chan_trong_phien_claude; cho P-B"
 KET_BUOC = ("success", "failure", "cancelled", "skipped", "neutral")
@@ -133,14 +134,17 @@ def doc_moi(duong=CI_DANG_KY):
     return dict(m.MOI), m.bang_chung_xanh
 
 def git_cuc_bo(sha, goc=ROOT):
-    """parents/tree của commit trong kho cục bộ; không có object (hoặc không phải commit) ⇒ None."""
+    """parents/tree của commit trong kho cục bộ; không có object (hoặc không phải commit) ⇒ None.
+    F13 (#955 review A): đọc BYTES — message/author không phải UTF-8 là commit HỢP LỆ; chỉ giải mã dòng tree/parent, và chỉ khi là OID hex."""
     try:
-        r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, text=True, timeout=60)
+        r = subprocess.run(["git", "-C", str(goc), "cat-file", "-p", sha], capture_output=True, timeout=60)
     except (OSError, subprocess.SubprocessError):
         return None
-    dau = r.stdout.split("\n\n", 1)[0].splitlines() if r.returncode == 0 else []
-    tree = [x[5:] for x in dau if x.startswith("tree ")]
-    return {"tree": tree[0], "parents": [x[7:] for x in dau if x.startswith("parent ")]} if len(tree) == 1 else None
+    dau = r.stdout.split(b"\n\n", 1)[0].splitlines() if r.returncode == 0 else []
+    tree, cha = [x[5:] for x in dau if x.startswith(b"tree ")], [x[7:] for x in dau if x.startswith(b"parent ")]
+    if len(tree) != 1 or not all(RE_OID_B.fullmatch(x) for x in tree + cha):
+        return None
+    return {"tree": tree[0].decode("ascii"), "parents": [x.decode("ascii") for x in cha]}
 
 def git_blob(sha, path, goc=ROOT):
     """Văn bản blob `<sha>:<path>` trong kho cục bộ; thiếu object/tệp, không phải blob hay không UTF-8 ⇒ None."""

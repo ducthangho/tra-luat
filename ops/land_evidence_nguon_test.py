@@ -37,10 +37,10 @@ PROV = "pr9001-thu-provenance"
 L6_TRUONG = ("post_merge_checks", "bookkeeping")   # chép riêng, không đọc từ bộ kiểm: bỏ một trường ở đó ⇒ c16 ĐỎ
 KY_VONG_SO_MIEN_TRU = 28
 KY_VONG_VAN_TAY_MIEN_TRU = "5311e7557cd75ef2f3b06371c66a4830d4970613c1e98a8fd4af732d7dab2257"
-# L7 — cùng cách chép riêng, đo trên `f577ab5` (27-10-2026): 3 hồ sơ khai DAT thiếu `thuc_thi`. Đổi danh sách ⇒ c19 ĐỎ.
+# L7 — cùng cách chép riêng, đo trên `7129f7d` (27-10-2026): 3 hồ sơ khai DAT thiếu `thuc_thi`. Đổi danh sách ⇒ c19 ĐỎ.
 L7_KHOA = ("model", "effort", "sandbox_mode")   # chép riêng: bỏ một khoá ở bộ kiểm ⇒ c17 ĐỎ
 KY_VONG_SO_MIEN_TRU_L7 = 3
-KY_VONG_VAN_TAY_MIEN_TRU_L7 = "f70596f243a6da93b79e01c50cee6f4ae9932bf04d399fb674cbc12c44aa5e78"
+KY_VONG_VAN_TAY_MIEN_TRU_L7 = "6b5ef08603e37239742fe5d7fe8cbe933b24e33174cf3af04c453b0e7be83574"
 
 
 class TinHieuChotCa(AssertionError):

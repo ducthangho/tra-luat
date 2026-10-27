@@ -101,11 +101,12 @@ L6_PHAN_HOAN_TAT = ("post_merge_checks", "bookkeeping")   # cây thật 19-10-20
 L6_DAU_GIU_CHO = "CHO_DIEN"
 L7_KHOA = ("model", "effort", "sandbox_mode")
 L7_MUC_DAT = ("DAT", "ĐẠT")   # sau `_chuan_hoa_81`; dạng NFC
-# L7 — đo 2026-10-27 trên `f577ab5`: 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới.
+# L7 — đo 2026-10-27 trên `7129f7d` (băm chụp lại sau #962/#966 sửa pr924, pr950; tên giữ nguyên như ở `f577ab5`):
+# 3 hồ sơ khai DAT mà thiếu `thuc_thi`. KHÔNG thêm tên mới.
 MIEN_TRU_L7 = {
-    "pr924-wp923-land-evidence.yaml": "067df625f496a13703931d84c3a76858406b08b60d221007701ecdfa74562721",
+    "pr924-wp923-land-evidence.yaml": "f246000294972947543a1afb3d9122b43ea11f8e540c4927ebda8d7a202d8f5b",
     "pr931-wp835-land-evidence.yaml": "31c8ce908aa08631a58993b1e431d4653b01b23b87ed59926181f2df4df485da",
-    "pr950-wp834-land-evidence.yaml": "5f1925471e098474544ff2bf3c348762e3b6e35b214e848a17e472f5f10a1805",
+    "pr950-wp834-land-evidence.yaml": "b0ae6da9f1f919d1f6ae785ad6950b94dd37f99c0a2852d31d5aaee645a6a080",
 }
 
 

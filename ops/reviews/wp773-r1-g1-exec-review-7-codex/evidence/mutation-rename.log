@@ -1,0 +1,3 @@
+argv=['/usr/bin/python3.13', '-B', PosixPath('/home/user/rv773/ops/land_evidence_nguon_test.py'), '--mot-ca', 'c10_l5_danh_sach_dong_bang']
+rc=3
+DO:c10_l5_danh_sach_dong_bang:MIEN_TRU_CUTOVER trôi khỏi ảnh chụp cutover: 28 tên, vân tay ef22b9a8bf2e…

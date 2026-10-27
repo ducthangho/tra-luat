@@ -1,0 +1,6 @@
+yaml_parsed=369 receipts=294 duplicate_ids=[]
+verdict_path_hashes=304 all_match=True
+flat_verdicts=272 unclaimed=[]
+frozen_groups={'ALLOWLIST_CUTOVER': 11, 'NO_DA_DO': 42} all_hash_and_bytes_match=True
+modified_historical_verdicts=[]
+errors=[]

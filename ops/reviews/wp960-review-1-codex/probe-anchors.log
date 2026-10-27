@@ -1,0 +1,24 @@
+anchor-plain first=ede3cfadd60dc9d925cf81d9bd06bf7da61be8f7 later=6cdb1482486fb82e3e322ea0e94795988df04a77
+anchor-plain-add-anchor-only {"rc": 1, "loi": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `ea13584` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `ea13584` ĐÃ là tổ tiên — câu đã cũ; sửa câu hoặc thêm mốc `dung_tai`"], "chua_do": [], "surface_chua_do": []}
+anchor-plain-same-sentence-whitespace {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-plain-after-commit {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-plain-exact-scalar-equal=True
+anchor-plain-YAML-only-format {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-folded first=d268ce46cbe60857952a2ba15b4ff82709799df3 later=ca4942ab0ca22243164a52b67296e22dd97f3c29
+anchor-folded-add-anchor-only {"rc": 1, "loi": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `ea13584` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `ea13584` ĐÃ là tổ tiên — câu đã cũ; sửa câu hoặc thêm mốc `dung_tai`"], "chua_do": [], "surface_chua_do": []}
+anchor-folded-same-sentence-whitespace {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-folded-after-commit {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-folded-exact-scalar-equal=True
+anchor-folded-YAML-only-format {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-literal first=6b98f463d655120b282a86ca40077100556dcbcc later=236f68b74f6c8bd5512c6102acf8fc87aab9c4de
+anchor-literal-add-anchor-only {"rc": 1, "loi": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `ea13584` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `ea13584` ĐÃ là tổ tiên — câu đã cũ; sửa câu hoặc thêm mốc `dung_tai`"], "chua_do": [], "surface_chua_do": []}
+anchor-literal-same-sentence-whitespace {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-literal-after-commit {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-literal-exact-scalar-equal=True
+anchor-literal-YAML-only-format {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-list first=9c1ef7db70c25b60fd2d85c93d6e424f9f3ecb8e later=386df446a6419f9756d008374ab4fb1db8865408
+anchor-list-add-anchor-only {"rc": 1, "loi": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta[0]` nói `199d7f3` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `199d7f3` ĐÃ là tổ tiên — câu đã cũ; sửa câu hoặc thêm mốc `dung_tai`"], "chua_do": [], "surface_chua_do": []}
+anchor-list-same-sentence-whitespace {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-list-after-commit {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+anchor-list-exact-scalar-equal=True
+anchor-list-YAML-only-format {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}

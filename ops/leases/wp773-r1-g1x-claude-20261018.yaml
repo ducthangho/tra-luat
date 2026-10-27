@@ -1,0 +1,88 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 773
+packet_id: land-evidence-khai-phai-co-nguon
+mission_issue: 773
+revision: 1
+generation: 2
+lease_id: wp773-r1-g1x-claude-20261018
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+review_mode: phan_lop_kem_hint_khi_phuc_tap
+assurance_target: human_audited
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/land-evidence-khai-phai-co-nguon-r1.md
+spec_sha256_required: 063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd
+spec_hash: 063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd
+prompt_path: ops/specs/land-evidence-khai-phai-co-nguon-r1.md
+prompt_sha256_required: 063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd
+write_set:
+- ops/land_evidence_nguon.py
+- ops/land_evidence_nguon_test.py
+effective_write_set:
+- ops/land_evidence_nguon.py
+- ops/land_evidence_nguon_test.py
+branch: agent/wp773-g1-claude
+branch_ownership: shared_with_g2
+target_branch_neu_land: master
+base_sha: fb490a7c3fa2992c6f4635ed091dafa813df2fe7
+start_from_sha: 597edf7dc6173f1a5c1f642db4e53c75e4ebf416
+reviewed_sha_required: 128b2e892f91dd353367c082bfc9cf2c300ecfb7
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/773#issuecomment-6245193547
+granted_on_instruction_note: >-
+  Chu kho ducthangho dang comment 6245193547 (OWNER, performed_via_github_app null, 2026-10-18T03:28:46Z, doc lai qua
+  API 03:29Z): gia han toi 2026-10-18T19:00:00Z, chap nhan spec r3 sha256 81543d80 (ops/wp773-r3-g3-lease, 3c92353),
+  lease moi g3 (g2) va g1x (g1) thay hai lease cu kem bia mo hai chieu. Comment nay thay comment 6244761753 (02:32Z,
+  ban nhap cu neo spec r2, base 1360108) cung lease_id.
+recorded_by: claude-executor-session
+recorder_is_executor: true
+leased_at_utc: '2026-10-18T03:35:00Z'
+lease_expires_at_utc: '2026-10-18T05:30:00Z'
+size_limit_exception: 'g1 <= 750 dong them (ADR-0044 ngoai le; 600 -> 700 issuecomment-6221230175 -> 750 issuecomment-6243722103)'
+review_rounds_limit: null
+review_rounds_limit_basis: >-
+  Review Codex doc lap toi khi P1=0, P2=0 tren dung head (theo tien le #743).
+ci_policy: ci_day_du_qua_draft_pr
+ci_policy_note: >-
+  Day nhanh agent/wp773-g1-claude, mo draft PR (ci.yml chay). g1 KHONG sua workflow; noi CI la g2 (spec Q1).
+  Khong merge, khong land, khong deploy.
+push_policy: push_nhanh_agent_mo_draft_pr
+thay_the_cho: wp773-r1-g1-claude-20261016
+xung_dot_write_set_do_luc: >-
+  2026-10-18T03:3xZ ai-dang-giu cho ca hai duong dan g1: NGUOI_GIU 1 = wp773-r1-g1-claude-20261016 (chinh lease duoc thay).
+base_ghi_chu: >-
+  base_sha = origin/master fb490a7 do luc soan; reviewed_sha_required = 128b2e8 (head duoc review g2 luot 1). Ban va F2 (c11)
+  da day o 597edf7 duoi lease g1 cu, truoc khi lease nay dang.
+han_ghi_chu: >-
+  Goc 2026-10-18T19:00:00Z. RUT NGAN ve 2026-10-18T05:30:00Z — xem thu_hoi_bang_rut_han.
+lease_sua_lan_cuoi: '2026-10-18T04:20Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-18T19:00:00Z'
+  han_moi_utc: '2026-10-18T05:30:00Z'
+  chi_thi: >-
+    Uy quyen land cua chu kho, PR #778 comment 6245464876 (ducthangho, OWNER), muc "Thao tac duoc phep":
+    thu hoi som hai lease wp773-r3-g3-claude-20261018 va wp773-r1-g1x-claude-20261018.
+  ly_do: >-
+    Packet #773 da MERGE: PR #778 (agent/wp773-g1-claude) merge bang merge commit
+    dba7fae7864dd0f346285bc5eb357c8d062c1a36 (cha fb490a7 + 6f69f9d, tree 2121397 = tree candidate) luc 2026-10-18T04:15Z.
+    Lease khong tu chet khi land (CLAUDE.md); de nguyen thi giu write set toi 19:00Z, chan wp748 r18.
+  vi_sao_khong_dung_bia_mo: >-
+    Theo tien le #772 (cacf16b): rut han dung co che da cai. Han moi dat SAU luc push de luot dang lease con thay lease
+    song, tranh rc=8 che rc=9. Khong bia mo: khong co lease ke nhiem.
+  nguoi_rut: 'land operator, phien Claude Code session_017khPoiSXW9Yvefabg6MWaH (cung la executor)'
+  nghiem_thu: 'ai-dang-giu cho write set sau 05:30Z phai ra NGUOI_GIU 0 — do o PR ghi so.'

@@ -1,0 +1,13 @@
+AST exact ops/lease_publish_test.py:7848-7923 _danh_gia_bieu_thuc_chuan_bi
+REAL outputs.os = ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only') && '["windows-latest"]' || (github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'windows')) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]' }}
+runner_set.default = windows-and-ubuntu
+push master => ["ubuntu-latest"]
+dispatch windows-only => ["windows-latest"]
+dispatch default => ["ubuntu-latest", "windows-latest"]
+dispatch missing inputs => ["ubuntu-latest", "windows-latest"]
+PR without label => ["ubuntu-latest"]
+PR windows label => ["ubuntu-latest", "windows-latest"]
+push with irrelevant windows-only input => ["ubuntu-latest"]
+e63961f workflow-identical-to-checkout = True
+HEAD workflow-identical-to-checkout = True
+probe_rc=0

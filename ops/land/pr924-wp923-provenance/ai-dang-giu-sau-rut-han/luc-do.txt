@@ -1,0 +1,19 @@
+# do luc 2026-10-25T06:50:04Z; master b306e15
+ls-remote heads=594 for-each-ref=594 thieu=0 (so TAP ten, comm -23)
+== .claude/dev/chay-cong-windows.ps1
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp923-r1-g1-claude	refs/heads/ops/wp923-r1-g1-lease:ops/leases/wp923-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc(ai-dang-giu)=0
+== .github/workflows/ci.yml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp923-r1-g1-claude	refs/heads/ops/wp923-r1-g1-lease:ops/leases/wp923-r1-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp910-r1-g1-claude	refs/remotes/origin/ops/wp910-r1-g1-lease:ops/leases/wp910-r1-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp910-r2-g2-claude	refs/remotes/origin/ops/wp910-r2-g2-lease:ops/leases/wp910-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc(ai-dang-giu)=0
+== ops/handoff/wp923-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp923-r1-g1-claude	refs/heads/ops/wp923-r1-g1-lease:ops/leases/wp923-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc(ai-dang-giu)=0

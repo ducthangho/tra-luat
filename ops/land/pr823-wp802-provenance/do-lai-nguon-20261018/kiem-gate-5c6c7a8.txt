@@ -1,0 +1,19 @@
+# kiem-gate OFFLINE tren readback-check-runs-5c6c7a8.json — 2026-10-18T09:47:04Z; suite 105982956223 = ci.yml pull_request run 39109075612
+$ sha256sum .claude/dev/packet_loop.py
+c15ac9330a084d4a10d559885dbeb606c841ca4ad22a6ca51686c681e59f8634  .claude/dev/packet_loop.py
+CẢNH BÁO: 'chuan-bi' có 1 run ở suite khác (117621106062) — bỏ qua
+CẢNH BÁO: 'gate (ubuntu-latest)' có 1 run ở suite khác (117621119354) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 0)' có 1 run ở suite khác (117621119417) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 1)' có 1 run ở suite khác (117621119383) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 2)' có 1 run ở suite khác (117621119495) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 3)' có 1 run ở suite khác (117621119403) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 4)' có 1 run ở suite khác (117621119536) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 5)' có 1 run ở suite khác (117621119438) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 6)' có 1 run ở suite khác (117621119486) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu (ubuntu-latest, 7)' có 1 run ở suite khác (117621119440) — bỏ qua
+CẢNH BÁO: 'gate-cong-cu-gop (ubuntu-latest)' có 1 run ở suite khác (117626373415) — bỏ qua
+CẢNH BÁO: 'gate-ops (ubuntu-latest)' có 1 run ở suite khác (117621119332) — bỏ qua
+CẢNH BÁO: 'gate-packet-loop (ubuntu-latest)' có 1 run ở suite khác (117621119311) — bỏ qua
+CẢNH BÁO: 'gate-registry (ubuntu-latest)' có 1 run ở suite khác (117621119336) — bỏ qua
+gate XANH trên 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456 (suite 105982956223): chuan-bi id=117621098436 · gate (ubuntu-latest) id=117621140319 · gate-cong-cu (ubuntu-latest, 0) id=117621140418 · gate-cong-cu (ubuntu-latest, 1) id=117621140483 · gate-cong-cu (ubuntu-latest, 2) id=117621140429 · gate-cong-cu (ubuntu-latest, 3) id=117621140410 · gate-cong-cu (ubuntu-latest, 4) id=117621140404 · gate-cong-cu (ubuntu-latest, 5) id=117621140455 · gate-cong-cu (ubuntu-latest, 6) id=117621140460 · gate-cong-cu (ubuntu-latest, 7) id=117621140452 · gate-cong-cu-gop (ubuntu-latest) id=117627286865 · gate-ops (ubuntu-latest) id=117621140372 · gate-packet-loop (ubuntu-latest) id=117621140345 · gate-registry (ubuntu-latest) id=117621140376
+rc=0

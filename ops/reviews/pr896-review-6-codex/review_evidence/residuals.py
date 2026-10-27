@@ -1,0 +1,14 @@
+from pathlib import Path
+import hashlib,json,re,subprocess,yaml
+from audit import ROOT,OUT,SHA,MASTER,git,blob,record
+from states import scalars,at,rc
+selected=[('doctor-github-mcp-review-6-codex-verdict',['receipt_khong_khai','0']),('don-nhanh-base-review-4-claude-verdict',['truy_xuat_ghi_chu']),('don-nhanh-base-review-5-claude-verdict',['truy_xuat_ghi_chu']),('wp461-review-1-codex-verdict',['anchor','cuong_do']),('wp461-review-1-codex-verdict',['lich_su_ban_ung_vien','ghi_chu']),('wp523-r15-review-1-codex-verdict',['anchor','cuong_do']),('wp523-r15-review-1-codex-verdict',['lich_su_ban_ung_vien','ghi_chu'])]
+rows=[]
+for stem,keys in selected:
+ name='ops/reviews/'+stem+'.receipt.yaml';p=ROOT/name;d=yaml.safe_load(p.read_text());oid=re.search('/blob/([0-9a-f]{40})/',d['evidence_url'])[1];line=next(l for k,l,s in scalars(yaml.compose(p.read_text())) if k==tuple(keys));last=git('log','-1','--format=%H',SHA,'--',name).decode().strip()
+ rows.append({'receipt':name,'field':'.'.join(keys),'line':line,'text':at(d,keys),'schema_version':d['schema_version'],'evidence_oid':oid,'rc_master':rc('merge-base','--is-ancestor',oid,MASTER),'rc_candidate':rc('merge-base','--is-ancestor',oid,SHA),'receipt_at_master_ls_tree':git('ls-tree',MASTER,'--',name).decode().strip(),'last_unchanged_blob_commit':last,'last_blob_equals_current':blob(last,name)==p.read_bytes(),'verdict_sha256':hashlib.sha256((ROOT/d['verdict_path']).read_bytes()).hexdigest(),'hash_match':hashlib.sha256((ROOT/d['verdict_path']).read_bytes()).hexdigest()==d['verdict_sha256']})
+(OUT/'residual-status.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2))
+output='inventory: 294 YAML; targeted no-review/no-apply/no-merge/ancestry strings = 179 unanchored candidates + 149 anchored candidates; README candidates = 119 (regex inventory, not finding counts).\n'
+for x in rows:output+=f"{x['receipt']}:{x['line']} {x['field']} oid={x['evidence_oid']} rc(master,candidate)={[x['rc_master'],x['rc_candidate']]} schema={x['schema_version']}\n{x['text']}\nls-tree master: {x['receipt_at_master_ls_tree']}\n"
+output+='NO_DA_DO covers don-nhanh-base-review-4/5; ALLOWLIST_CUTOVER covers doctor-github-mcp-review-6. No supplementary entry for any of these five receipts at reviewed_sha.\nOther review heads: 5a96c1a and 888c0d9 have 0 matching ops/reviews receipts; 4bc9432 and 604b8d9 remain non-ancestors of master and candidate (rc1). Historical finding summaries and land-decision statements excluded.'
+record(10,'Mở rộng quét trạng thái ra ngoài danh sách lượt 5','python3 review_evidence/inventory.py; python3 review_evidence/negative_ancestry.py; python3 review_evidence/residuals.py; git merge-base --is-ancestor <OID> '+MASTER+'; git ls-tree '+MASTER+' -- <receipt>',output,'LỖI P1 phu-nhan-ancestry-chi-tren-nhanh-da-cu: 7 trường trong 5 receipt còn sai hiện hành; ba v1 cần sidecar supplementary, không đổi byte')

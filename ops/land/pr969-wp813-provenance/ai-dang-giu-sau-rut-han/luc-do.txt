@@ -1,0 +1,16 @@
+# ai-dang-giu sau rut han, do 2026-10-27T09:45:37Z tren clone moi tu https://github.com/ducthangho/tra-luat.git (is-shallow false; master 74132ce2); lenh: python3 ops/lease_publish.py ai-dang-giu <duong> --root .
+ls-remote heads 652 · for-each-ref 652 · thieu cuc bo (comm -23): 0 · thua cuc bo (comm -13): 0
+== .claude/dev/packet_loop.py
+HẾT_HẠN	wp813-r2-g1-claude	refs/remotes/origin/ops/wp813-r2-g1-lease:ops/leases/wp813-r2-g1-claude.yaml
+CÒN_HẠN	wp814-r2-g1-claude	refs/remotes/origin/ops/wp814-r2-g1-lease:ops/leases/wp814-r2-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp814-r2-g1-claude
+rc=11
+== .claude/dev/packet_loop_test.py
+HẾT_HẠN	wp813-r2-g1-claude	refs/remotes/origin/ops/wp813-r2-g1-lease:ops/leases/wp813-r2-g1-claude.yaml
+CÒN_HẠN	wp814-r2-g1-claude	refs/remotes/origin/ops/wp814-r2-g1-lease:ops/leases/wp814-r2-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp814-r2-g1-claude
+rc=11
+== ops/handoff/wp813-g1-claude.md
+HẾT_HẠN	wp813-r2-g1-claude	refs/remotes/origin/ops/wp813-r2-g1-lease:ops/leases/wp813-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

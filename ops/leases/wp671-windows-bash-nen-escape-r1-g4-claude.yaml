@@ -1,0 +1,128 @@
+# LEASE — WINDOWS-BASH-NEN-ESCAPE revision 1 / generation 4 (g3 da het han; chong CO DUYET voi #748 r19) — ghep master + push mot lan cho PR #690
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 671
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/671#issuecomment-6252830932
+granted_on_instruction_nguyen_van: >-
+  'Kiểm tra trạng thái và cập nhật các thay đổi. Xử lý các conflict đối với PR 690.'; AskUserQuestion
+  (2026-10-18 ~17:20Z): 'Cấp g4 chồng có duyệt, push (Recommended)'.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-10-18T17:21:00Z'
+lease_expires_at_utc: '2026-10-19T01:58:00Z'
+han_ghi_chu: >-
+  Goc 12 gio (2026-10-19T05:21:00Z). RUT NGAN ve 2026-10-19T01:58:00Z — xem thu_hoi_bang_rut_han.
+
+packet_id: WINDOWS-BASH-NEN-ESCAPE
+packet_slug: WINDOWS-BASH-NEN-ESCAPE
+revision: 1
+generation: 4
+lease_id: wp671-windows-bash-nen-escape-r1-g4-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: >-
+  g3 (wp671-windows-bash-nen-escape-r1-g3-claude) da HET HAN tu 2026-10-02T00:20:00Z nen write-set exclusion da nha;
+  KHONG khai bia mo da_bi_thay_the tren tep g3 (sua lease da chet dua tep chet vao tap quet => rc=8, CLAUDE.md
+  bai hoc 20-09-2026). Cung phien cloud session_014dEtdMqShJhdQ8JfNbEeLU tiep tuc.
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+model_ghi_chu: 'Phien dieu phoi + agent va (va-spec-opus, effort xhigh) + agent review (review-opus-max, effort max) deu Opus 5.5; doi chieu modelUsage moi luot.'
+environment: cloud
+environment_ghi_chu: 'Container Claude Code remote (Linux). Nghiem thu Windows KHONG DO DUOC o day — chu kho "Chỉ chạy tại máy".'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Cross-review theo .claude/skills/cross-review/SKILL.md; human_audited la cong land.'
+access: read-write
+
+spec_path: ops/specs/WINDOWS-BASH-NEN-ESCAPE-r1.md
+spec_ref: refs/heads/ops/cap-lease-671-g1
+spec_source_oid: 8da6c16d9c2fb3a1b0dfa423095c2745ec4001aa
+spec_blob: 0e94c8ac95286bab8581710263dd1cfc45a54d38
+spec_sha256: 18504ced1549cbe62816f067b6ed16f36c12292820c8204cb6085a9c39e80b88
+spec_hash: 18504ced1549cbe62816f067b6ed16f36c12292820c8204cb6085a9c39e80b88
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+prompt_path: ops/specs/WINDOWS-BASH-NEN-ESCAPE-r1.md
+prompt_sha256_required: 18504ced1549cbe62816f067b6ed16f36c12292820c8204cb6085a9c39e80b88
+ban_va_tham_chieu: ops/specs/WINDOWS-BASH-NEN-ESCAPE-r1.patch
+ban_va_tham_chieu_sha256: 59fcf3679e05cd5bd4689d5c3310ff3cf829d7b5300563734771b38375d4f011
+
+branch: claude/wp671-windows-bash-nen-escape-g1
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  Spec + lease o nhanh ops/cap-lease-671-g1; ma o nhanh claude/wp671-windows-bash-nen-escape-g1 dat THANG tren
+  start_from_sha (khong mang commit spec/lease) de diff chi con W1–W2.
+start_from_sha: 1741e0a1ab7ebce4b26912aefadca56ddfcdc691
+immutable_acceptance_baseline: 1741e0a1ab7ebce4b26912aefadca56ddfcdc691
+reviewed_sha_required: 302a15dd56c58918a4ca9e4965eb54907204a9f9
+reviewed_sha_required_nghia: 'Head vong 7 (review luot 7, PR #690 issuecomment-5933156034); giu o nhanh ops/luu-671-vong7-302a15d; verdict moi neo exact head THAT sau khi ghep.'
+
+write_set:
+  - ops/bash_nen.py
+  - ops/cong_cu_test.py
+write_set_hash: 0ec9fb5315b4df36d79408a4510d5bd0ac57830dc0a92a885975039fe67b9d01
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-18T17:17Z tren clone du 613 refs/heads (ls-remote khop tap ten, comm -3 = 0): ca hai duong dan
+  ai-dang-giu NGUOI_GIU 1 = wp748-r19-g19-claude-windows-20261018 (#748, CON_HAN toi 2026-10-19T04:48:21Z,
+  write set 12 duong dan gom ca hai tep nay) — CHONG CO DUYET (issuecomment-6252830932).
+lech_protocol_duoc_duyet: >-
+  (1) CHONG write set voi #748 r19 tren ops/bash_nen.py + ops/cong_cu_test.py — chu kho "Cấp g4 chồng có duyệt,
+  push"; thu tu land #748 -> #671; #671 KHONG merge vao master khi chua co quyet dinh moi. (2) TRAN dong them ~420
+  so fc852ff (issues/671#issuecomment-5925174103). (3) Gop no CONG-CU-TEST-EP-UTF8 (spec r1 §2C). (4) Khong
+  workflow_dispatch. (5) Review cung provider — nhan toi da same_provider_approved; land can human_audited.
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) duoc phep neu mo PR draft'
+  phep_do_duoc_cap: '0 workflow_dispatch'
+  tham_do_chua_cap: cam
+  het: 'DUNG truoc moi workflow_dispatch; cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — cham duong ngoai W1–W2. DUNG.'
+  - 'S2 — gia thuyet B (t49) sai tren Windows. DUNG phan B, bao so do, hoi chu kho.'
+  - 'S3 — > 420 dong them so fc852ff hoac > 2 tep (tran chu kho nang). DUNG, hoi chu kho.'
+  - 'S4 — het han lease => ngung ghi, handoff §7.'
+  - 'S5 — cung hinh dang finding >= 3 lan => hoi chu kho.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong workflow_dispatch, khong LIVE/deploy, khong VERSION/Package
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Git for Windows co nhan ten byte tho / ten mang dau cheo nguoc trong INDEX khong.'
+lease_sua_lan_cuoi: '2026-10-19T01:45Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-19T05:21:00Z'
+  han_moi_utc: '2026-10-19T01:58:00Z'
+  chi_thi: >-
+    Chu kho trong phien Claude Code session_014dEtdMqShJhdQ8JfNbEeLU 2026-10-19 ~01:42Z: "Đã merge, hãy land, bookeeping".
+  ly_do: >-
+    Packet #671 da MERGE het: PR #690 merge 6b641ca2a2b889c9f43eec58bae47a00a80373cd (2026-10-18T18:42:26Z, head
+    abc03391) va PR #838 merge ed02bf65a3bacba249670ab9f23c320f3deb3a10 (2026-10-19T01:40:32Z, head 72a1d641,
+    human_audited pull/838#issuecomment-6257649150).
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660/#661/#668: rut han chi dung co che da cai (phan loai lease theo han). Han moi dat vai phut SAU
+    luc push de ops-publish-lease.yml con thay lease song (nhanh rc=9 da dang), khong roi vao rc=8.
+  nguoi_rut: 'phien dieu phoi/executor session_014dEtdMqShJhdQ8JfNbEeLU'
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/cap-lease-671-g1 (ban rut han) va master sau PR bookkeeping. Nghiem thu: ai-dang-giu
+    cho ops/bash_nen.py, ops/cong_cu_test.py khong con wp671-windows-bash-nen-escape-r1-g4-claude sau han moi.

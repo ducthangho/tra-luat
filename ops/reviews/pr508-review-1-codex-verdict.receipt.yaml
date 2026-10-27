@@ -69,11 +69,7 @@ anchor:
   mo_ta: >-
     Blob verdict ghim `9196eaf`. Head đã review là TỔ TIÊN của head nhánh packet (đo
     `git merge-base --is-ancestor`, cả 5/5 ⇒ CÓ).
-  gioi_han: >-
-    YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ
-    trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ
-    bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha`
-    thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách.
+  gioi_han: "Anh chup lich su tai commit ghi bien nhan a639e48e3077eb6797f6d793c3d91e7ae290f68a: YẾU HƠN các biên nhận `cao` trong thư mục này: PR #508 **CHƯA merge**, nên quan hệ tổ tiên mới chỉ trong NHÁNH, chưa tới `master` (đo: `HEAD` KHÔNG phải tổ tiên của `origin/master`). Quan hệ ấy chỉ bền nếu land bằng **merge commit hoặc fast-forward**; **squash phá nó** và làm cả 5 `reviewed_sha` thành SHA không tra được. Nâng lên `cao` được sau khi PR land đúng cách. Do lai tai 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0: git merge-base --is-ancestor 9196eaf70ca0d908b8d23ff26512c4e395e1e997 101263f va voi 2e4183b deu rc=0. Cau phu nhan ancestry/chi-tren-nhanh cua moc cu khong con la trang thai hien hanh. Chi xac nhan quan he Git, khong tu nang assurance/cuong_do va khong suy Packet da landed."
   pr: 508
   branch: claude/handoff-tra-luat-repo-2ak5th
   reviewed_sha: 4918d5f073464b5136c4c0c6a3d538347fec2baa

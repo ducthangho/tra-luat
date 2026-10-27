@@ -29,8 +29,22 @@ python .claude/dev/launcher.py doctor          # người đọc
 python .claude/dev/launcher.py doctor --json   # máy đọc
 ```
 
-Thoát `12` khi thiếu công cụ **bắt buộc** (git, python). Thiếu `claude`/`codex`
-chỉ là cảnh báo — có phiên không cần gọi agent nào cả.
+Thoát `12` khi thiếu công cụ **bắt buộc** (hoặc có mặt mà phép `xac_thuc` khai trong
+`CONG_CU` đo được là SAI), **và cả khi** `rg` hoặc `git` ở trạng thái
+`BI_CHE`. Tập bắt buộc lấy từ `CONG_CU` trong `.claude/dev/launcher.py` (`_bat_buoc`),
+và nó **theo nền**, không phải một danh sách chung:
+
+| công cụ | máy người dùng | phiên remote (`CLAUDE_CODE_REMOTE=true`) | CI (`GITHUB_ACTIONS`/`CI`) |
+|---|---|---|---|
+| `git` · `python` · `rg` · `bash` | bắt buộc | bắt buộc | bắt buộc |
+| `claude` · `codex` | bắt buộc | bắt buộc | tuỳ chọn |
+| `gh` | bắt buộc | tuỳ chọn | tuỳ chọn |
+
+`BI_CHE` (wp802, `_AP_DUNG_BI_CHE`, chỉ áp cho `rg` và `git`): bản TÊN TRẦN — bản shell
+gọi khi agent gõ `rg`/`git` — hỏng, trong lúc một bản khác trên máy vẫn chạy được.
+`doctor` in `THIEU rg (BI_CHE: co cai, ban ten tran hong)` kèm cách chữa: đưa thư mục
+bản tốt lên trước trong PATH, hoặc gỡ bản hỏng. Agent gõ tên trần, nên "máy có một bản
+chạy được" không cứu được lệnh của nó. Công cụ ngoài bảng chỉ là cảnh báo.
 
 Đã đo trong container Claude Code web (12-08-2026): có `python`, `git`, `node`,
 `claude`, `rg`; **không có** `codex`, `gh`, `pwsh`. Hook
@@ -423,7 +437,7 @@ danh tính nên bị loại khỏi danh sách: kho chỉ có remote kiểu đó 
 | 7 · 8 | prompt (thiếu/rỗng/sha lệch) · hạn chót đã qua |
 | 10 | không xác định được danh tính tiến trình → **từ chối giết** |
 | 11 | kho không đúng |
-| 12 | thiếu công cụ bắt buộc |
+| 12 | thiếu công cụ bắt buộc (bảng theo nền ở mục "Trước tiên: đủ công cụ chưa"), hoặc `rg`/`git` `BI_CHE` (tên trần hỏng, bản khác chạy được) |
 | 124 | quá hạn **và đã giết được** |
 | 125 | quá hạn **nhưng KHÔNG giết được** — cần người can thiệp (`stop` cũng dùng mã này khi giết chưa trọn vẹn) |
 | 130 | bị ngắt (Ctrl-C) — đã giết con |

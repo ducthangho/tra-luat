@@ -1,0 +1,2 @@
+loi_g5_workflow errors=1
+gate-cong-cu-gop: matrix phải đúng os + exclude [{'os': 'windows-latest'}], thấy {'os': '${{ fromJson(needs.chuan-bi.outputs.os) }}'}

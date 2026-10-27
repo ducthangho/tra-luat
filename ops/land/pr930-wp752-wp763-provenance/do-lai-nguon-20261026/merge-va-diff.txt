@@ -1,0 +1,39 @@
+# do 2026-10-26T01:21:14Z trong phien ghi so (git, core.abbrev 7)
+$ git rev-parse 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^{tree} 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^1 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^2
+45dff0244ab39a54d3cde40dc5530e236dbcc2d5
+7009ab94f814fa19d3dc148f1ce074f40fd9031b
+b0fadc96366115d3545b9c723b30f04281898d94
+$ git rev-parse b0fadc96366115d3545b9c723b30f04281898d94^{tree}
+0f37ccea8563d543e239e77dd371ee293313736f
+$ git diff --numstat 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^1 36057e8292bcb3b27ceb64b461d7cf29057a8ba3
+2	0	.claude/dev/ci_dang_ky_test.py
+141	0	ops/kiem_ho_so_land.py
+284	0	ops/kiem_ho_so_land_test.py
+78	0	ops/kiem_nhan_hint.py
+222	0	ops/kiem_nhan_hint_test.py
+$ so byte: git diff 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^1 36057e8292bcb3b27ceb64b461d7cf29057a8ba3  vs  git diff cdc4e80bc439fa974775f319dccac5bf2fc955fe b0fadc96366115d3545b9c723b30f04281898d94   (noi dung merge vs diff PR so nen cdc4e80; python, khong cmp)
+bang_nhau=True  (34984 byte vs 34984 byte)
+$ ghi chu: so 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^1..36057e8292bcb3b27ceb64b461d7cf29057a8ba3 voi 36057e8292bcb3b27ceb64b461d7cf29057a8ba3^1..b0fadc96366115d3545b9c723b30f04281898d94 (lan do dau) la phep so SAI — cha 1 7009ab9 co thay doi cua #928/#931 ma b0fadc9 khong co.
+$ git diff --numstat 9d34a8e 7a7d52d   (diff packet #763)
+2	0	.claude/dev/ci_dang_ky_test.py
+$ git diff --numstat 1797c32 9d34a8e   (diff packet #752 da duyet)
+141	0	ops/kiem_ho_so_land.py
+284	0	ops/kiem_ho_so_land_test.py
+78	0	ops/kiem_nhan_hint.py
+222	0	ops/kiem_nhan_hint_test.py
+$ blob 4 tep #752 tai 9d34a8e (sha da duyet) vs merge
+ops/kiem_ho_so_land.py 9969e36798eaa390154d61ba5a4d812f3b2d55a9 9969e36798eaa390154d61ba5a4d812f3b2d55a9 9969e36798eaa390154d61ba5a4d812f3b2d55a9
+ops/kiem_ho_so_land_test.py 89492c450d67c70ed7a7efee36cea656cc39f5ff 89492c450d67c70ed7a7efee36cea656cc39f5ff 89492c450d67c70ed7a7efee36cea656cc39f5ff
+ops/kiem_nhan_hint.py f589dbb228416a9d8bf7c6948cc7ff291db09026 f589dbb228416a9d8bf7c6948cc7ff291db09026 f589dbb228416a9d8bf7c6948cc7ff291db09026
+ops/kiem_nhan_hint_test.py d41b297b30c1fed83cb06f1eea564e3bd97d2033 d41b297b30c1fed83cb06f1eea564e3bd97d2033 d41b297b30c1fed83cb06f1eea564e3bd97d2033
+.claude/dev/ci_dang_ky_test.py a3bfa4d966ee46ed6521da6b493d308e82a0b26e 802e2225a561331cd4f343580063d19fdc662dd8 802e2225a561331cd4f343580063d19fdc662dd8
+$ is-ancestor
+9d34a8e7e97fdc8ac178fc209219cea067e4c279 rc=0
+7a7d52d rc=0
+b0fadc96366115d3545b9c723b30f04281898d94 rc=0
+$ git diff --stat 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 origin/master -- (5 tep cua PR)
+(rong = khong doi)
+$ git merge-base --is-ancestor 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 39f21b331a1f46d3c8d6ad3efba9371f1412fc08   (39f21b3 = merge #932)
+rc=0
+$ git rev-parse 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^1
+36057e8292bcb3b27ceb64b461d7cf29057a8ba3

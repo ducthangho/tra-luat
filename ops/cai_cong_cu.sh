@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ops/cai_cong_cu.sh <ten>|--bat-buoc — doc ops/cong_cu.yaml (G1), cai roi DO LAI,
 # KHONG tin rc trinh cai (r244). Giu 2 tinh chat cua cai_actionlint.sh: ban ghim o MOT noi
-# (YAML) · KHONG `command -v` roi thoat som (T5). `cai.lenh` PHAI in duong dan vua cai lam
-# DONG CUOI stdout de dua vao PATH truoc buoc DO LAI; khong in duong dan (vd pip) thi
-# `[ -d ]` tra sai an toan.
+# (YAML) · KHONG `command -v` roi thoat som (T5). Thu muc vua cai di qua KENH KET QUA rieng
+# (`chon_thu_muc_chay_duoc`, wp868); cong thuc KHONG goi bo chon thi DONG CUOI stdout cua no
+# la thu muc (vd cai_actionlint.sh); khong in duong dan (vd pip) thi `[ -d ]` tra sai an toan.
 set -euo pipefail
 KICH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
 GOC="$(cd -- "$(dirname -- "$KICH")/.." && pwd)"
@@ -11,11 +11,57 @@ cd -- "$GOC"  # cong thuc YAML la duong dan TUONG DOI; doc lap CWD nguoi goi
 TEN="${1:-}"
 [ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }
 # Windows thuong chi co `python`; Linux/macOS co the chi co `python3` (CLAUDE.md).
-if command -v python >/dev/null 2>&1; then PY=(python)
+# wp831 (Codex luot 3 F03): luot duoc `source` trong vong `--bat-buoc` cua CUNG shell DUNG LAI PY da ghim cua luot
+# cha — chon lai o day se doc PATH ma cong thuc cong cu truoc vua doi (vd thu muc rg co Python thieu PyYAML). Dau hieu
+# la bien shell KHONG export gan voi $$, va PY phai la MANG do luot cha tao.
+# Codex luot 4 F04: dau den tu MOI TRUONG luon mang thuoc tinh export (va `exec` giu nguyen PID, nen so gia tri voi $$
+# khong du) => bo dau ay truoc khi xet; PY vo huong tu moi truong khong bao gio duoc dung lai.
+case "$(declare -p CAI_CONG_CU_PY_CUA 2>/dev/null)" in "declare -x"*) unset CAI_CONG_CU_PY_CUA ;; esac
+if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && [[ "$(declare -p PY 2>/dev/null)" == "declare -a"* ]]; then :
+elif command -v python >/dev/null 2>&1; then PY=(python)
 elif command -v python3 >/dev/null 2>&1; then PY=(python3)
 elif command -v py >/dev/null 2>&1; then PY=(py -3)
 else echo "cai_cong_cu: khong tim thay python, python3 hay py" >&2; exit 4
 fi
+# wp831 (Codex luot 2 F03): ghim PY[0] thanh duong dan tuyet doi NGAY tai day. Cong thuc `rg.cai` goi checker duoi
+# `PATH="$RG_D:$PATH"`, va dong kiem cuoi chay sau `export PATH="$DICH:$PATH"`: ten tran se doi sang Python cua thu muc
+# ung vien (vd thieu PyYAML). Giu nguyen doi so con lai cua mang (`py -3`).
+PY[0]="$(command -v "${PY[0]}")"
+
+# wp858 (L1, Q1): MOT bo chon thu muc cho cong thuc `cai` (duoc `eval` duoi day). `dirname "$(command -v X)"` in thu
+# muc ban DAU PATH, ke ca ban HONG. Chuan DUY NHAT: CHINH `cong_cu.py kiem-tra --chi <ten>` bang PY da ghim (wp831 F03),
+# khong loc `-f/-x/.exe` (ten tran chua DAT thi thu muc khong co <ten> khong doi phep tra ten — F858-02).
+# wp868 (N1, Q1): ket qua ghi vao KENH RIENG `$KENH_KQ` (tep mktemp, bien KHONG export => trinh cai con khong biet duong
+# dan), KHONG in ra stdout: stdout di chung voi trinh cai nen moi dong canh/LF deu thua (F858-03, 4 duong). Noi dung
+# kenh: `GIU_PATH` (ten tran da DAT => khong doi PATH, Q3) hoac `DICH` + LF + thu muc (khong LF cuoi, doc nguyen van).
+# `--win`: ung vien qua `cygpath -u`, $GITHUB_PATH qua `cygpath -w`; ghi $GITHUB_PATH chi khi ten tran chua DAT. Moi buoc
+# hong => `return 1` TUONG MINH vi cong thuc chay voi `errexit` tat (F858-01/04).
+chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
+  local win="" ten d dich="" w
+  [ -n "${KENH_KQ:-}" ] || { echo "cai_cong_cu: chon_thu_muc_chay_duoc chi chay duoi cai_cong_cu.sh (thieu KENH_KQ)" >&2; return 1; }
+  if [ "${1:-}" = "--win" ]; then win=1; shift; fi
+  ten="$1"; shift
+  if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then
+    echo "cai_cong_cu: '$ten' ten tran da DAT, giu nguyen PATH" >&2
+    printf 'GIU_PATH' > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }
+    return 0
+  fi
+  for d in "$@"; do
+    if [ -n "$win" ]; then
+      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua '$ten'" >&2; return 1; }
+    fi
+    if PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then dich="$d"; break; fi
+  done
+  [ -n "$dich" ] || { echo "cai_cong_cu: khong thu muc nao co '$ten' chay duoc" >&2; return 1; }
+  if [ -n "${GITHUB_PATH:-}" ]; then
+    w="$dich"
+    if [ -n "$win" ]; then
+      w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho '$dich'" >&2; return 1; }
+    fi
+    printf '%s\n' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; return 1; }
+  fi
+  printf 'DICH\n%s' "$dich" > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }
+}
 
 if [ "$TEN" = "--bat-buoc" ]; then
   # PyYAML la bootstrap cua chinh ban ke. Ghim nay duoc t20 doi chieu voi YAML/CI;
@@ -48,6 +94,10 @@ import yaml
 d=yaml.safe_load(open("ops/cong_cu.yaml", encoding="utf-8"))
 print("\n".join(k for k,v in d["cong_cu"].items() if v["bat_buoc"] or v.get("chuan_bi")))')
   [ "${#BAT_BUOC[@]}" -gt 0 ] || { echo "cai_cong_cu: ban ke khong co cong cu bat buoc" >&2; exit 5; }
+  # Gan ROI MOI go export: duoi `allexport` (`bash -a`, SHELLOPTS) chinh phep gan tu export lai, ke ca sau `unset`
+  # hay `declare +x X=...` mot buoc (Codex luot 5: luot `source` cho rg thay dau export, xoa no, va bash chon lai Python).
+  CAI_CONG_CU_PY_CUA=$$
+  declare +x CAI_CONG_CU_PY_CUA  # chi cac luot `source` duoi day thay (xem khoi chon python); installer con khong thay
   for cong_cu in "${BAT_BUOC[@]}"; do
     # source de PATH do installer vua them ton tai o parent cho vong sau + probe cuoi.
     # KICH la path tuyet doi, khong dung lai $0 tu CWD cua caller.
@@ -68,10 +118,33 @@ while IFS= read -r dong; do
   case "$dong" in *=*) export "${dong?}" ;; esac
 done < <(printf '%s\n' "$DAU_RA" | tail -n +2)
 
-# eval TREN LENH doc tu ban ke cua CHINH kho — khong phai dau vao nguoi dung/mang ngoai.
-KET_QUA_CAI="$(eval "$LENH")"
-DICH="$(printf '%s\n' "$KET_QUA_CAI" | tail -1)"
-DICH="${DICH%$'\r'}"  # trinh cai Windows (choco) in CRLF; \r lam `[ -d ]` sai am tham
+# wp868 (N1/N2, Q1/Q2): thu muc TAM rieng cho kenh ket qua + stdout trinh cai. Gan ROI MOI go export (allexport, nhu
+# CAI_CONG_CU_PY_CUA): trinh cai con khong thay duong dan kenh. `rm` tuong minh sau khi doc; `trap` lo duong thoat loi
+# (luot `source` cua --bat-buoc ghi de trap cua nhau, nen moi luot tu xoa thu muc cua no).
+TAM_CAI="$(mktemp -d "${TMPDIR:-/tmp}/cai_cong_cu.XXXXXX")"
+declare +x TAM_CAI
+trap 'rm -rf -- "$TAM_CAI"' EXIT
+KENH_KQ="$TAM_CAI/kq"
+declare +x KENH_KQ
+: > "$KENH_KQ"
+# eval TREN LENH doc tu ban ke cua CHINH kho — khong phai dau vao nguoi dung/mang ngoai. Subshell `( )` + chuyen huong
+# vao TEP thay cho `$( )`: bash chi cho subshell thoat, KHONG cho EOF cua stdout — tien trinh con chay nen giu stdout
+# (writer muon) khong lam treo (N2), va moi gi no ghi sau do khong con duoc doc lam ket qua. `set +e`: giu ngu nghia
+# `$( )` cu (errexit tat) — ma thoat la cua chuoi `&&`, cac `return 1` tuong minh cua bo chon la chot.
+( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
+# F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
+KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
+KQ="${KQ%x}"
+case "$KQ" in
+  GIU_PATH) DICH="" ;;
+  DICH$'\n'?*) DICH="${KQ#DICH$'\n'}" ;;
+  "")  # cong thuc khong goi bo chon (pip, cai_actionlint.sh): dong cuoi stdout nhu truoc (N3)
+    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"
+    DICH="$(printf '%s\n' "$KET_QUA_CAI" | tail -1)"
+    DICH="${DICH%$'\r'}" ;;  # trinh cai Windows (choco) in CRLF; \r lam `[ -d ]` sai am tham
+  *) echo "cai_cong_cu: kenh ket qua hong: $(printf '%q' "$KQ")" >&2; exit 7 ;;
+esac
+rm -rf -- "$TAM_CAI"
 [ -d "$DICH" ] && export PATH="$DICH:$PATH"
 
 "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json

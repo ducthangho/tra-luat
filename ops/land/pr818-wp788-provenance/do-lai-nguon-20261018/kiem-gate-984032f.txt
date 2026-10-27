@@ -1,0 +1,16 @@
+# kiem-gate OFFLINE tren readback-check-runs-984032f.json — 2026-10-18T17:32:15Z; packet_loop.py tai 984032f (code cua chinh packet)
+$ sha256sum packet_loop.py@984032f
+c15ac9330a084d4a10d559885dbeb606c841ca4ad22a6ca51686c681e59f8634
+$ sha256sum readback-check-runs-984032f.json
+2dc47c3b23748cb004af6851caad749cd3b9f4045b9f581eba828ac3ef855d07
+$ kiem-gate --head 984032f… --check-suite 105925916913 (14 ten ci.yml)
+gate XANH trên 984032f375aa0c8fe6039dfd35f6842acd49c926 (suite 105925916913): chuan-bi id=117557451328 · gate (ubuntu-latest) id=117557498590 · gate-registry (ubuntu-latest) id=117557498549 · gate-ops (ubuntu-latest) id=117557498668 · gate-packet-loop (ubuntu-latest) id=117557498603 · gate-cong-cu-gop (ubuntu-latest) id=117562474654 · gate-cong-cu (ubuntu-latest, 0) id=117557498612 · gate-cong-cu (ubuntu-latest, 1) id=117557498670 · gate-cong-cu (ubuntu-latest, 2) id=117557498665 · gate-cong-cu (ubuntu-latest, 3) id=117557498615 · gate-cong-cu (ubuntu-latest, 4) id=117557498680 · gate-cong-cu (ubuntu-latest, 5) id=117557498621 · gate-cong-cu (ubuntu-latest, 6) id=117557498636 · gate-cong-cu (ubuntu-latest, 7) id=117557498678
+rc=0
+$ kiem-gate --head 984032f… --check-suite 105925913336 (14 ten ci.yml)
+  ĐỎ  'gate-cong-cu (ubuntu-latest, 7)': VẮNG — không check-run nào mang đúng tên này trong suite 105925913336
+gate KHÔNG xanh trên 984032f375aa0c8fe6039dfd35f6842acd49c926: 14/14 tên bắt buộc đỏ
+rc=12
+$ kiem-gate --head 984032f… --check-suite 105925916762 (14 ten ci.yml)
+  ĐỎ  'gate-cong-cu (ubuntu-latest, 7)': VẮNG — không check-run nào mang đúng tên này trong suite 105925916762
+gate KHÔNG xanh trên 984032f375aa0c8fe6039dfd35f6842acd49c926: 14/14 tên bắt buộc đỏ
+rc=12

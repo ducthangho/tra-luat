@@ -1,0 +1,3 @@
+40c88b13806e285b1d85961ed9ff99ed89ed2108cdca94d0d8dd6177de0530fd  ops/specs/no-p3-lease-spec-hash-r4.md @ 50a59a9
+a98d09e86e32ee249668aaa114aed43e8a982e8bd7f9ef81fe61aa6a2a168791  ops/specs/no-p3-cong-cu-ho-so-r4.md @ 50a59a9
+30776483ab40e57708c6b03ba0877bc3f40dd27edf334e7dceb0fe5629a113e2  ops/specs/no-p3-dang-ky-ci-r2.md @ 50a59a9

@@ -1,0 +1,10 @@
+patching file ops/reviews/README.md
+patching file ops/reviews/ci-windows-review-5-claude-verdict.receipt.yaml
+patching file ops/reviews/doctrine-scan-review-1-claude-verdict.receipt.yaml
+patching file ops/reviews/doctrine-scan-review-2-claude-verdict.receipt.yaml
+patching file ops/reviews/doctrine-scan-review-3-claude-verdict.receipt.yaml
+patching file ops/reviews/pr870-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/pr889-review-1-codex-verdict.receipt.yaml
+patching file ops/reviews/wp538-review-1-claude-verdict.receipt.yaml
+patching file ops/reviews/wp538-review-2-claude-verdict.receipt.yaml
+patching file ops/reviews/wp540-review-1-claude-verdict.receipt.yaml

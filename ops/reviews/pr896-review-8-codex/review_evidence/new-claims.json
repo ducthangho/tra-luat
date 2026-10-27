@@ -1,0 +1,74 @@
+{
+  "verdict_bytes": 43635,
+  "verdict_bytes_match": true,
+  "verdict_sha256_match": true,
+  "flat_original_byte_match": true,
+  "header": [
+    "verdict: changes_requested",
+    "reviewed_sha: 05bc12e2b9008071ca28edbd4574e58644d48220",
+    "Kết quả: 0 P0, 2 P1, 1 P2, 0 P3."
+  ],
+  "reviewed_tree_match": true,
+  "runtime": {
+    "run_id": "2ca2785d9e4d4c9ba14492dc17ac2276",
+    "head": "05bc12e2b9008071ca28edbd4574e58644d48220",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "ma_thoat": 0,
+    "trang_thai": "xong",
+    "worktree_sach": true,
+    "thoi_luong_giay": 1144.447,
+    "model_phuc_vu_trang_thai": "DO_DUOC"
+  },
+  "runtime_head_match": true,
+  "prompt_sha_match": true,
+  "model_events": {
+    "count": 48,
+    "unique_response_ids": 48,
+    "models": [
+      "gpt-6.1-sol"
+    ]
+  },
+  "evidence_url_commit": "54021fb0a92eae606076606fc83431c486013bdd",
+  "evidence_blob_byte_match": true,
+  "stdout_hash_and_size_match": true,
+  "stderr_hash_and_size_match": true,
+  "caveat_readme_rows": [
+    {
+      "id": "HINT-LUOT7-AP-CUNG-COMMIT-GHI-SO",
+      "rows": 1,
+      "description_match": true
+    },
+    {
+      "id": "LAN-CHAY-DAU-CHET-VI-MAY-CHU-QUA-TAI",
+      "rows": 1,
+      "description_match": true
+    },
+    {
+      "id": "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+      "rows": 1,
+      "description_match": true
+    },
+    {
+      "id": "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+      "rows": 1,
+      "description_match": true
+    },
+    {
+      "id": "TEP-LON-KHONG-VAO-KHO",
+      "rows": 1,
+      "description_match": true
+    }
+  ],
+  "artifact_manifest": {
+    "rc": 0,
+    "ok_count": 145,
+    "errors": "",
+    "non_ok_lines": []
+  },
+  "review_delta_files": 131,
+  "receipt_added_at_current_sha": true,
+  "land_receipt_head_verdict_match": true,
+  "receipt_commit_parent": "54021fb0a92eae606076606fc83431c486013bdd",
+  "artifact_commit_parent": "05bc12e2b9008071ca28edbd4574e58644d48220"
+}

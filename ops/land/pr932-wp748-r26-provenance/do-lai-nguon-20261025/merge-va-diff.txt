@@ -1,0 +1,28 @@
+$ git rev-list --parents -n1 39f21b331a1f46d3c8d6ad3efba9371f1412fc08
+39f21b331a1f46d3c8d6ad3efba9371f1412fc08 36057e8292bcb3b27ceb64b461d7cf29057a8ba3 0aaf143ba6e8c4974492aa26e0082fd636077efd
+$ git rev-parse 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^{tree} 0aaf143ba6e8c4974492aa26e0082fd636077efd^{tree}
+8184abf01ce3a7ff7778fe88c01fe6c832207b02
+3dd8bd4cd7e634aade232176bc8b60566bea0210
+$ git merge-base 0aaf143ba6e8c4974492aa26e0082fd636077efd 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^1
+5775864b04a18c5afe1aafcbb23e54525ce8a3d8
+$ git diff --stat 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^1 39f21b331a1f46d3c8d6ad3efba9371f1412fc08
+ .claude/dev/launcher.py      |  251 +++++++---
+ .claude/dev/launcher_test.py | 1042 ++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 1190 insertions(+), 103 deletions(-)
+$ git diff 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^1 39f21b331a1f46d3c8d6ad3efba9371f1412fc08 | sha256sum
+34784a08bb933bb895a8c9ea640bdd9667f8c127b19ea7ab914f744f66b2ba77  -
+$ git diff 5775864b04a18c5afe1aafcbb23e54525ce8a3d8 0aaf143ba6e8c4974492aa26e0082fd636077efd | sha256sum
+34784a08bb933bb895a8c9ea640bdd9667f8c127b19ea7ab914f744f66b2ba77  -
+$ git diff --stat 5775864b04a18c5afe1aafcbb23e54525ce8a3d8 0aaf143ba6e8c4974492aa26e0082fd636077efd
+ .claude/dev/launcher.py      |  251 +++++++---
+ .claude/dev/launcher_test.py | 1042 ++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 1190 insertions(+), 103 deletions(-)
+$ git diff --stat 5775864b04a18c5afe1aafcbb23e54525ce8a3d8 39f21b331a1f46d3c8d6ad3efba9371f1412fc08^1 -- .claude/dev/launcher.py .claude/dev/launcher_test.py  (master tien sau merge-base: khong cham hai tep)
+[het]
+$ git rev-parse 39f21b331a1f46d3c8d6ad3efba9371f1412fc08:.claude/dev/launcher.py 0aaf143ba6e8c4974492aa26e0082fd636077efd:.claude/dev/launcher.py 39f21b331a1f46d3c8d6ad3efba9371f1412fc08:.claude/dev/launcher_test.py 0aaf143ba6e8c4974492aa26e0082fd636077efd:.claude/dev/launcher_test.py
+9c38fb1c6562c07ffe744ee4365f23cc5941c417
+9c38fb1c6562c07ffe744ee4365f23cc5941c417
+f91ff954a99ec4f269d874d9b9d4ad8647560e34
+f91ff954a99ec4f269d874d9b9d4ad8647560e34
+$ git log -1 --format='%H %cI' 0aaf143ba6e8c4974492aa26e0082fd636077efd
+0aaf143ba6e8c4974492aa26e0082fd636077efd 2026-10-25T16:27:34+00:00

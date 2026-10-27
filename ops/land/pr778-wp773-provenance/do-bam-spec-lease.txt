@@ -1,0 +1,5 @@
+# do bam spec — 2026-10-18T04:40:46Z, cay nhanh claude/bookkeeping-773-land HEAD 37658f1
+$ sha256sum ops/specs/land-evidence-khai-phai-co-nguon-r{1,2,3}.md
+063ccaa692372d8f431af07fcb86acccef32435e4b69e7a63e3b0a4ee67e02dd  ops/specs/land-evidence-khai-phai-co-nguon-r1.md
+c70c19b57ad1d9bf0304a04bbb259b0b74ebc366824c24597c7207b7beaf14a0  ops/specs/land-evidence-khai-phai-co-nguon-r2.md
+81543d80b4d27cbecdcce4bfcdfe5a8974bb8a17cae6e8a2de56d0e53b4ee012  ops/specs/land-evidence-khai-phai-co-nguon-r3.md

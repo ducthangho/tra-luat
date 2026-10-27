@@ -1,0 +1,5 @@
+COMMAND: ['/usr/bin/python3.13', '-B', '/home/user/rv773/ops/land_evidence_nguon.py', '--root', '/tmp/len_cay_b4wdfvdq/kho']
+RC: 0
+ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT

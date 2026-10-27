@@ -1,0 +1,6 @@
+COMMAND: ['/usr/bin/python3.13', '-B', '/home/user/rv773/ops/land_evidence_nguon_test.py', '--mot-ca', 'c06_l3_luot2_moc_sau_merged_at']
+RC: 3
+DO:c06_l3_luot2_moc_sau_merged_at:độ lệch âm 2026-10-16T02:00:00-01:00 phải quy đổi sang UTC: mong rc=1, được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+

@@ -1,0 +1,33 @@
+# 4 moc §10.2.2 cho ci.yml push master run 39921552473 attempt 1 tren 6ac385f — do 2026-10-26, cach do theo ho so pr931 (PR #937) / f9f5d36
+
+## Run
+REST run 39921552473: event push, attempt 1, head 6ac385fdd7325f532ac4b4b6eb861292bfa7e970, conclusion success, path .github/workflows/ci.yml
+
+## Checkout (git, ban sao day du)
+$ git rev-parse 6ac385f^{commit} 6ac385f^{tree} 6ac385f^1 6ac385f^2
+6ac385fdd7325f532ac4b4b6eb861292bfa7e970
+e64cdd92b27a66cbc4f0a91e0f84a4400b83c097
+daf89615efff9fde33039036ddf7f23ec9cb1c10
+094e8d17ae4dfcf21dca63702c9262267bdc072c
+log job 120319840559: git log -1 sau checkout = 6ac385fdd7325f532ac4b4b6eb861292bfa7e970; head_sha = 6ac385fdd7325f532ac4b4b6eb861292bfa7e970; base_sha = 6ac385fdd7325f532ac4b4b6eb861292bfa7e970
+
+## Gate output — artifact
+sha256 zip tai tu REST /actions/artifacts/12488609174/zip = 6334f7215ad4400247081ae9e1c4cf1e6ce24e8a3bf8bb9bdf2507e62f622ba9
+digest REST: sha256:6334f7215ad4400247081ae9e1c4cf1e6ce24e8a3bf8bb9bdf2507e62f622ba9 (readback-artifacts-39921552473.json)
+zip KHONG kem; tep giai nen nguyen byte vao artifact-12488609174/ (tl-selftest-Linux.json, tl-selftest-Linux.out).
+tl-selftest-Linux.out sha256 1bee4b7ad0128f67820f1e5053635543cd16304647d808efa891a1a0846d3ba6 == output_sha256 trong json: True
+json: {'status': 'pass', 'returncode': 0, 'positive_verified': True, 'positive_match': '== tl selftest 1731/1731 ==\n', 'command': ['python', 'scripts/tl.py', '--selftest']}
+json.identity: {'catalog_policy_sha256': '5615230ce6499b47e79d3ee6b00189f7af2804b6dedc790614a75b893d289bc6', 'head_sha': '6ac385fdd7325f532ac4b4b6eb861292bfa7e970', 'machine': 'x86_64', 'python_implementation': 'CPython', 'python_version': '3.12.15', 'runner_sha256': '637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810', 'system': 'Linux', 'system_release': '6.17.0-1022-azure', 'tracked_clean': True, 'tree_sha': 'e64cdd92b27a66cbc4f0a91e0f84a4400b83c097', 'worktree_clean': True}
+identity_after == identity: True
+
+## Workflow definition
+not_measured — GraphQL WorkflowRun.file bi 403 trong phien Claude Code tren web (cung ly do ho so pr931).
+Bang chung phu (KHONG thay cho exact definition OID):
+REST run path: .github/workflows/ci.yml, referenced_workflows: []
+blob ci.yml tai 6ac385f = f618cdb469016ac585724d286b498b7e1dcc80ea
+blob ci.yml tai 6ac385f^1 = f618cdb469016ac585724d286b498b7e1dcc80ea
+blob ci.yml tai 6ac385f^2 = f618cdb469016ac585724d286b498b7e1dcc80ea
+sha256 bytes blob f618cdb4… = b630260ce676292ced82da65f4cb54ec1dc0f66109901e7c1d61746d21baab06
+
+## Ket qua
+{"checkout_log": true, "head_sha_log": true, "artifact_identity_head": true, "artifact_identity_tree": true, "cay_sach": true, "output_sha_khop": true, "rc0": true, "positive": true, "identity_after_bang": true, "zip_digest_khop": true}

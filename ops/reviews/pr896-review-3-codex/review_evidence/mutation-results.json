@@ -1,0 +1,50 @@
+[
+  {
+    "mutation": "delete_README_row",
+    "selector": "t26_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "mutation": "delete_README_row",
+    "selector": "t27_",
+    "rc": 1,
+    "summary": [
+      "lease_publish: 0/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "mutation": "delete_README_row",
+    "selector": "t138_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "mutation": "delete_receipt_caveat",
+    "selector": "t26_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "mutation": "delete_receipt_caveat",
+    "selector": "t27_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  },
+  {
+    "mutation": "delete_receipt_caveat",
+    "selector": "t138_",
+    "rc": 0,
+    "summary": [
+      "lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0"
+    ]
+  }
+]

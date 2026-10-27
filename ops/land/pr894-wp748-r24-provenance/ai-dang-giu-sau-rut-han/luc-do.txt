@@ -1,0 +1,93 @@
+luc: 2026-10-23T17:44:32Z
+ls-remote 566 guong 566 thieu 0 thua 0
+== ops/land/pr621-skill-bai-hoc-land-evidence.yaml
+HẾT_HẠN	wp741-r1-g1-claude-20261015	refs/heads/claude/determined-euler-rw6l8i:ops/leases/wp741-r1-g1-claude-20261015.yaml
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr672-wp574-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr679-wp678-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr696-wp668-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr721-wp698-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr779-wp775-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr791-wp782-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr792-wp484-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr793-wp784-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr800-wp794-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr801-wp795-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr818-wp788-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr823-wp802-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr832-wp831-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr836-wp812-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr848-wp744-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr864-wp858-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/land/pr873-wp868-land-evidence.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp748-r24-g24-claude-remote-20261023	refs/heads/ops/wp748-r24-g24-lease:ops/leases/wp748-r24-g24-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+xong: 2026-10-23T17:50:23Z

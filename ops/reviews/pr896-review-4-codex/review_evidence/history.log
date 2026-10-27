@@ -1,0 +1,32 @@
+diff.patch byte_match= True
+numstat.txt byte_match= True
+diff-pr947.patch byte_match= True
+numstat-pr947.txt byte_match= True
+old_hint_on_parent_rc= 1
+ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml missing_hint_lines= 0 extra_delta_lines= 4 patched_blob_match= False
+  EXTRA 1 +  ghi_chu_luot3: >-
+  EXTRA 1 +    Khoi cap_nhat_20261026_luot3 o tren (ghi tai 8879165) noi HINT.patch luot 3 "CHUA ap"; cau ay dung tai 8879165 va c8c1ee0.
+  EXTRA 1 +    HINT.patch luot 3 duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex (xem git log), theo yeu cau
+  EXTRA 1 +    chu kho "va cho toi khi het P1, P2, P3".
+ops/reviews/README.md missing_hint_lines= 0 extra_delta_lines= 2 patched_blob_match= False
+  EXTRA 1 -| `pr896-review-3-codex-verdict.md` | `HINT-LUOT3-CHUA-AP` | changes_requested 2 P1 + 1 P2. HINT.patch luot 3 (17 tep: receipt wp766 + 13 receipt service/API + receipt luot 2 + README + khoi land) CHUA ap; da cham tran 2 loi goi codex, cho chu kho quyet. |
+  EXTRA 1 +| `pr896-review-3-codex-verdict.md` | `HINT-LUOT3-DA-AP-CAN-VERDICT-MOI` | Verdict lich su tren 82359c4 la changes_requested 2 P1 + 1 P2. Tai moc ghi so 8879165 (va c8c1ee0) HINT.patch luot 3 CHUA ap; no duoc ap o commit ke tiep sau c8c1ee0 tren nhanh claude/pr896-review-2-codex theo yeu cau chu kho. Can verdict moi tren exact SHA ung vien; khong doi ket qua hay byte verdict lich su. |
+ops/reviews/phan-bien-quy-trinh-review-3-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/phan-bien-quy-trinh-review-4-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/phan-bien-quy-trinh-review-5-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-7-gpt6astra-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr455-bien-nhan-v2-review-8-gpt6astra-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr493-review-5-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/pr896-review-2-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+ops/reviews/wp766-r1-g1-exec-review-1-codex-verdict.receipt.yaml missing_hint_lines= 0 extra_delta_lines= 0 patched_blob_match= True
+additional_paths= ['ops/reviews/pr896-review-3-codex-verdict.receipt.yaml']
+merge_pr889_receipt_equals_master= True
+merge_pr889_README_caveat_equals_master= True rows= 1
+next_commit_after_c8c1ee0= 2e4183bc2dc40e6bc306e377fc442ff0f405bbe0

@@ -1,0 +1,11 @@
+2026-10-23T04:05:35Z
+ls-remote 551 ten; guong 551 ten; thieu 0; thua 0
+== ops/land/pr846-wp845-land-evidence.yaml
+HẾT_HẠN	wp748-r23-g23-claude-remote-20261023	refs/heads/ops/wp748-r23-g23-lease:ops/leases/wp748-r23-g23-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+== ops/land/pr869-wp748-r22-land-evidence.yaml
+HẾT_HẠN	wp748-r23-g23-claude-remote-20261023	refs/heads/ops/wp748-r23-g23-lease:ops/leases/wp748-r23-g23-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có
+== ops/land/pr869-wp748-r22-provenance/
+HẾT_HẠN	wp748-r23-g23-claude-remote-20261023	refs/heads/ops/wp748-r23-g23-lease:ops/leases/wp748-r23-g23-claude-remote-20261023.yaml
+NGƯỜI_GIỮ 0: không có

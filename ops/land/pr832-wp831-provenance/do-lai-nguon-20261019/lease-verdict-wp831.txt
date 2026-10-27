@@ -1,0 +1,7 @@
+# do 2026-10-19
+$ git show origin/ops/wp831-r4-g4-lease:ops/reviews/wp831-g1-luot7-codex-verdict.md | sha256sum
+1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28  -
+$ git log -1 --format='%H %s' origin/ops/wp831-r4-g4-lease -- ops/reviews/wp831-g1-luot7-codex-verdict.md
+6b02bf70a024bdb32bf865b9656af20458de8925 review(#831): verdict Codex luot 7/8 cho wp831 — APPROVE @ 51ae5c0
+$ sha256sum verdict-luot7/wp831-g1-luot7-codex-verdict.md
+1e27ba6bf2c4690a470b7786fe799c850b5924352a85a24460fb5053ff216d28  ops/land/pr832-wp831-provenance/verdict-luot7/wp831-g1-luot7-codex-verdict.md

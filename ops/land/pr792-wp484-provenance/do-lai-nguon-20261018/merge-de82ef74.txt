@@ -1,0 +1,4 @@
+$ git log -1 --format="%H %T %P" de82ef74
+de82ef748e75659ab3dceed225b0f56dcc69e78b 7ae003fa7b98b596b5ee3d2d678e4aacc5a44e93 924527c2d67ae36bb20a80147e687a823564ad90 288ad3ea79ef94e061b649effe7bee2c7e2a0a9b
+$ git log -1 --format=%T 288ad3ea
+608f7892b62b0a6222631cb0a548b6ee6ea524bf

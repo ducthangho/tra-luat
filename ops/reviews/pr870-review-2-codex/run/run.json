@@ -1,0 +1,59 @@
+{
+  "version": "1.5.0",
+  "run_id": "2699e2d8b1a54b8e86bfa3efb9a4b61b",
+  "short_id": "2699e2d8",
+  "ten": "pr870-review-2-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 9,
+    "van_tay": "b1e1e9e45b5742c2"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-10-24T16:37:08.890339+00:00",
+  "ket_thuc_utc": "2026-10-24T16:45:25.027419+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 831,
+  "khoa_danh_tinh": "linux:32429",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr870.nqvB/cay-kho",
+  "head": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "2c58af0d239a7c590e30c346a719cbcde8cdb124f49ecac9bcb8e094c2dcd5a9",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "5c77b6e983ee8d667b7b413bbc3827ac244976b4cac9b422afbb6d2e9ae469c6",
+  "checkpoint_sha256": "7159fbb39ccd6372964c8803d1a63b73ea6341085e97a608807974b0dd6e0316",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr2-pr870.nqvB/runs/2699e2d8/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 496.137,
+  "stdout_byte": 358,
+  "stdout_sha256": "1e014ad0ee2e718ee65fd45a448ca1856a10d6ad7e19f82b51361af8477f1754",
+  "stderr_byte": 1287629,
+  "stderr_sha256": "2294ac8fcad6764e185def5a1f4b2a4d21bea5e3092b384c82abc6a542f5f083"
+}

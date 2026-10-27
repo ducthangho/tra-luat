@@ -1,0 +1,12 @@
+# do 2026-10-20T01:36:19Z
+3a3a3caca5de4934ff53851feb6994c2c7b84ad5 d49c674d3c3fb81d7c389b44e5ae4085d3d229be 94220547cd155c73392e95726e8daf353888b3aa 23bc189f28ea60f04ca1634b6fe66d02babf12ed
+23bc189f28ea60f04ca1634b6fe66d02babf12ed 2593a4b3a846d9d98caaaea2c2f12110c14e0f59 5618020a67709ca6f2c93138905df0aa8d9c2df6
+$ git diff --numstat 5618020a 23bc189f
+15	0	ops/specs/wp725-nlm-huong-dan-tai-lieu-r2.md
+21	0	ops/specs/wp726-nlm-script-phan-quyet-canary-r2.md
+15	0	ops/specs/wp727-nlm-refresh-va-goi-y-tl-gws-r2.md
+$ git diff --numstat 23bc189f 3a3a3ca -- <3 tep write set> | wc -l
+0
+$ git ls-tree 5618020a 3a3a3ca -- ops/specs/wp728-do-linux-doc-lap-wp710-r2.md
+100644 blob 0f05c51dfaeb52140ec901bd7330905042ffb077	ops/specs/wp728-do-linux-doc-lap-wp710-r2.md
+100644 blob 0f05c51dfaeb52140ec901bd7330905042ffb077	ops/specs/wp728-do-linux-doc-lap-wp710-r2.md

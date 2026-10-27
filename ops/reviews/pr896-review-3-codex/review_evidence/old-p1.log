@@ -1,0 +1,35 @@
+verdict:7 Phạm vi: chỉ đọc/đo `cay-kho/`; không mạng, không push, không sửa cây reviewed. Các script và evidence đều ở thư mục cha. Provider `openai_codex`, model family `openai`; phiên Codex có shell cục bộ, không đi qua `codex exec` hay Desktop nên theo phân loại của kho là `execution_surface: codex_service`, `transport: machine`. Không có runtime receipt để machine-verify model/effort/session identity; không tự cấp assurance/approval land. Authority cho review và artifact là chỉ thị trực tiếp trong `runs/9f946d71/prompt.snapshot`.
+run_id=9f946d714c2344fa9691c3d7d4f1b2d9; run.json:47   "execution_surface": "codex_cli",
+program=codex
+header: OpenAI Codex v0.163.0
+caveat={"id": "VERDICT-KHAI-SAI-EXECUTION-SURFACE", "muc": "P1", "mo_ta": "Verdict dong 7 tu khai `execution_surface: codex_service` va phu nhan di qua `codex exec`, nhung run.json 9f946d71 dong 47 ghi execution_surface=codex_cli, lenh.chuong_trinh=codex; run/stderr-header.txt ghi OpenAI Codex v0.163.0. Dinh chinh be mat thanh codex_cli; giu nguyen byte verdict lich su. Dinh chinh nay KHONG chung thuc model/effort da phuc vu va KHONG doi assurance cross_reviewed."}
+README rows matching new caveat=1
+verdict sha256=6aa03cacbde6f33a41ba4af60e408b2c742da5959390f28a9cf8420b5cb098f5; receipt sha256=6aa03cacbde6f33a41ba4af60e408b2c742da5959390f28a9cf8420b5cb098f5
+verdict bytes=75193; receipt bytes=75193
+flat_equals_directory=True
+unchanged_since_parent=True
+./HINT.patch: OK
+./PROMPT.md: OK
+./VERDICT.md: OK
+./audit_review.py: OK
+./evidence/00-preflight.txt: OK
+./evidence/01-expression.txt: OK
+./evidence/02-windows-last-command.txt: OK
+./evidence/02-windows.txt: OK
+./evidence/03-merger.txt: OK
+./evidence/04-census.txt: OK
+./evidence/05-steps.txt: OK
+./evidence/06-history.txt: OK
+./evidence/07-contradictions.txt: OK
+./evidence/08-doctrine-scan.txt: OK
+./evidence/09-doc-claims-check.txt: OK
+./evidence/10-provenance.txt: OK
+./evidence/11-scan-index.txt: OK
+./evidence/12-hint-check.txt: OK
+./evidence/13-final-state.txt: OK
+./run/checkpoint.json: OK
+./run/run.json: OK
+./run/stderr-header.txt: OK
+./run/stdout.log: OK
+
+sha256sum rc=0

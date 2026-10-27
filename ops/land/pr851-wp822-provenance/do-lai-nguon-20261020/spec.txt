@@ -1,0 +1,5 @@
+$ git show origin/ops/wp822-spec:ops/specs/wp822.md | sha256sum
+6bcac18917516e89119065a249037cb81f13d77b01bb77e7b557f6d23d5c0b07  -
+$ git rev-parse origin/ops/wp822-spec origin/ops/wp822-g1-reviews
+1189caf817d5632b6f07a2d804d9c6b7e14b0542
+62b904c89130b96ca8ae3c1bc08cc4b8eec8f690

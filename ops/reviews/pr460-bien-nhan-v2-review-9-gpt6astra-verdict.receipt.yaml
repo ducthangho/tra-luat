@@ -151,3 +151,9 @@ no_khai_ra: >-
   ("`codex_cli` hoac Codex service") va *Codex service* CHUA CO TEN MAY trong hop dong du
   lieu. `c44` tang (b) nay khai thang ngoai le ay thay vi lo di, nhung viec quyet dinh cach
   bieu dien no la thay doi HOP DONG DU LIEU => packet rieng, khong va trong PR #460.
+
+verdict_usage_caveats:
+  - id: SURFACE-TU-KHAI-KHAC-RECEIPT-RUNTIME-CHUA-DO-DUOC
+    muc: P2
+    mo_ta: >-
+      Verdict dong 5 tu mo ta be mat Codex service/API, trong khi model_reviewer_identity.surface cua receipt ghi codex_cli (run ID khai 3bfdc70ca03647139a3da914246acd20). Day la hai loi khai khac nhau; checkout khong kem run.json cua chinh luot de phan xu be mat thuc te. CLI/launcher trong receipt la loi khai ghi so, KHONG phai phep do lai runtime tai day. Giu nguyen byte verdict; can bo sung bang chung dung run truoc khi chon be mat, khong suy model/effort hay nang assurance tu caveat nay.

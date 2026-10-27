@@ -1,0 +1,2 @@
+COMMAND: ['git', '-C', '/home/user/rv773', 'diff', '--check', 'c73af7b', '5250883']
+RC: 0

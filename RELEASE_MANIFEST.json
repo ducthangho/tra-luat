@@ -2,13 +2,13 @@
   "ok": true,
   "schema": "release_manifest.v1",
   "skill": "tra-luat",
-  "skill_version": "1.36.68",
+  "skill_version": "1.36.69",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 187,
-  "total_bytes": 8762760,
-  "package_hash": "8656dca8b9d7c53b65ab4cdeda5e0710326467783c8b78bb680c17b231be63f2",
-  "content_hash": "8656dca8b9d7c53b65ab4cdeda5e0710326467783c8b78bb680c17b231be63f2",
+  "file_count": 192,
+  "total_bytes": 8785692,
+  "package_hash": "149a2d765ca3df7e384f9bd4b4558b62c3d946bfc877938a728ffcbf755db4fd",
+  "content_hash": "149a2d765ca3df7e384f9bd4b4558b62c3d946bfc877938a728ffcbf755db4fd",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 1111587,
-      "sha256": "738642fc9dcacfff3f9ade0aff6406c716ce0e3847619fb0598296b9c48cbeac"
+      "size": 1112626,
+      "sha256": "22daff1d4a79b58a9285faab262967660ec2427675f63562edd7cfc3d530ec48"
     },
     {
       "path": "CONTEXT.md",
@@ -44,12 +44,12 @@
     {
       "path": "SKILL.md",
       "size": 47724,
-      "sha256": "5c7690d9f772f0629db28020b4f313187bc24220872b2bfef1ac8ba3de728450"
+      "sha256": "12905a1c420a23b26a14421b44a9de786181210bccded8ccb92b355df60ef912"
     },
     {
       "path": "VERSION",
       "size": 7,
-      "sha256": "8fc1753c6ce48c105b1c297d68ae00a1662b83beb5f113a7d75ed152e37ca662"
+      "sha256": "48fbe07c27781623738dbb8b77f94e0f57050a819041a1092ce07ad45c91e775"
     },
     {
       "path": "agents/openai.yaml",
@@ -80,6 +80,31 @@
       "path": "changelog.d/wp-766.md",
       "size": 1250,
       "sha256": "e15e736659a6c9dd08bbf51693a35171530ab7023b28c6342151b2fcaaa91f28"
+    },
+    {
+      "path": "changelog.d/wp-802.md",
+      "size": 1023,
+      "sha256": "76d574ee8240d1dcc6f9ab5f90070e6d9ff64cc60a209f44e877ff94f5d6a31c"
+    },
+    {
+      "path": "changelog.d/wp-831.md",
+      "size": 2222,
+      "sha256": "b1c18da5232a0da61618b0f74baebcb9045703933faa39ab4951d50d450c2287"
+    },
+    {
+      "path": "changelog.d/wp-858.md",
+      "size": 1352,
+      "sha256": "29c421d927c9d691bbe0f836bb2a818ab0ea810aca531f8debe1faebb46b7546"
+    },
+    {
+      "path": "changelog.d/wp-868.md",
+      "size": 915,
+      "sha256": "be06bc58c3ad45af7c328f571d9e80b5ce571f74402edd3878f2e13f27891f12"
+    },
+    {
+      "path": "changelog.d/wp-886.md",
+      "size": 958,
+      "sha256": "5b29279d96839e2548799a0cd89e3c55d2ea8a853895ec6da73da511c33e6012"
     },
     {
       "path": "references/API_CONTRACT.md",
@@ -718,8 +743,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 229800,
-      "sha256": "ae0e4f07d7a346da28f4a4d3191de08a5821a34ed3a02df4cf092433c851f8c1"
+      "size": 229960,
+      "sha256": "2faa448423e8d1a8b1845b65e1933a3ee81cde234731a440cd3e0913f48b04b0"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -823,18 +848,18 @@
     },
     {
       "path": "scripts/tl_core/ops_misc.py",
-      "size": 181989,
-      "sha256": "142f7ad75fb66a55461748a247952f2818067b6052dd86757b895043bc24df76"
+      "size": 183101,
+      "sha256": "30bb6bb57d858b3d6b1995a7601a16fd9da7123e48f17caed6c7dac09a27dbc9"
     },
     {
       "path": "scripts/tl_core/profile_env.py",
-      "size": 47611,
-      "sha256": "63ed085c424cbe4e5f0bd7463411c8ca1a4233d6134449303cda410970c1dcd9"
+      "size": 49472,
+      "sha256": "44c832baf264380d2b0eb6034a6b1cd3bda1ddd3a7c00ea596ebf3a1bb5213b2"
     },
     {
       "path": "scripts/tl_core/profile_mgmt.py",
-      "size": 217152,
-      "sha256": "b25a0eab90eedda480fd53a967524abb600690a49c345dc5c13d068cab9db517"
+      "size": 217594,
+      "sha256": "c4efdd69c7a86460ab14272cd3b0b226ac4066bd5e1400eeeef24f2b98c02bc9"
     },
     {
       "path": "scripts/tl_core/regio.py",
@@ -893,8 +918,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2221870,
-      "sha256": "3ee38b4b85d242faea65b27153941a1da15cd44c044bd129850851980d3fcc8b"
+      "size": 2233718,
+      "sha256": "31145d71d7615ccc60c911c36869971f8af4d0203aa3341e794e35ee3e426047"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

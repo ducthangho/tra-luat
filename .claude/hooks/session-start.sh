@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -32,6 +32,12 @@
 # và nó hỏng IM LẶNG. Tên đặt theo NĂNG LỰC, đừng theo số phiên bản: số thì phải nhớ
 # tăng, còn tên thì tự nói nó là gì khi báo động.
 set -euo pipefail
+
+# Keep the snapshot in an unexported shell variable before ANY external command.
+unset TL_CODEX_SNAPSHOT
+TL_CODEX_SNAPSHOT="${CODEX_AUTH_JSON:-}"
+unset CODEX_AUTH_JSON
+CODEX_AUTH_CO=0; [ -n "$TL_CODEX_SNAPSHOT" ] && CODEX_AUTH_CO=1
 
 GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 ghi_dau_vet_hook() {
@@ -77,6 +83,11 @@ else
   exit 1
 fi
 
+# wp484 g7 (Codex lượt 1 F04): khối materialize snapshot đã DỜI xuống ngay SAU bước cài CLI agent.
+# Snapshot mới cần probe bằng `codex` thật; đặt ở đây thì máy chưa có `codex` chết rc=13 TRƯỚC
+# `npm install` và không bao giờ tự phục hồi được. `TL_CODEX_SNAPSHOT` là biến shell KHÔNG export
+# nên installer và mọi lệnh ở giữa không thấy nó.
+
 # CÓ MẶT ≠ CHẠY ĐƯỢC. `command -v` chỉ chứng minh có đường dẫn: audit dựng hai tệp
 # RỖNG tên git.exe/python.exe mà doctor vẫn báo xanh, và trên Windows `rg.exe` nằm
 # trong PATH nhưng chạy ra "Access is denied". Probe thật: có timeout, đòi rc=0 VÀ
@@ -105,7 +116,6 @@ raise SystemExit(0 if p.returncode == 0 and (p.stdout+p.stderr).strip() else 1)'
 # tới GitHub thì không phải credential. So bằng băm để không giá trị nào bị in ra.
 # Luật này phải GIỐNG `_doc_moi_truong` trong launcher.py — hai bản của cùng một
 # quy tắc sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt.
-CODEX_AUTH_CO=0; [ -n "${CODEX_AUTH_JSON:-}" ] && CODEX_AUTH_CO=1
 GITHUB_AUTH_SOURCE="$(
   "$PY" -c '
 import hashlib, os, secrets
@@ -150,13 +160,36 @@ else
   echo "[session-start] CANH BAO: khong co npm — bo qua phan CLI agent"
 fi
 
+# Only the trusted repository materializer receives the raw snapshot — chạy SAU khi đã cố cài
+# `codex` (F04) nhưng vẫn TRƯỚC mọi probe credential phía dưới.
+if [ "$CODEX_AUTH_CO" = 1 ]; then
+  MA_AUTH=0
+  CODEX_AUTH_JSON="$TL_CODEX_SNAPSHOT" "$PY" .claude/dev/launcher.py chuan-bi || MA_AUTH=$?
+  unset TL_CODEX_SNAPSHOT
+  if [ "$MA_AUTH" != 0 ]; then
+    echo "[session-start] CHO snapshot Codex moi; dung truoc cac probe"
+    exit 13
+  fi
+else
+  unset TL_CODEX_SNAPSHOT
+fi
+
 # --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì
 # lệnh tìm gãy giữa chừng chứ KHÔNG tự lùi về grep — phiên mất khả năng tra cứu mà
 # không hỏng ở chỗ đọc được. Vì thế `rg` là BAT BUOC trong `doctor` từ 15-08-2026.
 #
 # Ba đường cài, thử lần lượt: apt-get (có/không sudo), rồi cargo. Không đường nào
 # chạy thì nói THẲNG là phiên sẽ thiếu — đừng để nó lộ ra giữa chừng.
-if ! co_chay rg; then
+#
+# wp802 (Q4): Windows (Git Bash) KHÔNG có apt-get và thường vắng cargo — hook KHÔNG tự cài ở
+# đó: in ĐÚNG MỘT lệnh rồi để `doctor` chặn (thoát 12). Chuỗi dưới PHẢI khớp `rg.cai.windows`
+# của ops/cong_cu.yaml (phần trước ` && ` đầu tiên) — canh: `r802_bang_cai_rg_khop_cong_cu_yaml`.
+RG_CAI_WINDOWS='winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements --disable-interactivity || choco install ripgrep --yes --no-progress'
+RG_WIN=0; case "$(uname -s 2>/dev/null || true)" in MINGW*|MSYS*|CYGWIN*) RG_WIN=1 ;; esac
+if [ "$RG_WIN" = 1 ]; then   # chọn nền TRƯỚC probe: Windows probe ĐÚNG MỘT lần (Codex lượt 2 F5)
+  co_chay rg || { echo "[session-start] CANH BAO: rg THIEU/HONG (Windows) — hook KHONG tu cai; doctor se chan. Cai bang:"
+                  echo "$RG_CAI_WINDOWS"; }
+elif ! co_chay rg; then
   echo "[session-start] cai ripgrep ..."
   if co apt-get; then
     apt-get install -y -qq ripgrep >/dev/null 2>&1 \
@@ -166,7 +199,8 @@ if ! co_chay rg; then
            || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1; } \
       || true
   fi
-  co rg || { co cargo && cargo install ripgrep >/dev/null 2>&1 || true; }
+  # wp802 (M3): `co_chay`, KHÔNG `co` — `rg` có mặt mà hỏng thì `co rg` đúng, bỏ mất cargo.
+  co_chay rg || { co cargo && cargo install ripgrep >/dev/null 2>&1 || true; }
   # BANG CHUNG DUONG: `command -v` la CO MAT, `rg --version` la CHAY DUOC. Audit
   # codex tung dung hai tep RONG ten git.exe/python.exe roi doctor bao xanh.
   if rg --version >/dev/null 2>&1; then
@@ -569,49 +603,16 @@ if co codex; then
   fi
 fi
 
-if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  if codex login status >/dev/null 2>&1 </dev/null; then
-    echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
+if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
+  MA_AUTH=0
+  "$PY" .claude/dev/launcher.py credential-status || MA_AUTH=$?
+  if [ "$MA_AUTH" = 0 ]; then
+    # Offline status is not proof of live health. Doctor labels it accordingly.
+    codex login status >/dev/null 2>&1 </dev/null || true
   else
-    if "$PY" - <<'PYEOF'
-import base64, binascii, json, os, sys, tempfile
-raw = os.environ.get("CODEX_AUTH_JSON", "").strip()
-try:
-    data = base64.b64decode(raw, validate=True)
-except (binascii.Error, ValueError):
-    sys.exit(1)                      # KHONG in noi dung, ke ca doan dau
-try:
-    d = json.loads(data)
-except Exception:
-    sys.exit(2)
-if not isinstance(d, dict) or "tokens" not in d:
-    sys.exit(3)                      # thieu khoa bat buoc
-dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")
-os.makedirs(os.path.dirname(dst), mode=0o700, exist_ok=True)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dst))
-try:
-    os.write(fd, data); os.close(fd)
-    os.chmod(tmp, 0o600); os.replace(tmp, dst)
-except BaseException:
-    os.unlink(tmp); raise
-PYEOF
-    then
-      echo "[session-start] codex: da khoi phuc auth tu CODEX_AUTH_JSON"
-    else
-      echo "[session-start] CANH BAO: CODEX_AUTH_JSON khong dung dang (base64 cua auth.json) — bo qua"
-    fi
+    echo "[session-start] codex: CHO snapshot moi; khong thu lai credential da hong"
   fi
 fi
-if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp: hỏi chính codex.
-  echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
-elif co codex; then
-  echo "[session-start] codex auth: BO QUA — codex dang bi chan (xem tren)"
-fi
-
-# --- KHOI PHUC credential codex: KHOI O TREN da lam roi, dung goi lai o day.
-# `launcher.py chuan-bi` la duong CUU HO cho truong hop hook NAY khong chay — xem
-# chu thich cua `chuan_bi_xac_thuc()`. Goi ca hai trong mot luot chi thanh nhieu.
 
 # --- BANG CHUNG DUONG, khong tin "da cai xong".
 #   12 = thieu cong cu BAT BUOC          -> phien nay khong lam viec duoc, DUNG.

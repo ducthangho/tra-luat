@@ -1,0 +1,46 @@
+PRIOR_VERDICT_SOURCE=7a2eecf:ops/reviews/pr870-review-1-codex-verdict.md (chỉ dùng làm tài liệu lượt1, không thay cây runtime của SHA review)
+### master-windows-bo-sot-dispatch  [P2]  Giới hạn lời khai Windows trên master vào push tự động
+TỆP/DÒNG: `CLAUDE.md:169` (liên quan cách hiểu “KHÔNG BAO GIỜ” tại 173–174).
+VẤN ĐỀ: Câu nhấn mạnh “Windows trên master hiện chỉ đến từ launcher-windows.yml” khai rộng hơn cấu hình đã đo. `ci.yml` vẫn khai `workflow_dispatch`; output `chuan-bi.os` chọn Windows theo event này mà không loại `refs/heads/master`. Vì vậy cùng một ref master có thể có Windows từ gate `ci.yml`, đúng như chính dòng 176 hướng dẫn. Thiếu từ “tự động khi push” khiến người đọc lại suy phạm vi phủ Windows từ một câu doctrine thay vì đọc event/ref. Đây là P2 về thiếu điều kiện, không phải P1 cho số job/run/SHA (các số đã đo đều khớp).
+ĐÃ THỬ NGHIỆM: HƯỚNG 13, evaluator nguyên hàm `ops/lease_publish_test.py:7848`, lấy biểu thức từ workflow thật: `push + refs/heads/master => [ubuntu-latest]`; `workflow_dispatch + refs/heads/master => [ubuntu-latest, windows-latest]`, `rc=0`, marker `COUNTEREXAMPLE PASS`. HƯỚNG 2/7/9 xác nhận trigger, consumers và không có chốt ref khác. Chưa tạo/chạy Actions run thật vì sandbox không mạng.
+GỢI Ý VÁ: Sửa ngay L169 thành “Windows tự động khi push master …”; tại L173–174 giới hạn hệ quả vào các lượt PR/push của `ci.yml` theo ma trận đang đo. Không mở rộng thành mọi gate: protocol T3 và ADR-0049 vẫn nói tới gate Windows tại chỗ trước phát hành. `HINT.patch` là gợi ý cho hai chỗ cùng phạm vi này.
+CA KHÓA: Giữ bảng năm context ở HƯỚNG 13, đặc biệt phân biệt push/master với dispatch/master; đối chiếu lại câu mới có nêu phạm vi push tự động. Không cần thêm test sản phẩm cho một sửa tài liệu.
+RỦI RO BẢN VÁ: Chỉ thu hẹp mô tả; phải giữ nguyên ngoại lệ dispatch/label và điều kiện paths của launcher. Không đổi workflow, gate policy hoặc miễn nghĩa vụ gate Windows tại chỗ.
+ĐỘ TIN: cao.
+
+$ git diff b38fce8 06a50c5feea77c2654f31edd26efeed7eeee62f5 -- CLAUDE.md
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 0a00adc..e6bbe1d 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -166,12 +166,12 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package 
+   `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên
+   bản land (commit `3f6c694`) khai `jobs: '23/23 success (gom windows)'`; Codex connector bắt thành P1 trên PR #859 (comment
+   `r4323607674`), sửa ở PR #865. Đúng bệnh mục này đang dạy: tin một câu GẦN TAY thay vì đọc nhãn job.
+-  **Windows trên master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: push master chỉ bắn
++  **Windows tự động khi push master hiện chỉ đến từ `launcher-windows.yml`**, và CÓ ĐIỀU KIỆN: chỉ bắn
+   khi đổi `.claude/dev/**` hoặc chính tệp workflow ấy (`paths:`), ma trận `windows-latest` + `ubuntu-latest`;
+   PR chỉ chạy khi mang nhãn `windows` (workflow này CÓ khai `types: [..., labeled]`). Nó chỉ đo lane
+   launcher, KHÔNG phải gate. Các workflow còn lại (`ci-dot-bien-du` `ops-*`) đều `ubuntu-latest`.
+-  Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **gate của mã đó KHÔNG BAO GIỜ
+-  được đo trên Windows, kể cả sau merge**; merge không còn là "lần đo Windows đầu tiên" như bản cũ viết.
++  Hệ quả: với một PR THƯỜNG — không nhãn `windows`, không ai gọi tay — **các lượt PR và push hậu merge
++  của `ci.yml` theo ma trận hiện tại chỉ đo Ubuntu**; merge không còn là "lần đo Windows đầu tiên" như bản cũ viết.
+   Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.
+   **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+
+BASE_OLD_QUOTE:
+158:   · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,
+159:   còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
+160:   hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
+161:   không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
+162:   trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
+163:   ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
+164:   trớ trêu là đoạn ngay trên đã trích đúng điều kiện đó rồi vẫn viết câu quên nó).
+165:   **Muốn có Windows TRƯỚC khi merge thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+166:   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+SCOPE_FIX_ASSERTIONS=passed (cả hai vị trí của finding cũ; ngoại lệ dispatch/label vẫn còn)
+AUTHOR_CAUSATION: có doctrine cũ và biên bản sai cùng tồn tại; không có transcript đủ chứng minh doctrine đã gây lời khai của executor 3f6c694.
+AUTHOR_MEASUREMENT_DATE: base/head commits ngày 22-10-2026; không có transcript gốc chứng minh tác giả thực chạy phép đo vào ngày ấy.
+rc=0

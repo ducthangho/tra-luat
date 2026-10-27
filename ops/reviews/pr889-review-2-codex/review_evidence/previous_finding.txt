@@ -1,0 +1,20 @@
+prior-finding-headers=["### windows-green-does-not-prove-all-baselines  [P2]  Thu hẹp lời khai ca nền đạt: run xanh vẫn có ca bị bỏ qua"]
+  BỎ QUA t51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi: nền này không có `/bin/sh` để dựng ứng viên giả — KHÔNG ĐO ĐƯỢC
+
+cong_cu_test: 2/2 đạt; tổng=3, bỏ qua=1, tiền kiểm bỏ qua=0
+
+TỔNG: CA 2/2 đạt · ĐỘT BIẾN 1 mục KHÔNG ĐO TRÊN WINDOWS — đo trên ubuntu-latest (`gate-cong-cu` 8 mảnh + `gate-cong-cu-gop`)
+actual t51 with missing /bin/sh + two passing fixtures: rc=0
+CLAUDE.md:180:   **Nhưng "gate trên Windows" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên
+CLAUDE.md:181:   `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`
+CLAUDE.md:182:   duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:
+CLAUDE.md:183:   `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;
+CLAUDE.md:184:   `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi
+CLAUDE.md:185:   `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong
+CLAUDE.md:186:   `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên "có job Windows" chưa phải "mọi
+CLAUDE.md:187:   bước chạy". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —
+CLAUDE.md:188:   phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy
+CLAUDE.md:189:   từ lượt Ubuntu của CÙNG head.
+CLAUDE.md:190:   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+CLAUDE.md:191:   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
+windows-green-does-not-prove-all-baselines: ĐÃ VÁ THẬT in both sentences; extra final-sentence edit preserves the measured scope.

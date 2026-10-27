@@ -1,0 +1,106 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 943
+packet_id: wp943
+revision: 1
+generation: 1
+lease_id: wp943-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [834]
+depends_on_ghi_chu: '#834 da merge (PR #950, 3e973a0) va lease wp834-r1-g1-claude rut han (388ec45, 12:51Z) => docs/PROTOCOL_DA_PHIEN.md da nha. Base chua merge #834 dung dieu kien spec.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'luat governance protocol => sensitive; executor ho claude, reviewer ho openai; toi da 2 loi goi Codex (spec Q1).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp943.md
+spec_sha256_required: 22729e93eec0e1c4677a5d6529b81f9f0c46c47f3f605017b7abb337b5e1e270
+spec_hash: 22729e93eec0e1c4677a5d6529b81f9f0c46c47f3f605017b7abb337b5e1e270
+spec_ref: refs/heads/ops/wp943-spec@80ebcfbd99fb1fcef5bd2ea5acce03a8e5155119
+prompt_path: ops/specs/wp943.md
+prompt_sha256_required: 22729e93eec0e1c4677a5d6529b81f9f0c46c47f3f605017b7abb337b5e1e270
+write_set:
+- docs/adr/0056-lease-no-progress-six-hours.md
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/handoff/wp943-g1-claude.md
+write_set_hash: de0e72e9e6a043d400c082303c5b08c1e35b3459556c2703379a0a1552168b79
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'M1 ADR-0056 (Trang thai + Hieu luc) + M2 PROTOCOL (dong §20 ADR-0056; §4 mac dinh giu nguyen); handoff chi tren nhanh lease; diff PR <= 2 tep, <= 80 dong them.'
+change_policy_sha: null
+effective_write_set:
+- docs/adr/0056-lease-no-progress-six-hours.md
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/handoff/wp943-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 2 loi goi codex; commit run.json; moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; tl --selftest N/N tai cho tren dung commit day'}
+- {id: M-3, dieu_kien: 'N1 adr-song, doctrine-scan, git diff --check rc0; N3 khong con dong noi ADR-0056 chua kich hoat; N4 chi cham doan M1/M2'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp943-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3e973a03b151e37cd402e0a723816eeaa8247193
+start_from_sha: 3e973a03b151e37cd402e0a723816eeaa8247193
+start_from_ghi_chu: 'origin/master luc cap lease (chua merge PR #950 cua #834).'
+reviewed_sha_required: 3e973a03b151e37cd402e0a723816eeaa8247193
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/943#issuecomment-6416417774
+granted_on_instruction_readback: 'chu kho chi thi "Đã merge #950, ghi sổ land và rút hạn lease #834, cấp lease cho #943 (kích hoạt vận hành ADR-0056)" (phien session_01FLVLxi5gKZgtVvbuTCEqEn, 26-10-2026); truoc do "Kích hoạt vận hành ADR-0056" (#835 issuecomment-6407154789) va "Soạn sẵn, chờ #834 land". Bam byte KHONG DO DUOC.'
+granted_on_instruction_note: >-
+  Chu kho cap lease kich hoat van hanh ADR-0056 sau khi #834 land. Lease nay van theo nguong cu (30 phut), vi packet chi
+  co hieu luc sau khi land. Ghi ho qua GitHub App.
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (session_01FLVLxi5gKZgtVvbuTCEqEn) KHONG phai executor.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-26T12:52:09Z'
+  goc_quet: 'master 3e973a0, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref, thieu 0; nhanh cuc bo khong tut sau'
+  ket_qua: 'ca 3 duong dan: NGUOI_GIU 0 sau khi wp834-r1-g1-claude het han 12:51Z (621/621 ten, thieu 0).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet chua tung co lease.'
+leased_at_utc: '2026-10-26T12:53:00Z'
+heartbeat_at: '2026-10-26T12:53:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 30
+heartbeat_required_ghi_chu: 'lease cap TRUOC moc kich hoat ADR-0056 => giu nguong 30 phut (ADR-0056 khong hoi to).'
+lease_until: '2026-10-27T07:05:00Z'
+lease_expires_at_utc: '2026-10-27T07:05:00Z'
+rut_han:
+  han_cu: '2026-10-28T12:53:00Z'
+  han_moi: '2026-10-27T07:05:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #943 da merge: PR #963 (head fb2bbcbf5ba456756df28701f97eb2ce67cd574c, merge 7129f7de204a6f92db8e29e8a5a79383d4907029, 2026-10-27T06:11:11Z, merged_by ducthangho); chu kho giao ghi so land va rut han lease (ghi ho #943 issuecomment-6435716217).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem cua #943 tro nguoc bang thay_the_cho. Tien le wp834-r1-g1-claude (388ec45).'
+  ghi_boi: claude-executor-session session_01Mr84zPTvmQhhshvV6Q88vq (theo ghi ho #943 issuecomment-6435716217)
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'Q2 cua spec wp943.'
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp943_g1: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_943_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp943-g1-claude MOT lan khi N1-N4 dat va review approve; mo PR draft. Sau approve khong day merge commit them neu khong con luot Codex de xac minh lai.'

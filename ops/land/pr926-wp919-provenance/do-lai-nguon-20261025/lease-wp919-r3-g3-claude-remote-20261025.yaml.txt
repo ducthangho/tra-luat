@@ -1,0 +1,76 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 919
+packet_id: wp919
+mission_issue: 919
+revision: 3
+generation: 3
+lease_id: wp919-r3-g3-claude-remote-20261025
+thay_the_cho:
+- wp919-r2-g2-claude-remote-20261025
+thay_the_cho_ghi_chu: lease g2 con han (toi 2026-10-26T06:45:48Z) => bia mo hai chieu; g2 mang da_bi_thay_the tro ve lease nay. g1 da bi g2 thay the tu truoc
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/919#issuecomment-6396165849
+authority_url: https://github.com/ducthangho/tra-luat/issues/919#issuecomment-6396165849
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+leased_at_utc: '2026-10-25T11:35:17Z'
+heartbeat_at: '2026-10-25T11:35:17Z'
+lease_until: '2026-10-26T11:35:17Z'
+lease_expires_at_utc: '2026-10-26T11:35:17Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: fresh independent session, read-only exact Executor head, qua launcher.py run
+spec_path: ops/specs/wp919-adr-0055-tran-loi-goi-codex-muoi-r3.md
+spec_ref: ops/wp919-r1-g1-lease
+spec_commit: 289d1f29ace72edf60a4cb7633b02657a05612dd
+spec_hash: 7d0eb91dd35a36a547348dbc0370366975071c6b3ac3468c2bab7351edbf2987
+spec_sha256: 7d0eb91dd35a36a547348dbc0370366975071c6b3ac3468c2bab7351edbf2987
+branch: agent/wp919-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 937162894e703dec9aa7c30163d913e2f83d276c
+start_from_sha: 937162894e703dec9aa7c30163d913e2f83d276c
+reviewed_sha_required: 937162894e703dec9aa7c30163d913e2f83d276c
+reviewed_sha_ghi_chu: 'neo base; luot review r3 tren head cuc bo 4e4d482 cua agent/wp919-g1-claude (chua push); review Codex cuoi phai neo dung head PR cuoi'
+write_set:
+- docs/adr/0055-tran-loi-goi-codex-len-muoi.md
+- docs/PROTOCOL_DA_PHIEN.md
+write_set_hash: 0dddc70e2ac7a55db20f1bb9af2f4a26848f2caad15bf6f4897310ea20d6bef0
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+write_set_ghi_chu: docs/PROTOCOL_DA_PHIEN.md chi bang §20 (them dong ADR-0055, sua o trang thai dong ADR-0052)
+closure_status: 'holder scan 2026-10-25T11:35:17Z tren ban sao bare: ls-remote 595 = guong 595 (thieu 0, thua 0); 2/2 duong dan NGUOI_GIU 1 = wp919-r2-g2 (lease nay thay the)'
+tran_loi_goi_codex_ghi_chu: 'spec khai tran_loi_goi_codex: ADR-0052@8ab1007 => tran 8 cho chinh packet nay; tran_kich_thuoc_sensitive: ADR-0053@8ab1007 => <= 6 tep / <= 450 dong them'
+coordination_paths:
+- ops/leases/wp919-r3-g3-claude-remote-20261025.yaml
+- ops/leases/wp919-r2-g2-claude-remote-20261025.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 30
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+cach_lam: 'review offline neo SHA cuc bo toi khi 0 P0-P3; KHONG push nhanh code, KHONG gate cho toi khi du dieu kien merge (chi thi chu kho #919 issuecomment-6396165849)'

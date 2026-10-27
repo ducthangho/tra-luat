@@ -1,0 +1,210 @@
+{
+  "old_eight": [
+    {
+      "source": "pr455-bien-nhan-v2-review-1-codex-verdict.receipt.yaml",
+      "verdict": "pr455-bien-nhan-v2-review-2-codex-verdict.md",
+      "expected_sha": "c595292cb63fb8c09d7d7b482cda20f9d5f0917f",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "b6f169f69cf719645b93ca0e2bcb4aff16295b2d8a09714ddb4b41beefd45814",
+      "hash_match": true,
+      "result": "changes_requested",
+      "counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr455-bien-nhan-v2-review-2-codex-verdict.receipt.yaml",
+      "verdict": "pr455-bien-nhan-v2-review-3-codex-verdict.md",
+      "expected_sha": "cb212847375c2319fe0ccad3f7c00c90b870e3ba",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "9f3c781842913fbffedd9198d88a1e2be2a6eb80a905f293223659a19a7a398c",
+      "hash_match": true,
+      "result": "approve_with_findings",
+      "counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr455-bien-nhan-v2-review-3-codex-verdict.receipt.yaml",
+      "verdict": "pr455-bien-nhan-v2-review-4-codex-verdict.md",
+      "expected_sha": "4ef73e69d5f3c419634118983723355e25e38305",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "3708d03a1fd871ac143f74eaacd13fdf943fe5c3e0704b77a23640b13addda1c",
+      "hash_match": true,
+      "result": "approve_with_findings",
+      "counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr455-bien-nhan-v2-review-4-codex-verdict.receipt.yaml",
+      "verdict": "pr455-bien-nhan-v2-review-5-codex-verdict.md",
+      "expected_sha": "670071b700bd97a893d64393ffded0257957d0b3",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "331fa1296a6d65e684352de9073f9c7a09b0b970ee1e81974f0f978248dbde8e",
+      "hash_match": true,
+      "result": "approve_with_findings",
+      "counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr455-bien-nhan-v2-review-5-codex-verdict.receipt.yaml",
+      "verdict": "pr455-bien-nhan-v2-review-6-codex-verdict.md",
+      "expected_sha": "5a78c150106ae381461354c77ba2023834330bbd",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "0b249313b99c3e6ec66163f6fe9043d0309926ab0b6877c866a4c024f13ae982",
+      "hash_match": true,
+      "result": "approve_with_findings",
+      "counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr455-bien-nhan-v2-review-6-codex-verdict.receipt.yaml",
+      "verdict": "pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md",
+      "expected_sha": "ca960160b477cd16346a293aaa8752772a9921d4",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "cee6b762fb08c1724c56ccbb1c6aaef8cedb22eb91b334840aa09f18ef2ebee8",
+      "hash_match": true,
+      "result": "approve_with_findings",
+      "counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr896-review-1-codex-verdict.receipt.yaml",
+      "verdict": "pr896-review-2-codex-verdict.md",
+      "expected_sha": "8d56009a09af7b3ef93801df105f9483de212cc7",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "a2b588b64535203f9e481240e7f014ae0f34f84b8a776e646b573666e5bd689f",
+      "hash_match": true,
+      "result": "changes_requested",
+      "counts": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr915-review-1-codex-verdict.receipt.yaml",
+      "verdict": "pr896-review-2-codex-verdict.md",
+      "expected_sha": "8d56009a09af7b3ef93801df105f9483de212cc7",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "a2b588b64535203f9e481240e7f014ae0f34f84b8a776e646b573666e5bd689f",
+      "hash_match": true,
+      "result": "changes_requested",
+      "counts": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "next_absent_at_anchor_rc": 128
+    }
+  ],
+  "new_two_four_reviews": [
+    {
+      "source": "pr870-review-1",
+      "verdict": "pr870-review-2-codex-verdict.md",
+      "expected_sha": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "8b222ab37b7de41499829abb52d1958043ee8fd2969212596277aacc211026a6",
+      "hash_match": true,
+      "result": "approve",
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr870-review-1",
+      "verdict": "pr870-review-3-codex-verdict.md",
+      "expected_sha": "06a50c5feea77c2654f31edd26efeed7eeee62f5",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "0021b5b2f90e0da39a92c11041c3236980acfbbd0b22f46d0044ac8334f16e81",
+      "hash_match": true,
+      "result": "approve",
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr889-review-1",
+      "verdict": "pr889-review-2-codex-verdict.md",
+      "expected_sha": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "c5fe298af73bb6081ecf44638b7fce7e7dd220c11c3ddcee5ba5fcc234a4b612",
+      "hash_match": true,
+      "result": "approve",
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "next_absent_at_anchor_rc": 128
+    },
+    {
+      "source": "pr889-review-1",
+      "verdict": "pr889-review-3-codex-verdict.md",
+      "expected_sha": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+      "receipt_sha_match": true,
+      "verdict_header_sha_match": true,
+      "hash": "c05bc41d9232d99a9e0c49199e022a9a64b01227674144da73bf50b9b7ce445f",
+      "hash_match": true,
+      "result": "approve",
+      "counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "next_absent_at_anchor_rc": 128
+    }
+  ]
+}

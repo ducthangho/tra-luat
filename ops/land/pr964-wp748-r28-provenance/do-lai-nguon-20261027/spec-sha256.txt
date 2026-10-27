@@ -1,0 +1,4 @@
+$ git show a8bf192:ops/specs/wp748-r28-windows-dot-bien-khong-do-duoc.md | sha256sum
+07e058391eb9b592d384c8eb7a8136f7ff49fed6dbc9847a1588d02e6c0814a3  -
+lease-wp748-r28-g1-d4b267a.yaml.txt: spec_hash: 07e058391eb9b592d384c8eb7a8136f7ff49fed6dbc9847a1588d02e6c0814a3
+lease-wp748-r28-g1-sau-rut-han-188d456.yaml.txt: spec_hash: 07e058391eb9b592d384c8eb7a8136f7ff49fed6dbc9847a1588d02e6c0814a3

@@ -1,0 +1,6 @@
+$ python3 ops/land_evidence_nguon.py --root . --tep ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+ĐẠT ops/land/pr889-claude-md-bai-hoc-c-land-evidence.yaml
+land_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+TỔNG: ĐẠT
+
+rc=0

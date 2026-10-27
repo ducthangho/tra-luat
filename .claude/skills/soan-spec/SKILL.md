@@ -33,7 +33,7 @@ luôn là của người dùng.
 Xong khi biên giới RỖNG: mọi nhánh đã đi qua, không còn gì được giả định trong im lặng.
 **Không hành động cho tới khi người dùng xác nhận đã hiểu giống nhau.**
 
-## 2. Năm luật riêng của kho — chúng sinh ra từ những lần đã trả giá
+## 2. Sáu luật riêng của kho — chúng sinh ra từ những lần đã trả giá
 
 **L1 — Mọi con số "N thứ phải xử" phải khai N ĐẾM GÌ.** Một đặc tả từng viết một con số mà
 người viết đếm phản chứng còn người đọc đếm finding; lượt thi hành đốt hơn 170 nghìn token và
@@ -81,12 +81,64 @@ một chữ số, nó khai sai rằng một thẩm quyền đã có. Phân biệ
 NGAY: hỏi *"con số này có đang chống đỡ một câu về THẨM QUYỀN không"* — nếu có thì nó không còn là
 số, nó là một lời khai.
 
+**L6 — Tiêu chí khớp chuỗi là một thước đo, và thước đo phải được kiểm như mã.** Hai packet liền
+đốt hơn mười revision/lượt review vào CÙNG một lớp lỗi: tiêu chí trông chặt mà mù.
+Mỗi tiêu chí dùng `rg`/regex/đếm chuỗi phải qua đủ năm vế dưới đây; vế nào không áp dụng thì ghi
+thẳng vì sao trong tiêu chí.
+
+- **(a) Có vế dương trên nội dung MỚI và vế âm trên nội dung CŨ.** Chỉ có vế âm ("không còn câu
+  X") thì xoá trắng tệp cũng ĐẠT. Bằng chứng: wp782 r3 — A3 chỉ có phép âm (`rg … ⇒ 0
+  dòng` trên protocol), không phép nào đòi ADR mang ngưỡng mới
+  (`ops/specs/TRAN-CODEX-VA-SENSITIVE-r3.md` mục A3); wp784 r2 — nợ
+  `WP784-R2-TIEU-CHI-THIEU-VE-DUONG`.
+- **(b) Đo trên văn bản đã nối dòng, hoặc chọn cụm không bị xuống dòng — chỉ trong biên hẹp dưới
+  đây.** Markdown được ngắt cột tuỳ người viết, mà `rg` khớp TỪNG dòng: cụm đầy đủ vắt sang dòng sau
+  thì `rg -F` không khớp gì (tiêu chí dương đỏ oan); rút mẫu xuống phần đầu cho khỏi vướng chỗ ngắt
+  thì một hậu tố sai vẫn khớp (tiêu chí xanh giả). Cả hai đều đổi màu theo chỗ ngắt chứ không theo
+  nội dung. Mặc định là nối dòng: gộp khoảng trắng trong phạm vi TỪNG đoạn (không nối qua dòng trống
+  hay sang mục khác, kẻo khớp nhầm hai câu không liên quan) rồi khớp TOÀN BỘ lời khẳng định. Khớp
+  cụm trên một dòng chỉ được dùng khi cả hai điều sau cùng đúng: cụm ấy là toàn bộ lời khẳng định
+  (không phải tiền tố của nó), và phép đo chạy trên một blob đã neo băm nên không bị ngắt dòng lại.
+  Đột biến kèm theo: với cách nối dòng, ngắt dòng lại mà giữ nghĩa thì vẫn xanh và đổi hậu tố thì
+  đỏ; với cụm cùng dòng chỉ đột biến đổi hậu tố áp dụng — ngắt dòng lại sinh blob MỚI, phải neo băm
+  và đo lại, đừng coi phép khớp cùng dòng là đã chịu được ngắt dòng. Bằng chứng: lớp
+  "khớp tiền tố cụm bị cắt" của #782, chép ở `ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md` mục
+  `hinh_dang_ke_thua`.
+- **(c) Tiêu chí nói "N chỗ" thì đếm theo từng vị trí, không đếm gộp.** Một tổng `≥ N` trên nhiều
+  tệp vẫn ĐẠT khi một chỗ có thừa còn chỗ khác vắng hẳn; khớp chuỗi con thay vì nguyên từ còn đếm
+  cả thứ không liên quan. Bằng chứng: wp782 r1 A6 đếm chuỗi con trên mọi `*.py` (P1 comment
+  4300256160), sửa thành đếm nguyên từ, từng trường, từng tệp; wp784 r2 — nợ `WP784-R2-A7-DO-PHU`.
+- **(d) Regex phủ cả dạng chữ lẫn dạng chữ số.** "tám lời gọi" và "8 lời gọi" là cùng một lời
+  khai; tiêu chí âm chỉ bắt dạng chữ thì dạng chữ số lọt qua. Bằng chứng: wp782 r5 A2 phải thêm
+  `[0-9]+ lời gọi Codex` (P2 comment 4300560293).
+- **(e) Lời khai "không cổng nào cưỡng chế" phải đo đủ danh sách vị trí cổng của §20 protocol.**
+  Dẫn hai tệp rồi kết luận cho cả kho là lời khai rộng hơn phép đo. Ghi lệnh và kết quả cho TỪNG
+  vị trí cổng mà `docs/PROTOCOL_DA_PHIEN.md` §20 liệt kê. Bằng chứng: wp784 g2 — `ADR-0054` mục
+  Cưỡng chế ban đầu chỉ dẫn hai tệp, phải đo lại trên đủ sáu vị trí (commit `1182060`, P2 connector
+  4302037482 trên PR #785).
+
+Trước khi đóng băng, chạy thử trên nền mọi tiêu chí ĐO ĐƯỢC lúc ấy. Tiêu chí đo hành vi MỚI phải ra
+đúng màu "chưa làm"; tiêu chí canh bất biến (`doctrine-scan`, selftest, `release-verify`…) xanh sẵn trên
+nền là đúng, và răng của nó đến từ đột biến. Tiêu chí chỉ đo được sau land (canary trên PR đầu tiên sau
+land, gate master, receipt LIVE) thì khai điều kiện đo, thời điểm, ai đo và bằng chứng phải đọc lại; nó ở
+trạng thái `chưa đo được` cho tới khi đo thật — chưa chạy KHÔNG phải đạt, và đừng thay canary bằng một phép
+đo khác. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
+
 ## 3. Đo trước khi hỏi
 
 Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt người dùng nhớ hộ:
 
 - kích thước dự kiến (`git diff --numstat` trên phạm vi tương đương gần nhất) — đối chiếu
-  ngưỡng ở `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md`;
+  ngưỡng thường ở `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md`; packet `sensitive`
+  đối chiếu cặp số ở `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`; số lời gọi Codex
+  review dự kiến đối chiếu trần ở `docs/adr/0052-tran-loi-goi-codex-len-tam.md`. Skill này
+  không chép ngưỡng; đặc tả ghi số đo, trần hay khối vượt trần (`nang_tran`) theo đúng dạng ADR
+  tương ứng quy định. Đặc tả muốn áp trần của `ADR-0052`/`ADR-0053` thì khai dòng `tran_*` theo
+  mục *Hiệu lực* của chính ADR ấy — giá trị sau `@` là OID 40 ký tự của commit LAND ADR trên nhánh
+  mặc định, không phải một commit bất kỳ có chứa ADR (base của packet chứa ADR mà không phải
+  commit land). Hai dạng khai, mỗi dòng đứng riêng ở đầu đặc tả, `<OID land>` thay bằng OID thật:
+  `tran_loi_goi_codex: ADR-0052@<OID land>` và `tran_kich_thuoc_sensitive: ADR-0053@<OID land>`.
+  ADR nào đang hiệu lực thì hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
 - write set dự kiến có giao với packet nào đang mở không;
 - base dự kiến có phải tổ tiên của nhánh mặc định không;
 - lớp review theo đường dẫn bị chạm (`docs/PROTOCOL_DA_PHIEN.md` §8), fail-closed khi không rõ.

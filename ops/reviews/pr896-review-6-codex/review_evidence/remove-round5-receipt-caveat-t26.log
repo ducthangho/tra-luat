@@ -1,0 +1,10 @@
+>>> vao t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2026-10-26T14:13:18Z
+<<< ra t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi 2.264s QUA
+
+lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+
+STDERR:
+/tmp/pr896-r6-mutations-bwmr16mi/copy/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/pr896-r6-mutations-bwmr16mi/copy/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ

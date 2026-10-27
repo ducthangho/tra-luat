@@ -1,0 +1,3 @@
+Đã hoàn tất [VERDICT.md](/tmp/claude-0/rv/wp960-review-2-codex/VERDICT.md): **changes_requested — 6 P1, 1 P2**.
+
+Đã đo 13 hướng, chạy đủ `85/85` ca và `95/95` đột biến. Kèm [HINT.patch](/tmp/claude-0/rv/wp960-review-2-codex/HINT.patch) vá một phần, dry-run sạch. Cây `cay-kho` giữ nguyên; không gọi mạng.

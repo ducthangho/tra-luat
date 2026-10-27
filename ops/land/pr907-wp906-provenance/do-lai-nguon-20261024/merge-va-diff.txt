@@ -1,0 +1,7 @@
+# do luc 2026-10-24T10:09:10Z
+git show -s --format='%H %P %T' dc657149941f9db3ab2afc6fb6462ba4827bf18f:
+dc657149941f9db3ab2afc6fb6462ba4827bf18f 1c20f3bd6a7ed08114feaf1d91c0790360b8f581 35d87eb073ae8c6f79049c0097b4208cc2139c47 d9aaf7d988367fa8f051d806c9af92ca11a157f8
+head 35d87eb tree: d9aaf7d988367fa8f051d806c9af92ca11a157f8
+cmp(git diff 1c20f3b dc657149941f9db3ab2afc6fb6462ba4827bf18f, git diff 1c20f3b 35d87eb) rc=0
+numstat merge:
+2	2	ops/cong_cu.yaml

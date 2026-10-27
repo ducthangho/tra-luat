@@ -1,0 +1,12 @@
+os=["windows-latest"] gate-cong-cu=[{"manh": 0, "os": "windows-latest"}]
+os=["ubuntu-latest", "windows-latest"] gate-cong-cu=[{"manh": 0, "os": "ubuntu-latest"}, {"manh": 1, "os": "ubuntu-latest"}, {"manh": 2, "os": "ubuntu-latest"}, {"manh": 3, "os": "ubuntu-latest"}, {"manh": 4, "os": "ubuntu-latest"}, {"manh": 5, "os": "ubuntu-latest"}, {"manh": 6, "os": "ubuntu-latest"}, {"manh": 7, "os": "ubuntu-latest"}, {"manh": 0, "os": "windows-latest"}]
+os=["ubuntu-latest"] gate-cong-cu=[{"manh": 0, "os": "ubuntu-latest"}, {"manh": 1, "os": "ubuntu-latest"}, {"manh": 2, "os": "ubuntu-latest"}, {"manh": 3, "os": "ubuntu-latest"}, {"manh": 4, "os": "ubuntu-latest"}, {"manh": 5, "os": "ubuntu-latest"}, {"manh": 6, "os": "ubuntu-latest"}, {"manh": 7, "os": "ubuntu-latest"}]
+gate: Windows cells=1; job-if=<absent>
+gate-cong-cu: Windows cells=1; job-if=<absent>
+gate-cong-cu-gop: Windows cells=0; job-if=${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
+gate-ops: Windows cells=1; job-if=<absent>
+gate-nhanh-manh: Windows cells=8; job-if=<absent>
+gate-nhanh-gop: Windows cells=1; job-if=${{ !cancelled() }}
+gate-registry: Windows cells=1; job-if=${{ !cancelled() }}
+gate-packet-loop: Windows cells=1; job-if=<absent>
+PASS: matrix excludes only Windows shards 1..7 and Windows aggregator

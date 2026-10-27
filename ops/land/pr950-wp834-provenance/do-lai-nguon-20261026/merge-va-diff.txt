@@ -1,0 +1,17 @@
+# do 2026-10-26: noi dung merge PR #950 = diff PR
+$ git rev-parse 3e973a03b151e37cd402e0a723816eeaa8247193^{tree} 3e973a03b151e37cd402e0a723816eeaa8247193^1 3e973a03b151e37cd402e0a723816eeaa8247193^2
+c34b3096a0d427b57c87db87077253a458db7ebf
+2935dac8b82834b9e75905ddd0756d11aa69734f
+294f0eb7eaae7b142bd6a3e89a18f512c4b819d0
+merge-base(cha1, head) = 9372ecd93bd95350c90dfc75d3f0d014b4f932ed
+$ git diff --numstat 3e973a03b151e37cd402e0a723816eeaa8247193^1 3e973a03b151e37cd402e0a723816eeaa8247193
+181	1	.claude/dev/packet_loop.py
+262	3	.claude/dev/packet_loop_test.py
+4	1	docs/PROTOCOL_DA_PHIEN.md
+$ git diff --numstat 9372ecd93bd95350c90dfc75d3f0d014b4f932ed 294f0eb7eaae7b142bd6a3e89a18f512c4b819d0
+181	1	.claude/dev/packet_loop.py
+262	3	.claude/dev/packet_loop_test.py
+4	1	docs/PROTOCOL_DA_PHIEN.md
+cmp (bo dong index) rc=0
+cmp byte rc=0
+tree merge == tree head: False

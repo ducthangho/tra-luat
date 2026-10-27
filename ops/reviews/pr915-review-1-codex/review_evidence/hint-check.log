@@ -1,0 +1,12 @@
+HINT.patch files=3; paths=['ops/reviews/README.md', 'ops/reviews/pr870-review-2-codex-verdict.receipt.yaml', 'ops/reviews/pr889-review-2-codex-verdict.receipt.yaml']
+patch --dry-run -p0 --fuzz=0 rc=0; 'checking file ops/reviews/README.md\nchecking file ops/reviews/pr870-review-2-codex-verdict.receipt.yaml\nchecking file ops/reviews/pr889-review-2-codex-verdict.receipt.yaml\n'
+patch -p0 --fuzz=0 rc=0
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr3-pr915.iS5d/cay-kho/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/cr3-pr915.iS5d/cay-kho/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi: DAT tren ban sao da ap hint
+t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc: DAT tren ban sao da ap hint
+remove_new_README_caveat pr870-review-2-codex: t27 FAIL; README.md: caveat 'VERDICT-KHAI-SAI-EXECUTION-SURFACE' của pr870-review-2-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr870-review-2-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.
+remove_new_README_caveat pr889-review-2-codex: t27 FAIL; README.md: caveat 'VERDICT-KHAI-SAI-EXECUTION-SURFACE' của pr889-review-2-codex-verdict.receipt.yaml KHÔNG nằm ở CỘT 'id' trên cùng hàng với 'pr889-review-2-codex-verdict.md' ở CỘT 'tệp verdict', trong bảng 'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.
+KET_LUAN: patch hop le; t26/t27 nen xanh; hai dot bien bo canh bao deu do; khong sua hien vat verdict/hash.

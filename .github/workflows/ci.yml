@@ -16,7 +16,22 @@ on:
   # từng chạy lần nào. `workflow_dispatch` cho phép soi gate theo yêu cầu trên BẤT KỲ ref nào, không
   # phải mở PR mới biết. (GitHub đòi workflow có mặt ở nhánh mặc định thì nút này mới dùng được ⇒ chỉ
   # hiệu lực SAU khi bản này lên master.)
+  #
+  # packet #878 (CI-DISPATCH-CHI-WINDOWS): dispatch hầu như luôn được gọi để đo WINDOWS cho một head ĐÃ có lượt PR
+  # Ubuntu, nên phần Ubuntu (250–330 phút/lượt, đo 19→22-10-2026) là lặp. `windows-only` bỏ phần ấy; mặc định
+  # GIỮ hành vi cũ (hai nền). Cùng từ vựng với `launcher-windows.yml` — ghim ở `.claude/dev/ci_dang_ky_test.py`.
+  # Biểu thức `os` của `chuan-bi`: vế đầu chỉ đúng khi dispatch CHỌN `windows-only`; dispatch không input (API cũ)
+  # rơi xuống vế hai như cũ.
   workflow_dispatch:
+    inputs:
+      runner_set:
+        description: "windows-and-ubuntu (mặc định) hoặc windows-only (bỏ các job ma trận Ubuntu)"
+        required: false
+        default: windows-and-ubuntu
+        type: choice
+        options:
+          - windows-and-ubuntu
+          - windows-only
 
 # r245 — CẮT PHÚT ACTIONS. Đo ngày 13-08: gate chạy 6,6 phút tường, nhân hệ số
 # Windows x2 thành ~20 phút TÍNH TIỀN mỗi lượt, x13,6 lượt/ngày = ~8.100 phút/tháng.
@@ -47,7 +62,9 @@ jobs:
     # ngan thoi gian chan tu 360 phut mac dinh xuong day. Tran trong o hai buoc phan loai ben duoi (het gio => roi day_du).
     timeout-minutes: 20
     outputs:
-      os: ${{ (github.event_name == 'workflow_dispatch'
+      os: ${{ (github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')
+              && '["windows-latest"]'
+              || (github.event_name == 'workflow_dispatch'
                || contains(github.event.pull_request.labels.*.name, 'windows'))
               && '["ubuntu-latest","windows-latest"]'
               || '["ubuntu-latest"]' }}
@@ -105,7 +122,7 @@ jobs:
     # công cụ hiện có (`get_job_logs` trả `failed_jobs: 0` vì job bị huỷ không tính là
     # "failed"); quy cho `windows-latest` là SUY LUẬN từ chỗ ubuntu-only về đích.
     # NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang lớn dần là nợ riêng.
-    timeout-minutes: 60
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -494,15 +511,30 @@ jobs:
   # nên chỉ nhiều RUNNER mới rút được thời gian tường. Mỗi mảnh chạy lại ĐÚNG phần thiết lập G5 của `gate` (ca của
   # mảnh cần đủ công cụ, thiếu thì ca đích bị BỎ QUA và bán kính KHÔNG ĐO ĐƯỢC). `loi_g5_workflow`
   # (`.claude/dev/ci_dang_ky_test.py`) ghim hình dạng hai job này; `N` trong `CONG_CU_TEST_MANH` phải khớp matrix.
+  # wp879 (#879): Windows chỉ còn MỘT job (mảnh 0) và `cong_cu_test.py` ở đó chạy ĐỦ ca nền rồi dừng (`nen_bo_qua_dot_bien`)
+  # — 111/118 lượt mảnh Windows không xanh vì lý do của nền (#853), mỗi lượt 570–650 phút. Bán kính đo trên ubuntu-latest.
+  # wp892 (#892): PR chỉ đổi hồ sơ (`che_do == duong_nhanh`, #674) thì 8 mảnh `skipped` (0 phút runner). Chỉ ĐÚNG chuỗi ấy
+  # mới bỏ — rỗng/vắng/lạ ⇒ chạy; push master và `workflow_dispatch` luôn `day_du` ⇒ bán kính đủ trên master không đổi.
   gate-cong-cu:
     needs: chuan-bi
+    if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
         manh: [0, 1, 2, 3, 4, 5, 6, 7]
+        exclude:
+          - {os: windows-latest, manh: 1}
+          - {os: windows-latest, manh: 2}
+          - {os: windows-latest, manh: 3}
+          - {os: windows-latest, manh: 4}
+          - {os: windows-latest, manh: 5}
+          - {os: windows-latest, manh: 6}
+          - {os: windows-latest, manh: 7}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # WP748 r20 (chu kho, PR #849): 45 -> 150. Do run 39304938900 tren 9983615: CA 8 manh Windows bi huy
+    # o dung phut 45 (18:45:15 -> 19:29:33), khong mot assertion nao do; Ubuntu cung dot xong trong 18-32 phut.
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -542,7 +574,9 @@ jobs:
         run: |
           python ops/cong_cu.py kiem-tra --json
           python ops/cong_cu_test.py
-      - uses: actions/upload-artifact@v4
+      # wp879: Windows không ghi tệp mảnh (không đo bán kính) và không có job gom ⇒ không tải gì lên.
+      - if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
         with:
           name: gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}
           path: manh/manh-${{ matrix.manh }}.txt
@@ -552,13 +586,18 @@ jobs:
   # cùng bộ nhận của đường song song, ĐỎ khi thiếu/trùng mảnh, lệch băm/HEAD, lệch tổng. `!cancelled()`: mảnh đỏ thì
   # gom VẪN chạy và ĐỎ vì thiếu mảnh — `needs` mặc định sẽ cho nó `skipped`, mà `skipped` đọc như xanh ở check bắt buộc.
   # Sau land: chủ kho thêm context `gate-cong-cu-gop (ubuntu-latest)` vào ruleset (spec #668 §7).
+  # wp879: gom CHỈ trên ubuntu-latest (Windows không còn mảnh để gom). `os` vẫn lấy từ `chuan-bi` (chốt nguồn duy nhất,
+  # `t161`) và loại `windows-latest`; `if` theo cùng output ⇒ lượt `runner_set=windows-only` (#878) thì job này `skipped`
+  # trước khi ma trận rỗng, không đỏ oan vì "thiếu mảnh 0..7".
   gate-cong-cu-gop:
     needs: [chuan-bi, gate-cong-cu]
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        exclude:
+          - {os: windows-latest}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:
@@ -585,6 +624,9 @@ jobs:
           merge-multiple: true
       - name: G5 gom manh ban kinh dot bien (#668)
         shell: bash
+        # wp892: gom là context BẮT BUỘC — với `duong_nhanh` + 0 mảnh nó in "KHÔNG ĐO" và XANH, không `skipped`.
+        env:
+          CONG_CU_TEST_GOP_CHE_DO: ${{ needs.chuan-bi.outputs.che_do }}
         run: python ops/cong_cu_test.py --gop manh
 
   gate-ops:
@@ -602,7 +644,7 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -689,7 +731,7 @@ jobs:
       #
       # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
       # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
-      # không đáng kể so với trần 25 phút của job.
+      # không đáng kể so với trần job lúc đo (25 phút; #910 pha A, PR #913: `gate-ops` 60 → 150).
       # PyYAML đã được cài ở vùng setup trước G5. GHIM EXACT, không để spec trần.
       # Cross-review PR "#134" (codex) nêu
       # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
@@ -824,6 +866,80 @@ jobs:
         if: ${{ runner.os != 'Linux' && needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         run: python .claude/dev/gate_lifecycle_test.py
 
+  # WP748 r16 — `targeted_mutant_gate` (cổng PR, KHÔNG phải full mutant audit): 52 ca nền + 239 tự đột biến
+  # (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh
+  # ghi biên nhận (head, sha256, rc, mốc giờ, tiến độ, nhật ký có trần, RAM đỉnh, số lần chạy lại). Gom đòi đủ
+  # thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở
+  # `ci-dot-bien-du.yml` trên đúng SHA ứng viên, BẮT BUỘC trước merge/land/release.
+  gate-nhanh-manh:
+    needs: chuan-bi
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh: [0, 1, 2, 3, 4, 5, 6, 7]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        env:
+          NHANH_DON_DUOC_DICH: ${{ matrix.manh }}/8
+          NHANH_DON_DUOC_DICH_RA: manh/manh-${{ matrix.manh }}.json
+        run: python ops/nhanh_don_duoc_test.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gate-nhanh-${{ matrix.os }}-${{ matrix.manh }}
+          path: manh/manh-${{ matrix.manh }}.json
+          if-no-files-found: error
+
+  gate-nhanh-gop:
+    needs: [chuan-bi, gate-nhanh-manh]
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: gate-nhanh-${{ matrix.os }}-*
+          path: manh
+          merge-multiple: true
+      - name: gộp mảnh nhanh_don_duoc (targeted_mutant_gate)
+        run: python ops/nhanh_don_duoc_test.py --gop-dich manh
+
   gate-registry:
     # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
     # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
@@ -835,14 +951,16 @@ jobs:
     # 90 cỡ theo UBUNTU: windows-latest đã chạm trần 60 từ run 35637741169 (trước #593) — 90 KHÔNG đủ Windows.
     # #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 90 → 105 cùng trần một bộ 4500 → 5400 s — số đo và lý do ở
     # `GIAY_TOI_DA_MOT_BO` (.claude/dev/ci_dang_ky_test.py). 105 vẫn cỡ theo UBUNTU, KHÔNG bảo đảm Windows.
-    # Timeout KHÁC `gate`/`gate-packet-loop` (vẫn 60) có chủ đích; tiền tố 9 bước và ma trận vẫn chung.
-    needs: chuan-bi
+    # #910 pha B (PR #917, a7da463): 105 → 150. Trước #910 timeout KHÁC `gate` (60) và `gate-packet-loop` (120) có
+    # chủ đích; #910 (PR #913 + #917) đưa cả ba lên 150. Tiền tố 9 bước và ma trận vẫn chung.
+    needs: [chuan-bi, gate-nhanh-gop]
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 105
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -892,12 +1010,14 @@ jobs:
           CI_DANG_KY_SU_KIEN: ${{ github.event_name }}
           CI_DANG_KY_GOC: ${{ github.event.pull_request.base.sha || github.event.before }}
           CI_DANG_KY_DAU: ${{ github.event.pull_request.head.sha || github.sha }}
+          CI_DANG_KY_DOT_BIEN_MANH: ops/nhanh_don_duoc_test.py
+          CI_DANG_KY_GOP_KQ: ${{ needs.gate-nhanh-gop.result }}
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
   gate-packet-loop:
     # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
     # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
-    # ma trận/`timeout-minutes`/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
+    # ma trận/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
     needs: chuan-bi
@@ -906,7 +1026,9 @@ jobs:
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    # WP856 (chu kho, PR #866): 60 -> 120. Run 39722546630: Ubuntu 40,4 phut (truoc 22,4) sau khi
+    # #856 them ma tran T1-T6; Windows van chay o phut ~46, sat tran 60.
+    timeout-minutes: 150
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

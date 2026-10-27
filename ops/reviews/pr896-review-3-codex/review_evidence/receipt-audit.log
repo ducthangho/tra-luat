@@ -1,0 +1,25 @@
+sha256= a2b588b64535203f9e481240e7f014ae0f34f84b8a776e646b573666e5bd689f receipt= a2b588b64535203f9e481240e7f014ae0f34f84b8a776e646b573666e5bd689f
+bytes= 66095 receipt= 66095
+flat_equals_directory= True
+flat_equals_verdict_cu= True
+header= ['verdict: changes_requested', 'reviewed_sha: 8d56009a09af7b3ef93801df105f9483de212cc7', 'Kết quả: 0 P0, 1 P1, 0 P2, 0 P3.']
+counts= {'so_p0': 0, 'so_p1': 1, 'so_p2': 0, 'so_p3': 0}
+reviewed_sha= 8d56009a09af7b3ef93801df105f9483de212cc7 run_head= 8d56009a09af7b3ef93801df105f9483de212cc7
+tree= e93305541ae7d7f87fa5c57dd610fa1be829b0f7 receipt= e93305541ae7d7f87fa5c57dd610fa1be829b0f7
+base= 50a59a945026a2ab2f97dc0e7ef7b5a540e17652 receipt= 50a59a945026a2ab2f97dc0e7ef7b5a540e17652
+merge21fe565_second_parent= 8d56009a09af7b3ef93801df105f9483de212cc7
+prompt_sha256= 64404d73a93d9f43878adc436e1cbe761a5f930cdf011a793e31b896b166812a run= 64404d73a93d9f43878adc436e1cbe761a5f930cdf011a793e31b896b166812a
+run_summary= {'version': '1.5.0', 'run_id': 'b3269a02045c4e178b1c5c328b671273', 'trang_thai': 'xong', 'ma_thoat': 0, 'thoi_luong_giay': 600.539, 'worktree_sach': True, 'execution_surface': 'codex_cli', 'model_phuc_vu_trang_thai': 'DO_DUOC'}
+timestamp_seconds= 600.539266
+events= 25 unique_response_id= 25 models= {'gpt-6.1-sol': 25} event_types= {'response.created': 25}
+stdout bytes= 254 declared= 254 sha256= 26de49a6a2f8c3874bb5a014df9b545621636a523ae6dda8257e9aa9e29a0f62 declared= 26de49a6a2f8c3874bb5a014df9b545621636a523ae6dda8257e9aa9e29a0f62
+stderr bytes= 78 declared= 78 sha256= 730529f6e0d97fdeb369050e841c7e3258632d374c13577c9ca6db80ad3c6d01 declared= 730529f6e0d97fdeb369050e841c7e3258632d374c13577c9ca6db80ad3c6d01
+evidence_commit= 25e7d1167856c3beea2552f49a6c1ded0a128fdf paths= 108 artifact_only= True other_paths= []
+evidence_blob_equal= True
+OMITTED:
+# Tep KHONG vao kho (>500 KB) cua thu muc bang chung reviewer /tmp/pr896-r2-audit-b3269a02 (chi tep muc 1; thu muc con copy/ = ban sao kho dot bien, khong luu): sha256  byte  ten
+fca16267b398120bdb79a51237f78ea216949039968c1dcedbae6a9b900932ff  1056144  review_evidence/original-snapshot.json
+thu_muc_con_khong_luu: /tmp/pr896-r2-audit-b3269a02/copy
+original-snapshot-present= False copy-present= False
+files= 107 largest= [(73441, 'review_evidence/gate-8.log'), (66095, 'VERDICT.md'), (43775, 'diff-a9bc934.patch')]
+README row_count= 5

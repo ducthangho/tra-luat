@@ -1,0 +1,10 @@
+HEAD=06a50c5feea77c2654f31edd26efeed7eeee62f5
+tree=0fa694daf17e10c37fc3e61690531ade4bd528bf
+is_shallow=false
+core.abbrev=7
+status_with_ignored=''
+snapshot_hashed_files=4843
+provided_diff_matches_exact_SHA=True
+numstat=21	9	CLAUDE.md
+HEAD_message=docs(CLAUDE.md): (c) gioi han 'Windows tren master' vao push tu dong — va P2 cross-review codex
+rc=0

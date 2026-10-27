@@ -54,6 +54,12 @@ PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: 
 Lệnh này không có cờ nới, và không được thêm. Uỷ quyền cho một exact head SHA sống trên GitHub, không
 sống trong ngữ cảnh phiên — đọc §13 để biết cái gì được coi là uỷ quyền hợp lệ.
 
+## Mốc Workflow definition khi phiên không gọi được GraphQL
+
+Phiên Claude Code trên web nhận 403 cho GraphQL, nên `WorkflowRun.file` phải do chủ kho chạy rồi dán output.
+Cú pháp lệnh đưa cho chủ kho và cách đối chiếu: mục *"Lệnh `gh api graphql` đưa cho chủ kho chạy"* của `CLAUDE.md`.
+Đọc mục ấy từ `origin/master` ngay trước khi soạn lệnh — phiên mở từ trước có thể đang giữ bản cũ.
+
 ## Full ref fence và merge evidence
 
 Protocol §5.1/§13.1 quy định phạm vi so sánh. `$SCRATCH` là thư mục ngoài checkout;

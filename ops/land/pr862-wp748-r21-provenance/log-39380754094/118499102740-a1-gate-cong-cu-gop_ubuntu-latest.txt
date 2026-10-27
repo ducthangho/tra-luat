@@ -1,0 +1,749 @@
+﻿2026-10-20T07:01:59.9589013Z Current runner version: '2.337.0'
+2026-10-20T07:01:59.9607615Z ##[group]Runner Image Provisioner
+2026-10-20T07:01:59.9608141Z Hosted Compute Agent
+2026-10-20T07:01:59.9608616Z Version: 20261015.610
+2026-10-20T07:01:59.9609034Z Commit: 267fdb4e8bbec4ab5ea31367f3a00d5c480c7656
+2026-10-20T07:01:59.9609512Z Build Date: 2026-10-14T17:06:54Z
+2026-10-20T07:01:59.9609927Z Worker ID: {701c1ceb-b841-4233-9f8b-24b106c02cdb}
+2026-10-20T07:01:59.9610342Z Region: centralus
+2026-10-20T07:01:59.9610760Z Cloud: Azure
+2026-10-20T07:01:59.9611096Z ##[endgroup]
+2026-10-20T07:01:59.9611934Z ##[group]Operating System
+2026-10-20T07:01:59.9612321Z Ubuntu
+2026-10-20T07:01:59.9612643Z 24.04.5
+2026-10-20T07:01:59.9613030Z LTS
+2026-10-20T07:01:59.9613381Z ##[endgroup]
+2026-10-20T07:01:59.9614298Z ##[group]Runner Image
+2026-10-20T07:01:59.9614677Z Image: ubuntu-24.04
+2026-10-20T07:01:59.9615023Z Version: 20261018.339.1
+2026-10-20T07:01:59.9615870Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261018.339/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-20T07:01:59.9616769Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261018.339
+2026-10-20T07:01:59.9617396Z ##[endgroup]
+2026-10-20T07:01:59.9619174Z ##[group]GITHUB_TOKEN Permissions
+2026-10-20T07:01:59.9620593Z Actions: write
+2026-10-20T07:01:59.9620970Z ArtifactMetadata: write
+2026-10-20T07:01:59.9621406Z Attestations: write
+2026-10-20T07:01:59.9621757Z Checks: write
+2026-10-20T07:01:59.9622151Z CodeQuality: write
+2026-10-20T07:01:59.9622514Z Contents: write
+2026-10-20T07:01:59.9622860Z CopilotRequests: write
+2026-10-20T07:01:59.9623251Z Deployments: write
+2026-10-20T07:01:59.9623782Z Discussions: write
+2026-10-20T07:01:59.9624142Z Drives: write
+2026-10-20T07:01:59.9624514Z Issues: write
+2026-10-20T07:01:59.9624921Z Metadata: read
+2026-10-20T07:01:59.9625285Z Models: read
+2026-10-20T07:01:59.9625617Z Packages: write
+2026-10-20T07:01:59.9625974Z Pages: write
+2026-10-20T07:01:59.9626359Z PullRequests: write
+2026-10-20T07:01:59.9626723Z RepositoryProjects: write
+2026-10-20T07:01:59.9627114Z SecurityEvents: write
+2026-10-20T07:01:59.9627479Z Statuses: write
+2026-10-20T07:01:59.9627857Z VulnerabilityAlerts: read
+2026-10-20T07:01:59.9628282Z ##[endgroup]
+2026-10-20T07:01:59.9629586Z Secret source: Actions
+2026-10-20T07:01:59.9630169Z Cache mode: write
+2026-10-20T07:01:59.9630616Z Prepare workflow directory
+2026-10-20T07:02:00.0061022Z Prepare all required actions
+2026-10-20T07:02:00.0095911Z Getting action download info
+2026-10-20T07:02:00.2688070Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-20T07:02:01.0660850Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-20T07:02:01.7777442Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-20T07:02:02.3423645Z Complete job name: gate-cong-cu-gop (ubuntu-latest)
+2026-10-20T07:02:02.3791121Z ##[group]Run git config --global core.autocrlf false
+2026-10-20T07:02:02.3791446Z [36;1mgit config --global core.autocrlf false[0m
+2026-10-20T07:02:02.3791656Z [36;1mgit config --global core.eol lf[0m
+2026-10-20T07:02:02.3791847Z [36;1mgit config --global core.abbrev 7[0m
+2026-10-20T07:02:02.4228796Z shell: /usr/bin/bash -e {0}
+2026-10-20T07:02:02.4229114Z env:
+2026-10-20T07:02:02.4229266Z   PYTHONIOENCODING: utf-8
+2026-10-20T07:02:02.4229431Z   PYTHONUTF8: 1
+2026-10-20T07:02:02.4229584Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T07:02:02.4229756Z ##[endgroup]
+2026-10-20T07:02:02.4577479Z ##[group]Run actions/checkout@v4
+2026-10-20T07:02:02.4577693Z with:
+2026-10-20T07:02:02.4577859Z   repository: ducthangho/tra-luat
+2026-10-20T07:02:02.4579186Z   token: ***
+2026-10-20T07:02:02.4579326Z   ssh-strict: true
+2026-10-20T07:02:02.4579469Z   ssh-user: git
+2026-10-20T07:02:02.4579622Z   persist-credentials: true
+2026-10-20T07:02:02.4579781Z   clean: true
+2026-10-20T07:02:02.4579933Z   sparse-checkout-cone-mode: true
+2026-10-20T07:02:02.4580100Z   fetch-depth: 1
+2026-10-20T07:02:02.4580426Z   fetch-tags: false
+2026-10-20T07:02:02.4580572Z   show-progress: true
+2026-10-20T07:02:02.4580722Z   lfs: false
+2026-10-20T07:02:02.4580856Z   submodules: false
+2026-10-20T07:02:02.4581003Z   set-safe-directory: true
+2026-10-20T07:02:02.4581169Z   allow-unsafe-pr-checkout: false
+2026-10-20T07:02:02.4581361Z env:
+2026-10-20T07:02:02.4581516Z   PYTHONIOENCODING: utf-8
+2026-10-20T07:02:02.4581671Z   PYTHONUTF8: 1
+2026-10-20T07:02:02.4581818Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T07:02:02.4582000Z ##[endgroup]
+2026-10-20T07:02:02.5327673Z Syncing repository: ducthangho/tra-luat
+2026-10-20T07:02:02.5329016Z ##[group]Getting Git version info
+2026-10-20T07:02:02.5329385Z Working directory is '/home/runner/work/tra-luat/tra-luat'
+2026-10-20T07:02:02.5329908Z [command]/usr/bin/git version
+2026-10-20T07:02:02.5370945Z git version 2.55.0
+2026-10-20T07:02:02.5393373Z ##[endgroup]
+2026-10-20T07:02:02.5398888Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/68cddded-3913-483f-843b-b873d6f66e76/.gitconfig'
+2026-10-20T07:02:02.5423966Z Temporarily overriding HOME='/home/runner/work/_temp/68cddded-3913-483f-843b-b873d6f66e76' before making global git config changes
+2026-10-20T07:02:02.5430721Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T07:02:02.5431711Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-10-20T07:02:02.5481180Z Deleting the contents of '/home/runner/work/tra-luat/tra-luat'
+2026-10-20T07:02:02.5482141Z ##[group]Initializing the repository
+2026-10-20T07:02:02.5482673Z [command]/usr/bin/git init /home/runner/work/tra-luat/tra-luat
+2026-10-20T07:02:02.5597128Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-20T07:02:02.5614237Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-20T07:02:02.5614925Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-20T07:02:02.5642665Z hint: call:
+2026-10-20T07:02:02.5643094Z hint:
+2026-10-20T07:02:02.5644701Z hint: 	git config --global init.defaultBranch <name>
+2026-10-20T07:02:02.5645052Z hint:
+2026-10-20T07:02:02.5645482Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-20T07:02:02.5646051Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-20T07:02:02.5646856Z hint:
+2026-10-20T07:02:02.5647152Z hint: 	git branch -m <name>
+2026-10-20T07:02:02.5647508Z hint:
+2026-10-20T07:02:02.5647926Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-20T07:02:02.5649077Z Initialized empty Git repository in /home/runner/work/tra-luat/tra-luat/.git/
+2026-10-20T07:02:02.5650412Z [command]/usr/bin/git remote add origin https://github.com/ducthangho/tra-luat
+2026-10-20T07:02:02.5704900Z ##[endgroup]
+2026-10-20T07:02:02.5709057Z ##[group]Disabling automatic garbage collection
+2026-10-20T07:02:02.5709757Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-20T07:02:02.5745480Z ##[endgroup]
+2026-10-20T07:02:02.5746025Z ##[group]Setting up auth
+2026-10-20T07:02:02.5755181Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T07:02:02.5806162Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T07:02:02.6189990Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T07:02:02.6232760Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T07:02:02.6443765Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T07:02:02.6479692Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T07:02:02.6683193Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-20T07:02:02.6727490Z ##[endgroup]
+2026-10-20T07:02:02.6728333Z ##[group]Fetching the repository
+2026-10-20T07:02:02.6734001Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +401d4f15362b3270d5dc8437ade3be5ab449eb22:refs/remotes/origin/master
+2026-10-20T07:02:04.9148324Z From https://github.com/ducthangho/tra-luat
+2026-10-20T07:02:04.9148808Z  * [new ref]         401d4f15362b3270d5dc8437ade3be5ab449eb22 -> origin/master
+2026-10-20T07:02:04.9150019Z ##[endgroup]
+2026-10-20T07:02:04.9150324Z ##[group]Determining the checkout info
+2026-10-20T07:02:04.9150664Z ##[endgroup]
+2026-10-20T07:02:04.9150870Z [command]/usr/bin/git sparse-checkout disable
+2026-10-20T07:02:04.9237714Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-20T07:02:04.9281019Z ##[group]Checking out the ref
+2026-10-20T07:02:04.9281883Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-10-20T07:02:05.3424520Z Reset branch 'master'
+2026-10-20T07:02:05.3437239Z branch 'master' set up to track 'origin/master'.
+2026-10-20T07:02:05.3469055Z ##[endgroup]
+2026-10-20T07:02:05.3539763Z [command]/usr/bin/git log -1 --format=%H
+2026-10-20T07:02:05.3571751Z 401d4f15362b3270d5dc8437ade3be5ab449eb22
+2026-10-20T07:02:05.3918562Z ##[group]Run actions/setup-python@v5
+2026-10-20T07:02:05.3918732Z with:
+2026-10-20T07:02:05.3918844Z   python-version: 3.12
+2026-10-20T07:02:05.3918966Z   check-latest: false
+2026-10-20T07:02:05.3920239Z   token: ***
+2026-10-20T07:02:05.3920357Z   update-environment: true
+2026-10-20T07:02:05.3920490Z   allow-prereleases: false
+2026-10-20T07:02:05.3920626Z   freethreaded: false
+2026-10-20T07:02:05.3920745Z env:
+2026-10-20T07:02:05.3920855Z   PYTHONIOENCODING: utf-8
+2026-10-20T07:02:05.3920980Z   PYTHONUTF8: 1
+2026-10-20T07:02:05.3921120Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T07:02:05.3921253Z ##[endgroup]
+2026-10-20T07:02:05.4809092Z ##[group]Installed versions
+2026-10-20T07:02:05.4874204Z (node:2005) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T07:02:05.4874964Z Successfully set up CPython (3.12.15)
+2026-10-20T07:02:05.4875627Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T07:02:05.4876212Z ##[endgroup]
+2026-10-20T07:02:05.5801417Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-10-20T07:02:05.5801895Z [36;1mpython -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0[0m
+2026-10-20T07:02:05.5858122Z shell: /usr/bin/bash -e {0}
+2026-10-20T07:02:05.5858270Z env:
+2026-10-20T07:02:05.5858385Z   PYTHONIOENCODING: utf-8
+2026-10-20T07:02:05.5858511Z   PYTHONUTF8: 1
+2026-10-20T07:02:05.5858628Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T07:02:05.5858796Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:05.5859057Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T07:02:05.5859278Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:05.5859480Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:05.5859685Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:05.5859894Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T07:02:05.5860112Z ##[endgroup]
+2026-10-20T07:02:10.5597599Z ##[group]Run actions/download-artifact@v4
+2026-10-20T07:02:10.5597843Z with:
+2026-10-20T07:02:10.5598039Z   pattern: gate-cong-cu-manh-ubuntu-latest-*
+2026-10-20T07:02:10.5598278Z   path: manh
+2026-10-20T07:02:10.5598435Z   merge-multiple: true
+2026-10-20T07:02:10.5598627Z   repository: ducthangho/tra-luat
+2026-10-20T07:02:10.5598837Z   run-id: 39380754094
+2026-10-20T07:02:10.5599003Z env:
+2026-10-20T07:02:10.5599162Z   PYTHONIOENCODING: utf-8
+2026-10-20T07:02:10.5599501Z   PYTHONUTF8: 1
+2026-10-20T07:02:10.5599676Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T07:02:10.5599920Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:10.5600261Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T07:02:10.5600597Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:10.5600901Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:10.5601272Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:10.5601583Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T07:02:10.5601845Z ##[endgroup]
+2026-10-20T07:02:10.6711086Z (node:2036) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T07:02:10.6714293Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T07:02:10.8518515Z Found 17 artifact(s)
+2026-10-20T07:02:10.8519364Z Filtering artifacts by pattern 'gate-cong-cu-manh-ubuntu-latest-*'
+2026-10-20T07:02:10.8533282Z Preparing to download the following artifacts:
+2026-10-20T07:02:10.8534289Z - gate-cong-cu-manh-ubuntu-latest-1 (ID: 12246712370, Size: 25974, Expected Digest: sha256:fb8622aa15f35024f5e16cbec362ddf58601408f0b4e1bd5c36d0bd8f334392a)
+2026-10-20T07:02:10.8535465Z - gate-cong-cu-manh-ubuntu-latest-3 (ID: 12246627844, Size: 16304, Expected Digest: sha256:d6a1648f78d6599466f512dc850d8413890af81d99f632e8b811ef1a49d344f2)
+2026-10-20T07:02:10.8536612Z - gate-cong-cu-manh-ubuntu-latest-0 (ID: 12246622870, Size: 22741, Expected Digest: sha256:28b9ffbfdc739c751a15effe0b91dd52345e00d92408aaab83b6503900198a13)
+2026-10-20T07:02:10.8538293Z - gate-cong-cu-manh-ubuntu-latest-2 (ID: 12246516984, Size: 15931, Expected Digest: sha256:c89bef654e13665ce50404338c167ec85de87d7138439c16984ede06991fcce1)
+2026-10-20T07:02:10.8540339Z - gate-cong-cu-manh-ubuntu-latest-5 (ID: 12246378218, Size: 24894, Expected Digest: sha256:0b947d7699d864ca12f1b99baf0e945146994c220cd487a40304c3ea6730c699)
+2026-10-20T07:02:10.8541648Z - gate-cong-cu-manh-ubuntu-latest-7 (ID: 12246325677, Size: 29674, Expected Digest: sha256:edf9ca7f6ef62f2e5924707fdbee852f69113590806f4f9059cbeb1ff4849701)
+2026-10-20T07:02:10.8543223Z - gate-cong-cu-manh-ubuntu-latest-4 (ID: 12246323366, Size: 23399, Expected Digest: sha256:8a808edc69c4dad1e56e6cc4c57e64080bce233f95cc6c771de543247a260462)
+2026-10-20T07:02:10.8544535Z - gate-cong-cu-manh-ubuntu-latest-6 (ID: 12246081829, Size: 15215, Expected Digest: sha256:7cbee9b1efdacfedf230b8360478c373c1606fb13bd6e9f5bcf06001db49e96a)
+2026-10-20T07:02:11.0322152Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-06a2c65d-b4f1-5fec-9ee7-2903ba8674da/artifacts/3d022acbd15cb83fedb218c3c6a4c6616ceebddadbde9cf9c785334943094ce4.zip
+2026-10-20T07:02:11.0325013Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.0744241Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-6c9de445-40f4-5c2b-ae74-533bfe150291/artifacts/5a22a1bc5caafbf365963f97e63e47fb6fd47621d6e9ec07d310a2ccb32fe0ea.zip
+2026-10-20T07:02:11.0745439Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.0831084Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-f7245717-7308-5535-9342-4a5bfd2e8b4c/artifacts/b8ca8811e5abf826fb52f4332402b73cdf1b524304d52a0aea1040966ef5c6c8.zip
+2026-10-20T07:02:11.0832236Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.0915118Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-7aaad773-d7c3-5d79-b9f7-0891a7146601/artifacts/2fb8631f33e7b67e7b8f22eba996df19a06b95e746c6d198cb323e94f300605a.zip
+2026-10-20T07:02:11.0917036Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.0931650Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-8129e705-1521-55c6-84f0-4b462a4a9a48/artifacts/9117884e72dca4691e49cdac5e0ffb9ffb7dfdda7c415851b737296bf5b49cda.zip
+2026-10-20T07:02:11.0932839Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.0977276Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-b8bc01b6-9bb8-5a6c-9436-ed89e44bb3f1/artifacts/a6e44ee28fd30674f0cc7e9e2d954b1429124acfdd392c91a98993dd838e916f.zip
+2026-10-20T07:02:11.0978456Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.1065179Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-5105155c-2e89-56e9-b873-03dfae5998ef/artifacts/dcab4f6803a352f4917a01a2e26c1c7fc12d8254fab1ce70e3c0e2d4e755962e.zip
+2026-10-20T07:02:11.1066476Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.1350848Z Redirecting to blob download url: https://productionresultssa16.blob.core.windows.net/actions-results/b6514317-048e-80a6-9968-462e6cc0d2c2/workflow-job-run-ae4da564-395e-5be7-9c9d-fa1f1594af54/artifacts/bdc0ab0004a25bb8c5b7da0b237f305644a1bbb00896ac9fe4964cf8d3fddf9f.zip
+2026-10-20T07:02:11.1356347Z Starting download of artifact to: /home/runner/work/tra-luat/tra-luat/manh
+2026-10-20T07:02:11.1904076Z (node:2036) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-20T07:02:11.2198909Z SHA256 digest of downloaded artifact is fb8622aa15f35024f5e16cbec362ddf58601408f0b4e1bd5c36d0bd8f334392a
+2026-10-20T07:02:11.2199432Z Artifact download completed successfully.
+2026-10-20T07:02:11.2288258Z SHA256 digest of downloaded artifact is d6a1648f78d6599466f512dc850d8413890af81d99f632e8b811ef1a49d344f2
+2026-10-20T07:02:11.2288720Z Artifact download completed successfully.
+2026-10-20T07:02:11.2498324Z SHA256 digest of downloaded artifact is 0b947d7699d864ca12f1b99baf0e945146994c220cd487a40304c3ea6730c699
+2026-10-20T07:02:11.2498822Z Artifact download completed successfully.
+2026-10-20T07:02:11.2525404Z SHA256 digest of downloaded artifact is 28b9ffbfdc739c751a15effe0b91dd52345e00d92408aaab83b6503900198a13
+2026-10-20T07:02:11.2525866Z Artifact download completed successfully.
+2026-10-20T07:02:11.2673065Z SHA256 digest of downloaded artifact is 7cbee9b1efdacfedf230b8360478c373c1606fb13bd6e9f5bcf06001db49e96a
+2026-10-20T07:02:11.2673872Z Artifact download completed successfully.
+2026-10-20T07:02:11.2743372Z SHA256 digest of downloaded artifact is edf9ca7f6ef62f2e5924707fdbee852f69113590806f4f9059cbeb1ff4849701
+2026-10-20T07:02:11.2744031Z Artifact download completed successfully.
+2026-10-20T07:02:11.2808501Z SHA256 digest of downloaded artifact is c89bef654e13665ce50404338c167ec85de87d7138439c16984ede06991fcce1
+2026-10-20T07:02:11.2808977Z Artifact download completed successfully.
+2026-10-20T07:02:11.3129858Z SHA256 digest of downloaded artifact is 8a808edc69c4dad1e56e6cc4c57e64080bce233f95cc6c771de543247a260462
+2026-10-20T07:02:11.3130737Z Artifact download completed successfully.
+2026-10-20T07:02:11.3131045Z Total of 8 artifact(s) downloaded
+2026-10-20T07:02:11.3150508Z Download artifact has finished successfully
+2026-10-20T07:02:11.5148850Z ##[group]Run python ops/cong_cu_test.py --gop manh
+2026-10-20T07:02:11.5149242Z [36;1mpython ops/cong_cu_test.py --gop manh[0m
+2026-10-20T07:02:11.5196242Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-20T07:02:11.5196454Z env:
+2026-10-20T07:02:11.5196779Z   PYTHONIOENCODING: utf-8
+2026-10-20T07:02:11.5196936Z   PYTHONUTF8: 1
+2026-10-20T07:02:11.5197084Z   PYTHONDONTWRITEBYTECODE: 1
+2026-10-20T07:02:11.5197287Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:11.5197550Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-20T07:02:11.5197808Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:11.5198044Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:11.5198284Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-20T07:02:11.5198524Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-20T07:02:11.5198765Z ##[endgroup]
+2026-10-20T07:02:11.8611618Z /home/runner/work/tra-luat/tra-luat/ops/lease_publish_test.py:2961: SyntaxWarning: invalid escape sequence '\s'
+2026-10-20T07:02:11.8612952Z   2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+2026-10-20T07:02:11.8811521Z /home/runner/work/tra-luat/tra-luat/ops/lease_publish_test.py:5104: SyntaxWarning: invalid escape sequence '\d'
+2026-10-20T07:02:11.8812727Z   KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+2026-10-20T07:02:12.0258283Z GOM MẢNH 8/8
+2026-10-20T07:02:12.0258939Z BÁN KÍNH ĐỘT BIẾN (470 đột biến, mỗi ca đúng một; 8 mảnh):
+2026-10-20T07:02:12.0259789Z   ok  t1_rc_gop → giết đúng 't1_thieu_bat_buoc_khac_ma_voi_do' · bán kính 1/61
+2026-10-20T07:02:12.0260555Z   ok  t2_go_canary → giết đúng 't2_canary_thieu_shellcheck_phai_SUY_GIAM' · bán kính 1/61
+2026-10-20T07:02:12.0261279Z   ok  t3_bao_dong_gia → giết đúng 't3_du_cong_cu_dung_ban_khong_canh_bao_thua' · bán kính 1/61
+2026-10-20T07:02:12.0262113Z   ok  t4_mat_ban_mong_doi → giết đúng 't4_sai_ban_phai_neu_ro_ban_mong_doi_va_ban_thay' · bán kính 1/61
+2026-10-20T07:02:12.0262881Z   ok  t5_thoat_som → giết đúng 't5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH' · bán kính 1/61
+2026-10-20T07:02:12.0263737Z   ok  t6_day_g5_sau_py_compile → giết đúng 't6_ci_kiem_ban_ke_truoc_moi_test_nang' · bán kính 1/61
+2026-10-20T07:02:12.0264502Z   ok  t7_bo_luat_2_duong → giết đúng 't7_hai_duong_goi_khac_ban_phai_bao_khong_im' · bán kính 1/61
+2026-10-20T07:02:12.0265212Z   ok  t8_mat_field_ten → giết đúng 't8_van_tay_cong_cu_co_trong_ho_so' · bán kính 1/61
+2026-10-20T07:02:12.0265931Z   ok  t9_bo_kiem_rc → giết đúng 't9_probe_rc_phai_hop_le_ke_ca_khong_ghim_va_mixed' · bán kính 1/61
+2026-10-20T07:02:12.0266712Z   ok  t10_cho_parse_rong_va_cat_tien_to → giết đúng 't10_probe_phai_parse_va_bat_tron_token' · bán kính 1/61
+2026-10-20T07:02:12.0267510Z   ok  t11_cho_ban_ghim_rong → giết đúng 't11_ban_ghim_rong_bi_tu_choi_nhung_null_hop_le' · bán kính 1/61
+2026-10-20T07:02:12.0268304Z   ok  t12_mac_dinh_advisory → giết đúng 't12_vang_chinh_sach_canary_mac_dinh_blocking' · bán kính 1/61
+2026-10-20T07:02:12.0269579Z   ok  t13_mat_requiredness_khi_tool_bien_mat → giết đúng 't13_actionlint_bien_mat_giua_probe_va_canary' · bán kính 1/61
+2026-10-20T07:02:12.0270515Z   ok  t14_advisory_keo_tong → giết đúng 't14_advisory_giu_trang_thai_that_nhung_khong_keo_tong' · bán kính 1/61
+2026-10-20T07:02:12.0271403Z   ok  t15_blocking_bat_oan → giết đúng 't15_blocking_du_cong_cu_phai_DAT_khong_bat_oan' · bán kính 1/61
+2026-10-20T07:02:12.0272247Z   ok  t21_git_regex_cat_hau_to → giết đúng 't21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron' · bán kính 1/61
+2026-10-20T07:02:12.0273177Z   ok  t22_lay_lai_loc_theo_ten → giết đúng 't22_bash_windows_quyet_bang_NANG_LUC_chu_khong_bang_DUONG_DAN' · bán kính 1/61
+2026-10-20T07:02:12.0291807Z   ok  t30_go_fail_close_bo_giai → giết đúng 't30_cay_tam_mang_cong_cu_phai_mang_ca_BO_GIAI' · bán kính 1/61
+2026-10-20T07:02:12.0294564Z   ok  t31_tien_kiem_nuot_moi_loi → giết đúng 't31_tien_kiem_KHONG_DO_DUOC_khong_duoc_giet_ca_suite' · bán kính 1/61
+2026-10-20T07:02:12.0295595Z   ok  t32_bo_nhan_dong_ho_nhay → giết đúng 't32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia' · bán kính 1/61
+2026-10-20T07:02:12.0296489Z   ok  t32_noi_ra_moi_timeout → giết đúng 't32_dong_ho_nhay_la_KHONG_DO_DUOC_chu_khong_phai_tin_dung_gia' · bán kính 1/61
+2026-10-20T07:02:12.0297460Z   ok  t33_bo_bash_exe → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0298198Z   ok  t33_bo_doi_so_keyword → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0298969Z   ok  t35_thu_pham_vi_ve_ops → giết đúng 't35_cong_phai_quet_TOAN_CAY_chu_khong_chi_ops' · bán kính 1/61
+2026-10-20T07:02:12.0299780Z   ok  t23_bo_cat_CR_ten_cong_cu → giết đúng 't23_batch_chiu_duoc_stdout_CRLF_cua_python_windows' · bán kính 1/61
+2026-10-20T07:02:12.0300552Z   ok  t24_sai_pham_vi → giết đúng 't24_pham_vi_mot_cong_cu_va_toan_bo' · bán kính 1/61
+2026-10-20T07:02:12.0301287Z   ok  t24a_mot_cong_cu_ghi_chu_rong → giết đúng 't24_pham_vi_mot_cong_cu_va_toan_bo' · bán kính 1/61
+2026-10-20T07:02:12.0302066Z   ok  t24b_mot_cong_cu_ghi_chu_sai_su_that → giết đúng 't24_pham_vi_mot_cong_cu_va_toan_bo' · bán kính 1/61
+2026-10-20T07:02:12.0302856Z   ok  t24c_toan_bo_ghi_chu_rong → giết đúng 't24_pham_vi_mot_cong_cu_va_toan_bo' · bán kính 1/61
+2026-10-20T07:02:12.0303697Z   ok  bn_bo_kiem_argv0 → giết đúng 't23_bash_nen_tu_choi_bash_nuot_argv' · bán kính 1/61
+2026-10-20T07:02:12.0304451Z   ok  bn_bo_kiem_so_doi_so → giết đúng 't23_bash_nen_tu_choi_bash_nuot_argv' · bán kính 1/61
+2026-10-20T07:02:12.0305206Z   ok  bn_bo_kiem_doi_so_1 → giết đúng 't23_bash_nen_tu_choi_bash_nuot_argv' · bán kính 1/61
+2026-10-20T07:02:12.0306013Z   ok  bn_bo_kiem_mo_tep → giết đúng 't24_bash_nen_tu_choi_bash_khong_mo_duoc_duong_dan_ban_dia' · bán kính 1/61
+2026-10-20T07:02:12.0306774Z   ok  bn_cong_cho_qua_moi_noi → giết đúng 't25_cong_chan_loi_goi_bash_tran_MOI' · bán kính 1/61
+2026-10-20T07:02:12.0307523Z   ok  bn_ratchet_mot_chieu → giết đúng 't26_ratchet_phai_NGAN_di_chu_khong_muc_ra' · bán kính 1/61
+2026-10-20T07:02:12.0308332Z   ok  bn_bo_han_treo → giết đúng 't28_bash_nen_tu_choi_bash_TREO_trong_han' · bán kính 1/61
+2026-10-20T07:02:12.0309152Z   ok  bn_ban_kinh_giau_ly_do → giết đúng 't29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan' · bán kính 1/61
+2026-10-20T07:02:12.0309997Z   ok  bn_ban_kinh_gia_ve_som → giết đúng 't29_ban_kinh_qua_RONG_phai_neu_LY_DO_tung_ca_oan' · bán kính 1/61
+2026-10-20T07:02:12.0310821Z   ok  bn_ratchet_tha_ca_tep → giết đúng 't36_ratchet_dem_SO_LAN_chu_khong_tha_ca_tep' · bán kính 1/61
+2026-10-20T07:02:12.0311665Z   ok  bn_han_ngach_0_bi_bo_qua → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0312577Z   ok  bn_muc_chuoi_trong_ratchet_that → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0313648Z   ok  bn_quet_thang_bo_qua_INDEX → giết đúng 't37_danh_sach_tep_la_INDEX_da_add_thi_quet_chua_add_thi_KHONG' · bán kính 1/61
+2026-10-20T07:02:12.0314619Z   ok  bn_ten_phan_biet_hoa_thuong → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0315492Z   ok  bn_cho_phep_vo_han → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0316384Z   ok  bn_dem_theo_DONG → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0317261Z   ok  bn_nghe_lai_luat_ignore → giết đúng 't43_khong_luat_ignore_nao_doi_duoc_danh_sach_tep' · bán kính 1/61
+2026-10-20T07:02:12.0318112Z   ok  bn_bo_executable_kw → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0318936Z   ok  bn_executable_cong_them → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0319906Z   ok  bn_bo_chuoi_tran → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0320688Z   ok  bn_import_ro_ri_qua_pham_vi → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0321536Z   ok  bn_ten_bi_che_khong_chan → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0322534Z   ok  bn_import_tuong_doi_la_stdlib → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0323573Z   ok  bn_import_module_con_bo_sot → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0324461Z   ok  bn_git_hong_lui_ve_rglob → giết đúng 't44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob' · bán kính 1/61
+2026-10-20T07:02:12.0325301Z   ok  bn_bo_walrus_luc_dinh_nghia → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0326108Z   ok  bn_bo_type_params → giết đúng 't50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc' · bán kính 1/61
+2026-10-20T07:02:12.0327011Z   ok  bn_giai_ma_hong_thanh_traceback → giết đúng 't47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet' · bán kính 1/61
+2026-10-20T07:02:12.0327901Z   ok  bn_ngay_go_chi_la_chu → giết đúng 't49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC' · bán kính 1/61
+2026-10-20T07:02:12.0328696Z   ok  bn_khong_gap_f_string → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0329462Z   ok  bn_loc_re_bo_join → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0330157Z   ok  bn_bo_pty → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0330913Z   ok  bn_chu_thich_luu_khong_quet → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0331714Z   ok  bn_chu_thich_cuc_bo_van_quet → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0332787Z   ok  bn_ghi_de_ten_tran_khong_giai → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0333839Z   ok  bn_dong_cung_khong_kiem_hinh_dang → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0334771Z   ok  bn_oid_khong_kiem_hex → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0335589Z   ok  bn_khong_gap_vo_boc → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0336342Z   ok  bn_str_bi_che_van_gap → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0337086Z   ok  bn_dict_khong_la_argv → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0337811Z   ok  bn_bo_bang_api → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0338590Z   ok  bn_api_bo_kieu_nhan → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0339352Z   ok  bn_api_vi_tri_luon_dau → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0340141Z   ok  bn_path_rong_bo_qua → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0340941Z   ok  bn_quota_ep_kieu → giết đúng 't40_moi_MIEN_TRU_deu_mang_HAN_NGACH_va_dem_theo_LOI_GOI' · bán kính 1/61
+2026-10-20T07:02:12.0341708Z   ok  bn_tai_qua_tran_im → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0342444Z   ok  bn_giai_dong_co_tran → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0343205Z   ok  bn_phan_tram_sao_tong_moi_so → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0344301Z   ok  bn_chinh_xac_chuoi_van_tinh → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0345220Z   ok  bn_tai_exec_co_khong → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0345966Z   ok  bn_giai_dong_quet_lai → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0346679Z   ok  bn_kieu_b_thieu → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0347400Z   ok  bn_phu_thuoc_moi_bang → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0348284Z   ok  bn_eval_khong_phu_thuoc → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0349070Z   ok  bn_tra_duong_goc → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0349863Z   ok  bn_khong_han_tong → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0350686Z   ok  bn_han_tong_theo_ung_vien → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0351503Z   ok  bn_eval_moi_thuoc_tinh → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0352282Z   ok  bn_phu_thuoc_dai_dien → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0353090Z   ok  bn_chinh_xac_am_tinh → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0353940Z   ok  bn_phu_thuoc_luat_rieng → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0354706Z   ok  bn_khoa_dung_o_ngoac_dau → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0355463Z   ok  bn_khoa_khong_khep_nem → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0356253Z   ok  bn_g_khong_thang_van_tinh → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0357043Z   ok  bn_asyncio_bo_executable → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0357879Z   ok  bn_rglob_nuot_loi_doc → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0358727Z   ok  bn_quet_bo_rglob_hong → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0359544Z   ok  bn_bo_phep_tinh_nang_bash → giết đúng 't23_bash_nen_tu_choi_bash_nuot_argv' · bán kính 1/61
+2026-10-20T07:02:12.0360392Z   ok  bn_khong_git_bo_kiem_oid → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0361235Z   ok  bn_khong_tran_tep → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0362038Z   ok  bn_khong_tran_tong → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0362890Z   ok  bn_git_khong_kiem_tran → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0363878Z   ok  bn_khong_git_khong_kiem_tran → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0364738Z   ok  bn_git_khong_tran_so_muc → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0365550Z   ok  bn_git_giu_moi_ban_ghi → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0366408Z   ok  bn_khong_git_khong_tran_so_muc → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0367271Z   ok  bn_khong_git_khong_tran_duyet → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0368207Z   ok  bn_vuot_tran_nuot_thanh_danh_sach → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0369037Z   ok  bn_ban_ghi_theo_toa_do → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0369994Z   ok  ct_gan_mot_tang → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0370822Z   ok  ct_bo_dk_sao_sao → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0371638Z   ok  bn_chu_thich_dai_im → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0372435Z   ok  ct_bo_tu_khoa_dk → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0373385Z   ok  bn_rglob_bo_symlink_tep → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0374330Z   ok  bn_rglob_bo_symlink_thu_muc → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0375143Z   ok  bn_rglob_hoi_dich → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0375928Z   ok  bn_chu_thich_chuoi_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0376709Z   ok  bn_chu_thich_chuoi_loc_re → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0377494Z   ok  bn_trung_qua_sao_sao_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0378296Z   ok  bn_eval_khong_bo_khoang_trang → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0379155Z   ok  ct_mien_tru_quet_truc_tiep_bo → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0380000Z   ok  bn_cache_dung_lai → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0380796Z   ok  bn_join_ngan_sach_sau → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0381556Z   ok  bn_trung_doi_so_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0382288Z   ok  bn_eval_che_do_exec → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0383068Z   ok  bn_chu_thich_hoan_khong_hop → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0383947Z   ok  ct_mien_tru_ca_cay → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0384768Z   ok  bn_noi_ngan_sach_sau → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0385512Z   ok  bn_gap_het_sau_im → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0386276Z   ok  bn_noi_khong_phang → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0387004Z   ok  bn_loc_re_het_sau → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0387682Z   ok  bn_trai_dict_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0388380Z   ok  bn_trai_set_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0389244Z   ok  bn_nap_dong_bo_tu_khoa → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0389961Z   ok  bn_callee_tinh_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0390700Z   ok  bn_tai_exec_bo_callee_tinh → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0391555Z   ok  bn_nap_dong_khong_giai → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0392295Z   ok  bn_nap_dong_chi_cu_phap → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0393029Z   ok  bn_gan_chi_dich_cuoi → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0393848Z   ok  bn_gan_bo_chu_thich → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0394593Z   ok  bn_eval_khong_tra_module → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0395345Z   ok  bn_bo_importlib_import → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0396074Z   ok  bn_exec_bo_builtins → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0396941Z   ok  bn_tai_khong_gap → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0397693Z   ok  bn_tai_bo_bytes → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0398394Z   ok  bn_mo_dau_cu_phap → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0399097Z   ok  bn_tai_hong_nuot → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0399797Z   ok  bn_exec_long_im → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0400497Z   ok  bn_tham_de_quy → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0401217Z   ok  bn_argv_khong_mo_noi → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0401948Z   ok  bn_argv_khong_mo_trai → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0402685Z   ok  bn_phan_tram_bo_dict → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0403544Z   ok  ct_bo_get_truong → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0404341Z   ok  ct_bo_bi_danh_truong → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0405151Z   ok  ct_bo_walrus_rang_buoc → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0406038Z   ok  ct_bo_comprehension_rang_buoc → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0407171Z   ok  ct_lap_bo_phan_tu_hang → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0424182Z   ok  bn_bo_nap_dong_nhan → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0429778Z   ok  bn_nap_dong_khong_hoi_che → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0454253Z   ok  bn_nap_dong_gan_ten_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0455088Z   ok  bn_exec_khong_rang_buoc → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0458972Z   ok  bn_exec_khong_quet_tai → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0464468Z   ok  bn_nonlocal_dung_o_giua → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0465326Z   ok  bn_global_doc_khong_van_che → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0466357Z   ok  bn_so_dai_khong_chan → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0467136Z   ok  bn_lop_khong_gop_bao → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0467917Z   ok  bn_mot_rang_buoc_thay_bat_ky → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0468935Z   ok  bn_alias_khong_thay_lop → giết đúng 't50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc' · bán kính 1/61
+2026-10-20T07:02:12.0469770Z   ok  bn_walrus_comp_la_cuc_bo → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0470581Z   ok  bn_dich_khong_don_future_van_quet → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0471376Z   ok  bn_ngan_sach_tung_o → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0472153Z   ok  bn_chay_phep_liet_ke → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0472913Z   ok  bn_bo_ngan_sach → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0473961Z   ok  bn_quet_liet_ke_ngoai_le → giết đúng 't44_khong_lay_duoc_INDEX_thi_KHONG_DO_DUOC_chu_khong_lui_ve_rglob' · bán kính 1/61
+2026-10-20T07:02:12.0474756Z   ok  bn_khong_gap_noi_hang → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0475545Z   ok  bn_tap_nhieu_phan_tu_van_tinh → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0476296Z   ok  bn_shell_ra_nhan_path → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0477011Z   ok  bn_loc_re_hep_hon_luat → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0477833Z   ok  bn_hien_thi_khong_don_anh → giết đúng 't49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC' · bán kính 1/61
+2026-10-20T07:02:12.0478804Z   ok  bn_path_vang_thanh_rong → giết đúng 't51_cache_phai_HET_HIEU_LUC_khi_chinh_TEP_ung_vien_doi' · bán kính 1/61
+2026-10-20T07:02:12.0479690Z   ok  ct_khong_theo_xuat_xu_bao → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0480502Z   ok  bn_bo_shell_ra → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0481281Z   ok  bn_pathlib_khong_la_ten → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0482101Z   ok  bn_pathlib_khong_giai_callee → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0482972Z   ok  bn_alias_khong_mo_pham_vi → giết đúng 't50_PEP695_type_params_phai_duoc_tham_va_phai_CHE_duoc' · bán kính 1/61
+2026-10-20T07:02:12.0483935Z   ok  bn_loi_ra_duong_tho → giết đúng 't49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC' · bán kính 1/61
+2026-10-20T07:02:12.0484729Z   ok  bn_json_khong_ascii → giết đúng 't49_duong_XAU_ra_JSON_HOP_LE_va_NGAY_GO_phai_duoc_DOC' · bán kính 1/61
+2026-10-20T07:02:12.0485410Z   ok  ct_bo_nhanh_assert → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0486104Z   ok  ct_chi_ten_rc → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0486767Z   ok  ct_ly_do_khong_doc → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0487414Z   ok  bn_khung_dich_dong → giết đúng 't48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB' · bán kính 1/61
+2026-10-20T07:02:12.0488067Z   ok  bn_anh_chup_chi_dem_so → giết đúng 't48_khung_INDEX_giu_BYTES_va_anh_chup_ghim_BLOB' · bán kính 1/61
+2026-10-20T07:02:12.0488768Z   ok  bn_dinh_nghia_giai_o_pham_vi_trong → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0489515Z   ok  bn_theo_ref_thay_the → giết đúng 't47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet' · bán kính 1/61
+2026-10-20T07:02:12.0490475Z   ok  bn_bo_qua_stage → giết đúng 't47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet' · bán kính 1/61
+2026-10-20T07:02:12.0490948Z   ok  bn_giai_ma_cung_utf8 → giết đúng 't47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet' · bán kính 1/61
+2026-10-20T07:02:12.0491439Z   ok  bn_duoi_theo_mot_cach_viet → giết đúng 't47_INDEX_phai_duoc_doc_TRUNG_THUC_va_nguon_py_nhan_du_moi_cach_viet' · bán kính 1/61
+2026-10-20T07:02:12.0491977Z   ok  bn_doc_cay_lam_viec → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0492394Z   ok  bn_giu_bien_git_ke_thua → giết đúng 't46_noi_dung_lay_tu_INDEX_chu_khong_tu_cay_lam_viec' · bán kính 1/61
+2026-10-20T07:02:12.0492808Z   ok  bn_bo_qua_global_nonlocal → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0493226Z   ok  bn_bo_qua_walrus_comprehension → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0493882Z   ok  bn_bo_hang_byte → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0494530Z   ok  t45_cong_khong_noi → giết đúng 't45_bo_ca_phai_CHAY_cong_tren_cay_THAT_chu_khong_chi_cay_gia' · bán kính 1/61
+2026-10-20T07:02:12.0495228Z   ok  t45_cong_noi_ma_khong_neu_ten → giết đúng 't45_bo_ca_phai_CHAY_cong_tren_cay_THAT_chu_khong_chi_cay_gia' · bán kính 1/61
+2026-10-20T07:02:12.0495665Z   ok  bn_khong_giai_callee → giết đúng 't33_do_phu_cua_cong_do_duoc_THEO_HINH_DANG' · bán kính 1/61
+2026-10-20T07:02:12.0496076Z   ok  t39_thu_hep_ve_chieu_DO → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0496523Z   ok  t39_noi_qua_sang_truong_co_che → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0496952Z   ok  t39_bo_phep_quet → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0497389Z   ok  t39_de_ten_chet_trong_danh_sach → giết đúng 't39_chi_CA_PHAN_QUYET_duoc_chot_tren_rc_va_trang_thai' · bán kính 1/61
+2026-10-20T07:02:12.0497854Z   ok  bn_nen_do_van_tinh_vao_ban_kinh → giết đúng 't42_ca_do_o_NEN_bi_loai_khoi_ban_kinh_va_van_keo_ma_thoat' · bán kính 1/61
+2026-10-20T07:02:12.0498319Z   ok  bn_nen_do_dich_khong_nhan_ra → giết đúng 't42_ca_do_o_NEN_bi_loai_khoi_ban_kinh_va_van_keo_ma_thoat' · bán kính 1/61
+2026-10-20T07:02:12.0498764Z   ok  bn_nen_do_lang_le_xanh → giết đúng 't42_ca_do_o_NEN_bi_loai_khoi_ban_kinh_va_van_keo_ma_thoat' · bán kính 1/61
+2026-10-20T07:02:12.0499169Z   ok  bn_quet_theo_chuoi → giết đúng 't27_cong_khong_bao_dong_gia_tren_CHU_THICH' · bán kính 1/61
+2026-10-20T07:02:12.0499551Z   ok  f6_main_mat_gia_tri → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0499925Z   ok  f6_main_mat_van_tay → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0500306Z   ok  f6_main_bo_tien_kiem → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0500706Z   ok  f6_main_manh_mot_tien_trinh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0501088Z   ok  f5_main_bo_nhan → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0501460Z   ok  f5_main_bo_ghi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0501838Z   ok  f5_main_bo_truyen_loi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0502216Z   ok  f5_main_bo_loi_con → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0502591Z   ok  f5_main_nen_do_van_do → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0502972Z   ok  f2_main_du_bo_ban_kinh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0503642Z   ok  f2_main_gate_van_do → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0504034Z   ok  f2_main_manh_do_ca_bang → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0504464Z   ok  g668_gom_bo_thu_muc → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0505081Z   ok  g668_gom_bo_rong → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0505536Z   ok  g668_gom_bo_head → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0506004Z   ok  g668_gom_bo_tep_thuong → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0506480Z   ok  g668_gom_nhan_khoa_thua → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0506960Z   ok  g668_gom_bo_kieu_int → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0507429Z   ok  g668_gom_bo_phien_ban → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0507888Z   ok  g668_gom_bo_sha → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0508349Z   ok  g668_gom_bo_head_manh → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0508811Z   ok  g668_gom_bo_dong_la → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0509265Z   ok  g668_gom_bo_so_manh → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0509711Z   ok  g668_gom_bo_n → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0510162Z   ok  g668_gom_bo_tap → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0510622Z   ok  g668_gom_bo_phan_hoach → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0511077Z   ok  g668_gom_bo_dem → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0511545Z   ok  g668_gom_tin_ten_cua_manh → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0512019Z   ok  g668_phan_manh_chong → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0512500Z   ok  g668_ghi_bo_xoa_cu → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0512948Z   ok  g668_ghi_bo_con → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0513604Z   ok  g668_ghi_bo_head → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0514093Z   ok  g668_ghi_bo_loi → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0514650Z   ok  g668_che_do_bo_ra_le → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0515156Z   ok  g668_che_do_rong_la_vang → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0515666Z   ok  g668_che_do_bo_ca_hai → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0516180Z   ok  g668_che_do_match_khong_full → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0516712Z   ok  g668_che_do_chu_so_unicode → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0517218Z   ok  g668_che_do_nhan_n_1 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0517719Z   ok  g668_che_do_nhan_k_bang_n → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0518231Z   ok  g668_che_do_bo_tran_tren → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0518730Z   ok  g668_che_do_ra_rong_lot → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0519162Z   ok  f7_cau_hinh_nuot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0519535Z   ok  f7_tk_chi_batch → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0519906Z   ok  f7_tk_chi_alias → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0520267Z   ok  f7_ca_do_nuot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0520637Z   ok  f7_ca_loi_khac_nuot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0521023Z   ok  f7_bo_qua_thanh_hong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0521388Z   ok  f7_con_rc_bo → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0521751Z   ok  f7_ghi_ket_du_loi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0522113Z   ok  f7_bo_cong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0522475Z   ok  f7_cong_goc_sai → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0522847Z   ok  f7_bo_phan_hang → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0523208Z   ok  f7_bo_gian_giao → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0523719Z   ok  f7_nen_rong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0524081Z   ok  f7_bo_song_song → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0524455Z   ok  f7_song_song_nen_rong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0524831Z   ok  f7_du_nen_rong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0525192Z   ok  f7_du_nuot_loi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0525564Z   ok  f7_du_mot_tien_trinh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0526040Z   ok  f7_ket_bo_tien_kiem → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0526412Z   ok  f7_ket_bo_cong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0526776Z   ok  f7_ket_bo_loi_db → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0527268Z   ok  f8_gop_nuot_ma → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0527711Z   ok  f8_gop_bo_goi → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0528162Z   ok  f8_gop_van_tay_hang → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0528620Z   ok  f8_gop_bo_doi_so → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0529087Z   ok  f9_sha_hang → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0529558Z   ok  f9_head_hang → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0529965Z   ok  f12_ca_lap → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0530331Z   ok  f12_bk_gan_de → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0530694Z   ok  f12_bk_chi_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0531052Z   ok  f12_dem_qua → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0531408Z   ok  f12_dem_bo_qua → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0531766Z   ok  f12_bo_in_bk → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0532129Z   ok  f12_bo_in_ghi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0532547Z   ok  f13_dispatcher_nuot → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0532963Z   ok  f15_ghi_bang_mot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0533341Z   ok  f15_ket_db_bang_mot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0533837Z   ok  f15_nen_chi_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0534197Z   ok  f15_tk_chi_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0534552Z   ok  f15_ly_cuoi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0534910Z   ok  f15_so_lieu_loi_0 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0535293Z   ok  f15_so_lieu_cong_dat → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0535656Z   ok  f15_bo_in_do → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0536007Z   ok  f15_bo_in_tk → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0536365Z   ok  f15_bo_in_bq → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0536734Z   ok  f15_bo_thong_bao_giao → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0537159Z   ok  f16_gom_bo_ket_luan → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0537619Z   ok  f16_gom_bo_cong_loi → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0538170Z   ok  f16_gom_gan_de → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0538618Z   ok  f16_gom_chi_dau → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0539063Z   ok  f16_gom_bo_bang → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0539592Z   ok  f17_cli_bang_mot → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0540040Z   ok  f17_cli_in_dau → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0540446Z   ok  f18_ghi_lon_hon_mot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0540826Z   ok  f18_ket_db_lon_hon_mot → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0541212Z   ok  f18_manh_n_co_dinh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0541585Z   ok  f18_bk_dong_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0541952Z   ok  f18_ghi_dong_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0542315Z   ok  f18_bo_in_cong → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0542685Z   ok  f18_bo_in_nen → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0543086Z   ok  f19_gom_dao → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0543723Z   ok  f19_gom_lap_mot_ten → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0544188Z   ok  f19_gom_bo_chi_tiet → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0544649Z   ok  f20_cli_dao_bang → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0545108Z   ok  f21_ghi_chi_loai_loi → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0545579Z   ok  f21_ghi_chi_ban_ghi_dau → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0546006Z   ok  f23_bq_chi_in_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0546373Z   ok  f23_bq_dem_bool → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0546733Z   ok  f23_ly_bo_duoi → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0547148Z   ok  f24_kieu_phien_ban → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0547614Z   ok  f24_kieu_so_manh → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0548066Z   ok  f25_cua_moi_vi_tri → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0548527Z   ok  f25_bo_chot_doi_so_la → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0548946Z   ok  f26_bq_ly_ca_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0549308Z   ok  f26_do_ly_ca_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0549669Z   ok  f26_tk_ly_dau → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0550030Z   ok  f26_con_sau_rc0 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0550396Z   ok  f27_entry_drop → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0550868Z   ok  f27_entry_rc → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0551232Z   ok  f27_shard_zero → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0551594Z   ok  f27_fixed_path → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0552066Z   ok  f27_fixed_workers_manh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0552480Z   ok  f27_fixed_workers_du → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0552855Z   ok  f28_can_cau_hinh → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0553221Z   ok  f28_gate_di_tat → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0553734Z   ok  f28_du_nuot_ma → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0554099Z   ok  f28_nen_ma → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0554522Z   ok  f29_bk_truthy → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0554997Z   ok  f29_ra_truthy → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0555476Z   ok  f29_mh_truthy → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0555936Z   ok  f30_bo_rc → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0556405Z   ok  f30_bo_dinh_dang → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0556881Z   ok  f31_trim_gate → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0557352Z   ok  f32_do_dai → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0557817Z   ok  f32_bang_chu → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0558280Z   ok  f32_hoa → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0558747Z   ok  f33_k_width → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0559209Z   ok  f33_n_width → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0559673Z   ok  f33_n_zero → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0560156Z   ok  f33_n_unicode_first → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0560748Z   ok  f33_n_unicode_tail → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0561245Z   ok  f33_k_unicode_tail → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0561809Z   ok  f33_k_sign → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0562274Z   ok  f33_n_sign → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0562745Z   ok  f33_separator → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0563227Z   ok  f33_output_trim → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0563883Z   ok  f33_output_space → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0564367Z   ok  f34_head_64_alpha → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0564850Z   ok  f34_head_64_case → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0565362Z   ok  f34_head_64_ascii_extra → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0565863Z   ok  f34_head_40_ascii_extra → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0566358Z   ok  f34_head_64_narrow → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0566871Z   ok  f34_head_64_decimal_only → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0567368Z   ok  f34_head_strip_left → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0567849Z   ok  f34_head_rc_two → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0568338Z   ok  f34_head_no_oserror → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0568852Z   ok  f34_head_no_subprocesserror → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0569359Z   ok  f34_head_timeout → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0569849Z   ok  f34_source_text_bytes → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0570325Z   ok  f35_gom_n_min → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0570772Z   ok  f35_gom_n_max_low → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0571226Z   ok  f35_gom_n_max_high → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0571689Z   ok  f35_gom_n_no_upper → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0572162Z   ok  f35_gom_drop_head_prefix → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0572628Z   ok  f35_gom_manh_float → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0573214Z   ok  f35_gom_drop_oserror → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0573788Z   ok  f35_writer_parents → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0574254Z   ok  f35_writer_path_trim → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0574815Z   ok  f35_phan_hoach_xoay → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0575287Z   ok  f35_phan_hoach_dao_nguon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0575742Z   ok  f37_dk_dao → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0576131Z   ok  f42_k_mod_8 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0576492Z   ok  f42_n_luy_thua_2 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0576860Z   ok  f42_ra_strip → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0577218Z   ok  f42_ra_lower → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0577592Z   ok  f42_worker_manh_tran_3 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0577989Z   ok  f42_worker_du_tran_3 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0578360Z   ok  f44_nen_k_mod_8 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0578733Z   ok  f44_nen_n_luy_thua_2 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0579107Z   ok  f44_nen_ra_strip → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0579474Z   ok  f44_nen_ra_lower → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0579847Z   ok  f44_nen_ten_n8 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0580216Z   ok  f44_nen_in_k_mod_8 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0580599Z   ok  f44_nen_chi_tien_kiem → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0581021Z   ok  f45_them_ten_la → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0581458Z   ok  f45_xoa_ten → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0581895Z   ok  f45_ghi_de_ten → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0582299Z   ok  f27_full_seed → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0582735Z   ok  w698_e49_nfkc_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0583216Z   ok  w698_e49_nfkc_mh → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0583840Z   ok  w698_e49_nfkc_head → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0584325Z   ok  w698_e49_cf_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0584798Z   ok  w698_e49_cf_mh → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0585275Z   ok  w698_e49_cf_head → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0585892Z   ok  w698_x46_tab_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0586364Z   ok  w698_x46_tab_mh → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0586839Z   ok  w698_x46_tab_head → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0587418Z   ok  w698_e49_ra_normpath → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0587920Z   ok  w698_e49_ra_expanduser → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0588351Z   ok  w698_e50_bang_2 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0588718Z   ok  w698_e50_tu_2 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0589102Z   ok  w698_x50_bang_n_tru_1 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0589488Z   ok  w698_x47_hong_bang_1 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0589863Z   ok  w698_x47_tk_bang_1 → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0590295Z   ok  w698_s_ra_nfkc → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0590773Z   ok  w698_s_ra_cf → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0591241Z   ok  w698_s_ra_tab → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0591731Z   ok  w698_s_ra_rstrip_slash → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0592236Z   ok  w698_s_ra_lstrip_dot → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0592787Z   ok  w698_s_ra_expandvars → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0593274Z   ok  w698_q_cf_mid_ra → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0593907Z   ok  w698_m_cf_tag_ra → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0594388Z   ok  w698_q_cf_lead_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0594873Z   ok  w698_q_cf_mid_head → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0595359Z   ok  w698_q_tab_lead_mh → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0595849Z   ok  w698_p_cf_head_17 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0596326Z   ok  w698_m_cf_tag_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0596808Z   ok  w698_m_cf_061c_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0597305Z   ok  w698_m_nfkc_ngoai_bmp_mh → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0597793Z   ok  w698_m_bodau_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0598266Z   ok  w698_m_cc_head → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0598837Z   ok  w698_m_co_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0599322Z   ok  w698_s_bk_drop_zs → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0599798Z   ok  w698_s_mh_drop_zs → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0600376Z   ok  w698_s_head_strip_ascii → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0600866Z   ok  w698_z_exc_all → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0601366Z   ok  w698_z_exc_them_valueerror → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0601824Z   ok  w698_s2_hong_va_khong_bq → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0602214Z   ok  w698_s2_hong_gt_bq → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0602596Z   ok  w698_s2_tk_va_khong_bq → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0602965Z   ok  w698_s3_xor → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0603529Z   ok  w698_x_exc_typeerror → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0604043Z   ok  w698_x3_exc_kbint → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0604567Z   ok  w698_x3_exc_re_error → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0605057Z   ok  w698_x_head_nl_last → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0605563Z   ok  w698_x3_head_emsp_last → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0606050Z   ok  w698_x_cat_mc_bk → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0606491Z   ok  w698_x_main_ra_normpath → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0606877Z   ok  w698_x3_m3a_ra_nfkc → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0607253Z   ok  w698_x3_m3b_ra_cf → giết đúng 't54_main_chon_DUNG_vong_ban_kinh_theo_che_do' · bán kính 1/61
+2026-10-20T07:02:12.0607671Z   ok  w698_x_wr_ra_nfkc → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0608127Z   ok  w698_x3_wr5_nfkc → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0608695Z   ok  f36_prefix_4096 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0609175Z   ok  f36_prefix_64 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0609734Z   ok  f36_suffix_4096 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0610204Z   ok  f36_suffix_64 → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0610684Z   ok  f36_ascii_ignore → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0611160Z   ok  f36_casefold → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0611650Z   ok  f36_bo_khoang_trang → giết đúng 't53_che_do_doc_FAIL_CLOSED_moi_cau_hinh_la_co_THE_RIENG_va_van_tay_bam_NGUON' · bán kính 1/61
+2026-10-20T07:02:12.0612125Z   ok  f24_nhan_symlink → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0612594Z   ok  f35_writer_broken_link → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0613051Z   ok  f37_bo_f24 → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0613561Z   ok  f37_bo_f35 → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0614007Z   ok  f40_false_luon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0614456Z   ok  f41_bo_f40_luon → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0614920Z   ok  f41_f40_khong_ra_ngoai → giết đúng 't52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG' · bán kính 1/61
+2026-10-20T07:02:12.0615296Z SỐ LIỆU GOM: ca=61 · đột biến=470 · lỗi đột biến=0
+2026-10-20T07:02:12.1409572Z Post job cleanup.
+2026-10-20T07:02:12.2294707Z (node:2053) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-20T07:02:12.2295666Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-20T07:02:12.3800278Z Post job cleanup.
+2026-10-20T07:02:12.4446004Z [command]/usr/bin/git version
+2026-10-20T07:02:12.4530898Z git version 2.55.0
+2026-10-20T07:02:12.4533972Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/e198c643-f5ef-410c-bdd8-2a93873446bb/.gitconfig'
+2026-10-20T07:02:12.4696050Z Temporarily overriding HOME='/home/runner/work/_temp/e198c643-f5ef-410c-bdd8-2a93873446bb' before making global git config changes
+2026-10-20T07:02:12.4696852Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-20T07:02:12.4724802Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/tra-luat/tra-luat
+2026-10-20T07:02:12.5115223Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-20T07:02:12.5164638Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-20T07:02:12.5384556Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-20T07:02:12.5418713Z http.https://github.com/.extraheader
+2026-10-20T07:02:12.5426661Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-20T07:02:12.5465675Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-20T07:02:12.5754327Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-20T07:02:12.5790907Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-20T07:02:12.6309846Z Cleaning up orphan processes
+2026-10-20T07:02:12.6495818Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

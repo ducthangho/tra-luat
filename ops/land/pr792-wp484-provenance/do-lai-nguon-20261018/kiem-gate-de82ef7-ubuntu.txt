@@ -1,0 +1,6 @@
+# do lai kiem-gate OFFLINE tren readback-check-runs-de82ef7.json — 2026-10-18T05:21:48Z
+# 14 ten = tap job cua push-gate master (ci.yml: push => ma tran chi ubuntu); suite 105949986767 = run 39096585920 (workflow_dispatch tren claude/gate-exact-de82ef74)
+$ sha256sum .claude/dev/packet_loop.py
+c15ac9330a084d4a10d559885dbeb606c841ca4ad22a6ca51686c681e59f8634  .claude/dev/packet_loop.py
+gate XANH trên de82ef748e75659ab3dceed225b0f56dcc69e78b (suite 105949986767): chuan-bi id=117584211269 · gate (ubuntu-latest) id=117584224284 · gate-cong-cu (ubuntu-latest, 0) id=117584224386 · gate-cong-cu (ubuntu-latest, 1) id=117584224549 · gate-cong-cu (ubuntu-latest, 2) id=117584224454 · gate-cong-cu (ubuntu-latest, 3) id=117584224581 · gate-cong-cu (ubuntu-latest, 4) id=117584224416 · gate-cong-cu (ubuntu-latest, 5) id=117584224384 · gate-cong-cu (ubuntu-latest, 6) id=117584224547 · gate-cong-cu (ubuntu-latest, 7) id=117584224534 · gate-cong-cu-gop (ubuntu-latest) id=117590460394 · gate-ops (ubuntu-latest) id=117584224362 · gate-packet-loop (ubuntu-latest) id=117584224295 · gate-registry (ubuntu-latest) id=117584224281
+rc=0

@@ -1,0 +1,109 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 1 cua packet #960 NO-CAU-LICH-SU-BIEN-NHAN r1 (PR #976, merge 20a2e2b),
+# KHAC NEN (reviewer codex CLI, executor claude), tren `7ae7fc1`. **`changes_requested`** — 6 P1 / 2 P2 / 0 P3 theo finding.
+# Ghi so boi CHINH phien executor (session_015GtxrbeTfDyFKdj7rb72Uq) sau khi PR merge, theo dong y cua chu kho.
+# Nhan dung trong tep: (a) DO tu kho/run.json luc ghi so · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp960-review-1-codex-49b76071
+kind: review_delivery_receipt
+packet_id: NO-CAU-LICH-SU-BIEN-NHAN
+packet_issue: 960
+target_pull_request: 976
+land_merge_commit: 20a2e2b3dd52a83442c739d17db1f1bd66181a6c
+land_merge_commit_ghi_chu: '(a) merge commit cua PR #976 (chu kho merge 2026-10-27T12:33:27Z). Day la merge, KHONG phai ghi so land.'
+revision: 1
+generation: 1
+lease_id: wp960-r1-g1-claude
+lease_gan_theo: '(a) ops/leases/wp960-r1-g1-claude.yaml tren nhanh ops/wp960-r1-g1-lease; cua so [2026-10-27T07:22:00Z, 2026-10-29T07:22:00Z); run.json bat_dau_utc nam trong cua so.'
+luot: 1
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: systemic
+effective_review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho model (reviewer GPT do_may qua run.json model_phuc_vu, executor Claude theo lease) nhung verdict la
+  changes_requested nen KHONG len cross_approved. Muc nay ghi nhan mot luot review khac nen DA CHAY, khong phai approval.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 3 `Ket qua: 0 P0, 6 P1, 2 P2, 0 P3.`'
+verdict_path: ops/reviews/wp960-review-1-codex-verdict.md
+verdict_sha256: 49b7607132f4bd788b3274f57517be4279a6087c495e649c8c070bfb15858ea1
+verdict_bytes: 29746
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: '(a) ops/reviews/wp960-review-1-codex/VERDICT.md la tep goc chep tu sandbox reviewer; ban phang byte-identical (SHA256SUMS cua thu muc).'
+reviewed_sha: 7ae7fc1ec1b8345115a4918aedefff6e45d20b2a
+reviewed_sha_nguon: '(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/168a9680545c7f121186fe96a3c45fb86f276e7d/ops/reviews/wp960-review-1-codex-verdict.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim commit hien vat cua nhanh bookkeeping agent/wp960-g1-claude; bien nhan nay di o commit sau, tren cung nhanh.'
+so_p0: 0
+so_p1: 6
+so_p2: 2
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict; khop so muc `### <slug> [P*]` trong tep.'
+findings_ids:
+  - id: moc-muon-tay-trang-cau-cu
+    hang: P1
+  - id: surface-hong-nguon-thanh-sach-hoac-no-chet
+    hang: P1
+  - id: oid-hop-le-toan-chu-bi-bo-qua
+    hang: P1
+  - id: yaml-alias-vong-lam-crash
+    hang: P1
+  - id: surface-thu-hai-cung-dong-bi-bo
+    hang: P1
+  - id: chot-moi-chua-duoc-ca-nao-khoa
+    hang: P1
+  - id: a4-fixture-khong-co-lich-su-git
+    hang: P2
+  - id: a3-mutant-chet-boi-literal-khong-phai-folded
+    hang: P2
+xu_ly_finding: >-
+  (a) Phien executor va o acedecb (5 finding: moc, surface hong, oid toan chu, alias vong, khai bao thu hai; them a4 fixture git that) va 916a60a (chot-moi r1/r2/r3/r5; tach assertion A3). Ket luan cua luot 2 ve tung finding: xem wp960-review-2-codex-verdict.md muc KET LUAN VE FINDING CU.
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: ed9b1b0c92fa4124b1793c108d04b666
+  run_json: ops/reviews/wp960-review-1-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 1526.846, worktree_sach true, execution_surface codex_cli,
+    prompt_sha256 1ce81cd59a69… = sha256 PROMPT.md trong thu muc.
+  cli: >-
+    codex-cli 0.164.0 qua `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-head 7ae7fc1… --require-clean
+    --prompt-file … --expected-prompt-sha256 … -- codex exec -c model_reasoning_effort=xhigh --cd <sandbox> --sandbox workspace-write
+    --skip-git-repo-check "<chi thi tro {PROMPT_FILE}>"`
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model: gpt-6.1-sol
+  model_da_chay: gpt-6.1-sol
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp960-review-1-codex/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: '(a) run.json model_phuc_vu_trang_thai DO_DUOC; 55 su kien, 55 response_id khac nhau, moi su kien model gpt-6.1-sol; effort_phuc_vu xhigh.'
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua git push bang credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+independent_from_executor_session: true
+independent_ghi_chu: 'Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context).'
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: '(a) Blob verdict ghim o commit hien vat cua PR ghi so; len trung_binh/cao khi PR ghi so land bang merge commit (squash pha quan he to tien).'
+verdict_usage_caveats:
+  - id: VERDICT-KHAI-SAI-EXECUTION-SURFACE
+    muc: P3
+    mo_ta: >-
+      DUONG TINH GIA da biet cua chinh luat L-SURFACE (#960): verdict KHONG tu khai execution surface; cac dong khop `execution_surface`
+      la MO TA FIXTURE/phep do cua reviewer (vd `execution_surface: codex_service` trong ca thu). run.json = codex_cli la nguon duy nhat.
+      Caveat nay ton tai chi de cong bien_nhan_v2 khong do — chinh lop loi ma luot 2 ghi la tham-chieu-truoc-khai-bao-mien-nham-surface /
+      ba-no-surface-con-lai-la-trich-dan, giao cho packet tiep noi.
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: 'Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can dung lai mirror tai 7ae7fc1.'
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

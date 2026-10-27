@@ -21,6 +21,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
@@ -3064,6 +3065,11 @@ def t49_env_va_lease_khong_duoc_chon_moi_noi():
         gh = s / ("api" if os.name == "nt" else "gh")
         if os.name == "nt":
             shutil.copy2(sys.executable, s / "gh.exe")
+            # WP748 r17/g17 (G6 rc1 trên 19683a0: `gh api` rc=106 "failed to locate pyvenv.cfg") — trong
+            # venv, `python.exe` chỉ là launcher, đọc `pyvenv.cfg` CẠNH nó để tìm `home`. Chép trần thì
+            # đồ giả chết trước khi ghi nhật ký. Mang theo cfg; ngoài venv thì không có gì để mang.
+            if sys.prefix != sys.base_prefix:
+                shutil.copy2(Path(sys.prefix) / "pyvenv.cfg", s / "pyvenv.cfg")
         gh.write_text(
             ("" if os.name == "nt" else f"#!{Path(sys.executable).resolve()}\n") +
             "import json,os,pathlib,sys\n"
@@ -4862,7 +4868,129 @@ def _nap_launcher_thu_hoi():
     return mod
 
 
-def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
+# WP748 r17/g17 (G6 rc1 trên 19683a0: t125 `ArgumentError ... expected LP__PROCESSENTRY32W instance
+# instead of pointer to _PROCESSENTRY32W`) — hai waiter của t125 cùng quá hạn và cùng gọi `_giet_ca_cay`.
+# `launcher._cac_pid_cha_windows` dựng LỚP struct MỚI mỗi lời gọi rồi gán `argtypes` lên
+# `ctypes.windll.kernel32` dùng CHUNG toàn tiến trình ⇒ luồng kia ghi đè giữa chừng. Đo bằng probe hai
+# luồng: không khoá 40/80 lời gọi ném; có khoá 0/80. Vá tận gốc nằm ở launcher.py (ngoài write set).
+_KHOA_CHUP_CAY_WINDOWS = threading.Lock()
+
+
+def _giu_hau_due_windows(p):
+    """Mở HANDLE tới mọi hậu duệ của `p` TRƯỚC khi giết. Trả (k32, [(pid, handle)], dòng nhật ký).
+
+    WP748 r8/g8 (t154 ĐỎ một lần ngoài sandbox 2026-10-14T18:37:33Z: `taskkill rc=0`, con rc=1, mà nhịp
+    cháu 4->5 trong cửa sổ 1 s; chạy lại 18:38:04Z XANH) — `taskkill /T /F` chỉ GỌI `TerminateProcess`,
+    mà hàm ấy BẤT ĐỒNG BỘ: trả về khi kết liễu mới được KHỞI ĐỘNG, chưa xong. Nhánh Windows cũ chỉ chờ
+    CON (`p.wait`), không chờ CHÁU ⇒ một lần ghi đang dở của cháu hạ cánh sau mốc đo `a`. Cháu thật sự
+    còn sống thì cửa sổ 1 s thấy ~20 nhịp, không phải 1. Chữa bằng BẰNG CHỨNG chứ không bằng ngủ: giữ
+    handle (PID không bị tái dùng khi còn handle), rồi `WaitForSingleObject` tới khi đối tượng tiến
+    trình được báo hiệu, tức mọi luồng đã thoát. `None` = KHÔNG ĐO ĐƯỢC, khai thẳng, không đọc thành rỗng.
+    Dòng nhật ký nêu PID giữ/bỏ để ca gọi (t154) ĐÒI cháu nằm trong tập giữ, không chỉ đếm.
+    Ngoại lệ SAU khi đã mở handle ⇒ đóng MỌI handle đang giữ rồi mới trả/ném (không rò handle).
+    """
+    k32, mo = None, []                             # `mo`: mọi (pid, handle) đã mở mà chưa đóng
+    try:
+        import ctypes
+        from ctypes import wintypes
+        thu_hoi = _nap_launcher_thu_hoi()
+        with _KHOA_CHUP_CAY_WINDOWS:
+            anh = thu_hoi._chup_cay(p.pid)          # Toolhelp32 + khoá danh tính, đã bỏ PID của ta
+        goc = (anh or {}).get(p.pid)
+        if not anh or not goc:
+            return None, None, f"hau_due: KHONG chup duoc cay (anh={anh!r}) - CHAU KHONG DO DUOC"
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        k32.OpenProcess.restype = wintypes.HANDLE
+        k32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+        k32.WaitForSingleObject.restype = wintypes.DWORD
+        k32.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+        k32.TerminateProcess.restype = wintypes.BOOL
+        k32.CloseHandle.argtypes = [wintypes.HANDLE]
+        k32.CloseHandle.restype = wintypes.BOOL
+        bo = []
+        for q, khoa in anh.items():
+            if q == p.pid:
+                continue                           # con: `p` đã giữ handle, `p.wait` đo nó
+            # Liên kết cha trong ảnh Toolhelp có thể trỏ tới PID ĐÃ tái dùng: hậu duệ thật sinh SAU gốc.
+            if not khoa or int(khoa[4:]) < int(goc[4:]):
+                bo.append(q)
+                continue
+            h = k32.OpenProcess(0x00100000 | 0x0001 | 0x1000, False, q)   # SYNCHRONIZE|TERMINATE|QUERY_LIMITED
+            if not h:
+                bo.append(q)                       # đã thoát giữa lúc chụp và lúc mở
+                continue
+            mo.append((q, h))                      # vào `mo` NGAY, trước mọi lời gọi có thể ném
+            # WP748 r20 (Codex WP748-R3 trên 9d471d9) — `_khoa_danh_tinh` cũng gán `GetProcessTimes.argtypes`
+            # bằng lớp `_FILETIME` MỚI trên kernel32 dùng chung, y hệt `_chup_cay`; gọi ngoài khoá thì waiter
+            # kia đè chữ ký giữa chừng ⇒ `ctypes.ArgumentError`. Cùng một khoá cho MỌI lời gọi ctypes launcher.
+            with _KHOA_CHUP_CAY_WINDOWS:
+                khoa_hien = thu_hoi._khoa_danh_tinh(q)
+            if khoa_hien != khoa:                  # handle đã giữ ⇒ phép so này không còn khe tái dùng
+                mo.pop()
+                k32.CloseHandle(h)
+                bo.append(q)
+                continue
+        giu, mo = mo, []                           # bàn giao: từ đây `_giet_ca_cay` chịu trách nhiệm đóng
+        return k32, giu, f"hau_due: giu {sorted(q for q, _ in giu)} bo {sorted(bo)}"
+    except BaseException as ex:
+        for _, h in mo:
+            try:
+                k32.CloseHandle(h)
+            except BaseException:
+                pass
+        mo = []
+        if isinstance(ex, (OSError, AttributeError, ValueError, ImportError)):
+            return None, None, f"hau_due: loi {type(ex).__name__} - CHAU KHONG DO DUOC"
+        raise
+
+
+def _cho_hau_due_windows(k32, giu, cho_giay: float):
+    """Chờ hậu duệ ĐÃ THOÁT thật, trong MỘT hạn đơn điệu `cho_giay` cho CẢ tập — không nhân theo số PID.
+
+    Nửa đầu hạn: chờ tự thoát (sau taskkill). Ai còn chưa báo hiệu ⇒ `TerminateProcess` qua chính handle
+    đã giữ, rồi chờ nốt tới CÙNG mốc hạn. Tổng thời gian ≤ `cho_giay` bất kể bao nhiêu hậu duệ.
+    `WAIT_FAILED`/mã lạ là KHÔNG ĐO ĐƯỢC (vào `hong`), không đọc thành quá hạn hay đã thoát.
+    Trả (dòng nhật ký, đã_thoát, còn_sống, hỏng) — ba tập PID để ca gọi đòi bằng chứng DƯƠNG.
+    """
+    import ctypes
+    WAIT_OBJECT_0, WAIT_TIMEOUT = 0x0, 0x102
+    het = time.monotonic() + cho_giay
+    moc_tu_nhien = het - cho_giay / 2
+
+    def cho(h, moc):
+        return k32.WaitForSingleObject(h, max(0, int((moc - time.monotonic()) * 1000)))
+
+    da_thoat, cho_ep, hong = [], [], []
+    for q, h in giu:
+        kq = cho(h, moc_tu_nhien)
+        if kq == WAIT_OBJECT_0:
+            da_thoat.append(q)
+        elif kq == WAIT_TIMEOUT:
+            cho_ep.append((q, h))
+        else:
+            hong.append((q, f"wait={kq:#x} err={ctypes.get_last_error()}"))
+    for _, h in cho_ep:
+        k32.TerminateProcess(h, 1)   # rc bị bỏ CÓ CHỦ ĐÍCH: có thể vừa tự thoát; phép chờ dưới mới quyết định
+    con_song = []
+    for q, h in cho_ep:
+        kq = cho(h, het)
+        if kq == WAIT_OBJECT_0:
+            da_thoat.append(q)
+        elif kq == WAIT_TIMEOUT:
+            con_song.append(q)
+        else:
+            hong.append((q, f"wait={kq:#x} err={ctypes.get_last_error()}"))
+    ep = sorted(q for q, _ in cho_ep)
+    if con_song or hong:
+        dong = f"hau_due CON SONG {sorted(con_song)} HONG {hong} (da ep {ep}) - CHAU KHONG DO DUOC"
+    else:
+        dong = (f"hau_due da thoat {sorted(da_thoat)} {len(da_thoat)}/{len(giu)} "
+                f"(WaitForSingleObject; ep TerminateProcess {ep})")
+    return dong, sorted(da_thoat), sorted(con_song), hong
+
+
+def _giet_ca_cay(p, cho_giay: float = 5.0, bang_chung: dict | None = None) -> str:
     """Giết con VÀ CHÁU. Trả một dòng ĐO ĐƯỢC về đường đã đi — kể cả đường KHÔNG làm được gì.
 
     Bốn chốt, mỗi chốt là một bài học đã trả giá:
@@ -4870,7 +4998,8 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
       KHÁC nhóm của tiến trình này; `start_new_session` hỏng âm thầm thì lùi về `p.kill()` chứ không
       giết cả runner ("test không được nhét PID của chính nó vào thứ mình đang thử giết").
     · `taskkill /T /F` KHÔNG đáng tin — trả `Access denied` ngay trên con do chính mình sinh. Gọi
-      xong phải KIỂM LẠI, còn sống thì `p.kill()`.
+      xong phải KIỂM LẠI, còn sống thì `p.kill()`. `rc=0` cũng chưa phải cháu đã thoát
+      (`TerminateProcess` bất đồng bộ) — nên giữ handle hậu duệ TRƯỚC và CHỜ chúng báo hiệu.
     · POSIX dùng lại launcher để chụp hậu duệ, giữ khoá danh tính và kiểm cả nhóm;
       ZOMBIE tính là ĐÃ CHẾT. `wait()` bên dưới thu hồi PID con trực tiếp.
     · "Đã gọi lệnh giết" ≠ "đã chết" — nên hàm này trả nhật ký từng bước, và ca gọi nó phải ĐO hành
@@ -4895,20 +5024,45 @@ def _giet_ca_cay(p, cho_giay: float = 5.0) -> str:
                         f"- chi giet PID, CHAU KHONG DO DUOC")
     else:
         import shutil
-        tk = shutil.which("taskkill")
-        if tk:
-            try:
-                r = subprocess.run([tk, "/T", "/F", "/PID", str(p.pid)],
-                                   capture_output=True, text=True, timeout=cho_giay)
-                buoc.append(f"taskkill rc={r.returncode} err={(r.stderr or '').strip()[:80]!r}")
-            except (OSError, subprocess.TimeoutExpired) as ex:
-                buoc.append(f"taskkill loi {type(ex).__name__}")
-            try:
-                p.wait(timeout=max(0.1, cho_giay / 2))
-            except subprocess.TimeoutExpired:
-                pass
-        else:
-            buoc.append("KHONG co taskkill")
+        k32, giu, ghi = _giu_hau_due_windows(p)    # TRƯỚC taskkill: sau đó cháu mồ côi không tìm lại được
+        buoc.append(ghi)
+        # Bằng chứng CÓ CẤU TRÚC cho ca gọi (t154): `do_duoc=False` cho tới khi phép chờ hậu duệ chạy xong.
+        bc = {"do_duoc": False, "giu": None, "song_truoc": None, "da_thoat": None, "con_song": None,
+              "hong": None}
+        if giu is not None:
+            bc["giu"] = sorted(q for q, _ in giu)
+            # WP748 r9/g9 — `OpenProcess` vẫn THÀNH CÔNG trên tiến trình ĐÃ THOÁT khi còn ai giữ handle
+            # (con giữ handle cháu qua `Popen`), nên "có trong `giu`" + "đã báo hiệu" KHÔNG chứng minh cháu
+            # còn SỐNG lúc dọn. Hỏi trạng thái đối tượng NGAY trên handle đã giữ, TRƯỚC taskkill:
+            # `WAIT_TIMEOUT` (0x102) với hạn 0 = chưa báo hiệu = còn sống. Mã khác ⇒ không vào tập sống.
+            bc["song_truoc"] = sorted(q for q, h in giu if k32.WaitForSingleObject(h, 0) == 0x102)
+            buoc.append(f"hau_due song truoc taskkill {bc['song_truoc']}")
+        if bang_chung is not None:
+            bang_chung.update(bc)
+            bc = bang_chung
+        try:
+            tk = shutil.which("taskkill")
+            if tk:
+                try:
+                    r = subprocess.run([tk, "/T", "/F", "/PID", str(p.pid)],
+                                       capture_output=True, text=True, timeout=cho_giay)
+                    buoc.append(f"taskkill rc={r.returncode} err={(r.stderr or '').strip()[:80]!r}")
+                except (OSError, subprocess.TimeoutExpired) as ex:
+                    buoc.append(f"taskkill loi {type(ex).__name__}")
+                try:
+                    p.wait(timeout=max(0.1, cho_giay / 2))
+                except subprocess.TimeoutExpired:
+                    pass
+            else:
+                buoc.append("KHONG co taskkill")
+            if giu is not None:
+                dong, da_thoat, con_song, hong = _cho_hau_due_windows(k32, giu, cho_giay)
+                buoc.append(dong)
+                bc.update(da_thoat=da_thoat, con_song=con_song, hong=hong,
+                          do_duoc=not con_song and not hong)
+        finally:
+            for _, h in giu or ():
+                k32.CloseHandle(h)
     if p.poll() is None:
         p.kill()
         buoc.append("p.kill()")
@@ -5228,6 +5382,10 @@ def _kho_do_thi(tmp: Path):
     cay = tmp / "kho"
     cay.mkdir()
     _g_a0(cay, "init", "-q", "-b", "master")
+    # WP748 r21 (run 39352202619, 2/2 đỏ trên git 2.55) — mỗi `git commit` sinh `git maintenance run --auto --detach`;
+    # tiến trình nền ấy tạo rồi xoá `.git/objects/maintenance.lock` trong kho mẫu `_mau_t133`, nên `copytree` của t133
+    # liệt kê thấy tệp rồi chép thì mất (`[Errno 2]`). Tắt TRƯỚC commit đầu tiên để không commit nào sinh tiến trình nền.
+    _g_a0(cay, "config", "maintenance.auto", "false"); _g_a0(cay, "config", "gc.auto", "0")
     (cay / "README.md").write_bytes("nen\n".encode("utf-8"))
     _g_a0(cay, "add", "-A"); _g_a0(cay, "commit", "-qm", "c0")
     (cay / "docs").mkdir(); (cay / "docs" / "a.md").write_bytes("a\n".encode("utf-8"))
@@ -5635,33 +5793,88 @@ def t132_shallow_va_object_thieu_la_12_khong_phai_vang():
             kho.dong()
 
 
+_MAU_T133: dict = {}
+_POL_BYTES_T133 = b'{"schema": 1}\n'
+_DESC_T133 = "c" * 64
+
+
+def _mau_t133() -> dict:
+    """Kho fixture của `t133`, dựng MỘT lần mỗi tiến trình; mỗi lượt `t133` CHÉP ra bản riêng.
+
+    WP748 r17/g17 (profile t139 trên 7bb520b: t133 chạy 8 lần = 168,7 s, phần lớn là ~150 lần spawn git
+    dựng CÙNG một đồ thị commit). Chỉ dựng lại là thứ được chia sẻ: mẫu không bao giờ được trao cho cổng,
+    mỗi lượt — kể cả lượt mutant của t139 — nhận một `copytree` mới, nên không lượt nào thấy dấu của lượt
+    trước. Dựng HẾT commit trước mọi lời gọi cổng là tương đương vì cổng không ghi vào kho: probe bọc 35
+    lời gọi cổng của t133 (main trong tiến trình + CLI thật) bằng ảnh refs/HEAD/index/status/object ⇒ 0 lệch.
+    """
+    import atexit
+    import hashlib as _h
+    import shutil
+    if _MAU_T133 and _MAU_T133["cay"].is_dir():
+        return _MAU_T133
+    goc = Path(tempfile.mkdtemp(prefix="lp_mau_t133_"))
+    atexit.register(shutil.rmtree, goc, True)
+    cay, (c0, c1, S) = _kho_do_thi(goc)
+    RET = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
+    POL = ".github/coordination/change-impact.v1.json"
+    h = {"c0": c0, "S": S}
+    h["H_sach"] = _them_commit(cay, "h-sach", S, {"docs/b.md": b"b\n"})
+    h["H_thu_hoi"] = _them_commit(cay, "h-thu-hoi", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yaml": _yaml_bytes(_ban_ghi_thu_hoi())})
+    h["H_meta_policy"] = _them_commit(cay, "h-meta", S, {RET: _yaml_bytes(_metadata_retired()), POL: b"{}\n"})
+    h["H_meta_khong_policy"] = _them_commit(cay, "h-meta-0", S, {RET: _yaml_bytes(_metadata_retired())})
+    h["H_meta_hong"] = _them_commit(cay, "h-meta-hong", S, {RET: b"a: [\n", POL: b"{}\n"})
+    h["H_symlink"] = _them_commit(cay, "h-symlink", S, {}, symlink=("ops/thu-hoi/x.yaml", "../leases/x.yaml"))
+    h["H_thu_muc_con"] = _them_commit(cay, "h-sub", S, {"ops/thu-hoi/sub/x.yaml": b"a: 1\n"})
+    h["H_khong_yaml"] = _them_commit(cay, "h-yml", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yml": _yaml_bytes(_ban_ghi_thu_hoi())})
+    # S' có metadata + policy; H sửa / xoá metadata ⇒ append-only 8
+    S2 = h["S2"] = h["H_meta_policy"]
+    h["H_sua_meta"] = _them_commit(cay, "h-sua-meta", S2, {RET: _yaml_bytes(_metadata_retired(retired_at_utc=khi_truoc(2)))})
+    h["H_xoa_meta"] = _them_commit(cay, "h-xoa-meta", S2, {"docs/c.md": b"c\n"}, xoa=(RET,))
+    h["H_them_tren_S2"] = _them_commit(cay, "h-them-s2", S2, {"docs/c.md": b"c\n"})
+    # S'' có bản ghi thu hồi (lọt trước kích hoạt); H xoá nó ⇒ 8 (append-only đứng TRƯỚC chốt inactive)
+    S3 = h["S3"] = h["H_thu_hoi"]
+    h["H_xoa_thu_hoi"] = _them_commit(cay, "h-xoa-th", S3, {"docs/d.md": b"d\n"}, xoa=("ops/thu-hoi/wp1-exec-1-codex-20260901.yaml",))
+    h["H_giu_thu_hoi"] = _them_commit(cay, "h-giu-th", S3, {"docs/d.md": b"d\n"})
+    h["H_policy_khong_marker"] = _them_commit(cay, "h-policy-0", S, {POL: b"{}\n"})
+    # Binding Q13: đúng cả ba / sai từng cái / policy hỏng / policy executable / S đã có policy
+    dung = _metadata_retired(descriptor_sha256=_DESC_T133, first_policy_sha256=_h.sha256(_POL_BYTES_T133).hexdigest(),
+                             base_sha_before_add=S)
+    h["H_bind_ok"] = _them_commit(cay, "h-bind-ok", S, {RET: _yaml_bytes(dung), POL: _POL_BYTES_T133})
+    h["H_bind_desc"] = _them_commit(cay, "h-bind-desc", S, {RET: _yaml_bytes(dict(dung, descriptor_sha256="d" * 64)), POL: _POL_BYTES_T133})
+    h["H_bind_hash"] = _them_commit(cay, "h-bind-hash", S, {RET: _yaml_bytes(dict(dung, first_policy_sha256="e" * 64)), POL: _POL_BYTES_T133})
+    h["H_bind_base"] = _them_commit(cay, "h-bind-base", S, {RET: _yaml_bytes(dict(dung, base_sha_before_add=c0)), POL: _POL_BYTES_T133})
+    h["H_bind_pol_hong"] = _them_commit(cay, "h-bind-hong", S, {RET: _yaml_bytes(dung), POL: b"[1]\n"})
+    _them_commit(cay, "h-bind-exec", S, {RET: _yaml_bytes(dung), POL: _POL_BYTES_T133})
+    _g_a0(cay, "update-index", "--chmod=+x", POL); _g_a0(cay, "commit", "-qm", "exec")
+    h["H_bind_pol_exec"] = _g_a0(cay, "rev-parse", "HEAD")
+    S_pol = h["S_pol"] = h["H_policy_khong_marker"]
+    h["H_bind_S_co_policy"] = _them_commit(cay, "h-bind-s-pol", S_pol, {RET: _yaml_bytes(dict(
+        dung, base_sha_before_add=S_pol, first_policy_sha256=_h.sha256(b"{}\n").hexdigest()))})
+    # marker CŨ (đã ở S2 canonical): T thêm tệp ngoài sổ / T làm hỏng policy
+    h["H_old_marker"] = _them_commit(cay, "h-old-marker", h["H_bind_ok"], {"docs/z.md": b"z\n"})
+    h["H_old_marker_pol_hong"] = _them_commit(cay, "h-old-marker-pol-hong", h["H_bind_ok"], {POL: b"not JSON\n"})
+    _MAU_T133.update(cay=cay, h=h)
+    return _MAU_T133
+
+
 @ca
 def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
     """M4 end-to-end: ancestry S→H, T = tree(H), map append-only (8) trước validator, chế độ chưa kích hoạt
     đòi tập revocation RỖNG ở S và T (12), metadata Q13 cần policy; receipt S/H/T; CLI thật cũng chạy."""
     import json
+    import shutil
     mod = _nap_cong()
+    mau = _mau_t133()
     with San() as s:
-        cay, (c0, c1, S) = _kho_do_thi(s)
+        cay = s / "kho"
+        shutil.copytree(mau["cay"], cay, symlinks=True)   # bản RIÊNG của lượt này; mẫu không bao giờ tới cổng
+        h = mau["h"]
+        c0, S, H_sach, H_thu_hoi = h["c0"], h["S"], h["H_sach"], h["H_thu_hoi"]
+        H_meta_policy, H_meta_khong_policy, H_meta_hong = h["H_meta_policy"], h["H_meta_khong_policy"], h["H_meta_hong"]
+        H_symlink, H_thu_muc_con, H_khong_yaml = h["H_symlink"], h["H_thu_muc_con"], h["H_khong_yaml"]
+        S2, H_sua_meta, H_xoa_meta, H_them_tren_S2 = h["S2"], h["H_sua_meta"], h["H_xoa_meta"], h["H_them_tren_S2"]
+        S3, H_xoa_thu_hoi, H_giu_thu_hoi = h["S3"], h["H_xoa_thu_hoi"], h["H_giu_thu_hoi"]
         RET = "ops/thu-hoi/_ngoai-le-closure.retired.yaml"
-        POL = ".github/coordination/change-impact.v1.json"
-        H_sach = _them_commit(cay, "h-sach", S, {"docs/b.md": b"b\n"})
-        H_thu_hoi = _them_commit(cay, "h-thu-hoi", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yaml": _yaml_bytes(_ban_ghi_thu_hoi())})
-        H_meta_policy = _them_commit(cay, "h-meta", S, {RET: _yaml_bytes(_metadata_retired()), POL: b"{}\n"})
-        H_meta_khong_policy = _them_commit(cay, "h-meta-0", S, {RET: _yaml_bytes(_metadata_retired())})
-        H_meta_hong = _them_commit(cay, "h-meta-hong", S, {RET: b"a: [\n", POL: b"{}\n"})
-        H_symlink = _them_commit(cay, "h-symlink", S, {}, symlink=("ops/thu-hoi/x.yaml", "../leases/x.yaml"))
-        H_thu_muc_con = _them_commit(cay, "h-sub", S, {"ops/thu-hoi/sub/x.yaml": b"a: 1\n"})
-        H_khong_yaml = _them_commit(cay, "h-yml", S, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yml": _yaml_bytes(_ban_ghi_thu_hoi())})
-        # S' có metadata + policy; H sửa / xoá metadata ⇒ append-only 8
-        S2 = H_meta_policy
-        H_sua_meta = _them_commit(cay, "h-sua-meta", S2, {RET: _yaml_bytes(_metadata_retired(retired_at_utc=khi_truoc(2)))})
-        H_xoa_meta = _them_commit(cay, "h-xoa-meta", S2, {"docs/c.md": b"c\n"}, xoa=(RET,))
-        H_them_tren_S2 = _them_commit(cay, "h-them-s2", S2, {"docs/c.md": b"c\n"})
-        # S'' có bản ghi thu hồi (lọt trước kích hoạt); H xoá nó ⇒ 8 (append-only đứng TRƯỚC chốt inactive)
-        S3 = H_thu_hoi
-        H_xoa_thu_hoi = _them_commit(cay, "h-xoa-th", S3, {"docs/d.md": b"d\n"}, xoa=("ops/thu-hoi/wp1-exec-1-codex-20260901.yaml",))
-        H_giu_thu_hoi = _them_commit(cay, "h-giu-th", S3, {"docs/d.md": b"d\n"})
 
         def m4(H, S_, receipt=None, nhanh="master", goc=cay):
             argv = ["kiem-thu-hoi-github", H, "--canonical-base", S_, "--nhanh-mac-dinh", nhanh, "--root", str(goc)]
@@ -5690,25 +5903,17 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         # F01/Q13: marker MỚI khi descriptor CHƯA ghim (A0) ⇒ 12, kể cả policy JSON hợp lệ; policy mà không marker ⇒ 12
         rc, o, e = m4(H_meta_policy, S, rcp)
         chot(rc == 12 and "descriptor" in e and not rcp.exists(), f"marker mới ở A0 (descriptor chưa ghim) phải 12: {rc} {e!r}")
-        H_policy_khong_marker = _them_commit(cay, "h-policy-0", S, {POL: b"{}\n"})
+        H_policy_khong_marker = h["H_policy_khong_marker"]
         rc, o, e = m4(H_policy_khong_marker, S)
         chot(rc == 12 and "thiếu marker" in e, f"policy không marker phải 12 (không grandfather): {rc} {e!r}")
         # Binding Q13 với descriptor GHIM (tiêm qua thuộc tính module — API nội bộ, không CLI): đúng cả ba ⇒ 0;
         # sai từng cái ⇒ 12; policy đã có ở S mà marker mới ⇒ 12
         import hashlib as _h
-        POL_BYTES = b'{"schema": 1}\n'
-        DESC = "c" * 64
-        dung = _metadata_retired(descriptor_sha256=DESC, first_policy_sha256=_h.sha256(POL_BYTES).hexdigest(), base_sha_before_add=S)
-        H_bind_ok = _them_commit(cay, "h-bind-ok", S, {RET: _yaml_bytes(dung), POL: POL_BYTES})
-        H_bind_desc = _them_commit(cay, "h-bind-desc", S, {RET: _yaml_bytes(dict(dung, descriptor_sha256="d" * 64)), POL: POL_BYTES})
-        H_bind_hash = _them_commit(cay, "h-bind-hash", S, {RET: _yaml_bytes(dict(dung, first_policy_sha256="e" * 64)), POL: POL_BYTES})
-        H_bind_base = _them_commit(cay, "h-bind-base", S, {RET: _yaml_bytes(dict(dung, base_sha_before_add=c0)), POL: POL_BYTES})
-        H_bind_pol_hong = _them_commit(cay, "h-bind-hong", S, {RET: _yaml_bytes(dung), POL: b"[1]\n"})
-        H_bind_pol_exec = _them_commit(cay, "h-bind-exec", S, {RET: _yaml_bytes(dung), POL: POL_BYTES})
-        _g_a0(cay, "update-index", "--chmod=+x", POL); _g_a0(cay, "commit", "-qm", "exec"); H_bind_pol_exec = _g_a0(cay, "rev-parse", "HEAD")
-        S_pol = H_policy_khong_marker
-        H_bind_S_co_policy = _them_commit(cay, "h-bind-s-pol", S_pol, {RET: _yaml_bytes(dict(
-            dung, base_sha_before_add=S_pol, first_policy_sha256=_h.sha256(b"{}\n").hexdigest()))})
+        POL_BYTES = _POL_BYTES_T133
+        DESC = _DESC_T133
+        H_bind_ok, H_bind_desc, H_bind_hash, H_bind_base = h["H_bind_ok"], h["H_bind_desc"], h["H_bind_hash"], h["H_bind_base"]
+        H_bind_pol_hong, H_bind_pol_exec = h["H_bind_pol_hong"], h["H_bind_pol_exec"]
+        S_pol, H_bind_S_co_policy = h["S_pol"], h["H_bind_S_co_policy"]
         mod.DESCRIPTOR_Q13_SHA256 = DESC
         try:
             rc, o, e = m4(H_bind_ok, S, rcp)
@@ -5721,9 +5926,9 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
                 rc, o, e = m4(H, S_pol if H is H_bind_S_co_policy else S)
                 chot(rc == 12 and dau in e, f"binding {ten}: đợi 12 '{dau}', được {rc}: {e!r}")
             # marker CŨ (đã ở S2 canonical) không bị đòi binding lại: chỉ policy T phải là JSON object
-            rc, o, e = m4(_them_commit(cay, "h-old-marker", H_bind_ok, {"docs/z.md": b"z\n"}), H_bind_ok)
+            rc, o, e = m4(h["H_old_marker"], H_bind_ok)
             chot(rc == 0, f"marker cũ + policy hợp lệ ở T phải 0: {rc} {e!r}")
-            rc, o, e = m4(_them_commit(cay, "h-old-marker-pol-hong", H_bind_ok, {POL: b"not JSON\n"}), H_bind_ok)
+            rc, o, e = m4(h["H_old_marker_pol_hong"], H_bind_ok)
             chot(rc == 12 and "JSON" in e, f"marker cũ nhưng policy T hỏng phải 12: {rc} {e!r}")
         finally:
             mod.DESCRIPTOR_Q13_SHA256 = None
@@ -5766,6 +5971,33 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         _g_a0(cay, "checkout", "-q", H_thu_hoi)
         rc, o, e = m4(H_sach, S)
         chot(rc == 0, f"checkout hiện tại không được đổi verdict: {rc} {e!r}")
+
+
+@ca
+def t221_mau_t133_tat_auto_maintenance_truoc_commit_dau():
+    """WP748 r21: kho mẫu `_mau_t133` phải tắt `maintenance.auto` và `gc.auto` TRƯỚC commit đầu tiên.
+
+    Đỏ thật (run 39352202619, 2/2, git 2.55): `copytree` của t133 ném `[Errno 2] ... maintenance.lock` vì commit của
+    mẫu sinh maintenance nền; container git 2.43 không tái hiện được nên race không đo trực tiếp ở đây. Ca này đo
+    ĐIỀU KIỆN chặn race trên CHÍNH kho mẫu: config cục bộ đọc bằng git thật, và mốc khai config phải ở reflog TRƯỚC
+    commit `c0` (config đặt sau commit đầu vẫn để lọt tiến trình nền của các commit trước nó).
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `config maintenance.auto false` / `config gc.auto 0` trong `_kho_do_thi`."""
+    mau = _mau_t133()
+    cay = mau["cay"]
+    auto = subprocess.run(["git", "-C", str(cay), "config", "--local", "--get", "maintenance.auto"],
+                          capture_output=True, text=True)
+    gc = subprocess.run(["git", "-C", str(cay), "config", "--local", "--get", "gc.auto"],
+                        capture_output=True, text=True)
+    chot(auto.returncode == 0 and auto.stdout.strip() == "false",
+         f"kho mẫu t133 phải có maintenance.auto=false cục bộ: rc={auto.returncode} {auto.stdout!r}")
+    chot(gc.returncode == 0 and gc.stdout.strip() == "0",
+         f"kho mẫu t133 phải có gc.auto=0 cục bộ: rc={gc.returncode} {gc.stdout!r}")
+    # Thứ tự: `_kho_do_thi` đặt config ngay sau `init`, nên tệp config phải cũ hơn object của commit c0.
+    cfg = (cay / ".git" / "config").stat().st_mtime_ns
+    c0 = mau["h"]["c0"]
+    obj = cay / ".git" / "objects" / c0[:2] / c0[2:]
+    chot(obj.is_file() and cfg <= obj.stat().st_mtime_ns,
+         f"config phải được ghi TRƯỚC commit c0: config={cfg} c0={obj.stat().st_mtime_ns if obj.is_file() else None}")
 
 
 @ca
@@ -7020,11 +7252,35 @@ def t154_giet_ca_cay_thu_hoi_CHAU_chu_khong_chi_CON():
         try:
             so2 = doc_pid(pid2, "fixture hỏng: cháu chiều 2")
             bang(doi_nhip(nhip2), "fixture hỏng: cháu chiều 2 không đập nhịp trong 15 s")
-            nhat_ky = _giet_ca_cay(p2)
+            # WP748 r9/g9 — "đã đập MỘT nhịp" chưa phải "còn sống ngay trước cú dọn". Đòi nhịp TĂNG trong
+            # cùng cửa sổ dùng để kết luận "im" bên dưới, để vế "im sau dọn" so được với vế "đập trước dọn".
+            dap0, a0, b0 = con_dap(nhip2)
+            bang(dap0, f"fixture hỏng: cháu chiều 2 không còn đập ngay trước cú dọn (nhịp {a0}->{b0})")
+            bc = {}
+            nhat_ky = _giet_ca_cay(p2, bang_chung=bc)
             bang(p2.poll() is not None, f"con chưa chết sau `_giet_ca_cay`: {nhat_ky}")
             dap, a, b = con_dap(nhip2)
             bang(not dap, f"`_giet_ca_cay` KHÔNG thu hồi được CHÁU: nhịp còn tăng {a}->{b}; "
                           f"nhật ký giết: {nhat_ky}")
+            if not (getattr(os, "killpg", None) and getattr(os, "getpgid", None)):
+                # WP748 r8/g8 — nhịp im CHƯA đủ trên Windows: taskkill may mắn thắng thì nhịp cũng im, kể cả
+                # khi `_giu_hau_due_windows` trả None. Đường giữ-handle phải tự có bằng chứng DƯƠNG: cháu
+                # (đã đập nhịp TRƯỚC cú giết, nên ảnh 0 hậu duệ là KHÔNG chấp nhận) nằm trong tập GIỮ và
+                # trong tập ĐÃ THOÁT theo `WaitForSingleObject`. Không đòi số PID > 1 (venv redirector
+                # có thể thêm/bớt tầng); chỉ đòi ĐÚNG PID cháu đo được.
+                bang("CHAU KHONG DO DUOC" not in nhat_ky, f"đường Windows KHÔNG ĐO ĐƯỢC cháu: {nhat_ky}")
+                bang(bc.get("giu") is not None and so2 in bc["giu"],
+                     f"ảnh hậu duệ thiếu CHÁU sống {so2} (mở/khoá danh tính hỏng?): giu={bc.get('giu')!r}; "
+                     f"nhật ký: {nhat_ky}")
+                bang(so2 in (bc.get("song_truoc") or ()),
+                     f"thiếu mốc CÒN SỐNG dương cho cháu {so2} trên handle đã giữ trước taskkill: "
+                     f"song_truoc={bc.get('song_truoc')!r}; nhật ký: {nhat_ky}")
+                bang(bc.get("do_duoc") is True and not bc.get("con_song") and not bc.get("hong"),
+                     f"phép chờ hậu duệ không xác nhận: con_song={bc.get('con_song')!r} "
+                     f"hong={bc.get('hong')!r}; nhật ký: {nhat_ky}")
+                bang(so2 in (bc.get("da_thoat") or ()) and set(bc["da_thoat"]) == set(bc["giu"]),
+                     f"thiếu mốc ĐÃ THOÁT dương cho cháu {so2}: da_thoat={bc.get('da_thoat')!r} "
+                     f"giu={bc.get('giu')!r}; nhật ký: {nhat_ky}")
         finally:
             if p2.poll() is None:
                 p2.kill(); p2.wait(timeout=5)
@@ -7591,65 +7847,80 @@ def _kiem_tra_outputs_ci_khong_boc_fromjson(wf_path_or_dict):
 
 def _danh_gia_bieu_thuc_chuan_bi(expr_str: str, ctx: dict) -> list[str]:
     """Evaluator tối giản cho đúng hình biểu thức của chuan-bi.
-    Hình chuẩn: ( <cond> ) && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest"]'
-    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài).
+    Hình chuẩn: một hay nhiều nhánh `( <cond> ) && '<mảng>' ||` rồi một `'<mảng>'` cuối — `&&` đứng trước `||` như
+    Actions, nên nhánh ĐẦU TIÊN có cond đúng thắng (#878 thêm nhánh `windows-only` trước nhánh hai nền).
+    `<cond>` là các vế nối `||`, mỗi vế là các nguyên tử nối `&&`: `github.event_name == '…'`, `github.ref == '…'`,
+    `contains(github.event.pull_request.labels.*.name, '…')`, `inputs.<tên> == '…'` (đọc `ctx["inputs"]`; vắng = rỗng).
+    Fail-close: in 'KHÔNG ĐO ĐƯỢC' và raise khi gặp hình khác (kể cả bọc fromJSON ngoài) hoặc một nguyên tử lạ — mọi
+    nguyên tử được kiểm TRƯỚC khi tính, để một vế lạ không trốn được sau một vế đúng đứng trước nó.
     """
     import json
     raw = expr_str.strip()
     if raw.startswith("${{") and raw.endswith("}}"):
         raw = raw[3:-2].strip()
 
-    m = re.fullmatch(
-        r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<t>'\[.*?\]')\s*\|\|\s*(?P<f>'\[.*?\]')",
-        raw,
-        re.DOTALL,
-    )
-    if not m:
-        msg = f"KHÔNG ĐO ĐƯỢC: biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}"
+    def _khong_do_duoc(msg):
+        msg = f"KHÔNG ĐO ĐƯỢC: {msg}"
         print(msg)
         raise ValueError(msg)
 
-    cond_str = m.group("cond").strip()
-    try:
-        true_arr = json.loads(m.group("t").strip("'"))
-        false_arr = json.loads(m.group("f").strip("'"))
-    except Exception as ex:
-        msg = f"KHÔNG ĐO ĐƯỢC: không parse được mảng JSON trong biểu thức: {ex}"
-        print(msg)
-        raise ValueError(msg)
+    nhanh, con_lai = [], raw
+    mau_nhanh = re.compile(r"\(\s*(?P<cond>.*?)\)\s*&&\s*(?P<arr>'\[[^']*\]')\s*\|\|\s*", re.DOTALL)
+    while (m := mau_nhanh.match(con_lai)):
+        nhanh.append((m.group("cond").strip(), m.group("arr")))
+        con_lai = con_lai[m.end():]
+    if not nhanh or not re.fullmatch(r"'\[[^']*\]'", con_lai.strip()):
+        _khong_do_duoc(f"biểu thức không khớp hình chuẩn tối giản của chuan-bi: {raw!r}")
 
-    ve_list = [v.strip() for v in cond_str.split("||")]
-    cond_true = False
-    for ve in ve_list:
-        m_eq = re.fullmatch(r"github\.event_name\s*==\s*'([^']+)'", ve)
-        if m_eq:
-            if ctx.get("event_name") == m_eq.group(1):
-                cond_true = True
-                break
-            continue
+    def _mang(chuoi):
+        try:
+            return json.loads(chuoi.strip().strip("'"))
+        except ValueError as ex:
+            _khong_do_duoc(f"không parse được mảng JSON trong biểu thức: {ex}")
 
-        m_ref = re.fullmatch(r"github\.ref\s*==\s*'([^']+)'", ve)
-        if m_ref:
-            if ctx.get("ref") == m_ref.group(1):
-                cond_true = True
-                break
-            continue
+    def _nguyen_tu(nt):
+        nt = nt.strip()
+        for mau, khoa in ((r"github\.event_name\s*==\s*'([^']+)'", "event_name"),
+                          (r"github\.ref\s*==\s*'([^']+)'", "ref")):
+            if (m := re.fullmatch(mau, nt)):
+                return lambda c, k=khoa, v=m.group(1): c.get(k) == v
+        if (m := re.fullmatch(r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", nt)):
+            return lambda c, v=m.group(1): v in (c.get("labels") or [])
+        # P3 review Codex #878: tên input theo ngữ pháp định danh của Actions (không bắt đầu bằng số, cho phép `-`).
+        if (m := re.fullmatch(r"inputs\.([A-Za-z_][A-Za-z0-9_-]*)\s*==\s*'([^']+)'", nt)):
+            return lambda c, k=m.group(1), v=m.group(2): (c.get("inputs") or {}).get(k, "") == v
+        _khong_do_duoc(f"vế điều kiện không nằm trong tập tối giản hỗ trợ: {nt!r}")
 
-        m_contains = re.fullmatch(
-            r"contains\s*\(\s*github\.event\.pull_request\.labels\.\*\.name\s*,\s*'([^']+)'\s*\)", ve
-        )
-        if m_contains:
-            labels = ctx.get("labels") or []
-            if m_contains.group(1) in labels:
-                cond_true = True
-                break
-            continue
+    def _tach(chuoi, toan_tu):
+        """Tách theo `toan_tu` CHỈ ở ngoài literal `'…'` và ngoài ngoặc (vd `contains(...)`) — review Codex #878 P2:
+        `split` thô tách cả `'refs/heads/a&&b'`, làm một ref/label hợp lệ thành KHÔNG ĐO ĐƯỢC."""
+        phan, dau, sau, trong_nhay = [], 0, 0, False
+        i = 0
+        while i < len(chuoi):
+            c = chuoi[i]
+            if c == "'":
+                trong_nhay = not trong_nhay      # `''` trong literal là dấu nháy thoát: hai lần đảo, triệt tiêu
+            elif not trong_nhay and c == "(":
+                sau += 1
+            elif not trong_nhay and c == ")":
+                sau -= 1
+            elif not trong_nhay and sau == 0 and chuoi.startswith(toan_tu, i):
+                phan.append(chuoi[dau:i])
+                i += len(toan_tu)
+                dau = i
+                continue
+            i += 1
+        if trong_nhay or sau:
+            _khong_do_duoc(f"literal/ngoặc không cân trong điều kiện: {chuoi!r}")
+        return phan + [chuoi[dau:]]
 
-        msg = f"KHÔNG ĐO ĐƯỢC: vế điều kiện không nằm trong tập tối giản hỗ trợ: {ve!r}"
-        print(msg)
-        raise ValueError(msg)
-
-    return true_arr if cond_true else false_arr
+    dieu_kien = [[[_nguyen_tu(nt) for nt in _tach(ve, "&&")] for ve in _tach(cond, "||")] for cond, _ in nhanh]
+    mang = [_mang(arr) for _, arr in nhanh]
+    cuoi = _mang(con_lai)
+    for cac_ve, arr in zip(dieu_kien, mang):
+        if any(all(f(ctx) for f in ve) for ve in cac_ve):
+            return arr
+    return cuoi
 
 
 @ca
@@ -7737,6 +8008,63 @@ def t162_M4_evaluator_toi_gian_chuan_bi():
     bang(r_pr == ["ubuntu-latest"], f"PR thường phải chỉ chạy ubuntu-latest, nhận được: {r_pr}")
     bang(r_pr_win == ["ubuntu-latest", "windows-latest"], f"PR nhãn windows phải chạy hai nền, nhận được: {r_pr_win}")
     bang(r_disp == ["ubuntu-latest", "windows-latest"], f"workflow_dispatch phải chạy hai nền, nhận được: {r_disp}")
+
+    # #878 N2: input `runner_set` của dispatch — `windows-only` bỏ Ubuntu; giá trị mặc định / vắng input GIỮ hai nền.
+    def _disp(gia_tri):
+        return dict(c_dispatch, inputs={} if gia_tri is None else {"runner_set": gia_tri})
+    r_win_only = _danh_gia_bieu_thuc_chuan_bi(raw_expr, _disp("windows-only"))
+    bang(r_win_only == ["windows-latest"], f"dispatch windows-only phải chỉ chạy windows-latest, nhận được: {r_win_only}")
+    for gia_tri in ("windows-and-ubuntu", None):
+        r = _danh_gia_bieu_thuc_chuan_bi(raw_expr, _disp(gia_tri))
+        bang(r == ["ubuntu-latest", "windows-latest"], f"dispatch runner_set={gia_tri!r} phải chạy hai nền, nhận được: {r}")
+    for ctx in (c_push_master, c_pr_thuong, c_pr_windows):   # input chỉ có ở dispatch: sự kiện khác KHÔNG được đổi
+        r = _danh_gia_bieu_thuc_chuan_bi(raw_expr, dict(ctx, inputs={"runner_set": "windows-only"}))
+        bang(r == _danh_gia_bieu_thuc_chuan_bi(raw_expr, ctx), f"runner_set lọt sang sự kiện {ctx['event_name']}: {r}")
+    # Đột biến #878 (trên CHÍNH biểu thức thật): gỡ nhánh windows-only ⇒ windows-only lại chạy hai nền; nhánh ấy trả
+    # hai nền ⇒ cũng vậy. Neo phải xuất hiện đúng một lần, kẻo đột biến không chạy mà vẫn "giết".
+    neo_vao = "(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only')"
+    neo_mang = """&& '["windows-latest"]'"""
+    bang(raw_expr.count(neo_vao) == 1 and raw_expr.count(neo_mang) == 1,
+         f"neo đột biến #878 phải xuất hiện đúng một lần trong biểu thức thật: {raw_expr!r}")
+    dot_bien_878 = {
+        # YAML gập biểu thức nhiều dòng thành dấu cách ⇒ khớp khoảng trắng bằng regex, không bằng chuỗi cố định.
+        "go_nhanh_windows_only": re.sub(re.escape(neo_vao) + r"\s*" + re.escape(neo_mang) + r"\s*\|\|\s*", "",
+                                        raw_expr, count=1),
+        "nhanh_windows_only_tra_hai_nen": raw_expr.replace(neo_mang, """&& '["ubuntu-latest","windows-latest"]'""", 1),
+    }
+    for ten, bt in dot_bien_878.items():
+        bang(bt != raw_expr, f"đột biến #878 {ten} không đổi được biểu thức (neo trôi)")
+        r = _danh_gia_bieu_thuc_chuan_bi(bt, _disp("windows-only"))
+        bang(r != ["windows-latest"], f"đột biến #878 {ten} SỐNG: windows-only vẫn chỉ ra {r}")
+
+    # Review Codex #878 (P2, P3): toán tử NẰM TRONG literal không được tách; tên input theo ngữ pháp Actions.
+    # Bản `split` thô làm các ca "nhận" dưới đây thành KHÔNG ĐO ĐƯỢC — chính chúng là đột biến của bộ tách.
+    hai_nen, chi_u = """'["ubuntu-latest","windows-latest"]'""", """'["ubuntu-latest"]'"""
+    def _bt(cond):
+        return f"({cond}) && {hai_nen} || {chi_u}"
+    nhan = [
+        ("ref chứa &&", "github.ref == 'refs/heads/feature&&x'", {"ref": "refs/heads/feature&&x"}),
+        ("ref chứa ||", "github.ref == 'refs/heads/a||b'", {"ref": "refs/heads/a||b"}),
+        ("label chứa &&", "contains(github.event.pull_request.labels.*.name, 'win&&dows')", {"labels": ["win&&dows"]}),
+        ("input có gạch nối", "inputs.runner-set == 'x'", {"inputs": {"runner-set": "x"}}),
+    ]
+    for ten, cond, ctx in nhan:
+        try:
+            r = _danh_gia_bieu_thuc_chuan_bi(_bt(cond), ctx)
+        except ValueError as ex:
+            r = f"ValueError: {ex}"
+        bang(r == ["ubuntu-latest", "windows-latest"], f"evaluator phải NHẬN và tính đúng ({ten}): {r}")
+    r = _danh_gia_bieu_thuc_chuan_bi(_bt("github.event_name == 'workflow_dispatch' && inputs.runner-set == 'x'"),
+                                     {"event_name": "workflow_dispatch", "inputs": {"runner-set": "y"}})
+    bang(r == ["ubuntu-latest"], f"`&&` THẬT ngoài literal vẫn phải tách (một vế sai ⇒ nhánh sai): {r}")
+    for ten, bt in (("input bắt đầu bằng số", _bt("inputs.123 == 'x'")), ("nhánh rỗng", _bt("github.ref == 'a' || ")),
+                    ("nháy không cân", _bt("github.ref == 'a"))):
+        try:
+            _danh_gia_bieu_thuc_chuan_bi(bt, {})
+            bat = False
+        except ValueError as ex:
+            bat = "KHÔNG ĐO ĐƯỢC" in str(ex)
+        bang(bat, f"evaluator phải fail-close với {ten}: {bt!r}")
 
     # Đột biến A3: đưa github.ref == 'refs/heads/master' trở lại => push master phải sinh 2 nền (làm ca đích ĐỎ)
     expr_dot_bien_ref = """(github.event_name == 'workflow_dispatch'
@@ -9710,11 +10038,15 @@ def _chay_t190_tren(nguon: str, thu_muc: Path, ten: str) -> str:
     import importlib.util
     p = thu_muc / f"{ten}.py"
     p.write_text(nguon, encoding="utf-8")
+    # WP748 r17/g17 (profile t191 trên 7bb520b: 1762 lần `_nap` ⇒ `source_to_code` ~190 s / 439 s) — biên dịch
+    # MỘT lần từ CHÍNH byte vừa ghi, rồi mỗi `_nap` vẫn dựng module MỚI và exec mã ấy vào namespace mới — đúng
+    # việc `exec_module` làm, chỉ bỏ biên dịch lặp. Nguồn đổi ⇒ tệp mới ⇒ mã mới; không cache xuyên lời gọi.
+    ma = compile(p.read_bytes(), str(p), "exec", dont_inherit=True)
 
     def _nap():
         spec = importlib.util.spec_from_file_location(f"lp_t191_{ten}", p)
         m = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(m)
+        exec(ma, m.__dict__)
         return m
     cu, cu_bc = globals()["_nap_cong"], sys.dont_write_bytecode
     globals()["_nap_cong"], sys.dont_write_bytecode = _nap, True
@@ -12907,6 +13239,46 @@ def t217_a9_bien_pyyaml_vang():
         chot("ImportError" in e, f"A9: {e!r}")
 
 
+@ca
+def t220_giu_hau_due_windows_moi_loi_goi_ctypes_launcher_trong_khoa():
+    """WP748 r20 (Codex WP748-R3 trên 9d471d9) — hai waiter t125 cùng vào `_giu_hau_due_windows`; launcher
+    gán `argtypes` lên kernel32 DÙNG CHUNG ở CẢ `_chup_cay` lẫn `_khoa_danh_tinh`, nên lời gọi nào nằm
+    ngoài `_KHOA_CHUP_CAY_WINDOWS` là còn khe ném `ctypes.ArgumentError`. Đo HÀNH VI, chạy được mọi nền:
+    launcher giả ghi `locked()` lúc từng lời gọi, kernel32 giả trả handle thật-giả. Đối chứng: cháu đúng
+    danh tính PHẢI được giữ (không thì ca đo một đường thoát sớm, không đo khoá)."""
+    import ctypes
+    from unittest import mock
+    goi = []
+
+    class _ThuHoiGia:
+        @staticmethod
+        def _chup_cay(pid):
+            goi.append(("_chup_cay", _KHOA_CHUP_CAY_WINDOWS.locked()))
+            return {pid: "win:100", 4242: "win:200"}
+
+        @staticmethod
+        def _khoa_danh_tinh(pid):
+            goi.append(("_khoa_danh_tinh", _KHOA_CHUP_CAY_WINDOWS.locked()))
+            return "win:200" if pid == 4242 else None
+
+    class _K32Gia:
+        def __init__(self):
+            for ten in ("OpenProcess", "WaitForSingleObject", "TerminateProcess", "CloseHandle"):
+                setattr(self, ten, mock.Mock(return_value=7 if ten == "OpenProcess" else 1))
+
+    class _P:
+        pid = 1000
+
+    with mock.patch.dict(globals(), {"_nap_launcher_thu_hoi": lambda: _ThuHoiGia}), \
+            mock.patch.object(ctypes, "WinDLL", lambda *a, **k: _K32Gia(), create=True):
+        k32, giu, ghi = _giu_hau_due_windows(_P())
+    chot(giu is not None and [q for q, _ in giu] == [4242],
+         f"đối chứng: cháu đúng danh tính phải được GIỮ, được giu={giu!r} ({ghi})")
+    chot([t for t, _ in goi] == ["_chup_cay", "_khoa_danh_tinh"], f"tập lời gọi lệch: {goi!r}")
+    ngoai = [t for t, giu_khoa in goi if not giu_khoa]
+    chot(not ngoai, f"lời gọi ctypes launcher NGOÀI _KHOA_CHUP_CAY_WINDOWS: {ngoai} — waiter kia đè argtypes")
+
+
 def _a9_tep_object(kho: Path, oid: str) -> Path:
     return kho / ".git" / "objects" / oid[:2] / oid[2:]
 
@@ -12929,7 +13301,9 @@ def t217_a9_object_store_blob_sai_bam_la_2():
 def t217_a9_object_store_thieu_blob_la_2():
     with San() as s:
         kho, _, _, bx, _ = _a9_hai_commit(s)
-        _a9_tep_object(kho, bx).unlink()
+        tep = _a9_tep_object(kho, bx)
+        tep.chmod(0o644)
+        tep.unlink()
         _a9_chot("thiếu blob", _a9_cli(kho), 2)
 
 

@@ -1,0 +1,7 @@
+./HINT.patch: OK
+./PROMPT.md: OK
+./VERDICT.md: OK
+./evidence/measure_history.py: OK
+./evidence/measure_more.py: OK
+./evidence/review_probe.py: OK
+./stderr-header.txt: OK

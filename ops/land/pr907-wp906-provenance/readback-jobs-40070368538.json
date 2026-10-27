@@ -1,0 +1,186 @@
+{
+ "jobs": [
+  {
+   "id": 120802305447,
+   "run_id": 40070368538,
+   "workflow_name": "ops — đăng lease bằng git",
+   "head_branch": "ops/wp906-r1-g1-lease",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40070368538",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAcIGDlpw",
+   "head_sha": "702a50c66581a50947d648bffe8871ef9661fcec",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120802305447",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40070368538/job/120802305447",
+   "status": "completed",
+   "conclusion": "failure",
+   "created_at": "2026-10-24T06:28:54Z",
+   "started_at": "2026-10-24T06:28:54Z",
+   "completed_at": "2026-10-24T06:28:56Z",
+   "name": "dang",
+   "steps": [],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/120802305447",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 0,
+   "runner_name": "",
+   "runner_group_id": 0,
+   "runner_group_name": ""
+  },
+  {
+   "id": 120802671891,
+   "run_id": 40070368538,
+   "workflow_name": "ops — đăng lease bằng git",
+   "head_branch": "ops/wp906-r1-g1-lease",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40070368538",
+   "run_attempt": 2,
+   "node_id": "CR_kwDOTNeRjc8AAAAcIGZ9Ew",
+   "head_sha": "702a50c66581a50947d648bffe8871ef9661fcec",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120802671891",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40070368538/job/120802671891",
+   "status": "completed",
+   "conclusion": "failure",
+   "created_at": "2026-10-24T06:30:44Z",
+   "started_at": "2026-10-24T06:30:44Z",
+   "completed_at": "2026-10-24T06:30:46Z",
+   "name": "dang",
+   "steps": [],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/120802671891",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 0,
+   "runner_name": "",
+   "runner_group_id": 0,
+   "runner_group_name": ""
+  },
+  {
+   "id": 120802713528,
+   "run_id": 40070368538,
+   "workflow_name": "ops — đăng lease bằng git",
+   "head_branch": "ops/wp906-r1-g1-lease",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40070368538",
+   "run_attempt": 3,
+   "node_id": "CR_kwDOTNeRjc8AAAAcIGcfuA",
+   "head_sha": "702a50c66581a50947d648bffe8871ef9661fcec",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120802713528",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40070368538/job/120802713528",
+   "status": "completed",
+   "conclusion": "failure",
+   "created_at": "2026-10-24T06:30:56Z",
+   "started_at": "2026-10-24T06:30:56Z",
+   "completed_at": "2026-10-24T06:30:57Z",
+   "name": "dang",
+   "steps": [],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/120802713528",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 0,
+   "runner_name": "",
+   "runner_group_id": 0,
+   "runner_group_name": ""
+  },
+  {
+   "id": 120803792378,
+   "run_id": 40070368538,
+   "workflow_name": "ops — đăng lease bằng git",
+   "head_branch": "ops/wp906-r1-g1-lease",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40070368538",
+   "run_attempt": 4,
+   "node_id": "CR_kwDOTNeRjc8AAAAcIHeV-g",
+   "head_sha": "702a50c66581a50947d648bffe8871ef9661fcec",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/120803792378",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40070368538/job/120803792378",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-24T06:36:24Z",
+   "started_at": "2026-10-24T06:36:26Z",
+   "completed_at": "2026-10-24T06:42:48Z",
+   "name": "dang",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-10-24T06:36:28Z",
+     "completed_at": "2026-10-24T06:36:28Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-10-24T06:36:28Z",
+     "completed_at": "2026-10-24T06:36:38Z"
+    },
+    {
+     "name": "cài PyYAML",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-10-24T06:36:38Z",
+     "completed_at": "2026-10-24T06:36:40Z"
+    },
+    {
+     "name": "neo bộ kiểm vào nhánh mặc định",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-10-24T06:36:40Z",
+     "completed_at": "2026-10-24T06:36:42Z"
+    },
+    {
+     "name": "tự kiểm cổng trước khi tin nó (cài công cụ + chạy cổng)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-10-24T06:36:42Z",
+     "completed_at": "2026-10-24T06:42:42Z"
+    },
+    {
+     "name": "tìm lease vừa đổi",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-10-24T06:42:42Z",
+     "completed_at": "2026-10-24T06:42:42Z"
+    },
+    {
+     "name": "đăng",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-10-24T06:42:42Z",
+     "completed_at": "2026-10-24T06:42:45Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-10-24T06:42:45Z",
+     "completed_at": "2026-10-24T06:42:45Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-10-24T06:42:45Z",
+     "completed_at": "2026-10-24T06:42:45Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/120803792378",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000019066,
+   "runner_name": "GitHub Actions 1000019066",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  }
+ ],
+ "total_count": 4
+}

@@ -1,0 +1,105 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 835
+packet_id: wp835
+mission_issue: 835
+revision: 3
+generation: 3
+lease_id: wp835-r3-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [919]
+depends_on_ghi_chu: '#919 da merge (PR #926, d2e3052) va lease wp919-r3-g3-claude-remote-20261025 da rut han (be6f91b, ops-publish-lease xanh). r3 la DELTA tren r2 (spec r2 sha256 da98e225...).'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'governance protocol => sensitive; executor ho claude, reviewer ho openai; toi da 2 loi goi Codex (spec r3 Q1).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp835-lease-6h-governance-r3.md
+spec_sha256_required: 71403df80d133e4568cb891ae5ab41de937a9d1d1086a92f7255323568596ddc
+spec_hash: 71403df80d133e4568cb891ae5ab41de937a9d1d1086a92f7255323568596ddc
+spec_ref: refs/heads/ops/wp835-r3-g3-lease@df88ca47bed9f9b0423969737d4468be3b9a0726
+spec_r2_ref: 'ops/specs/wp835-lease-6h-governance-r2.md @ ops/wp835-r2-g2-lease 53cf373 (sha256 da98e225c1e0bb419b83c368d2b3112309bd95316a4787c18f91f79bdbc57833); r3 la DELTA, doc ca hai'
+prompt_path: ops/specs/wp835-lease-6h-governance-r3.md
+prompt_sha256_required: 71403df80d133e4568cb891ae5ab41de937a9d1d1086a92f7255323568596ddc
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0056-lease-no-progress-six-hours.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+- ops/handoff/wp835-g3-claude.md
+write_set_hash: fa59517725ec0632dc7584988b0fbea3a15b0e265fe7a7c591a3bb989f05b929
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'r3: port ban va r2 (a62ba1f) len base moi, ADR doi so 0056; tl_selftest.py CHI ratchet r291_docs_ngoai_goi; RELEASE_MANIFEST.json tai sinh; handoff chi tren nhanh lease; diff PR <= 4 tep. Ngoai le closure thu cong cua chu kho (r1/r2) van ap vi change-impact.v1.json van vang.'
+change_policy_sha: null
+effective_write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0056-lease-no-progress-six-hours.md
+- scripts/tl_selftest.py
+- RELEASE_MANIFEST.json
+- ops/handoff/wp835-g3-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 2 loi goi codex; moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; tl --selftest N/N tai cho tren dung commit day'}
+- {id: M-3, dieu_kien: 'N1-N5 spec r3: adr-song rc0, doctrine-scan rc0, release-verify strict ok, doc-claims-check delta 0; ADR giu CHUA KICH HOAT VAN HANH'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp835-g3-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: d2e3052d479d140b7e7b91df41ec4914fab7d544
+start_from_sha: d2e3052d479d140b7e7b91df41ec4914fab7d544
+start_from_ghi_chu: 'origin/master luc soan spec r3; master tien toi cdc4e80 chi o ops/land/** (khong cham write set) truoc khi cap lease.'
+reviewed_sha_required: d2e3052d479d140b7e7b91df41ec4914fab7d544
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/835#issuecomment-6397870294
+granted_on_instruction_readback: 'chu kho chon "Land #835 + sua so", "Doi #835 sang ADR-0056", "Them hai tep" (AskUserQuestion phien session_01FLVLxi5gKZgtVvbuTCEqEn, 25-10-2026, ghi ho #835 issuecomment-6397870294) va "Rut gan phien #919 cho #835 ngay" (ghi ho #919 issuecomment-6399079847). Bam byte KHONG DO DUOC.'
+granted_on_instruction_note: >-
+  Chu kho chon land ADR nguong thu hoi lease 6 gio cua #835, doi so sang 0056 vi 0055 da thuoc #919 va da bi
+  packet_loop.py giu cho cho #816; rut han lease #919 de nha protocol. Ghi ho qua GitHub App.
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (session_01FLVLxi5gKZgtVvbuTCEqEn) KHONG phai executor; executor la mot phien cloud MOI do phien nay tao.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-25T14:56:00Z'
+  goc_quet: 'master cdc4e80, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: 599, thieu 0; nhanh cuc bo khong tut sau'
+  ket_qua: 'ca 5 duong dan: NGUOI_GIU 0. docs/PROTOCOL_DA_PHIEN.md: wp919-r1/r2 CON_HAN nhung DA_BI_THAY_THE; wp919-r3 da rut han (be6f91b).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease wp835-r2-g2-claude-governance-20261019 da het han 2026-10-19T13:59Z => khong bia mo (bai hoc: viet bia mo vao lease da chet la mua mot luot DO).'
+leased_at_utc: '2026-10-25T14:58:00Z'
+heartbeat_at: '2026-10-25T14:58:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-27T14:58:00Z'
+lease_expires_at_utc: '2026-10-27T14:58:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'Q2 cua spec wp835 r3.'
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_wp835_g3: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_835_r3: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp835-g3-claude MOT lan khi N1-N5 dat va review approve; mo PR draft'
+da_bi_thay_the: wp835-r4-g4-claude
+ly_do_thu_hoi: 'P2 WP835-R3-01 (Codex luot 1/2): D3.3/N4 cua spec r3 doi ratchet docs da bo tu #794; chu kho chon "Soan r4, bo 2 tep thua" (#835 issuecomment-6399670937) => spec r4, lease r4 g4 thay.'

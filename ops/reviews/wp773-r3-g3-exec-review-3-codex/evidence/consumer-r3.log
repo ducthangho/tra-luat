@@ -1,0 +1,6 @@
+CA: 15/15 dat
+DOT BIEN: 37/37 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (2 dot bien)
+TONG: DAT
+CI_DANG_KY ops/land_evidence_nguon_test.py: ĐẠT rc=0
+REPORT {'ke_hoach': {}, 'N': 2, 'so_lop_logic': 4, 'bo': [{'duong_dan': 'ops/land_evidence_nguon_test.py', 'rc': 0, 'giay': 41.366, 'bat_dau_utc': '2026-10-18T03:40:45.611Z', 'ket_thuc_utc': '2026-10-18T03:41:26.977Z', 'che_do': 'day_du'}], 'so_lop_dung_duoc': 4}

@@ -1,0 +1,398 @@
+{
+  "patched": [
+    {
+      "receipt": "assurance-ho-model-review-1-claude-verdict.receipt.yaml",
+      "oid": "7d7f12249696e80238967c9ae2a8f360337db80e",
+      "anchor": "673e0541e104aac07b64c02ad565e159ba44144c",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "ci-windows-review-5-claude-verdict.receipt.yaml",
+      "oid": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "anchor": "e32c5643111e001dc0c655c568b445c897ade450",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "oid": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "anchor": "86169c00beff045b0faed63e39d1a67b9acd1fc1",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "oid": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "anchor": "de0ecd0f912bb131b63ada866672af00129eefd0",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "oid": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "anchor": "6d59a4394f0e51ace4e02c8f4be13cb649e6871e",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "pr508-review-1-codex-verdict.receipt.yaml",
+      "oid": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "pr508-review-2-codex-verdict.receipt.yaml",
+      "oid": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "pr508-review-3-codex-verdict.receipt.yaml",
+      "oid": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "pr508-review-4-codex-verdict.receipt.yaml",
+      "oid": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "pr508-review-5-codex-verdict.receipt.yaml",
+      "oid": "9196eaf70ca0d908b8d23ff26512c4e395e1e997",
+      "anchor": "a639e48e3077eb6797f6d793c3d91e7ae290f68a",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "r330-rig-quyet-mau-audit-nguoi-verdict.receipt.yaml",
+      "oid": "5c713298c49c1dde5c550112d6bc4daf6b876735",
+      "anchor": "615b98d77ced83be11cd2f90dcf34817019ba453",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp538-review-1-claude-verdict.receipt.yaml",
+      "oid": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp538-review-2-claude-verdict.receipt.yaml",
+      "oid": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp540-review-1-claude-verdict.receipt.yaml",
+      "oid": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "anchor": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp541-review-1-claude-verdict.receipt.yaml",
+      "oid": "34ebd10850d407b4cb1c1575284cc191e6f11bc5",
+      "anchor": "1af97acae891ac48aeb8df7d98dcbaad06ab062c",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp541-review-2-claude-verdict.receipt.yaml",
+      "oid": "820aebc767e20f00ff2ef86d0a4d09d9e680c31d",
+      "anchor": "517f6a8041a128220cae094cbb28bc33e3209075",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp678-spec-review-10-claude-verdict.receipt.yaml",
+      "oid": "42292b4219901137607d3fd9adda26d49f7cfd5e",
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp678-spec-review-11-claude-verdict.receipt.yaml",
+      "oid": "e48423a2719f64a5dfa2f85363874dfadf6c10f8",
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp678-spec-review-12-claude-verdict.receipt.yaml",
+      "oid": "d5a57c1ac152c344eef1c3b2cfdee310bba35200",
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp678-spec-review-7-claude-verdict.receipt.yaml",
+      "oid": "088511f1fd75faf9bf01f0cf8da037a14fa6d22d",
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp678-spec-review-8-claude-verdict.receipt.yaml",
+      "oid": "f958e147754bed8e9e7034dd28450681f19c3db0",
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "wp678-spec-review-9-claude-verdict.receipt.yaml",
+      "oid": "2469f3ebed51dc228319cf375d7912bf7dbc0947",
+      "anchor": "62319d945fff81de6396aab6806a4ab349682aba",
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      },
+      "anchor_receipt_exists_rc": 0
+    },
+    {
+      "receipt": "don-nhanh-base-review-1-codex-verdict.receipt.yaml",
+      "oid": "e872e98e7b3612baf71fc177b54ce8b3bafd033d",
+      "anchor": null,
+      "ancestor_rc": {
+        "101263f": 0,
+        "2e4183b": 0,
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    }
+  ],
+  "residual": [
+    {
+      "receipt": "ci-windows-review-5-claude-verdict.receipt.yaml",
+      "field": "chuoi_verdict_ghi_chu",
+      "line": 70,
+      "text": "Nam verdict deu CHUA land — chung song tren nam nhanh claude/review-548-luot*-20260917 va KHONG phai to tien cua master (do: `merge-base --is-ancestor c2f6898 origin/master` => KHONG). `approve` cua luot 2 DA BI RUT va KHONG song lai; `approve` co hieu luc la cua luot 5.",
+      "oid": "c2f68987b3f298de12b84cf29a934c7b844c8558",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    },
+    {
+      "receipt": "doctrine-scan-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 138,
+      "text": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "oid": "bc5d0c6e4d3d5b3cc5d6f8c08ba1c005dd9bdadc",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    },
+    {
+      "receipt": "doctrine-scan-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 138,
+      "text": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "oid": "80d816130fda69af75dc1d9ae76f3fc83b837773",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    },
+    {
+      "receipt": "doctrine-scan-review-3-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 120,
+      "text": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi #543 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "oid": "7d8bb69ac02b54075d63a9915e12e6d2bf28b513",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    },
+    {
+      "receipt": "wp538-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 155,
+      "text": "`cuong_do: thap` vi mo neo hien CHI la mot nhanh, khong phai tag `luu-tru/*` va khong phai to tien cua `master`. Nhanh xoa duoc va SHA se thanh khong tra duoc. Manh len `cao` khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "oid": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    },
+    {
+      "receipt": "wp538-review-2-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 158,
+      "text": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/*. Manh len cao khi WP538 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "oid": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    },
+    {
+      "receipt": "wp540-review-1-claude-verdict.receipt.yaml",
+      "field": "anchor.gioi_han",
+      "line": 165,
+      "text": "cuong_do thap vi mo neo hien chi la mot nhanh, khong phai tag luu-tru/* va khong phai to tien cua master. Manh len cao khi WP540 land bang merge commit hoac fast-forward; squash pha quan he to tien.",
+      "oid": "ab27f786a45de5df7aae23f7df7b4c4fb8eecb92",
+      "ancestor_rc": {
+        "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+        "1a276a15192013fdb1e472db409133b53ac57944": 0
+      }
+    }
+  ],
+  "ci_windows_all_five": {
+    "2d8b4fb9e1e122f40011e4fffe87fa6908c5f7fc": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 1
+    },
+    "7e2ef2e11b204f397a463d6ab824e3f12dfad709": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 1
+    },
+    "4bc35d3d6dc8a75464255048d50603ceba271667": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 1
+    },
+    "a45c8dc1c62ea493eb97c64d640727fd08230c13": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 1
+    },
+    "c2f68987b3f298de12b84cf29a934c7b844c8558": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 0,
+      "1a276a15192013fdb1e472db409133b53ac57944": 0
+    }
+  },
+  "exclusions": {
+    "4bc9432": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 1
+    },
+    "604b8d9": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 1
+    },
+    "2e4183b": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 0
+    },
+    "82359c4": {
+      "3e973a03b151e37cd402e0a723816eeaa8247193": 1,
+      "1a276a15192013fdb1e472db409133b53ac57944": 0
+    }
+  }
+}

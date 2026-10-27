@@ -7,6 +7,7 @@ import datetime
 import hashlib
 import io
 import json
+import math
 import os
 import pathlib
 import re
@@ -50,6 +51,11 @@ MOI = {
     ".claude/hooks/pretooluse_guard_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
+    "ops/kiem_ho_so_land_test.py": r"^(\d+)/(\d+)$",
+    "ops/kiem_nhan_hint_test.py": r"^(\d+)/(\d+)$",
+    "ops/codex_cloud_setup_test.py": r"^(\d+)/(\d+)$",
+    "ops/land_evidence_nguon_test.py": r"(?ms)\A(?!.*^(?:TONG|TU KIEM PHAN HANG): DO\b).*^CA: ([1-9]\d*)/(\1) dat\nDOT BIEN: ([1-9]\d*)/\3 bi giet dung ly do\nTU KIEM PHAN HANG: DAT \(\d+ dot bien\)\nTONG: DAT\n?\Z",
+    "ops/ci_provenance_test.py": r"(?ms)\A(?!.*^(?:TONG|TU KIEM PHAN HANG): DO\b).*^CA: ([1-9]\d*)/(\1) dat\nDOT BIEN: ([1-9]\d*)/\3 bi giet dung ly do\nTU KIEM PHAN HANG: DAT \(\d+ dot bien\)\nTONG: DAT\n?\Z",
 }
 # Tap mau THAY THE, chi dung khi nen dang chay la Windows. Windows nhan HAI dang:
 #   (a) dong da cat dot bien;  (b) dong Linux day du — ai do chay tay do du van DAT (A3).
@@ -80,11 +86,34 @@ DA_NOI = {
 DANG_KY = set(MOI) | DA_NOI
 
 
-def tim(root):
-    """Trả (test sống, hiện vật, vị trí lạ); ops chỉ nhận tệp mức đỉnh."""
+def _git_bo_qua(root, ds, chay=subprocess.run):
+    """Tệp Git BỎ QUA và KHÔNG tracked trong `ds`.
+    WP748 r18 (G5 g17: k01 đỏ vì gương `.codex/hooks/*_test.py` bị `.gitignore` mà
+    `rglob` vẫn thấy, ra "vị trí chưa biết") — fix. `check-ignore` mặc định KHÔNG báo
+    tệp đã tracked, nên test tracked vẫn hiện. Fail-close: không phải gốc kho Git,
+    hoặc git không chạy/không đo được (rc ngoài 0/1) ⇒ rỗng, mọi tệp vẫn được đếm."""
+    if not ds or not (root / ".git").exists():
+        return set()
+    try:
+        r = chay(["git", "-C", str(root), "check-ignore", "-z", "--stdin"],
+                 input="".join(x + "\0" for x in ds), capture_output=True, text=True,
+                 encoding="utf-8", errors="surrogateescape", timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    if r.returncode not in (0, 1):
+        return set()
+    return set(r.stdout.split("\0")) & set(ds)
+
+
+def tim(root, chay=subprocess.run):
+    """Trả (test sống, hiện vật, vị trí lạ); ops chỉ nhận tệp mức đỉnh.
+    Tệp Git bỏ qua mà không tracked không thuộc cây ⇒ không đếm (xem `_git_bo_qua`)."""
     song, hien_vat, la = set(), set(), set()
-    for p in root.rglob("*_test.py"):
-        q = p.relative_to(root).as_posix()
+    ds = sorted(p.relative_to(root).as_posix() for p in root.rglob("*_test.py"))
+    bo_qua = _git_bo_qua(root, ds, chay)
+    for q in ds:
+        if q in bo_qua:
+            continue
         if q.startswith(OPS_REVIEWS):
             hien_vat.add(q)
         elif any(q.startswith(g + "/") for g in GOC) or (q.startswith("ops/") and q.count("/") == 1):
@@ -537,9 +566,14 @@ def loi_ruff_ci(source=None):
     steps = {jn: [s for s in j.get("steps", []) if isinstance(s, dict)] for jn, j in jobs.items()}
     parsed = {jn: [_doc_buoc_ruff(data, jobs[jn], s) for s in bs] for jn, bs in steps.items()}
     kinds = {jn: [p[0] for p in ps] for jn, ps in parsed.items()}
+    def _job_if_duoc_phep(jn):
+        j = jobs[jn]
+        return (jn == "gate-registry" and j.get("if") == "${{ !cancelled() }}"
+                and j.get("needs") == ["chuan-bi", "gate-nhanh-gop"])
     for jn, ks in kinds.items():
         for i, kind in enumerate(ks):
-            if kind != "KHONG" and (_buoc_co_dieu_kien(steps[jn][i]) or jobs[jn].get("if") is not None):
+            if kind != "KHONG" and (_buoc_co_dieu_kien(steps[jn][i])
+                                     or (jobs[jn].get("if") is not None and not _job_if_duoc_phep(jn))):
                 ks[i] = "KHONG_PHAN_TICH_DUOC"
     installs = [jn for jn, ks in kinds.items() if any(k != "KHONG" for k in ks)]
     bad_pin = [jn for jn in installs if "GHIM" not in kinds[jn] or any(k not in ("KHONG", "GHIM") for k in kinds[jn])]
@@ -558,7 +592,7 @@ def loi_ruff_ci(source=None):
         jn = callers[0]; gi = registry[jn].index(1)
         ri = next((i for i, k in enumerate(kinds[jn]) if k == "GHIM"), -1)
         before = (0 <= ri < gi and not _buoc_co_dieu_kien(steps[jn][gi])
-                  and jobs[jn].get("if") is None)
+                  and (jobs[jn].get("if") is None or _job_if_duoc_phep(jn)))
     outside = [f"{jn}/bước {i + 1}" for jn, ks in kinds.items() for i, k in enumerate(ks) if k == "KHONG_PHAN_TICH_DUOC"]
     reason = f"; ngoài miền cú pháp: {outside}" if outside else ""
     checks = [
@@ -568,6 +602,37 @@ def loi_ruff_ci(source=None):
                  f"(job chạy test registry: {callers or 'KHÔNG CÓ'})"),
     ]
     return [message for ok, message in checks if not ok], len(checks)
+
+def loi_ci_dispatch_windows(source=None):
+    """#878: hợp đồng `workflow_dispatch.inputs.runner_set` của `ci.yml` — cùng từ vựng với launcher, nhưng MẶC ĐỊNH
+    giữ hai nền (đổi mặc định là quyết định riêng của chủ kho, Q3 spec wp878). Biểu thức `os` của `chuan-bi` phải đọc
+    input ấy và trả đúng ba mảng theo thứ tự: chỉ Windows · hai nền · chỉ Ubuntu."""
+    source = CI_WORKFLOW.read_text(encoding="utf-8") if source is None else source
+    try:
+        data = yaml.safe_load(source) or {}
+    except yaml.YAMLError as e:
+        return [f"ci.yml YAML lỗi: {e}"], 1
+    triggers = data.get("on", data.get(True))
+    dispatch = triggers.get("workflow_dispatch") if isinstance(triggers, dict) else None
+    runner = ((dispatch or {}).get("inputs") or {}).get("runner_set") if isinstance(dispatch, dict) else None
+    expected = {"required": False, "default": "windows-and-ubuntu", "type": "choice",
+                "options": ["windows-and-ubuntu", "windows-only"]}
+    expr = ((((data.get("jobs") or {}).get("chuan-bi") or {}).get("outputs")) or {}).get("os")
+    compact = re.sub(r"\s+", " ", expr) if isinstance(expr, str) else ""
+    try:
+        arrays = [json.loads(x) for x in re.findall(r"'(\[[^']*\])'", compact)]
+    except json.JSONDecodeError:
+        arrays = None
+    checks = [
+        (isinstance(runner, dict) and all(runner.get(k) == v for k, v in expected.items()),
+         "ci.yml sai hợp đồng workflow_dispatch.runner_set"),
+        ("github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only'" in compact,
+         "ci.yml: os của chuan-bi không đọc inputs.runner_set == 'windows-only' trong nhánh dispatch"),
+        (arrays == [["windows-latest"], ["ubuntu-latest", "windows-latest"], ["ubuntu-latest"]],
+         f"ci.yml: os của chuan-bi sai ba mảng chỉ-Windows · hai nền · chỉ-Ubuntu (thấy {arrays})"),
+    ]
+    return [message for ok, message in checks if not ok], len(checks)
+
 
 def giet_windows_311_launcher_workflow(source):
     anchor = "'3.13'"
@@ -691,7 +756,7 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 # CI-SONG-SONG-REGISTRY-G5-MOT-LAN r1 (#637): M1–M3, M6, M7. Hằng số trong W1 theo spec M3.
 # #643 (chủ kho chọn "b", PR #644): 3600 → 4500. Đo run 36208617323, N=2 chế độ đủ: `nhanh_don_duoc_test` 3306,45 s = 92 %
-# trần cũ. KHÔNG bảo đảm cả job dưới `timeout-minutes` (nay 105): bộ ấy còn chờ worker trống (run trên: bắt đầu sau 337 s),
+# trần cũ. KHÔNG bảo đảm cả job dưới `timeout-minutes` (#705: 105 · #910 pha B, a7da463: 150): bộ ấy còn chờ worker trống (run trên: bắt đầu sau 337 s),
 # Windows ép N=1 ⇒ dài hơn; trần job là trần NGOÀI. Ca `p643-tran-bo-nho-hon-timeout-job` chỉ khoá trần bộ < trần job.
 # #705 (CI-REGISTRY-NANG-TRAN-BO-DAY-DU, chủ kho Q4): 4500 → 5400, job 90 → 105 phút. `nhanh_don_duoc_test` chế độ đủ:
 # 3645 s xanh (run 36642392330) rồi > 4500 s ĐỎ ba lần (36696528580 ×2, 36839918701) — runner chậm 22–42 % (hai bộ vô can
@@ -739,7 +804,10 @@ LENH_REGISTRY = frozenset({"git config --global core.autocrlf false", "git confi
                            "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
                            "python ops/cong_cu.py kiem-tra --json", "python -m pip install --quiet ruff==0.15.15",
                            "ruff --version", "python .claude/dev/ci_dang_ky_test.py --chay"})
-BAM_GATE_REGISTRY = "9dd2c23db45fd97c4ce44a98ff0abe74e21b4b2c64a97dab318addb92d3458d9"
+BAM_GATE_REGISTRY = "89516cf77c3ce734feadf348bfea8180254c67e8e8ec62a48e2f6ea1dc038452"
+# WP748 r16: hai job nay la `targeted_mutant_gate` (NHANH_DON_DUOC_DICH, gom `--gop-dich`, tran 30 phut).
+# #910 pha B (PR #917, a7da463): tran job manh 30 -> 150; job gom van 10.
+BAM_GATE_NHANH = "fe061a50668af83b6c9b6939f881ba37a30083bc72a27b52c2e02350835d626b"
 GOC_TAI_LIEU = frozenset({"AGENTS.md", "CHANGELOG.md", "CLAUDE.md", "CONTEXT.md", "INSTALL.md", "README.md", "SKILL.md"})
 
 
@@ -748,7 +816,15 @@ def _cham_vung(x, vung):
 DAY_DU, CHE_DO_NHE, BIEN_SU_KIEN, BIEN_GOC, BIEN_DAU = "day_du", "nhe", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"
 ENV_REGISTRY = {BIEN_WORKERS: "2", BIEN_SU_KIEN: "${{ github.event_name }}",
                 BIEN_GOC: "${{ github.event.pull_request.base.sha || github.event.before }}",
-                BIEN_DAU: "${{ github.event.pull_request.head.sha || github.sha }}"}
+                BIEN_DAU: "${{ github.event.pull_request.head.sha || github.sha }}",
+                "CI_DANG_KY_DOT_BIEN_MANH": "ops/nhanh_don_duoc_test.py",
+                "CI_DANG_KY_GOP_KQ": "${{ needs.gate-nhanh-gop.result }}"}
+
+
+def doc_ket_qua_gop(env=os.environ):
+    """Vắng ngoài ci.yml (lượt tuần/local); khi CI ghim biến thì chỉ success là đạt."""
+    raw = env.get("CI_DANG_KY_GOP_KQ")
+    return None if raw is None else raw == "success"
 
 
 def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
@@ -769,7 +845,7 @@ def doc_diff(env=os.environ, chay=subprocess.run, kho=ROOT):
 
 # #661 M4: CHỈ lượt tuần đặt biến này (ci.yml CẤM qua `loi_env_registry`); đột biến ĐỦ do job mảnh + gom (M5).
 BIEN_MANH, BO_MANH, JOB_MANH, JOB_GOP, SO_MANH = ("CI_DANG_KY_DOT_BIEN_MANH", "ops/nhanh_don_duoc_test.py",
-                                                  "dot-bien-manh", "dot-bien-gop", 4)
+                                                  "dot-bien-manh", "dot-bien-gop", 8)   # WP748 r16: full audit 8 manh
 
 
 def doc_bien_manh(env=os.environ):
@@ -804,6 +880,21 @@ def bam_gate_registry(data):
     d = data or {}
     goi = {"job": (d.get("jobs") or {}).get("gate-registry"), "env": d.get("env"), "defaults": d.get("defaults")}
     return hashlib.sha256(json.dumps(goi, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def bam_gate_nhanh(data):
+    """Ghim trọn hai job mảnh/gom chịu trách nhiệm cho cờ nhẹ của registry."""
+    jobs = (data or {}).get("jobs") or {}
+    goi = {k: jobs.get(k) for k in ("gate-nhanh-manh", "gate-nhanh-gop")}
+    return hashlib.sha256(json.dumps(goi, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def loi_gate_nhanh(data):
+    jobs = (data or {}).get("jobs") or {}
+    loi = [] if bam_gate_nhanh(data) == BAM_GATE_NHANH else ["hai job mảnh/gom nhanh_don_duoc lệch cấu hình ghim"]
+    if (jobs.get("gate-registry") or {}).get("needs") != ["chuan-bi", "gate-nhanh-gop"]:
+        loi.append("gate-registry không phụ thuộc phép gom đủ mảnh")
+    return loi
 
 
 def loi_vung_thiet_lap(data):
@@ -885,16 +976,18 @@ def _job_manh_gop(goc):
     """#661 M5: hai job GHIM trọn; bước python + `env` TRÍCH từ `gate-registry`; matrix và N cùng từ `SO_MANH`."""
     dau = [{"uses": "actions/checkout@v4"}] + json.loads(json.dumps((goc.get("steps") or [])[2:3]))
     env, m = goc.get("env"), "${{ matrix.manh }}"
-    manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 30, "env": env,
+    # WP748 r16: full_mutant_audit ~73 800 s noi tiep (g12) => 8 manh x ~2,6 h => tran 360 (tran job GitHub).
+    manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 360, "env": env,
             "strategy": {"fail-fast": False, "matrix": {"manh": list(range(SO_MANH))}},
             "steps": dau + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
-                             "env": {"NHANH_DON_DUOC_MANH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_MANH_RA": f"manh/manh-{m}.json"}},
+                             "env": {"NHANH_DON_DUOC_DICH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_DICH_RA": f"manh/manh-{m}.json",
+                                     "NHANH_DON_DUOC_DICH_DU": "1"}},
                             {"uses": "actions/upload-artifact@v4", "with": {
                                 "name": f"dot-bien-manh-{m}", "path": f"manh/manh-{m}.json", "if-no-files-found": "error"}}]}
     gop = {"needs": JOB_MANH, "runs-on": "ubuntu-latest", "timeout-minutes": 10,
            "steps": dau + [{"uses": "actions/download-artifact@v4",
                             "with": {"pattern": "dot-bien-manh-*", "path": "manh", "merge-multiple": True}},
-                           {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop manh"}]}
+                           {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop-du manh"}]}
     return manh, gop
 
 
@@ -1050,7 +1143,9 @@ def loi_json_thoi_gian(js, moi=MOI):
     loi = [] if sorted(m.get("duong_dan") for m in bo) == sorted(moi) else ["mục không khớp một-một với MOI"]
     for m in bo:
         mo = [m.get(k) for k in ("bat_dau_utc", "ket_thuc_utc")]
-        if type(m.get("rc")) is not int or type(m.get("giay")) not in (int, float) or m["giay"] < 0:
+        # WP748 r19 (cung lop Codex P2 o nhanh_don_duoc_test) — NaN/Infinity qua duoc `< 0`; int KHONG goi isfinite (OverflowError).
+        g = m.get("giay")
+        if type(m.get("rc")) is not int or not (type(g) is int or (type(g) is float and math.isfinite(g))) or g < 0:
             loi.append(f"rc/giay sai: {m.get('duong_dan')}")
         with contextlib.suppress(TypeError, ValueError):  # PARSE rồi so thời điểm, không so chuỗi (PR #640 P2)
             mo = [datetime.datetime.fromisoformat(x[:-1] + "+00:00") for x in mo if x.endswith("Z")]
@@ -1078,14 +1173,20 @@ JOB_G5 = ("gate", "gate-registry", "gate-packet-loop", JOB_G5_MANH, JOB_G5_GOP)
 G5_GOP = "python ops/cong_cu_test.py --gop manh"
 G5_LENH = {"gate": [G5_PROBE, G5_SELFTEST], JOB_G5_MANH: [G5_PROBE, G5_SELFTEST], JOB_G5_GOP: [G5_GOP]}
 G5_ENV = {"gate": {"CONG_CU_TEST_BAN_KINH": "manh"},
+          JOB_G5_GOP: {"CONG_CU_TEST_GOP_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"},   # wp892: gom đọc che_do
           JOB_G5_MANH: {"CONG_CU_TEST_MANH": f"${{{{ matrix.manh }}}}/{SO_MANH_G5}",
                         "CONG_CU_TEST_MANH_RA": "manh/manh-${{ matrix.manh }}.txt"}}
-G5_TAI_LEN = {"uses": "actions/upload-artifact@v4", "with": {
+# wp879 (#879): Windows chỉ còn mảnh 0 và chỉ chạy ca nền ⇒ không ghi tệp mảnh, không tải lên, không có job gom Windows.
+G5_MANH_LOAI = [{"os": "windows-latest", "manh": k} for k in range(1, SO_MANH_G5)]
+# wp892 (#892): PR chỉ đổi hồ sơ ⇒ 8 mảnh `skipped`. Ghim NGUYÊN chuỗi: dạng `== 'day_du'` thì `che_do` rỗng/vắng cũng bỏ mảnh.
+G5_MANH_IF = "${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}"
+G5_TAI_LEN = {"if": "runner.os != 'Windows'", "uses": "actions/upload-artifact@v4", "with": {
     "name": "gate-cong-cu-manh-${{ matrix.os }}-${{ matrix.manh }}", "path": "manh/manh-${{ matrix.manh }}.txt",
     "if-no-files-found": "error"}}
 G5_TAI_VE = {"uses": "actions/download-artifact@v4", "with": {
     "pattern": "gate-cong-cu-manh-${{ matrix.os }}-*", "path": "manh", "merge-multiple": True}}
-G5_GOP_IF, G5_GOP_NEEDS = "${{ !cancelled() }}", ["chuan-bi", JOB_G5_MANH]
+G5_GOP_IF = "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'ubuntu-latest') }}"
+G5_GOP_NEEDS, G5_GOP_LOAI = ["chuan-bi", JOB_G5_MANH], [{"os": "windows-latest"}]
 G5_THIET_LAP = frozenset({"git config --global core.autocrlf false", "git config --global core.eol lf", "git config --global core.abbrev 7",
                           "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0", "bash ops/cai_actionlint.sh",
                           "bash ops/cai_cong_cu.sh shellcheck", "bash ops/cai_cong_cu.sh rg",
@@ -1107,8 +1208,9 @@ G5_OS = "${{ fromJson(needs.chuan-bi.outputs.os) }}"
 
 def _loi_thuc_thi_g5(j, v, buoc):
     """Lỗi ngữ nghĩa thực thi của job G5 `j` trên các bước `buoc` (từ đầu tới HẾT bước G5; job mới: mọi bước)."""
-    loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - ({'if'} if j == JOB_G5_GOP else set()))}"] \
-        if set(v) - G5_KHOA_JOB - ({"if"} if j == JOB_G5_GOP else set()) else []
+    _if_duoc = {"if"} if j in (JOB_G5_GOP, JOB_G5_MANH, "gate-registry") else set()
+    loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - _if_duoc)}"] \
+        if set(v) - G5_KHOA_JOB - _if_duoc else []
     st = v.get("strategy") or {}
     if v.get("env") != G5_JOB_ENV or v.get("runs-on") != "${{ matrix.os }}" or set(st) != {"fail-fast", "matrix"} \
             or st.get("fail-fast") is not False or (st.get("matrix") or {}).get("os") != G5_OS:
@@ -1122,8 +1224,9 @@ def _loi_thuc_thi_g5(j, v, buoc):
         than = str(b.get("run", ""))
         if "${{" in than or any(not (c == "\n" or c.isprintable()) for c in than):
             loi.append(f"{j}: bước {ten!r} có biểu thức GitHub hoặc ký tự không in được trong `run`")
-        if set(b) - G5_KHOA_BUOC or b.get("shell", "bash") != "bash":
-            loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - G5_KHOA_BUOC)} shell={b.get('shell')!r}")
+        khoa = G5_KHOA_BUOC | ({"if"} if b == G5_TAI_LEN else set())   # wp879: `if` CHỈ ở đúng bước tải lên đã ghim
+        if set(b) - khoa or b.get("shell", "bash") != "bash":
+            loi.append(f"{j}: bước {ten!r} có khoá/shell ngoài danh sách cho phép: {sorted(set(b) - khoa)} shell={b.get('shell')!r}")
         elif "uses" in b and b.get("with", {}) not in G5_WITH.get(b["uses"], (b.get("with", {}),)):
             loi.append(f"{j}: bước {ten!r} có `with` lệch ghim: {b.get('with')}")
         elif "env" in b and not re.search(r"(?<![A-Za-z0-9_])cong_cu", str(b.get("run", ""))) and set(b["env"]) != {"AL_VER"}:
@@ -1135,11 +1238,14 @@ def _loi_g5_manh_gop(j, v, buoc, i):
     """#668: phần RIÊNG của hai job mảnh/gom — matrix, `needs`, `if`, và bước artifact, mọi thứ so BẰNG ĐÚNG."""
     ma = ((v.get("strategy") or {}).get("matrix") or {})
     if j == JOB_G5_MANH:
-        loi = [] if ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh"} else [
-            f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))}, thấy {ma}"]
-        loi += [] if v.get("needs") == "chuan-bi" and "if" not in v else [f"{j}: needs/if lệch: {v.get('needs')!r}/{v.get('if')!r}"]
+        loi = [] if (ma.get("manh") == list(range(SO_MANH_G5)) and set(ma) == {"os", "manh", "exclude"}
+                     and ma.get("exclude") == G5_MANH_LOAI) else [
+            f"{j}: matrix phải đúng os + manh {list(range(SO_MANH_G5))} + exclude {G5_MANH_LOAI}, thấy {ma}"]
+        loi += [] if v.get("needs") == "chuan-bi" and v.get("if") == G5_MANH_IF else [
+            f"{j}: needs/if phải đúng 'chuan-bi'/{G5_MANH_IF!r}, thấy {v.get('needs')!r}/{v.get('if')!r}"]
         return loi + ([] if buoc[i + 1:] == [G5_TAI_LEN] else [f"{j}: sau bước G5 phải đúng MỘT bước tải lên {G5_TAI_LEN}"])
-    loi = [] if set(ma) == {"os"} else [f"{j}: matrix chỉ được có os, thấy {ma}"]
+    loi = [] if set(ma) == {"os", "exclude"} and ma.get("exclude") == G5_GOP_LOAI else [
+        f"{j}: matrix phải đúng os + exclude {G5_GOP_LOAI}, thấy {ma}"]
     loi += [] if v.get("needs") == G5_GOP_NEEDS and v.get("if") == G5_GOP_IF else [
         f"{j}: needs/if phải đúng {G5_GOP_NEEDS}/{G5_GOP_IF!r}, thấy {v.get('needs')!r}/{v.get('if')!r}"]
     loi += [] if i + 1 == len(buoc) else [f"{j}: bước gom phải là bước CUỐI"]
@@ -1167,7 +1273,10 @@ def loi_g5_workflow(data):
         # thoát của lệnh CUỐI, nên probe đỏ + selftest xanh có thể thành bước xanh. Bước G5 phải KHAI RÕ `shell: bash`.
         elif buoc[cham[0]].get("shell") != "bash":
             loi.append(f"{j}: bước G5 phải khai rõ `shell: bash` (thấy {buoc[cham[0]].get('shell')!r})")
-        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"} if j == JOB_G5_GOP else set(v))):
+        elif {"if", "continue-on-error"} & (set(buoc[cham[0]]) | (set(v) - {"if"}
+              if j == JOB_G5_GOP or (j == JOB_G5_MANH and v.get("if") == G5_MANH_IF)
+              or (j == "gate-registry" and v.get("if") == "${{ !cancelled() }}"
+                                         and v.get("needs") == ["chuan-bi", "gate-nhanh-gop"]) else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
         elif any(not set(_dong_lenh(b)) <= (G5_THIET_LAP | {G5_TAI_VE["uses"]} if j == JOB_G5_GOP else G5_THIET_LAP)
                  for b in buoc[:cham[0]]):
@@ -1209,6 +1318,41 @@ def phan_chung():
                 _them(("i-thieu-so", "ii-mat-tep", "iii-mat-loi-goi", "iv-vi-tri-la")[i], bool(kiem(r, reg, wf)[0]))
             finally:
                 DA_NOI.clear(); DA_NOI.update(old)
+        # WP748 r18 (G5 g17 k01 đỏ vì gương `.codex/` bị Git bỏ qua) — hai chiều trên kho Git
+        # thật: bỏ qua+không tracked ⇒ không đếm; KHÔNG bỏ qua, hoặc tracked dù nằm trong
+        # thư mục bị bỏ qua, hoặc git không đo được ⇒ vẫn là "vị trí chưa biết".
+        g = base / "git-bo-qua"
+        (g / ".claude/dev").mkdir(parents=True)
+        (g / ".github/workflows").mkdir(parents=True)
+        (g / ".claude/dev/a_test.py").touch()
+        (g / ".codex/hooks").mkdir(parents=True)
+        (g / ".codex/hooks/x_test.py").touch()
+        (g / ".gitignore").write_text(".codex/\n", encoding="utf-8")
+        def _git(*a):
+            subprocess.run(["git", "-C", str(g), *a], check=True, capture_output=True, timeout=120)
+        _git("init", "-q")
+        reg_g, wf_g = {".claude/dev/a_test.py"}, "python .claude/dev/ci_dang_ky_test.py --chay"
+        old = set(DA_NOI)
+        try:
+            DA_NOI.clear()
+            _them("r18-git-bo-qua-khong-dem", not kiem(g, reg_g, wf_g)[0]
+                  and ".codex/hooks/x_test.py" not in tim(g)[2])
+            def _git_hong(*a, **k): return subprocess.CompletedProcess(a, 128, "", "fatal")
+            def _git_vang(*a, **k): raise OSError("git vang")
+            _them("r18-git-hong-van-thay", ".codex/hooks/x_test.py" in tim(g, _git_hong)[2]
+                  and ".codex/hooks/x_test.py" in tim(g, _git_vang)[2])
+            kg = base / "khong-git"
+            (kg / ".codex/hooks").mkdir(parents=True); (kg / ".codex/hooks/x_test.py").touch()
+            (kg / ".gitignore").write_text(".codex/\n", encoding="utf-8")
+            _them("r18-khong-git-van-thay", ".codex/hooks/x_test.py" in tim(kg)[2])
+            (g / "la").mkdir(); (g / "la/y_test.py").touch()
+            _them("r18-khong-bo-qua-van-la", any("la/y_test.py" in x for x in kiem(g, reg_g, wf_g)[0]))
+            (g / "la/y_test.py").unlink()
+            _git("add", "-f", ".codex/hooks/x_test.py")
+            _them("r18-tracked-trong-thu-muc-bo-qua-van-la",
+                  any(".codex/hooks/x_test.py" in x for x in kiem(g, reg_g, wf_g)[0]))
+        finally:
+            DA_NOI.clear(); DA_NOI.update(old)
         # (a) Bản sao sổ cách ly mất slug phải đỏ.
         mutant_cu = {".claude/dev/a_test.py": {"slug": "", "ly_do": "đỏ trên CI"}}
         _them("a-cach-ly-thieu-slug", bool(kiem(r, reg, wf, mutant_cu)[0]))
@@ -1354,6 +1498,14 @@ def phan_chung():
           bool(launcher_source) and giet_windows_311_launcher_workflow(launcher_source))
     _them("launcher-semantic-spacing", bool(launcher_source) and not loi_launcher_windows(
           launcher_source.replace("fromJSON(", "fromJSON( ", 1))[0])
+    # #878: hợp đồng runner_set của ci.yml — bản thật sạch; hai đột biến (đổi mặc định sang windows-only, bỏ option
+    # windows-only) đều phải ĐỎ. Neo phải có đúng một lần, kẻo đột biến không đổi gì mà vẫn tính là "giết".
+    _neo_md, _neo_op = "default: windows-and-ubuntu", "          - windows-only\n"
+    _them("ci-dispatch-runner-set-that-sach", bool(ci_source) and not loi_ci_dispatch_windows(ci_source)[0])
+    _them("ci-dispatch-runner-set-mac-dinh-windows-only-DO", ci_source.count(_neo_md) == 1 and bool(
+          loi_ci_dispatch_windows(ci_source.replace(_neo_md, "default: windows-only", 1))[0]))
+    _them("ci-dispatch-runner-set-bo-option-DO", ci_source.count(_neo_op) == 1 and bool(
+          loi_ci_dispatch_windows(ci_source.replace(_neo_op, "", 1))[0]))
     # Doi DUNG LOAI thong diep, khong phai `bool(loi)`: bo ghim lam CA ghim LAN probe do, nen ca
     # cu van xanh khi da XOA HAN chot ghim — do duoc 102/102 (luot 8, P2 #2).
     _them("ruff-pin-required", bool(ci_source) and any("ghim Ruff" in m for m in
@@ -1754,11 +1906,21 @@ def phan_chung():
                    ("giay-am", lambda b: b[0].update(giay=-1)), ("moc-khong-utc", lambda b: b[0].update(
                        bat_dau_utc="2026-09-25T08:00:00")), ("moc-dao", lambda b: b[0].update(
                        bat_dau_utc=b[0]["ket_thuc_utc"], ket_thuc_utc=b[0]["bat_dau_utc"])),
-                   ("moc-lich-khong-ton-tai", lambda b: b[0].update(bat_dau_utc="2026-99-99T99:99:99.000Z"))):
+                   ("moc-lich-khong-ton-tai", lambda b: b[0].update(bat_dau_utc="2026-99-99T99:99:99.000Z")),
+                   ("giay-nan", lambda b: b[0].update(giay=float("nan"))), ("giay-inf", lambda b: b[0].update(
+                       giay=float("inf"))), ("giay-am-inf", lambda b: b[0].update(giay=float("-inf")))):
         _j = json.loads(json.dumps(_bc)); _f(_j["bo"])
         _them("p637-A1-" + _t, bool(loi_json_thoi_gian(_j, _M)))
     _j["bo"] = [{**m, "bat_dau_utc": "2026-09-25T08:00:00Z", "ket_thuc_utc": "2026-09-25T08:00:00.100Z"} for m in _bc["bo"]]
     _them("p637-A1-do-chinh-xac-khac-van-dung", not loi_json_thoi_gian(_j, _M))
+    _j["bo"] = [{**m, "giay": 2} for m in _bc["bo"]]          # WP748 r19: giay int huu han van DUNG
+    _them("p637-A1-giay-int-van-dung", not loi_json_thoi_gian(_j, _M))
+    _j["bo"] = [{**m, "giay": 10 ** 400} for m in _bc["bo"]]  # int json khong lo: DUNG, khong duoc nem OverflowError
+    try:
+        _kq = not loi_json_thoi_gian(_j, _M)
+    except OverflowError:
+        _kq = False
+    _them("p637-A1-giay-int-khong-lo-khong-nem", _kq)
     _cv, _st = threading.Condition(), {"act": 0, "max": 0, "goi": []}
     def _tran(path):
         with _cv:
@@ -1861,6 +2023,25 @@ def phan_chung():
             ("gop-hai-tai-ve", _G, lambda v, b, i: b.insert(i, dict(b[i - 1]))),
             ("gop-buoc-sau-gom", _G, lambda v, b, i: b.append({"run": "true"})),
             ("gop-matrix-them-manh", _G, lambda v, b, i: v["strategy"]["matrix"].update({"manh": [0]})),
+            # wp879 N4: Windows quay về 8 mảnh / chỉ loại một phần · Linux còn 1 mảnh · tải lên mất `if` · gom quay về os động
+            # hoặc mất điều kiện ubuntu (lượt `windows-only` sẽ ĐỎ oan vì thiếu mảnh).
+            ("wp879-windows-8-manh", _M, lambda v, b, i: v["strategy"]["matrix"].pop("exclude")),
+            ("wp879-windows-loai-thieu", _M, lambda v, b, i: v["strategy"]["matrix"]["exclude"].pop()),
+            ("wp879-linux-1-manh", _M, lambda v, b, i: v["strategy"]["matrix"]["exclude"].extend(
+                {"os": "ubuntu-latest", "manh": k} for k in range(1, SO_MANH_G5))),
+            ("wp879-tai-len-khong-if", _M, lambda v, b, i: b[i + 1].pop("if")),
+            ("wp879-gop-khong-loai-windows", _G, lambda v, b, i: v["strategy"]["matrix"].pop("exclude")),
+            ("wp879-gop-loai-ubuntu", _G, lambda v, b, i: v["strategy"]["matrix"].update({"exclude": [{"os": "ubuntu-latest"}]})),
+            ("wp879-gop-if-cu", _G, lambda v, b, i: v.update({"if": "${{ !cancelled() }}"})),
+            # wp892 N2: if mảnh bị bỏ / đảo sang `== 'day_du'` (che_do rỗng ⇒ bỏ mảnh) / so lỏng; env gom bị bỏ / lấy nguồn khác.
+            ("wp892-manh-bo-if", _M, lambda v, b, i: v.pop("if")),
+            ("wp892-manh-if-day-du", _M, lambda v, b, i: v.update({"if": "${{ needs.chuan-bi.outputs.che_do == 'day_du' }}"})),
+            ("wp892-manh-if-contains", _M, lambda v, b, i: v.update({"if": "${{ !contains(needs.chuan-bi.outputs.che_do, 'duong') }}"})),
+            ("wp892-gop-bo-env", _G, lambda v, b, i: b[i].pop("env")),
+            ("wp892-gop-env-hang", _G, lambda v, b, i: b[i].update({"env": {"CONG_CU_TEST_GOP_CHE_DO": "duong_nhanh"}})),
+            ("wp892-gop-env-ten-khac", _G, lambda v, b, i: b[i].update({"env": {"CONG_CU_TEST_CHE_DO": "${{ needs.chuan-bi.outputs.che_do }}"}})),
+            ("wp879-gop-if-windows", _G, lambda v, b, i: v.update(
+                {"if": "${{ !cancelled() && contains(fromJson(needs.chuan-bi.outputs.os), 'windows-latest') }}"})),
     ):
         _them(f"p668-A6-{_t}", _hong_job(_j, _f))
     for _j in (_M, _G):
@@ -2086,14 +2267,16 @@ def phan_chung():
     def _j(w, ten): return w["jobs"][ten]
     for _t, _f in (("thieu-gop", lambda w, j: w["jobs"].pop(JOB_GOP)), ("gop-khong-needs", lambda w, j: _j(w, JOB_GOP).pop("needs")),
                    ("matrix-3", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0, 1, 2])),
-                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_MANH="${{ matrix.manh }}/3")),
+                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].update(NHANH_DON_DUOC_DICH="${{ matrix.manh }}/3")),
+                   ("manh-bo-co-du", lambda w, j: _j(w, JOB_MANH)["steps"][2]["env"].pop("NHANH_DON_DUOC_DICH_DU")),
+                   ("gop-targeted", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="python ops/nhanh_don_duoc_test.py --gop-dich manh")),
                    ("manh-if", lambda w, j: _j(w, JOB_MANH).update({"if": "false"})),
                    ("manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),
                    ("gop-if", lambda w, j: _j(w, JOB_GOP).update({"if": "always()"})),
                    ("gop-lenh-khac", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="true")),
-                   ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True, 2, 3])),
-                   ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0, 1, 2, 3])),
-                   ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 30.0})),
+                   ("matrix-bool", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[False, True] + list(range(2, SO_MANH)))),
+                   ("matrix-float", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0.0] + list(range(1, SO_MANH)))),
+                   ("manh-timeout-float", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 360.0})),
                    ("du-fetch-depth-false", lambda w, j: j["steps"][1]["with"].update({"fetch-depth": False})),
                    # #705 F4: SUY từ ci.yml — hằng tay trôi khỏi trần thật thì ca thắng nhờ GIÁ TRỊ, thôi đo KIỂU.
                    ("du-timeout-float", lambda w, j: j.update({"timeout-minutes": float(_wf0["jobs"]["gate-registry"]["timeout-minutes"])})),
@@ -2116,7 +2299,7 @@ def phan_chung():
         _tho, _w = WF_DOT_BIEN_DU.read_text(encoding="utf-8"), pathlib.Path(_d, "w.yml")
         for _t, _a, _b in (("goc", "", ""), ("on-thanh-true", "\non:\n", "\ntrue:\n"), ("khoa-True-rac", "\npermissions:", '\n"True": rac\npermissions:'),
                            ("cron-trung", '    - cron: "17', '    - cron: "0 0 1 1 *"\n      cron: "17'),
-                           ("timeout-trung", "    timeout-minutes: 105\n", "    timeout-minutes: 5\n    timeout-minutes: 105\n")):
+                           ("timeout-trung", "    timeout-minutes: 150\n", "    timeout-minutes: 5\n    timeout-minutes: 150\n")):
             _w.write_text(_v := _tho.replace(_a, _b, 1) if _a else _tho, encoding="utf-8")
             _them(f"p651-M4-yaml-tho-{_t}", not loi_actionlint(_w) if not _a else (
                 _v != _tho and not loi_workflow_dot_bien_du(yaml.safe_load(_v), _wf0) and bool(loi_actionlint(_w))))
@@ -2173,7 +2356,26 @@ def phan_chung():
         _them(f"p643-A4-thieu-{_k}", _hong_env(lambda b, w: b["env"].pop(_k)))
         _them(f"p643-A4-lech-{_k}", _hong_env(lambda b, w: b["env"].update({_k: b["env"][_k] + " "})))
     _them("p643-A4-thua-khoa", _hong_env(lambda b, w: b["env"].update(X="1")))
-    _them("p661-M4-ci-yml-co-bien-manh-do", _hong_env(lambda b, w: b["env"].update({BIEN_MANH: BO_MANH})))
+    _them("p748-M4-ci-yml-bo-bien-manh-do", _hong_env(lambda b, w: b["env"].pop(BIEN_MANH)))
+    _them("p748-gop-ket-qua-vang-ngoai-ci", doc_ket_qua_gop({}) is None)
+    _them("p748-gop-ket-qua-success", doc_ket_qua_gop({"CI_DANG_KY_GOP_KQ": "success"}) is True)
+    for _kq in ("", "failure", "skipped", "cancelled"):
+        _them("p748-gop-ket-qua-" + (_kq or "rong") + "-do",
+              doc_ket_qua_gop({"CI_DANG_KY_GOP_KQ": _kq}) is False)
+    _them("p748-manh-gop-cau-hinh-that-dat", not loi_gate_nhanh(_wf0))
+    for ten, sua in (
+        ("thieu-manh", lambda w: w["jobs"].pop("gate-nhanh-manh")),
+        ("thieu-gop", lambda w: w["jobs"].pop("gate-nhanh-gop")),
+        ("thieu-phan-hoach", lambda w: w["jobs"]["gate-nhanh-manh"]["strategy"]["matrix"].update(manh=[0, 1, 2, 3, 4, 5, 6])),
+        ("bo-bien-manh", lambda w: w["jobs"]["gate-nhanh-manh"]["steps"][3]["env"].pop("NHANH_DON_DUOC_DICH")),
+        ("bo-gop-khoi-needs", lambda w: w["jobs"]["gate-registry"].update(needs="chuan-bi")),
+    ):
+        w = json.loads(json.dumps(_wf0))
+        try:
+            sua(w)
+            _them("p748-manh-gop-" + ten, bool(loi_gate_nhanh(w)))
+        except (KeyError, IndexError, TypeError):
+            _them("p748-manh-gop-" + ten, False)
     _them("p643-A4-N-1", _hong_env(lambda b, w: b["env"].update({BIEN_WORKERS: "1"})))
     _them("p643-A4-bo-env", _hong_env(lambda b, w: b.pop("env")))
     _them("p643-A4-hai-buoc-registry", _hong_env(lambda b, w: w["jobs"]["gate"]["steps"].append(dict(b))))
@@ -2196,6 +2398,10 @@ def main():
         except ValueError as e:
             print("ĐỎ:", e); print("TỔNG: ĐỎ")
             return 2
+        if doc_ket_qua_gop() is False:
+            print("ĐỎ: job gom mảnh nhanh_don_duoc chưa success")
+            print("TỔNG: ĐỎ")
+            return 2
     if ns.mutant:
         killed = giet_windows_311_launcher_workflow(LAUNCHER_WORKFLOW.read_text(encoding="utf-8"))
         print(f"MUTANT {ns.mutant}: {'GIẾT' if killed else 'SỐNG'}")
@@ -2203,11 +2409,14 @@ def main():
     loi, tren_cay, trong_so = kiem()
     launcher_loi, launcher_chot = loi_launcher_windows()
     ruff_loi, ruff_chot = loi_ruff_ci()
+    ci_disp_loi, _ = loi_ci_dispatch_windows()
     loi += launcher_loi
+    loi += ci_disp_loi
     loi += ruff_loi
     wf = yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8"))
     loi += ["G5 (M6): " + x for x in loi_g5_workflow(wf)] + ["ENV registry (#643 M4): " + x for x in loi_env_registry(wf)] \
-        + ["VÙNG thiết lập (#643): " + x for x in loi_vung_thiet_lap(wf)]
+        + ["VÙNG thiết lập (#643): " + x for x in loi_vung_thiet_lap(wf)] \
+        + ["NHANH mảnh/gom (#748): " + x for x in loi_gate_nhanh(wf)]
     try:  # tệp rỗng ⇒ None ⇒ chốt vẫn chạy và ĐỎ; chỉ lỗi đọc/phân tích mới đi nhánh này
         loi_du = loi_workflow_dot_bien_du(yaml.safe_load(WF_DOT_BIEN_DU.read_text(encoding="utf-8")), wf)
     except (OSError, yaml.YAMLError) as e:

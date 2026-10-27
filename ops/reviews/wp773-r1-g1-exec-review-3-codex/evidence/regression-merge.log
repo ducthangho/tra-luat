@@ -1,0 +1,1 @@
+DO:r01_merge_duplicate:mong rc=2 + tổng kết, được rc=0, stdout='ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n', stderr cuối=[]

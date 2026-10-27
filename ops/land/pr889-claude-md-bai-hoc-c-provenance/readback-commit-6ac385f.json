@@ -1,0 +1,106 @@
+{
+  "sha": "6ac385fdd7325f532ac4b4b6eb861292bfa7e970",
+  "node_id": "C_kwDOTNeRjdoAKDZhYzM4NWZkZDczMjVmNTMyYWM0YjRiNmViODYxMjkyYmZhN2U5NzA",
+  "commit": {
+    "author": {
+      "name": "ducthangho",
+      "email": "ducthangho@gmail.com",
+      "date": "2026-10-23T07:59:59Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-23T07:59:59Z"
+    },
+    "message": "Merge pull request #889 from ducthangho/claude/gallant-fermat-34kgb9\n\ndocs(CLAUDE.md): bai hoc (c) do lai 23-10 — nhanh windows-only (#878), Windows chi la mot phan gate (#879)\n\nGate ci.yml run 39917653371 xanh tren 094e8d1. Cross-review codex (launcher run 9f946d71) tren 8d5cccb:\nchanges_requested 0/0/1/0, P2 windows-green-does-not-prove-all-baselines da va o 094e8d1.",
+    "tree": {
+      "sha": "e64cdd92b27a66cbc4f0a91e0f84a4400b83c097",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/e64cdd92b27a66cbc4f0a91e0f84a4400b83c097"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/6ac385fdd7325f532ac4b4b6eb861292bfa7e970",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2xP/CRC1aQ7uu5UhlAAA7wAQAKNyG6DmX8sHDSLuksQuvGZQ\nJ69CUFGvT3N9mlwcJJn0cJMrOIxu9Kegbl7WH42/jlbgJLK9BWjBVo3tcpux5TFu\nXntGEdOzLpX9/9Nmrv12xdxD4L4lzjm5dJRQE+iqDh9/fw4te/7w0Kg+UH7TOGJF\nw6AI8OkzVYFhUCheWafRQuVdCNkDxOp0pE4UgmAClVGivD5sAXeoqQ49aU1CFZ0U\ngBkoyvZ9gAC4vrQc9mV0pfF/jibR3skNJ++gvjgynOdj6kqRua9eonAyA8AipJO/\nD8g9jiNZbpbc4NZF/cmHZ3pHYJGL0F3NTLYCOAJhFO+k/OEuLDmxluxra4pvowhR\nsLOlSfzXhuizFo7wEwONbXdtiRxh91D7fS+XA3E9asRuujxG4CziDothCAG0MRsI\ngjCN/hMv2EF0IKTYPL6NCNzdUY+ls6hScSGFkUSGtYhGM4cKQ8mqv++uVVUBp6i1\n+a6etnsg4i62An5xOlVLVJw7ecvKjSDrLcfc3Rc7bWqHwS7Or27+W4BeWR4ucN+k\nbPv/ZmPymWuxlUiqusjBUrI1sQ4ByUyKEtgsN+EbhiL6RPHw2gc1Wjl4+dbvnecu\nvChCKnHz146wfXDB8mZasB55UZ6zzBucy3L14tDTOMpZTKw1sqdrrZnsq2oFM93y\nsYtP4RaDvmxBq/mD6TvB\n=H2f3\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree e64cdd92b27a66cbc4f0a91e0f84a4400b83c097\nparent daf89615efff9fde33039036ddf7f23ec9cb1c10\nparent 094e8d17ae4dfcf21dca63702c9262267bdc072c\nauthor ducthangho <ducthangho@gmail.com> 1792742399 +0700\ncommitter GitHub <noreply@github.com> 1792742399 +0700\n\nMerge pull request #889 from ducthangho/claude/gallant-fermat-34kgb9\n\ndocs(CLAUDE.md): bai hoc (c) do lai 23-10 — nhanh windows-only (#878), Windows chi la mot phan gate (#879)\n\nGate ci.yml run 39917653371 xanh tren 094e8d1. Cross-review codex (launcher run 9f946d71) tren 8d5cccb:\nchanges_requested 0/0/1/0, P2 windows-green-does-not-prove-all-baselines da va o 094e8d1.",
+      "verified_at": "2026-10-23T07:59:59Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6ac385fdd7325f532ac4b4b6eb861292bfa7e970",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/6ac385fdd7325f532ac4b4b6eb861292bfa7e970",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6ac385fdd7325f532ac4b4b6eb861292bfa7e970/comments",
+  "author": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "daf89615efff9fde33039036ddf7f23ec9cb1c10",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/daf89615efff9fde33039036ddf7f23ec9cb1c10",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/daf89615efff9fde33039036ddf7f23ec9cb1c10"
+    },
+    {
+      "sha": "094e8d17ae4dfcf21dca63702c9262267bdc072c",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/094e8d17ae4dfcf21dca63702c9262267bdc072c",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/094e8d17ae4dfcf21dca63702c9262267bdc072c"
+    }
+  ],
+  "stats": {
+    "total": 12,
+    "additions": 12,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "975cd94ff851a3a0ee3aa0493e90184e5f81c874",
+      "filename": "CLAUDE.md",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 0,
+      "changes": 12,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/6ac385fdd7325f532ac4b4b6eb861292bfa7e970/CLAUDE.md",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/6ac385fdd7325f532ac4b4b6eb861292bfa7e970/CLAUDE.md",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/CLAUDE.md?ref=6ac385fdd7325f532ac4b4b6eb861292bfa7e970",
+      "patch": "@@ -161,6 +161,8 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package \n   `github.ref == 'refs/heads/master'` khỏi output `os` của job `chuan-bi`). **Đo 22-10-2026** trên\n   `9e9a74b`: `os` = `[\"ubuntu-latest\",\"windows-latest\"]` CHỈ KHI `github.event_name == 'workflow_dispatch'`\n   HOẶC PR mang nhãn `windows`; mọi trường hợp khác — **kể cả push lên master** — là `[\"ubuntu-latest\"]`.\n+  **Đo lại 23-10-2026** trên `e63961f`: #878 thêm nhánh thứ ba — gọi tay với `runner_set=windows-only` ⇒\n+  `[\"windows-latest\"]` (KHÔNG có Ubuntu); gọi tay mặc định (`windows-and-ubuntu`) vẫn ra hai nền.\n   Bằng chứng chạy được: run `ci.yml` **39354156843** (push merge commit `3a3a3ca` lên master,\n   20-10-2026) có **23 job, cả 23 nhãn `ubuntu-latest`**, 0 job Windows — readback giữ ở\n   `ops/land/pr848-wp744-provenance/readback-jobs-39354156843.json`. Doctrine cũ đã kịp làm một biên\n@@ -175,6 +177,16 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package \n   Muốn biết master có Windows hay không thì **đọc nhãn từng job của lượt chạy**, đừng suy từ tên sự kiện.\n   **Muốn có Windows cho gate thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó** — kèm\n   `runner_set=windows-only` (#878) khi head ĐÃ có lượt PR Ubuntu, để khỏi trả lại 250–330 phút Ubuntu; mặc định vẫn hai nền.\n+  **Nhưng \"gate trên Windows\" từ #879 là MỘT PHẦN gate, không phải bản song song** (đo 23-10-2026 trên\n+  `e63961f`, `exclude:` của ma trận): `gate-cong-cu` trên Windows chỉ còn mảnh 0 và ở đó `cong_cu_test.py`\n+  duyệt toàn bộ ca nền rồi DỪNG (ca thiếu năng lực vẫn có thể `BỎ QUA`, và bị trừ khỏi mẫu số:\n+  `so_ca = len(CA) - len(bo_qua)` ở `ops/cong_cu_test.py`) — **bán kính đột biến chỉ đo trên Ubuntu**;\n+  `gate-cong-cu-gop` loại hẳn `windows-latest`, và với `windows-only` thì job ấy `skipped` (`if:` đòi\n+  `ubuntu-latest` trong `os`). Các job `gate*` còn lại vẫn có mặt trên Windows ở MỨC JOB — nhưng 6 bước trong\n+  `ci.yml` mang `if:` theo `runner.os` (tắt hoặc thay riêng trên Windows), nên \"có job Windows\" chưa phải \"mọi\n+  bước chạy\". Một lượt `windows-only` xanh chỉ chứng minh **các ca nền KHÔNG bị bỏ qua đạt trên Windows** —\n+  phải đọc riêng các dòng `BỎ QUA` trong log — và nó cũng KHÔNG chứng minh bán kính đột biến: phần đó phải lấy\n+  từ lượt Ubuntu của CÙNG head.\n   Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai\n   trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở\n   `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt"
+    }
+  ]
+}

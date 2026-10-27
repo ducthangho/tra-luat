@@ -1,0 +1,7 @@
+# do 2026-10-19 phien session_01FBUBzbedsJaUtQvX4vEYDE
+$ git rev-parse origin/ops/wp831-r4-g4-lease
+6b02bf70a024bdb32bf865b9656af20458de8925
+$ git show origin/ops/wp831-r4-g4-lease:ops/specs/wp831-r4.md | sha256sum
+5caec680395ae3dbe673091153e917feb4262a69142f36e54c63a2260d48bdad  -
+$ git show origin/ops/wp831-r4-g4-lease:ops/leases/wp831-r4-g4-claude.yaml | grep spec_hash
+spec_hash: 5caec680395ae3dbe673091153e917feb4262a69142f36e54c63a2260d48bdad

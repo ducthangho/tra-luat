@@ -1,0 +1,23 @@
+groups 3
+good True consumer_rc 0
+ca13 False consumer_rc 1
+ca0 False consumer_rc 1
+db0 False consumer_rc 1
+db36 False consumer_rc 1
+no_db False consumer_rc 1
+DO False consumer_rc 1
+DO_before False consumer_rc 1
+DO_after False consumer_rc 1
+selfDO False consumer_rc 1
+extra False consumer_rc 1
+middle False consumer_rc 1
+order False consumer_rc 1
+NHE False consumer_rc 1
+CRLF_raw False consumer_rc 1
+prefix False consumer_rc 1
+mutant_no_lookahead True
+mutant_no_Z True
+c11_fake29 original (3, 'DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=0 land_evidence_nguon: 0 ĐẠT · 29/28 miễn trừ')
+c11_fake29 no_bound (0, '')
+changed_exempt 0 (0, '')
+future_valid 0 (0, '')

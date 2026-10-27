@@ -1128,8 +1128,9 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
                 f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
         ca += [(cm(x + ai(b"A") + b"\nh\n", ("--literally",)), None) for x in hong]
         ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
-        g("tag", "-a", "-m", "t", "the", hop_le[0])
-        ca += [(cay, None), (g("rev-parse", "the"), None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None), ("\udc80", None)]   # tree · tag · thiếu · rỗng · 2 dòng · không str · không mã hoá được
+        the = g("hash-object", "-t", "tag", "-w", "--stdin",   # tag annotated dựng đúng byte: `git tag -a` đòi danh tính (runner CI không có)
+                i=f"object {hop_le[0]}\ntype commit\ntag the\ntagger A <a@b> 1700000000 +0000\n\nt\n".encode())
+        ca += [(cay, None), (the, None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None), ("\udc80", None)]   # tree · tag · thiếu · rỗng · 2 dòng · không str · không mã hoá được
         d2, g2 = kho("sha256", "--object-format=sha256")
         cay2 = g2("mktree", i=f"100644 blob {g2('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
         ba2 = ["f" * 64, "0" * 63 + "1", "a" * 64]

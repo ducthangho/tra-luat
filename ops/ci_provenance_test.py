@@ -1070,10 +1070,15 @@ def c34_git_blob_that():   # F08: reader THẬT trên kho tạm; đối tượng
 @ca
 def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reader THẬT trên kho tạm, object dựng đúng byte bằng `hash-object`
     m = nap()   # (`--literally` cho object cố ý hỏng). Hợp đồng `git_cuc_bo`: dict hoặc None, KHÔNG ném (main không bắt) ⇒ ném là sai
-    def doc(sha, goc):
+    def doc(sha, goc):   # chỉ lỗi NỔI TỪ khung `git_cuc_bo` mới thành giá trị `NEM:` (vi phạm hợp đồng không-ném); lỗi khác ném tiếp = vô can
         try:
             return m.git_cuc_bo(sha, goc=goc)
-        except Exception as e:   # noqa: BLE001 — ghi LỚP lỗi làm giá trị để phép so dưới báo đúng chỗ; không nuốt thành None
+        except Exception as e:   # noqa: BLE001
+            tb = e.__traceback__
+            while tb and tb.tb_frame.f_code is not m.git_cuc_bo.__code__:
+                tb = tb.tb_next
+            if tb is None:
+                raise
             return f"NEM:{type(e).__name__}"
     with tempfile.TemporaryDirectory(prefix="cip_f13_") as thu:
         def kho(ten, *co):
@@ -1098,7 +1103,7 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         ca += [(cm(x + ai(b"A") + b"\nh\n", ("--literally",)), None) for x in hong]
         ca += [(g("hash-object", "-w", "--stdin", i=v), None) for v in (b"\xff\n", b"tree zz\n", dau + ai(b"A") + b"\nblob\n")]   # blob, kể cả dạng commit
         g("tag", "-a", "-m", "t", "the", hop_le[0])
-        ca += [(cay, None), (g("rev-parse", "the"), None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None)]   # tree · tag · thiếu · rỗng · 2 dòng · không phải str
+        ca += [(cay, None), (g("rev-parse", "the"), None), ("0" * 40, None), ("", None), (f"{hop_le[0]}\nHEAD", None), (None, None), ("\udc80", None)]   # tree · tag · thiếu · rỗng · 2 dòng · không str · không mã hoá được
         d2, g2 = kho("sha256", "--object-format=sha256")
         cay2 = g2("mktree", i=f"100644 blob {g2('hash-object', '-w', '--stdin', i=b'x')}\tf\n".encode())
         c2 = g2("hash-object", "-t", "commit", "-w", "--stdin", i=f"tree {cay2}\n".encode() + ai(b"Jos\xe9") + b"\nm\xe9ssage\n")
@@ -1110,8 +1115,10 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         ra_that = subprocess.run(["git", "-C", d1, "cat-file", "--batch"], input=hop_le[0].encode() + b"\n", capture_output=True, check=True).stdout
         with mock.patch.object(m.subprocess, "run", return_value=subprocess.CompletedProcess([], 128, ra_that, b"")):   # git chết SAU khi in
             bang(doc(hop_le[0], d1) is None, "git rc ≠ 0 dù stdout trông như commit ⇒ None")
-        with mock.patch.object(m.subprocess, "run", return_value=subprocess.CompletedProcess([], 0, b"x commit zz\n\n", b"")):
-            bang(doc(hop_le[0], d1) is None, "kích thước không phải số ⇒ None, không ném")
+        for gia in (b"x commit zz\n\n", b"", ra_that.replace(b"\n", b" y\n", 1), ra_that[:-2], subprocess.TimeoutExpired("git", 60)):   # đầu ra/lỗi git TIÊM:
+            tiem = {"side_effect": gia} if isinstance(gia, Exception) else {"return_value": subprocess.CompletedProcess([], 0, gia, b"")}
+            with mock.patch.object(m.subprocess, "run", **tiem):   # kích thước không số · rỗng · thừa trường · thân cụt · quá hạn
+                bang(doc(hop_le[0], d1) is None, f"đầu ra git tiêm {gia!r:.40} ⇒ None, không ném")
         tt = types.SimpleNamespace(get=lambda sha: m.git_cuc_bo(sha, goc=d1))
         rc, ra, prov, _ = chay([(job(1), LINUX.replace(H, hop_le[1]))], run={"event": "pull_request", "head_sha": P2}, git=tt,
                                wf={(hop_le[1], ".github/workflows/ci.yml"): wf_tu_log(LINUX)})
@@ -1199,6 +1206,11 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F13_bo_kiem_rc", "if r.returncode != 0 or len(loai) != 3", "if len(loai) != 3", "c53"),
     ("F13_bo_isdigit", " or not loai[2].isdigit()", "", "c53"),
     ("F13_bo_kiem_kich_thuoc", " or len(than) != int(loai[2]) + 1", "", "c53"),
+    ("F13_bo_dem_truong_dau", "if r.returncode != 0 or len(loai) != 3 or", "if r.returncode != 0 or", "c53"),
+    ("F13_nhan_truong_thua", "or len(loai) != 3 or", "or len(loai) < 3 or", "c53"),
+    ("F13_nhan_than_cut", "len(than) != int(loai[2]) + 1", "len(than) > int(loai[2]) + 1", "c53"),
+    ("F13_bo_unicodeencode", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, subprocess.SubprocessError):", "c53"),
+    ("F13_bo_subprocesserror", "except (OSError, subprocess.SubprocessError, UnicodeEncodeError):", "except (OSError, UnicodeEncodeError):", "c53"),
     ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),

@@ -271,3 +271,29 @@ review_doc_lap_a_20261027:
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: cho_chu_kho
   landed: false
+
+# DINH CHINH SAU QUYET DINH CHU KHO (2026-10-27 09:38Z) — chi THEM khoi duoi day; moi dong phia tren giu nguyen.
+# Ket luan: GHI NHAN quyet dinh chu kho tren #955, `landed` GIU `false` vi assurance §8.1 CHUA DAT (tien le #891/pr870).
+# Chu kho chon phuong an nay trong phien (session_01A2KGpxCTnmJgQLVRxiJF1s, 27-10-2026): "Giu false, theo tien le".
+dinh_chinh_sau_quyet_dinh_20261027:
+  quyet_dinh_chu_kho:
+    trang_thai: da_quyet
+    comment: https://github.com/ducthangho/tra-luat/pull/955#issuecomment-6438474045
+    do_duoc: >-
+      measured — ops/land/pr945-wp899-provenance/do-1027-pr955/readback-comment-955-6438474045.json: ducthangho, OWNER, created_at = updated_at 2026-10-27T09:38:28Z,
+      than ghi "Duyet landed #899 ... kem caveat §8.1 chua dat vi F13 ... F13 sua bang packet rieng, khong chan landed"
+      va head 5c271ead310e68aeea0bcf03a679fbe77bfc7e87. ops/land/pr945-wp899-provenance/do-1027-pr955/readback-pr-955.json: head.sha 5c271ea (khop SHA trong comment),
+      merged_at 09:38:34Z (SAU comment 6 giay), merged_by ducthangho.
+    gioi_han: 'Ca hai readback doc qua MCP github (truong than co the bi chuan hoa thuc the HTML o phia doc); bam byte goc KHONG_DO_DUOC.'
+  landed_truoc: false
+  landed_sau: false
+  reviewer_assurance_81: CHUA DAT
+  ly_do: >-
+    doi_chieu — packet lop sensitive can cross_approved hoac human_audited (PROTOCOL §8). Luot doc lap (A) tren 4511b1e
+    (khoi review_doc_lap_a_20261027) do duoc model phuc vu gpt-6.1-sol nhung verdict changes_requested (F13 P2) => chua co
+    approve. Comment chu kho khong thay human_audited (phan quyet #566, tien le dinh_chinh_sau_quyet_dinh cua pr870):
+    tai khoan OWNER khong tach khoi phien agent va comment khong co cau tu doc diff.
+  dieu_kien_mo_lai: >-
+    Packet sua F13 (Issue/lease rieng) merge, roi mot luot approve DOC LAP qua launcher co model_phuc_vu DO_DUOC, ho model
+    khac claude, tren head cua packet sua (pham vi diff gom ca F13); khi do mo PR ghi so moi de lat landed.
+  landed: false

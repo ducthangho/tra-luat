@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "name": "linux-foundation-v1",
+  "scope": "Three cheap repository checks only. Does not replace all gate jobs, test registry, mutation suites, Windows, review or land admission.",
+  "steps": [
+    {
+      "id": "doctrine",
+      "argv": ["{python}", "-B", ".claude/dev/packet_loop.py", "doctrine-scan", "--root", "."],
+      "timeout_seconds": 120,
+      "positive": ["^doctrine-scan: sạch"]
+    },
+    {
+      "id": "adr",
+      "argv": ["{python}", "-B", ".claude/dev/packet_loop.py", "adr-song", "--root", "."],
+      "timeout_seconds": 120,
+      "positive": ["^adr-song: sạch"]
+    },
+    {
+      "id": "eol",
+      "argv": ["{python}", "-B", ".githooks/eol_policy.py", "--all", "--json"],
+      "timeout_seconds": 120,
+      "positive": ["\"ok\": true", "\"violations\": \\[\\]"]
+    }
+  ]
+}

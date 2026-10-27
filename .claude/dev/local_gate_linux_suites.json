@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "name": "linux-selected-suites-v1",
+  "scope": "Selected offline Linux suites, not full workflow equivalence, Windows, release or merge approval. Run foundation separately. Install pinned tools from repository manifest first.",
+  "steps": [
+    {
+      "id": "registry-contract",
+      "argv": ["{python}", "-B", ".claude/dev/ci_dang_ky_test.py"],
+      "timeout_seconds": 9000,
+      "positive": ["^TỔNG: ĐẠT$"]
+    },
+    {
+      "id": "registry-suites",
+      "argv": ["{python}", "-B", ".claude/dev/ci_dang_ky_test.py", "--chay"],
+      "timeout_seconds": 9000,
+      "positive": ["^TỔNG: ĐẠT$", "^CI_DANG_KY_THOI_GIAN "]
+    },
+    {
+      "id": "packet-loop",
+      "argv": ["{python}", "-B", ".claude/dev/packet_loop_test.py"],
+      "timeout_seconds": 9000,
+      "positive": ["^TỔNG: ĐẠT$"]
+    },
+    {
+      "id": "runtime-selftest",
+      "argv": ["{python}", "-B", "scripts/tl.py", "--selftest"],
+      "timeout_seconds": 9000,
+      "positive": ["^== tl selftest ([1-9][0-9]*)/\\1 ==$"]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+verdict: approve
+reviewed_sha: 1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986
+base_sha: ba222ffd1615f0d74b59985b9612f725211b62f5
+Reviewed commit: 1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986
+reviewed_tree: 13843e747b31df410a56e83b1dbc2f98a76e7d2d
+packet: wp899-r4-g4
+generation: 4
+spec_hash: be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45
+review_class: sensitive
+review_call: 11/12 (offline cuối, theo authority trong prompt)
+role: reviewer
+provider: openai_codex

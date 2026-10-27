@@ -97,3 +97,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp960-g1-claude khi A1-A7 dat; mo PR draft. Hinh dang loi lap >= 3 lan qua cac luot review => DUNG hoi chu kho (spec).'
+da_bi_thay_the: wp960-r2-g1-claude
+da_bi_thay_the_ly_do: 'Chu kho dong y cap lease revision 2 (comment #960 issuecomment-6444965500, 27-10-2026). Lease r1 nay KHONG con hieu luc; quyen ghi chuyen sang wp960-r2-g1-claude (spec NO-CAU-LICH-SU-BIEN-NHAN-r2, spec_hash 9a155cb9...). Giu tep lam hien vat, khong xoa.'

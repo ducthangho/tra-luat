@@ -1,0 +1,6 @@
+RUN: passed (run_attempt 1, yeu cau 1)
+JOB 121396258362 launcher (windows-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121396258477 launcher (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+WORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)
+provenance.yaml sha256 1e5139d3de6f18f20d663518b039e237f1f4d326a00524199f4866f29561ca66
+NOT_MEASURED: 3

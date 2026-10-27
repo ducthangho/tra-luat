@@ -95,3 +95,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp923-g2-claude MOT lan khi N1-N4 dat va review approve; mo PR draft. Sau approve khong day merge commit them neu khong con luot Codex de xac minh lai.'
+da_bi_thay_the: wp923-r3-g3-claude
+ly_do_thu_hoi: 'pha B da merge (PR #983, merge 7f19424, 2026-10-27T13:47:13Z, merged_by ducthangho); chu kho giao packet A (#923 r3, loi 1 fixture gpgsign) cung tep (ghi ho #923 issuecomment-6442742939) => lease g3 ke nhiem.'

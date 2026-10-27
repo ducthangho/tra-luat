@@ -383,8 +383,14 @@ def c17_l7_khai_dat_phai_do_thuc_thi():
     for muc in ("CHUA_DAT", "CHUA DAT", "'chua dat'", "CHƯA ĐẠT", "DAT_MOT_PHAN", "1", "true", "null", "[DAT]",
                 "ĐẤT", "DẠT", "ĐAT", "dát"):   # review l7a P2: chữ khác dấu là giá trị KHÁC, không phải DAT
         ky(hs7(muc), P7, 0, f"{muc!r} không phải DAT ⇒ L7 không áp")
-    for hs in ("assurance_81: DAT\n", "assurance_81: [{reviewer_assurance_81: DAT}]\n", "x: {reviewer_assurance_81: DAT}\n"):
-        ky(hs, P7, 0, f"không phải mapping assurance_81 ở gốc ⇒ L7 không áp: {hs.strip()!r}")
+    for hs in ("assurance_81: DAT\n", "assurance_81: [{reviewer_assurance_81: DAT}]\n", "x: {reviewer_assurance_81: DAT}\n",
+               "reviewer_assurance_81: DAT\n", "assurance_81: {}\n", "DAT\n", "null\n",
+               "- {assurance_81: {reviewer_assurance_81: DAT}}\n"):   # review l7e P3: phạm vi áp — vị trí, có mặt, hình dạng gốc
+        try:
+            rc, ra = chay(hs, P7)
+        except Exception as e:   # traceback không phải ĐẠT
+            rc, ra = -1, f"{type(e).__name__}: {e}"
+        bang(rc == 0 and "L7" not in ra, f"L7 không áp cho {hs.strip()!r}: rc={rc} {ra[-200:]}")
 
 
 @ca
@@ -534,6 +540,21 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7_mien_xoa_vi_pham_truoc", "        if not mien and not isinstance(tt7, dict):\n",
      "        if mien:\n            vp.clear()\n        if not mien and not isinstance(tt7, dict):\n", "c18"),
     ("L7_mien_tru_khong_ghi", '"L7 miễn trừ (băm khớp ảnh chụp, nợ NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO)" if mien', '"" if mien', "c18"),
+    # review l7e P3: phạm vi áp. Tương đương (reviewer đo, không cấp mutant): bỏ riêng `bam is not None`, bỏ thay khoảng
+    # trắng bằng `_`, thu `elif not mien` thành `elif isinstance(tt7, dict)` (mọi ảnh miễn trừ thật đều thiếu thuc_thi).
+    ("L7_dat_o_goc", 'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None',
+     'du_lieu.get("assurance_81", du_lieu) if isinstance(du_lieu, dict) else None', "c17"),
+    ("L7_thieu_khoa_mac_dinh_dat", 'a81.get("reviewer_assurance_81")', 'a81.get("reviewer_assurance_81", "DAT")', "c17"),
+    ("L7_goc_list_mo_goi", 'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None',
+     'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else (du_lieu[0].get("assurance_81") if isinstance(du_lieu, list)'
+     ' and du_lieu and isinstance(du_lieu[0], dict) else None)', "c17"),
+    ("L7_bo_kiem_goc_mapping", 'du_lieu.get("assurance_81") if isinstance(du_lieu, dict) else None', 'du_lieu.get("assurance_81")', "c17"),
+    ("L7_a81_list_mo_goi", '    if isinstance(a81, dict) and _chuan_hoa_81(',
+     '    a81 = a81[0] if isinstance(a81, list) and a81 and isinstance(a81[0], dict) else a81\n    if isinstance(a81, dict) and _chuan_hoa_81(', "c17"),
+    ("L7_moi_muc_deu_ap", 'in L7_MUC_DAT:   # L7', 'in L7_MUC_DAT or True:   # L7', "c17"),
+    ("L7_khong_chuoi_thanh_dat", "    if not isinstance(v, str):\n        return None\n",
+     "    if not isinstance(v, str):\n        return \"DAT\" if v is True or v == 1 else None\n", "c17"),
+    ("L7_ghi_chu_khong_can_ten", "        if bam is not None:\n            ghi.append(", "        if True:\n            ghi.append(", "c18"),
     ("L7_khong_bao_gio_mien", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = False", "c18"),
     ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
     ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),

@@ -1,0 +1,16 @@
+case {"name": "c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA", "result": ["qua", null]}
+case {"name": "c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC", "result": ["qua", null]}
+case {"name": "c71_A2_cau_ancestry_do_bang_merge_base", "result": ["qua", null]}
+case {"name": "c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan", "result": ["qua", null]}
+case {"name": "c73_A4_surface_verdict_doi_chieu_run_json", "result": ["qua", null]}
+case {"name": "c74_A5_no_cau_lich_su_chi_co_va_no_chet_la_vi_pham", "result": ["qua", null]}
+case {"name": "c75_no_cau_lich_su_CHI_CO_LAI_va_tro_tep_co_that", "result": ["qua", null]}
+case {"name": "c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet", "result": ["qua", null]}
+case {"name": "c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra", "result": ["qua", null]}
+case {"name": "c79_dong_TRICH_DAN_hien_vat_khac_khong_phai_tu_khai_surface", "result": ["qua", null]}
+case {"name": "c80_moc_chi_blame_DUNG_cau_duoc_mien", "result": ["qua", null]}
+case {"name": "c81_moc_muon_KHONG_tay_trang_duoc_cau_cu_bang_khoang_trang", "result": ["qua", null]}
+case {"name": "c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet", "result": ["qua", null]}
+case {"name": "c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet", "result": ["qua", null]}
+case {"name": "c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham", "result": ["qua", null]}
+case {"name": "c85_lich_su_tep_KHONG_DOC_DUOC_thi_moc_la_KHONG_DO_DUOC", "result": ["qua", null]}

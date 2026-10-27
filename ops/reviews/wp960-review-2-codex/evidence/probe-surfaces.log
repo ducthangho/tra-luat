@@ -1,0 +1,13 @@
+surface-mismatch {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "chua_do": [], "surface_chua_do": []}
+surface-two-fields {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "chua_do": [], "surface_chua_do": []}
+surface-quoted {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+surface-reference-before-self {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+surface-line-prefix-self {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+source-json-error-debt=False {"rc": 2, "loi": [], "chua_do": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "surface_chua_do": []}
+source-json-error-debt=True {"rc": 2, "loi": [], "chua_do": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "surface_chua_do": []}
+source-list-debt=False {"rc": 2, "loi": [], "chua_do": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "surface_chua_do": []}
+source-list-debt=True {"rc": 2, "loi": [], "chua_do": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "surface_chua_do": []}
+source-missing-field-debt=False {"rc": 2, "loi": [], "chua_do": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "surface_chua_do": []}
+source-missing-field-debt=True {"rc": 2, "loi": [], "chua_do": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "surface_chua_do": []}
+source-bad-surface-debt=False {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`gibberish`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "chua_do": [], "surface_chua_do": []}
+source-bad-surface-debt=True {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}

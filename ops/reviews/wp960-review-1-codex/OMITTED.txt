@@ -1,0 +1,2 @@
+# Tep KHONG vao kho: sha256  byte  duong_dan_tuong_doi.
+1ce81cd59a697a86bfac1cc5b77ac2eab26a24671fec46763102c02cdbd4a67a  7529  run/prompt.snapshot  (ban chup launcher, byte-identical PROMPT.md)

@@ -478,3 +478,33 @@ moc_workflow_definition_20261027:
         Chu kho duyet `landed` cho #896 bang comment tren PR ghi so nay, ghi du SHA head cuoi (40 hex) va chap nhan don vi land,
         dang SAU commit cuoi va TRUOC merge.
   landed: false
+
+landed_20261027:
+  bo_canh: 'Chu kho yeu cau ghi nhan landed sau khi merge #956 (phien 27-10-2026). Khoi nay KHONG sua dong nao o tren.'
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/956#issuecomment-6431407190
+    do_duoc: >-
+      measured — ops/land/pr896-claude-md-bai-hoc-c-tro-nguon-provenance/do-1027-157241c/readback-comment-956-6431407190.json:
+      ducthangho, author_association OWNER, created_at = updated_at 2026-10-27T01:25:05Z; than chap nhan don vi land
+      "816f439 + 3bc4244 (kem caveat)" va ghi "Head PR ghi so: 3e62ac5a3b3333d6bcc3d21d828ee7a4cd3022be".
+      readback-commit-3e62ac5.json: commit cuoi cua nhanh ghi so luc 2026-10-27T01:14:10Z (truoc comment).
+      readback-pr-956.json: head.sha 3e62ac5 (= SHA trong comment), merged_at 2026-10-27T02:10:54Z (sau comment),
+      merge_commit 157241c350e85d2b59959b7ea7d636672da19d8d, merged_by ducthangho.
+  don_vi_land: >-
+    816f43988eb3012726120ad00166a989cc2b9af6 (head #896, cha thu hai cua merge 27dcc3b) + 3bc4244fe5533a71b197a0efb8f79e40175c1a3e
+    (ban va P2, qua #915), kem caveat cua a9bc934 (#946), 7a01b3e (#951) va chuoi HINT luot 2..7 (#947). Chu kho chap nhan
+    trong comment tren.
+  landed: true
+  landed_hieu_luc_tu: 157241c350e85d2b59959b7ea7d636672da19d8d
+  landed_dieu_kien: >-
+    (1) gate tren merge 27dcc3b: DAT — 4/4 moc §10.2.2 (cap_nhat_20261026.bon_moc_10_2_2 + moc_workflow_definition_20261027).
+    (2) lease: KHONG_AP_DUNG — viec chu kho giao truc tiep, khong packet/lease. (3) review: DAT theo don vi land chu kho chap nhan —
+    pr896-review-8-codex approve 0 P0–P3, cross_approved, model_phuc_vu DO_DUOC, tren fb87110 (chuoi ban va sau 816f439);
+    noi dung CLAUDE.md cuoi cung = 3bc4244, khong doi toi fb87110. (4) noi dung merge = diff da review: 816f439 la cha thu hai
+    cua 27dcc3b; 3bc4244 va chuoi ban va deu la to tien master. (5) duyet chu kho neo dung head PR ghi so, dang sau commit cuoi
+    va truoc merge: DAT.
+  gioi_han: >-
+    Verdict approve KHONG nam tren dung authorized_head_sha 816f439 — chi hop le qua quyet dinh chap nhan don vi land cua chu kho.
+    Ho model executor (claude) suy theo provider, KHONG do_may. Tai khoan chu kho khong tach khoi phien agent (#566) — comment
+    la duyet landed, KHONG phai human_audited. Bam byte output GraphQL cua moc Workflow definition KHONG_DO_DUOC (ban chep tu hoi thoai).

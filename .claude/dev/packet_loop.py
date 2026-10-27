@@ -1195,6 +1195,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             )
 
     # #812 M2: packet áp ADR-0054 ghi MỌI verdict qua biên nhận H; `--verdict` một mình không đủ.
+    a.lop_truoc = _lop_truoc(st)  # #814 M1: chỉ record-review có vòng trước để nối; cửa khác vắng ⇒ không nhận nguồn
     bn = _du_dieu_kien_approve(st, a) if st.get("luat_adr0054") is True else None
     vong = _vong_p3(st, bn) if bn else None  # #814 M1: bảng nối sai ⇒ từ chối TRƯỚC `_xet_dung` (I4)
     _xet_dung(state_dir, st, "record-review")  # I4: chỉ sau khi MỌI đầu vào đã được xác thực
@@ -2747,7 +2748,7 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
             ("transport", nc["reviewer"]["transport"] is not None and bnv._chuoi(mri.get("transport")) == nc["reviewer"]["transport"]),
             ("executor-surface-transport", all((bm_chuan(mei[k]) if k == "surface" else bnv._chuoi(mei[k])) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")) if k in mei)),
             ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
-            ("bang-noi", "bang_noi" not in d or _noi_hop_le(d["bang_noi"])),  # #814 M1 (I3): mọi cửa tiêu thụ H
+            ("bang-noi", lop_ok and ("bang_noi" not in d or _kiem_noi(d["bang_noi"], lop, getattr(a, "lop_truoc", None)))),  # #814 M1: MỌI cửa đọc H
             ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
             ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop}),
             # same-failure đếm theo `--finding-id`: verdict âm phải khai ĐỦ mọi lớp của bảng, bỏ một lớp tái diễn là né trần.
@@ -2897,7 +2898,6 @@ def _slug_connector(st: dict, a, h: str, p3: list) -> list:
     if not a.bien_nhan_connector:
         _die(RC_BIEN_NHAN, f"connector có P3 {p3} — cần --bien-nhan-connector (bảng lớp do reviewer ký)")
     bnc = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan_connector, verdict="approve", reviewed_sha=h, finding_id=None))
-    _khong_noi_lai(bnc, "accept")
     lop = bnc["lop"]
     lop = [x for x in lop if "connector_refs" in x]
     refs = [tuple(r) for x in lop for r in (x["connector_refs"] if type(x["connector_refs"]) is list else [None])
@@ -2971,7 +2971,6 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
     if not a.finding_id:
         _die(RC_ARG, "mo-lai phải có ít nhất một --finding-id (I3: tập bằng chứng dương rỗng ⇒ không đạt)")
     bn = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan, verdict="changes_requested", reviewed_sha=h, finding_id=a.finding_id))
-    _khong_noi_lai(bn, f"mo-lai {a.nguyen_nhan}")
     khoa = "connector_refs" if connector else "check_refs"
     dung = (lambda r: type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int) if connector else (
         lambda r: type(r) is list and len(r) == 2 and all(type(y) is str and y.strip() for y in r))  # ci-do: [workflow, job] — định danh I7
@@ -3053,35 +3052,32 @@ def cmd_chu_kho_duyet(a, state_dir: Path) -> int:
 KHOA_NOI = {"tu", "den", "ly_do"}
 
 
-def _noi_hop_le(noi) -> bool:
-    """M1 (I3): lược đồ `bang_noi` = [{tu: [slug], den: slug, ly_do}], mỗi slug nguồn/đích một lần, lý do khác rỗng. Ở vị từ H DÙNG CHUNG."""
+def _kiem_noi(noi, lop: list, truoc) -> bool:
+    """M1 (I3, I11) — MỘT luật bảng nối `bang_noi` = [{tu: [slug], den: slug, ly_do}] cho MỌI cửa đọc biên nhận H (gọi từ
+    `_du_dieu_kien_approve`): lược đồ, mỗi slug nguồn/đích một lần, lý do khác rỗng; xét MỌI hàng: đích là lớp P3 của CHÍNH bảng lớp H
+    (kể cả `tu: []` = khai lớp mới); nguồn chỉ nhận khi có `truoc` (bảng lớp vòng trước — chỉ `record-review`), phải là lớp P3 vòng trước
+    đã rời vòng này. Ngoài `record-review` không có vòng trước ⇒ đổi tên/gộp bị từ chối, kẻo lớp tái diễn đổi slug mà tách bộ đếm."""
     if type(noi) is not list or not all(type(x) is dict and set(x) == KHOA_NOI and type(x["tu"]) is list for x in noi):
         return False
+    hang, cu = {x["slug"]: x["hang"] for x in lop}, {x["slug"]: x["hang"] for x in truoc or []}
     tu, den = [s for x in noi for s in x["tu"]], [x["den"] for x in noi]
     return (all(type(s) is str and SLUG_RE.fullmatch(s) for s in tu + den) and len(set(tu)) == len(tu) and len(set(den)) == len(den)
-            and all(type(x["ly_do"]) is str and x["ly_do"].strip() for x in noi))
+            and all(type(x["ly_do"]) is str and x["ly_do"].strip() for x in noi)
+            and all(hang.get(x["den"]) == "P3" and all(cu.get(s) == "P3" and s not in hang for s in x["tu"]) for x in noi))
 
 
-def _khong_noi_lai(bn: dict, cua: str) -> None:
-    """M1 (I11): ngoài vòng vá P3 của `record-review` không có vòng trước để đối chiếu ⇒ bảng nối đổi tên/gộp (`tu` khác rỗng) bị từ chối
-    TRƯỚC `_xet_dung`, kẻo một lớp tái diễn đổi slug mà tách bộ đếm same-failure. `tu: []` (khai lớp mới) vô hại."""
-    if nguon := sorted(s for x in bn.get("noi", []) for s in x["tu"]):
-        _die(RC_BIEN_NHAN, f"{cua}: bảng nối H đổi tên/gộp {nguon} — chỉ nhận ở vòng vá P3 của record-review")
+def _lop_truoc(st: dict) -> list:
+    """Bảng lớp (slug, hạng) của review liền trước; state trước #814 (review không có `lop`) lấy của verdict đang chờ từ `bien_nhan_approve`."""
+    r, bna = (st["reviews"][-1] if st["reviews"] else {}), st.get("bien_nhan_approve")
+    return r.get("lop") if "lop" in r else [{"slug": x["slug"], "hang": x["hang"]} for x in bna["lop"]] if r.get("verdict") == "approve" \
+        and r.get("reviewed_sha") == st.get("pending_sha") and type(bna) is dict and type(bna.get("lop")) is list else []
 
 
 def _vong_p3(st: dict, bn: dict):
-    """M1/M2 — bảng nối `bang_noi` của biên nhận H (I11) nối LỚP P3 vòng trước (`tu`) sang lớp P3 vòng này (`den`); `tu: []` khai lớp MỚI.
-    Trỏ slug không có, nguồn còn ở vòng này (nối mơ hồ/chuỗi) hay nối lớp P0–P2 (né bộ đếm) ⇒ từ chối (I4). Verdict liền sau một verdict
-    toàn-P3, không `mo_lai` xen giữa, là VÒNG VÁ P3: slug P3 mới không qua bảng nối ⇒ từ chối; số lớp P3 so SAU khi áp bảng nối lên CẢ HAI
-    vòng. State trước #814 (review không có `lop`) lấy bảng lớp của verdict đang chờ từ `bien_nhan_approve`. Trả None | {k, truoc, sau}."""
-    lop, noi = bn["lop"], bn.get("noi", [])
-    r, bna = (st["reviews"][-1] if st["reviews"] else {}), st.get("bien_nhan_approve")
-    truoc = r.get("lop") if "lop" in r else [{"slug": x["slug"], "hang": x["hang"]} for x in bna["lop"]] if r.get("verdict") == "approve" \
-        and r.get("reviewed_sha") == st.get("pending_sha") and type(bna) is dict and type(bna.get("lop")) is list else []
-    cu, nay = {x["slug"]: x["hang"] for x in truoc}, {x["slug"]: x["hang"] for x in lop}
-    tu, den = [s for x in noi for s in x["tu"]], [x["den"] for x in noi]
-    if not all(cu.get(s) == "P3" and s not in nay for s in tu) or not all(nay.get(s) == "P3" for s in den):
-        _die(RC_BIEN_NHAN, f"bảng nối H trỏ slug không có: nguồn là lớp P3 vòng trước {sorted(cu)} đã rời vòng này, đích là lớp P3 vòng này {sorted(nay)}")
+    """M1/M2 — bảng nối đã qua `_kiem_noi`. Verdict liền sau một verdict toàn-P3, không `mo_lai` xen giữa, là VÒNG VÁ P3: slug P3 mới không
+    có ở vòng trước và không qua bảng nối ⇒ từ chối (I11); số lớp P3 so SAU khi áp bảng nối lên CẢ HAI vòng. Trả None | {k, truoc, sau}."""
+    lop, noi, truoc = bn["lop"], bn.get("noi", []), _lop_truoc(st)
+    cu, den = {x["slug"] for x in truoc}, [x["den"] for x in noi]
     sau_rv = st["history"][max((i for i, h in enumerate(st["history"]) if h.get("event") == "record_review"), default=0):]
     if not truoc or {x["hang"] for x in truoc} != {"P3"} or any(h.get("event") == "mo_lai" for h in sau_rv):
         return None

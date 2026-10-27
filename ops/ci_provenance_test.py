@@ -1114,7 +1114,8 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
         bo_cha = ([], [P1], [P1, P1], [P1, P2, P1], [P1, P1, P1], [P2, P1, "0" * 39 + "1"], [f"{i:040x}" for i in range(1, 258)])   # trùng: AA·ABA·AAA
         pha = (b"", b"x-review start\n \ntree " + oid + b"\n", b"x-review start\n\t\ntree " + oid + b"\n",
                b"x-review start\n \t\ntree " + oid + b"\n", b"tree \n", b"x-review first\n \n tree " + oid + b"\n parent " + P1.encode() + b"\n",
-               b"tree\t " + oid + b"\n", b"tree\r\n " + oid + b"\n", b"tree\n\t" + oid + b"\n", b"tree\r\n\t" + oid + b"\n")   # lượt 7: TAB+SP, gập CRLF/TAB
+               b"tree\t " + oid + b"\n", b"tree\r\n " + oid + b"\n", b"tree\n\t" + oid + b"\n", b"tree\r\n\t" + oid + b"\n",   # lượt 7: TAB+SP, gập
+               b"tree: " + oid + b"\n", b"tree\\\n " + oid + b"\n")   # lượt 8: S01 `tree:` · S02 gập backslash-LF
         than = (None, b"m\n", b"first\n\ntree " + oid + b"\nparent " + P1.encode() + b"\n\nlast\n", b"tree " + oid + b"\n\nlast\n",
                 b"\n\ntree " + oid + b"\nparent " + P1.encode() + b"\n")   # None = không có dòng trống, không thân
         for bc in bo_cha:
@@ -1123,6 +1124,14 @@ def c53_git_commit_khong_utf8():   # F13 (#955 review A) + #978 lượt 1: reade
                     raw = f"tree {cay}\n".encode() + b"".join(f"parent {x}\n".encode() for x in bc) + ai(b"A") + ph + (b"" if th is None else b"\n" + th)
                     so_tree = sum(x.startswith(b"tree ") for x in raw.split(b"\n\n", 1)[0].split(b"\n"))
                     ca.append((cm(raw), {"tree": cay, "parents": bc} if so_tree == 1 else None))
+        # nợ `wp978-git-reader-differential-fuzz`: vi sai NGẪU NHIÊN (seed cố định) — dòng mở rộng ghép từ token bẫy; kỳ vọng như ma trận
+        bay = (b"tree", b"parent", b"Tree", "ｔｒｅｅ".encode(), b" ", b"\t", b"\r", b":", b"\\", b"\x0b", b"\x0c", b"\x85", b"\n", b"\n ", b"\r\n",
+               oid, P1.encode(), b"x")
+        ngau = random.Random(978)
+        for _ in range(150):
+            raw = dau[:-len(f"parent {P2}\n")] + ai(b"A") + b"".join(ngau.choice(bay) for _ in range(ngau.randint(1, 8))) + b"\n\nm\n"
+            so_tree = sum(x.startswith(b"tree ") for x in raw.split(b"\n\n", 1)[0].split(b"\n"))
+            ca.append((cm(raw), {"tree": cay, "parents": [P1]} if so_tree == 1 else None))
         hong = [b"tree %s\ntree %s\n" % (cay.encode(), cay.encode()), b"parent %s\n" % P1.encode(), b"tree %s1\n" % cay.encode(),
                 b"tree " + b"g" * 40 + b"\n", b"tree " + cay.upper().encode() + b"\n", f"tree {cay}\nparent zz\n".encode(),
                 f"tree {cay}\nparent {P1[:20]}".encode() + b"\xff" + P1[20:].encode() + b"\n", f"parent {P1}\ntree {cay}\n".encode(), f"tree {cay}\rparent {P1}\n".encode()]
@@ -1266,6 +1275,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
       for ten, gap in (("crlf_sp", 'b"\\r\\n "'), ("lf_tab", 'b"\\n\\t"'), ("crlf_tab", 'b"\\r\\n\\t"'))],
     ("F13_gop_cha_lech_mot", "        cha.append(x[7:])\n", "        if x[7:] not in cha[:-1]:\n            cha.append(x[7:])\n", "c53"),
     ("F13_rstrip_ten_truong", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.split(b" ", 1)[0].rstrip() + b" " + x.split(b" ", 1)[1] if b" " in x else x for x in dong]\n', "c53"),
+    ("F13_bo_hai_cham_ten", '.split(b"\\n\\n", 1)[0].split(b"\\n")\n', '.split(b"\\n\\n", 1)[0].split(b"\\n")\n    dong = [x.split(b" ", 1)[0].rstrip(b":") + b" " + x.split(b" ", 1)[1] if b" " in x else x for x in dong]\n', "c53"),
+    ("F13_gap_backslash", "dong = than[:int(loai[2])].split(", 'dong = than[:int(loai[2])].replace(b"\\\\\\n", b"").split(', "c53"),
     ("F13_oid_chi_40", 're.compile(rb"[0-9a-f]{40}|[0-9a-f]{64}")', 're.compile(rb"[0-9a-f]{40}")', "c53"),
     ("F08_git_luon_vang", 'return r.stdout.decode("utf-8") if r.returncode == 0 else None', "return None", "c34"),
     ("F02_bo_doi_dong", 'not b["mo"] and b["ok"]', 'b["ok"]', "c35"),

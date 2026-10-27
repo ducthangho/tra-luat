@@ -678,7 +678,7 @@ def _load(state_dir: Path, packet: int) -> dict:
             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
                         and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
                         and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
-            ("mo-lai", _quyen_hop_le(st.get("mo_lai_tu"), "nguyen_nhan", NGUYEN_NHAN_MO_LAI) and _quyen_hop_le(st.get("checkpoint_day"), "sha256", None)
+            ("mo-lai", _quyen_hop_le(st.get("mo_lai_tu"), "nguyen_nhan", (*NGUYEN_NHAN_MO_LAI, "p3")) and _quyen_hop_le(st.get("checkpoint_day"), "sha256", None)
                        and (st["state"] != "cho_chu_kho" or st.get("luat_adr0054") is True and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
@@ -1195,13 +1195,16 @@ def cmd_record_review(a, state_dir: Path) -> int:
             )
 
     # #812 M2: packet áp ADR-0054 ghi MỌI verdict qua biên nhận H; `--verdict` một mình không đủ.
+    a.lop_truoc = _lop_truoc(st)  # #814 M1: chỉ record-review có vòng trước để nối; cửa khác vắng ⇒ không nhận nguồn
     bn = _du_dieu_kien_approve(st, a) if st.get("luat_adr0054") is True else None
+    vong = _vong_p3(st, bn) if bn else None  # #814 M1: bảng nối sai ⇒ từ chối TRƯỚC `_xet_dung` (I4)
     _xet_dung(state_dir, st, "record-review")  # I4: chỉ sau khi MỌI đầu vào đã được xác thực
 
     # (c) cùng ID lặp TRONG MỘT review chỉ tính MỘT lần: dedup trước khi đếm.
     # Không có bước này thì reviewer nhắc lại một lỗi hai lần trong cùng một
     # lượt sẽ chặn oan ngay lượt đầu — đúng lỗi đã đo ở vòng 3.
     ids_duy_nhat = sorted(set(ids))
+    dem = sorted(set(ids) - set(bn["p3"])) if bn else ids_duy_nhat  # #814 M2: lớp P3 không vào same_failure_limit
 
     st["attempt_open"] = False
     st["review_rounds_used"] += 1
@@ -1213,15 +1216,16 @@ def cmd_record_review(a, state_dir: Path) -> int:
             "provider": a.provider,
             "verdict": a.verdict,
             "reviewed_sha": a.reviewed_sha,
-            "finding_ids": ids_duy_nhat,
+            "finding_ids": dem,
             # (d) mô tả CHỈ để đọc. Nó không tham gia phép đếm, nên hai mô tả
             # khác nhau cùng một ID vẫn là một finding.
             "finding_descs": list(a.finding_desc or []),
+            **({"lop": [{"slug": x["slug"], "hang": x["hang"]} for x in bn["lop"]], "bang_noi": bn.get("noi", []), "vong_p3": vong} if bn else {}),
         }
     )
 
     cham_tran = []
-    for fid in ids_duy_nhat:
+    for fid in dem:
         st["finding_counts"][fid] = st["finding_counts"].get(fid, 0) + 1
         if st["finding_counts"][fid] >= st["same_failure_limit"]:
             cham_tran.append(fid)
@@ -1235,7 +1239,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
         st["accepted_sha"] = a.reviewed_sha
     st["history"].append(
         {"event": "record_review", "verdict": a.verdict,
-         "reviewed_sha": a.reviewed_sha, "finding_ids": ids_duy_nhat}
+         "reviewed_sha": a.reviewed_sha, "finding_ids": dem}
     )
     _save(state_dir, st)
     print(
@@ -2744,13 +2748,15 @@ def _du_dieu_kien_approve(st: dict, a) -> dict:
             ("transport", nc["reviewer"]["transport"] is not None and bnv._chuoi(mri.get("transport")) == nc["reviewer"]["transport"]),
             ("executor-surface-transport", all((bm_chuan(mei[k]) if k == "surface" else bnv._chuoi(mei[k])) == nc["executor"][f] for k, f in (("surface", "execution_surface"), ("transport", "transport")) if k in mei)),
             ("khac-ho", nc["assurance_target"] != "cross_approved" or ho_rev != ho_exec), ("bang-lop", lop_ok),
+            ("bang-noi", lop_ok and ("bang_noi" not in d or _kiem_noi(d["bang_noi"], lop, getattr(a, "lop_truoc", None)))),  # #814 M1: MỌI cửa đọc H
             ("con-P0-P2", lop_ok and (a.verdict != "approve" or not any(x["hang"] in HANG_LOP[:3] for x in lop))),
             ("slug-ngoai-bang", lop_ok and set(a.finding_id or []) <= {x["slug"] for x in lop}),
             # same-failure đếm theo `--finding-id`: verdict âm phải khai ĐỦ mọi lớp của bảng, bỏ một lớp tái diễn là né trần.
             ("thieu-lop-am", lop_ok and (a.verdict == "approve" or {x["slug"] for x in lop} <= set(a.finding_id or [])))) if not dung]
     if loi:
         _die(RC_BIEN_NHAN, f"biên nhận {a.bien_nhan} không đủ điều kiện {a.verdict}: {loi}")
-    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3"), "lop": lop}
+    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3"), "lop": lop,
+            **({"noi": d["bang_noi"]} if "bang_noi" in d else {})}  # #814 M1: bảng nối của CHÍNH ảnh đã đọc
 
 
 # --- #834 MAY-ADR-0054-a2 (`ops/specs/wp834.md` + phần chung): cửa `accept` (approved_pending → accepted), I7 readback CI/connector, I11.
@@ -2891,7 +2897,8 @@ def _slug_connector(st: dict, a, h: str, p3: list) -> list:
     khai `connector_refs` [[endpoint, id], ...] phủ ĐÚNG tập (endpoint, id) P3 — không khoá bằng id số do executor đặt."""
     if not a.bien_nhan_connector:
         _die(RC_BIEN_NHAN, f"connector có P3 {p3} — cần --bien-nhan-connector (bảng lớp do reviewer ký)")
-    lop = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan_connector, verdict="approve", reviewed_sha=h, finding_id=None))["lop"]
+    bnc = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan_connector, verdict="approve", reviewed_sha=h, finding_id=None))
+    lop = bnc["lop"]
     lop = [x for x in lop if "connector_refs" in x]
     refs = [tuple(r) for x in lop for r in (x["connector_refs"] if type(x["connector_refs"]) is list else [None])
             if type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int]
@@ -2937,6 +2944,7 @@ def cmd_accept(a, state_dir: Path) -> int:
 # --- #813 MAY-ADR-0054-b (`ops/specs/wp813-r2.md` + phần chung): `mo-lai` (approved_pending → running | cho_chu_kho) · `chu-kho-duyet`.
 NGUYEN_NHAN_MO_LAI, CI_DO_THAT, PHAM_VI_CHECKPOINT = ("ci-do", "connector"), ("failure", "timed_out", "startup_failure"), ("cho_phep_va", "cho_phep_day")
 CUA_DI_TIEP = ("begin-attempt", "mo-lai", "chu-kho-duyet")  # I5: cửa đưa packet đi tiếp mà bộ đếm same-failure đã chạm phải chặn
+CUA_DI_TIEP += ("vua-p3",)  # #814 M3
 KHOA_CHECKPOINT = {"packet_issue": int, "generation": int, "spec_hash": str, "head_sha": str, "pham_vi": list, "nguoi_quyet": str, "neo": str}
 
 
@@ -2982,6 +2990,7 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
             _die(RC_ARG, "mo-lai ci-do phải có --workflow-runs, --workflow-jobs, --check-runs (readback như `accept`, trên head)")
         sha_ci = _kiem_ci(a, {**nc, "required_checks": [list(r) for r in refs]}, h, state_dir, CI_DO_THAT)  # I7: run/attempt/job/check-run mới nhất
     slugs = sorted({x["slug"] for x in bn["lop"]})
+    slugs = [s for s in slugs if s not in bn["p3"]]  # #814 M2: lớp P3 không vào same_failure_limit
     moi = {**st, "state": "cho_chu_kho" if connector else "running", "attempt_open": False, "reviewing_head_sha": None,
            "mo_lai_tu": {"nguyen_nhan": a.nguyen_nhan, "generation": nc["generation"], "sha": h},
            "finding_counts": {**st["finding_counts"], **{s: st["finding_counts"].get(s, 0) + 1 for s in slugs}},
@@ -3039,6 +3048,66 @@ def cmd_chu_kho_duyet(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# --- #814 MAY-ADR-0054-c (`ops/specs/wp814-r3.md` + phần chung): vòng vá P3 theo lớp (M1, M2) · `vua-p3` (M3).
+KHOA_NOI = {"tu", "den", "ly_do"}
+
+
+def _kiem_noi(noi, lop: list, truoc) -> bool:
+    """M1 (I3, I11) — MỘT luật bảng nối `bang_noi` = [{tu: [slug], den: slug, ly_do}] cho MỌI cửa đọc biên nhận H (gọi từ
+    `_du_dieu_kien_approve`): lược đồ, mỗi slug nguồn/đích một lần, lý do khác rỗng; xét MỌI hàng: đích là lớp P3 của CHÍNH bảng lớp H
+    (kể cả `tu: []` = khai lớp mới); nguồn chỉ nhận khi có `truoc` (bảng lớp vòng trước — chỉ `record-review`), phải là lớp P3 vòng trước
+    đã rời vòng này. Ngoài `record-review` không có vòng trước ⇒ đổi tên/gộp bị từ chối, kẻo lớp tái diễn đổi slug mà tách bộ đếm."""
+    if type(noi) is not list or not all(type(x) is dict and set(x) == KHOA_NOI and type(x["tu"]) is list for x in noi):
+        return False
+    hang, cu = {x["slug"]: x["hang"] for x in lop}, {x["slug"]: x["hang"] for x in truoc or []}
+    tu, den = [s for x in noi for s in x["tu"]], [x["den"] for x in noi]
+    return (all(type(s) is str and SLUG_RE.fullmatch(s) for s in tu + den) and len(set(tu)) == len(tu) and len(set(den)) == len(den)
+            and all(type(x["ly_do"]) is str and x["ly_do"].strip() for x in noi)
+            and all(hang.get(x["den"]) == "P3" and all(cu.get(s) == "P3" and s not in hang for s in x["tu"]) for x in noi))
+
+
+def _lop_truoc(st: dict) -> list:
+    """Bảng lớp (slug, hạng) của review liền trước; state trước #814 (review không có `lop`) lấy của verdict đang chờ từ `bien_nhan_approve`."""
+    r, bna = (st["reviews"][-1] if st["reviews"] else {}), st.get("bien_nhan_approve")
+    return r.get("lop") if "lop" in r else [{"slug": x["slug"], "hang": x["hang"]} for x in bna["lop"]] if r.get("verdict") == "approve" \
+        and r.get("reviewed_sha") == st.get("pending_sha") and type(bna) is dict and type(bna.get("lop")) is list else []
+
+
+def _vong_p3(st: dict, bn: dict):
+    """M1/M2 — bảng nối đã qua `_kiem_noi`. Verdict liền sau một verdict toàn-P3, không `mo_lai` xen giữa, là VÒNG VÁ P3: slug P3 mới không
+    có ở vòng trước và không qua bảng nối ⇒ từ chối (I11); số lớp P3 so SAU khi áp bảng nối lên CẢ HAI vòng. Trả None | {k, truoc, sau}."""
+    lop, noi, truoc = bn["lop"], bn.get("noi", []), _lop_truoc(st)
+    cu, den = {x["slug"] for x in truoc}, [x["den"] for x in noi]
+    sau_rv = st["history"][max((i for i, h in enumerate(st["history"]) if h.get("event") == "record_review"), default=0):]
+    if not truoc or {x["hang"] for x in truoc} != {"P3"} or any(h.get("event") == "mo_lai" for h in sau_rv):
+        return None
+    ma = {s: x["den"] for x in noi for s in x["tu"]}
+    p3 = lambda ds: {ma.get(x["slug"], x["slug"]) for x in ds if x["hang"] == "P3"}  # noqa: E731
+    if moi := {x["slug"] for x in lop if x["hang"] == "P3"} - set(cu) - set(den):
+        _die(RC_BIEN_NHAN, f"đổi slug không qua bảng nối: lớp P3 {sorted(moi)} không có ở vòng trước (I11)")
+    return {"k": 1 + sum(bool(r.get("vong_p3")) for r in st["reviews"]), "truoc": len(p3(truoc)), "sau": len(p3(lop))}
+
+
+def cmd_vua_p3(a, state_dir: Path) -> int:
+    """M3 (ADR-0054 §3): executor TỰ CHỌN vá P3 — approved_pending → running, không cần finding P0–P2. Tập chọn khác rỗng (I3), là tập con
+    slug P3 của biên nhận H đang chờ (I11); ghi quyền `mo_lai_tu` (p3, generation, pending_sha) THAY quyền cũ (I6); `_xet_dung` (I5)."""
+    st = _load(state_dir, a.packet)
+    if st.get("luat_adr0054") is not True or st["state"] != "approved_pending":
+        _die(RC_STATE, f"vua-p3 chỉ chạy từ 'approved_pending' của packet áp ADR-0054 (đang {st['state']!r})")
+    chon, p3 = sorted(set(a.finding_id or [])), st["bien_nhan_approve"].get("p3")
+    if not chon:
+        _die(RC_ARG, "vua-p3 phải có ít nhất một --finding-id (I3: tập P3 chọn vá rỗng ⇒ không đạt)")
+    if type(p3) is not list or not set(chon) <= set(p3):
+        _die(RC_BIEN_NHAN, f"slug {sorted(set(chon) - set(p3 or []))} không phải lớp P3 của biên nhận H đang chờ {p3}")
+    nc, h = st["ngu_canh_lease"], st["pending_sha"]
+    moi = {**st, "state": "running", "attempt_open": False, "reviewing_head_sha": None, "mo_lai_tu": {"nguyen_nhan": "p3", "generation": nc["generation"], "sha": h},
+           "history": [*st["history"], {"event": "vua_p3", "chon": chon, "sha": h, "generation": nc["generation"], "bien_nhan_sha256": st["bien_nhan_approve"].get("sha256")}]}
+    _xet_dung(state_dir, moi, "vua-p3")
+    _save(state_dir, moi)
+    print(f"vua-p3 trên {h} — chọn {chon}, state running")
+    return RC_OK
+
+
 def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None:
     """I5 (M4): hàm DUY NHẤT xét MỌI điều kiện dừng (trần lượt, trần vòng, same-failure, rescue sau review), gọi SAU khi đầu vào của cửa
     đã được xác thực (I4). `a`/`cham_tran` = đối số review + finding chạm trần, khi kết quả lượt đã ghi sổ. Packet áp ADR-0054 không bị trần vòng chặn
@@ -3052,6 +3121,11 @@ def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None
             _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
     if cua in CUA_DI_TIEP and not cham_tran:  # #813 M1: bộ đếm đã chạm (kể cả vừa cộng ở `mo-lai`) chặn cửa đi tiếp; cửa khép không ở đây
         cham_tran = sorted(f for f, n in st["finding_counts"].items() if n >= st["same_failure_limit"])
+    v = st["reviews"][-1].get("vong_p3") if a is not None and st["reviews"] else None
+    if v and (v["k"] > 2 or v["sau"] >= v["truoc"]):  # #814 M2: kết quả HỢP LỆ đã ghi sổ ⇒ blocked (I4)
+        st.update(state="blocked", history=[*st["history"], {"event": "blocked_vong_p3", **v}])
+        _save(state_dir, st)
+        _die(RC_TRAN, f"vòng vá P3 thứ {v['k']} (tối đa 2), lớp P3 {v['truoc']} → {v['sau']} (phải giảm) — packet về blocked; ghi handoff, hỏi chủ kho.")
     if cham_tran:
         st.update(state="blocked", history=[*st["history"], {"event": "blocked_same_failure", "finding_ids": cham_tran}])
         _save(state_dir, st)
@@ -3290,6 +3364,11 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--root", default=".")
     q.add_argument("--checkpoint-path", required=True, help="ops/checkpoints/<tên>.yaml, đọc tại origin/master sau khi máy tự fetch")
     q.set_defaults(fn=cmd_chu_kho_duyet)
+
+    q = sub.add_parser("vua-p3", help="#814: approved_pending → running — executor tự chọn vá lớp P3 (ADR-0054 §3); lượt sau là vòng vá P3")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--finding-id", action="append", help="slug lớp P3 của biên nhận H đang chờ; ít nhất một")
+    q.set_defaults(fn=cmd_vua_p3)
 
     q = sub.add_parser("bien-nhan",
                        help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")

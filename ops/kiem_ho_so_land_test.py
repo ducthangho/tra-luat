@@ -32,10 +32,10 @@ _TIEM = (
 )
 
 
-def _chay(root, *, tiem=False, chan_yaml=False, json_out=True):
+def _chay(root, *, tiem=False, chan_yaml=False, json_out=True, tool=TOOL):
     args = ["--root", str(root)] + (["--json"] if json_out else [])
     if tiem or chan_yaml:
-        code = _TIEM.format(chan="sys.modules['yaml'] = None\n" if chan_yaml else "", tool=str(TOOL))
+        code = _TIEM.format(chan="sys.modules['yaml'] = None\n" if chan_yaml else "", tool=str(tool))
         cmd = [sys.executable, "-B", "-c", code, *args]
     else:
         cmd = [sys.executable, "-B", str(TOOL), *args]
@@ -264,8 +264,103 @@ def ca_b1b_scalar_hong():
             shutil.rmtree(goc)
 
 
+# ---- wp981 (spec `ops/specs/wp981-r2.md`): kiểu b — khối `landed_<8 chữ số>` ở mức gốc.
+def _b(goc_url="'https://github.com/ducthangho/tra-luat/pull/1'", ten="landed_20261027", landed="true",
+       tt="da_duyet", comment=f"'{URL}#issuecomment-9'", tp="false"):
+    dong = [f"authorized_head_sha: '{SHA}'"]
+    if goc_url is not None:
+        dong.append(f"authorization_url: {goc_url}")
+    dong += [f"trang_thai_packet:\n  landed: {tp}", f"{ten}:\n  landed: {landed}\n  quyet_dinh_chu_kho:\n    trang_thai: {tt}"]
+    if comment is not None:
+        dong.append(f"    comment: {comment}")
+    return "\n".join(dong) + "\n"
+
+
+KB = "landed_20261027.quyet_dinh_chu_kho"
+# (tên, nội dung, trạng thái, khoá phải nêu trong ly_do); mục spec N1 ở chú thích.
+WP981 = [
+    ("b-du", _b(), "DAT", ("landed_20261027.landed",)),                                       # (i)
+    ("b-ab", _b(tp="true", goc_url=f"'{URL}#issuecomment-1'"), "DAT", ("trang_thai_packet.landed",)),
+    ("b-cmt-manh", _b(comment=f"'{URL}'"), "TRUOT", (KB + ".comment",)),                      # (ii)
+    ("b-cmt-tien-to", _b(comment="'https://gitlab.com/x/pull/1#issuecomment-9'"), "TRUOT", (KB + ".comment",)),
+    ("b-cmt-so", _b(comment="123"), "TRUOT", (KB + ".comment",)),
+    ("b-tt", _b(tt="cho_duyet"), "TRUOT", (KB + ".trang_thai",)),                             # (iii)
+    ("b-landed-chuoi", _b(landed="'true'"), "BO_QUA", ()),                                    # (iv)
+    ("b-landed-mot", _b(landed="1"), "BO_QUA", ()),
+    ("a-khong-manh", _b(tp="true", landed="false"), "TRUOT", ("authorization_url",)),        # (vi)
+    ("b-kad", _b(goc_url="KHONG_AP_DUNG"), "DAT", ()),                                        # (viii)
+    ("b-vang-url", _b(goc_url=None), "DAT", ()),
+    ("b-kad-cmt-vang", _b(goc_url="KHONG_AP_DUNG", comment=None), "TRUOT", (KB + ".comment",)),
+    ("ten-7so", _b(ten="landed_2026102"), "BO_QUA", ()),                                      # (vii)
+    ("ten-x", _b(ten="landed_x"), "BO_QUA", ()),
+]
+WP981_LOI = {"khoi-chuoi": "landed_20261027: xong\n", "khoi-ds": "landed_20261027:\n- landed: true\n"}  # (v)
+
+
+def _wp981_ket_qua(tool):
+    """Trả {tên ca con: None (đạt) | lý do đỏ}. Dùng chung cho bản thật và bản đột biến."""
+    kq = {}
+    goc = _cay({_ld(t): nd for t, nd, *_ in WP981})
+    try:
+        rc, j, _, err = _chay(goc, tiem=True, tool=tool)
+        theo = {t["duong_dan"]: t for t in (j or {}).get("tep", [])}
+        for ten, _, cho, phai in WP981:
+            t = theo.get(_ld(ten))
+            if t is None:
+                kq[ten] = f"vắng (rc {rc}; {err[-200:]})"
+            elif t["trang_thai"] != cho or not all(k in t["ly_do"] for k in phai):
+                kq[ten] = f"{t['trang_thai']} (cần {cho}, phải nêu {phai}) — {t['ly_do']}"
+            else:
+                kq[ten] = None
+    finally:
+        shutil.rmtree(goc)
+    for ten, nd in WP981_LOI.items():
+        goc = _cay({_ld(ten): f"authorized_head_sha: '{SHA}'\n" + nd})
+        try:
+            rc, j, _, err = _chay(goc, tiem=True, tool=tool)
+            ok = rc == 3 and "Traceback" not in err and j and j["tep"][0]["trang_thai"] == "LOI"
+            kq[ten] = None if ok else f"rc {rc} (cần 3, LOI); {err[-200:]}"
+        finally:
+            shutil.rmtree(goc)
+    return kq
+
+
+def ca_wp981_kieu_b():
+    do = {k: v for k, v in _wp981_ket_qua(TOOL).items() if v}
+    assert not do, do
+
+
+# Đột biến trên BẢN SAO TẠM (CLAUDE.md: không ghi tệp thật); mỗi đột biến phải làm ĐỎ đúng ca con đích.
+DOT_BIEN_WP981 = [
+    ("bo_nhanh_b", 'khoi_true = [k for k in khoi if doc[k].get("landed") is True]', "khoi_true = []", "b-du"),
+    ("bo_da_duyet", 'if not (isinstance(tt, str) and tt == "da_duyet"):', "if False:", "b-tt"),
+    ("noi_kieu_a", "doi_url_goc=landed is True)", "doi_url_goc=False)", "a-khong-manh"),
+    ("doi_url_goc_kieu_b", "doi_url_goc=landed is True)", "doi_url_goc=True)", "b-kad"),
+    ("bo_kiem_comment", 'if not _url_hop_le(q.get("comment")):', "if False:", "b-cmt-manh"),
+    ("ep_kieu_landed_khoi", '.get("landed") is True]', '.get("landed")]', "b-landed-chuoi"),
+    ("bo_loi_khoi", "if not isinstance(doc[k], dict):", "if False:", "khoi-chuoi"),
+    ("noi_ten_khoi", 'RE_KHOI = re.compile(r"landed_\\d{8}")', 'RE_KHOI = re.compile(r"landed_\\w+")', "ten-x"),
+]
+
+
+def ca_wp981_dot_bien():
+    goc_ma = TOOL.read_text(encoding="utf-8")
+    tam = Path(tempfile.mkdtemp(prefix="kiem-ho-so-land-dot-bien-"))
+    try:
+        song = []
+        for ten, cu, moi, dich in DOT_BIEN_WP981:
+            assert goc_ma.count(cu) == 1, f"{ten}: mẫu không khớp đúng một lần"
+            ban = tam / f"kiem_ho_so_land_{ten}.py"
+            ban.write_text(goc_ma.replace(cu, moi), encoding="utf-8")
+            if _wp981_ket_qua(ban).get(dich) is None:
+                song.append(f"{ten} (đích {dich})")
+        assert not song, f"đột biến sống: {song}"
+    finally:
+        shutil.rmtree(tam)
+
+
 CA = [ca_b1_rang_l6, ca_b1b_fail_close, ca_b1b_the_python, ca_b1b_scalar_hong, ca_b1b_thieu_pyyaml,
-      ca_b2_mien_tru_hang, ca_b2b_pham_vi, ca_glob_token, ca_b7_root_sai]
+      ca_b2_mien_tru_hang, ca_b2b_pham_vi, ca_glob_token, ca_b7_root_sai, ca_wp981_kieu_b, ca_wp981_dot_bien]
 
 
 def main():

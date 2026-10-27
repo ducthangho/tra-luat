@@ -1,0 +1,13 @@
+2026-10-27T02:18:21.8597193Z Image: windows-2025-vs2026
+2026-10-27T02:18:22.7719606Z ##[group]Run git config --global core.autocrlf false
+2026-10-27T02:18:24.0878410Z ##[group]Run actions/checkout@v4
+2026-10-27T02:18:35.5166102Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-27T02:18:35.5556519Z 06152341f461eedd97f1b95a2ae7bd9cb2f2e174
+2026-10-27T02:18:35.6035239Z ##[group]Run actions/setup-python@v5
+2026-10-27T02:18:36.1563406Z ##[group]Run python -c "import platform,sys;print('he:',platform.system(),'| python:',sys.version.split()[0])"
+2026-10-27T02:18:38.0791662Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-10-27T02:18:47.3760545Z ##[group]Run set -euo pipefail
+2026-10-27T02:19:34.3883645Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-10-27T02:19:36.8922849Z ##[group]Run python .claude/dev/launcher.py doctor
+2026-10-27T02:20:10.7516718Z ##[group]Run python .claude/dev/launcher_test.py
+2026-10-27T02:26:12.3905563Z ##[group]Run python .claude/dev/launcher_test.py --dot-bien

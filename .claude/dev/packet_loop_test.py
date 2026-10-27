@@ -1791,7 +1791,13 @@ def _kich_ban_in(c: Ctx, codepage: str):
     sd_r = _reviewing(c, "--codex-review-calls-limit", 1)  # #775: rescue cần state đã chạm trần, dựng ngoài kịch bản
     _pl(c, sd_r, _goi("r1", _H1), _goi("r2", _H1, 3))
     buoc += [([b[1], "--packet", 55, *b[2:]], sd_r) for b in (_nang(0, tran=2), _rescue(0, "nang_tran"))]
-    da_phu = {"accept"}
+    c2 = Ctx(c.script, c.tmp / "cp813")  # #813: `mo-lai` rồi `chu-kho-duyet` in tiếng Việt lúc thành công — nền approved_pending riêng
+    c2.tmp.mkdir(parents=True, exist_ok=True)
+    rc, sd2, e, _ = _r812(c2, "review", env=env)
+    for ten, (rc, e, _, o) in (("mo-lai", _ml813(c2, sd2, "connector", LCN813, cn=P1_813, env=env)), ("chu-kho-duyet", _ck813(c2, sd2, ["cho_phep_va"], env=env))):
+        if rc or not o.strip():
+            raise AssertionError(f"[{codepage}] {ten} phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
+    da_phu = {"accept", "mo-lai", "chu-kho-duyet"}
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
@@ -8822,7 +8828,7 @@ def _h813(sd):
     return st["mo_lai_tu"]["sha"] if st["state"] in ("running", "cho_chu_kho") and st.get("mo_lai_tu") else st["pending_sha"]
 
 
-def _ml813(c, sd, nn, lop, cn=(), xong=True, cr=(), ids=None):
+def _ml813(c, sd, nn, lop, cn=(), xong=True, cr=(), ids=None, env=None):
     """`mo-lai` thật trên head hiện hành. lop [(slug, hạng, refs)] · cn [(id, hạng)] review comment connector · cr [(tên, kết luận)]."""
     w, h, n = c.tmp / "kho" / "w", _h813(sd), next(_N813)
     trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: list(v)}  # noqa: E731
@@ -8835,25 +8841,25 @@ def _ml813(c, sd, nn, lop, cn=(), xong=True, cr=(), ids=None):
     return _buoc813(c, sd, "mo-lai", "--pr", 55, "--nguyen-nhan", nn, "--bien-nhan", ghi("bn.yaml", __import__("yaml").safe_dump(_bn812(w, h, _st(sd)["ngu_canh_lease"]["spec_hash"], bn=bn))),
                     *(x for s in ([s for s, *_ in lop] if ids is None else ids) for x in ("--finding-id", s)),
                     "--connector", ghi("cn.json", {"repo": "o/r", "pr": 55, "head_sha": h, "reviews": trang("items", []), "review_comments": trang("items", rcm),
-                                                   "issue_comments": trang("items", ic)}), *(("--check-runs", ghi("cr.json", trang("check_runs", crs))) if cr else ()))
+                                                   "issue_comments": trang("items", ic)}), *(("--check-runs", ghi("cr.json", trang("check_runs", crs))) if cr else ()), env=env)
 
 
-def _buoc813(c, sd, lenh, *args, root=True):
+def _buoc813(c, sd, lenh, *args, root=True, env=None):
     truoc = (sd / "wp55.json").read_bytes()
-    rc, _, e = run(c.script, [lenh, "--packet", 55, *(("--root", c.tmp / "kho" / "w") if root else ()), *args], sd)
+    rc, o, e = run(c.script, [lenh, "--packet", 55, *(("--root", c.tmp / "kho" / "w") if root else ()), *args], sd, env)
     if _co_banner(e):
         raise CliSapDo(f"r813 {lenh} SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
-    return rc, e, truoc
+    return rc, e, truoc, o
 
 
-def _ck813(c, sd, pham_vi, nhanh="master", **doi):
+def _ck813(c, sd, pham_vi, nhanh="master", env=None, **doi):
     """Hiện vật checkpoint đúng mọi trường (`doi` đổi một) đẩy lên `nhanh` của origin; HEAD cục bộ GIỮ commit ấy (đột biến đọc ref tuỳ ý thấy nó)."""
     w, n = c.tmp / "kho" / "w", next(_N813)
     d = {"packet_issue": 55, "generation": 1, "head_sha": _h813(sd), "pham_vi": pham_vi, "nguoi_quyet": "ducthangho",
          "neo": "https://github.com/o/r/issues/55#issuecomment-6432755983", **doi}
     _g(w, "checkout", "-qf", "-B", f"t813-{n}", "refs/remotes/origin/master"), (w / "ops/checkpoints").mkdir(parents=True, exist_ok=True)
     (w / f"ops/checkpoints/c{n}.yaml").write_text(json.dumps(d)), _g(w, "add", "-A"), _g(w, "commit", "-qm", "ck"), _g(w, "push", "-q", "origin", f"HEAD:{nhanh}")
-    return _buoc813(c, sd, "chu-kho-duyet", "--checkpoint-path", f"ops/checkpoints/c{n}.yaml")
+    return _buoc813(c, sd, "chu-kho-duyet", "--checkpoint-path", f"ops/checkpoints/c{n}.yaml", env=env)
 
 
 def _sua813(sd, **kv):
@@ -8883,7 +8889,7 @@ def _ca813(*buoc, rc_doi=0, phai="", **muon):
         rc, sd, e, _ = _r812(c, "review")
         _doi(0, rc, e, "r813 nền approved_pending")
         for i, b in enumerate(buoc):
-            rc, e, truoc = b(c, sd) or (0, b"", None)
+            rc, e, truoc, *_ = b(c, sd) or (0, b"", None)
             _doi(rc_doi if i == len(buoc) - 1 else 0, rc, e, f"r813 bước {i}")
         if phai not in _txt(e):
             raise AssertionError(f"r813: rc đúng mà lý do khác — đòi {phai!r}, stderr={_txt(e)!r}")

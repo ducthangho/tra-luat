@@ -3013,7 +3013,7 @@ def cmd_chu_kho_duyet(a, state_dir: Path) -> int:
     rc, raw = _git_do(root, "show", f"{gan[1].decode().strip()}:{a.checkpoint_path}")
     try:
         d = yaml.safe_load(raw) if rc == 0 else None
-    except (yaml.YAMLError, RecursionError):
+    except (RecursionError, yaml.YAMLError):  # thứ tự khác `_record_lease_ref` để mốc đột biến #812 khớp đúng một chỗ
         d = None
     if rc or type(d) is not dict or set(d) != set(KHOA_CHECKPOINT) or any(type(d[k]) is not t for k, t in KHOA_CHECKPOINT.items()):
         _die(RC_GUARD, f"checkpoint {a.checkpoint_path} không có trên origin/master hoặc sai lược đồ {sorted(KHOA_CHECKPOINT)}")

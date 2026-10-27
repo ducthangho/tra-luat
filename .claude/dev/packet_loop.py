@@ -210,6 +210,8 @@ CHUYEN_HOP_LE = {
     "reviewing": (),
     # #812 M2: packet áp ADR-0054 — `record-review` (biên nhận H) vào; cửa ra `accept` thuộc #834.
     "approved_pending": (),
+    # #813 M2/M3: vào bằng `mo-lai --nguyen-nhan connector`, ra CHỈ bằng `chu-kho-duyet` — không cạnh `transition` nào.
+    "cho_chu_kho": (),
     "accepted": (),
     "blocked": (),
 }
@@ -217,7 +219,7 @@ CHUYEN_HOP_LE = {
 # Các state chỉ được ghi bởi luồng review, không bao giờ bởi `transition`.
 # `reviewing` không nằm đây vì nó VÀO được bằng `transition` (từ `running`); thứ bị
 # cấm là đường RA. Bảng `CHUYEN_HOP_LE` ở trên đã cưỡng chế điều đó.
-STATE_CHI_DO_REVIEW_GHI = ("accepted", "approved_pending")
+STATE_CHI_DO_REVIEW_GHI = ("accepted", "approved_pending", "cho_chu_kho")
 
 # --- (a) same-failure theo ID ỔN ĐỊNH ----------------------------------------
 # Vì sao không dùng vân tay văn xuôi: ba lượt review liên tiếp lách được nó bằng
@@ -667,7 +669,8 @@ def _load(state_dir: Path, packet: int) -> dict:
                    and type(st.get("finding_counts")) is dict and all(type(n) is int and n >= 0 for n in st["finding_counts"].values())),
             ("posts", type(posts) is dict and all(type(r) is dict and type(r["for"]) is str and (r["consumed_by"] is None or type(r["consumed_by"]) is str) for r in posts.values())),
             ("anchor", anchor is None or type(anchor) is dict and type(anchor["attempt"]) is int and type(anchor["consumed"]) is bool and re.fullmatch(r"[0-9a-f]{32}", anchor["nonce"]) and re.fullmatch(r"[0-9a-f]{64}", st["hmac_key"])),
-            ("findings", st["finding_counts"] == {fid: sum(fid in r.get("finding_ids", []) for r in st["reviews"]) for r in st["reviews"] for fid in r.get("finding_ids", [])}),
+            ("findings", st["finding_counts"] == {fid: sum(fid in r.get("finding_ids", []) for r in so) for so in [[*st["reviews"], *(  # #813: + sự kiện `mo_lai`
+                h for h in st["history"] if h.get("event") == "mo_lai")]] for r in so for fid in r.get("finding_ids", [])}),
             ("loi-goi", all(set(g) == {"run_id", "head", "da_dung"} and RUN_ID_RE.match(g["run_id"])
                             and SHA_RE.match(g["head"]) and type(g["da_dung"]) is bool for g in goi)),
             ("dem-goi", len({g["run_id"] for g in goi}) == len(goi) <= st["codex_review_calls_used"] >= can_duoi + sum(not g["da_dung"] for g in goi)),
@@ -675,6 +678,8 @@ def _load(state_dir: Path, packet: int) -> dict:
             ("adr0054", type(st.get("luat_adr0054", False)) is bool and (st.get("luat_adr0054") is not True or type(st.get("ngu_canh_lease")) is dict)
                         and (st["state"] != "approved_pending" or st["luat_adr0054"] and SHA_RE.match(str(st.get("pending_sha"))) and type(st.get("bien_nhan_approve")) is dict)
                         and (st.get("luat_adr0054") is not True or _nc_hop_le(st["ngu_canh_lease"]))),
+            ("mo-lai", _quyen_hop_le(st.get("mo_lai_tu"), "nguyen_nhan", NGUYEN_NHAN_MO_LAI) and _quyen_hop_le(st.get("checkpoint_day"), "sha256", None)
+                       and (st["state"] != "cho_chu_kho" or st.get("luat_adr0054") is True and (st.get("mo_lai_tu") or {}).get("nguyen_nhan") == "connector")),
             ("checkpoint", pending == (st.get("ly_do") == "rescue_required")), ("truc", st.get("ly_do") != "rescue_required" or st["state"] == "blocked" and st["truc"] in TRUC_TRAN and st["truc"] == next(  # mốc chạm trần MỚI NHẤT
                 h["truc"] for h in reversed(st["history"]) if h.get("event") == "blocked_rescue_required"))) if not dung]
     except (ValueError, TypeError, KeyError, AttributeError, StopIteration) as e:
@@ -2793,11 +2798,12 @@ def _neo_connector(k: str, x: dict, head: str, biet: set):
     return "hong" if len(phia) > 1 else "hien" if phia == {True} else "cu"
 
 
-def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
+def _doc_connector(duong: str, repo: str, pr: int, head: str, p0p2: list | None = None) -> tuple:
     """I7 — neo MỘT kho + MỘT PR + MỘT head; đủ trang theo tập id của TỪNG endpoint. Dạng: {"repo","pr","head_sha", <endpoint>: trang
     {"total_count","items"}}. Xong = review hoàn tất (không PENDING) trên head, hoặc kết luận `Reviewed commit:` neo head; finding đọc ở
     CẢ BA endpoint, hạng miền đóng (I3); mục của head cũ hợp lệ được bỏ qua, neo thiếu/sai/mơ hồ thì không đạt.
-    Trả ((endpoint, id) P3 còn mở, mốc id lớn nhất theo endpoint)."""
+    Trả ((endpoint, id) P3 còn mở, mốc id lớn nhất theo endpoint). #813 `mo-lai` truyền `p0p2` (list): P0–P2 trên head được GOM vào đó thay vì
+    từ chối, và connector chưa xong không phải lỗi; `accept` không truyền nên giữ đúng hợp đồng cũ."""
     d, _ = _doc_json(duong, RC_GATE)
     if not isinstance(d, dict) or (d.get("repo"), d.get("pr"), d.get("head_sha")) != (repo, pr, head):
         _die(RC_GATE, f"readback connector không neo đúng ({repo}, PR {pr}, {head})")
@@ -2811,7 +2817,7 @@ def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
     if hong := [(k, x["id"]) for k, v in cua.items() for x, n in v if n == "hong"]:
         _die(RC_GATE, f"connector: mục của {BOT_CONNECTOR} có neo head thiếu/sai/mơ hồ {hong}")
     if not (any(n == "hien" for _, n in cua["issue_comments"])
-            or any(n == "hien" and x.get("state") in ("APPROVED", "COMMENTED", "CHANGES_REQUESTED") for x, n in cua["reviews"])):
+            or any(n == "hien" and x.get("state") in ("APPROVED", "COMMENTED", "CHANGES_REQUESTED") for x, n in cua["reviews"])) and p0p2 is None:
         _die(RC_GATE, f"connector chưa xong trên {head}: không review hoàn tất/kết luận nào của {BOT_CONNECTOR}")  # I3: bằng chứng dương rỗng
     p3 = []
     for k in EP_CONNECTOR:
@@ -2822,6 +2828,9 @@ def _doc_connector(duong: str, repo: str, pr: int, head: str) -> tuple:
             if n == "hien" and (hang or k == "review_comments" or x.get("state") == "CHANGES_REQUESTED"):
                 if len(hang) != 1 or not hang <= set(HANG_LOP):
                     _die(RC_GATE, f"connector {k} {x['id']}: hạng ngoài miền {HANG_LOP}: {sorted(hang)}")
+                if p0p2 is not None and hang != {"P3"}:
+                    p0p2.append((k, x["id"]))
+                    continue
                 if hang != {"P3"}:
                     _die(RC_GATE, f"connector {k} {x['id']} còn {sorted(hang)} trên {head} — DỪNG, hỏi chủ kho")
                 p3.append((k, x["id"]))
@@ -2833,6 +2842,9 @@ def _kiem_ci(a, nc: dict, h: str, state_dir: Path) -> dict:
     trỏ đúng check-run (cùng kho, app, suite), check-run ấy là bản MỚI NHẤT cùng tên trong suite, và luật `kiem-gate` xanh trên nó."""
     wr, sha_wr = _doc_json(a.workflow_runs, RC_GATE)
     runs = _trang_du(wr, "workflow_runs", "workflow_runs")
+    if not all(type(r.get("path")) is str and type(r.get("head_sha")) is str and isinstance(r.get("repository"), dict)
+               and type(r["repository"].get("full_name")) is str for r in runs):  # #813 M5: TRƯỚC lọc — run hỏng không được rơi khỏi bộ lọc
+        _die(RC_GATE, "KHÔNG ĐO ĐƯỢC: workflow_runs: mọi run phải có path/head_sha là chuỗi và repository là object có full_name chuỗi")
     moi_tep = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], "jobs", f"workflow_jobs {f}")]  # đủ trang THEO TỪNG tệp
     jobs = _trang_du({"total_count": len({j["id"] for j in moi_tep}), "jobs": moi_tep}, "jobs", "workflow_jobs (gộp các tệp)")
     if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int and j["run_attempt"] > 0
@@ -2916,6 +2928,113 @@ def cmd_accept(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# --- #813 MAY-ADR-0054-b (`ops/specs/wp813-r2.md` + phần chung): `mo-lai` (approved_pending → running | cho_chu_kho) · `chu-kho-duyet`.
+NGUYEN_NHAN_MO_LAI, CI_DO_THAT, PHAM_VI_CHECKPOINT = ("ci-do", "connector"), ("failure", "timed_out", "startup_failure"), ("cho_phep_va", "cho_phep_day")
+CUA_DI_TIEP = ("begin-attempt", "mo-lai", "chu-kho-duyet")  # I5: cửa đưa packet đi tiếp mà bộ đếm same-failure đã chạm phải chặn
+KHOA_CHECKPOINT = {"packet_issue": int, "generation": int, "head_sha": str, "pham_vi": list, "nguoi_quyet": str, "neo": str}
+
+
+def _quyen_hop_le(q, khoa: str, mien) -> bool:
+    """I6: quyền phái sinh (`mo_lai_tu`, `checkpoint_day`) neo (nguyên nhân | sha256 hiện vật, generation, sha) — hoặc vắng."""
+    return q is None or (type(q) is dict and set(q) == {khoa, "generation", "sha"} and type(q[khoa]) is str and (mien is None or q[khoa] in mien)
+                         and type(q["generation"]) is int and type(q["sha"]) is str and bool(SHA_RE.match(q["sha"])))
+
+
+def cmd_mo_lai(a, state_dir: Path) -> int:
+    """M2 — `ci-do`: từ approved_pending (head = pending_sha), mọi check khai trong biên nhận là check ĐỎ THẬT trên head và connector không
+    còn P0–P2 ⇒ running. `connector`: (endpoint, id) của biên nhận phủ BẰNG ĐÚNG P0–P2 connector trên head ⇒ cho_chu_kho, từ approved_pending
+    hoặc từ running khi quyền mở lại hiện hành là `ci-do` cùng generation, cùng head. Slug từ bảng lớp biên nhận H (I11), cộng bộ đếm
+    same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5)."""
+    st = _load(state_dir, a.packet)
+    nc, ml, connector = st.get("ngu_canh_lease"), st.get("mo_lai_tu"), a.nguyen_nhan == "connector"
+    tu_ci = connector and st["state"] == "running" and ml is not None and ml["nguyen_nhan"] == "ci-do" and ml["generation"] == (nc or {}).get("generation")
+    if st.get("luat_adr0054") is not True or not (st["state"] == "approved_pending" or tu_ci):
+        _die(RC_STATE, f"mo-lai {a.nguyen_nhan} không chạy từ {st['state']!r} (đòi approved_pending của packet áp ADR-0054"
+                       + (", hoặc running mở lại bằng ci-do cùng generation)" if connector else ")"))
+    h = ml["sha"] if tu_ci else st["pending_sha"]
+    if not a.finding_id:
+        _die(RC_ARG, "mo-lai phải có ít nhất một --finding-id (I3: tập bằng chứng dương rỗng ⇒ không đạt)")
+    bn = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan, verdict="changes_requested", reviewed_sha=h, finding_id=a.finding_id))
+    khoa = "connector_refs" if connector else "check_refs"
+    dung = (lambda r: type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int) if connector else (lambda r: type(r) is str and r.strip())
+    refs = [tuple(r) if connector else r for x in bn["lop"] for r in (x.get(khoa) if type(x.get(khoa)) is list else [None]) if dung(r)]
+    if any(type(x.get(khoa)) is not list or not x[khoa] or connector and x["hang"] not in HANG_LOP[:3] for x in bn["lop"]) \
+            or len(refs) != sum(len(x[khoa]) for x in bn["lop"]) or len(set(refs)) != len(refs):
+        _die(RC_BIEN_NHAN, f"bảng lớp H: mỗi lớp phải có `{khoa}` khác rỗng, đúng dạng, không lặp" + (" và hạng P0–P2" if connector else ""))
+    p02 = []
+    _doc_connector(a.connector, nc["repo"], a.pr, h, p02)
+    if connector and sorted(refs) != sorted(p02):
+        _die(RC_BIEN_NHAN, f"connector: `connector_refs` phải phủ BẰNG ĐÚNG P0–P2 trên {h}: {sorted(p02)}")
+    if not connector and p02:
+        _die(RC_GATE, f"ci-do: connector còn P0–P2 {sorted(p02)} trên {h} — dùng --nguyen-nhan connector")
+    sha_cr = None
+    if not connector:
+        if not a.check_runs:
+            _die(RC_ARG, "mo-lai ci-do phải có --check-runs (trang check-runs của head, `filter=all`)")
+        _doc_check_runs(a.check_runs)
+        cr, sha_cr = _doc_json(a.check_runs, RC_GATE)
+        cr = _trang_du(cr, "check_runs", "check_runs")
+        for ten in refs:  # lượt MỚI NHẤT của đúng tên, đúng head, đúng kho, app `github-actions` — kết luận thuộc danh sách cho phép
+            r = max((r for r in cr if r["name"] == ten and r["head_sha"] == h and r.get("url") == f"{API_GH}{nc['repo']}/check-runs/{r['id']}"
+                     and (r.get("app") if isinstance(r.get("app"), dict) else {}).get("slug") == APP_CHECK), key=lambda r: r["id"], default={})
+            if r.get("status") != "completed" or r.get("conclusion") not in CI_DO_THAT:
+                _die(RC_GATE, f"ci-do: {ten!r} không phải check đỏ thật trên {h} (lượt mới nhất phải completed + {CI_DO_THAT})")
+    slugs = sorted({x["slug"] for x in bn["lop"]})
+    moi = {**st, "state": "cho_chu_kho" if connector else "running", "attempt_open": False, "reviewing_head_sha": None,
+           "mo_lai_tu": {"nguyen_nhan": a.nguyen_nhan, "generation": nc["generation"], "sha": h},
+           "finding_counts": {**st["finding_counts"], **{s: st["finding_counts"].get(s, 0) + 1 for s in slugs}},
+           "history": [*st["history"], {"event": "mo_lai", "nguyen_nhan": a.nguyen_nhan, "sha": h, "generation": nc["generation"], "finding_ids": slugs,
+                                        "refs": [list(r) if connector else r for r in refs], "bien_nhan_sha256": bn["sha256"],
+                                        "connector_sha256": _doc_json(a.connector, RC_GATE)[1], "check_runs_sha256": sha_cr}]}
+    _xet_dung(state_dir, moi, "mo-lai")  # bộ đếm vừa ghi chạm trần ⇒ ghi sổ đủ rồi blocked (I4)
+    _save(state_dir, moi)
+    print(f"mo-lai {a.nguyen_nhan} trên {h} — finding {slugs}, state {moi['state']}")
+    return RC_OK
+
+
+def cmd_chu_kho_duyet(a, state_dir: Path) -> int:
+    """M3 (Đ): hiện vật checkpoint đọc từ `origin/master` SAU khi máy tự fetch và khớp `ls-remote` — chỉ thứ chủ kho đã merge. `cho_phep_va`:
+    rời cho_chu_kho về running, head = sha đã mở lại (tiêu thụ `mo_lai_tu`). `cho_phep_day`: ở approved_pending, head = pending_sha ⇒ ghi
+    quyền riêng `checkpoint_day` cho #816, không đổi state. Mỗi (hiện vật, phạm vi) dùng MỘT lần (I6)."""
+    import yaml
+    st, root = _load(state_dir, a.packet), Path(a.root)
+    pv = {"cho_chu_kho": "cho_phep_va", "approved_pending": "cho_phep_day"}.get(st["state"])
+    if st.get("luat_adr0054") is not True or pv is None:
+        _die(RC_STATE, f"chu-kho-duyet chỉ chạy ở cho_chu_kho / approved_pending của packet áp ADR-0054 (đang {st['state']!r})")
+    p = PurePosixPath(a.checkpoint_path)
+    if p.parts[:2] != ("ops", "checkpoints") or len(p.parts) < 3 or ".." in p.parts or p.suffix != ".yaml":
+        _die(RC_ARG, f"--checkpoint-path phải là ops/checkpoints/<tên>.yaml: {a.checkpoint_path!r}")
+    m = "refs/remotes/origin/master"
+    if _git_do(root, "fetch", "-q", "origin", f"+refs/heads/master:{m}")[0]:
+        _die(RC_GUARD, "KHÔNG ĐO ĐƯỢC: `git fetch origin master` không chạy được")
+    xa, gan = _git_do(root, "ls-remote", "origin", "refs/heads/master"), _git_do(root, "rev-parse", "-q", "--verify", f"{m}^{{commit}}")
+    if xa[0] or gan[0] or xa[1].split() != [gan[1].strip(), b"refs/heads/master"]:
+        _die(RC_GUARD, "origin/master cục bộ lệch ls-remote — không đọc checkpoint từ ref chưa đo")
+    rc, raw = _git_do(root, "show", f"{gan[1].decode().strip()}:{a.checkpoint_path}")
+    try:
+        d = yaml.safe_load(raw) if rc == 0 else None
+    except (yaml.YAMLError, RecursionError):
+        d = None
+    if rc or type(d) is not dict or set(d) != set(KHOA_CHECKPOINT) or any(type(d[k]) is not t for k, t in KHOA_CHECKPOINT.items()):
+        _die(RC_GUARD, f"checkpoint {a.checkpoint_path} không có trên origin/master hoặc sai lược đồ {sorted(KHOA_CHECKPOINT)}")
+    ml, sha = st.get("mo_lai_tu"), hashlib.sha256(raw).hexdigest()
+    h = ml["sha"] if pv == "cho_phep_va" else st["pending_sha"]
+    loi = [ten for ten, dung in (
+        ("packet", d["packet_issue"] == st["packet"]), ("generation", d["generation"] == st["ngu_canh_lease"]["generation"]),
+        ("head_sha", d["head_sha"] == h), ("nguoi_quyet", d["nguoi_quyet"] in NGUOI_CO_THAM_QUYEN),
+        ("neo", bool(REPO_RE.fullmatch(d["neo"]))), ("pham_vi", bool(d["pham_vi"]) and set(d["pham_vi"]) <= set(PHAM_VI_CHECKPOINT) and pv in d["pham_vi"]),
+        ("da_dung", not any(x.get("event") == "chu_kho_duyet" and (x.get("sha256"), x.get("pham_vi")) == (sha, pv) for x in st["history"]))) if not dung]
+    if loi:
+        _die(RC_GUARD, f"checkpoint {a.checkpoint_path} không mở được {pv} trên {h}: {loi}")
+    su_kien = {"event": "chu_kho_duyet", "pham_vi": pv, "sha256": sha, "head_sha": h, "checkpoint_path": a.checkpoint_path}
+    moi = {**st, "history": [*st["history"], su_kien], **({"state": "running", "mo_lai_tu": None} if pv == "cho_phep_va" else
+                                                           {"checkpoint_day": {"sha256": sha, "generation": d["generation"], "sha": h}})}
+    _xet_dung(state_dir, moi, "chu-kho-duyet")
+    _save(state_dir, moi)
+    print(f"chu-kho-duyet {pv} trên {h} — state {moi['state']}")
+    return RC_OK
+
+
 def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None:
     """I5 (M4): hàm DUY NHẤT xét MỌI điều kiện dừng (trần lượt, trần vòng, same-failure, rescue sau review), gọi SAU khi đầu vào của cửa
     đã được xác thực (I4). `a`/`cham_tran` = đối số review + finding chạm trần, khi kết quả lượt đã ghi sổ. Packet áp ADR-0054 không bị trần vòng chặn
@@ -2927,6 +3046,8 @@ def _xet_dung(state_dir: Path, st: dict, cua: str, a=None, cham_tran=()) -> None
     if cua == "record-review" and a is None and st.get("luat_adr0054") is not True:
         if st["review_rounds_used"] >= st["review_rounds_limit"]:  # review MỚI khi trần vòng đã chạm (state v1 cũ / sửa tay) ⇒ rescue, kể cả approve
             _vao_rescue(state_dir, st, "vong_review", "review vượt trần vòng")
+    if cua in CUA_DI_TIEP and not cham_tran:  # #813 M1: bộ đếm đã chạm (kể cả vừa cộng ở `mo-lai`) chặn cửa đi tiếp; cửa khép không ở đây
+        cham_tran = sorted(f for f, n in st["finding_counts"].items() if n >= st["same_failure_limit"])
     if cham_tran:
         st.update(state="blocked", history=[*st["history"], {"event": "blocked_same_failure", "finding_ids": cham_tran}])
         _save(state_dir, st)
@@ -3146,6 +3267,23 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--bien-nhan-connector", help="biên nhận H: bang_lop[].connector_refs = [[endpoint, id], ...] (bắt buộc khi connector có P3)")
     q.add_argument("--quyet-dinh-p3", help="JSON list {nguon: offline|connector, khoa: slug, ten_no, owner, huong, ly_do}")
     q.set_defaults(fn=cmd_accept)
+
+    q = sub.add_parser("mo-lai", help="#813: approved_pending → running (ci-do) | cho_chu_kho (connector); slug từ biên nhận H, readback R trên head")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--root", default=".")
+    q.add_argument("--pr", type=int, required=True)
+    q.add_argument("--nguyen-nhan", required=True, choices=NGUYEN_NHAN_MO_LAI)
+    q.add_argument("--bien-nhan", required=True, help="biên nhận H verdict changes_requested trên head: bang_lop[].connector_refs | check_refs")
+    q.add_argument("--finding-id", action="append", help="slug của bảng lớp biên nhận; khai ĐỦ mọi lớp, ít nhất một")
+    q.add_argument("--connector", required=True, help="JSON như `accept --connector`, neo đúng head")
+    q.add_argument("--check-runs", help="trang check-runs của head, `filter=all` (bắt buộc với ci-do)")
+    q.set_defaults(fn=cmd_mo_lai)
+
+    q = sub.add_parser("chu-kho-duyet", help="#813: rời cho_chu_kho (cho_phep_va) | ghi quyền cho_phep_day — checkpoint trên origin/master")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--root", default=".")
+    q.add_argument("--checkpoint-path", required=True, help="ops/checkpoints/<tên>.yaml, đọc tại origin/master sau khi máy tự fetch")
+    q.set_defaults(fn=cmd_chu_kho_duyet)
 
     q = sub.add_parser("bien-nhan",
                        help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")

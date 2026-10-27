@@ -1,0 +1,299 @@
+# HO SO LAND — PR #945 "wp899 r4 (#899): CI-PROVENANCE-REST-LOG — provenance gate tu REST + log job".
+# Packet #899 (wp899, P-A), revision 4, lease cuoi wp899-r4-g5-claude, spec ops/specs/wp899-r4.md sha256
+# be1e1feabe7c23b832168e36b0cce333043863af505e65c48d5a22d2101cef45.
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
+#
+# TRANG THAI: merged (cebb5b2), `landed: false` — con thieu moc Workflow definition (chu kho chay GraphQL ngoai phien),
+# reviewer assurance §8.1 (model phuc vu KHONG do bang may) va quyet dinh `landed` cua chu kho. "merged" KHONG dong nghia
+# "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do lai trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot
+# khac, KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr945-wp899-provenance/ (SHA256SUMS.txt). Moi phep do REST: GET
+# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang GITHUB_PAT, do 2026-10-26 14:00Z.
+
+schema_version: 1
+mission_id: 899
+packet_id: wp899
+packet_issue: 899
+pham_vi_land: cong_cu_dev
+pham_vi_land_ghi_chu: 'ops/ci_provenance.py, ops/ci_provenance_test.py, .claude/dev/ci_dang_ky_test.py — dev-side, khong vao goi phat hanh.'
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_01A2KGpxCTnmJgQLVRxiJF1s
+  recorded_by: claude-session (phien executor r2 g1 cua cung packet, KHONG thi cong r4)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap. Ben ghi so khac phien thi cong r4 (session_01J5UVb6kiH9edF9McTVQvDT
+    va cac phien sau) nhung CUNG ho model claude va la executor cua r2 — khong tach vai hoan toan.
+
+authorized_head_sha: 4511b1eb6168904da117791cea178aa0c80e0e47
+approver: ducthangho
+authorization_url: KHONG_AP_DUNG
+authorization_ghi_chu: >-
+  thuat_lai — khong co comment duyet merge tren GitHub. measured — readback-comments-945.json: ba comment, khong comment nao
+  cua chu kho duyet merge; readback-events-945.json: ready_for_review 03:29:21Z, merged 04:20:35Z. Loi duyet (neu co) chi o
+  trong mot phien; day la khoang trong bang chung, ghi o no_con_mo.
+land_operator: ducthangho
+land_operator_nguon: >-
+  measured — readback-pr-945.json merged_by ducthangho. Nguoi BAM merge thuc te (chu kho hay mot phien dung credential chu
+  kho) KHONG do duoc tu GitHub.
+merge_method: merge
+merge_method_nguon: 'measured — readback-commit-cebb5b2.json co hai cha (21fe565, 4511b1e) => merge commit, khong squash/rebase.'
+merge_commit: cebb5b22e1ebf369a70234662b7e9355bdd5095e
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-945.json: state closed, merged true, merged_at 2026-10-26T04:20:35Z, merge_commit_sha
+    cebb5b22e1ebf369a70234662b7e9355bdd5095e, head 4511b1eb6168904da117791cea178aa0c80e0e47 (agent/wp899-g3-claude), base.sha
+    f9f4a8d6da2d351fbcf5203256aba4e1bbf027b7, 21 commit, 3 tep +2045/-0.
+  merge_commit:
+    sha: cebb5b22e1ebf369a70234662b7e9355bdd5095e
+    parents: [21fe565633b0fba269f6ab4e2c9df5b70d98ddb2, 4511b1eb6168904da117791cea178aa0c80e0e47]
+    tree: 482e5edd0ac66925a3f60b60b0540df99c4067e3
+    nguon: 'measured — readback-commit-cebb5b2.json: parents, tree, files = 3 tep cua write set.'
+  head_va_review:
+    reviewed_sha_offline_approve: 1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986
+    reviewed_sha_codex_connector: 4511b1eb6168904da117791cea178aa0c80e0e47
+    head_da_merge: 4511b1eb6168904da117791cea178aa0c80e0e47
+    doi_chieu: >-
+      measured — do-1026-cebb5b2/review-11-VERDICT-dau.txt: verdict approve, Reviewed commit 1f731c7. 4511b1e = 1f731c7 + merge
+      origin/master f9f4a8d + mot commit them dong MOI. do-1026-cebb5b2/diff-1f731c7-4511b1e-write-set.patch: tren ba tep write
+      set chi .claude/dev/ci_dang_ky_test.py doi +3 dong (2 dong MOI cua #763 vao qua merge master, 1 dong MOI cua
+      ops/ci_provenance_test.py); ops/ci_provenance.py va ops/ci_provenance_test.py KHONG doi. Connector cham DUNG 4511b1e
+      (readback-comments-945.json comment 6407566643: code_review commit_sha 4511b1e, status completed, has_any_findings false).
+  landed: false
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so chua ho so nay — CHI KHI du ba dieu kien o con_thieu_de_goi_landed va chu kho quyet `landed`
+    bang comment tren PR ghi so. Comment quyet dinh la NEO, khong phai moc hieu luc (tien le pr759, pr870).
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-CEBB5B2
+      trang_thai: da_dong
+      mo_ta: 'measured — readback-run-40268583940.json + readback-jobs-40268583940.json; chi tiet post_merge_checks[0].'
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: cho_chu_kho
+      mo_ta: >-
+        Output `gh api graphql` WorkflowRun.file cho run 40268583940 do chu kho chay ngoai phien va dan vao; phien doi chieu blob
+        tai OID qua REST contents?ref=OID (tien le moc_workflow_definition_20261026 cua pr870).
+    - id: REVIEWER-ASSURANCE-81
+      trang_thai: cho_chu_kho
+      mo_ta: 'Xem review.assurance_81 — model phuc vu cua luot approve KHONG do bang may.'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+      mo_ta: 'Chu kho duyet `landed` bang comment tren PR ghi so, ghi du SHA head cuoi (40 hex), dang SAU commit cuoi.'
+
+lease:
+  cuoi: wp899-r4-g5-claude
+  thu_hoi_cuoi: >-
+    thuat_lai — lease het han 2026-10-26T04:40:00Z (truong lease_until cua ops/leases/wp899-r4-g5-claude.yaml tren nhanh
+    ops/wp899-r4-g5-lease), SAU merge 04:20:35Z. Phep do `ai-dang-giu` cua phien ghi so 06:2xZ 26-10: ops/ci_provenance.py va
+    .claude/dev/ci_dang_ky_test.py NGUOI_GIU 0. Readback cua phep do ay KHONG luu trong provenance.
+
+review:
+  codex_offline:
+    luot_cuoi: 11
+    verdict: approve
+    reviewed_sha: 1f731c7bfc99c8fca3cba74d4cd8bbf6a14db986
+    so_lop: 'P0 0 / P1 0 / P2 0 / P3 0 (thuat_lai — ban chieu #899 issuecomment-6406341349; tep verdict day du o nhanh ops/wp899-g4-luu-tru 74ae5d2)'
+    dinh_danh: >-
+      measured — do-1026-cebb5b2/review-11-dinh-danh-reviewer.json: thread_id 01a175b4-e325-74b1-b29d-14552f553759 khop
+      session_meta.id, model ['gpt-6.1-sol'] effort ['xhigh'] doc tu turn_context cua rollout = model DO CLI CONG BO.
+      do-1026-cebb5b2/review-11-run.json: launcher 1.5.0, head 1f731c7, ma_thoat 0, trang_thai xong, KHONG co khoa
+      model_phuc_vu / model_phuc_vu_trang_thai.
+  codex_connector:
+    do_duoc: >-
+      measured — readback-comments-945.json comment 6407566643 (chatgpt-codex-connector[bot]): Code Review Completed
+      2026-10-26T03:42:34Z tren 4511b1e, has_any_findings false, trigger "Draft marked ready". readback-reactions-pr-945.json:
+      +1 cua connector 03:42:37Z. readback-reviews-945.json = [], readback-review-comments-945.json = [] => 0 review object.
+    dem_loi_goi: >-
+      measured — readback-comments-945.json: `@codex review` comment 6407563866 luc 03:28:28Z (executor khai la loi goi 12/12);
+      readback-events-945.json: ready_for_review 03:29:21Z. Bang tong hop connector ghi trigger "Draft marked ready", chi MOT
+      luot Code Review hoan tat. Connector co chay hai luot ben trong hay khong: KHONG DO DUOC. Dem la MOT loi goi (12/12).
+    thu_tu_thoi_gian: 'measured — connector xong 03:42:34Z, TRUOC merge 04:20:35Z (readback-pr-945.json merged_at).'
+    gioi_han: 'Connector chi la tin hieu "khong gop y"; khong lo model, khong co tep verdict.'
+  assurance_81: CHUA DAT
+  assurance_81_ly_do: >-
+    doi_chieu — (1) luot approve offline cuoi chi co model DO CLI CONG BO (turn_context), run.json khong co model_phuc_vu:
+    launcher cua nhanh executor co truoc commit 97bb4c5 (25-10 09:43Z, "run ghi model do may chu tra") dua do_may vao master;
+    (2) connector khong lo model => ho model reviewer cua chinh lan cham head da merge `khong_do_duoc` (§8, §8.1); (3) luot approve
+    cham 1f731c7, khong cham 4511b1e (khac dung 3 dong tren mot tep write set, xem trang_thai_packet.head_va_review).
+  dieu_kien_mo_lai: >-
+    (A) mot lan approve DOC LAP tren DUNG 4511b1eb6168904da117791cea178aa0c80e0e47 chay qua launcher co model_phuc_vu (>= 97bb4c5),
+    model_phuc_vu_trang_thai DO_DUOC, ho model khac claude (tien le cap_nhat_20261026 cua pr870); HOAC (B) quyet dinh rieng cua
+    chu kho chap nhan model DO CLI CONG BO cho packet nay.
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head 4511b1e (pull_request)
+    run_id: 40264014854
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-40264014854.json: event pull_request, head 4511b1e, run_attempt 1, completed/success, updated_at
+      2026-10-26T04:06:26Z. readback-jobs-40264014854.json: 23 job, 23 success, 0 job runner_id 0.
+    check_runs: 'measured — readback-check-runs-4511b1e.json: 26 check run, 25 success + 1 skipped.'
+
+post_merge_checks:
+  - ten: gate ci.yml tren merge cebb5b2 (push master)
+    run_id: 40268583940
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-40268583940.json: .github/workflows/ci.yml, event push, head cebb5b2, run_attempt 1,
+      completed/success, run_started_at 04:20:37Z, updated_at 05:20:33Z. readback-jobs-40268583940.json: 23 job, 23 success,
+      moi job ubuntu-latest, 0 job runner_id 0.
+  - ten: launcher-windows tren merge cebb5b2 (push master)
+    run_id: 40268583877
+    trang_thai: measured
+    do_duoc: 'measured — readback-run-40268583877.json: completed/success; readback-jobs-40268583877.json: 2 job success (1 ubuntu-latest, 1 windows-latest), 0 job runner_id 0.'
+    gioi_han: 'Lane launcher (paths:), KHONG phai gate tren Windows — gate cua merge nay chi do tren Ubuntu.'
+
+bon_moc_10_2_2:
+  cong_cu: >-
+    ops/ci_provenance.py tai master 9372ecd (chinh cong cu cua packet), chay `thu --repo ducthangho/tra-luat --run <id>
+    --attempt 1`; dau ra do-1026-cebb5b2/ci-provenance-<id>.yaml + .stdout.txt.
+  run: >-
+    measured — do-1026-cebb5b2/ci-provenance-40268583940.yaml moc run passed: run_id 40268583940, run_attempt 1, event push,
+    head_sha cebb5b2, check_suite_id, path chi la loi_khai_rest_path.
+  checkout: >-
+    measured — do-1026-cebb5b2/ci-provenance-40268583940.stdout.txt: 22/23 job checkout passed SHA cebb5b2; job chuan-bi
+    not_measured (buoc checkout skipped tren push, dung thiet ke). Trich log job gate:
+    do-1026-cebb5b2/log-gate-121401313206-trich.txt. Run launcher: do-1026-cebb5b2/ci-provenance-40268583877.stdout.txt 2/2 job checkout passed SHA cebb5b2.
+  gate_output: >-
+    measured — artifact 12628631748 gate-evidence-ubuntu-latest-1: zip sha256 93ad7ecfd300a6730a6f7c6e28854872a3d09fe99a0335129bea08e4ca7de30d
+    (do-1026-cebb5b2/gate-evidence-12628631748.zip.sha256) = digest REST trong readback-artifacts-40268583940.json; giai nen
+    nguyen byte do-1026-cebb5b2/tl-selftest-Linux.json + tl-selftest-Linux.out: status pass, returncode 0, positive_verified
+    true, identity.head_sha cebb5b2, identity.tree_sha 482e5ed = tree merge, output_sha256 e71bb31e8c03124304a1b234f1e036382afb1bbb89bf82929b7c18bba3f13395
+    khop sha256 tep .out; dong cuoi "tl selftest 1731/1731". Marker MOI cua ci_provenance: 23 job not_measured (0 buoc goi thang
+    duong dan MOI; hai buoc nhanh_don_duoc bi chan che do) — khong phai bang chung gate, chi ghi de doi chieu.
+  workflow_definition: >-
+    not_measured — GraphQL WorkflowRun.file bi chan trong phien Claude Code tren web; cong cu ghi
+    graphql_bi_chan_trong_phien_claude. Can chu kho chay `gh api graphql` ngoai phien va dan output.
+  tong: '3/4 measured (thieu Workflow definition).'
+
+bookkeeping:
+  - viec: luu verdict 11 luot review offline r4
+    trang_thai: tren_nhanh_ops
+    nguon: 'thuat_lai — nhanh ops/wp899-g4-luu-tru (74ae5d2) va ops/wp899-g3-luu-tru; CHUA vao master.'
+  - viec: ho so land nay
+    trang_thai: trong_pr_ghi_so
+    nguon: 'PR ghi so tu nhanh claude/bookkeeping-945-land (chua merge luc soan).'
+  - viec: dong Issue #899
+    trang_thai: cho
+    nguon: 'Chi dong sau khi ho so land merge.'
+
+no_con_mo:
+  - id: DUYET-MERGE-KHONG-NEO-GITHUB
+    mo_ta: 'Khong co comment chu kho duyet merge #945 neo SHA tren GitHub (authorization_ghi_chu).'
+  - id: APPROVE-OFFLINE-KHONG-CHAM-HEAD-MERGE
+    mo_ta: >-
+      Approve offline cham 1f731c7, khong cham 4511b1e. Bu mot phan: connector cham dung 4511b1e va sach; diff write set giua
+      hai SHA chi 3 dong MOI tren .claude/dev/ci_dang_ky_test.py.
+  - id: P-B-CHUA-CO-ISSUE
+    mo_ta: >-
+      Moc Workflow definition va logic che do chay cua so dang ky (marker Gate) la viec cua P-B; chua co Issue. Moi ho so land
+      ve sau van can chu kho dan GraphQL tay cho toi khi P-B land.
+
+moc_workflow_definition_20261027:
+  bo_canh: >-
+    Chu kho chay `gh api graphql` (node WFR_kwLOTNeRjc8AAAAJYDHUBA) ngoai phien va dan output vao hoi thoai phien ghi so
+    27-10-2026. Khoi nay KHONG sua dong nao o tren.
+  workflow_definition: >-
+    measured — WorkflowRun.file cua run 40268583940 (chu kho doc ngoai phien): path .github/workflows/ci.yml, repositoryFileUrl
+    neo OID cebb5b2 (40 hex trong URL), checkSuite.commit.oid cung OID. Phien doi chieu REST run 40268583940 (head_sha, path,
+    attempt 1, run_number 3224, node_id) va tai blob qua contents?ref=OID: blob 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc,
+    sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, khop `git rev-parse cebb5b2:.github/workflows/ci.yml`.
+  nguon:
+    - ops/land/pr945-wp899-provenance/do-1026-cebb5b2/workflow-definition-cebb5b2.txt
+    - ops/land/pr945-wp899-provenance/do-1026-cebb5b2/graphql-output-chu-kho-dan-pr945.json
+  gioi_han: >-
+    Bam byte output goc cua chu kho KHONG_DO_DUOC — chi co ban chep nguyen van tu hoi thoai (khong co comment tren GitHub).
+    URL va blob tai OID da duoc phien doi chieu doc lap qua REST.
+  bon_moc_10_2_2: '4/4 measured (Run, Checkout, Gate output o bon_moc_10_2_2; Workflow definition o khoi nay).'
+  con_thieu_de_goi_landed:
+    - id: MOC-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+    - id: REVIEWER-ASSURANCE-81
+      trang_thai: cho_chu_kho
+      mo_ta: 'Khong doi — xem review.assurance_81 va review.dieu_kien_mo_lai.'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+  landed: false
+review_doc_lap_a_20261027:
+  bo_canh: >-
+    Chu kho chon phuong an (A) cua review.dieu_kien_mo_lai: mot luot review Codex doc lap tren 4511b1e qua launcher co do
+    model phuc vu (#952). Khoi nay KHONG sua dong nao o tren.
+  reviewed_commit: 4511b1eb6168904da117791cea178aa0c80e0e47
+  pham_vi_diff: 'git diff f9f4a8d6da2d351fbcf5203256aba4e1bbf027b7 4511b1e (3 tep cua write set, dung diff PR #945).'
+  launcher: >-
+    measured — ops/land/pr945-wp899-provenance/review-a-4511b1e/run.json: launcher 1.5.0 tu clone master 7471f95 (gom #952 2bcf466), ma_thoat 0,
+    2313.124 giay, workspace sach truoc/sau (ops/land/pr945-wp899-provenance/review-a-4511b1e/reviewer-snapshot-comparison.json: same true, 6026 tep).
+  model_phuc_vu: >-
+    measured — ops/land/pr945-wp899-provenance/review-a-4511b1e/run.json model_phuc_vu_trang_thai DO_DUOC, 62 su kien, tap model {gpt-6.1-sol}; turn_context cong bo
+    gpt-6.1-sol effort xhigh (ops/land/pr945-wp899-provenance/review-a-4511b1e/dinh-danh-reviewer.json). Ho model openai, khac ho executor (claude).
+  dinh_danh: >-
+    measured — ops/land/pr945-wp899-provenance/review-a-4511b1e/dinh-danh-reviewer.json: thread_id tu stdout khop session_meta.id 01a17b0c-b9b3-7dd2-a7c3-00d6491b58a4,
+    codex-cli 0.164.0, rollout 2956981 byte sha256 8f3f2ef7c05535f63dff93a0c96c8c88518b0a4f542d8a6991af58b026c4e869
+    (rollout KHONG luu trong kho, chi luu bam).
+  verdict: changes_requested
+  dem: 'P0=0 P1=0 P2=1 (moi) P3=2 lop (ke thua)'
+  phat_hien:
+    - id: F13
+      hang: P2
+      bieu_hien: >-
+        ops/ci_provenance.py:138 git_cuc_bo doc toan commit voi text=True; commit hop le co message khong phai UTF-8
+        (ISO-8859-1) nem UnicodeDecodeError qua :425 => rc1, khong sinh provenance. Blob khong UTF-8 cung nem thay vi None.
+      tai_hien: 'reviewer-git_commit_encoding.py, reviewer-git-commit-encoding-results.json (Git that, hai commit cung tree/parents).'
+      huong_va: 'Doc bytes, chi giai ma truong tree/parent; khoa bang commit UTF-8 va ISO-8859-1 cung tree/parents.'
+    - id: D02
+      hang: P3
+      bieu_hien: 'ops/ci_provenance.py:174 uses nhieu dong — no da ghi, giu nguyen.'
+    - id: F10-D05
+      hang: P3
+      bieu_hien: 'ops/ci_provenance.py:158, test :1044 — mutant mo rong try song c52; no test da ghi, giu nguyen.'
+  nguon:
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/VERDICT.md
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/run.json
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/dinh-danh-reviewer.json
+    - ops/land/pr945-wp899-provenance/review-a-4511b1e/prompt.md
+  ket_luan_assurance_81: >-
+    CHUA DAT. Model phuc vu nay da DO DUOC (khoang trong cu da dong), nhung verdict la changes_requested voi mot P2,
+    nen chua co approve doc lap tren 4511b1e. Khong gi o day cap quyen landed hay cross_approved.
+  lua_chon_cho_chu_kho:
+    - 'Mo packet sua F13 (lease moi, write set ops/ci_provenance.py + test), roi review lai head moi.'
+    - 'Hoac chu kho chap nhan F13 la no co ghi ten nguoi quyet dinh; khi do assurance_81 van khong phai approve.'
+  con_thieu_de_goi_landed:
+    - id: REVIEWER-ASSURANCE-81
+      trang_thai: cho_chu_kho
+      mo_ta: 'Do duoc model phuc vu; verdict changes_requested (F13 P2).'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+  landed: false
+
+# DINH CHINH SAU QUYET DINH CHU KHO (2026-10-27 09:38Z) — chi THEM khoi duoi day; moi dong phia tren giu nguyen.
+# Ket luan: GHI NHAN quyet dinh chu kho tren #955, `landed` GIU `false` vi assurance §8.1 CHUA DAT (tien le #891/pr870).
+# Chu kho chon phuong an nay trong phien (session_01A2KGpxCTnmJgQLVRxiJF1s, 27-10-2026): "Giu false, theo tien le".
+dinh_chinh_sau_quyet_dinh_20261027:
+  quyet_dinh_chu_kho:
+    trang_thai: da_quyet
+    comment: https://github.com/ducthangho/tra-luat/pull/955#issuecomment-6438474045
+    do_duoc: >-
+      measured — ops/land/pr945-wp899-provenance/do-1027-pr955/readback-comment-955-6438474045.json: ducthangho, OWNER, created_at = updated_at 2026-10-27T09:38:28Z,
+      than ghi "Duyet landed #899 ... kem caveat §8.1 chua dat vi F13 ... F13 sua bang packet rieng, khong chan landed"
+      va head 5c271ead310e68aeea0bcf03a679fbe77bfc7e87. ops/land/pr945-wp899-provenance/do-1027-pr955/readback-pr-955.json: head.sha 5c271ea (khop SHA trong comment),
+      merged_at 09:38:34Z (SAU comment 6 giay), merged_by ducthangho.
+    gioi_han: 'Ca hai readback doc qua MCP github (truong than co the bi chuan hoa thuc the HTML o phia doc); bam byte goc KHONG_DO_DUOC.'
+  landed_truoc: false
+  landed_sau: false
+  reviewer_assurance_81: CHUA DAT
+  ly_do: >-
+    doi_chieu — packet lop sensitive can cross_approved hoac human_audited (PROTOCOL §8). Luot doc lap (A) tren 4511b1e
+    (khoi review_doc_lap_a_20261027) do duoc model phuc vu gpt-6.1-sol nhung verdict changes_requested (F13 P2) => chua co
+    approve. Comment chu kho khong thay human_audited (phan quyet #566, tien le dinh_chinh_sau_quyet_dinh cua pr870):
+    tai khoan OWNER khong tach khoi phien agent va comment khong co cau tu doc diff.
+  dieu_kien_mo_lai: >-
+    Packet sua F13 (Issue/lease rieng) merge, roi mot luot approve DOC LAP qua launcher co model_phuc_vu DO_DUOC, ho model
+    khac claude, tren head cua packet sua (pham vi diff gom ca F13); khi do mo PR ghi so moi de lat landed.
+  landed: false

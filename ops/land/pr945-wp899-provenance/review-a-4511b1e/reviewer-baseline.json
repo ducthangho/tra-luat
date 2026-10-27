@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/python",
+    "-B",
+    "ops/ci_provenance_test.py"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/478a1184-1d56-5267-9225-61e30ad186af/scratchpad/review-A/ws",
+  "rc": 0,
+  "elapsed_seconds": 1849.6573367118835,
+  "stdout_sha256": "d474cc418a5ce8d1b02676932a106339434cc9ca337d71bfb9ad0f34655cc3c0",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

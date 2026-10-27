@@ -1,0 +1,326 @@
+[
+  {
+    "name": "A7_bo_dong_dem",
+    "severity_if_regressed": "P1",
+    "target": "c18_dem_not_measured",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c18_dem_not_measured"
+    ],
+    "mutant_source_sha256": "fe0475bfc3bbf9b005892470da944b180f1975ee8b436e27a214f25f25412f96",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "5cb107f9f65f1c83e8cce05895d036fa8dc55de15d6925667ccb59ef68bb2c26",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A7_gop_rest_vao_12",
+    "severity_if_regressed": "P1",
+    "target": "c19_rest_loi",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c19_rest_loi"
+    ],
+    "mutant_source_sha256": "29e445cc2cab710859ce82352439ad65270072b11affde2e641adb22af8cb0bf",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "84960f1fa10bf60c9b51104f2b57ef65ca812a061bb47f1607eef7e5fff9192e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A26_bo_GITHUB_ENV",
+    "severity_if_regressed": "P0",
+    "target": "c42_github_env_cung_job",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c42_github_env_cung_job"
+    ],
+    "mutant_source_sha256": "8ec201928bf0d29dd8f3c6ee7889f889f28144be1a809899d325e800442a677b",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "64940510a3ef47de47d4787bdb8d42028ffca9b4486d6747c704ca9110f9892b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A26_GITHUB_ENV_toan_workflow",
+    "severity_if_regressed": "P1",
+    "target": "c42_github_env_cung_job",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c42_github_env_cung_job"
+    ],
+    "mutant_source_sha256": "4e061696d7de56344b9a43c883e0655aefdf620b98668ebbd52d3134c4889bde",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "b73592e337a22aaa445e805fb5bcc1bde9af0c3bddddf0fd4659f3b3113d85b8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "L10_bat_lai_tuple_luot9",
+    "severity_if_regressed": "P2",
+    "target": "c52_tap_dong",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c52_tap_dong"
+    ],
+    "mutant_source_sha256": "5892f1033db75827e8db2825b83d21e727a1b32f6f887a53ae2f712aae872879",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "8f9d9718bc882f61c27b931a9accc9907ec4616362430164e0a8af7f94b79689",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A19_moi_ung_vien_trung_chu",
+    "severity_if_regressed": "P1",
+    "target": "c33_trung_chu_khac_job",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c33_trung_chu_khac_job"
+    ],
+    "mutant_source_sha256": "f5f74acb13f976ba7e21a734ac7146cb42c20e1530bb3200790f025549ee16f4",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "30c386d64326c277656f88e2a61089605622456c7720701750e04850e801364c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A19_chan_doc_job_khac",
+    "severity_if_regressed": "P0",
+    "target": "c33_trung_chu_khac_job",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c33_trung_chu_khac_job"
+    ],
+    "mutant_source_sha256": "21942eff42f29252f59dcaed1ca67664a73cedb5ef4f50aff01cfd524be332ea",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "30c386d64326c277656f88e2a61089605622456c7720701750e04850e801364c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A20i_zip_bo_dem_nhom",
+    "severity_if_regressed": "P0",
+    "target": "c36_ghep_lech_so",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c36_ghep_lech_so"
+    ],
+    "mutant_source_sha256": "fa0649f2d14eb4cb35bf07609fbf1be36ffd11cfd11a04ea5b322f370a73ccba",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "9a34a0a7851303e3149a70e523664a6517f301d1a443f658b7b6ff8c16889f06",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A20ii_zip_bo_dem_yaml",
+    "severity_if_regressed": "P0",
+    "target": "c36_ghep_lech_so",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c36_ghep_lech_so"
+    ],
+    "mutant_source_sha256": "ddd55632b38fdefc23ae6f3aaebe9f21fc076a90d54918b58b7c420a8bb237a9",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "2f6a0dc5d63d7d9ab2c08b191e9c446fe1597dffa1b0ae16aa37cdd38a95c76e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A21_bo_kiem_ten",
+    "severity_if_regressed": "P0",
+    "target": "c37_ghep_lech_ten",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c37_ghep_lech_ten"
+    ],
+    "mutant_source_sha256": "b576fe0e27936f57d157ded10651925e09251097c84b7dd2892c607e41580e82",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "00f87b64840f10656094f7422a70b689c83a9be50538d7ea43f3da1fda03eb1f",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A22_bo_kiem_gio",
+    "severity_if_regressed": "P0",
+    "target": "c38_ghep_lech_gio",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c38_ghep_lech_gio"
+    ],
+    "mutant_source_sha256": "2c9ed40ece79435eaac9e2f087cf4e63cca46715c3e977841dfda1be50911244",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "484c15ab4218539a4aa0a2e8a15568661f87f3a5af0378248324b1a0e2ea0da9",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A22_khong_cat_giay",
+    "severity_if_regressed": "P1",
+    "target": "c38_ghep_lech_gio",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c38_ghep_lech_gio"
+    ],
+    "mutant_source_sha256": "0bdc56ffa3a0a0530b87dd0212c4927681fcc9c6f44d58ce24f84fec9d7e940d",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "510c98d86aa20bea96165f1af4bb4ac43aaa894390059dd5f1fb6ca2fa290eda",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A23_lay_khoa_dau",
+    "severity_if_regressed": "P0",
+    "target": "c39_ghep_job",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c39_ghep_job"
+    ],
+    "mutant_source_sha256": "d50fe3f98ebf2a693b27a464937bdae82ef00f6661a1f03f9b359d6c1d153573",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "66ff3f32710a62c56afd499eeacea0bea78cecfe9713a370aea07c457c298762",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A24_bo_luat_nhom_long",
+    "severity_if_regressed": "P0",
+    "target": "c40_nhom_long",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c40_nhom_long"
+    ],
+    "mutant_source_sha256": "6eccad57d848adfb81891a3b01f4041099e087cc1cfef9c3cb1a552b344eb79e",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "da9c6efff4092cb0ac33d916fa780a008e93b17a99fdae4952edfe403043822b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A25i_uses_sinh_marker",
+    "severity_if_regressed": "P1",
+    "target": "c41_buoc_uses",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c41_buoc_uses"
+    ],
+    "mutant_source_sha256": "b49546ab3627df47063a14855aec0ee95b7058dd05b3d0d2152f4a1eeced13e5",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "ca72bd9747b0852c2b637f85b028703856a713368c445bcd947830c7c3f90ba1",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A25ii_zip_bo_dem_nhom",
+    "severity_if_regressed": "P0",
+    "target": "c41_buoc_uses",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c41_buoc_uses"
+    ],
+    "mutant_source_sha256": "fa0649f2d14eb4cb35bf07609fbf1be36ffd11cfd11a04ea5b322f370a73ccba",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "bb76b0955df2e16bf5d58572f0e5f827f352953ad2ec3a3da7358462b0b53b90",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "A27_khoi_bang_buoc_khac",
+    "severity_if_regressed": "P0",
+    "target": "c43_khoi_khac_buoc",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c43_khoi_khac_buoc"
+    ],
+    "mutant_source_sha256": "991acc3344b6537a532e945549b8dd26751a08309d40c6c0b5f14fcdff876806",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "63a8e35eacf5fb7478eb4ad2d447361d0de36d2b0e44d5fcbc7d9145bdeb274a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "F06_redirect_mang_token",
+    "severity_if_regressed": "P0",
+    "target": "c24_goi_that_loi_va_chuyen_huong",
+    "command": [
+      "/usr/bin/python",
+      "-B",
+      "ops/ci_provenance_test.py",
+      "--mot-ca",
+      "c24_goi_that_loi_va_chuyen_huong"
+    ],
+    "mutant_source_sha256": "8decfb56d8b014a1279bef96d81a924a2be118b92bfe3f149bf01573d417d425",
+    "rc": 3,
+    "correct_target_TinHieuChotCa": true,
+    "classification": "GIET",
+    "stdout_sha256": "10d081ef82e528da52b7479bfc070ae127a66ee73834264c83697f2fb40f762a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

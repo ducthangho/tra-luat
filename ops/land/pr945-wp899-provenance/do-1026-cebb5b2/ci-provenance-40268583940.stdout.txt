@@ -1,0 +1,27 @@
+RUN: passed (run_attempt 1, yeu cau 1)
+JOB 121401282760 chuan-bi: checkout=not_measured - gate=not_measured
+JOB 121401313160 gate-ops (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313161 gate-packet-loop (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313206 gate (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313255 gate-cong-cu (ubuntu-latest, 0): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313274 gate-cong-cu (ubuntu-latest, 4): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313277 gate-cong-cu (ubuntu-latest, 3): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313287 gate-cong-cu (ubuntu-latest, 5): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313297 gate-cong-cu (ubuntu-latest, 1): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313303 gate-nhanh-manh (ubuntu-latest, 1): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313304 gate-nhanh-manh (ubuntu-latest, 5): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313306 gate-nhanh-manh (ubuntu-latest, 7): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313309 gate-cong-cu (ubuntu-latest, 2): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313312 gate-nhanh-manh (ubuntu-latest, 4): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313326 gate-nhanh-manh (ubuntu-latest, 3): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313327 gate-nhanh-manh (ubuntu-latest, 2): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313328 gate-nhanh-manh (ubuntu-latest, 0): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313344 gate-cong-cu (ubuntu-latest, 6): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313372 gate-cong-cu (ubuntu-latest, 7): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401313390 gate-nhanh-manh (ubuntu-latest, 6): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401755920 gate-nhanh-gop (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121401835511 gate-registry (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+JOB 121411741257 gate-cong-cu-gop (ubuntu-latest): checkout=passed cebb5b22e1ebf369a70234662b7e9355bdd5095e gate=not_measured
+WORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)
+provenance.yaml sha256 b4525eeb195ce3249cc8fb881058bb95bbc6721e85575f7420aad6b96655d63d
+NOT_MEASURED: 25

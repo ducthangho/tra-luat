@@ -1,0 +1,699 @@
+[
+  {
+    "name": "control",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed b27fe85c9e9593ddbb059808fe4347fe1bd267be gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 2280fbcefee3c5ad942316b4085c7fd48ada13226733519f5e14777c4918af4c\nNOT_MEASURED: 1\n",
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "no_git_objects",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed b27fe85c9e9593ddbb059808fe4347fe1bd267be gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 7f368d9bf7fb2e961f0020dbdcba93f0e940a2f358d98777946b3fac5dc73db2\nNOT_MEASURED: 1\n",
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": "not_measured",
+      "tree": "not_measured",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "no_git_objects_pr_same_head",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed b27fe85c9e9593ddbb059808fe4347fe1bd267be gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 18bbf5d2c87aa5fa52f29f3960bb0b08dd224f3e452551ff7f9949526c3ec142\nNOT_MEASURED: 1\n",
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": "not_measured",
+      "tree": "not_measured",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "bad_git_tree",
+    "rc": 0,
+    "stdout": "RUN: passed (run_attempt 1, yeu cau 1)\nJOB 1 j: checkout=passed b27fe85c9e9593ddbb059808fe4347fe1bd267be gate=passed\nWORKFLOW_DEFINITION: not_measured (graphql_bi_chan_trong_phien_claude; cho P-B)\nprovenance.yaml sha256 f5e5673264fa7287ceb88cbd034313dc5f012dcb48bf3c86219c0d85fdd5f51f\nNOT_MEASURED: 1\n",
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [],
+      "tree": null,
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "step_success",
+    "rc": 0,
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "step_failure",
+    "rc": 0,
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "step_cancelled",
+    "rc": 0,
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "cancelled"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "step_neutral",
+    "rc": 0,
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python ops/thu_gia_test.py",
+          "conclusion": "neutral"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ],
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "passed"
+    }
+  },
+  {
+    "name": "step_timed_out",
+    "rc": 0,
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": "not_measured",
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [
+        "steps"
+      ],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "not_measured"
+    }
+  },
+  {
+    "name": "step_None",
+    "rc": 0,
+    "checkout": {
+      "job_id": 1,
+      "name": "j",
+      "dong_sha": [
+        "b27fe85c9e9593ddbb059808fe4347fe1bd267be"
+      ],
+      "sha": "b27fe85c9e9593ddbb059808fe4347fe1bd267be",
+      "parents": [
+        "5618020a67709ca6f2c93138905df0aa8d9c2df6",
+        "400589368e09ab2ee0e734b7af08b93478035503"
+      ],
+      "tree": "857bc47e6bc5f0024e442b400819ac51286dfc55",
+      "trang_thai": "passed",
+      "doi_chieu": "sha_bang_head_sha"
+    },
+    "gate": {
+      "job_id": 1,
+      "name": "j",
+      "check_run_id": "1",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 7,
+      "runner_name": "GitHub Actions 7",
+      "conclusion": "success",
+      "buoc": "not_measured",
+      "image": "ubuntu-24.04",
+      "dau_duong": [
+        {
+          "lenh": "python ops/thu_gia_test.py",
+          "duong_dan": "ops/thu_gia_test.py",
+          "trang_thai": "passed",
+          "dong_khop": [
+            "THU: 4/4 dat"
+          ]
+        }
+      ],
+      "thieu": [
+        "steps"
+      ],
+      "ghep_buoc": {
+        "trang_thai": "passed",
+        "so_buoc": 2
+      },
+      "kich_ban": {
+        "buoc_xac_thuc": 1,
+        "trang_thai": "passed",
+        "nguon": "run_tai_sha_checkout"
+      },
+      "trang_thai": "not_measured"
+    }
+  }
+]

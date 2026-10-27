@@ -1,0 +1,14 @@
+surface-mismatch {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "chua_do": [], "surface_chua_do": []}
+surface-json-invalid {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `ops/reviews/v/run.json` không đọc được `execution_surface` — L-SURFACE không áp"]}
+surface-debt-json-invalid {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: `verdict_path` NỢ CHẾT — nằm trong `NO_CAU_LICH_SU` mà câu đã hết vi phạm; xoá mục nợ, bánh cóc chỉ quay một chiều"], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `ops/reviews/v/run.json` không đọc được `execution_surface` — L-SURFACE không áp"]}
+surface-json-list {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `ops/reviews/v/run.json` không đọc được `execution_surface` — L-SURFACE không áp"]}
+surface-debt-json-list {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: `verdict_path` NỢ CHẾT — nằm trong `NO_CAU_LICH_SU` mà câu đã hết vi phạm; xoá mục nợ, bánh cóc chỉ quay một chiều"], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `ops/reviews/v/run.json` không đọc được `execution_surface` — L-SURFACE không áp"]}
+surface-json-missing-field {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `ops/reviews/v/run.json` không đọc được `execution_surface` — L-SURFACE không áp"]}
+surface-json-absent {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `run_json` ops/reviews/v/run.json không có trong kho — L-SURFACE không áp"]}
+surface-debt-json-absent {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: `verdict_path` NỢ CHẾT — nằm trong `NO_CAU_LICH_SU` mà câu đã hết vi phạm; xoá mục nợ, bánh cóc chỉ quay một chiều"], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: `run_json` ops/reviews/v/run.json không có trong kho — L-SURFACE không áp"]}
+surface-verdict-invalid-utf8 {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: verdict không đọc được — L-SURFACE không áp"]}
+surface-debt-verdict-invalid-utf8 {"rc": 1, "loi": ["[L-SURFACE] r.receipt.yaml: `verdict_path` NỢ CHẾT — nằm trong `NO_CAU_LICH_SU` mà câu đã hết vi phạm; xoá mục nợ, bánh cóc chỉ quay một chiều"], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: verdict không đọc được — L-SURFACE không áp"]}
+surface-verdict-absent {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": ["r.receipt.yaml: verdict không đọc được — L-SURFACE không áp"]}
+surface-upper-case {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+surface-two-fields-same-line {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}
+surface-prose-mentions {"rc": 0, "loi": [], "chua_do": [], "surface_chua_do": []}

@@ -1,0 +1,39 @@
+--- ops/bien_nhan_v2.py
++++ ops/bien_nhan_v2.py
+@@ -1126,9 +1126,9 @@
+     import yaml
+     try:
+         cay = yaml.compose(van, Loader=yaml.SafeLoader)
+-    except yaml.YAMLError:
+-        return False
+-    return any(cau in _cac_cau(n.value) for _, n, _ in _duyet_scalar(cay))
++        return any(cau in _cac_cau(n.value) for _, n, _ in _duyet_scalar(cay))
++    except (yaml.YAMLError, _AliasVong) as ex:
++        raise KhongDoDuoc(f"không duyệt được phiên bản YAML lịch sử ({type(ex).__name__})") from ex
+ 
+ 
+ def _commit_them_cau(root: Path, rel: str, cau: str):
+@@ -1149,7 +1149,11 @@
+         except (OSError, subprocess.SubprocessError):
+             return None
+         if p.returncode != 0:
+-            continue                       # commit xoá tệp: phiên bản ấy không có câu
++            # Chỉ bỏ qua khi tree xác nhận tệp vắng. Blob thiếu/lỗi show không chứng minh câu vắng.
++            rc_tree, entry = _git(root, "ls-tree", c, "--", rel)
++            if rc_tree != 0 or entry:
++                return None
++            continue
+         try:
+             van = p.stdout.decode("utf-8")
+         except UnicodeDecodeError:
+@@ -1366,8 +1370,9 @@
+                        f"và bằng chứng phiên độc lập vẫn chạy")
+     tep_doc = {}
+     for p in ds:
+-        ten, b = p.name, _bam(p)
++        ten = p.name
+         try:
++            b = _bam(p)
+             van = p.read_text(encoding="utf-8")
+             d = yaml.safe_load(van)
+         except Exception as ex:                                  # noqa: BLE001

@@ -95,3 +95,16 @@ không thuộc packet. Không có docstring nào khẳng định `timeout-minute
   `core.abbrev=7` ở cấp tiến trình, làm fixture r226 không đổi được; chạy lại ra 1731/1731. Phép đo sinh ra 20 tệp và 4 thư
   mục fixture/cache bị ignore trong bản sao sandbox, reviewer đã ghi và hoàn nguyên.
 - Codex đã dùng 2/2: hết lượt. Sau lần đẩy này KHÔNG đẩy thêm merge commit nào (push_policy).
+
+## Đính chính và đo lại ba lỗi (27-10, sau khi chủ kho yêu cầu sửa)
+- **ĐÍNH CHÍNH mục N3 ở trên.** Câu "lệnh `rg` của spec chạy quá 30 phút trên cây này" là SAI NGUYÊN NHÂN. Lệnh của spec,
+  `rg -n "ci_dang_ky_test" --glob '!*.md'`, KHÔNG có tham số đường dẫn. Khi stdin không phải TTY (shell agent nối ống),
+  `rg` đọc STDIN thay vì quét thư mục, nên treo cho tới khi hết giờ. Đo: lệnh nguyên văn `rc=124` sau 120 s, 0 dòng;
+  thêm `< /dev/null` thì `rc=0`, 0 s; thêm `.` hoặc một `--glob` với đường dẫn cũng 0–1 s. Kích thước cây không liên quan.
+- **Fixture ký commit:** `.claude/dev/ci_dang_ky_test.py:2126`, lambda `_gk` chạy `git -C <tmp> -c user.name=t -c user.email=t@t`
+  nhưng KHÔNG ghi đè `commit.gpgsign`. Container này có `~/.gitconfig` với `commit.gpgsign=true`, `gpg.format=ssh`,
+  `user.signingkey=/home/claude/.ssh/commit_signing_key.pub`. Sandbox Codex chặn helper ký, nên `commit` thoát 128.
+  Ứng viên vá một dòng: thêm `"-c", "commit.gpgsign=false"` vào `_gk`. Đây là sửa MÃ, ngoài phạm vi spec r2.
+- **Header model Codex:** cả hai `stderr.log` chỉ có 39 byte, `Reading additional input from stdin...`. `stdout.log` chỉ có
+  câu trả lời cuối. `codex exec` 0.164 không in header khi chạy kiểu này. Ứng viên: `codex exec --json` (sự kiện JSONL ra
+  stdout); CHƯA thử, vì mỗi lần thử là một lời gọi Codex. Chỗ sửa là cách gọi trong adapter/launcher, ngoài write set.

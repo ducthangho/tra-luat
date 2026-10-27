@@ -245,6 +245,23 @@ bằng SHA đang chờ; mọi check bắt buộc xanh trên attempt mới nhất
 PR và head, không còn P0–P2; mỗi P3 còn mở (offline và connector, slug lấy từ biên nhận) có đúng một quyết định. Thiếu
 một điều kiện thì state giữ nguyên. Packet chưa áp giữ đường `reviewing → accepted`.
 
+Cũng chỉ ở packet áp `ADR-0054`, cửa `mo-lai` mở lại packet `approved_pending` trên SHA đang chờ, theo một trong hai
+nguyên nhân; mỗi lớp trong bảng lớp của biên nhận phải mang tham chiếu khác rỗng, đúng dạng, không lặp. `ci-do` (mỗi lớp
+neo `[workflow, job]`) ⇒ `running`, khi readback cho thấy đúng các check ấy đỏ thật (`failure`, `timed_out`,
+`startup_failure`) trên attempt mới nhất của run mới nhất, và connector không còn P0–P2 trên head (còn thì phải dùng
+`connector`). `connector` (mỗi lớp hạng P0–P2, tham chiếu phủ bằng đúng tập P0–P2 của connector trên head) ⇒
+`cho_chu_kho`; nguyên nhân này cũng chạy được từ `running` khi quyền mở lại hiện hành là `ci-do` cùng generation, chưa
+có `begin_attempt` sau sự kiện `mo_lai` cuối, và xét trên chính SHA đã mở lại. Mỗi lần mở lại ghi quyền `mo_lai_tu`
+(nguyên nhân, generation, SHA) thay quyền trước, và cộng một vào bộ đếm same-failure cho mỗi slug lấy từ biên nhận.
+`cho_chu_kho` không có cạnh `transition` nào; chỉ rời được bằng `chu-kho-duyet`, cửa đọc checkpoint
+`ops/checkpoints/<tên>.yaml` từ `origin/master` sau khi máy tự fetch và khớp `ls-remote`. Checkpoint phải đúng lược đồ,
+do người có thẩm quyền quyết, khớp packet, generation, `spec_hash`, head, và có phạm vi `cho_phep_va`; khi đó packet về
+`running` trên SHA đã mở lại và `mo_lai_tu` bị tiêu thụ. `cho_phep_day` là quyền riêng: `chu-kho-duyet` ở
+`approved_pending` (head = `pending_sha`) chỉ ghi quyền `checkpoint_day`, state giữ nguyên; chưa cửa nào tiêu thụ quyền
+này (dành cho #816). Mỗi cặp (hiện vật, phạm vi) chỉ dùng một lần. `mo-lai`, `chu-kho-duyet` và `begin-attempt` cùng qua
+hàm xét dừng: bộ đếm same-failure đã chạm trần thì packet ghi sổ rồi về `blocked`. Packet chưa áp `ADR-0054` không có
+các state và cửa này.
+
 Mỗi phiên chỉ thực hiện một chuyển động có trách nhiệm rõ: execute một Packet, review một PR hoặc land một exact
 head. “Một đơn vị công việc” không có nghĩa một micro-step: Executor được hoàn thành mọi substep cần thiết trong
 objective/write set/acceptance của Packet. Khi xuất hiện outcome độc lập hoặc phạm vi mới, phiên ghi successor và
@@ -1138,8 +1155,8 @@ cơ chế đánh thức (alarm/monitor/notification), không poll chủ động.
 với trần 90 phút và đồng hồ absolute wall clock riêng; run mới phải ĐO LẠI trước khi làm: `git ls-remote` head, hạn lease,
 state packet, sáu kích hoạt drift — trí nhớ ấm không thay được phép đo (bài học “phiên sau phải đo lại”).
 
-Mission không được complete khi còn packet `ready`, `leased`, `running`, `reviewing`, `blocked` hoặc khi land gate
-chưa xanh. Land thất bại quay về `paused` hoặc sinh packet sửa lỗi trong envelope.
+Mission không được complete khi còn packet `ready`, `leased`, `running`, `reviewing`, `approved_pending`, `cho_chu_kho`,
+`blocked` hoặc khi land gate chưa xanh. Land thất bại quay về `paused` hoặc sinh packet sửa lỗi trong envelope.
 
 Khi chạm attempt/same-failure/quota/permission stop condition, phiên ghi failure evidence và handoff rồi dừng.
 Human/dispatcher có thể reroute bằng generation mới nhưng không hồi sinh lease cũ. Nếu stop condition cho thấy

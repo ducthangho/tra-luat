@@ -1,0 +1,101 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 977
+packet_id: wp977
+packet_alias: MAY-ADR-0054-b2
+mission_issue: 796
+revision: 1
+generation: 1
+lease_id: wp977-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [813]
+depends_on_ghi_chu: '#813 r2 da merge (PR #969, merge 1af1593); #943 da land (PR #963, landed PR #970), lease wp943-r1-g1-claude het han.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'van ban protocol => sensitive; executor ho claude, reviewer ho openai; tran Codex theo dong khai ADR-0052 cua spec.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp977.md
+spec_sha256_required: adaf8d2469ac16c46314c3c9ac7667cce90825a053a7b98e12b803c6719040c3
+spec_hash: adaf8d2469ac16c46314c3c9ac7667cce90825a053a7b98e12b803c6719040c3
+spec_ref: refs/heads/ops/wp977-spec@ea34f2d9883ff009641d710f53844a1792ecaf36
+spec_chung: 'ops/specs/may-adr-0054-chung.md (sha256 4e3d1e1b3f6a0b60b96ad7b70f0ece97eca4bb3d6d10defeab1cd24ac6d1cbf0) — rang buoc, doc kem'
+spec_nguon: 'muc M4 cua ops/specs/wp813.md r1 (sha256 e64acd3bc2681a0ddb3b8253cf4dfa711da16cf77a23259ef85dc7ed8683d4fa)'
+prompt_path: ops/specs/wp977.md
+prompt_sha256_required: adaf8d2469ac16c46314c3c9ac7667cce90825a053a7b98e12b803c6719040c3
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/handoff/wp977-g1-claude.md
+write_set_hash: 226913833b7ebb11cd52904aae565258cd63d8fda2a6b177aed6692046deac63
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'theo spec wp977 r1 (chi §4 va §12); handoff chi tren nhanh lease; diff PR dung 1 duong dan, <= 40 dong them.'
+change_policy_sha: null
+effective_write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- ops/handoff/wp977-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 8 loi goi codex (ADR-0052), luot thu hai tro di co ly do; commit run.json; moi thread connector duoc tra loi VA connector da xong tren head cuoi truoc khi bao du dieu kien (bai hoc #950)'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run (gate-packet-loop, thu-hoi); packet_loop_test N/N tai cho tren dung commit day'}
+- {id: M-3, dieu_kien: 'nghiem_thu spec wp977: ba phep rg (duong sau, am truoc), doctrine-scan, adr-song rc0; numstat dung 1 duong dan, <= 40 dong them'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp977-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: e139e55883d90fd74a358230be5599c9e223d4b3
+start_from_sha: e139e55883d90fd74a358230be5599c9e223d4b3
+start_from_ghi_chu: 'origin/master luc cap lease (da co #943, #813 r2).'
+reviewed_sha_required: e139e55883d90fd74a358230be5599c9e223d4b3
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/977#issuecomment-6438074584
+granted_on_instruction_readback: 'chu kho chi thi "#969 đã merge, xử lý drift và làm tiếp"; tra loi AskUserQuestion: "Cả hai", "Claude cloud mới" (phien session_01KkDLBwdpZ9RMeaPMjeUaht, 27-10-2026); ghi ho tren Issue #977. Bam byte KHONG DO DUOC.'
+granted_on_instruction_note: >-
+  Chu kho giao xu ly drift code -> protocol (cho_chu_kho co trong packet_loop.py, 0 lan trong PROTOCOL); M4 tach tu #813.
+  Cap lease cho executor Claude cloud MOI. Ghi ho qua GitHub App.
+recorded_by: claude-session-01KkDLBwdpZ9RMeaPMjeUaht
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (session_01KkDLBwdpZ9RMeaPMjeUaht, phien dieu phoi) KHONG phai executor #977; executor la mot phien cloud MOI do phien nay tao.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-27T09:13:00Z'
+  goc_quet: 'master e139e55, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: thieu 0; nhanh cuc bo khong tut sau'
+  ket_qua: 'docs/PROTOCOL_DA_PHIEN.md: NGUOI_GIU 0 (wp943-r1-g1-claude HET_HAN; wp835-r3-g3-claude CON_HAN nhung DA_BI_THAY_THE).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet chua tung co lease.'
+leased_at_utc: '2026-10-27T09:30:00Z'
+heartbeat_at: '2026-10-27T09:30:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'ADR-0056 da kich hoat van hanh (merge 7129f7d) => lease moi cap khai 360 phut.'
+lease_until: '2026-10-29T09:30:00Z'
+lease_expires_at_utc: '2026-10-29T09:30:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh protocol; spec wp977 khong khai.'
+review_rounds_limit: 8
+budget:
+  codex_review_calls:
+    pr_wp977_g1: {used: 0, reserved: 0, limit: 8}
+  attempt:
+    packet_977_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp977-g1-claude MOT lan khi nghiem thu dat va review approve; mo PR draft. Merge origin/master TRUOC luot Codex cuoi de head duoc duyet = head day. Master tien sau approve lam thu-hoi do => merge master + mot luot Codex xac minh (tien le #813 luot 5), khong day merge commit chua xac minh.'

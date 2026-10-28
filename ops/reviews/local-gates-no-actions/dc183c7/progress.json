@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-10-28T07:57:27.533268+00:00",
+  "kind": "interim_review_evidence",
+  "reviewed_sha": "dc183c7ceb0c8efda6c648e4bcddb8f16ab18064",
+  "targeted_run": "in_progress_in_standalone_clone",
+  "worktree_attempt": "interrupted after six clone-precondition failures; logs preserved",
+  "not_ready_for_merge": true,
+  "approval": false
+}

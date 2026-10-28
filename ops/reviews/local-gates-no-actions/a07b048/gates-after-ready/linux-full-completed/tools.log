@@ -1,0 +1,97 @@
+{
+  "trang_thai_tong": "DAT",
+  "pham_vi": "toan-bo",
+  "canary_da_quet": true,
+  "ghi_chu_pham_vi": "da quet canary toan bo (khong co nghia moi canary dat)",
+  "cong_cu": [
+    {
+      "ten": "git",
+      "bat_buoc": true,
+      "ban_ghim": null,
+      "ban_thay": {
+        "mac_dinh": "2.52.0"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "python",
+      "bat_buoc": true,
+      "ban_ghim": null,
+      "ban_thay": {
+        "mac_dinh": "3.12.14"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "PyYAML",
+      "bat_buoc": true,
+      "ban_ghim": null,
+      "ban_thay": {
+        "mac_dinh": "6.0.3"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "actionlint",
+      "bat_buoc": true,
+      "ban_ghim": "1.7.7",
+      "ban_thay": {
+        "mac_dinh": "1.7.7"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "jsonschema",
+      "bat_buoc": true,
+      "ban_ghim": "4.26.0",
+      "ban_thay": {
+        "mac_dinh": "4.26.0"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "shellcheck",
+      "bat_buoc": false,
+      "ban_ghim": null,
+      "ban_thay": {
+        "mac_dinh": "0.11.0"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "rg",
+      "bat_buoc": true,
+      "ban_ghim": null,
+      "ban_thay": {
+        "mac_dinh": "15.2.0"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    },
+    {
+      "ten": "bash",
+      "bat_buoc": true,
+      "ban_ghim": null,
+      "ban_thay": {
+        "mac_dinh": "5.2.37"
+      },
+      "trang_thai": "DAT",
+      "chi_tiet": "dat"
+    }
+  ],
+  "canary": [
+    {
+      "ten": "actionlint_shellcheck",
+      "chu_so_huu": "actionlint",
+      "chinh_sach": "blocking",
+      "trang_thai": "DAT",
+      "chi_tiet": "canary bat dung SC1003 (rc=1)"
+    }
+  ]
+}

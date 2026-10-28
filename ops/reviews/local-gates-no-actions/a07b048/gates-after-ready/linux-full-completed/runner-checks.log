@@ -1,0 +1,51 @@
+test_both_plans_run_behavior_checks (__main__.RunnerChecks.test_both_plans_run_behavior_checks) ... ok
+test_caller_git_override_is_not_inherited (__main__.RunnerChecks.test_caller_git_override_is_not_inherited) ... probe passed rc=0
+ok
+test_dirty_tree_and_wrong_head_refused (__main__.RunnerChecks.test_dirty_tree_and_wrong_head_refused) ... ok
+test_explicit_worker_tuning_and_isolated_temp (__main__.RunnerChecks.test_explicit_worker_tuning_and_isolated_temp) ... probe passed rc=0
+ok
+test_ignored_writes_invalidate_checkout (__main__.RunnerChecks.test_ignored_writes_invalidate_checkout) ... VERIFIED: 1 steps; cb190e21d81d285debc5cd0cda8f2f07451c3d33
+Content integrity only; not independent attestation or merge approval.
+probe passed rc=0
+ok
+test_missing_step_cannot_verify (__main__.RunnerChecks.test_missing_step_cannot_verify) ... probe passed rc=0
+ok
+test_nested_git_config_can_override_abbreviation (__main__.RunnerChecks.test_nested_git_config_can_override_abbreviation) ... probe passed rc=0
+ok
+test_nonzero_with_positive_is_failure (__main__.RunnerChecks.test_nonzero_with_positive_is_failure) ... probe failed rc=7
+ok
+test_output_inside_checkout_refused (__main__.RunnerChecks.test_output_inside_checkout_refused) ... ok
+test_partial_run_cannot_verify (__main__.RunnerChecks.test_partial_run_cannot_verify) ... probe passed rc=0
+ok
+test_receipt_invariants_rejected (__main__.RunnerChecks.test_receipt_invariants_rejected) ... probe passed rc=0
+ok
+test_receipt_temp_symlink_is_not_followed (__main__.RunnerChecks.test_receipt_temp_symlink_is_not_followed) ... ok
+test_reuse_output_refused (__main__.RunnerChecks.test_reuse_output_refused) ... probe passed rc=0
+ok
+test_rewritten_plan_not_trusted (__main__.RunnerChecks.test_rewritten_plan_not_trusted) ... probe passed rc=0
+ok
+test_scratch_clone_keeps_ignored_writes_outside_source (__main__.RunnerChecks.test_scratch_clone_keeps_ignored_writes_outside_source) ... SCRATCH_CLONE_HEAD 792b6cafaa806b690ed751df82345573220fa829 TREE 1287224d691cba8c9b1cc8fbae2120ef875d2da3
+POSITIVE
+SCRATCH_CLONE_TRACKED_UNCHANGED true
+ok
+test_sigterm_records_interruption_and_reaps_child (__main__.RunnerChecks.test_sigterm_records_interruption_and_reaps_child) ... ok
+test_success_and_tampered_log (__main__.RunnerChecks.test_success_and_tampered_log) ... probe passed rc=0
+ok
+test_symlinked_artifacts_rejected (__main__.RunnerChecks.test_symlinked_artifacts_rejected) ... VERIFIED: 1 steps; 7ca1701f05e4af3f6393555491f0ecb0d0b7661e
+Content integrity only; not independent attestation or merge approval.
+probe passed rc=0
+ok
+test_test_editing_checkout_invalidates_receipt (__main__.RunnerChecks.test_test_editing_checkout_invalidates_receipt) ... probe passed rc=0
+ok
+test_timeout_is_not_measured (__main__.RunnerChecks.test_timeout_is_not_measured) ... probe not_measured rc=None
+ok
+test_timeout_reaps_detached_grandchild (__main__.RunnerChecks.test_timeout_reaps_detached_grandchild) ... probe not_measured rc=None
+ok
+test_zero_exit_without_positive_is_failure (__main__.RunnerChecks.test_zero_exit_without_positive_is_failure) ... probe failed rc=0
+ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 4.961s
+
+OK
+LOCAL_GATE_CHECKS_PASS 22/22

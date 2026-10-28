@@ -1,0 +1,58 @@
+{
+  "head": "a07b0487635118f1d66487691e70e6e837261289",
+  "finished_at": "2026-10-28T11:41:44.784625+00:00",
+  "gate_exit": {
+    "rc": 1,
+    "finished_at": "2026-10-28T11:41:35.868907+00:00"
+  },
+  "verifier_rc": 2,
+  "source_clean": true,
+  "steps": [
+    {
+      "id": "tools",
+      "state": "passed",
+      "rc": 0,
+      "seconds": 0.268
+    },
+    {
+      "id": "ruff-version",
+      "state": "passed",
+      "rc": 0,
+      "seconds": 0.115
+    },
+    {
+      "id": "runner-checks",
+      "state": "passed",
+      "rc": 0,
+      "seconds": 5.132
+    },
+    {
+      "id": "registry-contract",
+      "state": "passed",
+      "rc": 0,
+      "seconds": 7.69
+    },
+    {
+      "id": "registry-suites",
+      "state": "failed",
+      "rc": 1,
+      "seconds": 5629.529
+    },
+    {
+      "id": "packet-loop",
+      "state": "passed",
+      "rc": 0,
+      "seconds": 2571.256
+    },
+    {
+      "id": "runtime-selftest",
+      "state": "passed",
+      "rc": 0,
+      "seconds": 204.858
+    }
+  ],
+  "full_ci_equivalence": false,
+  "approval": false,
+  "windows": "not completed; native first attempt preflight rc=4 on PowerShell 7.6; device offline at last observation",
+  "long_log_audit": "tl-auditor observed first seven completed nested suites only; no final audit claimed"
+}

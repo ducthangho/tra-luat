@@ -1,0 +1,30 @@
+{
+  "kind": "windows_transport_observation",
+  "not_native_log_copy": true,
+  "device": "ASUS-LAPTOP",
+  "device_id": "7404cfba-9034-4787-b46b-7c358126a411",
+  "head": "a07b0487635118f1d66487691e70e6e837261289",
+  "tree": "81f18cdb34196d3c04edbea73b9156b436cea0b1",
+  "task_root": "D:\\tra-luat-gates\\pr1003-a07-47a26722",
+  "pwsh_attempt": "7.6.9",
+  "python": "3.12.10",
+  "gate_rc": 4,
+  "tests_started": false,
+  "capture_complete": true,
+  "head_after": "a07b0487635118f1d66487691e70e6e837261289",
+  "tracked_untracked_clean": true,
+  "native_stdout_sha256": "a7a95e6a4179aa4dddb1b3c4733b7105fd322624397673ac5bcf9f12bd8ce8b3",
+  "native_stderr_sha256": "919276f0eb4784df71fe5a15b97f069759bc5751ccb18bde1fbe58dde2ecc6ca",
+  "root_cause_repro": {
+    "before_git_rc": 0,
+    "set_environment_variable_null_creates_empty_git_dir": true,
+    "after_git_rc": 128,
+    "after_remove_item_env_git_dir_git_rc": 0
+  },
+  "canonical_head_observed": "c16bd3293a9d2dc7a8a789b99d77057cb02ce374",
+  "lts_setup_pid": 19812,
+  "lts_state": "not_measured; MCP timed out before confirmation",
+  "files_remain_on_windows": true,
+  "approval": false,
+  "full_ci_equivalence": false
+}

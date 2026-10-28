@@ -1,0 +1,32 @@
+{
+  "kind": "owner_authorized_local_gate_plan",
+  "authority": "Owner direct instruction: Tôi đã bỏ draft. Chạy các gate đi",
+  "head": "a07b0487635118f1d66487691e70e6e837261289",
+  "base": "ef34d88838bc125727670f494b15213b6c6f0c8d",
+  "tree": "81f18cdb34196d3c04edbea73b9156b436cea0b1",
+  "started_at": "2026-10-28T09:21:03.950119+00:00",
+  "cwd": "/workspace/local-gates-full-a07",
+  "out": "/workspace/agy-preflight/linux-full-a07",
+  "argv": [
+    "python",
+    "-B",
+    ".claude/dev/local_gate.py",
+    "run",
+    "--root",
+    ".",
+    "--expected-head",
+    "a07b0487635118f1d66487691e70e6e837261289",
+    "--plan",
+    ".claude/dev/local_gate_linux_suites.json",
+    "--out",
+    "/workspace/agy-preflight/linux-full-a07"
+  ],
+  "mode": "full seven-step Linux plan, no selection, no receipt merging",
+  "git_config_scope": "repo-local only; no GIT_CONFIG_* environment overrides",
+  "actions": "disabled per owner; no workflow invocation",
+  "windows": "not_run; real Windows host required",
+  "approval": false,
+  "full_ci_equivalence": false,
+  "plan_sha256": "c62d11eae570b4075fe5bea105cf54b6abb472563de8a8df766e98714c763649",
+  "runner_sha256": "c86864d3acfee411034a242c7b12e7283ea56df513852195745de7311e4c7b89"
+}

@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "kind": "local_test_evidence",
+  "head": "a07b0487635118f1d66487691e70e6e837261289",
+  "tree": "81f18cdb34196d3c04edbea73b9156b436cea0b1",
+  "started_at": "2026-10-28T09:21:16.783969+00:00",
+  "system": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "python_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+  "git_version": "git version 2.52.0",
+  "plan_sha256": "c62d11eae570b4075fe5bea105cf54b6abb472563de8a8df766e98714c763649",
+  "runner_sha256": "c86864d3acfee411034a242c7b12e7283ea56df513852195745de7311e4c7b89",
+  "full_ci_equivalence": false,
+  "approval": false,
+  "checkout_unchanged": true,
+  "steps": [
+    {
+      "id": "tools",
+      "state": "passed",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "ops/cong_cu.py",
+        "kiem-tra",
+        "--json"
+      ],
+      "env": {},
+      "execution_scope": "checkout",
+      "timeout_seconds": 120,
+      "rc": 0,
+      "cleanup_complete": true,
+      "containment": "linux_subreaper",
+      "seconds": 0.268,
+      "log": "tools.log",
+      "log_sha256": "7334959034b6ce0e0e00a3ce14ed652a713f3645ec47e511fdfd0a737126421b",
+      "positive_matches": [
+        true
+      ]
+    },
+    {
+      "id": "ruff-version",
+      "state": "passed",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "env": {},
+      "execution_scope": "checkout",
+      "timeout_seconds": 30,
+      "rc": 0,
+      "cleanup_complete": true,
+      "containment": "linux_subreaper",
+      "seconds": 0.115,
+      "log": "ruff-version.log",
+      "log_sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+      "positive_matches": [
+        true
+      ]
+    },
+    {
+      "id": "runner-checks",
+      "state": "passed",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        ".claude/dev/local_gate_checks.py"
+      ],
+      "env": {},
+      "execution_scope": "checkout",
+      "timeout_seconds": 120,
+      "rc": 0,
+      "cleanup_complete": true,
+      "containment": "linux_subreaper",
+      "seconds": 5.132,
+      "log": "runner-checks.log",
+      "log_sha256": "3880e8cb5895ca94b7857e0b5ad4facade2b5eb44666d4589528f2f33f6797d4",
+      "positive_matches": [
+        true
+      ]
+    },
+    {
+      "id": "registry-contract",
+      "state": "passed",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "env": {},
+      "execution_scope": "checkout",
+      "timeout_seconds": 9000,
+      "rc": 0,
+      "cleanup_complete": true,
+      "containment": "linux_subreaper",
+      "seconds": 7.69,
+      "log": "registry-contract.log",
+      "log_sha256": "ef11caf341ed192c60c62430ddb81f53d10b03304fdc871dc29c8ce22b90de88",
+      "positive_matches": [
+        true
+      ]
+    },
+    {
+      "id": "registry-suites",
+      "state": "running",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py",
+        "--chay"
+      ],
+      "env": {
+        "CI_DANG_KY_WORKERS": "2"
+      },
+      "execution_scope": "checkout",
+      "timeout_seconds": 9000
+    },
+    {
+      "id": "packet-loop",
+      "state": "not_run"
+    },
+    {
+      "id": "runtime-selftest",
+      "state": "not_run"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "device": "ASUS-LAPTOP",
+  "device_id": "7404cfba-9034-4787-b46b-7c358126a411",
+  "last_gate_attempt": "Windows PS7.6 preflight rc4; no tests started",
+  "lts_setup_pid": 19812,
+  "transport": "remote_desktop_commander",
+  "status": "MCP start_process request timed out; subsequent pending read orchestration cancelled",
+  "test_state": "not_measured",
+  "native_gate_profile_complete": false
+}

@@ -4,28 +4,97 @@
   "scope": "Selected offline Linux suites, not full workflow equivalence, Windows, release or merge approval. Run foundation separately. Install pinned tools from repository manifest first.",
   "steps": [
     {
+      "id": "tools",
+      "argv": [
+        "{python}",
+        "-B",
+        "ops/cong_cu.py",
+        "kiem-tra",
+        "--json"
+      ],
+      "timeout_seconds": 120,
+      "positive": [
+        "\"trang_thai_tong\": \"DAT\""
+      ]
+    },
+    {
+      "id": "ruff-version",
+      "argv": [
+        "{python}",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "timeout_seconds": 30,
+      "positive": [
+        "^ruff 0\\.15\\.15$"
+      ]
+    },
+    {
+      "id": "runner-checks",
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/local_gate_checks.py"
+      ],
+      "timeout_seconds": 120,
+      "positive": [
+        "^LOCAL_GATE_CHECKS_PASS ([1-9][0-9]*)/\\1$"
+      ]
+    },
+    {
       "id": "registry-contract",
-      "argv": ["{python}", "-B", ".claude/dev/ci_dang_ky_test.py"],
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
       "timeout_seconds": 9000,
-      "positive": ["^TỔNG: ĐẠT$"]
+      "positive": [
+        "^TỔNG: ĐẠT$"
+      ]
     },
     {
       "id": "registry-suites",
-      "argv": ["{python}", "-B", ".claude/dev/ci_dang_ky_test.py", "--chay"],
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py",
+        "--chay"
+      ],
       "timeout_seconds": 9000,
-      "positive": ["^TỔNG: ĐẠT$", "^CI_DANG_KY_THOI_GIAN "]
+      "positive": [
+        "^TỔNG: ĐẠT$",
+        "^CI_DANG_KY_THOI_GIAN "
+      ],
+      "env": {
+        "CI_DANG_KY_WORKERS": "2"
+      }
     },
     {
       "id": "packet-loop",
-      "argv": ["{python}", "-B", ".claude/dev/packet_loop_test.py"],
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/packet_loop_test.py"
+      ],
       "timeout_seconds": 9000,
-      "positive": ["^TỔNG: ĐẠT$"]
+      "positive": [
+        "^TỔNG: ĐẠT$"
+      ]
     },
     {
       "id": "runtime-selftest",
-      "argv": ["{python}", "-B", "scripts/tl.py", "--selftest"],
+      "argv": [
+        "{python}",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
       "timeout_seconds": 9000,
-      "positive": ["^== tl selftest ([1-9][0-9]*)/\\1 ==$"]
+      "positive": [
+        "^== tl selftest ([1-9][0-9]*)/\\1 ==$"
+      ]
     }
   ]
 }

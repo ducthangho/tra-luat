@@ -239,6 +239,31 @@ class RunnerChecks(unittest.TestCase):
             self.assertTrue(any('.claude/dev/local_gate_checks.py' in step['argv']
                                 for step in plan['steps']))
 
+    def test_nested_git_config_can_override_abbreviation(self):
+        self.make_plan('import subprocess,tempfile; '
+                       't=tempfile.TemporaryDirectory(); '
+                       'subprocess.run(["git","init","-q",t.name],check=True); '
+                       'subprocess.run(["git","-C",t.name,"config","core.abbrev","8"],check=True); '
+                       'assert subprocess.check_output(["git","-C",t.name,"config","core.abbrev"],text=True).strip()=="8"; '
+                       'print("POSITIVE")')
+        self.assertEqual(self.run_gate(), 0)
+
+    def test_scratch_clone_keeps_ignored_writes_outside_source(self):
+        (self.root / '.gitignore').write_text('ignored/\n')
+        (self.root / 'probe.py').write_text(
+            'from pathlib import Path\nimport subprocess\n'
+            'Path("ignored").mkdir(); Path("ignored/state").write_text("fixture")\n'
+            'subprocess.run(["git","config","core.abbrev","8"],check=True)\n'
+            'assert subprocess.check_output(["git","config","core.abbrev"],text=True).strip()=="8"\n'
+            'print("POSITIVE")\n')
+        self.git('add', '.')
+        self.git('-c', 'user.name=test', '-c', 'user.email=test@example.invalid',
+                 '-c', 'commit.gpgsign=false', 'commit', '-qm', 'scratch fixture')
+        self.head = self.git('rev-parse', 'HEAD').strip()
+        self.assertEqual(gate.scratch_run(self.root, [sys.executable, '-B', 'probe.py']), 0)
+        self.assertFalse((self.root / 'ignored').exists())
+        self.assertEqual(gate.identity(self.root)['head'], self.head)
+
 
 if __name__ == '__main__':
     result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(RunnerChecks))

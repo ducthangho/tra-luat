@@ -62,6 +62,8 @@ def read_plan(path):
             raise ValueError('timeout must be 1..9000 seconds')
         if not isinstance(s['positive'], list) or not s['positive'] or not all(isinstance(p, str) and p for p in s['positive']):
             raise ValueError('positive output patterns are required')
+        if s.get('execution_scope', 'checkout') not in ('checkout', 'scratch_clone'):
+            raise ValueError('unknown execution scope')
         tuning = s.get('env', {})
         if (not isinstance(tuning, dict) or set(tuning) - {'CI_DANG_KY_WORKERS'}
                 or any(not isinstance(v, str) or not re.fullmatch('[1-8]', v) for v in tuning.values())):
@@ -164,6 +166,36 @@ def supervise(status, timeout, argv):
     return 0 if result['cleanup_complete'] else 1
 
 
+def scratch_run(root, argv):
+    """Run a declared command in a disposable standalone clone at the source OID.
+
+    Runtime selftests deliberately create ignored fixtures/state. Those writes
+    belong in this mutable copy; tracked/untracked changes still fail the step.
+    """
+    source = identity(root)
+    with tempfile.TemporaryDirectory(prefix='local-gate-copy-') as temp:
+        copy = Path(temp) / 'repo'
+        git(root, 'clone', '--quiet', '--no-hardlinks', str(root), str(copy))
+        git(copy, 'checkout', '--quiet', '--detach', source['head'])
+        for key, value in [('core.abbrev', '7'), ('core.autocrlf', 'false'), ('core.eol', 'lf')]:
+            git(copy, 'config', '--local', key, value)
+        if identity(copy) != source:
+            raise ValueError('scratch clone identity differs from source')
+        print('SCRATCH_CLONE_HEAD', source['head'], 'TREE', source['tree'], flush=True)
+        env = {k: os.environ[k] for k in ('PATH', 'HOME', 'LANG', 'LC_ALL', 'TMPDIR') if k in os.environ}
+        env.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8', PYTHONDONTWRITEBYTECODE='1',
+                   RUFF_CACHE_DIR=str(Path(temp) / 'ruff-cache'))
+        rc = subprocess.call(argv, cwd=copy, env=env, stdin=subprocess.DEVNULL)
+        # Ignored fixtures are explicitly permitted only in the disposable copy.
+        if (git(copy, 'rev-parse', 'HEAD') != source['head']
+                or git(copy, 'rev-parse', 'HEAD^{tree}') != source['tree']
+                or git(copy, 'status', '--porcelain', '--untracked-files=all')
+                or identity(root) != source):
+            raise ValueError('scratch source or tracked/untracked content changed')
+        print('SCRATCH_CLONE_TRACKED_UNCHANGED true', flush=True)
+        return rc
+
+
 def execute(root, out, plan_path, expected, only=None):
     if platform.system() != 'Linux':
         raise ValueError('this runner requires Linux; use chay-cong-windows.ps1 on Windows')
@@ -194,14 +226,13 @@ def execute(root, out, plan_path, expected, only=None):
     # Do not inherit credentials or test-mode switches into candidate code.
     env = {k: os.environ[k] for k in ('PATH', 'HOME', 'LANG', 'LC_ALL', 'TMPDIR') if k in os.environ}
     env.update(PYTHONUTF8='1', PYTHONIOENCODING='utf-8', PYTHONDONTWRITEBYTECODE='1',
-               GIT_CONFIG_COUNT='3', GIT_CONFIG_KEY_0='core.abbrev', GIT_CONFIG_VALUE_0='7',
-               GIT_CONFIG_KEY_1='core.autocrlf', GIT_CONFIG_VALUE_1='false',
-               GIT_CONFIG_KEY_2='core.eol', GIT_CONFIG_VALUE_2='lf')
+               )
     for s, row in zip(plan['steps'], receipt['steps']):
         if s['id'] not in selected:
             continue
         argv = [sys.executable if a == '{python}' else a for a in s['argv']]
-        row.update(argv=argv, env=s.get('env', {}), timeout_seconds=s['timeout_seconds'], state='running')
+        row.update(argv=argv, env=s.get('env', {}),
+                   execution_scope=s.get('execution_scope', 'checkout'), timeout_seconds=s['timeout_seconds'], state='running')
         write_receipt(out, receipt)
         log = out / (s['id'] + '.log')
         start = time.monotonic()
@@ -291,6 +322,7 @@ def verify(out, expected, trusted_plan):
         require(isinstance(matches, list) and len(matches) == len(s['positive'])
                 and all(match is True for match in matches))
         require(row.get('env') == s.get('env', {}))
+        require(row.get('execution_scope') == s.get('execution_scope', 'checkout'))
         require(type(row['timeout_seconds']) is int and row['timeout_seconds'] == s['timeout_seconds'])
         require(row['argv'] == [r['python_executable'] if a == '{python}' else a for a in s['argv']])
         require(row['log'] == s['id'] + '.log')
@@ -323,6 +355,8 @@ def main():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == '_scratch_run':
+        raise SystemExit(scratch_run(Path.cwd().resolve(), sys.argv[2:]))
     if len(sys.argv) > 1 and sys.argv[1] == '_supervise':
         raise SystemExit(supervise(Path(sys.argv[2]), int(sys.argv[3]), sys.argv[4:]))
     raise SystemExit(main())

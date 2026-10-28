@@ -29,11 +29,19 @@ resume hoặc gộp hai lần chạy thành một bằng chứng đầy đủ.
 
 Checkout phải sạch cả tracked, untracked và ignored. Đặt virtualenv, cache và công cụ ngoài checkout.
 Mọi phép Git của runner bỏ các biến `GIT_*` do caller đặt và dùng `--no-optional-locks`.
-Linked worktree vẫn được hỗ trợ; kiểm tra này không coi worktree là standalone clone.
+Runner hỗ trợ linked worktree, nhưng bộ packet-loop có ca bắt buộc standalone clone; dùng clone độc lập để chạy các suite.
 
 Mỗi bước có TMPDIR/TEMP/TMP riêng ngoài checkout và RUFF_CACHE_DIR ngoài checkout.
 Plan chỉ được đặt tuning `env.CI_DANG_KY_WORKERS` trong miền chuỗi `1..8`; không kế thừa tuning từ caller.
 Plan suite ghim hai worker cho registry; vẫn có thể tốn nhiều thời gian và không tự chia shard.
+Không truyền `GIT_CONFIG_*` vào test: nó đè cả cấu hình repo fixture. Nếu cần ghim Git cho
+checkout chạy trực tiếp, cấu hình repo-local trước khi chạy; không sửa global của người dùng.
+Riêng runtime-selftest chạy qua `_scratch_run` trong clone tạm độc lập ở TMPDIR ngoài checkout,
+đúng HEAD/tree nguồn, với core.abbrev=7/autocrlf=false/eol=lf đặt repo-local trong bản sao.
+Fixture con vẫn đổi được config riêng. Log ghi HEAD/tree của clone; sau lệnh, HEAD/tree và tracked/
+untracked phải giữ nguyên. Chỉ ignored fixture/state được phép đổi trong bản sao và bị dọn khi xong.
+Receipt ghi execution_scope=scratch_clone; checkout_unchanged vẫn chỉ checkout nguồn đã giao.
+Đây không phải cơ chế resume/gộp bằng chứng; selftest trên bản sao không chứng minh Windows.
 Dependency phải cài trước bằng công thức của `ops/cong_cu.yaml`; probe thất bại không phải pass.
 
 Runner không cài dependency, tự push, gọi API hay đọc biến credential của phiên để truyền cho test.

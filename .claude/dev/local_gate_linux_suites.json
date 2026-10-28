@@ -88,13 +88,20 @@
       "argv": [
         "{python}",
         "-B",
+        ".claude/dev/local_gate.py",
+        "_scratch_run",
+        "{python}",
+        "-B",
         "scripts/tl.py",
         "--selftest"
       ],
       "timeout_seconds": 9000,
       "positive": [
-        "^== tl selftest ([1-9][0-9]*)/\\1 ==$"
-      ]
+        "^== tl selftest ([1-9][0-9]*)/\\1 ==$",
+        "^SCRATCH_CLONE_HEAD [0-9a-f]{40,64} TREE [0-9a-f]{40,64}$",
+        "^SCRATCH_CLONE_TRACKED_UNCHANGED true$"
+      ],
+      "execution_scope": "scratch_clone"
     }
   ]
 }

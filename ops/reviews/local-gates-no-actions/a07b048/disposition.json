@@ -1,0 +1,58 @@
+{
+  "reviewed_old_sha": "c0b7711850ecee2e7165564df2f84cb92afe5fa0",
+  "candidate_sha": "a07b0487635118f1d66487691e70e6e837261289",
+  "reviewer_session": "5560112b-091f-4d31-a888-4fd5267a8376",
+  "hint_provenance": "Executor re-derived changes from Argon advisory findings, independently reproduced core F01/F02/F03 on the old SHA, and wrote regressions. No reviewer patch was applied.",
+  "findings": [
+    {
+      "id": "F01",
+      "disposition": "accepted_core",
+      "evidence": "reproduction-results.json: verifier rc=0 for approval=true, full_ci_equivalence=true, checkout_unchanged string false, invalid tree",
+      "fix": "strict receipt invariants and recorded markers; reject symlinked files; strict integer schema and timeout; validate tree shape",
+      "rejected_detail": "negative_matches, timed_out and load_plan do not exist in reviewed code. No independent provenance is inferred from hashes. A symlink alias of the output directory alone does not change artifact bytes."
+    },
+    {
+      "id": "F02",
+      "disposition": "accepted_core",
+      "evidence": "ignored file created while old runner returned 0 and checkout_unchanged=true",
+      "fix": "include ignored paths; sanitize GIT_* for identity; no optional Git locks",
+      "rejected_detail": "Rejecting linked worktrees is unnecessary; their support is retained. Snapshot does not prove no intermediate write-and-revert."
+    },
+    {
+      "id": "F03",
+      "disposition": "accepted",
+      "evidence": "detached grandchild still sleeping after old runner timeout",
+      "fix": "isolated Linux subreaper supervisor, bounded cleanup with kernel ECHILD confirmation, DEVNULL stdin, termination handlers and persisted not_measured receipt; stop on unmeasured step",
+      "risk": "Linux prctl required; cleanup cannot execute after SIGKILL or host loss. Supervisor is not a security sandbox. Failure to confirm cleanup blocks evidence."
+    },
+    {
+      "id": "F04",
+      "disposition": "accepted_in_part",
+      "fix": "per-step temporary directories, cache outside checkout, explicit validated worker tuning=2, tool manifest and pinned Ruff probes",
+      "rejected_detail": "Stripping caller tuning is intentional and retained. Serial execution is slow, not itself a correctness bug. Full registry mutation suite remains a separate expensive obligation; no workflow equivalence claimed."
+    },
+    {
+      "id": "F05",
+      "disposition": "accepted_plan_integration",
+      "fix": "both plans explicitly run runner checks with a positive N/N marker and no skipped cases",
+      "rejected_detail": "Renaming tests into the existing registry would expand into #999 write set; independent checks remain named _checks.py."
+    },
+    {
+      "id": "F06",
+      "disposition": "accepted_durability_hardening",
+      "fix": "unique temporary file, fsync file and directory, atomic replace, cleanup on failure; test fixed-name symlink cannot overwrite victim",
+      "evidence_limit": "Review AST assertion only demonstrated absence of fsync; it did not reproduce power-loss data loss."
+    },
+    {
+      "id": "F07",
+      "source": "executor full runtime-selftest on dc183c7",
+      "disposition": "accepted",
+      "evidence": "1737/1738 rc=1, sole r226 Git abbreviation drift test; ignored runtime fixtures/state changed original checkout. New nested Git regression red on dc183c7; 22/22 runner checks green on a07b048.",
+      "fix": "Remove inherited GIT_CONFIG_* overrides; declared scratch_clone execution for selftest, repo-local Git pins in disposable copy; source remains strict-clean, copy HEAD/tree/tracked/untracked postchecks enforced; ignored fixtures permitted only in disposable copy.",
+      "risk": "Extra local clone I/O and disk. Scratch execution is explicit scope, not original checkout execution, not sandbox or independent attestation.",
+      "review": "Argon round 3 advisory approve on a07b048; tests not run by reviewer"
+    }
+  ],
+  "approval": false,
+  "governance_complete": false
+}

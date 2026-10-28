@@ -1,9 +1,10 @@
 {
   "timestamp": "2026-10-28T07:57:27.533268+00:00",
-  "kind": "interim_review_evidence",
+  "kind": "superseded_candidate_evidence",
   "reviewed_sha": "dc183c7ceb0c8efda6c648e4bcddb8f16ab18064",
-  "targeted_run": "in_progress_in_standalone_clone",
+  "targeted_run": "finished; runtime failed 1737/1738 and ignored writes changed checkout",
   "worktree_attempt": "interrupted after six clone-precondition failures; logs preserved",
   "not_ready_for_merge": true,
-  "approval": false
+  "approval": false,
+  "superseded_by": "a07b0487635118f1d66487691e70e6e837261289"
 }

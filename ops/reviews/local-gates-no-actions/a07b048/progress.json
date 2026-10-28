@@ -1,0 +1,7 @@
+{
+  "kind": "final_scoped_test_evidence",
+  "head": "a07b0487635118f1d66487691e70e6e837261289",
+  "targeted_run": "finished; registry-suites and packet-loop remain not_run on final SHA",
+  "not_ready_for_merge": true,
+  "approval": false
+}

@@ -1,0 +1,28 @@
+format: temporary_ag_review_note.v0
+machine_validated: false
+reviewed_sha: a07b0487635118f1d66487691e70e6e837261289
+reviewed_target: 'PR #1003 local gates without Actions'
+reviewer_provider: google_antigravity
+reviewer_model: gemini-4-argon-high
+model_family: gemini
+execution_surface: antigravity
+transport: machine/local
+reviewer_session_id: 5560112b-091f-4d31-a888-4fd5267a8376
+reviewer_worktree_path: /workspace/argon-review-1003-r3
+executor_session_id: 01a180a5-31a3-7349-bd2e-5e2d11a6d094
+github_submitter: ducthangho
+verdict: approve
+findings: []
+test_evidence:
+  reviewer: 'not_run: CLI command execution denied'
+  executor: See handoff.json, receipts and original logs; selected scope only
+limitations:
+- full registry mutation suite (old-head attempt interrupted; not_run on candidate)
+- packet-loop not_run on final SHA; prior dc183c7 passed 981/981 and 1342 mutation
+  positives with Windows skips
+- real Windows validation
+- 'governance disposition: no frozen Packet/lease; no admission or merge authority'
+- Static advisory review; Git object graph and test evidence measured by executor/orchestrator
+- Runtime identity anchored by agy init events, not cryptographic model attestation
+assurance: advisory_review
+verdict_source_sha256: b409b7394c25d16ef2666e5720184d64c2f2b3b5b686f215b2d505bca89215a8

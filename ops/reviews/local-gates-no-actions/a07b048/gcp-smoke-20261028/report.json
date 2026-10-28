@@ -1,0 +1,122 @@
+{
+  "schema": "gcp-readonly-smoke.v1",
+  "at": "2026-10-28T16:26:21.154044+00:00",
+  "project": "ubqlv-202307",
+  "region": "asia-southeast1",
+  "job": "tra-luat",
+  "image": "asia-southeast1-docker.pkg.dev/ubqlv-202307/tra-luat/cli@sha256:d3d880aaf787f70cdc8fab5284e5b314c2e9552d9bcdc89dcb6ccdc6a1bf28af",
+  "job_spec_unchanged": true,
+  "job_spec_sha256": "7493c6fdda5541c966ff66094a7aa1005e2f51146d95afaf9ad84896bbfded82",
+  "cases": [
+    {
+      "case": "help",
+      "execution": "tra-luat-ws27b",
+      "args": [
+        "--help"
+      ],
+      "gcloud_rc": 0,
+      "completed": true,
+      "completed_at": "2026-10-28T16:20:46.719777Z"
+    },
+    {
+      "case": "reg-help",
+      "execution": "tra-luat-g7td7",
+      "args": [
+        "reg-query",
+        "--help"
+      ],
+      "gcloud_rc": 0,
+      "completed": true,
+      "completed_at": "2026-10-28T16:21:34.682050Z"
+    },
+    {
+      "case": "ping",
+      "execution": "tra-luat-z9nvc",
+      "args": [
+        "ping"
+      ],
+      "gcloud_rc": 0,
+      "completed": true,
+      "completed_at": "2026-10-28T16:22:06.633254Z"
+    },
+    {
+      "case": "reg-refresh",
+      "execution": "tra-luat-g722p",
+      "args": [
+        "reg-query",
+        "--name",
+        "Bảo hiểm xã hội",
+        "--limit",
+        "5",
+        "--json",
+        "--refresh",
+        "--config",
+        "/secrets/tra-luat/runtime.json",
+        "--out",
+        "/data/output/gcp-smoke-pr1003-reg-query-refresh-20261028.json"
+      ],
+      "gcloud_rc": 0,
+      "completed": true,
+      "completed_at": "2026-10-28T16:24:12.412183Z"
+    },
+    {
+      "case": "reg-exact",
+      "execution": "tra-luat-49dhz",
+      "args": [
+        "reg-query",
+        "--sohieu",
+        "25/2025/TT-BYT",
+        "--live",
+        "--config",
+        "/secrets/tra-luat/runtime.json",
+        "--limit",
+        "5",
+        "--json",
+        "--out",
+        "/data/output/gcp-smoke-pr1003-reg-exact-20261028.json"
+      ],
+      "gcloud_rc": 0,
+      "completed": true,
+      "completed_at": "2026-10-28T16:25:30.559390Z"
+    },
+    {
+      "case": "reg-query-initial",
+      "execution": "tra-luat-p2gcq",
+      "gcloud_rc": 1,
+      "task_exit_code": 2,
+      "completed": false,
+      "error": "Cold offline manifest path did not load TL_WEBAPP/TL_TOKEN from mounted config; retry used supported --refresh --config flags. No source or job configuration patched."
+    }
+  ],
+  "positive_evidence": {
+    "ping": {
+      "ok": true,
+      "pong": true,
+      "version": "2.21.2p",
+      "action": "ping"
+    },
+    "name_query": {
+      "ok": true,
+      "count": 51,
+      "returned": 5,
+      "limit": 5,
+      "truncated": true,
+      "aliases_equal": true,
+      "matching": "fuzzy including subject; strict name substring is not the oracle"
+    },
+    "exact_query": {
+      "ok": true,
+      "source": "live",
+      "count": 1,
+      "returned": 1,
+      "sohieu": "25-2025-TT-BYT"
+    }
+  },
+  "limitations": [
+    "Linux Cloud Run, not Windows",
+    "Packaged image source SHA not established; not a gate for PR1003 HEAD",
+    "Initial reg-query failed and is preserved",
+    "No ingest/apply, deployment, VM creation, image build or job configuration change",
+    "No full-CI equivalence, approval or governance completion"
+  ]
+}

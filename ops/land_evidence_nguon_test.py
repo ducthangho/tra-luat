@@ -462,6 +462,10 @@ def c20_l7r2_long_mapping_khong_khoi_goc():
         ky7(hs.format(tho), 0, f"lồng {tho} không phải chuỗi ⇒ không áp, có ghi chú",
             [f"L7 $.cap_nhat_20261026.reviewer_assurance_81: giá trị {kieu} không phải chuỗi"], [L7_DO])
     ky7("x: {y: DAT, reviewer_assurance_8: DAT, Reviewer_Assurance_81: DAT}\n", 0, "chỉ đúng tên khoá", khong=["L7"])
+    ky7("'a.b': {reviewer_assurance_81: DAT}\na: {b: {reviewer_assurance_81: DAT}}\nx: {1: {reviewer_assurance_81: DAT}}\n"
+        "'k ý': {reviewer_assurance_81: DAT}\n", 1, "đường dẫn không nhập nhằng (review l7r2 lượt 1 P2)",
+        ['L7 $["a.b"].reviewer_assurance_81' + L7_DO, "L7 $.a.b.reviewer_assurance_81" + L7_DO,
+         "L7 $.x[int:1].reviewer_assurance_81" + L7_DO, 'L7 $["k ý"].reviewer_assurance_81' + L7_DO, ": 4 vi phạm"])
 
 
 @ca
@@ -489,6 +493,8 @@ def c22_l7r2_khoi_goc_la_nguon_duy_nhat():
     ky7(hs7("CHUA_DAT") + "  thuc_thi: {reviewer_assurance_81: DAT}\n", 0, "lồng bên trong chính khối gốc",
         ["L7 $.assurance_81.thuc_thi.reviewer_assurance_81: khai DAT lồng bị bỏ qua"], [L7_DO])
     ky7(hs7("DAT", DU7), 0, "khối gốc không bị ghi chú như khoá lồng", khong=["lồng bị bỏ qua", L7_DO])
+    ky7(hs7("CHUA_DAT") + "'assurance_81.x': {reviewer_assurance_81: DAT}\n", 0, "ghi chú nêu đường dẫn có escape",
+        ['L7 $["assurance_81.x"].reviewer_assurance_81: khai DAT lồng bị bỏ qua'], [L7_DO])
     ky7("assurance_81: {}\nx: {reviewer_assurance_81: DAT}\n", 0, "khối gốc mapping RỖNG vẫn là khối gốc",
         ["L7 $.x.reviewer_assurance_81: khai DAT lồng bị bỏ qua"], [L7_DO])
 
@@ -619,7 +625,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7_ghi_chu_khong_can_ten", "        if bam is not None:\n            ghi.append(", "        if True:\n            ghi.append(", "c18"),
     ("L7_khong_bao_gio_mien", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = False", "c18"),
     ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
-    ("L7r2_go_do_sau", "yield from _khoa_81(v, f\"{duong}.{k}\")   # độ sâu", "pass", "c20"),
+    ("L7r2_go_do_sau", "yield from _khoa_81(v, d)   # độ sâu", "pass", "c20"),
     ("L7r2_go_list", "yield from _khoa_81(v, f\"{duong}[{i}]\")   # list", "pass", "c21"),
     ("L7r2_dao_khoi_goc_nguon_duy_nhat", "co_goc = isinstance(a81, dict)", "co_goc = False", "c22"),
     ("L7r2_long_dat_chi_ghi_chu", 'vp.append(f"L7 {d}: khai DAT mà không có', 'ghi.append(f"L7 {d}: khai DAT mà không có', "c20"),
@@ -628,6 +634,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7r2_ghi_chu_long_bi_mat", 'ghi.append(f"L7 {d}: khai DAT lồng bị bỏ qua', '(f"L7 {d}: khai DAT lồng bị bỏ qua', "c22"),
     ("L7r2_khoi_goc_tu_ghi_chu", 'if d == "$.assurance_81.reviewer_assurance_81":', "if False:", "c22"),
     ("L7r2_ten_khoa_khong_chinh_xac", 'if k == "reviewer_assurance_81":', 'if "assurance_8" in str(k).lower():', "c20"),
+    ("L7r2_duong_dan_khong_escape", 'return f".{k}" if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", k) else', 'return f".{k}" if True else', "c20"),
+    ("L7r2_khoa_khong_chuoi_nhu_list", 'return f"[{type(k).__name__}:{k!r}]"', 'return f"[{k!r}]"', "c20"),
     ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

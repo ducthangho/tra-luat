@@ -337,12 +337,21 @@ def _khoa_81(nut, duong="$"):
     """(đường dẫn JSON, giá trị) của MỌI khoá `reviewer_assurance_81`, mọi độ sâu, kể cả trong phần tử list (L7 r2)."""
     if isinstance(nut, dict):
         for k, v in nut.items():
+            d = duong + _doan(k)
             if k == "reviewer_assurance_81":
-                yield f"{duong}.{k}", v
-            yield from _khoa_81(v, f"{duong}.{k}")   # độ sâu
+                yield d, v
+            yield from _khoa_81(v, d)   # độ sâu
     elif isinstance(nut, list):
         for i, v in enumerate(nut):
             yield from _khoa_81(v, f"{duong}[{i}]")   # list
+
+
+def _doan(k):
+    """Đoạn đường dẫn KHÔNG nhập nhằng (review l7r2 lượt 1 P2): `.k` chỉ cho tên ASCII đơn giản; chuỗi khác ⇒ `["…"]`
+    (khoá `a.b` ≠ nhánh a → b); khoá không phải chuỗi ⇒ `[kiểu:repr]` (khoá int 1 ≠ phần tử list `[1]`)."""
+    if not isinstance(k, str):
+        return f"[{type(k).__name__}:{k!r}]"
+    return f".{k}" if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", k) else f"[{json.dumps(k, ensure_ascii=False)}]"
 
 
 def _chuan_hoa_81(v):

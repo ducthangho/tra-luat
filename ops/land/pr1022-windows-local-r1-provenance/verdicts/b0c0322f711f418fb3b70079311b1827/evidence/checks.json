@@ -1,0 +1,55 @@
+[
+  {
+    "name": "adr-song",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-1/cay-kho",
+    "rc": 0,
+    "elapsed_s": 0.2,
+    "stdout_sha256": "f4fdd3a21d05a8257f9bfd6459bb7a24803cb6180cfa665f76c85a2bb15724a3",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "adr-song: sạch — 56 ADR trên đĩa, 56 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])"
+  },
+  {
+    "name": "doctrine-scan",
+    "command": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-1/cay-kho",
+    "rc": 0,
+    "elapsed_s": 0.459,
+    "stdout_sha256": "5dc320d098e17eea22fc3d940e41b58774b648394253380eeb99bf85aacdba83",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+  },
+  {
+    "name": "doc-claims-check",
+    "command": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-1/cay-kho",
+    "rc": 0,
+    "elapsed_s": 5.031,
+    "stdout_sha256": "ee6a905f2524ee3bbc51a432072e5e22ba443bc462b4513cb6778187caee356b",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary": {
+      "ok": true,
+      "files_scanned": 116,
+      "claims_flagged": 381,
+      "advisory_count": 381,
+      "layers_skipped": {}
+    }
+  }
+]

@@ -1,0 +1,195 @@
+[
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "--verify",
+      "1cc847d^{commit}"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "1cc847defbe646c68f4126144dbc80e02eafd61b\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "rev-parse",
+      "--verify",
+      "e9967f0^{commit}"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "e9967f07b95c6458afc63dabf4a5c0494e90eca7\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "show",
+      "-s",
+      "--format=%H %s",
+      "96667715996d41bc45e70a64fbaa8996de20f6a0"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "96667715996d41bc45e70a64fbaa8996de20f6a0 Merge pull request #1020 from ducthangho/claude/gallant-fermat-34kgb9\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "log",
+      "--all",
+      "--format=%H %s",
+      "--extended-regexp",
+      "--grep=(#1020|#1010|#1014|#1017|#1006)"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "fff91390dafb3b8a16e6d11a7243dce036618260 docs: ADR-0057 may Windows local cua chu kho (WINDOWS-LOCAL-MAY-CHU-KHO r1 g1, mission #748)\n96667715996d41bc45e70a64fbaa8996de20f6a0 Merge pull request #1020 from ducthangho/claude/gallant-fermat-34kgb9\nd8d5571e7c1669360eba672f2547d14081039b9b Merge pull request #1010 from ducthangho/agent/land-81-ha-cap-r2-claude\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "d8d5571e7c1669360eba672f2547d14081039b9b^1",
+      "d8d5571e7c1669360eba672f2547d14081039b9b",
+      "--",
+      ".claude/dev/packet_loop_test.py"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "diff --git a/.claude/dev/packet_loop_test.py b/.claude/dev/packet_loop_test.py\nindex a94579f..4cb6613 100644\n--- a/.claude/dev/packet_loop_test.py\n+++ b/.claude/dev/packet_loop_test.py\n@@ -8467,6 +8467,14 @@ def _r929_adr(c, doi, muon, nen=True, index=None, sau=None):\n     _kiem(sd, f\"wp929 {sorted(doi)}\", luat_adr0054=muon)\n \n \n+def _r929_xoa_blob(w, duong):\n+    \"\"\"Xoá loose object của `master:<duong>`. Git ghi object chỉ-đọc; trên Windows `unlink` tệp chỉ-đọc ném `WinError 5`\n+    (đo run 40812761896, `gate-packet-loop (windows-latest)` 977/978), nên mở quyền ghi trước. Linux không cần, chmod vô hại.\"\"\"\n+    p = w / \".git/objects\" / (o := _g(w, \"rev-parse\", f\"master:{duong}\"))[:2] / o[2:]\n+    os.chmod(p, 0o644)\n+    p.unlink()\n+\n+\n CASES += [\n     # (a) số bất kỳ, tên bất kỳ — không neo 0055 hay 0099\n     (\"r929_kich_hoat_so_bat_ky\", lambda c: _r929_adr(c, {_R929_KICH: None, \"docs/adr/0731-bat-ky.md\": \"Tệp này kích hoạt `ADR-0054`.\\n\"}, True, nen=False)),\n@@ -8486,8 +8494,8 @@ CASES += [\n     # NFD trong blob phải được chuẩn hoá trước khi so cụm\n     (\"r929_nfd_van_tinh\", lambda c: _r929_adr(c, {_R929_KICH: __import__(\"unicodedata\").normalize(\"NFD\", \"kích hoạt `ADR-0054`\\n\").encode()}, True, nen=False)),\n     # `git show` một ứng viên lỗi (blob mất khỏi kho) ⇒ False dù tệp kích hoạt khác vẫn hợp lệ\n-    (\"r929_show_loi_la_false\", lambda c: _r929_adr(c, {\"docs/adr/0100-ghi-chu.md\": \"ghi chú wp929\\n\"}, False, sau=lambda w: (\n-        w / \".git/objects\" / (o := _g(w, \"rev-parse\", \"master:docs/adr/0100-ghi-chu.md\"))[:2] / o[2:]).unlink())),\n+    (\"r929_show_loi_la_false\", lambda c: _r929_adr(c, {\"docs/adr/0100-ghi-chu.md\": \"ghi chú wp929\\n\"}, False,\n+                                                    sau=lambda w: _r929_xoa_blob(w, \"docs/adr/0100-ghi-chu.md\"))),\n ]\n MUTANTS.update({\n     \"r929_bo_loai_tru_adr0054\": (' and t != ADR0054_TEP]', ']', [\"r929_chi_adr0054_tu_neu_cum\"]),\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "rg",
+      "-n",
+      "KHOA\\.txt|do-luong\\.csv|list_devices|không đo local|0057|WINDOWS-LOCAL-MAY-CHU-KHO",
+      "ops/lease_publish.py",
+      ".claude/dev/packet_loop.py",
+      ".claude/dev/launcher.py",
+      ".claude/dev/gate_lifecycle.py",
+      ".github/workflows/ci.yml",
+      ".github/workflows/ops-publish-lease.yml"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "rg",
+      "-n",
+      "--hidden",
+      "-g",
+      "!.git/**",
+      "-g",
+      "*.py",
+      "-g",
+      "*.yml",
+      "-g",
+      "*.yaml",
+      "-g",
+      "*.ps1",
+      "-g",
+      "*.sh",
+      "-g",
+      "*.cmd",
+      "-g",
+      "*.bat",
+      "-g",
+      "!**/reviews/**",
+      "KHOA\\.txt|do-luong\\.csv|list_devices|không đo local",
+      "."
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "rg",
+      "-n",
+      "-e",
+      "^def t192_S8",
+      "-e",
+      "^def t27_",
+      "-e",
+      "^def c91_",
+      "-e",
+      "^def c93_",
+      "-e",
+      "^def c96_",
+      "-e",
+      "^def _r929_xoa_blob",
+      "ops/lease_publish_test.py",
+      "ops/bien_nhan_v2_test.py",
+      ".claude/dev/packet_loop_test.py",
+      ".claude/dev/launcher_test.py"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": ".claude/dev/packet_loop_test.py:8470:def _r929_xoa_blob(w, duong):\n.claude/dev/launcher_test.py:539:def t27_qua_han_thi_giet_va_tra_124():\nops/bien_nhan_v2_test.py:3093:def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():\nops/bien_nhan_v2_test.py:3282:def c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho():\nops/bien_nhan_v2_test.py:3408:def c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC():\nops/lease_publish_test.py:1685:def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():\nops/lease_publish_test.py:10767:def t192_S8_het_deadline_la_12_va_KHONG_spawn_cat_file_dem_bang_Popen():\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "remote",
+      "get-url",
+      "origin"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "/home/user/tra-luat\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "config",
+      "--get",
+      "core.abbrev"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "7\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "--version"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "Python 3.13.17\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "--version"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "git version 2.43.0\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "uname",
+      "-sr"
+    ],
+    "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+    "rc": 0,
+    "stdout": "Linux 6.18.44-fc-v185\n",
+    "stderr": ""
+  }
+]

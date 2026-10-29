@@ -21455,8 +21455,15 @@ def run() -> int:
         rc1, _, up1, drv = _set973(_ns973(new=True, antigravity_key_env="MY_KEY973"), e)
         rc2, _, up2, drv2 = _set973(_ns973(new=True, claude_token_env="MY_KEY973"), e)
         rc3, _, up3, _d3 = _set973(_ns973(new=True, antigravity_key_env="RONG973"), e)
+        # review lượt 2 F7: biến token Claude được NÊU mà rỗng / chỉ khoảng trắng / chưa đặt ⇒ từ chối cả lệnh,
+        # kể cả khi cùng lượt có một khoá hợp lệ khác (không xanh nhờ nhánh "không có khoá nào"); bản cũ nguyên byte
+        cu, xau = drv[up1[0]], []
+        for bien in ("RONG973", "TRANG973", "THIEU973"):
+            r = _set973(_ns973(file_id=up1[0], antigravity_key_env="MY_KEY973", claude_token_env=bien),
+                        {**e, "TRANG973": "   ", "THIEU973": None}, drv)
+            xau.append(r[0] != 0 and r[2] == [] and drv[up1[0]] == cu)
         return (rc1 == 0 and _dec973(drv[up1[0]]).get("antigravity_api_key") == "gem-973-val" and rc2 == 0
-                and "antigravity_api_key" not in _dec973(drv2[up2[0]]) and rc3 != 0 and up3 == [])
+                and "antigravity_api_key" not in _dec973(drv2[up2[0]]) and rc3 != 0 and up3 == [] and all(xau))
     _t110("r973_agent_creds_khoa_gemini_tu_bien", _c973_a6)
 
     def _c973_a4(d):
@@ -21477,7 +21484,10 @@ def run() -> int:
             ups, o = [], {n: getattr(_tg973, n) for n in ("_secrets_upload", "_stage_enc_upload", "load_creds")}
             for n in o:
                 setattr(_tg973, n, lambda *a, **kw: ups.append(1) or ("X973", True))
-            def _khong_cfg(*a, **kw):   # lệnh cũ qua chốt rồi dừng ở đây (rc 5) — chỉ đo "chốt KHÔNG chặn"
+            cfg = []
+
+            def _khong_cfg(*a, **kw):   # lệnh cũ qua chốt rồi dừng ở đây (rc 5) — bằng chứng DƯƠNG đã qua chốt
+                cfg.append(1)
                 raise RuntimeError("CFG973")
             _tg973.load_creds = _khong_cfg
             sav, b = _env110({"TL_MASTER_KEY": k, "CODEX_HOME": None, "TOK973B": "x"}), _io110.StringIO()
@@ -21485,7 +21495,7 @@ def run() -> int:
                 with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
                     return fn(_ns973(claude_token_env="TOK973B", new=True, config=None, profile=None, secrets_id="S",
                                      secrets_file=None, gas_token="g", webapp=None, gws=False, nlm=False,
-                                     no_gws=True, no_nlm=True, no_public=True)), len(ups), "TL_MASTER_KEY yếu" in b.getvalue()
+                                     no_gws=True, no_nlm=True, no_public=True)), len(ups), "TL_MASTER_KEY yếu" in b.getvalue(), bool(cfg)
             finally:
                 for n, v in o.items():
                     setattr(_tg973, n, v)
@@ -21494,9 +21504,10 @@ def run() -> int:
         yeu = ("abcdefghijklmnopqrstuvwxyz01234", ("abcdefghijk" * 3)[:32])   # 31 ký tự · 32 ký tự/11 khác nhau
         bien = ("abcdefghijkl" * 3)[:32]   # review F4: ĐÚNG biên — 32 ký tự, đúng 12 ký tự khác nhau ⇒ phải QUA
         # đòi thông điệp CỦA CHỐT: rc 2 vì lý do khác (vd. không tải được bundle) là tín dụng giả
-        return (all(_rc(f, k) == (2, 0, True) for f in lenh for k in yeu)
-                and all(_rc(_tg973.cmd_agent_creds_set, k) == (0, 1, False) for k in (_sec973.token_urlsafe(32), bien))
-                and all(_rc(f, bien)[1:] == (0, False) for f in lenh[:2]))
+        # review lượt 2 (F4 vá hờ): vế dương lệnh cũ đòi rc 5 của ranh giới + load_creds ĐÃ được gọi
+        return (all(_rc(f, k) == (2, 0, True, False) for f in lenh for k in yeu)
+                and all(_rc(_tg973.cmd_agent_creds_set, k) == (0, 1, False, False) for k in (_sec973.token_urlsafe(32), bien))
+                and all(_rc(f, bien) == (5, 0, False, True) for f in lenh[:2]))
     _t110("r973_khoa_yeu_bi_tu_choi_o_duong_ghi", _c973_b1)
 
     def _boot973(env, drv, xem=lambda h: True, req=False):
@@ -21575,9 +21586,11 @@ def run() -> int:
     def _c973_d3():
         # đĩa mới hơn / bằng ⇒ giữ; cũ hơn ⇒ ghi. Review F3: offset ≠ 0 để đảo dấu offset phải lộ
         # (+07:00 12h = 05h Z cũ hơn 11h35 Z; -05:00 07h = 12h Z mới hơn; +07:00 18h35m54.5111532 = bằng).
+        # review lượt 2 F6: lệch ±1 nano giây so bundle (.511153200Z) — cắt về micro giây phải lộ
         giu = [_mot973(x) for x in ("2026-10-28T00:00:00.5+00:00", "2026-10-27T11:35:54.5111532Z",
-                                    "2026-10-27T07:00:00-05:00", "2026-10-27T18:35:54.511153200+07:00")]
-        ghi = [_mot973(x) for x in ("2026-10-27T11:35:54Z", "2026-10-27T12:00:00+07:00")]
+                                    "2026-10-27T07:00:00-05:00", "2026-10-27T18:35:54.511153200+07:00",
+                                    "2026-10-27T11:35:54.511153201Z")]
+        ghi = [_mot973(x) for x in ("2026-10-27T11:35:54Z", "2026-10-27T12:00:00+07:00", "2026-10-27T11:35:54.511153199Z")]
         return (all(r[:2] == ("ĐÃ NẠP", True) for r in giu)
                 and all(r[0] == "ĐÃ NẠP" and not r[1] and r[2] and r[3] == _AU973 for r in ghi))
     _t110("r973_bootstrap_giu_auth_json_moi_hon", _c973_d3)
@@ -21673,6 +21686,7 @@ def run() -> int:
                                text=True, encoding="utf-8", errors="replace", timeout=120)
                 return r.returncode, r.stdout, r.stderr
             kg, ac, ss = _chay("secrets-keygen"), _chay("agent-creds-set", "--codex"), _chay("secrets-set", "--gas-token", "x")
+            st = _chay("secrets-stage", "--no-gws", "--no-nlm")   # review lượt 2 F8: vế âm cho CẢ hai lệnh ghi cũ
         dong = kg[1].splitlines()
         ok_kg = kg[0] == 0 and len(dong) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", dong[0]) is not None
         ok_ac = ac[0] == 2 and "[agent-creds-set]" in ac[2] and "TL_MASTER_KEY" in ac[2] and "TL_WEBAPP" not in ac[2]
@@ -21681,8 +21695,10 @@ def run() -> int:
         ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
         cfg_gan = any(_P110(x, n).exists() for x in (tl_py.parent, tl_py.parent.parent) for n in ten) \
             or _P110("/tmp/tra_luat_config.json").exists()
-        ok_ss = ("secrets-set" not in _tlm973._CREDS_LAZY_CMDS
-                 and (cfg_gan or (ss[0] != 0 and "TL_WEBAPP" in ss[2] and "[secrets-set]" not in ss[2])))
+        cam = {"secrets-set", "secrets-stage", "gws-auth-stage"}   # lệnh ghi credential cũ: vẫn qua load_creds
+        ok_ss = (not cam & _tlm973._CREDS_LAZY_CMDS
+                 and (cfg_gan or all(r[0] != 0 and "TL_WEBAPP" in r[2] and f"[{t}]" not in r[2]
+                                     for r, t in ((ss, "secrets-set"), (st, "secrets-stage")))))
         return ok_kg and ok_ac and ok_ss
     _t110("r973_lenh_moi_khong_can_creds_webapp", _c973_e2)
 

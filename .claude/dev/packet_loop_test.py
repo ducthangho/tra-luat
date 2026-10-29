@@ -8467,6 +8467,14 @@ def _r929_adr(c, doi, muon, nen=True, index=None, sau=None):
     _kiem(sd, f"wp929 {sorted(doi)}", luat_adr0054=muon)
 
 
+def _r929_xoa_blob(w, duong):
+    """Xoá loose object của `master:<duong>`. Git ghi object chỉ-đọc; trên Windows `unlink` tệp chỉ-đọc ném `WinError 5`
+    (đo run 40812761896, `gate-packet-loop (windows-latest)` 977/978), nên mở quyền ghi trước. Linux không cần, chmod vô hại."""
+    p = w / ".git/objects" / (o := _g(w, "rev-parse", f"master:{duong}"))[:2] / o[2:]
+    os.chmod(p, 0o644)
+    p.unlink()
+
+
 CASES += [
     # (a) số bất kỳ, tên bất kỳ — không neo 0055 hay 0099
     ("r929_kich_hoat_so_bat_ky", lambda c: _r929_adr(c, {_R929_KICH: None, "docs/adr/0731-bat-ky.md": "Tệp này kích hoạt `ADR-0054`.\n"}, True, nen=False)),
@@ -8486,8 +8494,8 @@ CASES += [
     # NFD trong blob phải được chuẩn hoá trước khi so cụm
     ("r929_nfd_van_tinh", lambda c: _r929_adr(c, {_R929_KICH: __import__("unicodedata").normalize("NFD", "kích hoạt `ADR-0054`\n").encode()}, True, nen=False)),
     # `git show` một ứng viên lỗi (blob mất khỏi kho) ⇒ False dù tệp kích hoạt khác vẫn hợp lệ
-    ("r929_show_loi_la_false", lambda c: _r929_adr(c, {"docs/adr/0100-ghi-chu.md": "ghi chú wp929\n"}, False, sau=lambda w: (
-        w / ".git/objects" / (o := _g(w, "rev-parse", "master:docs/adr/0100-ghi-chu.md"))[:2] / o[2:]).unlink())),
+    ("r929_show_loi_la_false", lambda c: _r929_adr(c, {"docs/adr/0100-ghi-chu.md": "ghi chú wp929\n"}, False,
+                                                    sau=lambda w: _r929_xoa_blob(w, "docs/adr/0100-ghi-chu.md"))),
 ]
 MUTANTS.update({
     "r929_bo_loai_tru_adr0054": (' and t != ADR0054_TEP]', ']', ["r929_chi_adr0054_tu_neu_cum"]),

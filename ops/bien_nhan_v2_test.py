@@ -3161,7 +3161,8 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
     def run_json_ten_qua_dai(tmp):
         # Windows trả ENOENT cho thành phần 300 ký tự (đo: run 40833865576), nên ở đó dùng ký tự cấm `<` —
         # `lstat` ném WinError 123 (EINVAL). Cùng lớp "lstat lỗi khác ENOENT/ENOTDIR"; phép kiểm dưới vẫn đo độc lập.
-        rj = "ops/reviews/" + ("a<b" if os.name == "nt" else "a" * 300) + "/run.json"
+        thanh_phan = "a<b" if os.name == "nt" else "a" * 300
+        rj = f"ops/reviews/{thanh_phan}/run.json"
         al = _surface(tmp, rj)
         try:                                        # kiểm ĐỘC LẬP với `_vang` (đột biến m116 nhắm hàm ấy)
             os.lstat(tmp / rj)
@@ -3170,7 +3171,7 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
             dung(False, "fixture: lstat tên quá dài báo ENOENT/ENOTDIR, không phải lỗi khác")
         except OSError:
             pass
-        return tmp, al, k_sf, None, "a" * 40
+        return tmp, al, k_sf, None, thanh_phan[:40]       # dấu stderr lấy từ CHÍNH thành phần tên đã dùng (review #1014 F1)
 
     def git_vang(tmp):
         k = _kho_cau(tmp)

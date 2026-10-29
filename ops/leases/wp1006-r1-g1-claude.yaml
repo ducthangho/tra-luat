@@ -102,3 +102,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh claude/magical-clarke-gzvwbp khi A1-A4 dat; mo PR draft.'
+da_bi_thay_the: wp1006-r1-g2-claude
+da_bi_thay_the_ly_do: 'Chu kho chi thi lap va den het P1 P2 P3 (#1006 issuecomment-6495722744); g2 nang tran codex 2->4. Lease g1 nay KHONG con hieu luc; giu tep lam hien vat.'

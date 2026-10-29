@@ -1866,6 +1866,31 @@ def t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen():
         muc_luc("thuong-verdict.md", "moi-VERDICT.md")
         _kiem_muc_luc(tm, goc)
 
+        # Cross-review #1006 lượt 1 (P3): bỏ `is_file()` hoặc chỉ đổi nhánh verdict mà để
+        # biên nhận đi `glob` thì mọi khẳng định trên vẫn XANH. Khoá cả hai biên của M1.
+        bo = goc / "bo-liet-ke"
+        bo.mkdir()
+        (bo / "thu-muc-VERDICT.md").mkdir()
+        (bo / "that-VERDICT.md").write_text("verdict\n", encoding="utf-8")
+        (bo / "mau.RECEIPT.YAML").write_text("verdict_path: x\n", encoding="utf-8")
+        bang([p.name for p in _liet_ke_theo_duoi(bo, "-verdict.md")] == ["that-VERDICT.md"],
+             "bộ liệt kê nhận cả THƯ MỤC mang đuôi verdict — `is_file()` đã mất")
+        bang([p.name for p in _liet_ke_theo_duoi(bo, ".receipt.yaml")] == ["mau.RECEIPT.YAML"],
+             "bộ liệt kê không thấy biên nhận đuôi HOA `.RECEIPT.YAML`")
+
+        # Và ở đúng chỗ dùng: một biên nhận đuôi HOA vắng khỏi mục lục phải làm ĐỎ.
+        (tm / "le.RECEIPT.YAML").write_text(
+            "verdict_path: ops/reviews/thuong-verdict.md\n", encoding="utf-8")
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("le.RECEIPT.YAML" in str(e) and "CỘT 'biên nhận'" in str(e),
+                 f"ĐỎ nhưng SAI chốt — đòi chốt cột 'biên nhận' nêu 'le.RECEIPT.YAML', được: {e}")
+        else:
+            raise AssertionError(
+                "biên nhận đuôi `.RECEIPT.YAML` vắng khỏi mục lục mà `_kiem_muc_luc` vẫn XANH — "
+                "nhánh duyệt biên nhận còn phụ thuộc nền (lỗi #1006)")
+
 
 @ca
 def t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban():

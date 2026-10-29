@@ -23,7 +23,7 @@ review_class: sensitive
 assurance: cross_reviewed
 assurance_KHONG_dat: cross_approved
 assurance_ghi_chu: >-
-  Verdict approve, khac ho model theo khai bao, nhung bien nhan HAU KY khong co run.json nen ho model da phuc vu
+  Verdict approve, khac ho model theo khai bao, nhung run.json khong co model_phuc_vu nen ho model da phuc vu
   KHONG DO DUOC; khong dat muc bang chung do_may/khai_co_audit ma ADR-0050 doi cho cross_approved. Head land
   ab94c4f = 227dcde + merge master (f3b54d2), khong phai head da duyet.
 verdict: approve
@@ -49,16 +49,28 @@ xu_ly_finding: '(b) THUAT LAI tu handoff: giu no P3 nhanh ls-tree, de xuat packe
 model_reviewer_identity:
   provider: openai_codex
   surface: codex_cli
-  surface_nguon: '(b) THUAT LAI: lease g1 reviewer_execution_surface codex_cli; handoff ghi lenh launcher.py run -- codex exec.'
+  surface_nguon: >-
+    (a) ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json: launcher.py run, execution_surface subprocess (be mat cua LAUNCHER, khong phai chung nhan model);
+    lenh codex exec theo handoff ops/handoff/wp929-g1-claude.md (b).
   surface_tu_khai_trong_verdict: 'verdict khong tu khai be mat'
+  session_run_id: 3536a415068645adab6cfed3e3de5f03
+  run_json: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json
+  run_json_ghi_chu: >-
+    (a) Do tu kho luc ghi so (hien vat vao kho o f46ddf5, 2026-10-26T01:25:13Z, to tien cua base 79dbaf4): run_id 3536a415068645adab6cfed3e3de5f03,
+    head 227dcdebc62c9275f9df09056f66e2124ed5f14c = reviewed_sha, trang_thai xong, ma_thoat 0, thoi_luong_giay 594.161, prompt_sha256 35f2eb79ff59... = sha256
+    ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-prompt.md. Ban sao verdict ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-verdict.md trung byte verdict_path.
+  prompt_path: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-prompt.md
+  prompt_sha256: 35f2eb79ff5990b071239fe46c9464e5963ded6037768b396c5a98aea55733f5
+  stderr_header: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-stderr-header.txt
   model_yeu_cau: gpt-6-astra
-  model_yeu_cau_nguon: '(b) handoff: codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh'
+  model_yeu_cau_nguon: '(a) trich doan stderr-header (13 dong dau stderr.log): `model: gpt-6-astra`, `reasoning effort: xhigh` — LOI KHAI cua CLI, khong phai khung response cua may chu'
   effort_thuat_lai: xhigh
-  effort_nguon: '(b) handoff: header stderr.log ghi reasoning effort xhigh (stderr.log khong vao kho)'
+  effort_nguon: '(a) cung trich doan stderr-header; la cau hinh yeu cau, khong phai effort phuc vu da do'
   model_da_chay: KHONG_DO_DUOC
-  session_run_id_thuat_lai: 3536a415068645adab6cfed3e3de5f03
-  thoi_luong_thuat_lai: '594.2 s, rc0'
-  KHONG_do_duoc: 'run.json/stderr.log khong vao kho; model va effort thuc phuc vu KHONG DO DUOC tu kho.'
+  KHONG_do_duoc: >-
+    run.json KHONG co truong model_phuc_vu (do: khoa vang; nguyen nhan KHONG DO), va kho chi
+    giu trich doan stderr chu khong giu toan stderr.log; nen model va effort THUC PHUC VU khong do duoc. Moi thu khac
+    cua runtime (run_id, head, ma thoat, thoi luong, prompt) DO DUOC tu run.json o tren.
 github_submitter_identity:
   actor: ducthangho
   actor_nguon: '(b) THUAT LAI: tep verdict vao kho qua git push cua phien executor (credential chu kho); khong co ban chieu comment nguyen van.'
@@ -71,12 +83,12 @@ anchor:
     1 dong). Do luc ghi so 29-10-2026: 8d3f655 la to tien cua origin/master 79dbaf4 (vao qua merge fe46e7e, nhanh
     ops/wp929-r1-g1-lease); blob bam dung verdict_sha256.
 verdict_usage_caveats:
-  - id: WP929-BIEN-NHAN-HAU-KY-KHONG-CO-run.json
+  - id: WP929-MODEL-PHUC-VU-KHONG-DO-DUOC
     muc: P3
     mo_ta: >-
-      Bien nhan ghi HAU KY o packet #1006 (29-10-2026), khong phai phien da sinh verdict. (a) DO DUOC tu kho: bam/byte
-      verdict, reviewed_sha va quan he to tien voi merge ab94c4f, blob neo 8d3f655, so P dem tu dong '- [P*]'.
-      (b) THUAT LAI tu ops/handoff/wp929-g1-claude.md: be mat Codex CLI qua launcher.py run, model gpt-6-astra, effort
-      xhigh, run_id, thoi luong, rc. KHONG DO DUOC: run.json/stderr.log cua luot khong vao kho nen model thuc phuc vu,
-      prompt day du va ma thoat khong kiem duoc. Ket qua sandbox trong verdict la cua luot ay; chay lai phai do lai.
+      Bien nhan ghi HAU KY o packet #1006 (29-10-2026). Hien vat runtime CO trong kho: ops/land/pr933-wp929-provenance/verdicts/wp929-r1-g1-claude-review-2-codex-run.json, -prompt.md,
+      -stderr-header.txt (vao kho o f46ddf5). Do duoc tu do: run_id, head, ma thoat 0, thoi luong, prompt_sha256 khop
+      tep prompt. KHONG DO DUOC: model va effort thuc phuc vu — run.json khong co model_phuc_vu, stderr chi con trich doan
+      13 dong (model gpt-6-astra, effort xhigh la LOI KHAI cua CLI). Vi vay assurance dung o cross_reviewed. Ket qua
+      sandbox trong verdict la cua luot ay; chay lai phai do lai.
 nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256). Ten tep viet hoa VERDICT giu nguyen byte; t27 tu #1006 duyet khong phan biet hoa thuong.'

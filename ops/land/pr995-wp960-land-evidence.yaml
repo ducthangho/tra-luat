@@ -1,0 +1,108 @@
+# HO SO LAND — packet #960 NO-CAU-LICH-SU-BIEN-NHAN revision 2, ma qua PR #995. Khuon: ops/land/pr969-wp813-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7. NHAN: measured = do trong phien ghi so (tep kem); thuat_lai = so cua luot
+# review/executor, KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr995-wp960-provenance/ (GET qua proxy
+# phien bang GITHUB_PAT; readback.py va kiemgate.py chep tu ho so pr969 vao do-lai-nguon-20261029/; SHA256SUMS kem).
+# landed FALSE: (a) review — KHONG luot Codex nao `approve`; head merge 6dca85f co verdict luot 5 changes_requested 1 P1 + 1 P2,
+# tran 8 loi goi da het o luot 7 (057abc8, PR #1005) van con 1 P1; M-1 cua lease KHONG DAT. (b) §10.2.2 — gate ci.yml push
+# master tren DUNG merge SHA 79dbaf4 XANH 23/23 (run/jobs/check-run + kiem-gate), nhung moc Checkout, Workflow definition,
+# Gate output not_measured (GraphQL bi chan trong phien web — CLAUDE.md). Lease wp960-r2-g2-claude CON HAN, CHUA rut (PR #1005 mo).
+
+schema_version: 1
+mission_id: gh-960
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrbeTfDyFKdj7rb72Uq
+input_packet_generations:
+  - {packet_issue: 960, packet_id: NO-CAU-LICH-SU-BIEN-NHAN, revision: 2, generation: 1, lease_id: wp960-r2-g1-claude}
+  - {packet_issue: 960, packet_id: NO-CAU-LICH-SU-BIEN-NHAN, revision: 2, generation: 2, lease_id: wp960-r2-g2-claude}
+authorized_head_sha: 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf
+authorized_head_tree: b95fb2108ab139c9a31f6f107797b00aa704ab34
+authorized_head_tree_nguon: 'measured — do-lai-nguon-20261029/merge-va-diff.txt: tree merge == tree head (merge cha1 = merge-base, diff byte khop).'
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/995
+authorization_ghi_chu: >-
+  measured — readback-pr-995.json merged true, merged_by=ducthangho, merged_at 2026-10-29T04:16:26Z, head.sha 6dca85f;
+  readback-events-995.json (ready_for_review, merged, closed). Lease ghi uy_quyen_merge: false; executor KHONG merge. Merge
+  dien ra khi executor dang va ket qua review luot 5 (chu kho chon "them test roi chay luot 6" truoc do ~2 phut, theo phien).
+  KHONG_DO_DUOC bam tay hay qua phien khac.
+land_operator: 'measured — readback-pr-995.json merged_by=ducthangho; readback-events-995.json (su kien merged/closed).'
+merge_method: merge
+merge_commit: 79dbaf443f90daece751d9ab2537796bbd6084bf
+merge_commit_tree: b95fb2108ab139c9a31f6f107797b00aa704ab34
+merge_commit_parents: [ef34d88838bc125727670f494b15213b6c6f0c8d, 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261029/merge-va-diff.txt: diff cha1 (ef34d88) .. merge BANG BYTE diff merge-base (ef34d88) ..
+  head 6dca85f (cmp rc=0); 2 tep: ops/bien_nhan_v2.py +297 -193, ops/bien_nhan_v2_test.py +665 -104. Blob hai tep tai merge
+  == tai head (83ba1d37…, 86959fff…); blob ops/bien_nhan_v2.py tai 057abc8 (PR #1005) cung 83ba1d37….
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) — head cuoi', run_id: 40812408501, run_attempt: 1, sha: 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-pre-6dca85f.txt (kiem-gate rc=0)', nguon: [readback-run-40812408501.json, readback-jobs-40812408501.json, readback-check-runs-6dca85f-all.json]}
+  - {name: 'ops-thu-hoi-admission (thu-hoi) — head cuoi', run_id: 40812406916, conclusion: success, kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-pre-6dca85f.txt: thu-hoi rc=0', nguon: [readback-run-40812406916.json, readback-jobs-40812406916.json]}
+  - {name: 'executor cross-review Codex qua launcher.py run, luot 5 tren DUNG head merge', sha: 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf, conclusion: 'changes_requested; 0 P0, 1 P1, 1 P2 (ca test thieu rang; reviewer xac nhan hanh vi cong dung)', nguon: [ops/reviews/wp960-r2-review-5-codex-verdict.md, ops/reviews/wp960-r2-review-5-codex/run/run.json], ghi_chu: 'measured — ops/reviews/wp960-r2-review-5-codex-verdict.md dong 1 changes_requested, reviewed_sha 6dca85f; run.json ma_thoat 0, model_phuc_vu gpt-6.1-sol, effort xhigh.'}
+  - {name: 'executor cross-review Codex luot 1–4 (r2)', conclusion: 'changes_requested ca bon: 6/1/1 · 5/0/0 · 6/1/0 · 4/0/0 (P1/P2/P3); luot 3 co mot lan chet ae2d0a62', nguon: [ops/reviews/wp960-r2-review-1-codex-verdict.receipt.yaml, ops/reviews/wp960-r2-review-2-codex-verdict.receipt.yaml, ops/reviews/wp960-r2-review-3-codex-verdict.receipt.yaml, ops/reviews/wp960-r2-review-4-codex-verdict.receipt.yaml], ghi_chu: 'measured — ops/reviews/wp960-r2-review-2-codex-verdict.md … ops/reviews/wp960-r2-review-5-codex-verdict.md: moi verdict luot N+1 co bang DONG FINDING xac nhan dong finding luot N.'}
+  - {name: 'quyet dinh chu kho trong khi thuc thi (M-4, ghi ho tren #960)', conclusion: 'va trong r2; doi kien truc tra git; va nhom A + khai nhom B; va hep; gia han lease 24h', nguon: [readback-comments-960.json], ghi_chu: 'measured — readback-comments-960.json comment 6447238975, 6448831611, 6486210223, 6486355173, 6486913158.'}
+  - {name: 'connector Codex GitHub tren PR #995', conclusion: 'Code Review hoan tat tren ae0d06c (trigger Draft marked ready), has_any_findings false; KHONG co luot connector tren head merge 6dca85f', nguon: [readback-comments-995.json, readback-reviews-995.json, readback-review-comments-995.json], ghi_chu: 'measured — readback-comments-995.json comment 6447773292 (codex-review-state commit ae0d06c, has_any_findings false); readback-reviews-995.json rong.'}
+  - {name: 'dieu kien kich thuoc', conclusion: '2 tep, +962 -297 (vuot uoc tinh +250/-250 cua spec; ADR-0044 nguong 1000 dong them KHONG vuot)', nguon: [readback-pr-995.json, do-lai-nguon-20261029/merge-va-diff.txt]}
+  - {name: 'cong tai cho cua executor tren 6dca85f', conclusion: 'bien_nhan_v2_test 93/93 ca · 129/129 dot bien thuong CO RANG · 2/2 TU KIEM; bien_nhan_v2 --root . rc=0 no 1/60/0; doctrine-scan sach', ghi_chu: 'thuat_lai — commit message 6dca85f va handoff ops/handoff/wp960-r2-g1-claude.md (nhanh ops/wp960-r2-g2-lease).'}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40816820409, run_attempt: 1, sha: 79dbaf443f90daece751d9ab2537796bbd6084bf, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-post-79dbaf4.txt: suite 110638323011, 23 ten, rc=0', nguon: [readback-run-40816820409.json, readback-jobs-40816820409.json, readback-check-runs-79dbaf4-all.json], ghi_chu: 'Moc Run, Jobs, Check-run do duoc qua REST; moc Checkout (SHA/tree thuc chay), Workflow definition (blob qua WorkflowRun.file — GraphQL bi chan 403 trong phien web), Gate output (command/rc/marker) not_measured.'}
+  - {name: 'executor cross-review Codex sau merge — luot 6, 7 tren PR #1005 (chi tep test)', conclusion: 'luot 6 (78c138f) changes_requested 2 P1; luot 7 (057abc8, loi goi 8/8 = tran) changes_requested 1 P1', nguon: [ops/reviews/wp960-r2-review-6-codex-verdict.receipt.yaml, ops/reviews/wp960-r2-review-7-codex-verdict.receipt.yaml], ghi_chu: 'measured — hai bien nhan v2; cong tai 057abc8 giong het cong tai merge (do-lai-nguon-20261029/merge-va-diff.txt dong cuoi). Finding con lai chuyen no con Issue #1011.'}
+bookkeeping:
+  - {item: 'chi thi chu kho cap lease r2', ket_qua: 'measured — readback-comments-960.json comment 6444965500; ban chieu lease 6445133603'}
+  - {item: 'gia han lease (g2) theo chi thi chu kho', ket_qua: 'measured — readback-comments-960.json comment 6486210223; ban chieu 6486400275; do-lai-nguon-20261029/lease-wp960-r2-g2-claude-811a0ec.yaml.txt'}
+  - {item: 'ghi so 8 loi goi review r2 (7 bien nhan v2 + luot chet)', ket_qua: 'measured — ops/reviews/wp960-r2-review-7-codex-verdict.receipt.yaml va sau bien nhan cung lo (PR ghi so nay)'}
+  - {item: 'handoff', ket_qua: 'thuat_lai — ops/handoff/wp960-r2-g1-claude.md tren nhanh ops/wp960-r2-g2-lease @ 811a0ec'}
+  - {item: 'PR ghi so', nhanh: agent/wp960-r2-ghi-so}
+# ---- het truong chuan
+packet_id: NO-CAU-LICH-SU-BIEN-NHAN
+packet_issue: 960
+revision: 2
+pham_vi_land: cong_cu_dev
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_015GtxrbeTfDyFKdj7rb72Uq — CHINH phien executor cua #960 r2 ghi so, theo
+  de xuat cua phien dieu phoi session_01WZT2MvvoQV8QGF1vX9STrJ ma chu kho xac nhan lai truc tiep trong phien executor.
+
+spec:
+  r2: {path: ops/specs/NO-CAU-LICH-SU-BIEN-NHAN-r2.md, sha256: 9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca}
+  do_lai: 'measured — do-lai-nguon-20261029/spec-sha256.txt (khop).'
+lease:
+  lease_id: wp960-r2-g2-claude
+  lease_truoc: wp960-r2-g1-claude
+  ban_chep: 'measured — do-lai-nguon-20261029/lease-wp960-r2-g1-claude-3c0b5c9.yaml.txt (g1 kem bia mo) va do-lai-nguon-20261029/lease-wp960-r2-g2-claude-811a0ec.yaml.txt (g2)'
+  lease_until_ban_dau: '2026-10-29T14:43:00Z'
+  lease_until_hien_tai: '2026-10-30T14:43:00Z'
+  thu_hoi_cuoi: >-
+    CHUA THU HOI — PR #1005 (chi ops/bien_nhan_v2_test.py, trong write set) con mo; rut han chi khi #1005 merge hoac dong, kem
+    ly do. Neu den luc ay lease da HET HAN thi KHONG viet bia mo vao no (bai hoc 20-09 trong CLAUDE.md).
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-995.json: merged true, merged_at 2026-10-29T04:16:26Z, merge_commit_sha 79dbaf4, head.sha 6dca85f.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 79dbaf4: run/jobs/check-run XANH 23/23 + kiem-gate rc=0, ba moc Checkout,
+    Workflow definition, Gate output not_measured. (2) lease CHUA nha (PR #1005 mo). (3) bookkeeping: ho so nay + 7 bien nhan
+    DAT khi PR ghi so merge. (4) review: KHONG luot nao approve; tren DUNG authorized_head_sha 6dca85f verdict luot 5
+    changes_requested; M-1 KHONG DAT. (5) noi dung merge = diff head DAT (byte). (6) merge boi tai khoan chu kho DAT.
+    Mo lai: verdict approve tren head cuoi (can nang_tran ngan sach Codex — tran 8 da het) va du bon moc §10.2.2.
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: CHUA_DAT
+  review_exact_sha_nguon: 'measured — ops/reviews/wp960-r2-review-5-codex-verdict.md: luot tren DUNG authorized_head_sha 6dca85f la changes_requested, khong phai approve.'
+  thuc_thi:
+    model: 'measured — ops/reviews/wp960-r2-review-5-codex/run/run.json model_phuc_vu DO_DUOC, moi su kien gpt-6.1-sol (ho openai, khac ho claude cua executor).'
+    effort: 'measured — ops/reviews/wp960-r2-review-5-codex/run/run.json effort_phuc_vu [xhigh].'
+    sandbox_mode: 'not_measured — ops/reviews/wp960-r2-review-5-codex/run/run.json sandbox_trang_thai KHONG_DO_DUOC (lay mau /proc tu ben ngoai, lech danh tinh tien trinh); sandbox_quan_sat chi la mau.'
+
+no_co_ten:
+  - {ma: NO-CAU-LICH-SU-TEST-RANG, trang_thai: mo, muc: P1, ghi_chu: 'Issue #1011 — P1 luot 7 bien-ngoai-cua-so-surface-chua-co-rang (ca test khoa bien cua so M4) kem HINT.patch d21485b0… cua reviewer; hai tien de da chot voi chu kho: (B1) object/commit-graph sai ma git im lang, (B2) cau hinh git in canh bao => KHONG DO DUOC.'}
+  - {ma: wp960-r2-pr1005-test-chua-merge, trang_thai: mo, ghi_chu: 'PR #1005 (78c138f, 057abc8) va test luot 5 va luot 6; cong giong het master. Chu kho quyet merge/dong.'}
+khong_do_duoc:
+  - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
+  - 'Ba moc §10.2.2 Checkout / Workflow definition / Gate output tren 79dbaf4: not_measured (GraphQL 403 trong phien web).'
+  - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'

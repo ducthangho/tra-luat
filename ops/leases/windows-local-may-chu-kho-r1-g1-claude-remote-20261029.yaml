@@ -31,7 +31,8 @@ operating_system: Linux
 shell: bash
 risk: systemic
 review_class: systemic
-effective_review_class: systemic
+effective_review_class: sensitive
+effective_review_class_ghi_chu: "spec khai systemic la muc toi thieu; cong lease_publish tinh sensitive cho write set nay (docs/PROTOCOL_DA_PHIEN.md) nen lay muc cao hon"
 assurance_target: cross_approved_or_human_audited
 reviewer: codex
 reviewer_provider: openai_codex

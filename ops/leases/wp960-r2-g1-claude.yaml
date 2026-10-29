@@ -97,3 +97,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp960-g1-claude khi B1-B8 dat; mo PR draft. Hinh dang loi lap lan thu 4 => DUNG hoi chu kho (M-4).'
+da_bi_thay_the: wp960-r2-g2-claude
+da_bi_thay_the_ly_do: 'Chu kho gia han lease 24h (comment #960 issuecomment-6486210223, 29-10-2026). Lease g1 nay KHONG con hieu luc; quyen ghi chuyen sang wp960-r2-g2-claude (cung revision 2, cung write set, han 2026-10-30T14:43Z). Giu tep lam hien vat, khong xoa.'

@@ -1,0 +1,16 @@
+merge e9967f07b95c6458afc63dabf4a5c0494e90eca7 tree 55eeda3c8af6f17cea533e56285a3933447a0ec6 parents 641b3deff2b3ab2dcecaab00440661a865bde537 07bea5f6568dd82fb18a9e7d8a779b6000f65bfd
+head 07bea5f6568dd82fb18a9e7d8a779b6000f65bfd tree 917acfa54cad8ebb28c2162e3299b114c5f3c621
+merge-base(P1,H)=0a8f4d78d30854247a7147e45f5586bf856925da
+diff P1..M sha256 ee2df15ce3486a1d378d9bb0d8887c9f68356da5df3ba3735af61fabe3fcb91f
+ ops/land_evidence_nguon.py      | 37 ++++++++++++++++++
+ ops/land_evidence_nguon_test.py | 85 +++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 119 insertions(+), 3 deletions(-)
+diff MB..H sha256 ee2df15ce3486a1d378d9bb0d8887c9f68356da5df3ba3735af61fabe3fcb91f
+ ops/land_evidence_nguon.py      | 37 ++++++++++++++++++
+ ops/land_evidence_nguon_test.py | 85 +++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 119 insertions(+), 3 deletions(-)
+ops/land_evidence_nguon.py blob M=ab830bb8b970c2736b5d51526d19722433df2d52 H=ab830bb8b970c2736b5d51526d19722433df2d52
+ops/land_evidence_nguon_test.py blob M=ecfb925adc06445b0113ac4d36a6733ba9fd90b3 H=ecfb925adc06445b0113ac4d36a6733ba9fd90b3
+# commit nhanh PR (--first-parent 0a8f4d7..H):
+07bea5f6568dd82fb18a9e7d8a779b6000f65bfd 2026-10-29T07:31:00+00:00 Claude land-evidence-l7 r2: duong dan L7 khong nhap nhang (review Codex luot 1 P2)
+ab25bd0f0f98139ed901605d04576903a92b9cf7 2026-10-29T07:19:05+00:00 Claude land-evidence-l7 r2 (#748): L7 doc reviewer_assurance_81 o moi do sau

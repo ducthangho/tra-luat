@@ -1,0 +1,89 @@
+{
+ "jobs": [
+  {
+   "id": 123323850358,
+   "run_id": 40836952971,
+   "workflow_name": "thu-hoi",
+   "head_branch": "agent/land-evidence-l7-r2-claude",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40836952971",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAActqyedg",
+   "head_sha": "07bea5f6568dd82fb18a9e7d8a779b6000f65bfd",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/123323850358",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40836952971/job/123323850358",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-29T07:40:33Z",
+   "started_at": "2026-10-29T07:40:34Z",
+   "completed_at": "2026-10-29T07:40:48Z",
+   "name": "thu-hoi",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-10-29T07:40:35Z",
+     "completed_at": "2026-10-29T07:40:36Z"
+    },
+    {
+     "name": "lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-10-29T07:40:36Z",
+     "completed_at": "2026-10-29T07:40:42Z"
+    },
+    {
+     "name": "cài PyYAML",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-10-29T07:40:42Z",
+     "completed_at": "2026-10-29T07:40:44Z"
+    },
+    {
+     "name": "đo S, fetch H từ endpoint canonical, chạy bộ kiểm canonical, ghi receipt",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-10-29T07:40:44Z",
+     "completed_at": "2026-10-29T07:40:44Z"
+    },
+    {
+     "name": "tải receipt lên artifact",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-10-29T07:40:44Z",
+     "completed_at": "2026-10-29T07:40:46Z"
+    },
+    {
+     "name": "Post lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-10-29T07:40:46Z",
+     "completed_at": "2026-10-29T07:40:46Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-10-29T07:40:46Z",
+     "completed_at": "2026-10-29T07:40:46Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/123323850358",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000023991,
+   "runner_name": "GitHub Actions 1000023991",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  }
+ ],
+ "total_count": 1
+}

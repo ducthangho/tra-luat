@@ -21392,7 +21392,7 @@ def run() -> int:
         drv, ups = ({} if drv is None else drv), []
         def _up(name, blob, folder, fid, force_new, g=None):
             if hong:
-                raise RuntimeError("UPLOAD973")
+                raise RuntimeError("UPLOAD973 SENT973-codex SENT973-claude SENT973-gemini")   # lượt 3 F13
             fid = f"FID973-{len(drv)}" if (force_new or not fid) else fid
             ups.append(fid); drv[fid] = blob
             return fid, not force_new
@@ -21446,7 +21446,7 @@ def run() -> int:
         ns = dict(codex=True, claude_token_env="TOKC973", antigravity_key_env="GEMK973")
         ra = [_set973(_ns973(new=True, **ns), e), _set973(_ns973(file_id="OLD973", **ns), e, dict(_OLD973)),
               _set973(_ns973(new=True, **ns), e, hong=True)]
-        return (ra[0][0] == 0 and all(r[0] != 0 for r in ra[1:])
+        return (ra[0][0] == 0 and all(r[0] != 0 for r in ra[1:]) and "upload lỗi" in ra[2][1]
                 and all(s not in r[1] for r in ra for s in ("SENT973-codex", "SENT973-claude", "SENT973-gemini")))
     _t110("r973_agent_creds_khong_in_gia_tri", lambda: _codex973(_c973_a3))
 
@@ -21459,9 +21459,10 @@ def run() -> int:
         # kể cả khi cùng lượt có một khoá hợp lệ khác (không xanh nhờ nhánh "không có khoá nào"); bản cũ nguyên byte
         cu, xau = drv[up1[0]], []
         for bien in ("RONG973", "TRANG973", "THIEU973"):
-            r = _set973(_ns973(file_id=up1[0], antigravity_key_env="MY_KEY973", claude_token_env=bien),
-                        {**e, "TRANG973": "   ", "THIEU973": None}, drv)
-            xau.append(r[0] != 0 and r[2] == [] and drv[up1[0]] == cu)
+            for dich in ({"file_id": up1[0]}, {"new": True}):   # lượt 3 F7: CẢ nhánh --new
+                r = _set973(_ns973(antigravity_key_env="MY_KEY973", claude_token_env=bien, **dich),
+                            {**e, "TRANG973": "   ", "THIEU973": None}, drv)
+                xau.append(r[0] != 0 and r[2] == [] and drv[up1[0]] == cu and len(drv) == 1)
         return (rc1 == 0 and _dec973(drv[up1[0]]).get("antigravity_api_key") == "gem-973-val" and rc2 == 0
                 and "antigravity_api_key" not in _dec973(drv2[up2[0]]) and rc3 != 0 and up3 == [] and all(xau))
     _t110("r973_agent_creds_khoa_gemini_tu_bien", _c973_a6)
@@ -21478,6 +21479,28 @@ def run() -> int:
             rc, _, ups, drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d, "HOME": h, "USERPROFILE": h})
             return rc == 0 and _dec973(drv[ups[0]]).get("codex_auth") == _AU973
     _t110("r973_agent_creds_ton_trong_CODEX_HOME", lambda: _codex973(_c973_a5))
+
+    def _c973_f11():
+        # lượt 3 F11: đích ghi --file-id > TL_AGENT_CREDS_FILEID > AGENT_CREDS_FILEID; --new thắng cả ba.
+        # Blob KHÔNG được chọn phải giữ nguyên byte.
+        cu = {f: _st973.encrypt(json.dumps({"schema": 1, "rev": r}).encode(), _K973)
+              for f, r in (("EXP973", 4), ("ENV973", 9), ("HANG973", 2))}
+        o, kq = _tg973.AGENT_CREDS_FILEID, []
+        _tg973.AGENT_CREDS_FILEID = "HANG973"
+        try:
+            for ns, env, dich in ((dict(file_id="EXP973"), {"TL_AGENT_CREDS_FILEID": "ENV973"}, "EXP973"),
+                                  ({}, {"TL_AGENT_CREDS_FILEID": "ENV973"}, "ENV973"), ({}, {}, "HANG973"),
+                                  (dict(new=True, file_id="EXP973"), {"TL_AGENT_CREDS_FILEID": "ENV973"}, None)):
+                drv = dict(cu)
+                rc, _, ups, drv = _set973(_ns973(claude_token_env="TOK973F", **ns), {"TOK973F": "x", **env}, drv)
+                moi = [f for f in drv if f not in cu]
+                kq.append(rc == 0 and ups == ([dich] if dich else moi) and len(ups) == 1
+                          and all(drv[f] == cu[f] for f in cu if f != dich)
+                          and _dec973(drv[ups[0]]).get("rev") == ({"EXP973": 5, "ENV973": 10, "HANG973": 3}.get(dich, 1)))
+        finally:
+            _tg973.AGENT_CREDS_FILEID = o
+        return len(kq) == 4 and all(kq)
+    _t110("r973_agent_creds_set_thu_tu_dich_ghi", _c973_f11)
 
     def _c973_b1():
         def _rc(fn, k):
@@ -21537,14 +21560,16 @@ def run() -> int:
                                                  "claude_oauth_token": "SENT973-claude",
                                                  "antigravity_api_key": "SENT973-gemini"}).encode(), _K973)}
 
-    def _c973_b2():
-        rc, out, _ = _boot973({"TL_MASTER_KEY": "kh8short"},
-                              {"S973": _st973.encrypt(json.dumps({"token": "t"}).encode(), "kh8short")})
-        return rc == 0 and "giải mã OK" in out
-    _t110("r973_bootstrap_khong_kiem_khoa", _c973_b2)
-
     def _trang_thai973(out):
         return [ln.split("agent_creds:", 1)[1].split("—")[0].strip() for ln in out.splitlines() if "agent_creds:" in ln]
+
+    def _c973_b2():
+        # lượt 3 F10: CẢ bundle chính LẪN tl_agent_creds.enc mã hoá bằng khoá 8 ký tự, có --require-agent-creds
+        yeu = {"S973": _st973.encrypt(json.dumps({"token": "t"}).encode(), "kh8short"),
+               "AC973": _st973.encrypt(json.dumps({"schema": 1, "rev": 1, "codex_auth": _AU973}).encode(), "kh8short")}
+        rc, out, _ = _boot973({"TL_MASTER_KEY": "kh8short", "TL_AGENT_CREDS_FILEID": "AC973"}, yeu, req=True)
+        return rc == 0 and "giải mã OK" in out and _trang_thai973(out) == ["ĐÃ NẠP"]
+    _t110("r973_bootstrap_khong_kiem_khoa", _c973_b2)
 
     def _c973_d1():
         ra = [_boot973({}, _B973), _boot973({"TL_AGENT_CREDS_FILEID": "MAT973"}, _B973),
@@ -21559,15 +21584,20 @@ def run() -> int:
         return rc[0] != 0 and rc[1] != 0 and rc[2] == 0
     _t110("r973_bootstrap_require_agent_creds", _c973_d2)
 
+    _THIEU973 = object()   # "không có khoá last_refresh" (khác với giá trị null)
+
+    def _lr973(lr, d):
+        return {k: v for k, v in d.items() if k != "last_refresh"} if lr is _THIEU973 else {**d, "last_refresh": lr}
+
     def _goi_lr973(lr):
-        return _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": {**_AU973, "last_refresh": lr}}).encode(), _K973)
+        return _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": _lr973(lr, _AU973)}).encode(), _K973)
 
     def _mot973(disk_lr, goi_lr=_AU973["last_refresh"], thay=None):
         """_bootstrap_agent_creds với CODEX_HOME tạm có auth.json `disk_lr`; `thay` thay os.replace tạm thời.
         Trả (trạng thái, giữ nguyên byte/inode/mtime, quyền 0600, nội dung sau, tên tệp trong thư mục)."""
         with _tf110.TemporaryDirectory() as d:
             p = _P110(d, "auth.json")
-            p.write_bytes((json.dumps({"tokens": {}, "last_refresh": disk_lr}) + "\n").encode())
+            p.write_bytes((json.dumps(_lr973(disk_lr, {"tokens": {}})) + "\n").encode())
             s0, b0 = p.stat(), p.read_bytes()
             sav, o = _env110({"CODEX_HOME": d, "TL_AGENT_CREDS_FILEID": "AC973"}), (_tg973._public_curl_bytes, _os973.replace)
             _tg973._public_curl_bytes = lambda fid, timeout=120.0: _goi_lr973(goi_lr)
@@ -21591,6 +21621,9 @@ def run() -> int:
                                     "2026-10-27T07:00:00-05:00", "2026-10-27T18:35:54.511153200+07:00",
                                     "2026-10-27T11:35:54.511153201Z")]
         ghi = [_mot973(x) for x in ("2026-10-27T11:35:54Z", "2026-10-27T12:00:00+07:00", "2026-10-27T11:35:54.511153199Z")]
+        # lượt 3 F9: last_refresh thiếu / null / không phải ngày ⇒ CŨ HƠN mọi bản có (cả phía đĩa lẫn phía bundle)
+        ghi += [_mot973(x) for x in (_THIEU973, None, "khong-phai-ngay")]
+        giu += [_mot973("2026-10-27T05:00:00Z", goi_lr=x) for x in (_THIEU973, None)]
         return (all(r[:2] == ("ĐÃ NẠP", True) for r in giu)
                 and all(r[0] == "ĐÃ NẠP" and not r[1] and r[2] and r[3] == _AU973 for r in ghi))
     _t110("r973_bootstrap_giu_auth_json_moi_hon", _c973_d3)
@@ -21636,6 +21669,20 @@ def run() -> int:
         return (ok[0] == "ĐÃ NẠP" and ok[3] == _AU973 and seen == [(True, True, True, True)]
                 and ok[4] == ["auth.json"] and loi[:2] == ("KHÔNG ĐO ĐƯỢC", True) and loi[4] == ["auth.json"])
     _t110("r973_bootstrap_auth_json_nguyen_tu", _c973_f2)
+
+    def _c973_f12():
+        # lượt 3 F12: giải mã ĐƯỢC mà sai định dạng ⇒ KHÔNG ĐO ĐƯỢC, không ghi auth.json; rc chỉ đổi theo cờ require
+        sai = ({"schema": 2, "rev": 1, "codex_auth": _AU973}, ["schema", 1],
+               {"schema": 1, "rev": 1, "codex_auth": {"tokens": "chuoi"}}, {"schema": 1, "rev": 1, "codex_auth": "x"})
+        kq = []
+        for p in sai:
+            drv = {**_B973, "AC973": _st973.encrypt(json.dumps(p).encode(), _K973)}
+            for req in (False, True):
+                rc, out, khong_ghi = _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, drv,
+                                              lambda h: not _P110(h, "cx", "auth.json").exists(), req=req)
+                kq.append(rc == (4 if req else 0) and khong_ghi and _trang_thai973(out) == ["KHÔNG ĐO ĐƯỢC"])
+        return len(kq) == 8 and all(kq)
+    _t110("r973_bootstrap_sai_dinh_dang_khong_nap", _c973_f12)
 
     def _c973_d4():
         hoi, o = [], (_tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes)

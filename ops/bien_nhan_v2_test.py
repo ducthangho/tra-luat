@@ -3251,18 +3251,22 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
         return tmp, al, k_sf, None, "run.json"
 
     def run_json_ten_qua_dai(tmp):
-        rj = "ops/reviews/" + "a" * 300 + "/run.json"
-        al = _surface(tmp, rj)
-        try:                                        # kiểm ĐỘC LẬP với `_vang` (đột biến m116 nhắm hàm ấy)
-            os.lstat(tmp / rj)
-            dung(False, "fixture: lstat tên quá dài lại thành công")
-        except (FileNotFoundError, NotADirectoryError):
-            # #1017: Windows báo tên quá dài là ENOENT, nên nền này KHÔNG dựng được "lstat lỗi khác" bằng tên dài.
-            # Đo được thì nói ra, không giả xanh: nhánh ấy vẫn được đo bằng nguồn tiêm `run_json_lstat_loi_tiem`.
-            return None
-        except OSError:
-            pass
-        return tmp, al, k_sf, None, "a" * 40
+        # #1017: hai thành phần, thử theo thứ tự, mỗi cái ĐO bằng lstat ĐỘC LẬP với `_vang` (m116 nhắm hàm ấy): tên quá dài
+        # cho ENAMETOOLONG trên POSIX nhưng ENOENT trên Windows; ký tự cấm `<` cho WinError 123 (EINVAL) trên Windows nhưng
+        # là tên hợp lệ (ENOENT) trên POSIX (đo phiên #1014 trên máy Windows của chủ kho). Dấu stderr lấy từ CHÍNH thành
+        # phần đã dùng. Không cái nào cho lỗi khác ENOENT/ENOTDIR thì nói ra; nhánh ấy đo bằng `_nguon_lstat_tiem`.
+        # Thư mục cha PHẢI có trước: thiếu nó thì lstat dừng ở ENOENT của `ops` mà chưa tới thành phần đang đo.
+        (tmp / "ops/reviews").mkdir(parents=True, exist_ok=True)
+        for phan, dau in (("a" * 300, "a" * 40), ("b" * 40 + "<c", "b" * 40)):
+            rj = "ops/reviews/" + phan + "/run.json"
+            try:
+                os.lstat(tmp / rj)
+                dung(False, f"fixture: lstat thành phần {dau}… lại thành công")
+            except (FileNotFoundError, NotADirectoryError):
+                continue
+            except OSError:
+                return tmp, _surface(tmp, rj), k_sf, None, dau
+        return None
 
 
     def git_vang(tmp):
@@ -3320,12 +3324,14 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
 
     def cau_hinh_canh_bao(tmp):
         k, al = _anc(tmp)
-        k["g"]("config", "core.fsyncObjectFiles", "true")          # git in cảnh báo deprecated ở MỌI lệnh
-        # #1017: ĐO trước bằng chính đường gọi git của cổng — git for Windows 2.55 KHÔNG in cảnh báo này (đo trên máy
-        # Windows của chủ kho), nên nguồn KHÔNG dựng được ở đó; nhánh ấy đo bằng `_nguon_canh_bao_tiem`.
-        if "fsyncObjectFiles" not in bnv2._chay_git(tmp, ["rev-parse", "--is-shallow-repository"]).stderr:
+        # #1017: `core.fsyncObjectFiles=true` KHÔNG làm git for Windows 2.55 in gì (đo trên máy Windows của chủ kho; git
+        # 2.43 Linux có in) ⇒ đổi sang thành phần `core.fsync` LẠ: git cảnh báo "ignoring unknown core.fsync component"
+        # ở mọi lệnh trên CẢ HAI nền (đo: Linux 2.43 tại chỗ; Windows 2.55 do phiên #1014 đo trên cùng máy).
+        k["g"]("config", "core.fsync", "khong-co-thanh-phan-1017")
+        # Vẫn ĐO trước bằng chính đường gọi git của cổng: git nào không cảnh báo thì nói ra, đo bằng `_nguon_canh_bao_tiem`.
+        if "khong-co-thanh-phan-1017" not in bnv2._chay_git(tmp, ["rev-parse", "--is-shallow-repository"]).stderr:
             return None
-        return tmp, al, k_anc, None, "fsyncObjectFiles"
+        return tmp, al, k_anc, None, "khong-co-thanh-phan-1017"
 
     def grafts(tmp):
         k, al = _anc(tmp)

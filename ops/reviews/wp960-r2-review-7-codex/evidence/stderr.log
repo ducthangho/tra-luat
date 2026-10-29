@@ -1,0 +1,12 @@
+{"witness": "same-error-wrong-ancestry"}
+{"debt": false, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — `merge-base` cho `e72d857`: `git merge-base --is-ancestor e72d8570d56391888423561308429963ae4f1b56 0dda7648f3476baeba72b8572a393498ca61a22c` stderr: error: same probe diagnostic\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"debt": true, "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — `merge-base` cho `e72d857`: `git merge-base --is-ancestor e72d8570d56391888423561308429963ae4f1b56 0dda7648f3476baeba72b8572a393498ca61a22c` stderr: error: same probe diagnostic\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"witness": "health-error"}
+{"debt": false, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=1: error: same probe diagnostic\n"}
+{"debt": true, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=1: error: same probe diagnostic\n"}
+{"witness": "health-rc3"}
+{"debt": false, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=3: \n"}
+{"debt": true, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=3: \n"}
+{"witness": "old-probe-only"}
+{"debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"debt": true, "rc": 0, "stderr": ""}

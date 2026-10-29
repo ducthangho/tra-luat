@@ -1,0 +1,50 @@
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-REVIEW] r1.receipt.yaml: `anchor.mo_ta` khai head e72d8570d563… chưa được review (lại), nhưng ['r2.receipt.yaml'] đã review đúng SHA ấy ở `luot` lớn hơn 1 — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-REVIEW] r1.receipt.yaml: `anchor.mo_ta` khai e72d8570d563… chưa review, có biên nhận khác cùng `reviewed_sha` mà `luot` không so được (['r2.receipt.yaml'])"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-REVIEW] r1.receipt.yaml: `anchor.mo_ta` khai e72d8570d563… chưa review, có biên nhận khác cùng `reviewed_sha` mà `luot` không so được (['r2.receipt.yaml'])"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `1234abc` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c71_A2_cau_ancestry_do_bang_merge_base", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `co_dau` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu", "[L-ANCESTRY] r.receipt.yaml: `khoi_gap` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu", "[L-ANCESTRY] r.receipt.yaml: `khoi_lit` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu", "[L-ANCESTRY] r.receipt.yaml: `khong_dau` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c73_A4_surface_verdict_doi_chieu_run_json", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 0, "debt": true, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 1, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 1, "debt": true, "errors": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` NỢ CHẾT — nằm trong `NO_CAU_LICH_SU` mà câu đã hết vi phạm; xoá mục nợ, bánh cóc chỉ quay một chiều"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c74_A5_no_cau_lich_su_chi_co_va_no_chet_la_vi_pham", "state": "qua", "message": null}
+{"case": "c75_no_cau_lich_su_CHI_CO_LAI_va_tro_tep_co_that", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `3181510` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `3181510` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `dbffbbc` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `dbffbbc` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c79_dong_TRICH_DAN_hien_vat_khac_khong_phai_tu_khai_surface", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-REVIEW] r1.receipt.yaml: `anchor.mo_ta` khai head e72d8570d563… chưa được review (lại), nhưng ['r2.receipt.yaml'] đã review đúng SHA ấy ở `luot` lớn hơn 1 — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r1.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c86_B1_moc_dung_tai_KHONG_con_mien", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `abcdefa` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `1234567` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `12ab34c` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c87_B3_OID_khong_tra_duoc_theo_NGU_CANH", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 0, "debt": false, "errors": [], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"group": "acceptance", "passed": 13, "total": 13}

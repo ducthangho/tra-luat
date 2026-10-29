@@ -1,0 +1,12 @@
+{"start": "u2-bo-bien-suc-khoe", "source": "/tmp/r5-mutant-u2-bo-bien-suc-khoe-0ez93cos/repo", "match_count": 1}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u2-bo-bien-suc-khoe", "completed": 20, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 30, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 40, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 50, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 60, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 70, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 80, "red_count": 0}
+{"progress": "u2-bo-bien-suc-khoe", "completed": 90, "red_count": 0}
+{"mutant": "u2-bo-bien-suc-khoe", "match_count": 1, "count": 93, "passed": 92, "red": [["c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC", "giet_that", "is-shallow-repository: đòi rc=2 nêu `is-shallow-repository` rc=3, được rc=2: \"KHÔNG ĐO ĐƯỢC: kho nông (`--is-shallow-repository` = '') — không đo được quan hệ tổ tiên\\n\""]], "seconds": 406.887}

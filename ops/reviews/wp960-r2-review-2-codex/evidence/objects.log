@@ -1,0 +1,15 @@
+{"label": "object-control", "token": "dbffbbc", "disambiguate": {"rc": 0, "stdout": "dbffbbc94a7488c35d0a4050c1d26ffad20fa8ad", "stderr": ""}, "peel": {"rc": 0, "stdout": "dbffbbc94a7488c35d0a4050c1d26ffad20fa8ad", "stderr": ""}, "resolved": "dbffbbc94a7488c35d0a4050c1d26ffad20fa8ad", "failure": null, "cli": {"rc": 1, "stdout": "bien_nhan_v2: 0 ĐẠT v2 · 1/1 miễn trừ legacy (băm khớp) · 0 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\ncâu lịch sử: nợ L-REVIEW 0 · L-ANCESTRY 0 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0", "stderr": "ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `dbffbbc` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `dbffbbc` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ", "traceback": false, "dead": false}}
+Traceback (most recent call last):
+  File "/tmp/claude-0/rv/wp960-r2-review-2-codex/probe_objects.py", line 105, in <module>
+    if __name__=='__main__':globals()[sys.argv[1]]()
+                            ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/tmp/claude-0/rv/wp960-r2-review-2-codex/probe_objects.py", line 36, in objects
+    obj.write_bytes(data)
+    ~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/pathlib/_abc.py", line 641, in write_bytes
+    with self.open(mode='wb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/tmp/tmpnjz77lhv/.git/objects/db/ffbbc94a7488c35d0a4050c1d26ffad20fa8ad'

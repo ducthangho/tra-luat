@@ -1,0 +1,12 @@
+{"start": "u6-bo-chan-promisor-true", "source": "/tmp/r5-mutant-u6-bo-chan-promisor-true-7xtt1qo5/repo", "match_count": 1}
+{"progress": "u6-bo-chan-promisor-true", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u6-bo-chan-promisor-true", "completed": 20, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 30, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 40, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 50, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 60, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 70, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 80, "red_count": 0}
+{"progress": "u6-bo-chan-promisor-true", "completed": 90, "red_count": 1}
+{"mutant": "u6-bo-chan-promisor-true", "match_count": 1, "count": 93, "passed": 92, "red": [["c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no", "giet_that", "kho_partial_promisor/khong-no: đòi rc=2, không NỢ CHẾT, stderr nêu `promisor` = true`; được rc=1: '  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\\nTỔNG: ĐỎ\\n'"]], "seconds": 404.916}

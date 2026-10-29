@@ -1,0 +1,3 @@
+{"appearances": 99, "distinct": 31, "changes": []}
+{"receipts": 297, "violation_keys": 61, "debt_keys": 61, "equal_debt": true, "unknown": {}, "surface_not_applied": []}
+{"empty_debt_rc": 1, "law_errors": 61, "other_errors": 0, "unknown": []}

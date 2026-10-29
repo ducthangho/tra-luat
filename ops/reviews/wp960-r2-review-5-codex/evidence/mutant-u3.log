@@ -1,0 +1,12 @@
+{"start": "u3-bo-kiem-dang-bool", "source": "/tmp/r5-mutant-u3-bo-kiem-dang-bool-llq2gk_p/repo", "match_count": 1}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u3-bo-kiem-dang-bool", "completed": 20, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 30, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 40, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 50, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 60, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 70, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 80, "red_count": 0}
+{"progress": "u3-bo-kiem-dang-bool", "completed": 90, "red_count": 0}
+{"mutant": "u3-bo-kiem-dang-bool", "match_count": 1, "count": 93, "passed": 93, "red": [], "seconds": 405.572}

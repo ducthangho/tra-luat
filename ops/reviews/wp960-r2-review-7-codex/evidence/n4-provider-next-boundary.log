@@ -1,0 +1,6 @@
+{"mutant": "n4-provider-next-boundary", "old": "cua = dong_tep[max(0, j - 1):j + 2]", "new": "cua = dong_tep[max(0, j - 1):j + 3]", "target": "c88"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"mutant": "n4-provider-next-boundary", "control": [true, ""], "file": "/tmp/wp960-r7-review/whole-n4-provider-next-boundary/ops/bien_nhan_v2.py"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "n4-provider-next-boundary", "passed": 93, "total": 93, "red": []}
+{"mutant": "n4-provider-next-boundary", "persisted_sha256": "720966c7fe5f87ad78ff64ac353487a1bf2c6c69a8d3cfa9e308295153b73927"}

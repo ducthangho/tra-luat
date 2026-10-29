@@ -1,0 +1,5 @@
+B1 ('qua', None)
+B6-baseline ('qua', None)
+B6-m78 ('giet_that', "biến thể khối `|` gãy dòng (`khoi_lit`) không bị nhận: ['co_dau', 'khoi_gap', 'khong_dau']")
+B6-docstring A3 (M2): có dấu / không dấu / gãy dòng trong `|` và `>-` đều bị nhận; câu chỉ NHẮC cụm từ
+trong ngoặc trích, không có OID ⇒ không phải vi phạm.

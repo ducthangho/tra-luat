@@ -1,0 +1,7 @@
+removed [77, 86, 87, 90, 93]
+added [94, 95, 96, 97, 98, 99, 100, 101, 102]
+remaining 88
+  CÓ RĂNG    m76_ancestry_oid_thieu_la_khong_to_tien → c71_A2_cau_ancestry_do_bang_merge_base = giet_that  (A2: OID không tra được coi là 'không tổ tiên')
+  CÓ RĂNG    m83_run_json_hong_thanh_khong_ap       → c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet = giet_that  (run.json hỏng đọc thành 'không áp')
+  CÓ RĂNG    m84_bo_OID_toan_chu_so                 → c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra = giet_that  (loại token toàn chữ số trước khi tra)
+  CÓ RĂNG    m92_merge_base_loi_thanh_vi_pham       → c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham = giet_that  (r3: merge-base hỏng thành vi phạm)

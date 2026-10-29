@@ -1,0 +1,5 @@
+{"command": ["rev-parse", "HEAD", "HEAD^{tree}"], "rc": 0, "out": "a6012e53d719d5e10615af494335c0ae96b887fd\nd46fa5b04fd1ae9d1580b59ae90e58ed73852451\n", "err": ""}
+{"command": ["rev-list", "--parents", "-1", "HEAD"], "rc": 0, "out": "a6012e53d719d5e10615af494335c0ae96b887fd 2618eb4e59ab296e5dd8d2bc8543fe8e7e966b40 934a5b063670acfbed410487d8244cd17d586d6e\n", "err": ""}
+{"command": ["rev-parse", "--is-shallow-repository"], "rc": 0, "out": "false\n", "err": ""}
+{"command": ["for-each-ref", "--format=%(refname) %(objectname)", "refs/remotes/origin/HEAD", "refs/remotes/origin/master", "refs/heads/master"], "rc": 0, "out": "refs/remotes/origin/master 2618eb4e59ab296e5dd8d2bc8543fe8e7e966b40\n", "err": ""}
+{"command": "gate", "rc": 0, "out": "\nbien_nhan_v2: 244 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 297\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n", "err": ""}

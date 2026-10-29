@@ -1,0 +1,12 @@
+{"start": "u7-giu-GIT_DIR", "source": "/tmp/r5-mutant-u7-giu-GIT_DIR-6ldd99u8/repo", "match_count": 1}
+{"progress": "u7-giu-GIT_DIR", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u7-giu-GIT_DIR", "completed": 20, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 30, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 40, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 50, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 60, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 70, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 80, "red_count": 0}
+{"progress": "u7-giu-GIT_DIR", "completed": 90, "red_count": 0}
+{"mutant": "u7-giu-GIT_DIR", "match_count": 1, "count": 93, "passed": 93, "red": [], "seconds": 319.297}

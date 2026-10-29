@@ -1,0 +1,98 @@
+$ git -C cay-kho rev-parse HEAD HEAD^{tree}
+rc=0
+3a52e6d194d08a755793cf449f393fb15b56757b
+97ba989c22cbde6bd24cdd33671d9e7f2442ae58
+$ git -C cay-kho status --short
+rc=0
+$ git -C cay-kho rev-parse --is-shallow-repository
+rc=0
+false
+$ git -C cay-kho diff --numstat 44884446f71c89e25f9a72ac58e4f597db63c1ba HEAD -- ops/bien_nhan_v2.py ops/bien_nhan_v2_test.py
+rc=0
+294	193	ops/bien_nhan_v2.py
+643	104	ops/bien_nhan_v2_test.py
+$ git -C cay-kho diff --name-only 2618eb4 HEAD
+rc=0
+RELEASE_MANIFEST.json
+ops/bien_nhan_v2.py
+ops/bien_nhan_v2_test.py
+ops/codex_cloud_setup.sh
+ops/codex_cloud_setup_test.py
+ops/kiem_ho_so_land.py
+ops/kiem_ho_so_land_test.py
+ops/land/pr969-wp813-land-evidence.yaml
+ops/land/pr969-wp813-provenance/SHA256SUMS
+ops/land/pr969-wp813-provenance/ai-dang-giu-sau-rut-han/luc-do.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/kiem-gate-post-1af1593-launcher.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/kiem-gate-post-e139e55.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/kiem-gate-pre-be88caf.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/kiemgate.py
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/lease-wp813-r2-g1-claude-093aad1.yaml.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/lease-wp813-r2-g1-claude-sau-rut-han-abfd648.yaml.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/merge-va-diff.txt
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/readback.py
+ops/land/pr969-wp813-provenance/do-lai-nguon-20261027/spec-sha256.txt
+ops/land/pr969-wp813-provenance/readback-check-runs-1af1593-all.json
+ops/land/pr969-wp813-provenance/readback-check-runs-be88caf-all.json
+ops/land/pr969-wp813-provenance/readback-check-runs-e139e55-all.json
+ops/land/pr969-wp813-provenance/readback-comment-6432858083.json
+ops/land/pr969-wp813-provenance/readback-comment-6434345039.json
+ops/land/pr969-wp813-provenance/readback-comment-6434351773.json
+ops/land/pr969-wp813-provenance/readback-comment-6434981875.json
+ops/land/pr969-wp813-provenance/readback-comment-6436153577.json
+ops/land/pr969-wp813-provenance/readback-comment-6436510218.json
+ops/land/pr969-wp813-provenance/readback-comment-6437106726.json
+ops/land/pr969-wp813-provenance/readback-comment-6437972050.json
+ops/land/pr969-wp813-provenance/readback-comment-6438636974.json
+ops/land/pr969-wp813-provenance/readback-comments-813.json
+ops/land/pr969-wp813-provenance/readback-comments-969.json
+ops/land/pr969-wp813-provenance/readback-events-969.json
+ops/land/pr969-wp813-provenance/readback-issue-813.json
+ops/land/pr969-wp813-provenance/readback-jobs-40471827356.json
+ops/land/pr969-wp813-provenance/readback-jobs-40471830215.json
+ops/land/pr969-wp813-provenance/readback-jobs-40471830261.json
+ops/land/pr969-wp813-provenance/readback-jobs-40478359750.json
+ops/land/pr969-wp813-provenance/readback-jobs-40478456381.json
+ops/land/pr969-wp813-provenance/readback-jobs-40478456455.json
+ops/land/pr969-wp813-provenance/readback-jobs-40478507092.json
+ops/land/pr969-wp813-provenance/readback-jobs-40479048275.json
+ops/land/pr969-wp813-provenance/readback-pr-969.json
+ops/land/pr969-wp813-provenance/readback-review-comments-969.json
+ops/land/pr969-wp813-provenance/readback-reviews-969.json
+ops/land/pr969-wp813-provenance/readback-run-40471827356.json
+ops/land/pr969-wp813-provenance/readback-run-40471830215.json
+ops/land/pr969-wp813-provenance/readback-run-40471830261.json
+ops/land/pr969-wp813-provenance/readback-run-40478359750.json
+ops/land/pr969-wp813-provenance/readback-run-40478456381.json
+ops/land/pr969-wp813-provenance/readback-run-40478456455.json
+ops/land/pr969-wp813-provenance/readback-run-40478507092.json
+ops/land/pr969-wp813-provenance/readback-run-40479048275.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-1-codex-prompt.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-1-codex-run.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-1-codex-verdict.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-2-codex-prompt.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-2-codex-run.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-2-codex-verdict.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-3-codex-prompt.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-3-codex-run.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-3-codex-verdict.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-4-codex-prompt.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-4-codex-run.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-4-codex-verdict.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-5-codex-prompt.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-5-codex-run.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-5-codex-verdict.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-6-codex-prompt.md
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-6-codex-run.json
+ops/land/pr969-wp813-provenance/verdicts/wp813-g1-claude-review-6-codex-verdict.md
+scripts/tl_selftest.py
+spec_sha256=9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca
+$ ['git', '--version']
+rc=0
+git version 2.43.0
+$ ['python3', '--version']
+rc=0
+Python 3.13.17
+$ ['python3', '-m', 'ruff', '--version']
+rc=0
+ruff 0.17.3

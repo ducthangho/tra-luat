@@ -1,0 +1,81 @@
+--- ops/bien_nhan_v2.py
++++ ops/bien_nhan_v2.py
+@@ -1111,14 +1111,22 @@
+ def _commit_cua(root: Path, oid: str):
+     """OID → commit 40 hex, hoặc None khi KHÔNG tra được (trạng thái thứ ba, không phải 'không tổ tiên')."""
+     rc, ra = _git(root, "rev-parse", "--verify", "--quiet", f"{oid}^{{commit}}")
+-    return ra if rc == 0 and _HEX40.match(ra) else None
++    if rc not in (0, 1) or (rc == 0 and not _HEX40.match(ra)):
++        raise KhongDoDuoc(f"không tra được commit `{oid}`: git rev-parse rc={rc}: {ra}")
++    return ra if rc == 0 else None
+ 
+ 
+ def _nhanh_mac_dinh(root: Path):
+     for ref in ("refs/remotes/origin/HEAD", "refs/remotes/origin/master", "refs/heads/master"):
++        rc, ra = _git(root, "show-ref", "--verify", "--quiet", ref)
++        if rc == 1:                       # ref thực sự vắng: CI không origin/HEAD vẫn fallback
++            continue
++        if rc != 0:
++            raise KhongDoDuoc(f"không kiểm được ref mặc định `{ref}`: git show-ref rc={rc}: {ra}")
+         c = _commit_cua(root, ref)
+-        if c:
+-            return c
++        if c is None:
++            raise KhongDoDuoc(f"ref mặc định `{ref}` có nhưng không trỏ commit")
++        return c
+     return None
+ 
+ 
+@@ -1248,7 +1256,7 @@
+                     f"{ten}: KHÔNG ĐO ĐƯỢC L-SURFACE — không có từ vựng execution surface của kho")
+                 continue
+             p_rj = root / rj
+-            if rj.startswith("/") or ".." in Path(rj).parts or not p_rj.is_file():
++            if rj.startswith("/") or ".." in Path(rj).parts or not p_rj.exists():
+                 sf_chua.append(f"{ten}: `run_json` {rj} không có trong kho — L-SURFACE không áp")
+                 continue
+             # TỆP CÓ mà đọc/phân tích hỏng ⇒ KHÔNG ĐO ĐƯỢC (rc=2), không phải "không áp": miễn trừ của
+@@ -1403,11 +1411,11 @@
+                          "như `--sinh-no`: KHÔNG ghi đè tệp")
+     a = ap.parse_args(argv)
+     root = Path(a.root).resolve()
+-    if a.sinh_no:
+-        return _sinh_no(root)
+-    if a.sinh_no_cau_lich_su:
+-        return _sinh_no_cau(root)
+     try:
++        if a.sinh_no:
++            return _sinh_no(root)
++        if a.sinh_no_cau_lich_su:
++            return _sinh_no_cau(root)
+         loi, tk = kiem(root)
+     except KhongDoDuoc as ex:
+         print(f"KHÔNG ĐO ĐƯỢC: {ex}", file=sys.stderr)
+@@ -1450,16 +1458,22 @@
+ 
+ 
+ def _sinh_no(root: Path) -> int:
+-    import yaml
++    try:
++        import yaml
++    except ImportError as ex:
++        raise KhongDoDuoc(f"thiếu PyYAML: {ex}") from ex
+     tm = root / THU_MUC
+     ra = {}
+     for p in sorted(tm.glob("*.receipt.yaml")):
+         if p.name in ALLOWLIST_CUTOVER:
+             continue
+-        d = yaml.safe_load(p.read_text(encoding="utf-8"))
+-        if isinstance(d, dict) and not _thieu(d):
+-            continue
+-        ra[p.name] = _bam(p)
++        try:
++            d = yaml.safe_load(p.read_text(encoding="utf-8"))
++            if isinstance(d, dict) and not _thieu(d):
++                continue
++            ra[p.name] = _bam(p)
++        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:
++            raise KhongDoDuoc(f"{p.name}: không sinh được nợ ({type(ex).__name__}: {ex})") from ex
+     print("NO_DA_DO: dict[str, str] = {")
+     for k, v in ra.items():
+         print(f'    "{k}":\n        "{v}",')

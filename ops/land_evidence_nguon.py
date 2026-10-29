@@ -33,6 +33,10 @@ LUẬT:
       thêm NFC và nhận cả cách viết có dấu `ĐẠT` — chỉ đúng hai cách viết ấy, KHÔNG bỏ dấu đại trà (review l7a P2: `ĐẤT`, `DẠT`
       là giá trị khác, phải để L7 không áp). Giá trị khác ⇒ không đòi. Connector P1 PR #934 (4372912640): hồ sơ khai ĐẠT
       khi biên nhận chỉ đo model. `MIEN_TRU_L7` = 3 hồ sơ đã khai như thế (nợ `NO-L7-3-HO-SO-KHAI-DAT-THIEU-DO`), cơ chế như L5.
+      r2 (`ops/specs/land-evidence-l7-r2-moi-do-sau.md`): `$.assurance_81` là mapping ⇒ nó là nguồn DUY NHẤT, mọi khoá
+      `reviewer_assurance_81` lồng chuẩn hoá ra DAT chỉ thành ghi chú (hồ sơ chỉ thêm, câu DAT cũ còn nằm đó). Không có khối ấy
+      ⇒ mỗi khoá lồng (mọi độ sâu, kể cả trong list) chuẩn hoá ra DAT là MỘT vi phạm; không nhận `thuc_thi` lồng. Giá trị
+      không phải chuỗi ⇒ không áp, ghi chú. Lời khai văn xuôi (`§8.1 … cross_approved` trong chuỗi) KHÔNG đọc được, không bắt.
 
 ĐIỀU CỔNG NÀY KHÔNG LÀM (đặc tả `ngoai_pham_vi`): L1 chỉ đo "lời khai trỏ tới thứ CÓ THẬT", KHÔNG đo thứ ấy chứng minh câu
 văn — một tệp vô can vẫn làm L1 qua. Chỉ L2 đọc NỘI DUNG, và chỉ cho token số. Hồ sơ cũ đi qua miễn trừ, không được kiểm.
@@ -314,7 +318,31 @@ def kiem_ho_so(tep, byte, goc, yaml):
         elif not mien:
             vp += [f"L7 $.assurance_81.thuc_thi.{k}: khai DAT mà không phải lời khai measured — {str(tt7.get(k))[:60]!r}"
                    for k in L7_KHOA if not (isinstance(tt7.get(k), str) and RE_KHAI_DO.match(tt7[k]))]
+    co_goc = isinstance(a81, dict)   # L7 r2: có khối cấp gốc ⇒ khối ấy là nguồn DUY NHẤT, khoá lồng chỉ được ghi chú
+    for d, v in _khoa_81(du_lieu):
+        if d == "$.assurance_81.reviewer_assurance_81":   # chính khối gốc, r1 đã xét
+            continue
+        if not isinstance(v, str):
+            ghi.append(f"L7 {d}: giá trị {type(v).__name__} không phải chuỗi — L7 không áp")
+        elif _chuan_hoa_81(v) not in L7_MUC_DAT:
+            continue
+        elif co_goc:
+            ghi.append(f"L7 {d}: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất")
+        else:
+            vp.append(f"L7 {d}: khai DAT mà không có khối $.assurance_81 cấp gốc có thuc_thi")
     return vp, ghi
+
+
+def _khoa_81(nut, duong="$"):
+    """(đường dẫn JSON, giá trị) của MỌI khoá `reviewer_assurance_81`, mọi độ sâu, kể cả trong phần tử list (L7 r2)."""
+    if isinstance(nut, dict):
+        for k, v in nut.items():
+            if k == "reviewer_assurance_81":
+                yield f"{duong}.{k}", v
+            yield from _khoa_81(v, f"{duong}.{k}")   # độ sâu
+    elif isinstance(nut, list):
+        for i, v in enumerate(nut):
+            yield from _khoa_81(v, f"{duong}[{i}]")   # list
 
 
 def _chuan_hoa_81(v):

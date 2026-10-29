@@ -383,14 +383,16 @@ def c17_l7_khai_dat_phai_do_thuc_thi():
     for muc in ("CHUA_DAT", "CHUA DAT", "'chua dat'", "CHƯA ĐẠT", "DAT_MOT_PHAN", "1", "true", "null", "[DAT]",
                 "ĐẤT", "DẠT", "ĐAT", "dát"):   # review l7a P2: chữ khác dấu là giá trị KHÁC, không phải DAT
         ky(hs7(muc), P7, 0, f"{muc!r} không phải DAT ⇒ L7 không áp")
-    for hs in ("assurance_81: DAT\n", "assurance_81: [{reviewer_assurance_81: DAT}]\n", "x: {reviewer_assurance_81: DAT}\n",
-               "reviewer_assurance_81: DAT\n", "assurance_81: {}\n", "DAT\n", "null\n",
-               "- {assurance_81: {reviewer_assurance_81: DAT}}\n"):   # review l7e P3: phạm vi áp — vị trí, có mặt, hình dạng gốc
+    for hs in ("assurance_81: DAT\n", "assurance_81: {}\n", "DAT\n", "null\n"):   # review l7e P3: phạm vi áp
         try:
             rc, ra = chay(hs, P7)
         except Exception as e:   # traceback không phải ĐẠT
             rc, ra = -1, f"{type(e).__name__}: {e}"
         bang(rc == 0 and "L7" not in ra, f"L7 không áp cho {hs.strip()!r}: rc={rc} {ra[-200:]}")
+    for hs, d in (("assurance_81: [{reviewer_assurance_81: DAT}]\n", "$.assurance_81[0]"), ("x: {reviewer_assurance_81: DAT}\n", "$.x"),
+                  ("reviewer_assurance_81: DAT\n", "$"), ("- {assurance_81: {reviewer_assurance_81: DAT}}\n", "$[0].assurance_81")):
+        # r2: bốn ca r1 "không áp" (lồng, trong list, ở gốc tài liệu) chính là lỗ r2 đóng ⇒ nay ĐỎ theo r2, KHÔNG theo luật khối gốc
+        ky7(hs, 1, f"r2 đòi ĐỎ {hs.strip()!r}", [f"L7 {d}.reviewer_assurance_81" + L7_DO], ["L7 $.assurance_81.thuc_thi"])
 
 
 @ca
@@ -429,6 +431,66 @@ def c19_l7_danh_sach_dong_bang():
     van_tay = hashlib.sha256(json.dumps(sorted(ds.items())).encode()).hexdigest()
     bang(len(ds) == KY_VONG_SO_MIEN_TRU_L7 and van_tay == KY_VONG_VAN_TAY_MIEN_TRU_L7,
          f"MIEN_TRU_L7 trôi khỏi ảnh chụp: {len(ds)} tên, vân tay {van_tay[:12]}…")
+
+
+L7_DO = ": khai DAT mà không có khối $.assurance_81 cấp gốc có thuc_thi"
+
+
+def ky7(hs, mong, ly_do, chua=(), khong=()):
+    """L7 r2: đòi rc `mong`, mọi chuỗi `chua` có trong đầu ra, mọi chuỗi `khong` vắng."""
+    rc, ra = chay(hs, P7)
+    bang(rc == mong and all(x in ra for x in chua) and not any(x in ra for x in khong),
+         f"{ly_do}: mong rc={mong} chua={chua} khong={khong}, được {rc} {ra[-300:]}")
+
+
+@ca
+def c20_l7r2_long_mapping_khong_khoi_goc():
+    """r2 §2: không có khối $.assurance_81 cấp gốc ⇒ mỗi khoá lồng (mọi độ sâu) chuẩn hoá ra DAT là MỘT vi phạm, nêu đường dẫn."""
+    hs = "cap_nhat_20261026:\n  reviewer_assurance_81: {}\n"
+    for muc in ("DAT", "Dat", "' DAT '", "ĐẠT", "dat", unicodedata.normalize("NFD", "đạt")):
+        ky7(hs.format(muc), 1, f"lồng {muc!r}", ["L7 $.cap_nhat_20261026.reviewer_assurance_81" + L7_DO])
+    ky7("reviewer_assurance_81: DAT\n", 1, "khoá ở gốc tài liệu, không phải khối", ["L7 $.reviewer_assurance_81" + L7_DO])
+    ky7("a:\n  b:\n    c: {reviewer_assurance_81: DAT}\nd: {reviewer_assurance_81: dat}\n", 1, "hai khoá ⇒ hai vi phạm",
+        ["L7 $.a.b.c.reviewer_assurance_81" + L7_DO, "L7 $.d.reviewer_assurance_81" + L7_DO, ": 2 vi phạm"])
+    ky7("x:\n  reviewer_assurance_81: DAT\n  thuc_thi: {" + ", ".join(f"{k}: '{v}'" for k, v in DU7.items()) + "}\n", 1,
+        "thuc_thi lồng không được nhận", ["L7 $.x.reviewer_assurance_81" + L7_DO])
+    ky7("assurance_81: DAT\nx: {reviewer_assurance_81: DAT}\n", 1, "assurance_81 vô hướng không phải khối",
+        ["L7 $.x.reviewer_assurance_81" + L7_DO])
+    for muc in ("CHUA_DAT", "'chua dat'", "ĐẤT", "DAT_MOT_PHAN", "''"):
+        ky7(hs.format(muc), 0, f"lồng {muc!r} không phải DAT ⇒ không áp", khong=["L7"])
+    for tho, kieu in (("null", "NoneType"), ("true", "bool"), ("3", "int"), ("[DAT]", "list"), ("{a: DAT}", "dict")):
+        ky7(hs.format(tho), 0, f"lồng {tho} không phải chuỗi ⇒ không áp, có ghi chú",
+            [f"L7 $.cap_nhat_20261026.reviewer_assurance_81: giá trị {kieu} không phải chuỗi"], [L7_DO])
+    ky7("x: {y: DAT, reviewer_assurance_8: DAT, Reviewer_Assurance_81: DAT}\n", 0, "chỉ đúng tên khoá", khong=["L7"])
+
+
+@ca
+def c21_l7r2_long_trong_list():
+    """r2 §2: duyệt cả phần tử list — kể cả list ở gốc tài liệu và list trong `assurance_81` vô hướng hoá."""
+    ky7("lich_su:\n  - {a: 1}\n  - {reviewer_assurance_81: ' Dat '}\n", 1, "trong phần tử list",
+        ["L7 $.lich_su[1].reviewer_assurance_81" + L7_DO])
+    ky7("assurance_81: [{reviewer_assurance_81: DAT}]\n", 1, "assurance_81 là list ⇒ không phải khối gốc",
+        ["L7 $.assurance_81[0].reviewer_assurance_81" + L7_DO])
+    ky7("- {assurance_81: {reviewer_assurance_81: DAT}}\n", 1, "gốc tài liệu là list",
+        ["L7 $[0].assurance_81.reviewer_assurance_81" + L7_DO])
+    ky7("x: [[{y: [{reviewer_assurance_81: ĐẠT}]}]]\n", 1, "list lồng list", ["L7 $.x[0][0].y[0].reviewer_assurance_81" + L7_DO])
+    ky7("x: [{reviewer_assurance_81: CHUA_DAT}]\n", 0, "trong list nhưng CHUA_DAT", khong=["L7"])
+
+
+@ca
+def c22_l7r2_khoi_goc_la_nguon_duy_nhat():
+    """r2 §2: có khối $.assurance_81 mapping ⇒ nó là nguồn duy nhất; khoá lồng DAT chỉ là ghi chú nêu đường dẫn."""
+    long = "cap_nhat_20261026:\n  reviewer_assurance_81: DAT\nds: [{reviewer_assurance_81: Dat}]\n"
+    ghi = [f"L7 {d}: khai DAT lồng bị bỏ qua" for d in ("$.cap_nhat_20261026.reviewer_assurance_81",
+                                                         "$.ds[0].reviewer_assurance_81")]
+    ky7(hs7("DAT", DU7) + long, 0, "khối gốc DAT đủ đo + lồng DAT", ghi, [L7_DO])
+    ky7(hs7("CHUA_DAT") + long, 0, "khối gốc CHUA_DAT + lồng DAT", ghi, [L7_DO])
+    ky7(hs7("DAT") + long, 1, "khối gốc DAT thiếu đo vẫn ĐỎ theo r1", ["L7 $.assurance_81.thuc_thi:"] + ghi, [L7_DO])
+    ky7(hs7("CHUA_DAT") + "  thuc_thi: {reviewer_assurance_81: DAT}\n", 0, "lồng bên trong chính khối gốc",
+        ["L7 $.assurance_81.thuc_thi.reviewer_assurance_81: khai DAT lồng bị bỏ qua"], [L7_DO])
+    ky7(hs7("DAT", DU7), 0, "khối gốc không bị ghi chú như khoá lồng", khong=["lồng bị bỏ qua", L7_DO])
+    ky7("assurance_81: {}\nx: {reviewer_assurance_81: DAT}\n", 0, "khối gốc mapping RỖNG vẫn là khối gốc",
+        ["L7 $.x.reviewer_assurance_81: khai DAT lồng bị bỏ qua"], [L7_DO])
 
 
 @ca
@@ -557,6 +619,15 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L7_ghi_chu_khong_can_ten", "        if bam is not None:\n            ghi.append(", "        if True:\n            ghi.append(", "c18"),
     ("L7_khong_bao_gio_mien", "mien = bam is not None and hashlib.sha256(byte).hexdigest() == bam", "mien = False", "c18"),
     ("L7_mat_mien_tru_khong_ghi", 'else "L7 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ")', 'else "L7 kiểm đủ")', "c18"),
+    ("L7r2_go_do_sau", "yield from _khoa_81(v, f\"{duong}.{k}\")   # độ sâu", "pass", "c20"),
+    ("L7r2_go_list", "yield from _khoa_81(v, f\"{duong}[{i}]\")   # list", "pass", "c21"),
+    ("L7r2_dao_khoi_goc_nguon_duy_nhat", "co_goc = isinstance(a81, dict)", "co_goc = False", "c22"),
+    ("L7r2_long_dat_chi_ghi_chu", 'vp.append(f"L7 {d}: khai DAT mà không có', 'ghi.append(f"L7 {d}: khai DAT mà không có', "c20"),
+    ("L7r2_bo_chuan_hoa_long", "elif _chuan_hoa_81(v) not in L7_MUC_DAT:", "elif v not in L7_MUC_DAT:", "c20"),
+    ("L7r2_khong_chuoi_khong_ghi_chu", '            ghi.append(f"L7 {d}: giá trị {type(v).__name__}', '            (f"L7 {d}: giá trị {type(v).__name__}', "c20"),
+    ("L7r2_ghi_chu_long_bi_mat", 'ghi.append(f"L7 {d}: khai DAT lồng bị bỏ qua', '(f"L7 {d}: khai DAT lồng bị bỏ qua', "c22"),
+    ("L7r2_khoi_goc_tu_ghi_chu", 'if d == "$.assurance_81.reviewer_assurance_81":', "if False:", "c22"),
+    ("L7r2_ten_khoa_khong_chinh_xac", 'if k == "reviewer_assurance_81":', 'if "assurance_8" in str(k).lower():', "c20"),
     ("L7_noi_danh_sach", "MIEN_TRU_L7 = {\n", "MIEN_TRU_L7 = {\n    \"pr9999-tan-cong-land-evidence.yaml\": \"0\" * 64,\n", "c19"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

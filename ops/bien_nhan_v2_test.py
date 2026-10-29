@@ -3092,6 +3092,76 @@ def _commit_trung_tien_to(tmp: Path, k: dict):
     return sha[0][:7]
 
 
+def _tiem_git(dk, ket_qua):
+    """Context manager: thay `_chay_git` của module `bnv2` ĐANG HIỆN HÀNH (đọc `globals()` lúc vào — module đột biến
+    nếu có): lệnh mà `dk(args)` đúng thì trả `ket_qua(root, args, vao, timeout, goc)`, lệnh khác đi `goc`. Gỡ lại khi ra,
+    kể cả khi thân ném lỗi. #1017: dùng cho nhánh mà nền không dựng được bằng git thật."""
+    import contextlib
+
+    @contextlib.contextmanager
+    def _cm():
+        mod = globals()["bnv2"]
+        goc = mod._chay_git
+
+        def gia(root, args, vao=None, timeout=60):
+            if dk(args):
+                return ket_qua(root, args, vao, timeout, goc)
+            return goc(root, args, vao, timeout)
+        mod._chay_git = gia
+        try:
+            yield
+        finally:
+            mod._chay_git = goc
+    return _cm()
+
+
+def _bn_anc_cau(tmp: Path):
+    k = _kho_cau(tmp)
+    return k, _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
+
+
+def _nguon_lstat_tiem(tmp: Path):
+    """Nguồn c91 (#1017): "lstat lỗi khác ENOENT/ENOTDIR" dựng bằng TIÊM, chạy MỌI nền — tên quá dài chỉ cho lỗi ấy
+    trên POSIX. Đường dẫn không tồn tại; `Path.lstat` của đúng đường dẫn ấy ném `PermissionError` trong lúc chạy CLI."""
+    import json as _j
+    rj = "ops/reviews/tiem-lstat/run.json"
+    d, _ = _bn_surface(rj, "")
+    al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}),
+                      "provider: openai_codex\nexecution_surface: codex_service\n")
+    return (tmp, al, ("r.receipt.yaml", "verdict_path", bnv2.LUAT_SURFACE), None, "tiem-lstat",
+            lambda: _tiem_lstat(rj, PermissionError(13, "tiem #1017")))
+
+
+def _nguon_canh_bao_tiem(tmp: Path):
+    """Nguồn c91 (#1017): git in cảnh báo ở MỌI lệnh, dựng bằng TIÊM vào stderr — `core.fsyncObjectFiles` không làm
+    git for Windows 2.55 in gì (đo trên máy Windows của chủ kho 29-10-2026), git 2.43 Linux thì có."""
+    _, al = _bn_anc_cau(tmp)
+
+    def kq(root, args, vao, timeout, goc):
+        p = goc(root, args, vao, timeout)
+        return subprocess.CompletedProcess(p.args, p.returncode, p.stdout, p.stderr + "warning: tiem-canh-bao-1017\n")
+    return (tmp, al, ("r.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY), None, "tiem-canh-bao-1017",
+            lambda: _tiem_git(lambda a: True, kq))
+
+
+def _c96_tiem(tmp: Path, mau: str):
+    """Biến thể tiêm của c96 (#1017), MỌI nền: lệnh khớp `mau` trả rc=3 + stderr RỖNG, lệnh khác đi git thật."""
+    _, al = _bn_anc_cau(tmp)
+    with _tiem_git(lambda a: any(mau in str(x) for x in a),
+                   lambda root, a, v, t, g: subprocess.CompletedProcess(["git", *a], 3, "", "")):
+        return _chay_cli(tmp, al)
+
+
+def _qua_nguon_c91(dung_: tuple, co_no: bool):
+    """Chạy MỘT nguồn c91 ĐÃ DỰNG qua CLI; trả (đạt?, mô tả). Dùng chung cho c91 và c97."""
+    import contextlib
+    goc, al, khoa, path, dau, *boc = dung_
+    with (boc[0]() if boc else contextlib.nullcontext()):
+        rc, loi_ra = _chay_cli(goc, al, {khoa} if co_no else (), path=path)
+    dat = rc == 2 and "NỢ CHẾT" not in loi_ra and "Traceback" not in loi_ra and dau in loi_ra
+    return dat, f"đòi rc=2, không NỢ CHẾT, stderr nêu `{dau}`; được rc={rc}: {loi_ra[-400:]!r}"
+
+
 def _tiem_lstat(duoi: str, loi: OSError):
     """Context manager: `Path.lstat` của đường dẫn kết thúc bằng `duoi` (so theo `/`) ném `loi`; mọi đường khác đi lstat
     THẬT. Gỡ lại khi ra. #1017: chỉ dùng cho nhánh mà nền không dựng được bằng tệp thật."""
@@ -3194,12 +3264,6 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
             pass
         return tmp, al, k_sf, None, "a" * 40
 
-    def run_json_lstat_loi_tiem(tmp):
-        """#1017: "lstat lỗi khác ENOENT/ENOTDIR" dựng bằng TIÊM, chạy trên MỌI nền — tên quá dài chỉ cho lỗi ấy trên
-        POSIX. Đường dẫn không tồn tại; `Path.lstat` của đúng đường dẫn ấy ném `PermissionError` trong lúc chạy CLI."""
-        rj = "ops/reviews/tiem-lstat/run.json"
-        al = _surface(tmp, rj)
-        return tmp, al, k_sf, None, "tiem-lstat", lambda: _tiem_lstat(rj, PermissionError(13, "tiem #1017"))
 
     def git_vang(tmp):
         k = _kho_cau(tmp)
@@ -3257,6 +3321,10 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
     def cau_hinh_canh_bao(tmp):
         k, al = _anc(tmp)
         k["g"]("config", "core.fsyncObjectFiles", "true")          # git in cảnh báo deprecated ở MỌI lệnh
+        # #1017: ĐO trước bằng chính đường gọi git của cổng — git for Windows 2.55 KHÔNG in cảnh báo này (đo trên máy
+        # Windows của chủ kho), nên nguồn KHÔNG dựng được ở đó; nhánh ấy đo bằng `_nguon_canh_bao_tiem`.
+        if "fsyncObjectFiles" not in bnv2._chay_git(tmp, ["rev-parse", "--is-shallow-repository"]).stderr:
+            return None
         return tmp, al, k_anc, None, "fsyncObjectFiles"
 
     def grafts(tmp):
@@ -3267,10 +3335,10 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
         k["g"]("config", "advice.graftFileDeprecated", "false")      # tắt lời nhắc: chốt phải đứng một mình
         return tmp, al, k_anc, None, "grafts"
 
-    import contextlib
     for nguon in (receipt_thu_muc, receipt_utf8, alias_vong, nhanh_la_tree, ref_hong, symref_gay, run_json_thu_muc,
-                  run_json_symlink_gay, run_json_ten_qua_dai, run_json_lstat_loi_tiem, git_vang, tien_to_mo_ho,
-                  object_rong, kho_nong, kho_partial, kho_partial_promisor, grafts, cau_hinh_canh_bao):
+                  run_json_symlink_gay, run_json_ten_qua_dai, _nguon_lstat_tiem, git_vang, tien_to_mo_ho,
+                  object_rong, kho_nong, kho_partial, kho_partial_promisor, grafts, cau_hinh_canh_bao,
+                  _nguon_canh_bao_tiem):
         for ten_no in ("khong-no", "co-no"):
             ten = f"{nguon.__name__}/{ten_no}"
             with tempfile.TemporaryDirectory() as t:
@@ -3278,11 +3346,8 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
                 if dung_ is None:                   # nền không dựng được nguồn này — nói ra, ĐỪNG giả xanh
                     print(f"  GHI CHÚ c91 {ten}: nền KHÔNG dựng được (đo) — nhánh ấy đo bằng nguồn tiêm")
                     continue
-                goc, al, khoa, path, dau, *boc = dung_
-                with (boc[0]() if boc else contextlib.nullcontext()):
-                    rc, loi_ra = _chay_cli(goc, al, {khoa} if ten_no == "co-no" else (), path=path)
-                bang(rc == 2 and "NỢ CHẾT" not in loi_ra and "Traceback" not in loi_ra and dau in loi_ra,
-                     f"{ten}: đòi rc=2, không NỢ CHẾT, stderr nêu `{dau}`; được rc={rc}: {loi_ra[-400:]!r}")
+                dat, mo_ta = _qua_nguon_c91(dung_, ten_no == "co-no")
+                bang(dat, f"{ten}: {mo_ta}")
 
 
 @ca
@@ -3457,9 +3522,8 @@ def c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC():
         for cach in ("path", "tiem"):
             with tempfile.TemporaryDirectory() as t:
                 tmp = Path(t)
-                k = _kho_cau(tmp)
-                al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
                 if cach == "path":
+                    _, al = _bn_anc_cau(tmp)
                     bin_ = tmp / "_bin"
                     bin_.mkdir()
                     gia = bin_ / "git"
@@ -3479,22 +3543,74 @@ def c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC():
                         continue
                     rc, loi_ra = _chay_cli(tmp, al, path=path)
                 else:
-                    # Tiêm ở `_chay_git`, MỌI nền: lệnh khớp mẫu trả rc=3 + stderr RỖNG, lệnh khác đi git thật.
-                    mod = bnv2
-                    goc_fn = mod._chay_git
-
-                    def gia_fn(root, args, vao=None, timeout=60, _mau=mau, _goc=goc_fn):
-                        if any(_mau in str(a) for a in args):
-                            return subprocess.CompletedProcess(["git", *args], 3, "", "")
-                        return _goc(root, args, vao, timeout)
-                    mod._chay_git = gia_fn
-                    try:
-                        rc, loi_ra = _chay_cli(tmp, al)
-                    finally:
-                        mod._chay_git = goc_fn
+                    rc, loi_ra = _c96_tiem(tmp, mau)
                 bang(rc == 2 and mau in loi_ra and "rc=3" in loi_ra,
                      f"{mau}/{cach}: đòi rc=2 nêu `{mau}` rc=3, được rc={rc}: {loi_ra[-400:]!r}")
 
+
+
+@ca
+def c97_NHANH_TIEM_co_rang_tren_module_da_thay_va_tu_go():
+    """#1017 cross-review lượt 1 (`nhanh-tiem-thieu-chot-tu-kiem`, P2): trên Linux m116/m125/m114 chết ở biến thể THẬT trước
+    khi tới nhánh tiêm, nên hai đột biến của CHÍNH phần tiêm SỐNG qua toàn suite — tiêm vá nhầm module (`_BNV2_THAT` thay
+    vì `bnv2` hiện hành) và không gỡ `Path.lstat`. Trên Windows nhánh tiêm là đường DUY NHẤT, nên lỗi ấy biến thành tín
+    dụng giết giả. Ca này đo nhánh tiêm ĐỘC LẬP với biến thể thật, trên MỌI nền:
+      · đối chứng DƯƠNG: module đã THAY bằng bản sao VÔ HẠI (chỉ đổi một docstring) ⇒ cả ba nhánh tiêm phải qua;
+      · răng: bản sao m116 / m125 / m114 ⇒ đúng nhánh tiêm tương ứng phải ĐỎ;
+      · tự gỡ: `Path.lstat` và `_chay_git` trở lại đúng object cũ, kể cả khi thân `with` ném lỗi."""
+    VO_HAI = ('    """Đường dẫn VẮNG thật — không mục nào, kể cả symlink gãy.',
+              '    """Đường dẫn VẮNG thật — không mục nào, kể cả symlink gãy. (bản sao vô hại #1017)')
+    M116 = ("    except OSError:\n        return False\n    return False\n",
+            "    except OSError:\n        return True\n    return False\n")
+    M125 = ("    if p.returncode not in sach:\n        raise KhongDoDuoc(", "    if False:\n        raise KhongDoDuoc(")
+    M114 = ("    if con:\n        raise KhongDoDuoc(", "    if False:\n        raise KhongDoDuoc(")
+
+    def lstat_tiem():
+        with tempfile.TemporaryDirectory() as t:
+            return _qua_nguon_c91(_nguon_lstat_tiem(Path(t)), False)
+
+    def canh_bao_tiem():
+        with tempfile.TemporaryDirectory() as t:
+            return _qua_nguon_c91(_nguon_canh_bao_tiem(Path(t)), False)
+
+    def rc3_tiem():
+        with tempfile.TemporaryDirectory() as t:
+            rc, loi_ra = _c96_tiem(Path(t), "merge-base")
+            return rc == 2 and "merge-base" in loi_ra and "rc=3" in loi_ra, f"rc={rc}: {loi_ra[-300:]!r}"
+
+    nhanh = {"lstat": (lstat_tiem, M116), "canh-bao": (canh_bao_tiem, M114), "rc3": (rc3_tiem, M125)}
+    lstat0 = Path.lstat
+    the = globals()["bnv2"], globals()["CONG"]
+    try:
+        for ten, (ham, dot_bien) in nhanh.items():
+            for nhan, sua, mong_dat in (("vo-hai", VO_HAI, True), ("dot-bien", dot_bien, False)):
+                _dot_bien_tep(*sua)
+                try:
+                    mod = globals()["bnv2"]
+                    git0 = mod._chay_git
+                    dat, mo_ta = ham()
+                    bang(dat == mong_dat,
+                         f"nhánh tiêm `{ten}` trên bản sao {nhan}: đòi {'QUA' if mong_dat else 'ĐỎ'}, được "
+                         f"{'QUA' if dat else 'ĐỎ'} — {mo_ta}")
+                    bang(Path.lstat is lstat0, f"nhánh tiêm `{ten}` ({nhan}) KHÔNG gỡ `Path.lstat`")
+                    bang(mod._chay_git is git0, f"nhánh tiêm `{ten}` ({nhan}) KHÔNG gỡ `_chay_git`")
+                finally:
+                    globals()["bnv2"], globals()["CONG"] = the
+        # Tự gỡ cả khi thân ném lỗi.
+        for cm in (_tiem_lstat("x/y", PermissionError(13, "t")), _tiem_git(lambda a: True, lambda *a: None)):
+            git0 = globals()["bnv2"]._chay_git
+            try:
+                with cm:
+                    raise RuntimeError("thân ném lỗi")
+            except RuntimeError:
+                pass
+            bang(Path.lstat is lstat0 and globals()["bnv2"]._chay_git is git0,
+                 "context manager tiêm KHÔNG gỡ khi thân ném lỗi")
+    finally:
+        Path.lstat = lstat0
+        globals()["bnv2"], globals()["CONG"] = the
+        while _TAM_DOT_BIEN:
+            shutil.rmtree(_TAM_DOT_BIEN.pop(), ignore_errors=True)
 
 def _chay_1(fn):
     global _CA

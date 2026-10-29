@@ -1089,6 +1089,7 @@ def _secrets_set_body(a, entry_notebook) -> int:
 AGENT_CREDS_FILEID = ""
 _AGENT_CREDS_KEYS = ("codex_auth", "claude_oauth_token", "antigravity_api_key")
 _MASTER_KEY_MIN_LEN, _MASTER_KEY_MIN_DISTINCT = 32, 12   # Q11: chỉ đường GHI; đường ĐỌC phải mở được bản cũ
+_G = globals().__getitem__   # tên bind() chèn (_imp, HOPNAP_FOLDER_ID) tra lúc gọi — ruff F delta 0 (CLAUDE.md bước 3)
 
 
 def _master_key_ghi(tag: str) -> str | None:
@@ -1177,7 +1178,7 @@ def cmd_agent_creds_set(a) -> int:
         return 1
     new = bool(getattr(a, "new", False))
     fid = None if new else (getattr(a, "file_id", None) or os.environ.get("TL_AGENT_CREDS_FILEID") or AGENT_CREDS_FILEID)
-    store = _imp("gws_cred_store")
+    store = _G("_imp")("gws_cred_store")
     payload = {}
     if not new:
         if not fid:
@@ -1200,7 +1201,7 @@ def cmd_agent_creds_set(a) -> int:
                "updated_at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     blob = store.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf-8"), master)
     try:
-        fid, _ = _stage_enc_upload("tl_agent_creds.enc", blob, getattr(a, "folder", None) or HOPNAP_FOLDER_ID, fid, new)
+        fid, _ = _stage_enc_upload("tl_agent_creds.enc", blob, getattr(a, "folder", None) or _G("HOPNAP_FOLDER_ID"), fid, new)
     except Exception as e:  # noqa: BLE001
         print(f"[{tag}] ✗ upload lỗi ({_safe_exc(e)}).", file=sys.stderr)
         return 4
@@ -1220,7 +1221,7 @@ def _bootstrap_agent_creds(master: str) -> tuple[str, str]:
     if blob is None:
         return "KHÔNG ĐO ĐƯỢC", f"tải công khai id={fid} lỗi (chưa anyone-with-link / mất mạng?)"
     try:
-        p = json.loads(_imp("gws_cred_store").decrypt(blob, master).decode("utf-8"))
+        p = json.loads(_G("_imp")("gws_cred_store").decrypt(blob, master).decode("utf-8"))
         ca = p.get("codex_auth") if isinstance(p, dict) and p.get("schema") == 1 else 0
         if ca is not None and not (isinstance(ca, dict) and isinstance(ca.get("tokens"), dict)):
             raise ValueError("schema")

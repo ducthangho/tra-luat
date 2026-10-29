@@ -21374,8 +21374,9 @@ def run() -> int:
     # ═══ r973 — WP1009 CLOUD-SETUP-P1-BUNDLE: tl_agent_creds.enc · chốt khoá gốc ở đường GHI · bootstrap nạp ═══
     # Hermetic: upload/tải công khai thay bằng đồ giả GIỮ TRẠNG THÁI (`drv` = {fileId: blob}) có đếm lời gọi.
     import argparse as _ap973, secrets as _sec973, subprocess as _sp973, sys as _sys973
-    _tg973 = _TL_MODULE._imp("tl_gws"); _tg973.bind(_TL_MODULE)
-    _st973, _os973 = _TL_MODULE._imp("gws_cred_store"), globals()["os"]
+    _tlm973, _os973 = globals()["_TL_MODULE"], globals()["os"]   # tên tĩnh cho ruff (như r972)
+    _tg973 = _tlm973._imp("tl_gws"); _tg973.bind(_tlm973)
+    _st973 = _tlm973._imp("gws_cred_store")
     _K973 = "k973-abcdefghijklmnopqrstuvwxyz0123456789"
     _AU973 = {"tokens": {"refresh_token": "SENT973-codex"}, "last_refresh": "2026-10-27T11:35:54.511153200Z"}
 
@@ -21473,7 +21474,7 @@ def run() -> int:
                 with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
                     return fn(_ns973(claude_token_env="TOK973B", new=True, config=None, profile=None, secrets_id="S",
                                      secrets_file=None, gas_token="g", webapp=None, gws=False, nlm=False,
-                                     no_gws=True, no_nlm=True, no_public=True)), len(ups)
+                                     no_gws=True, no_nlm=True, no_public=True)), len(ups), "TL_MASTER_KEY yếu" in b.getvalue()
             finally:
                 for n, v in o.items():
                     setattr(_tg973, n, v)
@@ -21481,7 +21482,8 @@ def run() -> int:
         lenh = (_tg973.cmd_secrets_stage, _tg973.cmd_secrets_set, _tg973.cmd_agent_creds_set)
         yeu = ("abcdefghijklmnopqrstuvwxyz01234", ("abcdefghijk" * 3)[:32])   # 31 ký tự · 32 ký tự/11 khác nhau
         manh = _sec973.token_urlsafe(32)
-        return all(_rc(f, k) == (2, 0) for f in lenh for k in yeu) and _rc(_tg973.cmd_agent_creds_set, manh) == (0, 1)
+        # đòi thông điệp CỦA CHỐT: rc 2 vì lý do khác (vd. không tải được bundle) là tín dụng giả
+        return all(_rc(f, k) == (2, 0, True) for f in lenh for k in yeu) and _rc(_tg973.cmd_agent_creds_set, manh) == (0, 1, False)
     _t110("r973_khoa_yeu_bi_tu_choi_o_duong_ghi", _c973_b1)
 
     def _boot973(env, drv, xem=lambda h: True, req=False):
@@ -21581,7 +21583,7 @@ def run() -> int:
     _t110("r973_bootstrap_khong_export_khong_ghi_gemini", _c973_d5)
 
     def _c973_e1():
-        ap, ra = _TL_MODULE.build_parser(), {}
+        ap, ra = _tlm973.build_parser(), {}
         for c in ("agent-creds-set", "secrets-keygen", "bootstrap"):
             b = _io110.StringIO()
             try:
@@ -21597,7 +21599,7 @@ def run() -> int:
 
     def _c973_e2():
         # tiến trình con THẬT, HOME/cwd tạm, không TL_WEBAPP/TL_TOKEN/TL_MASTER_KEY
-        tl_py = _P110(_TL_MODULE.__file__).resolve()
+        tl_py = _P110(_tlm973.__file__).resolve()
         with _tf110.TemporaryDirectory() as h:
             env = {k: v for k, v in _os973.environ.items()
                    if k not in ("TL_WEBAPP", "TL_TOKEN", "TL_MASTER_KEY", "CODEX_HOME")}
@@ -21615,7 +21617,7 @@ def run() -> int:
         ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
         cfg_gan = any(_P110(x, n).exists() for x in (tl_py.parent, tl_py.parent.parent) for n in ten) \
             or _P110("/tmp/tra_luat_config.json").exists()
-        ok_ss = ("secrets-set" not in _TL_MODULE._CREDS_LAZY_CMDS
+        ok_ss = ("secrets-set" not in _tlm973._CREDS_LAZY_CMDS
                  and (cfg_gan or (ss[0] != 0 and "TL_WEBAPP" in ss[2] and "[secrets-set]" not in ss[2])))
         return ok_kg and ok_ac and ok_ss
     _t110("r973_lenh_moi_khong_can_creds_webapp", _c973_e2)
@@ -22385,7 +22387,8 @@ def run() -> int:
         # manifest) + `changelog.d/wp-831.md`. Trần Package 200 còn 10 khe.
         # KÊ KHAI SLOT (packet #868): 190 → **191** = + `changelog.d/wp-868.md`. Trần Package 200 còn 8 khe.
         # KÊ KHAI SLOT (packet #886): 191 → **192** = + `changelog.d/wp-886.md`. Trần Package 200 còn 7 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 192
+        # KÊ KHAI SLOT (packet #1009): 192 → **193** = + `changelog.d/wp-1009.md`. Trần Package 200 còn 6 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 193
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22438,9 +22441,9 @@ def run() -> int:
             # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
             # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md;
             # packet #858: 189 -> 190, manh changelog.d/wp-858.md; packet #868: 190 -> 191, manh changelog.d/wp-868.md;
-            # packet #886: 191 -> 192, manh changelog.d/wp-886.md).
+            # packet #886: 191 -> 192, manh changelog.d/wp-886.md; packet #1009: 192 -> 193, manh changelog.d/wp-1009.md).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 192
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 193
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

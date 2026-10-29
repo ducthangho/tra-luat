@@ -1,0 +1,33 @@
+# 4 moc §10.2.2 cho ci.yml push master run 40542837100 attempt 2 tren e926bd9 — do 2026-10-29, cach do theo ho so pr931 (PR #937)
+
+## Run
+REST run 40542837100: event push, attempt 2, head e926bd9d765b2a5f6e50122776ba95e73f84e978, conclusion success, path .github/workflows/ci.yml
+
+## Checkout (git, ban sao day du)
+$ git rev-parse e926bd9^{commit} e926bd9^{tree} e926bd9^1 e926bd9^2
+e926bd9d765b2a5f6e50122776ba95e73f84e978
+5dcd2226aa245c41f83bc0ef392baab2561dd969
+b3decc512dd6e0247ec2439870bd06725d79f028
+0eb66e513f2736f0bfc342ddbcbc70b84f773b3b
+log job 123441408491: git log -1 sau checkout = e926bd9d765b2a5f6e50122776ba95e73f84e978; head_sha = e926bd9d765b2a5f6e50122776ba95e73f84e978; base_sha = e926bd9d765b2a5f6e50122776ba95e73f84e978
+
+## Gate output — artifact
+sha256 zip tai tu REST /actions/artifacts/12897391108/zip = ffd5ce90c37a07e6de97d93edc2bad04c66c4d27b5ed75804aef52398f9624aa
+digest REST: sha256:ffd5ce90c37a07e6de97d93edc2bad04c66c4d27b5ed75804aef52398f9624aa (readback-artifacts-40542837100.json)
+zip KHONG kem; tep giai nen nguyen byte vao artifact-12897391108/ (tl-selftest-Linux.json, tl-selftest-Linux.out).
+tl-selftest-Linux.out sha256 8b621d4c3a73fd6820d3a1042c09d8405dd8199ca516c418d6767521989431c2 == output_sha256 trong json: True
+json: {'status': 'pass', 'returncode': 0, 'positive_verified': True, 'positive_match': '== tl selftest 1738/1738 ==\n', 'command': ['python', 'scripts/tl.py', '--selftest']}
+json.identity: {'head_sha': 'e926bd9d765b2a5f6e50122776ba95e73f84e978', 'tree_sha': '5dcd2226aa245c41f83bc0ef392baab2561dd969', 'tracked_clean': True, 'worktree_clean': True, 'system': 'Linux', 'system_release': '7.0.0-1017-azure', 'python_version': '3.12.15'}
+identity_after == identity: True
+
+## Workflow definition
+not_measured — GraphQL WorkflowRun.file bi 403 trong phien Claude Code tren web (cung ly do ho so pr931).
+Bang chung phu (KHONG thay cho exact definition OID):
+REST run path: .github/workflows/ci.yml, referenced_workflows: []
+blob ci.yml tai e926bd9 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+blob ci.yml tai e926bd9^1 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+blob ci.yml tai e926bd9^2 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+sha256 bytes blob 82d9f239… = ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb
+
+## Ket qua
+{"checkout_log": true, "head_sha_log": true, "artifact_identity_head": true, "artifact_identity_tree": true, "cay_sach": true, "output_sha_khop": true, "rc0": true, "positive": true, "identity_after_bang": true}

@@ -4700,10 +4700,10 @@ def run() -> int:
     try:
         _os38.environ["TL_NOTEBOOK_ID"] = "NB-WP710-CANARY-0001"
         _os38.environ["TL_TOKEN"] = _o_env50c["TL_TOKEN"] or "selftest-token"
-        _tg50c._master_key = lambda: "mk50c"
-        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c"), "file")
+        _tg50c._master_key = lambda: "mk50c-wp1009-0123456789abcdefghij"
+        _tg50c._secrets_fetch = lambda a, fid: (_store50c.encrypt(json.dumps({"token": "t", "webappUrl": "u"}).encode(), "mk50c-wp1009-0123456789abcdefghij"), "file")
         _tg50c._secrets_upload = lambda blob, folder, fid: (
-            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c").decode())) or (fid, True))
+            _log50c["bundle"].append(json.loads(_store50c.decrypt(blob, "mk50c-wp1009-0123456789abcdefghij").decode())) or (fid, True))
         _tg50c._refresh_nlm_auth = lambda: True
         _tg50c._nlm_auth_files = lambda: {"auth.json": "{}"}
         _tg50c._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_log50c["stage"].append(name) or (fid, True))
@@ -4754,16 +4754,16 @@ def run() -> int:
     try:
         import tempfile as _tf714a
         _os38.environ["TL_TOKEN"] = "offline-test-token"
-        _tg50._master_key = lambda: "offline-test-master"
+        _tg50._master_key = lambda: "offline-test-master-wp1009-0123456789abcdefghij"
         _tg50.load_creds = lambda *a, **k: None
         _tg50._nlm_auth_alive = _alive714a
         _tg50._nlm_auth_files = lambda: {}
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._gws_export_cred = lambda: None
         _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(
-            json.dumps(_bundle714a).encode(), "offline-test-master"), "file")
+            json.dumps(_bundle714a).encode(), "offline-test-master-wp1009-0123456789abcdefghij"), "file")
         _tg50._secrets_upload = lambda blob, *a, **k: (_up714a.append(json.loads(
-            _store50d.decrypt(blob, "offline-test-master").decode())) or ("OFFLINE", True))
+            _store50d.decrypt(blob, "offline-test-master-wp1009-0123456789abcdefghij").decode())) or ("OFFLINE", True))
         with _tf714a.TemporaryDirectory() as _td714a:
             _cfg714a = _os38.path.join(_td714a, "config.json")
             with open(_cfg714a, "w", encoding="utf-8") as _f714a:
@@ -4843,8 +4843,8 @@ def run() -> int:
         import contextlib as _cx714b, io as _io714b
         _os38.environ["TL_TOKEN"] = "offline-test-token"
         _tg50.load_creds = lambda *a, **k: None
-        _tg50._master_key = lambda: "offline-test-master"
-        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master"), "file")
+        _tg50._master_key = lambda: "offline-test-master-wp1009-0123456789abcdefghij"
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "offline-test-master-wp1009-0123456789abcdefghij"), "file")
         _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._stage_enc_upload = lambda *a, **k: (_up714b.append(True) or ("OFFLINE", True))
@@ -4890,10 +4890,10 @@ def run() -> int:
         _tg50._nlm_auth_files = lambda: {"auth.json": _st50d["jar"]}
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (
             _st50d["up"].append(json.loads(_store50d.decrypt(blob, "tok50d").decode())) or (fid, True))
-        _tg50._master_key = lambda: "mk50d"
-        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d"), "file")
+        _tg50._master_key = lambda: "mk50d-wp1009-0123456789abcdefghij"
+        _tg50._secrets_fetch = lambda a, fid: (_store50d.encrypt(json.dumps({"token": "tok50d"}).encode(), "mk50d-wp1009-0123456789abcdefghij"), "file")
         _tg50._secrets_upload = lambda blob, folder, fid: (
-            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d").decode()).get("nlm_auth")) or (fid, True))
+            _st50d["up"].append(json.loads(_store50d.decrypt(blob, "mk50d-wp1009-0123456789abcdefghij").decode()).get("nlm_auth")) or (fid, True))
         _tg50._refresh_nlm_auth = lambda: True
         _tg50._gws_export_cred = lambda: None
         _tg50.load_creds = lambda *a, **k: None
@@ -5051,15 +5051,15 @@ def run() -> int:
     try:
         import tempfile as _tf714e
         _os38.environ["TL_TOKEN"] = "offline-test-token"
-        _tg50._master_key = lambda: "mk714e"
+        _tg50._master_key = lambda: "mk714e-wp1009-0123456789abcdefghij"
         _tg50.load_creds = lambda *a, **k: None
         _tg50._nlm_auth_alive = _alive714e
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._gws_export_cred = lambda: None
         _tg50._stage_enc_upload = lambda name, blob, folder, fid, force, g=None: (_st714e["up"].append(name) or (fid, True))
-        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e"), "file")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps(_st714e["remote"]).encode(), "mk714e-wp1009-0123456789abcdefghij"), "file")
         _tg50._secrets_upload = lambda blob, *a, **k: (_st714e["up"].append(json.loads(
-            _store50d.decrypt(blob, "mk714e").decode())) or ("S714E", True))
+            _store50d.decrypt(blob, "mk714e-wp1009-0123456789abcdefghij").decode())) or ("S714E", True))
         with _tf714e.TemporaryDirectory() as _td714e:
             _cfg714e = _os38.path.join(_td714e, "cfg.json")
             with open(_cfg714e, "w", encoding="utf-8") as _fh714e:
@@ -5116,13 +5116,13 @@ def run() -> int:
     try:
         import contextlib as _cx714f, io as _io714f
         _os38.environ["TL_TOKEN"] = "offline-test-token"
-        _tg50._master_key = lambda: "mk714f"
+        _tg50._master_key = lambda: "mk714f-wp1009-0123456789abcdefghij"
         _tg50.load_creds = lambda *a, **k: None
         _tg50._refresh_nlm_auth = lambda: False
         _tg50._gws_export_cred = lambda: None
         _tg50._nlm_auth_files = lambda: {"auth.json": "{}"}
         _tg50._nlm_auth_alive = lambda nb, timeout=30, **kw: (True, "LIVE OK (test)")
-        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f"), "file")
+        _tg50._secrets_fetch = lambda *a: (_store50d.encrypt(json.dumps({"token": "offline-test-token"}).encode(), "mk714f-wp1009-0123456789abcdefghij"), "file")
 
         def _run714f(fn, ns):
             _cap = _io714f.StringIO()
@@ -21370,6 +21370,274 @@ def run() -> int:
             return kq == [True, True, True]
         return _cay972(_f)
     _t110("r972_init_config_khong_di_theo_bi_danh_dich", _c972_init_config_khong_di_theo_bi_danh_dich)
+
+    # ═══ r973 — WP1009 CLOUD-SETUP-P1-BUNDLE: tl_agent_creds.enc · chốt khoá gốc ở đường GHI · bootstrap nạp ═══
+    # Hermetic: upload/tải công khai thay bằng đồ giả GIỮ TRẠNG THÁI (`drv` = {fileId: blob}) có đếm lời gọi.
+    import argparse as _ap973, secrets as _sec973, subprocess as _sp973, sys as _sys973
+    _tg973 = _TL_MODULE._imp("tl_gws"); _tg973.bind(_TL_MODULE)
+    _st973, _os973 = _TL_MODULE._imp("gws_cred_store"), globals()["os"]
+    _K973 = "k973-abcdefghijklmnopqrstuvwxyz0123456789"
+    _AU973 = {"tokens": {"refresh_token": "SENT973-codex"}, "last_refresh": "2026-10-27T11:35:54.511153200Z"}
+
+    def _ns973(**kw):
+        d = dict(codex=False, claude_token_env=None, antigravity_key_env=None, new=False, file_id=None, folder="F973")
+        return _ap973.Namespace(**{**d, **kw})
+
+    def _dec973(blob, k=_K973):
+        return json.loads(_st973.decrypt(blob, k).decode("utf-8"))
+
+    def _set973(ns, env=None, drv=None, hong=False):
+        """agent-creds-set THẬT; trả (rc, stdout+stderr, [fileId đã upload], drv)."""
+        drv, ups = ({} if drv is None else drv), []
+        def _up(name, blob, folder, fid, force_new, g=None):
+            if hong:
+                raise RuntimeError("UPLOAD973")
+            fid = f"FID973-{len(drv)}" if (force_new or not fid) else fid
+            ups.append(fid); drv[fid] = blob
+            return fid, not force_new
+        o = {k: getattr(_tg973, k) for k in ("_stage_enc_upload", "_public_curl_bytes")}
+        _tg973._stage_enc_upload, _tg973._public_curl_bytes = _up, lambda fid, timeout=120.0: drv.get(fid)
+        sav, b = _env110({"TL_MASTER_KEY": _K973, "TL_AGENT_CREDS_FILEID": None, **(env or {})}), _io110.StringIO()
+        try:
+            with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                rc = _tg973.cmd_agent_creds_set(ns)
+        finally:
+            for k, v in o.items():
+                setattr(_tg973, k, v)
+            _env110_restore(sav)
+        return rc, b.getvalue(), ups, drv
+
+    def _codex973(fn, auth=_AU973):
+        with _tf110.TemporaryDirectory() as d:
+            _P110(d, "auth.json").write_text(json.dumps(auth), encoding="utf-8")
+            return fn(d)
+
+    def _c973_a1(d):
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude"}
+        rc1, _, up1, drv = _set973(_ns973(new=True, codex=True), e)
+        if rc1 != 0 or len(up1) != 1 or b"SENT973-codex" in drv[up1[0]]:
+            return False
+        p1 = _dec973(drv[up1[0]])
+        rc2, _, up2, drv = _set973(_ns973(file_id=up1[0], claude_token_env="TOKC973"), e, drv)
+        p2 = _dec973(drv[up1[0]])
+        return (p1.get("schema") == 1 and p1.get("rev") == 1 and p1.get("codex_auth") == _AU973 and rc2 == 0
+                and up2 == up1 and p2.get("rev") == 2 and p2.get("codex_auth") == _AU973
+                and p2.get("claude_oauth_token") == "SENT973-claude")
+    _t110("r973_agent_creds_set_ma_hoa_va_rev", lambda: _codex973(_c973_a1))
+
+    _OLD973 = {"OLD973": _st973.encrypt(json.dumps({"schema": 1, "rev": 5}).encode(), "khoa-KHAC-" + _K973)}
+
+    def _c973_a2(d):
+        rc, _, ups, _drv = _set973(_ns973(file_id="OLD973", codex=True), {"CODEX_HOME": d}, dict(_OLD973))
+        return rc not in (0, None) and ups == []
+    _t110("r973_agent_creds_tu_choi_ban_cu_khong_giai_ma_duoc", lambda: _codex973(_c973_a2))
+
+    def _c973_a3(d):
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude", "GEMK973": "SENT973-gemini"}
+        ns = dict(codex=True, claude_token_env="TOKC973", antigravity_key_env="GEMK973")
+        ra = [_set973(_ns973(new=True, **ns), e), _set973(_ns973(file_id="OLD973", **ns), e, dict(_OLD973)),
+              _set973(_ns973(new=True, **ns), e, hong=True)]
+        return (ra[0][0] == 0 and all(r[0] != 0 for r in ra[1:])
+                and all(s not in r[1] for r in ra for s in ("SENT973-codex", "SENT973-claude", "SENT973-gemini")))
+    _t110("r973_agent_creds_khong_in_gia_tri", lambda: _codex973(_c973_a3))
+
+    def _c973_a6():
+        e = {"MY_KEY973": "gem-973-val", "GEMINI_API_KEY": "KHAC973", "RONG973": ""}
+        rc1, _, up1, drv = _set973(_ns973(new=True, antigravity_key_env="MY_KEY973"), e)
+        rc2, _, up2, drv2 = _set973(_ns973(new=True, claude_token_env="MY_KEY973"), e)
+        rc3, _, up3, _d3 = _set973(_ns973(new=True, antigravity_key_env="RONG973"), e)
+        return (rc1 == 0 and _dec973(drv[up1[0]]).get("antigravity_api_key") == "gem-973-val" and rc2 == 0
+                and "antigravity_api_key" not in _dec973(drv2[up2[0]]) and rc3 != 0 and up3 == [])
+    _t110("r973_agent_creds_khoa_gemini_tu_bien", _c973_a6)
+
+    def _c973_a4(d):
+        rc, _, ups, _drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d})
+        return rc != 0 and ups == []
+    _t110("r973_agent_creds_tokens_phai_la_object", lambda: _codex973(_c973_a4, {"tokens": "chuoi"}))
+
+    def _c973_a5(d):
+        with _tf110.TemporaryDirectory() as h:
+            _P110(h, ".codex").mkdir()
+            _P110(h, ".codex", "auth.json").write_text(json.dumps({"tokens": {"o": "HOME973"}}), encoding="utf-8")
+            rc, _, ups, drv = _set973(_ns973(new=True, codex=True), {"CODEX_HOME": d, "HOME": h, "USERPROFILE": h})
+            return rc == 0 and _dec973(drv[ups[0]]).get("codex_auth") == _AU973
+    _t110("r973_agent_creds_ton_trong_CODEX_HOME", lambda: _codex973(_c973_a5))
+
+    def _c973_b1():
+        def _rc(fn, k):
+            ups, o = [], {n: getattr(_tg973, n) for n in ("_secrets_upload", "_stage_enc_upload")}
+            for n in o:
+                setattr(_tg973, n, lambda *a, **kw: ups.append(1) or ("X973", True))
+            sav, b = _env110({"TL_MASTER_KEY": k, "CODEX_HOME": None, "TOK973B": "x"}), _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                    return fn(_ns973(claude_token_env="TOK973B", new=True, config=None, profile=None, secrets_id="S",
+                                     secrets_file=None, gas_token="g", webapp=None, gws=False, nlm=False,
+                                     no_gws=True, no_nlm=True, no_public=True)), len(ups)
+            finally:
+                for n, v in o.items():
+                    setattr(_tg973, n, v)
+                _env110_restore(sav)
+        lenh = (_tg973.cmd_secrets_stage, _tg973.cmd_secrets_set, _tg973.cmd_agent_creds_set)
+        yeu = ("abcdefghijklmnopqrstuvwxyz01234", ("abcdefghijk" * 3)[:32])   # 31 ký tự · 32 ký tự/11 khác nhau
+        manh = _sec973.token_urlsafe(32)
+        return all(_rc(f, k) == (2, 0) for f in lenh for k in yeu) and _rc(_tg973.cmd_agent_creds_set, manh) == (0, 1)
+    _t110("r973_khoa_yeu_bi_tu_choi_o_duong_ghi", _c973_b1)
+
+    def _boot973(env, drv, xem=lambda h: True, req=False):
+        """bootstrap THẬT với --env chat (bỏ nhánh gws/nlm), HOME tạm; trả (rc, stdout+stderr, xem(h))."""
+        with _tf110.TemporaryDirectory() as h:
+            sav = _env110({"HOME": h, "USERPROFILE": h, "CODEX_HOME": _os973.path.join(h, "cx"), "TL_TOKEN": None,
+                           "TL_WEBAPP": None, "TL_MASTER_KEY": _K973, "TL_AGENT_CREDS_FILEID": None,
+                           "CLAUDE_CODE_OAUTH_TOKEN": None, "GEMINI_API_KEY": None, **env})
+            o = {k: getattr(_tg973, k) for k in ("load_creds", "_secrets_fetch", "_public_curl_bytes")}
+            _tg973.load_creds = lambda *a, **k: None
+            _tg973._secrets_fetch = lambda a, fid: (drv.get("S973"), "file")
+            _tg973._public_curl_bytes = lambda fid, timeout=120.0: drv.get(fid)
+            b = _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
+                    rc = _tg973.cmd_bootstrap(_ap973.Namespace(
+                        secrets_id="S973", secrets_file=None, env="chat", config=None, profile=None, no_gws=True,
+                        no_nlm=True, bindir=None, require_agent_creds=req))
+                return rc, b.getvalue(), xem(h)
+            finally:
+                for k, v in o.items():
+                    setattr(_tg973, k, v)
+                _env110_restore(sav)
+
+    _B973 = {"S973": _st973.encrypt(json.dumps({"token": "t973"}).encode(), _K973),
+             "AC973": _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": _AU973,
+                                                 "claude_oauth_token": "SENT973-claude",
+                                                 "antigravity_api_key": "SENT973-gemini"}).encode(), _K973)}
+
+    def _c973_b2():
+        rc, out, _ = _boot973({"TL_MASTER_KEY": "kh8short"},
+                              {"S973": _st973.encrypt(json.dumps({"token": "t"}).encode(), "kh8short")})
+        return rc == 0 and "giải mã OK" in out
+    _t110("r973_bootstrap_khong_kiem_khoa", _c973_b2)
+
+    def _trang_thai973(out):
+        return [ln.split("agent_creds:", 1)[1].split("—")[0].strip() for ln in out.splitlines() if "agent_creds:" in ln]
+
+    def _c973_d1():
+        ra = [_boot973({}, _B973), _boot973({"TL_AGENT_CREDS_FILEID": "MAT973"}, _B973),
+              _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, _B973)]
+        return ([_trang_thai973(r[1]) for r in ra] == [["KHÔNG CẤU HÌNH"], ["KHÔNG ĐO ĐƯỢC"], ["ĐÃ NẠP"]]
+                and [r[0] for r in ra] == [0, 0, 0])
+    _t110("r973_bootstrap_ba_trang_thai", _c973_d1)
+
+    def _c973_d2():
+        rc = [_boot973(e, _B973, req=True)[0] for e in ({}, {"TL_AGENT_CREDS_FILEID": "MAT973"},
+                                                         {"TL_AGENT_CREDS_FILEID": "AC973"})]
+        return rc[0] != 0 and rc[1] != 0 and rc[2] == 0
+    _t110("r973_bootstrap_require_agent_creds", _c973_d2)
+
+    def _c973_d3():
+        def _mot(disk_lr):
+            with _tf110.TemporaryDirectory() as d:
+                p = _P110(d, "auth.json")
+                p.write_bytes((json.dumps({"tokens": {}, "last_refresh": disk_lr}) + "\n").encode())
+                s0, b0 = p.stat(), p.read_bytes()
+                sav = _env110({"CODEX_HOME": d, "TL_AGENT_CREDS_FILEID": "AC973"})
+                o = _tg973._public_curl_bytes
+                _tg973._public_curl_bytes = lambda fid, timeout=120.0: _B973.get(fid)
+                try:
+                    st = _tg973._bootstrap_agent_creds(_K973)[0]
+                finally:
+                    _tg973._public_curl_bytes = o
+                    _env110_restore(sav)
+                s1 = p.stat()
+                giu = p.read_bytes() == b0 and (s1.st_mtime_ns, s1.st_ino) == (s0.st_mtime_ns, s0.st_ino)
+                # quyền 0600 không đo được bằng stat trên Windows (spec chua_do_duoc) ⇒ bỏ vế quyền ở đó
+                q = _os973.name == "nt" or (s1.st_mode & 0o777) == 0o600
+                return st, giu, q, json.loads(p.read_text(encoding="utf-8"))
+        moi, bang = _mot("2026-10-28T00:00:00.5+00:00"), _mot("2026-10-27T11:35:54.5111532Z")
+        cu = _mot("2026-10-27T11:35:54Z")
+        return (moi[:2] == ("ĐÃ NẠP", True) and bang[:2] == ("ĐÃ NẠP", True) and cu[0] == "ĐÃ NẠP"
+                and not cu[1] and cu[2] and cu[3] == _AU973)
+    _t110("r973_bootstrap_giu_auth_json_moi_hon", _c973_d3)
+
+    def _c973_d4():
+        hoi, o = [], (_tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes)
+        _tg973.AGENT_CREDS_FILEID = "HANG973"
+        _tg973._public_curl_bytes = lambda fid, timeout=120.0: hoi.append(fid)
+        sav = _env110({"TL_AGENT_CREDS_FILEID": "ENV973"})
+        try:
+            _tg973._bootstrap_agent_creds(_K973)
+        finally:
+            _tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes = o
+            _env110_restore(sav)
+        return hoi == ["ENV973"]
+    _t110("r973_bootstrap_env_thang_hang", _c973_d4)
+
+    def _c973_d5():
+        def _xem(h):
+            return ("CLAUDE_CODE_OAUTH_TOKEN" not in _os973.environ and "GEMINI_API_KEY" not in _os973.environ
+                    and not _P110(h, ".gemini").exists() and _P110(h, "cx", "auth.json").is_file())
+        rc, out, ok = _boot973({"TL_AGENT_CREDS_FILEID": "AC973"}, _B973, _xem)
+        return (ok and "claude_oauth_token" in out and "antigravity_api_key" in out
+                and "SENT973" not in out and _trang_thai973(out) == ["ĐÃ NẠP"])
+    _t110("r973_bootstrap_khong_export_khong_ghi_gemini", _c973_d5)
+
+    def _c973_e1():
+        ap, ra = _TL_MODULE.build_parser(), {}
+        for c in ("agent-creds-set", "secrets-keygen", "bootstrap"):
+            b = _io110.StringIO()
+            try:
+                with _ctx110.redirect_stdout(b):
+                    ap.parse_args([c, "--help"])
+            except SystemExit as e:
+                ra[c] = (e.code, b.getvalue())
+        return (all(v[0] == 0 for v in ra.values()) and len(ra) == 3
+                and all(f in ra["agent-creds-set"][1] for f in ("--codex", "--claude-token-env",
+                                                                 "--antigravity-key-env", "--new", "--file-id"))
+                and "--require-agent-creds" in ra["bootstrap"][1])
+    _t110("r973_parser_lenh_moi", _c973_e1)
+
+    def _c973_e2():
+        # tiến trình con THẬT, HOME/cwd tạm, không TL_WEBAPP/TL_TOKEN/TL_MASTER_KEY
+        tl_py = _P110(_TL_MODULE.__file__).resolve()
+        with _tf110.TemporaryDirectory() as h:
+            env = {k: v for k, v in _os973.environ.items()
+                   if k not in ("TL_WEBAPP", "TL_TOKEN", "TL_MASTER_KEY", "CODEX_HOME")}
+            env.update(HOME=h, USERPROFILE=h, PYTHONIOENCODING="utf-8")
+            def _chay(*argv):
+                r = _sp973.run([_sys973.executable, str(tl_py), *argv], cwd=h, env=env, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace", timeout=120)
+                return r.returncode, r.stdout, r.stderr
+            kg, ac, ss = _chay("secrets-keygen"), _chay("agent-creds-set", "--codex"), _chay("secrets-set", "--gas-token", "x")
+        dong = kg[1].splitlines()
+        ok_kg = kg[0] == 0 and len(dong) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", dong[0]) is not None
+        ok_ac = ac[0] == 2 and "[agent-creds-set]" in ac[2] and "TL_MASTER_KEY" in ac[2] and "TL_WEBAPP" not in ac[2]
+        # vế âm: secrets-set vẫn đi qua load_creds. Máy dev có config cạnh cây (B1 _config_candidates) thì
+        # load_creds QUA ⇒ đo vế âm bằng tập lệnh; CI clone sạch đo bằng tiến trình con.
+        ten = ("tra_luat_config.v2.json", "tra_luat_config.json")
+        cfg_gan = any(_P110(x, n).exists() for x in (tl_py.parent, tl_py.parent.parent) for n in ten) \
+            or _P110("/tmp/tra_luat_config.json").exists()
+        ok_ss = ("secrets-set" not in _TL_MODULE._CREDS_LAZY_CMDS
+                 and (cfg_gan or (ss[0] != 0 and "TL_WEBAPP" in ss[2] and "[secrets-set]" not in ss[2])))
+        return ok_kg and ok_ac and ok_ss
+    _t110("r973_lenh_moi_khong_can_creds_webapp", _c973_e2)
+
+    def _c973_c1():
+        with _tf110.TemporaryDirectory() as h:
+            sav, ra, cwd = _env110({"HOME": h, "USERPROFILE": h}), [], _os973.getcwd()
+            _os973.chdir(h)   # cwd = HOME tạm: đo được cả "không ghi vào thư mục làm việc"
+            try:
+                for _ in range(2):
+                    b = _io110.StringIO()
+                    with _ctx110.redirect_stdout(b):
+                        rc = _tg973.cmd_secrets_keygen(_ns973())
+                    ra.append((rc, b.getvalue()))
+            finally:
+                _os973.chdir(cwd)
+                _env110_restore(sav)
+            moi = list(_P110(h).iterdir())
+        dong = [r[1].splitlines() for r in ra]
+        return (all(r[0] == 0 and len(d) == 1 and re.fullmatch(r"[A-Za-z0-9_-]{43}", d[0]) for r, d in zip(ra, dong))
+                and dong[0] != dong[1] and not moi)
+    _t110("r973_secrets_keygen", _c973_c1)
 
     def _c208b_auth_fix_chain_dung_thu_tu():
         # r208b 3.2 (báo cáo 25-07 mục 3.2 — CA CHỈ-NÓ-CHẶN): cookie NLM chết, MỌI thông báo trong skill

@@ -929,9 +929,8 @@ def cmd_secrets_stage(a) -> int:
 
 
 def _secrets_stage_body(a, entry_notebook) -> int:
-    master = _master_key()
-    if not master:
-        print("[secrets-stage] ✗ thiếu TL_MASTER_KEY — đặt: export TL_MASTER_KEY='<passphrase mạnh>'", file=sys.stderr)
+    master = _master_key_ghi("secrets-stage")   # WP1009 Q11: thiếu HOẶC yếu ⇒ rc 2, 0 upload
+    if master is None:
         return 2
     load_creds(getattr(a, "config", None), getattr(a, "profile", None))
     # Gói FULL config (webappUrl, token, rootFolderId, registryDocId, manifestId, categories, profiles…)
@@ -997,9 +996,8 @@ def cmd_secrets_set(a) -> int:
 
 
 def _secrets_set_body(a, entry_notebook) -> int:
-    master = _master_key()
-    if not master:
-        print("[secrets-set] ✗ thiếu TL_MASTER_KEY.", file=sys.stderr)
+    master = _master_key_ghi("secrets-set")     # WP1009 Q11: thiếu HOẶC yếu ⇒ rc 2, 0 upload
+    if master is None:
         return 2
     fid = getattr(a, "secrets_id", None) or os.environ.get("TL_SECRETS_FILEID") or SECRETS_FILEID
     if not fid:
@@ -1084,6 +1082,170 @@ def _secrets_set_body(a, entry_notebook) -> int:
         if _pub:
             print(f"[secrets-set] ✓ đồng bộ PUBLIC tại chỗ: {', '.join(_pub)} — Chat/Cowork đường public cũng tươi.")
     return 0
+
+
+# WP1009 (spec CLOUD-SETUP-P1-BUNDLE r2): credential AGENT ở tệp RIÊNG `tl_agent_creds.enc` — chốt WP714 cấm phiên
+# cloud ghi tl_secrets.enc. Cùng TL_MASTER_KEY, cùng link công khai; fileId thật ghi ở P2 (Q15).
+AGENT_CREDS_FILEID = ""
+_AGENT_CREDS_KEYS = ("codex_auth", "claude_oauth_token", "antigravity_api_key")
+_MASTER_KEY_MIN_LEN, _MASTER_KEY_MIN_DISTINCT = 32, 12   # Q11: chỉ đường GHI; đường ĐỌC phải mở được bản cũ
+
+
+def _master_key_ghi(tag: str) -> str | None:
+    """TL_MASTER_KEY cho đường GHI; thiếu hoặc yếu ⇒ in lý do (KHÔNG in khoá) và trả None — người gọi trả rc 2."""
+    master = _master_key()
+    if not master:
+        print(f"[{tag}] ✗ thiếu TL_MASTER_KEY — sinh khoá mạnh: `tl secrets-keygen`.", file=sys.stderr)
+        return None
+    if len(master) < _MASTER_KEY_MIN_LEN or len(set(master)) < _MASTER_KEY_MIN_DISTINCT:
+        print(f"[{tag}] ✗ TL_MASTER_KEY yếu (cần ≥{_MASTER_KEY_MIN_LEN} ký tự VÀ ≥{_MASTER_KEY_MIN_DISTINCT} ký tự "
+              "khác nhau) — sinh khoá: `tl secrets-keygen`; 0 upload.", file=sys.stderr)
+        return None
+    return master
+
+
+def cmd_secrets_keygen(a) -> int:
+    """WP1009: in MỘT khoá `secrets.token_urlsafe(32)` (43 ký tự) lên stdout — KHÔNG ghi đĩa."""
+    import secrets as _secrets
+    print(_secrets.token_urlsafe(32))
+    return 0
+
+
+def _codex_auth_path() -> str:
+    return os.path.join(os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex"), "auth.json")
+
+
+def _last_refresh_key(d):
+    """`last_refresh` ISO-8601 → (giây epoch, nano) — so được chuỗi có số chữ số phần giây khác nhau (container đo
+    9 chữ số). Thiếu/không đọc được ⇒ (-inf, 0): CŨ HƠN mọi bản có (spec mục chua_do_duoc)."""
+    import datetime as _dt
+    s = d.get("last_refresh") if isinstance(d, dict) else None
+    m = re.fullmatch(r"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d+))?(Z|[+-]\d\d:\d\d)?", s) if isinstance(s, str) else None
+    if not m:
+        return (float("-inf"), 0)
+    t = _dt.datetime.strptime(m[1], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc)
+    if m[3] and m[3] != "Z":
+        t -= (1 if m[3][0] == "+" else -1) * _dt.timedelta(hours=int(m[3][1:3]), minutes=int(m[3][4:6]))
+    return (int(t.timestamp()), int((m[2] or "")[:9].ljust(9, "0")))
+
+
+def _ghi_nguyen_tu_0600(path: str, data: bytes) -> None:
+    """Tệp tạm CÙNG thư mục (mkstemp: tên ngẫu nhiên + O_EXCL) → fsync → chmod 0600 → os.replace."""
+    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".auth.json.")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data); f.flush(); os.fsync(f.fileno())
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+
+
+def cmd_agent_creds_set(a) -> int:
+    """WP1009: ghi credential AGENT (Codex auth.json · token Claude · khoá Gemini cho `agy`) vào tl_agent_creds.enc.
+    Giá trị chỉ đọc từ TỆP/BIẾN, không bao giờ từ argv; không in giá trị ở bất kỳ nhánh nào — chỉ TÊN khoá."""
+    tag = "agent-creds-set"
+    master = _master_key_ghi(tag)
+    if master is None:
+        return 2
+    upd = {}
+    if getattr(a, "codex", False):
+        p = _codex_auth_path()
+        try:
+            with open(p, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, ValueError) as e:
+            print(f"[{tag}] ✗ không đọc được {p} ({_safe_exc(e)}).", file=sys.stderr)
+            return 2
+        if not isinstance(d, dict) or not isinstance(d.get("tokens"), dict):
+            print(f"[{tag}] ✗ {p}: `tokens` không phải object — không phải auth.json gói ChatGPT; 0 upload.", file=sys.stderr)
+            return 2
+        upd["codex_auth"] = d
+    for khoa, bien in (("claude_oauth_token", getattr(a, "claude_token_env", None)),
+                       ("antigravity_api_key", getattr(a, "antigravity_key_env", None))):
+        if bien is None:
+            continue
+        if not (val := os.environ.get(bien) or "").strip():
+            print(f"[{tag}] ✗ biến {bien} rỗng/chưa đặt — không ghi chuỗi rỗng cho {khoa}; 0 upload.", file=sys.stderr)
+            return 2
+        upd[khoa] = val
+    if not upd:
+        print(f"[{tag}] ⚠ không có khoá nào để ghi (--codex/--claude-token-env/--antigravity-key-env).", file=sys.stderr)
+        return 1
+    new = bool(getattr(a, "new", False))
+    fid = None if new else (getattr(a, "file_id", None) or os.environ.get("TL_AGENT_CREDS_FILEID") or AGENT_CREDS_FILEID)
+    store = _imp("gws_cred_store")
+    payload = {}
+    if not new:
+        if not fid:
+            print(f"[{tag}] ✗ chưa có fileId (--file-id / TL_AGENT_CREDS_FILEID / AGENT_CREDS_FILEID) — "
+                  "tạo tệp đầu bằng --new.", file=sys.stderr)
+            return 2
+        old = _public_curl_bytes(fid)
+        try:
+            payload = json.loads(store.decrypt(old, master).decode("utf-8")) if old is not None else None
+            if not isinstance(payload, dict) or payload.get("schema") != 1 or type(payload.get("rev")) is not int:
+                raise ValueError("schema")
+        except Exception as e:  # noqa: BLE001
+            # KHÔNG coi như tệp rỗng: reset `rev` ngầm + đánh rơi khoá cũ là mất credential âm thầm.
+            print(f"[{tag}] ✗ không tải/giải mã được bản cũ id={fid} ({_safe_exc(e)}) — sai TL_MASTER_KEY hoặc "
+                  "chưa anyone-with-link; 0 upload.", file=sys.stderr)
+            return 3
+    import datetime as _dt
+    payload = {**{k: v for k, v in payload.items() if k in _AGENT_CREDS_KEYS}, **upd, "schema": 1,
+               "rev": int(payload.get("rev", 0)) + 1,
+               "updated_at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+    blob = store.encrypt(json.dumps(payload, ensure_ascii=False).encode("utf-8"), master)
+    try:
+        fid, _ = _stage_enc_upload("tl_agent_creds.enc", blob, getattr(a, "folder", None) or HOPNAP_FOLDER_ID, fid, new)
+    except Exception as e:  # noqa: BLE001
+        print(f"[{tag}] ✗ upload lỗi ({_safe_exc(e)}).", file=sys.stderr)
+        return 4
+    print(f"[{tag}] ✓ tl_agent_creds.enc rev={payload['rev']} (thay: {sorted(upd)}) → Drive id={fid} ({len(blob)}B)")
+    if new:
+        print(f"  → bật anyone-with-link rồi đặt TL_AGENT_CREDS_FILEID={fid} (P2 ghi vào hằng AGENT_CREDS_FILEID).")
+    return 0
+
+
+def _bootstrap_agent_creds(master: str) -> tuple[str, str]:
+    """WP1009 mục 4: nạp tl_agent_creds.enc ⇒ (trạng thái, chi tiết KHÔNG mang giá trị credential).
+    Ghi DUY NHẤT auth.json của Codex; token Claude/khoá Gemini: không export, không ghi tệp — chỉ báo TÊN (P2)."""
+    fid = os.environ.get("TL_AGENT_CREDS_FILEID") or AGENT_CREDS_FILEID
+    if not fid:
+        return "KHÔNG CẤU HÌNH", "chưa có TL_AGENT_CREDS_FILEID/AGENT_CREDS_FILEID"
+    blob = _public_curl_bytes(fid)
+    if blob is None:
+        return "KHÔNG ĐO ĐƯỢC", f"tải công khai id={fid} lỗi (chưa anyone-with-link / mất mạng?)"
+    try:
+        p = json.loads(_imp("gws_cred_store").decrypt(blob, master).decode("utf-8"))
+        ca = p.get("codex_auth") if isinstance(p, dict) and p.get("schema") == 1 else 0
+        if ca is not None and not (isinstance(ca, dict) and isinstance(ca.get("tokens"), dict)):
+            raise ValueError("schema")
+    except Exception as e:  # noqa: BLE001
+        return "KHÔNG ĐO ĐƯỢC", f"giải mã/định dạng lỗi ({_safe_exc(e)})"
+    phan = [f"rev={p.get('rev')}"]
+    if ca is not None:
+        dst = _codex_auth_path()
+        try:
+            with open(dst, encoding="utf-8") as f:
+                cu = json.load(f)
+        except (OSError, ValueError):
+            cu = None
+        if isinstance(cu, dict) and _last_refresh_key(cu) >= _last_refresh_key(ca):   # Q12: đĩa mới hơn/BẰNG ⇒ giữ
+            phan.append("codex auth.json: giữ bản đĩa (last_refresh mới hơn hoặc bằng)")
+        else:
+            try:
+                _ghi_nguyen_tu_0600(dst, json.dumps(ca, ensure_ascii=False, indent=2).encode("utf-8"))
+            except OSError as e:
+                return "KHÔNG ĐO ĐƯỢC", f"ghi {dst} lỗi ({_safe_exc(e)})"
+            phan.append(f"codex auth.json → {dst} (0600)")
+    co = [k for k in ("claude_oauth_token", "antigravity_api_key") if p.get(k)]
+    if co:
+        phan.append(f"có khoá {', '.join(co)} (không export, không ghi tệp)")
+    return "ĐÃ NẠP", "; ".join(phan)
 
 
 def _ensure_nlm_installed(version: str | None = None):
@@ -1525,8 +1687,14 @@ def cmd_bootstrap(a) -> int:
                 okn, msgn = False, f"{type(e).__name__}: {e}"
             print(f"[bootstrap] {'✓' if okn else '⚠'} nlm (notebooklm-mcp-cli): {msgn}",
                   file=(sys.stdout if okn else sys.stderr))
+    # WP1009 mục 4: credential agent — ĐÚNG MỘT dòng trạng thái; chỉ làm đổi rc khi có --require-agent-creds (Q17).
+    ac, ac_ct = _bootstrap_agent_creds(master)
+    print(f"[bootstrap] agent_creds: {ac} — {ac_ct}")
     status = "XONG" if not degraded else "XONG (SUY GIẢM — gws/nlm chưa đủ, op chạy fallback GAS)"
     print(f"[bootstrap] ➜ {status} (env={env}). Kiểm: python scripts/tl.py ping ; tl gws-ping --env {env}")
+    if getattr(a, "require_agent_creds", False) and ac != "ĐÃ NẠP":
+        print("[bootstrap] ✗ --require-agent-creds: credential agent chưa nạp được (rc 4).", file=sys.stderr)
+        return 4
     return 0 if not degraded else 1   # B8: degraded → exit≠0 để caller tự động biết bootstrap chưa trọn
 
 

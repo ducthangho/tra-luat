@@ -67,7 +67,7 @@ Hiện vật nguyên byte ở `ops/handoff/wp1006-g1-claude/` (SHA256SUMS kèm).
 ## Quan sát (ghi, KHÔNG vá — ngoài write set)
 1. `ops/bien_nhan_v2_test.py` ĐỎ trên Windows (c96 và hai ca khác, 90/93) — git giả `#!/bin/sh`. Chặn mọi phép đo t27 Windows qua `gate-ops`.
 2. `ops/bien_nhan_v2.py:1442,1601` cũng `glob("*.receipt.yaml")` — cùng bệnh phụ thuộc nền với t27 (hiện mọi biên nhận đuôi thường nên chưa lộ).
-3. `ops/lease_publish_test.py` còn `goc.glob("*.yml")`/`("*.yaml")` cho workflow (dòng ~2216, ~2438) — cùng lớp, chưa lộ.
+3. `ops/lease_publish_test.py` còn `goc.glob("*.yml")`/`("*.yaml")` cho workflow (dòng 2303, 2525 trên head `65e623b`) — cùng lớp, chưa lộ.
 4. Bảng cảnh báo README trên master có một dòng trống cắt bảng (ba hàng không render). PR này bỏ dòng ấy; không có chốt nào canh việc bảng
    bị cắt (t27 chỉ thấy hàng nằm trong bảng đọc được).
 

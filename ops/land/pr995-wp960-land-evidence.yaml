@@ -77,8 +77,9 @@ lease:
   lease_until_ban_dau: '2026-10-29T14:43:00Z'
   lease_until_hien_tai: '2026-10-30T14:43:00Z'
   thu_hoi_cuoi: >-
-    CHUA THU HOI — PR #1005 (chi ops/bien_nhan_v2_test.py, trong write set) con mo; rut han chi khi #1005 merge hoac dong, kem
-    ly do. Neu den luc ay lease da HET HAN thi KHONG viet bia mo vao no (bai hoc 20-09 trong CLAUDE.md).
+    thuat_lai — RUT HAN (khong bia mo) sau khi PR #1005 merge (641b3de, 2026-10-29T08:18:37Z): commit ae8558a tren nhanh
+    ops/wp960-r2-g2-lease dua lease_until 2026-10-30T14:43Z ve 2026-10-29T08:45Z, khoi rut_han ghi ly do; tien le
+    wp813-r2-g1-claude (abfd648). lease_publish check rc=0 truoc khi day.
 
 trang_thai_packet:
   merged: true
@@ -102,7 +103,7 @@ assurance_81:
 no_co_ten:
   - {ma: NO-CAU-LICH-SU-TEST-RANG, trang_thai: mo, muc: P1, ghi_chu: 'Issue #1011 — P1 luot 7 bien-ngoai-cua-so-surface-chua-co-rang (ca test khoa bien cua so M4) kem HINT.patch d21485b0… cua reviewer; hai tien de da chot voi chu kho: (B1) object/commit-graph sai ma git im lang, (B2) cau hinh git in canh bao => KHONG DO DUOC.'}
   - {ma: wp960-r2-vuot-nguong-adr0044-khong-khai, trang_thai: mo, ghi_chu: 'PR #995 +962 -297 = 1259 dong > 1000 (ADR-0044, packet thuong); spec r2 doi khai trong PR khi vuot, executor KHONG khai. Ghi nhan khuyet diem quy trinh; khong sua lich su da merge.'}
-  - {ma: wp960-r2-pr1005-test-chua-merge, trang_thai: mo, ghi_chu: 'PR #1005 (78c138f, 057abc8) va test luot 5 va luot 6; cong giong het master. Chu kho quyet merge/dong.'}
+  - {ma: wp960-r2-pr1005-merge-khong-approve, trang_thai: dong, ghi_chu: 'thuat_lai — PR #1005 (chi tep test: va luot 5, HINT luot 6, HINT luot 7 nguyen ban sha256 d21485b0…) merge 641b3de 2026-10-29T08:18:37Z theo chi thi chu kho "Dong y huong 1, ap HINT luot 7 roi merge #1005"; KHONG verdict Codex CLI tren head 2c36e1c (tran 8 het); connector Codex tren 2c36e1c khong finding; CI xanh. P1 luot 7 da va bang HINT nhung CHUA co review xac nhan (Issue #1011).'}
 khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
   - 'Ba moc §10.2.2 Checkout / Workflow definition / Gate output tren 79dbaf4: not_measured (GraphQL 403 trong phien web).'

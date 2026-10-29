@@ -3228,8 +3228,10 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
 
     def cau_hinh_canh_bao(tmp):
         k, al = _anc(tmp)
-        # `core.fsync` thành phần lạ ⇒ git in "warning: ignoring unknown core.fsync component" ở MỌI lệnh, đo được trên
-        # cả Linux lẫn Git for Windows. `core.fsyncObjectFiles=true` (bản trước) KHÔNG cảnh báo trên Git for Windows
+        # `core.fsync` thành phần lạ ⇒ git in "warning: ignoring unknown core.fsync component" ở lệnh kiểm kho ĐẦU TIÊN của
+        # cổng (`rev-parse --is-shallow-repository`), đủ để cổng trả rc=2; đo trên cả Linux lẫn Git for Windows (rev-parse,
+        # merge-base, cat-file, for-each-ref). KHÔNG phải mọi lệnh: `git config --get …` không cảnh báo (review #1014
+        # lượt 3, P3). `core.fsyncObjectFiles=true` (bản trước) KHÔNG cảnh báo trên Git for Windows
         # (đo 2.55.0.windows.5: rev-parse/merge-base/cat-file/for-each-ref stderr rỗng; run 40844300802, `gate-ops (windows-latest)`).
         k["g"]("config", "core.fsync", "tl-thanh-phan-la")
         return tmp, al, k_anc, None, "tl-thanh-phan-la"

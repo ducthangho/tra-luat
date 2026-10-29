@@ -36,6 +36,8 @@ thay_the_cho:
 thay_the_cho_ghi_chu: >-
   g1 (spec r2) CON HAN toi 2026-10-30T08:10:00Z luc cap g2 => KHAI bia mo da_bi_thay_the tren tep g1 (hai chieu), cung
   commit. Executor g1 (session_015GtxrZE9sQqfnKV4jsABnr) dung theo S1/S2/S3 sau WIP 283a718; g2 giao CUNG phien, cung nhanh.
+da_bi_thay_the: wp1009-cloud-setup-p1-r3-g3-claude
+da_bi_thay_the_ghi_chu: 'Thay boi g3 (tran 800 dong) luc 2026-10-29T10:00Z — chu kho issuecomment-6493446162.'
 role: executor
 provider: anthropic_claude
 executor: claude

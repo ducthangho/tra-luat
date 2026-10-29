@@ -1121,29 +1121,61 @@ class _MoHo(Exception):
 # chỉ được đọc từ STDOUT của lệnh có giao thức nói ra điều đó (`cat-file --batch-check` in `missing`,
 # `for-each-ref` không in ref vắng, `--disambiguate` không in ứng viên).
 _RE_HEX_TOKEN = re.compile(r"[0-9a-f]{4,40}")
-_ENV_GIT = {"LC_ALL": "C", "LANG": "C", "GIT_TERMINAL_PROMPT": "0", "GIT_NO_LAZY_FETCH": "1"}
+_ENV_GIT = {"LC_ALL": "C", "LANG": "C", "GIT_TERMINAL_PROMPT": "0", "GIT_NO_LAZY_FETCH": "1",
+            "GIT_NO_REPLACE_OBJECTS": "1"}
+# Dòng stderr "nền" theo từng kho: cảnh báo cấu hình in ra ở MỌI lệnh git (vd. `core.fsyncObjectFiles is deprecated`,
+# đo 29-10) không mang thông tin gì về phép tra cụ thể, nên được trừ đi; đo một lần bằng lệnh không đọc object nào.
+_NEN_STDERR: dict = {}
+
+
+def _env_git() -> dict:
+    """Môi trường git CÔ LẬP: bỏ MỌI biến `GIT_*` kế thừa (review r2 lượt 3: `GIT_DIR` làm `-C root` đo nhầm kho;
+    `GIT_TRACE*` làm kho lành thành rc=2; `GIT_GRAFT_FILE`/`GIT_REPLACE_REF_BASE` đổi đồ thị) rồi đặt bộ của cổng."""
+    return {**{k: v for k, v in os.environ.items() if not k.startswith("GIT_")}, **_ENV_GIT}
+
+
+def _chay_git(root: Path, args, vao=None, timeout=60):
+    """MỘT chỗ gọi git cho ba luật (môi trường cô lập). Không chạy được ⇒ `KhongDoDuoc`."""
+    try:
+        return subprocess.run(["git", "-C", str(root), *args], input=vao, capture_output=True, text=True,
+                              timeout=timeout, env=_env_git())
+    except (OSError, subprocess.SubprocessError) as ex:      # noqa: BLE001
+        raise KhongDoDuoc(f"không gọi được `git {args[0]}`: {type(ex).__name__}: {ex}") from ex
 
 
 def _git_do(root: Path, *args, vao=None, sach=(0,), timeout=60) -> tuple[int, str]:
-    """Chạy git, trả (rc, STDOUT). Ném `KhongDoDuoc` khi không chạy được, rc ngoài `sach`, hoặc stderr KHÔNG rỗng."""
-    try:
-        p = subprocess.run(["git", "-C", str(root), *args], input=vao, capture_output=True, text=True,
-                           timeout=timeout, env={**os.environ, **_ENV_GIT})
-    except (OSError, subprocess.SubprocessError) as ex:      # noqa: BLE001
-        raise KhongDoDuoc(f"không gọi được `git {args[0]}`: {type(ex).__name__}: {ex}") from ex
-    if p.returncode not in sach or p.stderr.strip():
+    """Chạy git, trả (rc, STDOUT). Ném `KhongDoDuoc` khi không chạy được, rc ngoài `sach`, hoặc stderr còn dòng nào
+    ngoài dòng NỀN của kho (`_NEN_STDERR`)."""
+    p = _chay_git(root, args, vao, timeout)
+    nen = _NEN_STDERR.get(str(root), frozenset())
+    con = [d for d in p.stderr.splitlines() if d.strip() and d not in nen]
+    if p.returncode not in sach:
         raise KhongDoDuoc(f"`git {' '.join(args)[:120]}` rc={p.returncode}: {p.stderr.strip()[:300]}")
+    if con:
+        raise KhongDoDuoc(f"`git {' '.join(args)[:120]}` stderr: {' | '.join(con)[:300]}")
     return p.returncode, p.stdout
 
 
 def _kho_lanh(root: Path) -> None:
-    """Kho đủ để đo tổ tiên: KHÔNG nông (merge-base trên kho nông trả sai mà không báo lỗi — bài học CLAUDE.md)
-    và KHÔNG partial clone (object vắng có thể là chưa tải, không phải không có)."""
+    """Kho đủ để đo tổ tiên, và đo dòng stderr nền. KHÔNG nông (merge-base trên kho nông trả sai mà không báo lỗi);
+    KHÔNG partial clone — cả kiểu `extensions.partialclone` lẫn kiểu git hiện hành `remote.<x>.promisor` (object
+    vắng có thể là chưa tải); KHÔNG có tệp grafts (đổi parent; lời nhắc deprecated tắt được bằng cấu hình nên
+    không trông vào stderr). Replace ref bị tắt bằng `GIT_NO_REPLACE_OBJECTS`. Tính toàn vẹn object/commit-graph
+    (băm sai mà git im lặng) là TIỀN ĐỀ, không đo — cần `git fsck` (quyết định chủ kho 29-10, #960)."""
+    p = _chay_git(root, ("rev-parse", "--git-dir"))
+    if p.returncode != 0:
+        raise KhongDoDuoc(f"`git rev-parse --git-dir` rc={p.returncode}: {p.stderr.strip()[:300]}")
+    _NEN_STDERR[str(root)] = frozenset(d for d in p.stderr.splitlines() if d.strip())
     nong = _git_do(root, "rev-parse", "--is-shallow-repository")[1].strip()
     if nong != "false":
         raise KhongDoDuoc(f"kho nông (`--is-shallow-repository` = {nong!r}) — không đo được quan hệ tổ tiên")
     if _git_do(root, "config", "--get", "extensions.partialclone", sach=(0, 1))[1].strip():
-        raise KhongDoDuoc("kho partial clone — object vắng có thể là chưa tải, không đo được")
+        raise KhongDoDuoc("kho partial clone (`extensions.partialclone`) — object vắng có thể là chưa tải")
+    if _git_do(root, "config", "--get-regexp", r"^remote\..*\.promisor$", sach=(0, 1))[1].strip():
+        raise KhongDoDuoc("kho partial clone (`remote.<x>.promisor`) — object vắng có thể là chưa tải")
+    gf = _git_do(root, "rev-parse", "--git-path", "info/grafts")[1].strip()
+    if gf and (root / gf if not Path(gf).is_absolute() else Path(gf)).exists():
+        raise KhongDoDuoc(f"kho có tệp grafts `{gf}` — parent bị thay, không đo được quan hệ tổ tiên")
 
 
 def _loai_object(root: Path, oid40: str) -> str:
@@ -1183,6 +1215,8 @@ def _nhanh_mac_dinh(root: Path):
     co = {}
     for dong in ra.splitlines():
         t = dong.split()
+        if len(t) == 3 and t[0] not in _REF_MAC_DINH and t[0].startswith(tuple(r + "/" for r in _REF_MAC_DINH)):
+            continue        # `for-each-ref` khớp theo TIỀN TỐ: `refs/heads/master/topic` là ref khác, bỏ qua
         if len(t) != 3 or t[0] not in _REF_MAC_DINH or not _HEX40.match(t[1]):
             raise KhongDoDuoc(f"`for-each-ref` trả dòng lạ: {dong!r}")
         co[t[0]] = (t[1], t[2])

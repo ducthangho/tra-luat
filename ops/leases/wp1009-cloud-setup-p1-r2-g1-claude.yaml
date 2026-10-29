@@ -1,0 +1,114 @@
+# LEASE — CLOUD-SETUP-P1-BUNDLE revision 2 / generation 1 — bundle credential agent (tl_agent_creds.enc) + keygen + bootstrap nap
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1009
+mission_issue: 1008
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1009#issuecomment-6491429241
+authority_url: https://github.com/ducthangho/tra-luat/issues/1009#issuecomment-6491429241
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho (2026-10-29 ~08:06Z): 'đồng ý, cấp lease đi'; AskUserQuestion: 'Duyệt r2, cấp lease khi Codex sạch
+  (Recommended)'; 'Cho phép (Recommended)' (push ops/cap-lease-<issue>-g<n> va claude/wp<issue>-…); 'Hỏi trước mỗi
+  bước (Recommended)' (buoc LIVE).
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment
+  chu kho tu viet (#566). author_association=OWNER khong tach chu kho khoi phien agent dung token chu kho.
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; KHONG thi hanh packet nay.'
+
+leased_at_utc: '2026-10-29T08:10:00Z'
+heartbeat_at: '2026-10-29T08:10:00Z'
+lease_until: '2026-10-30T08:10:00Z'
+lease_expires_at_utc: '2026-10-30T08:10:00Z'
+
+packet_id: CLOUD-SETUP-P1-BUNDLE
+packet_slug: cloud-setup-p1-bundle
+revision: 2
+generation: 1
+lease_id: wp1009-cloud-setup-p1-r2-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau tien cua packet; r1 chua tung duoc cap lease (spec r2 dong dau).'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+environment: cloud
+environment_ghi_chu: 'Phien con Claude Code remote (Linux), tao bang create_session.'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Cross-review theo .claude/skills/cross-review/SKILL.md (phien doc lap, read-only, neo exact head); Codex connector tren PR la lop bo sung.'
+access: read-write
+
+spec_path: ops/specs/cloud-setup-p1-bundle-r2.md
+spec_ref: refs/heads/master
+spec_source_oid: a0ae060a31f303cfb2df8cda0e870243ff0e991c
+spec_land_oid: 1cc847defbe646c68f4126144dbc80e02eafd61b
+spec_blob: 36a178c70a47b8130a45e73c0f81d5a28f39b9f0
+spec_sha256: 2eb2aeadd80078c263b5fdb976cdd8ac735cf546926bcf8c16373a1a88b01492
+spec_hash: 2eb2aeadd80078c263b5fdb976cdd8ac735cf546926bcf8c16373a1a88b01492
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_review: 'Codex connector PR #1004: r1 1 finding P2 (sua o r2, thread resolved); r2 (a0ae060) sach — issuecomment-6490964601.'
+
+branch: claude/wp1009-cloud-setup-p1-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1cc847defbe646c68f4126144dbc80e02eafd61b
+start_from_sha: 1cc847defbe646c68f4126144dbc80e02eafd61b
+immutable_acceptance_baseline: 1cc847defbe646c68f4126144dbc80e02eafd61b
+base_ghi_chu: 'Base do lai luc cap 08:06Z = merge PR #1004 (tree 5cccb599cff4500ccad69858740b9c6e5dd7a2d2); spec ghi 0a8f4d78 (07:22Z) — chenh chi la commit spec r1/r2 + merge, khong cham write set.'
+reviewed_sha_required: 1cc847defbe646c68f4126144dbc80e02eafd61b
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - scripts/tl_gws.py
+  - scripts/tl_core/cli.py
+  - scripts/tl_selftest.py
+  - changelog.d/wp-1009.md
+  - RELEASE_MANIFEST.json
+  - scripts/tl.py
+write_set_hash: ad32cb25b298e35f521e24d12938913dd4cda9429cfdfa1035dae27ad3f6fcfd
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-29T08:06Z sau fetch du refs/heads: ls-remote 686 = cuc bo 686 (comm -23 = 0, comm -13 = 0);
+  `ops/lease_publish.py ai-dang-giu` tra NGUOI_GIU 0 cho ca 6 duong dan.
+tran_kich_thuoc: 'ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab: <= 6 tep / <= 450 dong them. Vuot 450 => chuyen secrets-keygen sang P2 (quy tac lui cua spec); van vuot => DUNG, hoi chu kho.'
+tran_loi_goi_codex: 'ADR-0052@8ab100793df9831505f495543a74044b91c2c9ab: toi da 8 loi goi Codex review cho PR packet; da dung 0. Het luot 8 chua approve => Review Rescue Checkpoint (ADR-0037).'
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) khi mo PR draft'
+  phep_do_duoc_cap: '0 workflow_dispatch'
+  het: 'DUNG truoc moi workflow_dispatch; cho quyet dinh cua chu kho'
+
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set. DUNG, handoff.'
+  - 'S2 — vuot tran kich thuoc sau khi da ap quy tac lui. DUNG, hoi chu kho.'
+  - 'S3 — spec tu mau thuan / thieu du kien de lam dung tieu chi. DUNG, bao phien dieu phoi (khong tu suy).'
+  - 'S4 — het han lease => ngung ghi, handoff §7.'
+  - 'S5 — cung hinh dang finding >= 3 lan => hoi chu kho.'
+  - 'S6 — bat ky buoc nao can Drive/NLM/webapp LIVE hoac credential that. DUNG.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy Package, khong bump VERSION
+  - Khong doc/ghi credential that (tl_secrets*, *.enc, auth.json that, token); test chi dung fixture gia
+  - Khong workflow_dispatch
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/wp1009-cloud-setup-p1-r2-g1-claude.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'Hanh vi agy voi GEMINI_API_KEY (thuoc P2, ngoai pham vi P1).'

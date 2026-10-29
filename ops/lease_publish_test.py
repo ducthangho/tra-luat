@@ -1531,6 +1531,15 @@ def t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan():
          "helper đã lấn sang thân block/heredoc dù không có trạng thái xuyên dòng")
 
 
+def _tep_co_duoi(thu_muc, duoi):
+    """Tệp trong `thu_muc` có tên kết thúc bằng ĐÚNG `duoi`, phân biệt hoa thường trên MỌI nền.
+
+    `Path.glob` khớp không phân biệt hoa thường trên Windows mà phân biệt trên Linux: cùng một cây, `t27` thấy
+    `wp929-g1-codex-luot1-VERDICT.md` ở Windows và bỏ qua nó ở Linux (đo: run 40812761896, `gate-ops
+    (windows-latest)` 253/254). So tên bằng `str.endswith` để hai nền đo cùng một tập."""
+    return sorted(f for f in thu_muc.iterdir() if f.name.endswith(duoi))
+
+
 def _doi_thu_muc_reviews():
     """Trả `ops/reviews`, và ĐỎ nếu nó vắng — KHÔNG có nhánh 'vắng thì thôi'.
 
@@ -1658,7 +1667,7 @@ def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
     import hashlib
     import yaml
     thu_muc = _doi_thu_muc_reviews()
-    ds = sorted(thu_muc.glob("*.receipt.yaml"))
+    ds = _tep_co_duoi(thu_muc, ".receipt.yaml")
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
     for p in ds:
         d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
@@ -1735,8 +1744,8 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
         """Tên tệp phải BẰNG một tên trong ô của đúng cột — không phải chuỗi con."""
         return any(ten in _ten_tep(h.get(khoa, "")) for h in hang)
 
-    ds = sorted(thu_muc.glob("*.receipt.yaml"))
-    ds_verdict = sorted(thu_muc.glob("*-verdict.md"))
+    ds = _tep_co_duoi(thu_muc, ".receipt.yaml")
+    ds_verdict = _tep_co_duoi(thu_muc, "-verdict.md")
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
     bang(ds_verdict, f"không thấy verdict nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
 

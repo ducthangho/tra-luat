@@ -2568,14 +2568,16 @@ def _kho_cau(tmp: Path):
         r = subprocess.run(["git", "-C", str(tmp), *a], capture_output=True, text=True, env=E)
         dung(r.returncode == 0, f"git {' '.join(a)} hỏng: {r.stderr[:200]}")
         return r.stdout.strip()
+    # BYTE, không `write_text`: chế độ văn bản trên Windows ghi `\r\n`, đổi blob ⇒ đổi mọi SHA dưới đây so với Linux
+    # (đo: run 40833865576, `c93` báo commit/blob không chung tiền tố trên `windows-latest`).
     g("init", "-q"); g("checkout", "-q", "-b", "master")
-    (tmp / "a.txt").write_text("a\n", encoding="utf-8"); g("add", "-A"); g("commit", "-qm", "B0")
+    (tmp / "a.txt").write_bytes(b"a\n"); g("add", "-A"); g("commit", "-qm", "B0")
     b0 = g("rev-parse", "HEAD")
     g("checkout", "-q", "-b", "re")
-    (tmp / "x.txt").write_text("x\n", encoding="utf-8"); g("add", "-A"); g("commit", "-qm", "X")
+    (tmp / "x.txt").write_bytes(b"x\n"); g("add", "-A"); g("commit", "-qm", "X")
     x = g("rev-parse", "HEAD")
     g("checkout", "-q", "master")
-    (tmp / "m.txt").write_text("m\n", encoding="utf-8"); g("add", "-A"); g("commit", "-qm", "M")
+    (tmp / "m.txt").write_bytes(b"m\n"); g("add", "-A"); g("commit", "-qm", "M")
     return {"B0": b0, "X": x, "M": g("rev-parse", "HEAD"), "g": g}
 
 
@@ -3150,7 +3152,9 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
         return tmp, al, k_sf, None, "run.json"
 
     def run_json_ten_qua_dai(tmp):
-        rj = "ops/reviews/" + "a" * 300 + "/run.json"
+        # Windows trả ENOENT cho thành phần 300 ký tự (đo: run 40833865576), nên ở đó dùng ký tự cấm `<` —
+        # `lstat` ném WinError 123 (EINVAL). Cùng lớp "lstat lỗi khác ENOENT/ENOTDIR"; phép kiểm dưới vẫn đo độc lập.
+        rj = "ops/reviews/" + ("a<b" if os.name == "nt" else "a" * 300) + "/run.json"
         al = _surface(tmp, rj)
         try:                                        # kiểm ĐỘC LẬP với `_vang` (đột biến m116 nhắm hàm ấy)
             os.lstat(tmp / rj)
@@ -3285,8 +3289,9 @@ def c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho():
              "GIT_AUTHOR_DATE": "2026-01-01T00:00:00Z", "GIT_COMMITTER_DATE": "2026-01-01T00:00:00Z"}
         c = subprocess.run(["git", "-C", str(tmp), "commit-tree", cay, "-p", k["B0"], "-m", _COMMIT_BLOB_TRUNG[0]],
                            capture_output=True, text=True, env=E).stdout.strip()
-        b = subprocess.run(["git", "-C", str(tmp), "hash-object", "-w", "--stdin"], input=_COMMIT_BLOB_TRUNG[1],
-                           capture_output=True, text=True, env=E).stdout.strip()
+        # stdin BYTE: `text=True` trên Windows đổi `\n` thành `\r\n` trước khi git băm.
+        b = subprocess.run(["git", "-C", str(tmp), "hash-object", "-w", "--stdin"], input=_COMMIT_BLOB_TRUNG[1].encode(),
+                           capture_output=True, env=E).stdout.decode().strip()
         dung(c[:7] == b[:7] and len(c) == 40, f"fixture: commit/blob không chung tiền tố: {c} {b}")
         k["g"]("merge", "-q", "--no-ff", c, "-m", "merge")
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {c[:7]} chua vao master.\n")})
@@ -3392,20 +3397,32 @@ def c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC():
     tập sạch mà KHÔNG in gì ra stderr (git giả bọc git thật) ⇒ KHÔNG ĐO ĐƯỢC (rc=2), không phải vi phạm hay sạch —
     cho cả `merge-base` lẫn lệnh kiểm sức khoẻ kho đầu tiên (`--is-shallow-repository`)."""
     import shutil
-    that = shutil.which("git")
-    dung(that is not None, "fixture: không có git")
+    import types
+    dung(shutil.which("git") is not None, "fixture: không có git")
+    # Git giả chặn ở `bnv2.subprocess.run` — cửa DUY NHẤT cổng gọi git — thay vì một script `git` đặt trước PATH:
+    # trên Windows `CreateProcess` chỉ tự thêm `.exe`, nên script không đuôi KHÔNG BAO GIỜ được gọi và git thật trả
+    # rc=1 (đo: run 40833865576, `gate-ops (windows-latest)` "được rc=1"). Lệnh khớp `mau` trả rc=3, stderr rỗng;
+    # lệnh khác vẫn tới git thật. `dem` đòi lệnh giả THẬT SỰ được gọi — ca có ĐO, không chỉ có MẶT.
+    goc_sp = bnv2.subprocess
     for mau in ("merge-base", "is-shallow-repository"):
+        dem = [0]
+
+        def run_gia(cmd, *a, _mau=mau, _dem=dem, **kw):
+            if Path(str(cmd[0])).stem == "git" and _mau in " ".join(map(str, cmd)):
+                _dem[0] += 1
+                rong = "" if kw.get("text") else b""
+                return goc_sp.CompletedProcess(cmd, 3, rong, rong)
+            return goc_sp.run(cmd, *a, **kw)
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             k = _kho_cau(tmp)
             al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
-            bin_ = tmp / "_bin"
-            bin_.mkdir()
-            gia = bin_ / "git"
-            gia.write_text(f"#!/bin/sh\ncase \"$*\" in *{mau}*) exit 3;; esac\n"
-                           f'exec "{that}" "$@"\n', encoding="utf-8")
-            gia.chmod(0o755)
-            rc, loi_ra = _chay_cli(tmp, al, path=f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}")
+            bnv2.subprocess = types.SimpleNamespace(**{**vars(goc_sp), "run": run_gia})
+            try:
+                rc, loi_ra = _chay_cli(tmp, al)
+            finally:
+                bnv2.subprocess = goc_sp
+            dung(dem[0] > 0, f"fixture: git giả `{mau}` không được cổng gọi lần nào")
             bang(rc == 2 and mau in loi_ra and "rc=3" in loi_ra,
                  f"{mau}: đòi rc=2 nêu `{mau}` rc=3, được rc={rc}: {loi_ra[-400:]!r}")
 

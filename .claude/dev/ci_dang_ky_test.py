@@ -2123,7 +2123,9 @@ def phan_chung():
     _them("p643-A1-argv-git-push", _g == [["git", "merge-base", "--is-ancestor", _A, _B], _dif])
     _them("p643-A1-argv-git-pr", _h == [_dif])
     with tempfile.TemporaryDirectory() as _k:  # git THẬT: tiến, lùi (force-push), phân kỳ
-        _gk = lambda *a: subprocess.run(["git", "-C", _k, "-c", "user.name=t", "-c", "user.email=t@t", *a],
+        # #923 r3: máy có `commit.gpgsign=true` mà không ký được (sandbox Codex) ⇒ `commit` thoát 128, ca đỏ vì môi trường.
+        _gk = lambda *a: subprocess.run(["git", "-C", _k, "-c", "user.name=t", "-c", "user.email=t@t",
+                                         "-c", "commit.gpgsign=false", *a],
                                         capture_output=True, text=True, check=True).stdout.strip()
         _gk("init", "-q"); _t = pathlib.Path(_k, "ops"); _t.mkdir()
         _c = []

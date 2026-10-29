@@ -1,21 +1,21 @@
 # Đặc tả packet — `CLOUD-SETUP-P1-BUNDLE` (revision 1)
 
-- `packet_id`: **CLOUD-SETUP-P1-BUNDLE** · `packet_issue`: **CHƯA CÓ** — tạo sau khi chủ kho duyệt bản nháp này (Q7);
-  số Issue điền vào đây TRƯỚC khi đóng băng và tính băm · `revision`: **1** · soạn 29-10-2026 bằng skill `soan-spec`,
+- `packet_id`: **CLOUD-SETUP-P1-BUNDLE** · `packet_issue`: **#1009** (Issue cha #1008) · `revision`: **1** · trạng thái: **ĐÓNG BĂNG**
+  lúc 07:10Z 29-10-2026 sau khi chủ kho duyệt (băm `sha256` ghi trên Issue #1009 và PR #1004, không ghi trong tệp) · soạn 29-10-2026 bằng skill `soan-spec`,
   phiên `session_015GtxraXfMD1t2FJLzzGDr4`. Chủ kho chốt Q1–Q18 "theo khuyến nghị" trong cùng phiên, rồi chọn
   phương án (A) ở Q19: thêm khoá Gemini cho CLI `agy` (Antigravity) vào cùng tệp, chuyển phần `RUNBOOK.md` sang P2.
 - `nguon_cap_viec`: chỉ thị trực tiếp của chủ kho trong phiên nói trên (không có dòng kế hoạch nào trong
   `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md`). Packet đầu của chuỗi ba packet `cloud-setup` (Q1): P1 bundle · P2 script ·
   P3 ghi ngược + NLM. P2 và P3 soạn đặc tả riêng SAU khi P1 land.
 - `review_class`: **sensitive** — chạm ranh giới credential (protocol §8, dòng `sensitive`).
-- Base dự kiến: nhánh mặc định lúc cấp lease. Đo 04:19Z 29-10: `ef34d88838bc125727670f494b15213b6c6f0c8d`
-  (tree `63aac762b840e7ccb3ad1d9b071cb566b1a6ac4b`). Đo lại khi cấp lease.
+- Base dự kiến: nhánh mặc định lúc cấp lease. Đo 07:10Z 29-10: `0a8f4d78d30854247a7147e45f5586bf856925da`
+  (tree `4f8af6635d9ce0a60de26b22da45b280119ee09c`). Đo lại khi cấp lease.
 
 tran_loi_goi_codex: ADR-0052@8ab100793df9831505f495543a74044b91c2c9ab
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
 (OID trên là commit LAND của cả `ADR-0052` lẫn `ADR-0053` trên nhánh mặc định, đo bằng
-`git log origin/master --first-parent --diff-filter=A` lúc 04:19Z 29-10.)
+`git log origin/master --first-parent --diff-filter=A` lúc 04:19Z và đo lại 07:10Z 29-10: không đổi.)
 
 ## Vấn đề (một đoạn)
 
@@ -32,17 +32,17 @@ refresh token. P1 dựng một tệp mã hoá RIÊNG cho credential agent, cùng
 1. `scripts/tl_gws.py`
 2. `scripts/tl_core/cli.py`
 3. `scripts/tl_selftest.py`
-4. `changelog.d/wp-<số Issue>.md` (tên chính xác điền cùng lúc với `packet_issue`)
+4. `changelog.d/wp-1009.md`
 5. `RELEASE_MANIFEST.json`
 
-Năm tệp, dưới trần `ADR-0053` (≤ 6 tệp). Ba tệp đầu nằm trong `RELEASE_MANIFEST.json` (đo 04:19Z 29-10: manifest có 192
+Năm tệp, dưới trần `ADR-0053` (≤ 6 tệp). Ba tệp đầu nằm trong `RELEASE_MANIFEST.json` (đo 04:19Z, đo lại 07:10Z 29-10: manifest có 192
 tệp, gồm cả `scripts/tl_core/cli.py`, `scripts/tl_gws.py`, `scripts/tl_selftest.py`), nên manifest phải tái sinh
 (tiền lệ commit `685bc187`). `changelog.d/` bị release filter loại (protocol, mục fragment). `references/RUNBOOK.md`
 chuyển sang P2 theo Q19 (A) để giữ dư địa dòng cho khoá Gemini.
 
-`ai-dang-giu` lúc 04:19Z 29-10, sau khi đồng bộ đủ ref (`ls-remote` so tập tên với ref cục bộ: thiếu 0):
-`scripts/tl_gws.py`, `scripts/tl_selftest.py` chỉ có lease **HẾT_HẠN** (`wp710-*`, `r378-*`), không lease còn hiệu
-lực; `scripts/tl_core/cli.py` ⇒ `NGƯỜI_GIỮ 0` (đo 04:25Z 29-10). Đo lại cả năm khi cấp lease.
+`ai-dang-giu` lúc 07:10Z 29-10, sau khi fetch đủ `refs/heads/*`: cả năm đường dẫn ⇒ `NGƯỜI_GIỮ 0`, rc 0 (lần đo
+04:19Z chỉ thấy lease **HẾT_HẠN** `wp710-*`, `r378-*` trên `scripts/tl_gws.py`, `scripts/tl_selftest.py`). Đo lại cả
+năm khi cấp lease.
 
 ## `ngoai_pham_vi`
 
@@ -85,7 +85,7 @@ Mỗi dòng chiếu vào đúng một đường dẫn ở `write_set` (L2).
    `--new`, `--file-id`, `--folder`), `secrets-keygen`, và cờ `--require-agent-creds` của `bootstrap`.
 6. `scripts/tl_selftest.py` — các ca ở mục `nghiem_thu`, hermetic: không mạng, không Drive, `_stage_enc_upload` và
    tải công khai bị thay bằng đồ giả GIỮ TRẠNG THÁI có đếm lời gọi.
-7. `changelog.d/wp-<số Issue>.md` — fragment changelog của packet.
+7. `changelog.d/wp-1009.md` — fragment changelog của packet.
 8. `RELEASE_MANIFEST.json` — tái sinh sau khi ba tệp thuộc manifest đổi nội dung.
 
 Luật dự phòng kích thước (thay luật Q14 cũ, vì `RUNBOOK.md` đã ra khỏi P1): nếu tổng dòng thêm vượt 450 thì chuyển
@@ -93,7 +93,7 @@ mục tiêu 3 (`secrets-keygen`) cùng ca C1 sang P2, không xin nâng trần.
 
 ## `nghiem_thu`
 
-Tên ca dùng tiền tố `r973_` … (đo 04:19Z 29-10: số `r` lớn nhất trong `scripts/tl_selftest.py` là `r972`; nếu đã có
+Tên ca dùng tiền tố `r973_` … (đo 04:19Z, đo lại 07:10Z 29-10: số `r` lớn nhất trong `scripts/tl_selftest.py` là `r972`; nếu đã có
 `r973` lúc thi hành thì lấy số kế tiếp còn trống và ghi lại trong handoff). Mỗi ca kèm đột biến làm nó đổi màu (L3);
 đột biến chạy trên BẢN SAO TẠM, không trên tệp thật.
 
@@ -114,7 +114,7 @@ Tên ca dùng tiền tố `r973_` … (đo 04:19Z 29-10: số `r` lớn nhất t
 | D4 | 4 | `r973_bootstrap_env_thang_hang`: `TL_AGENT_CREDS_FILEID` đặt ⇒ đồ giả tải nhận đúng fileId của biến dù hằng khác rỗng | đảo thứ tự ưu tiên ⇒ ĐỎ |
 | D5 | 4 | `r973_bootstrap_khong_export_khong_ghi_gemini`: payload có `claude_oauth_token` và `antigravity_api_key` ⇒ sau `bootstrap`, `os.environ` của tiến trình KHÔNG có `CLAUDE_CODE_OAUTH_TOKEN`, `GEMINI_API_KEY` (nếu trước đó vắng), HOME tạm KHÔNG có thư mục `.gemini`; stdout chứa TÊN hai khoá, không chứa giá trị | thêm `os.environ["GEMINI_API_KEY"] = …` ⇒ ĐỎ; ghi `settings.json` vào `~/.gemini` ⇒ ĐỎ |
 | E1 | 5 | các lệnh mới có trong parser: `tl agent-creds-set --help` chứa cả `--antigravity-key-env`, `tl secrets-keygen --help`, `tl bootstrap --help` chứa `--require-agent-creds` (rc 0, khớp chuỗi cờ nguyên văn — vế dương; vế âm L6a: trên base cả ba chưa có, đo 04:19Z 29-10) | xoá dòng `add_parser("agent-creds-set"…)` ⇒ ĐỎ |
-| G1 | 6 | `python scripts/tl.py --selftest`: **delta so base = 0 ca đỏ mới**, và mọi ca `r973_*` ĐẠT. Nền đo 04:19Z 29-10 trong container cloud: **1736/1738** (đơn vị: ca selftest), hai ca đỏ sẵn `r218_docclaims_l2_sha_khong_ton_tai`, `r264_doc_claims_phu_docs` | một ca `r973_*` đỏ, hoặc bất kỳ ca nào đạt trên base mà đỏ trên head ⇒ ĐỎ |
+| G1 | 6 | `python scripts/tl.py --selftest`: **delta so base = 0 ca đỏ mới**, và mọi ca `r973_*` ĐẠT. Nền đo 04:19Z và đo lại 07:10Z 29-10 trong container cloud (cây = nhánh mặc định + đúng tệp đặc tả này): **1736/1738** (đơn vị: ca selftest), hai ca đỏ sẵn `r218_docclaims_l2_sha_khong_ton_tai`, `r264_doc_claims_phu_docs` | một ca `r973_*` đỏ, hoặc bất kỳ ca nào đạt trên base mà đỏ trên head ⇒ ĐỎ |
 | J1 | 8 | `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` ⇒ `ok=true` và `expected == checked` (lane LAND, CLAUDE.md mục deploy 5) | sửa một byte của `scripts/tl_gws.py` sau khi tái sinh ⇒ ĐỎ |
 | K1 | — | `python -m ruff check --select F scripts/tl_gws.py scripts/tl_core/cli.py`: delta F so base = 0 | thêm một tên chưa định nghĩa ⇒ ĐỎ |
 | K2 | — | kích thước: `git diff --numstat <base>..<head>` ⇒ ≤ 6 tệp và ≤ 450 dòng thêm (đơn vị: dòng thêm, tổng trên mọi tệp của diff) | vượt ⇒ ĐỎ; luật dự phòng: chuyển mục tiêu 3 sang P2 |
@@ -151,4 +151,4 @@ khai bằng chữ số dạng "N lời gọi" cần bắt hai dạng (L6d); khô
 - CLI `agy` chưa được đo ở bất kỳ máy nào trong phiên soạn (container không cài, laptop chưa kiểm). Việc `agy` nhận
   `GEMINI_API_KEY` khi `modelProvider: gemini` lấy từ tài liệu cài đặt chính thức của Antigravity, chưa chạy thật.
   P1 chỉ lưu và giải mã khoá, nên điều này không chặn P1; P2 phải đo trước khi dựa vào.
-- Số dòng thêm thật (mục Kích thước dự kiến) và số Issue: đo/điền lúc thi hành và lúc đóng băng.
+- Số dòng thêm thật (mục Kích thước dự kiến): đo lúc thi hành.

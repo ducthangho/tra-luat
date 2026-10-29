@@ -1,0 +1,9 @@
+{"command": ["rev-parse", "HEAD", "HEAD^{tree}"], "rc": 0, "out": "3a52e6d194d08a755793cf449f393fb15b56757b\n97ba989c22cbde6bd24cdd33671d9e7f2442ae58\n", "err": ""}
+{"command": ["status", "--short"], "rc": 0, "out": "", "err": ""}
+{"command": ["diff", "--check", "44884446f71c89e25f9a72ac58e4f597db63c1ba", "HEAD"], "rc": 0, "out": "", "err": ""}
+{"path": "ops/bien_nhan_v2.py", "byte_identical": true, "sha256": "17b82cdb704fc935b92a196a7abd4e90401c71d9bbdb8534d7a4d3a4b81fa207"}
+{"path": "ops/bien_nhan_v2_test.py", "byte_identical": true, "sha256": "933b0e801dc016648ee89f77310d58d306da94982eb636be8edebeade4708cca"}
+{"path": "ops/specs/NO-CAU-LICH-SU-BIEN-NHAN-r2.md", "byte_identical": true, "sha256": "9a155cb9995b225129dc11de03e2d6d9811a9c53321151e0389214a85d33b1ca"}
+  ĐẠT   c86_B1_moc_dung_tai_KHONG_con_mien
+  CÓ RĂNG    m94_B1_chen_lai_mien_tru_dung_tai      → c86_B1_moc_dung_tai_KHONG_con_mien = giet_that  (B1: chèn lại phép miễn khi mapping có `dung_tai`)
+  CÓ RĂNG    m94_B1_chen_lai_mien_tru_dung_tai      → c86_B1_moc_dung_tai_KHONG_con_mien = giet_that  (B1: chèn lại phép miễn khi mapping có `dung_tai`)

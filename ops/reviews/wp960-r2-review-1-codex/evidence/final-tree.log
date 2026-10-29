@@ -1,0 +1,6 @@
+head=f7659a2f911e4a686d2b312ce046f3625a563b93
+tree=629fb10af4dd84631518a66705d3e4ee83f05e15
+status=''
+ops/bien_nhan_v2.py byte_identical=True sha256=737c7849878e72e9348c1a6ce2e890d2f6e2ff03f6cc22007229575d0880bd3f
+ops/bien_nhan_v2_test.py byte_identical=True sha256=66ae3adbf07e36214176370274041c5670503a94169479ef2d7d923ca86457b2
+diff_check_rc=0

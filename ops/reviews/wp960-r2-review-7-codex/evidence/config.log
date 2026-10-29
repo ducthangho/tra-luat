@@ -1,0 +1,27 @@
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmp6ljktaa0", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "false", "debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"config": "false", "debt": true, "rc": 0, "stderr": ""}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmpo44zrpwi", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "no", "debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"config": "no", "debt": true, "rc": 0, "stderr": ""}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmp5j_rln78", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "off", "debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"config": "off", "debt": true, "rc": 0, "stderr": ""}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmpu1k2613r", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "true", "debt": false, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.archive.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"config": "true", "debt": true, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.archive.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmp4rbyxm0k", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "yes", "debt": false, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.archive.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"config": "yes", "debt": true, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.archive.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmpnhl6sfiq", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "on", "debt": false, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.archive.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"config": "on", "debt": true, "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.archive.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmp9sgwr78j/repo", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "alternates-env", "debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"config": "alternates-env", "debt": true, "rc": 0, "stderr": ""}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmpverg029o/repo", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "alternates-file", "debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"config": "alternates-file", "debt": true, "rc": 0, "stderr": ""}
+{"command": ["git", "fsck", "--full"], "cwd": "/tmp/tmpnwuloz62/linked", "rc": 0, "stdout": "", "stderr": ""}
+{"config": "linked-worktree", "debt": false, "rc": 1, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"config": "linked-worktree", "debt": true, "rc": 0, "stderr": ""}

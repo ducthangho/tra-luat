@@ -1,0 +1,6 @@
+wp960-r4-ruff-base rc 1 findings [('F541', 'bien_nhan_v2_test.py', 1677, 'f-string without any placeholders')]
+wp960-r4-ruff-head rc 1 findings [('F541', 'bien_nhan_v2_test.py', 1677, 'f-string without any placeholders')]
+diff-check rc= 0 stdout= '' stderr= ''
+diff since merged parent rc= 0 files= ops/bien_nhan_v2.py
+ops/bien_nhan_v2_test.py
+

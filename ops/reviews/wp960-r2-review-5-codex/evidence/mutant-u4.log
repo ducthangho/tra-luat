@@ -1,0 +1,12 @@
+{"start": "u4-bo-chuan-hoa-bool", "source": "/tmp/r5-mutant-u4-bo-chuan-hoa-bool-5lv1d6kq/repo", "match_count": 1}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 20, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 30, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 40, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 50, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 60, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 70, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 80, "red_count": 0}
+{"progress": "u4-bo-chuan-hoa-bool", "completed": 90, "red_count": 0}
+{"mutant": "u4-bo-chuan-hoa-bool", "match_count": 1, "count": 93, "passed": 93, "red": [], "seconds": 404.145}

@@ -2946,12 +2946,14 @@ def c86_B1_moc_dung_tai_KHONG_con_mien():
 @ca
 def c87_B3_OID_khong_tra_duoc_theo_NGU_CANH():
     """r2 B3 (M3): OID không tra được ⇒ rc=2 khi có ngữ cảnh (40 hex · backtick · sau `commit`); token
-    thuần số / thuần chữ không ngữ cảnh ⇒ bỏ qua (rc=0). Trộn số-chữ đã có ở `c71`, OID thật ở `c78`.
+    thuần số / thuần chữ không ngữ cảnh ⇒ bỏ qua (rc=0). Trộn số-chữ đo RIÊNG không từ commit/backtick;
+    OID thật ở `c78`.
     Ranh giới của từng ngữ cảnh (r2 review 1, `bo-chon-moi-chua-khoa-bien`): `Precommit` không phải từ
     `commit`; backtick chỉ MỞ không phải trong backtick ⇒ rc=0."""
     for ten, cau, rc_doi in (("40-hex", "Ban " + "a" * 40 + " chua vao master.", 2),
                              ("backtick", "Ban `abcdefa` chua vao master.", 2),
                              ("sau-commit", "Commit 1234567 chua vao master.", 2),
+                             ("tron-so-chu-rieng", "Ban 12ab34c chua vao master.", 2),
                              ("tu-thuong", "Tu deadbeef chua vao master.", 0),
                              ("so-run", "Run 40268583940 chua vao master.", 0),
                              ("tien-to-commit", "Precommit 1234567 chua vao master.", 0),
@@ -2973,14 +2975,19 @@ def c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan():
     """r2 B4 (M4): (i) `provider` ở dòng kề + khai `codex_service`, thiếu caveat ⇒ rc=1; (ii) cùng thế mà
     dòng trước là trích dẫn `tệp:N` ⇒ rc=0; (iii) khai báo không có `provider` trong cửa sổ ⇒ rc=0.
     Ranh giới cửa sổ (r2 review 1, `bo-chon-moi-chua-khoa-bien`): (iv) `notprovider` không phải từ `provider`
-    ⇒ rc=0; (v) `provider` ở dòng SAU cũng thuộc cửa sổ ⇒ rc=1."""
+    ⇒ rc=0; (v) `provider` ở dòng SAU cũng thuộc cửa sổ ⇒ rc=1. Hai dòng cách xa là NGOÀI cửa sổ:
+    provider ngoài cửa sổ không tạo tự khai; trích dẫn ngoài cửa sổ không miễn tự khai."""
     import json as _j
     for ten, verdict, rc_doi in (
             ("i-tu-khai", "provider: openai_codex\nexecution_surface: codex_service\n", 1),
             ("ii-trich-dan-ke", "ops/x/v.md:6\nSELF: provider `openai_codex`, execution surface `codex_service`\n", 0),
             ("iii-khong-provider", "Bang do: thay dong verdict thanh `execution_surface: codex_service`.\n", 0),
             ("iv-notprovider", "notprovider: openai_codex\nexecution_surface: codex_service\n", 0),
-            ("v-provider-dong-sau", "execution_surface: codex_service\nprovider: openai_codex\n", 1)):
+            ("v-provider-dong-sau", "execution_surface: codex_service\nprovider: openai_codex\n", 1),
+            ("vi-provider-truoc-hai-dong", "provider: openai_codex\n\nexecution_surface: codex_service\n", 0),
+            ("vii-provider-sau-hai-dong", "execution_surface: codex_service\n\nprovider: openai_codex\n", 0),
+            ("viii-trich-dan-truoc-hai-dong", "ops/x/v.md:6\n\nprovider: openai_codex execution_surface: codex_service\n", 1),
+            ("ix-trich-dan-sau-hai-dong", "provider: openai_codex execution_surface: codex_service\n\nops/x/v.md:6\n", 1)):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             d, _ = _bn_surface("ops/reviews/v/run.json", "")
@@ -3299,7 +3306,8 @@ def c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho():
 def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
     """Kiến trúc tra git (r2, sau review lượt 2): stdout của `--disambiguate` / `cat-file --batch-check` /
     `for-each-ref` mà KHÔNG đúng dạng giao thức ⇒ `KhongDoDuoc`, không được lọc bỏ thành "không có"; ứng viên
-    `--disambiguate` liệt kê mà `cat-file` nói `missing` ⇒ `KhongDoDuoc`. Đồ giả thay `_git_do` theo lệnh."""
+    `--disambiguate` liệt kê mà `cat-file` nói `missing` ⇒ `KhongDoDuoc`; `config --type=bool` trả giá trị không
+    phải true/false ⇒ `KhongDoDuoc` (review r2 lượt 5). Đồ giả thay `_git_do` theo lệnh."""
     that = bnv2._git_do
     h = "a" * 40
 
@@ -3315,9 +3323,14 @@ def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
             ("disambiguate-dong-la", lambda r: bnv2._commit_cua(r, "abcdef1"), {"rev-parse --disambiguate": "khong-phai-oid\n"}),
             ("batch-check-dang-la", lambda r: bnv2._commit_cua(r, "abcdef1"),
              {"rev-parse --disambiguate": h + "\n", "cat-file": h + " commit thua\n"}),
+            ("batch-check-sai-oid", lambda r: bnv2._commit_cua(r, "abcdef1"),
+             {"rev-parse --disambiguate": h + "\n", "cat-file": "b" * 40 + " commit\n"}),
+            ("batch-check-sai-loai", lambda r: bnv2._commit_cua(r, "abcdef1"),
+             {"rev-parse --disambiguate": h + "\n", "cat-file": h + " nonsense\n"}),
             ("ung-vien-missing", lambda r: bnv2._commit_cua(r, "abcdef1"),
              {"rev-parse --disambiguate": h + "\n", "cat-file": h + " missing\n"}),
-            ("for-each-ref-dong-la", lambda r: bnv2._nhanh_mac_dinh(r), {"for-each-ref": "refs/heads/master khong-phai-oid commit\n"})):
+            ("for-each-ref-dong-la", lambda r: bnv2._nhanh_mac_dinh(r), {"for-each-ref": "refs/heads/master khong-phai-oid commit\n"}),
+            ("promisor-gia-tri-la", lambda r: bnv2._kho_lanh(r), {"config --type=bool": "remote.archive.promisor maybe\n"})):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             _kho_cau(tmp)
@@ -3349,14 +3362,19 @@ def c95_moi_truong_git_KHONG_doi_ket_qua_do():
     def git_dir_khac(tmp, k):
         khac = tmp / "_khac"
         khac.mkdir()
-        _kho_cau(khac)
+        kk = _kho_cau(khac)
+        # Kho ngoài có master = X (M KHÔNG là tổ tiên) — đo nhầm kho ấy thì ra SẠCH, không ra một vi phạm
+        # (review r2 lượt 5: fixture cũ cùng đồ thị nên không phân biệt được kho nào được đo).
+        kk["g"]("update-ref", "refs/heads/master", kk["X"])
         return {"GIT_DIR": str(khac / ".git")}
 
     def git_trace(tmp, k):
         return {"GIT_TRACE": "1"}
 
     def promisor_tat(tmp, k):
-        k["g"]("config", "remote.archive.promisor", "false")
+        # Ba cách viết TẮT mà git chấp nhận; `off`/`no` chỉ đúng khi đọc qua `--type=bool` (review r2 lượt 5).
+        for remote, gt in (("archive", "false"), ("a2", "off"), ("a3", "no")):
+            k["g"]("config", f"remote.{remote}.promisor", gt)
         return {}
 
     def alternates_env(tmp, k):
@@ -4178,6 +4196,34 @@ def _dot_bien():
     do("m133_bo_alternates_khoi_danh_sach_giu", lambda: _dot_bien_tep(
         '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})', '_GIT_GIU = frozenset({"GIT_EXEC_PATH"})'),
        C95, "bỏ `GIT_ALTERNATE_OBJECT_DIRECTORIES` làm kho đủ mất object", doi_chung=DC)
+    # --- review r2 lượt 5: răng riêng cho hai chốt promisor và fixture GIT_DIR phân biệt được kho.
+    do("m134_doc_promisor_khong_chuan_hoa_bool", lambda: _dot_bien_tep(
+        '"config", "--type=bool", "--get-regexp"', '"config", "--get-regexp"'),
+       C95, "`off`/`no` đọc thô thành dòng lạ ⇒ kho đủ bị chặn", doi_chung=DC)
+    do("m135_bo_chot_gia_tri_promisor_la", lambda: _dot_bien_tep(
+        '        if gt not in ("true", "false"):\n', "        if False:\n"),
+       C94, "giá trị promisor không phải bool được coi là tắt", doi_chung=DC)
+    do("m136_giu_GIT_DIR_ke_thua", lambda: _dot_bien_tep(
+        '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})',
+        '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH", "GIT_DIR"})'),
+       C95, "`GIT_DIR` kế thừa làm cổng đo kho khác", doi_chung=DC)
+    # Review r2 lượt 6: từng vế giao thức và từng ngữ cảnh phải có răng riêng.
+    do("m137_bo_so_OID_batch_check", lambda: _dot_bien_tep(
+        ' or ra[0] != oid40', ''),
+       C94, "batch-check trả OID khác mà được tin", doi_chung=DC)
+    do("m138_bo_kiem_loai_batch_check", lambda: _dot_bien_tep(
+        ' or ra[1] not in ("commit", "tag", "tree", "blob")', ''),
+       C94, "batch-check trả loại ngoài giao thức mà được tin", doi_chung=DC)
+    do("m139_bo_ngu_canh_tron_so_chu", lambda: _dot_bien_tep(
+        'if len(x) == 40 or _oid_tron(x):', 'if len(x) == 40:'),
+       "c87_B3_OID_khong_tra_duoc_theo_NGU_CANH", "OID trộn số-chữ thiếu mà thành token thường", doi_chung=DC)
+    # Cửa sổ M4 đúng ba dòng, không được nới thêm về phía trước hoặc phía sau.
+    do("m140_B4_noi_cua_so_ve_truoc", lambda: _dot_bien_tep(
+        "cua = dong_tep[max(0, j - 1):j + 2]", "cua = dong_tep[max(0, j - 2):j + 2]"),
+       "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "provider/citation cách hai dòng là ngoài cửa sổ", doi_chung=DC)
+    do("m141_B4_noi_cua_so_ve_sau", lambda: _dot_bien_tep(
+        "cua = dong_tep[max(0, j - 1):j + 2]", "cua = dong_tep[max(0, j - 1):j + 3]"),
+       "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "provider/citation cách hai dòng là ngoài cửa sổ", doi_chung=DC)
     do("m130_bo_chot_GRAFTS", lambda: _dot_bien_tep(
         "    if gf and (root / gf", "    if False and (root / gf"),
        C91, "tệp grafts đổi parent mà vẫn đo", doi_chung=DC)

@@ -1,0 +1,4 @@
+$ git --version
+git version 2.43.0
+
+rc=0

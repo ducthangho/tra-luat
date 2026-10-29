@@ -1,0 +1,78 @@
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": true, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": true, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": true, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: verdict không đọc được — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": true, "errors": [], "unknown": ["[L-SURFACE] r.receipt.yaml: verdict không đọc được — KHÔNG ĐO ĐƯỢC L-SURFACE"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `a.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu", "[L-ANCESTRY] r.receipt.yaml: `b.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet", "state": "qua", "message": null}
+{"case": "c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham", "state": "qua", "message": null}
+{"case": "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 2, "debt": false, "errors": [], "unknown": ["[*] r.receipt.yaml: KHÔNG ĐO ĐƯỢC câu lịch sử — RuntimeError: git gia hong"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"probe": "kiem", "rc": 2, "debt": true, "errors": [], "unknown": ["[*] r.receipt.yaml: KHÔNG ĐO ĐƯỢC câu lịch sử — RuntimeError: git gia hong"], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c90_B2_MOT_BIEN_loi_do_khong_traceback_khong_no_chet", "state": "qua", "message": null}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmp6lhn_okg/ops/reviews/hong.receipt.yaml')\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmphcx7dcos/ops/reviews/hong.receipt.yaml')\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: r.receipt.yaml: YAML có alias VÒNG ở `cycle[0]` — không duyệt được câu\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: r.receipt.yaml: YAML có alias VÒNG ở `cycle[0]` — không duyệt được câu\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: ref mặc định `refs/remotes/origin/master` trỏ tree, không phải commit\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: ref mặc định `refs/remotes/origin/master` trỏ tree, không phải commit\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: `git for-each-ref --format=%(refname) %(objectname) %(objecttype) refs/remotes/origin/HEAD refs/remotes/origin/master refs/he` stderr: warning: ignoring broken ref refs/remotes/origin/master\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: `git for-each-ref --format=%(refname) %(objectname) %(objecttype) refs/remotes/origin/HEAD refs/remotes/origin/master refs/he` stderr: warning: ignoring broken ref refs/remotes/origin/master\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: `refs/remotes/origin/HEAD` là dangling symref (trỏ `refs/remotes/origin/gone` không có)\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: `refs/remotes/origin/HEAD` là dangling symref (trỏ `refs/remotes/origin/gone` không có)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: không gọi được `git rev-parse`: FileNotFoundError: [Errno 2] No such file or directory: 'git'\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: không gọi được `git rev-parse`: FileNotFoundError: [Errno 2] No such file or directory: 'git'\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `5298700` mơ hồ — 2 commit chung tiền tố, KHÔNG kết luận được quan hệ tổ tiên\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `5298700` mơ hồ — 2 commit chung tiền tố, KHÔNG kết luận được quan hệ tổ tiên\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: `git cat-file --batch-check=%(objectname) %(objecttype)` stderr: error: object file .git/objects/db/ffbbc94a7488c35d0a4050c1d26ffad20fa8ad is empty\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: `git cat-file --batch-check=%(objectname) %(objecttype)` stderr: error: object file .git/objects/db/ffbbc94a7488c35d0a4050c1d26ffad20fa8ad is empty\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: kho nông (`--is-shallow-repository` = 'true') — không đo được quan hệ tổ tiên\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: kho nông (`--is-shallow-repository` = 'true') — không đo được quan hệ tổ tiên\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`extensions.partialclone`) — object vắng có thể là chưa tải\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`extensions.partialclone`) — object vắng có thể là chưa tải\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.origin.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone (`remote.origin.promisor` = true) — object vắng có thể là chưa tải\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: kho có tệp grafts `.git/info/grafts` — parent bị thay, không đo được quan hệ tổ tiên\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: kho có tệp grafts `.git/info/grafts` — parent bị thay, không đo được quan hệ tổ tiên\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` stderr: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead\n"}
+{"probe": "CLI", "rc": 2, "debt": true, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` stderr: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead\n"}
+{"case": "c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no", "state": "qua", "message": null}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmppm6csbem/ops/reviews/hong.receipt.yaml')\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmp7jof7xun/ops/reviews/hong.receipt.yaml')\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (ParserError: while parsing a flow node\nexpected the node content, but found '<stream end>'\n  in \"<unicode string>\", line 2, column 1:\n    \n    ^)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: YAML hỏng (ParserError: while parsing a flow node\nexpected the node content, but found '<stream end>'\n  in \"<unicode string>\", line 2, column 1:\n    \n    ^)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (ValueError: month must be in 1..12)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: YAML hỏng (ValueError: month must be in 1..12)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (RecursionError: maximum recursion depth exceeded)\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: YAML hỏng (RecursionError: maximum recursion depth exceeded)\n"}
+{"probe": "CLI", "rc": 0, "debt": false, "stderr": "# 1 tệp\n"}
+{"probe": "CLI", "rc": 0, "debt": false, "stderr": "# 0 mục\n"}
+{"case": "c92_B2_co_SINH_NO_cung_bien_voi_cong", "state": "qua", "message": null}
+{"probe": "kiem", "rc": 1, "debt": false, "errors": ["[L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e4a3f5d` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e4a3f5d` ĐÃ là tổ tiên — câu đã cũ; sửa câu"], "unknown": [], "debts": {"L-REVIEW": 0, "L-ANCESTRY": 0, "L-SURFACE": 0}}
+{"case": "c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho", "state": "qua", "message": null}
+{"case": "c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC", "state": "qua", "message": null}
+{"probe": "CLI", "rc": 1, "debt": false, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"probe": "CLI", "rc": 1, "debt": false, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"probe": "CLI", "rc": 1, "debt": false, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"probe": "CLI", "rc": 1, "debt": false, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"probe": "CLI", "rc": 1, "debt": false, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"probe": "CLI", "rc": 1, "debt": false, "stderr": "  ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ\n"}
+{"case": "c95_moi_truong_git_KHONG_doi_ket_qua_do", "state": "qua", "message": null}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — `merge-base` cho `e72d857`: `git merge-base --is-ancestor e72d8570d56391888423561308429963ae4f1b56 0dda7648f3476baeba72b8572a393498ca61a22c` rc=3: \nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"probe": "CLI", "rc": 2, "debt": false, "stderr": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=3: \n"}
+{"case": "c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC", "state": "qua", "message": null}
+{"group": "closure", "passed": 11, "total": 11}

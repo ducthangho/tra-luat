@@ -1,0 +1,89 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 6 cua packet #960 NO-CAU-LICH-SU-BIEN-NHAN revision 2,
+# KHAC NEN (reviewer codex CLI, executor claude). **`changes_requested`** — 2 P1 / 0 P2 / 0 P3 theo finding.
+# Ghi so boi CHINH phien executor (session_015GtxrbeTfDyFKdj7rb72Uq) theo dong y cua chu kho (29-10-2026).
+# Nhan dung trong tep: (a) DO tu kho/run.json luc ghi so · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp960-r2-review-6-codex-25244061
+kind: review_delivery_receipt
+packet_id: NO-CAU-LICH-SU-BIEN-NHAN
+packet_issue: 960
+target_pull_request: 1005
+revision: 2
+generation: 2
+lease_id: wp960-r2-g2-claude
+lease_gan_theo: '(a) ops/leases/wp960-r2-g2-claude.yaml tren nhanh ops/wp960-r2-g2-lease; cua so [2026-10-29T02:25:00Z, 2026-10-30T14:43:00Z); run.json bat_dau_utc 2026-10-29T04:57:06Z nam trong cua so.'
+luot: 6
+loi_goi_codex_thu: '7 / tran 8 (ADR-0052, dong khai cua spec r2)'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: systemic
+effective_review_class: sensitive
+assurance: cross_reviewed
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Khac ho model (reviewer GPT do_may qua run.json model_phuc_vu, executor Claude theo lease) nhung verdict la
+  changes_requested nen KHONG len cross_approved. Muc nay ghi nhan mot luot review khac nen DA CHAY, khong phai approval.
+verdict: changes_requested
+verdict_nguon: '(a) dong 1 `verdict: changes_requested`; dong 3 `Kết quả: 0 P0, 2 P1, 0 P2, 0 P3.`'
+verdict_path: ops/reviews/wp960-r2-review-6-codex-verdict.md
+verdict_sha256: 25244061cfbc495155cab72bd74d9db19d5b71f10986617fe49037eff5870c62
+verdict_bytes: 29015
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: '(a) ops/reviews/wp960-r2-review-6-codex/VERDICT.md la tep goc chep tu sandbox reviewer; ban phang byte-identical (SHA256SUMS cua thu muc).'
+reviewed_sha: 78c138f863696def68f88080b2b32057fe98f207
+reviewed_sha_nguon: '(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/560b58e22164ca23534eda790343872d92feb754/ops/reviews/wp960-r2-review-6-codex-verdict.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim commit hien vat cua nhanh ghi so agent/wp960-r2-ghi-so; bien nhan nay di o commit sau, tren cung nhanh.'
+so_p0: 0
+so_p1: 2
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict; khop so muc `### <slug> [P*]` trong tep.'
+findings_ids:
+  - id: chot-oid-va-loai-batch-check-chua-co-rang
+    hang: P1
+  - id: ngu-canh-tron-so-chu-chua-co-rang-rieng
+    hang: P1
+xu_ly_finding: >-
+  (a) Moi finding cua luot nay duoc verdict luot 7 (ops/reviews/wp960-r2-review-7-codex-verdict.md) xac nhan DONG trong bang dong finding cua no; cac ban va nam trong lich su nhanh agent/wp960-g1-claude.
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: c9d2db30ad794af39e478e84b7567028
+  run_json: ops/reviews/wp960-r2-review-6-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) ma_thoat 0, trang_thai xong, thoi_luong_giay 862.807, worktree_sach true, execution_surface codex_cli,
+    prompt_sha256 47d3118119c4… = sha256 PROMPT.md trong thu muc.
+  cli: >-
+    codex-cli 0.164.0 qua `launcher.py run --expected-repo github.com/ducthangho/tra-luat --expected-head 78c138f… --require-clean
+    --prompt-file … --expected-prompt-sha256 … -- codex exec -c model_reasoning_effort=xhigh --cd <sandbox> --sandbox workspace-write
+    --skip-git-repo-check "<chi thi tro {PROMPT_FILE}>"`
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model: gpt-6.1-sol
+  model_da_chay: gpt-6.1-sol
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp960-r2-review-6-codex/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: '(a) run.json model_phuc_vu_trang_thai DO_DUOC; 34 su kien, moi su kien model gpt-6.1-sol; effort_phuc_vu xhigh.'
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua git push bang credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+independent_from_executor_session: true
+independent_ghi_chu: 'Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context).'
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: '(a) Blob verdict ghim o commit hien vat cua PR ghi so; len trung_binh/cao khi PR ghi so land bang merge commit (squash pha quan he to tien).'
+verdict_usage_caveats:
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: 'Script/bang chung cua reviewer tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can dung lai mirror tai 78c138f.'
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

@@ -1,0 +1,3 @@
+Đã hoàn tất [VERDICT.md](/tmp/claude-0/rv/wp960-r2-review-7-codex/VERDICT.md): **changes_requested — 1 P1** về thiếu test biên cửa sổ surface. Hai finding lượt 6 đã đóng.
+
+[HINT.patch](/tmp/claude-0/rv/wp960-r2-review-7-codex/HINT.patch) đã dry-run sạch; sau áp trên bản sao, suite đạt **93/93 ca, 137/137 đột biến**.

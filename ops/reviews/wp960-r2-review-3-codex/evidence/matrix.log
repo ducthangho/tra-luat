@@ -1,0 +1,44 @@
+{"call": 1, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpo9ni47_x/ops/reviews/hong.receipt.yaml')\n"}
+{"call": 2, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmp665thtix/ops/reviews/hong.receipt.yaml')\n"}
+{"call": 3, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"call": 4, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"call": 5, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: r.receipt.yaml: YAML có alias VÒNG ở `cycle[0]` — không duyệt được câu\n"}
+{"call": 6, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: r.receipt.yaml: YAML có alias VÒNG ở `cycle[0]` — không duyệt được câu\n"}
+{"call": 7, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: ref mặc định `refs/remotes/origin/master` trỏ tree, không phải commit\n"}
+{"call": 8, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: ref mặc định `refs/remotes/origin/master` trỏ tree, không phải commit\n"}
+{"call": 9, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git for-each-ref --format=%(refname) %(objectname) %(objecttype) refs/remotes/origin/HEAD refs/remotes/origin/master refs/he` rc=0: warning: ignoring broken ref refs/remotes/origin/master\n"}
+{"call": 10, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git for-each-ref --format=%(refname) %(objectname) %(objecttype) refs/remotes/origin/HEAD refs/remotes/origin/master refs/he` rc=0: warning: ignoring broken ref refs/remotes/origin/master\n"}
+{"call": 11, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `refs/remotes/origin/HEAD` là dangling symref (trỏ `refs/remotes/origin/gone` không có)\n"}
+{"call": 12, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `refs/remotes/origin/HEAD` là dangling symref (trỏ `refs/remotes/origin/gone` không có)\n"}
+{"call": 13, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 14, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 15, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 16, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/v/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 17, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 18, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-SURFACE] r.receipt.yaml: `ops/reviews/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/run.json` có mà không đọc được `execution_surface` — KHÔNG ĐO ĐƯỢC L-SURFACE\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 19, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: không gọi được `git rev-parse`: FileNotFoundError: [Errno 2] No such file or directory: 'git'\n"}
+{"call": 20, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: không gọi được `git rev-parse`: FileNotFoundError: [Errno 2] No such file or directory: 'git'\n"}
+{"call": 21, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `5298700` mơ hồ — 2 commit chung tiền tố, KHÔNG kết luận được quan hệ tổ tiên\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 22, "flags": [], "rc": 2, "stderr": "  KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — OID `5298700` mơ hồ — 2 commit chung tiền tố, KHÔNG kết luận được quan hệ tổ tiên\nTỔNG: KHÔNG ĐO ĐƯỢC\n"}
+{"call": 23, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git cat-file --batch-check=%(objectname) %(objecttype)` rc=0: error: object file .git/objects/db/ffbbc94a7488c35d0a4050c1d26ffad20fa8ad is empty\n"}
+{"call": 24, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: `git cat-file --batch-check=%(objectname) %(objecttype)` rc=0: error: object file .git/objects/db/ffbbc94a7488c35d0a4050c1d26ffad20fa8ad is empty\n"}
+{"call": 25, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho nông (`--is-shallow-repository` = 'true') — không đo được quan hệ tổ tiên\n"}
+{"call": 26, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho nông (`--is-shallow-repository` = 'true') — không đo được quan hệ tổ tiên\n"}
+{"call": 27, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone — object vắng có thể là chưa tải, không đo được\n"}
+{"call": 28, "flags": [], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: kho partial clone — object vắng có thể là chưa tải, không đo được\n"}
+{"case": "c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no", "result": ["qua", null]}
+{"call": 29, "flags": ["--sinh-no"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmp7keyf_xa/ops/reviews/hong.receipt.yaml')\n"}
+{"call": 30, "flags": ["--sinh-no-cau-lich-su"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/tmpwoc61sr_/ops/reviews/hong.receipt.yaml')\n"}
+{"call": 31, "flags": ["--sinh-no"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"call": 32, "flags": ["--sinh-no-cau-lich-su"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không đọc được (UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte)\n"}
+{"call": 33, "flags": ["--sinh-no"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (ParserError: while parsing a flow node\nexpected the node content, but found '<stream end>'\n  in \"<unicode string>\", line 2, column 1:\n    \n    ^)\n"}
+{"call": 34, "flags": ["--sinh-no-cau-lich-su"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: YAML hỏng (ParserError: while parsing a flow node\nexpected the node content, but found '<stream end>'\n  in \"<unicode string>\", line 2, column 1:\n    \n    ^)\n"}
+{"call": 35, "flags": ["--sinh-no"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (ValueError: month must be in 1..12)\n"}
+{"call": 36, "flags": ["--sinh-no-cau-lich-su"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: YAML hỏng (ValueError: month must be in 1..12)\n"}
+{"call": 37, "flags": ["--sinh-no"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: không sinh được nợ (RecursionError: maximum recursion depth exceeded)\n"}
+{"call": 38, "flags": ["--sinh-no-cau-lich-su"], "rc": 2, "stderr": "KHÔNG ĐO ĐƯỢC: hong.receipt.yaml: YAML hỏng (RecursionError: maximum recursion depth exceeded)\n"}
+{"call": 39, "flags": ["--sinh-no"], "rc": 0, "stderr": "# 1 tệp\n"}
+{"call": 40, "flags": ["--sinh-no-cau-lich-su"], "rc": 0, "stderr": "# 0 mục\n"}
+{"case": "c92_B2_co_SINH_NO_cung_bien_voi_cong", "result": ["qua", null]}
+{"case": "c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho", "result": ["qua", null]}
+{"case": "c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC", "result": ["qua", null]}

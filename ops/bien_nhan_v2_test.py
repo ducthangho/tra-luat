@@ -2569,13 +2569,16 @@ def _kho_cau(tmp: Path):
         dung(r.returncode == 0, f"git {' '.join(a)} hỏng: {r.stderr[:200]}")
         return r.stdout.strip()
     g("init", "-q"); g("checkout", "-q", "-b", "master")
-    (tmp / "a.txt").write_text("a\n", encoding="utf-8"); g("add", "-A"); g("commit", "-qm", "B0")
+    # #1017: BYTE LF, không `write_text` — chế độ văn bản của Python đổi `\n` thành `\r\n` trên Windows nên
+    # blob khác byte, SHA mọi commit đổi theo, và các fixture ghim SHA (`_COMMIT_BLOB_TRUNG`, `_THONG_DIEP_TRUNG`)
+    # gãy ở đó mà xanh trên Linux (run 40833816523: c93 ra đúng SHA của bản CRLF, đã tái hiện trên Linux).
+    (tmp / "a.txt").write_bytes(b"a\n"); g("add", "-A"); g("commit", "-qm", "B0")
     b0 = g("rev-parse", "HEAD")
     g("checkout", "-q", "-b", "re")
-    (tmp / "x.txt").write_text("x\n", encoding="utf-8"); g("add", "-A"); g("commit", "-qm", "X")
+    (tmp / "x.txt").write_bytes(b"x\n"); g("add", "-A"); g("commit", "-qm", "X")
     x = g("rev-parse", "HEAD")
     g("checkout", "-q", "master")
-    (tmp / "m.txt").write_text("m\n", encoding="utf-8"); g("add", "-A"); g("commit", "-qm", "M")
+    (tmp / "m.txt").write_bytes(b"m\n"); g("add", "-A"); g("commit", "-qm", "M")
     return {"B0": b0, "X": x, "M": g("rev-parse", "HEAD"), "g": g}
 
 
@@ -3089,6 +3092,27 @@ def _commit_trung_tien_to(tmp: Path, k: dict):
     return sha[0][:7]
 
 
+def _tiem_lstat(duoi: str, loi: OSError):
+    """Context manager: `Path.lstat` của đường dẫn kết thúc bằng `duoi` (so theo `/`) ném `loi`; mọi đường khác đi lstat
+    THẬT. Gỡ lại khi ra. #1017: chỉ dùng cho nhánh mà nền không dựng được bằng tệp thật."""
+    import contextlib
+
+    @contextlib.contextmanager
+    def _cm():
+        that = Path.lstat
+
+        def gia(self, *a, **k):
+            if str(self).replace("\\", "/").endswith(duoi):
+                raise loi
+            return that(self, *a, **k)
+        Path.lstat = gia
+        try:
+            yield
+        finally:
+            Path.lstat = that
+    return _cm()
+
+
 @ca
 def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
     """r2 B2 (M2) + review r2 lượt 1–2: MỖI nguồn hỏng × {không nợ, có nợ trúng khoá} chạy QUA CLI ⇒ rc=2,
@@ -3163,10 +3187,19 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
             os.lstat(tmp / rj)
             dung(False, "fixture: lstat tên quá dài lại thành công")
         except (FileNotFoundError, NotADirectoryError):
-            dung(False, "fixture: lstat tên quá dài báo ENOENT/ENOTDIR, không phải lỗi khác")
+            # #1017: Windows báo tên quá dài là ENOENT, nên nền này KHÔNG dựng được "lstat lỗi khác" bằng tên dài.
+            # Đo được thì nói ra, không giả xanh: nhánh ấy vẫn được đo bằng nguồn tiêm `run_json_lstat_loi_tiem`.
+            return None
         except OSError:
             pass
         return tmp, al, k_sf, None, "a" * 40
+
+    def run_json_lstat_loi_tiem(tmp):
+        """#1017: "lstat lỗi khác ENOENT/ENOTDIR" dựng bằng TIÊM, chạy trên MỌI nền — tên quá dài chỉ cho lỗi ấy trên
+        POSIX. Đường dẫn không tồn tại; `Path.lstat` của đúng đường dẫn ấy ném `PermissionError` trong lúc chạy CLI."""
+        rj = "ops/reviews/tiem-lstat/run.json"
+        al = _surface(tmp, rj)
+        return tmp, al, k_sf, None, "tiem-lstat", lambda: _tiem_lstat(rj, PermissionError(13, "tiem #1017"))
 
     def git_vang(tmp):
         k = _kho_cau(tmp)
@@ -3234,14 +3267,20 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
         k["g"]("config", "advice.graftFileDeprecated", "false")      # tắt lời nhắc: chốt phải đứng một mình
         return tmp, al, k_anc, None, "grafts"
 
+    import contextlib
     for nguon in (receipt_thu_muc, receipt_utf8, alias_vong, nhanh_la_tree, ref_hong, symref_gay, run_json_thu_muc,
-                  run_json_symlink_gay, run_json_ten_qua_dai, git_vang, tien_to_mo_ho, object_rong, kho_nong,
-                  kho_partial, kho_partial_promisor, grafts, cau_hinh_canh_bao):
+                  run_json_symlink_gay, run_json_ten_qua_dai, run_json_lstat_loi_tiem, git_vang, tien_to_mo_ho,
+                  object_rong, kho_nong, kho_partial, kho_partial_promisor, grafts, cau_hinh_canh_bao):
         for ten_no in ("khong-no", "co-no"):
             ten = f"{nguon.__name__}/{ten_no}"
             with tempfile.TemporaryDirectory() as t:
-                goc, al, khoa, path, dau = nguon(Path(t))
-                rc, loi_ra = _chay_cli(goc, al, {khoa} if ten_no == "co-no" else (), path=path)
+                dung_ = nguon(Path(t))
+                if dung_ is None:                   # nền không dựng được nguồn này — nói ra, ĐỪNG giả xanh
+                    print(f"  GHI CHÚ c91 {ten}: nền KHÔNG dựng được (đo) — nhánh ấy đo bằng nguồn tiêm")
+                    continue
+                goc, al, khoa, path, dau, *boc = dung_
+                with (boc[0]() if boc else contextlib.nullcontext()):
+                    rc, loi_ra = _chay_cli(goc, al, {khoa} if ten_no == "co-no" else (), path=path)
                 bang(rc == 2 and "NỢ CHẾT" not in loi_ra and "Traceback" not in loi_ra and dau in loi_ra,
                      f"{ten}: đòi rc=2, không NỢ CHẾT, stderr nêu `{dau}`; được rc={rc}: {loi_ra[-400:]!r}")
 
@@ -3292,8 +3331,10 @@ def c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho():
              "GIT_AUTHOR_DATE": "2026-01-01T00:00:00Z", "GIT_COMMITTER_DATE": "2026-01-01T00:00:00Z"}
         c = subprocess.run(["git", "-C", str(tmp), "commit-tree", cay, "-p", k["B0"], "-m", _COMMIT_BLOB_TRUNG[0]],
                            capture_output=True, text=True, env=E).stdout.strip()
-        b = subprocess.run(["git", "-C", str(tmp), "hash-object", "-w", "--stdin"], input=_COMMIT_BLOB_TRUNG[1],
-                           capture_output=True, text=True, env=E).stdout.strip()
+        # #1017: BYTE qua stdin — `text=True` đổi `\n` thành `\r\n` trên Windows nên blob ra SHA khác.
+        b = subprocess.run(["git", "-C", str(tmp), "hash-object", "-w", "--stdin"],
+                           input=_COMMIT_BLOB_TRUNG[1].encode("utf-8"),
+                           capture_output=True, env=E).stdout.decode("ascii").strip()
         dung(c[:7] == b[:7] and len(c) == 40, f"fixture: commit/blob không chung tiền tố: {c} {b}")
         k["g"]("merge", "-q", "--no-ff", c, "-m", "merge")
         al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {c[:7]} chua vao master.\n")})
@@ -3413,19 +3454,46 @@ def c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC():
     that = shutil.which("git")
     dung(that is not None, "fixture: không có git")
     for mau in ("merge-base", "is-shallow-repository"):
-        with tempfile.TemporaryDirectory() as t:
-            tmp = Path(t)
-            k = _kho_cau(tmp)
-            al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
-            bin_ = tmp / "_bin"
-            bin_.mkdir()
-            gia = bin_ / "git"
-            gia.write_text(f"#!/bin/sh\ncase \"$*\" in *{mau}*) exit 3;; esac\n"
-                           f'exec "{that}" "$@"\n', encoding="utf-8")
-            gia.chmod(0o755)
-            rc, loi_ra = _chay_cli(tmp, al, path=f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}")
-            bang(rc == 2 and mau in loi_ra and "rc=3" in loi_ra,
-                 f"{mau}: đòi rc=2 nêu `{mau}` rc=3, được rc={rc}: {loi_ra[-400:]!r}")
+        for cach in ("path", "tiem"):
+            with tempfile.TemporaryDirectory() as t:
+                tmp = Path(t)
+                k = _kho_cau(tmp)
+                al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
+                if cach == "path":
+                    bin_ = tmp / "_bin"
+                    bin_.mkdir()
+                    gia = bin_ / "git"
+                    gia.write_bytes((f"#!/bin/sh\ncase \"$*\" in *__do_gia_wp1017__*) echo GIT-GIA; exit 0;; "
+                                     f"*{mau}*) exit 3;; esac\n" f'exec "{that}" "$@"\n').encode("utf-8"))
+                    gia.chmod(0o755)
+                    path = f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}"
+                    # #1017: ĐO nền trước — Windows `CreateProcess` chỉ tìm `git.exe`, nên script không đuôi ở đầu PATH
+                    # KHÔNG được gọi và git thật trả rc=1 (run 40833816523). Không bọc được thì nói ra, đo bằng tiêm.
+                    try:
+                        do = subprocess.run(["git", "__do_gia_wp1017__"], capture_output=True, text=True,
+                                            env={**os.environ, "PATH": path}, timeout=60).stdout
+                    except OSError:
+                        do = ""
+                    if "GIT-GIA" not in do:
+                        print(f"  GHI CHÚ c96 {mau}/path: nền KHÔNG bọc được git qua PATH (đo) — đo bằng tiêm")
+                        continue
+                    rc, loi_ra = _chay_cli(tmp, al, path=path)
+                else:
+                    # Tiêm ở `_chay_git`, MỌI nền: lệnh khớp mẫu trả rc=3 + stderr RỖNG, lệnh khác đi git thật.
+                    mod = bnv2
+                    goc_fn = mod._chay_git
+
+                    def gia_fn(root, args, vao=None, timeout=60, _mau=mau, _goc=goc_fn):
+                        if any(_mau in str(a) for a in args):
+                            return subprocess.CompletedProcess(["git", *args], 3, "", "")
+                        return _goc(root, args, vao, timeout)
+                    mod._chay_git = gia_fn
+                    try:
+                        rc, loi_ra = _chay_cli(tmp, al)
+                    finally:
+                        mod._chay_git = goc_fn
+                bang(rc == 2 and mau in loi_ra and "rc=3" in loi_ra,
+                     f"{mau}/{cach}: đòi rc=2 nêu `{mau}` rc=3, được rc={rc}: {loi_ra[-400:]!r}")
 
 
 def _chay_1(fn):

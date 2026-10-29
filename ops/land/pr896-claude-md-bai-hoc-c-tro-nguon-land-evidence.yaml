@@ -534,3 +534,41 @@ no_con_mo_20261027:
         Than Issue #960 (luc ghi khoi nay) mo ta chuoi review #896 nhu "5 luot deu changes_requested"; chuoi thuc te da toi
         luot 8 approve va #947 da merge (7471f95). Cac so 8/23/7 trong Issue la cua luot 3..5; cac luot 5..7 da va them.
       khong_anh_huong_landed: 'No nay o so review cua PR khac; KHONG phai dieu kien land #896 va khong doi landed_20261027.'
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: CHUA_DAT
+  review_exact_sha_nguon: >-
+    measured — ops/reviews/pr896-review-8-codex/run/run.json: luot launcher.py run 1d140267, ma_thoat 0, head fb87110
+    (KHAC authorized_head_sha 816f439); verdict approve 0 P0–P3 (ops/reviews/pr896-review-8-codex-verdict.md). Luot approve chay tren fb87110, KHONG phai
+    816f439. Chu kho da chap nhan don vi land 816f439 + 3bc4244 bang comment 6431407190 tren PR #956; do la can cu
+    cua landed, KHONG phai cua review_exact_sha.
+  thuc_thi:
+    model: >-
+      measured — ops/reviews/pr896-review-8-codex/run/run.json model_phuc_vu_trang_thai DO_DUOC, 38/38 su kien model_phuc_vu
+      deu `gpt-6.1-sol`.
+    effort: >-
+      not_measured — ops/reviews/pr896-review-8-codex/run/run.json khong co truong effort nao; `lenh` chi ghi chuong_trinh codex,
+      so_doi_so 9, van_tay (khong luu doi so). Cau hinh yeu cau khong phai runtime evidence (§8.1).
+    sandbox_mode: >-
+      not_measured — ops/reviews/pr896-review-8-codex/run/run.json khong co truong sandbox nao; cau hinh yeu cau khong thay phep do (§8.2).
+  lich_su: >-
+    Ha §8.1 (DAT/cross_approved) -> CHUA_DAT (27-10-2026, packet land-81-ha-cap r2, ops/specs/land-81-ha-cap-r2-pr870-889-896.md (master @ 02bdffa, sha256 ba96df80…), lease land-81-ha-cap-r2-g1-claude-remote-20261027 (#748 issuecomment-6445221939)). Ban truoc khai §8.1 o
+    $.pr_ghi_so_duyet_landed_20261027.dieu_kien_da_dat (van xuoi "§8.1 reviewer: … cross_approved, model do_may"), trong khi bien nhan chi do model, thieu effort va sandbox mode thuc te ma §8.1/§8.2
+    doi — cung loi connector Codex P1 tren PR #934 (review comment 4372912640). Viec ha thuoc packet nay.
+
+ha_cap_assurance_81_20261027:
+  bo_canh: >-
+    Packet land-81-ha-cap r2 (ops/specs/land-81-ha-cap-r2-pr870-889-896.md (master @ 02bdffa, sha256 ba96df80…), lease land-81-ha-cap-r2-g1-claude-remote-20261027 (#748 issuecomment-6445221939)). Khoi nay va khoi assurance_81 cap goc la hai cho DUY NHAT them;
+    moi dong khac giu nguyen byte lam lich su.
+  thay_the:
+    - '$.cap_nhat_20261026_luot8.cross_review_moi.assurance: cross_approved'
+    - '$.cap_nhat_20261026_luot8.reviewer_assurance_81 (approve khac ho, model do_may)'
+    - '$.pr_ghi_so_duyet_landed_20261027.dieu_kien_da_dat[0] (§8.1 reviewer … cross_approved)'
+    - '$.landed_20261027.landed_dieu_kien muc (3) (review DAT theo don vi land, cross_approved)'
+  thay_the_ghi_chu: >-
+    Moi duong dan tren dang khai §8.1 DAT hoac cross_approved; khoi assurance_81 cap goc da thay the chung: nay
+    reviewer_assurance_81 CHUA_DAT (thieu do effort va sandbox mode thuc te).
+  landed_ghi_chu: >-
+    GIU NGUYEN landed. Ghi nhan: comment duyet landed 6431407190 cua chu kho tren PR #956 dan assurance §8.1 ay
+    lam dieu kien (muc (3) review cua landed_dieu_kien). Rut landed la quyet dinh rieng cua chu kho; packet nay khong tu lam.

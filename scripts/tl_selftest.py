@@ -21414,16 +21414,24 @@ def run() -> int:
             return fn(d)
 
     def _c973_a1(d):
-        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude"}
-        rc1, _, up1, drv = _set973(_ns973(new=True, codex=True), e)
+        # review F5: rev1 mang ĐỦ ba khoá; mỗi lần sau chỉ thay MỘT khoá ⇒ hai khoá kia phải còn nguyên
+        e = {"CODEX_HOME": d, "TOKC973": "SENT973-claude", "GEMK973": "SENT973-gemini"}
+        rc1, _, up1, drv = _set973(_ns973(new=True, codex=True, claude_token_env="TOKC973",
+                                          antigravity_key_env="GEMK973"), e)
         if rc1 != 0 or len(up1) != 1 or b"SENT973-codex" in drv[up1[0]]:
             return False
         p1 = _dec973(drv[up1[0]])
-        rc2, _, up2, drv = _set973(_ns973(file_id=up1[0], claude_token_env="TOKC973"), e, drv)
+        rc2, _, up2, drv = _set973(_ns973(file_id=up1[0], claude_token_env="TOKC973"),
+                                   {**e, "TOKC973": "SENT973-claude2"}, drv)
         p2 = _dec973(drv[up1[0]])
-        return (p1.get("schema") == 1 and p1.get("rev") == 1 and p1.get("codex_auth") == _AU973 and rc2 == 0
-                and up2 == up1 and p2.get("rev") == 2 and p2.get("codex_auth") == _AU973
-                and p2.get("claude_oauth_token") == "SENT973-claude")
+        rc3, _, up3, drv = _set973(_ns973(file_id=up1[0], antigravity_key_env="GEMK973"),
+                                   {**e, "GEMK973": "SENT973-gemini2"}, drv)
+        p3 = _dec973(drv[up1[0]])
+        return (p1.get("schema") == 1 and p1.get("rev") == 1 and p1.get("codex_auth") == _AU973
+                and (rc2, rc3, up2, up3) == (0, 0, up1, up1) and (p2.get("rev"), p3.get("rev")) == (2, 3)
+                and p2.get("codex_auth") == p3.get("codex_auth") == _AU973
+                and (p2.get("claude_oauth_token"), p2.get("antigravity_api_key")) == ("SENT973-claude2", "SENT973-gemini")
+                and (p3.get("claude_oauth_token"), p3.get("antigravity_api_key")) == ("SENT973-claude2", "SENT973-gemini2"))
     _t110("r973_agent_creds_set_ma_hoa_va_rev", lambda: _codex973(_c973_a1))
 
     _OLD973 = {"OLD973": _st973.encrypt(json.dumps({"schema": 1, "rev": 5}).encode(), "khoa-KHAC-" + _K973)}
@@ -21466,9 +21474,12 @@ def run() -> int:
 
     def _c973_b1():
         def _rc(fn, k):
-            ups, o = [], {n: getattr(_tg973, n) for n in ("_secrets_upload", "_stage_enc_upload")}
+            ups, o = [], {n: getattr(_tg973, n) for n in ("_secrets_upload", "_stage_enc_upload", "load_creds")}
             for n in o:
                 setattr(_tg973, n, lambda *a, **kw: ups.append(1) or ("X973", True))
+            def _khong_cfg(*a, **kw):   # lệnh cũ qua chốt rồi dừng ở đây (rc 5) — chỉ đo "chốt KHÔNG chặn"
+                raise RuntimeError("CFG973")
+            _tg973.load_creds = _khong_cfg
             sav, b = _env110({"TL_MASTER_KEY": k, "CODEX_HOME": None, "TOK973B": "x"}), _io110.StringIO()
             try:
                 with _ctx110.redirect_stdout(b), _ctx110.redirect_stderr(b):
@@ -21481,9 +21492,11 @@ def run() -> int:
                 _env110_restore(sav)
         lenh = (_tg973.cmd_secrets_stage, _tg973.cmd_secrets_set, _tg973.cmd_agent_creds_set)
         yeu = ("abcdefghijklmnopqrstuvwxyz01234", ("abcdefghijk" * 3)[:32])   # 31 ký tự · 32 ký tự/11 khác nhau
-        manh = _sec973.token_urlsafe(32)
+        bien = ("abcdefghijkl" * 3)[:32]   # review F4: ĐÚNG biên — 32 ký tự, đúng 12 ký tự khác nhau ⇒ phải QUA
         # đòi thông điệp CỦA CHỐT: rc 2 vì lý do khác (vd. không tải được bundle) là tín dụng giả
-        return all(_rc(f, k) == (2, 0, True) for f in lenh for k in yeu) and _rc(_tg973.cmd_agent_creds_set, manh) == (0, 1, False)
+        return (all(_rc(f, k) == (2, 0, True) for f in lenh for k in yeu)
+                and all(_rc(_tg973.cmd_agent_creds_set, k) == (0, 1, False) for k in (_sec973.token_urlsafe(32), bien))
+                and all(_rc(f, bien)[1:] == (0, False) for f in lenh[:2]))
     _t110("r973_khoa_yeu_bi_tu_choi_o_duong_ghi", _c973_b1)
 
     def _boot973(env, drv, xem=lambda h: True, req=False):
@@ -21535,30 +21548,81 @@ def run() -> int:
         return rc[0] != 0 and rc[1] != 0 and rc[2] == 0
     _t110("r973_bootstrap_require_agent_creds", _c973_d2)
 
+    def _goi_lr973(lr):
+        return _st973.encrypt(json.dumps({"schema": 1, "rev": 3, "codex_auth": {**_AU973, "last_refresh": lr}}).encode(), _K973)
+
+    def _mot973(disk_lr, goi_lr=_AU973["last_refresh"], thay=None):
+        """_bootstrap_agent_creds với CODEX_HOME tạm có auth.json `disk_lr`; `thay` thay os.replace tạm thời.
+        Trả (trạng thái, giữ nguyên byte/inode/mtime, quyền 0600, nội dung sau, tên tệp trong thư mục)."""
+        with _tf110.TemporaryDirectory() as d:
+            p = _P110(d, "auth.json")
+            p.write_bytes((json.dumps({"tokens": {}, "last_refresh": disk_lr}) + "\n").encode())
+            s0, b0 = p.stat(), p.read_bytes()
+            sav, o = _env110({"CODEX_HOME": d, "TL_AGENT_CREDS_FILEID": "AC973"}), (_tg973._public_curl_bytes, _os973.replace)
+            _tg973._public_curl_bytes = lambda fid, timeout=120.0: _goi_lr973(goi_lr)
+            _os973.replace = thay(p, b0, o[1]) if thay else o[1]
+            try:
+                st = _tg973._bootstrap_agent_creds(_K973)[0]
+            finally:
+                _tg973._public_curl_bytes, _os973.replace = o
+                _env110_restore(sav)
+            s1 = p.stat()
+            giu = p.read_bytes() == b0 and (s1.st_mtime_ns, s1.st_ino) == (s0.st_mtime_ns, s0.st_ino)
+            # quyền 0600 không đo được bằng stat trên Windows (spec chua_do_duoc) ⇒ bỏ vế quyền ở đó
+            q = _os973.name == "nt" or (s1.st_mode & 0o777) == 0o600
+            return st, giu, q, json.loads(p.read_text(encoding="utf-8")), sorted(x.name for x in _P110(d).iterdir())
+
     def _c973_d3():
-        def _mot(disk_lr):
-            with _tf110.TemporaryDirectory() as d:
-                p = _P110(d, "auth.json")
-                p.write_bytes((json.dumps({"tokens": {}, "last_refresh": disk_lr}) + "\n").encode())
-                s0, b0 = p.stat(), p.read_bytes()
-                sav = _env110({"CODEX_HOME": d, "TL_AGENT_CREDS_FILEID": "AC973"})
-                o = _tg973._public_curl_bytes
-                _tg973._public_curl_bytes = lambda fid, timeout=120.0: _B973.get(fid)
-                try:
-                    st = _tg973._bootstrap_agent_creds(_K973)[0]
-                finally:
-                    _tg973._public_curl_bytes = o
-                    _env110_restore(sav)
-                s1 = p.stat()
-                giu = p.read_bytes() == b0 and (s1.st_mtime_ns, s1.st_ino) == (s0.st_mtime_ns, s0.st_ino)
-                # quyền 0600 không đo được bằng stat trên Windows (spec chua_do_duoc) ⇒ bỏ vế quyền ở đó
-                q = _os973.name == "nt" or (s1.st_mode & 0o777) == 0o600
-                return st, giu, q, json.loads(p.read_text(encoding="utf-8"))
-        moi, bang = _mot("2026-10-28T00:00:00.5+00:00"), _mot("2026-10-27T11:35:54.5111532Z")
-        cu = _mot("2026-10-27T11:35:54Z")
-        return (moi[:2] == ("ĐÃ NẠP", True) and bang[:2] == ("ĐÃ NẠP", True) and cu[0] == "ĐÃ NẠP"
-                and not cu[1] and cu[2] and cu[3] == _AU973)
+        # đĩa mới hơn / bằng ⇒ giữ; cũ hơn ⇒ ghi. Review F3: offset ≠ 0 để đảo dấu offset phải lộ
+        # (+07:00 12h = 05h Z cũ hơn 11h35 Z; -05:00 07h = 12h Z mới hơn; +07:00 18h35m54.5111532 = bằng).
+        giu = [_mot973(x) for x in ("2026-10-28T00:00:00.5+00:00", "2026-10-27T11:35:54.5111532Z",
+                                    "2026-10-27T07:00:00-05:00", "2026-10-27T18:35:54.511153200+07:00")]
+        ghi = [_mot973(x) for x in ("2026-10-27T11:35:54Z", "2026-10-27T12:00:00+07:00")]
+        return (all(r[:2] == ("ĐÃ NẠP", True) for r in giu)
+                and all(r[0] == "ĐÃ NẠP" and not r[1] and r[2] and r[3] == _AU973 for r in ghi))
     _t110("r973_bootstrap_giu_auth_json_moi_hon", _c973_d3)
+
+    def _c973_f1():
+        # review F1: `last_refresh` khớp regex mà ngày/giờ không tồn tại ⇒ coi là CŨ HƠN, không ném;
+        # và lỗi bất ngờ ở nhánh agent không được phá đường chính của bootstrap (Q17)
+        dia_hong = _mot973("2026-02-30T12:00:00Z")
+        goi_hong = _mot973("2026-10-27T05:00:00Z", goi_lr="2026-10-27T25:00:00Z")
+
+        class _NemAC(dict):
+            def get(self, k, *a):
+                if k == "AC973":
+                    raise RuntimeError("TAI973")
+                return super().get(k, *a)
+        drv = _NemAC(_B973)
+        e = {"TL_AGENT_CREDS_FILEID": "AC973"}
+        rc0, out0, _ = _boot973(e, drv)
+        rc1 = _boot973(e, drv, req=True)[0]
+        return (dia_hong[0] == "ĐÃ NẠP" and not dia_hong[1] and dia_hong[3] == _AU973
+                and goi_hong[:2] == ("ĐÃ NẠP", True)
+                and (rc0, rc1) == (0, 4) and _trang_thai973(out0) == ["KHÔNG ĐO ĐƯỢC"] and "TAI973" not in out0)
+    _t110("r973_bootstrap_last_refresh_hong_khong_pha", _c973_f1)
+
+    def _c973_f2():
+        # review F2: ghi auth.json PHẢI qua tệp tạm cùng thư mục, 0600, rồi os.replace; lúc replace đích vẫn là
+        # bản cũ. replace lỗi ⇒ bản cũ còn nguyên byte, không sót tệp tạm, trạng thái KHÔNG ĐO ĐƯỢC.
+        seen = []
+
+        def _do(p, b0, that):
+            def _r(src, dst):
+                seen.append((_P110(src).parent == p.parent, _P110(dst) == p, p.read_bytes() == b0,
+                             _os973.name == "nt" or (_os973.stat(src).st_mode & 0o777) == 0o600))
+                return that(src, dst)
+            return _r
+
+        def _hong(p, b0, that):
+            def _r(src, dst):
+                raise OSError("REPLACE973")
+            return _r
+        ok = _mot973("2026-10-27T11:35:54Z", thay=_do)
+        loi = _mot973("2026-10-27T11:35:54Z", thay=_hong)
+        return (ok[0] == "ĐÃ NẠP" and ok[3] == _AU973 and seen == [(True, True, True, True)]
+                and ok[4] == ["auth.json"] and loi[:2] == ("KHÔNG ĐO ĐƯỢC", True) and loi[4] == ["auth.json"])
+    _t110("r973_bootstrap_auth_json_nguyen_tu", _c973_f2)
 
     def _c973_d4():
         hoi, o = [], (_tg973.AGENT_CREDS_FILEID, _tg973._public_curl_bytes)

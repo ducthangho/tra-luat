@@ -1124,10 +1124,13 @@ def _last_refresh_key(d):
     m = re.fullmatch(r"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d+))?(Z|[+-]\d\d:\d\d)?", s) if isinstance(s, str) else None
     if not m:
         return (float("-inf"), 0)
-    t = _dt.datetime.strptime(m[1], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc)
-    if m[3] and m[3] != "Z":
-        t -= (1 if m[3][0] == "+" else -1) * _dt.timedelta(hours=int(m[3][1:3]), minutes=int(m[3][4:6]))
-    return (int(t.timestamp()), int((m[2] or "")[:9].ljust(9, "0")))
+    try:   # review F1: khớp regex mà ngày/giờ không tồn tại (30/02, 25h) ⇒ không đọc được, KHÔNG ném
+        t = _dt.datetime.strptime(m[1], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc)
+        if m[3] and m[3] != "Z":
+            t -= (1 if m[3][0] == "+" else -1) * _dt.timedelta(hours=int(m[3][1:3]), minutes=int(m[3][4:6]))
+        return (int(t.timestamp()), int((m[2] or "")[:9].ljust(9, "0")))
+    except (ValueError, OverflowError):
+        return (float("-inf"), 0)
 
 
 def _ghi_nguyen_tu_0600(path: str, data: bytes) -> None:
@@ -1689,7 +1692,10 @@ def cmd_bootstrap(a) -> int:
             print(f"[bootstrap] {'✓' if okn else '⚠'} nlm (notebooklm-mcp-cli): {msgn}",
                   file=(sys.stdout if okn else sys.stderr))
     # WP1009 mục 4: credential agent — ĐÚNG MỘT dòng trạng thái; chỉ làm đổi rc khi có --require-agent-creds (Q17).
-    ac, ac_ct = _bootstrap_agent_creds(master)
+    try:   # review F1: lỗi bất ngờ ở nhánh agent KHÔNG được phá đường chính (Q17) — vẫn đúng một dòng
+        ac, ac_ct = _bootstrap_agent_creds(master)
+    except Exception as e:  # noqa: BLE001
+        ac, ac_ct = "KHÔNG ĐO ĐƯỢC", f"lỗi {_safe_exc(e)}"
     print(f"[bootstrap] agent_creds: {ac} — {ac_ct}")
     status = "XONG" if not degraded else "XONG (SUY GIẢM — gws/nlm chưa đủ, op chạy fallback GAS)"
     print(f"[bootstrap] ➜ {status} (env={env}). Kiểm: python scripts/tl.py ping ; tl gws-ping --env {env}")

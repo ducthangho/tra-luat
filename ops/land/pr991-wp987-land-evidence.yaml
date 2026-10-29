@@ -5,8 +5,8 @@
 # kiemgate.py, bon_moc.py, tomtat_luot.py kem trong do-lai-nguon-20261029/; SHA256SUMS kem.
 # GATE HAU MERGE: run push 40528509595 tren 2bcd8f3 attempt 1 bi HUY (concurrency, push master ke tiep); attempt 2 (phien
 # dieu phoi chay lai 27-10 ~16:17Z) 23/23 job Ubuntu success, event push, ref master => buoc release-verify lane LAND CO CHAY
-# va success. 3/4 moc §10.2.2 do theo JOB gate (ubuntu-latest). landed FALSE: moc Workflow definition chua do (GraphQL 403)
-# + chua co duyet landed cua chu kho.
+# va success. 4/4 moc §10.2.2 (Workflow definition do 29-10). landed FALSE: chi con
+# thieu duyet landed cua chu kho.
 
 schema_version: 1
 mission_id: gh-987
@@ -44,7 +44,7 @@ pre_merge_checks:
   - {name: 'connector Codex GitHub tren PR #991', conclusion: 'khong co finding; has_any_findings false tren a2e2ebf; 0 review, 0 review comment', nguon: [readback-comments-991.json, readback-reviews-991.json, readback-review-comments-991.json]}
   - {name: 'dieu kien kich thuoc', conclusion: '2 tep, +17 -11 (tran spec: <= 2 tep, <= 60 dong them)', nguon: [readback-pr-991.json, do-lai-nguon-20261029/merge-va-diff.txt]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40528509595, run_attempt: 2, sha: 2bcd8f31111d354e1e72934a3c22aba8b14675f0, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-post-2bcd8f3.txt: suite 109849045323, 23 ten, rc=0', nguon: [readback-run-40528509595.json, readback-jobs-40528509595.json, readback-check-runs-2bcd8f3-all.json], ghi_chu: 'Attempt 1 bi huy (concurrency); attempt 2 do phien dieu phoi chay lai (event van la push, ref master). release-verify strict lane LAND (manifest committed) success trong job gate (ubuntu-latest) — readback-jobs-40528509595.json. Ba moc §10.2.2 do theo JOB gate (ubuntu-latest) 122293257860 (do-1029-2bcd8f3/bon-moc-10-2-2.txt): Run measured (event push, head 2bcd8f3, attempt 2, conclusion success). Checkout measured — do-1029-2bcd8f3/log-gate-122293257860-trich.txt: git log -1 = 2bcd8f3, head_sha = 2bcd8f3; artifact json identity head 2bcd8f3, tree e925050, cay sach. Gate output measured — artifact 12748072043 gate-evidence-ubuntu-latest-2 (sha256 zip 5aafd3c0… = digest REST, do-1029-2bcd8f3/readback-artifacts-40528509595.json; tep giai nen do-1029-2bcd8f3/artifact-12748072043/): python scripts/tl.py --selftest rc 0, marker == tl selftest 1738/1738 ==, output sha256 b8546058… khop; Linux 6.17.0-1022-azure, CPython 3.12.15. Workflow definition NOT_MEASURED trong phien (GraphQL 403); bang chung phu khong thay the: blob ci.yml 82d9f239 tai 2bcd8f3; node_id WFR_kwLOTNeRjc8AAAAJb6_6mw.'}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40528509595, run_attempt: 2, sha: 2bcd8f31111d354e1e72934a3c22aba8b14675f0, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-post-2bcd8f3.txt: suite 109849045323, 23 ten, rc=0', nguon: [readback-run-40528509595.json, readback-jobs-40528509595.json, readback-check-runs-2bcd8f3-all.json], ghi_chu: 'Attempt 1 bi huy (concurrency); attempt 2 do phien dieu phoi chay lai (event van la push, ref master). release-verify strict lane LAND (manifest committed) success trong job gate (ubuntu-latest) — readback-jobs-40528509595.json. Ba moc §10.2.2 do theo JOB gate (ubuntu-latest) 122293257860 (do-1029-2bcd8f3/bon-moc-10-2-2.txt): Run measured (event push, head 2bcd8f3, attempt 2, conclusion success). Checkout measured — do-1029-2bcd8f3/log-gate-122293257860-trich.txt: git log -1 = 2bcd8f3, head_sha = 2bcd8f3; artifact json identity head 2bcd8f3, tree e925050, cay sach. Gate output measured — artifact 12748072043 gate-evidence-ubuntu-latest-2 (sha256 zip 5aafd3c0… = digest REST, do-1029-2bcd8f3/readback-artifacts-40528509595.json; tep giai nen do-1029-2bcd8f3/artifact-12748072043/): python scripts/tl.py --selftest rc 0, marker == tl selftest 1738/1738 ==, output sha256 b8546058… khop; Linux 6.17.0-1022-azure, CPython 3.12.15. Workflow definition measured 29-10 — xem moc_workflow_definition_20261029 (blob ci.yml 82d9f239 tai 2bcd8f3).'}
   - {name: 'ops-publish-lease.yml cho rut han (c6cc5b2)', run_id: 40528725601, sha: c6cc5b2, conclusion: success, nguon: [readback-run-40528725601.json]}
 bookkeeping:
   - {item: 'cap lease r1 (2987464), ban chieu', ket_qua: 'measured — readback-comments-987.json comment 6442899508; ops-publish-lease run 40510333326 success (readback-run-40510333326.json)'}
@@ -83,11 +83,10 @@ trang_thai_packet:
   landed: false
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 2bcd8f3: run push 40528509595 attempt 2 23/23 success, lane LAND success,
-    3/4 moc §10.2.2 measured; Workflow definition not_measured. (2) lease da nha: rut han c6cc5b2, NGUOI_GIU 0 DAT.
+    4/4 moc §10.2.2 measured (Workflow definition do 29-10). (2) lease da nha: rut han c6cc5b2, NGUOI_GIU 0 DAT.
     (3) bookkeeping: ho so nay DAT. (4) review approve neo DUNG a2e2ebf voi §8.1 DAT. (5) noi dung merge = diff PR DAT.
     (6) merge boi tai khoan chu kho DAT.
-    Mo lai: chu kho doc WorkflowRun.file cua run 40528509595 (node WFR_kwLOTNeRjc8AAAAJb6_6mw) ngoai phien, roi duyet
-    landed bang comment neo head PR ghi so.
+    Mo lai: chi con comment duyet landed cua chu kho neo head PR ghi so (moc Workflow definition da do 29-10).
 assurance_81:
   reviewer_assurance_81: DAT
   ly_do: >-
@@ -109,6 +108,22 @@ no_co_ten:
   - {ma: gate-hau-merge-bi-huy-boi-push-ke-tiep, trang_thai: mo, ghi_chu: 'lap lai o #991 (attempt 1 bi huy), #983 va #990.'}
 khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
-  - 'Moc Workflow definition §10.2.2 cua run 40528509595: KHONG_DO_DUOC trong phien — GraphQL WorkflowRun.file 403.'
+  - 'Moc Workflow definition §10.2.2: KHONG_DO_DUOC TRONG PHIEN (GraphQL 403); da do NGOAI phien tren may chu kho — xem moc_workflow_definition_20261029.'
   - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'
   - 'PowerShell tren Windows that: KHONG_DO_DUOC (reviewer chay pwsh 7.4.6 tren Linux).'
+
+moc_workflow_definition_20261029:
+  run_id: 40528509595
+  node_id: WFR_kwLOTNeRjc8AAAAJb6_6mw
+  nguoi_chay: >-
+    phien executor #923 session_015GtxrZWhXPHPfAPL1BXfPB, chay `gh api graphql` bang cmd tren may ASUS-LAPTOP cua chu kho qua
+    Remote Desktop Commander luc ~2026-10-29T16:25Z, theo chi thi chu kho trong hoi thoai voi phien dieu phoi (29-10 ~16:22Z:
+    "Cho phien executor #923 chay GraphQL cho #1024 va #1027"). Phien dieu phoi nhan output qua send_message —
+    KHONG_DO_DUOC byte goc tren may chu kho; ban chep do-1029-2bcd8f3/graphql-workflowrun-40528509595.json.
+  lenh: 'gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJb6_6mw -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"'
+  ket_qua: >-
+    measured — do-1029-2bcd8f3/workflow-definition-2bcd8f3.txt (script do-lai-nguon-20261029/moc_wd.py, cach do theo tien le pr870
+    moc_workflow_definition_20261026): databaseId 40528509595 (runNumber 3337) khop run; file.path .github/workflows/ci.yml = REST
+    path; repositoryFileUrl neo OID 2bcd8f3; checkSuite.commit.oid 2bcd8f3 = REST head_sha; blob REST contents?ref=2bcd8f3 =
+    git rev-parse 2bcd8f3:.github/workflows/ci.yml = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 bytes
+    ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, byte REST = byte git. 7/7 phep so khop.

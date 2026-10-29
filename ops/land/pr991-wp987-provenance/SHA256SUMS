@@ -2,8 +2,10 @@
 11ee5bb64a226958668658680e0f8a958f90dd0828bd98ee8b6a6674a2d6d658  ./do-1029-2bcd8f3/artifact-12748072043/tl-selftest-Linux.json
 b85460588b5caffb0e3427791c66038308e7491ed597efb5b66dad501901a9a4  ./do-1029-2bcd8f3/artifact-12748072043/tl-selftest-Linux.out
 fb1f015bcd68926414b80ffaa2a12d82471e323f6d5913cdad07ed0f57886f5b  ./do-1029-2bcd8f3/bon-moc-10-2-2.txt
+ebf339dcbd3d5a32b631db22e733beae41e769157096f8937201d01ecb00f119  ./do-1029-2bcd8f3/graphql-workflowrun-40528509595.json
 761e567961a6a719c20d53ceb802decad977d70faa179e567006beb3a1ef9d8c  ./do-1029-2bcd8f3/log-gate-122293257860-trich.txt
 0ce9eb3da2a8843ef03b942e56958587fc40549b614be34a034513a4b1f60923  ./do-1029-2bcd8f3/readback-artifacts-40528509595.json
+ea4e0f7f4a901b8ce5226e08b22360563475a87e5fc95cd0b8f3b151dbd4b356  ./do-1029-2bcd8f3/workflow-definition-2bcd8f3.txt
 d6078bd2b213a73ec30295e1aa405f84ac580e3d19be6dbb91a6361c013167be  ./do-lai-nguon-20261029/bon_moc.py
 12dab7c86b1f8f3df8b0529a2e8d2f65583e65580e59e4d52dd996a7ea38c255  ./do-lai-nguon-20261029/kiem-gate-post-2bcd8f3.txt
 6ac9cb06e8e5c13ef78a8821ca4b5594b6c1ec29858c3bb126c5892131daaae0  ./do-lai-nguon-20261029/kiem-gate-pre-a2e2ebf.txt
@@ -11,6 +13,7 @@ d6078bd2b213a73ec30295e1aa405f84ac580e3d19be6dbb91a6361c013167be  ./do-lai-nguon
 5712e4fa2c1924bc2c86c6e92fb27bf5307b9524c6cb2daba785646f2d0bfe4d  ./do-lai-nguon-20261029/lease-wp987-r1-g1-claude-2987464.yaml.txt
 785b1f9d0feca703851ecaa105c78cc2e588a4733ddb29f16a6bcefac8bbcd03  ./do-lai-nguon-20261029/lease-wp987-r1-g1-claude-sau-rut-han-c6cc5b2.yaml.txt
 851dc606195b5d3a3bb0ea1a11e237c2f4b84a17fdee94a778bbbdbe1042a291  ./do-lai-nguon-20261029/merge-va-diff.txt
+bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-lai-nguon-20261029/moc_wd.py
 03e2aead3e4d18a60cdb2132f1c11968274b14c6379ddadd4c19d7dbc7f044aa  ./do-lai-nguon-20261029/readback.py
 08d5af61932a979a3679d3aa05c54e7595463eee54db9c189cdac0004d565722  ./do-lai-nguon-20261029/spec-sha256.txt
 55501ca5c5c2d72af0dc76bbc9b054aad26f5c681ff3906f3adafec44f1a73f3  ./do-lai-nguon-20261029/tom-tat-luot.txt

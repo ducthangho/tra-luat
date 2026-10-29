@@ -5,7 +5,7 @@ Kiểm thử toàn diện:
 - Duyệt đệ quy cây lệnh Argparse (collect_parser_tree)
 - Báo cáo độ phủ hai chiều cây lệnh ↔ metadata (compute_parser_coverage)
 - Kiểm tra tính tất định, schema parser_tree_coverage.v1, cờ --strict và --unregistered-only
-- Ratchet 100.0% coverage (196/196 lệnh lá), 0 unregistered, 0 high-risk unregistered
+- Ratchet 100.0% coverage (198/198 lệnh lá), 0 unregistered, 0 high-risk unregistered
 - Kiểm thử các lệnh mới đăng ký và ratchet fail-closed trong validate_registry & compute_parser_coverage
 """
 import argparse
@@ -78,10 +78,10 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertTrue(report["ok"])
 
         summary = report["summary"]
-        self.assertEqual(summary["total_nodes"], 198)
+        self.assertEqual(summary["total_nodes"], 200)
         self.assertEqual(summary["container_commands"], 2)
-        self.assertEqual(summary["total_leaf_commands"], 196)
-        self.assertEqual(summary["registered_leaf_commands"], 196)
+        self.assertEqual(summary["total_leaf_commands"], 198)
+        self.assertEqual(summary["registered_leaf_commands"], 198)
         self.assertEqual(summary["unregistered_leaf_commands"], 0)
         self.assertEqual(summary["high_risk_unregistered_count"], 0)
         self.assertEqual(summary["registry_orphaned_commands"], 0)
@@ -102,7 +102,7 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         report_all = compute_parser_coverage(self.parser, unregistered_only=False)
         report_unreg = compute_parser_coverage(self.parser, unregistered_only=True)
 
-        self.assertEqual(len(report_all["commands"]), 196)
+        self.assertEqual(len(report_all["commands"]), 198)
         self.assertEqual(len(report_unreg["commands"]), 0)
 
     def test_registry_coverage_command_registered(self):

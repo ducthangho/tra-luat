@@ -634,10 +634,10 @@ def t32_khong_chan_oan_be_mat_vua_siet(g):
 
 def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
     """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
-    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 104, tu runtime."""
+    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 105, tu runtime (WP1009 +agent-creds-set)."""
     r = _kiem_bang_that(g or GUARD, HERE.parent.parent)
     dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
-    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 104" in dong)
+    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 105" in dong)
     return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")
 
 

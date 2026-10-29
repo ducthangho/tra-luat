@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 193,
-  "total_bytes": 8824844,
-  "package_hash": "06b042c6f3943c56a03139ada195b9aba10a1e17978bff374e4447993f21a6d9",
-  "content_hash": "06b042c6f3943c56a03139ada195b9aba10a1e17978bff374e4447993f21a6d9",
+  "total_bytes": 8825629,
+  "package_hash": "46bfa3bf61f053b0b1e012759f08e4a1be55ef451774a627e1ff2134636b9053",
+  "content_hash": "46bfa3bf61f053b0b1e012759f08e4a1be55ef451774a627e1ff2134636b9053",
   "required_missing": [],
   "files": [
     {
@@ -58,8 +58,8 @@
     },
     {
       "path": "changelog.d/wp-1009.md",
-      "size": 1236,
-      "sha256": "4b82cbef2cd5c6d4f4e7ab92c4e1930f36fdc4187ed3e7c563a752042795d2e2"
+      "size": 1406,
+      "sha256": "02907556e39bc99aab122f2435333c9dbfa249c2bff3a71f5741ca34e35c5d10"
     },
     {
       "path": "changelog.d/wp-710.md",
@@ -388,8 +388,8 @@
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 62439,
-      "sha256": "036597f9e95ff08ebcef71f1ebc63758c7b60f76bf243bc7caaba77e037a8be6"
+      "size": 63054,
+      "sha256": "488814717c87596ad43e10d20c52fd8a2d4f26aae6e46b70537b7e2c6b92991c"
     },
     {
       "path": "references/golden/topology_vectors.json",
@@ -399,7 +399,7 @@
     {
       "path": "references/golden/workflow_audit.json",
       "size": 31010,
-      "sha256": "9129cab5c4f6611c564618e7216a1ad466ae0d29b4c422b0aa654e5918827b17"
+      "sha256": "a69f9926019580a167c0a8d1c56e17c70644dfb3455297a8eb51c503f1163f0c"
     },
     {
       "path": "references/linhvuc_phapdien.json",

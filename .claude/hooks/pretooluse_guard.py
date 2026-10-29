@@ -566,7 +566,9 @@ def _kiem_python(doi):
         return "kich ban ngoai danh sach cho phep: %s" % kich
     # TANG 1 — lo #336 muc 1. `recat` khong can CO nao de ghi, nen chan theo CO khong bao gio
     # bat duoc no; `read_only` la thuoc tinh cua LENH. Lay doi so VI TRI ke sau kich ban.
-    if kich.rsplit("/", 1)[-1] == "tl.py":
+    # WP1009 F14: nhan dien tl.py tren duong dan DA CHUAN HOA (cung thu ma allowlist vua duyet) —
+    # so tren `kich` goc thi `"scripts\tl.py"` qua allowlist ma bo qua ca bang writer ben duoi.
+    if chuan.rsplit("/", 1)[-1] == "tl.py":
         lenh = _tach_lenh_tl(doi, kich)
         if lenh and (lenh[0] in _TL_LENH_GHI
                      or " ".join(lenh[:2]) in _TL_LENH_GHI_LONG):

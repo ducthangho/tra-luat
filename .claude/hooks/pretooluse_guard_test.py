@@ -865,6 +865,24 @@ def t49_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO(g):
             and not dat_windows(39, 0, 0) and not dat_windows(39, 1, 34),
             "che do nhe: dong bang chung rieng, bang dot bien rong -> DO")
 
+def t50_duong_dan_tl_py_DAU_PHAN_CACH_nao_cung_bi_chan(g):
+    """WP1009 F14 (cross-review luot 5): `"scripts\\tl.py"` qua allowlist (da chuan hoa) nhung nhanh
+    chan writer lai so tren token GOC theo dau `/` => lot. Moi cach viet CUNG MOT kich ban, moi agent:
+    lenh ghi (moi + cu) phai deny; lenh doc `secrets-keygen` van allow."""
+    bs = chr(92)
+    duong = ("scripts/tl.py", "./scripts/tl.py", "scripts" + bs + "tl.py", "." + bs + "scripts" + bs + "tl.py")
+    xau = []
+    for a in AGENT:
+        for d in duong:
+            for lenh, mong in (("agent-creds-set --new", "deny"), ("secrets-set --gws", "deny"),
+                               ("secrets-keygen", "allow")):
+                c = 'python "%s" %s' % (d, lenh)
+                if hoi(g, c, a)[0] != mong:
+                    xau.append("%s: %s" % (a, c))
+    return (not xau, "2 agent x 4 cach viet x 3 lenh -> dung %d/24" % (24 - len(xau))
+                     + ("; SAI: %s" % xau if xau else ""))
+
+
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t3_khong_chan_oan_lenh_doc, t4_phien_chinh_khop_packet_base,
       t5_doi_chung_van_ask, t6_agent_la_khong_bi_ap_luat,
@@ -899,6 +917,7 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t47_vi_tu_nen_chi_cat_dot_bien_tren_nt,
       t48_che_do_nhe_chi_khi_co_DUNG_1_va_windows_dung_truoc,
       t49_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO,
+      t50_duong_dan_tl_py_DAU_PHAN_CACH_nao_cung_bi_chan,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -1003,6 +1022,10 @@ DOT_BIEN = [
     ("m34_bo_timings_khoi_co_global_don",
      '_TL_CO_GLOBAL_CO_DON = frozenset({"--version", "--timings", "--deterministic", "--selftest"})',
      '_TL_CO_GLOBAL_CO_DON = frozenset({"--version", "--deterministic", "--selftest"})'),
+    # WP1009 F14: quay ve nhan dien tl.py tren token GOC — dung hinh dang lo cua luot 5.
+    ("m36_nhan_dien_tl_py_tren_kich_goc",
+     '    if chuan.rsplit("/", 1)[-1] == "tl.py":',
+     '    if kich.rsplit("/", 1)[-1] == "tl.py":'),
     ("m33_siet_lai_isdigit_cho_co_ngan",
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):',
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep\n'

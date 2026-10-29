@@ -3228,8 +3228,11 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
 
     def cau_hinh_canh_bao(tmp):
         k, al = _anc(tmp)
-        k["g"]("config", "core.fsyncObjectFiles", "true")          # git in cảnh báo deprecated ở MỌI lệnh
-        return tmp, al, k_anc, None, "fsyncObjectFiles"
+        # `core.fsync` thành phần lạ ⇒ git in "warning: ignoring unknown core.fsync component" ở MỌI lệnh, đo được trên
+        # cả Linux lẫn Git for Windows. `core.fsyncObjectFiles=true` (bản trước) KHÔNG cảnh báo trên Git for Windows
+        # (đo 2.55.0.windows.5: rev-parse/merge-base/cat-file/for-each-ref stderr rỗng; run 40844300802, `gate-ops (windows-latest)`).
+        k["g"]("config", "core.fsync", "tl-thanh-phan-la")
+        return tmp, al, k_anc, None, "tl-thanh-phan-la"
 
     def grafts(tmp):
         k, al = _anc(tmp)

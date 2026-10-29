@@ -13,6 +13,9 @@
   · `gate-registry` (Ubuntu job 123414873474): `.claude/hooks/pretooluse_guard_test.py` 39/41 —
     `python .claude/hooks/pretooluse_guard.py --kiem-bang` head rc 4 `CHAN: _TL_LENH_GHI THIEU 1 lenh read_only=False:
     agent-creds-set`, base rc 0.
+  · `gate-registry` (Windows run 40866904091 job 123425366775): CÙNG chỗ — `pretooluse_guard_test.py` 39/41 (t15, t33).
+  Lúc đóng băng (~13:05Z) còn `gate-packet-loop (windows-latest)` (job 123423901974) CHƯA xong; bản Ubuntu của job ấy đã xanh trên
+  `ea0903a7`. Nếu nó đỏ do packet ở tệp ngoài write set ⇒ S1, revision mới.
   Lỗi Windows CÓ SẴN, KHÔNG do packet: `gate-ops (windows-latest)` `ops/bien_nhan_v2_test.py` c96 (90/93) — đã đỏ y hệt ở run
   40833865576 của nhánh khác; packet #1017 (PR #1018) đang vá. Không vào write set; packet hấp thụ bằng merge `origin/master`
   sau khi bản vá ấy land.

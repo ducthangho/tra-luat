@@ -1,0 +1,3 @@
+$ git status --short
+
+rc=0

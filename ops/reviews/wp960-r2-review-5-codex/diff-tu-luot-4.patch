@@ -1,0 +1,230 @@
+diff --git a/ops/bien_nhan_v2.py b/ops/bien_nhan_v2.py
+index b77b7d8..83ba1d3 100644
+--- a/ops/bien_nhan_v2.py
++++ b/ops/bien_nhan_v2.py
+@@ -1123,15 +1123,17 @@ class _MoHo(Exception):
+ _RE_HEX_TOKEN = re.compile(r"[0-9a-f]{4,40}")
+ _ENV_GIT = {"LC_ALL": "C", "LANG": "C", "GIT_TERMINAL_PROMPT": "0", "GIT_NO_LAZY_FETCH": "1",
+             "GIT_NO_REPLACE_OBJECTS": "1"}
+-# Dòng stderr "nền" theo từng kho: cảnh báo cấu hình in ra ở MỌI lệnh git (vd. `core.fsyncObjectFiles is deprecated`,
+-# đo 29-10) không mang thông tin gì về phép tra cụ thể, nên được trừ đi; đo một lần bằng lệnh không đọc object nào.
+-_NEN_STDERR: dict = {}
++# Biến `GIT_*` kế thừa ĐƯỢC GIỮ — danh sách CHO PHÉP, không phải danh sách cấm (bài học CLAUDE.md: danh sách cấm
++# không bao giờ đủ). Chỉ hai biến không đổi KHO nào được đo hay ĐỒ THỊ của nó: nguồn object phụ cho chính kho ấy
++# (review r2 lượt 4: bỏ nó làm kho đủ mất object) và chỗ đặt lệnh con của git.
++_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})
+ 
+ 
+ def _env_git() -> dict:
+-    """Môi trường git CÔ LẬP: bỏ MỌI biến `GIT_*` kế thừa (review r2 lượt 3: `GIT_DIR` làm `-C root` đo nhầm kho;
+-    `GIT_TRACE*` làm kho lành thành rc=2; `GIT_GRAFT_FILE`/`GIT_REPLACE_REF_BASE` đổi đồ thị) rồi đặt bộ của cổng."""
+-    return {**{k: v for k, v in os.environ.items() if not k.startswith("GIT_")}, **_ENV_GIT}
++    """Môi trường git CÔ LẬP: bỏ biến `GIT_*` kế thừa NGOÀI `_GIT_GIU` (review r2 lượt 3: `GIT_DIR` làm `-C root`
++    đo nhầm kho; `GIT_TRACE*` làm kho lành thành rc=2; `GIT_GRAFT_FILE`/`GIT_REPLACE_REF_BASE` đổi đồ thị) rồi đặt
++    bộ của cổng."""
++    return {**{k: v for k, v in os.environ.items() if not k.startswith("GIT_") or k in _GIT_GIU}, **_ENV_GIT}
+ 
+ 
+ def _chay_git(root: Path, args, vao=None, timeout=60):
+@@ -1144,11 +1146,11 @@ def _chay_git(root: Path, args, vao=None, timeout=60):
+ 
+ 
+ def _git_do(root: Path, *args, vao=None, sach=(0,), timeout=60) -> tuple[int, str]:
+-    """Chạy git, trả (rc, STDOUT). Ném `KhongDoDuoc` khi không chạy được, rc ngoài `sach`, hoặc stderr còn dòng nào
+-    ngoài dòng NỀN của kho (`_NEN_STDERR`)."""
++    """Chạy git, trả (rc, STDOUT). Ném `KhongDoDuoc` khi không chạy được, rc ngoài `sach`, hoặc stderr KHÔNG rỗng.
++    Không trừ dòng "nền" nào: review r2 lượt 4 đo được phép trừ ấy nuốt lỗi thật trùng chữ. Cảnh báo cấu hình
++    (vd. khoá deprecated) vì thế làm lượt KHÔNG ĐO ĐƯỢC — tiền đề "cấu hình git không in cảnh báo" (CI clone sạch)."""
+     p = _chay_git(root, args, vao, timeout)
+-    nen = _NEN_STDERR.get(str(root), frozenset())
+-    con = [d for d in p.stderr.splitlines() if d.strip() and d not in nen]
++    con = [d for d in p.stderr.splitlines() if d.strip()]
+     if p.returncode not in sach:
+         raise KhongDoDuoc(f"`git {' '.join(args)[:120]}` rc={p.returncode}: {p.stderr.strip()[:300]}")
+     if con:
+@@ -1157,22 +1159,23 @@ def _git_do(root: Path, *args, vao=None, sach=(0,), timeout=60) -> tuple[int, st
+ 
+ 
+ def _kho_lanh(root: Path) -> None:
+-    """Kho đủ để đo tổ tiên, và đo dòng stderr nền. KHÔNG nông (merge-base trên kho nông trả sai mà không báo lỗi);
+-    KHÔNG partial clone — cả kiểu `extensions.partialclone` lẫn kiểu git hiện hành `remote.<x>.promisor` (object
+-    vắng có thể là chưa tải); KHÔNG có tệp grafts (đổi parent; lời nhắc deprecated tắt được bằng cấu hình nên
+-    không trông vào stderr). Replace ref bị tắt bằng `GIT_NO_REPLACE_OBJECTS`. Tính toàn vẹn object/commit-graph
+-    (băm sai mà git im lặng) là TIỀN ĐỀ, không đo — cần `git fsck` (quyết định chủ kho 29-10, #960)."""
+-    p = _chay_git(root, ("rev-parse", "--git-dir"))
+-    if p.returncode != 0:
+-        raise KhongDoDuoc(f"`git rev-parse --git-dir` rc={p.returncode}: {p.stderr.strip()[:300]}")
+-    _NEN_STDERR[str(root)] = frozenset(d for d in p.stderr.splitlines() if d.strip())
++    """Kho đủ để đo tổ tiên. KHÔNG nông (merge-base trên kho nông trả sai mà không báo lỗi); KHÔNG partial clone —
++    cả kiểu `extensions.partialclone` lẫn kiểu git hiện hành `remote.<x>.promisor` mang giá trị ĐÚNG (object vắng
++    có thể là chưa tải); KHÔNG có tệp grafts (đổi parent; lời nhắc deprecated tắt được bằng cấu hình nên không trông
++    vào stderr). Replace ref bị tắt bằng `GIT_NO_REPLACE_OBJECTS`. Tính toàn vẹn object/commit-graph (băm sai mà git
++    im lặng) là TIỀN ĐỀ, không đo — cần `git fsck` (quyết định chủ kho 29-10, #960)."""
+     nong = _git_do(root, "rev-parse", "--is-shallow-repository")[1].strip()
+     if nong != "false":
+         raise KhongDoDuoc(f"kho nông (`--is-shallow-repository` = {nong!r}) — không đo được quan hệ tổ tiên")
+     if _git_do(root, "config", "--get", "extensions.partialclone", sach=(0, 1))[1].strip():
+         raise KhongDoDuoc("kho partial clone (`extensions.partialclone`) — object vắng có thể là chưa tải")
+-    if _git_do(root, "config", "--get-regexp", r"^remote\..*\.promisor$", sach=(0, 1))[1].strip():
+-        raise KhongDoDuoc("kho partial clone (`remote.<x>.promisor`) — object vắng có thể là chưa tải")
++    for dong in _git_do(root, "config", "--type=bool", "--get-regexp", r"^remote\..*\.promisor$",
++                        sach=(0, 1))[1].splitlines():
++        khoa, _, gt = dong.rpartition(" ")
++        if gt not in ("true", "false"):
++            raise KhongDoDuoc(f"`config --type=bool` trả dòng lạ: {dong!r}")
++        if gt == "true":                    # `false`/`no`/`off` là promisor TẮT — kho đủ (review r2 lượt 4)
++            raise KhongDoDuoc(f"kho partial clone (`{khoa}` = true) — object vắng có thể là chưa tải")
+     gf = _git_do(root, "rev-parse", "--git-path", "info/grafts")[1].strip()
+     if gf and (root / gf if not Path(gf).is_absolute() else Path(gf)).exists():
+         raise KhongDoDuoc(f"kho có tệp grafts `{gf}` — parent bị thay, không đo được quan hệ tổ tiên")
+diff --git a/ops/bien_nhan_v2_test.py b/ops/bien_nhan_v2_test.py
+index 5ffb65c..86959ff 100644
+--- a/ops/bien_nhan_v2_test.py
++++ b/ops/bien_nhan_v2_test.py
+@@ -3088,7 +3088,8 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
+     không ngoại lệ, không `NỢ CHẾT`, và stderr nêu đúng nguồn (ca có ĐO, không chỉ rc). Nguồn: receipt là
+     thư mục · receipt byte UTF-8 hỏng · alias vòng · `origin/master` là TREE (ref thật, không tiêm) · loose ref
+     hỏng · symref `origin/HEAD` gãy · `run.json` là thư mục / symlink gãy / tên quá dài (lstat lỗi khác ENOENT) ·
+-    git vắng · tiền tố OID MƠ HỒ (hai commit) · object commit RỖNG · kho nông · partial clone (hai kiểu) · grafts.
++    git vắng · tiền tố OID MƠ HỒ (hai commit) · object commit RỖNG · kho nông · partial clone (hai kiểu) · grafts ·
++    cấu hình in cảnh báo ở mọi lệnh (tiền đề "cấu hình git không in cảnh báo", review r2 lượt 4).
+     Tiền đề KHÔNG đo (quyết định chủ kho 29-10, #960): object/commit-graph sai mà git im lặng — cần `git fsck`."""
+     import json as _j
+     k_anc = ("r.receipt.yaml", "anchor.mo_ta", bnv2.LUAT_ANCESTRY)
+@@ -3211,7 +3212,12 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
+         r = subprocess.run(["git", "clone", "-q", "--filter=blob:none", f"file://{nguon_}", str(dich)],
+                            capture_output=True, text=True)
+         dung(r.returncode == 0, f"fixture: clone partial hỏng: {r.stderr[:200]}")
+-        return dich, al, k_anc, None, "remote.<x>.promisor"
++        return dich, al, k_anc, None, "promisor` = true"
++
++    def cau_hinh_canh_bao(tmp):
++        k, al = _anc(tmp)
++        k["g"]("config", "core.fsyncObjectFiles", "true")          # git in cảnh báo deprecated ở MỌI lệnh
++        return tmp, al, k_anc, None, "fsyncObjectFiles"
+ 
+     def grafts(tmp):
+         k, al = _anc(tmp)
+@@ -3223,7 +3229,7 @@ def c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no():
+ 
+     for nguon in (receipt_thu_muc, receipt_utf8, alias_vong, nhanh_la_tree, ref_hong, symref_gay, run_json_thu_muc,
+                   run_json_symlink_gay, run_json_ten_qua_dai, git_vang, tien_to_mo_ho, object_rong, kho_nong,
+-                  kho_partial, kho_partial_promisor, grafts):
++                  kho_partial, kho_partial_promisor, grafts, cau_hinh_canh_bao):
+         for ten_no in ("khong-no", "co-no"):
+             ten = f"{nguon.__name__}/{ten_no}"
+             with tempfile.TemporaryDirectory() as t:
+@@ -3331,9 +3337,10 @@ def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
+ 
+ @ca
+ def c95_moi_truong_git_KHONG_doi_ket_qua_do():
+-    """Review r2 lượt 3: kho LÀNH với câu sai thật (M đã vào master) phải ra ĐÚNG một L-ANCESTRY (rc=1) dù:
+-    replace ref che quan hệ tổ tiên · `GIT_DIR` kế thừa trỏ kho khác · `GIT_TRACE=1` · cấu hình deprecated in cảnh
+-    báo ở mọi lệnh · ref con `refs/remotes/origin/HEAD/topic` (for-each-ref khớp theo tiền tố)."""
++    """Review r2 lượt 3–4: kho LÀNH với câu sai thật (M đã vào master) phải ra ĐÚNG một L-ANCESTRY (rc=1) dù:
++    replace ref che quan hệ tổ tiên · `GIT_DIR` kế thừa trỏ kho khác · `GIT_TRACE=1` · ref con
++    `refs/remotes/origin/HEAD/topic` (for-each-ref khớp theo tiền tố) · `remote.<x>.promisor=false` (promisor TẮT) ·
++    object nằm trong kho phụ qua `GIT_ALTERNATE_OBJECT_DIRECTORIES`."""
+     def replace_ref(tmp, k):
+         dau = k["g"]("rev-parse", "HEAD")
+         k["g"]("replace", "--graft", dau, k["B0"])
+@@ -3348,16 +3355,27 @@ def c95_moi_truong_git_KHONG_doi_ket_qua_do():
+     def git_trace(tmp, k):
+         return {"GIT_TRACE": "1"}
+ 
+-    def cau_hinh_deprecated(tmp, k):
+-        k["g"]("config", "core.fsyncObjectFiles", "true")
++    def promisor_tat(tmp, k):
++        k["g"]("config", "remote.archive.promisor", "false")
+         return {}
+ 
++    def alternates_env(tmp, k):
++        k["g"]("repack", "-q", "-a", "-d")
++        k["g"]("prune-packed")
++        pool = tmp / "_pool"
++        (pool / "pack").mkdir(parents=True)
++        for f in (tmp / ".git/objects/pack").iterdir():
++            f.rename(pool / "pack" / f.name)
++        con = [x for x in (tmp / ".git/objects").rglob("*") if x.is_file() and x.parent.name not in ("info", "pack")]
++        dung(not con, f"fixture: còn object rời trong kho: {con[:3]}")
++        return {"GIT_ALTERNATE_OBJECT_DIRECTORIES": str(pool)}
++
+     def ref_con_tien_to(tmp, k):
+         k["g"]("update-ref", "refs/remotes/origin/master", k["g"]("rev-parse", "HEAD"))
+         k["g"]("update-ref", "refs/remotes/origin/HEAD/topic", k["B0"])
+         return {}
+ 
+-    for kieu in (replace_ref, git_dir_khac, git_trace, cau_hinh_deprecated, ref_con_tien_to):
++    for kieu in (replace_ref, git_dir_khac, git_trace, ref_con_tien_to, promisor_tat, alternates_env):
+         with tempfile.TemporaryDirectory() as t:
+             tmp = Path(t)
+             k = _kho_cau(tmp)
+@@ -3370,24 +3388,26 @@ def c95_moi_truong_git_KHONG_doi_ket_qua_do():
+ 
+ @ca
+ def c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC():
+-    """Review r2 lượt 3 (`chot-ma-thoat-git-chua-co-rang`): `git merge-base` trả rc ngoài {0,1} mà KHÔNG in gì ra
+-    stderr (git giả bọc git thật) ⇒ KHÔNG ĐO ĐƯỢC (rc=2), không phải vi phạm hay sạch — chốt rc đứng một mình."""
++    """Review r2 lượt 3–4 (`chot-ma-thoat-git-chua-co-rang`, `chot-probe-git-chua-co-rang`): một lệnh git trả rc ngoài
++    tập sạch mà KHÔNG in gì ra stderr (git giả bọc git thật) ⇒ KHÔNG ĐO ĐƯỢC (rc=2), không phải vi phạm hay sạch —
++    cho cả `merge-base` lẫn lệnh kiểm sức khoẻ kho đầu tiên (`--is-shallow-repository`)."""
+     import shutil
+     that = shutil.which("git")
+     dung(that is not None, "fixture: không có git")
+-    with tempfile.TemporaryDirectory() as t:
+-        tmp = Path(t)
+-        k = _kho_cau(tmp)
+-        al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
+-        bin_ = tmp / "_bin"
+-        bin_.mkdir()
+-        gia = bin_ / "git"
+-        gia.write_text("#!/bin/sh\ncase \"$*\" in *merge-base*) exit 3;; esac\n"
+-                       f'exec "{that}" "$@"\n', encoding="utf-8")
+-        gia.chmod(0o755)
+-        rc, loi_ra = _chay_cli(tmp, al, path=f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}")
+-        bang(rc == 2 and "merge-base" in loi_ra and "rc=3" in loi_ra,
+-             f"đòi rc=2 nêu merge-base rc=3, được rc={rc}: {loi_ra[-400:]!r}")
++    for mau in ("merge-base", "is-shallow-repository"):
++        with tempfile.TemporaryDirectory() as t:
++            tmp = Path(t)
++            k = _kho_cau(tmp)
++            al = _ghi_bn_cau(tmp, k, {"r.receipt.yaml": _bn_cau(1, f"anchor:\n    mo_ta: Commit {k['M'][:7]} chua vao master.\n")})
++            bin_ = tmp / "_bin"
++            bin_.mkdir()
++            gia = bin_ / "git"
++            gia.write_text(f"#!/bin/sh\ncase \"$*\" in *{mau}*) exit 3;; esac\n"
++                           f'exec "{that}" "$@"\n', encoding="utf-8")
++            gia.chmod(0o755)
++            rc, loi_ra = _chay_cli(tmp, al, path=f"{bin_}{os.pathsep}{os.environ.get('PATH', '')}")
++            bang(rc == 2 and mau in loi_ra and "rc=3" in loi_ra,
++                 f"{mau}: đòi rc=2 nêu `{mau}` rc=3, được rc={rc}: {loi_ra[-400:]!r}")
+ 
+ 
+ def _chay_1(fn):
+@@ -4144,18 +4164,20 @@ def _dot_bien():
+         "    if p.returncode not in sach:\n        raise KhongDoDuoc(", "    if False:\n        raise KhongDoDuoc("),
+        "c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC", "rc lạ mà stderr rỗng được tin", doi_chung=DC)
+     do("m126_ke_thua_bien_GIT", lambda: _dot_bien_tep(
+-        'if not k.startswith("GIT_")}', "if True}"),
++        'if not k.startswith("GIT_") or k in _GIT_GIU}', "if True}"),
+        C95, "biến `GIT_*` kế thừa (GIT_DIR, GIT_TRACE) lọt vào phép đo", doi_chung=DC)
+     do("m127_khong_tat_replace", lambda: _dot_bien_tep(
+         '"GIT_NO_REPLACE_OBJECTS": "1"', '"GIT_NO_REPLACE_OBJECTS_TAT": "1"'),
+        C95, "replace ref che quan hệ tổ tiên", doi_chung=DC)
+-    do("m128_bo_tru_stderr_NEN", lambda: _dot_bien_tep(
+-        "if d.strip() and d not in nen]", "if d.strip()]"),
+-       C95, "cảnh báo cấu hình in ở mọi lệnh làm kho lành thành rc=2", doi_chung=DC)
+     do("m129_bo_chot_PROMISOR", lambda: _dot_bien_tep(
+-        '    if _git_do(root, "config", "--get-regexp", r"^remote\\..*\\.promisor$", sach=(0, 1))[1].strip():\n',
+-        "    if False:\n"),
++        '        if gt == "true":                    # `false`/`no`/`off`', '        if False:                    # `false`/`no`/`off`'),
+        C91, "partial clone thật (promisor) vẫn đo", doi_chung=DC)
++    do("m132_promisor_TAT_van_la_partial", lambda: _dot_bien_tep(
++        '        if gt == "true":                    # `false`/`no`/`off`', '        if gt:                    # `false`/`no`/`off`'),
++       C95, "`remote.<x>.promisor=false` bị coi là partial clone", doi_chung=DC)
++    do("m133_bo_alternates_khoi_danh_sach_giu", lambda: _dot_bien_tep(
++        '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})', '_GIT_GIU = frozenset({"GIT_EXEC_PATH"})'),
++       C95, "bỏ `GIT_ALTERNATE_OBJECT_DIRECTORIES` làm kho đủ mất object", doi_chung=DC)
+     do("m130_bo_chot_GRAFTS", lambda: _dot_bien_tep(
+         "    if gf and (root / gf", "    if False and (root / gf"),
+        C91, "tệp grafts đổi parent mà vẫn đo", doi_chung=DC)

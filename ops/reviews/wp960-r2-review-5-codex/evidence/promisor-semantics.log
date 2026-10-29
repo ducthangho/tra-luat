@@ -1,0 +1,3 @@
+{"vals": ["true", "false"], "effective": {"rc": 0, "out": "false", "err": ""}, "catfile_rc": 0, "out": "commit\n", "err": ""}
+{"vals": ["false"], "effective": {"rc": 0, "out": "false", "err": ""}, "catfile_rc": 128, "out": "", "err": "fatal: git cat-file: could not get object info\n"}
+{"vals": ["false", "true"], "effective": {"rc": 0, "out": "true", "err": ""}, "catfile_rc": 0, "out": "commit\n", "err": ""}

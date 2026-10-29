@@ -1,0 +1,9 @@
+patch --dry-run --fuzz=0 -p0 -i /tmp/claude-0/rv/wp960-r2-review-6-codex/HINT.patch rc= 0 checking file ops/bien_nhan_v2_test.py
+ 
+patch --fuzz=0 -p0 -i /tmp/claude-0/rv/wp960-r2-review-6-codex/HINT.patch rc= 0 patching file ops/bien_nhan_v2_test.py
+ 
+head c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC ('qua', None)
+head c87_B3_OID_khong_tra_duoc_theo_NGU_CANH ('qua', None)
+v1-batch-oid ('giet_that', "batch-check-sai-oid: dạng lạ mà không ném KhongDoDuoc, trả 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'") control= ('qua', None)
+v2-batch-type ('giet_that', 'batch-check-sai-loai: dạng lạ mà không ném KhongDoDuoc, trả None') control= ('qua', None)
+v3-mixed-context ('giet_that', 'tron-so-chu-rieng: đòi rc=2, được 0: loi=[] chua=[]') control= ('qua', None)

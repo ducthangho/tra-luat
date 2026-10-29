@@ -1,0 +1,89 @@
+{
+ "jobs": [
+  {
+   "id": 123245576165,
+   "run_id": 40812406916,
+   "workflow_name": "thu-hoi",
+   "head_branch": "agent/wp960-g1-claude",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/40812406916",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAcsgI_5Q",
+   "head_sha": "6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/123245576165",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/40812406916/job/123245576165",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-10-29T03:29:18Z",
+   "started_at": "2026-10-29T03:29:20Z",
+   "completed_at": "2026-10-29T03:29:35Z",
+   "name": "thu-hoi",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-10-29T03:29:21Z",
+     "completed_at": "2026-10-29T03:29:22Z"
+    },
+    {
+     "name": "lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-10-29T03:29:22Z",
+     "completed_at": "2026-10-29T03:29:29Z"
+    },
+    {
+     "name": "cài PyYAML",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-10-29T03:29:29Z",
+     "completed_at": "2026-10-29T03:29:32Z"
+    },
+    {
+     "name": "đo S, fetch H từ endpoint canonical, chạy bộ kiểm canonical, ghi receipt",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-10-29T03:29:32Z",
+     "completed_at": "2026-10-29T03:29:33Z"
+    },
+    {
+     "name": "tải receipt lên artifact",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-10-29T03:29:33Z",
+     "completed_at": "2026-10-29T03:29:34Z"
+    },
+    {
+     "name": "Post lấy MÃ CANONICAL tại workflow_sha — không bao giờ head PR",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-10-29T03:29:34Z",
+     "completed_at": "2026-10-29T03:29:34Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-10-29T03:29:34Z",
+     "completed_at": "2026-10-29T03:29:34Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/123245576165",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000023484,
+   "runner_name": "GitHub Actions 1000023484",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  }
+ ],
+ "total_count": 1
+}

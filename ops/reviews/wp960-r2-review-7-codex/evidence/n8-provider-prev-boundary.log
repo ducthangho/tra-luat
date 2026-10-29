@@ -1,0 +1,6 @@
+{"mutant": "n8-provider-prev-boundary", "old": "cua = dong_tep[max(0, j - 1):j + 2]", "new": "cua = dong_tep[max(0, j - 2):j + 2]", "target": "c88"}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "state": "qua", "message": null}
+{"mutant": "n8-provider-prev-boundary", "control": [true, ""], "file": "/tmp/wp960-r7-review/whole-n8-provider-prev-boundary/ops/bien_nhan_v2.py"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutant": "n8-provider-prev-boundary", "passed": 93, "total": 93, "red": []}
+{"mutant": "n8-provider-prev-boundary", "persisted_sha256": "17ff34f130596e47ee1c680ad80d63b5e23cab0e3c50ef3a9658605020bd5340"}

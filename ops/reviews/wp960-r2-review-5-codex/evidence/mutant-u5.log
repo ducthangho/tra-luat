@@ -1,0 +1,12 @@
+{"start": "u5-bo-loc-env", "source": "/tmp/r5-mutant-u5-bo-loc-env-j7h0dz7t/repo", "match_count": 1}
+{"progress": "u5-bo-loc-env", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u5-bo-loc-env", "completed": 20, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 30, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 40, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 50, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 60, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 70, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 80, "red_count": 0}
+{"progress": "u5-bo-loc-env", "completed": 90, "red_count": 0}
+{"mutant": "u5-bo-loc-env", "match_count": 1, "count": 93, "passed": 92, "red": [["c95_moi_truong_git_KHONG_doi_ket_qua_do", "giet_that", "git_trace: đòi đúng một L-ANCESTRY rc=1; được rc=2: 'KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` stderr: 03:45:01.985550 git.c:463               trace: built-in: git rev-parse --is-shallow-repository\\n'"]], "seconds": 404.531}

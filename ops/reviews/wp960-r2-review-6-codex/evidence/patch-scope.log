@@ -1,0 +1,4 @@
+$ git diff --numstat 6dca85f 78c138f863696def68f88080b2b32057fe98f207 -- ops/bien_nhan_v2.py ops/bien_nhan_v2_test.py
+22	4	ops/bien_nhan_v2_test.py
+
+rc=0

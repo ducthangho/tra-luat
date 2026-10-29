@@ -1,0 +1,17 @@
+{"healthy": {"rc": 1, "out": "bien_nhan_v2: 0 ĐẠT v2 · 1/1 miễn trừ legacy (băm khớp) · 0 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\ncâu lịch sử: nợ L-REVIEW 0 · L-ANCESTRY 0 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0", "err": "ĐỎ  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` nói `e72d857` chưa vào / không là tổ tiên nhánh mặc định, nhưng nay `e72d857` ĐÃ là tổ tiên — câu đã cũ; sửa câu\nTỔNG: ĐỎ", "traceback": false, "dead": false}, "git_error": {"rc": 128, "out": "", "err": ""}}
+{"gate": "head", "debt": false, "result": {"rc": 2, "out": "bien_nhan_v2: 0 ĐẠT v2 · 1/1 miễn trừ legacy (băm khớp) · 0 NỢ đóng băng · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\ncâu lịch sử: nợ L-REVIEW 0 · L-ANCESTRY 0 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0", "err": "KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — `merge-base` cho `e72d857`: `git merge-base --is-ancestor e72d8570d56391888423561308429963ae4f1b56 003bf72b987316aa9a4e2a440d844889eccb666f` rc=128: \nTỔNG: KHÔNG ĐO ĐƯỢC", "traceback": false, "dead": false}}
+{"gate": "head", "debt": true, "result": {"rc": 2, "out": "bien_nhan_v2: 0 ĐẠT v2 · 1/1 miễn trừ legacy (băm khớp) · 0 NỢ đóng băng · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1\ncâu lịch sử: nợ L-REVIEW 0 · L-ANCESTRY 0 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0", "err": "KHÔNG ĐO ĐƯỢC  [L-ANCESTRY] r.receipt.yaml: `anchor.mo_ta` — `merge-base` cho `e72d857`: `git merge-base --is-ancestor e72d8570d56391888423561308429963ae4f1b56 003bf72b987316aa9a4e2a440d844889eccb666f` rc=128: \nTỔNG: KHÔNG ĐO ĐƯỢC", "traceback": false, "dead": false}}
+Traceback (most recent call last):
+  File "/tmp/claude-0/rv/wp960-r2-review-4-codex/replay_rc_witness_recheck.py", line 11, in <module>
+    dst=Path('/tmp/wp960-r3-recheck-u1-witness');shutil.copytree(h.COPY,dst)
+                                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/usr/lib/python3.13/shutil.py", line 593, in copytree
+    return _copytree(entries=entries, src=src, dst=dst, symlinks=symlinks,
+                     ignore=ignore, copy_function=copy_function,
+                     ignore_dangling_symlinks=ignore_dangling_symlinks,
+                     dirs_exist_ok=dirs_exist_ok)
+  File "/usr/lib/python3.13/shutil.py", line 491, in _copytree
+    os.makedirs(dst, exist_ok=dirs_exist_ok)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 228, in makedirs
+FileExistsError: [Errno 17] File exists: '/tmp/wp960-r3-recheck-u1-witness'

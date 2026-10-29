@@ -1,0 +1,4 @@
+{"existing_remote": {"rc": 1, "out": "", "err": ""}}
+{"add_ref": {"rc": 0, "out": "", "err": ""}}
+{"added_ref_rc": 2, "out": "", "err": "KHÔNG ĐO ĐƯỢC: `for-each-ref` trả dòng lạ: 'refs/heads/master/topic 934a5b063670acfbed410487d8244cd17d586d6e commit'\n"}
+{"delete_ref": {"rc": 0, "out": "", "err": ""}}

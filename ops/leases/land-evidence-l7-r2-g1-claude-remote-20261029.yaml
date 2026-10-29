@@ -16,8 +16,15 @@ recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-10-29T07:08:00Z'
 heartbeat_at: '2026-10-29T07:08:00Z'
-lease_until: '2026-10-30T07:08:00Z'
-lease_expires_at_utc: '2026-10-30T07:08:00Z'
+lease_until: '2026-10-29T08:28:37Z'
+lease_expires_at_utc: '2026-10-29T08:28:37Z'
+rut_han:
+  han_cu: '2026-10-30T07:08:00Z'
+  han_moi: '2026-10-29T08:28:37Z'
+  rut_boi: ducthangho
+  ly_do: 'packet land-evidence-l7 r2 da merge (PR #1013, head 07bea5f6568dd82fb18a9e7d8a779b6000f65bfd, merge e9967f07b95c6458afc63dabf4a5c0494e90eca7, 2026-10-29T08:28:06Z).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le land-81-ha-cap r1 (9b40bcc)'
+  ghi_boi: claude-dispatcher-session (theo chi thi chu kho trong phien)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

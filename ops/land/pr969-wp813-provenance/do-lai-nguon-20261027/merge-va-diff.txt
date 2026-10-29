@@ -1,0 +1,11 @@
+# merge-va-diff do 2026-10-27
+merge 1af15933eac7486f93718f0de921045bd5a75cd0 parents 7891c0b11ff2b7e47405131254def6a82e732c71 be88cafd7bdaee556c0ec3e60b3cba0d22efbb7e tree 255e08ad4f0a5e403d93e9aebcf0f8f933d11935
+head be88cafd7bdaee556c0ec3e60b3cba0d22efbb7e tree d010f718a85af630bc7e817a1d303f3bcf099144
+merge-base(cha1, head) = e3ea13923dceab7c15fc62a0823ef5f4f576e589
+cmp(diff cha1..merge, diff merge-base..head) rc=0
+155	11	.claude/dev/packet_loop.py
+222	3	.claude/dev/packet_loop_test.py
+blob .claude/dev/packet_loop.py: merge 097b8683b9b67adda6cce350e80b85532b0bb9f7 head 097b8683b9b67adda6cce350e80b85532b0bb9f7
+blob .claude/dev/packet_loop_test.py: merge a94579fe38302e3c89c6d9965983cb079e4836c6 head a94579fe38302e3c89c6d9965983cb079e4836c6
+git diff --stat 1af15933eac7486f93718f0de921045bd5a75cd0 e139e55 (commit first-parent ke tiep):
+ 7 files changed, 748 insertions(+)

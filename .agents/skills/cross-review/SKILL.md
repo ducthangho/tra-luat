@@ -62,10 +62,11 @@ $RuffLintRc = $LASTEXITCODE
 Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
 tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
 ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
-Đọc header thật bằng `Get-Content -LiteralPath $StderrLog -TotalCount 80`; đối chiếu
-`model:`/`reasoning effort:` với prompt/receipt theo §8.1, đọc tiếp nếu header chưa đủ.
-`Get-Content -Raw $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
-completion evidence. Không lấy model từ actor GitHub.
+`$Run = Get-Content -Raw -LiteralPath $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
+completion evidence. Model/effort/sandbox lấy từ `$Run.model_phuc_vu`, `$Run.effort_phuc_vu`, `$Run.sandbox_quan_sat`,
+chỉ đo được khi `model_phuc_vu_trang_thai`/`effort_phuc_vu_trang_thai`/`sandbox_trang_thai` là `DO_DUOC`
+(khác thì đọc `*_ly_do`); đối chiếu với prompt/receipt theo §8.1. Header `model:`/`reasoning effort:` trong
+`$StderrLog`, nếu có, chỉ là lời khai phụ; vắng header không phải chưa đo được. Không lấy model từ actor GitHub.
 
 ## Provenance và vận chuyển
 

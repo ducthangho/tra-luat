@@ -82,8 +82,15 @@ heartbeat_at: '2026-10-29T02:25:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'ADR-0056 => 360 phut.'
-lease_until: '2026-10-30T14:43:00Z'
-lease_expires_at_utc: '2026-10-30T14:43:00Z'
+lease_until: '2026-10-29T08:45:00Z'
+lease_expires_at_utc: '2026-10-29T08:45:00Z'
+rut_han:
+  han_cu: '2026-10-30T14:43:00Z'
+  han_moi: '2026-10-29T08:45:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet #960 r2 xong phan thi cong: PR #995 (head 6dca85f463c6ce551eb8c27ff2d94b7a102e2fdf, merge 79dbaf443f90daece751d9ab2537796bbd6084bf, 2026-10-29T04:16:26Z) va PR #1005 (head 2c36e1cb6c84ac0a8d220076b59518973915a357, merge 641b3deff2b3ab2dcecaab00440661a865bde537, 2026-10-29T08:18:37Z) da merge; tran 8 loi goi codex da het, KHONG verdict approve (M-1 KHONG DAT); chu kho quyet "Dong y huong 1, ap HINT luot 7 roi merge #1005" (qua phien dieu phoi, xac nhan lai trong phien executor 29-10). Phan con ho chuyen no con Issue #1011.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem cua #960 tro nguoc bang thay_the_cho; no con #1011 chua co packet/lease. Tien le wp813-r2-g1-claude (abfd648).'
+  ghi_boi: claude-session session_015GtxrbeTfDyFKdj7rb72Uq (chinh phien executor r2, theo de xuat phien dieu phoi session_01WZT2MvvoQV8QGF1vX9STrJ ma chu kho xac nhan)
 han_ghi_chu: 'han g1 (2026-10-29T14:43Z) + 24h theo chi thi chu kho.'
 run_minutes: 60
 heartbeat_minutes: 30

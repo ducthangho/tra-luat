@@ -2946,12 +2946,14 @@ def c86_B1_moc_dung_tai_KHONG_con_mien():
 @ca
 def c87_B3_OID_khong_tra_duoc_theo_NGU_CANH():
     """r2 B3 (M3): OID không tra được ⇒ rc=2 khi có ngữ cảnh (40 hex · backtick · sau `commit`); token
-    thuần số / thuần chữ không ngữ cảnh ⇒ bỏ qua (rc=0). Trộn số-chữ đã có ở `c71`, OID thật ở `c78`.
+    thuần số / thuần chữ không ngữ cảnh ⇒ bỏ qua (rc=0). Trộn số-chữ đo RIÊNG không từ commit/backtick;
+    OID thật ở `c78`.
     Ranh giới của từng ngữ cảnh (r2 review 1, `bo-chon-moi-chua-khoa-bien`): `Precommit` không phải từ
     `commit`; backtick chỉ MỞ không phải trong backtick ⇒ rc=0."""
     for ten, cau, rc_doi in (("40-hex", "Ban " + "a" * 40 + " chua vao master.", 2),
                              ("backtick", "Ban `abcdefa` chua vao master.", 2),
                              ("sau-commit", "Commit 1234567 chua vao master.", 2),
+                             ("tron-so-chu-rieng", "Ban 12ab34c chua vao master.", 2),
                              ("tu-thuong", "Tu deadbeef chua vao master.", 0),
                              ("so-run", "Run 40268583940 chua vao master.", 0),
                              ("tien-to-commit", "Precommit 1234567 chua vao master.", 0),
@@ -3316,6 +3318,10 @@ def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
             ("disambiguate-dong-la", lambda r: bnv2._commit_cua(r, "abcdef1"), {"rev-parse --disambiguate": "khong-phai-oid\n"}),
             ("batch-check-dang-la", lambda r: bnv2._commit_cua(r, "abcdef1"),
              {"rev-parse --disambiguate": h + "\n", "cat-file": h + " commit thua\n"}),
+            ("batch-check-sai-oid", lambda r: bnv2._commit_cua(r, "abcdef1"),
+             {"rev-parse --disambiguate": h + "\n", "cat-file": "b" * 40 + " commit\n"}),
+            ("batch-check-sai-loai", lambda r: bnv2._commit_cua(r, "abcdef1"),
+             {"rev-parse --disambiguate": h + "\n", "cat-file": h + " nonsense\n"}),
             ("ung-vien-missing", lambda r: bnv2._commit_cua(r, "abcdef1"),
              {"rev-parse --disambiguate": h + "\n", "cat-file": h + " missing\n"}),
             ("for-each-ref-dong-la", lambda r: bnv2._nhanh_mac_dinh(r), {"for-each-ref": "refs/heads/master khong-phai-oid commit\n"}),
@@ -4196,6 +4202,16 @@ def _dot_bien():
         '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})',
         '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH", "GIT_DIR"})'),
        C95, "`GIT_DIR` kế thừa làm cổng đo kho khác", doi_chung=DC)
+    # Review r2 lượt 6: từng vế giao thức và từng ngữ cảnh phải có răng riêng.
+    do("m137_bo_so_OID_batch_check", lambda: _dot_bien_tep(
+        ' or ra[0] != oid40', ''),
+       C94, "batch-check trả OID khác mà được tin", doi_chung=DC)
+    do("m138_bo_kiem_loai_batch_check", lambda: _dot_bien_tep(
+        ' or ra[1] not in ("commit", "tag", "tree", "blob")', ''),
+       C94, "batch-check trả loại ngoài giao thức mà được tin", doi_chung=DC)
+    do("m139_bo_ngu_canh_tron_so_chu", lambda: _dot_bien_tep(
+        'if len(x) == 40 or _oid_tron(x):', 'if len(x) == 40:'),
+       "c87_B3_OID_khong_tra_duoc_theo_NGU_CANH", "OID trộn số-chữ thiếu mà thành token thường", doi_chung=DC)
     do("m130_bo_chot_GRAFTS", lambda: _dot_bien_tep(
         "    if gf and (root / gf", "    if False and (root / gf"),
        C91, "tệp grafts đổi parent mà vẫn đo", doi_chung=DC)

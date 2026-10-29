@@ -1,0 +1,25 @@
+{
+  "command": [
+    "python3",
+    ".claude/dev/packet_loop.py",
+    "adr-song",
+    "--root",
+    "."
+  ],
+  "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+  "env_overrides": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8",
+    "PYTHONPYCACHEPREFIX": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/adr-song/pycache",
+    "TL_CACHE_DIR": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/adr-song/tl",
+    "XDG_CACHE_HOME": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/adr-song/xdg",
+    "TMPDIR": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/adr-song/tmp",
+    "GIT_OPTIONAL_LOCKS": "0"
+  },
+  "rc": 0,
+  "stdout_bytes": 113,
+  "stdout_sha256": "f4fdd3a21d05a8257f9bfd6459bb7a24803cb6180cfa665f76c85a2bb15724a3",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

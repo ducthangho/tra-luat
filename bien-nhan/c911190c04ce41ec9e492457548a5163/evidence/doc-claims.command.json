@@ -1,0 +1,24 @@
+{
+  "command": [
+    "python3",
+    "scripts/tl.py",
+    "doc-claims-check",
+    "--json"
+  ],
+  "cwd": "/tmp/claude-0/rv/wlmck-r1-review-2/cay-kho",
+  "env_overrides": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8",
+    "PYTHONPYCACHEPREFIX": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/doc-claims/pycache",
+    "TL_CACHE_DIR": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/doc-claims/tl",
+    "XDG_CACHE_HOME": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/doc-claims/xdg",
+    "TMPDIR": "/tmp/claude-0/rv/wlmck-r1-review-2/evidence/cache/doc-claims/tmp",
+    "GIT_OPTIONAL_LOCKS": "0"
+  },
+  "rc": 0,
+  "stdout_bytes": 73388,
+  "stdout_sha256": "ee6a905f2524ee3bbc51a432072e5e22ba443bc462b4513cb6778187caee356b",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

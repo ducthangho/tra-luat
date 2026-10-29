@@ -3299,7 +3299,8 @@ def c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho():
 def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
     """Kiến trúc tra git (r2, sau review lượt 2): stdout của `--disambiguate` / `cat-file --batch-check` /
     `for-each-ref` mà KHÔNG đúng dạng giao thức ⇒ `KhongDoDuoc`, không được lọc bỏ thành "không có"; ứng viên
-    `--disambiguate` liệt kê mà `cat-file` nói `missing` ⇒ `KhongDoDuoc`. Đồ giả thay `_git_do` theo lệnh."""
+    `--disambiguate` liệt kê mà `cat-file` nói `missing` ⇒ `KhongDoDuoc`; `config --type=bool` trả giá trị không
+    phải true/false ⇒ `KhongDoDuoc` (review r2 lượt 5). Đồ giả thay `_git_do` theo lệnh."""
     that = bnv2._git_do
     h = "a" * 40
 
@@ -3317,7 +3318,8 @@ def c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC():
              {"rev-parse --disambiguate": h + "\n", "cat-file": h + " commit thua\n"}),
             ("ung-vien-missing", lambda r: bnv2._commit_cua(r, "abcdef1"),
              {"rev-parse --disambiguate": h + "\n", "cat-file": h + " missing\n"}),
-            ("for-each-ref-dong-la", lambda r: bnv2._nhanh_mac_dinh(r), {"for-each-ref": "refs/heads/master khong-phai-oid commit\n"})):
+            ("for-each-ref-dong-la", lambda r: bnv2._nhanh_mac_dinh(r), {"for-each-ref": "refs/heads/master khong-phai-oid commit\n"}),
+            ("promisor-gia-tri-la", lambda r: bnv2._kho_lanh(r), {"config --type=bool": "remote.archive.promisor maybe\n"})):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             _kho_cau(tmp)
@@ -3349,14 +3351,19 @@ def c95_moi_truong_git_KHONG_doi_ket_qua_do():
     def git_dir_khac(tmp, k):
         khac = tmp / "_khac"
         khac.mkdir()
-        _kho_cau(khac)
+        kk = _kho_cau(khac)
+        # Kho ngoài có master = X (M KHÔNG là tổ tiên) — đo nhầm kho ấy thì ra SẠCH, không ra một vi phạm
+        # (review r2 lượt 5: fixture cũ cùng đồ thị nên không phân biệt được kho nào được đo).
+        kk["g"]("update-ref", "refs/heads/master", kk["X"])
         return {"GIT_DIR": str(khac / ".git")}
 
     def git_trace(tmp, k):
         return {"GIT_TRACE": "1"}
 
     def promisor_tat(tmp, k):
-        k["g"]("config", "remote.archive.promisor", "false")
+        # Ba cách viết TẮT mà git chấp nhận; `off`/`no` chỉ đúng khi đọc qua `--type=bool` (review r2 lượt 5).
+        for remote, gt in (("archive", "false"), ("a2", "off"), ("a3", "no")):
+            k["g"]("config", f"remote.{remote}.promisor", gt)
         return {}
 
     def alternates_env(tmp, k):
@@ -4178,6 +4185,17 @@ def _dot_bien():
     do("m133_bo_alternates_khoi_danh_sach_giu", lambda: _dot_bien_tep(
         '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})', '_GIT_GIU = frozenset({"GIT_EXEC_PATH"})'),
        C95, "bỏ `GIT_ALTERNATE_OBJECT_DIRECTORIES` làm kho đủ mất object", doi_chung=DC)
+    # --- review r2 lượt 5: răng riêng cho hai chốt promisor và fixture GIT_DIR phân biệt được kho.
+    do("m134_doc_promisor_khong_chuan_hoa_bool", lambda: _dot_bien_tep(
+        '"config", "--type=bool", "--get-regexp"', '"config", "--get-regexp"'),
+       C95, "`off`/`no` đọc thô thành dòng lạ ⇒ kho đủ bị chặn", doi_chung=DC)
+    do("m135_bo_chot_gia_tri_promisor_la", lambda: _dot_bien_tep(
+        '        if gt not in ("true", "false"):\n', "        if False:\n"),
+       C94, "giá trị promisor không phải bool được coi là tắt", doi_chung=DC)
+    do("m136_giu_GIT_DIR_ke_thua", lambda: _dot_bien_tep(
+        '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH"})',
+        '_GIT_GIU = frozenset({"GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_EXEC_PATH", "GIT_DIR"})'),
+       C95, "`GIT_DIR` kế thừa làm cổng đo kho khác", doi_chung=DC)
     do("m130_bo_chot_GRAFTS", lambda: _dot_bien_tep(
         "    if gf and (root / gf", "    if False and (root / gf"),
        C91, "tệp grafts đổi parent mà vẫn đo", doi_chung=DC)

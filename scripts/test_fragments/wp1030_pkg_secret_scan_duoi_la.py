@@ -3,7 +3,9 @@
 
 Chạy BẢN THẬT của `scripts/pkg_secret_scan.py` (đọc nguồn rồi `exec`, không qua bộ đệm `.pyc`) trên một fixture
 trong thư mục tạm. Khoá giả dựng lúc chạy từ các mảnh, nên chính tệp này không thành hit của bộ quét. So bằng TẬP
-đường dẫn hit, không bằng số đếm.
+đường dẫn hit, không bằng số đếm. Fixture biên riêng khoá hai phía của trần `MAX_BYTES` và của cửa sổ kiểm NUL
+8192 byte, cùng việc tệp `TEXT_SUFFIXES` (kể cả đuôi viết HOA) vẫn được miễn cả hai phép lọc. Tên tệp trong fixture
+khác nhau cả khi bỏ phân biệt hoa thường, để ca đo đúng trên hệ tệp Windows/macOS.
 
 Topo phát hành: bundle của fragment nằm trong gói, còn bộ quét thì bị loại khỏi gói. Chỉ tha (in `BỎ QUA`, trả True)
 khi đủ ba điều: (i) bộ quét vắng; (ii) chính sách phát hành loại nó THEO THIẾT KẾ, đo trên một sentinel CÓ THẬT
@@ -123,6 +125,43 @@ def _ca(mod):
     return ok
 
 
+def _ca_bien(mod):
+    """Hai phía của mỗi biên lọc, và nhánh `TEXT_SUFFIXES` được miễn cả hai phép lọc (đuôi thường lẫn HOA)."""
+    khoa = _khoa().encode("ascii")
+    dong = b"dong 1\n" + khoa + b"\n"
+    tran = int(mod.MAX_BYTES)
+    cua_so = 8192
+    tep = {
+        "dung_tran.log": dong + b"x" * (tran - len(dong)),          # = trần ⇒ quét
+        "qua_tran.log": dong + b"x" * (tran + 1 - len(dong)),       # trần + 1 ⇒ bỏ
+        "nul_cuoi_cua_so.log": b"x" * (cua_so - 1) + b"\x00\n" + khoa + b"\n",   # NUL ở byte thứ 8192 ⇒ bỏ
+        "nul_ngoai_cua_so.log": b"x" * cua_so + b"\x00\n" + khoa + b"\n",        # NUL ở byte thứ 8193 ⇒ quét
+        "dung_tran_khong_duoi": dong + b"x" * (tran - len(dong)),
+        "qua_tran_khong_duoi": dong + b"x" * (tran + 1 - len(dong)),
+        "nul_khong_duoi": b"\x00\n" + khoa + b"\n",
+        "lon.txt": dong + b"x" * tran,                              # TEXT_SUFFIXES: không trần
+        "nul.txt": b"\x00\n" + khoa + b"\n",                        # TEXT_SUFFIXES: không kiểm NUL
+        "hoa_lon.TXT": dong + b"x" * tran,                          # đuôi HOA vẫn thuộc TEXT_SUFFIXES
+        "hoa_nul.TXT": b"\x00\n" + khoa + b"\n",
+    }
+    mong = {"dung_tran.log", "nul_ngoai_cua_so.log", "dung_tran_khong_duoi",
+            "lon.txt", "nul.txt", "hoa_lon.TXT", "hoa_nul.TXT"}
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam) / "bien"
+        goc.mkdir()
+        for ten, noi_dung in tep.items():
+            (goc / ten).write_bytes(noi_dung)
+        co_mat = {p.name for p in goc.iterdir()}
+        if co_mat != set(tep):
+            _bao("BIÊN fixture lệch (hệ tệp gộp tên?): %s" % sorted(set(tep) ^ co_mat))
+            return False
+        thuc = _tap(_hit(mod, goc))
+    if thuc != mong:
+        _bao("BIÊN tập hit lệch: thiếu %s, thừa %s" % (sorted(mong - thuc), sorted(thuc - mong)))
+        return False
+    return True
+
+
 def run(tl_module):
     try:
         kho = Path(tl_module.__file__).resolve().parent.parent
@@ -138,4 +177,10 @@ def run(tl_module):
     except Exception as exc:                            # fail-closed
         _bao("không kiểm được topo/nạp bộ quét: %s" % type(exc).__name__)
         return False
-    return _ca(mod)
+    try:
+        a = _ca(mod)
+        b = _ca_bien(mod)
+    except Exception as exc:                            # fixture/thư mục tạm hỏng ⇒ ĐỎ có chẩn đoán, không bao giờ True
+        _bao("không dựng/đo được fixture: %s: %s" % (type(exc).__name__, exc))
+        return False
+    return a and b

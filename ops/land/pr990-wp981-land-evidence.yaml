@@ -5,8 +5,8 @@
 # kiemgate.py, bon_moc.py kem trong do-lai-nguon-20261029/; SHA256SUMS kem.
 # GATE HAU MERGE: run push 40542837100 tren e926bd9 attempt 1 bi HUY (concurrency); attempt 2 (phien dieu phoi chay lai
 # 29-10) 23/23 job Ubuntu success, event push, ref master => release-verify lane LAND CO CHAY va success. 4/4 moc §10.2.2 (Workflow definition do 29-10).
-# landed FALSE: (a) §8.1 CHUA_DAT — head merge 0eb66e5 khong co luot Codex launcher nao (luot 3/3 approve afd3a86);
-# (b) chua co duyet landed cua chu kho.
+# §8.1 DAT tu 30-10: chu kho nang tran (3 -> 4 -> 5), luot 5/5 approve DUNG 0eb66e5 voi receipt do duoc.
+# landed FALSE: chi con thieu duyet landed cua chu kho.
 
 schema_version: 1
 mission_id: gh-981
@@ -88,30 +88,36 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA e926bd9: run push 40542837100 attempt 2 23/23 success, lane LAND success,
     4/4 moc §10.2.2 measured (Workflow definition do 29-10). (2) lease da nha: rut han 12b43c0, NGUOI_GIU 0 DAT.
-    (3) bookkeeping: ho so nay DAT. (4) review approve neo DUNG authorized head 0eb66e5: KHONG DAT — xem assurance_81.
+    (3) bookkeeping: ho so nay DAT. (4) review approve neo DUNG authorized head 0eb66e5 voi §8.1 DAT (luot 5/5, 30-10).
     (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho DAT.
-    Mo lai — moc Workflow definition da do 29-10; con can: mot luot Codex launcher approve DUNG 0eb66e5, hoac quyet dinh rieng cua chu kho chap nhan approve afd3a86 cho head
-    0eb66e5 (write set giong tung byte). Sau do chu kho duyet landed bang comment neo head PR ghi so.
+    Mo lai: chi con comment duyet landed cua chu kho neo head PR ghi so.
 assurance_81:
-  reviewer_assurance_81: CHUA_DAT
+  reviewer_assurance_81: DAT
   ly_do: >-
-    measured — luot Codex launcher cuoi (luot 3/3, run 6018070a) approve DUNG afd3a86, KHONG phai authorized head 0eb66e5.
-    0eb66e5 la merge commit (cha afd3a86 + 4488444 origin/master) do executor tao theo yeu cau truc tiep cua chu kho
-    ("xu ly drift di", loi khai comment 6445122489) sau khi da dung het tran 3 luot; khong luot Codex nao chay tren no.
-    Giam nhe, KHONG thay exact-SHA: blob hai tep write set giong tung byte o 2c70821, afd3a86 va 0eb66e5
-    (do-lai-nguon-20261029/merge-va-diff.txt); connector Codex khong co finding tren 0eb66e5; CI 23/23 tren 0eb66e5. Nhung
-    phan con lai cua cay doi (git diff --stat afd3a86 0eb66e5: 110 tep) nen hanh vi cong co the doi qua tep ngoai write set.
-    Nghia vu read-only cua luot 3: verdict khai INITIAL_FINAL_IDENTICAL=True 7259 tep, khong khai ghi-roi-hoan-nguyen.
+    measured — verdicts/wp981-g2-codex-luot5-run.json: luot launcher.py run 6ac8bbbe (luot 5/5) tren DUNG authorized_head_sha
+    0eb66e5, provider openai_codex, execution_surface codex_cli, trang_thai xong, ma_thoat 0, 880.194 s; verdict
+    verdicts/wp981-g2-codex-luot5-verdict.md "verdict: approve", reviewed_sha 0eb66e5 du 40 ky tu, 0 finding P0–P3;
+    model_phuc_vu_trang_thai DO_DUOC 29/29 gpt-6-astra (ho openai, khac ho claude cua executor) => cross_approved.
+    Tran Codex: chu kho nang 3 -> 4 (readback-comments-981.json comment 6512475787) roi 4 -> 5 (comment 6512854872).
+    Luot 4/4 (verdicts/wp981-g2-codex-luot4-verdict.md, run 8eb247e7) cung approve 0eb66e5 nhung run.json KHONG do duoc
+    model/effort/sandbox (lenh truyen …/codex.js nen launcher khong khop hop dong codex_cli, provider local_process); giu
+    lam bang chung noi dung, KHONG tinh la receipt §8.1. Nghia vu read-only (AGENTS.md §Reviewer): luot 5 doc checkout clone
+    rieng /home/user/wp981-rv4/cay-kho nam NGOAI vung ghi cua sandbox codex; verdict khai khong ghi, khong tao-roi-hoan-nguyen;
+    snapshot truoc/sau HEAD 0eb66e5, tree 0470294, ls-files sha256 trung, status 0 dong. Gioi han §8.2: snapshot chi chung
+    minh khong co delta o hai moc. Lich su: luot 3/3 approve afd3a86; 0eb66e5 la merge drift lan 2 theo yeu cau truc tiep
+    cua chu kho (comment 6445122489), write set giong tung byte afd3a86 (do-lai-nguon-20261029/merge-va-diff.txt).
+    Ban chep nguyen byte luot 4–5 tu ops/wp981-r2-review-4@d62393b (re tu ops/wp981-r2-g2-lease@12b43c0).
   thuc_thi:
-    model: 'measured — verdicts/wp981-g2-codex-luot3-run.json model_phuc_vu DO_DUOC, 19/19 response gpt-6-astra (luot tren afd3a86)'
-    effort: 'measured — verdicts/wp981-g2-codex-luot3-run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC'
-    sandbox_mode: 'measured — verdicts/wp981-g2-codex-luot3-run.json sandbox_trang_thai DO_DUOC (sandbox_quan_sat trong run.json).'
+    model: 'measured — verdicts/wp981-g2-codex-luot5-run.json model_phuc_vu DO_DUOC, 29/29 response gpt-6-astra'
+    effort: 'measured — verdicts/wp981-g2-codex-luot5-run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC'
+    sandbox_mode: 'measured — verdicts/wp981-g2-codex-luot5-run.json sandbox_trang_thai DO_DUOC (sandbox_quan_sat trong run.json).'
   gioi_han: 'model_phuc_vu do tu su kien response.created ma launcher ghi; la model may chu TRA VE, khong phai chung thu ben thu ba.'
 
 no_co_ten:
   - {ma: l6-doc-khoi-landed-ngay, trang_thai: dong, bang_chung: 'PR #990 merge e926bd9'}
   - {ma: gate-hau-merge-bi-huy-boi-push-ke-tiep, trang_thai: mo, ghi_chu: 'lap lai o #990 (attempt 1 bi huy), #991, #983.'}
-  - {ma: merge-drift-sau-het-tran-codex, trang_thai: mo, ghi_chu: 'head merge khong co luot review exact-SHA khi tran da het; can quy tac ro (nang tran hay chap nhan theo write set).'}
+  - {ma: merge-drift-sau-het-tran-codex, trang_thai: mo, ghi_chu: 'o #990 da xu ly bang nang tran (luot 5/5 tren 0eb66e5); van can quy tac chung (nang tran hay chap nhan theo write set).'}
+  - {ma: launcher-run-codex-js-khong-khop-hop-dong, trang_thai: mo, ghi_chu: 'luot 4: truyen duong dan readlink -f toi codex.js => provider local_process, mat do model/effort/sandbox; launcher chap nhan im lang. Tien de cho mot chot o launcher.py run.'}
 khong_do_duoc:
   - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
   - 'Moc Workflow definition §10.2.2: KHONG_DO_DUOC TRONG PHIEN (GraphQL 403); da do NGOAI phien tren may chu kho — xem moc_workflow_definition_20261029.'

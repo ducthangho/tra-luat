@@ -18,7 +18,7 @@ bb749d4e8019fb2de532e062e2d5eeaae06d1de8034c63aeed7cc67945c6e9f6  ./do-lai-nguon
 93c2c9fef31c27d163952ba92564e8102031631fba1fef1b02fdd85618025361  ./do-lai-nguon-20261029/spec-sha256.txt
 9fef01dfed1e903bb52b4eb2def0e75bbfea38036f723638c2edfbfbdda2f9f6  ./readback-check-runs-0eb66e5-all.json
 70163e7739e654bd54886e20fb0e334f3bf1d6eb54ba893cd3704bd6d0cf74fb  ./readback-check-runs-e926bd9-all.json
-a1e1e6e5b54487cd91d85407c4e451faf07f4799f20bf71ece70c085745937e4  ./readback-comments-981.json
+421861f499f7be159c76e55cca698ab666504b36e2f478904d53bdc795a6a193  ./readback-comments-981.json
 704acecf44782fc381b480be3e0376ac5187cc72307e897087eb99c782765796  ./readback-comments-990.json
 14bc8d83200bacc98633075103e94b653cf8a79a65c49749e82677bab57bc164  ./readback-events-990.json
 eae5961fc1a90f6e319b0f4639e4ae12337dd70e71ec20c164d89972ef3fd275  ./readback-jobs-40524821956.json
@@ -38,3 +38,10 @@ a04642ab7ee89f5df042e854ac84e5a313f910c8c03f348bf2835d98f2c10416  ./verdicts/wp9
 d0ebb5e62a398e71ecccaba0610cac59d5e9d3997f3d9d391f23dc7f5cc1f25e  ./verdicts/wp981-g2-codex-luot2-verdict.md
 5595aec1fb0e15334a78b8f44377f96b0d75c5061510647a899282f5dc618001  ./verdicts/wp981-g2-codex-luot3-run.json
 480712d0108ede38b6b25b6544751c3370b87ff1c38f8f2b0fd65b6e8235fe4e  ./verdicts/wp981-g2-codex-luot3-verdict.md
+fe6ded950ec16a7fb73e2159b424eed5089313971a3613bd456523246fca8d4f  ./verdicts/wp981-g2-codex-luot4-prompt.md
+881c1944a8ab518a41681963b77283ad396cab1466ad26e840aa680c23464f53  ./verdicts/wp981-g2-codex-luot4-run.json
+4ecd18ca4ae60f2bd4b8b9f7e731fc4117f1a7732e120c907be3e44637680fce  ./verdicts/wp981-g2-codex-luot4-stderr-header.txt
+f52195a9a702227e1fedbe97e4c4e49de2fbba554d163fcd6831de81f189c87b  ./verdicts/wp981-g2-codex-luot4-verdict.md
+c3f99cabef6fb5639fd2bc5d8abc8b6e69f2070fa3cfc422cf105f9b65e9f924  ./verdicts/wp981-g2-codex-luot5-prompt.md
+36404088803d90419347be02569df9732caea8323d545525e8cd9bf336bf1101  ./verdicts/wp981-g2-codex-luot5-run.json
+eb03d2909f982d26aa88359f5dde56360eaac18897e8f8cb47f00900ac170182  ./verdicts/wp981-g2-codex-luot5-verdict.md

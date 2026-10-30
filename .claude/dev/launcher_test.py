@@ -10388,7 +10388,9 @@ def r1045_hinh_dang_dat_theo_trang_thai():
     for can in ('  if cong_cu_dat "$ten"; then\n', 'if PATH="$d:$PATH" cong_cu_dat "$ten"; then dich="$d"; break; fi'):
         bang(can in than, f"bo chon thieu {can!r}")
     bang("kiem-tra --chi" not in than, "bo chon con goi kiem-tra truc tiep (tin rc)")
-    cuoi = sh[sh.index('if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra'):]
+    moc_cuoi = 'if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra'
+    bang(moc_cuoi in sh, "dong kiem cuoi khong tach luot source khoi loi goi truc tiep")
+    cuoi = sh[sh.index(moc_cuoi):]
     bang('  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json || RC_KT=$?\n  if [ "$RC_KT" -ne 0 ] || ! cong_cu_dat "$TEN"; then' in cuoi and "    exit 3\n  fi\nfi" in cuoi,
          "dong kiem cuoi thieu thoat 3 cho loi goi truc tiep khi chua DAT")
     bang("set +e\n( set +e; eval \"$LENH\" ) > \"$TAM_CAI/stdout\"\nRC_CAI=$?\nset -e\n" in sh

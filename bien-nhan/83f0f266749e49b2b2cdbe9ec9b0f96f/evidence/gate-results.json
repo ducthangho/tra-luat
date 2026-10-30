@@ -1,0 +1,38 @@
+[
+  {
+    "command": "python3 .claude/dev/packet_loop.py adr-song --root .",
+    "cwd": "cay-kho/",
+    "env": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "rc": 0,
+    "stdout": "adr-song: sạch — 57 ADR trên đĩa, 57 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])\n"
+  },
+  {
+    "command": "python3 .claude/dev/packet_loop.py doctrine-scan --root .",
+    "cwd": "cay-kho/",
+    "env": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "rc": 0,
+    "stdout": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine\n"
+  },
+  {
+    "command": "python3 scripts/tl.py doc-claims-check --json",
+    "cwd": "cay-kho/",
+    "env": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "rc": 0,
+    "stdout_file": "doc-claims-check.json"
+  },
+  {
+    "command": "python3 review_audit.py",
+    "cwd": ".",
+    "env": {
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "rc": 0,
+    "stdout_file": "review-audit.log"
+  }
+]

@@ -2,6 +2,7 @@
 # Khuon: ops/land/pr1022-windows-local-r1-land-evidence.yaml. Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7.
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo = co neo; thuat_lai = so cua luot review/executor,
 # KHONG tai chay; not_measured = khong do duoc. Readback tho: ops/land/pr1029-windows-local-r2-provenance/.
+# assurance_81 CHUA_XAC_NHAN: bien nhan review khong co snapshot §8.1/§8.2 (finding P1 PR #1032).
 # landed FALSE vi §10.2.2: moc Workflow definition va Gate output not_measured (GraphQL 403 trong phien web), VA gate
 # push master tren DUNG merge SHA eaf83fd bi huy truoc khi co job nao (concurrency, merge sau de len) — tien le pr969.
 
@@ -82,10 +83,11 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA eaf83fd: KHONG DAT — run 41004317229 bi huy 0 job; moc Workflow definition va
     Gate output cua §10.2.2 cung not_measured. (2) lease da nha: rut han cf5c0fb DAT. (3) bookkeeping: ho so nay DAT. (4) review
-    neo DUNG authorized_head_sha 9aa725c: DAT (assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho
+    neo DUNG authorized_head_sha 9aa725c: CHUA_DAT — verdict noi dung
+    approved tren dung head, nhung assurance_81 CHUA_XAC_NHAN vi thieu snapshot §8.1/§8.2 (xem assurance_81). (5) noi dung merge = diff PR DAT. (6) merge boi tai khoan chu kho
     DAT; duyet merge tren SHA chi la loi_khai. (7) ADR-0057 §2: khong do Windows local (packet tai lieu).
 assurance_81:
-  reviewer_assurance_81: DAT
+  reviewer_assurance_81: CHUA_XAC_NHAN
   review_exact_sha: DAT
   review_exact_sha_nguon: >-
     measured — verdicts/83f0f266749e49b2b2cdbe9ec9b0f96f/run/run.json head 9aa725c = authorized_head_sha (readback-pr-1029.json
@@ -97,7 +99,13 @@ assurance_81:
       measured — verdicts/83f0f266749e49b2b2cdbe9ec9b0f96f/run/run.json sandbox_trang_thai DO_DUOC (codex-linux-sandbox,
       file_system restricted: ghi chi o slash_tmp, tmpdir va thu muc lam viec rieng; network restricted).
   snapshot_82: 'not_measured — bien nhan khong co snapshot-before/final (verdicts/SHA256SUMS liet ke du tep, khong co snapshot).'
-  ly_do: 'model, effort, sandbox mode thuc te do may tren DUNG head => cross_approved.'
+  ly_do: >-
+    model, effort, sandbox mode thuc te do may tren DUNG head, NHUNG §8.1 doi doi chieu exact SHA/tree o dau VA cuoi run, va
+    §8.2 doi snapshot dau/cuoi gom tracked, untracked, ignored, HEAD/tree, diff/index. Bien nhan chi co
+    verdicts/83f0f266749e49b2b2cdbe9ec9b0f96f/evidence/review-audit.log (git status sach, exact HEAD) — khong co snapshot.
+    Model/effort/sandbox KHONG thay duoc snapshot (finding P1 cua connector Codex tren PR #1032, comment 4420706458).
+    => verdict noi dung approved duoc giu, assurance CHUA_XAC_NHAN cho toi khi khoi phuc duoc snapshot hoac co mot luot
+    review doc lap dung §8.1/§8.2 tren 9aa725c.
   gioi_han: 'khong co snapshot §8.2 nen khong co phep do delta checkout dau/cuoi; sandbox DO_DUOC chi chung minh co che da thay, khong chung minh moi lenh (sandbox_gioi_han trong run.json).'
 
 review:

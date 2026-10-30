@@ -1,0 +1,50 @@
+ROUND 1 PROMPT.md bytes=3977 sha256=ca20a3a06a82643b7d48fe3185600a35d00d4dc7d7e45c4dd7409c5b142d88dc SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 1 VERDICT.md bytes=14251 sha256=e33a3c3efdeb3d55c7dd2c45ae831d814861690c360071b706026f4c9ed2a95b SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 1 run/run.json bytes=10930 sha256=58050918256f449a93a69403f46623d45dadb4f0888492d65d09a31cb7323e8b SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 1 FLAT bytes=14251 sha256=e33a3c3efdeb3d55c7dd2c45ae831d814861690c360071b706026f4c9ed2a95b DIRECTORY_EQUAL=True SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 1 stdout.log hash_match=True bytes=420 declared_bytes=420 bytes_match=True
+ROUND 1 stderr.log hash_match=True bytes=39 declared_bytes=39 bytes_match=True
+ROUND 1 checkpoint.json hash_match=True bytes=212 declared_bytes=None bytes_match=True
+ROUND 1 CHECKPOINT {"checkpoint_id": "4d0668e2f3d045ef86354bea2a6afd29", "head": "016852ae7acc22a75bae9505febd1697a1ab79ba", "prompt_sha256": "ca20a3a06a82643b7d48fe3185600a35d00d4dc7d7e45c4dd7409c5b142d88dc", "schema_version": 1}
+ROUND 2 PROMPT.md bytes=3907 sha256=d1d75feb247d2e20d64c5cbceffb2dd50fdbed8efa65f5accff67c72c339a75d SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 2 VERDICT.md bytes=10679 sha256=2f482565c235380145253d76ae51ab9606e8d7cfc8044d6efd113ff80049feaf SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 2 run/run.json bytes=10492 sha256=21dfe28a8d9410c39cfe3c02e2ece250bad1ec75e134c38f7ae25ddaf74ac629 SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 2 FLAT bytes=10679 sha256=2f482565c235380145253d76ae51ab9606e8d7cfc8044d6efd113ff80049feaf DIRECTORY_EQUAL=True SOURCE_EQUAL=True HEAD_EQUAL=True
+ROUND 2 stdout.log hash_match=True bytes=569 declared_bytes=569 bytes_match=True
+ROUND 2 stderr.log hash_match=True bytes=39 declared_bytes=39 bytes_match=True
+ROUND 2 checkpoint.json hash_match=True bytes=212 declared_bytes=None bytes_match=True
+ROUND 2 CHECKPOINT {"checkpoint_id": "e400a3206474480f827b771e59395389", "head": "91466322f705658ed51b80c7c152f6b77f4f90c6", "prompt_sha256": "d1d75feb247d2e20d64c5cbceffb2dd50fdbed8efa65f5accff67c72c339a75d", "schema_version": 1}
+MANIFEST ops/reviews/wp1037-g1-codex-luot1 PROMPT.md OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot1 VERDICT.md OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot1 run/checkpoint.json OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot1 run/run.json OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot1 run/stderr.log OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot1 run/stdout.log OK
+MANIFEST_SET ops/reviews/wp1037-g1-codex-luot1 entries 6 files 6 MISSING [] EXTRA []
+MANIFEST ops/reviews/wp1037-g1-codex-luot2 PROMPT.md OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot2 VERDICT.md OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot2 run/checkpoint.json OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot2 run/run.json OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot2 run/stderr.log OK
+MANIFEST ops/reviews/wp1037-g1-codex-luot2 run/stdout.log OK
+MANIFEST_SET ops/reviews/wp1037-g1-codex-luot2 entries 6 files 6 MISSING [] EXTRA []
+MANIFEST ops/land/pr1041-wp1037-provenance ai-dang-giu-sau-rut-han/luc-do.txt OK
+MANIFEST ops/land/pr1041-wp1037-provenance lease-wp1037-r1-g1.yaml.txt OK
+MANIFEST ops/land/pr1041-wp1037-provenance merge-va-diff.txt OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-comment-6529010520.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-jobs-41033737059.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-jobs-41069257658-a1.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-jobs-41069257658-a2.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-pr-1041.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-run-41033737059.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-run-41069257658-a1.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-run-41069257658-a2.json OK
+MANIFEST ops/land/pr1041-wp1037-provenance readback-runs-b29da0b.json OK
+MANIFEST_SET ops/land/pr1041-wp1037-provenance entries 12 files 12 MISSING [] EXTRA []
+SOURCE_DIRECTORY_FILES ['ops/handoff/wp1037-g1-claude/SHA256SUMS', 'ops/handoff/wp1037-g1-claude/luot1-PROMPT.md', 'ops/handoff/wp1037-g1-claude/luot1-VERDICT-codex.md', 'ops/handoff/wp1037-g1-claude/luot1-run.json', 'ops/handoff/wp1037-g1-claude/luot2-PROMPT.md', 'ops/handoff/wp1037-g1-claude/luot2-VERDICT-codex.md', 'ops/handoff/wp1037-g1-claude/luot2-run.json']
+SOURCE_MANIFEST luot1-PROMPT.md True
+SOURCE_MANIFEST luot1-VERDICT-codex.md True
+SOURCE_MANIFEST luot1-run.json True
+SOURCE_MANIFEST luot2-PROMPT.md True
+SOURCE_MANIFEST luot2-VERDICT-codex.md True
+SOURCE_MANIFEST luot2-run.json True

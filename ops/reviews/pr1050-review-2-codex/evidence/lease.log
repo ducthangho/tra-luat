@@ -1,0 +1,43 @@
+LEASE_SOURCE_EQUAL True sha256 b1738f6ffa3edd8f03aada2b84c863ec74676f7c02acf05e9b409e7e2168b039
+CLASSIFY 2026-10-30T17:37:00Z CÒN_HẠN
+CLASSIFY 2026-10-30T17:41:02Z CÒN_HẠN
+CLASSIFY 2026-10-30T17:53:00Z HẾT_HẠN
+CLASSIFY 2026-10-30T18:07:34Z HẾT_HẠN
+CLASSIFY 2026-10-30T18:08:52Z HẾT_HẠN
+SHORTENING 2026-10-30T17:33:00Z 2026-10-30T17:53:00Z 2026-10-30T17:53:00Z
+AFTER_EXPIRY_LOG_SHA256 cbc0c4a31a8df98e835ea232a96b4339cf763b3c7d302a087f7de4c23c1ba765
+AFTER_EXPIRY_LOG_BEGIN
+# do 2026-10-30T18:07:34Z trong phien session_015GtxrYjGJtmjF3eT1nCSG9 (sau han moi 17:53Z cua wp1037-r1-g1-claude)
+ls-remote heads: 708 ten; for-each-ref origin: 708 ten; thieu (co tren may chu, vang cuc bo): 0; thua: 0
+$ python3 ops/lease_publish.py ai-dang-giu ops/bien_nhan_v2_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml
+HẾT_HẠN	wp1037-r1-g1-claude	refs/heads/ops/wp1037-r1-g1-lease:ops/leases/wp1037-r1-g1-claude.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907	refs/remotes/origin/agent/codex-credential-refresh-g1:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml
+HẾT_HẠN	wp610-codex-desktop-r1-g1	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r1-g1.yaml
+HẾT_HẠN	wp610-codex-desktop-r2-g2	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r2-g2.yaml
+HẾT_HẠN	wp610-codex-desktop-r3-g3	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r3-g3.yaml
+HẾT_HẠN	wp610-codex-desktop-r4-g4	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r4-g4.yaml
+HẾT_HẠN	wp610-codex-desktop-r5-g5	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r5-g5.yaml
+HẾT_HẠN	assurance-ho-model-r1-g1-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r1-g1-claude.yaml
+HẾT_HẠN	assurance-ho-model-r2-g2-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r2-g2-claude.yaml
+HẾT_HẠN	assurance-ho-model-r3-g3-antigravity	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r3-g3-antigravity.yaml
+HẾT_HẠN	assurance-ho-model-r4-g4-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r4-g4-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g1-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g1-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g2-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g2-claude.yaml
+HẾT_HẠN	wp1017-r1-g1-claude	refs/remotes/origin/ops/wp1017-r1-g1-lease:ops/leases/wp1017-r1-g1-claude.yaml
+CÒN_HẠN	wp1021-r2-g1-claude	refs/remotes/origin/ops/wp1021-r2-g1-lease:ops/leases/wp1021-r2-g1-claude.yaml
+HẾT_HẠN	wp960-r1-g1-claude	refs/remotes/origin/ops/wp960-r1-g1-lease:ops/leases/wp960-r1-g1-claude.yaml
+HẾT_HẠN	wp960-r2-g1-claude	refs/remotes/origin/ops/wp960-r2-g1-lease:ops/leases/wp960-r2-g1-claude.yaml
+HẾT_HẠN	wp960-r2-g2-claude	refs/remotes/origin/ops/wp960-r2-g2-lease:ops/leases/wp960-r2-g2-claude.yaml
+NGƯỜI_GIỮ 1: wp1021-r2-g1-claude
+rc=11
+AFTER_EXPIRY_LOG_END
+LOG_SUBJECT wp1037-r1-g1-claude ref_oid a34b9a38cda2669f9a90958c69bb6f2faa0f4353 expires 2026-10-30T17:53:00Z AT_180734 HẾT_HẠN
+LOG_SUBJECT wp1021-r2-g1-claude ref_oid 71f96cf257425147440c0391b5e62928b1570435 expires 2026-10-31T08:57:00Z AT_180734 CÒN_HẠN
+OFFLINE_REF_NAMES 708 PLUS_HEAD_ALIAS 1
+REMOTE_SERVER_REF_SET_AT_180734 KHONG_DO_DUOC_OFFLINE: log chi luu summary 708/708, khong luu danh sach ten/OID may chu
+SPEC_SHA256 253f12ae9c7e68c57a153c1f0e89993f65bf303529ed3f2444ed769a909b3230

@@ -1,0 +1,11 @@
+luc 2026-10-30T07:30:48Z ls-remote 705 guong 705 thieu 0 thua 0
+== scripts/tl_gws.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== scripts/tl_core/cli.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== scripts/tl_selftest.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== changelog.d/wp-1009.md

@@ -1,0 +1,2 @@
+1 689e8f77f38b4f0782e9f052ba05bb28 67bacb3 xong 0 701.203 prompt_khop True DO_DUOC [{"response_id": "resp_03ac79e1bea80e48016ae07876ad148195a34bbd3d0036e7b3", "model": "gpt-6.1-sol", "su_kien": "response None None
+2 4bca85201dee4c9ba3760586eefcc72c bbfb96c xong 0 1398.097 prompt_khop True DO_DUOC [{"response_id": "resp_0b352a9f14e57d25016ae0887f0f2c8196b1a444d62b224ff0", "model": "gpt-6.1-sol", "su_kien": "response None None

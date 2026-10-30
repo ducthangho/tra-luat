@@ -1,0 +1,79 @@
+# LEASE REVIEWER — wp1030 r6, luot 10 (L10) neo DUNG authorized_head 79017438 cua PR #1046 (da merge 8cdb15a7).
+# GHI HO theo chi thi CHU KHO trong phien dieu phoi (chep nguyen van o granted_on_instruction_nguyen_van).
+#
+# MUC DICH: dong U2 (reviewer assurance §8.1) cua ho so land ops/land/pr1046-wp1030-r6-land-evidence.yaml. Luot approve cuoi L9
+# (run 84a671e0) neo dung 79017438 nhung run.json va VERDICT mat cung phien executor ARCHIVED. Luot nay la review DOC LAP tren
+# DUNG 79017438 qua launcher.py run, de run.json + VERDICT duoc luu vao kho.
+
+schema_version: 2
+event: review_lease_granted
+
+packet_issue: 1030
+mission_issue: 748
+packet_id: wp1030
+revision: 6
+generation: 1
+lease_id: wp1030-r6-review-l10-codex
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease reviewer dau tien cua packet; cac luot L1-L9 chay duoi lease executor r4/r5/r6 g1 (launcher.py run do executor goi).'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1030#issuecomment-6531693236
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho trong phien dieu phoi session_015GtxrbRnRANivtXrA1edLB (2026-10-30): 'Làm hộ tôi theo khuyến nghị đi' — tra loi
+  khuyen nghi dong U2 bang mot luot review doc lap tren DUNG 79017438 qua launcher.py run, luu run.json + VERDICT vao kho.
+authority_caveat: 'ghi ho (#566): comment do phien Claude Code dang bang token chu kho; comment chu kho tu viet manh hon.'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxrbRnRANivtXrA1edLB ghi lease VA khoi chay launcher.py run trong sandbox rieng (clone tai 79017438); phien nay khong review, reviewer la codex.'
+
+leased_at_utc: '2026-10-30T19:26:00Z'
+heartbeat_at: '2026-10-30T19:26:00Z'
+lease_until: '2026-10-31T01:26:00Z'
+lease_expires_at_utc: '2026-10-31T01:26:00Z'
+
+role: reviewer
+provider: openai_codex
+reviewer: openai_codex
+model_family: openai
+execution_surface: codex_cli
+executor: anthropic_claude
+executor_model_family: claude
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+spec_path: ops/specs/wp1030-pkg-secret-scan-duoi-la-r6.md
+spec_ref: refs/heads/master
+spec_blob: 83268db932a064a5f8655dc77548421ffdb0ed38
+spec_sha256: 17d76055b288836057a18c234c4893bc0fced836d07bd8d3f43495a97f7fa6be
+spec_hash: 17d76055b288836057a18c234c4893bc0fced836d07bd8d3f43495a97f7fa6be
+
+reviewed_sha_required: 79017438cccaf77cd41e8126633943075b7b9200
+reviewed_tree_required: 721e379cec1a561b64765043bd6959ff436cbfa1
+merge_commit_da_land: 8cdb15a786304bab084b43c8b30c127ae87e2594
+target_pull_request: 1046
+pham_vi_review: >-
+  Diff packet = git diff 059a4a5..79017438 (merge-base cua 79017438 voi 0edfc4a, cha thu nhat cua merge) — 6 tep / 273 them / 14 xoa
+  (ops/land/pr1046-wp1030-r6-provenance/merge-va-diff.txt, sha256 diff 95b03d0f…). Doi chieu: L9 (79017438) va L8 (7da1bd2) approve
+  0/0/0/0 theo loi khai executor; 7da1bd2..79017438 chi la merge origin/master 059a4a5.
+verdict_must_answer: >-
+  (i) 79017438 co dung la 7da1bd2 + merge 059a4a5 khong lam doi 6 tep packet (do bang git); (ii) co loi hanh vi P0-P3 nao trong diff
+  packet tai DUNG 79017438 so voi spec r6 (M1-M6, A1-A9); (iii) verdict approve/request_changes neo reviewed_sha 79017438.
+tran_loi_goi_codex: 'ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544: day la loi goi thu 10/10 cua PR thi cong #1046.'
+cach_chay: >-
+  launcher.py run, sandbox clone rieng tai 79017438, --require-clean, --expected-head; run.json phai co model_phuc_vu_trang_thai
+  (DO_DUOC moi tinh §8.1 do_may). Ket qua (run.json + VERDICT.md + sha256) do phien dieu phoi ghi vao ho so land; reviewer KHONG ghi kho.
+
+cam_tuyet_doi:
+  - Khong ghi bat ky tep nao trong kho, khong push, khong mo PR
+  - Khong approve/merge tren GitHub
+  - Khong LIVE, khong credential that
+  - Khong viet chuoi bo-qua-CI nguyen van
+
+run_minutes: 360
+heartbeat_required_minutes: 360

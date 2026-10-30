@@ -1085,8 +1085,8 @@ def _secrets_set_body(a, entry_notebook) -> int:
 
 
 # WP1009 (spec CLOUD-SETUP-P1-BUNDLE r2): credential AGENT ở tệp RIÊNG `tl_agent_creds.enc` — chốt WP714 cấm phiên
-# cloud ghi tl_secrets.enc. Cùng TL_MASTER_KEY, cùng link công khai; fileId thật ghi ở P2 (Q15).
-AGENT_CREDS_FILEID = ""
+# cloud ghi tl_secrets.enc. Cùng TL_MASTER_KEY, cùng link công khai. WP1038: fileId thật (bước LIVE 5, 30-10-2026).
+AGENT_CREDS_FILEID = "1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ"
 _AGENT_CREDS_KEYS = ("codex_auth", "claude_oauth_token", "antigravity_api_key")
 _MASTER_KEY_MIN_LEN, _MASTER_KEY_MIN_DISTINCT = 32, 12   # Q11: chỉ đường GHI; đường ĐỌC phải mở được bản cũ
 _G = globals().__getitem__   # tên bind() chèn (_imp, HOPNAP_FOLDER_ID) tra lúc gọi — ruff F delta 0 (CLAUDE.md bước 3)
@@ -1250,6 +1250,63 @@ def _bootstrap_agent_creds(master: str) -> tuple[str, str]:
     if co:
         phan.append(f"có khoá {', '.join(co)} (không export, không ghi tệp)")
     return "ĐÃ NẠP", "; ".join(phan)
+
+
+# WP1038 (spec CLOUD-SETUP-P2A-EXEC r1, vòng 1 Q3 phương án C): cờ → (khoá trong tl_agent_creds.enc, biến của tiến trình con)
+_AGENT_EXEC_BIEN = (("claude", "claude_oauth_token", "CLAUDE_CODE_OAUTH_TOKEN"),
+                    ("gemini", "antigravity_api_key", "GEMINI_API_KEY"))
+
+
+def cmd_agent_creds_exec(a) -> int:
+    """WP1038: `tl agent-creds-exec [--claude] [--gemini] -- <lệnh> …` — giải mã tl_agent_creds.enc TRONG BỘ NHỚ, đặt
+    biến CHỈ cho tiến trình con (không export cho phiên, không ghi tệp, không bộ đệm — tải mỗi lần, vòng 3 Q16).
+    Fail-close: mọi lỗi tải/giải mã/thiếu khoá ⇒ rc 4, KHÔNG chạy con. Trả nguyên rc của con; không in giá trị."""
+    tag = "agent-creds-exec"
+    can = [(khoa, bien) for co, khoa, bien in _AGENT_EXEC_BIEN if getattr(a, co, False)]
+    lenh = list(getattr(a, "lenh", None) or [])
+    if not can or lenh[:1] != ["--"] or len(lenh) < 2:
+        print(f"[{tag}] ✗ cú pháp: tl {tag} [--claude] [--gemini] -- <lệnh> [đối số…] (cần ≥1 cờ và lệnh sau `--`).",
+              file=sys.stderr)
+        return 2
+    lenh = lenh[1:]
+    fid = os.environ.get("TL_AGENT_CREDS_FILEID") or AGENT_CREDS_FILEID
+    master = _master_key()   # đường ĐỌC: không kiểm độ mạnh (luật Q11 của P1 chỉ áp đường GHI)
+    if not fid or not master:
+        print(f"[{tag}] ✗ thiếu {'TL_AGENT_CREDS_FILEID/AGENT_CREDS_FILEID' if not fid else 'TL_MASTER_KEY'} — "
+              "không chạy tiến trình con.", file=sys.stderr)
+        return 4
+    blob = _public_curl_bytes(fid)
+    if blob is None:
+        print(f"[{tag}] ✗ tải công khai id={fid} lỗi (chưa anyone-with-link / mất mạng?) — không chạy tiến trình con.",
+              file=sys.stderr)
+        return 4
+    try:
+        p = json.loads(_G("_imp")("gws_cred_store").decrypt(blob, master).decode("utf-8"))
+        if not isinstance(p, dict) or p.get("schema") != 1:
+            raise ValueError("schema")
+    except Exception as e:  # noqa: BLE001
+        print(f"[{tag}] ✗ giải mã/định dạng lỗi ({_safe_exc(e)}) — sai TL_MASTER_KEY? Không chạy tiến trình con.",
+              file=sys.stderr)
+        return 4
+    env = dict(os.environ)
+    for khoa, bien in can:
+        v = p.get(khoa)
+        if not isinstance(v, str) or not v.strip():
+            print(f"[{tag}] ✗ tl_agent_creds.enc thiếu/rỗng khoá {khoa} — không chạy tiến trình con.", file=sys.stderr)
+            return 4
+        env[bien] = v
+    import shutil as _sh, subprocess as _sp
+    exe = _sh.which(lenh[0])   # bẫy shim `codex.CMD`: CreateProcessW chỉ tự thêm `.exe` (CLAUDE.md, `launcher.py run`)
+    if not exe:
+        print(f"[{tag}] ✗ không tìm thấy lệnh {lenh[0]!r} trong PATH — không chạy.", file=sys.stderr)
+        return 127
+    print(f"[{tag}] đặt {', '.join(b for _, b in can)} cho tiến trình con.", file=sys.stderr, flush=True)
+    sys.stdout.flush()
+    try:
+        return _sp.run([exe, *lenh[1:]], env=env).returncode
+    except OSError as e:
+        print(f"[{tag}] ✗ không chạy được {exe!r} ({_safe_exc(e)}).", file=sys.stderr)
+        return 126
 
 
 def _ensure_nlm_installed(version: str | None = None):

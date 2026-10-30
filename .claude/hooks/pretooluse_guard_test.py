@@ -634,10 +634,10 @@ def t32_khong_chan_oan_be_mat_vua_siet(g):
 
 def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
     """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
-    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 105, tu runtime (WP1009 +agent-creds-set)."""
+    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 106, tu runtime (WP1009 +agent-creds-set, WP1038 +agent-creds-exec)."""
     r = _kiem_bang_that(g or GUARD, HERE.parent.parent)
     dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
-    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 105" in dong)
+    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 106" in dong)
     return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")
 
 
@@ -874,12 +874,12 @@ def t50_duong_dan_tl_py_DAU_PHAN_CACH_nao_cung_bi_chan(g):
     xau = []
     for a in AGENT:
         for d in duong:
-            for lenh, mong in (("agent-creds-set --new", "deny"), ("secrets-set --gws", "deny"),
-                               ("secrets-keygen", "allow")):
+            for lenh, mong in (("agent-creds-set --new", "deny"), ("agent-creds-exec --claude -- x", "deny"),
+                               ("secrets-set --gws", "deny"), ("secrets-keygen", "allow")):
                 c = 'python "%s" %s' % (d, lenh)
                 if hoi(g, c, a)[0] != mong:
                     xau.append("%s: %s" % (a, c))
-    return (not xau, "2 agent x 4 cach viet x 3 lenh -> dung %d/24" % (24 - len(xau))
+    return (not xau, "2 agent x 4 cach viet x 4 lenh -> dung %d/32" % (32 - len(xau))
                      + ("; SAI: %s" % xau if xau else ""))
 
 

@@ -30,7 +30,9 @@ def bind(tl_module) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="tl", description="CLI hợp nhất tra-luat (webapp target 2.21.2i)")
+    # WP1038 (review F01, chủ kho duyệt): KHÔNG nhận cờ gốc viết tắt (`--det`/`--tim`) — guard PreToolUse không biết
+    # dạng viết tắt nên coi nó là cờ ăn giá trị, nuốt luôn TÊN LỆNH ⇒ subagent chạy được lệnh ghi; nay `tl` tự từ chối rc 2.
+    ap = argparse.ArgumentParser(prog="tl", description="CLI hợp nhất tra-luat (webapp target 2.21.2i)", allow_abbrev=False)
     # F (v1.33.6 — log rà: `tl --version` in usage-error thay vì version): flag chuẩn, nguồn = hằng VERSION.
     ap.add_argument("--version", action="version",
                     version=f"tl {VERSION} (webapp target {globals().get('EXPECT_VERSION', '2.21.2i')})")

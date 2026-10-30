@@ -21834,16 +21834,18 @@ def run() -> int:
                 and c["bien"] == {"CLAUDE_CODE_OAUTH_TOKEN": _h1000(_S1000["claude_oauth_token"])})
     _t110("r1000_exec_chi_dat_khoa_duoc_yeu_cau", lambda: _con1000(_c1000_a2))
 
-    # nhánh fail-close: tải lỗi · thiếu khoá gốc · khoá sai · schema 2 · thiếu khoá yêu cầu · khoá rỗng
+    # nhánh fail-close: tải lỗi · thiếu khoá gốc · khoá sai · schema 2/true · thiếu khoá Claude/Gemini · khoá rỗng
     _HONG1000 = (("tai_loi", {}, {}), ("thieu_master", {"TL_MASTER_KEY": None}, None),
                  ("khoa_sai", {}, {"AC1000": _blob1000(k="khoa-KHAC-" + _K1000)}),
                  ("schema_2", {}, {"AC1000": _blob1000({"schema": 2, **_S1000})}),
+                 ("schema_true", {}, {"AC1000": _blob1000({"schema": True, **_S1000})}),   # review F02: True == 1
+                 ("thieu_gemini", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "SENT1000-claude"})}),
                  ("thieu_khoa", {}, {"AC1000": _blob1000({"schema": 1, "antigravity_api_key": "SENT1000-gemini"})}),
                  ("khoa_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "  ", **{
                      "antigravity_api_key": "SENT1000-gemini"}})}))
 
     def _nhanh1000():
-        """MỌI nhánh fail-close + rc 127, mỗi nhánh ĐẾM con riêng ⇒ [(tên, rc, số lần chạy con, output)]."""
+        """MỌI nhánh fail-close + rc 127 + rc 126, mỗi nhánh ĐẾM con riêng ⇒ [(tên, rc, số lần chạy con, output)]."""
         kq = []
         for ten, env, drv in _HONG1000:
             n = []
@@ -21853,11 +21855,15 @@ def run() -> int:
         n = []
         rc, out, _ = _exec1000(["--claude", "--", "khong-co-1000"], which=lambda x: None,
                                run=lambda *a, **k: n.append(1) or _sp1000.CompletedProcess(a, 0))
-        return kq + [("rc127", rc, len(n), out)]
+        def _os_loi(*a, **k):
+            raise OSError("exec1000")
+        rc2, out2, _ = _exec1000(["--claude", "--gemini", "--", "con1000"], which=lambda x: "/con1000", run=_os_loi)
+        return kq + [("rc127", rc, len(n), out), ("rc126", rc2, 0, out2)]
 
     def _c1000_a3():
         kq = _nhanh1000()
-        return len(kq) == 7 and all(rc == 4 and n == 0 for _, rc, n, _ in kq[:6]) and kq[6][1:3] == (127, 0)
+        return (len(kq) == 10 and all(rc == 4 and n == 0 for _, rc, n, _ in kq[:8])
+                and kq[8][1:3] == (127, 0) and kq[9][1] == 126)
     _t110("r1000_exec_fail_close", _c1000_a3)
 
     def _c1000_a4(d, chay):
@@ -21866,7 +21872,7 @@ def run() -> int:
 
     def _c1000_a5(d, chay):
         outs = [chay(["--claude", "--gemini"])[1]] + [x[3] for x in _nhanh1000()]
-        return len(outs) == 8 and all(s not in o for s in _S1000.values() for o in outs)
+        return len(outs) == 11 and all(s not in o for s in _S1000.values() for o in outs)
     _t110("r1000_exec_khong_in_gia_tri", lambda: _con1000(_c1000_a5))
 
     def _c1000_a6():
@@ -21958,6 +21964,21 @@ def run() -> int:
             return e.code == 0 and "--claude" in b.getvalue() and "--gemini" in b.getvalue()
         return False
     _t110("r1000_parser_agent_creds_exec_help", _c1000_c1)
+
+    def _c1000_viet_tat():
+        # review F01: cờ gốc viết tắt nuốt tên lệnh ở guard ⇒ `tl` phải TỰ từ chối (rc 2); dạng đầy đủ vẫn nhận
+        ap, ra = _tlm973.build_parser(), []
+        for v in (["--det", "agent-creds-exec", "--claude", "--", "x"], ["--tim", "recat", "x"],
+                  ["--prof=vbqppl", "agent-creds-set", "--new"], ["--conf", "c.json", "agent-creds-exec", "--gemini", "--", "x"]):
+            try:
+                with _ctx110.redirect_stderr(_io110.StringIO()):
+                    ap.parse_args(v)
+                ra.append(None)
+            except SystemExit as e:
+                ra.append(e.code)
+        du = ap.parse_args(["--deterministic", "--profile", "vbqppl", "agent-creds-exec", "--claude", "--", "x"])
+        return ra == [2, 2, 2, 2] and (du.cmd, du.deterministic, du.lenh) == ("agent-creds-exec", True, ["--", "x"])
+    _t110("r1000_tl_tu_choi_co_goc_viet_tat", _c1000_viet_tat)
 
     def _c1000_c2():
         # (a) main() in-process, `load_creds` (tên tra ở tl) = đồ giả đếm rồi ném

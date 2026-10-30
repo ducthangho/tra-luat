@@ -1282,7 +1282,7 @@ def cmd_agent_creds_exec(a) -> int:
         return 4
     try:
         p = json.loads(_G("_imp")("gws_cred_store").decrypt(blob, master).decode("utf-8"))
-        if not isinstance(p, dict) or p.get("schema") != 1:
+        if not isinstance(p, dict) or type(p.get("schema")) is not int or p["schema"] != 1:   # review F02: True == 1
             raise ValueError("schema")
     except Exception as e:  # noqa: BLE001
         print(f"[{tag}] ✗ giải mã/định dạng lỗi ({_safe_exc(e)}) — sai TL_MASTER_KEY? Không chạy tiến trình con.",

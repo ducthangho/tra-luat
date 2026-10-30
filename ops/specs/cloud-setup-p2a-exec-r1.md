@@ -84,7 +84,7 @@ Mỗi dòng chiếu vào đúng một đường dẫn ở `write_set` (L2).
    - không in giá trị credential ở bất kỳ nhánh nào; dòng chẩn đoán (stderr) chỉ nêu TÊN biến đã đặt.
 2. `scripts/tl_core/cli.py` — parser `agent-creds-exec` với `--claude`, `--gemini` và phần lệnh còn lại sau `--`.
 3. `scripts/tl_gws.py` — ghi fileId thật của `tl_agent_creds.enc` (từ bước LIVE) vào hằng `AGENT_CREDS_FILEID`. Giá trị:
-   **ĐIỀN LÚC ĐÓNG BĂNG**.
+   **`1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ`** (tạo ở bước LIVE 5, 30-10-2026 ~15:5xZ).
 4. `scripts/tl.py` — thêm `agent-creds-exec` vào `_CREDS_LAZY_CMDS` (lệnh không cần config webapp). Không đổi lệnh nào khác.
 5. `scripts/tl_core/command_registry.py` — metadata cho `agent-creds-exec` theo khuôn dòng `agent-creds-set`; lệnh chạy một
    tiến trình tuỳ ý mang credential ⇒ `read_only=False`, có gate nếu `validate_registry` đòi (không thì `WRITE_CMD_NO_GATE`).
@@ -125,7 +125,7 @@ trống và ghi handoff). Mỗi ca kèm đột biến đổi màu (L3), chạy t
 | A9 | 1 | `r1000_exec_env_thang_hang`: `TL_AGENT_CREDS_FILEID` đặt ⇒ đồ giả tải nhận đúng id của biến dù hằng khác rỗng | đảo thứ tự ⇒ ĐỎ |
 | A10 | 1 | `r1000_exec_tai_moi_lan`: hai lần gọi liên tiếp ⇒ đồ giả tải đếm **2** | thêm bộ đệm (lần hai không tải) ⇒ ĐỎ |
 | A11 | 1 | `r1000_exec_khong_ghi_dia`: trong suốt lời gọi (in-process, tiến trình con thay bằng đồ giả ghi nhận env), mọi lời gọi `builtins.open`/`io.open` ở chế độ ghi hoặc nối, `os.open` có cờ `O_WRONLY`/`O_RDWR`/`O_CREAT`, và `tempfile.mkstemp`/`NamedTemporaryFile`/`TemporaryFile`/`mkdtemp` được bọc bằng đồ giả ĐẾM lời gọi (vẫn chuyển tiếp) ⇒ tổng **0** lời gọi ghi; thêm vế sentinel: không tệp nào dưới HOME tạm, cwd tạm, `tempfile.gettempdir()` tạm (đặt `TMPDIR`/`TEMP`/`TMP` vào thư mục tạm của ca) chứa byte sentinel của khoá sau lời gọi. Phép đếm lời gọi bắt cả tệp tạm bị xoá trước lúc kiểm | đột biến ghi bản giải mã bằng `tempfile.NamedTemporaryFile(delete=True)` rồi đọc lại ⇒ ĐỎ (đếm 1); đột biến ghi bản mã hoá ra cwd ⇒ ĐỎ |
-| B1 | 3 | `AGENT_CREDS_FILEID` khác rỗng và bằng đúng giá trị LIVE ghi ở Issue #1038 (khớp nguyên chuỗi; vế âm: trên base `757bde56` hằng rỗng) | để rỗng ⇒ ĐỎ |
+| B1 | 3 | `AGENT_CREDS_FILEID` khác rỗng và bằng đúng `1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ` (khớp nguyên chuỗi; vế âm: trên base `757bde56` hằng rỗng) | để rỗng ⇒ ĐỎ |
 | C1 | 2 | `tl agent-creds-exec --help` rc 0, chứa `--claude` và `--gemini` (vế âm: base chưa có lệnh) | xoá `add_parser("agent-creds-exec"…)` ⇒ ĐỎ |
 | C2 | 4 | `r1000_exec_khong_goi_load_creds` — HAI vế, cả hai bắt buộc. **(a) Phép đo chính, không phụ thuộc máy:** gọi `main()` của `tl` in-process với `argv` `agent-creds-exec --claude -- <con>`, `load_creds` (tên tra ở `tl`) thay bằng đồ giả ĐẾM lời gọi rồi ném lỗi riêng ⇒ đồ giả đếm **0** lời gọi và rc 4 với thông báo của lệnh. **(b) CLI thật trong bản sao tạm:** chép `scripts/` sang thư mục tạm, cwd tạm, HOME tạm, không `TL_WEBAPP`/`TL_TOKEN`/`TL_MASTER_KEY`; TIỀN ĐIỀU KIỆN đo trực tiếp: mọi đường của `profile_env._config_candidates()` (cwd · gốc skill · `scripts/` · `~/.tra_luat_config.json` · `/tmp/tra_luat_config.json`, `scripts/tl_core/profile_env.py:58-69`) đều không tồn tại — có đường nào tồn tại (vd `/tmp/tra_luat_config.json` trên máy dev) thì vế (b) ĐỎ với thông báo nêu đường ấy, KHÔNG được tha hay bỏ qua; đạt tiền điều kiện ⇒ rc 4 với thông báo của lệnh, không phải thông báo thiếu credential webapp | bỏ lệnh khỏi `_CREDS_LAZY_CMDS` ⇒ ĐỎ ở vế (a) (đồ giả đếm 1) bất kể máy có config hay không |
 | H1 | 5 | `python scripts/tl.py workflow-audit --strict --json` rc 0, `registry.issues == []` | xoá metadata lệnh ⇒ ĐỎ (`UNREGISTERED_PARSER_CMD`) |
@@ -154,16 +154,27 @@ selftest ~150, changelog ~8, manifest ~20 ⇒ **khoảng 300 dòng thêm trên 1
 
 1. ✅ `git pull --ff-only` kho trên laptop → `757bde5` (30-10 ~09:10Z).
 2. ✅ `tl secrets-keygen` → `C:\Users\admin\tl-work\tl_master_key_new.txt`, ACL chỉ `ASUS-LAPTOP\admin`; 43 ký tự / 31 khác nhau.
-3. ☐ Mã hoá lại `tl_secrets.enc` bằng khoá mới: `secrets-stage` (KHÔNG phải `secrets-set` — `secrets-set` giải mã và mã hoá
+3. ✅ Mã hoá lại `tl_secrets.enc` bằng khoá mới: `secrets-stage` (KHÔNG phải `secrets-set` — `secrets-set` giải mã và mã hoá
    bằng cùng một khoá, `scripts/tl_gws.py:991-1035`), ghi đè tại chỗ `SECRETS_FILEID`. Trước đó kiểm (chỉ đọc) bundle trên
    Drive không có khoá nào mà config laptop thiếu.
-4. ☐ Chủ kho đặt `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) và `GEMINI_API_KEY` vào biến User trên laptop.
-5. ☐ `tl agent-creds-set --new --codex --claude-token-env --antigravity-key-env` → fileId `F` (lệnh chỉ IN fileId, không lưu
+4. ✅ Chủ kho đặt `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) và `GEMINI_API_KEY` vào biến User trên laptop.
+5. ✅ `tl agent-creds-set --new --codex --claude-token-env --antigravity-key-env` → fileId `F` (lệnh chỉ IN fileId, không lưu
    vào đâu — `scripts/tl_gws.py:1213`); bật anyone-with-link cho `F`; rồi kiểm bằng một tiến trình MỚI đặt
    `TL_AGENT_CREDS_FILEID=F` (chỉ trong tiến trình đó) và `TL_MASTER_KEY` mới: `bootstrap` ⇒ `agent_creds: ĐÃ NẠP` và
    `rev=1`. Không dựa vào hằng `AGENT_CREDS_FILEID` (còn rỗng tới lúc thi hành) hay vào một `TL_AGENT_CREDS_FILEID` có
    sẵn trong môi trường (có thể trỏ bundle cũ). `F` điền vào mục tiêu 3 và tiêu chí B1.
 6. ☐ Cập nhật `TL_MASTER_KEY` (biến User laptop; chủ kho dán vào Claude Code web và Codex cloud).
+
+Kết quả LIVE (đo 30-10-2026 trên laptop chủ kho qua Desktop Commander; giá trị credential không in ra):
+- Bước 3: backup bundle cũ `C:\Users\admin\tl-work\tl_secrets.enc.backup-20261030-220452` (37256 B, sha256 `2F023F6B…`) cùng khoá cũ ở
+  tệp riêng; lần chạy đầu `secrets-stage` TỪ CHỐI (canary NLM `AUTH_EXPIRED`, rc 4, 0 upload) — chủ kho `nlm login` lại; lần hai rc 0,
+  `LIVE_OK`, ghi đè tại chỗ `SECRETS_FILEID` (62249 B, sha256 `b5cde989…`). Kiểm: khoá MỚI giải mã được (có `profiles`, 4 profile,
+  `defaultProfile` vbqppl); khoá CŨ ⇒ `ValueError`.
+- Bước 4: `CLAUDE_CODE_OAUTH_TOKEN` 108 ký tự tiền tố `sk-ant-`; `GEMINI_API_KEY` 53 ký tự (định dạng mới, không `AIza`), gọi
+  `v1beta/models` ⇒ HTTP 200.
+- Bước 5: `agent-creds-set --new` ⇒ `1I0-p-FKSy3255OUNv7xkhRACy3k1zqWQ`, `rev=1`, 4725 B, thay ba khoá; quyền `anyone`/`reader`,
+  `allowFileDiscovery: false`; `_bootstrap_agent_creds` với `TL_AGENT_CREDS_FILEID` = id ấy ⇒ `ĐÃ NẠP — rev=1`, giữ `auth.json` trên đĩa
+  (băm trước = sau). Kiểm bằng HÀM nạp của `bootstrap` chứ không chạy `bootstrap` đầy đủ: lệnh đầy đủ ghi đè config và gws cred của laptop.
 
 ## `hinh_dang_ke_thua`
 

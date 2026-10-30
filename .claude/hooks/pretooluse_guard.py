@@ -528,6 +528,31 @@ def _tach_lenh_tl(doi, kich):
     return ra
 
 
+# WP1038 (review F03, chu kho duyet): shlex KHONG mo rong nhu Bash — `$'recat'`, `${X:-recat}`, `re$(printf cat)`
+# den tay hook van mang `$` nen khong trung bang writer, trong khi Bash dua `recat` that cho tl. DANH SACH CHO PHEP
+# ky tu (khong liet ke cach viet): moi token tu sau kich ban toi het TEN LENH (co global + gia tri + ten lenh, them
+# ten con neu la lenh LONG) phai nam trong tap nay; ngoai tap => coi nhu ten lenh KHONG DOC DUOC => deny.
+_RE_TL_VUNG_TEN_AN_TOAN = re.compile(r"[A-Za-z0-9._/\\:=+@ -]*\Z")
+
+
+def _vung_ten_lenh_tl(doi, kich):
+    """Token tu sau `tl.py` toi het ten lenh, theo dung luat tieu co cua `_tach_lenh_tl`."""
+    cha_long = {x.split()[0] for x in _TL_LENH_GHI_LONG}
+    k, ra, ten = doi.index(kich) + 1, [], []
+    while k < len(doi) and len(ten) < (2 if ten and ten[0] in cha_long else 1):
+        a = doi[k]
+        if a.startswith("-") and a != "--":
+            an = not ("=" in a or a in _TL_CO_GLOBAL_CO_DON)
+            ra += doi[k:k + 2] if an else [a]
+            k += 2 if an else 1
+            continue
+        ra.append(a)
+        if a != "--":
+            ten.append(a)
+        k += 1
+    return ra
+
+
 # P1 `python-allowlist-lstrip-khong-phai-exact-path` (cross-review luot 2, PR #341).
 # Ban luot 2 so bang `kich.lstrip("./")`. `str.lstrip` bo MOI ky tu trong tap, khong phai
 # mot TIEN TO — nen `../../scripts/tl.py` co ve dung `scripts/tl.py` va lot vao danh sach
@@ -570,6 +595,11 @@ def _kiem_python(doi):
     # WP1009 F14: nhan dien tl.py tren duong dan DA CHUAN HOA (cung thu ma allowlist vua duyet) —
     # so tren `kich` goc thi `"scripts\tl.py"` qua allowlist ma bo qua ca bang writer ben duoi.
     if chuan.rsplit("/", 1)[-1] == "tl.py":
+        # `$( )`/backtick da bi `_boc_thay_the` doi thanh chu `THAYTHE` (toan chu cai) — o vung ten lenh no la
+        # gia tri DO SHELL TINH RA, nen cung tinh la khong doc duoc.
+        la = [a for a in _vung_ten_lenh_tl(doi, kich) if not _RE_TL_VUNG_TEN_AN_TOAN.match(a) or "THAYTHE" in a]
+        if la:
+            return "ten lenh tl qua mo rong shell (ky tu ngoai danh sach cho phep): %s" % la[0]
         lenh = _tach_lenh_tl(doi, kich)
         if lenh and (lenh[0] in _TL_LENH_GHI
                      or " ".join(lenh[:2]) in _TL_LENH_GHI_LONG):

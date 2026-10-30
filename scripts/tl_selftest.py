@@ -21781,12 +21781,10 @@ def run() -> int:
     _CON1000 = ("import hashlib, json, os, sys\n"
                 "json.dump({'bien': {b: hashlib.sha256(os.environ[b].encode()).hexdigest() for b in %r if b in os.environ},"
                 " 'argv': sys.argv[3:]}, open(sys.argv[1], 'w'))\nsys.exit(int(sys.argv[2]))\n" % (_V1000,))
+    _h1000 = lambda s: _hl1000.sha256(s.encode()).hexdigest()   # noqa: E731
 
     def _blob1000(p=None, k=_K1000):
         return _st973.encrypt(json.dumps({"schema": 1, "rev": 1, **_S1000} if p is None else p).encode(), k)
-
-    def _h1000(s):
-        return _hl1000.sha256(s.encode()).hexdigest()
 
     def _exec1000(argv, env=None, drv=None, which=None, run=None, fid_hang=None, xem=None):
         """agent-creds-exec THẬT (parser thật + handler) in-process ⇒ (rc, stdout+stderr, [fileId đã tải]);
@@ -21813,8 +21811,7 @@ def run() -> int:
     def _con1000(fn):
         """fn(d, chay) — chay(cờ, rc_con, *đối số) chạy con THẬT `sys.executable con.py out rc …` ⇒ (rc, out, kq con)."""
         with _tf110.TemporaryDirectory() as d:
-            # KHÔNG đặt tên `con.py`: CON là tên thiết bị dành riêng của Windows — ghi vào console, con đọc script từ
-            # console và TREO (đo 30-10-2026 trên tra-luat-win, Python 3.12, faulthandler dừng ở subprocess wait)
+            # KHÔNG đặt `con.py`: CON là tên thiết bị Windows ⇒ con đọc script từ console và TREO (đo 30-10, tra-luat-win)
             con, ra = _P110(d, "tien_trinh_con.py"), _P110(d, "ra.json")
             con.write_text(_CON1000, encoding="utf-8")
             def chay(co, rc_con=0, *doi, **kw):
@@ -21843,8 +21840,8 @@ def run() -> int:
                  ("schema_true", {}, {"AC1000": _blob1000({"schema": True, **_S1000})}),   # review F02: True == 1
                  ("thieu_gemini", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "SENT1000-claude"})}),
                  ("thieu_khoa", {}, {"AC1000": _blob1000({"schema": 1, "antigravity_api_key": "SENT1000-gemini"})}),
-                 ("khoa_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": "  ", **{
-                     "antigravity_api_key": "SENT1000-gemini"}})}))
+                 ("khoa_rong", {}, {"AC1000": _blob1000({"schema": 1, "claude_oauth_token": " ",
+                                                         "antigravity_api_key": "SENT1000-gemini"})}))
 
     def _nhanh1000():
         """MỌI nhánh fail-close + rc 127 + rc 126, mỗi nhánh ĐẾM con riêng ⇒ [(tên, rc, số lần chạy con, output)]."""

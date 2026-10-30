@@ -92,10 +92,19 @@ def _chon_bien_nhan(tm: Path) -> list:
     của NỀN — Windows không phân biệt, POSIX có — nên cùng một cây hai nền đếm hai tập biên nhận: tệp
     `X.RECEIPT.YAML` bị cổng bỏ qua LẶNG trên Linux mà bị kiểm trên Windows. Cùng chiều với
     `_liet_ke_theo_duoi` của `t27` (#1006). KHÔNG lọc `is_file()`: thư mục mang tên `*.receipt.yaml`
-    phải tới được phép băm để ra rc=2 (`c89`). Thư mục vắng ⇒ rỗng, như `glob` cũ."""
+    phải tới được phép băm để ra rc=2 (`c89`). Thư mục vắng ⇒ rỗng, như `glob` cũ.
+
+    Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê
+    (⇒ danh sách rỗng ⇒ `KhongDoDuoc` "không có tệp"), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng ra
+    rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG
+    trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình)."""
     if not tm.is_dir():
         return []
-    return sorted(p for p in tm.iterdir() if p.name.lower().endswith(".receipt.yaml"))
+    try:
+        ds = [p for p in tm.iterdir() if p.name.lower().endswith(".receipt.yaml")]
+    except OSError as ex:
+        raise KhongDoDuoc(f"không liệt kê được {tm} ({type(ex).__name__}: {ex})") from ex
+    return sorted(ds)
 
 # --- Lược đồ v2 tối thiểu, chép theo `PROTOCOL §8` dòng 453-454 -------------------------
 # "Đích v2 tối thiểu có `schema_version: 2`, receipt ID, `reviewed_sha`, verdict path/hash,

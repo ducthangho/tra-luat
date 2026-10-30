@@ -3643,6 +3643,8 @@ def c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
             try:
                 with contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
                     rc = bnv2.main(["--root", str(tmp)])
+            except LoiDungCa:
+                raise                     # giàn giáo hỏng KHÔNG được đội lốt "ca đỏ" (quan sát RIG, Codex lượt 1)
             except Exception as ex:                               # noqa: BLE001
                 bang(False, f"{sorted(tep)}: CLI chết bằng {type(ex).__name__}: {ex}")
             tong = tong_re.findall(ra.getvalue())
@@ -3657,6 +3659,87 @@ def c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
     rc, ra, loi, tong = chay({"y.receipt.yaml": "a: 1\n", "x.RECEIPT.YAML": "b: [\n"})
     bang(rc == 2 and "x.RECEIPT.YAML" in loi and "Traceback" not in ra + loi,
          f"C1b: đòi rc=2 nêu x.RECEIPT.YAML, không traceback; được rc={rc}: {loi[-300:]!r}")
+
+
+@ca
+def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE():
+    """#1021, cross-review Codex lượt 1 (`bo-chon-ung-vien-thieu-rang-hai-duong-goi`, P2): ba đột biến phá bộ
+    chọn vẫn qua toàn suite vì `c98` chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng (m144–m147):
+    1. `--sinh-no` THẤY `X.RECEIPT.YAML` (rc=0, khối nợ nêu tên, `# 1 tệp`) — m144 lọc đuôi chính xác ở `_sinh_no`.
+    2. Thứ tự: `iterdir` bị ép trả NGƯỢC mà helper vẫn trả đã sắp xếp — m145 bỏ `sorted`. Tên toàn chữ thường nên
+       thứ tự `Path` giống nhau trên mọi nền (không so hai tên chỉ khác hoa thường).
+    3. Kho thật thiếu `ops/reviews`: `kiem` rc=2 (guard riêng), `--sinh-no` rc=0 + `# 0 tệp` — m146 bỏ nhánh thư mục
+       vắng của helper (khi ấy `--sinh-no` ra rc=2 vì lỗi liệt kê).
+    4. Liệt kê ném `PermissionError` ⇒ cả `kiem` lẫn `--sinh-no` rc=2 nêu "không liệt kê được", không traceback —
+       m147 bỏ phép bắt `OSError` (hồi quy `loi-do-liet-ke-thu-muc-thoat-traceback` mà Codex đo được)."""
+    import contextlib
+    import io
+
+    def cli(tmp, *co):
+        ra, loi = io.StringIO(), io.StringIO()
+        try:
+            with contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
+                rc = bnv2.main(["--root", str(tmp), *co])
+        except LoiDungCa:
+            raise
+        except Exception as ex:                                   # noqa: BLE001
+            bang(False, f"{list(co)}: CLI chết bằng {type(ex).__name__}: {ex} — đòi mã thoát, không traceback")
+        return rc, ra.getvalue(), loi.getvalue()
+
+    goc = Path.iterdir
+    # (1) --sinh-no thấy đuôi hoa
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        _ghi_bn_cau(tmp, k, {"x.RECEIPT.YAML": "b: 2\n"})
+        rc, ra, loi = cli(tmp, "--sinh-no")
+        bang(rc == 0 and '"x.RECEIPT.YAML"' in ra and "# 1 tệp" in loi,
+             f"sinh-no: đòi rc=0, khối nợ nêu x.RECEIPT.YAML, `# 1 tệp`; được rc={rc}: {(ra + loi)[-300:]!r}")
+    # (2) thứ tự: ép iterdir trả ngược
+    with tempfile.TemporaryDirectory() as t:
+        tm = Path(t) / "r"
+        tm.mkdir()
+        ten = ["a.receipt.yaml", "m.receipt.yaml", "z.receipt.yaml"]
+        for x in ten:
+            (tm / x).write_bytes(b"a: 1\n")
+
+        def nguoc(self):
+            return iter(sorted(goc(self), reverse=True))
+        Path.iterdir = nguoc
+        try:
+            dung([p.name for p in tm.iterdir()] == ten[::-1], "fixture: iterdir ngược không có hiệu lực")
+            ds = [p.name for p in bnv2._chon_bien_nhan(tm)]
+        finally:
+            Path.iterdir = goc
+        bang(ds == ten, f"thứ tự: đòi {ten} khi iterdir trả ngược, được {ds}")
+    # (3) kho thật thiếu ops/reviews
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        _kho_cau(tmp)
+        dung(not (tmp / bnv2.THU_MUC).exists(), "fixture: ops/reviews không được tồn tại")
+        rc, ra, loi = cli(tmp)
+        bang(rc == 2 and "không có" in loi, f"vắng/kiem: đòi rc=2 'kho thật mà không có'; được rc={rc}: {loi[-300:]!r}")
+        rc, ra, loi = cli(tmp, "--sinh-no")
+        bang(rc == 0 and "# 0 tệp" in loi, f"vắng/sinh-no: đòi rc=0 `# 0 tệp`; được rc={rc}: {loi[-300:]!r}")
+    # (4) lỗi liệt kê
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        _ghi_bn_cau(tmp, k, {"y.receipt.yaml": "a: 1\n"})
+        dich = (tmp / bnv2.THU_MUC).resolve()
+
+        def hong(self):
+            if Path(self).resolve() == dich:
+                raise PermissionError(13, "Permission denied (tiêm, #1021)", str(self))
+            return goc(self)
+        for co in ((), ("--sinh-no",)):
+            Path.iterdir = hong
+            try:
+                rc, ra, loi = cli(tmp, *co)
+            finally:
+                Path.iterdir = goc
+            bang(rc == 2 and "không liệt kê được" in loi and "Traceback" not in ra + loi,
+                 f"liệt kê hỏng {list(co)}: đòi rc=2 'không liệt kê được'; được rc={rc}: {loi[-300:]!r}")
 
 
 def _chay_1(fn):
@@ -4465,11 +4548,26 @@ def _dot_bien():
     # (glob Windows vốn không phân biệt hoa thường) nên sẽ SỐNG trên Windows và làm cổng Windows đỏ —
     # đo một lần trên bản sao tạm, ghi ở PR (spec r2 C3).
     do("m142_chon_bien_nhan_so_duoi_CHINH_XAC", lambda: _dot_bien_tep(
-        'if p.name.lower().endswith(".receipt.yaml"))', 'if p.name.endswith(".receipt.yaml"))'),
+        'if p.name.lower().endswith(".receipt.yaml")]', 'if p.name.endswith(".receipt.yaml")]'),
        "c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen", "đuôi hoa lại bị bỏ qua lặng", doi_chung=DC)
     do("m143_chon_bien_nhan_loc_is_file", lambda: _dot_bien_tep(
-        "return sorted(p for p in tm.iterdir() if p.name", "return sorted(p for p in tm.iterdir() if p.is_file() and p.name"),
+        "ds = [p for p in tm.iterdir() if p.name", "ds = [p for p in tm.iterdir() if p.is_file() and p.name"),
        "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback", "thư mục `*.receipt.yaml` trốn khỏi phép băm", doi_chung=DC)
+    # Codex lượt 1 (#1021): ba đột biến từng SỐNG qua toàn suite + hồi quy lỗi liệt kê — mỗi cái một chốt của `c99`.
+    C99 = "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE"
+    do("m144_sinh_no_loc_duoi_CHINH_XAC", lambda: _dot_bien_tep(
+        "    for p in _chon_bien_nhan(tm):\n        if p.name in ALLOWLIST_CUTOVER:",
+        "    for p in _chon_bien_nhan(tm):\n        if not p.name.endswith(\".receipt.yaml\") or p.name in ALLOWLIST_CUTOVER:"),
+       C99, "`--sinh-no` bỏ qua đuôi hoa (đường gọi thứ hai)", doi_chung=DC)
+    do("m145_bo_chon_khong_sap_xep", lambda: _dot_bien_tep("    return sorted(ds)\n", "    return ds\n"),
+       C99, "thứ tự duyệt theo hệ tệp, không sắp xếp", doi_chung=DC)
+    do("m146_bo_chon_bo_nhanh_thu_muc_vang", lambda: _dot_bien_tep(
+        "    if not tm.is_dir():\n        return []\n    try:", "    try:"),
+       C99, "`--sinh-no` trên kho thiếu ops/reviews thành lỗi đo", doi_chung=DC)
+    do("m147_bo_chon_bo_bat_OSError", lambda: _dot_bien_tep(
+        "    except OSError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được",
+        "    except ZeroDivisionError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được"),
+       C99, "lỗi liệt kê thoát thành traceback (Codex lượt 1)", doi_chung=DC)
     return ra
 
 

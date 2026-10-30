@@ -84,8 +84,8 @@ thay_the_cho_ghi_chu: 'r4 g1 CON HAN toi 2026-11-01T07:12:00Z luc cap r5 g1 => K
 leased_at_utc: '2026-10-30T08:28:00Z'
 heartbeat_at: '2026-10-30T08:28:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
-lease_until: '2026-11-01T07:12:00Z'
-lease_expires_at_utc: '2026-11-01T07:12:00Z'
+lease_until: '2026-10-30T17:19:00Z'
+lease_expires_at_utc: '2026-10-30T17:19:00Z'
 run_minutes: 90
 heartbeat_minutes: 30
 attempts_used: 1
@@ -102,3 +102,11 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1030-g1-claude MOT lan khi A1-A8 dat (hoac khai chua_do_duoc) va review approve; mo PR draft vao master'
+rut_han:
+  han_cu: '2026-11-01T07:12:00Z'
+  han_moi: '2026-10-30T17:19:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet wp1030 da merge: PR #1046 (head 79017438cccaf77cd41e8126633943075b7b9200, merge 8cdb15a786304bab084b43c8b30c127ae87e2594, 2026-10-30T17:00:32Z, merged_by ducthangho).'
+  vi_sao_khong_bia_mo: 'lease nay DA mang bia mo da_bi_thay_the; rut han cung luot voi r6 g1 de so lease sach (yeu cau cua phien dieu phoi P2a #1038)'
+  han_moi_ghi_chu: 'han_moi dat sau thoi diem rut khoang 12 phut de workflow dang lease con thay lease song (tranh rc=8 che rc=9, bai hoc CLAUDE.md); tien le wp1009 rut ve +9 phut.'
+  ghi_boi: 'claude-session session_015GtxrbRnRANivtXrA1edLB (phien dieu phoi wp1030) theo chi thi chu kho trong phien: "Rut han ngay" (30-10-2026), sau yeu cau tu phien dieu phoi P2a session_015GtxraXfMD1t2FJLzzGDr4'

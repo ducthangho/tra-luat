@@ -1554,7 +1554,7 @@ def _doi_thu_muc_reviews():
 
 
 def _tach_o(dong: str) -> list:
-    """Tách một dòng bảng thành ô theo `|` KHÔNG thoát, rồi trả `\|` về `|` (GFM §4.10, ví dụ 200).
+    r"""Tách một dòng bảng thành ô theo `|` KHÔNG thoát, rồi trả `\|` về `|` (GFM §4.10, ví dụ 200).
 
     Vì sao (cross-review #1051 lượt 4, P2): `split("|")` coi `\|` là ranh giới cột, nên chữ trong ô
     `tệp verdict` tràn sang cột `biên nhận`/`id` và thoả cho cột ấy dù cột thật ghi tên khác."""
@@ -1670,7 +1670,7 @@ def _liet_ke_theo_duoi(thu_muc: Path, duoi: str) -> list:
 
 
 def _ten_tep(o: str) -> set:
-    """Rút TÊN TỆP trong một ô, để so BẰNG NHAU thay vì so chuỗi con.
+    r"""Rút TÊN TỆP trong một ô, để so BẰNG NHAU thay vì so chuỗi con.
 
     Vì sao: `foo-verdict.md` là chuỗi con của `old-foo-verdict.md`, nên một hàng mục lục
     của tệp NÀY thoả luôn cho tệp KIA. Hai tên chồng nhau là đủ để một verdict không có
@@ -2198,26 +2198,27 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
         phai_do(bn, hang_ml=r"| `x-verdict.md` \| x-verdict.receipt.yaml | khac.receipt.yaml |")
         phai_do(cb, hang_cb=r"| `x-verdict.md` \| C1 | C2 |")
 
-        # Verdict ở THƯ MỤC CON (mục lục thật: 22 hàng): danh tính trong Mục lục là ĐƯỜNG DẪN `con/y-verdict.md`
+        # Thư mục con KHÔNG tên `con`: đó là tên thiết bị dành riêng của Windows (`mkdir` ném WinError 267).
+        # Verdict ở THƯ MỤC CON (mục lục thật: 22 hàng): danh tính trong Mục lục là ĐƯỜNG DẪN `ho-so/y-verdict.md`
         # — hàng chỉ ghi basename trỏ một tệp KHÁC (ở gốc) nên ĐỎ; bảng cảnh báo viết basename vẫn XANH.
-        (tm / "con").mkdir()
-        (tm / "con" / "y-verdict.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "ho-so").mkdir()
+        (tm / "ho-so" / "y-verdict.md").write_text("verdict\n", encoding="utf-8")
         (tm / "y.receipt.yaml").write_text(
-            "verdict_path: ops/reviews/con/y-verdict.md\nverdict_usage_caveats:\n  - id: C9\n", encoding="utf-8")
+            "verdict_path: ops/reviews/ho-so/y-verdict.md\nverdict_usage_caveats:\n  - id: C9\n", encoding="utf-8")
         x_ml = "| `x-verdict.md` | `x-verdict.receipt.yaml` |"
         y_cb = "| `x-verdict.md` | `C1` |\n| `y-verdict.md` | `C9` |"
-        muc_luc(hang_cb=y_cb, hang_ml=x_ml + "\n| [`y-verdict.md`](con/y-verdict.md) | `y.receipt.yaml` |")
+        muc_luc(hang_cb=y_cb, hang_ml=x_ml + "\n| [`y-verdict.md`](ho-so/y-verdict.md) | `y.receipt.yaml` |")
         _kiem_muc_luc(tm, goc)
-        phai_do(("'con/y-verdict.md'", "CỘT 'tệp verdict'"), hang_cb=y_cb,
+        phai_do(("'ho-so/y-verdict.md'", "CỘT 'tệp verdict'"), hang_cb=y_cb,
                 hang_ml=x_ml + "\n| `y-verdict.md` | `y.receipt.yaml` |")
         # Có thêm verdict GỐC cùng basename ⇒ hàng cảnh báo basename là của verdict gốc, KHÔNG thoả caveat
-        # của `con/y-verdict.md`.
+        # của `ho-so/y-verdict.md`.
         (tm / "y-verdict.md").write_text("verdict goc\n", encoding="utf-8")
         (tm / "y-verdict.receipt.yaml").write_text("verdict_path: ops/reviews/y-verdict.md\n", encoding="utf-8")
-        y_ml = (x_ml + "\n| [`y-verdict.md`](con/y-verdict.md) | `y.receipt.yaml` |"
+        y_ml = (x_ml + "\n| [`y-verdict.md`](ho-so/y-verdict.md) | `y.receipt.yaml` |"
                 "\n| `y-verdict.md` | `y-verdict.receipt.yaml` |")
         phai_do(("'C9'", "CỘT 'id'"), hang_cb=y_cb, hang_ml=y_ml)
-        muc_luc(hang_cb=y_cb + "\n| [`y-verdict.md`](con/y-verdict.md) | `C9` |", hang_ml=y_ml)
+        muc_luc(hang_cb=y_cb + "\n| [`y-verdict.md`](ho-so/y-verdict.md) | `C9` |", hang_ml=y_ml)
         _kiem_muc_luc(tm, goc)
 
 

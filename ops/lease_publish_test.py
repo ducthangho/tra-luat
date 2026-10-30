@@ -1634,6 +1634,20 @@ def _cot_duy_nhat(van: str, tieu_de: str, ten_cot: str) -> str:
     return ten
 
 
+def _liet_ke_theo_duoi(thu_muc: Path, duoi: str) -> list:
+    """Liệt kê tệp con trực tiếp có đuôi `duoi`, so KHÔNG phân biệt hoa thường, trên MỌI nền.
+
+    Vì sao có (#1006, đo 29-10-2026, run 40812761896): `Path.glob("*-verdict.md")` phân
+    biệt hoa thường THEO NỀN — Windows không, POSIX có. `wp929-g1-codex-luot{1,2}-VERDICT.md`
+    (`8d3f655`) chỉ hiện trên Windows nên `t27` ĐỎ ở đó (253/254) mà XANH trên Linux:
+    một chốt chỉ đo được trên một nền là chốt MÙ ở nền kia. Tự so `name.lower()` để hai
+    nền thấy CÙNG một tập.
+    """
+    d = duoi.lower()
+    return sorted((p for p in thu_muc.iterdir() if p.is_file() and p.name.lower().endswith(d)),
+                  key=lambda p: p.name)
+
+
 def _ten_tep(o: str) -> set:
     """Rút TÊN TỆP trong một ô, để so BẰNG NHAU thay vì so chuỗi con.
 
@@ -1658,7 +1672,7 @@ def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
     import hashlib
     import yaml
     thu_muc = _doi_thu_muc_reviews()
-    ds = sorted(thu_muc.glob("*.receipt.yaml"))
+    ds = _liet_ke_theo_duoi(thu_muc, ".receipt.yaml")   # #1006: cùng tập trên mọi nền
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
     for p in ds:
         d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
@@ -1712,9 +1726,17 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
     thủng bằng đúng comment HTML** — vì nó chỉ thu hẹp PHẠM VI (dòng bảng) mà không đổi
     THỨ ĐEM SO (văn bản thô). Và tôi áp ý "soi trong bảng" cho caveat mà quên áp cho mục
     lục — cùng một khẳng định, hai vị trí, lần thứ tư trong đợt này.
+
+    LỖ THỨ BẢY (#1006): duyệt bằng `glob` thì tập tệp PHỤ THUỘC NỀN — xem
+    `_liet_ke_theo_duoi`. Thân kiểm tách ra `_kiem_muc_luc(thu_muc, goc)` để ca phản
+    chứng `t27_phan_chung_*` chạy được trên thư mục tạm.
     """
+    _kiem_muc_luc(_doi_thu_muc_reviews(), HERE.parent)
+
+
+def _kiem_muc_luc(thu_muc: Path, goc: Path):
+    """Thân của `t27`: `thu_muc` là thư mục verdict, `goc` là gốc kho để so `verdict_path`."""
     import yaml
-    thu_muc = _doi_thu_muc_reviews()
     muc_luc = thu_muc / "README.md"
     bang(muc_luc.is_file(),
          f"thiếu {muc_luc} — thư mục verdict không có cửa vào thì cảnh báo trong biên "
@@ -1735,8 +1757,8 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
         """Tên tệp phải BẰNG một tên trong ô của đúng cột — không phải chuỗi con."""
         return any(ten in _ten_tep(h.get(khoa, "")) for h in hang)
 
-    ds = sorted(thu_muc.glob("*.receipt.yaml"))
-    ds_verdict = sorted(thu_muc.glob("*-verdict.md"))
+    ds = _liet_ke_theo_duoi(thu_muc, ".receipt.yaml")
+    ds_verdict = _liet_ke_theo_duoi(thu_muc, "-verdict.md")   # #1006: bắt cả `-VERDICT.md` trên Linux
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
     bang(ds_verdict, f"không thấy verdict nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
 
@@ -1757,7 +1779,7 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
         # không ca nào đụng tới. Đã đo: thay ruột tệp thật bằng rác mà suite vẫn 30/30.
         d_bn = yaml.safe_load(bn.read_text(encoding="utf-8")) or {}
         tro = PurePosixPath(str(d_bn.get("verdict_path") or "").strip().lstrip("./"))
-        mong = PurePosixPath(f.relative_to(HERE.parent).as_posix())
+        mong = PurePosixPath(f.relative_to(goc).as_posix())
         bang(tro == mong,
              f"{bn.name}: `verdict_path` trỏ {str(tro)!r} chứ không phải {str(mong)!r}. "
              f"So basename thôi thì một bản sao ở thư mục khác lọt qua, và tệp THẬT "
@@ -1789,6 +1811,85 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
                  f"cùng hàng với {ten_verdict!r} ở CỘT 'tệp verdict', trong bảng "
                  f"'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác "
                  f"KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.")
+
+
+@ca
+def t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen():
+    """Một `*-VERDICT.md` (đuôi HOA) vắng khỏi mục lục phải làm `_kiem_muc_luc` ĐỎ — trên Linux nữa.
+
+    Vì sao có (#1006): `t27` từng duyệt bằng `glob("*-verdict.md")`, nên trên POSIX hai
+    verdict wp929 đuôi HOA không bao giờ bị thấy, còn Windows thì thấy và ĐỎ. Fixture tái
+    dựng ĐÚNG hình dạng ấy: verdict đuôi HOA, KHÔNG biên nhận (nên nhánh duyệt biên nhận
+    không cứu được), cạnh một cặp verdict/biên nhận thường đầy đủ (nên đột biến quay về
+    `glob` không đỏ vì "không thấy verdict nào" mà XANH hẳn — tức bị lộ là mù).
+
+    Đối chứng hai chiều: thêm verdict ấy vào mục lục kèm biên nhận ⇒ XANH (không chặn
+    quá rộng). Gỡ bản vá ở `_liet_ke_theo_duoi` (trả về `glob`) ⇒ chiều ĐỎ của ca này
+    thua trên Linux.
+    """
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam)
+        tm = goc / "ops" / "reviews"
+        tm.mkdir(parents=True)
+
+        def bien_nhan(ten_verdict):
+            (tm / ten_verdict).write_text("verdict\n", encoding="utf-8")
+            (tm / (Path(ten_verdict).stem + ".receipt.yaml")).write_text(
+                f"verdict_path: ops/reviews/{ten_verdict}\n", encoding="utf-8")
+
+        def muc_luc(*ten_verdict):
+            hang = "".join(f"| `{v}` | `{Path(v).stem}.receipt.yaml` |\n" for v in ten_verdict)
+            (tm / "README.md").write_text(
+                "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n"
+                "| `khong-ai.md` | `x` |\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n"
+                f"|---|---|\n{hang}", encoding="utf-8")
+
+        bien_nhan("thuong-verdict.md")
+        (tm / "moi-VERDICT.md").write_text("verdict\n", encoding="utf-8")
+        muc_luc("thuong-verdict.md")
+
+        bang([p.name for p in _liet_ke_theo_duoi(tm, "-verdict.md")]
+             == ["moi-VERDICT.md", "thuong-verdict.md"],
+             "bộ liệt kê không thấy đủ cả hai cách viết đuôi — nó đang phụ thuộc nền")
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("'moi-VERDICT.md'" in str(e) and "CỘT 'tệp verdict'" in str(e),
+                 f"ĐỎ nhưng SAI chốt — đòi chốt mục lục nêu tên 'moi-VERDICT.md', được: {e}")
+        else:
+            raise AssertionError(
+                "verdict đuôi `-VERDICT.md` vắng khỏi mục lục mà `_kiem_muc_luc` vẫn XANH — "
+                "chốt mù với đuôi HOA trên nền này (lỗi #1006)")
+
+        # Đối chứng: đủ hàng + đủ biên nhận ⇒ phải XANH.
+        bien_nhan("moi-VERDICT.md")
+        muc_luc("thuong-verdict.md", "moi-VERDICT.md")
+        _kiem_muc_luc(tm, goc)
+
+        # Cross-review #1006 lượt 1 (P3): bỏ `is_file()` hoặc chỉ đổi nhánh verdict mà để
+        # biên nhận đi `glob` thì mọi khẳng định trên vẫn XANH. Khoá cả hai biên của M1.
+        bo = goc / "bo-liet-ke"
+        bo.mkdir()
+        (bo / "thu-muc-VERDICT.md").mkdir()
+        (bo / "that-VERDICT.md").write_text("verdict\n", encoding="utf-8")
+        (bo / "mau.RECEIPT.YAML").write_text("verdict_path: x\n", encoding="utf-8")
+        bang([p.name for p in _liet_ke_theo_duoi(bo, "-verdict.md")] == ["that-VERDICT.md"],
+             "bộ liệt kê nhận cả THƯ MỤC mang đuôi verdict — `is_file()` đã mất")
+        bang([p.name for p in _liet_ke_theo_duoi(bo, ".receipt.yaml")] == ["mau.RECEIPT.YAML"],
+             "bộ liệt kê không thấy biên nhận đuôi HOA `.RECEIPT.YAML`")
+
+        # Và ở đúng chỗ dùng: một biên nhận đuôi HOA vắng khỏi mục lục phải làm ĐỎ.
+        (tm / "le.RECEIPT.YAML").write_text(
+            "verdict_path: ops/reviews/thuong-verdict.md\n", encoding="utf-8")
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("le.RECEIPT.YAML" in str(e) and "CỘT 'biên nhận'" in str(e),
+                 f"ĐỎ nhưng SAI chốt — đòi chốt cột 'biên nhận' nêu 'le.RECEIPT.YAML', được: {e}")
+        else:
+            raise AssertionError(
+                "biên nhận đuôi `.RECEIPT.YAML` vắng khỏi mục lục mà `_kiem_muc_luc` vẫn XANH — "
+                "nhánh duyệt biên nhận còn phụ thuộc nền (lỗi #1006)")
 
 
 @ca

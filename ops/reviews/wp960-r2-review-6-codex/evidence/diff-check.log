@@ -1,0 +1,3 @@
+$ git diff --check 44884446f71c89e25f9a72ac58e4f597db63c1ba HEAD
+
+rc=0

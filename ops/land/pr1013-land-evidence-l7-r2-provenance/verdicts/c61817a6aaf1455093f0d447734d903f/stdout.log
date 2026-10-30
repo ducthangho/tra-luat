@@ -1,0 +1,28 @@
+```text
+VERDICT: REQUEST_CHANGES
+reviewed_head: ab25bd0f0f98139ed901605d04576903a92b9cf7
+reviewed_tree: c225eb8360c42d0151691e3b825a75d5b0bc8794
+spec_sha256: b43528c572e55bb29049fec44196550ddb5ff88ca356aa2d444473a823b9995a
+provider: openai_codex
+execution_surface: codex_cli
+transport: machine
+
+FINDINGS:
+- [P2] ops/land_evidence_nguon.py:342 — F01 (l7-duong-dan-mo-ho): _khoa_81 nối nguyên tên khóa bằng dấu chấm, nên đường dẫn chẩn đoán không giữ đúng cấu trúc, trái yêu cầu §2/§3. Tái hiện bằng lời: hồ sơ không có assurance_81 gốc, có khóa nguyên văn “a.b” chứa reviewer_assurance_81: DAT, đồng thời có nhánh a → b chứa cùng lời khai. Cả hai bị báo thành $.a.b.reviewer_assurance_81; đường dẫn của khóa “a.b” phải là $["a.b"].reviewer_assurance_81. Lỗi cũng làm ghi chú chỉ sai vị trí khi có khối gốc. Đây là lỗi định vị, không phải bỏ lọt vi phạm. Đề xuất: sửa cách dựng đường dẫn trong _khoa_81, dùng ký pháp ngoặc có escape cho khóa đặc biệt; thêm ca phân biệt hai cấu trúc trên ở cả nhánh vi phạm và ghi chú, kèm mutant bỏ escape. Giữ định dạng khóa đơn giản và kiểm lại việc loại chính khóa gốc để tránh hồi quy.
+
+DOI_CHIEU:
+- Đổi bốn đầu vào c17 sang đòi ĐỎ phù hợp §2 r2; không coi đây là vi phạm câu “các ca r1 vẫn đạt”.
+- Chín mutant L7r2 có neo duy nhất và ca đích tồn tại. Ba mutant bắt buộc lần lượt trỏ c20/c21/c22. Đọc mã chưa thấy chúng chết vì lý do vô can; chưa đo được thực thi.
+
+DA_DO:
+- git rev-parse, kiểm ancestry, status kể cả ignored, diff/index và sha256sum: rc=0; đúng base/head/hash, worktree sạch.
+- PYTHONDONTWRITEBYTECODE=1 python ops/land_evidence_nguon.py: rc=0; 54 ĐẠT, 25/28 miễn trừ, 0 vi phạm, 0 KHÔNG ĐO ĐƯỢC, tổng 79; TỔNG: ĐẠT. Hai ghi chú L7 đúng ở pr870/pr889.
+- python -B gọi chay_ca("c19_l7_danh_sach_dong_bang") qua runpy: rc=0, DAT; danh sách miễn trừ L7 đúng 3 tên và vân tay kỳ vọng.
+- Kiểm AST/neo mutant: rc=0; có 22 ca, 104 mutant, trong đó 9 L7r2. Đây chỉ là kiểm tĩnh.
+
+KHONG_DO_DUOC:
+- python ops/land_evidence_nguon_test.py --mot-ca c22_l7r2_khoi_goc_la_nguon_duy_nhat: rc=4, FileNotFoundError “No usable temporary directory found”. Sandbox read-only; đây là lỗi môi trường, không phải finding mã.
+- Toàn suite và thực thi mutant: not_run; chưa xác nhận lời khai 22/22, 104/104.
+- F01 kết luận bằng đọc mã; đầu vào đặc biệt chỉ mô tả bằng lời theo chỉ thị.
+- Model/effort phục vụ thực tế chưa có trường đo trong run.json đang chạy.
+```

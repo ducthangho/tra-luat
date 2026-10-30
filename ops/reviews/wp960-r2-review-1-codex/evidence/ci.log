@@ -1,0 +1,11 @@
+merge=1ca858c22fd0a8c5fa717abf45a8c1a1c84de424
+parents=44884446f71c89e25f9a72ac58e4f597db63c1ba f7659a2f911e4a686d2b312ce046f3625a563b93
+tree=629fb10af4dd84631518a66705d3e4ee83f05e15
+shallow=false
+origin_master=44884446f71c89e25f9a72ac58e4f597db63c1ba
+origin_HEAD_rc=128
+
+bien_nhan_v2: 244 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 297
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐẠT
+gate_rc=0

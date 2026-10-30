@@ -1,0 +1,14 @@
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n1-vang-stat", "cases": 89, "passed": 89, "red": [], "old": "        p.lstat()\n", "new": "        p.stat()\n"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n2-vang-oserror", "cases": 89, "passed": 89, "red": [], "old": "    except OSError:\n        return False\n", "new": "    except OSError:\n        return True\n"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n3-peel-rc", "cases": 89, "passed": 89, "red": [], "old": "    if rc != 0 or not _HEX40.match(ra):\n", "new": "    if False:\n"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n4-ref-show-error", "cases": 89, "passed": 89, "red": [], "old": "        if rc != 0:\n            raise KhongDoDuoc(f\"không kiểm được ref mặc định", "new": "        if rc != 0:\n            continue\n            raise KhongDoDuoc(f\"không kiểm được ref mặc định"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n5-sinh-no-utf8", "cases": 89, "passed": 88, "red": [["c92_B2_co_SINH_NO_cung_bien_voi_cong", "giet_that", "CLI ['--sinh-no'] chết bằng UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 21: invalid start byte — đòi rc=2, không traceback"]], "old": "        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:\n", "new": "        except (OSError, yaml.YAMLError) as ex:\n"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n6-sinh-no-yaml", "cases": 89, "passed": 88, "red": [["c92_B2_co_SINH_NO_cung_bien_voi_cong", "giet_that", "CLI ['--sinh-no'] chết bằng ParserError: while parsing a flow node\nexpected the node content, but found '<stream end>'\n  in \"<unicode string>\", line 2, column 1:\n    \n    ^ — đòi rc=2, không traceback"]], "old": "        except (OSError, UnicodeDecodeError, yaml.YAMLError) as ex:\n", "new": "        except (OSError, UnicodeDecodeError) as ex:\n"}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"mutation": "n7-peel-noncommit", "cases": 89, "passed": 89, "red": [], "old": " if c}\n", "new": "}\n"}

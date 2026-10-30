@@ -1,0 +1,12 @@
+{"start": "u1-bo-stderr", "source": "/tmp/r5-mutant-u1-bo-stderr-dr1dgeqp/repo", "match_count": 1}
+{"progress": "u1-bo-stderr", "completed": 10, "red_count": 0}
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+{"progress": "u1-bo-stderr", "completed": 20, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 30, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 40, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 50, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 60, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 70, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 80, "red_count": 0}
+{"progress": "u1-bo-stderr", "completed": 90, "red_count": 1}
+{"mutant": "u1-bo-stderr", "match_count": 1, "count": 93, "passed": 92, "red": [["c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no", "giet_that", "ref_hong/khong-no: đòi rc=2, không NỢ CHẾT, stderr nêu `broken ref`; được rc=2: 'KHÔNG ĐO ĐƯỢC: `git symbolic-ref -q refs/remotes/origin/master` rc=128: fatal: No such ref: refs/remotes/origin/master\\n'"]], "seconds": 396.941}

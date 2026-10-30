@@ -1,0 +1,9 @@
+corpus rc= 0 bien_nhan_v2: 244 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 297
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐẠT 
+doctrine rc= 0 doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine 
+diff-check rc= 0  
+ruff {'base': [('bien_nhan_v2_test.py', 'F541', {'column': 19, 'row': 1677}, 'f-string without any placeholders')], 'head': [('bien_nhan_v2_test.py', 'F541', {'column': 19, 'row': 1677}, 'f-string without any placeholders')]}
+git-version git version 2.43.0
+python-version Python 3.13.17
+ruff-version ruff 0.16.9

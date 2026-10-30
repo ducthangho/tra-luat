@@ -1,0 +1,6 @@
+{"env": {"GIT_TRACE": "1"}, "rc": 2, "out": "", "err": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=0: 02:19:10.875482 git.c:463               trace: built-in: git rev-parse --is-shallow-repository\n"}
+{"env": {"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.fsyncObjectFiles", "GIT_CONFIG_VALUE_0": "true"}, "rc": 2, "out": "", "err": "KHÔNG ĐO ĐƯỢC: `git rev-parse --is-shallow-repository` rc=0: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead\n"}
+{"existing_remote": {"rc": 0, "out": "2618eb4e59ab296e5dd8d2bc8543fe8e7e966b40 refs/remotes/origin/master", "err": ""}}
+{"add_ref": {"rc": 128, "out": "", "err": "fatal: update_ref failed for ref 'refs/remotes/origin/master/topic': cannot lock ref 'refs/remotes/origin/master/topic': 'refs/remotes/origin/master' exists; cannot create 'refs/remotes/origin/master/topic'"}}
+{"added_ref_rc": 0, "out": "\nbien_nhan_v2: 244 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 297\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\nTỔNG: ĐẠT\n", "err": ""}
+{"delete_ref": {"rc": 1, "out": "", "err": "error: cannot lock ref 'refs/remotes/origin/master/topic': 'refs/remotes/origin/master' exists; cannot create 'refs/remotes/origin/master/topic'"}}

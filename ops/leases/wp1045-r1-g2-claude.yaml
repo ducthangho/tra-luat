@@ -79,8 +79,10 @@ heartbeat_at: '2026-10-30T17:29:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-10-31T17:29:00Z'
-lease_expires_at_utc: '2026-10-31T17:29:00Z'
+lease_until: '2026-10-31T00:20:00Z'
+lease_expires_at_utc: '2026-10-31T00:20:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-10-31T17:29:00Z). RUT NGAN ve 2026-10-31T00:20:00Z — xem thu_hoi_bang_rut_han.
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -103,3 +105,22 @@ nang_tran:
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1045-g1-claude khi A1-A4 dat; mo PR draft.'
+lease_sua_lan_cuoi: '2026-10-31T00:00:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch, budget.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-31T17:29:00Z'
+  han_moi_utc: '2026-10-31T00:20:00Z'
+  chi_thi: >-
+    Chu kho trong phien session_015GtxrYjGJtmjF3eT1nCSG9 (30-10-2026, sau merge #1047): "Rut han lease wp1045-r1-g2 luon di".
+  ly_do: 'Packet #1045 da merge (PR #1047 merge b2d5f06c154331a6fc10c9e6f687f522196440a9, 2026-10-30T23:36Z). Nha ops/cai_cong_cu.sh, .claude/dev/launcher_test.py, ops/handoff/wp1045-g1-claude.md.'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660 va a34b9a3 (#1037): so ops/thu-hoi/ chua kich hoat (SO_THU_HOI_KICH_HOAT = False, ops/lease_publish.py);
+    rut han chi dung co che DA CAI (phan loai lease theo han).
+  vi_sao_han_moi_khong_bang_luc_sua: >-
+    Han moi = luc sua + 20 phut de luot ops-publish-lease cua chinh commit nay doc lease CON HAN (rc=9 da dang, xanh),
+    khong roi vao rc=8 het han che rc=9 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: lease CON HAN va khong co lease ke nhiem.
+  g1: 'wp1045-r1-g1-claude da mang da_bi_thay_the tu a7cd99e; khong sua lai (them tep vao tap quet ma khong mua them gi).'
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/wp1045-r1-g1-lease. Nhanh ma agent/wp1045-g1-claude KHONG mang tep lease. Nghiem thu: sau
+    han moi, ai-dang-giu ops/cai_cong_cu.sh khong con wp1045-r1-g2-claude trong NGUOI_GIU khi quet du ref.

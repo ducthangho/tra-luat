@@ -4757,7 +4757,7 @@ def _dot_bien(chi=None):
     do("m141_B4_noi_cua_so_ve_sau", lambda: _dot_bien_tep(
         "cua = dong_tep[max(0, j - 1):j + 2]", "cua = dong_tep[max(0, j - 1):j + 3]"),
        "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "provider/citation cách hai dòng là ngoài cửa sổ", doi_chung=DC)
-    # #1021 Codex lượt 5: biên đầu tệp và trích dẫn dòng sau — hai đột biến ấy từng SỐNG qua toàn suite.
+    # #1021 Codex lượt 5: no_clamp từng SỐNG qua toàn suite; citation_drop_next từng qua đủ 98 ca thường.
     do("m156_B4_bo_chan_bien_dau_tep", lambda: _dot_bien_tep(
         "        cua = dong_tep[max(0, j - 1):j + 2]\n",
         "        max = lambda lower, value: value\n        cua = dong_tep[max(0, j - 1):j + 2]\n"),

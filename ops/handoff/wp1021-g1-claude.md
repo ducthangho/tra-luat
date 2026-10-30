@@ -31,15 +31,18 @@ Diff so base: `ops/bien_nhan_v2.py` +40/−5 · `ops/bien_nhan_v2_test.py` +283/
   `success`. Job `gate-ops (windows-latest)` 124057167797 (nhãn `windows-latest`, runner_id 1000026012): `bien_nhan_v2_test: 97/97
   ca đạt · 151/151 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt` · `TỔNG: ĐẠT`; `lease_publish: 255/255 đạt; đã chạy=255, bỏ
   qua=13` (13 ca bỏ qua có khai báo, giống run Windows trên `dbbabf9` trước packet).
-- **M-4 / C7 (Windows local)**: **KHÔNG ĐO ĐƯỢC** — đã bắt đầu, máy rời mạng giữa chừng. Theo ADR-0057/0058: 14:04Z
-  `list_devices` ASUS-LAPTOP `Online`; `D:\tl-win\KHOA.txt` rỗng ⇒ ghi khoá `session_015GtxrZ1Tt93F4NLUUhKYQy`
-  `14:05:00Z` hạn `16:05:00Z`; kiểm tải: 4 tiến trình `python.exe` không phải test (2 `browser-use --cli-mcp`, 2
-  `proxima_agent.web`), không đụng tới. Clone riêng `D:\tl-win\session_015GtxrZ1Tt93F4NLUUhKYQy` ở `e9e0048`, sạch, không nông,
-  `core.abbrev 7`. Lệnh: `python -u ops\bien_nhan_v2_test.py` với `PYTHONUTF8=1 PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1`,
-  log `D:\tl-win\session_015GtxrZ1Tt93F4NLUUhKYQy-head.log` (lúc đọc cuối mới có dòng `bien_nhan_v2_test — 97 ca`). Sau đó Desktop
-  Commander hết trả lời (~14:16Z), tới 14:36Z `list_devices` báo `Offline`. Không có kết quả N/N local, không ghi được
-  `do-luong.csv`, không xoá được khoá: khoá tự hết hiệu lực lúc 16:05Z theo ADR-0058 §3(a). Theo ADR-0057 §2: máy offline ⇒ vế local
-  không áp; PR ghi "không đo local".
+- **M-4 / C7 (Windows local)**: **ĐẠT, local** — ASUS-LAPTOP, theo ADR-0057/0058, đúng `e9e0048`.
+  · Lượt 1: 14:04Z `list_devices` `Online`; `D:\tl-win\KHOA.txt` rỗng ⇒ ghi khoá `session_015GtxrZ1Tt93F4NLUUhKYQy` 14:05:00Z
+    hạn 16:05:00Z; kiểm tải: 4 `python.exe` không phải test (2 `browser-use --cli-mcp`, 2 `proxima_agent.web`), không đụng tới.
+    Clone riêng `D:\tl-win\session_015GtxrZ1Tt93F4NLUUhKYQy` ở `e9e0048`, sạch, không nông, `core.abbrev 7`. Máy rời mạng
+    ~14:16Z (14:36Z `Offline`), lượt bị cắt ở ca `c13`, không còn tiến trình test.
+  · Lượt 2: máy `Online` lại 15:25Z; khoá vẫn của phiên này ⇒ gia hạn 15:26:48Z → 17:26:48Z; chạy lại từ đầu trong tiến trình
+    tách (`Start-Process`), lệnh `python -u ops\bien_nhan_v2_test.py` với `PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+    PYTHONDONTWRITEBYTECODE=1`, log `D:\tl-win\session_015GtxrZ1Tt93F4NLUUhKYQy-head2.log`. Kết quả nguyên văn:
+    `bien_nhan_v2_test: 97/97 ca đạt · 151/151 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 133/151 đột biến thường khai đối
+    chứng` · `TỔNG: ĐẠT` · `rc=0 s=2625`. `m142`–`m155` đều `CÓ RĂNG … giet_that` đúng ca đích.
+  · Không có lỗi local ⇒ không có gì phải vá (ADR-0057 §2). Đã ghi một dòng `do-luong.csv` (16:13:56Z, `may=ASUS-LAPTOP`) và xoá
+    nội dung khoá. Lượt local KHÔNG phải check run, không thay bằng chứng Windows CI ở trên.
 
 ## Cross-review Codex — 4/4 lời gọi (trần spec r2 / lease M-1)
 Qua `.claude/dev/launcher.py run --require-clean --expected-head …`, lệnh `codex exec -m gpt-6-astra -c

@@ -23,8 +23,15 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-10-29T17:00:00Z'
 heartbeat_at: '2026-10-29T17:00:00Z'
-lease_until: '2026-10-30T17:00:00Z'
-lease_expires_at_utc: '2026-10-30T17:00:00Z'
+lease_until: '2026-10-30T07:10:00Z'
+lease_expires_at_utc: '2026-10-30T07:10:00Z'
+rut_han:
+  han_cu: '2026-10-30T17:00:00Z'
+  han_moi: '2026-10-30T07:10:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet CLOUD-SETUP-P1-BUNDLE da merge: PR #1023 (head 5b76266d391695940c449497bfbf0acbdfb7d499, merge 09e059457a033de769f7cb789edc20810f4b95f5, 2026-10-30T06:56:44Z, merged_by ducthangho).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp972 (ddd5f4b8)'
+  ghi_boi: 'claude-session session_015GtxraXfMD1t2FJLzzGDr4 (phien dieu phoi) theo chi thi chu kho trong phien: ghi ho so land cho PR #1023'
 
 packet_id: CLOUD-SETUP-P1-BUNDLE
 packet_slug: cloud-setup-p1-bundle

@@ -1311,6 +1311,8 @@ _CREDS_LAZY_CMDS = frozenset({
     "rasoat-merge",   # handler tự khai "Không gọi mạng, không NLM" — thuần cục bộ, không có đường dùng creds
     "state-get",      # handler CÓ `except SystemExit → CAN_WEBAPP_LIVE` (rc=2 + JSON) nhưng là CODE CHẾT khi main() thoát trước
     "state-put",      # nhánh `--dry-run` return TRƯỚC load_creds (cục bộ thuần) + cùng `CAN_WEBAPP_LIVE` chết như trên
+    # WP1009 (finding P2 PR #1004): máy mới chưa có config webapp vẫn phải sinh khoá / ghi credential agent
+    "secrets-keygen", "agent-creds-set",   # keygen: không cần creds nào; agent-creds-set: chỉ TL_MASTER_KEY + upload gws
 })
 
 

@@ -22515,7 +22515,8 @@ def run() -> int:
         # KÊ KHAI SLOT (packet #868): 190 → **191** = + `changelog.d/wp-868.md`. Trần Package 200 còn 8 khe.
         # KÊ KHAI SLOT (packet #886): 191 → **192** = + `changelog.d/wp-886.md`. Trần Package 200 còn 7 khe.
         # KÊ KHAI SLOT (packet #1009): 192 → **193** = + `changelog.d/wp-1009.md`. Trần Package 200 còn 6 khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 193
+        # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 194
         d = root / "docs"
         # chỉ TỆP thường VẬT LÝ dưới `docs/`: thư mục, symlink (hỏng hay trỏ tới tệp thật) và `docs/` là symlink
         # đều không được tính là còn docs (F1 review wp794 lượt 1–2).
@@ -22564,13 +22565,15 @@ def run() -> int:
             j = _j209.loads(mf.read_text(encoding="utf-8"))
             paths = [str(x.get("path") or "") for x in (j.get("files") or [])]
             ok2 = not [p for p in paths if p.startswith(".agents/")]
-            # RATCHET: goi giu 192 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
+            # RATCHET: goi giu 194 (WP710 PR #714: 180 -> 183; land WP725-727 PR #729-#731: 183 -> 186, ba manh
             # changelog.d; land WP766 PR #772: 186 -> 187, manh changelog.d/wp-766.md — ke khai slot day du o
             # r291_docs_ngoai_goi; packet #831 spec r2: 187 -> 189, manh changelog.d/wp-802.md + wp-831.md;
             # packet #858: 189 -> 190, manh changelog.d/wp-858.md; packet #868: 190 -> 191, manh changelog.d/wp-868.md;
-            # packet #886: 191 -> 192, manh changelog.d/wp-886.md; packet #1009: 192 -> 193, manh changelog.d/wp-1009.md).
+            # packet #886: 191 -> 192, manh changelog.d/wp-886.md; packet #1009: 192 -> 193, manh changelog.d/wp-1009.md;
+            # packet #1030: 193 -> 194, manh changelog.d/wp-1030.md).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
-            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 193
+            # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
+            ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 194
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay
         # CO HIEU LUC — va mot phep kiem khong the do thi khong phai bang chung.

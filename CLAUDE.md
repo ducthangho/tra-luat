@@ -58,8 +58,11 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   KHÔNG cứu được**: `[string](Get-Content -Raw …)` VẪN là `$null` (đo 30-10-2026 trên PS 5.1.26100 và 7.6.9, cả
   hai loại tệp). Chỉ hai dạng ra `""`: khai BIẾN có kiểu `[string]$x = Get-Content -Raw …`, hoặc nối chuỗi
   `'' + (Get-Content -Raw …)`. `deploy-package.ps1` an toàn là nhờ dòng `if ($null -eq $txt)` ngay sau phép ép,
-  không nhờ phép ép. Dưới `ErrorActionPreference = 'Continue'`, điều kiện `if` ném lỗi thì nhánh bị BỎ QUA và
-  script chạy tiếp: script chờ `KHOA.txt` (ADR-0057) đã đứng chờ ~4 phút một khoá chỉ còn BOM vì lỗi này.
+  không nhờ phép ép. Hậu quả tuỳ ngữ cảnh (đo 30-10-2026, cùng hai bản PS): gọi `.Trim()` trên `$null` trong điều
+  kiện `if`, NGOÀI `try`, dưới `ErrorActionPreference = 'Continue'` ⇒ nhánh bị BỎ QUA và script chạy tiếp (`rc=0`);
+  cùng ca dưới `'Stop'` ⇒ script dừng (`rc=1`); bọc trong `try` ⇒ nhảy vào `catch` ở cả hai chế độ. Đừng mở rộng
+  thành "mọi lỗi trong `if` đều bỏ qua": `throw` trong điều kiện dừng script kể cả dưới `'Continue'`. Ca thứ nhất đã
+  khiến script chờ `KHOA.txt` (ADR-0057) đứng chờ ~4 phút một khoá chỉ còn BOM.
   · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —
   `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển.
 - **Câu mô tả VỊ TRÍ của một artefact phải đúng ở CẢ HAI phía của lần merge.** Prompt reviewer neo

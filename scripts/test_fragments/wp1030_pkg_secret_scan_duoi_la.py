@@ -17,6 +17,7 @@ import contextlib
 import io
 import os
 from pathlib import Path
+from stat import S_ISLNK, S_ISREG
 import sys
 import tempfile
 import types
@@ -65,6 +66,14 @@ class _DuongDanDo(type(Path())):
 
     def lstat(self):
         return self.stat(follow_symlinks=False)
+
+    # Python 3.14: `Path.is_file()`/`is_symlink()` gọi thẳng `os.path.isfile`/`islink`, không qua `self.stat` — bộ ghi
+    # mù và gói hợp lệ sẽ ĐỎ. Định nghĩa hai predicate mà chính sách dùng qua `self.stat`/`self.lstat` được quan sát.
+    def is_symlink(self):
+        return S_ISLNK(self.lstat().st_mode)
+
+    def is_file(self, *, follow_symlinks=True):
+        return S_ISREG(self.stat(follow_symlinks=follow_symlinks).st_mode)
 
 
 def _ly_do_tha(tl_module, kho):

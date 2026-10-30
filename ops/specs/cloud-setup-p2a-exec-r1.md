@@ -123,10 +123,11 @@ trống và ghi handoff). Mỗi ca kèm đột biến đổi màu (L3), chạy t
 | A7 | 1 | `r1000_exec_khong_shell`: đối số con chứa `;`, `&&`, `$(…)` được con nhận NGUYÊN VĂN, không được shell diễn giải | đổi sang `shell=True` ⇒ ĐỎ |
 | A8 | 1 | `r1000_exec_resolve_which`: tên trần resolve qua `shutil.which` (đồ giả `which` đếm lời gọi); tên không resolve được ⇒ rc 127, con 0 lần | dùng `argv[0]` thô ⇒ ĐỎ (đồ giả `which` 0 lời gọi) |
 | A9 | 1 | `r1000_exec_env_thang_hang`: `TL_AGENT_CREDS_FILEID` đặt ⇒ đồ giả tải nhận đúng id của biến dù hằng khác rỗng | đảo thứ tự ⇒ ĐỎ |
-| A10 | 1 | `r1000_exec_tai_moi_lan`: hai lần gọi liên tiếp ⇒ đồ giả tải đếm **2**; thư mục HOME tạm không có tệp mới | thêm bộ đệm ⇒ ĐỎ |
+| A10 | 1 | `r1000_exec_tai_moi_lan`: hai lần gọi liên tiếp ⇒ đồ giả tải đếm **2** | thêm bộ đệm (lần hai không tải) ⇒ ĐỎ |
+| A11 | 1 | `r1000_exec_khong_ghi_dia`: trong suốt lời gọi (in-process, tiến trình con thay bằng đồ giả ghi nhận env), mọi lời gọi `builtins.open`/`io.open` ở chế độ ghi hoặc nối, `os.open` có cờ `O_WRONLY`/`O_RDWR`/`O_CREAT`, và `tempfile.mkstemp`/`NamedTemporaryFile`/`TemporaryFile`/`mkdtemp` được bọc bằng đồ giả ĐẾM lời gọi (vẫn chuyển tiếp) ⇒ tổng **0** lời gọi ghi; thêm vế sentinel: không tệp nào dưới HOME tạm, cwd tạm, `tempfile.gettempdir()` tạm (đặt `TMPDIR`/`TEMP`/`TMP` vào thư mục tạm của ca) chứa byte sentinel của khoá sau lời gọi. Phép đếm lời gọi bắt cả tệp tạm bị xoá trước lúc kiểm | đột biến ghi bản giải mã bằng `tempfile.NamedTemporaryFile(delete=True)` rồi đọc lại ⇒ ĐỎ (đếm 1); đột biến ghi bản mã hoá ra cwd ⇒ ĐỎ |
 | B1 | 3 | `AGENT_CREDS_FILEID` khác rỗng và bằng đúng giá trị LIVE ghi ở Issue #1038 (khớp nguyên chuỗi; vế âm: trên base `757bde56` hằng rỗng) | để rỗng ⇒ ĐỎ |
 | C1 | 2 | `tl agent-creds-exec --help` rc 0, chứa `--claude` và `--gemini` (vế âm: base chưa có lệnh) | xoá `add_parser("agent-creds-exec"…)` ⇒ ĐỎ |
-| C2 | 4 | `r1000_exec_khong_can_creds_webapp` (CLI thật, HOME tạm không config, không `TL_WEBAPP`/`TL_TOKEN`, không `TL_MASTER_KEY`): `agent-creds-exec --claude -- <con>` ⇒ rc 4 với thông báo CỦA lệnh, KHÔNG phải thông báo thiếu credential webapp của `load_creds` | bỏ lệnh khỏi `_CREDS_LAZY_CMDS` ⇒ ĐỎ |
+| C2 | 4 | `r1000_exec_khong_goi_load_creds` — HAI vế, cả hai bắt buộc. **(a) Phép đo chính, không phụ thuộc máy:** gọi `main()` của `tl` in-process với `argv` `agent-creds-exec --claude -- <con>`, `load_creds` (tên tra ở `tl`) thay bằng đồ giả ĐẾM lời gọi rồi ném lỗi riêng ⇒ đồ giả đếm **0** lời gọi và rc 4 với thông báo của lệnh. **(b) CLI thật trong bản sao tạm:** chép `scripts/` sang thư mục tạm, cwd tạm, HOME tạm, không `TL_WEBAPP`/`TL_TOKEN`/`TL_MASTER_KEY`; TIỀN ĐIỀU KIỆN đo trực tiếp: mọi đường của `profile_env._config_candidates()` (cwd · gốc skill · `scripts/` · `~/.tra_luat_config.json` · `/tmp/tra_luat_config.json`, `scripts/tl_core/profile_env.py:58-69`) đều không tồn tại — có đường nào tồn tại (vd `/tmp/tra_luat_config.json` trên máy dev) thì vế (b) ĐỎ với thông báo nêu đường ấy, KHÔNG được tha hay bỏ qua; đạt tiền điều kiện ⇒ rc 4 với thông báo của lệnh, không phải thông báo thiếu credential webapp | bỏ lệnh khỏi `_CREDS_LAZY_CMDS` ⇒ ĐỎ ở vế (a) (đồ giả đếm 1) bất kể máy có config hay không |
 | H1 | 5 | `python scripts/tl.py workflow-audit --strict --json` rc 0, `registry.issues == []` | xoá metadata lệnh ⇒ ĐỎ (`UNREGISTERED_PARSER_CMD`) |
 | H2 | 7 | `r77a_parser_surface_matches_snapshot` ĐẠT không đặt `TL_WRITE_PARSER_SURFACE`; diff snapshot chỉ mang `agent-creds-exec` | khôi phục snapshot base ⇒ ĐỎ |
 | H3 | 6 | `python scripts/tl_core/command_registry_test.py` rc 0 | trả số về 198 ⇒ ĐỎ |
@@ -137,10 +138,10 @@ trống và ghi handoff). Mỗi ca kèm đột biến đổi màu (L3), chạy t
 | K1 | — | `ruff check --select F` trên các tệp `.py` của write set: delta so base = 0 | thêm tên chưa định nghĩa ⇒ ĐỎ |
 | K2 | — | `git diff --numstat origin/master...HEAD` ⇒ ≤ 13 tệp và ≤ 450 dòng thêm (tổng mọi tệp) | vượt ⇒ ĐỎ; DỪNG hỏi chủ kho |
 | L1 | 14 | Context bắt buộc như tiêu chí L1 của P1 r4 (đọc lại ma trận `ci.yml` lúc nghiệm thu; lệch thì theo `ci.yml`): Ubuntu lượt PR, Windows `workflow_dispatch` `runner_set=windows-only` trên CÙNG head; `skipped`/vắng ngoài hai ngoại lệ đã nêu ở P1 r4 ⇒ ĐỎ | một context bắt buộc đỏ do packet ⇒ ĐỎ |
-| M1 | 1 (LIVE, sau land) | Trên laptop: `tl agent-creds-exec --gemini -- python -c "import os;print(bool(os.environ.get('GEMINI_API_KEY')))"` in `True`, rc 0, với `TL_MASTER_KEY` mới và hằng đã land | chưa đo được tới khi chạy thật; ai đo: phiên điều phối qua Desktop Commander, hỏi chủ kho trước |
+| M1 | 1 (LIVE, sau land) | Trên laptop, với `TL_MASTER_KEY` mới và hằng đã land. Tiến trình gọi đo phải XOÁ `GEMINI_API_KEY` và `CLAUDE_CODE_OAUTH_TOKEN` khỏi môi trường CỦA CHÍNH NÓ trước khi gọi (biến User trên laptop vẫn giữ; chỉ tiến trình đo không thấy). Con là một script in sha256 của `os.environ.get('GEMINI_API_KEY','')`. Băm kỳ vọng do phiên đo tính riêng từ khoá đã nạp vào bundle ở bước LIVE 5 (đọc biến User, không in giá trị). (i) `agent-creds-exec --gemini -- <con>` ⇒ rc 0 và băm con in ra BẰNG băm kỳ vọng; (ii) đối chứng: chạy `<con>` trực tiếp từ cùng tiến trình đã xoá biến ⇒ băm của chuỗi rỗng — chứng minh giá trị ở (i) đến từ bundle chứ không từ môi trường kế thừa | chưa đo được tới khi chạy thật; vế (ii) chính là phản chứng "bỏ chèn biến" (không có chèn ⇒ băm rỗng ≠ kỳ vọng). Ai đo: phiên điều phối qua Desktop Commander, hỏi chủ kho trước |
 
 C1 khớp chuỗi trên đầu ra `--help` (không phải Markdown — L6b không áp dụng), có vế âm trên base (L6a). A3, A5 đếm từng ca /
-từng sentinel riêng (L6c). Không có lời khai "N lời gọi" dạng chữ (L6d), không có lời khai "không cổng nào cưỡng chế" (L6e).
+từng sentinel riêng (L6c); A11 đếm lời gọi ghi chứ không chỉ đọc trạng thái đĩa cuối lượt. Không có lời khai "N lời gọi" dạng chữ (L6d), không có lời khai "không cổng nào cưỡng chế" (L6e).
 
 ## Kích thước dự kiến
 
@@ -157,8 +158,11 @@ selftest ~150, changelog ~8, manifest ~20 ⇒ **khoảng 300 dòng thêm trên 1
    bằng cùng một khoá, `scripts/tl_gws.py:991-1035`), ghi đè tại chỗ `SECRETS_FILEID`. Trước đó kiểm (chỉ đọc) bundle trên
    Drive không có khoá nào mà config laptop thiếu.
 4. ☐ Chủ kho đặt `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) và `GEMINI_API_KEY` vào biến User trên laptop.
-5. ☐ `tl agent-creds-set --new --codex --claude-token-env --antigravity-key-env` → fileId; bật anyone-with-link; kiểm
-   `bootstrap` ⇒ `agent_creds: ĐÃ NẠP`. FileId điền vào mục tiêu 3 và tiêu chí B1.
+5. ☐ `tl agent-creds-set --new --codex --claude-token-env --antigravity-key-env` → fileId `F` (lệnh chỉ IN fileId, không lưu
+   vào đâu — `scripts/tl_gws.py:1213`); bật anyone-with-link cho `F`; rồi kiểm bằng một tiến trình MỚI đặt
+   `TL_AGENT_CREDS_FILEID=F` (chỉ trong tiến trình đó) và `TL_MASTER_KEY` mới: `bootstrap` ⇒ `agent_creds: ĐÃ NẠP` và
+   `rev=1`. Không dựa vào hằng `AGENT_CREDS_FILEID` (còn rỗng tới lúc thi hành) hay vào một `TL_AGENT_CREDS_FILEID` có
+   sẵn trong môi trường (có thể trỏ bundle cũ). `F` điền vào mục tiêu 3 và tiêu chí B1.
 6. ☐ Cập nhật `TL_MASTER_KEY` (biến User laptop; chủ kho dán vào Claude Code web và Codex cloud).
 
 ## `hinh_dang_ke_thua`

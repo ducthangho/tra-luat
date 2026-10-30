@@ -43,9 +43,18 @@ def _nap(quet):
     return mod
 
 
+def _co_mat(path):
+    # Chỉ ENOENT chứng minh vắng; lỗi quyền/I/O/độ dài phải tới catch fail-closed của run.
+    try:
+        os.lstat(path)                    # giữ ngữ nghĩa symlink hỏng là CÓ MẶT
+    except FileNotFoundError:
+        return False
+    return True
+
+
 def _ly_do_tha(tl_module, kho):
     """Trả lý do tha khi (ii) và (iii) cùng đúng; None nếu không được tha. Lỗi ném ra ngoài ⇒ người gọi trả False."""
-    if os.path.lexists(kho / ".git"):
+    if _co_mat(kho / ".git"):
         return None                                     # (iii): checkout có .git mà thiếu bộ quét ⇒ ĐỎ
     with tempfile.TemporaryDirectory() as tam:
         goc = Path(tam)
@@ -168,7 +177,7 @@ def run(tl_module):
     try:
         kho = Path(tl_module.__file__).resolve().parent.parent
         quet = kho / "scripts" / "pkg_secret_scan.py"
-        if not os.path.lexists(quet):                   # (i)
+        if not _co_mat(quet):                           # (i)
             ly_do = _ly_do_tha(tl_module, kho)
             if ly_do is None:
                 _bao("bộ quét vắng mà không đủ điều kiện tha: %s" % quet)

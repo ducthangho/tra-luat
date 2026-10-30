@@ -28,6 +28,7 @@ import re as _RE
 import subprocess
 import sys
 import tempfile
+import traceback
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -3618,6 +3619,46 @@ def c97_NHANH_TIEM_co_rang_tren_module_da_thay_va_tu_go():
         while _TAM_DOT_BIEN:
             shutil.rmtree(_TAM_DOT_BIEN.pop(), ignore_errors=True)
 
+@ca
+def c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem():
+    """#1037: một đột biến KHÔNG đạt phải để lại đủ dấu vết để truy. (a) `_chay_1` với ca ném lỗi không phải chốt ⇒
+    `tin_dung_gia` + tên ngoại lệ + thông điệp + vị trí ném ĐÚNG hàm; (b) `_dong_chi_tiet` của kết quả không đạt mang
+    `tt` và MỌI dòng `ct`, của kết quả đạt thì rỗng; (c) vượt trần thì cắt và nói đã cắt."""
+    global _CA
+    ca_ngoai = _CA
+
+    def _ca_nem_attr():
+        raise AttributeError("thuoc_tinh_1037_vang")
+    try:
+        tt, ct = _chay_1(_ca_nem_attr)
+    finally:
+        _CA = ca_ngoai
+    bang(tt == "tin_dung_gia", f"ca ném AttributeError phải là tin_dung_gia, được {tt}")
+    bang("AttributeError: thuoc_tinh_1037_vang" in (ct or ""), f"thiếu tên/thông điệp ngoại lệ: {ct!r}")
+    bang(f"{Path(__file__).name}:" in (ct or "") and "in _ca_nem_attr" in (ct or ""),
+         f"thiếu vị trí ném (tệp:dòng in hàm): {ct!r}")
+
+    ct2 = "dong-1 loi that\ndong-2 ngu canh\ndong-3 cuoi"
+    dong = _dong_chi_tiet(False, "tin_dung_gia", ct2)
+    bang(bool(dong) and "tin_dung_gia" in dong[0], f"dòng đầu phải nêu tt: {dong!r}")
+    for x in ("dong-1 loi that", "dong-2 ngu canh", "dong-3 cuoi"):
+        bang(any(x in d for d in dong), f"chi tiết mất dòng `{x}`: {dong!r}")
+    bang(_dong_chi_tiet(True, "giet_that", ct2) == [], "đột biến ĐẠT không được in thêm chi tiết")
+    # Dây nối: thứ `do()` in cho đột biến KHÔNG đạt phải chứa ngoại lệ thật; cho đột biến đạt thì đúng một dòng.
+    kq = _dong_ket_qua_dot_bien("KHÔNG RĂNG", "mX", "cY", tt, "mo ta", False, ct)
+    bang(len(kq) > 1 and any("thuoc_tinh_1037_vang" in d for d in kq) and "mX" in kq[0],
+         f"dòng in của đột biến KHÔNG đạt thiếu ngoại lệ thật: {kq!r}")
+    bang(len(_dong_ket_qua_dot_bien("CÓ RĂNG ", "mX", "cY", "giet_that", "mo ta", True, ct2)) == 1,
+         "đột biến ĐẠT phải in đúng một dòng như trước")
+    bang(any("không có chi tiết" in d for d in _dong_chi_tiet(False, "gian_giao", None)),
+         "ct rỗng phải nói rõ là không có chi tiết, không im lặng")
+
+    dai = "x" * 50 + "DUOI_BI_CAT"
+    cat = "\n".join(_dong_chi_tiet(False, "tin_dung_gia", dai, tran=50))
+    bang("DUOI_BI_CAT" not in cat and "cắt" in cat, f"vượt trần phải cắt và nói đã cắt: {cat!r}")
+    bang("x" * 50 in cat, f"phần trong trần phải giữ nguyên: {cat!r}")
+
+
 def _chay_1(fn):
     global _CA
     _CA = fn.__name__
@@ -3629,9 +3670,39 @@ def _chay_1(fn):
         return ("giet_that" if getattr(ex, "ca_nguon", None) == fn.__name__
                 else "tin_dung_gia"), str(ex)
     except Exception as ex:                                       # noqa: BLE001
-        return "tin_dung_gia", f"{type(ex).__name__}: {ex}"
+        return "tin_dung_gia", f"{type(ex).__name__}: {ex} [ném tại {_vi_tri_nem(ex)}]"
     finally:
         _CA = None
+
+
+def _vi_tri_nem(ex: BaseException) -> str:
+    """#1037: khung TRONG CÙNG nơi ngoại lệ được ném (`tệp:dòng in hàm`). Laptop Windows (head `7b92e5c`) cho
+    `m81 → c74 = tin_dung_gia` đúng một lần trong lượt full rồi 22/22 `giet_that` khi chạy riêng — và không truy
+    được gì vì chỉ còn `type: msg`. Lần sau nó lặp lại thì vị trí này là thứ phân biệt rig với sản phẩm."""
+    tb = traceback.extract_tb(ex.__traceback__)
+    if not tb:
+        return "không có traceback"
+    f = tb[-1]
+    return f"{Path(f.filename).name}:{f.lineno} in {f.name}"
+
+
+_TRAN_CHI_TIET = 2000
+
+
+def _dong_chi_tiet(dat: bool, tt: str, ct, tran: int = _TRAN_CHI_TIET) -> list:
+    """#1037: dòng in thêm dưới một đột biến KHÔNG đạt — `tt` + `ct` đủ nhiều dòng, có trần. Đột biến đạt ⇒ rỗng
+    (log xanh giữ nguyên). Trước đây `do()` chỉ in `mo_ta`, nên ngoại lệ thật của một `tin_dung_gia` mất hẳn."""
+    if dat:
+        return []
+    van = ct or "(không có chi tiết)"
+    if len(van) > tran:
+        van = van[:tran] + f" …[cắt, còn {len(van) - tran} ký tự]"
+    return [f"      chi tiết [{tt}]:"] + [f"        {x}" for x in van.splitlines()]
+
+
+def _dong_ket_qua_dot_bien(nhan, ten, ca_dich, tt, mo_ta, dat, ct) -> list:
+    """Toàn bộ những gì `do()` in cho một đột biến — gom một chỗ để `c98` đo được cả dây nối, không chỉ hàm con."""
+    return [f"  {nhan:10s} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})"] + _dong_chi_tiet(dat, tt, ct)
 
 
 # ------------------------------------------------------------------ đột biến
@@ -3693,7 +3764,7 @@ def _dot_bien():
                    tu_kiem, bool(doi_chung)))
         nhan = ("TỰ KIỂM ok" if dat else "TỰ KIỂM ĐỎ") if tu_kiem else (
             "CÓ RĂNG " if ok else "KHÔNG RĂNG")
-        print(f"  {nhan:10s} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})")
+        print("\n".join(_dong_ket_qua_dot_bien(nhan, ten, ca_dich, tt, mo_ta, dat, ct)))
 
     do("m1_noi_allowlist_chua_tep_tan_cong",
        lambda: bnv2.ALLOWLIST_CUTOVER.__setitem__("ke-gian-verdict.receipt.yaml", "0" * 64),

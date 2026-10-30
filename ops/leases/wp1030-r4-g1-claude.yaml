@@ -1,0 +1,99 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1030
+packet_id: wp1030
+revision: 4
+generation: 1
+lease_id: wp1030-r4-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: 'wp1009 (giu RELEASE_MANIFEST.json) da land qua PR #1023 (09e05945) va lease wp1009-cloud-setup-p1-r4-g4-claude da rut han ve 07:10Z; lease nay cap SAU moc ay.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'ranh gioi security/credential => sensitive; executor ho claude, reviewer ho openai qua launcher.py run; tran 10 loi goi Codex theo dong khai ADR-0055 trong spec, da dung 3 cho chinh spec (PR #1031) - dem rieng cho PR thi cong.'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1030-pkg-secret-scan-duoi-la-r4.md
+spec_sha256_required: 2ee97b57c6f3786eb6f01f8a2fe1e3f685dfe92bef17cc1880fafb73af6611d6
+spec_hash: 2ee97b57c6f3786eb6f01f8a2fe1e3f685dfe92bef17cc1880fafb73af6611d6
+spec_ref: refs/heads/claude/focused-feynman-tu0fma@12d82029821a13c3d8292c4b6257f9f7c92740d3
+spec_ref_ghi_chu: 'spec song tren nhanh cua PR #1031 (chua merge); blob 31b85c65f1bb0f9941a758deacb60c2883ce65e2. Tim o master truoc, chua thay thi fetch nhanh tren; thu dinh danh la BAM, khong phai ten nhanh.'
+prompt_path: ops/specs/wp1030-pkg-secret-scan-duoi-la-r4.md
+prompt_sha256_required: 2ee97b57c6f3786eb6f01f8a2fe1e3f685dfe92bef17cc1880fafb73af6611d6
+write_set:
+- scripts/pkg_secret_scan.py
+- scripts/test_fragments/wp1030_pkg_secret_scan_duoi_la.py
+- scripts/tl_test_fragments_bundled.py
+- changelog.d/wp-1030.md
+- RELEASE_MANIFEST.json
+write_set_hash: d71c45006d5ea7026e16213232c7940bdb39d38a54c30bc8e508bd1f02ba76e0
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'dung 5 tep cua spec r4; bundle va manifest chi sinh lai bang cong cu, khong sua tay; handoff (neu co) chi tren nhanh lease ops/wp1030-r4-g1-lease, khong vao PR.'
+change_policy_sha: null
+effective_write_set:
+- scripts/pkg_secret_scan.py
+- scripts/test_fragments/wp1030_pkg_secret_scan_duoi_la.py
+- scripts/tl_test_fragments_bundled.py
+- changelog.d/wp-1030.md
+- RELEASE_MANIFEST.json
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi qua launcher.py run, 0 P0-P3 (spec A7); moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; selftest N/N tai cho tren dung commit day (spec A5)'}
+- {id: M-3, dieu_kien: 'spec A1-A8 dat hoac ghi ro chua_do_duoc; dot bien M-a..M-f giet dung ca dich vi assertion cua chinh no; A3 delta = rong; A8 tap ca FAIL trong goi bang nen'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp1030-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+target_branch_ghi_chu: 'ngoai le tuyen §5 do chu kho quyet, ghi trong spec r4 muc mission; tien le wp728 r2 (#755).'
+base_sha: 09e059457a033de769f7cb789edc20810f4b95f5
+start_from_sha: 09e059457a033de769f7cb789edc20810f4b95f5
+start_from_ghi_chu: 'origin/master luc cap lease (merge PR #1023). Tu 11204f55 toi day chi RELEASE_MANIFEST.json va changelog.d doi (do wp1009); scanner, release.py, test_fragments.py, hai script deploy khong doi.'
+reviewed_sha_required: 09e059457a033de769f7cb789edc20810f4b95f5
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/pull/1031#issuecomment-6516958703
+granted_on_instruction_readback: 'chu kho duyet spec r4 spec_hash 2ee97b57...11d6 (blob 31b85c65, PR #1031 head 12d8202) va cho cap lease r4 g1 sau khi lease wp1009-cloud-setup-p1-r4-g4-claude nha RELEASE_MANIFEST.json; doc lai qua MCP get_comments 07:01Z. Bam byte KHONG DO DUOC.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+recorder_ghi_chu: 'phien ghi lease (phien soan spec) KHONG phai executor; executor la mot phien cloud MOI.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-30T07:10:44Z'
+  goc_quet: 'master 09e05945, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: 704, thieu 0; master cuc bo dong bo origin/master'
+  ket_qua: 'ca 5 duong dan: NGUOI_GIU 0 (wp1009-cloud-setup-p1-r4-g4-claude da het han 07:10Z sau rut han).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi, khong co lease truoc; lease wp1009 thuoc packet khac va da tu rut han, khong khai bia mo.'
+leased_at_utc: '2026-10-30T07:12:00Z'
+heartbeat_at: '2026-10-30T07:12:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-11-01T07:12:00Z'
+lease_expires_at_utc: '2026-11-01T07:12:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+attempts_basis: 'envelope mac dinh max_attempts_per_packet cua protocol §3.1; spec r4 khong khai rieng.'
+review_rounds_limit: 10
+budget:
+  codex_review_calls:
+    pr_wp1030_g1: {used: 0, reserved: 0, limit: 10}
+  attempt:
+    packet_1030_r4: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp1030-g1-claude MOT lan khi A1-A8 dat (hoac khai chua_do_duoc) va review approve; mo PR draft vao master'

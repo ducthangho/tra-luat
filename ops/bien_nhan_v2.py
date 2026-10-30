@@ -85,6 +85,15 @@ RC_KHONG_DO_DUOC = 2
 THU_MUC = "ops/reviews"
 
 
+def _hoi_trang_thai(hoi, p: Path) -> bool:
+    """`hoi()` (vd `p.is_dir`, `p.exists`) nhưng `OSError` ⇒ `KhongDoDuoc` nêu `p` (rc=2), không traceback.
+    #1021 lượt 2: chỉ `OSError` — lỗi lập trình phải đi thẳng ra (`c99` chốt 7)."""
+    try:
+        return hoi()
+    except OSError as ex:
+        raise KhongDoDuoc(f"không đọc được trạng thái {p} ({type(ex).__name__}: {ex})") from ex
+
+
 def _chon_bien_nhan(tm: Path) -> list:
     """Mọi mục trong `tm` có đuôi `.receipt.yaml`, so KHÔNG phân biệt hoa thường, sắp xếp.
 
@@ -97,8 +106,11 @@ def _chon_bien_nhan(tm: Path) -> list:
     Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê
     (⇒ danh sách rỗng ⇒ `KhongDoDuoc` "không có tệp"), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng ra
     rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG
-    trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình)."""
-    if not tm.is_dir():
+    trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình).
+
+    Lượt 2 (cùng slug, P2): `Path.is_dir()` chỉ nuốt ENOENT/ENOTDIR/… — `EACCES` khi `stat` vẫn NÉM, nên phép hỏi
+    "có phải thư mục" cũng đi qua `_hoi_trang_thai` như phép liệt kê."""
+    if not _hoi_trang_thai(tm.is_dir, tm):
         return []
     try:
         ds = [p for p in tm.iterdir() if p.name.lower().endswith(".receipt.yaml")]
@@ -1456,8 +1468,8 @@ def kiem(root: Path, allowlist=None, no_da_do=None, no_cau_lich_su=None, nhanh_m
     no = NO_DA_DO if no_da_do is None else no_da_do
     no_cau = NO_CAU_LICH_SU if no_cau_lich_su is None else no_cau_lich_su
     tm = root / THU_MUC
-    if not tm.is_dir():
-        if (root / ".git").exists():
+    if not _hoi_trang_thai(tm.is_dir, tm):                      # #1021 lượt 2: EACCES ở `stat` ⇒ rc=2
+        if _hoi_trang_thai((root / ".git").exists, root / ".git"):
             raise KhongDoDuoc(f"kho thật mà không có {tm} — không phải 'sạch'")
         return [], {"tong": 0, "dat": 0, "mien_tru": 0, "no": 0, "bo_qua_vi_khong_phai_kho": True}
 

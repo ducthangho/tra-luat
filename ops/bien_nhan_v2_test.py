@@ -3742,6 +3742,95 @@ def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE()
                  f"liệt kê hỏng {list(co)}: đòi rc=2 'không liệt kê được'; được rc={rc}: {loi[-300:]!r}")
 
 
+@ca
+def c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang():
+    """#1021, cross-review Codex lượt 2. Ba chốt, mỗi chốt một đột biến riêng (m148–m152):
+    5. `stat` của `ops/reviews` ném `PermissionError` (`is_dir()` chỉ nuốt ENOENT/ENOTDIR/…) ⇒ cả `kiem` lẫn
+       `--sinh-no` rc=2 nêu "không đọc được trạng thái", không traceback (P2 `loi-do-liet-ke-thu-muc-thoat-traceback`,
+       biểu hiện thứ hai) — m148 helper hỏi `is_dir()` trần, m149 guard của `kiem` hỏi trần, m150 bỏ bắt `OSError`.
+    6. Kho thiếu `ops/reviews` mà `stat` của `.git` ném ⇒ `kiem` rc=2 nêu `.git`, không traceback — m151.
+    7. Lỗi LẬP TRÌNH (`RuntimeError` mốc) ở phép liệt kê hoặc phép hỏi thư mục phải đi THẲNG ra khỏi `main`, đúng
+       đối tượng, trên cả hai đường (P3 `loi-do-thieu-chot-ngoai-le-lap-trinh`) — m152 nới bắt liệt kê thành
+       `Exception`, m153 nới `_hoi_trang_thai` thành `Exception`."""
+    import contextlib
+    import io
+
+    def cli(tmp, *co):
+        ra, loi = io.StringIO(), io.StringIO()
+        try:
+            with contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
+                rc = bnv2.main(["--root", str(tmp), *co])
+        except LoiDungCa:
+            raise
+        except Exception as ex:                                   # noqa: BLE001
+            bang(False, f"{list(co)}: CLI chết bằng {type(ex).__name__}: {ex} — đòi mã thoát, không traceback")
+        return rc, ra.getvalue(), loi.getvalue()
+
+    def tiem(ten, dich, loi_tao):
+        """Thay `Path.<ten>` bằng bản ném `loi_tao()` khi đúng `dich`; trả (khôi phục, đếm lượt trúng)."""
+        goc = getattr(Path, ten)
+        trung = []
+
+        def gia(self, *a, **k):
+            if Path(self).resolve() == dich:
+                trung.append(1)
+                raise loi_tao()
+            return goc(self, *a, **k)
+        setattr(Path, ten, gia)
+        return (lambda: setattr(Path, ten, goc)), trung
+
+    # (5) stat của thư mục biên nhận ném EACCES
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        _ghi_bn_cau(tmp, k, {"y.receipt.yaml": "a: 1\n"})
+        dich = (tmp / bnv2.THU_MUC).resolve()
+        for co in ((), ("--sinh-no",)):
+            tra, trung = tiem("is_dir", dich, lambda: PermissionError(13, "Permission denied (tiêm stat, #1021)"))
+            try:
+                rc, ra, loi = cli(tmp, *co)
+            finally:
+                tra()
+            dung(trung, f"fixture: is_dir của {dich} không được hỏi {list(co)}")
+            bang(rc == 2 and "không đọc được trạng thái" in loi and "Traceback" not in ra + loi,
+                 f"stat hỏng {list(co)}: đòi rc=2 'không đọc được trạng thái'; được rc={rc}: {loi[-300:]!r}")
+    # (6) kho thiếu ops/reviews, stat của .git ném
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        _kho_cau(tmp)
+        dung(not (tmp / bnv2.THU_MUC).exists(), "fixture: ops/reviews không được tồn tại")
+        tra, trung = tiem("exists", (tmp / ".git").resolve(),
+                          lambda: PermissionError(13, "Permission denied (tiêm .git, #1021)"))
+        try:
+            rc, ra, loi = cli(tmp)
+        finally:
+            tra()
+        dung(trung, "fixture: exists của .git không được hỏi")
+        bang(rc == 2 and "không đọc được trạng thái" in loi and ".git" in loi and "Traceback" not in ra + loi,
+             f".git hỏng: đòi rc=2 nêu .git; được rc={rc}: {loi[-300:]!r}")
+    # (7) lỗi lập trình đi thẳng
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        k = _kho_cau(tmp)
+        _ghi_bn_cau(tmp, k, {"y.receipt.yaml": "a: 1\n"})
+        dich = (tmp / bnv2.THU_MUC).resolve()
+        for ten in ("iterdir", "is_dir"):
+            for co in ((), ("--sinh-no",)):
+                moc = RuntimeError(f"mốc lỗi lập trình #1021 ({ten})")
+                tra, trung = tiem(ten, dich, lambda: moc)
+                bay = None
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                        bnv2.main(["--root", str(tmp), *co])
+                except RuntimeError as ex:
+                    bay = ex
+                finally:
+                    tra()
+                dung(trung, f"fixture: {ten} của {dich} không được hỏi {list(co)}")
+                bang(bay is moc, f"lỗi lập trình ở {ten} {list(co)} bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, "
+                                 f"được {type(bay).__name__ if bay else 'không ngoại lệ'}")
+
+
 def _chay_1(fn):
     global _CA
     _CA = fn.__name__
@@ -4562,12 +4651,37 @@ def _dot_bien():
     do("m145_bo_chon_khong_sap_xep", lambda: _dot_bien_tep("    return sorted(ds)\n", "    return ds\n"),
        C99, "thứ tự duyệt theo hệ tệp, không sắp xếp", doi_chung=DC)
     do("m146_bo_chon_bo_nhanh_thu_muc_vang", lambda: _dot_bien_tep(
-        "    if not tm.is_dir():\n        return []\n    try:", "    try:"),
+        "    if not _hoi_trang_thai(tm.is_dir, tm):\n        return []\n    try:", "    try:"),
        C99, "`--sinh-no` trên kho thiếu ops/reviews thành lỗi đo", doi_chung=DC)
     do("m147_bo_chon_bo_bat_OSError", lambda: _dot_bien_tep(
         "    except OSError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được",
         "    except ZeroDivisionError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được"),
        C99, "lỗi liệt kê thoát thành traceback (Codex lượt 1)", doi_chung=DC)
+    # Codex lượt 2 (#1021): lỗi `stat` trước liệt kê + lỗi lập trình phải đi thẳng — chốt của `c100`.
+    C100 = "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang"
+    do("m148_bo_chon_hoi_is_dir_TRAN", lambda: _dot_bien_tep(
+        "    if not _hoi_trang_thai(tm.is_dir, tm):\n        return []", "    if not tm.is_dir():\n        return []"),
+       C100, "`--sinh-no`: EACCES ở `stat` thoát thành traceback", doi_chung=DC)
+    do("m149_kiem_guard_hoi_is_dir_TRAN", lambda: _dot_bien_tep(
+        "    if not _hoi_trang_thai(tm.is_dir, tm):                      # #1021",
+        "    if not tm.is_dir():                      # #1021"),
+       C100, "`kiem`: EACCES ở `stat` thoát thành traceback", doi_chung=DC)
+    do("m150_hoi_trang_thai_bo_bat_OSError", lambda: _dot_bien_tep(
+        "    except OSError as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái",
+        "    except ZeroDivisionError as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái"),
+       C100, "lỗi `stat` thoát thành traceback ở cả hai đường", doi_chung=DC)
+    do("m151_kiem_hoi_git_TRAN", lambda: _dot_bien_tep(
+        "        if _hoi_trang_thai((root / \".git\").exists, root / \".git\"):",
+        "        if (root / \".git\").exists():"),
+       C100, "`stat` của `.git` thoát thành traceback", doi_chung=DC)
+    do("m152_bo_chon_bat_Exception", lambda: _dot_bien_tep(
+        "    except OSError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được",
+        "    except Exception as ex:\n        raise KhongDoDuoc(f\"không liệt kê được"),
+       C100, "lỗi lập trình ở phép liệt kê bị đổi thành KHÔNG ĐO ĐƯỢC", doi_chung=DC)
+    do("m153_hoi_trang_thai_bat_Exception", lambda: _dot_bien_tep(
+        "    except OSError as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái",
+        "    except Exception as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái"),
+       C100, "lỗi lập trình ở phép hỏi thư mục bị đổi thành KHÔNG ĐO ĐƯỢC", doi_chung=DC)
     return ra
 
 

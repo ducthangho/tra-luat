@@ -3,7 +3,7 @@
 #
 # TRANG THAI: merged (09e05945), `landed: false`. Ly do: (4) review khong neo DUNG authorized_head_sha 5b76266d — luot approve cuoi (L6)
 # neo 4cbb418, 5b76266d = 4cbb418 + merge origin/master (gom #1018); (5) khong co duyet ben neo DUNG 5b76266d, chi hanh dong merge;
-# (1) provenance CI §10.2.2 cua gate hau merge: moc Workflow definition chua do (GraphQL 403 trong phien web); Run, Checkout, Gate output da do.
+# (1) provenance CI §10.2.2 cua gate hau merge: DA DU bon moc (Workflow definition qua GraphQL chay tren may chu kho).
 # DIEM KHAC cac ho so truoc: run.json cua launcher.py run ghi DUOC model phuc vu (`model_phuc_vu_trang_thai: DO_DUOC`,
 # model `gpt-6.1-sol`, ho openai) — §8.1 `cross_approved` muc (i) `do_may` DAT cho CHINH cac lan chay ay; chi thieu neo SHA.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
@@ -43,7 +43,7 @@ pre_merge_checks:
   - {name: 'Codex connector', conclusion: 'not_measured — khong co lan review connector hoan tat tren PR #1023', nguon: readback-comments-1023.json}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-1023.json, readback-review-comments-1023.json]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41017062295, run_attempt: 1, sha: 09e059457a033de769f7cb789edc20810f4b95f5, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', luc: '2026-10-30T06:56:4xZ -> 2026-10-30T07:57:57Z', kiem_gate: 'measured — kiem-gate/kiem-gate-09e05945.txt: packet_loop.py kiem-gate suite 111185156706 cua run 41017062295, check-runs filter=all, 23 ten tu readback-jobs-41017062295.json, rc=0', nguon: [readback-run-41017062295.json, readback-jobs-41017062295.json, readback-check-runs-09e05945-all.json, kiem-gate/kiem-gate-09e05945.txt, gate-output-41017062295.txt], moc_run: 'measured — readback-run-41017062295.json head_sha 09e05945, completed success; readback-jobs-41017062295.json 23/23.', moc_checkout: 'measured — gate-output-41017062295.txt: 22/22 job gate* in dong git log -1 --format=%H = 09e059457a033de769f7cb789edc20810f4b95f5 (log tai qua REST actions/jobs/<id>/logs ~08:15Z, sha256 tung log ghi kem); job chuan-bi khong co buoc checkout. Tree suy tu SHA: 91b21b8c62dfb1b6a2ea66276aeed92de267b234 (merge-va-diff.txt).', moc_gate_output: 'measured — gate-output-41017062295.txt: job gate (ubuntu-latest) in == tl selftest 1758/1758 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 == (2x), TỔNG: ĐẠT (2x); gate-ops TONG: DAT + TỔNG: ĐẠT; gate-packet-loop TỔNG: ĐẠT; khong job nao co ##[error] hay exit code khac 0. Mot dong {"ok": false, "error": "STUB_EARLY_EXIT"} trong log gate la output fixture cua transport selftest (ngay sau == transport selftest 12/12 ==), khong phai gate do. Manh gate-nhanh-manh/gate-cong-cu dua ket qua qua artifact, gop o job -gop.', moc_workflow_definition: 'not_measured — can WorkflowRun.file qua GraphQL (403 trong phien web); REST: path .github/workflows/ci.yml, node_id WFR_kwLOTNeRjc8AAAAJjM6zlw; blob ky vong tai 09e05945 = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc (git rev-parse 09e05945:.github/workflows/ci.yml). Cho chu kho chay lenh gh api graphql tren cmd.', ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows da do tren head truoc merge (pre_merge_checks, run 41004664516).'}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41017062295, run_attempt: 1, sha: 09e059457a033de769f7cb789edc20810f4b95f5, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', luc: '2026-10-30T06:56:4xZ -> 2026-10-30T07:57:57Z', kiem_gate: 'measured — kiem-gate/kiem-gate-09e05945.txt: packet_loop.py kiem-gate suite 111185156706 cua run 41017062295, check-runs filter=all, 23 ten tu readback-jobs-41017062295.json, rc=0', nguon: [readback-run-41017062295.json, readback-jobs-41017062295.json, readback-check-runs-09e05945-all.json, kiem-gate/kiem-gate-09e05945.txt, gate-output-41017062295.txt, graphql-workflowrun-file-41017062295.txt, readback-contents-ci-yml-09e05945.json], moc_run: 'measured — readback-run-41017062295.json head_sha 09e05945, completed success; readback-jobs-41017062295.json 23/23.', moc_checkout: 'measured — gate-output-41017062295.txt: 22/22 job gate* in dong git log -1 --format=%H = 09e059457a033de769f7cb789edc20810f4b95f5 (log tai qua REST actions/jobs/<id>/logs ~08:15Z, sha256 tung log ghi kem); job chuan-bi khong co buoc checkout. Tree suy tu SHA: 91b21b8c62dfb1b6a2ea66276aeed92de267b234 (merge-va-diff.txt).', moc_gate_output: 'measured — gate-output-41017062295.txt: job gate (ubuntu-latest) in == tl selftest 1758/1758 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 == (2x), TỔNG: ĐẠT (2x); gate-ops TONG: DAT + TỔNG: ĐẠT; gate-packet-loop TỔNG: ĐẠT; khong job nao co ##[error] hay exit code khac 0. Mot dong {"ok": false, "error": "STUB_EARLY_EXIT"} trong log gate la output fixture cua transport selftest (ngay sau == transport selftest 12/12 ==), khong phai gate do. Manh gate-nhanh-manh/gate-cong-cu dua ket qua qua artifact, gop o job -gop.', moc_workflow_definition: 'loi_khai_co_neo + measured — graphql-workflowrun-file-41017062295.txt: WorkflowRun.file chay tren may chu kho (gh CLI chu kho, qua phien executor, ~08:25Z) cho databaseId 41017062295, file.path .github/workflows/ci.yml, repositoryFileUrl neo blob tai 09e05945, checkSuite.commit.oid 09e05945; phien dieu phoi do lai: readback-contents-ci-yml-09e05945.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size 69161 = git rev-parse 09e05945:.github/workflows/ci.yml; sha256 noi dung ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb. Phan GraphQL la loi khai co neo (phien dieu phoi khong goi duoc GraphQL)', ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows da do tren head truoc merge (pre_merge_checks, run 41004664516).'}
 bookkeeping:
   - {item: 'rut han lease wp1009-cloud-setup-p1-r4-g4-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: ccr-004fa546-sde2w7}
@@ -88,15 +88,15 @@ trang_thai_packet:
     9d3ac97a… (13 tep, 716 dong them).
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 09e05945: CHUA DAT day du — measured: moc Run (REST 23/23, kiem-gate rc=0), moc Checkout (22/22 log = 09e05945), moc Gate output (marker duong, gate-output-41017062295.txt); not_measured: moc
-    Workflow definition cua §10.2.2 (GraphQL 403); (2) lease da nha: rut han — xem lease.thu_hoi_cuoi; (3) bookkeeping:
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 09e05945: DAT — bon moc §10.2.2: Run (REST 23/23, kiem-gate rc=0), Checkout (22/22 log =
+    09e05945), Workflow definition (WorkflowRun.file chay tren may chu kho + blob 82d9f239 doi chieu REST/git), Gate output (marker duong,
+    gate-output-41017062295.txt); (2) lease da nha: rut han — xem lease.thu_hoi_cuoi; (3) bookkeeping:
     ho so nay; (4) review neo DUNG authorized_head_sha 5b76266d: CHUA DAT — luot approve cuoi neo 4cbb418; khac biet 4cbb418..5b76266d
     chi la merge origin/master (diff packet so merge-base khong doi, 716 dong ca hai) nhung protocol doi neo DUNG SHA; (5) uy quyen land
     neo SHA: CHUA DAT — chi co hanh dong merge va chi thi trong phien; (6) muc tieu packet: tieu chi spec r4 dat theo gate executor va CI
     hai nen (pre_merge_checks); (7) reviewer assurance §8.1: DAT cho chinh luot L6 tren 4cbb418 o muc (i) `do_may`
     (model_phuc_vu DO_DUOC, ho openai khac ho executor claude), nhung luot ay KHONG neo 5b76266d nen (4) van chan.
-    Mo lai — TAT CA: (1) do moc Workflow definition cho DUNG run 41017062295 (lenh gh api graphql cho chu kho chay tren cmd, muc
-    CLAUDE.md; doi chieu blob 82d9f239); VA (4)+(7) mot luot review doc lap tren DUNG 5b76266d qua launcher.py run co model_phuc_vu DO_DUOC
+    Mo lai — TAT CA: (4)+(7) mot luot review doc lap tren DUNG 5b76266d qua launcher.py run co model_phuc_vu DO_DUOC
     ho khac claude; VA (5) chu kho ghi duyet ben neo 5b76266d.
 
 uy_quyen_land:
@@ -130,6 +130,6 @@ no_ngoai_pham_vi:
   - {ma: 'cloud-setup-p3', muc: P2, ghi_chu: 'Ghi nguoc auth.json co CAS qua action GAS moi + nap lai jar NLM khi 401 — packet P3 (can deploy webapp, buoc LIVE).'}
 
 khong_do_duoc:
-  - 'Provenance CI §10.2.2 cua gate hau merge 41017062295: moc Workflow definition KHONG_DO_DUOC (GraphQL 403 trong phien web). Checkout va Gate output da do tu log (gate-output-41017062295.txt).'
+  - 'GraphQL WorkflowRun.file: phien dieu phoi KHONG goi truc tiep (403); output do may chu kho chay, chuyen qua phien executor — loi khai co neo, phan REST/git do lai.'
   - 'run.json va VERDICT cua L1-L3, L5 khong luu trong kho; chi co bam (thuat_lai tu executor).'
   - 'Codex connector khong hoan tat review tren PR #1023.'

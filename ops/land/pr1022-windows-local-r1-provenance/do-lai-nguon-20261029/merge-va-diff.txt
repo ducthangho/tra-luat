@@ -1,0 +1,11 @@
+merge d31df1eb84c31514537d08f51ecb9a20b3cc07fc tree dbef3516db6055cd1d5b5d88736a6c9b69dbfe10 parents 96667715996d41bc45e70a64fbaa8996de20f6a0 f4d15edcb5d0a9742182273e5950f76165060667
+head f4d15edcb5d0a9742182273e5950f76165060667 tree dbef3516db6055cd1d5b5d88736a6c9b69dbfe10
+merge-base=96667715996d41bc45e70a64fbaa8996de20f6a0
+diff P1..M sha256 014c581a1c408c6c1f6361eb97744ef982bd18f9ec916605c1b40a708e351f9d
+ docs/PROTOCOL_DA_PHIEN.md                  |  2 +
+ docs/adr/0057-windows-local-may-chu-kho.md | 73 ++++++++++++++++++++++++++++++
+ 2 files changed, 75 insertions(+)
+diff MB..H sha256 014c581a1c408c6c1f6361eb97744ef982bd18f9ec916605c1b40a708e351f9d
+# commit nhanh PR:
+f4d15edcb5d0a9742182273e5950f76165060667 2026-10-29T10:56:35+00:00 Claude docs(protocol): cau con tro §10.2 ve ADR-0057 viet trung tinh, khong tao nghia vu (review luot 1, P1 con-tro-tao-them-nghia-vu)
+fff91390dafb3b8a16e6d11a7243dce036618260 2026-10-29T10:46:45+00:00 Claude docs: ADR-0057 may Windows local cua chu kho (WINDOWS-LOCAL-MAY-CHU-KHO r1 g1, mission #748)

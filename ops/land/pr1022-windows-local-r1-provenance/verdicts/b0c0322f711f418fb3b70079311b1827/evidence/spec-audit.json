@@ -1,0 +1,92 @@
+{
+  "head": "fff91390dafb3b8a16e6d11a7243dce036618260",
+  "tree": "9e6aaf583c41659cd0379292b80b07a110075605",
+  "numstat": [
+    [
+      "2",
+      "0",
+      "docs/PROTOCOL_DA_PHIEN.md"
+    ],
+    [
+      "73",
+      "0",
+      "docs/adr/0057-windows-local-may-chu-kho.md"
+    ]
+  ],
+  "files": 2,
+  "added_lines": 75,
+  "write_set": [
+    "docs/adr/0057-windows-local-may-chu-kho.md",
+    "docs/PROTOCOL_DA_PHIEN.md"
+  ],
+  "measurements": [
+    {
+      "row": "D1",
+      "spec_measurement": "`t192_S8` đỏ khi chạy song song; chạy riêng trên `e9967f0` lúc máy rảnh ra 3/3 ĐẠT (8 s)",
+      "adr_measurement": "`t192_S8` đỏ khi chạy song song; chạy riêng trên `e9967f0` lúc máy rảnh ra 3/3 ĐẠT (8 s)",
+      "numeric_tokens_equal": true
+    },
+    {
+      "row": "D2",
+      "spec_measurement": "PID 17016 (`wp960-win`) và PID 22884 (`tl1014`, PR #1014 đã đóng) chạy `bien_nhan_v2_test` từ 09:06Z và 09:10Z, ngoài khoá, trong lúc phiên #1006 giữ khoá từ 09:24Z",
+      "adr_measurement": "PID 17016 (`wp960-win`) và PID 22884 (`tl1014`, PR #1014 đã đóng) chạy `bien_nhan_v2_test` từ 09:06Z và 09:10Z, ngoài khoá, trong lúc phiên #1006 giữ khoá từ 09:24Z",
+      "numeric_tokens_equal": true
+    },
+    {
+      "row": "D3",
+      "spec_measurement": "65 phút với `pl.out` = 0 byte rồi phải dừng tay",
+      "adr_measurement": "65 phút với `pl.out` = 0 byte rồi phải dừng tay",
+      "numeric_tokens_equal": true
+    },
+    {
+      "row": "D4",
+      "spec_measurement": "Desktop Commander trả `CONNECT_TIMEOUT` cho `session_015GtxrZ1Tt93F4NLUUhKYQy` lúc ~09:00Z và ~09:23Z; máy offline khoảng 3 giờ trước 07:48Z",
+      "adr_measurement": "Desktop Commander trả `CONNECT_TIMEOUT` cho `session_015GtxrZ1Tt93F4NLUUhKYQy` lúc ~09:00Z và ~09:23Z; máy offline khoảng 3 giờ trước 07:48Z",
+      "numeric_tokens_equal": true
+    },
+    {
+      "row": "D5",
+      "spec_measurement": "`tl selftest` 1738/1738 local trong khoảng 10 phút; Windows CI qua `workflow_dispatch` ~40 phút cộng hàng đợi, và hôm đó bị billing chặn nhiều giờ",
+      "adr_measurement": "selftest của `tl.py` 1738/1738 local trong khoảng 10 phút; Windows CI qua `workflow_dispatch` ~40 phút cộng hàng đợi, hôm đó bị billing chặn nhiều giờ",
+      "numeric_tokens_equal": true
+    },
+    {
+      "row": "D6",
+      "spec_measurement": "trên master: `t27` (Windows-only, packet #1006), `r929` (WinError 5, đã vá #1010), `bien_nhan_v2_test` c91/c93/c96 (#1017)",
+      "adr_measurement": "trên master: `t27` (Windows-only, packet #1006), `r929` (WinError 5, đã vá #1010), `bien_nhan_v2_test` c91/c93/c96 (#1017)",
+      "numeric_tokens_equal": true
+    }
+  ],
+  "section20_row_count": 1,
+  "section20_row": "| `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI | Accepted | không cổng — kỷ luật executor |",
+  "protocol_added_lines": [
+    "Chạy test thêm trên máy Windows local của chủ kho, khi máy online, theo `ADR-0057`.",
+    "| `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI | Accepted | không cổng — kỷ luật executor |"
+  ],
+  "pointer_line": 1015,
+  "references_verified_locally": {
+    "1cc847d": "1cc847defbe646c68f4126144dbc80e02eafd61b Merge pull request #1004 from ducthangho/ccr-004fa546-sde2w7",
+    "e9967f0": "e9967f07b95c6458afc63dabf4a5c0494e90eca7 Merge pull request #1013 from ducthangho/agent/land-evidence-l7-r2-claude",
+    "PR#1010": "d8d5571e7c1669360eba672f2547d14081039b9b Merge pull request #1010 from ducthangho/agent/land-81-ha-cap-r2-claude",
+    "PR#1020": "96667715996d41bc45e70a64fbaa8996de20f6a0 Merge pull request #1020 from ducthangho/claude/gallant-fermat-34kgb9",
+    "t192_S8": "ops/lease_publish_test.py:10767",
+    "c91": "ops/bien_nhan_v2_test.py:3093",
+    "c93": "ops/bien_nhan_v2_test.py:3282",
+    "c96": "ops/bien_nhan_v2_test.py:3408",
+    "r929": ".claude/dev/packet_loop_test.py:8470"
+  },
+  "gate_paths_scanned": [
+    "ops/lease_publish.py",
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/launcher.py",
+    ".claude/dev/gate_lifecycle.py",
+    ".github/workflows/ci.yml",
+    ".github/workflows/ops-publish-lease.yml"
+  ],
+  "gate_hits": [],
+  "limits": [
+    "Numeric comparison does not prove causality of Windows measurements.",
+    "Frozen spec is the source for D1-D6; Windows logs are not supplied.",
+    "PR #1014, packet #1006, #1017, mission #748 and authority comment are not independently read back from GitHub."
+  ]
+}

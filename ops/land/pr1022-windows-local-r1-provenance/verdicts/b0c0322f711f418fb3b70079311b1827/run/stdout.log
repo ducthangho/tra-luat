@@ -1,0 +1,3 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/rv/wlmck-r1-review-1/VERDICT.md).
+
+Kết luận: `changes_requested`, **1 P1** về câu con trỏ §10.2 có thể làm rộng nghĩa vụ chạy local. Cả ba kiểm tra bắt buộc đều đạt; checkout `cay-kho/` giữ nguyên.

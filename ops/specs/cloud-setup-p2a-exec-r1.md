@@ -1,15 +1,15 @@
 # Đặc tả packet — `CLOUD-SETUP-P2A-EXEC` (revision 1)
 
 - `packet_id`: **CLOUD-SETUP-P2A-EXEC** · `packet_issue`: **#1038** (Issue cha #1008) · `revision`: **1** · trạng thái:
-  **BẢN NHÁP — CHƯA ĐÓNG BĂNG.** Chỉ đóng băng sau bước LIVE (mục *Bước LIVE trước đóng băng*), vì mục tiêu 3 cần fileId thật.
-  Băm `sha256` ghi trên Issue #1038 và PR khi đóng băng, không ghi trong tệp · soạn 30-10-2026, phiên
+  **ĐÓNG BĂNG** 30-10-2026 ~16:25Z, sau bước LIVE (fileId thật ở mục tiêu 3). Băm `sha256` ghi trên Issue #1038 và PR #1042,
+  không ghi trong tệp. Sửa nội dung từ đây ⇒ revision 2 · soạn 30-10-2026, phiên
   `session_015GtxraXfMD1t2FJLzzGDr4`.
 - `nguon_cap_viec`: chỉ thị trực tiếp của chủ kho (Issue cha #1008, chuỗi `cloud-setup`). P2 tách thành P2a/P2b (vòng 1 Q6);
   phạm vi P2a chốt qua ba vòng hỏi trong phiên nói trên (vòng 1 Q1–Q7 "đồng ý khuyến nghị cả bảy"; vòng 2 Q8–Q12 và vòng 3
   Q13–Q18 "đồng ý khuyến nghị cả sáu"). Không có dòng kế hoạch nào trong `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md`.
 - `review_class`: **sensitive** — chạm ranh giới credential (đặt token vào môi trường tiến trình con) và hook
   `.claude/hooks/pretooluse_guard.py` (protocol §8).
-- Base dự kiến: `origin/master` lúc cấp lease (đo 09:17Z 30-10: `757bde56`). Mọi phép đo kích thước/delta đo so merge-base
+- Base dự kiến: `origin/master` lúc cấp lease (đo lại 16:15Z 30-10: `5e458f47`, merge PR #1044). Mọi phép đo kích thước/delta đo so merge-base
   (`git diff origin/master...HEAD`).
 - `nang_tran`: chủ kho đồng ý vòng 3 Q17 trong phiên nói trên (đồng ý cả sáu khuyến nghị Q13–Q18). Trần của packet này:
   **≤ 13 tệp / ≤ 450 dòng thêm** (thay `ADR-0053` CHỈ cho packet này — trần dòng giữ nguyên, trần tệp nâng vì các tệp cơ học
@@ -48,7 +48,12 @@ một lệnh mới giải mã trong bộ nhớ và đặt biến **chỉ cho đ�
 Mười ba tệp = trần (`nang_tran`). Tệp 4–10 là danh sách P1 r4 đã chứng minh mỗi lệnh `tl` mới kéo theo (đặc tả
 `ops/specs/cloud-setup-p1-bundle-r4.md`, phần mở đầu: CI đỏ ở đúng các tệp ấy khi thiếu chúng). Đo 09:17Z 30-10 trên `757bde56`:
 `command_registry_test.py` ghim `198` lệnh lá / `200` node; `pretooluse_guard_test.py:637-640` ghim `= 105` lệnh ghi;
-manifest 193 tệp. Đo `ai-dang-giu` cho cả 13 đường dẫn lúc cấp lease (chưa đo — bản nháp).
+manifest 193 tệp (đo lại 16:15Z trên `5e458f47`: 193, `198`/`200` và `= 105` không đổi).
+`ai-dang-giu` 16:21Z 30-10 (sau `git branch -f master origin/master`; lần đầu CHAN [12] vì master cục bộ tụt 24 commit): **11/13 đường dẫn
+`NGƯỜI_GIỮ 0`**; **`scripts/tl_selftest.py` và `RELEASE_MANIFEST.json` ⇒ `NGƯỜI_GIỮ 1: wp1030-r6-g1-claude`** (packet #1030, PR #1046,
+hạn `2026-11-01T07:12Z`). Bất biến: **KHÔNG cấp lease P2a khi lease ấy còn giữ hai đường dẫn** — chờ #1030 land và lease ấy rút hạn/
+hết hạn, hoặc chủ kho quyết khác. #1030 đổi ratchet số tệp gói 193→194 và nền selftest 1758→1759: nếu land trước, đo lại G1/J1
+trên base mới lúc cấp lease (không phải đổi spec — các tiêu chí đo DELTA so base).
 
 ## `ngoai_pham_vi`
 
@@ -109,7 +114,7 @@ Mỗi dòng chiếu vào đúng một đường dẫn ở `write_set` (L2).
 
 ## `nghiem_thu`
 
-Tiền tố ca `r1000_` (đo 09:17Z 30-10: số `r` lớn nhất trong `scripts/tl_selftest.py` là `r999`; đã có thì lấy số kế tiếp còn
+Tiền tố ca `r1000_` (đo 09:17Z, đo lại 16:15Z 30-10: số `r` lớn nhất trong `scripts/tl_selftest.py` là `r999`; đã có thì lấy số kế tiếp còn
 trống và ghi handoff). Mỗi ca kèm đột biến đổi màu (L3), chạy trên BẢN SAO TẠM.
 
 | # | mục tiêu | tiêu chí | phép đo làm ĐỎ (đột biến) |
@@ -163,7 +168,12 @@ selftest ~150, changelog ~8, manifest ~20 ⇒ **khoảng 300 dòng thêm trên 1
    `TL_AGENT_CREDS_FILEID=F` (chỉ trong tiến trình đó) và `TL_MASTER_KEY` mới: `bootstrap` ⇒ `agent_creds: ĐÃ NẠP` và
    `rev=1`. Không dựa vào hằng `AGENT_CREDS_FILEID` (còn rỗng tới lúc thi hành) hay vào một `TL_AGENT_CREDS_FILEID` có
    sẵn trong môi trường (có thể trỏ bundle cũ). `F` điền vào mục tiêu 3 và tiêu chí B1.
-6. ☐ Cập nhật `TL_MASTER_KEY` (biến User laptop; chủ kho dán vào Claude Code web và Codex cloud).
+6. ✅ Cập nhật `TL_MASTER_KEY` (biến User laptop; chủ kho dán vào Claude Code web và Codex cloud).
+
+- Bước 6 (~16:05Z): biến User `TL_MASTER_KEY` trên laptop = khoá mới (43 ký tự, khác khoá cũ); chủ kho đặt `TL_MASTER_KEY` +
+  `TL_AGENT_CREDS_FILEID` trong Claude Code web và Codex cloud. Kiểm phiên mới `session_015GtxrbQ212YgPV1gUBqBGh` (16:13Z):
+  `bootstrap --require-agent-creds` rc 0, `agent_creds: ĐÃ NẠP — rev=1`; `tl ping` ok (webapp 2.21.2p); `gws-ping` rc 0.
+  Quan sát cho P2b: `gws`/`nlm` cài vào `~/.local/bin` không nằm trong PATH phiên cloud.
 
 Kết quả LIVE (đo 30-10-2026 trên laptop chủ kho qua Desktop Commander; giá trị credential không in ra):
 - Bước 3: backup bundle cũ `C:\Users\admin\tl-work\tl_secrets.enc.backup-20261030-220452` (37256 B, sha256 `2F023F6B…`) cùng khoá cũ ở

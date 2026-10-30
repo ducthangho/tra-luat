@@ -1311,6 +1311,7 @@ _CREDS_LAZY_CMDS = frozenset({
     "rasoat-merge",   # handler tự khai "Không gọi mạng, không NLM" — thuần cục bộ, không có đường dùng creds
     "state-get",      # handler CÓ `except SystemExit → CAN_WEBAPP_LIVE` (rc=2 + JSON) nhưng là CODE CHẾT khi main() thoát trước
     "state-put",      # nhánh `--dry-run` return TRƯỚC load_creds (cục bộ thuần) + cùng `CAN_WEBAPP_LIVE` chết như trên
+    "rasoat-dot-check",   # LỚP 3: chỉ đọc <out-dir> cục bộ — cùng lớp doc-claims-check/rasoat-merge
 })
 
 
@@ -1365,6 +1366,7 @@ _tl_fetch_web = _tl_core_import("fetch_web")            # noqa: E402 — I3 v1.3
 _tl_profile_mgmt = _tl_core_import("profile_mgmt")      # noqa: E402 — I4 v1.34.7
 _tl_ingest_ops = _tl_core_import("ingest_ops")          # noqa: E402 — I5 v1.34.8
 _tl_lookup_ops = _tl_core_import("lookup_ops")     # noqa: E402 — I6 v1.34.9
+_tl_rasoat_dot_check = _tl_core_import("rasoat_dot_check")   # noqa: E402 — LỚP 3 bóc khỏi lookup_ops (ratchet py_size)
 _tl_ops_misc = _tl_core_import("ops_misc")        # noqa: E402 — I8 v1.34.12
 _tl_classify = _tl_core_import("classify")        # noqa: E402 — I9a v1.34.13
 _tl_profile_env = _tl_core_import("profile_env")  # noqa: E402 — I9a v1.34.13
@@ -1541,7 +1543,11 @@ _STUB_MAP = {
         '_docpatch_norm', '_docpatch_vung_doc', '_docpatch_vung_ghi', '_docpatch_ap',
         '_docpatch_tim_file', '_docpatch_sha', '_docpatch_cache_dir', 'cmd_doc_patch',   # r217 sửa-theo-điểm (note CUỐI dòng — I11)
         '_rasoat_corpus_hieu_luc',   # r295 RAS-13 predicate corpus-hiệu-lực dùng chung (note CUỐI dòng — I11)
-        '_rasoat_state_validate', '_rasoat_state_newest',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
+        '_rasoat_state_validate', '_rasoat_state_newest', '_rasoat_thieu_gia_tri',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
+    ],
+    "rasoat_dot_check": [
+        '_khoa_hop_le', '_dinh_danh_chuan_hoa', '_nfc_lech', '_nfc_lech_json', '_dot_check_nfc', '_tra_kho_doc',
+        '_dot_check_tra_kho', '_dot_check_so_lieu', 'cmd_rasoat_dot_check',   # LỚP 3 (note CUỐI dòng — I11)
     ],
     "nlm_ops": [
         '_slice_dieu', '_split_source_ids', '_strip_font_runs', '_vbqppl_notebooks',   # I11
@@ -1756,6 +1762,12 @@ _NLM_ROTATION_COOKIE_NAMES = _tl_nlm_ops._NLM_ROTATION_COOKIE_NAMES  # r208c 3.1
 _RASOAT_STATE_ALLOWED = _tl_lookup_ops._RASOAT_STATE_ALLOWED         # r213 ĐỢT 5 — HẰNG re-export trực tiếp (bẫy I11)
 _RASOAT_BANG_SCHEMA = _tl_lookup_ops._RASOAT_BANG_SCHEMA             # r213 ĐỢT 5 — như trên
 _RASOAT_VB_META_FIELDS = _tl_lookup_ops._RASOAT_VB_META_FIELDS       # r213 ĐỢT 5 — như trên
+_DOT_CHECK_SCHEMA = _tl_rasoat_dot_check._DOT_CHECK_SCHEMA                 # LỚP 3 — HẰNG re-export trực tiếp (bẫy I11)
+_TRA_KHO_TRUONG = _tl_rasoat_dot_check._TRA_KHO_TRUONG                     # LỚP 3 — như trên
+_TRA_KHO_KHOA = _tl_rasoat_dot_check._TRA_KHO_KHOA                         # LỚP 3 — như trên
+_TRA_KHO_KET_QUA = _tl_rasoat_dot_check._TRA_KHO_KET_QUA                   # LỚP 3 F2 enum ĐÓNG — như trên (bẫy I11)
+_DOT_CHECK_THIEU_TT = _tl_rasoat_dot_check._DOT_CHECK_THIEU_TT             # LỚP 3 — như trên
+_DOT_CHECK_SO_TRA_KHO = _tl_rasoat_dot_check._DOT_CHECK_SO_TRA_KHO         # LỚP 3 — như trên
 
 # ── I11: re-export bảng hằng đã chuyển (hàm rebase đọc globals tl → giữ tên tại đây) ──
 INSTRUCTION_REQUIRED = _tl_ops_misc.INSTRUCTION_REQUIRED
@@ -1770,7 +1782,7 @@ _IDEMPOTENCY_CONTRACTS = _tl_workflow._IDEMPOTENCY_CONTRACTS
 _TASK_TO_WORKFLOW = _tl_workflow._TASK_TO_WORKFLOW
 BackupTrongCaySkill = _tl_profile_env.BackupTrongCaySkill   # v1.36.69 (#972) — LỚP, không stub được (bẫy I11)
 
-for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene, _tl_nlm_ops, _tl_extract_cache, _tl_fetch_web, _tl_profile_mgmt, _tl_ingest_ops, _tl_lookup_ops, _tl_ops_misc, _tl_classify, _tl_profile_env, _tl_resolve, _tl_regio, _tl_cli, _tl_doc_identity, _tl_source_ops, _tl_nlm_admin_ops, _tl_the_thuc):
+for _m in (_tl_workflow, _tl_release, _tl_live, _tl_zip_ingest, _tl_ocr, _tl_chunking, _tl_hygiene, _tl_nlm_ops, _tl_extract_cache, _tl_fetch_web, _tl_profile_mgmt, _tl_ingest_ops, _tl_lookup_ops, _tl_rasoat_dot_check, _tl_ops_misc, _tl_classify, _tl_profile_env, _tl_resolve, _tl_regio, _tl_cli, _tl_doc_identity, _tl_source_ops, _tl_nlm_admin_ops, _tl_the_thuc):
     _m.bind(sys.modules[__name__])
 
 

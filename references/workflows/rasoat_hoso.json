@@ -13,6 +13,7 @@
     "state-get --json",
     "state-put --in <out-dir>/rasoat_state.json --expect-claim <id> --json",
     "rasoat-merge --in <out-dir>/master --out <out-dir>/BANG_MASTER.json --state <out-dir>/rasoat_state.json --json",
+    "rasoat-dot-check --in <out-dir> --dot <dot_id> --strict --json",
     "frontier-expand --json",
     "reg-query --refresh --json",
     "profile-ingest --staged --json",
@@ -37,7 +38,8 @@
     "sau luot chay: git status cay skill SACH (state/master nam NGOAI cay - doctrine B.5)",
     "don vi done khong bao gio reset ve pending toan phan tru khi anchor vo",
     "PHA 4: `rasoat-merge --in <out-dir>/master` dung duoc bang master, roi rasoat_phuluc.py --in <bang master> ra phu luc 03-07 (r213: rasoat_phuluc.py cung tu nhan khuon S6 nen --in master/ chay thang duoc; TRUOC r213 dong nay la LOI KHONG DUOC KIEM - PHA 4 sap that ngay 26-07)",
-    "bang master co o metadata trong (ngay/hieu_luc_tu) thi phai HIEN trong _thieu_o_metadata - khong duoc bia de lap o"
+    "bang master co o metadata trong (ngay/hieu_luc_tu) thi phai HIEN trong _thieu_o_metadata - khong duoc bia de lap o",
+    "DONG DOT: `rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` rc=0 TRUOC khi chot dot.trang_thai=da_dong. rc=1 = CO PHAT HIEN (verdict du lieu), rc=2 = loi dau vao hoac --strict co phat hien. rc=1 CHAN dong BINH THUONG (da_dong) — nhung KHONG triet tieu duong dong HAN CHE: van duoc da_dong_co_gioi_han VOI DIEU KIEN chep nguyen phat hien cua cong vao gioi_han_da_biet (S7.1). Lenh CO Y khong co co mien tru: mien tru phai nam trong so nguoi doc duoc. QUYET theo `loai_verdict` trong payload, KHONG theo ma thoat: --strict gop rc=1 vao rc=2 nen doc theo rc thi duong dong HAN CHE bien mat. loai_verdict=do_duoc -> duoc da_dong_co_gioi_han neu chep phat hien vao gioi_han_da_biet; loai_verdict=khong_do_duoc -> CHAN CUNG, khong mien tru."
   ],
   "stop_conditions": [
     "HOI TU: het pending + Q-INGEST rong + dry_rounds >= 2",
@@ -45,7 +47,8 @@
     "moi don vi con lai deu blocked boi CUNG mot loi (chan dung that) -> bao nguoi 1 dong",
     "can ngan sach NLM (mac dinh 60 call/ho so) hoac quota TVPL bao het that",
     "max-iter fail-safe cua rasoat-loop",
-    "DONG HO SO (khac dong goi phien): du 6 ve §7.1 RASOAT_PLAN_SCHEMA -> vong_doi.trang_thai=da_dong; thieu ve nao -> da_dong_co_gioi_han + khai gioi_han_da_biet (CAM dong im lang)"
+    "DONG HO SO (khac dong goi phien): du 6 ve §7.1 RASOAT_PLAN_SCHEMA -> vong_doi.trang_thai=da_dong; thieu ve nao -> da_dong_co_gioi_han + khai gioi_han_da_biet (CAM dong im lang)",
+    "DONG DOT bi CHAN o duong BINH THUONG khi `rasoat-dot-check --strict` khac 0; muon dong thi phai ha dot.trang_thai=da_dong_co_gioi_han VA chep phat hien vao gioi_han_da_biet — cam dong im lang, cam bo qua rc khac 0 ; loai_verdict=khong_do_duoc chan CUNG, khong co duong dong han che"
   ],
   "rules": [
     "phien chinh (dang cam session_claim) la BEN GHI DUY NHAT; agent ra read-only; worker Q-NLM chi goi NLM, tra JSON ve phien chinh",

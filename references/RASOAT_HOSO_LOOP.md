@@ -50,6 +50,71 @@ kickoff, trước khi hứa gì. Hỏng loại **chặn đứng** ⇒ báo ngư�
 nào**; **chặn làn ghi** ⇒ nhận việc nhưng khai rõ Loop B đứng (chỉ rà được trên cái đã có trong corpus);
 **có fallback** ⇒ nhận việc, chạy chế độ suy giảm và ghi vào note bàn giao.
 
+## §1bis. CHẾ ĐỘ ĐỢT (Kế hoạch cơ quan) + CỔNG VÀO BẮT BUỘC
+
+Kế hoạch rà soát của cơ quan chia việc theo **Đợt**. Đợt KHÔNG phải khái niệm mới: **một Đợt = tập con
+`q_units` cùng `dot_id`** (`references/RASOAT_PLAN_SCHEMA.md` §2/§8). Không đẻ hàng đợi mới, không đẻ file
+state mới — nếu phải thêm file thì cách ánh xạ đã sai.
+
+**Cổng vào (SKILL.md §0 #20) — chạy TRƯỚC đơn vị rà đầu tiên của MỖI phiên, kể cả phiên kế nhiệm:**
+
+<!-- RASOAT_ENTRY_GATE_v1
+tien_kiem: PHA0_GATE_v1 b1-b6 (references/QUY_TRINH_RA_SOAT_3_TANG.md - PHA 0)
+doc_state: tl state-get --json (rc=3 = chua co, hop le o luot dau)
+truoc: don vi ra DAU TIEN cua phien - ke ca "ra thu"
+chan_dung: b1 b4 hong -> DUNG SOM, chua tieu call truy van NLM nao
+chan_lan_ghi: b2 b3 hong -> nhan viec nhung khai Loop B dung (chi ra tren corpus da co)
+dot_tuan_tu: mot Dot = tap con q_units cung dot_id; KHONG mo Dot ke tiep khi Dot dang mo
+nap_giua_chung: PHAI qua BA CONG ANH HUONG (S3bis) - KHONG ra lai toan bo Dot da done
+tra_kho_3_khoa: so_hieu | ten_day_du | dinh_danh_chuan_hoa -> ghi rasoat_tra_kho.jsonl (S10)
+dem_nfc: moi phep DEM chay tren van ban da chuan hoa Unicode NFC
+-->
+
+**Đợt chạy TUẦN TỰ.** Đang mở một Đợt thì không mở Đợt kế tiếp. Lý do không phải hiệu năng mà là **truy
+nguyên**: hai Đợt chồng nhau thì `dry_rounds_lien_tiep` và Q-INGEST không quy được về Đợt nào, và điều kiện
+đóng Đợt mất nghĩa.
+
+**Điều kiện đóng MỘT Đợt — đủ cả 5.** Thiếu vế nào mà vẫn đóng ⇒ `dot.trang_thai="da_dong_co_gioi_han"`
+kèm mục tương ứng trong `gioi_han_da_biet` (cùng khuôn §7.1 `RASOAT_PLAN_SCHEMA.md`; **cấm đóng im lặng**):
+
+1. Mọi đơn vị mang `dot_id` này ở `done`/`blocked` — 0 mục `pending`/`doing` (`blocked` ⇒ khai giới hạn).
+2. Q-INGEST không còn mục `cho_tai`/`cho_nguoi_tai` **thuộc Đợt này**; còn ⇒ khai giới hạn.
+3. Phần Phiếu rà soát thuộc Đợt đã cập nhật: `tl rasoat-merge --in <out-dir>/master --check` rc=0.
+4. Đã sinh **hai danh sách bàn giao** dưới đây và chuyển cho người xử lý.
+5. **CỔNG MÁY CUỐI ĐỢT đạt:** `tl rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` **rc=0**.
+   Ba chốt: NFC trước mọi phép đếm · kết luận «kho thiếu X» phải có log tra ĐỦ 3 khoá đều `not_found` ·
+   sổ số liệu tái lập. **rc=1 = CÓ PHÁT HIỆN** (verdict dữ liệu), **rc=2** = lỗi đầu vào hoặc `--strict`
+   có phát hiện. **`rc=1` chặn ĐÓNG BÌNH THƯỜNG (`da_dong`)** — nhưng KHÔNG triệt tiêu đường
+   đóng HẠN CHẾ của chính mục này: vẫn được `da_dong_co_gioi_han` **với điều kiện** chép nguyên
+   phát hiện của cổng vào `gioi_han_da_biet` (§7.1) — tức KHAI RA, không phải bỏ qua. Lệnh
+   KHÔNG có cờ miễn trừ, và đó là cố ý: miễn trừ phải nằm trong sổ người đọc được, không nằm
+   trong một cờ ai cũng gõ được. Đừng đọc `rc≠0` thành «lệnh hỏng» rồi bỏ qua.
+   **Đừng quyết theo MÃ THOÁT — quyết theo `loai_verdict` trong payload.** Lý do: workflow BẮT chạy
+   `--strict`, mà `--strict` gộp rc=1 vào rc=2, nên đọc theo rc thì đường đóng hạn chế BIẾN MẤT.
+   `loai_verdict="do_duoc"` (kèm `co_the_dong_han_che:true`) — đã đo xong: được `da_dong_co_gioi_han`
+   nếu chép phát hiện vào `gioi_han_da_biet`. `loai_verdict="khong_do_duoc"` — state hỏng, `--dot`
+   không giải được, hoặc tập đếm không toàn vẹn: **chặn CỨNG, kể cả đường hạn chế.** Lý do không phải
+   nghiêm khắc hơn mà là KHÁC LOẠI: `rc=1` là **đã đo được và thấy vấn đề** — khẩn ra `gioi_han_da_biet`
+   là khai thật; `rc=2` là **CHƯA ĐO ĐƯỢC GÌ** (state hỏng, hoặc `--dot` trỏ sai Đợt). Cho phép
+   chép `rc=2` vào `gioi_han_da_biet` nghĩa là gõ nhầm `--dot dot-10` rồi đóng được `dot-01` MÀ
+   CỔNG CỦA NÓ CHƯA TỪNG CHẠY — biến một phép đo bất khả thi thành một dòng giới hạn nghe như đã cân nhắc.
+   *Vì sao là ĐIỀU KIỆN chứ không phải gợi ý:* cả 4 vế trên đều là **lời khai của phiên rà**;
+   riêng vế này là **phép ĐO**. Một cổng không nằm trên đường đi mặc định là cổng không tồn tại — đúng
+   khuyết tật mà §1bis này sinh ra để chữa. Thẻ `rasoat_hoso` khai nó ở `recommended_commands` + `verify`.
+
+**Hai danh sách bàn giao — sinh sau MỖI Đợt, không dồn tới cuối hồ sơ:**
+
+| Danh sách | Nguồn máy | Chuyển cho |
+|---|---|---|
+| Nguồn cần bổ sung vào kho | `q_ingest` lọc `dot_id`, trạng thái `cho_tai`/`cho_nguoi_tai` | người duyệt nạp (điểm chạm ②) |
+| Vấn đề hạ tầng | sổ `rasoat_bugs.md` khuôn `BUG_LEDGER_v1` đủ 8 trường, lọc `don_vi` thuộc Đợt | người bảo trì skill/hạ tầng |
+
+**Sau khi người xử lý xong: KHÔNG rà lại cả Đợt.** Nguồn mới flip corpus đi qua **§3bis — ba cổng ảnh
+hưởng**; chỉ đơn vị nào cổng chỉ ĐÍCH DANH mới sinh `doi_chieu_bo_sung`. Bất biến §3 B6 giữ nguyên: đơn vị
+`done` không reset toàn phần trừ khi anchor vỡ. Vế "chạy lại các Đợt đã rà" của bản đề xuất 4 bước bị thay
+bằng đúng vế này — đo trên hồ sơ ATVSLĐ: rà lại toàn bộ làm Mục H/I tự đính chính SAI, phải khôi phục lại
+kết luận Đợt 4.
+
 ## §2. LOOP A — RÀ (mỗi phiên chạy MỘT lượt drain)
 
 | Bước | Việc | Lệnh/cơ chế CÓ THẬT |
@@ -105,6 +170,41 @@ tl --profile "<hồ sơ>" verify-staged --json                          # DRY b�
 **B6. Đơn vị `doi_chieu_bo_sung`:** văn bản mới D flip corpus ⇒ `tl relation-check` 2 CHIỀU: đơn vị `done`
 nào dẫn chiếu tới/bị D dẫn chiếu → sinh đơn vị cặp (đơn-vị-cũ × D), **chỉ so phần giao**.
 **Bất biến:** đơn vị `done` KHÔNG BAO GIỜ reset về `pending` toàn phần trừ khi anchor vỡ.
+Ba loại ảnh hưởng và ba cổng tương ứng: **§3bis** ngay dưới — B6 một mình CHỈ bắt loại thứ nhất.
+
+## §3bis. BA CỔNG ẢNH HƯỞNG KHI NẠP NGUỒN GIỮA CHỪNG (mở rộng §3 B6)
+
+B6 phát hiện ảnh hưởng **chỉ qua dẫn chiếu**. Hai loại lọt lưới, đo được trên hồ sơ ATVSLĐ (7 Đợt kế
+hoạch / 11 lượt thực tế):
+
+- **Chồng chéo nội dung không qua dẫn chiếu** — trùng phạm vi điều chỉnh, thuật ngữ, thẩm quyền.
+- **Tác động chính sách / căn cứ đánh giá** — không sửa, không dẫn chiếu, không trùng thuật ngữ, nhưng đổi
+  **tiêu chí đánh giá** hoặc **địa chỉ xử lý**. Bằng chứng: NQ 117/NQ-CP ngày 02/5/2026 xác lập cơ quan chủ
+  trì mới ⇒ đổi địa chỉ xử lý của **cả 07 nội dung** đề xuất, dù không dẫn chiếu tới điều nào của luật được
+  rà. Cùng loại: 21 văn bản của Đảng làm căn cứ Tiêu chí 1 — ảnh hưởng xuyên toàn văn, không qua dẫn chiếu.
+
+| Cổng | Bắt loại ảnh hưởng | Lệnh | Khi nào chạy | Hệ quả |
+|---|---|---|---|---|
+| 1. Dẫn chiếu | D dẫn chiếu / bị dẫn chiếu | `tl relation-check` 2 chiều | **MẶC ĐỊNH** — mọi nguồn mới flip corpus | sinh `doi_chieu_bo_sung`, **chỉ so phần giao** |
+| 2. Chồng chéo nội dung | trùng phạm vi/thuật ngữ/thẩm quyền, KHÔNG qua dẫn chiếu | `tl rasoat-chongcheo <base> --target <D>` **chỉ dựng TẬP LIÊN QUAN (lớp DISCOVERY)** — KHÔNG có phép so hai văn bản theo ngưỡng, và **không lệnh `tl` nào hiện có** làm việc đó (`tl overlap` là trích NGUYÊN VĂN Điều bị sửa, không phải so cặp) | **NGƯỜI đọc nguyên văn quyết định** — cổng này KHÔNG máy hoá được, đừng đánh dấu xong khi mới chạy discovery | sinh `doi_chieu_bo_sung` cho cặp người xác nhận |
+| 3. Tác động chính sách | đổi tiêu chí đánh giá / địa chỉ xử lý | **rà ngang theo tiêu chí xuyên chương** — KHÔNG mở lại từng đơn vị | chỉ khi D thuộc **nhóm chính sách** | đánh dấu tiêu chí xuyên chương phải rà lại; đơn vị `done` GIỮ NGUYÊN |
+
+**Ngưỡng cổng 2 — CHƯA HIỆU CHỈNH, phải khai là giả định.** Đề xuất khởi điểm: chạy cổng 2 cho cặp
+(đơn-vị-`done` × D) khi thoả ≥1: jaccard bag-of-words ≥ **0,30** (hàm `_bow_jaccard` sẵn có trong
+`doc_identity`) · cùng ≥1 `linhvuc` pháp điển · cùng ≥2 `tukhoa` registry. Con số 0,30 là **giả định của
+lượt rà này, chưa đo trên tập mẫu** — ghi rõ trong báo cáo, hiệu chỉnh sau ≥2 hồ sơ, KHÔNG trình bày như
+ngưỡng đã kiểm.
+
+**Nhóm chính sách — danh sách MỞ (kickoff mở rộng được, KHÔNG thu hẹp):**
+- văn bản của Đảng (cat `00`);
+- nghị quyết Quốc hội / Chính phủ về **chủ trương, chương trình, kế hoạch** (không phải NQ quy phạm sửa luật);
+- điều ước quốc tế / công ước;
+- văn bản **phân công cơ quan chủ trì** hoặc **điều chỉnh tổ chức bộ máy**.
+
+D **không** thuộc nhóm chính sách ⇒ chạy cổng 1 (+ cổng 2 nếu vượt ngưỡng). D **thuộc** nhóm chính sách ⇒
+chạy **cả ba**, và lượt rà ngang phải chạy **TRONG Đợt hiện tại**, không hoãn tới lúc đóng hồ sơ. Đó đúng
+là khe hở đã đo: quy tắc "rà ngang toàn văn" hiện chỉ áp lúc **ĐÓNG** hồ sơ, nên nguồn chính sách nạp
+**giữa chừng** không kích hoạt được nó.
 
 ## §4. LOOP C — TÁI RÀ ĐỊNH KỲ (tuần 1 lần, phiên mới, context sạch)
 
@@ -216,6 +316,7 @@ _meta/rasoat_state.json
 <out-dir>/master/<unit>.json
 <out-dir>/rasoat_approvals.json
 <out-dir>/rasoat_bugs.md
+<out-dir>/rasoat_tra_kho.jsonl
 -->
 
 **Hai guard, hai tầm — đừng đọc gộp:** `r210_loop_khong_ghi_trong_cay` khoá **KHAI BÁO** — khối trên
@@ -285,6 +386,33 @@ Cùng họ với bẫy đã mắc lượt 7 (để bản sao lưu **trong** `mas
 
 Kiểm được bằng máy: `tl doc-claims-check --strict` bắt con trỏ chết dạng đường dẫn/link/`file.py:dòng`/
 version/số hiệu đợt. Nó KHÔNG bắt được "mục trên" — nên vế đó vẫn là kỷ luật lúc ghi.
+
+## §10. ĐỊNH DANH CHUẨN HOÁ + LOG TRA KHO 3 KHOÁ
+
+Ba lần tra sót trong hồ sơ ATVSLĐ đều do tra **một** khoá. Khoá thứ ba là **định danh chuẩn hoá**, sinh
+bằng hàm SẴN CÓ `_sohieu_cmp_key` trong `scripts/tl_core/doc_identity.py` — KHÔNG viết lại (SKILL.md §0 #15).
+
+| Loại | Khuôn chuẩn hoá | Biệt lệ đã gặp |
+|---|---|---|
+| Công ước ILO | `ILO-0NN` — đệm 0 tới 3 chữ số | tra "ILO 81" trượt vì kho lưu `ILO-081` |
+| VBHN | `NN-YYYY-VBHN-XXX` | số VBHN TĂNG theo mỗi lần hợp nhất, không phải semver (SKILL.md §0 #1) |
+| Số hiệu có phần thập phân | giữ nguyên dấu chấm phần số: `66.17-2026-NQ-CP` | lọc máy móc theo loại văn bản làm trượt `66.17/2026/NQ-CP` |
+| Nghị định cùng năm, số liền nhau | KHÔNG dừng ở bản đầu khớp — quét hết dải số | thấy NĐ 216/2025 rồi dừng, sót NĐ 217/2025 |
+| Dấu nối | `_sohieu_cmp_key` đổi `_` → `-` trước khi chuẩn hoá | tên file Drive dùng `_`, registry dùng `/` |
+
+**Luật tra kho 3 khoá.** Kết luận "kho thiếu văn bản X" chỉ hợp lệ khi đã tra **cả ba** khoá (số hiệu · tên
+đầy đủ · định danh chuẩn hoá) **và** ghi lại khoá đã tra — một dòng JSON cho một lần tra:
+
+<!-- TRA_KHO_LOG_v1
+truong_bat_buoc: thoi_diem | muc_tieu | ket_qua | lenh
+khoa: khoa_so_hieu | khoa_ten | khoa_dinh_danh (moi dong khai IT NHAT MOT khoa da tra)
+ket_qua: found | not_found
+ket_luan_thieu_hop_le: ca BA khoa deu duoc tra va deu not_found
+so_file: rasoat_tra_kho.jsonl (o <out-dir>, NGOAI cay skill)
+-->
+
+Nguyên tắc CORPUS-FIRST hai khoá đã có sẵn trong Project Instruction mà vẫn bị vi phạm 3 lần trong cùng một
+đợt ⇒ nguyên tắc là điều kiện **cần nhưng chưa đủ**; phần kiểm được bằng máy chuyển thành cổng máy (LỚP 3).
 
 ## §9. NHỊP REGISTRY (cấm chen ngang)
 

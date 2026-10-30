@@ -3358,6 +3358,20 @@ def _rasoat_meta_folder(a):
                 "`--folder-id <id>` hoặc đặt env TL_META_FOLDER_ID.")
 
 
+def _rasoat_thieu_gia_tri(v) -> bool:
+    """PURE — "trường này CÓ giá trị dùng được không", dùng CHUNG cho mọi phép đòi trường của
+    `_rasoat_state_validate`. Sinh ra vì hai phép kiểm khác nhau đã tồn tại song song cho cùng một
+    loại ràng buộc (`.strip()` cho trường nền, truthiness cho trường có điều kiện) và chỗ lệch ấy
+    cho `"dong_luc": " "` đi lọt. Xử luôn list/dict RỖNG: `gioi_han_da_biet: []` là "chưa khai",
+    không phải "đã khai rỗng" — mà `str([]).strip()` lại là `"[]"`, truthy, nên phép kiểm chuỗi
+    trần cũng sai ở đúng chỗ ấy."""
+    if v is None:
+        return True
+    if isinstance(v, (list, dict, tuple, set)):
+        return len(v) == 0
+    return not str(v).strip()
+
+
 def _rasoat_state_validate(obj) -> tuple:
     """PURE — r295 (RAS-09, audit lõi 31-07): validate `rasoat_plan.v1` TRƯỚC khi ghi lên Drive.
 
@@ -3373,7 +3387,16 @@ def _rasoat_state_validate(obj) -> tuple:
     nguồn `NameError` chỉ lộ trên đường sản xuất. Chỉ hàm này dùng ⇒ giữ tại chỗ, hết đường trôi.
     """
     _TT_UNIT = ("pending", "doing", "done", "blocked", "stale")
-    _TT_INGEST = ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped", "out_of_scope")
+    # G4 (cross-review cục bộ P1): `RASOAT_PLAN_SCHEMA.md` §3 khai TÁM trạng thái; validator chỉ có
+    # SÁU, nên state HỢP LỆ mang `da_quyet`/`da_quyet_va_thi_hanh` (mục người thẩm tra đã quyết) bị
+    # bác. Trước đây vô hại vì chỉ `state-put` gọi; từ khi `rasoat-dot-check` biến nó thành CỔNG BẮT
+    # BUỘC lúc đóng Đợt thì nó CHẶN OAN đúng lúc hồ sơ sắp xong — fail-closed sai chiều.
+    _TT_INGEST = ("cho_tai", "cho_nguoi_tai", "dry_planned", "staged", "flipped", "out_of_scope",
+                  "da_quyet", "da_quyet_va_thi_hanh")
+    _TT_DOT = ("chua_mo", "dang_ra", "da_dong", "da_dong_co_gioi_han")
+    # Hai trạng thái Q-INGEST được `rasoat-dot-check` quy thành claim «kho thiếu». Giữ TẠI CHỖ theo
+    # đúng ghi chú ở đầu hàm: hằng mức module của `tl_core` không tự có trong namespace đã re-home.
+    _TT_SINH_CLAIM = ("cho_tai", "cho_nguoi_tai")
     _TT_NLM = ("pending", "added", "failed")
     _LOAI_UNIT = ("ra_soat", "doi_chieu_bo_sung")
     errs = []
@@ -3386,7 +3409,61 @@ def _rasoat_state_validate(obj) -> tuple:
         if not isinstance(_sc, dict):
             errs.append("SESSION_CLAIM_KHONG_PHAI_OBJECT")
         elif not str(_sc.get("id") or "").strip():
-            errs.append("SESSION_CLAIM_THIEU_ID")
+            # LỚP C — CHẶN OAN cũng là hỏng, và nguy ngang fail-open vì nó chặn đúng lúc việc sắp
+            # xong. §7 khai dạng ĐÃ NHẢ (`id: null` + `released_at`) và `_rasoat_vong_doi_findings`
+            # ĐÃ mã hoá đúng dạng ấy ⇒ validator bác nó là hai chỗ trong cùng kho nói ngược nhau.
+            # Chỉ tha khi CÓ `released_at`; `id` rỗng mà không nhả thì vẫn ĐỎ.
+            # §7 khai dạng đã nhả là `id: null` — ĐÚNG NGHĨA null, không phải "mọi giá trị falsy".
+            # `id: ""` hay `id: 0` mà có `released_at` thì `_rasoat_vong_doi_findings` vẫn coi là CHƯA
+            # nhả (nó so `is None`), nên nới ở đây là để hai chốt trong cùng kho phán ngược nhau.
+            # `.get("id")` trả None cho CẢ khoá vắng mặt — một claim ghi dở (chỉ có `released_at`)
+            # khi ấy được coi là ĐÃ NHẢ. §7 đòi CẢ HAI dấu, nên phải hỏi khoá CÓ MẶT.
+            if ("id" not in _sc or _sc.get("id") is not None
+                    or not str(_sc.get("released_at") or "").strip()):
+                errs.append("SESSION_CLAIM_THIEU_ID")
+    # G4: mảng `dot` (§8) trước đây KHÔNG được kiểm gì ⇒ `dot: "broken"` lọt sạch. `dot_id`/`ten`
+    # bắt buộc, `trang_thai` theo enum §3 — đúng những gì đặc tả CHỐT, không tự chế thêm.
+    _dot = obj.get("dot")
+    if _dot is not None:
+        if not isinstance(_dot, list):
+            errs.append("DOT_KHONG_PHAI_MANG")
+        else:
+            for _i, _x in enumerate(_dot):
+                if not isinstance(_x, dict):
+                    errs.append(f"DOT[{_i}]_KHONG_PHAI_OBJECT")
+                    continue
+                # H1 (P1): §8 khai BA trường bắt buộc; bản đầu chỉ đòi `dot_id` và tha `trang_thai`
+                # RỖNG (`_tt and ...`) ⇒ `{"dot_id":"dot-01"}` lọt sạch.
+                for _bb in ("dot_id", "ten", "trang_thai"):
+                    if not str(_x.get(_bb) or "").strip():
+                        errs.append(f"DOT[{_i}]_THIEU_" + _bb.upper())
+                _tt = str(_x.get("trang_thai") or "").strip()
+                if _tt and _tt not in _TT_DOT:
+                    errs.append(f"DOT[{_i}]_TRANG_THAI_SAI:" + _tt)
+                # LỚP B — §8 còn khai trường bắt buộc THEO TRẠNG THÁI. Bỏ chúng thì luật "cấm đóng
+                # im lặng" mất hiệu lực đúng lúc cần nhất: khai `da_dong_co_gioi_han` mà không có
+                # `gioi_han_da_biet` CHÍNH LÀ đóng im lặng, chỉ khác cái nhãn.
+                # Trường có điều kiện phải dùng CÙNG phép kiểm với trường nền. Bản trước dùng
+                # `not _x.get(...)` nên `"dong_luc": " "` (một dấu cách) là truthy ⇒ LỌT. Hai phép
+                # kiểm khác nhau cho cùng một loại ràng buộc là chỗ lệch tự mọc ra; nay một hàm.
+                for _tt_can, _truong in (("da_dong_co_gioi_han", "gioi_han_da_biet"),
+                                         ("da_dong_co_gioi_han", "dong_luc"),
+                                         ("da_dong", "dong_luc"), ("dang_ra", "mo_luc")):
+                    if _tt == _tt_can and _rasoat_thieu_gia_tri(_x.get(_truong)):
+                        errs.append(f"DOT[{_i}]_THIEU_{_truong.upper()}_KHI_{_tt.upper()}")
+            # §8 bất biến 1: TỐI ĐA MỘT Đợt `dang_ra`. Kiểm từng-bản-ghi không bao giờ thấy điều
+            # này — nó là ràng buộc của TẬP HỢP, nên phải kiểm sau vòng lặp. Hai Đợt chồng nhau thì
+            # `dry_rounds_lien_tiep` và Q-INGEST không quy được về Đợt nào.
+            _dang_ra = [str(x.get("dot_id") or "") for x in _dot
+                        if isinstance(x, dict) and str(x.get("trang_thai") or "").strip() == "dang_ra"]
+            if len(_dang_ra) > 1:
+                errs.append("DOT_NHIEU_HON_MOT_DANG_RA:" + ",".join(sorted(_dang_ra)[:5]))
+    # `dot` sai kiểu đã được ghi nhận `DOT_KHONG_PHAI_MANG` ở trên, nhưng comprehension này vẫn
+    # LẶP trên nó ⇒ `{"dot": 1}` ném TypeError, và cả `state-put` lẫn `rasoat-dot-check` trả
+    # traceback thay vì rc=2 có cấu trúc. Validator mà tự crash trên đầu vào hỏng thì nó không còn
+    # là validator — chỉ dựng tập khi `_dot` THỰC SỰ là list.
+    _dot_ids = ({str(x.get("dot_id") or "").strip() for x in _dot if isinstance(x, dict)} - {""}
+                if isinstance(_dot, list) else set())
     for _khoa, _tt_hop_le in (("q_units", _TT_UNIT), ("q_ingest", _TT_INGEST), ("q_nlm", _TT_NLM)):
         _q = obj.get(_khoa)
         if _q is None:
@@ -3398,6 +3475,33 @@ def _rasoat_state_validate(obj) -> tuple:
             if not isinstance(_x, dict):
                 errs.append(f"{_khoa.upper()}[{_i}]_KHONG_PHAI_OBJECT")
                 continue
+            # LỚP B — `trang_thai` là trường MÁY ĐỌC nên KHÔNG được vắng. Bản trước chỉ kiểm enum
+            # KHI có giá trị, nên mục thiếu hẳn `trang_thai` lọt sạch rồi bị lớp trên bỏ qua ⇒ cổng
+            # trả rc=0 với 0 claim. "Kiểm-khi-có" là danh sách CẤM trá hình: nó tha đúng cái vắng mặt.
+            if not str(_x.get("trang_thai") or "").strip():
+                errs.append(f"{_khoa.upper()}[{_i}]_THIEU_TRANG_THAI")
+            # Mục Q-INGEST không có `so_hieu` là mục KHÔNG CHỈ ĐÍCH ĐƯỢC văn bản nào. Cổng cuối Đợt
+            # rút claim từ đây; mục rỗng bị lọc đi lặng lẽ ⇒ cổng KHÔNG đòi bằng chứng tra kho nào
+            # rồi trả rc=0, trong khi luật đóng Đợt cấm còn mục chưa xử. Đòi ngay ở validator.
+            # CHỈ ràng ở trạng thái SINH RA CLAIM. Đòi vô điều kiện là phá tương thích: mục đã
+            # xử xong (`flipped`, `da_quyet`…) không cần `so_hieu`, và kho có sẵn fixture đóng-sạch
+            # dùng `{"trang_thai":"flipped"}` — làm mọi `state-put` sau đó ĐỎ. Lý do của chốt này là
+            # "mục còn treo bị lọc lặng lẽ thành 0 claim", nên phạm vi đúng là đúng hai trạng thái ấy.
+            if (_khoa == "q_ingest" and str(_x.get("trang_thai") or "").strip() in _TT_SINH_CLAIM
+                    and _rasoat_thieu_gia_tri(_x.get("so_hieu"))):
+                errs.append(f"Q_INGEST[{_i}]_THIEU_SO_HIEU")
+            # `dot_id` chỉ bắt buộc khi hồ sơ CÓ dùng Đợt — không ép hồ sơ chưa chia Đợt.
+            if _dot and _khoa in ("q_units", "q_ingest"):
+                _di = str(_x.get("dot_id") or "").strip()
+                if not _di:
+                    errs.append(f"{_khoa.upper()}[{_i}]_THIEU_DOT_ID")
+                # KHÔNG đòi `dot_id` phải trỏ Đợt ĐÃ KHAI. Bản trước đòi, và nó BÁC chính ví dụ
+                # chuẩn của đặc tả: `dot` mới có `dot-01` trong khi `q_units` đã tham chiếu `dot-02`
+                # (`RASOAT_PLAN_SCHEMA.md` §2) — tức xếp việc cho Đợt SẮP MỞ là hình mẫu HỢP LỆ, và
+                # chốt ấy làm mọi `state-put` theo đúng tài liệu bị chặn. Rủi ro "dot_id gõ nhầm" là
+                # THẬT nhưng thuộc lúc ĐÓNG ĐỢT, không thuộc lúc ghi state: state không phân biệt
+                # được "Đợt tương lai" với "gõ nhầm". Đã chuyển sang `rasoat-dot-check` (phát hiện,
+                # rc=1) thay vì bác ở đây (rc=2) — đúng chỗ mới có đủ ngữ cảnh để phán.
             _tt = str(_x.get("trang_thai") or "")
             if _tt and _tt not in _tt_hop_le:
                 errs.append(f"{_khoa.upper()}[{_i}].trang_thai_NGOAI_ENUM:{_tt}")

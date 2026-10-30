@@ -22,14 +22,20 @@
   "ho_so_id": "luat-x-2026",
   "session_claim": {"id": "phien-2026-07-26-a", "ts": "2026-07-26T09:00:00", "progress_ptr": "unit-007"},
   "quota": {"nlm_con_lai": 60, "tvpl_hom_nay": 0},
+  "dot": [
+    {"dot_id": "dot-01", "ten": "Đợt 1 — chế định A", "trang_thai": "da_dong",
+     "mo_luc": "2026-08-20", "dong_luc": "2026-08-24", "gioi_han_da_biet": []}
+  ],
   "q_units": [
     {"unit_id": "unit-001", "van_ban": "18-2025-VBHN-VPQH", "dieu": ["54"], "tang": "SAU",
-     "trang_thai": "done", "loai": "ra_soat"},
+     "trang_thai": "done", "loai": "ra_soat", "dot_id": "dot-01"},
     {"unit_id": "unit-009", "van_ban": "18-2025-VBHN-VPQH", "dieu": ["125"], "tang": "DOI_CHIEU",
-     "trang_thai": "pending", "loai": "doi_chieu_bo_sung", "doi_chieu_voi": "145-2026-ND-CP"}
+     "trang_thai": "pending", "loai": "doi_chieu_bo_sung", "doi_chieu_voi": "145-2026-ND-CP",
+     "dot_id": "dot-02", "cong_anh_huong": "dan_chieu"}
   ],
   "q_ingest": [
-    {"so_hieu": "145-2026-ND-CP", "trang_thai": "staged", "plan_hash": "…", "nguon": "vbpl.vn"}
+    {"so_hieu": "145-2026-ND-CP", "trang_thai": "staged", "plan_hash": "…", "nguon": "vbpl.vn",
+     "dot_id": "dot-02", "nhom_chinh_sach": false}
   ],
   "q_nlm": [
     {"so_hieu": "145-2026-ND-CP", "trang_thai": "pending"}
@@ -58,6 +64,11 @@
   hồ sơ thật đã tự dùng khoá `ly_do` với từ vựng riêng; giữ `ly_do` làm ghi chú, `trang_thai` là trường máy đọc.
 - `q_approvals.trang_thai`: `cho_duyet | da_duyet_va_da_chay | da_quyet`.
 - `vong_doi.trang_thai` (mục 7): `dang_ra | tam_ngung | da_dong | da_dong_co_gioi_han`.
+- `dot.trang_thai` (mục 8): `chua_mo | dang_ra | da_dong | da_dong_co_gioi_han` — cùng từ vựng `vong_doi`
+  một tầng dưới (Đợt ⊂ hồ sơ), để điều kiện đóng dùng chung một khuôn kiểm.
+- `q_units[].cong_anh_huong` (chỉ đơn vị `loai="doi_chieu_bo_sung"`): `dan_chieu | chong_cheo |
+  tac_dong_chinh_sach` — GHI cổng nào đã sinh đơn vị này (`references/RASOAT_HOSO_LOOP.md` §3bis). Thiếu
+  trường ⇒ không truy nguyên được vì sao một đơn vị `done` bị mở lại.
 
 > **Luật chung cho MỌI hàng đợi:** `trang_thai` chỉ nhận token trong enum. Diễn giải đi kèm ⇒ `ghi_chu`;
 > giá trị cũ trước khi chuẩn hoá ⇒ `trang_thai_goc`. Đo 01-08 trên hồ sơ `h7-3nd-bhxh-2025`: 7 mục đã trôi
@@ -169,3 +180,24 @@ công cụ không dùng được.
 4. Kickoff khai lại `quota` (NLM/TVPL) và `max_units_per_session` — quota là của LƯỢT, không kế thừa.
 5. Khai `skill_version_toi_thieu`: nhiều bất biến đường ghi chỉ được cưỡng chế từ **v1.36.20** (r281/r282).
 6. Nợ `no_treo` của hồ sơ trước phải được **nêu lại** trong kickoff mới nếu cùng phạm vi văn bản.
+
+## 8. ĐỢT (`dot`) — ánh xạ Kế hoạch rà soát của cơ quan vào state
+
+Kế hoạch của cơ quan chia việc theo **Đợt**; state KHÔNG mọc thêm hàng đợi cho việc đó. **Một Đợt = tập con
+`q_units` cùng `dot_id`**, mô tả Đợt nằm ở mảng `dot` (trên). Kịch bản vận hành + điều kiện đóng Đợt:
+`references/RASOAT_HOSO_LOOP.md` §1bis.
+
+| Trường | Bắt buộc | Ý nghĩa |
+|---|---|---|
+| `dot_id` | có | khoá ngắn (`dot-01`), dùng ở `q_units[].dot_id` và `q_ingest[].dot_id` |
+| `ten` | có | tên Đợt ĐÚNG như Kế hoạch của cơ quan gọi — không đặt tên riêng |
+| `trang_thai` | có | enum mục 3 |
+| `mo_luc` / `dong_luc` | có khi đã mở/đóng | mốc thời gian |
+| `gioi_han_da_biet` | bắt buộc khi `da_dong_co_gioi_han` | cùng khuôn §7.1 — không có mục = không được đóng |
+
+**Bất biến Đợt:**
+
+1. **Tuần tự** — tối đa MỘT Đợt ở `dang_ra`. Hai Đợt chồng nhau thì `dry_rounds_lien_tiep` và Q-INGEST
+   không quy được về Đợt nào.
+2. Đơn vị `doi_chieu_bo_sung` sinh do nguồn nạp giữa chừng thuộc **Đợt đang mở**, KHÔNG mở lại Đợt cũ.
+3. `dot_id` là **nhãn**, không phải trạng thái: đổi `dot_id` của một đơn vị `done` không hạ nó về `pending`.

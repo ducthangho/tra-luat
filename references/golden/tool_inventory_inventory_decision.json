@@ -138,6 +138,7 @@
     "quarantine-fix",
     "rasoat",
     "rasoat-chongcheo",
+    "rasoat-dot-check",
     "rasoat-loop",
     "rasoat-merge",
     "recat",
@@ -1695,6 +1696,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "rasoat-dot-check": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "rasoat_hoso",
+        "write_scope": "local"
+      },
       "rasoat-loop": {
         "generated": true,
         "idempotency_contract": null,
@@ -2207,10 +2218,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 154,
+      "generated_parsers": 155,
       "high_risk": 29,
       "nested": 9,
-      "total": 196,
+      "total": 197,
       "write_commands": 104
     },
     "schema": "command_registry.v1"

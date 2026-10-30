@@ -792,6 +792,10 @@
         },
         {
           "available": true,
+          "command": "rasoat-dot-check --in <out-dir> --dot <dot_id> --strict --json"
+        },
+        {
+          "available": true,
           "command": "frontier-expand --json"
         },
         {
@@ -1182,7 +1186,7 @@
     "links_checked": 15,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 47724,
+    "size_bytes": 45426,
     "size_limit": 49152,
     "size_ok": true,
     "size_warn": false,
@@ -1193,7 +1197,7 @@
     "basis": "trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)",
     "fail": [],
     "fail_limit": 327680,
-    "files_scanned": 73,
+    "files_scanned": 74,
     "size_ok": true,
     "waived": [
       "scripts/tl_selftest.py"
@@ -1202,15 +1206,15 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 196,
+    "checked_commands": 197,
     "coverage": {
       "container_commands": 2,
       "coverage_percent": 100.0,
       "high_risk_unregistered_count": 0,
-      "registered_leaf_commands": 196,
+      "registered_leaf_commands": 197,
       "registry_orphaned_commands": 0,
-      "total_leaf_commands": 196,
-      "total_nodes": 198,
+      "total_leaf_commands": 197,
+      "total_nodes": 199,
       "unregistered_leaf_commands": 0
     },
     "issues": [],
@@ -1220,7 +1224,7 @@
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 189,
+    "available_commands": 190,
     "cards": 26,
     "groups": 11,
     "tasks": 60

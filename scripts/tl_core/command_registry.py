@@ -41,6 +41,20 @@ GENERATED_SPECS = [
          {"flags": ["--strict"], "action": "store_true", "help": "fail cả khi có warnings"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
+    {"name": "rasoat-dot-check", "handler": "cmd_rasoat_dot_check",
+     "help": "READ-ONLY (offline): cổng kiểm CUỐI ĐỢT — NFC trước khi đếm · tra kho ĐỦ 3 khoá trước khi "
+             "kết luận thiếu · sổ số liệu tái lập",
+     "args": [
+         {"flags": ["--in"], "dest": "in_dir", "help": "<out-dir> của lượt rà (NGOÀI cây skill)"},
+         {"flags": ["--dot"], "help": "chỉ kiểm một Đợt (`dot_id`); bỏ trống = cả hồ sơ"},
+         {"flags": ["--state"], "help": "file state; mặc định <in>/rasoat_state.json"},
+         {"flags": ["--claim"], "action": "append",
+          "help": "thêm một kết luận «kho thiếu» ngoài q_ingest (lặp được)"},
+         {"flags": ["--ngay-chot"], "dest": "ngay_chot", "help": "ngày chốt số liệu; mặc định state.cap_nhat"},
+         {"flags": ["--strict"], "action": "store_true", "help": "biến rc=1 (có phát hiện) thành rc=2 — dùng khi vào gate"},
+         {"flags": ["--json"], "action": "store_true"},
+         {"flags": ["--out"], "help": "ghi payload JSON ra file"},
+     ]},
     {"name": "doc-claims-check", "handler": "cmd_doc_claims_check",
      "help": "READ-ONLY: kiểm CƠ HỌC trích dẫn trong văn xuôi (đường dẫn, SHA, link, version, rNNN, file.py:dòng)",
      "args": [
@@ -1876,6 +1890,8 @@ COMMAND_META = {
     # xen mỗi lần chốt state, phá nghiệm thu H7 (≤2 lần xen/hồ sơ). Cổng thật = builtin_gate
     # (_rasoat_state_scope fail-CLOSED: danh sách tên đóng + folder _meta/ bắt buộc) + --dry-run.
     "rasoat-merge":          _m("low", False, "local", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
+    # LỚP 3 — cổng kiểm cuối Đợt: READ-ONLY, chỉ ghi khi người gọi tự khai `--out` (khuôn doc-claims-check)
+    "rasoat-dot-check":      _m("low", True, "local", False, False, True, "rasoat_hoso", None, True, "rasoat_dot_check", generated=True),
     "state-get":             _m("low", True, "none", False, False, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
     "state-put":             dict(_m("medium", False, "drive", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
                                   builtin_gate="rasoat_state_scope_guard"),

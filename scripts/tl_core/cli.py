@@ -95,6 +95,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-gws", dest="no_gws", action="store_true", help="chỉ nạp GAS token, bỏ qua gws")
     p.add_argument("--no-nlm", dest="no_nlm", action="store_true", help="bỏ qua pip install nlm (notebooklm-mcp-cli)")
     p.add_argument("--env", choices=["code", "cowork", "chat"], help="ép runtime env")
+    p.add_argument("--require-agent-creds", dest="require_agent_creds", action="store_true",
+                   help="(WP1009) rc 4 khi credential agent (tl_agent_creds.enc) KHÔNG CẤU HÌNH / KHÔNG ĐO ĐƯỢC")
     p.set_defaults(fn=tlg.cmd_bootstrap)
     p = sub.add_parser("nlm-install", help="Cài nlm: mặc định tải Python 3.11 từ Drive (Cowork CHẶN astral). `--uv`: egress mở → uv tự cài Python 3.11 (dùng python hệ thống nếu đã ≥3.11) → KHÔNG tải 31MB từ Drive. ★Cowork 45s/lệnh: LẶP `--resume` tới rc=0 (mỗi lần 1 bước fetch→extract→install; rc=3=PARTIAL còn bước)")
     p.add_argument("--py-file-id", dest="py_file_id", help="fileId tarball Python 3.11 (mặc định PY311_FILEID)")
@@ -134,6 +136,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--secrets-file", dest="secrets_file", help="dùng .enc local thay vì tải")
     p.add_argument("--folder", help="folderId (khi cần tạo lại)")
     p.set_defaults(fn=tlg.cmd_secrets_set)
+    p = sub.add_parser("secrets-keygen", help="(WP1009) in MỘT khoá TL_MASTER_KEY mạnh (token_urlsafe 32 = 43 ký tự), không ghi đĩa")
+    p.set_defaults(fn=tlg.cmd_secrets_keygen)
+    p = sub.add_parser("agent-creds-set", help="(WP1009) ghi credential agent (Codex auth.json/token Claude/khoá Gemini) → tl_agent_creds.enc mã hoá (TL_MASTER_KEY)")
+    p.add_argument("--codex", action="store_true", help="gói <CODEX_HOME>/auth.json (thiếu CODEX_HOME ⇒ ~/.codex/auth.json)")
+    p.add_argument("--claude-token-env", dest="claude_token_env", nargs="?", const="CLAUDE_CODE_OAUTH_TOKEN",
+                   metavar="VAR", help="đọc token Claude từ BIẾN VAR (mặc định CLAUDE_CODE_OAUTH_TOKEN), không từ argv")
+    p.add_argument("--antigravity-key-env", dest="antigravity_key_env", nargs="?", const="GEMINI_API_KEY",
+                   metavar="VAR", help="đọc khoá Gemini cho `agy` từ BIẾN VAR (mặc định GEMINI_API_KEY), không từ argv")
+    p.add_argument("--new", action="store_true", help="tạo tệp MỚI (rev=1) và in fileId")
+    p.add_argument("--file-id", dest="file_id", help="ghi đè tại chỗ fileId này (mặc định TL_AGENT_CREDS_FILEID > AGENT_CREDS_FILEID)")
+    p.add_argument("--folder", help="folderId khi --new (mặc định _HOP_NAP)")
+    p.set_defaults(fn=tlg.cmd_agent_creds_set)
     p = sub.add_parser("gws-auth-stage", help="[CODE] export gws cred → mã hoá (khoá=webapp token) → v1.33.1: GHI ĐÈ TẠI CHỖ GWS_CRED_FILEID (fileId giữ nguyên, không bake lại); --new tạo file mới")
     p.add_argument("--folder", help="folderId đích (mặc định _HOP_NAP; chỉ dùng khi --new)")
     p.add_argument("--cred-file-id", dest="cred_file_id", help="fileId đích ghi đè tại chỗ (mặc định GWS_CRED_FILEID baked)")

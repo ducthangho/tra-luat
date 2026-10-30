@@ -113,6 +113,7 @@ _GIT_CO_MANG_GIA_TRI = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--nam
 # cong CI doi chieu lai — xem `--kiem-bang`. Bang nay SE TROI khi `tl` them lenh; cong CI
 # la thu duy nhat giu no khong troi, nen dung bo cong ay di.
 _TL_LENH_GHI = frozenset({
+    "agent-creds-set",   # WP1009: ghi credential agent len Drive — subagent PHAI bi chan
     "backfill-hieuluc", "backfill-loai", "backfill-nlm-status", "backfill-notebook",
     "backfill-title-vn", "bench", "boot", "bootstrap", "bundle-export", "cache-build",
     "cache-snapshot", "chunk-apply", "config-pin-registry", "confirm", "consolidation-cleanup",
@@ -565,7 +566,9 @@ def _kiem_python(doi):
         return "kich ban ngoai danh sach cho phep: %s" % kich
     # TANG 1 — lo #336 muc 1. `recat` khong can CO nao de ghi, nen chan theo CO khong bao gio
     # bat duoc no; `read_only` la thuoc tinh cua LENH. Lay doi so VI TRI ke sau kich ban.
-    if kich.rsplit("/", 1)[-1] == "tl.py":
+    # WP1009 F14: nhan dien tl.py tren duong dan DA CHUAN HOA (cung thu ma allowlist vua duyet) —
+    # so tren `kich` goc thi `"scripts\tl.py"` qua allowlist ma bo qua ca bang writer ben duoi.
+    if chuan.rsplit("/", 1)[-1] == "tl.py":
         lenh = _tach_lenh_tl(doi, kich)
         if lenh and (lenh[0] in _TL_LENH_GHI
                      or " ".join(lenh[:2]) in _TL_LENH_GHI_LONG):

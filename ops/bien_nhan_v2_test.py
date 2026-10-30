@@ -18,8 +18,10 @@ Khi commit cutover `2f84531` tra được, `c12` đo THÊM một tầng: đối 
 """
 from __future__ import annotations
 
+import contextlib
 import copy
 import importlib.util
+import io
 import os
 os.environ["PYTHONUTF8"] = "1"
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -3627,16 +3629,20 @@ def c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem():
     global _CA
     ca_ngoai = _CA
 
-    def _ca_nem_attr():
+    def _nem_trong():
         raise AttributeError("thuoc_tinh_1037_vang")
+
+    def _ca_nem_attr():
+        _nem_trong()
     try:
         tt, ct = _chay_1(_ca_nem_attr)
     finally:
         _CA = ca_ngoai
     bang(tt == "tin_dung_gia", f"ca ném AttributeError phải là tin_dung_gia, được {tt}")
     bang("AttributeError: thuoc_tinh_1037_vang" in (ct or ""), f"thiếu tên/thông điệp ngoại lệ: {ct!r}")
-    bang(f"{Path(__file__).name}:" in (ct or "") and "in _ca_nem_attr" in (ct or ""),
-         f"thiếu vị trí ném (tệp:dòng in hàm): {ct!r}")
+    # Dòng `raise` đọc từ code object, KHÔNG ghi cứng: tệp này đổi dòng mỗi lần thêm import.
+    vt = f"{Path(__file__).name}:{_nem_trong.__code__.co_firstlineno + 1} in _nem_trong"
+    bang(vt in (ct or ""), f"vị trí ném phải là khung TRONG CÙNG `{vt}`: {ct!r}")
 
     ct2 = "dong-1 loi that\ndong-2 ngu canh\ndong-3 cuoi"
     dong = _dong_chi_tiet(False, "tin_dung_gia", ct2)
@@ -3657,6 +3663,40 @@ def c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem():
     cat = "\n".join(_dong_chi_tiet(False, "tin_dung_gia", dai, tran=50))
     bang("DUOI_BI_CAT" not in cat and "cắt" in cat, f"vượt trần phải cắt và nói đã cắt: {cat!r}")
     bang("x" * 50 in cat, f"phần trong trần phải giữ nguyên: {cat!r}")
+    # Trần MẶC ĐỊNH (đường `do()` dùng, không truyền `tran`) là 2000 — số của đặc tả, không lấy từ chính hàm.
+    cat_md = "\n".join(_dong_chi_tiet(False, "tin_dung_gia", "y" * 2000 + "DUOI5"))
+    bang("DUOI5" not in cat_md and "còn 5 ký tự" in cat_md and "y" * 2000 in cat_md,
+         f"trần mặc định 2000 không cắt đúng: …{cat_md[-80:]!r}")
+
+    # Đường THẬT của `do()` (#1037 lượt 1, P2): chạy đúng m81 qua `_dot_bien(chi=…)`, thu stdout. Ca đích thay bằng
+    # một ca CÙNG TÊN ném AttributeError ⇒ dòng in phải mang ngoại lệ + vị trí; ca đích thật ⇒ đúng một dòng.
+    ten_m, i = "m81_bo_chot_no_chet", next(k for k, f in enumerate(CA) if f.__name__.startswith("c74_"))
+    c74_that = CA[i]
+
+    def _c74_gia():
+        raise AttributeError("c98_qua_do_that")
+    _c74_gia.__name__ = c74_that.__name__
+
+    def _qua_do(ca_dich):
+        buf = io.StringIO()
+        CA[i] = ca_dich
+        try:
+            with contextlib.redirect_stdout(buf):
+                ket = _dot_bien(chi={ten_m})
+        finally:
+            CA[i] = c74_that
+            globals()["_CA"] = ca_ngoai
+        return ket, buf.getvalue().splitlines()
+    ket, ra_in = _qua_do(_c74_gia)
+    vt_gia = f"{Path(__file__).name}:{_c74_gia.__code__.co_firstlineno + 1} in {_c74_gia.__code__.co_name}"
+    bang(len(ket) == 1 and ket[0][0] == ten_m and ket[0][3] == "tin_dung_gia",
+         f"`_dot_bien(chi=…)` phải chạy đúng {ten_m} và ra tin_dung_gia: {ket!r}")
+    bang(any("chi tiết [tin_dung_gia]" in d for d in ra_in)
+         and any("AttributeError: c98_qua_do_that" in d and vt_gia in d for d in ra_in),
+         f"stdout của `do()` thiếu ngoại lệ/vị trí `{vt_gia}`: {ra_in!r}")
+    ket, ra_in = _qua_do(c74_that)
+    bang(len(ket) == 1 and ket[0][2] and len(ra_in) == 1 and ten_m in ra_in[0],
+         f"đột biến ĐẠT qua `do()` phải in đúng một dòng: {ra_in!r} · {ket!r}")
 
 
 def _chay_1(fn):
@@ -3706,11 +3746,16 @@ def _dong_ket_qua_dot_bien(nhan, ten, ca_dich, tt, mo_ta, dat, ct) -> list:
 
 
 # ------------------------------------------------------------------ đột biến
-def _dot_bien():
-    """Mỗi đột biến phải làm ĐÚNG ca đích ĐỎ. Không đỏ ⇒ ca ấy rỗng."""
+def _dot_bien(chi=None):
+    """Mỗi đột biến phải làm ĐÚNG ca đích ĐỎ. Không đỏ ⇒ ca ấy rỗng.
+
+    `chi` (#1037): tập tên đột biến được chạy — CHỈ để `c98` đi qua đúng thân `do()` thật với một đột biến;
+    `main` gọi không đối số nên bảng chạy đủ như trước."""
     ra = []
 
     def do(ten, sua, ca_dich, mo_ta, doi_chung=None, mong_khong_rang=False, mong_gian_giao=False):
+        if chi is not None and ten not in chi:
+            return
         # BẢN SAO SÂU, không phải tham chiếu: đột biến dưới đây sửa TẠI CHỖ
         # (`dict.__setitem__`), nên `setattr` lại chính object đã bẩn thì khôi phục ĐƯỢC SỐ
         # KHÔNG — và mọi ca chạy sau sẽ đo trên một cổng đã bị nới. Đúng bài học "đột biến

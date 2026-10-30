@@ -87,7 +87,7 @@ THU_MUC = "ops/reviews"
 
 def _hoi_trang_thai(hoi, p: Path) -> bool:
     """`hoi()` (vd `p.is_dir`, `p.exists`) nhưng `OSError` ⇒ `KhongDoDuoc` nêu `p` (rc=2), không traceback.
-    #1021 lượt 2: chỉ `OSError` — lỗi lập trình phải đi thẳng ra (`c99` chốt 7)."""
+    #1021 lượt 2: chỉ `OSError` — lỗi lập trình phải đi thẳng ra (`c100` chốt 7)."""
     try:
         return hoi()
     except OSError as ex:

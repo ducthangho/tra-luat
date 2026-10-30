@@ -3672,7 +3672,8 @@ def c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
 @ca
 def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE():
     """#1021, cross-review Codex lượt 1 (`bo-chon-ung-vien-thieu-rang-hai-duong-goi`, P2): ba đột biến phá bộ
-    chọn vẫn qua toàn suite vì `c101` (bản trước tên `c98`) chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng (m144–m147):
+    chọn vẫn qua toàn suite vì `c101` (bản trước tên `c98`) chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng
+    (m144–m147; lượt 3 thêm m155 cho chốt 4):
     1. `--sinh-no` THẤY `X.RECEIPT.YAML` (rc=0, khối nợ nêu tên, `# 1 tệp`) — m144 lọc đuôi chính xác ở `_sinh_no`.
     2. Thứ tự: `iterdir` bị ép trả NGƯỢC mà helper vẫn trả đã sắp xếp — m145 bỏ `sorted`. Tên toàn chữ thường nên
        thứ tự `Path` giống nhau trên mọi nền (không so hai tên chỉ khác hoa thường).
@@ -3756,7 +3757,7 @@ def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE()
 
 @ca
 def c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang():
-    """#1021, cross-review Codex lượt 2. Ba chốt, mỗi chốt một đột biến riêng (m148–m152):
+    """#1021, cross-review Codex lượt 2. Ba chốt, đột biến riêng m148–m153 (lượt 3 thêm m154 cho chốt 5):
     5. `stat` của `ops/reviews` ném `PermissionError` (`is_dir()` chỉ nuốt ENOENT/ENOTDIR/…) ⇒ cả `kiem` lẫn
        `--sinh-no` rc=2 nêu "không đọc được trạng thái", không traceback (P2 `loi-do-liet-ke-thu-muc-thoat-traceback`,
        biểu hiện thứ hai) — m148 helper hỏi `is_dir()` trần, m149 guard của `kiem` hỏi trần, m150 bỏ bắt `OSError`.

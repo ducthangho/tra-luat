@@ -19,6 +19,7 @@ Khi commit cutover `2f84531` tra được, `c12` đo THÊM một tầng: đối 
 from __future__ import annotations
 
 import copy
+import errno
 import importlib.util
 import os
 os.environ["PYTHONUTF8"] = "1"
@@ -3727,19 +3728,23 @@ def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE()
         k = _kho_cau(tmp)
         _ghi_bn_cau(tmp, k, {"y.receipt.yaml": "a: 1\n"})
         dich = (tmp / bnv2.THU_MUC).resolve()
-
-        def hong(self):
-            if Path(self).resolve() == dich:
-                raise PermissionError(13, "Permission denied (tiêm, #1021)", str(self))
-            return goc(self)
-        for co in ((), ("--sinh-no",)):
-            Path.iterdir = hong
-            try:
-                rc, ra, loi = cli(tmp, *co)
-            finally:
-                Path.iterdir = goc
-            bang(rc == 2 and "không liệt kê được" in loi and "Traceback" not in ra + loi,
-                 f"liệt kê hỏng {list(co)}: đòi rc=2 'không liệt kê được'; được rc={rc}: {loi[-300:]!r}")
+        # Codex lượt 3 (#1021, P3): tiêm cả một `OSError` KHÔNG phải `PermissionError` (EIO), kẻo phép bắt bị thu
+        # hẹp thành `PermissionError` vẫn qua (m155).
+        for tao in (lambda s: PermissionError(errno.EACCES, "Permission denied (tiêm, #1021)", s),
+                    lambda s: OSError(errno.EIO, "I/O error (tiêm, #1021)", s)):
+            def hong(self, tao=tao):
+                if Path(self).resolve() == dich:
+                    raise tao(str(self))
+                return goc(self)
+            for co in ((), ("--sinh-no",)):
+                Path.iterdir = hong
+                try:
+                    rc, ra, loi = cli(tmp, *co)
+                finally:
+                    Path.iterdir = goc
+                bang(rc == 2 and "không liệt kê được" in loi and "Traceback" not in ra + loi,
+                     f"liệt kê hỏng {list(co)} ({type(tao('')).__name__}): đòi rc=2 'không liệt kê được'; "
+                     f"được rc={rc}: {loi[-300:]!r}")
 
 
 @ca
@@ -3779,35 +3784,42 @@ def c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang():
         setattr(Path, ten, gia)
         return (lambda: setattr(Path, ten, goc)), trung
 
+    # Codex lượt 3 (#1021, P3): hai lớp `OSError` — `PermissionError` VÀ một `OSError` thường (EIO) — kẻo phép bắt
+    # thu hẹp thành `PermissionError` vẫn qua (m154).
+    OS_LOI = (lambda: PermissionError(errno.EACCES, "Permission denied (tiêm, #1021)"),
+              lambda: OSError(errno.EIO, "I/O error (tiêm, #1021)"))
+
     # (5) stat của thư mục biên nhận ném EACCES
     with tempfile.TemporaryDirectory() as t:
         tmp = Path(t)
         k = _kho_cau(tmp)
         _ghi_bn_cau(tmp, k, {"y.receipt.yaml": "a: 1\n"})
         dich = (tmp / bnv2.THU_MUC).resolve()
-        for co in ((), ("--sinh-no",)):
-            tra, trung = tiem("is_dir", dich, lambda: PermissionError(13, "Permission denied (tiêm stat, #1021)"))
-            try:
-                rc, ra, loi = cli(tmp, *co)
-            finally:
-                tra()
-            dung(trung, f"fixture: is_dir của {dich} không được hỏi {list(co)}")
-            bang(rc == 2 and "không đọc được trạng thái" in loi and "Traceback" not in ra + loi,
-                 f"stat hỏng {list(co)}: đòi rc=2 'không đọc được trạng thái'; được rc={rc}: {loi[-300:]!r}")
+        for tao in OS_LOI:
+            for co in ((), ("--sinh-no",)):
+                tra, trung = tiem("is_dir", dich, tao)
+                try:
+                    rc, ra, loi = cli(tmp, *co)
+                finally:
+                    tra()
+                dung(trung, f"fixture: is_dir của {dich} không được hỏi {list(co)}")
+                bang(rc == 2 and "không đọc được trạng thái" in loi and "Traceback" not in ra + loi,
+                     f"stat hỏng {list(co)} ({type(tao()).__name__}): đòi rc=2 'không đọc được trạng thái'; "
+                     f"được rc={rc}: {loi[-300:]!r}")
     # (6) kho thiếu ops/reviews, stat của .git ném
     with tempfile.TemporaryDirectory() as t:
         tmp = Path(t)
         _kho_cau(tmp)
         dung(not (tmp / bnv2.THU_MUC).exists(), "fixture: ops/reviews không được tồn tại")
-        tra, trung = tiem("exists", (tmp / ".git").resolve(),
-                          lambda: PermissionError(13, "Permission denied (tiêm .git, #1021)"))
-        try:
-            rc, ra, loi = cli(tmp)
-        finally:
-            tra()
-        dung(trung, "fixture: exists của .git không được hỏi")
-        bang(rc == 2 and "không đọc được trạng thái" in loi and ".git" in loi and "Traceback" not in ra + loi,
-             f".git hỏng: đòi rc=2 nêu .git; được rc={rc}: {loi[-300:]!r}")
+        for tao in OS_LOI:
+            tra, trung = tiem("exists", (tmp / ".git").resolve(), tao)
+            try:
+                rc, ra, loi = cli(tmp)
+            finally:
+                tra()
+            dung(trung, "fixture: exists của .git không được hỏi")
+            bang(rc == 2 and "không đọc được trạng thái" in loi and ".git" in loi and "Traceback" not in ra + loi,
+                 f".git hỏng ({type(tao()).__name__}): đòi rc=2 nêu .git; được rc={rc}: {loi[-300:]!r}")
     # (7) lỗi lập trình đi thẳng
     with tempfile.TemporaryDirectory() as t:
         tmp = Path(t)
@@ -4682,6 +4694,15 @@ def _dot_bien():
         "    except OSError as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái",
         "    except Exception as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái"),
        C100, "lỗi lập trình ở phép hỏi thư mục bị đổi thành KHÔNG ĐO ĐƯỢC", doi_chung=DC)
+    # Codex lượt 3 (#1021): thu hẹp phép bắt về `PermissionError` — EIO phải vẫn ra rc=2.
+    do("m154_hoi_trang_thai_chi_bat_PermissionError", lambda: _dot_bien_tep(
+        "    except OSError as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái",
+        "    except PermissionError as ex:\n        raise KhongDoDuoc(f\"không đọc được trạng thái"),
+       C100, "EIO ở `stat` thoát thành traceback", doi_chung=DC)
+    do("m155_bo_chon_chi_bat_PermissionError", lambda: _dot_bien_tep(
+        "    except OSError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được",
+        "    except PermissionError as ex:\n        raise KhongDoDuoc(f\"không liệt kê được"),
+       C99, "EIO khi liệt kê thoát thành traceback", doi_chung=DC)
     return ra
 
 

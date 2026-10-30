@@ -9,3 +9,32 @@ NGƯỜI_GIỮ 0: không có
 HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
 NGƯỜI_GIỮ 0: không có
 == changelog.d/wp-1009.md
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== RELEASE_MANIFEST.json
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 1: wp1030-r4-g1-claude
+== scripts/tl.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== scripts/tl_core/command_registry.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== references/golden/parser_surface.json
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== scripts/tl_core/command_registry_test.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== references/golden/workflow_audit.json
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== references/golden/tool_inventory_inventory_decision.json
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/hooks/pretooluse_guard.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/hooks/pretooluse_guard_test.py
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/heads/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+NGƯỜI_GIỮ 0: không có

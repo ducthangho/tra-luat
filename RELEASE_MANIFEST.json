@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 194,
-  "total_bytes": 8836323,
-  "package_hash": "bf98380181e2be2a692931750b3f6aeedfc8b914125b3c58885421d09ab80dae",
-  "content_hash": "bf98380181e2be2a692931750b3f6aeedfc8b914125b3c58885421d09ab80dae",
+  "total_bytes": 8836547,
+  "package_hash": "f564cce5ffa8f8db8995f8e04e6f6c41f758fbf13b8149fe59533cabd6cd0728",
+  "content_hash": "f564cce5ffa8f8db8995f8e04e6f6c41f758fbf13b8149fe59533cabd6cd0728",
   "required_missing": [],
   "files": [
     {
@@ -933,8 +933,8 @@
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 60206,
-      "sha256": "c12ade051376b03bbb502b40ce54bc5126f4bc67ebc1114f4979dacd1210dd66"
+      "size": 60430,
+      "sha256": "b2d48b3bc06e8dce98aae6ee77e335afab42b24b770044ba9130d247102c6cc3"
     },
     {
       "path": "scripts/tra_cuu.py",

@@ -139,12 +139,14 @@ def _ca_bien(mod):
         "dung_tran_khong_duoi": dong + b"x" * (tran - len(dong)),
         "qua_tran_khong_duoi": dong + b"x" * (tran + 1 - len(dong)),
         "nul_khong_duoi": b"\x00\n" + khoa + b"\n",
+        "nul_cuoi_cua_so_khong_duoi": b"x" * (cua_so - 1) + b"\x00\n" + khoa + b"\n",
+        "nul_ngoai_cua_so_khong_duoi": b"x" * cua_so + b"\x00\n" + khoa + b"\n",
         "lon.txt": dong + b"x" * tran,                              # TEXT_SUFFIXES: không trần
         "nul.txt": b"\x00\n" + khoa + b"\n",                        # TEXT_SUFFIXES: không kiểm NUL
         "hoa_lon.TXT": dong + b"x" * tran,                          # đuôi HOA vẫn thuộc TEXT_SUFFIXES
         "hoa_nul.TXT": b"\x00\n" + khoa + b"\n",
     }
-    mong = {"dung_tran.log", "nul_ngoai_cua_so.log", "dung_tran_khong_duoi",
+    mong = {"dung_tran.log", "nul_ngoai_cua_so.log", "dung_tran_khong_duoi", "nul_ngoai_cua_so_khong_duoi",
             "lon.txt", "nul.txt", "hoa_lon.TXT", "hoa_nul.TXT"}
     with tempfile.TemporaryDirectory() as tam:
         goc = Path(tam) / "bien"

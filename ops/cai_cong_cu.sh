@@ -36,12 +36,26 @@ PY[0]="$(command -v "${PY[0]}")"
 # kenh: `GIU_PATH` (ten tran da DAT => khong doi PATH, Q3) hoac `DICH` + LF + thu muc (khong LF cuoi, doc nguyen van).
 # `--win`: ung vien qua `cygpath -u`, $GITHUB_PATH qua `cygpath -w`; ghi $GITHUB_PATH chi khi ten tran chua DAT. Moi buoc
 # hong => `return 1` TUONG MINH vi cong thuc chay voi `errexit` tat (F858-01/04).
+# wp1045: "<ten> DAT" = `trang_thai` cua CHINH cong cu ay trong `kiem-tra --chi <ten> --json`, KHONG phai rc. `tong_hop`
+# chi nang KHONG_DO_DUOC len trang_thai_tong khi `bat_buoc: true` (#498, hop dong #290) => cong cu tuy chon VANG MAT van
+# rc=0. Tin rc la nhan `GIU_PATH` cho shellcheck khong co tren PATH (run 41069257658, windows-latest: bo chon khong thu
+# `choco\bin`, khong ghi $GITHUB_PATH, buoc xanh roi `G5 probe` do). Ket qua JSON phai co DUNG MOT muc, dung ten.
+cong_cu_json_dung() {  # <ten> <khoa> <gia tri JSON> — muc DUY NHAT cua <ten> trong `kiem-tra --chi` co <khoa> == <gia tri>
+  local json
+  json="$("${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$1" --json 2>/dev/null)" || return 1
+  printf '%s' "$json" | "${PY[@]}" -c 'import json, sys
+c = json.load(sys.stdin).get("cong_cu") or []
+sys.exit(0 if len(c) == 1 and c[0].get("ten") == sys.argv[1] and c[0].get(sys.argv[2]) == json.loads(sys.argv[3]) else 1)' \
+    "$1" "$2" "$3" 2>/dev/null
+}
+cong_cu_dat() { cong_cu_json_dung "$1" trang_thai '"DAT"'; }  # <ten>
+
 chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
   local win="" ten d dich="" w
   [ -n "${KENH_KQ:-}" ] || { echo "cai_cong_cu: chon_thu_muc_chay_duoc chi chay duoi cai_cong_cu.sh (thieu KENH_KQ)" >&2; return 1; }
   if [ "${1:-}" = "--win" ]; then win=1; shift; fi
   ten="$1"; shift
-  if "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then
+  if cong_cu_dat "$ten"; then
     echo "cai_cong_cu: '$ten' ten tran da DAT, giu nguyen PATH" >&2
     printf 'GIU_PATH' > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }
     return 0
@@ -50,7 +64,7 @@ chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
     if [ -n "$win" ]; then
       d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua '$ten'" >&2; return 1; }
     fi
-    if PATH="$d:$PATH" "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$ten" >/dev/null 2>&1; then dich="$d"; break; fi
+    if PATH="$d:$PATH" cong_cu_dat "$ten"; then dich="$d"; break; fi
   done
   [ -n "$dich" ] || { echo "cai_cong_cu: khong thu muc nao co '$ten' chay duoc" >&2; return 1; }
   if [ -n "${GITHUB_PATH:-}" ]; then
@@ -131,7 +145,19 @@ declare +x KENH_KQ
 # vao TEP thay cho `$( )`: bash chi cho subshell thoat, KHONG cho EOF cua stdout — tien trinh con chay nen giu stdout
 # (writer muon) khong lam treo (N2), va moi gi no ghi sau do khong con duoc doc lam ket qua. `set +e`: giu ngu nghia
 # `$( )` cu (errexit tat) — ma thoat la cua chuoi `&&`, cac `return 1` tuong minh cua bo chon la chot.
-( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
+# wp1045 (M2): bo chon nay THU ung vien cho cong cu tuy chon vang mat, nen no co the hong o day; luot `source` cua --bat-buoc
+# KHONG duoc dung vi cong cu `bat_buoc: false` (vd shellcheck dung truoc rg) — canh bao roi di tiep, `kiem-tra --json` toan bo
+# cuoi vong quyet. Moi truong hop khac thoat DUNG ma cu (errexit truoc day thoat bang chinh ma cua lenh hong).
+RC_CAI=0
+( set +e; eval "$LENH" ) > "$TAM_CAI/stdout" || RC_CAI=$?
+if [ "$RC_CAI" -ne 0 ]; then
+  if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then
+    echo "cai_cong_cu: '$TEN' (bat_buoc: false) khong cai duoc (rc=$RC_CAI); --bat-buoc di tiep" >&2
+    rm -rf -- "$TAM_CAI"
+    return 0
+  fi
+  exit "$RC_CAI"
+fi
 # F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
 KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
 KQ="${KQ%x}"
@@ -148,3 +174,10 @@ rm -rf -- "$TAM_CAI"
 [ -d "$DICH" ] && export PATH="$DICH:$PATH"
 
 "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json
+# wp1045 (M2): goi TRUC TIEP mot cong cu => cai xong ma CHINH no chua DAT thi thoat 3 (KHONG_DO_DUOC), ke ca khi
+# `bat_buoc: false` lam dong tren rc=0. Luot `source` cua --bat-buoc (CAI_CONG_CU_PY_CUA = $$) giu hanh vi cu: cong cu tuy
+# chon thieu khong duoc chan cong cu bat buoc dung sau no; `kiem-tra --json` toan bo cuoi vong do moi quyet.
+if [ "${CAI_CONG_CU_PY_CUA:-}" != "$$" ] && ! cong_cu_dat "$TEN"; then
+  echo "cai_cong_cu: '$TEN' chua DAT sau khi cai (trang_thai cua chinh no khac DAT)" >&2
+  exit 3
+fi

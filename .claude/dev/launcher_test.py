@@ -9628,14 +9628,17 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
     lenh = [vo, str(ops / "cai_cong_cu.sh"), "--bat-buoc" if bang_ke else ten]
     if truc_tiep:
         import yaml
-        ham = re.search(r"^chon_thu_muc_chay_duoc\(\) \{.*?^\}$", (ops / "cai_cong_cu.sh").read_text(encoding="utf-8"),
-                        re.M | re.S)
+        # wp1045: bộ chọn gọi `cong_cu_dat` → `cong_cu_json_dung`, nên tách CẢ khối từ hai hàm ấy tới hết bộ chọn.
+        ham = re.search(r"^cong_cu_json_dung\(\) \{.*?^chon_thu_muc_chay_duoc\(\) \{.*?^\}$",
+                        (ops / "cai_cong_cu.sh").read_text(encoding="utf-8"), re.M | re.S)
         env["LENH"] = yaml.safe_load((ops / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"][ten]["cai"][nen]["lenh"]
         lenh = [vo, "-c", f'set -euo pipefail; PY=({shlex.quote(PY)}); GOC={shlex.quote(str(kho))}; cd "$GOC"\n'
                 + f'KENH_KQ={shlex.quote(str(s / "kenh_kq"))}; : > "$KENH_KQ"\n'
                 + (ham.group(0) if ham else "") + '\n( set +e; eval "$LENH" ) > "$KENH_KQ.out"\n'
                 + 'if [ -s "$KENH_KQ" ]; then cat "$KENH_KQ"; else cat "$KENH_KQ.out"; fi']
     p = subprocess.run(lenh, env=env, capture_output=True, text=True, timeout=180)
+    # wp1045: rig thiếu hàm thì `rc ≠ 0` vì "command not found" — ca đòi rc ≠ 0 sẽ ĐẠT oan. Thiếu lệnh ⇒ ĐỎ ngay.
+    bang(not truc_tiep or "command not found" not in p.stderr, f"rig truc_tiep thieu lenh: {p.stderr[-300:]}")
     return p, ("" if gp_thu_muc else gp.read_text().strip()), uv, dau_d
 
 

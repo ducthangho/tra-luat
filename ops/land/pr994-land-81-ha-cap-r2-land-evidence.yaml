@@ -130,3 +130,11 @@ khong_do_duoc:
   - 'Merge bam qua phien dung credential chu kho (#566): chi co merged_by.'
   - 'Provenance CI §10.2.2 cua gate hau merge (Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403.'
   - 'Chi thi truc tiep cua chu kho cho lan push e77ac9e: KHONG_DO_DUOC — chi co loi bao cua executor.'
+
+neo_quyet_dinh_20261029:
+  bo_canh: 'Them sau khi #1020 merge (9666771). Ho so chi duoc THEM; cac dong loi_khai o tren giu nguyen byte.'
+  quyet_dinh_push_sau_han: >-
+    measured — readback-comment-6493571372.json (ducthangho OWNER, PR #1020, 2026-10-29T09:56:02Z, neo head 1bfc91c) muc 1:
+    chu kho chap nhan lan push e77ac9e sau khi lease g1 het han va truoc comment uy quyen g2 6489429404. Thay cho nhan
+    loi_khai cua lease.ghi_sau_het_han va khong_do_duoc[2].
+  landed_giu_nguyen: 'measured — readback-comment-6493571372.json: ho so giu landed false; comment khong phai human_audited.'

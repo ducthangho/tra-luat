@@ -39,11 +39,11 @@ merge_commit_parents: [f9e24f8ac827c36077191371f0263680993afa75, 5b76266d3916959
 pre_merge_checks:
   - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 41004661958, run_attempt: 1, sha: 5b76266d391695940c449497bfbf0acbdfb7d499, conclusion: success, ghi_chu: 'measured — readback-run-41004661958.json completed success; readback-jobs-41004661958.json: moi job nhan ubuntu-latest success; readback-check-runs-5b76266d-all.json: 41 check = 39 success + 2 skipped (gate-cong-cu-gop cua luot Windows, mo), 0 failure.', nguon: [readback-run-41004661958.json, readback-jobs-41004661958.json, readback-check-runs-5b76266d-all.json]}
   - {name: 'ci.yml workflow_dispatch runner_set=windows-only tren head cuoi (L1 spec r4)', run_id: 41004664516, run_attempt: 1, sha: 5b76266d391695940c449497bfbf0acbdfb7d499, conclusion: success, ghi_chu: 'measured — readback-run-41004664516.json completed success; readback-jobs-41004664516.json: 15 job success (gate, gate-ops, gate-registry, gate-packet-loop, gate-nhanh-manh 0-7, gate-nhanh-gop, gate-cong-cu 0, chuan-bi), gate-cong-cu-gop skipped — dung loai tru L1 r4. gate-ops (windows-latest) success: c96 het nho #1018.', nguon: [readback-run-41004664516.json, readback-jobs-41004664516.json]}
-  - {name: 'executor cross-review Codex luot 6/6 (launcher.py run 1e2e900b)', sha: 4cbb418af52bd55c1266b7be34740959ad1e1aa2, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/run-1e2e900b.json, verdicts/wp1009-r4-luot6-VERDICT.md], ghi_chu: 'measured — run-1e2e900b.json: trang_thai xong, ma_thoat 0, head 4cbb418, provider openai_codex, model_phuc_vu_trang_thai DO_DUOC, tap model {gpt-6.1-sol}; sha256 tep 21253d68d6c0c47390b9ef149a73ec8e7837d15abc0213a39b811d03012bb0fb (doi chieu ben gui truoc khi nhan). VERDICT sha256 1535eef7835e0c41a464a7ed728306f5956347bcb1bc6995bdad5dae80598edd. Head luot 6 KHAC authorized_head 5b76266d (xem review.neo_sha).'}
+  - {name: 'executor cross-review Codex luot 6/6 (launcher.py run 1e2e900b)', sha: 4cbb418af52bd55c1266b7be34740959ad1e1aa2, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/run-1e2e900b.json, verdicts/wp1009-r4-luot6-VERDICT.md], ghi_chu: 'measured — verdicts/run-1e2e900b.json: trang_thai xong, ma_thoat 0, head 4cbb418, provider openai_codex, model_phuc_vu_trang_thai DO_DUOC, tap model {gpt-6.1-sol}; sha256 tep 21253d68d6c0c47390b9ef149a73ec8e7837d15abc0213a39b811d03012bb0fb (doi chieu ben gui truoc khi nhan). VERDICT sha256 1535eef7835e0c41a464a7ed728306f5956347bcb1bc6995bdad5dae80598edd. Head luot 6 KHAC authorized_head 5b76266d (xem review.neo_sha).'}
   - {name: 'Codex connector', conclusion: 'not_measured — khong co lan review connector hoan tat tren PR #1023', nguon: readback-comments-1023.json}
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-1023.json, readback-review-comments-1023.json]}
 post_merge_checks:
-  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41017062295, run_attempt: 1, sha: 09e059457a033de769f7cb789edc20810f4b95f5, conclusion: 'DIEN_SAU_KHI_XONG', nguon: [readback-run-41017062295.json, readback-jobs-41017062295.json], ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master). Day chi la moc Run cua §10.2.2. Moc Checkout, Workflow definition (WorkflowRun.file qua GraphQL — 403 trong phien web), Gate output: not_measured. KHONG suy cac moc ay tu REST head_sha.'}
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41017062295, run_attempt: 1, sha: 09e059457a033de769f7cb789edc20810f4b95f5, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', luc: '2026-10-30T06:56:4xZ -> 2026-10-30T07:57:57Z', kiem_gate: 'measured — kiem-gate/kiem-gate-09e05945.txt: packet_loop.py kiem-gate suite 111185156706 cua run 41017062295, check-runs filter=all, 23 ten tu readback-jobs-41017062295.json, rc=0', nguon: [readback-run-41017062295.json, readback-jobs-41017062295.json, readback-check-runs-09e05945-all.json, kiem-gate/kiem-gate-09e05945.txt], ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows da do tren head truoc merge (pre_merge_checks, run 41004664516). Day chi la moc Run cua §10.2.2 (REST head_sha + trang thai). Moc Checkout (SHA/parents/tree thuc chay), Workflow definition (commit/blob/sha256 qua WorkflowRun.file — GraphQL 403 trong phien web) va Gate output (command/rc/marker duong/artifact): not_measured. KHONG suy cac moc ay tu REST head_sha.'}
 bookkeeping:
   - {item: 'rut han lease wp1009-cloud-setup-p1-r4-g4-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: ccr-004fa546-sde2w7}
@@ -75,7 +75,9 @@ lease:
   thu_hoi_cuoi: >-
     DA NHA bang RUT HAN (khong bia mo): commit cab00cfd tren ops/cap-lease-1009-g1 dua lease_until/lease_expires_at_utc ve
     2026-10-30T07:10:00Z; ly do o khoi `rut_han` cua chinh tep lease. Luot dang lease 41017527506 success
-    (readback-run-41017527506-lease-rut-han.json). measured — ai-dang-giu-sau-rut-han/luc-do.txt.
+    (readback-run-41017527506-lease-rut-han.json). measured — ai-dang-giu-sau-rut-han/luc-do.txt: ls-remote = guong (thieu 0,
+    thua 0); ca 13 duong dan lease g4 ra HẾT_HẠN; 12/13 "NGƯỜI_GIỮ 0"; RELEASE_MANIFEST.json "NGƯỜI_GIỮ 1: wp1030-r4-g1-claude" — lease
+    MOI cua packet khac (#1030), cap sau khi g4 nha, khong phai lease cua packet nay.
   heartbeat_ghi_chu: 'not_measured — heartbeat_at khong cap nhat sau leased_at_utc.'
 
 trang_thai_packet:
@@ -86,7 +88,7 @@ trang_thai_packet:
     9d3ac97a… (13 tep, 716 dong them).
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 09e05945: xem post_merge_checks; du xanh van CHUA DAT day du vi moc Checkout,
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 09e05945: CHUA DAT day du — measured: REST run/jobs/check-run 23/23 success va kiem-gate rc=0 (moc Run); not_measured: moc Checkout,
     Workflow definition, Gate output cua §10.2.2 not_measured; (2) lease da nha: rut han — xem lease.thu_hoi_cuoi; (3) bookkeeping:
     ho so nay; (4) review neo DUNG authorized_head_sha 5b76266d: CHUA DAT — luot approve cuoi neo 4cbb418; khac biet 4cbb418..5b76266d
     chi la merge origin/master (diff packet so merge-base khong doi, 716 dong ca hai) nhung protocol doi neo DUNG SHA; (5) uy quyen land
@@ -113,12 +115,12 @@ review:
   luot_cuoi:
     reviewer: 'measured — verdicts/run-1e2e900b.json: launcher.py run, provider openai_codex, head 4cbb418, ma_thoat 0, 723.033 s, model_phuc_vu_trang_thai DO_DUOC, model gpt-6.1-sol (64 muc).'
     hien_vat: ops/land/pr1023-wp1009-r4-provenance/verdicts/
-    ket_qua: 'measured (noi dung VERDICT) — approve tren 4cbb418, 0 P0-P3; F14 dong; delta luot 6 chi 2 tep guard/test; 13 tep / 716 dong.'
+    ket_qua: 'measured — verdicts/wp1009-r4-luot6-VERDICT.md: approve tren 4cbb418, 0 P0-P3; F14 dong; delta luot 6 chi 2 tep guard/test; 13 tep / 716 dong.'
   cac_luot_truoc:
     - {luot: 1, run: 1323865f, head: 7cea463, ket_qua: 'thuat_lai — request_changes 0/1/4/0', prompt_sha256: 02a0ed8f6664828d0f48bb92c972f3619495f4d101f0beacd507c6b413b0b9b5, verdict_sha256: bd6a644b8abeed19795753ed9b891c7e1dff8091c673eddacbcc01efc5f7c33d}
     - {luot: 2, run: c83481e6, head: 606d2f9, ket_qua: 'thuat_lai — request_changes 0/0/4/0', prompt_sha256: c2b1e4028826bf14b004f23dac0624f2ecf154db66dea6735e92a7b6b27916ef, verdict_sha256: 0ec3d9b0c3a2fc68b9d8098c40aa9891c638e16aa663e6fa16115c0fdb140d45}
     - {luot: 3, run: 4f1013e9, head: bb64485, ket_qua: 'thuat_lai — request_changes 0/0/6/0; S5 => chu kho dat luat (a)+(c) issuecomment-6494782891', prompt_sha256: 8187facf95059c314a28cd2b9b3b365546c178c178dc927475404d9727c6633d, verdict_sha256: e2abd0a64062568f6c8f431ba65fa267f9b0198ae36e6b031cf3ed259fcfe91f}
-    - {luot: 4, run: d81f77ee, head: fa04437, ket_qua: 'measured — approve 0/0/0/0', hien_vat: [verdicts/run-d81f77ee.json, verdicts/wp1009-r3-luot4-VERDICT.md], ghi_chu: 'run.json sha256 fc32f9881807defc12a4febe2c17349c23248f3bc97656028a79ed541d2c3b6b, model_phuc_vu DO_DUOC gpt-6.1-sol; VERDICT sha256 d269f332a091433bf92ffd89d06f609cd1e8848f0a489b2be6f2ca55f9be008f.'}
+    - {luot: 4, run: d81f77ee, head: fa04437, ket_qua: 'measured — verdicts/wp1009-r3-luot4-VERDICT.md: approve 0/0/0/0', hien_vat: [verdicts/run-d81f77ee.json, verdicts/wp1009-r3-luot4-VERDICT.md], ghi_chu: 'run.json sha256 fc32f9881807defc12a4febe2c17349c23248f3bc97656028a79ed541d2c3b6b, model_phuc_vu DO_DUOC gpt-6.1-sol; VERDICT sha256 d269f332a091433bf92ffd89d06f609cd1e8848f0a489b2be6f2ca55f9be008f.'}
     - {luot: 5, run: 5f05a5ae, head: 69bee9c, ket_qua: 'thuat_lai — request_changes 0/1/0/0 (F14); lech muc tieu 14 duoc duyet issuecomment-6503698943', prompt_sha256: eddc970f1a8f607aa59aefa18bfd22cd61ce3c7fb0d91b9445f561967b909472, verdict_sha256: a2d878101e23bc886ce1bc0dd35fec2e0e4ecbe0637f63aa87dbbd8aaae16d5e}
   thread: 'measured — readback-reviews-1023.json: 0 review; readback-review-comments-1023.json: 0.'
   dot_bien: 'thuat_lai — executor do lai tren 5b76266d (~07:14Z): r973 41/41 GIET; pretooluse_guard_test 35/35 (gom m36 cho F14).'

@@ -21813,7 +21813,9 @@ def run() -> int:
     def _con1000(fn):
         """fn(d, chay) — chay(cờ, rc_con, *đối số) chạy con THẬT `sys.executable con.py out rc …` ⇒ (rc, out, kq con)."""
         with _tf110.TemporaryDirectory() as d:
-            con, ra = _P110(d, "con.py"), _P110(d, "ra.json")
+            # KHÔNG đặt tên `con.py`: CON là tên thiết bị dành riêng của Windows — ghi vào console, con đọc script từ
+            # console và TREO (đo 30-10-2026 trên tra-luat-win, Python 3.12, faulthandler dừng ở subprocess wait)
+            con, ra = _P110(d, "tien_trinh_con.py"), _P110(d, "ra.json")
             con.write_text(_CON1000, encoding="utf-8")
             def chay(co, rc_con=0, *doi, **kw):
                 ra.unlink(missing_ok=True)

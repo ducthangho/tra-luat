@@ -1912,7 +1912,10 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
         vp = str(d.get("verdict_path") or "").strip().lstrip("./")
         goc_tm = thu_muc.relative_to(goc).as_posix() + "/"
         ten_verdict = vp[len(goc_tm):] if vp.startswith(goc_tm) else vp
-        ten_cb = {ten_verdict, PurePosixPath(ten_verdict).name} if ten_verdict else set()
+        # …nhưng KHÔNG khi ở gốc có verdict cùng basename: lúc ấy hàng basename là của verdict GỐC.
+        ten_cb = {ten_verdict} if ten_verdict else set()
+        if "/" in ten_verdict and PurePosixPath(ten_verdict).name not in {v.name for v in ds_verdict}:
+            ten_cb.add(PurePosixPath(ten_verdict).name)
         bang(ten_verdict and co_o_cot(ten_verdict, hang_ml, k_ml_v),
              f"{muc_luc.name}: verdict {ten_verdict!r} KHÔNG có trong CỘT 'tệp verdict' "
              f"của bảng 'Mục lục'")
@@ -2207,6 +2210,15 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
         _kiem_muc_luc(tm, goc)
         phai_do(("'con/y-verdict.md'", "CỘT 'tệp verdict'"), hang_cb=y_cb,
                 hang_ml=x_ml + "\n| `y-verdict.md` | `y.receipt.yaml` |")
+        # Có thêm verdict GỐC cùng basename ⇒ hàng cảnh báo basename là của verdict gốc, KHÔNG thoả caveat
+        # của `con/y-verdict.md`.
+        (tm / "y-verdict.md").write_text("verdict goc\n", encoding="utf-8")
+        (tm / "y-verdict.receipt.yaml").write_text("verdict_path: ops/reviews/y-verdict.md\n", encoding="utf-8")
+        y_ml = (x_ml + "\n| [`y-verdict.md`](con/y-verdict.md) | `y.receipt.yaml` |"
+                "\n| `y-verdict.md` | `y-verdict.receipt.yaml` |")
+        phai_do(("'C9'", "CỘT 'id'"), hang_cb=y_cb, hang_ml=y_ml)
+        muc_luc(hang_cb=y_cb + "\n| [`y-verdict.md`](con/y-verdict.md) | `C9` |", hang_ml=y_ml)
+        _kiem_muc_luc(tm, goc)
 
 
 @ca

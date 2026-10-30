@@ -5,6 +5,8 @@ packet_id: wp1030
 revision: 4
 generation: 1
 lease_id: wp1030-r4-g1-claude
+da_bi_thay_the: wp1030-r5-g1-claude
+da_bi_thay_the_ghi_chu: 'Thay boi r5 g1 (spec r5, write set 6 tep them scripts/tl_selftest.py) — chu kho chon phuong an 1, ghi o #1030 issuecomment-6517889151.'
 role: executor
 provider: claude
 executor: claude

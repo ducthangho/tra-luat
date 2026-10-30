@@ -1,0 +1,9 @@
+# GraphQL WorkflowRun.file — run 41094993408 (push master, merge 8cdb15a7)
+# Chay tren may chu kho ASUS-LAPTOP qua Desktop Commander (shell cmd), gh 2.95.0 dang nhap ducthangho (keyring),
+# boi phien dieu phoi session_015GtxrbRnRANivtXrA1edLB luc ~18:06Z 30-10-2026, theo chi thi chu kho trong phien
+# "Bạn tự chạy các lệnh gh api graphql cho tôi". Khoa may luc do thuoc session_015GtxrZ1Tt93F4NLUUhKYQy (test #1021, han 19:46Z);
+# lenh chi doc mot truy van GraphQL, khong chay test, khong cham thu muc cua phien kia.
+# Lenh:
+# gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJkXPWAA -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+# Output nguyen van:
+{"data":{"node":{"databaseId":41094993408,"runNumber":3512,"createdAt":"2026-10-30T17:00:35Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/8cdb15a786304bab084b43c8b30c127ae87e2594/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"8cdb15a786304bab084b43c8b30c127ae87e2594"}}}}}

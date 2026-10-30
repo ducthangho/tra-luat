@@ -1,0 +1,6 @@
+# GraphQL WorkflowRun.file — run 41079999961 (pull_request, head 79017438)
+# Cung dieu kien do voi graphql-workflowrun-file-41094993408.txt (ASUS-LAPTOP, cmd, gh 2.95.0, ~18:06Z 30-10-2026).
+# Lenh:
+# gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJkI8N2Q -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+# Output nguyen van:
+{"data":{"node":{"databaseId":41079999961,"runNumber":3505,"createdAt":"2026-10-30T15:21:46Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/79017438cccaf77cd41e8126633943075b7b9200/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"79017438cccaf77cd41e8126633943075b7b9200"}}}}}

@@ -1,0 +1,9 @@
+$ git rev-parse 2bcd8f31111d354e1e72934a3c22aba8b14675f0^{tree} 2bcd8f31111d354e1e72934a3c22aba8b14675f0^1 2bcd8f31111d354e1e72934a3c22aba8b14675f0^2
+e925050c49811874ee6e298aa683e1f14643254d
+44884446f71c89e25f9a72ac58e4f597db63c1ba
+a2e2ebf812f57254affe9344fd02530efa1a0130
+merge-base(cha1,head) = 20a2e2b3dd52a83442c739d17db1f1bd66181a6c
+cmp diff(cha1..merge) vs diff(merge-base..head) rc=0
+ .agents/skills/cross-review/SKILL.md |  9 +++++----
+ .claude/skills/cross-review/SKILL.md | 19 ++++++++++++-------
+ 2 files changed, 17 insertions(+), 11 deletions(-)

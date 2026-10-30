@@ -1,0 +1,129 @@
+# HO SO LAND — packet #987 wp987 r1 g1 (adapter cross-review doc model/effort/sandbox Codex tu run.json), ma qua PR #991.
+# Khuon: ops/land/pr983-wp923-land-evidence.yaml (PR #996). Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7.
+# Moi loi khai measured tro toi tep trong ops/land/pr991-wp987-provenance/ (duong dan tuong doi thu muc do).
+# KHONG tai chay; not_measured = khong do duoc. Readback tho: GET qua proxy phien bang GITHUB_PAT; script readback.py,
+# kiemgate.py, bon_moc.py, tomtat_luot.py kem trong do-lai-nguon-20261029/; SHA256SUMS kem.
+# GATE HAU MERGE: run push 40528509595 tren 2bcd8f3 attempt 1 bi HUY (concurrency, push master ke tiep); attempt 2 (phien
+# dieu phoi chay lai 27-10 ~16:17Z) 23/23 job Ubuntu success, event push, ref master => buoc release-verify lane LAND CO CHAY
+# va success. 4/4 moc §10.2.2 (Workflow definition do 29-10). landed FALSE: chi con
+# thieu duyet landed cua chu kho.
+
+schema_version: 1
+mission_id: gh-987
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_01FLVLxi5gKZgtVvbuTCEqEn
+input_packet_generations:
+  - {packet_issue: 987, packet_id: wp987, revision: 1, generation: 1, lease_id: wp987-r1-g1-claude}
+authorized_head_sha: a2e2ebf812f57254affe9344fd02530efa1a0130
+authorized_head_tree: 427c0775c0f1b4f5fdadaf10c6e65bc23d4182aa
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/991
+authorization_ghi_chu: >-
+  measured — readback-pr-991.json merged_by=ducthangho, merged_at 2026-10-27T15:11:26Z; readback-events-991.json (su kien
+  merged/closed). Lease khong uy quyen merge cho executor; KHONG_DO_DUOC bam tay hay qua phien khac. Chi thi chu kho
+  "da merge 991." ghi ho readback-comments-987.json comment 6445705447.
+land_operator: 'measured — readback-pr-991.json merged_by=ducthangho; readback-events-991.json.'
+merge_method: merge
+merge_commit: 2bcd8f31111d354e1e72934a3c22aba8b14675f0
+merge_commit_tree: e925050c49811874ee6e298aa683e1f14643254d
+merge_commit_parents: [44884446f71c89e25f9a72ac58e4f597db63c1ba, a2e2ebf812f57254affe9344fd02530efa1a0130]
+merge_noi_dung: >-
+  measured — do-lai-nguon-20261029/merge-va-diff.txt: diff cha1 (4488444) .. merge bang BYTE diff merge-base (20a2e2b) ..
+  head a2e2ebf (cmp rc=0); 2 tep .claude/skills/cross-review/SKILL.md +12 -7 va .agents/skills/cross-review/SKILL.md +5 -4
+  (tong +17 -11), dung write set lease.
+pre_merge_checks:
+  - {name: 'ci.yml pull_request (ubuntu) — head cuoi', run_id: 40514648828, run_attempt: 1, sha: a2e2ebf812f57254affe9344fd02530efa1a0130, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-pre-a2e2ebf.txt: suite 109809358193, 23 ten, rc=0', nguon: [readback-run-40514648828.json, readback-jobs-40514648828.json, readback-check-runs-a2e2ebf-all.json]}
+  - {name: 'thu-hoi pull_request_target tren a2e2ebf', run_id: [40514648735, 40524514062], conclusion: 'success x2', nguon: [readback-run-40514648735.json, readback-run-40524514062.json]}
+  - {name: 'executor cross-review Codex qua launcher.py run, luot 2/2 (lop sensitive, tran 10 theo ADR-0055)', sha: a2e2ebf812f57254affe9344fd02530efa1a0130, conclusion: 'approve; 0 finding', nguon: [verdicts/wp987-g1-claude-review-2-codex-verdict.md, verdicts/wp987-g1-claude-review-2-codex-prompt.md, verdicts/wp987-g1-claude-review-2-codex-run.json], ghi_chu: 'measured — verdicts/wp987-g1-claude-review-2-codex-verdict.md dong 1–2 "verdict: approve", "reviewed_sha: a2e2ebf…"; run.json run_id 0e1042359a214887bcdedd2cce365dbb, head a2e2ebf, trang_thai xong, ma_thoat 0, 324.218 s, prompt khop prompt_sha256; model_phuc_vu 15/15 gpt-6.1-sol DO_DUOC; effort_phuc_vu xhigh DO_DUOC; sandbox_trang_thai DO_DUOC. PowerShell 7.4.6 that tren Linux: POWERSHELL_PARITY 3/3 (khong chung nhan runtime Windows). Ban chep nguyen byte tu ops/wp987-r1-g1-lease:ops/reviews/wp987-g1-claude-review-2-codex/.'}
+  - {name: 'executor cross-review Codex luot 1/2', sha: a2e2ebf812f57254affe9344fd02530efa1a0130, conclusion: 'blocked (moi truong: thieu pwsh); 0 finding P0/P1/P2', nguon: [verdicts/wp987-g1-claude-review-1-codex-run.json, verdicts/wp987-g1-claude-review-1-codex-verdict.md], ghi_chu: 'measured — do-lai-nguon-20261029/tom-tat-luot.txt; run da438d8f, ma_thoat 0, 74/74 gpt-6.1-sol, xhigh, sandbox DO_DUOC. Luot 2 ke thua phep do luot 1 tren cung SHA (selftest 1731/1731 khong chay lai).'}
+  - {name: 'connector Codex GitHub tren PR #991', conclusion: 'khong co finding; has_any_findings false tren a2e2ebf; 0 review, 0 review comment', nguon: [readback-comments-991.json, readback-reviews-991.json, readback-review-comments-991.json]}
+  - {name: 'dieu kien kich thuoc', conclusion: '2 tep, +17 -11 (tran spec: <= 2 tep, <= 60 dong them)', nguon: [readback-pr-991.json, do-lai-nguon-20261029/merge-va-diff.txt]}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 40528509595, run_attempt: 2, sha: 2bcd8f31111d354e1e72934a3c22aba8b14675f0, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest', kiem_gate: 'measured — do-lai-nguon-20261029/kiem-gate-post-2bcd8f3.txt: suite 109849045323, 23 ten, rc=0', nguon: [readback-run-40528509595.json, readback-jobs-40528509595.json, readback-check-runs-2bcd8f3-all.json], ghi_chu: 'Attempt 1 bi huy (concurrency); attempt 2 do phien dieu phoi chay lai (event van la push, ref master). release-verify strict lane LAND (manifest committed) success trong job gate (ubuntu-latest) — readback-jobs-40528509595.json. Ba moc §10.2.2 do theo JOB gate (ubuntu-latest) 122293257860 (do-1029-2bcd8f3/bon-moc-10-2-2.txt): Run measured (event push, head 2bcd8f3, attempt 2, conclusion success). Checkout measured — do-1029-2bcd8f3/log-gate-122293257860-trich.txt: git log -1 = 2bcd8f3, head_sha = 2bcd8f3; artifact json identity head 2bcd8f3, tree e925050, cay sach. Gate output measured — artifact 12748072043 gate-evidence-ubuntu-latest-2 (sha256 zip 5aafd3c0… = digest REST, do-1029-2bcd8f3/readback-artifacts-40528509595.json; tep giai nen do-1029-2bcd8f3/artifact-12748072043/): python scripts/tl.py --selftest rc 0, marker == tl selftest 1738/1738 ==, output sha256 b8546058… khop; Linux 6.17.0-1022-azure, CPython 3.12.15. Workflow definition measured 29-10 — xem moc_workflow_definition_20261029 (blob ci.yml 82d9f239 tai 2bcd8f3).'}
+  - {name: 'ops-publish-lease.yml cho rut han (c6cc5b2)', run_id: 40528725601, sha: c6cc5b2, conclusion: success, nguon: [readback-run-40528725601.json]}
+bookkeeping:
+  - {item: 'cap lease r1 (2987464), ban chieu', ket_qua: 'measured — readback-comments-987.json comment 6442899508; ops-publish-lease run 40510333326 success (readback-run-40510333326.json)'}
+  - {item: 'bao cao executor', ket_qua: 'measured — readback-comments-987.json comment 6444915481; handoff verdicts/wp987-g1-claude-handoff.md'}
+  - {item: 'ghi ho "da merge 991."', ket_qua: 'measured — readback-comments-987.json comment 6445705447'}
+  - {item: 'thu hoi lease wp987-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', nhanh: claude/bookkeeping-991-land}
+# ---- het truong chuan
+packet_id: wp987
+packet_issue: 987
+generation: 1
+pham_vi_land: ma
+pham_vi_land_ghi_chu: 'Adapter cross-review cua hai nen (.claude/skills, .agents/skills) — dev-side, ngoai goi phat hanh.'
+environment: cloud
+operating_system: linux
+recorded_by: >-
+  claude-session https://claude.ai/code/session_01FLVLxi5gKZgtVvbuTCEqEn — phien DIEU PHOI da cap lease va tao executor;
+  KHONG phai executor.
+
+spec:
+  r1: {path: 'ops/specs/wp987.md (nhanh ops/wp987-r1-g1-lease)', sha256: 9403038447154f1e2e714c40fa8561460a2bac08e8a06708923a5541a5047b15}
+  do_lai: 'measured — do-lai-nguon-20261029/spec-sha256.txt (khop spec_hash cua lease).'
+lease:
+  lease_id: wp987-r1-g1-claude
+  path: ops/leases/wp987-r1-g1-claude.yaml (nhanh ops/wp987-r1-g1-lease)
+  ban_chep: 'measured — do-lai-nguon-20261029/lease-wp987-r1-g1-claude-2987464.yaml.txt va -sau-rut-han-c6cc5b2.yaml.txt'
+  lease_until_ban_dau: '2026-10-29T13:15:00Z'
+  thu_hoi_cuoi: >-
+    measured — RUT HAN (khong bia mo, chua co lease ke nhiem): commit c6cc5b2 dua lease_until ve 2026-10-27T15:14:00Z;
+    ops-publish-lease run 40528725601 success; ai-dang-giu-sau-rut-han/luc-do.txt (2026-10-29T11:45:51Z): ls-remote =
+    for-each-ref 694, thieu 0; ca hai SKILL.md va handoff NGUOI_GIU 0, wp987-r1-g1-claude HET_HAN.
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-991.json: merged true, merged_at 2026-10-27T15:11:26Z, merge_commit_sha 2bcd8f3, head.sha a2e2ebf.'
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 2bcd8f3: run push 40528509595 attempt 2 23/23 success, lane LAND success,
+    4/4 moc §10.2.2 measured (Workflow definition do 29-10). (2) lease da nha: rut han c6cc5b2, NGUOI_GIU 0 DAT.
+    (3) bookkeeping: ho so nay DAT. (4) review approve neo DUNG a2e2ebf voi §8.1 DAT. (5) noi dung merge = diff PR DAT.
+    (6) merge boi tai khoan chu kho DAT.
+    Mo lai: chi con comment duyet landed cua chu kho neo head PR ghi so (moc Workflow definition da do 29-10).
+assurance_81:
+  reviewer_assurance_81: DAT
+  ly_do: >-
+    measured — verdicts/wp987-g1-claude-review-2-codex-run.json: luot launcher.py run 0e104235 tren DUNG authorized_head_sha
+    a2e2ebf, ma_thoat 0, verdict approve 0 finding; model_phuc_vu_trang_thai DO_DUOC 15/15 gpt-6.1-sol (ho openai, khac ho
+    claude cua executor) => cross_approved. Nghia vu read-only (AGENTS.md §Reviewer): verdict khai "Moi hien vat thu nam
+    ngoai cay-kho/" (dong 16), fixture o /tmp ngoai cay-kho; snapshot dau/cuoi 7.259 tep ngoai .git cung hash/mode,
+    HEAD/tree, diff/index va status tracked/untracked/ignored sach, delta rong — khong khai ghi-roi-hoan-nguyen nao (khac
+    ho so pr983, PR #996). Gioi han §8.2: snapshot chi chung minh khong co delta o hai moc; sandbox thuc te cho phep
+    workspace-write.
+  thuc_thi:
+    model: 'measured — verdicts/wp987-g1-claude-review-2-codex-run.json model_phuc_vu DO_DUOC, 15/15 response gpt-6.1-sol'
+    effort: 'measured — verdicts/wp987-g1-claude-review-2-codex-run.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC'
+    sandbox_mode: 'measured — verdicts/wp987-g1-claude-review-2-codex-run.json sandbox_trang_thai DO_DUOC (sandbox_quan_sat trong run.json).'
+  gioi_han: 'model_phuc_vu do tu su kien response.created ma launcher ghi; la model may chu TRA VE, khong phai chung thu ben thu ba.'
+
+no_co_ten:
+  - {ma: cross-review-adapter-doc-header-cli, trang_thai: dong, bang_chung: 'PR #991 merge 2bcd8f3'}
+  - {ma: gate-hau-merge-bi-huy-boi-push-ke-tiep, trang_thai: mo, ghi_chu: 'lap lai o #991 (attempt 1 bi huy), #983 va #990.'}
+khong_do_duoc:
+  - 'Merge bam tay hay qua mot phien dung credential chu kho: KHONG_DO_DUOC (chi co merged_by).'
+  - 'Moc Workflow definition §10.2.2: KHONG_DO_DUOC TRONG PHIEN (GraphQL 403); da do NGOAI phien tren may chu kho — xem moc_workflow_definition_20261029.'
+  - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'
+  - 'PowerShell tren Windows that: KHONG_DO_DUOC (reviewer chay pwsh 7.4.6 tren Linux).'
+
+moc_workflow_definition_20261029:
+  run_id: 40528509595
+  node_id: WFR_kwLOTNeRjc8AAAAJb6_6mw
+  nguoi_chay: >-
+    phien executor #923 session_015GtxrZWhXPHPfAPL1BXfPB, chay `gh api graphql` bang cmd tren may ASUS-LAPTOP cua chu kho qua
+    Remote Desktop Commander luc ~2026-10-29T16:25Z, theo chi thi chu kho trong hoi thoai voi phien dieu phoi (29-10 ~16:22Z:
+    "Cho phien executor #923 chay GraphQL cho #1024 va #1027"). Phien dieu phoi nhan output qua send_message —
+    KHONG_DO_DUOC byte goc tren may chu kho; ban chep do-1029-2bcd8f3/graphql-workflowrun-40528509595.json.
+  lenh: 'gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJb6_6mw -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"'
+  ket_qua: >-
+    measured — do-1029-2bcd8f3/workflow-definition-2bcd8f3.txt (script do-lai-nguon-20261029/moc_wd.py, cach do theo tien le pr870
+    moc_workflow_definition_20261026): databaseId 40528509595 (runNumber 3337) khop run; file.path .github/workflows/ci.yml = REST
+    path; repositoryFileUrl neo OID 2bcd8f3; checkSuite.commit.oid 2bcd8f3 = REST head_sha; blob REST contents?ref=2bcd8f3 =
+    git rev-parse 2bcd8f3:.github/workflows/ci.yml = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc, sha256 bytes
+    ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb, byte REST = byte git. 7/7 phep so khop.

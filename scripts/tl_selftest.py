@@ -22572,6 +22572,7 @@ def run() -> int:
             # packet #886: 191 -> 192, manh changelog.d/wp-886.md; packet #1009: 192 -> 193, manh changelog.d/wp-1009.md;
             # packet #1030: 193 -> 194, manh changelog.d/wp-1030.md).
             # Do o day => co tep RUNTIME duoc them, phai ke khai slot CO CHU DICH.
+            # KÊ KHAI SLOT (packet #1030): 193 → **194** = + `changelog.d/wp-1030.md`. Trần Package 200 còn 5 khe.
             ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) == 194
         # RANG HAI CHIEU tren CAY TAM: khoa VAO => loai; go khoa RA => phai QUAY LAI vao goi.
         # Khong co ve thu hai thi ca chi chung minh "hang co chua chuoi", khong chung minh hang ay

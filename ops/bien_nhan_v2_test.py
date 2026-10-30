@@ -18,9 +18,11 @@ Khi commit cutover `2f84531` tra được, `c12` đo THÊM một tầng: đối 
 """
 from __future__ import annotations
 
+import contextlib
 import copy
 import errno
 import importlib.util
+import io
 import os
 os.environ["PYTHONUTF8"] = "1"
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -29,6 +31,7 @@ import re as _RE
 import subprocess
 import sys
 import tempfile
+import traceback
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -3621,7 +3624,7 @@ def c97_NHANH_TIEM_co_rang_tren_module_da_thay_va_tu_go():
 
 
 @ca
-def c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
+def c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
     """#1021 (`BIEN-NHAN-V2-GLOB-HOA-THUONG` r2, C1a/C1b): cổng THẤY `x.RECEIPT.YAML` trên MỌI nền.
 
     `glob` cũ bỏ qua đuôi hoa LẶNG trên POSIX mà kiểm trên Windows. Ba fixture, mỗi cái một kho git thật:
@@ -3665,7 +3668,7 @@ def c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
 @ca
 def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE():
     """#1021, cross-review Codex lượt 1 (`bo-chon-ung-vien-thieu-rang-hai-duong-goi`, P2): ba đột biến phá bộ
-    chọn vẫn qua toàn suite vì `c98` chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng (m144–m147):
+    chọn vẫn qua toàn suite vì `c101` (bản trước tên `c98`) chỉ đi đường `kiem`. Bốn chốt, mỗi chốt một đột biến riêng (m144–m147):
     1. `--sinh-no` THẤY `X.RECEIPT.YAML` (rc=0, khối nợ nêu tên, `# 1 tệp`) — m144 lọc đuôi chính xác ở `_sinh_no`.
     2. Thứ tự: `iterdir` bị ép trả NGƯỢC mà helper vẫn trả đã sắp xếp — m145 bỏ `sorted`. Tên toàn chữ thường nên
        thứ tự `Path` giống nhau trên mọi nền (không so hai tên chỉ khác hoa thường).
@@ -3841,6 +3844,82 @@ def c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang():
                 dung(trung, f"fixture: {ten} của {dich} không được hỏi {list(co)}")
                 bang(bay is moc, f"lỗi lập trình ở {ten} {list(co)} bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, "
                                  f"được {type(bay).__name__ if bay else 'không ngoại lệ'}")
+@ca
+def c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem():
+    """#1037: một đột biến KHÔNG đạt phải để lại đủ dấu vết để truy. (a) `_chay_1` với ca ném lỗi không phải chốt ⇒
+    `tin_dung_gia` + tên ngoại lệ + thông điệp + vị trí ném ĐÚNG hàm; (b) `_dong_chi_tiet` của kết quả không đạt mang
+    `tt` và MỌI dòng `ct`, của kết quả đạt thì rỗng; (c) vượt trần thì cắt và nói đã cắt."""
+    global _CA
+    ca_ngoai = _CA
+
+    def _nem_trong():
+        raise AttributeError("thuoc_tinh_1037_vang")
+
+    def _ca_nem_attr():
+        _nem_trong()
+    try:
+        tt, ct = _chay_1(_ca_nem_attr)
+    finally:
+        _CA = ca_ngoai
+    bang(tt == "tin_dung_gia", f"ca ném AttributeError phải là tin_dung_gia, được {tt}")
+    bang("AttributeError: thuoc_tinh_1037_vang" in (ct or ""), f"thiếu tên/thông điệp ngoại lệ: {ct!r}")
+    # Dòng `raise` đọc từ code object, KHÔNG ghi cứng: tệp này đổi dòng mỗi lần thêm import.
+    vt = f"{Path(__file__).name}:{_nem_trong.__code__.co_firstlineno + 1} in _nem_trong"
+    bang(vt in (ct or ""), f"vị trí ném phải là khung TRONG CÙNG `{vt}`: {ct!r}")
+
+    ct2 = "dong-1 loi that\ndong-2 ngu canh\ndong-3 cuoi"
+    dong = _dong_chi_tiet(False, "tin_dung_gia", ct2)
+    bang(bool(dong) and "tin_dung_gia" in dong[0], f"dòng đầu phải nêu tt: {dong!r}")
+    for x in ("dong-1 loi that", "dong-2 ngu canh", "dong-3 cuoi"):
+        bang(any(x in d for d in dong), f"chi tiết mất dòng `{x}`: {dong!r}")
+    bang(_dong_chi_tiet(True, "giet_that", ct2) == [], "đột biến ĐẠT không được in thêm chi tiết")
+    # Dây nối: thứ `do()` in cho đột biến KHÔNG đạt phải chứa ngoại lệ thật; cho đột biến đạt thì đúng một dòng.
+    kq = _dong_ket_qua_dot_bien("KHÔNG RĂNG", "mX", "cY", tt, "mo ta", False, ct)
+    bang(len(kq) > 1 and any("thuoc_tinh_1037_vang" in d for d in kq) and "mX" in kq[0],
+         f"dòng in của đột biến KHÔNG đạt thiếu ngoại lệ thật: {kq!r}")
+    bang(len(_dong_ket_qua_dot_bien("CÓ RĂNG ", "mX", "cY", "giet_that", "mo ta", True, ct2)) == 1,
+         "đột biến ĐẠT phải in đúng một dòng như trước")
+    bang(any("không có chi tiết" in d for d in _dong_chi_tiet(False, "gian_giao", None)),
+         "ct rỗng phải nói rõ là không có chi tiết, không im lặng")
+
+    dai = "x" * 50 + "DUOI_BI_CAT"
+    cat = "\n".join(_dong_chi_tiet(False, "tin_dung_gia", dai, tran=50))
+    bang("DUOI_BI_CAT" not in cat and "cắt" in cat, f"vượt trần phải cắt và nói đã cắt: {cat!r}")
+    bang("x" * 50 in cat, f"phần trong trần phải giữ nguyên: {cat!r}")
+    # Trần MẶC ĐỊNH (đường `do()` dùng, không truyền `tran`) là 2000 — số của đặc tả, không lấy từ chính hàm.
+    cat_md = "\n".join(_dong_chi_tiet(False, "tin_dung_gia", "y" * 2000 + "DUOI5"))
+    bang("DUOI5" not in cat_md and "còn 5 ký tự" in cat_md and "y" * 2000 in cat_md,
+         f"trần mặc định 2000 không cắt đúng: …{cat_md[-80:]!r}")
+
+    # Đường THẬT của `do()` (#1037 lượt 1, P2): chạy đúng m81 qua `_dot_bien(chi=…)`, thu stdout. Ca đích thay bằng
+    # một ca CÙNG TÊN ném AttributeError ⇒ dòng in phải mang ngoại lệ + vị trí; ca đích thật ⇒ đúng một dòng.
+    ten_m, i = "m81_bo_chot_no_chet", next(k for k, f in enumerate(CA) if f.__name__.startswith("c74_"))
+    c74_that = CA[i]
+
+    def _c74_gia():
+        raise AttributeError("c98_qua_do_that")
+    _c74_gia.__name__ = c74_that.__name__
+
+    def _qua_do(ca_dich):
+        buf = io.StringIO()
+        CA[i] = ca_dich
+        try:
+            with contextlib.redirect_stdout(buf):
+                ket = _dot_bien(chi={ten_m})
+        finally:
+            CA[i] = c74_that
+            globals()["_CA"] = ca_ngoai
+        return ket, buf.getvalue().splitlines()
+    ket, ra_in = _qua_do(_c74_gia)
+    vt_gia = f"{Path(__file__).name}:{_c74_gia.__code__.co_firstlineno + 1} in {_c74_gia.__code__.co_name}"
+    bang(len(ket) == 1 and ket[0][0] == ten_m and ket[0][3] == "tin_dung_gia",
+         f"`_dot_bien(chi=…)` phải chạy đúng {ten_m} và ra tin_dung_gia: {ket!r}")
+    bang(any("chi tiết [tin_dung_gia]" in d for d in ra_in)
+         and any("AttributeError: c98_qua_do_that" in d and vt_gia in d for d in ra_in),
+         f"stdout của `do()` thiếu ngoại lệ/vị trí `{vt_gia}`: {ra_in!r}")
+    ket, ra_in = _qua_do(c74_that)
+    bang(len(ket) == 1 and ket[0][2] and len(ra_in) == 1 and ten_m in ra_in[0],
+         f"đột biến ĐẠT qua `do()` phải in đúng một dòng: {ra_in!r} · {ket!r}")
 
 
 def _chay_1(fn):
@@ -3854,17 +3933,52 @@ def _chay_1(fn):
         return ("giet_that" if getattr(ex, "ca_nguon", None) == fn.__name__
                 else "tin_dung_gia"), str(ex)
     except Exception as ex:                                       # noqa: BLE001
-        return "tin_dung_gia", f"{type(ex).__name__}: {ex}"
+        return "tin_dung_gia", f"{type(ex).__name__}: {ex} [ném tại {_vi_tri_nem(ex)}]"
     finally:
         _CA = None
 
 
+def _vi_tri_nem(ex: BaseException) -> str:
+    """#1037: khung TRONG CÙNG nơi ngoại lệ được ném (`tệp:dòng in hàm`). Laptop Windows (head `7b92e5c`) cho
+    `m81 → c74 = tin_dung_gia` đúng một lần trong lượt full rồi 22/22 `giet_that` khi chạy riêng — và không truy
+    được gì vì chỉ còn `type: msg`. Lần sau nó lặp lại thì vị trí này là thứ phân biệt rig với sản phẩm."""
+    tb = traceback.extract_tb(ex.__traceback__)
+    if not tb:
+        return "không có traceback"
+    f = tb[-1]
+    return f"{Path(f.filename).name}:{f.lineno} in {f.name}"
+
+
+_TRAN_CHI_TIET = 2000
+
+
+def _dong_chi_tiet(dat: bool, tt: str, ct, tran: int = _TRAN_CHI_TIET) -> list:
+    """#1037: dòng in thêm dưới một đột biến KHÔNG đạt — `tt` + `ct` đủ nhiều dòng, có trần. Đột biến đạt ⇒ rỗng
+    (log xanh giữ nguyên). Trước đây `do()` chỉ in `mo_ta`, nên ngoại lệ thật của một `tin_dung_gia` mất hẳn."""
+    if dat:
+        return []
+    van = ct or "(không có chi tiết)"
+    if len(van) > tran:
+        van = van[:tran] + f" …[cắt, còn {len(van) - tran} ký tự]"
+    return [f"      chi tiết [{tt}]:"] + [f"        {x}" for x in van.splitlines()]
+
+
+def _dong_ket_qua_dot_bien(nhan, ten, ca_dich, tt, mo_ta, dat, ct) -> list:
+    """Toàn bộ những gì `do()` in cho một đột biến — gom một chỗ để `c98` đo được cả dây nối, không chỉ hàm con."""
+    return [f"  {nhan:10s} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})"] + _dong_chi_tiet(dat, tt, ct)
+
+
 # ------------------------------------------------------------------ đột biến
-def _dot_bien():
-    """Mỗi đột biến phải làm ĐÚNG ca đích ĐỎ. Không đỏ ⇒ ca ấy rỗng."""
+def _dot_bien(chi=None):
+    """Mỗi đột biến phải làm ĐÚNG ca đích ĐỎ. Không đỏ ⇒ ca ấy rỗng.
+
+    `chi` (#1037): tập tên đột biến được chạy — CHỈ để `c98` đi qua đúng thân `do()` thật với một đột biến;
+    `main` gọi không đối số nên bảng chạy đủ như trước."""
     ra = []
 
     def do(ten, sua, ca_dich, mo_ta, doi_chung=None, mong_khong_rang=False, mong_gian_giao=False):
+        if chi is not None and ten not in chi:
+            return
         # BẢN SAO SÂU, không phải tham chiếu: đột biến dưới đây sửa TẠI CHỖ
         # (`dict.__setitem__`), nên `setattr` lại chính object đã bẩn thì khôi phục ĐƯỢC SỐ
         # KHÔNG — và mọi ca chạy sau sẽ đo trên một cổng đã bị nới. Đúng bài học "đột biến
@@ -3918,7 +4032,7 @@ def _dot_bien():
                    tu_kiem, bool(doi_chung)))
         nhan = ("TỰ KIỂM ok" if dat else "TỰ KIỂM ĐỎ") if tu_kiem else (
             "CÓ RĂNG " if ok else "KHÔNG RĂNG")
-        print(f"  {nhan:10s} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})")
+        print("\n".join(_dong_ket_qua_dot_bien(nhan, ten, ca_dich, tt, mo_ta, dat, ct)))
 
     do("m1_noi_allowlist_chua_tep_tan_cong",
        lambda: bnv2.ALLOWLIST_CUTOVER.__setitem__("ke-gian-verdict.receipt.yaml", "0" * 64),
@@ -4650,7 +4764,7 @@ def _dot_bien():
     # đo một lần trên bản sao tạm, ghi ở PR (spec r2 C3).
     do("m142_chon_bien_nhan_so_duoi_CHINH_XAC", lambda: _dot_bien_tep(
         'if p.name.lower().endswith(".receipt.yaml")]', 'if p.name.endswith(".receipt.yaml")]'),
-       "c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen", "đuôi hoa lại bị bỏ qua lặng", doi_chung=DC)
+       "c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen", "đuôi hoa lại bị bỏ qua lặng", doi_chung=DC)
     do("m143_chon_bien_nhan_loc_is_file", lambda: _dot_bien_tep(
         "ds = [p for p in tm.iterdir() if p.name", "ds = [p for p in tm.iterdir() if p.is_file() and p.name"),
        "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback", "thư mục `*.receipt.yaml` trốn khỏi phép băm", doi_chung=DC)

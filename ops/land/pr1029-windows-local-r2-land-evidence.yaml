@@ -135,3 +135,25 @@ neo_duyet_merge_20261030:
   thay_doi_ket_luan: >-
     authorization_ghi_chu va khong_do_duoc[2] giu nguyen (append-only); tu khoi nay, "duyet merge tai SHA" co neo ben vung
     nhung la neo HAU KIEM. landed van false (gate hau merge, §10.2.2, assurance_81 CHUA_XAC_NHAN khong doi).
+
+# ---- KHOI BO SUNG (append-only) — gate hau merge tren DUNG merge SHA (chay lai attempt 2) + chap nhan assurance
+gate_hau_merge_attempt2_20261030:
+  chi_thi: 'loi_khai — chu kho "Dong y tat ca, lam luon" trong phien dieu phoi (de xuat 1: chay lai run bi huy; de xuat 2: chap nhan CHUA_XAC_NHAN).'
+  run: {run_id: 41004317229, run_attempt: 2, sha: eaf83fd78ad3a85a6758d0e81be233b5fedcdf6c, conclusion: success}
+  run_nguon: 'measured — gate-hau-merge-attempt2-20261030/readback-run-41004317229.json: run_attempt 2, push master, head_sha eaf83fd, path .github/workflows/ci.yml, bat dau 10:05:56Z, xong 11:02:59Z, success.'
+  jobs: 'measured — gate-hau-merge-attempt2-20261030/readback-jobs-41004317229.json: 23/23 success, moi job run_attempt 2, nhan ubuntu-latest, runner_id khac 0.'
+  kiem_gate: 'measured — gate-hau-merge-attempt2-20261030/kiem-gate-eaf83fd-a2.txt rc=0 (23 ten bat buoc, bo skipped).'
+  moc_10_2_2:
+    run: 'measured — gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml moc.run passed.'
+    checkout: 'measured — gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml: 22/23 job passed (sha = eaf83fd, tree f620656 = merge_commit_tree); job chuan-bi khong checkout (not_measured, khong co dong SHA).'
+    workflow_definition: 'not_measured — gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml (GraphQL 403 trong phien; lenh gh api graphql da dua chu kho, chua co output).'
+    gate_output: 'not_measured — gate-hau-merge-attempt2-20261030/ci-provenance-41004317229-a2/provenance.yaml 23/23 not_measured.'
+  thay_doi_ket_luan: >-
+    post_merge_checks[0] (attempt 1 huy 0 job) va khong_do_duoc[0] giu nguyen nhu lich su (append-only). Tu khoi nay, dieu
+    kien (1) cua landed_dieu_kien co gate xanh tren DUNG merge SHA voi moc Run + Checkout do duoc; con thieu Workflow
+    definition va Gate output nen (1) van CHUA DAT day du.
+  assurance_chap_nhan: >-
+    loi_khai — chu kho chap nhan reviewer_assurance_81 CHUA_XAC_NHAN la ket luan cuoi cho packet tai lieu nay (de xuat 2),
+    khong mo luot review doc lap bo sung. Gia tri trong assurance_81 khong doi.
+  landed: false
+  landed_ly_do_con_lai: [workflow_definition not_measured, gate_output not_measured, reviewer_assurance_81 CHUA_XAC_NHAN]

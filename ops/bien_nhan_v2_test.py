@@ -3618,6 +3618,47 @@ def c97_NHANH_TIEM_co_rang_tren_module_da_thay_va_tu_go():
         while _TAM_DOT_BIEN:
             shutil.rmtree(_TAM_DOT_BIEN.pop(), ignore_errors=True)
 
+
+@ca
+def c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen():
+    """#1021 (`BIEN-NHAN-V2-GLOB-HOA-THUONG` r2, C1a/C1b): cổng THẤY `x.RECEIPT.YAML` trên MỌI nền.
+
+    `glob` cũ bỏ qua đuôi hoa LẶNG trên POSIX mà kiểm trên Windows. Ba fixture, mỗi cái một kho git thật:
+    - C1a: `y.receipt.yaml` + `x.RECEIPT.YAML`, cả hai YAML HỢP LỆ mà sai lược đồ ⇒ dòng tổng `tổng 2`, đầu ra
+      nêu `x.RECEIPT.YAML`, không `TỔNG: ĐẠT`. Không đòi rc cụ thể: kho tạm có thể sinh `KHÔNG ĐO ĐƯỢC` vô can.
+    - chỉ `x.RECEIPT.YAML` ⇒ `tổng 1`, KHÔNG có thông báo "không có tệp".
+    - C1b: `x.RECEIPT.YAML` là YAML HỎNG ⇒ rc=2, stderr nêu tên, không traceback. YAML hỏng làm cổng dừng
+      TRƯỚC dòng tổng (hành vi có sẵn), nên C1b không đòi `tổng` — lý do r2 tách C1 (Codex connector P2, #1019).
+    Đột biến `m142` (so đuôi CHÍNH XÁC) giết cả ba trên CẢ HAI nền."""
+    import contextlib
+    import io
+    tong_re = _RE.compile(r"· tổng (\d+)$", _RE.M)
+
+    def chay(tep):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            k = _kho_cau(tmp)
+            _ghi_bn_cau(tmp, k, tep)
+            ra, loi = io.StringIO(), io.StringIO()
+            try:
+                with contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi):
+                    rc = bnv2.main(["--root", str(tmp)])
+            except Exception as ex:                               # noqa: BLE001
+                bang(False, f"{sorted(tep)}: CLI chết bằng {type(ex).__name__}: {ex}")
+            tong = tong_re.findall(ra.getvalue())
+            return rc, ra.getvalue(), loi.getvalue(), (int(tong[-1]) if tong else None)
+
+    rc, ra, loi, tong = chay({"y.receipt.yaml": "a: 1\n", "x.RECEIPT.YAML": "b: 2\n"})
+    bang(tong == 2 and "x.RECEIPT.YAML" in ra + loi and rc != 0 and "TỔNG: ĐẠT" not in ra,
+         f"C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc={rc} tổng={tong}: {(ra + loi)[-300:]!r}")
+    rc, ra, loi, tong = chay({"x.RECEIPT.YAML": "b: 2\n"})
+    bang(tong == 1 and "không có tệp" not in loi,
+         f"chỉ-x: đòi tổng 1, không 'không có tệp'; được rc={rc} tổng={tong}: {loi[-300:]!r}")
+    rc, ra, loi, tong = chay({"y.receipt.yaml": "a: 1\n", "x.RECEIPT.YAML": "b: [\n"})
+    bang(rc == 2 and "x.RECEIPT.YAML" in loi and "Traceback" not in ra + loi,
+         f"C1b: đòi rc=2 nêu x.RECEIPT.YAML, không traceback; được rc={rc}: {loi[-300:]!r}")
+
+
 def _chay_1(fn):
     global _CA
     _CA = fn.__name__
@@ -4420,6 +4461,15 @@ def _dot_bien():
     do("m131_ref_con_tien_to_la_dong_la", lambda: _dot_bien_tep(
         "            continue        # `for-each-ref` khớp theo TIỀN TỐ", "            pass        # `for-each-ref` khớp theo TIỀN TỐ"),
        C95, "ref con `origin/HEAD/topic` làm hỏng phép chọn nhánh mặc định", doi_chung=DC)
+    # --- #1021: bộ chọn biên nhận. Hoàn nguyên về `glob` KHÔNG vào bảng này: nó chỉ đỏ trên POSIX
+    # (glob Windows vốn không phân biệt hoa thường) nên sẽ SỐNG trên Windows và làm cổng Windows đỏ —
+    # đo một lần trên bản sao tạm, ghi ở PR (spec r2 C3).
+    do("m142_chon_bien_nhan_so_duoi_CHINH_XAC", lambda: _dot_bien_tep(
+        'if p.name.lower().endswith(".receipt.yaml"))', 'if p.name.endswith(".receipt.yaml"))'),
+       "c98_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen", "đuôi hoa lại bị bỏ qua lặng", doi_chung=DC)
+    do("m143_chon_bien_nhan_loc_is_file", lambda: _dot_bien_tep(
+        "return sorted(p for p in tm.iterdir() if p.name", "return sorted(p for p in tm.iterdir() if p.is_file() and p.name"),
+       "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback", "thư mục `*.receipt.yaml` trốn khỏi phép băm", doi_chung=DC)
     return ra
 
 

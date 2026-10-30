@@ -52,28 +52,44 @@ def _co_mat(path):
     return True
 
 
+class _DuongDanDo(type(Path())):
+    """Đường dẫn chỉ dùng để đo chính sách: ghi lại mọi lời gọi `stat`/`lstat`, và đổi OSError thành RuntimeError để
+    `except OSError` hay predicate của pathlib (`is_file`, `is_symlink`) không nuốt được lỗi đo thành False."""
+
+    def stat(self, *, follow_symlinks=True):
+        self.__dict__.setdefault("_goi_stat", []).append(follow_symlinks)
+        try:
+            return os.stat(self, follow_symlinks=follow_symlinks)
+        except (OSError, ValueError) as exc:
+            raise RuntimeError("không stat được tệp đo chính sách: %s" % type(exc).__name__) from exc
+
+    def lstat(self):
+        return self.stat(follow_symlinks=False)
+
+
 def _ly_do_tha(tl_module, kho):
     """Trả lý do tha khi (ii) và (iii) cùng đúng; None nếu không được tha. Lỗi ném ra ngoài ⇒ người gọi trả False."""
     if _co_mat(kho / ".git"):
         return None                                     # (iii): checkout có .git mà thiếu bộ quét ⇒ ĐỎ
     with tempfile.TemporaryDirectory() as tam:
         goc = Path(tam)
-        sentinel = goc / "scripts" / "pkg_secret_scan.py"
-        doi_chung = goc / "scripts" / "wp1030_doi_chung_khong_bi_loai.py"
+        sentinel = _DuongDanDo(goc / "scripts" / "pkg_secret_scan.py")
+        doi_chung = _DuongDanDo(goc / "scripts" / "wp1030_doi_chung_khong_bi_loai.py")
         sentinel.parent.mkdir(parents=True)
         sentinel.write_bytes(b"")
         doi_chung.write_bytes(b"")
-        # `_release_should_include` dừng ở `is_file()`/`is_symlink()`, hai hàm nuốt OSError thành False. Nên (ii) đo VI PHÂN
-        # (tệp đối chứng cùng thư mục phải ra True: False ở sentinel không phải do chính sách loại cả `scripts/`), và
-        # `os.stat` (ném lỗi, không nuốt) cả hai tệp TRƯỚC lẫn SAU lời gọi chính sách.
         for p in (sentinel, doi_chung):
             os.stat(p)
+            p.__dict__["_goi_stat"] = []
+        # (ii) "loại THEO THIẾT KẾ" = False mà KHÔNG chạm hệ tệp (loại theo tên). `_release_should_include` kết thúc bằng
+        # `is_symlink()`/`is_file()`, nên một False đã đi qua stat có thể chỉ là lỗi I/O bị nuốt: không nhận làm bằng chứng.
+        # Đối chứng cùng thư mục phải ra True VÀ có stat được ghi — chứng tỏ bộ ghi nằm trên đường gọi của Python này.
         loai = tl_module._release_should_include(sentinel, goc)
         giu = tl_module._release_should_include(doi_chung, goc)
-        for p in (sentinel, doi_chung):
-            os.stat(p)
-        if loai is not False or giu is not True:
-            return None                                 # (ii): chính sách GIỮ bộ quét, hoặc phép đo không phân biệt ⇒ ĐỎ
+        if loai is not False or sentinel.__dict__["_goi_stat"]:
+            return None                                 # (ii): chính sách giữ bộ quét, hoặc False đến từ hệ tệp ⇒ ĐỎ
+        if giu is not True or not doi_chung.__dict__["_goi_stat"]:
+            return None                                 # phép đo không phân biệt được / bộ ghi không trên đường gọi ⇒ ĐỎ
     return "bộ quét vắng, chính sách phát hành loại nó (sentinel), cây không có .git"
 
 

@@ -1656,7 +1656,10 @@ def _ten_tep(o: str) -> set:
     hàng riêng mà vẫn xanh.
     """
     import re
-    return set(re.findall(r"[\w.\-/]+\.(?:md|ya?ml)", o))
+    # Đuôi so KHÔNG phân biệt hoa thường (kiểm toán sau merge #1007, P2): `_liet_ke_theo_duoi` đã nhận
+    # `x.RECEIPT.YAML`, nên bộ trích ở đây phải nhận được chính tên ấy, nếu không hàng đúng cột vẫn bị
+    # báo thiếu. Phần TÊN giữ nguyên hoa thường — không gộp hai tên khác nhau trên POSIX.
+    return set(re.findall(r"[\w.\-/]+\.(?:md|ya?ml)", o, re.IGNORECASE))
 
 
 @ca
@@ -1734,6 +1737,18 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
     _kiem_muc_luc(_doi_thu_muc_reviews(), HERE.parent)
 
 
+def _bien_nhan_cua(verdict: Path, ds_bien_nhan: list) -> list:
+    """Biên nhận sidecar của `verdict` trong `ds_bien_nhan` (đã liệt kê bởi `_liet_ke_theo_duoi`).
+
+    Tiền tố phải BẰNG `verdict.stem` (phân biệt hoa thường), đuôi `.receipt.yaml` so KHÔNG phân
+    biệt hoa thường — cùng hợp đồng với bộ liệt kê, thay vì dựng cứng `{stem}.receipt.yaml` rồi
+    trông vào việc hệ tệp có phân biệt hoa thường hay không (kiểm toán sau merge #1007, P2).
+    Trả MỌI ứng viên: người gọi đòi đúng một, hai cái là mơ hồ chứ không tự chọn."""
+    duoi = ".receipt.yaml"
+    return [p for p in ds_bien_nhan
+            if p.name[:-len(duoi)] == verdict.stem and p.name[-len(duoi):].lower() == duoi]
+
+
 def _kiem_muc_luc(thu_muc: Path, goc: Path):
     """Thân của `t27`: `thu_muc` là thư mục verdict, `goc` là gốc kho để so `verdict_path`."""
     import yaml
@@ -1769,10 +1784,14 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
              f"{muc_luc.name}: verdict {f.name!r} KHÔNG có trong CỘT 'tệp verdict' của "
              f"bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột "
              f"mô tả nào đó thì bảng render ra vẫn thiếu nó.")
-        bn = thu_muc / f"{f.stem}.receipt.yaml"
-        bang(bn.is_file(),
-             f"{f.name}: KHÔNG có biên nhận {bn.name}. Verdict không biên nhận là verdict "
+        ung_vien = _bien_nhan_cua(f, ds)
+        bang(ung_vien,
+             f"{f.name}: KHÔNG có biên nhận {f.stem}.receipt.yaml. Verdict không biên nhận là verdict "
              f"không ai khai đã đăng ở đâu — và `t26` cũng không đụng tới nó.")
+        bang(len(ung_vien) == 1,
+             f"{f.name}: biên nhận MƠ HỒ {[p.name for p in ung_vien]} — chỉ khác hoa thường ở đuôi; "
+             f"giữ đúng một tệp, không tự chọn.")
+        bn = ung_vien[0]
         # N3+P1 — đúng TÊN chưa đủ, và đúng BASENAME cũng chưa đủ. So ĐƯỜNG DẪN ĐẦY ĐỦ:
         # một biên nhận trỏ `ops/reviews/archive/x.md` trong khi tệp thật nằm ở
         # `ops/reviews/x.md` có basename y hệt, nên t26 đi băm BẢN LƯU TRỮ còn tệp thật
@@ -1890,6 +1909,73 @@ def t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen():
             raise AssertionError(
                 "biên nhận đuôi `.RECEIPT.YAML` vắng khỏi mục lục mà `_kiem_muc_luc` vẫn XANH — "
                 "nhánh duyệt biên nhận còn phụ thuộc nền (lỗi #1006)")
+
+
+@ca
+def t27_phan_chung_bien_nhan_duoi_HOA_co_hang_phai_XANH_va_sidecar_HOA_tim_duoc():
+    """Biên nhận đuôi HOA CÓ hàng đúng cột phải XANH; sidecar HOA phải tìm được; hai sidecar ⇒ ĐỎ mơ hồ.
+
+    Vì sao có (kiểm toán sau merge #1007, P2 `wp1006-case-insensitive-listing-case-sensitive-consumer`):
+    bộ liệt kê đã nhận `x.RECEIPT.YAML`, nhưng `_ten_tep` trích tên bằng regex phân biệt hoa thường,
+    nên với hàng mục lục ĐÚNG tên ĐÚNG cột `_kiem_muc_luc` vẫn báo thiếu — không thể làm xanh. Ca
+    phản chứng có sẵn chỉ đo chiều ÂM, mà chiều âm ấy xanh vì lý do SAI (tên không bao giờ khớp).
+    Còn đường thứ hai cùng lớp: sidecar `{stem}.receipt.yaml` dựng cứng, Linux không thấy
+    `x-VERDICT.RECEIPT.YAML`. Mỗi đường một chốt riêng dưới đây.
+    """
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam)
+        tm = goc / "ops" / "reviews"
+        tm.mkdir(parents=True)
+        (tm / "a-verdict.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "a-verdict.receipt.yaml").write_text("verdict_path: ops/reviews/a-verdict.md\n", encoding="utf-8")
+
+        def muc_luc(*hang):
+            (tm / "README.md").write_text(
+                "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n"
+                "| `khong-ai.md` | `x` |\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n|---|---|\n"
+                + "".join(f"| `{v}` | `{b}` |\n" for v, b in hang), encoding="utf-8")
+
+        # (1) Alias đuôi HOA trỏ đúng verdict, CÓ hàng đúng cột ⇒ XANH.
+        (tm / "alias.RECEIPT.YAML").write_text("verdict_path: ops/reviews/a-verdict.md\n", encoding="utf-8")
+        muc_luc(("a-verdict.md", "a-verdict.receipt.yaml"), ("a-verdict.md", "alias.RECEIPT.YAML"))
+        _kiem_muc_luc(tm, goc)
+        bang(_ten_tep("`alias.RECEIPT.YAML`") == {"alias.RECEIPT.YAML"},
+             "bộ trích tên không nhận đuôi HOA hoặc đã đổi hoa thường của TÊN")
+
+        # (2) Bỏ hàng alias ⇒ ĐỎ đúng cột, nêu đúng tên.
+        muc_luc(("a-verdict.md", "a-verdict.receipt.yaml"))
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("alias.RECEIPT.YAML" in str(e) and "CỘT 'biên nhận'" in str(e),
+                 f"ĐỎ nhưng SAI chốt — đòi cột 'biên nhận' nêu 'alias.RECEIPT.YAML', được: {e}")
+        else:
+            raise AssertionError("biên nhận đuôi HOA vắng khỏi mục lục mà vẫn XANH")
+        (tm / "alias.RECEIPT.YAML").unlink()
+
+        # (3) Sidecar đuôi HOA của verdict đuôi HOA ⇒ tìm được, XANH (Linux trước bản vá: "KHÔNG có biên nhận").
+        (tm / "b-VERDICT.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "b-VERDICT.RECEIPT.YAML").write_text("verdict_path: ops/reviews/b-VERDICT.md\n", encoding="utf-8")
+        muc_luc(("a-verdict.md", "a-verdict.receipt.yaml"), ("b-VERDICT.md", "b-VERDICT.RECEIPT.YAML"))
+        _kiem_muc_luc(tm, goc)
+
+        # (4) Hai sidecar chỉ khác hoa thường ở đuôi ⇒ ĐỎ mơ hồ (chỉ dựng được trên hệ tệp phân biệt hoa thường).
+        hai = tm / "b-VERDICT.receipt.yaml"
+        try:
+            hai.write_text("verdict_path: ops/reviews/b-VERDICT.md\n", encoding="utf-8")
+            phan_biet = sorted(p.name for p in tm.iterdir() if p.name.startswith("b-VERDICT.")) == [
+                "b-VERDICT.RECEIPT.YAML", "b-VERDICT.md", "b-VERDICT.receipt.yaml"]
+        except OSError:
+            phan_biet = False
+        if phan_biet:
+            muc_luc(("a-verdict.md", "a-verdict.receipt.yaml"), ("b-VERDICT.md", "b-VERDICT.RECEIPT.YAML"),
+                    ("b-VERDICT.md", "b-VERDICT.receipt.yaml"))
+            try:
+                _kiem_muc_luc(tm, goc)
+            except AssertionError as e:
+                bang("MƠ HỒ" in str(e), f"ĐỎ nhưng SAI chốt — đòi báo mơ hồ, được: {e}")
+            else:
+                raise AssertionError("hai sidecar chỉ khác hoa thường ở đuôi mà vẫn XANH — tự chọn một")
 
 
 @ca

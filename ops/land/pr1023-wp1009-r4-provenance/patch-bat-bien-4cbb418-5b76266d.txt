@@ -1,0 +1,9 @@
+# patch packet bat bien 4cbb418 -> 5b76266d, do phien dieu phoi 2026-10-30T08:21Z
+merge-base(4cbb418, dbbabf98) = 2de4c049d3a8aa949f8e7a0e300550b6d0ffc781
+5b76266d parents: 4cbb418af52bd55c1266b7be34740959ad1e1aa2 dbbabf980cc8cd56e1b80aea7b93df711fbd38f7
+13 tep: .claude/hooks/pretooluse_guard.py .claude/hooks/pretooluse_guard_test.py RELEASE_MANIFEST.json changelog.d/wp-1009.md references/golden/parser_surface.json references/golden/tool_inventory_inventory_decision.json references/golden/workflow_audit.json scripts/tl.py scripts/tl_core/cli.py scripts/tl_core/command_registry.py scripts/tl_core/command_registry_test.py scripts/tl_gws.py scripts/tl_selftest.py 
+sha256(git diff 2de4c049 4cbb418 -- <13 tep> | bo dong index) = d1511c96f19b018efa4e0b8187b31f95e40f680083590a68e6fb8ee2e9d9e84f
+sha256(git diff dbbabf98 5b76266d -- <13 tep> | bo dong index) = d1511c96f19b018efa4e0b8187b31f95e40f680083590a68e6fb8ee2e9d9e84f
+numstat 2de4c049..4cbb418 (them xoa): 716 60
+numstat dbbabf98..5b76266d (them xoa): 716 60
+tep khac 13 tep doi trong dbbabf98..5b76266d: 0

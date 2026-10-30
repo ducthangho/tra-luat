@@ -1,0 +1,97 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1052
+packet_id: wp1052
+revision: 2
+generation: 1
+lease_id: wp1052-r2-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: normal
+depends_on: []
+depends_on_ghi_chu: 'giai doan A (spec r2) KHONG cho wp1038: write set 4 tep khong chong lease wp1038-cloud-setup-p2a-r1-g1-claude. Giai doan B (manifest, golden, tl_selftest.py) cho wp1038, duoi r3.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; toi da 2 loi goi Codex (spec r2).'
+access: read-write
+review_class: routine
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec khai routine; cong ops/lease_publish.py xep moi duong dan ngoai _BANG_LOP vao sensitive (fail-closed) => lop hieu luc = sensitive. Reviewer van la codex, khong doi tran loi goi.'
+spec_path: ops/specs/wp1052-r2.md
+spec_sha256_required: 41afea1f3ed251148e80b5835cdf0795cd7c6dfe3b96f70d70f7795302d1ef94
+spec_hash: 41afea1f3ed251148e80b5835cdf0795cd7c6dfe3b96f70d70f7795302d1ef94
+spec_ref: refs/heads/claude/epic-ritchie-quvrz1@c5c06ef20ee795178a97e09df017ddc0ec184b3a
+spec_r1: 'ops/specs/wp1052.md sha256 0b8442c1df944e05489389b70be62731a2add5a1eb80c21b6c2f10d92960e5b3 @ master 6db934145acf6e47d01db5b2dc8c9da417c2d8eb (Phu luc A, M1-M3, M5 van ap dung theo r2).'
+prompt_path: ops/specs/wp1052-r2.md
+prompt_sha256_required: 41afea1f3ed251148e80b5835cdf0795cd7c6dfe3b96f70d70f7795302d1ef94
+write_set:
+- references/windows-testing.md
+- SKILL.md
+- references/GOTCHAS.md
+- changelog.d/wp-1052.md
+write_set_hash: c9e51dde20ffe93dc339e2060613cf722815704671bf76ed6dd4bb5da082d08f
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'dung 4 tep giai doan A cua spec r2. KHONG sua RELEASE_MANIFEST.json, references/golden/workflow_audit.json, scripts/tl_selftest.py (wp1038 dang giu).'
+change_policy_sha: null
+effective_write_set:
+- references/windows-testing.md
+- SKILL.md
+- references/GOTCHAS.md
+- changelog.d/wp-1052.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'PR giai doan A KHONG merge rieng (golden workflow_audit va release-verify strict do da biet); chi merge cung hoac sau giai doan B'}
+- {id: M-2, dieu_kien: 'A1-A6 cua spec r2 dat tren dung commit day; moi job CI do phai doc log va chi do vi ly do da ghi trong spec r2'}
+- {id: M-3, dieu_kien: 'codex khong P0/P1/P2 tren head cuoi giai doan A; toi da 2 loi goi codex'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'merge/land/deploy do chu kho. Khong tang VERSION.'
+branch: claude/epic-ritchie-quvrz1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 6db934145acf6e47d01db5b2dc8c9da417c2d8eb
+start_from_sha: c5c06ef20ee795178a97e09df017ddc0ec184b3a
+start_from_ghi_chu: 'base = origin/master luc cap (da chua spec r1 qua PR #1054); start = commit spec r2 tren nhanh thi cong.'
+reviewed_sha_required: c5c06ef20ee795178a97e09df017ddc0ec184b3a
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1052#issuecomment-6531493796
+granted_on_instruction_readback: 'chu kho viet trong phien session_015GtxrcSEjPkSR4KLHEyEsm (2026-10-30 ~19:13Z): "cấp lease wp1052 đi", roi chon "Cấp ngay, chỉ thi công phần không chồng"; ghi ho tren Issue #1052. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease (session_015GtxrcSEjPkSR4KLHEyEsm) cung la executor; reviewer la codex (ho khac).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-30T19:16:05Z'
+  goc_quet: 'mirror --mirror cua origin, fetch +refs/heads/*; ls-remote so TAP ten voi for-each-ref: 709, thieu 0; master 6db9341'
+  ket_qua: 'ca 4 duong dan: NGUOI_GIU 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'r1 chua tung co lease; day la lease dau tien cua wp1052.'
+leased_at_utc: '2026-10-30T19:20:00Z'
+heartbeat_at: '2026-10-30T19:20:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-10-31T19:20:00Z'
+lease_expires_at_utc: '2026-10-31T19:20:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+review_rounds_limit: 2
+budget:
+  codex_review_calls:
+    pr_wp1052_g1: {used: 0, reserved: 0, limit: 2}
+  attempt:
+    packet_1052_r2: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: do_da_biet_golden_va_release_verify_o_giai_doan_A_moi_do_khac_la_loi
+push_policy: 'day nhanh claude/epic-ritchie-quvrz1 khi A1-A6 dat; mo PR draft, ghi ro khong merge rieng'

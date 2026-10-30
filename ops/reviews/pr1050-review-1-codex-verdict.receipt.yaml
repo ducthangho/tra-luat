@@ -18,8 +18,9 @@ role: reviewer
 provider: codex
 executor_provider: claude
 cross_provider: true
-review_class: standard
-review_class_ghi_chu: '(b) Khong co lease khai Review Class; PR chi doi ops/reviews/** va ops/land/** (du lieu ghi so, khong ma).'
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: '(a) Protocol section 8: class khong ro xu ly nhu sensitive; _tinh_lop_tu_write_set tren 32 tep cua diff b29da0b..c24875d tra sensitive (fail-closed cho path chua phan loai), khong dung class standard. (b) Khong co lease rieng; PR chi ghi so du lieu ops/reviews/** va ops/land/**; khong co override class co audit.'
 assurance: cross_reviewed
 assurance_ghi_chu: >-
   Verdict changes_requested 0/1/1/0; reviewer gpt-6.1-sol do_may qua run.json model_phuc_vu, executor ho claude => khac ho.

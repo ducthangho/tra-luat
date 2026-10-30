@@ -2983,11 +2983,15 @@ def c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan():
     dòng trước là trích dẫn `tệp:N` ⇒ rc=0; (iii) khai báo không có `provider` trong cửa sổ ⇒ rc=0.
     Ranh giới cửa sổ (r2 review 1, `bo-chon-moi-chua-khoa-bien`): (iv) `notprovider` không phải từ `provider`
     ⇒ rc=0; (v) `provider` ở dòng SAU cũng thuộc cửa sổ ⇒ rc=1. Hai dòng cách xa là NGOÀI cửa sổ:
-    provider ngoài cửa sổ không tạo tự khai; trích dẫn ngoài cửa sổ không miễn tự khai."""
+    provider ngoài cửa sổ không tạo tự khai; trích dẫn ngoài cửa sổ không miễn tự khai.
+    #1021 (Codex lượt 5, P1 `bien-ngoai-cua-so-surface-chua-co-rang`, áp `HINT.patch` của reviewer): bỏ tiền tố cố định
+    để các hàng thật sự chạm biên đầu tệp `j = 0` (m156 bỏ chặn chỉ số âm), thêm (ii-b) trích dẫn ở dòng NGAY SAU vẫn
+    miễn tự khai (m157 bỏ dòng sau khỏi phép tìm trích dẫn)."""
     import json as _j
     for ten, verdict, rc_doi in (
             ("i-tu-khai", "provider: openai_codex\nexecution_surface: codex_service\n", 1),
             ("ii-trich-dan-ke", "ops/x/v.md:6\nSELF: provider `openai_codex`, execution surface `codex_service`\n", 0),
+            ("ii-b-trich-dan-dong-sau", "provider: openai_codex execution_surface: codex_service\nops/x/v.md:6\n", 0),
             ("iii-khong-provider", "Bang do: thay dong verdict thanh `execution_surface: codex_service`.\n", 0),
             ("iv-notprovider", "notprovider: openai_codex\nexecution_surface: codex_service\n", 0),
             ("v-provider-dong-sau", "execution_surface: codex_service\nprovider: openai_codex\n", 1),
@@ -2998,7 +3002,7 @@ def c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan():
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
             d, _ = _bn_surface("ops/reviews/v/run.json", "")
-            al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}), "verdict: approve\n\n" + verdict)
+            al = _kho_surface(tmp, d, _j.dumps({"execution_surface": "codex_cli"}), verdict)
             rc, loi, tk = _kiem_cau(tmp, al)
             bang(rc == rc_doi, f"{ten}: đòi rc={rc_doi}, được {rc}: loi={loi} chua={tk['chua_do']}")
 
@@ -4753,6 +4757,15 @@ def _dot_bien(chi=None):
     do("m141_B4_noi_cua_so_ve_sau", lambda: _dot_bien_tep(
         "cua = dong_tep[max(0, j - 1):j + 2]", "cua = dong_tep[max(0, j - 1):j + 3]"),
        "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "provider/citation cách hai dòng là ngoài cửa sổ", doi_chung=DC)
+    # #1021 Codex lượt 5: biên đầu tệp và trích dẫn dòng sau — hai đột biến ấy từng SỐNG qua toàn suite.
+    do("m156_B4_bo_chan_bien_dau_tep", lambda: _dot_bien_tep(
+        "        cua = dong_tep[max(0, j - 1):j + 2]\n",
+        "        max = lambda lower, value: value\n        cua = dong_tep[max(0, j - 1):j + 2]\n"),
+       "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "dòng đầu bị mất cửa sổ", doi_chung=DC)
+    do("m157_B4_trich_dan_bo_dong_sau", lambda: _dot_bien_tep(
+        "_RE_TRICH_DAN.search(x) for x in cua",
+        "_RE_TRICH_DAN.search(x) for x in (cua[:-1] if j + 1 < len(dong_tep) else cua)"),
+       "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "trích dẫn ở dòng sau bị bỏ qua", doi_chung=DC)
     do("m130_bo_chot_GRAFTS", lambda: _dot_bien_tep(
         "    if gf and (root / gf", "    if False and (root / gf"),
        C91, "tệp grafts đổi parent mà vẫn đo", doi_chung=DC)

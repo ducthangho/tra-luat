@@ -1,0 +1,28 @@
+# do 2026-10-30T18:07:34Z trong phien session_015GtxrYjGJtmjF3eT1nCSG9 (sau han moi 17:53Z cua wp1037-r1-g1-claude)
+ls-remote heads: 708 ten; for-each-ref origin: 708 ten; thieu (co tren may chu, vang cuc bo): 0; thua: 0
+$ python3 ops/lease_publish.py ai-dang-giu ops/bien_nhan_v2_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907	refs/heads/agent/wp1037-g1-claude:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml
+HẾT_HẠN	wp1037-r1-g1-claude	refs/heads/ops/wp1037-r1-g1-lease:ops/leases/wp1037-r1-g1-claude.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907	refs/remotes/origin/agent/codex-credential-refresh-g1:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml
+HẾT_HẠN	wp610-codex-desktop-r1-g1	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r1-g1.yaml
+HẾT_HẠN	wp610-codex-desktop-r2-g2	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r2-g2.yaml
+HẾT_HẠN	wp610-codex-desktop-r3-g3	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r3-g3.yaml
+HẾT_HẠN	wp610-codex-desktop-r4-g4	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r4-g4.yaml
+HẾT_HẠN	wp610-codex-desktop-r5-g5	refs/remotes/origin/codex/wp610-authority:ops/leases/wp610-codex-desktop-r5-g5.yaml
+HẾT_HẠN	assurance-ho-model-r1-g1-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r1-g1-claude.yaml
+HẾT_HẠN	assurance-ho-model-r2-g2-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r2-g2-claude.yaml
+HẾT_HẠN	assurance-ho-model-r3-g3-antigravity	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r3-g3-antigravity.yaml
+HẾT_HẠN	assurance-ho-model-r4-g4-claude	refs/remotes/origin/ops/cap-lease-551:ops/leases/assurance-ho-model-r4-g4-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g1-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g1-claude.yaml
+HẾT_HẠN	human-audited-khai-ai-dang-r1-g2-claude	refs/remotes/origin/ops/cap-lease-566:ops/leases/human-audited-khai-ai-dang-r1-g2-claude.yaml
+HẾT_HẠN	wp1017-r1-g1-claude	refs/remotes/origin/ops/wp1017-r1-g1-lease:ops/leases/wp1017-r1-g1-claude.yaml
+CÒN_HẠN	wp1021-r2-g1-claude	refs/remotes/origin/ops/wp1021-r2-g1-lease:ops/leases/wp1021-r2-g1-claude.yaml
+HẾT_HẠN	wp960-r1-g1-claude	refs/remotes/origin/ops/wp960-r1-g1-lease:ops/leases/wp960-r1-g1-claude.yaml
+HẾT_HẠN	wp960-r2-g1-claude	refs/remotes/origin/ops/wp960-r2-g1-lease:ops/leases/wp960-r2-g1-claude.yaml
+HẾT_HẠN	wp960-r2-g2-claude	refs/remotes/origin/ops/wp960-r2-g2-lease:ops/leases/wp960-r2-g2-claude.yaml
+NGƯỜI_GIỮ 1: wp1021-r2-g1-claude
+rc=11

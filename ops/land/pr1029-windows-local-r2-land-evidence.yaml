@@ -123,3 +123,15 @@ khong_do_duoc:
   - 'Duyet merge tai SHA cua chu kho: loi_khai (phien executor), chua co comment ben vung.'
   - 'Provenance CI §10.2.2 (Workflow definition, Gate output): KHONG_DO_DUOC — GraphQL 403.'
   - 'Issue #748 da CLOSED (completed) tu 2026-10-20 trong khi lease van neo vao no — cho chu kho quyet (mo lai hay mission moi).'
+
+# ---- KHOI BO SUNG (append-only) — neo duyet merge tai SHA cua chu kho
+neo_duyet_merge_20261030:
+  comment: https://github.com/ducthangho/tra-luat/pull/1029#issuecomment-6516970021
+  nguon: 'measured — readback-comment-6516970021.json: ducthangho OWNER, 2026-10-30T07:01:24Z, than dung nguyen van "Chủ kho duyệt merge PR #1029 tại head 9aa725c72b6b38263de366ce34a80fb384a522a0."'
+  sha_khop: 'measured — readback-comment-6516970021.json SHA trong than = authorized_head_sha = readback-pr-1029.json head.sha.'
+  thu_tu_thoi_gian: >-
+    measured — readback-comment-6516970021.json (07:01:24Z) SAU readback-pr-1029.json merged_at (04:41:44Z): day la XAC NHAN
+    SAU MERGE cho mot duyet da khai trong phien executor (~04:18Z, loi_khai), KHONG phai duyet truoc merge co ban ghi.
+  thay_doi_ket_luan: >-
+    authorization_ghi_chu va khong_do_duoc[2] giu nguyen (append-only); tu khoi nay, "duyet merge tai SHA" co neo ben vung
+    nhung la neo HAU KIEM. landed van false (gate hau merge, §10.2.2, assurance_81 CHUA_XAC_NHAN khong doi).

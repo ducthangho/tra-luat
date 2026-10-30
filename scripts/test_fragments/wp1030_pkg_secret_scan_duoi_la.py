@@ -59,12 +59,21 @@ def _ly_do_tha(tl_module, kho):
     with tempfile.TemporaryDirectory() as tam:
         goc = Path(tam)
         sentinel = goc / "scripts" / "pkg_secret_scan.py"
+        doi_chung = goc / "scripts" / "wp1030_doi_chung_khong_bi_loai.py"
         sentinel.parent.mkdir(parents=True)
         sentinel.write_bytes(b"")
-        if not sentinel.is_file():
-            return None
-        if tl_module._release_should_include(sentinel, goc) is not False:
-            return None                                 # (ii): chính sách GIỮ bộ quét trong gói mà gói lại thiếu ⇒ ĐỎ
+        doi_chung.write_bytes(b"")
+        # `_release_should_include` dừng ở `is_file()`/`is_symlink()`, hai hàm nuốt OSError thành False. Nên (ii) đo VI PHÂN
+        # (tệp đối chứng cùng thư mục phải ra True: False ở sentinel không phải do chính sách loại cả `scripts/`), và
+        # `os.stat` (ném lỗi, không nuốt) cả hai tệp TRƯỚC lẫn SAU lời gọi chính sách.
+        for p in (sentinel, doi_chung):
+            os.stat(p)
+        loai = tl_module._release_should_include(sentinel, goc)
+        giu = tl_module._release_should_include(doi_chung, goc)
+        for p in (sentinel, doi_chung):
+            os.stat(p)
+        if loai is not False or giu is not True:
+            return None                                 # (ii): chính sách GIỮ bộ quét, hoặc phép đo không phân biệt ⇒ ĐỎ
     return "bộ quét vắng, chính sách phát hành loại nó (sentinel), cây không có .git"
 
 
@@ -175,7 +184,7 @@ def _ca_bien(mod):
 
 def run(tl_module):
     try:
-        kho = Path(tl_module.__file__).resolve().parent.parent
+        kho = Path(tl_module.__file__).resolve(strict=True).parent.parent   # strict: lỗi phân giải ⇒ ngoại lệ ⇒ False
         quet = kho / "scripts" / "pkg_secret_scan.py"
         if not _co_mat(quet):                           # (i)
             ly_do = _ly_do_tha(tl_module, kho)

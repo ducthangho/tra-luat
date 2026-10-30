@@ -36,6 +36,14 @@ Lượt 2 ghi năm đột biến của mã test còn SỐNG qua `c98`, xếp là
 gọi thứ hai gán lại che lần thứ nhất) · bỏ khôi phục `_CA` ngoài (`_chay_1` ngoài cùng xoá `_CA`) · bỏ chốt đếm số dòng khi đạt
 (chỉ xoá chốt) · thêm dòng + xoá chốt (phản chứng kép) · `main` chỉ chạy m81 (đo bằng so log head/base, không qua `c98`).
 
+## Windows — đo trên `9146632`
+`workflow_dispatch` `runner_set=windows-only`, run 41069257658:
+- attempt 1: job `gate-ops (windows-latest)` (124108765783) ⇒ `bien_nhan_v2_test: 95/95 ca đạt · 137/137 đột biến thường CÓ RĂNG ·
+  2/2 ca TỰ KIỂM đạt`, `TỔNG: ĐẠT`; `lease_publish: 255/255 đạt` (bỏ qua 13 ca chỉ-Ubuntu). Hai job `gate-packet-loop` và
+  `gate-cong-cu (windows-latest, 0)` ĐỎ ở bước `G5 probe` vì runner thiếu shellcheck — gốc lỗi ở `ops/cai_cong_cu.sh` (bộ chọn tin
+  rc của `kiem-tra --chi`), ngoài write set; tách thành packet #1045 (PR #1047). Comment PR #1041 issuecomment-6524864187.
+- attempt 2 (`rerun_failed_jobs` một lần, 15:28Z): cả hai job XANH; toàn run `conclusion: success`, 15/15 job Windows xanh.
+
 ## Việc còn lại
-- Windows: chưa đo trên head này. Lần sau `bien_nhan_v2_test` có `tin_dung_gia` trên laptop, log sẽ mang ngoại lệ + vị trí.
+- Lần sau `bien_nhan_v2_test` có `tin_dung_gia` trên laptop, log sẽ mang ngoại lệ + vị trí.
 - Merge/land: chủ kho (`uy_quyen_merge: false`).

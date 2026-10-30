@@ -157,3 +157,29 @@ gate_hau_merge_attempt2_20261030:
     khong mo luot review doc lap bo sung. Gia tri trong assurance_81 khong doi.
   landed: false
   landed_ly_do_con_lai: [workflow_definition not_measured, gate_output not_measured, reviewer_assurance_81 CHUA_XAC_NHAN]
+
+# ---- KHOI BO SUNG (append-only) — hai moc §10.2.2 con lai cua run 41004317229 attempt 2
+moc_10_2_2_bo_sung_20261030:
+  chi_thi: 'loi_khai — chu kho "Dong y tat ca, lam luon" (de xuat 1, phien dieu phoi ~17:18Z).'
+  workflow_definition: >-
+    loi_khai_co_neo + measured — gate-hau-merge-attempt2-20261030/graphql-workflowrun-file-41004317229.json: gh api graphql (gh CLI cua chu kho) chay tren
+    ASUS-LAPTOP qua Desktop Commander, HAI lan doc lap 17:20:55Z va 17:20:56Z, sha256 output ca hai lan CF8EF68E…2194, bang
+    sha256 tep trong kho: databaseId 41004317229, runNumber 3457, event push, file.path .github/workflows/ci.yml,
+    repositoryFileUrl neo blob tai eaf83fd, checkSuite.commit.oid eaf83fd78ad3a85a6758d0e81be233b5fedcdf6c. Doi chieu REST:
+    gate-hau-merge-attempt2-20261030/readback-run-41004317229.json node_id WFR_kwLOTNeRjc8AAAAJjAw6LQ, path .github/workflows/ci.yml, run_number 3457;
+    gate-hau-merge-attempt2-20261030/readback-contents-ci-yml-eaf83fd.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size 69161 = git rev-parse
+    eaf83fd:.github/workflows/ci.yml, sha256 noi dung ce9a3ec0…13fb. Phan GraphQL la loi khai co neo (phien web khong goi
+    duoc GraphQL; output van chuyen qua Desktop Commander, hash doi chieu sau khi ghi). Theo tien le fc892c6 (#1009).
+  khoa_may: >-
+    loi_khai — ADR-0058: khoa D:/tl-win/KHOA.txt rong (da nha) truoc khi lay; ghi dong session_01V2PEqhkb91vD5PCBM5yXbm
+    17:20:22Z han 18:00:22Z; nha khoa sau khi do; them mot dong do-luong.csv (khong chay test).
+  gate_output: >-
+    measured — gate-hau-merge-attempt2-20261030/gate-output-41004317229-a2.txt: log tho 23 job tai qua REST (sha256 tung log ghi kem, log khong chep vao kho);
+    0 dong ##[error]; 22/23 job co marker duong: gate tl selftest 1738/1738, transport 12/12, gen_instructions 44/44, cong_cu
+    61/61, TONG: DAT; gate-ops lease_publish 268/268 TONG: DAT; gate-packet-loop nen 981/981 (1 BO QUA) TONG: DAT; gate-registry
+    TONG: DAT; gate-cong-cu 8 manh 61/61; gate-nhanh-manh 8 manh rc=0 passed; gate-nhanh-gop targeted_mutant_gate DAT (56/56
+    ca nen, 255/255 tu dot bien, 10/10 dot bien san pham); gate-cong-cu-gop 490 dot bien, loi dot bien=0. Job
+    chuan-bi khong in marker (job dung ma tran). 0 marker am.
+  ket_qua_bon_moc: 'Run passed · Checkout passed (22/23, khoi gate_hau_merge_attempt2_20261030) · Workflow definition measured (co neo) · Gate output measured.'
+  landed: false
+  landed_ly_do_con_lai: [reviewer_assurance_81 CHUA_XAC_NHAN (cho luot review doc lap §8.1/§8.2 tren 9aa725c, de xuat 2)]

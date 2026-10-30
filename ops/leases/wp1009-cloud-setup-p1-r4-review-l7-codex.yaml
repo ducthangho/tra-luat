@@ -1,0 +1,82 @@
+# LEASE REVIEWER — CLOUD-SETUP-P1-BUNDLE r4, luot 7 (L7) neo DUNG authorized_head 5b76266d cua PR #1023 (da merge 09e05945).
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+#
+# MUC DICH: dong dieu kien (4)+(7) cua ho so land ops/land/pr1023-wp1009-r4-land-evidence.yaml (PR #1034): luot approve cuoi
+# L6 neo 4cbb418, con head duoc merge la 5b76266d = 4cbb418 + merge origin/master (gom #1018 dbbabf98). Luot nay la review
+# DOC LAP tren DUNG 5b76266d, qua launcher.py run, de run.json ghi model phuc vu (`model_phuc_vu_trang_thai`).
+
+schema_version: 2
+event: review_lease_granted
+
+packet_issue: 1009
+mission_issue: 1008
+packet_id: CLOUD-SETUP-P1-BUNDLE
+revision: 4
+generation: 4
+lease_id: wp1009-cloud-setup-p1-r4-review-l7-codex
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease reviewer dau tien cua packet; cac luot L1-L6 chay duoi lease executor g1-g4 (launcher.py run do executor goi).'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1009#issuecomment-6495628501
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho trong phien dieu phoi (2026-10-30 ~08:15Z): 'chọn (a), cấp lease reviewer đi' — tra loi cau hoi: (a) them mot
+  luot Codex L7 tren DUNG 5b76266d (loi goi thu 7 trong tran 8) qua lease reviewer ngan, hay (b) chi do may diff packet bat bien.
+authority_caveat: >-
+  granted_on_instruction tro chi thi tong "Vá hết các lỗi…" (issuecomment-6495628501) vi chi thi rieng cho lease nay chi co
+  trong phien; comment chu kho tu viet manh hon (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; phien GOI reviewer la session_015GtxrZE9sQqfnKV4jsABnr (chi khoi chay launcher.py run, khong review, khong ghi kho).'
+
+leased_at_utc: '2026-10-30T08:20:00Z'
+heartbeat_at: '2026-10-30T08:20:00Z'
+lease_until: '2026-10-30T14:20:00Z'
+lease_expires_at_utc: '2026-10-30T14:20:00Z'
+
+role: reviewer
+provider: openai_codex
+reviewer: openai_codex
+model_family: openai
+execution_surface: codex_cli
+executor: anthropic_claude
+executor_model_family: claude
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+spec_path: ops/specs/cloud-setup-p1-bundle-r4.md
+spec_ref: refs/heads/master
+spec_blob: 68858db92383229d68ab9f5deddb69fae5881727
+spec_sha256: 6e42dea2742120210bdb9b07c2dd902825f34883462ac4c2832c6e78ec878ffe
+spec_hash: 6e42dea2742120210bdb9b07c2dd902825f34883462ac4c2832c6e78ec878ffe
+
+reviewed_sha_required: 5b76266d391695940c449497bfbf0acbdfb7d499
+reviewed_tree_required: 90c0f3114817b4688cc8c77257f3c87fdc2ecce9
+merge_commit_da_land: 09e059457a033de769f7cb789edc20810f4b95f5
+target_pull_request: 1023
+pham_vi_review: >-
+  Diff packet = git diff <merge-base cua 5b76266d^1 voi origin/master truoc merge>..5b76266d — 13 tep / 716 dong them
+  (ops/land/pr1023-wp1009-r4-provenance/merge-va-diff.txt, sha256 diff 9d3ac97a…). Doi chieu: luot L6 (4cbb418) approve 0/0/0/0
+  (verdicts/wp1009-r4-luot6-VERDICT.md); khac biet 4cbb418..5b76266d chi la merge origin/master gom #1018.
+verdict_must_answer: >-
+  (i) 5b76266d co dung la 4cbb418 + merge master khong lam doi 13 tep packet (do bang git, khong nhan loi); (ii) co loi hanh vi
+  P0-P3 nao trong diff packet tai DUNG 5b76266d, ke ca tuong tac voi thay doi cua #1018; (iii) verdict approve/request_changes neo
+  reviewed_sha 5b76266d. Khong san dot bien moi ngoai ma packet (luat chu kho issuecomment-6494782891).
+tran_loi_goi_codex: 'ADR-0052@8ab100793df9831505f495543a74044b91c2c9ab: day la loi goi thu 7/8 cua packet.'
+cach_chay: >-
+  launcher.py run, phien doc lap read-only, neo exact head 5b76266d; run.json phai co model_phuc_vu_trang_thai (DO_DUOC moi tinh
+  §8.1 do_may). Ket qua (run.json + VERDICT.md + sha256) gui ve phien dieu phoi de ghi vao ho so land; KHONG ghi kho.
+
+cam_tuyet_doi:
+  - Khong ghi bat ky tep nao trong kho, khong push, khong mo PR
+  - Khong approve/merge tren GitHub
+  - Khong LIVE, khong credential that
+  - Khong viet chuoi bo-qua-CI nguyen van
+
+run_minutes: 360
+heartbeat_required_minutes: 360

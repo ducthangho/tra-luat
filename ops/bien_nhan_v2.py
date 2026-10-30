@@ -103,9 +103,9 @@ def _chon_bien_nhan(tm: Path) -> list:
     `_liet_ke_theo_duoi` của `t27` (#1006). KHÔNG lọc `is_file()`: thư mục mang tên `*.receipt.yaml`
     phải tới được phép băm để ra rc=2 (`c89`). Thư mục vắng ⇒ rỗng, như `glob` cũ.
 
-    Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê
-    (⇒ danh sách rỗng ⇒ `KhongDoDuoc` "không có tệp"), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng ra
-    rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG
+    Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê (⇒ danh
+    sách rỗng: `kiem` báo "không có tệp", `--sinh-no` ra `# 0 tệp`), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng
+    ra rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG
     trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình).
 
     Lượt 2 (cùng slug, P2): `Path.is_dir()` chỉ nuốt ENOENT/ENOTDIR/… — `EACCES` khi `stat` vẫn NÉM, nên phép hỏi

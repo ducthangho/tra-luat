@@ -3679,7 +3679,8 @@ def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE()
        thứ tự `Path` giống nhau trên mọi nền (không so hai tên chỉ khác hoa thường).
     3. Kho thật thiếu `ops/reviews`: `kiem` rc=2 (guard riêng), `--sinh-no` rc=0 + `# 0 tệp` — m146 bỏ nhánh thư mục
        vắng của helper (khi ấy `--sinh-no` ra rc=2 vì lỗi liệt kê).
-    4. Liệt kê ném `PermissionError` ⇒ cả `kiem` lẫn `--sinh-no` rc=2 nêu "không liệt kê được", không traceback —
+    4. Liệt kê ném `PermissionError` hoặc `OSError(EIO)` ⇒ cả `kiem` lẫn `--sinh-no` rc=2 nêu "không liệt kê được",
+       không traceback —
        m147 bỏ phép bắt `OSError` (hồi quy `loi-do-liet-ke-thu-muc-thoat-traceback` mà Codex đo được)."""
     import contextlib
     import io
@@ -3758,10 +3759,12 @@ def c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE()
 @ca
 def c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang():
     """#1021, cross-review Codex lượt 2. Ba chốt, đột biến riêng m148–m153 (lượt 3 thêm m154 cho chốt 5):
-    5. `stat` của `ops/reviews` ném `PermissionError` (`is_dir()` chỉ nuốt ENOENT/ENOTDIR/…) ⇒ cả `kiem` lẫn
+    5. `stat` của `ops/reviews` ném `PermissionError`/`OSError(EIO)` (`is_dir()` chỉ nuốt ENOENT/ENOTDIR/…) ⇒ cả
+       `kiem` lẫn
        `--sinh-no` rc=2 nêu "không đọc được trạng thái", không traceback (P2 `loi-do-liet-ke-thu-muc-thoat-traceback`,
        biểu hiện thứ hai) — m148 helper hỏi `is_dir()` trần, m149 guard của `kiem` hỏi trần, m150 bỏ bắt `OSError`.
-    6. Kho thiếu `ops/reviews` mà `stat` của `.git` ném ⇒ `kiem` rc=2 nêu `.git`, không traceback — m151.
+    6. Kho thiếu `ops/reviews` mà `stat` của `.git` ném (cùng hai lớp) ⇒ `kiem` rc=2 nêu `.git`, không traceback —
+       m151.
     7. Lỗi LẬP TRÌNH (`RuntimeError` mốc) ở phép liệt kê hoặc phép hỏi thư mục phải đi THẲNG ra khỏi `main`, đúng
        đối tượng, trên cả hai đường (P3 `loi-do-thieu-chot-ngoai-le-lap-trinh`) — m152 nới bắt liệt kê thành
        `Exception`, m153 nới `_hoi_trang_thai` thành `Exception`."""

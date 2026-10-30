@@ -10249,6 +10249,7 @@ def r868_hinh_dang_kenh_ket_qua():
 # (`DO`, rc=2) o dau PATH nen khong phu ca VANG MAT; cong cu GIA ten la de PATH that (vd `/usr/bin/shellcheck`) khong che.
 _WP1045_TUY = "tuychon1045x"
 _WP1045_BB = "batbuoc1045x"
+_WP1045_GIUA, _WP1045_SAU = "giua1045x", "sau1045x"
 
 
 def _wp1045_chay(s, ten, cong_cu, tep=None, dau=None, lenh_rieng=None, hong=None):
@@ -10366,6 +10367,26 @@ def r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung():
         # Mã 47 (khác 1) để đo mã GỐC được giữ, không chỉ `≠ 0` (Codex wp1045 lượt 1, P3).
         bang(p.returncode == 47 and gp == [] and "--bat-buoc di tiep" not in p.stderr,
              f"--bat-buoc: cong cu bat buoc hong ma van di tiep: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+
+
+@ca
+def r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat():
+    """wp1045 (Codex lượt 2, P3): `--bat-buoc` ba công cụ — (1) bắt buộc cài được · (2) công thức rc 0 mà kiểm cuối của
+    lượt `source` ra DO (bản hỏng đầu PATH, tuỳ chọn hoặc bắt buộc) · (3) công thức ghi dấu. Đòi rc = 2 (mã DO của
+    `cong_cu.py`) và công cụ (3) KHÔNG được chạy: lỗi kiểm cuối của lượt source phải dừng cả loạt như base."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    for bb_giua in (False, True):
+        with San() as s:
+            dau_ky = s / "uv_sau1045x" / "DA_CHAY"
+            p, _gp, _uv = _wp1045_chay(
+                s, "--bat-buoc", {_WP1045_BB: True, _WP1045_GIUA: bb_giua, _WP1045_SAU: True},
+                tep={_WP1045_BB: s / f"uv_{_WP1045_BB}"}, hong={_WP1045_GIUA: s / "dau"}, dau=s / "dau",
+                lenh_rieng={_WP1045_GIUA: "true", _WP1045_SAU: f"touch {shlex.quote(str(dau_ky))}"})
+            bang(p.returncode == 2 and not dau_ky.exists(),
+                 f"--bat-buoc (giua bat_buoc={bb_giua}): kiem cuoi DO cua luot source khong dung ca loat: "
+                 f"rc={p.returncode} cong cu sau da chay={dau_ky.exists()} {p.stderr[-300:]}")
 
 
 @ca
@@ -13429,6 +13450,14 @@ DOT_BIEN_HOOK = [
     ("wp1045_sh_rc_cai_mat_ma",
      ('  exit "$RC_CAI"\n', '  RC_CAI=1; exit "$RC_CAI"\n'),
      ["r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung"], "cai_sh"),
+    # Codex wp1045 lượt 2 (P3): lỗi kiểm cuối của lượt source phải dừng cả loạt.
+    ("wp1045_sh_errexit_tat_sau_eval",
+     ('RC_CAI=$?\nset -e\n', 'RC_CAI=$?\nset -e\nset +e\n'),
+     ["r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat"], "cai_sh"),
+    ("wp1045_sh_kiem_cuoi_source_nuot_loi",
+     ('then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json\nelse\n',
+      'then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json || true\nelse\n'),
+     ["r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat"], "cai_sh"),
     ("wp1045_sh_thoat_3_ca_luot_source",
      ('if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json\nelse\n',
       'if false; then\n  :\nelse\n'),

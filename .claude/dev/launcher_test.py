@@ -10228,7 +10228,7 @@ def r868_hinh_dang_kenh_ket_qua():
     for can in ('TAM_CAI="$(mktemp -d "${TMPDIR:-/tmp}/cai_cong_cu.XXXXXX")"\ndeclare +x TAM_CAI\ntrap ',
                 'KENH_KQ="$TAM_CAI/kq"\ndeclare +x KENH_KQ\n: > "$KENH_KQ"\n# eval',
                 "trap 'rm -rf -- \"$TAM_CAI\"' EXIT\n", 'KENH_KQ="$TAM_CAI/kq"\ndeclare +x KENH_KQ\n',
-                '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout" || RC_CAI=$?\n',
+                '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n',
                 'KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }\n',
                 "    DICH=\"${DICH%$'\\r'}\" ;;",
                 '  GIU_PATH) DICH="" ;;\n', "  DICH$'\\n'?*) DICH=\"${KQ#DICH$'\\n'}\" ;;\n",
@@ -10251,11 +10251,12 @@ _WP1045_TUY = "tuychon1045x"
 _WP1045_BB = "batbuoc1045x"
 
 
-def _wp1045_chay(s, ten, cong_cu, tep=None, dau=None, lenh_rieng=None):
+def _wp1045_chay(s, ten, cong_cu, tep=None, dau=None, lenh_rieng=None, hong=None):
     """Chạy cai_cong_cu.sh (`ten` hoặc `--bat-buoc`) trên bản kê CHỈ gồm công cụ GIẢ `cong_cu` = {tên: bat_buoc}; công
     thức mọi nền là `chon_thu_muc_chay_duoc <tên> "$UV_<TÊN>_RONG" "$UV_<TÊN>"` — ứng viên ĐẦU luôn RỖNG, nên bộ chọn
     tin rc (rc=0 cho công cụ tuỳ chọn vắng) sẽ chọn nhầm nó. `tep`: {tên: thư mục} đặt bản TỐT; `dau`: thư mục đặt
-    ĐẦU PATH; `lenh_rieng`: {tên: công thức} thay công thức mặc định. Trả (p, các dòng $GITHUB_PATH, {tên: thư mục})."""
+    ĐẦU PATH; `lenh_rieng`: {tên: công thức} thay công thức mặc định; `hong`: {tên: thư mục} đặt bản HỎNG (`exit 1`,
+    tức `DO`). TMPDIR riêng `<sân>/tmp` để đếm thư mục tạm bị bỏ lại. Trả (p, các dòng $GITHUB_PATH, {tên: thư mục})."""
     import yaml
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", ops / "bash_nen.py")
@@ -10271,13 +10272,18 @@ def _wp1045_chay(s, ten, cong_cu, tep=None, dau=None, lenh_rieng=None):
         uv[t].mkdir()
         (s / f"uv_{t}_rong").mkdir()
     (ops / "cong_cu.yaml").write_text(yaml.safe_dump(bk, sort_keys=False), encoding="utf-8")
+    for t, d in (hong or {}).items():
+        d.mkdir(parents=True, exist_ok=True)
+        (d / t).write_text("#!/bin/sh\nexit 1\n")
+        (d / t).chmod(0o755)
     for t, d in (tep or {}).items():
         d.mkdir(parents=True, exist_ok=True)
         (d / t).write_text(f"#!/bin/sh\necho '{t} version 1.2.3'\n")
         (d / t).chmod(0o755)
     gp = s / "github_path"; gp.write_text("")
+    (s / "tmp").mkdir()
     vo, env = _wp802_bash_env()
-    env.update({f"UV_{t.upper()}": str(d) for t, d in uv.items()}, CONG_CU_NEN="linux", GITHUB_PATH=str(gp),
+    env.update({f"UV_{t.upper()}": str(d) for t, d in uv.items()}, CONG_CU_NEN="linux", GITHUB_PATH=str(gp), TMPDIR=str(s / "tmp"),
                **{f"UV_{t.upper()}_RONG": str(s / f"uv_{t}_rong") for t in cong_cu},
                PATH=os.pathsep.join(([str(dau)] if dau else []) + [env.get("PATH", "")]))
     p = subprocess.run([vo, str(ops / "cai_cong_cu.sh"), ten], env=env, capture_output=True, text=True, timeout=180)
@@ -10310,6 +10316,19 @@ def r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path():
         p, gp, _uv = _wp1045_chay(s, t, {t: False}, tep={t: s / "dau"}, dau=s / "dau")
         bang(p.returncode == 0 and gp == [] and "ten tran da DAT" in p.stderr,
              f"(c) ten tran tot ma khong GIU_PATH: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+    # Codex wp1045 lượt 1 (P2): (e) DO (bản hỏng đầu PATH) · (f) công cụ BẮT BUỘC vắng — công thức rc 0 ⇒ vẫn thoát 3 kèm dòng
+    # nêu tên (kiểm cuối không được để errexit cắt trước chốt). (g, P3) công thức tự bật `set -e` ⇒ lỗi giữa chừng vẫn dừng.
+    for nhan, ten_cc, bb in (("e-DO", t, False), ("f-bat-buoc-vang", _WP1045_BB, True)):
+        with San() as s:
+            kw = dict(hong={ten_cc: s / "dau"}, dau=s / "dau") if nhan == "e-DO" else {}
+            p, _gp, _uv = _wp1045_chay(s, ten_cc, {ten_cc: bb}, lenh_rieng={ten_cc: "true"}, **kw)
+            bang(p.returncode == 3 and f"'{ten_cc}' chua DAT sau khi cai" in p.stderr,
+                 f"({nhan}) doi rc=3 kem dong neu ten, duoc rc={p.returncode} stderr={p.stderr[-300:]!r}")
+    with San() as s:
+        p, _gp, _uv = _wp1045_chay(s, t, {t: False}, tep={t: s / "dau"}, dau=s / "dau",
+                                   lenh_rieng={t: "set -e; false; echo DA_DI_TIEP"})
+        bang(p.returncode == 1 and "DA_DI_TIEP" not in p.stdout,
+             f"(g) cong thuc tu bat set -e ma loi giua chung van di tiep: rc={p.returncode} {p.stdout[-200:]!r}")
     with San() as s:
         p, gp, _uv = _wp1045_chay(s, t, {t: False}, lenh_rieng={t: "true"})
         bang(p.returncode == 3 and f"'{t}' chua DAT sau khi cai" in p.stderr and '"trang_thai": "KHONG_DO_DUOC"' in p.stdout,
@@ -10331,6 +10350,8 @@ def r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau():
             bang(p.returncode == 0 and gp == [str(uv[_WP1045_BB])],
                  f"--bat-buoc ({nhan}): cong cu tuy chon thieu chan cong cu bat buoc sau no: rc={p.returncode} "
                  f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+            sot = sorted(x.name for x in (s / "tmp").iterdir())
+            bang(sot == [], f"--bat-buoc ({nhan}): bo lai thu muc tam sau hai luot source: {sot}")
 
 
 @ca
@@ -10341,8 +10362,9 @@ def r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung():
     _wp802_rg_yaml()
     with San() as s:
         p, gp, _uv = _wp1045_chay(s, "--bat-buoc", {_WP1045_BB: True, _WP1045_TUY: False},
-                                  tep={_WP1045_TUY: s / f"uv_{_WP1045_TUY}"})
-        bang(p.returncode != 0 and gp == [] and "--bat-buoc di tiep" not in p.stderr,
+                                  tep={_WP1045_TUY: s / f"uv_{_WP1045_TUY}"}, lenh_rieng={_WP1045_BB: "exit 47"})
+        # Mã 47 (khác 1) để đo mã GỐC được giữ, không chỉ `≠ 0` (Codex wp1045 lượt 1, P3).
+        bang(p.returncode == 47 and gp == [] and "--bat-buoc di tiep" not in p.stderr,
              f"--bat-buoc: cong cu bat buoc hong ma van di tiep: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
 
 
@@ -10366,9 +10388,11 @@ def r1045_hinh_dang_dat_theo_trang_thai():
     for can in ('  if cong_cu_dat "$ten"; then\n', 'if PATH="$d:$PATH" cong_cu_dat "$ten"; then dich="$d"; break; fi'):
         bang(can in than, f"bo chon thieu {can!r}")
     bang("kiem-tra --chi" not in than, "bo chon con goi kiem-tra truc tiep (tin rc)")
-    cuoi = sh[sh.index('"${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json\n'):]
-    bang('if [ "${CAI_CONG_CU_PY_CUA:-}" != "$$" ] && ! cong_cu_dat "$TEN"; then' in cuoi and "  exit 3\nfi" in cuoi,
+    cuoi = sh[sh.index('if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra'):]
+    bang('  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json || RC_KT=$?\n  if [ "$RC_KT" -ne 0 ] || ! cong_cu_dat "$TEN"; then' in cuoi and "    exit 3\n  fi\nfi" in cuoi,
          "dong kiem cuoi thieu thoat 3 cho loi goi truc tiep khi chua DAT")
+    bang("set +e\n( set +e; eval \"$LENH\" ) > \"$TAM_CAI/stdout\"\nRC_CAI=$?\nset -e\n" in sh
+         and ") > \"$TAM_CAI/stdout\" ||" not in sh, "dong eval bi dat vao ngu canh dieu kien (`||` vo hieu set -e)")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -13381,8 +13405,7 @@ DOT_BIEN_HOOK = [
      (' and c[0].get(sys.argv[2]) == json.loads(sys.argv[3]) else 1)', ' else 1)'),
      ["r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path", "r1045_hinh_dang_dat_theo_trang_thai"], "cai_sh"),
     ("wp1045_sh_bo_thoat_3",
-     ('  echo "cai_cong_cu: \'$TEN\' chua DAT sau khi cai (trang_thai cua chinh no khac DAT)" >&2\n  exit 3\n',
-      '  echo "cai_cong_cu: \'$TEN\' chua DAT sau khi cai (trang_thai cua chinh no khac DAT)" >&2\n'),
+     ('kiem-tra rc=$RC_KT)" >&2\n    exit 3\n', 'kiem-tra rc=$RC_KT)" >&2\n'),
      ["r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path", "r1045_hinh_dang_dat_theo_trang_thai"], "cai_sh"),
     ("wp1045_sh_source_tuy_chon_hong_van_dung",
      ('if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then', 'if false; then'),
@@ -13390,8 +13413,23 @@ DOT_BIEN_HOOK = [
     ("wp1045_sh_source_bat_buoc_hong_van_di_tiep",
      ('cong_cu_json_dung "$TEN" bat_buoc false; then', 'true; then'),
      ["r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung", "r1045_hinh_dang_dat_theo_trang_thai"], "cai_sh"),
+    ("wp1045_sh_kiem_cuoi_tran_duoi_errexit",
+     ('  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json || RC_KT=$?\n',
+      '  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json\n'),
+     ["r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path", "r1045_hinh_dang_dat_theo_trang_thai"], "cai_sh"),
+    ("wp1045_sh_eval_trong_ngu_canh_dieu_kien",
+     ('set +e\n( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\nRC_CAI=$?\nset -e\n',
+      'RC_CAI=0\n( set +e; eval "$LENH" ) > "$TAM_CAI/stdout" || RC_CAI=$?\n'),
+     ["r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path", "r1045_hinh_dang_dat_theo_trang_thai"], "cai_sh"),
+    ("wp1045_sh_source_khong_don_tam",
+     ('    rm -rf -- "$TAM_CAI"\n    return 0\n', '    return 0\n'),
+     ["r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau"], "cai_sh"),
+    ("wp1045_sh_rc_cai_mat_ma",
+     ('  exit "$RC_CAI"\n', '  RC_CAI=1; exit "$RC_CAI"\n'),
+     ["r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung"], "cai_sh"),
     ("wp1045_sh_thoat_3_ca_luot_source",
-     ('if [ "${CAI_CONG_CU_PY_CUA:-}" != "$$" ] && ! cong_cu_dat "$TEN"; then', 'if ! cong_cu_dat "$TEN"; then'),
+     ('if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ]; then\n  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json\nelse\n',
+      'if false; then\n  :\nelse\n'),
      ["r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau", "r1045_hinh_dang_dat_theo_trang_thai"], "cai_sh"),
     ("wp858_sh_khong_ung_vien_van_rc0",
      ("chay duoc\" >&2; return 1; }", "chay duoc\" >&2; return 0; }"),
@@ -13471,7 +13509,7 @@ DOT_BIEN_HOOK = [
     ("wp868_sh_gan_lai_tam_sau_go_export", ("declare +x TAM_CAI\ntrap ", 'declare +x TAM_CAI\nTAM_CAI="$TAM_CAI"\ntrap '),
      ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     # Codex lượt 4: F868-02 mở lại — gỡ trap SAU khi công thức chạy ⇒ hai đường `exit 7` của reader rò thư mục kênh.
-    ("wp868_sh_go_trap_sau_eval", ('( set +e; eval "$LENH" ) > "$TAM_CAI/stdout" || RC_CAI=$?\n', '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout" || RC_CAI=$?\ntrap - EXIT\n'),
+    ("wp868_sh_go_trap_sau_eval", ('( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n', '( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\ntrap - EXIT\n'),
      ["r868_doc_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_chi_duyet_hai_ung_vien", ('  for d in "$@"; do', '  for d in "${@:1:2}"; do'),
      ["r868_vong_duyet_ung_vien", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),

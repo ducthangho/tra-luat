@@ -1,0 +1,22 @@
+# do 2026-10-30 07:26Z, git trong phien dieu phoi
+merge: 09e059457a033de769f7cb789edc20810f4b95f5 tree 91b21b8c62dfb1b6a2ea66276aeed92de267b234
+parents: 09e059457a033de769f7cb789edc20810f4b95f5 f9e24f8ac827c36077191371f0263680993afa75 5b76266d391695940c449497bfbf0acbdfb7d499
+head 5b76266d tree 90c0f3114817b4688cc8c77257f3c87fdc2ecce9
+numstat origin-master-truoc-merge...head (merge-base):
+4	1	.claude/hooks/pretooluse_guard.py
+25	2	.claude/hooks/pretooluse_guard_test.py
+24	19	RELEASE_MANIFEST.json
+9	0	changelog.d/wp-1009.md
+3	1	references/golden/parser_surface.json
+24	2	references/golden/tool_inventory_inventory_decision.json
+5	5	references/golden/workflow_audit.json
+2	0	scripts/tl.py
+14	0	scripts/tl_core/cli.py
+3	0	scripts/tl_core/command_registry.py
+5	5	scripts/tl_core/command_registry_test.py
+181	6	scripts/tl_gws.py
+417	19	scripts/tl_selftest.py
+tong: 13 tep 716 dong them
+sha256 diff mergebase..head: 9d3ac97ada80da693fa31a4b0caf4a1693dfd856e1bebf5983f4a61ad163c670
+sha256 diff merge^1..merge: 9d3ac97ada80da693fa31a4b0caf4a1693dfd856e1bebf5983f4a61ad163c670
+spec r4 tren master: 6e42dea2742120210bdb9b07c2dd902825f34883462ac4c2832c6e78ec878ffe blob 68858db92383229d68ab9f5deddb69fae5881727

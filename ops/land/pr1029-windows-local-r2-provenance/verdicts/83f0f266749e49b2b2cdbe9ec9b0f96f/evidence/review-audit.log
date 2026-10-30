@@ -1,0 +1,45 @@
+PASS exact HEAD
+PASS full clone
+PASS clean worktree
+PASS core.abbrev=7
+PASS spec hash
+PASS spec bytes at frozen base
+PASS base is ancestor of HEAD
+PASS diff.patch equals git diff base HEAD byte-for-byte
+PASS exact write set: 2 files
+PASS changed paths equal lease.write_set
+PASS lease.write_set_hash
+PASS size: files=2, added=68, deleted=2
+PASS ADR-0057 untouched
+PASS git diff --check
+PASS ADR-0057 row: only description cell changed
+PASS ADR-0057 description amendment
+PASS exactly one ADR-0058 routing row
+PASS ADR-0058 gate cell exact
+PASS neutral pointer names both ADRs exactly once
+PASS protocol has exactly the three authorized changes, no extra doctrine
+PASS D7 measurement cell matches spec (comma/whitespace ignored)
+PASS D8 measurement cell matches spec (comma/whitespace ignored)
+PASS D9 measurement cell matches spec (comma/whitespace ignored)
+PASS all historical session IDs match spec
+SESSIONS ["session_015GtxrYjGJtmjF3eT1nCSG9", "session_015GtxrbUPS7zGdffB8Sfo8Y"]
+COMMIT 10446ff 10446ffa400725b23189ad9c4902932d5eb969bc
+COMMIT 9666771 96667715996d41bc45e70a64fbaa8996de20f6a0
+COMMIT f4d15ed f4d15edcb5d0a9742182273e5950f76165060667
+PASS referenced ADR-0017 exists uniquely
+PASS referenced ADR-0056 exists uniquely
+PASS referenced ADR-0057 exists uniquely
+PASS ADR-0057 decision §1 exists
+PASS ADR-0057 decision §2 exists
+PASS ADR-0057 decision §3 exists
+PASS ADR-0057 decision §4 exists
+PASS ADR-0057 decision §5 exists
+PASS ADR-0057 decision §6 exists
+PASS ADR-0057 decision §7 exists
+PASS ADR-0057 decision §8 exists
+PASS ADR-0057 decision §9 exists
+PASS ADR-0057 decision §10 exists
+OPERATIONAL_SOURCE_SCAN {"files": 380, "hits": []}
+PASS no local-device/lock/ledger reference in operational code; historical evidence excluded
+PASS worktree still clean after audit
+AUDIT PASSED

@@ -1,9 +1,9 @@
 # HO SO LAND — packet #1009 CLOUD-SETUP-P1-BUNDLE r4 (lease g4), code qua PR #1023. Khuon: ops/land/pr882-wp748-r23-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (09e05945), `landed: false`. Ly do: (4) review khong neo DUNG authorized_head_sha 5b76266d — luot approve cuoi (L6)
-# neo 4cbb418, 5b76266d = 4cbb418 + merge origin/master (gom #1018); (5) khong co duyet ben neo DUNG 5b76266d, chi hanh dong merge;
-# (1) provenance CI §10.2.2 cua gate hau merge: DA DU bon moc (Workflow definition qua GraphQL chay tren may chu kho).
+# TRANG THAI: merged (09e05945), `landed: true`. (1) du bon moc §10.2.2 (Workflow definition qua GraphQL chay tren may chu kho);
+# (2) lease g4 rut han; (4)+(7) luot review doc lap L7 (launcher.py run 3584dea7) approve 0/0/0/0 tren DUNG 5b76266d, reviewed_tree
+# 90c0f311 = 5b76266d^{tree}, model_phuc_vu DO_DUOC; (5) DAT co caveat #566 (comment duyet dang bang token chu kho boi phien agent).
 # DIEM KHAC cac ho so truoc: run.json cua launcher.py run ghi DUOC model phuc vu (`model_phuc_vu_trang_thai: DO_DUOC`,
 # model `gpt-6.1-sol`, ho openai) — §8.1 `cross_approved` muc (i) `do_may` DAT cho CHINH cac lan chay ay; chi thieu neo SHA.
 # NHAN: measured = do trong phien ghi so (lenh/tep kem); loi_khai_co_neo = loi khai co neo; thuat_lai = so lieu cua luot
@@ -49,6 +49,7 @@ pre_merge_checks:
   - {name: 'thread review', conclusion: '0 review, 0 review comment', nguon: [readback-reviews-1023.json, readback-review-comments-1023.json]}
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41017062295, run_attempt: 1, sha: 09e059457a033de769f7cb789edc20810f4b95f5, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', luc: '2026-10-30T06:56:4xZ -> 2026-10-30T07:57:57Z', kiem_gate: 'measured — kiem-gate/kiem-gate-09e05945.txt: packet_loop.py kiem-gate suite 111185156706 cua run 41017062295, check-runs filter=all, 23 ten tu readback-jobs-41017062295.json, rc=0', nguon: [readback-run-41017062295.json, readback-jobs-41017062295.json, readback-check-runs-09e05945-all.json, kiem-gate/kiem-gate-09e05945.txt, gate-output-41017062295.txt, graphql-workflowrun-file-41017062295.txt, readback-contents-ci-yml-09e05945.json], moc_run: 'measured — readback-run-41017062295.json head_sha 09e05945, completed success; readback-jobs-41017062295.json 23/23.', moc_checkout: 'measured — gate-output-41017062295.txt: 22/22 job gate* in dong git log -1 --format=%H = 09e059457a033de769f7cb789edc20810f4b95f5 (log tai qua REST actions/jobs/<id>/logs ~08:15Z, sha256 tung log ghi kem); job chuan-bi khong co buoc checkout. Tree suy tu SHA: 91b21b8c62dfb1b6a2ea66276aeed92de267b234 (merge-va-diff.txt).', moc_gate_output: 'measured — gate-output-41017062295.txt: job gate (ubuntu-latest) in == tl selftest 1758/1758 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 == (2x), TỔNG: ĐẠT (2x); gate-ops TONG: DAT + TỔNG: ĐẠT; gate-packet-loop TỔNG: ĐẠT; khong job nao co ##[error] hay exit code khac 0. Mot dong {"ok": false, "error": "STUB_EARLY_EXIT"} trong log gate la output fixture cua transport selftest (ngay sau == transport selftest 12/12 ==), khong phai gate do. Manh gate-nhanh-manh/gate-cong-cu dua ket qua qua artifact, gop o job -gop.', moc_workflow_definition: 'loi_khai_co_neo + measured — graphql-workflowrun-file-41017062295.txt: WorkflowRun.file chay tren may chu kho (gh CLI chu kho, qua phien executor, ~08:25Z) cho databaseId 41017062295, file.path .github/workflows/ci.yml, repositoryFileUrl neo blob tai 09e05945, checkSuite.commit.oid 09e05945; phien dieu phoi do lai: readback-contents-ci-yml-09e05945.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size 69161 = git rev-parse 09e05945:.github/workflows/ci.yml; sha256 noi dung ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb. Phan GraphQL la loi khai co neo (phien dieu phoi khong goi duoc GraphQL)', ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master); Windows da do tren head truoc merge (pre_merge_checks, run 41004664516).'}
+  - {name: 'cross-review Codex luot 7 doc lap HAU MERGE tren authorized_head (khong phai merge SHA) (launcher.py run 3584dea7, lease reviewer wp1009-cloud-setup-p1-r4-review-l7-codex)', sha: 5b76266d391695940c449497bfbf0acbdfb7d499, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/run-3584dea7.json, verdicts/wp1009-r4-luot7-VERDICT.md], ghi_chu: 'measured — verdicts/run-3584dea7.json: trang_thai xong, ma_thoat 0, head 5b76266d, 2026-10-30T08:22:54Z -> 08:36:25Z (811.517 s), provider openai_codex, execution_surface codex_cli, worktree_sach true, model_phuc_vu_trang_thai DO_DUOC, 74 muc tap model {gpt-6.1-sol}, effort xhigh DO_DUOC; sha256 tep 3f249b12753574a17df04483bd1463e1b3782b2fc0f95090b715e6e3d20e6d80 (doi chieu ben gui truoc khi nhan). VERDICT sha256 137a0a898663fae80327e90b005bd26703e4b18aa41beb6c658db89865978a89, reviewed_sha 5b76266d, reviewed_tree 90c0f311 = git rev-parse 5b76266d^{tree} (do trong phien ghi so).'}
 bookkeeping:
   - {item: 'rut han lease wp1009-cloud-setup-p1-r4-g4-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: ccr-004fa546-sde2w7}
@@ -91,18 +92,18 @@ trang_thai_packet:
     measured — readback-pr-1023.json: merged true, merged_at 2026-10-30T06:56:44Z, merged_by ducthangho, merge_commit_sha
     09e05945, head.sha 5b76266d; cha va tree o merge-va-diff.txt; diff merge-base..5b76266d va 09e05945^1..09e05945 cung sha256
     9d3ac97a… (13 tep, 716 dong them).
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA 09e05945: DAT — bon moc §10.2.2: Run (REST 23/23, kiem-gate rc=0), Checkout (22/22 log =
     09e05945), Workflow definition (WorkflowRun.file chay tren may chu kho + blob 82d9f239 doi chieu REST/git), Gate output (marker duong,
     gate-output-41017062295.txt); (2) lease da nha: rut han — xem lease.thu_hoi_cuoi; (3) bookkeeping:
-    ho so nay; (4) review neo DUNG authorized_head_sha 5b76266d: CHUA DAT — luot approve cuoi neo 4cbb418; khac biet 4cbb418..5b76266d
-    chi la merge origin/master (diff packet so merge-base khong doi, 716 dong ca hai) nhung protocol doi neo DUNG SHA; (5) uy quyen land
+    ho so nay; (4) review neo DUNG authorized_head_sha 5b76266d: DAT — luot L7 doc lap (verdicts/run-3584dea7.json head 5b76266d;
+    verdicts/wp1009-r4-luot7-VERDICT.md reviewed_sha 5b76266d, reviewed_tree 90c0f311 = 5b76266d^{tree}, approve 0/0/0/0); (5) uy quyen land
     neo SHA: DAT co caveat — comment duyet neo 5b76266d tren PR #1023 (authorization_ben_neo_sha), dang bang token chu kho boi phien agent (#566); (6) muc tieu packet: tieu chi spec r4 dat theo gate executor va CI
-    hai nen (pre_merge_checks); (7) reviewer assurance §8.1: DAT cho chinh luot L6 tren 4cbb418 o muc (i) `do_may`
-    (model_phuc_vu DO_DUOC, ho openai khac ho executor claude), nhung luot ay KHONG neo 5b76266d nen (4) van chan.
-    Mo lai — TAT CA: (4)+(7) mot luot review doc lap tren DUNG 5b76266d qua launcher.py run co model_phuc_vu DO_DUOC
-    ho khac claude; (5) da co ban ghi ben (caveat #566); comment chu kho tu go se go caveat.
+    hai nen (pre_merge_checks); (7) reviewer assurance §8.1: DAT o muc (i) `do_may` cho luot L7 tren 5b76266d
+    (model_phuc_vu DO_DUOC, 74/74 muc gpt-6.1-sol, ho openai khac ho executor claude). Caveat con lai: (5) #566 — comment chu kho
+    tu go se go caveat. Gioi han L7 tu khai: khong chay native Windows, H5 full suite khong passed local do thieu Git object lich su
+    (guard pin 41/42, t4 thieu object co san tren master) — Windows va gate day du da do o CI (pre_merge_checks, post_merge_checks).
 
 uy_quyen_land:
   dang: >-
@@ -112,21 +113,23 @@ uy_quyen_land:
   khong_xung_dot: 'loi_khai_co_neo — merge commit tao boi GitHub; cha thu nhat f9e24f8a (PR #1027 merge truoc, khac tep); diff merge^1..merge = diff merge-base..head (cung sha256).'
 
 review:
-  so_loi_goi_codex_cli: 6
-  tran: 'ADR-0052: 8 loi goi; da dung 6.'
+  so_loi_goi_codex_cli: 7
+  tran: 'ADR-0052: 8 loi goi; da dung 7 (L7 la luot review doc lap cho neo SHA, lease reviewer rieng).'
   patch_bat_bien: 'measured — patch-bat-bien-4cbb418-5b76266d.txt: 5b76266d co cha 4cbb418 + dbbabf98; merge-base(4cbb418, dbbabf98) = 2de4c049; git diff 2de4c049..4cbb418 va dbbabf98..5b76266d tren cung 13 tep (bo dong index) cung sha256 d1511c96f19b018efa4e0b8187b31f95e40f680083590a68e6fb8ee2e9d9e84f, 716 them / 60 xoa ca hai; 0 tep khac doi trong dbbabf98..5b76266d.'
   neo_sha: >-
     Luot cuoi L6 neo 4cbb418; authorized_head 5b76266d = 4cbb418 + merge origin/master (5b76266d^1 = 4cbb418 theo lich su nhanh,
-    5b76266d^2 chua dbbabf98 = #1018). Review KHONG tai chay tren 5b76266d.
+    5b76266d^2 chua dbbabf98 = #1018). Luot L7 doc lap chay lai tren DUNG 5b76266d (luot_cuoi).
   luot_cuoi:
-    reviewer: 'measured — verdicts/run-1e2e900b.json: launcher.py run, provider openai_codex, head 4cbb418, ma_thoat 0, 723.033 s, model_phuc_vu_trang_thai DO_DUOC, model gpt-6.1-sol (64 muc).'
+    reviewer: 'measured — verdicts/run-3584dea7.json: launcher.py run, provider openai_codex, head 5b76266d, ma_thoat 0, 811.517 s, model_phuc_vu_trang_thai DO_DUOC, model gpt-6.1-sol (74 muc), prompt_sha256 6241416958afd85acf712b1aaec85b8ec4311fbd6e2045f1a49bfe486aea4736.'
+    lease: 'wp1009-cloud-setup-p1-r4-review-l7-codex (role reviewer, write_set [], reviewed_sha_required 5b76266d, han 2026-10-30T14:20Z; cong bo issuecomment-6518369878). Luot chay 08:22Z-08:36Z nam trong han.'
     hien_vat: ops/land/pr1023-wp1009-r4-provenance/verdicts/
-    ket_qua: 'measured — verdicts/wp1009-r4-luot6-VERDICT.md: approve tren 4cbb418, 0 P0-P3; F14 dong; delta luot 6 chi 2 tep guard/test; 13 tep / 716 dong.'
+    ket_qua: 'measured — verdicts/wp1009-r4-luot7-VERDICT.md: approve tren 5b76266d, 0 P0/0 P1/0 P2/0 P3; cau_i hai cha 4cbb418 + dbbabf98, diff 13 tep packet L6->HEAD rong; selftest 1758/1758, release 193/193.'
   cac_luot_truoc:
     - {luot: 1, run: 1323865f, head: 7cea463, ket_qua: 'thuat_lai — request_changes 0/1/4/0', prompt_sha256: 02a0ed8f6664828d0f48bb92c972f3619495f4d101f0beacd507c6b413b0b9b5, verdict_sha256: bd6a644b8abeed19795753ed9b891c7e1dff8091c673eddacbcc01efc5f7c33d}
     - {luot: 2, run: c83481e6, head: 606d2f9, ket_qua: 'thuat_lai — request_changes 0/0/4/0', prompt_sha256: c2b1e4028826bf14b004f23dac0624f2ecf154db66dea6735e92a7b6b27916ef, verdict_sha256: 0ec3d9b0c3a2fc68b9d8098c40aa9891c638e16aa663e6fa16115c0fdb140d45}
     - {luot: 3, run: 4f1013e9, head: bb64485, ket_qua: 'thuat_lai — request_changes 0/0/6/0; S5 => chu kho dat luat (a)+(c) issuecomment-6494782891', prompt_sha256: 8187facf95059c314a28cd2b9b3b365546c178c178dc927475404d9727c6633d, verdict_sha256: e2abd0a64062568f6c8f431ba65fa267f9b0198ae36e6b031cf3ed259fcfe91f}
     - {luot: 4, run: d81f77ee, head: fa04437, ket_qua: 'measured — verdicts/wp1009-r3-luot4-VERDICT.md: approve 0/0/0/0', hien_vat: [verdicts/run-d81f77ee.json, verdicts/wp1009-r3-luot4-VERDICT.md], ghi_chu: 'run.json sha256 fc32f9881807defc12a4febe2c17349c23248f3bc97656028a79ed541d2c3b6b, model_phuc_vu DO_DUOC gpt-6.1-sol; VERDICT sha256 d269f332a091433bf92ffd89d06f609cd1e8848f0a489b2be6f2ca55f9be008f.'}
+    - {luot: 6, run: 1e2e900b, head: 4cbb418, ket_qua: 'measured — verdicts/wp1009-r4-luot6-VERDICT.md: approve 0/0/0/0; F14 dong', hien_vat: [verdicts/run-1e2e900b.json, verdicts/wp1009-r4-luot6-VERDICT.md], ghi_chu: 'model_phuc_vu DO_DUOC gpt-6.1-sol (64 muc); khong neo authorized_head 5b76266d nen L7 chay lai.'}
     - {luot: 5, run: 5f05a5ae, head: 69bee9c, ket_qua: 'thuat_lai — request_changes 0/1/0/0 (F14); lech muc tieu 14 duoc duyet issuecomment-6503698943', prompt_sha256: eddc970f1a8f607aa59aefa18bfd22cd61ce3c7fb0d91b9445f561967b909472, verdict_sha256: a2d878101e23bc886ce1bc0dd35fec2e0e4ecbe0637f63aa87dbbd8aaae16d5e}
   thread: 'measured — readback-reviews-1023.json: 0 review; readback-review-comments-1023.json: 0.'
   dot_bien: 'thuat_lai — executor do lai tren 5b76266d (~07:14Z): r973 41/41 GIET; pretooluse_guard_test 35/35 (gom m36 cho F14).'

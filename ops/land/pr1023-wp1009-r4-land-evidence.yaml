@@ -31,6 +31,11 @@ authorization_ghi_chu: >-
   readback-events-1023.json: chuoi su kien PR. Ghi THANG: KHONG co ban ghi ben "duyet tren SHA 5b76266d" truoc hay sau merge;
   chi thi chu kho trong phien ("Vá hết các lỗi…" issuecomment-6495628501; "ghi hồ sơ land" trong phien) khong ben.
   Day la uy quyen bang hanh dong merge, khong phai duyet ben neo SHA.
+authorization_ben_neo_sha: >-
+  measured — readback-comment-duyet-6518287879.json: comment tren PR #1023, user ducthangho, 2026-10-30T08:15:28Z, duyet head
+  5b76266d391695940c449497bfbf0acbdfb7d499 (merge 09e05945). CAVEAT (tien le #566): than comment tu khai do Claude Code (phien executor)
+  dang thay chu kho theo yeu cau trong phien — author_association OWNER khong tach chu kho khoi phien agent dung token chu kho; yeu
+  hon comment chu kho tu go.
 land_operator: 'loi_khai_co_neo — chu kho tu bam merge, executor va dieu phoi khong merge; REST chi neo tai khoan merged_by=ducthangho, KHONG_DO_DUOC nguoi bam hay phien dung credential'
 merge_method: merge
 merge_commit: 09e059457a033de769f7cb789edc20810f4b95f5
@@ -93,11 +98,11 @@ trang_thai_packet:
     gate-output-41017062295.txt); (2) lease da nha: rut han — xem lease.thu_hoi_cuoi; (3) bookkeeping:
     ho so nay; (4) review neo DUNG authorized_head_sha 5b76266d: CHUA DAT — luot approve cuoi neo 4cbb418; khac biet 4cbb418..5b76266d
     chi la merge origin/master (diff packet so merge-base khong doi, 716 dong ca hai) nhung protocol doi neo DUNG SHA; (5) uy quyen land
-    neo SHA: CHUA DAT — chi co hanh dong merge va chi thi trong phien; (6) muc tieu packet: tieu chi spec r4 dat theo gate executor va CI
+    neo SHA: DAT co caveat — comment duyet neo 5b76266d tren PR #1023 (authorization_ben_neo_sha), dang bang token chu kho boi phien agent (#566); (6) muc tieu packet: tieu chi spec r4 dat theo gate executor va CI
     hai nen (pre_merge_checks); (7) reviewer assurance §8.1: DAT cho chinh luot L6 tren 4cbb418 o muc (i) `do_may`
     (model_phuc_vu DO_DUOC, ho openai khac ho executor claude), nhung luot ay KHONG neo 5b76266d nen (4) van chan.
     Mo lai — TAT CA: (4)+(7) mot luot review doc lap tren DUNG 5b76266d qua launcher.py run co model_phuc_vu DO_DUOC
-    ho khac claude; VA (5) chu kho ghi duyet ben neo 5b76266d.
+    ho khac claude; (5) da co ban ghi ben (caveat #566); comment chu kho tu go se go caveat.
 
 uy_quyen_land:
   dang: >-
@@ -109,6 +114,7 @@ uy_quyen_land:
 review:
   so_loi_goi_codex_cli: 6
   tran: 'ADR-0052: 8 loi goi; da dung 6.'
+  patch_bat_bien: 'measured — patch-bat-bien-4cbb418-5b76266d.txt: 5b76266d co cha 4cbb418 + dbbabf98; merge-base(4cbb418, dbbabf98) = 2de4c049; git diff 2de4c049..4cbb418 va dbbabf98..5b76266d tren cung 13 tep (bo dong index) cung sha256 d1511c96f19b018efa4e0b8187b31f95e40f680083590a68e6fb8ee2e9d9e84f, 716 them / 60 xoa ca hai; 0 tep khac doi trong dbbabf98..5b76266d.'
   neo_sha: >-
     Luot cuoi L6 neo 4cbb418; authorized_head 5b76266d = 4cbb418 + merge origin/master (5b76266d^1 = 4cbb418 theo lich su nhanh,
     5b76266d^2 chua dbbabf98 = #1018). Review KHONG tai chay tren 5b76266d.

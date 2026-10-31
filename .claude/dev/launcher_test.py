@@ -3363,6 +3363,7 @@ def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
 
     # gh CO va DA XAC THUC, nhung thao tac muc kho HONG; REST kho cung hong.
     def chay(cmd, **_k):
+        cmd = [os.path.basename(cmd[0]), *cmd[1:]]   # wp1077: probe giai ten tran truoc khi chay
         if cmd[:3] == ["gh", "auth", "status"]:
             return P(0, "Logged in")
         if cmd[:2] == ["gh", "api"]:
@@ -3378,6 +3379,7 @@ def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
 
     # Chieu NGUOC: thao tac muc kho THANH CONG thi phai la DUNG_DUOC.
     def chay2(cmd, **_k):
+        cmd = [os.path.basename(cmd[0]), *cmd[1:]]   # wp1077: probe giai ten tran truoc khi chay
         if cmd[:2] == ["gh", "api"]:
             return P(0, "o/r\n")
         return P(0, "Logged in")

@@ -349,7 +349,10 @@ function Update-CongCuZip([string]$Ten, [string]$Repo, [string]$Tag, [string]$Ma
         $rel = Get-Release $Repo $Tag
         $moi = ($rel.tag_name -replace '^v', '')
         $ss = Compare-PhienBan $truoc $moi
-        if ($null -ne $ss -and $ss -ge 0 -and -not ($Tag -and $ss -gt 0)) { Add-KetQua $Ten $truoc $truoc 'giu'; return }
+        # Hợp đồng B (lượt 10): ĐẠT `giu` chỉ khi BẰNG đích. Cao hơn bản phát hành mới nhất (không ghim) ⇒ `loi`, không tự hạ;
+        # có ghim mà cao hơn ⇒ đi tiếp để cài đúng bản ghim.
+        if ($ss -eq 0) { Add-KetQua $Ten $truoc $truoc 'giu'; return }
+        if ($ss -gt 0 -and -not $Tag) { Add-KetQua $Ten $truoc $moi 'loi' "đang cài $truoc CAO HƠN bản phát hành mới nhất $moi — không tự hạ, kiểm tay"; return }
         if ($ChiKiem) { Add-KetQua $Ten "$truoc" $moi 'can_cap_nhat'; return }
         $ts = Select-TaiSan $rel $MauTaiSan
         $bam = Get-BamTaiSan $rel $ts
@@ -484,7 +487,7 @@ function Invoke-TangNguoiDung([string]$GocKho) {
             } catch { $loiSt = $_.Exception.Message } finally { $env:USERPROFILE, $env:HOME = $hTruoc }
             $goiNlm = Get-PhienBanGoi $nlmPy 'notebooklm-mcp-cli'; $dich = Get-BanMoiNhat 'pip' $nlmPy 'notebooklm-mcp-cli'
             if ($rcPip -ne 0 -or -not $sau) { Add-KetQua 'nlm' "$truoc" "$sau" 'loi' "pip rc=$rcPip $($o | Select-Object -Last 1)" }
-            elseif (-not $dich -or $goiNlm -ne $dich) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "gói sau cài '$goiNlm', bản mới nhất '$dich'" }
+            elseif (-not $dich -or $goiNlm -ne $dich -or $sau -ne $dich) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm.exe báo '$sau', gói '$goiNlm', bản mới nhất '$dich'" }
             elseif ($rcSt -ne 0) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm auth storage status rc=$rcSt $loiSt" }
             elseif ($cheDo -ne 'file') { Add-KetQua 'nlm' "$truoc" $sau 'loi' "chế độ lưu credential = '$cheDo' (cần 'file' cho nlm-auth-stage)" }
             else { Add-KetQua 'nlm' "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) 'storage=file' }
@@ -540,7 +543,8 @@ function Invoke-TangHeThong {
                 $bam = $null
             }
             $ss = Compare-PhienBan $truoc $moi
-            if ($null -ne $ss -and $ss -ge 0) { Add-KetQua $c.ten $truoc $truoc 'giu'; continue }
+            if ($ss -eq 0) { Add-KetQua $c.ten $truoc $truoc 'giu'; continue }
+            if ($ss -gt 0) { Add-KetQua $c.ten $truoc $moi 'loi' "đang cài $truoc CAO HƠN đích $moi — không tự hạ, kiểm tay"; continue }
             if ($ChiKiem) { Add-KetQua $c.ten "$truoc" $moi 'can_cap_nhat'; continue }
             if ($c.kieu -ne 'node') { $bam = Get-BamTaiSan $rel $ts }
             $tai = New-ThuMucTai -ChiAdmin

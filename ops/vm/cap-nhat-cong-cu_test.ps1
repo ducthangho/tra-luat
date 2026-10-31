@@ -305,6 +305,8 @@ if '/venv/Scripts/' in sys.argv[0] and mode.startswith('venv-cai-'):
 if os.environ.get('CNCC_CHE_DO') == 'venv-python-hong' and '/venv/Scripts/' in sys.argv[0]:
     print('venv-runtime-error', file=sys.stderr); sys.exit(9)
 if a == ['--version']:
+    if mode == 'nlm-cli-cu' and ten == 'nlm.exe':
+        print('nlm version 0.4.0'); sys.exit(0)
     if os.environ.get('CNCC_CHE_DO') == 'cli-version-hong' and ten in ('claude.cmd', 'codex.cmd'):
         print("Error: Cannot find module 'offline-missing-module'\nNode.js v24.2.0", file=sys.stderr); sys.exit(1)
     if os.environ.get('CNCC_CHE_DO') == 'python-hong' and ten == 'python.exe':
@@ -447,6 +449,11 @@ if (-not $IsWindows) {
         -not $k.loi -and $k.kq.Count -eq 11 -and $pip.Count -eq 1 -and $pip[0].rc -eq 8 -and
             (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
     }
+    Ca 'nd_nlm_cli_sau_phai_bang_dich_khong_chi_metadata' {
+        # Metadata + pip index đều 0.5.0, nhưng launcher cũ thực sự chạy 0.4.0.
+        $k = Invoke-NguoiDungGia 'nlm-cli-cu'
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
+    }
     Ca 'nd_cai_rc0_khong_len_ban_moi_nhat_la_loi' {
         # Trình quản lý gói báo bản mới nhất 9.9.9 mà sau lệnh cài rc=0 vẫn đo được bản cũ ⇒ lệnh cài không làm gì ⇒ `loi`.
         $k = Invoke-NguoiDungGia 'dich-moi-hon'
@@ -519,6 +526,65 @@ if (-not $IsWindows) {
     }
     Ca 'zip_chikiem_native_rc_khac_0_phai_ghi_loi' {
         $k = @(Invoke-ZipKiemGia 'rc9')
+        $k.Count -eq 1 -and $k[0].hanh_dong -eq 'loi'
+    }
+}
+
+# HINT reviewer lượt 10: native version lớn hơn đích vẫn phải được phân loại đúng B.
+function Invoke-DichBanGia([string]$Tang, [switch]$BanCao) {
+    $ChiKiem = $false
+    $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-dich-' + [guid]::NewGuid().ToString('N'))
+    $pfCuDich = $env:ProgramFiles
+    try {
+        $env:ProgramFiles = "$g/PF"
+        New-Item -ItemType Directory -Path "$g/PF/Git/cmd", "$g/PF/GitHub CLI", "$g/PF/nodejs", "$g/PF/PowerShell/7", "$g/bin" | Out-Null
+        $v = if ($BanCao) { '3.0.0' } else { '2.0.0' }
+        $nv = if ($BanCao) { '24.3.0' } else { '24.2.0' }
+        $pv = if ($BanCao) { '7.7.0' } else { '7.6.10' }
+        $exes = @{
+            "$g/PF/Git/cmd/git.exe" = "git version $v"
+            "$g/PF/GitHub CLI/gh.exe" = "gh version $v"
+            "$g/PF/nodejs/node.exe" = "v$nv"
+            "$g/PF/PowerShell/7/pwsh.exe" = $pv
+            "$g/bin/rg.exe" = "ripgrep $v"
+        }
+        foreach ($e in $exes.Keys) {
+            [IO.File]::WriteAllText($e, "#!/bin/sh`necho $($exes[$e])`nexit 0`n"); & chmod +x $e
+        }
+        function Get-Release { param($Repo, $Tag)
+            $f = if ($Repo -eq 'git-for-windows/git') { 'Git-2.0.0-64-bit.exe' } elseif ($Repo -eq 'cli/cli') { 'gh_2.0.0_windows_amd64.msi' } elseif ($Repo -eq 'PowerShell/PowerShell') { 'PowerShell-7.6.10-win-x64.msi' } else { 'rg.zip' }
+            $vRel = if ($Repo -eq 'PowerShell/PowerShell') { '7.6.10' } else { '2.0.0' }
+            [pscustomobject]@{tag_name="v$vRel";assets=@([pscustomobject]@{name=$f;browser_download_url='OFFLINE';digest=('sha256:' + ('a' * 64))})}
+        }
+        function Invoke-RestMethod { param($Uri, $TimeoutSec) @([pscustomobject]@{version='v24.2.0';lts='fixture'}) }
+        function Invoke-WebRequest { param($Uri, $TimeoutSec, $Headers, $OutFile)
+            if ($OutFile) { throw 'OFFLINE-KHONG-CAI' }
+            [pscustomobject]@{Content=(('a' * 64) + '  node-v24.2.0-x64.msi')}
+        }
+        function New-ThuMucTai { param([switch]$ChiAdmin) New-Item -ItemType Directory -Force -Path "$g/tai" | Out-Null; "$g/tai" }
+        function Save-CoKiemBam { param($Url, $Bam, $ThuMuc, $Ten) throw 'OFFLINE-KHONG-CAI' }
+        function Start-Process { throw 'OFFLINE-KHONG-CAI' }
+        $Script:KetQua.Clear()
+        if ($Tang -eq 'HeThong') { Invoke-TangHeThong *> $null }
+        else { Update-CongCuZip 'rg' 'OFFLINE/rg' '' '^rg[.]zip$' 'rg.exe' @('--version') 'ripgrep +([0-9]+[.][0-9]+[.][0-9]+)' "$g/bin" *> $null }
+        @($Script:KetQua)
+    } finally { $env:ProgramFiles = $pfCuDich; Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
+}
+if (-not $IsWindows) {
+    Ca 'dich_he_thong_doi_chung_bang_dich' {
+        $k = @(Invoke-DichBanGia 'HeThong')
+        $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'giu').Count -eq 0
+    }
+    Ca 'dich_he_thong_ban_cao_hon_khong_duoc_giu_dat' {
+        $k = @(Invoke-DichBanGia 'HeThong' -BanCao)
+        $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'loi').Count -eq 0
+    }
+    Ca 'dich_zip_doi_chung_bang_dich' {
+        $k = @(Invoke-DichBanGia 'Zip')
+        $k.Count -eq 1 -and $k[0].hanh_dong -eq 'giu'
+    }
+    Ca 'dich_zip_ban_cao_hon_khong_duoc_giu_dat' {
+        $k = @(Invoke-DichBanGia 'Zip' -BanCao)
         $k.Count -eq 1 -and $k[0].hanh_dong -eq 'loi'
     }
 }

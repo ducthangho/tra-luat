@@ -66,7 +66,8 @@ function ConvertTo-PhienBan([string]$Chuoi) {
     # Git for Windows: `2.56.0.windows.4` / tag `v2.56.0.windows.4` ⇒ 2.56.0.4.
     if ([string]::IsNullOrWhiteSpace($Chuoi)) { return $null }
     $s = $Chuoi.Trim() -replace '^[vV]', '' -replace '\.windows\.', '.'
-    $m = [regex]::Match($s, '^(\d+(?:\.\d+){1,3})')
+    # Neo CẢ HAI đầu (lượt 11): `2.0.0-rc.7` KHÔNG phải 2.0.0 — hậu tố prerelease/build ⇒ null (không biết), không cắt bỏ.
+    $m = [regex]::Match($s, '^(\d+(?:\.\d+){1,3})$')
     if (-not $m.Success) { return $null }
     try { return [version]$m.Groups[1].Value } catch { return $null }
 }
@@ -436,10 +437,11 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         }
     } else { Add-KetQua 'venv-kho' '' '' 'loi' "không có $vpy hoặc requirements.txt" }
 
+    # Mẫu phiên bản bắt CẢ hậu tố (`\S*`): bản đo được phải là định danh đầy đủ để so BẰNG đích (lượt 11).
     # 3. claude + codex qua npm global vào C:\Tools\npm (cùng chỗ codex đang nằm).
     foreach ($p in @(@('claude', '@anthropic-ai/claude-code', 'claude.cmd'), @('codex', '@openai/codex', 'codex.cmd'))) {
         $exe = Join-Path $npmPrefix $p[2]
-        $truoc = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
+        $truoc = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+\S*)'
         if (-not (Test-Path -LiteralPath $npm)) { Add-KetQua $p[0] "$truoc" '' 'loi' "không có $npm"; continue }
         if ($ChiKiem) {
             if (-not $truoc) { Add-KetQua $p[0] '' '' 'loi' "$exe --version không chạy được hoặc chưa cài" } else { Add-KetQua $p[0] "$truoc" '' 'kiem' }
@@ -447,16 +449,16 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         }
         try { $o = & $npm install -g --prefix $npmPrefix "$($p[1])@latest" --no-fund --no-audit 2>&1; $rc = $LASTEXITCODE }
         catch { Add-KetQua $p[0] "$truoc" '' 'loi' "không chạy được npm: $($_.Exception.Message)"; continue }
-        $sau = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
+        $sau = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+\S*)'
         $dich = Get-BanMoiNhat 'npm' $npm $p[1]
         if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -ne $dich) { Add-KetQua $p[0] "$truoc" "$sau" 'loi' "npm rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
         else { Add-KetQua $p[0] "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' }) }
     }
 
     # 4. Nhị phân portable vào C:\Tools\bin, có kiểm băm. actionlint theo ghim; rg/shellcheck bản mới nhất.
-    Update-CongCuZip 'rg' 'BurntSushi/ripgrep' '' 'x86_64-pc-windows-msvc\.zip$' 'rg.exe' @('--version') '(?m)^ripgrep\s+(\d+\.\d+\.\d+)' $bin
-    Update-CongCuZip 'shellcheck' 'koalaman/shellcheck' '' '^shellcheck-v[\d.]+\.zip$' 'shellcheck.exe' @('--version') 'version:\s*(\d+\.\d+\.\d+)' $bin
-    Update-CongCuZip 'actionlint' 'rhysd/actionlint' "v$($ghim.actionlint)" "^actionlint_$([regex]::Escape($ghim.actionlint))_windows_amd64\.zip$" 'actionlint.exe' @('-version') '(?m)^(\d+\.\d+\.\d+)' $bin
+    Update-CongCuZip 'rg' 'BurntSushi/ripgrep' '' 'x86_64-pc-windows-msvc\.zip$' 'rg.exe' @('--version') '(?m)^ripgrep\s+(\d+\.\d+\.\d+\S*)' $bin
+    Update-CongCuZip 'shellcheck' 'koalaman/shellcheck' '' '^shellcheck-v[\d.]+\.zip$' 'shellcheck.exe' @('--version') 'version:\s*(\d+\.\d+\.\d+\S*)' $bin
+    Update-CongCuZip 'actionlint' 'rhysd/actionlint' "v$($ghim.actionlint)" "^actionlint_$([regex]::Escape($ghim.actionlint))_windows_amd64\.zip$" 'actionlint.exe' @('-version') '(?m)^(\d+\.\d+\.\d+\S*)' $bin
 
     # 5. nlm (notebooklm-mcp-cli) trong venv riêng; sau nâng cấp, chế độ lưu credential phải còn là `file`
     #    — `tl nlm-auth-stage` chỉ đọc `cookies.json` (scripts/tl_gws.py `_NLM_AUTH_RELS`).
@@ -509,10 +511,10 @@ function Invoke-TangHeThong {
     $pf = ${env:ProgramFiles}
     $muc = @(
         @{ ten = 'git'; exe = "$pf\Git\cmd\git.exe"; ds = @('--version'); mau = 'git version\s+(\S+)'; repo = 'git-for-windows/git'; ts = '^Git-[\d.]+-64-bit\.exe$'; kieu = 'exe' },
-        @{ ten = 'gh'; exe = "$pf\GitHub CLI\gh.exe"; ds = @('--version'); mau = 'gh version\s+(\d+\.\d+\.\d+)'; repo = 'cli/cli'; ts = '^gh_[\d.]+_windows_amd64\.msi$'; kieu = 'msi' },
-        @{ ten = 'node'; exe = "$pf\nodejs\node.exe"; ds = @('--version'); mau = 'v(\d+\.\d+\.\d+)'; repo = ''; ts = ''; kieu = 'node' },
+        @{ ten = 'gh'; exe = "$pf\GitHub CLI\gh.exe"; ds = @('--version'); mau = 'gh version\s+(\d+\.\d+\.\d+\S*)'; repo = 'cli/cli'; ts = '^gh_[\d.]+_windows_amd64\.msi$'; kieu = 'msi' },
+        @{ ten = 'node'; exe = "$pf\nodejs\node.exe"; ds = @('--version'); mau = 'v(\d+\.\d+\.\d+\S*)'; repo = ''; ts = ''; kieu = 'node' },
         # pwsh CUỐI: đang chạy chính nó, MSI có thể đòi khởi động lại (3010) — vẫn là kết quả hợp lệ.
-        @{ ten = 'pwsh'; exe = "$pf\PowerShell\7\pwsh.exe"; ds = @('-NoProfile', '-Command', '$PSVersionTable.PSVersion.ToString()'); mau = '(\d+\.\d+\.\d+)'; repo = 'PowerShell/PowerShell'; ts = '^PowerShell-[\d.]+-win-x64\.msi$'; kieu = 'msi' }
+        @{ ten = 'pwsh'; exe = "$pf\PowerShell\7\pwsh.exe"; ds = @('-NoProfile', '-Command', '$PSVersionTable.PSVersion.ToString()'); mau = '(\d+\.\d+\.\d+\S*)'; repo = 'PowerShell/PowerShell'; ts = '^PowerShell-[\d.]+-win-x64\.msi$'; kieu = 'msi' }
     )
     foreach ($c in $muc) {
         $truoc = Get-PhienBanLenh $c.exe $c.ds $c.mau

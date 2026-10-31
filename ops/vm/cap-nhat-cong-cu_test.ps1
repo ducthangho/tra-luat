@@ -17,6 +17,7 @@ function Nem([scriptblock]$B) { try { & $B; return $false } catch { return $true
 # ── phiên bản ──
 Ca 'phien_ban_git_windows' { (ConvertTo-PhienBan 'v2.56.0.windows.4') -eq [version]'2.56.0.4' -and (ConvertTo-PhienBan '2.47.1.windows.2') -eq [version]'2.47.1.2' }
 Ca 'phien_ban_khong_doc_duoc_la_null' { $null -eq (ConvertTo-PhienBan 'abc') -and $null -eq (ConvertTo-PhienBan '') -and $null -eq (ConvertTo-PhienBan $null) }
+Ca 'phien_ban_hau_to_la_null' { $null -eq (ConvertTo-PhienBan '2.0.0-rc.7') -and $null -eq (ConvertTo-PhienBan 'v1.7.7+build.1') -and $null -eq (Compare-PhienBan '2.0.0-rc.7' '2.0.0') }
 Ca 'so_sanh_so_hoc_khong_chuoi' { (Compare-PhienBan '7.6.10' '7.6.9') -eq 1 -and (Compare-PhienBan '1.7.7' '1.7.7') -eq 0 -and (Compare-PhienBan '2.47.1.windows.2' 'v2.56.0.windows.4') -eq -1 }
 Ca 'so_sanh_khong_biet_la_null' { $null -eq (Compare-PhienBan '' '1.2.3') -and $null -eq (Compare-PhienBan '1.2.3' 'x') }
 
@@ -304,6 +305,11 @@ if '/venv/Scripts/' in sys.argv[0] and mode.startswith('venv-cai-'):
 
 if os.environ.get('CNCC_CHE_DO') == 'venv-python-hong' and '/venv/Scripts/' in sys.argv[0]:
     print('venv-runtime-error', file=sys.stderr); sys.exit(9)
+if mode == 'cli-hau-to' and ten in ('claude.cmd', 'codex.cmd') and a == ['--version']:
+    print('1.0.0-rc.7'); sys.exit(0)
+if mode == 'portable-hau-to' and ten in ('rg.exe', 'shellcheck.exe', 'actionlint.exe'):
+    v = '1.7.7' if ten == 'actionlint.exe' else '1.0.0'
+    print(('ripgrep ' if ten == 'rg.exe' else 'version: ' if ten == 'shellcheck.exe' else '') + v + '-rc.7'); sys.exit(0)
 if a == ['--version']:
     if mode == 'nlm-cli-cu' and ten == 'nlm.exe':
         print('nlm version 0.4.0'); sys.exit(0)
@@ -346,7 +352,26 @@ elif a and a[0] == 'auth':
             if ($CheDo -eq 'npm-bien-mat' -and "$LiteralPath" -eq $npmGia -and $co) { Microsoft.PowerShell.Management\Remove-Item -LiteralPath $LiteralPath -Force }
             $co }
         function Set-PathNguoiDung { param($ThuMuc) }
-        function Update-CongCuZip { param($Ten) Add-KetQua $Ten '1.0.0' '1.0.0' 'giu' 'zip-gia' }
+        if ($CheDo -eq 'portable-hau-to') {
+            New-Item -ItemType Directory -Path "$g/Tools/bin" | Out-Null
+            foreach ($n in 'rg.exe', 'shellcheck.exe', 'actionlint.exe') {
+                [IO.File]::WriteAllText("$g/Tools/bin/$n", $shim); & chmod +x "$g/Tools/bin/$n"
+            }
+            # Gọi Update-CongCuZip và regex CALLER của sản phẩm thật; chỉ HTTP là đồ giả.
+            function Get-Release { param($Repo, $Tag)
+                $vRel = if ($Tag) { $Tag.TrimStart('v') } else { '1.0.0' }
+                $f = switch ($Repo) {
+                    'BurntSushi/ripgrep' { 'ripgrep-x86_64-pc-windows-msvc.zip' }
+                    'koalaman/shellcheck' { "shellcheck-v$vRel.zip" }
+                    'rhysd/actionlint' { "actionlint_${vRel}_windows_amd64.zip" }
+                    default { throw "repo ngoài fixture: $Repo" }
+                }
+                [pscustomobject]@{tag_name="v$vRel";assets=@([pscustomobject]@{name=$f;browser_download_url='OFFLINE';digest=('sha256:' + ('a' * 64))})}
+            }
+            function Invoke-WebRequest { throw 'OFFLINE-KHONG-CAI' }
+        } else {
+            function Update-CongCuZip { param($Ten) Add-KetQua $Ten '1.0.0' '1.0.0' 'giu' 'zip-gia' }
+        }
         $Script:KetQua.Clear(); $loi = $null
         try { Invoke-TangNguoiDung "$g/repo" *> $null } catch { $loi = $_.Exception.Message }
         # Keep product events before independent direct-after probes.
@@ -449,6 +474,16 @@ if (-not $IsWindows) {
         -not $k.loi -and $k.kq.Count -eq 11 -and $pip.Count -eq 1 -and $pip[0].rc -eq 8 -and
             (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
     }
+    Ca 'nd_cli_hau_to_khong_duoc_coi_la_stable_dich' {
+        $k = Invoke-NguoiDungGia 'cli-hau-to'
+        -not $k.loi -and $k.kq.Count -eq 11 -and
+            @('claude', 'codex' | Where-Object { (& $hang $k $_)[0].hanh_dong -ne 'loi' }).Count -eq 0
+    }
+    Ca 'nd_portable_hau_to_khong_duoc_coi_la_stable_dich' {
+        $k = Invoke-NguoiDungGia 'portable-hau-to'
+        -not $k.loi -and $k.kq.Count -eq 11 -and
+            @('rg', 'shellcheck', 'actionlint' | Where-Object { (& $hang $k $_)[0].hanh_dong -ne 'loi' }).Count -eq 0
+    }
     Ca 'nd_nlm_cli_sau_phai_bang_dich_khong_chi_metadata' {
         # Metadata + pip index đều 0.5.0, nhưng launcher cũ thực sự chạy 0.4.0.
         $k = Invoke-NguoiDungGia 'nlm-cli-cu'
@@ -531,7 +566,7 @@ if (-not $IsWindows) {
 }
 
 # HINT reviewer lượt 10: native version lớn hơn đích vẫn phải được phân loại đúng B.
-function Invoke-DichBanGia([string]$Tang, [switch]$BanCao) {
+function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '') {
     $ChiKiem = $false
     $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-dich-' + [guid]::NewGuid().ToString('N'))
     $pfCuDich = $env:ProgramFiles
@@ -549,7 +584,7 @@ function Invoke-DichBanGia([string]$Tang, [switch]$BanCao) {
             "$g/bin/rg.exe" = "ripgrep $v"
         }
         foreach ($e in $exes.Keys) {
-            [IO.File]::WriteAllText($e, "#!/bin/sh`necho $($exes[$e])`nexit 0`n"); & chmod +x $e
+            [IO.File]::WriteAllText($e, "#!/bin/sh`necho $($exes[$e])$HauTo`nexit 0`n"); & chmod +x $e
         }
         function Get-Release { param($Repo, $Tag)
             $f = if ($Repo -eq 'git-for-windows/git') { 'Git-2.0.0-64-bit.exe' } elseif ($Repo -eq 'cli/cli') { 'gh_2.0.0_windows_amd64.msi' } elseif ($Repo -eq 'PowerShell/PowerShell') { 'PowerShell-7.6.10-win-x64.msi' } else { 'rg.zip' }
@@ -574,6 +609,10 @@ if (-not $IsWindows) {
     Ca 'dich_he_thong_doi_chung_bang_dich' {
         $k = @(Invoke-DichBanGia 'HeThong')
         $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'giu').Count -eq 0
+    }
+    Ca 'dich_he_thong_hau_to_khong_duoc_coi_la_stable_dich' {
+        $k = @(Invoke-DichBanGia 'HeThong' -HauTo '-rc.7')
+        $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'loi').Count -eq 0
     }
     Ca 'dich_he_thong_ban_cao_hon_khong_duoc_giu_dat' {
         $k = @(Invoke-DichBanGia 'HeThong' -BanCao)

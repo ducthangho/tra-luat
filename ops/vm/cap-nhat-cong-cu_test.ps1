@@ -174,6 +174,18 @@ Ca 'icacls_rc_khac_0_thi_nem' {
         $m -match 'rc=5' -and $m -match 'gia-hong'
     } finally { $env:SystemRoot = $cu; Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
 }
+Ca 'phien_ban_lenh_rc_khac_0_la_null' {
+    # Chạy được trên CẢ HAI nền: .cmd trên Windows, sh ngoài Windows. In chuỗi giống phiên bản rồi thoát 1 ⇒ null; thoát 0 ⇒ nhận.
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-pb-" + [guid]::NewGuid().ToString('N')); New-Item -ItemType Directory $g | Out-Null
+    try {
+        $tao = { param($ten, $rc)
+            if ($IsWindows) { $f = Join-Path $g "$ten.cmd"; [IO.File]::WriteAllText($f, "@echo Node.js v24.2.0`r`n@exit /b $rc`r`n") }
+            else { $f = Join-Path $g $ten; [IO.File]::WriteAllText($f, "#!/bin/sh`necho Node.js v24.2.0 >&2`nexit $rc`n"); & chmod +x $f }
+            $f }
+        $hong = & $tao 'hong' 1; $tot = & $tao 'tot' 0
+        $null -eq (Get-PhienBanLenh $hong @('--version') 'v(\d+\.\d+\.\d+)') -and (Get-PhienBanLenh $tot @('--version') 'v(\d+\.\d+\.\d+)') -eq '24.2.0'
+    } finally { Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
+}
 Ca 'reparse_o_to_tien_bi_phat_hien' {
     $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-tt-" + [guid]::NewGuid().ToString('N')); $that = "$g-that"
     New-Item -ItemType Directory -Path $g, "$that\npm" | Out-Null
@@ -272,6 +284,12 @@ function Invoke-NguoiDungGia([string]$CheDo) {
 import os, sys, json
 ten = os.path.basename(sys.argv[0]); a = sys.argv[1:]
 if a == ['--version']:
+    if os.environ.get('CNCC_CHE_DO') == 'cli-version-hong' and ten in ('claude.cmd', 'codex.cmd'):
+        print("Error: Cannot find module 'offline-missing-module'\nNode.js v24.2.0", file=sys.stderr); sys.exit(1)
+    if os.environ.get('CNCC_CHE_DO') == 'python-hong' and ten == 'python.exe':
+        print('Python 3.12.7'); sys.exit(3)
+    if os.environ.get('CNCC_CHE_DO') == 'nlm-version-hong' and ten == 'nlm.exe':
+        print('nlm version 0.5.0'); sys.exit(9)
     print('Python 3.12.7' if ten == 'python.exe' else 'nlm version 0.5.0' if ten == 'nlm.exe' else '1.0.0')
 elif a and a[0] == '-c':
     if 'importlib.metadata' in a[1]: print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '4.25.1')
@@ -315,6 +333,21 @@ if (-not $IsWindows) {
     Ca 'nd_nlm_status_rc_khac_0_la_loi' {
         $k = Invoke-NguoiDungGia 'nlm-status-hong'
         $n = (& $hang $k 'nlm')[0]; $n.hanh_dong -eq 'loi' -and $n.chi_tiet -match 'rc=7'
+    }
+    Ca 'nd_python_version_hong_la_loi_khong_phai_giu' {
+        $k = Invoke-NguoiDungGia 'python-hong'
+        -not $k.loi -and $k.kq.Count -eq 1 -and $k.kq[0].cong_cu -eq 'python' -and $k.kq[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_cli_version_hong_phai_ghi_loi' {
+        # --version thất bại, chỉ stderr có version NODE: không được nhận nó làm version CLI.
+        $k = Invoke-NguoiDungGia 'cli-version-hong'
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'claude')[0].hanh_dong -eq 'loi' -and
+            (& $hang $k 'codex')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_nlm_version_rc_khac_0_phai_ghi_loi' {
+        # stdout có version hợp lệ vẫn không đủ khi chính --version exit9; pip và storage đều rc0.
+        $k = Invoke-NguoiDungGia 'nlm-version-hong'
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
     }
 }
 Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {

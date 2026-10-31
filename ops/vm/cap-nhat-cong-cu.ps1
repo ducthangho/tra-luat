@@ -261,7 +261,11 @@ function Add-KetQua([string]$CongCu, [string]$Truoc, [string]$Sau, [string]$Hanh
 
 function Get-PhienBanLenh([string]$Exe, [string[]]$DoiSo, [string]$Mau) {
     if (-not $Exe -or -not (Test-Path -LiteralPath $Exe)) { return $null }
-    try { $o = (& $Exe @DoiSo 2>&1 | Out-String) } catch { return $null }
+    # rc lấy NGAY sau lệnh; rc≠0 ⇒ không biết phiên bản. CLI hỏng vẫn có thể in một chuỗi giống phiên bản (vd
+    # `Node.js v24.2.0` trong stderr của lỗi node) — trước đây nó được nhận là phiên bản của chính công cụ và ghi `giu`
+    # (cross-review PR #1065 lượt 5, P1 `loi-native-tang-nguoi-dung`).
+    try { $o = (& $Exe @DoiSo 2>&1 | Out-String); $rc = $LASTEXITCODE } catch { return $null }
+    if ($rc -ne 0) { return $null }
     $m = [regex]::Match($o, $Mau)
     if ($m.Success) { return $m.Groups[1].Value } else { return $null }
 }
@@ -353,6 +357,7 @@ function Invoke-TangNguoiDung([string]$GocKho) {
 
     # 1. pip + PyYAML/jsonschema theo ghim của bản kê (Python dùng chung của máy, như `python` trên PATH).
     $pyTruoc = Get-PhienBanLenh $py @('--version') 'Python\s+(\S+)'
+    if (-not $pyTruoc) { Add-KetQua 'python' '' '' 'loi' "$py --version không chạy được"; return }
     Add-KetQua 'python' $pyTruoc $pyTruoc 'giu' 'bản Python không tự nâng (đổi minor phá venv) — chỉ báo'
     try {
         if (-not $ChiKiem) { & $py -m pip install --quiet --disable-pip-version-check PyYAML 2>&1 | Out-Null }

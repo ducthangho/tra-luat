@@ -1,0 +1,63 @@
+[
+  {
+    "rc": 0,
+    "threw": false,
+    "message": null,
+    "argv": [
+      "D:\\thư mục a&$`[x]\\",
+      "/grant:r",
+      "*S-1-5-18:(OI)(CI)F",
+      "/L",
+      "/Q"
+    ],
+    "roundtrip": true,
+    "absolute_exe": "/tmp/review icacls-đường dẫn-4de68991e2284b4f8d473051cb800e9e/System32/icacls.exe"
+  },
+  {
+    "rc": 1,
+    "threw": true,
+    "message": "icacls D:\\thư mục a&$`[x]\\ /grant:r *S-1-5-18:(OI)(CI)F /L /Q rc=1: stderr-shim",
+    "argv": [
+      "D:\\thư mục a&$`[x]\\",
+      "/grant:r",
+      "*S-1-5-18:(OI)(CI)F",
+      "/L",
+      "/Q"
+    ],
+    "roundtrip": true,
+    "absolute_exe": "/tmp/review icacls-đường dẫn-4de68991e2284b4f8d473051cb800e9e/System32/icacls.exe"
+  },
+  {
+    "rc": 5,
+    "threw": true,
+    "message": "icacls D:\\thư mục a&$`[x]\\ /grant:r *S-1-5-18:(OI)(CI)F /L /Q rc=5: stderr-shim",
+    "argv": [
+      "D:\\thư mục a&$`[x]\\",
+      "/grant:r",
+      "*S-1-5-18:(OI)(CI)F",
+      "/L",
+      "/Q"
+    ],
+    "roundtrip": true,
+    "absolute_exe": "/tmp/review icacls-đường dẫn-4de68991e2284b4f8d473051cb800e9e/System32/icacls.exe"
+  },
+  {
+    "rc": 1332,
+    "threw": true,
+    "message": "icacls D:\\thư mục a&$`[x]\\ /grant:r *S-1-5-18:(OI)(CI)F /L /Q rc=52: stderr-shim",
+    "argv": [
+      "D:\\thư mục a&$`[x]\\",
+      "/grant:r",
+      "*S-1-5-18:(OI)(CI)F",
+      "/L",
+      "/Q"
+    ],
+    "roundtrip": true,
+    "absolute_exe": "/tmp/review icacls-đường dẫn-4de68991e2284b4f8d473051cb800e9e/System32/icacls.exe"
+  },
+  {
+    "case": "missing_absolute_exe",
+    "threw": true,
+    "message": "The module '/tmp/review icacls-đường dẫn-4de68991e2284b4f8d473051cb800e9e' could not be loaded. For more information, run 'Import-Module /tmp/review icacls-đường dẫn-4de68991e2284b4f8d473051cb800e9e'."
+  }
+]

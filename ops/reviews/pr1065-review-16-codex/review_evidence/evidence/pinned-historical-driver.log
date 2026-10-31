@@ -1,0 +1,6 @@
+{"mode": "control", "pin": "1.7.7", "release": "1.7.7", "requests": [{"uri": "https://api.github.com/repos/rhysd/actionlint/releases/tags/v1.7.7", "returned_tag": "v1.7.7"}], "downloads": 1, "rows": [{"cong_cu": "actionlint", "truoc": "1.0.0", "sau": "1.7.7", "hanh_dong": "nang_cap", "chi_tiet": ""}], "direct": {"stdout": "1.7.7", "rc": 0}, "zip_hash": "47858429a12764c4dddb9f234aa9947c17f283a1250e92b386ab66e67c4eb83b", "matches_manifest_pin": true}
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/edb6b026-69ec-5fe1-81b8-38640ff85a8e/scratchpad/cr16-pr1065.1jbf/probes/pinned-release-round15.py", line 14, in <module>
+    assert d['rows'][0]['hanh_dong']==('giu' if mode=='keep-mismatch' else 'nang_cap')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

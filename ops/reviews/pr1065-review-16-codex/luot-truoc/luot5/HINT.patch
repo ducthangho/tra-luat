@@ -1,0 +1,31 @@
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -272,6 +272,10 @@
+ import os, sys, json
+ ten = os.path.basename(sys.argv[0]); a = sys.argv[1:]
+ if a == ['--version']:
++    if os.environ.get('CNCC_CHE_DO') == 'cli-version-hong' and ten in ('claude.cmd', 'codex.cmd'):
++        print("Error: Cannot find module 'offline-missing-module'\nNode.js v24.2.0", file=sys.stderr); sys.exit(1)
++    if os.environ.get('CNCC_CHE_DO') == 'nlm-version-hong' and ten == 'nlm.exe':
++        print('nlm version 0.5.0'); sys.exit(9)
+     print('Python 3.12.7' if ten == 'python.exe' else 'nlm version 0.5.0' if ten == 'nlm.exe' else '1.0.0')
+ elif a and a[0] == '-c':
+     if 'importlib.metadata' in a[1]: print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '4.25.1')
+@@ -315,6 +319,17 @@
+     Ca 'nd_nlm_status_rc_khac_0_la_loi' {
+         $k = Invoke-NguoiDungGia 'nlm-status-hong'
+         $n = (& $hang $k 'nlm')[0]; $n.hanh_dong -eq 'loi' -and $n.chi_tiet -match 'rc=7'
++    }
++    Ca 'nd_cli_version_hong_phai_ghi_loi' {
++        # --version thất bại, chỉ stderr có version NODE: không được nhận nó làm version CLI.
++        $k = Invoke-NguoiDungGia 'cli-version-hong'
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'claude')[0].hanh_dong -eq 'loi' -and
++            (& $hang $k 'codex')[0].hanh_dong -eq 'loi'
++    }
++    Ca 'nd_nlm_version_rc_khac_0_phai_ghi_loi' {
++        # stdout có version hợp lệ vẫn không đủ khi chính --version exit9; pip và storage đều rc0.
++        $k = Invoke-NguoiDungGia 'nlm-version-hong'
++        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
+     }
+ }
+ Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {

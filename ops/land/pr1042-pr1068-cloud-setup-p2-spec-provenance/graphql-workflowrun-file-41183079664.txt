@@ -1,0 +1,5 @@
+# WorkflowRun.file qua GraphQL — chay tren may chu kho ASUS-LAPTOP (gh CLI chu kho ducthangho, keyring) boi phien dieu phoi
+# session_015GtxraXfMD1t2FJLzzGDr4 qua Remote Desktop Commander (pwsh 7), 2026-10-31T09:49Z. Output chep nguyen van, rc=0.
+== WFR_kwLOTNeRjc8AAAAJlrPs8A @ 2026-10-31T09:49:47.0247897Z
+{"data":{"node":{"databaseId":41183079664,"runNumber":3627,"createdAt":"2026-10-31T08:04:14Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/97120d3c76ebb7c3eda4b585ff46f1c51e30c91b/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"}}}}}
+rc=0

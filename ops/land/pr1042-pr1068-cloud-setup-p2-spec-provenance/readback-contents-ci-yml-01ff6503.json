@@ -1,0 +1,17 @@
+{
+ "name": "ci.yml",
+ "path": ".github/workflows/ci.yml",
+ "sha": "82d9f239ff311bd1ba3d3021119b5a2f7f699ffc",
+ "size": 69161,
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.github/workflows/ci.yml?ref=01ff65035c8b0833fa521b93239931772c14dffd",
+ "html_url": "https://github.com/ducthangho/tra-luat/blob/01ff65035c8b0833fa521b93239931772c14dffd/.github/workflows/ci.yml",
+ "git_url": "https://api.github.com/repos/ducthangho/tra-luat/git/blobs/82d9f239ff311bd1ba3d3021119b5a2f7f699ffc",
+ "download_url": "https://raw.githubusercontent.com/ducthangho/tra-luat/01ff65035c8b0833fa521b93239931772c14dffd/.github/workflows/ci.yml",
+ "type": "file",
+ "encoding": "base64",
+ "_links": {
+  "self": "https://api.github.com/repos/ducthangho/tra-luat/contents/.github/workflows/ci.yml?ref=01ff65035c8b0833fa521b93239931772c14dffd",
+  "git": "https://api.github.com/repos/ducthangho/tra-luat/git/blobs/82d9f239ff311bd1ba3d3021119b5a2f7f699ffc",
+  "html": "https://github.com/ducthangho/tra-luat/blob/01ff65035c8b0833fa521b93239931772c14dffd/.github/workflows/ci.yml"
+ }
+}

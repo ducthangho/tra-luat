@@ -280,10 +280,28 @@ function Invoke-NguoiDungGia([string]$CheDo, [switch]$Kiem) {
         New-Item -ItemType Directory -Path "$g/PF/nodejs", "$g/Tools/Python312", "$g/Tools/npm", "$g/nlm/Scripts", "$g/venv/Scripts", "$g/repo/ops" | Out-Null
         [IO.File]::WriteAllText("$g/repo/ops/cong_cu.yaml", 'gia'); [IO.File]::WriteAllText("$g/repo/requirements.txt", 'gia')
         $env:CNCC_CHE_DO = $CheDo
+        $env:CNCC_VENV_LOG = "$g/venv-native.jsonl"
+        if ($CheDo -like 'venv-cai-*') { [IO.File]::WriteAllText("$g/repo/requirements.txt", "PyYAML==6.0.3`njsonschema==4.25.1`n") }
+
         $shim = @'
 #!/usr/bin/env python3
 import os, sys, json
 ten = os.path.basename(sys.argv[0]); a = sys.argv[1:]
+# Round 9: pip success does not substitute for measuring its postcondition.
+mode = os.environ.get('CNCC_CHE_DO', '')
+if '/venv/Scripts/' in sys.argv[0] and mode.startswith('venv-cai-'):
+    installed = os.path.exists(sys.argv[0] + '.installed')
+    rc = 9 if a == ['--version'] and installed and mode == 'venv-cai-python-rc9' else 8 if a[:2] == ['-m', 'pip'] and mode == 'venv-cai-pip-rc8' else 0
+    with open(os.environ['CNCC_VENV_LOG'], 'a') as f:
+        f.write(json.dumps({'argv': a, 'rc': rc}) + '\n')
+    if a[:2] == ['-m', 'pip']:
+        if rc == 0: open(sys.argv[0] + '.installed', 'w').write('pip-completed')
+        sys.exit(rc)
+    if rc != 0:
+        print('Python 3.12.7'); sys.exit(rc)
+    if a and a[0] == '-c' and 'importlib.metadata' in a[1] and mode == 'venv-cai-goi-lech':
+        print('0.0.1'); sys.exit(0)
+
 if os.environ.get('CNCC_CHE_DO') == 'venv-python-hong' and '/venv/Scripts/' in sys.argv[0]:
     print('venv-runtime-error', file=sys.stderr); sys.exit(9)
 if a == ['--version']:
@@ -294,9 +312,15 @@ if a == ['--version']:
     if os.environ.get('CNCC_CHE_DO') == 'nlm-version-hong' and ten == 'nlm.exe':
         print('nlm version 0.5.0'); sys.exit(9)
     print('Python 3.12.7' if ten == 'python.exe' else 'nlm version 0.5.0' if ten == 'nlm.exe' else '1.0.0')
+elif ten == 'npm.cmd' and a[:1] == ['view']:
+    print('1.0.0' if os.environ.get('CNCC_CHE_DO') != 'dich-moi-hon' else '9.9.9')
+    if os.environ.get('CNCC_CHE_DO') == 'dich-rc-hong': sys.exit(4)
+elif a[:4] == ['-m', 'pip', 'index', 'versions']:
+    print(f"{a[4]} ({ {'pip': '25.0', 'notebooklm-mcp-cli': '0.5.0'}.get(a[4], '0') if os.environ.get('CNCC_CHE_DO') != 'dich-moi-hon' else '9.9.9'})")
+    if os.environ.get('CNCC_CHE_DO') == 'dich-rc-hong': sys.exit(4)
 elif a and a[0] == '-c':
     if 'importlib.metadata' in a[1]:
-        print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '4.25.1')
+        print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '0.5.0' if "'notebooklm-mcp-cli'" in a[1] else '4.25.1')
         if os.environ.get('CNCC_CHE_DO') == 'metadata-hong':
             print('metadata-native-error', file=sys.stderr); sys.exit(6)
     else: print(json.dumps({'PyYAML': '6.0.3', 'jsonschema': '4.25.1', 'actionlint': '1.7.7'}))
@@ -323,10 +347,21 @@ elif a and a[0] == 'auth':
         function Update-CongCuZip { param($Ten) Add-KetQua $Ten '1.0.0' '1.0.0' 'giu' 'zip-gia' }
         $Script:KetQua.Clear(); $loi = $null
         try { Invoke-TangNguoiDung "$g/repo" *> $null } catch { $loi = $_.Exception.Message }
-        [pscustomobject]@{ loi = $loi; kq = @($Script:KetQua) }
+        # Keep product events before independent direct-after probes.
+        $vCalls = @(); $vAfter = $null
+        if ($CheDo -like 'venv-cai-*') {
+            if (Test-Path -LiteralPath $env:CNCC_VENV_LOG) { $vCalls = @(Get-Content -LiteralPath $env:CNCC_VENV_LOG | ConvertFrom-Json) }
+            $vexe = "$g/venv/Scripts/python.exe"
+            $vAfter = [pscustomobject]@{
+                python = Get-PhienBanLenh $vexe @('--version') 'Python\s+(\S+)'
+                yaml = Get-PhienBanGoi $vexe 'PyYAML'
+                schema = Get-PhienBanGoi $vexe 'jsonschema'
+            }
+        }
+        [pscustomobject]@{ loi = $loi; kq = @($Script:KetQua); venv_calls = $vCalls; venv_after = $vAfter }
     } finally {
         $env:ProgramFiles = $cu.pf; $Script:ThuMucCongCu = $cu.tools; $Script:NlmVenv = $cu.nlm; $Script:VenvKho = $cu.venv; $Script:HomeCommander = $cu.home
-        Remove-Item Env:CNCC_CHE_DO -ErrorAction SilentlyContinue
+        Remove-Item Env:CNCC_CHE_DO, Env:CNCC_VENV_LOG -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
@@ -387,6 +422,43 @@ if (-not $IsWindows) {
     Ca 'nd_chikiem_venv_kho_khong_khoi_chay_la_loi' {
         $k = Invoke-NguoiDungGia 'venv-python-khong-chay' -Kiem
         -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_venv_cai_doi_chung_hau_dieu_khop' {
+        $k = Invoke-NguoiDungGia 'venv-cai-control'
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'giu' -and
+            $k.venv_after.python -eq '3.12.7' -and $k.venv_after.yaml -eq '6.0.3' -and $k.venv_after.schema -eq '4.25.1' -and
+            @($k.kq | Where-Object hanh_dong -eq 'loi').Count -eq 0
+    }
+    Ca 'nd_venv_cai_pip_rc0_python_sau_rc9_phai_loi' {
+        $k = Invoke-NguoiDungGia 'venv-cai-python-rc9'
+        $pip = @($k.venv_calls | Where-Object { $_.argv[0] -eq '-m' })
+        -not $k.loi -and $k.kq.Count -eq 11 -and $pip.Count -eq 1 -and $pip[0].rc -eq 0 -and
+            -not $k.venv_after.python -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_venv_cai_pip_rc0_ghim_sau_lech_phai_loi' {
+        $k = Invoke-NguoiDungGia 'venv-cai-goi-lech'
+        $pip = @($k.venv_calls | Where-Object { $_.argv[0] -eq '-m' })
+        -not $k.loi -and $k.kq.Count -eq 11 -and $pip.Count -eq 1 -and $pip[0].rc -eq 0 -and
+            $k.venv_after.yaml -eq '0.0.1' -and $k.venv_after.schema -eq '0.0.1' -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_venv_cai_pip_rc8_phai_loi' {
+        $k = Invoke-NguoiDungGia 'venv-cai-pip-rc8'
+        $pip = @($k.venv_calls | Where-Object { $_.argv[0] -eq '-m' })
+        -not $k.loi -and $k.kq.Count -eq 11 -and $pip.Count -eq 1 -and $pip[0].rc -eq 8 -and
+            (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_cai_rc0_khong_len_ban_moi_nhat_la_loi' {
+        # Trình quản lý gói báo bản mới nhất 9.9.9 mà sau lệnh cài rc=0 vẫn đo được bản cũ ⇒ lệnh cài không làm gì ⇒ `loi`.
+        $k = Invoke-NguoiDungGia 'dich-moi-hon'
+        -not $k.loi -and $k.kq.Count -eq 11 -and
+            @('pip', 'claude', 'codex', 'nlm' | Where-Object { (& $hang $k $_)[0].hanh_dong -ne 'loi' }).Count -eq 0 -and
+            @('PyYAML', 'jsonschema' | Where-Object { (& $hang $k $_)[0].hanh_dong -eq 'loi' }).Count -eq 0
+    }
+    Ca 'nd_tra_ban_moi_nhat_rc_khac_0_la_loi' {
+        # npm view / pip index in đúng bản rồi thoát 4 ⇒ không có đích tin được ⇒ `loi`, kể cả khi bản sau cài trùng chuỗi in ra.
+        $k = Invoke-NguoiDungGia 'dich-rc-hong'
+        -not $k.loi -and $k.kq.Count -eq 11 -and
+            @('pip', 'claude', 'codex', 'nlm' | Where-Object { (& $hang $k $_)[0].hanh_dong -ne 'loi' }).Count -eq 0
     }
     Ca 'nd_chikiem_doi_chung_khong_loi' {
         # Đối chứng: chốt ChiKiem mới không được biến lượt kiểm lành thành lỗi.

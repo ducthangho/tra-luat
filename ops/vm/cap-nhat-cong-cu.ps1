@@ -279,6 +279,19 @@ function Get-PhienBanGoi([string]$Py, [string]$Goi) {
     if ($v -match '^\d+(\.[0-9A-Za-z]+)*$') { return $v } else { return $null }
 }
 
+function Get-BanMoiNhat([string]$Kieu, [string]$Lenh, [string]$Goi) {
+    # Đích của bước nâng `@latest`/`--upgrade`: bản mới nhất theo CHÍNH trình quản lý gói (npm view / pip index). rc=0 + khớp
+    # mẫu, không thì $null. Không có đích thì không có cách phân biệt "đã lên bản mới" với "lệnh cài rc=0 mà chẳng cài gì"
+    # (vd PIP_DRY_RUN) — cùng lớp với hậu điều venv của cross-review PR #1065 lượt 9.
+    try {
+        if ($Kieu -eq 'npm') { $o = (& $Lenh view $Goi version 2>$null | Out-String); $rc = $LASTEXITCODE; $mau = '^\s*(\d+\.\d+\.\d+\S*)\s*$' }
+        else { $o = (& $Lenh -m pip index versions $Goi --disable-pip-version-check 2>$null | Out-String); $rc = $LASTEXITCODE; $mau = "(?m)^$([regex]::Escape($Goi))\s+\((\S+)\)" }
+    } catch { return $null }
+    if ($rc -ne 0) { return $null }
+    $m = [regex]::Match($o, $mau)
+    if ($m.Success) { return $m.Groups[1].Value } else { return $null }
+}
+
 function Get-Release([string]$Repo, [string]$Tag = '') {
     $u = if ($Tag) { "https://api.github.com/repos/$Repo/releases/tags/$Tag" } else { "https://api.github.com/repos/$Repo/releases/latest" }
     return Invoke-RestMethod -Headers $Script:GhHeader -Uri $u -TimeoutSec 60
@@ -391,7 +404,8 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         $o = & $py -m pip install --quiet --disable-pip-version-check --upgrade $spec 2>&1
         $rc = $LASTEXITCODE
         $sau = Get-PhienBanGoi $py $goi
-        if ($rc -ne 0 -or -not $sau -or ($goi -ne 'pip' -and $sau -ne $ghim.$goi)) { Add-KetQua $goi "$truoc" "$sau" 'loi' "pip rc=$rc $($o | Select-Object -Last 1)" }
+        $dich = if ($goi -eq 'pip') { Get-BanMoiNhat 'pip' $py 'pip' } else { $ghim.$goi }
+        if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -ne $dich) { Add-KetQua $goi "$truoc" "$sau" 'loi' "pip rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
         else { Add-KetQua $goi "$truoc" "$sau" $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) }
       } catch { Add-KetQua $goi '' '' 'loi' $_.Exception.Message }
     }
@@ -406,7 +420,15 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         else {
             try {
                 $o = & $vpy -m pip install --quiet --disable-pip-version-check -r $yeuCau "PyYAML==$($ghim.PyYAML)" "jsonschema==$($ghim.jsonschema)" 2>&1
-                if ($LASTEXITCODE -ne 0) { Add-KetQua 'venv-kho' '' '' 'loi' "$($o | Select-Object -Last 1)" } else { Add-KetQua 'venv-kho' '' '' 'giu' 'requirements.txt đã khớp' }
+                $rcPip = $LASTEXITCODE
+                # pip rc=0 chưa phải hậu điều (vd PIP_DRY_RUN=1 trả 0 mà không cài): ĐO lại interpreter và hai gói ghim
+                # (cross-review PR #1065 lượt 9). Đạt chỉ khi cả ba đo được và hai gói khớp ghim.
+                $vpb = Get-PhienBanLenh $vpy @('--version') 'Python\s+(\S+)'
+                $vy = Get-PhienBanGoi $vpy 'PyYAML'; $vj = Get-PhienBanGoi $vpy 'jsonschema'
+                if ($rcPip -ne 0) { Add-KetQua 'venv-kho' "$vpb" '' 'loi' "pip rc=$rcPip $($o | Select-Object -Last 1)" }
+                elseif (-not $vpb -or $vy -ne $ghim.PyYAML -or $vj -ne $ghim.jsonschema) {
+                    Add-KetQua 'venv-kho' "$vpb" '' 'loi' "sau pip: python='$vpb' PyYAML='$vy' (ghim $($ghim.PyYAML)) jsonschema='$vj' (ghim $($ghim.jsonschema))"
+                } else { Add-KetQua 'venv-kho' $vpb $vpb 'giu' "requirements.txt đã cài; PyYAML $vy, jsonschema $vj khớp ghim" }
             } catch { Add-KetQua 'venv-kho' '' '' 'loi' $_.Exception.Message }
         }
     } else { Add-KetQua 'venv-kho' '' '' 'loi' "không có $vpy hoặc requirements.txt" }
@@ -423,7 +445,8 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         try { $o = & $npm install -g --prefix $npmPrefix "$($p[1])@latest" --no-fund --no-audit 2>&1; $rc = $LASTEXITCODE }
         catch { Add-KetQua $p[0] "$truoc" '' 'loi' "không chạy được npm: $($_.Exception.Message)"; continue }
         $sau = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
-        if ($rc -ne 0 -or -not $sau) { Add-KetQua $p[0] "$truoc" "$sau" 'loi' "npm rc=$rc $($o | Select-Object -Last 1)" }
+        $dich = Get-BanMoiNhat 'npm' $npm $p[1]
+        if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -ne $dich) { Add-KetQua $p[0] "$truoc" "$sau" 'loi' "npm rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
         else { Add-KetQua $p[0] "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' }) }
     }
 
@@ -459,7 +482,9 @@ function Invoke-TangNguoiDung([string]$GocKho) {
                 $rcSt = $LASTEXITCODE
                 $cheDo = ($raSt | ConvertFrom-Json).mode
             } catch { $loiSt = $_.Exception.Message } finally { $env:USERPROFILE, $env:HOME = $hTruoc }
+            $goiNlm = Get-PhienBanGoi $nlmPy 'notebooklm-mcp-cli'; $dich = Get-BanMoiNhat 'pip' $nlmPy 'notebooklm-mcp-cli'
             if ($rcPip -ne 0 -or -not $sau) { Add-KetQua 'nlm' "$truoc" "$sau" 'loi' "pip rc=$rcPip $($o | Select-Object -Last 1)" }
+            elseif (-not $dich -or $goiNlm -ne $dich) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "gói sau cài '$goiNlm', bản mới nhất '$dich'" }
             elseif ($rcSt -ne 0) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm auth storage status rc=$rcSt $loiSt" }
             elseif ($cheDo -ne 'file') { Add-KetQua 'nlm' "$truoc" $sau 'loi' "chế độ lưu credential = '$cheDo' (cần 'file' cho nlm-auth-stage)" }
             else { Add-KetQua 'nlm' "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) 'storage=file' }

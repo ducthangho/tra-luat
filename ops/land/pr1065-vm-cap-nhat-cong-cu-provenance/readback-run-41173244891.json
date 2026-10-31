@@ -8,8 +8,8 @@
   "display_title": "Merge PR #1065: ops/vm — script cài/nâng cấp công cụ cho VM Windows t…",
   "run_number": 3606,
   "event": "push",
-  "status": "pending",
-  "conclusion": null,
+  "status": "completed",
+  "conclusion": "success",
   "workflow_id": 309682866,
   "check_suite_id": 111609980198,
   "check_suite_node_id": "CS_kwDOTNeRjc8AAAAZ_HklJg",
@@ -19,7 +19,7 @@
 
   ],
   "created_at": "2026-10-31T05:36:00Z",
-  "updated_at": "2026-10-31T05:36:01Z",
+  "updated_at": "2026-10-31T07:03:35Z",
   "actor": {
     "login": "ducthangho",
     "id": 12748935,

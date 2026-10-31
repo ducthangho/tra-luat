@@ -78,8 +78,8 @@ trang_thai_packet:
       nhanh ghi so, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-3DFB973
-      trang_thai: CHO_DIEN
-      mo_ta: 'Run 41173244891 (push master, ci.yml) — xem post_merge_checks[0].'
+      trang_thai: da_dong
+      mo_ta: 'Run 41173244891 (push master, ci.yml) completed/success — xem post_merge_checks[0].'
     - id: MOC-WORKFLOW-DEFINITION
       trang_thai: da_dong
       mo_ta: >-
@@ -138,8 +138,12 @@ pre_merge_checks:
 post_merge_checks:
   - ten: gate ci.yml tren merge 3dfb973 (push master)
     run_id: 41173244891
-    trang_thai: CHO_DIEN
-    do_duoc: 'pending luc soan (readback-runs-3dfb973.json).'
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41173244891.json: event push, path .github/workflows/ci.yml, head_sha 3dfb973,
+      run_attempt 1, status completed, conclusion success (05:36:00Z -> 07:03:35Z). readback-jobs-41173244891.json
+      (filter=all): 23 job, 23 success, ca 23 nhan ubuntu-latest, khong job nao runner_id 0. Windows KHONG do o lan chay
+      nay. Day chi la moc RUN; Checkout va Gate output van not_measured (MOC-CHECKOUT-VA-GATE-OUTPUT).
 
 van_hanh_tren_vm:
   trang_thai: thuat_lai

@@ -79,6 +79,11 @@ lease:
   write_set_ngoai_le: >-
     loi_khai_co_neo — executor ghi: hien vat luot 1-7 dat duoi ops/handoff/wp1021-g1-claude/ (thu muc) trong khi lease khai
     ops/handoff/wp1021-g1-claude.md (tep); lam theo yeu cau cua phien dieu phoi, chi tren nhanh lease, khong vao master.
+  do_lai_sau_han_20261031T0811Z: >-
+    measured — ai-dang-giu-sau-rut-han/luc-do.txt (do 2026-10-31T08:11:23Z, SAU han moi 08:10Z): ls-remote 717 ten, for-each-ref 720 ten
+    (thieu 0, thua 3); ai-dang-giu ops/bien_nhan_v2.py va ops/bien_nhan_v2_test.py: NGƯỜI_GIỮ 0, rc=0; wp1021-r2-g1-claude HẾT_HẠN.
+    Lan do 08:11:05Z truoc do CHAN [12] (nhanh master cuc bo tut sau), chua bang git branch -f roi do lai. Khoi nay THEM SAU,
+    co moc rieng; cau 'CHUA NHA tai moc ghi so dau' o tren giu nguyen.
 
 trang_thai_packet:
   merged: true
@@ -90,7 +95,7 @@ trang_thai_packet:
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA c8ff9ed: CHUA DAT — run 41182092305 pending luc ghi so, va moc Checkout / Workflow
     definition / Gate output cua §10.2.2 khong do duoc trong phien web; (2) lease: rut han ve 08:10Z, CHUA do ai-dang-giu sau han tai moc
-    ghi so dau; (3) bookkeeping: ho so nay + 10 bien nhan review; (4) review neo head da review 356a27e: loi goi 9 va 10 approve 0 P0-P3
+    ghi so dau; do lai 08:11:23Z NGƯỜI_GIỮ 0 — xem lease.do_lai_sau_han_20261031T0811Z; (3) bookkeeping: ho so nay + 10 bien nhan review; (4) review neo head da review 356a27e: loi goi 9 va 10 approve 0 P0-P3
     DAT, connector sach tren a16932a; (5) uy quyen land neo SHA: CHUA DAT — chi thi bang loi trong phien, khong neu SHA; (6) muc tieu
     packet: cong chon bien nhan khong phan biet hoa thuong tren moi nen vao master DAT; (7) reviewer assurance §8.1: xem assurance_81.
     Lech da duoc chu kho chap nhan khi duyet merge: tran Codex 10/9; Windows local 97/98 (c91 do san).

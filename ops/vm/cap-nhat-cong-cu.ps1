@@ -42,6 +42,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+# Ép UTF-8 TRƯỚC khi in: console VM không phải UTF-8 nên dòng tiếng Việt ra thành `b?n kh�ng` (đo 31-10-2026).
+try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
+$OutputEncoding = [Text.UTF8Encoding]::new($false)
 
 $Script:TenTacVuHeThong = 'TraLuat-CapNhatCongCu-HeThong'
 $Script:TenTacVuNguoiDung = 'TraLuat-CapNhatCongCu-NguoiDung'

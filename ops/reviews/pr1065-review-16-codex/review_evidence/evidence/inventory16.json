@@ -1,0 +1,601 @@
+{
+  "parse_errors": 0,
+  "add_count": 50,
+  "nonloi_count": 19,
+  "nonloi": [
+    {
+      "line": 366,
+      "function": "Update-CongCuZip",
+      "action": "'giu'",
+      "command": "Add-KetQua $Ten $truoc $truoc 'giu'"
+    },
+    {
+      "line": 368,
+      "function": "Update-CongCuZip",
+      "action": "'can_cap_nhat'",
+      "command": "Add-KetQua $Ten \"$truoc\" $moi 'can_cap_nhat'"
+    },
+    {
+      "line": 383,
+      "function": "Update-CongCuZip",
+      "action": "$(if ($truoc) { 'nang_cap' } else { 'cai_moi' })",
+      "command": "Add-KetQua $Ten \"$truoc\" $sau $(if ($truoc) { 'nang_cap' } else { 'cai_moi' })"
+    },
+    {
+      "line": 401,
+      "function": "Invoke-TangNguoiDung",
+      "action": "'giu'",
+      "command": "Add-KetQua 'python' $pyTruoc $pyTruoc 'giu' 'bản Python không tự nâng (đổi minor phá venv) — chỉ báo'"
+    },
+    {
+      "line": 416,
+      "function": "Invoke-TangNguoiDung",
+      "action": "'kiem'",
+      "command": "Add-KetQua $goi \"$truoc\" $(if ($goi -eq 'pip') { 'moi nhat' } else { $ghim.$goi }) 'kiem'"
+    },
+    {
+      "line": 424,
+      "function": "Invoke-TangNguoiDung",
+      "action": "$(if ($truoc -ceq $sau) { 'giu' } else { 'nang_cap' })",
+      "command": "Add-KetQua $goi \"$truoc\" \"$sau\" $(if ($truoc -ceq $sau) { 'giu' } else { 'nang_cap' })"
+    },
+    {
+      "line": 433,
+      "function": "Invoke-TangNguoiDung",
+      "action": "'kiem'",
+      "command": "Add-KetQua 'venv-kho' $vpb '' 'kiem' $VenvKho"
+    },
+    {
+      "line": 446,
+      "function": "Invoke-TangNguoiDung",
+      "action": "'giu'",
+      "command": "Add-KetQua 'venv-kho' $vpb $vpb 'giu' \"requirements.txt đã cài; PyYAML $vy, jsonschema $vj khớp ghim\""
+    },
+    {
+      "line": 458,
+      "function": "Invoke-TangNguoiDung",
+      "action": "'kiem'",
+      "command": "Add-KetQua $p[0] \"$truoc\" '' 'kiem'"
+    },
+    {
+      "line": 467,
+      "function": "Invoke-TangNguoiDung",
+      "action": "$(if ($truoc -ceq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' })",
+      "command": "Add-KetQua $p[0] \"$truoc\" $sau $(if ($truoc -ceq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' })"
+    },
+    {
+      "line": 485,
+      "function": "Invoke-TangNguoiDung",
+      "action": "'kiem'",
+      "command": "Add-KetQua 'nlm' \"$truoc\" '' 'kiem'"
+    },
+    {
+      "line": 507,
+      "function": "Invoke-TangNguoiDung",
+      "action": "$(if ($truoc -ceq $sau) { 'giu' } else { 'nang_cap' })",
+      "command": "Add-KetQua 'nlm' \"$truoc\" $sau $(if ($truoc -ceq $sau) { 'giu' } else { 'nang_cap' }) 'storage=file'"
+    },
+    {
+      "line": 544,
+      "function": "Invoke-TangHeThong",
+      "action": "'can_quyet_dinh'",
+      "command": "Add-KetQua 'node-major' \"$truoc\" $chon.moi_nhat 'can_quyet_dinh' 'có LTS major mới — KHÔNG tự nâng; chủ kho quyết định'"
+    },
+    {
+      "line": 546,
+      "function": "Invoke-TangHeThong",
+      "action": "'can_quyet_dinh'",
+      "command": "Add-KetQua $c.ten \"$truoc\" '' 'can_quyet_dinh' 'major đang cài không còn bản LTS nào'"
+    },
+    {
+      "line": 560,
+      "function": "Invoke-TangHeThong",
+      "action": "'giu'",
+      "command": "Add-KetQua $c.ten $truoc $truoc 'giu'"
+    },
+    {
+      "line": 562,
+      "function": "Invoke-TangHeThong",
+      "action": "'can_cap_nhat'",
+      "command": "Add-KetQua $c.ten \"$truoc\" $moi 'can_cap_nhat'"
+    },
+    {
+      "line": 576,
+      "function": "Invoke-TangHeThong",
+      "action": "'can_khoi_dong_lai'",
+      "command": "Add-KetQua $c.ten \"$truoc\" \"$sau\" 'can_khoi_dong_lai' \"đã cài $moi, có hiệu lực sau khởi động lại\""
+    },
+    {
+      "line": 578,
+      "function": "Invoke-TangHeThong",
+      "action": "$(if ($truoc) { 'nang_cap' } else { 'cai_moi' })",
+      "command": "Add-KetQua $c.ten \"$truoc\" $sau $(if ($truoc) { 'nang_cap' } else { 'cai_moi' })"
+    },
+    {
+      "line": 590,
+      "function": "Invoke-TangHeThong",
+      "action": "'khoi_dong_lai'",
+      "command": "Add-KetQua 'commander' '' 'Running' 'khoi_dong_lai' \"đã cài lại Node ⇒ khởi động lại $TacVuCommander\""
+    }
+  ],
+  "case_count": 119,
+  "unique_case_names": 119,
+  "cases": [
+    {
+      "line": 18,
+      "name": "phien_ban_git_windows"
+    },
+    {
+      "line": 19,
+      "name": "phien_ban_khong_doc_duoc_la_null"
+    },
+    {
+      "line": 20,
+      "name": "phien_ban_hau_to_la_null"
+    },
+    {
+      "line": 21,
+      "name": "cung_dinh_danh_la_cung_chuoi"
+    },
+    {
+      "line": 25,
+      "name": "so_sanh_so_hoc_khong_chuoi"
+    },
+    {
+      "line": 26,
+      "name": "so_sanh_khong_biet_la_null"
+    },
+    {
+      "line": 33,
+      "name": "chon_dung_mot_asset"
+    },
+    {
+      "line": 34,
+      "name": "khong_khop_thi_nem"
+    },
+    {
+      "line": 35,
+      "name": "khop_nhieu_thi_nem"
+    },
+    {
+      "line": 40,
+      "name": "tim_bam_dung_ten"
+    },
+    {
+      "line": 41,
+      "name": "tim_bam_co_tien_to_duong_dan"
+    },
+    {
+      "line": 42,
+      "name": "tim_bam_ten_vang_la_null"
+    },
+    {
+      "line": 43,
+      "name": "van_ban_tu_mang_byte"
+    },
+    {
+      "line": 44,
+      "name": "van_ban_tu_chuoi_giu_nguyen"
+    },
+    {
+      "line": 45,
+      "name": "bam_tu_digest_khong_can_mang"
+    },
+    {
+      "line": 46,
+      "name": "khong_co_nguon_bam_la_null"
+    },
+    {
+      "line": 57,
+      "name": "bam_khop_giu_tep"
+    },
+    {
+      "line": 58,
+      "name": "bam_khop_khong_phan_biet_hoa"
+    },
+    {
+      "line": 59,
+      "name": "thieu_bam_thi_tu_choi_va_giu_tep"
+    },
+    {
+      "line": 60,
+      "name": "bam_lech_thi_xoa_tep"
+    },
+    {
+      "line": 67,
+      "name": "node_cung_major"
+    },
+    {
+      "line": 68,
+      "name": "node_bo_qua_ban_khong_lts"
+    },
+    {
+      "line": 69,
+      "name": "node_chua_cai_lay_moi_nhat"
+    },
+    {
+      "line": 70,
+      "name": "node_major_cu_van_co_lts"
+    },
+    {
+      "line": 73,
+      "name": "path_them_vao_dau"
+    },
+    {
+      "line": 74,
+      "name": "path_khong_nhan_doi"
+    },
+    {
+      "line": 75,
+      "name": "path_rong"
+    },
+    {
+      "line": 79,
+      "name": "sddl_noi_cuoi_khi_khong_co_sacl"
+    },
+    {
+      "line": 80,
+      "name": "sddl_chen_truoc_sacl"
+    },
+    {
+      "line": 81,
+      "name": "sddl_khong_nhan_doi"
+    },
+    {
+      "line": 82,
+      "name": "sddl_khong_dacl_thi_nem"
+    },
+    {
+      "line": 85,
+      "name": "doc_ghim_tu_ban_ke_that"
+    },
+    {
+      "line": 94,
+      "name": "ban_ke_thieu_ghim_thi_nem"
+    },
+    {
+      "line": 102,
+      "name": "scheduledtask_co_erroraction_stop"
+    },
+    {
+      "line": 106,
+      "name": "dang_ky_loi_co_ma_thoat_rieng"
+    },
+    {
+      "line": 109,
+      "name": "co_tep_khong_doc_phien_ban_thi_khong_cai"
+    },
+    {
+      "line": 114,
+      "name": "acl_chi_admin_ghi"
+    },
+    {
+      "line": 124,
+      "name": "doi_so_tac_vu_mang_du_cau_hinh"
+    },
+    {
+      "line": 131,
+      "name": "reparse_trong_cay_bi_phat_hien"
+    },
+    {
+      "line": 146,
+      "name": "assert_khong_reparse_nem_khi_co_lien_ket"
+    },
+    {
+      "line": 167,
+      "name": "dang_ky_chan_reparse_thu_muc_cai_dat"
+    },
+    {
+      "line": 170,
+      "name": "icacls_rc_khac_0_thi_nem"
+    },
+    {
+      "line": 183,
+      "name": "phien_ban_lenh_rc_khac_0_la_null"
+    },
+    {
+      "line": 195,
+      "name": "reparse_o_to_tien_bi_phat_hien"
+    },
+    {
+      "line": 207,
+      "name": "acl_mat_na_so_va_khong_nhan_dien"
+    },
+    {
+      "line": 215,
+      "name": "doi_so_tac_vu_di_mot_vong_qua_tien_trinh_that"
+    },
+    {
+      "line": 230,
+      "name": "dang_ky_kem_chikiem_hoac_nhatky_thoat_2"
+    },
+    {
+      "line": 235,
+      "name": "thu_muc_tai_bo_thua_ke"
+    },
+    {
+      "line": 241,
+      "name": "ma_thoat_2_pham_vi_sai"
+    },
+    {
+      "line": 251,
+      "name": "napham_khong_can_programfiles"
+    },
+    {
+      "line": 255,
+      "name": "khong_programfiles_van_toi_chot"
+    },
+    {
+      "line": 260,
+      "name": "khong_phai_windows_thoat_4"
+    },
+    {
+      "line": 262,
+      "name": "sai_may_thoat_5_truoc_moi_thay_doi"
+    },
+    {
+      "line": 269,
+      "name": "he_thong_khong_admin_thoat_3"
+    },
+    {
+      "line": 270,
+      "name": "dang_ky_lich_khong_admin_thoat_3"
+    },
+    {
+      "line": 272,
+      "name": "admin_ca_ma_thoat_3_khong_do_duoc"
+    },
+    {
+      "line": 407,
+      "name": "nd_doi_chung_thanh_cong"
+    },
+    {
+      "line": 411,
+      "name": "nd_npm_bien_mat_ghi_loi_va_chay_tiep"
+    },
+    {
+      "line": 416,
+      "name": "nd_nlm_status_rc_khac_0_la_loi"
+    },
+    {
+      "line": 420,
+      "name": "nd_python_version_hong_la_loi_khong_phai_giu"
+    },
+    {
+      "line": 424,
+      "name": "nd_cli_version_hong_phai_ghi_loi"
+    },
+    {
+      "line": 430,
+      "name": "nd_nlm_version_rc_khac_0_phai_ghi_loi"
+    },
+    {
+      "line": 435,
+      "name": "nd_chikiem_nlm_thieu_python_phai_ghi_loi"
+    },
+    {
+      "line": 439,
+      "name": "nd_chikiem_nlm_thieu_venv_phai_ghi_loi"
+    },
+    {
+      "line": 443,
+      "name": "nd_cai_that_nlm_thieu_venv_cung_la_loi"
+    },
+    {
+      "line": 448,
+      "name": "nd_venv_kho_thieu_la_loi"
+    },
+    {
+      "line": 455,
+      "name": "nd_chikiem_venv_kho_runtime_hong_la_loi"
+    },
+    {
+      "line": 459,
+      "name": "nd_chikiem_venv_kho_khong_khoi_chay_la_loi"
+    },
+    {
+      "line": 463,
+      "name": "nd_venv_cai_doi_chung_hau_dieu_khop"
+    },
+    {
+      "line": 469,
+      "name": "nd_venv_cai_pip_rc0_python_sau_rc9_phai_loi"
+    },
+    {
+      "line": 475,
+      "name": "nd_venv_cai_pip_rc0_ghim_sau_lech_phai_loi"
+    },
+    {
+      "line": 481,
+      "name": "nd_venv_cai_pip_rc8_phai_loi"
+    },
+    {
+      "line": 487,
+      "name": "nd_cli_dinh_danh_khac_hoa_thuong_khong_duoc_dat"
+    },
+    {
+      "line": 492,
+      "name": "nd_cli_hau_to_khong_duoc_coi_la_stable_dich"
+    },
+    {
+      "line": 497,
+      "name": "nd_portable_hau_to_khong_duoc_coi_la_stable_dich"
+    },
+    {
+      "line": 502,
+      "name": "nd_nlm_cli_sau_phai_bang_dich_khong_chi_metadata"
+    },
+    {
+      "line": 507,
+      "name": "nd_cai_rc0_khong_len_ban_moi_nhat_la_loi"
+    },
+    {
+      "line": 514,
+      "name": "nd_tra_ban_moi_nhat_rc_khac_0_la_loi"
+    },
+    {
+      "line": 520,
+      "name": "nd_chikiem_doi_chung_khong_loi"
+    },
+    {
+      "line": 525,
+      "name": "nd_chikiem_cli_version_hong_phai_ghi_loi"
+    },
+    {
+      "line": 530,
+      "name": "nd_chikiem_nlm_version_hong_phai_ghi_loi"
+    },
+    {
+      "line": 534,
+      "name": "nd_metadata_rc_khac_0_phai_ghi_loi"
+    },
+    {
+      "line": 539,
+      "name": "nd_chikiem_metadata_rc_khac_0_phai_ghi_loi"
+    },
+    {
+      "line": 569,
+      "name": "zip_chikiem_phien_ban_cu_do_duoc_van_bao_cap_nhat"
+    },
+    {
+      "line": 573,
+      "name": "zip_chikiem_thieu_exe_phai_ghi_loi"
+    },
+    {
+      "line": 577,
+      "name": "zip_chikiem_native_rc_khac_0_phai_ghi_loi"
+    },
+    {
+      "line": 630,
+      "name": "dich_he_thong_doi_chung_bang_dich"
+    },
+    {
+      "line": 634,
+      "name": "dich_he_thong_zero_dau_khong_phai_dinh_danh_dich"
+    },
+    {
+      "line": 638,
+      "name": "node_hau_to_khong_duoc_tu_chon_major_moi"
+    },
+    {
+      "line": 648,
+      "name": "dich_he_thong_hau_to_khong_duoc_coi_la_stable_dich"
+    },
+    {
+      "line": 652,
+      "name": "dich_he_thong_ban_cao_hon_khong_duoc_giu_dat"
+    },
+    {
+      "line": 656,
+      "name": "dich_zip_doi_chung_bang_dich"
+    },
+    {
+      "line": 660,
+      "name": "dich_zip_ban_cao_hon_khong_duoc_giu_dat"
+    },
+    {
+      "line": 695,
+      "name": "zip_dinh_danh_doi_chung_dung_dich"
+    },
+    {
+      "line": 699,
+      "name": "zip_zero_dau_truoc_khong_duoc_giu_dat"
+    },
+    {
+      "line": 706,
+      "name": "zip_zero_dau_sau_khong_duoc_bao_nang_cap"
+    },
+    {
+      "line": 769,
+      "name": "he_thong_hau_cai_dinh_danh_dich_doi_chung"
+    },
+    {
+      "line": 775,
+      "name": "he_thong_hau_cai_zero_dau_phai_loi"
+    },
+    {
+      "line": 781,
+      "name": "he_thong_hau_cai_git_windows_marker_phai_loi"
+    },
+    {
+      "line": 827,
+      "name": "zip_ghim_tag_dung_doi_chung"
+    },
+    {
+      "line": 833,
+      "name": "zip_ghim_response_tag_lech_khong_duoc_nang_cap_dat"
+    },
+    {
+      "line": 838,
+      "name": "zip_ghim_response_tag_lech_khong_duoc_giu_dat"
+    },
+    {
+      "line": 846,
+      "name": "main_co_luoi_cuoi_ghi_nhat_ky"
+    },
+    {
+      "line": 860,
+      "name": "save_that_su_kiem_bam_va_xoa_tep_lech"
+    },
+    {
+      "line": 865,
+      "name": "sidecar_ten_khac_bi_tu_choi"
+    },
+    {
+      "line": 866,
+      "name": "sidecar_bam_tran_duoc_nhan"
+    },
+    {
+      "line": 867,
+      "name": "sidecar_chon_dung_dong_ten"
+    },
+    {
+      "line": 895,
+      "name": "node_co_tep_khong_doc_phien_ban_khong_cai"
+    },
+    {
+      "line": 900,
+      "name": "node_cai_hong_van_dung_lai_commander"
+    },
+    {
+      "line": 906,
+      "name": "he_thong_chikiem_thieu_cong_cu_la_loi"
+    },
+    {
+      "line": 1028,
+      "name": "dk_chay_icacls_chi_cham_thu_muc_cai_dat"
+    },
+    {
+      "line": 1032,
+      "name": "dk_chay_icacls_dung_owner_va_grant"
+    },
+    {
+      "line": 1042,
+      "name": "dk_chay_chep_du_ba_tep"
+    },
+    {
+      "line": 1043,
+      "name": "dk_chay_do_acl_moi_tep_sau_khi_chep"
+    },
+    {
+      "line": 1050,
+      "name": "dk_chay_doi_so_tac_vu_day_du"
+    },
+    {
+      "line": 1059,
+      "name": "dk_chay_tu_choi_to_tien_cai_dat_la_lien_ket"
+    },
+    {
+      "line": 1063,
+      "name": "dk_chay_tu_choi_cai_dat_la_lien_ket"
+    },
+    {
+      "line": 1067,
+      "name": "dk_chay_tu_choi_acl_sai"
+    },
+    {
+      "line": 1068,
+      "name": "dk_chay_tu_choi_bam_lech"
+    }
+  ]
+}

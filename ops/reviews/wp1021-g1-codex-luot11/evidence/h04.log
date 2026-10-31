@@ -1,0 +1,57 @@
+C1a: files=['y.receipt.yaml', 'x.RECEIPT.YAML'], directory=None, flags=()
+rc=1
+STDOUT:
+
+bien_nhan_v2: 0 ĐẠT v2 · 0/11 miễn trừ legacy (băm khớp) · 0 NỢ đóng băng · 2 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 2
+câu lịch sử: nợ L-REVIEW 0 · L-ANCESTRY 0 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+STDERR:
+  ĐỎ  x.RECEIPT.YAML: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — schema_version=None, đòi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`
+  ĐỎ  y.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — schema_version=None, đòi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`
+TỔNG: ĐỎ
+
+
+C1a-only-upper: files=['x.RECEIPT.YAML'], directory=None, flags=()
+rc=1
+STDOUT:
+
+bien_nhan_v2: 0 ĐẠT v2 · 0/11 miễn trừ legacy (băm khớp) · 0 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1
+câu lịch sử: nợ L-REVIEW 0 · L-ANCESTRY 0 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+STDERR:
+  ĐỎ  x.RECEIPT.YAML: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — schema_version=None, đòi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`
+TỔNG: ĐỎ
+
+
+C1b: files=['y.receipt.yaml', 'x.RECEIPT.YAML'], directory=None, flags=()
+rc=2
+STDOUT:
+STDERR:
+KHÔNG ĐO ĐƯỢC: x.RECEIPT.YAML: YAML hỏng (ParserError: while parsing a flow node
+expected the node content, but found '<stream end>'
+  in "<unicode string>", line 2, column 1:
+    
+    ^)
+
+
+sinh-no-upper: files=['x.RECEIPT.YAML'], directory=None, flags=('--sinh-no',)
+rc=0
+STDOUT:
+NO_DA_DO: dict[str, str] = {
+    "x.RECEIPT.YAML":
+        "d4eed209fa44e2eb45f5dbe26726d1985cef0bc7b9a2c923a8d7e8003662234e",
+}
+STDERR:
+# 1 tệp
+
+
+directory-upper: files=['y.receipt.yaml'], directory='X.RECEIPT.YAML', flags=()
+rc=2
+STDOUT:
+STDERR:
+KHÔNG ĐO ĐƯỢC: X.RECEIPT.YAML: không đọc được (IsADirectoryError: [Errno 21] Is a directory: '/tmp/rv1040-r11-fixture-x626i6xb/ops/reviews/X.RECEIPT.YAML')
+
+
+empty-receipts: files=['ignore.yaml'], directory=None, flags=()
+rc=2
+STDOUT:
+STDERR:
+KHÔNG ĐO ĐƯỢC: /tmp/rv1040-r11-fixture-iwv94dk2/ops/reviews không có tệp `*.receipt.yaml` nào (so đuôi không phân biệt hoa thường) — mốc neo đã đổi?

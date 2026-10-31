@@ -1,0 +1,466 @@
+[
+  {
+    "name": "m142_chon_bien_nhan_so_duoi_CHINH_XAC",
+    "row": [
+      "m142_chon_bien_nhan_so_duoi_CHINH_XAC",
+      "c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen",
+      true,
+      "giet_that",
+      "C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=1: 'òi 2 · thiếu/r",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen",
+        "status": "giet_that",
+        "detail": "C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m143_chon_bien_nhan_loc_is_file",
+    "row": [
+      "m143_chon_bien_nhan_loc_is_file",
+      "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback",
+      true,
+      "giet_that",
+      "đòi rc=2 nêu tệp hỏng, được rc=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback",
+        "status": "giet_that",
+        "detail": "đòi rc=2 nêu tệp hỏng, được rc=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\\nTỔNG: ĐỎ\\n'"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m144_sinh_no_loc_duoi_CHINH_XAC",
+    "row": [
+      "m144_sinh_no_loc_duoi_CHINH_XAC",
+      "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+      true,
+      "giet_that",
+      "sinh-no: đòi rc=0, khối nợ nêu x.RECEIPT.YAML, `# 1 tệp`; được rc=0: 'NO_DA_DO: ",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+        "status": "giet_that",
+        "detail": "sinh-no: đòi rc=0, khối nợ nêu x.RECEIPT.YAML, `# 1 tệp`; được rc=0: 'NO_DA_DO: dict[str, str] = {\\n}\\n# 0 tệp\\n'"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m145_bo_chon_khong_sap_xep",
+    "row": [
+      "m145_bo_chon_khong_sap_xep",
+      "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+      true,
+      "giet_that",
+      "thứ tự: đòi ['a.receipt.yaml', 'm.receipt.yaml', 'z.receipt.yaml'] khi iterdir t",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+        "status": "giet_that",
+        "detail": "thứ tự: đòi ['a.receipt.yaml', 'm.receipt.yaml', 'z.receipt.yaml'] khi iterdir trả ngược, được ['z.receipt.yaml', 'm.receipt.yaml', 'a.receipt.yaml']"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m146_bo_chon_bo_nhanh_thu_muc_vang",
+    "row": [
+      "m146_bo_chon_bo_nhanh_thu_muc_vang",
+      "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+      true,
+      "giet_that",
+      "vắng/sinh-no: đòi rc=0 `# 0 tệp`; được rc=2: \"KHÔNG ĐO ĐƯỢC: không liệt kê được ",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+        "status": "giet_that",
+        "detail": "vắng/sinh-no: đòi rc=0 `# 0 tệp`; được rc=2: \"KHÔNG ĐO ĐƯỢC: không liệt kê được /tmp/tmpkhje9h6n/ops/reviews (FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpkhje9h6n/ops/reviews')\\n\""
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m147_bo_chon_bo_bat_OSError",
+    "row": [
+      "m147_bo_chon_bo_bat_OSError",
+      "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+      true,
+      "giet_that",
+      "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021): '",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+        "status": "giet_that",
+        "detail": "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021): '/tmp/tmp35v_y6sl/ops/reviews' — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m148_bo_chon_hoi_is_dir_TRAN",
+    "row": [
+      "m148_bo_chon_hoi_is_dir_TRAN",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "['--sinh-no']: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "['--sinh-no']: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m149_kiem_guard_hoi_is_dir_TRAN",
+    "row": [
+      "m149_kiem_guard_hoi_is_dir_TRAN",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — ",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m150_hoi_trang_thai_bo_bat_OSError",
+    "row": [
+      "m150_hoi_trang_thai_bo_bat_OSError",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — ",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m151_kiem_hoi_git_TRAN",
+    "row": [
+      "m151_kiem_hoi_git_TRAN",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — ",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021) — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m152_bo_chon_bat_Exception",
+    "row": [
+      "m152_bo_chon_bat_Exception",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "lỗi lập trình ở iterdir [] bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, được k",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "lỗi lập trình ở iterdir [] bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, được không ngoại lệ"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m153_hoi_trang_thai_bat_Exception",
+    "row": [
+      "m153_hoi_trang_thai_bat_Exception",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "lỗi lập trình ở is_dir [] bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, được kh",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "lỗi lập trình ở is_dir [] bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, được không ngoại lệ"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m154_hoi_trang_thai_chi_bat_PermissionError",
+    "row": [
+      "m154_hoi_trang_thai_chi_bat_PermissionError",
+      "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+      true,
+      "giet_that",
+      "[]: CLI chết bằng OSError: [Errno 5] I/O error (tiêm, #1021) — đòi mã thoát, khô",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang",
+        "status": "giet_that",
+        "detail": "[]: CLI chết bằng OSError: [Errno 5] I/O error (tiêm, #1021) — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m155_bo_chon_chi_bat_PermissionError",
+    "row": [
+      "m155_bo_chon_chi_bat_PermissionError",
+      "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+      true,
+      "giet_that",
+      "[]: CLI chết bằng OSError: [Errno 5] I/O error (tiêm, #1021): '/tmp/tmp6v1jl5yq/",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE",
+        "status": "giet_that",
+        "detail": "[]: CLI chết bằng OSError: [Errno 5] I/O error (tiêm, #1021): '/tmp/tmp6v1jl5yq/ops/reviews' — đòi mã thoát, không traceback"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m156_B4_bo_chan_bien_dau_tep",
+    "row": [
+      "m156_B4_bo_chan_bien_dau_tep",
+      "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan",
+      true,
+      "giet_that",
+      "ix-trich-dan-sau-hai-dong: đòi rc=1, được 0: loi=[] chua=[]",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan",
+        "status": "giet_that",
+        "detail": "ix-trich-dan-sau-hai-dong: đòi rc=1, được 0: loi=[] chua=[]"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  },
+  {
+    "name": "m157_B4_trich_dan_bo_dong_sau",
+    "row": [
+      "m157_B4_trich_dan_bo_dong_sau",
+      "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan",
+      true,
+      "giet_that",
+      "ii-b-trich-dan-dong-sau: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: ver",
+      false,
+      true
+    ],
+    "events": [
+      {
+        "case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan",
+        "status": "giet_that",
+        "detail": "ii-b-trich-dan-dong-sau: đòi rc=0, được 1: loi=[\"[L-SURFACE] r.receipt.yaml: verdict khai execution surface ['codex_service'] khác `run.json` (`codex_cli`) mà thiếu caveat `VERDICT-KHAI-SAI-EXECUTION-SURFACE`\"] chua=[]"
+      },
+      {
+        "case": "c18_neo_git_DUNG_thi_qua",
+        "status": "qua",
+        "detail": null
+      },
+      {
+        "control": "c18_neo_git_DUNG_thi_qua",
+        "clean": true,
+        "detail": ""
+      }
+    ]
+  }
+]

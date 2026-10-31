@@ -14,6 +14,7 @@ chế điều §13 quy định — đừng gỡ.
 là cổng riêng) · §8 (mức review được chấp nhận) · §10.2 (các thuật ngữ trạng thái, không dùng thay
 nhau) · §12 (khi nào mission được đóng) · §13.1–§13.2 (fence, hạn quyền và ruleset)
 · §7 (receipt vận chuyển). Quy ước deploy của kho: `CLAUDE.md`.
+Packet áp `ADR-0060`: một lần duyệt và sổ sách trên Issue WP đọc ở ADR-0060 (M7, M8).
 
 Tệp này **không tóm tắt** những mục trên. Chốt cơ học:
 

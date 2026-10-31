@@ -1,0 +1,98 @@
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -340,6 +340,8 @@
+         Remove-Item -LiteralPath "$g/PF/tra-luat-ops" -Recurse -Force
+         New-Item -ItemType $lk -Path "$g/PF/tra-luat-ops" -Target "$g/nan-nhan" | Out-Null
+     }
++    $Script:AclGia = @{}
++    $Script:AclGia[(Join-Path $env:ProgramFiles 'tra-luat-ops')] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @(New-QuyenGia 'BUILTIN\Users' 'Modify') }
+     $Script:GiaCheDo = $CheDo; $Script:SuKien = [Collections.Generic.List[object]]::new()
+     $Script:HanhDong = [Collections.Generic.List[object]]::new(); $Script:TacVu = [Collections.Generic.List[object]]::new()
+     $Script:NlmVenv = 'D:\nlm venv\'; $Script:VenvKho = 'D:\repo venv\\'; $Script:HomeCommander = 'D:\profile rieng'
+@@ -358,27 +360,55 @@
+     $kq
+ }
+ try {
+-    function Invoke-Icacls([string[]]$DoiSo) { $Script:SuKien.Add([pscustomobject]@{ loai = 'icacls'; doi_so = $DoiSo }) }
++    # Mô hình chỉ hỗ trợ tập lệnh đăng ký này; đọc target, /T, SID owner và từng grant.
++    # Không mô phỏng NTFS/effective access; tệp mới chép kế thừa các grant OI/CI của thư mục.
++    function New-QuyenGia($Id, $Rights) { [pscustomobject]@{ IdentityReference = $Id; FileSystemRights = $Rights; AccessControlType = 'Allow' } }
++    function Get-DanhTinhGia([string]$Id) {
++        switch ($Id.TrimStart('*')) {
++            'S-1-5-18' { 'NT AUTHORITY\SYSTEM' }
++            'S-1-5-32-544' { 'BUILTIN\Administrators' }
++            'S-1-5-32-545' { 'BUILTIN\Users' }
++            default { $Id }
++        }
++    }
++    function Invoke-Icacls([string[]]$DoiSo) {
++        $Script:SuKien.Add([pscustomobject]@{ loai = 'icacls'; doi_so = $DoiSo })
++        $prefix = $DoiSo[0].TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
++        foreach ($key in @($Script:AclGia.Keys)) {
++            if ($key -ne $DoiSo[0] -and -not (($DoiSo -contains '/T') -and $key.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase))) { continue }
++            $node = $Script:AclGia[$key]
++            if ($DoiSo -contains '/setowner') {
++                $i = [array]::IndexOf($DoiSo, '/setowner'); $node.Owner = Get-DanhTinhGia $DoiSo[$i + 1]
++            }
++            if ($DoiSo -contains '/inheritance:r') { $node.Access = @() }
++            if ($DoiSo -contains '/grant:r') {
++                $i = [array]::IndexOf($DoiSo, '/grant:r') + 1
++                while ($i -lt $DoiSo.Count -and $DoiSo[$i] -notmatch '^/') {
++                    if ($DoiSo[$i] -notmatch '^([^:]+):(?:(?:\(OI\)|\(CI\))*)(F|RX|M)$') { throw "grant ngoài mô hình: $($DoiSo[$i])" }
++                    $id = Get-DanhTinhGia $Matches[1]
++                    $rights = switch ($Matches[2]) { 'F' { 'FullControl' } 'RX' { 'ReadAndExecute, Synchronize' } 'M' { 'Modify' } }
++                    $node.Access = @($node.Access | Where-Object IdentityReference -ne $id) + @(New-QuyenGia $id $rights)
++                    $i++
++                }
++            }
++        }
++    }
+     function Copy-Item { param($LiteralPath, $Destination, [switch]$Force)
+         $Script:SuKien.Add([pscustomobject]@{ loai = 'chep'; dich = "$Destination" })
+-        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force }
++        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
++        $parent = Split-Path -Parent $Destination
++        $Script:AclGia["$Destination"] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @($Script:AclGia[$parent].Access) } }
+     function Get-Acl { param($LiteralPath)
+         $p = "$LiteralPath"; $caiDat = $p.StartsWith($Script:ThuMucCaiDat)
+         if ($caiDat) { $Script:SuKien.Add([pscustomobject]@{ loai = 'do_acl'; dich = $p }) }
+-        $chu = if ($caiDat) { 'BUILTIN\Administrators' } else { "$env:COMPUTERNAME\tlcommander" }
+-        $quyen = 'ReadAndExecute, Synchronize'
+         if ($caiDat) {
+-            $ev = @($Script:SuKien)
+-            $chep = -1; $own = -1; $reset = -1
+-            for ($i = 0; $i -lt $ev.Count; $i++) {
+-                if ($ev[$i].loai -eq 'chep' -and $ev[$i].dich -eq $p) { $chep = $i }
+-                if ($ev[$i].loai -eq 'icacls' -and $ev[$i].doi_so -contains '/setowner') { $own = $i }
+-                if ($ev[$i].loai -eq 'icacls' -and $ev[$i].doi_so -contains '/inheritance:r') { $reset = $i }
+-            }
+-            if ($chep -gt $own) { $chu = "$env:COMPUTERNAME\tladmin" }
+-            if ($reset -lt 0 -or $Script:GiaCheDo -eq 'acl-sai') { $quyen = 'Modify' }
++            $node = $Script:AclGia[$p]
++            if (-not $node) { throw "thiếu trạng thái ACL giả: $p" }
++            $access = @($node.Access)
++            if ($Script:GiaCheDo -eq 'acl-sai') { $access += New-QuyenGia 'BUILTIN\Users' 'Modify' }
++            return [pscustomobject]@{ Owner = $node.Owner; Access = $access }
+         }
+-        [pscustomobject]@{ Owner = $chu; Access = @([pscustomobject]@{ IdentityReference = 'BUILTIN\Users'; FileSystemRights = $quyen; AccessControlType = 'Allow' }) } }
++        [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tlcommander"; Access = @(New-QuyenGia 'BUILTIN\Users' 'ReadAndExecute, Synchronize') } }
+     function Get-FileHash { param($LiteralPath)
+         if ($Script:GiaCheDo -eq 'bam-lech' -and "$LiteralPath".StartsWith($Script:ThuMucCaiDat)) { return [pscustomobject]@{ Hash = 'LECH' } }
+         Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $LiteralPath }
+@@ -396,6 +426,16 @@
+         $ic = @($kSach.su_kien | Where-Object loai -eq 'icacls')
+         (& $dungLaiDung $kSach) -and $ic.Count -eq 3 -and -not ($ic | Where-Object { $_.doi_so[0] -ne $kSach.cai_dat -or $_.doi_so -notcontains '/L' })
+     }
++    Ca 'dk_chay_icacls_dung_owner_va_grant' {
++        $ic = @($kSach.su_kien | Where-Object loai -eq 'icacls')
++        $owners = @($ic | Where-Object { $_.doi_so -contains '/setowner' })
++        $grants = @($ic | Where-Object { $_.doi_so -contains '/grant:r' })
++        $owners.Count -eq 2 -and @($owners | Where-Object {
++            $i = [array]::IndexOf($_.doi_so, '/setowner')
++            $_.doi_so[$i + 1] -ne '*S-1-5-32-544' -or $_.doi_so -notcontains '/T'
++        }).Count -eq 0 -and $grants.Count -eq 1 -and
++            @('*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/inheritance:r' | Where-Object { $grants[0].doi_so -notcontains $_ }).Count -eq 0
++    }
+     Ca 'dk_chay_chep_du_ba_tep' { @($kSach.tep | Sort-Object) -join ',' -eq 'cap-nhat-cong-cu.ps1,cong_cu.yaml,requirements.txt' }
+     Ca 'dk_chay_do_acl_moi_tep_sau_khi_chep' {
+         # 1 thư mục + 3 tệp, và lần đo đầu tiên ĐỨNG SAU lần chép cuối cùng. (Bọc @(...).Count: `-not 0` là $true —

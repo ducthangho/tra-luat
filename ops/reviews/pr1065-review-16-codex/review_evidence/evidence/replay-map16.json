@@ -1,0 +1,214 @@
+[
+  {
+    "round": 4,
+    "scope": "Native user, HeThong hash/MSI/recovery, register/ACL",
+    "probes": [
+      {
+        "path": "probes/l4-user-oracle.py",
+        "sha256": "7c9958b240666088c7924e48ff7c782b316e8f8b62276025e2ad85f5cf5d10a8",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/system-matrix.py",
+        "sha256": "4a9d7f4856d780c390d20e48e7281f0699b43522c1ac7677c22d4e8b54d8244c",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/registration-head.py",
+        "sha256": "76b96faf76738c5ef23752f3186992daabf2da4aff94b7f9fc510cc4955cfb72",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/icacls-round15.ps1",
+        "sha256": "879dc1e5e2981ba87e94767d8b949c9bab3a4690e09493ee0e7cb587b084bea8",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 5,
+    "scope": "Getter rc và CLI/Python version failure",
+    "probes": [
+      {
+        "path": "probes/user-version-oracle.py",
+        "sha256": "9b066334d433b195d118bacfad68ee12033c6ce08be9cd9f3f19401a393b28fc",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/run-user-extra.py",
+        "sha256": "82c61c54e909656b151f32c37f9a0ee00bad0f0e99539932fbb54724f75aa6d1",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 6,
+    "scope": "Metadata rc và các nhánh native còn lại",
+    "probes": [
+      {
+        "path": "probes/new-paths-oracle.py",
+        "sha256": "d00a3fb605211b856c96c33e039efa257b1f38269be3d5f661f83a754185f239",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/caller-matrix.py",
+        "sha256": "85df78feb76be87938b05279ea3feeaf6d142dde2bc792b2d0138a2c62783d30",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 7,
+    "scope": "Venv/NLM thiếu prerequisite, metadata phục hồi",
+    "probes": [
+      {
+        "path": "probes/absence-oracle.py",
+        "sha256": "2dabaa2779483f256223f331b6846af97d5bf26b3edc2868a95de731e5e68931",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/absence-regression-oracle.py",
+        "sha256": "f4c4a18d1c3d0b12f89b25e4d7165e23555b79fd1304ce25f7803e375bb7108a",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 8,
+    "scope": "ChiKiem chung ở user/portable/system",
+    "probes": [
+      {
+        "path": "probes/third-paths-oracle.py",
+        "sha256": "e0780c24adc1a70bcbfcdb17dba8b98d70af059cf66fdf417b79f192af1896e1",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/portable-check-oracle.py",
+        "sha256": "705ab09b0e684a4ee8091a31ab27e788d42f61c44c863c948b93aad169316e71",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/system-check-oracle.py",
+        "sha256": "a7d6bed507bc694e0214a298b4eb6b18cc96ea5be821f5fc31ad98e42980142d",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 9,
+    "scope": "Hậu cài venv/ghim, pip thật offline, launcher",
+    "probes": [
+      {
+        "path": "probes/install-contract-oracle.py",
+        "sha256": "36e6a8d0b3b2b582a5fa87dc6f5ea4ee4334b7f34b3f5af7bf0b3e30c4ea222a",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/real-pip-oracle.py",
+        "sha256": "35e126afa71bb4df4a4881bfe687a025208951c991cfe743efae3854dc7e44e4",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/real-nlm-oracle.py",
+        "sha256": "85d083df0494a66e1f9767b09659af221d9c5460de16f08d2042a8deb6ebd018",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 10,
+    "scope": "Đích mới nhất, không giu bản cao hơn, NLM CLI",
+    "probes": [
+      {
+        "path": "probes/target-equality-oracle.py",
+        "sha256": "b9b268479e7aa8f79f9ee86de42246bf50f23e19c872a14a579bb70be544bd48",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/zip-target-oracle.py",
+        "sha256": "666fa6373f9b5aec2eb770fdc24ead8296208c9798dd7067f0419075641671d0",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 11,
+    "scope": "Định danh đầy đủ/suffix và parser",
+    "probes": [
+      {
+        "path": "probes/version-identity-oracle.py",
+        "sha256": "f1da0eaab99b9b29468db8a36b7feb89fc8acf998da7771f0076ee904628bdad",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/cli-version-identity-oracle.py",
+        "sha256": "b99f50bdf73384fc0ad6dc40db6e199fb9b4fe1306bc73c71afcc6963a378917",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 12,
+    "scope": "Case và Node current không parse được",
+    "probes": [
+      {
+        "path": "probes/cli-case-identity-oracle.py",
+        "sha256": "363ad4e6ef126085a7d486f9763fd4149ad40a67ad4fdebc5f064a828fb45d4d",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/node-major-oracle.py",
+        "sha256": "4a5999cce1ecec9e8be37c4e6a52169aa7e08d7abc250c952786cf3cd81fe1c7",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 13,
+    "scope": "Định danh số học/Git .windows. trước/sau",
+    "probes": [
+      {
+        "path": "probes/numeric-identity-oracle.py",
+        "sha256": "e59290153b2f4a6ef5a9a71301aa61f693e69aba58eeeabf50f7f7a50495bdec",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/zip-numeric-identity-oracle.py",
+        "sha256": "bd5d269edd7d707bb6597e1d3b4a0d8fb29b80cbba22b59acd5ab80844a8954c",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 14,
+    "scope": "Hậu cài HeThong fixture có trạng thái + mutation",
+    "probes": [
+      {
+        "path": "probes/post-observations-round15.py",
+        "sha256": "6745c62d6b2a735a26009c5406875fcbda2a1a98be82a93d65d68f00374fab98",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/review14-mutations.py",
+        "sha256": "1a4b48d8dbbc54d291f23e8e345894fd99faf5afb7e8113453e462eb53cabb56",
+        "historical_l15_same_bytes": true
+      }
+    ]
+  },
+  {
+    "round": 15,
+    "scope": "Pin mismatch, native chỉ hỏng sau cài",
+    "probes": [
+      {
+        "path": "probes/pinned-release-round15.py",
+        "sha256": "7822dbb54ecefb6eb0897e3567d16dde8856b5d082c91311e7ee27abbaffaad9",
+        "historical_l15_same_bytes": true
+      },
+      {
+        "path": "probes/new-third-paths-round15.py",
+        "sha256": "48c2d96975f2bd409c7941b97fcfa6c7a060e80488b58b0f338daffd836b215f",
+        "historical_l15_same_bytes": false
+      }
+    ]
+  }
+]

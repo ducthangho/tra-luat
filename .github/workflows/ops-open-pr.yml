@@ -55,5 +55,6 @@ jobs:
             git log -1 --pretty=%b
           } > than-pr.md
           gh pr create --head "$NHANH" --base master \
+            --draft \
             --title "$TIEU_DE" --body-file than-pr.md
           gh pr list --head "$NHANH" --state open --json number,url --jq '.[0]'

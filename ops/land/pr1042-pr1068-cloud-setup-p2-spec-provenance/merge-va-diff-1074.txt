@@ -1,0 +1,18 @@
+# Danh tinh merge PR #1074 (spec P2a r2 errata). Do 2026-10-31T12:20:05Z.
+$ git show -s --format='%H%n%T%n%P' 1bc4684571db74de9a607d6a1267df6506fa4a0d
+1bc4684571db74de9a607d6a1267df6506fa4a0d
+a56e5916186df87fde92ad97dec4f830fbac6a9a
+086f1b7343fc1d778e50797e6c9ca0964b11a755 019d044739068d393e7067d3b88250e90c492713
+$ git rev-parse 019d044^{tree}
+7cc8e189115f72d1befc749348f676f67a822d1f
+$ git diff 1bc4684571db74de9a607d6a1267df6506fa4a0d^1..1bc4684571db74de9a607d6a1267df6506fa4a0d --stat
+ ops/specs/cloud-setup-p2a-exec-r2.md | 220 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 220 insertions(+)
+$ git merge-base 1bc4684571db74de9a607d6a1267df6506fa4a0d^1 019d044
+97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+$ diff merge-base..head vs merge^1..merge (bo index) sha256
+8f859d402962d433ac13e62e169967244d253f7fb5166ccedd4c16d3716fd9fa  -
+8f859d402962d433ac13e62e169967244d253f7fb5166ccedd4c16d3716fd9fa  -
+$ git show origin/master:ops/specs/cloud-setup-p2a-exec-r2.md | sha256sum ; git rev-parse origin/master:ops/specs/cloud-setup-p2a-exec-r2.md
+3de590bea4d26de3cf931df0757140a27fd36a2206f2ef381b95247f22563fed  -
+6dc7ff17032ab9e8313d939ca0ef3af9a973f82b

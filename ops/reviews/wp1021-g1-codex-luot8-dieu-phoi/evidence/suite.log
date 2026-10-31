@@ -1,0 +1,261 @@
+bien_nhan_v2_test — 98 ca
+
+  ĐẠT   c1_kho_that_hien_tai_phai_SACH
+  ĐẠT   c2_bien_nhan_moi_tu_khai_v1
+  ĐẠT   c4_v2_du_truong_phai_XANH
+  ĐẠT   c4b_submitter_NULL_van_HOP_LE
+  ĐẠT   c4c_vang_khoa_submitter_thi_DO
+  ĐẠT   c4d_assurance_vuot_bang_chung_doc_lap_thi_DO
+  ĐẠT   c4e_assurance_CHI_co_dieu_kien_che_do
+  ĐẠT   c4f_assurance_CHI_thieu_bang_chung
+  ĐẠT   c4g_bang_chung_doc_lap_phai_dung_KIEU
+  ĐẠT   c23_trang_thai_thu_ba_UU_TIEN_hon_vi_pham
+  ĐẠT   c5_sua_tep_trong_allowlist_thi_MAT_mien_tru
+  ĐẠT   c6_sua_tep_trong_no_thi_DO
+  ĐẠT   c7_no_da_len_v2_ma_con_trong_danh_sach_no
+  ĐẠT   c8_anchor_loai_ngoai_danh_sach_CHO_PHEP
+  ĐẠT   c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong
+  ĐẠT   c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am
+  ĐẠT   c9_thieu_thu_muc_trong_kho_git_la_KHONG_DO_DUOC
+  ĐẠT   c10_thu_muc_RONG_la_KHONG_DO_DUOC
+  ĐẠT   c11_yaml_hong_la_KHONG_DO_DUOC
+     (tầng git: khớp `git ls-tree 2f84531` — 11 tệp)
+  ĐẠT   c12_allowlist_khop_TUYET_DOI_ban_dong_bang
+  ĐẠT   c13_no_chi_duoc_CO_LAI_va_KHONG_DUOC_DOI_BAM
+  ĐẠT   c18_neo_git_DUNG_thi_qua
+  ĐẠT   c19_neo_git_SAI_DUONG_DAN_thi_DO
+  ĐẠT   c20_neo_git_BAM_LECH_thi_DO
+  ĐẠT   c22_canonical_ancestry_ma_URL_khong_ghim_thi_DO
+  ĐẠT   c21_object_khong_tra_duoc_la_KHONG_DO_DUOC_chu_khong_phai_DO
+  ĐẠT   c24_anchor_KHONG_CO_DUONG_DO_vao_trang_thai_THU_BA
+  ĐẠT   c25_commit_CO_THAT_ma_KHONG_phai_to_tien_thi_DO
+  ĐẠT   c26_merge_base_rc_NGOAI_0_1_la_KHONG_DO_DUOC
+  ĐẠT   c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do
+  ĐẠT   c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA
+  ĐẠT   c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay
+  ĐẠT   c29_CLI_CHI_co_vi_pham_phai_tra_rc_1
+  ĐẠT   c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC
+  ĐẠT   c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy
+  ĐẠT   c34b_PHAN_CHUNG_NGUYEN_VAN_cua_connector
+  ĐẠT   c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do
+  ĐẠT   c36_provider_KHONG_mang_theo_quyen_cua_provider_khac
+  ĐẠT   c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai
+  ĐẠT   c38_BI_DANH_phai_duoc_CHUAN_HOA_truoc_moi_phep_kiem
+  ĐẠT   c39_bam_fixture_phai_LAY_TU_GIT_khong_tu_chuoi_Python
+  ĐẠT   c40_R7_01_nguon_hong_tren_bien_nhan_THAT_khong_ket_toi_bien_nhan_nao
+  ĐẠT   c41_human_audit_theo_PROTOCOL_8_QUA_va_muc_MO_HINH_cho_nguoi_bi_chan
+  ĐẠT   c42_hai_builder_cay_guong_cung_nguon_phai_cho_CUNG_hanh_vi_tren_bien_nhan_THAT
+  ĐẠT   c14_cli_ba_trang_thai
+  ĐẠT   c43_bang_neo_luat_cua_san_pham_phai_khop_ORACLE_chep_tay
+  ĐẠT   c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi
+  ĐẠT   c45_neo_canonical_ancestry_KHONG_song_sot_qua_land_bang_SQUASH
+  ĐẠT   c49_cross_approved_cung_ho_model_phai_bi_tu_choi
+  ĐẠT   c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi
+  ĐẠT   c51_cross_approved_khac_ho_model_co_audit_phai_QUA
+  ĐẠT   c52_cross_approved_thieu_executor_phai_bi_tu_choi
+  ĐẠT   c53_cross_approved_antigravity_khong_khai_model_phai_bi_tu_choi
+  ĐẠT   c54_cross_approved_model_la_phai_bi_tu_choi
+  ĐẠT   c55_cross_approved_muc_bang_chung_la_phai_bi_tu_choi
+  ĐẠT   c56_cross_approved_khong_do_duoc_phai_bi_tu_choi
+  ĐẠT   c57_cross_approved_do_may_thieu_ref_phai_bi_tu_choi
+  ĐẠT   c58_cross_approved_do_may_co_ref_phai_QUA
+  ĐẠT   c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi
+  ĐẠT   c60_cross_approved_executor_do_may_co_ref_phai_QUA
+  ĐẠT   c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien
+  ĐẠT   c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer
+  ĐẠT   c63_muc_bang_chung_RONG_KHONG_khai_de_phai_QUA
+  ĐẠT   c64_desktop_advisory_va_cli_giu_hop_dong
+  ĐẠT   c65_desktop_khong_muon_quyen_hoac_bien_thanh_cli
+  ĐẠT   c66_desktop_xoa_hang_doi_hanh_vi_cli_van_qua
+  ĐẠT   c67_service_khai_that_duoc_nhan_khai_sai_bi_tu_choi_dung_cot
+  ĐẠT   c68_service_xoa_hang_doi_hanh_vi_cli_desktop_van_qua
+  ĐẠT   c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA
+  ĐẠT   c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC
+  ĐẠT   c71_A2_cau_ancestry_do_bang_merge_base
+  ĐẠT   c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan
+  ĐẠT   c73_A4_surface_verdict_doi_chieu_run_json
+  ĐẠT   c74_A5_no_cau_lich_su_chi_co_va_no_chet_la_vi_pham
+  ĐẠT   c75_no_cau_lich_su_CHI_CO_LAI_va_tro_tep_co_that
+  ĐẠT   c76_A6_kho_that_voi_no_RONG_phai_DO_dung_bang_so_no
+  ĐẠT   c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet
+  ĐẠT   c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra
+  ĐẠT   c79_dong_TRICH_DAN_hien_vat_khac_khong_phai_tu_khai_surface
+  ĐẠT   c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet
+  ĐẠT   c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet
+  ĐẠT   c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham
+  ĐẠT   c86_B1_moc_dung_tai_KHONG_con_mien
+  ĐẠT   c87_B3_OID_khong_tra_duoc_theo_NGU_CANH
+  ĐẠT   c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan
+  ĐẠT   c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback
+  ĐẠT   c90_B2_MOT_BIEN_loi_do_khong_traceback_khong_no_chet
+  ĐẠT   c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no
+  ĐẠT   c92_B2_co_SINH_NO_cung_bien_voi_cong
+  ĐẠT   c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho
+  ĐẠT   c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC
+  ĐẠT   c95_moi_truong_git_KHONG_doi_ket_qua_do
+  ĐẠT   c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC
+  ĐẠT   c97_NHANH_TIEM_co_rang_tren_module_da_thay_va_tu_go
+  ĐẠT   c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen
+  ĐẠT   c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE
+  ĐẠT   c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang
+  ĐẠT   c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem
+
+ĐỘT BIẾN (mỗi cái phải làm ĐÚNG ca đích đỏ):
+  CÓ RĂNG    m1_noi_allowlist_chua_tep_tan_cong     → c12_allowlist_khop_TUYET_DOI_ban_dong_bang = giet_that  (PROTOCOL đòi ĐÚNG ca này)
+  CÓ RĂNG    m2_no_lon_them_mot_tep                 → c13_no_chi_duoc_CO_LAI_va_KHONG_DUOC_DOI_BAM = giet_that  (bánh cóc quay ngược)
+  CÓ RĂNG    m2b_no_DOI_BAM_giu_nguyen_ten          → c13_no_chi_duoc_CO_LAI_va_KHONG_DUOC_DOI_BAM = giet_that  (tái đóng băng một bản không đạt)
+  CÓ RĂNG    m3_bo_doi_model_identity               → c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong = giet_that  (gỡ một yêu cầu khỏi cổng)
+  CÓ RĂNG    m3b_bo_doi_submitter_identity          → c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong = giet_that  (đúng đột biến reviewer chạy được mà bản cũ KHÔNG bắt)
+  CÓ RĂNG    m3c_bo_doi_reviewed_sha                → c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong = giet_that  (đột biến reviewer chạy được, bản cũ mù)
+  CÓ RĂNG    m4_noi_anchor_chua_ten_tan_cong        → c8_anchor_loai_ngoai_danh_sach_CHO_PHEP = giet_that  (danh sách cho phép bị nới)
+  CÓ RĂNG    m5_reviewed_sha_nhan_SHA_VIET_TAT      → c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am = giet_that  (đúng ca reviewer dựng: SHA 7 ký tự phải ĐỎ)
+  CÓ RĂNG    m7_bo_phep_kiem_DUONG_DAN_trong_commit → c19_neo_git_SAI_DUONG_DAN_thi_DO = giet_that  (bỏ kiểm đường dẫn, GIỮ nhận dạng URL)
+  CÓ RĂNG    m9_dispatch_doc_THO_khong_chuan_hoa    → c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do = giet_that  (hai cách đọc cùng một trường ⇒ qua schema rồi trốn dispatch)
+  CÓ RĂNG    m9b_URL_khong_ghim_tut_xuong_trang_thai_thu_ba → c22_canonical_ancestry_ma_URL_khong_ghim_thi_DO = giet_that  (mỏ neo TỰ KHAI mà không đo được bị hạ từ VI PHẠM xuống chưa đo)
+  CÓ RĂNG    m8_neo_git_khong_so_bam_blob           → c20_neo_git_BAM_LECH_thi_DO = giet_that  (cổng thôi so băm blob)
+  CÓ RĂNG    m30_bo_yeu_cau_anchor_loai             → c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong = giet_that  (gỡ `anchor.loai` khỏi cổng)
+  CÓ RĂNG    m6_bo_yeu_cau_anchor_cuong_do          → c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong = giet_that  (gỡ một yêu cầu con của anchor)
+  TỰ KIỂM ok m14_TU_KIEM_tu_choi_tat_ca_phai_bi_bao_KHONG_RANG → c19_neo_git_SAI_DUONG_DAN_thi_DO = giet_that  (PHẢI hiện KHÔNG RĂNG — đây là ca tự kiểm — NHƯNG đối chứng c18_neo_git_DUNG_thi_qua KHÔNG sạch hoàn toàn (giet_that: mỏ neo git ĐÚNG mà vẫn bị từ chối: ['a-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — từ chối tất cả']): đột biến phá cả cổng)
+  CÓ RĂNG    m12_assurance_doi_OR_thanh_AND         → c4e_assurance_CHI_co_dieu_kien_che_do = giet_that  (R2-03 số 3: một ca bật cả hai điều kiện thì mù)
+  CÓ RĂNG    m13_go_UU_TIEN_cua_trang_thai_thu_ba   → c23_trang_thai_thu_ba_UU_TIEN_hon_vi_pham = giet_that  (kết quả HỖN HỢP bị gộp thành vi phạm thường (rc=1 thay vì 2))
+  CÓ RĂNG    m15_bo_nhanh_hai_loai_anchor_khong_co_duong_do → c24_anchor_KHONG_CO_DUONG_DO_vao_trang_thai_THU_BA = giet_that  (loại mỏ neo cổng không đo được thì TRỐN luôn khỏi phép đo)
+  CÓ RĂNG    m16_bo_phep_kiem_TO_TIEN               → c25_commit_CO_THAT_ma_KHONG_phai_to_tien_thi_DO = giet_that  (`cat-file -e` qua là đủ ⇒ một nhánh rẽ thành canonical ancestry)
+  CÓ RĂNG    m17_bo_trang_thai_thu_ba_cua_merge_base → c26_merge_base_rc_NGOAI_0_1_la_KHONG_DO_DUOC = giet_that  (git hỏng bị đọc thành 'là tổ tiên')
+  CÓ RĂNG    m18_go_hang_KHONG_DO_DUOC_cua_nguon_provider → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (hỏng nguồn trở lại IM LẶNG ⇒ cổng xanh)
+  CÓ RĂNG    m19_van_KET_TOI_provider_khi_nguon_hong → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (lỗi ĐO lại bị báo thành lỗi DỮ LIỆU — đúng ca reviewer dựng)
+  CÓ RĂNG    m20_provider_tut_ve_ban_CHEP_TAY       → c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay = giet_that  (bản chép tay TỪ CHỐI `anthropic_claude` — biên nhận Claude hợp lệ rớt cổng)
+  CÓ RĂNG    m21_CLI_vi_pham_tra_ve_SACH            → c29_CLI_CHI_co_vi_pham_phai_tra_rc_1 = giet_that  (nhánh CHỈ có vi phạm không ai chạm)
+  CÓ RĂNG    m22_MRI_khong_goi_chot_kieu_o_cho_goi  → c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am = giet_that  (R4-01: chốt kiểu ở `_mri` bị chốt khác che)
+  CÓ RĂNG    m23_go_KHONG_DO_DUOC_khi_git_khong_goi_duoc → c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC = giet_that  (rc=127 tụt xuống nhánh 'object không tra được')
+  CÓ RĂNG    m24_go_KHONG_DO_DUOC_cua_commit_trong_evidence_url → c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC = giet_that  (commit không tra được thành IM LẶNG)
+  CÓ RĂNG    m25_go_KHONG_DO_DUOC_khi_khong_co_HEAD → c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC = giet_that  (không có HEAD để so mà cổng vẫn im)
+  CÓ RĂNG    m26_go_KHONG_DO_DUOC_khi_doc_blob_tra_rc_khac_0 → c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC = giet_that  (đọc blob hỏng thành IM LẶNG)
+  CÓ RĂNG    m27_go_KHONG_DO_DUOC_khi_doc_blob_NEM  → c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC = giet_that  (ngoại lệ khi đọc blob thành IM LẶNG)
+  CÓ RĂNG    m28_phuc_hoi_phep_ep_str_cho_MOI_truong → c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy = giet_that  (ánh xạ/danh sách lại thành lời khai hợp lệ)
+  CÓ RĂNG    m29_bo_mot_bang_nguon_phai_lam_HAI_NGUON_LECH → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (bỏ một bảng nguồn KHÔNG được im lặng thu hẹp)
+  CÓ RĂNG    m31_quet_TOAN_TEP_thay_vi_hai_bang     → c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do = giet_that  (một dòng chú thích lại cấp được quyền)
+  CÓ RĂNG    m32_bo_gioi_han_assurance_theo_provider → c36_provider_KHONG_mang_theo_quyen_cua_provider_khac = giet_that  (advisory biến thành bằng chứng có thẩm quyền)
+  CÓ RĂNG    m33_bo_kiem_BO_BA_provider_be_mat      → c36_provider_KHONG_mang_theo_quyen_cua_provider_khac = giet_that  (`surface: banana` lại qua)
+  CÓ RĂNG    m34_bo_so_verdict_path_voi_duong_dan_trong_URL → c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai = giet_that  (mỏ neo trỏ một tệp KHÁC thứ nó khai)
+  CÓ RĂNG    m35_rc127_cua_rev_parse_duong_dan_thanh_TRO_HUT → c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC = giet_that  (lỗi ĐO thành lời KẾT TỘI ở thao tác git thứ sáu)
+  CÓ RĂNG    m36_luat_chep_tay_MAT_NEO_van_giu_nguyen → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (giữ một luật có thể đã hết hiệu lực)
+  CÓ RĂNG    m37_bang_transport_RONG_van_di_tiep    → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (nguồn 1 không fail-close như hai nguồn kia)
+  CÓ RĂNG    m38_khong_bat_loi_GIAI_MA_nguon        → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (cổng chết trước khi kịp phân ba trạng thái)
+  CÓ RĂNG    m39_nhet_execution_surface_vao_tap_provider → c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay = giet_that  (`R5-02`: nới danh sách bằng chính token trong nguồn)
+  CÓ RĂNG    m40_bi_danh_lich_su_KHONG_co_bien      → c38_BI_DANH_phai_duoc_CHUAN_HOA_truoc_moi_phep_kiem = giet_that  (miễn trừ tương thích thành đường lách vĩnh viễn)
+  CÓ RĂNG    m41_bo_kiem_VAN_CHUYEN_trong_bo_ba     → c36_provider_KHONG_mang_theo_quyen_cua_provider_khac = giet_that  (bộ ba SAI SỰ THẬT vẫn qua)
+  CÓ RĂNG    m42_KHONG_hop_dong_van_co_tham_quyen   → c36_provider_KHONG_mang_theo_quyen_cua_provider_khac = giet_that  (chưa khai hợp đồng mà vẫn cấp thẩm quyền)
+  CÓ RĂNG    m43_phuc_hoi_lstrip_bo_MOI_dau_cham_gach_cheo → c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai = giet_that  (`../../x` và `/x` chuẩn hoá về `x` rồi khớp URL — receipt sai được NHẬN)
+  CÓ RĂNG    m44_chi_cam_MOT_muc_assurance          → c36_provider_KHONG_mang_theo_quyen_cua_provider_khac = giet_that  (mất cấm `same_provider_approved` và `human_audited`)
+  CÓ RĂNG    m45_chi_kiem_be_mat_cho_HAI_provider   → c36_provider_KHONG_mang_theo_quyen_cua_provider_khac = giet_that  (ba provider chính tắc khác mất kiểm bề mặt)
+  CÓ RĂNG    m46_bo_kiem_arity_RIENG_bang_bi_danh_provider → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (hàng thiếu cột lọt qua lược đồ rồi nổ `ValueError` lúc import (rc=1, traceback))
+  CÓ RĂNG    m47_bo_kiem_arity_RIENG_bang_bi_danh_be_mat → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (cùng lỗ ở bảng bí danh thứ hai — vá một bảng không phải vá lớp)
+  CÓ RĂNG    m48_bo_kiem_KIEU_o_chuoi_surface_transport → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (surface/transport `None` thành hợp đồng `[None]` ⇒ biên nhận nguyên byte bị KẾT TỘI)
+  CÓ RĂNG    m49_van_suy_KHONG_HOP_DONG_khi_nguon_hong → c40_R7_01_nguon_hong_tren_bien_nhan_THAT_khong_ket_toi_bien_nhan_nao = giet_that  (11 biên nhận THẬT bị kết tội `KHÔNG có hợp đồng` khi thiếu launcher.py — đúng ca reviewer)
+  CÓ RĂNG    m50_moi_provider_coi_la_MO_HINH_human_mat_human_audited → c41_human_audit_theo_PROTOCOL_8_QUA_va_muc_MO_HINH_cho_nguoi_bi_chan = giet_that  (human trở lại bị cấm `human_audited` — ca DƯƠNG phải đỏ)
+  CÓ RĂNG    m51_cap_MOI_muc_cho_nguoi              → c41_human_audit_theo_PROTOCOL_8_QUA_va_muc_MO_HINH_cho_nguoi_bi_chan = giet_that  (human tự cấp `cross_approved`/`same_provider_approved` — ca ÂM phải đỏ)
+  CÓ RĂNG    m52_mo_hinh_khai_duoc_human_audited    → c41_human_audit_theo_PROTOCOL_8_QUA_va_muc_MO_HINH_cho_nguoi_bi_chan = giet_that  (mặt thứ ba của cùng lớp: một mô hình lĩnh mức của người audit)
+  CÓ RĂNG    m54_bo_doi_chieu_SURFACE_cua_AGENTS    → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (phép A của reviewer: AGENTS khai bề mặt của provider khác mà vẫn 'khớp')
+  CÓ RĂNG    m55_bo_RIENG_chot_thieu_bang_bi_danh_be_mat → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (phép B của reviewer: mất bảng bí danh bề mặt ⇒ `None` đi vào vòng unpack)
+  CÓ RĂNG    m56_bo_RIENG_chot_neo_ASSURANCE_CUA_NGUOI → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (mất neo `human_audited` của PROTOCOL §8 mà cổng vẫn nhận nguồn)
+  CÓ RĂNG    m57_bo_RIENG_chot_neo_ASSURANCE_CUA_MO_HINH → c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA = giet_that  (mất neo `cross_approved` của PROTOCOL §8 mà cổng vẫn nhận nguồn)
+  CÓ RĂNG    m58_bo_MOT_MUC_khoi_bang_neo_cua_san_pham → c43_bang_neo_luat_cua_san_pham_phai_khop_ORACLE_chep_tay = giet_that  (bảng neo CO LẠI trong im lặng — oracle chép tay không được co theo)
+  CÓ RĂNG    m59_transport_gop_VANG_voi_CO_MA_HONG  → c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy = giet_that  (`{fake:1}` `[..]` `7` `True` `''` lọt LẶNG y như vắng mặt — chỉ chuỗi-sai bị bắt)
+  CÓ RĂNG    m60_bo_HAN_chot_hop_dong_van_chuyen    → c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi = giet_that  (hàng launcher thôi QUYẾT ĐỊNH gì — witness đối xứng của `c44` mất vế TỪ CHỐI)
+  CÓ RĂNG    m61_transport_null_bi_coi_la_VANG_MAT  → c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy = giet_that  (`transport: null` lọt vì bị gộp vào nhánh VẮNG — hành vi đã công bố mà không ai canh)
+  CÓ RĂNG    m62_bo_chot_cung_ho_model              → c49_cross_approved_cung_ho_model_phai_bi_tu_choi = giet_that  (gỡ chốt cùng họ model)
+  CÓ RĂNG    m63_bo_chot_thieu_nguoi_audit          → c50_cross_approved_khai_co_audit_thieu_nguoi_audit_phai_bi_tu_choi = giet_that  (gỡ chốt thiếu audit)
+  CÓ RĂNG    m64_bo_chot_thieu_ho_executor          → c52_cross_approved_thieu_executor_phai_bi_tu_choi = giet_that  (gỡ chốt thiếu executor)
+  CÓ RĂNG    m65_bo_chot_antigravity_khong_khai_model → c53_cross_approved_antigravity_khong_khai_model_phai_bi_tu_choi = giet_that  (antigravity ngầm định gemini)
+  CÓ RĂNG    m66_noi_bang_nhan_dien_model_la        → c54_cross_approved_model_la_phai_bi_tu_choi = giet_that  (nới nhận diện model lạ)
+  CÓ RĂNG    m67_bo_chot_muc_bang_chung_la          → c55_cross_approved_muc_bang_chung_la_phai_bi_tu_choi = giet_that  (gỡ chốt mức lạ)
+  CÓ RĂNG    m68_bo_chot_khong_do_duoc              → c56_cross_approved_khong_do_duoc_phai_bi_tu_choi = giet_that  (gỡ chốt khong_do_duoc)
+  CÓ RĂNG    m69_bo_chot_do_may_thieu_ref           → c57_cross_approved_do_may_thieu_ref_phai_bi_tu_choi = giet_that  (gỡ chốt do_may thiếu ref)
+  CÓ RĂNG    m70_bo_chot_executor_khai_de_thieu_evidence → c59_cross_approved_executor_khai_de_thieu_evidence_phai_bi_tu_choi = giet_that  (gỡ chốt khai đè thiếu evidence)
+  CÓ RĂNG    m71_xoa_gemini_khoi_ho_model_cho_phep  → c61_ho_model_cho_phep_phai_quyet_dinh_nhan_dien = giet_that  (xoá gemini khỏi HO_MODEL_CHO_PHEP)
+  CÓ RĂNG    m72_tra_tien_to_ve_ap_cho_ca_sub       → c62_khoi_model_executor_identity_phai_doi_xung_voi_khoi_reviewer = giet_that  (áp lại tiền tố vai cho khoá tra BÊN TRONG khối model_<vai>_identity)
+  TỰ KIỂM ok m53_TU_KIEM_rig_lam_hong_nguon_phu_phai_bi_phan_GIAN_GIAO → c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai = gian_giao  (PHẢI hiện gian_giao — lệch do rig không được đội lốt đột biến)
+  CÓ RĂNG    m10_bo_kiem_actor_cua_submitter        → c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am = giet_that  (R2-03 số 1: vòng 1 mù với nhánh này)
+  CÓ RĂNG    m11_MRI_khong_phai_dict_van_qua        → c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am = giet_that  (R2-03 số 2: nhánh không-phải-dict)
+  CÓ RĂNG    m73_cau_review_bo_so_reviewed_sha      → c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA = giet_that  (A1: bỏ phép so `reviewed_sha`)
+  CÓ RĂNG    m74_cau_review_so_tien_to_7            → c69_A1_cau_chua_review_ma_luot_sau_DA_review_dung_SHA = giet_that  (A1: so tiền tố 7 ký tự)
+  CÓ RĂNG    m75_cau_review_luot_thieu_thanh_0      → c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC = giet_that  (`luot` thiếu bị đọc thành 0)
+  CÓ RĂNG    m76_ancestry_oid_thieu_la_khong_to_tien → c71_A2_cau_ancestry_do_bang_merge_base = giet_that  (A2: OID không tra được coi là 'không tổ tiên')
+  CÓ RĂNG    m78_cau_khop_theo_tung_dong            → c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan = giet_that  (A3: khớp từng dòng, không trên scalar đã nối)
+  CÓ RĂNG    m79_cau_khong_bo_dau                   → c72_A3_bien_the_co_dau_khong_dau_xuong_dong_deu_bi_nhan = giet_that  (A3: biến thể có dấu không được chuẩn hoá)
+  CÓ RĂNG    m80_surface_luon_coi_khac              → c73_A4_surface_verdict_doi_chieu_run_json = giet_that  (A4: bỏ phép đọc run.json (luôn coi khác))
+  CÓ RĂNG    m81_bo_chot_no_chet                    → c74_A5_no_cau_lich_su_chi_co_va_no_chet_la_vi_pham = giet_that  (A5: nợ chết không bị bắt)
+  CÓ RĂNG    m82_no_cau_lich_su_NO_them_muc         → c75_no_cau_lich_su_CHI_CO_LAI_va_tro_tep_co_that = giet_that  (M4: danh sách nợ nở thêm)
+  CÓ RĂNG    m83_run_json_hong_thanh_khong_ap       → c77_run_json_CO_ma_HONG_la_KHONG_DO_DUOC_khong_phai_no_chet = giet_that  (run.json hỏng đọc thành 'không áp')
+  CÓ RĂNG    m84_bo_OID_toan_chu_so                 → c78_OID_viet_tat_TOAN_CHU_SO_van_duoc_tra = giet_that  (loại token toàn chữ số trước khi tra)
+  CÓ RĂNG    m88_bo_chot_alias_vong                 → c82_alias_VONG_la_KHONG_DO_DUOC_alias_dung_lai_van_duyet = giet_that  (alias vòng chết bằng RecursionError)
+  CÓ RĂNG    m89_chi_xet_khai_bao_dau_tren_dong     → c83_MOI_khai_bao_surface_tren_cung_dong_deu_duoc_xet = giet_that  (chỉ khai báo đầu tiên trên dòng)
+  CÓ RĂNG    m91_luot_bien_nhan_khac_thieu          → c70_A1_luot_KHONG_so_duoc_la_KHONG_DO_DUOC = giet_that  (r2: `luot` thiếu ở biên nhận khác)
+  CÓ RĂNG    m92_merge_base_loi_thanh_vi_pham       → c84_merge_base_HONG_la_KHONG_DO_DUOC_khong_phai_vi_pham = giet_that  (r3: merge-base hỏng thành vi phạm)
+  CÓ RĂNG    m94_B1_chen_lai_mien_tru_dung_tai      → c86_B1_moc_dung_tai_KHONG_con_mien = giet_that  (B1: chèn lại phép miễn khi mapping có `dung_tai`)
+  CÓ RĂNG    m95_B2_bam_receipt_ngoai_bien          → c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback = giet_that  (B2: lỗi I/O khi băm/đọc receipt thoát biên)
+  CÓ RĂNG    m96_B2_go_bien_loi_do                  → c90_B2_MOT_BIEN_loi_do_khong_traceback_khong_no_chet = giet_that  (B2: gỡ biên lỗi đo của ba luật)
+  CÓ RĂNG    m97_B2_tep_hong_van_ket_luan_no_chet   → c90_B2_MOT_BIEN_loi_do_khong_traceback_khong_no_chet = giet_that  (B2: tệp đo hỏng mà nợ vẫn bị kết luận chết)
+  CÓ RĂNG    m98_B3_bo_ngu_canh_backtick            → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (B3: bỏ ngữ cảnh backtick)
+  CÓ RĂNG    m99_B3_bo_ngu_canh_40_hex              → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (B3: bỏ ngữ cảnh đủ 40 hex)
+  CÓ RĂNG    m100_B3_bo_ngu_canh_sau_commit         → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (B3: bỏ ngữ cảnh sau từ `commit`)
+  CÓ RĂNG    m101_B3_moi_token_thuan_la_bat_buoc    → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (B3: mọi token thuần thành bắt buộc (`deadbeef` rc=2))
+  CÓ RĂNG    m102_B4_bo_dieu_kien_provider          → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (B4: khai báo không `provider` thành tự khai)
+  CÓ RĂNG    m85_B4_bo_dieu_kien_trich_dan          → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (B4: dòng có trích dẫn kề thành tự khai)
+  CÓ RĂNG    m103_git_khong_goi_duoc_thanh_rong     → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (git vắng/hỏng đọc thành stdout rỗng)
+  CÓ RĂNG    m104_ref_mac_dinh_khong_phai_commit_lui_ref_ke → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (`origin/master` là tree mà lùi về `master` cục bộ)
+  CÓ RĂNG    m105_tien_to_mo_ho_thanh_mot           → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (tiền tố trỏ hai commit đọc thành một)
+  CÓ RĂNG    m106_run_json_thu_muc_thanh_vang       → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (run.json là thư mục bị coi như vắng (không áp))
+  CÓ RĂNG    m107_bo_bat_UTF8_khi_doc_receipt       → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (byte UTF-8 hỏng trong receipt thoát biên)
+  CÓ RĂNG    m108_sinh_no_ngoai_bien_CLI            → c92_B2_co_SINH_NO_cung_bien_voi_cong = giet_that  (`--sinh-no` gọi ngoài biên CLI)
+  CÓ RĂNG    m109_sinh_no_khong_doi_loi_doc         → c92_B2_co_SINH_NO_cung_bien_voi_cong = giet_that  (`_sinh_no` không đổi lỗi đọc thành KHÔNG ĐO ĐƯỢC)
+  CÓ RĂNG    m110_B3_bo_ranh_gioi_tu_commit         → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (B3: `Precommit` thành ngữ cảnh commit)
+  CÓ RĂNG    m111_B3_backtick_chi_can_mo            → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (B3: backtick chỉ mở thành ngữ cảnh)
+  CÓ RĂNG    m112_B4_bo_ranh_gioi_tu_provider       → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (B4: `notprovider` thành `provider`)
+  CÓ RĂNG    m113_B4_cua_so_bo_dong_sau             → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (B4: cửa sổ bỏ dòng sau)
+  CÓ RĂNG    m114_bo_qua_STDERR_cua_git             → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (tin kết quả git dù stderr báo ref/object hỏng)
+  CÓ RĂNG    m115_vang_dung_stat_khong_lstat        → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (symlink gãy của run.json bị coi như vắng)
+  CÓ RĂNG    m116_vang_loi_stat_khac_thanh_vang     → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (lỗi lstat khác ENOENT/ENOTDIR bị coi như vắng)
+  CÓ RĂNG    m117_bo_chot_kho_NONG                  → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (kho nông vẫn đo tổ tiên)
+  CÓ RĂNG    m118_bo_chot_kho_PARTIAL               → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (kho partial clone vẫn đo)
+  CÓ RĂNG    m119_bo_chot_SYMREF_gay                → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (symref `origin/HEAD` gãy bị coi như vắng)
+  CÓ RĂNG    m120_tinh_MOI_loai_object_la_ung_vien  → c93_ung_vien_CHI_TINH_COMMIT_blob_chung_tien_to_khong_mo_ho = giet_that  (blob chung tiền tố đẩy commit thành mơ hồ)
+  CÓ RĂNG    m121_disambiguate_loc_bo_dong_la       → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (dòng lạ của `--disambiguate` bị lọc bỏ)
+  CÓ RĂNG    m122_ung_vien_missing_thanh_khong_phai_commit → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (ứng viên được liệt kê mà `missing` bị coi là không phải commit)
+  CÓ RĂNG    m123_batch_check_dang_la_thanh_khac    → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (dòng lạ của `cat-file --batch-check` được tin)
+  CÓ RĂNG    m124_for_each_ref_dong_la_duoc_tin     → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (dòng lạ của `for-each-ref` được tin)
+  CÓ RĂNG    m125_bo_chot_RC_cua_git                → c96_git_rc_LA_ma_stderr_RONG_van_la_KHONG_DO_DUOC = giet_that  (rc lạ mà stderr rỗng được tin)
+  CÓ RĂNG    m126_ke_thua_bien_GIT                  → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (biến `GIT_*` kế thừa (GIT_DIR, GIT_TRACE) lọt vào phép đo)
+  CÓ RĂNG    m127_khong_tat_replace                 → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (replace ref che quan hệ tổ tiên)
+  CÓ RĂNG    m129_bo_chot_PROMISOR                  → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (partial clone thật (promisor) vẫn đo)
+  CÓ RĂNG    m132_promisor_TAT_van_la_partial       → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (`remote.<x>.promisor=false` bị coi là partial clone)
+  CÓ RĂNG    m133_bo_alternates_khoi_danh_sach_giu  → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (bỏ `GIT_ALTERNATE_OBJECT_DIRECTORIES` làm kho đủ mất object)
+  CÓ RĂNG    m134_doc_promisor_khong_chuan_hoa_bool → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (`off`/`no` đọc thô thành dòng lạ ⇒ kho đủ bị chặn)
+  CÓ RĂNG    m135_bo_chot_gia_tri_promisor_la       → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (giá trị promisor không phải bool được coi là tắt)
+  CÓ RĂNG    m136_giu_GIT_DIR_ke_thua               → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (`GIT_DIR` kế thừa làm cổng đo kho khác)
+  CÓ RĂNG    m137_bo_so_OID_batch_check             → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (batch-check trả OID khác mà được tin)
+  CÓ RĂNG    m138_bo_kiem_loai_batch_check          → c94_giao_thuc_git_DANG_LA_la_KHONG_DO_DUOC = giet_that  (batch-check trả loại ngoài giao thức mà được tin)
+  CÓ RĂNG    m139_bo_ngu_canh_tron_so_chu           → c87_B3_OID_khong_tra_duoc_theo_NGU_CANH = giet_that  (OID trộn số-chữ thiếu mà thành token thường)
+  CÓ RĂNG    m140_B4_noi_cua_so_ve_truoc            → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (provider/citation cách hai dòng là ngoài cửa sổ)
+  CÓ RĂNG    m141_B4_noi_cua_so_ve_sau              → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (provider/citation cách hai dòng là ngoài cửa sổ)
+  CÓ RĂNG    m156_B4_bo_chan_bien_dau_tep           → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (dòng đầu bị mất cửa sổ)
+  CÓ RĂNG    m157_B4_trich_dan_bo_dong_sau          → c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan = giet_that  (trích dẫn ở dòng sau bị bỏ qua)
+  CÓ RĂNG    m130_bo_chot_GRAFTS                    → c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no = giet_that  (tệp grafts đổi parent mà vẫn đo)
+  CÓ RĂNG    m131_ref_con_tien_to_la_dong_la        → c95_moi_truong_git_KHONG_doi_ket_qua_do = giet_that  (ref con `origin/HEAD/topic` làm hỏng phép chọn nhánh mặc định)
+  CÓ RĂNG    m142_chon_bien_nhan_so_duoi_CHINH_XAC  → c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen = giet_that  (đuôi hoa lại bị bỏ qua lặng)
+  CÓ RĂNG    m143_chon_bien_nhan_loc_is_file        → c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback = giet_that  (thư mục `*.receipt.yaml` trốn khỏi phép băm)
+  CÓ RĂNG    m144_sinh_no_loc_duoi_CHINH_XAC        → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (`--sinh-no` bỏ qua đuôi hoa (đường gọi thứ hai))
+  CÓ RĂNG    m145_bo_chon_khong_sap_xep             → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (thứ tự duyệt theo hệ tệp, không sắp xếp)
+  CÓ RĂNG    m146_bo_chon_bo_nhanh_thu_muc_vang     → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (`--sinh-no` trên kho thiếu ops/reviews thành lỗi đo)
+  CÓ RĂNG    m147_bo_chon_bo_bat_OSError            → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (lỗi liệt kê thoát thành traceback (Codex lượt 1))
+  CÓ RĂNG    m148_bo_chon_hoi_is_dir_TRAN           → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (`--sinh-no`: EACCES ở `stat` thoát thành traceback)
+  CÓ RĂNG    m149_kiem_guard_hoi_is_dir_TRAN        → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (`kiem`: EACCES ở `stat` thoát thành traceback)
+  CÓ RĂNG    m150_hoi_trang_thai_bo_bat_OSError     → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (lỗi `stat` thoát thành traceback ở cả hai đường)
+  CÓ RĂNG    m151_kiem_hoi_git_TRAN                 → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (`stat` của `.git` thoát thành traceback)
+  CÓ RĂNG    m152_bo_chon_bat_Exception             → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (lỗi lập trình ở phép liệt kê bị đổi thành KHÔNG ĐO ĐƯỢC)
+  CÓ RĂNG    m153_hoi_trang_thai_bat_Exception      → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (lỗi lập trình ở phép hỏi thư mục bị đổi thành KHÔNG ĐO ĐƯỢC)
+  CÓ RĂNG    m154_hoi_trang_thai_chi_bat_PermissionError → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (EIO ở `stat` thoát thành traceback)
+  CÓ RĂNG    m155_bo_chon_chi_bat_PermissionError   → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (EIO khi liệt kê thoát thành traceback)
+
+bien_nhan_v2_test: 98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 135/153 đột biến thường khai đối chứng
+TỔNG: ĐẠT

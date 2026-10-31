@@ -1,0 +1,19 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "rg",
+    "-n",
+    "-i",
+    "--hidden",
+    "Get-Content|Value cannot be null|null-valued|\\$null|\\[string\\]|Ép.*string|ép.*kiểu|BOM|KHOA\\.txt|ErrorActionPreference|7\\.6\\.9|5\\.1\\.26100",
+    "CLAUDE.md",
+    "docs/",
+    "-g",
+    "*.md"
+  ],
+  "rc": 0,
+  "stdout_file": "docs-search.stdout",
+  "stderr_file": "docs-search.stderr",
+  "stdout_bytes": 3078,
+  "stderr_bytes": 0
+}

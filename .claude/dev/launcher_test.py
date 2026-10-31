@@ -9357,8 +9357,8 @@ def _wp1077_llm(env, cwd=None, them_path=False):
     with (contextlib.chdir(cwd) if cwd else contextlib.nullcontext()), patch.dict(os.environ, env, clear=True):
         try:
             return m._do_openai_llm(env, False)
-        except OSError as e:
-            return ("OSError", f"errno={e.errno} {e}")
+        except (OSError, UnicodeError) as e:
+            return ("OSError" if isinstance(e, OSError) else type(e).__name__, f"errno={getattr(e, 'errno', None)} {e}")
 
 
 def _wp1077_llm_tep(d, nhan, shebang=False, dau=""):
@@ -9402,7 +9402,7 @@ def r1077_probe_doctor_khong_spawn_tran():
 @ca
 def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
     """F4 (Codex lượt 2–5): bản đầu PATH không shebang thắng bản sau có shebang (PATH tuyệt đối, rỗng, `link/..`);
-    bản đầu thiếu interpreter (ENOENT) thì sang bản sau."""
+    phần tử PATH quá dài trước `:` còn thử cwd (glibc); bản đầu thiếu interpreter (ENOENT) thì sang bản sau."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as d:
@@ -9411,7 +9411,7 @@ def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
         (d / "first" / "sub").mkdir()
         (d / "link").symlink_to(d / "first" / "sub", target_is_directory=True)
         (d / "llm").symlink_to(d / "later" / "llm")
-        for dau in (str(d / "first"), "", str(d / "link" / "..")):
+        for dau in (str(d / "first"), "", str(d / "link" / ".."), "x" * 4200):
             path = dau + os.pathsep + str(d / "later")
             kq = _wp1077_llm({"PATH": path}, cwd=d / "first")
             bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH={path!r}: do nham llm phia sau: {kq}")
@@ -12406,7 +12406,7 @@ DOT_BIEN = [
     ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
      ["r1077_probe_doctor_khong_spawn_tran"]),
     # Codex lượt 2–5 F4: tự duyệt PATH như execvp (bỏ ⇒ subprocess chạy bản sau / sh TÊN không tra PATH).
-    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(os.fsencode(d)) < tran]',
+    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [f"{d}/{ten}" if d else ten for d in phan]',
       '        ung_vien = [ten]'),
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan", ('            return subprocess.run(lenh, executable=tep if os.sep in tep else os.curdir + os.sep + tep, **kw)',
@@ -12417,7 +12417,10 @@ DOT_BIEN = [
       "r1077_PATH_hop_dong_glibc"]),
     ("wp1077_tiep_moi_loi_exec", ('            if os.sep in ten or e.errno not in tiep:', '            if os.sep in ten:'),
      ["r1077_PATH_hop_dong_glibc"]),
-    ("wp1077_PATH_ma_hoa_strict", ('if len(os.fsencode(d)) < tran]', 'if len(d.encode()) < tran]'), ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_PATH_ma_hoa_strict", ('[d if len(os.fsencode(d)) < tran else "" for d in phan[:-1]]', '[d if len(d.encode()) < tran else "" for d in phan[:-1]]'),
+     ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_PATH_dai_bo_han", ('[d if len(os.fsencode(d)) < tran else "" for d in phan[:-1]]', '[d for d in phan[:-1] if len(os.fsencode(d)) < tran]'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     ("wp1077_mat_gach_cuoi_PATH", ('[f"{d}/{ten}" if d else ten for d', '[os.path.join(d, ten) for d'), ["r1077_PATH_hop_dong_glibc"]),
     ("wp1077_dung_o_loi_tim_kiem", ('            if os.sep in ten or e.errno not in tiep:', '            if True:'),
      ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),

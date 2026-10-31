@@ -2925,7 +2925,7 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
     còn `subprocess` ném OSError (tên có `/`) hoặc THỬ TIẾP bản sau trên PATH — `doctor` gắn BI_CHE oan hoặc đo
     NHẦM công cụ. Hợp đồng là glibc (spec M1); bash chạy lại bằng chính bash nên có thể khác với wrapper bash.
     Tên trần (Codex lượt 2–6): ứng viên là chuỗi glibc `<phần tử>/<tên>` (giữ `/` cuối, tương đối, `..`,
-    symlink; phần tử rỗng ⇒ `<tên>`; phần tử dài hơn PATH bị bỏ), theo thứ tự; execve qua `./<tên>` khi chuỗi
+    symlink; phần tử rỗng ⇒ `<tên>`; phần tử quá dài ⇒ như phần tử rỗng, trừ phần tử cuối thì bỏ), theo thứ tự; execve qua `./<tên>` khi chuỗi
     không có `/`. Chỉ EACCES/ENOENT/ESTALE/ENOTDIR/ENODEV/ETIMEDOUT sang ứng viên sau; ENOEXEC ⇒ `/bin/sh`
     chạy CHÍNH chuỗi ấy; lỗi khác (ETXTBSY, ELOOP…) ném ngay; hết ⇒ EACCES nếu từng gặp, không thì lỗi cuối.
     MIỄN TRỪ W-1077-1 (chủ kho, lease g5): shebang qua phần tử rỗng thấy `$0`=`./<tên>`. Windows giữ nguyên. PHẠM VI (chủ kho thu hẹp
@@ -2940,7 +2940,9 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
     else:
         duong = (kw["env"] if kw.get("env") is not None else os.environ).get("PATH", os.defpath)
         tran = min(len(os.fsencode(duong)), 4095) + 1
-        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(os.fsencode(d)) < tran]
+        phan = duong.split(os.pathsep)   # glibc: phần tử quá dài ⇒ con trỏ dừng ở `:` ⇒ thành phần tử RỖNG (cwd); cuối thì bỏ
+        phan = [d if len(os.fsencode(d)) < tran else "" for d in phan[:-1]] + [d for d in phan[-1:] if len(os.fsencode(d)) < tran]
+        ung_vien = [f"{d}/{ten}" if d else ten for d in phan]
     tiep = {errno.EACCES, errno.ENOENT, errno.ESTALE, errno.ENOTDIR, errno.ENODEV, errno.ETIMEDOUT}
     eacces = loi = None
     for tep in ung_vien:

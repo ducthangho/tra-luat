@@ -126,7 +126,8 @@ review:
     do_duoc: >-
       measured — readback-reviews-1065.json + readback-review-comments-1065.json: luot 1 tren 6733d09 (Draft marked ready)
       co 1 finding P2 (comment 4430537534: khoi tao ProgramFiles truoc chot nen => mat ma 4, -NapHam khong nap duoc); sua o
-      b0814f4, tra loi 4430544980, thread da resolve. Luot 2 tren b0814f4 (yeu cau "@codex review", comment 6539120935):
+      b0814f4, tra loi 4430544980. Thread PRRT_kwDOTNeRjc6yN7uy (chua ca 4430537534 va 4430544980) is_resolved=true —
+      readback-review-threads-1065.json (MCP get_review_comments, do sau khi cross-review luot 17 chi ra loi khai cu thieu nguon). Luot 2 tren b0814f4 (yeu cau "@codex review", comment 6539120935):
       comment 6539133141 "Didn't find any major issues", Reviewed commit b0814f4a4c.
     thu_tu_thoi_gian: >-
       measured — readback-comments-1065.json comment 6539133141 created 04:41:52Z, TRUOC readback-pr-1065.json merged_at

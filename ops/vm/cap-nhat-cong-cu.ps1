@@ -51,7 +51,7 @@ $OutputEncoding = [Text.UTF8Encoding]::new($false)
 
 $Script:TenTacVuHeThong = 'TraLuat-CapNhatCongCu-HeThong'
 $Script:TenTacVuNguoiDung = 'TraLuat-CapNhatCongCu-NguoiDung'
-$Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'
+$Script:ThuMucCaiDat = $null   # tính trong Register-LichCapNhat — xem chú thích ở đó
 $Script:KetQua = [System.Collections.Generic.List[object]]::new()
 $Script:DaCaiNode = $false
 $Script:GhHeader = @{ 'User-Agent' = 'tra-luat-cap-nhat-cong-cu'; Accept = 'application/vnd.github+json' }
@@ -411,6 +411,9 @@ function Invoke-TangHeThong {
 
 function Register-LichCapNhat([string]$GocKho) {
     # Chép script + bản kê + requirements vào Program Files (chỉ admin ghi) rồi đăng ký 2 tác vụ.
+    # Tính đường dẫn Ở ĐÂY, không ở mức script: ngoài Windows `ProgramFiles` không có, và `Join-Path $null` ném lỗi
+    # TRƯỚC chốt nền ⇒ mất mã 4 và `-NapHam` không nạp được (Codex review P2 trên PR #1065, head 6733d09).
+    $Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'
     New-Item -ItemType Directory -Force -Path $Script:ThuMucCaiDat | Out-Null
     $nguon = @{
         'cap-nhat-cong-cu.ps1' = $PSCommandPath

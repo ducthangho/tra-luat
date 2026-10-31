@@ -102,6 +102,17 @@ Ca 'dang_ky_loi_co_ma_thoat_rieng' { (Get-Content -LiteralPath $Script -Raw) -ma
 
 # ── mã thoát của chính script (tiến trình con) ──
 $pwsh = (Get-Process -Id $PID).Path
+# Không có ProgramFiles (như Linux): nạp hàm vẫn được, và chạy thường vẫn tới được chốt (mã 4 ngoài Windows, mã 5 sai máy
+# trên Windows) thay vì chết ở dòng khởi tạo — Codex review P2 trên PR #1065.
+$boPF = "Remove-Item Env:ProgramFiles -ErrorAction SilentlyContinue; "
+Ca 'napham_khong_can_programfiles' {
+    & $pwsh -NoProfile -Command ($boPF + ". '$Script' -NapHam; if (Get-Command Select-TaiSan -ErrorAction SilentlyContinue) { exit 0 } else { exit 9 }") *> $null
+    $LASTEXITCODE -eq 0
+}
+Ca 'khong_programfiles_van_toi_chot' {
+    & $pwsh -NoProfile -Command ($boPF + "& '$Script' -ChiKiem -MayDich 'KHONG-PHAI-MAY-NAY'; exit `$LASTEXITCODE") *> $null
+    $LASTEXITCODE -eq $(if ($IsWindows) { 5 } else { 4 })
+}
 if (-not $IsWindows) {
     Ca 'khong_phai_windows_thoat_4' { & $pwsh -NoProfile -File $Script -ChiKiem *> $null; $LASTEXITCODE -eq 4 }
 } else {

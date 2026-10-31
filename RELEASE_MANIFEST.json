@@ -5,10 +5,10 @@
   "skill_version": "1.36.69",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 195,
-  "total_bytes": 8864120,
-  "package_hash": "340c16a5fa439d0eef8f0ea83fb475dcd7c249805a2a74fa357206ec4f487bf3",
-  "content_hash": "340c16a5fa439d0eef8f0ea83fb475dcd7c249805a2a74fa357206ec4f487bf3",
+  "file_count": 197,
+  "total_bytes": 8874942,
+  "package_hash": "3d72aa0b9d580456e7d4d78f1136f87e95d1ee033b19b3a19a34ecff640d5ae3",
+  "content_hash": "3d72aa0b9d580456e7d4d78f1136f87e95d1ee033b19b3a19a34ecff640d5ae3",
   "required_missing": [],
   "files": [
     {
@@ -43,8 +43,8 @@
     },
     {
       "path": "SKILL.md",
-      "size": 47724,
-      "sha256": "12905a1c420a23b26a14421b44a9de786181210bccded8ccb92b355df60ef912"
+      "size": 47925,
+      "sha256": "3ad7b87898d9cc059e5f45fb3545f8823cae3062dbe0e4ed9b9aa5ff9b5fddd3"
     },
     {
       "path": "VERSION",
@@ -70,6 +70,11 @@
       "path": "changelog.d/wp-1038.md",
       "size": 1234,
       "sha256": "6028003711a9c9b59323f5476760c3f8cd80dc439c257c9260e426c38ada3d94"
+    },
+    {
+      "path": "changelog.d/wp-1052.md",
+      "size": 2465,
+      "sha256": "36e208fe2ffe757a346bea00270410c48425edc3ffee862ad6764945481da954"
     },
     {
       "path": "changelog.d/wp-710.md",
@@ -194,7 +199,7 @@
     {
       "path": "references/GOTCHAS.md",
       "size": 12266,
-      "sha256": "7146611551afd2c572534f46e745ace12b614bb8cfe10217f98915e17bea3246"
+      "sha256": "16ff1f5cb6916b437d2fe9682e35fdb6ce11f3131dceed7dd480de955d3117f6"
     },
     {
       "path": "references/KERNEL_APPENDIX.md",
@@ -409,7 +414,7 @@
     {
       "path": "references/golden/workflow_audit.json",
       "size": 31010,
-      "sha256": "6624450cfa319c18c06955c5719c7cf011948ff570e4f27d8f176b69d098f0ed"
+      "sha256": "6ac8753414eaef02da85f91953b43d4c66ab6968c00f76b33df58a7b5ab3a1c7"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -425,6 +430,11 @@
       "path": "references/subject_clusters.json",
       "size": 1923,
       "sha256": "3144c747e882e50c715cb7cb5f6511649fec06d471928fcf9c19d9f41304b0a4"
+    },
+    {
+      "path": "references/windows-testing.md",
+      "size": 7850,
+      "sha256": "3c188bb465b31b0da675c68418ca59d03a78c7ed3544d5dbf4bcf90f227d6b08"
     },
     {
       "path": "references/workflows/bundle_export.json",
@@ -933,8 +943,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2275427,
-      "sha256": "19fbb1f08312243b334454130dcf07256b5db936c999cffde8cd2eaf9062d0eb"
+      "size": 2275733,
+      "sha256": "ca4854b51a7f1a102caec581aa60772c3f481fed92084236ec3276122858ecc8"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

@@ -84,6 +84,40 @@ RC_KHONG_DO_DUOC = 2
 
 THU_MUC = "ops/reviews"
 
+
+def _hoi_trang_thai(hoi, p: Path) -> bool:
+    """`hoi()` (vd `p.is_dir`, `p.exists`) nhưng `OSError` ⇒ `KhongDoDuoc` nêu `p` (rc=2), không traceback.
+    #1021 lượt 2: chỉ `OSError` — lỗi lập trình phải đi thẳng ra (`c100` chốt 7)."""
+    try:
+        return hoi()
+    except OSError as ex:
+        raise KhongDoDuoc(f"không đọc được trạng thái {p} ({type(ex).__name__}: {ex})") from ex
+
+
+def _chon_bien_nhan(tm: Path) -> list:
+    """Mọi mục trong `tm` có đuôi `.receipt.yaml`, so KHÔNG phân biệt hoa thường, sắp xếp.
+
+    #1021 (`BIEN-NHAN-V2-GLOB-HOA-THUONG` r2): `Path.glob` với mẫu `*.receipt.yaml` khớp theo luật hoa thường
+    của NỀN — Windows không phân biệt, POSIX có — nên cùng một cây hai nền đếm hai tập biên nhận: tệp
+    `X.RECEIPT.YAML` bị cổng bỏ qua LẶNG trên Linux mà bị kiểm trên Windows. Cùng chiều với
+    `_liet_ke_theo_duoi` của `t27` (#1006). KHÔNG lọc `is_file()`: thư mục mang tên `*.receipt.yaml`
+    phải tới được phép băm để ra rc=2 (`c89`). Thư mục vắng ⇒ rỗng, như `glob` cũ.
+
+    Cross-review Codex lượt 1 (`loi-do-liet-ke-thu-muc-thoat-traceback`, P2): `glob` cũ NUỐT lỗi liệt kê (⇒ danh
+    sách rỗng: `kiem` báo "không có tệp", `--sinh-no` ra `# 0 tệp`), còn `iterdir()` NÉM — `EACCES` khi liệt kê từng
+    ra rc=1 + traceback ở cả `kiem` lẫn `--sinh-no`. Nay lỗi liệt kê là `KhongDoDuoc` nêu thư mục (rc=2); KHÔNG
+    trả rỗng (biến lỗi đo thành danh sách nợ rỗng) và KHÔNG bắt `Exception` (che lỗi lập trình).
+
+    Lượt 2 (cùng slug, P2): `Path.is_dir()` chỉ nuốt ENOENT/ENOTDIR/… — `EACCES` khi `stat` vẫn NÉM, nên phép hỏi
+    "có phải thư mục" cũng đi qua `_hoi_trang_thai` như phép liệt kê."""
+    if not _hoi_trang_thai(tm.is_dir, tm):
+        return []
+    try:
+        ds = [p for p in tm.iterdir() if p.name.lower().endswith(".receipt.yaml")]
+    except OSError as ex:
+        raise KhongDoDuoc(f"không liệt kê được {tm} ({type(ex).__name__}: {ex})") from ex
+    return sorted(ds)
+
 # --- Lược đồ v2 tối thiểu, chép theo `PROTOCOL §8` dòng 453-454 -------------------------
 # "Đích v2 tối thiểu có `schema_version: 2`, receipt ID, `reviewed_sha`, verdict path/hash,
 #  hai identity ở trên, evidence URL và khai loại/cường độ mỏ neo."
@@ -1434,14 +1468,15 @@ def kiem(root: Path, allowlist=None, no_da_do=None, no_cau_lich_su=None, nhanh_m
     no = NO_DA_DO if no_da_do is None else no_da_do
     no_cau = NO_CAU_LICH_SU if no_cau_lich_su is None else no_cau_lich_su
     tm = root / THU_MUC
-    if not tm.is_dir():
-        if (root / ".git").exists():
+    if not _hoi_trang_thai(tm.is_dir, tm):                      # #1021 lượt 2: EACCES ở `stat` ⇒ rc=2
+        if _hoi_trang_thai((root / ".git").exists, root / ".git"):
             raise KhongDoDuoc(f"kho thật mà không có {tm} — không phải 'sạch'")
         return [], {"tong": 0, "dat": 0, "mien_tru": 0, "no": 0, "bo_qua_vi_khong_phai_kho": True}
 
-    ds = sorted(tm.glob("*.receipt.yaml"))
+    ds = _chon_bien_nhan(tm)
     if not ds:
-        raise KhongDoDuoc(f"{tm} không có tệp `*.receipt.yaml` nào — mốc neo đã đổi?")
+        raise KhongDoDuoc(f"{tm} không có tệp `*.receipt.yaml` nào (so đuôi không phân biệt hoa thường) "
+                          "— mốc neo đã đổi?")
 
     loi, chua_do, dat, mien_tru, nod = [], [], 0, 0, 0
     if PROVIDER_NGUON_HONG is not None:
@@ -1598,7 +1633,7 @@ def _sinh_no(root: Path) -> int:
         raise KhongDoDuoc(f"thiếu PyYAML: {ex}") from ex
     tm = root / THU_MUC
     ra = {}
-    for p in sorted(tm.glob("*.receipt.yaml")):
+    for p in _chon_bien_nhan(tm):
         if p.name in ALLOWLIST_CUTOVER:
             continue
         try:

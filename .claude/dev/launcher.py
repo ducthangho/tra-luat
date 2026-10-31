@@ -2931,21 +2931,29 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
     (`CreateProcessW`), nên giữ nguyên. Lượt chạy lại trả kết quả cho phía gọi phân loại Y NHƯ lượt
     thường — không nới cho bản hỏng.
 
-    Tên trần (`gh`, `llm`…) được giải theo PATH của `env` TRƯỚC khi đưa cho `/bin/sh`: `sh TÊN` coi
-    đối số là đường dẫn tệp tính từ cwd, không tra PATH như `execvp`. Mọi probe công cụ của `doctor`
-    (bảng `CONG_CU` lẫn `KHA_NANG`) phải đi qua hàm này — `r1077_probe_doctor_khong_spawn_tran` khoá.
+    Tên trần (`gh`, `llm`…) được giải theo PATH của `env` TRƯỚC LẦN CHẠY ĐẦU (Codex lượt 2 F4, đo
+    trên container thật): `subprocess` gặp ENOEXEC ở bản đầu PATH sẽ THỬ TIẾP bản phía sau và chạy nó
+    — đo NHẦM công cụ, trong khi bash và `execvp` glibc dừng ở bản đầu. Giải trước rồi chạy đúng tệp
+    ấy; ENOEXEC thì `/bin/sh` chạy lại CHÍNH tệp ấy (`sh TÊN` không tra PATH). Không giải ra thì giữ
+    tên trần để `subprocess` báo không tìm thấy như cũ.
+
+    PHẠM VI (Codex lượt 2 F1, chủ kho thu hẹp 31-10-2026): các probe chạy CLI trong bảng `CONG_CU` và
+    `KHA_NANG` đi qua hàm này — `r1077_probe_doctor_khong_spawn_tran` khoá danh sách hàm. CHƯA phủ:
+    `_git` (dùng chung với đường `run`; doctor gọi nó để dò workspace, `_do_github`, hook/launcher) và
+    `_do_codex_song` (spawn nằm ở `codex_cred.py`, ngoài write set) — nợ nối tiếp, không phải "mọi probe".
     """
     import errno
+    tep = lenh[0]
+    if os.name != "nt" and os.sep not in tep:
+        moi = kw.get("env")
+        tep = shutil.which(tep, path=(moi if moi is not None else os.environ).get("PATH", os.defpath)) or tep
+    lenh = [tep, *lenh[1:]]
     try:
         return subprocess.run(lenh, **kw)
     except OSError as e:
         if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):
             raise
-        tep = lenh[0] if os.sep in lenh[0] else shutil.which(
-            lenh[0], path=(kw.get("env") or os.environ).get("PATH"))
-        if not tep:
-            raise
-    return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)
+    return subprocess.run(["/bin/sh", *lenh], **kw)
 
 
 def _chay_probe_llm(lenh: list[str], *, env=None, timeout: float = 30.0) -> subprocess.CompletedProcess:

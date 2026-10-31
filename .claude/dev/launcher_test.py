@@ -3355,7 +3355,7 @@ def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
         return (128, "", "fatal: unable to access")
 
     m._git = gia_git
-    m.shutil.which = lambda t: "/gia/gh" if t == "gh" else None
+    m.shutil.which = lambda t, *_a, **_k: "/gia/gh" if t == "gh" else None   # wp1077: probe truyen path=
 
     class P:
         def __init__(self, rc, out=""):
@@ -3451,7 +3451,7 @@ def t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA():
         return (0, "https://github.com/o/r.git", "") if a[:1] == ("remote",) else (128, "", "")
 
     m._git = gia_git
-    m.shutil.which = lambda t: "/gia/gh" if t == "gh" else None
+    m.shutil.which = lambda t, *_a, **_k: "/gia/gh" if t == "gh" else None   # wp1077: probe truyen path=
     m.os.environ = {"GH_TOKEN": "GIU_CHO"}          # bản CŨ, chưa chuẩn hoá
 
     class P:
@@ -3524,7 +3524,7 @@ def t103_nam_finding_cua_bot_review_PR128():
     m = _tai_launcher_thu()
 
     # (a) BIEN RONG khong phai credential
-    m.shutil.which = lambda t: f"/usr/bin/{t}"
+    m.shutil.which = lambda t, *_a, **_k: f"/usr/bin/{t}"   # wp1077: probe truyen path=
     m.os.path.expanduser = lambda d: "/khong-ton-tai-o-dau-ca" if d.startswith("~") else d
     m.os.environ = {"ANTHROPIC_API_KEY": ""}
     tt, mo_ta = m._do_claude()
@@ -3751,13 +3751,14 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
             self.returncode, self.stdout, self.stderr = rc, out, ""
 
     def dac_ta():
-        return (("claude", "mcp", "get", ten_mong_doi[0]),
+        # wp1077 (Codex lượt 2 F4): probe giải tên trần theo PATH TRƯỚC lần chạy ⇒ argv[0] là đường dẫn `which` trả.
+        return (("/usr/bin/claude", "mcp", "get", ten_mong_doi[0]),
                 {"capture_output": True, "text": True,
                  "encoding": "utf-8", "errors": "replace",
                  "timeout": m.PROBE_TIMEOUT_GIAY})
 
     def gia_run(cmd, *_a, **_k):
-        if list(cmd)[:2] != ["claude", "mcp"]:
+        if [os.path.basename(str(cmd[0])), *list(cmd)[1:2]] != ["claude", "mcp"]:
             return Rc(1)                       # gh/git: ngoai pham vi ca nay
         # DO GIA TU TU CHOI loi goi lech dac ta — chot TOAN PHAN, khong opt-in. Bon
         # luot cross-review lien tiep tim duoc dot bien song sot o dung lop nay, va
@@ -9370,9 +9371,10 @@ def r1077_llm_khong_shebang_ten_tran_giai_PATH():
 
 @ca
 def r1077_probe_doctor_khong_spawn_tran():
-    """F1: mọi hàm probe của `doctor` (CONG_CU + KHA_NANG) KHÔNG gọi thẳng `subprocess.run/Popen`
-    hay `_chay_van_ban_an_toan` — phải qua `_chay_probe_nhu_shell`. Ngoài: `_git` (đường `run` dùng chung),
-    `_do_codex_song` (spawn nằm ở codex_cred.py) — spec wp1077 mục Ngoài phạm vi."""
+    """F1: các hàm probe CLI của `doctor` (CONG_CU + KHA_NANG) liệt kê dưới đây KHÔNG gọi thẳng
+    `subprocess.run/Popen` hay `_chay_van_ban_an_toan` — phải qua `_chay_probe_nhu_shell`. Danh sách là
+    PHẠM VI ĐÃ THU HẸP (chủ kho, 31-10-2026), KHÔNG phải mọi probe: `_git` và `_do_codex_song`
+    (spawn ở codex_cred.py) chưa phủ — Codex lượt 2 F1, nợ nối tiếp."""
     import ast
     cay = ast.parse(LAUNCHER_DANG_DUNG.read_text(encoding="utf-8"))
     can = {"_phien_ban", "_xac_thuc_kem_dau_ra", "_do_codex", "_do_openai_llm", "_do_github",
@@ -9387,6 +9389,21 @@ def r1077_probe_doctor_khong_spawn_tran():
                     tran.append(f"{n.name}:{c.lineno}")
     bang(thay == can, f"thieu ham probe trong launcher: {sorted(can - thay)}")
     bang(not tran, f"probe doctor con spawn tran (khong qua _chay_probe_nhu_shell): {tran}")
+
+
+@ca
+def r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau():
+    """Codex lượt 2 F4: bản đầu PATH không shebang, bản sau có shebang ⇒ phải chạy BẢN ĐẦU như execvp/bash."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    m = _tai_launcher_thu()
+    with San() as d:
+        _wp1077_tep(d / "first", "cli", "echo FIRST\n")
+        _wp1077_tep(d / "later", "cli", "#!/bin/sh\necho LATER\n")
+        env = {"PATH": os.pathsep.join([str(d / "first"), str(d / "later")])}
+        p = m._chay_probe_nhu_shell(["cli", "--version"], env=env, capture_output=True, text=True)
+        bang(p.returncode == 0 and p.stdout == "FIRST\n",
+             f"probe bo qua ban dau PATH, chay ban sau: rc={p.returncode} {p.stdout!r}")
 
 
 @ca
@@ -12314,12 +12331,12 @@ DOT_BIEN = [
      ["r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC"]),
     ("wp1077_xac_thuc_khong_dung_probe_chung", ('p = _chay_probe_nhu_shell([duong_dan, *doi_so]', 'p = subprocess.run([duong_dan, *doi_so]'),
      ["r1077_xac_thuc_khong_shebang_chay_duoc"]),
-    ("wp1077_chay_lai_bo_qua_rc", ('    return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)',
-      '    q = subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)\n    return subprocess.CompletedProcess(lenh, 0, q.stdout, q.stderr)'),
+    ("wp1077_chay_lai_bo_qua_rc", ('    return subprocess.run(["/bin/sh", *lenh], **kw)',
+      '    q = subprocess.run(["/bin/sh", *lenh], **kw)\n    return subprocess.CompletedProcess(lenh, 0, q.stdout, q.stderr)'),
      ["r1077_doctor_khong_shebang_hong_van_BI_CHE"]),
     # Codex lượt 1: F3 (đối số) · F1 (mọi probe KHA_NANG + giải tên trần theo PATH).
-    ("wp1077_retry_mat_doi_so", ('    return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)',
-      '    return subprocess.run(["/bin/sh", tep], **kw)'), ["r1077_retry_giu_argv_env"]),
+    ("wp1077_retry_mat_doi_so", ('    return subprocess.run(["/bin/sh", *lenh], **kw)',
+      '    return subprocess.run(["/bin/sh", lenh[0]], **kw)'), ["r1077_retry_giu_argv_env"]),
     ("wp1077_codex_status_spawn_tran", ('p = _chay_probe_nhu_shell([duong_codex, "login", "status"]',
       'p = subprocess.run([duong_codex, "login", "status"]'),
      ["r1077_doctor_codex_status_khong_shebang", "r1077_probe_doctor_khong_spawn_tran"]),
@@ -12328,8 +12345,9 @@ DOT_BIEN = [
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_probe_doctor_khong_spawn_tran"]),
     ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
      ["r1077_probe_doctor_khong_spawn_tran"]),
-    ("wp1077_ten_tran_khong_giai_PATH", ('tep = lenh[0] if os.sep in lenh[0] else shutil.which(',
-      'tep = lenh[0] if True else shutil.which('), ["r1077_llm_khong_shebang_ten_tran_giai_PATH"]),
+    # Codex lượt 2 F4: giải PATH TRƯỚC lần chạy đầu (bỏ ⇒ subprocess chạy bản sau; sh TÊN không tra PATH).
+    ("wp1077_ten_tran_khong_giai_PATH", ('    if os.name != "nt" and os.sep not in tep:', '    if False:'),
+     ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau"]),
     ("wp802_launcher_winget_thanh_choco", ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
      ["r802_bang_cai_rg_khop_cong_cu_yaml"]),

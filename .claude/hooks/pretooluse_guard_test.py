@@ -1027,7 +1027,7 @@ DOT_BIEN = [
     # --- luot 2: dot bien cho BA chot vua them ---
     ("m23_rong_bang_lenh_LONG", "_TL_LENH_GHI_LONG = frozenset({",
      "_TL_LENH_GHI_LONG = frozenset()\n_TL_LENH_GHI_LONG_CU = frozenset({"),
-    ("m24_bo_tieu_gia_tri_co_global", "                k += 2 if not ra else 1",
+    ("m24_bo_tieu_gia_tri_co_global", "                k += 2 if not ra or a in _TL_CO_GLOBAL_AN_GIA_TRI else 1",
      "                k += 1"),
     ("m25_noi_kich_ban_ve_theo_THU_MUC",
      '_KICH_BAN_CHO_PHEP = frozenset({"scripts/tl.py"})',

@@ -124,9 +124,24 @@ def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), ch�
         nk = json.loads((t / "nk").read_text(encoding="utf-8")) if (t / "nk").exists() else {}
         song = _song_roi_don([nk.get("con"), *([int((t / "nk.chau").read_text())] if (t / "nk.chau").exists() else [])])
     bang(song, "fixture hỏng: con/cháu phải còn sống khi chỉ cha bị giết")
-    bang("KHÔNG dừng được" in buf.getvalue() and "đã dừng" not in buf.getvalue(), f"báo dừng khi nhóm còn sống: {buf.getvalue()!r}")
+    bang("KHÔNG xác minh được việc dừng" in buf.getvalue() and "đã dừng" not in buf.getvalue(), f"báo dừng khi nhóm còn sống: {buf.getvalue()!r}")
     ra = buf.getvalue()   # F12: nhóm KHÔNG dừng được vẫn chuyển tiếp log đã nhận, đúng một lần, đã che, bỏ dòng agent cũ
     bang(ra.count("chẩn đoán ***") == 1 and ra.count("lỗi chẩn đoán") == 1 and "SENTINEL-a9" not in ra and ra.count("agent_creds:") == 1, f"log: {ra!r}")
+def _co_subreaper():   # PR_GET_CHILD_SUBREAPER của CHÍNH tiến trình test
+    import ctypes
+    c = ctypes.c_int(-1)
+    return c.value if ctypes.CDLL(None).prctl(37, ctypes.byref(c), 0, 0, 0) == 0 else None
+def a11_subreaper_va_esrch():   # (B, #1039): CHỈ ESRCH sau khi thu hồi cháu mồ côi mới "đã dừng"; không subreaper ⇒ không xác minh
+    _posix()
+    for co_sr in (True, False):
+        m = nap_mod()
+        m._SUBREAPER = None if co_sr else False
+        bang(m._dat_subreaper() is co_sr and (not co_sr or _co_subreaper() == 1), f"subreaper={co_sr}: không đặt được thật")
+        p = subprocess.Popen(["sh", "-c", "sleep 30 & echo $!; sleep 30"], stdout=subprocess.PIPE, start_new_session=True)
+        time.sleep(0.3)
+        da, ra = m._giet_nhom(p)
+        song = _song_roi_don([int(x) for x in ra.split()[:1]])
+        bang(ra.split() and da is co_sr and not song, f"subreaper={co_sr}: đã dừng={da}, cháu còn sống {song}, ra={ra!r}")
 def a5_doc_timeout():
     m = nap_mod()
     for v in ("abc", "-5", "0", "inf", "1e300", "2147484"):
@@ -312,7 +327,10 @@ DOT_BIEN = (
     ("A4_chi_giet_cha", "ma", "os.killpg(p.pid, signal.SIGKILL) if", "p.kill() if", "a4_qua_han_giet_ca_nhom"),
     ("A9_mat_log_khi_khong_dung_duoc", "ma", "        ra = e.output or b\"\"\n", "        ra = b\"\"\n", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
     ("A4_bo_chuyen_tiep_log_khi_qua_han", "ma", "(da, ra), ly = _giet_nhom(p),", "(da, _), ra, ly = _giet_nhom(p), b\"\",", "a4_qua_han_giet_ca_nhom"),
-    ("A9_bo_hau_kiem_nhom", "ma", "    return song is False, ra", "    return True, ra", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
+    ("A9_bo_hau_kiem_nhom", "ma", "            os.killpg(p.pid, 0)\n", "            raise ProcessLookupError\n", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
+    ("A11_bo_subreaper", "ma", "_SUBREAPER = ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) == 0", "_SUBREAPER = True", "a11_subreaper_va_esrch"),
+    ("A11_bo_waitpid", "ma", "            while os.waitpid(-p.pid, os.WNOHANG)[0] > 0:", "            while False:", "a11_subreaper_va_esrch"),
+    ("A11_khong_prctl_van_bao_dung", "ma", "    if os.name == \"nt\" or not _dat_subreaper():\n        return False, ra\n", "", "a11_subreaper_va_esrch"),
     ("A4_bo_timeout", "ma", "p.communicate(timeout=han)", "p.communicate()", "a4_qua_han_giet_ca_nhom"),
     ("A5_nhan_0", "ma", "0 < v <= 86400", "0 <= v <= 86400", "a5_doc_timeout"),
     ("A5_bo_tran_tren", "ma", "0 < v <= 86400", "0 < v", "a5_doc_timeout"),

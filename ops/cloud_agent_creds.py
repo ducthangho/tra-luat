@@ -33,23 +33,21 @@ def ket_luan(dong_agent, rc):
     if not sep or s not in TRANG_THAI:
         return "KHÔNG ĐO ĐƯỢC — đầu ra bootstrap không đúng hợp đồng (trạng thái lạ)"
     return f"{s} — {ct} (bootstrap rc={rc})"
-def _nhom_song(pgid):
-    """Nhóm còn thành viên KHÔNG phải zombie: True / False; không đo được ⇒ None (F11 — đo cả nhóm, không chỉ cha)."""
-    try:
-        os.killpg(pgid, 0)
-    except ProcessLookupError:
-        return False
-    except OSError:
-        return None
-    if not Path("/proc/self/stat").exists():
-        return None
-    tt = []
-    for f in Path("/proc").glob("[0-9]*/stat"):   # tiến trình biến mất giữa chừng: bỏ qua đúng tệp ấy
-        with contextlib.suppress(OSError, IndexError):
-            tt.append(f.read_text().rsplit(")", 1)[1].split())
-    return any(len(x) > 2 and x[2] == str(pgid) and x[0] != "Z" for x in tt)
+_SUBREAPER = None
+def _dat_subreaper():
+    """Linux `prctl(PR_SET_CHILD_SUBREAPER)`: con cháu mồ côi của nhóm được trả về CHÍNH tiến trình này để thu hồi.
+    Gọi TRƯỚC Popen. Không có/không đặt được ⇒ False, và khi đó KHÔNG BAO GIỜ báo "đã dừng" (chủ kho chọn (B), #1039)."""
+    global _SUBREAPER
+    if _SUBREAPER is None:
+        try:
+            import ctypes
+            _SUBREAPER = ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) == 0
+        except (OSError, AttributeError, TypeError):
+            _SUBREAPER = False
+    return _SUBREAPER
 def _giet_nhom(p):
-    """Giết cả nhóm, thu output còn lại, rồi KIỂM LẠI cả nhóm (hạn HAN_DON). (đã chết?, bytes đã nhận)."""
+    """SIGKILL cả nhóm, thu output còn lại, thu hồi mọi thành viên (subreaper), rồi CHỈ ESRCH của `killpg(pg, 0)` mới là
+    đã dừng — không đọc /proc. (đã dừng?, bytes đã nhận)."""
     ra = b""
     with contextlib.suppress(OSError):
         os.killpg(p.pid, signal.SIGKILL) if os.name != "nt" else p.kill()
@@ -59,12 +57,22 @@ def _giet_nhom(p):
         ra = e.output or b""
     except (OSError, ValueError):
         pass
-    if p.poll() is None or os.name == "nt":
-        return p.poll() is not None, ra
+    if os.name == "nt" or not _dat_subreaper():
+        return False, ra
     het = time.monotonic() + HAN_DON
-    while (song := _nhom_song(p.pid)) and time.monotonic() < het:
-        time.sleep(0.1)
-    return song is False, ra
+    while True:
+        with contextlib.suppress(OSError):
+            while os.waitpid(-p.pid, os.WNOHANG)[0] > 0:   # thu hồi zombie của nhóm (con cháu đã về tay subreaper)
+                pass
+        try:
+            os.killpg(p.pid, 0)
+        except ProcessLookupError:
+            return True, ra
+        except OSError:
+            return False, ra
+        if time.monotonic() >= het:
+            return False, ra
+        time.sleep(0.05)
 def nap(env=os.environ):
     khoa, rc = env.get("TL_MASTER_KEY") or "", None
     if not khoa:
@@ -74,6 +82,7 @@ def nap(env=os.environ):
     try:
         if not tl.is_file():
             raise FileNotFoundError(str(tl))
+        _dat_subreaper()
         p = subprocess.Popen([sys.executable, str(tl), "bootstrap", "--env", "code", "--no-nlm"], cwd=str(GOC),
                              stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              start_new_session=os.name != "nt")
@@ -84,7 +93,7 @@ def nap(env=os.environ):
         (ra, _), rc, het_han = p.communicate(timeout=han), p.returncode, None
     except Exception as e:  # noqa: BLE001 — quá hạn hay lỗi chờ: dọn cả nhóm, vẫn chuyển tiếp log đã nhận (F12), đúng một dòng
         (da, ra), ly = _giet_nhom(p), f"bootstrap quá {han:g} s" if isinstance(e, subprocess.TimeoutExpired) else f"lỗi chờ bootstrap ({type(e).__name__})"
-        het_han = f"KHÔNG ĐO ĐƯỢC — {ly}, {'đã dừng' if da else 'KHÔNG dừng được'}"
+        het_han = f"KHÔNG ĐO ĐƯỢC — {ly}, {'đã dừng' if da else 'KHÔNG xác minh được việc dừng'}"
     dong_agent = []
     for d in ra.decode("utf-8", "replace").replace(khoa, "***").splitlines():
         if "agent_creds:" in d:
@@ -112,6 +121,7 @@ def tai(url):
         return r.read()
 def _ban_khop(agy):   # `agy --version` rc 0 và có TOKEN đúng bằng AGY_VER (1.4.120, 1.4.12rc1 ⇒ lệch); thiếu/hỏng ⇒ False
     try:
+        _dat_subreaper()
         p = subprocess.Popen([str(agy), "--version"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, stdout=subprocess.PIPE,
                              start_new_session=os.name != "nt")
     except OSError:

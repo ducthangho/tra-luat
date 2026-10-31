@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 197,
-  "total_bytes": 8874942,
-  "package_hash": "3d72aa0b9d580456e7d4d78f1136f87e95d1ee033b19b3a19a34ecff640d5ae3",
-  "content_hash": "3d72aa0b9d580456e7d4d78f1136f87e95d1ee033b19b3a19a34ecff640d5ae3",
+  "total_bytes": 8874994,
+  "package_hash": "daa77a90b38b43148850fda071f49847141ca785efafa9061959a88e673df5bf",
+  "content_hash": "daa77a90b38b43148850fda071f49847141ca785efafa9061959a88e673df5bf",
   "required_missing": [],
   "files": [
     {
@@ -73,8 +73,8 @@
     },
     {
       "path": "changelog.d/wp-1052.md",
-      "size": 2465,
-      "sha256": "36e208fe2ffe757a346bea00270410c48425edc3ffee862ad6764945481da954"
+      "size": 2517,
+      "sha256": "0fb54cad0e9961f6f55053c6914b64825cd4c4c9460480869c3fb02b7d2d5f93"
     },
     {
       "path": "changelog.d/wp-710.md",

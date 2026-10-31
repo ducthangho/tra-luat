@@ -25,7 +25,7 @@ asset GitHub → tệp checksum trong CÙNG release → (Node) SHASUMS256.txt. K
 công cụ đó (đo 31-10: actionlint 1.7.7 không có `digest` nhưng có `*_checksums.txt`).
 
 Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê/tham số sai · 3 tầng HeThong mà không
-phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì.
+phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì · 6 -DangKyLich hỏng giữa chừng.
 #>
 [CmdletBinding()]
 param(
@@ -412,21 +412,28 @@ function Register-LichCapNhat([string]$GocKho) {
     $aHT = New-ScheduledTaskAction -Execute $pwsh -Argument "-NoProfile -NonInteractive -File `"$script`" -PhamVi HeThong"
     $aND = New-ScheduledTaskAction -Execute $pwsh -Argument "-NoProfile -NonInteractive -File `"$script`" -PhamVi NguoiDung"
     $pHT = New-ScheduledTaskPrincipal -UserId 'NT AUTHORITY\SYSTEM' -LogonType ServiceAccount -RunLevel Highest
-    # S4U: chạy khi không ai đăng nhập mà KHÔNG lưu mật khẩu (mạng Internet vẫn dùng được).
-    $pND = New-ScheduledTaskPrincipal -UserId "$env:COMPUTERNAME\$TaiKhoanNguoiDung" -LogonType S4U -RunLevel Limited
-    Register-ScheduledTask -TaskName $Script:TenTacVuHeThong -Action $aHT -Trigger $tHT -Principal $pHT -Settings $caiDat -Force | Out-Null
-    Register-ScheduledTask -TaskName $Script:TenTacVuNguoiDung -Action $aND -Trigger $tND -Principal $pND -Settings $caiDat -Force | Out-Null
+    # -ErrorAction Stop TƯỜNG MINH: Register-ScheduledTask là hàm module CDXML, KHÔNG thừa hưởng $ErrorActionPreference
+    # của script — đo 31-10-2026, lỗi của nó trôi qua, script chết ở bước sau và in rc=0 (mã của icacls trước đó).
+    Register-ScheduledTask -TaskName $Script:TenTacVuHeThong -Action $aHT -Trigger $tHT -Principal $pHT -Settings $caiDat -Force -ErrorAction Stop | Out-Null
+    # Tầng NguoiDung lưu mật khẩu (như TraLuatRemoteCommander có sẵn). S4U cho tài khoản KHÁC bị từ chối trên VM
+    # (`Access is denied`, đo 31-10-2026). Mật khẩu chỉ đi từ hộp nhập vào Task Scheduler, không vào lệnh/log.
+    $ten = "$env:COMPUTERNAME\$TaiKhoanNguoiDung"
+    $cred = Get-Credential -UserName $ten -Message "Mật khẩu của $ten (để tác vụ $($Script:TenTacVuNguoiDung) chạy khi không ai đăng nhập)"
+    if (-not $cred) { throw 'không nhập mật khẩu — chưa đăng ký tác vụ NguoiDung' }
+    Register-ScheduledTask -TaskName $Script:TenTacVuNguoiDung -Action $aND -Trigger $tND -Settings $caiDat -Force -ErrorAction Stop `
+        -User $ten -Password $cred.GetNetworkCredential().Password -RunLevel Limited | Out-Null
+    Remove-Variable cred
     # Cho tlcommander quyền ĐỌC + CHẠY hai tác vụ (không sửa được): Commander bấm "chạy ngay" khi được yêu cầu,
     # còn nội dung chạy vẫn là script trong Program Files mà tlcommander không ghi được.
     $sid = (New-Object Security.Principal.NTAccount("$env:COMPUTERNAME\$TaiKhoanNguoiDung")).Translate([Security.Principal.SecurityIdentifier]).Value
     $svc = New-Object -ComObject Schedule.Service; $svc.Connect()
-    foreach ($ten in $Script:TenTacVuHeThong, $Script:TenTacVuNguoiDung) {
-        $t = $svc.GetFolder('\').GetTask($ten)
+    foreach ($tenTv in $Script:TenTacVuHeThong, $Script:TenTacVuNguoiDung) {
+        $t = $svc.GetFolder('\').GetTask($tenTv)
         # 4 = DACL_SECURITY_INFORMATION; đọc cả SACL (0xF) cần SeSecurityPrivilege mà admin thường chưa bật.
         $sd = Add-AceVaoSddl $t.GetSecurityDescriptor(4) "(A;;GRGX;;;$sid)"
         $t.SetSecurityDescriptor($sd, 0)
     }
-    Get-ScheduledTask -TaskName $Script:TenTacVuHeThong, $Script:TenTacVuNguoiDung |
+    Get-ScheduledTask -TaskName $Script:TenTacVuHeThong, $Script:TenTacVuNguoiDung -ErrorAction Stop |
         Select-Object TaskName, State, @{ n = 'User'; e = { $_.Principal.UserId } }, @{ n = 'Logon'; e = { $_.Principal.LogonType } } | Format-Table -AutoSize | Out-String | Write-Host
 }
 
@@ -446,7 +453,8 @@ $laSystem = $id.User.Value -eq 'S-1-5-18'
 
 if ($DangKyLich) {
     if (-not $laAdmin) { Write-Loi '-DangKyLich cần PowerShell chạy bằng quyền admin'; exit 3 }
-    Register-LichCapNhat $goc
+    try { Register-LichCapNhat $goc }
+    catch { Write-Loi "-DangKyLich hỏng: $($_.Exception.Message)"; exit 6 }
     exit 0
 }
 if ($PhamVi -eq 'HeThong' -and -not ($laSystem -or $laAdmin)) { Write-Loi 'tầng HeThong cần SYSTEM hoặc admin'; exit 3 }

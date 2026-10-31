@@ -84,6 +84,13 @@ Ca 'ban_ke_thieu_ghim_thi_nem' {
     try { Nem { Read-BanGhim $t $py } } finally { Remove-Item -LiteralPath $t -Force }
 }
 
+# ── tĩnh: mọi lệnh *-ScheduledTask* làm thay đổi phải có -ErrorAction Stop (hàm CDXML không thừa hưởng preference) ──
+Ca 'scheduledtask_co_erroraction_stop' {
+    $dong = @(Get-Content -LiteralPath $Script | Where-Object { $_ -match '^\s*Register-ScheduledTask\b' })
+    $dong.Count -ge 2 -and -not ($dong | Where-Object { $_ -notmatch '-ErrorAction Stop' })
+}
+Ca 'dang_ky_loi_co_ma_thoat_rieng' { (Get-Content -LiteralPath $Script -Raw) -match 'catch \{ Write-Loi "-DangKyLich hỏng: [^"]*"; exit 6 \}' }
+
 # ── mã thoát của chính script (tiến trình con) ──
 $pwsh = (Get-Process -Id $PID).Path
 if (-not $IsWindows) {

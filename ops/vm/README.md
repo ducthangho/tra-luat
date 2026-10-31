@@ -28,7 +28,8 @@ Remove-Item -Recurse -Force $d
 2. giao `C:\Tools\{npm,Python312,bin}` cho `tlcommander` (owner + Modify) — từ đây coi `C:\Tools` là vùng
    của tài khoản ấy, admin/SYSTEM không chạy công cụ từ đó;
 3. đăng ký `TraLuat-CapNhatCongCu-HeThong` (SYSTEM, CN 02:30) và `TraLuat-CapNhatCongCu-NguoiDung`
-   (`tlcommander`, S4U — không lưu mật khẩu, CN 03:30), 2 tuần/lần, `StartWhenAvailable` (VM tắt thì chạy
+   (`tlcommander`, lưu mật khẩu như `TraLuatRemoteCommander` — script HỎI mật khẩu khi đăng ký; S4U bị từ chối trên
+   VM; CN 03:30; đổi mật khẩu `tlcommander` thì chạy lại `-DangKyLich`), 2 tuần/lần, `StartWhenAvailable` (VM tắt thì chạy
    bù khi bật). `tlcommander` được quyền đọc + chạy hai tác vụ, không sửa được.
 
 ## Chạy theo yêu cầu

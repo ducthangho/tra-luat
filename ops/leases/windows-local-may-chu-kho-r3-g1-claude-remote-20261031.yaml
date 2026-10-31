@@ -18,8 +18,15 @@ recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-10-31T01:59:00Z'
 heartbeat_at: '2026-10-31T01:59:00Z'
-lease_until: '2026-11-01T01:59:00Z'
-lease_expires_at_utc: '2026-11-01T01:59:00Z'
+lease_until: '2026-10-31T10:05:23Z'
+lease_expires_at_utc: '2026-10-31T10:05:23Z'
+rut_han:
+  han_cu: '2026-11-01T01:59:00Z'
+  han_moi: '2026-10-31T10:05:23Z'
+  rut_boi: ducthangho
+  ly_do: 'packet WINDOWS-LOCAL-MAY-CHU-KHO r3 da merge (PR #1064, head cb9bd240c269811f14331b827879b271498c6628, merge 086f1b7343fc1d778e50797e6c9ca0964b11a755, 2026-10-31T10:03:41Z, merged_by ducthangho).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le r1 (e4844b9), r2 (cf5c0fb)'
+  ghi_boi: claude-dispatcher-session (phien dieu phoi session_01V2PEqhkb91vD5PCBM5yXbm)
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude

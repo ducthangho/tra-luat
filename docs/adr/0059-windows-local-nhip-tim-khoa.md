@@ -62,8 +62,8 @@ sửa `ADR-0057`. Mọi điểm khác của hai ADR giữ nguyên hiệu lực. 
 - **D10.** Khoá dạng cũ ghi 09:01:16Z, quá 2 giờ nên hết hiệu lực theo 3(b). Phiên tiếp nhận kiểm tải và thấy PID
   26296 `tl.py --selftest`, không phải MCP. Mục 2 so giờ tạo PID 26296 với 09:01:16Z. Sổ đo không ghi
   `CreationDate`, giờ bắt đầu lượt suy từ 18113 s không phải giờ tạo tiến trình, và lần đọc lại không tìm thấy sự
-  kiện Security 4688 nào ngày 30-10, nên nguồn ấy không cho số đo giờ tạo tiến trình. Nguồn quyết định là cặp tệp của chính phiên giữ khoá, đọc lại chỉ-đọc qua
-  Desktop Commander ngày 31-10-2026:
+  kiện Security 4688 nào ngày 30-10, nên nguồn ấy không cho số đo giờ tạo tiến trình. Nguồn quyết định là cặp tệp
+  của chính phiên giữ khoá, đọc lại chỉ-đọc qua Desktop Commander ngày 31-10-2026:
   - script `C:\Users\admin\tl-work\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest.ps1` (sửa lần cuối 09:00:26Z) ghi
     `BAT_DAU`, ghi khoá, ngủ 3 s, fetch và checkout, rồi lấy mẫu
     `Get-CimInstance Win32_Process -Filter "Name='python.exe'"` không loại PID nào thành dòng `TAI_TRUOC`, và chỉ

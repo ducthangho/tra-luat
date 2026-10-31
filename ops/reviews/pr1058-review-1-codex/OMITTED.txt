@@ -1,0 +1,2 @@
+DIFF.patch	sha256 a8e3d2e479804d07751849d0dc4f74a2ae4c7d5613473833a8a3a9470a1ed8da	bytes 605514	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); tai lap: git diff afc82f6 5dd347c
+cay-kho/ base-copy/	khong chep: ban sao kho cua sandbox reviewer, tai lap bang clone tai reviewed_sha / base

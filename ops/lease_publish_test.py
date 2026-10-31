@@ -1614,11 +1614,14 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
 
     for dong in _dong(van):
         m = re.match(r"^ {0,3}(`{3,}|~{3,})", dong)
+        # Rào backtick có `info` chứa backtick KHÔNG phải rào (GFM §4.5) — là chữ thường (lượt 9).
+        if m and m.group(1)[0] == "`" and "`" in dong[m.end():] and rao is None:
+            m = None
         if m:
             k, d = m.group(1)[0], len(m.group(1))
             if rao is None:
                 rao = (k, d)
-            elif k == rao[0] and d >= rao[1] and not dong.strip()[d:].strip():
+            elif k == rao[0] and d >= rao[1] and re.fullmatch(r"[ \t]*", dong[m.end():]):
                 rao = None
             dau_bang, cho_gach, trong_doan = None, False, False
             continue
@@ -1638,13 +1641,15 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
         bang("\x01" not in dong,
              f"mục '{tieu_de}' có comment HTML (`<!--`/`-->`) — comment có thể ghép hai hàng bảng làm một "
              f"hoặc giấu chữ, nên mục lục không kiểm chắc được. Chuyển comment ra ngoài mục.")
-        if not dong.strip():
+        # Dòng trống chỉ là dòng rỗng hoặc toàn space/tab (GFM §2.1) — `str.strip()` coi cả NBSP, U+3000,
+        # U+2028… là trắng, nên một dòng GitHub coi là CHỮ đã ngắt đoạn trong bộ đọc (lượt 9).
+        if re.fullmatch(r"[ \t]*", dong):
             dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if trong_doan and dau_bang is None and re.fullmatch(r" {0,3}(=+|-+)[ \t]*", dong):
             lay = False                                    # tiêu đề setext: dòng văn ngay trên thành tiêu đề
             continue
-        if not dong.strip().startswith("|"):
+        if not dong.lstrip(" \t").startswith("|"):
             dau_bang, cho_gach, trong_doan = None, False, True   # hết bảng; dòng văn
             continue
         # Hàng thụt lề: 4 dấu cách là KHỐI MÃ, không phải bảng (lượt 7) — đòi cột 0 như mục lục thật.
@@ -1879,6 +1884,17 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
     _kiem_muc_luc(_doi_thu_muc_reviews(), HERE.parent)
 
 
+def _id_hien_thi(o: str) -> set:
+    """ID trong một ô cột `id`: ô phải là TRỌN một dãy code span một nháy (cách bằng space/tab hoặc `,`) — đúng
+    dạng mục lục thật (đo 31-10-2026: 750/750 ô). Dạng khác cho tập RỖNG (cross-review #1051 lượt 9: `.split()`
+    nhận `C1` từ `<span data-x=" C1 ">OTHER</span>` hay `[OTHER]( C1 )`, trong khi ô hiển thị `OTHER`)."""
+    import re
+    o = o.strip(" \t")
+    if not re.fullmatch(r"`[^`\s]+`(?:[ \t]*,?[ \t]*`[^`\s]+`)*", o):
+        return set()
+    return set(re.findall(r"`([^`\s]+)`", o))
+
+
 def _kiem_muc_luc(thu_muc: Path, goc: Path):
     """Thân của `t27`: `thu_muc` là thư mục verdict, `goc` là gốc kho để so `verdict_path`."""
     import yaml
@@ -1976,7 +1992,7 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
             # `tệp verdict`. Ràng theo hàng thôi vẫn thủng: phần mô tả của một hàng nhắc
             # CHÉO tên verdict khác kèm id của nó thì phép kiểm "cả hai chuỗi có mặt đâu
             # đó trong hàng" nhận nhầm đó là cảnh báo của verdict thứ hai.
-            bang(any(ma in {x.strip().strip("`") for x in h.get(k_cb_id, "").split()}
+            bang(any(ma in _id_hien_thi(h.get(k_cb_id, ""))
                      and ten_cb & _ten_tep(h.get(k_cb_v, ""))
                      for h in hang_cb),
                  f"{muc_luc.name}: caveat {ma!r} của {p.name} KHÔNG nằm ở CỘT 'id' trên "
@@ -2262,8 +2278,9 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
                      "two&#46;x-verdict.md", "khac`x-verdict.md`", "[_x_-verdict.md](_x_-verdict.md)"):
             phai_do(cb, o_cb=o_cb)
         # `\|` là NỘI DUNG ô (GFM §4.10): chữ sau nó vẫn thuộc cột 'tệp verdict', không tràn sang cột kế.
-        phai_do(bn, hang_ml=r"| `x-verdict.md` \| x-verdict.receipt.yaml | khac.receipt.yaml |")
-        phai_do(cb, hang_cb=r"| `x-verdict.md` \| C1 | C2 |")
+        # Giá trị TRONG nháy để chỉ chốt `\|` quyết định (bản trần bị ngữ pháp ô từ chối sẵn — không đo gì).
+        phai_do(bn, hang_ml=r"| `x-verdict.md` \| `x-verdict.receipt.yaml` | `khac.receipt.yaml` |")
+        phai_do(cb, hang_cb=r"| `x-verdict.md` \| `C1` | `C2` |")
         # Comment HTML TRONG mục (lượt 6–7): trong span thì là chữ hiển thị (xoá rỗng ⇒ tên khác liền lại); nhiều
         # dòng thì ghép ô của HAI hàng; một mình thì giấu tên/id. Không đọc chắc được ⇒ cấm hẳn trong mục.
         cm = ("comment HTML",)
@@ -2385,6 +2402,17 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
             "trich_dan_ngay_truoc": ("Cảnh báo", dict(cb="> trích\n" + CB)),
             "setext_cat_muc": ("Mục lục", dict(ml="Khác\n---\n\n" + ML)),
             "tieu_de_thut_cat_muc": ("Mục lục", dict(ml="   ## Khác\n\n" + ML)),
+            # lượt 9: dòng chỉ có ký tự trắng Unicode KHÔNG phải dòng trống (GFM: chỉ space/tab)
+            "nbsp_khong_phai_dong_trong": ("Cảnh báo", dict(cb="Ghi chú\n \n" + CB)),
+            "u3000_khong_phai_dong_trong": ("Mục lục", dict(ml="Ghi chú\n　\n" + ML)),
+            "bang_gia_ngan_bang_nbsp": ("Cảnh báo", dict(cb="| other | other |\n|---|---|\n \n" + CB)),
+            # rào backtick có info chứa backtick không phải rào ⇒ rào thật mở ở dòng SAU và nuốt bảng
+            "rao_mo_info_co_nhay": ("Mục lục", dict(ml="```info`\n```\n\n" + ML + "\n```")),
+            "rao_dong_kem_nbsp": ("Mục lục", dict(ml="```\n``` \n\n" + ML + "\n```")),
+            # ô id hiển thị OTHER, C1 chỉ nằm trong thuộc tính HTML / đích link
+            "id_trong_thuoc_tinh": ("'C1'", dict(cb=CB.replace("`C1`", '<span data-x=" C1 ">OTHER</span>'))),
+            "id_trong_the_html": ("'C1'", dict(cb=CB.replace("`C1`", "<span C1 >OTHER</span>"))),
+            "id_trong_dich_link": ("'C1'", dict(cb=CB.replace("`C1`", "[OTHER]( C1 )"))),
         }
         for ten, (dau_hieu, kw) in do.items():
             viet(**kw)

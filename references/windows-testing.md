@@ -2,14 +2,16 @@
 
 Test/build trên Windows qua Desktop Commander: đọc tệp này. Mặc định dùng tra-luat-win; ASUS dùng khi cần tương thích/UI. Luôn chọn deviceId, kiểm hostname/source SHA và tách vùng ghi mỗi run. Commander là transport, không thay Packet/lease hay release gate.
 
+Khoá máy, sổ đo và thư mục phiên theo ADR-0057, ADR-0058, ADR-0059 (kho nguồn, dev-side): đọc các ADR ấy trước mỗi lượt; tệp này không chép lại luật của chúng. Mỗi máy dùng thư mục gốc `tl-win` của chính nó: `D:\tl-win` trên ASUS-LAPTOP, `C:\tl-win` trên tra-luat-win (không có ổ D).
+
 Cập nhật thông tin đã xác minh ngày 2026-10-31 (Asia/Saigon). Kiểm tra trạng thái và phiên bản thực tế mỗi lượt; không coi trạng thái Online hay phiên bản bên dưới là cố định.
 
 ## Chọn máy
 
 | Vai trò | Máy | Commander deviceId | Thư mục |
 |---|---|---|---|
-| Mặc định cho build/test Windows | tra-luat-win | f7281f27-f79f-40a2-a2f5-b454b58a166a | Snapshot: C:\work\tra-luat; vùng làm việc: C:\work\tra-luat-agent |
-| Kiểm tra tương thích máy cá nhân/UI | ASUS-LAPTOP | 7404cfba-9034-4787-b46b-7c358126a411 | Canonical: D:\Quốc hội\tra-luat; vùng riêng: C:\Users\admin\tl-work |
+| Mặc định cho build/test Windows | tra-luat-win | f7281f27-f79f-40a2-a2f5-b454b58a166a | Snapshot: C:\work\tra-luat; vùng làm việc: C:\work\tra-luat-agent; khoá/sổ đo/thư mục phiên: C:\tl-win |
+| Kiểm tra tương thích máy cá nhân/UI | ASUS-LAPTOP | 7404cfba-9034-4787-b46b-7c358126a411 | Canonical: D:\Quốc hội\tra-luat; vùng riêng: C:\Users\admin\tl-work; khoá/sổ đo/thư mục phiên: D:\tl-win |
 
 Gọi list_devices và luôn truyền deviceId rõ ràng. Xác minh hostname, tài khoản, PowerShell, thư mục và source SHA trước lệnh ghi/test. Nếu hostname không khớp thì dừng. Máy offline không đồng nghĩa chưa cài Commander; không chạy lại installer/pairing khi chưa kiểm tra.
 
@@ -59,7 +61,7 @@ Compute Engine, không phải Cloud Run Windows:
 - Zone: asia-southeast1-a
 - Windows Server 2022; e2-standard-2 (2 vCPU, 8 GiB); boot disk 50 GiB pd-balanced.
 
-Commander không bật được chính VM đang tắt. Dùng môi trường gcloud đã xác thực và luôn ghi project/zone; không thay config tài khoản toàn cục. ASUS có gcloud tại D:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd.
+Commander không bật được chính VM đang tắt. `gcloud` chỉ dùng cho vòng đời VM (describe/start/stop), không dùng làm đường vào máy nằm ngoài `list_devices` (ADR-0058). Dùng môi trường gcloud đã xác thực và luôn ghi project/zone; không thay config tài khoản toàn cục. ASUS có gcloud tại D:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd.
 ~~~powershell
 & 'D:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd' compute instances describe tra-luat-win --project=ubqlv-202307 --zone=asia-southeast1-a --format='value(status)'
 # Chỉ start/stop khi tác vụ đã cho phép thay đổi vòng đời VM:
@@ -70,4 +72,4 @@ Commander không bật được chính VM đang tắt. Dùng môi trường gclo
 
 ## Bảo vệ dữ liệu
 
-ASUS chỉ cho phép D:\Quốc hội\tra-luat và C:\Users\admin\tl-work; không vượt allowlist qua shell. Không ghi password/token, mã ghép nối, cookie, IP tạm hoặc nội dung runtime config vào skill, log hay báo cáo. Dùng credential đã lưu tại máy; chỉ yêu cầu login nếu công cụ thực sự báo thiếu/hết hạn.
+Allowlist công cụ tệp của Commander (`allowedDirectories`, đo bằng `get_config` ngày 2026-10-31): ASUS chỉ cho phép D:\Quốc hội\tra-luat, C:\Users\admin\tl-work và D:\tl-win; tra-luat-win để rỗng, tức không giới hạn, nên chỉ ghi trong C:\work\tra-luat-agent và C:\tl-win theo kỷ luật. Allowlist không chặn `start_process`; không vượt allowlist qua shell. Không ghi password/token, mã ghép nối, cookie, IP tạm hoặc nội dung runtime config vào skill, log hay báo cáo. Dùng credential đã lưu tại máy; chỉ yêu cầu login nếu công cụ thực sự báo thiếu/hết hạn.

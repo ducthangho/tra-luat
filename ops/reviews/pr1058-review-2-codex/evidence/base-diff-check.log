@@ -1,0 +1,5 @@
+command: ['git', 'diff', '--check']
+rc: 0
+STDOUT:
+
+STDERR:

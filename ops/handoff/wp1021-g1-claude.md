@@ -88,7 +88,18 @@ lưu. `ops/reviews/**` không thuộc write set nên executor KHÔNG ghi biên n
 ## Cập nhật 31-10-2026 — Codex lượt 8 và 9 trên `356a27e`: APPROVE (đọc phần này TRƯỚC mọi mục khác)
 
 Phiên `session_015GtxrbRjCRMMLRWHoUuZYj`. Head không đổi: **`356a27e1378b2162bbc0be2ec06ff08fdacbdead`**. Không sửa mã.
-Trần Codex 9 (Issue #1021 issuecomment-6531357709) — **đã dùng 9/9**, không còn lời gọi.
+Trần Codex 9 (Issue #1021 issuecomment-6531357709). **ĐÍNH CHÍNH (05:40Z): thực tế đã dùng 10 lời gọi — VƯỢT trần một.**
+Phiên điều phối cũng chạy một lượt "8/9" trên đúng `356a27e` (run `e8bb597dcf5c44cca3228093286661ed`, 549,5 s, approve, 0 P0–P3;
+prompt `55fa2adb…829ada`, VERDICT.md `27cea768…85fbffe`, 20114 byte — số liệu chép từ PR #1040 issuecomment-6538420022, phiên này
+KHÔNG tự đo). Phiên này (`session_015GtxrbRjCRMMLRWHoUuZYj`) chạy lượt 8 lúc 03:12Z mà không biết lượt kia, rồi lượt 9 sau khi lượt 8 của
+mình bị chặn; không kiểm comment PR trước khi gọi. Hai phiên chạy song song, không phiên nào biết phiên kia ⇒ đúng ca "hai writer" mà
+lease sinh ra để chặn, ở đây là hai người tiêu cùng một ngân sách lời gọi. Ba verdict trên `356a27e` đều 0 P0–P3 (hai approve).
+Chốt cho lần sau: trước MỖI lời gọi Codex, đọc comment PR + Issue để đếm lời gọi của MỌI phiên, không chỉ của mình.
+
+**PR #1040 và nhánh code (đo 05:40Z).** PR tự đóng lúc 03:22Z (không merge) vì nhánh `agent/wp1021-g1-claude` bị xoá; review connector
+lúc 03:30Z neo `b29da0b` (head sau khi nhánh bị đặt lại), KHÔNG phải `356a27e`. Phiên `session_015GtxrZ1Tt93F4NLUUhKYQy` theo chỉ thị chủ
+kho đã dựng lại nhánh = `356a27e` từ tag `luu-tru/wp1021-g1-claude` (không thêm commit), mở lại PR ~05:36Z, chuyển ready; `get` PR lúc
+05:40Z: `open`, `draft=false`, head `356a27e`, `mergeable_state=blocked` (chờ CI/connector trên head mới mở lại).
 
 Cả hai lượt qua `.claude/dev/launcher.py run --require-clean --expected-head 356a27e…`, lệnh `codex exec -m gpt-6-astra -c
 model_reasoning_effort="xhigh" --sandbox workspace-write`; `run.json` ghi `model_phuc_vu_trang_thai=DO_DUOC` (mọi
@@ -119,11 +130,18 @@ Giới hạn Codex khai: input `runner_set` của dispatch không có trong JSON
 
 Nguyên văn hai verdict ở **Phụ lục A** (lượt 8, 9), cùng quy ước cắt giữa hai dấu như lượt 1–7 (phần giữa + một `\n` cuối = tệp gốc).
 
-**C7 Windows local trên `356a27e`** — ĐANG CHẠY: ASUS-LAPTOP `Online` (03:44Z, `tra-luat-win` cũng `Online` nhưng không dùng);
+**C7 Windows local trên `356a27e`** — lượt ASUS-LAPTOP BỊ CẮT (dưới), chạy lại trên `tra-luat-win` (đang chạy, kết quả ở commit sau).
+`tra-luat-win`: `Online` trong `list_devices` (ADR-0058 §1); `C:\tl-win\KHOA.txt` rỗng, không `python.exe` nào ⇒ khoá
+`session_015GtxrbRjCRMMLRWHoUuZYj` 04:54:46Z hạn 06:54:46Z; clone `C:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj` đúng `356a27e`, không nông,
+có `4bc94325…`, sạch, `core.abbrev 7`; Python 3.12.10; tiến trình tách PID 6996 từ 04:57:01Z, log
+`C:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj-356a27e.log`. 05:39Z: qua phần ca, tới m48 (~50/153), mọi dòng đã in ĐẠT/CÓ RĂNG.
+Lượt ASUS-LAPTOP (bị cắt, KHÔNG phải bằng chứng): máy `Offline` từ ~04:28Z khi đã ~100/153 đột biến (6 dòng khớp `ĐỎ|KHÔNG RĂNG|Traceback`
+đều là tên ca chứa chữ "traceback", không lỗi thật); khoá `D:\tl-win\KHOA.txt` không xoá được, tự hết hiệu lực 05:44:33Z (ADR-0058 §3a).
+Chi tiết lượt ASUS-LAPTOP: ASUS-LAPTOP `Online` (03:44Z, `tra-luat-win` cũng `Online` nhưng không dùng);
 `KHOA.txt` rỗng ⇒ ghi khoá `session_015GtxrbRjCRMMLRWHoUuZYj` 03:44:33Z hạn 05:44:33Z. Kiểm tải: 2 `python.exe` của `browser-use --cli-mcp`
 (PID 19112, 14808), không đụng. Clone `D:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj` từ GitHub, đúng `356a27e`, không nông, có `4bc94325…`,
 sạch, `core.abbrev 7`. Lệnh `python -u ops\bien_nhan_v2_test.py` (`PYTHONUTF8=1 PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1`),
-tiến trình tách bắt đầu 03:46:14Z, log `D:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj-356a27e.log`. Kết quả sẽ ghi ở commit sau.
+tiến trình tách bắt đầu 03:46:14Z, log `D:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj-356a27e.log`.
 
 **Còn lại:** C7 (trên). Không merge/land (`uy_quyen_merge: false`) — chờ chủ kho. Lease hết hạn 2026-10-31T08:57:00Z.
 

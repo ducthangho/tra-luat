@@ -1590,48 +1590,62 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
     nó phá vỡ ranh giới hàng. Vá một lớp bằng cách mở một lớp khác.
     """
     import re
-    # comment: người đọc KHÔNG thấy. Thay bằng \x01 chứ KHÔNG xoá rỗng (cross-review #1051 lượt 6, P2): trong
-    # code span, `<!-- h -->` là CHỮ hiển thị, và xoá rỗng thì `` `x-verdict<!-- h -->.md` `` liền lại thành
-    # tên hợp lệ `x-verdict.md`. \x01 không phải biên, không phải chữ tên: tên/id chỉ nằm trong comment vẫn
-    # không được tính (N1), còn tên bị comment cắt đôi thì gãy, không nối lại.
-    # …và TRONG mục đang đọc thì cấm hẳn (cross-review #1051 lượt 7, P2): comment nhiều dòng ghép ô của HAI
-    # hàng thành một (xoá luôn dấu xuống dòng), nên verdict của hàng này và id của hàng kia thoả nhau. Bảng
-    # thật không có comment nào (đo 31-10-2026); đọc chắc được thì đọc, không thì ĐỎ — không đoán.
-    lay = False
-    for dong in van.splitlines():
-        if dong.startswith("## "):
-            lay = tieu_de in dong
-        bang(not (lay and ("<!--" in dong or "-->" in dong)),
-             f"mục '{tieu_de}' có comment HTML (`<!--`/`-->`) — comment có thể ghép hai hàng bảng làm một "
-             f"hoặc giấu chữ, nên mục lục không kiểm chắc được. Chuyển comment ra ngoài mục.")
-    van = re.sub(r"<!--.*?-->", "\x01", van, flags=re.S)
+    # MỘT lượt duy nhất, cùng luật cho kiểm comment và đọc bảng (cross-review #1051 lượt 8, P2): lượt quét
+    # comment riêng không nhớ rào mã, nên một tiêu đề giả trong rào mã tắt được chốt comment mà bộ đọc bảng vẫn
+    # ở đúng mục. Luật dưới đây bám GFM ở những chỗ ảnh hưởng tới "đâu là bảng của mục này", và ĐỎ ở chỗ
+    # không chắc — mục lục thật (đo 31-10-2026) không có rào mã, khối HTML, comment hay ký tự xuống dòng lạ nào.
+    #  · Dòng: chỉ CR/LF là biên dòng (GFM §2.2); `splitlines()` tách cả U+2028/U+000C… mà GFM không tách.
+    #  · Comment: thay bằng \x01 trên MỌI dòng nó phủ — giữ nguyên số dòng (lượt 7: xoá mất xuống dòng thì hai
+    #    hàng thành một) và không nối hai mảnh tên (lượt 6). Dòng nào của mục chạm comment ⇒ ĐỎ.
+    #  · Rào mã: mở/đóng thụt tối đa 3 dấu cách (GFM §4.5); dòng thụt 4 không đóng rào.
+    #  · Khối HTML (dòng mở bằng `<`): ĐỎ — trong khối HTML GitHub không dựng bảng (`<pre>`, `<div>`…).
+    #  · Tiêu đề ATX `#`/`##` (thụt ≤3) hoặc setext ngay sau một dòng văn: kết thúc mục.
+    #  · Bảng phải mở sau dòng trống/tiêu đề — ngay sau một dòng văn/danh sách/trích dẫn thì GitHub coi cả khối
+    #    là đoạn văn. Ô hàng gạch phải đúng `:?-+:?` (lượt 8: `|:|:|` không phải hàng gạch).
+    def _dong(x):
+        return re.split(r"\r\n|\r|\n", x)
+    van = re.sub(r"<!--.*?-->", lambda m: "\n".join("\x01" for _ in _dong(m.group(0))), van, flags=re.S)
     ra, lay, rao = [], False, None
-    dau_bang, cho_gach = None, False
+    dau_bang, cho_gach, trong_doan = None, False, False
 
     def la_gach(dong):
-        o = [x.strip() for x in dong.strip().strip("|").split("|")]
-        return bool(o) and all(x and set(x) <= set("-: ") for x in o)
+        o = _tach_o(dong)
+        return bool(o) and all(re.fullmatch(r":?-+:?", x) for x in o)
 
-    for dong in van.splitlines():
-        # Rào mã: PHẢI nhớ ký tự mở và ĐỘ DÀI. Cờ bật/tắt thô bỏ sót rào `~~~` và đóng
-        # sớm rào ```` khi gặp dòng ``` bên trong — Markdown thì không đóng.
-        m = re.match(r"^\s*(`{3,}|~{3,})", dong)
+    for dong in _dong(van):
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})", dong)
         if m:
             k, d = m.group(1)[0], len(m.group(1))
             if rao is None:
                 rao = (k, d)
             elif k == rao[0] and d >= rao[1] and not dong.strip()[d:].strip():
                 rao = None
+            dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if rao is not None:                                # bảng trong khối mã là ví dụ
             continue
-        if dong.startswith("## "):
-            lay, dau_bang, cho_gach = (tieu_de in dong), None, False
+        bang(not re.match(r"^ {0,3}<[A-Za-z/?!]", dong),
+             f"README có khối HTML {dong[:60]!r} — trong khối HTML GitHub không dựng bảng Markdown, nên mục "
+             f"lục không kiểm chắc được. Bỏ HTML.")
+        tieu = re.match(r"^ {0,3}(#{1,6})(?:[ \t]|$)", dong)
+        if tieu:
+            if len(tieu.group(1)) <= 2:
+                lay = len(tieu.group(1)) == 2 and tieu_de in dong
+            dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if not lay:
             continue
+        bang("\x01" not in dong,
+             f"mục '{tieu_de}' có comment HTML (`<!--`/`-->`) — comment có thể ghép hai hàng bảng làm một "
+             f"hoặc giấu chữ, nên mục lục không kiểm chắc được. Chuyển comment ra ngoài mục.")
+        if not dong.strip():
+            dau_bang, cho_gach, trong_doan = None, False, False
+            continue
+        if trong_doan and dau_bang is None and re.fullmatch(r" {0,3}(=+|-+)[ \t]*", dong):
+            lay = False                                    # tiêu đề setext: dòng văn ngay trên thành tiêu đề
+            continue
         if not dong.strip().startswith("|"):
-            dau_bang, cho_gach = None, False               # hết bảng
+            dau_bang, cho_gach, trong_doan = None, False, True   # hết bảng; dòng văn
             continue
         # Hàng thụt lề: 4 dấu cách là KHỐI MÃ, không phải bảng (lượt 7) — đòi cột 0 như mục lục thật.
         bang(dong.startswith("|"), f"mục '{tieu_de}': hàng bảng THỤT LỀ {dong[:60]!r} — thụt 4 dấu cách thì "
@@ -1640,6 +1654,8 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
         tho = _tach_o(dong)
         o = [x.strip("`").strip() for x in tho]
         if dau_bang is None:                               # ứng viên hàng tiêu đề
+            if trong_doan:
+                continue                                   # dính đoạn văn phía trên ⇒ GitHub không dựng bảng
             dau_bang, cho_gach = [x.lower() for x in o], True
             continue
         if giu_span:
@@ -1652,7 +1668,7 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
             if la_gach(dong) and len(_tach_o(dong)) == len(dau_bang):
                 cho_gach = False
             else:
-                dau_bang, cho_gach = None, False
+                dau_bang, cho_gach, trong_doan = None, False, True
             continue
         if la_gach(dong):
             continue
@@ -2336,6 +2352,48 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
                 + "\n".join(cb2) + "\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n"
                 "|---|---|\n" + "\n".join(ml) + "\n", encoding="utf-8")
             _kiem_muc_luc(tm, goc)
+
+    # (8) CẤU TRÚC KHỐI quanh bảng (#1051 lượt 8, P2): bộ đọc phải thấy ĐÚNG bảng GitHub dựng — không hơn.
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam)
+        tm = goc / "ops" / "reviews"
+        tm.mkdir(parents=True)
+        (tm / "x-verdict.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "x-verdict.receipt.yaml").write_text(
+            "verdict_path: ops/reviews/x-verdict.md\nverdict_usage_caveats:\n  - id: C1\n", encoding="utf-8")
+        CB = "| tệp verdict | id |\n|---|---|\n| `x-verdict.md` | `C1` |"
+        ML = "| tệp verdict | biên nhận |\n|---|---|\n| `x-verdict.md` | `x-verdict.receipt.yaml` |"
+
+        def viet(cb=CB, ml=ML, dau=""):
+            (tm / "README.md").write_text(f"# x\n\n{dau}## Cảnh báo đang có hiệu lực\n\n{cb}\n\n## Mục lục\n\n{ml}\n",
+                                          encoding="utf-8")
+
+        # Đối chứng XANH: comment và rào mã (kể cả một "## Mục lục" giả trong đó) ở NGOÀI hai mục là vô hại.
+        viet(dau="<!-- ghi chú -->\n\n## Khác\n\n```\n## Mục lục\n| tệp verdict | biên nhận |\n|---|---|\n```\n\n")
+        _kiem_muc_luc(tm, goc)
+        do = {
+            # tiêu đề giả trong rào mã từng tắt chốt comment, rồi comment ghép hai hàng thành một
+            "rao_gia_roi_comment": ("comment HTML", dict(cb="```\n## Đây chỉ là ví dụ\n```\n\n| tệp verdict | id |\n"
+                                                         "|---|---|\n| `khac.md` | `K` |\n| `x-verdict.md` <!--\n| --> | `C1` |")),
+            "pre_boc_bang": ("khối HTML", dict(cb="<pre>\n" + CB + "\n</pre>")),
+            "div_boc_bang": ("khối HTML", dict(ml="<div>\n" + ML + "\n</div>")),
+            "gach_chi_hai_cham": ("Mục lục", dict(ml=ML.replace("|---|---|", "|:|:|"))),
+            "rao_dong_thut_4": ("Cảnh báo", dict(cb="```\n    ```\n\n" + CB + "\n\n```")),
+            "u2028_thay_xuong_dong": ("Cảnh báo", dict(cb=CB.replace("\n", " "))),
+            "van_ngay_truoc_bang": ("Cảnh báo", dict(cb="Ghi chú\n" + CB)),
+            "danh_sach_ngay_truoc": ("Cảnh báo", dict(cb="- mục\n" + CB)),
+            "trich_dan_ngay_truoc": ("Cảnh báo", dict(cb="> trích\n" + CB)),
+            "setext_cat_muc": ("Mục lục", dict(ml="Khác\n---\n\n" + ML)),
+            "tieu_de_thut_cat_muc": ("Mục lục", dict(ml="   ## Khác\n\n" + ML)),
+        }
+        for ten, (dau_hieu, kw) in do.items():
+            viet(**kw)
+            try:
+                _kiem_muc_luc(tm, goc)
+            except AssertionError as e:
+                bang(dau_hieu in str(e), f"{ten}: ĐỎ nhưng SAI chốt — đòi {dau_hieu!r}, được: {e}")
+            else:
+                raise AssertionError(f"{ten}: GitHub KHÔNG dựng bảng này cho mục ấy mà `_kiem_muc_luc` vẫn XANH")
 
 
 @ca

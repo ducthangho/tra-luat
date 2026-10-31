@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "name": "linux-foundation-v1",
+  "scope": "Runner behavior checks plus doctrine, ADR and EOL only; not full CI, Windows, review or land admission.",
+  "steps": [
+    {
+      "id": "runner-checks",
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/local_gate_checks.py"
+      ],
+      "timeout_seconds": 120,
+      "positive": [
+        "^LOCAL_GATE_CHECKS_PASS ([1-9][0-9]*)/\\1$"
+      ]
+    },
+    {
+      "id": "doctrine",
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/packet_loop.py",
+        "doctrine-scan",
+        "--root",
+        "."
+      ],
+      "timeout_seconds": 120,
+      "positive": [
+        "^doctrine-scan: sạch"
+      ]
+    },
+    {
+      "id": "adr",
+      "argv": [
+        "{python}",
+        "-B",
+        ".claude/dev/packet_loop.py",
+        "adr-song",
+        "--root",
+        "."
+      ],
+      "timeout_seconds": 120,
+      "positive": [
+        "^adr-song: sạch"
+      ]
+    },
+    {
+      "id": "eol",
+      "argv": [
+        "{python}",
+        "-B",
+        ".githooks/eol_policy.py",
+        "--all",
+        "--json"
+      ],
+      "timeout_seconds": 120,
+      "positive": [
+        "\"ok\": true",
+        "\"violations\": \\[\\]"
+      ]
+    }
+  ]
+}

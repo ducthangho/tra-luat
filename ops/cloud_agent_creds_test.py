@@ -27,6 +27,8 @@ class BoQua(Exception):
 def bang(dieu_kien, thong_diep):
     if not dieu_kien:
         raise TinHieuChotCa(thong_diep)
+def _nem(loi):
+    raise loi
 def _posix():
     if LA_WINDOWS:
         raise BoQua("đồ giả là script POSIX / nhóm tiến trình POSIX")
@@ -71,9 +73,7 @@ def _con_song(pid):   # zombie tính là chết (CLAUDE.md)
         return False
 def _song_roi_don(pids):   # PID còn sống TRƯỚC khi dọn, rồi giết hết để ca không để rác
     song = [x for x in pids if x is not None and _con_song(x)]
-    for x in song:
-        with contextlib.suppress(OSError):
-            os.kill(x, 9)
+    song and subprocess.run(["kill", "-9", *map(str, song)], capture_output=True)
     return song
 def _ghi(f, noi_dung, chay=False):
     f.parent.mkdir(parents=True, exist_ok=True), f.write_text(noi_dung, encoding="utf-8"), chay and f.chmod(0o755)
@@ -112,11 +112,7 @@ def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), ch�
         m, t, that, buf = nap_mod(), Path(t), os.killpg, io.StringIO()
         _ghi(t / "scripts" / "tl.py", TL_GIA)
         m.GOC, m.HAN_DON = t, 1
-        def gia(pg, sig):
-            if sig:
-                os.kill(pg, 9)
-                raise PermissionError("tiêm lỗi")
-            return that(pg, sig)
+        gia = lambda pg, sig: _nem(PermissionError("tiêm lỗi")) if sig and not os.kill(pg, 9) else that(pg, sig)   # noqa: E731
         kb = {"ngu": 60, "con": 1, "in": "chẩn đoán SENTINEL-a9\n[bootstrap] agent_creds: ĐÃ NẠP — cũ\n", "loi": "lỗi chẩn đoán\n"}
         moi = {"TL_MASTER_KEY": "SENTINEL-a9", "CAC_NHAT_KY": str(t / "nk"), "CAC_KICH_BAN": json.dumps(kb)}
         with mock.patch.dict(os.environ, moi), mock.patch.object(m.os, "killpg", gia), contextlib.redirect_stdout(buf):
@@ -129,8 +125,7 @@ def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), ch�
     bang(ra.count("chẩn đoán ***") == 1 and ra.count("lỗi chẩn đoán") == 1 and "SENTINEL-a9" not in ra and ra.count("agent_creds:") == 1, f"log: {ra!r}")
 def _co_subreaper():   # PR_GET_CHILD_SUBREAPER của CHÍNH tiến trình test
     import ctypes
-    c = ctypes.c_int(-1)
-    return c.value if ctypes.CDLL(None).prctl(37, ctypes.byref(c), 0, 0, 0) == 0 else None
+    return c.value if ctypes.CDLL(None).prctl(37, ctypes.byref(c := ctypes.c_int(-1)), 0, 0, 0) == 0 else None
 def a11_subreaper_va_esrch():   # (B, #1039): CHỈ ESRCH sau khi thu hồi cháu mồ côi mới "đã dừng"; không subreaper ⇒ không xác minh
     _posix()
     for co_sr in (True, False):
@@ -138,10 +133,19 @@ def a11_subreaper_va_esrch():   # (B, #1039): CHỈ ESRCH sau khi thu hồi chá
         m._SUBREAPER = None if co_sr else False
         bang(m._dat_subreaper() is co_sr and (not co_sr or _co_subreaper() == 1), f"subreaper={co_sr}: không đặt được thật")
         p = subprocess.Popen(["sh", "-c", "sleep 30 & echo $!; sleep 30"], stdout=subprocess.PIPE, start_new_session=True)
+        q = subprocess.Popen([sys.executable, "-c", "raise SystemExit(7)"])   # con NGOÀI nhóm: waitpid không được thu nhầm (F14)
         time.sleep(0.3)
         da, ra = m._giet_nhom(p)
         song = _song_roi_don([int(x) for x in ra.split()[:1]])
-        bang(ra.split() and da is co_sr and not song, f"subreaper={co_sr}: đã dừng={da}, cháu còn sống {song}, ra={ra!r}")
+        bang(ra.split() and da is co_sr and not song and q.wait(timeout=10) == 7, f"sr={co_sr}: dừng={da}, sống {song}, q={q.returncode}")
+    m, that, p = nap_mod(), os.killpg, subprocess.Popen(["sleep", "30"], start_new_session=True)   # F14: EPERM ≠ ESRCH
+    with mock.patch.object(m.os, "killpg", lambda pg, sig: that(pg, sig) if sig else _nem(PermissionError("tiêm"))):
+        bang(m._giet_nhom(p)[0] is False, "EPERM của killpg(pg, 0) bị nhận là đã dừng")
+    for goi in (lambda m: (setattr(m, "GOC", HERE.parent), m.nap({"TL_MASTER_KEY": "k"})), lambda m: m._ban_khop(Path("/khong-co-agy"))):   # F14: subreaper TRƯỚC Popen
+        m, thu = nap_mod(), []   # Popen giả ném lỗi: KHÔNG chạy tiến trình thật nào
+        with mock.patch.object(m, "_dat_subreaper", lambda: thu.append("sr")), mock.patch.object(m.subprocess, "Popen", lambda *a, **k: _nem(OSError(thu.append("popen")))), contextlib.redirect_stdout(io.StringIO()):
+            goi(m)
+        bang(thu[:2] == ["sr", "popen"], f"thứ tự subreaper/Popen: {thu}")
 def a5_doc_timeout():
     m = nap_mod()
     for v in ("abc", "-5", "0", "inf", "1e300", "2147484"):
@@ -329,6 +333,10 @@ DOT_BIEN = (
     ("A4_bo_chuyen_tiep_log_khi_qua_han", "ma", "(da, ra), ly = _giet_nhom(p),", "(da, _), ra, ly = _giet_nhom(p), b\"\",", "a4_qua_han_giet_ca_nhom"),
     ("A9_bo_hau_kiem_nhom", "ma", "            os.killpg(p.pid, 0)\n", "            raise ProcessLookupError\n", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
     ("A11_bo_subreaper", "ma", "_SUBREAPER = ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) == 0", "_SUBREAPER = True", "a11_subreaper_va_esrch"),
+    ("A11_waitpid_toan_cuc", "ma", "os.waitpid(-p.pid, os.WNOHANG)", "os.waitpid(-1, os.WNOHANG)", "a11_subreaper_va_esrch"),
+    ("A11_eperm_la_dung", "ma", "        except OSError:\n            return False, ra\n        if time", "        except OSError:\n            return True, ra\n        if time", "a11_subreaper_va_esrch"),
+    ("A11_subreaper_muon_nap", "ma", None, lambda s: s.replace("        _dat_subreaper()\n        p = subprocess.Popen([sys", "        p = subprocess.Popen([sys", 1).replace("    except OSError as e:\n        print(f\"agent_creds: KHÔNG ĐO ĐƯỢC — không chạy", "    except OSError as e:\n        _dat_subreaper()\n        print(f\"agent_creds: KHÔNG ĐO ĐƯỢC — không chạy", 1), "a11_subreaper_va_esrch"),
+    ("A11_subreaper_muon_version", "ma", None, lambda s: s.replace("        _dat_subreaper()\n        p = subprocess.Popen([str(agy)", "        p = subprocess.Popen([str(agy)", 1).replace("    except OSError:\n        return False\n    try:", "    except OSError:\n        return _dat_subreaper() and False\n    try:", 1), "a11_subreaper_va_esrch"),
     ("A11_bo_waitpid", "ma", "            while os.waitpid(-p.pid, os.WNOHANG)[0] > 0:", "            while False:", "a11_subreaper_va_esrch"),
     ("A11_khong_prctl_van_bao_dung", "ma", "    if os.name == \"nt\" or not _dat_subreaper():\n        return False, ra\n", "", "a11_subreaper_va_esrch"),
     ("A4_bo_timeout", "ma", "p.communicate(timeout=han)", "p.communicate()", "a4_qua_han_giet_ca_nhom"),

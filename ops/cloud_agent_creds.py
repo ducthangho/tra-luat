@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """`nap` (bootstrap + ĐÚNG MỘT dòng `agent_creds:` kể cả khi bootstrap thoát sớm/quá hạn/sai hợp đồng) và `cai-agy` (agy ghim,
 sha512, settings, CLAUDE_ENV_FILE) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039). Cả hai luôn rc 0. Test: *_test.py."""
-import contextlib, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, time, urllib.request  # noqa: E401
+import contextlib, ctypes, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, time, urllib.request  # noqa: E401
 from pathlib import Path
 
 GOC = Path(__file__).resolve().parent.parent
@@ -35,19 +35,16 @@ def ket_luan(dong_agent, rc):
     return f"{s} — {ct} (bootstrap rc={rc})"
 _SUBREAPER = None
 def _dat_subreaper():
-    """Linux `prctl(PR_SET_CHILD_SUBREAPER)`: con cháu mồ côi của nhóm được trả về CHÍNH tiến trình này để thu hồi.
-    Gọi TRƯỚC Popen. Không có/không đặt được ⇒ False, và khi đó KHÔNG BAO GIỜ báo "đã dừng" (chủ kho chọn (B), #1039)."""
+    """`prctl(PR_SET_CHILD_SUBREAPER)` (Linux), gọi TRƯỚC Popen; không đặt được ⇒ False ⇒ không bao giờ báo "đã dừng" (#1039 (B))."""
     global _SUBREAPER
     if _SUBREAPER is None:
         try:
-            import ctypes
             _SUBREAPER = ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) == 0
         except (OSError, AttributeError, TypeError):
             _SUBREAPER = False
     return _SUBREAPER
 def _giet_nhom(p):
-    """SIGKILL cả nhóm, thu output còn lại, thu hồi mọi thành viên (subreaper), rồi CHỈ ESRCH của `killpg(pg, 0)` mới là
-    đã dừng — không đọc /proc. (đã dừng?, bytes đã nhận)."""
+    """SIGKILL nhóm, thu output, thu hồi thành viên (subreaper); CHỈ ESRCH của `killpg(pg, 0)` là đã dừng. (đã dừng?, bytes)."""
     ra = b""
     with contextlib.suppress(OSError):
         os.killpg(p.pid, signal.SIGKILL) if os.name != "nt" else p.kill()
@@ -103,10 +100,8 @@ def nap(env=os.environ):
     print("agent_creds: " + (het_han or ket_luan(dong_agent, rc)))
     return 0  # nap: luôn 0 (mục tiêu 1)
 def _co_musl():
-    if any(Path(f).exists() for f in ("/lib/libc.musl-x86_64.so.1", "/lib/libc.musl-aarch64.so.1")):
-        return True
     try:
-        return "musl" in subprocess.run(["ldd", "/bin/ls"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=10).stdout
+        return any(Path(f).exists() for f in ("/lib/libc.musl-x86_64.so.1", "/lib/libc.musl-aarch64.so.1")) or "musl" in subprocess.run(["ldd", "/bin/ls"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=10).stdout
     except (OSError, subprocess.SubprocessError, ValueError):
         return False
 def khoa_nen(he, may, musl):
@@ -160,8 +155,7 @@ def cai_dat_agy(home):
             return print("agy: ✗ tarball không đúng MỘT tệp thường `antigravity` — từ chối toàn bộ")
         _ghi_nguyen_tu(agy, tf.extractfile(tv[0]).read(), 0o755)
     print(f"agy: ✓ đã cài {AGY_VER} ({k}) → {agy}")
-    thay = shutil.which("agy")
-    if thay is None or Path(thay).resolve() != agy.resolve():
+    if (thay := shutil.which("agy")) is None or Path(thay).resolve() != agy.resolve():
         print(f"agy: ⚠ `agy` trong PATH là {thay!r}, không phải {agy} — thêm ~/.local/bin vào PATH")
 def gop_settings(home):
     p, d = home / ".gemini" / "antigravity-cli" / "settings.json", {}
@@ -192,8 +186,7 @@ def cai_agy(env=os.environ):
             print(f"agy: ✗ lỗi {type(e).__name__}")
     return 0
 def main(argv):
-    for s in (sys.stdout, sys.stderr):
-        s.reconfigure(encoding="utf-8", errors="backslashreplace")
+    [s.reconfigure(encoding="utf-8", errors="backslashreplace") for s in (sys.stdout, sys.stderr)]
     if argv in (["nap"], ["cai-agy"]):
         return {"nap": nap, "cai-agy": cai_agy}[argv[0]]()
     return print("dùng: cloud_agent_creds.py nap | cai-agy", file=sys.stderr) or 2

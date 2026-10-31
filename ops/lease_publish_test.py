@@ -1640,9 +1640,13 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
                 # Đúng CHỮ HIỂN THỊ của tiêu đề, không tìm chuỗi con trong NGUỒN (lượt 11): `## [Khác](x "Mục lục")`
                 # hay `## <span title="Mục lục">Khác</span>` hiển thị "Khác". Chữ tiêu đề (bỏ `#` mở/đóng) phải là
                 # tên mục, trước nó chỉ được ký hiệu (mục lục thật: `⚠ `), không chữ, không cú pháp Markdown/HTML.
+                # Tiền tố theo danh sách CHO PHÉP (lượt 12): chỉ space/tab và ký hiệu Unicode `So`/`Sc`. Lớp phủ định
+                # cũ nhận cả ký tự định dạng như RLO (U+202E, `Cf`) — nó đảo chữ hiển thị thành "cụl cụM".
+                import unicodedata
                 chu = re.sub(r"[ \t]+#+[ \t]*$", "", dong[tieu.end():]).strip(" \t")
-                lay = len(tieu.group(1)) == 2 and re.fullmatch(
-                    r"[^\w\[\]<>()`&\\*_!~]*" + re.escape(tieu_de), chu) is not None
+                tien = chu[:-len(tieu_de)] if chu.endswith(tieu_de) else None
+                lay = len(tieu.group(1)) == 2 and tien is not None and all(
+                    c in " \t" or unicodedata.category(c) in ("So", "Sc") for c in tien)
             dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if not lay:
@@ -2446,6 +2450,12 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
             "tieu_de_dich_link": ("Mục lục", dict(t_ml="## [Khác](<Mục lục>)")),
             "tieu_de_thuoc_tinh_html": ("Mục lục", dict(t_ml='## <span title="Mục lục">Khác</span>')),
             "tieu_de_chu_khac_dung_truoc": ("Mục lục", dict(t_ml="## Không phải Mục lục")),
+            # lượt 12: ký tự định dạng (RLO U+202E, `Cf`) đứng trước đảo CHỮ HIỂN THỊ — không phải ký hiệu
+            "tieu_de_rlo_canh_bao": ("Cảnh báo", dict(t_cb="## \u202eCảnh báo đang có hiệu lực")),
+            "tieu_de_rlo_muc_luc": ("Mục lục", dict(t_ml="## \u202eMục lục")),
+            "tieu_de_zwsp": ("Mục lục", dict(t_ml="## \u200bMục lục")),
+            # ký hiệu Markdown/HTML (`Sm`/`Sk`/`P*`) đứng trước cũng không phải ký hiệu được phép
+            "tieu_de_dau_nho_hon": ("Mục lục", dict(t_ml="## < Mục lục")),
         }
         for ten, (dau_hieu, kw) in do.items():
             viet(**kw)

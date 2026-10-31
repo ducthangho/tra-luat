@@ -30,8 +30,8 @@ recorder_ghi_chu: 'Phien executor session_015GtxrbVWthHq1mtsPgqZLw ghi lease va 
 
 leased_at_utc: '2026-10-31T16:20:00Z'
 heartbeat_at: '2026-10-31T16:20:00Z'
-lease_until: '2026-10-31T20:20:00Z'
-lease_expires_at_utc: '2026-10-31T20:20:00Z'
+lease_until: '2026-10-31T16:35:00Z'
+lease_expires_at_utc: '2026-10-31T16:35:00Z'
 
 role: reviewer
 provider: openai_codex
@@ -78,3 +78,14 @@ cam_tuyet_doi:
 
 run_minutes: 240
 heartbeat_required_minutes: 240
+
+rut_han:
+  han_cu: '2026-10-31T20:20:00Z'
+  han_moi: '2026-10-31T16:35:00Z'
+  rut_boi: ducthangho
+  ly_do: >-
+    Chu kho doi lua chon: chap nhan muc assurance cua luot 7 (issuecomment-6545979440, ~16:20Z) thay vi chay L8; xac nhan lai trong phien
+    executor (~16:22Z, chon "Chấp nhận lượt 7"). Luot L8 KHONG duoc chay — 0 loi goi Codex duoi lease nay.
+  vi_sao_khong_bia_mo: 'khong co lease ke nhiem; tien le rut han c4c03ef5'
+  han_moi_ghi_chu: 'han moi dat sau luc rut ~12 phut de workflow dang lease con thay lease song (tranh rc=8)'
+  ghi_boi: 'claude-session session_015GtxrbVWthHq1mtsPgqZLw (phien executor)'

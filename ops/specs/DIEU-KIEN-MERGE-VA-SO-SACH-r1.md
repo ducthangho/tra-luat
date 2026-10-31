@@ -36,7 +36,9 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 1. **`docs/adr/0060-dieu-kien-merge-va-moc-ready.md` (mới)** — ADR độc lập, trạng thái `Accepted` khi chủ kho duyệt
    `spec_hash`. Không kích hoạt, không sửa, không mượn hiệu lực của `ADR-0054`. Nội dung bắt buộc, mỗi điểm một mục:
    - **M1 Severity.** Điều kiện merge: 0 finding P0, P1, P2 mở. Mỗi P3 hoặc **đóng có bằng chứng** (reviewer xác nhận
-     theo bảng lớp §8.3), hoặc **chủ kho miễn** bằng một comment trên PR nêu slug finding, SHA, lý do, hướng xử lý.
+     theo bảng lớp §8.3), hoặc **chủ kho miễn** bằng một comment nêu slug finding, SHA, lý do, hướng xử lý: trước push đăng trên Packet Issue,
+     neo SHA ứng viên cục bộ (M12); sau push đăng hoặc dẫn lại trên PR. Quyết định miễn neo SHA nào chỉ có hiệu lực cho
+     đúng SHA ấy.
      Agent không tự ghi nợ P3. Cấm giảm số lớp bằng gộp slug hoặc đổi hạng. Điều kiện dừng theo P3 **chỉ** xét khi đã
      hết P0–P2 và vòng đang xét là vòng vá thêm vì P3: vòng ấy không giảm số lớp P3 ⇒ dừng, checkpoint chủ kho. Vòng
      vá P0–P2 không bị điều kiện này chặn (kể cả khi số lớp P3 là 0 → 0); mọi điều kiện dừng và trần khác giữ nguyên. Thay bảng ngưỡng §8 cho packet áp ADR-0060; P0 vẫn chặn như cũ.
@@ -137,8 +139,9 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 - **A7** Hồi quy: `python ops/lease_publish_test.py` và `python .claude/dev/ci_dang_ky_test.py` đạt N/N, hai số bằng
   nhau. **Không** khai hai bộ này ghim `ops-open-pr.yml` (đo 31-10: không bộ nào nhắc tệp ấy); răng cho `--draft` ở A4.
 - **A8** Cross-review Codex tới 0 P0–P2, mọi P3 đóng hoặc được chủ kho miễn. Reviewer làm hai việc:
-  (a) đi năm ca (ca thứ năm: vòng vá đóng hết P1 khi số lớp P3 là 0 → 0 ⇒ **không** checkpoint; vòng chỉ vá P3 mà
-  không giảm lớp ⇒ dừng), bốn ca dưới đây cùng loại, mỗi ca dẫn đoạn ADR-0060 làm căn cứ: còn một P2 mở ⇒ không đề xuất merge; Windows `required` đang
+  (a) đi sáu ca (ca thứ năm: vòng vá đóng hết P1 khi số lớp P3 là 0 → 0 ⇒ **không** checkpoint; vòng chỉ vá P3 mà
+  không giảm lớp ⇒ dừng; ca thứ sáu: review offline còn một P3, chủ kho miễn trên Packet Issue neo SHA ứng viên ⇒
+  approve được và push được, miễn được dẫn lại sang PR; miễn neo SHA khác ⇒ không approve), bốn ca dưới đây cùng loại, mỗi ca dẫn đoạn ADR-0060 làm căn cứ: còn một P2 mở ⇒ không đề xuất merge; Windows `required` đang
   chạy ⇒ PR ở draft; `unknown` chưa chốt ⇒ chặn; PR "lưu trữ" sửa `ops/leases/**` ⇒ không thuộc làn lưu trữ;
   (b) nhận bốn bản ADR đột biến do điều phối dựng (cho P2 qua; cho ready khi Windows còn chạy; cho `unknown` đi tiếp;
   nhận `ops/leases/**` vào làn lưu trữ) và phải chỉ ra đúng điều khoản sai ở **mỗi** bản. Đỏ: bỏ sót một bản.

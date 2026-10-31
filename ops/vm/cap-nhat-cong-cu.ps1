@@ -24,12 +24,14 @@ BĂM: mọi thứ tải về phải khớp sha256 trước khi chạy/chép. Ngu
 asset GitHub → tệp checksum trong CÙNG release → (Node) SHASUMS256.txt. Không tìm được băm ⇒ TỪ CHỐI cài
 công cụ đó (đo 31-10: actionlint 1.7.7 không có `digest` nhưng có `*_checksums.txt`).
 
-Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê/tham số sai · 3 tầng HeThong mà không
+Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê hoặc -PhamVi sai · 3 tầng HeThong mà không
 phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì · 6 -DangKyLich hỏng giữa chừng.
+Tham số KHÔNG TỒN TẠI do chính PowerShell từ chối lúc gán tham số ⇒ rc 1, script không chạy tới để đổi được (cross-review
+PR #1065 lượt 1, P2 `ma-thoat-tham-so-sai`).
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('NguoiDung', 'HeThong')][string]$PhamVi = 'NguoiDung',
+    [string]$PhamVi = 'NguoiDung',    # NguoiDung | HeThong — tự kiểm (mã 2), KHÔNG ValidateSet (ValidateSet ra rc 1)
     [switch]$ChiKiem,                 # đo + so phiên bản, KHÔNG cài gì
     [switch]$DangKyLich,              # (admin) chép script vào Program Files + đăng ký 2 Scheduled Task
     [string]$ThuMucCongCu = 'C:\Tools',
@@ -140,6 +142,57 @@ function Select-NodeLts($DanhSach, [string]$Truoc) {
     return @{ cung_major = $cung; moi_nhat = $moiNhat }
 }
 
+function Test-CoTheCai([bool]$CoTep, [string]$PhienBan) {
+    # Có tệp chạy mà KHÔNG đọc được phiên bản ⇒ không biết đang ở major nào ⇒ KHÔNG cài (tránh nhảy major / ghi đè mù).
+    # Cross-review PR #1065 lượt 1, P1 `node-khong-doc-duoc-van-nang-major`.
+    return -not ($CoTep -and [string]::IsNullOrWhiteSpace($PhienBan))
+}
+
+function Test-AclChiAdminGhi($Owner, $Rules) {
+    # Thư mục/tệp mà SYSTEM chạy: chủ phải là SYSTEM/Administrators/TrustedInstaller, và KHÔNG ai khác có quyền ghi.
+    # $Rules: các đối tượng có IdentityReference, FileSystemRights, AccessControlType (như Get-Acl().Access).
+    # Trả danh sách vi phạm (rỗng = đạt).
+    $tin = '^(NT AUTHORITY\\SYSTEM|BUILTIN\\Administrators|NT SERVICE\\TrustedInstaller|S-1-5-18|S-1-5-32-544)$'
+    $ghi = 'FullControl|Modify|Write|CreateFiles|AppendData|CreateDirectories|Delete|ChangePermissions|TakeOwnership'
+    $vp = @()
+    if ("$Owner" -notmatch $tin) { $vp += "chủ sở hữu '$Owner'" }
+    foreach ($r in @($Rules)) {
+        if ("$($r.AccessControlType)" -ne 'Allow') { continue }
+        if ("$($r.IdentityReference)" -match $tin) { continue }
+        if ("$($r.FileSystemRights)" -match $ghi) { $vp += "$($r.IdentityReference): $($r.FileSystemRights)" }
+    }
+    return $vp
+}
+
+function New-DoiSoTacVu([string]$Script, [string]$Pham) {
+    # Đối số của Scheduled Task mang ĐỦ cấu hình đang dùng lúc đăng ký — bản cũ chỉ ghi -PhamVi nên -MayDich/-ThuMucCongCu
+    # tuỳ biến bị mất ở lần chạy theo lịch (cross-review PR #1065 lượt 1, P1 `dang-ky-lam-mat-tham-so`).
+    $cap = [ordered]@{ PhamVi = $Pham; MayDich = $MayDich; ThuMucCongCu = $ThuMucCongCu; NlmVenv = $NlmVenv; VenvKho = $VenvKho
+                       HomeCommander = $HomeCommander; TaiKhoanNguoiDung = $TaiKhoanNguoiDung; TacVuCommander = $TacVuCommander }
+    $ds = @('-NoProfile', '-NonInteractive', '-File', "`"$Script`"")
+    foreach ($k in $cap.Keys) {
+        $v = [string]$cap[$k]
+        if ($v -match '"' -or [string]::IsNullOrWhiteSpace($v)) { throw "giá trị -$k không dùng được trong tác vụ: '$v'" }
+        $ds += "-$k"; $ds += "`"$v`""
+    }
+    return ($ds -join ' ')
+}
+
+function Find-Reparse([string]$Goc) {
+    # Mọi reparse point (junction/symlink) trong cây, KHÔNG đi theo chúng; kể cả chính gốc. Rỗng = sạch.
+    $ra = @()
+    $g = Get-Item -LiteralPath $Goc -Force -ErrorAction SilentlyContinue
+    if (-not $g) { return $ra }
+    if ($g.Attributes -band [IO.FileAttributes]::ReparsePoint) { return @($g.FullName) }
+    $ra += @(Get-ChildItem -LiteralPath $Goc -Recurse -Force -Attributes ReparsePoint -ErrorAction Stop | ForEach-Object { $_.FullName })
+    return $ra
+}
+
+function Assert-KhongReparse([string]$Goc) {
+    $rp = @(Find-Reparse $Goc)
+    if ($rp.Count) { throw "từ chối: $Goc có reparse point (junction/symlink): $($rp -join ', ')" }
+}
+
 function Read-BanGhim([string]$TepYaml, [string]$Python) {
     # Đọc ghim từ `ops/cong_cu.yaml` bằng PyYAML — MỘT nguồn với CI. PyYAML/jsonschema ghim trong
     # `cai.lenh` (`==X.Y.Z`); actionlint ghim ở `ban_ghim`.
@@ -191,8 +244,12 @@ function Get-BamTaiSan($Release, $TaiSan) {
     $tepBam = @($Release.assets | Where-Object { $_.name -match '(checksums?\.txt|sha256(sums)?(\.txt)?|hashes\.sha256)$' -or $_.name -eq "$($TaiSan.name).sha256" })
     foreach ($t in $tepBam) {
         $nd = ConvertTo-VanBan (Invoke-WebRequest -Uri $t.browser_download_url -Headers @{ 'User-Agent' = 'tra-luat' } -TimeoutSec 60).Content
-        if ($t.name -eq "$($TaiSan.name).sha256" -and $nd -match '^\s*([0-9A-Fa-f]{64})\b') { return $Matches[1].ToLowerInvariant() }
         $b = Find-BamTrongTep $nd $TaiSan.name
+        # Tệp riêng `<asset>.sha256` chỉ được nhận dạng TRẦN khi CẢ tệp là đúng một băm; có tên tệp thì tên phải khớp
+        # (Find-BamTrongTep). Bản cũ nhận 64 hex đầu dòng bất kể tên ghi kèm (cross-review PR #1065 lượt 1, P1).
+        if (-not $b -and $t.name -eq "$($TaiSan.name).sha256" -and ([string]$nd).Trim() -match '^[0-9A-Fa-f]{64}$') {
+            $b = ([string]$nd).Trim().ToLowerInvariant()
+        }
         if ($b) { return $b }
     }
     return $null
@@ -353,6 +410,10 @@ function Invoke-TangHeThong {
     )
     foreach ($c in $muc) {
         $truoc = Get-PhienBanLenh $c.exe $c.ds $c.mau
+        if (-not (Test-CoTheCai (Test-Path -LiteralPath $c.exe) $truoc)) {
+            Add-KetQua $c.ten '' '' 'loi' "có $($c.exe) nhưng không đọc được phiên bản — KHÔNG tự cài (tránh đổi major/ghi đè mù)"
+            continue
+        }
         try {
             if ($c.kieu -eq 'node') {
                 $ds = Invoke-RestMethod -Uri 'https://nodejs.org/dist/index.json' -TimeoutSec 60
@@ -414,7 +475,34 @@ function Register-LichCapNhat([string]$GocKho) {
     # Tính đường dẫn Ở ĐÂY, không ở mức script: ngoài Windows `ProgramFiles` không có, và `Join-Path $null` ném lỗi
     # TRƯỚC chốt nền ⇒ mất mã 4 và `-NapHam` không nạp được (Codex review P2 trên PR #1065, head 6733d09).
     $Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'
+    $icacls = "$env:SystemRoot\System32\icacls.exe"
+    # Giao vùng công cụ cho tài khoản tầng NguoiDung (chủ kho duyệt 31-10-2026). Đo được: tệp do SYSTEM cài sẵn
+    # trong C:\Tools\npm và C:\Tools\Python312 chỉ cho Users TẠO tệp mới, không sửa/xoá ⇒ nâng codex trả EPERM
+    # (-4048), nâng pip rc=1. Hệ quả cần nhớ: C:\Tools là vùng của tài khoản ấy — admin/SYSTEM KHÔNG chạy công cụ
+    # từ đây (tầng HeThong đã chỉ dùng đường dẫn tuyệt đối trong Program Files vì đúng lý do này).
+    # AN NINH (cross-review PR #1065 lượt 1, P0 `giao-acl-theo-junction`): tài khoản ấy dựng được junction trong cây của
+    # nó, và `icacls /T` của admin sẽ đi theo — trao quyền lên chính script SYSTEM. Ba lớp: (1) từ chối khi cây có reparse
+    # point, (2) `/L` để icacls không đi theo liên kết, bỏ qua thư mục đã giao; (3) ACL thư mục cài đặt được ĐẶT LẠI sau
+    # bước này và ĐO lại ở cuối — nên kể cả khi (1)(2) lọt, quyền trao nhầm lên Program Files cũng bị xoá trước khi dùng.
+    $ai = "$env:COMPUTERNAME\$TaiKhoanNguoiDung"
+    foreach ($con in 'npm', 'Python312', 'bin') {
+        $d = Join-Path $ThuMucCongCu $con
+        New-Item -ItemType Directory -Force -Path $d | Out-Null
+        Assert-KhongReparse $d
+        if ("$((Get-Acl -LiteralPath $d).Owner)" -eq $ai) { Write-Host "bỏ qua $d — đã thuộc $ai"; continue }
+        $o1 = & $icacls $d /setowner $ai /T /C /L /Q 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "icacls /setowner $d rc=$LASTEXITCODE`: $($o1 | Select-Object -Last 1)" }
+        $o2 = & $icacls $d /grant "${ai}:(OI)(CI)M" /T /C /L /Q 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "icacls /grant $d rc=$LASTEXITCODE`: $($o2 | Select-Object -Last 1)" }
+        Write-Host "giao $d cho $ai"
+    }
+    # Thư mục cài đặt: tạo, từ chối nếu là liên kết, ĐẶT LẠI ACL (bỏ thừa kế; SYSTEM/Administrators toàn quyền, Users đọc).
     New-Item -ItemType Directory -Force -Path $Script:ThuMucCaiDat | Out-Null
+    Assert-KhongReparse $Script:ThuMucCaiDat
+    $o3 = & $icacls $Script:ThuMucCaiDat /setowner '*S-1-5-32-544' /T /C /L /Q 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "icacls /setowner $($Script:ThuMucCaiDat) rc=$LASTEXITCODE`: $($o3 | Select-Object -Last 1)" }
+    $o4 = & $icacls $Script:ThuMucCaiDat /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' '*S-1-5-32-545:(OI)(CI)RX' /T /C /L /Q 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "icacls đặt lại $($Script:ThuMucCaiDat) rc=$LASTEXITCODE`: $($o4 | Select-Object -Last 1)" }
     $nguon = @{
         'cap-nhat-cong-cu.ps1' = $PSCommandPath
         'cong_cu.yaml'         = @((Join-Path $GocKho 'ops\cong_cu.yaml'), (Join-Path $GocKho 'cong_cu.yaml')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
@@ -426,27 +514,24 @@ function Register-LichCapNhat([string]$GocKho) {
             Copy-Item -LiteralPath $nguon[$k] -Destination (Join-Path $Script:ThuMucCaiDat $k) -Force
         }
     }
-    # Giao vùng công cụ cho tài khoản tầng NguoiDung (chủ kho duyệt 31-10-2026). Đo được: tệp do SYSTEM cài sẵn
-    # trong C:\Tools\npm và C:\Tools\Python312 chỉ cho Users TẠO tệp mới, không sửa/xoá ⇒ nâng codex trả EPERM
-    # (-4048), nâng pip rc=1. Hệ quả cần nhớ: C:\Tools là vùng của tài khoản ấy — admin/SYSTEM KHÔNG chạy công cụ
-    # từ đây (tầng HeThong đã chỉ dùng đường dẫn tuyệt đối trong Program Files vì đúng lý do này).
-    $ai = "$env:COMPUTERNAME\$TaiKhoanNguoiDung"
-    foreach ($con in 'npm', 'Python312', 'bin') {
-        $d = Join-Path $ThuMucCongCu $con
-        New-Item -ItemType Directory -Force -Path $d | Out-Null
-        $o1 = & "$env:SystemRoot\System32\icacls.exe" $d /setowner $ai /T /C /Q 2>&1
-        if ($LASTEXITCODE -ne 0) { throw "icacls /setowner $d rc=$LASTEXITCODE`: $($o1 | Select-Object -Last 1)" }
-        $o2 = & "$env:SystemRoot\System32\icacls.exe" $d /grant "${ai}:(OI)(CI)M" /T /C /Q 2>&1
-        if ($LASTEXITCODE -ne 0) { throw "icacls /grant $d rc=$LASTEXITCODE`: $($o2 | Select-Object -Last 1)" }
-        Write-Host "giao $d cho $ai"
+    # Tệp vừa chép có thể mang chủ là chính tài khoản admin đang chạy (tuỳ chính sách "default owner") ⇒ đặt lại về nhóm.
+    $o5 = & $icacls $Script:ThuMucCaiDat /setowner '*S-1-5-32-544' /T /C /L /Q 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "icacls /setowner sau khi chép rc=$LASTEXITCODE`: $($o5 | Select-Object -Last 1)" }
+    # Đo lại SAU khi chép: thư mục + từng tệp chỉ admin ghi được, và bản chép trùng băm nguồn.
+    foreach ($k in @('') + @($nguon.Keys)) {
+        $dich = if ($k) { Join-Path $Script:ThuMucCaiDat $k } else { $Script:ThuMucCaiDat }
+        $acl = Get-Acl -LiteralPath $dich
+        $vp = @(Test-AclChiAdminGhi $acl.Owner $acl.Access)
+        if ($vp.Count) { throw "ACL $dich không đạt: $($vp -join '; ')" }
+        if ($k -and (Get-FileHash -LiteralPath $dich).Hash -ne (Get-FileHash -LiteralPath $nguon[$k]).Hash) { throw "bản chép $dich lệch băm nguồn" }
     }
     $script = Join-Path $Script:ThuMucCaiDat 'cap-nhat-cong-cu.ps1'
     $pwsh = Join-Path ${env:ProgramFiles} 'PowerShell\7\pwsh.exe'
     $caiDat = New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 2) -MultipleInstances IgnoreNew
     $tHT = New-ScheduledTaskTrigger -Weekly -WeeksInterval 2 -DaysOfWeek Sunday -At '02:30'
     $tND = New-ScheduledTaskTrigger -Weekly -WeeksInterval 2 -DaysOfWeek Sunday -At '03:30'
-    $aHT = New-ScheduledTaskAction -Execute $pwsh -Argument "-NoProfile -NonInteractive -File `"$script`" -PhamVi HeThong"
-    $aND = New-ScheduledTaskAction -Execute $pwsh -Argument "-NoProfile -NonInteractive -File `"$script`" -PhamVi NguoiDung"
+    $aHT = New-ScheduledTaskAction -Execute $pwsh -Argument (New-DoiSoTacVu $script 'HeThong')
+    $aND = New-ScheduledTaskAction -Execute $pwsh -Argument (New-DoiSoTacVu $script 'NguoiDung')
     $pHT = New-ScheduledTaskPrincipal -UserId 'NT AUTHORITY\SYSTEM' -LogonType ServiceAccount -RunLevel Highest
     # -ErrorAction Stop TƯỜNG MINH: Register-ScheduledTask là hàm module CDXML, KHÔNG thừa hưởng $ErrorActionPreference
     # của script — đo 31-10-2026, lỗi của nó trôi qua, script chết ở bước sau và in rc=0 (mã của icacls trước đó).
@@ -474,6 +559,8 @@ function Register-LichCapNhat([string]$GocKho) {
 }
 
 if ($NapHam) { return }
+
+if ($PhamVi -notin 'NguoiDung', 'HeThong') { Write-Loi "-PhamVi '$PhamVi' không hợp lệ (NguoiDung | HeThong)"; exit 2 }
 
 # ───────────────────────── chạy ─────────────────────────
 

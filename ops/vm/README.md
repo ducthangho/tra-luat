@@ -24,13 +24,15 @@ Remove-Item -Recurse -Force $d
 ```
 
 `-DangKyLich` làm ba việc:
-1. chép script + `cong_cu.yaml` + `requirements.txt` vào `C:\Program Files\tra-luat-ops` (chỉ admin ghi);
-2. giao `C:\Tools\{npm,Python312,bin}` cho `tlcommander` (owner + Modify) — từ đây coi `C:\Tools` là vùng
-   của tài khoản ấy, admin/SYSTEM không chạy công cụ từ đó;
+1. giao `C:\Tools\{npm,Python312,bin}` cho `tlcommander` (owner + Modify) — từ đây coi `C:\Tools` là vùng
+   của tài khoản ấy, admin/SYSTEM không chạy công cụ từ đó. Cây có junction/symlink nào thì TỪ CHỐI (mã 6); `icacls`
+   chạy với `/L` (không đi theo liên kết); thư mục đã thuộc `tlcommander` thì bỏ qua;
+2. ĐẶT LẠI ACL `C:\Program Files\tra-luat-ops` (bỏ thừa kế; chỉ SYSTEM/Administrators ghi), chép script + `cong_cu.yaml`
+   + `requirements.txt` vào, rồi ĐO lại ACL và băm từng tệp — lệch là dừng mã 6;
 3. đăng ký `TraLuat-CapNhatCongCu-HeThong` (SYSTEM, CN 02:30) và `TraLuat-CapNhatCongCu-NguoiDung`
    (`tlcommander`, lưu mật khẩu như `TraLuatRemoteCommander` — script HỎI mật khẩu khi đăng ký; S4U bị từ chối trên
    VM; CN 03:30; đổi mật khẩu `tlcommander` thì chạy lại `-DangKyLich`), 2 tuần/lần, `StartWhenAvailable` (VM tắt thì chạy
-   bù khi bật). `tlcommander` được quyền đọc + chạy hai tác vụ, không sửa được.
+   bù khi bật). Đối số tác vụ mang ĐỦ tham số dùng lúc đăng ký (`-MayDich`, `-ThuMucCongCu`, …). `tlcommander` được quyền đọc + chạy hai tác vụ, không sửa được.
 
 ## Chạy theo yêu cầu
 

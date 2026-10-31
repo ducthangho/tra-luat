@@ -100,6 +100,77 @@ Ca 'scheduledtask_co_erroraction_stop' {
 }
 Ca 'dang_ky_loi_co_ma_thoat_rieng' { (Get-Content -LiteralPath $Script -Raw) -match 'catch \{ Write-Loi "-DangKyLich hỏng: [^"]*"; exit 6 \}' }
 
+# ── cross-review PR #1065 lượt 1: mỗi finding một ca đo HÀNH VI ──
+Ca 'co_tep_khong_doc_phien_ban_thi_khong_cai' {
+    (Test-CoTheCai $true '') -eq $false -and (Test-CoTheCai $true $null) -eq $false -and
+    (Test-CoTheCai $false '') -eq $true -and (Test-CoTheCai $true '24.1.0') -eq $true
+}
+Ca 'acl_chi_admin_ghi' {
+    $ok = @([pscustomobject]@{ IdentityReference = 'NT AUTHORITY\SYSTEM'; FileSystemRights = 'FullControl'; AccessControlType = 'Allow' },
+            [pscustomobject]@{ IdentityReference = 'BUILTIN\Administrators'; FileSystemRights = 'FullControl'; AccessControlType = 'Allow' },
+            [pscustomobject]@{ IdentityReference = 'BUILTIN\Users'; FileSystemRights = 'ReadAndExecute, Synchronize'; AccessControlType = 'Allow' })
+    $xau = $ok + @([pscustomobject]@{ IdentityReference = 'TRA-LUAT-WIN\tlcommander'; FileSystemRights = 'Modify, Synchronize'; AccessControlType = 'Allow' })
+    @(Test-AclChiAdminGhi 'BUILTIN\Administrators' $ok).Count -eq 0 -and
+    @(Test-AclChiAdminGhi 'BUILTIN\Administrators' $xau).Count -eq 1 -and
+    @(Test-AclChiAdminGhi 'TRA-LUAT-WIN\tlcommander' $ok).Count -eq 1 -and
+    @(Test-AclChiAdminGhi 'BUILTIN\Administrators' @([pscustomobject]@{ IdentityReference = 'BUILTIN\Users'; FileSystemRights = 'CreateFiles, Synchronize'; AccessControlType = 'Allow' })).Count -eq 1
+}
+Ca 'doi_so_tac_vu_mang_du_cau_hinh' {
+    $MayDich = 'MAY-KHAC'; $ThuMucCongCu = 'D:\cong-cu'; $TacVuCommander = 'CMD-KHAC'
+    $a = New-DoiSoTacVu 'C:\x\cap-nhat-cong-cu.ps1' 'HeThong'
+    $a.Contains('-PhamVi "HeThong"') -and $a.Contains('-MayDich "MAY-KHAC"') -and $a.Contains('-ThuMucCongCu "D:\cong-cu"') -and
+    $a.Contains('-TacVuCommander "CMD-KHAC"') -and $a.Contains('-NlmVenv "') -and $a.Contains('-VenvKho "') -and
+    $a.Contains('-HomeCommander "') -and $a.Contains('-TaiKhoanNguoiDung "') -and (Nem { $MayDich = 'a"b'; New-DoiSoTacVu 'C:\x.ps1' 'HeThong' })
+}
+Ca 'reparse_trong_cay_bi_phat_hien' {
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-rp-" + [guid]::NewGuid().ToString('N')); $ngoai = "$g-ngoai"
+    New-Item -ItemType Directory -Path "$g\con", $ngoai | Out-Null
+    try {
+        $sach = @(Find-Reparse $g).Count -eq 0
+        $kieu = if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }
+        New-Item -ItemType $kieu -Path "$g\con\lienket" -Target $ngoai | Out-Null
+        New-Item -ItemType $kieu -Path "$g-goc-la-lienket" -Target $ngoai | Out-Null
+        $sach -and @(Find-Reparse $g).Count -eq 1 -and @(Find-Reparse "$g-goc-la-lienket").Count -eq 1 -and @(Find-Reparse "$g-khong-co").Count -eq 0
+    } finally {
+        foreach ($x in "$g\con\lienket", "$g-goc-la-lienket") { if (Test-Path -LiteralPath $x) { (Get-Item -LiteralPath $x -Force).Delete() } }
+        Remove-Item -LiteralPath $g, $ngoai -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Ca 'dang_ky_chan_reparse_ca_hai_noi' {
+    $ast = [Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $f = $ast.FindAll({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Register-LichCapNhat' }, $true)[0]
+    $goi = @($f.FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] -and $n.GetCommandName() -eq 'Assert-KhongReparse' }, $true) | ForEach-Object { $_.Extent.Text })
+    ($goi -contains 'Assert-KhongReparse $d') -and ($goi -contains 'Assert-KhongReparse $Script:ThuMucCaiDat')
+}
+Ca 'assert_khong_reparse_nem_khi_co_lien_ket' {
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-ak-" + [guid]::NewGuid().ToString('N')); $ngoai = "$g-ngoai"
+    New-Item -ItemType Directory -Path $g, $ngoai | Out-Null
+    try {
+        $sach = -not (Nem { Assert-KhongReparse $g })
+        New-Item -ItemType $(if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }) -Path "$g\lk" -Target $ngoai | Out-Null
+        $sach -and (Nem { Assert-KhongReparse $g })
+    } finally {
+        if (Test-Path -LiteralPath "$g\lk") { (Get-Item -LiteralPath "$g\lk" -Force).Delete() }
+        Remove-Item -LiteralPath $g, $ngoai -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Ca 'icacls_dang_ky_khong_di_theo_lien_ket' {
+    $ast = [Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $f = $ast.FindAll({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Register-LichCapNhat' }, $true)[0]
+    $goi = @($f.FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] -and $n.CommandElements[0].Extent.Text -eq '$icacls' }, $true))
+    $goi.Count -ge 4 -and -not ($goi | Where-Object { $_.Extent.Text -notmatch '\s/L\s' })
+}
+Ca 'thu_muc_tai_bo_thua_ke' {
+    $ast = [Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
+    $f = $ast.FindAll({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'New-ThuMucTai' }, $true)[0]
+    $goi = $f.FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] -and $n.Extent.Text -match 'icacls\.exe' }, $true)[0]
+    [bool](@($goi.CommandElements | ForEach-Object { $_.Extent.Text }) -contains '/inheritance:r')
+}
+Ca 'ma_thoat_2_pham_vi_sai' {
+    & (Get-Process -Id $PID).Path -NoProfile -File $Script -PhamVi Sai *> $null
+    $LASTEXITCODE -eq 2
+}
+
 # ── mã thoát của chính script (tiến trình con) ──
 $pwsh = (Get-Process -Id $PID).Path
 # Không có ProgramFiles (như Linux): nạp hàm vẫn được, và chạy thường vẫn tới được chốt (mã 4 ngoài Windows, mã 5 sai máy
@@ -128,6 +199,66 @@ if (-not $IsWindows) {
     } else {
         Ca 'admin_ca_ma_thoat_3_khong_do_duoc' { Write-Host '  chạy bằng admin: ca mã thoát 3 không đo được ở đây — chạy lại bằng tài khoản thường'; $false }
     }
+}
+
+# ── luồng thật với đồ giả (CHẠY CUỐI: các hàm giả che hàm của script) — gợi ý của cross-review lượt 1 ──
+$tamGia = Join-Path ([IO.Path]::GetTempPath()) ("cncc-gia-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory $tamGia | Out-Null
+$pfCu = $env:ProgramFiles
+try {
+    $Script:Payload = 'payload-offline'; $Script:VanBanMang = ''
+    function Invoke-WebRequest { param($Uri, $Headers, $TimeoutSec, $OutFile)
+        if ($OutFile) { [IO.File]::WriteAllText($OutFile, $Script:Payload); return }
+        [pscustomobject]@{ Content = $Script:VanBanMang } }
+    Ca 'save_that_su_kiem_bam_va_xoa_tep_lech' {
+        (Nem { Save-CoKiemBam 'OFFLINE' ('0' * 64) $tamGia 'xau.msi' }) -and -not (Test-Path (Join-Path $tamGia 'xau.msi'))
+    }
+    $ts = [pscustomobject]@{ name = 'muon.msi'; digest = $null }
+    $rl = [pscustomobject]@{ assets = @($ts, [pscustomobject]@{ name = 'muon.msi.sha256'; browser_download_url = 'OFFLINE' }) }
+    Ca 'sidecar_ten_khac_bi_tu_choi' { $Script:VanBanMang = ('a' * 64) + '  khac.msi'; $null -eq (Get-BamTaiSan $rl $ts) }
+    Ca 'sidecar_bam_tran_duoc_nhan' { $Script:VanBanMang = ('a' * 64) + "`n"; (Get-BamTaiSan $rl $ts) -eq ('a' * 64) }
+    Ca 'sidecar_chon_dung_dong_ten' {
+        $Script:VanBanMang = ('a' * 64) + "  khac.msi`n" + ('b' * 64) + "  muon.msi`n"; (Get-BamTaiSan $rl $ts) -eq ('b' * 64)
+    }
+
+    $env:ProgramFiles = Join-Path $tamGia 'PF'
+    New-Item -ItemType Directory -Path (Join-Path $env:ProgramFiles 'nodejs') | Out-Null
+    [IO.File]::WriteAllText((Join-Path $env:ProgramFiles 'nodejs/node.exe'), 'chi-co-mat')
+    $Script:CheDo = ''; $Script:DaCai = $false; $Script:DaDungLai = $false; $Script:CoLucCai = $false
+    function Get-PhienBanLenh($Exe, $DoiSo, $Mau) {
+        if ($Exe -match 'git.exe$') { return '2.56.0.windows.4' }
+        if ($Exe -match 'gh.exe$') { return '1.0.0' }
+        if ($Exe -match 'pwsh.exe$') { return '7.6.9' }
+        if ($Script:CheDo -eq 'khong-doc') { return $null }
+        return '24.1.0' }
+    function Get-Release($Repo) {
+        $tag = '7.6.9'; $f = 'PowerShell-7.6.9-win-x64.msi'
+        if ($Repo -eq 'git-for-windows/git') { $tag = '2.56.0.windows.4'; $f = 'Git-2.56.0-64-bit.exe' }
+        if ($Repo -eq 'cli/cli') { $tag = '1.0.0'; $f = 'gh_1.0.0_windows_amd64.msi' }
+        [pscustomobject]@{ tag_name = "v$tag"; assets = @([pscustomobject]@{ name = $f; browser_download_url = 'OFFLINE' }) } }
+    function Invoke-RestMethod { param($Uri, $TimeoutSec) @([pscustomobject]@{ version = 'v26.2.0'; lts = 'moi' }, [pscustomobject]@{ version = 'v24.2.0'; lts = 'cu' }) }
+    function Save-CoKiemBam($Url, $Bam, $ThuMuc, $Ten) { Join-Path $tamGia $Ten }
+    function Install-Msi($Msi, $Ten) { $Script:DaCai = $true; $Script:CoLucCai = $Script:DaCaiNode; throw 'msi-hong-sau-khi-node-co-the-da-tat' }
+    function Stop-ScheduledTask { param($TaskName, $ErrorAction) }
+    function Start-ScheduledTask { param($TaskName, $ErrorAction) $Script:DaDungLai = $true }
+    function Get-ScheduledTask { param($TaskName, $ErrorAction) [pscustomobject]@{ State = 'Running' } }
+    function Start-Sleep { param($Seconds) }
+    function New-ThuMucTai { param([switch]$ChiAdmin) $d = Join-Path $tamGia ([guid]::NewGuid().ToString('N')); New-Item -ItemType Directory $d | Out-Null; $d }
+    $Script:VanBanMang = ('a' * 64) + "  node-v26.2.0-x64.msi`n" + ('a' * 64) + "  node-v24.2.0-x64.msi`n"
+    Ca 'node_co_tep_khong_doc_phien_ban_khong_cai' {
+        $Script:CheDo = 'khong-doc'; $Script:DaCai = $false; $Script:DaCaiNode = $false; $Script:KetQua.Clear()
+        Invoke-TangHeThong *> $null
+        -not $Script:DaCai -and @($Script:KetQua | Where-Object { $_.cong_cu -eq 'node' -and $_.hanh_dong -eq 'loi' }).Count -eq 1
+    }
+    Ca 'node_cai_hong_van_dung_lai_commander' {
+        $Script:CheDo = ''; $Script:DaCai = $false; $Script:DaDungLai = $false; $Script:CoLucCai = $false; $Script:DaCaiNode = $false; $Script:KetQua.Clear()
+        Invoke-TangHeThong *> $null
+        $Script:DaCai -and $Script:CoLucCai -and $Script:DaDungLai -and
+            @($Script:KetQua | Where-Object { $_.cong_cu -eq 'node-major' -and $_.hanh_dong -eq 'can_quyet_dinh' }).Count -eq 1
+    }
+} finally {
+    $env:ProgramFiles = $pfCu
+    Remove-Item -LiteralPath $tamGia -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 $dat = @($Ca.Values | Where-Object { $_ }).Count

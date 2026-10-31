@@ -1,0 +1,9 @@
+# WorkflowRun.file cho run 41209445414 (push master, merge a253c169). Phien web KHONG goi duoc GraphQL (403), nen lenh chay
+# tren VM tra-luat-win (deviceId f7281f27-f79f-40a2-a2f5-b454b58a166a) bang gh CLI dang nhap tai khoan chu kho, qua Remote
+# Desktop Commander, boi phien executor session_015GtxrbVWthHq1mtsPgqZLw, 2026-10-31T15:1xZ, shell cmd, process ket thuc binh thuong.
+# node_id lay tu REST readback-run-41209445414.json (WFR_kwLOTNeRjc8AAAAJmEY8Jg).
+lenh: gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJmEY8Jg -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+output:
+{"data":{"node":{"databaseId":41209445414,"runNumber":3715,"createdAt":"2026-10-31T14:17:33Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/a253c169ed79617b8d1a4754867c336ac72c72c5/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"a253c169ed79617b8d1a4754867c336ac72c72c5"}}}}}
+doi chieu REST/git trong phien ghi so: readback-contents-ci-yml-a253c169.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size 69161
+= git rev-parse a253c169:.github/workflows/ci.yml; sha256 noi dung ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb.

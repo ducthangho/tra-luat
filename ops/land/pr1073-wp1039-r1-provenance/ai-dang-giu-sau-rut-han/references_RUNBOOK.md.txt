@@ -1,0 +1,9 @@
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp710-r3-g1-codex	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp710-r3-g1-codex.yaml
+HẾT_HẠN	wp710-r4-g2-codex	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp710-r4-g2-codex.yaml
+HẾT_HẠN	wp710-r4-g3-claude	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp710-r4-g3-claude.yaml
+HẾT_HẠN	wp710-r4-g4-claude-windows	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp710-r4-g4-claude-windows.yaml
+HẾT_HẠN	wp710-r4-g5-claude-windows	refs/heads/claude/wp1039-cloud-setup-p2b-g1:ops/leases/wp710-r4-g5-claude-windows.yaml
+HẾT_HẠN	wp1039-cloud-setup-p2b-r1-g1-claude	refs/remotes/origin/ops/cap-lease-1039-g1:ops/leases/wp1039-cloud-setup-p2b-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

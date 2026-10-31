@@ -1,0 +1,32 @@
+{
+  "nguon": "MCP github pull_request_read method=get_review_comments owner=ducthangho repo=tra-luat pullNumber=1065",
+  "do_luc_utc": "2026-10-31T14:07:20Z",
+  "ghi_chu": "Trich cac truong dinh danh/trang thai tu phan hoi MCP (than comment luoc bo); totalCount=1, hasNextPage=false.",
+  "review_threads": [
+    {
+      "id": "PRRT_kwDOTNeRjc6yN7uy",
+      "is_resolved": true,
+      "is_outdated": true,
+      "is_collapsed": true,
+      "comments": [
+        {
+          "html_url": "https://github.com/ducthangho/tra-luat/pull/1065#discussion_r4430537534",
+          "author": "chatgpt-codex-connector",
+          "created_at": "2026-10-31T04:38:49Z",
+          "path": "ops/vm/cap-nhat-cong-cu.ps1",
+          "original_line": 54
+        },
+        {
+          "html_url": "https://github.com/ducthangho/tra-luat/pull/1065#discussion_r4430544980",
+          "author": "ducthangho",
+          "created_at": "2026-10-31T04:40:22Z",
+          "path": "ops/vm/cap-nhat-cong-cu.ps1",
+          "original_line": 54
+        }
+      ],
+      "total_count": 2
+    }
+  ],
+  "totalCount": 1,
+  "hasNextPage": false
+}

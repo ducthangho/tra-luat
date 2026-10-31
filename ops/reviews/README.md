@@ -838,6 +838,9 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | `pr1058-review-2-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
 | `pr1058-review-2-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer (evidence/*) tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 3534a6e. |
 | `pr1058-review-2-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | DIFF.patch (>500 KB), ban sao kho cua sandbox va evidence/gates-summary.log (khoang trang thua) KHONG vao kho; sha256/so byte o OMITTED.txt. |
+| `pr1071-review-1-codex-verdict.md` | `CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY` | Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong. |
+| `pr1071-review-1-codex-verdict.md` | `SCRIPT-DO-DOC-DUONG-DAN-SANDBOX` | Script/bang chung cua reviewer (evidence/*) tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can clone tai 0104461. |
+| `pr1071-review-1-codex-verdict.md` | `TEP-LON-KHONG-VAO-KHO` | DIFF.patch, ban sao kho/nguon cua sandbox va evidence/readme.diff (khoang trang thua) KHONG vao kho; sha256/so byte o OMITTED.txt. |
 
 ## Mục lục
 
@@ -1160,6 +1163,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`pr1056-review-2-codex-verdict.md`](pr1056-review-2-codex-verdict.md) | [`.receipt.yaml`](pr1056-review-2-codex-verdict.receipt.yaml) | khong co (PR ghi so review #1050, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **2** cua PR **#1056** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run 6ad116a8`, `gpt-6.1-sol` do_may · head da duyet = head PR #1056 luc merge (`afc82f6`) · thu muc goc [`pr1056-review-2-codex/`](pr1056-review-2-codex/) | `047eaa4` | 44974 |
 | [`pr1058-review-1-codex-verdict.md`](pr1058-review-1-codex-verdict.md) | [`.receipt.yaml`](pr1058-review-1-codex-verdict.receipt.yaml) | khong co (PR ghi so cua #1045, chu kho giao truc tiep) | **`changes_requested`** · `cross_reviewed` · luot **1** cua PR **#1058** · 0/0/1/1 (P0/P1/P2/P3) · codex CLI `launcher.py run f98dce6d`, `gpt-6-astra` do_may · thu muc goc [`pr1058-review-1-codex/`](pr1058-review-1-codex/) | `5dd347c` | 13159 |
 | [`pr1058-review-2-codex-verdict.md`](pr1058-review-2-codex-verdict.md) | [`.receipt.yaml`](pr1058-review-2-codex-verdict.receipt.yaml) | khong co (PR ghi so cua #1045, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **2** cua PR **#1058** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run 488b7693`, `gpt-6-astra` do_may · head da duyet = head PR #1058 luc merge (merge `9c7dc11`) · thu muc goc [`pr1058-review-2-codex/`](pr1058-review-2-codex/) | `3534a6e` | 13506 |
+| [`pr1071-review-1-codex-verdict.md`](pr1071-review-1-codex-verdict.md) | [`.receipt.yaml`](pr1071-review-1-codex-verdict.receipt.yaml) | khong co (PR ghi so review #1058, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **1** cua PR **#1071** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run 94bf0499`, `gpt-6-astra` do_may · head da duyet = head PR #1071 luc merge (merge `0d79022`) · thu muc goc [`pr1071-review-1-codex/`](pr1071-review-1-codex/) | `0104461` | 12716 |
 
 ### Tám hàng `don-nhanh-*` — chuỗi ĐẦU TIÊN của bảng này KHÔNG có hàng `approve` nào
 

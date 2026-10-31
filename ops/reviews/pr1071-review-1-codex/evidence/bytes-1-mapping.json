@@ -1,0 +1,219 @@
+[
+  {
+    "dest": "VERDICT.md",
+    "source": "VERDICT.md",
+    "bytes": 13159,
+    "sha256": "f062f215087cab163ac378a5582002842c8a50312fd1fc748a8942a4115bee7e",
+    "equal": true
+  },
+  {
+    "dest": "PROMPT.md",
+    "source": "PROMPT.md",
+    "bytes": 3481,
+    "sha256": "c7908dff5728e24280f66a1116dbe2eba9b46fe41d4a54171c1ede482d1b23b8",
+    "equal": true
+  },
+  {
+    "dest": "launcher.out",
+    "source": "launcher.json",
+    "bytes": 8325,
+    "sha256": "a001139b44f68671b5bdfa15674d52f697e35be5e64caf8a038c1d9a6c2c83c2",
+    "equal": true
+  },
+  {
+    "dest": "run/checkpoint.json",
+    "source": "runs/f98dce6d/checkpoint.json",
+    "bytes": 212,
+    "sha256": "d95c2886da3b44305abe5fa10f39913f6d78ad5ce4458fe336d1a622568c167b",
+    "equal": true
+  },
+  {
+    "dest": "run/run.json",
+    "source": "runs/f98dce6d/run.json",
+    "bytes": 11842,
+    "sha256": "8cf03154d41a41b84011bbff9b8bb7896e898a707f3f99bbd15a5c9adf3a963b",
+    "equal": true
+  },
+  {
+    "dest": "run/stdout.log",
+    "source": "runs/f98dce6d/stdout.log",
+    "bytes": 488,
+    "sha256": "c47ef20e02e1aa30a68877f5145852dcfab1529d4c0776ab27c75e456fae8ab6",
+    "equal": true
+  },
+  {
+    "dest": "run/stderr.log",
+    "source": "runs/f98dce6d/stderr.log",
+    "bytes": 39,
+    "sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-diff-check.log",
+    "source": "evidence/base-diff-check.log",
+    "bytes": 27,
+    "sha256": "a4268df249eee8f5fe1919ba5d2988f8dcd2fdc04ccf7958793426bdbe91dc95",
+    "equal": true
+  },
+  {
+    "dest": "evidence/gates.py",
+    "source": "gates.py",
+    "bytes": 1483,
+    "sha256": "b676eab524c969d06dd8a49003e3240acd055dd5d3c1caf6e1d8a7e7fefc7677",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-t26-t27.log",
+    "source": "evidence/head-t26-t27.log",
+    "bytes": 932,
+    "sha256": "7b80cd27980fa079b60ecb5b841dda0643c224a77f324bb5e49fd621b801879d",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-receipts.log",
+    "source": "evidence/base-receipts.log",
+    "bytes": 306,
+    "sha256": "6dee05935beac15d4949835073a2b5707f8ec29751723369580942fb6f138e19",
+    "equal": true
+  },
+  {
+    "dest": "evidence/gates.json",
+    "source": "evidence/gates.json",
+    "bytes": 18238,
+    "sha256": "2d2f7ec12ed318fa5291c590ade636de3bab69a3220c10583e4be2ac726de34a",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-land.log",
+    "source": "evidence/head-land.log",
+    "bytes": 6846,
+    "sha256": "2b2e3ea92955c89b41c9286c22015b6a5528e56764dee56b070f17d78fa0d112",
+    "equal": true
+  },
+  {
+    "dest": "evidence/provenance.log",
+    "source": "evidence/provenance.log",
+    "bytes": 8109,
+    "sha256": "91c74f09f62babdd8383e626995ada76129efbbc36a4bb79316583cf767d7963",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-doctrine.log",
+    "source": "evidence/head-doctrine.log",
+    "bytes": 138,
+    "sha256": "9866f3e98c3c6779bb1b40139af7232f02d2783aaed57f13ccbbfcfb1499df59",
+    "equal": true
+  },
+  {
+    "dest": "evidence/finding_checks.py",
+    "source": "finding_checks.py",
+    "bytes": 1526,
+    "sha256": "e85daca6ebc8db7e34b7a05209a09651e38327326cf830029b360880862f8e06",
+    "equal": true
+  },
+  {
+    "dest": "evidence/provenance_audit.py",
+    "source": "provenance_audit.py",
+    "bytes": 8108,
+    "sha256": "63c021f43315b7efcd1284abb9cf8a5be3665f184d21e6840c45cce94fa1a639",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-receipts.log",
+    "source": "evidence/head-receipts.log",
+    "bytes": 306,
+    "sha256": "dabc65d83236c850ab2bb6aedbb925ef1938a43aca1ba3c1afcef45a687b7c2e",
+    "equal": true
+  },
+  {
+    "dest": "evidence/finalize_verdict.py",
+    "source": "finalize_verdict.py",
+    "bytes": 7274,
+    "sha256": "476f53d16bafa6ffefcd589456d6ff244699df35c090451df0e42454f926b4e9",
+    "equal": true
+  },
+  {
+    "dest": "evidence/checksums.log",
+    "source": "evidence/checksums.log",
+    "bytes": 1427,
+    "sha256": "b5038725fa6ac624121163c074002a846adb9eca498e7519507aaaa993e0ffb7",
+    "equal": true
+  },
+  {
+    "dest": "evidence/head-diff-check.log",
+    "source": "evidence/head-diff-check.log",
+    "bytes": 27,
+    "sha256": "a4268df249eee8f5fe1919ba5d2988f8dcd2fdc04ccf7958793426bdbe91dc95",
+    "equal": true
+  },
+  {
+    "dest": "evidence/changed-files.txt",
+    "source": "evidence/changed-files.txt",
+    "bytes": 2760,
+    "sha256": "ccbb26f8efe0b83149536acf91a4fc2cb80b94562575e18439d531a6c7e53260",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-land.log",
+    "source": "evidence/base-land.log",
+    "bytes": 6797,
+    "sha256": "a235653ca7d43f8e3efc1ffd21796c78d317376eca721915465d85319da5201d",
+    "equal": true
+  },
+  {
+    "dest": "evidence/findings.log",
+    "source": "evidence/findings.log",
+    "bytes": 2410,
+    "sha256": "836e6a542379e32dfeb42a0d5b01e748faab8b98dc43023367a03142f09baa67",
+    "equal": true
+  },
+  {
+    "dest": "evidence/final-state.json",
+    "source": "evidence/final-state.json",
+    "bytes": 1147,
+    "sha256": "b4d0a63eaa7b9a8959af200824411d332cfb1071a876acc2699e617e4d2ee240",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-doctrine.log",
+    "source": "evidence/base-doctrine.log",
+    "bytes": 138,
+    "sha256": "9866f3e98c3c6779bb1b40139af7232f02d2783aaed57f13ccbbfcfb1499df59",
+    "equal": true
+  },
+  {
+    "dest": "evidence/diff-range-check.log",
+    "source": "evidence/diff-range-check.log",
+    "bytes": 7,
+    "sha256": "418a5c17f33c70e99b0cc0a07fce69191489cfedc94164bfa903785777c5bd4b",
+    "equal": true
+  },
+  {
+    "dest": "evidence/base-t26-t27.log",
+    "source": "evidence/base-t26-t27.log",
+    "bytes": 936,
+    "sha256": "f3dae473ff886d69ce567343764b1fb6c651b8a383bd7c6a07ebdcb1325ba304",
+    "equal": true
+  },
+  {
+    "dest": "evidence/audit.py",
+    "source": "audit.py",
+    "bytes": 9495,
+    "sha256": "ee486c7df22726e5a9ef478b318f3419cf90c79f80f33c8648f2db2d2ce224be",
+    "equal": true
+  },
+  {
+    "dest": "evidence/audit.log",
+    "source": "evidence/audit.log",
+    "bytes": 5564,
+    "sha256": "de751dc52c6afb4d13a86830bbe43f5a436ff595a9e471e61aac6cfb9c3ff763",
+    "equal": true
+  },
+  {
+    "dest": "evidence/direct_cases.py",
+    "source": "direct_cases.py",
+    "bytes": 539,
+    "sha256": "62cbf7e864904407151f77d6b8aabad92e647f2616f854c6fc99c377bc4fe1de",
+    "equal": true
+  }
+]

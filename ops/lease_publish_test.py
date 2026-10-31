@@ -1553,8 +1553,30 @@ def _doi_thu_muc_reviews():
     return thu_muc
 
 
-def _bang(van: str, tieu_de: str) -> list:
+def _tach_o(dong: str) -> list:
+    r"""Tách một dòng bảng thành ô theo `|` KHÔNG thoát, rồi trả `\|` về `|` (GFM §4.10, ví dụ 200).
+
+    Vì sao (cross-review #1051 lượt 4, P2): `split("|")` coi `\|` là ranh giới cột, nên chữ trong ô
+    `tệp verdict` tràn sang cột `biên nhận`/`id` và thoả cho cột ấy dù cột thật ghi tên khác.
+
+    Chỉ bóc space/tab — `str.strip()` bóc cả NBSP (lượt 10) và VT/FF (lượt 11), nên `|\u00a0---|` hay
+    `|\x0b---|` thành hàng gạch hợp lệ dù GitHub không dựng bảng (cross-review #1051, P2)."""
+    import re
+    TRANG = " \t"
+    d = dong.strip(TRANG)
+    if d.startswith("|"):
+        d = d[1:]
+    if d.endswith("|") and not d.endswith("\\|"):
+        d = d[:-1]
+    return [x.replace("\\|", "|").strip(TRANG) for x in re.split(r"(?<!\\)\|", d)]
+
+
+def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
     """Trả các HÀNG DỮ LIỆU của bảng dưới `## <tieu_de>`, mỗi hàng là dict {tên cột: ô}.
+
+    `giu_span=True` giữ NGUYÊN dấu nháy ngược của ô dữ liệu (tiêu đề vẫn bóc) — cross-review #1051
+    lượt 3: bóc nó đi thì `` `two x.receipt.yaml` `` thành `two x.receipt.yaml`, và `_ten_tep` mất
+    ranh giới code span, nên hàng của tên KHÁC thoả cho `x.receipt.yaml`.
 
     SÁU bậc thu hẹp, mỗi bậc vì một lỗ ĐO ĐƯỢC. Chuỗi này mới là bài học, không phải
     từng bậc riêng lẻ:
@@ -1572,48 +1594,98 @@ def _bang(van: str, tieu_de: str) -> list:
     nó phá vỡ ranh giới hàng. Vá một lớp bằng cách mở một lớp khác.
     """
     import re
-    van = re.sub(r"<!--.*?-->", "", van, flags=re.S)      # comment: người đọc KHÔNG thấy
+    # MỘT lượt duy nhất, cùng luật cho kiểm comment và đọc bảng (cross-review #1051 lượt 8, P2): lượt quét
+    # comment riêng không nhớ rào mã, nên một tiêu đề giả trong rào mã tắt được chốt comment mà bộ đọc bảng vẫn
+    # ở đúng mục. Luật dưới đây bám GFM ở những chỗ ảnh hưởng tới "đâu là bảng của mục này", và ĐỎ ở chỗ
+    # không chắc — mục lục thật (đo 31-10-2026) không có rào mã, khối HTML, comment hay ký tự xuống dòng lạ nào.
+    #  · Dòng: chỉ CR/LF là biên dòng (GFM §2.2); `splitlines()` tách cả U+2028/U+000C… mà GFM không tách.
+    #  · Comment: thay bằng \x01 trên MỌI dòng nó phủ — giữ nguyên số dòng (lượt 7: xoá mất xuống dòng thì hai
+    #    hàng thành một) và không nối hai mảnh tên (lượt 6). Dòng nào của mục chạm comment ⇒ ĐỎ.
+    #  · Rào mã: mở/đóng thụt tối đa 3 dấu cách (GFM §4.5); dòng thụt 4 không đóng rào.
+    #  · Khối HTML (dòng mở bằng `<`): ĐỎ — trong khối HTML GitHub không dựng bảng (`<pre>`, `<div>`…).
+    #  · Tiêu đề ATX `#`/`##` (thụt ≤3) hoặc setext ngay sau một dòng văn: kết thúc mục.
+    #  · Bảng phải mở sau dòng trống/tiêu đề — ngay sau một dòng văn/danh sách/trích dẫn thì GitHub coi cả khối
+    #    là đoạn văn. Ô hàng gạch phải đúng `:?-+:?` (lượt 8: `|:|:|` không phải hàng gạch).
+    def _dong(x):
+        return re.split(r"\r\n|\r|\n", x)
+    van = re.sub(r"<!--.*?-->", lambda m: "\n".join("\x01" for _ in _dong(m.group(0))), van, flags=re.S)
     ra, lay, rao = [], False, None
-    dau_bang, cho_gach = None, False
+    dau_bang, cho_gach, trong_doan = None, False, False
 
     def la_gach(dong):
-        o = [x.strip() for x in dong.strip().strip("|").split("|")]
-        return bool(o) and all(x and set(x) <= set("-: ") for x in o)
+        o = _tach_o(dong)
+        return bool(o) and all(re.fullmatch(r":?-+:?", x) for x in o)
 
-    for dong in van.splitlines():
-        # Rào mã: PHẢI nhớ ký tự mở và ĐỘ DÀI. Cờ bật/tắt thô bỏ sót rào `~~~` và đóng
-        # sớm rào ```` khi gặp dòng ``` bên trong — Markdown thì không đóng.
-        m = re.match(r"^\s*(`{3,}|~{3,})", dong)
+    for dong in _dong(van):
+        m = re.match(r"^ {0,3}(`{3,}|~{3,})", dong)
+        # Rào backtick có `info` chứa backtick KHÔNG phải rào (GFM §4.5) — là chữ thường (lượt 9).
+        if m and m.group(1)[0] == "`" and "`" in dong[m.end():] and rao is None:
+            m = None
         if m:
             k, d = m.group(1)[0], len(m.group(1))
             if rao is None:
                 rao = (k, d)
-            elif k == rao[0] and d >= rao[1] and not dong.strip()[d:].strip():
+            elif k == rao[0] and d >= rao[1] and re.fullmatch(r"[ \t]*", dong[m.end():]):
                 rao = None
+            dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if rao is not None:                                # bảng trong khối mã là ví dụ
             continue
-        if dong.startswith("## "):
-            lay, dau_bang, cho_gach = (tieu_de in dong), None, False
+        bang(not re.match(r"^ {0,3}<[A-Za-z/?!]", dong),
+             f"README có khối HTML {dong[:60]!r} — trong khối HTML GitHub không dựng bảng Markdown, nên mục "
+             f"lục không kiểm chắc được. Bỏ HTML.")
+        tieu = re.match(r"^ {0,3}(#{1,6})(?:[ \t]|$)", dong)
+        if tieu:
+            if len(tieu.group(1)) <= 2:
+                # Đúng CHỮ HIỂN THỊ của tiêu đề, không tìm chuỗi con trong NGUỒN (lượt 11): `## [Khác](x "Mục lục")`
+                # hay `## <span title="Mục lục">Khác</span>` hiển thị "Khác". Chữ tiêu đề (bỏ `#` mở/đóng) phải là
+                # tên mục, trước nó chỉ được ký hiệu (mục lục thật: `⚠ `), không chữ, không cú pháp Markdown/HTML.
+                # Tiền tố là tập LITERAL (lượt 12–13): lớp phủ định nhận cả RLO (U+202E) — đảo chữ hiển thị; còn nhóm
+                # Unicode `So` chứa trọn bảng chữ Latin khoanh tròn/đóng khung (U+24B6…, U+1F130…) — viết được cả từ.
+                # Không nhóm ký tự nào là "ký hiệu không mang chữ"; nên chỉ nhận đúng tiền tố mục lục thật đang dùng.
+                # Thêm một tiền tố mới là thay đổi CÓ CHỦ ĐÍCH, kèm đối chứng.
+                chu = re.sub(r"[ \t]+#+[ \t]*$", "", dong[tieu.end():]).strip(" \t")
+                lay = len(tieu.group(1)) == 2 and chu in {tieu_de, "\u26a0 " + tieu_de}
+            dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if not lay:
             continue
-        if not dong.strip().startswith("|"):
-            dau_bang, cho_gach = None, False               # hết bảng
+        bang("\x01" not in dong,
+             f"mục '{tieu_de}' có comment HTML (`<!--`/`-->`) — comment có thể ghép hai hàng bảng làm một "
+             f"hoặc giấu chữ, nên mục lục không kiểm chắc được. Chuyển comment ra ngoài mục.")
+        # Dòng trống chỉ là dòng rỗng hoặc toàn space/tab (GFM §2.1) — `str.strip()` coi cả NBSP, U+3000,
+        # U+2028… là trắng, nên một dòng GitHub coi là CHỮ đã ngắt đoạn trong bộ đọc (lượt 9).
+        if re.fullmatch(r"[ \t]*", dong):
+            dau_bang, cho_gach, trong_doan = None, False, False
             continue
+        if trong_doan and dau_bang is None and re.fullmatch(r" {0,3}(=+|-+)[ \t]*", dong):
+            lay = False                                    # tiêu đề setext: dòng văn ngay trên thành tiêu đề
+            continue
+        if not dong.lstrip(" \t").startswith("|"):
+            dau_bang, cho_gach, trong_doan = None, False, True   # hết bảng; dòng văn
+            continue
+        # Hàng thụt lề: 4 dấu cách là KHỐI MÃ, không phải bảng (lượt 7) — đòi cột 0 như mục lục thật.
+        bang(dong.startswith("|"), f"mục '{tieu_de}': hàng bảng THỤT LỀ {dong[:60]!r} — thụt 4 dấu cách thì "
+                                   f"GitHub hiển thị khối mã chứ không phải bảng. Bỏ thụt lề.")
 
-        o = [x.strip().strip("`").strip() for x in dong.strip().strip("|").split("|")]
+        tho = _tach_o(dong)
+        o = [x.strip("`").strip() for x in tho]
         if dau_bang is None:                               # ứng viên hàng tiêu đề
+            if trong_doan:
+                continue                                   # dính đoạn văn phía trên ⇒ GitHub không dựng bảng
             dau_bang, cho_gach = [x.lower() for x in o], True
             continue
+        if giu_span:
+            o = tho
         if cho_gach:
             # Không có hàng gạch thì GitHub KHÔNG render thành bảng. Bộ đọc cũ chỉ BỎ QUA
             # hàng gạch chứ không ĐÒI nó, nên xoá `|---|` đi là người đọc mất bảng mà
             # `t27` vẫn xanh.
-            if la_gach(dong):
+            # …và hàng gạch phải CÙNG số ô với tiêu đề, không thì GitHub cũng không render bảng (lượt 7).
+            if la_gach(dong) and len(_tach_o(dong)) == len(dau_bang):
                 cho_gach = False
             else:
-                dau_bang, cho_gach = None, False
+                dau_bang, cho_gach, trong_doan = None, False, True
             continue
         if la_gach(dong):
             continue
@@ -1649,14 +1721,99 @@ def _liet_ke_theo_duoi(thu_muc: Path, duoi: str) -> list:
 
 
 def _ten_tep(o: str) -> set:
-    """Rút TÊN TỆP trong một ô, để so BẰNG NHAU thay vì so chuỗi con.
+    r"""Rút TÊN TỆP trong một ô tên của mục lục, để so BẰNG NHAU thay vì so chuỗi con.
 
-    Vì sao: `foo-verdict.md` là chuỗi con của `old-foo-verdict.md`, nên một hàng mục lục
-    của tệp NÀY thoả luôn cho tệp KIA. Hai tên chồng nhau là đủ để một verdict không có
-    hàng riêng mà vẫn xanh.
+    Vì sao so bằng nhau: `foo-verdict.md` là chuỗi con của `old-foo-verdict.md`, nên một hàng mục
+    lục của tệp NÀY thoả luôn cho tệp KIA.
+
+    Vì sao NGỮ PHÁP CHO PHÉP thay vì đọc Markdown: năm lượt cross-review #1051 cùng MỘT lớp — ô ghi
+    tên KHÁC vẫn thoả cho tên trên đĩa — và mỗi lượt là một cách đọc Markdown lỏng mới (span một/nhiều
+    nháy, `_bang` bóc nháy, `\|`, ký tự dính sau tên, nhãn ≠ đích, link tham chiếu, ảnh, HTML, entity,
+    link nằm trong span). Đọc Markdown tự do là thua từ thiết kế: luôn còn một cú pháp chưa nghĩ tới.
+    Nên ô tên phải BẮT ĐẦU bằng một hay nhiều MỤC thuộc đúng hai dạng mục lục thật đang viết
+    (đo 31-10-2026: 306/306 hàng cột verdict, mọi ô cột biên nhận), mỗi mục theo sau bởi hết ô, `,`,
+    hoặc khoảng trắng (từ đó trở đi là CHÚ THÍCH, bỏ qua — kiểu ` — v2`):
+      · `` `TÊN` ``           — một dấu nháy, nội dung đúng TRỌN một tên;
+      · `[NHÃN](ĐƯỜNG)`       — danh tính là ĐƯỜNG; NHÃN (TRONG nháy — nhãn trần bị Markdown đổi chữ:
+                                 `_x_` hiển thị `x`, lượt 7) phải BẰNG basename của
+                                 ĐƯỜNG, hoặc là đuôi bắt đầu bằng `.` của nó (`` `.receipt.yaml` ``).
+    Mọi thứ khác ở đầu ô — HTML, ảnh, link tham chiếu, entity, chữ trần, span nhiều nháy, tên dính
+    tiền tố/hậu tố — cho TẬP RỖNG: thiếu tên thì `t27` ĐỎ, tức hỏng về phía an toàn.
+    Đuôi so KHÔNG phân biệt hoa thường (kiểm toán sau merge #1007, P2); phần TÊN giữ nguyên hoa thường.
+    Tên không được bắt đầu bằng `.` (tệp ẩn: `Get-ChildItem` thiếu `-Force` bỏ qua — bài học r244).
     """
     import re
-    return set(re.findall(r"[\w.\-/]+\.(?:md|ya?ml)", o))
+    ten = r"[\w\-][\w.\-]*\.(?:md|ya?ml)"
+    duong = rf"(?:[\w\-][\w.\-]*/)*{ten}"
+    muc = re.compile(rf"`(?P<span>{ten})`|\[(?P<nhan>`[^`\[\]]+`)\]\((?P<dich>{duong})\)",
+                     re.IGNORECASE)
+    o = o.strip(" \t")
+    ra, i = set(), 0
+    while True:
+        m = muc.match(o, i)
+        if not m:
+            return set()                    # mục không thuộc ngữ pháp ⇒ ô không cho tên nào
+        if m.group("span"):
+            moi = m.group("span")
+        else:
+            nhan, dich = m.group("nhan"), m.group("dich")
+            if nhan.startswith("`"):
+                nhan = nhan[1:-1]
+            co_so = dich.rsplit("/", 1)[-1]
+            if not (nhan == co_so or (nhan.startswith(".") and len(co_so) > len(nhan)
+                                      and co_so.endswith(nhan))):
+                return set()                # nhãn nêu tên KHÁC đích ⇒ mâu thuẫn
+            moi = dich
+        ra.add(moi)
+        j = m.end()
+        if j == len(o):
+            return ra
+        if o[j] == ",":
+            i = j + 1
+            while i < len(o) and o[i].isspace():
+                i += 1
+            continue                        # sau dấu phẩy PHẢI là một mục nữa
+        if not o[j].isspace():
+            return set()                    # ký tự dính sau mục (`+bak`, `.bak`, nháy…) ⇒ tên KHÁC
+        k = j
+        while k < len(o) and o[k].isspace():
+            k += 1
+        if k < len(o) and muc.match(o, k):
+            i = k
+            continue
+        return ra                           # phần còn lại là chú thích
+
+
+DUOI_BIEN_NHAN = ".receipt.yaml"
+
+
+def _doi_ten_hop_le(ds: list, bien_nhan: bool = True):
+    """Tên tệp phải (1) TRÍCH ĐƯỢC NGUYÊN VẸN bằng `_ten_tep`, và với biên nhận (2) mang đuôi
+    `.receipt.yaml` VIẾT THƯỜNG đúng từng byte. Mọi lỗi của một tệp nêu trong CÙNG một thông báo, để
+    làm đúng lời chữa là xanh — không phải chữa một lỗi rồi mới thấy lỗi kế.
+
+    (1) — cross-review #1051 lượt 2 (P2): `two words.receipt.yaml` được bộ liệt kê nhận, nhưng
+    `_ten_tep` chỉ trích `words.receipt.yaml`, nên hàng mục lục ĐÚNG tên vẫn bị báo thiếu, và làm theo
+    lời chữa "đổi đuôi" vẫn đỏ. Mục lục thật viết tên TRẦN (không code span), nên không có ranh giới
+    nào khác để đọc tên có khoảng trắng; tên ấy bị từ chối kèm lời chữa "đổi tên".
+
+    (2):
+
+    Vì sao (cross-review #1051 lượt 1, P2): `_liet_ke_theo_duoi` THẤY `x.RECEIPT.YAML` trên mọi nền,
+    nhưng các bộ đọc khác của kho — cổng lược đồ `ops/bien_nhan_v2.py`, `--sinh-no`, c38/c42, và
+    `_doc_bien_nhan` của `packet_loop.py` — duyệt bằng `glob("*.receipt.yaml")`, tức BỎ QUA nó trên
+    POSIX. Nhận nó ở đây là mở một lối đi vòng cổng v2 (đo được: `schema_version: 999` vẫn ĐẠT khi
+    chỉ đổi đuôi sang HOA). Nên tên ấy bị TỪ CHỐI kèm cách chữa làm được, thay vì nhận ở một bộ đọc
+    và vô hình ở năm bộ kia."""
+    for p in ds:
+        loi = []
+        if bien_nhan and not p.name.endswith(DUOI_BIEN_NHAN):
+            loi.append(f"đuôi biên nhận phải viết thường đúng `{DUOI_BIEN_NHAN}` — cổng lược đồ v2 và "
+                       f"packet_loop chỉ đọc đuôi ấy, nên tệp này bị chúng bỏ qua")
+        if _ten_tep(f"`{p.name}`") != {p.name}:
+            loi.append("tên chỉ được gồm chữ, số, `.`, `-`, `_` — bộ đọc mục lục không trích được tên này "
+                       "NGUYÊN VẸN, nên hàng mục lục đúng tên vẫn bị báo thiếu")
+        bang(not loi, f"{p.name}: " + "; ".join(loi) + ". Đổi tên tệp (và hàng mục lục).")
 
 
 @ca
@@ -1669,11 +1826,16 @@ def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
     khai một con băm không còn đúng, mà người đọc lại tin. Ca này buộc hai thứ đi
     cùng nhau — đổi tệp gốc mà quên biên nhận thì ĐỎ.
     """
+    _kiem_bam_bien_nhan(_doi_thu_muc_reviews(), HERE.parent)
+
+
+def _kiem_bam_bien_nhan(thu_muc: Path, goc: Path):
+    """Thân của `t26` (tách ra ở #1051 để ca phản chứng đo được chốt đuôi trên thư mục tạm)."""
     import hashlib
     import yaml
-    thu_muc = _doi_thu_muc_reviews()
     ds = _liet_ke_theo_duoi(thu_muc, ".receipt.yaml")   # #1006: cùng tập trên mọi nền
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+    _doi_ten_hop_le(ds)
     for p in ds:
         d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
         duong = str(d.get("verdict_path") or "").strip()
@@ -1682,7 +1844,7 @@ def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
              f"{p.name}: biên nhận NỬA VỜI (verdict_path={duong!r} sha={sha!r}) — "
              f"băm không địa chỉ thì không kiểm được, địa chỉ không băm thì tệp đổi "
              f"lúc nào cũng không ai biết")
-        f = HERE.parent / duong
+        f = goc / duong
         bang(f.is_file(), f"{p.name}: trỏ vào tệp không có: {duong}")
         thuc = hashlib.sha256(f.read_bytes()).hexdigest()
         bang(thuc == sha,
@@ -1734,6 +1896,19 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
     _kiem_muc_luc(_doi_thu_muc_reviews(), HERE.parent)
 
 
+def _id_hien_thi(o: str) -> set:
+    """ID trong một ô cột `id`: ô phải là TRỌN một dãy code span một nháy (cách bằng space/tab hoặc `,`) — đúng
+    dạng mục lục thật (đo 31-10-2026: 750/750 ô). Dạng khác cho tập RỖNG (cross-review #1051 lượt 9: `.split()`
+    nhận `C1` từ `<span data-x=" C1 ">OTHER</span>` hay `[OTHER]( C1 )`, trong khi ô hiển thị `OTHER`)."""
+    import re
+    o = o.strip(" \t")
+    # Phân cách giữa hai span phải KHÁC RỖNG (lượt 10): `` `C1``OTHER` `` là MỘT span theo GFM §6.3 — dãy hai nháy
+    # ở giữa không đóng span mở bằng một nháy — chứ không phải hai id.
+    if not re.fullmatch(r"`[^`\s]+`(?:(?:[ \t]*,[ \t]*|[ \t]+)`[^`\s]+`)*", o):
+        return set()
+    return set(re.findall(r"`([^`\s]+)`", o))
+
+
 def _kiem_muc_luc(thu_muc: Path, goc: Path):
     """Thân của `t27`: `thu_muc` là thư mục verdict, `goc` là gốc kho để so `verdict_path`."""
     import yaml
@@ -1748,8 +1923,8 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
     k_cb_id = _cot_duy_nhat(van, CB, "id")
     k_ml_v = _cot_duy_nhat(van, ML, "tệp verdict")
     k_ml_bn = _cot_duy_nhat(van, ML, "biên nhận")
-    hang_cb = _bang(van, CB)
-    hang_ml = _bang(van, ML)
+    hang_cb = _bang(van, CB, giu_span=True)   # #1051 lượt 3: giữ ranh giới code span cho `_ten_tep`
+    hang_ml = _bang(van, ML, giu_span=True)
     bang(hang_ml, f"{muc_luc.name}: bảng 'Mục lục' RỖNG — mục lục rỗng thì mọi phép "
                   f"kiểm dưới đây chỉ là hình thức")
 
@@ -1761,6 +1936,8 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
     ds_verdict = _liet_ke_theo_duoi(thu_muc, "-verdict.md")   # #1006: bắt cả `-VERDICT.md` trên Linux
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
     bang(ds_verdict, f"không thấy verdict nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+    _doi_ten_hop_le(ds)
+    _doi_ten_hop_le(ds_verdict, bien_nhan=False)
 
     # L3 — duyệt VERDICT theo đĩa, KHÔNG suy từ biên nhận. Suy từ biên nhận thì một
     # verdict chưa ai làm biên nhận sẽ vô hình đúng lúc nó cần bị thấy nhất.
@@ -1769,9 +1946,11 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
              f"{muc_luc.name}: verdict {f.name!r} KHÔNG có trong CỘT 'tệp verdict' của "
              f"bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột "
              f"mô tả nào đó thì bảng render ra vẫn thiếu nó.")
-        bn = thu_muc / f"{f.stem}.receipt.yaml"
-        bang(bn.is_file(),
-             f"{f.name}: KHÔNG có biên nhận {bn.name}. Verdict không biên nhận là verdict "
+        # Tra theo TÊN trong tập đã liệt kê, không hỏi hệ tệp: `is_file()` trên Windows khớp cả
+        # `x.RECEIPT.YAML` (kiểm toán sau merge #1007, P2). Đuôi khác đã bị từ chối ở trên.
+        bn = next((p for p in ds if p.name == f"{f.stem}{DUOI_BIEN_NHAN}"), None)
+        bang(bn,
+             f"{f.name}: KHÔNG có biên nhận {f.stem}{DUOI_BIEN_NHAN}. Verdict không biên nhận là verdict "
              f"không ai khai đã đăng ở đâu — và `t26` cũng không đụng tới nó.")
         # N3+P1 — đúng TÊN chưa đủ, và đúng BASENAME cũng chưa đủ. So ĐƯỜNG DẪN ĐẦY ĐỦ:
         # một biên nhận trỏ `ops/reviews/archive/x.md` trong khi tệp thật nằm ở
@@ -1785,12 +1964,35 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
              f"So basename thôi thì một bản sao ở thư mục khác lọt qua, và tệp THẬT "
              f"không được băm bởi bất kỳ ca nào.")
 
-    for p in ds:
-        d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+    goc_tm = thu_muc.relative_to(goc).as_posix() + "/"
+
+    def duong_verdict(d):
+        """Đường dẫn verdict tính từ thư mục verdict (= tên khi verdict nằm ngay trong đó)."""
+        vp = str(d.get("verdict_path") or "").strip().lstrip("./")
+        return vp[len(goc_tm):] if vp.startswith(goc_tm) else vp
+
+    du_lieu = [(p, yaml.safe_load(p.read_text(encoding="utf-8")) or {}) for p in ds]
+    # Mọi DANH TÍNH verdict đã biết — từ MỌI biên nhận cộng verdict trên đĩa — để alias basename chỉ được
+    # cấp khi nó trỏ DUY NHẤT một đường dẫn (cross-review #1051 lượt 5: `VERDICT.md` gốc không mang hậu
+    # tố `-verdict.md` nên không có trong `ds_verdict`; hai thư mục con cùng basename cũng va nhau).
+    dinh_danh = {duong_verdict(d) for _, d in du_lieu} | {f.name for f in ds_verdict}
+    dem_co_so = {}
+    for x in dinh_danh - {""}:
+        dem_co_so[PurePosixPath(x).name] = dem_co_so.get(PurePosixPath(x).name, 0) + 1
+
+    for p, d in du_lieu:
         bang(co_o_cot(p.name, hang_ml, k_ml_bn),
              f"{muc_luc.name}: biên nhận {p.name} KHÔNG có trong CỘT 'biên nhận' của "
              f"bảng 'Mục lục'")
-        ten_verdict = Path(str(d.get("verdict_path") or "")).name
+        # Danh tính verdict trong Mục lục là ĐƯỜNG DẪN tính từ thư mục verdict (= tên, khi verdict nằm
+        # ngay trong đó): link của mục lục trỏ ĐÍCH, và `x.md` ở gốc khác `con/x.md` (#1051 lượt 4).
+        # Bảng cảnh báo viết basename cho verdict ở thư mục con (đo 30-10-2026: 22/22 hàng như vậy), nên
+        # ở bảng ấy nhận thêm basename — chỉ đúng cho verdict thư mục con, đã nêu ở đây cho người sau.
+        ten_verdict = duong_verdict(d)
+        # …nhưng CHỈ khi basename ấy xác định DUY NHẤT một danh tính (xem `dinh_danh` ở trên).
+        ten_cb = {ten_verdict} if ten_verdict else set()
+        if "/" in ten_verdict and dem_co_so.get(PurePosixPath(ten_verdict).name) == 1:
+            ten_cb.add(PurePosixPath(ten_verdict).name)
         bang(ten_verdict and co_o_cot(ten_verdict, hang_ml, k_ml_v),
              f"{muc_luc.name}: verdict {ten_verdict!r} KHÔNG có trong CỘT 'tệp verdict' "
              f"của bảng 'Mục lục'")
@@ -1804,8 +2006,8 @@ def _kiem_muc_luc(thu_muc: Path, goc: Path):
             # `tệp verdict`. Ràng theo hàng thôi vẫn thủng: phần mô tả của một hàng nhắc
             # CHÉO tên verdict khác kèm id của nó thì phép kiểm "cả hai chuỗi có mặt đâu
             # đó trong hàng" nhận nhầm đó là cảnh báo của verdict thứ hai.
-            bang(any(ma in {x.strip() for x in h.get(k_cb_id, "").split()}
-                     and ten_verdict in _ten_tep(h.get(k_cb_v, ""))
+            bang(any(ma in _id_hien_thi(h.get(k_cb_id, ""))
+                     and ten_cb & _ten_tep(h.get(k_cb_v, ""))
                      for h in hang_cb),
                  f"{muc_luc.name}: caveat {ma!r} của {p.name} KHÔNG nằm ở CỘT 'id' trên "
                  f"cùng hàng với {ten_verdict!r} ở CỘT 'tệp verdict', trong bảng "
@@ -1878,18 +2080,394 @@ def t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen():
         bang([p.name for p in _liet_ke_theo_duoi(bo, ".receipt.yaml")] == ["mau.RECEIPT.YAML"],
              "bộ liệt kê không thấy biên nhận đuôi HOA `.RECEIPT.YAML`")
 
-        # Và ở đúng chỗ dùng: một biên nhận đuôi HOA vắng khỏi mục lục phải làm ĐỎ.
+        # Và ở đúng chỗ dùng: một biên nhận đuôi HOA phải làm ĐỎ (từ #1051: bị từ chối vì đuôi
+        # không viết thường — các bộ đọc khác của kho không thấy nó).
         (tm / "le.RECEIPT.YAML").write_text(
             "verdict_path: ops/reviews/thuong-verdict.md\n", encoding="utf-8")
         try:
             _kiem_muc_luc(tm, goc)
         except AssertionError as e:
-            bang("le.RECEIPT.YAML" in str(e) and "CỘT 'biên nhận'" in str(e),
-                 f"ĐỎ nhưng SAI chốt — đòi chốt cột 'biên nhận' nêu 'le.RECEIPT.YAML', được: {e}")
+            bang("le.RECEIPT.YAML" in str(e) and "viết thường" in str(e),
+                 f"ĐỎ nhưng SAI chốt — đòi chốt đuôi viết thường nêu 'le.RECEIPT.YAML', được: {e}")
         else:
             raise AssertionError(
                 "biên nhận đuôi `.RECEIPT.YAML` vắng khỏi mục lục mà `_kiem_muc_luc` vẫn XANH — "
                 "nhánh duyệt biên nhận còn phụ thuộc nền (lỗi #1006)")
+
+
+@ca
+def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t27():
+    """Tên biên nhận/verdict mà các bộ đọc khác không đọc được phải ĐỎ ở `t26` LẪN `t27`, với lời chữa
+    mà LÀM ĐÚNG thì CẢ HAI xanh.
+
+    Vì sao có, ba lượt cùng một lớp (`wp1006-case-insensitive-listing-case-sensitive-consumer`):
+    · kiểm toán sau merge #1007 (P2): bộ liệt kê thấy `x.RECEIPT.YAML` mà bộ trích tên thì không, nên
+      hàng mục lục ĐÚNG tên vẫn bị báo thiếu — lời chữa trong thông báo KHÔNG làm xanh được.
+    · cross-review #1051 lượt 1 (P2): bản vá đầu NHẬN tên ấy, mở lối vòng cổng lược đồ v2 (nó duyệt
+      `glob("*.receipt.yaml")`, POSIX không thấy đuôi HOA) ⇒ đuôi không viết thường bị TỪ CHỐI.
+    · cross-review #1051 lượt 2 (P2): `two words.receipt.yaml` — `_ten_tep` chỉ trích `words.receipt.yaml`,
+      nên làm đúng lời chữa "đổi đuôi" vẫn đỏ ⇒ tên không trích được NGUYÊN VẸN cũng bị từ chối, và mọi
+      lỗi của một tệp nêu trong CÙNG một thông báo.
+    Fixture dùng biên nhận ĐỦ (băm đúng, `evidence_url` https) để đo được chiều XANH của `t26`, không
+    chỉ chiều đỏ. Chiều ĐỎ đo bằng dấu riêng của chốt tên (`Đổi tên tệp`), không bằng lời chốt mục lục.
+    """
+    import hashlib
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam)
+        tm = goc / "ops" / "reviews"
+        tm.mkdir(parents=True)
+
+        def verdict(ten):
+            (tm / ten).write_text(f"verdict {ten}\n", encoding="utf-8")
+
+        def bien_nhan(ten, ten_verdict):
+            sha = hashlib.sha256((tm / ten_verdict).read_bytes()).hexdigest()
+            (tm / ten).write_text(f"verdict_path: ops/reviews/{ten_verdict}\nverdict_sha256: {sha}\n"
+                                  f"evidence_url: https://example.test/r\n", encoding="utf-8")
+
+        def muc_luc(*hang):
+            (tm / "README.md").write_text(
+                "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n"
+                "| `khong-ai.md` | `x` |\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n|---|---|\n"
+                + "".join(f"| `{v}` | `{b}` |\n" for v, b in hang), encoding="utf-8")
+
+        def ca_hai_xanh():
+            _kiem_bam_bien_nhan(tm, goc)
+            _kiem_muc_luc(tm, goc)
+
+        def phai_do_vi_ten(ten, *dau, ham):
+            try:
+                ham()
+            except AssertionError as e:
+                bang(ten in str(e) and "Đổi tên tệp" in str(e) and all(d in str(e) for d in dau),
+                     f"ĐỎ nhưng SAI chốt — đòi chốt tên nêu {ten!r} kèm {dau}, được: {e}")
+            else:
+                raise AssertionError(f"tên {ten!r} các bộ đọc khác không đọc được mà vẫn XANH")
+
+        def ca_hai_do_vi_ten(ten, *dau):
+            phai_do_vi_ten(ten, *dau, ham=lambda: _kiem_bam_bien_nhan(tm, goc))
+            phai_do_vi_ten(ten, *dau, ham=lambda: _kiem_muc_luc(tm, goc))
+
+        verdict("a-verdict.md")
+        bien_nhan("a-verdict.receipt.yaml", "a-verdict.md")
+        nen = [("a-verdict.md", "a-verdict.receipt.yaml")]
+
+        # (1) Alias đuôi HOA, CÓ hàng đúng cột ⇒ ĐỎ vì đuôi ở cả hai ca; đổi theo lời chữa ⇒ cả hai XANH.
+        bien_nhan("alias.RECEIPT.YAML", "a-verdict.md")
+        muc_luc(*nen, ("a-verdict.md", "alias.RECEIPT.YAML"))
+        ca_hai_do_vi_ten("alias.RECEIPT.YAML", "viết thường")
+        bang(_ten_tep("`alias.RECEIPT.YAML`") == {"alias.RECEIPT.YAML"},
+             "bộ trích tên không nhận đuôi HOA hoặc đã đổi hoa thường của TÊN")
+        (tm / "alias.RECEIPT.YAML").unlink()
+        bien_nhan("alias.receipt.yaml", "a-verdict.md")
+        nen.append(("a-verdict.md", "alias.receipt.yaml"))
+        muc_luc(*nen)
+        ca_hai_xanh()
+
+        # (2) Tên có khoảng trắng VÀ đuôi HOA ⇒ MỘT thông báo nêu CẢ HAI lỗi; chỉ đổi đuôi ⇒ vẫn đỏ vì tên
+        # (đúng biểu hiện lượt 2); đổi cả tên ⇒ cả hai XANH.
+        bien_nhan("two words.RECEIPT.YAML", "a-verdict.md")
+        muc_luc(*nen, ("a-verdict.md", "two words.RECEIPT.YAML"))
+        ca_hai_do_vi_ten("two words.RECEIPT.YAML", "viết thường", "chữ, số")
+        (tm / "two words.RECEIPT.YAML").unlink()
+        bien_nhan("two words.receipt.yaml", "a-verdict.md")
+        muc_luc(*nen, ("a-verdict.md", "two words.receipt.yaml"))
+        ca_hai_do_vi_ten("two words.receipt.yaml", "chữ, số")
+        (tm / "two words.receipt.yaml").unlink()
+        bien_nhan("two-words.receipt.yaml", "a-verdict.md")
+        nen.append(("a-verdict.md", "two-words.receipt.yaml"))
+        muc_luc(*nen)
+        ca_hai_xanh()
+        # Code span là ranh giới rõ: span không trọn một tên thì không cho tên nào — hàng của
+        # `two words…` KHÔNG được thoả cho tệp `words…`; ngoài span, ký tự lạ dính liền cũng không.
+        bang(_ten_tep("`two words.receipt.yaml`") == set() and _ten_tep("plus+name.receipt.yaml") == set(),
+             "bộ trích tên cắt ĐUÔI của một tên dài hơn — hàng của tệp NÀY thoả cho tệp KIA")
+        # Ngữ pháp cho phép (#1051 lượt 5): nhiều mục cách bằng `,` nhận đủ, đuôi HOA vẫn là tên; chữ TRẦN
+        # không thuộc ngữ pháp nên không cho tên nào.
+        bang(_ten_tep("`a-VERDICT.MD`, [`b.Receipt.Yaml`](b.Receipt.Yaml) — ghi chú") == {"a-VERDICT.MD", "b.Receipt.Yaml"},
+             "bộ trích tên không nhận đủ các mục cách nhau bằng dấu phẩy, hoặc đổi hoa thường của TÊN")
+        bang(_ten_tep("a-verdict.md") == set(),
+             "bộ trích tên nhận chữ TRẦN — dạng ngoài ngữ pháp cho phép phải cho tập RỖNG")
+
+        # (3) Verdict có khoảng trắng ⇒ `t27` ĐỎ vì tên (không vì "thiếu ở cột").
+        verdict("x y-verdict.md")
+        muc_luc(*nen, ("x y-verdict.md", "a-verdict.receipt.yaml"))
+        phai_do_vi_ten("x y-verdict.md", "chữ, số", ham=lambda: _kiem_muc_luc(tm, goc))
+        (tm / "x y-verdict.md").unlink()
+
+        # (4) Sidecar đuôi HOA của verdict đuôi HOA ⇒ ĐỎ vì đuôi; đổi sang đuôi thường ⇒ cả hai XANH.
+        verdict("b-VERDICT.md")
+        bien_nhan("b-VERDICT.RECEIPT.YAML", "b-VERDICT.md")
+        muc_luc(*nen, ("b-VERDICT.md", "b-VERDICT.RECEIPT.YAML"))
+        ca_hai_do_vi_ten("b-VERDICT.RECEIPT.YAML", "viết thường")
+        (tm / "b-VERDICT.RECEIPT.YAML").unlink()
+        bien_nhan("b-VERDICT.receipt.yaml", "b-VERDICT.md")
+        nen.append(("b-VERDICT.md", "b-VERDICT.receipt.yaml"))
+        muc_luc(*nen)
+        ca_hai_xanh()
+
+        # (5) Tiền tố chỉ khác hoa thường KHÔNG phải sidecar: `c-VERDICT.md` + `c-verdict.receipt.yaml`
+        # là hai danh tính (dựng được trên mọi hệ tệp) ⇒ ĐỎ "KHÔNG có biên nhận". So tên NGUYÊN.
+        verdict("c-VERDICT.md")
+        bien_nhan("c-verdict.receipt.yaml", "c-VERDICT.md")
+        muc_luc(*nen, ("c-VERDICT.md", "c-verdict.receipt.yaml"))
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("c-VERDICT.md" in str(e) and "KHÔNG có biên nhận" in str(e),
+                 f"ĐỎ nhưng SAI chốt — đòi 'KHÔNG có biên nhận' cho 'c-VERDICT.md', được: {e}")
+        else:
+            raise AssertionError("sidecar khớp tiền tố KHÔNG phân biệt hoa thường — `c-verdict.receipt.yaml` "
+                                 "bị nhận làm biên nhận của `c-VERDICT.md`")
+
+    # (6) Tích hợp qua BẢNG THẬT (#1051 lượt 3–4, P2): ô ghi tên KHÁC — dài hơn trong code span một hay
+    # NHIỀU dấu nháy, dính ký tự sau tên, link nhãn ≠ đích, `\|` đẩy chữ sang cột khác — KHÔNG được thoả cho
+    # tệp trên đĩa, ở cột 'biên nhận', cột 'tệp verdict' của Mục lục, và bảng cảnh báo. Đo qua
+    # `_kiem_muc_luc`, không gọi riêng `_ten_tep`: lượt 3 chỉ ra bộ trích đúng khi gọi riêng mà `_bang`
+    # bóc mất ranh giới span trước khi tới nó. Đối chứng XANH dùng đúng các dạng mục lục thật đang viết.
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam)
+        tm = goc / "ops" / "reviews"
+        tm.mkdir(parents=True)
+        (tm / "x-verdict.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "x-verdict.receipt.yaml").write_text(
+            "verdict_path: ops/reviews/x-verdict.md\nverdict_usage_caveats:\n  - id: C1\n", encoding="utf-8")
+
+        def muc_luc(o_bn="`x-verdict.receipt.yaml`", o_cb="`x-verdict.md`", o_v="`x-verdict.md`",
+                    hang_ml=None, hang_cb=None):
+            hang_cb = hang_cb or f"| {o_cb} | `C1` |"
+            hang_ml = hang_ml or f"| {o_v} | {o_bn} |"
+            (tm / "README.md").write_text(
+                "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n"
+                f"{hang_cb}\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n|---|---|\n{hang_ml}\n",
+                encoding="utf-8")
+
+        def phai_do(dau, **kw):
+            muc_luc(**kw)
+            try:
+                _kiem_muc_luc(tm, goc)
+            except AssertionError as e:
+                bang(all(d in str(e) for d in dau), f"{kw}: ĐỎ nhưng SAI chốt — đòi {dau}, được: {e}")
+            else:
+                raise AssertionError(f"{kw}: ô ghi tên/cột KHÁC mà vẫn thoả cho tệp trên đĩa")
+
+        # Đối chứng XANH — các dạng mục lục thật dùng.
+        for kw in ({}, {"o_bn": "[`.receipt.yaml`](x-verdict.receipt.yaml) — v2"},
+                   {"o_v": "[`x-verdict.md`](x-verdict.md)"}, {"o_bn": "`khac.receipt.yaml`, `x-verdict.receipt.yaml`"},
+                   {"o_bn": "`x-verdict.receipt.yaml` *(ghi chú)*"}, {"o_cb": "[`x-verdict.md`](x-verdict.md)"}):
+            muc_luc(**kw)
+            _kiem_muc_luc(tm, goc)
+        bn = ("x-verdict.receipt.yaml", "CỘT 'biên nhận'")
+        for o_bn in ("`two x-verdict.receipt.yaml`", "``two x-verdict.receipt.yaml``", "`two`x-verdict.receipt.yaml",
+                     "x-verdict.receipt.yaml.bak", "x-verdict.receipt.yaml/con", "x-verdict.receipt.yaml+bak",
+                     "x-verdict.receipt.yaml@bak", "[`x-verdict.receipt.yaml`](khac.receipt.yaml)",
+                     "[`.receipt.yaml`](khac.receipt.yaml)", "`khac.receipt.yaml`",
+                     # nhãn là tên KHÁC đích: người đọc thấy `khac`, link đi `x` ⇒ mâu thuẫn, không cho tên nào
+                     "[`khac.receipt.yaml`](x-verdict.receipt.yaml)",
+                     # nhãn bắt đầu bằng `.` mà KHÔNG phải đuôi của đích
+                     "[`.md`](x-verdict.receipt.yaml)",
+                     # span HAI nháy chứa nháy đơn (GFM §6.3): nội dung là chuỗi có nháy, không phải tên
+                     "`` `x-verdict.receipt.yaml` ``",
+                     # lượt 5: link tham chiếu, HTML (tên chỉ ở thuộc tính), ảnh, link nằm trong span, entity,
+                     # span dính tiền tố/hậu tố, `<code>`, chữ trần — đều NGOÀI ngữ pháp ⇒ không cho tên nào
+                     "[`x-verdict.receipt.yaml`][1]",
+                     '<a href="khac.yaml" title="x-verdict.receipt.yaml">khac.yaml</a>',
+                     "![.receipt.yaml](x-verdict.receipt.yaml)", "`[.receipt.yaml](x-verdict.receipt.yaml)`",
+                     "two&#46;x-verdict.receipt.yaml", "khac`x-verdict.receipt.yaml`",
+                     "`x-verdict.receipt.yaml`+bak", "<code>two x-verdict.receipt.yaml</code>",
+                     "x-verdict.receipt.yaml", "`x-verdict.receipt.yaml`.", "`` x-verdict.receipt.yaml ``",
+                     # lượt 7: nhãn link TRẦN bị Markdown đổi chữ (`_x_` hiển thị `x`) ⇒ chỉ nhận nhãn trong nháy
+                     "[_x_-verdict.receipt.yaml](_x_-verdict.receipt.yaml)",
+                     "[x-verdict.receipt.yaml](x-verdict.receipt.yaml)",
+                     # ảnh với nhãn TRONG nháy — hiển thị ảnh, không phải tên
+                     "![`.receipt.yaml`](x-verdict.receipt.yaml)"):
+            phai_do(bn, o_bn=o_bn)
+        for o_v in ("``two x-verdict.md``", "[`x-verdict.md`](con/x-verdict.md)", "x-verdict.md+bak",
+                    "![x-verdict.md](x-verdict.md)", "[`x-verdict.md`][1]", '<a href="x-verdict.md">x</a>',
+                    "`[x-verdict.md](x-verdict.md)`", "[_x_-verdict.md](_x_-verdict.md)", "![`x-verdict.md`](x-verdict.md)"):
+            phai_do(("x-verdict.md", "CỘT 'tệp verdict'"), o_v=o_v)
+        cb = ("'C1'", "CỘT 'id'")
+        for o_cb in ("`two x-verdict.md`", "``two x-verdict.md``", "x-verdict.md.bak", "x-verdict.md/con",
+                     "x-verdict.md@bak", "`khac-verdict.md`", "![x-verdict.md](x-verdict.md)",
+                     "two&#46;x-verdict.md", "khac`x-verdict.md`", "[_x_-verdict.md](_x_-verdict.md)"):
+            phai_do(cb, o_cb=o_cb)
+        # `\|` là NỘI DUNG ô (GFM §4.10): chữ sau nó vẫn thuộc cột 'tệp verdict', không tràn sang cột kế.
+        # Giá trị TRONG nháy để chỉ chốt `\|` quyết định (bản trần bị ngữ pháp ô từ chối sẵn — không đo gì).
+        phai_do(bn, hang_ml=r"| `x-verdict.md` \| `x-verdict.receipt.yaml` | `khac.receipt.yaml` |")
+        phai_do(cb, hang_cb=r"| `x-verdict.md` \| `C1` | `C2` |")
+        # Comment HTML TRONG mục (lượt 6–7): trong span thì là chữ hiển thị (xoá rỗng ⇒ tên khác liền lại); nhiều
+        # dòng thì ghép ô của HAI hàng; một mình thì giấu tên/id. Không đọc chắc được ⇒ cấm hẳn trong mục.
+        cm = ("comment HTML",)
+        for kw in ({"o_bn": "`x-verdict<!-- h -->.receipt.yaml`"}, {"o_v": "`x-verdict<!-- h -->.md`"},
+                   {"o_cb": "`x-verdict<!-- h -->.md`"}, {"o_bn": "<!-- `x-verdict.receipt.yaml` -->"},
+                   {"o_bn": "`x-verdict.receipt.yaml` <!-- ghi chú -->"},
+                   {"hang_cb": "| `x-verdict.md` | `C<!-- h -->1` |"}, {"hang_cb": "| `x-verdict.md` | <!-- `C1` --> |"},
+                   {"hang_cb": "| `khac.md` | `KHAC` |\n| `x-verdict.md` <!--\n| --> | `C1` |"}):
+            phai_do(cm, **kw)
+        # Bảng THỤT 4 dấu cách là khối mã, không phải bảng (lượt 7).
+        for kw in ({"hang_cb": "    | `x-verdict.md` | `C1` |"}, {"hang_ml": "    | `x-verdict.md` | `x-verdict.receipt.yaml` |"}):
+            phai_do(("THỤT LỀ",), **kw)
+        # Hàng gạch khác số ô với tiêu đề ⇒ GitHub không render bảng ⇒ coi như không có bảng.
+        (tm / "README.md").write_text(
+            "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n| `x-verdict.md` | `C1` |\n\n"
+            "## Mục lục\n\n| tệp verdict | biên nhận |\n|---|---|---|\n| `x-verdict.md` | `x-verdict.receipt.yaml` |\n",
+            encoding="utf-8")
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("Mục lục" in str(e), f"hàng gạch lệch số ô: ĐỎ nhưng SAI chốt — được: {e}")
+        else:
+            raise AssertionError("hàng gạch khác số ô với tiêu đề mà bảng vẫn được đọc — GitHub không render nó")
+
+        # Thư mục con KHÔNG tên `con`: đó là tên thiết bị dành riêng của Windows (`mkdir` ném WinError 267).
+        # Verdict ở THƯ MỤC CON (mục lục thật: 22 hàng): danh tính trong Mục lục là ĐƯỜNG DẪN `ho-so/y-verdict.md`
+        # — hàng chỉ ghi basename trỏ một tệp KHÁC (ở gốc) nên ĐỎ; bảng cảnh báo viết basename vẫn XANH.
+        (tm / "ho-so").mkdir()
+        (tm / "ho-so" / "y-verdict.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "y.receipt.yaml").write_text(
+            "verdict_path: ops/reviews/ho-so/y-verdict.md\nverdict_usage_caveats:\n  - id: C9\n", encoding="utf-8")
+        x_ml = "| `x-verdict.md` | `x-verdict.receipt.yaml` |"
+        y_cb = "| `x-verdict.md` | `C1` |\n| `y-verdict.md` | `C9` |"
+        muc_luc(hang_cb=y_cb, hang_ml=x_ml + "\n| [`y-verdict.md`](ho-so/y-verdict.md) | `y.receipt.yaml` |")
+        _kiem_muc_luc(tm, goc)
+        phai_do(("'ho-so/y-verdict.md'", "CỘT 'tệp verdict'"), hang_cb=y_cb,
+                hang_ml=x_ml + "\n| `y-verdict.md` | `y.receipt.yaml` |")
+        # Có thêm verdict GỐC cùng basename ⇒ hàng cảnh báo basename là của verdict gốc, KHÔNG thoả caveat
+        # của `ho-so/y-verdict.md`.
+        (tm / "y-verdict.md").write_text("verdict goc\n", encoding="utf-8")
+        (tm / "y-verdict.receipt.yaml").write_text("verdict_path: ops/reviews/y-verdict.md\n", encoding="utf-8")
+        y_ml = (x_ml + "\n| [`y-verdict.md`](ho-so/y-verdict.md) | `y.receipt.yaml` |"
+                "\n| `y-verdict.md` | `y-verdict.receipt.yaml` |")
+        phai_do(("'C9'", "CỘT 'id'"), hang_cb=y_cb, hang_ml=y_ml)
+        muc_luc(hang_cb=y_cb + "\n| [`y-verdict.md`](ho-so/y-verdict.md) | `C9` |", hang_ml=y_ml)
+        _kiem_muc_luc(tm, goc)
+
+    # (7) Alias basename chỉ khi DUY NHẤT (#1051 lượt 5): verdict gốc KHÔNG mang hậu tố `-verdict.md` (không có
+    # trong `ds_verdict`, chỉ biết qua biên nhận), và hai thư mục con cùng basename — đều làm alias mơ hồ.
+    for goc_ten, con_a, con_b in (("VERDICT.md", "ho-so/VERDICT.md", None), ("report.md", "ho-so/report.md", None),
+                                  (None, "mot/z-verdict.md", "hai/z-verdict.md")):
+        with tempfile.TemporaryDirectory() as tam:
+            goc = Path(tam)
+            tm = goc / "ops" / "reviews"
+            tm.mkdir(parents=True)
+            (tm / "a-verdict.md").write_text("verdict\n", encoding="utf-8")
+            (tm / "a-verdict.receipt.yaml").write_text("verdict_path: ops/reviews/a-verdict.md\n", encoding="utf-8")
+            ml = ["| `a-verdict.md` | `a-verdict.receipt.yaml` |"]
+            cb = ["| `khong-ai.md` | `x` |"]
+            for i, v in enumerate(x for x in (goc_ten, con_a, con_b) if x):
+                (tm / v).parent.mkdir(parents=True, exist_ok=True)
+                (tm / v).write_text(f"verdict {v}\n", encoding="utf-8")
+                (tm / f"r{i}.receipt.yaml").write_text(
+                    f"verdict_path: ops/reviews/{v}\nverdict_usage_caveats:\n  - id: C9\n", encoding="utf-8")
+                ml.append(f"| [`{PurePosixPath(v).name}`]({v}) | `r{i}.receipt.yaml` |")
+            base = PurePosixPath(con_a).name
+            # Chỉ MỘT hàng basename/C9 — thuộc về verdict gốc (hoặc thư mục con đầu), không thể thoả cho cả hai.
+            (tm / "README.md").write_text(
+                "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n"
+                + "\n".join(cb + [f"| `{base}` | `C9` |"]) + "\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n"
+                "|---|---|\n" + "\n".join(ml) + "\n", encoding="utf-8")
+            try:
+                _kiem_muc_luc(tm, goc)
+            except AssertionError as e:
+                bang("'C9'" in str(e) and "CỘT 'id'" in str(e),
+                     f"basename {base!r} trùng: ĐỎ nhưng SAI chốt — được: {e}")
+            else:
+                raise AssertionError(f"một hàng cảnh báo `{base}` thoả caveat C9 cho MỌI verdict cùng basename "
+                                     f"({goc_ten}, {con_a}, {con_b}) — alias mơ hồ")
+            # Đối chứng: mỗi verdict thư mục con có hàng ghi ĐƯỜNG DẪN riêng ⇒ XANH.
+            cb2 = cb + [f"| [`{PurePosixPath(v).name}`]({v}) | `C9` |" for v in (con_a, con_b) if v]
+            if goc_ten:
+                cb2.append(f"| `{goc_ten}` | `C9` |")
+            (tm / "README.md").write_text(
+                "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n"
+                + "\n".join(cb2) + "\n\n## Mục lục\n\n| tệp verdict | biên nhận |\n"
+                "|---|---|\n" + "\n".join(ml) + "\n", encoding="utf-8")
+            _kiem_muc_luc(tm, goc)
+
+    # (8) CẤU TRÚC KHỐI quanh bảng (#1051 lượt 8, P2): bộ đọc phải thấy ĐÚNG bảng GitHub dựng — không hơn.
+    with tempfile.TemporaryDirectory() as tam:
+        goc = Path(tam)
+        tm = goc / "ops" / "reviews"
+        tm.mkdir(parents=True)
+        (tm / "x-verdict.md").write_text("verdict\n", encoding="utf-8")
+        (tm / "x-verdict.receipt.yaml").write_text(
+            "verdict_path: ops/reviews/x-verdict.md\nverdict_usage_caveats:\n  - id: C1\n", encoding="utf-8")
+        CB = "| tệp verdict | id |\n|---|---|\n| `x-verdict.md` | `C1` |"
+        ML = "| tệp verdict | biên nhận |\n|---|---|\n| `x-verdict.md` | `x-verdict.receipt.yaml` |"
+
+        def viet(cb=CB, ml=ML, dau="", t_cb="## Cảnh báo đang có hiệu lực", t_ml="## Mục lục"):
+            (tm / "README.md").write_text(f"# x\n\n{dau}{t_cb}\n\n{cb}\n\n{t_ml}\n\n{ml}\n", encoding="utf-8")
+
+        # Đối chứng XANH: comment và rào mã (kể cả một "## Mục lục" giả trong đó) ở NGOÀI hai mục là vô hại.
+        viet(dau="<!-- ghi chú -->\n\n## Khác\n\n```\n## Mục lục\n| tệp verdict | biên nhận |\n|---|---|\n```\n\n")
+        _kiem_muc_luc(tm, goc)
+        # Đối chứng XANH: tiêu đề có ký hiệu đứng trước (mục lục thật: `⚠ `) và `#` đóng vẫn là đúng mục.
+        viet(t_cb="## ⚠ Cảnh báo đang có hiệu lực", t_ml="## Mục lục ##")
+        _kiem_muc_luc(tm, goc)
+        # Đối chứng XANH: ô id nhiều span TÁCH RỜI (phẩy hoặc khoảng trắng) vẫn nhận đủ.
+        for o_id in ("`C2`, `C1`", "`C2` `C1`"):
+            viet(cb=CB.replace("`C1`", o_id))
+            _kiem_muc_luc(tm, goc)
+        do = {
+            # tiêu đề giả trong rào mã từng tắt chốt comment, rồi comment ghép hai hàng thành một
+            "rao_gia_roi_comment": ("comment HTML", dict(cb="```\n## Đây chỉ là ví dụ\n```\n\n| tệp verdict | id |\n"
+                                                         "|---|---|\n| `khac.md` | `K` |\n| `x-verdict.md` <!--\n| --> | `C1` |")),
+            "pre_boc_bang": ("khối HTML", dict(cb="<pre>\n" + CB + "\n</pre>")),
+            "div_boc_bang": ("khối HTML", dict(ml="<div>\n" + ML + "\n</div>")),
+            "gach_chi_hai_cham": ("Mục lục", dict(ml=ML.replace("|---|---|", "|:|:|"))),
+            "rao_dong_thut_4": ("Cảnh báo", dict(cb="```\n    ```\n\n" + CB + "\n\n```")),
+            "u2028_thay_xuong_dong": ("Cảnh báo", dict(cb=CB.replace("\n", "\u2028"))),
+            "van_ngay_truoc_bang": ("Cảnh báo", dict(cb="Ghi chú\n" + CB)),
+            "danh_sach_ngay_truoc": ("Cảnh báo", dict(cb="- mục\n" + CB)),
+            "trich_dan_ngay_truoc": ("Cảnh báo", dict(cb="> trích\n" + CB)),
+            "setext_cat_muc": ("Mục lục", dict(ml="Khác\n---\n\n" + ML)),
+            "tieu_de_thut_cat_muc": ("Mục lục", dict(ml="   ## Khác\n\n" + ML)),
+            # lượt 9: dòng chỉ có ký tự trắng Unicode KHÔNG phải dòng trống (GFM: chỉ space/tab)
+            "nbsp_khong_phai_dong_trong": ("Cảnh báo", dict(cb="Ghi chú\n\u00a0\n" + CB)),
+            "u3000_khong_phai_dong_trong": ("Mục lục", dict(ml="Ghi chú\n\u3000\n" + ML)),
+            "bang_gia_ngan_bang_nbsp": ("Cảnh báo", dict(cb="| other | other |\n|---|---|\n\u00a0\n" + CB)),
+            # rào backtick có info chứa backtick không phải rào ⇒ rào thật mở ở dòng SAU và nuốt bảng
+            "rao_mo_info_co_nhay": ("Mục lục", dict(ml="```info`\n```\n\n" + ML + "\n```")),
+            "rao_dong_kem_nbsp": ("Mục lục", dict(ml="```\n```\u00a0\n\n" + ML + "\n```")),
+            # ô id hiển thị OTHER, C1 chỉ nằm trong thuộc tính HTML / đích link
+            "id_trong_thuoc_tinh": ("'C1'", dict(cb=CB.replace("`C1`", '<span data-x=" C1 ">OTHER</span>'))),
+            "id_trong_the_html": ("'C1'", dict(cb=CB.replace("`C1`", "<span C1 >OTHER</span>"))),
+            "id_trong_dich_link": ("'C1'", dict(cb=CB.replace("`C1`", "[OTHER]( C1 )"))),
+            # lượt 10: span DÍNH nhau là MỘT span (GFM §6.3) — không có id `C1` độc lập
+            "id_dinh_span_dau": ("'C1'", dict(cb=CB.replace("`C1`", "`C1``OTHER`"))),
+            "id_dinh_span_cuoi": ("'C1'", dict(cb=CB.replace("`C1`", "`OTHER``C1`"))),
+            "id_dinh_span_giua": ("'C1'", dict(cb=CB.replace("`C1`", "`OTHER``C1``ELSE`"))),
+            # lượt 10: NBSP không phải khoảng trắng của bảng ⇒ hàng gạch hỏng ⇒ không có bảng
+            "gach_nbsp_dau_o": ("Cảnh báo", dict(cb=CB.replace("|---|---|", "|\u00a0---|---|"))),
+            "gach_nbsp_cuoi_o": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---\u00a0|---|"))),
+            "gach_nbsp_ngoai_bang": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---|---|\u00a0"))),
+            # lượt 11: VT/FF cũng không phải khoảng trắng của hàng gạch
+            "gach_vt": ("Cảnh báo", dict(cb=CB.replace("|---|---|", "|\x0b---|---|"))),
+            "gach_ff": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---|---|\x0c"))),
+            # lượt 11: tên mục chỉ nằm trong METADATA tiêu đề (title/đích link, thuộc tính HTML) — chữ hiển thị là "Khác"
+            "tieu_de_title_link": ("Cảnh báo", dict(t_cb='## [Khác](other.md "Cảnh báo đang có hiệu lực")')),
+            "tieu_de_dich_link": ("Mục lục", dict(t_ml="## [Khác](<Mục lục>)")),
+            "tieu_de_thuoc_tinh_html": ("Mục lục", dict(t_ml='## <span title="Mục lục">Khác</span>')),
+            "tieu_de_chu_khac_dung_truoc": ("Mục lục", dict(t_ml="## Không phải Mục lục")),
+            # lượt 12: ký tự định dạng (RLO U+202E, `Cf`) đứng trước đảo CHỮ HIỂN THỊ — không phải ký hiệu
+            "tieu_de_rlo_canh_bao": ("Cảnh báo", dict(t_cb="## \u202eCảnh báo đang có hiệu lực")),
+            "tieu_de_rlo_muc_luc": ("Mục lục", dict(t_ml="## \u202eMục lục")),
+            "tieu_de_zwsp": ("Mục lục", dict(t_ml="## \u200bMục lục")),
+            # ký hiệu Markdown/HTML (`Sm`/`Sk`/`P*`) đứng trước cũng không phải ký hiệu được phép
+            "tieu_de_dau_nho_hon": ("Mục lục", dict(t_ml="## < Mục lục")),
+            # lượt 13: chữ Latin khoanh tròn/đóng khung thuộc nhóm `So` — vẫn là CHỮ
+            "tieu_de_chu_khoanh_tron": ("Mục lục", dict(t_ml="## \u24c0\u24bd\u24b6\u24b8 Mục lục")),
+            "tieu_de_chu_dong_khung": ("Cảnh báo", dict(t_cb="## \U0001f13a\U0001f137\U0001f130\U0001f132 Cảnh báo đang có hiệu lực")),
+            "tieu_de_ky_hieu_khac": ("Mục lục", dict(t_ml="## \u2605 Mục lục")),
+        }
+        for ten, (dau_hieu, kw) in do.items():
+            viet(**kw)
+            try:
+                _kiem_muc_luc(tm, goc)
+            except AssertionError as e:
+                bang(dau_hieu in str(e), f"{ten}: ĐỎ nhưng SAI chốt — đòi {dau_hieu!r}, được: {e}")
+            else:
+                raise AssertionError(f"{ten}: GitHub KHÔNG dựng bảng này cho mục ấy mà `_kiem_muc_luc` vẫn XANH")
 
 
 @ca

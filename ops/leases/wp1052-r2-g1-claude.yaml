@@ -95,3 +95,9 @@ nang_tran: []
 requires_live: false
 ci_policy: do_da_biet_golden_va_release_verify_o_giai_doan_A_moi_do_khac_la_loi
 push_policy: 'day nhanh claude/epic-ritchie-quvrz1 khi A1-A6 dat; mo PR draft, ghi ro khong merge rieng'
+da_bi_thay_the: wp1052-r3-g2-claude
+da_bi_thay_the_ly_do: >-
+  Chu kho 'Lam giai doan B di' (#1052 issuecomment-6541150433) va chon 'B1+B2 ngay, manifest sau'
+  (issuecomment-6541183716). Lease wp1052-r3-g2-claude (spec r3) thay lease nay, giu 4 tep giai doan A
+  cong scripts/tl_selftest.py va references/golden/workflow_audit.json. Lease nay con han luc ghi bia mo
+  (toi 2026-10-31T19:20:00Z), nen bia mo hai chieu la duong thu hoi.

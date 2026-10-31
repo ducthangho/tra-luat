@@ -9410,7 +9410,7 @@ def r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau():
 
 @ca
 def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
-    """F4 còn lại: phần tử PATH rỗng = cwd; llm ở cwd phải thắng bản có shebang phía sau."""
+    """F4: PATH rỗng và symlink/.. đều phải giữ đúng executable đầu PATH."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     from unittest.mock import patch
@@ -9420,11 +9420,15 @@ def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
         later = d / "later"
         _wp1077_tep(first, "llm", 'case "$1" in --version) echo llm-FIRST;; keys) echo openai;; esac\n')
         _wp1077_tep(later, "llm", '#!/bin/sh\ncase "$1" in --version) echo llm-LATER;; keys) echo other;; esac\n')
-        env = {"PATH": os.pathsep + str(later), "LANG": "C.UTF-8"}
-        with contextlib.chdir(first), patch.dict(os.environ, env, clear=True):
-            tt, mo_ta = m._do_openai_llm(env, False)
-        bang(tt == "CO_CREDENTIAL" and "llm-FIRST" in mo_ta,
-             f"PATH rong: do nham llm phia sau: {tt} {mo_ta!r}")
+        (first / "sub").mkdir()
+        (d / "link").symlink_to(first / "sub", target_is_directory=True)
+        (d / "llm").symlink_to(later / "llm")
+        for path in (os.pathsep + str(later), str(d / "link" / "..") + os.pathsep + str(later)):
+            env = {"PATH": path, "LANG": "C.UTF-8"}
+            with contextlib.chdir(first), patch.dict(os.environ, env, clear=True):
+                tt, mo_ta = m._do_openai_llm(env, False)
+            bang(tt == "CO_CREDENTIAL" and "llm-FIRST" in mo_ta,
+                 f"PATH={path!r}: do nham llm phia sau: {tt} {mo_ta!r}")
 
 
 @ca
@@ -12343,7 +12347,6 @@ DOT_BIEN = [
      ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
     ("wp802_ten_co_duoi_khong_noi_them", ('([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)',
      '([""] if any(ten.upper().endswith(e.upper()) for e in ext) else ext))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
-    # wp1077 (M4): mỗi chốt của probe chạy-như-shell một đột biến.
     ("wp1077_bo_chay_lai_ENOEXEC",
      ('        if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):\n            raise',
       '        raise'),
@@ -12355,7 +12358,7 @@ DOT_BIEN = [
     ("wp1077_chay_lai_bo_qua_rc", ('    return subprocess.run(["/bin/sh", *lenh], **kw)',
       '    q = subprocess.run(["/bin/sh", *lenh], **kw)\n    return subprocess.CompletedProcess(lenh, 0, q.stdout, q.stderr)'),
      ["r1077_doctor_khong_shebang_hong_van_BI_CHE"]),
-    # Codex lượt 1: F3 (đối số) · F1 (mọi probe KHA_NANG + giải tên trần theo PATH).
+    # Codex lượt 1: F3 (đối số) · F1 (probe trong phạm vi; trừ _git/_do_codex_song, #1083).
     ("wp1077_retry_mat_doi_so", ('    return subprocess.run(["/bin/sh", *lenh], **kw)',
       '    return subprocess.run(["/bin/sh", lenh[0]], **kw)'), ["r1077_retry_giu_argv_env"]),
     ("wp1077_codex_status_spawn_tran", ('p = _chay_probe_nhu_shell([duong_codex, "login", "status"]',
@@ -12367,8 +12370,10 @@ DOT_BIEN = [
     ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
      ["r1077_probe_doctor_khong_spawn_tran"]),
     ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan",
-     ('        tep = os.path.abspath(tim) if tim else tep', '        tep = tim if tim else tep'),
+     ('        tep = os.path.join(os.getcwd(), tim) if tim else tep', '        tep = tim if tim else tep'),
      ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
+    ("wp1077_abspath_doi_nghia_symlink", ('        tep = os.path.join(os.getcwd(), tim) if tim else tep',
+     '        tep = os.path.abspath(tim) if tim else tep'), ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     # Codex lượt 2 F4: giải PATH TRƯỚC lần chạy đầu (bỏ ⇒ subprocess chạy bản sau; sh TÊN không tra PATH).
     ("wp1077_ten_tran_khong_giai_PATH", ('    if os.name != "nt" and os.sep not in tep:', '    if False:'),
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau"]),

@@ -21,8 +21,16 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-10-30T17:25:00Z'
 heartbeat_at: '2026-10-30T17:25:00Z'
-lease_until: '2026-10-31T17:25:00Z'
-lease_expires_at_utc: '2026-10-31T17:25:00Z'
+lease_until: '2026-10-31T04:41:00Z'
+lease_expires_at_utc: '2026-10-31T04:41:00Z'
+rut_han:
+  han_cu: '2026-10-31T17:25:00Z'
+  han_moi: '2026-10-31T04:41:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet CLOUD-SETUP-P2A-EXEC da merge: PR #1063 (head 08baebb25b54ce343c9ad56df5f4c389a6241c7e, merge 69dcfee9274aae12ca27dfecc22a980e560cc3bc, 2026-10-31T04:28Z); spec PR #1042 merge 01ff65035c8b0833fa521b93239931772c14dffd.'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp1009 g4 (cab00cfd)'
+  han_moi_ghi_chu: 'han moi dat sau luc rut ~12 phut de workflow dang lease con thay lease song (tranh rc=8), tien le wp1030 700cf710'
+  ghi_boi: 'claude-session session_015GtxraXfMD1t2FJLzzGDr4 (phien dieu phoi) theo chi thi chu kho issuecomment-6539003369: merge, land va ghi so'
 
 packet_id: CLOUD-SETUP-P2A-EXEC
 packet_slug: cloud-setup-p2a-exec

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """`nap` (bootstrap + ĐÚNG MỘT dòng `agent_creds:` kể cả khi bootstrap thoát sớm/quá hạn/sai hợp đồng) và `cai-agy` (agy ghim,
 sha512, settings, CLAUDE_ENV_FILE) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039). Cả hai luôn rc 0. Test: *_test.py."""
-import hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, urllib.request  # noqa: E401
+import contextlib, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, urllib.request  # noqa: E401
 from pathlib import Path
 
 GOC = Path(__file__).resolve().parent.parent
 TRANG_THAI = ("ĐÃ NẠP", "KHÔNG CẤU HÌNH", "KHÔNG ĐO ĐƯỢC")
-TIMEOUT_MAC_DINH = 180
+TIMEOUT_MAC_DINH, HAN_VERSION = 180, 15
 DONG_ENV = "export AGY_CLI_DISABLE_AUTO_UPDATE=1"
 # Hằng ghim — chép NGUYÊN VĂN spec r1 mục "Hằng ghim agy". Đổi bản ⇒ revision mới của spec, không sửa tại chỗ.
 AGY_VER = "1.4.12"
@@ -20,11 +20,10 @@ NEN = {
     "darwin_arm64": (_U + "darwin-arm/cli_mac_arm64.tar.gz", "e858cfc02fb5bb500a760643da270accd2847aa986b7e2973da97ad1928b99d62f62bad28c039e25b65e1ca073d27b2f30b13ed0919d0329774eb1e0ee5b4748"),
 }
 def doc_timeout(gia_tri):
-    try:
-        v = float(gia_tri)
+    try:   # rác/âm/0/inf/nan và > 1 ngày (Popen.communicate tràn — F02) ⇒ mặc định
+        return v if math.isfinite(v := float(gia_tri)) and 0 < v <= 86400 else TIMEOUT_MAC_DINH
     except (TypeError, ValueError):
         return TIMEOUT_MAC_DINH
-    return v if math.isfinite(v) and v > 0 else TIMEOUT_MAC_DINH
 def ket_luan(dong_agent, rc):
     if not dong_agent:
         return f"KHÔNG ĐO ĐƯỢC — bootstrap thoát rc={rc} trước bước agent"
@@ -35,14 +34,9 @@ def ket_luan(dong_agent, rc):
         return "KHÔNG ĐO ĐƯỢC — đầu ra bootstrap không đúng hợp đồng (trạng thái lạ)"
     return f"{s} — {ct} (bootstrap rc={rc})"
 def _giet_nhom(p):   # giết cả nhóm rồi KIỂM LẠI: True chỉ khi con đã chết và được thu hồi (zombie tính là chết)
-    try:
-        if os.name == "nt":
-            p.kill()
-        else:
-            os.killpg(p.pid, signal.SIGKILL)
+    with contextlib.suppress(OSError, subprocess.TimeoutExpired):
+        os.killpg(p.pid, signal.SIGKILL) if os.name != "nt" else p.kill()
         p.communicate(timeout=10)
-    except (OSError, subprocess.TimeoutExpired):
-        pass
     return p.poll() is not None
 def nap(env=os.environ):
     khoa, rc = env.get("TL_MASTER_KEY") or "", None
@@ -62,8 +56,9 @@ def nap(env=os.environ):
     try:
         ra, _ = p.communicate(timeout=han)
         rc = p.returncode
-    except subprocess.TimeoutExpired:
-        print(f"agent_creds: KHÔNG ĐO ĐƯỢC — bootstrap quá {han:g} s, {'đã dừng' if _giet_nhom(p) else 'KHÔNG dừng được'}")
+    except Exception as e:  # noqa: BLE001 — quá hạn hay lỗi chờ bất kỳ: dọn cả nhóm, vẫn đúng một dòng (F02)
+        ly = f"bootstrap quá {han:g} s" if isinstance(e, subprocess.TimeoutExpired) else f"lỗi chờ bootstrap ({type(e).__name__})"
+        print(f"agent_creds: KHÔNG ĐO ĐƯỢC — {ly}, {'đã dừng' if _giet_nhom(p) else 'KHÔNG dừng được'}")
         return 0
     dong_agent = []
     for d in ra.decode("utf-8", "replace").replace(khoa, "***").splitlines():
@@ -77,9 +72,8 @@ def _co_musl():
     if any(Path(f).exists() for f in ("/lib/libc.musl-x86_64.so.1", "/lib/libc.musl-aarch64.so.1")):
         return True
     try:
-        r = subprocess.run(["ldd", "/bin/ls"], capture_output=True, text=True, timeout=10)
-        return "musl" in r.stdout + r.stderr
-    except (OSError, subprocess.SubprocessError):
+        return "musl" in subprocess.run(["ldd", "/bin/ls"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=10).stdout
+    except (OSError, subprocess.SubprocessError, ValueError):
         return False
 def khoa_nen(he, may, musl):
     """Luật chọn nền của install.sh chính thức (spec mục Hằng ghim)."""
@@ -91,12 +85,17 @@ def khoa_nen_hien_tai():
 def tai(url):
     with urllib.request.urlopen(url, timeout=300) as r:
         return r.read()
-def _ban_khop(agy):
-    try:   # `agy --version` (≤ 15 s) rc 0 và chứa đúng AGY_VER (không khớp 1.4.120); thiếu/hỏng ⇒ False
-        r = subprocess.run([str(agy), "--version"], capture_output=True, text=True, timeout=15, stdin=subprocess.DEVNULL)
-        return r.returncode == 0 and re.search(r"(?<![\d.])" + re.escape(AGY_VER) + r"(?!\.?\d)", r.stdout + r.stderr) is not None
-    except (OSError, subprocess.SubprocessError):
+def _ban_khop(agy):   # `agy --version` rc 0 và chứa đúng AGY_VER (không khớp 1.4.120); thiếu/hỏng/không giải mã ⇒ False
+    try:
+        p = subprocess.Popen([str(agy), "--version"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, stdout=subprocess.PIPE,
+                             start_new_session=os.name != "nt")
+    except OSError:
         return False
+    try:
+        ra = p.communicate(timeout=HAN_VERSION)[0].decode("utf-8", "replace")
+    except Exception:  # noqa: BLE001 — quá 15 s: giết CẢ NHÓM (tiến trình con của agy), không chỉ cha (F01)
+        return _giet_nhom(p) and False
+    return p.returncode == 0 and re.search(r"(?<![\d.])" + re.escape(AGY_VER) + r"(?!\.?\d)", ra) is not None
 def _ghi_nguyen_tu(p, du_lieu, quyen=None):
     p.parent.mkdir(parents=True, exist_ok=True)
     fd, tam = tempfile.mkstemp(dir=str(p.parent), prefix=f".{p.name}.")
@@ -162,7 +161,6 @@ def main(argv):
         s.reconfigure(encoding="utf-8", errors="backslashreplace")
     if argv in (["nap"], ["cai-agy"]):
         return {"nap": nap, "cai-agy": cai_agy}[argv[0]]()
-    print("dùng: cloud_agent_creds.py nap | cai-agy", file=sys.stderr)
-    return 2
+    return print("dùng: cloud_agent_creds.py nap | cai-agy", file=sys.stderr) or 2
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

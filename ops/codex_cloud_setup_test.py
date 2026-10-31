@@ -228,7 +228,7 @@ def ca_bashrc_grep_hong_khong_ghi_de():
 # wp1039 (spec CLOUD-SETUP-P2B-WIRE r1, E1/E2): `main` gọi `cloud_agent_creds.py nap` đúng 1 lần, sau pip, không giết setup.
 RE_NAP, BASE_WP1039 = re.compile(r'cloud_agent_creds\.py"?\s+nap\b'), "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"
 def ca_nap_trong_main_sau_pip():
-    dong = SCRIPT_DANG_DUNG.read_text(encoding="utf-8").splitlines()
+    dong = [d if not d.lstrip().startswith("#") else "" for d in SCRIPT_DANG_DUNG.read_text(encoding="utf-8").splitlines()]
     vt, i_main = [i for i, d in enumerate(dong) if RE_NAP.search(d)], dong.index("main() {")
     bang(len(vt) == 1 and not any("cai-agy" in d for d in dong), f"nap {len(vt)} lần / có cai-agy")
     i_het = next(i for i in range(i_main + 1, len(dong)) if dong[i] == "}")
@@ -236,19 +236,19 @@ def ca_nap_trong_main_sau_pip():
     bang(i_main < i_pip < vt[0] < i_het, f"nap ở dòng {vt[0]}, phải trong main ({i_main}–{i_het}) và sau pip ({i_pip})")
     if not (SCRIPT.parent.parent / ".git").exists():   # chỉ tha khi là bản sao rời (CLAUDE.md, "ca có MẶT ≠ ca có ĐO")
         raise BoQua("cây không có .git — không đo được vế âm trên base")
-    r = subprocess.run(["git", "-C", str(SCRIPT.parent.parent), "show", f"{BASE_WP1039}:ops/codex_cloud_setup.sh"],
-                       capture_output=True, text=True, encoding="utf-8")
+    r = subprocess.run(["git", "-C", str(SCRIPT.parent.parent), "show", f"{BASE_WP1039}:ops/codex_cloud_setup.sh"], capture_output=True, text=True, encoding="utf-8")
     bang(r.returncode == 0 and not RE_NAP.search(r.stdout), f"vế âm trên base: rc={r.returncode}")
 def ca_nap_khong_giet_setup():
     _posix()
-    d = [x for x in SCRIPT_DANG_DUNG.read_text(encoding="utf-8").splitlines() if RE_NAP.search(x)]
+    d = [x for x in SCRIPT_DANG_DUNG.read_text(encoding="utf-8").splitlines() if RE_NAP.search(x) and not x.lstrip().startswith("#")]
     bang(len(d) == 1, f"nap {len(d)} lần")
     goc, env = _san()
-    (py := goc / "gia" / "py_rc3").write_text("#!/bin/sh\nexit 3\n", encoding="utf-8", newline="\n")
+    (py := goc / "gia" / "py_rc3").write_text(f'#!/bin/sh\necho "$*" >> "{goc}/argv"\nexit 3\n', encoding="utf-8", newline="\n")
     py.chmod(0o755)
-    p = subprocess.run([_bash(), "-c", 'set -euo pipefail; PY="$1"\n' + d[0] + "\necho XONG", "_", str(goc / "gia" / "py_rc3")],
-                       capture_output=True, text=True, env=env, cwd=str(goc), timeout=60)
+    p = subprocess.run([_bash(), "-c", 'set -euo pipefail; PY="$1"\n' + d[0] + "\necho XONG", "_", str(py)], capture_output=True, text=True, env=env, cwd=str(goc), timeout=60)
     bang(p.returncode == 0 and "XONG" in p.stdout, f"PY rc 3 giết setup: rc={p.returncode} {p.stderr}")
+    goi = (goc / "argv").read_text(encoding="utf-8").splitlines() if (goc / "argv").exists() else []
+    bang(goi == ["ops/cloud_agent_creds.py nap"], f"PY nhận {goi} (lời gọi mất/sai đích — F05)")
 _SH = SCRIPT.read_text(encoding="utf-8")
 _PIP, _NAP = '  "$PY" -m pip install --quiet -r requirements.txt\n', '  "$PY" ops/cloud_agent_creds.py nap || true\n'
 _DOAN = _SH[_SH.find(_PIP):_SH.find(_NAP) + len(_NAP)] if _PIP in _SH and _NAP in _SH else "<khong thay doan pip..nap>"
@@ -271,6 +271,7 @@ DOT_BIEN = [
      'cat "$f" >> "$tam" || rc=$?', "ca_bashrc_localappdata_ngoai_home"),
     ("nuot_loi_grep", '[ "$rc" -le 1 ] ||', "true ||", "ca_bashrc_grep_hong_khong_ghi_de"),
     ("nap_truoc_pip", _DOAN, _NAP + _DOAN[:-len(_NAP)], "ca_nap_trong_main_sau_pip"),
+    ("nap_bi_vo_hieu", '  "$PY" ops/cloud_agent_creds.py nap', '  : "$PY" ops/cloud_agent_creds.py nap', "ca_nap_khong_giet_setup"),
     ("nap_bo_or_true", "ops/cloud_agent_creds.py nap || true", "ops/cloud_agent_creds.py nap", "ca_nap_khong_giet_setup"),
 ]
 

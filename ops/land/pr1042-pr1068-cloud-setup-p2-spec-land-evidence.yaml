@@ -74,6 +74,12 @@ bookkeeping:
       (readback-run-41178646847.json, readback-jobs-41178646847.json), kiem-gate/kiem-gate-3376d539.txt rc=0, gate-output-41178646847.txt
       22/22 checkout 3376d539 + selftest 1774/1774, graphql-workflowrun-file-41178646847.txt file.path .github/workflows/ci.yml +
       checkSuite.commit.oid 3376d539, readback-contents-ci-yml-3376d539.json blob 82d9f239.
+  - item: 'M1 LIVE packet #1038 (agent-creds-exec --gemini tren laptop chu kho)'
+    ket_qua: >-
+      measured — m1-live-p2a/m1-ket-qua.txt: DAT tren 97120d3c (ASUS-LAPTOP, 2026-10-31T08:33:06Z-08:33:47Z, clone rieng theo ADR-0057 §5,
+      khoa may tiep nhan theo ADR-0058 §3(a) roi xoa). (i) agent-creds-exec --gemini -- <con> rc=0, bam con = bam ky vong;
+      (ii) doi chung <con> truc tiep rc=0, bam con = bam chuoi rong. Tien trinh do da xoa GEMINI_API_KEY va CLAUDE_CODE_OAUTH_TOKEN
+      khoi moi truong cua chinh no. Uy quyen: issuecomment-6541198303 (#1008). Script: m1-live-p2a/m1-p2a.ps1 (ban chep).
   - {item: 'PR ghi so', nhanh: ccr-004fa546-sde2w7}
 # ---- het truong chuan
 packet_id: [CLOUD-SETUP-P2A-EXEC, CLOUD-SETUP-P2B-WIRE]

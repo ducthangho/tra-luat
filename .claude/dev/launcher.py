@@ -2919,15 +2919,21 @@ def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = Tr
 
 
 def _chay_probe_nhu_shell(lenh: list[str], **kw):
-    """`subprocess.run(lenh, **kw)`, cộng MỘT ngữ nghĩa của shell: tệp không shebang chạy bằng `/bin/sh`.
+    """`subprocess.run(lenh, **kw)`, cộng ngữ nghĩa ENOEXEC của `execvp` glibc: chạy lại bằng `/bin/sh`.
 
     wp1077 (review độc lập #823 F1, tái hiện trên master `2bcd8f3`): kernel trả `ENOEXEC` cho tệp
-    thực thi KHÔNG có shebang; bash và `execvp` của libc khi ấy chạy lại tệp bằng `/bin/sh`, còn
+    thực thi KHÔNG có shebang; `execvp` của glibc khi ấy chạy lại tệp bằng `/bin/sh`, còn
     `subprocess` ném `OSError`. Bộ dò tên trần wp802 vì thế gắn BI_CHE (rc=12) cho một `rg` mà
-    chính shell của người dùng gọi được. Chỉ `ENOEXEC` mới được chạy lại: thiếu bit thực thi
+    shell của người dùng gọi được. GIỚI HẠN (Codex lượt 1 F2, đo trên bash thật): bash chạy lại
+    bằng CHÍNH bash, nên wrapper không shebang dùng cú pháp riêng của bash (`[[ ]]`) chạy được
+    trong bash mà vẫn hỏng ở đây — hợp đồng là `/bin/sh` (spec M1), không phải "mọi shell". Chỉ `ENOEXEC` mới được chạy lại: thiếu bit thực thi
     (`PermissionError`), không tồn tại… vẫn là hỏng như shell báo. Windows không có ngữ nghĩa này
     (`CreateProcessW`), nên giữ nguyên. Lượt chạy lại trả kết quả cho phía gọi phân loại Y NHƯ lượt
     thường — không nới cho bản hỏng.
+
+    Tên trần (`gh`, `llm`…) được giải theo PATH của `env` TRƯỚC khi đưa cho `/bin/sh`: `sh TÊN` coi
+    đối số là đường dẫn tệp tính từ cwd, không tra PATH như `execvp`. Mọi probe công cụ của `doctor`
+    (bảng `CONG_CU` lẫn `KHA_NANG`) phải đi qua hàm này — `r1077_probe_doctor_khong_spawn_tran` khoá.
     """
     import errno
     try:
@@ -2935,7 +2941,20 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
     except OSError as e:
         if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):
             raise
-    return subprocess.run(["/bin/sh", *lenh], **kw)
+        tep = lenh[0] if os.sep in lenh[0] else shutil.which(
+            lenh[0], path=(kw.get("env") or os.environ).get("PATH"))
+        if not tep:
+            raise
+    return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)
+
+
+def _chay_probe_llm(lenh: list[str], *, env=None, timeout: float = 30.0) -> subprocess.CompletedProcess:
+    """Y hệt `_chay_van_ban_an_toan` (utf-8/replace, stdin=DEVNULL) nhưng qua `_chay_probe_nhu_shell`.
+
+    wp1077: `_chay_van_ban_an_toan` còn phục vụ đường ngoài `doctor`, nên không đổi nó; chỉ probe
+    `llm` của `doctor` đi đường này."""
+    return _chay_probe_nhu_shell(lenh, capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace", env=env, stdin=subprocess.DEVNULL, timeout=timeout)
 
 
 def _phien_ban(duong_dan: str, *, env=None,
@@ -3906,7 +3925,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # Một `doctor` mà hai probe của nó phân giải cùng một tên ra hai kết quả
         # ngược nhau là doctor tự mâu thuẫn; mọi spawn CLI agent (.cmd shim của
         # npm) phải đi qua đường dẫn resolve.
-        p = subprocess.run([duong_codex, "login", "status"], capture_output=True,
+        p = _chay_probe_nhu_shell([duong_codex, "login", "status"], capture_output=True,
                            text=True, timeout=30, encoding="utf-8", errors="replace")
         ra = ((p.stdout or "") + (p.stderr or ""))
         rc = p.returncode
@@ -4012,7 +4031,7 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
     if not shutil.which("llm"):
         return ("THIEU", "chua cai llm CLI — pip install llm")
 
-    p_ver = _chay_van_ban_an_toan(["llm", "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+    p_ver = _chay_probe_llm(["llm", "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
     ver = p_ver.stdout.strip() if p_ver.returncode == 0 else "llm"
 
     # Kiểm tra OPENAI_API_KEY trong môi trường hoặc keys.json của llm
@@ -4020,7 +4039,7 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
     co_key_file = False
     if not tok:
         try:
-            p_k = _chay_van_ban_an_toan(["llm", "keys", "list"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+            p_k = _chay_probe_llm(["llm", "keys", "list"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
             if p_k.returncode == 0 and "openai" in p_k.stdout.lower():
                 co_key_file = True
         except (OSError, subprocess.SubprocessError):
@@ -4034,7 +4053,7 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
 
     # Kiểm sống: gọi probe qua prompt không lưu log (--no-log)
     try:
-        p_song = _chay_van_ban_an_toan(
+        p_song = _chay_probe_llm(
             ["llm", "prompt", "in ra: ok", "-m", "gpt-4o-mini", "--no-log"],
             env=mt, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
@@ -4345,7 +4364,7 @@ def _suc_khoe_mcp_github(ten: str = "github",
     # trường thô lọt xuống.
     moi_truong = _env_da_chuan(moi_truong)
     try:
-        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
+        r = _chay_probe_nhu_shell(["claude", "mcp", "get", ten], capture_output=True, text=True,
                            encoding="utf-8", errors="replace",
                            env=moi_truong, stdin=subprocess.DEVNULL,
                            timeout=PROBE_TIMEOUT_GIAY)
@@ -4543,7 +4562,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # GitHub được gắn `DUNG_DUOC` mà không có lấy một đường đã xác thực nào.
     if shutil.which("gh"):
         try:
-            pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
+            pg = _chay_probe_nhu_shell(["gh", "auth", "status"], capture_output=True, text=True,
                                 encoding="utf-8", errors="replace",
                                 env=mt, stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
@@ -4604,7 +4623,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # vào một thao tác kho ĐÃ THÀNH CÔNG, không neo vào probe.
     if shutil.which("gh") and slug:
         try:
-            pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
+            pk = _chay_probe_nhu_shell(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
                                 capture_output=True, text=True,
                                 encoding="utf-8", errors="replace", env=mt,
                                 stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)

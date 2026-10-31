@@ -1594,6 +1594,16 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
     # code span, `<!-- h -->` là CHỮ hiển thị, và xoá rỗng thì `` `x-verdict<!-- h -->.md` `` liền lại thành
     # tên hợp lệ `x-verdict.md`. \x01 không phải biên, không phải chữ tên: tên/id chỉ nằm trong comment vẫn
     # không được tính (N1), còn tên bị comment cắt đôi thì gãy, không nối lại.
+    # …và TRONG mục đang đọc thì cấm hẳn (cross-review #1051 lượt 7, P2): comment nhiều dòng ghép ô của HAI
+    # hàng thành một (xoá luôn dấu xuống dòng), nên verdict của hàng này và id của hàng kia thoả nhau. Bảng
+    # thật không có comment nào (đo 31-10-2026); đọc chắc được thì đọc, không thì ĐỎ — không đoán.
+    lay = False
+    for dong in van.splitlines():
+        if dong.startswith("## "):
+            lay = tieu_de in dong
+        bang(not (lay and ("<!--" in dong or "-->" in dong)),
+             f"mục '{tieu_de}' có comment HTML (`<!--`/`-->`) — comment có thể ghép hai hàng bảng làm một "
+             f"hoặc giấu chữ, nên mục lục không kiểm chắc được. Chuyển comment ra ngoài mục.")
     van = re.sub(r"<!--.*?-->", "\x01", van, flags=re.S)
     ra, lay, rao = [], False, None
     dau_bang, cho_gach = None, False
@@ -1623,6 +1633,9 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
         if not dong.strip().startswith("|"):
             dau_bang, cho_gach = None, False               # hết bảng
             continue
+        # Hàng thụt lề: 4 dấu cách là KHỐI MÃ, không phải bảng (lượt 7) — đòi cột 0 như mục lục thật.
+        bang(dong.startswith("|"), f"mục '{tieu_de}': hàng bảng THỤT LỀ {dong[:60]!r} — thụt 4 dấu cách thì "
+                                   f"GitHub hiển thị khối mã chứ không phải bảng. Bỏ thụt lề.")
 
         tho = _tach_o(dong)
         o = [x.strip("`").strip() for x in tho]
@@ -1635,7 +1648,8 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
             # Không có hàng gạch thì GitHub KHÔNG render thành bảng. Bộ đọc cũ chỉ BỎ QUA
             # hàng gạch chứ không ĐÒI nó, nên xoá `|---|` đi là người đọc mất bảng mà
             # `t27` vẫn xanh.
-            if la_gach(dong):
+            # …và hàng gạch phải CÙNG số ô với tiêu đề, không thì GitHub cũng không render bảng (lượt 7).
+            if la_gach(dong) and len(_tach_o(dong)) == len(dau_bang):
                 cho_gach = False
             else:
                 dau_bang, cho_gach = None, False
@@ -1687,7 +1701,8 @@ def _ten_tep(o: str) -> set:
     (đo 31-10-2026: 306/306 hàng cột verdict, mọi ô cột biên nhận), mỗi mục theo sau bởi hết ô, `,`,
     hoặc khoảng trắng (từ đó trở đi là CHÚ THÍCH, bỏ qua — kiểu ` — v2`):
       · `` `TÊN` ``           — một dấu nháy, nội dung đúng TRỌN một tên;
-      · `[NHÃN](ĐƯỜNG)`       — danh tính là ĐƯỜNG; NHÃN (có/không nháy) phải BẰNG basename của
+      · `[NHÃN](ĐƯỜNG)`       — danh tính là ĐƯỜNG; NHÃN (TRONG nháy — nhãn trần bị Markdown đổi chữ:
+                                 `_x_` hiển thị `x`, lượt 7) phải BẰNG basename của
                                  ĐƯỜNG, hoặc là đuôi bắt đầu bằng `.` của nó (`` `.receipt.yaml` ``).
     Mọi thứ khác ở đầu ô — HTML, ảnh, link tham chiếu, entity, chữ trần, span nhiều nháy, tên dính
     tiền tố/hậu tố — cho TẬP RỖNG: thiếu tên thì `t27` ĐỎ, tức hỏng về phía an toàn.
@@ -1697,7 +1712,7 @@ def _ten_tep(o: str) -> set:
     import re
     ten = r"[\w\-][\w.\-]*\.(?:md|ya?ml)"
     duong = rf"(?:[\w\-][\w.\-]*/)*{ten}"
-    muc = re.compile(rf"`(?P<span>{ten})`|\[(?P<nhan>`[^`\[\]]+`|[^`\[\]]+)\]\((?P<dich>{duong})\)",
+    muc = re.compile(rf"`(?P<span>{ten})`|\[(?P<nhan>`[^`\[\]]+`)\]\((?P<dich>{duong})\)",
                      re.IGNORECASE)
     o = o.strip()
     ra, i = set(), 0
@@ -2123,7 +2138,7 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
              "bộ trích tên cắt ĐUÔI của một tên dài hơn — hàng của tệp NÀY thoả cho tệp KIA")
         # Ngữ pháp cho phép (#1051 lượt 5): nhiều mục cách bằng `,` nhận đủ, đuôi HOA vẫn là tên; chữ TRẦN
         # không thuộc ngữ pháp nên không cho tên nào.
-        bang(_ten_tep("`a-VERDICT.MD`, [b.Receipt.Yaml](b.Receipt.Yaml) — ghi chú") == {"a-VERDICT.MD", "b.Receipt.Yaml"},
+        bang(_ten_tep("`a-VERDICT.MD`, [`b.Receipt.Yaml`](b.Receipt.Yaml) — ghi chú") == {"a-VERDICT.MD", "b.Receipt.Yaml"},
              "bộ trích tên không nhận đủ các mục cách nhau bằng dấu phẩy, hoặc đổi hoa thường của TÊN")
         bang(_ten_tep("a-verdict.md") == set(),
              "bộ trích tên nhận chữ TRẦN — dạng ngoài ngữ pháp cho phép phải cho tập RỖNG")
@@ -2215,29 +2230,47 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
                      "two&#46;x-verdict.receipt.yaml", "khac`x-verdict.receipt.yaml`",
                      "`x-verdict.receipt.yaml`+bak", "<code>two x-verdict.receipt.yaml</code>",
                      "x-verdict.receipt.yaml", "`x-verdict.receipt.yaml`.", "`` x-verdict.receipt.yaml ``",
-                     # lượt 6: comment HTML NẰM TRONG span là chữ hiển thị — xoá rỗng thì tên khác liền lại
-                     "`x-verdict<!-- h -->.receipt.yaml`", "[`.receipt.yaml`](x-verdict<!-- h -->.receipt.yaml)",
-                     # tên chỉ còn trong comment thật ⇒ người đọc không thấy
-                     "<!-- `x-verdict.receipt.yaml` -->"):
+                     # lượt 7: nhãn link TRẦN bị Markdown đổi chữ (`_x_` hiển thị `x`) ⇒ chỉ nhận nhãn trong nháy
+                     "[_x_-verdict.receipt.yaml](_x_-verdict.receipt.yaml)",
+                     "[x-verdict.receipt.yaml](x-verdict.receipt.yaml)",
+                     # ảnh với nhãn TRONG nháy — hiển thị ảnh, không phải tên
+                     "![`.receipt.yaml`](x-verdict.receipt.yaml)"):
             phai_do(bn, o_bn=o_bn)
         for o_v in ("``two x-verdict.md``", "[`x-verdict.md`](con/x-verdict.md)", "x-verdict.md+bak",
                     "![x-verdict.md](x-verdict.md)", "[`x-verdict.md`][1]", '<a href="x-verdict.md">x</a>',
-                    "`[x-verdict.md](x-verdict.md)`", "`x-verdict<!-- h -->.md`"):
+                    "`[x-verdict.md](x-verdict.md)`", "[_x_-verdict.md](_x_-verdict.md)", "![`x-verdict.md`](x-verdict.md)"):
             phai_do(("x-verdict.md", "CỘT 'tệp verdict'"), o_v=o_v)
         cb = ("'C1'", "CỘT 'id'")
         for o_cb in ("`two x-verdict.md`", "``two x-verdict.md``", "x-verdict.md.bak", "x-verdict.md/con",
                      "x-verdict.md@bak", "`khac-verdict.md`", "![x-verdict.md](x-verdict.md)",
-                     "two&#46;x-verdict.md", "khac`x-verdict.md`", "`x-verdict<!-- h -->.md`"):
+                     "two&#46;x-verdict.md", "khac`x-verdict.md`", "[_x_-verdict.md](_x_-verdict.md)"):
             phai_do(cb, o_cb=o_cb)
         # `\|` là NỘI DUNG ô (GFM §4.10): chữ sau nó vẫn thuộc cột 'tệp verdict', không tràn sang cột kế.
         phai_do(bn, hang_ml=r"| `x-verdict.md` \| x-verdict.receipt.yaml | khac.receipt.yaml |")
         phai_do(cb, hang_cb=r"| `x-verdict.md` \| C1 | C2 |")
-        # Comment trong span của ô id cũng không được liền lại thành `C1`; id chỉ trong comment thật cũng không.
-        phai_do(cb, hang_cb="| `x-verdict.md` | `C<!-- h -->1` |")
-        phai_do(cb, hang_cb="| `x-verdict.md` | <!-- `C1` --> |")
-        # Đối chứng: comment ĐỨNG NGOÀI mục, sau khoảng trắng, là chú thích ⇒ XANH.
-        muc_luc(o_bn="`x-verdict.receipt.yaml` <!-- ghi chú -->")
-        _kiem_muc_luc(tm, goc)
+        # Comment HTML TRONG mục (lượt 6–7): trong span thì là chữ hiển thị (xoá rỗng ⇒ tên khác liền lại); nhiều
+        # dòng thì ghép ô của HAI hàng; một mình thì giấu tên/id. Không đọc chắc được ⇒ cấm hẳn trong mục.
+        cm = ("comment HTML",)
+        for kw in ({"o_bn": "`x-verdict<!-- h -->.receipt.yaml`"}, {"o_v": "`x-verdict<!-- h -->.md`"},
+                   {"o_cb": "`x-verdict<!-- h -->.md`"}, {"o_bn": "<!-- `x-verdict.receipt.yaml` -->"},
+                   {"o_bn": "`x-verdict.receipt.yaml` <!-- ghi chú -->"},
+                   {"hang_cb": "| `x-verdict.md` | `C<!-- h -->1` |"}, {"hang_cb": "| `x-verdict.md` | <!-- `C1` --> |"},
+                   {"hang_cb": "| `khac.md` | `KHAC` |\n| `x-verdict.md` <!--\n| --> | `C1` |"}):
+            phai_do(cm, **kw)
+        # Bảng THỤT 4 dấu cách là khối mã, không phải bảng (lượt 7).
+        for kw in ({"hang_cb": "    | `x-verdict.md` | `C1` |"}, {"hang_ml": "    | `x-verdict.md` | `x-verdict.receipt.yaml` |"}):
+            phai_do(("THỤT LỀ",), **kw)
+        # Hàng gạch khác số ô với tiêu đề ⇒ GitHub không render bảng ⇒ coi như không có bảng.
+        (tm / "README.md").write_text(
+            "# x\n\n## Cảnh báo đang có hiệu lực\n\n| tệp verdict | id |\n|---|---|\n| `x-verdict.md` | `C1` |\n\n"
+            "## Mục lục\n\n| tệp verdict | biên nhận |\n|---|---|---|\n| `x-verdict.md` | `x-verdict.receipt.yaml` |\n",
+            encoding="utf-8")
+        try:
+            _kiem_muc_luc(tm, goc)
+        except AssertionError as e:
+            bang("Mục lục" in str(e), f"hàng gạch lệch số ô: ĐỎ nhưng SAI chốt — được: {e}")
+        else:
+            raise AssertionError("hàng gạch khác số ô với tiêu đề mà bảng vẫn được đọc — GitHub không render nó")
 
         # Thư mục con KHÔNG tên `con`: đó là tên thiết bị dành riêng của Windows (`mkdir` ném WinError 267).
         # Verdict ở THƯ MỤC CON (mục lục thật: 22 hàng): danh tính trong Mục lục là ĐƯỜNG DẪN `ho-so/y-verdict.md`

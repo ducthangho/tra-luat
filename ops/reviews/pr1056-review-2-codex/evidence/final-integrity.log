@@ -1,0 +1,19 @@
+cay-kho git rev-parse HEAD HEAD^{tree} rc 0 stdout 047eaa4d26a5bb1e702199c870f42480aebed673
+ac826681109d74ad18efc3120c79b65ddb8280a2 stderr (empty)
+cay-kho git status --short --untracked-files=all --ignored=matching rc 0 stdout (empty) stderr (empty)
+cay-kho git diff --exit-code rc 0 stdout (empty) stderr (empty)
+cay-kho git diff --cached --exit-code rc 0 stdout (empty) stderr (empty)
+cay-kho git diff --check rc 0 stdout (empty) stderr (empty)
+cay-kho git config core.abbrev rc 0 stdout 7 stderr (empty)
+cay-kho ALL_CHANGED_FILES_EQUAL_HEAD 180 / 180
+review-copy git rev-parse HEAD HEAD^{tree} rc 0 stdout 047eaa4d26a5bb1e702199c870f42480aebed673
+ac826681109d74ad18efc3120c79b65ddb8280a2 stderr (empty)
+review-copy git status --short --untracked-files=all --ignored=matching rc 0 stdout (empty) stderr (empty)
+review-copy git diff --exit-code rc 0 stdout (empty) stderr (empty)
+review-copy git diff --cached --exit-code rc 0 stdout (empty) stderr (empty)
+review-copy git diff --check rc 0 stdout (empty) stderr (empty)
+review-copy git config core.abbrev rc 0 stdout 7 stderr (empty)
+review-copy ALL_CHANGED_FILES_EQUAL_HEAD 180 / 180
+ORIGINAL_ARTIFACT_COMMIT_FILES_EQUAL 177 / 177
+SUPPLIED_PATCH_EQUAL True BYTES 2202
+CURRENT_PROMPT_SNAPSHOT_EQUAL True PROMPT_BYTES 6387 SHA256 3f3def22144b76e031c9b5236d8ff98b4c4079e6474cc303a0a11b25dc0ee0c2

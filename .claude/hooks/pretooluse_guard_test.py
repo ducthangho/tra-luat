@@ -890,7 +890,8 @@ def t51_ten_lenh_tl_qua_mo_rong_shell_bi_chan(g):
     dl = chr(36)
     tu_choi = ["%s'agent-creds-exec' --claude -- x" % dl, "%s{X:-agent-creds-exec} --claude -- x" % dl,
                "agent-creds-%s'exec' --claude -- x" % dl, "agent-creds-%s(printf exec) --claude -- x" % dl,
-               "agent-creds-`printf exec` --claude -- x", "--profile %sP recat x" % dl, "agent-creds-{exec,} --claude",
+               "agent-creds-`printf exec` --claude -- x", "--profile %sP locate a" % dl, "agent-creds-{exec,} --claude",
+               "--profile %s(echo v agent-creds-exec) locate a" % dl,
                "agent-creds-exe? --claude -- x", "hygiene %s'plan'" % dl]
     cho_phep = ["profile-list", "--profile vbqppl locate 'Luat dat dai 2024' --json", "\"profile-list\"",
                 "locate \"%sX\"" % dl, "locate %s(echo a)" % dl]
@@ -905,6 +906,22 @@ def t51_ten_lenh_tl_qua_mo_rong_shell_bi_chan(g):
     tong = len(AGENT) * (len(tu_choi) + len(cho_phep))
     return (not xau, "mo rong shell o vung ten lenh tl -> dung %d/%d" % (tong - len(xau), tong)
                      + ("; %s" % xau if xau else ""))
+
+
+def t52_ten_lenh_tl_phai_KHOP_danh_sach_DOC(g):
+    """WP1038 S5 (F04 noi dong · F06 extglob · F05 chan oan Unicode): ten la/manh => deny; lenh doc tieng Viet => allow."""
+    nl, bs = chr(10), chr(92)
+    tu_choi = ["agent-creds-ex%s%sec --claude -- x" % (bs, nl), "--pro%s%sfile locate agent-creds-exec --claude" % (bs, nl),
+               "@(agent-creds-exec) --claude -- x", "agent-creds-@(exec) --claude", "+(recat) x"]
+    cho_phep = ['--config "Qu\u1ed1c h\u1ed9i/c.json" profile-list --json', "--profile lu\u1eadt profile-list",
+                "hygiene scan", "hygiene --help", "--help"]
+    xau = [("LOT " if m == "deny" else "CHAN OAN ") + "%s: %s" % (a, c)
+           for a in AGENT for ds, m in ((tu_choi, "deny"), (cho_phep, "allow")) for c in ds
+           if hoi(g, "python scripts/tl.py " + c, a)[0] != m]
+    if hoi(g, "git log %s%s --oneline -3" % (bs, nl), AGENT[0])[0] != "allow":
+        xau.append("CHAN OAN git log noi dong")
+    tong = len(AGENT) * (len(tu_choi) + len(cho_phep)) + 1
+    return (not xau, "danh sach lenh DOC -> dung %d/%d" % (tong - len(xau), tong) + ("; %s" % xau if xau else ""))
 
 
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
@@ -943,6 +960,7 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t49_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO,
       t50_duong_dan_tl_py_DAU_PHAN_CACH_nao_cung_bi_chan,
       t51_ten_lenh_tl_qua_mo_rong_shell_bi_chan,
+      t52_ten_lenh_tl_phai_KHOP_danh_sach_DOC,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -1053,10 +1071,12 @@ DOT_BIEN = [
      '    if kich.rsplit("/", 1)[-1] == "tl.py":'),
     # WP1038 F03: nui danh sach cho phep ky tu de chua `$` · bo chot dau thay the `THAYTHE`.
     ("m37_cho_dau_dola_vao_vung_ten_lenh_tl",
-     '_RE_TL_VUNG_TEN_AN_TOAN = re.compile(r"[A-Za-z0-9._/\\\\:=+@ -]*\\Z")',
-     '_RE_TL_VUNG_TEN_AN_TOAN = re.compile(r"[A-Za-z0-9._/\\\\:=+@ ${}\'?*`-]*\\Z")'),
+     '[\\w./\\\\:=+@ -]*\\Z', '[\\w./\\\\:=+@ ${}\'?*`-]*\\Z'),
     ("m38_bo_chot_THAYTHE_o_vung_ten_lenh_tl",
      ' or "THAYTHE" in a]', ']'),
+    ("m39_bo_chot_danh_sach_lenh_DOC", " and ten not in _TL_LENH_DOC | _TL_LENH_GHI | _TL_LENH_GHI_LONG:", " and False:"),
+    ("m40_noi_dong_bang_dau_cach", 'cmd = re.sub(r"\\\\\\n", "", cmd)', 'cmd = re.sub(r"\\\\\\s*\\n", " ", cmd)'),
+    ("m41_vung_ten_chi_ASCII", '[\\w./\\\\:=+@ -]*\\Z', '[A-Za-z0-9_./\\\\:=+@ -]*\\Z'),
     ("m33_siet_lai_isdigit_cho_co_ngan",
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):',
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep\n'

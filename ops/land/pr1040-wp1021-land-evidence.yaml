@@ -170,3 +170,16 @@ landed_20261031:
     - '(7) reviewer assurance §8.1: DAT (assurance_81).'
   lech_da_chap_nhan: ['tran Codex 10/9', 'Windows local 97/98 (c91 do san tren base, thuat_lai cua executor)']
   landed: true
+
+dinh_chinh_windows_local_20261031T1010Z:
+  bo_canh: 'Khoi nay THEM SAU, khong sua dong nao o tren. Cau "Windows local 97/98 (c91 do san tren base)" o pre_merge_checks va landed_20261031.lech_da_chap_nhan la ket qua luot TRUOC khi cap quyen symlink cho VM; nay da co luot sau.'
+  nguon: 'thuat_lai — ops/handoff/wp1021-g1-claude.md tren nhanh ops/wp1021-r2-g1-lease @ 5e56a15 (muc "C7 — CAP NHAT 31-10 ~10:03Z"), do phien session_015GtxrbRjCRMMLRWHoUuZYj ghi; log tren VM khong luu trong kho.'
+  luot_truoc_cap_quyen: '356a27e tren tra-luat-win 04:57Z→06:00Z: 97/98 · 145/153 · 2/2, TONG: DO; ca do duy nhat c91 (WinError 1314, VM thieu SeCreateSymbolicLinkPrivilege), do san tren b29da0b cung VM.'
+  luot_sau_cap_quyen: >-
+    Chu kho duyet cap SeCreateSymbolicLinkPrivilege cho tra-luat-win\tlcommander (boot 08:22:02Z, symlink_to OK). Toan suite 08:24:43Z→09:45:28Z:
+    97/98 · 153/153 · 2/2, TONG: DO; ca do duy nhat c14_cli_ba_trang_thai (git rc=127) do chay CHONG voi phep do rieng c91 cua chinh phien do
+    (ADR-0057 D1). Phep do rieng c91 + 8 dot bien (m103 m105 m115 m116 m117 m118 m129 m130): c91 DAT, ca 8 CO RANG dung c91. Chay lai rieng tren
+    VM ranh 09:56Z→10:02Z: c14 DAT, c91 DAT.
+  ket_luan: 'Moi ca va moi dot bien deu da co lan DAT tren 356a27e o VM co quyen symlink, nhung CHUA co mot luot toan suite 98/98 khong chong — ghep hai phep do, khong phai mot N/N.'
+  quyet_dinh_chu_kho: 'thuat_lai — handoff @ 5e56a15: chu kho (sau 10:03Z) chap nhan ghep hai phep do lam bang chung C7, khong can luot toan suite 98/98 khong chong; giu lau dai quyen symlink tren VM.'
+  lech_da_chap_nhan_cap_nhat: ['tran Codex 10/9', 'Windows local: chua co mot luot toan suite 98/98 khong chong (c14 do do chay chong; c14 va c91 chay rieng DAT), chu kho chap nhan']

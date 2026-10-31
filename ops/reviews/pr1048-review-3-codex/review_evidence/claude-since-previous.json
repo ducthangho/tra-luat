@@ -1,0 +1,16 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "diff",
+    "48b54d89b152871063c7296df33a60308667599e",
+    "6f23a4e68805b4af3e2efe77be6e10b513843e93",
+    "--",
+    "CLAUDE.md"
+  ],
+  "rc": 0,
+  "stdout_file": "claude-since-previous.stdout",
+  "stderr_file": "claude-since-previous.stderr",
+  "stdout_bytes": 0,
+  "stderr_bytes": 0
+}

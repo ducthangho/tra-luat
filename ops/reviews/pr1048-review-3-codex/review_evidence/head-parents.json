@@ -1,0 +1,15 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "show",
+    "-s",
+    "--format=%H%n%P%n%T",
+    "6f23a4e68805b4af3e2efe77be6e10b513843e93"
+  ],
+  "rc": 0,
+  "stdout_file": "head-parents.stdout",
+  "stderr_file": "head-parents.stderr",
+  "stdout_bytes": 164,
+  "stderr_bytes": 0
+}

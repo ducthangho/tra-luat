@@ -1,0 +1,6 @@
+Ket qua 12 ca (executor do tren ASUS-LAPTOP 30-10-2026; reviewer KHONG tai lap duoc tren Linux - day la loi khai, khong phai bang chung da kiem):
+ca a = .Trim() tren $null trong dieu kien if, ngoai try ; ca b = if goi ham co throw ; ca c = ca a boc trong try/catch
+PS 5.1.26100 va 7.6.9 cho KET QUA GIONG HET:
+ Continue a: BAT_DAU, SAU_IF, KET_THUC rc=0      Stop a: BAT_DAU rc=1
+ Continue b: BAT_DAU rc=1                         Stop b: BAT_DAU rc=1
+ Continue c: BAT_DAU, CATCH, SAU_TRY, KET_THUC rc=0   Stop c: giong Continue c

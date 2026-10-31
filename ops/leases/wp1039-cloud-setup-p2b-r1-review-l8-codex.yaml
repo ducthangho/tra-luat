@@ -1,0 +1,80 @@
+# LEASE REVIEWER — CLOUD-SETUP-P2B-WIRE r1, luot 8 (L8) neo DUNG authorized_head 9783b42 cua PR #1073 (da merge a253c169).
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van). Khuon: wp1038-cloud-setup-p2a-r1-review-l9-codex.
+#
+# MUC DICH: dong dieu kien (7) §8.1 cua ho so land PR #1073 (ops/land/pr1073-wp1039-r1-land-evidence.yaml, landed false): luot
+# approve L7 (run 2bfa8722) tren 9783b42 co sandbox_trang_thai KHONG_DO_DUOC (DanhTinhDoi). Luot nay la review DOC LAP tren DUNG
+# 9783b42 qua launcher.py run; chi tinh §8.1 khi run.json co model, effort VA sandbox deu DO_DUOC.
+
+schema_version: 2
+event: review_lease_granted
+
+packet_issue: 1039
+mission_issue: 1008
+packet_id: CLOUD-SETUP-P2B-WIRE
+revision: 1
+generation: 1
+lease_id: wp1039-cloud-setup-p2b-r1-review-l8-codex
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease reviewer dau tien cua packet; cac luot L1-L7 chay duoi lease executor g1 (da rut han c4c03ef5).'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1039#issuecomment-6545950278
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho trong phien executor (2026-10-31 ~16:15Z): 'Chọn a' — tra loi cau hoi: (a) chay luot Codex thu 8 (loi goi cuoi 8/8)
+  tren 9783b42 de thu do sandbox, hay (b) chu kho chap nhan sandbox KHONG_DO_DUOC cho luot 7.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho tu viet (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'Phien executor session_015GtxrbVWthHq1mtsPgqZLw ghi lease va khoi chay launcher.py run (khong tu review, khong ghi kho trong luot).'
+
+leased_at_utc: '2026-10-31T16:20:00Z'
+heartbeat_at: '2026-10-31T16:20:00Z'
+lease_until: '2026-10-31T20:20:00Z'
+lease_expires_at_utc: '2026-10-31T20:20:00Z'
+
+role: reviewer
+provider: openai_codex
+reviewer: openai_codex
+model_family: openai
+execution_surface: codex_cli
+executor: anthropic_claude
+executor_model_family: claude
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+spec_path: ops/specs/cloud-setup-p2b-wire-r1.md
+spec_ref: refs/heads/master
+spec_blob: 3d17563ad81733a5b5e87ba207f87ca9fde3b0a2
+spec_sha256: 67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81
+spec_hash: 67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81
+
+reviewed_sha_required: 9783b421ecb74636311501e7c0d712e2aa73a5c0
+reviewed_tree_required: 17900666c586ce782a42a958f5224de354d57c54
+merge_commit_da_land: a253c169ed79617b8d1a4754867c336ac72c72c5
+target_pull_request: 1073
+pham_vi_review: >-
+  Diff packet = git diff 97120d3c..9783b42 (8 tep write set, +700/-7). Doi chieu: L7 (run 2bfa8722) approve 0/0/0/0 tren cung 9783b42;
+  L6 approve 901644d. Quyet dinh chu kho dang hieu luc: D2/F08, tran 700, F13 cau truc (B) subreaper.
+verdict_must_answer: >-
+  (i) co loi hanh vi P0-P3 nao trong diff packet tai DUNG 9783b42 (do bang lenh, khong nhan loi); (ii) hai suite
+  ops/cloud_agent_creds_test.py va ops/codex_cloud_setup_test.py chay lai; (iii) verdict approve/request_changes neo reviewed_sha
+  9783b42 va reviewed_tree 17900666.
+tran_loi_goi_codex: 'ADR-0052: 8 loi goi; day la loi goi thu 8/8 cua packet.'
+cach_chay: >-
+  launcher.py run, phien doc lap read-only, neo exact head 9783b42; run.json phai co model_phuc_vu_trang_thai, effort_phuc_vu_trang_thai
+  va sandbox_trang_thai — chi DO_DUOC ca ba moi tinh §8.1. Ket qua (run.json + VERDICT.md + sha256) ghi vao ho so land qua PR ghi so.
+
+cam_tuyet_doi:
+  - Khong ghi bat ky tep nao trong kho, khong push, khong mo PR
+  - Khong approve/merge tren GitHub
+  - Khong LIVE, khong credential that
+  - Khong viet chuoi bo-qua-CI nguyen van
+
+run_minutes: 240
+heartbeat_required_minutes: 240

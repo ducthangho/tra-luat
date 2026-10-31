@@ -4,9 +4,10 @@ cap-nhat-cong-cu.ps1 — cài/nâng cấp bộ công cụ dev cho VM Windows `tr
 phiên cloud (`.claude/hooks/session-start.sh`) và `ops/cong_cu.yaml` dựng cho Claude/Codex.
 
 HAI TẦNG, vì VM có HAI chủ thể quyền khác nhau (đo 31-10-2026):
-  NguoiDung — chạy bằng `tlcommander` (tài khoản thường, Commander chạy dưới nó). Sau `-DangKyLich`, tài khoản
-              ấy SỞ HỮU `C:\Tools\{npm,Python312,bin}` (trước đó chỉ tạo được tệp MỚI, gói do SYSTEM cài sẵn như
-              codex/pip không nâng được) nên cài/nâng cấp KHÔNG cần admin: claude, codex (npm), rg,
+  NguoiDung — chạy bằng `tlcommander` (tài khoản thường, Commander chạy dưới nó). Cần tài khoản ấy SỞ HỮU
+              `C:\Tools\{npm,Python312,bin}` (không thì gói do SYSTEM cài sẵn như codex/pip không nâng được). Việc giao
+              quyền ấy là bước TAY một lần của admin (README) — script KHÔNG tự làm, xem chú thích ở Register-LichCapNhat.
+              Cài/nâng cấp KHÔNG cần admin: claude, codex (npm), rg,
               shellcheck, actionlint (zip có kiểm băm), PyYAML/jsonschema theo ghim của `ops/cong_cu.yaml`,
               requirements.txt vào venv của kho, notebooklm-mcp-cli (nlm) vào venv riêng.
   HeThong   — chạy bằng SYSTEM (Scheduled Task do admin đăng ký): Git, Node LTS, gh, PowerShell 7 —
@@ -24,7 +25,7 @@ BĂM: mọi thứ tải về phải khớp sha256 trước khi chạy/chép. Ngu
 asset GitHub → tệp checksum trong CÙNG release → (Node) SHASUMS256.txt. Không tìm được băm ⇒ TỪ CHỐI cài
 công cụ đó (đo 31-10: actionlint 1.7.7 không có `digest` nhưng có `*_checksums.txt`).
 
-Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê hoặc -PhamVi sai · 3 tầng HeThong mà không
+Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê, -PhamVi sai, hoặc -NhatKy/-ChiKiem đi kèm -DangKyLich · 3 tầng HeThong mà không
 phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì · 6 -DangKyLich hỏng giữa chừng.
 Tham số KHÔNG TỒN TẠI do chính PowerShell từ chối lúc gán tham số ⇒ rc 1, script không chạy tới để đổi được (cross-review
 PR #1065 lượt 1, P2 `ma-thoat-tham-so-sai`).
@@ -148,18 +149,32 @@ function Test-CoTheCai([bool]$CoTep, [string]$PhienBan) {
     return -not ($CoTep -and [string]::IsNullOrWhiteSpace($PhienBan))
 }
 
+function ConvertTo-MatNaQuyen($Quyen) {
+    # FileSystemRights → số. ToString của mask lạ (vd GENERIC_WRITE|WriteData = 0x40000002) ra SỐ, nên so TÊN bỏ lọt
+    # (cross-review PR #1065 lượt 2, P2 `acl-mat-na-khong-nhan-dien`). Không quy đổi được ⇒ $null (người gọi coi là vi phạm).
+    if ($null -eq $Quyen) { return $null }
+    if ($Quyen -is [enum] -or $Quyen -is [int] -or $Quyen -is [long]) { return [long]$Quyen }
+    $t = ([string]$Quyen).Trim()
+    if ($t -match '^-?\d+$') { return [long]$t }
+    try { return [long][Security.AccessControl.FileSystemRights]$t } catch { return $null }
+}
+
 function Test-AclChiAdminGhi($Owner, $Rules) {
     # Thư mục/tệp mà SYSTEM chạy: chủ phải là SYSTEM/Administrators/TrustedInstaller, và KHÔNG ai khác có quyền ghi.
     # $Rules: các đối tượng có IdentityReference, FileSystemRights, AccessControlType (như Get-Acl().Access).
-    # Trả danh sách vi phạm (rỗng = đạt).
+    # Trả danh sách vi phạm (rỗng = đạt). So BIT, không so tên.
     $tin = '^(NT AUTHORITY\\SYSTEM|BUILTIN\\Administrators|NT SERVICE\\TrustedInstaller|S-1-5-18|S-1-5-32-544)$'
-    $ghi = 'FullControl|Modify|Write|CreateFiles|AppendData|CreateDirectories|Delete|ChangePermissions|TakeOwnership'
+    # WriteData 0x2 · AppendData 0x4 · WriteExtendedAttributes 0x10 · DeleteSubdirectoriesAndFiles 0x40 · WriteAttributes 0x100
+    # · Delete 0x10000 · ChangePermissions 0x40000 · TakeOwnership 0x80000 · GENERIC_ALL 0x10000000 · GENERIC_WRITE 0x40000000
+    $bitGhi = 0x2 -bor 0x4 -bor 0x10 -bor 0x40 -bor 0x100 -bor 0x10000 -bor 0x40000 -bor 0x80000 -bor 0x10000000 -bor 0x40000000
     $vp = @()
     if ("$Owner" -notmatch $tin) { $vp += "chủ sở hữu '$Owner'" }
     foreach ($r in @($Rules)) {
         if ("$($r.AccessControlType)" -ne 'Allow') { continue }
         if ("$($r.IdentityReference)" -match $tin) { continue }
-        if ("$($r.FileSystemRights)" -match $ghi) { $vp += "$($r.IdentityReference): $($r.FileSystemRights)" }
+        $m = ConvertTo-MatNaQuyen $r.FileSystemRights
+        if ($null -eq $m) { $vp += "$($r.IdentityReference): quyền không nhận diện '$($r.FileSystemRights)'"; continue }
+        if ($m -band $bitGhi) { $vp += "$($r.IdentityReference): $($r.FileSystemRights)" }
     }
     return $vp
 }
@@ -173,6 +188,9 @@ function New-DoiSoTacVu([string]$Script, [string]$Pham) {
     foreach ($k in $cap.Keys) {
         $v = [string]$cap[$k]
         if ($v -match '"' -or [string]::IsNullOrWhiteSpace($v)) { throw "giá trị -$k không dùng được trong tác vụ: '$v'" }
+        # Luật CommandLineToArgvW: dãy `\` ngay trước nháy đóng phải NHÂN ĐÔI, không thì `\"` thành nháy THẬT và mọi
+        # tham số sau bị gộp vào giá trị này (cross-review PR #1065 lượt 2, P1 `doi-so-duong-dan-ket-thuc-backslash`).
+        $v = [regex]::Replace($v, '(\\+)$', { param($m) $m.Value * 2 })
         $ds += "-$k"; $ds += "`"$v`""
     }
     return ($ds -join ' ')
@@ -181,6 +199,13 @@ function New-DoiSoTacVu([string]$Script, [string]$Pham) {
 function Find-Reparse([string]$Goc) {
     # Mọi reparse point (junction/symlink) trong cây, KHÔNG đi theo chúng; kể cả chính gốc. Rỗng = sạch.
     $ra = @()
+    # Tổ tiên trước: một thư mục cha là liên kết thì cả cây con thật ra nằm chỗ khác (cross-review lượt 2, P0).
+    $cha = Split-Path -Parent ([IO.Path]::GetFullPath($Goc))
+    while ($cha) {
+        $gc = Get-Item -LiteralPath $cha -Force -ErrorAction SilentlyContinue
+        if ($gc -and ($gc.Attributes -band [IO.FileAttributes]::ReparsePoint)) { return @($gc.FullName) }
+        $tiep = Split-Path -Parent $cha; if ($tiep -eq $cha) { break }; $cha = $tiep
+    }
     $g = Get-Item -LiteralPath $Goc -Force -ErrorAction SilentlyContinue
     if (-not $g) { return $ra }
     if ($g.Attributes -band [IO.FileAttributes]::ReparsePoint) { return @($g.FullName) }
@@ -476,25 +501,16 @@ function Register-LichCapNhat([string]$GocKho) {
     # TRƯỚC chốt nền ⇒ mất mã 4 và `-NapHam` không nạp được (Codex review P2 trên PR #1065, head 6733d09).
     $Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'
     $icacls = "$env:SystemRoot\System32\icacls.exe"
-    # Giao vùng công cụ cho tài khoản tầng NguoiDung (chủ kho duyệt 31-10-2026). Đo được: tệp do SYSTEM cài sẵn
-    # trong C:\Tools\npm và C:\Tools\Python312 chỉ cho Users TẠO tệp mới, không sửa/xoá ⇒ nâng codex trả EPERM
-    # (-4048), nâng pip rc=1. Hệ quả cần nhớ: C:\Tools là vùng của tài khoản ấy — admin/SYSTEM KHÔNG chạy công cụ
-    # từ đây (tầng HeThong đã chỉ dùng đường dẫn tuyệt đối trong Program Files vì đúng lý do này).
-    # AN NINH (cross-review PR #1065 lượt 1, P0 `giao-acl-theo-junction`): tài khoản ấy dựng được junction trong cây của
-    # nó, và `icacls /T` của admin sẽ đi theo — trao quyền lên chính script SYSTEM. Ba lớp: (1) từ chối khi cây có reparse
-    # point, (2) `/L` để icacls không đi theo liên kết, bỏ qua thư mục đã giao; (3) ACL thư mục cài đặt được ĐẶT LẠI sau
-    # bước này và ĐO lại ở cuối — nên kể cả khi (1)(2) lọt, quyền trao nhầm lên Program Files cũng bị xoá trước khi dùng.
+    # KHÔNG tự giao quyền C:\Tools cho tài khoản NguoiDung nữa — chỉ ĐỌC và báo. Hai lượt cross-review liên tiếp (PR #1065,
+    # P0 `giao-acl-theo-junction`) cho thấy mọi ACL đệ quy THEO TÊN trên cây mà tài khoản ấy kiểm soát đều có khe tráo
+    # (junction ở con, rồi ở tổ tiên, rồi tráo giữa hai lệnh) và đích bị trao quyền có thể là BẤT KỲ thư mục hệ thống nào.
+    # Cùng một hình dạng lỗi lặp lại ⇒ bỏ việc làm, không vá tiếp (CLAUDE.md "BẢY phát hiện cùng MỘT đường"). Trên VM việc
+    # giao quyền đã làm xong 31-10-2026; máy mới thì admin tự làm một lần theo README, biết rõ rủi ro.
     $ai = "$env:COMPUTERNAME\$TaiKhoanNguoiDung"
     foreach ($con in 'npm', 'Python312', 'bin') {
         $d = Join-Path $ThuMucCongCu $con
-        New-Item -ItemType Directory -Force -Path $d | Out-Null
-        Assert-KhongReparse $d
-        if ("$((Get-Acl -LiteralPath $d).Owner)" -eq $ai) { Write-Host "bỏ qua $d — đã thuộc $ai"; continue }
-        $o1 = & $icacls $d /setowner $ai /T /C /L /Q 2>&1
-        if ($LASTEXITCODE -ne 0) { throw "icacls /setowner $d rc=$LASTEXITCODE`: $($o1 | Select-Object -Last 1)" }
-        $o2 = & $icacls $d /grant "${ai}:(OI)(CI)M" /T /C /L /Q 2>&1
-        if ($LASTEXITCODE -ne 0) { throw "icacls /grant $d rc=$LASTEXITCODE`: $($o2 | Select-Object -Last 1)" }
-        Write-Host "giao $d cho $ai"
+        $chu = if (Test-Path -LiteralPath $d) { "$((Get-Acl -LiteralPath $d).Owner)" } else { '(chưa có)' }
+        if ($chu -ne $ai) { Write-Host "LƯU Ý: $d thuộc '$chu', không phải '$ai' — tầng NguoiDung không nâng được gói có sẵn ở đó (xem README)" }
     }
     # Thư mục cài đặt: tạo, từ chối nếu là liên kết, ĐẶT LẠI ACL (bỏ thừa kế; SYSTEM/Administrators toàn quyền, Users đọc).
     New-Item -ItemType Directory -Force -Path $Script:ThuMucCaiDat | Out-Null
@@ -561,6 +577,9 @@ function Register-LichCapNhat([string]$GocKho) {
 if ($NapHam) { return }
 
 if ($PhamVi -notin 'NguoiDung', 'HeThong') { Write-Loi "-PhamVi '$PhamVi' không hợp lệ (NguoiDung | HeThong)"; exit 2 }
+# -NhatKy/-ChiKiem chỉ có nghĩa cho MỘT lượt chạy; lịch luôn ghi nhật ký có dấu thời gian ở thư mục mặc định và luôn cài
+# thật. Đi kèm -DangKyLich là mơ hồ ⇒ từ chối thay vì lặng lẽ bỏ (cross-review PR #1065 lượt 2, P1 `dang-ky-lam-mat-tham-so`).
+if ($DangKyLich -and ($ChiKiem -or $NhatKy)) { Write-Loi '-NhatKy/-ChiKiem không đi kèm -DangKyLich (lịch luôn cài thật, nhật ký mặc định)'; exit 2 }
 
 # ───────────────────────── chạy ─────────────────────────
 

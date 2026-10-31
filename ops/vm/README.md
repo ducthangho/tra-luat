@@ -24,11 +24,11 @@ Remove-Item -Recurse -Force $d
 ```
 
 `-DangKyLich` làm ba việc:
-1. giao `C:\Tools\{npm,Python312,bin}` cho `tlcommander` (owner + Modify) — từ đây coi `C:\Tools` là vùng
-   của tài khoản ấy, admin/SYSTEM không chạy công cụ từ đó. Cây có junction/symlink nào thì TỪ CHỐI (mã 6); `icacls`
-   chạy với `/L` (không đi theo liên kết); thư mục đã thuộc `tlcommander` thì bỏ qua;
-2. ĐẶT LẠI ACL `C:\Program Files\tra-luat-ops` (bỏ thừa kế; chỉ SYSTEM/Administrators ghi), chép script + `cong_cu.yaml`
-   + `requirements.txt` vào, rồi ĐO lại ACL và băm từng tệp — lệch là dừng mã 6;
+1. ĐỌC chủ sở hữu `C:\Tools\{npm,Python312,bin}` và in `LƯU Ý` nếu chưa thuộc `tlcommander` — KHÔNG tự đổi ACL
+   (xem mục "Giao `C:\Tools` cho `tlcommander`" bên dưới);
+2. ĐẶT LẠI ACL `C:\Program Files\tra-luat-ops` (bỏ thừa kế; chỉ SYSTEM/Administrators ghi; từ chối nếu thư mục ấy hay
+   tổ tiên của nó là junction/symlink), chép script + `cong_cu.yaml` + `requirements.txt` vào, đặt lại chủ sở hữu, rồi ĐO
+   lại ACL (theo bit quyền) và băm từng tệp — lệch là dừng mã 6;
 3. đăng ký `TraLuat-CapNhatCongCu-HeThong` (SYSTEM, CN 02:30) và `TraLuat-CapNhatCongCu-NguoiDung`
    (`tlcommander`, lưu mật khẩu như `TraLuatRemoteCommander` — script HỎI mật khẩu khi đăng ký; S4U bị từ chối trên
    VM; CN 03:30; đổi mật khẩu `tlcommander` thì chạy lại `-DangKyLich`), 2 tuần/lần, `StartWhenAvailable` (VM tắt thì chạy
@@ -47,3 +47,20 @@ Remove-Item -Recurse -Force $d
 
 `pwsh -NoProfile -File ops/vm/cap-nhat-cong-cu_test.ps1` (cần `python` có PyYAML, hoặc đặt
 `$env:TL_TEST_PYTHON`). Không mạng, không cài gì. Chưa nối vào CI — xem mô tả PR.
+
+## Giao `C:\Tools` cho `tlcommander` (bước TAY, một lần cho máy mới)
+
+Tầng `NguoiDung` chỉ nâng được gói có sẵn (codex, pip…) khi `tlcommander` sở hữu `C:\Tools\{npm,Python312,bin}`.
+Script KHÔNG tự làm việc này: hai lượt cross-review PR #1065 cho thấy ACL đệ quy theo tên trên cây mà `tlcommander` kiểm
+soát luôn có khe tráo (junction ở con, ở tổ tiên, hoặc tráo giữa hai lệnh), và đích bị trao quyền có thể là BẤT KỲ thư mục
+hệ thống nào. Trên `tra-luat-win` việc này đã làm xong 31-10-2026. Máy mới: admin chạy MỘT lần, LÚC `tlcommander` chưa
+có quyền ghi gì trong các thư mục ấy (ngay sau khi cài, trước khi bật Commander), và tự kiểm không có liên kết:
+
+```powershell
+foreach ($d in 'C:\Tools\npm','C:\Tools\Python312','C:\Tools\bin') {
+    if (Get-ChildItem $d -Recurse -Force -Attributes ReparsePoint) { throw "co lien ket trong $d" }
+    icacls $d /setowner "$env:COMPUTERNAME\tlcommander" /T /C /L /Q
+    icacls $d /grant "$env:COMPUTERNAME\tlcommander:(OI)(CI)M" /T /C /L /Q
+}
+```
+

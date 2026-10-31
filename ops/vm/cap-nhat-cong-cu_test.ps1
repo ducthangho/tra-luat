@@ -137,12 +137,6 @@ Ca 'reparse_trong_cay_bi_phat_hien' {
         Remove-Item -LiteralPath $g, $ngoai -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-Ca 'dang_ky_chan_reparse_ca_hai_noi' {
-    $ast = [Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
-    $f = $ast.FindAll({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Register-LichCapNhat' }, $true)[0]
-    $goi = @($f.FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] -and $n.GetCommandName() -eq 'Assert-KhongReparse' }, $true) | ForEach-Object { $_.Extent.Text })
-    ($goi -contains 'Assert-KhongReparse $d') -and ($goi -contains 'Assert-KhongReparse $Script:ThuMucCaiDat')
-}
 Ca 'assert_khong_reparse_nem_khi_co_lien_ket' {
     $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-ak-" + [guid]::NewGuid().ToString('N')); $ngoai = "$g-ngoai"
     New-Item -ItemType Directory -Path $g, $ngoai | Out-Null
@@ -155,11 +149,82 @@ Ca 'assert_khong_reparse_nem_khi_co_lien_ket' {
         Remove-Item -LiteralPath $g, $ngoai -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-Ca 'icacls_dang_ky_khong_di_theo_lien_ket' {
+# ── cross-review lượt 2 ──
+function Get-HamAst([string]$Ten) {
     $ast = [Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
-    $f = $ast.FindAll({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Register-LichCapNhat' }, $true)[0]
-    $goi = @($f.FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] -and $n.CommandElements[0].Extent.Text -eq '$icacls' }, $true))
-    $goi.Count -ge 4 -and -not ($goi | Where-Object { $_.Extent.Text -notmatch '\s/L\s' })
+    $ast.FindAll({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $Ten }, $true)[0]
+}
+function Get-LenhTrongHam([string]$Ten) {
+    @((Get-HamAst $Ten).FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] }, $true))
+}
+Ca 'dang_ky_khong_doi_acl_cay_cong_cu' {
+    # Kiến trúc mới: Register KHÔNG gọi icacls/Set-Acl lên cây C:\Tools (P0 lượt 1+2); icacls chỉ chạm thư mục cài đặt.
+    $l = Get-LenhTrongHam 'Register-LichCapNhat'
+    $ic = @($l | Where-Object { $_.CommandElements[0].Extent.Text -eq '$icacls' })
+    $ic.Count -ge 3 -and -not ($ic | Where-Object { $_.CommandElements[1].Extent.Text -ne '$Script:ThuMucCaiDat' }) -and
+        -not ($ic | Where-Object { $_.Extent.Text -notmatch '\s/L\s' }) -and
+        -not ($l | Where-Object { $_.GetCommandName() -eq 'Set-Acl' })
+}
+Ca 'dang_ky_chan_reparse_thu_muc_cai_dat' {
+    @(Get-LenhTrongHam 'Register-LichCapNhat' | Where-Object { $_.Extent.Text -eq 'Assert-KhongReparse $Script:ThuMucCaiDat' }).Count -eq 1
+}
+Ca 'dang_ky_dat_lai_acl_roi_moi_chep_va_dat_owner_sau' {
+    $l = Get-LenhTrongHam 'Register-LichCapNhat'
+    $viTri = { param($mau) ($l | Where-Object { $_.Extent.Text -match $mau } | ForEach-Object { $_.Extent.StartOffset } | Measure-Object -Minimum -Maximum) }
+    $reset = & $viTri '/inheritance:r\s.*/grant:r'
+    $chep = & $viTri '^Copy-Item\b'
+    $owner = & $viTri '/setowner'
+    $reset.Count -eq 1 -and $chep.Count -ge 1 -and $owner.Count -eq 2 -and
+        $reset.Maximum -lt $chep.Minimum -and $owner.Maximum -gt $chep.Maximum
+}
+Ca 'dang_ky_do_acl_va_bam_sau_khi_chep' {
+    $f = (Get-HamAst 'Register-LichCapNhat').Extent.Text
+    $f -match '\$vp = @\(Test-AclChiAdminGhi \$acl\.Owner \$acl\.Access\)\s*\r?\n\s*if \(\$vp\.Count\) \{ throw' -and
+        $f -match 'Get-FileHash -LiteralPath \$dich\)\.Hash -ne \(Get-FileHash -LiteralPath \$nguon\[\$k\]\)\.Hash\) \{ throw'
+}
+Ca 'dang_ky_dung_doi_so_day_du' {
+    $l = Get-LenhTrongHam 'Register-LichCapNhat' | ForEach-Object { $_.Extent.Text }
+    ($l -contains "New-DoiSoTacVu `$script 'HeThong'") -and ($l -contains "New-DoiSoTacVu `$script 'NguoiDung'")
+}
+Ca 'reparse_o_to_tien_bi_phat_hien' {
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-tt-" + [guid]::NewGuid().ToString('N')); $that = "$g-that"
+    New-Item -ItemType Directory -Path $g, "$that\npm" | Out-Null
+    try {
+        New-Item -ItemType $(if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }) -Path "$g\Tools" -Target $that | Out-Null
+        # Bản thân npm là thư mục thật, chỉ CHA là liên kết.
+        @(Find-Reparse (Join-Path $g 'Tools/npm')).Count -eq 1 -and (Nem { Assert-KhongReparse (Join-Path $g 'Tools/npm') })
+    } finally {
+        if (Test-Path -LiteralPath "$g\Tools") { (Get-Item -LiteralPath "$g\Tools" -Force).Delete() }
+        Remove-Item -LiteralPath $g, $that -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Ca 'acl_mat_na_so_va_khong_nhan_dien' {
+    $r = { param($q) @([pscustomobject]@{ IdentityReference = 'VM\u'; FileSystemRights = $q; AccessControlType = 'Allow' }) }
+    @(Test-AclChiAdminGhi 'BUILTIN\Administrators' (& $r ([Enum]::ToObject([Security.AccessControl.FileSystemRights], 0x40000002)))).Count -eq 1 -and
+        @(Test-AclChiAdminGhi 'BUILTIN\Administrators' (& $r 268435456)).Count -eq 1 -and
+        @(Test-AclChiAdminGhi 'BUILTIN\Administrators' (& $r 'khong-phai-quyen')).Count -eq 1 -and
+        @(Test-AclChiAdminGhi 'BUILTIN\Administrators' (& $r 'ReadAndExecute, Synchronize')).Count -eq 0 -and
+        @(Test-AclChiAdminGhi 'BUILTIN\Administrators' (& $r 1179817)).Count -eq 0
+}
+Ca 'doi_so_tac_vu_di_mot_vong_qua_tien_trinh_that' {
+    # Gửi chuỗi đối số qua một tiến trình pwsh THẬT, đọc lại PSBoundParameters — đo đúng thứ Task Scheduler sẽ đưa.
+    $tam = Join-Path ([IO.Path]::GetTempPath()) ("cncc-dv-" + [guid]::NewGuid().ToString('N') + '.ps1')
+    Set-Content -LiteralPath $tam -Value 'param([string]$PhamVi,[string]$MayDich,[string]$ThuMucCongCu,[string]$NlmVenv,[string]$VenvKho,[string]$HomeCommander,[string]$TaiKhoanNguoiDung,[string]$TacVuCommander) $PSBoundParameters | ConvertTo-Json -Compress'
+    try {
+        $MayDich = 'MAY X'; $ThuMucCongCu = 'D:\cong cu\'; $NlmVenv = 'C:\a b\\'; $VenvKho = 'C:\v$x`y'
+        $ds = (New-DoiSoTacVu 'X' 'HeThong') -replace '^-NoProfile -NonInteractive -File "X"', ''
+        $psi = [Diagnostics.ProcessStartInfo]::new((Get-Process -Id $PID).Path, "-NoProfile -File `"$tam`" $ds")
+        $psi.RedirectStandardOutput = $true; $psi.UseShellExecute = $false
+        $pr = [Diagnostics.Process]::Start($psi); $o = $pr.StandardOutput.ReadToEnd(); $pr.WaitForExit()
+        $j = $o | ConvertFrom-Json
+        $j.PhamVi -eq 'HeThong' -and $j.MayDich -eq 'MAY X' -and $j.ThuMucCongCu -eq 'D:\cong cu\' -and $j.NlmVenv -eq 'C:\a b\\' -and
+            $j.VenvKho -eq 'C:\v$x`y' -and $j.TacVuCommander -eq $TacVuCommander
+    } finally { Remove-Item -LiteralPath $tam -Force -ErrorAction SilentlyContinue }
+}
+Ca 'dang_ky_kem_chikiem_hoac_nhatky_thoat_2' {
+    & (Get-Process -Id $PID).Path -NoProfile -File $Script -DangKyLich -ChiKiem *> $null; $a = $LASTEXITCODE
+    & (Get-Process -Id $PID).Path -NoProfile -File $Script -DangKyLich -NhatKy 'x.json' *> $null; $b = $LASTEXITCODE
+    $a -eq 2 -and $b -eq 2
 }
 Ca 'thu_muc_tai_bo_thua_ke' {
     $ast = [Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)

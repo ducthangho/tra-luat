@@ -61,12 +61,21 @@ sửa `ADR-0057`. Mọi điểm khác của hai ADR giữ nguyên hiệu lực. 
 - **Quá hạn, chưa ai tiếp nhận.** A kết nối lại, đọc thấy dòng vẫn là của A: A chạy bước kiểm tải rồi gia hạn.
 - **D10.** Khoá dạng cũ ghi 09:01:16Z, quá 2 giờ nên hết hiệu lực theo 3(b). Phiên tiếp nhận kiểm tải và thấy PID
   26296 `tl.py --selftest`, không phải MCP. Mục 2 so giờ tạo PID 26296 với 09:01:16Z. Sổ đo không ghi
-  `CreationDate`, và giờ bắt đầu lượt suy từ 18113 s không phải giờ tạo tiến trình. Nguồn quyết định là tệp
-  `selftest-ketqua.txt` trong thư mục riêng của phiên giữ khoá, do script của chính phiên ấy ghi lúc chạy (đọc lại
-  qua Desktop Commander ngày 31-10-2026, chỉ đọc): `BAT_DAU=2026-10-30T09:01:16.5807497Z`, rồi danh sách kiểm tải
-  `TAI_TRUOC` gồm PID 23252, 5772 (`browser-use.exe --cli-mcp`), 12720, 26716 (`python.exe -m proxima_agent.web`),
-  **không có 26296**. PID 26296 chưa tồn tại sau 09:01:16Z, nên được tạo sau giờ bắt đầu khoá. Khoá còn sống:
-  **không tiếp nhận**, ghi sổ đo, đợi.
+  `CreationDate`, giờ bắt đầu lượt suy từ 18113 s không phải giờ tạo tiến trình, và máy không bật nhật ký tạo tiến
+  trình (Security 4688 rỗng ngày 30-10). Nguồn quyết định là cặp tệp của chính phiên giữ khoá, đọc lại chỉ-đọc qua
+  Desktop Commander ngày 31-10-2026:
+  - script `C:\Users\admin\tl-work\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest.ps1` (sửa lần cuối 09:00:26Z) ghi
+    `BAT_DAU`, ghi khoá, ngủ 3 s, fetch và checkout, rồi lấy mẫu
+    `Get-CimInstance Win32_Process -Filter "Name='python.exe'"` không loại PID nào thành dòng `TAI_TRUOC`, và chỉ
+    sau đó mới gọi `cmd /c "python -u scripts/tl.py --selftest …"`;
+  - kết quả `D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest-ketqua.txt` ghi
+    `BAT_DAU=2026-10-30T09:01:16.5807497Z` và `TAI_TRUOC` gồm đúng bốn `python.exe`: 23252, 5772 (`browser-use`
+    `--cli-mcp`), 12720, 26716 (`-m proxima_agent.web`). Tệp `scripts/tl.py` của checkout ấy ghi lúc 09:01:22.77Z,
+    nên mẫu lấy sau mốc đó.
+
+  Mẫu phủ mọi `python.exe`, lấy sau 09:01:16Z, và **không có 26296**; sổ đo 13:59:37Z ghi PID 26296 chạy
+  `tl.py --selftest`, tức một tiến trình Python, đúng loại mục 2 xét. Vậy PID 26296 được tạo sau mẫu, tức sau giờ bắt đầu khoá. Khoá còn sống: **không tiếp nhận**, ghi sổ
+  đo, đợi. Đây là cận dưới suy từ một mẫu âm có nguồn, không phải `CreationDate` đo trực tiếp.
 
 ## Những gì KHÔNG đổi
 

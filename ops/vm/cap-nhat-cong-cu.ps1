@@ -218,6 +218,13 @@ function Assert-KhongReparse([string]$Goc) {
     if ($rp.Count) { throw "từ chối: $Goc có reparse point (junction/symlink): $($rp -join ', ')" }
 }
 
+function Invoke-Icacls([string[]]$DoiSo) {
+    # MỘT cửa cho mọi lời gọi icacls của bước đăng ký: đường dẫn TUYỆT ĐỐI trong System32, rc≠0 ⇒ ném. Gom về đây để bộ
+    # test giả được icacls trên cả Windows lẫn Linux và chạy Register-LichCapNhat THẬT (cross-review PR #1065 lượt 3, P2).
+    $o = & "$env:SystemRoot\System32\icacls.exe" @DoiSo 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "icacls $($DoiSo -join ' ') rc=$LASTEXITCODE`: $($o | Select-Object -Last 1)" }
+}
+
 function Read-BanGhim([string]$TepYaml, [string]$Python) {
     # Đọc ghim từ `ops/cong_cu.yaml` bằng PyYAML — MỘT nguồn với CI. PyYAML/jsonschema ghim trong
     # `cai.lenh` (`==X.Y.Z`); actionlint ghim ở `ban_ghim`.
@@ -500,25 +507,22 @@ function Register-LichCapNhat([string]$GocKho) {
     # Tính đường dẫn Ở ĐÂY, không ở mức script: ngoài Windows `ProgramFiles` không có, và `Join-Path $null` ném lỗi
     # TRƯỚC chốt nền ⇒ mất mã 4 và `-NapHam` không nạp được (Codex review P2 trên PR #1065, head 6733d09).
     $Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'
-    $icacls = "$env:SystemRoot\System32\icacls.exe"
     # KHÔNG tự giao quyền C:\Tools cho tài khoản NguoiDung nữa — chỉ ĐỌC và báo. Hai lượt cross-review liên tiếp (PR #1065,
     # P0 `giao-acl-theo-junction`) cho thấy mọi ACL đệ quy THEO TÊN trên cây mà tài khoản ấy kiểm soát đều có khe tráo
     # (junction ở con, rồi ở tổ tiên, rồi tráo giữa hai lệnh) và đích bị trao quyền có thể là BẤT KỲ thư mục hệ thống nào.
     # Cùng một hình dạng lỗi lặp lại ⇒ bỏ việc làm, không vá tiếp (CLAUDE.md "BẢY phát hiện cùng MỘT đường"). Trên VM việc
-    # giao quyền đã làm xong 31-10-2026; máy mới thì admin tự làm một lần theo README, biết rõ rủi ro.
+    # giao quyền đã làm xong 31-10-2026. Kho cũng KHÔNG đưa công thức tay (lượt 3: công thức tay mang đúng khe ấy) — README.
     $ai = "$env:COMPUTERNAME\$TaiKhoanNguoiDung"
     foreach ($con in 'npm', 'Python312', 'bin') {
         $d = Join-Path $ThuMucCongCu $con
         $chu = if (Test-Path -LiteralPath $d) { "$((Get-Acl -LiteralPath $d).Owner)" } else { '(chưa có)' }
-        if ($chu -ne $ai) { Write-Host "LƯU Ý: $d thuộc '$chu', không phải '$ai' — tầng NguoiDung không nâng được gói có sẵn ở đó (xem README)" }
+        if ($chu -ne $ai) { Write-Host "LƯU Ý: $d thuộc '$chu', không phải '$ai' — tầng NguoiDung không nâng được gói có sẵn ở đó; kho không tự giao quyền (README mục 'Giao C:\Tools')" }
     }
     # Thư mục cài đặt: tạo, từ chối nếu là liên kết, ĐẶT LẠI ACL (bỏ thừa kế; SYSTEM/Administrators toàn quyền, Users đọc).
     New-Item -ItemType Directory -Force -Path $Script:ThuMucCaiDat | Out-Null
     Assert-KhongReparse $Script:ThuMucCaiDat
-    $o3 = & $icacls $Script:ThuMucCaiDat /setowner '*S-1-5-32-544' /T /C /L /Q 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "icacls /setowner $($Script:ThuMucCaiDat) rc=$LASTEXITCODE`: $($o3 | Select-Object -Last 1)" }
-    $o4 = & $icacls $Script:ThuMucCaiDat /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-544:(OI)(CI)F' '*S-1-5-32-545:(OI)(CI)RX' /T /C /L /Q 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "icacls đặt lại $($Script:ThuMucCaiDat) rc=$LASTEXITCODE`: $($o4 | Select-Object -Last 1)" }
+    Invoke-Icacls @($Script:ThuMucCaiDat, '/setowner', '*S-1-5-32-544', '/T', '/C', '/L', '/Q')
+    Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/C', '/L', '/Q')
     $nguon = @{
         'cap-nhat-cong-cu.ps1' = $PSCommandPath
         'cong_cu.yaml'         = @((Join-Path $GocKho 'ops\cong_cu.yaml'), (Join-Path $GocKho 'cong_cu.yaml')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
@@ -531,8 +535,7 @@ function Register-LichCapNhat([string]$GocKho) {
         }
     }
     # Tệp vừa chép có thể mang chủ là chính tài khoản admin đang chạy (tuỳ chính sách "default owner") ⇒ đặt lại về nhóm.
-    $o5 = & $icacls $Script:ThuMucCaiDat /setowner '*S-1-5-32-544' /T /C /L /Q 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "icacls /setowner sau khi chép rc=$LASTEXITCODE`: $($o5 | Select-Object -Last 1)" }
+    Invoke-Icacls @($Script:ThuMucCaiDat, '/setowner', '*S-1-5-32-544', '/T', '/C', '/L', '/Q')
     # Đo lại SAU khi chép: thư mục + từng tệp chỉ admin ghi được, và bản chép trùng băm nguồn.
     foreach ($k in @('') + @($nguon.Keys)) {
         $dich = if ($k) { Join-Path $Script:ThuMucCaiDat $k } else { $Script:ThuMucCaiDat }

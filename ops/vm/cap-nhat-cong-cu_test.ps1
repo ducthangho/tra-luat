@@ -157,34 +157,22 @@ function Get-HamAst([string]$Ten) {
 function Get-LenhTrongHam([string]$Ten) {
     @((Get-HamAst $Ten).FindAll({ param($n) $n -is [Management.Automation.Language.CommandAst] }, $true))
 }
-Ca 'dang_ky_khong_doi_acl_cay_cong_cu' {
-    # Kiến trúc mới: Register KHÔNG gọi icacls/Set-Acl lên cây C:\Tools (P0 lượt 1+2); icacls chỉ chạm thư mục cài đặt.
-    $l = Get-LenhTrongHam 'Register-LichCapNhat'
-    $ic = @($l | Where-Object { $_.CommandElements[0].Extent.Text -eq '$icacls' })
-    $ic.Count -ge 3 -and -not ($ic | Where-Object { $_.CommandElements[1].Extent.Text -ne '$Script:ThuMucCaiDat' }) -and
-        -not ($ic | Where-Object { $_.Extent.Text -notmatch '\s/L\s' }) -and
-        -not ($l | Where-Object { $_.GetCommandName() -eq 'Set-Acl' })
-}
+# Các ca HÀNH VI của Register-LichCapNhat nằm ở cuối tệp (chạy thật với đồ giả) — lượt 3 P2: ca AST để sáu đột biến sống.
 Ca 'dang_ky_chan_reparse_thu_muc_cai_dat' {
     @(Get-LenhTrongHam 'Register-LichCapNhat' | Where-Object { $_.Extent.Text -eq 'Assert-KhongReparse $Script:ThuMucCaiDat' }).Count -eq 1
 }
-Ca 'dang_ky_dat_lai_acl_roi_moi_chep_va_dat_owner_sau' {
-    $l = Get-LenhTrongHam 'Register-LichCapNhat'
-    $viTri = { param($mau) ($l | Where-Object { $_.Extent.Text -match $mau } | ForEach-Object { $_.Extent.StartOffset } | Measure-Object -Minimum -Maximum) }
-    $reset = & $viTri '/inheritance:r\s.*/grant:r'
-    $chep = & $viTri '^Copy-Item\b'
-    $owner = & $viTri '/setowner'
-    $reset.Count -eq 1 -and $chep.Count -ge 1 -and $owner.Count -eq 2 -and
-        $reset.Maximum -lt $chep.Minimum -and $owner.Maximum -gt $chep.Maximum
-}
-Ca 'dang_ky_do_acl_va_bam_sau_khi_chep' {
-    $f = (Get-HamAst 'Register-LichCapNhat').Extent.Text
-    $f -match '\$vp = @\(Test-AclChiAdminGhi \$acl\.Owner \$acl\.Access\)\s*\r?\n\s*if \(\$vp\.Count\) \{ throw' -and
-        $f -match 'Get-FileHash -LiteralPath \$dich\)\.Hash -ne \(Get-FileHash -LiteralPath \$nguon\[\$k\]\)\.Hash\) \{ throw'
-}
-Ca 'dang_ky_dung_doi_so_day_du' {
-    $l = Get-LenhTrongHam 'Register-LichCapNhat' | ForEach-Object { $_.Extent.Text }
-    ($l -contains "New-DoiSoTacVu `$script 'HeThong'") -and ($l -contains "New-DoiSoTacVu `$script 'NguoiDung'")
+Ca 'icacls_rc_khac_0_thi_nem' {
+    # Cửa icacls duy nhất của bước đăng ký phải ném khi rc≠0. Windows: icacls THẬT trên đường dẫn không có. Nơi khác: icacls
+    # giả ở $env:SystemRoot\System32 trả rc 5 — đúng đường dẫn tuyệt đối mà hàm gọi.
+    if ($IsWindows) { return (Nem { Invoke-Icacls @((Join-Path $env:TEMP "khong-co-$([guid]::NewGuid())"), '/setowner', '*S-1-5-32-544', '/L', '/Q') }) }
+    $cu = $env:SystemRoot; $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-ic-" + [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path "$g/System32" | Out-Null
+        [IO.File]::WriteAllText("$g/System32/icacls.exe", "#!/bin/sh`necho gia-hong`nexit 5`n"); & chmod +x "$g/System32/icacls.exe"
+        $env:SystemRoot = $g
+        $m = $null; try { Invoke-Icacls @('x', '/Q') } catch { $m = $_.Exception.Message }
+        $m -match 'rc=5' -and $m -match 'gia-hong'
+    } finally { $env:SystemRoot = $cu; Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
 }
 Ca 'reparse_o_to_tien_bi_phat_hien' {
     $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-tt-" + [guid]::NewGuid().ToString('N')); $that = "$g-that"
@@ -325,6 +313,119 @@ try {
 } finally {
     $env:ProgramFiles = $pfCu
     Remove-Item -LiteralPath $tamGia -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# ── Register-LichCapNhat chạy THẬT với đồ giả (cross-review PR #1065 lượt 3, P2 `test-thieu-duong-tich-hop`) ──
+# Đường dẫn và tệp chép là THẬT (thư mục tạm); chỉ icacls, Get-Acl, Get-FileHash (khi cần), các lệnh *-ScheduledTask* là giả.
+# Get-Credential ném dấu dừng ⇒ dừng trước mật khẩu/COM. ACL gốc của Windows KHÔNG được đo ở đây — đo trên VM khi đăng ký.
+# Mô hình ACL giả GIỮ TRẠNG THÁI (CLAUDE.md "đồ giả phải mô phỏng TRẠNG THÁI"): chủ của tệp vừa chép là admin đang chạy cho tới
+# lần /setowner kế tiếp; thư mục còn thừa kế (Users ghi được) cho tới lần /inheritance:r.
+$DungLai = 'OFFLINE-DUNG-TRUOC-MAT-KHAU'
+$cuCauHinh = @{ ThuMucCongCu = $ThuMucCongCu; NlmVenv = $NlmVenv; VenvKho = $VenvKho; HomeCommander = $HomeCommander; TacVuCommander = $TacVuCommander; MayDich = $MayDich }
+$cuMay = $env:COMPUTERNAME
+function Invoke-DangKyGia([string]$CheDo) {
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-dk-" + [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $g, "$g/PF/tra-luat-ops", "$g/nan-nhan/npm", "$g/nan-nhan/Python312", "$g/nan-nhan/bin" | Out-Null
+    $lk = $(if ($IsWindows) { 'Junction' } else { 'SymbolicLink' })
+    $Script:ThuMucCongCu = Join-Path $g 'Tools'
+    # Tổ tiên của cây công cụ là LIÊN KẾT tới thư mục nạn nhân — mọi ca đều chạy trên cây độc này.
+    New-Item -ItemType $lk -Path $Script:ThuMucCongCu -Target "$g/nan-nhan" | Out-Null
+    $env:ProgramFiles = Join-Path $g 'PF'
+    if ($CheDo -eq 'pf-lien-ket') {
+        Remove-Item -LiteralPath $env:ProgramFiles -Recurse -Force
+        New-Item -ItemType Directory -Path "$g/pf-that/tra-luat-ops" | Out-Null
+        New-Item -ItemType $lk -Path $env:ProgramFiles -Target "$g/pf-that" | Out-Null
+    }
+    if ($CheDo -eq 'cai-dat-lien-ket') {
+        Remove-Item -LiteralPath "$g/PF/tra-luat-ops" -Recurse -Force
+        New-Item -ItemType $lk -Path "$g/PF/tra-luat-ops" -Target "$g/nan-nhan" | Out-Null
+    }
+    $Script:GiaCheDo = $CheDo; $Script:SuKien = [Collections.Generic.List[object]]::new()
+    $Script:HanhDong = [Collections.Generic.List[object]]::new(); $Script:TacVu = [Collections.Generic.List[object]]::new()
+    $Script:NlmVenv = 'D:\nlm venv\'; $Script:VenvKho = 'D:\repo venv\\'; $Script:HomeCommander = 'D:\profile rieng'
+    $Script:TacVuCommander = 'CMD-RIENG'; $Script:MayDich = 'MAY-GIA'; $env:COMPUTERNAME = 'MAY-GIA'
+    $loi = $null
+    try { Register-LichCapNhat (Resolve-Path (Join-Path $Here '../..')).Path *> $null } catch { $loi = $_.Exception.Message }
+    $kq = [pscustomobject]@{
+        loi = $loi; su_kien = @($Script:SuKien); hanh_dong = @($Script:HanhDong); tac_vu = @($Script:TacVu); cai_dat = $Script:ThuMucCaiDat
+        tep = @(Get-ChildItem -LiteralPath (Join-Path $g 'PF/tra-luat-ops') -File -ErrorAction SilentlyContinue | ForEach-Object Name)
+    }
+    foreach ($l in "$g/PF", "$g/PF/tra-luat-ops", "$g/Tools") {
+        $it = Get-Item -LiteralPath $l -Force -ErrorAction SilentlyContinue
+        if ($it -and ($it.Attributes -band [IO.FileAttributes]::ReparsePoint)) { $it.Delete() }
+    }
+    Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue
+    $kq
+}
+try {
+    function Invoke-Icacls([string[]]$DoiSo) { $Script:SuKien.Add([pscustomobject]@{ loai = 'icacls'; doi_so = $DoiSo }) }
+    function Copy-Item { param($LiteralPath, $Destination, [switch]$Force)
+        $Script:SuKien.Add([pscustomobject]@{ loai = 'chep'; dich = "$Destination" })
+        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force }
+    function Get-Acl { param($LiteralPath)
+        $p = "$LiteralPath"; $caiDat = $p.StartsWith($Script:ThuMucCaiDat)
+        if ($caiDat) { $Script:SuKien.Add([pscustomobject]@{ loai = 'do_acl'; dich = $p }) }
+        $chu = if ($caiDat) { 'BUILTIN\Administrators' } else { "$env:COMPUTERNAME\tlcommander" }
+        $quyen = 'ReadAndExecute, Synchronize'
+        if ($caiDat) {
+            $ev = @($Script:SuKien)
+            $chep = -1; $own = -1; $reset = -1
+            for ($i = 0; $i -lt $ev.Count; $i++) {
+                if ($ev[$i].loai -eq 'chep' -and $ev[$i].dich -eq $p) { $chep = $i }
+                if ($ev[$i].loai -eq 'icacls' -and $ev[$i].doi_so -contains '/setowner') { $own = $i }
+                if ($ev[$i].loai -eq 'icacls' -and $ev[$i].doi_so -contains '/inheritance:r') { $reset = $i }
+            }
+            if ($chep -gt $own) { $chu = "$env:COMPUTERNAME\tladmin" }
+            if ($reset -lt 0 -or $Script:GiaCheDo -eq 'acl-sai') { $quyen = 'Modify' }
+        }
+        [pscustomobject]@{ Owner = $chu; Access = @([pscustomobject]@{ IdentityReference = 'BUILTIN\Users'; FileSystemRights = $quyen; AccessControlType = 'Allow' }) } }
+    function Get-FileHash { param($LiteralPath)
+        if ($Script:GiaCheDo -eq 'bam-lech' -and "$LiteralPath".StartsWith($Script:ThuMucCaiDat)) { return [pscustomobject]@{ Hash = 'LECH' } }
+        Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $LiteralPath }
+    function New-ScheduledTaskSettingsSet { param([switch]$StartWhenAvailable, $ExecutionTimeLimit, $MultipleInstances) [pscustomobject]@{ swa = [bool]$StartWhenAvailable } }
+    function New-ScheduledTaskTrigger { param([switch]$Weekly, $WeeksInterval, $DaysOfWeek, $At) [pscustomobject]@{ At = $At; WeeksInterval = $WeeksInterval } }
+    function New-ScheduledTaskAction { param($Execute, $Argument) $a = [pscustomobject]@{ Execute = $Execute; Argument = $Argument }; $Script:HanhDong.Add($a); $a }
+    function New-ScheduledTaskPrincipal { param($UserId, $LogonType, $RunLevel) [pscustomobject]@{ UserId = $UserId; LogonType = $LogonType; RunLevel = $RunLevel } }
+    function Register-ScheduledTask { param($TaskName, $Action, $Trigger, $Principal, $Settings, [switch]$Force, $ErrorAction, $User, $Password, $RunLevel)
+        $Script:TacVu.Add([pscustomobject]@{ ten = $TaskName; hanh_dong = $Action; chu = $Principal; cai_dat = $Settings; ea = "$ErrorAction" }) }
+    function Get-Credential { param($UserName, $Message) throw $DungLai }
+
+    $dungLaiDung = { param($k) $k.loi -eq $DungLai -and $k.tac_vu.Count -eq 1 }
+    $kSach = Invoke-DangKyGia 'sach'
+    Ca 'dk_chay_icacls_chi_cham_thu_muc_cai_dat' {
+        $ic = @($kSach.su_kien | Where-Object loai -eq 'icacls')
+        (& $dungLaiDung $kSach) -and $ic.Count -eq 3 -and -not ($ic | Where-Object { $_.doi_so[0] -ne $kSach.cai_dat -or $_.doi_so -notcontains '/L' })
+    }
+    Ca 'dk_chay_chep_du_ba_tep' { @($kSach.tep | Sort-Object) -join ',' -eq 'cap-nhat-cong-cu.ps1,cong_cu.yaml,requirements.txt' }
+    Ca 'dk_chay_do_acl_moi_tep_sau_khi_chep' {
+        # 1 thư mục + 3 tệp, và lần đo đầu tiên ĐỨNG SAU lần chép cuối cùng. (Bọc @(...).Count: `-not 0` là $true —
+        # chỉ số 0 lọt ra từ Where-Object từng làm ca đối số tác vụ xanh dưới đột biến, đo 31-10-2026.)
+        $ev = $kSach.su_kien; $do = @(0..($ev.Count - 1) | Where-Object { $ev[$_].loai -eq 'do_acl' })
+        $chep = @(0..($ev.Count - 1) | Where-Object { $ev[$_].loai -eq 'chep' })
+        $do.Count -eq 4 -and $chep.Count -eq 3 -and ($do | Measure-Object -Minimum).Minimum -gt ($chep | Measure-Object -Maximum).Maximum
+    }
+    Ca 'dk_chay_doi_so_tac_vu_day_du' {
+        $h = $kSach.hanh_dong
+        $h.Count -eq 2 -and -not ($h | Where-Object { $_.Execute -ne (Join-Path (Split-Path $kSach.cai_dat) 'PowerShell\7\pwsh.exe') }) -and
+            @(0, 1 | Where-Object {
+                $a = $h[$_].Argument; $pv = @('HeThong', 'NguoiDung')[$_]
+                @("-PhamVi `"$pv`"", '-MayDich "MAY-GIA"', '-NlmVenv "D:\nlm venv\\"', '-VenvKho "D:\repo venv\\\\"', '-HomeCommander "D:\profile rieng"',
+                  '-TaiKhoanNguoiDung "tlcommander"', '-TacVuCommander "CMD-RIENG"', '-ThuMucCongCu "', '-File "') | Where-Object { -not $a.Contains($_) }
+            }).Count -eq 0 -and $kSach.tac_vu[0].ea -eq 'Stop' -and $kSach.tac_vu[0].chu.UserId -eq 'NT AUTHORITY\SYSTEM' -and $kSach.tac_vu[0].cai_dat.swa
+    }
+    Ca 'dk_chay_tu_choi_to_tien_cai_dat_la_lien_ket' {
+        $k = Invoke-DangKyGia 'pf-lien-ket'
+        $k.loi -match 'reparse point' -and $k.tac_vu.Count -eq 0 -and @($k.su_kien | Where-Object loai -in 'icacls', 'chep').Count -eq 0
+    }
+    Ca 'dk_chay_tu_choi_cai_dat_la_lien_ket' {
+        $k = Invoke-DangKyGia 'cai-dat-lien-ket'
+        $k.loi -match 'reparse point' -and $k.tac_vu.Count -eq 0 -and @($k.su_kien | Where-Object loai -in 'icacls', 'chep').Count -eq 0
+    }
+    Ca 'dk_chay_tu_choi_acl_sai' { $k = Invoke-DangKyGia 'acl-sai'; $k.loi -like 'ACL *' -and $k.tac_vu.Count -eq 0 }
+    Ca 'dk_chay_tu_choi_bam_lech' { $k = Invoke-DangKyGia 'bam-lech'; $k.loi -match 'lệch băm nguồn' -and $k.tac_vu.Count -eq 0 }
+} finally {
+    foreach ($kv in $cuCauHinh.GetEnumerator()) { Set-Variable -Name $kv.Key -Value $kv.Value -Scope Script }
+    $env:ProgramFiles = $pfCu; $env:COMPUTERNAME = $cuMay
 }
 
 $dat = @($Ca.Values | Where-Object { $_ }).Count

@@ -48,19 +48,15 @@ Remove-Item -Recurse -Force $d
 `pwsh -NoProfile -File ops/vm/cap-nhat-cong-cu_test.ps1` (cần `python` có PyYAML, hoặc đặt
 `$env:TL_TEST_PYTHON`). Không mạng, không cài gì. Chưa nối vào CI — xem mô tả PR.
 
-## Giao `C:\Tools` cho `tlcommander` (bước TAY, một lần cho máy mới)
+## Giao `C:\Tools` cho `tlcommander` — KHÔNG có công thức tự động hay bước tay trong kho
 
-Tầng `NguoiDung` chỉ nâng được gói có sẵn (codex, pip…) khi `tlcommander` sở hữu `C:\Tools\{npm,Python312,bin}`.
-Script KHÔNG tự làm việc này: hai lượt cross-review PR #1065 cho thấy ACL đệ quy theo tên trên cây mà `tlcommander` kiểm
-soát luôn có khe tráo (junction ở con, ở tổ tiên, hoặc tráo giữa hai lệnh), và đích bị trao quyền có thể là BẤT KỲ thư mục
-hệ thống nào. Trên `tra-luat-win` việc này đã làm xong 31-10-2026. Máy mới: admin chạy MỘT lần, LÚC `tlcommander` chưa
-có quyền ghi gì trong các thư mục ấy (ngay sau khi cài, trước khi bật Commander), và tự kiểm không có liên kết:
+Tầng `NguoiDung` chỉ nâng được gói có sẵn (codex, pip…) khi `tlcommander` sở hữu `C:\Tools\{npm,Python312,bin}`;
+thiếu quyền thì công cụ ấy báo `loi` (EPERM) trong nhật ký, các công cụ khác vẫn chạy.
 
-```powershell
-foreach ($d in 'C:\Tools\npm','C:\Tools\Python312','C:\Tools\bin') {
-    if (Get-ChildItem $d -Recurse -Force -Attributes ReparsePoint) { throw "co lien ket trong $d" }
-    icacls $d /setowner "$env:COMPUTERNAME\tlcommander" /T /C /L /Q
-    icacls $d /grant "$env:COMPUTERNAME\tlcommander:(OI)(CI)M" /T /C /L /Q
-}
-```
+Kho KHÔNG cung cấp cách giao quyền ấy, kể cả dạng lệnh tay. Ba lượt cross-review PR #1065 (P0 `giao-acl-theo-junction`)
+cho thấy mọi ACL đệ quy THEO TÊN trên cây mà một tài khoản thường kiểm soát (hoặc có thể tráo tổ tiên của nó) đều có khe:
+junction ở con, ở tổ tiên, hoặc tráo giữa hai lệnh — và đích bị trao quyền có thể là BẤT KỲ thư mục hệ thống nào. Kiểm
+tra trước khi chạy không đóng được khe giữa lúc kiểm và lúc ghi.
 
+Trên `tra-luat-win`, việc giao quyền đã làm MỘT lần ngày 31-10-2026 (trước khi có kết luận trên). Máy mới: chấp nhận giới
+hạn trên, hoặc dựng `C:\Tools` sao cho `tlcommander` TỰ TẠO các thư mục ấy (người tạo là chủ) thay vì giao quyền lại.

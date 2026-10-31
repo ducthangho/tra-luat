@@ -1,0 +1,11 @@
+ADDED_ROWS 8 UNIQUE_ROWS 8
+ROUND 1 TOC_ROWS 1 CAVEAT_ROWS 3 CHECKS {'verdict': True, 'assurance': True, 'counts': True, 'run_id': True, 'head': True, 'bytes': True, 'model': True, 'receipt_link': True}
+CAVEAT CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY rows 1 text_equal True
+CAVEAT SCRIPT-DO-DOC-DUONG-DAN-SANDBOX rows 1 text_equal True
+CAVEAT TEP-LON-KHONG-VAO-KHO rows 1 text_equal True
+ALL_LINKS_EXIST True
+ROUND 2 TOC_ROWS 1 CAVEAT_ROWS 3 CHECKS {'verdict': True, 'assurance': True, 'counts': True, 'run_id': True, 'head': True, 'bytes': True, 'model': True, 'receipt_link': True}
+CAVEAT CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY rows 1 text_equal True
+CAVEAT SCRIPT-DO-DOC-DUONG-DAN-SANDBOX rows 1 text_equal True
+CAVEAT TEP-LON-KHONG-VAO-KHO rows 1 text_equal True
+ALL_LINKS_EXIST True

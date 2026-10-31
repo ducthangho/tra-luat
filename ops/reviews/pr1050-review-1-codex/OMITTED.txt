@@ -1,0 +1,2 @@
+diff.patch	sha256 0aba68a37e02f9532406b5ae9397271a9614494bcfd84a296a343b35ced43d63	bytes 520915	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO); tai lap: git diff b29da0b c24875d
+review-copy/ cay-kho/ mirror.git/	khong chep: ban sao kho/mirror cua sandbox reviewer (hang tram MB), tai lap bang clone tai reviewed_sha

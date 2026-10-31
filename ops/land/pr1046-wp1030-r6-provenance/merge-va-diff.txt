@@ -1,0 +1,24 @@
+# do 30-10-2026 17:17Z, phien dieu phoi session_015GtxrbRnRANivtXrA1edLB, git 2.43.0
+merge 8cdb15a786304bab084b43c8b30c127ae87e2594 tree 2edf022a7df6168e0de20eb95271209f73e7aab0
+cha: 0edfc4af2fa4890833c8de6758f408753bbcd2f2 79017438cccaf77cd41e8126633943075b7b9200
+head 79017438cccaf77cd41e8126633943075b7b9200 tree 721e379cec1a561b64765043bd6959ff436cbfa1
+merge-base(cha1, head) = 059a4a5a080a98270973ef9ce23a38dad5aa2f38
+diff merge^1..merge (ten tep):
+RELEASE_MANIFEST.json
+changelog.d/wp-1030.md
+scripts/pkg_secret_scan.py
+scripts/test_fragments/wp1030_pkg_secret_scan_duoi_la.py
+scripts/tl_selftest.py
+scripts/tl_test_fragments_bundled.py
+numstat merge^1..merge:
+13	8	RELEASE_MANIFEST.json
+18	0	changelog.d/wp-1030.md
+3	2	scripts/pkg_secret_scan.py
+231	0	scripts/test_fragments/wp1030_pkg_secret_scan_duoi_la.py
+7	4	scripts/tl_selftest.py
+1	0	scripts/tl_test_fragments_bundled.py
+sha256 diff merge^1..merge (bo dong index): 95b03d0f3a5660a2e637c620dbc5dedd03cc8846f6d38a11ae4b3147ac5a7172
+sha256 diff merge-base..head tren write set (bo dong index): 95b03d0f3a5660a2e637c620dbc5dedd03cc8846f6d38a11ae4b3147ac5a7172
+write set tren master merge == head (rong = giong):
+spec r6 tren merge: 17d76055b288836057a18c234c4893bc0fced836d07bd8d3f43495a97f7fa6be blob 83268db932a064a5f8655dc77548421ffdb0ed38
+ci.yml blob tai head: 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc tai merge: 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc

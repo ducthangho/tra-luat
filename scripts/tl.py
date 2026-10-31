@@ -1313,6 +1313,7 @@ _CREDS_LAZY_CMDS = frozenset({
     "state-put",      # nhánh `--dry-run` return TRƯỚC load_creds (cục bộ thuần) + cùng `CAN_WEBAPP_LIVE` chết như trên
     # WP1009 (finding P2 PR #1004): máy mới chưa có config webapp vẫn phải sinh khoá / ghi credential agent
     "secrets-keygen", "agent-creds-set",   # keygen: không cần creds nào; agent-creds-set: chỉ TL_MASTER_KEY + upload gws
+    "agent-creds-exec",   # WP1038: chỉ TL_MASTER_KEY + tải công khai tl_agent_creds.enc
 })
 
 

@@ -1,0 +1,18 @@
+cay-kho git rev-parse HEAD HEAD^{tree} rc 0 output c24875d00e93e6a98e0a0abd0837e0cbcad65d4d
+9382f7512f3adf569f1f82c4d597c66fa1b463d7
+cay-kho git status --short --untracked-files=all --ignored=matching rc 0 output (empty)
+cay-kho git diff --exit-code rc 0 output (empty)
+cay-kho git diff --cached --exit-code rc 0 output (empty)
+cay-kho git diff --check rc 0 output (empty)
+review-copy git rev-parse HEAD HEAD^{tree} rc 0 output c24875d00e93e6a98e0a0abd0837e0cbcad65d4d
+9382f7512f3adf569f1f82c4d597c66fa1b463d7
+review-copy git status --short --untracked-files=all --ignored=matching rc 0 output (empty)
+review-copy git diff --exit-code rc 0 output (empty)
+review-copy git diff --cached --exit-code rc 0 output (empty)
+review-copy git diff --check rc 0 output (empty)
+ALL_CHANGED_PATHS_EQUAL_HEAD_BLOB 32 / 32
+NUMSTAT 32 files 11630 insertions 0 deletions
+core.abbrev 7
+origin/master b29da0bfe3bfb7a7be69136a1c5c40f82c088a93
+ANCESTRY e788a5d c24875d00e93e6a98e0a0abd0837e0cbcad65d4d rc 0
+ANCESTRY c24875d00e93e6a98e0a0abd0837e0cbcad65d4d b29da0bfe3bfb7a7be69136a1c5c40f82c088a93 rc 1

@@ -1,5 +1,7 @@
+7c09f8f7a62684079050627d4baa5a2e44cbec7cf98a292019c21f32a9882547  ./do-lai-nguon-20261031/graphql-output-run-41161511121.json
 1449893d7dbba0be8c656a8fae554e7161d8a6be6e72a108ad46205fc1cf98fc  ./do-lai-nguon-20261031/kiem-gate-pre-6f23a4e.txt
 345df064b04c12c461a6d0580545c3366c253277bde6d06fe2e1c6671c8922a2  ./do-lai-nguon-20261031/kiemgate.py
+ddc79bb730ae0d5479a67ed4075e47a79693fda6737cd0b9d34f14f70f4a57fa  ./do-lai-nguon-20261031/workflow-definition-b653574.txt
 485c2503ac56993a6bbbdb2f8c966fafdb2993b50699f5981aaed42fc23b43b8  ./merge-va-diff.txt
 e5df350423c1b40e4c8b5639a1cd01a8f21b234cf16a6bc3c482e914a020dbfc  ./readback-check-runs-6f23a4e-all.json
 f5ffe95b0dc496f6b3a04c00cd40ed3220d37bed2da2a141f4a8c550864d6003  ./readback-check-runs-b653574-all.json

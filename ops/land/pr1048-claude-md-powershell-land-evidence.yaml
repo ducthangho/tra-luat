@@ -77,9 +77,14 @@ trang_thai_packet:
     - id: GATE-HAU-MERGE-B653574-RUN
       trang_thai: cho_do
       mo_ta: 'Run ci.yml push master 41161511121 tren b653574 dang chay luc soan; xem post_merge_checks.'
-    - id: MOC-10-2-2-CHECKOUT-WORKFLOW-GATE-OUTPUT
-      trang_thai: not_measured
-      mo_ta: 'Moc Checkout, Workflow definition (GraphQL 403 trong phien web), Gate output chua do.'
+    - id: MOC-10-2-2-WORKFLOW-DEFINITION
+      trang_thai: da_dong
+      mo_ta: >-
+        measured — do-lai-nguon-20261031/workflow-definition-b653574.txt: GraphQL WorkflowRun.file cua run 41161511121 do PHIEN
+        chay tren may chu kho qua Desktop Commander (gh tai khoan ducthangho); ci.yml @ b653574, blob 82d9f239… khop REST va git.
+    - id: MOC-10-2-2-CHECKOUT-GATE-OUTPUT
+      trang_thai: cho_do
+      mo_ta: 'Moc Checkout (log job) va Gate output (artifact) do sau khi run 41161511121 xong.'
     - id: REVIEW-EXACT-SHA
       trang_thai: da_dong
       mo_ta: 'measured — luot 3 approve 0 P0–P3 tren DUNG 6f23a4e (ops/reviews/pr1048-review-3-codex-verdict.receipt.yaml). Chay SAU merge.'
@@ -190,5 +195,5 @@ assurance_81:
 
 khong_do_duoc:
   - 'Merge bam tay hay qua phien: phien bam (thuat_lai); GitHub chi ghi merged_by ducthangho.'
-  - 'Moc §10.2.2 Workflow definition tren b653574: not_measured (GraphQL 403 trong phien web — CLAUDE.md).'
+  - 'Ma thoat cua lenh gh api graphql tren laptop: KHONG_DO_DUOC chinh xac (cmd mo rong %errorlevel% luc parse); output JSON hop le khong co errors.'
   - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'

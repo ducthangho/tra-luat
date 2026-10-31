@@ -9401,8 +9401,8 @@ def r1077_probe_doctor_khong_spawn_tran():
 
 @ca
 def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
-    """F4 (Codex lượt 2–4): bản đầu PATH không shebang phải thắng bản sau có shebang — PATH tuyệt đối,
-    PATH rỗng (=cwd) và `link/..` (kernel giải symlink trước `..`)."""
+    """F4 (Codex lượt 2–5): bản đầu PATH không shebang thắng bản sau có shebang (PATH tuyệt đối, rỗng, `link/..`);
+    bản đầu thiếu interpreter (ENOENT) thì sang bản sau."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as d:
@@ -9415,17 +9415,9 @@ def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
             path = dau + os.pathsep + str(d / "later")
             kq = _wp1077_llm({"PATH": path}, cwd=d / "first")
             bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH={path!r}: do nham llm phia sau: {kq}")
-
-
-@ca
-def r1077_PATH_tuong_doi_giu_dollar_zero():
-    """F4 lượt 5: PATH tương đối giữ `$0` mà bash/execvp truyền cho wrapper POSIX (không ghép cwd)."""
-    if LA_WINDOWS:
-        return "BO QUA shell POSIX"
-    with San() as d:
-        _wp1077_llm_tep(d / "bin", "FIRST", dau='case "$0" in bin/llm) ;; *) exit 42;; esac\n')
-        kq = _wp1077_llm({"PATH": "bin"}, cwd=d)
-        bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"$0 tuong doi bi doi: {kq}")
+        _wp1077_tep(d / "thieu", "llm", "#!/khong-ton-tai-wp1077/interpreter\nexit 1\n")   # lượt 5: ENOENT ⇒ sang bản sau
+        kq = _wp1077_llm({"PATH": str(d / "thieu") + os.pathsep + str(d / "later")})
+        bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"dung o ban thieu interpreter: {kq}")
 
 
 @ca
@@ -9450,15 +9442,25 @@ def r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc():
 
 
 @ca
-def r1077_PATH_khong_chan_ban_sau_khi_interpreter_dau_bi_thieu():
-    """F4 lượt 5: bản đầu thiếu interpreter (ENOENT khi exec) ⇒ sang bản sau như execvp, không dừng."""
-    if LA_WINDOWS:
-        return "BO QUA shell POSIX"
+def r1077_PATH_hop_dong_glibc():
+    """F4 lượt 5–6: `$0` đúng chuỗi glibc (PATH='' ⇒ `rg`, `bin` ⇒ `bin/llm`, `bin/` ⇒ `bin//llm`) · ETXTBSY DỪNG."""
+    if platform.system() != "Linux":
+        return "BO QUA can Linux (ETXTBSY, glibc)"
+    m = _tai_launcher_thu()
     with San() as d:
-        _wp1077_tep(d / "first", "llm", "#!/khong-ton-tai-wp1077/interpreter\nexit 1\n")
+        _wp1077_tep(d, "rg", '[ "$0" = rg ] || exit 42\necho ripgrep-FIRST\n')
+        with contextlib.chdir(d):
+            ver, auth = m._phien_ban("rg", env={"PATH": ""}), m._xac_thuc_kem_dau_ra("rg", ["s"], env={"PATH": ""})
+        bang(ver[0] is True and auth[0] is True and "FIRST" in ver[1], f"PATH='' doi $0: {ver} {auth}")
+        _wp1077_llm_tep(d / "bin", "FIRST", dau='[ "$0" = "$MONG" ] || exit 42\n')
+        for path, mong in (("bin", "bin/llm"), ("bin/", "bin//llm")):
+            kq = _wp1077_llm({"PATH": path, "MONG": mong}, cwd=d)
+            bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH={path!r} lech $0 glibc: {kq}")
+        _wp1077_llm_tep(d / "first", "FIRST", shebang=True)
         _wp1077_llm_tep(d / "later", "LATER", shebang=True)
-        kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
-        bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"dung o ban thieu interpreter: {kq}")
+        with (d / "first" / "llm").open("ab"):
+            kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
+        bang(kq[0] == "OSError" and "errno=26 " in kq[1], f"ETXTBSY dau PATH bi nuot, do nham ban sau: {kq}")
 
 
 @ca
@@ -12399,16 +12401,20 @@ DOT_BIEN = [
     ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
      ["r1077_probe_doctor_khong_spawn_tran"]),
     # Codex lượt 2–5 F4: tự duyệt PATH như execvp (bỏ ⇒ subprocess chạy bản sau / sh TÊN không tra PATH).
-    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [os.path.join(d or os.curdir, lenh[0]) for d in os.get_exec_path(kw.get("env"))]',
-      '        ung_vien = [lenh[0]]'),
+    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(d.encode()) < tran]',
+      '        ung_vien = [ten]'),
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
-    ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan", ('os.path.join(d or os.curdir, lenh[0]) for d', 'os.path.join(d, lenh[0]) for d'),
+    ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan", ('            return subprocess.run(lenh, executable=tep if os.sep in tep else os.curdir + os.sep + tep, **kw)',
+      '            return subprocess.run(lenh, executable=tep, **kw)'),
      ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
-    ("wp1077_abspath_doi_nghia_symlink", ('os.path.join(d or os.curdir, lenh[0]) for d', 'os.path.abspath(os.path.join(d or os.curdir, lenh[0])) for d'),
-     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau", "r1077_PATH_tuong_doi_giu_dollar_zero",
-      "r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc"]),
-    ("wp1077_dung_o_loi_tim_kiem", ('            if e.errno == errno.ENOEXEC or os.sep in lenh[0]:', '            if True:'),
-     ["r1077_PATH_khong_chan_ban_sau_khi_interpreter_dau_bi_thieu"]),
+    ("wp1077_abspath_doi_nghia_symlink", ('[f"{d}/{ten}" if d else ten for d', '[os.path.abspath(f"{d}/{ten}" if d else ten) for d'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau", "r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc",
+      "r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_tiep_moi_loi_exec", ('            if os.sep in ten or e.errno not in tiep:', '            if os.sep in ten:'),
+     ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_mat_gach_cuoi_PATH", ('[f"{d}/{ten}" if d else ten for d', '[os.path.join(d, ten) for d'), ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_dung_o_loi_tim_kiem", ('            if os.sep in ten or e.errno not in tiep:', '            if True:'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     ("wp802_launcher_winget_thanh_choco", ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
      ["r802_bang_cai_rg_khop_cong_cu_yaml"]),

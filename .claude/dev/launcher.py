@@ -2919,44 +2919,40 @@ def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = Tr
 
 
 def _chay_probe_nhu_shell(lenh: list[str], **kw):
-    """`subprocess.run(lenh, **kw)` nhưng CHỌN TỆP như `execvp` glibc, kể cả fallback ENOEXEC → `/bin/sh`.
+    """`subprocess.run(lenh, **kw)` nhưng CHỌN TỆP theo `execvpe` glibc, kể cả fallback ENOEXEC → `/bin/sh`.
 
-    wp1077 (review độc lập #823 F1, tái hiện trên master `2bcd8f3`): tệp thực thi KHÔNG shebang làm kernel
-    trả `ENOEXEC`; `execvp` glibc chạy lại tệp bằng `/bin/sh`, còn `subprocess` ném `OSError` (tên có `/`)
-    hoặc THỬ TIẾP bản sau trên PATH (tên trần) — `doctor` gắn BI_CHE oan hoặc đo NHẦM công cụ. Hợp đồng là
-    `/bin/sh` của glibc (spec M1); bash chạy lại bằng chính bash nên wrapper dùng cú pháp bash vẫn có thể khác.
-
-    Tên trần: duyệt `os.get_exec_path(env)` THEO THỨ TỰ, mỗi ứng viên là `<thư mục>/<tên>` giữ nguyên dạng
-    (tương đối, `..`, symlink — KHÔNG ghép cwd, KHÔNG chuẩn hoá: Codex lượt 3–5), phần tử rỗng là `./<tên>`;
-    `executable=` giữ `argv[0]` như phía gọi. Lỗi tìm kiếm (ENOENT, ENOTDIR, EACCES, interpreter vắng…) ⇒
-    sang ứng viên sau như `execvp`; ENOEXEC ⇒ DỪNG, `/bin/sh` chạy CHÍNH ứng viên ấy. Hết ứng viên ⇒ ném
-    lỗi đầu tiên khác ENOENT/ENOTDIR, nếu không có thì lỗi cuối (quy tắc của CPython). Tên có `/`: chỉ
-    ENOEXEC được chạy lại. Windows giữ nguyên. Kết quả lượt chạy lại phân loại Y NHƯ lượt thường.
-
-    PHẠM VI (Codex lượt 2 F1, chủ kho thu hẹp 31-10-2026): các probe CLI trong `CONG_CU`/`KHA_NANG` đi qua
-    hàm này (`r1077_probe_doctor_khong_spawn_tran` khoá). CHƯA phủ `_git` (dùng chung với `run`) và
-    `_do_codex_song` (spawn ở `codex_cred.py`) — nợ #1083, không phải "mọi probe".
+    wp1077 (review độc lập #823 F1): tệp KHÔNG shebang làm kernel trả ENOEXEC; glibc chạy lại bằng `/bin/sh`,
+    còn `subprocess` ném OSError (tên có `/`) hoặc THỬ TIẾP bản sau trên PATH — `doctor` gắn BI_CHE oan hoặc đo
+    NHẦM công cụ. Hợp đồng là glibc (spec M1); bash chạy lại bằng chính bash nên có thể khác với wrapper bash.
+    Tên trần (Codex lượt 2–6): ứng viên là chuỗi glibc `<phần tử>/<tên>` (giữ `/` cuối, tương đối, `..`,
+    symlink; phần tử rỗng ⇒ `<tên>`; phần tử dài hơn PATH bị bỏ), theo thứ tự; execve qua `./<tên>` khi chuỗi
+    không có `/`. Chỉ EACCES/ENOENT/ESTALE/ENOTDIR/ENODEV/ETIMEDOUT sang ứng viên sau; ENOEXEC ⇒ `/bin/sh`
+    chạy CHÍNH chuỗi ấy; lỗi khác (ETXTBSY, ELOOP…) ném ngay; hết ⇒ EACCES nếu từng gặp, không thì lỗi cuối.
+    GIỚI HẠN: shebang qua phần tử rỗng thấy `$0`=`./<tên>`. Windows giữ nguyên. PHẠM VI (chủ kho thu hẹp
+    31-10-2026): probe CLI của `CONG_CU`/`KHA_NANG`; CHƯA phủ `_git`, `_do_codex_song` — nợ #1083.
     """
     import errno
     if os.name == "nt":
         return subprocess.run(lenh, **kw)
-    if os.sep in lenh[0]:
-        ung_vien = [lenh[0]]
+    ten = lenh[0]
+    if os.sep in ten:
+        ung_vien = [ten]
     else:
-        ung_vien = [os.path.join(d or os.curdir, lenh[0]) for d in os.get_exec_path(kw.get("env"))]
-    loi_luu = loi_cuoi = None
+        duong = (kw["env"] if kw.get("env") is not None else os.environ).get("PATH", os.defpath)
+        tran = min(len(duong.encode()), 4095) + 1
+        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(d.encode()) < tran]
+    tiep = {errno.EACCES, errno.ENOENT, errno.ESTALE, errno.ENOTDIR, errno.ENODEV, errno.ETIMEDOUT}
+    eacces = loi = None
     for tep in ung_vien:
         try:
-            return subprocess.run(lenh, executable=tep, **kw)
+            return subprocess.run(lenh, executable=tep if os.sep in tep else os.curdir + os.sep + tep, **kw)
         except OSError as e:
             if e.errno == errno.ENOEXEC and os.path.isfile("/bin/sh"):
                 return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)
-            if e.errno == errno.ENOEXEC or os.sep in lenh[0]:
+            if os.sep in ten or e.errno not in tiep:
                 raise
-            loi_cuoi = e
-            if loi_luu is None and e.errno not in (errno.ENOENT, errno.ENOTDIR):
-                loi_luu = e
-    raise loi_luu or loi_cuoi or FileNotFoundError(errno.ENOENT, "khong tim thay", lenh[0])
+            loi, eacces = e, (e if e.errno == errno.EACCES else eacces)
+    raise eacces or loi or FileNotFoundError(errno.ENOENT, "khong tim thay", ten)
 
 def _chay_probe_llm(lenh: list[str], *, env=None, timeout: float = 30.0) -> subprocess.CompletedProcess:
     """Y hệt `_chay_van_ban_an_toan` (utf-8/replace, stdin=DEVNULL) nhưng qua `_chay_probe_nhu_shell`.

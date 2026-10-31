@@ -109,3 +109,5 @@ nang_tran_lan_2:
   can_cu: 'chu kho chon "+1 loi goi, cho vuot tran dong (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026, AskUserQuestion); ghi ho. Bam byte KHONG DO DUOC.'
   dieu_kien_dung: 'luot 5 van con loi chan => dung han, khong nang tiep.'
 push_policy: 'day nhanh agent/wp1077-g1-claude khi A1-A4 dat; mo PR draft.'
+da_bi_thay_the: wp1077-r1-g4-claude
+da_bi_thay_the_ly_do: 'Chu kho nang tran lan 3 (codex 5->10) trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026); g4 thay the. Lease g3 nay KHONG con hieu luc; giu tep lam hien vat.'

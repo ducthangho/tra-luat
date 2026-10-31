@@ -554,6 +554,8 @@ def build_parser() -> argparse.ArgumentParser:
         return out
     for _sp in _walk_subparsers(sub):
         _opts = {o for _act in _sp._actions for o in _act.option_strings}
+        if any(isinstance(_a, argparse._SubParsersAction) for _a in _sp._actions):
+            _sp.allow_abbrev = False   # WP1038 review F09: `hygiene --prof scan plan` = lá `plan`, guard đọc ra `scan`
         if "--profile" not in _opts:
             _sp.add_argument("--profile", default=argparse.SUPPRESS, help="corpus profile (nhận cả trước lẫn sau subcommand)")
         if "--config" not in _opts:

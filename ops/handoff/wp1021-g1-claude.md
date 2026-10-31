@@ -148,6 +148,9 @@ script chạy nên vẫn token cũ, `symlink_to` vẫn `WinError 1314`; lần 2,
 - Kết luận đo được: mọi ca và mọi đột biến đều đã có lần ĐẠT trên `356a27e` ở VM có quyền symlink, nhưng **chưa có MỘT lượt toàn suite 98/98
   không chồng** — ghép hai phép đo, không phải một N/N. Muốn N/N một lượt thì chạy lại toàn suite (~80 phút trên VM) khi máy rảnh.
 - Sổ đo `C:\tl-win\do-luong.csv` thêm dòng 10:02:58Z; khoá `C:\tl-win\KHOA.txt` xoá (0 byte).
+- **Quyết định chủ kho (31-10, sau 10:03Z):** (a) KHÔNG cần lượt toàn suite 98/98 không chồng — chấp nhận ghép hai phép đo trên làm bằng chứng C7;
+  (b) GIỮ LÂU DÀI quyền `SeCreateSymbolicLinkPrivilege` của `tra-luat-win\tlcommander` trên VM. Phiên sau dùng VM: ca cần symlink (`c91` và
+  mọi ca tạo symlink) nay đo được; đừng gỡ quyền này, và đừng diễn giải `c91` đỏ trên VM thành "đỏ sẵn do môi trường" nữa.
 
 **C7 Windows local trên `356a27e` — KẾT QUẢ (tra-luat-win): `97/98 ca · 145/153 đột biến thường CÓ RĂNG · 2/2 TỰ KIỂM`, `TỔNG: ĐỎ`.
 Toàn bộ chỗ đỏ là MÔI TRƯỜNG VM, ĐỎ SẴN trên base, KHÔNG do diff #1021** (ADR-0057 §2: lỗi có sẵn trên base nêu tên kèm SHA đo nền):

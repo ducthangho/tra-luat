@@ -144,6 +144,13 @@ post_merge_checks:
       run_attempt 1, status completed, conclusion success (05:36:00Z -> 07:03:35Z). readback-jobs-41173244891.json
       (filter=all): 23 job, 23 success, ca 23 nhan ubuntu-latest, khong job nao runner_id 0. Windows KHONG do o lan chay
       nay. Day chi la moc RUN; Checkout va Gate output van not_measured (MOC-CHECKOUT-VA-GATE-OUTPUT).
+  - ten: full gate 8 buoc tren VM Windows tra-luat-win, merge 3dfb973 (theo yeu cau chu kho "do tren Windows")
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — thuatlai-gate-windows-3dfb973.json: clone moi tu GitHub, checkout 3dfb973 (tree ddb5ae9), --require-clean,
+      gate_lifecycle.py run --kind heavy; 8/8 rc0 + marker duong (selftest 1774/1774, gen_instructions 44/44, 6 lenh
+      "ok": true). Tep evidence goc nam tren VM, khong trong kho; ban trong kho la chep tay kem sha256 bundle goc. Khong
+      thay the moc Checkout/Gate output cua run CI 41173244891 — do la run khac, may khac.
 
 van_hanh_tren_vm:
   trang_thai: thuat_lai

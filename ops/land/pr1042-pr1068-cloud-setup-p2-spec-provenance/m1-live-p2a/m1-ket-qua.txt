@@ -1,0 +1,27 @@
+# M1 LIVE packet #1038 (CLOUD-SETUP-P2A-EXEC r1), tieu chi M1 cua ops/specs/cloud-setup-p2a-exec-r1.md.
+# Do tren may chu kho ASUS-LAPTOP boi phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 qua Remote Desktop Commander, theo chi thi
+# chu kho "Đồng ý cả ba, làm đi" (issuecomment-6541198303 tren #1008). Cach ly theo ADR-0057 §5: clone rieng
+# D:\tl-win\session_015GtxraXfMD1t2FJLzzGDr4\tra-luat, khong dung kho lam viec cua chu kho.
+# Script: C:\Users\admin\tl-work\m1-p2a.ps1, sha256 tren laptop adc1c67dc1dfde4b66f1a459506531165fab8bd0b30f3ebd3ba096d2fc61dfdf
+# (ban chep: m1-p2a.ps1 canh tep nay). Khong in gia tri khoa nao; chi in ket qua so bam va rc.
+# Luot 1 (08:31:14Z) dung o buoc ghi khoa (Set-Content bao loi tham so -Encoding), CHUA chay phep do; luot 2 doi sang
+# [IO.File]::WriteAllText va bo dong ghi so tiep nhan khoa (da ghi o luot 1).
+# Output luot 2, chep nguyen van (dau "·" hien thi loi ma o console duoc khoi phuc):
+== kiem tai (ADR-0057 §4) 2026-10-31T08:33:06Z
+python pid=19112 cmd="C:\Users\admin\AppData\Local\uv\cache\archive-v0\LHHyG1it6sy12yA3\Scripts\python.exe" "C:\Users\admin\AppData\Local\uv\cache\archive-v0\LHHyG1it6sy12yA3\Scripts\browser-use.exe" --cli-mcp
+python pid=14808 cmd="C:\Users\admin\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\python.exe" "C:\Users\admin\AppData\Local\uv\cache\archive-v0\LHHyG1it6sy12yA3\Scripts\browser-use.exe" --cli-mcp
+python pid=10016 cmd="D:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\..\platform\bundledpython\python.exe"  -S "D:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\..\lib\gcloud.py" compute start-iap-tunnel tra-luat-win 3389 --local-host-port=localhost:13389 --project=ubqlv-202307 --zone=asia-southeast1-a 
+khoa cu: session_015GtxrbRjCRMMLRWHoUuZYj	2026-10-31T03:44:33Z	2026-10-31T05:44:33Z	wp1021 C7 bien_nhan_v2_test 356a27e
+khoa moi: session_015GtxraXfMD1t2FJLzzGDr4	2026-10-31T08:33:06Z	2026-10-31T10:33:06Z	wp1038 M1 LIVE agent-creds-exec --gemini
+== kho do: 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+GEMINI_API_KEY trong tien trinh do: False · CLAUDE_CODE_OAUTH_TOKEN: False · TL_MASTER_KEY dai: 43
+== (i) agent-creds-exec --gemini -- <con>
+   | [agent-creds-exec] đặt GEMINI_API_KEY cho tiến trình con.
+rc=0 · bam_con == kyvong: True · bam_con == rong: False · kyvong == rong: False
+== (ii) doi chung: <con> truc tiep
+rc=0 · bam_con == rong: True · bam_con == kyvong: False
+== M1 DAT · khoa da xoa · 2026-10-31T08:33:47Z
+# Hai dong cuoi D:\tl-win\do-luong.csv sau luot do:
+2026-10-31T08:31:14Z,session_015GtxraXfMD1t2FJLzzGDr4,1038-M1,,tiep-nhan-khoa,,,,,,,,"may=ASUS-LAPTOP; tiep nhan khoa het hieu luc (a) qua han: session_015GtxrbRjCRMMLRWHoUuZYj | 2026-10-31T03:44:33Z | 2026-10-31T05:44:33Z | wp1021 C7 bien_nhan_v2_test 356a27e"
+2026-10-31T08:33:47Z,session_015GtxraXfMD1t2FJLzzGDr4,1038-M1,97120d3c76ebb7c3eda4b585ff46f1c51e30c91b,M1-agent-creds-exec,1,1,0,,phien-dieu-phoi,,,"may=ASUS-LAPTOP; (i) rc=0 khop=True; (ii) rc=0 rong=True"
+# KHOA.txt sau luot do: 0 byte.

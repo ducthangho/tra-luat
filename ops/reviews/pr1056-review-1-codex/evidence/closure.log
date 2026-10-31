@@ -1,0 +1,18 @@
+EXACT_OLD_NEW_LAND_MATCH_CURRENT_SNAPSHOTS True
+LEASE_SNAPSHOT_EQUAL_GIT_OBJECT True
+CLASSIFY 2026-10-30T17:37:00Z CÒN_HẠN
+CLASSIFY 2026-10-30T17:53:00Z HẾT_HẠN
+CLASSIFY 2026-10-30T18:07:34Z HẾT_HẠN
+POST_EXPIRY_LOG_HASH cbc0c4a31a8df98e835ea232a96b4339cf763b3c7d302a087f7de4c23c1ba765 IN_MANIFEST True NEW_SOURCE_BLOCK True
+NEW_LOG_MARKERS ['# do 2026-10-30T18:07:34Z trong phien session_015GtxrYjGJtmjF3eT1nCSG9 (sau han moi 17:53Z cua wp1037-r1-g1-claude)', 'HẾT_HẠN\twp1037-r1-g1-claude\trefs/heads/ops/wp1037-r1-g1-lease:ops/leases/wp1037-r1-g1-claude.yaml', 'NGƯỜI_GIỮ 1: wp1021-r2-g1-claude', 'rc=11']
+LEASE_OLD_CLAIM DA NHA bang RUT HAN (khong bia mo — lease con han, khong co lease
+LEASE_NEW_HISTORICAL_CLAIM DA RUT HAN; CHUA NHA tai moc ghi so 17:37Z (khong bia mo — lease con han, khong co lease ke nhiem): 
+WINDOWS_NEW_NAME ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi
+WINDOWS_ATTEMPT 1 total 16 array 16 conclusions {'success': 13, 'failure': 2, 'skipped': 1} windows_jobs 14
+WINDOWS_ATTEMPT 2 total 16 array 16 conclusions {'success': 15, 'skipped': 1} windows_jobs 14
+CAUSE_IS_IN_THUAT_LAI_SEGMENT True
+THREE_FILES_CHANGED 10	4	ops/land/pr1041-wp1037-land-evidence.yaml
+1	0	ops/land/pr1041-wp1037-provenance/SHA256SUMS
+28	0	ops/land/pr1041-wp1037-provenance/ai-dang-giu-sau-rut-han/luc-do.txt
+LANDED_STAYS_FALSE True
+NO_REMOTE_REF_READBACK: server 708/708 summary not independently reproducible offline; no network used.

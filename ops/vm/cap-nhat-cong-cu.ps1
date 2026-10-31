@@ -270,6 +270,15 @@ function Get-PhienBanLenh([string]$Exe, [string[]]$DoiSo, [string]$Mau) {
     if ($m.Success) { return $m.Groups[1].Value } else { return $null }
 }
 
+function Get-PhienBanGoi([string]$Py, [string]$Goi) {
+    # Phiên bản gói Python qua importlib.metadata; rc≠0 hoặc không giống số phiên bản ⇒ $null (cross-review PR #1065 lượt 6:
+    # trước đây rc của lệnh này bị bỏ qua, nên lệnh in đúng ghim rồi thoát lỗi vẫn được ghi `giu`).
+    try { $o = (& $Py -c "import importlib.metadata as m; print(m.version('$Goi'))" 2>$null | Out-String); $rc = $LASTEXITCODE } catch { return $null }
+    if ($rc -ne 0) { return $null }
+    $v = $o.Trim()
+    if ($v -match '^\d+(\.[0-9A-Za-z]+)*$') { return $v } else { return $null }
+}
+
 function Get-Release([string]$Repo, [string]$Tag = '') {
     $u = if ($Tag) { "https://api.github.com/repos/$Repo/releases/tags/$Tag" } else { "https://api.github.com/repos/$Repo/releases/latest" }
     return Invoke-RestMethod -Headers $Script:GhHeader -Uri $u -TimeoutSec 60
@@ -368,12 +377,17 @@ function Invoke-TangNguoiDung([string]$GocKho) {
     # ký (cross-review PR #1065 lượt 4, P1 `loi-native-tang-nguoi-dung`).
     foreach ($goi in 'pip', 'PyYAML', 'jsonschema') {
       try {
-        $truoc = (& $py -c "import importlib.metadata as m; print(m.version('$goi'))" 2>$null)
+        $truoc = Get-PhienBanGoi $py $goi
         $spec = if ($goi -eq 'pip') { 'pip' } else { "$goi==$($ghim.$goi)" }
-        if ($ChiKiem) { Add-KetQua $goi "$truoc" $(if ($goi -eq 'pip') { 'moi nhat' } else { $ghim.$goi }) 'kiem'; continue }
+        # ChiKiem: không đọc được phiên bản là LỖI, không phải `kiem` với ô trống (lượt 6).
+        if ($ChiKiem) {
+            if (-not $truoc) { Add-KetQua $goi '' '' 'loi' 'không đọc được phiên bản (importlib.metadata rc≠0 hoặc chưa cài)' }
+            else { Add-KetQua $goi "$truoc" $(if ($goi -eq 'pip') { 'moi nhat' } else { $ghim.$goi }) 'kiem' }
+            continue
+        }
         $o = & $py -m pip install --quiet --disable-pip-version-check --upgrade $spec 2>&1
         $rc = $LASTEXITCODE
-        $sau = (& $py -c "import importlib.metadata as m; print(m.version('$goi'))" 2>$null)
+        $sau = Get-PhienBanGoi $py $goi
         if ($rc -ne 0 -or -not $sau -or ($goi -ne 'pip' -and $sau -ne $ghim.$goi)) { Add-KetQua $goi "$truoc" "$sau" 'loi' "pip rc=$rc $($o | Select-Object -Last 1)" }
         else { Add-KetQua $goi "$truoc" "$sau" $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) }
       } catch { Add-KetQua $goi '' '' 'loi' $_.Exception.Message }
@@ -396,7 +410,10 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         $exe = Join-Path $npmPrefix $p[2]
         $truoc = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
         if (-not (Test-Path -LiteralPath $npm)) { Add-KetQua $p[0] "$truoc" '' 'loi' "không có $npm"; continue }
-        if ($ChiKiem) { Add-KetQua $p[0] "$truoc" '' 'kiem'; continue }
+        if ($ChiKiem) {
+            if (-not $truoc) { Add-KetQua $p[0] '' '' 'loi' "$exe --version không chạy được hoặc chưa cài" } else { Add-KetQua $p[0] "$truoc" '' 'kiem' }
+            continue
+        }
         try { $o = & $npm install -g --prefix $npmPrefix "$($p[1])@latest" --no-fund --no-audit 2>&1; $rc = $LASTEXITCODE }
         catch { Add-KetQua $p[0] "$truoc" '' 'loi' "không chạy được npm: $($_.Exception.Message)"; continue }
         $sau = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
@@ -416,7 +433,9 @@ function Invoke-TangNguoiDung([string]$GocKho) {
     if (-not (Test-Path -LiteralPath $nlmPy)) { Add-KetQua 'nlm' '' '' 'bo_qua' "không có venv $NlmVenv" }
     else {
         $truoc = Get-PhienBanLenh $nlm @('--version') 'nlm version\s+(\S+)'
-        if ($ChiKiem) { Add-KetQua 'nlm' "$truoc" '' 'kiem' }
+        if ($ChiKiem) {
+            if (-not $truoc) { Add-KetQua 'nlm' '' '' 'loi' "$nlm --version không chạy được hoặc chưa cài" } else { Add-KetQua 'nlm' "$truoc" '' 'kiem' }
+        }
         else {
           try {
             $o = & $nlmPy -m pip install --quiet --disable-pip-version-check --upgrade notebooklm-mcp-cli 2>&1

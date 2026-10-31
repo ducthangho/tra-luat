@@ -1,0 +1,42 @@
+--- .claude/dev/launcher_test.py
++++ .claude/dev/launcher_test.py
+@@ -8421,6 +8421,39 @@
+ def r831_cai_rg_macos_chon_ban_chay_duoc():
+     """N2/N3: NGUYÊN `rg.cai.macos`; ứng viên `$(brew --prefix)/bin`, cùng hai chiều như Linux."""
+     return _wp831_cai_rg_chon_ban_chay_duoc("macos")
++
++
++def _r831_python_ham_ke_thua(nen):
++    if LA_WINDOWS:
++        return "BO QUA shell POSIX"
++    global _wp802_bash_env
++    env_goc = _wp802_bash_env
++
++    def env_co_ham():
++        vo, env = env_goc()
++        env["BASH_FUNC_python%%"] = '() { command python "$@";\n}'
++        return vo, env
++
++    _wp802_bash_env = env_co_ham
++    try:
++        with San() as s:
++            p, gp, uv, _d = _wp831_chay_cai_rg(
++                s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True)
++            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
++                 f"{nen}: Python ham ke thua van bi PATH doi interpreter: "
++                 f"rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
++    finally:
++        _wp802_bash_env = env_goc
++
++
++@ca
++def r831_cai_rg_linux_python_ham_ke_thua():
++    return _r831_python_ham_ke_thua("linux")
++
++
++@ca
++def r831_cai_rg_macos_python_ham_ke_thua():
++    return _r831_python_ham_ke_thua("macos")
+ 
+ 
+ # ---------------------------------------------------------------------------------------------

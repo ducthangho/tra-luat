@@ -161,3 +161,35 @@ verdict_usage_caveats:
     So luot CLI va loi thuat lai khong thay bang chung runtime. Be mat thuc chay
     KHONG_DO_DUOC; khong tu chon codex_cli hay codex_service. Giu byte verdict,
     khong chung thuc model/effort hay nang assurance/quyen merge/land.
+
+review_doc_lap_a_20261027:
+  bo_canh: >-
+    Chu kho yeu cau (phien session_01J7EgTVGTrNi4xqh7MeBFQv 27-10-2026, "chay 1 roi 2 va 3" va "Dong y de xuat") thu dieu
+    kien (A) cua dinh_chinh_r24.dieu_kien_mo_lai: mot luot Codex DOC LAP tren DUNG head da merge qua launcher co do model
+    phuc vu. Khoi nay KHONG sua dong nao o tren.
+  reviewed_commit: 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456
+  pham_vi_diff: 'git diff fb490a7c3fa2992c6f4635ed091dafa813df2fe7 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456 (merge-base cua head voi cha thu nhat cua merge commit).'
+  spec: 'measured — ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/PROMPT.md ghi spec sha256 e4fd84e1f079d0ac4841a145d078473576af3a3e4e2f593e4f3e40c5de7200e0 (khop spec_sha256 cua lease); ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/VERDICT.md dong 3 la gia tri reviewer tu do. Prompt sha256 5d7f49568ca8198dbb7ade76dadf4f9795847a01f5536274590ffb75db08d80f.'
+  launcher: >-
+    measured — ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/run.json: launcher 1.5.0 (master co model_phuc_vu tu 97bb4c5), run a34aff65, trang_thai xong, ma_thoat 0, 1468.458 giay.
+  model_phuc_vu: >-
+    measured — ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/run.json model_phuc_vu_trang_thai DO_DUOC, 46 su kien, tap model {gpt-6.1-sol} => ho openai, khac ho executor (claude).
+  verdict: changes_requested
+  dem: 'P0=0 P1=1 P2=1 P3=0'
+  phat_hien:
+    - {id: F1-shell-enoexec, hang: P1, tep: '.claude/dev/launcher.py (nhanh hong_dau cua probe ban ten tran)', bieu_hien: 'wrapper khong shebang Bash chay duoc (rc 0) nhung Python nhan ENOEXEC => doctor gan BI_CHE, rc 12; base rc 0 => hoi quy', tai_hien: evidence/doctor_probes_final.log, con_song_tren_master: 'measured — ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/evidence/tai-hien-master-2bcd8f3.txt: phien ghi so tai hien tren master 2bcd8f3 27-10: bash in ripgrep 14.1.0, doctor rc=12 BI_CHE [Errno 8] Exec format error'}
+    - {id: F2-handoff-scope, hang: P2, tep: 'ops/handoff/wp802-g1-claude.md:11', bieu_hien: 'git diff --numstat de82ef74 tai head cho 28/1107/32, khong phai 6/482 da khai; thieu bo loc write set hoac base fb490a7', tai_hien: evidence/scope_probe.log}
+  nguon:
+    - ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/VERDICT.md
+    - ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/run.json
+    - ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/PROMPT.md
+    - ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/SHA256SUMS
+  gioi_han: >-
+    Bang chung phu (log, ban sao dot bien, cay tam) KHONG vao kho; ops/land/pr823-wp802-provenance/review-doc-lap-a-5c6c7a8/OMITTED.txt giu sha256 + byte cua tep cap 1-2.
+    Workspace la clone day du khong nong tai head, core.abbrev 7; reviewer khong mang, khong credential that.
+  ket_luan_assurance_81: >-
+    CHUA DAT. Model phuc vu DO DUOC, nhung verdict changes_requested (F1 P1 con song tren master), nen khong co approve doc lap tren 5c6c7a8. Lo ghi them 'gate tren DUNG dfe5437 do' van chi dong duoc bang quyet dinh chu kho. Khong gi o day cap quyen landed hay cross_approved.
+  lua_chon_cho_chu_kho:
+    - 'Mo packet va loi con song tren master (xem phat_hien); approve tren head cu KHONG con dat duoc vi chinh luot doc lap da doi sua.'
+    - 'Hoac (B) human_audited day du §8 muc 2 do chu kho, neo DUNG 5c6c7a8ac0dc1b968cfda9d11065e5f3e8713456.'
+  landed: false

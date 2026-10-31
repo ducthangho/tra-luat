@@ -60,11 +60,13 @@ sửa `ADR-0057`. Mọi điểm khác của hai ADR giữ nguyên hiệu lực. 
   của B: A không ghi đè. Khoá của B còn hiệu lực nên A đợi.
 - **Quá hạn, chưa ai tiếp nhận.** A kết nối lại, đọc thấy dòng vẫn là của A: A chạy bước kiểm tải rồi gia hạn.
 - **D10.** Khoá dạng cũ ghi 09:01:16Z, quá 2 giờ nên hết hiệu lực theo 3(b). Phiên tiếp nhận kiểm tải và thấy PID
-  26296 `tl.py --selftest`, không phải MCP. Mục 2 so `CreationDate` của PID 26296 với 09:01:16Z; bước kiểm tải lúc
-  ấy trả giá trị này. `CreationDate` sau 09:01:16Z thì khoá còn sống: **không tiếp nhận**, ghi sổ đo, đợi.
-  Số đo D10 **không ghi** `CreationDate`. Thứ có trong sổ đo là giờ bắt đầu **lượt** selftest, suy được: xong
-  14:03:16Z sau 18113 s, tức ~09:01:23Z. Đó là giờ của lượt, không phải phép đo giờ tạo tiến trình, nên kết quả
-  "không tiếp nhận" của ca này đứng trên giả định PID 26296 được tạo sau 09:01:16Z, chưa trên một phép đo.
+  26296 `tl.py --selftest`, không phải MCP. Mục 2 so giờ tạo PID 26296 với 09:01:16Z. Sổ đo không ghi
+  `CreationDate`, và giờ bắt đầu lượt suy từ 18113 s không phải giờ tạo tiến trình. Nguồn quyết định là tệp
+  `selftest-ketqua.txt` trong thư mục riêng của phiên giữ khoá, do script của chính phiên ấy ghi lúc chạy (đọc lại
+  qua Desktop Commander ngày 31-10-2026, chỉ đọc): `BAT_DAU=2026-10-30T09:01:16.5807497Z`, rồi danh sách kiểm tải
+  `TAI_TRUOC` gồm PID 23252, 5772 (`browser-use.exe --cli-mcp`), 12720, 26716 (`python.exe -m proxima_agent.web`),
+  **không có 26296**. PID 26296 chưa tồn tại sau 09:01:16Z, nên được tạo sau giờ bắt đầu khoá. Khoá còn sống:
+  **không tiếp nhận**, ghi sổ đo, đợi.
 
 ## Những gì KHÔNG đổi
 

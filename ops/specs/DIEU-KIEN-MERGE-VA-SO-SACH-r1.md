@@ -37,8 +37,9 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
    `spec_hash`. Không kích hoạt, không sửa, không mượn hiệu lực của `ADR-0054`. Nội dung bắt buộc, mỗi điểm một mục:
    - **M1 Severity.** Điều kiện merge: 0 finding P0, P1, P2 mở. Mỗi P3 hoặc **đóng có bằng chứng** (reviewer xác nhận
      theo bảng lớp §8.3), hoặc **chủ kho miễn** bằng một comment trên PR nêu slug finding, SHA, lý do, hướng xử lý.
-     Agent không tự ghi nợ P3. Cấm giảm số lớp bằng gộp slug hoặc đổi hạng. Một vòng vá không giảm số lớp P3 ⇒ dừng,
-     checkpoint chủ kho. Thay bảng ngưỡng §8 cho packet áp ADR-0060; P0 vẫn chặn như cũ.
+     Agent không tự ghi nợ P3. Cấm giảm số lớp bằng gộp slug hoặc đổi hạng. Điều kiện dừng theo P3 **chỉ** xét khi đã
+     hết P0–P2 và vòng đang xét là vòng vá thêm vì P3: vòng ấy không giảm số lớp P3 ⇒ dừng, checkpoint chủ kho. Vòng
+     vá P0–P2 không bị điều kiện này chặn (kể cả khi số lớp P3 là 0 → 0); mọi điều kiện dừng và trần khác giữ nguyên. Thay bảng ngưỡng §8 cho packet áp ADR-0060; P0 vẫn chặn như cũ.
    - **M2 Review theo lớp.** Reviewer khái quát biểu hiện thành lớp nguyên nhân và quét mọi biểu hiện cùng lớp trước
      khi báo. Cách ghi giữ nguyên §8.3.
    - **M3 Windows.** Phân loại theo **thứ tự**, dừng ở bước đầu tiên khớp:
@@ -114,8 +115,10 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
 ## 4. Nghiệm thu (mỗi tiêu chí kèm phép đo làm nó ĐỎ, hoặc nói thẳng là hồi quy không có răng riêng)
 - **A1** `python .claude/dev/packet_loop.py adr-song --root .` rc=0. Đỏ: bỏ dòng §20 của ADR-0060.
-- **A2** Adapter chỉ mang con trỏ: với **mỗi** tệp trong ba tệp `.claude/skills/*/SKILL.md` của §3, `git diff --numstat`
-  cho ≤ 3 dòng thêm, và mỗi dòng thêm chứa chuỗi `ADR-0060`. Đỏ: thêm một dòng luật không nhắc `ADR-0060`, hoặc dòng thứ tư.
+- **A2** Adapter chỉ mang con trỏ: với **mỗi** tệp trong ba tệp `.claude/skills/*/SKILL.md` của §3,
+  `git diff --numstat --ignore-cr-at-eol` cho ≤ 3 dòng thêm và **0 dòng xoá**, và mỗi dòng thêm chứa chuỗi `ADR-0060`;
+  `git diff` không có `--ignore-cr-at-eol` phải cho cùng số (không đổi EOL). Đỏ: thêm một dòng luật không nhắc
+  `ADR-0060`; thêm dòng thứ tư; xoá hoặc sửa một dòng sẵn có của adapter; đổi EOL toàn tệp.
   `doctrine-scan` rc=0 chạy kèm như **hồi quy** — không khai nó bắt được việc chép luật của ADR mới.
 - **A3** `python scripts/tl.py doc-claims-check --json` cho `ok`. **Hồi quy**, không có đột biến riêng.
 - **A4** `actionlint .github/workflows/ops-open-pr.yml` rc=0; khối `gh pr create` có đúng một dòng chứa `--draft`;
@@ -134,7 +137,8 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 - **A7** Hồi quy: `python ops/lease_publish_test.py` và `python .claude/dev/ci_dang_ky_test.py` đạt N/N, hai số bằng
   nhau. **Không** khai hai bộ này ghim `ops-open-pr.yml` (đo 31-10: không bộ nào nhắc tệp ấy); răng cho `--draft` ở A4.
 - **A8** Cross-review Codex tới 0 P0–P2, mọi P3 đóng hoặc được chủ kho miễn. Reviewer làm hai việc:
-  (a) đi bốn ca, mỗi ca dẫn đoạn ADR-0060 làm căn cứ: còn một P2 mở ⇒ không đề xuất merge; Windows `required` đang
+  (a) đi năm ca (ca thứ năm: vòng vá đóng hết P1 khi số lớp P3 là 0 → 0 ⇒ **không** checkpoint; vòng chỉ vá P3 mà
+  không giảm lớp ⇒ dừng), bốn ca dưới đây cùng loại, mỗi ca dẫn đoạn ADR-0060 làm căn cứ: còn một P2 mở ⇒ không đề xuất merge; Windows `required` đang
   chạy ⇒ PR ở draft; `unknown` chưa chốt ⇒ chặn; PR "lưu trữ" sửa `ops/leases/**` ⇒ không thuộc làn lưu trữ;
   (b) nhận bốn bản ADR đột biến do điều phối dựng (cho P2 qua; cho ready khi Windows còn chạy; cho `unknown` đi tiếp;
   nhận `ops/leases/**` vào làn lưu trữ) và phải chỉ ra đúng điều khoản sai ở **mỗi** bản. Đỏ: bỏ sót một bản.
@@ -181,6 +185,16 @@ thư mục riêng `C:\tl-win\session_015GtxrYPjZCTZeRiazdssgq\`, nhả khoá (0 
 Giới hạn của phép đo: một commit, bundle 882 byte. Bundle lớn hơn phải chia nhiều lần `write_file`; chưa đo trần
 kích thước. Log PowerShell hiển thị lỗi mã hoá ký tự (`sß║ích`) do chuyển hướng `*>`; không ảnh hưởng hash hay rc.
 
-## 9. Phụ lục C1
+## 9. Phụ lục C1 — connector chạy trên PR draft (ĐẠT)
 
-(điền sau khi đo trên PR #1084)
+| trường | giá trị |
+|---|---|
+| PR | #1084, trạng thái **draft** suốt phép đo |
+| head lúc gọi | `15169eb1b9abd9c8d14f7090e049ac98191d6e5c` |
+| comment gọi | issuecomment-6543726761 (`@codex review`), ~13:04Z 31-10-2026 |
+| xác nhận nhận việc | issuecomment-6543729560 của `chatgpt-codex-connector[bot]`: Code Review `Running` từ 13:04:43Z, commit `15169eb`, trigger `Manual request` |
+| kết quả | review 5722826710 lúc 13:07:45Z, state `commented`, có dòng Reviewed commit: 15169eb1b9, hai finding P2 (review comment 4431799804, 4431799806) |
+| thời gian | ~3 phút từ lúc gọi tới lúc có review |
+
+Hai finding P2 của lượt này đã vá trong revision này (A2 đòi 0 dòng xoá; điều kiện dừng P3 chỉ áp cho vòng vá thêm vì
+P3). Kết luận: M6 dùng trạng thái "C1 ĐẠT".

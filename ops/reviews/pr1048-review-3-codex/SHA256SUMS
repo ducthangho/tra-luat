@@ -3,6 +3,7 @@
 a91379cfbe7b77827110de905c95f39eb49368fac11d5d39fee995c7ee49640f  ./VERDICT.md
 d36258b796d077d0227235e64d144e071ac12b3200934d4abbcc6e5cc23f6693  ./diff.patch
 cc7d51955ae92ba76a5863bed8dd4d377830f053ec4e841560e9253d76b0ef79  ./numstat.txt
+3fc52f214493473809f703182b5dc672bc8ce156a00c75aea0ef6e0dba2e5fd8  ./review_evidence/SHA256SUMS
 3fe7218b056e2a034edbdd8e938d22c26be30915bfd24fc9bc1b197a07562685  ./review_evidence/adr-song.json
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./review_evidence/adr-song.stderr
 797e8f04920d4bc6eaffed7131ef6830f97498c0d16765d9fa2e5eb01260cfe7  ./review_evidence/adr-song.stdout

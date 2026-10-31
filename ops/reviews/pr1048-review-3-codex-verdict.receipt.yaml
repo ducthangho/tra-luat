@@ -24,8 +24,9 @@ role: reviewer
 provider: codex
 executor_provider: claude
 cross_provider: true
-review_class: standard
-review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff tai reviewed_sha so voi 5a174b9: CLAUDE.md +10/-1 (numstat.txt trong thu muc).'
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: '(a) Protocol section 8: class khong ro xu ly nhu sensitive; _tinh_lop_tu_write_set trong ops/lease_publish.py tren [CLAUDE.md] tra sensitive (path chua phan loai). (b) Khong co lease/Issue hay override class co audit; diff tai reviewed_sha: CLAUDE.md +10/-1.'
 assurance: cross_approved
 assurance_ghi_chu: >-
   Khac ho (reviewer gpt do_may qua run.json model_phuc_vu, executor claude theo provider), verdict `approved` 0/0/0/0 tren

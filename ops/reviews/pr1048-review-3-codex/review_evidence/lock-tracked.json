@@ -1,0 +1,14 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "ls-files",
+    "--",
+    "*KHOA.txt"
+  ],
+  "rc": 0,
+  "stdout_file": "lock-tracked.stdout",
+  "stderr_file": "lock-tracked.stderr",
+  "stdout_bytes": 0,
+  "stderr_bytes": 0
+}

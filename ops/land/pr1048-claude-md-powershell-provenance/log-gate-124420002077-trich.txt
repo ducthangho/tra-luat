@@ -1,0 +1,27 @@
+# Trich log job 124420002077 (gate (ubuntu-latest), run 41161511121), dong 918-936 va 1630-1636; log day du 10761 dong, sha256 6b94c3800ef040243984898531f00dd8ea86c1e27fc4dc25c456bb79f26fe56e (khong vao kho).
+2026-10-31T02:47:39.2628435Z  * [new tag]         v1.33.8                     -> v1.33.8
+2026-10-31T02:47:39.2628888Z  * [new tag]         v1.33.9                     -> v1.33.9
+2026-10-31T02:47:39.2629395Z  * [new tag]         rescue/d0-2026-08-04        -> rescue/d0-2026-08-04
+2026-10-31T02:47:39.2630746Z [command]/usr/bin/git branch --list --remote origin/master
+2026-10-31T02:47:39.2631360Z   origin/master
+2026-10-31T02:47:39.2632245Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-10-31T02:47:39.2632727Z b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+2026-10-31T02:47:39.2633789Z ##[endgroup]
+2026-10-31T02:47:39.2634333Z ##[group]Determining the checkout info
+2026-10-31T02:47:39.2634930Z ##[endgroup]
+2026-10-31T02:47:39.2635563Z [command]/usr/bin/git sparse-checkout disable
+2026-10-31T02:47:39.2636641Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-31T02:47:39.2637821Z ##[group]Checking out the ref
+2026-10-31T02:47:39.2638381Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-10-31T02:47:40.1432490Z Reset branch 'master'
+2026-10-31T02:47:40.1438992Z branch 'master' set up to track 'origin/master'.
+2026-10-31T02:47:40.1534491Z ##[endgroup]
+2026-10-31T02:47:40.1595335Z [command]/usr/bin/git log -1 --format=%H
+2026-10-31T02:47:40.1628307Z b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+2026-10-31T02:54:29.8333309Z ##[endgroup]
+2026-10-31T02:54:30.0202370Z From https://github.com/ducthangho/tra-luat
+2026-10-31T02:54:30.0203395Z  * branch            master     -> FETCH_HEAD
+2026-10-31T02:54:30.0286162Z head_sha = b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+2026-10-31T02:54:30.0286841Z base_sha = b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+2026-10-31T02:58:33.9745921Z [tl] ⚠ PROFILE_NOT_FOUND: 'khong_ton_tai_trong_config' không có trong config.profiles (p6, p6off, vbqppl) — KHÔNG dùng scope nền thay thế. Kiểm chính tả (nhận cả gõ không dấu nếu khớp DUY NHẤT) hoặc thêm block profiles vào config (xem SKILL.md corpus_profile).
+2026-10-31T02:58:33.9748150Z   [OK] pin_sync

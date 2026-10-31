@@ -99,3 +99,8 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh claude/epic-ritchie-quvrz1 khi N1/N2/N4/N5/N6 dat; PR #1055 giu draft toi khi B3 xong'
+da_bi_thay_the: wp1052-r4-g3-claude
+da_bi_thay_the_ly_do: >-
+  Chu kho duyet spec r4 (sha256 38645b5f) va chon 'Duyệt, làm phần C ngay' (#1052 issuecomment-6542251013).
+  Lease wp1052-r4-g3-claude thay lease nay, cung 6 tep. Lease nay con han luc ghi bia mo (toi 2026-11-01T08:35:00Z),
+  nen bia mo hai chieu la duong thu hoi.

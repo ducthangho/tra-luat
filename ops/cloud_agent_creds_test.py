@@ -97,12 +97,33 @@ def a3_bang_sau_ca_hop_dong():
         bang(k.ag[0].startswith(f"agent_creds: {s} — ") and ly_do in k.ag[0], f"ca {i}: {k.ag[0]!r} (mong {s}/{ly_do})")
 def a4_qua_han_giet_ca_nhom():
     _posix()
-    k = chay_nap({"ngu": 60, "con": 1}, them={"TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "2"})
+    sen = "SENTINEL-khoa-a4-55d1"   # F12: log chẩn đoán (hai kênh) đã nhận trước khi treo vẫn được chuyển tiếp, đã che
+    k = chay_nap({"ngu": 60, "con": 1, "in": f"chẩn đoán {sen}\n[bootstrap] agent_creds: ĐÃ NẠP — cũ\n", "loi": "lỗi chẩn đoán\n"},
+                 khoa=sen, them={"TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "2"})
     pids = [k.nk[0]["pid"], k.nk[0]["con"], *(k.chau or [None])] if k.nk else [None]
     song = _song_roi_don(pids)
     bang(k.giay < 20, f"nap mất {k.giay:.1f} s")
     bang(k.rc == 0 and k.ag == ["agent_creds: KHÔNG ĐO ĐƯỢC — bootstrap quá 2 s, đã dừng"], f"rc={k.rc} {k.ag}")
     bang(None not in pids and not song, f"PID {pids} (cha, con, cháu cùng nhóm): còn sống {song}")
+    bang("chẩn đoán ***" in k.ra and "lỗi chẩn đoán" in k.ra and sen not in k.ra + k.loi, f"log khi quá hạn mất/lộ: {k.ra!r}")
+def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), chỉ cha chết ⇒ cấm in "đã dừng"
+    _posix()
+    with tempfile.TemporaryDirectory() as t:
+        m, t, that, buf = nap_mod(), Path(t), os.killpg, io.StringIO()
+        _ghi(t / "scripts" / "tl.py", TL_GIA)
+        m.GOC, m.HAN_DON = t, 1
+        def gia(pg, sig):
+            if sig:
+                os.kill(pg, 9)
+                raise PermissionError("tiêm lỗi")
+            return that(pg, sig)
+        moi = {"TL_MASTER_KEY": "k", "CAC_NHAT_KY": str(t / "nk"), "CAC_KICH_BAN": json.dumps({"ngu": 60, "con": 1})}
+        with mock.patch.dict(os.environ, moi), mock.patch.object(m.os, "killpg", gia), contextlib.redirect_stdout(buf):
+            m.nap({"TL_MASTER_KEY": "k", "TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "1"})
+        nk = json.loads((t / "nk").read_text(encoding="utf-8")) if (t / "nk").exists() else {}
+        song = _song_roi_don([nk.get("con"), *([int((t / "nk.chau").read_text())] if (t / "nk.chau").exists() else [])])
+    bang(song, "fixture hỏng: con/cháu phải còn sống khi chỉ cha bị giết")
+    bang("KHÔNG dừng được" in buf.getvalue() and "đã dừng" not in buf.getvalue(), f"báo dừng khi nhóm còn sống: {buf.getvalue()!r}")
 def a5_doc_timeout():
     m = nap_mod()
     for v in ("abc", "-5", "0", "inf", "1e300", "2147484"):
@@ -166,7 +187,7 @@ def b2_sha512_lech_khong_ghi():
         bang(s.agy.read_bytes() == truoc, "bản cũ bị đổi dù sha512 lệch")
 def b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay():   # B3 (đếm 0) + B4 (đếm 1, tệp được thay)
     _posix()
-    for cu, n in ((("antigravity 1.4.12", 0), 0), (("antigravity 1.4.13", 0), 1), (("antigravity 1.4.12", 1), 1), (("\\0377", 0), 1), (("antigravity 1.4.120", 0), 1)):
+    for cu, n in ((("antigravity 1.4.12", 0), 0), (("antigravity 1.4.13", 0), 1), (("antigravity 1.4.12", 1), 1), (("\\0377", 0), 1), (("antigravity 1.4.120", 0), 1), (("antigravity 1.4.12rc1", 0), 1), (("antigravity 1.4.12beta", 0), 1)):
         with san_agy(agy_cu=cu) as s:
             s.chay()
             bang(len(s.dem) == n and (n == 0 or s.agy.read_bytes() == NOI_DUNG), f"{cu}: tải {len(s.dem)} lần (mong {n}) / không thay tệp")
@@ -258,12 +279,12 @@ def h2_khoi_song_sot_set_e():
     bash = bash_nen.tim_bash()[0]
     bang(bash, "POSIX mà không có bash dùng được — không được bỏ qua (F06)")
     with tempfile.TemporaryDirectory() as t:
-        _ghi(py := Path(t) / "py_gia", f'#!/bin/sh\necho "$*" >> "{t}/argv"\nexit 3\n', True)
+        _ghi(py := Path(t) / "py_gia", f'#!/bin/sh\nprintf "[%s]" "$@" >> "{t}/argv"\necho >> "{t}/argv"\nexit 3\n', True)   # giữ ranh giới đối số
         than = "\n".join(dong[dong.index(MO) + 1:dong.index(DONG)])
         r = subprocess.run([bash, "-c", 'set -euo pipefail; PY="$1"; GOC="$2"\n' + than, "h2", str(py), t], capture_output=True, text=True, timeout=60)
         goi = Path(t, "argv").read_text(encoding="utf-8").splitlines() if Path(t, "argv").exists() else []
     bang(r.returncode == 0 and "[session-start] " in r.stdout, f"rc={r.returncode} {r.stdout!r} {r.stderr!r}")
-    bang(goi == [f"{t}/ops/cloud_agent_creds.py nap", f"{t}/ops/cloud_agent_creds.py cai-agy"], f"PY nhận {goi}")
+    bang(goi == [f"[{t}/ops/cloud_agent_creds.py][nap]", f"[{t}/ops/cloud_agent_creds.py][cai-agy]"], f"PY nhận {goi}")
 def h3_ten_nang_luc():
     moi, cu = [set(next(x for x in v.splitlines() if x.startswith("# hook-nang-luc:")).split()[2:])
                for v in (HOOK.read_text(encoding="utf-8"), _git_base(".claude/hooks/session-start.sh"))]
@@ -285,6 +306,8 @@ DOT_BIEN = (
     ("A3_bo_kiem_tap_trang_thai", "ma", " or s not in TRANG_THAI", "", "a3_bang_sau_ca_hop_dong"),
     ("A4_bo_giet", "ma", "os.killpg(p.pid, signal.SIGKILL) if", "None if", "a4_qua_han_giet_ca_nhom"),
     ("A4_chi_giet_cha", "ma", "os.killpg(p.pid, signal.SIGKILL) if", "p.kill() if", "a4_qua_han_giet_ca_nhom"),
+    ("A4_bo_chuyen_tiep_log_khi_qua_han", "ma", "(da, ra), ly = _giet_nhom(p),", "(da, _), ra, ly = _giet_nhom(p), b\"\",", "a4_qua_han_giet_ca_nhom"),
+    ("A9_bo_hau_kiem_nhom", "ma", "    return song is False, ra", "    return True, ra", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
     ("A4_bo_timeout", "ma", "p.communicate(timeout=han)", "p.communicate()", "a4_qua_han_giet_ca_nhom"),
     ("A5_nhan_0", "ma", "0 < v <= 86400", "0 <= v <= 86400", "a5_doc_timeout"),
     ("A5_bo_tran_tren", "ma", "0 < v <= 86400", "0 < v", "a5_doc_timeout"),
@@ -296,9 +319,10 @@ DOT_BIEN = (
     ("B1_khong_ghi", "ma", "        _ghi_nguyen_tu(agy, tf.extractfile(tv[0]).read(), 0o755)", "        pass", "b1_chua_co_thi_tai_va_ghi"),
     ("B2_bo_kiem_sha", "ma", "    if hashlib.sha512(du_lieu).hexdigest() != muc[1]:", "    if False:", "b2_sha512_lech_khong_ghi"),
     ("B3_luon_tai", "ma", "    if _ban_khop(agy):", "    if False:", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
-    ("B4_loi_giai_ma_thoat_khoi_kiem_ban", "ma", "    return p.returncode == 0 and re.search(", '    return p.returncode == 0 and ra.encode("ascii") and re.search(', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
-    ("B4_qua_han_chi_giet_cha", "ma", "        return _giet_nhom(p) and False", "        return p.kill() or False", "b10_version_treo_giet_ca_nhom"),
-    ("B4_so_chuoi_con", "ma", 're.search(r"(?<![\\d.])" + re.escape(AGY_VER) + r"(?!\\.?\\d)", ra) is not None', "AGY_VER in ra", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_loi_giai_ma_thoat_khoi_kiem_ban", "ma", "    return p.returncode == 0 and AGY_VER in", '    return p.returncode == 0 and ra.encode("ascii") and AGY_VER in', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_qua_han_chi_giet_cha", "ma", "        return _giet_nhom(p)[0] and False", "        return p.kill() or False", "b10_version_treo_giet_ca_nhom"),
+    ("B4_so_chuoi_con", "ma", 'AGY_VER in re.split(r"[\\s,;()]+", ra)', "AGY_VER in ra", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_bien_chi_chan_so", "ma", 'AGY_VER in re.split(r"[\\s,;()]+", ra)', 're.search(r"(?<![\\d.])" + re.escape(AGY_VER) + r"(?!\\.?\\d)", ra) is not None', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B4_chi_kiem_co_mat", "ma", "    if _ban_khop(agy):", "    if agy.is_file():", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B5_roi_ve_linux_amd64", "ma", "    muc = NEN.get(k)", '    muc = NEN.get(k) or NEN["linux_amd64"]', "b5_nen_ngoai_bang"),
     ("B6_extractall", "ma", "        tv = tf.getmembers()\n", '        tf.extractall(agy.parent, filter="fully_trusted")\n        tv = tf.getmembers()\n', "b6_tarball_doc_tu_choi"),
@@ -314,12 +338,13 @@ DOT_BIEN = (
     ("H1_doi_khoi_ra_sau_doctor", "hook", None, _doi_khoi_ra_sau, "h1_vi_tri_khoi_trong_hook"),
     ("H1_khoi_ngay_sau_tieu_de_truoc_pip", "hook", None, _doi_khoi_len_tieu_de, "h1_vi_tri_khoi_trong_hook"),
     ("H2_bo_or_true", "hook", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /'", "h2_khoi_song_sot_set_e"),
+    ("H2_gop_doi_so", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_bo_qua_nap", "hook", 'MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap', 'MA_AC=0; : "$PY" "$GOC/ops/cloud_agent_creds.py" nap', "h2_khoi_song_sot_set_e"),
     ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
 )
 TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_qua_except_doi_kieu", "ma", "    he = he.lower()\n", "    raise AttributeError('vo can')\n", "b9_luat_chon_nen", "TIN_DUNG_GIA"),
-    ("chi_them_chu_thich", "ma", "TIMEOUT_MAC_DINH, HAN_VERSION = 180, 15\n", "TIMEOUT_MAC_DINH, HAN_VERSION = 180, 15  # vo hai\n", "a5_doc_timeout", "SONG_SOT"),
+    ("chi_them_chu_thich", "ma", "TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10\n", "TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10  # vo hai\n", "a5_doc_timeout", "SONG_SOT"),
 )
 def phan_hang(rc, ra, ten_ca):
     """GIET chỉ khi con thoát 3 VÀ có dòng `DO:<đúng ca đích>:` — `AssertionError` trần hay ca khác là tín dụng giả."""

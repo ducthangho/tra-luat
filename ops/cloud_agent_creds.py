@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """`nap` (bootstrap + ĐÚNG MỘT dòng `agent_creds:` kể cả khi bootstrap thoát sớm/quá hạn/sai hợp đồng) và `cai-agy` (agy ghim,
 sha512, settings, CLAUDE_ENV_FILE) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039). Cả hai luôn rc 0. Test: *_test.py."""
-import contextlib, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, urllib.request  # noqa: E401
+import contextlib, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, time, urllib.request  # noqa: E401
 from pathlib import Path
 
 GOC = Path(__file__).resolve().parent.parent
 TRANG_THAI = ("ĐÃ NẠP", "KHÔNG CẤU HÌNH", "KHÔNG ĐO ĐƯỢC")
-TIMEOUT_MAC_DINH, HAN_VERSION = 180, 15
+TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10
 DONG_ENV = "export AGY_CLI_DISABLE_AUTO_UPDATE=1"
 # Hằng ghim — chép NGUYÊN VĂN spec r1 mục "Hằng ghim agy". Đổi bản ⇒ revision mới của spec, không sửa tại chỗ.
 AGY_VER = "1.4.12"
@@ -33,11 +33,34 @@ def ket_luan(dong_agent, rc):
     if not sep or s not in TRANG_THAI:
         return "KHÔNG ĐO ĐƯỢC — đầu ra bootstrap không đúng hợp đồng (trạng thái lạ)"
     return f"{s} — {ct} (bootstrap rc={rc})"
-def _giet_nhom(p):   # giết cả nhóm rồi KIỂM LẠI: True chỉ khi con đã chết và được thu hồi (zombie tính là chết)
-    with contextlib.suppress(OSError, subprocess.TimeoutExpired):
+def _nhom_song(pgid):
+    """Nhóm còn thành viên KHÔNG phải zombie: True / False; không đo được ⇒ None (F11 — đo cả nhóm, không chỉ cha)."""
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False
+    except OSError:
+        return None
+    if not Path("/proc/self/stat").exists():
+        return None
+    tt = []
+    for f in Path("/proc").glob("[0-9]*/stat"):   # tiến trình biến mất giữa chừng: bỏ qua đúng tệp ấy
+        with contextlib.suppress(OSError, IndexError):
+            tt.append(f.read_text().rsplit(")", 1)[1].split())
+    return any(len(x) > 2 and x[2] == str(pgid) and x[0] != "Z" for x in tt)
+def _giet_nhom(p):
+    """Giết cả nhóm, thu output còn lại, rồi KIỂM LẠI cả nhóm (hạn HAN_DON). (đã chết?, bytes đã nhận)."""
+    ra = b""
+    with contextlib.suppress(OSError):
         os.killpg(p.pid, signal.SIGKILL) if os.name != "nt" else p.kill()
-        p.communicate(timeout=10)
-    return p.poll() is not None
+    with contextlib.suppress(OSError, ValueError, subprocess.TimeoutExpired):
+        ra = p.communicate(timeout=HAN_DON)[0] or b""
+    if p.poll() is None or os.name == "nt":
+        return p.poll() is not None, ra
+    het = time.monotonic() + HAN_DON
+    while (song := _nhom_song(p.pid)) and time.monotonic() < het:
+        time.sleep(0.1)
+    return song is False, ra
 def nap(env=os.environ):
     khoa, rc = env.get("TL_MASTER_KEY") or "", None
     if not khoa:
@@ -54,19 +77,17 @@ def nap(env=os.environ):
         print(f"agent_creds: KHÔNG ĐO ĐƯỢC — không chạy được bootstrap ({type(e).__name__})")
         return 0
     try:
-        ra, _ = p.communicate(timeout=han)
-        rc = p.returncode
-    except Exception as e:  # noqa: BLE001 — quá hạn hay lỗi chờ bất kỳ: dọn cả nhóm, vẫn đúng một dòng (F02)
-        ly = f"bootstrap quá {han:g} s" if isinstance(e, subprocess.TimeoutExpired) else f"lỗi chờ bootstrap ({type(e).__name__})"
-        print(f"agent_creds: KHÔNG ĐO ĐƯỢC — {ly}, {'đã dừng' if _giet_nhom(p) else 'KHÔNG dừng được'}")
-        return 0
+        (ra, _), rc, het_han = p.communicate(timeout=han), p.returncode, None
+    except Exception as e:  # noqa: BLE001 — quá hạn hay lỗi chờ: dọn cả nhóm, vẫn chuyển tiếp log đã nhận (F12), đúng một dòng
+        (da, ra), ly = _giet_nhom(p), f"bootstrap quá {han:g} s" if isinstance(e, subprocess.TimeoutExpired) else f"lỗi chờ bootstrap ({type(e).__name__})"
+        het_han = f"KHÔNG ĐO ĐƯỢC — {ly}, {'đã dừng' if da else 'KHÔNG dừng được'}"
     dong_agent = []
     for d in ra.decode("utf-8", "replace").replace(khoa, "***").splitlines():
         if "agent_creds:" in d:
             dong_agent.append(d)
         else:
             print(d)
-    print("agent_creds: " + ket_luan(dong_agent, rc))
+    print("agent_creds: " + (het_han or ket_luan(dong_agent, rc)))
     return 0  # nap: luôn 0 (mục tiêu 1)
 def _co_musl():
     if any(Path(f).exists() for f in ("/lib/libc.musl-x86_64.so.1", "/lib/libc.musl-aarch64.so.1")):
@@ -85,7 +106,7 @@ def khoa_nen_hien_tai():
 def tai(url):
     with urllib.request.urlopen(url, timeout=300) as r:
         return r.read()
-def _ban_khop(agy):   # `agy --version` rc 0 và chứa đúng AGY_VER (không khớp 1.4.120); thiếu/hỏng/không giải mã ⇒ False
+def _ban_khop(agy):   # `agy --version` rc 0 và có TOKEN đúng bằng AGY_VER (1.4.120, 1.4.12rc1 ⇒ lệch); thiếu/hỏng ⇒ False
     try:
         p = subprocess.Popen([str(agy), "--version"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT, stdout=subprocess.PIPE,
                              start_new_session=os.name != "nt")
@@ -94,8 +115,8 @@ def _ban_khop(agy):   # `agy --version` rc 0 và chứa đúng AGY_VER (không k
     try:
         ra = p.communicate(timeout=HAN_VERSION)[0].decode("utf-8", "replace")
     except Exception:  # noqa: BLE001 — quá 15 s: giết CẢ NHÓM (tiến trình con của agy), không chỉ cha (F01)
-        return _giet_nhom(p) and False
-    return p.returncode == 0 and re.search(r"(?<![\d.])" + re.escape(AGY_VER) + r"(?!\.?\d)", ra) is not None
+        return _giet_nhom(p)[0] and False
+    return p.returncode == 0 and AGY_VER in re.split(r"[\s,;()]+", ra)
 def _ghi_nguyen_tu(p, du_lieu, quyen=None):
     p.parent.mkdir(parents=True, exist_ok=True)
     fd, tam = tempfile.mkstemp(dir=str(p.parent), prefix=f".{p.name}.")

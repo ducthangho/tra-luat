@@ -83,8 +83,10 @@ heartbeat_at: '2026-10-30T08:57:00Z'
 heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
 heartbeat_required_minutes: 360
 heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
-lease_until: '2026-10-31T08:57:00Z'
-lease_expires_at_utc: '2026-10-31T08:57:00Z'
+lease_until: '2026-10-31T08:10:00Z'
+lease_expires_at_utc: '2026-10-31T08:10:00Z'
+han_ghi_chu: >-
+  Goc 24 gio (2026-10-31T08:57:00Z). RUT NGAN ve 2026-10-31T08:10:00Z — xem thu_hoi_bang_rut_han.
 run_minutes: 60
 heartbeat_minutes: 30
 attempts_used: 0
@@ -101,3 +103,23 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 push_policy: 'day nhanh agent/wp1021-g1-claude khi C1a/C1b/C2/C3 dat tren Linux; mo PR draft; dispatch Windows tren head.'
+lease_sua_lan_cuoi: '2026-10-31T07:50:00Z'
+lease_sua_ghi_chu: >-
+  Lan 1: rut ngan lease_expires_at_utc (thu_hoi_bang_rut_han). Khong doi write set, spec, branch.
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-10-31T08:57:00Z'
+  han_moi_utc: '2026-10-31T08:10:00Z'
+  chi_thi: >-
+    Phien dieu phoi session_01WZT2MvvoQV8QGF1vX9STrJ nho rut han sau khi chu kho duyet va dieu phoi merge #1040
+    (07:49Z 31-10-2026); chu kho truoc do chi thi phien executor "Thuc hien buoc tiep theo khuyen nghi".
+  ly_do: 'Packet #1021 da LAND: PR #1040 merge c8ff9ed563403fffa3c49c84bfce42e9a66bc68b (head a16932aa09ce860a614f0bab4b2015699e7221bc), 2026-10-31T07:49:09Z. Nha write set.'
+  vi_sao_khong_dung_so: >-
+    Theo tien le #651/#660 va wp1037 (a34b9a3): so ops/thu-hoi/ chua kich hoat; rut han chi dung co che DA CAI
+    (phan loai lease theo han).
+  vi_sao_han_moi_khong_bang_luc_sua: >-
+    Han moi = luc sua + 20 phut de luot ops-publish-lease cua chinh commit nay doc lease CON HAN (rc=9 da dang, xanh),
+    khong roi vao rc=8 het han che rc=9 (bai hoc CLAUDE.md 20-09-2026). Khong viet bia mo: lease CON HAN va khong co
+    lease ke nhiem.
+  gioi_han: >-
+    Ref mang lease nay: nhanh ops/wp1021-r2-g1-lease. Nhanh ma agent/wp1021-g1-claude KHONG mang tep lease. Nghiem thu:
+    sau han moi, ai-dang-giu ops/bien_nhan_v2.py va ops/bien_nhan_v2_test.py khong con wp1021-r2-g1-claude.

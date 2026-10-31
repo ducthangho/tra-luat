@@ -9443,7 +9443,8 @@ def r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc():
 
 @ca
 def r1077_PATH_hop_dong_glibc():
-    """F4 lượt 5–6: `$0` đúng chuỗi glibc (PATH='' ⇒ `rg`, `bin` ⇒ `bin/llm`, `bin/` ⇒ `bin//llm`) · ETXTBSY DỪNG."""
+    """F4 lượt 5–7: `$0` đúng chuỗi glibc (PATH='' ⇒ `rg`, `bin` ⇒ `bin/llm`, `bin/` ⇒ `bin//llm`) · ETXTBSY DỪNG ·
+    PATH có byte ngoài UTF-8."""
     if platform.system() != "Linux":
         return "BO QUA can Linux (ETXTBSY, glibc)"
     m = _tai_launcher_thu()
@@ -9461,6 +9462,10 @@ def r1077_PATH_hop_dong_glibc():
         with (d / "first" / "llm").open("ab"):
             kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
         bang(kq[0] == "OSError" and "errno=26 " in kq[1], f"ETXTBSY dau PATH bi nuot, do nham ban sau: {kq}")
+        raw = os.fsdecode(os.fsencode(d) + b"/byte-\xff")   # lượt 7: PATH ngoài UTF-8 (surrogateescape)
+        os.mkdir(raw)
+        kq = _wp1077_llm({"PATH": raw + os.pathsep + str(d / "later")})
+        bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"PATH byte ngoai UTF-8 lam mat probe: {kq}")
 
 
 @ca
@@ -12401,7 +12406,7 @@ DOT_BIEN = [
     ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
      ["r1077_probe_doctor_khong_spawn_tran"]),
     # Codex lượt 2–5 F4: tự duyệt PATH như execvp (bỏ ⇒ subprocess chạy bản sau / sh TÊN không tra PATH).
-    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(d.encode()) < tran]',
+    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(os.fsencode(d)) < tran]',
       '        ung_vien = [ten]'),
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan", ('            return subprocess.run(lenh, executable=tep if os.sep in tep else os.curdir + os.sep + tep, **kw)',
@@ -12412,6 +12417,7 @@ DOT_BIEN = [
       "r1077_PATH_hop_dong_glibc"]),
     ("wp1077_tiep_moi_loi_exec", ('            if os.sep in ten or e.errno not in tiep:', '            if os.sep in ten:'),
      ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_PATH_ma_hoa_strict", ('if len(os.fsencode(d)) < tran]', 'if len(d.encode()) < tran]'), ["r1077_PATH_hop_dong_glibc"]),
     ("wp1077_mat_gach_cuoi_PATH", ('[f"{d}/{ten}" if d else ten for d', '[os.path.join(d, ten) for d'), ["r1077_PATH_hop_dong_glibc"]),
     ("wp1077_dung_o_loi_tim_kiem", ('            if os.sep in ten or e.errno not in tiep:', '            if True:'),
      ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),

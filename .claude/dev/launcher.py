@@ -2939,8 +2939,8 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
         ung_vien = [ten]
     else:
         duong = (kw["env"] if kw.get("env") is not None else os.environ).get("PATH", os.defpath)
-        tran = min(len(duong.encode()), 4095) + 1
-        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(d.encode()) < tran]
+        tran = min(len(os.fsencode(duong)), 4095) + 1
+        ung_vien = [f"{d}/{ten}" if d else ten for d in duong.split(os.pathsep) if len(os.fsencode(d)) < tran]
     tiep = {errno.EACCES, errno.ENOENT, errno.ESTALE, errno.ENOTDIR, errno.ENODEV, errno.ETIMEDOUT}
     eacces = loi = None
     for tep in ung_vien:

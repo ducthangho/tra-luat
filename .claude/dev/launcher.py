@@ -2918,6 +2918,26 @@ def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = Tr
     return None
 
 
+def _chay_probe_nhu_shell(lenh: list[str], **kw):
+    """`subprocess.run(lenh, **kw)`, cộng MỘT ngữ nghĩa của shell: tệp không shebang chạy bằng `/bin/sh`.
+
+    wp1077 (review độc lập #823 F1, tái hiện trên master `2bcd8f3`): kernel trả `ENOEXEC` cho tệp
+    thực thi KHÔNG có shebang; bash và `execvp` của libc khi ấy chạy lại tệp bằng `/bin/sh`, còn
+    `subprocess` ném `OSError`. Bộ dò tên trần wp802 vì thế gắn BI_CHE (rc=12) cho một `rg` mà
+    chính shell của người dùng gọi được. Chỉ `ENOEXEC` mới được chạy lại: thiếu bit thực thi
+    (`PermissionError`), không tồn tại… vẫn là hỏng như shell báo. Windows không có ngữ nghĩa này
+    (`CreateProcessW`), nên giữ nguyên. Lượt chạy lại trả kết quả cho phía gọi phân loại Y NHƯ lượt
+    thường — không nới cho bản hỏng.
+    """
+    import errno
+    try:
+        return subprocess.run(lenh, **kw)
+    except OSError as e:
+        if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):
+            raise
+    return subprocess.run(["/bin/sh", *lenh], **kw)
+
+
 def _phien_ban(duong_dan: str, *, env=None,
                timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
     """Chạy thử `--version`. Trả (chay_duoc, dong_dau, qua_han).
@@ -2939,7 +2959,7 @@ def _phien_ban(duong_dan: str, *, env=None,
     bản tự do); nên cờ này phải là phần tử trả về riêng.
     """
     try:
-        p = subprocess.run([duong_dan, "--version"], capture_output=True, text=True,
+        p = _chay_probe_nhu_shell([duong_dan, "--version"], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
@@ -2991,7 +3011,7 @@ def _xac_thuc_kem_dau_ra(duong_dan: str, doi_so: list[str], *, env=None,
     khớp đúng một chỗ (chốt `moi mau dot bien phai khop DUNG MOT cho`).
     """
     try:
-        p = subprocess.run([duong_dan, *doi_so], capture_output=True, text=True,
+        p = _chay_probe_nhu_shell([duong_dan, *doi_so], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:

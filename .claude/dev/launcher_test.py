@@ -9234,6 +9234,73 @@ def r802_doctor_ten_tran_tu_muc_PATH_rong():
              f"ten tran tu muc PATH rong khong duoc do: rc={rc}, bi_che={che}")
 
 
+# wp1077 (spec ops/specs/wp1077.md M3): tệp KHÔNG shebang — shell chạy bằng `/bin/sh`, probe phải đo như shell.
+def _wp1077_tep(d, ten, than, mode=0o755):
+    d.mkdir(parents=True, exist_ok=True)
+    (d / ten).write_text(than)
+    (d / ten).chmod(mode)
+    return d / ten
+
+
+def _wp1077_doctor(ten, than_dau):
+    """`ten` không shebang thân `than_dau` đầu PATH, bản tốt (có shebang) sau; trả (rc, mục) của `doctor`."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        _wp1077_tep(s / "dau", ten, than_dau)
+        _wp1077_tep(s / "tot", ten, f"#!/bin/sh\necho '{ten} 9.9.9'\n")
+        env = dict(os.environ, PATH=os.pathsep.join([str(s / "dau"), str(s / "tot")]), LOCALAPPDATA="")
+        rc, _d, muc = _wp802_doctor(m, ten, None, env)
+        return rc, muc
+
+
+@ca
+def r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE():
+    """M3(a): `rg`/`git` KHÔNG shebang in phiên bản, đứng đầu PATH ⇒ shell gọi được ⇒ không BI_CHE, thoát 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    for ten in ("rg", "git"):
+        rc, muc = _wp1077_doctor(ten, f"echo '{ten} 1.0.0-khong-shebang'\n")
+        bang(rc == MA_OK and "bi_che" not in muc and muc["co"] is True
+             and "khong-shebang" in str(muc.get("phien_ban")),
+             f"{ten} khong shebang chay duoc trong shell ma doctor khong nhan: rc={rc}, muc={muc}")
+
+
+@ca
+def r1077_doctor_khong_shebang_hong_van_BI_CHE():
+    """M3(b): `rg` KHÔNG shebang `exit 1` đứng đầu, bản tốt sau ⇒ vẫn BI_CHE, thoát 12."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    rc, muc = _wp1077_doctor("rg", "echo 'Access is denied' >&2\nexit 1\n")
+    bang(rc == MA_THIEU_CONG_CU and muc.get("trang_thai") == "BI_CHE",
+         f"chay lai qua /bin/sh da noi cho ban hong: rc={rc}, muc={muc}")
+
+
+@ca
+def r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC():
+    """M3(c): tệp shebang hợp lệ nhưng THIẾU bit thực thi ⇒ shell báo Permission denied ⇒ probe hỏng, không chạy lại."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    m = _tai_launcher_thu()   # 0644: execve ⇒ EACCES kể cả root (root vẫn cần ít nhất một bit x)
+    with San() as s:
+        f = _wp1077_tep(s, "rg", "#!/bin/sh\necho 'ripgrep 14.1.0'\n", mode=0o644)
+        ok, mo_ta, qua_han = m._phien_ban(str(f), env=dict(os.environ))
+        bang(ok is False and qua_han is False,
+             f"tep thieu bit thuc thi bi chay lai nhu ENOEXEC: ok={ok} mo_ta={mo_ta!r}")
+
+
+@ca
+def r1077_xac_thuc_khong_shebang_chay_duoc():
+    """M3(d): probe xác thực cũng đo như shell — tệp không shebang in một dòng, rc 0 ⇒ ok."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    m = _tai_launcher_thu()
+    with San() as s:
+        f = _wp1077_tep(s, "cli", "echo 'Logged in'\n")
+        ok, mo_ta, qua_han, ra = m._xac_thuc_kem_dau_ra(str(f), ["status"], env=dict(os.environ))
+        bang(ok is True and "Logged in" in ra,
+             f"probe xac thuc khong chay tep khong shebang: ok={ok} mo_ta={mo_ta!r}")
+
+
 @ca
 def r802_cai_rg_windows_chon_ban_chay_duoc():
     """F2 (Codex lượt 1): NGUYÊN `rg.cai.windows` qua cai_cong_cu.sh; `rg` cũ hỏng đầu PATH ⇒ DAT, đúng thư mục."""
@@ -12150,6 +12217,18 @@ DOT_BIEN = [
      ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
     ("wp802_ten_co_duoi_khong_noi_them", ('([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)',
      '([""] if any(ten.upper().endswith(e.upper()) for e in ext) else ext))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
+    # wp1077 (M4): mỗi chốt của probe chạy-như-shell một đột biến.
+    ("wp1077_bo_chay_lai_ENOEXEC",
+     ('        if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):\n            raise',
+      '        raise'),
+     ["r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE", "r1077_xac_thuc_khong_shebang_chay_duoc"]),
+    ("wp1077_chay_lai_moi_OSError", ('        if e.errno != errno.ENOEXEC or os.name', '        if False or os.name'),
+     ["r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC"]),
+    ("wp1077_xac_thuc_khong_dung_probe_chung", ('p = _chay_probe_nhu_shell([duong_dan, *doi_so]', 'p = subprocess.run([duong_dan, *doi_so]'),
+     ["r1077_xac_thuc_khong_shebang_chay_duoc"]),
+    ("wp1077_chay_lai_bo_qua_rc", ('    return subprocess.run(["/bin/sh", *lenh], **kw)',
+      '    q = subprocess.run(["/bin/sh", *lenh], **kw)\n    return subprocess.CompletedProcess(lenh, 0, q.stdout, q.stderr)'),
+     ["r1077_doctor_khong_shebang_hong_van_BI_CHE"]),
     ("wp802_launcher_winget_thanh_choco", ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
      ["r802_bang_cai_rg_khop_cong_cu_yaml"]),

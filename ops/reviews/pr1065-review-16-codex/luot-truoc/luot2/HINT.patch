@@ -1,0 +1,158 @@
+# TEST-ONLY HINT; Linux offline control flow, not native Windows ACL evidence.
+# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
+--- /dev/null
++++ ops/vm/cap-nhat-cong-cu_dang-ky_probe.ps1
+@@ -0,0 +1,73 @@
++# Linux-only offline control-flow harness. Does not measure native ACL or Scheduler.
++# chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
++param([ValidateSet('clean','root-link','ancestor-link','swap-parent','owned','acl-reject','hash-reject')][string]$Mode='clean', [Parameter(Mandatory=$true)][string]$ProductScript)
++$ErrorActionPreference='Stop'
++. $ProductScript -NapHam
++$root = Join-Path ([IO.Path]::GetTempPath()) ('r2-reg-' + [guid]::NewGuid().ToString('N'))
++$env:ProgramFiles=Join-Path $root 'PF'
++$env:SystemRoot=Join-Path $root 'OS'
++$env:COMPUTERNAME='VM'
++$env:R2_ICACLS_LOG=Join-Path $root 'icacls.jsonl'
++$TaiKhoanNguoiDung='tlcommander';$MayDich='VM';$TacVuCommander='CMD-CUSTOM'
++$NlmVenv='D:\custom nlm';$VenvKho='D:\custom venv';$HomeCommander='D:\custom profile'
++$NhatKy='D:\custom logs\run.json';$ChiKiem=$true
++$ThuMucCongCu=Join-Path $root 'Tools'
++$victim=Join-Path $root 'victim'
++New-Item -ItemType Directory "$env:SystemRoot/System32",$victim,$env:ProgramFiles -Force | Out-Null
++foreach ($name in 'npm','Python312','bin') {New-Item -ItemType Directory (Join-Path $victim $name) -Force | Out-Null}
++Copy-Item "$PSScriptRoot/cap-nhat-cong-cu_icacls_stub.py" "$env:SystemRoot/System32/icacls.exe"
++& /bin/chmod +x "$env:SystemRoot/System32/icacls.exe"
++$script:Captured=[Collections.Generic.List[object]]::new()
++function Get-Acl { param($LiteralPath)
++    $owner='BUILTIN\Administrators'
++    if ($Mode -eq 'owned' -and $LiteralPath.StartsWith($ThuMucCongCu)) {$owner='VM\tlcommander'}
++    $access=@([pscustomobject]@{IdentityReference='BUILTIN\Users';FileSystemRights='ReadAndExecute';AccessControlType='Allow'})
++    if ($LiteralPath -match 'tra-luat-ops' -and (Test-Path $env:R2_ICACLS_LOG)) {
++        $events=@(Get-Content $env:R2_ICACLS_LOG | ForEach-Object {$_ | ConvertFrom-Json})
++        $lastCopy=-1; $lastOwner=-1; $resetInheritance=$false
++        for ($i=0;$i -lt $events.Count;$i++) {
++            $e=$events[$i]
++            if ($e.event -eq 'copy' -and $e.destination -eq $LiteralPath) {$lastCopy=$i}
++            if ($e.args -and $e.args[0] -match 'tra-luat-ops') {
++                if ($e.args -contains '/setowner') {$lastOwner=$i}
++                if ($e.args -contains '/inheritance:r') {$resetInheritance=$true}
++            }
++        }
++        # Model: a freshly copied file can be owned by the running admin account.
++        if ($lastCopy -gt $lastOwner) {$owner='VM\tladmin'}
++        # Model: inherited Users Modify must be removed before protected copies are used.
++        if (-not $resetInheritance) {
++            $access+= [pscustomobject]@{IdentityReference='BUILTIN\Users';FileSystemRights='Modify';AccessControlType='Allow'}
++        }
++    }
++    if ($Mode -eq 'acl-reject' -and $LiteralPath -match 'tra-luat-ops') {
++        $access+= [pscustomobject]@{IdentityReference='VM\tlcommander';FileSystemRights='Modify';AccessControlType='Allow'}
++    }
++    [pscustomobject]@{Owner=$owner;Access=$access}
++}
++function New-ScheduledTaskSettingsSet {param([switch]$StartWhenAvailable,$ExecutionTimeLimit,$MultipleInstances) [pscustomobject]@{stub=$true}}
++function New-ScheduledTaskTrigger {param([switch]$Weekly,$WeeksInterval,$DaysOfWeek,$At) [pscustomobject]@{At=$At}}
++function New-ScheduledTaskAction {param($Execute,$Argument) [pscustomobject]@{Execute=$Execute;Argument=$Argument}}
++function New-ScheduledTaskPrincipal {param($UserId,$LogonType,$RunLevel) [pscustomobject]@{UserId=$UserId}}
++function Register-ScheduledTask {param($TaskName,$Action,$Trigger,$Principal,$Settings,[switch]$Force,$ErrorAction) $script:Captured.Add([pscustomobject]@{name=$TaskName;action=$Action;EA=$ErrorAction})}
++function Get-Credential {param($UserName,$Message) throw 'OFFLINE-STOP-BEFORE-CREDENTIALS'}
++try {
++    if ($Mode -eq 'ancestor-link') {New-Item -ItemType SymbolicLink -Path $ThuMucCongCu -Target $victim | Out-Null}
++    else {
++        New-Item -ItemType Directory $ThuMucCongCu -Force | Out-Null
++        if ($Mode -eq 'root-link') {New-Item -ItemType SymbolicLink -Path (Join-Path $ThuMucCongCu 'npm') -Target $victim | Out-Null}
++    }
++    if ($Mode -eq 'swap-parent') {$env:R2_SWAP_PARENT=$ThuMucCongCu;$env:R2_SWAP_TARGET=$victim}
++    function Copy-Item {param($LiteralPath,$Destination,[switch]$Force)
++        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force
++        [pscustomobject]@{event='copy';destination=$Destination} | ConvertTo-Json -Compress | Add-Content $env:R2_ICACLS_LOG
++        if ($Mode -eq 'hash-reject') {[IO.File]::AppendAllText($Destination,'CORRUPTED')}
++    }
++    $why=''
++    try {Register-LichCapNhat (Split-Path (Split-Path (Split-Path $ProductScript -Parent) -Parent) -Parent)} catch {$why=$_.Exception.Message}
++    $calls=@(); if(Test-Path $env:R2_ICACLS_LOG){$calls=@(Get-Content $env:R2_ICACLS_LOG | ForEach-Object {$_ | ConvertFrom-Json})}
++    [pscustomobject]@{mode=$Mode;stopped=$why;icacls_count=$calls.Count;icacls=$calls;tasks=@($script:Captured);custom_log_preserved=(@($script:Captured | Where-Object {$_.action.Argument -match '-NhatKy'}).Count -gt 0);check_preserved=(@($script:Captured | Where-Object {$_.action.Argument -match '-ChiKiem'}).Count -gt 0);native_ACL_measured=$false} | ConvertTo-Json -Depth 6 -Compress | ForEach-Object { "R2_JSON:$_" }
++} finally {
++    Remove-Item Env:R2_SWAP_PARENT,Env:R2_SWAP_TARGET -ErrorAction SilentlyContinue
++    Remove-Item $root -Recurse -Force
++}
+--- /dev/null
++++ ops/vm/cap-nhat-cong-cu_dang-ky_test.py
+@@ -0,0 +1,59 @@
++#!/usr/bin/env python3
++"""Linux offline Register tests; control flow only, not native Windows ACL evidence.
++
++Run: TL_TEST_PWSH=/path/to/pwsh python3 ops/vm/cap-nhat-cong-cu_dang-ky_test.py
++Product override supports isolated mutation copies via --product /path/to/script.ps1.
++chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm commit
++"""
++import argparse
++import json
++import os
++from pathlib import Path
++import shutil
++import subprocess
++import sys
++
++HERE = Path(__file__).resolve().parent
++parser = argparse.ArgumentParser(description=__doc__)
++parser.add_argument('--product', type=Path, default=HERE / 'cap-nhat-cong-cu.ps1')
++ns = parser.parse_args()
++if sys.platform != 'linux':
++    sys.exit('NOT_RUN: this harness is Linux-only; Windows native tests remain required')
++pwsh = os.environ.get('TL_TEST_PWSH') or shutil.which('pwsh')
++if not pwsh:
++    sys.exit('NOT_RUN: set TL_TEST_PWSH to the local pwsh executable')
++
++measurements = {}
++for mode in ('clean', 'owned', 'acl-reject', 'hash-reject'):
++    p = subprocess.run([pwsh, '-NoProfile', '-File', str(HERE / 'cap-nhat-cong-cu_dang-ky_probe.ps1'),
++                        '-Mode', mode, '-ProductScript', str(ns.product.resolve())],
++                       capture_output=True, text=True, timeout=30)
++    lines = [line[len('R2_JSON:'):] for line in p.stdout.splitlines() if line.startswith('R2_JSON:')]
++    if p.returncode or len(lines) != 1:
++        sys.exit(f'HARNESS_ERROR {mode}: rc={p.returncode}\n{p.stdout}\n{p.stderr}')
++    measurements[mode] = json.loads(lines[0])
++
++clean = measurements['clean']
++actions = clean['tasks']
++arguments = actions[0]['action']['Argument'] if actions else ''
++owned = measurements['owned']
++tests = {
++    'action_preserves_supported_configuration': all(x in arguments for x in (
++        '-MayDich "VM"', '-ThuMucCongCu "', '-NlmVenv "D:\\custom nlm"',
++        '-VenvKho "D:\\custom venv"', '-HomeCommander "D:\\custom profile"',
++        '-TaiKhoanNguoiDung "tlcommander"', '-TacVuCommander "CMD-CUSTOM"')),
++    'bad_acl_prevents_task_registration': not measurements['acl-reject']['tasks'] and
++        measurements['acl-reject']['stopped'].startswith('ACL '),
++    'corrupt_copy_prevents_task_registration': not measurements['hash-reject']['tasks'] and
++        'lệch băm nguồn' in measurements['hash-reject']['stopped'],
++    'new_copy_owner_is_normalized_before_use': bool(actions) and
++        clean['stopped'] == 'OFFLINE-STOP-BEFORE-CREDENTIALS',
++    'inherited_write_is_removed': any('/inheritance:r' in e.get('args', []) and
++        'tra-luat-ops' in e.get('args', [''])[0] for e in clean['icacls']),
++    'already_owned_tree_is_not_provisioned_again': not any('/Tools/' in e.get('resolved', '')
++        for e in owned['icacls']) and bool(owned['tasks']),
++}
++for name, passed in tests.items():
++    print(('PASS' if passed else 'FAIL') + ' ' + name)
++print(f'Register offline: {sum(tests.values())}/{len(tests)} PASS; native ACL NOT_MEASURED')
++sys.exit(0 if all(tests.values()) else 1)
+--- /dev/null
++++ ops/vm/cap-nhat-cong-cu_icacls_stub.py
+@@ -0,0 +1,15 @@
++#!/usr/bin/python3
++import json, os, sys
++from pathlib import Path
++args = sys.argv[1:]
++target = args[0].replace('\\', '/')
++entry = {'args': args, 'resolved': os.path.realpath(target), 'is_link': os.path.islink(target)}
++with open(os.environ['R2_ICACLS_LOG'], 'a') as f:
++    f.write(json.dumps(entry) + '\n')
++# Only records calls. Does not emulate or modify any ACL/owner.
++if os.environ.get('R2_SWAP_PARENT') and '/setowner' in args and '/tra-luat-ops' not in target:
++    parent = Path(os.environ['R2_SWAP_PARENT'])
++    if parent.exists() and not parent.is_symlink():
++        parent.rename(str(parent) + '-before-swap')
++        parent.symlink_to(os.environ['R2_SWAP_TARGET'], target_is_directory=True)
++sys.exit(0)

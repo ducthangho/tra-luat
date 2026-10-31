@@ -1,0 +1,149 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4430537534",
+    "pull_request_review_id": 5721285705,
+    "id": 4430537534,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCBSjPg",
+    "diff_hunk": "@@ -0,0 +1,512 @@\n+#requires -Version 7.0\n+<#\n+cap-nhat-cong-cu.ps1 — cài/nâng cấp bộ công cụ dev cho VM Windows `tra-luat-win`, tương đương bộ mà hook\n+phiên cloud (`.claude/hooks/session-start.sh`) và `ops/cong_cu.yaml` dựng cho Claude/Codex.\n+\n+HAI TẦNG, vì VM có HAI chủ thể quyền khác nhau (đo 31-10-2026):\n+  NguoiDung — chạy bằng `tlcommander` (tài khoản thường, Commander chạy dưới nó). Sau `-DangKyLich`, tài khoản\n+              ấy SỞ HỮU `C:\\Tools\\{npm,Python312,bin}` (trước đó chỉ tạo được tệp MỚI, gói do SYSTEM cài sẵn như\n+              codex/pip không nâng được) nên cài/nâng cấp KHÔNG cần admin: claude, codex (npm), rg,\n+              shellcheck, actionlint (zip có kiểm băm), PyYAML/jsonschema theo ghim của `ops/cong_cu.yaml`,\n+              requirements.txt vào venv của kho, notebooklm-mcp-cli (nlm) vào venv riêng.\n+  HeThong   — chạy bằng SYSTEM (Scheduled Task do admin đăng ký): Git, Node LTS, gh, PowerShell 7 —\n+              bốn thứ nằm trong `C:\\Program Files`. VM KHÔNG có winget/choco/scoop, nên tải installer\n+              chính thức, KIỂM sha256, rồi cài im lặng.\n+\n+AN NINH tầng HeThong (đừng nới): `C:\\Tools` do `tlcommander` ghi được, mà `tlcommander` là tài khoản\n+Commander điều khiển từ xa. Vì vậy tầng SYSTEM:\n+  · chỉ gọi tệp chạy bằng ĐƯỜNG DẪN TUYỆT ĐỐI trong `Program Files`/`System32`, KHÔNG tra PATH;\n+  · tải vào một thư mục mới tạo mà ACL chỉ cho SYSTEM + Administrators;\n+  · chạy từ bản script đã được `-DangKyLich` chép vào `Program Files` (chỉ admin ghi được).\n+Một script SYSTEM đặt ở chỗ user ghi được là cửa leo quyền.\n+\n+BĂM: mọi thứ tải về phải khớp sha256 trước khi chạy/chép. Nguồn băm theo thứ tự: trường `digest` của\n+asset GitHub → tệp checksum trong CÙNG release → (Node) SHASUMS256.txt. Không tìm được băm ⇒ TỪ CHỐI cài\n+công cụ đó (đo 31-10: actionlint 1.7.7 không có `digest` nhưng có `*_checksums.txt`).\n+\n+Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê/tham số sai · 3 tầng HeThong mà không\n+phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì · 6 -DangKyLich hỏng giữa chừng.\n+#>\n+[CmdletBinding()]\n+param(\n+    [ValidateSet('NguoiDung', 'HeThong')][string]$PhamVi = 'NguoiDung',\n+    [switch]$ChiKiem,                 # đo + so phiên bản, KHÔNG cài gì\n+    [switch]$DangKyLich,              # (admin) chép script vào Program Files + đăng ký 2 Scheduled Task\n+    [string]$ThuMucCongCu = 'C:\\Tools',\n+    [string]$NlmVenv = 'C:\\work\\nlm-venv',\n+    [string]$VenvKho = 'C:\\work\\tra-luat\\.venv',\n+    [string]$HomeCommander = 'C:\\ProgramData\\TraLuatCommander\\profile',\n+    [string]$TaiKhoanNguoiDung = 'tlcommander',\n+    [string]$MayDich = 'TRA-LUAT-WIN',  # chốt tên máy: đổi ACL/đăng ký tác vụ chỉ được làm đúng trên VM này\n+    [string]$TacVuCommander = 'TraLuatRemoteCommander',  # Desktop Commander chạy trên Node — cài lại Node là giết nó\n+    [string]$NhatKy = '',\n+    [switch]$NapHam                   # chỉ nạp hàm (cho bộ test), không chạy gì\n+)\n+\n+$ErrorActionPreference = 'Stop'\n+$ProgressPreference = 'SilentlyContinue'\n+# Ép UTF-8 TRƯỚC khi in: console VM không phải UTF-8 nên dòng tiếng Việt ra thành `b?n kh�ng` (đo 31-10-2026).\n+try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }\n+$OutputEncoding = [Text.UTF8Encoding]::new($false)\n+\n+$Script:TenTacVuHeThong = 'TraLuat-CapNhatCongCu-HeThong'\n+$Script:TenTacVuNguoiDung = 'TraLuat-CapNhatCongCu-NguoiDung'\n+$Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'",
+    "path": "ops/vm/cap-nhat-cong-cu.ps1",
+    "commit_id": "6733d09558218c146b6c9475e6c0016d0b68d311",
+    "original_commit_id": "6733d09558218c146b6c9475e6c0016d0b68d311",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Defer ProgramFiles initialization until after the Windows guard**\n\nOn Linux, where `ProgramFiles` is normally unset, this `Join-Path` throws under `$ErrorActionPreference = 'Stop'` before the platform guard can return the documented exit code 4. It also prevents the test suite from loading functions through `-NapHam`, making its explicit non-Windows test unreachable. Initialize this Windows-only path after the platform guard, while allowing function-only loading without it. Add a subprocess test with `ProgramFiles` unset for both normal execution and `-NapHam`, and retain a Windows registration test to ensure the installation path still initializes correctly.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-10-31T04:38:49Z",
+    "updated_at": "2026-10-31T04:38:49Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1065#discussion_r4430537534",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1065",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4430537534"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1065#discussion_r4430537534"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1065"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4430537534/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 54,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 54,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4430544980",
+    "pull_request_review_id": 5721293082,
+    "id": 4430544980,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABCBTAVA",
+    "diff_hunk": "@@ -0,0 +1,512 @@\n+#requires -Version 7.0\n+<#\n+cap-nhat-cong-cu.ps1 — cài/nâng cấp bộ công cụ dev cho VM Windows `tra-luat-win`, tương đương bộ mà hook\n+phiên cloud (`.claude/hooks/session-start.sh`) và `ops/cong_cu.yaml` dựng cho Claude/Codex.\n+\n+HAI TẦNG, vì VM có HAI chủ thể quyền khác nhau (đo 31-10-2026):\n+  NguoiDung — chạy bằng `tlcommander` (tài khoản thường, Commander chạy dưới nó). Sau `-DangKyLich`, tài khoản\n+              ấy SỞ HỮU `C:\\Tools\\{npm,Python312,bin}` (trước đó chỉ tạo được tệp MỚI, gói do SYSTEM cài sẵn như\n+              codex/pip không nâng được) nên cài/nâng cấp KHÔNG cần admin: claude, codex (npm), rg,\n+              shellcheck, actionlint (zip có kiểm băm), PyYAML/jsonschema theo ghim của `ops/cong_cu.yaml`,\n+              requirements.txt vào venv của kho, notebooklm-mcp-cli (nlm) vào venv riêng.\n+  HeThong   — chạy bằng SYSTEM (Scheduled Task do admin đăng ký): Git, Node LTS, gh, PowerShell 7 —\n+              bốn thứ nằm trong `C:\\Program Files`. VM KHÔNG có winget/choco/scoop, nên tải installer\n+              chính thức, KIỂM sha256, rồi cài im lặng.\n+\n+AN NINH tầng HeThong (đừng nới): `C:\\Tools` do `tlcommander` ghi được, mà `tlcommander` là tài khoản\n+Commander điều khiển từ xa. Vì vậy tầng SYSTEM:\n+  · chỉ gọi tệp chạy bằng ĐƯỜNG DẪN TUYỆT ĐỐI trong `Program Files`/`System32`, KHÔNG tra PATH;\n+  · tải vào một thư mục mới tạo mà ACL chỉ cho SYSTEM + Administrators;\n+  · chạy từ bản script đã được `-DangKyLich` chép vào `Program Files` (chỉ admin ghi được).\n+Một script SYSTEM đặt ở chỗ user ghi được là cửa leo quyền.\n+\n+BĂM: mọi thứ tải về phải khớp sha256 trước khi chạy/chép. Nguồn băm theo thứ tự: trường `digest` của\n+asset GitHub → tệp checksum trong CÙNG release → (Node) SHASUMS256.txt. Không tìm được băm ⇒ TỪ CHỐI cài\n+công cụ đó (đo 31-10: actionlint 1.7.7 không có `digest` nhưng có `*_checksums.txt`).\n+\n+Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê/tham số sai · 3 tầng HeThong mà không\n+phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì · 6 -DangKyLich hỏng giữa chừng.\n+#>\n+[CmdletBinding()]\n+param(\n+    [ValidateSet('NguoiDung', 'HeThong')][string]$PhamVi = 'NguoiDung',\n+    [switch]$ChiKiem,                 # đo + so phiên bản, KHÔNG cài gì\n+    [switch]$DangKyLich,              # (admin) chép script vào Program Files + đăng ký 2 Scheduled Task\n+    [string]$ThuMucCongCu = 'C:\\Tools',\n+    [string]$NlmVenv = 'C:\\work\\nlm-venv',\n+    [string]$VenvKho = 'C:\\work\\tra-luat\\.venv',\n+    [string]$HomeCommander = 'C:\\ProgramData\\TraLuatCommander\\profile',\n+    [string]$TaiKhoanNguoiDung = 'tlcommander',\n+    [string]$MayDich = 'TRA-LUAT-WIN',  # chốt tên máy: đổi ACL/đăng ký tác vụ chỉ được làm đúng trên VM này\n+    [string]$TacVuCommander = 'TraLuatRemoteCommander',  # Desktop Commander chạy trên Node — cài lại Node là giết nó\n+    [string]$NhatKy = '',\n+    [switch]$NapHam                   # chỉ nạp hàm (cho bộ test), không chạy gì\n+)\n+\n+$ErrorActionPreference = 'Stop'\n+$ProgressPreference = 'SilentlyContinue'\n+# Ép UTF-8 TRƯỚC khi in: console VM không phải UTF-8 nên dòng tiếng Việt ra thành `b?n kh�ng` (đo 31-10-2026).\n+try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false) } catch { }\n+$OutputEncoding = [Text.UTF8Encoding]::new($false)\n+\n+$Script:TenTacVuHeThong = 'TraLuat-CapNhatCongCu-HeThong'\n+$Script:TenTacVuNguoiDung = 'TraLuat-CapNhatCongCu-NguoiDung'\n+$Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'",
+    "path": "ops/vm/cap-nhat-cong-cu.ps1",
+    "commit_id": "6733d09558218c146b6c9475e6c0016d0b68d311",
+    "original_commit_id": "6733d09558218c146b6c9475e6c0016d0b68d311",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Đúng — đã sửa ở `b0814f4`. `$Script:ThuMucCaiDat` giờ chỉ được tính bên trong `Register-LichCapNhat` (chỗ duy nhất dùng; đã qua chốt nền + chốt máy + chốt admin), mức script để `$null`. Ba chỗ dùng `ProgramFiles` khác đều nằm trong hàm, chỉ chạy sau các chốt.\n\nThêm 2 ca tiến trình con bỏ `Env:ProgramFiles`:\n- `napham_khong_can_programfiles` — dot-source `-NapHam` phải nạp được hàm;\n- `khong_programfiles_van_toi_chot` — chạy thường phải tới chốt: mã 4 ngoài Windows, mã 5 (sai máy) trên Windows.\n\nĐo trên VM Windows (pwsh 7.6.9): head `b0814f4` ⇒ **38/38**; cùng bộ test với script cũ `6733d09` ⇒ **36/38**, đỏ đúng hai ca mới (có răng). Đường đăng ký trên Windows đã chạy thật với `-DangKyLich` (rc=0, bản cài khớp băm) trước bản sửa; bản sửa chỉ dời chỗ tính, không đổi giá trị. Chưa đo trên Linux (container không có pwsh).\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-10-31T04:40:22Z",
+    "updated_at": "2026-10-31T04:40:23Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1065#discussion_r4430544980",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1065",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4430544980"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1065#discussion_r4430544980"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1065"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4430544980/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 54,
+    "side": "RIGHT",
+    "in_reply_to_id": 4430537534,
+    "author_association": "OWNER",
+    "original_position": 54,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  }
+]

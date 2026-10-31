@@ -1,0 +1,85 @@
+{
+  "nguon": "thuat_lai — chep tay tu C:\\work\\gate-3dfb973-bundle.json tren tra-luat-win (sha256 f5976d52476cba5a321fa3c29e727a7f785789db0892abfa85e5431c81b30781), doc qua Desktop Commander 31-10-2026; tep goc va scripts/.tl_state/gate/*.{json,out} o lai tren VM, KHONG nam trong kho",
+  "may": "tra-luat-win (Windows Server 2022, AMD64), CPython 3.12.10 (C:/work/tra-luat/.venv), Git Bash MINGW64, tai khoan tlcommander qua Desktop Commander",
+  "repo": "C:\\work\\tra-luat-agent\\gate-3dfb973 (clone moi tu github, checkout detached, core.abbrev=7)",
+  "head_sha": "3dfb9731ceda05afbcec4e803a919c4df5e2e5a2",
+  "tree_sha": "ddb5ae9dc882d75b33bc6dfddcd3b4aba6dda6cc",
+  "che_do": "--require-clean (tracked_clean=true, worktree_clean=true truoc va sau moi lenh)",
+  "runner": ".claude/dev/gate_lifecycle.py run --kind heavy (co_che_cach_ly job-object), runner_sha256 637678bdf8354935ad965326899b7d5b07d3cd6fbf289ccfc79ad194b1a08810",
+  "lenh": "8 gate cua .claude/skills/gate (selftest gen_inst workflow golden docclaims determinism relcheck relverify)",
+  "ket_qua": {
+    "selftest": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "== tl selftest 1774/1774 ==",
+      "output_sha256": "e52aa48ae19a875d9b78215295cbb884635a380dff9157f8b744e00d494e2bf9",
+      "output_bytes": 82227,
+      "duration_seconds": 714.688
+    },
+    "gen_inst": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "== gen_instructions selftest 44/44 ==",
+      "output_sha256": "6e94484461be7ca3914dedee716a280e5a62f082cdb723a60396b5fbbbfe7b04",
+      "output_bytes": 1627,
+      "duration_seconds": 1.0
+    },
+    "workflow": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "\"ok\": true",
+      "output_sha256": "f701308001f4f2854c60413aab3d7f603de379926120fc36f0b301ddf0240073",
+      "output_bytes": 33350,
+      "duration_seconds": 1.594
+    },
+    "golden": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "\"ok\": true",
+      "output_sha256": "fdc5307d8ff3f4f6107ce4912059a79f16d9e86bce5d01ff23f2f17f5f868c75",
+      "output_bytes": 25819,
+      "duration_seconds": 34.75
+    },
+    "docclaims": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "\"ok\": true",
+      "output_sha256": "fc2bd6a5471a71118ffc7cff087898a002521caa27c8d78b5b0113dd3a859ac8",
+      "output_bytes": 75828,
+      "duration_seconds": 13.469
+    },
+    "determinism": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "\"ok\": true",
+      "output_sha256": "a7ed974adadcddd4822f37ea3c6a35583a12f5123a4d83d499372835da61cf9e",
+      "output_bytes": 32876,
+      "duration_seconds": 77.656
+    },
+    "relcheck": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "\"ok\": true",
+      "output_sha256": "48f763832d3a4f69b7aae4f0ccc4c34e5f7f64ae9ae5ad44188db5989fc33f7f",
+      "output_bytes": 7580,
+      "duration_seconds": 7.14
+    },
+    "relverify": {
+      "returncode": 0,
+      "status": "pass",
+      "positive_verified": true,
+      "positive_match": "\"ok\": true",
+      "output_sha256": "71e9004ea843b736449be7752f9e847d07cc563f5e696b9f84a837450ed08563",
+      "output_bytes": 22387,
+      "duration_seconds": 3.954
+    }
+  },
+  "tong": "== GATE XANH TRON == GATE_EXIT=0"
+}

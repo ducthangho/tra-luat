@@ -24,13 +24,15 @@ Remove-Item -Recurse -Force $d
 ```
 
 `-DangKyLich` làm ba việc:
-1. chép script + `cong_cu.yaml` + `requirements.txt` vào `C:\Program Files\tra-luat-ops` (chỉ admin ghi);
-2. giao `C:\Tools\{npm,Python312,bin}` cho `tlcommander` (owner + Modify) — từ đây coi `C:\Tools` là vùng
-   của tài khoản ấy, admin/SYSTEM không chạy công cụ từ đó;
+1. ĐỌC chủ sở hữu `C:\Tools\{npm,Python312,bin}` và in `LƯU Ý` nếu chưa thuộc `tlcommander` — KHÔNG tự đổi ACL
+   (xem mục "Giao `C:\Tools` cho `tlcommander`" bên dưới);
+2. ĐẶT LẠI ACL `C:\Program Files\tra-luat-ops` (bỏ thừa kế; chỉ SYSTEM/Administrators ghi; từ chối nếu thư mục ấy hay
+   tổ tiên của nó là junction/symlink), chép script + `cong_cu.yaml` + `requirements.txt` vào, đặt lại chủ sở hữu, rồi ĐO
+   lại ACL (theo bit quyền) và băm từng tệp — lệch là dừng mã 6;
 3. đăng ký `TraLuat-CapNhatCongCu-HeThong` (SYSTEM, CN 02:30) và `TraLuat-CapNhatCongCu-NguoiDung`
    (`tlcommander`, lưu mật khẩu như `TraLuatRemoteCommander` — script HỎI mật khẩu khi đăng ký; S4U bị từ chối trên
    VM; CN 03:30; đổi mật khẩu `tlcommander` thì chạy lại `-DangKyLich`), 2 tuần/lần, `StartWhenAvailable` (VM tắt thì chạy
-   bù khi bật). `tlcommander` được quyền đọc + chạy hai tác vụ, không sửa được.
+   bù khi bật). Đối số tác vụ mang ĐỦ tham số dùng lúc đăng ký (`-MayDich`, `-ThuMucCongCu`, …). `tlcommander` được quyền đọc + chạy hai tác vụ, không sửa được.
 
 ## Chạy theo yêu cầu
 
@@ -45,3 +47,16 @@ Remove-Item -Recurse -Force $d
 
 `pwsh -NoProfile -File ops/vm/cap-nhat-cong-cu_test.ps1` (cần `python` có PyYAML, hoặc đặt
 `$env:TL_TEST_PYTHON`). Không mạng, không cài gì. Chưa nối vào CI — xem mô tả PR.
+
+## Giao `C:\Tools` cho `tlcommander` — KHÔNG có công thức tự động hay bước tay trong kho
+
+Tầng `NguoiDung` chỉ nâng được gói có sẵn (codex, pip…) khi `tlcommander` sở hữu `C:\Tools\{npm,Python312,bin}`;
+thiếu quyền thì công cụ ấy báo `loi` (EPERM) trong nhật ký, các công cụ khác vẫn chạy.
+
+Kho KHÔNG cung cấp cách giao quyền ấy, kể cả dạng lệnh tay. Ba lượt cross-review PR #1065 (P0 `giao-acl-theo-junction`)
+cho thấy mọi ACL đệ quy THEO TÊN trên cây mà một tài khoản thường kiểm soát (hoặc có thể tráo tổ tiên của nó) đều có khe:
+junction ở con, ở tổ tiên, hoặc tráo giữa hai lệnh — và đích bị trao quyền có thể là BẤT KỲ thư mục hệ thống nào. Kiểm
+tra trước khi chạy không đóng được khe giữa lúc kiểm và lúc ghi.
+
+Trên `tra-luat-win`, việc giao quyền đã làm MỘT lần ngày 31-10-2026 (trước khi có kết luận trên). Máy mới: chấp nhận giới
+hạn trên, hoặc dựng `C:\Tools` sao cho `tlcommander` TỰ TẠO các thư mục ấy (người tạo là chủ) thay vì giao quyền lại.

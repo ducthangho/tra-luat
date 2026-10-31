@@ -1,0 +1,79 @@
+--- ops/vm/cap-nhat-cong-cu.ps1
++++ ops/vm/cap-nhat-cong-cu.ps1
+@@ -357,7 +357,9 @@
+     if ($ChiKiem -and -not $truoc) { Add-KetQua $Ten '' '' 'loi' "$exe chưa cài hoặc không đọc được phiên bản"; return }
+     try {
+         $rel = Get-Release $Repo $Tag
+-        $moi = ($rel.tag_name -replace '^v', '')
++        # Bản ghim là đích độc lập với metadata HTTP; tag trả về lệch thì không chứng nhận/cài.
++        if ($Tag -and -not (Test-CungDinhDanh $rel.tag_name $Tag)) { throw "release tag '$($rel.tag_name)' lệch ghim '$Tag'" }
++        $moi = if ($Tag) { $Tag -replace '^[vV]', '' } else { $rel.tag_name -replace '^v', '' }
+         $ss = Compare-PhienBan $truoc $moi
+         # Hợp đồng B (lượt 10): ĐẠT `giu` chỉ khi BẰNG đích. Cao hơn bản phát hành mới nhất (không ghim) ⇒ `loi`, không tự hạ;
+         # có ghim mà cao hơn ⇒ đi tiếp để cài đúng bản ghim.
+--- ops/vm/cap-nhat-cong-cu_test.ps1
++++ ops/vm/cap-nhat-cong-cu_test.ps1
+@@ -786,6 +786,63 @@
+     }
+ }
+ 
++# Native output, archive, hash, copy and version getter are real on Linux.
++# Only HTTP is substituted; the requested pinned URL is observed independently.
++function Invoke-ZipGhimGia([string]$CheDo = 'dung') {
++    $ChiKiem = $false
++    $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-pin-' + [guid]::NewGuid().ToString('N'))
++    try {
++        New-Item -ItemType Directory -Path "$g/bin", "$g/package" | Out-Null
++        $pin = '2.0.0'
++        $tagTraVe = if ($CheDo -eq 'dung') { '2.0.0' } else { '3.0.0' }
++        $before = if ($CheDo -eq 'giu-lech') { '3.0.0' } else { '1.0.0' }
++        [IO.File]::WriteAllText("$g/bin/actionlint.exe", "#!/bin/sh`necho $before`nexit 0`n")
++        [IO.File]::WriteAllText("$g/package/actionlint.exe", "#!/bin/sh`necho $tagTraVe`nexit 0`n")
++        & chmod +x "$g/bin/actionlint.exe"
++        Compress-Archive -LiteralPath "$g/package/actionlint.exe" -DestinationPath "$g/payload.zip"
++        $hashPin = (Get-FileHash -LiteralPath "$g/payload.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
++        $requestsPin = [Collections.Generic.List[string]]::new()
++        $downloadsPin = [Collections.Generic.List[string]]::new()
++        function Invoke-RestMethod { param($Headers, $Uri, $TimeoutSec)
++            $requestsPin.Add([string]$Uri)
++            [pscustomobject]@{tag_name="v$tagTraVe";assets=@([pscustomobject]@{
++                name="actionlint_${pin}_windows_amd64.zip";browser_download_url='OFFLINE';digest="sha256:$hashPin"
++            })}
++        }
++        function Invoke-WebRequest { param($Uri, $OutFile, $Headers, $TimeoutSec)
++            $downloadsPin.Add([string]$OutFile)
++            Microsoft.PowerShell.Management\Copy-Item -LiteralPath "$g/payload.zip" -Destination $OutFile
++        }
++        function Copy-Item { param($LiteralPath, $Destination, [switch]$Force)
++            Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
++            & chmod +x $Destination
++        }
++        $Script:KetQua.Clear()
++        Update-CongCuZip 'actionlint' 'rhysd/actionlint' "v$pin" '^actionlint_2[.]0[.]0_windows_amd64[.]zip$' 'actionlint.exe' @('-version') '(?m)^(\d+\.\d+\.\d+\S*)' "$g/bin" *> $null
++        $rawPin = & "$g/bin/actionlint.exe" -version; $rcPin = $LASTEXITCODE
++        [pscustomobject]@{rows=@($Script:KetQua);requests=@($requestsPin);downloads=$downloadsPin.Count;raw="$rawPin";rc=$rcPin}
++    } finally { Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
++}
++if (-not $IsWindows) {
++    Ca 'zip_ghim_tag_dung_doi_chung' {
++        $k = Invoke-ZipGhimGia
++        $k.rows.Count -eq 1 -and $k.rows[0].hanh_dong -eq 'nang_cap' -and $k.rows[0].sau -ceq '2.0.0' -and
++            $k.downloads -eq 1 -and $k.rc -eq 0 -and $k.raw -ceq '2.0.0' -and
++            $k.requests.Count -eq 1 -and $k.requests[0] -ceq 'https://api.github.com/repos/rhysd/actionlint/releases/tags/v2.0.0'
++    }
++    Ca 'zip_ghim_response_tag_lech_khong_duoc_nang_cap_dat' {
++        $k = Invoke-ZipGhimGia 'cai-lech'
++        $k.rows.Count -eq 1 -and $k.rows[0].hanh_dong -eq 'loi' -and $k.rc -eq 0 -and
++            $k.requests.Count -eq 1 -and $k.requests[0] -ceq 'https://api.github.com/repos/rhysd/actionlint/releases/tags/v2.0.0'
++    }
++    Ca 'zip_ghim_response_tag_lech_khong_duoc_giu_dat' {
++        $k = Invoke-ZipGhimGia 'giu-lech'
++        $k.rows.Count -eq 1 -and $k.rows[0].hanh_dong -eq 'loi' -and $k.rc -eq 0 -and $k.raw -ceq '3.0.0' -and
++            $k.requests.Count -eq 1 -and $k.requests[0] -ceq 'https://api.github.com/repos/rhysd/actionlint/releases/tags/v2.0.0'
++    }
++}
++
++
+ Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {
+     # Lưới cuối của luồng chạy (không gọi được ngoài Windows vì chốt nền): lệnh gọi tầng nằm trong try, catch ghi `loi`.
+     (Get-Content -LiteralPath $Script -Raw) -match "try \{ if \(\`$PhamVi -eq 'NguoiDung'\) \{ Invoke-TangNguoiDung \`$goc \} else \{ Invoke-TangHeThong \} \}\s*\r?\ncatch \{ Add-KetQua "

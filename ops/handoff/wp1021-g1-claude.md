@@ -130,6 +130,25 @@ Giới hạn Codex khai: input `runner_set` của dispatch không có trong JSON
 
 Nguyên văn hai verdict ở **Phụ lục A** (lượt 8, 9), cùng quy ước cắt giữa hai dấu như lượt 1–7 (phần giữa + một `\n` cuối = tệp gốc).
 
+**C7 — CẬP NHẬT 31-10 ~10:03Z, SAU KHI CẤP QUYỀN SYMLINK (đọc trước đoạn "KẾT QUẢ" ngay dưới; đoạn ấy là lượt TRƯỚC khi cấp quyền).**
+Chủ kho duyệt cấp quyền. Cách làm: `gcloud` trên ASUS-LAPTOP (tài khoản chủ kho) thêm TẠM khoá metadata `windows-startup-script-cmd` gọi
+`C:\tl-win\cap-quyen-symlink.ps1` (sha256 `3F25C86F…2E5926`, `secedit` thêm `SeCreateSymbolicLinkPrivilege` cho `tra-luat-win\tlcommander`,
+chạy dưới SYSTEM lúc khởi động); khoá `windows-startup-script-ps1` (bootstrap của chủ kho) KHÔNG đụng. Trước khi tắt VM: đợi gate của một phiên
+khác (`C:\work\tra-luat-agent\gate-3dfb973`, 07:58Z→08:12:22Z, KHÔNG ghi `KHOA.txt`) xong, rồi ghi khoá 08:16:20Z. Tắt êm `stop`/`start` hai lần
+(lần 1: chính sách đã áp — `SeCreateSymbolicLinkPrivilege = tlcommander,*S-1-5-32-544` — nhưng tiến trình Desktop Commander đăng nhập TRƯỚC khi
+script chạy nên vẫn token cũ, `symlink_to` vẫn `WinError 1314`; lần 2, boot 08:22:02Z: `whoami /priv` có quyền, `symlink_to` ⇒ `symlink_ok True`).
+Đã gỡ khoá `-cmd` (rc=0; còn `block-project-ssh-keys`, `windows-keys`, `windows-startup-script-ps1`). Quyền symlink của `tlcommander` GIỮ lâu dài.
+- Toàn suite 08:24:43Z→09:45:28Z: `97/98 ca · 153/153 đột biến thường CÓ RĂNG · 2/2 TỰ KIỂM`, `TỔNG: ĐỎ`. Ca đỏ duy nhất là `c14_cli_ba_trang_thai`
+  (cổng thật rc=2, `KHÔNG ĐO ĐƯỢC quan hệ tổ tiên của 669ba5866cf2… (git rc=127)`), KHÔNG phải `c91`.
+- `c14` chạy ~08:45Z, CHỒNG với phép đo riêng `c91` + 8 đột biến của chính phiên này (08:36:28Z→08:56:25Z) — lỗi của executor, đúng bài học
+  ADR-0057 D1. Phép đo riêng ấy: `c91` ĐẠT; m103 m105 m115 m116 m117 m118 m129 m130 đều `CÓ RĂNG … giet_that` đúng `c91` (assertion của chính
+  `c91`, không còn `WinError 1314`).
+- Chạy lại riêng trên VM RẢNH (09:56:43Z→~10:02Z, chỉ một tiến trình python): `669ba5866cf2` có trong clone (`cat-file` ⇒ `commit`);
+  `c14` **ĐẠT**, `c91` **ĐẠT**.
+- Kết luận đo được: mọi ca và mọi đột biến đều đã có lần ĐẠT trên `356a27e` ở VM có quyền symlink, nhưng **chưa có MỘT lượt toàn suite 98/98
+  không chồng** — ghép hai phép đo, không phải một N/N. Muốn N/N một lượt thì chạy lại toàn suite (~80 phút trên VM) khi máy rảnh.
+- Sổ đo `C:\tl-win\do-luong.csv` thêm dòng 10:02:58Z; khoá `C:\tl-win\KHOA.txt` xoá (0 byte).
+
 **C7 Windows local trên `356a27e` — KẾT QUẢ (tra-luat-win): `97/98 ca · 145/153 đột biến thường CÓ RĂNG · 2/2 TỰ KIỂM`, `TỔNG: ĐỎ`.
 Toàn bộ chỗ đỏ là MÔI TRƯỜNG VM, ĐỎ SẴN trên base, KHÔNG do diff #1021** (ADR-0057 §2: lỗi có sẵn trên base nêu tên kèm SHA đo nền):
 - Ca đỏ duy nhất `c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no` = `KHÔNG ĐO ĐƯỢC [tin_dung_gia]`: `OSError: [WinError 1314] A required

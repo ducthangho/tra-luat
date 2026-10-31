@@ -35,7 +35,7 @@ verdict_ban_goc: >-
   cmp khop, cung sha256 (SHA256SUMS cua thu muc).
 reviewed_sha: 16e992a01c0a4ec8cfcc793dac9c1def5e288ae8
 reviewed_tree: da846f35658795cf61c910ea4524e36888e8d0b0
-reviewed_sha_nguon: '(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean.'
+reviewed_sha_nguon: '(a) Dong 2 verdict va run.json head khop reviewed_sha. Run.json neo kho nguon /home/user/tra-luat; SHA/tree cua clone /tmp/claude-0/rv/pr1048-review-1/cay-kho do reviewer kiem rieng, xem review_evidence va VERDICT.md.'
 reviewed_sha_to_tien: '(a) git merge-base --is-ancestor 16e992a b653574: rc 0.'
 base_sha: 8cdb15a786304bab084b43c8b30c127ae87e2594
 evidence_url: https://github.com/ducthangho/tra-luat/blob/18a9f0351d566b3895abf5c11e43cbe35938c7d8/ops/reviews/pr1048-review-1-codex-verdict.md
@@ -60,10 +60,15 @@ model_reviewer_identity:
   run_json_ghi_chu: >-
     (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 316.376, head 16e992a, worktree_sach true,
     execution_surface codex_cli, prompt_sha256 8f0d5d05… = sha256 ops/reviews/pr1048-review-1-codex/PROMPT.md.
+  launcher_workspace: /home/user/tra-luat
+  review_clone_workspace: /tmp/claude-0/rv/pr1048-review-1/cay-kho
+  workspace_ghi_chu: >-
+    (a) run.json workspace/head/worktree_sach/probe cua launcher thuoc kho nguon /home/user/tra-luat.
+    Clone reviewer duoc kiem rieng trong review_evidence va VERDICT.md; khong gan phep do kho nguon cho clone.
   cli: >-
-    codex-cli 0.164.0 qua `launcher.py run --workspace <sandbox>/cay-kho --expected-repo github.com/ducthangho/tra-luat
-    --expected-root-commit 394e934… --expected-head 16e992a… --require-clean --prompt-file … --expected-prompt-sha256 … --
-    codex exec -c model_reasoning_effort=xhigh --sandbox workspace-write -C <sandbox> --skip-git-repo-check "<chi thi>"`
+    (b) codex-cli 0.164.0 la loi khai lich su. Argv day du KHONG_DO_DUOC tu cac tep duoc luu.
+    (a) run.json lenh.chuong_trinh=codex, so_doi_so=9, van_tay=068af61f1d5db986;
+    workspace hieu luc cua launcher la /home/user/tra-luat.
   model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
   model: gpt-6.1-sol
   model_da_chay: gpt-6.1-sol
@@ -88,4 +93,7 @@ verdict_usage_caveats:
   - id: VERDICT-KHONG-TU-XAC-NHAN-SURFACE
     muc: P3
     mo_ta: '(a) Than verdict tu noi khong xac nhan duoc model/surface tu ben trong; nguon do_may la run.json cua launcher, khong phai loi khai cua verdict.'
+  - id: LAUNCHER-NEO-KHO-NGUON-KHONG-PHAI-CLONE
+    muc: P3
+    mo_ta: '(a) run.json workspace /home/user/tra-luat: head/worktree_sach/probe do kho nguon. Clone duoc review o /tmp/claude-0/rv/pr1048-review-1/cay-kho, SHA/tree/check dan tu review_evidence va VERDICT.md. Argv CLI day du KHONG_DO_DUOC tu hien vat luu.'
 nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

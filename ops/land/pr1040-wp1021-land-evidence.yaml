@@ -143,3 +143,30 @@ moc_workflow_definition_20261031:
     Output graphql chep tu ket qua start_process cua Desktop Commander (khong qua hoi thoai cua chu kho); bam byte tren may chu kho
     KHONG_DO_DUOC. Luc do (08:33Z) run 41182092305 con in_progress: moc Run (conclusion), Checkout va Gate output CHUA do.
   bon_moc_10_2_2: '1/4 measured (Workflow definition). Run · Checkout · Gate output cho run xong.'
+
+landed_20261031:
+  bo_canh: 'Them sau khi gate push master xong. Khoi nay KHONG sua dong nao o tren; cac cau `landed: false` / `pending` o tren la anh chup luc ghi so dau.'
+  bon_moc_10_2_2:
+    nguon: ops/land/pr1040-wp1021-provenance/bon-moc-10-2-2.txt
+    run: 'measured — readback-run-41182092305.json: attempt 1, push master, head c8ff9ed, completed success, path .github/workflows/ci.yml; readback-jobs-41182092305.json 23/23 success ubuntu-latest, runner_id khac 0.'
+    checkout: 'measured — log-gate-124483186191-trich.txt: git log -1 --format=%H sau checkout = c8ff9ed563403fffa3c49c84bfce42e9a66bc68b.'
+    workflow_definition: 'measured — xem moc_workflow_definition_20261031 (graphql-workflowrun-41182092305.json, moc-workflow-definition.txt).'
+    gate_output: >-
+      measured — artifact-13035698299/tl-selftest-Linux.json (zip sha256 0f1dd175… = digest REST trong readback-artifacts-41182092305.json):
+      status pass, returncode 0, positive_verified true, positive_match `== tl selftest 1774/1774 ==`, identity.head_sha c8ff9ed,
+      identity.tree_sha 83dd5e0 = merge_commit_tree, output_sha256 = sha256 artifact-13035698299/tl-selftest-Linux.out.
+  duyet_landed:
+    url: https://github.com/ducthangho/tra-luat/pull/1070#issuecomment-6541260357
+    nguon: 'measured — readback-comment-6541260357.json: user ducthangho, author_association OWNER, 2026-10-31T08:40:41Z, than chua authorized_head_sha a16932aa09ce860a614f0bab4b2015699e7221bc.'
+    nguoi_dang: 'loi_khai_co_neo — phien session_01WZT2MvvoQV8QGF1vX9STrJ dang bang credential cua chu kho theo chi thi trong phien "Ban comment luon cho toi di de land bang true" (31-10-2026); comment tu khai dieu nay. Bam byte chi thi KHONG_DO_DUOC.'
+    dieu_kien_kem: 'Comment rang buoc landed vao gate 41182092305 success + 4/4 moc: ca hai DAT (tren).'
+  dieu_kien_10_2_4:
+    - '(1) gate tren merge SHA c8ff9ed: DAT — 4/4 moc §10.2.2 measured.'
+    - '(2) lease da nha: DAT — rut han 08:10Z, ai-dang-giu 08:11:23Z NGƯỜI_GIỮ 0 (lease.do_lai_sau_han_20261031T0811Z).'
+    - '(3) bookkeeping: DAT — ho so nay + 10 bien nhan review (PR #1070).'
+    - '(4) review neo head da review 356a27e: DAT — loi goi 9, 10 approve 0 P0-P3; a16932a chi them merge master; connector sach tren a16932a.'
+    - '(5) uy quyen land neo SHA: DAT — duyet_landed.'
+    - '(6) muc tieu packet vao master: DAT.'
+    - '(7) reviewer assurance §8.1: DAT (assurance_81).'
+  lech_da_chap_nhan: ['tran Codex 10/9', 'Windows local 97/98 (c91 do san tren base, thuat_lai cua executor)']
+  landed: true

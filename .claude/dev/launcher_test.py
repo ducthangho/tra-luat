@@ -9409,6 +9409,25 @@ def r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau():
 
 
 @ca
+def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
+    """F4 còn lại: phần tử PATH rỗng = cwd; llm ở cwd phải thắng bản có shebang phía sau."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    with San() as d:
+        first = d / "first"
+        later = d / "later"
+        _wp1077_tep(first, "llm", 'case "$1" in --version) echo llm-FIRST;; keys) echo openai;; esac\n')
+        _wp1077_tep(later, "llm", '#!/bin/sh\ncase "$1" in --version) echo llm-LATER;; keys) echo other;; esac\n')
+        env = {"PATH": os.pathsep + str(later), "LANG": "C.UTF-8"}
+        with contextlib.chdir(first), patch.dict(os.environ, env, clear=True):
+            tt, mo_ta = m._do_openai_llm(env, False)
+        bang(tt == "CO_CREDENTIAL" and "llm-FIRST" in mo_ta,
+             f"PATH rong: do nham llm phia sau: {tt} {mo_ta!r}")
+
+
+@ca
 def r802_cai_rg_windows_chon_ban_chay_duoc():
     """F2 (Codex lượt 1): NGUYÊN `rg.cai.windows` qua cai_cong_cu.sh; `rg` cũ hỏng đầu PATH ⇒ DAT, đúng thư mục."""
     if LA_WINDOWS:
@@ -12347,6 +12366,9 @@ DOT_BIEN = [
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_probe_doctor_khong_spawn_tran"]),
     ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
      ["r1077_probe_doctor_khong_spawn_tran"]),
+    ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan",
+     ('        tep = os.path.abspath(tim) if tim else tep', '        tep = tim if tim else tep'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     # Codex lượt 2 F4: giải PATH TRƯỚC lần chạy đầu (bỏ ⇒ subprocess chạy bản sau; sh TÊN không tra PATH).
     ("wp1077_ten_tran_khong_giai_PATH", ('    if os.name != "nt" and os.sep not in tep:', '    if False:'),
      ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_ten_tran_khong_duoc_bo_qua_wrapper_dau"]),

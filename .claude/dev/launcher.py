@@ -2933,9 +2933,12 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
 
     Tên trần (`gh`, `llm`…) được giải theo PATH của `env` TRƯỚC LẦN CHẠY ĐẦU (Codex lượt 2 F4, đo
     trên container thật): `subprocess` gặp ENOEXEC ở bản đầu PATH sẽ THỬ TIẾP bản phía sau và chạy nó
-    — đo NHẦM công cụ, trong khi bash và `execvp` glibc dừng ở bản đầu. Giải trước rồi chạy đúng tệp
-    ấy; ENOEXEC thì `/bin/sh` chạy lại CHÍNH tệp ấy (`sh TÊN` không tra PATH). Không giải ra thì giữ
-    tên trần để `subprocess` báo không tìm thấy như cũ.
+    — đo NHẦM công cụ, trong khi bash và `execvp` glibc dừng ở bản đầu. Giải trước, ĐỔI THÀNH ĐƯỜNG DẪN
+    TUYỆT ĐỐI (Codex lượt 3: phần tử PATH rỗng = cwd khiến `which` trả lại tên trần `cli`, và `subprocess`
+    lại tra PATH từ đầu), rồi chạy đúng tệp ấy; ENOEXEC thì `/bin/sh` chạy lại CHÍNH tệp ấy (`sh TÊN`
+    không tra PATH). Đường tương đối tính theo cwd của tiến trình CHA — mọi caller probe hiện không truyền
+    `cwd=`; caller nào truyền thì phải xét lại. Không giải ra thì giữ tên trần để `subprocess` báo không
+    tìm thấy như cũ.
 
     PHẠM VI (Codex lượt 2 F1, chủ kho thu hẹp 31-10-2026): các probe chạy CLI trong bảng `CONG_CU` và
     `KHA_NANG` đi qua hàm này — `r1077_probe_doctor_khong_spawn_tran` khoá danh sách hàm. CHƯA phủ:
@@ -2946,7 +2949,8 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
     tep = lenh[0]
     if os.name != "nt" and os.sep not in tep:
         moi = kw.get("env")
-        tep = shutil.which(tep, path=(moi if moi is not None else os.environ).get("PATH", os.defpath)) or tep
+        tim = shutil.which(tep, path=(moi if moi is not None else os.environ).get("PATH", os.defpath))
+        tep = os.path.abspath(tim) if tim else tep
     lenh = [tep, *lenh[1:]]
     try:
         return subprocess.run(lenh, **kw)

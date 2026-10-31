@@ -1,0 +1,56 @@
+RUN 41033737059 {'id': 41033737059, 'run_attempt': 1, 'event': 'pull_request', 'head_sha': '91466322f705658ed51b80c7c152f6b77f4f90c6', 'status': 'completed', 'conclusion': 'success', 'path': '.github/workflows/ci.yml'} REPOSITORY ducthangho/tra-luat
+JOBS 41033737059 TOTAL 23 LENGTH 23 CONCLUSIONS {'success': 23} LABELS {('ubuntu-latest',): 23}
+JOBS_IDENTITY 41033737059 RUN_IDS [41033737059] HEAD_SHAS ['91466322f705658ed51b80c7c152f6b77f4f90c6'] ATTEMPTS [1]
+RERUN_METADATA 41033737059 {'previous_attempt_url': None, 'rerun_url': 'https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41033737059/rerun'}
+RUN 41069257658-a1 {'id': 41069257658, 'run_attempt': 1, 'event': 'workflow_dispatch', 'head_sha': '91466322f705658ed51b80c7c152f6b77f4f90c6', 'status': 'completed', 'conclusion': 'failure', 'path': '.github/workflows/ci.yml'} REPOSITORY ducthangho/tra-luat
+JOBS 41069257658-a1 TOTAL 16 LENGTH 16 CONCLUSIONS {'success': 13, 'failure': 2, 'skipped': 1} LABELS {('ubuntu-latest',): 1, ('windows-latest',): 14, (): 1}
+JOBS_IDENTITY 41069257658-a1 RUN_IDS [41069257658] HEAD_SHAS ['91466322f705658ed51b80c7c152f6b77f4f90c6'] ATTEMPTS [1]
+WINDOWS_OPS_JOB 124108765783 RUNNER 1000026073 ['windows-latest'] CONCLUSION success
+FAILED_JOB 124108765805 gate-cong-cu (windows-latest, 0) RUNNER 1000026071 ['windows-latest'] FAILED_STEPS [(9, 'G5 manh ban kinh dot bien (#668)', 'failure')]
+SHELLCHECK_STEPS 124108765805 [(7, 'cài shellcheck cho G5 (cài xong đo lại)', 'success')]
+FAILED_JOB 124108766201 gate-packet-loop (windows-latest) RUNNER 1000026080 ['windows-latest'] FAILED_STEPS [(9, 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6', 'failure')]
+SHELLCHECK_STEPS 124108766201 [(7, 'cài shellcheck cho G5 (cài xong đo lại)', 'success')]
+RERUN_METADATA 41069257658-a1 {'previous_attempt_url': None, 'rerun_url': 'https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41069257658/rerun'}
+RUN 41069257658-a2 {'id': 41069257658, 'run_attempt': 2, 'event': 'workflow_dispatch', 'head_sha': '91466322f705658ed51b80c7c152f6b77f4f90c6', 'status': 'completed', 'conclusion': 'success', 'path': '.github/workflows/ci.yml'} REPOSITORY ducthangho/tra-luat
+JOBS 41069257658-a2 TOTAL 16 LENGTH 16 CONCLUSIONS {'success': 15, 'skipped': 1} LABELS {('windows-latest',): 14, ('ubuntu-latest',): 1, (): 1}
+JOBS_IDENTITY 41069257658-a2 RUN_IDS [41069257658] HEAD_SHAS ['91466322f705658ed51b80c7c152f6b77f4f90c6'] ATTEMPTS [2]
+WINDOWS_OPS_JOB 124149392588 RUNNER 1000026073 ['windows-latest'] CONCLUSION success
+RERUN_METADATA 41069257658-a2 {'previous_attempt_url': 'https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41069257658/attempts/1', 'rerun_url': 'https://api.github.com/repos/ducthangho/tra-luat/actions/runs/41069257658/rerun'}
+PR {'number': 1041, 'state': 'closed', 'merged': True, 'merged_at': '2026-10-30T17:28:50Z', 'merge_commit_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93'} MERGED_BY ducthangho HEAD 91466322f705658ed51b80c7c152f6b77f4f90c6 BASE 757bde561d09738858506aecf5de2f050a5f0d5e
+AUTHORIZATION_COMMENT 6529010520 ducthangho OWNER 2026-10-30T17:25:09Z CONTAINS_FULL_AUTHORIZED_HEAD False BODY '**Chỉ thị chủ kho (30-10-2026, khoảng 17:3xZ, phiên điều phối `session_01WZT2MvvoQV8QGF1vX9STrJ`): thứ tự merge và điều kiện merge cho #1037 và #1021.** Ghi hộ chủ kho; phiên điều phối là người đăng.\n\nNguyên văn: *"#1041 đi trước, ghi thứ tự lên #1021 và #1037. Tôi chỉ cho phép merge nếu đã cross review hết P1, P2, P3 và đã test xanh trên Windows. Nếu chưa thỏa mãn điều kiện thì vá tiếp. Test trên Windows có thể chọn 1 trong các máy sẵn sàng"*\n\n**Vì sao cần thứ tự.** Lease `wp1021-r2-g1-claude` và `wp1037-r1-g1-claude` cùng được cấp lúc 30-10 08:57Z và cùng giữ `ops/bien_nhan_v2_test.py`. Mỗi lease đo `ai-dang-giu` ra `NGƯỜI_GIỮ 0`, vì lúc đo, lease kia chưa đăng. Tôi đã thử merge thật `agent/wp1021-g1-claude` với `agent/wp1037-g1-claude` trên bản sao: kết quả là `CONFLICT (content)` trong `ops/bien_nhan_v2_test.py`.\n\n**Thứ tự:**\n1. **#1041 (#1037) merge TRƯỚC.**\n2. **#1040 (#1021) merge SAU.** Sau khi #1041 vào master, #1040 phải merge master vào nhánh của mình và giải xung đột. Sau khi giải:\n   - `bien_nhan_v2_test` vẫn ra N/N, hai số BẰNG NHAU;\n   - không đột biến nào bị mất răng;\n   - lượt cross-review cuối chấm trên đúng head đã giải xung đột.\n\n**Điều kiện merge (áp cho CẢ HAI PR, chặt hơn M-1 của lease):**\n- Cross-review không còn finding **P1, P2 hay P3 nào** trên head cuối. Chưa đạt thì vá tiếp.\n- Test **xanh trên Windows** trên head cuối. Dùng một trong các máy sẵn sàng:\n  - runner `windows-latest`, gọi `workflow_dispatch` cho `ci.yml` trên ref đó và đọc nhãn job;\n  - hoặc máy Windows của chủ kho qua Remote Commander.\n\n  Phải ghi rõ đã đo trên máy nào, kèm N/N.\n- CI lượt PR xanh trên head cuối.\n\n**Trần lời gọi codex:** lease hiện cho #1037 tối đa 2 lời gọi, #1021 tối đa 4. Nếu chạm trần mà vẫn còn P1–P3, executor phải xin `nang_tran` của chủ kho TRƯỚC lời gọi kế tiếp, không tự nới trần. Chỉ thị "vá tiếp" ở trên KHÔNG tự động nâng trần.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_'
+MERGE_GIT b29da0bfe3bfb7a7be69136a1c5c40f82c088a93
+24a37bebf90e5f8e2dd3d4a34e842f2e2f9c6a39
+8cdb15a786304bab084b43c8b30c127ae87e2594 91466322f705658ed51b80c7c152f6b77f4f90c6
+2026-10-31T00:28:50+07:00
+MERGE_IDENTITY_MATCH True True
+DIFF_EQUAL True SHA256 40b6d80f2c0140953cc8712362138de059503982cce0e736b9a196b892ad2198 NUMSTAT 120	4	ops/bien_nhan_v2_test.py
+MASTER_RUNS_COUNT 8
+MASTER_RUN {'id': 41100265738, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'queued', 'conclusion': None, 'created_at': '2026-10-30T17:36:31Z', 'updated_at': '2026-10-30T17:36:31Z'}
+MASTER_RUN {'id': 41099962373, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-30T17:34:11Z', 'updated_at': '2026-10-30T17:36:23Z'}
+MASTER_RUN {'id': 41099591835, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-30T17:31:40Z', 'updated_at': '2026-10-30T17:31:56Z'}
+MASTER_RUN {'id': 41099535313, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-30T17:31:17Z', 'updated_at': '2026-10-30T17:31:31Z'}
+MASTER_RUN {'id': 41099477315, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-30T17:30:53Z', 'updated_at': '2026-10-30T17:31:13Z'}
+MASTER_RUN {'id': 41099285473, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-30T17:29:36Z', 'updated_at': '2026-10-30T17:29:52Z'}
+MASTER_RUN {'id': 41099231598, 'run_attempt': 1, 'name': 'ops — dọn ref (xoá nhánh · xoá tag · tạo tag)', 'event': 'workflow_dispatch', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'completed', 'conclusion': 'success', 'created_at': '2026-10-30T17:29:13Z', 'updated_at': '2026-10-30T17:29:29Z'}
+MASTER_RUN {'id': 41099184556, 'run_attempt': 1, 'name': 'gate', 'event': 'push', 'head_sha': 'b29da0bfe3bfb7a7be69136a1c5c40f82c088a93', 'status': 'pending', 'conclusion': None, 'created_at': '2026-10-30T17:28:53Z', 'updated_at': '2026-10-30T17:28:54Z'}
+CHECK_SOURCE_EXISTS ci.yml pull_request (ubuntu) tren head cuoi readback-run-41033737059.json True
+CHECK_SOURCE_EXISTS ci.yml pull_request (ubuntu) tren head cuoi readback-jobs-41033737059.json True
+CHECK_SOURCE_EXISTS ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi readback-run-41069257658-a1.json True
+CHECK_SOURCE_EXISTS ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi readback-jobs-41069257658-a1.json True
+CHECK_SOURCE_EXISTS ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi readback-run-41069257658-a2.json True
+CHECK_SOURCE_EXISTS ci.yml workflow_dispatch (nhan windows-latest do tu jobs) tren head cuoi readback-jobs-41069257658-a2.json True
+CHECK_SOURCE_EXISTS executor cross-review Codex luot 2/2 tren head cuoi (launcher.py run e400a320) ../reviews/wp1037-g1-codex-luot2/VERDICT.md True
+CHECK_SOURCE_EXISTS executor cross-review Codex luot 2/2 tren head cuoi (launcher.py run e400a320) ../reviews/wp1037-g1-codex-luot2/run/run.json True
+CHECK_SOURCE_EXISTS executor cross-review Codex luot 2/2 tren head cuoi (launcher.py run e400a320) ../reviews/wp1037-g1-codex-luot2-verdict.receipt.yaml True
+CHECK_SOURCE_EXISTS ci.yml push master — DUNG merge SHA readback-runs-b29da0b.json True
+SOURCE_TOKEN 'runner thieu shellcheck' FILES []
+SOURCE_TOKEN 'cai_cong_cu.sh' FILES []
+SOURCE_TOKEN '1045' FILES []
+SOURCE_TOKEN 'runner_set' FILES []
+SOURCE_TOKEN 'windows-only' FILES []
+SOURCE_TOKEN 'rerun_failed_jobs' FILES []
+SOURCE_TOKEN 'rerun-failed-jobs' FILES []
+RERUN_JOB_ID_INTERSECTION []
+RERUN_PREVIOUS_SUCCESS chuan-bi A1 124108724868 success 2026-10-30T14:08:47Z A2 124149329577 success 2026-10-30T14:08:47Z
+RERUN_PREVIOUS_SUCCESS gate-ops (windows-latest) A1 124108765783 success 2026-10-30T14:08:53Z A2 124149392588 success 2026-10-30T14:08:53Z
+CI_PROVENANCE_LIMIT REST run/jobs + merge snapshot; no checkout log, workflow-definition identity readback, or command/rc/N/N job output; no GraphQL403 raw response

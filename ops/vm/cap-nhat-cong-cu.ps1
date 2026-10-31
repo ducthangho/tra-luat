@@ -79,6 +79,13 @@ function Compare-PhienBan([string]$A, [string]$B) {
     return $va.CompareTo($vb)
 }
 
+function Test-CungDinhDanh([string]$A, [string]$B) {
+    # Chứng nhận "BẰNG đích" là bằng ĐỊNH DANH: cùng chuỗi, phân biệt hoa/thường, chỉ bỏ tiền tố `v` của tag. Compare-PhienBan chỉ
+    # dùng để SO THỨ TỰ — nó gộp `2.0.0.windows.4`/`2.0.0.4` và `02.0.0`/`2.0.0` (cross-review PR #1065 lượt 13).
+    if ([string]::IsNullOrWhiteSpace($A) -or [string]::IsNullOrWhiteSpace($B)) { return $false }
+    return ($A.Trim() -replace '^[vV]', '') -ceq ($B.Trim() -replace '^[vV]', '')
+}
+
 function Select-TaiSan($Release, [string]$Mau) {
     # Đúng MỘT asset khớp, không thì ném: không khớp hay khớp nhiều đều là release lạ, đừng tự chọn.
     $khop = @($Release.assets | Where-Object { $_.name -match $Mau })
@@ -354,7 +361,7 @@ function Update-CongCuZip([string]$Ten, [string]$Repo, [string]$Tag, [string]$Ma
         $ss = Compare-PhienBan $truoc $moi
         # Hợp đồng B (lượt 10): ĐẠT `giu` chỉ khi BẰNG đích. Cao hơn bản phát hành mới nhất (không ghim) ⇒ `loi`, không tự hạ;
         # có ghim mà cao hơn ⇒ đi tiếp để cài đúng bản ghim.
-        if ($ss -eq 0) { Add-KetQua $Ten $truoc $truoc 'giu'; return }
+        if (Test-CungDinhDanh $truoc $moi) { Add-KetQua $Ten $truoc $truoc 'giu'; return }
         if ($ss -gt 0 -and -not $Tag) { Add-KetQua $Ten $truoc $moi 'loi' "đang cài $truoc CAO HƠN bản phát hành mới nhất $moi — không tự hạ, kiểm tay"; return }
         if ($ChiKiem) { Add-KetQua $Ten "$truoc" $moi 'can_cap_nhat'; return }
         $ts = Select-TaiSan $rel $MauTaiSan
@@ -370,7 +377,7 @@ function Update-CongCuZip([string]$Ten, [string]$Repo, [string]$Tag, [string]$Ma
             Copy-Item -LiteralPath $tim[0].FullName -Destination $exe -Force
         } finally { Remove-Item -LiteralPath $tai -Recurse -Force -ErrorAction SilentlyContinue }
         $sau = Get-PhienBanLenh $exe $DoiSoPhienBan $MauPhienBan
-        if ((Compare-PhienBan $sau $moi) -ne 0) { throw "sau khi cài đo được '$sau', mong '$moi'" }
+        if (-not (Test-CungDinhDanh $sau $moi)) { throw "sau khi cài đo được '$sau', mong '$moi'" }
         Add-KetQua $Ten "$truoc" $sau $(if ($truoc) { 'nang_cap' } else { 'cai_moi' })
     } catch { Add-KetQua $Ten "$truoc" '' 'loi' $_.Exception.Message }
 }
@@ -548,7 +555,7 @@ function Invoke-TangHeThong {
                 $bam = $null
             }
             $ss = Compare-PhienBan $truoc $moi
-            if ($ss -eq 0) { Add-KetQua $c.ten $truoc $truoc 'giu'; continue }
+            if (Test-CungDinhDanh $truoc $moi) { Add-KetQua $c.ten $truoc $truoc 'giu'; continue }
             if ($ss -gt 0) { Add-KetQua $c.ten $truoc $moi 'loi' "đang cài $truoc CAO HƠN đích $moi — không tự hạ, kiểm tay"; continue }
             if ($ChiKiem) { Add-KetQua $c.ten "$truoc" $moi 'can_cap_nhat'; continue }
             if ($c.kieu -ne 'node') { $bam = Get-BamTaiSan $rel $ts }
@@ -565,7 +572,7 @@ function Invoke-TangHeThong {
             } finally { Remove-Item -LiteralPath $tai -Recurse -Force -ErrorAction SilentlyContinue }
             $sau = Get-PhienBanLenh $c.exe $c.ds $c.mau
             if ($trangThai -eq 'can_khoi_dong_lai') { Add-KetQua $c.ten "$truoc" "$sau" 'can_khoi_dong_lai' "đã cài $moi, có hiệu lực sau khởi động lại"; continue }
-            if ((Compare-PhienBan $sau $moi) -ne 0) { throw "sau khi cài đo được '$sau', mong '$moi'" }
+            if (-not (Test-CungDinhDanh $sau $moi)) { throw "sau khi cài đo được '$sau', mong '$moi'" }
             Add-KetQua $c.ten "$truoc" $sau $(if ($truoc) { 'nang_cap' } else { 'cai_moi' })
         } catch { Add-KetQua $c.ten "$truoc" '' 'loi' $_.Exception.Message }
     }

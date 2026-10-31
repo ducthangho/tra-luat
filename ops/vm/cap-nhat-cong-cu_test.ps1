@@ -18,6 +18,10 @@ function Nem([scriptblock]$B) { try { & $B; return $false } catch { return $true
 Ca 'phien_ban_git_windows' { (ConvertTo-PhienBan 'v2.56.0.windows.4') -eq [version]'2.56.0.4' -and (ConvertTo-PhienBan '2.47.1.windows.2') -eq [version]'2.47.1.2' }
 Ca 'phien_ban_khong_doc_duoc_la_null' { $null -eq (ConvertTo-PhienBan 'abc') -and $null -eq (ConvertTo-PhienBan '') -and $null -eq (ConvertTo-PhienBan $null) }
 Ca 'phien_ban_hau_to_la_null' { $null -eq (ConvertTo-PhienBan '2.0.0-rc.7') -and $null -eq (ConvertTo-PhienBan 'v1.7.7+build.1') -and $null -eq (Compare-PhienBan '2.0.0-rc.7' '2.0.0') }
+Ca 'cung_dinh_danh_la_cung_chuoi' {
+    (Test-CungDinhDanh 'v2.0.0.windows.4' '2.0.0.windows.4') -and -not (Test-CungDinhDanh '2.0.0.4' 'v2.0.0.windows.4') -and
+    -not (Test-CungDinhDanh '02.0.0' '2.0.0') -and -not (Test-CungDinhDanh '1.0.0-rc.a' '1.0.0-rc.A') -and -not (Test-CungDinhDanh '' '') -and -not (Test-CungDinhDanh $null '1.0.0')
+}
 Ca 'so_sanh_so_hoc_khong_chuoi' { (Compare-PhienBan '7.6.10' '7.6.9') -eq 1 -and (Compare-PhienBan '1.7.7' '1.7.7') -eq 0 -and (Compare-PhienBan '2.47.1.windows.2' 'v2.56.0.windows.4') -eq -1 }
 Ca 'so_sanh_khong_biet_la_null' { $null -eq (Compare-PhienBan '' '1.2.3') -and $null -eq (Compare-PhienBan '1.2.3' 'x') }
 
@@ -577,7 +581,7 @@ if (-not $IsWindows) {
 }
 
 # HINT reviewer lượt 10: native version lớn hơn đích vẫn phải được phân loại đúng B.
-function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '', [switch]$MajorMoi) {
+function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '', [switch]$MajorMoi, [switch]$ZeroDau) {
     $ChiKiem = $false
     $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-dich-' + [guid]::NewGuid().ToString('N'))
     $pfCuDich = $env:ProgramFiles
@@ -596,7 +600,9 @@ function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '', 
             "$g/bin/rg.exe" = "ripgrep $v"
         }
         foreach ($e in $exes.Keys) {
-            [IO.File]::WriteAllText($e, "#!/bin/sh`necho $($exes[$e])$HauTo`nexit 0`n"); & chmod +x $e
+            $raw = [string]$exes[$e]
+            if ($ZeroDau) { $raw = [regex]::new('[0-9]+').Replace($raw, '0$0', 1) }
+            [IO.File]::WriteAllText($e, "#!/bin/sh`necho $raw$HauTo`nexit 0`n"); & chmod +x $e
         }
         function Get-Release { param($Repo, $Tag)
             $f = if ($Repo -eq 'git-for-windows/git') { 'Git-2.0.0-64-bit.exe' } elseif ($Repo -eq 'cli/cli') { 'gh_2.0.0_windows_amd64.msi' } elseif ($Repo -eq 'PowerShell/PowerShell') { 'PowerShell-7.6.10-win-x64.msi' } else { 'rg.zip' }
@@ -625,6 +631,10 @@ if (-not $IsWindows) {
         $k = @(Invoke-DichBanGia 'HeThong')
         $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'giu').Count -eq 0
     }
+    Ca 'dich_he_thong_zero_dau_khong_phai_dinh_danh_dich' {
+        $k = @(Invoke-DichBanGia 'HeThong' -ZeroDau)
+        $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'loi').Count -eq 0
+    }
     Ca 'node_hau_to_khong_duoc_tu_chon_major_moi' {
         foreach ($ht in '-rc.7', '+build.1') {
             $k = @(Invoke-DichBanGia 'HeThong' -HauTo $ht -MajorMoi)
@@ -650,6 +660,55 @@ if (-not $IsWindows) {
     Ca 'dich_zip_ban_cao_hon_khong_duoc_giu_dat' {
         $k = @(Invoke-DichBanGia 'Zip' -BanCao)
         $k.Count -eq 1 -and $k[0].hanh_dong -eq 'loi'
+    }
+}
+
+# Round 13: numerical equality is not full identity; native output/file copy/hash are real on Linux.
+function Invoke-ZipDinhDanhGia([string]$Truoc, [string]$Sau, [string]$Tag = '') {
+    $ChiKiem = $false
+    $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-id-' + [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path "$g/bin", "$g/payload" | Out-Null
+        [IO.File]::WriteAllText("$g/bin/rg.exe", "#!/bin/sh`necho ripgrep $Truoc`nexit 0`n")
+        & chmod +x "$g/bin/rg.exe"
+        [IO.File]::WriteAllText("$g/payload/rg.exe", "#!/bin/sh`necho ripgrep $Sau`nexit 0`n")
+        Compress-Archive -LiteralPath "$g/payload/rg.exe" -DestinationPath "$g/tool.zip"
+        $hash = (Get-FileHash -LiteralPath "$g/tool.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+        function Get-Release { param($Repo, $Tag)
+            [pscustomobject]@{tag_name='v2.0.0';assets=@([pscustomobject]@{
+                name='tool.zip';browser_download_url='OFFLINE';digest=('sha256:' + $hash)
+            })}
+        }
+        function Invoke-WebRequest { param($Uri, $OutFile, $Headers, $TimeoutSec)
+            Microsoft.PowerShell.Management\Copy-Item -LiteralPath "$g/tool.zip" -Destination $OutFile
+        }
+        function Copy-Item { param($LiteralPath, $Destination, [switch]$Force)
+            Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
+            & chmod +x $Destination
+        }
+        $Script:KetQua.Clear()
+        Update-CongCuZip 'rg' 'OFFLINE' $Tag '^tool[.]zip$' 'rg.exe' @('--version') '(?m)^ripgrep\s+(\d+\.\d+\.\d+\S*)' "$g/bin" *> $null
+        @($Script:KetQua)
+    } finally { Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
+}
+if (-not $IsWindows) {
+    Ca 'zip_dinh_danh_doi_chung_dung_dich' {
+        $k = @(Invoke-ZipDinhDanhGia '2.0.0' '2.0.0')
+        $k.Count -eq 1 -and $k[0].hanh_dong -eq 'giu'
+    }
+    Ca 'zip_zero_dau_truoc_khong_duoc_giu_dat' {
+        foreach ($tag in '', 'v2.0.0') {
+            $k = @(Invoke-ZipDinhDanhGia '02.0.0' '02.0.0' $tag)
+            if ($k.Count -ne 1 -or $k[0].hanh_dong -ne 'loi') { return $false }
+        }
+        $true
+    }
+    Ca 'zip_zero_dau_sau_khong_duoc_bao_nang_cap' {
+        foreach ($tag in '', 'v2.0.0') {
+            $k = @(Invoke-ZipDinhDanhGia '1.0.0' '02.0.0' $tag)
+            if ($k.Count -ne 1 -or $k[0].hanh_dong -ne 'loi') { return $false }
+        }
+        $true
     }
 }
 

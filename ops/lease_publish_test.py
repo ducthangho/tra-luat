@@ -1640,13 +1640,12 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
                 # Đúng CHỮ HIỂN THỊ của tiêu đề, không tìm chuỗi con trong NGUỒN (lượt 11): `## [Khác](x "Mục lục")`
                 # hay `## <span title="Mục lục">Khác</span>` hiển thị "Khác". Chữ tiêu đề (bỏ `#` mở/đóng) phải là
                 # tên mục, trước nó chỉ được ký hiệu (mục lục thật: `⚠ `), không chữ, không cú pháp Markdown/HTML.
-                # Tiền tố theo danh sách CHO PHÉP (lượt 12): chỉ space/tab và ký hiệu Unicode `So`/`Sc`. Lớp phủ định
-                # cũ nhận cả ký tự định dạng như RLO (U+202E, `Cf`) — nó đảo chữ hiển thị thành "cụl cụM".
-                import unicodedata
+                # Tiền tố là tập LITERAL (lượt 12–13): lớp phủ định nhận cả RLO (U+202E) — đảo chữ hiển thị; còn nhóm
+                # Unicode `So` chứa trọn bảng chữ Latin khoanh tròn/đóng khung (U+24B6…, U+1F130…) — viết được cả từ.
+                # Không nhóm ký tự nào là "ký hiệu không mang chữ"; nên chỉ nhận đúng tiền tố mục lục thật đang dùng.
+                # Thêm một tiền tố mới là thay đổi CÓ CHỦ ĐÍCH, kèm đối chứng.
                 chu = re.sub(r"[ \t]+#+[ \t]*$", "", dong[tieu.end():]).strip(" \t")
-                tien = chu[:-len(tieu_de)] if chu.endswith(tieu_de) else None
-                lay = len(tieu.group(1)) == 2 and tien is not None and all(
-                    c in " \t" or unicodedata.category(c) in ("So", "Sc") for c in tien)
+                lay = len(tieu.group(1)) == 2 and chu in {tieu_de, "\u26a0 " + tieu_de}
             dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if not lay:
@@ -2456,6 +2455,10 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
             "tieu_de_zwsp": ("Mục lục", dict(t_ml="## \u200bMục lục")),
             # ký hiệu Markdown/HTML (`Sm`/`Sk`/`P*`) đứng trước cũng không phải ký hiệu được phép
             "tieu_de_dau_nho_hon": ("Mục lục", dict(t_ml="## < Mục lục")),
+            # lượt 13: chữ Latin khoanh tròn/đóng khung thuộc nhóm `So` — vẫn là CHỮ
+            "tieu_de_chu_khoanh_tron": ("Mục lục", dict(t_ml="## \u24c0\u24bd\u24b6\u24b8 Mục lục")),
+            "tieu_de_chu_dong_khung": ("Cảnh báo", dict(t_cb="## \U0001f13a\U0001f137\U0001f130\U0001f132 Cảnh báo đang có hiệu lực")),
+            "tieu_de_ky_hieu_khac": ("Mục lục", dict(t_ml="## \u2605 Mục lục")),
         }
         for ten, (dau_hieu, kw) in do.items():
             viet(**kw)

@@ -2,7 +2,7 @@
 """Phản chứng cho `ops/cloud_agent_creds.py` + khối hook (CLOUD-SETUP-P2B-WIRE r1, `nghiem_thu` A–D, H, F2). Ca = hàm `<a-h><số>_…`;
 `nap` chạy con trên cây tạm có `scripts/tl.py` GIẢ, `cai-agy` in-process (tải giả ĐẾM lời gọi). Đột biến sửa BẢN SAO TẠM; chỉ `bang()`
 ném `TinHieuChotCa` (con thoát 3 + `DO:<ca>:`); lỗi vô can thoát 4 = TÍN DỤNG GIẢ; 5 = bỏ qua (Windows, hay cây rời không .git)."""
-import contextlib, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
+import contextlib, ctypes, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -73,7 +73,9 @@ def _con_song(pid):   # zombie tính là chết (CLAUDE.md)
         return False
 def _song_roi_don(pids):   # PID còn sống TRƯỚC khi dọn, rồi giết hết để ca không để rác
     song = [x for x in pids if x is not None and _con_song(x)]
-    song and subprocess.run(["kill", "-9", *map(str, song)], capture_output=True)
+    for x in song:   # dọn bằng syscall, không dựa tiện ích ngoài (F15)
+        with contextlib.suppress(OSError):
+            os.kill(x, 9)
     return song
 def _ghi(f, noi_dung, chay=False):
     f.parent.mkdir(parents=True, exist_ok=True), f.write_text(noi_dung, encoding="utf-8"), chay and f.chmod(0o755)
@@ -124,17 +126,15 @@ def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), ch�
     ra = buf.getvalue()   # F12: nhóm KHÔNG dừng được vẫn chuyển tiếp log đã nhận, đúng một lần, đã che, bỏ dòng agent cũ
     bang(ra.count("chẩn đoán ***") == 1 and ra.count("lỗi chẩn đoán") == 1 and "SENTINEL-a9" not in ra and ra.count("agent_creds:") == 1, f"log: {ra!r}")
 def _co_subreaper():   # PR_GET_CHILD_SUBREAPER của CHÍNH tiến trình test
-    import ctypes
     return c.value if ctypes.CDLL(None).prctl(37, ctypes.byref(c := ctypes.c_int(-1)), 0, 0, 0) == 0 else None
 def a11_subreaper_va_esrch():   # (B, #1039): CHỈ ESRCH sau khi thu hồi cháu mồ côi mới "đã dừng"; không subreaper ⇒ không xác minh
     _posix()
     for co_sr in (True, False):
-        m = nap_mod()
-        m._SUBREAPER = None if co_sr else False
+        (m := nap_mod())._SUBREAPER = None if co_sr else False
         bang(m._dat_subreaper() is co_sr and (not co_sr or _co_subreaper() == 1), f"subreaper={co_sr}: không đặt được thật")
         p = subprocess.Popen(["sh", "-c", "sleep 30 & echo $!; sleep 30"], stdout=subprocess.PIPE, start_new_session=True)
         q = subprocess.Popen([sys.executable, "-c", "raise SystemExit(7)"])   # con NGOÀI nhóm: waitpid không được thu nhầm (F14)
-        time.sleep(0.3)
+        time.sleep(0.3), os.waitid(os.P_PID, q.pid, os.WEXITED | os.WNOWAIT)   # q CHẮC đã thoát, trạng thái chưa bị thu
         da, ra = m._giet_nhom(p)
         song = _song_roi_don([int(x) for x in ra.split()[:1]])
         bang(ra.split() and da is co_sr and not song and q.wait(timeout=10) == 7, f"sr={co_sr}: dừng={da}, sống {song}, q={q.returncode}")

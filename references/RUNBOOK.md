@@ -233,11 +233,11 @@ Claude Code web → *Environment variables* của môi trường; Codex Cloud �
 | `KHÔNG ĐO ĐƯỢC` | bootstrap thoát sớm/quá hạn/sai hợp đồng, sai khoá, mất mạng → đọc dòng `[bootstrap]` ngay trên, chạy tay `python scripts/tl.py bootstrap --env code --no-nlm` |
 | `BỎ QUA` | thiếu `TL_MASTER_KEY` → đặt biến rồi mở phiên MỚI |
 
-Dùng: `python scripts/tl.py agent-creds-exec --gemini -- agy models` (`GEMINI_API_KEY` CHỈ cho tiến trình con; `--claude` ⇒
-`CLAUDE_CODE_OAUTH_TOKEN`). Đổi khoá: `tl secrets-keygen` → `tl secrets-stage` (mã hoá lại) → `tl agent-creds-set --codex
---claude-token-env --antigravity-key-env` → cập nhật `TL_MASTER_KEY` ở cả hai nền. Giới hạn Codex Cloud: secret chỉ có lúc
-*setup script*; lúc agent chạy `$HOME` chỉ đọc, thường không mạng ⇒ `agent-creds-exec` gần như chắc không chạy được ở đó, và
-`agy` không cài ở Codex Cloud.
+Dùng: `python scripts/tl.py agent-creds-exec --gemini -- agy models` (`GEMINI_API_KEY` CHỈ cho tiến trình con; `--claude` ⇒ `CLAUDE_CODE_OAUTH_TOKEN`).
+Đổi khoá: `tl secrets-keygen` → đặt khoá mới → `tl secrets-stage` (mã hoá lại) → `tl agent-creds-set --new --codex --claude-token-env
+--antigravity-key-env` (bundle MỚI; thiếu `--new` thì lệnh giải mã bản cũ bằng khoá mới ⇒ rc 3, 0 upload) → bật anyone-with-link, đặt
+`TL_AGENT_CREDS_FILEID=<fileId mới>` cùng `TL_MASTER_KEY` mới ở cả hai nền. Giới hạn Codex Cloud: secret chỉ có lúc *setup script*; lúc agent
+chạy `$HOME` chỉ đọc, thường không mạng ⇒ `agent-creds-exec` gần như chắc không chạy được ở đó, và `agy` không cài ở Codex Cloud.
 
 **A0.5 — BÍ MẬT.** `credentials.json` chứa refresh_token/client_secret = SECRET.
 - KHÔNG echo/commit/upload; KHÔNG để vương trong cây skill hay gói INSTALL.zip. Mỗi phiên Cowork nạp lại qua env, hết phiên dọn file.

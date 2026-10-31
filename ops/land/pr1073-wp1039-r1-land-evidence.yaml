@@ -166,6 +166,11 @@ landed_20261031:
       Chap nhan luot 7 (launcher.py run 2bfa8722, approve 0 P0-P3 tren DUNG 9783b421ecb74636311501e7c0d712e2aa73a5c0, model
       gpt-6-astra va effort xhigh DO_DUOC, ho openai khac ho executor claude) voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi); khong goi
       luot Codex 8/8. Tra loi cau hoi ve finding P1 Codex connector PR #1086 (discussion_r4432221720).
+    thay_the: >-
+      measured — readback-comment-chon-a-6545950278.json: luc 16:17:00Z co comment chep loi chu kho "Chọn a" (chay L8) trong phien
+      executor; sau do chu kho chon chap nhan luot 7 o phien dieu phoi (6545979440, 16:19:39Z) va xac nhan lai trong phien executor
+      ("Chấp nhận lượt 7"). 6545979440 THAY THE 6545950278. L8 KHONG chay (0 loi goi Codex duoi lease L8); lease reviewer
+      wp1039-cloud-setup-p2b-r1-review-l8-codex (dang 479df940) da rut han ve 16:35Z o 31aef353 tren ops/cap-lease-1039-g1.
     do_duoc: >-
       measured — readback-comment-quyet-dinh-6545979440.json: user ducthangho, author_association OWNER, created_at = updated_at
       2026-10-31T16:19:39Z. CAVEAT #566: comment do phien agent dang bang token chu kho, chep loi chu kho trong phien.

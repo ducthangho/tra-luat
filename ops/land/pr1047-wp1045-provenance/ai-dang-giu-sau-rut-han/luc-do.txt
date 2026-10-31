@@ -1,0 +1,78 @@
+# do 2026-10-31T00:23:19Z trong phien session_015GtxrYjGJtmjF3eT1nCSG9 (sau han moi 00:20Z cua wp1045-r1-g2-claude, rut han a430543)
+# lan do dau 00:23:09Z CHAN [12] NHANH_CUC_BO_TUT_SAU (master 0/21, ops/wp1045-r1-g1-lease 0/2) — chua bang git branch -f theo dung lenh cong cu in, roi do lai
+ls-remote heads: 713 ten; for-each-ref origin: 713 ten; thieu (co tren may chu, vang cuc bo): 0; thua: 0
+$ python3 ops/lease_publish.py ai-dang-giu ops/cai_cong_cu.sh
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	cai-cong-cu-sigpipe-r1-g1-claude	refs/heads/agent/wp1037-g1-claude:ops/leases/cai-cong-cu-sigpipe-r1-g1-claude.yaml
+HẾT_HẠN	cai-cong-cu-sigpipe-r2-g2-claude	refs/heads/agent/wp1037-g1-claude:ops/leases/cai-cong-cu-sigpipe-r2-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1045-r1-g1-claude	refs/heads/ops/wp1045-r1-g1-lease:ops/leases/wp1045-r1-g1-claude.yaml
+HẾT_HẠN	wp1045-r1-g2-claude	refs/heads/ops/wp1045-r1-g1-lease:ops/leases/wp1045-r1-g2-claude.yaml
+HẾT_HẠN	wp831-r3-g3-claude	refs/remotes/origin/ops/wp831-r3-g3-lease:ops/leases/wp831-r3-g3-claude.yaml
+HẾT_HẠN	wp831-r4-g4-claude	refs/remotes/origin/ops/wp831-r4-g4-lease:ops/leases/wp831-r4-g4-claude.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+HẾT_HẠN	wp868-r1-g1-claude	refs/remotes/origin/ops/wp868-r1-g1-lease:ops/leases/wp868-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python3 ops/lease_publish.py ai-dang-giu .claude/dev/launcher_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ag-t0-01b-exec-1-antigravity-20260821	refs/heads/agent/wp1037-g1-claude:ops/leases/ag-t0-01b-exec-1-antigravity-20260821.yaml
+HẾT_HẠN	ag-t0-01b-exec-1r2-antigravity-20260822	refs/heads/agent/wp1037-g1-claude:ops/leases/ag-t0-01b-exec-1r2-antigravity-20260822.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/agent/wp1037-g1-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/agent/wp1037-g1-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/agent/wp1037-g1-claude:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	plat-m4-exec-2-claude-20260821	refs/heads/agent/wp1037-g1-claude:ops/leases/plat-m4-exec-2-claude-20260821.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/agent/wp1037-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/agent/wp1037-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/agent/wp1037-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g6	refs/heads/agent/wp1037-g1-claude:ops/leases/wp-codex-credential-refresh-exec-g6.yaml
+HẾT_HẠN	wp685-r18-g1-antigravity-20261007	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r18-g1-antigravity-20261007.yaml
+HẾT_HẠN	wp685-r19-g2-codex-20261007	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r19-g2-codex-20261007.yaml
+HẾT_HẠN	wp685-r19-g2b-codex-20261007	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r19-g2b-codex-20261007.yaml
+HẾT_HẠN	wp685-r20-g3-codex-20261007	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r20-g3-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4-codex-20261007	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r23-g4-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4b-codex-20261007	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r23-g4b-codex-20261007.yaml
+HẾT_HẠN	wp685-r28-g5-claude-20261009	refs/heads/agent/wp1037-g1-claude:ops/leases/wp685-r28-g5-claude-20261009.yaml
+HẾT_HẠN	wp743-r1-g1-claude-20261016	refs/heads/agent/wp1037-g1-claude:ops/leases/wp743-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp766-r1-g1-claude-20261016	refs/heads/agent/wp1037-g1-claude:ops/leases/wp766-r1-g1-claude-20261016.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1045-r1-g1-claude	refs/heads/ops/wp1045-r1-g1-lease:ops/leases/wp1045-r1-g1-claude.yaml
+HẾT_HẠN	wp1045-r1-g2-claude	refs/heads/ops/wp1045-r1-g1-lease:ops/leases/wp1045-r1-g2-claude.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g1	refs/remotes/origin/agent/codex-credential-refresh-g1:ops/leases/wp-codex-credential-refresh-exec-g1.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/remotes/origin/codex/wp484-g4-windows:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/remotes/origin/codex/wp484-g4-windows:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	moi-truong-r1-g1-antigravity	refs/remotes/origin/ops/cap-lease-546:ops/leases/moi-truong-r1-g1-antigravity.yaml
+HẾT_HẠN	mcp-doc-phan-tich-exec-1r3-codex-20260828	refs/remotes/origin/ops/cap-lease-mcp-github-doc:ops/leases/mcp-doc-phan-tich-exec-1r3-codex-20260828.yaml
+HẾT_HẠN	probe-agent-exec-1-codex-20260828	refs/remotes/origin/ops/cap-lease-probe-agent-20260828:ops/leases/probe-agent-exec-1-codex-20260828.yaml
+HẾT_HẠN	probe-agent-r2-exec-1-codex-20260828	refs/remotes/origin/ops/cap-lease-probe-agent-r2-20260829:ops/leases/probe-agent-r2-exec-1-codex-20260828.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-1-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-1-codex-20260828.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-2-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-2-codex-20260828.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-3-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-3-codex-20260828.yaml
+HẾT_HẠN	w1-p1-van-chuyen-prompt-exec-4-codex-20260828	refs/remotes/origin/ops/cap-lease-w1-p1:ops/leases/w1-p1-van-chuyen-prompt-exec-4-codex-20260828.yaml
+HẾT_HẠN	ag-t0-01b-exec-1r2-antigravity-20260822	refs/remotes/origin/ops/lease-ag-t0-01b-r2:ops/leases/ag-t0-01b-exec-1r2-antigravity-20260822.yaml
+HẾT_HẠN	plat-m4-exec-1-claude-20260820	refs/remotes/origin/ops/lease-dong-so-20260820:ops/leases/plat-m4-exec-1-claude-20260820.yaml
+HẾT_HẠN	wp484-r7-g7-claude	refs/remotes/origin/ops/wp484-r7-spec:ops/leases/wp484-r7-g7-claude.yaml
+HẾT_HẠN	wp484-r8-g7-claude	refs/remotes/origin/ops/wp484-r7-spec:ops/leases/wp484-r8-g7-claude.yaml
+HẾT_HẠN	wp685-r18-g1-antigravity-20261007	refs/remotes/origin/ops/wp685-r18-g1-lease:ops/leases/wp685-r18-g1-antigravity-20261007.yaml
+HẾT_HẠN	wp748-r25-g25-claude-remote-20261024	refs/remotes/origin/ops/wp748-r25-g25-lease:ops/leases/wp748-r25-g25-claude-remote-20261024.yaml
+HẾT_HẠN	wp748-r26-g26-claude-remote-20261025	refs/remotes/origin/ops/wp748-r25-g25-lease:ops/leases/wp748-r26-g26-claude-remote-20261025.yaml
+HẾT_HẠN	wp748-r27-g27-claude-remote-20261026	refs/remotes/origin/ops/wp748-r27-g27-lease:ops/leases/wp748-r27-g27-claude-remote-20261026.yaml
+HẾT_HẠN	wp748-r27-g28-claude-remote-20261027	refs/remotes/origin/ops/wp748-r27-g27-lease:ops/leases/wp748-r27-g28-claude-remote-20261027.yaml
+HẾT_HẠN	wp748-r28-g1-claude-remote-20261027	refs/remotes/origin/ops/wp748-r28-l7-lease:ops/leases/wp748-r28-g1-claude-remote-20261027.yaml
+HẾT_HẠN	wp802-r1-g1-claude	refs/remotes/origin/ops/wp802-r1-g1-lease:ops/leases/wp802-r1-g1-claude.yaml
+HẾT_HẠN	wp831-r1-g1-claude	refs/remotes/origin/ops/wp831-r1-g1-lease:ops/leases/wp831-r1-g1-claude.yaml
+HẾT_HẠN	wp831-r2-g2-claude	refs/remotes/origin/ops/wp831-r2-g2-lease:ops/leases/wp831-r2-g2-claude.yaml
+HẾT_HẠN	wp831-r3-g3-claude	refs/remotes/origin/ops/wp831-r3-g3-lease:ops/leases/wp831-r3-g3-claude.yaml
+HẾT_HẠN	wp831-r4-g4-claude	refs/remotes/origin/ops/wp831-r4-g4-lease:ops/leases/wp831-r4-g4-claude.yaml
+HẾT_HẠN	wp858-r1-g1-claude	refs/remotes/origin/ops/wp858-r1-g1-lease:ops/leases/wp858-r1-g1-claude.yaml
+HẾT_HẠN	wp858-r1-g2-claude	refs/remotes/origin/ops/wp858-r1-g2-lease:ops/leases/wp858-r1-g2-claude.yaml
+HẾT_HẠN	wp868-r1-g1-claude	refs/remotes/origin/ops/wp868-r1-g1-lease:ops/leases/wp868-r1-g1-claude.yaml
+HẾT_HẠN	wp886-r1-g1-claude	refs/remotes/origin/ops/wp886-r1-g1-lease:ops/leases/wp886-r1-g1-claude.yaml
+HẾT_HẠN	wp886-r2-g2-claude	refs/remotes/origin/ops/wp886-r2-g2-lease:ops/leases/wp886-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+$ python3 ops/lease_publish.py ai-dang-giu ops/handoff/wp1045-g1-claude.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1045-r1-g1-claude	refs/heads/ops/wp1045-r1-g1-lease:ops/leases/wp1045-r1-g1-claude.yaml
+HẾT_HẠN	wp1045-r1-g2-claude	refs/heads/ops/wp1045-r1-g1-lease:ops/leases/wp1045-r1-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

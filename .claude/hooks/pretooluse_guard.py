@@ -114,6 +114,7 @@ _GIT_CO_MANG_GIA_TRI = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--nam
 # la thu duy nhat giu no khong troi, nen dung bo cong ay di.
 _TL_LENH_GHI = frozenset({
     "agent-creds-set",   # WP1009: ghi credential agent len Drive — subagent PHAI bi chan
+    "agent-creds-exec",  # WP1038: dat credential vao tien trinh khac — subagent PHAI bi chan
     "backfill-hieuluc", "backfill-loai", "backfill-nlm-status", "backfill-notebook",
     "backfill-title-vn", "bench", "boot", "bootstrap", "bundle-export", "cache-build",
     "cache-snapshot", "chunk-apply", "config-pin-registry", "confirm", "consolidation-cleanup",
@@ -140,6 +141,26 @@ _TL_LENH_GHI_LONG = frozenset({
     "hygiene plan", "hygiene reconcile", "rasoat keywords", "rasoat orchestrate",
     "rasoat phuluc", "rasoat titles", "rasoat worksheet",
 })
+
+# WP1038 (S5 sau F01/F03/F04/F06, chu kho duyet): bang CHO PHEP — subagent chi chay `tl.py` khi ten lenh KHOP DUNG mot
+# lenh read_only=True. Guard (shlex) khong the doc ten lenh nhu Bash; ten la/manh/dong => deny. `--kiem-bang` doi chieu.
+_TL_LENH_DOC = frozenset({
+    "cat-audit", "cat-list", "cat-verify", "chunk-plan", "chunk-verify", "cluster", "convert-verify",
+    "corpus-relation-sweep", "counts", "cowork-plan", "dedup-check", "deploy-plan", "determinism-audit",
+    "doc-claims-check", "doc-compare", "doc-text", "doctor", "drive-parity", "exists", "fetch-links", "fetch-route",
+    "final-acceptance", "find-doc", "footnote-map", "frontier-expand", "go-live-runbook", "gws-ping",
+    "header-verify", "hygiene query", "hygiene scan", "ingest-analyze", "ingest-route", "instruction-audit",
+    "link-priority", "live-contract-check", "live-readiness", "live-smoke-plan", "live-state-diff",
+    "live-state-snapshot", "locate", "nlm-audit-physical", "nlm-auth-status", "nlm-content", "nlm-cross", "nlm-get",
+    "nlm-links", "nlm-list", "nlm-orphans", "nlm-query", "nlm-query-plan", "ocr-analyze", "ocr-verify", "ops-plan",
+    "overflow-resolve", "overlap", "perf", "ping", "precheck", "preflight", "profile-files", "profile-info",
+    "profile-list", "profile-load", "profile-manifest", "rasoat-chongcheo", "reg-query", "registry-coverage",
+    "registry-doctor", "registry-map", "relation-check", "release-verify", "review-queue", "rollback-plan",
+    "route-task", "secrets-keygen", "slot-audit", "source-map", "source-verify", "state-get", "status", "sweep",
+    "test-fragments-check", "the-thuc-check", "tool-inventory", "transport-info", "tvpl-url", "vbhn-check",
+    "vbhn-compare", "vbhn-normalize", "vbhn-verify", "verify-integrity", "workflow-audit", "xref",
+})
+_TL_CHA_LONG = frozenset(x.split()[0] for x in _TL_LENH_GHI_LONG | _TL_LENH_DOC if " " in x)
 
 # ── TANG 2: CO, theo DANH SACH CHO PHEP tung chuong trinh ─────────────────────────────────
 # Doctrine kho: "danh sach CAM khong bao gio du — phai dao thanh danh sach CHO PHEP".
@@ -519,10 +540,35 @@ def _tach_lenh_tl(doi, kich):
         if a.startswith("-"):
             if "=" in a or a in _TL_CO_GLOBAL_CO_DON:
                 k += 1
-            else:
-                k += 2 if not ra else 1     # co global an gia tri; sau khi da co ten lenh
-            continue                         # thi co la cua chinh lenh do, khong tieu bua
+            else:   # WP1038 F08: co global AN GIA TRI duoc ca sau ten cha LONG — gia tri khong phai ten con
+                k += 2 if not ra or a in _TL_CO_GLOBAL_AN_GIA_TRI else 1
+            continue                         # co la sau ten lenh la cua chinh lenh do, khong tieu bua
         ra.append(a)
+        k += 1
+    return ra
+
+
+# WP1038 (review F03, chu kho duyet): shlex KHONG mo rong nhu Bash — `$'recat'`, `${X:-recat}`, `re$(printf cat)`
+# den tay hook van mang `$` nen khong trung bang writer, trong khi Bash dua `recat` that cho tl. DANH SACH CHO PHEP
+# ky tu (khong liet ke cach viet): moi token tu sau kich ban toi het TEN LENH (co global + gia tri + ten lenh, them
+# ten con neu la lenh LONG) phai nam trong tap nay; ngoai tap => coi nhu ten lenh KHONG DOC DUOC => deny.
+_RE_TL_VUNG_TEN_AN_TOAN = re.compile(r"[\w./\\:=+@ -]*\Z")   # F05: \w Unicode — duong dan/profile tieng Viet
+
+
+def _vung_ten_lenh_tl(doi, kich):
+    """Token tu sau `tl.py` toi het ten lenh, theo dung luat tieu co cua `_tach_lenh_tl`."""
+    cha_long = {x.split()[0] for x in _TL_LENH_GHI_LONG}
+    k, ra, ten = doi.index(kich) + 1, [], []
+    while k < len(doi) and len(ten) < (2 if ten and ten[0] in cha_long else 1):
+        a = doi[k]
+        if a.startswith("-") and a != "--":
+            an = not ("=" in a or a in _TL_CO_GLOBAL_CO_DON)
+            ra += doi[k:k + 2] if an else [a]
+            k += 2 if an else 1
+            continue
+        ra.append(a)
+        if a != "--":
+            ten.append(a)
         k += 1
     return ra
 
@@ -569,7 +615,15 @@ def _kiem_python(doi):
     # WP1009 F14: nhan dien tl.py tren duong dan DA CHUAN HOA (cung thu ma allowlist vua duyet) —
     # so tren `kich` goc thi `"scripts\tl.py"` qua allowlist ma bo qua ca bang writer ben duoi.
     if chuan.rsplit("/", 1)[-1] == "tl.py":
+        # `$( )`/backtick da bi `_boc_thay_the` doi thanh chu `THAYTHE` (toan chu cai) — o vung ten lenh no la
+        # gia tri DO SHELL TINH RA, nen cung tinh la khong doc duoc.
+        la = [a for a in _vung_ten_lenh_tl(doi, kich) if not _RE_TL_VUNG_TEN_AN_TOAN.match(a) or "THAYTHE" in a]
+        if la:
+            return "ten lenh tl qua mo rong shell (ky tu ngoai danh sach cho phep): %s" % la[0]
         lenh = _tach_lenh_tl(doi, kich)
+        ten = " ".join(lenh[:2]) if lenh and lenh[0] in _TL_CHA_LONG else (lenh[0] if lenh else None)
+        if ten not in (None, *_TL_CHA_LONG) and ten not in _TL_LENH_DOC | _TL_LENH_GHI | _TL_LENH_GHI_LONG:
+            return "ten lenh tl `%s` khong nam trong danh sach lenh DOC (ten la/manh/qua mo rong shell)" % ten
         if lenh and (lenh[0] in _TL_LENH_GHI
                      or " ".join(lenh[:2]) in _TL_LENH_GHI_LONG):
             return "lenh tl `%s` co read_only=False trong COMMAND_META" % " ".join(lenh[:2])
@@ -684,7 +738,9 @@ def _kiem_lenh_agent(cmd, sau=0):
     # `shlex` voi whitespace_split NUOT xuong dong, nen "echo hi\ncp a b" gop thanh MOT doan va
     # chi chuong trinh DAU duoc kiem — do 2026-08-26: lenh ghi o dong 2 di LOT. Tach TRUOC khi
     # tokenize. Gop dong noi bang dau cheo nguoc truoc, keo "git log \\\n --oneline" bi cat doi.
-    cmd = re.sub(r"\\\s*\n", " ", cmd)
+    # WP1038 F04: Bash BO cap `\` + xuong dong (noi lien tu, khong thay bang dau cach) — chi khi `\` ay KHONG bi escape:
+    # `a\\` + xuong dong la doi so `a\` roi TACH LENH, noi vao la gop lenh sau thanh doi so cua lenh truoc.
+    cmd = re.sub(r"(?<!\\)((?:\\\\)*)\\\n", r"\1", cmd)
     if "\n" in cmd:
         for dong in cmd.split("\n"):
             if dong.strip():
@@ -702,6 +758,7 @@ def _kiem_lenh_agent(cmd, sau=0):
     try:
         lex = shlex.shlex(con_lai, posix=True, punctuation_chars=True)
         lex.whitespace_split = True
+        lex.commenters = ""   # WP1038 F07: shlex cat comment o `#` GIUA tu, Bash thi khong; giu het token => chi chat hon
         toks = list(lex)
     except ValueError:
         return "khong tach duoc chuoi lenh (trich dan lech)"
@@ -782,7 +839,7 @@ def _writer_tu_runtime(goc):
     if dem.is_file():
         try:
             d = json.loads(dem.read_text(encoding="utf-8"))
-            return set(d["top"]), set(d["long"]), set(d["ws"])
+            return set(d["top"]), set(d["long"]), set(d["ws"]), set(d["doc"])
         except Exception:
             pass
     try:
@@ -797,12 +854,13 @@ def _writer_tu_runtime(goc):
           if v.get("read_only") is True and v.get("write_scope") not in (None, "none")}
     top = {x for x in w if " " not in x}
     lng = {x for x in w if " " in x}
+    doc = {k for k, v in cmds.items() if v.get("read_only") is True}
     try:
         dem.write_text(json.dumps({"top": sorted(top), "long": sorted(lng),
-                                   "ws": sorted(ws)}), encoding="utf-8")
+                                   "ws": sorted(ws), "doc": sorted(doc)}), encoding="utf-8")
     except OSError:
         pass                                   # dem hong KHONG duoc lam hong phep do
-    return (top, lng, ws)
+    return (top, lng, ws, doc)
 
 
 def _co_tu_help(lenh):
@@ -828,18 +886,19 @@ def _kiem_bang(goc):
         # can nhat — va lan truoc chinh cho nay in "bang khop" tu mot phep do SAI TAP.
         loi.append("KHONG DO DUOC: khong hoi duoc `tl tool-inventory --json` — fail-close")
     else:
-        top, lng, ws = rt
+        top, lng, ws, doc = rt
         for nhan, that, bang in (("_TL_LENH_GHI", top, _TL_LENH_GHI),
-                                 ("_TL_LENH_GHI_LONG", lng, _TL_LENH_GHI_LONG)):
+                                 ("_TL_LENH_GHI_LONG", lng, _TL_LENH_GHI_LONG), ("_TL_LENH_DOC", doc, _TL_LENH_DOC)):
             thieu, thua = sorted(that - bang), sorted(bang - that)
             if thieu:
-                loi.append("%s THIEU %d lenh read_only=False: %s"
-                           % (nhan, len(thieu), " ".join(thieu)))
+                loi.append("%s THIEU %d lenh read_only=%s: %s"
+                           % (nhan, len(thieu), bang is _TL_LENH_DOC, " ".join(thieu)))
             if thua:
-                loi.append("%s THUA %d ten khong con read_only=False: %s"
-                           % (nhan, len(thua), " ".join(thua)))
+                loi.append("%s THUA %d ten khong con read_only=%s: %s"
+                           % (nhan, len(thua), bang is _TL_LENH_DOC, " ".join(thua)))
         print("TANG 1 : %d writer top-level + %d writer LONG = %d (nguon: runtime)"
               % (len(top), len(lng), len(top) + len(lng)))
+        print("TANG 1d: %d lenh DOC trong danh sach cho phep (nguon: runtime)" % len(doc))
         if ws and not _TL_CO_SINH_TEP:
             loi.append("_TL_CO_SINH_TEP RONG trong khi co %d lenh read_only=True co "
                        "write_scope != none" % len(ws))

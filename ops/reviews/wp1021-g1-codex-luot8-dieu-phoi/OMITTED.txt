@@ -1,0 +1,3 @@
+review-copy/ cay-kho/ mirror.git	khong chep: ban sao kho/mirror cua sandbox reviewer, tai lap bang clone tai reviewed_sha 356a27e1378b2162bbc0be2ec06ff08fdacbdead
+handoff.md	khong chep: ban doc cua ops/handoff/wp1021-g1-claude.md tren nhanh ops/wp1021-r2-g1-lease, sha256 708d6a4ea0ba61f2ff13246bc679aedab05f982e90e1d8b97131ecb3a33dc190
+merge-thu/	khong chep: worktree thu merge cua phien dieu phoi, khong phai hien vat reviewer

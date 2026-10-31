@@ -358,7 +358,11 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         if (-not $ChiKiem) { & $py -m pip install --quiet --disable-pip-version-check PyYAML 2>&1 | Out-Null }
         $ghim = Read-BanGhim $banKe $py
     } catch { Add-KetQua 'cong_cu.yaml' '' '' 'loi' $_.Exception.Message; return }
+    # Mỗi công cụ một ranh giới try/catch: lỗi KHỞI CHẠY lệnh native (tệp biến mất giữa Test-Path và lúc gọi, quyền…) ném
+    # CommandNotFoundException chứ không đặt $LASTEXITCODE — trước đây nó giết cả tầng, mất các công cụ sau và mất nhật
+    # ký (cross-review PR #1065 lượt 4, P1 `loi-native-tang-nguoi-dung`).
     foreach ($goi in 'pip', 'PyYAML', 'jsonschema') {
+      try {
         $truoc = (& $py -c "import importlib.metadata as m; print(m.version('$goi'))" 2>$null)
         $spec = if ($goi -eq 'pip') { 'pip' } else { "$goi==$($ghim.$goi)" }
         if ($ChiKiem) { Add-KetQua $goi "$truoc" $(if ($goi -eq 'pip') { 'moi nhat' } else { $ghim.$goi }) 'kiem'; continue }
@@ -367,6 +371,7 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         $sau = (& $py -c "import importlib.metadata as m; print(m.version('$goi'))" 2>$null)
         if ($rc -ne 0 -or -not $sau -or ($goi -ne 'pip' -and $sau -ne $ghim.$goi)) { Add-KetQua $goi "$truoc" "$sau" 'loi' "pip rc=$rc $($o | Select-Object -Last 1)" }
         else { Add-KetQua $goi "$truoc" "$sau" $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) }
+      } catch { Add-KetQua $goi '' '' 'loi' $_.Exception.Message }
     }
 
     # 2. venv của kho: requirements.txt (giữ ghim của kho, không --upgrade bừa).
@@ -374,8 +379,10 @@ function Invoke-TangNguoiDung([string]$GocKho) {
     if ((Test-Path -LiteralPath $vpy) -and $yeuCau) {
         if ($ChiKiem) { Add-KetQua 'venv-kho' '' '' 'kiem' $VenvKho }
         else {
-            $o = & $vpy -m pip install --quiet --disable-pip-version-check -r $yeuCau "PyYAML==$($ghim.PyYAML)" "jsonschema==$($ghim.jsonschema)" 2>&1
-            if ($LASTEXITCODE -ne 0) { Add-KetQua 'venv-kho' '' '' 'loi' "$($o | Select-Object -Last 1)" } else { Add-KetQua 'venv-kho' '' '' 'giu' 'requirements.txt đã khớp' }
+            try {
+                $o = & $vpy -m pip install --quiet --disable-pip-version-check -r $yeuCau "PyYAML==$($ghim.PyYAML)" "jsonschema==$($ghim.jsonschema)" 2>&1
+                if ($LASTEXITCODE -ne 0) { Add-KetQua 'venv-kho' '' '' 'loi' "$($o | Select-Object -Last 1)" } else { Add-KetQua 'venv-kho' '' '' 'giu' 'requirements.txt đã khớp' }
+            } catch { Add-KetQua 'venv-kho' '' '' 'loi' $_.Exception.Message }
         }
     } else { Add-KetQua 'venv-kho' '' '' 'bo_qua' "không có $vpy hoặc requirements.txt" }
 
@@ -385,8 +392,8 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         $truoc = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
         if (-not (Test-Path -LiteralPath $npm)) { Add-KetQua $p[0] "$truoc" '' 'loi' "không có $npm"; continue }
         if ($ChiKiem) { Add-KetQua $p[0] "$truoc" '' 'kiem'; continue }
-        $o = & $npm install -g --prefix $npmPrefix "$($p[1])@latest" --no-fund --no-audit 2>&1
-        $rc = $LASTEXITCODE
+        try { $o = & $npm install -g --prefix $npmPrefix "$($p[1])@latest" --no-fund --no-audit 2>&1; $rc = $LASTEXITCODE }
+        catch { Add-KetQua $p[0] "$truoc" '' 'loi' "không chạy được npm: $($_.Exception.Message)"; continue }
         $sau = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+)'
         if ($rc -ne 0 -or -not $sau) { Add-KetQua $p[0] "$truoc" "$sau" 'loi' "npm rc=$rc $($o | Select-Object -Last 1)" }
         else { Add-KetQua $p[0] "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' }) }
@@ -406,18 +413,25 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         $truoc = Get-PhienBanLenh $nlm @('--version') 'nlm version\s+(\S+)'
         if ($ChiKiem) { Add-KetQua 'nlm' "$truoc" '' 'kiem' }
         else {
+          try {
             $o = & $nlmPy -m pip install --quiet --disable-pip-version-check --upgrade notebooklm-mcp-cli 2>&1
-            $rc = $LASTEXITCODE
+            $rcPip = $LASTEXITCODE
             $sau = Get-PhienBanLenh $nlm @('--version') 'nlm version\s+(\S+)'
-            $cheDo = $null
+            # rc của lệnh status đo RIÊNG, ngay sau lệnh: trước đây phép so dùng rc của pip nên status rc≠0 mà vẫn in JSON
+            # mode=file thì được ghi ĐẠT (lượt 4, P1). Đòi rc=0 VÀ JSON đọc được VÀ mode=file.
+            $cheDo = $null; $rcSt = $null; $loiSt = ''
             $hTruoc = $env:USERPROFILE, $env:HOME
             try {
                 $env:USERPROFILE = $HomeCommander; $env:HOME = $HomeCommander
-                $cheDo = ((& $nlm auth storage status --json 2>$null | Out-String) | ConvertFrom-Json).mode
-            } catch { $cheDo = $null } finally { $env:USERPROFILE, $env:HOME = $hTruoc }
-            if ($rc -ne 0 -or -not $sau) { Add-KetQua 'nlm' "$truoc" "$sau" 'loi' "pip rc=$rc $($o | Select-Object -Last 1)" }
+                $raSt = & $nlm auth storage status --json 2>$null | Out-String
+                $rcSt = $LASTEXITCODE
+                $cheDo = ($raSt | ConvertFrom-Json).mode
+            } catch { $loiSt = $_.Exception.Message } finally { $env:USERPROFILE, $env:HOME = $hTruoc }
+            if ($rcPip -ne 0 -or -not $sau) { Add-KetQua 'nlm' "$truoc" "$sau" 'loi' "pip rc=$rcPip $($o | Select-Object -Last 1)" }
+            elseif ($rcSt -ne 0) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm auth storage status rc=$rcSt $loiSt" }
             elseif ($cheDo -ne 'file') { Add-KetQua 'nlm' "$truoc" $sau 'loi' "chế độ lưu credential = '$cheDo' (cần 'file' cho nlm-auth-stage)" }
             else { Add-KetQua 'nlm' "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) 'storage=file' }
+          } catch { Add-KetQua 'nlm' "$truoc" '' 'loi' $_.Exception.Message }
         }
     }
 }
@@ -606,7 +620,9 @@ if ($PhamVi -eq 'HeThong' -and -not ($laSystem -or $laAdmin)) { Write-Loi 'tần
 
 $batDau = Get-Date
 Write-Host "cap-nhat-cong-cu: pham_vi=$PhamVi chi_kiem=$([bool]$ChiKiem) may=$env:COMPUTERNAME nguoi=$($id.Name)"
-if ($PhamVi -eq 'NguoiDung') { Invoke-TangNguoiDung $goc } else { Invoke-TangHeThong }
+# Lưới cuối: lỗi lọt khỏi ranh giới từng công cụ vẫn thành một dòng `loi` và nhật ký vẫn được ghi (lượt 4, P1).
+try { if ($PhamVi -eq 'NguoiDung') { Invoke-TangNguoiDung $goc } else { Invoke-TangHeThong } }
+catch { Add-KetQua "tang-$PhamVi" '' '' 'loi' "dừng giữa chừng: $($_.Exception.Message)" }
 
 $loi = @($Script:KetQua | Where-Object { $_.hanh_dong -eq 'loi' })
 $tom = [ordered]@{

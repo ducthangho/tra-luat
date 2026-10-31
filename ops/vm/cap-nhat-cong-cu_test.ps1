@@ -255,6 +255,73 @@ if (-not $IsWindows) {
     }
 }
 
+# ── tầng NguoiDung với lệnh native giả (cross-review PR #1065 lượt 4, P1 `loi-native-tang-nguoi-dung`) ──
+# Chạy Invoke-TangNguoiDung THẬT; các "exe" là script Python có shebang nên CHỈ chạy được ngoài Windows — trên Windows các
+# ca này KHÔNG có mặt (không đếm), phần ấy đo bằng luồng thật trên VM. Đồ giả đặt TRONG hàm nên không rò ra ca sau.
+# Phỏng theo probes/user-errors.ps1 của reviewer lượt 4.
+function Invoke-NguoiDungGia([string]$CheDo) {
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-nd-" + [guid]::NewGuid().ToString('N'))
+    $cu = @{ pf = $env:ProgramFiles; tools = $ThuMucCongCu; nlm = $NlmVenv; venv = $VenvKho; home = $HomeCommander }
+    try {
+        $env:ProgramFiles = "$g/PF"; $Script:ThuMucCongCu = "$g/Tools"; $Script:NlmVenv = "$g/nlm"; $Script:VenvKho = "$g/venv"; $Script:HomeCommander = "$g/profile"
+        New-Item -ItemType Directory -Path "$g/PF/nodejs", "$g/Tools/Python312", "$g/Tools/npm", "$g/nlm/Scripts", "$g/venv/Scripts", "$g/repo/ops" | Out-Null
+        [IO.File]::WriteAllText("$g/repo/ops/cong_cu.yaml", 'gia'); [IO.File]::WriteAllText("$g/repo/requirements.txt", 'gia')
+        $env:CNCC_CHE_DO = $CheDo
+        $shim = @'
+#!/usr/bin/env python3
+import os, sys, json
+ten = os.path.basename(sys.argv[0]); a = sys.argv[1:]
+if a == ['--version']:
+    print('Python 3.12.7' if ten == 'python.exe' else 'nlm version 0.5.0' if ten == 'nlm.exe' else '1.0.0')
+elif a and a[0] == '-c':
+    if 'importlib.metadata' in a[1]: print('25.0' if "'pip'" in a[1] else '6.0.3' if "'PyYAML'" in a[1] else '4.25.1')
+    else: print(json.dumps({'PyYAML': '6.0.3', 'jsonschema': '4.25.1', 'actionlint': '1.7.7'}))
+elif a and a[0] == 'auth':
+    print(json.dumps({'mode': 'file'}))
+    if os.environ.get('CNCC_CHE_DO') == 'nlm-status-hong':
+        print('loi-luu-tru-gia', file=sys.stderr); sys.exit(7)
+'@
+        foreach ($e in "$g/Tools/Python312/python.exe", "$g/Tools/npm/claude.cmd", "$g/Tools/npm/codex.cmd", "$g/PF/nodejs/npm.cmd", "$g/nlm/Scripts/python.exe", "$g/nlm/Scripts/nlm.exe", "$g/venv/Scripts/python.exe") {
+            [IO.File]::WriteAllText($e, $shim); & chmod +x $e
+        }
+        $npmGia = "$g/PF/nodejs/npm.cmd"
+        # npm CÓ lúc Test-Path rồi BIẾN MẤT trước lúc gọi ⇒ `& $npm` ném CommandNotFoundException, không đặt $LASTEXITCODE.
+        function Test-Path { param($LiteralPath)
+            $co = Microsoft.PowerShell.Management\Test-Path -LiteralPath $LiteralPath
+            if ($CheDo -eq 'npm-bien-mat' -and "$LiteralPath" -eq $npmGia -and $co) { Microsoft.PowerShell.Management\Remove-Item -LiteralPath $LiteralPath -Force }
+            $co }
+        function Set-PathNguoiDung { param($ThuMuc) }
+        function Update-CongCuZip { param($Ten) Add-KetQua $Ten '1.0.0' '1.0.0' 'giu' 'zip-gia' }
+        $Script:KetQua.Clear(); $loi = $null
+        try { Invoke-TangNguoiDung "$g/repo" *> $null } catch { $loi = $_.Exception.Message }
+        [pscustomobject]@{ loi = $loi; kq = @($Script:KetQua) }
+    } finally {
+        $env:ProgramFiles = $cu.pf; $Script:ThuMucCongCu = $cu.tools; $Script:NlmVenv = $cu.nlm; $Script:VenvKho = $cu.venv; $Script:HomeCommander = $cu.home
+        Remove-Item Env:CNCC_CHE_DO -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+if (-not $IsWindows) {
+    $hang = { param($k, $ten) @($k.kq | Where-Object cong_cu -eq $ten) }
+    Ca 'nd_doi_chung_thanh_cong' {
+        $k = Invoke-NguoiDungGia 'sach'
+        -not $k.loi -and $k.kq.Count -eq 11 -and @($k.kq | Where-Object hanh_dong -eq 'loi').Count -eq 0 -and (& $hang $k 'nlm')[0].chi_tiet -eq 'storage=file'
+    }
+    Ca 'nd_npm_bien_mat_ghi_loi_va_chay_tiep' {
+        $k = Invoke-NguoiDungGia 'npm-bien-mat'
+        -not $k.loi -and (& $hang $k 'claude')[0].hanh_dong -eq 'loi' -and (& $hang $k 'codex')[0].hanh_dong -eq 'loi' -and
+            @('rg', 'shellcheck', 'actionlint', 'nlm' | Where-Object { (& $hang $k $_).Count -ne 1 }).Count -eq 0
+    }
+    Ca 'nd_nlm_status_rc_khac_0_la_loi' {
+        $k = Invoke-NguoiDungGia 'nlm-status-hong'
+        $n = (& $hang $k 'nlm')[0]; $n.hanh_dong -eq 'loi' -and $n.chi_tiet -match 'rc=7'
+    }
+}
+Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {
+    # Lưới cuối của luồng chạy (không gọi được ngoài Windows vì chốt nền): lệnh gọi tầng nằm trong try, catch ghi `loi`.
+    (Get-Content -LiteralPath $Script -Raw) -match "try \{ if \(\`$PhamVi -eq 'NguoiDung'\) \{ Invoke-TangNguoiDung \`$goc \} else \{ Invoke-TangHeThong \} \}\s*\r?\ncatch \{ Add-KetQua "
+}
+
 # ── luồng thật với đồ giả (CHẠY CUỐI: các hàm giả che hàm của script) — gợi ý của cross-review lượt 1 ──
 $tamGia = Join-Path ([IO.Path]::GetTempPath()) ("cncc-gia-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory $tamGia | Out-Null
@@ -340,6 +407,8 @@ function Invoke-DangKyGia([string]$CheDo) {
         Remove-Item -LiteralPath "$g/PF/tra-luat-ops" -Recurse -Force
         New-Item -ItemType $lk -Path "$g/PF/tra-luat-ops" -Target "$g/nan-nhan" | Out-Null
     }
+    $Script:AclGia = @{}
+    $Script:AclGia[(Join-Path $env:ProgramFiles 'tra-luat-ops')] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @(New-QuyenGia 'BUILTIN\Users' 'Modify') }
     $Script:GiaCheDo = $CheDo; $Script:SuKien = [Collections.Generic.List[object]]::new()
     $Script:HanhDong = [Collections.Generic.List[object]]::new(); $Script:TacVu = [Collections.Generic.List[object]]::new()
     $Script:NlmVenv = 'D:\nlm venv\'; $Script:VenvKho = 'D:\repo venv\\'; $Script:HomeCommander = 'D:\profile rieng'
@@ -358,27 +427,55 @@ function Invoke-DangKyGia([string]$CheDo) {
     $kq
 }
 try {
-    function Invoke-Icacls([string[]]$DoiSo) { $Script:SuKien.Add([pscustomobject]@{ loai = 'icacls'; doi_so = $DoiSo }) }
+    # Mô hình chỉ hỗ trợ tập lệnh đăng ký này; đọc target, /T, SID owner và từng grant.
+    # Không mô phỏng NTFS/effective access; tệp mới chép kế thừa các grant OI/CI của thư mục.
+    function New-QuyenGia($Id, $Rights) { [pscustomobject]@{ IdentityReference = $Id; FileSystemRights = $Rights; AccessControlType = 'Allow' } }
+    function Get-DanhTinhGia([string]$Id) {
+        switch ($Id.TrimStart('*')) {
+            'S-1-5-18' { 'NT AUTHORITY\SYSTEM' }
+            'S-1-5-32-544' { 'BUILTIN\Administrators' }
+            'S-1-5-32-545' { 'BUILTIN\Users' }
+            default { $Id }
+        }
+    }
+    function Invoke-Icacls([string[]]$DoiSo) {
+        $Script:SuKien.Add([pscustomobject]@{ loai = 'icacls'; doi_so = $DoiSo })
+        $prefix = $DoiSo[0].TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+        foreach ($key in @($Script:AclGia.Keys)) {
+            if ($key -ne $DoiSo[0] -and -not (($DoiSo -contains '/T') -and $key.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase))) { continue }
+            $node = $Script:AclGia[$key]
+            if ($DoiSo -contains '/setowner') {
+                $i = [array]::IndexOf($DoiSo, '/setowner'); $node.Owner = Get-DanhTinhGia $DoiSo[$i + 1]
+            }
+            if ($DoiSo -contains '/inheritance:r') { $node.Access = @() }
+            if ($DoiSo -contains '/grant:r') {
+                $i = [array]::IndexOf($DoiSo, '/grant:r') + 1
+                while ($i -lt $DoiSo.Count -and $DoiSo[$i] -notmatch '^/') {
+                    if ($DoiSo[$i] -notmatch '^([^:]+):(?:(?:\(OI\)|\(CI\))*)(F|RX|M)$') { throw "grant ngoài mô hình: $($DoiSo[$i])" }
+                    $id = Get-DanhTinhGia $Matches[1]
+                    $rights = switch ($Matches[2]) { 'F' { 'FullControl' } 'RX' { 'ReadAndExecute, Synchronize' } 'M' { 'Modify' } }
+                    $node.Access = @($node.Access | Where-Object IdentityReference -ne $id) + @(New-QuyenGia $id $rights)
+                    $i++
+                }
+            }
+        }
+    }
     function Copy-Item { param($LiteralPath, $Destination, [switch]$Force)
         $Script:SuKien.Add([pscustomobject]@{ loai = 'chep'; dich = "$Destination" })
-        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force }
+        Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
+        $parent = Split-Path -Parent $Destination
+        $Script:AclGia["$Destination"] = [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tladmin"; Access = @($Script:AclGia[$parent].Access) } }
     function Get-Acl { param($LiteralPath)
         $p = "$LiteralPath"; $caiDat = $p.StartsWith($Script:ThuMucCaiDat)
         if ($caiDat) { $Script:SuKien.Add([pscustomobject]@{ loai = 'do_acl'; dich = $p }) }
-        $chu = if ($caiDat) { 'BUILTIN\Administrators' } else { "$env:COMPUTERNAME\tlcommander" }
-        $quyen = 'ReadAndExecute, Synchronize'
         if ($caiDat) {
-            $ev = @($Script:SuKien)
-            $chep = -1; $own = -1; $reset = -1
-            for ($i = 0; $i -lt $ev.Count; $i++) {
-                if ($ev[$i].loai -eq 'chep' -and $ev[$i].dich -eq $p) { $chep = $i }
-                if ($ev[$i].loai -eq 'icacls' -and $ev[$i].doi_so -contains '/setowner') { $own = $i }
-                if ($ev[$i].loai -eq 'icacls' -and $ev[$i].doi_so -contains '/inheritance:r') { $reset = $i }
-            }
-            if ($chep -gt $own) { $chu = "$env:COMPUTERNAME\tladmin" }
-            if ($reset -lt 0 -or $Script:GiaCheDo -eq 'acl-sai') { $quyen = 'Modify' }
+            $node = $Script:AclGia[$p]
+            if (-not $node) { throw "thiếu trạng thái ACL giả: $p" }
+            $access = @($node.Access)
+            if ($Script:GiaCheDo -eq 'acl-sai') { $access += New-QuyenGia 'BUILTIN\Users' 'Modify' }
+            return [pscustomobject]@{ Owner = $node.Owner; Access = $access }
         }
-        [pscustomobject]@{ Owner = $chu; Access = @([pscustomobject]@{ IdentityReference = 'BUILTIN\Users'; FileSystemRights = $quyen; AccessControlType = 'Allow' }) } }
+        [pscustomobject]@{ Owner = "$env:COMPUTERNAME\tlcommander"; Access = @(New-QuyenGia 'BUILTIN\Users' 'ReadAndExecute, Synchronize') } }
     function Get-FileHash { param($LiteralPath)
         if ($Script:GiaCheDo -eq 'bam-lech' -and "$LiteralPath".StartsWith($Script:ThuMucCaiDat)) { return [pscustomobject]@{ Hash = 'LECH' } }
         Microsoft.PowerShell.Utility\Get-FileHash -LiteralPath $LiteralPath }
@@ -395,6 +492,16 @@ try {
     Ca 'dk_chay_icacls_chi_cham_thu_muc_cai_dat' {
         $ic = @($kSach.su_kien | Where-Object loai -eq 'icacls')
         (& $dungLaiDung $kSach) -and $ic.Count -eq 3 -and -not ($ic | Where-Object { $_.doi_so[0] -ne $kSach.cai_dat -or $_.doi_so -notcontains '/L' })
+    }
+    Ca 'dk_chay_icacls_dung_owner_va_grant' {
+        $ic = @($kSach.su_kien | Where-Object loai -eq 'icacls')
+        $owners = @($ic | Where-Object { $_.doi_so -contains '/setowner' })
+        $grants = @($ic | Where-Object { $_.doi_so -contains '/grant:r' })
+        $owners.Count -eq 2 -and @($owners | Where-Object {
+            $i = [array]::IndexOf($_.doi_so, '/setowner')
+            $_.doi_so[$i + 1] -ne '*S-1-5-32-544' -or $_.doi_so -notcontains '/T'
+        }).Count -eq 0 -and $grants.Count -eq 1 -and
+            @('*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/inheritance:r' | Where-Object { $grants[0].doi_so -notcontains $_ }).Count -eq 0
     }
     Ca 'dk_chay_chep_du_ba_tep' { @($kSach.tep | Sort-Object) -join ',' -eq 'cap-nhat-cong-cu.ps1,cong_cu.yaml,requirements.txt' }
     Ca 'dk_chay_do_acl_moi_tep_sau_khi_chep' {

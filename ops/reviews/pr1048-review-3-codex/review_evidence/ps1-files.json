@@ -1,0 +1,15 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "ls-files",
+    "-z",
+    "--",
+    "*.ps1"
+  ],
+  "rc": 0,
+  "stdout_file": "ps1-files.stdout",
+  "stderr_file": "ps1-files.stderr",
+  "stdout_bytes": 527,
+  "stderr_bytes": 0
+}

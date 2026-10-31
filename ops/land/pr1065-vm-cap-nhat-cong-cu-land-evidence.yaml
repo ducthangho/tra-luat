@@ -81,11 +81,16 @@ trang_thai_packet:
       trang_thai: CHO_DIEN
       mo_ta: 'Run 41173244891 (push master, ci.yml) — xem post_merge_checks[0].'
     - id: MOC-WORKFLOW-DEFINITION
-      trang_thai: not_measured
+      trang_thai: da_dong
       mo_ta: >-
-        §10.2.2 moc Workflow definition (WorkflowRun.file → blob/bam dinh nghia) can GraphQL; phien Claude Code tren web nhan
-        403. Can chu kho chay lenh `gh api graphql` (mau `cmd` trong CLAUDE.md) cho node WFR_kwLOTNeRjc8AAAAJlh3b2w (run
-        41173244891) va dan output.
+        measured — readback-graphql-workflowrun-41173244891.json: WorkflowRun databaseId 41173244891, file.path
+        .github/workflows/ci.yml, repositoryFileUrl blob/3dfb9731ceda05afbcec4e803a919c4df5e2e5a2, checkSuite.commit.oid 3dfb973.
+        Khop readback-run-41173244891.json (id, path, head_sha 3dfb973, node_id WFR_kwLOTNeRjc8AAAAJlh3b2w).
+        readback-contents-ci-yml-3dfb973.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc = `git rev-parse
+        3dfb973:.github/workflows/ci.yml`; noi dung giai ma khop tung byte (sha256 ce9a3ec0f777a516…).
+        Cach do: GraphQL bi 403 trong phien web, nen phien goi `gh api graphql` qua Desktop Commander tren ASUS-LAPTOP
+        (gh dang nhap tai khoan ducthangho), theo yeu cau chu kho "lam luon thong qua Remote Desktop Commander"; output luu
+        nguyen van. Nguon GraphQL la tai khoan chu kho, khong phai mot client doc lap.
     - id: MOC-CHECKOUT-VA-GATE-OUTPUT
       trang_thai: not_measured
       mo_ta: >-

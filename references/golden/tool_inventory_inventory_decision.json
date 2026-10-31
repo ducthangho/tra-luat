@@ -1,5 +1,6 @@
 {
   "commands_available": [
+    "agent-creds-exec",
     "agent-creds-set",
     "backfill-hieuluc",
     "backfill-loai",
@@ -247,6 +248,16 @@
   "ok": true,
   "registry": {
     "commands": {
+      "agent-creds-exec": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "agent-creds-set": {
         "generated": false,
         "idempotency_contract": null,
@@ -2232,8 +2243,8 @@
       "generated_parsers": 154,
       "high_risk": 29,
       "nested": 9,
-      "total": 198,
-      "write_commands": 105
+      "total": 199,
+      "write_commands": 106
     },
     "schema": "command_registry.v1"
   },

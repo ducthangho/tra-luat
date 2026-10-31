@@ -1,0 +1,184 @@
+[
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD",
+      "HEAD^{tree}"
+    ],
+    "command": "git rev-parse HEAD 'HEAD^{tree}'",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/00.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/00.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "rev-parse",
+      "--is-shallow-repository"
+    ],
+    "command": "git rev-parse --is-shallow-repository",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/01.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/01.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "config",
+      "--show-origin",
+      "--get",
+      "core.abbrev"
+    ],
+    "command": "git config --show-origin --get core.abbrev",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/02.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/02.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "remote",
+      "get-url",
+      "origin"
+    ],
+    "command": "git remote get-url origin",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/03.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/03.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignored=matching"
+    ],
+    "command": "git status --porcelain=v1 --untracked-files=all --ignored=matching",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/04.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/04.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "diff",
+      "--binary"
+    ],
+    "command": "git diff --binary",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/05.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/05.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "command": "git diff --cached --binary",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/06.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/06.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "diff",
+      "--numstat",
+      "5f3855eaf47e024b6c63f8923f64d8f80c5de707",
+      "HEAD"
+    ],
+    "command": "git diff --numstat 5f3855eaf47e024b6c63f8923f64d8f80c5de707 HEAD",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/07.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/07.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "diff",
+      "--check",
+      "5f3855eaf47e024b6c63f8923f64d8f80c5de707",
+      "HEAD"
+    ],
+    "command": "git diff --check 5f3855eaf47e024b6c63f8923f64d8f80c5de707 HEAD",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/08.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/08.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "python3",
+      "--version"
+    ],
+    "command": "python3 --version",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/09.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/09.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "git",
+      "--version"
+    ],
+    "command": "git --version",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/10.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/10.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "adr-song",
+      "--root",
+      "."
+    ],
+    "command": "python3 .claude/dev/packet_loop.py adr-song --root .",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/11.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/11.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "python3",
+      ".claude/dev/packet_loop.py",
+      "doctrine-scan",
+      "--root",
+      "."
+    ],
+    "command": "python3 .claude/dev/packet_loop.py doctrine-scan --root .",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/12.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/12.stderr"
+  },
+  {
+    "cwd": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/cay-kho",
+    "argv": [
+      "python3",
+      "scripts/tl.py",
+      "doc-claims-check",
+      "--json"
+    ],
+    "command": "python3 scripts/tl.py doc-claims-check --json",
+    "rc": 0,
+    "stdout": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/13.stdout",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/008916a5-97d8-5ef4-ac28-34381e972d65/scratchpad/rv-r2-l2/evidence/13.stderr"
+  }
+]

@@ -1,0 +1,78 @@
+# Gate output — run 41004317229 attempt 2 (push master, eaf83fd). Log tho tai qua REST actions/jobs/<id>/logs trong phien ghi so 2026-10-30 ~17:25Z; log KHONG chep vao kho, chi ghi sha256.
+# Moi job: conclusion, sha256 log tho, so dong ##[error], so dong co chu BO QUA, cac dong marker duong (toi da 8). SHA checkout do o ci-provenance-41004317229-a2/provenance.yaml, khong o tep nay.
+== chuan-bi job 124004259743 conclusion success sha256 d9cf53666d1c77a97f3c4a0ba0dd6259e1d00f3dbbf407bba501f38190aabdea error_lines 0 bo_qua 0 marker_am 0
+   (khong co marker)
+== gate (ubuntu-latest) job 124004305350 conclusion success sha256 59b7285a5ee559d91dabf1d8ed17407f582c5247fedb3ee3ec6e12f6c35c92d9 error_lines 0 bo_qua 1 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+   SỐ LIỆU: ca=61 · đột biến=490 (giao mảnh) · lỗi đột biến=0 · tiền kiểm bỏ qua=0 · cổng cây thật=ĐẠT
+   nền: 18/18 đạt
+   TỔNG: ĐẠT
+   == gen_instructions selftest 44/44 ==
+   == transport selftest 12/12 ==
+   == tl selftest 1738/1738 ==
+   "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_separate
+== gate-cong-cu (ubuntu-latest, 0) job 124004305533 conclusion success sha256 5c8d9b4207503aeff908e887d7a3dc39f4a49f03ca23a74a2f5128aa3360f31d error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 1) job 124004305954 conclusion success sha256 1b9b6e3cdb6915a735991d5525da7b678cc461a843f367c9e5c781cb4fc3fe8e error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 2) job 124004305599 conclusion success sha256 c277c0719cecb51376977a095c2c08cd3d2256478bbe9189fb2aaddc420e2747 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 3) job 124004305734 conclusion success sha256 1f1dc67f6cb8e9e67075e3ca9cb188e0a38560d43a8f62060dbf3e5209890b16 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 4) job 124004305534 conclusion success sha256 14e476f3cd9833a7a07682a2900c4fb380a93543bd95b290a781f5c5eac43a47 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 5) job 124004305604 conclusion success sha256 85faac6aa93380c5a222fcedbab7585ae7f0ae206a14b9cc196639d34630588a error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 6) job 124004305683 conclusion success sha256 af79a227707ce0eba3daa5bd21207a00c18129137f1f0ccc17e0e8c681584c69 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu (ubuntu-latest, 7) job 124004305597 conclusion success sha256 2dca1b59682c9c78f7807cd4c27f8668e28622c6bc1fd94d4cb45109b8f93910 error_lines 0 bo_qua 0 marker_am 0
+   cong_cu_test: 61/61 đạt; tổng=61, bỏ qua=0, tiền kiểm bỏ qua=0
+== gate-cong-cu-gop (ubuntu-latest) job 124012821925 conclusion success sha256 e0e1bbc82f23bd96f399b676f2f526f361c2eb7a2b818dbe70627e49a52fc895 error_lines 0 bo_qua 0 marker_am 0
+   SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
+== gate-nhanh-gop (ubuntu-latest) job 124004950062 conclusion success sha256 83e159fe83f6582a3cbff31aabfa6a6c92999f3894749978bec583a2617cfa9c error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate GOP 8/8 manh · head eaf83fd78ad3a85a6758d0e81be233b5fedcdf6c
+   CA NEN: 56/56 passed · TU DOT BIEN (chi ca dich): 255/255 giet · DOT BIEN SAN PHAM: 10/10 giet
+   targeted_mutant_gate: DAT — KHONG phai full mutant audit; full_mutant_audit van BAT BUOC truoc merge/land/release
+== gate-nhanh-manh (ubuntu-latest, 0) job 124004305678 conclusion success sha256 a3abefccd39d3c09b2fa3bfd2b3210232b59eec5bf17169ebf5db4e9cccc2e76 error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 0/8: 39 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 0/8: rc=0 · passed 39/39
+== gate-nhanh-manh (ubuntu-latest, 1) job 124004305779 conclusion success sha256 c899b1380e8f95b9ac0aae9cbf352d52a2e928630492b996cf7908da3d24f7c7 error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 1/8: 41 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 1/8: rc=0 · passed 41/41
+== gate-nhanh-manh (ubuntu-latest, 2) job 124004305780 conclusion success sha256 e11e5303b23c8afcec0284df3ce454687c1aade1a0e245138778bd634ed4ae8c error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 2/8: 40 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 2/8: rc=0 · passed 40/40
+== gate-nhanh-manh (ubuntu-latest, 3) job 124004305640 conclusion success sha256 cf72cbba10ded17aabd19b0f0785bca9b4e435bbe56f05c86c2ec029522d6e6d error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 3/8: 40 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 3/8: rc=0 · passed 40/40
+== gate-nhanh-manh (ubuntu-latest, 4) job 124004305661 conclusion success sha256 4092a1a76e68969e21d60bc6b276d0e079ecebfe9cfc11e32fcae93a61372b39 error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 4/8: 39 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 4/8: rc=0 · passed 39/39
+== gate-nhanh-manh (ubuntu-latest, 5) job 124004305691 conclusion success sha256 1926b55d703db2c805fe81dd9288533942b4262bd2f9e2080caeec9a8ed25ad5 error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 5/8: 41 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 5/8: rc=0 · passed 41/41
+== gate-nhanh-manh (ubuntu-latest, 6) job 124004305670 conclusion success sha256 5a4d7cf984d886a9f62455dfd6ef446503b61d5cc1233b16e61538a39d55c071 error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 6/8: 39 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 6/8: rc=0 · passed 39/39
+== gate-nhanh-manh (ubuntu-latest, 7) job 124004305679 conclusion success sha256 08434fb13d6728de8c6c086dcdf36b388fcbc397513f96d19a2d86eab1f8a219 error_lines 0 bo_qua 0 marker_am 0
+   targeted_mutant_gate MANH 7/8: 42 muc — KHONG phai full mutant audit
+   targeted_mutant_gate MANH 7/8: rc=0 · passed 42/42
+== gate-ops (ubuntu-latest) job 124004305429 conclusion success sha256 eacca25e9ace2de736d018570d2737100edf9a6b0d7b62ec2ca4984d03d3a2f2 error_lines 0 bo_qua 0 marker_am 0
+   TONG: DAT
+   TỔNG: ĐẠT
+   [A] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   [B] lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+   lease_publish: 268/268 đạt; đã chạy=268, bỏ qua=0
+== gate-packet-loop (ubuntu-latest) job 124004305513 conclusion success sha256 feb5fce498ada14e8f4dc4a505c0bdf44a4fc2062f7a8a58e28d1aa14851c3ba error_lines 0 bo_qua 3 marker_am 0
+   nền: 981/981 đạt · BỎ QUA: 1
+   TỔNG: ĐẠT
+== gate-registry (ubuntu-latest) job 124005075940 conclusion success sha256 73efeca232b88b9e82c7d2fba59dba3a73bf5f25c99ddcc052f3ac4d393f5516 error_lines 0 bo_qua 0 marker_am 0
+   nền: 28/28 đạt
+   TỔNG: ĐẠT
+   CA         : 42/42 đạt · 0 đỏ · ĐẠT
+   TỔNG: ĐẠT
+   TONG: DAT
+   TONG: DAT
+   TONG: DAT
+   TỔNG: ĐẠT
+# TONG ##[error] tren 23 job: 0

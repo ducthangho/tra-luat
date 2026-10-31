@@ -55,6 +55,15 @@ try {
     Ca 'bam_lech_thi_xoa_tep' { (Nem { Assert-Bam $tep ('0' * 64) }) -and -not (Test-Path -LiteralPath $tep) }
 } finally { Remove-Item -LiteralPath $tam -Recurse -Force -ErrorAction SilentlyContinue }
 
+# ── Node: chỉ nâng trong cùng major ──
+$idx = @([pscustomobject]@{ version = 'v26.13.0'; lts = 'Krypton' }, [pscustomobject]@{ version = 'v25.9.0'; lts = $false },
+         [pscustomobject]@{ version = 'v24.23.0'; lts = 'Jod' }, [pscustomobject]@{ version = 'v24.22.1'; lts = 'Jod' },
+         [pscustomobject]@{ version = 'v22.30.0'; lts = 'Iron' })
+Ca 'node_cung_major' { $r = Select-NodeLts $idx '24.22.1'; $r.cung_major -eq '24.23.0' -and $r.moi_nhat -eq '26.13.0' }
+Ca 'node_bo_qua_ban_khong_lts' { (Select-NodeLts $idx '25.1.0').cung_major -eq $null }
+Ca 'node_chua_cai_lay_moi_nhat' { (Select-NodeLts $idx '').cung_major -eq '26.13.0' }
+Ca 'node_major_cu_van_co_lts' { (Select-NodeLts $idx '22.1.0').cung_major -eq '22.30.0' }
+
 # ── PATH ──
 Ca 'path_them_vao_dau' { (Add-DuongDanVaoChuoi 'C:\a;C:\b' 'C:\Tools\bin') -eq 'C:\Tools\bin;C:\a;C:\b' }
 Ca 'path_khong_nhan_doi' { (Add-DuongDanVaoChuoi 'C:\a;c:\tools\BIN\;C:\b' 'C:\Tools\bin') -eq 'C:\a;c:\tools\BIN\;C:\b' }

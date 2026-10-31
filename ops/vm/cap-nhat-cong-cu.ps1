@@ -38,6 +38,7 @@ param(
     [string]$HomeCommander = 'C:\ProgramData\TraLuatCommander\profile',
     [string]$TaiKhoanNguoiDung = 'tlcommander',
     [string]$MayDich = 'TRA-LUAT-WIN',  # chốt tên máy: đổi ACL/đăng ký tác vụ chỉ được làm đúng trên VM này
+    [string]$TacVuCommander = 'TraLuatRemoteCommander',  # Desktop Commander chạy trên Node — cài lại Node là giết nó
     [string]$NhatKy = '',
     [switch]$NapHam                   # chỉ nạp hàm (cho bộ test), không chạy gì
 )
@@ -52,6 +53,7 @@ $Script:TenTacVuHeThong = 'TraLuat-CapNhatCongCu-HeThong'
 $Script:TenTacVuNguoiDung = 'TraLuat-CapNhatCongCu-NguoiDung'
 $Script:ThuMucCaiDat = Join-Path ${env:ProgramFiles} 'tra-luat-ops'
 $Script:KetQua = [System.Collections.Generic.List[object]]::new()
+$Script:DaCaiNode = $false
 $Script:GhHeader = @{ 'User-Agent' = 'tra-luat-cap-nhat-cong-cu'; Accept = 'application/vnd.github+json' }
 
 # ───────────────────────── hàm thuần (bộ test gọi thẳng) ─────────────────────────
@@ -124,6 +126,18 @@ function Add-AceVaoSddl([string]$Sddl, [string]$Ace) {
     $iS = $Sddl.IndexOf('S:', $Sddl.IndexOf('D:'))
     if ($iS -lt 0) { return $Sddl + $Ace }
     return $Sddl.Substring(0, $iS) + $Ace + $Sddl.Substring($iS)
+}
+
+function Select-NodeLts($DanhSach, [string]$Truoc) {
+    # Chọn bản LTS mới nhất CÙNG MAJOR với bản đang cài (index.json của nodejs.org xếp mới nhất trước).
+    # Lên major mới KHÔNG tự làm: đó là thay đổi lớn cho mọi công cụ npm, và lịch 2 tuần chạy không ai canh.
+    # Trả @{ cung_major = <ver|null>; moi_nhat = <ver|null> }; chưa cài gì thì cung_major = LTS mới nhất.
+    $lts = @($DanhSach | Where-Object { $_.lts } | ForEach-Object { ([string]$_.version) -replace '^v', '' })
+    $moiNhat = if ($lts.Count) { $lts[0] } else { $null }
+    $v = ConvertTo-PhienBan $Truoc
+    if ($null -eq $v) { return @{ cung_major = $moiNhat; moi_nhat = $moiNhat } }
+    $cung = $lts | Where-Object { (ConvertTo-PhienBan $_).Major -eq $v.Major } | Select-Object -First 1
+    return @{ cung_major = $cung; moi_nhat = $moiNhat }
 }
 
 function Read-BanGhim([string]$TepYaml, [string]$Python) {
@@ -342,8 +356,13 @@ function Invoke-TangHeThong {
         try {
             if ($c.kieu -eq 'node') {
                 $ds = Invoke-RestMethod -Uri 'https://nodejs.org/dist/index.json' -TimeoutSec 60
-                $lts = $ds | Where-Object { $_.lts } | Select-Object -First 1
-                $moi = $lts.version -replace '^v', ''
+                $chon = Select-NodeLts $ds $truoc
+                if ($chon.moi_nhat -and (Compare-PhienBan $chon.moi_nhat $truoc) -gt 0 -and
+                    (ConvertTo-PhienBan $chon.moi_nhat).Major -ne (ConvertTo-PhienBan $truoc).Major) {
+                    Add-KetQua 'node-major' "$truoc" $chon.moi_nhat 'can_quyet_dinh' 'có LTS major mới — KHÔNG tự nâng; chủ kho quyết định'
+                }
+                if (-not $chon.cung_major) { Add-KetQua $c.ten "$truoc" '' 'can_quyet_dinh' 'major đang cài không còn bản LTS nào'; continue }
+                $moi = $chon.cung_major
                 $tenTep = "node-v$moi-x64.msi"
                 $url = "https://nodejs.org/dist/v$moi/$tenTep"
                 $sums = ConvertTo-VanBan (Invoke-WebRequest -Uri "https://nodejs.org/dist/v$moi/SHASUMS256.txt" -TimeoutSec 60).Content
@@ -362,6 +381,8 @@ function Invoke-TangHeThong {
             $tai = New-ThuMucTai -ChiAdmin
             try {
                 $tep = Save-CoKiemBam $url $bam $tai $tenTep
+                # Đánh dấu TRƯỚC khi cài: MSI Node tắt node.exe đang chạy kể cả khi cài hỏng giữa chừng.
+                if ($c.kieu -eq 'node') { $Script:DaCaiNode = $true }
                 $trangThai = 'ok'
                 if ($c.kieu -eq 'exe') {
                     $p = Start-Process -FilePath $tep -ArgumentList @('/VERYSILENT', '/NORESTART', '/NOCANCEL', '/SP-', '/SUPPRESSMSGBOXES') -Wait -PassThru
@@ -373,6 +394,18 @@ function Invoke-TangHeThong {
             if ((Compare-PhienBan $sau $moi) -ne 0) { throw "sau khi cài đo được '$sau', mong '$moi'" }
             Add-KetQua $c.ten "$truoc" $sau $(if ($truoc) { 'nang_cap' } else { 'cai_moi' })
         } catch { Add-KetQua $c.ten "$truoc" '' 'loi' $_.Exception.Message }
+    }
+    # Đo 31-10-2026: lượt HeThong đầu tiên cài Node bằng MSI ⇒ Desktop Commander (chạy trên node.exe) rớt Offline
+    # giữa chừng, và phiên điều khiển mất đường vào VM. Lượt này chạy bằng pwsh dưới SYSTEM nên còn sống để dựng lại.
+    if ($Script:DaCaiNode) {
+        try {
+            Stop-ScheduledTask -TaskName $TacVuCommander -ErrorAction SilentlyContinue
+            Start-ScheduledTask -TaskName $TacVuCommander -ErrorAction Stop
+            Start-Sleep -Seconds 10
+            $st = (Get-ScheduledTask -TaskName $TacVuCommander -ErrorAction Stop).State
+            if ("$st" -ne 'Running') { throw "trạng thái sau khởi động lại: $st" }
+            Add-KetQua 'commander' '' 'Running' 'khoi_dong_lai' "đã cài lại Node ⇒ khởi động lại $TacVuCommander"
+        } catch { Add-KetQua 'commander' '' '' 'loi' "không dựng lại được $TacVuCommander`: $($_.Exception.Message)" }
     }
 }
 

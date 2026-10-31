@@ -1,0 +1,177 @@
+# HO SO LAND — PR #1048 "CLAUDE.md: bai hoc PowerShell — ep kieu [string](bieu thuc) khong cuu duoc Get-Content -Raw rong".
+# KHONG phai packet: viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat cung loai: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
+#
+# TRANG THAI: merged (b653574), `landed: false` — CHO CHU KHO duyet tren PR ghi so (uy_quyen_head_cuoi), va con thieu
+# moc §10.2.2. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# NHAN: measured = do trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot khac,
+# KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr1048-claude-md-powershell-provenance/ (SHA256SUMS). Moi phep do REST: GET
+# https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl + GITHUB_PAT qua proxy phien, do 2026-10-31.
+
+schema_version: 1
+mission_id: null
+packet_id: KHONG_AP_DUNG
+packet_issue: null
+pham_vi_land: tai_lieu_dev
+pham_vi_land_ghi_chu: 'Chi CLAUDE.md (dev-side, khong vao goi phat hanh, khong nam trong RELEASE_MANIFEST.json).'
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_015GtxrbUPS7zGdffB8Sfo8Y
+  recorded_by: claude-session (chinh phien da soan, goi cross-review, chay test Windows local va merge PR #1048)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap — mot phien Claude khong tu chung minh be mat chay cua
+    chinh no. model_family tu khai. Ben ghi so TRUNG ben thi cong va ben merge: khong co tach vai.
+
+authorized_head_sha: 6f23a4e68805b4af3e2efe77be6e10b513843e93
+authorized_head_tree: fd454a6a3121fead24d812b32de40c89f0a02e34
+approver: ducthangho
+authorization_url: KHONG_AP_DUNG
+authorization_ghi_chu: >-
+  thuat_lai — chu kho dat dieu kien bang loi trong phien ("Chay test tren VM di. Het p1, p2, p3 va test xanh moi duoc
+  merge.") roi ra lenh "Merge #1048 di roi land va ghi so" (31-10-2026). KHONG co comment duyet tren GitHub. Loi duyet
+  khong neo SHA; phien merge bang `expectedHeadSha` 6f23a4e sau khi doc CI 24/24 xanh, review thread rong va ket qua
+  selftest Windows local. Day la khoang trong bang chung that: khong ai ngoai phien kiem duoc loi duyet ay.
+land_operator: claude-session (thay mat chu kho)
+land_operator_nguon: >-
+  measured — readback-pr-1048.json merged_by ducthangho: phien Claude goi MCP merge_pull_request bang credential cua chu
+  kho, nen GitHub ghi nguoi merge la chu kho. Nguoi BAM merge thuc te la phien (thuat_lai, khong do duoc tu GitHub).
+merge_method: merge
+merge_method_nguon: 'measured — readback-commit-b653574.json co hai cha (ba1b10d, 6f23a4e) => merge commit, khong squash/rebase.'
+merge_commit: b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: >-
+    measured — readback-pr-1048.json: merged true, merged_at 2026-10-31T02:46:49Z, merge_commit_sha b653574, head.sha
+    6f23a4e (agent/windows-local-may-chu-kho-r1-claude), base.sha luc doc 5a174b9, 3 commit, 1 tep +10/-1.
+  merge_commit:
+    sha: b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+    parents: [ba1b10d899f29e73640376a2c2bd69341eb3a00a, 6f23a4e68805b4af3e2efe77be6e10b513843e93]
+    tree: f68a6474aeda307bde60e1a11928ced22378684b
+    nguon: 'measured — readback-commit-b653574.json: parents, tree, files = [CLAUDE.md +10/-1].'
+  merge_noi_dung: >-
+    measured — merge-va-diff.txt: diff cha1 (ba1b10d) .. merge BANG BYTE diff merge-base (5a174b9) .. head 6f23a4e (cmp rc=0);
+    1 tep CLAUDE.md +10/-1. Blob CLAUDE.md tai merge, tai head 6f23a4e va tai 48b54d8 (luot review approve) cung la
+    becd2ecc5fcb06f2ae018e4105357ed245c1dc57.
+  head_va_review:
+    reviewed_sha_cross_review_approve: 48b54d89b152871063c7296df33a60308667599e
+    reviewed_sha_codex_connector: 16e992a01c0a4ec8cfcc793dac9c1def5e288ae8
+    head_da_merge: 6f23a4e68805b4af3e2efe77be6e10b513843e93
+    doi_chieu: >-
+      measured — 6f23a4e = merge master 5a174b9 vao 48b54d8; `git diff 48b54d8 6f23a4e -- CLAUDE.md` rong (merge-va-diff.txt).
+      Moi tep khac doi trong 48b54d8..6f23a4e den tu master (nam san trong base), khong thuoc diff PR. Cross-review KHONG
+      cham dung 6f23a4e.
+  landed: false
+  landed_hieu_luc_tu: >-
+    merge commit cua PR ghi so — CHI KHI chu kho duyet `landed` bang comment tren PR ghi so, ghi du SHA head cuoi (40 hex),
+    dang SAU commit cuoi va TRUOC merge (tien le pr870/#951).
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-B653574-RUN
+      trang_thai: cho_do
+      mo_ta: 'Run ci.yml push master 41161511121 tren b653574 dang chay luc soan; xem post_merge_checks.'
+    - id: MOC-10-2-2-CHECKOUT-WORKFLOW-GATE-OUTPUT
+      trang_thai: not_measured
+      mo_ta: 'Moc Checkout, Workflow definition (GraphQL 403 trong phien web), Gate output chua do.'
+    - id: REVIEW-EXACT-SHA
+      trang_thai: chua_dat
+      mo_ta: 'Luot approve cham 48b54d8, khong cham authorized_head_sha 6f23a4e (noi dung CLAUDE.md trung byte).'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+      mo_ta: 'Chu kho duyet `landed` bang comment tren PR ghi so. Ho so nay KHONG tu goi landed.'
+
+review:
+  cross_review:
+    - luot: 1
+      provider: codex
+      verdict: changes_requested
+      reviewed_sha: 16e992a01c0a4ec8cfcc793dac9c1def5e288ae8
+      so_lop: 'P0 0 / P1 0 / P2 1 / P3 0'
+      hien_vat: ops/reviews/pr1048-review-1-codex-verdict.md
+      bien_nhan: ops/reviews/pr1048-review-1-codex-verdict.receipt.yaml
+      assurance: cross_reviewed
+      xu_ly: 'P2 continue-thieu-pham-vi-loi: executor do 12 ca tren PS 5.1.26100 va 7.6.9, thu hep cau o 48b54d8.'
+    - luot: 2
+      provider: codex
+      verdict: approve
+      reviewed_sha: 48b54d89b152871063c7296df33a60308667599e
+      so_lop: 'P0 0 / P1 0 / P2 0 / P3 0'
+      hien_vat: ops/reviews/pr1048-review-2-codex-verdict.md
+      bien_nhan: ops/reviews/pr1048-review-2-codex-verdict.receipt.yaml
+      assurance: cross_approved
+      xu_ly: 'Bang DOI CHIEU LUOT TRUOC xac nhan P2 luot 1 DA VA THAT.'
+  loi_goi_codex: '2 luot, ca hai qua launcher.py run (eb133f86, 33584cff), ma_thoat 0.'
+  codex_connector:
+    do_duoc: >-
+      measured — readback-comments-1048.json comment 6529018669 (chatgpt-codex-connector[bot], created 17:25:32Z, updated
+      17:26:14Z): codex-review-state code_review commit_sha 16e992a, status completed, has_any_findings false.
+      readback-reviews-1048.json = [], readback-review-comments-1048.json = [] => 0 review object, 0 thread.
+    gioi_han: 'Connector cham 16e992a (truoc ban va P2), khong cham 48b54d8 hay 6f23a4e; chi la tin hieu "khong gop y".'
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head 6f23a4e (pull_request)
+    run_id: 41157967248
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41157967248.json: .github/workflows/ci.yml, event pull_request, head 6f23a4e, run_attempt 1,
+      completed/success, updated_at 2026-10-31T02:45:32Z. readback-jobs-41157967248.json (filter=all): 23 job, 23 success,
+      moi job nhan ubuntu-latest, runner_id khac 0.
+    kiem_gate: 'measured — do-lai-nguon-20261031/kiem-gate-pre-6f23a4e.txt: suite 111570226733, 23 ten, rc=0.'
+    check_runs: 'measured — readback-check-runs-6f23a4e-all.json (filter=all).'
+  - ten: ops-thu-hoi-admission (thu-hoi) tren head 6f23a4e
+    run_id: 41161457241
+    trang_thai: measured
+    do_duoc: 'measured — readback-run-41161457241.json success; do-lai-nguon-20261031/kiem-gate-pre-6f23a4e.txt thu-hoi rc=0.'
+  - ten: selftest Windows local (ADR-0057) tren head 6f23a4e
+    trang_thai: measured
+    do_duoc: >-
+      measured — windows-local-6f23a4e.txt (ban chep qua Desktop Commander; bam tep goc do tren VM): VM tra-luat-win, HEAD
+      6f23a4e, STATUS sach, adr-song/doctrine-scan/doc-claims-check rc 0, `== tl selftest 1759/1759 ==`, selftest_rc 0, 1090 s.
+      Luot truoc tren 48b54d8 ra 1758/1759 vi ca wp1030 do san tren master 8cdb15a (delta 0), va o PR #1059.
+    gioi_han: 'Local KHONG phai check run CI va KHONG thay bang chung Windows cua CI (ADR-0057). Ban chep khong nguyen byte.'
+
+post_merge_checks:
+  - ten: gate ci.yml tren merge b653574 (push master)
+    run_id: 41161511121
+    trang_thai: cho_do
+    do_duoc: 'Dang chay luc soan (readback-runs-b653574.json: in_progress).'
+
+bookkeeping:
+  - viec: luu verdict cross-review Codex luot 1-2 vao ops/reviews
+    trang_thai: trong_pr_ghi_so
+    nguon: 'ops/reviews/pr1048-review-{1,2}-codex/ + verdict + receipt v2 (bien_nhan_v2 --root . TONG: DAT).'
+  - viec: so do Windows local (ADR-0057 muc 8)
+    trang_thai: da_xong
+    nguon: 'thuat_lai — C:\tl-win\do-luong.csv tren VM: dong 48b54d8 (1758/1759) va dong 6f23a4e (1759/1759). Tep ngoai kho.'
+  - viec: ho so land nay
+    trang_thai: trong_pr_ghi_so
+    nguon: 'PR ghi so tu nhanh agent/windows-local-may-chu-kho-r1-claude.'
+
+no_con_mo:
+  - id: DUYET-CHI-TRONG-PHIEN
+    mo_ta: 'Loi duyet merge chi co trong phien (authorization_ghi_chu); khong co comment GitHub neo SHA truoc merge.'
+  - id: CROSS-REVIEW-KHONG-CHAM-HEAD-MERGE
+    mo_ta: 'Approve cham 48b54d8; head merge 6f23a4e chi them merge master, CLAUDE.md trung byte. Khong co verdict tren 6f23a4e.'
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: CHUA_DAT
+  review_exact_sha_nguon: 'measured — ops/reviews/pr1048-review-2-codex/run/run.json head 48b54d8 != authorized_head_sha 6f23a4e.'
+  thuc_thi:
+    model: 'measured — ops/reviews/pr1048-review-2-codex/run/run.json model_phuc_vu_trang_thai DO_DUOC, 16/16 su kien gpt-6.1-sol (ho openai, khac ho claude cua executor).'
+    effort: 'measured — ops/reviews/pr1048-review-2-codex/run/run.json effort_phuc_vu [xhigh].'
+    sandbox_mode: >-
+      measured — ops/reviews/pr1048-review-2-codex/run/run.json sandbox_trang_thai DO_DUOC (codex-linux-sandbox,
+      file_system restricted). Gioi han cua phep do theo sandbox_gioi_han: lay mau /proc moi 0.2 s.
+  ly_do_chua_dat: 'Ba thanh phan thuc thi do duoc, nhung review_exact_sha CHUA_DAT nen §8.1 CHUA_DAT.'
+
+khong_do_duoc:
+  - 'Merge bam tay hay qua phien: phien bam (thuat_lai); GitHub chi ghi merged_by ducthangho.'
+  - 'Moc §10.2.2 Workflow definition tren b653574: not_measured (GraphQL 403 trong phien web — CLAUDE.md).'
+  - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'

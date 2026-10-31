@@ -1,0 +1,99 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 2 cua PR #1048 (CLAUDE.md, bai hoc PowerShell Get-Content -Raw rong), cham 48b54d8 (noi dung CLAUDE.md = head merge).
+# Reviewer Codex CLI KHAC HO executor (Claude), chay qua `launcher.py run 33584cff`. `approved` 0 P0 / 0 P1 / 0 P2 / 0 P3.
+# Ghi so boi CHINH phien executor session_015GtxrbUPS7zGdffB8Sfo8Y theo chi thi chu kho "Merge #1048 di roi land va ghi so" (31-10-2026).
+# Phien ay KHONG viet verdict, chi dung sandbox va goi CLI. Nhan: (a) DO tu kho/run.json luc ghi so · (b) THUAT LAI · KHONG_DO_DUOC.
+# Khuon: ops/reviews/pr870-review-3-codex-verdict.receipt.yaml (viec chu kho giao truc tiep) + ops/reviews/wp1037-g1-codex-luot2-verdict.receipt.yaml.
+
+schema_version: 2
+receipt_id: pr1048-review-2-codex-da5fe326
+kind: review_delivery_receipt
+packet_id: KHONG_AP_DUNG
+packet_ghi_chu: >-
+  (b) Viec chu kho giao truc tiep trong phien ("sua bai hoc PowerShell trong CLAUDE.md di"), KHONG phai work packet: khong
+  Issue packet, khong lease, khong spec_hash.
+target_pull_request: 1048
+land_merge_commit: b653574b117fa1496fbf58f09a22a8cbed5cc5dc
+land_merge_commit_ghi_chu: >-
+  (a) merge commit cua PR #1048 tren master (2026-10-31T02:46:49Z); cha thu hai = head PR 6f23a4e = 48b54d8 + merge master
+  5a174b9. Blob CLAUDE.md tai 48b54d8, 6f23a4e va b653574 cung la becd2ecc… (ops/land/pr1048-claude-md-powershell-provenance/merge-va-diff.txt).
+luot: 2
+luot_ghi_chu: '(a) Luot truoc: pr1048-review-1-codex (changes_requested 1 P2 tren 16e992a). Prompt luot 2 kem VERDICT-luot-1.md va diff-tu-luot-1.patch.'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: standard
+review_class_ghi_chu: '(b) Khong co lease/Issue khai Review Class; diff tai reviewed_sha: CLAUDE.md +10/-1 (numstat.txt trong thu muc).'
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Khac ho (reviewer gpt do_may qua run.json model_phuc_vu, executor claude theo provider), verdict `approved` 0/0/0/0 tren
+  48b54d8. Head da merge 6f23a4e chi them merge commit tu master, KHONG doi CLAUDE.md (blob trung). Day KHONG phai phe duyet
+  land/merge cua chu kho.
+verdict: approve
+verdict_nguon: '(a) dong 1 tep verdict viet `verdict: approved` (dang qua khu cua approve); dong 3 `Kết quả: 0 P0, 0 P1, 0 P2, 0 P3.`'
+verdict_path: ops/reviews/pr1048-review-2-codex-verdict.md
+verdict_sha256: da5fe3262416997c598ef48a971ad3f3ce3e0556bcd0fb234bde6ea2a383e07d
+verdict_bytes: 11871
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: >-
+  (a) Tep goc ops/reviews/pr1048-review-2-codex/VERDICT.md, chep nguyen byte tu sandbox reviewer; tep phang la ban sao `cp`,
+  cmp khop, cung sha256 (SHA256SUMS cua thu muc).
+reviewed_sha: 48b54d89b152871063c7296df33a60308667599e
+reviewed_tree: 3c283128c5591ba2daaa8ec4830298d44587a042
+reviewed_sha_nguon: '(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean.'
+reviewed_sha_to_tien: '(a) git merge-base --is-ancestor 48b54d8 b653574: rc 0.'
+base_sha: 8cdb15a786304bab084b43c8b30c127ae87e2594
+evidence_url: https://github.com/ducthangho/tra-luat/blob/18a9f0351d566b3895abf5c11e43cbe35938c7d8/ops/reviews/pr1048-review-2-codex-verdict.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim commit hien vat 18a9f03 cua nhanh ghi so agent/windows-local-may-chu-kho-r1-claude; bien nhan nay di o commit sau, cung nhanh.'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dong 3 tep verdict; khong co muc `### <slug> [P*]` nao.'
+findings_ids: []
+xu_ly_finding: '(a) Khong co finding moi. Bang DOI CHIEU LUOT TRUOC xac nhan continue-thieu-pham-vi-loi [P2] DA VA THAT.'
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 33584cff9e2f47b2b99fe7a985f404f0
+  run_json: ops/reviews/pr1048-review-2-codex/run/run.json
+  run_json_ghi_chu: >-
+    (a) launcher 1.5.0, ma_thoat 0, trang_thai xong, thoi_luong_giay 293.339, head 48b54d8, worktree_sach true,
+    execution_surface codex_cli, prompt_sha256 2b68aefb… = sha256 ops/reviews/pr1048-review-2-codex/PROMPT.md.
+  cli: >-
+    codex-cli 0.164.0 qua `launcher.py run --workspace <sandbox>/cay-kho --expected-repo github.com/ducthangho/tra-luat
+    --expected-root-commit 394e934… --expected-head 48b54d8… --require-clean --prompt-file … --expected-prompt-sha256 … --
+    codex exec -c model_reasoning_effort=xhigh --sandbox workspace-write -C <sandbox> --skip-git-repo-check "<chi thi>"`
+  model_yeu_cau: 'KHONG_DO_DUOC (khong truyen -m; mac dinh tai khoan)'
+  model: gpt-6.1-sol
+  model_da_chay: gpt-6.1-sol
+  model_evidence: do_may
+  muc_bang_chung_model: do_may
+  model_evidence_ref: ops/reviews/pr1048-review-2-codex/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: '(a) run.json model_phuc_vu_trang_thai DO_DUOC; 16 su kien, moi su kien gpt-6.1-sol; effort_phuc_vu [xhigh]; sandbox_trang_thai DO_DUOC (codex-linux-sandbox).'
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so day bang git push qua credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+independent_from_executor_session: true
+independent_ghi_chu: 'Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context executor).'
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: '(a) Blob verdict ghim o commit hien vat 18a9f03 cua PR ghi so; len trung_binh/cao khi PR ghi so land bang merge commit.'
+verdict_usage_caveats:
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'
+  - id: VERDICT-KHONG-TU-XAC-NHAN-SURFACE
+    muc: P3
+    mo_ta: '(a) Than verdict tu noi khong xac nhan duoc model/surface tu ben trong; nguon do_may la run.json cua launcher, khong phai loi khai cua verdict.'
+  - id: REVIEW-CHAM-48B54D8-KHONG-CHAM-HEAD-MERGE
+    muc: P3
+    mo_ta: '(a) Head merge 6f23a4e = 48b54d8 + merge master 5a174b9; CLAUDE.md blob trung (becd2ecc…), cac tep khac den tu master. Verdict khong cham 6f23a4e.'
+  - id: BA-ANH-CHUP-CAY-KHONG-VAO-KHO
+    muc: P3
+    mo_ta: '(a) review_evidence/snapshot-{before,after,final}.json (moi tep 2556550 byte) KHONG vao kho; sha256 o OMITTED.txt.'
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

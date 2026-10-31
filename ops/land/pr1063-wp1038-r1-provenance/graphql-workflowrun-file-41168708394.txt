@@ -1,0 +1,6 @@
+# WorkflowRun.file qua GraphQL — chay tren may chu kho ASUS-LAPTOP (gh CLI chu kho, tai khoan ducthangho, keyring) boi phien dieu phoi
+# session_015GtxraXfMD1t2FJLzzGDr4 qua Remote Desktop Commander (pwsh 7), 2026-10-31T05:46:5xZ. Output chep nguyen van, rc=0.
+# Lenh: gh api graphql -f id=<NODE_ID> -f 'query=query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }'
+== WFR_kwLOTNeRjc8AAAAJldijKg @ 2026-10-31T05:46:55.8847875Z
+{"data":{"node":{"databaseId":41168708394,"runNumber":3595,"createdAt":"2026-10-31T04:28:30Z","file":{"path":".github/workflows/ci.yml","repositoryFileUrl":"https://github.com/ducthangho/tra-luat/blob/69dcfee9274aae12ca27dfecc22a980e560cc3bc/.github/workflows/ci.yml"},"checkSuite":{"commit":{"oid":"69dcfee9274aae12ca27dfecc22a980e560cc3bc"}}}}}
+rc=0

@@ -11,7 +11,8 @@ và mã thoát nằm ở đầu script; tệp này chỉ là cách dùng.
 
 ## Đăng ký lịch 2 tuần/lần (admin, một lần — và chạy lại mỗi khi script đổi)
 
-Chạy trong PowerShell 7 **Run as administrator** bằng tài khoản admin (vd `tladmin`). Clone vào TEMP riêng
+Chạy **TRÊN VM `tra-luat-win`** (RDP vào VM — không phải laptop), trong PowerShell 7 **Run as administrator** bằng tài
+khoản admin (vd `tladmin`). Sai máy thì script dừng mã 5 trước mọi thay đổi (`-MayDich`, mặc định `TRA-LUAT-WIN`). Clone vào TEMP riêng
 của admin, KHÔNG chạy từ `C:\work`: `tlcommander` ghi được `C:\work`, nên script ở đó có thể đã bị sửa
 ngay trước khi admin chạy nó.
 

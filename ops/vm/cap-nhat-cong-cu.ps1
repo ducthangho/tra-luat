@@ -25,7 +25,7 @@ asset GitHub → tệp checksum trong CÙNG release → (Node) SHASUMS256.txt. K
 công cụ đó (đo 31-10: actionlint 1.7.7 không có `digest` nhưng có `*_checksums.txt`).
 
 Mã thoát: 0 mọi công cụ ĐẠT · 1 có công cụ LỖI · 2 thiếu bản kê/tham số sai · 3 tầng HeThong mà không
-phải SYSTEM/admin · 4 không phải Windows.
+phải SYSTEM/admin · 4 không phải Windows · 5 sai máy (không phải -MayDich), chưa đụng gì.
 #>
 [CmdletBinding()]
 param(
@@ -37,6 +37,7 @@ param(
     [string]$VenvKho = 'C:\work\tra-luat\.venv',
     [string]$HomeCommander = 'C:\ProgramData\TraLuatCommander\profile',
     [string]$TaiKhoanNguoiDung = 'tlcommander',
+    [string]$MayDich = 'TRA-LUAT-WIN',  # chốt tên máy: đổi ACL/đăng ký tác vụ chỉ được làm đúng trên VM này
     [string]$NhatKy = '',
     [switch]$NapHam                   # chỉ nạp hàm (cho bộ test), không chạy gì
 )
@@ -434,6 +435,10 @@ if ($NapHam) { return }
 # ───────────────────────── chạy ─────────────────────────
 
 if (-not $IsWindows) { Write-Loi 'chỉ chạy trên Windows'; exit 4 }
+# Chốt tên máy TRƯỚC mọi thay đổi. Đo 31-10-2026: chủ kho chạy `-DangKyLich` nhầm trên laptop (cùng là Windows,
+# cùng là admin) — script kịp chép vào Program Files và tạo C:\Tools\npm rồi mới chết ở icacls (1332, máy ấy không
+# có tlcommander). Kiểm quyền admin không bắt được ca này; chỉ tên máy phân biệt được.
+if ($env:COMPUTERNAME -ne $MayDich) { Write-Loi "máy này là '$env:COMPUTERNAME', không phải '$MayDich' — dừng, chưa đụng gì"; exit 5 }
 $goc = if ((Split-Path $PSScriptRoot -Leaf) -eq 'vm') { (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path } else { $PSScriptRoot }
 $id = [Security.Principal.WindowsIdentity]::GetCurrent()
 $laAdmin = ([Security.Principal.WindowsPrincipal]$id).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)

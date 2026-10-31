@@ -89,10 +89,15 @@ $pwsh = (Get-Process -Id $PID).Path
 if (-not $IsWindows) {
     Ca 'khong_phai_windows_thoat_4' { & $pwsh -NoProfile -File $Script -ChiKiem *> $null; $LASTEXITCODE -eq 4 }
 } else {
+    Ca 'sai_may_thoat_5_truoc_moi_thay_doi' {
+        $gia = 'KHONG-PHAI-' + $env:COMPUTERNAME
+        $o = & $pwsh -NoProfile -File $Script -DangKyLich -MayDich $gia 2>&1 | Out-String
+        $LASTEXITCODE -eq 5 -and $o.Contains($gia)
+    }
     $laAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if (-not $laAdmin) {
-        Ca 'he_thong_khong_admin_thoat_3' { & $pwsh -NoProfile -File $Script -PhamVi HeThong -ChiKiem *> $null; $LASTEXITCODE -eq 3 }
-        Ca 'dang_ky_lich_khong_admin_thoat_3' { & $pwsh -NoProfile -File $Script -DangKyLich *> $null; $LASTEXITCODE -eq 3 }
+        Ca 'he_thong_khong_admin_thoat_3' { & $pwsh -NoProfile -File $Script -PhamVi HeThong -ChiKiem -MayDich $env:COMPUTERNAME *> $null; $LASTEXITCODE -eq 3 }
+        Ca 'dang_ky_lich_khong_admin_thoat_3' { & $pwsh -NoProfile -File $Script -DangKyLich -MayDich $env:COMPUTERNAME *> $null; $LASTEXITCODE -eq 3 }
     } else {
         Ca 'admin_ca_ma_thoat_3_khong_do_duoc' { Write-Host '  chạy bằng admin: ca mã thoát 3 không đo được ở đây — chạy lại bằng tài khoản thường'; $false }
     }

@@ -1,0 +1,119 @@
+# LEASE — CLOUD-SETUP-P2B-WIRE revision 1 / generation 1 — noi bootstrap vao setup cloud qua ops/cloud_agent_creds.py + cai agy ghim
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+
+schema_version: 2
+event: executor_lease_granted
+
+packet_issue: 1039
+mission_issue: 1008
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1039#issuecomment-6540937382
+authority_url: https://github.com/ducthangho/tra-luat/issues/1039#issuecomment-6540937382
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho trong phien dieu phoi 31-10-2026 ~07:10Z: 'Windows xanh thì merge 1068 rồi cấp lease P2b'. Luot Windows run
+  41177514143 tren 780b7ecc xanh (15 success + 1 skipped) luc ~08:03Z; PR #1068 merge 97120d3c.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho tu viet (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; KHONG thi hanh packet nay.'
+
+leased_at_utc: '2026-10-31T08:10:00Z'
+heartbeat_at: '2026-10-31T08:10:00Z'
+lease_until: '2026-11-01T08:10:00Z'
+lease_expires_at_utc: '2026-11-01T08:10:00Z'
+
+packet_id: CLOUD-SETUP-P2B-WIRE
+packet_slug: cloud-setup-p2b-wire
+revision: 1
+generation: 1
+lease_id: wp1039-cloud-setup-p2b-r1-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Lease dau tien cua packet #1039; khong thay lease nao.'
+role: executor
+provider: anthropic_claude
+executor: claude
+surface: claude_code
+model: claude-opus-5-5
+environment: cloud
+environment_ghi_chu: 'Phien con Claude Code remote (Linux) — phien dieu phoi tao rieng khi chu kho duyet.'
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer_provider: openai_codex
+reviewer_surface: codex_cli
+reviewer_ghi_chu: 'Cross-review theo .claude/skills/cross-review/SKILL.md (phien doc lap, read-only, neo exact head, launcher.py run do model phuc vu); Codex connector tren PR la lop bo sung.'
+access: read-write
+
+spec_path: ops/specs/cloud-setup-p2b-wire-r1.md
+spec_ref: refs/heads/master
+spec_source_oid: 780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3
+spec_blob: 3d17563ad81733a5b5e87ba207f87ca9fde3b0a2
+spec_sha256: 67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81
+spec_hash: 67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81
+spec_hash_formula: SHA256 of UTF-8 LF Git blob bytes at spec_source_oid:spec_path
+spec_ref_ghi_chu: >-
+  Spec r1 da land: PR #1068 merge 97120d3c (git rev-parse 97120d3c:<spec_path> = 3d17563a, sha256 = spec_sha256). Dong bang
+  issuecomment-6539912892. Thu dinh danh spec la BLOB/BAM, khong phai ten nhanh.
+spec_review: 'Codex connector PR #1068 tren 780b7ecc: sach (has_any_findings false). CI Ubuntu 41171237575 xanh; Windows run 41177514143 xanh.'
+
+branch: claude/wp1039-cloud-setup-p2b-g1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+start_from_sha: 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+immutable_acceptance_baseline: 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+base_ghi_chu: >-
+  Base = master sau merge PR #1068 (spec P2b) va PR #1067 (ho so land P2a, landed true — dieu kien cap lease cua spec, vong 1 Q1).
+  Spec do nen tren 01ff6503; tieu chi G1/J1 do DELTA so base nen do lai tren base nay, khong doi spec. Moi phep do kich thuoc:
+  git diff origin/master...HEAD.
+reviewed_sha_required: 97120d3c76ebb7c3eda4b585ff46f1c51e30c91b
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot.'
+
+write_set:
+  - .claude/hooks/session-start.sh
+  - ops/codex_cloud_setup.sh
+  - ops/cloud_agent_creds.py
+  - ops/cloud_agent_creds_test.py
+  - ops/codex_cloud_setup_test.py
+  - .claude/dev/ci_dang_ky_test.py
+  - references/RUNBOOK.md
+  - RELEASE_MANIFEST.json
+write_set_hash: 494bf61cfdb71e2a3e747717a0053dc22a091c1f87f8e2c0e95201b863be5e8d
+write_set_hash_cach_tinh: 'sha256 cua cac duong dan DA SAP XEP, noi bang LF, co LF cuoi, utf-8.'
+write_set_da_do_truoc_khi_cap: >-
+  Do 2026-10-31T08:0xZ sau fetch du refs/heads (ls-remote 716 / cuc bo 726, comm -23 = 0) va master = 97120d3c:
+  `ops/lease_publish.py ai-dang-giu` 8/8 duong dan NGUOI_GIU 0 (do ~08:05-08:15Z, phien dieu phoi).
+tran_kich_thuoc: 'nang_tran spec r1 (vong 2 Q18): <= 8 tep / <= 600 dong them, do so merge-base (git diff origin/master...HEAD). Vuot 600 => bo bot ca phu, KHONG xin nang them; vuot 8 tep => DUNG, hoi chu kho.'
+tran_loi_goi_codex: 'ADR-0052@8ab100793df9831505f495543a74044b91c2c9ab: toi da 8 loi goi Codex review; da dung 0. Het 8 chua approve => Review Rescue Checkpoint (ADR-0037).'
+ci_budget:
+  gate_tu_dong: 'CI PR tu dong (ubuntu) tren PR cua packet'
+  phep_do_duoc_cap: 'khong — spec L1 khong doi luot Windows (vong 2 Q20; hook thoat ngay khi CLAUDE_CODE_REMOTE khac true)'
+  het: 'Mot job bat buoc do 2 luot lien tiep cung mot loi => DUNG, bao phien dieu phoi truoc luot thu ba'
+dieu_kien_dung:
+  - 'S1 — can sua tep ngoai write set. DUNG, handoff.'
+  - 'S2 — vuot tran 8 tep (hoac 600 dong sau khi da bo ca phu). DUNG, hoi chu kho.'
+  - 'S3 — spec tu mau thuan / thieu du kien de lam dung tieu chi. DUNG, bao phien dieu phoi (khong tu suy).'
+  - 'S4 — het han lease => ngung ghi, handoff §7.'
+  - 'S5 — cung hinh dang finding >= 3 lan => hoi chu kho.'
+  - 'S6 — bat ky buoc nao can Drive/NLM/webapp LIVE, credential that, hoac tai/chay nhi phan agy that (tieu chi M1 do sau land, chu kho duyet rieng). DUNG.'
+  - 'S7 — hang ghim agy (phien ban, URL, sha512) can doi => DUNG; doi ban la revision moi cua spec.'
+
+cam_tuyet_doi:
+  - Khong sua spec; khong sua tep ngoai write set
+  - Khong tu review / approve / merge / land
+  - Khong LIVE (Drive/NLM/webapp/registry), khong deploy Package, khong bump VERSION
+  - Khong doc/ghi credential that (tl_secrets*, *.enc, auth.json that, token, TL_MASTER_KEY); test chi dung fixture gia
+  - Khong workflow_dispatch
+  - Khong force-push
+  - Khong viet chuoi bo-qua-CI nguyen van trong commit message
+
+coordination_paths:
+  - ops/leases/wp1039-cloud-setup-p2b-r1-g1-claude.yaml
+run_minutes: 1440
+heartbeat_required_minutes: 360
+
+chua_do_duoc:
+  - 'Danh tinh nguoi ky: #566.'
+  - 'M1 (LIVE sau land, phien Claude Code web moi co TL_MASTER_KEY) — chu kho duyet rieng; khong phai viec cua executor truoc land.'

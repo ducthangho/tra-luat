@@ -41,16 +41,22 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
      checkpoint chủ kho. Thay bảng ngưỡng §8 cho packet áp ADR-0060; P0 vẫn chặn như cũ.
    - **M2 Review theo lớp.** Reviewer khái quát biểu hiện thành lớp nguyên nhân và quét mọi biểu hiện cùng lớp trước
      khi báo. Cách ghi giữ nguyên §8.3.
-   - **M3 Windows.** Phân loại `required` / `not_required` / `unknown`:
-     `required` khi diff chạm `*.ps1`, `*.cmd`, `*.bat`, `scripts/deploy-*`, `.claude/dev/**`, `.github/workflows/**`;
-     hoặc thêm/sửa dòng chứa `os.name`, `sys.platform`, `platform.system`, `subprocess`, `encoding=`, `os.sep`, `pathlib`;
-     hoặc đặc tả khai `windows: required`.
-     `not_required` khi diff **chỉ** chạm `*.md`, `docs/**`, `ops/land/**`, `ops/reviews/**`, `ops/specs/**`.
-     Còn lại `unknown`: reviewer phải chốt `required` hoặc `not_required` kèm lý do trong verdict. Reviewer được nâng
-     mức; agent không được hạ.
+   - **M3 Windows.** Phân loại theo **thứ tự**, dừng ở bước đầu tiên khớp:
+     (1) PR thuộc làn lưu trữ M8 ⇒ `not_required`.
+     (2) `required` khi diff chạm `*.ps1`, `*.cmd`, `*.bat`, `*.sh`, `scripts/deploy-*`, `.claude/dev/**`,
+     `.github/workflows/**`; hoặc thêm/sửa dòng chứa `os.name`, `sys.platform`, `platform.system`, `subprocess`,
+     `encoding=`, `os.sep`, `pathlib` **trong tệp mã** (`*.py`, `*.ps1`, `*.sh`, `*.yml`; không xét `*.md` và bản ghi
+     thụ động); hoặc đặc tả khai `windows: required`.
+     (3) `not_required` khi mọi tệp của diff là `*.md`, hoặc nằm trong `docs/**`, `ops/land/**`, `ops/reviews/**`,
+     `ops/specs/**` mà **không** phải `*.py`, `*.ps1`, `*.sh`, `*.cmd`, `*.bat`.
+     (4) Còn lại `unknown`: reviewer phải chốt `required` hoặc `not_required` kèm lý do trong verdict.
+     Reviewer được nâng mức; agent không được hạ.
      `required` ⇒ chạy trên máy Windows của chủ kho qua Desktop Commander theo `ADR-0057`/`0058`/`0059` (khoá, kiểm tải,
-     cô lập, sổ đo). Cộng thêm vào Windows CI, không thay. "Xanh" = tập test ID đỏ trên ứng viên **nằm trong** tập đỏ
-     trên SHA nền, hai lượt cùng máy, dựng trong cùng một lệnh; ca đỏ thuộc tệp trong write set ⇒ chủ kho quyết.
+     cô lập, sổ đo). Cộng thêm vào Windows CI, không thay. Điều kiện "xanh", theo thứ tự: (a) hai lượt (SHA nền và ứng
+     viên), cùng máy, dựng trong cùng một lệnh, mỗi lượt **chạy trọn** tập test bắt buộc và có danh sách test ID kèm kết
+     quả; thiếu lượt, thiếu báo cáo, lỗi setup, hoặc test bắt buộc bị `skipped`/`not_run` ⇒ **không xanh** (ứng viên
+     chạy 0 test ⇒ không xanh); (b) tập test ID đỏ trên ứng viên **nằm trong** tập đỏ trên nền; (c) ca đỏ thuộc tệp
+     trong write set ⇒ chủ kho quyết.
      Máy không `Online`: sau **15 phút** báo chủ kho; sau **24 giờ** packet sang `blocked`. Không tự miễn.
      Với packet áp ADR-0060 điều này **thay** câu "máy offline thì vế này không áp" của `ADR-0057` §2.
    - **M4 Đưa ứng viên sang Windows.** Clone nền từ GitHub trong thư mục riêng của phiên, nhập git bundle của ứng viên,
@@ -60,10 +66,15 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
      Quá hai lần ⇒ đóng PR, generation mới. Không có không gian tên nào được miễn đếm.
    - **M6 Draft và đề xuất merge.** PR mở ở draft. Khi chưa đủ mọi điều kiện, cấm cả bốn: bỏ draft; nói "sẵn sàng
      merge"/"có thể merge" ở bất kỳ đâu; gọi merge; bật auto-merge. Báo theo mẫu `CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu …`.
-     Điều kiện bỏ draft: CI bắt buộc xanh trên đúng head (bốn mốc §10.2.2 nếu đo được, thiếu thì ghi thiếu); connector
-     đã review đúng commit (dòng `Reviewed commit:` cho đúng SHA, đã đọc các finding); M1 đạt; M3 đạt nếu `required`;
-     PR head = SHA đã approve. Commit mới ⇒ về draft. Connector gọi bằng comment `@codex review` khi còn draft;
-     điều khoản này chỉ có hiệu lực khi §6 `C1` có kết quả ĐẠT ghi trong ADR, trước đó ghi thẳng là chưa đo.
+     Điều kiện bỏ draft: bằng chứng CI đáp ứng §10.2.2–§10.2.3 trên đúng head; mốc bắt buộc chưa đo được phải ghi
+     thiếu và **tiếp tục chặn**, trừ waiver hợp lệ theo protocol; connector đã review đúng commit (dòng
+     `Reviewed commit:` cho đúng SHA, đã đọc các finding); M1 đạt; M3 đạt nếu `required`; PR head = SHA đã approve.
+     Commit mới ⇒ về draft.
+     **Cách gọi connector, hai trạng thái theo §6 `C1`.** C1 ĐẠT ⇒ gọi bằng comment `@codex review` khi PR còn draft;
+     lượt connector tự động khi bỏ draft (S10) trên **cùng SHA** không mở vòng mới, kết quả của nó chỉ đối chiếu.
+     C1 chưa đạt ⇒ connector là điều kiện **merge**, không phải điều kiện bỏ draft: được bỏ draft khi mọi điều kiện
+     khác đủ, kèm dòng `CHƯA ĐỦ ĐIỀU KIỆN MERGE: chờ connector trên <SHA>`; lượt tự động sau ready là lượt connector
+     duy nhất cho SHA ấy. Trong trạng thái này, bỏ draft không phải "đề xuất merge"; câu "sẵn sàng merge" vẫn cấm.
    - **M7 Một lần duyệt.** Chủ kho duyệt **một lần**, neo SHA H, bao gồm: merge, thu bằng chứng hậu merge, ghi sổ, nhả
      lease, đóng WP. Hậu kiểm thất bại ⇒ không `landed`, không đóng WP. Agent không tự duyệt.
    - **M8 Sổ sách.** Ghi sổ hoàn tất = một **bản ghi có cấu trúc** đăng lên Issue của WP và đọc lại khớp. Trường tối
@@ -76,15 +87,20 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
    - **M9 CI.** Giữ CI PR và CI master hậu merge; gate local không thay CI. `full_mutant_audit` bắt buộc khi diff chạm
      `.claude/dev/**`, `ops/**/*.py` hoặc `.github/workflows/**`; còn lại không bắt buộc. Ghi thẳng: chú thích
      `ci.yml:869` hiện rộng hơn luật này và chưa sửa (nợ, ngoài write set).
-   - **M10 Hiệu lực.** Luật áp cho một packet khi và chỉ khi blob đặc tả có đúng một dòng
-     `^dieu_kien_merge: ADR-0060@([0-9a-f]{40})$` và OID qua ba phép đo của `ADR-0053` mục *Hiệu lực* (thay đường dẫn).
-     Không hồi tố.
+   - **M10 Hiệu lực.** Luật áp cho một packet khi và chỉ khi **blob đặc tả mà `spec_hash` của lease trỏ tới** có đúng
+     một dòng `^dieu_kien_merge: ADR-0060@([0-9a-f]{40})$` và OID qua ba phép đo của `ADR-0053` mục *Hiệu lực* (thay
+     đường dẫn). Không hồi tố.
+   - **M12 Review offline trước push.** Vì M5 đòi approve trước push mà ADR-0060 không mượn ánh xạ của `ADR-0054`,
+     ADR-0060 tự ghi cách đọc các điểm §7/§13 của protocol trước push: mỏ neo là SHA ứng viên cục bộ và bundle của nó;
+     handoff, verdict và biên nhận ghi lên Packet Issue; sau push, đối chiếu PR head = SHA đã approve rồi dẫn lại
+     evidence vào PR. Mọi phép so của §7 giữ nguyên, chỉ đổi mỏ neo.
    - **M11 Cưỡng chế.** Lúc land: 0 cổng. Đo trên đủ các vị trí cổng mà §20 liệt kê, ghi lệnh và kết quả từng vị trí.
      Nêu tên ba packet kế nhiệm: B (collector bốn mốc, phần còn lại của #899), C (cổng điều kiện merge và đóng WP trong
      `packet_loop.py`, tách khỏi `ADR-0054`), D (gọn hiện vật review và validator làn lưu trữ).
-2. **`docs/PROTOCOL_DA_PHIEN.md`** — đúng ba chỗ, câu trung tính, không chép doctrine: một dòng ADR-0060 vào bảng §20
-   (cột cổng: `không cổng — kỷ luật executor/reviewer`); một câu con trỏ ngay dưới bảng ngưỡng §8; một câu con trỏ trong
-   §10.2.4 cạnh câu con trỏ `ADR-0057`.
+2. **`docs/PROTOCOL_DA_PHIEN.md`** — chỉ câu con trỏ trung tính, không chép doctrine: một dòng ADR-0060 vào bảng §20
+   (cột cổng: `không cổng — kỷ luật executor/reviewer`); một câu con trỏ dưới bảng ngưỡng §8; một câu con trỏ trong
+   §10.2.4 cạnh câu con trỏ `ADR-0057`; và một câu con trỏ tại mỗi điểm §7/§13 mà M12 đọc lại (cùng chỗ protocol đã
+   trỏ `ADR-0054`). Mỗi con trỏ là một câu, không tạo nghĩa vụ mới.
 3. **`.github/workflows/ops-open-pr.yml`** — thêm `--draft` vào lệnh `gh pr create`. Không đổi gì khác.
 4. **`.claude/skills/cross-review/SKILL.md`** — một dòng con trỏ tới ADR-0060 (M1–M3, M6).
 5. **`.claude/skills/work-packet/SKILL.md`** — một dòng con trỏ tới ADR-0060 (M5, M6).
@@ -96,26 +112,37 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 `.claude/skills/land-packets/SKILL.md`. Không ký tự đại diện. `ai-dang-giu` đo 31-10 sau khi fetch đủ 724/724 nhánh:
 `NGƯỜI_GIỮ 0` cho cả sáu tệp. Phải đo lại trước khi cấp lease.
 
-## 4. Nghiệm thu (mỗi tiêu chí kèm phép đo làm nó ĐỎ)
+## 4. Nghiệm thu (mỗi tiêu chí kèm phép đo làm nó ĐỎ, hoặc nói thẳng là hồi quy không có răng riêng)
 - **A1** `python .claude/dev/packet_loop.py adr-song --root .` rc=0. Đỏ: bỏ dòng §20 của ADR-0060.
-- **A2** `python .claude/dev/packet_loop.py doctrine-scan --root .` rc=0. Đỏ: chép một đoạn luật M-x vào adapter.
-- **A3** `python scripts/tl.py doc-claims-check --json` cho `ok`.
-- **A4** `actionlint .github/workflows/ops-open-pr.yml` rc=0, và đúng một dòng khớp `--draft` trong khối
-  `gh pr create`. Đỏ: xoá `--draft`.
+- **A2** Adapter chỉ mang con trỏ: với **mỗi** tệp trong ba tệp `.claude/skills/*/SKILL.md` của §3, `git diff --numstat`
+  cho ≤ 3 dòng thêm, và mỗi dòng thêm chứa chuỗi `ADR-0060`. Đỏ: thêm một dòng luật không nhắc `ADR-0060`, hoặc dòng thứ tư.
+  `doctrine-scan` rc=0 chạy kèm như **hồi quy** — không khai nó bắt được việc chép luật của ADR mới.
+- **A3** `python scripts/tl.py doc-claims-check --json` cho `ok`. **Hồi quy**, không có đột biến riêng.
+- **A4** `actionlint .github/workflows/ops-open-pr.yml` rc=0; khối `gh pr create` có đúng một dòng chứa `--draft`;
+  `git diff` của tệp chỉ thêm đúng một dòng, không đổi khối `on:`. Đỏ: xoá `--draft`; sửa thêm `on:`.
 - **A5** `git diff --numstat <base>..<head>`: đúng 6 tệp của §3, tổng dòng thêm ≤ 450. Đỏ: chạm tệp thứ bảy.
-- **A6** Vế dương (đo trên văn bản ADR đã gộp khoảng trắng trong từng đoạn): có đủ các cụm
-  `CHƯA ĐỦ ĐIỀU KIỆN MERGE`, `15 phút`, `24 giờ`, `required`, `not_required`, `unknown`, `hai lần push thêm`,
-  `dieu_kien_merge: ADR-0060@`. Vế âm: ADR không chứa câu kích hoạt ADR-0054 (`kích hoạt \`ADR-0054\``).
-  Đỏ: xoá một cụm; thêm câu kích hoạt.
-- **A7** Các bộ test đang ghim workflow vẫn đạt: `python ops/lease_publish_test.py` và
-  `python .claude/dev/ci_dang_ky_test.py` (N/N, hai số bằng nhau). Đỏ: đột biến đổi `on:` của `ops-open-pr.yml`.
-- **A8** Cross-review Codex tới 0 P0–P2 và mọi P3 đóng hoặc được chủ kho miễn (chính M1). Reviewer đi qua văn bản
-  ADR theo bốn ca và phải ra đúng kết luận: (i) còn một P2 mở ⇒ không đề xuất merge; (ii) Windows `required` đang
-  chạy ⇒ PR ở draft; (iii) `unknown` chưa được chốt ⇒ chặn; (iv) PR "lưu trữ" có sửa `ops/leases/**` ⇒ không thuộc
-  làn lưu trữ.
-- **A9** Windows: packet này **`required`** theo chính M3, vì chạm `.github/workflows/ops-open-pr.yml` và
-  `.claude/**`. Chạy A1, A2, A4 (nếu máy có `actionlint`) và A7 trên máy Windows theo M3/M4, ghi sổ đo. Đỏ: một ca
-  đỏ trên ứng viên mà không đỏ trên nền.
+- **A6** ADR có mục `## Tham số` là một bảng; mỗi hàng nằm trên một dòng (phép khớp cùng dòng hợp lệ theo L6(b) vì đo
+  trên blob đã neo băm). Phải có **đúng một** hàng cho mỗi tham số, khớp nguyên dòng:
+  `| báo chủ kho khi máy Windows không Online | 15 phút |` ·
+  `| packet sang blocked khi máy Windows không Online | 24 giờ |` ·
+  `| số lần push thêm tối đa mỗi PR | 2 |` ·
+  `| hạng chặn merge | P0, P1, P2 |` ·
+  `| P3 còn mở | đóng có bằng chứng hoặc chủ kho miễn |` ·
+  `| dòng khai hiệu lực | dieu_kien_merge: ADR-0060@<oid40> |`.
+  Giá trị dùng chữ số. Vế âm: ADR không chứa token `luat_push_va_dung_va` (token khai hiệu lực của `ADR-0054`).
+  Đỏ: đổi giá trị một hàng (`24 giờ` → `24 giờ được merge`, `2` → `hai`); nhân đôi một hàng; thêm token ADR-0054.
+- **A7** Hồi quy: `python ops/lease_publish_test.py` và `python .claude/dev/ci_dang_ky_test.py` đạt N/N, hai số bằng
+  nhau. **Không** khai hai bộ này ghim `ops-open-pr.yml` (đo 31-10: không bộ nào nhắc tệp ấy); răng cho `--draft` ở A4.
+- **A8** Cross-review Codex tới 0 P0–P2, mọi P3 đóng hoặc được chủ kho miễn. Reviewer làm hai việc:
+  (a) đi bốn ca, mỗi ca dẫn đoạn ADR-0060 làm căn cứ: còn một P2 mở ⇒ không đề xuất merge; Windows `required` đang
+  chạy ⇒ PR ở draft; `unknown` chưa chốt ⇒ chặn; PR "lưu trữ" sửa `ops/leases/**` ⇒ không thuộc làn lưu trữ;
+  (b) nhận bốn bản ADR đột biến do điều phối dựng (cho P2 qua; cho ready khi Windows còn chạy; cho `unknown` đi tiếp;
+  nhận `ops/leases/**` vào làn lưu trữ) và phải chỉ ra đúng điều khoản sai ở **mỗi** bản. Đỏ: bỏ sót một bản.
+- **A9** Windows: packet này **`required`** theo M3 bước (2), căn cứ duy nhất là `.github/workflows/ops-open-pr.yml`
+  (ba adapter thuộc `.claude/skills/**`, không thuộc `.claude/dev/**`). Chạy A1, A4 (nếu máy có `actionlint`) và A7 trên máy Windows theo M3/M4, hai lượt nền/ứng viên, ghi sổ đo. Đỏ: ứng
+  viên có ca đỏ không có trên nền, hoặc một lượt không chạy trọn.
+- **A10** Mục Cưỡng chế của ADR liệt kê **từng** vị trí cổng mà §20 của protocol nêu, mỗi vị trí kèm lệnh và kết quả đo
+  (L6(e)). Đỏ: thiếu một vị trí.
 
 ## 5. Ngoài phạm vi
 - Không viết cổng máy (packet C), collector (packet B), validator làn lưu trữ (packet D).
@@ -124,8 +151,11 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
 ## 6. Đo trước khi đóng băng
 - **B1 — git bundle sang Windows.** Kết quả: xem phụ lục §8 (điền trước khi tính băm).
-- **C1 — connector chạy trên PR draft bằng `@codex review`.** `chua_do_duoc` lúc đóng băng; đo trên PR đầu tiên của
-  packet này. Chưa đo ⇒ M6 ghi điều khoản connector là chưa hiệu lực.
+- **C1 — connector chạy trên PR draft bằng `@codex review`.** Đo trên PR #1084 (PR đặc tả này, đang draft). Đầu ra
+  bắt buộc: số PR, head SHA lúc gọi, URL comment gọi, phản hồi của connector (review hoặc comment, có dòng
+  `Reviewed commit:` đúng SHA) và kết quả đọc lại. ĐẠT khi connector trả kết quả neo đúng head trong lúc PR còn draft.
+  Không phản hồi trong 60 phút, hoặc phản hồi neo SHA khác ⇒ KHÔNG ĐẠT. `chua_do_duoc` không bao giờ được đọc là ĐẠT;
+  khi ấy M6 ở trạng thái "C1 chưa đạt". Kết quả ghi vào phụ lục §9 trước khi tính băm.
 - Branch protection của `master`: `GET …/branches/master/protection` ⇒ HTTP 403 "Resource not accessible by
   integration" (đo 31-10). `chua_do_duoc`.
 
@@ -150,3 +180,7 @@ thư mục riêng `C:\tl-win\session_015GtxrYPjZCTZeRiazdssgq\`, nhả khoá (0 
 
 Giới hạn của phép đo: một commit, bundle 882 byte. Bundle lớn hơn phải chia nhiều lần `write_file`; chưa đo trần
 kích thước. Log PowerShell hiển thị lỗi mã hoá ký tự (`sß║ích`) do chuyển hướng `*>`; không ảnh hưởng hash hay rc.
+
+## 9. Phụ lục C1
+
+(điền sau khi đo trên PR #1084)

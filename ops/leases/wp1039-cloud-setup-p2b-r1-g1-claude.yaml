@@ -20,8 +20,16 @@ recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; K
 
 leased_at_utc: '2026-10-31T08:10:00Z'
 heartbeat_at: '2026-10-31T08:10:00Z'
-lease_until: '2026-11-01T08:10:00Z'
-lease_expires_at_utc: '2026-11-01T08:10:00Z'
+lease_until: '2026-10-31T14:30:00Z'
+lease_expires_at_utc: '2026-10-31T14:30:00Z'
+rut_han:
+  han_cu: '2026-11-01T08:10:00Z'
+  han_moi: '2026-10-31T14:30:00Z'
+  rut_boi: ducthangho
+  ly_do: 'packet CLOUD-SETUP-P2B-WIRE da merge: PR #1073 (head 9783b421ecb74636311501e7c0d712e2aa73a5c0, merge a253c169ed79617b8d1a4754867c336ac72c72c5, 2026-10-31T14:1xZ).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; tien le wp1038 g1 (9828f470)'
+  han_moi_ghi_chu: 'han moi dat sau luc rut ~12 phut de workflow dang lease con thay lease song (tranh rc=8), tien le 9828f470 / wp1030 700cf710'
+  ghi_boi: 'claude-session session_015GtxrbVWthHq1mtsPgqZLw (phien executor) theo chi thi chu kho trong phien (31-10-2026 ~13:11Z): "Xanh thi merge, land va bookeeping"; phien dieu phoi xac nhan va chuyen viec land cho executor'
 
 packet_id: CLOUD-SETUP-P2B-WIRE
 packet_slug: cloud-setup-p2b-wire

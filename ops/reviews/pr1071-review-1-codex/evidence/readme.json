@@ -1,0 +1,82 @@
+{
+  "index_rows": 2,
+  "caveat_rows": 7,
+  "rounds": [
+    {
+      "round": 1,
+      "index_line": "| [`pr1058-review-1-codex-verdict.md`](pr1058-review-1-codex-verdict.md) | [`.receipt.yaml`](pr1058-review-1-codex-verdict.receipt.yaml) | khong co (PR ghi so cua #1045, chu kho giao truc tiep) | **`changes_requested`** · `cross_reviewed` · luot **1** cua PR **#1058** · 0/0/1/1 (P0/P1/P2/P3) · codex CLI `launcher.py run f98dce6d`, `gpt-6-astra` do_may · thu muc goc [`pr1058-review-1-codex/`](pr1058-review-1-codex/) | `5dd347c` | 13159 |",
+      "caveat_ids": [
+        "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+        "SANDBOX-MODE-KHONG-DO-DUOC",
+        "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+        "TEP-LON-KHONG-VAO-KHO"
+      ],
+      "checks": {
+        "verdict": true,
+        "assurance": true,
+        "counts": true,
+        "head": true,
+        "bytes": true,
+        "run_id": true,
+        "model": true,
+        "receipt_link": true,
+        "caveat_ids_exact": true,
+        "caveat_count": true,
+        "caveat_text": true
+      },
+      "caveat_text_checks": {
+        "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY": true,
+        "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX": true,
+        "TEP-LON-KHONG-VAO-KHO": true,
+        "SANDBOX-MODE-KHONG-DO-DUOC": true
+      }
+    },
+    {
+      "round": 2,
+      "index_line": "| [`pr1058-review-2-codex-verdict.md`](pr1058-review-2-codex-verdict.md) | [`.receipt.yaml`](pr1058-review-2-codex-verdict.receipt.yaml) | khong co (PR ghi so cua #1045, chu kho giao truc tiep) | **`approve`** · `cross_approved` · luot **2** cua PR **#1058** · 0/0/0/0 (P0/P1/P2/P3) · codex CLI `launcher.py run 488b7693`, `gpt-6-astra` do_may · head da duyet = head PR #1058 luc merge (merge `9c7dc11`) · thu muc goc [`pr1058-review-2-codex/`](pr1058-review-2-codex/) | `3534a6e` | 13506 |",
+      "caveat_ids": [
+        "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY",
+        "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX",
+        "TEP-LON-KHONG-VAO-KHO"
+      ],
+      "checks": {
+        "verdict": true,
+        "assurance": true,
+        "counts": true,
+        "head": true,
+        "bytes": true,
+        "run_id": true,
+        "model": true,
+        "receipt_link": true,
+        "caveat_ids_exact": true,
+        "caveat_count": true,
+        "caveat_text": true
+      },
+      "caveat_text_checks": {
+        "CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY": true,
+        "SCRIPT-DO-DOC-DUONG-DAN-SANDBOX": true,
+        "TEP-LON-KHONG-VAO-KHO": true
+      }
+    }
+  ],
+  "readme_minus_new_rows_equals_base_bytewise": true,
+  "preserved": {
+    "97120d3": {
+      "table_rows": 1115,
+      "missing_or_changed": 0
+    },
+    "origin/master": {
+      "table_rows": 1115,
+      "missing_or_changed": 0
+    },
+    "HEAD^1": {
+      "table_rows": 1124,
+      "missing_or_changed": 0
+    },
+    "HEAD^2": {
+      "table_rows": 1115,
+      "missing_or_changed": 0
+    }
+  },
+  "errors": []
+}

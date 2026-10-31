@@ -3763,7 +3763,7 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
         # luot cross-review lien tiep tim duoc dot bien song sot o dung lop nay, va
         # ca bon lan vi ca test cham diem le te nhung gi nguoi va NGHI RA phai dung,
         # tuc mot danh sach CAM. Nay dao thanh danh sach CHO PHEP.
-        thay = (tuple(cmd), {k: v for k, v in _k.items() if k != "env" and k != "stdin"})
+        thay = (tuple(cmd), {k: v for k, v in _k.items() if k not in ("env", "stdin", "executable")})  # wp1077
         nhat_ky.append(thay)
         bang(thay == dac_ta(), f"loi goi `claude` lech dac ta\n  mong: {dac_ta()!r}\n  do  : {thay!r}")
         # KIEM GIA TRI, khong chi kiem KHOA CO MAT. Cross-review luot 7 tim duoc dot
@@ -4219,7 +4219,7 @@ def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
     bang(len(muc_kn) == 1, f"KHA_NANG thieu muc openai-llm: {m.KHA_NANG}")
 
     goc_which = m.shutil.which
-    goc_run = m._chay_van_ban_an_toan
+    goc_run = m._chay_probe_llm   # wp1077: probe llm cua doctor di qua _chay_probe_llm
     lenh_chay = []
 
     class _P:
@@ -4252,12 +4252,12 @@ def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
         if list(cmd) == ["llm", "keys", "list"]:
             return _P(0, "")
         return _P(1)
-    m._chay_van_ban_an_toan = run_khong_key
+    m._chay_probe_llm = run_khong_key
     tt, mo_ta = m._do_openai_llm({})
     bang(tt == "CHUA_XAC_THUC", f"khong co key ma khong bao CHUA_XAC_THUC: {tt}, {mo_ta}")
 
     # (c) CO_CREDENTIAL khi co OPENAI_API_KEY nhung kiem_song=False (khong goi API)
-    m._chay_van_ban_an_toan = run_gia
+    m._chay_probe_llm = run_gia
     lenh_chay.clear()
     tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, False)
     bang(tt == "CO_CREDENTIAL", f"co key mac dinh phai CO_CREDENTIAL: {tt}")
@@ -4277,7 +4277,7 @@ def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
         if list(cmd)[:2] == ["llm", "prompt"]:
             return _P(1, "", "Error: 401 Unauthorized")
         return _P(0)
-    m._chay_van_ban_an_toan = run_loi
+    m._chay_probe_llm = run_loi
     tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, True)
     bang(tt == "CHUA_XAC_THUC", f"kiem song loi phai tra CHUA_XAC_THUC: {tt}")
 
@@ -9234,6 +9234,240 @@ def r802_doctor_ten_tran_tu_muc_PATH_rong():
              f"ten tran tu muc PATH rong khong duoc do: rc={rc}, bi_che={che}")
 
 
+# wp1077 (spec ops/specs/wp1077.md M3): probe ENOEXEC theo `/bin/sh` của execvp glibc (bash có thể khác — Codex lượt 1 F2).
+def _wp1077_tep(d, ten, than, mode=0o755):
+    d.mkdir(parents=True, exist_ok=True)
+    (d / ten).write_text(than)
+    (d / ten).chmod(mode)
+    return d / ten
+
+
+def _wp1077_doctor(ten, than_dau):
+    """`ten` không shebang thân `than_dau` đầu PATH, bản tốt (có shebang) sau; trả (rc, mục) của `doctor`."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        _wp1077_tep(s / "dau", ten, than_dau)
+        _wp1077_tep(s / "tot", ten, f"#!/bin/sh\necho '{ten} 9.9.9'\n")
+        env = dict(os.environ, PATH=os.pathsep.join([str(s / "dau"), str(s / "tot")]), LOCALAPPDATA="")
+        rc, _d, muc = _wp802_doctor(m, ten, None, env)
+        return rc, muc
+
+
+@ca
+def r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE():
+    """M3(a): `rg`/`git` KHÔNG shebang in phiên bản, đứng đầu PATH ⇒ shell gọi được ⇒ không BI_CHE, thoát 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    for ten in ("rg", "git"):
+        rc, muc = _wp1077_doctor(ten, f"echo '{ten} 1.0.0-khong-shebang'\n")
+        bang(rc == MA_OK and "bi_che" not in muc and muc["co"] is True
+             and "khong-shebang" in str(muc.get("phien_ban")),
+             f"{ten} khong shebang chay duoc trong shell ma doctor khong nhan: rc={rc}, muc={muc}")
+
+
+@ca
+def r1077_doctor_khong_shebang_hong_van_BI_CHE():
+    """M3(b): `rg` KHÔNG shebang `exit 1` đứng đầu, bản tốt sau ⇒ vẫn BI_CHE, thoát 12."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    rc, muc = _wp1077_doctor("rg", "echo 'Access is denied' >&2\nexit 1\n")
+    bang(rc == MA_THIEU_CONG_CU and muc.get("trang_thai") == "BI_CHE",
+         f"chay lai qua /bin/sh da noi cho ban hong: rc={rc}, muc={muc}")
+
+
+@ca
+def r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC():
+    """M3(c): tệp shebang hợp lệ nhưng THIẾU bit thực thi ⇒ shell báo Permission denied ⇒ probe hỏng, không chạy lại."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    m = _tai_launcher_thu()   # 0644: execve ⇒ EACCES kể cả root (root vẫn cần ít nhất một bit x)
+    with San() as s:
+        f = _wp1077_tep(s, "rg", "#!/bin/sh\necho 'ripgrep 14.1.0'\n", mode=0o644)
+        ok, mo_ta, qua_han = m._phien_ban(str(f), env=dict(os.environ))
+        bang(ok is False and qua_han is False,
+             f"tep thieu bit thuc thi bi chay lai nhu ENOEXEC: ok={ok} mo_ta={mo_ta!r}")
+
+
+@ca
+def r1077_xac_thuc_khong_shebang_chay_duoc():
+    """M3(d): probe xác thực cũng đo như shell — tệp không shebang in một dòng, rc 0 ⇒ ok."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    m = _tai_launcher_thu()
+    with San() as s:
+        f = _wp1077_tep(s, "cli", "echo 'Logged in'\n")
+        ok, mo_ta, qua_han, ra = m._xac_thuc_kem_dau_ra(str(f), ["status"], env=dict(os.environ))
+        bang(ok is True and "Logged in" in ra,
+             f"probe xac thuc khong chay tep khong shebang: ok={ok} mo_ta={mo_ta!r}")
+
+
+@ca
+def r1077_retry_giu_argv_env():
+    """M1 (Codex lượt 1 F3): lượt chạy lại giữ đối số (kể cả khoảng trắng) và env của phía gọi."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    m = _tai_launcher_thu()
+    with San() as d:
+        f = _wp1077_tep(d, "cli", """[ "$MEASURE" = value ] || exit 7
+case "$1" in
+  --version) [ "$#" = 1 ] || exit 8; echo 'version-correct';;
+  status) [ "$#" = 2 ] && [ "$2" = 'two words' ] || exit 9; echo 'auth-correct';;
+  *) echo 'lost arguments' >&2; exit 6;;
+esac
+""")
+        env = {"PATH": str(d), "MEASURE": "value"}
+        ver = m._phien_ban(str(f), env=env)
+        auth = m._xac_thuc_kem_dau_ra(str(f), ["status", "two words"], env=env)
+        bang(ver == (True, "version-correct", False) and auth == (True, "ok", False, "auth-correct\n"),
+             f"argv/env mat khi chay lai: version={ver}, auth={auth}")
+
+
+@ca
+def r1077_doctor_codex_status_khong_shebang():
+    """F1 (Codex lượt 1): probe `codex login status` của KHA_NANG cùng nhận wrapper không shebang như probe version."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    with San() as d:
+        _wp1077_tep(d, "codex", "echo 'Logged in using ChatGPT'\n")
+        env = {"PATH": str(d), "LANG": "C.UTF-8", "TL_LAUNCHER_ENV_DA_DOC": "1"}
+        m.CONG_CU = [c for c in m.CONG_CU if c["ten"] == "codex"]
+        m.MODULE_PY = []
+        m.KHA_NANG = [k for k in m.KHA_NANG if k["ten"] == "codex"]
+        m._doc_moi_truong = lambda: (env, {"da_doc_truoc_cong_cu": True})
+        m.tim_workspace = lambda _: None
+        m._co_chan_codex = lambda: None
+        m._dang_cho_snapshot = lambda _: False
+        m._codex_home_hieu_luc = lambda: d / "isolated-home"
+        m._han_token_codex = lambda: {"gio_con_lai": {}, "last_refresh": None, "tuoi_anh_chup_gio": None}
+        with patch.dict(os.environ, env, clear=True):
+            rc, info = _doctor_json(m)
+        cap = info["kha_nang"][0]
+        bang(info["cong_cu"][0]["co"] is True and cap["trang_thai"] == "CO_CREDENTIAL",
+             f"version xanh nhung probe status van nem ENOEXEC: rc={rc}, capability={cap}")
+
+
+def _wp1077_llm(env, cwd=None, them_path=False):
+    """`_do_openai_llm` dưới env SẠCH (+ cwd); OSError đổi thành kết quả để ca chết bằng assertion của CHÍNH nó."""
+    from unittest.mock import patch
+    m = _tai_launcher_thu()
+    if them_path:
+        env = dict(env, PATH=env["PATH"] + os.pathsep + os.environ.get("PATH", ""))
+    with (contextlib.chdir(cwd) if cwd else contextlib.nullcontext()), patch.dict(os.environ, env, clear=True):
+        try:
+            return m._do_openai_llm(env, False)
+        except (OSError, UnicodeError) as e:
+            return ("OSError" if isinstance(e, OSError) else type(e).__name__, f"errno={getattr(e, 'errno', None)} {e}")
+
+
+def _wp1077_llm_tep(d, nhan, shebang=False, dau=""):
+    _wp1077_tep(d, "llm", ("#!/bin/sh\n" if shebang else "") + dau
+                + f'case "$1" in --version) echo llm-{nhan};; keys) echo openai;; esac\n')
+
+
+@ca
+def r1077_llm_khong_shebang_ten_tran_giai_PATH():
+    """F1: `llm` tên TRẦN, không shebang ⇒ tìm theo PATH rồi mới đưa `/bin/sh` (sh không tra PATH)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as d:
+        _wp1077_llm_tep(d / "bin", "0.1-ks")
+        kq = _wp1077_llm({"PATH": str(d / "bin")}, them_path=True)
+        bang(kq[0] == "CO_CREDENTIAL" and "0.1-ks" in kq[1], f"probe llm khong chay wrapper khong shebang: {kq}")
+
+
+@ca
+def r1077_probe_doctor_khong_spawn_tran():
+    """F1: các hàm probe CLI của `doctor` (CONG_CU + KHA_NANG) liệt kê dưới đây KHÔNG gọi thẳng
+    `subprocess.run/Popen` hay `_chay_van_ban_an_toan` — phải qua `_chay_probe_nhu_shell`. Danh sách là
+    PHẠM VI ĐÃ THU HẸP (chủ kho, 31-10-2026), KHÔNG phải mọi probe: `_git` và `_do_codex_song`
+    (spawn ở codex_cred.py) chưa phủ — Codex lượt 2 F1, nợ nối tiếp."""
+    import ast
+    cay = ast.parse(LAUNCHER_DANG_DUNG.read_text(encoding="utf-8"))
+    can = {"_phien_ban", "_xac_thuc_kem_dau_ra", "_do_codex", "_do_openai_llm", "_do_github",
+           "_suc_khoe_mcp_github", "_chay_probe_llm"}
+    thay, tran = set(), []
+    for n in ast.walk(cay):
+        if isinstance(n, ast.FunctionDef) and n.name in can:
+            thay.add(n.name)
+            for c in ast.walk(n):
+                if isinstance(c, ast.Call) and ast.unparse(c.func) in (
+                        "subprocess.run", "subprocess.Popen", "_chay_van_ban_an_toan"):
+                    tran.append(f"{n.name}:{c.lineno}")
+    bang(thay == can, f"thieu ham probe trong launcher: {sorted(can - thay)}")
+    bang(not tran, f"probe doctor con spawn tran (khong qua _chay_probe_nhu_shell): {tran}")
+
+
+@ca
+def r1077_PATH_rong_khong_bo_qua_wrapper_dau():
+    """F4 (Codex lượt 2–5): bản đầu PATH không shebang thắng bản sau có shebang (PATH tuyệt đối, rỗng, `link/..`);
+    phần tử PATH quá dài trước `:` còn thử cwd (glibc); bản đầu thiếu interpreter (ENOENT) thì sang bản sau."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as d:
+        _wp1077_llm_tep(d / "first", "FIRST")
+        _wp1077_llm_tep(d / "later", "LATER", shebang=True)
+        (d / "first" / "sub").mkdir()
+        (d / "link").symlink_to(d / "first" / "sub", target_is_directory=True)
+        (d / "llm").symlink_to(d / "later" / "llm")
+        for dau in (str(d / "first"), "", str(d / "link" / ".."), "x" * 4200):
+            path = dau + os.pathsep + str(d / "later")
+            kq = _wp1077_llm({"PATH": path}, cwd=d / "first")
+            bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH={path!r}: do nham llm phia sau: {kq}")
+        _wp1077_tep(d / "thieu", "llm", "#!/khong-ton-tai-wp1077/interpreter\nexit 1\n")   # lượt 5: ENOENT ⇒ sang bản sau
+        kq = _wp1077_llm({"PATH": str(d / "thieu") + os.pathsep + str(d / "later")})
+        bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"dung o ban thieu interpreter: {kq}")
+
+
+@ca
+def r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc():
+    """F4 lượt 5: tên tương đối ngắn vẫn chạy khi cwd vượt PATH_MAX (ghép cwd ⇒ ENAMETOOLONG)."""
+    if platform.system() != "Linux":
+        return "BO QUA can getcwd Linux dai hon PATH_MAX"
+    with San() as d:
+        goc = os.open(".", os.O_RDONLY)
+        try:
+            os.chdir(d)
+            while len(os.getcwd()) < 4200:
+                os.mkdir("a" * 220)
+                os.chdir("a" * 220)
+            for shebang in (True, False):
+                _wp1077_llm_tep(Path("."), "FIRST", shebang=shebang)
+                kq = _wp1077_llm({"PATH": "."})
+                bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"cwd dai, shebang={shebang}: {kq}")
+        finally:
+            os.fchdir(goc)
+            os.close(goc)
+
+
+@ca
+def r1077_PATH_hop_dong_glibc():
+    """F4 lượt 5–7: `$0` đúng chuỗi glibc (PATH='' ⇒ `rg`, `bin` ⇒ `bin/llm`, `bin/` ⇒ `bin//llm`) · ETXTBSY DỪNG ·
+    PATH có byte ngoài UTF-8."""
+    if platform.system() != "Linux":
+        return "BO QUA can Linux (ETXTBSY, glibc)"
+    m = _tai_launcher_thu()
+    with San() as d:
+        _wp1077_tep(d, "rg", '[ "$0" = rg ] || exit 42\necho ripgrep-FIRST\n')
+        with contextlib.chdir(d):
+            ver, auth = m._phien_ban("rg", env={"PATH": ""}), m._xac_thuc_kem_dau_ra("rg", ["s"], env={"PATH": ""})
+        bang(ver[0] is True and auth[0] is True and "FIRST" in ver[1], f"PATH='' doi $0: {ver} {auth}")
+        _wp1077_llm_tep(d / "bin", "FIRST", dau='[ "$0" = "$MONG" ] || exit 42\n')
+        for path, mong in (("bin", "bin/llm"), ("bin/", "bin//llm")):
+            kq = _wp1077_llm({"PATH": path, "MONG": mong}, cwd=d)
+            bang(kq[0] == "CO_CREDENTIAL" and "llm-FIRST" in kq[1], f"PATH={path!r} lech $0 glibc: {kq}")
+        _wp1077_llm_tep(d / "first", "FIRST", shebang=True)
+        _wp1077_llm_tep(d / "later", "LATER", shebang=True)
+        with (d / "first" / "llm").open("ab"):
+            kq = _wp1077_llm({"PATH": str(d / "first") + os.pathsep + str(d / "later")})
+        bang(kq[0] == "OSError" and "errno=26 " in kq[1], f"ETXTBSY dau PATH bi nuot, do nham ban sau: {kq}")
+        raw = os.fsdecode(os.fsencode(d) + b"/byte-\xff")   # lượt 7: PATH ngoài UTF-8 (surrogateescape)
+        os.mkdir(raw)
+        kq = _wp1077_llm({"PATH": raw + os.pathsep + str(d / "later")})
+        bang(kq[0] == "CO_CREDENTIAL" and "llm-LATER" in kq[1], f"PATH byte ngoai UTF-8 lam mat probe: {kq}")
+
+
 @ca
 def r802_cai_rg_windows_chon_ban_chay_duoc():
     """F2 (Codex lượt 1): NGUYÊN `rg.cai.windows` qua cai_cong_cu.sh; `rg` cũ hỏng đầu PATH ⇒ DAT, đúng thư mục."""
@@ -12150,6 +12384,46 @@ DOT_BIEN = [
      ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
     ("wp802_ten_co_duoi_khong_noi_them", ('([""] if any(ten.upper().endswith(e.upper()) for e in ext) else []) + ext)',
      '([""] if any(ten.upper().endswith(e.upper()) for e in ext) else ext))'), ["r802_cac_duong_dan_chi_trong_PATH_va_theo_PATHEXT"]),
+    ("wp1077_bo_chay_lai_ENOEXEC", ('            if e.errno == errno.ENOEXEC and os.path.isfile("/bin/sh"):', '            if False:'),
+     ["r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE", "r1077_xac_thuc_khong_shebang_chay_duoc"]),
+    ("wp1077_chay_lai_moi_OSError", ('            if e.errno == errno.ENOEXEC and os.path.isfile("/bin/sh"):',
+      '            if os.path.isfile("/bin/sh"):'), ["r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC"]),
+    ("wp1077_xac_thuc_khong_dung_probe_chung", ('p = _chay_probe_nhu_shell([duong_dan, *doi_so]', 'p = subprocess.run([duong_dan, *doi_so]'),
+     ["r1077_xac_thuc_khong_shebang_chay_duoc"]),
+    ("wp1077_chay_lai_bo_qua_rc", ('                return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)',
+      '                q = subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)\n'
+      '                return subprocess.CompletedProcess(lenh, 0, q.stdout, q.stderr)'),
+     ["r1077_doctor_khong_shebang_hong_van_BI_CHE"]),
+    # Codex lượt 1: F3 (đối số) · F1 (probe trong phạm vi; trừ _git/_do_codex_song, #1083).
+    ("wp1077_retry_mat_doi_so", ('                return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)',
+      '                return subprocess.run(["/bin/sh", tep], **kw)'), ["r1077_retry_giu_argv_env"]),
+    ("wp1077_codex_status_spawn_tran", ('p = _chay_probe_nhu_shell([duong_codex, "login", "status"]',
+      'p = subprocess.run([duong_codex, "login", "status"]'),
+     ["r1077_doctor_codex_status_khong_shebang", "r1077_probe_doctor_khong_spawn_tran"]),
+    ("wp1077_llm_khong_qua_helper", ('    return _chay_probe_nhu_shell(lenh, capture_output=True, text=True, encoding="utf-8",',
+      '    return subprocess.run(lenh, capture_output=True, text=True, encoding="utf-8",'),
+     ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_probe_doctor_khong_spawn_tran"]),
+    ("wp1077_gh_auth_spawn_tran", ('pg = _chay_probe_nhu_shell(["gh", "auth", "status"]', 'pg = subprocess.run(["gh", "auth", "status"]'),
+     ["r1077_probe_doctor_khong_spawn_tran"]),
+    # Codex lượt 2–5 F4: tự duyệt PATH như execvp (bỏ ⇒ subprocess chạy bản sau / sh TÊN không tra PATH).
+    ("wp1077_ten_tran_khong_giai_PATH", ('        ung_vien = [f"{d}/{ten}" if d else ten for d in phan]',
+      '        ung_vien = [ten]'),
+     ["r1077_llm_khong_shebang_ten_tran_giai_PATH", "r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
+    ("wp1077_PATH_rong_khong_chuan_hoa_duong_dan", ('            return subprocess.run(lenh, executable=tep if os.sep in tep else os.curdir + os.sep + tep, **kw)',
+      '            return subprocess.run(lenh, executable=tep, **kw)'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
+    ("wp1077_abspath_doi_nghia_symlink", ('[f"{d}/{ten}" if d else ten for d', '[os.path.abspath(f"{d}/{ten}" if d else ten) for d'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau", "r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc",
+      "r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_tiep_moi_loi_exec", ('            if os.sep in ten or e.errno not in tiep:', '            if os.sep in ten:'),
+     ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_PATH_ma_hoa_strict", ('[d if len(os.fsencode(d)) < tran else "" for d in phan[:-1]]', '[d if len(d.encode()) < tran else "" for d in phan[:-1]]'),
+     ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_PATH_dai_bo_han", ('[d if len(os.fsencode(d)) < tran else "" for d in phan[:-1]]', '[d for d in phan[:-1] if len(os.fsencode(d)) < tran]'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
+    ("wp1077_mat_gach_cuoi_PATH", ('[f"{d}/{ten}" if d else ten for d', '[os.path.join(d, ten) for d'), ["r1077_PATH_hop_dong_glibc"]),
+    ("wp1077_dung_o_loi_tim_kiem", ('            if os.sep in ten or e.errno not in tiep:', '            if True:'),
+     ["r1077_PATH_rong_khong_bo_qua_wrapper_dau"]),
     ("wp802_launcher_winget_thanh_choco", ('"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e"',
       '"Windows": "choco install --id BurntSushi.ripgrep.MSVC -e"'),
      ["r802_bang_cai_rg_khop_cong_cu_yaml"]),
@@ -12706,10 +12980,8 @@ DOT_BIEN = [
       '        song, vi_sao = _do_codex_song(duong_dan="codex")'),
      ["t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran"]),
     ("do_codex_spawn_ten_tran",
-     ('        p = subprocess.run([duong_codex, "login", "status"], capture_output=True,\n'
-      '                           text=True, timeout=30, encoding="utf-8", errors="replace")',
-      '        p = subprocess.run(["codex", "login", "status"], capture_output=True,\n'
-      '                           text=True, timeout=30, encoding="utf-8", errors="replace")'),
+     ('        p = _chay_probe_nhu_shell([duong_codex, "login", "status"], capture_output=True,',
+      '        p = _chay_probe_nhu_shell(["codex", "login", "status"], capture_output=True,'),
      ["t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran"]),
     ("do_codex_song_spawn_ten_tran",
      ('            probe.__globals__["_co_codex"] = lambda: duong_dan',
@@ -13039,8 +13311,8 @@ DOT_BIEN = [
       '    _ds = list(_RE_STATUS.finditer(_RE_ANSI.sub("", r.stdout or "")))\n'
       '    kq = _ds[-1] if _ds else None'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_hoi_ten_dung_san_thay_vi_ten_da_khai",
-     ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,',
-      '        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True, text=True,'),
+     ('        r = _chay_probe_nhu_shell(["claude", "mcp", "get", ten], capture_output=True, text=True,',
+      '        r = _chay_probe_nhu_shell(["claude", "mcp", "get", "github"], capture_output=True, text=True,'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     # ĐỘT BIẾN CỦA REVIEWER LƯỢT 7 — lượt thứ NĂM của lớp "đo đồ giả", và là lượt đầu
     # tìm được sau khi chốt đã đảo thành danh sách CHO PHÉP. Giữ cả hai chiều: bỏ chuẩn

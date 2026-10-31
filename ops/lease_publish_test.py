@@ -1559,10 +1559,10 @@ def _tach_o(dong: str) -> list:
     Vì sao (cross-review #1051 lượt 4, P2): `split("|")` coi `\|` là ranh giới cột, nên chữ trong ô
     `tệp verdict` tràn sang cột `biên nhận`/`id` và thoả cho cột ấy dù cột thật ghi tên khác.
 
-    Chỉ bóc khoảng trắng ASCII (GFM: space/tab/LT/FF) — `str.strip()` bóc cả NBSP, nên `|\u00a0---|` thành
-    hàng gạch hợp lệ dù GitHub không dựng bảng (cross-review #1051 lượt 10, P2)."""
+    Chỉ bóc space/tab — `str.strip()` bóc cả NBSP (lượt 10) và VT/FF (lượt 11), nên `|\u00a0---|` hay
+    `|\x0b---|` thành hàng gạch hợp lệ dù GitHub không dựng bảng (cross-review #1051, P2)."""
     import re
-    TRANG = " \t\x0b\x0c"
+    TRANG = " \t"
     d = dong.strip(TRANG)
     if d.startswith("|"):
         d = d[1:]
@@ -1637,7 +1637,12 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
         tieu = re.match(r"^ {0,3}(#{1,6})(?:[ \t]|$)", dong)
         if tieu:
             if len(tieu.group(1)) <= 2:
-                lay = len(tieu.group(1)) == 2 and tieu_de in dong
+                # Đúng CHỮ HIỂN THỊ của tiêu đề, không tìm chuỗi con trong NGUỒN (lượt 11): `## [Khác](x "Mục lục")`
+                # hay `## <span title="Mục lục">Khác</span>` hiển thị "Khác". Chữ tiêu đề (bỏ `#` mở/đóng) phải là
+                # tên mục, trước nó chỉ được ký hiệu (mục lục thật: `⚠ `), không chữ, không cú pháp Markdown/HTML.
+                chu = re.sub(r"[ \t]+#+[ \t]*$", "", dong[tieu.end():]).strip(" \t")
+                lay = len(tieu.group(1)) == 2 and re.fullmatch(
+                    r"[^\w\[\]<>()`&\\*_!~]*" + re.escape(tieu_de), chu) is not None
             dau_bang, cho_gach, trong_doan = None, False, False
             continue
         if not lay:
@@ -1739,7 +1744,7 @@ def _ten_tep(o: str) -> set:
     duong = rf"(?:[\w\-][\w.\-]*/)*{ten}"
     muc = re.compile(rf"`(?P<span>{ten})`|\[(?P<nhan>`[^`\[\]]+`)\]\((?P<dich>{duong})\)",
                      re.IGNORECASE)
-    o = o.strip(" \t\x0b\x0c")
+    o = o.strip(" \t")
     ra, i = set(), 0
     while True:
         m = muc.match(o, i)
@@ -2387,12 +2392,14 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
         CB = "| tệp verdict | id |\n|---|---|\n| `x-verdict.md` | `C1` |"
         ML = "| tệp verdict | biên nhận |\n|---|---|\n| `x-verdict.md` | `x-verdict.receipt.yaml` |"
 
-        def viet(cb=CB, ml=ML, dau=""):
-            (tm / "README.md").write_text(f"# x\n\n{dau}## Cảnh báo đang có hiệu lực\n\n{cb}\n\n## Mục lục\n\n{ml}\n",
-                                          encoding="utf-8")
+        def viet(cb=CB, ml=ML, dau="", t_cb="## Cảnh báo đang có hiệu lực", t_ml="## Mục lục"):
+            (tm / "README.md").write_text(f"# x\n\n{dau}{t_cb}\n\n{cb}\n\n{t_ml}\n\n{ml}\n", encoding="utf-8")
 
         # Đối chứng XANH: comment và rào mã (kể cả một "## Mục lục" giả trong đó) ở NGOÀI hai mục là vô hại.
         viet(dau="<!-- ghi chú -->\n\n## Khác\n\n```\n## Mục lục\n| tệp verdict | biên nhận |\n|---|---|\n```\n\n")
+        _kiem_muc_luc(tm, goc)
+        # Đối chứng XANH: tiêu đề có ký hiệu đứng trước (mục lục thật: `⚠ `) và `#` đóng vẫn là đúng mục.
+        viet(t_cb="## ⚠ Cảnh báo đang có hiệu lực", t_ml="## Mục lục ##")
         _kiem_muc_luc(tm, goc)
         # Đối chứng XANH: ô id nhiều span TÁCH RỜI (phẩy hoặc khoảng trắng) vẫn nhận đủ.
         for o_id in ("`C2`, `C1`", "`C2` `C1`"):
@@ -2406,19 +2413,19 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
             "div_boc_bang": ("khối HTML", dict(ml="<div>\n" + ML + "\n</div>")),
             "gach_chi_hai_cham": ("Mục lục", dict(ml=ML.replace("|---|---|", "|:|:|"))),
             "rao_dong_thut_4": ("Cảnh báo", dict(cb="```\n    ```\n\n" + CB + "\n\n```")),
-            "u2028_thay_xuong_dong": ("Cảnh báo", dict(cb=CB.replace("\n", " "))),
+            "u2028_thay_xuong_dong": ("Cảnh báo", dict(cb=CB.replace("\n", "\u2028"))),
             "van_ngay_truoc_bang": ("Cảnh báo", dict(cb="Ghi chú\n" + CB)),
             "danh_sach_ngay_truoc": ("Cảnh báo", dict(cb="- mục\n" + CB)),
             "trich_dan_ngay_truoc": ("Cảnh báo", dict(cb="> trích\n" + CB)),
             "setext_cat_muc": ("Mục lục", dict(ml="Khác\n---\n\n" + ML)),
             "tieu_de_thut_cat_muc": ("Mục lục", dict(ml="   ## Khác\n\n" + ML)),
             # lượt 9: dòng chỉ có ký tự trắng Unicode KHÔNG phải dòng trống (GFM: chỉ space/tab)
-            "nbsp_khong_phai_dong_trong": ("Cảnh báo", dict(cb="Ghi chú\n \n" + CB)),
-            "u3000_khong_phai_dong_trong": ("Mục lục", dict(ml="Ghi chú\n　\n" + ML)),
-            "bang_gia_ngan_bang_nbsp": ("Cảnh báo", dict(cb="| other | other |\n|---|---|\n \n" + CB)),
+            "nbsp_khong_phai_dong_trong": ("Cảnh báo", dict(cb="Ghi chú\n\u00a0\n" + CB)),
+            "u3000_khong_phai_dong_trong": ("Mục lục", dict(ml="Ghi chú\n\u3000\n" + ML)),
+            "bang_gia_ngan_bang_nbsp": ("Cảnh báo", dict(cb="| other | other |\n|---|---|\n\u00a0\n" + CB)),
             # rào backtick có info chứa backtick không phải rào ⇒ rào thật mở ở dòng SAU và nuốt bảng
             "rao_mo_info_co_nhay": ("Mục lục", dict(ml="```info`\n```\n\n" + ML + "\n```")),
-            "rao_dong_kem_nbsp": ("Mục lục", dict(ml="```\n``` \n\n" + ML + "\n```")),
+            "rao_dong_kem_nbsp": ("Mục lục", dict(ml="```\n```\u00a0\n\n" + ML + "\n```")),
             # ô id hiển thị OTHER, C1 chỉ nằm trong thuộc tính HTML / đích link
             "id_trong_thuoc_tinh": ("'C1'", dict(cb=CB.replace("`C1`", '<span data-x=" C1 ">OTHER</span>'))),
             "id_trong_the_html": ("'C1'", dict(cb=CB.replace("`C1`", "<span C1 >OTHER</span>"))),
@@ -2428,9 +2435,17 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
             "id_dinh_span_cuoi": ("'C1'", dict(cb=CB.replace("`C1`", "`OTHER``C1`"))),
             "id_dinh_span_giua": ("'C1'", dict(cb=CB.replace("`C1`", "`OTHER``C1``ELSE`"))),
             # lượt 10: NBSP không phải khoảng trắng của bảng ⇒ hàng gạch hỏng ⇒ không có bảng
-            "gach_nbsp_dau_o": ("Cảnh báo", dict(cb=CB.replace("|---|---|", "| ---|---|"))),
-            "gach_nbsp_cuoi_o": ("Mục lục", dict(ml=ML.replace("|---|---|", "|--- |---|"))),
-            "gach_nbsp_ngoai_bang": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---|---| "))),
+            "gach_nbsp_dau_o": ("Cảnh báo", dict(cb=CB.replace("|---|---|", "|\u00a0---|---|"))),
+            "gach_nbsp_cuoi_o": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---\u00a0|---|"))),
+            "gach_nbsp_ngoai_bang": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---|---|\u00a0"))),
+            # lượt 11: VT/FF cũng không phải khoảng trắng của hàng gạch
+            "gach_vt": ("Cảnh báo", dict(cb=CB.replace("|---|---|", "|\x0b---|---|"))),
+            "gach_ff": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---|---|\x0c"))),
+            # lượt 11: tên mục chỉ nằm trong METADATA tiêu đề (title/đích link, thuộc tính HTML) — chữ hiển thị là "Khác"
+            "tieu_de_title_link": ("Cảnh báo", dict(t_cb='## [Khác](other.md "Cảnh báo đang có hiệu lực")')),
+            "tieu_de_dich_link": ("Mục lục", dict(t_ml="## [Khác](<Mục lục>)")),
+            "tieu_de_thuoc_tinh_html": ("Mục lục", dict(t_ml='## <span title="Mục lục">Khác</span>')),
+            "tieu_de_chu_khac_dung_truoc": ("Mục lục", dict(t_ml="## Không phải Mục lục")),
         }
         for ten, (dau_hieu, kw) in do.items():
             viet(**kw)

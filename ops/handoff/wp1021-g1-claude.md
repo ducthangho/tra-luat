@@ -130,12 +130,27 @@ Giới hạn Codex khai: input `runner_set` của dispatch không có trong JSON
 
 Nguyên văn hai verdict ở **Phụ lục A** (lượt 8, 9), cùng quy ước cắt giữa hai dấu như lượt 1–7 (phần giữa + một `\n` cuối = tệp gốc).
 
-**C7 Windows local trên `356a27e`** — lượt ASUS-LAPTOP BỊ CẮT (dưới), chạy lại trên `tra-luat-win` (đang chạy, kết quả ở commit sau).
+**C7 Windows local trên `356a27e` — KẾT QUẢ (tra-luat-win): `97/98 ca · 145/153 đột biến thường CÓ RĂNG · 2/2 TỰ KIỂM`, `TỔNG: ĐỎ`.
+Toàn bộ chỗ đỏ là MÔI TRƯỜNG VM, ĐỎ SẴN trên base, KHÔNG do diff #1021** (ADR-0057 §2: lỗi có sẵn trên base nêu tên kèm SHA đo nền):
+- Ca đỏ duy nhất `c91_B2_MA_TRAN_nguon_hong_qua_CLI_co_va_khong_no` = `KHÔNG ĐO ĐƯỢC [tin_dung_gia]`: `OSError: [WinError 1314] A required
+  privilege is not held by the client` tại `pathlib.py:1386 in symlink_to` (fixture `ops/reviews/v/run.json` → `khong-co.json`, test:3258).
+  Tám đột biến đích `c91` mất răng vì cùng lỗi ấy: m103, m105, m115, m116, m117, m118, m129, m130 (đều `tin_dung_gia`, cùng `WinError 1314`).
+- Nguyên nhân đo được: tài khoản chạy trên VM không có quyền tạo symlink — `whoami /priv` không liệt kê `SeCreateSymbolicLinkPrivilege`;
+  `python -c "...symlink_to('x')"` trần ra cùng `WinError 1314`, rc=1.
+- Đo nền: worktree `b29da0bfe3bfb7a7be69136a1c5c40f82c088a93` trên cùng VM, gọi thẳng `_chay_1(c91)` ⇒ `tin_dung_gia`, cùng `WinError 1314`.
+  `c91` và m103–m130 có từ wp960 (`ae0d06c`), không nằm trong diff #1021. ASUS-LAPTOP lượt `e9e0048` và Windows CI đều cho `c91` ĐẠT
+  (máy có quyền symlink) — tức đây là thuộc tính của VM `tra-luat-win`, không phải của mã.
+- Mọi ca/đột biến của #1021 trên VM: `c88`, `c89`, `c99`, `c100`, `c101` ĐẠT; m142–m157 đều `CÓ RĂNG … giet_that` đúng ca đích.
+- Thời lượng 3828 s (04:57:01Z → 06:00:48Z theo `LastWriteTime` của log; dòng `rc=` không được ghi vì lệnh nối của tiến trình tách hỏng —
+  lỗi quoting của executor, không ảnh hưởng nội dung log). Sổ đo `C:\tl-win\do-luong.csv` đã thêm một dòng (06:06:24Z, `may=tra-luat-win`,
+  `loi_that=khong`); khoá `C:\tl-win\KHOA.txt` đã xoá (0 byte, 06:07Z).
+- Hệ quả cho điều kiện merge: VM `tra-luat-win` hiện KHÔNG đo được `c91` ⇒ muốn có N/N local đầy đủ trên `356a27e` cần máy có quyền symlink
+  (ASUS-LAPTOP, hoặc bật Developer Mode / cấp `SeCreateSymbolicLinkPrivilege` cho tài khoản VM — việc của chủ kho).
+Chi tiết lượt `tra-luat-win`:
 `tra-luat-win`: `Online` trong `list_devices` (ADR-0058 §1); `C:\tl-win\KHOA.txt` rỗng, không `python.exe` nào ⇒ khoá
 `session_015GtxrbRjCRMMLRWHoUuZYj` 04:54:46Z hạn 06:54:46Z; clone `C:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj` đúng `356a27e`, không nông,
 có `4bc94325…`, sạch, `core.abbrev 7`; Python 3.12.10; tiến trình tách PID 6996 từ 04:57:01Z, log
-`C:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj-356a27e.log`. 05:39Z: qua phần ca, tới m48 (~50/153), mọi dòng đã in ĐẠT/CÓ RĂNG.
-Lượt ASUS-LAPTOP (bị cắt, KHÔNG phải bằng chứng): máy `Offline` từ ~04:28Z khi đã ~100/153 đột biến (6 dòng khớp `ĐỎ|KHÔNG RĂNG|Traceback`
+`C:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj-356a27e.log`. Lượt ASUS-LAPTOP (bị cắt, KHÔNG phải bằng chứng): máy `Offline` từ ~04:28Z khi đã ~100/153 đột biến (6 dòng khớp `ĐỎ|KHÔNG RĂNG|Traceback`
 đều là tên ca chứa chữ "traceback", không lỗi thật); khoá `D:\tl-win\KHOA.txt` không xoá được, tự hết hiệu lực 05:44:33Z (ADR-0058 §3a).
 Chi tiết lượt ASUS-LAPTOP: ASUS-LAPTOP `Online` (03:44Z, `tra-luat-win` cũng `Online` nhưng không dùng);
 `KHOA.txt` rỗng ⇒ ghi khoá `session_015GtxrbRjCRMMLRWHoUuZYj` 03:44:33Z hạn 05:44:33Z. Kiểm tải: 2 `python.exe` của `browser-use --cli-mcp`
@@ -143,7 +158,7 @@ Chi tiết lượt ASUS-LAPTOP: ASUS-LAPTOP `Online` (03:44Z, `tra-luat-win` cũ
 sạch, `core.abbrev 7`. Lệnh `python -u ops\bien_nhan_v2_test.py` (`PYTHONUTF8=1 PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1`),
 tiến trình tách bắt đầu 03:46:14Z, log `D:\tl-win\session_015GtxrbRjCRMMLRWHoUuZYj-356a27e.log`.
 
-**Còn lại:** C7 (trên). Không merge/land (`uy_quyen_merge: false`) — chờ chủ kho. Lease hết hạn 2026-10-31T08:57:00Z.
+**Còn lại:** C7 N/N đầy đủ trên máy có quyền symlink (tuỳ chủ kho). Không merge/land (`uy_quyen_merge: false`) — chờ chủ kho. Lease hết hạn 2026-10-31T08:57:00Z.
 
 ## Cập nhật 30→31-10-2026 — sau khi #1041 vào master (đọc phần này TRƯỚC các mục trên)
 

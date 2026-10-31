@@ -1,7 +1,9 @@
 # HO SO LAND — packet #1039 CLOUD-SETUP-P2B-WIRE r1 (lease g1), code qua PR #1073. Khuon: ops/land/pr1063-wp1038-r1-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (a253c169), `landed: true`. Bon moc §10.2.2 du cho gate hau merge 41209445414 (a253c169): Run (REST 23/23,
+# TRANG THAI: merged (a253c169), `landed: false`. Ly do DUY NHAT: (7) reviewer assurance §8.1 CHUA_DAT — run.json cua luot approve
+# (verdicts/run-2bfa8722.json) khai sandbox_trang_thai KHONG_DO_DUOC (DanhTinhDoi); tien le pr1047. Codex connector bat (P1, PR #1086
+# discussion_r4432221720). Cac dieu kien khac DAT. Bon moc §10.2.2 du cho gate hau merge 41209445414 (a253c169): Run (REST 23/23,
 # kiem-gate rc=0), Checkout (22/22 = a253c169), Gate output (marker duong), Workflow definition (GraphQL WorkflowRun.file chay tren VM
 # tra-luat-win bang gh CLI chu kho qua Remote Desktop Commander + blob ci.yml 82d9f239 doi chieu REST/git).
 # KHONG co luot Windows cho packet nay — theo chi thi chu kho (xem uy_quyen_land); spec r1 L1 khong doi luot Windows.
@@ -45,7 +47,7 @@ merge_commit_parents: [713694ba6b9ab0bdce49b416f1b1faed938f1875, 9783b421ecb7463
 pre_merge_checks:
   - {name: 'ci.yml pull_request (ubuntu) tren head cuoi', run_id: 41205257444, run_attempt: 1, sha: 9783b421ecb74636311501e7c0d712e2aa73a5c0, conclusion: success, ghi_chu: 'measured — readback-run-41205257444.json pull_request, completed success, 13:22:12Z -> 14:16:46Z; readback-jobs-41205257444.json 23/23 success nhan ubuntu-latest, runner_id khac 0; readback-check-runs-9783b42-all.json: 26 check = 24 success + 2 skipped, 0 failure.', nguon: [readback-run-41205257444.json, readback-jobs-41205257444.json, readback-check-runs-9783b42-all.json]}
   - {name: 'Codex connector', sha: 9783b421ecb74636311501e7c0d712e2aa73a5c0, conclusion: 'completed; has_any_findings false', nguon: readback-comments-1073.json, ghi_chu: 'measured — readback-comments-1073.json: 6543863483 codex-review-state code_review.commit_sha 9783b42 has_any_findings false; 6543976778 (13:28:00Z) "Reviewed commit: 9783b421ec", khong finding. Finding P2 truoc do (discussion_r4431827772, RUNBOOK A0.4e cong thuc doi khoa) tren 901644d da va o 9783b42, thread da resolve.'}
-  - {name: 'executor cross-review Codex luot 7 (launcher.py run 2bfa8722)', sha: 9783b421ecb74636311501e7c0d712e2aa73a5c0, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/run-2bfa8722.json, verdicts/wp1039-r1-luot7-VERDICT.md], ghi_chu: 'measured — verdicts/run-2bfa8722.json: trang_thai xong, ma_thoat 0, head 9783b42, 502.7 s, model_phuc_vu_trang_thai DO_DUOC, prompt_sha256 7d708002…; VERDICT dong 1-3: approve / Reviewed commit 9783b42 / Spec sha256 67b448ac…. Head luot 7 = authorized_head.'}
+  - {name: 'executor cross-review Codex luot 7 (launcher.py run 2bfa8722)', sha: 9783b421ecb74636311501e7c0d712e2aa73a5c0, conclusion: 'approve; 0 P0-P3', nguon: [verdicts/run-2bfa8722.json, verdicts/wp1039-r1-luot7-VERDICT.md], ghi_chu: 'measured — verdicts/run-2bfa8722.json: trang_thai xong, ma_thoat 0, head 9783b42, 502.7 s, model_phuc_vu_trang_thai DO_DUOC (23/23 gpt-6-astra), effort xhigh DO_DUOC, sandbox_trang_thai KHONG_DO_DUOC (DanhTinhDoi — xem assurance_81), prompt_sha256 7d708002…; VERDICT dong 1-3: approve / Reviewed commit 9783b42 / Spec sha256 67b448ac…. Head luot 7 = authorized_head.'}
   - {name: 'thread review', conclusion: 'xem readback-reviews/-review-comments', nguon: [readback-reviews-1073.json, readback-review-comments-1073.json]}
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41209445414, run_attempt: 1, sha: a253c169ed79617b8d1a4754867c336ac72c72c5, conclusion: success, jobs: '23/23 success, nhan ubuntu-latest, runner_id khac 0', luc: '2026-10-31T14:17:33Z -> 2026-10-31T15:14:23Z', kiem_gate: 'measured — kiem-gate/kiem-gate-a253c169.txt: packet_loop.py kiem-gate suite 111704117086 cua run 41209445414, check-runs filter=all (25 = 25 success), 23 ten tu readback-jobs-41209445414.json, rc=0', nguon: [readback-run-41209445414.json, readback-jobs-41209445414.json, readback-check-runs-a253c169-all.json, kiem-gate/kiem-gate-a253c169.txt, gate-output-41209445414.txt, readback-contents-ci-yml-a253c169.json, graphql-workflowrun-file-41209445414.txt], moc_run: 'measured — readback-run-41209445414.json event push, head_sha a253c169, completed success, check_suite 111704117086; readback-jobs-41209445414.json 23/23.', moc_checkout: 'measured — gate-output-41209445414.txt: 22/22 job gate* in dong git log -1 --format=%H = a253c169ed79617b8d1a4754867c336ac72c72c5 (log tai qua REST, sha256 tung log ghi kem); chuan-bi khong co buoc checkout. Tree suy tu SHA: d0fa9509a6e1dab62e5d91e8c5528f5c6186df36.', moc_gate_output: 'measured — gate-output-41209445414.txt: == tl selftest 1774/1774 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 == (2x); suite packet: CA: 26/26 dat · DOT BIEN: 49/49 bi giet dung ly do (ops/cloud_agent_creds_test.py), DOT BIEN 13/13 (ops/codex_cloud_setup_test.py); TONG: DAT; gate-registry TONG: CA 44/44 dat · DOT BIEN 43/43 va CA 45/45 · DOT BIEN 25/25; khong job nao co ##[error].', moc_workflow_definition: 'loi_khai_co_neo + measured — graphql-workflowrun-file-41209445414.txt: WorkflowRun.file chay tren VM tra-luat-win (gh CLI chu kho, phien executor qua Remote Desktop Commander, shell cmd) cho node WFR_kwLOTNeRjc8AAAAJmEY8Jg: databaseId 41209445414, runNumber 3715, createdAt 2026-10-31T14:17:33Z, file.path .github/workflows/ci.yml, repositoryFileUrl neo blob tai a253c169ed79617b8d1a4754867c336ac72c72c5, checkSuite.commit.oid a253c169ed79617b8d1a4754867c336ac72c72c5. Phan REST do lai trong phien ghi so: readback-run-41209445414.json path .github/workflows/ci.yml, node_id WFR_kwLOTNeRjc8AAAAJmEY8Jg; readback-contents-ci-yml-a253c169.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size 69161 = git rev-parse a253c169:.github/workflows/ci.yml; sha256 noi dung ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb. Phan GraphQL la loi khai co neo (phien web khong goi duoc GraphQL; output chay tren VM).', ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master).'}
@@ -99,7 +101,8 @@ trang_thai_packet:
   merged_nguon: >-
     measured — readback-pr-1073.json: merged true, merged_at 2026-10-31T14:17:31Z, merged_by ducthangho, merge_commit_sha a253c169,
     head.sha 9783b42; merge-va-diff.txt: cha 713694ba (master) + 9783b42; tree d0fa9509.
-  landed: true
+  landed: false
+  reviewer_assurance_81: CHUA_DAT
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren merge SHA a253c169: DAT — bon moc §10.2.2: Run (REST 23/23, kiem-gate rc=0), Checkout (22/22 =
     a253c169), Gate output (marker duong), Workflow definition (graphql-workflowrun-file-41209445414.txt + blob 82d9f239 doi chieu
@@ -107,7 +110,20 @@ trang_thai_packet:
     9783b42: DAT — luot 7 (verdicts/run-2bfa8722.json head 9783b42, VERDICT approve 0/0/0/0) + connector sach tren 9783b42; (5) uy quyen
     land neo SHA: DAT co hai caveat (#566 va neo dang sau merge ~1,5 phut — xem authorization_ben_neo_sha); (6) muc tieu packet: tieu chi
     spec r1 dat theo gate executor va CI Ubuntu; KHONG do Windows (theo chi thi chu kho; spec L1 khong doi); (7) reviewer assurance §8.1:
-    luot 7 model_phuc_vu DO_DUOC, ho openai khac ho executor claude.
+    CHUA_DAT — model va effort do duoc nhung sandbox mode KHONG_DO_DUOC (xem assurance_81). Ban dau (commit 29599aa) ho so ghi (7) DAT
+    chi tu ho model; Codex connector bat dung (discussion_r4432221720) va ho so ha ve landed false.
+  dieu_kien_mo_landed: >-
+    Mot trong hai: (a) mot luot review doc lap tren DUNG 9783b42 co run.json sandbox_trang_thai DO_DUOC (cung model/effort do duoc), hien vat
+    vao provenance; HOAC (b) chu kho ghi quyet dinh chap nhan sandbox KHONG_DO_DUOC cho luot 7 (comment neo 9783b42). Chua lam ca hai.
+
+assurance_81:
+  reviewer_assurance_81: CHUA_DAT
+  review_exact_sha: 'DAT — verdicts/run-2bfa8722.json head 9783b42 = authorized_head_sha, ma_thoat 0, VERDICT approve.'
+  thuc_thi:
+    model: 'measured — verdicts/run-2bfa8722.json model_phuc_vu_trang_thai DO_DUOC, 23/23 su kien gpt-6-astra (ho openai, khac ho claude cua executor).'
+    effort: 'measured — verdicts/run-2bfa8722.json effort_phuc_vu [xhigh], effort_phuc_vu_trang_thai DO_DUOC.'
+    sandbox_mode: 'not_measured — verdicts/run-2bfa8722.json sandbox_trang_thai KHONG_DO_DUOC, sandbox_ly_do "luong lay mau sandbox hong (DanhTinhDoi)"; sandbox_quan_sat (codex-linux-sandbox, bwrap --unshare-net, network restricted) chi la mau quan sat, launcher khong khai DO_DUOC.'
+  cac_luot_khac: 'measured — verdicts/run-*.json: 6/7 luot KHONG_DO_DUOC (DanhTinhDoi); chi luot 1 (run-a6634cfc.json, head khac) DO_DUOC.'
 
 uy_quyen_land:
   dang: 'measured — issuecomment-6544584769 (caveat #566, dang sau merge) + readback-pr-1073.json merged_by.login=ducthangho.'
@@ -137,3 +153,4 @@ khong_do_duoc:
   - 'GraphQL WorkflowRun.file: phien web KHONG goi truc tiep (403); output chay tren VM tra-luat-win qua Remote Desktop Commander — loi khai co neo, phan REST/git do lai.'
   - 'Windows cho gate: khong co luot (chi thi chu kho); luot windows-only 41204420977 da huy.'
   - 'Danh tinh nguoi ky cac comment uy quyen: #566.'
+  - 'Sandbox mode cua luot approve (verdicts/run-2bfa8722.json): KHONG_DO_DUOC (DanhTinhDoi) => §8.1 CHUA_DAT, landed false.'

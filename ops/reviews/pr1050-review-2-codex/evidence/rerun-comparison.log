@@ -1,0 +1,16 @@
+chuan-bi a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:47Z a2_start=2026-10-30T14:08:47Z
+gate-ops (windows-latest) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-cong-cu (windows-latest, 0) a1=failure a2=success start_equal=False end_equal=False a1_start=2026-10-30T14:08:52Z a2_start=2026-10-30T15:27:27Z
+gate (windows-latest) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-nhanh-manh (windows-latest, 1) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-nhanh-manh (windows-latest, 5) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:52Z a2_start=2026-10-30T14:08:52Z
+gate-nhanh-manh (windows-latest, 7) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-nhanh-manh (windows-latest, 6) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:52Z a2_start=2026-10-30T14:08:52Z
+gate-nhanh-manh (windows-latest, 4) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-nhanh-manh (windows-latest, 3) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:52Z a2_start=2026-10-30T14:08:52Z
+gate-nhanh-manh (windows-latest, 0) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-packet-loop (windows-latest) a1=failure a2=success start_equal=False end_equal=False a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T15:27:28Z
+gate-nhanh-manh (windows-latest, 2) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:08:53Z a2_start=2026-10-30T14:08:53Z
+gate-cong-cu-gop a1=skipped a2=skipped start_equal=False end_equal=False a1_start=2026-10-30T14:09:56Z a2_start=2026-10-30T15:30:05Z
+gate-nhanh-gop (windows-latest) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:11:58Z a2_start=2026-10-30T14:11:58Z
+gate-registry (windows-latest) a1=success a2=success start_equal=True end_equal=True a1_start=2026-10-30T14:12:29Z a2_start=2026-10-30T14:12:29Z

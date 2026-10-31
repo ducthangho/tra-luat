@@ -357,6 +357,8 @@ function Update-CongCuZip([string]$Ten, [string]$Repo, [string]$Tag, [string]$Ma
     if ($ChiKiem -and -not $truoc) { Add-KetQua $Ten '' '' 'loi' "$exe chưa cài hoặc không đọc được phiên bản"; return }
     try {
         $rel = Get-Release $Repo $Tag
+        # Có ghim thì ĐÍCH là ghim, không phải thứ phản hồi HTTP khai: tag trả về phải đúng tag đã xin (lượt 15).
+        if ($Tag -and -not (Test-CungDinhDanh "$($rel.tag_name)" $Tag)) { throw "release trả tag '$($rel.tag_name)', đã xin '$Tag'" }
         $moi = ($rel.tag_name -replace '^v', '')
         $ss = Compare-PhienBan $truoc $moi
         # Hợp đồng B (lượt 10): ĐẠT `giu` chỉ khi BẰNG đích. Cao hơn bản phát hành mới nhất (không ghim) ⇒ `loi`, không tự hạ;

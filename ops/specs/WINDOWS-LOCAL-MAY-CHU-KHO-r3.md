@@ -36,9 +36,15 @@ tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
      nêu PID và lệnh đã thấy, rồi đợi. Quy tắc này không áp dụng cho 3(c), vì ở đó phiên giữ khoá đã tuyên bố bỏ.
    - **Lượt bị ngắt.** Nếu máy Offline hoặc Desktop Commander không truy cập được trong lúc một lượt đang chạy,
      dòng sổ đo của lượt ấy ghi `ngat=co` trong `ghi_chu`, kèm khoảng thời gian không truy cập được nếu đo được.
-     Thời lượng của lượt bị ngắt không dùng cho rà soát ADR. Khi kết nối lại mà còn cần máy, phiên giữ khoá ghi lại
-     dòng khoá ngay (nhịp tim và hạn mới) trước khi chạy tiếp. Không tự đổi chế độ nguồn hoặc ngủ của máy (protocol §3.1);
+     Thời lượng của lượt bị ngắt không dùng cho rà soát ADR. Không tự đổi chế độ nguồn hoặc ngủ của máy (protocol §3.1);
      việc chống ngủ là của chủ kho.
+   - **Đọc lại trước mọi lần ghi lại dòng khoá** (nhịp tim, gia hạn, hay lúc kết nối lại sau khi bị ngắt). Phiên đọc
+     `KHOA.txt` trước, và chỉ ghi lại khi dòng hiện có vẫn mang `session_id` của chính mình. Nếu dòng đã đổi sang phiên
+     khác, hoặc tệp rỗng, thì phiên **không** còn giữ khoá. Khi ấy phải theo đúng luật lấy khoá: khoá của phiên khác còn
+     hiệu lực thì đợi; tệp rỗng hoặc khoá hết hiệu lực thì chạy bước kiểm tải rồi mới lấy. Ca phải xử lý đúng:
+     A bị ngắt tới khi khoá quá hạn và tiến trình của A đã dừng, B tiếp nhận hợp lệ theo 3(a), rồi A kết nối lại.
+     Lúc ấy A thấy dòng của B nên không ghi đè. Ca ngược lại cũng phải giữ được: dòng vẫn là của A dù đã quá hạn
+     và chưa ai tiếp nhận, thì A được gia hạn sau khi chạy bước kiểm tải.
    - **Nhả khoá.** Nhả khoá là ghi tệp `KHOA.txt` rỗng (0 byte). Phiên giữ khoá nhả ngay khi xong, kể cả khi lượt đỏ
      hoặc bị bỏ.
    - **Số đo D10–D12** của §1, kèm mục "không cổng nào cưỡng chế" (vẫn 0 cổng, như ADR-0057 và ADR-0058).
@@ -54,7 +60,11 @@ tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 - `python .claude/dev/packet_loop.py adr-song --root .` rc=0.
 - `doctrine-scan` rc=0; `python scripts/tl.py doc-claims-check --json` cho `ok`.
 - Diff chạm đúng 2 tệp của write set, không chạm `docs/adr/0057-*` và `docs/adr/0058-*`.
-- Review chéo Codex qua `launcher.py run` trên đúng head, có snapshot §8.2 đầu/cuối, tới khi 0 P0–P3.
+- Review chéo Codex qua `launcher.py run` trên đúng head, có snapshot §8.2 đầu/cuối, tới khi 0 P0–P3. Reviewer
+  đi qua văn bản ADR-0059 theo từng bước của hai ca trong mục "Đọc lại trước mọi lần ghi lại dòng khoá":
+  (i) A ngắt → quá hạn → B tiếp nhận → A kết nối lại: dòng của B phải giữ nguyên;
+  (ii) quá hạn nhưng chưa ai tiếp nhận: A phải gia hạn được.
+  Reviewer cũng đi qua ca D10, phải ra kết quả "không tiếp nhận".
 - Nếu chạy local trên Windows thì theo chính luật khoá mới, và ghi sổ đo.
 
 ## 4. Trần

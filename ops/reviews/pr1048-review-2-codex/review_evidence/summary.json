@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "platform": "Linux-6.18.44-fc-v185-x86_64-with-glibc2.39",
+    "python": "3.13.17",
+    "pwsh": null,
+    "powershell": null
+  },
+  "checks": [
+    {
+      "name": "doctrine-scan",
+      "rc": 0,
+      "stderr": "",
+      "summary": "doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine"
+    },
+    {
+      "name": "adr-song",
+      "rc": 0,
+      "stderr": "",
+      "summary": "adr-song: sạch — 57 ADR trên đĩa, 57 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])"
+    },
+    {
+      "name": "doc-claims-check",
+      "rc": 0,
+      "stderr": "",
+      "summary": {
+        "ok": true,
+        "files_scanned": 117,
+        "claims_flagged": 381,
+        "flags": [],
+        "advisory_count": 381,
+        "layers_skipped": {}
+      }
+    }
+  ],
+  "snapshots_equal": true,
+  "files_hashed": 8468,
+  "head": "48b54d89b152871063c7296df33a60308667599e",
+  "tree": "3c283128c5591ba2daaa8ec4830298d44587a042",
+  "status": ""
+}

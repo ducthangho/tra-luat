@@ -1,0 +1,77 @@
+./scripts/don-nhanh.ps1:123:    # phân biệt null với mảng rỗng (cùng bẫy với `Get-Content -Raw` trên tệp rỗng).
+./.claude/dev/chay-cong-windows_test.ps1:533:        if (Test-Path -LiteralPath $pidf) { Stop-Process -Id ([int](Get-Content -LiteralPath $pidf)) -Force -ErrorAction SilentlyContinue }
+./.claude/dev/chay-cong-windows_test.ps1:565:    finally { if (Test-Path -LiteralPath $pidf) { Stop-Process -Id ([int](Get-Content -LiteralPath $pidf)) -Force -ErrorAction SilentlyContinue } }
+./.claude/dev/chay-cong-windows_test.ps1:990:    if (Test-Path -LiteralPath $dau) { throw "BASH_ENV ro tu phien goi: bash nap tep ay truoc cong ($(@(Get-Content -LiteralPath $dau).Count) lan)" }
+./.claude/dev/chay-cong-windows_test.ps1:991:    if (Test-Path -LiteralPath $dauHam) { throw "BASH_FUNC_* ro tu phien goi: ham export che lenh noi tru exit ($(@(Get-Content -LiteralPath $dauHam).Count) lan)" }
+./scripts/deploy-guard.ps1:16:  Version SẮP ĐẨY (vd '1.35.79'). Thường lấy từ (Get-Content VERSION).Trim().
+./scripts/deploy-guard.ps1:35:  .\scripts\deploy-guard.ps1 -Version (Get-Content VERSION).Trim()
+./scripts/deploy-package.ps1:136:$VER  = (Get-Content (Join-Path $Root 'VERSION') -Raw -Encoding utf8).Trim()
+./scripts/deploy-package.ps1:137:$V_TL = ([regex]::Match((Get-Content (Join-Path $Root 'scripts/tl.py') -Raw -Encoding utf8), '(?m)^VERSION = "([^"]+)"')).Groups[1].Value
+./scripts/deploy-package.ps1:138:$V_SK = ([regex]::Match((Get-Content (Join-Path $Root 'SKILL.md') -Raw -Encoding utf8), 'LÕI VẬN HÀNH \(v([0-9.]+) — KERNEL\)')).Groups[1].Value
+./scripts/deploy-package.ps1:168:    $VER = (Get-Content (Join-Path $Root 'VERSION') -Raw -Encoding utf8).Trim()
+./scripts/deploy-package.ps1:195:    $txt = if (Test-Path $f) { [string](Get-Content $f -Raw -Encoding utf8) } else { '' }
+./scripts/deploy-package.ps1:256:  try { $out = (Get-Content $f -Raw -Encoding utf8 | ConvertFrom-Json).out } catch { Bad "không parse được output release-bundle — soi $f"; exit 2 }
+./scripts/deploy-package.ps1:279:  $zver = (Get-Content (Join-Path $pkg 'VERSION') -Raw -Encoding utf8).Trim()
+./scripts/deploy-package.ps1:317:    if ((Get-Content $f -Raw -Encoding utf8) -match '"ok":\s*true') { Ok 'release-verify TRONG gói: ok' }
+./scripts/deploy-package.ps1:362:  $dver = (Get-Content (Join-Path $dtmp "$dTop/VERSION") -Raw -Encoding utf8).Trim()
+./.claude/dev/chay-cong-windows.ps1:492:                Get-Content -LiteralPath $f -Tail $(if ($ChiTiet) { 10000 } else { 40 }) |
+./scripts/nlm-credential-refresh.ps1:563:    try { $record = [string](Get-Content -LiteralPath $OperationRecord -Raw) | ConvertFrom-Json } catch { $record = $null }
+./scripts/nlm-credential-refresh.ps1:965:    $config = [string](Get-Content -LiteralPath $configFull -Raw) | ConvertFrom-Json
+./scripts/nlm-credential-refresh.Tests.ps1:234:            Calls = @(Get-Content -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue)
+./scripts/nlm-credential-refresh.Tests.ps1:247:        $calls = @(Get-Content -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue)
+./scripts/nlm-credential-refresh.Tests.ps1:300:    $lines = @(Get-Content -LiteralPath $env:WP710_LOG)
+./scripts/nlm-credential-refresh.Tests.ps1:380:    $lockFromScript = [regex]::Match((Get-Content -LiteralPath $script -Raw), 'Mutex\]::new\(\$false,\s*''([^'']+)''\)').Groups[1].Value
+./scripts/nlm-credential-refresh.Tests.ps1:410:    foreach ($ln in @(Get-Content -LiteralPath $env:WP710_LOG | Where-Object { $_ -like 'start:*' })) {
+./scripts/nlm-credential-refresh.Tests.ps1:422:    if (@(Get-Content -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue | Where-Object { $_ -like 'end:auth:*' }).Count -ne 0) { throw 'timed-out child must be killed, not left to finish' }
+./scripts/nlm-credential-refresh.Tests.ps1:464:        $lingerPid = [int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:482:            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)) -Force -ErrorAction SilentlyContinue
+./scripts/nlm-credential-refresh.Tests.ps1:495:    for ($i=0; $i -lt 100 -and -not (@(Get-Content -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue) -like 'beat:auth:*:A'); $i++) { Start-Sleep -Milliseconds 100 }
+./scripts/nlm-credential-refresh.Tests.ps1:496:    if (-not (@(Get-Content -LiteralPath $env:WP710_LOG) -like 'beat:auth:*:A')) { throw 'wrapper A never started its child' }
+./scripts/nlm-credential-refresh.Tests.ps1:502:    $lines = @(Get-Content -LiteralPath $env:WP710_LOG)
+./scripts/nlm-credential-refresh.Tests.ps1:524:    if ((Get-Content -LiteralPath $env:WP710_ENVLOG -Raw) -cne 'NOTEBOOK12345|NOTEBOOK12345') { throw 'stage child did not receive TL_NOTEBOOK_ID and TL_CANARY_NOTEBOOK_ID of the trusted config' }
+./scripts/nlm-credential-refresh.Tests.ps1:544:    $times = @(Get-Content -LiteralPath $env:WP710_TIMELOG)
+./scripts/nlm-credential-refresh.Tests.ps1:559:    $recName = [regex]::Match((Get-Content -LiteralPath $script -Raw), "GetTempPath\(\)\)\s+'([^']+)'").Groups[1].Value
+./scripts/nlm-credential-refresh.Tests.ps1:624:        $childPid = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:626:        $before = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+./scripts/nlm-credential-refresh.Tests.ps1:628:        $after = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+./scripts/nlm-credential-refresh.Tests.ps1:641:            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)) -Force -ErrorAction SilentlyContinue
+./scripts/nlm-credential-refresh.Tests.ps1:652:    $markVar = [regex]::Match((Get-Content -LiteralPath $script -Raw), "MarkerName\s*=\s*'([^']+)'").Groups[1].Value
+./scripts/nlm-credential-refresh.Tests.ps1:702:            $startNbLine = @(Get-Content -LiteralPath $env:WP710_TIMELOG -ErrorAction SilentlyContinue) | Where-Object { $_ -like 'start notebook *' } | Select-Object -First 1
+./scripts/nlm-credential-refresh.Tests.ps1:705:            $beatsQ = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue)
+./scripts/nlm-credential-refresh.Tests.ps1:712:            $daemonQ = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:720:            $before = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+./scripts/nlm-credential-refresh.Tests.ps1:722:            $after = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+./scripts/nlm-credential-refresh.Tests.ps1:731:            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)) -Force -ErrorAction SilentlyContinue
+./scripts/nlm-credential-refresh.Tests.ps1:753:            $childR = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:755:            $writtenR = Get-Content -LiteralPath $recordR -Raw | ConvertFrom-Json
+./scripts/nlm-credential-refresh.Tests.ps1:769:            $beforeR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+./scripts/nlm-credential-refresh.Tests.ps1:771:            $afterR = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE -ErrorAction SilentlyContinue).Count
+./scripts/nlm-credential-refresh.Tests.ps1:835:        $srcS = Get-Content -LiteralPath $script -Raw
+./scripts/nlm-credential-refresh.Tests.ps1:894:    $srcT = Get-Content -LiteralPath $script -Raw
+./scripts/nlm-credential-refresh.Tests.ps1:916:        if (-not (Test-Path -LiteralPath $recT) -or (Get-Content -LiteralPath $recT -Raw | ConvertFrom-Json).tree_unconfirmed -ne $true) {
+./scripts/nlm-credential-refresh.Tests.ps1:941:            Stop-Process -Id ([int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)) -Force -ErrorAction SilentlyContinue
+./scripts/nlm-credential-refresh.Tests.ps1:961:            $lingerU = [int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:969:            $orphanU = [int](Get-Content -LiteralPath $env:WP714_LINGER_PID -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:977:            $startNb = [double]((@(Get-Content -LiteralPath $env:WP710_TIMELOG) | Where-Object { $_ -like 'start notebook *' } | Select-Object -First 1) -split ' ')[2]
+./scripts/nlm-credential-refresh.Tests.ps1:978:            $late = @(Get-Content -LiteralPath $env:WP714_BEAT_FILE | Where-Object { [double]$_ -gt $startNb })
+./scripts/nlm-credential-refresh.Tests.ps1:984:                if (Test-Path -LiteralPath $f) { Stop-Process -Id ([int](Get-Content -LiteralPath $f -Raw)) -Force -ErrorAction SilentlyContinue }
+./scripts/nlm-credential-refresh.Tests.ps1:1006:                $lineV = Get-Content -LiteralPath $outV -ErrorAction SilentlyContinue | Select-Object -First 1
+./scripts/nlm-credential-refresh.Tests.ps1:1011:            $childV = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:1049:            $childW = [int](Get-Content -LiteralPath $env:WP714_CHILD_PID_FILE -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:1050:            $recordW = Get-Content -LiteralPath (Join-Path ([IO.Path]::GetTempPath()) $recName) -Raw | ConvertFrom-Json
+./scripts/nlm-credential-refresh.Tests.ps1:1051:            Stop-Process -Id ([int](Get-Content -LiteralPath $ownerFileW -Raw)) -Force
+./scripts/nlm-credential-refresh.Tests.ps1:1091:        $srcX = Get-Content -LiteralPath $script -Raw
+./scripts/nlm-credential-refresh.Tests.ps1:1100:Add-Type -TypeDefinition (Get-Content -LiteralPath $Source -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:1119:            $memberX = [int](Get-Content -LiteralPath $readyX -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:1160:        $srcY = Get-Content -LiteralPath $script -Raw
+./scripts/nlm-credential-refresh.Tests.ps1:1197:        $srcZ = Get-Content -LiteralPath $script -Raw
+./scripts/nlm-credential-refresh.Tests.ps1:1210:                Get-Content -LiteralPath $destination -Raw | ConvertFrom-Json
+./scripts/nlm-credential-refresh.Tests.ps1:1241:                try { $strayZ = [int](Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json).pid } catch { }
+./scripts/nlm-credential-refresh.Tests.ps1:1248:                Calls = @(Get-Content -LiteralPath $env:WP710_LOG -ErrorAction SilentlyContinue) }
+./scripts/nlm-credential-refresh.Tests.ps1:1253:            $writtenZ = Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json
+./scripts/nlm-credential-refresh.Tests.ps1:1268:Add-Type -TypeDefinition (Get-Content -LiteralPath $Source -Raw)
+./scripts/nlm-credential-refresh.Tests.ps1:1278:                if (-not (Test-Path -LiteralPath $readyZ) -or [int](Get-Content -LiteralPath $readyZ -Raw) -ne 0) { throw 'fixture: the empty job holder did not start with 0 members' }
+./scripts/nlm-credential-refresh.Tests.ps1:1317:            if (-not (Test-Path -LiteralPath $recZ) -or (Get-Content -LiteralPath $recZ -Raw | ConvertFrom-Json).tree_unconfirmed -ne $true) { throw 'a stage whose tree is unproven must keep its record' }
+./scripts/don-nhanh_test.ps1:581:    # Doc RAW roi tach o NUL — KHONG `Get-Content` (no tach theo DONG, tuc lai lam mat
+./docs/runbooks/New-SharedWorkPacket.ps1:161:    $Snapshot = Get-Content -LiteralPath $SnapshotPath -Raw | ConvertFrom-Json
+./ops/reviews/wp541-do-g2.ps1:1477:$dong = @(Get-Content -LiteralPath $Log -Encoding UTF8)

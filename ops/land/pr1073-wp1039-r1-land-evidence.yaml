@@ -154,3 +154,24 @@ khong_do_duoc:
   - 'Windows cho gate: khong co luot (chi thi chu kho); luot windows-only 41204420977 da huy.'
   - 'Danh tinh nguoi ky cac comment uy quyen: #566.'
   - 'Sandbox mode cua luot approve (verdicts/run-2bfa8722.json): KHONG_DO_DUOC (DanhTinhDoi) => §8.1 CHUA_DAT, landed false.'
+
+landed_20261031:
+  bo_canh: >-
+    Chu kho chap nhan muc assurance cua luot approve (phien dieu phoi 31-10-2026 ~16:18Z, "Chọn 2"). Khoi nay KHONG sua dong nao
+    o tren: reviewer_assurance_81 van CHUA_DAT vi sandbox mode KHONG_DO_DUOC; landed di theo quyet dinh chu kho (kieu b, wp981 r2).
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/issues/1039#issuecomment-6545979440
+    noi_dung: >-
+      Chap nhan luot 7 (launcher.py run 2bfa8722, approve 0 P0-P3 tren DUNG 9783b421ecb74636311501e7c0d712e2aa73a5c0, model
+      gpt-6-astra va effort xhigh DO_DUOC, ho openai khac ho executor claude) voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi); khong goi
+      luot Codex 8/8. Tra loi cau hoi ve finding P1 Codex connector PR #1086 (discussion_r4432221720).
+    do_duoc: >-
+      measured — readback-comment-quyet-dinh-6545979440.json: user ducthangho, author_association OWNER, created_at = updated_at
+      2026-10-31T16:19:39Z. CAVEAT #566: comment do phien agent dang bang token chu kho, chep loi chu kho trong phien.
+  landed: true
+  landed_dieu_kien: >-
+    (1) bon moc §10.2.2 tren merge a253c169: DAT (khoi tren). (2) lease g1 rut han (khoi lease). (3) bookkeeping: ho so nay + PR
+    #1086. (4) review neo dung authorized_head 9783b42: DAT. (5) uy quyen land: DAT co caveat #566. (6) muc tieu packet: DAT theo gate
+    executor + CI Ubuntu; khong Windows theo chi thi chu kho. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho
+    tren. Con mo ngoai land: M1/M2 LIVE cua P2b (can chu kho duyet).

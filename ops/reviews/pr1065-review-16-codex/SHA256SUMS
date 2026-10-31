@@ -3,6 +3,7 @@
 342b33a0d5efeb7dc82f3610853507338804ceee72745efd6ddd13cae61bdf33  ./VERDICT.md
 173133fad7309c9ddd5204a7feb1d29c5387418b27e3a66b3dac482b57aa288a  ./diff-tu-luot15.patch
 a6cd06d1838f515c2c32d72d6b3684f804e3ec10ecd057c30f76da0d33379ade  ./diff.patch
+0030e7526a59ff58b0db029d23dc19d0f9987e457dcf18c70cbe6c2c3328ae44  ./luot-truoc/luot1/HINT.patch
 45d9cb31128d3b0ed839d1a9c7443e5ccc4378eb2bc1c600ed6c4d0904fe7fb6  ./luot-truoc/luot1/VERDICT.md
 61c87b873ce8fa842309c4109df30e4a70d8c1a2014d4a20f036ac4053e49a58  ./luot-truoc/luot10/HINT.patch
 01ebb27d3d361e9a3651e54a1e38018ae2a3e6d398942dda822f745ff8cda3b5  ./luot-truoc/luot10/VERDICT.md
@@ -16,6 +17,7 @@ f9f07fe04e1284775e5da25f584a69e4cc153942646aff3f31cf12637d6d3050  ./luot-truoc/l
 118fd9f718f81c81f1d50f487cdd426e10258fdd70dbc51cbd4f2162045c654a  ./luot-truoc/luot14/VERDICT.md
 8f6cb3af5ff654afc6f1b878a7845b708aed99bb1cd6bc2cdd78db4e685439b8  ./luot-truoc/luot15/HINT.patch
 36a01565a3a4a40faea20738dd86de8034c05d1d2fc25614d48fa6224e5e0d25  ./luot-truoc/luot15/VERDICT.md
+010a5d598b2db1130d192cff59b32064aa4de19fd9d18ddbad60eedb60220027  ./luot-truoc/luot2/HINT.patch
 7dceed3f172857864e36f708de026e7ea56d038d0305f04c3b5ed137c2084837  ./luot-truoc/luot2/VERDICT.md
 1e0947e58139c0b02dee0e86eb812e0e51a992e8b9e5a7f62c0248a3eb2bce27  ./luot-truoc/luot3/HINT.patch
 a80995d95c2d0234b929f6d273644d7c4b6099a58912a2144fe6c63961ab4402  ./luot-truoc/luot3/VERDICT.md

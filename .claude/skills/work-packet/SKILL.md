@@ -10,6 +10,7 @@ argument-hint: "[so-issue-packet]"
 từ chối việc, định nghĩa hoàn tất) · §3.2 (schema packet) · §5 (write set) · §7 (handoff) ·
 §12 (điều kiện dừng) · §3.2.1 (spec nguồn và ba mốc Git) · §10.2.1–§10.2.3
 (preflight, provenance và evidence thiếu). Quy trình sửa code của kho: `CLAUDE.md`.
+Packet áp `ADR-0060`: push, mốc bỏ draft và review offline trước push đọc ở ADR-0060 (M5, M6, M12).
 
 Bảng lớp, cách đọc kết quả vá và phần chưa đo: protocol §8.3; công thức tỷ lệ,
 lớp tái diễn và checkpoint: §12. Gợi ý reviewer và `hint_provenance`: §7/§8.

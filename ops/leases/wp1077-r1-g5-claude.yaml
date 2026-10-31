@@ -132,3 +132,5 @@ mien_tru:
   can_cu: 'cung chi thi nang_tran_lan_4'
   reviewer_khong_tinh_la_finding: true
 push_policy: 'day nhanh agent/wp1077-g1-claude khi A1-A4 dat; mo PR draft.'
+da_bi_thay_the: wp1077-r1-g6-claude
+da_bi_thay_the_ly_do: 'Chu kho mo rong mien tru W-1077-1 sang ung vien cwd tu phan tu PATH qua dai (phien session_01J7EgTVGTrNi4xqh7MeBFQv, 31-10-2026); g6 thay the. Lease g5 nay KHONG con hieu luc; giu tep lam hien vat.'

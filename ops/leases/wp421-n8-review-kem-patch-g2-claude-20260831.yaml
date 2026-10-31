@@ -1,0 +1,337 @@
+# Lease EXECUTOR — `N8-REVIEW-KEM-PATCH` (#421), revision 1, generation 1.
+#
+# Revision 2: MỞ RỘNG write set từ 2 lên 3 đường dẫn. Thay `...-exec-1-...`.
+# Packet này do một PHIÊN KHÁC thi hành — xem `phien_thi_hanh` ở cuối tệp.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 421
+packet_id: wp421
+phase_key: N8-REVIEW-KEM-PATCH
+revision: 6
+generation: 2
+lease_id: wp421-n8-review-kem-patch-g2-claude-20260831
+
+
+
+
+
+thay_the_cho:
+  - n8-review-kem-patch-exec-1r5-claude-20260830
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là lớp MÁY TÍNH RA: `_tinh_lop_tu_write_set` trên cả hai đường dẫn ⇒ `sensitive`.
+  ĐỌC ĐÚNG LÝ DO: lớp đến từ giá trị MẶC ĐỊNH fail-closed vì không đường nào khớp tiền tố
+  trong `_BANG_LOP` — KHÔNG phải vì packet chạm authority. CẤM khai ngược lại để mượn uy tín
+  cụm từ ấy. Nhưng cũng đừng đọc nhẹ: `AGENTS.md` là tệp QUẢN TRỊ, mọi reviewer về sau đọc nó.
+
+spec_path: ops/specs/N8-REVIEW-KEM-PATCH.md
+spec_hash: f496e552425ca30e2a5a6d23f3c74545f31123b124598996df3f2734cfa01c19
+spec_note: >-
+  Băm đo 16:21Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này, SAU khi điền số issue #421.
+  ĐO LẠI trước khi merge: sửa đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn
+  tồn tại, và đó là đường đi vòng qua §3.2 chứ không phải một lần sửa chính tả.
+
+codex_review_calls_used: 2
+codex_review_calls_max: 4
+review_rounds_used: 2
+tran_review_ghi_chu: >-
+  Packet MỚI, bắt đầu 0/2. KHÔNG mượn bộ đếm của `N7-HOOK-GIAI-MA-UTF8` (đang 1/2) theo bất kỳ
+  chiều nào. Lưu ý riêng của packet này: lượt review do CONNECTOR tự chạy khi mở PR KHÔNG tính
+  vào trần thủ công — nhưng cũng KHÔNG được mượn ngược lại để khai là đã đủ cross-review.
+
+write_set:
+  - AGENTS.md
+  - .claude/skills/cross-review/SKILL.md
+  - RELEASE_MANIFEST.json
+
+write_set_da_do_truoc_khi_cap: >-
+  Đo 16:0xZ 30-08-2026 bằng `ops/lease_publish.py ai-dang-giu` cho từng đường dẫn: cả hai
+  `NGƯỜI_GIỮ 0` (`SKILL.md` có hai lease `wp55-r3-exec-5` và `wp55-r3-exec-9` nhưng đều
+  HẾT_HẠN; `AGENTS.md` sạch hoàn toàn).
+  BA CẢNH BÁO VỀ CHÍNH PHÉP ĐO NÀY, đừng đọc như dòng thủ tục:
+  (a) Bộ quét KHÔNG chạy được ở chế độ mặc định trên máy chủ kho — `rc=12 KHÔNG_XÁC_ĐỊNH` vì
+  khuyết tật codepage của #417. Phải chạy dưới `PYTHONUTF8=1` làm RIG ĐO, không phải bản vá.
+  (b) Lượt quét ĐẦU trả `KHÔNG_XÁC_ĐỊNH` vì bản sao thiếu object (`fetch` báo "did not send
+  all necessary objects"). Bộ quét fail-close ĐÚNG thay vì trả "không ai giữ"; phải dựng lại
+  bản sao rồi đo lại. Nếu nó im lặng trả 0 thì lease này đã được cấp trên một phép đo mù.
+  (c) Bản sao dùng để đo có 405 remote ref, là SIÊU TẬP của máy chủ — chiều an toàn: chỉ có
+  thể tìm THỪA người giữ, không thể tìm HỤT.
+
+branch: claude/n8-review-kem-patch-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
+reviewed_sha_required: a11943f71100ae2e592667edcb9338421f0b92b1
+reviewed_sha_ghi_chu: >-
+  Generation 1 chưa có commit công việc nào nên mỏ neo khởi đầu bằng `base_sha`.
+  BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8). Packet N5 vấp đúng chỗ này
+  và ăn một finding P1; packet N7 cùng phiên phải dời neo HAI lần vì head đổi sau mỗi lượt vá.
+  Dời TRƯỚC khi gọi reviewer, không phải sau.
+
+base_ghi_chu: >-
+  `6fa8a745` đo bằng `git rev-parse origin/master`. Nhãn `merged` của GitHub KHÔNG dùng làm
+  bằng chứng (nợ N11); ancestry cộng băm nội dung mới là.
+  CẢNH BÁO CHO PHIÊN THI HÀNH: tại lúc cấp lease có HAI PR đang mở chưa land (#419 packet
+  N7, #420 lease N7). Chúng KHÔNG chạm write set của packet này, nhưng nếu chúng land trước
+  thì `origin/master` đi tiếp so `base_sha` ⇒ điều kiện dừng `S4`, phải đo lại chứ không
+  rebase im lặng.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 220
+  do_tu_sha: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
+  don_vi: >-
+    `git diff --numstat c9a2e9c2 -- AGENTS.md .claude/skills/cross-review/SKILL.md
+    RELEASE_MANIFEST.json` — dòng
+    THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 94
+  ghi_chu: >-
+    Trần 200 CHẬT CÓ CHỦ ĐÍCH: đây là hai tệp QUẢN TRỊ, và việc phải làm là thêm một yêu cầu
+    cùng một cờ CLI — không phải viết lại tài liệu. Chạm trần là dấu hiệu packet đang nở phạm
+    vi, không phải dấu hiệu trần sai. PHẢI ĐO LẠI trước mỗi bước công bố, đừng chép dòng này.
+    Tiền lệ trong cùng phiên: packet N7 chạm trần 301/300 và phải dừng theo `S6`.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-30: chủ kho được trình ba lựa chọn cho việc bắt codex kèm patch
+  và chạy xhigh, chọn "Có — sửa cả AGENTS.md và SKILL.md"; sau đó chỉ thị "Mở packet thứ ba
+  trước, tạo phiên mới chạy packet".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: false
+
+phien_thi_hanh: >-
+  Packet này do một PHIÊN KHÁC thi hành theo chỉ thị của chủ kho. Phiên ghi lease này là phiên
+  ĐIỀU PHỐI và KHÔNG thi công — khác packet N7 cùng phiên, nơi hai vai nhập nhằng và đã phải
+  khai xung đột lợi ích. Đây là điểm assurance MẠNH HƠN, không phải hình thức: người viết mã
+  và người cấp quyền ghi là hai phiên khác nhau.
+  Phiên thi hành PHẢI tự xác minh, đừng nhận bảng giá trị từ điều phối: fetch nhánh lease rồi
+  `git show` chính tệp này. Bài học 28-08-2026: executor codex DỪNG hai lượt liên tiếp vì chỉ
+  thị thiếu `spec_hash` và vì không có hiện vật lease trong checkout để tự kiểm — nó từ chối
+  tự suy, và nó ĐÚNG.
+
+leased_at_utc: '2026-08-31T03:15:11Z'
+lease_expires_at_utc: '2026-08-31T11:15:11Z'
+lease_until: '2026-08-31T11:15:11Z'
+heartbeat_at: '2026-08-31T03:15:11Z'
+write_set_hash: 8668fc3e751a66ea31e336339095d70e6927c5f95a092101e26f27979bd98aab
+environment:
+  os: windows
+  python: '3.13.1'
+  git: '2.47.1.windows.1'
+run_minutes: 480
+
+ly_do_revision_2: >-
+  MỞ RỘNG write set thêm `RELEASE_MANIFEST.json`. Đây KHÔNG phải packet nở phạm vi — nó là
+  phiên ĐIỀU PHỐI soạn write set THIẾU, và lỗi ấy đo được:
+  `AGENTS.md` nằm trong `RELEASE_MANIFEST.json` (`files[2]`), còn `.github/workflows/ci.yml`
+  chạy `release-verify RELEASE_MANIFEST.json --strict --json` **KHÔNG có `if:`**, tức vô điều
+  kiện. Nên mọi packet chạm `AGENTS.md` mà không tái sinh manifest đều ĐỎ CI theo kiến trúc.
+  Đo với bản sửa tại chỗ: `rc=2`, `failed` có ĐÚNG một mục `AGENTS.md` (5683 → 6484 byte),
+  `extra_files: []`, `file_count` giữ 180.
+  Vì `file_count` KHÔNG đổi nên golden KHÔNG phải ghi lại (CLAUDE.md §Quy ước deploy mục 5 chỉ
+  đòi khi số đếm kiểm kê đổi). Bản vá manifest đo được là ĐÚNG 5 dòng: `total_bytes`,
+  `package_hash`, `content_hash`, cộng `size`/`sha256` của mục `AGENTS.md`.
+  Phiên thi hành DỪNG đúng theo `S1` thay vì tự chạm đường thứ ba — hành vi ĐÚNG, và chính nó
+  làm lộ thiếu sót của điều phối. Bài học đã có từ đợt `r291` (packet docs-only ăn hai vòng CI
+  đỏ vì lý do y hệt) mà điều phối vẫn không hỏi câu "tệp này có trong manifest không".
+  Trần dòng nâng 200 → 210 CHỈ để chứa 5 dòng manifest, không phải để nới cho phần văn bản.
+
+ly_do_revision_3: >-
+  ĐẶC TẢ ĐỔI: thêm §4.1b — `AGENTS.md` phải mang một CON TRỎ sang `docs/PROTOCOL_DA_PHIEN.md`
+  §8 về patch-as-hint, và CẤM chép nội dung luật sang đó.
+  Vì sao phải qua revision chứ không sửa spec tại chỗ: §3.2 đóng băng spec bằng `spec_hash`;
+  sửa spec mà giữ lease cũ là làm băm trỏ vào thứ không còn tồn tại. Thêm một yêu cầu là đổi
+  CLOSURE, nên đi qua revision mới.
+  XUẤT XỨ: chủ kho hỏi "reviewer gửi patch, executor áp thấy đạt thì có được approve luôn
+  không". Phiên điều phối trả lời bằng SUY LUẬN TỪ ĐẦU, rồi mới tra ra §8 đã quy định trọn vẹn
+  và CHẶT HƠN — nó phân loại theo LOẠI TỆP (packet `sensitive` chỉ cho patch-as-hint với tệp
+  TEST thuần hoặc tooling ngoài authority/gate/runtime), thứ bản tự nghĩ bỏ sót hoàn toàn.
+  Đúng lỗi "hỏi chỗ tiện tay thay vì hỏi chỗ kết luận được ghi".
+  CẢNH BÁO CHO NGƯỜI THI HÀNH: `doctrine-scan` quét `.claude/skills/**/*.md` và `CLAUDE.md`,
+  **KHÔNG quét `AGENTS.md`** (đo bằng cách đọc `cmd_doctrine_scan` trong `packet_loop.py`).
+  Nên chép luật vào `AGENTS.md` sẽ KHÔNG bị máy bắt. Cổng im lặng không có nghĩa việc ấy đúng.
+  Trần dòng 210 → 220 chỉ để chứa con trỏ một-hai dòng cộng chú thích, không phải để nới cho
+  phần văn bản.
+
+cap_nhat_truoc_khi_xin_review: >-
+  DỜI NEO TRƯỚC KHI MỞ PR, không phải sau: `reviewed_sha_required` từ `dfef15c6` sang exact head
+  `629ab4ae`. Phiên thi hành TỪ CHỐI mở PR khi neo còn cũ — đúng, vì mở PR là XIN REVIEW
+  (connector tự bắn), và §8 buộc approval neo `reviewed_sha`. Packet N5 vấp đúng chỗ này và ăn
+  một finding P1; N7 phải dời neo BA lần vì head đổi sau mỗi lượt vá.
+
+  `ngan_sach_kich_thuoc.da_dung` 57 → 65, đo bằng đúng đơn vị đã khai:
+  `git diff --numstat 6fa8a745 -- AGENTS.md .claude/skills/cross-review/SKILL.md
+  RELEASE_MANIFEST.json` = `47 1` + `13 0` + `5 5` ⇒ 3 tệp, 65 dòng thêm. Trần 3/220.
+  Manifest đổi ĐÚNG 5 dòng như lease r2 dự báo, và `file_count` giữ 180 nên golden KHÔNG ghi lại.
+
+  CỔNG MÙ ĐÃ ĐƯỢC BIẾN THÀNH PHÉP ĐO, ghi lại vì nó là hiện vật hiếm: phiên thi hành tự chĩa
+  `doctrine-scan --path AGENTS.md` vào tệp mà cổng mặc định KHÔNG quét ⇒ `rc=6`, 2 chỗ. Rồi ĐO
+  NỀN: cùng lệnh trên bản tại `6fa8a745` ⇒ `rc=6`, ĐÚNG 2 chỗ ấy. **DELTA = 0** — đỏ sẵn, con
+  trỏ mới không đẻ thêm. Đây đúng doctrine "đo nền trước khi nghi bản vá của mình"; nếu chỉ chạy
+  bản mới thì `rc=6` đã bị đọc thành hồi quy do chính packet gây ra.
+
+  LỆCH QUY ƯỚC ĐÃ BIẾT, khai chứ không sửa: hậu tố ngày của `lease_id` này là `20260831` (giờ
+  CỤC BỘ UTC+7) trong khi kho dùng giờ UTC — lease được cấp lúc `2026-08-30T17:5xZ`. Đổi tên
+  lease bây giờ sẽ làm hỏng bia mộ hai chiều đang khớp và mọi con trỏ đã đăng, nên giữ nguyên và
+  ghi ở đây. Lease sau dùng UTC.
+
+ly_do_revision_4: >-
+  SỬA BA P1 mà connector bắt được trên PR #425. Cả ba ĐÚNG, và cả ba là lỗi soạn thảo của phiên
+  ĐIỀU PHỐI — không phải của phiên thi hành. Chủ kho uỷ quyền cho phiên tự quyết.
+
+  (A) `generation` 1 → 2. Protocol dòng 271-272: "Mở rộng phạm vi hay đổi closure là revision
+  mới, GENERATION MỚI"; generation chỉ giữ được nếu closure/check/hash KHÔNG đổi. Packet này
+  đổi write set 2→3 và `spec_hash` hai lần mà vẫn để `generation: 1` qua cả ba revision.
+  TÊN NHÁNH GIỮ NGUYÊN, khai chứ không giấu: §214 nêu khuôn có mã hoá generation, nhưng kho này
+  dùng `claude/<slug>-exec-1` vốn không theo khuôn ấy, và đổi tên lúc này huỷ review đang neo.
+
+  (B) `SPEC.md` §3 sửa "ĐÚNG 2 tệp" → "ĐÚNG 3 tệp", thêm `RELEASE_MANIFEST.json`. `spec_hash`
+  neo lại `7a7d87eb` → `f496e552`.
+
+  (C) Dòng `S6` sửa "vượt 2 tệp hoặc 200 dòng" → "vượt 3 tệp hoặc 220 dòng", khớp
+  `ngan_sach_kich_thuoc`. Trước khi sửa, phiên thi hành đang ở 3 tệp tức NẰM TRONG điều kiện
+  dừng của chính packet — nó dừng đúng và trình lên, thay vì tự đi qua.
+
+  HÌNH DẠNG LỖI CHUNG CỦA CẢ BA, đáng ghi hơn từng cái: khi nới write set ở r2 tôi sửa
+  `write_set` và trần nhưng bỏ quên §3 của spec, dòng `S6`, và `generation`. BỐN hiện vật cùng
+  nói về một quyết định; tôi sửa một. Đúng lớp "một bất biến còn đúng không chứng minh các số
+  hạng còn đúng" — và ở đây còn tệ hơn, vì `write_set` với `S6` mâu thuẫn NHAU trong cùng một
+  tệp mà vẫn qua được mắt tôi hai lượt.
+  NẾP: nới write set lần sau phải sửa ĐỦ BỐN chỗ — `write_set` · `ngan_sach_kich_thuoc` ·
+  dòng `S6` · `SPEC.md` §3 — và bump `generation`.
+
+  CÒN LẠI, chưa sửa ở revision này vì thuộc write set của phiên thi hành chứ không của điều
+  phối: F1 (con trỏ §8 CHÉP luật thay vì trỏ), F2 (script rollout trong SKILL.md FAIL-OPEN —
+  không so bậc, không đọc terminal event, trong khi văn khai là phép kiểm CẶP), F3 (số trong
+  thân PR #424 là số của commit TRUNG GIAN, không phải của `reviewed_sha`). Phiên thi hành được
+  phép vá cả ba trong write set.
+
+ly_do_revision_5: >-
+  BỘ ĐẾM ĐẾM HỤT + neo cũ. Chủ kho uỷ quyền cho phiên tự quyết việc nới trần.
+
+  ĐẾM HỤT: `codex_review_calls_used` ghi `0` trong khi packet ĐÃ TIÊU một lượt (cross-review
+  `codex exec` xhigh, verdict `REQUEST_CHANGES`, effort đo được bằng phép kiểm CẶP). Tôi tạo r3
+  rồi r4 bằng cách chép tiến mà KHÔNG cập nhật bộ đếm sau lượt đã chạy. Nay `1/4`.
+  ĐẾM HỤT nguy hiểm hơn đếm thừa: nó cho tiêu nhiều lượt hơn ngân sách định, và cổng sẽ không
+  kêu vì con số vẫn "dưới trần".
+  Phiên thi hành PHÁT HIỆN lệch, khai vào thân PR #425, và KHÔNG tự sửa `ops/leases/**` —
+  đúng. Điều phối (tôi) là bên khai sai; tôi đã nói "r4 vẫn 1/2" theo trí nhớ báo cáo trong khi
+  TỆP nói `0`. Hiện vật thắng trí nhớ.
+
+  NEO: `629ab4ae` → `6411e821` (exact head sau khi vá năm việc). Dời TRƯỚC lượt review kế.
+  `da_dung` 65 → 84, đo `65 1` + `14 0` + `5 5` trên ba đường write set; trần 3/220.
+
+  TRẦN REVIEW 2 → 4: bản `6411e821` chưa ai review, và nếu lượt kế ra finding thì bản vá của nó
+  cũng chưa ai review — trần 2 sẽ cạn đúng lúc cần. Cùng lý do đã nâng ở N7.
+  GENERATION GIỮ 2, KHÔNG bump: nâng ngân sách review KHÔNG đổi closure (không đổi write set,
+  không đổi `spec_hash`, không đổi việc phải làm). Protocol dòng 271-272 chỉ đòi generation mới
+  khi closure/check/hash đổi — ở đây không.
+
+  CHECKLIST đã chạy cho revision này, vì ba P1 trước sinh ra từ việc sửa một chỗ quên chỗ khác:
+  `write_set` 3 · `ngan_sach_kich_thuoc` 3/220 · dòng `S6` 3/220 · `SPEC.md` §3 "ĐÚNG 3 tệp" ·
+  `spec_hash` khớp đĩa · `generation` 2 · bộ đếm 1/4 · neo `6411e821` · bia mộ hai chiều.
+
+ket_qua_luot_2_va_doi_neo: >-
+  Lượt 2: `REQUEST_CHANGES`, hai finding, cả hai ĐÚNG và đã vá. Neo dời `6411e821` sang
+  `a11943f7` TRƯỚC lượt 3. `da_dung` 84 sang 94. Bộ đếm 1 sang 2 trên trần 4.
+
+  P1 ĐÁNG GHI NHẤT CỦA CẢ PACKET: bản vá F2 đóng fail-open trên GIÁ TRỊ nhưng gán cứng KỲ
+  VỌNG. Lệnh phóng dùng bậc theo bảng (`high, xhigh, xhigh, max` — HAI trong bốn ô không phải
+  `xhigh`), còn validator gán cứng `xhigh`. Hai hằng số ĐỘC LẬP cho cùng một giá trị.
+  Phản chứng: lane chọn `max`, rollout ghi `xhigh`, validator trả `rc=0` ⇒ FALSE GREEN.
+  Tức phiên thi hành vá fail-open ở một mặt rồi MỞ LẠI ĐÚNG LỚP LỖI ẤY ở mặt kia — và chính nó
+  tự khai như vậy. Chữa bằng MỘT NGUỒN SỰ THẬT cộng guard rỗng/ngoài-tập, đo được ba vế:
+  nền PASS · đột biến gán cứng validator FAIL · đột biến gán cứng lệnh phóng FAIL; và trên
+  rollout THẬT: `xhigh` rc=0, `max` rc=1 (`SAI BAC`), `low` rc=1.
+
+  P2: `§7` xuất hiện ĐÚNG 0 lần trong `SKILL.md` trong khi `AGENTS.md` đã trỏ — hai tệp nói hai
+  điều khác nhau. Đo lại sau vá: 2 lần. Adapter TRỎ §7 chứ không chép bốn điều kiện vào.
+
+  `diff.patch` báo `byte_equal=False` KHÔNG phải lỗi bundle: reviewer tự truy ra `git diff` từ
+  mirror BARE rút gọn index hash thành 8 ký tự (8191 byte) còn cây ghim `abbrev=7` cho 8185 =
+  bundle. Đây là ca hiếm reviewer tự bác phát hiện của chính mình bằng phép đo.
+
+  Điều phối kiểm độc lập, ba lời khai KHỚP: head `a11943f7`; `75 1` + `14 0` + `5 5` = 3 tệp /
+  94 dòng thêm; không đường thứ tư; `§7` nay có 2 lần trong `SKILL.md`.
+
+  CHƯA GIẢI QUYẾT — P1 write set chứa tệp land-only: `RELEASE_MANIFEST.json` vẫn trong
+  `write_set` và vẫn có trong diff (`5 5`). Protocol dòng 652 cấm worker sửa tệp ấy, dòng 710
+  nói CI worker KHÔNG so feature branch với manifest committed. Nhưng `ci.yml` LẠI chạy
+  `release-verify --strict` vô điều kiện. Đó là MÂU THUẪN giữa protocol và cấu hình CI thật,
+  không phải lỗi của phiên thi hành — và gỡ manifest ra sẽ làm CI đỏ. Cần quyết định của chủ
+  kho, ghi ở đây để không bốc hơi.
+
+ly_do_revision_6: >-
+  BA việc trong một revision, và cả ba đều do sự kiện BÊN NGOÀI packet:
+
+  (1) LEASE r5 ĐÃ CHẾT. Hết hạn `00:21Z` 31-08; cổng `check` từ chối đăng với lý do đúng —
+  "đăng một lease chết thì người nhận tưởng có quyền mà không có". Hạn mới `11:15:11Z`.
+
+  (2) `S4` KÍCH HOẠT: PR #419 land, `origin/master` đi `6fa8a745` sang `c9a2e9c2`.
+  ĐO TRƯỚC KHI DỜI, không rebase im lặng: `git merge-tree` ⇒ **0 xung đột**; giao giữa tập tệp
+  #419 sửa và write set packet này ⇒ **RỖNG**. `base_sha` và `do_tu_sha` dời sang `c9a2e9c2`.
+  KHÔNG dời `reviewed_sha_required` — nó neo `a11943f7` là exact head nhánh packet, khác base.
+  PHIÊN THI HÀNH PHẢI ĐO LẠI `da_dung`: con số 94 đo từ nền CŨ. Đổi nền là đổi mẫu số.
+
+  (3) Áp bốn trường fencing và `packet_id: wp421` theo P1 của cross-review hiện vật. Đo kèm để
+  khỏi đọc lệch: trên `origin/master` **0/82** lease có bốn trường ấy — khoảng cách TOÀN KHO,
+  không phải sơ suất riêng.
+  TÊN NHÁNH GIỮ NGUYÊN `claude/n8-review-kem-patch-exec-1`, khai chứ không giấu: đổi tên lúc
+  này bỏ rơi công việc đã có ở `a11943f7` và huỷ mọi review đã neo. Lệch với `PROTOCOL:214` là
+  CÓ THẬT và chưa chữa; packet #427 dùng khuôn đúng từ đầu.
+
+phu_thuoc_packet_427: >-
+  P1 CÒN LẠI CHƯA CHỮA ĐƯỢC Ở ĐÂY: `RELEASE_MANIFEST.json` vẫn trong `write_set`, mà
+  `PROTOCOL:652` cấm worker sửa tệp ấy. Không phải packet này ương ngạnh — gỡ nó ra thì
+  `ci.yml:511` chạy `release-verify --strict` vô điều kiện và CI ĐỎ.
+  Packet **#427** (`N9-CI-MANIFEST-LANE`) sinh ra để chữa đúng gốc ấy. KHI #427 LAND thì packet
+  này phải: gỡ `RELEASE_MANIFEST.json` khỏi `write_set`, hoàn nguyên commit sửa manifest, đưa
+  việc tái sinh manifest sang `land_obligations`, và đo lại rằng CI vẫn xanh.
+  TỚI LÚC ĐÓ, quyền ghi manifest ở đây là một NGOẠI LỆ CÓ VẾT, không phải quyền hợp lệ. Ai đọc
+  lease này về sau đừng lấy nó làm tiền lệ.
+
+vung_duoc_phep_cham: >-
+  ĐÚNG BA tệp trong `write_set`. KHÔNG đụng `docs/PROTOCOL_DA_PHIEN.md` (adapter lệch protocol
+  thì ADAPTER sai — và `doctrine-scan` sẽ ĐỎ nếu adapter chép doctrine). KHÔNG đụng
+  `.github/workflows/**`. KHÔNG đụng `.claude/hooks/**` (đang thuộc lease N7).
+  KHÔNG đụng `ops/leases/**` hay `ops/specs/**` TỪ NHÁNH PACKET.
+  ĐỌC KỸ: "không được chạm" nghĩa là không sửa VÀ không land qua nhánh packet — phiên trước
+  từng đọc câu tương đương thành "cấm sửa, không cấm land" rồi merge nhánh lease vào nhánh
+  packet; cross-review bác đúng, phải revert, và cái revert ấy đẻ ra nợ N11.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, trình phép đo ·
+  S2 phải sửa cấu hình ChatGPT cloud ⇒ DỪNG, thứ đó NGOÀI kho và ngoài thẩm quyền packet ·
+  S3 không đo được bậc effort đã dùng ⇒ KHÔNG khai là đã đặt xhigh; ghi `KHÔNG ĐO ĐƯỢC` ·
+  S4 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ⇒ DỪNG ·
+  S5 muốn sửa `docs/PROTOCOL_DA_PHIEN.md` ⇒ DỪNG ·
+  S6 vượt 3 tệp hoặc 220 dòng thêm ⇒ DỪNG, KHÔNG tự khai cổng ADR-0044 là ĐẠT.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) HAI KÊNH KHÁC NHAU. Effort của connector GitHub nằm ở ChatGPT cloud settings, NGOÀI kho —
+  packet này KHÔNG đổi được nó. Chỉ lane `codex exec` cục bộ mới đặt được cờ. Viết tài liệu
+  như thể sửa được cả hai là một lời khai rộng hơn phép đo.
+  (2) `--effort` sai tên CHỈ CẢNH BÁO rồi lùi im lặng về mặc định, và `rc` lẫn `subtype` CÙNG
+  NÓI DỐI — chính skill này đã ghi, đo 27-08-2026. Đặt `xhigh` xong PHẢI ĐO là nó có hiệu lực.
+  (3) Chưa biết `codex exec` phơi bậc effort đã dùng ở ĐÂU. Đó là việc phải ĐO, không giả định.
+  Đo ra "không phơi ở đâu cả" thì khai thẳng KHÔNG ĐO ĐƯỢC — đừng viết một câu hứa không kiểm được.
+  (4) `codex exec -c model_reasoning_effort=xhigh` đã đo `rc=0` ngày 30-08-2026. `rc=0` chỉ
+  chứng minh CLI NHẬN cờ, KHÔNG chứng minh bậc ấy có hiệu lực. Hai câu khác nhau.
+  (5) Bộ quét lease KHÔNG chạy được ở chế độ mặc định trên máy này (#417) — cần `PYTHONUTF8=1`.
+  Đừng đọc `rc=12` thành "không có ai giữ".
+  (6) `core.abbrev=7` phải ghim TRONG mọi clone/sandbox.
+  (7) KHÔNG `git push` thẳng master, KHÔNG ép qua ruleset.

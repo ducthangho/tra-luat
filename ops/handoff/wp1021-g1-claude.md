@@ -84,7 +84,51 @@ lưu. `ops/reviews/**` không thuộc write set nên executor KHÔNG ghi biên n
 - Merge/land: chủ kho.
 - Biên nhận review trong `ops/reviews/` (nếu cổng land đòi): ngoài write set.
 
-## Phụ lục A — nguyên văn verdict Codex (bốn lượt)
+
+## Cập nhật 30→31-10-2026 — sau khi #1041 vào master (đọc phần này TRƯỚC các mục trên)
+
+Head hiện hành **`356a27e1378b2162bbc0be2ec06ff08fdacbdead`** (các mục trên mô tả `e9e0048`, nay đã cũ).
+
+**Vì sao đổi head.** Chủ kho chỉ thị thứ tự merge (#1037 issuecomment-6529010520): #1041 trước, #1040 sau. #1041 vào master ở
+`b29da0b`; nhánh này merge master vào ở `3883b60` (một hunk xung đột trong `ops/bien_nhan_v2_test.py`: giữ cả hai khối, đổi ca
+`c98_chon_…` của #1021 thành `c101_…`). Chủ kho chọn gộp vào review các ca biên cửa sổ M4 của `c88` (#1011).
+
+**Trần Codex** (ghi ở Issue #1021): 4 → 6 (issuecomment-6529311540) → 7 (6530712225) → 9 (6531357709). Đã dùng **7**.
+
+| lượt | run_id | prompt sha256 | head | thời lượng | verdict | VERDICT.md sha256 |
+|---|---|---|---|---|---|---|
+| 5 | `2559d018c8b84c4d9517f138689796c1` | `faddce17…9aedea` | `3883b60` | 1048,1 s | request_changes — 1 P1 `bien-ngoai-cua-so-surface-chua-co-rang` (c88: biên `j = 0`, trích dẫn dòng sau; HÌNH DẠNG `bo-chon-ung-vien`) | `d0bebd7f…3ef46f` |
+| 6 | `529bc3d976b244eaaaadc7e134d05993` | `e81958dc…e07ebc` | `691cb65` | 1010,8 s | request_changes — P1 **đã vá thật**; 1 P3 chú thích | `7be99282…103173` |
+| 7 | `fcb9cb37d2014088ac4292a38b353dc8` | `6011d33a…bf03f8` | `c8a493c` | 627,9 s | request_changes — P3 lượt 6 đã vá; 1 P3 docstring trỏ `c99` thay `c100` | `181946a7…a00d1a10` |
+
+Lượt 5 cũng xác nhận giải xung đột đúng (không mất dòng của bên nào) và F1–F3 cũ vẫn đóng.
+
+| commit | nội dung |
+|---|---|
+| `3883b60` | merge master `b29da0b` (#1041) |
+| `691cb65` | áp `HINT.patch` lượt 5 (sha256 `994c283d…`): bỏ tiền tố fixture `c88`, hàng `ii-b`, `m156`, `m157` (chủ kho duyệt) |
+| `c8a493c` | áp `HINT-LUOT6.patch` (sha256 `fc52cb29…`): một dòng chú thích |
+| `6964930` | P3 lượt 7 + hai tham chiếu đã cũ executor tự rà (chỉ docstring) |
+| `356a27e` | tự rà mọi docstring #1021 trước lượt 8 (chỉ docstring) |
+
+**Đo trên `356a27e`:**
+- Linux (phiên executor): `bien_nhan_v2_test: 98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt`, `TỔNG: ĐẠT`;
+  `bien_nhan_v2 --root .` `tổng 306`, `TỔNG: ĐẠT`; ruff F delta 0; `doctrine-scan` sạch.
+- Ubuntu PR run 41113943723 `success`.
+- Windows dispatch `runner_set=windows-only` 41113949578 `success`; job `gate-ops (windows-latest)` (runner_id 1000026867):
+  `98/98 · 153/153 · 2/2`, `TỔNG: ĐẠT`; `lease_publish: 255/255 đạt; bỏ qua=13`.
+- Windows local (ASUS-LAPTOP) trên `356a27e`: **KHÔNG ĐO ĐƯỢC** — đã khởi chạy 19:17Z (khoá hạn 21:17Z) nhưng máy offline từ
+  ~19:35Z; không đọc được log, không ghi được `do-luong.csv`, không xoá được khoá (khoá tự hết hiệu lực 21:17Z theo ADR-0058 §3a).
+  Các head trung gian `3883b60`/`691cb65`/`c8a493c` từng được chạy rồi dừng tay khi head đổi — không có N/N local nào cho chúng.
+
+**CHƯA XONG — việc còn lại:**
+1. **Codex lời gọi 8/9 trên `356a27e` chưa chạy.** Đĩa container còn ~75 MB; xoá bản làm việc review cũ bị cơ chế quyền phiên chặn
+   (chủ kho đã đồng ý xoá, nhưng phiên không vượt chốt). Prompt lượt 8 đã soạn (sha256 `e6fdd2c0…`), cần chạy ở phiên có đĩa.
+2. Lease hết hạn **2026-10-31T08:57:00Z**.
+3. Master đã tiến tới `ba1b10d` (30 commit sau `b29da0b`), KHÔNG chạm `ops/bien_nhan_v2*.py`; có biên nhận mới trong
+   `ops/reviews/` nên `tổng` của cổng sau merge sẽ khác 306.
+
+## Phụ lục A — nguyên văn verdict Codex
 
 ### Lượt 1 — sha256 `2b6249476820cfb79ca8137c0de8b8bcbd40c82ffb381aaa490b50ddfc20fdf4`
 
@@ -673,3 +717,415 @@ Không tạo mục `[P0..P3]` hay gán `HÌNH DẠNG` cho một lỗi không t�
 
 Tất cả tiến trình đo dùng cho kết luận đã hoàn tất. Các lỗi I/O được nêu là phép tiêm có hit kiểm chứng, không phải đo sự cố phần cứng/quyền truy cập thật. Windows CI/local và Ubuntu CI exact head: **KHÔNG ĐO ĐƯỢC**. Không dùng lời khai executor thay số đo, không sửa mã nguồn checkout được review, không cấp quyền merge/land.
 <!-- VERDICT-L4-KET-THUC -->
+### Lượt 5 — sha256 `d0bebd7fff8951937823d2cbf00b94874a8c35792ebecd8abc98d60f9f3ef46f`
+
+<!-- VERDICT-L5-BAT-DAU -->
+Verdict: request_changes
+Reviewed commit: 3883b607c2167758065e408f0fa6eeb580472015
+Spec sha256: d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+
+Kết luận: **request_changes**. Merge giữ đủ thay đổi hai bên; suite head đạt **98/98 · 151/151 · 2/2**, F1/F2/F3 cũ vẫn đóng. Còn **1 lớp P1 ở kiểm thử cửa sổ M4 của c88**: mutant làm sai biên đầu tệp vẫn qua toàn suite; mutant bỏ citation liền sau cũng qua toàn bộ 98 ca thường. Chỉ ghi trong sandbox, không sửa mã nguồn checkout được review. Chi tiết, giới hạn và gợi ý vá có bằng chứng bên dưới.
+
+## Nhật ký đo tăng dần
+
+Quy ước tái hiện: chạy từ gốc sandbox; mọi tiến trình đo dùng `PYTHONDONTWRITEBYTECODE=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null` (wrapper `measure.py` còn đặt UTF-8). `git config core.abbrev 7` được đặt trước phép đo và được giữ trong các bản sao. Log `.json` cạnh `.stdout/.stderr` ghi lệnh, cwd, rc và thời gian thật. Rc=0 của script thu quan sát không tự có nghĩa mutant chết; verdict dùng trạng thái ca và đối chứng cụ thể.
+
+Đợt 1: `evidence/preflight.json` lưu lệnh/rc/output. Reviewed tree: `c25e25dbcfbfd2a8f584199ec2d6e6dfc26c69a6`. Head, cha 1, cha 2 và origin/master đúng assignment; SPEC khớp băm. `git diff --name-only b29da0b..HEAD` đúng hai tệp write set; `git diff --check b29da0b..HEAD` rc=0.
+
+## GIẢI XUNG ĐỘT
+
+`PYTHONDONTWRITEBYTECODE=1 python3 audit_merge.py` rc=0 (`evidence/merge-audit.json`). Ba patch đầu vào khớp byte với các lệnh `git diff` tương ứng. `git merge-file -p <e9e0048> <merge-base> <b29da0b>` trên tệp test phát đúng **một** xung đột; giữ tuần tự cả hai thân, đổi tên định nghĩa/đích m142/docstring c99 ⇒ **byte-identical với HEAD**. Merge-base là `757bde561d09738858506aecf5de2f050a5f0d5e`.
+
+- So cha 1: `ops/bien_nhan_v2.py` không đổi byte. Tệp test nhận ba import contextlib/io/traceback, ca c98 của #1037, các hàm in chi tiết/vị trí ngoại lệ, tham số `chi` và dây in của `_dot_bien`; thêm đúng ba thay tên đã nêu. Ngoài `_chay_1` và `_dot_bien`, mọi hàm cũ còn nguyên sau chuẩn hóa tên.
+- So cha 2: nhận đúng thay đổi #1021 của `DIFF.patch`: mã sản phẩm +40/−5, test +281/−0. Mọi hàm #1037 nguyên byte; chỉ `_dot_bien` được bổ sung đăng ký m142–m155. Không mất hàm của bên nào.
+- Đếm AST: cha 1 **97 ca / 153 đăng ký**, cha 2 **95 ca / 139 đăng ký**, HEAD **98 ca / 153 đăng ký**. Tên ca, số tiền tố ca và tên đột biến không trùng. 153 gồm 151 thường + 2 tự kiểm (đã đối chiếu bằng output suite bên dưới). Mọi đăng ký của từng cha khớp AST sau đổi tên; chuỗi `c98_chon_bien_nhan_` vắng hoàn toàn ở head.
+
+`python3 run_checks.py` đã chạy riêng `_dot_bien(chi={tên})` cho **m140–m155**, mỗi tên một tiến trình: tất cả rc=0, đúng một hàng, `giet_that`, có đối chứng. m142 trỏ c101; m147/m155 trỏ c99; m154 trỏ c100. Bốn lượt tiêm AttributeError vào đúng ca đích của m142/m147/m154/m155 đều in `KHÔNG RĂNG`, `chi tiết [tin_dung_gia]`, `AttributeError: review_merge_trace_sentinel` và vị trí `focused_merge.py:11 in reviewer_throw`; không nhận tín dụng giết giả. Log `evidence/focused-*.{json,stdout,stderr}`; phép focused không được gọi là toàn suite.
+
+## C88 CỬA SỔ M4 — phép đo hành vi head
+
+`python3 window_probe.py head --gate` (qua `measure.run`, `evidence/window-head.*`) rc=0: **71/71 phép trực tiếp và 71/71 fixture git thật qua cổng đúng kỳ vọng**. Ma trận độc lập đặt provider/citation ở khoảng cách −3…+3, dòng giữa; đầu tệp j=0 và cuối tệp; một/hai/ba dòng; dòng trống, khoảng trắng/tab, nhiều khai báo cùng dòng và gần nhau. Expected được ghi riêng trong script theo hợp đồng ba dòng. Output: `SUMMARY {"total":71,"direct_pass":71,"gate_pass":71,"failed":[]}`. Chưa thấy lỗi hành vi sản phẩm ở head trên tập này. Kết quả đột biến bên dưới cho thấy ma trận head xanh chưa chứng minh c88 đủ răng.
+
+## Tiêu chí đã đo
+
+`python3 run_checks.py` ghi lệnh/rc/output vào `evidence/`:
+
+- C1a/C1b: `probe.py head behaviors` chạy fixture thật; hai tệp hợp lệ YAML sai schema ⇒ rc=1/tổng 2/nêu x; chỉ x ⇒ rc=1/tổng 1; YAML hỏng đuôi hoa ⇒ rc=2/stderr nêu x/không traceback. Log `head-behaviors.*` và `fixture-head-*`.
+- C6: head và base chạy `python3 ops/bien_nhan_v2.py --root .` đều rc=0, tổng 306, `TỔNG: ĐẠT`. `receipt-count.stdout` đếm riêng casefold=306/exact=306.
+- C9: Ruff F **đỏ sẵn**, head/base cùng F541 ở cùng nội dung dòng; `ruff-delta.json` xác nhận delta=0. Doctrine head/base rc=0: 10 tệp, 0 chỗ chép doctrine. `no-glob` rc=1/0 dòng. Không gọi Ruff sạch.
+
+## ĐỐI CHIẾU LƯỢT TRƯỚC
+
+Nguồn lịch sử: `VERDICT-LUOT4.md` trên `e9e0048b48ab610fee1246368b4f134c1ac4ae76`. Kết quả dưới đây đo lại trên head mới, không lấy verdict cũ làm bằng chứng pass.
+
+| Lớp lịch sử | Kết quả trên head mới | Phép đo |
+|---|---|---|
+| F1/P2 `loi-do-liet-ke-thu-muc-thoat-traceback` | Vẫn đóng trong phạm vi đã đo | `run_old_findings.py`: PermissionError ở trạng thái/liệt kê và iterator yield rồi lỗi trên cả kiem/sinh ⇒ rc=2, không traceback; `mutation_probe.py m147` trên bản sao đầy đủ ⇒ c99 giet_that, c18 sạch. |
+| F2/P3 `loi-do-thieu-chot-ngoai-le-lap-trinh` | Vẫn đóng trong phạm vi đã đo | `boundary_oracle.py head` ⇒ cả hai đường truyền đúng đối tượng RuntimeError, hit=1, restored=true; `review_new.py error-child head <kiem\|sinh> <runtime\|value>` ⇒ rc=1/traceback đúng lỗi lập trình; focused m152/m153 chết đúng c100. |
+| F3/P3 `loi-do-thieu-chot-oserror-ngoai-permissionerror` | Vẫn đóng trong phạm vi đã đo | `errno_probe.py head <mode> <site> <EIO\|ESTALE>`: 12/12 tiến trình rc=2, hit=1, không traceback, đủ guard/helper/git/listing. `mutation_probe.py m154` ⇒ c100 giet_that vì OSError errno 5; m155 ⇒ c99 giet_that vì errno 5; c18 đều sạch. Tracer c99/c100 xác nhận thực sự ném OSError thuần, không chỉ PermissionError. |
+
+Cả ba lớp F1/F2/F3 có hình dạng `loi-do`; không mở lại bởi merge. Log chi tiết `evidence/errno-*`, `old-*`, `boundary-head.*`, `trace-*`, `mut-m147*`, `mut-m154*`, `mut-m155*`. Các lỗi I/O là lỗi tiêm có hit kiểm chứng.
+
+### C2/C3 và chạy lại đột biến trên bản sao đủ cây
+
+`python3 run_mutants.py` chạy mỗi mutant một tiến trình. `work/mutation` là bản sao đủ cây gồm `.git`; mỗi tiến trình sửa đúng mẫu duy nhất trên bản sao, chạy ca/đối chứng khi mutant còn hiệu lực, băm lại, rồi phục hồi. Patch và kết quả giữ trong `evidence/mut-*.patch` và `mut-*-result.json`.
+
+| Mutant | Ca đích / đối chứng |
+|---|---|
+| m142 — so đuôi chính xác | c101 **giet_that**; c99 cũng đỏ; c18 sạch |
+| m143 — thêm is_file | c89 **giet_that**; c18 sạch; C2 đạt |
+| m147 — bỏ bắt lỗi liệt kê | c99 **giet_that**; c18 sạch |
+| m154 — chỉ bắt PermissionError ở trạng thái | c100 **giet_that** với EIO; c18 sạch |
+| m155 — chỉ bắt PermissionError ở liệt kê | c99 **giet_that** với EIO; c18 sạch |
+| glob — hoàn nguyên selector | c101/c99 **giet_that**, c18 sạch; C3 đạt. c100 là `gian_giao` do không gọi iterdir, **không tính** làm tín dụng giết. |
+
+### Toàn suite head đã hoàn tất
+
+`PYTHONDONTWRITEBYTECODE=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null python3 measure.py head suite` chạy lệnh `python3 ops/bien_nhan_v2_test.py` trong bản sao đủ cây `work/head`: **rc=0, 375.16 s**, stderr rỗng (`evidence/head-suite.*`):
+
+```text
+bien_nhan_v2_test: 98/98 ca đạt · 151/151 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 133/151 đột biến thường khai đối chứng
+TỔNG: ĐẠT
+```
+
+So cha 2 chi tiết mã sản phẩm: thêm `_hoi_trang_thai` (chỉ đổi OSError thành KhongDoDuoc) và `_chon_bien_nhan` (iterdir/lower/endswith/sorted, không lọc is_file); kiem dùng helper cho hai câu hỏi trạng thái và selector, thông báo rỗng nêu phép so không phân biệt hoa thường; `_sinh_no` dùng cùng selector. Test thêm import errno, c101/c99/c100 và m142–m155. Đây là toàn bộ delta #1021; `audit_merge.py` đã chứng minh phần #1037 còn nguyên.
+
+### C88 — 40 đột biến reviewer
+
+`python3 run_mutants.py` / `python3 mutation_probe.py <tên>`; bảng máy `evidence/window-mutations-summary.json`. **40/40** mutant có đối chứng c18 sạch và băm nguồn không đổi suốt phép đo. Mỗi mutant chạy tiến trình riêng trên bản sao đủ cây. Không tuyên bố tập hữu hạn này vét cạn mọi biểu thức Python tương đương.
+
+| Nhóm | Số | Kết quả ca c88 / oracle độc lập |
+|---|---:|---|
+| Cận trái L ∈ {−3,−2,−1,0,+1}, cận phải R ∈ {0,1,2,3,4}, `max(0,j+L):j+R`, trừ cặp đúng (−1,2) | 24 | Tất cả c88 **giet_that**; bao gồm nới/thu hẹp/lệch sang trước/sau và cửa sổ rỗng |
+| Lấy mọi dòng trước / mọi dòng sau / toàn tệp / loại dòng trắng / bỏ dòng khai ở EOF | 5 | Tất cả c88 **giet_that** |
+| Nới riêng provider hoặc riêng citation sang trước/sau hai dòng | 4 | Tất cả c88 **giet_that**; xác nhận cả bốn phản chứng cũ đã được khóa |
+| Bỏ provider trên chính dòng khai; bỏ citation dòng trước | 2 | c88 **giet_that** |
+| `no_clamp`: bỏ chặn chỉ số âm ở đầu tệp | 1 | **SỐNG** ở c88/c79/c83; oracle chỉ 66/71 đúng |
+| `skip_first`: bỏ qua khai báo j=0 | 1 | **SỐNG** ở c88/c79/c83; oracle chỉ 63/71 đúng |
+| `citation_drop_next`: bỏ citation dòng ngay sau | 1 | **SỐNG** ở c88/c79/c83; oracle chỉ 65/71 đúng |
+| `citation_drop_self`: bỏ citation cùng dòng | 1 | SỐNG ở c88 nhưng **c79 giet_that**, nên không phải lỗ hổng không được bộ ca bắt |
+| `reverse_equivalent`: đảo thứ tự ba dòng trong cửa sổ | 1 | SỐNG; oracle 71/71. Tương đương với hai phép `any`, không phải lỗi |
+
+Tổng: c88 giết 35/40; 5 sống tại c88 gồm 1 tương đương, 1 được c79 bắt, 3 mutant sai hành vi cần kiểm tiếp toàn bộ ca. Kết quả xác nhận cuối: `no_clamp` sống qua toàn suite 98/98 · 151/151 · 2/2; `citation_drop_next` sống qua toàn bộ 98/98 ca thường. Chỉ mutant đầu đã được chạy cả bảng đột biến; không gán kết quả whole-suite đó cho mutant thứ hai.
+
+## Bảng finding — cập nhật sau phép đo ma trận
+
+- [P1] bien-ngoai-cua-so-surface-chua-co-rang: `ops/bien_nhan_v2_test.py:2981` (ma trận c88), `:3001` (prefix che j=0); chốt sản phẩm `ops/bien_nhan_v2.py:1310–1311` — `python3 mutation_probe.py no_clamp` và `python3 mutation_probe.py citation_drop_next` — c88/c79/c83 đều `qua`, c18 sạch, trong khi oracle độc lập lần lượt chỉ 66/71 và 65/71 — bổ sung fixture thật bắt đầu tại dòng 0, citation ở dòng ngay sau và đăng ký đột biến riêng; gợi ý đã đo trong `HINT.patch`.
+
+  HÌNH DẠNG: `bo-chon-ung-vien`.
+
+  **Một lớp, hai biểu hiện còn mở** (biên đầu tệp; citation phía sau). Giữ slug lịch sử để nối P1 lượt 7; không coi số dòng tăng hoặc m140/m141 xanh là đóng mọi biên của lớp này. Đây là thiếu răng kiểm thử; chưa thấy sản phẩm head sai trên 71 fixture độc lập.
+
+  **Biểu hiện A — đầu tệp.** Tất cả nội dung c88 đều được thêm `verdict: approve` và một dòng trống, nên không có khai báo ở j=0. Mutant `no_clamp` chèn `max = lambda lower, value: value` ngay trước dòng cắt cửa sổ, giữ nguyên dòng neo đột biến cũ: ở j=0 nó lấy chỉ số âm, có thể bỏ lời tự khai sai hoặc đọc sai cửa sổ. `skip_first` là phản chứng cùng biểu hiện. Witness `edge-j0-n3-provider-+1`: dòng 0 là khai báo khác run.json, dòng 1 có provider, dòng 2 trung tính; head có L-SURFACE/rc=1, mutant bỏ qua/rc=0. `window_probe.py mutation --gate` trên bản `no_clamp` (`window-no-clamp.*`) xác nhận **67/71** fixture git thật đúng, bốn fixture ra sai mã; oracle trực tiếp **66/71** vì thêm một ca nhiều khai báo vẫn có một vi phạm khác nên rc chưa phân biệt được. Không dùng rc đơn lẻ để che mất một surface.
+
+  **Biểu hiện B — citation phía sau.** c88 chỉ có citation liền trước, hoặc cách hai dòng; c79 có citation cùng dòng. Không ca nào trong ba ca này bắt việc bỏ riêng citation ở dòng kế tiếp. Mutant `citation_drop_next` chỉ đổi tập xét `_RE_TRICH_DAN`, giữ nguyên tập provider. Witness `text-citation-+1`: provider + khai báo sai ở cùng dòng, citation ở dòng ngay sau; head loại khỏi lời tự khai, mutant báo sai L-SURFACE. Ma trận trực tiếp bắt sáu ca sai, còn c88/c79/c83 đều qua.
+
+  **Hướng vá đã thử trong sandbox.** `HINT.patch` bỏ prefix cố định khỏi các fixture c88 (nhờ đó các hàng sẵn có thực sự chạm j=0), thêm hàng citation liền sau, thêm m156/m157 để khóa hai chốt. `python3 hint_probe.py create` rc=0: c88 head qua; m140/m141/m156/m157 đều `giet_that`, có đối chứng. `hint_probe.py <tên>` thử lại 40 mutant: sau hint, 38 mutant sai bị c88 bắt, `citation_drop_self` bị c79 bắt, `reverse_equivalent` vẫn qua. Không yêu cầu mutant tương đương phải chết. Các log `hint-*` lưu bằng chứng; chưa chạy toàn suite cho HINT và chưa áp HINT vào checkout được review. Executor cần tự tái dẫn xuất, chạy toàn suite/CI trên head mới.
+
+  Ghi nhận lỗi của script reviewer: lần đầu `hint_probe.py citation_drop_self` đòi c88 tự giết dù đã biết c79 bắt mutant này; assertion reviewer sai. Giữ log `initial-hint-citation_drop_self.*`, sửa phép kiểm để ghi và đòi c79 `giet_that`, chạy lại rc=0. Không tính lần lỗi oracle đó là lỗi sản phẩm hay tín dụng giết.
+
+### Xác nhận survivor qua toàn suite
+
+`python3 mutation_probe.py no_clamp --suite` (wrapper `confirm-no-clamp.json`) rc=0. Lệnh con `python3 ops/bien_nhan_v2_test.py` trong cây đầy đủ đang mang đột biến: **rc=0**, stderr rỗng, `evidence/mut-no_clamp-suite.*`:
+
+```text
+bien_nhan_v2_test: 98/98 ca đạt · 151/151 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 133/151 đột biến thường khai đối chứng
+TỔNG: ĐẠT
+```
+
+`mut-no_clamp-result.json` xác nhận băm sản phẩm trước/sau suite giữ nguyên; c18 sạch khi mutant đang hiệu lực. Dòng `max = lambda lower, value: value` chỉ thay clipping cận trái; dòng cắt cửa sổ gốc được giữ để m113/m140/m141 vẫn áp đúng mẫu. Vì thế đây là **SỐNG QUA TOÀN SUITE**, không phải rc=0 do bỏ chạy bảng đột biến hoặc lỗi giàn giáo. Witness git thật ở `window-no-clamp.*` đã chứng minh mutant sai hành vi.
+
+**Kết luận riêng P1 lượt 7:** xác nhận `fc73522` đã vá thật bốn phản chứng ngoài cửa sổ ở khoảng cách ±2 (provider và citation); m140/m141 chết đúng c88, kể cả phép reviewer đổi riêng từng bộ lọc. Tuy nhiên **bác kết luận đóng toàn bộ lớp cửa sổ M4**: biên đầu tệp và citation liền sau vẫn chưa được khóa. Một lớp P1 với hai biểu hiện còn mở; nối cùng slug lịch sử. Việc này thuộc phần c88 được chỉ thị bổ sung cho lượt 5, không phải lỗi giải xung đột #1021/#1037.
+
+## Bảng tiêu chí
+
+| Tiêu chí | Kết quả | Lệnh / output quyết định |
+|---|---|---|
+| Đúng head/spec/phạm vi | ĐẠT | `preflight.json`, `audit_merge.py`: OID 40 ký tự/băm đúng; hai tệp; diff-check rc=0 |
+| Giải xung đột | ĐẠT | `audit_merge.py`: 1 conflict; giữ cả hai + 3 đổi tham chiếu ⇒ khớp byte; 98 ca, 151 thường + 2 tự kiểm; không trùng/tên cũ |
+| Suite head | ĐẠT | `measure.py head suite`: rc=0, 98/98 · 151/151 · 2/2, TỔNG: ĐẠT |
+| #1037 với m142–m155 | ĐẠT | `focused_merge.py <m142…m155> real` đúng một hàng `giet_that`; 4 phép fake ghi đủ chi tiết/vị trí, `tin_dung_gia`, không được nhận CÓ RĂNG |
+| C1a | ĐẠT phần đo; Windows KHÔNG ĐO ĐƯỢC | `probe.py head behaviors`: tổng 2/nêu x/rc=1; chỉ x tổng 1/không “không có tệp”; `mutation_probe.py m142` giết c101 |
+| C1b | ĐẠT phần đo; Windows KHÔNG ĐO ĐƯỢC | YAML hỏng đuôi hoa rc=2/stderr nêu x/không traceback; mutant exact chết c101 |
+| C2 | ĐẠT phần đo; Windows KHÔNG ĐO ĐƯỢC | c89 qua trong suite; `mutation_probe.py m143` c89 giet_that, c18 sạch |
+| C3 | ĐẠT phép hoàn nguyên được yêu cầu | `mutation_probe.py glob` c101/c99 giet_that; c18 sạch; không lấy c100 gian_giao làm tín dụng |
+| C4 Windows CI | KHÔNG ĐO ĐƯỢC | Không có phép đo độc lập job/runner/log exact head trong lượt này |
+| C5 Ubuntu CI | KHÔNG ĐO ĐƯỢC | Suite vừa chạy không chứng minh job CI; không có phép đo độc lập CI exact head |
+| C6 | ĐẠT | Head/base gate rc=0, tổng 306/TỔNG: ĐẠT; os.listdir đếm riêng 306 |
+| C7 Windows local | KHÔNG ĐO ĐƯỢC | Không chạy Windows local; không suy kết quả từ lời khai executor |
+| C8 nội dung review | KHÔNG ĐẠT | 1 lớp P1 còn mở trong phần c88; request_changes |
+| C9 | ĐẠT | Ruff F delta 0 (đỏ sẵn F541); doctrine rc=0/10 tệp/0 chỗ; diff-check rc=0; glob 0 dòng; numstat +40/−5 và +281/−0 |
+| C88 hành vi head | ĐẠT tập đã đo | `window_probe.py head --gate`: 71/71 trực tiếp và 71/71 git thật |
+| C88 răng kiểm thử | KHÔNG ĐẠT | `no_clamp` sai trên witness nhưng vẫn toàn suite xanh; P1 ở trên |
+
+**Tổng finding mở: P0=0, P1=1 lớp (2 biểu hiện), P2=0, P3=0.** Không cấp quyền merge/land.
+
+
+### Xác nhận biểu hiện citation và toàn vẹn cuối
+
+`python3 mutation_probe.py citation_drop_next --all-cases` (`evidence/confirm-citation-drop-next.*`) **rc=0, 208.20 s**: `ALL_CASES {"total":98,"passed":98,"failed":[]}`. Băm sản phẩm giữ nguyên, c18 sạch. Đây là toàn bộ **ca thường**, không phải lượt toàn suite có 151 đột biến. `python3 witness_citation.py` dựng lại cùng mutant trên bản sao đầy đủ rồi chạy `window_probe.py focus --gate`: phép kiểm oracle rc=1, **65/71 trực tiếp và 65/71 git thật đúng**, sáu fixture phát hiện hành vi sai; mọi lỗi là L-SURFACE, không phải giàn giáo. Log `window-citation-drop-next.*`, bảng `citation-gate-summary.json`.
+
+`python3 validate_review.py` **rc=0**, output `ALL REVIEW ASSERTIONS PASS; 5 trees clean; 20 inherited scripts unchanged`. `evidence/final-validation.json` đối chiếu tự động số đếm suite, ca đích mutant/đối chứng, 12 phép EIO/ESTALE, tracer, C1/C6/C9, 40 mutant, 40 phép hint, bốn đột biến hint chạy riêng từng tiến trình, cùng snapshot cuối:
+
+- `cay-kho`, `work/head`, `work/focus`, `work/mutation` vẫn ở exact head dòng 2/tree `c25e25dbcfbfd2a8f584199ec2d6e6dfc26c69a6`; `work/base` ở `b29da0bfe3bfb7a7be69136a1c5c40f82c088a93`.
+- Cả năm cây: tracked/untracked/ignored sạch, diff worktree/index rỗng, không nông, `core.abbrev=7`; hai tệp nguồn khớp từng byte với blob HEAD. Snapshot đầu ghi tracked/untracked; ignored ở đầu lượt không được ghi riêng. Snapshot cuối không chứng minh toàn bộ lịch sử ghi trong lúc chạy; các bản sao phục vụ đột biến đã được phục hồi sau phép đo.
+- SPEC giữ đúng SHA-256 dòng 3; 20 script `luot4-probe` được chép ra gốc sandbox giữ nguyên byte. Các script mới và HINT chỉ nằm trong sandbox. `git apply --check HINT.patch` trên bản sao rc=0; không áp lên `cay-kho`.
+
+Các tiến trình đo đã kết thúc. **Verdict cuối: request_changes**, vì một lớp P1 M4 còn mở; phần giải xung đột và F1/F2/F3 không phát hiện hồi quy. Windows CI/local, Ubuntu CI exact head và toàn suite của HINT: **KHÔNG ĐO ĐƯỢC / chưa chạy**, không được suy là pass. Không cấp quyền merge/land.
+<!-- VERDICT-L5-KET-THUC -->
+
+### Lượt 6 — sha256 `7be99282d09817bc318facbd7746ef33fdff70167f677c0107ee00ad18103173`
+
+<!-- VERDICT-L6-BAT-DAU -->
+Verdict: request_changes
+Reviewed commit: 691cb65388e71afb825aeba3b5cbc5359fc4dac5
+Spec sha256: d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+
+Còn **1 finding P3** trong chú thích mới: khẳng định cả hai đột biến từng sống qua toàn suite không đúng với citation_drop_next. Vì ngưỡng yêu cầu hết mọi P0–P3, verdict là **request_changes**. P1 `bien-ngoai-cua-so-surface-chua-co-rang` lượt 5 **ĐÃ VÁ THẬT**: ba phản chứng cũ đều chết tại c88; no_clamp chết qua toàn suite. Head sạch đạt **98/98 · 153/153 · 2/2, TỔNG: ĐẠT**. F1/F2/F3 và phần giải xung đột #1037 không có hồi quy trong các phép đo dưới đây. Windows CI/local và Ubuntu CI exact head: **KHÔNG ĐO ĐƯỢC**. Verdict này không cấp quyền merge/land.
+
+## Neo và cách tái hiện
+
+Các lệnh Python dưới đây chạy từ gốc sandbox, với `PYTHONDONTWRITEBYTECODE=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null`; `measure.run` truyền cùng môi trường cho tiến trình con, thêm UTF-8 và lưu command/cwd/rc/thời gian/stdout/stderr. Các suite chạy lệnh `python3 ops/bien_nhan_v2_test.py` trong cây được ghi ở log. Mọi đột biến reviewer chạy trên cây đủ, mỗi đột biến một tiến trình, có đối chứng khi mutant còn hiệu lực và kiểm băm nguồn trước/sau. Không sửa nguồn trong `cay-kho`.
+
+`python3 preflight.py` rc=0 ([log](evidence/preflight.json)): HEAD và cha đúng chỉ thị, tree `2bfc4623ba0ac56cee9a1766f1bee3ee2faa3a0e`; origin/master = `b29da0bfe3bfb7a7be69136a1c5c40f82c088a93`; không nông, `.git` là thư mục, core.abbrev=7, trạng thái sạch. SPEC khớp băm dòng 3; HINT khớp `994c283d58086efc070a51c6347aca928edae847da153e95cd10f73600340fa9`. DIFF.patch và DIFF-LUOT6.patch khớp byte với git diff tương ứng.
+
+`git -C cay-kho diff --name-only b29da0b..HEAD` chỉ có `ops/bien_nhan_v2.py` và `ops/bien_nhan_v2_test.py`. `git diff --numstat b29da0b..HEAD`: **40/5** và **296/2** (thêm/xóa). `git diff --check b29da0b..HEAD` và `git diff --check` đều rc=0/không output; lệnh và kết quả lưu trong preflight.json.
+
+## ĐỐI CHIẾU LƯỢT TRƯỚC
+
+Không dùng lời khai executor hay verdict cũ làm bằng chứng pass. `python3 run_mutants_l6.py`, `run_old_findings.py`, `run_focused_l6.py`, và `summarize_l6.py` đều hoàn tất rc=0; script cuối kiểm các kết quả con bằng assertion ([bảng máy](evidence/review-summary.json)).
+
+| Lớp/biểu hiện | Phép đo trên head mới | Kết luận |
+|---|---|---|
+| P1, đầu tệp: no_clamp | `mutation_probe.py no_clamp --suite`: wrapper rc=0; suite con **rc=1**, 97/98 · 153/153 · 2/2, TỔNG: ĐỎ. Chỉ c88 `giet_that`, hàng ix đòi rc=1 được 0; c18 sạch, băm ổn định. | ĐÃ VÁ THẬT |
+| P1, đầu tệp: skip_first | `mutation_probe.py skip_first`: c88 `giet_that`, hàng v đòi 1 được 0; c18 sạch. Oracle 63/71 xác nhận hành vi mutant sai. | ĐÃ VÁ THẬT |
+| P1, citation dòng sau | `mutation_probe.py citation_drop_next`: c88 `giet_that`, hàng ii-b đòi 0 được 1, đúng L-SURFACE; c18 sạch. Oracle 65/71. | ĐÃ VÁ THẬT |
+| F1/P2, lỗi liệt kê thoát traceback | `review_new.py error-child head <kiem\|sinh> <stat-os\|access\|late>`: 6 tiến trình có hit, rc=2, không traceback; iterator yield rồi lỗi cũng được bắt. m147 bị c99 giết thật. | Vẫn đóng |
+| F2/P3, chốt ngoại lệ lập trình | `boundary_oracle.py head`: hai đường truyền đúng đối tượng RuntimeError, hit=1, restored=true; RuntimeError/ValueError qua CLI: rc=1, traceback. Focused m152/m153 bị c100 giết thật. | Vẫn đóng |
+| F3/P3, OSError ngoài PermissionError | `errno_probe.py head <mode> <site> <EIO\|ESTALE>`: **12/12** có đúng 1 hit, rc=2, không traceback. Tracer c99/c100 thấy OSError thuần errno=5; m154/m155 bị c100/c99 giết thật, c18 sạch. | Vẫn đóng |
+
+Log P1: [suite no_clamp](evidence/mut-no_clamp-suite.stdout), [rc/thời gian](evidence/mut-no_clamp-suite.json), [băm/đối chứng](evidence/mut-no_clamp-result.json), `evidence/wm-{no_clamp,skip_first,citation_drop_next}-result.json`. Log F1/F2/F3: `evidence/old-*`, `errno-*`, `boundary-head.*`, `trace-*`, `wm-m147*`, `wm-m154*`, `wm-m155*`, `focused-*`. Không tính lỗi giàn giáo hay ngoại lệ lập trình thành tín dụng giết.
+
+**Giới hạn lịch sử được làm rõ:** lượt 5 chỉ có bằng chứng toàn suite cho no_clamp; citation_drop_next khi ấy chỉ chạy toàn bộ 98 ca thường. Để kiểm câu chú thích mới “hai đột biến từng sống qua toàn suite”, lượt 6 chạy thêm `python3 historical_citation_suite.py` trên **3883b60** mang citation_drop_next: wrapper rc=0; suite con **rc=1, 98/98 · 150/151 · 2/2, TỔNG: ĐỎ**, băm mutant ổn định ([log](evidence/historical-citation-suite.stdout), [neo](evidence/historical-citation-integrity.json)). m85 báo **KHÔNG RĂNG / gian_giao**, mẫu ` or any(_RE_TRICH_DAN.search(x) for x in cua)` khớp 0 chỗ. Vì vậy citation_drop_next sống qua ca thường, nhưng không phải survivor của **toàn suite xanh**. Đây là lỗi giàn giáo m85, không phải bộ ca cũ bắt được hành vi citation; cũng không được đổi lỗi giàn giáo thành bằng chứng full-suite survivor. Phép đo bổ sung của lượt 6 không được gán ngược thành phép đo đã có ở lượt 5. Chú thích mới sai ở phạm vi bằng chứng này (P3 bên dưới).
+
+## C88 CỬA SỔ M4
+
+`python3 window_probe.py head --gate` qua measure.run: **rc=0**, `SUMMARY {"total":71,"direct_pass":71,"gate_pass":71,"failed":[]}` ([log](evidence/window-head.stdout)). Ma trận độc lập gồm khoảng cách −3…+3, đầu/cuối tệp, một/hai/ba dòng, dòng trắng/tab và nhiều khai báo. Chưa thấy sai hành vi sản phẩm trong tập này.
+
+`python3 c88_rows.py` rc=0: **10/10 hàng đúng, 10/10 phản chứng đảo rc, 10/10 giữ cùng rc khi thử lại tiền tố cũ** ([chi tiết](evidence/c88-rows.json)). Mỗi hàng được đo trực tiếp và qua kho git thật; rc=1 chỉ có L-SURFACE, rc=0 không lỗi/không chua_do. Bỏ tiền tố không làm hàng cũ xanh tình cờ vì lỗi khác:
+
+| Hàng | j (từ 0) | Điều kiện thực sự được đo | rc head → khi đổi riêng điều kiện |
+|---|---:|---|---|
+| i | 1 | provider dòng trước | 1 → 0 khi bỏ provider |
+| ii | 1 | citation dòng trước | 0 → 1 khi bỏ citation |
+| ii-b (mới) | 0 | citation dòng sau | 0 → 1 khi bỏ citation |
+| iii | 0 | không provider | 0 → 1 khi thêm provider cùng dòng |
+| iv | 1 | notprovider không khớp cả từ | 0 → 1 khi đổi thành provider |
+| v | 0 | provider dòng sau | 1 → 0 khi bỏ provider |
+| vi | 2 | provider trước hai dòng ở ngoài cửa sổ | 0 → 1 khi kéo về cách một dòng |
+| vii | 0 | provider sau hai dòng ở ngoài cửa sổ | 0 → 1 khi kéo về cách một dòng |
+| viii | 2 | citation trước hai dòng không miễn | 1 → 0 khi kéo về cách một dòng |
+| ix | 0 | citation sau hai dòng không miễn | 1 → 0 khi kéo về cách một dòng |
+
+`run_mutants_l6.py` chạy lại nguyên **40 cặp đột biến** lượt 5. Tất cả đối chứng c18 sạch, băm nguồn ổn định; [bảng đầy đủ](evidence/review-summary.json):
+
+| Nhóm | Số | Kết quả |
+|---|---:|---|
+| 24 cặp cận trái/phải khác cửa sổ đúng | 24 | c88 giet_that |
+| Mọi dòng trước/sau/toàn tệp, loại dòng trắng, bỏ dòng khai ở EOF | 5 | c88 giet_that |
+| Nới riêng provider hoặc citation ra trước/sau hai dòng | 4 | c88 giet_that |
+| Bỏ provider cùng dòng, bỏ citation dòng trước | 2 | c88 giet_that |
+| no_clamp, skip_first, citation_drop_next | 3 | c88 giet_that |
+| citation_drop_self | 1 | SỐNG tại c88, **c79 giet_that**; không phải lỗ hổng của cả bộ ca |
+| reverse_equivalent | 1 | SỐNG, oracle 71/71; tương đương vì đảo thứ tự không đổi hai phép any |
+
+Tổng: **38 bị c88 giết + 1 bị c79 giết + 1 tương đương**. Tập hữu hạn này không được tuyên bố là vét cạn mọi biểu thức hay mọi nội dung verdict.
+
+## Đột biến mới của reviewer
+
+`python3 new_probe_l6.py <tên>` qua run_mutants_l6, mỗi tên một tiến trình; cả **14 phép** hoàn tất rc=0, đối chứng sạch, băm ổn định. Patch và dữ liệu: `evidence/new-*.patch/.json`, lệnh/rc: `newrun-*.json`.
+
+| Phần thử | Số | Kết quả và lý do survivor |
+|---|---:|---|
+| Chỉ số âm cuộn về EOF; clamp ở 1; đòi đủ ba dòng; bỏ citation cuối vô điều kiện; chỉ citation dòng sau/cùng dòng; bỏ provider dòng sau; chỉ provider cùng dòng | 8 | Đều c88 giet_that; oracle chỉ 56–69/71 |
+| Chặn cận phải bằng min(len, j+2); loại dòng trùng trong cửa sổ | 2 | **SỐNG, tương đương**; ba ca qua, oracle 71/71. Slice vốn tự chặn cận phải; loại bản sao không đổi any |
+| Khôi phục tiền tố cũ; thêm một dòng trắng trước fixture | 2 | c88 riêng vẫn qua, nhưng **m156 KHÔNG RĂNG**, m157 vẫn giet_that |
+| Bỏ hàng ii-b; đổi ii-b thành citation dòng trước | 2 | c88 riêng vẫn qua, nhưng **m157 KHÔNG RĂNG**, m156 vẫn giet_that |
+
+Bốn phép cuối là đột biến vào test: sống qua ca thường nhưng bị bảng đột biến bắt. Không gán kết quả focused đó thành kết quả toàn suite.
+
+## Giải xung đột và áp HINT
+
+`python3 audit_l6.py` **rc=0**, `AUDIT ASSERTIONS PASS` ([JSON](evidence/merge-audit-l6.json)):
+
+- Merge-base e9e0048/b29da0b là `757bde561d09738858506aecf5de2f050a5f0d5e`. `git merge-file -p` phát đúng **một** conflict; giữ cả hai thân + chuẩn hóa tên ca/đích m142/docstring c99 cho kết quả **khớp byte 3883b60**.
+- Áp nguyên HINT bằng `patch -p1` lên blob test của 3883b60: rc=0. So head chỉ còn docstring/chú thích; AST thực thi giống nhau ([delta](evidence/hint-vs-head.patch)). Sản phẩm nguyên byte qua e9e0048/3883b60/head.
+- Ca/đăng ký đột biến: e9e0048 **97/153**, b29da0b **95/139**, 3883b60 **98/153**, head **98/155**. Không mất hàm/đăng ký từ hai cha, không trùng tên/số ca, tên c98_chon_bien_nhan cũ không còn. 155 ở head gồm 153 thường và 2 tự kiểm, được suite xác nhận.
+
+`python3 run_focused_l6.py` **rc=0**: m140–m157 chạy riêng **18/18**, mỗi log có đúng một hàng `giet_that` và `ASSERTIONS PASS`; m156/m157 đích c88, có đối chứng. Bốn lượt tiêm AttributeError vào ca đích m142/m147/m154/m155 đều **KHÔNG RĂNG**, `tin_dung_gia`, có tên ngoại lệ và vị trí ném (`focused_merge.py ... in reviewer_throw`). Dây báo lỗi #1037 còn hoạt động ([log driver](evidence/run-focused-l6.stdout)).
+
+## Bảng tiêu chí
+
+| Tiêu chí | Kết quả | Lệnh / output quyết định |
+|---|---|---|
+| Neo/phạm vi | ĐẠT | preflight.py; exact head/spec/tree, hai tệp, diff-check rc=0 |
+| C1a | ĐẠT phần đã đo; Windows KHÔNG ĐO ĐƯỢC | probe.py head behaviors: hai YAML hợp lệ sai schema rc=1/tổng 2/nêu x; chỉ x rc=1/tổng 1/không báo rỗng; m142 so đuôi chính xác bị c101 giết thật |
+| C1b | ĐẠT phần đã đo; Windows KHÔNG ĐO ĐƯỢC | Cùng driver: YAML hỏng đuôi hoa rc=2, stderr nêu x.RECEIPT.YAML, không Traceback; m142 chết c101 |
+| C2 | ĐẠT phần đã đo; Windows KHÔNG ĐO ĐƯỢC | c89 qua trong suite; mutation_probe.py m143 thêm is_file → c89 giet_that, c18 sạch |
+| C3 | ĐẠT | mutation_probe.py glob: c101/c99 giet_that, c18 sạch. c100 gian_giao vì không gọi iterdir, KHÔNG tính làm tín dụng |
+| C4 Windows CI | KHÔNG ĐO ĐƯỢC | Không có đo độc lập jobs/labels/runner/log trên exact head |
+| C5 Ubuntu CI | KHÔNG ĐO ĐƯỢC | Suite trong sandbox không chứng minh job CI exact head |
+| C6 | ĐẠT | head/base chạy python3 ops/bien_nhan_v2.py --root .: rc=0, tổng 306, TỔNG: ĐẠT; os.listdir đếm riêng casefold=306/exact=306 |
+| C7 Windows local | KHÔNG ĐO ĐƯỢC | Không chạy Windows local; không suy pass từ lời khai executor |
+| C8 nội dung review | KHÔNG ĐẠT | Còn 1 P3 ở chú thích mới; request_changes neo exact head. Không xác nhận các điều kiện CI/land chưa đo; trần lượt 6 theo chỉ thị hiện hành |
+| C9 | ĐẠT | Ruff F head/base cùng một F541 cùng nội dung dòng: **đỏ sẵn, delta=0**; doctrine rc=0, 10 tệp/0 chỗ; diff-check rc=0; rg glob rc=1/0 dòng; numstat 40/5 và 296/2 |
+| Toàn suite head | ĐẠT | head-suite-final: rc=0, 372.70s, **98/98 · 153/153 · 2/2**, TỔNG: ĐẠT; stderr rỗng |
+| C88/M4 | ĐẠT tập đã đo | 71/71 trực tiếp và git thật; 40 mutant phân loại đủ; no_clamp chết qua toàn suite |
+
+Log C1: `evidence/head-behaviors.*`, `fixture-head-{c1a,only-x,c1b}.*`. C6/C9: `head-gate.*`, `base-gate.*`, `receipt-count.*`, `head-ruff.*`, `base-ruff.*`, `ruff-delta.json`, `head-doctrine.*`, `base-doctrine.*`, `no-glob.*`. Lệnh Ruff là `python3 -m ruff check --no-cache --select F --output-format json ops/bien_nhan_v2.py ops/bien_nhan_v2_test.py`; doctrine là `python3 .claude/dev/packet_loop.py doctrine-scan --root .`. Không gọi Ruff sạch tuyệt đối. C9 vế âm dùng `rg -n 'glob\("\*\.receipt\.yaml"\)' ops/bien_nhan_v2.py`; vế dương là C1a/C1b ở trên.
+
+## Bảng finding
+
+**Finding mở: 1. Tổng P0=0, P1=0, P2=0, P3=1.**
+
+- [P3] chu-thich-nang-ca-thuong-thanh-toan-suite: `ops/bien_nhan_v2_test.py:4760` — `python3 historical_citation_suite.py` — suite con rc=1, 98/98 · 150/151 · 2/2, TỔNG: ĐỎ; m85 gian_giao do mẫu khớp 0 chỗ — sửa chú thích để tách no_clamp (từng sống qua toàn suite) với citation_drop_next (từng qua đủ 98 ca thường). Đây là lỗi mô tả bằng chứng mới được thêm ngoài HINT, không phải lỗi runtime hay mở lại P1.
+
+  HÌNH DẠNG: `khac`.
+
+  **Hướng vá cụ thể:** [HINT-LUOT6.patch](HINT-LUOT6.patch) thay đúng một dòng chú thích bằng: `# #1021 Codex lượt 5: no_clamp từng SỐNG qua toàn suite; citation_drop_next từng qua đủ 98 ca thường.` `python3 comment_hint_l6.py` rc=0: git apply --check và git diff --check đều rc=0; AST thực thi không đổi, bản sao đã phục hồi ([bằng chứng](evidence/comment-hint.json)). Patch chỉ được thử trong sandbox, chưa áp vào checkout được review.
+
+  **Cách kiểm và rủi ro vá:** không thêm test runtime cho một chú thích; đối chiếu N/N/cờ gian_giao với log lịch sử và kiểm patch/AST như trên. Giữ nguyên các ca và m156/m157 đã xanh. Chỉ sửa chữ thì không đổi hành vi; tránh chạm mẫu neo, target hoặc đăng ký đột biến khi áp.
+
+- [P1 — ĐÃ ĐÓNG] bien-ngoai-cua-so-surface-chua-co-rang: `ops/bien_nhan_v2_test.py:2981`, hàng ii-b tại `:2994`, bỏ prefix tại `:3005`, đăng ký tại `:4761`/`:4765` — `mutation_probe.py no_clamp --suite`, `skip_first`, `citation_drop_next` — c88 giet_that; no_clamp toàn suite rc=1/97 trên 98 ca, chỉ c88 đỏ — hướng vá lượt 5 đã được áp và kiểm: fixture chạm j=0, citation ngay sau, m156/m157 khóa hai chốt. Không yêu cầu vá thêm.
+
+  HÌNH DẠNG: `bo-chon-ung-vien` (lớp lịch sử đã đóng).
+
+F1/F2/F3 lịch sử có hình dạng `loi-do`, vẫn đóng theo bảng đối chiếu. P3 mới chỉ là câu mô tả sai phạm vi bằng chứng; không tạo finding runtime cho lỗi giàn giáo m85, mutant tương đương, ENOSPC hay phần nền không đo được.
+
+## Toàn vẹn và giới hạn bằng chứng
+
+`python3 summarize_l6.py` rc=0: `PASS: 40 windows (38 c88, 1 c79, 1 equivalent); 6 selector mutations; 18 focused real + 4 fake; F1/F2/F3; C1/C6/C9; 14 new probes`.
+
+`python3 validate_l6_final.py` rc=0: `FINAL ASSERTIONS PASS: 4 clean full trees; exact head/spec/hint; all suite counts; no_clamp killed by c88; historical citation NOT a full-suite survivor` ([snapshot](evidence/final-validation.json)). `cay-kho`, `work/head`, `work/mutation`, `work/focus` về exact head/tree dòng đầu, tracked/untracked/ignored sạch, worktree/index diff rỗng; hai tệp nguồn khớp blob HEAD; .git là thư mục, không nông, core.abbrev=7. Snapshot cuối không được dùng để tuyên bố toàn bộ lịch sử ghi trong lúc chạy.
+
+Script kế thừa được chép ra gốc sandbox để ROOT neo đúng. Chỉ `mutation_probe.py` được chỉnh để nhận `REVIEW_MUTATION_TREE`/`REVIEW_MUTATION_PREFIX`, giữ nguyên byte toàn bộ 40 định nghĩa đột biến và oracle; dùng `run_mutants_l6.py` thay driver sao chép cũ. `audit_l6.py` tái dựng merge tại 3883b60 rồi áp HINT trước khi so head. Không chạy `hint_probe.py create` vì hint đã áp. Các script nguyên bản trong luot5-probe không sửa. `work/focus` là clone local đủ cây, object git bất biến hardlink theo clone local; nguồn có bản riêng. Đã ghim origin/master và origin/HEAD về b29da0b cho bản clone này.
+
+Sự cố hạ tầng được giữ riêng: lần sao work/focus đầu và audit scratch gặp ENOSPC; suite head đầu ra 97/98 do **c42 OSError ENOSPC**; suite no_clamp đầu bị cắt ngang/log dở. Các log `infra-initial-*` không được tính làm kết quả sản phẩm. Đã bỏ bản sao dở và bản base sau khi lưu C6/C9; suite head và no_clamp chạy lại đầy đủ, cho kết quả dùng ở trên. Bằng chứng tăng dần trước bản tổng hợp được giữ tại `evidence/VERDICT-progress.md`.
+
+Windows CI/local, Ubuntu CI exact head: **KHÔNG ĐO ĐƯỢC**. Không cấp quyền merge/land.
+<!-- VERDICT-L6-KET-THUC -->
+
+### Lượt 7 — sha256 `181946a7e31be93140bf45fa35fb3e207d2c8f263bddca24ec504acca00d1a10`
+
+<!-- VERDICT-L7-BAT-DAU -->
+Verdict: request_changes
+Reviewed commit: c8a493c0bb8afe0cfb8448e9220b661ed0f6aaa8
+Spec sha256: d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+
+P3 lượt 6 **ĐÃ VÁ THẬT**. Còn **1 P3 mới phát hiện trong diff tổng thể**: docstring `_hoi_trang_thai` trỏ sai ca kiểm tra lỗi lập trình (`c99` thay vì `c100`). Do ngưỡng yêu cầu không còn bất kỳ P0/P1/P2/P3 nào, verdict là **request_changes**. Không phát hiện lỗi runtime mới trong các phép đo dưới đây.
+
+Suite: **98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt, TỔNG: ĐẠT**. Sáu đột biến chỉ định đều chết đúng ca đích. C6/C9 đạt theo tiêu chí delta. Windows CI/local và Ubuntu CI trên exact head: **KHÔNG ĐO ĐƯỢC**. Verdict này không cấp quyền merge/land.
+
+## Neo và cách tái hiện
+
+Từ gốc sandbox: `PYTHONDONTWRITEBYTECODE=1 python3 measure_l7.py preflight`, `python3 measure_l7.py history`, `python3 measure_l7.py pipeline`. Driver ghi command, cwd, rc, thời gian và băm stdout/stderr trong `evidence/<tên>.json`; stdout/stderr được lưu riêng. Mọi tiến trình đo con dùng `PYTHONDONTWRITEBYTECODE=1 PYTHONUTF8=1 PYTHONIOENCODING=utf-8 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null`. Các lệnh suite, cổng, Ruff, doctrine và rg chạy tại `cay-kho/`. Các probe dùng cơ chế `_dot_bien_tep` của suite; không sao chép toàn cây kho.
+
+`python3 measure_l7.py preflight` rc=0 ([kết quả](evidence/preflight.json)): HEAD `c8a493c0bb8afe0cfb8448e9220b661ed0f6aaa8`, cha `691cb65388e71afb825aeba3b5cbc5359fc4dac5`, base `b29da0bfe3bfb7a7be69136a1c5c40f82c088a93`, tree `5ea6194cbf993b93521a01f269f2b446f4b1cf2a`. `.git` là thư mục, `git rev-parse --is-shallow-repository` → `false`; trạng thái tracked/untracked/ignored sạch, nguồn khớp blob HEAD. SPEC khớp băm dòng 3; HINT sha256 `fc52cb294ec8eba18038ffa00f95626e4de45b74d79360c79f7282ece7c3e202`. Hai tệp DIFF đầu vào khớp byte với git diff tương ứng.
+
+## ĐỐI CHIẾU LƯỢT TRƯỚC
+
+| Finding/phạm vi trước | Phép đo, output | Kết luận |
+|---|---|---|
+| P3 `chu-thich-nang-ca-thuong-thanh-toan-suite`, lượt 6 / 691cb65 | `measure_l7.py preflight`: thay đúng một dòng theo HINT trong blob cha cho kết quả khớp byte HEAD. `measure_l7.py history`: kiểm log gốc lượt 5–6 bằng assertion, rc=0. | **ĐÃ VÁ THẬT** |
+| P1 `bien-ngoai-cua-so-surface-chua-co-rang` / c88 | AST hai tệp giống hệt 691cb65. Suite sạch; `_dot_bien(chi={m156})` và `chi={m157}` đều `giet_that` tại c88, đối chứng c18 sạch. | Giữ kết luận **ĐÃ VÁ THẬT** của lượt 6; không mở lại P1. |
+| F1/P2 `loi-do-liet-ke-thu-muc-thoat-traceback` | AST không đổi; m147 chết tại c99; m154 chết tại c100; suite sạch. | Vẫn đóng trong phạm vi đã đo. |
+| F2/P3 `loi-do-thieu-chot-ngoai-le-lap-trinh` | AST không đổi; c100 và m152/m153 đạt trong suite. Probe bổ sung m153 bị c100 giết thật vì RuntimeError bị nuốt, c18 sạch. | Vẫn đóng về hành vi; finding mới bên dưới chỉ là tham chiếu docstring sai. |
+| F3/P3, bắt OSError ngoài PermissionError | AST không đổi; m154/m155 chết đúng c100/c99 với errno=5. | Vẫn đóng. |
+| Giải xung đột #1037 | `git diff 691cb65..HEAD` chỉ đổi một dòng chú thích; AST hai tệp giống hệt; c98 và toàn suite qua, m142 vẫn nhắm c101. | Giữ kết luận hành vi của lượt 6. Không chạy lại riêng toàn bộ thí nghiệm tiêm lỗi báo cáo của lượt 6. |
+
+Lệnh đối chiếu AST: driver gọi `ast.dump(ast.parse(git show <rev>:<file>), include_attributes=False)` cho cả hai tệp ở HEAD và 691cb65, so chuỗi bằng nhau, lưu băm AST trong [preflight.json](evidence/preflight.json). `git diff --numstat 691cb65..HEAD` tương ứng 1 thêm/1 xóa chỉ trong chú thích trên m156. Chú thích hiện tại tại `ops/bien_nhan_v2_test.py:4760` là: “no_clamp từng SỐNG qua toàn suite; citation_drop_next từng qua đủ 98 ca thường.”
+
+`python3 measure_l7.py history` rc=0 ([audit và provenance](evidence/history-audit.json)): log lượt 5 của no_clamp có rc=0, **98/98 · 151/151 · 2/2, TỔNG: ĐẠT**; hiện vật citation_drop_next ghi **98/98 ca thường**, không lỗi. Phép đo bổ sung lượt 6 trên 3883b60 có rc=1, **98/98 · 150/151 · 2/2, TỔNG: ĐỎ**, m85=`gian_giao` vì mẫu không khớp. Câu mới tách đúng hai phạm vi. Đây là đối chiếu lại hiện vật lịch sử, không gán chúng thành lần chạy mới trên HEAD.
+
+Kết quả 71/71 M4, 40 mutant biên, no_clamp toàn suite đỏ, và phép đo F1/F2/F3 sâu của [lượt 6](VERDICT-LUOT6.md) được **kế thừa theo chỉ thị**, dựa trên AST bất biến; không khai đã chạy lại chúng ở lượt 7. Tập lớp mở lượt 6 có 1, đóng được 1; thêm 1 lớp P3 được phát hiện lượt này.
+
+## Bảng tiêu chí
+
+| Tiêu chí | Kết quả | Lệnh / output quyết định |
+|---|---|---|
+| Neo và write set | ĐẠT | `git diff --name-only b29da0b..HEAD` → đúng `ops/bien_nhan_v2.py`, `ops/bien_nhan_v2_test.py`; `preflight` rc=0. |
+| C1a/C1b | ĐẠT phần đã đo; Windows KHÔNG ĐO ĐƯỢC | c101 qua trong suite và đối chứng sạch của `probe_l7.py glob`; m142 chết đúng c101 với tổng 1 thay vì 2. Ba nhánh ca giữ nguyên AST so lượt 6. |
+| C2 | ĐẠT phần đã đo; Windows KHÔNG ĐO ĐƯỢC | `suite.stdout`: c89 ĐẠT, m143 lọc is_file bị c89 `giet_that` / CÓ RĂNG. |
+| C3 | ĐẠT | `python3 probe_l7.py glob` rc=0: c101 sạch=`qua`, mutant glob=`giet_that`, tổng=1; c18 sạch; nguồn ổn định, temp dọn sạch ([log](evidence/glob-probe.stdout)). |
+| C4 Windows CI | KHÔNG ĐO ĐƯỢC | Không có phép đo độc lập jobs/labels/runner/log trên exact head; không suy pass từ lời khai đang chạy. |
+| C5 Ubuntu CI | KHÔNG ĐO ĐƯỢC | Lần chạy suite tại đây không chứng minh job CI exact head. |
+| C6 | ĐẠT | `python3 ops/bien_nhan_v2.py --root .` rc=0, tổng 306, TỔNG: ĐẠT; đếm riêng os.listdir/name.lower().endswith = 306. |
+| C7 Windows local | KHÔNG ĐO ĐƯỢC | Theo chỉ thị lượt 7; không sử dụng lời khai executor làm bằng chứng. |
+| C8 nội dung review | KHÔNG ĐẠT | Còn 1 P3 mới; exact reviewed SHA đúng. Trần lượt 7 theo chỉ thị hiện hành. Không xác nhận điều kiện land/CI còn thiếu. |
+| C9 | ĐẠT | Đúng hai tệp; hai diff-check rc=0; Ruff F head/base delta=0; doctrine rc=0; rg glob rc=1/0 dòng. |
+| Toàn suite | ĐẠT | rc=0, 396.308 giây, 98/98 · 153/153 · 2/2, TỔNG: ĐẠT; stderr rỗng. |
+| Sáu đột biến chạy riêng | ĐẠT | `python3 probe_l7.py focused` rc=0; 6/6 `giet_that` đúng ca đích, 6/6 đối chứng sạch; chi tiết dưới đây. |
+
+Log suite: [stdout](evidence/suite.stdout), [command/rc](evidence/suite.json). Output cuối nguyên văn:
+
+```text
+bien_nhan_v2_test: 98/98 ca đạt · 153/153 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 135/153 đột biến thường khai đối chứng
+TỔNG: ĐẠT
+```
+
+C6: [stdout](evidence/gate.stdout), [command/rc](evidence/gate.json), [đếm độc lập](evidence/receipt-count.json):
+
+```text
+bien_nhan_v2: 253 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 306
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐẠT
+```
+
+Lệnh đếm độc lập tương đương: `python3 -c 'import os; print(sum(n.lower().endswith(".receipt.yaml") for n in os.listdir("ops/reviews")))'` → **306**. Không lọc is_file.
+
+C9: `git diff --numstat b29da0b..HEAD` → **40/5** ở sản phẩm, **296/2** ở test. `git diff --check` và `git diff --check b29da0b..HEAD` → rc=0, stdout/stderr rỗng. `rg -n 'glob\("\*\.receipt\.yaml"\)' ops/bien_nhan_v2.py` → rc=1, 0 dòng.
+
+Ruff `ruff 0.15.15`: `python3 -m ruff check --no-cache --select F --output-format json ops/bien_nhan_v2.py ops/bien_nhan_v2_test.py` → rc=1, **1 lỗi**; base cũng **1 lỗi**. Base lấy từng blob bằng `git show b29da0b:<path>` và lint stdin bằng cùng config, cùng `--select F --stdin-filename <path>`. Chuẩn hóa theo path/code/message/nội dung dòng: thêm 0, mất 0 ([delta](evidence/ruff-delta.json)). Đây là **delta đạt**, không phải Ruff sạch tuyệt đối.
+
+Doctrine: `python3 .claude/dev/packet_loop.py doctrine-scan --root .` rc=0 ([log](evidence/doctrine.stdout)):
+
+```text
+doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+```
+
+## Sáu đột biến yêu cầu
+
+`python3 probe_l7.py focused` gọi riêng `_dot_bien(chi={tên_đầy_đủ})` cho từng tên, kiểm đúng một hàng kết quả, `dat=true`, `tt=giet_that`, có đối chứng và không phải ca tự kiểm. Mọi đối chứng chạy khi mutant còn hiệu lực theo cơ chế suite. Băm nguồn trước/sau không đổi, module/CONG phục hồi và danh sách temp rỗng. [Output](evidence/focused.stdout), [bảng máy](evidence/focused-results.json).
+
+| Đột biến | Ca đích | Kết quả | Assertion đầu tiên |
+|---|---|---|---|
+| `m142_chon_bien_nhan_so_duoi_CHINH_XAC` | `c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen` | `giet_that`; CÓ RĂNG; c18 sạch | `C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=1: 'òi 2 · thiếu/r` |
+| `m147_bo_chon_bo_bat_OSError` | `c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE` | `giet_that`; CÓ RĂNG; c18 sạch | `[]: CLI chết bằng PermissionError: [Errno 13] Permission denied (tiêm, #1021): '` |
+| `m154_hoi_trang_thai_chi_bat_PermissionError` | `c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang` | `giet_that`; CÓ RĂNG; c18 sạch | `[]: CLI chết bằng OSError: [Errno 5] I/O error (tiêm, #1021) — đòi mã thoát, khô` |
+| `m155_bo_chon_chi_bat_PermissionError` | `c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE` | `giet_that`; CÓ RĂNG; c18 sạch | `[]: CLI chết bằng OSError: [Errno 5] I/O error (tiêm, #1021): '/tmp/tmpxd6vy39i/` |
+| `m156_B4_bo_chan_bien_dau_tep` | `c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan` | `giet_that`; CÓ RĂNG; c18 sạch | `ix-trich-dan-sau-hai-dong: đòi rc=1, được 0: loi=[] chua=[]` |
+| `m157_B4_trich_dan_bo_dong_sau` | `c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan` | `giet_that`; CÓ RĂNG; c18 sạch | `ii-b-trich-dan-dong-sau: đòi rc=0, được 1: loi=["[L-SURFACE] r.receipt.yaml: ver` |
+
+## Bảng finding
+
+**Finding mở: 1. P0=0, P1=0, P2=0, P3=1.**
+
+| Slug lớp | Mức | Vị trí | Trạng thái |
+|---|---|---|---|
+| `chu-thich-nang-ca-thuong-thanh-toan-suite` | P3 lịch sử | test:4760 | ĐÃ VÁ THẬT |
+| `chu-thich-tro-sai-ca-ngoai-le-lap-trinh` | P3 | sản phẩm:90 | MỚI PHÁT HIỆN, còn mở |
+
+- [P3] chu-thich-tro-sai-ca-ngoai-le-lap-trinh: `ops/bien_nhan_v2.py:90` — `PYTHONDONTWRITEBYTECODE=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null python3 probe_l7.py comment-probe` — wrapper rc=0; c99/c100 trên nguồn sạch đều `qua`; cùng mutant m153 nới `_hoi_trang_thai` từ bắt OSError sang Exception: **c99 vẫn qua**, **c100 giet_that**, chi tiết “lỗi lập trình ở is_dir [] bị nuốt/đổi: đòi RuntimeError mốc đi thẳng ra, được không ngoại lệ”; c18 sạch — đổi đúng tham chiếu `c99` thành `c100` trong docstring.
+
+  HÌNH DẠNG: `khac`.
+
+  Docstring hiện gán thuộc tính “lỗi lập trình phải đi thẳng ra” cho “c99 chốt 7”, nhưng c99 không canh thuộc tính này. Người bảo trì chạy ca được chỉ dẫn có thể nhận xanh dù đã nuốt lỗi lập trình; probe trên đã tái hiện đúng tình huống đó. Chốt 7 nằm trong `c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang` tại test:3830 và mutant m153 đăng ký ca này tại test:4820. Đây là lỗi tham chiếu bằng chứng trong diff #1021 tổng thể, đã tồn tại trước commit lượt 7; không phải hồi quy do sửa chú thích m156 và không phủ nhận F2 đã được vá về hành vi. [Kết quả chi tiết](evidence/comment-probe-results.json), [lệnh/rc](evidence/comment-probe.json), [đối chiếu lịch sử](evidence/comment-rename-history.json).
+
+  Gợi ý vá chỉ thay chữ `c99` bằng `c100` ở vị trí nêu trên. Không sửa kho trong lượt review này. Bản probe dùng bản sao tạm đúng tệp nguồn qua `_dot_bien_tep`; đã kiểm băm nguồn không đổi và dọn bản tạm.
+
+## Kiểm tra cuối và giới hạn
+
+`PYTHONDONTWRITEBYTECODE=1 python3 finalize_l7.py` kiểm các rc, mẫu số, đích mutant, delta Ruff, head/spec và snapshot bằng assertion; output **FINAL ASSERTIONS PASS** ([kết quả](evidence/final-validation.json)). Snapshot đầu/cuối giống nhau về HEAD/tree, index, nội dung hai tệp nguồn, diff staged/unstaged và trạng thái tracked/untracked/ignored. Điều này chứng minh không có delta quan sát được ở hai mốc, không dùng để suy toàn bộ lịch sử ghi. Các bản tạm do probe tạo đều được dọn; chỉ giữ script và log bằng chứng trong sandbox. Bản cập nhật tăng dần trước tổng hợp được giữ tại [VERDICT-progress.md](evidence/VERDICT-progress.md).
+
+Windows CI/local, Ubuntu CI exact head: **KHÔNG ĐO ĐƯỢC**. Không cấp quyền merge/land.
+<!-- VERDICT-L7-KET-THUC -->

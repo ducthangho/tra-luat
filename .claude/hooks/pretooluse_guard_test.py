@@ -912,15 +912,18 @@ def t52_ten_lenh_tl_phai_KHOP_danh_sach_DOC(g):
     """WP1038 S5 (F04 noi dong · F06 extglob · F05 chan oan Unicode): ten la/manh => deny; lenh doc tieng Viet => allow."""
     nl, bs = chr(10), chr(92)
     tu_choi = ["agent-creds-ex%s%sec --claude -- x" % (bs, nl), "--pro%s%sfile locate agent-creds-exec --claude" % (bs, nl),
-               "@(agent-creds-exec) --claude -- x", "agent-creds-@(exec) --claude", "+(recat) x"]
+               "@(agent-creds-exec) --claude -- x", "agent-creds-@(exec) --claude", "+(recat) x",
+               "--profile a#b agent-creds-exec --claude -- x", "hygiene --profile scan plan"]   # F07 · F08
     cho_phep = ['--config "Qu\u1ed1c h\u1ed9i/c.json" profile-list --json', "--profile lu\u1eadt profile-list",
-                "hygiene scan", "hygiene --help", "--help"]
+                "hygiene scan", "hygiene --help", "--help", "hygiene --profile plan scan", "profile-list # ghi chu"]
     xau = [("LOT " if m == "deny" else "CHAN OAN ") + "%s: %s" % (a, c)
            for a in AGENT for ds, m in ((tu_choi, "deny"), (cho_phep, "allow")) for c in ds
            if hoi(g, "python scripts/tl.py " + c, a)[0] != m]
     if hoi(g, "git log %s%s --oneline -3" % (bs, nl), AGENT[0])[0] != "allow":
         xau.append("CHAN OAN git log noi dong")
-    tong = len(AGENT) * (len(tu_choi) + len(cho_phep)) + 1
+    if hoi(g, "python scripts/tl.py locate a%s%s%spython scripts/tl.py recat x" % (bs, bs, nl), AGENT[0])[0] != "deny":
+        xau.append("LOT: `\\\\`+xuong dong la TACH lenh, khong phai noi dong")
+    tong = len(AGENT) * (len(tu_choi) + len(cho_phep)) + 2
     return (not xau, "danh sach lenh DOC -> dung %d/%d" % (tong - len(xau), tong) + ("; %s" % xau if xau else ""))
 
 
@@ -1075,8 +1078,11 @@ DOT_BIEN = [
     ("m38_bo_chot_THAYTHE_o_vung_ten_lenh_tl",
      ' or "THAYTHE" in a]', ']'),
     ("m39_bo_chot_danh_sach_lenh_DOC", " and ten not in _TL_LENH_DOC | _TL_LENH_GHI | _TL_LENH_GHI_LONG:", " and False:"),
-    ("m40_noi_dong_bang_dau_cach", 'cmd = re.sub(r"\\\\\\n", "", cmd)', 'cmd = re.sub(r"\\\\\\s*\\n", " ", cmd)'),
+    ("m40_noi_dong_bang_dau_cach", 'r"(?<!\\\\)((?:\\\\\\\\)*)\\\\\\n", r"\\1"', 'r"\\\\\\s*\\n", " "'),
     ("m41_vung_ten_chi_ASCII", '[\\w./\\\\:=+@ -]*\\Z', '[A-Za-z0-9_./\\\\:=+@ -]*\\Z'),
+    ("m44_noi_dong_ca_khi_cheo_nguoc_bi_escape", 'r"(?<!\\\\)((?:\\\\\\\\)*)\\\\\\n", r"\\1"', 'r"\\\\\\n", ""'),
+    ("m42_shlex_cat_comment_giua_tu", '        lex.commenters = ""', '        lex.commenters = "#"'),
+    ("m43_bo_gia_tri_co_global_sau_ten_cha", " or a in _TL_CO_GLOBAL_AN_GIA_TRI else 1", " else 1"),
     ("m33_siet_lai_isdigit_cho_co_ngan",
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):',
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep\n'

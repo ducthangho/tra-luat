@@ -540,9 +540,9 @@ def _tach_lenh_tl(doi, kich):
         if a.startswith("-"):
             if "=" in a or a in _TL_CO_GLOBAL_CO_DON:
                 k += 1
-            else:
-                k += 2 if not ra else 1     # co global an gia tri; sau khi da co ten lenh
-            continue                         # thi co la cua chinh lenh do, khong tieu bua
+            else:   # WP1038 F08: co global AN GIA TRI duoc ca sau ten cha LONG — gia tri khong phai ten con
+                k += 2 if not ra or a in _TL_CO_GLOBAL_AN_GIA_TRI else 1
+            continue                         # co la sau ten lenh la cua chinh lenh do, khong tieu bua
         ra.append(a)
         k += 1
     return ra
@@ -738,7 +738,9 @@ def _kiem_lenh_agent(cmd, sau=0):
     # `shlex` voi whitespace_split NUOT xuong dong, nen "echo hi\ncp a b" gop thanh MOT doan va
     # chi chuong trinh DAU duoc kiem — do 2026-08-26: lenh ghi o dong 2 di LOT. Tach TRUOC khi
     # tokenize. Gop dong noi bang dau cheo nguoc truoc, keo "git log \\\n --oneline" bi cat doi.
-    cmd = re.sub(r"\\\n", "", cmd)   # WP1038 F04: Bash BO cap `\` + xuong dong (noi lien tu), khong thay bang dau cach
+    # WP1038 F04: Bash BO cap `\` + xuong dong (noi lien tu, khong thay bang dau cach) — chi khi `\` ay KHONG bi escape:
+    # `a\\` + xuong dong la doi so `a\` roi TACH LENH, noi vao la gop lenh sau thanh doi so cua lenh truoc.
+    cmd = re.sub(r"(?<!\\)((?:\\\\)*)\\\n", r"\1", cmd)
     if "\n" in cmd:
         for dong in cmd.split("\n"):
             if dong.strip():
@@ -756,6 +758,7 @@ def _kiem_lenh_agent(cmd, sau=0):
     try:
         lex = shlex.shlex(con_lai, posix=True, punctuation_chars=True)
         lex.whitespace_split = True
+        lex.commenters = ""   # WP1038 F07: shlex cat comment o `#` GIUA tu, Bash thi khong; giu het token => chi chat hon
         toks = list(lex)
     except ValueError:
         return "khong tach duoc chuoi lenh (trich dan lech)"

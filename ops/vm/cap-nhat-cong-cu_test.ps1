@@ -306,6 +306,10 @@ elif a and a[0] == 'auth':
         foreach ($e in "$g/Tools/Python312/python.exe", "$g/Tools/npm/claude.cmd", "$g/Tools/npm/codex.cmd", "$g/PF/nodejs/npm.cmd", "$g/nlm/Scripts/python.exe", "$g/nlm/Scripts/nlm.exe", "$g/venv/Scripts/python.exe") {
             [IO.File]::WriteAllText($e, $shim); & chmod +x $e
         }
+        # Phản chứng thật: fixture đã tạo venv đầy đủ, rồi làm mất prerequisite trước khi chạy hàm sản phẩm.
+        if ($CheDo -eq 'nlm-thieu-python') { Remove-Item -LiteralPath "$g/nlm/Scripts/python.exe" -Force }
+        if ($CheDo -eq 'nlm-thieu-venv') { Remove-Item -LiteralPath "$g/nlm" -Recurse -Force }
+        if ($CheDo -eq 'venv-kho-thieu') { Remove-Item -LiteralPath "$g/venv" -Recurse -Force }
         $npmGia = "$g/PF/nodejs/npm.cmd"
         # npm CÓ lúc Test-Path rồi BIẾN MẤT trước lúc gọi ⇒ `& $npm` ném CommandNotFoundException, không đặt $LASTEXITCODE.
         function Test-Path { param($LiteralPath)
@@ -352,6 +356,26 @@ if (-not $IsWindows) {
         # stdout có version hợp lệ vẫn không đủ khi chính --version exit9; pip và storage đều rc0.
         $k = Invoke-NguoiDungGia 'nlm-version-hong'
         -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_chikiem_nlm_thieu_python_phai_ghi_loi' {
+        $k = Invoke-NguoiDungGia 'nlm-thieu-python' -Kiem
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_chikiem_nlm_thieu_venv_phai_ghi_loi' {
+        $k = Invoke-NguoiDungGia 'nlm-thieu-venv' -Kiem
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_cai_that_nlm_thieu_venv_cung_la_loi' {
+        # Khác HINT lượt 7 (giữ `bo_qua` khi cài thật): executor chọn chặt hơn — venv được cấu hình mà vắng thì lượt cài cũng ĐỎ.
+        $k = Invoke-NguoiDungGia 'nlm-thieu-venv'
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'nlm')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_venv_kho_thieu_la_loi' {
+        foreach ($kiem in $false, $true) {
+            $k = Invoke-NguoiDungGia 'venv-kho-thieu' -Kiem:$kiem
+            if (-not (-not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi')) { return $false }
+        }
+        $true
     }
     Ca 'nd_chikiem_doi_chung_khong_loi' {
         # Đối chứng: chốt ChiKiem mới không được biến lượt kiểm lành thành lỗi.

@@ -403,7 +403,7 @@ function Invoke-TangNguoiDung([string]$GocKho) {
                 if ($LASTEXITCODE -ne 0) { Add-KetQua 'venv-kho' '' '' 'loi' "$($o | Select-Object -Last 1)" } else { Add-KetQua 'venv-kho' '' '' 'giu' 'requirements.txt đã khớp' }
             } catch { Add-KetQua 'venv-kho' '' '' 'loi' $_.Exception.Message }
         }
-    } else { Add-KetQua 'venv-kho' '' '' 'bo_qua' "không có $vpy hoặc requirements.txt" }
+    } else { Add-KetQua 'venv-kho' '' '' 'loi' "không có $vpy hoặc requirements.txt" }
 
     # 3. claude + codex qua npm global vào C:\Tools\npm (cùng chỗ codex đang nằm).
     foreach ($p in @(@('claude', '@anthropic-ai/claude-code', 'claude.cmd'), @('codex', '@openai/codex', 'codex.cmd'))) {
@@ -430,7 +430,9 @@ function Invoke-TangNguoiDung([string]$GocKho) {
     #    — `tl nlm-auth-stage` chỉ đọc `cookies.json` (scripts/tl_gws.py `_NLM_AUTH_RELS`).
     $nlmPy = Join-Path $NlmVenv 'Scripts\python.exe'
     $nlm = Join-Path $NlmVenv 'Scripts\nlm.exe'
-    if (-not (Test-Path -LiteralPath $nlmPy)) { Add-KetQua 'nlm' '' '' 'bo_qua' "không có venv $NlmVenv" }
+    # Venv được cấu hình (-NlmVenv/-VenvKho) mà vắng là LỖI ở cả hai chế độ, không phải `bo_qua`: script không tự dựng venv,
+    # nên lượt chạy báo ĐẠT khi công cụ thuộc phạm vi đã mất là báo sai (cross-review PR #1065 lượt 7).
+    if (-not (Test-Path -LiteralPath $nlmPy)) { Add-KetQua 'nlm' '' '' 'loi' "không có venv $NlmVenv (script không tự dựng)" }
     else {
         $truoc = Get-PhienBanLenh $nlm @('--version') 'nlm version\s+(\S+)'
         if ($ChiKiem) {

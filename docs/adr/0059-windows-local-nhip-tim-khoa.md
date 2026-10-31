@@ -34,7 +34,7 @@ sửa `ADR-0057`. Mọi điểm khác của hai ADR giữ nguyên hiệu lực. 
    3(a) hoặc 3(b) của `ADR-0058`, chạy bước kiểm tải (§4 của `ADR-0057`).
    - Nếu thấy một tiến trình `python.exe` khởi động (`CreationDate`, đổi sang UTC) sau `UTC bắt đầu` của khoá cũ
      và không phải tiến trình MCP, thì khoá được coi là **còn sống**: không tiếp nhận, ghi một dòng sổ đo nêu PID
-     và lệnh đã thấy, rồi đợi. Không đọc được giờ khởi động của một tiến trình như thế thì cũng coi là còn sống.
+     và lệnh đã thấy, rồi đợi.
    - Quy tắc này không áp dụng cho 3(c), vì ở đó phiên giữ khoá đã tuyên bố bỏ.
    - Thứ tự ghi sổ đo rồi thay nội dung khoá của `ADR-0058` 3 giữ nguyên khi tiếp nhận được.
 3. **Lượt bị ngắt.** Nếu máy Offline hoặc Desktop Commander không truy cập được trong lúc một lượt đang chạy,

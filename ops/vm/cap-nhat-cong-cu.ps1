@@ -329,6 +329,9 @@ function Update-CongCuZip([string]$Ten, [string]$Repo, [string]$Tag, [string]$Ma
                           [string[]]$DoiSoPhienBan, [string]$MauPhienBan, [string]$ThuMucBin) {
     $exe = Join-Path $ThuMucBin $TenExe
     $truoc = Get-PhienBanLenh $exe $DoiSoPhienBan $MauPhienBan
+    # Hợp đồng ChiKiem CHUNG cho cả hai tầng (chốt ở lượt 8 sau bốn lượt tìm từng nhánh một): một dòng ChiKiem chỉ được
+    # khác `loi` khi phiên bản ĐANG CÀI đo được (rc=0 + khớp mẫu). Thiếu tệp hay chạy hỏng đều là `loi`.
+    if ($ChiKiem -and -not $truoc) { Add-KetQua $Ten '' '' 'loi' "$exe chưa cài hoặc không đọc được phiên bản"; return }
     try {
         $rel = Get-Release $Repo $Tag
         $moi = ($rel.tag_name -replace '^v', '')
@@ -396,7 +399,10 @@ function Invoke-TangNguoiDung([string]$GocKho) {
     # 2. venv của kho: requirements.txt (giữ ghim của kho, không --upgrade bừa).
     $vpy = Join-Path $VenvKho 'Scripts\python.exe'
     if ((Test-Path -LiteralPath $vpy) -and $yeuCau) {
-        if ($ChiKiem) { Add-KetQua 'venv-kho' '' '' 'kiem' $VenvKho }
+        if ($ChiKiem) {
+            $vpb = Get-PhienBanLenh $vpy @('--version') 'Python\s+(\S+)'
+            if (-not $vpb) { Add-KetQua 'venv-kho' '' '' 'loi' "$vpy --version không chạy được" } else { Add-KetQua 'venv-kho' $vpb '' 'kiem' $VenvKho }
+        }
         else {
             try {
                 $o = & $vpy -m pip install --quiet --disable-pip-version-check -r $yeuCau "PyYAML==$($ghim.PyYAML)" "jsonschema==$($ghim.jsonschema)" 2>&1
@@ -482,6 +488,7 @@ function Invoke-TangHeThong {
     )
     foreach ($c in $muc) {
         $truoc = Get-PhienBanLenh $c.exe $c.ds $c.mau
+        if ($ChiKiem -and -not $truoc) { Add-KetQua $c.ten '' '' 'loi' "$($c.exe) chưa cài hoặc không đọc được phiên bản"; continue }
         if (-not (Test-CoTheCai (Test-Path -LiteralPath $c.exe) $truoc)) {
             Add-KetQua $c.ten '' '' 'loi' "có $($c.exe) nhưng không đọc được phiên bản — KHÔNG tự cài (tránh đổi major/ghi đè mù)"
             continue

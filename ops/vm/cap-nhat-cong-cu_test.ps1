@@ -284,6 +284,8 @@ function Invoke-NguoiDungGia([string]$CheDo, [switch]$Kiem) {
 #!/usr/bin/env python3
 import os, sys, json
 ten = os.path.basename(sys.argv[0]); a = sys.argv[1:]
+if os.environ.get('CNCC_CHE_DO') == 'venv-python-hong' and '/venv/Scripts/' in sys.argv[0]:
+    print('venv-runtime-error', file=sys.stderr); sys.exit(9)
 if a == ['--version']:
     if os.environ.get('CNCC_CHE_DO') == 'cli-version-hong' and ten in ('claude.cmd', 'codex.cmd'):
         print("Error: Cannot find module 'offline-missing-module'\nNode.js v24.2.0", file=sys.stderr); sys.exit(1)
@@ -310,6 +312,7 @@ elif a and a[0] == 'auth':
         if ($CheDo -eq 'nlm-thieu-python') { Remove-Item -LiteralPath "$g/nlm/Scripts/python.exe" -Force }
         if ($CheDo -eq 'nlm-thieu-venv') { Remove-Item -LiteralPath "$g/nlm" -Recurse -Force }
         if ($CheDo -eq 'venv-kho-thieu') { Remove-Item -LiteralPath "$g/venv" -Recurse -Force }
+        if ($CheDo -eq 'venv-python-khong-chay') { & chmod -x "$g/venv/Scripts/python.exe" }
         $npmGia = "$g/PF/nodejs/npm.cmd"
         # npm CÓ lúc Test-Path rồi BIẾN MẤT trước lúc gọi ⇒ `& $npm` ném CommandNotFoundException, không đặt $LASTEXITCODE.
         function Test-Path { param($LiteralPath)
@@ -377,6 +380,14 @@ if (-not $IsWindows) {
         }
         $true
     }
+    Ca 'nd_chikiem_venv_kho_runtime_hong_la_loi' {
+        $k = Invoke-NguoiDungGia 'venv-python-hong' -Kiem
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
+    }
+    Ca 'nd_chikiem_venv_kho_khong_khoi_chay_la_loi' {
+        $k = Invoke-NguoiDungGia 'venv-python-khong-chay' -Kiem
+        -not $k.loi -and $k.kq.Count -eq 11 -and (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
+    }
     Ca 'nd_chikiem_doi_chung_khong_loi' {
         # Đối chứng: chốt ChiKiem mới không được biến lượt kiểm lành thành lỗi.
         $k = Invoke-NguoiDungGia 'sach' -Kiem
@@ -402,6 +413,44 @@ if (-not $IsWindows) {
             @($k.kq | Where-Object { $_.cong_cu -in 'pip', 'PyYAML', 'jsonschema' -and $_.hanh_dong -eq 'loi' }).Count -eq 3
     }
 }
+# Cross-review lượt 8: gọi Update-CongCuZip thật, chỉ HTTP release là giả.
+# Shebang native chỉ chạy ngoài Windows; thiếu nền không được đếm vào số ca Windows.
+function Invoke-ZipKiemGia([string]$CheDo) {
+    $ChiKiem = $true
+    $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-zip-kiem-" + [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $g | Out-Null
+    try {
+        $rc = if ($CheDo -eq 'rc9') { 9 } else { 0 }
+        if ($CheDo -ne 'thieu') {
+            [IO.File]::WriteAllText("$g/rg.exe", "#!/bin/sh`necho ripgrep 1.0.0`nexit $rc`n")
+            & chmod +x "$g/rg.exe"
+        }
+        function Get-Release { param($Repo, $Tag)
+            [pscustomobject]@{ tag_name = 'v2.0.0'; assets = @([pscustomobject]@{
+                name = 'rg-windows.zip'; digest = ('sha256:' + ('a' * 64)); browser_download_url = 'OFFLINE'
+            }) }
+        }
+        function Invoke-WebRequest { throw 'không được tải trong ChiKiem' }
+        $Script:KetQua.Clear()
+        Update-CongCuZip 'rg' 'OFFLINE/rg' '' '^rg-windows[.]zip$' 'rg.exe' @('--version') '(?m)^ripgrep +([0-9]+[.][0-9]+[.][0-9]+)' $g *> $null
+        @($Script:KetQua)
+    } finally { Remove-Item -LiteralPath $g -Recurse -Force -ErrorAction SilentlyContinue }
+}
+if (-not $IsWindows) {
+    Ca 'zip_chikiem_phien_ban_cu_do_duoc_van_bao_cap_nhat' {
+        $k = @(Invoke-ZipKiemGia 'tot')
+        $k.Count -eq 1 -and $k[0].truoc -eq '1.0.0' -and $k[0].hanh_dong -eq 'can_cap_nhat'
+    }
+    Ca 'zip_chikiem_thieu_exe_phai_ghi_loi' {
+        $k = @(Invoke-ZipKiemGia 'thieu')
+        $k.Count -eq 1 -and $k[0].hanh_dong -eq 'loi'
+    }
+    Ca 'zip_chikiem_native_rc_khac_0_phai_ghi_loi' {
+        $k = @(Invoke-ZipKiemGia 'rc9')
+        $k.Count -eq 1 -and $k[0].hanh_dong -eq 'loi'
+    }
+}
+
 Ca 'main_co_luoi_cuoi_ghi_nhat_ky' {
     # Lưới cuối của luồng chạy (không gọi được ngoài Windows vì chốt nền): lệnh gọi tầng nằm trong try, catch ghi `loi`.
     (Get-Content -LiteralPath $Script -Raw) -match "try \{ if \(\`$PhamVi -eq 'NguoiDung'\) \{ Invoke-TangNguoiDung \`$goc \} else \{ Invoke-TangHeThong \} \}\s*\r?\ncatch \{ Add-KetQua "
@@ -461,6 +510,16 @@ try {
         Invoke-TangHeThong *> $null
         $Script:DaCai -and $Script:CoLucCai -and $Script:DaDungLai -and
             @($Script:KetQua | Where-Object { $_.cong_cu -eq 'node-major' -and $_.hanh_dong -eq 'can_quyet_dinh' }).Count -eq 1
+    }
+    Ca 'he_thong_chikiem_thieu_cong_cu_la_loi' {
+        # Hợp đồng ChiKiem chung (lượt 8): node không đọc được phiên bản ⇒ `loi`, không `can_cap_nhat`, không cài.
+        $Script:CheDo = 'khong-doc'; $Script:DaCai = $false; $Script:DaCaiNode = $false; $Script:KetQua.Clear()
+        Remove-Item -LiteralPath (Join-Path $env:ProgramFiles 'nodejs/node.exe') -Force
+        $cuKiem = $ChiKiem; $Script:ChiKiem = $true
+        try { Invoke-TangHeThong *> $null } finally { $Script:ChiKiem = $cuKiem }
+        $n = @($Script:KetQua | Where-Object cong_cu -eq 'node')
+        -not $Script:DaCai -and $n.Count -eq 1 -and $n[0].hanh_dong -eq 'loi' -and
+            @($Script:KetQua | Where-Object hanh_dong -eq 'can_cap_nhat' | Where-Object { -not $_.truoc }).Count -eq 0
     }
 } finally {
     $env:ProgramFiles = $pfCu

@@ -1,0 +1,9 @@
+# do 2026-10-31T08:33:12Z: gh api graphql chay tren ASUS-LAPTOP (may chu kho) qua Desktop Commander, cmd, node_id WFR_kwLOTNeRjc8AAAAJlqTcEQ lay tu REST run 41182092305
+$ gh api graphql -f id=WFR_kwLOTNeRjc8AAAAJlqTcEQ -f query="query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt file { path repositoryFileUrl } checkSuite { commit { oid } } } } }"
+(output: graphql-workflowrun-41182092305.json)
+$ git rev-parse c8ff9ed:.github/workflows/ci.yml
+82d9f239ff311bd1ba3d3021119b5a2f7f699ffc
+$ git show c8ff9ed:.github/workflows/ci.yml | sha256sum
+ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb  -
+$ GET repos/ducthangho/tra-luat/contents/.github/workflows/ci.yml?ref=c8ff9ed563403fffa3c49c84bfce42e9a66bc68b
+sha (blob): 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size: 69161 sha256 noi dung: ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb

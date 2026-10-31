@@ -1,0 +1,4 @@
+evidence/snapshot-before.json	sha256 00c4d13b06422d461415f63e58a194ae73cc2326997b52d73c2fa33ee14b60a5	bytes 2774729	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO)
+evidence/snapshot-after.json	sha256 00c4d13b06422d461415f63e58a194ae73cc2326997b52d73c2fa33ee14b60a5	bytes 2774729	ly do: >500 KB (tien le TEP-LON-KHONG-VAO-KHO)
+cay-kho/ mirror.git	khong chep: ban sao kho/mirror cua sandbox reviewer, tai lap bang clone tai a16932a
+reviewer-SHA256SUMS.txt	la SHA256SUMS ma reviewer tu viet o goc sandbox (doi ten de khong trung manifest thu muc); hai muc snapshot trong do khong co tep trong kho

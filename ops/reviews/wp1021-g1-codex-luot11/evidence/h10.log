@@ -1,0 +1,15 @@
+c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback = qua; None
+c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = qua; None
+c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = qua; None
+c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen = qua; None
+  CÓ RĂNG    m143_chon_bien_nhan_loc_is_file        → c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback = giet_that  (thư mục `*.receipt.yaml` trốn khỏi phép băm)
+  CÓ RĂNG    m144_sinh_no_loc_duoi_CHINH_XAC        → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (`--sinh-no` bỏ qua đuôi hoa (đường gọi thứ hai))
+  CÓ RĂNG    m145_bo_chon_khong_sap_xep             → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (thứ tự duyệt theo hệ tệp, không sắp xếp)
+  CÓ RĂNG    m146_bo_chon_bo_nhanh_thu_muc_vang     → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (`--sinh-no` trên kho thiếu ops/reviews thành lỗi đo)
+  CÓ RĂNG    m148_bo_chon_hoi_is_dir_TRAN           → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (`--sinh-no`: EACCES ở `stat` thoát thành traceback)
+  CÓ RĂNG    m149_kiem_guard_hoi_is_dir_TRAN        → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (`kiem`: EACCES ở `stat` thoát thành traceback)
+  CÓ RĂNG    m150_hoi_trang_thai_bo_bat_OSError     → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (lỗi `stat` thoát thành traceback ở cả hai đường)
+  CÓ RĂNG    m151_kiem_hoi_git_TRAN                 → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (`stat` của `.git` thoát thành traceback)
+  CÓ RĂNG    m152_bo_chon_bat_Exception             → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (lỗi lập trình ở phép liệt kê bị đổi thành KHÔNG ĐO ĐƯỢC)
+  CÓ RĂNG    m154_hoi_trang_thai_chi_bat_PermissionError → c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang = giet_that  (EIO ở `stat` thoát thành traceback)
+  CÓ RĂNG    m155_bo_chon_chi_bat_PermissionError   → c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE = giet_that  (EIO khi liệt kê thoát thành traceback)

@@ -1,0 +1,18 @@
+HEAD=a16932aa09ce860a614f0bab4b2015699e7221bc
+tree=d4eea17c04edc0a62c320d4f44cae8290082cf2f
+parents=356a27e1378b2162bbc0be2ec06ff08fdacbdead 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2
+shallow=false
+symbolic-ref rc=1
+core.abbrev=7
+SPEC.md sha256=d5dd5a5df5a2dd8ce799a30442ed974fa3a0d669728446fafdbc2267a59b5b1d
+ops/bien_nhan_v2.py: HEAD=416d612ea5be4691fdeaf912c9e55fd9ecb1fbe6 P1=416d612ea5be4691fdeaf912c9e55fd9ecb1fbe6 P2=83ba1d37a902b7064f95e2efb2a2d0f197a81733
+ops/bien_nhan_v2_test.py: HEAD=ab1d5a104d896cc13eca681030bb3fc01d1b3f7d P1=ab1d5a104d896cc13eca681030bb3fc01d1b3f7d P2=3b334cf53622cf041a2953c15edf788463bca932
+P2..HEAD paths=['ops/bien_nhan_v2.py', 'ops/bien_nhan_v2_test.py']
+P2..HEAD numstat:
+40	5	ops/bien_nhan_v2.py
+300	2	ops/bien_nhan_v2_test.py
+union_tree_entries=8972
+entries_different_from_both_parents=[]
+actual diff sha256=6b0591b75c9a0b4deeac22c775811d5ed49f56384b078a5a97c5e9441cbdd463
+diff.patch sha256=6b0591b75c9a0b4deeac22c775811d5ed49f56384b078a5a97c5e9441cbdd463
+diff.patch byte_identical=True

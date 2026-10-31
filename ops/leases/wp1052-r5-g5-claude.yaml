@@ -1,0 +1,106 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1052
+packet_id: wp1052
+mission_id: gh-1035
+mission_issue: 1035
+mission_ghi_chu: 'theo #1052 issuecomment-6542167327 (plan #1035 tieu chi 1); lease truoc khong khai, khong sua hoi to.'
+revision: 5
+generation: 5
+lease_id: wp1052-r5-g5-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: normal
+depends_on: []
+depends_on_ghi_chu: 'wp1039 da merge (PR #1073, a253c16); ai-dang-giu RELEASE_MANIFEST.json NGUOI_GIU 0 luc 2026-10-31T14:56:45Z.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'executor ho claude, reviewer ho openai; toi da 2 loi goi Codex cho ca packet; da dung 1 (connector, head 235b738, khong finding).'
+access: read-write
+review_class: routine
+effective_review_class: sensitive
+effective_review_class_ghi_chu: 'spec khai routine; cong ops/lease_publish.py xep moi duong dan ngoai _BANG_LOP vao sensitive (fail-closed) => lop hieu luc = sensitive. Reviewer van la codex, khong doi tran loi goi.'
+spec_path: ops/specs/wp1052-r5.md
+spec_sha256_required: e6db3bf5ef7b8a5a2c95e841f71febee39228feeb2e22f7cf45066ee03ce06f9
+spec_hash: e6db3bf5ef7b8a5a2c95e841f71febee39228feeb2e22f7cf45066ee03ce06f9
+spec_ref: refs/heads/claude/epic-ritchie-quvrz1@62ed5cb83885fd89c6aa5878714b58bce16040e4
+prompt_path: ops/specs/wp1052-r5.md
+prompt_sha256_required: e6db3bf5ef7b8a5a2c95e841f71febee39228feeb2e22f7cf45066ee03ce06f9
+write_set:
+- references/windows-testing.md
+- SKILL.md
+- references/GOTCHAS.md
+- changelog.d/wp-1052.md
+- scripts/tl_selftest.py
+- references/golden/workflow_audit.json
+- RELEASE_MANIFEST.json
+write_set_hash: 2e9383d1f0a412a545c940911bc5eb6f87d047704ee63a35f53d0b01b6915958
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'spec r5 B1 (tl_selftest.py: CHI hai hang dem goi 195->197 va hai dong KE KHAI SLOT) + B3 (tai sinh RELEASE_MANIFEST.json, file_count 197); cac tep A/B2/C/D giu nguyen.'
+change_policy_sha: null
+effective_write_set:
+- references/windows-testing.md
+- SKILL.md
+- references/GOTCHAS.md
+- changelog.d/wp-1052.md
+- scripts/tl_selftest.py
+- references/golden/workflow_audit.json
+- RELEASE_MANIFEST.json
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'release-verify --strict lane LAND rc 0 (expected == checked == 197) tren head cuoi truoc khi xin merge'}
+- {id: M-2, dieu_kien: 'N1, N2, N4, N5, N6 cua spec r3 dat tren dung commit day; N3 chi lane WORKER (lane LAND cho B3)'}
+- {id: M-3, dieu_kien: 'ci.yml luot PR xanh tren head cuoi doc bang check run; codex khong P0/P1/P2; toi da 2 loi goi codex'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'merge/land/deploy do chu kho. Khong tang VERSION.'
+branch: claude/epic-ritchie-quvrz1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: a253c169ed79617b8d1a4754867c336ac72c72c5
+start_from_sha: 30339d7db9d907c20f13383338f6dd40ecfd3841
+start_from_ghi_chu: 'base = origin/master luc cap (sau merge wp1039); start = head PR #1055 sau D1+D2; commit thi cong dau tien merge master vao.'
+reviewed_sha_required: 30339d7db9d907c20f13383338f6dd40ecfd3841
+reviewed_sha_required_nghia: 'Chua co head ung vien giai doan B; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1052#issuecomment-6545026256
+granted_on_instruction_readback: 'chu kho chon "Làm ngay" B1+B3 trong phien session_015GtxrcSEjPkSR4KLHEyEsm (2026-10-31 ~15:0xZ); ghi ho tren Issue #1052. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease (session_015GtxrcSEjPkSR4KLHEyEsm) cung la executor; reviewer la codex (ho khac).'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-31T14:56:45Z'
+  goc_quet: 'mirror --mirror cua origin, fetch +refs/heads/*; ls-remote so TAP ten voi for-each-ref: 726, thieu 0; master a253c16'
+  ket_qua: '6 tep: NGUOI_GIU 1 = wp1052-r5-g4-claude (chinh lease duoc thay o day); RELEASE_MANIFEST.json: NGUOI_GIU 0.'
+thay_the_cho:
+- wp1052-r5-g4-claude
+thay_the_cho_ghi_chu: 'g4 con han toi 2026-11-01T12:20:00Z; bia mo hai chieu (da_bi_thay_the trong tep g4, cung commit).'
+leased_at_utc: '2026-10-31T15:00:00Z'
+heartbeat_at: '2026-10-31T15:00:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+lease_until: '2026-11-01T15:00:00Z'
+lease_expires_at_utc: '2026-11-01T15:00:00Z'
+run_minutes: 90
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+review_rounds_limit: 2
+budget:
+  codex_review_calls:
+    pr_wp1052_g1: {used: 1, reserved: 0, limit: 2}
+  attempt:
+    packet_1052_r5: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh claude/epic-ritchie-quvrz1 khi N1/N2/N4/N5/N6 dat; PR #1055 giu draft toi khi B3 xong'

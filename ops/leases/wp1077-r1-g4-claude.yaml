@@ -117,3 +117,5 @@ nang_tran_lan_3:
   can_cu: 'chu kho go "Nang tran 10, tiep tuc" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026); ghi ho. Bam byte KHONG DO DUOC.'
   tran_dong_them: 'giu 330 (nang_tran_lan_2); chu kho khong neu so moi.'
 push_policy: 'day nhanh agent/wp1077-g1-claude khi A1-A4 dat; mo PR draft.'
+da_bi_thay_the: wp1077-r1-g5-claude
+da_bi_thay_the_ly_do: 'Chu kho mien tru W-1077-1 va nang tran dong 330->345 trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026); g5 thay the. Lease g4 nay KHONG con hieu luc; giu tep lam hien vat.'

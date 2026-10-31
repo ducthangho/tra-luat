@@ -128,3 +128,18 @@ review:
     - {loi_goi: 8, run_id: 2bc4a8762172489490fcf1c8fd54b625, head: 356a27e1378b2162bbc0be2ec06ff08fdacbdead, verdict: changes_requested, dem: '0/0/0/0', bien_nhan: ops/reviews/wp1021-g1-codex-luot8b-verdict.receipt.yaml}
     - {loi_goi: 9, run_id: e8bb597dcf5c44cca3228093286661ed, head: 356a27e1378b2162bbc0be2ec06ff08fdacbdead, verdict: approve, dem: '0/0/0/0', bien_nhan: ops/reviews/wp1021-g1-codex-luot8-dieu-phoi-verdict.receipt.yaml}
     - {loi_goi: 10, run_id: 629cf3361f294f8aa9eea40043e36a12, head: 356a27e1378b2162bbc0be2ec06ff08fdacbdead, verdict: approve, dem: '0/0/0/0', bien_nhan: ops/reviews/wp1021-g1-codex-luot9-verdict.receipt.yaml}
+
+moc_workflow_definition_20261031:
+  bo_canh: 'Phien dieu phoi chay gh api graphql TREN MAY CHU KHO (ASUS-LAPTOP) qua Desktop Commander, theo chi thi chu kho 31-10-2026 "Ban chay cho toi luon di thong qua Desktop Commander". Khoi nay KHONG sua dong nao o tren.'
+  workflow_definition: >-
+    measured — graphql-workflowrun-41182092305.json: WorkflowRun 41182092305 (runNumber 3621) file.path .github/workflows/ci.yml,
+    repositoryFileUrl neo OID c8ff9ed563403fffa3c49c84bfce42e9a66bc68b, checkSuite.commit.oid cung OID. moc-workflow-definition.txt:
+    `git rev-parse c8ff9ed:.github/workflows/ci.yml` = 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc = blob sha cua REST
+    contents?ref=c8ff9ed (69161 byte, sha256 ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb).
+  nguon:
+    - ops/land/pr1040-wp1021-provenance/graphql-workflowrun-41182092305.json
+    - ops/land/pr1040-wp1021-provenance/moc-workflow-definition.txt
+  gioi_han: >-
+    Output graphql chep tu ket qua start_process cua Desktop Commander (khong qua hoi thoai cua chu kho); bam byte tren may chu kho
+    KHONG_DO_DUOC. Luc do (08:33Z) run 41182092305 con in_progress: moc Run (conclusion), Checkout va Gate output CHUA do.
+  bon_moc_10_2_2: '1/4 measured (Workflow definition). Run · Checkout · Gate output cho run xong.'

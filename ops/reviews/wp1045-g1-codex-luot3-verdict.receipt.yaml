@@ -1,0 +1,91 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 3 cua packet #1045 CAI-CONG-CU-DAT-THEO-TRANG-THAI revision 1,
+# KHAC NEN (reviewer codex CLI, executor claude). **`approve`** — 0 P1 / 0 P2 / 0 P3 theo finding.
+# Ghi so boi CHINH phien executor (session_015GtxrYjGJtmjF3eT1nCSG9) theo chi thi chu kho (30-10-2026, "Ghi bien nhan review va ho so land cho #1045 di").
+# Nhan dung trong tep: (a) DO tu kho/run.json luc ghi so · (b) THUAT LAI · KHONG_DO_DUOC.
+
+schema_version: 2
+receipt_id: wp1045-g1-codex-luot3-edf9683e
+kind: review_delivery_receipt
+packet_id: CAI-CONG-CU-DAT-THEO-TRANG-THAI
+packet_issue: 1045
+target_pull_request: 1047
+land_merge_commit: b2d5f06c154331a6fc10c9e6f687f522196440a9
+land_merge_commit_ghi_chu: '(a) merge commit cua PR #1047 tren master (2026-10-30T23:36Z); cha thu hai = head PR 201460203f42485f589add150896f2febc00c027.'
+revision: 1
+generation: 2
+lease_id: wp1045-r1-g2-claude
+lease_gan_theo: '(a) ops/leases/wp1045-r1-g2-claude.yaml tren nhanh ops/wp1045-r1-g1-lease; cua so [2026-10-30T17:29:00Z, 2026-10-31T17:29:00Z) lease g2; run.json bat_dau_utc 2026-10-30T17:30:56Z nam trong cua so.'
+luot: 3
+loi_goi_codex_thu: '3 / tran 4 (lease g2 sau nang_tran 2->4)'
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+review_class: sensitive
+effective_review_class: sensitive
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Verdict approve 0/0/0/0; reviewer GPT (gpt-6-astra do_may qua run.json model_phuc_vu), executor Claude theo lease =>
+  khac ho; tien trinh codex rieng qua launcher. Head da duyet 2014602 = head PR #1047 luc merge (cha thu hai cua b2d5f06).
+  sandbox_trang_thai cua run.json KHONG_DO_DUOC (caveat SANDBOX-MODE-KHONG-DO-DUOC) — ho so land vi the ghi §8.1 CHUA_DAT.
+verdict: approve
+verdict_nguon: '(a) dong 1 tep verdict `Verdict: approve`'
+verdict_path: ops/reviews/wp1045-g1-codex-luot3-verdict.md
+verdict_sha256: edf9683e99a2f17c813c74f0eac3728c77bd9f3668c091326a0351e11bd65f86
+verdict_bytes: 17479
+nguon_tep: ban_sao_nguyen_byte_cua_tep_goc_trong_kho
+verdict_ban_goc: '(a) ops/reviews/wp1045-g1-codex-luot3/VERDICT.md la tep goc chep tu sandbox reviewer (qua handoff ops/handoff/wp1045-g1-claude/luot3/VERDICT.md tren ops/wp1045-r1-g1-lease @ 4b4f37f, sha256 trung); ban phang byte-identical (SHA256SUMS cua thu muc).'
+reviewed_sha: 201460203f42485f589add150896f2febc00c027
+reviewed_sha_nguon: '(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean.'
+reviewed_sha_to_tien: '(a) git merge-base --is-ancestor 2014602 b2d5f06: rc 0.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/01171edfc6a8f6f9cd196e053118ba9e633a3227/ops/reviews/wp1045-g1-codex-luot3-verdict.md
+evidence_url_ghi_chu: '(a) Neo BLOB ghim commit hien vat cua nhanh ghi so claude/magical-clarke-gzvwbp; bien nhan nay di o commit sau, tren cung nhanh.'
+so_p0: 0
+so_p1: 0
+so_p2: 0
+so_p3: 0
+so_dem_theo: finding
+so_dem_nguon: '(a) dem dong `- [P*]` trong tep verdict.'
+findings_ids: []
+xu_ly_finding: >-
+  (a) Khong co finding. 16/16 dot bien dang ky chet, 28/28 ca dich do dung TinHieuChotCa; 4 dot bien tu them cung chet.
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: 8381511e234e453d876e4dee7204ee75
+  run_json: ops/reviews/wp1045-g1-codex-luot3/run/run.json
+  run_json_ghi_chu: >-
+    (a) ma_thoat 0, trang_thai xong, thoi_luong_giay 836.55, worktree_sach true, execution_surface codex_cli,
+    prompt_sha256 83cd6e23ffa0… = sha256 ops/reviews/wp1045-g1-codex-luot3/PROMPT.md.
+  cli: >-
+    codex-cli 0.164.0 qua `launcher.py run --workspace <sandbox>/cay-kho --expected-repo github.com/ducthangho/tra-luat
+    --expected-root-commit 394e934… --expected-head 2014602… --require-clean --prompt-file … --expected-prompt-sha256 … --
+    codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh --sandbox workspace-write -C <sandbox> --skip-git-repo-check "<PROMPT>"`
+  model_yeu_cau: gpt-6-astra
+  model: gpt-6-astra
+  model_da_chay: gpt-6-astra
+  model_evidence: do_may
+  model_evidence_ref: ops/reviews/wp1045-g1-codex-luot3/run/run.json#model_phuc_vu
+  model_evidence_ghi_chu: '(a) run.json model_phuc_vu_trang_thai DO_DUOC; 43 su kien, moi su kien model gpt-6-astra; effort_phuc_vu xhigh.'
+github_submitter_identity:
+  actor: ducthangho
+  actor_nguon: '(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua git push bang credential cua phien.'
+  ghi_chu: 'ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen.'
+independent_from_executor_session: true
+independent_ghi_chu: 'Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context).'
+anchor:
+  loai: canonical_ancestry
+  cuong_do: thap
+  mo_ta: '(a) Blob verdict ghim o commit hien vat 01171ed cua PR ghi so; len trung_binh/cao khi PR ghi so land bang merge commit (squash pha quan he to tien).'
+verdict_usage_caveats:
+  - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
+    muc: P3
+    mo_ta: 'Ban sao cay-kho/ nam TRONG vung ghi sandbox codex (workspace-write); read-only chi la CHI THI. run.json worktree_sach true luc phong.'
+  - id: SCRIPT-DO-DOC-DUONG-DAN-SANDBOX
+    muc: P3
+    mo_ta: 'Script/bang chung cua reviewer (evidence/*) KHONG vao kho va tham chieu duong dan tuyet doi cua sandbox phien (/tmp/...); tai lap can dung lai clone tai 2014602.'
+  - id: SANDBOX-MODE-KHONG-DO-DUOC
+    muc: P3
+    mo_ta: '(a) run.json sandbox_trang_thai KHONG_DO_DUOC, sandbox_ly_do "luong lay mau sandbox hong (DanhTinhDoi)"; sandbox_quan_sat chi la mau quan sat, launcher khong khai DO_DUOC.'
+nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

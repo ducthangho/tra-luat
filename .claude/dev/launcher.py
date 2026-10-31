@@ -2919,47 +2919,44 @@ def _ten_tran_giai_ra(ten: str, moi_truong: dict[str, str], kieu_bash: bool = Tr
 
 
 def _chay_probe_nhu_shell(lenh: list[str], **kw):
-    """`subprocess.run(lenh, **kw)`, cộng ngữ nghĩa ENOEXEC của `execvp` glibc: chạy lại bằng `/bin/sh`.
+    """`subprocess.run(lenh, **kw)` nhưng CHỌN TỆP như `execvp` glibc, kể cả fallback ENOEXEC → `/bin/sh`.
 
-    wp1077 (review độc lập #823 F1, tái hiện trên master `2bcd8f3`): kernel trả `ENOEXEC` cho tệp
-    thực thi KHÔNG có shebang; `execvp` của glibc khi ấy chạy lại tệp bằng `/bin/sh`, còn
-    `subprocess` ném `OSError`. Bộ dò tên trần wp802 vì thế gắn BI_CHE (rc=12) cho một `rg` mà
-    shell của người dùng gọi được. GIỚI HẠN (Codex lượt 1 F2, đo trên bash thật): bash chạy lại
-    bằng CHÍNH bash, nên wrapper không shebang dùng cú pháp riêng của bash (`[[ ]]`) chạy được
-    trong bash mà vẫn hỏng ở đây — hợp đồng là `/bin/sh` (spec M1), không phải "mọi shell". Chỉ `ENOEXEC` mới được chạy lại: thiếu bit thực thi
-    (`PermissionError`), không tồn tại… vẫn là hỏng như shell báo. Windows không có ngữ nghĩa này
-    (`CreateProcessW`), nên giữ nguyên. Lượt chạy lại trả kết quả cho phía gọi phân loại Y NHƯ lượt
-    thường — không nới cho bản hỏng.
+    wp1077 (review độc lập #823 F1, tái hiện trên master `2bcd8f3`): tệp thực thi KHÔNG shebang làm kernel
+    trả `ENOEXEC`; `execvp` glibc chạy lại tệp bằng `/bin/sh`, còn `subprocess` ném `OSError` (tên có `/`)
+    hoặc THỬ TIẾP bản sau trên PATH (tên trần) — `doctor` gắn BI_CHE oan hoặc đo NHẦM công cụ. Hợp đồng là
+    `/bin/sh` của glibc (spec M1); bash chạy lại bằng chính bash nên wrapper dùng cú pháp bash vẫn có thể khác.
 
-    Tên trần (`gh`, `llm`…) được giải theo PATH của `env` TRƯỚC LẦN CHẠY ĐẦU (Codex lượt 2 F4, đo
-    trên container thật): `subprocess` gặp ENOEXEC ở bản đầu PATH sẽ THỬ TIẾP bản phía sau và chạy nó
-    — đo NHẦM công cụ, trong khi bash và `execvp` glibc dừng ở bản đầu. Giải trước, GHÉP VỚI cwd thành
-    đường có `/` (Codex lượt 3: phần tử PATH rỗng = cwd khiến `which` trả lại tên trần `cli`, và `subprocess`
-    lại tra PATH từ đầu) mà KHÔNG chuẩn hoá (Codex lượt 4: `abspath` xoá `link/..` theo chuỗi, trước khi
-    kernel giải symlink, nên trỏ sang tệp khác), rồi chạy đúng tệp ấy; ENOEXEC thì `/bin/sh` chạy lại CHÍNH tệp ấy (`sh TÊN`
-    không tra PATH). Đường tương đối tính theo cwd của tiến trình CHA — mọi caller probe hiện không truyền
-    `cwd=`; caller nào truyền thì phải xét lại. Không giải ra thì giữ tên trần để `subprocess` báo không
-    tìm thấy như cũ.
+    Tên trần: duyệt `os.get_exec_path(env)` THEO THỨ TỰ, mỗi ứng viên là `<thư mục>/<tên>` giữ nguyên dạng
+    (tương đối, `..`, symlink — KHÔNG ghép cwd, KHÔNG chuẩn hoá: Codex lượt 3–5), phần tử rỗng là `./<tên>`;
+    `executable=` giữ `argv[0]` như phía gọi. Lỗi tìm kiếm (ENOENT, ENOTDIR, EACCES, interpreter vắng…) ⇒
+    sang ứng viên sau như `execvp`; ENOEXEC ⇒ DỪNG, `/bin/sh` chạy CHÍNH ứng viên ấy. Hết ứng viên ⇒ ném
+    lỗi đầu tiên khác ENOENT/ENOTDIR, nếu không có thì lỗi cuối (quy tắc của CPython). Tên có `/`: chỉ
+    ENOEXEC được chạy lại. Windows giữ nguyên. Kết quả lượt chạy lại phân loại Y NHƯ lượt thường.
 
-    PHẠM VI (Codex lượt 2 F1, chủ kho thu hẹp 31-10-2026): các probe chạy CLI trong bảng `CONG_CU` và
-    `KHA_NANG` đi qua hàm này — `r1077_probe_doctor_khong_spawn_tran` khoá danh sách hàm. CHƯA phủ:
-    `_git` (dùng chung với đường `run`; doctor gọi nó để dò workspace, `_do_github`, hook/launcher) và
-    `_do_codex_song` (spawn nằm ở `codex_cred.py`, ngoài write set) — nợ nối tiếp, không phải "mọi probe".
+    PHẠM VI (Codex lượt 2 F1, chủ kho thu hẹp 31-10-2026): các probe CLI trong `CONG_CU`/`KHA_NANG` đi qua
+    hàm này (`r1077_probe_doctor_khong_spawn_tran` khoá). CHƯA phủ `_git` (dùng chung với `run`) và
+    `_do_codex_song` (spawn ở `codex_cred.py`) — nợ #1083, không phải "mọi probe".
     """
     import errno
-    tep = lenh[0]
-    if os.name != "nt" and os.sep not in tep:
-        moi = kw.get("env")
-        tim = shutil.which(tep, path=(moi if moi is not None else os.environ).get("PATH", os.defpath))
-        tep = os.path.join(os.getcwd(), tim) if tim else tep
-    lenh = [tep, *lenh[1:]]
-    try:
+    if os.name == "nt":
         return subprocess.run(lenh, **kw)
-    except OSError as e:
-        if e.errno != errno.ENOEXEC or os.name == "nt" or not os.path.isfile("/bin/sh"):
-            raise
-    return subprocess.run(["/bin/sh", *lenh], **kw)
-
+    if os.sep in lenh[0]:
+        ung_vien = [lenh[0]]
+    else:
+        ung_vien = [os.path.join(d or os.curdir, lenh[0]) for d in os.get_exec_path(kw.get("env"))]
+    loi_luu = loi_cuoi = None
+    for tep in ung_vien:
+        try:
+            return subprocess.run(lenh, executable=tep, **kw)
+        except OSError as e:
+            if e.errno == errno.ENOEXEC and os.path.isfile("/bin/sh"):
+                return subprocess.run(["/bin/sh", tep, *lenh[1:]], **kw)
+            if e.errno == errno.ENOEXEC or os.sep in lenh[0]:
+                raise
+            loi_cuoi = e
+            if loi_luu is None and e.errno not in (errno.ENOENT, errno.ENOTDIR):
+                loi_luu = e
+    raise loi_luu or loi_cuoi or FileNotFoundError(errno.ENOENT, "khong tim thay", lenh[0])
 
 def _chay_probe_llm(lenh: list[str], *, env=None, timeout: float = 30.0) -> subprocess.CompletedProcess:
     """Y hệt `_chay_van_ban_an_toan` (utf-8/replace, stdin=DEVNULL) nhưng qua `_chay_probe_nhu_shell`.

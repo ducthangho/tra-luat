@@ -634,10 +634,10 @@ def t32_khong_chan_oan_be_mat_vua_siet(g):
 
 def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
     """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
-    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 105, tu runtime (WP1009 +agent-creds-set)."""
+    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 106, tu runtime (WP1009 +agent-creds-set, WP1038 +agent-creds-exec)."""
     r = _kiem_bang_that(g or GUARD, HERE.parent.parent)
     dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
-    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 105" in dong)
+    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 106" in dong)
     return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")
 
 
@@ -874,13 +874,57 @@ def t50_duong_dan_tl_py_DAU_PHAN_CACH_nao_cung_bi_chan(g):
     xau = []
     for a in AGENT:
         for d in duong:
-            for lenh, mong in (("agent-creds-set --new", "deny"), ("secrets-set --gws", "deny"),
-                               ("secrets-keygen", "allow")):
+            for lenh, mong in (("agent-creds-set --new", "deny"), ("agent-creds-exec --claude -- x", "deny"),
+                               ("secrets-set --gws", "deny"), ("secrets-keygen", "allow")):
                 c = 'python "%s" %s' % (d, lenh)
                 if hoi(g, c, a)[0] != mong:
                     xau.append("%s: %s" % (a, c))
-    return (not xau, "2 agent x 4 cach viet x 3 lenh -> dung %d/24" % (24 - len(xau))
+    return (not xau, "2 agent x 4 cach viet x 4 lenh -> dung %d/32" % (32 - len(xau))
                      + ("; SAI: %s" % xau if xau else ""))
+
+
+def t51_ten_lenh_tl_qua_mo_rong_shell_bi_chan(g):
+    """WP1038 F03 (cross-review luot 3): Bash mo rong `$'..'`/`${..}`/`$( )`/backtick/brace/glob thanh ten lenh THAT,
+    shlex thi khong — nen moi cach viet ay phai deny o CA HAI agent; con `$` la DU LIEU sau ten lenh, ten trich dan
+    nguyen van va gia tri co global binh thuong van allow (khong chan oan)."""
+    dl = chr(36)
+    tu_choi = ["%s'agent-creds-exec' --claude -- x" % dl, "%s{X:-agent-creds-exec} --claude -- x" % dl,
+               "agent-creds-%s'exec' --claude -- x" % dl, "agent-creds-%s(printf exec) --claude -- x" % dl,
+               "agent-creds-`printf exec` --claude -- x", "--profile %sP locate a" % dl, "agent-creds-{exec,} --claude",
+               "--profile %s(echo v agent-creds-exec) locate a" % dl,
+               "agent-creds-exe? --claude -- x", "hygiene %s'plan'" % dl]
+    cho_phep = ["profile-list", "--profile vbqppl locate 'Luat dat dai 2024' --json", "\"profile-list\"",
+                "locate \"%sX\"" % dl, "locate %s(echo a)" % dl]
+    xau = []
+    for a in AGENT:
+        for c in tu_choi:
+            if hoi(g, "python scripts/tl.py " + c, a)[0] != "deny":
+                xau.append("LOT %s: %s" % (a, c))
+        for c in cho_phep:
+            if hoi(g, "python scripts/tl.py " + c, a)[0] != "allow":
+                xau.append("CHAN OAN %s: %s" % (a, c))
+    tong = len(AGENT) * (len(tu_choi) + len(cho_phep))
+    return (not xau, "mo rong shell o vung ten lenh tl -> dung %d/%d" % (tong - len(xau), tong)
+                     + ("; %s" % xau if xau else ""))
+
+
+def t52_ten_lenh_tl_phai_KHOP_danh_sach_DOC(g):
+    """WP1038 S5 (F04 noi dong · F06 extglob · F05 chan oan Unicode): ten la/manh => deny; lenh doc tieng Viet => allow."""
+    nl, bs = chr(10), chr(92)
+    tu_choi = ["agent-creds-ex%s%sec --claude -- x" % (bs, nl), "--pro%s%sfile locate agent-creds-exec --claude" % (bs, nl),
+               "@(agent-creds-exec) --claude -- x", "agent-creds-@(exec) --claude", "+(recat) x",
+               "--profile a#b agent-creds-exec --claude -- x", "hygiene --profile scan plan"]   # F07 · F08
+    cho_phep = ['--config "Qu\u1ed1c h\u1ed9i/c.json" profile-list --json', "--profile lu\u1eadt profile-list",
+                "hygiene scan", "hygiene --help", "--help", "hygiene --profile plan scan", "profile-list # ghi chu"]
+    xau = [("LOT " if m == "deny" else "CHAN OAN ") + "%s: %s" % (a, c)
+           for a in AGENT for ds, m in ((tu_choi, "deny"), (cho_phep, "allow")) for c in ds
+           if hoi(g, "python scripts/tl.py " + c, a)[0] != m]
+    if hoi(g, "git log %s%s --oneline -3" % (bs, nl), AGENT[0])[0] != "allow":
+        xau.append("CHAN OAN git log noi dong")
+    if hoi(g, "python scripts/tl.py locate a%s%s%spython scripts/tl.py recat x" % (bs, bs, nl), AGENT[0])[0] != "deny":
+        xau.append("LOT: `\\\\`+xuong dong la TACH lenh, khong phai noi dong")
+    tong = len(AGENT) * (len(tu_choi) + len(cho_phep)) + 2
+    return (not xau, "danh sach lenh DOC -> dung %d/%d" % (tong - len(xau), tong) + ("; %s" % xau if xau else ""))
 
 
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
@@ -918,6 +962,8 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t48_che_do_nhe_chi_khi_co_DUNG_1_va_windows_dung_truoc,
       t49_dong_nhe_KHONG_gia_dang_dong_du_va_bang_rong_thi_DO,
       t50_duong_dan_tl_py_DAU_PHAN_CACH_nao_cung_bi_chan,
+      t51_ten_lenh_tl_qua_mo_rong_shell_bi_chan,
+      t52_ten_lenh_tl_phai_KHOP_danh_sach_DOC,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -981,7 +1027,7 @@ DOT_BIEN = [
     # --- luot 2: dot bien cho BA chot vua them ---
     ("m23_rong_bang_lenh_LONG", "_TL_LENH_GHI_LONG = frozenset({",
      "_TL_LENH_GHI_LONG = frozenset()\n_TL_LENH_GHI_LONG_CU = frozenset({"),
-    ("m24_bo_tieu_gia_tri_co_global", "                k += 2 if not ra else 1",
+    ("m24_bo_tieu_gia_tri_co_global", "                k += 2 if not ra or a in _TL_CO_GLOBAL_AN_GIA_TRI else 1",
      "                k += 1"),
     ("m25_noi_kich_ban_ve_theo_THU_MUC",
      '_KICH_BAN_CHO_PHEP = frozenset({"scripts/tl.py"})',
@@ -1026,6 +1072,17 @@ DOT_BIEN = [
     ("m36_nhan_dien_tl_py_tren_kich_goc",
      '    if chuan.rsplit("/", 1)[-1] == "tl.py":',
      '    if kich.rsplit("/", 1)[-1] == "tl.py":'),
+    # WP1038 F03: nui danh sach cho phep ky tu de chua `$` · bo chot dau thay the `THAYTHE`.
+    ("m37_cho_dau_dola_vao_vung_ten_lenh_tl",
+     '[\\w./\\\\:=+@ -]*\\Z', '[\\w./\\\\:=+@ ${}\'?*`-]*\\Z'),
+    ("m38_bo_chot_THAYTHE_o_vung_ten_lenh_tl",
+     ' or "THAYTHE" in a]', ']'),
+    ("m39_bo_chot_danh_sach_lenh_DOC", " and ten not in _TL_LENH_DOC | _TL_LENH_GHI | _TL_LENH_GHI_LONG:", " and False:"),
+    ("m40_noi_dong_bang_dau_cach", 'r"(?<!\\\\)((?:\\\\\\\\)*)\\\\\\n", r"\\1"', 'r"\\\\\\s*\\n", " "'),
+    ("m41_vung_ten_chi_ASCII", '[\\w./\\\\:=+@ -]*\\Z', '[A-Za-z0-9_./\\\\:=+@ -]*\\Z'),
+    ("m44_noi_dong_ca_khi_cheo_nguoc_bi_escape", 'r"(?<!\\\\)((?:\\\\\\\\)*)\\\\\\n", r"\\1"', 'r"\\\\\\n", ""'),
+    ("m42_shlex_cat_comment_giua_tu", '        lex.commenters = ""', '        lex.commenters = "#"'),
+    ("m43_bo_gia_tri_co_global_sau_ten_cha", " or a in _TL_CO_GLOBAL_AN_GIA_TRI else 1", " else 1"),
     ("m33_siet_lai_isdigit_cho_co_ngan",
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):',
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep\n'

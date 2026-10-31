@@ -61,13 +61,14 @@ trang_thai_packet:
     1 tep CLAUDE.md +10/-1. Blob CLAUDE.md tai merge, tai head 6f23a4e va tai 48b54d8 (luot review approve) cung la
     becd2ecc5fcb06f2ae018e4105357ed245c1dc57.
   head_va_review:
-    reviewed_sha_cross_review_approve: 48b54d89b152871063c7296df33a60308667599e
+    reviewed_sha_cross_review_approve: 6f23a4e68805b4af3e2efe77be6e10b513843e93
+    reviewed_sha_cross_review_approve_truoc: 48b54d89b152871063c7296df33a60308667599e
     reviewed_sha_codex_connector: 16e992a01c0a4ec8cfcc793dac9c1def5e288ae8
     head_da_merge: 6f23a4e68805b4af3e2efe77be6e10b513843e93
     doi_chieu: >-
       measured — 6f23a4e = merge master 5a174b9 vao 48b54d8; `git diff 48b54d8 6f23a4e -- CLAUDE.md` rong (merge-va-diff.txt).
-      Moi tep khac doi trong 48b54d8..6f23a4e den tu master (nam san trong base), khong thuoc diff PR. Cross-review KHONG
-      cham dung 6f23a4e.
+      Moi tep khac doi trong 48b54d8..6f23a4e den tu master (nam san trong base), khong thuoc diff PR. Luot 2 approve cham
+      48b54d8; luot 3 (chay SAU merge) approve cham DUNG 6f23a4e va xac nhan 311/311 path doi giua hai SHA khop master 5a174b9.
   landed: false
   landed_hieu_luc_tu: >-
     merge commit cua PR ghi so — CHI KHI chu kho duyet `landed` bang comment tren PR ghi so, ghi du SHA head cuoi (40 hex),
@@ -80,8 +81,8 @@ trang_thai_packet:
       trang_thai: not_measured
       mo_ta: 'Moc Checkout, Workflow definition (GraphQL 403 trong phien web), Gate output chua do.'
     - id: REVIEW-EXACT-SHA
-      trang_thai: chua_dat
-      mo_ta: 'Luot approve cham 48b54d8, khong cham authorized_head_sha 6f23a4e (noi dung CLAUDE.md trung byte).'
+      trang_thai: da_dong
+      mo_ta: 'measured — luot 3 approve 0 P0–P3 tren DUNG 6f23a4e (ops/reviews/pr1048-review-3-codex-verdict.receipt.yaml). Chay SAU merge.'
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: cho_chu_kho
       mo_ta: 'Chu kho duyet `landed` bang comment tren PR ghi so. Ho so nay KHONG tu goi landed.'
@@ -106,7 +107,18 @@ review:
       bien_nhan: ops/reviews/pr1048-review-2-codex-verdict.receipt.yaml
       assurance: cross_approved
       xu_ly: 'Bang DOI CHIEU LUOT TRUOC xac nhan P2 luot 1 DA VA THAT.'
-  loi_goi_codex: '2 luot, ca hai qua launcher.py run (eb133f86, 33584cff), ma_thoat 0.'
+    - luot: 3
+      provider: codex
+      verdict: approve
+      reviewed_sha: 6f23a4e68805b4af3e2efe77be6e10b513843e93
+      so_lop: 'P0 0 / P1 0 / P2 0 / P3 0'
+      hien_vat: ops/reviews/pr1048-review-3-codex-verdict.md
+      bien_nhan: ops/reviews/pr1048-review-3-codex-verdict.receipt.yaml
+      assurance: cross_approved
+      xu_ly: >-
+        Chay SAU merge (run.json bat_dau_utc 2026-10-31T03:12:57Z > merged_at 02:46:49Z) theo chi thi chu kho, de co verdict
+        tren exact SHA. Reviewer dinh chinh prompt: 5a174b9 la cha thu HAI cua 6f23a4e (khong doi base/diff).
+  loi_goi_codex: '3 luot, ca ba qua launcher.py run (eb133f86, 33584cff, ba975358), ma_thoat 0.'
   codex_connector:
     do_duoc: >-
       measured — readback-comments-1048.json comment 6529018669 (chatgpt-codex-connector[bot], created 17:25:32Z, updated
@@ -143,9 +155,9 @@ post_merge_checks:
     do_duoc: 'Dang chay luc soan (readback-runs-b653574.json: in_progress).'
 
 bookkeeping:
-  - viec: luu verdict cross-review Codex luot 1-2 vao ops/reviews
+  - viec: luu verdict cross-review Codex luot 1-3 vao ops/reviews
     trang_thai: trong_pr_ghi_so
-    nguon: 'ops/reviews/pr1048-review-{1,2}-codex/ + verdict + receipt v2 (bien_nhan_v2 --root . TONG: DAT).'
+    nguon: 'ops/reviews/pr1048-review-{1,2,3}-codex/ + verdict + receipt v2 (bien_nhan_v2 --root . TONG: DAT).'
   - viec: so do Windows local (ADR-0057 muc 8)
     trang_thai: da_xong
     nguon: 'thuat_lai — C:\tl-win\do-luong.csv tren VM: dong 48b54d8 (1758/1759) va dong 6f23a4e (1759/1759). Tep ngoai kho.'
@@ -157,19 +169,24 @@ no_con_mo:
   - id: DUYET-CHI-TRONG-PHIEN
     mo_ta: 'Loi duyet merge chi co trong phien (authorization_ghi_chu); khong co comment GitHub neo SHA truoc merge.'
   - id: CROSS-REVIEW-KHONG-CHAM-HEAD-MERGE
-    mo_ta: 'Approve cham 48b54d8; head merge 6f23a4e chi them merge master, CLAUDE.md trung byte. Khong co verdict tren 6f23a4e.'
+    trang_thai: da_dong
+    mo_ta: 'Dong boi luot 3 (approve tren 6f23a4e). Con lai: verdict exact SHA co SAU merge, nen khong phai dieu kien truoc merge.'
 
 assurance_81:
-  reviewer_assurance_81: CHUA_DAT
-  review_exact_sha: CHUA_DAT
-  review_exact_sha_nguon: 'measured — ops/reviews/pr1048-review-2-codex/run/run.json head 48b54d8 != authorized_head_sha 6f23a4e.'
+  reviewer_assurance_81: DAT
+  review_exact_sha: DAT
+  review_exact_sha_nguon: >-
+    measured — ops/reviews/pr1048-review-3-codex/run/run.json: launcher.py run ba975358, ma_thoat 0, head 6f23a4e (DUNG
+    authorized_head_sha), worktree_sach true; verdict approve 0 P0–P3 (ops/reviews/pr1048-review-3-codex-verdict.md).
   thuc_thi:
-    model: 'measured — ops/reviews/pr1048-review-2-codex/run/run.json model_phuc_vu_trang_thai DO_DUOC, 16/16 su kien gpt-6.1-sol (ho openai, khac ho claude cua executor).'
-    effort: 'measured — ops/reviews/pr1048-review-2-codex/run/run.json effort_phuc_vu [xhigh].'
+    model: 'measured — ops/reviews/pr1048-review-3-codex/run/run.json model_phuc_vu_trang_thai DO_DUOC, 16/16 su kien gpt-6.1-sol (ho openai, khac ho claude cua executor).'
+    effort: 'measured — ops/reviews/pr1048-review-3-codex/run/run.json effort_phuc_vu [xhigh].'
     sandbox_mode: >-
-      measured — ops/reviews/pr1048-review-2-codex/run/run.json sandbox_trang_thai DO_DUOC (codex-linux-sandbox,
+      measured — ops/reviews/pr1048-review-3-codex/run/run.json sandbox_trang_thai DO_DUOC (codex-linux-sandbox,
       file_system restricted). Gioi han cua phep do theo sandbox_gioi_han: lay mau /proc moi 0.2 s.
-  ly_do_chua_dat: 'Ba thanh phan thuc thi do duoc, nhung review_exact_sha CHUA_DAT nen §8.1 CHUA_DAT.'
+  gioi_han: >-
+    Ho model executor (claude) suy theo provider, KHONG do_may. Verdict exact SHA co SAU merge; luot truoc merge (luot 2)
+    cham 48b54d8 voi CLAUDE.md trung byte.
 
 khong_do_duoc:
   - 'Merge bam tay hay qua phien: phien bam (thuat_lai); GitHub chi ghi merged_by ducthangho.'

@@ -1,0 +1,86 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1085
+packet_id: DIEU-KIEN-MERGE-VA-SO-SACH
+mission_issue: 1085
+mission_id: gh-1085
+mission_ghi_chu: 'packet don le, khong thuoc mission nao; dung chinh Packet Issue #1085 lam o chua'
+revision: 1
+generation: 1
+lease_id: dieu-kien-merge-va-so-sach-r1-g1-claude-remote-20261031
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau tien cua packet; khong co lease tien nhiem'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1085#issuecomment-6543878208
+authority_url: https://github.com/ducthangho/tra-luat/issues/1085#issuecomment-6543878208
+authority_ghi_chu: 'duyet spec_hash 614f9eec…afbe5 (blob f26076e0, commit e447d34) va cho cap lease write set 6 tep; ghi ho theo chi thi truc tiep cua chu kho trong phien session_015GtxrYPjZCTZeRiazdssgq 31-10-2026'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-10-31T13:21:00Z'
+heartbeat_at: '2026-10-31T13:21:00Z'
+lease_until: '2026-11-01T13:21:00Z'
+lease_expires_at_utc: '2026-11-01T13:21:00Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: systemic
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: 'fresh independent session, read-only exact head, qua launcher.py run, co snapshot §8.2 dau/cuoi; connector Codex goi bang @codex review tren PR draft (C1 DAT)'
+spec_path: ops/specs/DIEU-KIEN-MERGE-VA-SO-SACH-r1.md
+spec_ref: refs/heads/ops/dieu-kien-merge-r1-lease
+spec_ref_ghi_chu: 'spec cung co tren nhanh PR #1084 (claude/pr-wp-merge-conditions-26j42i @ e447d34) va duoc chep nguyen byte len nhanh lease nay; thu dinh danh la BAM, khong phai ten nhanh.'
+spec_hash: 614f9eec4a80a41fc12014848b0b8fdaacea37ccba0193d7a94088227b9afbe5
+spec_sha256: 614f9eec4a80a41fc12014848b0b8fdaacea37ccba0193d7a94088227b9afbe5
+spec_blob: f26076e0b0ba8b7454cc845ba4d8b9d77ddd4d72
+branch: agent/wp1085-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 7b845f59e150047ca44582331fb9207860297e24
+start_from_sha: 7b845f59e150047ca44582331fb9207860297e24
+reviewed_sha_required: 7b845f59e150047ca44582331fb9207860297e24
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot'
+write_set:
+- docs/adr/0060-dieu-kien-merge-va-moc-ready.md
+- docs/PROTOCOL_DA_PHIEN.md
+- .github/workflows/ops-open-pr.yml
+- .claude/skills/cross-review/SKILL.md
+- .claude/skills/work-packet/SKILL.md
+- .claude/skills/land-packets/SKILL.md
+write_set_planned:
+- docs/adr/0060-dieu-kien-merge-va-moc-ready.md
+write_set_hash: c367c54408bd56e40659fcdf32f4e1bb0d49746d83da3f2bbae1d2f9711a4f57
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-10-31T13:21:00Z: ls-remote 725, fetch du; 6/6 duong dan NGUOI_GIU 0; so ADR 0060 chua dung o nhanh nao'
+tran_kich_thuoc: '<= 6 tep / <= 450 dong them (ADR-0053@8ab1007, spec §4 A5)'
+tran_loi_goi_codex: '10 theo dong khai ADR-0055@d2e3052 cua spec; da dung 0 (4 luot review tren PR spec #1084 khong tinh)'
+dieu_kien_merge_bo_sung: 'chu kho 31-10: het P0-P2, P3 dong hoac chu kho mien; Windows required (spec A9) tren may chu kho qua Desktop Commander; review co snapshot §8.2'
+coordination_paths:
+- ops/leases/dieu-kien-merge-va-so-sach-r1-g1-claude-remote-20261031.yaml
+- ops/specs/DIEU-KIEN-MERGE-VA-SO-SACH-r1.md
+run_minutes: 1440
+heartbeat_required_minutes: 360
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

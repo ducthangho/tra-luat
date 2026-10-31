@@ -1,0 +1,6 @@
+sys.platform=linux
+Python=3.13.17
+os.name=posix
+independent_os_listdir_total=312
+CLI_total=312
+equal=True

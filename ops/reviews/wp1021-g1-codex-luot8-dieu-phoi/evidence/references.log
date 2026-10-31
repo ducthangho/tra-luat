@@ -1,0 +1,20 @@
+{"history": [{"commit": "5efa311fd857f7657a1c687e9ea37693070a37d3", "new_mutants": ["m144_sinh_no_loc_duoi_CHINH_XAC", "m145_bo_chon_khong_sap_xep", "m146_bo_chon_bo_nhanh_thu_muc_vang", "m147_bo_chon_bo_bat_OSError"]}, {"commit": "8d9e3e3b55897575b9e69a13f5d1a4f3ff6c9fde", "new_mutants": ["m148_bo_chon_hoi_is_dir_TRAN", "m149_kiem_guard_hoi_is_dir_TRAN", "m150_hoi_trang_thai_bo_bat_OSError", "m151_kiem_hoi_git_TRAN", "m152_bo_chon_bat_Exception", "m153_hoi_trang_thai_bat_Exception"]}, {"commit": "e9e0048b48ab610fee1246368b4f134c1ac4ae76", "new_mutants": ["m154_hoi_trang_thai_chi_bat_PermissionError", "m155_bo_chon_chi_bat_PermissionError"]}], "c98_to_c101_body_equal_without_docstring": true}
+{"case": "c88_B4_LOI_TU_KHAI_surface_can_provider_va_khong_trich_dan", "result": ["qua", null]}
+{"case": "c89_B2_receipt_KHONG_DOC_DUOC_la_rc2_khong_traceback", "result": ["qua", null]}
+{"case": "c98_TIN_DUNG_GIA_phai_in_DU_ngoai_le_va_vi_tri_nem", "result": ["qua", null]}
+{"case": "c99_bo_chon_bien_nhan_co_rang_o_SINH_NO_THU_TU_THU_MUC_VANG_va_LOI_LIET_KE", "result": ["qua", null]}
+{"case": "c100_LOI_TRANG_THAI_thu_muc_la_rc2_va_LOI_LAP_TRINH_di_thang", "result": ["qua", null]}
+{"case": "c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen", "result": ["qua", null]}
+{"mutation": "m144_sinh_no_loc_duoi_CHINH_XAC", "non_target": "c101", "result": ["qua", null], "control": [true, ""]}
+{"mutation": "m145_bo_chon_khong_sap_xep", "non_target": "c101", "result": ["qua", null], "control": [true, ""]}
+{"mutation": "m146_bo_chon_bo_nhanh_thu_muc_vang", "non_target": "c101", "result": ["qua", null], "control": [true, ""]}
+/tmp/review-t27-2vgfx7ev/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/review-t27-2vgfx7ev/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+/tmp/review-t27-2vgfx7ev/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/review-t27-2vgfx7ev/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+{"case": "t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen", "baseline": "qua", "mutant": "assertion_failed", "detail": "bộ liệt kê không thấy đủ cả hai cách viết đuôi — nó đang phụ thuộc nền", "old": "p.is_file() and p.name.lower().endswith(d)", "new": "p.is_file() and p.name.endswith(d)"}
+REFERENCES: history matches 1/2/3; rename AST equal; 6/6 current cases qua; c101 survives m144/145/146; t27 suffix mutant killed

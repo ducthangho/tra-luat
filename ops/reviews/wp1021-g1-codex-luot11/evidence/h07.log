@@ -1,0 +1,13 @@
+ruff 0.16.9
+python3 -m ruff --version: /usr/bin/python3: No module named ruff
+Dùng executable Ruff có sẵn; không cài đặt và không tải mạng.
+COMMAND: cwd=/tmp/rv1040-r11-ruff-base-aus4b1yk /root/.local/bin/ruff check --no-cache --select F --output-format json ops/bien_nhan_v2.py ops/bien_nhan_v2_test.py
+base: rc=1; diagnostics=1
+base codes={'F541': 1}
+COMMAND: cwd=/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/rv1040-r11/cay-kho /root/.local/bin/ruff check --no-cache --select F --output-format json ops/bien_nhan_v2.py ops/bien_nhan_v2_test.py
+head: rc=1; diagnostics=1
+head codes={'F541': 1}
+added={}
+removed={}
+delta_count=0
+diagnostics_equal_after_line_mapping=True

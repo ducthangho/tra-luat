@@ -1,0 +1,3 @@
+glob-revert -> c101_chon_bien_nhan_KHONG_phan_biet_hoa_thuong_tren_moi_nen = giet_that
+detail=C1a: đòi tổng 2 nêu x.RECEIPT.YAML, không ĐẠT; được rc=1 tổng=1: 'òi 2 · thiếu/rỗng `receipt_id` · thiếu/rỗng `reviewed_sha` · thiếu/rỗng `verdict_path` · thiếu/rỗng `verdict_sha256` · thiếu/rỗng `evidence_url` · thiếu/rỗng ánh xạ `model_reviewer_identity` · thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không) · thiếu/rỗng ánh xạ `anchor`\nTỔNG: ĐỎ\n'
+control=c18_neo_git_DUNG_thi_qua; clean=True; reason=

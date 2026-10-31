@@ -1,0 +1,7 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/6311a229-c7eb-5096-a819-78ab343b359f/scratchpad/rv1040-r11/VERDICT.md): **approve** đúng SHA `a16932aa09ce860a614f0bab4b2015699e7221bc`, 0 finding P0–P3.
+
+- Suite: **98/98 · 153/153 · 2/2**, `TỔNG: ĐẠT`.
+- Cổng thật: tổng **312**, đạt.
+- Năm đột biến chỉ định đều `giet_that` đúng ca đích.
+- C4/C5/C7: **KHÔNG ĐO ĐƯỢC**.
+- Snapshot đầu/cuối xác nhận `cay-kho/` không đổi.

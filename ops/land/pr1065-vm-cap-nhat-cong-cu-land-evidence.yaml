@@ -3,7 +3,8 @@
 # Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
 #
 # TRANG THAI: merged (3dfb973), `landed: false` — cho chu kho quyet o PR ghi so; mot moc §10.2.2 (Workflow definition)
-# KHONG do duoc trong phien web (GraphQL 403) va assurance reviewer §8.1 CHUA DAT (xem con_thieu_de_goi_landed).
+# Workflow definition da dong qua ASUS (gh graphql); assurance §8.1: cross_approved tren BAN VA 210ab81 (PR #1069), con ban
+# merge b0814f4 bi cross-review luot 1 tra changes_requested (1 P0) — xem ASSURANCE-REVIEWER-81 va review.cross_review.
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien, KHONG tai
 # chay; not_measured = khong do duoc, ghi ly do.
@@ -97,17 +98,30 @@ trang_thai_packet:
         §10.2.2 moc Checkout (SHA/tree that chay) va Gate output (command/rc/marker duong) chua do: chi co REST run/jobs. Theo
         bai hoc CLAUDE.md (PR #900), REST run xanh CHI la moc run.
     - id: ASSURANCE-REVIEWER-81
-      trang_thai: chua_dat
+      trang_thai: dat_tren_ban_va
       mo_ta: >-
-        Khong co cross-review doc lap (khong launcher.py run, khong verdict trong ops/reviews). Codex connector sach tren DUNG
-        b0814f4 nhung khong lo ho model => `khong_do_duoc` (§8, §8.1), cung ly do dinh_chinh cua pr870.
+        measured — ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml (schema v2, bien_nhan_v2 DAT): codex qua launcher.py
+        run 52f05f65, model gpt-6.1-sol do_may, `approve` 0/0/0/0 tren 210ab81 (nhanh PR #1069, pham vi ops/vm/). CHU Y: day la
+        phe duyet BAN VA, KHONG phai ban da merge b0814f4 — luot 1 tren b0814f4 tra changes_requested (1 P0 giao-acl-theo-junction,
+        3 P1); ban da merge chi "land dung" khi PR #1069 merge. Codex connector tren b0814f4 sach nhung khong lo ho model.
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: cho_chu_kho
       mo_ta: 'Ho so nay KHONG tu goi landed.'
 
 review:
-  cross_review: []
-  cross_review_ghi_chu: 'Khong chay cross-review (codex qua launcher.py) cho PR nay.'
+  cross_review:
+    - luot: 1-15
+      reviewed_sha: 'b0814f4 aedd620 bbc3430 e5e2430 ea5ccd5 28fdbdf 00dd9d4 8e67b70 e218901 d005cf4 d20a69e b667da8 e5838ff f3231c8 c489c72'
+      verdict: changes_requested
+      nguon: ops/reviews/pr1065-review-16-codex/luot-truoc/luotN/VERDICT.md
+    - luot: 16
+      reviewed_sha: 210ab81c3f1af36243748458eb5e70180baeab71
+      verdict: approve
+      nguon: ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml
+  cross_review_ghi_chu: >-
+    measured — luot 16: ops/reviews/pr1065-review-16-codex/run/run.json (head 210ab81, ma_thoat 0) va
+    ops/reviews/pr1065-review-16-codex/VERDICT.md; luot 1–15: ops/reviews/pr1065-review-16-codex/luot-truoc/ (chi verdict + HINT,
+    run cua cac luot ay KHONG luu trong kho). Finding P0/P1 cua luot 1–13 deu sua tren nhanh PR #1069; luot 14–15 chi P2.
   codex_connector:
     do_duoc: >-
       measured — readback-reviews-1065.json + readback-review-comments-1065.json: luot 1 tren 6733d09 (Draft marked ready)

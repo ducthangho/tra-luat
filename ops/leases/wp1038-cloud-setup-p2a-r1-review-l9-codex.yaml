@@ -1,0 +1,83 @@
+# LEASE REVIEWER — CLOUD-SETUP-P2A-EXEC r1, luot 9 (L9) neo DUNG authorized_head 08baebb cua PR #1063 (da merge 69dcfee9).
+# GHI HO theo chi thi CHU KHO (chep nguyen van o granted_on_instruction_nguyen_van).
+#
+# MUC DICH: dong dieu kien (4)+(7) cua ho so land PR #1063 (PR #1067): luot approve cuoi L8 neo f4360dd, con head duoc merge
+# la 08baebb = f4360dd + merge origin/master 5a174b9. Luot nay la review DOC LAP tren DUNG 08baebb, qua launcher.py run,
+# de run.json ghi model phuc vu (model_phuc_vu_trang_thai).
+
+schema_version: 2
+event: review_lease_granted
+
+packet_issue: 1038
+mission_issue: 1008
+packet_id: CLOUD-SETUP-P2A-EXEC
+revision: 1
+generation: 1
+lease_id: wp1038-cloud-setup-p2a-r1-review-l9-codex
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease reviewer dau tien cua packet; cac luot L1-L8 chay duoi lease executor g1 (launcher.py run do executor goi).'
+
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1038#issuecomment-6539167708
+granted_on_instruction_nguyen_van: >-
+  Tin nhan chu kho trong phien dieu phoi (2026-10-31 ~04:5xZ): 'chọn 1, nâng trần lên 10 và chạy L9' — tra loi cau hoi: (1) nang
+  tran va chay them mot luot Codex L9 tren DUNG 08baebb, hay (2) chap nhan do may patch bat bien + Codex connector.
+authority_caveat: >-
+  Comment neo do phien agent dang bang tai khoan chu kho, chep loi chu kho trong phien — yeu hon comment chu kho tu viet (#566).
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4 ghi lease; phien GOI reviewer la session_015GtxraGTojT59SGoA5dZDb (chi khoi chay launcher.py run, khong review, khong ghi kho).'
+
+leased_at_utc: '2026-10-31T04:45:00Z'
+heartbeat_at: '2026-10-31T04:45:00Z'
+lease_until: '2026-10-31T10:45:00Z'
+lease_expires_at_utc: '2026-10-31T10:45:00Z'
+
+role: reviewer
+provider: openai_codex
+reviewer: openai_codex
+model_family: openai
+execution_surface: codex_cli
+executor: anthropic_claude
+executor_model_family: claude
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+spec_path: ops/specs/cloud-setup-p2a-exec-r1.md
+spec_ref: refs/heads/master
+spec_blob: d7d4e240a181c7b68dea72b0be0393e334544b75
+spec_sha256: 1071797a1cf2016a9266a98ccece02ed6edd4e80ca33d3b91b2547f7ca0c13e1
+spec_hash: 1071797a1cf2016a9266a98ccece02ed6edd4e80ca33d3b91b2547f7ca0c13e1
+
+reviewed_sha_required: 08baebb25b54ce343c9ad56df5f4c389a6241c7e
+reviewed_tree_required: fb949df97b295611d8c4403aaa42ea18137dc8fb
+merge_commit_da_land: 69dcfee9274aae12ca27dfecc22a980e560cc3bc
+target_pull_request: 1063
+pham_vi_review: >-
+  Diff packet = git diff 8cdb15a7..08baebb tren 13 tep write set (13 tep / +524 dong so merge-base). Doi chieu: luot L8 (f4360dd)
+  approve 0/0/0/0 (ops/land/pr1063-wp1038-r1-provenance/verdicts/wp1038-r1-luot8-VERDICT.md tren nhanh ccr-004fa546-sde2w7);
+  khac biet f4360dd..08baebb chi la merge origin/master 5a174b9 — patch-bat-bien-f4360dd-08baebb.txt: 12/13 tep giong tung byte,
+  RELEASE_MANIFEST.json tai sinh. Ngoai le pham vi chu kho duyet: issuecomment-6539003369.
+verdict_must_answer: >-
+  (i) 08baebb co dung la f4360dd + merge 5a174b9, va 12 tep packet ngoai RELEASE_MANIFEST.json khong doi; RELEASE_MANIFEST.json
+  tai 08baebb co khop release-verify --strict khong (do bang git va lenh, khong nhan loi); (ii) co loi hanh vi P0-P3 nao trong diff
+  packet tai DUNG 08baebb, ke ca tuong tac voi cac thay doi master mang vao qua 5a174b9; (iii) verdict approve/request_changes neo
+  reviewed_sha 08baebb. Khong san dot bien moi ngoai ma packet (luat chu kho issuecomment-6494782891).
+tran_loi_goi_codex: 'ADR-0052@8ab100793df9831505f495543a74044b91c2c9ab, nang_tran chu kho issuecomment-6539167708 (8 -> 10): day la loi goi thu 9/10 cua packet.'
+cach_chay: >-
+  launcher.py run, phien doc lap read-only, neo exact head 08baebb; run.json phai co model_phuc_vu_trang_thai (DO_DUOC moi tinh
+  §8.1 do_may). Ket qua (run.json + VERDICT.md + sha256) gui ve phien dieu phoi de ghi vao ho so land; KHONG ghi kho.
+
+cam_tuyet_doi:
+  - Khong ghi bat ky tep nao trong kho, khong push, khong mo PR
+  - Khong approve/merge tren GitHub
+  - Khong LIVE, khong credential that
+  - Khong viet chuoi bo-qua-CI nguyen van
+
+run_minutes: 360
+heartbeat_required_minutes: 360

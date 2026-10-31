@@ -17,7 +17,7 @@ authority_ghi_chu: 'duyet spec_hash 614f9eec…afbe5 (blob f26076e0, commit e447
 recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-10-31T13:21:00Z'
-heartbeat_at: '2026-10-31T13:21:00Z'
+heartbeat_at: '2026-10-31T13:21:54Z'
 lease_until: '2026-11-01T13:21:00Z'
 lease_expires_at_utc: '2026-11-01T13:21:00Z'
 role: executor

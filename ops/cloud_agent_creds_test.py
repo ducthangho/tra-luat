@@ -117,13 +117,16 @@ def a9_loi_gui_tin_hieu_khong_bao_da_dung():   # F11: killpg lỗi (TIÊM), ch�
                 os.kill(pg, 9)
                 raise PermissionError("tiêm lỗi")
             return that(pg, sig)
-        moi = {"TL_MASTER_KEY": "k", "CAC_NHAT_KY": str(t / "nk"), "CAC_KICH_BAN": json.dumps({"ngu": 60, "con": 1})}
+        kb = {"ngu": 60, "con": 1, "in": "chẩn đoán SENTINEL-a9\n[bootstrap] agent_creds: ĐÃ NẠP — cũ\n", "loi": "lỗi chẩn đoán\n"}
+        moi = {"TL_MASTER_KEY": "SENTINEL-a9", "CAC_NHAT_KY": str(t / "nk"), "CAC_KICH_BAN": json.dumps(kb)}
         with mock.patch.dict(os.environ, moi), mock.patch.object(m.os, "killpg", gia), contextlib.redirect_stdout(buf):
-            m.nap({"TL_MASTER_KEY": "k", "TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "1"})
+            m.nap({"TL_MASTER_KEY": "SENTINEL-a9", "TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "1"})
         nk = json.loads((t / "nk").read_text(encoding="utf-8")) if (t / "nk").exists() else {}
         song = _song_roi_don([nk.get("con"), *([int((t / "nk.chau").read_text())] if (t / "nk.chau").exists() else [])])
     bang(song, "fixture hỏng: con/cháu phải còn sống khi chỉ cha bị giết")
     bang("KHÔNG dừng được" in buf.getvalue() and "đã dừng" not in buf.getvalue(), f"báo dừng khi nhóm còn sống: {buf.getvalue()!r}")
+    ra = buf.getvalue()   # F12: nhóm KHÔNG dừng được vẫn chuyển tiếp log đã nhận, đúng một lần, đã che, bỏ dòng agent cũ
+    bang(ra.count("chẩn đoán ***") == 1 and ra.count("lỗi chẩn đoán") == 1 and "SENTINEL-a9" not in ra and ra.count("agent_creds:") == 1, f"log: {ra!r}")
 def a5_doc_timeout():
     m = nap_mod()
     for v in ("abc", "-5", "0", "inf", "1e300", "2147484"):
@@ -257,6 +260,7 @@ def d1_env_file_dung_mot_dong():
         bang(dong.count("export AGY_CLI_DISABLE_AUTO_UPDATE=1") == 1 and "export FOO=1" in dong, f"env file: {dong}")
 # ---------- H: khối trong hook ----------
 MO, DONG = "# >>> agent-creds (wp1039)", "# <<< agent-creds (wp1039)"
+PY_GIA = "#!{exe}\nimport json, sys\nopen({log!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n"   # argv nguyên danh sách (F09)
 RE_NAP, RE_CAI = re.compile(r'cloud_agent_creds\.py"?\s+nap\b'), re.compile(r'cloud_agent_creds\.py"?\s+cai-agy\b')
 def h1_vi_tri_khoi_trong_hook():
     dong = HOOK.read_text(encoding="utf-8").splitlines()
@@ -279,12 +283,12 @@ def h2_khoi_song_sot_set_e():
     bash = bash_nen.tim_bash()[0]
     bang(bash, "POSIX mà không có bash dùng được — không được bỏ qua (F06)")
     with tempfile.TemporaryDirectory() as t:
-        _ghi(py := Path(t) / "py_gia", f'#!/bin/sh\nprintf "[%s]" "$@" >> "{t}/argv"\necho >> "{t}/argv"\nexit 3\n', True)   # giữ ranh giới đối số
+        _ghi(py := Path(t) / "py_gia", PY_GIA.format(exe=sys.executable, log=str(Path(t, "argv"))), True)
         than = "\n".join(dong[dong.index(MO) + 1:dong.index(DONG)])
         r = subprocess.run([bash, "-c", 'set -euo pipefail; PY="$1"; GOC="$2"\n' + than, "h2", str(py), t], capture_output=True, text=True, timeout=60)
-        goi = Path(t, "argv").read_text(encoding="utf-8").splitlines() if Path(t, "argv").exists() else []
+        goi = [json.loads(x) for x in Path(t, "argv").read_text(encoding="utf-8").splitlines()] if Path(t, "argv").exists() else []
     bang(r.returncode == 0 and "[session-start] " in r.stdout, f"rc={r.returncode} {r.stdout!r} {r.stderr!r}")
-    bang(goi == [f"[{t}/ops/cloud_agent_creds.py][nap]", f"[{t}/ops/cloud_agent_creds.py][cai-agy]"], f"PY nhận {goi}")
+    bang(goi == [[f"{t}/ops/cloud_agent_creds.py", "nap"], [f"{t}/ops/cloud_agent_creds.py", "cai-agy"]], f"PY nhận {goi}")
 def h3_ten_nang_luc():
     moi, cu = [set(next(x for x in v.splitlines() if x.startswith("# hook-nang-luc:")).split()[2:])
                for v in (HOOK.read_text(encoding="utf-8"), _git_base(".claude/hooks/session-start.sh"))]
@@ -306,6 +310,7 @@ DOT_BIEN = (
     ("A3_bo_kiem_tap_trang_thai", "ma", " or s not in TRANG_THAI", "", "a3_bang_sau_ca_hop_dong"),
     ("A4_bo_giet", "ma", "os.killpg(p.pid, signal.SIGKILL) if", "None if", "a4_qua_han_giet_ca_nhom"),
     ("A4_chi_giet_cha", "ma", "os.killpg(p.pid, signal.SIGKILL) if", "p.kill() if", "a4_qua_han_giet_ca_nhom"),
+    ("A9_mat_log_khi_khong_dung_duoc", "ma", "        ra = e.output or b\"\"\n", "        ra = b\"\"\n", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
     ("A4_bo_chuyen_tiep_log_khi_qua_han", "ma", "(da, ra), ly = _giet_nhom(p),", "(da, _), ra, ly = _giet_nhom(p), b\"\",", "a4_qua_han_giet_ca_nhom"),
     ("A9_bo_hau_kiem_nhom", "ma", "    return song is False, ra", "    return True, ra", "a9_loi_gui_tin_hieu_khong_bao_da_dung"),
     ("A4_bo_timeout", "ma", "p.communicate(timeout=han)", "p.communicate()", "a4_qua_han_giet_ca_nhom"),
@@ -339,6 +344,7 @@ DOT_BIEN = (
     ("H1_khoi_ngay_sau_tieu_de_truoc_pip", "hook", None, _doi_khoi_len_tieu_de, "h1_vi_tri_khoi_trong_hook"),
     ("H2_bo_or_true", "hook", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /'", "h2_khoi_song_sot_set_e"),
     ("H2_gop_doi_so", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py nap" 2>&1', "h2_khoi_song_sot_set_e"),
+    ("H2_va_cham_ngoac", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py][nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_bo_qua_nap", "hook", 'MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap', 'MA_AC=0; : "$PY" "$GOC/ops/cloud_agent_creds.py" nap', "h2_khoi_song_sot_set_e"),
     ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
 )

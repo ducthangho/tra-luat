@@ -53,8 +53,12 @@ def _giet_nhom(p):
     ra = b""
     with contextlib.suppress(OSError):
         os.killpg(p.pid, signal.SIGKILL) if os.name != "nt" else p.kill()
-    with contextlib.suppress(OSError, ValueError, subprocess.TimeoutExpired):
+    try:
         ra = p.communicate(timeout=HAN_DON)[0] or b""
+    except subprocess.TimeoutExpired as e:   # nhóm còn giữ ống: vẫn giữ phần đã nhận (F12)
+        ra = e.output or b""
+    except (OSError, ValueError):
+        pass
     if p.poll() is None or os.name == "nt":
         return p.poll() is not None, ra
     het = time.monotonic() + HAN_DON

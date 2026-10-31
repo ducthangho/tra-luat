@@ -8,6 +8,7 @@ tạm của script và đòi ca đích ĐỎ bằng `ChotCa` (lớp riêng: lỗ
 In ĐÚNG MỘT dòng chỉ gồm `đạt/tổng` (đơn vị: ca test); ca đỏ in `DO <ca>: …`; ca không đo được trên nền này
 (Windows: đồ giả là script POSIX) in `BO QUA <ca>: …`, bị trừ khỏi tổng. Chạy: python -B ops/codex_cloud_setup_test.py
 """
+import json
 import os
 import re
 import shutil
@@ -243,12 +244,12 @@ def ca_nap_khong_giet_setup():
     d = [x for x in SCRIPT_DANG_DUNG.read_text(encoding="utf-8").splitlines() if RE_NAP.search(x) and not x.lstrip().startswith("#")]
     bang(len(d) == 1, f"nap {len(d)} lần")
     goc, env = _san()
-    (py := goc / "gia" / "py_rc3").write_text(f'#!/bin/sh\nprintf "[%s]" "$@" >> "{goc}/argv"\necho >> "{goc}/argv"\nexit 3\n', encoding="utf-8", newline="\n")
+    (py := goc / "gia" / "py_rc3").write_text(f"#!{sys.executable}\nimport json, sys\nopen({str(goc / 'argv')!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n", encoding="utf-8", newline="\n")
     py.chmod(0o755)
     p = subprocess.run([_bash(), "-c", 'set -euo pipefail; PY="$1"\n' + d[0] + "\necho XONG", "_", str(py)], capture_output=True, text=True, env=env, cwd=str(goc), timeout=60)
     bang(p.returncode == 0 and "XONG" in p.stdout, f"PY rc 3 giết setup: rc={p.returncode} {p.stderr}")
-    goi = (goc / "argv").read_text(encoding="utf-8").splitlines() if (goc / "argv").exists() else []
-    bang(goi == ["[ops/cloud_agent_creds.py][nap]"], f"PY nhận {goi} (lời gọi mất/sai đích — F05)")
+    goi = [json.loads(x) for x in (goc / "argv").read_text(encoding="utf-8").splitlines()] if (goc / "argv").exists() else []
+    bang(goi == [["ops/cloud_agent_creds.py", "nap"]], f"PY nhận {goi} (lời gọi mất/sai đích — F05)")
 _SH = SCRIPT.read_text(encoding="utf-8")
 _PIP, _NAP = '  "$PY" -m pip install --quiet -r requirements.txt\n', '  "$PY" ops/cloud_agent_creds.py nap || true\n'
 _DOAN = _SH[_SH.find(_PIP):_SH.find(_NAP) + len(_NAP)] if _PIP in _SH and _NAP in _SH else "<khong thay doan pip..nap>"
@@ -273,6 +274,7 @@ DOT_BIEN = [
     ("nap_truoc_pip", _DOAN, _NAP + _DOAN[:-len(_NAP)], "ca_nap_trong_main_sau_pip"),
     ("nap_bi_vo_hieu", '  "$PY" ops/cloud_agent_creds.py nap', '  : "$PY" ops/cloud_agent_creds.py nap', "ca_nap_khong_giet_setup"),
     ("nap_gop_doi_so", '"$PY" ops/cloud_agent_creds.py nap || true', '"$PY" "ops/cloud_agent_creds.py nap" || true', "ca_nap_khong_giet_setup"),
+    ("nap_va_cham_ngoac", '"$PY" ops/cloud_agent_creds.py nap || true', '"$PY" "ops/cloud_agent_creds.py][nap" || true', "ca_nap_khong_giet_setup"),
     ("nap_bo_or_true", "ops/cloud_agent_creds.py nap || true", "ops/cloud_agent_creds.py nap", "ca_nap_khong_giet_setup"),
 ]
 

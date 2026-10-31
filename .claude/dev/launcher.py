@@ -2928,7 +2928,8 @@ def _chay_probe_nhu_shell(lenh: list[str], **kw):
     symlink; phần tử rỗng ⇒ `<tên>`; phần tử quá dài ⇒ như phần tử rỗng, trừ phần tử cuối thì bỏ), theo thứ tự; execve qua `./<tên>` khi chuỗi
     không có `/`. Chỉ EACCES/ENOENT/ESTALE/ENOTDIR/ENODEV/ETIMEDOUT sang ứng viên sau; ENOEXEC ⇒ `/bin/sh`
     chạy CHÍNH chuỗi ấy; lỗi khác (ETXTBSY, ELOOP…) ném ngay; hết ⇒ EACCES nếu từng gặp, không thì lỗi cuối.
-    MIỄN TRỪ W-1077-1 (chủ kho, lease g5): shebang qua phần tử rỗng thấy `$0`=`./<tên>`. Windows giữ nguyên. PHẠM VI (chủ kho thu hẹp
+    MIỄN TRỪ W-1077-1 (chủ kho, lease g5–g6): shebang qua ứng viên cwd (phần tử rỗng hoặc quá dài) thấy `$0`=`./<tên>`.
+    Windows giữ nguyên. PHẠM VI (chủ kho thu hẹp
     31-10-2026): probe CLI của `CONG_CU`/`KHA_NANG`; CHƯA phủ `_git`, `_do_codex_song` — nợ #1083.
     """
     import errno

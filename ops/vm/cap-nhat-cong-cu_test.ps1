@@ -104,7 +104,8 @@ Ca 'dang_ky_loi_co_ma_thoat_rieng' { (Get-Content -LiteralPath $Script -Raw) -ma
 # ── cross-review PR #1065 lượt 1: mỗi finding một ca đo HÀNH VI ──
 Ca 'co_tep_khong_doc_phien_ban_thi_khong_cai' {
     (Test-CoTheCai $true '') -eq $false -and (Test-CoTheCai $true $null) -eq $false -and
-    (Test-CoTheCai $false '') -eq $true -and (Test-CoTheCai $true '24.1.0') -eq $true
+    (Test-CoTheCai $false '') -eq $true -and (Test-CoTheCai $true '24.1.0') -eq $true -and
+    (Test-CoTheCai $true '24.1.0-rc.7') -eq $false -and (Test-CoTheCai $true '24.1.0+build.1') -eq $false
 }
 Ca 'acl_chi_admin_ghi' {
     $ok = @([pscustomobject]@{ IdentityReference = 'NT AUTHORITY\SYSTEM'; FileSystemRights = 'FullControl'; AccessControlType = 'Allow' },
@@ -305,6 +306,11 @@ if '/venv/Scripts/' in sys.argv[0] and mode.startswith('venv-cai-'):
 
 if os.environ.get('CNCC_CHE_DO') == 'venv-python-hong' and '/venv/Scripts/' in sys.argv[0]:
     print('venv-runtime-error', file=sys.stderr); sys.exit(9)
+# Round 12: valid full identifiers differ in the case of a prerelease component.
+if mode == 'cli-khac-hoa-thuong' and ten in ('claude.cmd', 'codex.cmd') and a == ['--version']:
+    print('1.0.0-rc.a'); sys.exit(0)
+if mode == 'cli-khac-hoa-thuong' and ten == 'npm.cmd' and a[:1] == ['view']:
+    print('1.0.0-rc.A'); sys.exit(0)
 if mode == 'cli-hau-to' and ten in ('claude.cmd', 'codex.cmd') and a == ['--version']:
     print('1.0.0-rc.7'); sys.exit(0)
 if mode == 'portable-hau-to' and ten in ('rg.exe', 'shellcheck.exe', 'actionlint.exe'):
@@ -474,6 +480,11 @@ if (-not $IsWindows) {
         -not $k.loi -and $k.kq.Count -eq 11 -and $pip.Count -eq 1 -and $pip[0].rc -eq 8 -and
             (& $hang $k 'venv-kho')[0].hanh_dong -eq 'loi'
     }
+    Ca 'nd_cli_dinh_danh_khac_hoa_thuong_khong_duoc_dat' {
+        $k = Invoke-NguoiDungGia 'cli-khac-hoa-thuong'
+        -not $k.loi -and $k.kq.Count -eq 11 -and
+            @('claude', 'codex' | Where-Object { (& $hang $k $_).Count -ne 1 -or (& $hang $k $_)[0].hanh_dong -ne 'loi' }).Count -eq 0
+    }
     Ca 'nd_cli_hau_to_khong_duoc_coi_la_stable_dich' {
         $k = Invoke-NguoiDungGia 'cli-hau-to'
         -not $k.loi -and $k.kq.Count -eq 11 -and
@@ -566,10 +577,11 @@ if (-not $IsWindows) {
 }
 
 # HINT reviewer lượt 10: native version lớn hơn đích vẫn phải được phân loại đúng B.
-function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '') {
+function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '', [switch]$MajorMoi) {
     $ChiKiem = $false
     $g = Join-Path ([IO.Path]::GetTempPath()) ('cncc-dich-' + [guid]::NewGuid().ToString('N'))
     $pfCuDich = $env:ProgramFiles
+    $Script:TaiDichDaThu = [Collections.Generic.List[string]]::new()
     try {
         $env:ProgramFiles = "$g/PF"
         New-Item -ItemType Directory -Path "$g/PF/Git/cmd", "$g/PF/GitHub CLI", "$g/PF/nodejs", "$g/PF/PowerShell/7", "$g/bin" | Out-Null
@@ -591,13 +603,16 @@ function Invoke-DichBanGia([string]$Tang, [switch]$BanCao, [string]$HauTo = '') 
             $vRel = if ($Repo -eq 'PowerShell/PowerShell') { '7.6.10' } else { '2.0.0' }
             [pscustomobject]@{tag_name="v$vRel";assets=@([pscustomobject]@{name=$f;browser_download_url='OFFLINE';digest=('sha256:' + ('a' * 64))})}
         }
-        function Invoke-RestMethod { param($Uri, $TimeoutSec) @([pscustomobject]@{version='v24.2.0';lts='fixture'}) }
+        function Invoke-RestMethod { param($Uri, $TimeoutSec)
+            if ($MajorMoi) { [pscustomobject]@{version='v26.2.0';lts='new-major'} }
+            [pscustomobject]@{version='v24.2.0';lts='fixture'}
+        }
         function Invoke-WebRequest { param($Uri, $TimeoutSec, $Headers, $OutFile)
             if ($OutFile) { throw 'OFFLINE-KHONG-CAI' }
-            [pscustomobject]@{Content=(('a' * 64) + '  node-v24.2.0-x64.msi')}
+            [pscustomobject]@{Content=(('a' * 64) + '  node-v24.2.0-x64.msi' + "`n" + ('a' * 64) + '  node-v26.2.0-x64.msi')}
         }
         function New-ThuMucTai { param([switch]$ChiAdmin) New-Item -ItemType Directory -Force -Path "$g/tai" | Out-Null; "$g/tai" }
-        function Save-CoKiemBam { param($Url, $Bam, $ThuMuc, $Ten) throw 'OFFLINE-KHONG-CAI' }
+        function Save-CoKiemBam { param($Url, $Bam, $ThuMuc, $Ten) $Script:TaiDichDaThu.Add($Ten); throw 'OFFLINE-KHONG-CAI' }
         function Start-Process { throw 'OFFLINE-KHONG-CAI' }
         $Script:KetQua.Clear()
         if ($Tang -eq 'HeThong') { Invoke-TangHeThong *> $null }
@@ -609,6 +624,16 @@ if (-not $IsWindows) {
     Ca 'dich_he_thong_doi_chung_bang_dich' {
         $k = @(Invoke-DichBanGia 'HeThong')
         $k.Count -eq 4 -and @($k | Where-Object hanh_dong -ne 'giu').Count -eq 0
+    }
+    Ca 'node_hau_to_khong_duoc_tu_chon_major_moi' {
+        foreach ($ht in '-rc.7', '+build.1') {
+            $k = @(Invoke-DichBanGia 'HeThong' -HauTo $ht -MajorMoi)
+            $n = @($k | Where-Object cong_cu -eq 'node')
+            # Fail closed: unknown current major must not reach the download/installer path.
+            if ($n.Count -ne 1 -or $n[0].hanh_dong -ne 'loi' -or
+                @($Script:TaiDichDaThu | Where-Object { $_ -like 'node-v*' }).Count -ne 0) { return $false }
+        }
+        $true
     }
     Ca 'dich_he_thong_hau_to_khong_duoc_coi_la_stable_dich' {
         $k = @(Invoke-DichBanGia 'HeThong' -HauTo '-rc.7')

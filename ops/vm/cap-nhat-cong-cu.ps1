@@ -147,7 +147,9 @@ function Select-NodeLts($DanhSach, [string]$Truoc) {
 function Test-CoTheCai([bool]$CoTep, [string]$PhienBan) {
     # Có tệp chạy mà KHÔNG đọc được phiên bản ⇒ không biết đang ở major nào ⇒ KHÔNG cài (tránh nhảy major / ghi đè mù).
     # Cross-review PR #1065 lượt 1, P1 `node-khong-doc-duoc-van-nang-major`.
-    return -not ($CoTep -and [string]::IsNullOrWhiteSpace($PhienBan))
+    # "Đọc được" = parser nhận (ConvertTo-PhienBan khác null), không chỉ chuỗi khác rỗng: từ lượt 11 parser trả null cho hậu tố
+    # prerelease/build, và Select-NodeLts coi null là "chưa cài" ⇒ tự nâng major (cross-review lượt 12).
+    return -not ($CoTep -and $null -eq (ConvertTo-PhienBan $PhienBan))
 }
 
 function ConvertTo-MatNaQuyen($Quyen) {
@@ -409,8 +411,8 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         $rc = $LASTEXITCODE
         $sau = Get-PhienBanGoi $py $goi
         $dich = if ($goi -eq 'pip') { Get-BanMoiNhat 'pip' $py 'pip' } else { $ghim.$goi }
-        if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -ne $dich) { Add-KetQua $goi "$truoc" "$sau" 'loi' "pip rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
-        else { Add-KetQua $goi "$truoc" "$sau" $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) }
+        if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -cne $dich) { Add-KetQua $goi "$truoc" "$sau" 'loi' "pip rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
+        else { Add-KetQua $goi "$truoc" "$sau" $(if ($truoc -ceq $sau) { 'giu' } else { 'nang_cap' }) }
       } catch { Add-KetQua $goi '' '' 'loi' $_.Exception.Message }
     }
 
@@ -430,7 +432,7 @@ function Invoke-TangNguoiDung([string]$GocKho) {
                 $vpb = Get-PhienBanLenh $vpy @('--version') 'Python\s+(\S+)'
                 $vy = Get-PhienBanGoi $vpy 'PyYAML'; $vj = Get-PhienBanGoi $vpy 'jsonschema'
                 if ($rcPip -ne 0) { Add-KetQua 'venv-kho' "$vpb" '' 'loi' "pip rc=$rcPip $($o | Select-Object -Last 1)" }
-                elseif (-not $vpb -or $vy -ne $ghim.PyYAML -or $vj -ne $ghim.jsonschema) {
+                elseif (-not $vpb -or $vy -cne $ghim.PyYAML -or $vj -cne $ghim.jsonschema) {
                     Add-KetQua 'venv-kho' "$vpb" '' 'loi' "sau pip: python='$vpb' PyYAML='$vy' (ghim $($ghim.PyYAML)) jsonschema='$vj' (ghim $($ghim.jsonschema))"
                 } else { Add-KetQua 'venv-kho' $vpb $vpb 'giu' "requirements.txt đã cài; PyYAML $vy, jsonschema $vj khớp ghim" }
             } catch { Add-KetQua 'venv-kho' '' '' 'loi' $_.Exception.Message }
@@ -451,8 +453,9 @@ function Invoke-TangNguoiDung([string]$GocKho) {
         catch { Add-KetQua $p[0] "$truoc" '' 'loi' "không chạy được npm: $($_.Exception.Message)"; continue }
         $sau = Get-PhienBanLenh $exe @('--version') '(\d+\.\d+\.\d+\S*)'
         $dich = Get-BanMoiNhat 'npm' $npm $p[1]
-        if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -ne $dich) { Add-KetQua $p[0] "$truoc" "$sau" 'loi' "npm rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
-        else { Add-KetQua $p[0] "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' }) }
+        # So PHÂN BIỆT hoa/thường (-cne): `-ne` của PowerShell coi `rc.a` bằng `rc.A` (lượt 12).
+        if ($rc -ne 0 -or -not $sau -or -not $dich -or $sau -cne $dich) { Add-KetQua $p[0] "$truoc" "$sau" 'loi' "npm rc=$rc, sau='$sau', đích='$dich' $($o | Select-Object -Last 1)" }
+        else { Add-KetQua $p[0] "$truoc" $sau $(if ($truoc -ceq $sau) { 'giu' } elseif ($truoc) { 'nang_cap' } else { 'cai_moi' }) }
     }
 
     # 4. Nhị phân portable vào C:\Tools\bin, có kiểm băm. actionlint theo ghim; rg/shellcheck bản mới nhất.
@@ -489,10 +492,10 @@ function Invoke-TangNguoiDung([string]$GocKho) {
             } catch { $loiSt = $_.Exception.Message } finally { $env:USERPROFILE, $env:HOME = $hTruoc }
             $goiNlm = Get-PhienBanGoi $nlmPy 'notebooklm-mcp-cli'; $dich = Get-BanMoiNhat 'pip' $nlmPy 'notebooklm-mcp-cli'
             if ($rcPip -ne 0 -or -not $sau) { Add-KetQua 'nlm' "$truoc" "$sau" 'loi' "pip rc=$rcPip $($o | Select-Object -Last 1)" }
-            elseif (-not $dich -or $goiNlm -ne $dich -or $sau -ne $dich) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm.exe báo '$sau', gói '$goiNlm', bản mới nhất '$dich'" }
+            elseif (-not $dich -or $goiNlm -cne $dich -or $sau -cne $dich) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm.exe báo '$sau', gói '$goiNlm', bản mới nhất '$dich'" }
             elseif ($rcSt -ne 0) { Add-KetQua 'nlm' "$truoc" $sau 'loi' "nlm auth storage status rc=$rcSt $loiSt" }
             elseif ($cheDo -ne 'file') { Add-KetQua 'nlm' "$truoc" $sau 'loi' "chế độ lưu credential = '$cheDo' (cần 'file' cho nlm-auth-stage)" }
-            else { Add-KetQua 'nlm' "$truoc" $sau $(if ($truoc -eq $sau) { 'giu' } else { 'nang_cap' }) 'storage=file' }
+            else { Add-KetQua 'nlm' "$truoc" $sau $(if ($truoc -ceq $sau) { 'giu' } else { 'nang_cap' }) 'storage=file' }
           } catch { Add-KetQua 'nlm' "$truoc" '' 'loi' $_.Exception.Message }
         }
     }

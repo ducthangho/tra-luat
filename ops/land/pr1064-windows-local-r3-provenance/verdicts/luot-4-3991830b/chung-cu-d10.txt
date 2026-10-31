@@ -1,0 +1,52 @@
+# Doc lai CHI DOC qua Desktop Commander, may ASUS-LAPTOP (deviceId 7404cfba-9034-4787-b46b-7c358126a411), 2026-10-31 ~03:1xZ
+# Phien doc: executor WINDOWS-LOCAL-MAY-CHU-KHO r3 g1. Lenh: powershell -NoProfile -EncodedCommand (Get-ChildItem / Get-Content / Select-String / Get-WinEvent).
+# Day la ban chep nguyen van output cong cu tra ve (bo khoi CLIXML tien do cua PowerShell).
+
+## Tep trong D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y (ten|byte|CreationTimeUtc|LastWriteTimeUtc), loc sua > 08:30Z va tao < 15:00Z ngay 30-10
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\cho_luot.log|271|2026-10-30T08:56:42.9347808Z|2026-10-30T14:03:17.3303195Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest-ketqua.txt|635|2026-10-30T08:01:19.5322358Z|2026-10-30T14:03:16.9953540Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\selftest.log|81628|2026-10-30T09:01:24.1356599Z|2026-10-30T14:03:15.4872667Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\tra-luat\.git\FETCH_HEAD|623|2026-10-29T11:38:22.5196796Z|2026-10-30T18:34:25.9029771Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\tra-luat\changelog.d\wp-1009.md|1406|2026-10-30T09:01:22.4470409Z|2026-10-30T09:01:22.4470409Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\tra-luat\docs\PROTOCOL_DA_PHIEN.md|131639|2026-10-30T09:01:22.4629712Z|2026-10-30T09:01:22.4629712Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\tra-luat\ops\bien_nhan_v2_test.py|291095|2026-10-30T09:01:22.4629712Z|2026-10-30T09:01:22.4629712Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\tra-luat\scripts\tl.py|230206|2026-10-30T09:01:22.7671516Z|2026-10-30T09:01:22.7691466Z
+D:\tl-win\session_015GtxrbUPS7zGdffB8Sfo8Y\tra-luat\scripts\tl_gws.py|149903|2026-10-30T09:01:22.7751527Z|2026-10-30T09:01:22.7751527Z
+
+## Get-Content -Raw cho_luot.log
+2026-10-30T08:56:42.8662884Z BAT_DAU cho luot (toi da 8 gio)
+2026-10-30T09:01:15.0650793Z BAT_DAU cho luot (toi da 8 gio)
+2026-10-30T09:01:16.1237674Z khoa trong -> goi selftest.ps1
+2026-10-30T14:03:17.3060197Z selftest.ps1 rc=0
+2026-10-30T14:03:17.3273114Z XONG
+
+## Get-Content -Raw selftest-ketqua.txt
+BAT_DAU=2026-10-30T09:01:16.5807497Z
+KHOA_LAY=session_015GtxrbUPS7zGdffB8Sfo8Y	2026-10-30T09:01:16Z	tl --selftest tren origin/master (sau merge #1022)
+fetch_rc=0
+checkout_rc=0
+HEAD=757bde561d09738858506aecf5de2f050a5f0d5e
+STATUS=[]
+TAI_TRUOC=23252:browser-use.exe" --cli-mcp | 5772:browser-use.exe" --cli-mcp | 12720:python.exe -m proxima_agent.web | 26716:python.exe -m proxima_agent.web
+selftest_rc=0
+THOI_LUONG_S=18113
+KHOA_TRA=KHONG xoa, khoa khong con la cua phien nay: session_015GtxrcrefBJpLr7fGUSPtB	2026-10-30T14:01:44Z	2026-10-30T16:01:44Z	wp1030 do lai e9f7872 (thieu d4)
+KET_THUC=2026-10-30T14:03:16.9580995Z
+
+## selftest.log: 3 dong dau / 3 dong cuoi
+[tl] ⚠ PROFILE_NOT_FOUND: 'khong_ton_tai_trong_config' không có trong config.profiles (p6, p6off, vbqppl) — KHÔNG dùng scope nền thay thế. Kiểm chính tả (nhận cả gõ không dấu nếu khớp DUY NHẤT) hoặc thêm block profiles vào config (xem SKILL.md corpus_profile).
+  [OK] pin_sync
+  [OK] op_group_complete
+...
+  [OK] r332_registry_coverage_duong_san_xuat
+  [OK] wp42_complete_runtime_test_ids_unique
+== tl selftest 1758/1758 ==
+
+## Select-String do-luong.csv -Pattern 'GtxrbUPS7|26296|GtxrcrefB' (cac dong lien quan D10)
+2026-10-30T13:58:02Z,session_015GtxrcrefBJpLr7fGUSPtB,wp1030,e9f7872,tiep nhan khoa,0,0,0,0,,khong,khong,may=ASUS-LAPTOP; tiep nhan khoa het hieu luc ADR-0058 3(b): session_015GtxrbUPS7zGdffB8Sfo8Y 2026-10-30T09:01:16Z dang cu khong co han da qua 2 gio
+2026-10-30T13:59:37Z,session_015GtxrcrefBJpLr7fGUSPtB,wp1030,e9f7872,fragment wp1030 (checkout+goi) + A4 parity 3c ps1 vs sh,6,6,0,60,,khong,khong,may=ASUS-LAPTOP; Windows PowerShell 5.1; sh Git Bash; luc do co PID 26296 tl.py --selftest cua phien khac dang chay (khong dung)
+2026-10-30T09:01:16Z,session_015GtxrbUPS7zGdffB8Sfo8Y,WINDOWS-LOCAL-MAY-CHU-KHO r1 hau merge (master),757bde5,tl --selftest,1758,1758,,18113,,0,0,local ASUS-LAPTOP; rc=0; thoi luong 18113s KHONG dai dien: DC khong truy cap duoc tu ~09:06Z (Offline luc 10:22Z va 11:25Z) - nghi may ngu/mat mang, chua do duoc; khoa bi session_015GtxrcrefBJpLr7fGUSPtB ghi de luc 14:01:44Z khi selftest con chay (xong 14:03:16Z) -> chong lan ~1.5 phut; khong xoa khoa cua ho
+
+## Get-WinEvent Security 4688 ngay 30-10
+loi: No events were found that match the specified selection criteria.
+(=> may khong bat audit tao tien trinh; CreationDate cua PID 26296 khong con do truc tiep duoc)

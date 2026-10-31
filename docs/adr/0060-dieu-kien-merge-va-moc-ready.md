@@ -149,7 +149,8 @@ Mọi phép so của §7 giữ nguyên, chỉ đổi mỏ neo.
 
 - Check bắt buộc của CI và branch protection giữ nguyên.
 - `ADR-0057`/`0058`/`0059` giữ nguyên, trừ câu "máy offline thì không áp" của `ADR-0057` §2 với packet áp ADR này.
-- Bốn mốc §10.2.2 không nới. Mốc chưa đo được vẫn chặn `landed`.
+- Bốn mốc §10.2.2 không nới. Mốc chưa đo được xử lý đúng như §10.2.2–§10.2.3: ghi thiếu và tiếp tục chặn, trừ
+  waiver hợp lệ đúng scope theo protocol; waiver không viết lại kết quả thành `passed`.
 - Executor vẫn chỉ ghi trong effective write set; agent không tự approve hay merge.
 
 ## Cưỡng chế — M11

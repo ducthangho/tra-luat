@@ -35,6 +35,8 @@ $tepBam = "$h1  tool.zip`n$h2 *dist/tool.zip.sha256`r`n"
 Ca 'tim_bam_dung_ten' { (Find-BamTrongTep $tepBam 'tool.zip') -eq $h1 }
 Ca 'tim_bam_co_tien_to_duong_dan' { (Find-BamTrongTep $tepBam 'tool.zip.sha256') -eq $h2 }
 Ca 'tim_bam_ten_vang_la_null' { $null -eq (Find-BamTrongTep $tepBam 'khac.zip') -and $null -eq (Find-BamTrongTep '' 'tool.zip') }
+Ca 'van_ban_tu_mang_byte' { (ConvertTo-VanBan ([Text.Encoding]::UTF8.GetBytes("$h1  tool.zip"))) -eq "$h1  tool.zip" -and (Find-BamTrongTep (ConvertTo-VanBan ([Text.Encoding]::UTF8.GetBytes($tepBam))) 'tool.zip') -eq $h1 }
+Ca 'van_ban_tu_chuoi_giu_nguyen' { (ConvertTo-VanBan 'abc') -eq 'abc' -and (ConvertTo-VanBan $null) -eq '' }
 Ca 'bam_tu_digest_khong_can_mang' { (Get-BamTaiSan $rel $rel.assets[0]) -eq ('a' * 64) }
 Ca 'khong_co_nguon_bam_la_null' {
     $r2 = [pscustomobject]@{ tag_name = 'v1'; assets = @([pscustomobject]@{ name = 'x.zip'; digest = $null }) }

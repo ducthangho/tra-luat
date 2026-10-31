@@ -4,8 +4,9 @@ cap-nhat-cong-cu.ps1 — cài/nâng cấp bộ công cụ dev cho VM Windows `tr
 phiên cloud (`.claude/hooks/session-start.sh`) và `ops/cong_cu.yaml` dựng cho Claude/Codex.
 
 HAI TẦNG, vì VM có HAI chủ thể quyền khác nhau (đo 31-10-2026):
-  NguoiDung — chạy bằng `tlcommander` (tài khoản thường, Commander chạy dưới nó). Ghi được `C:\Tools`
-              (Python312, npm global, bin) nên cài/nâng cấp KHÔNG cần admin: claude, codex (npm), rg,
+  NguoiDung — chạy bằng `tlcommander` (tài khoản thường, Commander chạy dưới nó). Sau `-DangKyLich`, tài khoản
+              ấy SỞ HỮU `C:\Tools\{npm,Python312,bin}` (trước đó chỉ tạo được tệp MỚI, gói do SYSTEM cài sẵn như
+              codex/pip không nâng được) nên cài/nâng cấp KHÔNG cần admin: claude, codex (npm), rg,
               shellcheck, actionlint (zip có kiểm băm), PyYAML/jsonschema theo ghim của `ops/cong_cu.yaml`,
               requirements.txt vào venv của kho, notebooklm-mcp-cli (nlm) vào venv riêng.
   HeThong   — chạy bằng SYSTEM (Scheduled Task do admin đăng ký): Git, Node LTS, gh, PowerShell 7 —
@@ -89,6 +90,13 @@ function Find-BamTrongTep([string]$NoiDung, [string]$TenTep) {
     return $null
 }
 
+function ConvertTo-VanBan($NoiDung) {
+    # Invoke-WebRequest trả `.Content` là byte[] khi máy chủ gửi application/octet-stream (tệp checksum trên
+    # GitHub Releases) — `[string]` của byte[] là dãy SỐ, không phải văn bản (đo 31-10-2026: actionlint bị từ chối).
+    if ($NoiDung -is [byte[]]) { return [Text.Encoding]::UTF8.GetString($NoiDung) }
+    return [string]$NoiDung
+}
+
 function Assert-Bam([string]$Tep, [string]$BamMongDoi) {
     # Fail-close: không có băm mong đợi ⇒ ném; lệch ⇒ XOÁ tệp rồi ném.
     $BamMongDoi = ([string]$BamMongDoi).ToLowerInvariant()
@@ -167,7 +175,7 @@ function Get-BamTaiSan($Release, $TaiSan) {
     if ($TaiSan.digest -match '^sha256:([0-9a-fA-F]{64})$') { return $Matches[1].ToLowerInvariant() }
     $tepBam = @($Release.assets | Where-Object { $_.name -match '(checksums?\.txt|sha256(sums)?(\.txt)?|hashes\.sha256)$' -or $_.name -eq "$($TaiSan.name).sha256" })
     foreach ($t in $tepBam) {
-        $nd = [string](Invoke-WebRequest -Uri $t.browser_download_url -Headers @{ 'User-Agent' = 'tra-luat' } -TimeoutSec 60).Content
+        $nd = ConvertTo-VanBan (Invoke-WebRequest -Uri $t.browser_download_url -Headers @{ 'User-Agent' = 'tra-luat' } -TimeoutSec 60).Content
         if ($t.name -eq "$($TaiSan.name).sha256" -and $nd -match '^\s*([0-9A-Fa-f]{64})\b') { return $Matches[1].ToLowerInvariant() }
         $b = Find-BamTrongTep $nd $TaiSan.name
         if ($b) { return $b }
@@ -337,7 +345,7 @@ function Invoke-TangHeThong {
                 $moi = $lts.version -replace '^v', ''
                 $tenTep = "node-v$moi-x64.msi"
                 $url = "https://nodejs.org/dist/v$moi/$tenTep"
-                $sums = [string](Invoke-WebRequest -Uri "https://nodejs.org/dist/v$moi/SHASUMS256.txt" -TimeoutSec 60).Content
+                $sums = ConvertTo-VanBan (Invoke-WebRequest -Uri "https://nodejs.org/dist/v$moi/SHASUMS256.txt" -TimeoutSec 60).Content
                 $bam = Find-BamTrongTep $sums $tenTep
             } else {
                 $rel = Get-Release $c.repo
@@ -380,6 +388,20 @@ function Register-LichCapNhat([string]$GocKho) {
         if ((Resolve-Path -LiteralPath $nguon[$k]).Path -ne (Join-Path $Script:ThuMucCaiDat $k)) {
             Copy-Item -LiteralPath $nguon[$k] -Destination (Join-Path $Script:ThuMucCaiDat $k) -Force
         }
+    }
+    # Giao vùng công cụ cho tài khoản tầng NguoiDung (chủ kho duyệt 31-10-2026). Đo được: tệp do SYSTEM cài sẵn
+    # trong C:\Tools\npm và C:\Tools\Python312 chỉ cho Users TẠO tệp mới, không sửa/xoá ⇒ nâng codex trả EPERM
+    # (-4048), nâng pip rc=1. Hệ quả cần nhớ: C:\Tools là vùng của tài khoản ấy — admin/SYSTEM KHÔNG chạy công cụ
+    # từ đây (tầng HeThong đã chỉ dùng đường dẫn tuyệt đối trong Program Files vì đúng lý do này).
+    $ai = "$env:COMPUTERNAME\$TaiKhoanNguoiDung"
+    foreach ($con in 'npm', 'Python312', 'bin') {
+        $d = Join-Path $ThuMucCongCu $con
+        New-Item -ItemType Directory -Force -Path $d | Out-Null
+        $o1 = & "$env:SystemRoot\System32\icacls.exe" $d /setowner $ai /T /C /Q 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "icacls /setowner $d rc=$LASTEXITCODE`: $($o1 | Select-Object -Last 1)" }
+        $o2 = & "$env:SystemRoot\System32\icacls.exe" $d /grant "${ai}:(OI)(CI)M" /T /C /Q 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "icacls /grant $d rc=$LASTEXITCODE`: $($o2 | Select-Object -Last 1)" }
+        Write-Host "giao $d cho $ai"
     }
     $script = Join-Path $Script:ThuMucCaiDat 'cap-nhat-cong-cu.ps1'
     $pwsh = Join-Path ${env:ProgramFiles} 'PowerShell\7\pwsh.exe'

@@ -1179,10 +1179,10 @@
     }
   ],
   "kernel": {
-    "links_checked": 15,
+    "links_checked": 16,
     "links_missing": [],
     "links_ok": true,
-    "size_bytes": 47724,
+    "size_bytes": 47925,
     "size_limit": 49152,
     "size_ok": true,
     "size_warn": false,

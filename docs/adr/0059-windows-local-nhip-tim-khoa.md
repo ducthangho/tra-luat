@@ -60,8 +60,11 @@ sửa `ADR-0057`. Mọi điểm khác của hai ADR giữ nguyên hiệu lực. 
   của B: A không ghi đè. Khoá của B còn hiệu lực nên A đợi.
 - **Quá hạn, chưa ai tiếp nhận.** A kết nối lại, đọc thấy dòng vẫn là của A: A chạy bước kiểm tải rồi gia hạn.
 - **D10.** Khoá dạng cũ ghi 09:01:16Z, quá 2 giờ nên hết hiệu lực theo 3(b). Phiên tiếp nhận kiểm tải và thấy PID
-  26296 `tl.py --selftest`, không phải MCP. Giờ khởi động suy từ sổ đo: selftest xong 14:03:16Z sau 18113 s, tức
-  khởi động ~09:01:23Z, sau 09:01:16Z. Khoá còn sống: **không tiếp nhận**, ghi sổ đo, đợi.
+  26296 `tl.py --selftest`, không phải MCP. Mục 2 so `CreationDate` của PID 26296 với 09:01:16Z; bước kiểm tải lúc
+  ấy trả giá trị này. `CreationDate` sau 09:01:16Z thì khoá còn sống: **không tiếp nhận**, ghi sổ đo, đợi.
+  Số đo D10 **không ghi** `CreationDate`. Thứ có trong sổ đo là giờ bắt đầu **lượt** selftest, suy được: xong
+  14:03:16Z sau 18113 s, tức ~09:01:23Z. Đó là giờ của lượt, không phải phép đo giờ tạo tiến trình, nên kết quả
+  "không tiếp nhận" của ca này đứng trên giả định PID 26296 được tạo sau 09:01:16Z, chưa trên một phép đo.
 
 ## Những gì KHÔNG đổi
 

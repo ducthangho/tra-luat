@@ -1590,7 +1590,11 @@ def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
     nó phá vỡ ranh giới hàng. Vá một lớp bằng cách mở một lớp khác.
     """
     import re
-    van = re.sub(r"<!--.*?-->", "", van, flags=re.S)      # comment: người đọc KHÔNG thấy
+    # comment: người đọc KHÔNG thấy. Thay bằng \x01 chứ KHÔNG xoá rỗng (cross-review #1051 lượt 6, P2): trong
+    # code span, `<!-- h -->` là CHỮ hiển thị, và xoá rỗng thì `` `x-verdict<!-- h -->.md` `` liền lại thành
+    # tên hợp lệ `x-verdict.md`. \x01 không phải biên, không phải chữ tên: tên/id chỉ nằm trong comment vẫn
+    # không được tính (N1), còn tên bị comment cắt đôi thì gãy, không nối lại.
+    van = re.sub(r"<!--.*?-->", "\x01", van, flags=re.S)
     ra, lay, rao = [], False, None
     dau_bang, cho_gach = None, False
 
@@ -2210,20 +2214,30 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
                      "![.receipt.yaml](x-verdict.receipt.yaml)", "`[.receipt.yaml](x-verdict.receipt.yaml)`",
                      "two&#46;x-verdict.receipt.yaml", "khac`x-verdict.receipt.yaml`",
                      "`x-verdict.receipt.yaml`+bak", "<code>two x-verdict.receipt.yaml</code>",
-                     "x-verdict.receipt.yaml", "`x-verdict.receipt.yaml`.", "`` x-verdict.receipt.yaml ``"):
+                     "x-verdict.receipt.yaml", "`x-verdict.receipt.yaml`.", "`` x-verdict.receipt.yaml ``",
+                     # lượt 6: comment HTML NẰM TRONG span là chữ hiển thị — xoá rỗng thì tên khác liền lại
+                     "`x-verdict<!-- h -->.receipt.yaml`", "[`.receipt.yaml`](x-verdict<!-- h -->.receipt.yaml)",
+                     # tên chỉ còn trong comment thật ⇒ người đọc không thấy
+                     "<!-- `x-verdict.receipt.yaml` -->"):
             phai_do(bn, o_bn=o_bn)
         for o_v in ("``two x-verdict.md``", "[`x-verdict.md`](con/x-verdict.md)", "x-verdict.md+bak",
                     "![x-verdict.md](x-verdict.md)", "[`x-verdict.md`][1]", '<a href="x-verdict.md">x</a>',
-                    "`[x-verdict.md](x-verdict.md)`"):
+                    "`[x-verdict.md](x-verdict.md)`", "`x-verdict<!-- h -->.md`"):
             phai_do(("x-verdict.md", "CỘT 'tệp verdict'"), o_v=o_v)
         cb = ("'C1'", "CỘT 'id'")
         for o_cb in ("`two x-verdict.md`", "``two x-verdict.md``", "x-verdict.md.bak", "x-verdict.md/con",
                      "x-verdict.md@bak", "`khac-verdict.md`", "![x-verdict.md](x-verdict.md)",
-                     "two&#46;x-verdict.md", "khac`x-verdict.md`"):
+                     "two&#46;x-verdict.md", "khac`x-verdict.md`", "`x-verdict<!-- h -->.md`"):
             phai_do(cb, o_cb=o_cb)
         # `\|` là NỘI DUNG ô (GFM §4.10): chữ sau nó vẫn thuộc cột 'tệp verdict', không tràn sang cột kế.
         phai_do(bn, hang_ml=r"| `x-verdict.md` \| x-verdict.receipt.yaml | khac.receipt.yaml |")
         phai_do(cb, hang_cb=r"| `x-verdict.md` \| C1 | C2 |")
+        # Comment trong span của ô id cũng không được liền lại thành `C1`; id chỉ trong comment thật cũng không.
+        phai_do(cb, hang_cb="| `x-verdict.md` | `C<!-- h -->1` |")
+        phai_do(cb, hang_cb="| `x-verdict.md` | <!-- `C1` --> |")
+        # Đối chứng: comment ĐỨNG NGOÀI mục, sau khoảng trắng, là chú thích ⇒ XANH.
+        muc_luc(o_bn="`x-verdict.receipt.yaml` <!-- ghi chú -->")
+        _kiem_muc_luc(tm, goc)
 
         # Thư mục con KHÔNG tên `con`: đó là tên thiết bị dành riêng của Windows (`mkdir` ném WinError 267).
         # Verdict ở THƯ MỤC CON (mục lục thật: 22 hàng): danh tính trong Mục lục là ĐƯỜNG DẪN `ho-so/y-verdict.md`

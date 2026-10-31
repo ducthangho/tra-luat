@@ -106,7 +106,8 @@ verdict_usage_caveats:
     muc: P2
     mo_ta: >-
       Reviewer chi co pwsh Linux: ACL NTFS, icacls, Scheduled Task, msiexec la KHONG DO DUOC trong review. Executor do rieng tren VM
-      tra-luat-win (thuat lai trong phien, khong la bang chung reviewer): bo test 71/71 rc0 o head luot 13–16, va chay THAT tang
+      tra-luat-win (thuat lai trong phien, khong la bang chung reviewer): bo test 71/71 rc0 o f3231c8, c489c72, 210ab81 (head
+      cham o luot 14–16; head luot 13 e5838ff la 70/70), va chay THAT tang
       NguoiDung 11/11 giu rc0 o d005cf4 va f3231c8. -DangKyLich tren VM CHUA chay lai voi ban sau PR #1069.
   - id: CHECKOUT-REVIEW-KHONG-CUONG-CHE-READ-ONLY
     muc: P3

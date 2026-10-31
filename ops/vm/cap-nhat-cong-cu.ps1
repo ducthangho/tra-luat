@@ -137,6 +137,12 @@ print(json.dumps({"PyYAML": tu_lenh("PyYAML"), "jsonschema": tu_lenh("jsonschema
 
 # ───────────────────────── hàm có hiệu ứng ─────────────────────────
 
+function Write-Loi([string]$Thong) {
+    # KHÔNG dùng Write-Error trước `exit N`: với $ErrorActionPreference='Stop' nó thành lỗi kết thúc và script
+    # thoát rc=1, nuốt mã thoát đã khai (bộ test bắt được ở lượt đo đầu trên VM, 31-10-2026).
+    [Console]::Error.WriteLine("cap-nhat-cong-cu: $Thong")
+}
+
 function Add-KetQua([string]$CongCu, [string]$Truoc, [string]$Sau, [string]$HanhDong, [string]$ChiTiet = '') {
     $Script:KetQua.Add([pscustomobject]@{ cong_cu = $CongCu; truoc = $Truoc; sau = $Sau; hanh_dong = $HanhDong; chi_tiet = $ChiTiet })
     Write-Host ("{0,-22} {1,-14} -> {2,-14} {3} {4}" -f $CongCu, $Truoc, $Sau, $HanhDong, $ChiTiet)
@@ -226,7 +232,7 @@ function Invoke-TangNguoiDung([string]$GocKho) {
     $npm = Join-Path ${env:ProgramFiles} 'nodejs\npm.cmd'
     $banKe = @((Join-Path $GocKho 'cong_cu.yaml'), (Join-Path $GocKho 'ops\cong_cu.yaml')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     $yeuCau = @((Join-Path $GocKho 'requirements.txt')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
-    if (-not $banKe) { Write-Error "không thấy cong_cu.yaml dưới $GocKho"; exit 2 }
+    if (-not $banKe) { Write-Loi "không thấy cong_cu.yaml dưới $GocKho"; exit 2 }
     if (-not (Test-Path -LiteralPath $py)) { Add-KetQua 'python' '' '' 'loi' "không có $py"; return }
     if (-not $ChiKiem) { Set-PathNguoiDung @($bin, $npmPrefix) }
 
@@ -402,18 +408,18 @@ if ($NapHam) { return }
 
 # ───────────────────────── chạy ─────────────────────────
 
-if (-not $IsWindows) { Write-Error 'chỉ chạy trên Windows'; exit 4 }
+if (-not $IsWindows) { Write-Loi 'chỉ chạy trên Windows'; exit 4 }
 $goc = if ((Split-Path $PSScriptRoot -Leaf) -eq 'vm') { (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path } else { $PSScriptRoot }
 $id = [Security.Principal.WindowsIdentity]::GetCurrent()
 $laAdmin = ([Security.Principal.WindowsPrincipal]$id).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 $laSystem = $id.User.Value -eq 'S-1-5-18'
 
 if ($DangKyLich) {
-    if (-not $laAdmin) { Write-Error '-DangKyLich cần PowerShell chạy bằng quyền admin'; exit 3 }
+    if (-not $laAdmin) { Write-Loi '-DangKyLich cần PowerShell chạy bằng quyền admin'; exit 3 }
     Register-LichCapNhat $goc
     exit 0
 }
-if ($PhamVi -eq 'HeThong' -and -not ($laSystem -or $laAdmin)) { Write-Error 'tầng HeThong cần SYSTEM hoặc admin'; exit 3 }
+if ($PhamVi -eq 'HeThong' -and -not ($laSystem -or $laAdmin)) { Write-Loi 'tầng HeThong cần SYSTEM hoặc admin'; exit 3 }
 
 $batDau = Get-Date
 Write-Host "cap-nhat-cong-cu: pham_vi=$PhamVi chi_kiem=$([bool]$ChiKiem) may=$env:COMPUTERNAME nguoi=$($id.Name)"

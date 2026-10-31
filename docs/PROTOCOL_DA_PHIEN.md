@@ -1012,7 +1012,7 @@ chạy cùng legacy harness. Test-ID registry dùng chung phải lập chỉ m�
 `wp<issue>_<slug>` của fragment và ID trong bundled module; resolver tài liệu cùng duplicate gate đọc registry
 này và có negative fixture cho tên bịa. Worker dùng đúng land generator để sinh bundled candidate trong thư mục
 tạm ngoài repo, kiểm byte/topology nhưng không sửa module land-only trong diff.
-Quy ước sử dụng máy Windows local của chủ kho nằm tại `ADR-0057` và `ADR-0058`.
+Quy ước sử dụng máy Windows local của chủ kho nằm tại `ADR-0057`, `ADR-0058` và `ADR-0059`.
 
 Các thuật ngữ trạng thái không dùng thay nhau:
 
@@ -1535,7 +1535,8 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0055` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 25-10-2026, thay số của `ADR-0052`; trục LỜI GỌI nay bằng trục VÒNG; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | `packet_loop.py`: cùng bộ đếm trong state như `ADR-0052` — người khởi tạo tự truyền trần; không gì đọc dòng khai `tran_loi_goi_codex:` |
 | `ADR-0056` | Ngưỡng thu hồi lease vì không tiến triển nâng từ 30 lên 360 phút theo chỉ thị chủ kho 19-10-2026, thay đúng câu 30 phút của `ADR-0017`; chỉ áp lease mới, không hồi tố; `lease_until`, generation, bia mộ, exact head và heartbeat 15 phút sau `changes_requested` giữ nguyên | Accepted — đã kích hoạt vận hành (merge PR thi công wp943) | **0 cổng** — không controller trong kho mang hằng 30 phút; không có controller ngoài, phiên điều phối áp tay |
 | `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI; phạm vi và khoá sửa bởi `ADR-0058` | Accepted | không cổng — kỷ luật executor |
-| `ADR-0058` | Máy Windows local: sửa đúng §1 Phạm vi và §3 Khoá của `ADR-0057` theo chỉ thị chủ kho 30-10-2026 — phạm vi là mọi máy Windows của chủ kho `Online` trong `list_devices`; khoá và sổ đo theo từng máy; dòng khoá có hạn không quá 2 giờ, khoá hết hiệu lực khi quá hạn, khi dòng dạng cũ quá 2 giờ, hoặc khi phiên giữ khoá tuyên bố bỏ có bằng chứng | Accepted | không cổng — kỷ luật executor |
+| `ADR-0058` | Máy Windows local: sửa đúng §1 Phạm vi và §3 Khoá của `ADR-0057` theo chỉ thị chủ kho 30-10-2026 — phạm vi là mọi máy Windows của chủ kho `Online` trong `list_devices`; khoá và sổ đo theo từng máy; dòng khoá có hạn không quá 2 giờ, khoá hết hiệu lực khi quá hạn, khi dòng dạng cũ quá 2 giờ, hoặc khi phiên giữ khoá tuyên bố bỏ có bằng chứng; khoá bổ sung bởi `ADR-0059` | Accepted | không cổng — kỷ luật executor |
+| `ADR-0059` | Máy Windows local: chỉ bổ sung §3 Hạn khoá của `ADR-0058` và §3 Khoá của `ADR-0057` theo đặc tả chủ kho duyệt 31-10-2026 — dòng khoá có trường nhịp tim, ghi lại ít nhất 30 phút một lần; không tiếp nhận khoá hết hiệu lực theo 3(a)/3(b) khi kiểm tải thấy tiến trình `python.exe` không phải MCP khởi động sau giờ bắt đầu của khoá; lượt bị ngắt ghi `ngat=co` và không dùng thời lượng; đọc lại khoá trước mọi lần ghi lại; nhả khoá là ghi tệp rỗng | Accepted | không cổng — kỷ luật executor |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

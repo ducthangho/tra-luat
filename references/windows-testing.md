@@ -35,7 +35,7 @@ Truyền shell tuyệt đối khi mở tiến trình nếu shell mặc định l
 
 ## Preflight VM và ping chỉ đọc
 
-Dùng shell C:\Program Files\PowerShell\7\pwsh.exe. Kiểm tra hostname = TRA-LUAT-WIN và tài khoản trước:
+Dùng shell C:\Program Files\PowerShell\7\pwsh.exe. Kiểm tra hostname là tra-luat-win (so không phân biệt hoa-thường: `hostname` in chữ thường) và tài khoản trước:
 ~~~powershell
 hostname
 whoami
@@ -51,7 +51,7 @@ Runtime config có sẵn ở C:\ProgramData\tra-luat\runtime.json, tài khoản 
 ~~~
 Chỉ lặp ping khi tác vụ cần truy cập backend. C:\Tools\tl.cmd là wrapper cùng config. Xác minh hợp đồng API trước mọi action khác.
 
-Đã xác minh khi thiết lập: Commander, khởi động lại, pwsh, Python 3.12.10, import yaml/pypdf/cffi/docx và ping backend 2.21.2p. Chưa hoàn tất full selftest/build/regression. GitHub/Codex user auth trên VM chưa thiết lập; NLM/OCR/native PDF cần kiểm tra riêng. Không suy đăng nhập gcloud đồng nghĩa các công cụ khác đã đăng nhập.
+Đã xác minh khi thiết lập: Commander, khởi động lại, pwsh, Python 3.12.10, import yaml/pypdf/cffi/docx và ping backend 2.21.2p. Đo 2026-10-31 trong thư mục phiên C:\tl-win\<session_id>: clone qua HTTPS, `tl.py --selftest` 1774/1774 trên ad0cbb5 (785 s) cùng golden-test, workflow-audit, doc-claims-check, determinism-audit đều rc 0; build/regression đầy đủ chưa chạy. GitHub/Codex user auth trên VM chưa thiết lập, nhưng đọc kho qua HTTPS (`git ls-remote`, `git clone`) chạy được; NLM/OCR/native PDF cần kiểm tra riêng. Không suy đăng nhập gcloud đồng nghĩa các công cụ khác đã đăng nhập.
 
 ## Vòng đời VM
 

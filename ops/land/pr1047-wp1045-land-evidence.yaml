@@ -2,7 +2,7 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
 # TRANG THAI: merged (b2d5f06), `landed: false`. Ly do: (1) gate push master tren DUNG b2d5f06 (run 41145468254) con IN_PROGRESS luc
-# ghi so, va du xanh thi provenance CI §10.2.2 (checkout · dinh nghia workflow · output gate) KHONG DO DUOC trong phien web
+# ghi so (do lai 2026-10-31T04:05Z: success 23/23 — chi la moc RUN), va du xanh thi provenance CI §10.2.2 (checkout · dinh nghia workflow · output gate) KHONG DO DUOC trong phien web
 # (GraphQL 403 — CLAUDE.md, ho so pr882); (2) lease wp1045-r1-g2-claude CHUA NHA (han 2026-10-31T17:29Z, chua rut han);
 # (5) khong co duyet ben NEO DUNG authorized_head_sha 2014602 — chi thi chu kho neu DIEU KIEN merge, khong neu SHA.
 # §8.1 CHUA_DAT: run.json cua luot approve khai sandbox_trang_thai KHONG_DO_DUOC (DanhTinhDoi) — tien le pr969.
@@ -45,6 +45,8 @@ pre_merge_checks:
   - {name: 'Codex connector', sha: 201460203f42485f589add150896f2febc00c027, conclusion: 'completed; has_any_findings false', ghi_chu: 'measured — readback-comment-6531582115.json (chatgpt-codex-connector[bot], cap nhat 19:24:25Z): codex-review-state commit_sha 2014602, has_any_findings false, has_unresolved_findings false, status completed; kich hoat khi PR doi sang ready.', nguon: readback-comment-6531582115.json}
 post_merge_checks:
   - {name: 'ci.yml push master — DUNG merge SHA', run_id: 41145468254, sha: b2d5f06c154331a6fc10c9e6f687f522196440a9, conclusion: 'not_measured — in_progress luc ghi so', ghi_chu: 'measured — readback-runs-b2d5f06.json: run 41145468254 "gate" event push status in_progress luc 23:40Z (cung run 41145468496 launcher Windows that). Ke ca khi xanh, moc Checkout / Workflow definition / Gate output cua §10.2.2 KHONG DO DUOC trong phien web (GraphQL 403, tien le pr882) — KHONG suy tu REST head_sha.', nguon: readback-runs-b2d5f06.json}
+  - {name: 'ci.yml push master — DUNG merge SHA (do lai sau khi xong)', run_id: 41145468254, run_attempt: 1, sha: b2d5f06c154331a6fc10c9e6f687f522196440a9, conclusion: success, ghi_chu: 'measured — do 2026-10-31T04:05Z: readback-run-41145468254.json event push, head_sha b2d5f06, completed success, run_attempt 1, updated_at 2026-10-31T00:31:59Z; readback-jobs-41145468254.json 23/23 success, nhan ubuntu-latest, runner_id khac 0. Day chi la moc RUN cua §10.2.2; moc Checkout / Workflow definition / Gate output van KHONG DO DUOC (GraphQL 403). Dong tren giu nguyen lam moc ghi so 23:40Z.', nguon: [readback-run-41145468254.json, readback-jobs-41145468254.json, readback-runs-b2d5f06-sau.json]}
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA', run_id: 41145468496, run_attempt: 1, sha: b2d5f06c154331a6fc10c9e6f687f522196440a9, conclusion: success, ghi_chu: 'measured — do 2026-10-31T04:05Z: readback-run-41145468496.json event push, head_sha b2d5f06, completed success; readback-jobs-41145468496.json 2/2 success (launcher windows-latest, launcher ubuntu-latest). Cung gioi han §10.2.2 nhu dong tren.', nguon: [readback-run-41145468496.json, readback-jobs-41145468496.json]}
 bookkeeping:
   - {item: 'bien nhan review ba luot Codex', tep: [ops/reviews/wp1045-g1-codex-luot1-verdict.receipt.yaml, ops/reviews/wp1045-g1-codex-luot2-verdict.receipt.yaml, ops/reviews/wp1045-g1-codex-luot3-verdict.receipt.yaml]}
   - {item: 'handoff executor', tep: 'ops/handoff/wp1045-g1-claude.md (nhanh ops/wp1045-r1-g1-lease @ 4b4f37f)'}
@@ -96,7 +98,8 @@ trang_thai_packet:
     va b2d5f06^1..b2d5f06 cung sha256 65b4fa2e… (2 tep .claude/dev/launcher_test.py, ops/cai_cong_cu.sh; +276 -10).
   landed: false
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA b2d5f06: CHUA DAT — run 41145468254 in_progress luc ghi so, va moc Checkout / Workflow
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA b2d5f06: CHUA DAT — run 41145468254 in_progress luc ghi so (do lai 04:05Z: completed success
+    23/23, xem post_merge_checks; chi la moc RUN), va moc Checkout / Workflow
     definition / Gate output cua §10.2.2 khong do duoc trong phien web; (2) lease CHUA NHA tai moc ghi so 23:40Z; da rut han ve 00:20Z va do lai 00:23Z: NGUOI_GIU 0 (xem lease.do_lai_sau_han_20261031T0023Z) — DAT; (3) bookkeeping:
     ho so nay + ba bien nhan review DAT; (4) review neo DUNG authorized_head_sha 2014602: Codex luot 3 approve 0 P0-P3 va Codex connector
     sach DAT; (5) uy quyen land neo SHA: CHUA DAT — chi thi neu dieu kien, khong neu SHA; (6) muc tieu packet: bo chon cai_cong_cu.sh quyet

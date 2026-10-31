@@ -124,15 +124,16 @@ Ca 'doi_so_tac_vu_mang_du_cau_hinh' {
 }
 Ca 'reparse_trong_cay_bi_phat_hien' {
     $g = Join-Path ([IO.Path]::GetTempPath()) ("cncc-rp-" + [guid]::NewGuid().ToString('N')); $ngoai = "$g-ngoai"
-    New-Item -ItemType Directory -Path "$g\con", $ngoai | Out-Null
+    # KHÔNG đặt tên `con`: CON là tên thiết bị DOS bị cấm trên Windows (đo trên VM 31-10-2026: '\\.\con').
+    New-Item -ItemType Directory -Path "$g\thu-muc", $ngoai | Out-Null
     try {
         $sach = @(Find-Reparse $g).Count -eq 0
         $kieu = if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }
-        New-Item -ItemType $kieu -Path "$g\con\lienket" -Target $ngoai | Out-Null
+        New-Item -ItemType $kieu -Path "$g\thu-muc\lienket" -Target $ngoai | Out-Null
         New-Item -ItemType $kieu -Path "$g-goc-la-lienket" -Target $ngoai | Out-Null
         $sach -and @(Find-Reparse $g).Count -eq 1 -and @(Find-Reparse "$g-goc-la-lienket").Count -eq 1 -and @(Find-Reparse "$g-khong-co").Count -eq 0
     } finally {
-        foreach ($x in "$g\con\lienket", "$g-goc-la-lienket") { if (Test-Path -LiteralPath $x) { (Get-Item -LiteralPath $x -Force).Delete() } }
+        foreach ($x in "$g\thu-muc\lienket", "$g-goc-la-lienket") { if (Test-Path -LiteralPath $x) { (Get-Item -LiteralPath $x -Force).Delete() } }
         Remove-Item -LiteralPath $g, $ngoai -Recurse -Force -ErrorAction SilentlyContinue
     }
 }

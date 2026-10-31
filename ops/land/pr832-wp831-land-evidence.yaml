@@ -157,3 +157,34 @@ verdict_usage_caveats:
     lenh.chuong_trinh=codex) ghi execution_surface=codex_cli, transport=machine. Dinh
     chinh be mat cua CHINH luot nay thanh codex_cli. Giu nguyen byte verdict lich
     su; khong chung thuc model/effort hay nang assurance/quyen merge/land.
+
+review_doc_lap_a_20261027:
+  bo_canh: >-
+    Chu kho yeu cau (phien session_01J7EgTVGTrNi4xqh7MeBFQv 27-10-2026, "chay 1 roi 2 va 3" va "Dong y de xuat") thu dieu
+    kien (A) cua dinh_chinh_r24.dieu_kien_mo_lai: mot luot Codex DOC LAP tren DUNG head da merge qua launcher co do model
+    phuc vu. Khoi nay KHONG sua dong nao o tren.
+  reviewed_commit: 51ae5c095972611d2c6045bd81786a4fc7e9ca62
+  pham_vi_diff: 'git diff 6b641ca2a2b889c9f43eec58bae47a00a80373cd 51ae5c095972611d2c6045bd81786a4fc7e9ca62 (merge-base cua head voi cha thu nhat cua merge commit).'
+  spec: 'measured — ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/PROMPT.md ghi spec sha256 5caec680395ae3dbe673091153e917feb4262a69142f36e54c63a2260d48bdad (khop spec_sha256 cua lease); ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/VERDICT.md dong 3 la gia tri reviewer tu do. Prompt sha256 e9ff87d5130cca72855b760afdacfc09af0affc5bf5d3cbdc16784fad317910b.'
+  launcher: >-
+    measured — ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/run.json: launcher 1.5.0 (master co model_phuc_vu tu 97bb4c5), run 6c86064b, KHONG HOAN TAT — tien trinh bi dung o tran 2 gio cua tac vu nen phien (bat dau 15:25:23Z); run.json dung o trang_thai dang_chay, khong co ma_thoat.
+  model_phuc_vu: >-
+    not_measured — run.json khong co model_phuc_vu vi luot khong ket thuc (launcher ghi khoa nay luc ket thuc).
+  verdict: dang_lam (KHONG co verdict cuoi)
+  dem: 'ban do dang: P1=1 da ghi; khong co dong Ket qua'
+  phat_hien:
+    - {id: f03-exported-python-function-reselects, hang: P1, tep: 'ops/cai_cong_cu.sh:20-29', bieu_hien: 'python la ham shell ke thua (python() { command python "$@"; }) => command -v tra ten tran, PY[0] khong ghim, cong thuc rg chon venv thieu PyYAML; ham uy quyen 0/4 dat', tai_hien: evidence/python-functions-ab.log, ghi_chu: 'finding cua ban VERDICT do dang; reviewer chua ket thuc luot'}
+  nguon:
+    - ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/VERDICT.md
+    - ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/run.json
+    - ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/PROMPT.md
+    - ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/SHA256SUMS
+  gioi_han: >-
+    Bang chung phu (log, ban sao dot bien, cay tam) KHONG vao kho; ops/land/pr832-wp831-provenance/review-doc-lap-a-51ae5c0/OMITTED.txt giu sha256 + byte cua tep cap 1-2.
+    Workspace la clone day du khong nong tai head, core.abbrev 7; reviewer khong mang, khong credential that.
+  ket_luan_assurance_81: >-
+    CHUA DAT. Luot khong hoan tat nen khong co verdict va khong do duoc model phuc vu; ban do dang da ghi mot P1 co tai hien. Chay lai tron cung khong doi duoc ket luan approve. Khong gi o day cap quyen landed hay cross_approved.
+  lua_chon_cho_chu_kho:
+    - 'Mo packet va loi con song tren master (xem phat_hien); approve tren head cu KHONG con dat duoc vi chinh luot doc lap da doi sua.'
+    - 'Hoac (B) human_audited day du §8 muc 2 do chu kho, neo DUNG 51ae5c095972611d2c6045bd81786a4fc7e9ca62.'
+  landed: false

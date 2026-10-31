@@ -1,0 +1,11 @@
+PRODUCT: target cannot reach its assertion
+  g8_xong_rc0_van_giu_failure_class OK  giet 1/1: r484_g8_run_xong_khong_mang_failure_class(RuntimeError)
+accounting: (0, 0)
+HARNESS: neutral result: (0, 0, [('t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua', 'RuntimeError: REVIEW: unrelated fixture setup failure')])
+HARNESS: assertion remains unreachable under mutation
+  headline_lay_tong_lam_so_ca_da_chay OK  giet 1/1: t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua
+accounting: (0, 0)
+CREDENTIAL RUNNER neutral failed target set: []
+    ĐỎ t17_token_invalidated_la_tu_choi_va_thang_rc0: RuntimeError: REVIEW: unrelated fixture setup failure
+CREDENTIAL RUNNER unrelated-mutant failed target set: ['t17_token_invalidated_la_tu_choi_va_thang_rc0']
+CREDENTIAL RUNNER would grant kill: True

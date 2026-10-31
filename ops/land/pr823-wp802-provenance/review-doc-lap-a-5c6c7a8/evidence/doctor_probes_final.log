@@ -1,0 +1,19 @@
+ORDER rg rc= 12 co= True state= BI_CHE bad= /tmp/pr823_doctor_arm5pm2c/rg-bad/rg good= /tmp/pr823_doctor_arm5pm2c/rg-good/rg
+LEGACY_BAD_FIRST rg 0 None /tmp/pr823_doctor_arm5pm2c/rg-good/rg
+ORDER git rc= 12 co= True state= BI_CHE bad= /tmp/pr823_doctor_arm5pm2c/git-bad/git good= /tmp/pr823_doctor_arm5pm2c/git-good/git
+LEGACY_BAD_FIRST git 0 None /tmp/pr823_doctor_arm5pm2c/git-good/git
+ORDER bash rc= 0 co= True state= None bad= None good= None
+ORDER python rc= 0 co= True state= None bad= None good= None
+ONLY_GOOD 0 None True
+ABSENT 12 False None
+NONEXEC_SKIPPED 0 None /tmp/pr823_doctor_arm5pm2c/rg-good/rg
+DEDUP [('rg', '/tmp/pr823_doctor_arm5pm2c/rg-bad/rg'), ('rg', '/tmp/pr823_doctor_arm5pm2c/rg-good/rg')]
+TEXT 12   BI_CHE   rg       ripgrep 9.9.9
+        ten tran `rg` goi /tmp/pr823_doctor_arm5pm2c/rg-bad/rg - KHONG chay duoc: denied
+        ban chay duoc: /tmp/pr823_doctor_arm5pm2c/rg-good/rg
+        cach chua: dua thu muc /tmp/pr823_doctor_arm5pm2c/rg-good len TRUOC trong PATH, hoac go ban hong /tmp/pr823_doctor_arm5pm2c/rg-bad/rg
+KET LUAN  : THIEU rg (BI_CHE: co cai, ban ten tran hong)
+TIMEOUT_NOT_BROKEN 0 None True
+TEXT_WRAPPER rg {"shell_rc": 0, "shell_stdout": "/tmp/pr823_doctor_arm5pm2c/rg-wrapper/rg\nripgrep 9.9.9\n", "head_rc": 12, "head_state": "BI_CHE", "head_detail": {"trang_thai": "BI_CHE", "ban_hong": "/tmp/pr823_doctor_arm5pm2c/rg-wrapper/rg", "loi": "[Errno 8] Exec format error: '/tmp/pr823_doctor_arm5pm2c/rg-wrapper/rg'", "ban_tot": "/tmp/pr823_doctor_arm5pm2c/rg-good/rg", "cach_chua": "dua thu muc /tmp/pr823_doctor_arm5pm2c/rg-good len TRUOC trong PATH, hoac go ban hong /tmp/pr823_doctor_arm5pm2c/rg-wrapper/rg"}, "base_rc": 0, "base_state": null}
+TEXT_WRAPPER git {"shell_rc": 0, "shell_stdout": "/tmp/pr823_doctor_arm5pm2c/git-wrapper/git\ngit version 9.9.9\n", "head_rc": 12, "head_state": "BI_CHE", "head_detail": {"trang_thai": "BI_CHE", "ban_hong": "/tmp/pr823_doctor_arm5pm2c/git-wrapper/git", "loi": "[Errno 8] Exec format error: '/tmp/pr823_doctor_arm5pm2c/git-wrapper/git'", "ban_tot": "/tmp/pr823_doctor_arm5pm2c/git-good/git", "cach_chua": "dua thu muc /tmp/pr823_doctor_arm5pm2c/git-good len TRUOC trong PATH, hoac go ban hong /tmp/pr823_doctor_arm5pm2c/git-wrapper/git"}, "base_rc": 0, "base_state": null}
+Independent doctor measurements complete

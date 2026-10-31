@@ -2,8 +2,9 @@
 # KHONG phai packet: viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
 # Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat cung loai: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
 #
-# TRANG THAI: merged (b653574), `landed: false` — CHO CHU KHO duyet tren PR ghi so (uy_quyen_head_cuoi), va con thieu
-# moc §10.2.2. "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
+# TRANG THAI: merged (b653574), `landed: false` — CHI CON CHO CHU KHO duyet tren PR ghi so #1066 (uy_quyen_head_cuoi).
+# Gate hau merge 41161511121 tren b653574 success 23/23, §10.2.2 4/4 measured; §8.1 DAT. "merged" KHONG dong nghia
+# "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot khac,
 # KHONG tai chay; not_measured = khong do duoc, ghi ly do.
 # Readback tho: ops/land/pr1048-claude-md-powershell-provenance/ (SHA256SUMS). Moi phep do REST: GET
@@ -75,22 +76,24 @@ trang_thai_packet:
     dang SAU commit cuoi va TRUOC merge (tien le pr870/#951).
   con_thieu_de_goi_landed:
     - id: GATE-HAU-MERGE-B653574-RUN
-      trang_thai: cho_do
-      mo_ta: 'Run ci.yml push master 41161511121 tren b653574 dang chay luc soan; xem post_merge_checks.'
+      trang_thai: da_dong
+      mo_ta: 'measured — readback-run-41161511121.json completed/success, readback-jobs-41161511121.json 23/23 job, do-lai-nguon-20261031/kiem-gate-post-b653574.txt rc=0.'
     - id: MOC-10-2-2-WORKFLOW-DEFINITION
       trang_thai: da_dong
       mo_ta: >-
         measured — do-lai-nguon-20261031/workflow-definition-b653574.txt: GraphQL WorkflowRun.file cua run 41161511121 do PHIEN
         chay tren may chu kho qua Desktop Commander (gh tai khoan ducthangho); ci.yml @ b653574, blob 82d9f239… khop REST va git.
     - id: MOC-10-2-2-CHECKOUT-GATE-OUTPUT
-      trang_thai: cho_do
-      mo_ta: 'Moc Checkout (log job) va Gate output (artifact) do sau khi run 41161511121 xong.'
+      trang_thai: da_dong
+      mo_ta: 'measured — do-lai-nguon-20261031/bon-moc-10-2-2.txt: Checkout (log job 124420002077) va Gate output (artifact 13028021363) dat; 4/4 moc.'
     - id: REVIEW-EXACT-SHA
       trang_thai: da_dong
       mo_ta: 'measured — luot 3 approve 0 P0–P3 tren DUNG 6f23a4e (ops/reviews/pr1048-review-3-codex-verdict.receipt.yaml). Chay SAU merge.'
     - id: QUYET-DINH-LANDED-CHU-KHO
       trang_thai: cho_chu_kho
-      mo_ta: 'Chu kho duyet `landed` bang comment tren PR ghi so. Ho so nay KHONG tu goi landed.'
+      mo_ta: >-
+        Chu kho duyet `landed` bang comment tren PR ghi so #1066, ghi day du SHA head cuoi (40 hex), dang SAU commit cuoi va
+        TRUOC merge. Ho so nay KHONG tu goi landed.
 
 review:
   cross_review:
@@ -156,8 +159,23 @@ pre_merge_checks:
 post_merge_checks:
   - ten: gate ci.yml tren merge b653574 (push master)
     run_id: 41161511121
-    trang_thai: cho_do
-    do_duoc: 'Dang chay luc soan (readback-runs-b653574.json: in_progress).'
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41161511121.json: .github/workflows/ci.yml, event push, head_sha b653574, run_attempt 1,
+      completed/success, updated_at 2026-10-31T03:40:09Z. readback-jobs-41161511121.json (filter=all): 23 job, 23 success,
+      moi job nhan ubuntu-latest, runner_id khac 0. readback-runs-b653574.json la anh chup LUC SOAN (in_progress), giu lai lam lich su.
+    kiem_gate: 'measured — do-lai-nguon-20261031/kiem-gate-post-b653574.txt: suite 111579425801, 23 ten, rc=0.'
+    check_runs: 'measured — readback-check-runs-b653574-all.json (filter=all).'
+    bon_moc_10_2_2:
+      nguon: ops/land/pr1048-claude-md-powershell-provenance/do-lai-nguon-20261031/bon-moc-10-2-2.txt
+      run: 'measured — run 41161511121 attempt 1, push master, head b653574, success, path .github/workflows/ci.yml.'
+      checkout: 'measured — log job 124420002077 (log-gate-124420002077-trich.txt): git log -1 sau checkout = b653574; head_sha = base_sha = b653574.'
+      gate_output: >-
+        measured — artifact 13028021363 gate-evidence-ubuntu-latest-1 (zip sha256 = digest REST trong readback-artifacts-41161511121.json),
+        giai nen nguyen byte vao artifact-13028021363/: tl-selftest status pass, returncode 0, positive_verified true,
+        `== tl selftest 1759/1759 ==`, output_sha256 khop, identity head b653574 + tree f68a647 (= tree merge), identity_after == identity.
+      workflow_definition: 'measured — do-lai-nguon-20261031/workflow-definition-b653574.txt (GraphQL qua may chu kho; blob ci.yml 82d9f239… khop REST + git).'
+      tong: '4/4 measured.'
 
 bookkeeping:
   - viec: luu verdict cross-review Codex luot 1-3 vao ops/reviews

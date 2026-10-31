@@ -1557,14 +1557,18 @@ def _tach_o(dong: str) -> list:
     r"""Tách một dòng bảng thành ô theo `|` KHÔNG thoát, rồi trả `\|` về `|` (GFM §4.10, ví dụ 200).
 
     Vì sao (cross-review #1051 lượt 4, P2): `split("|")` coi `\|` là ranh giới cột, nên chữ trong ô
-    `tệp verdict` tràn sang cột `biên nhận`/`id` và thoả cho cột ấy dù cột thật ghi tên khác."""
+    `tệp verdict` tràn sang cột `biên nhận`/`id` và thoả cho cột ấy dù cột thật ghi tên khác.
+
+    Chỉ bóc khoảng trắng ASCII (GFM: space/tab/LT/FF) — `str.strip()` bóc cả NBSP, nên `|\u00a0---|` thành
+    hàng gạch hợp lệ dù GitHub không dựng bảng (cross-review #1051 lượt 10, P2)."""
     import re
-    d = dong.strip()
+    TRANG = " \t\x0b\x0c"
+    d = dong.strip(TRANG)
     if d.startswith("|"):
         d = d[1:]
     if d.endswith("|") and not d.endswith("\\|"):
         d = d[:-1]
-    return [x.replace("\\|", "|").strip() for x in re.split(r"(?<!\\)\|", d)]
+    return [x.replace("\\|", "|").strip(TRANG) for x in re.split(r"(?<!\\)\|", d)]
 
 
 def _bang(van: str, tieu_de: str, giu_span: bool = False) -> list:
@@ -1735,7 +1739,7 @@ def _ten_tep(o: str) -> set:
     duong = rf"(?:[\w\-][\w.\-]*/)*{ten}"
     muc = re.compile(rf"`(?P<span>{ten})`|\[(?P<nhan>`[^`\[\]]+`)\]\((?P<dich>{duong})\)",
                      re.IGNORECASE)
-    o = o.strip()
+    o = o.strip(" \t\x0b\x0c")
     ra, i = set(), 0
     while True:
         m = muc.match(o, i)
@@ -1890,7 +1894,9 @@ def _id_hien_thi(o: str) -> set:
     nhận `C1` từ `<span data-x=" C1 ">OTHER</span>` hay `[OTHER]( C1 )`, trong khi ô hiển thị `OTHER`)."""
     import re
     o = o.strip(" \t")
-    if not re.fullmatch(r"`[^`\s]+`(?:[ \t]*,?[ \t]*`[^`\s]+`)*", o):
+    # Phân cách giữa hai span phải KHÁC RỖNG (lượt 10): `` `C1``OTHER` `` là MỘT span theo GFM §6.3 — dãy hai nháy
+    # ở giữa không đóng span mở bằng một nháy — chứ không phải hai id.
+    if not re.fullmatch(r"`[^`\s]+`(?:(?:[ \t]*,[ \t]*|[ \t]+)`[^`\s]+`)*", o):
         return set()
     return set(re.findall(r"`([^`\s]+)`", o))
 
@@ -2388,6 +2394,10 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
         # Đối chứng XANH: comment và rào mã (kể cả một "## Mục lục" giả trong đó) ở NGOÀI hai mục là vô hại.
         viet(dau="<!-- ghi chú -->\n\n## Khác\n\n```\n## Mục lục\n| tệp verdict | biên nhận |\n|---|---|\n```\n\n")
         _kiem_muc_luc(tm, goc)
+        # Đối chứng XANH: ô id nhiều span TÁCH RỜI (phẩy hoặc khoảng trắng) vẫn nhận đủ.
+        for o_id in ("`C2`, `C1`", "`C2` `C1`"):
+            viet(cb=CB.replace("`C1`", o_id))
+            _kiem_muc_luc(tm, goc)
         do = {
             # tiêu đề giả trong rào mã từng tắt chốt comment, rồi comment ghép hai hàng thành một
             "rao_gia_roi_comment": ("comment HTML", dict(cb="```\n## Đây chỉ là ví dụ\n```\n\n| tệp verdict | id |\n"
@@ -2413,6 +2423,14 @@ def t27_phan_chung_ten_bien_nhan_sai_bi_TU_CHOI_kem_cach_chua_lam_XANH_ca_t26_t2
             "id_trong_thuoc_tinh": ("'C1'", dict(cb=CB.replace("`C1`", '<span data-x=" C1 ">OTHER</span>'))),
             "id_trong_the_html": ("'C1'", dict(cb=CB.replace("`C1`", "<span C1 >OTHER</span>"))),
             "id_trong_dich_link": ("'C1'", dict(cb=CB.replace("`C1`", "[OTHER]( C1 )"))),
+            # lượt 10: span DÍNH nhau là MỘT span (GFM §6.3) — không có id `C1` độc lập
+            "id_dinh_span_dau": ("'C1'", dict(cb=CB.replace("`C1`", "`C1``OTHER`"))),
+            "id_dinh_span_cuoi": ("'C1'", dict(cb=CB.replace("`C1`", "`OTHER``C1`"))),
+            "id_dinh_span_giua": ("'C1'", dict(cb=CB.replace("`C1`", "`OTHER``C1``ELSE`"))),
+            # lượt 10: NBSP không phải khoảng trắng của bảng ⇒ hàng gạch hỏng ⇒ không có bảng
+            "gach_nbsp_dau_o": ("Cảnh báo", dict(cb=CB.replace("|---|---|", "| ---|---|"))),
+            "gach_nbsp_cuoi_o": ("Mục lục", dict(ml=ML.replace("|---|---|", "|--- |---|"))),
+            "gach_nbsp_ngoai_bang": ("Mục lục", dict(ml=ML.replace("|---|---|", "|---|---| "))),
         }
         for ten, (dau_hieu, kw) in do.items():
             viet(**kw)

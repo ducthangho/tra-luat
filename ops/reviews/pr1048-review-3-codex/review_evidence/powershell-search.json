@@ -1,0 +1,21 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "rg",
+    "-n",
+    "-i",
+    "--hidden",
+    "--no-ignore",
+    "-g",
+    "!**/.git/**",
+    "-g",
+    "*.ps1",
+    "Get-Content",
+    "."
+  ],
+  "rc": 0,
+  "stdout_file": "powershell-search.stdout",
+  "stderr_file": "powershell-search.stderr",
+  "stdout_bytes": 11560,
+  "stderr_bytes": 0
+}

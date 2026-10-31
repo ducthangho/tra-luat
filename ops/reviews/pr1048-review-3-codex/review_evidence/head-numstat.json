@@ -1,0 +1,15 @@
+{
+  "cwd": "/tmp/claude-0/rv/pr1048-review-3/cay-kho",
+  "argv": [
+    "git",
+    "diff",
+    "--numstat",
+    "5a174b958a05e13f5c9a968a2596ca37267d0466",
+    "6f23a4e68805b4af3e2efe77be6e10b513843e93"
+  ],
+  "rc": 0,
+  "stdout_file": "head-numstat.stdout",
+  "stderr_file": "head-numstat.stderr",
+  "stdout_bytes": 15,
+  "stderr_bytes": 0
+}

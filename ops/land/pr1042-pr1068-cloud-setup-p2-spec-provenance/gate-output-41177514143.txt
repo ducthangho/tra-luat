@@ -1,0 +1,62 @@
+# Trich log run 41177514143 (workflow_dispatch runner_set=windows-only, head 780b7ecc (#1068), run_attempt 1), tai qua REST actions/jobs/<id>/logs boi phien dieu phoi.
+# Moi job: runner_id, sha256 + so byte log day du (log goc KHONG luu trong kho; GitHub giu log co han), dong checkout
+# (log -1 --format=%H cua actions/checkout), so dong 'BỎ QUA', dau hieu duong/am cua gate output.
+
+== job 124468025934 | chuan-bi | runner_id 1000028363 | success | log sha256 25c4cee5f81af119ab38d5c7999c29dcf31f5460a7bb7eeb68a6c5c89cdc25bd | 3552 byte
+   checkout: KHONG CO BUOC CHECKOUT
+   dong BỎ QUA: 0
+== job 124468042219 | gate-ops (windows-latest) | runner_id 1000028365 | success | log sha256 808fa7dd10aa84f8d59e8360db198d4bbbeddf5d623345d6c1470094a7c529db | 392490 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 39
+   1x TỔNG: ĐẠT
+== job 124468042239 | gate-cong-cu (windows-latest, 0) | runner_id 1000028371 | success | log sha256 dd99f68fd7fab4959423df3942be0bcb78f5b5e12ccd8470fd87840c752f8318 | 121979 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 2
+== job 124468042240 | gate (windows-latest) | runner_id 1000028372 | success | log sha256 94ec9602f99049355912d8109bcc404d5ed2c0a680e44d38483393a1068ed1b1 | 658226 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 9
+   2x TỔNG: ĐẠT
+   2x == gen_instructions selftest 44/44 ==
+   1x == transport selftest 12/12 ==
+   1x == tl selftest 1774/1774 ==
+== job 124468042251 | gate-packet-loop (windows-latest) | runner_id 1000028368 | success | log sha256 0e83c5c7a78b00bea96e529acf6283217f6ccb4c523d8614e4f8113aa035fbb7 | 305938 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 9
+   1x TỔNG: ĐẠT
+== job 124468042314 | gate-nhanh-manh (windows-latest, 3) | runner_id 1000028367 | success | log sha256 105c81a63dd89969ca3422b1ecdcbecd7f11724a043ac6797cca1e883a765818 | 124194 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042319 | gate-nhanh-manh (windows-latest, 4) | runner_id 1000028369 | success | log sha256 ef52de5549e9736e35097ae77114f4fc61cc22f7b158375de80ca775112975e8 | 124009 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042329 | gate-nhanh-manh (windows-latest, 0) | runner_id 1000028373 | success | log sha256 ce4ddf8e0319b4f3a07d0829c38a6594edf3b27ebbf123945ff31631c9a27d33 | 123265 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042332 | gate-nhanh-manh (windows-latest, 2) | runner_id 1000028366 | success | log sha256 3e96cbbde5167d58f5e115cd7afdc3d42100db15ead0716881437aa1941e93b6 | 123782 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042336 | gate-nhanh-manh (windows-latest, 1) | runner_id 1000028364 | success | log sha256 828372f1b77b7ce5b0616f73489b5f9709f459f86c0d2104e3f19f95a16624cb | 124192 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042349 | gate-nhanh-manh (windows-latest, 7) | runner_id 1000028370 | success | log sha256 0d1fd39674c0aa70c82382edfa7acb65cd7f70ee0838cbcfe37d2c6bf0eb8b35 | 124014 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042398 | gate-nhanh-manh (windows-latest, 6) | runner_id 1000028374 | success | log sha256 3569141a449401a5894b9f5ea97cbfdfecbb635631334a2365e93bd24bfaf1d5 | 124267 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468042407 | gate-nhanh-manh (windows-latest, 5) | runner_id 1000028375 | success | log sha256 8f69f4dc9b6fca2b42e5adcb0b777ce89fe6c18cc54559f8c71aa2854c13fc88 | 123830 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468511189 | gate-cong-cu-gop | runner_id None | skipped | log sha256 9a94d4753ca6b1179c0c28de722d463d8dacdb47409a48b6ac68e6017986298c | 215 byte
+   checkout: KHONG CO BUOC CHECKOUT
+   dong BỎ QUA: 0
+== job 124468651488 | gate-nhanh-gop (windows-latest) | runner_id 1000028376 | success | log sha256 66302871a7ace8e564b361599ff3c463cbe88f1440c0c20fc4c805d32da53aed | 119710 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+== job 124468743217 | gate-registry (windows-latest) | runner_id 1000028377 | success | log sha256 dc2d77398674595fd89fb354c735ef2084bb64d43506486630814178c8909be4 | 254880 byte
+   checkout: ['780b7ecc7f64e76f6fa6f64c7bce5a5f530880e3']
+   dong BỎ QUA: 0
+   4x TỔNG: ĐẠT
+   1x TONG: CA 44/44 dat · DOT BIEN 43 muc KHONG DO TREN WINDOWS — do tren ubuntu-latest
+   4x TONG: DAT
+   1x TONG: CA 45/45 dat · DOT BIEN 25/25 bi giet

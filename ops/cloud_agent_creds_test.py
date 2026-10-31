@@ -1,0 +1,359 @@
+#!/usr/bin/env python3
+"""Phản chứng CHẠY ĐƯỢC cho `ops/cloud_agent_creds.py` + khối hook — CLOUD-SETUP-P2B-WIRE r1, `nghiem_thu` A–D, H, F2. Ca = hàm
+`<a-h><số>_…`; `nap` chạy tiến trình con trên cây tạm có `scripts/tl.py` GIẢ, `cai-agy` in-process (tải giả ĐẾM lời gọi). Đột
+biến sửa BẢN SAO TẠM; chỉ `bang()` ném `TinHieuChotCa` (con thoát 3 + `DO:<ca>:`); lỗi vô can thoát 4 = TÍN DỤNG GIẢ; 5 = bỏ qua.
+"""
+import contextlib, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
+from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
+
+sys.dont_write_bytecode = True
+for _s in (sys.stdout, sys.stderr):
+    _s.reconfigure(encoding="utf-8", errors="backslashreplace")
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import bash_nen  # noqa: E402 — bộ giải `bash` dùng chung (#570)
+
+MA = Path(os.environ.get("CAC_MA") or HERE / "cloud_agent_creds.py")
+HOOK = Path(os.environ.get("CAC_HOOK") or HERE.parent / ".claude/hooks/session-start.sh")
+BASE = "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"   # base của lease wp1039 — vế âm L6a
+LA_WINDOWS = os.name == "nt"
+SPEC = HERE / "specs" / "cloud-setup-p2b-wire-r1.md"   # B8 so với CHÍNH bảng "Hằng ghim agy" của spec đóng băng, không chép lại
+SPEC_SHA256 = "67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81"
+class TinHieuChotCa(AssertionError):
+    """Chỉ `bang()` ném lớp này ⇒ phân biệt giết thật (chốt) với chết vì lỗi vô can."""
+class BoQua(Exception):
+    pass
+def bang(dieu_kien, thong_diep):
+    if not dieu_kien:
+        raise TinHieuChotCa(thong_diep)
+def _posix():
+    if LA_WINDOWS:
+        raise BoQua("đồ giả là script POSIX / nhóm tiến trình POSIX")
+def nap_mod():
+    spec = importlib.util.spec_from_file_location("cloud_agent_creds_duoi_test", MA)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+def _git_base(path):   # tệp ở BASE; chỉ tha (BoQua) khi cây là bản sao rời không `.git` (CLAUDE.md, "ca có MẶT ≠ ca có ĐO")
+    if not (HERE.parent / ".git").exists():
+        raise BoQua("cây không có .git — không đo được vế âm trên base")
+    r = subprocess.run(["git", "-C", str(HERE.parent), "show", f"{BASE}:{path}"], capture_output=True)
+    bang(r.returncode == 0, f"không đọc được {path} ở base: {r.stderr[-200:]!r}")
+    return r.stdout.decode("utf-8")
+
+# ---------- A: `nap` ----------
+TL_GIA = r'''import json, os, sys, time
+with open(os.environ["CAC_NHAT_KY"], "a", encoding="utf-8") as f:
+    f.write(json.dumps({"argv": sys.argv[1:], "pid": os.getpid(), "exe": sys.executable}) + "\n")
+kb = json.loads(os.environ["CAC_KICH_BAN"])
+sys.stdout.buffer.write(kb.get("in", "").encode("utf-8")); sys.stdout.flush()
+time.sleep(kb.get("ngu", 0)); sys.exit(kb.get("rc", 0))
+'''
+def chay_nap(kb=None, khoa="khoa-thu", them=None, xoa_tl=False, argv=("nap",)):
+    with tempfile.TemporaryDirectory(prefix="cac_nap_") as t:
+        t, bo = Path(t), ("TL_MASTER_KEY", "TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY")
+        (t / "ops").mkdir(), (t / "scripts").mkdir(), shutil.copy(MA, t / "ops" / "cloud_agent_creds.py")
+        if not xoa_tl:
+            (t / "scripts" / "tl.py").write_text(TL_GIA, encoding="utf-8")
+        nk = t / "nk.jsonl"
+        env = {k: v for k, v in os.environ.items() if k not in bo}
+        env.update(CAC_NHAT_KY=str(nk), CAC_KICH_BAN=json.dumps(kb or {}), **(them or {}), **({} if khoa is None else {"TL_MASTER_KEY": khoa}))
+        t0 = time.monotonic()
+        r = subprocess.run([sys.executable, "-B", str(t / "ops" / "cloud_agent_creds.py"), *argv], capture_output=True, env=env, timeout=150)
+        ra = r.stdout.decode("utf-8", "replace")
+        return SimpleNamespace(rc=r.returncode, ra=ra, loi=r.stderr.decode("utf-8", "replace"), giay=time.monotonic() - t0,
+                               nk=[json.loads(x) for x in nk.read_text(encoding="utf-8").splitlines()] if nk.exists() else [],
+                               ag=[d for d in ra.splitlines() if "agent_creds:" in d])
+def _con_song(pid):   # zombie tính là chết (CLAUDE.md)
+    try:
+        return os.kill(pid, 0) is None and Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[0] != "Z"
+    except (ProcessLookupError, FileNotFoundError):
+        return False
+def a1_thieu_khoa_khong_goi_tl():
+    for khoa in (None, ""):
+        k = chay_nap({"in": "[bootstrap] agent_creds: ĐÃ NẠP — x\n"}, khoa=khoa)
+        bang(k.rc == 0 and k.ag == ["agent_creds: BỎ QUA — thiếu TL_MASTER_KEY"], f"khoa={khoa!r}: rc={k.rc} {k.ag}")
+        bang(len(k.nk) == 0, f"khoa={khoa!r}: tl.py giả chạy {len(k.nk)} lần")
+def a2_loc_dong_agent_cua_bootstrap():
+    k = chay_nap({"in": "[bootstrap] dòng thường\n[bootstrap] agent_creds: ĐÃ NẠP — rev=7\n"})
+    bang(len(k.ag) == 1 and k.ag[0].startswith("agent_creds: ĐÃ NẠP — rev=7"), f"dòng agent {k.ag}")
+    bang("[bootstrap] agent_creds:" not in k.ra and "[bootstrap] dòng thường" in k.ra, f"chuyển tiếp sai: {k.ra!r}")
+def a3_bang_sau_ca_hop_dong():
+    hai = "agent_creds: ĐÃ NẠP — a\nagent_creds: ĐÃ NẠP — b\n"
+    for i, (kb, xoa, s, ly_do) in enumerate([
+            ({"rc": 2}, 0, "KHÔNG ĐO ĐƯỢC", "rc=2"), ({"rc": 3}, 0, "KHÔNG ĐO ĐƯỢC", "rc=3"),
+            ({"in": hai}, 0, "KHÔNG ĐO ĐƯỢC", "không đúng hợp đồng"), ({"in": "agent_creds: LẠ — x\n"}, 0, "KHÔNG ĐO ĐƯỢC", "không đúng hợp đồng"),
+            ({}, 1, "KHÔNG ĐO ĐƯỢC", "không chạy được"), ({"rc": 1, "in": "[bootstrap] agent_creds: KHÔNG CẤU HÌNH — y\n"}, 0, "KHÔNG CẤU HÌNH", "rc=1")], 1):
+        k = chay_nap(kb, xoa_tl=xoa)
+        bang(k.rc == 0 and len(k.ag) == 1, f"ca {i}: rc={k.rc} dòng agent {k.ag}")
+        bang(k.ag[0].startswith(f"agent_creds: {s} — ") and ly_do in k.ag[0], f"ca {i}: {k.ag[0]!r} (mong {s}/{ly_do})")
+def a4_qua_han_giet_ca_nhom():
+    _posix()
+    k = chay_nap({"ngu": 60}, them={"TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "2"})
+    pid = k.nk[0]["pid"] if k.nk else None
+    try:
+        bang(k.giay < 20, f"nap mất {k.giay:.1f} s")
+        bang(k.rc == 0 and k.ag == ["agent_creds: KHÔNG ĐO ĐƯỢC — bootstrap quá 2 s, đã dừng"], f"rc={k.rc} {k.ag}")
+        bang(pid is not None and not _con_song(pid), f"PID {pid} của bootstrap giả còn sống")
+    finally:
+        with contextlib.suppress(Exception):
+            os.kill(pid, 9)
+def a5_doc_timeout():
+    m = nap_mod()
+    for v in ("abc", "-5", "0", "inf"):
+        bang(m.doc_timeout(v) == 180, f"doc_timeout({v!r}) = {m.doc_timeout(v)}")
+def a6_argv_va_trinh_thong_dich():
+    k = chay_nap({"in": "agent_creds: ĐÃ NẠP — x\n"})
+    bang(len(k.nk) == 1 and k.nk[0]["argv"] == ["bootstrap", "--env", "code", "--no-nlm"], f"argv {k.nk}")
+    bang(os.path.realpath(k.nk[0]["exe"]) == os.path.realpath(sys.executable), f"trình thông dịch {k.nk[0]['exe']}")
+def a7_che_master_key():
+    s = "SENTINEL-khoa-a7-9f3c2e"
+    k = chay_nap({"in": f"dòng {s}\n[bootstrap] agent_creds: ĐÃ NẠP — {s}\n"}, khoa=s)
+    bang(s not in k.ra and s not in k.loi and "***" in k.ra, "giá trị TL_MASTER_KEY lọt ra đầu ra / không thấy dấu che")
+def a8_nap_luon_rc0():
+    for rc in range(5):
+        bang(chay_nap({"rc": rc}).rc == 0, f"bootstrap rc={rc} ⇒ nap rc khác 0")
+    bang(chay_nap({"ngu": 30}, them={"TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY": "1"}).rc == 0, "quá hạn ⇒ nap rc khác 0")
+    k = chay_nap({}, argv=("nap", "--la"))
+    bang(k.rc == 2 and len(k.nk) == 0, f"`nap --la`: rc={k.rc}, tl.py chạy {len(k.nk)} lần")
+
+# ---------- B/C/D: `cai-agy` ----------
+NOI_DUNG = b'#!/bin/sh\n[ -n "$CAC_AGY_NK" ] && echo "$*" >> "$CAC_AGY_NK"\necho antigravity 1.4.12\n'
+def _tar(muc):   # (tên, byte | None = symlink tới /etc/passwd)
+    b = io.BytesIO()
+    with tarfile.open(fileobj=b, mode="w:gz") as tf:
+        for ten, du in muc:
+            ti = tarfile.TarInfo(ten)
+            ti.type, ti.linkname, ti.size = (tarfile.SYMTYPE, "/etc/passwd", 0) if du is None else (tarfile.REGTYPE, "", len(du))
+            tf.addfile(ti, None if du is None else io.BytesIO(du))
+    return b.getvalue()
+TAR_TOT = _tar([("antigravity", NOI_DUNG)])
+@contextlib.contextmanager
+def san_agy(tar=TAR_TOT, nen="linux_amd64", sha=None, agy_cu=None, env_them=None, settings=None):
+    m = nap_mod()
+    with tempfile.TemporaryDirectory(prefix="cac_agy_") as t:
+        t = Path(t)
+        home, nk, dem = t / "home", t / "agy_goi.log", []
+        home.mkdir()
+        m.tai = lambda url: (dem.append(url), tar)[1]
+        m.NEN = {"linux_amd64": ("https://gia.invalid/agy.tar.gz", sha or hashlib.sha512(tar).hexdigest())}
+        m.khoa_nen_hien_tai = lambda: nen
+        agy, st = home / ".local" / "bin" / "agy", home / ".gemini/antigravity-cli/settings.json"
+        if settings is not None:
+            st.parent.mkdir(parents=True)
+            st.write_text(settings, encoding="utf-8")
+        if agy_cu is not None:
+            agy.parent.mkdir(parents=True)
+            agy.write_text(f'#!/bin/sh\necho "$*" >> "{nk}"\necho "{agy_cu[0]}"\nexit {agy_cu[1]}\n', encoding="utf-8")
+            agy.chmod(0o755)
+        def chay():
+            buf = io.StringIO()
+            with mock.patch.dict(os.environ, {"CAC_AGY_NK": str(nk)}), contextlib.redirect_stdout(buf):
+                rc = m.cai_agy({"HOME": str(home), **(env_them or {})})
+            return rc, buf.getvalue()
+        yield SimpleNamespace(t=t, dem=dem, chay=chay, agy=agy, nk=nk, settings=st,
+                              tep=lambda: sorted(str(p.relative_to(t)) for p in t.rglob("*") if p.is_symlink() or p.is_file()))
+def b1_chua_co_thi_tai_va_ghi():
+    with san_agy() as s:
+        rc, ra = s.chay()
+        bang(rc == 0 and len(s.dem) == 1, f"rc={rc}, tải {len(s.dem)} lần")
+        bang(s.agy.is_file() and s.agy.read_bytes() == NOI_DUNG, f"~/.local/bin/agy sai: {ra}")
+        bang(LA_WINDOWS or s.agy.stat().st_mode & 0o111, "agy không có bit thực thi")
+def b2_sha512_lech_khong_ghi():
+    _posix()
+    with san_agy(sha="0" * 128) as s:
+        rc, ra = s.chay()
+        bang(rc == 0 and not s.agy.exists() and "agy: ✗ sha512 lệch" in ra, f"rc={rc} tạo={s.agy.exists()} {ra!r}")
+    with san_agy(sha="0" * 128, agy_cu=("antigravity 1.4.0", 0)) as s:
+        truoc, _ = s.agy.read_bytes(), s.chay()
+        bang(s.agy.read_bytes() == truoc, "bản cũ bị đổi dù sha512 lệch")
+def b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay():   # B3 (đếm 0) + B4 (đếm 1, tệp được thay)
+    _posix()
+    for cu, n in ((("antigravity 1.4.12", 0), 0), (("antigravity 1.4.13", 0), 1), (("antigravity 1.4.12", 1), 1)):
+        with san_agy(agy_cu=cu) as s:
+            s.chay()
+            bang(len(s.dem) == n and (n == 0 or s.agy.read_bytes() == NOI_DUNG), f"{cu}: tải {len(s.dem)} lần (mong {n}) / không thay tệp")
+def b5_nen_ngoai_bang_va_d2_khong_env_file():   # B5 + D2 (không CLAUDE_ENV_FILE ⇒ không tạo tệp nào ở cwd/HOME)
+    with san_agy(nen="freebsd_amd64") as s, contextlib.chdir(s.t):
+        rc, ra = s.chay()
+        bang(rc == 0 and "agy: CHƯA HỖ TRỢ freebsd_amd64" in ra and len(s.dem) == 0, f"rc={rc} tải {len(s.dem)} {ra!r}")
+        bang(s.tep() == [str(s.settings.relative_to(s.t))], f"tệp lạ {s.tep()}")
+def b6_tarball_doc_tu_choi():
+    for i, muc in enumerate(([("../x", b"x")], [("antigravity", NOI_DUNG), ("khac", b"y")], [("antigravity", None)]), 1):
+        with san_agy(tar=_tar(muc)) as s:
+            rc, ra = s.chay()
+            bang(rc == 0 and not s.agy.exists() and not s.agy.is_symlink(), f"tarball độc {i}: tạo agy ({ra!r})")
+            bang(s.tep() == [str(s.settings.relative_to(s.t))], f"tarball độc {i}: ghi lạ {s.tep()}")
+def b7_khong_goi_agy_install():
+    _posix()
+    with san_agy(agy_cu=("antigravity 1.4.13", 0)) as s:
+        s.chay(), s.chay()
+        goi = s.nk.read_text(encoding="utf-8").splitlines() if s.nk.exists() else []
+        bang(goi and all(g == "--version" for g in goi), f"lời gọi agy: {goi}")
+def b8_hang_ghim_dung_spec():
+    m, b = nap_mod(), SPEC.read_bytes()
+    bang(hashlib.sha256(b).hexdigest() == SPEC_SHA256, "spec đóng băng đổi băm")
+    bang(len(spec := dict((k, (u, h)) for k, u, h in re.findall(r"^\| `(\w+)` \| `(https://\S+)` \| `([0-9a-f]{128})` \|$", b.decode("utf-8"), re.M))) == 6, "spec phải có 6 nền")
+    bang(m.AGY_VER == "1.4.12" and sorted(m.NEN) == sorted(spec), f"AGY_VER={m.AGY_VER} khoá={sorted(m.NEN)}")
+    for k, v in spec.items():
+        bang(tuple(m.NEN[k]) == v, f"hằng ghim {k} lệch spec")
+def _goi_doi_kieu(f, *a):
+    try:
+        return f(*a)
+    except Exception as e:  # CỐ Ý — bẫy F2: đổi lỗi vô can thành AssertionError; bộ phân hạng KHÔNG được nhận nó là giết
+        raise AssertionError(f"lỗi {type(e).__name__}") from e
+def b9_luat_chon_nen():
+    m = nap_mod()
+    for vao, mong in ((("Linux", "x86_64", False), "linux_amd64"), (("Linux", "aarch64", True), "linux_arm64_musl"),
+                      (("Darwin", "arm64", False), "darwin_arm64")):
+        bang(_goi_doi_kieu(m.khoa_nen, *vao) == mong, f"{vao} ⇒ {m.khoa_nen(*vao)}, mong {mong}")
+    bang(_goi_doi_kieu(m.khoa_nen, "Linux", "i686", False) not in m.NEN, "Linux/i686 rơi vào bảng")
+def c13_gop_model_provider_khong_ghi_khoa():   # C1 + C3 (khoá trong môi trường không được vào settings.json)
+    sen = "SENTINEL-gemini-c3-71ab"
+    for truoc, mong in (('{"a": 1, "modelProvider": "x"}', {"a": 1, "modelProvider": "gemini"}), (None, {"modelProvider": "gemini"})):
+        with mock.patch.dict(os.environ, {"GEMINI_API_KEY": sen, "GOOGLE_API_KEY": sen}), san_agy(nen="freebsd_amd64", settings=truoc) as s:
+            s.chay()
+            bang(json.loads(s.settings.read_text(encoding="utf-8")) == mong, f"{truoc!r}: settings sai")
+            bang(sen not in s.settings.read_text(encoding="utf-8"), "settings.json chứa khoá từ môi trường")
+def c2_settings_khong_phai_object_khong_dung():
+    for nd in ("[1,2]", "{không phải json"):
+        with san_agy(nen="freebsd_amd64", settings=nd) as s:
+            truoc = hashlib.sha256(s.settings.read_bytes()).hexdigest()
+            rc, ra = s.chay()
+            bang(rc == 0 and hashlib.sha256(s.settings.read_bytes()).hexdigest() == truoc and "agy: ⚠" in ra, f"{nd!r}: tệp bị đổi / không cảnh báo")
+def d1_env_file_dung_mot_dong():
+    with tempfile.TemporaryDirectory() as t:
+        f = Path(t) / "env.sh"
+        f.write_text("export FOO=1\n", encoding="utf-8")
+        with san_agy(nen="freebsd_amd64", env_them={"CLAUDE_ENV_FILE": str(f)}) as s:
+            s.chay(), s.chay()
+        dong = f.read_text(encoding="utf-8").splitlines()
+        bang(dong.count("export AGY_CLI_DISABLE_AUTO_UPDATE=1") == 1 and "export FOO=1" in dong, f"env file: {dong}")
+# ---------- H: khối trong hook ----------
+MO, DONG = "# >>> agent-creds (wp1039)", "# <<< agent-creds (wp1039)"
+RE_NAP, RE_CAI = re.compile(r'cloud_agent_creds\.py"?\s+nap\b'), re.compile(r'cloud_agent_creds\.py"?\s+cai-agy\b')
+def h1_vi_tri_khoi_trong_hook():
+    dong = HOOK.read_text(encoding="utf-8").splitlines()
+    bang(dong.count(MO) == 1 and dong.count(DONG) == 1, "dấu khối phải xuất hiện đúng 1 lần mỗi dấu")
+    i, j = dong.index(MO), dong.index(DONG)
+    pip = next(n for n, d in enumerate(dong) if d.startswith("# --- phụ thuộc Python của kho"))
+    pol = next(n for n, d in enumerate(dong) if "codex_env_policy.py" in d)
+    bang(pip < i < j < pol, f"khối ở dòng {i}–{j}, phải sau {pip} và trước {pol}")
+    khoi, ngoai = dong[i + 1:j], dong[:i] + dong[j + 1:]
+    for rx in (RE_NAP, RE_CAI):
+        bang([bool(rx.search(d)) for d in khoi].count(True) == 1, f"{rx.pattern}: trong khối phải đúng 1")
+        bang(not any(rx.search(d) for d in ngoai), f"{rx.pattern}: ngoài khối phải 0")
+        bang(not rx.search(_git_base(".claude/hooks/session-start.sh")), f"vế âm: base đã có {rx.pattern}")
+    vt = [next(n for n, d in enumerate(khoi) if rx.search(d)) for rx in (RE_NAP, RE_CAI)]
+    bang(vt[0] < vt[1], "nap phải đứng trước cai-agy")
+def h2_khoi_song_sot_set_e():
+    _posix()
+    dong = HOOK.read_text(encoding="utf-8").splitlines()
+    bash = bash_nen.tim_bash()[0]
+    if not bash:
+        raise BoQua("không có bash dùng được")
+    with tempfile.TemporaryDirectory() as t:
+        py = Path(t) / "py_gia"
+        py.write_text("#!/bin/sh\nexit 3\n", encoding="utf-8")
+        py.chmod(0o755)
+        than = "\n".join(dong[dong.index(MO) + 1:dong.index(DONG)])
+        r = subprocess.run([bash, "-c", 'set -euo pipefail; PY="$1"; GOC="$2"\n' + than, "h2", str(py), t], capture_output=True, text=True, timeout=60)
+    bang(r.returncode == 0 and "[session-start] " in r.stdout, f"rc={r.returncode} {r.stdout!r} {r.stderr!r}")
+def h3_ten_nang_luc():
+    moi, cu = [set(next(x for x in v.splitlines() if x.startswith("# hook-nang-luc:")).split()[2:])
+               for v in (HOOK.read_text(encoding="utf-8"), _git_base(".claude/hooks/session-start.sh"))]
+    bang({"agent-creds-bootstrap", "agy-ghim"} <= moi, f"thiếu tên năng lực mới: {moi}")
+    bang(cu <= moi, f"mất tên cũ: {cu - moi}")
+CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r"[a-h]\d+_\w+", k) and callable(v)}
+
+# ---------- đột biến: (tên, tệp, chuỗi gốc | None, thay (chuỗi | hàm), ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần ----------
+def _doi_khoi_ra_sau(s):
+    i, j = s.index(MO), s.index(DONG) + len(DONG) + 1
+    return s[:i] + s[j:] + s[i:j]
+DOT_BIEN = (
+    ("A1_goi_bat_ke_khoa", "ma", "    if not khoa:\n", "    if False:\n", "a1_thieu_khoa_khong_goi_tl"),
+    ("A2_chuyen_tiep_nguyen_van", "ma", '        if "agent_creds:" in d:\n            dong_agent.append(d)\n        else:\n            print(d)', "        print(d)", "a2_loc_dong_agent_cua_bootstrap"),
+    ("A3_bo_nhanh_khong_dong", "ma", '    if not dong_agent:\n        return f"KHÔNG ĐO ĐƯỢC — bootstrap thoát rc={rc} trước bước agent"\n', "", "a3_bang_sau_ca_hop_dong"),
+    ("A3_bo_kiem_tap_trang_thai", "ma", " or s not in TRANG_THAI", "", "a3_bang_sau_ca_hop_dong"),
+    ("A4_bo_giet", "ma", "            os.killpg(p.pid, signal.SIGKILL)", "            pass", "a4_qua_han_giet_ca_nhom"),
+    ("A4_bo_timeout", "ma", "p.communicate(timeout=han)", "p.communicate()", "a4_qua_han_giet_ca_nhom"),
+    ("A5_nhan_0", "ma", "v > 0 else", "v >= 0 else", "a5_doc_timeout"),
+    ("A6_bo_no_nlm", "ma", '"code", "--no-nlm"]', '"code"]', "a6_argv_va_trinh_thong_dich"),
+    ("A6_them_require", "ma", '"code", "--no-nlm"]', '"code", "--no-nlm", "--require-agent-creds"]', "a6_argv_va_trinh_thong_dich"),
+    ("A7_bo_che", "ma", '.replace(khoa, "***")', "", "a7_che_master_key"),
+    ("A8_tra_rc_bootstrap", "ma", "    return 0  # nap: luôn 0", "    return rc  # nap", "a8_nap_luon_rc0"),
+    ("B1_khong_ghi", "ma", "        _ghi_nguyen_tu(agy, tf.extractfile(tv[0]).read(), 0o755)", "        pass", "b1_chua_co_thi_tai_va_ghi"),
+    ("B2_bo_kiem_sha", "ma", "    if hashlib.sha512(du_lieu).hexdigest() != muc[1]:", "    if False:", "b2_sha512_lech_khong_ghi"),
+    ("B3_luon_tai", "ma", "    if _ban_khop(agy):", "    if False:", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_chi_kiem_co_mat", "ma", "    if _ban_khop(agy):", "    if agy.is_file():", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B5_roi_ve_linux_amd64", "ma", "    muc = NEN.get(k)", '    muc = NEN.get(k) or NEN["linux_amd64"]', "b5_nen_ngoai_bang_va_d2_khong_env_file"),
+    ("B6_extractall", "ma", "        tv = tf.getmembers()\n", '        tf.extractall(agy.parent, filter="fully_trusted")\n        tv = tf.getmembers()\n', "b6_tarball_doc_tu_choi"),
+    ("B7_goi_agy_install", "ma", '    print(f"agy: ✓ đã cài', '    subprocess.run([str(agy), "install"], capture_output=True, timeout=15)\n    print(f"agy: ✓ đã cài', "b7_khong_goi_agy_install"),
+    ("B8_doi_mot_ky_tu_sha", "ma", '"ea01c73b77', '"fa01c73b77', "b8_hang_ghim_dung_spec"),
+    ("B9_bo_musl", "ma", ' + ("_musl" if he == "linux" and musl else "")', "", "b9_luat_chon_nen"),
+    ("C1_ghi_de_ca_tep", "ma", '    d = {**d, "modelProvider": "gemini"}', '    d = {"modelProvider": "gemini"}', "c13_gop_model_provider_khong_ghi_khoa"),
+    ("C2_ghi_de_khi_parse_loi", "ma", 'return print(f"agy: ⚠ settings.json không đọc được', 'd = {}; print(f"', "c2_settings_khong_phai_object_khong_dung"),
+    ("C3_ghi_api_key", "ma", '    d = {**d, "modelProvider": "gemini"}', '    d = {**d, "modelProvider": "gemini", "apiKey": os.environ.get("GEMINI_API_KEY", "")}', "c13_gop_model_provider_khong_ghi_khoa"),
+    ("D1_noi_moi_luot", "ma", "        if cu.count(DONG_ENV) != 1:\n            _ghi_nguyen_tu(p, (\"\\n\".join([x for x in cu if x != DONG_ENV] + [DONG_ENV])",
+     "        if True:\n            _ghi_nguyen_tu(p, (\"\\n\".join(cu + [DONG_ENV])", "d1_env_file_dung_mot_dong"),
+    ("H1_doi_khoi_ra_sau_doctor", "hook", None, _doi_khoi_ra_sau, "h1_vi_tri_khoi_trong_hook"),
+    ("H2_bo_or_true", "hook", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /'", "h2_khoi_song_sot_set_e"),
+    ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
+)
+TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)
+    ("vo_can_qua_except_doi_kieu", "ma", "    he = he.lower()\n", "    raise AttributeError('vo can')\n", "b9_luat_chon_nen", "TIN_DUNG_GIA"),
+    ("chi_them_chu_thich", "ma", "TIMEOUT_MAC_DINH = 180\n", "TIMEOUT_MAC_DINH = 180  # vo hai\n", "a5_doc_timeout", "SONG_SOT"),
+)
+def phan_hang(rc, ra, ten_ca):
+    """GIET chỉ khi con thoát 3 VÀ có dòng `DO:<đúng ca đích>:` — `AssertionError` trần hay ca khác là tín dụng giả."""
+    if rc == 3:
+        return "GIET" if re.search(rf"^DO:{re.escape(ten_ca)}:", ra, re.M) else "TIN_DUNG_GIA"
+    return {0: "SONG_SOT", 5: "BO_QUA", 4: "TIN_DUNG_GIA"}.get(rc, "HONG")
+def chay_dot_bien(ten, tep, cu, moi, ten_ca):
+    nguon = MA if tep == "ma" else HOOK
+    goc = nguon.read_text(encoding="utf-8")
+    if cu is not None and (goc.count(cu) != 1 or cu == moi):
+        return "HONG", f"neo phải xuất hiện đúng 1 lần (thấy {goc.count(cu)})"
+    with tempfile.TemporaryDirectory(prefix="cac_db_") as t:
+        kq = []
+        for nhan, nd in (("goc", goc), ("db_" + ten, moi(goc) if cu is None else goc.replace(cu, moi))):
+            (ban := Path(t) / f"{nhan}_{nguon.name}").write_text(nd, encoding="utf-8", newline="\n")
+            r = subprocess.run([sys.executable, "-B", str(Path(__file__).resolve()), "--mot-ca", ten_ca], capture_output=True, timeout=600,
+                               env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", **{"CAC_MA" if tep == "ma" else "CAC_HOOK": str(ban)}))
+            kq.append((r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")))
+            if nhan == "goc" and r.returncode != 0:
+                return ("BO_QUA", "") if r.returncode == 5 else ("HONG", f"ca đích không xanh trên bản gốc (rc={r.returncode}): {kq[0][1][-200:]}")
+    return phan_hang(kq[1][0], kq[1][1], ten_ca), kq[1][1].strip()[-200:]
+def chay_ca(ten):
+    try:
+        return CA[ten]() or (0, "")
+    except TinHieuChotCa as e:
+        return 3, f"DO:{ten}:{e}"
+    except BoQua as e:
+        return 5, f"BO QUA {ten}: {e}"
+    except Exception as e:
+        return 4, f"HONG:{ten}:{type(e).__name__}: {e}"
+def main(argv):
+    if len(argv) == 2 and argv[0] == "--mot-ca" and argv[1] in CA:
+        rc, dong = chay_ca(argv[1])
+        return print(dong) or rc
+    if argv:
+        return print("dung: cloud_agent_creds_test.py [--mot-ca TEN]", file=sys.stderr) or 2
+    kq = [chay_ca(ten) for ten in CA]
+    print("".join(f"[{d}]\n" for rc, d in kq if rc), end="")
+    dat, tong = sum(rc == 0 for rc, _ in kq), sum(rc != 5 for rc, _ in kq)
+    db = [(ten, *chay_dot_bien(ten, tep, cu, moi, dich)) for ten, tep, cu, moi, dich in DOT_BIEN]
+    tk = [(ten, mong, chay_dot_bien(ten, tep, cu, moi, dich)[0]) for ten, tep, cu, moi, dich, mong in TU_KIEM]
+    tk += [("ca_khac_ca_dich", "TIN_DUNG_GIA", phan_hang(3, "DO:a1_thieu_khoa_khong_goi_tl:x", "a2_loc_dong_agent_cua_bootstrap")),
+           ("assertion_tran", "TIN_DUNG_GIA", phan_hang(4, "HONG:b9_luat_chon_nen:AssertionError: lỗi", "b9_luat_chon_nen"))]
+    xau = [f"{ten}: {h} {ct}" for ten, h, ct in db if h not in ("GIET", "BO_QUA")]
+    n_db = sum(h != "BO_QUA" for _, h, _ in db)
+    loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, mong, h in tk if h != mong]
+    print(f"CA: {dat}/{tong} dat\n" + "".join(f"[DOT BIEN KHONG BI GIET DUNG] {x}\n" for x in xau) + f"DOT BIEN: {n_db - len(xau)}/{n_db} bi giet dung ly do")
+    print("".join(f"[TU KIEM] {x}\n" for x in loi_tk) + f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(tk)} dot bien)")
+    ok = dat == tong > 0 and n_db > 0 and not xau and not loi_tk
+    return print(f"TONG: {'DAT' if ok else 'DO'}") or (0 if ok else 1)
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

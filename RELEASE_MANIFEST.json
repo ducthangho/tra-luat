@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 195,
-  "total_bytes": 8861697,
-  "package_hash": "6f5ac3ac9cebc4d3d45a1f6a7ae65b4beea2af36997ca1f847f5935dda4f843d",
-  "content_hash": "6f5ac3ac9cebc4d3d45a1f6a7ae65b4beea2af36997ca1f847f5935dda4f843d",
+  "total_bytes": 8864200,
+  "package_hash": "a89e2e121b2e90208df19080426514d31b7537f6e9db919b3966953ef9adbbb2",
+  "content_hash": "a89e2e121b2e90208df19080426514d31b7537f6e9db919b3966953ef9adbbb2",
   "required_missing": [],
   "files": [
     {
@@ -243,8 +243,8 @@
     },
     {
       "path": "references/RUNBOOK.md",
-      "size": 86217,
-      "sha256": "6bb3c7650aee1189aad1b143b42b4cf9f248e8892587accd492e4837d3d6bbfa"
+      "size": 88720,
+      "sha256": "508ae88ac226d071e5da28877bf3150151ae8f3155ccd3d5317181d4cf74a912"
     },
     {
       "path": "references/SKILL_KERNEL_MAPPING.md",

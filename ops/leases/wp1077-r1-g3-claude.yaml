@@ -1,0 +1,111 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1077
+packet_id: DOCTOR-ENOEXEC-BI-CHE
+revision: 1
+generation: 3
+lease_id: wp1077-r1-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: []
+depends_on_ghi_chu: 'doc lap; phat hien tu review doc lap (A) cua #823 (PR ghi so #1076). Base origin/master 086f1b7.'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'write set .claude/dev/launcher.py => sensitive; executor ho claude, reviewer ho openai; toi da 5 loi goi Codex (nang_tran 2->4->5).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1077.md
+spec_sha256_required: eabbb725650addad531429d48801667f2ef05a6090c00123d1d4146c7b89c3f3
+spec_hash: eabbb725650addad531429d48801667f2ef05a6090c00123d1d4146c7b89c3f3
+spec_ref: refs/heads/ops/wp1077-r1-g1-lease@8e8861a8d0a9f488ce47ea009cd2962565f97b9c
+prompt_path: ops/specs/wp1077.md
+prompt_sha256_required: eabbb725650addad531429d48801667f2ef05a6090c00123d1d4146c7b89c3f3
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- ops/handoff/wp1077-g1-claude.md
+write_set_hash: d22a5b88761a81490b0fb99e00390471aee4f47c60dd3ade2d480eea0d2582b7
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'launcher.py CHI ham probe dung chung + _phien_ban + _xac_thuc_kem_dau_ra + cac probe KHA_NANG; launcher_test.py CHI ca moi + do gia bi anh huong + bang dot bien; handoff chi tren nhanh lease; diff PR 2 tep. ADR-0044 sensitive: <=3 tep; tran dong them NANG 300 -> 330 (chu kho, nang_tran lan 2).'
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- ops/handoff/wp1077-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 5 loi goi codex (nang_tran lan 2); moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run'}
+- {id: M-3, dieu_kien: 'A1-A4 cua spec: phan chung tren base do, dot bien moi giet dung ca dich; ruff F delta 0; doctrine-scan, git diff --check rc0'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp1077-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 086f1b7343fc1d778e50797e6c9ca0964b11a755
+start_from_sha: 086f1b7343fc1d778e50797e6c9ca0964b11a755
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 086f1b7343fc1d778e50797e6c9ca0964b11a755
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1077
+granted_on_instruction_readback: 'chu kho go "Cap spec va lease cho #1077, #1078 roi lam tiep" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026); ghi ho. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease CUNG la executor, theo chi thi chu kho trong chinh phien; tien le wp1045-r1-g1-claude.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-10-31T10:12:00Z'
+  goc_quet: 'master 086f1b7, fetch +refs/heads/*, ls-remote so TAP ten voi for-each-ref: thieu 0; nhanh master cuc bo ff ve origin/master'
+  ket_qua: 'ai-dang-giu .claude/dev/launcher.py va .claude/dev/launcher_test.py: NGUOI_GIU 0 (chi lease HET_HAN).'
+thay_the_cho: [wp1077-r1-g2-claude]
+thay_the_cho_ghi_chu: 'g2 CON HAN (toi 2026-11-01T12:20Z) => bia mo hai chieu: g2 mang da_bi_thay_the trong cung commit. g1 da mang da_bi_thay_the tu g2, khong sua lai.'
+leased_at_utc: '2026-10-31T13:57:00Z'
+heartbeat_at: '2026-10-31T13:57:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
+lease_until: '2026-11-01T13:57:00Z'
+lease_expires_at_utc: '2026-11-01T13:57:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp1045).'
+review_rounds_limit: 2
+budget:
+  codex_review_calls:
+    pr_wp1077_g1: {used: 4, reserved: 0, limit: 5}
+  attempt:
+    packet_1077_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+nang_tran:
+  truc: codex_review_calls
+  tran_cu: 2
+  tran_moi: 4
+  ai_nang: ducthangho
+  khi_nao: 'sau verdict luot 2 changes_requested (3 P1: F1 git/codex_cred con ENOEXEC, F4 giai PATH sau spawn dau, F5 so dong khai sai) tren dcfb011'
+  can_cu: 'chu kho chon "Nang tran +2, thu hep pham vi (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026, AskUserQuestion); ghi ho. Bam byte KHONG DO DUOC.'
+  pham_vi_quyet_dinh: 'va F4 + dinh chinh F5; F1 KHONG va (_git dung chung voi run, _do_codex_song spawn o codex_cred.py ngoai write set) — sua loi khai "moi probe" va mo Issue noi tiep. Write set giu 3 tep.'
+nang_tran_lan_2:
+  truc: [codex_review_calls, dong_them]
+  tran_cu: {codex_review_calls: 4, dong_them: 300}
+  tran_moi: {codex_review_calls: 5, dong_them: 330}
+  ai_nang: ducthangho
+  khi_nao: 'sau verdict luot 4 changes_requested (F4 P1: abspath xoa .. truoc khi kernel giai symlink; F1 P2: chu thich bang dot bien "moi probe KHA_NANG") tren 1027f85'
+  can_cu: 'chu kho chon "+1 loi goi, cho vuot tran dong (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026, AskUserQuestion); ghi ho. Bam byte KHONG DO DUOC.'
+  dieu_kien_dung: 'luot 5 van con loi chan => dung han, khong nang tiep.'
+push_policy: 'day nhanh agent/wp1077-g1-claude khi A1-A4 dat; mo PR draft.'

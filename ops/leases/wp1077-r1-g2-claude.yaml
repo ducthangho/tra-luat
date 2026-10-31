@@ -101,3 +101,5 @@ nang_tran:
   can_cu: 'chu kho chon "Nang tran +2, thu hep pham vi (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026, AskUserQuestion); ghi ho. Bam byte KHONG DO DUOC.'
   pham_vi_quyet_dinh: 'va F4 + dinh chinh F5; F1 KHONG va (_git dung chung voi run, _do_codex_song spawn o codex_cred.py ngoai write set) — sua loi khai "moi probe" va mo Issue noi tiep. Write set giu 3 tep.'
 push_policy: 'day nhanh agent/wp1077-g1-claude khi A1-A4 dat; mo PR draft.'
+da_bi_thay_the: wp1077-r1-g3-claude
+da_bi_thay_the_ly_do: 'Chu kho nang tran lan 2 (codex 4->5, dong them 300->330) trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (31-10-2026); g3 thay the. Lease g2 nay KHONG con hieu luc; giu tep lam hien vat.'

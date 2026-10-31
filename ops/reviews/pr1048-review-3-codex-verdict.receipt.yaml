@@ -102,5 +102,5 @@ verdict_usage_caveats:
     mo_ta: '(a) Luot nay chay sau merge b653574 (02:46:49Z); run.json bat_dau_utc sau thoi diem merge. Verdict khong the la dieu kien merge.'
   - id: BA-ANH-CHUP-CAY-KHONG-VAO-KHO
     muc: P3
-    mo_ta: '(a) review_evidence/{before,after,final}.json (moi tep 1457718 byte) KHONG vao kho; sha256 o OMITTED.txt.'
+    mo_ta: '(a) review_evidence/{before,after,final}.json (moi tep 1457718 byte) va ps1-files.stdout (527 byte, nhi phan vi co NUL) KHONG vao kho; sha256 o OMITTED.txt.'
 nguon_co_tham_quyen: 'TEP CO BAM trong kho (verdict_path + verdict_sha256).'

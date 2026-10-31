@@ -1,4 +1,5 @@
-# Tep KHONG vao kho (>500 KB): sha256  byte  duong_dan_tuong_doi. Tai lap duoc tu clone tai reviewed_sha.
+# Tep KHONG vao kho: sha256  byte  duong_dan_tuong_doi. Tep >500 KB va tep NHI PHAN (co NUL). Tai lap duoc tu clone tai reviewed_sha.
 8dddad43523d008351807c0b168cef7fbf2af8971f798d8b8b68f2853b7c4816  1457718  review_evidence/after.json
 8dddad43523d008351807c0b168cef7fbf2af8971f798d8b8b68f2853b7c4816  1457718  review_evidence/before.json
 8dddad43523d008351807c0b168cef7fbf2af8971f798d8b8b68f2853b7c4816  1457718  review_evidence/final.json
+42e98be75c60287892a4acf1abc18564019fbfe76165ad647268ce2694f048d2  527  review_evidence/ps1-files.stdout  (danh sach ten tep cach bang NUL — git coi la nhi phan, cong gate-ops DUONG_NHANH tu choi)

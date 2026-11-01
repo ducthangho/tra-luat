@@ -1243,7 +1243,7 @@ def kiem_wf(van):   # A7: DANH SÁCH CHO PHÉP trọn cấu trúc — mọi job/
     d, loi, J = yaml.safe_load(van), [], lambda x: json.dumps(x, sort_keys=True)   # so qua JSON: True ≠ 1, False ≠ 0
     on, jobs = d.get("on", d.get(True)), list(d.get("jobs", {}).values())
     loi += ["on"] if J(on) != J({"workflow_dispatch": {"inputs": {"run_id": {"description": "id workflow run cần đo mốc Workflow definition", "required": True, "type": "string"}}}}) else []
-    loi += ["permissions"] if d.get("permissions") != {"contents": "read", "actions": "read"} or set(d) - {"name", "on", True, "permissions", "jobs"} else []
+    loi += ["permissions"] if d.get("permissions") != {"contents": "read", "actions": "read"} or set(d) - {"name", "on", True, "permissions", "jobs"} or {type(k) for k in d} - {str, bool} else []
     if len(jobs) != 1 or set(jobs[0]) != {"runs-on", "timeout-minutes", "steps"} or (jobs[0]["runs-on"], jobs[0]["timeout-minutes"]) != ("ubuntu-latest", 10):
         return loi + ["job"]
     b = jobs[0]["steps"]
@@ -1266,7 +1266,7 @@ def c59_workflow_tinh():   # A7: tệp thật sạch; MỖI đột biến YAML m
                           ("runs-on: ubuntu-latest", "runs-on: windows-latest", "job"), ("runs-on: ubuntu-latest", "runs-on: self-hosted", "job"),
                           ("          ref: master\n", "", "checkout"), ("ref: master", "ref: ${{ github.sha }}", "checkout"),
                           ("          persist-credentials: false\n", "", "checkout"), ("persist-credentials: false", "persist-credentials: 0", "checkout"),
-                          ("required: true", "required: 1", "on"),
+                          ("required: true", "required: 1", "on"), ("\non:\n", "\n1:\n", "permissions"), ("\non:\n", '\n"on":\n', None),
                           ("      - name: cài PyYAML\n", "      - uses: actions/checkout@v4\n      - name: cài PyYAML\n", "buoc"),
                           ('          rc=$?\n', '          rc=$?\n          eval "$RUN_ID"\n', "collector"), ('          rc=$?\n', '          rc=$?\n          curl -s x\n', "collector"),
                           ("          python3 ops/ci_provenance.py do-wd", "          # python3 ops/ci_provenance.py do-wd", "collector"),
@@ -1276,7 +1276,7 @@ def c59_workflow_tinh():   # A7: tệp thật sạch; MỖI đột biến YAML m
                           ("path: wd.json", "path: .", "upload"), ("        if: always()\n", "", "upload"),
                           ("name: workflow-definition-${{ inputs.run_id }}", "name: wd", "upload")):
         bang(van.count(cu) == 1, f"neo YAML {cu!r} phải xuất hiện đúng 1 lần")
-        bang(mong in kiem_wf(van.replace(cu, moi)), f"đột biến {cu!r} -> {moi!r} không bị bắt: {kiem_wf(van.replace(cu, moi))}")
+        bang(kiem_wf(van.replace(cu, moi)) == [] if mong is None else mong in kiem_wf(van.replace(cu, moi)), f"đột biến {cu!r} -> {moi!r} không bị bắt: {kiem_wf(van.replace(cu, moi))}")
 def chay_than(van, ghi=False, rc=3):   # A7b: chạy CHÍNH thân `run:` của bước collector với python3 giả
     b = next(b for jb in yaml.safe_load(van)["jobs"].values() for b in jb["steps"] if "do-wd" in b.get("run", ""))
     with tempfile.TemporaryDirectory(prefix="cip_than_") as thu:

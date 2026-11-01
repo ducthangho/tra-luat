@@ -2318,7 +2318,7 @@ def _tu_tach_nhom_neu_can() -> str:
     try:
         os.setsid()
     except OSError as e:
-        return f"KHONG tach duoc ({type(e).__name__}) - killpg co the giet vo shell"
+        return f"KHONG tach duoc ({mo_ta_loi(e)}) - killpg co the giet vo shell"
     return f"da tach sang session moi (pgid={os.getpgid(0)})"
 
 
@@ -10028,6 +10028,41 @@ def r1122_khong_assert_tran_trong_ca():
 
 
 @ca
+def r1122_tach_nhom_loi_giu_loai_va_thong_diep_160():
+    """Thông báo lỗi tách nhóm do main in cũng giữ loại và đúng 160 ký tự thông điệp."""
+    from unittest.mock import patch
+    with patch.object(os, "name", "posix"), patch.dict(globals(), _la_truong_nhom=lambda: False), \
+            patch.object(os, "setsid", create=True, side_effect=PermissionError("x" * 500)):
+        got = _tu_tach_nhom_neu_can()
+    bang(got == "KHONG tach duoc (PermissionError: " + "x" * 160 + ") - killpg co the giet vo shell",
+         "reporter tach nhom mat loai hoac khong giu dung 160 ky tu thong diep")
+
+
+@ca
+def r1122_reporter_unicode_console_khong_utf8():
+    """Thông điệp Unicode không được làm reporter chết trước tổng kết khi console mặc định không UTF-8."""
+    text = Path(__file__).read_text(encoding="utf-8")
+    neo = chr(10) + 'if __name__ == "__main__":'
+    extra = (chr(10) + '@ca\ndef review_unicode_mutation():\n'
+             '    if LAUNCHER_DANG_DUNG != LAUNCHER:\n'
+             '        raise TypeError("✓" * 500)\n'
+             'CA = [review_unicode_mutation]\n'
+             'DOT_BIEN = [("review_unicode", ("from __future__ import annotations", '
+             '"from __future__ import annotations"), ["review_unicode_mutation"])]\n'
+             'DOT_BIEN_HOOK = []\nDOT_BIEN_HARNESS = []\n')
+    bang(text.count(neo) == 1, "neo main khong duy nhat")
+    with San() as s:
+        dev = _dung_cay_harness(s / "unicode-console", text.replace(neo, extra + neo, 1),
+                               LAUNCHER.read_text(encoding="utf-8"))
+        p = subprocess.run([PY, str(dev / "launcher_test.py"), "--dot-bien"],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
+                           env=dict(os.environ, PYTHONIOENCODING="ascii", PYTHONDONTWRITEBYTECODE="1"))
+    bang(p.returncode == 1 and "DOT BIEN: 0/1 dat" in p.stdout and p.stdout.count("✓") == 160
+         and "UnicodeEncodeError" not in p.stderr,
+         "reporter mat thong diep Unicode hoac chet truoc tong ket tren console khong UTF-8")
+
+
+@ca
 def r1122_nhat_ky_giu_loai_va_thong_diep_160():
     """Cùng chi tiết loại/thông điệp phải sống trong nhật ký khi stdout chưa được in."""
     def review_loi():
@@ -14701,6 +14736,10 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    ('wp1122_tach_nhom_mat_chi_tiet', ('return f"KHONG tach duoc ({mo_ta_loi(e)}) - killpg co the giet vo shell"', 'return f"KHONG tach duoc ({type(e).__name__}) - killpg co the giet vo shell"'), ['r1122_tach_nhom_loi_giu_loai_va_thong_diep_160']),
+    ('wp1122_tach_nhom_khong_cat', ('return f"KHONG tach duoc ({mo_ta_loi(e)}) - killpg co the giet vo shell"', 'return f"KHONG tach duoc ({type(e).__name__}: {e}) - killpg co the giet vo shell"'), ['r1122_tach_nhom_loi_giu_loai_va_thong_diep_160']),
+    ('wp1122_stdout_bo_utf8', ('            luong.reconfigure(encoding="utf-8", errors="replace")', '            pass'), ['r1122_reporter_unicode_console_khong_utf8']),
+    ('wp1122_stdout_dung_ascii', ('            luong.reconfigure(encoding="utf-8", errors="replace")', '            luong.reconfigure(encoding="ascii", errors="replace")'), ['r1122_reporter_unicode_console_khong_utf8']),
     ('wp1122_nhat_ky_assertion_mat_chi_tiet', ('ket = f"HONG: {mo_ta_loi(e)}"', 'ket = f"HONG: {str(e)[:60]}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
     ('wp1122_nhat_ky_exception_mat_chi_tiet', ('ket = f"LOI: {mo_ta_loi(e)}"', 'ket = f"LOI {type(e).__name__}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
     ('wp1122_chot_ca_khac_mat_chi_tiet', ('return "loi", f"{fn.__name__}({mo_ta_loi(e)}; chot cua ca khac)"', 'return "loi", f"{fn.__name__}(chot cua ca khac)"'), ['r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi']),
@@ -14862,6 +14901,7 @@ def chay_dot_bien() -> int:
     """
     global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG, CC_TEST_DANG_DUNG
     kiem_registry(CA)   # #1079 F08 (Codex lượt 5): gọi thẳng `chay_dot_bien` cũng phải qua chốt
+    _cung_hoa_dau_ra_harness()
     goc = LAUNCHER.read_text(encoding="utf-8")
     goc_test = Path(__file__).read_text(encoding="utf-8")
     hong = 0
@@ -15260,10 +15300,20 @@ def phan_tich_doi_so(argv):
     return a
 
 
+def _cung_hoa_dau_ra_harness():
+    """Reporter có thông điệp Unicode; chuẩn hóa stdout/stderr như launcher CLI."""
+    for luong in (sys.stdout, sys.stderr):
+        try:
+            luong.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 def main() -> int:
     # PHÂN TÍCH ĐỐI SỐ TRƯỚC MỌI VIỆC — kể cả trước khi tự khai/tách nhóm. Sai đối số
     # phải đỏ NGAY, đừng để người ta chờ hết suite mới biết mình gõ nhầm.
     a = phan_tich_doi_so(sys.argv[1:])
+    _cung_hoa_dau_ra_harness()
     # Kế đó: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú `killpg` của ca
     # test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
     # TỰ KHAI TRƯỚC, tách nhóm SAU — thứ tự này cố ý: bản khai phải mô tả môi trường

@@ -56,9 +56,11 @@ CA: list = []
 
 
 def kiem_registry(ds):
-    """#1079 F05/F08 (Codex lượt 4–5): bộ chấm nhận diện "ca khác" theo `__code__`, nên hai ca chung
-    `__code__` (cùng factory) là bất khả phân biệt — TỪ CHỐI. Gọi ở `ca` VÀ ở mọi điểm vào chạy ca
-    (`main`, `chay_dot_bien`, `chot_tu_ca_khac`), vì `CA` còn có thể bị GÁN THẲNG, không qua `ca`."""
+    """#1079 F05/F08 (Codex lượt 4–6): bộ chấm nhận diện "ca khác" theo `__code__`, nên hai ca chung
+    `__code__` (cùng factory) là bất khả phân biệt — TỪ CHỐI. Gọi ở `ca` và ở các điểm vào chạy ca
+    đã biết: `chay_dot_bien` (nhánh hook gọi thẳng `fn()`), `cham_mot_ca`, `chay_bo_ca` (TRƯỚC thân ca;
+    `main` đi qua hai hàm này nên không cần chốt riêng) và `chot_tu_ca_khac`,
+    vì `CA` còn có thể bị GÁN THẲNG, không qua `ca`. Gọi thẳng `fn()` ở chỗ khác thì KHÔNG được che."""
     trung = [c.__name__ for i, c in enumerate(ds) if any(c.__code__ is d.__code__ for d in ds[:i])]
     if trung:
         raise ValueError(f"CA co ca trung __code__ voi mot ca da dang ky: {trung} — dung ham rieng")
@@ -189,6 +191,7 @@ def cham_mot_ca(fn):
     """#1079 F01: chạy một ca, trả `(loai, chi_tiet)`; loai ∈ qua · bo_qua · giet · loi.
     CHỈ `TinHieuChotCa` là `giet` — AssertionError trần hay lỗi vô can (kể cả khi một `except`
     đã đổi kiểu sang AssertionError) là `loi`, tức tín dụng giả."""
+    kiem_registry(CA)   # #1079 F08 (Codex lượt 6): TRƯỚC khi thân ca chạy
     try:
         with _co_lap_toan_cuc():
             kq = fn()
@@ -10360,6 +10363,65 @@ def r1079_review5_harness_direct_CA_must_reject_before_running():
     bang(all(results.values()), f'direct CA bypassed shared-code registration guard: {results}')
 
 
+
+def _review6_registry_raw_phai_tu_choi(runner):
+    from unittest.mock import patch
+    for mode in ("pass", "skip", "own"):
+        calls = []
+        def factory(name):
+            def target():
+                calls.append(name)
+                if mode == "own":
+                    bang(False, "own assertion " + name)
+                if mode == "skip":
+                    return "BO QUA platform"
+            target.__name__ = name
+            return target
+        target, alias = factory("review_target"), factory("review_alias")
+        rejected = False
+        with patch.dict(runner.__globals__, {"CA": [target, alias]}):
+            try:
+                if runner is cham_mot_ca:
+                    runner(target)
+                else:
+                    runner([target])
+            except ValueError as e:
+                rejected = "__code__" in str(e)
+        bang(rejected and not calls,
+             f"{runner.__name__}/{mode}: raw CA must be rejected BEFORE case execution: {calls}")
+
+
+@ca
+def r1079_review6_cham_mot_ca_kiem_registry_truoc_chay():
+    _review6_registry_raw_phai_tu_choi(cham_mot_ca)
+
+
+@ca
+def r1079_review6_chay_bo_ca_kiem_registry_truoc_chay():
+    _review6_registry_raw_phai_tu_choi(chay_bo_ca)
+
+
+@ca
+def r1079_registry_nhanh_hook_tu_choi_truoc_chay():
+    """#1079 F08: nhánh HOOK của `chay_dot_bien` gọi thẳng `fn()` (không qua `cham_mot_ca`) — chốt registry
+    ở đầu `chay_dot_bien` là thứ DUY NHẤT chặn registry chung `__code__` trước khi thân ca chạy."""
+    from unittest.mock import patch
+    goi = []
+    def nha_may(ten):
+        def f():
+            goi.append(ten)
+        f.__name__ = ten
+        return f
+    a, b = nha_may("review_a"), nha_may("review_b")
+    with patch.dict(chay_dot_bien.__globals__, {"CA": [a, b], "DOT_BIEN": [], "DOT_BIEN_HARNESS": [],
+                                                "DOT_BIEN_HOOK": [("review_hook", ("#!/bin/bash\n", "#!/bin/bash\n# r1079 tro\n"), ["review_a"])]}):
+        try:
+            kq = chay_dot_bien()
+        except ValueError as e:
+            kq = "tu_choi" if "__code__" in str(e) else repr(e)
+    bang(kq == "tu_choi" and not goi, f"nhanh hook chay registry chung __code__: {kq} {goi}")
+
+
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
 # chạy cả Windows nên đột biến wp858 đo được mọi nền (sàn ≥70%: launcher-windows 39343232374 là 197/281).
 _WP858_TOT = {"git": "echo 'git version 2.43.0'",
@@ -14546,10 +14608,13 @@ DOT_BIEN_HARNESS = [
      ["r1079_ca_trung_ma_bi_tu_choi_luc_dang_ky"]),
     ("wp1079_registry_bo_kiem_chay_dot_bien",
      ("    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): gọi thẳng `chay_dot_bien` cũng phải qua chốt\n", ""),
-     ["r1079_review5_product_direct_CA_must_reject_shared_code"]),
-    ("wp1079_registry_bo_kiem_main",
-     ("    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): trước MỌI chế độ chạy ca (mặc định, --lap-ca, --dot-bien)\n", ""),
-     ["r1079_review5_harness_direct_CA_must_reject_before_running"]),
+     ["r1079_registry_nhanh_hook_tu_choi_truoc_chay"]),
+    ("wp1079_registry_bo_kiem_cham_mot_ca",
+     ("    kiem_registry(CA)   # #1079 F08 (Codex lượt 6): TRƯỚC khi thân ca chạy\n", ""),
+     ["r1079_review6_cham_mot_ca_kiem_registry_truoc_chay"]),
+    ("wp1079_registry_bo_kiem_chay_bo_ca",
+     ("    kiem_registry(CA)   # #1079 F08 (Codex lượt 6): TRƯỚC khi ca đầu tiên chạy\n", ""),
+     ["r1079_review6_chay_bo_ca_kiem_registry_truoc_chay"]),
     ("wp1079_bo_kiem_ca_dich_vang", ("            if sorted(fn.__name__ for fn in dich) != sorted(set(phai_chet)):   # #1079 F06",
                                      "            if False:   # #1079 F06"),
      ["r1079_review_ca_dich_vang_phai_lam_cong_do", "r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),
@@ -14879,6 +14944,7 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
     Tách khỏi `main` để `t99` gọi được với danh sách ca giả — nếu không thì chốt
     nhật ký chỉ kiểm được bằng cách chạy lại toàn bộ suite trong suite.
     """
+    kiem_registry(CA)   # #1079 F08 (Codex lượt 6): TRƯỚC khi ca đầu tiên chạy
     qua = bo_qua = 0
     hong_ds = []
     for i, fn in enumerate(ds_ca, start=bat_dau):
@@ -15004,7 +15070,6 @@ def main() -> int:
     if a.moi_truong:
         print(json.dumps(mt, ensure_ascii=False, indent=2, default=str))
         return 0
-    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): trước MỌI chế độ chạy ca (mặc định, --lap-ca, --dot-bien)
     print(_mot_dong_moi_truong(mt))
     print(f"nhom tien trinh: {_tu_tach_nhom_neu_can()}")
     if a.dot_bien:

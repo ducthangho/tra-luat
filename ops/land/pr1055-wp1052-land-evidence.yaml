@@ -4,7 +4,7 @@
 # TRANG THAI: merged (906b24f), `landed: false`.
 # Gate hau merge cua CHINH 906b24f (run 41255939050) bi HUY o trang thai pending, 0 job: GitHub concurrency cua ci.yml
 # chi giu MOT luot pending moi nhom, nen luot cua 0b8d156 (#1093, tao 00:37:37Z) thay luot nay (huy 00:37:38Z).
-# Gate dau tien CHUA 906b24f la cua commit con 0b8d156 — luc ghi ho so van pending. "merged" KHONG dong nghia "landed"
+# Gate dau tien CHUA 906b24f la cua commit con 0b8d156 — run 41257563723 success 23/23 (do 2026-11-01T01:3xZ). "merged" KHONG dong nghia "landed"
 # (PROTOCOL §10.2.4).
 # NHAN: measured = do trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot khac,
 # KHONG tai chay; not_measured = khong do duoc, ghi ly do.
@@ -63,8 +63,16 @@ trang_thai_packet:
       trang_thai: not_measured
       mo_ta: >-
         measured — readback-run-41255939050.json: run gate (ci.yml, push master, head 906b24f) completed/cancelled, run_attempt 1;
-        readback-jobs-41255939050.json total_count 0. readback-runs-master-20261101.json: run 41257563723 (head 0b8d156,
-        cha la 906b24f) tao 00:37:37Z, pending. Gate cho noi dung nay chi co the do tren 0b8d156 khi run ay xong.
+        readback-jobs-41255939050.json total_count 0. Gate rieng cho 906b24f KHONG ton tai.
+    - id: GATE-HAU-MERGE-CON-0B8D156
+      trang_thai: measured
+      mo_ta: >-
+        measured — readback-run-41257563723.json: run gate ci.yml, push master, head 0b8d156 (#1093; 906b24f la tien cua no,
+        `git merge-base --is-ancestor` rc 0), run_attempt 1, completed/success, updated_at 2026-11-01T01:26:44Z.
+        readback-jobs-41257563723.json (filter=all): 23 job, 23 success, moi job nhan ubuntu-latest, runner_id khac 0.
+      gioi_han: >-
+        Gate cua commit CON, khong cua chinh 906b24f: 906b24f..0b8d156 them 1 tep (ops/specs, +123 dong, tu #1093). Day la moc
+        Run cho noi dung wp1052 tren master; Checkout va Gate output cua run nay chua doc.
     - id: MOC-10-2-2-WORKFLOW-DEFINITION
       trang_thai: not_measured
       mo_ta: 'GraphQL WorkflowRun.file bi chan trong phien Claude Code tren web (403); ASUS-LAPTOP (may co gh cua chu kho) offline.'

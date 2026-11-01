@@ -166,6 +166,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'D=\"${CLAUDE_PROJECT_DIR:-}\"; [ -n \"$D\" ] || D=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -n \"$D\" ] || D=\"$PWD\"; PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"$D/ops/cloud_agent_creds.py\" ghi-nguoc --neu-doi || true'",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   }
 }

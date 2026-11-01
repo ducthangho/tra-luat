@@ -1,0 +1,5 @@
+Đã ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l9/VERDICT.md).
+
+Không phát hiện P0–P3 mới; P2 lượt 8 đã đóng. Linux có delta lỗi bằng 0.
+
+Verdict `changes_requested` vì thiếu bằng chứng nghiệm thu Windows và CI bắt buộc. `cay-kho/` không thay đổi; đã dọn bản sao tạm.

@@ -12,7 +12,9 @@
 # https://api.github.com/repos/ducthangho/tra-luat/<duong dan> bang curl, 2026-10-31, gio do khac nhau theo tep). NGOAI LE, khong
 # phai ban tho: readback-graphql-workflowrun-41173244891.json (output `gh api graphql` qua ASUS, luu nguyen van);
 # readback-review-threads-1065.json (BAN TRICH cac truong id/trang thai tu phan hoi MCP get_review_comments, than comment luoc
-# bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai).
+# bo — tep tu ghi ro); thuatlai-gate-windows-3dfb973.json (chep tay tu VM, nhan thuat_lai); readback-pr-1111.json,
+# readback-commit-4397ee6.json, readback-run-41285898441.json, readback-run-41290009265.json, readback-jobs-41285898441.json va
+# readback-jobs-41290009265.json (BAN TRICH truong tu REST, 2026-11-01, ghi so bo sung sau khi PR #1111 merge).
 
 schema_version: 1
 mission_id: null
@@ -81,6 +83,10 @@ trang_thai_packet:
     (5) uy quyen: chu kho quyet trong phien, caveat #566 (xem uy_quyen_head_cuoi). Chi Ubuntu o run hau merge; Windows do o
     run 41263239790 cua #1091 va tren VM (thuat lai).
   landed_hieu_luc_tu: 'merge commit cua PR ghi so mang ho so nay.'
+  landed_hieu_luc_tu_do_duoc: >-
+    measured (ghi so bo sung) — readback-pr-1111.json: PR #1111 merged 2026-11-01T07:43:08Z, merge_commit_sha
+    4397ee616273a97c1503e8359452aef4e78cd75a, head f783bee391ada131df8df195acfd3d4c4ae394c9 (dung head ma comment chot neo).
+    readback-commit-4397ee6.json: hai cha (c6dd7b3, f783bee), chi doi tep ho so nay + thu muc provenance.
   quyet_dinh_chu_kho:
     trang_thai: da_quyet
     do_duoc: >-
@@ -191,6 +197,16 @@ post_merge_checks:
       run_attempt 1, status completed, conclusion success (05:36:00Z -> 07:03:35Z). readback-jobs-41173244891.json
       (filter=all): 23 job, 23 success, ca 23 nhan ubuntu-latest, khong job nao runner_id 0. Windows KHONG do o lan chay
       nay. Moc Checkout va Gate output: gate-output-41173244891.txt (MOC-CHECKOUT-VA-GATE-OUTPUT).
+  - ten: gate ci.yml tren merge 4397ee6 cua PR ghi so #1111 (push master)
+    run_id: 41285898441
+    trang_thai: measured
+    do_duoc: >-
+      measured — readback-run-41285898441.json: event push, head_sha 4397ee6, status completed, conclusion CANCELLED,
+      readback-jobs-41285898441.json (filter=all) total_count 0: run bi thay the truoc khi co job nao (push master tiep theo
+      cua #1108/#1112/#1109), KHONG phai test do. Run ke tiep da chay tron la 41290009265 tren 3bdd987 (merge #1109), ma 4397ee6
+      la to tien (`git merge-base --is-ancestor`): readback-run-41290009265.json completed/success; readback-jobs-41290009265.json
+      (filter=all) 23 job, 23 success, ca 23 nhan ubuntu-latest, runner_id khac 0. Run nay do CAY 3bdd987, khong phai rieng
+      4397ee6; ba PR xen giua chi them spec/ops, khong dung tep ho so nay hay ops/vm/. Chi Ubuntu.
   - ten: full gate 8 buoc tren VM Windows tra-luat-win, merge 3dfb973 (theo yeu cau chu kho "do tren Windows")
     trang_thai: thuat_lai
     do_duoc: >-
@@ -202,9 +218,14 @@ post_merge_checks:
 van_hanh_tren_vm:
   trang_thai: thuat_lai
   mo_ta: >-
-    Ngoai pham vi land nhung lien quan: -DangKyLich da chay tren VM (rc=0) tu ban 6733d09; ban cai trong
-    C:\Program Files\tra-luat-ops khop bam 6733d09 (script 86671436…), CHUA cap nhat len b0814f4 (ban sua chi doi cho tinh
-    duong dan, khong doi hanh vi tren Windows). Hai tac vu chay theo yeu cau 11:32 gio VM: HeThong 4/4, NguoiDung 11/11.
+    Ngoai pham vi land nhung lien quan. (Cu, 31-10) -DangKyLich chay tren VM (rc=0) tu ban 6733d09; hai tac vu chay theo yeu
+    cau 11:32 gio VM: HeThong 4/4, NguoiDung 11/11. (Cap nhat 01-11, ghi so bo sung) Ban sau PR #1069 chay -DangKyLich bi
+    rc=6 (icacls /T de lai DACL rong tren tep con) => va o PR #1091 (merge 40609d4); chu kho chay lai -DangKyLich tu nhanh
+    #1091 tren VM: rc=0. Ban cai trong C:\Program Files\tra-luat-ops nay khop bam cb39aca cua #1091 (cap-nhat-cong-cu.ps1
+    8EFC063A…, cong_cu.yaml 71631BB6…, requirements.txt 97733A88…); ACL tep con ke thua (Users RX, Administrators F,
+    SYSTEM F); tac vu NguoiDung LastTaskResult 0, 11/11 giu (log NguoiDung-20261101-070043.json tren VM). Tac vu HeThong
+    CHUA chay tay voi ban moi (lich Chu nhat 02:30, 2 tuan/lan). Moi so lieu trong doan nay la thuat_lai: doc tren VM qua
+    Desktop Commander, khong luu tep trong kho.
     Su co: luot HeThong dau tien (truoc ban sua) nang Node 24.22.1 -> 26.13.0, Desktop Commander rot Offline den khi khoi
     dong lai VM; chu kho quyet giu Node 26.
 
@@ -222,3 +243,4 @@ bookkeeping:
   - {item: 'hien vat cross-review #1065/#1069/#1091', ket_qua: 'ops/reviews/pr1065-review-16..20-codex*, pr1091-review-1..2-codex* (PR #1069, #1104)'}
   - {item: 'moc Checkout + Gate output run 41173244891', ket_qua: 'ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt'}
   - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 1111}
+  - {item: 'ghi so bo sung: merge 4397ee6, gate hau merge, van hanh VM sau #1091', nhanh: ccr-5249948c-9epnbs, pr: 'PR ghi so bo sung (sau #1111)'}

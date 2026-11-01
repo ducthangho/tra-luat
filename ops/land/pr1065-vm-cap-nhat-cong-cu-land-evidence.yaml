@@ -2,8 +2,8 @@
 # viec chu kho giao truc tiep trong phien Claude Code (khong Issue packet, khong lease, khong spec_hash).
 # Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon: ops/land/pr870-claude-md-bai-hoc-c-land-evidence.yaml.
 #
-# TRANG THAI: merged (3dfb973), `landed: false` — cho chu kho quyet o PR ghi so (PR #1069). Moc §10.2.2 Workflow definition da
-# dong (gh graphql qua ASUS); moc Checkout/Gate output van not_measured. Assurance §8.1: cross_approved tren BAN VA 210ab81
+# TRANG THAI: merged (3dfb973), `landed: true` (chu kho quyet trong phien 01-11-2026 "Land cả #1065"; comment neo head cuoi tren
+# PR ghi so). Bon moc §10.2.2 cua run hau merge 41173244891 deu da do (Run, Checkout, Gate output, Workflow definition). Assurance §8.1: cross_approved tren BAN VA 210ab81
 # (PR #1069), con ban merge b0814f4 bi cross-review luot 1 tra changes_requested (1 P0) — xem ASSURANCE-REVIEWER-81.
 # "merged" KHONG dong nghia "landed" (PROTOCOL §10.2.4).
 # NHAN: measured = do lai trong phien ghi so tu tep trong thu muc provenance (ten tep ghi kem); thuat_lai = loi khai cua phien,
@@ -69,14 +69,28 @@ trang_thai_packet:
     reviewed_sha_codex_connector: b0814f4a4c6dc4793b02865c6f7915b316224cdb
     head_da_merge: b0814f4a4c6dc4793b02865c6f7915b316224cdb
     doi_chieu: 'measured — readback-comments-1065.json comment 6539133141 "Reviewed commit: b0814f4a4c", khong finding.'
-  landed: false
-  landed_hieu_luc_tu: >-
-    merge commit cua PR ghi so — CHI KHI chu kho quyet `landed` bang comment tren PR ghi so, va chi sau khi cac moc trong
-    con_thieu_de_goi_landed duoc dong (tien le pr759, pr870).
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 3dfb973: DAT — bon moc §10.2.2: Run (readback-run/-jobs-41173244891.json 23/23
+    success), Checkout (gate-output-41173244891.txt: 22/22 job co buoc checkout in 3dfb9731ceda05afbcec4e803a919c4df5e2e5a2,
+    tree ddb5ae9 = 3dfb973^{tree}), Gate output (cung tep: lenh + rc (step.conclusion) + trich output tung buoc `Run`;
+    0 dong ##[error] tren 23 log — xem MOC-CHECKOUT-VA-GATE-OUTPUT), Workflow definition (MOC-WORKFLOW-DEFINITION); (2) lease:
+    KHONG_AP_DUNG (khong phai packet); (3) bookkeeping: ho so nay; (4) review: cross_approved tren BAN VA — ban merge b0814f4
+    co finding P0/P1 o luot 1, da va o PR #1069 (approve luot 20 tren dcb295a, merge 634d5a2) va PR #1091 (approve luot 2
+    tren 90b3f1c, merge 40609d4); gate master xanh tren a284f8a chua ca hai (run 41271721309, thuat lai trong phien);
+    (5) uy quyen: chu kho quyet trong phien, caveat #566 (xem uy_quyen_head_cuoi). Chi Ubuntu o run hau merge; Windows do o
+    run 41263239790 cua #1091 va tren VM (thuat lai).
+  landed_hieu_luc_tu: 'merge commit cua PR ghi so mang ho so nay.'
   quyet_dinh_chu_kho:
-    trang_thai: cho_chu_kho
+    trang_thai: da_quyet
+    do_duoc: >-
+      thuat_lai — chu kho go trong phien Claude Code session_015GtxrZLeJAkLFUg1SRa5G8 ngay 2026-11-01: "Land cả #1065". Phien
+      ghi so chep loi ay vao comment tren PR ghi so, neo day du SHA head cuoi, truoc khi merge.
   uy_quyen_head_cuoi:
-    trang_thai: cho_chu_kho
+    trang_thai: da_quyet_caveat_566
+    caveat: >-
+      (tien le #566) comment do phien agent dang bang token chu kho, chep loi chu kho trong phien — author_association OWNER
+      khong tach chu kho khoi phien agent; yeu hon comment chu kho tu go.
     quy_tac: >-
       Theo tien le pr721/pr759/pr870: chu kho xac nhan `landed` bang mot comment tren PR ghi so, dang SAU commit cuoi cua
       nhanh ghi so, ghi day du SHA head cuoi (40 hex). Commit nao den sau comment lam no het hieu luc.
@@ -96,10 +110,16 @@ trang_thai_packet:
         (gh dang nhap tai khoan ducthangho), theo yeu cau chu kho "lam luon thong qua Remote Desktop Commander"; output luu
         nguyen van. Nguon GraphQL la tai khoan chu kho, khong phai mot client doc lap.
     - id: MOC-CHECKOUT-VA-GATE-OUTPUT
-      trang_thai: not_measured
+      trang_thai: da_dong
       mo_ta: >-
-        §10.2.2 moc Checkout (SHA/tree that chay) va Gate output (command/rc/marker duong) chua do: chi co REST run/jobs. Theo
-        bai hoc CLAUDE.md (PR #900), REST run xanh CHI la moc run.
+        measured — gate-output-41173244891.txt (log 23 job tai qua REST actions/jobs/<id>/logs ngay 2026-11-01, sha256 + so byte
+        tung log ghi kem; log goc khong vao kho). Checkout: 22/22 job co buoc checkout in `git log -1 --format=%H` =
+        3dfb9731ceda05afbcec4e803a919c4df5e2e5a2 (chuan-bi khong co checkout). Gate output: TUNG buoc `Run` cua tung job ghi
+        lenh + toi da 3 dong output cuoi + dong `"ok": …` neu buoc in JSON (122 buoc; 9 dong `"ok": true`, 0 `"ok": false`;
+        37 buoc cau hinh/cai dat khong in gi, ghi '(khong co output)'). rc tung buoc: step.conclusion trong
+        readback-jobs-41173244891.json — 275 success, 10 skipped (giu rieng); 0 dong ##[error] tren 23 log. Vi du duong:
+        `== tl selftest 1774/1774 ==`, `targeted_mutant_gate: DAT`, `GOM MẢNH 8/8`, `MẢNH k/8: …`. Codex connector P1 tren PR #1111
+        (comment 4434706400) chi ra ban dau chi co so dem marker — ban nay bo sung lenh/rc/trich output tung buoc.
     - id: ASSURANCE-REVIEWER-81
       trang_thai: dat_tren_ban_va
       mo_ta: >-
@@ -108,8 +128,8 @@ trang_thai_packet:
         phe duyet BAN VA, KHONG phai ban da merge b0814f4 — luot 1 tren b0814f4 tra changes_requested (1 P0 giao-acl-theo-junction,
         3 P1); ban da merge chi "land dung" khi PR #1069 merge. Codex connector tren b0814f4 sach nhung khong lo ho model.
     - id: QUYET-DINH-LANDED-CHU-KHO
-      trang_thai: cho_chu_kho
-      mo_ta: 'Ho so nay KHONG tu goi landed.'
+      trang_thai: da_quyet
+      mo_ta: 'Chu kho quyet trong phien 2026-11-01 "Land cả #1065" (caveat #566) — xem quyet_dinh_chu_kho.'
 
 review:
   cross_review:
@@ -170,7 +190,7 @@ post_merge_checks:
       measured — readback-run-41173244891.json: event push, path .github/workflows/ci.yml, head_sha 3dfb973,
       run_attempt 1, status completed, conclusion success (05:36:00Z -> 07:03:35Z). readback-jobs-41173244891.json
       (filter=all): 23 job, 23 success, ca 23 nhan ubuntu-latest, khong job nao runner_id 0. Windows KHONG do o lan chay
-      nay. Day chi la moc RUN; Checkout va Gate output van not_measured (MOC-CHECKOUT-VA-GATE-OUTPUT).
+      nay. Moc Checkout va Gate output: gate-output-41173244891.txt (MOC-CHECKOUT-VA-GATE-OUTPUT).
   - ten: full gate 8 buoc tren VM Windows tra-luat-win, merge 3dfb973 (theo yeu cau chu kho "do tren Windows")
     trang_thai: thuat_lai
     do_duoc: >-
@@ -197,3 +217,8 @@ no_con_mo:
     mo_ta: >-
       Duong tu khoi dong lai TraLuatRemoteCommander sau khi cai Node chua tung chay; admin bam Start tac vu ay bi
       "Access is denied" (nguyen nhan chua ro).
+
+bookkeeping:
+  - {item: 'hien vat cross-review #1065/#1069/#1091', ket_qua: 'ops/reviews/pr1065-review-16..20-codex*, pr1091-review-1..2-codex* (PR #1069, #1104)'}
+  - {item: 'moc Checkout + Gate output run 41173244891', ket_qua: 'ops/land/pr1065-vm-cap-nhat-cong-cu-provenance/gate-output-41173244891.txt'}
+  - {item: 'PR ghi so landed', nhanh: ccr-5249948c-9epnbs, pr: 1111}

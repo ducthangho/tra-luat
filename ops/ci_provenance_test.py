@@ -1140,6 +1140,7 @@ def c54_wd_not_measured():   # A3: mỗi dòng not_measured của bảng §2.1 �
                    (dict(node=wd_node(checkSuite={"commit": "wrong"})), "phan_hoi_hong"), (dict(node=wd_node(databaseId=None)), "phan_hoi_hong"),
                    (dict(node=wd_node(runNumber=None)), "phan_hoi_hong"), (dict(node=wd_node(createdAt=None)), "phan_hoi_hong"),
                    *[(dict(gql={"data": {"node": wd_node()}, "errors": e}), "phan_hoi_hong") for e in (0, False, "", {}, None)],
+                   *[(dict(run={"event": ev}, node=wd_node(checkSuite={"commit": {"oid": "not-an-oid"}})), "phan_hoi_hong") for ev in ("push", "pull_request", "pull_request_target")],
                    *[(dict(gql=g), "phan_hoi_hong") for g in ({}, {"data": {}}, *[{"data": {"node": {k: v for k, v in wd_node().items() if k != b}}}
                                                                           for b in ("file", "checkSuite")])]):
         rc, j = do_wd_gia(**kw)
@@ -1183,7 +1184,6 @@ def c57_wd_sai_doi_so():   # A5: đích ghi theo ĐÚNG luật parser (`--out=x`
         bang(rc == 2 and not any(Path(thu).iterdir()), "thiếu --out phải rc 2 và không ghi tệp")
 
 XOA = object()
-
 def wd_zip(**sua):
     j = {"schema": "wd/1", "repo": "o/r", "run_id": 5, "path": WD_PATH, "trang_thai": "passed", "oid_dinh_nghia": H,
          "blob": hashlib.sha1(b"blob %d\0" % len(WD_BYTES) + WD_BYTES).hexdigest(), "sha256": hashlib.sha256(WD_BYTES).hexdigest(),
@@ -1194,7 +1194,6 @@ def wd_zip(**sua):
     with zipfile.ZipFile(b := io.BytesIO(), "w") as z:
         z.writestr(zipfile.ZipInfo("wd.json", (2026, 11, 1, 0, 0, 0)), json.dumps(j))   # dấu giờ GHIM: zip tất định
     return b.getvalue()
-
 def thu_wd(w=None, arts=None, j=None, bo=False, kho=b'{"default_branch": "master"}'):   # đi qua CLI thật `thu ... --wd-run 77`
     zb = wd_zip(**(j or {}))
     w = {"path": ".github/workflows/ops-do-workflow-definition.yml", "head_branch": "master", "event": "workflow_dispatch",
@@ -1223,6 +1222,7 @@ def c58_thu_wd_run():   # A6: bằng chứng chỉ từ artifact của chính l�
                    (dict(j={"schema": "x"}), "c:schema"), (dict(j={"repo": "o/x"}), "c:repo"), (dict(j={"run_id": 6}), "c:run_id"),
                    (dict(j={"path": "x.yml"}), "c:path"), (dict(j={"trang_thai": "failed"}), "c:trang_thai"),
                    *[(dict(j={k: XOA}), "c:khoa") for k in ("loi_graphql", "nguon", "ly_do", "event")], (dict(j={"them": 1}), "c:khoa"),
+                   (dict(j={"nguon": "anything"}), "c:khoa"), (dict(j={"run_id": 5.0}), "c:run_id"), (dict(j={"run_id": True}), "c:run_id"),
                    *[(dict(j={k: v}), "c:meta") for k, v in (("run_attempt_luc_do", "1"), ("run_number", 0), ("node_id", ""), ("head_sha_rest", "x"))],
                    (dict(j={"blob": "a" * 40}), "d:blob"), (dict(j={"sha256": "b" * 64}), "d:sha256"),
                    (dict(j={"repository_file_url": "https://github.com/o/r/blob/x/y"}), "d:url"),
@@ -1235,12 +1235,10 @@ def c58_thu_wd_run():   # A6: bằng chứng chỉ từ artifact của chính l�
         bang(thu_wd(arts=ds).get("ly_do") == "wd_khong_hop_le:b:artifact", f"{ds} phải không hợp lệ: {thu_wd(arts=ds)}")
     bang(thu_wd(bo=True)["trang_thai"] == "not_measured" and thu_wd(bo=True)["ly_do"] == "graphql_bi_chan_trong_phien_claude; cho P-B",
          "không --wd-run ⇒ giữ nguyên P-A")
-
 MAU_THAN = "\n".join(("set +e", 'python3 ops/ci_provenance.py do-wd --repo "$REPO" --run "$RUN_ID" --out wd.json', "rc=$?",
                       "if [ ! -f wd.json ]; then",
                       """  printf '{"schema": "wd/1", "trang_thai": "not_measured", "ly_do": "collector_khong_ghi_rc_%s"}\\n' "$rc" > wd.json""",
                       "fi", "cat wd.json", """{ echo '```json'; cat wd.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY\"""", 'exit "$rc"', ""))
-
 def kiem_wf(van):   # A7: DANH SÁCH CHO PHÉP trọn cấu trúc — mọi job/bước/khoá; trả danh sách vi phạm
     d, loi = yaml.safe_load(van), []
     on, jobs = d.get("on", d.get(True)), list(d.get("jobs", {}).values())
@@ -1278,7 +1276,6 @@ def c59_workflow_tinh():   # A7: tệp thật sạch; MỖI đột biến YAML m
                           ("name: workflow-definition-${{ inputs.run_id }}", "name: wd", "upload")):
         bang(van.count(cu) == 1, f"neo YAML {cu!r} phải xuất hiện đúng 1 lần")
         bang(mong in kiem_wf(van.replace(cu, moi)), f"đột biến {cu!r} -> {moi!r} không bị bắt: {kiem_wf(van.replace(cu, moi))}")
-
 def chay_than(van, ghi=False, rc=3):   # A7b: chạy CHÍNH thân `run:` của bước collector với python3 giả
     b = next(b for jb in yaml.safe_load(van)["jobs"].values() for b in jb["steps"] if "do-wd" in b.get("run", ""))
     with tempfile.TemporaryDirectory(prefix="cip_than_") as thu:
@@ -1647,7 +1644,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ))],
     *[(f"B6_bo_so{i}", a, a.split(",")[0] + ", True)", "c58") for i, a in enumerate((
         '("schema", j.get("schema") == "wd/1")', '("conclusion", w.get("conclusion") == "success")', '("repo", j.get("repo") == repo)',
-        '("run_id", j.get("run_id") == run)', '("path", j.get("path") == r.get("path"))',
+        '("run_id", _so(j.get("run_id"), 1) and j.get("run_id") == run)', '("path", j.get("path") == r.get("path"))',
         '("trang_thai", j.get("trang_thai") == "passed")',
     ))],
     *[(f"B3_bo_dk{i}", a, "", "c54") for i, a in enumerate((
@@ -1657,6 +1654,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("B3_errors_kieu_ngoai", 'if type(d.get("errors", [])) is not list:', "if False:", "c54"),
     ("B3_thieu_bang_null", 'n.get(khoa, ...)) is None:', "n.get(khoa)) is None:", "c54"),
     ("B6_bo_khoa", '("khoa", set(j) == KHOA_WD and', '("khoa", True or', "c58"),
+    ("B3_cso_khong_hex", 'type(cso) is str and bool(RE_HEX40.fullmatch(cso)) and', "_chuoi(cso) and", "c54"),
+    ("B6_run_id_kieu", '_so(j.get("run_id"), 1) and j.get("run_id") == run', 'j.get("run_id") == run', "c58"), ("B6_nguon_tuy_y", 'j.get("nguon") == "ops/ci_provenance.py do-wd"', '_chuoi(j.get("nguon"))', "c58"),
     ("B6_bo_meta", '("meta", all(', '("meta", True or all(', "c58"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

@@ -440,7 +440,7 @@ def do_wd(repo, run, goi, gql):
             return ket("not_measured", "phan_hoi_hong", 3)
     url, fp, cm = n["file"].get("repositoryFileUrl"), n["file"].get("path"), n["checkSuite"].get("commit")
     cso = cm.get("oid") if type(cm) is dict else None
-    if not (_chuoi(url) and _chuoi(fp) and _chuoi(cso) and _so(n.get("databaseId"), 1) and _so(n.get("runNumber"), 1) and _chuoi(n.get("createdAt"))):
+    if not (_chuoi(url) and _chuoi(fp) and type(cso) is str and bool(RE_HEX40.fullmatch(cso)) and _so(n.get("databaseId"), 1) and _so(n.get("runNumber"), 1) and _chuoi(n.get("createdAt"))):
         return ket("not_measured", "phan_hoi_hong", 3)
     kq.update(run_number=n.get("runNumber"), created_at=n.get("createdAt"), path=fp, repository_file_url=url, check_suite_commit=cso)
     m = RE_URL_WD.fullmatch(url)
@@ -498,12 +498,12 @@ def nhap_wd(goi, repo, run, r, wd_run):
         return ko("c", "zip")
     if type(j) is not dict:
         return ko("c", "schema")
-    for truong, ok in (("schema", j.get("schema") == "wd/1"), ("repo", j.get("repo") == repo), ("run_id", j.get("run_id") == run),
+    for truong, ok in (("schema", j.get("schema") == "wd/1"), ("repo", j.get("repo") == repo), ("run_id", _so(j.get("run_id"), 1) and j.get("run_id") == run),
                        ("path", j.get("path") == r.get("path")), ("trang_thai", j.get("trang_thai") == "passed"),
                        ("oid", type(j.get("oid_dinh_nghia")) is str and bool(RE_HEX40.fullmatch(j["oid_dinh_nghia"]))),
                        ("blob", type(j.get("blob")) is str and bool(RE_HEX40.fullmatch(j["blob"]))),
                        ("sha256", type(j.get("sha256")) is str and bool(re.fullmatch(r"[0-9a-f]{64}", j["sha256"]))),
-                       ("khoa", set(j) == KHOA_WD and j.get("ly_do") is None and j.get("loi_graphql") == [] and _chuoi(j.get("nguon"))),
+                       ("khoa", set(j) == KHOA_WD and j.get("ly_do") is None and j.get("loi_graphql") == [] and j.get("nguon") == "ops/ci_provenance.py do-wd"),
                        ("meta", all(_so(j.get(k), 1) for k in ("run_attempt_luc_do", "run_number")) and all(_chuoi(j.get(k)) for k in ("event", "node_id", "created_at"))
                         and all(type(j.get(k)) is str and bool(RE_HEX40.fullmatch(j[k])) for k in ("head_sha_rest", "check_suite_commit")))):
         if not ok:

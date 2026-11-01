@@ -1,0 +1,2 @@
+nguon	chep nguyen byte tu ops/handoff/wp1021-g1-claude/luot9/ tren nhanh ops/wp1021-r2-g1-lease commit 73b1ab9 (phien session_015GtxrbRjCRMMLRWHoUuZYj)
+cay-kho/ mirror.git evidence/	khong co trong handoff: sandbox reviewer cua phien kia, khong luu vao nhanh lease

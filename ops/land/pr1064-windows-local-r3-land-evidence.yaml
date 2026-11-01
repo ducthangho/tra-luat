@@ -132,3 +132,31 @@ khong_do_duoc:
   - 'Workflow definition §10.2.2 cua run 41191196998 (WorkflowRun.file qua GraphQL).'
   - 'Duyet merge tai SHA truoc merge: chu kho tu merge tren giao dien; comment 6542126256 la neo hau kiem.'
   - 'Merge va comment bam qua credential chu kho (#566): chi co merged_by.'
+
+# ---- KHOI BO SUNG (append-only) — moc Workflow definition §10.2.2 va ket luan landed
+moc_workflow_definition_20261031:
+  chi_thi: 'loi_khai — tiep chi thi "Land và ghi sổ luôn" cua chu kho cho chuoi r3; PR #1082 (ho so landed false) da merge 9a03544.'
+  do: >-
+    loi_khai_co_neo + measured — gate-hau-merge-20261031/graphql-workflowrun-file-41191196998.json: gh api graphql (gh CLI cua chu kho) chay
+    tren ASUS-LAPTOP qua Desktop Commander, HAI lan doc lap 16:54:07Z va 16:54:08Z, ca hai 362 byte sha256 0a6b4674…6ec7
+    (do tren may bang .NET SHA256), bang sha256 tep trong kho: databaseId 41191196998, runNumber 3661, event push,
+    file.path .github/workflows/ci.yml, repositoryFileUrl neo blob tai 086f1b7, checkSuite.commit.oid
+    086f1b7343fc1d778e50797e6c9ca0964b11a755. Doi chieu REST: gate-hau-merge-20261031/readback-run-41191196998.json node_id
+    WFR_kwLOTNeRjc8AAAAJly_JRg, path .github/workflows/ci.yml, run_number 3661, head_sha 086f1b7;
+    gate-hau-merge-20261031/readback-contents-ci-yml-086f1b7.json sha 82d9f239ff311bd1ba3d3021119b5a2f7f699ffc size 69161 = git rev-parse
+    086f1b7:.github/workflows/ci.yml, sha256 noi dung ce9a3ec0…13fb. Phan GraphQL la loi khai co neo (phien web 403);
+    tien le fc892c6 (#1009), pr1029 moc_10_2_2_bo_sung_20261030.
+  khoa_may: >-
+    loi_khai — ADR-0059: doc KHOA.txt rong; ghi dong 5 truong (session_01V2PEqhkb91vD5PCBM5yXbm, 16:54:03Z, han 17:24:03Z,
+    viec, nhip tim 16:54:03Z); doc lai sau 3 giay thay dong cua minh; doc lai truoc khi nha, nha bang tep rong; them mot dong
+    do-luong.csv (16:54:08Z, khong chay test). Lan thu luc ~11:47Z: start_process het thoi gian 2 lan, may Offline luc 12:29Z.
+
+ket_luan_landed_20261031:
+  landed: true
+  dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren DUNG merge SHA 086f1b7: run 41191196998 23/23, du bon moc §10.2.2 (Run, Checkout,
+    Gate output o moc_10_2_2; Workflow definition o moc_workflow_definition_20261031). (2) lease nha: rut han 0897985.
+    (3) bookkeeping: ho so nay. (4) assurance DAT tu luot 7 028f119f tren cb9bd24. (5) noi dung merge = diff PR.
+    (6) merge boi tai khoan chu kho. (7) dieu kien merge chu kho (het P1-P3 + Windows xanh run 41162915281) DAT.
+  caveat: [duyet merge tai SHA la neo HAU KIEM (comment 6542126256 dang ho sau merge), Workflow definition qua GraphQL la loi_khai_co_neo (phien web 403), merge va comment bang credential chu kho (#566)]
+  thay_the: 'trang_thai_packet.landed (false), moc_10_2_2.workflow_definition (not_measured) va khong_do_duoc[0] giu nguyen nhu lich su; khoi nay la ket luan hien hanh.'

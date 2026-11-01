@@ -1,0 +1,25 @@
+{
+  "reviewed_sha": "356a27e1378b2162bbc0be2ec06ff08fdacbdead",
+  "tree": "c1e160cfd5ddf1a053c2e8413e62f5881badd052",
+  "suite_counts": [
+    98,
+    98,
+    153,
+    153,
+    2,
+    2
+  ],
+  "suite_rc": 0,
+  "gate_count": 306,
+  "gate_rc": 0,
+  "sinh_no_rc": 0,
+  "focused_real_kills": 16,
+  "extra_real_kills": 4,
+  "ruff_delta_added": 0,
+  "ruff_delta_removed": 0,
+  "source_hashes_match_initial_and_HEAD": true,
+  "status_tracked_untracked_ignored": "",
+  "diff_HEAD": "",
+  "diff_cached": "",
+  "head_still_exact": true
+}

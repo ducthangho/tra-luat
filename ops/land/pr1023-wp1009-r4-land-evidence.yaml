@@ -26,7 +26,7 @@ input_packet_generations:
 authorized_head_sha: 5b76266d391695940c449497bfbf0acbdfb7d499
 authorized_head_tree: 90c0f3114817b4688cc8c77257f3c87fdc2ecce9
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1023
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1023#issuecomment-6518287879
 authorization_lease_url: https://github.com/ducthangho/tra-luat/issues/1009#issuecomment-6503131249
 authorization_ghi_chu: >-
   measured — readback-pr-1023.json: merged_by ducthangho, merged_at 2026-10-30T06:56:44Z, head.sha 5b76266d;

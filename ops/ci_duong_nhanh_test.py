@@ -2227,7 +2227,7 @@ def t55_kiem_re_chay_validator_land_toan_cay():
          "validator land DO phai thanh loi; DAT thi khong loi")
 
 
-# A7c (dac ta CI-LAN-LUU-TRU r1 §2.2 muc 3): bo dau do CO DINH tren bon tien to; moi dau do phai bi DUNG validator da uy
+# A7c (dac ta CI-LAN-LUU-TRU r1, muc tap cho phep): bo dau do CO DINH tren bon tien to; moi dau do phai bi DUNG validator da uy
 # nhiem bat, bang DAU RIENG cua no. Validator du lieu = tap cho phep tru buoc setup va tru `ci-duong-nhanh selftest` (buoc
 # chua chinh harness nay — chay no la de quy). Lenh lay tu CHINH ci.yml; buoc mang `che_do` thi khong con o duong nhanh.
 BUOC_SETUP = frozenset({"Force LF checkout (hash parity với manifest)", "actions/checkout@v4", "actions/setup-python@v5",
@@ -3489,7 +3489,7 @@ DOT_BIEN = [
     ("lease_het_han_coi_nhu_con_han", _ma("        het_han = han is not None and han <= bay_gio\n", "        het_han = False\n"), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),
     ("lease_het_han_duoc_mien_kiem", _ma("        if het_han:\n            print(", "        if het_han:\n            continue\n            print("), ("t20f_kiem_re_lease_het_han_sai_schema_van_do",)),
     ("lease_bo_duoi_yml", _ma('x.startswith("ops/leases/") and x.endswith((".yaml", ".yml"))', 'x.startswith("ops/leases/") and x.endswith(".yaml")'), ("t20g_kiem_re_lease_duoi_yml_van_duoc_kiem",)),
-    ("kiem_re_bo_ca_du_lieu", _ma("\n           + kiem_ca_du_lieu(kho, chay))", ")"), ("t20a_kiem_re_ho_so_sach_dat",)),
+    ("kiem_re_bo_ca_du_lieu", _ma("\n           + kiem_ca_du_lieu(kho, chay)\n", "\n"), ("t20a_kiem_re_ho_so_sach_dat",)),
     ("ca_du_lieu_bo_t27", _ma(',\n              "t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc")', ")"), ("t22_ca_du_lieu_thay_bo_lease_publish_selftest",)),
     ("ca_du_lieu_bo_qua_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        cuoi = _dau_ra(r).strip().splitlines()[-3:]", "    if False:\n        cuoi = _dau_ra(r).strip().splitlines()[-3:]"), ("t22_ca_du_lieu_thay_bo_lease_publish_selftest",)),
     ("lease_han_hong_coi_la_het_han", _ma('        except ValueError:\n            return None\n        return han if', '        except ValueError:\n            return datetime(1970, 1, 1, tzinfo=timezone.utc)\n        return han if'), ("t21_kiem_lease_phan_biet_con_han_het_han_va_duoi_tep",)),

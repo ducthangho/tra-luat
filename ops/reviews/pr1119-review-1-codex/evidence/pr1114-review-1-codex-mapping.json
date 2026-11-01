@@ -1,0 +1,354 @@
+[
+  {
+    "archive": "DIFF.patch",
+    "source": "DIFF.patch",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "11c407a6c076de2f9326e05afdd4c246b7d70a2da951efcdaa4921dab5a8f06e",
+    "bytes": 1913
+  },
+  {
+    "archive": "PROMPT.md",
+    "source": "PROMPT.md",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "8ac1b4d1911e4e11073fa1b40465bff8624a5e6412e6481ee19b8c0e77838baf",
+    "bytes": 3103
+  },
+  {
+    "archive": "VERDICT.md",
+    "source": "VERDICT.md",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "c4dd8f14224fad7b6d08009e83a027d20d8f8500e692ae78f1e5d2af8c01a41b",
+    "bytes": 17095
+  },
+  {
+    "archive": "bin/node",
+    "source": "bin/node",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "238a4b1e5a4e1913889fe258f892754e778648438c2f0aca68f4f3e7f49529d7",
+    "bytes": 757
+  },
+  {
+    "archive": "evidence/base-case-ids.json",
+    "source": "evidence/base-case-ids.json",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "be59a701fae7429134cb295c9f99c9fc2aca6a853e9a878bf60210cd00d73604",
+    "bytes": 3785
+  },
+  {
+    "archive": "evidence/base-limit.jsonl",
+    "source": "evidence/base-limit.jsonl",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "456a03da45fd2d11841453229fc6f7a83ff0c6cba9ebe1f368980dc9d53f3d08",
+    "bytes": 4082
+  },
+  {
+    "archive": "evidence/base-limit.log",
+    "source": "evidence/base-limit.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "a0c11ca16507a18db8915644abaae834caf8041a75b3fb09400439edc51e3f32",
+    "bytes": 428
+  },
+  {
+    "archive": "evidence/base-p3b4-limit.jsonl",
+    "source": "evidence/base-p3b4-limit.jsonl",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "6c088e4b0652cfb7e911637caa8353d76832c78e2d707171729cd8128f10e0bf",
+    "bytes": 143
+  },
+  {
+    "archive": "evidence/base-p3b4-limit.log",
+    "source": "evidence/base-p3b4-limit.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "a350071bc7a600da14de6d0fd78d90f09042481b5a198d9d3ca18b4c7500e605",
+    "bytes": 111
+  },
+  {
+    "archive": "evidence/base.log",
+    "source": "evidence/base.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e8a141ffef1d7444fbc7cf8f6aecd01bcbe53c4ac240dce35b10caee41f808b2",
+    "bytes": 95
+  },
+  {
+    "archive": "evidence/compare.log",
+    "source": "evidence/compare.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "c3b180045108c01352e3673bc1414c46eb22641b845eb8015b7122f5b2ece956",
+    "bytes": 149
+  },
+  {
+    "archive": "evidence/diff-check.log",
+    "source": "evidence/diff-check.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "archive": "evidence/extra-calls.log",
+    "source": "evidence/extra-calls.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "fcbc9716114268289ea04c4011810e488f6a950ec8737ea0e582e82036610c9f",
+    "bytes": 763
+  },
+  {
+    "archive": "evidence/final-anchor.log",
+    "source": "evidence/final-anchor.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "1ba5265fd55a4c3e1eaf4e92e0c086cb43059c047452765bcdde5a2166f20b26",
+    "bytes": 469
+  },
+  {
+    "archive": "evidence/head-case-ids.json",
+    "source": "evidence/head-case-ids.json",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "be59a701fae7429134cb295c9f99c9fc2aca6a853e9a878bf60210cd00d73604",
+    "bytes": 3785
+  },
+  {
+    "archive": "evidence/head-limit.jsonl",
+    "source": "evidence/head-limit.jsonl",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "3177296a145e23c34d57013bfa9bcb95f4e6363d229a6e873fe6098d7a578ff3",
+    "bytes": 4845
+  },
+  {
+    "archive": "evidence/head-limit.log",
+    "source": "evidence/head-limit.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e8a141ffef1d7444fbc7cf8f6aecd01bcbe53c4ac240dce35b10caee41f808b2",
+    "bytes": 95
+  },
+  {
+    "archive": "evidence/head-p3b4-limit.jsonl",
+    "source": "evidence/head-p3b4-limit.jsonl",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "78a6f652e48e3cde12ce323dfca73716b85508a25c7bba26a6b51c4e6eb1e808",
+    "bytes": 393
+  },
+  {
+    "archive": "evidence/head-p3b4-limit.log",
+    "source": "evidence/head-p3b4-limit.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "bytes": 1
+  },
+  {
+    "archive": "evidence/head.log",
+    "source": "evidence/head.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e8a141ffef1d7444fbc7cf8f6aecd01bcbe53c4ac240dce35b10caee41f808b2",
+    "bytes": 95
+  },
+  {
+    "archive": "evidence/inventory-in-progress.log",
+    "source": "evidence/inventory-in-progress.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "a3678c1dc500f096cc5932f374966c56642625d97199a11d1a080c7047cc442a",
+    "bytes": 8375
+  },
+  {
+    "archive": "evidence/inventory.log",
+    "source": "evidence/inventory.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "a3678c1dc500f096cc5932f374966c56642625d97199a11d1a080c7047cc442a",
+    "bytes": 8375
+  },
+  {
+    "archive": "evidence/make-mutants.log",
+    "source": "evidence/make-mutants.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "acd9f497d1cb630b1aa024d046af4afbd31e193385e015fcee100d145832944a",
+    "bytes": 95
+  },
+  {
+    "archive": "evidence/mutation-argv-read.log",
+    "source": "evidence/mutation-argv-read.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "155b34ca6fc4f8afd6b98675b0c2a0f0456a10b9ddca0b494e3e70e820eb46f8",
+    "bytes": 338
+  },
+  {
+    "archive": "evidence/mutation-no-input.log",
+    "source": "evidence/mutation-no-input.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "155b34ca6fc4f8afd6b98675b0c2a0f0456a10b9ddca0b494e3e70e820eb46f8",
+    "bytes": 338
+  },
+  {
+    "archive": "evidence/repo-final-diff.log",
+    "source": "evidence/repo-final-diff.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "archive": "evidence/repo-final-ignored.log",
+    "source": "evidence/repo-final-ignored.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "archive": "evidence/repo-final-status.log",
+    "source": "evidence/repo-final-status.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "archive": "evidence/ruff.log",
+    "source": "evidence/ruff.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "bytes": 19
+  },
+  {
+    "archive": "evidence/semantics-probe-v1.log",
+    "source": "evidence/semantics-probe-v1.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "c0aa5edda992d1a5f6d6f9aecc68c018b25ab0c107e320c932f597cf2e44f951",
+    "bytes": 332
+  },
+  {
+    "archive": "evidence/semantics.log",
+    "source": "evidence/semantics.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "636210491a3d643da10e3c125f40b96cefaccfcfb353bb1d8f22d9b725353548",
+    "bytes": 3402
+  },
+  {
+    "archive": "evidence/wrapper-boundary.log",
+    "source": "evidence/wrapper-boundary.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "cda3bc122276edd10f44517e786b074b6c64b2a4f592379766689bd2db300684",
+    "bytes": 180
+  },
+  {
+    "archive": "launcher.out",
+    "source": "launcher.json",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "1ee65d36c51dc90c5a1906f6d48c6c6b2bf061afee0dbe3620fb95abb650c240",
+    "bytes": 9464
+  },
+  {
+    "archive": "probes/compare.py",
+    "source": "probes/compare.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "91c45dfca0dd36e17701110a42f38f2878fc3631ace98a9684c5cb6735aa95ce",
+    "bytes": 843
+  },
+  {
+    "archive": "probes/extra_calls.py",
+    "source": "probes/extra_calls.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "9cc695cdae5687f966f77b9b1d5db3cabe32e535f4e944aa5078762731ec9679",
+    "bytes": 2012
+  },
+  {
+    "archive": "probes/inventory.py",
+    "source": "probes/inventory.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "aa50a2bad9a9e4b78688752909a707e5b9971a66c9aaf6da76a851afb4f84d58",
+    "bytes": 2553
+  },
+  {
+    "archive": "probes/make_mutants.py",
+    "source": "probes/make_mutants.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "c77e1a573d7527775029e59cdbd2065bde00e1735f545c3bf8b60579b4555fc6",
+    "bytes": 692
+  },
+  {
+    "archive": "probes/semantics.py",
+    "source": "probes/semantics.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "dc167712c16e53069319956969467c8b0007ff89038e468cc93de8daf781e8db",
+    "bytes": 5125
+  },
+  {
+    "archive": "probes/sitecustomize.py",
+    "source": "probes/sitecustomize.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "10b5fe883c230af2062d8f3166442611a79f29110dd89e48cf113d771dd5501c",
+    "bytes": 1750
+  },
+  {
+    "archive": "probes/wrapper_boundary.py",
+    "source": "probes/wrapper_boundary.py",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "8a69d2ee9771aa162095aaf2ae140486ad2e54a4e1c084a60b7385a0caa5c61c",
+    "bytes": 796
+  },
+  {
+    "archive": "run/checkpoint.json",
+    "source": "runs/df61ed4f/checkpoint.json",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "7081c5cc40b6cf28b5e000519f565bfd4a9e3da33fe78f0626fa534997248b94",
+    "bytes": 212
+  },
+  {
+    "archive": "run/run.json",
+    "source": "runs/df61ed4f/run.json",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "6afa57f06fe3b70e8f9877f3c14e91c71845a64e7a401735f2e4920f02f2c4ec",
+    "bytes": 13709
+  },
+  {
+    "archive": "run/stderr.log",
+    "source": "runs/df61ed4f/stderr.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+    "bytes": 39
+  },
+  {
+    "archive": "run/stdout.log",
+    "source": "runs/df61ed4f/stdout.log",
+    "source_exists": true,
+    "equal": true,
+    "sha256": "429266d6a0a8baa32bb9733d37a225da1bb5448f115892667d4a8df345649593",
+    "bytes": 442
+  }
+]

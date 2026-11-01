@@ -1,0 +1,84 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1106
+packet_id: DIEU-KIEN-MERGE-CONG
+mission_issue: 1106
+mission_id: gh-1106
+mission_ghi_chu: 'packet don le (packet C cua ADR-0060 M11), dung chinh Packet Issue #1106 lam o chua'
+revision: 1
+generation: 1
+lease_id: dieu-kien-merge-cong-r1-g1-claude-remote-20261101
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'lease dau tien cua packet'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1106#issuecomment-6555229240
+authority_url: https://github.com/ducthangho/tra-luat/issues/1106#issuecomment-6555229240
+authority_ghi_chu: 'chu kho duyet spec_hash f02911d9...19da (PR #1108 head 7ab1597) va cho cap lease write set 5 tep; kem mien A12 (Windows nen + phan con lai) va A13 (full_mutant_audit) theo dac ta; ghi ho theo chi thi truc tiep cua chu kho trong phien session_015GtxrYPjZCTZeRiazdssgq 01-11-2026'
+recorded_by: anthropic_claude_dispatcher
+recorder_is_dispatcher: true
+leased_at_utc: '2026-11-01T07:56:54Z'
+heartbeat_at: '2026-11-01T07:56:54Z'
+lease_until: '2026-11-02T07:56:54Z'
+lease_expires_at_utc: '2026-11-02T07:56:54Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: systemic
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved_or_human_audited
+reviewer: codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_independence: 'fresh independent session, read-only exact head, qua launcher.py run; connector Codex goi bang @codex review tren PR draft (ADR-0060 M6)'
+spec_path: ops/specs/DIEU-KIEN-MERGE-CONG-r1.md
+spec_ref: refs/heads/ops/dieu-kien-merge-cong-r1-lease
+spec_ref_ghi_chu: 'spec o PR #1108 nhanh claude/pr-wp-merge-conditions-26j42i @ 7ab1597, chep nguyen byte len nhanh lease nay; thu dinh danh la BAM.'
+spec_hash: f02911d9fb4d65fca5a8debb9e1a5a9abf9ce6b4701248e4487fdda5c82019da
+spec_sha256: f02911d9fb4d65fca5a8debb9e1a5a9abf9ce6b4701248e4487fdda5c82019da
+spec_blob: 867f3aa866ad4275b3efd8ae4014a91c837bb40d
+branch: agent/wp1106-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 4397ee616273a97c1503e8359452aef4e78cd75a
+start_from_sha: 4397ee616273a97c1503e8359452aef4e78cd75a
+reviewed_sha_required: 4397ee616273a97c1503e8359452aef4e78cd75a
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot'
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+- docs/adr/0060-dieu-kien-merge-va-moc-ready.md
+- docs/PROTOCOL_DA_PHIEN.md
+- .claude/skills/land-packets/SKILL.md
+write_set_planned: []
+write_set_hash: dbabd87377a0220a554466398456c0f48327caa00baf742af7494f007f828ba4
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-11-01T07:56:54Z: ls-remote 738, fetch du (thieu 0); 5/5 duong dan NGUOI_GIU 0'
+tran_kich_thuoc: '<= 6 tep / <= 500 dong them (nang_tran trong spec; tran goc ADR-0053@8ab1007 la 6/450)'
+tran_loi_goi_codex: '10 theo dong khai ADR-0055@d2e3052 cua spec; da dung 0 (cac luot review tren PR spec #1108 khong tinh)'
+dieu_kien_merge_bo_sung: 'ADR-0060@36d7c5d (dong khai trong spec): het P0-P2, P3 dong hoac chu kho mien; Windows required, A12 chi luot ung vien cong_c_*; A13 full_mutant_audit owner_waived'
+coordination_paths:
+- ops/leases/dieu-kien-merge-cong-r1-g1-claude-remote-20261101.yaml
+- ops/specs/DIEU-KIEN-MERGE-CONG-r1.md
+run_minutes: 1440
+heartbeat_required_minutes: 360
+review_sla_minutes: 120
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

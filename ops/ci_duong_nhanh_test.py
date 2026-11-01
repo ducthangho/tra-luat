@@ -170,7 +170,8 @@ def raw_ghi(*ban_ghi):
 
 
 def chay_gia(out=b"", rc=0, nem=None, log=None, merge_base=(GOC_A + "\n").encode(),
-             merge_tree=(CAY_GIA + "\n").encode(), diff_cay=(0, b""), merge_ref=(0, b""), raw=None):
+             merge_tree=(CAY_GIA + "\n").encode(), diff_cay=(0, b""), merge_ref=(0, b""), raw=None,
+             trich=(1, b"")):
     """Do gia git. `--raw` (kiem_mode_git) mac dinh DUNG tu cung nguon `--name-only` cua cap do (tep thuong); `raw` = {"ba_cham" |
     "cay" | "hop": gia tri} ghi de rieng tung cap. `merge-base --all`, `merge-tree`, `diff goc -> cay merge` va `diff goc -> merge ref` (`HOP_GIA`) co gia tri
     RIENG, doc lap voi `out`/`rc`/`nem` cua ba cham (mac dinh: MOT base, merge sach, merge va merge ref khong doi them gi) —
@@ -194,6 +195,8 @@ def chay_gia(out=b"", rc=0, nem=None, log=None, merge_base=(GOC_A + "\n").encode
             return _raw_tu_ten(_tra_gia(merge_ref if khoa == "hop" else diff_cay))
         if a[:4] == ["git", "diff", "--no-renames", "--name-only"]:
             return _tra_gia(merge_ref if a[-1] == HOP_GIA else diff_cay)
+        if a[:2] == ["git", "grep"]:   # wp1113 DO6: tai lieu co trich tep bi xoa khong (mac dinh: khong, rc=1)
+            return _tra_gia(trich)
         if nem is not None:
             raise nem
         return KQ(rc, out)
@@ -2169,6 +2172,27 @@ def t51_luat_mode_va_dac_ta_da_co():
         bang(che_do == mong, f"{cu}->{moi} {tt} {d}: phai {mong}, duoc {che_do!r}: {ly_do}")
 
 
+@ca
+def t57_xoa_tep_tai_lieu_con_trich_ve_day_du():
+    """DO6 cua dac ta: xoa ho so ma `docs/`/`references/`/cac tep goc trong TAI_LIEU_TRICH con trich ⇒ DAY_DU; khong ai trich ⇒ van duong nhanh;
+    git grep loi/dau ra rong voi rc=0/nem ⇒ fail-close DAY_DU. Them tep (khong co D) thi KHONG goi git grep."""
+    m = nap_module()
+    r = raw3(("100644", "000000", "D", "ops/land/a.md"))
+    for trich, mong, dau in (((0, b"GOC_B:docs/x.md\0"), "day_du", "xoa tep tai lieu con trich ['ops/land/a.md']"),
+                             ((1, b""), "duong_nhanh", None), ((2, b""), "day_du", "KHONG DO DUOC: git grep"),
+                             ((0, b""), "day_du", "KHONG DO DUOC: git grep"), (OSError("x"), "day_du", "KHONG DO DUOC: git grep")):
+        che_do, ly_do = phan_loai_gia(m, ["ops/land/a.md"], raw={"ba_cham": r, "cay": r, "hop": r}, trich=trich)
+        bang(che_do == mong and (dau is None or dau in ly_do), f"trich={trich!r}: phai {mong} ({dau}), duoc {che_do!r}: {ly_do}")
+    log = []
+    m.phan_loai(env_pr(), chay_gia(nul("ops/land/moi.md"), log=log, trich=(0, b"GOC_B:docs/x.md\0")))
+    bang(not any(a[:2] == ["git", "grep"] for a in map(bo_attr_source, log)), "khong co D thi khong duoc goi git grep")
+    log = []
+    m.xoa_bi_trich(env_pr(), {"ops/land/a.md": [("100644", "000000", "D")]}, chay_gia(log=log))
+    lenh = next((a for a in map(bo_attr_source, log) if a[:2] == ["git", "grep"]), None)
+    bang(lenh is not None and "-F" in lenh and lenh[-8:] == [GOC_B, "--", "docs", "references", "CHANGELOG.md", "SKILL.md",
+         "CLAUDE.md", "CONTEXT.md"], f"git grep phai tim chuoi co dinh tren `dau`, dung pham vi: {lenh}")
+
+
 def _env_su_kien(su_kien, goc, hop, **them):
     e = {"CI_DUONG_NHANH_SU_KIEN": su_kien, "CI_DUONG_NHANH_GOC": goc, "CI_DUONG_NHANH_MERGE": hop}
     e.update(them)
@@ -2241,9 +2265,9 @@ DAU_DO = {   # ten: (thay doi tren cay, buoc phai bat, dau rieng trong dau ra)
     "DO4": ({"ops/land/zz-dau-do-do4-land-evidence.yaml": b"packet_id: zz\ntrang_thai_packet:\n  landed: true\n"
              b"post_merge_checks: CHO_DIEN\nbookkeeping: CHO_DIEN\n"}, KIEM_RE, "land_evidence_nguon rc="),
     "DO5": ({"ops/specs/zz-dau-do-do5.md": b"first\rsecond\n"}, "eol-policy survey", "LONE_CR_IN_INDEX"),
-    # DO6: xoa (gia tri None) tep ma `docs/adr/0055` trich. doc-claims-check coi tep da xoa trong lich su la PATH_DELETED
-    # (advisory, rc=0) tren CA HAI duong; nen luat la "xoa ve DAY_DU" va buoc bat la phep phan loai lai cua kiem-re.
-    "DO6": ({"ops/land/pr909-wp748-r25-land-evidence.yaml": None}, KIEM_RE, "xoa tep da co 'ops/land/pr909-wp748-r25-land-evidence.yaml'"),
+    # DO6: xoa (gia tri None) tep ma mot ADR trong `docs/adr/` trich. doc-claims-check coi tep da xoa trong lich su la PATH_DELETED
+    # (advisory, rc=0) tren CA HAI duong; luat "xoa tep con bi trich ve DAY_DU", buoc bat la phep phan loai lai cua kiem-re.
+    "DO6": ({"ops/land/pr909-wp748-r25-land-evidence.yaml": None}, KIEM_RE, "xoa tep tai lieu con trich ['ops/land/pr909-wp748-r25-land-evidence.yaml']"),
 }
 
 
@@ -3897,7 +3921,9 @@ DOT_BIEN += [
     ("wp1113_land_bo_kiem_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        return [f\"land_evidence_nguon", "    if False:\n        return [f\"land_evidence_nguon"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
     ("wp1113_dau_do_bo_t26", _ma('CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",', 'CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA",'), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_dau_do_bo_land", _ma("           + kiem_land_evidence(kho, chay))", "           + [])"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
-    ("wp1113_xoa_tep_tat", _ma('            if tt == "D":\n', "            if False:\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
+    ("wp1113_xoa_trich_tat", _ma("    ly += [trich] if trich else []\n", ""), ("t56_dau_do_bi_bat_tren_duong_nhanh", "t57_xoa_tep_tai_lieu_con_trich_ve_day_du")),
+    ("wp1113_xoa_trich_rc0_rong_la_khop", _ma("isinstance(ra, (bytes, bytearray)) or not ra:", "isinstance(ra, (bytes, bytearray)):"), ("t57_xoa_tep_tai_lieu_con_trich_ve_day_du",)),
+    ("wp1113_xoa_trich_tren_goc", _ma("+ [dau, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_GOC) or \"\", \"--\", *TAI_LIEU_TRICH]"), ("t57_xoa_tep_tai_lieu_con_trich_ve_day_du",)),
     ("wp1113_dau_do_eol_che_do", _yml("      - name: eol-policy survey\n", "      - name: eol-policy survey\n        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_chuan_bi_khong_xuat_cap", _ma('if che_do == DUONG_NHANH else ""', 'if False else ""'), ("t54_kiem_re_doc_cap_cua_chuan_bi",)),
 ]

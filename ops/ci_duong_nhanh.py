@@ -333,11 +333,32 @@ def ly_do_ve_day_du(doi, raw):
                 ly.append(f"doi mode {cu}->{moi} {duong!r}")
             if duong.startswith("ops/specs/") and tt in ("M", "D", "T"):
                 ly.append(f"sua/xoa dac ta da co ({tt}) {duong!r}")
-            # wp1113 (dau do DO6) — lan luu tru chi THEM ho so. Xoa (ke ca doi ten: `--no-renames` tach thanh D+A) mot tep
-            # da co thi doc-claims-check chi ghi PATH_DELETED la advisory, nen KHONG buoc nao bat tren ca hai duong ⇒ DAY_DU.
-            if tt == "D":
-                ly.append(f"xoa tep da co {duong!r}")
     return sorted(set(ly))
+
+
+# wp1113 (dau do DO6) — doc-claims-check coi tep DA XOA trong lich su la PATH_DELETED (advisory, rc=0), nen xoa mot tep ho so
+# ma tai lieu con trich thi KHONG buoc nao bat, tren CA HAI duong. Xoa ho so khong bi trich van o duong nhanh (luat cua dac ta).
+TAI_LIEU_TRICH = ("docs", "references", "CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md")
+
+
+def xoa_bi_trich(env, raw, chay=subprocess.run, kho=ROOT):
+    """Ly do (chuoi) neu mot tep bi XOA ma tai lieu o `dau` con trich; '' neu khong; chuoi `KHONG DO DUOC` khi git grep loi."""
+    xoa = sorted(d for d, cac in raw.items() if any(tt == "D" for _, _, tt in cac))
+    if not xoa:
+        return ""
+    dau = env.get(BIEN_DAU) or ""
+    lenh = ["git", "grep", "-F", "-l", "-z"] + [x for d in xoa for x in ("-e", d)] + [dau, "--", *TAI_LIEU_TRICH]
+    try:
+        r = chay(lenh, cwd=kho, capture_output=True)
+    except Exception as e:
+        return f"KHONG DO DUOC: git grep trich dan nem {type(e).__name__}"
+    if getattr(r, "returncode", None) == 1:
+        return ""
+    ra = getattr(r, "stdout", None)
+    if getattr(r, "returncode", None) != 0 or not isinstance(ra, (bytes, bytearray)) or not ra:
+        return f"KHONG DO DUOC: git grep trich dan rc={getattr(r, 'returncode', None)}"
+    tl = sorted({x.decode("utf-8", "replace").split(":", 1)[-1] for x in bytes(ra).split(b"\0") if x})
+    return f"xoa tep tai lieu con trich {xoa[:TOI_DA_TEN_IN]} (trich o {tl[:TOI_DA_TEN_IN]})"
 
 
 def phan_loai_day_du(env, chay=subprocess.run, kho=ROOT):
@@ -353,6 +374,8 @@ def phan_loai_day_du(env, chay=subprocess.run, kho=ROOT):
     if isinstance(raw, str):
         return doi, DAY_DU, f"DUONG_NHANH: {raw} - fail-close ve DAY_DU"
     ly = ly_do_ve_day_du(doi, raw)
+    trich = xoa_bi_trich(env, raw, chay, kho)   # `KHONG DO DUOC ...` cung la mot ly do ⇒ fail-close ve DAY_DU
+    ly += [trich] if trich else []
     if ly:
         them = f" (+{len(ly) - TOI_DA_TEN_IN} ly do nua)" if len(ly) > TOI_DA_TEN_IN else ""
         return doi, DAY_DU, "DUONG_NHANH: DAY_DU vi " + "; ".join(ly[:TOI_DA_TEN_IN]) + them

@@ -337,7 +337,8 @@ def ly_do_ve_day_du(doi, raw):
 
 
 # wp1113 (dau do DO6) — doc-claims-check coi tep DA XOA trong lich su la PATH_DELETED (advisory, rc=0), nen xoa mot tep ho so
-# ma tai lieu con trich thi KHONG buoc nao bat, tren CA HAI duong. Xoa ho so khong bi trich van o duong nhanh (luat cua dac ta).
+# ma tai lieu con trich thi KHONG buoc nao bat, tren CA HAI duong. Dua no ve DAY_DU chi ne loi (cross-review offline F2), nen
+# diff van o duong nhanh va `kiem-re` DO. Xoa ho so khong bi trich van DAT (luat cua dac ta).
 TAI_LIEU_TRICH = ("docs", "references", "CHANGELOG.md", "SKILL.md", "CLAUDE.md", "CONTEXT.md")
 
 
@@ -374,8 +375,6 @@ def phan_loai_day_du(env, chay=subprocess.run, kho=ROOT):
     if isinstance(raw, str):
         return doi, DAY_DU, f"DUONG_NHANH: {raw} - fail-close ve DAY_DU"
     ly = ly_do_ve_day_du(doi, raw)
-    trich = xoa_bi_trich(env, raw, chay, kho)   # `KHONG DO DUOC ...` cung la mot ly do ⇒ fail-close ve DAY_DU
-    ly += [trich] if trich else []
     if ly:
         them = f" (+{len(ly) - TOI_DA_TEN_IN} ly do nua)" if len(ly) > TOI_DA_TEN_IN else ""
         return doi, DAY_DU, "DUONG_NHANH: DAY_DU vi " + "; ".join(ly[:TOI_DA_TEN_IN]) + them
@@ -734,6 +733,13 @@ def kiem_land_evidence(kho=ROOT, chay=subprocess.run) -> list[str]:
     return []
 
 
+def kiem_xoa_bi_trich(env, chay=subprocess.run, kho=ROOT):
+    """Loi (DAU RIENG `xoa tep tai lieu con trich`) khi diff xoa tep ma tai lieu o `dau` con trich; `KHONG DO DUOC` cung la loi."""
+    raw = doc_raw_ba_cap(env, chay, kho)
+    trich = raw if isinstance(raw, str) else xoa_bi_trich(env, raw, chay, kho)
+    return [trich] if trich else []
+
+
 def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio=None) -> int:
     ra = ra if ra is not None else sys.stdout
     doi, che_do, ly_do = phan_loai_day_du(env, chay, kho)
@@ -752,7 +758,8 @@ def lenh_kiem_re(env=os.environ, chay=subprocess.run, kho=ROOT, ra=None, bay_gio
            + kiem_symlink_treo_ca_cay(kho)
            + kiem_lease(doi, kho, chay, bay_gio, ra)
            + kiem_ca_du_lieu(kho, chay)
-           + kiem_land_evidence(kho, chay))
+           + kiem_land_evidence(kho, chay)
+           + kiem_xoa_bi_trich(env, chay, kho))
     for x in loi:
         print("DUONG_NHANH: LOI - " + x, file=ra)
     print(f"DUONG_NHANH: kiem-re {'DO' if loi or lech else 'DAT'} ({len(doi)} tep doi, {len(loi)} loi)", file=ra)

@@ -68,7 +68,7 @@ BAT_BUOC = ("gate", "gate-ops", "gate-packet-loop")
 # wp1113 (dac ta CI-LAN-LUU-TRU r1, A7): LUAT la danh sach CHO PHEP, khong phai danh sach bo. Trong sau job duoi, buoc NGOAI
 # tap nay (va ngoai cac buoc chi chay o duong nhanh) phai mang `if:` co ve FAST noi `&&` o muc ngoai cung. Buoc moi them vao
 # sau job ay mac dinh bi bo o duong nhanh. Tieu chi: bo khi moi kiem tra du lieu duoi bon tien to ho so da co buoc con chay dam nhiem
-# (bang `UY_NHIEM`); `eol-policy survey` va `doc-claims-check strict` kiem DU LIEU cay ma diff ho so doi duoc, nen o lai.
+# (bang `UY_NHIEM` ben duoi); `eol-policy survey`, `doc-claims-check strict` va `bien-nhan v2 selftest` kiem DU LIEU cay, nen o lai.
 JOB_LAN_LUU_TRU = ("gate", "gate-ops", "gate-packet-loop", "gate-registry", "gate-nhanh-manh", "gate-nhanh-gop")
 TAP_CHO_PHEP = frozenset({
     "Force LF checkout (hash parity với manifest)", "actions/checkout@v4", "actions/setup-python@v5",
@@ -2173,19 +2173,22 @@ def t51_luat_mode_va_dac_ta_da_co():
 
 
 @ca
-def t57_xoa_tep_tai_lieu_con_trich_ve_day_du():
-    """DO6 cua dac ta: xoa ho so ma `docs/`/`references/`/cac tep goc trong TAI_LIEU_TRICH con trich ⇒ DAY_DU; khong ai trich ⇒ van duong nhanh;
-    git grep loi/dau ra rong voi rc=0/nem ⇒ fail-close DAY_DU. Them tep (khong co D) thi KHONG goi git grep."""
+def t57_xoa_tep_tai_lieu_con_trich_kiem_re_do():
+    """DO6 cua dac ta: diff xoa ho so VAN o duong nhanh (khong ne loi sang DAY_DU); `kiem_xoa_bi_trich` (buoc kiem-re) DO khi
+    tai lieu trong TAI_LIEU_TRICH con trich; khong ai trich ⇒ khong loi; git grep loi/rong voi rc=0/nem ⇒ loi KHONG DO DUOC."""
     m = nap_module()
     r = raw3(("100644", "000000", "D", "ops/land/a.md"))
-    for trich, mong, dau in (((0, b"GOC_B:docs/x.md\0"), "day_du", "xoa tep tai lieu con trich ['ops/land/a.md']"),
-                             ((1, b""), "duong_nhanh", None), ((2, b""), "day_du", "KHONG DO DUOC: git grep"),
-                             ((0, b""), "day_du", "KHONG DO DUOC: git grep"), (OSError("x"), "day_du", "KHONG DO DUOC: git grep")):
-        che_do, ly_do = phan_loai_gia(m, ["ops/land/a.md"], raw={"ba_cham": r, "cay": r, "hop": r}, trich=trich)
-        bang(che_do == mong and (dau is None or dau in ly_do), f"trich={trich!r}: phai {mong} ({dau}), duoc {che_do!r}: {ly_do}")
+    gia = {"ba_cham": r, "cay": r, "hop": r}
+    bang(phan_loai_gia(m, ["ops/land/a.md"], raw=gia, trich=(0, b"GOC_B:docs/x.md\0"))[0] == "duong_nhanh",
+         "xoa tep bi trich phai VAN duong nhanh de kiem-re chay")
+    for trich, dau in (((0, b"GOC_B:docs/x.md\0"), "xoa tep tai lieu con trich ['ops/land/a.md']"), ((1, b""), None),
+                       ((2, b""), "KHONG DO DUOC: git grep"), ((0, b""), "KHONG DO DUOC: git grep"),
+                       (OSError("x"), "KHONG DO DUOC: git grep")):
+        loi = m.kiem_xoa_bi_trich(env_pr(), chay_gia(nul("ops/land/a.md"), raw=gia, trich=trich))
+        bang(loi == [] if dau is None else (len(loi) == 1 and dau in loi[0]), f"trich={trich!r}: phai {dau}, duoc {loi}")
     log = []
-    m.phan_loai(env_pr(), chay_gia(nul("ops/land/moi.md"), log=log, trich=(0, b"GOC_B:docs/x.md\0")))
-    bang(not any(a[:2] == ["git", "grep"] for a in map(bo_attr_source, log)), "khong co D thi khong duoc goi git grep")
+    bang(m.kiem_xoa_bi_trich(env_pr(), chay_gia(nul("ops/land/moi.md"), log=log, trich=(0, b"GOC_B:docs/x.md\0"))) == []
+         and not any(a[:2] == ["git", "grep"] for a in map(bo_attr_source, log)), "khong co D thi khong loi, khong goi git grep")
     log = []
     m.xoa_bi_trich(env_pr(), {"ops/land/a.md": [("100644", "000000", "D")]}, chay_gia(log=log))
     lenh = next((a for a in map(bo_attr_source, log) if a[:2] == ["git", "grep"]), None)
@@ -2266,9 +2269,71 @@ DAU_DO = {   # ten: (thay doi tren cay, buoc phai bat, dau rieng trong dau ra)
              b"post_merge_checks: CHO_DIEN\nbookkeeping: CHO_DIEN\n"}, KIEM_RE, "land_evidence_nguon rc="),
     "DO5": ({"ops/specs/zz-dau-do-do5.md": b"first\rsecond\n"}, "eol-policy survey", "LONE_CR_IN_INDEX"),
     # DO6: xoa (gia tri None) tep ma mot ADR trong `docs/adr/` trich. doc-claims-check coi tep da xoa trong lich su la PATH_DELETED
-    # (advisory, rc=0) tren CA HAI duong; luat "xoa tep con bi trich ve DAY_DU", buoc bat la phep phan loai lai cua kiem-re.
+    # (advisory, rc=0) tren CA HAI duong; nen diff van duong nhanh va kiem-re (`kiem_xoa_bi_trich`) DO.
     "DO6": ({"ops/land/pr909-wp748-r25-land-evidence.yaml": None}, KIEM_RE, "xoa tep tai lieu con trich ['ops/land/pr909-wp748-r25-land-evidence.yaml']"),
 }
+
+
+# Bang uy nhiem (dac ta CI-LAN-LUU-TRU r1, phep do dau do): moi buoc bi bo o duong nhanh dung mot dong. Do tren base 3bdd987
+# (01-11): `khong_doi_mau` = nen va nen+DO1..DO6 cung rc; `uy_nhiem` = doi mau va buoc con chay bat; `cai_dat` = cai/tai cong cu,
+# khong kiem cay; `chua_do` = CHUA do (no khai, khong phai bang chung). t58 khoa: thieu/thua dong hoac gia tri la ⇒ DO.
+UY_NHIEM_GOC = "3bdd987"
+UY_NHIEM = {
+    ('gate', 'cài actionlint cho G5'): 'cai_dat',
+    ('gate', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate', 'cài Ruff 0.15.15 và in probe dương'): 'cai_dat',
+    ('gate', 'G5 kiem ban ke cong cu + T1..T8 (packet'): 'cai_dat',
+    ('gate', 'PR head contains required EOL base'): 'chua_do',
+    ('gate', 'py_compile'): 'chua_do',
+    ('gate', 'codex credential selftest (packet #300)'): 'khong_doi_mau',
+    ('gate', 'idiom-ba-ten selftest'): 'khong_doi_mau',
+    ('gate', 'eol-policy selftest'): 'khong_doi_mau',
+    ('gate', 'pre-push selftest'): 'khong_doi_mau',
+    ('gate', 'bundled-fragment check (topology gói)'): 'khong_doi_mau',
+    ('gate', 'gen_instructions selftest'): 'khong_doi_mau',
+    ('gate', 'command-registry unit test (AG-T0-03)'): 'khong_doi_mau',
+    ('gate', 'tl selftest (luot PR — khong sinh bang chung)'): 'khong_doi_mau',
+    ('gate', 'tl selftest (co bang chung exact-identity)'): 'khong_doi_mau',
+    ('gate', 'tai len gate-evidence'): 'cai_dat',
+    ('gate', 'workflow-audit strict'): 'khong_doi_mau',
+    ('gate', 'golden-test'): 'khong_doi_mau',
+    ('gate', 'determinism-audit strict'): 'khong_doi_mau',
+    ('gate', 'ci-phamvi guard (bang phu thuoc khop ma)'): 'khong_doi_mau',
+    ('gate', 'ci-phamvi selftest (phan chung — cong co rang)'): 'khong_doi_mau',
+    ('gate', 'release-check full'): 'khong_doi_mau',
+    ('gate', 'release-verify strict (lane LAND — manifest committed)'): 'khong_doi_mau',
+    ('gate', 'release-verify strict (lane WORKER — manifest TẠM ngoài repo)'): 'khong_doi_mau',
+    ('gate', 'release-bundle x2 cùng SHA-256'): 'chua_do',
+    ('gate', 'tl_boot smoke'): 'khong_doi_mau',
+    ('gate-ops', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate-ops', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate-ops', 'lease-publish selftest (đo lại setup sau G5)'): 'uy_nhiem: DO1/DO2/DO3 -> kiem-re (CA_DU_LIEU t23, t26, t27)',
+    ('gate-ops', 'don-nhanh selftest (chốt xoá nhánh)'): 'chua_do',
+    ('gate-ops', 'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)'): 'khong_doi_mau',
+    ('gate-ops', 'gate lifecycle selftest (nen khong co cgroup)'): 'khong_doi_mau',
+    ('gate-packet-loop', 'cài actionlint cho G5'): 'cai_dat',
+    ('gate-packet-loop', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate-packet-loop', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate-packet-loop', 'cài Ruff 0.15.15 và in probe dương'): 'cai_dat',
+    ('gate-packet-loop', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',
+    ('gate-packet-loop', 'packet-loop selftest'): 'chua_do',
+    ('gate-registry', 'cài actionlint cho G5'): 'cai_dat',
+    ('gate-registry', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate-registry', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
+    ('gate-registry', 'cài Ruff 0.15.15 và in probe dương'): 'cai_dat',
+    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',
+    ('gate-registry', 'test registry (phạm vi + các bộ chưa được nối)'): 'uy_nhiem: DO4 -> kiem-re (kiem_land_evidence); bo con lai khong_doi_mau; packet_loop_test chua_do',
+    ('gate-nhanh-manh', 'chạy mảnh nhanh_don_duoc (targeted_mutant_gate)'): 'chua_do',
+    ('gate-nhanh-manh', 'actions/upload-artifact@v4'): 'cai_dat',
+    ('gate-nhanh-gop', 'actions/download-artifact@v4'): 'cai_dat',
+    ('gate-nhanh-gop', 'gộp mảnh nhanh_don_duoc (targeted_mutant_gate)'): 'chua_do',
+}
+
+
+# Validator du lieu KHONG chay trong harness, kem phep do tay. Phep so tap trong t56 bat validator lang le bien mat.
+VALIDATOR_DO_TAY = {"bien-nhan v2 selftest": "429s > han 120s cua tien trinh con dot bien; do tay 01-11 tren 3bdd987: nen rc=0, "
+                                             "DO2 rc=1 (DO2 con do kiem-re bat trong harness)"}
 
 
 def _lenh_validator(ten):
@@ -2281,14 +2346,31 @@ def _lenh_validator(ten):
 
 
 @ca
+def t58_bang_uy_nhiem_phu_dung_buoc_bi_bo():
+    """A7: UY_NHIEM co DUNG mot dong cho moi buoc bi bo (suy tu ci.yml qua bo_qua), gia tri thuoc bon loai, uy nhiem tro kiem-re."""
+    can = {(job, ten) for job, ds in bo_qua().items() for ten in ds}
+    bang(set(UY_NHIEM) == can, f"UY_NHIEM lech buoc bi bo: thieu {sorted(can - set(UY_NHIEM))[:3]}, thua {sorted(set(UY_NHIEM) - can)[:3]}")
+    la = {k: v for k, v in UY_NHIEM.items() if v not in ("khong_doi_mau", "cai_dat", "chua_do")
+          and not (v.startswith("uy_nhiem: DO") and "-> kiem-re (" in v)}
+    bang(not la, f"gia tri uy nhiem la: {la}")
+
+
+@ca
 def t56_dau_do_bi_bat_tren_duong_nhanh():
-    """A7c: tren worktree tam cua kho THAT (du ref cho bia mo lease), doi chung (them mot tep ho so lanh) phai DAT o kiem-re
-    va eol va doc-claims; moi dau do DO1-DO6 phai lam DO dung buoc uy nhiem voi dau rieng. Ma `ci_duong_nhanh.py` lay tu cay dang do."""
+    """A7c: tren worktree tam cua kho THAT (du ref cho bia mo lease), doi chung (them mot tep ho so lanh) phai ra duong nhanh va
+    DAT o moi validator cua harness; moi dau do DO1-DO6 phai ra duong nhanh roi lam DO dung buoc uy nhiem voi dau rieng. Ma `ci_duong_nhanh.py` lay tu cay dang do."""
     bang(os.environ.get("CI_DUONG_NHANH_DAU_DO") is None, "harness dau do bi goi long nhau (de quy)")
     bang(TAP_CHO_PHEP - BUOC_SETUP - {BUOC_HARNESS} == {"bien-nhan v2 selftest", "eol-policy survey", "doc-claims-check strict"},
          "tap validator du lieu lech tap cho phep")
+    VALIDATOR_HARNESS = sorted(TAP_CHO_PHEP - BUOC_SETUP - {BUOC_HARNESS} - set(VALIDATOR_DO_TAY)) + [KIEM_RE]
+    bang(set(VALIDATOR_HARNESS) | set(VALIDATOR_DO_TAY) == TAP_CHO_PHEP - BUOC_SETUP - {BUOC_HARNESS} | {KIEM_RE},
+         "harness + validator do tay phai DUNG bang tap validator da khai")
     if not (ROOT_THAT / ".git").exists():
         bang(False, "KHONG DO DUOC: kho that khong co .git")
+    sys.path.insert(0, str(ROOT_THAT / "ops"))
+    from bash_nen import tim_bash
+    bash, chan_doan = tim_bash()
+    bang(bash is not None, f"KHONG DO DUOC: khong co bash dung duoc ({chan_doan})")
     tam = Path(tempfile.mkdtemp(prefix="cdn_daudo_"))
     wt = tam / "w"
     try:
@@ -2312,13 +2394,16 @@ def t56_dau_do_bi_bat_tren_duong_nhanh():
             # CI ghim core.abbrev=7 (r241); khong ghim thi L2 cua doc-claims-check do do dai SHA theo co kho => do gia.
             env["GIT_CONFIG_PARAMETERS"] = (env.get("GIT_CONFIG_PARAMETERS", "") + " 'core.abbrev=7'").strip()
             kq = {}
-            for buoc_ten in ([KIEM_RE, "eol-policy survey", "doc-claims-check strict"] if can is None else [can]):
+            pl = subprocess.run([sys.executable, "-B", "ops/ci_duong_nhanh.py"], cwd=wt, env=env, capture_output=True, timeout=110)
+            bang("che_do=duong_nhanh" in pl.stdout.decode("utf-8", "replace"),
+                 f"{ten}: phan loai phai ra duong nhanh (khong thi validator duong nhanh khong chay): {pl.stdout[-200:]!r}")
+            for buoc_ten in (VALIDATOR_HARNESS if can is None else [can]):
                 lenh = _lenh_validator(buoc_ten)
                 lenh = "python ops/ci_duong_nhanh.py kiem-re" if buoc_ten == KIEM_RE and lenh else lenh
                 if lenh is None:
                     kq[buoc_ten] = (None, "vang o duong nhanh")
                     continue
-                r = subprocess.run(["bash", "-c", "set -e\n" + re.sub(r"(?m)^python ", sys.executable + " ", lenh)], cwd=wt, env=env,
+                r = subprocess.run([bash, "-c", "set -e\n" + re.sub(r"(?m)^python ", sys.executable + " ", lenh)], cwd=wt, env=env,
                                    capture_output=True, timeout=110)
                 kq[buoc_ten] = (r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace"))
             if can is None:
@@ -3917,13 +4002,16 @@ DOT_BIEN += [
     ("wp1113_rong_khong_pr_tat", _ma('if doi is not None and not doi and su_kien != "pull_request":', "if False:"), ("t52_push_phan_loai_fail_close",)),
     ("wp1113_dispatch_bo_day_du", _ma('    if vao == "day_du":\n', '    if False:\n'), ("t53_dispatch_input_che_do",)),
     ("wp1113_dispatch_nhan_input_la", _ma('if type(vao) is not str or vao not in ("", "tu_dong", "day_du"):', "if False:"), ("t53_dispatch_input_che_do",)),
-    ("wp1113_kiem_re_bo_land", _ma("           + kiem_land_evidence(kho, chay))", "           + [])"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
+    ("wp1113_kiem_re_bo_land", _ma("           + kiem_land_evidence(kho, chay)\n", "           + []\n"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
     ("wp1113_land_bo_kiem_rc", _ma("    if getattr(r, \"returncode\", None) != 0:\n        return [f\"land_evidence_nguon", "    if False:\n        return [f\"land_evidence_nguon"), ("t55_kiem_re_chay_validator_land_toan_cay",)),
     ("wp1113_dau_do_bo_t26", _ma('CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA", "t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi",', 'CA_DU_LIEU = ("t23_MOI_lease_THAT_trong_kho_phai_QUA",'), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
-    ("wp1113_dau_do_bo_land", _ma("           + kiem_land_evidence(kho, chay))", "           + [])"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
-    ("wp1113_xoa_trich_tat", _ma("    ly += [trich] if trich else []\n", ""), ("t56_dau_do_bi_bat_tren_duong_nhanh", "t57_xoa_tep_tai_lieu_con_trich_ve_day_du")),
-    ("wp1113_xoa_trich_rc0_rong_la_khop", _ma("isinstance(ra, (bytes, bytearray)) or not ra:", "isinstance(ra, (bytes, bytearray)):"), ("t57_xoa_tep_tai_lieu_con_trich_ve_day_du",)),
-    ("wp1113_xoa_trich_tren_goc", _ma("+ [dau, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_GOC) or \"\", \"--\", *TAI_LIEU_TRICH]"), ("t57_xoa_tep_tai_lieu_con_trich_ve_day_du",)),
+    ("wp1113_dau_do_bo_land", _ma("           + kiem_land_evidence(kho, chay)\n", "           + []\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
+    ("wp1113_xoa_trich_tat", _ma("           + kiem_xoa_bi_trich(env, chay, kho))", "           + [])"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
+    ("wp1113_xoa_trich_rc0_rong_la_khop", _ma("isinstance(ra, (bytes, bytearray)) or not ra:", "isinstance(ra, (bytes, bytearray)):"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
+    ("wp1113_xoa_trich_tren_goc", _ma("+ [dau, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_GOC) or \"\", \"--\", *TAI_LIEU_TRICH]"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
+    ("wp1113_uy_nhiem_thieu_dong", _test("    ('gate', 'py_compile'): 'chua_do',\n", ""), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
+    ("wp1113_uy_nhiem_gia_tri_la", _test("    ('gate', 'py_compile'): 'chua_do',\n", "    ('gate', 'py_compile'): 'xanh',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
+    ("wp1113_harness_bo_validator", _test("- set(VALIDATOR_DO_TAY" + ")) + [KIEM_RE]", "- set(VALIDATOR_DO_TAY) - {'eol-policy survey'}" + ") + [KIEM_RE]"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_dau_do_eol_che_do", _yml("      - name: eol-policy survey\n", "      - name: eol-policy survey\n        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_chuan_bi_khong_xuat_cap", _ma('if che_do == DUONG_NHANH else ""', 'if False else ""'), ("t54_kiem_re_doc_cap_cua_chuan_bi",)),
 ]

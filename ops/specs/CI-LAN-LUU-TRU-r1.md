@@ -24,7 +24,7 @@ dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
 | S1 | PR #1071 (chỉ chạm `ops/reviews/**`, 73 tệp), run `41183318847` (`pull_request`) | `chuan-bi` in `che_do=duong_nhanh`, **vậy mà** vẫn tốn **khoảng 51 runner-phút Ubuntu**: `gate-registry` 22,9 · `gate-ops` 9,8 · `gate` 7,4 · 8 mảnh `gate-nhanh-manh` khoảng 9,5 · `gate-packet-loop` 0,4. `gate-registry` và `gate-nhanh-manh` không có điều kiện `che_do` nào (`JOB_CO_IF_CHO_PHEP` trong `ops/ci_duong_nhanh_test.py`, dòng 2436) |
 | S2 | cùng head `0104461`, run `41183317816` (`workflow_dispatch`) | **khoảng 256 phút** trên Windows (`gate-packet-loop (windows-latest)` 83,7 · `gate-registry (windows-latest)` 81,7 · `gate-ops (windows-latest)` 47,2 · `gate (windows-latest)` 17,8 · 8 mảnh khoảng 22). Đây là nguồn của con số 84 phút trong `ADR-0060` S8: nó đến từ một lượt **dispatch**, không phải từ lượt PR |
 | S3 | `ci.yml`, output `che_do` của `chuan-bi` | chỉ `pull_request` được phân loại; push master và `workflow_dispatch` luôn `day_du` (dòng 71) |
-| S4 | 200 merge first-parent gần nhất của `origin/master` | **59** merge chỉ chạm `ops/{reviews,land}/**` · **22** merge chỉ chạm 4 tiền tố hồ sơ và có `specs`/`leases` · **53** merge có mã. Trong 59 merge thuần lưu trữ, **29** có tệp đuôi `.py/.sh/.ps1/.yml`, gần như toàn bộ là bản sao sandbox nằm sâu từ 4 cấp trở xuống (`git ls-files 'ops/{land,reviews}/*.py'`: 1 tệp ở 3 cấp, 650 tệp sâu hơn) |
+| S4 | 200 merge gần nhất trên `origin/master` `7eeb1d9a` (07:05Z 01-11; lệnh: `git log --first-parent --merges -200 --format=%H origin/master`, mỗi merge `M` lấy `git diff --name-only --no-renames M^1 M`; merge cũ nhất ngày 19-10-2026) | nhóm theo tập tệp đổi: **94** merge mọi tệp dưới `ops/{reviews,land}/**` · **26** merge mọi tệp dưới 4 tiền tố hồ sơ và có ít nhất một tệp `specs`/`leases` · **80** merge có ít nhất một tệp ngoài 4 tiền tố. Review offline lượt 1 đếm ra 95/26 trên cùng base; chênh 1, chưa tách được nguyên nhân (phép đếm của phiên soạn không gặp merge nào có diff rỗng), không đổi kết luận. Trong 94 merge thuần lưu trữ, **37** có tệp đuôi `.py/.sh/.ps1/.yml`, gần như toàn bộ là bản sao sandbox nằm sâu từ 4 cấp trở xuống (`git ls-files 'ops/{land,reviews}/*.py'`: 1 tệp ở 3 cấp, 650 tệp sâu hơn) |
 | S5 | push master của merge thuần lưu trữ | run `41278662487` (merge #1075, chỉ `ops/reviews`) chạy `day_du`, còn `in_progress` sau 25 phút. Merge chỉ đổi đặc tả: #1098 khoảng 56 phút, #1103 khoảng 40 phút |
 
 ## 2. Thay đổi
@@ -39,7 +39,8 @@ Giữ nguyên allowlist **4 tiền tố** `ops/{land,leases,reviews,specs}/**`, 
      (quyết định chủ kho: *"Chỉ chặn cấp nông"*). `.yaml`/`.yml` **không** thuộc tập này, vì `ops/land/*.yaml` cấp nông là hồ sơ land;
    - **mode git** ở phía mới là `100755`, `120000` (symlink) hoặc `160000` (gitlink). Hiện các ca này đi đường nhanh rồi bị `kiem-re` đánh ĐỎ;
      sau thay đổi thì chúng quay về làn thường. Riêng symlink và gitlink, `kiem-re` **giữ** chốt ĐỎ của nó (phòng thủ hai lớp);
-   - **đổi mode** (cũ ≠ mới, kể cả `100644 → 100755`).
+   - **đổi mode** của đường dẫn có mặt ở **cả hai** phía (mode cũ ≠ mode mới, khác `000000`), theo cả hai chiều: `100644 → 100755` và `100755 → 100644`.
+     Tệp mới hay tệp bị xoá **không** là đổi mode: chúng chỉ chịu luật mode phía mới ở gạch trên (`000000 → 100644` đi đường nhanh, xoá tệp đi đường nhanh).
    Rename ra/vào vùng mã đã được `--no-renames` xử lý (`t12`); diff hỗn hợp đã quay về `day_du`. Giữ nguyên.
 2. **Phân loại `push`** (chỉ `refs/heads/master`). Diff `before..after`, với `before = github.event.before` và `after = github.sha`.
    **KHÔNG ĐO ĐƯỢC ⇒ `day_du`** khi: `before` vắng, sai mẫu SHA hoặc toàn số 0; `before` không phải tổ tiên của `after` (force push); git lỗi;
@@ -60,10 +61,13 @@ Luật PR không đổi, trừ mục 1.
    - output `che_do` bỏ vế `github.event_name == 'pull_request' &&`. Bước phân loại vắng hoặc hỏng thì vẫn rơi về `day_du`;
    - output `os`: khi `che_do == duong_nhanh` thì **ép `["ubuntu-latest"]`** bất kể `runner_set` hay nhãn `windows`
      (quyết định chủ kho: *"Ép chỉ Ubuntu"*). Muốn Windows trên PR lưu trữ thì dispatch với `che_do=day_du`.
-2. **`gate-registry` và `gate-nhanh-manh`**: thêm `if:` **mức bước** theo `che_do` để bỏ các bước nặng; job vẫn khởi động và báo kết quả.
-   Thêm một bước `DUONG_NHANH - liet ke buoc bo qua (job <tên>)` như các job đã có. `gate-nhanh-gop` gộp 0 mảnh theo đường `KHÔNG ĐO`
-   đã có (`wp892`).
-3. **`gate` và `gate-ops` trên đường nhanh**: bỏ thêm các bước cài `actionlint`/`shellcheck`/`rg`/Ruff và probe G5
+2. **`gate-registry`, `gate-nhanh-manh` và `gate-nhanh-gop`**: thêm `if:` **mức bước** theo `che_do` để bỏ các bước nặng; job vẫn khởi động và báo kết quả.
+   Thêm một bước `DUONG_NHANH - liet ke buoc bo qua (job <tên>)` như các job đã có. Với `gate-nhanh-gop`: bước gộp
+   (`ops/nhanh_don_duoc_test.py --gop-dich manh`) mang `if: … != 'duong_nhanh'`, và một bước riêng chỉ chạy khi `== 'duong_nhanh'` in
+   `GOM: KHÔNG ĐO — duong_nhanh, 0 mảnh`. **Không** sửa consumer `ops/nhanh_don_duoc_test.py`: ở `day_du` (hay `che_do` vắng/lạ) bước gộp
+   vẫn chạy và vẫn từ chối khi thiếu mảnh (`_loi_gop_dich`: `khong co bien nhan manh nao`). Đường `KHÔNG ĐO` của `wp892` thuộc
+   `gate-cong-cu-gop`, không phải job này.
+3. **`gate`, `gate-ops`, `gate-packet-loop`, `gate-registry` trên đường nhanh**: bỏ thêm các bước cài `actionlint`/`shellcheck`/`rg`/Ruff và probe G5
    (quyết định chủ kho: *"Bỏ, chỉ giữ kiem-re"*). Giữ checkout, cài PyYAML/jsonschema, `kiem-re`, `ci_duong_nhanh_test.py` và validator
    biên nhận (`bien_nhan_v2`, `land_evidence_nguon` — đang chạy ở đường nhanh thì giữ, chưa chạy thì **không** thêm ở packet này).
 4. Bước `kiem-re` hiện nhận cặp gốc/đầu từ `github.event.pull_request.*`. Với `push` và `workflow_dispatch`, `chuan-bi` xuất thêm
@@ -75,6 +79,10 @@ Luật PR không đổi, trừ mục 1.
 - `ops/ci_duong_nhanh_test.py`: ca cho từng luật ở §2.1 và cho dạng mới của `ci.yml` (cập nhật bảng job/bước đang ghim, gồm `JOB_CO_IF_CHO_PHEP` và danh sách bước bỏ).
 - `ops/lease_publish_test.py`: `t162` (evaluator output `os` của `chuan-bi`) thêm các vế `che_do`. Không chạm ca nào khác của tệp.
 - `.claude/dev/ci_dang_ky_test.py`: chỉ sửa ở mức cần cho G5/registry khớp dạng `if:` mới. Không cần thì không chạm, và §3 khai lại.
+- `ops/cong_cu_test.py`: chỉ `t6`. Hiện `t6` đòi bước cài shellcheck của job `gate` **không có `if:`** (dòng 365), nên bỏ bước ấy
+  trên đường nhanh làm `t6` ĐỎ (review offline lượt 1 đo trong bộ nhớ). Sửa thành: mỗi bước cài trước G5 hoặc không có `if:`, hoặc có
+  `if:` đúng nguyên văn `needs.chuan-bi.outputs.che_do != 'duong_nhanh'`; bước G5 `kiem-tra` mang cùng `if:` ấy. Giữ allowlist lệnh
+  setup và chốt thứ tự G5 như cũ.
 
 ## 3. Write set
 
@@ -83,10 +91,12 @@ Luật PR không đổi, trừ mục 1.
 3. `ops/ci_duong_nhanh_test.py`
 4. `ops/lease_publish_test.py`
 5. `.claude/dev/ci_dang_ky_test.py`
-6. `ops/specs/CI-LAN-LUU-TRU-r1.md`: chỉ trong PR đặc tả, không sửa trong PR thi công
+6. `ops/cong_cu_test.py` (chỉ `t6`)
+
+`ops/specs/CI-LAN-LUU-TRU-r1.md` chỉ nằm trong PR đặc tả, không sửa trong PR thi công. PR thi công có tối đa 6 tệp, đúng trần.
 
 Quét người giữ lúc soạn (06:40Z 01-11, sau khi fetch đủ, so `ls-remote` với `for-each-ref`: thiếu 0/734): `ops/lease_publish.py ai-dang-giu` cho
-năm đường dẫn 1–5 cùng `ops/reviews/README.md` ⇒ **`NGƯỜI_GIỮ 0`** ở cả sáu. Đo lại trước khi cấp lease.
+năm đường dẫn 1–5 cùng `ops/reviews/README.md` ⇒ **`NGƯỜI_GIỮ 0`** ở cả sáu. `ops/cong_cu_test.py` thêm sau review lượt 1; quét lại cả sáu tệp của write set lúc 07:18Z (base `c6dd7b33`) ⇒ `NGƯỜI_GIỮ 0`. Đo lại trước khi cấp lease.
 
 **Không giao với packet C**: C giữ `.claude/dev/packet_loop.py`, `.claude/dev/packet_loop_test.py`, `docs/adr/0060-dieu-kien-merge-va-moc-ready.md`,
 `docs/PROTOCOL_DA_PHIEN.md`, `.claude/skills/land-packets/SKILL.md`. D1 không gọi `kiem-merge` hay `kiem-dong-wp`.
@@ -99,7 +109,7 @@ năm đường dẫn 1–5 cùng `ops/reviews/README.md` ⇒ **`NGƯỜI_GIỮ 0
 nang_tran:
   ai_nang: ducthangho   # chủ kho, protocol §2; chọn "Khai nang_tran 650 ngay" ở vòng hỏi thứ ba, 01-11-2026, phiên session_015GtxrcRSrPnyeixJVDudWu
   can_cu: >-
-    Ước tính lúc soạn: 350–450 dòng thêm trên 4–5 tệp (bộ phân loại khoảng 80, ci.yml khoảng 50, ca test và đột biến khoảng 250–300),
+    ƯỚC TÍNH lúc soạn, chưa phải numstat: 350–450 dòng thêm trên 4–5 tệp (bộ phân loại khoảng 80, ci.yml khoảng 50, ca test và đột biến khoảng 250–300),
     tức sát trần 450. Packet B (#1094) phải mở thêm hai PR đặc tả chỉ để nâng trần giữa chừng (#1098, #1103). Tách tiếp D1 thì
     bộ phân loại land mà ci.yml chưa gọi nó, hoặc ngược lại. Chưa có numstat thật: đo lại ở A9.
   tran_cu: "≤ 6 tệp / ≤ 450 dòng thêm (ADR-0053)"
@@ -111,20 +121,20 @@ nang_tran:
 | # | tiêu chí | đột biến / phép đo làm ĐỎ |
 |---|---|---|
 | A1 | PR chỉ thêm `ops/land/x.py` (3 thành phần) ⇒ `day_du`; `ops/reviews/a/run/x.py` ⇒ `duong_nhanh`; `ops/land/x.yaml` ⇒ `duong_nhanh` | bỏ luật mã cấp nông ⇒ ca thứ nhất ĐỎ; đếm sai số thành phần (≥3 thay vì ==3) ⇒ ca thứ hai ĐỎ; thêm `.yaml` vào tập đuôi ⇒ ca thứ ba ĐỎ |
-| A2 | tệp mới mode `100755`, symlink, gitlink, và đổi mode `100644→100755` dưới allowlist ⇒ `day_du` (mỗi dạng một ca) | gỡ từng nhánh của luật mode ⇒ đúng ca của nhánh ấy ĐỎ |
+| A2 | dưới allowlist: tệp mới mode `100755`, symlink mới, gitlink mới ⇒ `day_du`; đổi mode `100755→100644` ⇒ `day_du` (cô lập luật đổi mode); sửa nội dung một tệp đang `100755`, mode giữ nguyên ⇒ `day_du` (cô lập luật mode phía mới); tệp mới `100644` và xoá một tệp ⇒ `duong_nhanh` | gỡ luật mode phía mới ⇒ ca sửa nội dung tệp `100755` ĐỎ; gỡ luật đổi mode ⇒ ca `100755→100644` ĐỎ; tính thêm/xoá là đổi mode ⇒ ca tệp mới `100644` ĐỎ |
 | A3 | `kiem-re` vẫn ĐỎ với symlink/gitlink khi bị gọi thẳng | gỡ chốt `kiem_mode_git` ⇒ ĐỎ |
 | A4 | `push`: `before` vắng / toàn số 0 / sai mẫu / không phải tổ tiên / git lỗi / diff rỗng ⇒ `day_du`; push thuần lưu trữ ⇒ `duong_nhanh`; push có mã ⇒ `day_du` | gỡ từng chốt ⇒ ca của chốt ấy ĐỎ; bỏ kiểm tổ tiên ⇒ ca force push ĐỎ |
 | A5 | `workflow_dispatch`: input `day_du` ⇒ `day_du`; `tu_dong` + diff thuần lưu trữ ⇒ `duong_nhanh`; `tu_dong` + diff rỗng ⇒ `day_du`; input vắng ⇒ như `tu_dong`; input lạ ⇒ `day_du` | đổi luật diff rỗng thành `duong_nhanh` ⇒ ĐỎ; đọc input lạ như `tu_dong` ⇒ ĐỎ |
 | A6 | `t162` (sau khi mở rộng): output `os` ⇒ `["ubuntu-latest"]` khi `che_do == duong_nhanh` ở cả ba sự kiện, kể cả `runner_set=windows-only` và PR có nhãn `windows`; mọi tổ hợp `day_du` giữ đúng giá trị cũ | bỏ vế ép Ubuntu ⇒ ĐỎ; ép cả khi `day_du` ⇒ ĐỎ |
 | A7 | các bước nặng của `gate-registry`, `gate-nhanh-manh`, cùng các bước cài/probe của `gate`, `gate-ops`, đều mang `if:` đúng nguyên văn `needs.chuan-bi.outputs.che_do != 'duong_nhanh'` (kiểm trên cây node `yaml.compose`, không trên dict); mỗi job có bước liệt kê bước bỏ, khớp từng chữ tên bước | gỡ `if:` của một bước ⇒ ĐỎ; đổi `!=` thành `==` ⇒ ĐỎ; khoá trùng `if` trong một bước ⇒ ĐỎ |
-| A7b | `kiem-re` trên `push`/`dispatch` đọc cặp `goc`/`dau` do `chuan-bi` xuất; output vắng ⇒ ĐỎ | đổi `kiem-re` sang đọc env PR khi output vắng ⇒ ca ĐỎ |
+| A7b | `kiem-re` với cặp `goc`/`dau` hợp lệ ⇒ rc=0, và với cặp vắng hoặc sai mẫu ⇒ rc≠0, **riêng cho từng sự kiện** `push` và `workflow_dispatch` (bốn ca) | `kiem-re` luôn trả lỗi khi không phải PR ⇒ hai ca hợp lệ ĐỎ; đọc env PR khi output vắng ⇒ hai ca vắng ĐỎ |
 | A8 | `ci.yml` không có `paths:`/`paths-ignore:` ở mọi cò; ba check bắt buộc vẫn có job mang đúng tên cũ; `actionlint` rc=0 trên `ci.yml` (delta so nền = 0) | thêm `paths-ignore` ⇒ ĐỎ; đổi tên job ⇒ ĐỎ |
 | A9 | `git diff --numstat <base> <ứng viên>`: chỉ các tệp trong §3, ≤ 650 dòng thêm. Kiểm riêng staged, unstaged và untracked trước khi đóng băng | thêm tệp thứ sáu ngoài §3 ⇒ ĐỎ |
 | A10 | `ops/ci_duong_nhanh_test.py`, `ops/lease_publish_test.py`, `.claude/dev/ci_dang_ky_test.py` N/N trên Linux; Windows theo `ADR-0060` M3 (chạm `.github/workflows/**`): nền và ứng viên, so tập test ID đỏ | ca đỏ có ở ứng viên mà không có ở nền ⇒ ĐỎ |
 | A11 | `full_mutant_audit` theo `ADR-0060` M9: **bắt buộc** (chạm `.github/workflows/**` và `ops/**/*.py`), hoặc waiver `owner_waived` đúng scope §10.2.3 | thiếu receipt và thiếu waiver khi merge ⇒ ĐỎ |
-| A12 | **Canary sau land** (`chưa đo được` tới khi đo thật). PR lưu trữ thật đầu tiên sau land (chỉ `ops/{reviews,land}/**`, không có mã cấp nông), cùng run push master của merge ấy: mỗi run **≤ 12 runner-phút**, tính bằng tổng `completed_at − started_at` của mọi job (`actions/runs/<id>/jobs`), **0** job mang nhãn `windows-latest` có `runner_id ≠ 0`, và ba check bắt buộc ở trạng thái `success` (không `skipped`). Người đo là phiên land của D1; số đo ghi lên Issue | một run > 12 phút ⇒ ĐỎ; có job Windows chạy thật ⇒ ĐỎ; một check bắt buộc vắng mặt hoặc `skipped` ⇒ ĐỎ |
+| A12 | **Canary sau land** (`chưa đo được` tới khi đo thật). PR lưu trữ thật đầu tiên sau land (chỉ `ops/{reviews,land}/**`, không có mã cấp nông), cùng run push master của merge ấy: mỗi run **≤ 12 runner-phút**, tính bằng tổng `completed_at − started_at` của mọi job (`actions/runs/<id>/jobs`), **0** job mang nhãn `windows-latest` có `runner_id ≠ 0`, ba check bắt buộc ở trạng thái `success` (không `skipped`), log `chuan-bi` có dòng `che_do=duong_nhanh`, và log bước `kiem-re` của `gate-ops` báo đạt. **Dispatch** đo riêng: phiên land gọi một lượt `workflow_dispatch` (`che_do=tu_dong`, `runner_set` mặc định) trên head của chính PR canary; cùng bốn điều kiện trên, kể cả 0 job Windows. Người đo là phiên land của D1; số đo và id run ghi lên Issue | một run > 12 phút ⇒ ĐỎ; có job Windows chạy thật ⇒ ĐỎ; một check bắt buộc vắng mặt hoặc `skipped` ⇒ ĐỎ; log thiếu dòng `che_do=duong_nhanh` (tức run nhanh vì lý do khác) ⇒ ĐỎ |
 
-Lượt model bị loại (connector, cross-review) **không** thuộc nghiệm thu của D1: miễn review model là luật của `ADR-0060` M6 (xem §6).
+Lượt model bị loại (connector, cross-review) **không** thuộc nghiệm thu của D1. Hiện **chưa** có miễn trừ nào: `ADR-0060` M6 vẫn đòi connector sạch, M8 vẫn đòi cross-review theo lớp. Miễn trừ cho làn lưu trữ là nợ ở §6, làm sau khi C land.
 
 ## 5. Ngoài phạm vi
 

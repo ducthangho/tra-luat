@@ -9096,7 +9096,7 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None):
     f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(d)), goc / ten)[1]  # noqa: E731
     cn = {"repo": "o/r", "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}}
     args = ["kiem-merge", "--root", w, "--repo", "o/r", "--pr", 55, "--head", h, "--base", x.get("base", L2), "--spec", spec_path,
-            "--lease", f("l.yaml", yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
+            "--lease", f("l.yaml", x["lease"] if isinstance(x["lease"], str) else yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
             "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
             "--connector", f("cn.json", cn), "--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"]),
             *[a for k in x["p3off"] for a in ("--p3-offline", k)], *(("--chu-kho-comment", f("cmt.json", x["cmt"])) if x["cmt"] else ()),
@@ -9115,7 +9115,7 @@ def _c1106_ca(rc_doi, phai="", **kw):
     return ca
 
 
-def _d1106(c, doi=None, raw=None):
+def _d1106(c, doi=None, raw=None, raw_ls=None):
     import yaml
     goc = Path(tempfile.mkdtemp(prefix="d1106-", dir=c.tmp))
     w = goc / "w"
@@ -9131,8 +9131,20 @@ def _d1106(c, doi=None, raw=None):
           "lease_cuoi": "l1", "landed": True, "moc_10_2_2": dict.fromkeys(("run", "checkout", "workflow_definition", "gate_output"), "passed")}
     ls = {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}
     (doi or (lambda *_: None))(bb, ls)
-    (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True)), (goc / "ls.yaml").write_text(yaml.safe_dump(ls))
+    (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True)), (goc / "ls.yaml").write_text(raw_ls or yaml.safe_dump(ls))
     return run(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd())
+
+
+def _c1106_diff_loi(c):
+    """`git diff -U0` lỗi ⇒ K6 KHÔNG ĐO ĐƯỢC (ValueError), không được đọc thành `not_required` (review offline lượt 1, P1)."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1106", c.script))
+    sys.path.insert(0, str(c.script.parent)), sp.loader.exec_module(m)
+    m._git_do = lambda root, *x: (0, b":100644 100644 a b M\0docs/x.yml\0") if "--raw" in x else (-1, b"")
+    try:
+        loai = m._phan_loai_windows(Path("."), "a" * 40, "b" * 40, b"")
+    except ValueError:
+        return
+    raise AssertionError(f"git diff -U0 lỗi mà vẫn phân loại {loai!r}")
 
 
 _S1106 = lambda k, **v: lambda x, w, h: h and x[k].update(v)  # noqa: E731
@@ -9187,10 +9199,19 @@ CASES += [
     ("cong_c_d3_cha", _c1106_ca(12, "D3", bb=1, doi=lambda bb, ls: bb.update(head_da_review=bb["merge_commit"]))),
     ("cong_c_d4_tuong_lai", _c1106_ca(12, "D4", bb=1, doi=lambda bb, ls: ls.update(lease_until="2999-01-01T00:00:00Z"))),
     ("cong_c_d1_khoa_trung", _c1106_ca(2, "khoá YAML trùng", bb=1, raw="packet: P\npacket: Q\n")),
+    ("cong_c_d4_khong_nhay", _c1106_ca(0, bb=1, raw_ls="lease_id: l1\npacket_id: P\ngeneration: 1\nlease_until: 2026-01-01T00:00:00Z\n")),
+    ("cong_c_k1_anchor", _c1106_ca(2, "anchor", doi=lambda x, w, h: h and x.update(lease=f"spec_hash: &s {x['lease']['spec_hash']}\n"))),
+    ("cong_c_k1_yaml_hong", _c1106_ca(2, "YAML hỏng", doi=lambda x, w, h: h and x.update(lease="spec_hash: [\n"))),
+    ("cong_c_k1_khoa_trung", _c1106_ca(2, "trùng", doi=lambda x, w, h: h and x.update(lease=f"spec_hash: a\nspec_hash: {x['lease']['spec_hash']}\n"))),
+    ("cong_c_k6_thieu_id", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([{"ket_qua": "passed"}]))),
+    ("cong_c_k6_diff_loi", lambda c: _c1106_diff_loi(c)),
 ]
 MUTANTS.update({
     "c1106_k0_bo_pr_head": ("x[0] or x[1].split()[:1] != [h.encode()]", "x[0]", ["cong_c_k0_pr_head"]),
-    "c1106_k1_bo_spec_hash": ('rc or hashlib.sha256(spec).hexdigest() != _yaml_cay(Path(a.lease).read_bytes()).get("spec_hash")', "rc", ["cong_c_k1_hash"]),
+    "c1106_k1_bo_spec_hash": ('rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash")', "rc", ["cong_c_k1_hash"]),
+    "c1106_k6_bo_rc_diff": ('    if rc:\n        raise ValueError("không đo được dòng thêm', '    if False:\n        raise ValueError("không đo được dòng thêm', ["cong_c_k6_diff_loi"]),
+    "c1106_yaml_nhan_anchor": (' or getattr(e, "anchor", None)', "", ["cong_c_k1_anchor"]),
+    "c1106_k6_id_tuy_y": (' and type(x.get("id")) is str and x["id"]', "", ["cong_c_k6_thieu_id"]),
     "c1106_k1_bo_l1": (' and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0', "", ["cong_c_k1_l2"]),
     "c1106_k3_bo_connector": ("_doc_connector(a.connector, a.repo, a.pr, h)", "([], None)", ["cong_c_k3_p1"]),
     "c1106_k4_bo_head": ('r.get("head") == h and r.get("trang_thai")', 'r.get("trang_thai")', ["cong_c_k4_head"]),

@@ -3091,10 +3091,15 @@ DUOI_MA, DUOI_THU_DONG = (".py", ".ps1", ".sh", ".cmd", ".bat"), (".md", ".yaml"
 def _yaml_cay(b: bytes):
     """Kiểm trên CÂY NODE trước khi dựng dict: khoá phải là scalar chuỗi, không trùng trong một mapping, không alias."""
     import yaml
+    class Nap(yaml.SafeLoader):  # timestamp giữ nguyên CHUỖI: so `lease_until` theo đúng chữ, không theo datetime đã chuẩn hoá
+        yaml_implicit_resolvers = {k: [r for r in v if r[0] != "tag:yaml.org,2002:timestamp"] for k, v in yaml.SafeLoader.yaml_implicit_resolvers.items()}
     s = b.decode("utf-8")
-    if any(isinstance(e, yaml.AliasEvent) for e in yaml.parse(s)):
-        raise ValueError("YAML có alias")
-    cho = [yaml.compose(s)]
+    try:
+        if any(isinstance(e, yaml.AliasEvent) or getattr(e, "anchor", None) for e in yaml.parse(s)):
+            raise ValueError("YAML có anchor/alias")
+        cho, kq = [yaml.compose(s)], yaml.load(s, Loader=Nap)
+    except yaml.YAMLError as ex:
+        raise ValueError(f"YAML hỏng: {type(ex).__name__}") from None
     while cho:
         n = cho.pop()
         if isinstance(n, yaml.MappingNode):
@@ -3104,7 +3109,7 @@ def _yaml_cay(b: bytes):
             cho += [v for _, v in n.value]
         elif isinstance(n, yaml.SequenceNode):
             cho += n.value
-    return yaml.safe_load(s)
+    return kq
 
 
 def _dk(ten: str, fn, thieu: list):
@@ -3131,6 +3136,8 @@ def _phan_loai_windows(root: Path, b: str, h: str, spec: bytes) -> str:
         return "not_required"
     ma = [p for _, p in tep if duoi(p) in (".py", ".ps1", ".sh", ".yml")]
     rc, d = _git_do(root, "diff", "-U0", b, h, "--", *ma) if ma else (0, b"")
+    if rc:
+        raise ValueError("không đo được dòng thêm (git diff -U0)")
     them = [x for x in d.decode("utf-8", "replace").splitlines() if x.startswith("+") and not x.startswith("+++")]
     if (any(duoi(p) in (".ps1", ".cmd", ".bat", ".sh") or p.startswith(("scripts/deploy-", ".claude/dev/", ".github/workflows/")) for _, p in tep)
             or any(k in x for x in them for k in WIN_TU_KHOA) or re.search(rb"^windows: required$", spec, re.M)):
@@ -3154,6 +3161,12 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
     if not (SHA_RE.fullmatch(a.head) and SHA_RE.fullmatch(a.base) and re.fullmatch(r"[^/\s]+/[^/\s]+", a.repo)):
         _die(RC_ARG, "--head/--base phải là SHA 40 hex, --repo dạng chủ/kho")
     root, h, thieu, p3 = Path(a.root), a.head, [], []
+    try:  # đầu vào YAML hỏng là lỗi ĐỐI SỐ, không phải một điều kiện đỏ
+        lease = _yaml_cay(Path(a.lease).read_bytes())
+    except (OSError, ValueError, UnicodeDecodeError) as ex:
+        _die(RC_ARG, f"không đọc được --lease: {ex}")
+    if not isinstance(lease, dict):
+        _die(RC_ARG, "--lease phải là mapping")
 
     def k0():
         if a.base == h or _git_do(root, "merge-base", "--is-ancestor", a.base, h)[0] or _git_do(root, "merge-base", "--is-ancestor", a.base, "refs/remotes/origin/master")[0]:
@@ -3164,7 +3177,7 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
 
     def k1():
         rc, spec = _git_do(root, "show", f"{h}:{a.spec}")
-        if rc or hashlib.sha256(spec).hexdigest() != _yaml_cay(Path(a.lease).read_bytes()).get("spec_hash"):
+        if rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash"):
             _die(RC_GATE, "blob --spec tại head không khớp spec_hash của lease")
         khai = LUAT_0060_RE.findall(spec)
         oid = khai[0].decode() if len(khai) == 1 else None
@@ -3196,7 +3209,7 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
         if loai == "required" and f"windows: {h} mien" not in dong:
             w = _doc_json(a.windows_json, RC_GATE)[0] if a.windows_json else {}
             ts = w.get("tests") if isinstance(w, dict) else None
-            if not (w.get("sha") == h and w.get("os") == "Windows" and isinstance(ts, list) and ts and all(isinstance(x, dict) for x in ts)
+            if not (w.get("sha") == h and w.get("os") == "Windows" and isinstance(ts, list) and ts and all(isinstance(x, dict) and type(x.get("id")) is str and x["id"] for x in ts)
                     and len({x.get("id") for x in ts}) == len(ts) and all(x.get("ket_qua") == "passed" for x in ts)):
                 _die(RC_GATE, "Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn")
 

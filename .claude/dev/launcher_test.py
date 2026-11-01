@@ -9638,8 +9638,8 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=Fa
     hay không vào `dau.log`. `allexport`: `"co"` chạy `bash -a`, `"env"` đặt `SHELLOPTS=allexport` (Codex lượt 5);
     `thu_tu`: thứ tự hai mục của bảng kê batch. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
-    for t in ("cai_cong_cu.sh", "cong_cu.py"):
-        shutil.copy2(LAUNCHER.parents[2] / "ops" / t, ops / t)
+    shutil.copy2(CAI_SH_DANG_DUNG, ops / "cai_cong_cu.sh")   # wp1078: bản ĐANG THỬ (đột biến), không phải tệp thật
+    shutil.copy2(LAUNCHER.parents[2] / "ops" / "cong_cu.py", ops / "cong_cu.py")
     if batch:
         import yaml
         d = yaml.safe_load(YAML_DANG_DUNG.read_text(encoding="utf-8"))
@@ -10174,10 +10174,10 @@ def r886_n1_bo_qua_tep_khong_thuc_thi():
 @ca
 def r886_ten_python_khop_cai_cong_cu_sh():
     """Q1: `TEN_PYTHON` của cong_cu.py khớp ĐÚNG thứ tự + tập tên dòng chọn `PY` trong `ops/cai_cong_cu.sh`."""
-    sh = re.findall(r"^elif command -v (\S+) >/dev/null 2>&1; then PY=\(([^)]*)\)$",
+    # wp1078: dòng chọn là `elif _PY_TEP="$(type -P <tên>)"; then PY=("$_PY_TEP"[ đối số])`.
+    sh = re.findall(r'^elif _PY_TEP="\$\(type -P (\S+)\)"; then PY=\("\$_PY_TEP"([^)]*)\)$',
                     CAI_SH_DANG_DUNG.read_text(encoding="utf-8"), re.M)
-    bang([tuple(pha.split()) for _ten, pha in sh] == [tuple(x) for x in _r886_nap().TEN_PYTHON]
-         and all(pha.split()[0] == ten for ten, pha in sh),
+    bang(sh and [(ten, *them.split()) for ten, them in sh] == [tuple(x) for x in _r886_nap().TEN_PYTHON],
          f"TEN_PYTHON lech cai_cong_cu.sh: sh={sh} py={_r886_nap().TEN_PYTHON}")
 
 

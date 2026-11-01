@@ -9991,29 +9991,31 @@ def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
 
 @ca
 def r1122_kenh_loi_phai_thuoc_luot_ngoai():
-    """#1122 (Codex lượt 5, F01; hint_provenance: ca của HINT lượt 5, chỉ giữ phép đo `loai` vì chủ kho chốt
-    gỡ thông điệp khỏi kênh): ca lồng CÙNG TÊN chạy ở lần lặp sau không được đổi `loai` của lỗi ngoài đã ghi.
-    Ca lồng ném `TinHieuChotCa` mà kênh đọc map lúc ghi thì lỗi ngoài `TypeError` thành GIẾT — tín dụng giả."""
+    """#1122 F01: loại lỗi ngoài phải đúng dù ca lồng chạy ở lượt sau hoặc ngay trong __str__ của lỗi.
+    Kênh không mang thông điệp theo quyết định chủ kho; ca lồng không được biến lỗi thường thành giết."""
     text = Path(__file__).read_text(encoding="utf-8")
     neo = chr(10) + 'if __name__ == "__main__":'
     bang(text.count(neo) == 1, "neo main khong duy nhat")
     with San() as s:
-        for i, (ngoai, trong, bo_qua) in enumerate((
-                ("TypeError", "RuntimeError", False),
-                ("TypeError", "TinHieuChotCa", False),
-                ("TinHieuChotCa", "RuntimeError", False),
-                ("TypeError", "RuntimeError", True))):
+        for i, (ngoai, trong, bo_qua, khi_in) in enumerate((
+                ("TypeError", "RuntimeError", False, False), ("TypeError", "TinHieuChotCa", False, False),
+                ("TinHieuChotCa", "RuntimeError", False, False), ("TypeError", "RuntimeError", True, False),
+                ("TypeError", "RuntimeError", False, True), ("TypeError", "TinHieuChotCa", False, True))):
             them = (
                 '\nreview_n = 0\nreview_depth = 0\n@ca\ndef review_repeat():\n'
                 '    global review_n, review_depth\n'
                 '    if review_depth:\n        raise ' + trong + '("review-inner")\n'
                 '    review_n += 1\n'
                 '    if review_n == 1:\n        raise ' + ngoai + '("review-current")\n'
-                '    review_depth = 1\n'
-                '    try:\n        chay_bo_ca([review_repeat])\n'
+                '    review_depth = 1\n    try:\n        chay_bo_ca([review_repeat])\n'
                 '    finally:\n        review_depth = 0\n'
                 + ('    return "review-skip"\n' if bo_qua else '')
                 + 'CA = [review_repeat]\n')
+            if khi_in:
+                them = ('\nclass TypeError(TypeError):\n    def __str__(self):\n'
+                        '        global review_depth\n        review_depth = 1\n'
+                        '        try:\n            chay_bo_ca([review_repeat])\n'
+                        '        finally:\n            review_depth = 0\n        return "review-current"\n') + them
             dev = _dung_cay_harness(s / str(i), text.replace(neo, them + neo, 1),
                                    LAUNCHER.read_text(encoding="utf-8"))
             kenh = s / (str(i) + ".json")
@@ -14825,6 +14827,7 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    ('wp1122_dinh_dang_lai_sau_ghi_map', ('ket = f"LOI: {tin}"', 'ket = f"LOI: {mo_ta_loi(e)}"'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
     ('wp1122_kenh_chup_ca_qua', ('                if h:  # #1122: chụp loại của lỗi NGOÀI', '                if h or q or b:  # #1122: chụp loại của lỗi NGOÀI'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
     ('wp1122_kenh_loi_doc_lai_map', ('"loai": loai_luot', '"loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None)'), ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
     ('wp1122_kenh_ca_qua_ro_0', ('"loai": loai_luot', '"loai": LOAI_HONG.get(chon[0].__name__)'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
@@ -14835,13 +14838,13 @@ DOT_BIEN_HARNESS = [
     ('wp1122_tach_nhom_khong_cat', ('return f"KHONG tach duoc ({mo_ta_loi(e)}) - killpg co the giet vo shell"', 'return f"KHONG tach duoc ({type(e).__name__}: {e}) - killpg co the giet vo shell"'), ['r1122_tach_nhom_loi_giu_loai_va_thong_diep_160']),
     ('wp1122_stdout_bo_utf8', ('            luong.reconfigure(encoding="utf-8", errors="replace")', '            pass'), ['r1122_reporter_unicode_console_khong_utf8']),
     ('wp1122_stdout_dung_ascii', ('            luong.reconfigure(encoding="utf-8", errors="replace")', '            luong.reconfigure(encoding="ascii", errors="replace")'), ['r1122_reporter_unicode_console_khong_utf8']),
-    ('wp1122_nhat_ky_assertion_mat_chi_tiet', ('ket = f"HONG: {mo_ta_loi(e)}"', 'ket = f"HONG: {str(e)[:60]}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
-    ('wp1122_nhat_ky_exception_mat_chi_tiet', ('ket = f"LOI: {mo_ta_loi(e)}"', 'ket = f"LOI {type(e).__name__}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    ('wp1122_nhat_ky_assertion_mat_chi_tiet', ('ket = f"HONG: {tin}"', 'ket = f"HONG: {str(e)[:60]}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    ('wp1122_nhat_ky_exception_mat_chi_tiet', ('ket = f"LOI: {tin}"', 'ket = f"LOI {type(e).__name__}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
     ('wp1122_chot_ca_khac_mat_chi_tiet', ('return "loi", f"{fn.__name__}({mo_ta_loi(e)}; chot cua ca khac)"', 'return "loi", f"{fn.__name__}(chot cua ca khac)"'), ['r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi']),
     ('wp1122_bien_dich_khong_cat', ('print(f"  {ten:<28} SAI - dot bien khong bien dich: {mo_ta_loi(e)}")', 'print(f"  {ten:<28} SAI - dot bien khong bien dich: {e.msg}")'), ['r1122_loi_bien_dich_dot_bien_cat_160']),
     ('wp1122_reporter_transport_bo_thong_diep', ('return "loi", f"{ten_ca}({mo_ta_loi(e)})"', 'return "loi", f"{ten_ca}({type(e).__name__})"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
-    ('wp1122_reporter_assertion_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            # #1079 F01:', '            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
-    ('wp1122_reporter_exception_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"', '            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_assertion_khong_cat', ('            hong_ds.append((fn.__name__, tin))\n            # #1079 F01:', '            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_exception_khong_cat', ('            hong_ds.append((fn.__name__, tin))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"', '            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_encoding_cp1252', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding="cp1252", errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     ('wp1122_encoding_none', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding=None, errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     # Hai dòng fixture mới phải dùng đúng tên `MODULE_PY`; đổi phối hợp cả hai về
@@ -15294,15 +15297,17 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
                 qua += 1
                 ket = "qua"
         except AssertionError as e:
-            hong_ds.append((fn.__name__, mo_ta_loi(e)))
+            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ
+            hong_ds.append((fn.__name__, tin))
             # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.
             LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)
                                       else f"khac:{type(e).__qualname__}")
-            ket = f"HONG: {mo_ta_loi(e)}"
+            ket = f"HONG: {tin}"
         except Exception as e:  # noqa: BLE001
-            hong_ds.append((fn.__name__, mo_ta_loi(e)))
+            tin = mo_ta_loi(e)
+            hong_ds.append((fn.__name__, tin))
             LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"
-            ket = f"LOI: {mo_ta_loi(e)}"
+            ket = f"LOI: {tin}"
         if nk:
             nk.ra(i, fn.__name__, ket)
     return qua, bo_qua, hong_ds
@@ -15468,9 +15473,8 @@ def main() -> int:
         if kenh:   # #1079 F01: kênh kết quả cho runner harness (cham_lap_ca)
             Path(kenh).write_text(json.dumps({"nonce": nonce, "ten": chon[0].__name__, "qua": qua,
                                               "bo_qua": bo_qua, "hong": len(hong_ds),
-                                              # #1122 (chủ kho chốt sau Codex lượt 5): KHÔNG mang thông điệp
-                                              # qua kênh này — #1117 thay cả kênh bằng runner; `loai` là ảnh
-                                              # chụp của lần lặp NGOÀI, không đọc map toàn cục lúc ghi.
+                                              # #1122 (chủ kho, sau Codex lượt 5): kênh KHÔNG mang thông điệp
+                                              # (#1117 thay kênh); `loai` là ảnh chụp lần lặp NGOÀI có hỏng.
                                               "loai": loai_luot}), encoding="utf-8")
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)

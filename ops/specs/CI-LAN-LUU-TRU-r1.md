@@ -79,15 +79,27 @@ Luật PR không đổi, trừ mục 1.
      `eol-policy survey`: connector đo trên `f46ccb3`, tệp `ops/specs/*.md` chứa CR đơn ⇒ survey rc=1 `LONE_CR_IN_INDEX`, `kiem-re` rc=0
      (finding `4434813284`). `doc-claims-check` quét `docs/`, `references/` và bốn tệp gốc; xoá hay đổi tên một tệp dưới `ops/**` có thể
      làm chết một đường dẫn mà các tài liệu ấy trích.
-   **Tiêu chí phân loại.** Một bước được bỏ khi và chỉ khi mỗi kiểm tra nó làm trên dữ liệu dưới 4 tiền tố (nếu có) đã được một
-   **bước còn chạy** trên đường nhanh đảm nhiệm, khai đích danh. Bước không kiểm gì dưới 4 tiền tố (mã, workflow, manifest phát hành,
-   topology gói, kho tạm của test) thoả điều kiện ấy một cách hiển nhiên. `ops/**` không có trong `RELEASE_MANIFEST.json`. Kết quả phân
-   loại ghi thành **bảng ủy nhiệm** trong `ops/ci_duong_nhanh_test.py`, mỗi bước bị bỏ có đúng một dòng: `ngoai_4_tien_to`, hoặc
-   `uy_nhiem: <bước còn chạy> (<ca/hàm>)`. Rà lúc soạn (07:58Z 01-11, `grep` đường dẫn thật dưới 4 tiền tố trong các bộ test bị bỏ):
-   - `lease-publish selftest` (`gate-ops`) ⇒ `uy_nhiem: kiem-re (kiem_ca_du_lieu: t23, t26, t27)`. Đây là ủy nhiệm đã có từ #674
-     (`ops/ci_duong_nhanh.py`, `CA_DU_LIEU`); finding connector `4434830235` chỉ ra rằng bản `eb37d4a` của tiêu chí không tính tới nó;
-   - `packet-loop selftest`: các ca chạm `ops/leases` đều dựng trên kho tạm ⇒ `ngoai_4_tien_to`;
-   - các bước khác trong danh sách dưới ⇒ `ngoai_4_tien_to`. Phiên thi công phải rà lại từng dòng, không chép nguyên kết quả này.
+   **Tiêu chí phân loại — bằng PHÉP ĐO, không bằng liệt kê tay** (quyết định chủ kho 08:00Z 01-11, sau ba lượt connector liên tiếp
+   chỉ ra một bước kiểm dữ liệu mà bản liệt kê tay bỏ sót: `eol-policy survey` `4434813284`, `lease-publish` t23/t26/t27 `4434830235`,
+   `test registry` → `ops/land_evidence_nguon_test.py` c11 `4434838609`). Một bước được bỏ khi và chỉ khi **phép đo đầu dò** dưới đây
+   không làm nó đổi màu, hoặc làm nó đổi màu ở một ca dữ liệu mà một bước còn chạy trên đường nhanh cũng bắt được.
+   - **Bộ đầu dò cố định.** Mỗi đầu dò là một thay đổi chỉ chạm 4 tiền tố, dựng trên base:
+     `DO1` một lease YAML dưới `ops/leases/` thiếu trường bắt buộc ·
+     `DO2` một biên nhận `ops/reviews/*.receipt.yaml` có `verdict_sha256` sai ·
+     `DO3` một verdict `ops/reviews/*-verdict.md` mồ côi, không có biên nhận ·
+     `DO4` một hồ sơ `ops/land/*-land-evidence.yaml` khai `landed: true` mà `post_merge_checks`/`bookkeeping` là `CHO_DIEN` (đầu dò của connector `4434838609`) ·
+     `DO5` một tệp `ops/specs/*.md` chứa CR đơn (đầu dò của connector `4434813284`) ·
+     `DO6` xoá một tệp dưới `ops/**` mà `docs/` hoặc `references/` trích đường dẫn.
+   - **Phép đo (một lần, lúc thi công).** Với mỗi bước bị bỏ: chạy trên base, rồi trên base cộng cả sáu đầu dò. Bước nào xanh ở base mà
+     đỏ khi có đầu dò thì chạy lại với từng đầu dò để biết đầu dò nào bắt được nó. Kết quả ghi thành **bảng ủy nhiệm** trong
+     `ops/ci_duong_nhanh_test.py`, mỗi bước bị bỏ đúng một dòng, kèm OID base đã đo:
+     `khong_doi_mau`, hoặc `uy_nhiem: {DO_k: <bước còn chạy> (<ca/hàm>)}`.
+   - **Ca dữ liệu, không cả bộ.** Bước đổi màu mà chưa có bước còn chạy nào bắt được đầu dò ấy thì chỉ đưa **ca dữ liệu** tương ứng
+     vào đường nhanh, không đưa cả bộ test: thêm vào `CA_DU_LIEU` của `kiem-re` như t23/t26/t27, hoặc thêm một bước validator có sẵn
+     vào tập cho phép. Ví dụ đã biết: c11 ⇒ ca dữ liệu của `ops/land_evidence_nguon_test.py` hoặc gọi thẳng `ops/land_evidence_nguon.py`.
+   - **Hạt giống, cần đo lại:** `lease-publish selftest` ⇒ `uy_nhiem: {DO1/DO2/DO3: kiem-re (CA_DU_LIEU t23, t26, t27)}` ·
+     `test registry` ⇒ `uy_nhiem: {DO4: <chưa có, phải thêm>}` · `eol-policy survey` và `doc-claims-check strict` ở lại tập cho phép
+     (bắt `DO5`, `DO6`). Phiên thi công đo lại toàn bộ, không chép nguyên các dòng này.
    Mọi bước khác bị bỏ trên đường nhanh của cả ba sự kiện (quyết định chủ kho: *"Bỏ, chỉ giữ kiem-re"*). Đo trên `c6dd7b33` (07:50Z 01-11),
    tập ấy gồm: cài `actionlint`/`shellcheck`/`rg`/Ruff, G5, `py_compile`, các selftest của `gate`, `tl selftest (co bang chung exact-identity)`
    (hiện chỉ có `if: github.event_name != 'pull_request'`, tức sẽ chạy đủ trên push/dispatch đường nhanh: finding connector `4434801200`),
@@ -152,6 +164,7 @@ nang_tran:
 | A5 | `workflow_dispatch`: input `day_du` ⇒ `day_du`; `tu_dong` + diff thuần lưu trữ ⇒ `duong_nhanh`; `tu_dong` + diff rỗng ⇒ `day_du`; input vắng ⇒ như `tu_dong`; input lạ ⇒ `day_du` | đổi luật diff rỗng thành `duong_nhanh` ⇒ ĐỎ; đọc input lạ như `tu_dong` ⇒ ĐỎ |
 | A6 | `t162` (sau khi mở rộng): output `os` ⇒ `["ubuntu-latest"]` khi `che_do == duong_nhanh` ở cả ba sự kiện, kể cả `runner_set=windows-only` và PR có nhãn `windows`; mọi tổ hợp `day_du` giữ đúng giá trị cũ | bỏ vế ép Ubuntu ⇒ ĐỎ; ép cả khi `day_du` ⇒ ĐỎ |
 | A7 | trên cây node `yaml.compose` của `ci.yml` (không trên dict): mọi bước của sáu job ở §2.2 mục 3 hoặc thuộc tập cho phép (so nguyên văn tên/`uses`), hoặc có `if:` với vế nguyên văn `needs.chuan-bi.outputs.che_do != 'duong_nhanh'` nối `&&` ở mức ngoài cùng; mỗi job có bước liệt kê bước bỏ, khớp từng chữ tên bước; `tl selftest` có cả hai vế (`event_name != 'pull_request'` và `che_do`). Một ca riêng ghim rằng `tl selftest` **không** thuộc tập cho phép, và một ca ghim rằng `eol-policy survey` và `doc-claims-check strict` **thuộc** tập ấy, không có vế `che_do` | thêm một bước mới không `if:`, nằm ngoài tập cho phép ⇒ ĐỎ; gỡ vế `che_do` khỏi `tl selftest` ⇒ ĐỎ; nối bằng `\|\|` thay `&&` ⇒ ĐỎ; đổi `!=` thành `==` ⇒ ĐỎ; khoá `if` trùng trong một bước ⇒ ĐỎ; nới tập cho phép để chứa `tl selftest` ⇒ ca ghim ĐỎ; thêm vế `che_do` vào `eol-policy survey` ⇒ ca ghim thứ hai ĐỎ; bỏ một bước mà bảng ủy nhiệm không có dòng cho nó ⇒ ĐỎ; dòng `uy_nhiem` trỏ một bước không thuộc tập cho phép ⇒ ĐỎ; gỡ `t26` khỏi `CA_DU_LIEU` trong khi bảng vẫn khai ủy nhiệm `t26` ⇒ ĐỎ |
+| A7c | **Bộ đầu dò đỏ trên đường nhanh.** Với mỗi đầu dò `DO1`–`DO6` ở §2.2 mục 3, dựng trên một kho tạm: chạy đúng các bước của tập cho phép (gồm `kiem-re`) ⇒ có ít nhất một bước rc≠0; trên base không đầu dò ⇒ mọi bước rc=0 | gỡ `t26` khỏi `CA_DU_LIEU` ⇒ ca `DO2` ĐỎ; bỏ ca dữ liệu được thêm cho c11 ⇒ ca `DO4` ĐỎ; thêm vế `che_do` vào `eol-policy survey` ⇒ ca `DO5` ĐỎ |
 | A7b | `kiem-re` với cặp `goc`/`dau` hợp lệ ⇒ rc=0, và với cặp vắng hoặc sai mẫu ⇒ rc≠0, **riêng cho từng sự kiện** `push` và `workflow_dispatch` (bốn ca) | `kiem-re` luôn trả lỗi khi không phải PR ⇒ hai ca hợp lệ ĐỎ; đọc env PR khi output vắng ⇒ hai ca vắng ĐỎ |
 | A8 | `ci.yml` không có `paths:`/`paths-ignore:` ở mọi cò; ba check bắt buộc vẫn có job mang đúng tên cũ; `actionlint` rc=0 trên `ci.yml` (delta so nền = 0) | thêm `paths-ignore` ⇒ ĐỎ; đổi tên job ⇒ ĐỎ |
 | A9 | `git diff --numstat <base> <ứng viên>`: chỉ các tệp trong §3, ≤ 650 dòng thêm. Kiểm riêng staged, unstaged và untracked trước khi đóng băng | thêm tệp thứ sáu ngoài §3 ⇒ ĐỎ |

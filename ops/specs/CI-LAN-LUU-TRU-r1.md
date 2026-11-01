@@ -67,9 +67,20 @@ Luật PR không đổi, trừ mục 1.
    `GOM: KHÔNG ĐO — duong_nhanh, 0 mảnh`. **Không** sửa consumer `ops/nhanh_don_duoc_test.py`: ở `day_du` (hay `che_do` vắng/lạ) bước gộp
    vẫn chạy và vẫn từ chối khi thiếu mảnh (`_loi_gop_dich`: `khong co bien nhan manh nao`). Đường `KHÔNG ĐO` của `wp892` thuộc
    `gate-cong-cu-gop`, không phải job này.
-3. **`gate`, `gate-ops`, `gate-packet-loop`, `gate-registry` trên đường nhanh**: bỏ thêm các bước cài `actionlint`/`shellcheck`/`rg`/Ruff và probe G5
-   (quyết định chủ kho: *"Bỏ, chỉ giữ kiem-re"*). Giữ checkout, cài PyYAML/jsonschema, `kiem-re`, `ci_duong_nhanh_test.py` và validator
-   biên nhận (`bien_nhan_v2`, `land_evidence_nguon` — đang chạy ở đường nhanh thì giữ, chưa chạy thì **không** thêm ở packet này).
+3. **Danh sách CHO PHÉP, không phải danh sách bỏ.** Trên đường nhanh, trong sáu job `gate`, `gate-ops`, `gate-packet-loop`,
+   `gate-registry`, `gate-nhanh-manh`, `gate-nhanh-gop`, **mọi** bước phải mang `if:` có vế `needs.chuan-bi.outputs.che_do != 'duong_nhanh'`,
+   nối `&&` ở mức ngoài cùng với điều kiện cũ nếu có. Chỉ trừ các bước thuộc **tập cho phép**, khai bằng tên/`uses` nguyên văn trong
+   `ops/ci_duong_nhanh_test.py`:
+   - `Force LF checkout (hash parity với manifest)`, `actions/checkout@v4`, `actions/setup-python@v5`, `cài PyYAML + jsonschema (…)`;
+   - các bước chỉ chạy khi `che_do == 'duong_nhanh'`: liệt kê bước bỏ, `kiem-re`, `GOM: KHÔNG ĐO`;
+   - `ci-duong-nhanh selftest` và `bien-nhan v2 selftest` (job `gate-ops`): đang chạy trên đường nhanh hôm nay, giữ nguyên.
+   Mọi bước khác bị bỏ trên đường nhanh của cả ba sự kiện (quyết định chủ kho: *"Bỏ, chỉ giữ kiem-re"*). Đo trên `c6dd7b33` (07:50Z 01-11),
+   tập ấy gồm: cài `actionlint`/`shellcheck`/`rg`/Ruff, G5, `py_compile`, các selftest của `gate`, `tl selftest (co bang chung exact-identity)`
+   (hiện chỉ có `if: github.event_name != 'pull_request'`, tức sẽ chạy đủ trên push/dispatch đường nhanh: finding connector `4434801200`),
+   `tai len gate-evidence`, `workflow-audit`, `doc-claims-check`, `ci-phamvi`, hai bước `release-verify`, `tl_boot smoke`, `don-nhanh selftest`.
+   Không thêm validator mới. Vì sao dùng danh sách cho phép: danh sách bỏ phải đoán trước mọi bước nặng, nên thua ngay từ thiết kế. Bản
+   `c6b6680` của đặc tả này dùng danh sách bỏ và đã bỏ sót `tl selftest`. Bước thêm vào sáu job này về sau mặc định bị bỏ trên đường nhanh,
+   trừ khi được đưa vào tập cho phép.
 4. Bước `kiem-re` hiện nhận cặp gốc/đầu từ `github.event.pull_request.*`. Với `push` và `workflow_dispatch`, `chuan-bi` xuất thêm
    hai output `goc`/`dau` (đúng cặp đã dùng để phân loại); `kiem-re` đọc chúng. Thiếu ⇒ `kiem-re` ĐỎ (fail-close), không rơi về PR env.
 5. Không dùng `paths:` hay `paths-ignore:`. Không thêm job mới. Không đổi tên job, tên check hay `timeout-minutes`.
@@ -126,7 +137,7 @@ nang_tran:
 | A4 | `push`: `before` vắng / toàn số 0 / sai mẫu / không phải tổ tiên / git lỗi / diff rỗng ⇒ `day_du`; push thuần lưu trữ ⇒ `duong_nhanh`; push có mã ⇒ `day_du` | gỡ từng chốt ⇒ ca của chốt ấy ĐỎ; bỏ kiểm tổ tiên ⇒ ca force push ĐỎ |
 | A5 | `workflow_dispatch`: input `day_du` ⇒ `day_du`; `tu_dong` + diff thuần lưu trữ ⇒ `duong_nhanh`; `tu_dong` + diff rỗng ⇒ `day_du`; input vắng ⇒ như `tu_dong`; input lạ ⇒ `day_du` | đổi luật diff rỗng thành `duong_nhanh` ⇒ ĐỎ; đọc input lạ như `tu_dong` ⇒ ĐỎ |
 | A6 | `t162` (sau khi mở rộng): output `os` ⇒ `["ubuntu-latest"]` khi `che_do == duong_nhanh` ở cả ba sự kiện, kể cả `runner_set=windows-only` và PR có nhãn `windows`; mọi tổ hợp `day_du` giữ đúng giá trị cũ | bỏ vế ép Ubuntu ⇒ ĐỎ; ép cả khi `day_du` ⇒ ĐỎ |
-| A7 | các bước nặng của `gate-registry`, `gate-nhanh-manh`, cùng các bước cài/probe của `gate`, `gate-ops`, đều mang `if:` đúng nguyên văn `needs.chuan-bi.outputs.che_do != 'duong_nhanh'` (kiểm trên cây node `yaml.compose`, không trên dict); mỗi job có bước liệt kê bước bỏ, khớp từng chữ tên bước | gỡ `if:` của một bước ⇒ ĐỎ; đổi `!=` thành `==` ⇒ ĐỎ; khoá trùng `if` trong một bước ⇒ ĐỎ |
+| A7 | trên cây node `yaml.compose` của `ci.yml` (không trên dict): mọi bước của sáu job ở §2.2 mục 3 hoặc thuộc tập cho phép (so nguyên văn tên/`uses`), hoặc có `if:` với vế nguyên văn `needs.chuan-bi.outputs.che_do != 'duong_nhanh'` nối `&&` ở mức ngoài cùng; mỗi job có bước liệt kê bước bỏ, khớp từng chữ tên bước; `tl selftest` có cả hai vế (`event_name != 'pull_request'` và `che_do`). Một ca riêng ghim rằng `tl selftest` **không** thuộc tập cho phép | thêm một bước mới không `if:`, nằm ngoài tập cho phép ⇒ ĐỎ; gỡ vế `che_do` khỏi `tl selftest` ⇒ ĐỎ; nối bằng `\|\|` thay `&&` ⇒ ĐỎ; đổi `!=` thành `==` ⇒ ĐỎ; khoá `if` trùng trong một bước ⇒ ĐỎ; nới tập cho phép để chứa `tl selftest` ⇒ ca ghim ĐỎ |
 | A7b | `kiem-re` với cặp `goc`/`dau` hợp lệ ⇒ rc=0, và với cặp vắng hoặc sai mẫu ⇒ rc≠0, **riêng cho từng sự kiện** `push` và `workflow_dispatch` (bốn ca) | `kiem-re` luôn trả lỗi khi không phải PR ⇒ hai ca hợp lệ ĐỎ; đọc env PR khi output vắng ⇒ hai ca vắng ĐỎ |
 | A8 | `ci.yml` không có `paths:`/`paths-ignore:` ở mọi cò; ba check bắt buộc vẫn có job mang đúng tên cũ; `actionlint` rc=0 trên `ci.yml` (delta so nền = 0) | thêm `paths-ignore` ⇒ ĐỎ; đổi tên job ⇒ ĐỎ |
 | A9 | `git diff --numstat <base> <ứng viên>`: chỉ các tệp trong §3, ≤ 650 dòng thêm. Kiểm riêng staged, unstaged và untracked trước khi đóng băng | thêm tệp thứ sáu ngoài §3 ⇒ ĐỎ |

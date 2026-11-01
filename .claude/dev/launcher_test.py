@@ -10006,7 +10006,7 @@ def r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai():
     nguon = inspect.getsource(chay_dot_bien)
     for doan in ("LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)",
                  "neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)",
-                 '(goc_h / "launcher_test.py").write_text(goc_test, encoding="utf-8")',
+                 '_dung_cay_harness(tam / "harness_goc", goc_test, goc)',
                  "{fn.__name__: cham_mot_ca(fn) for fn in dich}", "{t: cham_lap_ca(thu_muc, t) for t in phai_chet}"):
         bang(nguon.count(doan) == 1, f"chay_dot_bien thieu/lap doan: {doan!r}")
     bang(nguon.count("ket_luan_mutant(") == 2, "hai nhanh (a)(b) phai cham bang ket_luan_mutant")
@@ -10027,11 +10027,14 @@ def r1079_cc_test_chi_chot_cua_suite_la_do():
             return e
     tep = str(CC_TEST_DANG_DUNG)
     la = ns["la_chot_cua_suite"]
-    th = {"assert_tran": la(nem("assert False", tep, n_assert)),
-          "doi_kieu": la(nem("raise AssertionError('boc')", tep, 1)),
-          "vo_can_dong_assert": la(nem("raise AttributeError('x')", tep, n_assert)),
-          "tep_khac": la(nem("assert False", tep + ".khac", n_assert)),
-          "tin_hieu": la(ns["TinHieuChotCa"]("x"))}
+    with San() as s:   # tệp KHÁC mà dòng ấy cũng là `assert` — chỉ phép so tệp mới phân biệt được
+        khac = s / "khac.py"
+        khac.write_text("assert False\n" * n_assert, encoding="utf-8")
+        th = {"assert_tran": la(nem("assert False", tep, n_assert)),
+              "doi_kieu": la(nem("raise AssertionError('boc')", tep, 1)),
+              "vo_can_dong_assert": la(nem("raise AttributeError('x')", tep, n_assert)),
+              "tep_khac": la(nem("assert False", str(khac), n_assert)),
+              "tin_hieu": la(ns["TinHieuChotCa"]("x"))}
     bang(th == {"assert_tran": True, "doi_kieu": False, "vo_can_dong_assert": False, "tep_khac": False,
                 "tin_hieu": True}, f"la_chot_cua_suite sai: {th}")
     bang(ns["ten_do"]("t1", AttributeError("x")) == "t1(AttributeError)"
@@ -14382,18 +14385,12 @@ def chay_dot_bien() -> int:
                             + moc_ham + moi_sau)
             else:
                 moi_test = moi_phan_ma
-            thu_muc = tam / f"harness_db_{i:02d}"
-            thu_muc.mkdir()
-            ban_test = thu_muc / "launcher_test.py"
-            ban_test.write_text(moi_test, encoding="utf-8")
-            (thu_muc / "launcher.py").write_text(goc, encoding="utf-8")
+            thu_muc = _dung_cay_harness(tam / f"harness_db_{i:02d}", moi_test, goc)
             for ten_ca in phai_chet:   # #1079 F01: neutral trên bản sao NGUYÊN của tệp test
                 if ten_ca not in neutral_h:
-                    goc_h = tam / "harness_goc"
+                    goc_h = tam / "harness_goc" / ".claude" / "dev"
                     if not goc_h.is_dir():
-                        goc_h.mkdir()
-                        (goc_h / "launcher_test.py").write_text(goc_test, encoding="utf-8")
-                        (goc_h / "launcher.py").write_text(goc, encoding="utf-8")
+                        _dung_cay_harness(tam / "harness_goc", goc_test, goc)
                     neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)
             tt, so_chet, can_do, mo_ta = ket_luan_mutant(
                 list(phai_chet), neutral_h, {t: cham_lap_ca(thu_muc, t) for t in phai_chet})
@@ -14458,6 +14455,22 @@ class NhatKyCa:
     def dong(self) -> None:
         self.ghi("# XONG TRON VEN")
         self.tep.close()
+
+
+def _dung_cay_harness(goc_cay, ma_test, ma_launcher):
+    """#1079: bản sao harness giữ ĐÚNG bố cục kho (`.claude/dev`, `.claude/hooks`, `ops/bash_nen.py`)
+    vì ca đọc `LAUNCHER.parents[1|2]`. Bố cục phẳng làm ca chết FileNotFoundError — trước #1079 lỗi
+    ấy được đếm là giết (đo: `g8_fixture_chep_nguyen_moi_truong`, neutral đỏ). Trả thư mục `dev`."""
+    dev = goc_cay / ".claude" / "dev"
+    dev.mkdir(parents=True)
+    (dev / "launcher_test.py").write_text(ma_test, encoding="utf-8")
+    (dev / "launcher.py").write_text(ma_launcher, encoding="utf-8")
+    if LAUNCHER.with_name("codex_cred.py").is_file():
+        shutil.copy2(LAUNCHER.with_name("codex_cred.py"), dev)
+    shutil.copytree(LAUNCHER.parents[1] / "hooks", goc_cay / ".claude" / "hooks")
+    (goc_cay / "ops").mkdir()
+    shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", goc_cay / "ops")
+    return dev
 
 
 def cham_lap_ca(thu_muc, ten_ca):

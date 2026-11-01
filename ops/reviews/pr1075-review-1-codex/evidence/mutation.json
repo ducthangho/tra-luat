@@ -1,0 +1,34 @@
+{
+  "bien-nhan": {
+    "command": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "rc": 1,
+    "target_lines": [
+      "  ĐỎ  pr1071-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1071-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm 8b8f3d9c709f… nhưng biên nhận khai `verdict_sha256` ffffffffffff… — mỏ neo KHÔNG trỏ đúng thứ nó khai"
+    ],
+    "red_receipts": [
+      "pr1071-review-1-codex-verdict.receipt.yaml"
+    ],
+    "failure_names_target": true
+  },
+  "direct": {
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1075a/direct_checks.py",
+      "."
+    ],
+    "rc": 1,
+    "target_lines": [
+      "{\"name\": \"t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi\", \"status\": \"FAIL\", \"exception\": \"AssertionError\", \"message\": \"pr1071-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1071-review-1-codex-verdict.md' thực 8b8f3d9c709fcf7f9222c45c20440a47248ef38a24c2b3ae83a2ac552f720b78. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\"}",
+      "AssertionError: pr1071-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, tệp 'ops/reviews/pr1071-review-1-codex-verdict.md' thực 8b8f3d9c709fcf7f9222c45c20440a47248ef38a24c2b3ae83a2ac552f720b78. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào."
+    ],
+    "red_receipts": [],
+    "failure_names_target": true
+  },
+  "restored_bytewise": true,
+  "status_after": ""
+}

@@ -9004,7 +9004,10 @@ def r484_g7_hook_vang_codex_cai_cli_truoc_materialize():
         bang(all(v and Path(v).parent == fakebin for v in lot.values()),
              f"installer không giải về shim của fixture: {lot}")
         import runpy
-        vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
+        from unittest.mock import patch
+        # #1079 F02 (Codex lượt 1): bước DÒ bash cũng là subprocess — chạy nó dưới CÙNG env đã lọc.
+        with patch.dict(os.environ, env, clear=True):
+            vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
         bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
         p = subprocess.run([vo, str(hooks / "session-start.sh")], env=env, cwd=project,
                            capture_output=True, text=True, timeout=120)
@@ -9979,22 +9982,20 @@ def r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung():
 
 @ca
 def r1079_cham_lap_ca_doi_dung_TinHieuChotCa():
-    """#1079 F01 (b): headline `0/1 qua` + rc=1 mà loại hỏng khác `TinHieuChotCa` (hoặc dòng loại
-    bị giả ở giữa output) KHÔNG phải giết."""
-    vi_du = {"giet": "print('  HONG giet: x');print('LOAI_HONG giet: TinHieuChotCa');"
-                     "print();print('LAP giet: 0/1 qua, 0 bo qua, 1 hong');sys.exit(1)",
-             "vocan": "print('LOAI_HONG vocan: AttributeError');print();"
-                      "print('LAP vocan: 0/1 qua, 0 bo qua, 1 hong');sys.exit(1)",
-             "gia": "print('LOAI_HONG gia: TinHieuChotCa');print('LOAI_HONG gia: OSError');print();"
-                    "print('LAP gia: 0/1 qua, 0 bo qua, 1 hong');sys.exit(1)",
-             "bo": "print('LAP bo: 0/1 qua, 1 bo qua, 0 hong')",
-             "qua": "print('LAP qua: 1/1 qua, 0 bo qua, 0 hong')"}
+    """#1079 F01 (b): chứng cứ là KÊNH KẾT QUẢ có nonce, không phải stdout — đuôi stdout giả rồi
+    thoát, nonce sai, hay loại hỏng khác `TinHieuChotCa` đều KHÔNG phải giết."""
+    ghi = ("import json,os,sys\nk,n=os.environ['LT_KENH_KET_QUA'],os.environ['LT_KENH_NONCE']\n"
+           "def g(**d): open(k,'w').write(json.dumps({'nonce': n, 'ten': sys.argv[2], 'qua': 0, 'bo_qua': 0, 'hong': 0, 'loai': None, **d}))\n")
+    vi_du = {"giet": "g(hong=1, loai='TinHieuChotCa'); sys.exit(1)",
+             "vocan": "g(hong=1, loai='AttributeError'); sys.exit(1)",
+             "gia": "print('LOAI_HONG gia: TinHieuChotCa'); print(); print('LAP gia: 0/1 qua, 0 bo qua, 1 hong'); sys.exit(1)",
+             "nonce": "n = 'x' * 32; g(hong=1, loai='TinHieuChotCa'); sys.exit(1)",
+             "bo": "g(bo_qua=1)", "qua": "g(qua=1)"}
     with San() as s:
-        (s / "launcher_test.py").write_text(
-            "import sys\nten = sys.argv[2]\n" + "".join(
-                f"if ten == {k!r}:\n    {v}\n" for k, v in vi_du.items()), encoding="utf-8")
+        (s / "launcher_test.py").write_text(ghi + "".join(
+            f"if sys.argv[2] == {k!r}:\n    {v}\n" for k, v in vi_du.items()), encoding="utf-8")
         kq = {k: cham_lap_ca(s, k)[0] for k in vi_du}
-    bang(kq == {"giet": "giet", "vocan": "loi", "gia": "loi", "bo": "bo_qua", "qua": "qua"},
+    bang(kq == {"giet": "giet", "vocan": "loi", "gia": "loi", "nonce": "loi", "bo": "bo_qua", "qua": "qua"},
          f"cham_lap_ca sai: {kq}")
 
 
@@ -10039,8 +10040,78 @@ def r1079_cc_test_chi_chot_cua_suite_la_do():
                 "tin_hieu": True}, f"la_chot_cua_suite sai: {th}")
     bang(ns["ten_do"]("t1", AttributeError("x")) == "t1(AttributeError)"
          and ns["ten_do"]("t1", ns["TinHieuChotCa"]("x")) == "t1", "ten_do khong tach loi vo can")
-    import inspect
-    bang("do.add(ten_do(ca.__name__, e))" in inspect.getsource(ns["chay_suite"]), "chay_suite khong cham bang ten_do")
+
+
+@ca
+def r1079_harness_trung_ten_loai_khong_cap_tin_dung():
+    """Regression: lớp khác trùng tên tín hiệu không phải chốt của suite."""
+    ma = Path(__file__).read_text(encoding="utf-8")
+    them = '''
+@ca
+def review_trung_ten():
+    class TinHieuChotCa(RuntimeError): pass
+    raise TinHieuChotCa("loi vo can")
+'''
+    ma = ma.replace('\nif __name__ == "__main__":', them + '\nif __name__ == "__main__":')
+    with San() as s:
+        dev = _dung_cay_harness(s / "tree", ma, LAUNCHER.read_text(encoding="utf-8"))
+        kq = cham_lap_ca(dev, "review_trung_ten")
+    bang(kq[0] == "loi", f"lop khac trung ten duoc cap tin dung: {kq}")
+
+
+@ca
+def r1079_harness_duoi_stdout_gia_khong_cap_tin_dung():
+    """Regression: in đuôi giống runner rồi thoát không phải một assertion."""
+    with San() as s:
+        (s / "launcher_test.py").write_text(
+            'print("LOAI_HONG review_gia: TinHieuChotCa", flush=True)\n'
+            'print("\\nLAP review_gia: 0/1 qua, 0 bo qua, 1 hong", flush=True)\n'
+            'raise SystemExit(1)\n', encoding="utf-8")
+        kq = cham_lap_ca(s, "review_gia")
+    bang(kq[0] == "loi", f"stdout gia duoc cap tin dung: {kq}")
+
+
+@ca
+def r1079_n13_do_bash_cung_phai_loc_env_cha():
+    """Regression: môi trường sạch phải bao cả bước dò Bash của N13."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    from unittest.mock import patch
+    with San() as s:
+        ky = s / "ambient.log"
+        init = s / "init.sh"
+        init.write_text(f"printf 'AMBIENT_INIT\\n' >> {shlex.quote(str(ky))}\n", encoding="utf-8")
+        home = s / "parent-home"; home.mkdir()
+        with patch.dict(os.environ, {"BASH_ENV": str(init), "ENV": str(init), "HOME": str(home)}):
+            r484_g7_hook_vang_codex_cai_cli_truoc_materialize()
+        dong = ky.read_text(encoding="utf-8").splitlines() if ky.exists() else []
+    bang(not dong, f"N13 van chay init cua cha khi do bash: {dong}")
+
+
+@ca
+def r1079_cc_chay_suite_phai_do_hanh_vi():
+    """Regression: chạy chay_suite thật; comment chứa lời gọi không thay được hành vi."""
+    import runpy
+    from types import SimpleNamespace
+    from unittest.mock import patch
+    ns = runpy.run_path(str(CC_TEST_DANG_DUNG), run_name="review_cc_behavior")
+    runner = ns["chay_suite"]
+    ten = "t2_chua_thay_thi_tra_None_khong_doan"
+    def vo_can(_):
+        raise AttributeError("loi vo can")
+    def doi_kieu(_):
+        try:
+            vo_can(None)
+        except AttributeError:
+            raise AssertionError("doi kieu") from None
+    th = {}
+    for nhan, fn in (("neutral", lambda _: (None, None)), ("chot", lambda _: ("sai", "sai")),
+                     ("vo_can", vo_can), ("doi_kieu", doi_kieu)):
+        m = SimpleNamespace(__nguon__="inert", __nhan__="inert", doc_moc_device=fn)
+        with patch.dict(runner.__globals__, {"nap": lambda *_, m=m: m}):
+            th[nhan] = runner(m, {ten})
+    bang(th == {"neutral": set(), "chot": {ten}, "vo_can": {f"{ten}(AttributeError)"},
+                "doi_kieu": {f"{ten}(AssertionError)"}}, f"chay_suite cap sai tin dung: {th}")
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -14142,8 +14213,10 @@ DOT_BIEN_HOOK = [
      ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
     ("wp1079_cc_ten_do_bo_loai", ('    return ten if la_chot_cua_suite(e) else f"{ten}({type(e).__name__})"', "    return ten"),
      ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
-    ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e))", "            do.add(ca.__name__)"),
-     ["r1079_cc_test_chi_chot_cua_suite_la_do"], "cc_test"),
+    # F03 (Codex lượt 1): đổi câu thực thi nhưng GIỮ lời gọi cũ trong chú thích — chỉ ca hành vi giết được.
+    ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e))",
+                                        "            do.add(ca.__name__)  # do.add(ten_do(ca.__name__, e))"),
+     ["r1079_cc_chay_suite_phai_do_hanh_vi"], "cc_test"),
 ]
 
 
@@ -14197,9 +14270,23 @@ DOT_BIEN_HARNESS = [
     ("wp1079_ket_luan_dem_tin_dung_gia",
      ('    return ("OK" if len(chet) == can_do else "SAI")', '    return ("OK" if len(chet) + len(gia) == can_do else "SAI")'),
      ["r1079_ket_luan_mutant_neutral_do_khong_cap_tin_dung"]),
-    ("wp1079_lap_ca_tin_headline",
-     ('    if p.returncode == 1 and p.stdout.endswith(duoi):', '    if p.returncode == 1 and f"LAP {ten_ca}: 0/1 qua, 0 bo qua" in p.stdout:'),
+    ("wp1079_lap_ca_bo_kiem_nonce",
+     ('    if kq.get("nonce") != nonce or kq.get("ten") != ten_ca:', '    if kq.get("ten") != ten_ca:'),
      ["r1079_cham_lap_ca_doi_dung_TinHieuChotCa"]),
+    ("wp1079_lap_ca_tin_stdout",
+     ('        kq = json.loads(kenh.read_text(encoding="utf-8")) if kenh.is_file() else {}',
+      '        kq = json.loads(kenh.read_text(encoding="utf-8")) if kenh.is_file() else (\n'
+      '            {"nonce": nonce, "ten": ten_ca, "hong": 1, "loai": "TinHieuChotCa"}\n'
+      '            if p.returncode == 1 and f"LAP {ten_ca}: 0/1 qua" in p.stdout else {})'),
+     ["r1079_cham_lap_ca_doi_dung_TinHieuChotCa", "r1079_harness_duoi_stdout_gia_khong_cap_tin_dung"]),
+    ("wp1079_bao_cao_theo_ten_lop",
+     ('            LOAI_HONG[fn.__name__] = "TinHieuChotCa" if isinstance(e, TinHieuChotCa) else type(e).__qualname__',
+      '            LOAI_HONG[fn.__name__] = type(e).__name__'),
+     ["r1079_harness_trung_ten_loai_khong_cap_tin_dung"]),
+    ("wp1079_n13_do_bash_ngoai_env_sach",
+     ('        with patch.dict(os.environ, env, clear=True):\n            vo, chan_doan',
+      '        with patch.dict(os.environ, {}):\n            vo, chan_doan'),
+     ["r1079_n13_do_bash_cung_phai_loc_env_cha"]),
     ("wp1079_neutral_san_pham_bo",
      ('                    LAUNCHER_DANG_DUNG = LAUNCHER\n                    neutral[fn.__name__] = cham_mot_ca(fn)\n',
       '                    neutral[fn.__name__] = ("qua", fn.__name__)\n'),
@@ -14475,25 +14562,28 @@ def _dung_cay_harness(goc_cay, ma_test, ma_launcher):
 
 def cham_lap_ca(thu_muc, ten_ca):
     """#1079 F01: chạy `--lap-ca` trên bản `launcher_test.py` trong `thu_muc`, trả `(loai, chi_tiet)`
-    như `cham_mot_ca`. `giet` CHỈ khi tiến trình con khai `LOAI_HONG <ca>: TinHieuChotCa` ngay trước
-    headline `0/1 qua` — rc hay headline một mình không phải chứng cứ nguyên nhân."""
+    như `cham_mot_ca`. Chứng cứ là KÊNH KẾT QUẢ riêng (tệp + nonce, biến bị gỡ khỏi `os.environ` trước
+    khi ca chạy), KHÔNG phải stdout của ca: in đuôi giả rồi thoát thì không có kết quả ⇒ `loi`."""
+    import secrets
+    kenh = Path(tempfile.mkdtemp(prefix="lt_kenh_")) / "ket_qua.json"
+    nonce = secrets.token_hex(16)
     try:
         p = subprocess.run(
             [PY, str(thu_muc / "launcher_test.py"), "--lap-ca", ten_ca, "--lan", "1"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
-            env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"), cwd=thu_muc)
-    except (OSError, subprocess.SubprocessError) as e:
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180, cwd=thu_muc,
+            env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", LT_KENH_KET_QUA=str(kenh), LT_KENH_NONCE=nonce))
+        kq = json.loads(kenh.read_text(encoding="utf-8")) if kenh.is_file() else {}
+    except (OSError, subprocess.SubprocessError, ValueError) as e:
         return "loi", f"{ten_ca}({type(e).__name__})"
-    if p.returncode == 0 and f"LAP {ten_ca}: 0/1 qua, 1 bo qua, 0 hong" in p.stdout:
-        # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC.
-        return "bo_qua", ten_ca
-    if p.returncode == 0 and f"LAP {ten_ca}: 1/1 qua" in p.stdout:
-        return "qua", ten_ca
-    duoi = f"LOAI_HONG {ten_ca}: TinHieuChotCa\n\nLAP {ten_ca}: 0/1 qua, 0 bo qua, 1 hong\n"
-    if p.returncode == 1 and p.stdout.endswith(duoi):
-        return "giet", ten_ca
-    loai = re.findall(rf"^LOAI_HONG {re.escape(ten_ca)}: (\S+)$", p.stdout, re.M)
-    return "loi", f"{ten_ca}({loai[-1] if loai else f'rc={p.returncode}'})"
+    finally:
+        shutil.rmtree(kenh.parent, ignore_errors=True)
+    if kq.get("nonce") != nonce or kq.get("ten") != ten_ca:
+        return "loi", f"{ten_ca}(khong co ket qua kenh, rc={p.returncode})"
+    if kq.get("hong"):
+        return ("giet" if kq.get("loai") == "TinHieuChotCa" else "loi"), (
+            ten_ca if kq.get("loai") == "TinHieuChotCa" else f"{ten_ca}({kq.get('loai')})")
+    # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC.
+    return ("bo_qua" if kq.get("bo_qua") else "qua"), ten_ca
 
 
 LOAI_HONG: dict = {}
@@ -14522,11 +14612,12 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
                 ket = "qua"
         except AssertionError as e:
             hong_ds.append((fn.__name__, str(e)))
-            LOAI_HONG[fn.__name__] = type(e).__name__   # #1079 F01: runner harness đọc
+            # #1079 F01: danh tính lớp THẬT, không phải tên lớp — lớp khác trùng tên không qua.
+            LOAI_HONG[fn.__name__] = "TinHieuChotCa" if isinstance(e, TinHieuChotCa) else type(e).__qualname__
             ket = f"HONG: {str(e)[:60]}"
         except Exception as e:  # noqa: BLE001
             hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))
-            LOAI_HONG[fn.__name__] = type(e).__name__
+            LOAI_HONG[fn.__name__] = type(e).__qualname__
             ket = f"LOI {type(e).__name__}"
         if nk:
             nk.ra(i, fn.__name__, ket)
@@ -14661,6 +14752,7 @@ def main() -> int:
             print(f"--lap-ca {a.lap_ca!r} khop {len(chon)} ca "
                   f"({', '.join(f.__name__ for f in chon[:5]) or 'khong ca nao'})"), sys.exit(2)
         nk = NhatKyCa(a.nhat_ky) if a.nhat_ky else None
+        kenh, nonce = os.environ.pop("LT_KENH_KET_QUA", None), os.environ.pop("LT_KENH_NONCE", None)
         qua = bo_qua = 0
         hong_ds = []
         try:
@@ -14676,8 +14768,10 @@ def main() -> int:
                 nk.dong()
         for ten, ly_do in hong_ds:
             print(f"  HONG {ten}: {ly_do}", flush=True)
-        if hong_ds:
-            print(f"LOAI_HONG {chon[0].__name__}: {LOAI_HONG.get(chon[0].__name__, '?')}", flush=True)
+        if kenh:   # #1079 F01: kênh kết quả cho runner harness (cham_lap_ca)
+            Path(kenh).write_text(json.dumps({"nonce": nonce, "ten": chon[0].__name__, "qua": qua,
+                                              "bo_qua": bo_qua, "hong": len(hong_ds),
+                                              "loai": LOAI_HONG.get(chon[0].__name__)}), encoding="utf-8")
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)
         return 1 if hong_ds else 0

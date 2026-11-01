@@ -1,0 +1,108 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1079
+packet_id: LAUNCHER-TEST-ORACLE-VA-FIXTURE
+revision: 1
+generation: 3
+lease_id: wp1079-r1-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+risk: sensitive
+depends_on: [1078]
+depends_on_ghi_chu: 'chung .claude/dev/launcher_test.py voi #1078; #1078 da merge (PR #1097, 7eeb1d9) va lease wp1078-r1-g2-claude da rut han ve 2026-11-01T06:21Z (6da7c0d).'
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_ghi_chu: 'write set cham cong CI => sensitive; executor ho claude, reviewer ho openai; toi da 2 loi goi Codex (spec muc Review).'
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1079.md
+spec_sha256_required: 81070fa2c5a00bc0bb63867c7173f310cba9002001b68a26d62726ec904cbf5b
+spec_hash: 81070fa2c5a00bc0bb63867c7173f310cba9002001b68a26d62726ec904cbf5b
+spec_ref: refs/heads/ops/wp1079-r1-g1-lease@d888445b62a08905bfedf749a69f5cd92eb91398
+prompt_path: ops/specs/wp1079.md
+prompt_sha256_required: 81070fa2c5a00bc0bb63867c7173f310cba9002001b68a26d62726ec904cbf5b
+write_set:
+- .claude/dev/launcher_test.py
+- .claude/dev/codex_cred_test.py
+- ops/handoff/wp1079-g1-claude.md
+write_set_hash: a240e3c1f395c4ff40710c6f47c29e3b08e43894c464006e75acd2307d7b4573
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'launcher_test.py: bo cham nhanh san pham + harness, ca khoa, sua 3-6 ca bi tin dung gia, fixture N13; codex_cred_test.py: bo cham chay_suite; handoff chi tren nhanh lease; diff PR 2 tep. ADR-0044 sensitive: <=3 tep; tran dong them 300->380 (g2) ->480 (g3).'
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/launcher_test.py
+- .claude/dev/codex_cred_test.py
+- ops/handoff/wp1079-g1-claude.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi, khong P0/P1/P2; toi da 2 loi goi codex; moi thread connector duoc tra loi'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run'}
+- {id: M-3, dieu_kien: 'A1-A4 cua spec: launcher_test N/N va --dot-bien M/M hai so bang nhau; codex_cred_test TONG DAT; phan chung tren base do; installer ngoai npm gia = 0; ruff F delta 0; doctrine-scan, git diff --check rc0'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'dich la du dieu kien merge; merge/land/deploy do chu kho.'
+branch: agent/wp1079-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da
+start_from_sha: 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da
+start_from_ghi_chu: 'origin/master luc cap lease (merge #1097); trung base spec.'
+reviewed_sha_required: 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1079
+granted_on_instruction_readback: 'chu kho "Dong y de xuat" (#1079 sau #1078), roi chot pham vi qua AskUserQuestion "F01+F02 chung, #824-826 de sau (Recommended)" va "Khong - chi neutral + cham theo loai (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (01-11-2026); ghi ho. Bam byte KHONG DO DUOC.'
+recorded_by: claude-executor-session
+recorder_is_executor: true
+recorder_ghi_chu: 'phien ghi lease CUNG la executor, theo chi thi chu kho trong chinh phien; tien le wp1078-r1-g1-claude.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-01T09:40:07Z'
+  goc_quet: 'fetch +refs/heads/* (sau CHAN 12 cache thieu 4 nhanh may chu), nhanh cuc bo ff ve origin'
+  ket_qua: 'ai-dang-giu 3 duong dan: NGUOI_GIU 1 = wp1079-r1-g2-claude (chinh packet nay, bia mo trong cung commit).'
+thay_the_cho: [wp1079-r1-g2-claude]
+thay_the_cho_ghi_chu: 'g2 CON HAN (toi 2026-11-02T08:17:00Z) => bia mo hai chieu: g2 mang da_bi_thay_the trong cung commit.'
+leased_at_utc: '2026-11-01T09:42:00Z'
+heartbeat_at: '2026-11-01T09:42:00Z'
+heartbeat_ghi_chu: heartbeat khoi tao = leased_at; khong khang dinh tien trien ve sau.
+heartbeat_required_minutes: 360
+heartbeat_required_ghi_chu: 'lease cap SAU moc kich hoat ADR-0056 => 360 phut.'
+lease_until: '2026-11-02T09:42:00Z'
+lease_expires_at_utc: '2026-11-02T09:42:00Z'
+run_minutes: 60
+heartbeat_minutes: 30
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: 'mac dinh kho (tien le wp1045).'
+review_rounds_limit: 2
+budget:
+  codex_review_calls:
+    pr_wp1079_g1: {used: 1, reserved: 0, limit: 2}
+  attempt:
+    packet_1079_r1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+push_policy: 'day nhanh agent/wp1079-g1-claude khi A1-A4 dat; mo PR draft.'
+nang_tran:
+  truc: so_dong_them
+  tran_cu: 380
+  tran_moi: 480
+  ai_nang: ducthangho
+  khi_nao: 'sau Codex luot 1/2 changes_requested (2 P1, 1 P2) tren c73dff3; ban va tren d929ee2 dua diff len +471/-117'
+  phan_ra_do: 'phan tang ~90 dong: 4 ca hoi quy lay nguyen tu HINT Codex luot 1 (~70), kenh ket qua co nonce (~20), 4 dot bien moi'
+  can_cu: 'chu kho chon "Nang tran 380->480, goi Codex 2/2 (Recommended)" trong phien session_01J7EgTVGTrNi4xqh7MeBFQv (01-11-2026, AskUserQuestion); ghi ho. Bam byte KHONG DO DUOC.'
+  khong_doi: 'write set, spec, branch, tran Codex (2).'
+  dieu_kien_dung: 'luot 2/2 van con loi chan => dung, hoi chu kho.'
+codex_da_goi:
+- {luot: 1, run_id: c15064fcc9ea462ebbf38cedff296bb8, head: c73dff39c0d50622ab26812ee88476ef884aa8fb, verdict: changes_requested, ket_qua: '0 P0, 2 P1, 1 P2, 0 P3'}
+codex_da_goi_ghi_chu: 'mot lan chay truoc do bi launcher CHAN [11] TRUOC spawn (remote clone khong phai GitHub) — khong goi codex, khong tinh vao tran.'

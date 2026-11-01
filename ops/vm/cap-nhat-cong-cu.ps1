@@ -612,7 +612,14 @@ function Register-LichCapNhat([string]$GocKho) {
     New-Item -ItemType Directory -Force -Path $Script:ThuMucCaiDat | Out-Null
     Assert-KhongReparse $Script:ThuMucCaiDat
     Invoke-Icacls @($Script:ThuMucCaiDat, '/setowner', '*S-1-5-32-544', '/T', '/C', '/L', '/Q')
-    Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/T', '/C', '/L', '/Q')
+    # ACL đặt cho RIÊNG thư mục (KHÔNG /T), rồi cho mọi thứ bên trong THỪA KẾ lại bằng `/reset`. Đo trên VM 31-10-2026: cùng lệnh
+    # `/inheritance:r /grant:r <SID>:(OI)(CI)… /T` để lại tệp con với DACL RỖNG (`(OI)(CI)` không áp lên tệp, mà thừa kế đã bị
+    # cắt) ⇒ không ai đọc/ghi được, kể cả admin; `-DangKyLich` lần hai chết ở Copy-Item với rc=6 và tác vụ NguoiDung
+    # (tlcommander) không đọc nổi script. `icacls rc=0` vẫn báo 'Successfully processed', nên phép đo ACL sau cùng là chốt thật.
+    Invoke-Icacls @($Script:ThuMucCaiDat, '/inheritance:r', '/grant:r', '*S-1-5-18:(OI)(CI)F', '*S-1-5-32-544:(OI)(CI)F', '*S-1-5-32-545:(OI)(CI)RX', '/C', '/L', '/Q')
+    if (@(Get-ChildItem -LiteralPath $Script:ThuMucCaiDat -Force).Count) {
+        Invoke-Icacls @((Join-Path $Script:ThuMucCaiDat '*'), '/reset', '/T', '/C', '/L', '/Q')
+    }
     $nguon = @{
         'cap-nhat-cong-cu.ps1' = $PSCommandPath
         'cong_cu.yaml'         = @((Join-Path $GocKho 'ops\cong_cu.yaml'), (Join-Path $GocKho 'cong_cu.yaml')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1

@@ -209,7 +209,7 @@ def cham_mot_ca(fn):
     except TinHieuChotCa as e:
         if not chot_tu_ca_khac(e, fn):
             return "giet", fn.__name__
-        return "loi", f"{fn.__name__}(chot cua ca khac)"
+        return "loi", f"{fn.__name__}({mo_ta_loi(e)}; chot cua ca khac)"
     except Exception as e:  # noqa: BLE001 - chinh la thu dang phan hang
         return "loi", f"{fn.__name__}({mo_ta_loi(e)})"
     return ("bo_qua" if isinstance(kq, str) else "qua"), fn.__name__
@@ -10028,6 +10028,61 @@ def r1122_khong_assert_tran_trong_ca():
 
 
 @ca
+def r1122_nhat_ky_giu_loai_va_thong_diep_160():
+    """Cùng chi tiết loại/thông điệp phải sống trong nhật ký khi stdout chưa được in."""
+    def review_loi():
+        raise TypeError("x" * 500)
+    def review_chot():
+        bang(False, "x" * 500)
+    with San() as s:
+        for fn, loai, nhan in ((review_loi, "TypeError", "LOI"),
+                               (review_chot, "TinHieuChotCa", "HONG")):
+            tep = s / (fn.__name__ + ".log")
+            nk = NhatKyCa(tep)
+            try:
+                chay_bo_ca([fn], nk)
+            finally:
+                nk.dong()
+            dong = next(x for x in tep.read_text(encoding="utf-8").splitlines()
+                        if x.startswith("<<< ra"))
+            bang(dong.endswith(" -> " + nhan + ": " + loai + ": " + "x" * 160),
+                 "nhat ky mat loai hoac khong giu dung 160 ky tu thong diep")
+
+
+@ca
+def r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi():
+    """Lỗi gọi chốt của ca khác vẫn có chi tiết, không được nhận tín dụng giết."""
+    from unittest.mock import patch
+    def review_nguon():
+        bang(False, "x" * 500)
+    def review_goi():
+        review_nguon()
+    with patch.dict(globals(), CA=[review_nguon, review_goi]):
+        got = cham_mot_ca(review_goi)
+    bang(got == ("loi", "review_goi(TinHieuChotCa: " + "x" * 160 + "; chot cua ca khac)"),
+         "chi tiet chot ca khac mat loai/thong diep hoac doi thanh giet")
+
+
+@ca
+def r1122_loi_bien_dich_dot_bien_cat_160():
+    """Ngoại lệ ở bước biên dịch cũng phải giữ loại và cắt thông điệp ở reporter SAI."""
+    from unittest.mock import patch
+    def review_pass():
+        pass
+    neo = chr(10) + 'if __name__ == "__main__":'
+    tham_so = "x" * 500
+    sai = (chr(10) + "def review_duplicate(" + tham_so + ", " + tham_so + "): pass" + chr(10))
+    out = io.StringIO()
+    with patch.dict(globals(), CA=[review_pass],
+                    DOT_BIEN=[("review_compile", (neo, sai + neo), ["review_pass"])],
+                    DOT_BIEN_HOOK=[], DOT_BIEN_HARNESS=[]), contextlib.redirect_stdout(out):
+        got = chay_dot_bien()
+    thong_diep = ("duplicate argument '" + tham_so + "' in function definition")[:160]
+    bang(got == (1, 0) and out.getvalue().rstrip().endswith("SyntaxError: " + thong_diep),
+         "reporter bien dich mat loai hoac khong cat dung 160 ky tu")
+
+
+@ca
 def r1122_reporter_giu_loai_va_cat_dung_thong_diep():
     """Đo reporter suite và kênh --lap-ca, kể cả phân loại tín hiệu chốt."""
     from unittest.mock import patch
@@ -14646,6 +14701,10 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    ('wp1122_nhat_ky_assertion_mat_chi_tiet', ('ket = f"HONG: {mo_ta_loi(e)}"', 'ket = f"HONG: {str(e)[:60]}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    ('wp1122_nhat_ky_exception_mat_chi_tiet', ('ket = f"LOI: {mo_ta_loi(e)}"', 'ket = f"LOI {type(e).__name__}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    ('wp1122_chot_ca_khac_mat_chi_tiet', ('return "loi", f"{fn.__name__}({mo_ta_loi(e)}; chot cua ca khac)"', 'return "loi", f"{fn.__name__}(chot cua ca khac)"'), ['r1122_chot_ca_khac_giu_thong_diep_nhung_van_la_loi']),
+    ('wp1122_bien_dich_khong_cat', ('print(f"  {ten:<28} SAI - dot bien khong bien dich: {mo_ta_loi(e)}")', 'print(f"  {ten:<28} SAI - dot bien khong bien dich: {e.msg}")'), ['r1122_loi_bien_dich_dot_bien_cat_160']),
     ('wp1122_reporter_transport_bo_thong_diep', ('return "loi", f"{ten_ca}({mo_ta_loi(e)})"', 'return "loi", f"{ten_ca}({type(e).__name__})"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_reporter_assertion_khong_cat', ('            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            # #1079 F01:', '            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_reporter_exception_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"', '            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
@@ -14850,7 +14909,7 @@ def chay_dot_bien() -> int:
             try:
                 compile(moi_ma, str(ban_sao), "exec")
             except SyntaxError as e:
-                print(f"  {ten:<28} SAI - dot bien khong bien dich: {e.msg}")
+                print(f"  {ten:<28} SAI - dot bien khong bien dich: {mo_ta_loi(e)}")
                 hong += 1
                 continue
             dich = [fn for fn in CA if fn.__name__ in phai_chet]
@@ -15108,12 +15167,12 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
             # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.
             LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)
                                       else f"khac:{type(e).__qualname__}")
-            ket = f"HONG: {str(e)[:60]}"
+            ket = f"HONG: {mo_ta_loi(e)}"
         except Exception as e:  # noqa: BLE001
             CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])
             hong_ds.append((fn.__name__, mo_ta_loi(e)))
             LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"
-            ket = f"LOI {type(e).__name__}"
+            ket = f"LOI: {mo_ta_loi(e)}"
         if nk:
             nk.ra(i, fn.__name__, ket)
     return qua, bo_qua, hong_ds

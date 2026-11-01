@@ -1,0 +1,3 @@
+units=32767 rc=0 stdout='OK' stderr=''
+units=32768 rc=206 stdout='' stderr='WINLIMIT206: 32768 UTF-16 units including NUL > 32767; argc=4; max_arg=32634\n'
+WRAPPER_BOUNDARIES=PASS

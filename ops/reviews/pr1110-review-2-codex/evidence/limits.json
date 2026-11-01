@@ -1,0 +1,313 @@
+{
+  "receipt_claims": {
+    "land_merge_commit_ghi_chu": "(a) merge commit PR #1075 tren master (2026-11-01, merge_method merge, expectedHeadSha 907c474); cha thu hai = head 907c474 = reviewed_sha.",
+    "packet_ghi_chu": "(b) PR ghi so review cua PR #1071 (khong phai thi cong packet): khong Issue/lease rieng cho luot review nay; chu kho giao truc tiep trong phien executor. Tien le pr1050-review-*, pr1056-review-*, pr1058-review-*, pr1071-review-*.",
+    "reviewed_sha_nguon": "(a) dong 2 tep verdict; run.json `head` = reviewed_sha; launcher chay voi --expected-head va --require-clean; `git rev-parse 907c474^{tree}` = reviewed_tree.",
+    "assurance_ghi_chu": "Verdict approve 0/0/0/0; reviewer gpt-6-astra do_may qua run.json model_phuc_vu, executor ho claude => khac ho.",
+    "independent_ghi_chu": "Tien trinh codex rieng qua launcher, context rieng (prompt tu chua, khong fork context)."
+  },
+  "cli_claim": "codex-cli 0.164.0 qua `launcher.py run --workspace <sandbox>/cay-kho --expected-repo github.com/ducthangho/tra-luat --expected-root-commit 394e934… --expected-head 907c474… --require-clean --prompt-file … --expected-prompt-sha256 … -- codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh --sandbox workspace-write -C <sandbox> --skip-git-repo-check \"<PROMPT>\"`",
+  "requested_model_claim": "gpt-6-astra",
+  "github_identity_claim": {
+    "actor": "ducthangho",
+    "actor_nguon": "(b) Chua dang ban chieu; tep trong kho la nguon duy nhat. PR ghi so dang qua git push bang credential cua phien.",
+    "ghi_chu": "ADR-0040: chi ghi AI VAN CHUYEN, khong cap tham quyen."
+  },
+  "run_lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "1f6235817e256044"
+  },
+  "run_keys": [
+    "version",
+    "run_id",
+    "short_id",
+    "ten",
+    "lenh",
+    "trang_thai",
+    "bat_dau_utc",
+    "ket_thuc_utc",
+    "ma_thoat",
+    "ly_do_dung",
+    "pid",
+    "khoa_danh_tinh",
+    "workspace",
+    "head",
+    "ref",
+    "remotes",
+    "commit_goc",
+    "worktree_sach",
+    "so_muc_ban",
+    "prompt_sha256",
+    "deadline_utc",
+    "probe",
+    "bo_qua_probe_ly_do",
+    "provider",
+    "execution_surface",
+    "transport",
+    "transport_sha256",
+    "checkpoint_sha256",
+    "prompt_ban_chup",
+    "prompt_kin_hoan_toan",
+    "model_phuc_vu",
+    "model_phuc_vu_trang_thai",
+    "stderr_bo_dong",
+    "stderr_bo_byte",
+    "effort_phuc_vu",
+    "effort_phuc_vu_trang_thai",
+    "sandbox_quan_sat",
+    "sandbox_trang_thai",
+    "sandbox_gioi_han",
+    "prompt_ban_chup_da_xoa",
+    "thoi_luong_giay",
+    "stdout_byte",
+    "stdout_sha256",
+    "stderr_byte",
+    "stderr_sha256"
+  ],
+  "source_file_count": 43,
+  "absolute_path_scripts": [],
+  "absolute_path_evidence": [
+    "evidence/base-direct.log",
+    "evidence/base-gates.json",
+    "evidence/head-direct.log",
+    "evidence/head-gates.json",
+    "evidence/mutant-direct.log",
+    "evidence/mutation.json",
+    "evidence/readme-history.json",
+    "evidence/readme.diff"
+  ],
+  "source_checkout": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1075a/cay-kho",
+  "sandbox_observed": [
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--command-cwd=to_tien_workspace",
+        "--sandbox-policy-cwd=to_tien_workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "to_tien_workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 12
+    },
+    {
+      "chuong_trinh": "bwrap",
+      "co": [
+        "--cap-drop=ALL",
+        "--die-with-parent",
+        "--new-session",
+        "--unshare-ipc",
+        "--unshare-net",
+        "--unshare-pid",
+        "--unshare-user"
+      ],
+      "gan": [
+        [
+          "--ro-bind",
+          "/"
+        ],
+        [
+          "--bind",
+          "/tmp"
+        ],
+        [
+          "--ro-bind",
+          "khac"
+        ],
+        [
+          "--bind",
+          "to_tien_workspace"
+        ]
+      ],
+      "so_lan": 14
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--apply-seccomp-then-exec",
+        "--command-cwd=to_tien_workspace",
+        "--sandbox-policy-cwd=to_tien_workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "to_tien_workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 12
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--command-cwd=khac",
+        "--sandbox-policy-cwd=to_tien_workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "to_tien_workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 1
+    },
+    {
+      "chuong_trinh": "codex-linux-sandbox",
+      "co": [
+        "--apply-seccomp-then-exec",
+        "--command-cwd=khac",
+        "--sandbox-policy-cwd=to_tien_workspace"
+      ],
+      "permission_profile": {
+        "file_system": "restricted",
+        "loai": "managed",
+        "muc": [
+          [
+            "root",
+            "read"
+          ],
+          [
+            "to_tien_workspace",
+            "write"
+          ],
+          [
+            "slash_tmp",
+            "write"
+          ],
+          [
+            "tmpdir",
+            "write"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ],
+          [
+            "khac",
+            "read"
+          ]
+        ],
+        "network": "restricted"
+      },
+      "so_lan": 1
+    }
+  ],
+  "sandbox_limits": "lay mau /proc tu ben ngoai moi 0.2s: lenh ngan hon chu ky co the lot; argv[0] do tien trinh tu khai. DO_DUOC = da THAY co che sandbox voi cac co ghi o day, KHONG chung minh moi lenh deu chay trong no. Moi lech danh tinh tien trinh (ke ca vong doi binh thuong nhu cha zombie) => KHONG_DO_DUOC: co the ha nham mot luot binh thuong, khong bao gio khai manh hon phep do",
+  "snapshot_deleted": true,
+  "omitted_trees_present": {
+    "cay-kho": false,
+    "work": false,
+    "nguon": false
+  },
+  "base_commit": "fb74c6eca742205acc0af9bb7ea89da94f15aa21 3bdd9877cab2543adc413a32a47decbb585ded97 51435a44659c4026539497a47ace971a71a64f40 Merge pull request #1114 from ducthangho/claude/fix-p3b4-windows-argv",
+  "base_to_head_p3b4_test_code_diff_bytes": 0
+}

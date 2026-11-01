@@ -1,0 +1,30 @@
+[
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "diff",
+      "3bdd987",
+      "HEAD"
+    ],
+    "file": "DIFF.patch",
+    "equal": true,
+    "bytes": 4160
+  },
+  {
+    "command": [
+      "git",
+      "-C",
+      "cay-kho",
+      "diff",
+      "e101b11",
+      "HEAD",
+      "--",
+      "ops/cloud_agent_creds_test.py"
+    ],
+    "file": "DIFF-TU-LUOT1.patch",
+    "equal": true,
+    "bytes": 2424
+  }
+]

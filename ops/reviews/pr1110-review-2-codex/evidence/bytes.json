@@ -1,0 +1,28 @@
+{
+  "source_files": 43,
+  "copies": 41,
+  "archive_files": 43,
+  "manifest_entries": 42,
+  "manifest_missing": [],
+  "manifest_extra": [],
+  "sha256sum_rc": 0,
+  "flat_equal": true,
+  "flat_sha256": "b823f2bc10297143977095eca1474d1fc73e2e98be0305173b2c486e9f8c38f6",
+  "flat_bytes": 13376,
+  "omissions": [
+    {
+      "source": "DIFF.patch",
+      "bytes": 301308,
+      "sha256": "de449cef2a3e30daa823b384a63ae390b972a4ca33240fddffb26761e64cbae1",
+      "declared_correct": true
+    },
+    {
+      "source": "launcher.err",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "declared_correct": true
+    }
+  ],
+  "unaccounted_source_files": [],
+  "errors": []
+}

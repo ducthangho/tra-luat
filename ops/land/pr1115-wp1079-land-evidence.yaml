@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1079 LAUNCHER-TEST-ORACLE-VA-FIXTURE r1 (lease g10), code qua PR #1115. Khuon: ops/land/pr1100-wp1089-r2-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7, khoi "Land evidence tach approval khoi thao tac".
 #
-# TRANG THAI: merged (c82047da). Truong goc trang_thai_packet.landed = false vi (4) KHONG co verdict approve tren head cuoi (luot 8:
+# TRANG THAI: merged (c82047da), landed FALSE — lane launcher-windows DO sau merge (#1122). Truoc do landed = false vi (4) KHONG co verdict approve tren head cuoi (luot 8:
 # changes_requested 0 P0-P3, ly do: reviewer khong do duoc A1 va CI trong sandbox) va (7) §8.1 CHUA_DAT (sandbox mode KHONG_DO_DUOC,
 # DanhTinhDoi, #1105).
 # Bon moc §10.2.2 cho gate hau merge run 41322980582 attempt 1: Run + Checkout + Workflow definition bang ops/ci_provenance.py thu
@@ -47,9 +47,11 @@ post_merge_checks:
     moc_workflow_definition: <MOC_WD>
     moc_gate_output: <MOC_GATE>
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master).'
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41322980509, sha: c82047da4d6f9546ce1d68282c37acf9567b74bc, conclusion: failure, ghi_chu: 'measured — REST run 41322980509: job launcher (ubuntu-latest) success; job launcher (windows-latest) 124896936117 failure o buoc Tu dot bien, DOT BIEN 430/434 (3 tin dung gia ca chi-Windows + neutral t73 TypeError); buoc launcher_test.py thuong 278/278 (74 bo qua). Packet va #1122.'}
 bookkeeping:
   - {item: 'rut han lease wp1079-r1-g10-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1077-1078-1079}
+  - {item: 'packet va sau merge', ket_qua: 'Issue #1122 — lane launcher-windows DO 430/434 tren c82047d; landed ha ve false.'}
   - {item: 'no tach', ket_qua: 'Issue #1117 (F04 kenh ket qua gia truoc main); phien xu ly no session_015Gtxra7iT6mwM1kqpdggt6 mo theo chi thi chu kho.'}
 # ---- het truong chuan
 packet_id: LAUNCHER-TEST-ORACLE-VA-FIXTURE
@@ -120,7 +122,15 @@ landed_20261101:
       Chu kho chon "Chap nhan, ghi landed true ca ba" (AskUserQuestion, phien session_01J7EgTVGTrNi4xqh7MeBFQv, 01-11-2026):
       chap nhan luot 8 (launcher.py run e2cb50f8) changes_requested 0 P0-P3 (HINT rong; 12/12 finding F01-F09 DONG) + A1 do ngoai sandbox reviewer (350/350, 548/548, codex_cred_test DAT) + CI PR 27/28 xanh tren DUNG af057e982ccc99b1f5eef2ae86dd129ccaa969b5, voi sandbox mode KHONG_DO_DUOC (DanhTinhDoi, #1105).
     do_duoc: 'measured — comment 6560351106 dang luc ghi so (MCP add_issue_comment). CAVEAT #566: agent dang bang token chu kho; ban chep, khong phai chu ky.'
-  landed: true
+  landed: false
+  landed_ha_cap:
+    comment: https://github.com/ducthangho/tra-luat/issues/1079#issuecomment-6560564188
+    ly_do: >-
+      Sau merge, lane launcher-windows.yml (push master, run 41322980509, job 124896936117, buoc Tu dot bien) DO: DOT BIEN 430/434 —
+      3 dot bien tin dung gia o ca CHI-Windows con assert tran (r484_g4_windows_sid_alias_identity, r484_g2_storage_kernel_guardrails)
+      + neutral t73 TypeError trong vong --dot-bien. Chu kho chon "Mo packet va, ha #1079 ve landed false" (AskUserQuestion).
+    packet_va: 'Issue #1122, giao phien xu ly no session_015Gtxra7iT6mwM1kqpdggt6, uu tien truoc tien.'
+    do_duoc: 'measured — log REST job 124896936117 (dong DOT BIEN va 4 dong SAI chep trong Issue #1122).'
   landed_dieu_kien: >-
     (1) bon moc §10.2.2 tren merge c82047da: xem post_merge_checks. (2) lease g10 rut han sau merge. (4) review neo DUNG authorized_head af057e9: CHUA_DAT theo nghia den (khong approve) — chu kho CHAP NHAN luot 8 0 P0-P3. (3) bookkeeping: ho so nay. (5) uy quyen land: DAT co caveat #566.
     (6) muc tieu packet: DAT theo gate + review. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho tren.

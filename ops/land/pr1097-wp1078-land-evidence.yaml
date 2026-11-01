@@ -48,6 +48,7 @@ post_merge_checks:
     moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition: passed (wd-run 41323664523, artifact workflow-definition-41279007434), ci_provenance.py thu tu tinh lai blob/sha256.'
     moc_gate_output: 'measured — gate-output-41279007434.txt (log REST tung job, sha256 + so byte kem): 23/23 job success, ##[error] = 0; == tl selftest 1774/1774 ==, == transport selftest 12/12 ==, == gen_instructions selftest 44/44 ==; DOT BIEN 343/343, 392/392, 106/106, 80/80, 13/13 bi giet dung ly do; TỔNG: ĐẠT 8x, TONG: DAT 6x.'
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master).'
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41279007470, sha: 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da, conclusion: success, ghi_chu: 'measured — REST run 41279007470 (launcher-windows.yml, event push, head 7eeb1d9a) conclusion success.'}
 bookkeeping:
   - {item: 'rut han lease wp1078-r1-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1077-1078-1079}

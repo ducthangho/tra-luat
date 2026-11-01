@@ -52,6 +52,7 @@ post_merge_checks:
     moc_workflow_definition: <MOC_WD>
     moc_gate_output: <MOC_GATE>
     ghi_chu: 'Chi do Ubuntu (ma tran os cua ci.yml cho push master). Attempt 2 chay SAU nhieu commit master khac nhung checkout DUNG merge SHA (moc_checkout).'
+  - {name: 'launcher-windows.yml push master — DUNG merge SHA (lane launcher, khong phai gate)', run_id: 41259734315, sha: 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5, conclusion: success, ghi_chu: 'measured — REST run 41259734315 (launcher-windows.yml, event push, head 9ced16f3) conclusion success.'}
 bookkeeping:
   - {item: 'rut han lease wp1077-r1-g6-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', nhanh: claude/ghi-so-land-1077-1078-1079}

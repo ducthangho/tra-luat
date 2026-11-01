@@ -1,0 +1,7 @@
+All checkout files before/after: 9502 9502
+Added: [] ; removed: [] ; changed bytes/mode: []
+HEAD: dcb295a903f7e51eab84d3dbd1feb48832471827 ; tree: ffbd1b78722fa22bd080af847279d7590b5b1c0f ; origin/master: a253c169ed79617b8d1a4754867c336ac72c72c5
+Index SHA256 unchanged: fd7820c53cc0b694989df849034a578a4994de30347c95b43d075e3677482fa3 ; status tracked/untracked/ignored and index/worktree diffs empty
+Open findings: []
+Classification: 0 P0, 0 P1, 0 P2, 0 P3; round17, round18 and round19 findings closed; no new open finding
+FINAL SNAPSHOT: PASS; no observed file/index/head delta. Endpoint snapshots cannot prove absence of transient write-and-restore; read-only was an instruction under workspace-write.

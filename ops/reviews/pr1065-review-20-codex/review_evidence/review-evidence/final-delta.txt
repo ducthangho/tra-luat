@@ -1,0 +1,7 @@
+All changed path bytes on disk == exact HEAD blobs: 128
+Supplied round19→20 patch equals Git bytes; delta: ['ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml', 'ops/reviews/README.md', 'ops/reviews/pr1065-review-16-codex-verdict.receipt.yaml']
+Land semantic YAML unchanged; correction is header/source classification only
+Receipt semantic change limited to Windows caveat: 71/71 rounds14–16, 70/70 round13, explicitly narrated; scheduling rerun remains unclaimed
+README adds only 6 target-review rows and removes/changes 0 master lines
+Windows case execution and original VM output remain NOT_MEASURED by this reviewer; narrowed narration is not a new execution measurement
+FINAL DELTA AUDIT: PASS

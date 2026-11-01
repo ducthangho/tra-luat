@@ -1,0 +1,10 @@
+Target schema errors: []
+Target Git anchor errors/unmeasured: [] []
+Target history errors/unmeasured/surface: {} {} []
+Unrelated receipt identical to master: True
+Validator code identical to master: True
+Master baseline anchor errors: []
+Master baseline unavailable: ['lease-publish-windows-do-review-r1-codex.receipt.yaml: KHÔNG ĐO ĐƯỢC `reviewed_sha` 4bc94325e647… — object không tra được ở cây này (clone nông / chưa fetch), KHÔNG kết luận là bịa']
+Master baseline history unavailable: {('lease-publish-windows-do-review-r1-codex.receipt.yaml', 'reviewed_sha_to_tien', 'L-ANCESTRY'): 'lease-publish-windows-do-review-r1-codex.receipt.yaml: `reviewed_sha_to_tien` — OID `4bc9432` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên', ('lease-publish-windows-do-review-r1-codex.receipt.yaml', 'verdict_usage_caveats[1].mo_ta', 'L-ANCESTRY'): 'lease-publish-windows-do-review-r1-codex.receipt.yaml: `verdict_usage_caveats[1].mo_ta` — OID `4bc9432` không tra được commit, KHÔNG kết luận được quan hệ tổ tiên'}
+Missing baseline OID: 4bc94325e647ee5e32373f3af30b8f83b98a90fa ; cat-file rc= 128
+TARGET RECEIPT: PASS; whole-tree gate remains NOT_MEASURED due to unchanged baseline missing object, not upgraded to PASS

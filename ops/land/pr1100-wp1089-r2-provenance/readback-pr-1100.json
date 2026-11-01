@@ -1,0 +1,10 @@
+{
+ "number": 1100,
+ "state": "closed",
+ "merged": true,
+ "merged_at": "2026-11-01T04:04:23Z",
+ "merge_commit_sha": "e4fdab583a33b08f364a9daa30035d48416190bf",
+ "merged_by": "ducthangho",
+ "head_sha": "6120ab88382ce605a2b7d1e853db208a15aaf835",
+ "base_ref": "master"
+}

@@ -3,7 +3,7 @@
 #
 # TRANG THAI: merged (9ced16f3). Truong goc trang_thai_packet.landed = false vi (7) reviewer assurance §8.1 CHUA_DAT: sandbox mode
 # KHONG_DO_DUOC (DanhTinhDoi, Issue #1105) o luot approve — cung ly do va cung xu ly nhu tien le pr1100.
-# Gate hau merge: run 41259734324 attempt 1 bi HUY truoc khi co job (0 job — concurrency, merge ke tiep chiem nhom); phien ghi so chay
+# Gate hau merge: run 41259734324 attempt 1 bi HUY truoc khi co job (0 job; nguyen nhan huy KHONG DO DUOC tu readback — khong co tep nguon); phien ghi so chay
 # lai MOT lan (attempt 2). Bon moc §10.2.2 do tren attempt 2: Run + Checkout + Workflow definition bang ops/ci_provenance.py thu
 # (--wd-run 41330644054); Gate output trich log REST tung job.
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured — nghia nhu khuon.
@@ -45,7 +45,8 @@ post_merge_checks:
     run_attempt: 2
     sha: 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5
     conclusion: success
-    attempt_1: 'measured — readback-run-41259734324-a1.json + readback-jobs-41259734324-a1.json: attempt 1 (01:07:35Z -> 01:14:52Z) conclusion cancelled, total_count 0 job — huy truoc khi test nao chay; phien ghi so chay lai MOT lan (POST runs/41259734324/rerun -> 201) luc 2026-11-01T15:5xZ.'
+    attempt_1: 'measured — readback-run-41259734324-a1.json + readback-jobs-41259734324-a1.json: attempt 1 (01:07:35Z -> 01:14:52Z) conclusion cancelled, total_count 0 job — huy truoc khi test nao chay. Attempt 2: measured — ci/run.json run_attempt 2, run_started_at 2026-11-01T15:55:17Z. Thao tac chay lai: thuat_lai — phien ghi so goi POST runs/41259734324/rerun MOT lan; ma HTTP va bien nhan cua POST KHONG luu, nen not_measured.'
+    attempt_1_nguon: [readback-run-41259734324-a1.json, readback-jobs-41259734324-a1.json, ci/run.json]
     nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, gate-output-41259734324-a2.txt]
     moc_run: 'measured — ci/provenance.yaml moc.run: event push, head_sha 9ced16f3, run_attempt 2, trang_thai passed; ci/jobs.json 23 job success.'
     moc_checkout: 'measured — ci/provenance.yaml moc.checkout: 22/22 job gate* checkout passed 9ced16f3764aed80a3f2ac21ca3db475cbf8aea5 (attempt 2 chay luc master da tien xa, van checkout DUNG merge SHA); chuan-bi khong co buoc checkout (not_measured co ly do).'

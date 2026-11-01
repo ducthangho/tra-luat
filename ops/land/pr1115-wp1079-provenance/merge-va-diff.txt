@@ -1,6 +1,6 @@
 $ git show -s --format='%H %P %T' c82047da4d6f9546ce1d68282c37acf9567b74bc
 c82047da4d6f9546ce1d68282c37acf9567b74bc f4b513da5802d439aedbe58ae4a5cd38ff47d6ab af057e982ccc99b1f5eef2ae86dd129ccaa969b5 8485ab51880da68bc0e7ed48a7f8fcb30026f64a
-$ git diff --numstat 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da c82047da4d6f9546ce1d68282c37acf9567b74bc~0^2 -- (PR head so base packet)
+$ git diff --numstat 7eeb1d9a10aea8e1805b66fbf3d68549eb6778da c82047da4d6f9546ce1d68282c37acf9567b74bc~0^2 --   # PR head so base packet
 49	7	.claude/dev/codex_cred_test.py
 785	111	.claude/dev/launcher_test.py
 39	14	ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml

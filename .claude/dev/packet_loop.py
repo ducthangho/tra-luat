@@ -3165,14 +3165,15 @@ def _phan_loai_windows(root: Path, b: str, h: str, spec: bytes) -> str:
     return "unknown"
 
 
-def _dong_chu_kho(duong) -> list[str]:
-    """Các dòng của MỘT comment readback chỉ khi tác giả là `CHU_KHO` (hằng trong mã, không có cờ đổi)."""
+def _dong_chu_kho(duong, tho=False) -> list[str]:
+    """Các dòng của MỘT comment readback chỉ khi tác giả là `CHU_KHO` (hằng trong mã, không có cờ đổi). `tho`: giữ nguyên dòng (#1120 K7
+    khớp `^full_mutant_audit: H mien$` đúng chữ — review offline lượt 1 F03: `strip()` nhận cả dòng thụt/đuôi khoảng trắng)."""
     if not duong:
         return []
     d = _doc_json(duong, RC_GATE)[0]
     if not isinstance(d, dict) or not isinstance(d.get("user"), dict) or d["user"].get("login") != CHU_KHO or type(d.get("body")) is not str:
         raise ValueError(f"comment không phải của chủ kho {CHU_KHO}")
-    return [x.strip() for x in d["body"].splitlines()]
+    return [x if tho else x.strip() for x in d["body"].splitlines()]
 
 
 def cmd_kiem_merge(a, state_dir: Path) -> int:
@@ -3232,15 +3233,23 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
                 _die(RC_GATE, "Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn")
 
     def k7():  # #1120 ADR-0060 M9: run `ci-dot-bien-du.yml` success ĐÚNG H với mọi job của đúng run_id/run_attempt, hoặc dòng miễn của chủ kho
-        if not _cham_m9(root, a.base, h) or (a.chu_kho_comment and f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment)):
+        if not _cham_m9(root, a.base, h) or (a.chu_kho_comment and f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment, tho=True)):
             return
         if not (a.dot_bien_du_runs and a.dot_bien_du_jobs):
             _die(RC_GATE, "diff chạm vùng M9 mà thiếu --dot-bien-du-runs/--dot-bien-du-jobs và dòng miễn `full_mutant_audit: H mien` của chủ kho")
         runs = _trang_du(_doc_json(a.dot_bien_du_runs, RC_GATE)[0], "workflow_runs", "--dot-bien-du-runs")
-        jobs = _trang_du([_doc_json(p, RC_GATE)[0] for p in a.dot_bien_du_jobs], "jobs", "--dot-bien-du-jobs")
+        # review offline lượt 1 F01/F02: MỖI tệp jobs là một lần lấy của MỘT (run_id, run_attempt) — trang đủ đo trên ĐÚNG tập dùng để quyết
+        # định; định danh phải đúng kiểu int ở cả hai phía (bool/float bằng nhau với int dưới `==`); một run/attempt không được ở hai tệp.
+        nhom = {}
+        for p in a.dot_bien_du_jobs:
+            js = _trang_du(_doc_json(p, RC_GATE)[0], "jobs", f"--dot-bien-du-jobs {p}")
+            khoa = {(j.get("run_id"), j.get("run_attempt")) for j in js}
+            if not all(type(j.get("run_id")) is int and type(j.get("run_attempt")) is int for j in js) or len(khoa) > 1 or khoa & nhom.keys():
+                _die(RC_GATE, f"--dot-bien-du-jobs {p}: phải là jobs của đúng MỘT run_id + run_attempt (int), không lặp ở tệp khác")
+            nhom.update(dict.fromkeys(khoa, js))
         xanh = lambda x: x.get("status") == "completed" and x.get("conclusion") == "success"  # noqa: E731
         for r in runs:
-            js = [j for j in jobs if j.get("run_id") == r["id"] and j.get("run_attempt") == r["run_attempt"]] if type(r.get("run_attempt")) is int else []
+            js = nhom.get((r["id"], r["run_attempt"])) if type(r.get("run_attempt")) is int else None
             if r.get("path") == DOT_BIEN_DU_TEP and r.get("head_sha") == h and xanh(r) and js and all(map(xanh, js)):
                 return
         _die(RC_GATE, f"không run `{DOT_BIEN_DU_TEP}` nào success tại {h} với mọi job (đúng run_id + run_attempt) success")

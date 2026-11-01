@@ -85,12 +85,12 @@ Chỉ phần **mốc Workflow definition**. Phần *"tái hiện logic chế đ�
 
 ## 3. Write set
 `ops/ci_provenance.py` · `ops/ci_provenance_test.py` · `.github/workflows/ops-do-workflow-definition.yml` (planned) ·
-`.claude/skills/land-packets/SKILL.md`. Bốn tệp, trần `sensitive` ≤ 6 tệp / ≤ 520 dòng thêm theo khối `nang_tran` dưới đây
+`.claude/skills/land-packets/SKILL.md`. Bốn tệp, trần `sensitive` ≤ 6 tệp / ≤ 560 dòng thêm theo khối `nang_tran` dưới đây
 (trần gốc của `ADR-0053` là ≤ 6 tệp / ≤ 450).
 
 ```yaml
 nang_tran:
-  ai_nang: ducthangho   # chủ kho, protocol §2; chỉ thị 01-11-2026 trong phiên session_015GtxrYPjZCTZeRiazdssgq: "Nâng trần lên 520"
+  ai_nang: ducthangho   # chủ kho, protocol §2; chỉ thị 01-11-2026 phiên session_015GtxrYPjZCTZeRiazdssgq: "Nâng trần lên 520", rồi "Nâng trần lên 560"
   can_cu: >-
     Review offline lần 1 (codex, ứng viên ff3b5e9) trả changes_requested với 7 lớp finding: 1 P1 (nhập artifact
     không đòi head_branch/default_branch có mặt) và 6 P2 (hợp đồng lỗi/schema của do-wd, --out lệch parser, test
@@ -98,8 +98,12 @@ nang_tran:
     Trước vá: `git diff --numstat origin/master` = 4 tệp, 450 dòng thêm. Sau vá: 4 tệp, 499 dòng thêm
     (ci_provenance.py +186, ci_provenance_test.py +263, workflow +49, SKILL +1). Không tách được: phần thêm là
     ca canh và đột biến cho chính các bất biến A2–A8 của packet; tách ra thì packet land với lỗ test đã biết.
+    Lần nâng hai (520 -> 560): review offline lượt 2–7 và connector trên PR #1102 (P1: tag trùng tên `master`
+    ngoài nhánh mặc định qua được bước nhập artifact, vì kiểm theo TÊN ref) — vá đúng cần neo `refs/heads/<default>`
+    và so OID…OID; sau vá 4 tệp, 526 dòng thêm (ci_provenance.py +198, ci_provenance_test.py +278, workflow +49,
+    SKILL +1). Chừa dư cho một vòng finding nữa thay vì ép code hoặc xoá dòng trống để lách trần.
   tran_cu: "ADR-0053@8ab1007: <= 6 tệp / <= 450 dòng thêm"
-  tran_moi: "<= 6 tệp / <= 520 dòng thêm"
+  tran_moi: "<= 6 tệp / <= 560 dòng thêm"
 ```
 `ops/ci_provenance_test.py` đã có trong sổ `MOI` của `.claude/dev/ci_dang_ky_test.py` (dòng 57); workflow mới không phải test
 nên không cần đăng ký.
@@ -118,7 +122,7 @@ nên không cần đăng ký.
 | A7 | Kiểm tĩnh trên chính tệp YAML (mọi job, mọi bước): `on` chỉ có `workflow_dispatch`; quyền hiệu lực đúng `{contents: read, actions: read}`, không job nào khai quyền riêng; checkout có `ref: master` cố định và `persist-credentials: false`; chỉ hai `uses:` (`actions/checkout`, `actions/upload-artifact`); upload `path` đúng `wd.json`; không có `${{` và `eval` trong thân `run:`; bước collector có `env.GH_TOKEN` lấy từ token của lượt chạy và token **không** xuất hiện trong thân `run:`; lời gọi collector nằm trong dòng lệnh thật (không phải chú thích), ở bước không bị `if:` tắt | mỗi đột biến YAML một ca đỏ: thêm `pull-requests: write` ở job; bỏ `ref`; đổi `ref` thành `${{ github.sha }}`; bỏ `persist-credentials`; thêm `eval "$RUN_ID"`; đổi upload `path` thành `.`; chuyển lời gọi collector vào chú thích; bỏ `GH_TOKEN` khỏi `env` |
 | A7b | Chạy thân `run:` bằng `bash` với `python` giả. Với `RUN_ID='1; touch PWNED'`: argv phải chứa `--run` theo sau bởi **đúng một** đối số bằng nguyên chuỗi đó; điều kiện an toàn đi kèm là không có tệp `PWNED`. Python giả trả rc 3 và **không ghi** `wd.json` ⇒ bước vẫn ghi JSON dự phòng, in vào summary, rồi thoát rc 3 | đột biến bỏ nháy quanh `"$RUN_ID"` ⇒ argv tách thành `1;` `touch` `PWNED` ⇒ assertion một-đối-số đỏ; đột biến bỏ JSON dự phòng ⇒ không có `wd.json` ⇒ đỏ; đột biến thoát trước khi in summary ⇒ đỏ |
 | A8 | `actionlint` trên tệp mới rc=0, đo khi có `shellcheck`; thiếu `shellcheck` thì ghi `KHÔNG ĐO ĐỦ`, không tính đạt | ca phụ: một bản YAML vẫn parse được nhưng sai hợp đồng Actions (`on: workflow_dispatch` với `inputs.run_id.type: number123`) ⇒ actionlint rc≠0 |
-| A9 | `git diff --numstat <base_oid> <candidate_oid>` sau khi đóng băng: đúng bốn tệp của §3, ≤ 520 dòng thêm (khối `nang_tran` §3); `land-packets/SKILL.md` +1/−0. Trước khi đóng băng, kiểm riêng các trạng thái staged, unstaged và untracked | thêm tệp thứ năm ở mỗi trạng thái ⇒ đỏ |
+| A9 | `git diff --numstat <base_oid> <candidate_oid>` sau khi đóng băng: đúng bốn tệp của §3, ≤ 560 dòng thêm (khối `nang_tran` §3); `land-packets/SKILL.md` +1/−0. Trước khi đóng băng, kiểm riêng các trạng thái staged, unstaged và untracked | thêm tệp thứ năm ở mỗi trạng thái ⇒ đỏ |
 | A10 | Windows theo `ADR-0060` M3 (bước 2: chạm `.github/workflows/**`): **nền** chạy `ci_provenance_test.py` (tập test ID và kết quả); **ứng viên** chạy `ci_provenance_test.py` cùng A8 trên tệp mới. Áp đủ M3 (a)–(c): hai lượt chạy trọn, so tập test ID đỏ, ca đỏ thuộc write set thì chủ kho quyết. Nền không có tệp workflow mới, nên A8 chỉ đo trên ứng viên và **không** dùng lỗi "không có tệp" ở nền làm mốc | ca đỏ có ở ứng viên mà không có ở nền ⇒ ĐỎ |
 | A11 | `full_mutant_audit` theo `ADR-0060` M9: **bắt buộc** (diff chạm `.github/workflows/**` và `ops/**/*.py`). Bỏ qua chỉ khi có waiver `owner_waived` đúng scope theo §10.2.3 | thiếu receipt hoặc waiver khi merge |
 | A12 | **Canary sau land**, đo được khi và chỉ khi workflow có trên nhánh mặc định: gọi workflow cho run `41218603332` ⇒ `passed`, `oid_dinh_nghia` `634d5a28973cd2f39175283b45fb820c5b0819e5`, `blob` `82d9f239ff311bd1ba3d3021119b5a2f7f699ffc`, `sha256` `ce9a3ec0f777a5165477c73b8fc9b9c098e8c3a9f5517c7499649670e84913fb` (khớp số đo tay ở S3) | lệch ⇒ ĐỎ; `GITHUB_TOKEN` bị từ chối ở GraphQL ⇒ `KHÔNG ĐO ĐƯỢC` kèm `ly_do` theo endpoint/field, packet chưa `landed` |

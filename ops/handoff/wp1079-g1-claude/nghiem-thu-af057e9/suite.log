@@ -1,0 +1,19 @@
+moi truong: pid=11518 pgid=11518 sid=11516 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: khong can (da la truong nhom)
+  BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+short_id  : 0f222ba7
+run_id    : 0f222ba7f3744bb5a4c7de358e30eb49
+so        : /tmp/lt_os2wtvte/runs/0f222ba7
+trang thai: xong  ma_thoat=0
+thoi luong: 10.033s  stdout=0B  stderr=0B
+  BO QUA r484_g4_windows_sid_alias_identity: BO QUA native Windows SID conversion
+  r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+  review_missing               SAI - ca dich khong tim thay/trung: ['review_missing_case']
+  r1079_a                      OK  giet 1/1: review_do_san
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+
+350/350 ca DA CHAY QUA (tong 352, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+rc=0

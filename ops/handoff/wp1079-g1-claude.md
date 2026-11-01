@@ -78,6 +78,21 @@ không gọi codex, không tính vào trần. HINT.patch giữ nguyên byte củ
 (P0/P1/P2/P3.) Ca HINT được nhận (khai `hint_provenance` trong commit): lượt 1 ×4, lượt 2 ×6 (bỏ ca F04), lượt 3 ×3 (sau gỡ
 vì đổi thiết kế), lượt 4 ×1 (+2 thay bằng ca từ chối), lượt 5 ×2, lượt 6 ×2.
 
+## Lượt Codex 7–8 (chủ kho yêu cầu sau khi PR mergeable; lease g9 6→7, g10 7→8)
+| lượt | run_id | head | thời lượng | model_phuc_vu | verdict |
+|---|---|---|---|---|---|
+| 7 | `ba939a5a96d54063a3a0c6fe245b8a73` | `af057e9` | 623.538 s | DO_DUOC `gpt-6.1-sol` | KHÔNG CÓ — container hết dung lượng (`No space left on device`); executor dọn bản sao tạm rồi chạy lại |
+| 8 | `e2cb50f80eef4dd5bf65d6df19a0eb4f` | `af057e9` | 1465.254 s | DO_DUOC `gpt-6.1-sol` | changes_requested — **0 P0, 0 P1, 0 P2, 0 P3**, `HINT.patch` rỗng |
+
+Lượt 8: bảng đóng finding — cả 12 dòng F01–F09 (lượt 1–6) **ĐÓNG** bằng phản chứng chạy lại trên `af057e9`; F04 vẫn đúng nợ
+#1117, không tệ hơn. `changes_requested` CHỈ vì reviewer không đo được A1 (sandbox của nó có `/tmp/.git` ⇒ 24 ca storage +
+36 neutral đỏ, base cũng đỏ y hệt) và CI exact head (sandbox cấm mạng) — "không có yêu cầu vá mã mới".
+Hai bằng chứng ấy executor đo NGOÀI sandbox reviewer:
+- A1 trên `af057e9`, `/tmp/.git` vắng: `350/350` · `548/548` · `TỔNG: ĐẠT` — log nguyên ở `nghiem-thu-af057e9/`.
+- CI PR #1115 trên `af057e982ccc99b1f5eef2ae86dd129ccaa969b5`: 28 check run, 27 success, 1 skipped (lane `launcher` Windows);
+  `mergeable_state: clean`; Codex connector review không finding.
+M-1 theo nghĩa đen ("verdict approve trên head cuối") vẫn CHƯA đạt — chủ kho quyết.
+
 ## Việc còn lại
 - Chủ kho: quyết merge khi M-1 chưa đạt (trần dòng đã nâng 1000 ở g8) (`uy_quyen_merge: false`).
 - Nợ #1117 (runner tin cậy ngoài mã bị đột biến); nợ cũ #824–#826 vẫn mở; nợ "cô lập process từng mutant" (spec Ngoài phạm vi).

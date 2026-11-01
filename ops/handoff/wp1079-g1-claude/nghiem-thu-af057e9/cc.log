@@ -1,0 +1,28 @@
+KHÔNG_ĐO_ĐƯỢC: thư mục Codex home chưa tồn tại — chưa có credential
+KHÔNG_ĐO_ĐƯỢC: không có auth.json
+nền: 18/18 đạt
+
+ĐỘT BIẾN — bán kính CHỈ đo trong phạm vi phai_chet:
+  ok  t14_probe_ke_thua_snapshot giết 1/1 trong phai_chet
+  ok  t1_khong_lot_ansi          giết 1/1 trong phai_chet
+  ok  t2_doan_bua_khi_thieu      giết 1/1 trong phai_chet
+  ok  t3_tin_rc0                 giết 1/1 trong phai_chet
+  ok  t4_bo_dau_hieu_tu_choi     giết 1/1 trong phai_chet
+  ok  t5_bo_dieu_kien_rc0        giết 1/1 trong phai_chet
+  ok  t6_in_bi_mat_luon          giết 1/1 trong phai_chet
+  ok  t7_bo_mo_doc_quyen         giết 1/1 trong phai_chet
+  ok  t9_khong_sinh_tep_dan      giết 1/1 trong phai_chet
+  ok  t10_khong_bu_padding       giết 1/1 trong phai_chet
+  ok  t8_thieu_cong_cu_van_xanh  giết 1/1 trong phai_chet
+  ok  t11_bo_tu_choi_symlink     giết 1/1 trong phai_chet
+  ok  t12_bo_O_NOFOLLOW          giết 1/1 trong phai_chet
+  ok  t13_bo_fail_closed         giết 1/1 trong phai_chet
+ĐỎ: không đọc credential an toàn được
+  ok  t15_bo_nhanh_home_vang     giết 1/1 trong phai_chet
+  ok  t16_nuot_loi_ghi           giết 1/1 trong phai_chet
+  ok  t17_bo_token_invalidated   giết 1/1 trong phai_chet
+  ok  t18_doc_lai_sau_probe      giết 1/1 trong phai_chet
+
+SỐ LIỆU:  ca 18  ·  đột biến 18
+TỔNG: ĐẠT
+rc=0

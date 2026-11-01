@@ -1,0 +1,6 @@
+Đã hoàn tất review: **changes_requested — 1 P2**. Khóa hồi quy chưa bắt lỗi thứ tự formatter ở nhánh `AssertionError`.
+
+- [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l8/VERDICT.md): kết luận và bằng chứng.
+- [HINT.patch](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l8/HINT.patch): gia cố khóa, giữ trần 450 dòng thêm.
+
+Suite và đột biến Linux có tập lỗi trùng base, delta=0. Windows/CI chưa đo độc lập. `cay-kho/` không thay đổi.

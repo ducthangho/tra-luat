@@ -1,0 +1,80 @@
+base-doctrine rc 0 stdout doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+ stderr 
+base-diff-default rc 0 stdout  stderr 
+base-diff-ci rc 0 stdout  stderr 
+base-ci-function rc 0 stdout []
+ stderr 
+base-land rc 0 stdout MIỄN TRỪ ops/land/plat-x8-land-evidence.yaml (băm khớp ảnh chụp cutover)
+ĐẠT ops/land/pr1013-land-evidence-l7-r2-land-evidence.yaml
+ĐẠT ops/land/pr1022-windows-local-r1-land-evidence.yaml
+ĐẠT ops/land/pr1023-wp1009-r4-land-evidence.yaml
+  ghi chú ops/land/pr1029-windows-local-r2-land-evidence.yaml: L7 $.assurance_bo_sung_20261030.reviewer_assurance_81: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất
+ĐẠT ops/land/pr1029-windows-local-r2-land-evidence.yaml
+ĐẠT ops/land/pr1040-wp1021-land-evidence.yaml
+ĐẠT ops/land/pr1041-wp1037-land-evidence.yaml
+ĐẠT ops/land/pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml
+ĐẠT ops/land/pr1046-wp1030-r6-land-evidence.yaml
+ĐẠT ops/land/pr1047-wp1045-land-evidence.yaml
+ĐẠT ops/land/pr1048-claude-md-powershell-land-evidence.yaml
+ĐẠT ops/land/pr1063-wp1038-r1-land-evidence.yaml
+ĐẠT ops/land/pr1064-windows-local-r3-land-evidence.yaml
+ĐẠT ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+ĐẠT ops/land/pr1073-wp1039-r1-land-evidence.yaml
+ĐẠT ops/land/pr1100-wp1089-r2-land-evidence.yaml
+MIỄN TRỪ ops/land/pr468-hoso-4-packet-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr477-dung-goi-review-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr478-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr480-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr487-land stderr 
+head-land rc 0 stdout MIỄN TRỪ ops/land/plat-x8-land-evidence.yaml (băm khớp ảnh chụp cutover)
+ĐẠT ops/land/pr1013-land-evidence-l7-r2-land-evidence.yaml
+ĐẠT ops/land/pr1022-windows-local-r1-land-evidence.yaml
+ĐẠT ops/land/pr1023-wp1009-r4-land-evidence.yaml
+  ghi chú ops/land/pr1029-windows-local-r2-land-evidence.yaml: L7 $.assurance_bo_sung_20261030.reviewer_assurance_81: khai DAT lồng bị bỏ qua — khối $.assurance_81 cấp gốc là nguồn duy nhất
+ĐẠT ops/land/pr1029-windows-local-r2-land-evidence.yaml
+ĐẠT ops/land/pr1040-wp1021-land-evidence.yaml
+ĐẠT ops/land/pr1041-wp1037-land-evidence.yaml
+ĐẠT ops/land/pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml
+ĐẠT ops/land/pr1046-wp1030-r6-land-evidence.yaml
+ĐẠT ops/land/pr1047-wp1045-land-evidence.yaml
+ĐẠT ops/land/pr1048-claude-md-powershell-land-evidence.yaml
+ĐẠT ops/land/pr1063-wp1038-r1-land-evidence.yaml
+ĐẠT ops/land/pr1064-windows-local-r3-land-evidence.yaml
+ĐẠT ops/land/pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml
+ĐẠT ops/land/pr1073-wp1039-r1-land-evidence.yaml
+ĐẠT ops/land/pr1100-wp1089-r2-land-evidence.yaml
+MIỄN TRỪ ops/land/pr468-hoso-4-packet-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr477-dung-goi-review-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr478-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr480-land-evidence.yaml (băm khớp ảnh chụp cutover)
+MIỄN TRỪ ops/land/pr487-land stderr 
+base-direct rc 0 stdout PASS t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi
+PASS t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc
+PASS t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen
+ stderr /tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/base/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-
+head-doctrine rc 0 stdout doctrine-scan: sạch — đã quét 10 tệp, 0 chỗ chép doctrine
+ stderr 
+head-diff-default rc 2 stdout ops/reviews/pr1119-review-2-codex-verdict.md:105: new blank line at EOF.
+ops/reviews/pr1119-review-2-codex/VERDICT.md:105: new blank line at EOF.
+ stderr 
+head-diff-ci rc 0 stdout  stderr 
+head-ci-function rc 0 stdout []
+ stderr 
+head-direct rc 0 stdout PASS t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi
+PASS t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc
+PASS t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen
+ stderr /tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-
+base-bien-nhan rc 0 stdout 
+bien_nhan_v2: 291 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 344
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐẠT
+ stderr 
+head-bien-nhan rc 0 stdout 
+bien_nhan_v2: 293 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 346
+câu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0
+TỔNG: ĐẠT
+ stderr 

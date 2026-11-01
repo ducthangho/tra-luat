@@ -1,0 +1,50 @@
+cay-kho/.github/coordination/f2-d-worktree-recovery.md:36:  `git diff --check` rejects for a new file; their targets remove only that
+cay-kho/.github/coordination/f2-d-groupb-recovery.md:82:`scripts/tl_selftest.py`. Conflict markers were absent, AST parsing passed, `git diff --check <EOL-base>`
+cay-kho/.github/coordination/f2-d-groupb-recovery.md:159:`RELEASE_MANIFEST.json`, and `SKILL.md` have zero changed paths, and `git diff --check` returns rc=0.
+cay-kho/.github/coordination/f2-d-writer-inventory.md:471:| `git diff --check` | rc=0 |
+cay-kho/.github/workflows/ci.yml:688:      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)
+cay-kho/ops/ci_duong_nhanh.py:49:  YAML parse được · `git diff --check` · lease đổi phải qua `lease_publish` · ba ca kiểm DỮ LIỆU của lease_publish_test ·
+cay-kho/ops/ci_duong_nhanh.py:58:  · D1 — `git diff --check` chạy với `core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab`. Trên TOÀN
+cay-kho/ops/ci_duong_nhanh.py:62:    vẫn bắt dấu xung đột còn sót (`<<<<<<<`, `=======`, `>>>>>>>`): `--check` báo chúng ngoài `core.whitespace` (`t20c`,
+cay-kho/ops/ci_duong_nhanh.py:66:    `--check`; `diff` (set) ép tệp có NUL thành "văn bản" cho `--numstat` (cross-review lượt 9, `t20t`); `-diff` trên tệp
+cay-kho/ops/ci_duong_nhanh.py:70:    `--name-only`, `merge-tree`, diff `goc -> cây` (cây merge-tree và `github.sha`), `--check`, `--numstat`, và
+cay-kho/ops/ci_duong_nhanh.py:117:CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"
+cay-kho/ops/ci_duong_nhanh.py:461:    """`git diff --check` trên ba chấm, mọi đuôi tệp. Thuộc tính đọc từ cây GỐC (`--attr-source`), không từ cây làm
+cay-kho/ops/ci_duong_nhanh.py:466:        r = chay(["git", "--attr-source=" + goc, "-c", CAU_HINH_WHITESPACE, "diff", "--check", "--no-renames", f"{goc}...{dau}"],
+cay-kho/ops/ci_duong_nhanh.py:469:        return [f"KHONG DO DUOC: git diff --check nem {type(e).__name__}"]
+cay-kho/ops/ci_duong_nhanh.py:473:    return [f"git diff --check rc={getattr(r, 'returncode', None)}: " + " | ".join(dong)]
+cay-kho/ops/ci_duong_nhanh.py:477:    """`git diff --check` BỎ QUA tệp git coi là nhị phân (NUL trong nội dung) — dấu xung đột trong đó lọt êm (đo
+cay-kho/ops/ci_duong_nhanh.py:481:    `diff` (set) do PR mang vào ép tệp có NUL thành "văn bản" cho numstat trong khi `--check` vẫn bỏ qua nó (lượt 9)."""
+cay-kho/ops/ci_duong_nhanh.py:493:    return [f"tep ho so nhi phan (diff --check khong kiem duoc): {ban_ghi[4:]!r}"
+cay-kho/ops/ci_duong_nhanh_test.py:854:        bang(rc == 1 and "diff --check" in log, f"dau xung dot con sot phai DO, duoc rc={rc}: {log}")
+cay-kho/ops/ci_duong_nhanh_test.py:865:        tho = git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False)
+cay-kho/ops/ci_duong_nhanh_test.py:866:        bang(tho.returncode != 0, "fixture vo hieu: `git diff --check` nguyen ban phai bat cac tep nay")
+cay-kho/ops/ci_duong_nhanh_test.py:870:            chi_loai = git(kho, "-c", "core.whitespace=-" + ",-".join(
+cay-kho/ops/ci_duong_nhanh_test.py:872:                "diff", "--check", f"{goc}...{dau}", "--", tep, kiem=False)
+cay-kho/ops/ci_duong_nhanh_test.py:926:    `conflict-marker-size` tat bao dau xung dot cua `diff --check` doc thuoc tinh tu cay lam viec. Chot: `--attr-source`
+cay-kho/ops/ci_duong_nhanh_test.py:936:            tho = git(kho, "-c", "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+cay-kho/ops/ci_duong_nhanh_test.py:937:                      "diff", "--check", f"{goc}...{dau}", kiem=False)
+cay-kho/ops/ci_duong_nhanh_test.py:940:            bang(rc == 1 and "diff --check" in log and f"{thu_muc}/x.md" in log,
+cay-kho/ops/ci_duong_nhanh_test.py:951:    """Luot 9 (lop `kiem-re-cua-fail-close-chua-co-ca`, pham vi `diff --check`): git coi tep co NUL la nhi phan va
+cay-kho/ops/ci_duong_nhanh_test.py:956:        bang(git(kho, "diff", "--check", f"{goc}...{dau}", kiem=False).returncode == 0,
+cay-kho/ops/ci_duong_nhanh_test.py:983:            bang(git(kho, f"--attr-source={goc}", "diff", "--check", f"{goc}...{dau}", kiem=False).returncode == 0,
+cay-kho/ops/ci_duong_nhanh_test.py:998:    "diff --check": lambda a: "--check" in a,
+cay-kho/ops/ci_duong_nhanh_test.py:1059:                 and git(kho, f"--attr-source={goc}", "diff", "--check", f"{goc}...{dau2}", kiem=False).returncode == 0,
+cay-kho/ops/ci_duong_nhanh_test.py:1798:    YAML (kiem_yaml khong bat ho) phai tu DO qua diff --check."""
+cay-kho/ops/ci_duong_nhanh_test.py:1803:            bang(rc == 1 and "diff --check" in log and duong in log, f"{duong}: dau xung dot phai DO qua diff --check: rc={rc}: {log}")
+cay-kho/ops/ci_duong_nhanh_test.py:2032:    bang(len(loi) == 1 and "KHONG DO DUOC" in loi[0], f"git diff --check NEM phai thanh loi, duoc {loi}")
+cay-kho/ops/ci_duong_nhanh_test.py:2034:    bang(len(loi) == 1 and "rc=128" in loi[0], f"git diff --check rc=128 phai thanh loi, duoc {loi}")
+cay-kho/ops/ci_duong_nhanh_test.py:2278:        'DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)': "needs.chuan-bi.outputs.che_do == 'duong_nhanh'",
+cay-kho/ops/ci_duong_nhanh_test.py:2380:        ('DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)', {'if': "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}", 'shell': 'bash', 'env': {'CI_DUONG_NHANH_SU_KIEN': '${{ github.event_name }}', 'CI_DUONG_NHANH_GOC': '${{ github.event.pull_request.base.sha }}', 'CI_DUONG_NHANH_DAU': '${{ github.event.pull_request.head.sha }}', 'CI_DUONG_NHANH_MERGE': '${{ github.sha }}'}}),
+cay-kho/ops/ci_duong_nhanh_test.py:2495:    ('gate-ops', 'DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)'): 'set -euo pipefail\npython .claude/dev/packet_loop.py doctrine-scan --root .\npython ops/ci_duong_nhanh.py kiem-re\n',
+cay-kho/ops/ci_duong_nhanh_test.py:3195:    ("diff_check_bo_tinh_chinh_whitespace", _ma('"-c", CAU_HINH_WHITESPACE, "diff", "--check"', '"diff", "--check"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3196:    ("diff_check_bo_check", _ma('"diff", "--check", "--no-renames"', '"diff", "--no-renames"'), ("t20c_kiem_re_dau_xung_dot_do",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3353:    ("yml_buoc_kiem_re_luon_chay", _yml("      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}\n", "      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)\n"), ("y08_buoc_kiem_re_o_gate_ops",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3404:    ("diff_check_nem_thanh_dat", _ma('        return [f"KHONG DO DUOC: git diff --check nem {type(e).__name__}"]', "        return []"), ("t20m_diff_check_nem_hoac_git_loi_do",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3407:    ("diff_check_bo_mien_space_before_tab", _ma('CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"', 'CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3408:    ("diff_check_bo_mien_blank_at_eof", _ma('CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"', 'CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-space-before-tab"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3409:    ("diff_check_bo_mien_blank_at_eol", _ma('CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab"', 'CAU_HINH_WHITESPACE = "core.whitespace=-blank-at-eof,-space-before-tab"'), ("t20d_kiem_re_khoang_trang_cuoi_dong_khong_do",)),
+cay-kho/ops/ci_duong_nhanh_test.py:3447:    # ---- luot 9: pham vi diff --check — tep nhi phan
+cay-kho/ops/ci_duong_nhanh_test.py:3455:    ("diff_check_chi_md", _ma('diff", "--check", "--no-renames", f"{goc}...{dau}"]', 'diff", "--check", "--no-renames", f"{goc}...{dau}", "--", "*.md"]'), ("t20r_kiem_re_dau_xung_dot_moi_duoi_tep_do",)),
+cay-kho/scripts/tl_selftest.py:22705:        # thi công r2 chạy `adr-song` + `doctrine-scan` + `doc-claims-check --strict` + `git diff --check`
+cay-kho/scripts/tl_selftest.py:22755:        # chạy `tl selftest`": executor push `4711e874` sau `adr-song` + `doctrine-scan` + `git diff --check`, CI đỏ

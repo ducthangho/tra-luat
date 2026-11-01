@@ -1,0 +1,89 @@
+{
+  "merge_kind": "synthetic local only; actual GitHub merge ref KHÔNG ĐO ĐƯỢC",
+  "merge": "5f4917c9fe9e8c34b64fc3745fb2e890c2afc915",
+  "merge_tree": "e3d867387abbcee063ab7b72803655d826bb0964",
+  "head_tree": "e3d867387abbcee063ab7b72803655d826bb0964",
+  "classified": [
+    "duong_nhanh",
+    "DUONG_NHANH: toan bo 180 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"
+  ],
+  "kiem_re_rc": 0,
+  "kiem_re_output": "DUONG_NHANH: toan bo 180 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh\nDUONG_NHANH: kiem-re DAT (180 tep doi, 0 loi)\n",
+  "diff_check_calls": [
+    {
+      "argv": [
+        "git",
+        "--attr-source=180039c4b791fba4c89991623151cbb7378fce53",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "180039c4b791fba4c89991623151cbb7378fce53...0e824fe4c1ac674081c93c6f2098e5433c932890"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "t20d": "PASS",
+  "python_scan_files": 131,
+  "parse_failures": [],
+  "exact_diff_check_call_sites": [
+    {
+      "path": "ops/ci_duong_nhanh.py",
+      "line": 466,
+      "code": "chay([\"git\", \"--attr-source=\" + goc, \"-c\", CAU_HINH_WHITESPACE, \"diff\", \"--check\", \"--no-renames\", f\"{goc}...{dau}\"],\n                 cwd=kho, capture_output=True)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 865,
+      "code": "git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 870,
+      "code": "git(kho, \"-c\", \"core.whitespace=-\" + \",-\".join(\n                x for x in (\"blank-at-eol\", \"blank-at-eof\", \"space-before-tab\") if x != loai),\n                \"diff\", \"--check\", f\"{goc}...{dau}\", \"--\", tep, kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 936,
+      "code": "git(kho, \"-c\", \"core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab\",\n                      \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 956,
+      "code": "git(kho, \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 983,
+      "code": "git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau}\", kiem=False)"
+    },
+    {
+      "path": "ops/ci_duong_nhanh_test.py",
+      "line": 1059,
+      "code": "git(kho, f\"--attr-source={goc}\", \"diff\", \"--check\", f\"{goc}...{dau2}\", kiem=False)"
+    }
+  ],
+  "workflow_steps": [
+    {
+      "job": "chuan-bi",
+      "name": "phan loai diff (duong nhanh ho so - chi pull_request)",
+      "condition": "${{ github.event_name == 'pull_request' }}",
+      "run": "python3 ops/ci_duong_nhanh.py"
+    },
+    {
+      "job": "gate-ops",
+      "name": "DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)",
+      "condition": "${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}",
+      "run": "set -euo pipefail\npython .claude/dev/packet_loop.py doctrine-scan --root .\npython ops/ci_duong_nhanh.py kiem-re\n"
+    },
+    {
+      "job": "gate-ops",
+      "name": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+      "condition": "runner.os == 'Linux'",
+      "run": "python ops/ci_duong_nhanh_test.py"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+<unknown>:3724: SyntaxWarning: invalid escape sequence '\d'
+{
+  "merge_kind": "synthetic local only; actual GitHub merge ref KHÔNG ĐO ĐƯỢC",
+  "merge": "5f4917c9fe9e8c34b64fc3745fb2e890c2afc915",
+  "merge_tree": "e3d867387abbcee063ab7b72803655d826bb0964",
+  "head_tree": "e3d867387abbcee063ab7b72803655d826bb0964",
+  "classified": [
+    "duong_nhanh",
+    "DUONG_NHANH: toan bo 180 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"
+  ],
+  "kiem_re_rc": 0,
+  "kiem_re_output": "DUONG_NHANH: toan bo 180 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh\nDUONG_NHANH: kiem-re DAT (180 tep doi, 0 loi)\n",
+  "diff_check_calls": [
+    {
+      "argv": [
+        "git",
+        "--attr-source=180039c4b791fba4c89991623151cbb7378fce53",
+        "-c",
+        "core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab",
+        "diff",
+        "--check",
+        "--no-renames",
+        "180039c4b791fba4c89991623151cbb7378fce53...0e824fe4c1ac674081c93c6f2098e5433c932890"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "t20d": "PASS",
+  "python_scan_files": 131,
+  "parse_failures": []
+}
+exact diff --check call sites [('ops/ci_duong_nhanh.py', 466), ('ops/ci_duong_nhanh_test.py', 865), ('ops/ci_duong_nhanh_test.py', 870), ('ops/ci_duong_nhanh_test.py', 936), ('ops/ci_duong_nhanh_test.py', 956), ('ops/ci_duong_nhanh_test.py', 983), ('ops/ci_duong_nhanh_test.py', 1059)]

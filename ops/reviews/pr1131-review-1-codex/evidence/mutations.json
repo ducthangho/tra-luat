@@ -1,0 +1,76 @@
+[
+  {
+    "round": 1,
+    "cmd": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "changed_field": "verdict_sha256",
+    "before": "a28c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65",
+    "after": "028c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65",
+    "rc": 1,
+    "reported": [
+      "pr1119-review-1-codex-verdict.receipt.yaml"
+    ],
+    "only_expected": true,
+    "stdout": "\nbien_nhan_v2: 292 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 346\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\n",
+    "stderr": "  ĐỎ  pr1119-review-1-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1119-review-1-codex-verdict.receipt.yaml: blob tại `evidence_url` băm a28c2594116b… nhưng biên nhận khai `verdict_sha256` 028c2594116b… — mỏ neo KHÔNG trỏ đúng thứ nó khai\nTỔNG: ĐỎ\n"
+  },
+  {
+    "round": 1,
+    "cmd": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/direct_tests.py",
+      "."
+    ],
+    "changed_field": "verdict_sha256",
+    "before": "a28c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65",
+    "after": "028c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65",
+    "rc": 1,
+    "reported": [
+      "pr1119-review-1-codex-verdict.receipt.yaml"
+    ],
+    "only_expected": true,
+    "stdout": "FAIL t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi AssertionError(\"pr1119-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 028c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65, tệp 'ops/reviews/pr1119-review-1-codex-verdict.md' thực a28c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\")\nPASS t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc\nPASS t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen\n",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\\s'\n  2. **Nhận nhầm văn xuôi.** `^\\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một\n/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\\d'\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ\nTraceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/direct_tests.py\", line 9, in <module>\n    getattr(m, name)()\n    ~~~~~~~~~~~~~~~~^^\n  File \"/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py\", line 1688, in t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi\n    bang(thuc == sha,\n    ~~~~^^^^^^^^^^^^^\n         f\"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. \"\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n         f\"Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc \"\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n         f\"biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\")\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py\", line 174, in bang\n    raise AssertionError(msg)\nAssertionError: pr1119-review-1-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 028c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65, tệp 'ops/reviews/pr1119-review-1-codex-verdict.md' thực a28c2594116bff50653a6486fa07fd97cb2ad5e6b440c43277ad644f2f014d65. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\n"
+  },
+  {
+    "round": 2,
+    "cmd": [
+      "python3",
+      "ops/bien_nhan_v2.py",
+      "--root",
+      "."
+    ],
+    "changed_field": "verdict_sha256",
+    "before": "7beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331",
+    "after": "0beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331",
+    "rc": 1,
+    "reported": [
+      "pr1119-review-2-codex-verdict.receipt.yaml"
+    ],
+    "only_expected": true,
+    "stdout": "\nbien_nhan_v2: 292 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 1 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 346\ncâu lịch sử: nợ L-REVIEW 1 · L-ANCESTRY 60 · L-SURFACE 0 · L-SURFACE chua_do_duoc 0\n",
+    "stderr": "  ĐỎ  pr1119-review-2-codex-verdict.receipt.yaml: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — pr1119-review-2-codex-verdict.receipt.yaml: blob tại `evidence_url` băm 7beb37162f9a… nhưng biên nhận khai `verdict_sha256` 0beb37162f9a… — mỏ neo KHÔNG trỏ đúng thứ nó khai\nTỔNG: ĐỎ\n"
+  },
+  {
+    "round": 2,
+    "cmd": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/direct_tests.py",
+      "."
+    ],
+    "changed_field": "verdict_sha256",
+    "before": "7beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331",
+    "after": "0beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331",
+    "rc": 1,
+    "reported": [
+      "pr1119-review-2-codex-verdict.receipt.yaml"
+    ],
+    "only_expected": true,
+    "stdout": "FAIL t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi AssertionError(\"pr1119-review-2-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 0beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331, tệp 'ops/reviews/pr1119-review-2-codex-verdict.md' thực 7beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\")\nPASS t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc\nPASS t27_phan_chung_verdict_duoi_HOA_thieu_muc_luc_phai_DO_tren_moi_nen\n",
+    "stderr": "/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py:3062: SyntaxWarning: invalid escape sequence '\\s'\n  2. **Nhận nhầm văn xuôi.** `^\\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một\n/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py:5205: SyntaxWarning: invalid escape sequence '\\d'\n  KHÔNG neo đầu dòng là `lease_publish: (\\d+)/(\\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ\nTraceback (most recent call last):\n  File \"/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/direct_tests.py\", line 9, in <module>\n    getattr(m, name)()\n    ~~~~~~~~~~~~~~~~^^\n  File \"/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py\", line 1688, in t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi\n    bang(thuc == sha,\n    ~~~~^^^^^^^^^^^^^\n         f\"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. \"\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n         f\"Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc \"\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n         f\"biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\")\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/claude-0/-home-user-tra-luat/67a05166-68ea-5948-af9b-66d84beeae6e/scratchpad/review1131b/work/head/ops/lease_publish_test.py\", line 174, in bang\n    raise AssertionError(msg)\nAssertionError: pr1119-review-2-codex-verdict.receipt.yaml: LỆCH BĂM — biên nhận khai 0beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331, tệp 'ops/reviews/pr1119-review-2-codex-verdict.md' thực 7beb37162f9a02089fea003b5db4261ada7f3c92d2b42d012c4db85b09d68331. Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.\n"
+  }
+]

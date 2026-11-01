@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Phản chứng cho `ops/cloud_agent_creds.py` + khối hook (CLOUD-SETUP-P2B-WIRE r1, `nghiem_thu` A–D, H, F2). Ca = hàm `<a-h><số>_…`;
 `nap` chạy con trên cây tạm có `scripts/tl.py` GIẢ, `cai-agy` in-process (tải giả ĐẾM lời gọi). Đột biến sửa BẢN SAO TẠM; chỉ `bang()`
-ném `TinHieuChotCa` (con thoát 3 + `DO:<ca>:`); lỗi vô can thoát 4 = TÍN DỤNG GIẢ; 5 = bỏ qua (Windows, hay cây rời không .git)."""
-import contextlib, ctypes, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
+ném `TinHieuChotCa` (con thoát 3 + `DO:<ca>:`); lỗi vô can thoát 4 = TÍN DỤNG GIẢ; 5 = bỏ qua (Windows, hay cây rời không .git).
+Ca `p3<a|b|c|s><số>_…` (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2 `nghiem_thu`): `ghi-nguoc` in-process trên Drive giả GIỮ TRẠNG THÁI;
+B trích NGUYÊN VĂN `agent_creds_put` từ references/Code.2.21.2q.gs, chạy bằng `node` với LockService/Drive/... giả."""
+import ast, atexit, base64, contextlib, ctypes, hashlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -13,9 +15,17 @@ for _s in (sys.stdout, sys.stderr):
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import bash_nen  # noqa: E402 — bộ giải `bash` dùng chung (#570)
+sys.path.insert(0, str(HERE.parent / "scripts"))
+import gas, gws_cred_store, tl_gws  # noqa: E401,E402 — CHÍNH các module helper import (sys.modules dùng chung ⇒ vá được)
+_CODEX_TAM = tempfile.mkdtemp(prefix="cac_codex_home_")   # nap/ghi-nguoc ghi/xoá DẤU ở CODEX_HOME: không bao giờ đụng ~/.codex thật
+os.environ["CODEX_HOME"] = _CODEX_TAM
+atexit.register(shutil.rmtree, _CODEX_TAM, True)
 
 MA = Path(os.environ.get("CAC_MA") or HERE / "cloud_agent_creds.py")
 HOOK = Path(os.environ.get("CAC_HOOK") or HERE.parent / ".claude/hooks/session-start.sh")
+GS = Path(os.environ.get("CAC_GS") or HERE.parent / "references/Code.2.21.2q.gs")
+SETTINGS = Path(os.environ.get("CAC_SETTINGS") or HERE.parent / ".claude/settings.json")
+BASE_P3 = "8f123b27b338e5e173a668209eb4904f49dd611b"   # base của lease wp1089 — vế âm S1
 BASE = "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"   # base của lease wp1039 — vế âm L6a
 LA_WINDOWS = os.name == "nt"
 SPEC = HERE / "specs" / "cloud-setup-p2b-wire-r1.md"   # B8 so với CHÍNH bảng "Hằng ghim agy" của spec đóng băng, không chép lại
@@ -35,10 +45,10 @@ def _posix():
 def nap_mod():
     (spec := importlib.util.spec_from_file_location("cloud_agent_creds_duoi_test", MA)).loader.exec_module(m := importlib.util.module_from_spec(spec))
     return m
-def _git_base(path):   # tệp ở BASE; chỉ tha (BoQua) khi cây là bản sao rời không `.git` (CLAUDE.md, "ca có MẶT ≠ ca có ĐO")
+def _git_base(path, base=BASE):   # tệp ở BASE; chỉ tha (BoQua) khi cây là bản sao rời không `.git` (CLAUDE.md, "ca có MẶT ≠ ca có ĐO")
     if not (HERE.parent / ".git").exists():
         raise BoQua("cây không có .git — không đo được vế âm trên base")
-    r = subprocess.run(["git", "-C", str(HERE.parent), "show", f"{BASE}:{path}"], capture_output=True)
+    r = subprocess.run(["git", "-C", str(HERE.parent), "show", f"{base}:{path}"], capture_output=True)
     bang(r.returncode == 0, f"không đọc được {path} ở base: {r.stderr[-200:]!r}")
     return r.stdout.decode("utf-8")
 
@@ -313,7 +323,261 @@ def h3_ten_nang_luc():
                for v in (HOOK.read_text(encoding="utf-8"), _git_base(".claude/hooks/session-start.sh"))]
     bang({"agent-creds-bootstrap", "agy-ghim"} <= moi, f"thiếu tên năng lực mới: {moi}")
     bang(cu <= moi, f"mất tên cũ: {cu - moi}")
-CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r"[a-h]\d+_\w+", k) and callable(v)}
+# ---------- P3 (#1089): `ghi-nguoc` — A/C in-process, Drive giả GIỮ TRẠNG THÁI ----------
+SEN_KHOA, SEN_RT, SEN_ENV = "SENTINEL-khoa-p3-abcdefghijklmnop", "SENTINEL-refresh-p3-77c1", "SENTINEL-env-p3-claude"
+LR_CU, LR_MOI, TEN_DAU, TIEN_TO = "2026-10-27T11:35:54.511Z", "2026-11-01T02:00:00.000Z", ".tra-luat-agent-creds-dau.json", "agent_creds_ghi_nguoc: "
+def _auth(lr):
+    return {"auth_mode": "chatgpt", "tokens": {"refresh_token": SEN_RT, "access_token": "a"}, "last_refresh": lr}
+def _bundle(rev, lr, claude="tok-claude-cu", ag="ag-cu"):
+    return gws_cred_store.encrypt(json.dumps({"schema": 1, "rev": rev, "codex_auth": _auth(lr), "claude_oauth_token": claude,
+                                              "antigravity_api_key": ag, "updated_at": "x"}).encode("utf-8"), SEN_KHOA)
+def _md5(b):
+    return hashlib.md5(b).hexdigest()
+class DriveGia:
+    """byte + md5 đổi THẬT sau mỗi lần ghi thành công; đếm tải/ping/post/ghi. `chen`: phiên khác ghi đúng trước lần post đầu."""
+    def __init__(s, blob, ping="2.21.2q", ma=None, md5_sai=False, sau_ghi=None, chen=None, treo=0):
+        s.blob, s.ping, s.ma, s.md5_sai, s.sau_ghi, s.chen, s.treo = blob, ping, ma, md5_sai, sau_ghi, chen, treo
+        s.dem, s.gui = {"tai": 0, "ping": 0, "post": 0, "ghi": 0}, []
+    def tai(s, fid, timeout=120.0):
+        s.dem["tai"] += 1
+        return s.sau_ghi if s.sau_ghi and s.dem["ghi"] else s.blob
+    def get(s, action, **kw):
+        s.dem["ping"] += 1
+        if s.ping == "nem":
+            raise RuntimeError("Thiếu TL_WEBAPP/TL_TOKEN")
+        return {"ok": False, "error": "webapp GET ping: URLError"} if s.ping is None else {"ok": True, "version": s.ping}
+    def post(s, action, fileId=None, expect_md5=None, b64=None, timeout=None, **kw):
+        s.dem["post"] += 1
+        s.gui.append(b64)
+        if s.treo:
+            return time.sleep(s.treo) or {"ok": False, "error": "TREO"}
+        if s.chen and s.dem["post"] == 1:
+            s.blob = s.chen
+        if s.ma:
+            return {"ok": False, "error": s.ma}
+        if fileId != tl_gws.AGENT_CREDS_FILEID or expect_md5 != _md5(s.blob):
+            return {"ok": False, "error": "CAS_CONFLICT", "md5": _md5(s.blob)}
+        s.blob, s.dem["ghi"] = base64.b64decode(b64), s.dem["ghi"] + 1
+        return {"ok": True, "md5": "0" * 32 if s.md5_sai else _md5(s.blob), "size": len(s.blob)}
+class _Buf(io.StringIO):   # `main` gọi reconfigure trên stdout/stderr
+    def reconfigure(self, **k):
+        pass
+def chay_gn(dr, dia=LR_MOI, khoa=SEN_KHOA, remote="true", neu_doi=False, dau=None, han=25.0, auth=None, argv=None):
+    m = nap_mod()
+    with tempfile.TemporaryDirectory(prefix="cac_gn_") as t:
+        ch, out, err = Path(t), _Buf(), _Buf()
+        (ch / "auth.json").write_text(json.dumps(_auth(dia)) if auth is None else auth, encoding="utf-8")
+        dau is None or (ch / TEN_DAU).write_text(dau, encoding="utf-8")
+        auth_truoc, env = (ch / "auth.json").read_bytes(), {k: v for k, v in (("CLAUDE_CODE_REMOTE", remote), ("TL_MASTER_KEY", khoa)) if v is not None}
+        with mock.patch.dict(os.environ, {"CODEX_HOME": t, "CLAUDE_CODE_OAUTH_TOKEN": SEN_ENV, "GEMINI_API_KEY": SEN_ENV, **env}), \
+             mock.patch.object(tl_gws, "_public_curl_bytes", dr.tai), mock.patch.object(gas, "get", dr.get), mock.patch.object(gas, "post", dr.post), \
+             contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            t0 = time.monotonic()
+            rc = m.ghi_nguoc(neu_doi, env=env, han=han) if argv is None else m.main(argv)
+            giay = time.monotonic() - t0
+        f = ch / TEN_DAU
+        return SimpleNamespace(rc=rc, ra=out.getvalue() + err.getvalue(), giay=giay, dr=dr, auth_doi=(ch / "auth.json").read_bytes() != auth_truoc,
+                               dau=f.read_text(encoding="utf-8") if f.exists() else None, quyen=f.stat().st_mode & 0o777 if f.exists() else None,
+                               dong=[d for d in (out.getvalue() + err.getvalue()).splitlines() if d.startswith(TIEN_TO)])
+def _mang(k):
+    return k.dr.dem["tai"] + k.dr.dem["ping"] + k.dr.dem["post"]
+def _trang(k, s):
+    bang(k.rc == 0 and len(k.dong) == 1 and k.dong[0].startswith(f"{TIEN_TO}{s}"), f"mong {s}: rc={k.rc} {k.dong} {k.ra[-300:]!r}")
+def p3a1_khong_phai_cloud():
+    for remote in (None, "false"):
+        k = chay_gn(DriveGia(_bundle(3, LR_CU)), remote=remote)
+        _trang(k, "BỎ QUA — không phải phiên cloud")
+        bang(_mang(k) == 0, f"remote={remote!r}: {k.dr.dem}")
+def p3a2_khoa_yeu():
+    for khoa in (None, "abcdefghijkl" + "a" * 19, "abcdefghijk" + "a" * 29):
+        k = chay_gn(DriveGia(_bundle(3, LR_CU)), khoa=khoa)
+        _trang(k, "BỎ QUA")
+        bang(_mang(k) == 0, f"khoá {len(khoa or '')} ký tự: {k.dr.dem}")
+    k = chay_gn(DriveGia(_bundle(3, LR_CU), ping="2.21.2p"), khoa="abcdefghijkl" + "a" * 20)
+    bang(k.dr.dem["ping"] == 1 and not k.dong[0].startswith(f"{TIEN_TO}BỎ QUA"), f"khoá 32/12 phải đi tiếp: {k.dong}")
+def p3a3_cong_phien_ban():
+    for v in ("2.21.2p", "2.21.2", "abc", None, "nem"):
+        k = chay_gn(DriveGia(_bundle(3, LR_CU), ping=v))
+        _trang(k, "KHÔNG HỖ TRỢ — webapp " + ("không đo được" if v in (None, "nem") else v))
+        bang(k.dr.dem["post"] == 0, f"{v!r}: post {k.dr.dem}")
+    for v in ("2.21.2q", "2.22.0", "2.21.10"):
+        k = chay_gn(DriveGia(_bundle(3, LR_CU), ping=v))
+        _trang(k, "ĐÃ GHI — rev=4")
+def p3a4_da_cu():
+    for lr in (LR_MOI, "2026-11-02T00:00:00Z"):
+        k = chay_gn(DriveGia(_bundle(3, lr)))
+        _trang(k, "ĐÃ CŨ — bỏ ghi")
+        bang(k.dr.dem["post"] == 0 and not k.auth_doi, f"bundle {lr}: post {k.dr.dem}, auth.json đổi={k.auth_doi}")
+def p3a5_da_ghi_giu_khoa_cu():
+    k = chay_gn(DriveGia(_bundle(3, LR_CU)))
+    _trang(k, "ĐÃ GHI — rev=4")
+    p = json.loads(gws_cred_store.decrypt(k.dr.blob, SEN_KHOA))
+    bang(p["codex_auth"] == _auth(LR_MOI) and p["schema"] == 1 and p["rev"] == 4, f"payload: rev={p.get('rev')}")
+    bang(p.get("claude_oauth_token") == "tok-claude-cu" and p.get("antigravity_api_key") == "ag-cu", "rơi/đổi khoá cũ")
+    bang(SEN_ENV not in json.dumps(p), "khoá từ môi trường lọt vào payload")
+def p3a6_cas_tai_lai_dung_ban_moi():
+    k = chay_gn(DriveGia(_bundle(3, LR_CU), chen=_bundle(10, "2026-10-30T00:00:00Z", claude="tok-phien-khac")))
+    _trang(k, "ĐÃ GHI — rev=11")
+    p = json.loads(gws_cred_store.decrypt(k.dr.blob, SEN_KHOA))
+    bang(k.dr.dem["post"] == 2 and k.dr.dem["tai"] >= 2 and p["rev"] == 11 and p["claude_oauth_token"] == "tok-phien-khac", f"{k.dr.dem} rev={p['rev']}")
+def p3a7_cas_lap_dung_ba():
+    for ma in ("CAS_CONFLICT", "LOCK_BUSY"):
+        k = chay_gn(DriveGia(_bundle(3, LR_CU), ma=ma))
+        _trang(k, "KHÔNG ĐO ĐƯỢC — xung đột CAS lặp")
+        bang(k.dr.dem["post"] == 3, f"{ma}: {k.dr.dem['post']} lời gọi post")
+def p3a8_readback_lech():
+    for dr in (DriveGia(_bundle(3, LR_CU), md5_sai=True), DriveGia(_bundle(3, LR_CU), sau_ghi=_bundle(9, LR_MOI))):
+        k = chay_gn(dr, dau='{"last_refresh": "x", "md5": null}')
+        _trang(k, "KHÔNG ĐO ĐƯỢC — readback lệch")
+        bang(k.dau == '{"last_refresh": "x", "md5": null}', f"dấu bị đổi: {k.dau!r}")
+SC = (dict(remote=None), dict(khoa="ngan"), dict(ping="2.21.2p"), dict(lr_bundle=LR_MOI), dict(), dict(chen=1), dict(ma="CAS_CONFLICT"),
+      dict(ma="WEBAPP_LOI"), dict(md5_sai=True), dict(auth="{hỏng"))
+def p3a9_mot_dong_khong_lo():
+    for sc in SC:
+        sc = dict(sc)
+        dr = DriveGia(_bundle(3, sc.pop("lr_bundle", LR_CU)), **{k: sc.pop(k) for k in ("ping", "ma", "md5_sai") if k in sc},
+                      chen=_bundle(10, LR_CU) if sc.pop("chen", None) else None)
+        k = chay_gn(dr, **sc)
+        bang(len(k.dong) == 1 and k.ra.count(TIEN_TO) == 1, f"{sc}: {len(k.dong)} dòng")
+        lo = [x for x in (SEN_KHOA, SEN_RT, *[g for g in dr.gui if g]) if x in k.ra]
+        bang(not lo, f"{sc}: đầu ra lộ {len(lo)} chuỗi bí mật")
+def p3a10_rc0_va_cu_phap():
+    k = chay_gn(DriveGia(_bundle(3, LR_CU)), argv=["ghi-nguoc", "--la"])
+    bang(k.rc == 2 and _mang(k) == 0, f"--la: rc={k.rc} {k.dr.dem}")
+    for dr in (DriveGia(_bundle(3, LR_CU), ma="CAS_CONFLICT"), DriveGia(_bundle(3, LR_CU), ma="KHAC")):
+        k = chay_gn(dr, argv=["ghi-nguoc"])
+        bang(k.rc == 0 and len(k.dong) == 1, f"CAS thua: rc={k.rc} {k.dong}")
+def p3a11_han_chot():
+    k = chay_gn(DriveGia(_bundle(3, LR_CU), treo=2.5), han=0.5)
+    _trang(k, "KHÔNG ĐO ĐƯỢC — quá 0.5 s")
+    bang(k.giay < 1.5, f"xong sau {k.giay:.1f} s (hạn 0.5)")
+SAU_TEN = ("AGENT_CREDS_FILEID", "_AGENT_CREDS_KEYS", "_MASTER_KEY_MIN_LEN", "_MASTER_KEY_MIN_DISTINCT", "_last_refresh_key", "_public_curl_bytes")
+def p3a12_khong_dinh_nghia_lai_ten_tl_gws():
+    cay, gan, nhap = ast.parse(MA.read_text(encoding="utf-8")), [], {}
+    for n in ast.walk(cay):   # (a) AST mọi cấp
+        if isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and n.id in SAU_TEN:
+            gan.append(n.id)
+        elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name in SAU_TEN:
+            gan.append(n.name)
+        elif isinstance(n, (ast.Import, ast.ImportFrom)):
+            for a in n.names:
+                if (ten := a.asname or a.name.split(".")[0]) in SAU_TEN:
+                    (nhap.setdefault(ten, []).append(1) if isinstance(n, ast.ImportFrom) and n.module == "tl_gws" else gan.append(ten))
+    bang(not gan, f"(a) helper tự gắn tên của tl_gws: {gan}")
+    tran = {n.id for n in ast.walk(cay) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load) and n.id in SAU_TEN}
+    bang(all(len(nhap.get(t, [])) == 1 for t in tran), f"(a) tên trần không import đúng một lần từ tl_gws: {tran}")
+    m = nap_mod()   # (b) chỉ hai hàm — hằng nhỏ/chuỗi intern làm `is` vô nghĩa (errata r2)
+    for ten in ("_last_refresh_key", "_public_curl_bytes"):
+        bang(not hasattr(m, ten) or getattr(m, ten) is getattr(tl_gws, ten), f"(b) {ten} không phải đối tượng của tl_gws")
+def p3c1_nap_ghi_xoa_dau():
+    _posix()
+    for in_, co_dau in (("agent_creds: ĐÃ NẠP — rev=3; codex auth.json → /x (0600)\n", True),
+                        ("agent_creds: ĐÃ NẠP — rev=3; codex auth.json: giữ bản đĩa (last_refresh mới hơn hoặc bằng)\n", False),
+                        ("agent_creds: KHÔNG ĐO ĐƯỢC — y\n", False)):
+        with tempfile.TemporaryDirectory() as t:
+            (f := Path(t) / TEN_DAU).write_text('{"last_refresh": "cu", "md5": null}', encoding="utf-8")
+            (Path(t) / "auth.json").write_text(json.dumps(_auth(LR_MOI)), encoding="utf-8")
+            chay_nap({"in": in_}, them={"CODEX_HOME": t})
+            d = json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
+            bang((d == {"last_refresh": LR_MOI, "md5": None} and f.stat().st_mode & 0o777 == 0o600) if co_dau else d is None, f"{in_.strip()}: dấu {d}")
+def p3c2_neu_doi():
+    k = chay_gn(DriveGia(_bundle(3, LR_CU)), neu_doi=True, dau=json.dumps({"last_refresh": LR_MOI, "md5": None}))
+    bang(k.ra == "" and _mang(k) == 0, f"dấu == đĩa: {k.ra!r} {k.dr.dem}")
+    for dau in (json.dumps({"last_refresh": LR_CU, "md5": None}), None, "[1]"):
+        k = chay_gn(DriveGia(_bundle(3, LR_CU)), neu_doi=True, dau=dau)
+        bang(k.dr.dem["tai"] >= 1 and len(k.dong) == 1, f"dấu {dau!r}: phải đi mạng {k.dr.dem}")
+def p3c3_dau_sau_ghi_va_cu():
+    k = chay_gn(DriveGia(_bundle(3, LR_CU)))
+    bang(k.dau and json.loads(k.dau) == {"last_refresh": LR_MOI, "md5": _md5(k.dr.blob)} and (LA_WINDOWS or k.quyen == 0o600), f"sau ĐÃ GHI: {k.dau}")
+    k = chay_gn(DriveGia(b := _bundle(3, "2026-11-05T00:00:00Z")))
+    bang(k.dau and json.loads(k.dau) == {"last_refresh": "2026-11-05T00:00:00Z", "md5": _md5(b)}, f"sau ĐÃ CŨ: {k.dau}")
+    bang(SEN_RT not in k.dau and "tokens" not in k.dau, "tệp dấu chứa token")
+# ---------- P3 B: `agent_creds_put` trích NGUYÊN VĂN từ Code.2.21.2q.gs, chạy bằng node ----------
+JS_GIA = r"""const c = require('crypto'), st = JSON.parse(process.argv[2]), nk = [];
+let tep = Buffer.from(st.tep, 'base64'), ghi = 0, doc = 0;
+const md5 = b => c.createHash('md5').update(b).digest('hex');
+globalThis.PropertiesService = {getScriptProperties: () => ({getProperty: k => (st.prop && k === 'TL_AGENT_CREDS_FILEID') ? st.prop : null})};
+globalThis.LockService = {getScriptLock: () => ({tryLock: ms => (nk.push('tryLock'), st.lock !== false), releaseLock: () => nk.push('releaseLock')})};
+globalThis.Utilities = {newBlob: (b, mime) => ({b, mime}), base64Decode: s => {
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(s)) throw new Error('Could not decode string.');
+  return Array.from(Buffer.from(s, 'base64')).map(x => x > 127 ? x - 256 : x); }};
+globalThis.Drive = {Files: {get: (id, o) => (nk.push('get'), doc++, {md5Checksum: md5(tep)}),
+  update: (r, id, blob, o) => { nk.push('update'); if (st.nem) throw new Error('ghi lỗi');
+    ghi++; tep = Buffer.from(blob.b.map(x => x & 255)); return {id}; }}};
+globalThis.DriveApp = {};
+"""
+JS_CHAY = r"""
+let ra; try { ra = dispatchAction_('agent_creds_put', st.p); } catch (e) { ra = {nem: String(e.message)}; }
+console.log(JSON.stringify({ra, nk, ghi, doc, sha: c.createHash('sha256').update(tep).digest('hex'), md5: md5(tep)}));
+"""
+def _node():
+    if not (n := shutil.which("node")):
+        bang(not (HERE.parent / ".git").exists(), "thiếu node trong kho có .git — ca B phải ĐO, không được bỏ qua")
+        raise BoQua("cây rời không .git và không có node")
+    return n
+def _trich_gs():
+    s = GS.read_text(encoding="utf-8")
+    i, j = s.find("/* ============ AGENT CREDS (v2.21.2q, #1089) ============ */"), s.find("/* ============ /AGENT CREDS ============ */")
+    case = [d for d in s.splitlines() if d.strip().startswith("case 'agent_creds_put':")]
+    bang(0 <= i < j, "không tìm thấy khối AGENT CREDS trong Code.2.21.2q.gs")
+    return s[i:j] + "\nfunction dispatchAction_(action, p){ switch(action){\n" + "\n".join(case) + "\n    default: throw new Error('Action không hỗ trợ: '+action);\n  }\n}\n"
+TEP0, FID = b"ban-cu-cua-tl_agent_creds.enc", "fid-dung"
+def chay_b(p=None, tep=TEP0, prop=FID, **st):
+    with tempfile.TemporaryDirectory(prefix="cac_gs_") as t:
+        (js := Path(t) / "b.js").write_text(JS_GIA + _trich_gs() + JS_CHAY, encoding="utf-8")
+        r = subprocess.run([_node(), str(js), json.dumps({"tep": base64.b64encode(tep).decode(), "prop": prop, "p": p or {}, **st})],
+                           capture_output=True, timeout=60)
+    bang(r.returncode == 0, f"node rc={r.returncode}: {r.stderr[-300:]!r}")
+    return SimpleNamespace(**json.loads(r.stdout))
+def _p(blob=b"ban-moi", md5=None, fid=FID):
+    return {"fileId": fid, "expect_md5": _md5(TEP0) if md5 is None else md5, "b64": base64.b64encode(blob).decode()}
+def p3b1_cas_khop_thi_ghi():
+    k = chay_b(_p(b"ban-moi"))
+    bang(k.ra.get("ok") is True and k.ghi == 1 and k.md5 == _md5(b"ban-moi") == k.ra.get("md5") and k.ra.get("size") == 7, f"{k.ra} ghi={k.ghi}")
+def p3b2_cas_lech_khong_ghi():
+    k = chay_b(_p(md5="f" * 32))
+    bang(k.ra == {"ok": False, "error": "CAS_CONFLICT", "md5": _md5(TEP0)} and k.ghi == 0 and k.sha == hashlib.sha256(TEP0).hexdigest(), f"{k.ra} ghi={k.ghi}")
+def p3b3_tham_so_sai_khong_ghi():
+    for p, prop, ma in (({**_p(), "expect_md5": None}, FID, "EXPECT_MD5_REQUIRED"), (_p(md5="abc"), FID, "EXPECT_MD5_REQUIRED"),
+                        (_p(), None, "AGENT_CREDS_NOT_CONFIGURED"), (_p(fid="fid-khac"), FID, "AGENT_CREDS_FILEID_MISMATCH")):
+        k = chay_b(p, prop=prop)
+        bang(k.ra == {"ok": False, "error": ma} and k.ghi == 0 and k.nk == [], f"mong {ma}: {k.ra} ghi={k.ghi} {k.nk}")
+def p3b4_co_blob():
+    for n, ok in ((65537, False), (0, False), (65536, True)):
+        k = chay_b(_p(b"x" * n))
+        bang((k.ra.get("ok") is True and k.ghi == 1) if ok else (k.ra == {"ok": False, "error": "BLOB_SIZE"} and k.ghi == 0), f"{n} byte: {k.ra}")
+def p3b5_lock_ban():
+    k = chay_b(_p(), lock=False)
+    bang(k.ra == {"ok": False, "error": "LOCK_BUSY"} and k.doc == 0 and k.ghi == 0, f"{k.ra} đọc={k.doc} ghi={k.ghi}")
+def p3b6_thu_tu_va_finally():
+    bang(chay_b(_p()).nk == ["tryLock", "get", "update", "get", "releaseLock"], "thứ tự lock/đọc/ghi/đọc/nhả sai")
+    k = chay_b(_p(), nem=True)
+    bang("nem" in k.ra and k.nk[-1] == "releaseLock", f"ném ở bước ghi mà không nhả lock: {k.nk}")
+def p3b7_ban_va_nhanh_case():
+    s = GS.read_text(encoding="utf-8")
+    bang(s.count("APP_VERSION = '2.21.2q'") == 1 and s.count("case 'agent_creds_put'") == 1, "APP_VERSION/case trong 2q")
+    bang((HERE.parent / "references/Code.2.21.2p.gs").read_text(encoding="utf-8").count("case 'agent_creds_put'") == 0, "vế âm: 2p đã có case")
+    bang(subprocess.run([_node(), "--check"], input=GS.read_bytes(), capture_output=True, timeout=60).returncode == 0, "node --check 2q đỏ")
+# ---------- P3 S: hook `Stop` trong .claude/settings.json ----------
+def _lenh_stop():
+    h = json.loads(SETTINGS.read_text(encoding="utf-8"))["hooks"].get("Stop") or []
+    bang(len(h) == 1 and len(h[0].get("hooks", [])) == 1, f"hooks.Stop phải đúng 1 hook: {h}")
+    return h[0]["hooks"][0]
+def p3s1_settings_co_stop():
+    h, cu = _lenh_stop(), json.loads(_git_base(".claude/settings.json", BASE_P3))
+    bang('ops/cloud_agent_creds.py\\" ghi-nguoc --neu-doi'.replace("\\", "") in h["command"].replace("\\", "") and "|| true" in h["command"] and h.get("timeout") == 30, f"Stop: {h}")
+    moi = json.loads(SETTINGS.read_text(encoding="utf-8"))
+    bang("Stop" not in cu["hooks"] and {k: v for k, v in moi["hooks"].items() if k != "Stop"} == cu["hooks"] and {k: v for k, v in moi.items() if k != "hooks"} == {k: v for k, v in cu.items() if k != "hooks"}, "khoá cũ của settings bị đổi")
+def p3s2_stop_chay_that():
+    _posix()
+    bash = bash_nen.tim_bash()[0]
+    bang(bash, "POSIX mà không có bash dùng được")
+    with tempfile.TemporaryDirectory() as t:
+        _ghi(Path(t) / "ops" / "cloud_agent_creds.py", f"import json, sys\nopen({str(Path(t, 'argv'))!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n")
+        r = subprocess.run([bash, "-c", _lenh_stop()["command"]], capture_output=True, text=True, timeout=60, env=dict(os.environ, CLAUDE_PROJECT_DIR=t))
+        goi = Path(t, "argv").read_text(encoding="utf-8").splitlines() if Path(t, "argv").exists() else []
+    bang(r.returncode == 0 and [json.loads(x) for x in goi] == [["ghi-nguoc", "--neu-doi"]], f"rc={r.returncode} argv={goi} {r.stderr[-200:]!r}")
+CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r"(?:[a-h]|p3[abcs])\d+_\w+", k) and callable(v)}
 # ---------- đột biến: (tên, tệp, chuỗi gốc | None, thay (chuỗi | hàm), ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần ----------
 def _doi_khoi_len_tieu_de(s):   # đặt khối ngay sau dòng tiêu đề pip, TRƯỚC lệnh pip thật
     i, j = s.index(MO), s.index(DONG) + len(DONG) + 1
@@ -373,6 +637,35 @@ DOT_BIEN = (
     ("H2_va_cham_ngoac", "hook", '"$GOC/ops/cloud_agent_creds.py" nap 2>&1', '"$GOC/ops/cloud_agent_creds.py][nap" 2>&1', "h2_khoi_song_sot_set_e"),
     ("H2_bo_qua_nap", "hook", 'MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap', 'MA_AC=0; : "$PY" "$GOC/ops/cloud_agent_creds.py" nap', "h2_khoi_song_sot_set_e"),
     ("H3_xoa_ten_cu", "hook", " rg-co-chay-truoc-cargo ", " ", "h3_ten_nang_luc"),
+    ("P3A1_bo_kiem_remote", "ma", '    if env.get("CLAUDE_CODE_REMOTE") != "true":\n        kq["v"] = ("BỎ QUA", "không phải phiên cloud")\n    elif', "    if", "p3a1_khong_phai_cloud"),
+    ("P3A2_nguong_31", "ma", "if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN or", "if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN - 1 or", "p3a2_khoa_yeu"),
+    ("P3A3_so_chuoi_tho", "ma", "if (b := ban_webapp(v)) is None or b < BAN_TOI_THIEU:", 'if (b := ban_webapp(v)) is None or v < "2.21.2q":', "p3a3_cong_phien_ban"),
+    ("P3A4_lon_hon_thay_lon_hon_bang", "ma", "if tl_gws._last_refresh_key(ca) >= k_dia:", "if tl_gws._last_refresh_key(ca) > k_dia:", "p3a4_da_cu"),
+    ("P3A5_doc_khoa_claude_tu_env", "ma", '"codex_auth": dia, "schema": 1,', '"codex_auth": dia, "claude_oauth_token": os.environ.get("CLAUDE_CODE_OAUTH_TOKEN", ""), "schema": 1,', "p3a5_da_ghi_giu_khoa_cu"),
+    ("P3A5_roi_khoa_cu", "ma", "**{k: cu[k] for k in tl_gws._AGENT_CREDS_KEYS if k in cu}, ", "", "p3a5_da_ghi_giu_khoa_cu"),
+    ("P3A6_payload_tren_ban_lan_1", "ma", "            cu = _giai(store, khoa, blob)\n", '            cu = locals().get("cu") or _giai(store, khoa, blob)\n', "p3a6_cas_tai_lai_dung_ban_moi"),
+    ("P3A7_mot_lan", "ma", "25.0, 3, (2, 21, 2", "25.0, 1, (2, 21, 2", "p3a7_cas_lap_dung_ba"),
+    ("P3A7_lap_vo_han", "ma", "    for _ in range(LAN_CAS):\n", "    for _ in iter(int, 1):\n", "p3a7_cas_lap_dung_ba"),
+    ("P3A8_bo_tai_lai", "ma", 'lai = _giai(store, khoa, tl_gws._public_curl_bytes(fid, timeout=con()) or b"")', "lai = moi", "p3a8_readback_lech"),
+    ("P3A9_in_payload_loi", "ma", "        if isinstance(r, dict) and r.get(\"ok\") is True:\n            break\n", "        print(base64.b64encode(gui).decode(), file=sys.stderr)\n        if isinstance(r, dict) and r.get(\"ok\") is True:\n            break\n", "p3a9_mot_dong_khong_lo"),
+    ("P3A10_rc_khac_0_khi_thua", "ma", "    return 0\ndef main(argv):", '    return 1 if kq.get("v", ("",))[0] == "KHÔNG ĐO ĐƯỢC" else 0\ndef main(argv):', "p3a10_rc0_va_cu_phap"),
+    ("P3A11_bo_han_chot", "ma", "        t.join(han)\n", "        t.join()\n", "p3a11_han_chot"),
+    ("P3A12_chep_hang_32", "ma", "def _codex_dir():", "_MASTER_KEY_MIN_LEN = 32\ndef _codex_dir():", "p3a12_khong_dinh_nghia_lai_ten_tl_gws"),
+    ("P3A12_chep_fileid", "ma", "def _codex_dir():", f"AGENT_CREDS_FILEID = {tl_gws.AGENT_CREDS_FILEID!r}\ndef _codex_dir():", "p3a12_khong_dinh_nghia_lai_ten_tl_gws"),
+    ("P3A12_dinh_nghia_lai_ham", "ma", "def _codex_dir():", inspect.getsource(tl_gws._last_refresh_key).replace("\n    import datetime as _dt\n", "\n    import datetime as _dt, re\n") + "def _codex_dir():", "p3a12_khong_dinh_nghia_lai_ten_tl_gws"),
+    ("P3C1_ghi_dau_bat_ke", "ma", 'if kl.startswith("ĐÃ NẠP — ") and "codex auth.json → " in kl and isinstance(d, dict):', "if isinstance(d, dict):", "p3c1_nap_ghi_xoa_dau"),
+    ("P3C2_so_khac", "ma", "and k_dia <= tl_gws._last_refresh_key(dau):", "and k_dia != tl_gws._last_refresh_key(dau):", "p3c2_neu_doi"),
+    ("P3C2_bo_doc_dau", "ma", "    if neu_doi and isinstance(dau := _doc_json(_codex_dir() / TEN_DAU), dict)", "    if neu_doi and isinstance(dau := None, dict)", "p3c2_neu_doi"),
+    ("P3C3_khong_dau_sau_cu", "ma", '            huy.is_set() or _ghi_dau(ca.get("last_refresh"), md5)\n', "", "p3c3_dau_sau_ghi_va_cu"),
+    ("P3B1_khong_ghi", "gs", "    Drive.Files.update({}, fid, Utilities.newBlob(bytes, 'application/octet-stream'),\n                       {supportsAllDrives:true, fields:'id'});\n", "", "p3b1_cas_khop_thi_ghi"),
+    ("P3B2_bo_so_cas", "gs", "    if (cur !== expect) return {ok:false, error:'CAS_CONFLICT', md5:cur};\n", "", "p3b2_cas_lech_khong_ghi"),
+    ("P3B3_bo_kiem_fileid", "gs", "  if (String(p.fileId == null ? '' : p.fileId) !== fid) return {ok:false, error:'AGENT_CREDS_FILEID_MISMATCH'};\n", "", "p3b3_tham_so_sai_khong_ghi"),
+    ("P3B4_nguong_lon_hon_bang", "gs", "bytes.length > AGENT_CREDS_MAX_BYTES_", "bytes.length >= AGENT_CREDS_MAX_BYTES_", "p3b4_co_blob"),
+    ("P3B5_doc_md5_truoc_lock", "gs", "error:'BLOB_SIZE'};\n  var lock = LockService.getScriptLock();\n", "error:'BLOB_SIZE'};\n  Drive.Files.get(fid, {fields:'md5Checksum', supportsAllDrives:true});\n  var lock = LockService.getScriptLock();\n", "p3b5_lock_ban"),
+    ("P3B6_bo_finally", "gs", "  } finally {\n    lock.releaseLock();\n  }\n}\n/* ============ /AGENT CREDS", "  } catch (e) { throw e; }\n}\n/* ============ /AGENT CREDS", "p3b6_thu_tu_va_finally"),
+    ("P3B7_xoa_case", "gs", "    case 'agent_creds_put': return doAgentCredsPut_(p);", "   ", "p3b7_ban_va_nhanh_case"),
+    ("P3S1_doi_lenh_subagentstop", "settings", '\\"$D/.claude/hooks/subagent_ghi_detect.py\\"\'"\n          }\n        ]\n      }\n    ],\n    "Stop"', '\\"$D/.claude/hooks/subagent_ghi_detect.py\\" --x\'"\n          }\n        ]\n      }\n    ],\n    "Stop"', "p3s1_settings_co_stop"),
+    ("P3S2_bo_or_true", "settings", "ghi-nguoc --neu-doi || true'", "ghi-nguoc --neu-doi'", "p3s2_stop_chay_that"),
 )
 TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_qua_except_doi_kieu", "ma", "    he = he.lower()\n", "    raise AttributeError('vo can')\n", "b9_luat_chon_nen", "TIN_DUNG_GIA"),
@@ -384,7 +677,7 @@ def phan_hang(rc, ra, ten_ca):
         return "GIET" if re.search(rf"^DO:{re.escape(ten_ca)}:", ra, re.M) else "TIN_DUNG_GIA"
     return {0: "SONG_SOT", 5: "BO_QUA", 4: "TIN_DUNG_GIA"}.get(rc, "HONG")
 def chay_dot_bien(ten, tep, cu, moi, ten_ca):
-    nguon = MA if tep == "ma" else HOOK
+    nguon, bien = {"ma": (MA, "CAC_MA"), "hook": (HOOK, "CAC_HOOK"), "gs": (GS, "CAC_GS"), "settings": (SETTINGS, "CAC_SETTINGS")}[tep]
     goc = nguon.read_text(encoding="utf-8")
     if cu is not None and (goc.count(cu) != 1 or cu == moi):
         return "HONG", f"neo phải xuất hiện đúng 1 lần (thấy {goc.count(cu)})"
@@ -393,7 +686,7 @@ def chay_dot_bien(ten, tep, cu, moi, ten_ca):
         for nhan, nd in (("goc", goc), ("db_" + ten, moi(goc) if cu is None else goc.replace(cu, moi))):
             (ban := Path(t) / f"{nhan}_{nguon.name}").write_text(nd, encoding="utf-8", newline="\n")
             r = subprocess.run([sys.executable, "-B", str(Path(__file__).resolve()), "--mot-ca", ten_ca], capture_output=True, timeout=600,
-                               env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", **{"CAC_MA" if tep == "ma" else "CAC_HOOK": str(ban)}))
+                               env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", **{bien: str(ban)}))
             kq.append((r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")))
             if nhan == "goc" and r.returncode != 0:
                 return ("BO_QUA", "") if r.returncode == 5 else ("HONG", f"ca đích không xanh trên bản gốc (rc={r.returncode}): {kq[0][1][-200:]}")

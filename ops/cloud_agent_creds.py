@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """`nap` (bootstrap + ĐÚNG MỘT dòng `agent_creds:` kể cả khi bootstrap thoát sớm/quá hạn/sai hợp đồng) và `cai-agy` (agy ghim,
-sha512, settings, CLAUDE_ENV_FILE) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039). Cả hai luôn rc 0. Test: *_test.py."""
-import contextlib, ctypes, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, time, urllib.request  # noqa: E401
+sha512, settings, CLAUDE_ENV_FILE) cho phiên cloud — spec CLOUD-SETUP-P2B-WIRE r1 (#1039). `ghi-nguoc [--neu-doi]` (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2): ghi
+NGƯỢC auth.json Codex vào tl_agent_creds.enc qua webapp `agent_creds_put` (CAS md5). Cả ba luôn rc 0. Test: *_test.py."""
+import base64, contextlib, ctypes, hashlib, io, json, math, os, platform, re, shutil, signal, subprocess, sys, tarfile, tempfile, threading, time, urllib.request  # noqa: E401
 from pathlib import Path
 
 GOC = Path(__file__).resolve().parent.parent
@@ -74,7 +75,7 @@ def nap(env=os.environ):
     khoa, rc = env.get("TL_MASTER_KEY") or "", None
     if not khoa:
         print("agent_creds: BỎ QUA — thiếu TL_MASTER_KEY")
-        return 0
+        return _dau_sau_nap("BỎ QUA") or 0
     han, tl = doc_timeout(env.get("TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY")), GOC / "scripts" / "tl.py"
     try:
         if not tl.is_file():
@@ -97,7 +98,8 @@ def nap(env=os.environ):
             dong_agent.append(d)
         else:
             print(d)
-    print("agent_creds: " + (het_han or ket_luan(dong_agent, rc)))
+    print("agent_creds: " + (kl := het_han or ket_luan(dong_agent, rc)))
+    _dau_sau_nap(kl)
     return 0  # nap: luôn 0 (mục tiêu 1)
 def _co_musl():
     try:
@@ -185,10 +187,125 @@ def cai_agy(env=os.environ):
         except Exception as e:  # noqa: BLE001 — mục tiêu 2: lỗi mạng/ghi chỉ là MỘT dòng `agy: …`, rc 0
             print(f"agy: ✗ lỗi {type(e).__name__}")
     return 0
+# ---------- ghi-nguoc (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2 mục tiêu 2–3) ----------
+TEN_DAU, HAN_GHI_NGUOC, LAN_CAS, BAN_TOI_THIEU = ".tra-luat-agent-creds-dau.json", 25.0, 3, (2, 21, 2, "q")
+def _codex_dir():   # cùng luật với tl_gws._codex_auth_path (bootstrap ghi auth.json ở đây)
+    return Path(os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex"))
+def _doc_json(p):
+    try:
+        return json.loads(Path(p).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+def _ghi_dau(last_refresh, md5):   # chỉ hai khoá; 0600; nguyên tử — không bao giờ chứa token
+    _ghi_nguyen_tu(_codex_dir() / TEN_DAU, (json.dumps({"last_refresh": last_refresh, "md5": md5}) + "\n").encode("utf-8"), 0o600)
+def _dau_sau_nap(kl):
+    """Mục tiêu 3: ghi dấu CHỈ KHI bootstrap đã đè auth.json bằng bản bundle (đĩa == bundle); mọi kết luận khác ⇒ xoá dấu."""
+    try:
+        d = _doc_json(_codex_dir() / "auth.json")
+        if kl.startswith("ĐÃ NẠP — ") and "codex auth.json → " in kl and isinstance(d, dict):
+            return _ghi_dau(d.get("last_refresh"), None)
+        (_codex_dir() / TEN_DAU).unlink(missing_ok=True)
+    except OSError:
+        pass
+def ban_webapp(v):   # (số, số, số, chữ) hoặc None — so theo bộ, không so chuỗi thô ("2.21.10" > "2.21.2q")
+    m = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)([a-z]?)", v) if isinstance(v, str) else None
+    return (int(m[1]), int(m[2]), int(m[3]), m[4]) if m else None
+def _ma_loi(r):   # chỉ mã dạng HẰNG (server tự đặt); văn bản tự do của tầng vận chuyển không được in
+    e = r.get("error") if isinstance(r, dict) else None
+    return e if isinstance(e, str) and re.fullmatch(r"[A-Z][A-Z0-9_]{0,63}", e) else "LỖI_GỌI"
+def _giai(store, khoa, blob):
+    p = json.loads(store.decrypt(blob, khoa).decode("utf-8"))
+    if not isinstance(p, dict) or p.get("schema") != 1 or type(p.get("rev")) is not int:
+        raise ValueError("schema")
+    return p
+def _lam_ghi_nguoc(neu_doi, khoa, het, huy):
+    """Trả (TRẠNG THÁI, chi tiết) hoặc None (im lặng). Không in gì — luồng chính in đúng MỘT dòng."""
+    con = lambda: max(0.5, het - time.monotonic())   # noqa: E731 — hạn còn lại cho từng lời gọi mạng
+    try:
+        if str(GOC / "scripts") not in sys.path:
+            sys.path.insert(0, str(GOC / "scripts"))
+        import gas, gws_cred_store as store, tl_gws  # noqa: E401 — dùng NGUYÊN tên của tl_gws qua thuộc tính (A12)
+    except Exception as e:  # noqa: BLE001
+        return "KHÔNG ĐO ĐƯỢC", f"không import được scripts/ ({type(e).__name__})"
+    if len(khoa) < tl_gws._MASTER_KEY_MIN_LEN or len(set(khoa)) < tl_gws._MASTER_KEY_MIN_DISTINCT:
+        return "BỎ QUA", f"TL_MASTER_KEY yếu (cần ≥{tl_gws._MASTER_KEY_MIN_LEN} ký tự VÀ ≥{tl_gws._MASTER_KEY_MIN_DISTINCT} ký tự khác nhau)"
+    dia = _doc_json(_codex_dir() / "auth.json")
+    if not isinstance(dia, dict) or not isinstance(dia.get("tokens"), dict):
+        return "KHÔNG ĐO ĐƯỢC", "auth.json không hợp lệ"
+    k_dia = tl_gws._last_refresh_key(dia)
+    if neu_doi and isinstance(dau := _doc_json(_codex_dir() / TEN_DAU), dict) and k_dia <= tl_gws._last_refresh_key(dau):
+        return None
+    try:
+        r = gas.get("ping", timeout=con())
+    except Exception:  # noqa: BLE001 — thiếu TL_WEBAPP/TL_TOKEN cũng là "ping lỗi"
+        r = None
+    v = r.get("version") if isinstance(r, dict) and r.get("ok") is True else None
+    if (b := ban_webapp(v)) is None or b < BAN_TOI_THIEU:
+        return "KHÔNG HỖ TRỢ", f"webapp {v[:40] if isinstance(v, str) else 'không đo được'}"
+    fid = tl_gws.AGENT_CREDS_FILEID
+    for _ in range(LAN_CAS):
+        if (blob := tl_gws._public_curl_bytes(fid, timeout=con())) is None:
+            return "KHÔNG ĐO ĐƯỢC", "tải công khai tl_agent_creds.enc lỗi"
+        md5 = hashlib.md5(blob).hexdigest()
+        try:
+            cu = _giai(store, khoa, blob)
+        except Exception:  # noqa: BLE001
+            return "KHÔNG ĐO ĐƯỢC", "bundle không giải mã/đúng định dạng"
+        ca = cu.get("codex_auth") if isinstance(cu.get("codex_auth"), dict) else {}
+        if tl_gws._last_refresh_key(ca) >= k_dia:
+            huy.is_set() or _ghi_dau(ca.get("last_refresh"), md5)
+            return "ĐÃ CŨ", f"bỏ ghi (bundle rev={cu['rev']} mới hơn hoặc bằng đĩa)"
+        moi = {**{k: cu[k] for k in tl_gws._AGENT_CREDS_KEYS if k in cu}, "codex_auth": dia, "schema": 1, "rev": cu["rev"] + 1,
+               "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+        gui = store.encrypt(json.dumps(moi, ensure_ascii=False).encode("utf-8"), khoa)
+        if huy.is_set():
+            return None
+        r = gas.post("agent_creds_put", timeout=con(), fileId=fid, expect_md5=md5, b64=base64.b64encode(gui).decode("ascii"))
+        if isinstance(r, dict) and r.get("ok") is True:
+            break
+        if (ma := _ma_loi(r)) not in ("CAS_CONFLICT", "LOCK_BUSY"):
+            return "KHÔNG ĐO ĐƯỢC", f"webapp {ma}"
+    else:
+        return "KHÔNG ĐO ĐƯỢC", "xung đột CAS lặp"
+    try:   # readback (Q16): md5 server == md5 blob gửi; tải lại công khai: rev và last_refresh khớp
+        lai = _giai(store, khoa, tl_gws._public_curl_bytes(fid, timeout=con()) or b"")
+        dung = (r.get("md5") == hashlib.md5(gui).hexdigest() and lai["rev"] == moi["rev"] and isinstance(lai.get("codex_auth"), dict)
+                and lai["codex_auth"].get("last_refresh") == dia.get("last_refresh"))
+    except Exception:  # noqa: BLE001
+        dung = False
+    if not dung:
+        return "KHÔNG ĐO ĐƯỢC", "readback lệch"
+    huy.is_set() or _ghi_dau(dia.get("last_refresh"), r["md5"])
+    return "ĐÃ GHI", f"rev={moi['rev']}"
+def ghi_nguoc(neu_doi=False, env=os.environ, han=HAN_GHI_NGUOC):
+    """Mục tiêu 2: đúng MỘT dòng `agent_creds_ghi_nguoc: …` (trừ ca im lặng của --neu-doi); luôn rc 0; không ghi auth.json."""
+    khoa, kq = env.get("TL_MASTER_KEY") or "", {}
+    if env.get("CLAUDE_CODE_REMOTE") != "true":
+        kq["v"] = ("BỎ QUA", "không phải phiên cloud")
+    elif not khoa:
+        kq["v"] = ("BỎ QUA", "thiếu TL_MASTER_KEY")
+    else:
+        huy, het = threading.Event(), time.monotonic() + han
+        def chay():
+            try:
+                kq["v"] = _lam_ghi_nguoc(neu_doi, khoa, het, huy)
+            except Exception as e:  # noqa: BLE001 — chỉ TÊN lớp lỗi, không bao giờ thông điệp (có thể mang dữ liệu)
+                kq["v"] = ("KHÔNG ĐO ĐƯỢC", f"lỗi {type(e).__name__}")
+        (t := threading.Thread(target=chay, daemon=True)).start()
+        t.join(han)
+        if t.is_alive():
+            huy.set()
+            kq["v"] = ("KHÔNG ĐO ĐƯỢC", f"quá {han:g} s")
+    if kq.get("v") is not None:
+        s, ct = kq["v"]
+        print(f"agent_creds_ghi_nguoc: {s} — {ct.replace(khoa, '***') if khoa else ct}")
+    return 0
 def main(argv):
     [s.reconfigure(encoding="utf-8", errors="backslashreplace") for s in (sys.stdout, sys.stderr)]
     if argv in (["nap"], ["cai-agy"]):
         return {"nap": nap, "cai-agy": cai_agy}[argv[0]]()
-    return print("dùng: cloud_agent_creds.py nap | cai-agy", file=sys.stderr) or 2
+    if argv in (["ghi-nguoc"], ["ghi-nguoc", "--neu-doi"]):
+        return ghi_nguoc(neu_doi=len(argv) == 2)
+    return print("dùng: cloud_agent_creds.py nap | cai-agy | ghi-nguoc [--neu-doi]", file=sys.stderr) or 2
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

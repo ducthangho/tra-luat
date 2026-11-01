@@ -1,0 +1,113 @@
+# HO SO LAND — PR #1055 "wp1052: references/windows-testing.md + con tro trong SKILL.md" (Packet #1052).
+# Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1; khuon gan nhat: ops/land/pr1048-claude-md-powershell-land-evidence.yaml.
+#
+# TRANG THAI: merged (906b24f), `landed: false`.
+# Gate hau merge cua CHINH 906b24f (run 41255939050) bi HUY o trang thai pending, 0 job: GitHub concurrency cua ci.yml
+# chi giu MOT luot pending moi nhom, nen luot cua 0b8d156 (#1093, tao 00:37:37Z) thay luot nay (huy 00:37:38Z).
+# Gate dau tien CHUA 906b24f la cua commit con 0b8d156 — luc ghi ho so van pending. "merged" KHONG dong nghia "landed"
+# (PROTOCOL §10.2.4).
+# NHAN: measured = do trong phien ghi so tu readback tho (ten tep ghi kem); thuat_lai = loi khai cua phien/luot khac,
+# KHONG tai chay; not_measured = khong do duoc, ghi ly do.
+# Readback tho: ops/land/pr1055-wp1052-provenance/. Moi phep do REST: GET https://api.github.com/repos/ducthangho/tra-luat/<duong dan>
+# bang curl + GITHUB_PAT qua proxy phien, do 2026-11-01 ~00:2x–00:4xZ.
+
+schema_version: 1
+mission_id: gh-1035
+packet_id: wp1052
+packet_issue: 1052
+pham_vi_land: tai_lieu_skill_va_kiem_ke_goi
+pham_vi_land_ghi_chu: >-
+  references/windows-testing.md (moi, vao goi), SKILL.md (+1 cau tro +1 dong bang), references/GOTCHAS.md, changelog.d/wp-1052.md,
+  golden workflow_audit, RELEASE_MANIFEST.json (197 tep), scripts/tl_selftest.py (2 hang dem goi), ops/specs/wp1052-r2..r5.md.
+  Khong doi VERSION, khong deploy.
+
+ghi_so:
+  provider: claude
+  model_family: claude
+  execution_surface: claude_code
+  transport: machine/local
+  environment: cloud
+  role: bookkeeping_recorder
+  session_id: https://claude.ai/code/session_015GtxrcSEjPkSR4KLHEyEsm
+  recorded_by: claude-session (chinh phien executor cua wp1052)
+  mat_quan_sat_duoc_the_nao: >-
+    Loi khai co neo (session URL), khong phai phep do doc lap. Ben ghi so TRUNG ben thi cong: khong co tach vai.
+
+authorized_head_sha: 9d5588b6b5442b197a63764f002fae12ba6e4877
+approver: ducthangho
+authorization_url: KHONG_AP_DUNG
+authorization_ghi_chu: >-
+  thuat_lai — chu kho tu chuyen PR #1055 sang ready (00:10:43Z) roi merge (00:15:19Z) sau khi phien bao "du dieu kien de ban
+  merge". Khong co comment duyet neo SHA truoc merge.
+land_operator: ducthangho
+land_operator_nguon: 'measured — readback-pr-1055.json merged_by ducthangho, merged_at 2026-11-01T00:15:19Z.'
+merge_method: merge
+merge_commit: 906b24fe23086e3ea47943e0311e8d75a6bbed6f
+
+trang_thai_packet:
+  merged: true
+  merged_nguon: 'measured — readback-pr-1055.json: merged true, merge_commit_sha 906b24f, head.sha 9d5588b.'
+  merge_noi_dung: >-
+    measured — merge-va-diff.txt: diff cha1..merge BANG BYTE diff merge_base..cha2 (cmp rc=0); 11 tep +477/-15. Blob
+    references/windows-testing.md tai 906b24f = tai 9d5588b (4a403732…).
+  head_va_review:
+    head_da_merge: 9d5588b6b5442b197a63764f002fae12ba6e4877
+    codex_connector:
+      - {luot: 1, reviewed_sha: 235b7387ee99a428f5d41d748bc369602af392dd, ket_qua: 'khong finding'}
+      - {luot: 2, reviewed_sha: 815fa1b2e64c64c950bbeca47677c25c20b3b0e0, ket_qua: 'khong finding'}
+      - {luot: 3, reviewed_sha: 9d5588b6b5442b197a63764f002fae12ba6e4877, ket_qua: 'khong finding', ghi_chu: 'tu kich khi chu kho chuyen ready; vuot tran 2 luot cua dac ta, do chu kho kich'}
+    nguon: 'measured — readback-comments-1055.json (chatgpt-codex-connector[bot]: codex-review-receipt "Reviewed commit"); readback-reviews-1055.json = 0 review object.'
+  landed: false
+  con_thieu_de_goi_landed:
+    - id: GATE-HAU-MERGE-906B24F
+      trang_thai: not_measured
+      mo_ta: >-
+        measured — readback-run-41255939050.json: run gate (ci.yml, push master, head 906b24f) completed/cancelled, run_attempt 1;
+        readback-jobs-41255939050.json total_count 0. readback-runs-master-20261101.json: run 41257563723 (head 0b8d156,
+        cha la 906b24f) tao 00:37:37Z, pending. Gate cho noi dung nay chi co the do tren 0b8d156 khi run ay xong.
+    - id: MOC-10-2-2-WORKFLOW-DEFINITION
+      trang_thai: not_measured
+      mo_ta: 'GraphQL WorkflowRun.file bi chan trong phien Claude Code tren web (403); ASUS-LAPTOP (may co gh cua chu kho) offline.'
+    - id: MOC-10-2-2-CHECKOUT-GATE-OUTPUT
+      trang_thai: not_measured
+      mo_ta: 'Chua co run gate hau merge chay xong de doc log checkout va artifact gate-evidence.'
+    - id: QUYET-DINH-LANDED-CHU-KHO
+      trang_thai: cho_chu_kho
+
+pre_merge_checks:
+  - ten: gate ci.yml tren head 9d5588b (pull_request)
+    trang_thai: measured
+    do_duoc: 'measured — readback-check-runs-9d5588b-all.json: 26 check run, 25 success, 1 skipped (mo, theo if: cua workflow).'
+  - ten: gate tai cho tren head 9d5588b (phien executor)
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — PR #1055 issuecomment-6545981621: selftest 1774/1774, golden-test / determinism-audit / doc-claims-check /
+      workflow-audit rc 0, release-verify --strict lane LAND ok 197/197.
+  - ten: selftest Windows local (ADR-0057) tren head 815fa1b
+    trang_thai: thuat_lai
+    do_duoc: >-
+      thuat_lai — PR #1055 issuecomment-6545981621: VM tra-luat-win, HEAD 815fa1b, selftest 1774/1774 rc 0 (774 s, 1 BO QUA co y
+      wp726_script_nlm_canary), golden/workflow-audit/doc-claims/determinism/release-verify LAND rc 0. 815fa1b..9d5588b chi doi
+      changelog.d/wp-1052.md va RELEASE_MANIFEST.json.
+    gioi_han: 'Local KHONG phai check run CI va KHONG thay bang chung Windows cua CI (ADR-0057). ASUS-LAPTOP khong do (offline).'
+
+bookkeeping:
+  - viec: rut han lease wp1052-r5-g5-claude
+    trang_thai: da_xong
+    nguon: 'thuat_lai — commit cec84f1 tren ops/wp1052-r2-g1-lease, han moi 2026-11-01T00:31:00Z; run ops-publish-lease 41256068061 success.'
+  - viec: so do Windows local (ADR-0057 muc 8)
+    trang_thai: da_xong
+    nguon: 'thuat_lai — C:\tl-win\do-luong.csv tren VM: dong ad0cbb5 (11:10:00Z) va dong 815fa1b (16:07:07Z, kem dinh chinh BO QUA).'
+  - viec: dong Issue #1052
+    trang_thai: trong_luot_ghi_so
+
+no_con_mo:
+  - id: CI-CONCURRENCY-HUY-PENDING-TREN-MASTER
+    mo_ta: >-
+      Chu thich ci.yml dong 45 khai "KHONG huy tren master", nhung luot PENDING tren master van bi thay boi luot pending moi hon
+      cung nhom concurrency (do duoc o run 41255939050). Commit merge nao nam giua hai lan push lien tiep se khong co gate rieng.
+      Ngoai pham vi packet nay.
+
+khong_do_duoc:
+  - 'Bam byte cua chi thi chu kho trong hoi thoai: KHONG_DO_DUOC.'
+  - 'Workflow definition (GraphQL): KHONG_DO_DUOC tu phien web.'

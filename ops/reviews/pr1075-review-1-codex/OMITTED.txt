@@ -1,0 +1,3 @@
+DIFF.patch	sha256 de449cef2a3e30daa823b384a63ae390b972a4ca33240fddffb26761e64cbae1	bytes 301308	ly do: tai lap bang git diff 3574cb0 907c474 (khong can chep)
+cay-kho/ work/ nguon/	khong chep: ban sao kho/ban sao nguon cua sandbox reviewer; work/{base,head,mutant} = ban sao cay tai 3574cb0 / 907c474 / ban dot bien; nguon/ = ban sao sandbox goc #1071 (da co trong ops/reviews/pr1071-review-1-codex), tai lap bang clone tai 907c474 / 3574cb0
+launcher.err	sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	bytes 0	ly do: tep rong

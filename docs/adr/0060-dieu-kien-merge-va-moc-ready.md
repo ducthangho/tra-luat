@@ -155,23 +155,24 @@ Mọi phép so của §7 giữ nguyên, chỉ đổi mỏ neo.
 
 ## Cưỡng chế — M11
 
-**0 cổng.** Đo trên đủ sáu vị trí cổng mà §20 của protocol liệt kê, lúc soạn ADR này, bằng
+**1 cổng** (packet C, #1106): `.claude/dev/packet_loop.py kiem-merge` (điều kiện bỏ draft/merge K0–K6) và `kiem-dong-wp` (đóng WP
+D1–D4), không đọc state. Đo trên đủ sáu vị trí cổng mà §20 của protocol liệt kê bằng
 `rg -c 'ADR-0060|dieu_kien_merge' <tệp>`:
 
 | vị trí cổng | kết quả |
 |---|---|
 | `ops/lease_publish.py` | 0 dòng |
-| `.claude/dev/packet_loop.py` | 0 dòng |
+| `.claude/dev/packet_loop.py` | 6 dòng (đo khi thi công packet C; lúc soạn ADR: 0) |
 | `.claude/dev/launcher.py` | 0 dòng |
 | `.claude/dev/gate_lifecycle.py` | 0 dòng |
 | `.github/workflows/ci.yml` | 0 dòng |
 | `.github/workflows/ops-publish-lease.yml` | 0 dòng |
 
-Toàn bộ ADR là kỷ luật executor và reviewer. Ba packet kế nhiệm biến nó thành cổng máy:
+Ngoài hai lệnh ấy, ADR là kỷ luật executor và reviewer. Ba packet kế nhiệm biến nó thành cổng máy:
 
 - **B** — collector bốn mốc: phần còn lại của #899, đo mốc Workflow definition bằng workflow Actions chỉ đọc.
 - **C** — cổng điều kiện merge và đóng WP trong `packet_loop.py`, tách khỏi `ADR-0054` (cửa `accept` hiện đòi
-  packet áp `ADR-0054`).
+  packet áp `ADR-0054`). Đã làm: `kiem-merge`, `kiem-dong-wp` (#1106).
 - **D** — gọn hiện vật review, validator cho làn lưu trữ.
 
 ## Nợ

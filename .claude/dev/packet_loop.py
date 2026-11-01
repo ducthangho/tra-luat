@@ -2815,7 +2815,7 @@ def _doc_connector(duong: str, repo: str, pr: int, head: str, p0p2: list | None 
         url, dung = ("issue_url", f"{API_GH}{repo}/issues/{pr}") if k == "issue_comments" else ("pull_request_url", f"{API_GH}{repo}/pulls/{pr}")
         if not all(x.get(url) == dung and isinstance(x.get("user"), dict) and type(x.get("body")) is str for x in v):
             _die(RC_GATE, f"connector {k}: phần tử không thuộc {repo} PR {pr} hoặc thiếu user/body")
-    biet = {c for v in ep.values() for x in v for c in [x.get("commit_id"), *re.findall(r"\b[0-9a-f]{40}\b", x["body"])] if type(c) is str and SHA_RE.fullmatch(c)}
+    biet = {c for v in ep.values() for x in v for c in [x.get("commit_id"), x.get("original_commit_id"), *re.findall(r"\b[0-9a-f]{40}\b", x["body"])] if type(c) is str and SHA_RE.fullmatch(c)}
     cua = {k: [(x, _neo_connector(k, x, head, biet)) for x in v if x["user"].get("login") == BOT_CONNECTOR] for k, v in ep.items()}
     if hong := [(k, x["id"]) for k, v in cua.items() for x, n in v if n == "hong"]:
         _die(RC_GATE, f"connector: mục của {BOT_CONNECTOR} có neo head thiếu/sai/mơ hồ {hong}")

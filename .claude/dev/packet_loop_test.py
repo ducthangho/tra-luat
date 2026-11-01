@@ -9249,6 +9249,10 @@ CASES += [
     ("cong_c_k3_p2_commit_doi", _c1106_ca(0, doi=lambda x, w, h: h and x["review_comments"].append(
         {"id": 13, "user": {"login": _CN834}, "body": "![P2 Badge] cũ", "commit_id": h, "original_commit_id": x["L2"],
          "pull_request_url": f"{_API834}pulls/55"}))),
+    # `original_commit_id` CHUNG tiền tố 10 ký tự với head ⇒ `Reviewed commit:` 10 ký tự thành mơ hồ (review offline lượt 7, P2)
+    ("cong_c_k3_original_tien_to", _c1106_ca(12, "K3", doi=lambda x, w, h: h and x["review_comments"].append(
+        {"id": 15, "user": {"login": _CN834}, "body": "nit", "commit_id": h, "original_commit_id": h[:10] + ("0" if h[10] != "0" else "1") + h[11:],
+         "pull_request_url": f"{_API834}pulls/55"}))),
     # ngược lại: viết TRÊN head (original = h) thì commit_id lệch cũng vẫn chặn
     ("cong_c_k3_p2_original_head", _c1106_ca(12, "K3", doi=lambda x, w, h: h and x["review_comments"].append(
         {"id": 14, "user": {"login": _CN834}, "body": "![P2 Badge] mới", "commit_id": x["L2"], "original_commit_id": h,
@@ -9277,6 +9281,7 @@ MUTANTS.update({
     "c1106_d2_bo_nghiem_thu": (' and all(v in DAT_MOC for v in bb["nghiem_thu"].values())', "", ["cong_c_d2_nghiem_thu"]),
     "c1106_d4_bo_han": ("het = datetime.strptime", "het = True or datetime.strptime", ["cong_c_d4_tuong_lai"]),
     "c1106_k3_neo_commit_id": ('x["original_commit_id"] if k == "review_comments" and "original_commit_id" in x else ', "", ["cong_c_k3_p2_commit_doi", "cong_c_k3_p2_original_head"]),
+    "c1106_k3_biet_bo_original": (' x.get("original_commit_id"), *re.findall(', " *re.findall(", ["cong_c_k3_original_tien_to"]),
     "c1106_k6_buoc1_bo_mode": (' and m == "100644"', "", ["cong_c_k6_symlink"]),
     "c1106_d1_nhan_bool": ("so = lambda v: type(v) is int and v >= 1", "so = lambda v: isinstance(v, int) and v >= 1", ["cong_c_d1_generation_bool"]),
 })

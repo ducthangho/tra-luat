@@ -3088,6 +3088,7 @@ LUAT_0060_RE = re.compile(rb"^dieu_kien_merge: ADR-0060@([0-9a-f]{40})$", re.M)
 CHU_KHO, MOC_10_2_2, DAT_MOC = "ducthangho", ("run", "checkout", "workflow_definition", "gate_output"), ("passed", "owner_waived")
 WIN_TU_KHOA = ("os.name", "sys.platform", "platform.system", "subprocess", "encoding=", "os.sep", "pathlib")
 DUOI_MA, DUOI_THU_DONG = (".py", ".ps1", ".sh", ".cmd", ".bat"), (".md", ".yaml", ".yml", ".json", ".txt", ".log")
+DOT_BIEN_DU_TEP = ".github/workflows/ci-dot-bien-du.yml"  # #1120 K7: nguồn `full_mutant_audit` của ADR-0060 M9
 
 
 def _yaml_cay(b: bytes):
@@ -3129,12 +3130,24 @@ def _dk(ten: str, fn, thieu: list):
         thieu.append(f"{ten}: KHÔNG ĐO ĐƯỢC ({type(ex).__name__}: {ex})"[:400])
 
 
+def _diff_raw(root: Path, b: str, h: str) -> list:
+    """`git diff --raw --no-renames -z B..H` ⇒ [(mode, đường dẫn)]; git lỗi ⇒ ValueError (KHÔNG ĐO ĐƯỢC, không phải "không chạm")."""
+    rc, raw = _git_do(root, "diff", "--raw", "--no-renames", "-z", b, h)
+    if rc:
+        raise ValueError("không đo được diff base..head")
+    t = raw.decode("utf-8", "surrogateescape").split("\0")
+    return [(t[i].split()[1] if t[i].split()[1] != "000000" else t[i].split()[0][1:], t[i + 1]) for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]
+
+
+def _cham_m9(root: Path, b: str, h: str) -> bool:
+    """#1120 ADR-0060 M9: diff chạm `.claude/dev/**`, `ops/**/*.py` hoặc `.github/workflows/**`."""
+    return any(p.startswith((".claude/dev/", ".github/workflows/")) or (p.startswith("ops/") and p.endswith(".py")) for _, p in _diff_raw(root, b, h))
+
+
 def _phan_loai_windows(root: Path, b: str, h: str, spec: bytes) -> str:
     """ADR-0060 M3, đúng thứ tự, dừng ở bước đầu khớp."""
-    rc, raw = _git_do(root, "diff", "--raw", "--no-renames", "-z", b, h)
-    t = raw.decode("utf-8", "surrogateescape").split("\0") if rc == 0 else []
-    tep = [(t[i].split()[1] if t[i].split()[1] != "000000" else t[i].split()[0][1:], t[i + 1]) for i in range(0, len(t) - 1, 2) if t[i].startswith(":")]
-    if rc or not tep:
+    tep = _diff_raw(root, b, h)
+    if not tep:
         raise ValueError("không đo được diff base..head")
     duoi = lambda p: PurePosixPath(p).suffix.lower()  # noqa: E731
     if all(p.startswith(("ops/reviews/", "ops/land/")) and m == "100644" and (duoi(p) in DUOI_THU_DONG or PurePosixPath(p).name == "SHA256SUMS") for m, p in tep):
@@ -3218,6 +3231,20 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
                     and len({x.get("id") for x in ts}) == len(ts) and all(x.get("ket_qua") == "passed" for x in ts)):
                 _die(RC_GATE, "Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn")
 
+    def k7():  # #1120 ADR-0060 M9: run `ci-dot-bien-du.yml` success ĐÚNG H với mọi job của đúng run_id/run_attempt, hoặc dòng miễn của chủ kho
+        if not _cham_m9(root, a.base, h) or (a.chu_kho_comment and f"full_mutant_audit: {h} mien" in _dong_chu_kho(a.chu_kho_comment)):
+            return
+        if not (a.dot_bien_du_runs and a.dot_bien_du_jobs):
+            _die(RC_GATE, "diff chạm vùng M9 mà thiếu --dot-bien-du-runs/--dot-bien-du-jobs và dòng miễn `full_mutant_audit: H mien` của chủ kho")
+        runs = _trang_du(_doc_json(a.dot_bien_du_runs, RC_GATE)[0], "workflow_runs", "--dot-bien-du-runs")
+        jobs = _trang_du([_doc_json(p, RC_GATE)[0] for p in a.dot_bien_du_jobs], "jobs", "--dot-bien-du-jobs")
+        xanh = lambda x: x.get("status") == "completed" and x.get("conclusion") == "success"  # noqa: E731
+        for r in runs:
+            js = [j for j in jobs if j.get("run_id") == r["id"] and j.get("run_attempt") == r["run_attempt"]] if type(r.get("run_attempt")) is int else []
+            if r.get("path") == DOT_BIEN_DU_TEP and r.get("head_sha") == h and xanh(r) and js and all(map(xanh, js)):
+                return
+        _die(RC_GATE, f"không run `{DOT_BIEN_DU_TEP}` nào success tại {h} với mọi job (đúng run_id + run_attempt) success")
+
     _dk("K0 đầu vào neo", k0, thieu)
     spec = _dk("K1 hiệu lực M10", k1, thieu)
     _dk("K2 CI", lambda: _kiem_ci(a, {"required_checks": [list(x) for x in CHECK_BAT_BUOC], "repo": a.repo}, h, state_dir), thieu)
@@ -3227,6 +3254,7 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
         _dk("K5 P3", k5, thieu)
     if spec is not None:
         _dk("K6 Windows", lambda: k6(spec), thieu)
+    _dk("K7 full_mutant_audit", k7, thieu)
     if thieu:
         for x in thieu:
             print(f"  THIẾU  {x}", file=sys.stderr)
@@ -3491,14 +3519,16 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--checkpoint-path", required=True, help="ops/checkpoints/<tên>.yaml, đọc tại origin/master sau khi máy tự fetch")
     q.set_defaults(fn=cmd_chu_kho_duyet)
 
-    q = sub.add_parser("kiem-merge", help="#1106 ADR-0060: đủ điều kiện bỏ draft/merge trên head H? (K0–K6, không state)")
+    q = sub.add_parser("kiem-merge", help="#1106 ADR-0060: đủ điều kiện bỏ draft/merge trên head H? (K0–K7, không state)")
     for x in ("--root", "--repo", "--head", "--base", "--spec", "--lease", "--workflow-runs", "--check-runs", "--connector", "--offline-run-json", "--offline-stdout"):
         q.add_argument(x, required=x != "--root", default="." if x == "--root" else None)
     q.add_argument("--pr", type=int, required=True)
     q.add_argument("--workflow-jobs", required=True, action="append")
     q.add_argument("--p3-offline", action="append", help="khoá P3 còn mở từ review offline; lặp")
-    q.add_argument("--chu-kho-comment", help="readback JSON một comment của chủ kho (dòng `mien_p3:` / `windows:`)")
+    q.add_argument("--chu-kho-comment", help="readback JSON một comment của chủ kho (dòng `mien_p3:` / `windows:` / `full_mutant_audit:`)")
     q.add_argument("--windows-json", help="{sha, os: Windows, tests: [{id, ket_qua}]} của lượt ứng viên")
+    q.add_argument("--dot-bien-du-runs", help="#1120 K7: readback trang `actions/workflows/ci-dot-bien-du.yml/runs?head_sha=H`")
+    q.add_argument("--dot-bien-du-jobs", action="append", help="#1120 K7: readback trang `actions/runs/<id>/jobs`; lặp")
     q.set_defaults(fn=cmd_kiem_merge)
 
     q = sub.add_parser("kiem-dong-wp", help="#1106 ADR-0060 M8: biên bản sổ sách + lease đủ để đóng WP? (D1–D4, không state)")

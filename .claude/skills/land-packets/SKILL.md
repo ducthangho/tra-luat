@@ -60,6 +60,7 @@ sống trong ngữ cảnh phiên — đọc §13 để biết cái gì được 
 Phiên Claude Code trên web nhận 403 cho GraphQL, nên `WorkflowRun.file` phải do chủ kho chạy rồi dán output.
 Cú pháp lệnh đưa cho chủ kho và cách đối chiếu: mục *"Lệnh `gh api graphql` đưa cho chủ kho chạy"* của `CLAUDE.md`.
 Đọc mục ấy từ `origin/master` ngay trước khi soạn lệnh — phiên mở từ trước có thể đang giữ bản cũ.
+Đường chính, không cần chủ kho: gọi `ops-do-workflow-definition.yml` (input `run_id`) qua MCP `actions_run_trigger`, rồi `python3 ops/ci_provenance.py thu ... --wd-run <id lượt ấy>` nhập artifact `workflow-definition-<run_id>` và tự tính lại blob/sha256; đường `gh api graphql` trên giữ làm dự phòng.
 
 ## Full ref fence và merge evidence
 

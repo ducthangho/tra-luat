@@ -10028,6 +10028,38 @@ def r1122_khong_assert_tran_trong_ca():
 
 
 @ca
+def r1122_reporter_giu_loai_va_cat_dung_thong_diep():
+    """Đo reporter suite và kênh --lap-ca, kể cả phân loại tín hiệu chốt."""
+    from unittest.mock import patch
+    def review_vo_can():
+        raise TypeError("x" * 500)
+    def review_chot():
+        bang(False, "x" * 500)
+    _, _, hong = chay_bo_ca([review_vo_can, review_chot])
+    bang(hong == [("review_vo_can", "TypeError: " + "x" * 160),
+                  ("review_chot", "TinHieuChotCa: " + "x" * 160)], "suite khong cat dung 160")
+    bang(LOAI_HONG["review_vo_can"] == "khac:TypeError"
+         and LOAI_HONG["review_chot"] == "TinHieuChotCa", "doi phan loai giet/loi")
+    with patch.object(subprocess, "run", side_effect=OSError("x" * 500)):
+        got = cham_lap_ca(Path("."), "review_transport")
+    bang(got == ("loi", "review_transport(OSError: " + "x" * 160 + ")"),
+         "loi subprocess mat thong diep")
+    extra = ('\n@ca\ndef review_loi_con():\n    raise TypeError("x" * 500)\n'
+             '@ca\ndef review_chot_con():\n    bang(False, "x" * 500)\n')
+    text = Path(__file__).read_text(encoding="utf-8")
+    anchor = '\nif __name__ == "__main__":'
+    bang(text.count(anchor) == 1, "neo main khong duy nhat")
+    with San() as s:
+        dev = _dung_cay_harness(s / "reporter", text.replace(anchor, extra + anchor, 1),
+                               LAUNCHER.read_text(encoding="utf-8"))
+        got = cham_lap_ca(dev, "review_loi_con")
+        bang(got == ("loi", "review_loi_con(TypeError: " + "x" * 160 + ")"),
+             f"chi tiet lap sai: {got}")
+        bang(cham_lap_ca(dev, "review_chot_con") == ("giet", "review_chot_con"),
+             "lap doi nhan TinHieuChotCa")
+
+
+@ca
 def r1122_con_python_giai_ma_utf8():
     """#1122 spec mục tiêu 4 (gốc ĐÃ ĐO ở run 41328709141): `chay()` gọi `subprocess.run(text=True)` không
     `encoding` ⇒ Windows giải mã stdout của launcher (UTF-8) bằng cp1252, byte 0x90 giết `_readerthread`
@@ -10048,9 +10080,12 @@ def r1122_con_python_giai_ma_utf8():
         if isinstance(x, ast.Call) and con_python(x):
             kw = {k.arg: k.value for k in x.keywords if k.arg}
             if (isinstance(kw.get("text"), ast.Constant) and kw["text"].value is True
-                    and "encoding" not in kw):
+                    and not (isinstance(kw.get("encoding"), ast.Constant)
+                             and kw["encoding"].value == "utf-8"
+                             and isinstance(kw.get("errors"), ast.Constant)
+                             and kw["errors"].value == "replace")):
                 thieu.append(x.lineno)
-    bang(not thieu, f"text=True khong encoding o con Python, dong: {thieu}")
+    bang(not thieu, f"text=True thieu utf-8/replace o con Python, dong: {thieu}")
 
 
 @ca
@@ -14611,6 +14646,12 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    ('wp1122_reporter_transport_bo_thong_diep', ('return "loi", f"{ten_ca}({mo_ta_loi(e)})"', 'return "loi", f"{ten_ca}({type(e).__name__})"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_assertion_khong_cat', ('            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            # #1079 F01:', '            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_exception_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"', '            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_lap_lay_ca_loai', ('"thong_diep": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1]', '"thong_diep": (hong_ds[-1][1][:TRAN_THONG_DIEP_LOI] if hong_ds else None)'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_encoding_cp1252', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding="cp1252", errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
+    ('wp1122_encoding_none', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding=None, errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     # Hai dòng fixture mới phải dùng đúng tên `MODULE_PY`; đổi phối hợp cả hai về
     # tên chết từng sống sót vẫn phải làm cả hai ca canh đỏ.
     ("fixture_MODULE_PY_quay_lai_ten_chet",
@@ -15021,7 +15062,7 @@ def cham_lap_ca(thu_muc, ten_ca):
             env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", LT_KENH_KET_QUA=str(kenh), LT_KENH_NONCE=nonce))
         kq = json.loads(kenh.read_text(encoding="utf-8")) if kenh.is_file() else {}
     except (OSError, subprocess.SubprocessError, ValueError) as e:
-        return "loi", f"{ten_ca}({type(e).__name__})"
+        return "loi", f"{ten_ca}({mo_ta_loi(e)})"
     finally:
         shutil.rmtree(kenh.parent, ignore_errors=True)
     if kq.get("nonce") != nonce or kq.get("ten") != ten_ca:
@@ -15029,12 +15070,14 @@ def cham_lap_ca(thu_muc, ten_ca):
     if kq.get("hong"):
         return ("giet" if kq.get("loai") == "TinHieuChotCa" else "loi"), (
             ten_ca if kq.get("loai") == "TinHieuChotCa" else
-            f"{ten_ca}({kq.get('loai')}" + (f": {kq['thong_diep']}" if kq.get("thong_diep") else "") + ")")
+            f"{ten_ca}({kq.get('ten_loai', kq.get('loai'))}"
+            + (f": {kq['thong_diep']}" if kq.get("thong_diep") else "") + ")")
     # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC.
     return ("bo_qua" if kq.get("bo_qua") else "qua"), ten_ca
 
 
 LOAI_HONG: dict = {}
+CHI_TIET_HONG: dict = {}
 
 
 def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
@@ -15060,13 +15103,15 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
                 qua += 1
                 ket = "qua"
         except AssertionError as e:
-            hong_ds.append((fn.__name__, str(e)))
+            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])
+            hong_ds.append((fn.__name__, mo_ta_loi(e)))
             # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.
             LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)
                                       else f"khac:{type(e).__qualname__}")
             ket = f"HONG: {str(e)[:60]}"
         except Exception as e:  # noqa: BLE001
-            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))
+            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])
+            hong_ds.append((fn.__name__, mo_ta_loi(e)))
             LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"
             ket = f"LOI {type(e).__name__}"
         if nk:
@@ -15223,8 +15268,8 @@ def main() -> int:
                                               "bo_qua": bo_qua, "hong": len(hong_ds),
                                               "loai": LOAI_HONG.get(chon[0].__name__),
                                               # #1122: thông điệp (cắt) cho chi tiết `loi` của `cham_lap_ca`
-                                              "thong_diep": (hong_ds[-1][1][:TRAN_THONG_DIEP_LOI]
-                                                             if hong_ds else None)}), encoding="utf-8")
+                                              "ten_loai": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0],
+                                              "thong_diep": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1]}), encoding="utf-8")
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)
         return 1 if hong_ds else 0

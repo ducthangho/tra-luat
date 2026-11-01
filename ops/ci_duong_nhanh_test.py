@@ -2312,7 +2312,7 @@ UY_NHIEM = {
     ('gate-ops', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-ops', 'lease-publish selftest (đo lại setup sau G5)'): 'uy_nhiem: DO1/DO2/DO3 -> kiem-re (CA_DU_LIEU t23, t26, t27)',
     ('gate-ops', 'don-nhanh selftest (chốt xoá nhánh)'): 'khong_doi_mau',
-    ('gate-ops', 'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)'): 'khong_doi_mau',
+    ('gate-ops', 'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)'): 'chua_do',   # container o cgroup goc: buoc exit 1
     ('gate-ops', 'gate lifecycle selftest (nen khong co cgroup)'): 'khong_doi_mau',
     ('gate-packet-loop', 'cài actionlint cho G5'): 'cai_dat',
     ('gate-packet-loop', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',

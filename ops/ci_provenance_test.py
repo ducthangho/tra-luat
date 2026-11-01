@@ -1085,7 +1085,7 @@ def c21_fixture_bam():
 
 # ---- CI-PROVENANCE-WD r1 (Issue #1094): `do-wd`, `thu --wd-run`, workflow `ops-do-workflow-definition.yml` ----
 import base64, shutil, zipfile
-WD_OID, WD_PATH = "c" * 40, ".github/workflows/ci.yml"
+WD_OID, WD_PATH, XOA = "c" * 40, ".github/workflows/ci.yml", object()
 WD_BYTES = b"name: ci\non: push\njobs: {}\n"
 WF_WD_TEP = ROOT_THAT / ".github/workflows/ops-do-workflow-definition.yml"
 GQL_CAN = ("WorkflowRun", "databaseId", "runNumber", "createdAt", "file", "path", "repositoryFileUrl", "checkSuite", "commit", "oid")
@@ -1183,7 +1183,6 @@ def c57_wd_sai_doi_so():   # A5: đích ghi theo ĐÚNG luật parser (`--out=x`
             rc = m.main(["do-wd", "--repo", "o/r", "--run", "7"], goi=lambda u: (500, b""), gql=lambda q, b: (500, b""))
         bang(rc == 2 and not any(Path(thu).iterdir()), "thiếu --out phải rc 2 và không ghi tệp")
 
-XOA = object()
 def wd_zip(**sua):
     j = {"schema": "wd/1", "repo": "o/r", "run_id": 5, "path": WD_PATH, "trang_thai": "passed", "oid_dinh_nghia": H,
          "blob": hashlib.sha1(b"blob %d\0" % len(WD_BYTES) + WD_BYTES).hexdigest(), "sha256": hashlib.sha256(WD_BYTES).hexdigest(),
@@ -1243,7 +1242,7 @@ def kiem_wf(van):   # A7: DANH SÁCH CHO PHÉP trọn cấu trúc — mọi job/
     d, loi, J = yaml.safe_load(van), [], lambda x: json.dumps(x, sort_keys=True)   # so qua JSON: True ≠ 1, False ≠ 0
     on, jobs = d.get("on", d.get(True)), list(d.get("jobs", {}).values())
     loi += ["on"] if J(on) != J({"workflow_dispatch": {"inputs": {"run_id": {"description": "id workflow run cần đo mốc Workflow definition", "required": True, "type": "string"}}}}) else []
-    loi += ["permissions"] if d.get("permissions") != {"contents": "read", "actions": "read"} or set(d) - {"name", "on", True, "permissions", "jobs"} or {type(k) for k in d} - {str, bool} else []
+    loi += ["permissions"] if d.get("permissions") != {"contents": "read", "actions": "read"} or set(d) - {"name", "on", True, "permissions", "jobs"} or [k.value for k, _ in yaml.compose(van).value] != ["name", "on", "permissions", "jobs"] else []
     if len(jobs) != 1 or set(jobs[0]) != {"runs-on", "timeout-minutes", "steps"} or (jobs[0]["runs-on"], jobs[0]["timeout-minutes"]) != ("ubuntu-latest", 10):
         return loi + ["job"]
     b = jobs[0]["steps"]
@@ -1266,7 +1265,8 @@ def c59_workflow_tinh():   # A7: tệp thật sạch; MỖI đột biến YAML m
                           ("runs-on: ubuntu-latest", "runs-on: windows-latest", "job"), ("runs-on: ubuntu-latest", "runs-on: self-hosted", "job"),
                           ("          ref: master\n", "", "checkout"), ("ref: master", "ref: ${{ github.sha }}", "checkout"),
                           ("          persist-credentials: false\n", "", "checkout"), ("persist-credentials: false", "persist-credentials: 0", "checkout"),
-                          ("required: true", "required: 1", "on"), ("\non:\n", "\n1:\n", "permissions"), ("\non:\n", '\n"on":\n', None),
+                          ("required: true", "required: 1", "on"), ("\non:\n", "\n1:\n", "permissions"), ("\non:\n", '\n"on":\n', None), ("\non:\n", "\ntrue:\n", "permissions"),
+                          ("\npermissions:\n", "\n1.0:" + van.split("\non:", 1)[1].split("\npermissions:")[0] + "\npermissions:\n", "permissions"),
                           ("      - name: cài PyYAML\n", "      - uses: actions/checkout@v4\n      - name: cài PyYAML\n", "buoc"),
                           ('          rc=$?\n', '          rc=$?\n          eval "$RUN_ID"\n', "collector"), ('          rc=$?\n', '          rc=$?\n          curl -s x\n', "collector"),
                           ("          python3 ops/ci_provenance.py do-wd", "          # python3 ops/ci_provenance.py do-wd", "collector"),

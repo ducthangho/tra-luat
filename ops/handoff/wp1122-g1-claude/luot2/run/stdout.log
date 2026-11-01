@@ -1,0 +1,5 @@
+Đã hoàn tất [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l2/VERDICT.md) và [HINT.patch](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l2/HINT.patch).
+
+Kết luận: `changes_requested` — còn **1 P1 thuộc F01**; F02 đã vá. Linux có delta lỗi bằng 0 so với base; Windows/CI chưa xác minh độc lập.
+
+Mã nguồn `cay-kho/` giữ nguyên; các bản sao tạm đã dọn.

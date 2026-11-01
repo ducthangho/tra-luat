@@ -9797,16 +9797,20 @@ def _r1078_python_ham_ke_thua(nen, than_ham='command python "$@"'):
 
     def env_co_ham():
         vo, env = env_goc()
-        env["BASH_FUNC_python%%"] = "() { " + than_ham + ";\n}"
+        env["R1078_HAM_LOG"] = str(ham_log)
+        env["BASH_FUNC_python%%"] = (
+            '() { printf "%s\\n" goi >> "$R1078_HAM_LOG"; ' + than_ham + ";\n}")
         return vo, env
 
     _wp802_bash_env = env_co_ham
     try:
         with San() as s:
+            ham_log = s / "ham.log"
             p, gp, uv, _d = _wp831_chay_cai_rg(s, nen, "echo 'ripgrep 14.1.0'", venv=True, batch=True)
             bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
                  f"{nen}: ham python ke thua ({than_ham}) doi interpreter: rc={p.returncode} "
                  f"GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+            bang(not ham_log.exists(), f"{nen}: ham python ke thua da bi goi")
     finally:
         _wp802_bash_env = env_goc
 
@@ -9837,6 +9841,30 @@ def r1078_hinh_dang_chon_python_bang_type_P():
          "con chon/ghim interpreter bang command -v (nhan ca HAM)")
     bang(re.search(r'case "\$\{PY\[0\]\}" in /\*\) ;; \*\) echo [^\n]*>&2; exit 4 ;; esac', sh) is not None,
          "thieu chot PY[0] tuyet doi (fail-close, thoat 4)")
+
+
+@ca
+def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
+    """M2: kiểm hành vi nhánh dùng lại PY; checker giả chặn mọi đường installer."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        ops = s / "kho" / "ops"
+        ops.mkdir(parents=True)
+        kich = ops / "cai_cong_cu.sh"
+        shutil.copy2(CAI_SH_DANG_DUNG, kich)
+        (ops / "cong_cu.py").write_text("raise SystemExit(23)\n", encoding="utf-8")
+        vo, env = _wp802_bash_env()
+        for ten in ("python", "./python"):
+            p = subprocess.run(
+                [vo, "-c", 'CAI_CONG_CU_PY_CUA=$$; PY=("$2"); . "$1" rg',
+                 "r1078", str(kich), ten],
+                env=env, capture_output=True, text=True, timeout=30)
+            bang(p.returncode == 4 and p.stdout == ""
+                 and len(p.stderr.splitlines()) == 1
+                 and "PY[0] khong phai duong dan tuyet doi" in p.stderr,
+                 f"PY dung lai {ten!r} phai thoat 4 truoc checker: "
+                 f"rc={p.returncode} out={p.stdout!r} err={p.stderr!r}")
 
 
 # wp858 (L1): ca hành vi chạy NGUYÊN công thức qua cai_cong_cu.sh, installer là stub (POSIX); ca hình dạng thuần Python
@@ -13718,6 +13746,12 @@ DOT_BIEN_HOOK = [
       'elif command -v python >/dev/null 2>&1; then PY=(python)'),
      ["r831_cai_rg_linux_python_ham_ke_thua", "r831_cai_rg_macos_python_ham_ke_thua",
       "r1078_ham_python_khong_phai_python_khong_duoc_goi", "r1078_hinh_dang_chon_python_bang_type_P"], "cai_sh"),
+    ("wp1078_goi_ham_python_thua", ('unset _PY_TEP',
+      'unset _PY_TEP\nif declare -F python >/dev/null; then python -c pass >/dev/null; fi'),
+     ["r1078_ham_python_khong_phai_python_khong_duoc_goi"], "cai_sh"),
+    ("wp1078_chot_chi_nhanh_chon_moi", ('case "${PY[0]}" in /*) ;; *) echo "cai_cong_cu: PY[0] khong phai duong dan tuyet doi: \'${PY[0]}\'" >&2; exit 4 ;; esac',
+      'if [ "${CAI_CONG_CU_PY_CUA:-}" != "$$" ]; then\ncase "${PY[0]}" in /*) ;; *) echo "cai_cong_cu: PY[0] khong phai duong dan tuyet doi: \'${PY[0]}\'" >&2; exit 4 ;; esac\nfi'),
+     ["r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4"], "cai_sh"),
     ("wp1078_bo_chot_tuyet_doi", ('case "${PY[0]}" in /*) ;; *) echo', 'case "${PY[0]}" in *) ;; /*) echo'),
      ["r1078_hinh_dang_chon_python_bang_type_P"], "cai_sh"),
     ("wp831_yaml_linux_bo_ung_vien_usrbin", ('chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin" ', 'chon_thu_muc_chay_duoc rg '),

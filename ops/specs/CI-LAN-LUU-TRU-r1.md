@@ -24,7 +24,7 @@ dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
 | S1 | PR #1071 (chỉ chạm `ops/reviews/**`, 73 tệp), run `41183318847` (`pull_request`) | `chuan-bi` in `che_do=duong_nhanh`, **vậy mà** vẫn tốn **khoảng 51 runner-phút Ubuntu**: `gate-registry` 22,9 · `gate-ops` 9,8 · `gate` 7,4 · 8 mảnh `gate-nhanh-manh` khoảng 9,5 · `gate-packet-loop` 0,4. `gate-registry` và `gate-nhanh-manh` không có điều kiện `che_do` nào (`JOB_CO_IF_CHO_PHEP` trong `ops/ci_duong_nhanh_test.py`, dòng 2436) |
 | S2 | cùng head `0104461`, run `41183317816` (`workflow_dispatch`) | **khoảng 256 phút** trên Windows (`gate-packet-loop (windows-latest)` 83,7 · `gate-registry (windows-latest)` 81,7 · `gate-ops (windows-latest)` 47,2 · `gate (windows-latest)` 17,8 · 8 mảnh khoảng 22). Đây là nguồn của con số 84 phút trong `ADR-0060` S8: nó đến từ một lượt **dispatch**, không phải từ lượt PR |
 | S3 | `ci.yml`, output `che_do` của `chuan-bi` | chỉ `pull_request` được phân loại; push master và `workflow_dispatch` luôn `day_du` (dòng 71) |
-| S4 | 200 merge gần nhất trên `origin/master` `7eeb1d9a` (07:05Z 01-11; lệnh: `git log --first-parent --merges -200 --format=%H origin/master`, mỗi merge `M` lấy `git diff --name-only --no-renames M^1 M`; merge cũ nhất ngày 19-10-2026) | nhóm theo tập tệp đổi: **94** merge mọi tệp dưới `ops/{reviews,land}/**` · **26** merge mọi tệp dưới 4 tiền tố hồ sơ và có ít nhất một tệp `specs`/`leases` · **80** merge có ít nhất một tệp ngoài 4 tiền tố. Review offline lượt 1 đếm ra 95/26 trên cùng base; chênh 1, chưa tách được nguyên nhân (phép đếm của phiên soạn không gặp merge nào có diff rỗng), không đổi kết luận. Trong 94 merge thuần lưu trữ, **37** có tệp đuôi `.py/.sh/.ps1/.yml`, gần như toàn bộ là bản sao sandbox nằm sâu từ 4 cấp trở xuống (`git ls-files 'ops/{land,reviews}/*.py'`: 1 tệp ở 3 cấp, 650 tệp sâu hơn) |
+| S4 | 200 merge gần nhất trên base ghim `7eeb1d9a10aea8e1805b66fbf3d68549eb6778da` (đo 07:50Z 01-11; lệnh: `git log --first-parent --merges -200 --format=%H 7eeb1d9a…`, mỗi merge `M` lấy `git diff --name-only --no-renames -z M^1 M` rồi tách theo NUL; merge cũ nhất ngày 19-10-2026; 0 merge có diff rỗng) | nhóm theo tập tệp đổi: **95** merge mọi tệp dưới `ops/{reviews,land}/**` · **26** merge mọi tệp dưới 4 tiền tố hồ sơ và có ít nhất một tệp `specs`/`leases` · **79** merge có ít nhất một tệp ngoài 4 tiền tố. Phải dùng `-z`: không có nó, git đặt tên tệp có dấu trong dấu nháy và merge `7471f95f` (tệp `HƯỚNG 10 - HINT tren ban sao.log`) bị xếp nhầm ra ngoài vùng — bản đầu của đặc tả này đếm sai 94/80 vì thế (review offline lượt 2). Trong 95 merge thuần lưu trữ, **38** có tệp đuôi `.py/.sh/.ps1/.yml`, gần như toàn bộ là bản sao sandbox nằm sâu từ 4 cấp trở xuống (`git ls-files 'ops/land/*.py' 'ops/reviews/*.py'`: 651 tệp, 1 ở 3 cấp, 650 sâu hơn) |
 | S5 | push master của merge thuần lưu trữ | run `41278662487` (merge #1075, chỉ `ops/reviews`) chạy `day_du`, còn `in_progress` sau 25 phút. Merge chỉ đổi đặc tả: #1098 khoảng 56 phút, #1103 khoảng 40 phút |
 
 ## 2. Thay đổi
@@ -134,7 +134,11 @@ nang_tran:
 | A11 | `full_mutant_audit` theo `ADR-0060` M9: **bắt buộc** (chạm `.github/workflows/**` và `ops/**/*.py`), hoặc waiver `owner_waived` đúng scope §10.2.3 | thiếu receipt và thiếu waiver khi merge ⇒ ĐỎ |
 | A12 | **Canary sau land** (`chưa đo được` tới khi đo thật). PR lưu trữ thật đầu tiên sau land (chỉ `ops/{reviews,land}/**`, không có mã cấp nông), cùng run push master của merge ấy: mỗi run **≤ 12 runner-phút**, tính bằng tổng `completed_at − started_at` của mọi job (`actions/runs/<id>/jobs`), **0** job mang nhãn `windows-latest` có `runner_id ≠ 0`, ba check bắt buộc ở trạng thái `success` (không `skipped`), log `chuan-bi` có dòng `che_do=duong_nhanh`, và log bước `kiem-re` của `gate-ops` báo đạt. **Dispatch** đo riêng: phiên land gọi một lượt `workflow_dispatch` (`che_do=tu_dong`, `runner_set` mặc định) trên head của chính PR canary; cùng bốn điều kiện trên, kể cả 0 job Windows. Người đo là phiên land của D1; số đo và id run ghi lên Issue | một run > 12 phút ⇒ ĐỎ; có job Windows chạy thật ⇒ ĐỎ; một check bắt buộc vắng mặt hoặc `skipped` ⇒ ĐỎ; log thiếu dòng `che_do=duong_nhanh` (tức run nhanh vì lý do khác) ⇒ ĐỎ |
 
-Lượt model bị loại (connector, cross-review) **không** thuộc nghiệm thu của D1. Hiện **chưa** có miễn trừ nào: `ADR-0060` M6 vẫn đòi connector sạch, M8 vẫn đòi cross-review theo lớp. Miễn trừ cho làn lưu trữ là nợ ở §6, làm sau khi C land.
+Lượt model bị loại **không** thuộc nghiệm thu của D1. Luật hiện hành, để phiên sau khỏi chạy thừa hay thiếu review:
+- `ADR-0060` M8 (*Làn lưu trữ*) **đã** miễn cross-review bằng model và Windows cho PR lưu trữ — nhưng chỉ PR chứa bản ghi thụ động trong
+  `ops/reviews/**` và `ops/land/**`. PR có `ops/specs/**` hay `ops/leases/**` đi làn thường theo M8, dù CI vẫn cho nó đi đường nhanh
+  (allowlist 4 tiền tố của #674, giữ nguyên ở D1). Đường nhanh của CI và làn lưu trữ của M8 là hai khái niệm khác nhau; D1 không gộp chúng.
+- `ADR-0060` M6 vẫn đòi connector sạch trên đúng head trước khi bỏ draft, kể cả với PR lưu trữ. Miễn connector cho làn lưu trữ là nợ ở §6.
 
 ## 5. Ngoài phạm vi
 
@@ -145,8 +149,9 @@ Lượt model bị loại (connector, cross-review) **không** thuộc nghiệm 
 
 ## 6. Nợ (làm sau khi packet C land)
 
-- **`LAN-LUU-TRU-MIEN-REVIEW-MODEL`**: PR làn lưu trữ không đòi review model (cross-review hay connector). Cần sửa `ADR-0060` M6 và
-  `docs/PROTOCOL_DA_PHIEN.md`, hai tệp nằm trong write set của C. Trong lúc chờ, PR lưu trữ vẫn theo M6 hiện hành, trừ khi chủ kho miễn từng lần.
+- **`LAN-LUU-TRU-MIEN-CONNECTOR`**: PR làn lưu trữ M8 (chỉ `ops/{reviews,land}/**`) không đòi connector. Cross-review đã được M8 miễn; phần
+  còn thiếu là M6. Cần sửa `ADR-0060` M6 và `docs/PROTOCOL_DA_PHIEN.md`, hai tệp nằm trong write set của C. Trong lúc chờ, PR lưu trữ vẫn
+  đòi connector theo M6, trừ khi chủ kho miễn từng lần.
 - **`LAN-LUU-TRU-ADR-0060-S8`**: dòng S8 của `ADR-0060` gán 84 phút cho "PR sổ sách", trong khi số ấy đến từ một lượt `workflow_dispatch` (S2).
   Sửa câu chữ cùng lúc với nợ trên.
 

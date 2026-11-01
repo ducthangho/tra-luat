@@ -1,0 +1,7 @@
+Đã hoàn tất review và ghi [VERDICT.md](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l4/VERDICT.md).
+
+Kết luận `changes_requested`: **1 P1**, gồm kênh kết quả mang lỗi cũ và lỗi nhật ký chưa cắt thông điệp.
+
+HEAD: suite `328/351`, đột biến `536/568`; tập lỗi/bỏ qua trùng base, **delta=0**. Chưa đo Windows/CI độc lập.
+
+Đã tạo [HINT.patch](/tmp/claude-0/-home-user-tra-luat/cd602115-8e1f-5ec4-a848-91a69cdc11c5/scratchpad/cr1122-l4/HINT.patch), dọn bản sao tạm; `cay-kho/` nguyên vẹn.

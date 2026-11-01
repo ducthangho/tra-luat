@@ -180,3 +180,19 @@ landed_20261031:
     #1086. (4) review neo dung authorized_head 9783b42: DAT. (5) uy quyen land: DAT co caveat #566. (6) muc tieu packet: DAT theo gate
     executor + CI Ubuntu; khong Windows theo chi thi chu kho. (7) §8.1: CHUA_DAT ve sandbox — chu kho CHAP NHAN bang quyet_dinh_chu_kho
     tren. Con mo ngoai land: M1/M2 LIVE cua P2b (can chu kho duyet).
+
+m1_live_20261031:
+  bo_canh: >-
+    Do tieu chi M1 (LIVE) cua spec r1 sau land, theo duyet cua chu kho trong phien dieu phoi session_015GtxraXfMD1t2FJLzzGDr4
+    (31-10-2026 ~16:53Z, muc 2 cua de xuat). Khoi nay KHONG sua dong nao o tren; muc no_ngoai_pham_vi 'cloud-setup-p2b-m1-m2-live'
+    nay chi con vế M2.
+  phien_do: session_015GtxrYcewV9WsVcxU5WhYz
+  sha_do: 9a03544cf837c10af091d6191ce9a7fbc419a609
+  ket_qua: >-
+    measured — m1-live-p2b/readback-m1-p2b.yaml (doc nguoc tu transcript phien do qua list_events, khong tu ban tom tat phien do gui
+    ve): (i) log hook 1 dong '[session-start] agent_creds: ĐÃ NẠP — rev=1 … (bootstrap rc=0)' (su kien 378eafcb); (ii) command -v agy =
+    /root/.local/bin/agy; (iii) agy --version = 1.4.12, rc 0 (su kien 7d1ac48c); (iv) agent-creds-exec --gemini -- agy models rc 0,
+    14 dong ten model, 'modelProvider is set to' 0, 'Both GOOGLE_API_KEY and GEMINI_API_KEY' 0, dong giong khoa 0 (su kien 31190aaa).
+  m1: DAT
+  m2: chua_do_duoc — can chu kho dung lai moi truong Codex Cloud co TL_MASTER_KEY va dan log setup.
+  ghi_chu_bao_cao: https://github.com/ducthangho/tra-luat/issues/1039#issuecomment-6546688640

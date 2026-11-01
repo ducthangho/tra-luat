@@ -160,6 +160,13 @@ landed_20261031:
     nguon: 'measured — readback-comment-6541260357.json: user ducthangho, author_association OWNER, 2026-10-31T08:40:41Z, than chua authorized_head_sha a16932aa09ce860a614f0bab4b2015699e7221bc.'
     nguoi_dang: 'loi_khai_co_neo — phien session_01WZT2MvvoQV8QGF1vX9STrJ dang bang credential cua chu kho theo chi thi trong phien "Ban comment luon cho toi di de land bang true" (31-10-2026); comment tu khai dieu nay. Bam byte chi thi KHONG_DO_DUOC.'
     dieu_kien_kem: 'Comment rang buoc landed vao gate 41182092305 success + 4/4 moc: ca hai DAT (tren).'
+  quyet_dinh_chu_kho:
+    trang_thai: da_duyet
+    comment: https://github.com/ducthangho/tra-luat/pull/1070#issuecomment-6541260357
+    ghi_chu: >-
+      Them 01-11-2026 (PR #1092) de dat luat L-6 (ops/kiem_ho_so_land.py doi anh xa trang_thai + comment); KHONG doi noi dung nao:
+      comment neo la chinh duyet_landed.url o tren (measured — readback-comment-6541260357.json). Chu kho duyet sua o phien dieu phoi
+      session_015GtxraXfMD1t2FJLzzGDr4 ("Đồng ý, sửa hồ sơ pr1040 đi", 01-11-2026 ~00:30Z).
   dieu_kien_10_2_4:
     - '(1) gate tren merge SHA c8ff9ed: DAT — 4/4 moc §10.2.2 measured.'
     - '(2) lease da nha: DAT — rut han 08:10Z, ai-dang-giu 08:11:23Z NGƯỜI_GIỮ 0 (lease.do_lai_sau_han_20261031T0811Z).'

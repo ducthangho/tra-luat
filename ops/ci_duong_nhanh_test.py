@@ -2274,18 +2274,18 @@ DAU_DO = {   # ten: (thay doi tren cay, buoc phai bat, dau rieng trong dau ra)
 }
 
 
-# Bang uy nhiem (dac ta CI-LAN-LUU-TRU r1, phep do dau do): moi buoc bi bo o duong nhanh dung mot dong. Do tren base 3bdd987
-# (01-11): `khong_doi_mau` = nen va nen+DO1..DO6 cung rc; `uy_nhiem` = doi mau va buoc con chay bat; `cai_dat` = cai/tai cong cu,
-# khong kiem cay; `chua_do` = CHUA do (no khai, khong phai bang chung). t58 khoa: thieu/thua dong hoac gia tri la ⇒ DO.
-UY_NHIEM_GOC = "3bdd987"
+# Bang uy nhiem (dac ta CI-LAN-LUU-TRU r1, phep do dau do): moi buoc bi bo o duong nhanh dung mot dong. Do tren 591cc9d (= 3bdd987
+# + commit CI cua packet, khong doi du lieu ho so; 01-11): `khong_doi_mau` = nen va nen+DO1..DO6 cung rc; `uy_nhiem` = doi mau va buoc con chay bat; `cai_dat` = cai/tai cong cu,
+# khong kiem cay (buoc chay test/kiem-tra KHONG duoc gan loai nay); `chua_do` = CHUA do. t58 khoa: thieu/thua dong, gia tri la ⇒ DO.
+UY_NHIEM_GOC = "591cc9d"
 UY_NHIEM = {
     ('gate', 'cài actionlint cho G5'): 'cai_dat',
     ('gate', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate', 'cài Ruff 0.15.15 và in probe dương'): 'cai_dat',
-    ('gate', 'G5 kiem ban ke cong cu + T1..T8 (packet'): 'cai_dat',
-    ('gate', 'PR head contains required EOL base'): 'chua_do',
-    ('gate', 'py_compile'): 'chua_do',
+    ('gate', 'G5 kiem ban ke cong cu + T1..T8 (packet'): 'khong_doi_mau',
+    ('gate', 'PR head contains required EOL base'): 'khong_doi_mau',
+    ('gate', 'py_compile'): 'khong_doi_mau',
     ('gate', 'codex credential selftest (packet #300)'): 'khong_doi_mau',
     ('gate', 'idiom-ba-ten selftest'): 'khong_doi_mau',
     ('gate', 'eol-policy selftest'): 'khong_doi_mau',
@@ -2304,30 +2304,30 @@ UY_NHIEM = {
     ('gate', 'release-check full'): 'khong_doi_mau',
     ('gate', 'release-verify strict (lane LAND — manifest committed)'): 'khong_doi_mau',
     ('gate', 'release-verify strict (lane WORKER — manifest TẠM ngoài repo)'): 'khong_doi_mau',
-    ('gate', 'release-bundle x2 cùng SHA-256'): 'chua_do',
+    ('gate', 'release-bundle x2 cùng SHA-256'): 'khong_doi_mau',
     ('gate', 'tl_boot smoke'): 'khong_doi_mau',
     ('gate-ops', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-ops', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-ops', 'lease-publish selftest (đo lại setup sau G5)'): 'uy_nhiem: DO1/DO2/DO3 -> kiem-re (CA_DU_LIEU t23, t26, t27)',
-    ('gate-ops', 'don-nhanh selftest (chốt xoá nhánh)'): 'chua_do',
+    ('gate-ops', 'don-nhanh selftest (chốt xoá nhánh)'): 'khong_doi_mau',
     ('gate-ops', 'bo ca gate chay TRONG cgroup duoc uy quyen (Linux)'): 'khong_doi_mau',
     ('gate-ops', 'gate lifecycle selftest (nen khong co cgroup)'): 'khong_doi_mau',
     ('gate-packet-loop', 'cài actionlint cho G5'): 'cai_dat',
     ('gate-packet-loop', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-packet-loop', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-packet-loop', 'cài Ruff 0.15.15 và in probe dương'): 'cai_dat',
-    ('gate-packet-loop', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',
+    ('gate-packet-loop', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'khong_doi_mau',
     ('gate-packet-loop', 'packet-loop selftest'): 'chua_do',
     ('gate-registry', 'cài actionlint cho G5'): 'cai_dat',
     ('gate-registry', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-registry', 'cài rg cho G5 (cài xong đo lại)'): 'cai_dat',
     ('gate-registry', 'cài Ruff 0.15.15 và in probe dương'): 'cai_dat',
-    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',
+    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'khong_doi_mau',
     ('gate-registry', 'test registry (phạm vi + các bộ chưa được nối)'): 'uy_nhiem: DO4 -> kiem-re (kiem_land_evidence); bo con lai khong_doi_mau; packet_loop_test chua_do',
-    ('gate-nhanh-manh', 'chạy mảnh nhanh_don_duoc (targeted_mutant_gate)'): 'chua_do',
+    ('gate-nhanh-manh', 'chạy mảnh nhanh_don_duoc (targeted_mutant_gate)'): 'khong_doi_mau',
     ('gate-nhanh-manh', 'actions/upload-artifact@v4'): 'cai_dat',
     ('gate-nhanh-gop', 'actions/download-artifact@v4'): 'cai_dat',
-    ('gate-nhanh-gop', 'gộp mảnh nhanh_don_duoc (targeted_mutant_gate)'): 'chua_do',
+    ('gate-nhanh-gop', 'gộp mảnh nhanh_don_duoc (targeted_mutant_gate)'): 'khong_doi_mau',
 }
 
 
@@ -2353,6 +2353,9 @@ def t58_bang_uy_nhiem_phu_dung_buoc_bi_bo():
     la = {k: v for k, v in UY_NHIEM.items() if v not in ("khong_doi_mau", "cai_dat", "chua_do")
           and not (v.startswith("uy_nhiem: DO") and "-> kiem-re (" in v)}
     bang(not la, f"gia tri uy nhiem la: {la}")
+    run = {(job, ten_buoc(b)): str(b.get("run", "")) for job in JOB_LAN_LUU_TRU for b in buoc(doc_wf(), job)}
+    gia = [k for k, v in UY_NHIEM.items() if v == "cai_dat" and re.search(r"_test\b|_test\.py|selftest|kiem-tra", run.get(k, ""))]
+    bang(not gia, f"buoc chay test/kiem-tra bi gan cai_dat (cross-review offline luot 2): {gia}")
 
 
 @ca
@@ -4009,8 +4012,10 @@ DOT_BIEN += [
     ("wp1113_xoa_trich_tat", _ma("           + kiem_xoa_bi_trich(env, chay, kho))", "           + [])"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_xoa_trich_rc0_rong_la_khop", _ma("isinstance(ra, (bytes, bytearray)) or not ra:", "isinstance(ra, (bytes, bytearray)):"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
     ("wp1113_xoa_trich_tren_goc", _ma("+ [dau, \"--\", *TAI_LIEU_TRICH]", "+ [env.get(BIEN_GOC) or \"\", \"--\", *TAI_LIEU_TRICH]"), ("t57_xoa_tep_tai_lieu_con_trich_kiem_re_do",)),
-    ("wp1113_uy_nhiem_thieu_dong", _test("    ('gate', 'py_compile'): 'chua_do',\n", ""), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
-    ("wp1113_uy_nhiem_gia_tri_la", _test("    ('gate', 'py_compile'): 'chua_do',\n", "    ('gate', 'py_compile'): 'xanh',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
+    ("wp1113_uy_nhiem_thieu_dong", _test("    ('gate', 'py_compile'): 'khong_doi_mau',\n", ""), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
+    ("wp1113_uy_nhiem_g5_cai_dat", _test("    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'khong_doi_" + "mau',\n",
+                                         "    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
+    ("wp1113_uy_nhiem_gia_tri_la", _test("    ('gate', 'py_compile'): 'khong_doi_mau',\n", "    ('gate', 'py_compile'): 'xanh',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
     ("wp1113_harness_bo_validator", _test("- set(VALIDATOR_DO_TAY" + ")) + [KIEM_RE]", "- set(VALIDATOR_DO_TAY) - {'eol-policy survey'}" + ") + [KIEM_RE]"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_dau_do_eol_che_do", _yml("      - name: eol-policy survey\n", "      - name: eol-policy survey\n        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_chuan_bi_khong_xuat_cap", _ma('if che_do == DUONG_NHANH else ""', 'if False else ""'), ("t54_kiem_re_doc_cap_cua_chuan_bi",)),

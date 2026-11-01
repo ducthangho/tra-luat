@@ -111,3 +111,5 @@ codex_da_goi:
 - {luot: 2, run_id: e1593942232745bc95b140131c6a437b, head: d929ee2dfa93f079a98d7e577ef6061e8e894d3a, verdict: changes_requested, ket_qua: '0 P0, 4 P1, 1 P2, 0 P3'}
 - {luot: 3, run_id: 650afa538bae4e7da0e871ea3e853a8e, head: 7df242e83cfa416cae78d3d8f04c3e323b4cf922, verdict: changes_requested, ket_qua: '0 P0, 1 P1, 0 P2, 0 P3'}
 codex_da_goi_ghi_chu: 'mot lan chay truoc luot 1 bi launcher CHAN [11] TRUOC spawn (remote clone khong phai GitHub) — khong goi codex, khong tinh vao tran.'
+da_bi_thay_the: wp1079-r1-g6-claude
+da_bi_thay_the_ly_do: 'Chu kho nang tran Codex 4->5 (cam ca trung __code__, bo va F08) (phien session_01J7EgTVGTrNi4xqh7MeBFQv, 01-11-2026); g6 thay the. Lease g5 nay KHONG con hieu luc; giu tep lam hien vat.'

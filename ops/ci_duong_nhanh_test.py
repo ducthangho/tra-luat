@@ -2278,6 +2278,8 @@ DAU_DO = {   # ten: (thay doi tren cay, buoc phai bat, dau rieng trong dau ra)
 # + commit CI cua packet, khong doi du lieu ho so; 01-11): `khong_doi_mau` = nen va nen+DO1..DO6 cung rc; `uy_nhiem` = doi mau va buoc con chay bat; `cai_dat` = cai/tai cong cu,
 # khong kiem cay (buoc chay test/kiem-tra KHONG duoc gan loai nay); `chua_do` = CHUA do. t58 khoa: thieu/thua dong, gia tri la ⇒ DO.
 UY_NHIEM_GOC = "591cc9d"
+CAI_DAT_HOP_LE = ("cài actionlint", "cài shellcheck", "cài rg", "cài Ruff", "tai len gate-evidence", "actions/upload-artifact@",
+                  "actions/download-artifact@")   # danh sach CHO PHEP, khong do tu khoa trong `run:`
 UY_NHIEM = {
     ('gate', 'cài actionlint cho G5'): 'cai_dat',
     ('gate', 'cài shellcheck cho G5 (cài xong đo lại)'): 'cai_dat',
@@ -2353,9 +2355,8 @@ def t58_bang_uy_nhiem_phu_dung_buoc_bi_bo():
     la = {k: v for k, v in UY_NHIEM.items() if v not in ("khong_doi_mau", "cai_dat", "chua_do")
           and not (v.startswith("uy_nhiem: DO") and "-> kiem-re (" in v)}
     bang(not la, f"gia tri uy nhiem la: {la}")
-    run = {(job, ten_buoc(b)): str(b.get("run", "")) for job in JOB_LAN_LUU_TRU for b in buoc(doc_wf(), job)}
-    gia = [k for k, v in UY_NHIEM.items() if v == "cai_dat" and re.search(r"_test\b|_test\.py|selftest|kiem-tra", run.get(k, ""))]
-    bang(not gia, f"buoc chay test/kiem-tra bi gan cai_dat (cross-review offline luot 2): {gia}")
+    gia = [k for k, v in UY_NHIEM.items() if v == "cai_dat" and not k[1].startswith(CAI_DAT_HOP_LE)]
+    bang(not gia, f"chi buoc cai cong cu / tai artifact duoc gan cai_dat (cross-review offline luot 2-3): {gia}")
 
 
 @ca
@@ -4015,6 +4016,7 @@ DOT_BIEN += [
     ("wp1113_uy_nhiem_thieu_dong", _test("    ('gate', 'py_compile'): 'khong_doi_mau',\n", ""), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
     ("wp1113_uy_nhiem_g5_cai_dat", _test("    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'khong_doi_" + "mau',\n",
                                          "    ('gate-registry', 'G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6'): 'cai_dat',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
+    ("wp1113_uy_nhiem_golden_cai_dat", _test("    ('gate', 'golden-test'): 'khong_doi_" + "mau',\n", "    ('gate', 'golden-test'): 'cai_dat',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
     ("wp1113_uy_nhiem_gia_tri_la", _test("    ('gate', 'py_compile'): 'khong_doi_mau',\n", "    ('gate', 'py_compile'): 'xanh',\n"), ("t58_bang_uy_nhiem_phu_dung_buoc_bi_bo",)),
     ("wp1113_harness_bo_validator", _test("- set(VALIDATOR_DO_TAY" + ")) + [KIEM_RE]", "- set(VALIDATOR_DO_TAY) - {'eol-policy survey'}" + ") + [KIEM_RE]"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),
     ("wp1113_dau_do_eol_che_do", _yml("      - name: eol-policy survey\n", "      - name: eol-policy survey\n        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}\n"), ("t56_dau_do_bi_bat_tren_duong_nhanh",)),

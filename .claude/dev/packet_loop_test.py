@@ -9060,6 +9060,152 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
 
 
 
+# --- #1106 ADR-0060 packet C: `kiem-merge` (K0–K6) · `kiem-dong-wp` (D1–D4). Kho thật: L đưa ADR-0060 vào master, L2 sau nó; H rẽ từ L2,
+# đẩy lên `refs/pull/55/head`. Mỗi ca đổi đúng một yếu tố, đòi rc + tên điều kiện; CLI sập ⇒ TÍN DỤNG GIẢ.
+def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None):
+    import yaml
+    goc = Path(tempfile.mkdtemp(prefix="c1106-", dir=c.tmp))
+    w = goc / "w"
+    _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
+
+    def ghi(nd, msg):
+        for p, b in nd.items():
+            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b)
+        return [_g(w, "add", "-A"), _g(w, "commit", "-qm", msg), _g(w, "rev-parse", "HEAD")][-1]
+    ghi({"README.md": "a\n"}, "A")
+    L = ghi({"docs/adr/0060-dieu-kien-merge-va-moc-ready.md": "adr\n"}, "L")
+    L2 = ghi({"docs/z.md": "z\n"}, "L2")
+    x = {"spec": f"# spec\ndieu_kien_merge: ADR-0060@{L}\n", "L2": L2}
+    (doi or (lambda *_: None))(x, w, None)
+    _g(w, "push", "-q", "origin", "master"), _g(w, "checkout", "-qb", "pr")
+    h = ghi({spec_path: x["spec"], **(them or {})}, "H")
+    _g(w, "push", "-q", "origin", "HEAD:refs/pull/55/head"), _g(w, "fetch", "-q", "origin")
+    out = "review\nKET_LUAN: approve\n"
+    x.update(runs=[{"id": 100, "path": ".github/workflows/ci.yml", "head_sha": h, "repository": {"full_name": "o/r"}, "run_attempt": 1,
+                    "status": "completed", "conclusion": "success", "check_suite_id": 500}],
+             jobs=[{"id": 200 + i, "run_id": 100, "run_attempt": 1, "name": j, "head_sha": h, "status": "completed", "conclusion": "success",
+                    "check_run_url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
+             cr=[{"id": 300 + i, "name": j, "head_sha": h, "status": "completed", "conclusion": "success", "check_suite": {"id": 500},
+                  "app": {"slug": "github-actions"}, "url": f"{_API834}check-runs/{300 + i}"} for i, j in enumerate(_J834)],
+             reviews=[], review_comments=[], issue_comments=[{"id": 20, "user": {"login": _CN834}, "issue_url": f"{_API834}issues/55",
+                                                               "body": f"Codex Review: Didn't find any major issues.\n\n**Reviewed commit:** `{h[:10]}`"}],
+             out=out, run={"head": h, "trang_thai": "xong", "ma_thoat": 0, "stdout_sha256": hashlib.sha256(out.encode()).hexdigest()},
+             lease={"spec_hash": hashlib.sha256(x["spec"].encode()).hexdigest()}, cmt=None, win=None, p3off=[])
+    (doi or (lambda *_: None))(x, w, h)
+    trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: v}  # noqa: E731
+    f = lambda ten, d: ((goc / ten).write_text(d if isinstance(d, str) else json.dumps(d)), goc / ten)[1]  # noqa: E731
+    cn = {"repo": "o/r", "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}}
+    args = ["kiem-merge", "--root", w, "--repo", "o/r", "--pr", 55, "--head", h, "--base", x.get("base", L2), "--spec", spec_path,
+            "--lease", f("l.yaml", yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
+            "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
+            "--connector", f("cn.json", cn), "--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"]),
+            *[a for k in x["p3off"] for a in ("--p3-offline", k)], *(("--chu-kho-comment", f("cmt.json", x["cmt"])) if x["cmt"] else ()),
+            *(("--windows-json", f("win.json", x["win"])) if x["win"] else ())]
+    return run(c.script, args, c.sd())
+
+
+def _c1106_ca(rc_doi, phai="", **kw):
+    def ca(c):
+        rc, o, e = (_c1106 if "bb" not in kw else _d1106)(c, **{k: v for k, v in kw.items() if k != "bb"})
+        if _co_banner(o) or _co_banner(e):
+            raise CliSapDo(f"c1106 SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
+        _doi(rc_doi, rc, e, "c1106")
+        if phai not in _txt(e):
+            raise AssertionError(f"c1106: rc đúng mà lý do khác — đòi {phai!r}, stderr={_txt(e)!r}")
+    return ca
+
+
+def _d1106(c, doi=None, raw=None):
+    import yaml
+    goc = Path(tempfile.mkdtemp(prefix="d1106-", dir=c.tmp))
+    w = goc / "w"
+    _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
+    (w / "a").write_text("a\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "A"), _g(w, "checkout", "-qb", "pr")
+    (w / "b").write_text("b\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "H"), _g(w, "checkout", "-q", "master")
+    h = _g(w, "rev-parse", "pr")
+    _g(w, "merge", "-q", "--no-ff", "-m", "M", "pr"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin")
+    m = _g(w, "rev-parse", "HEAD")
+    bb = {"packet": "P", "revision": 1, "generation": 1, "spec_hash": "a" * 64, "head_da_review": h, "tree_h": _g(w, "rev-parse", f"{h}^{{tree}}"),
+          "review": {"lop": []}, "windows": {"ci": "x"}, "duyet_chu_kho": "https://github.com/o/r/issues/1#issuecomment-1", "merge_commit": m,
+          "tree_m": _g(w, "rev-parse", f"{m}^{{tree}}"), "ci_master": {"run_id": 9, "conclusion": "success"}, "nghiem_thu": {"A1": "passed"},
+          "lease_cuoi": "l1", "landed": True, "moc_10_2_2": dict.fromkeys(("run", "checkout", "workflow_definition", "gate_output"), "passed")}
+    ls = {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}
+    (doi or (lambda *_: None))(bb, ls)
+    (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True)), (goc / "ls.yaml").write_text(yaml.safe_dump(ls))
+    return run(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd())
+
+
+_S1106 = lambda k, **v: lambda x, w, h: h and x[k].update(v)  # noqa: E731
+_CMT = lambda *dong: lambda x, w, h: h and x.update(cmt={"user": {"login": "ducthangho"}, "body": "\n".join(d.replace("H", h) for d in dong)})  # noqa: E731
+_WIN = lambda ts: lambda x, w, h: h and x.update(win={"sha": h, "os": "Windows", "tests": ts})  # noqa: E731
+_P3 = lambda x, w, h: h and x["review_comments"].append({"id": 11, "user": {"login": _CN834}, "body": "![P3 Badge] nit", "commit_id": h,  # noqa: E731
+                                                         "pull_request_url": f"{_API834}pulls/55"})
+_P3M = lambda *dong: lambda x, w, h: (_P3(x, w, h), _CMT(*dong)(x, w, h))  # noqa: E731
+_DEV = {".claude/dev/x.py": "a = 1\n"}
+CASES += [
+    ("cong_c_merge_du", _c1106_ca(0)),
+    ("cong_c_m6_hai_thieu", _c1106_ca(12, "K2 CI; K4 review offline", doi=lambda x, w, h: h and (x["jobs"][0].update(conclusion="failure"),
+                                                                                                x.update(out="KET_LUAN: changes_requested\n")))),
+    ("cong_c_k0_pr_head", _c1106_ca(12, "K0", doi=lambda x, w, h: h and (_g(w, "commit", "-q", "--allow-empty", "-m", "H2"),
+                                                                       _g(w, "push", "-q", "-f", "origin", "HEAD:refs/pull/55/head")))),
+    ("cong_c_k1_hash", _c1106_ca(12, "K1", doi=lambda x, w, h: h and x.update(lease={"spec_hash": "0" * 64}))),
+    ("cong_c_k1_l2", _c1106_ca(12, "K1", doi=lambda x, w, h: h is None and x.update(spec=f"dieu_kien_merge: ADR-0060@{x['L2']}\n"))),
+    ("cong_c_k1_hai_dong", _c1106_ca(12, "K1", doi=lambda x, w, h: h is None and x.update(spec=x["spec"] * 2))),
+    ("cong_c_k2_ci_do", _c1106_ca(12, "K2", doi=lambda x, w, h: h and x["jobs"][0].update(conclusion="failure"))),
+    ("cong_c_k3_p1", _c1106_ca(12, "K3", doi=lambda x, w, h: h and x["review_comments"].append(
+        {"id": 12, "user": {"login": _CN834}, "body": "![P1 Badge] bug", "commit_id": h, "pull_request_url": f"{_API834}pulls/55"}))),
+    ("cong_c_k4_head", _c1106_ca(12, "K4", doi=_S1106("run", head="0" * 40))),
+    ("cong_c_k4_ma_thoat", _c1106_ca(12, "K4", doi=_S1106("run", ma_thoat=True))),
+    ("cong_c_k4_stdout", _c1106_ca(12, "K4", doi=lambda x, w, h: h and x.update(out="khac\nKET_LUAN: approve\n"))),
+    ("cong_c_k4_changes", _c1106_ca(12, "K4", doi=lambda x, w, h: h and (x.update(out="KET_LUAN: changes_requested\n"),
+                                                                       x["run"].update(stdout_sha256=hashlib.sha256(b"KET_LUAN: changes_requested\n").hexdigest())))),
+    ("cong_c_k5_p3_khong_mien", _c1106_ca(12, "K5", doi=_P3)),
+    ("cong_c_k5_p3_mien", _c1106_ca(0, doi=_P3M("mien_p3: H review_comments:11"))),
+    ("cong_c_k5_thua", _c1106_ca(12, "K5", doi=_P3M("mien_p3: H review_comments:11,khac"))),
+    ("cong_c_k5_phu_dinh", _c1106_ca(12, "K5", doi=_P3M("không miễn: mien_p3: H review_comments:11"))),
+    ("cong_c_k5_sai_nguoi", _c1106_ca(12, "K5", doi=lambda x, w, h: (_P3M("mien_p3: H review_comments:11")(x, w, h), h and x["cmt"]["user"].update(login="evil")))),
+    ("cong_c_k5_offline", _c1106_ca(12, "K5", doi=lambda x, w, h: h and x.update(p3off=["lop-a"]))),
+    ("cong_c_k6_dev_thieu", _c1106_ca(12, "K6", them=_DEV)),
+    ("cong_c_k6_dev_xanh", _c1106_ca(0, them=_DEV, doi=_WIN([{"id": "a", "ket_qua": "passed"}]))),
+    ("cong_c_k6_rong", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([]))),
+    ("cong_c_k6_skipped", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([{"id": "a", "ket_qua": "skipped"}]))),
+    ("cong_c_k6_mien", _c1106_ca(0, them=_DEV, doi=_CMT("windows: H mien"))),
+    ("cong_c_k6_ps1_docs", _c1106_ca(12, "K6", them={"docs/x.ps1": "x\n"})),
+    ("cong_c_k6_md_chu_khoa", _c1106_ca(0, them={"README.md": "subprocess\n"})),
+    ("cong_c_k6_luu_tru", _c1106_ca(0, spec_path="ops/land/X.md", them={"ops/land/a.yaml": "a: 1\n"})),
+    ("cong_c_k6_land_py_unknown", _c1106_ca(12, "K6", spec_path="ops/land/X.md", them={"ops/land/x.py": "a = 1\n"})),
+    ("cong_c_k6_unknown_chot", _c1106_ca(0, spec_path="ops/land/X.md", them={"ops/land/x.py": "a = 1\n"}, doi=_CMT("windows: H not_required"))),
+    ("cong_c_k6_tu_khoa_py", _c1106_ca(12, "K6", spec_path="ops/land/X.md", them={"ops/land/x.py": "import subprocess\n"},
+                                       doi=_CMT("windows: H not_required"))),
+    ("cong_c_dong_du", _c1106_ca(0, bb=1)),
+    ("cong_c_d2_not_measured", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb["moc_10_2_2"].update(run="not_measured"))),
+    ("cong_c_d2_landed_false", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb.update(landed=False))),
+    ("cong_c_d2_nghiem_thu", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb["nghiem_thu"].update(A9="failed"))),
+    ("cong_c_d2_ci_master", _c1106_ca(12, "D2", bb=1, doi=lambda bb, ls: bb["ci_master"].update(conclusion="failure"))),
+    ("cong_c_d1_generation_bool", _c1106_ca(12, "D1", bb=1, doi=lambda bb, ls: bb.update(generation=True))),
+    ("cong_c_d1_nghiem_thu_rong", _c1106_ca(12, "D1", bb=1, doi=lambda bb, ls: bb.update(nghiem_thu={}))),
+    ("cong_c_d3_cha", _c1106_ca(12, "D3", bb=1, doi=lambda bb, ls: bb.update(head_da_review=bb["merge_commit"]))),
+    ("cong_c_d4_tuong_lai", _c1106_ca(12, "D4", bb=1, doi=lambda bb, ls: ls.update(lease_until="2999-01-01T00:00:00Z"))),
+    ("cong_c_d1_khoa_trung", _c1106_ca(2, "khoá YAML trùng", bb=1, raw="packet: P\npacket: Q\n")),
+]
+MUTANTS.update({
+    "c1106_k0_bo_pr_head": ("x[0] or x[1].split()[:1] != [h.encode()]", "x[0]", ["cong_c_k0_pr_head"]),
+    "c1106_k1_bo_spec_hash": ('rc or hashlib.sha256(spec).hexdigest() != _yaml_cay(Path(a.lease).read_bytes()).get("spec_hash")', "rc", ["cong_c_k1_hash"]),
+    "c1106_k1_bo_l1": (' and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0', "", ["cong_c_k1_l2"]),
+    "c1106_k3_bo_connector": ("_doc_connector(a.connector, a.repo, a.pr, h)", "([], None)", ["cong_c_k3_p1"]),
+    "c1106_k4_bo_head": ('r.get("head") == h and r.get("trang_thai")', 'r.get("trang_thai")', ["cong_c_k4_head"]),
+    "c1106_k4_bo_stdout_sha": (' and r.get("stdout_sha256") == hashlib.sha256(out).hexdigest()', "", ["cong_c_k4_stdout"]),
+    "c1106_k5_bo_chu_kho": ('d["user"].get("login") != CHU_KHO or ', "", ["cong_c_k5_sai_nguoi"]),
+    "c1106_k5_tap_con": ('set(mien[0].split(",")) != mo', 'not mo <= set(mien[0].split(","))', ["cong_c_k5_thua"]),
+    "c1106_k6_rong_van_dat": ("isinstance(ts, list) and ts and ", "isinstance(ts, list) and ", ["cong_c_k6_rong"]),
+    "c1106_k6_buoc1_bo_duoi": (' and (duoi(p) in DUOI_THU_DONG or PurePosixPath(p).name == "SHA256SUMS")', "", ["cong_c_k6_land_py_unknown"]),
+    "c1106_d2_bo": ('elif not (bb["landed"] is True and', 'elif False and (bb["landed"] is True and', ["cong_c_d2_not_measured"]),
+    "c1106_d2_bo_nghiem_thu": (' and all(v in DAT_MOC for v in bb["nghiem_thu"].values())', "", ["cong_c_d2_nghiem_thu"]),
+    "c1106_d4_bo_han": ("het = datetime.strptime", "het = True or datetime.strptime", ["cong_c_d4_tuong_lai"]),
+    "c1106_d1_nhan_bool": ("so = lambda v: type(v) is int and v >= 1", "so = lambda v: isinstance(v, int) and v >= 1", ["cong_c_d1_generation_bool"]),
+})
+
+
 def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]

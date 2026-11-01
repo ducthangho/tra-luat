@@ -9988,6 +9988,55 @@ def r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4():
                      f"rc={p.returncode} out={p.stdout!r} err={p.stderr!r}")
 
 
+
+@ca
+def r1122_kenh_ca_qua_khong_mang_chi_tiet_cu():
+    """Kênh lượt qua không được phát lại lỗi của lượt trước hoặc lỗi ca lồng cùng tên."""
+    text = Path(__file__).read_text(encoding="utf-8")
+    neo = '\nif __name__ == "__main__":'
+    bang(text.count(neo) == 1, "neo main khong duy nhat")
+    truoc = ('\nreview_fail = True\n@ca\ndef review_recover():\n'
+             '    if review_fail:\n        raise TypeError("review-old")\n'
+             'chay_bo_ca([review_recover])\nreview_fail = False\nCA = [review_recover]\n')
+    long = ('\nreview_depth = 0\n@ca\ndef review_recover():\n'
+            '    global review_depth\n'
+            '    if review_depth:\n        raise TypeError("review-old")\n'
+            '    review_depth = 1\n'
+            '    try:\n        chay_bo_ca([review_recover])\n'
+            '    finally:\n        review_depth = 0\nCA = [review_recover]\n')
+    with San() as s:
+        for nhan, them in (("truoc", truoc), ("long", long)):
+            dev = _dung_cay_harness(s / nhan, text.replace(neo, them + neo, 1),
+                                   LAUNCHER.read_text(encoding="utf-8"))
+            kenh = s / (nhan + ".json")
+            p = subprocess.run([PY, str(dev / "launcher_test.py"), "--lap-ca", "review_recover", "--lan", "1"],
+                               capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60,
+                               env=dict(os.environ, LT_KENH_KET_QUA=str(kenh), LT_KENH_NONCE="inert"))
+            got = json.loads(kenh.read_text(encoding="utf-8"))
+            bang(p.returncode == 0 and got.get("qua") == 1 and got.get("hong") == 0,
+                 "fixture ca qua khong do duoc")
+            bang(all(got.get(k) is None for k in ("loai", "ten_loai", "thong_diep")),
+                 "kenh ca qua mang chi tiet loi cu: " + nhan)
+
+
+@ca
+def r1122_nhat_ky_loi_io_khong_in_traceback_dai():
+    """Lỗi mở nhật ký qua CLI vẫn có loại + 160 ký tự; không đi qua excepthook thô."""
+    text = Path(__file__).read_text(encoding="utf-8")
+    neo = '\nif __name__ == "__main__":'
+    them = '\n@ca\ndef review_pass():\n    pass\nCA = [review_pass]\n'
+    bang(text.count(neo) == 1, "neo main khong duy nhat")
+    with San() as s:
+        dev = _dung_cay_harness(s / "journal-io", text.replace(neo, them + neo, 1),
+                               LAUNCHER.read_text(encoding="utf-8"))
+        tep = s / "missing" / ("x" * 180) / "journal.log"
+        p = subprocess.run([PY, str(dev / "launcher_test.py"), "--lap-ca", "review_pass", "--lan", "1",
+                            "--nhat-ky", str(tep)], capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=60, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    tin = str(FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), str(tep)))[:160]
+    bang(p.returncode == 1 and p.stderr.strip() == "FileNotFoundError: " + tin,
+         "loi I/O nhat ky thoat ra traceback hoac khong cat dung 160")
+
 @ca
 def r1122_loi_mang_thong_diep_cat_160():
     """#1122 spec A2: chi tiết `loi` mang loại + thông điệp cắt ĐÚNG 160 ký tự (số viết cứng ở đây, không đọc
@@ -14736,6 +14785,12 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    ('wp1122_kenh_ca_qua_ro_0', ('"loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None)', '"loai": LOAI_HONG.get(chon[0].__name__)'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
+    ('wp1122_kenh_ca_qua_ro_1', ('"ten_loai": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0] if hong_ds else None)', '"ten_loai": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0]'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
+    ('wp1122_kenh_ca_qua_ro_2', ('"thong_diep": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1] if hong_ds else None)', '"thong_diep": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1]'), ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
+    ('wp1122_nhat_ky_loi_io_khong_cat', ('        print(mo_ta_loi(e), file=sys.stderr)', '        print(f"{type(e).__name__}: {e}", file=sys.stderr)'), ['r1122_nhat_ky_loi_io_khong_in_traceback_dai']),
+    ('wp1122_nhat_ky_loi_io_bo_reporter', ('if __name__ == "__main__":\n    try:\n        sys.exit(main())\n    except Exception as e:  # noqa: BLE001 - bao loi ha tang CLI qua formatter chung\n        print(mo_ta_loi(e), file=sys.stderr)\n        sys.exit(1)', 'if __name__ == "__main__":\n    sys.exit(main())'), ['r1122_nhat_ky_loi_io_khong_in_traceback_dai']),
+
     ('wp1122_tach_nhom_mat_chi_tiet', ('return f"KHONG tach duoc ({mo_ta_loi(e)}) - killpg co the giet vo shell"', 'return f"KHONG tach duoc ({type(e).__name__}) - killpg co the giet vo shell"'), ['r1122_tach_nhom_loi_giu_loai_va_thong_diep_160']),
     ('wp1122_tach_nhom_khong_cat', ('return f"KHONG tach duoc ({mo_ta_loi(e)}) - killpg co the giet vo shell"', 'return f"KHONG tach duoc ({type(e).__name__}: {e}) - killpg co the giet vo shell"'), ['r1122_tach_nhom_loi_giu_loai_va_thong_diep_160']),
     ('wp1122_stdout_bo_utf8', ('            luong.reconfigure(encoding="utf-8", errors="replace")', '            pass'), ['r1122_reporter_unicode_console_khong_utf8']),
@@ -14747,7 +14802,7 @@ DOT_BIEN_HARNESS = [
     ('wp1122_reporter_transport_bo_thong_diep', ('return "loi", f"{ten_ca}({mo_ta_loi(e)})"', 'return "loi", f"{ten_ca}({type(e).__name__})"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_reporter_assertion_khong_cat', ('            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            # #1079 F01:', '            CHI_TIET_HONG[fn.__name__] = (type(e).__name__, str(e)[:TRAN_THONG_DIEP_LOI])\n            hong_ds.append((fn.__name__, str(e)))\n            # #1079 F01:'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_reporter_exception_khong_cat', ('            hong_ds.append((fn.__name__, mo_ta_loi(e)))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"', '            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))\n            LOAI_HONG[fn.__name__] = f"khac:{type(e).__qualname__}"'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
-    ('wp1122_reporter_lap_lay_ca_loai', ('"thong_diep": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1]', '"thong_diep": (hong_ds[-1][1][:TRAN_THONG_DIEP_LOI] if hong_ds else None)'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
+    ('wp1122_reporter_lap_lay_ca_loai', ('"thong_diep": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1] if hong_ds else None)', '"thong_diep": (hong_ds[-1][1][:TRAN_THONG_DIEP_LOI] if hong_ds else None)'), ['r1122_reporter_giu_loai_va_cat_dung_thong_diep']),
     ('wp1122_encoding_cp1252', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding="cp1252", errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     ('wp1122_encoding_none', ('                          text=True, encoding="utf-8", errors="replace", cwd=cwd, env=env)', '                          text=True, encoding=None, errors="replace", cwd=cwd, env=env)'), ['r1122_con_python_giai_ma_utf8']),
     # Hai dòng fixture mới phải dùng đúng tên `MODULE_PY`; đổi phối hợp cả hai về
@@ -15375,10 +15430,10 @@ def main() -> int:
         if kenh:   # #1079 F01: kênh kết quả cho runner harness (cham_lap_ca)
             Path(kenh).write_text(json.dumps({"nonce": nonce, "ten": chon[0].__name__, "qua": qua,
                                               "bo_qua": bo_qua, "hong": len(hong_ds),
-                                              "loai": LOAI_HONG.get(chon[0].__name__),
+                                              "loai": (LOAI_HONG.get(chon[0].__name__) if hong_ds else None),
                                               # #1122: thông điệp (cắt) cho chi tiết `loi` của `cham_lap_ca`
-                                              "ten_loai": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0],
-                                              "thong_diep": CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1]}), encoding="utf-8")
+                                              "ten_loai": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[0] if hong_ds else None),
+                                              "thong_diep": (CHI_TIET_HONG.get(chon[0].__name__, (None, None))[1] if hong_ds else None)}), encoding="utf-8")
         print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
               f"{len(hong_ds)} hong", flush=True)
         return 1 if hong_ds else 0
@@ -15397,4 +15452,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as e:  # noqa: BLE001 - bao loi ha tang CLI qua formatter chung
+        print(mo_ta_loi(e), file=sys.stderr)
+        sys.exit(1)

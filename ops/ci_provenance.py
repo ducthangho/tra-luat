@@ -35,6 +35,8 @@ LY_DO_WD = "graphql_bi_chan_trong_phien_claude; cho P-B"
 # CI-PROVENANCE-WD r1 (Issue #1094): mốc Workflow definition đo bằng `do-wd` trong Actions, nhập bằng `thu --wd-run`.
 WF_WD = ".github/workflows/ops-do-workflow-definition.yml"
 RE_URL_WD = re.compile(r"^https://github\.com/([\w.-]+/[\w.-]+)/blob/([0-9a-f]{40})/(.+)$")
+KHOA_WD = {"schema", "repo", "run_id", "loi_graphql", "nguon", "trang_thai", "ly_do", "run_attempt_luc_do", "event", "node_id", "head_sha_rest",
+           "run_number", "created_at", "path", "repository_file_url", "check_suite_commit", "oid_dinh_nghia", "blob", "sha256"}   # schema `passed` cố định
 SU_KIEN_SO_OID = ("push", "workflow_dispatch", "schedule")   # chỉ các event này mới bắt OID định nghĩa = head_sha = check-suite
 RE_TOKEN = re.compile(r"(gh[pousr]_[A-Za-z0-9]{8,}|github_pat_[A-Za-z0-9_]{8,})")
 GQL_WD = ("query($id: ID!) { node(id: $id) { ... on WorkflowRun { databaseId runNumber createdAt "
@@ -424,17 +426,17 @@ def do_wd(repo, run, goi, gql):
         return ket("not_measured", "phan_hoi_hong", 3)
     if type(d) is not dict:
         return ket("not_measured", "phan_hoi_hong", 3)
+    if type(d.get("errors", [])) is not list:   # kiểm KIỂU trước giá trị: `0`/`false`/`{}` sai kiểu mà falsy cũng là hỏng
+        return ket("not_measured", "phan_hoi_hong", 3)
     if d.get("errors"):
-        if type(d["errors"]) is not list:
-            return ket("not_measured", "phan_hoi_hong", 3)
         kq["loi_graphql"] = [{"path": e.get("path"), "type": e.get("type"), "message": RE_TOKEN.sub("***", str(e.get("message", "")))[:300]}
                              for e in d["errors"] if type(e) is dict]
         return ket("not_measured", "graphql_errors", 3)
-    n = d["data"].get("node") if type(d.get("data")) is dict else None
+    n = d["data"].get("node", ...) if type(d.get("data")) is dict else ...   # `...` = THIẾU khoá ≠ null ⇒ hỏng, không phải *_null
     for khoa, ten in ((None, "node_null"), ("file", "file_null"), ("checkSuite", "checksuite_null")):
-        if (n if khoa is None else n.get(khoa)) is None:
+        if (v := n if khoa is None else n.get(khoa, ...)) is None:
             return ket("not_measured", ten, 3)
-        if type(n if khoa is None else n.get(khoa)) is not dict:
+        if type(v) is not dict:
             return ket("not_measured", "phan_hoi_hong", 3)
     url, fp, cm = n["file"].get("repositoryFileUrl"), n["file"].get("path"), n["checkSuite"].get("commit")
     cso = cm.get("oid") if type(cm) is dict else None
@@ -500,7 +502,10 @@ def nhap_wd(goi, repo, run, r, wd_run):
                        ("path", j.get("path") == r.get("path")), ("trang_thai", j.get("trang_thai") == "passed"),
                        ("oid", type(j.get("oid_dinh_nghia")) is str and bool(RE_HEX40.fullmatch(j["oid_dinh_nghia"]))),
                        ("blob", type(j.get("blob")) is str and bool(RE_HEX40.fullmatch(j["blob"]))),
-                       ("sha256", type(j.get("sha256")) is str and bool(re.fullmatch(r"[0-9a-f]{64}", j["sha256"])))):
+                       ("sha256", type(j.get("sha256")) is str and bool(re.fullmatch(r"[0-9a-f]{64}", j["sha256"]))),
+                       ("khoa", set(j) == KHOA_WD and j.get("ly_do") is None and j.get("loi_graphql") == [] and _chuoi(j.get("nguon"))),
+                       ("meta", all(_so(j.get(k), 1) for k in ("run_attempt_luc_do", "run_number")) and all(_chuoi(j.get(k)) for k in ("event", "node_id", "created_at"))
+                        and all(type(j.get(k)) is str and bool(RE_HEX40.fullmatch(j[k])) for k in ("head_sha_rest", "check_suite_commit")))):
         if not ok:
             return ko("c", truong)
     oid = j["oid_dinh_nghia"]

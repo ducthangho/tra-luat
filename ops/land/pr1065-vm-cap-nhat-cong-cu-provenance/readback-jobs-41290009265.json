@@ -3,6 +3,7 @@
  "jobs": [
   {
    "id": 124807777230,
+   "run_id": 41290009265,
    "name": "chuan-bi",
    "run_attempt": 1,
    "status": "completed",
@@ -11,10 +12,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:37Z",
+   "completed_at": "2026-11-01T09:23:39Z"
   },
   {
    "id": 124807791546,
+   "run_id": 41290009265,
    "name": "gate-packet-loop (ubuntu-latest)",
    "run_attempt": 1,
    "status": "completed",
@@ -23,10 +27,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T10:22:23Z"
   },
   {
    "id": 124807791552,
+   "run_id": 41290009265,
    "name": "gate (ubuntu-latest)",
    "run_attempt": 1,
    "status": "completed",
@@ -35,10 +42,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:35:06Z"
   },
   {
    "id": 124807791557,
+   "run_id": 41290009265,
    "name": "gate-ops (ubuntu-latest)",
    "run_attempt": 1,
    "status": "completed",
@@ -47,10 +57,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:40:50Z"
   },
   {
    "id": 124807791612,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 1)",
    "run_attempt": 1,
    "status": "completed",
@@ -59,10 +72,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:24:29Z"
   },
   {
    "id": 124807791617,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 2)",
    "run_attempt": 1,
    "status": "completed",
@@ -71,10 +87,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:41Z",
+   "completed_at": "2026-11-01T09:44:18Z"
   },
   {
    "id": 124807791621,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 0)",
    "run_attempt": 1,
    "status": "completed",
@@ -83,10 +102,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:41Z",
+   "completed_at": "2026-11-01T09:24:39Z"
   },
   {
    "id": 124807791623,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 6)",
    "run_attempt": 1,
    "status": "completed",
@@ -95,10 +117,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:41Z",
+   "completed_at": "2026-11-01T09:43:59Z"
   },
   {
    "id": 124807791627,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 4)",
    "run_attempt": 1,
    "status": "completed",
@@ -107,10 +132,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:44:19Z"
   },
   {
    "id": 124807791632,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 3)",
    "run_attempt": 1,
    "status": "completed",
@@ -119,10 +147,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:25:12Z"
   },
   {
    "id": 124807791643,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 6)",
    "run_attempt": 1,
    "status": "completed",
@@ -131,10 +162,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:41Z",
+   "completed_at": "2026-11-01T09:25:00Z"
   },
   {
    "id": 124807791654,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 5)",
    "run_attempt": 1,
    "status": "completed",
@@ -143,10 +177,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:41Z",
+   "completed_at": "2026-11-01T09:36:08Z"
   },
   {
    "id": 124807791659,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 7)",
    "run_attempt": 1,
    "status": "completed",
@@ -155,10 +192,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:44:36Z"
   },
   {
    "id": 124807791665,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 0)",
    "run_attempt": 1,
    "status": "completed",
@@ -167,10 +207,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:44:37Z"
   },
   {
    "id": 124807791674,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 7)",
    "run_attempt": 1,
    "status": "completed",
@@ -179,10 +222,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:25:17Z"
   },
   {
    "id": 124807791677,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 5)",
    "run_attempt": 1,
    "status": "completed",
@@ -191,10 +237,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:24:42Z"
   },
   {
    "id": 124807791678,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 3)",
    "run_attempt": 1,
    "status": "completed",
@@ -203,10 +252,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:41Z",
+   "completed_at": "2026-11-01T09:36:31Z"
   },
   {
    "id": 124807791687,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 2)",
    "run_attempt": 1,
    "status": "completed",
@@ -215,10 +267,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:24:30Z"
   },
   {
    "id": 124807791705,
+   "run_id": 41290009265,
    "name": "gate-nhanh-manh (ubuntu-latest, 4)",
    "run_attempt": 1,
    "status": "completed",
@@ -227,10 +282,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:25:07Z"
   },
   {
    "id": 124807791751,
+   "run_id": 41290009265,
    "name": "gate-cong-cu (ubuntu-latest, 1)",
    "run_attempt": 1,
    "status": "completed",
@@ -239,10 +297,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:23:42Z",
+   "completed_at": "2026-11-01T09:39:36Z"
   },
   {
    "id": 124808139069,
+   "run_id": 41290009265,
    "name": "gate-nhanh-gop (ubuntu-latest)",
    "run_attempt": 1,
    "status": "completed",
@@ -251,10 +312,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:25:19Z",
+   "completed_at": "2026-11-01T09:25:33Z"
   },
   {
    "id": 124808200155,
+   "run_id": 41290009265,
    "name": "gate-registry (ubuntu-latest)",
    "run_attempt": 1,
    "status": "completed",
@@ -263,10 +327,13 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:25:36Z",
+   "completed_at": "2026-11-01T10:05:19Z"
   },
   {
    "id": 124812189901,
+   "run_id": 41290009265,
    "name": "gate-cong-cu-gop (ubuntu-latest)",
    "run_attempt": 1,
    "status": "completed",
@@ -275,7 +342,9 @@
    "labels": [
     "ubuntu-latest"
    ],
-   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97"
+   "head_sha": "3bdd9877cab2543adc413a32a47decbb585ded97",
+   "started_at": "2026-11-01T09:44:44Z",
+   "completed_at": "2026-11-01T09:44:55Z"
   }
  ]
 }

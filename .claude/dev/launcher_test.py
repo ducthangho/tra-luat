@@ -8305,11 +8305,11 @@ def r484_g2_doctor_doc_dung_home_da_materialize():
                   "print(json.dumps(m['_han_token_codex']()))")
         result = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
                                 env=env, capture_output=True, text=True, timeout=30)
-        assert result.returncode == 0, result.stderr
+        bang(result.returncode == 0, result.stderr)
         measured = json.loads(result.stdout)
-        assert measured["doc_duoc"], "doctor ignored the credential in CODEX_HOME"
-        assert measured["last_refresh"] == "2026-09-09T00:00:00Z"
-        assert not (default / ".codex").exists(), "diagnostic modified fallback home"
+        bang(measured["doc_duoc"], "doctor ignored the credential in CODEX_HOME")
+        bang(measured["last_refresh"] == "2026-09-09T00:00:00Z", 'measured["last_refresh"] == "2026-09-09T00:00:00Z"')
+        bang(not (default / ".codex").exists(), "diagnostic modified fallback home")
 
 
 @ca
@@ -8334,13 +8334,13 @@ def r484_g2_env_policy_cung_home_hai_chieu():
                                   capture_output=True, text=True, timeout=30)
 
         (custom / "config.toml").write_bytes(block)
-        assert gate("--tep", str(custom / "config.toml")).returncode == 3, "invalid control fixture"
-        assert gate().returncode == 3, "gate ignored active legacy block in CODEX_HOME"
+        bang(gate("--tep", str(custom / "config.toml")).returncode == 3, "invalid control fixture")
+        bang(gate().returncode == 3, "gate ignored active legacy block in CODEX_HOME")
         (custom / "config.toml").write_bytes(b"# clean custom home\n")
         (default / "config.toml").write_bytes(block)
-        assert gate().returncode == 0, "residue in fallback home blocked clean CODEX_HOME"
+        bang(gate().returncode == 0, "residue in fallback home blocked clean CODEX_HOME")
         env["CODEX_HOME"] = ""
-        assert gate().returncode == 3, "empty CODEX_HOME did not use fallback"
+        bang(gate().returncode == 3, "empty CODEX_HOME did not use fallback")
 
 
 @ca
@@ -8357,11 +8357,11 @@ def r484_g2_auth_hong_utf8_tra_loi_co_kiem_soat():
                   "print(json.dumps(m['chuan_bi_xac_thuc'](that_su=False)))")
         result = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
                                 env=env, capture_output=True, text=True, timeout=30)
-        assert result.returncode == 0, "corrupt auth escaped as traceback: " + result.stderr
+        bang(result.returncode == 0, "corrupt auth escaped as traceback: " + result.stderr)
         measured = json.loads(result.stdout)
-        assert measured and measured[0]["ok"] is False, "unreadable disk auth was reported healthy"
-        assert auth.read_bytes() == b"\xff\xfeINERT-CORRUPT"
-        assert "INERT-NEW" not in result.stdout + result.stderr
+        bang(measured and measured[0]["ok"] is False, "unreadable disk auth was reported healthy")
+        bang(auth.read_bytes() == b"\xff\xfeINERT-CORRUPT", 'auth.read_bytes() == b"\\xff\\xfeINERT-CORRUPT"')
+        bang("INERT-NEW" not in result.stdout + result.stderr, '"INERT-NEW" not in result.stdout + result.stderr')
 
 
 @ca
@@ -8384,14 +8384,14 @@ def r484_g2_schema_truoc_freshness_va_home_materialize():
                            "tokens": tokens, "last_refresh": "2026-09-08T00:00:00Z"}))
             p = subprocess.run([PY, "-c", script, str(LAUNCHER_DANG_DUNG)],
                                env=env, capture_output=True, text=True, timeout=30)
-            assert p.returncode == 0, "schema validation escaped controlled result"
+            bang(p.returncode == 0, "schema validation escaped controlled result")
             result = json.loads(p.stdout)[0]
-            assert result["ok"] is expected, "freshness hid invalid schema"
-            assert result["duong_dan"] == str(auth), "materializer selected another home"
-            assert result["doi"] is False
-            assert auth.read_text(encoding="utf-8") == old
-            assert "INERT-" not in p.stdout + p.stderr
-        assert not (root / ".codex").exists()
+            bang(result["ok"] is expected, "freshness hid invalid schema")
+            bang(result["duong_dan"] == str(auth), "materializer selected another home")
+            bang(result["doi"] is False, 'result["doi"] is False')
+            bang(auth.read_text(encoding="utf-8") == old, 'auth.read_text(encoding="utf-8") == old')
+            bang("INERT-" not in p.stdout + p.stderr, '"INERT-" not in p.stdout + p.stderr')
+        bang(not (root / ".codex").exists(), 'not (root / ".codex").exists()')
 
 
 @ca
@@ -8417,20 +8417,20 @@ def r484_g2_child_khong_nhan_snapshot_va_rac_chan_truoc_probe():
                             "--expected-head", head_cua(repo), "--deadline-utc", mai_sau(30),
                             "--run-root", str(rr), "--", PY, "-c", code],
                            env=env, capture_output=True, text=True, timeout=45)
-        assert p.returncode == 0, "inert launcher child failed: " + p.stderr
+        bang(p.returncode == 0, "inert launcher child failed: " + p.stderr)
         logs = list(rr.glob("*/stdout*"))
-        assert logs and any("BOUNDARY-OK" in f.read_text(encoding="utf-8") for f in logs)
-        assert auth.read_text(encoding="utf-8") == snapshot
+        bang(logs and any("BOUNDARY-OK" in f.read_text(encoding="utf-8") for f in logs), 'logs and any("BOUNDARY-OK" in f.read_text(encoding="utf-8") for f in logs)')
+        bang(auth.read_text(encoding="utf-8") == snapshot, 'auth.read_text(encoding="utf-8") == snapshot')
         bad_runs = s / "bad-runs"
         env["CODEX_AUTH_JSON"] = '{"tokens": "INERT-BAD"}'
         p = subprocess.run([PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
                             "--expected-head", head_cua(repo), "--run-root", str(bad_runs),
                             "--", PY, "-c", "raise AssertionError('child must not run')"],
                            env=env, capture_output=True, text=True, timeout=30)
-        assert p.returncode == MA_CHUA_XAC_THUC
-        assert not bad_runs.exists(), "invalid snapshot reached probe/run stage"
-        assert "INERT-BAD" not in p.stdout + p.stderr
-        assert auth.read_text(encoding="utf-8") == snapshot
+        bang(p.returncode == MA_CHUA_XAC_THUC, 'p.returncode == MA_CHUA_XAC_THUC')
+        bang(not bad_runs.exists(), "invalid snapshot reached probe/run stage")
+        bang("INERT-BAD" not in p.stdout + p.stderr, '"INERT-BAD" not in p.stdout + p.stderr')
+        bang(auth.read_text(encoding="utf-8") == snapshot, 'auth.read_text(encoding="utf-8") == snapshot')
 
 
 @ca
@@ -8442,7 +8442,7 @@ def r484_g2_storage_kernel_guardrails():
         home = s / "codex"
         with m._KhoCodex(home, create=True) as store:
             store.write("auth.json", b"INERT-OLD", None)
-            assert store.read() == b"INERT-OLD"
+            bang(store.read() == b"INERT-OLD", 'store.read() == b"INERT-OLD"')
             with patch.object(m.os, "replace", side_effect=OSError("injected rename failure")):
                 try:
                     store.write("auth.json", b"INERT-NEW", b"INERT-OLD")
@@ -8450,8 +8450,8 @@ def r484_g2_storage_kernel_guardrails():
                     pass
                 else:
                     raise AssertionError("rename failure was accepted")
-            assert store.read() == b"INERT-OLD"
-            assert not list(home.glob("*.tmp-*"))
+            bang(store.read() == b"INERT-OLD", 'store.read() == b"INERT-OLD"')
+            bang(not list(home.glob("*.tmp-*")), 'not list(home.glob("*.tmp-*"))')
             try:
                 store.write("auth.json", b"INERT-NEW", b"WRONG-CAS")
             except OSError:
@@ -8468,8 +8468,8 @@ def r484_g2_storage_kernel_guardrails():
                 raise AssertionError("hardlinked credential was accepted")
             link.unlink()
             moved = s / "moved"
-            assert home.resolve().is_relative_to(s.resolve())
-            assert moved.resolve().is_relative_to(s.resolve())
+            bang(home.resolve().is_relative_to(s.resolve()), 'home.resolve().is_relative_to(s.resolve())')
+            bang(moved.resolve().is_relative_to(s.resolve()), 'moved.resolve().is_relative_to(s.resolve())')
             if LA_WINDOWS:
                 try:
                     home.rename(moved)
@@ -8482,8 +8482,8 @@ def r484_g2_storage_kernel_guardrails():
                 home.mkdir()
                 (home / "auth.json").write_bytes(b"INERT-DECOY")
                 store.write("auth.json", b"INERT-NEW", b"INERT-OLD")
-                assert (moved / "auth.json").read_bytes() == b"INERT-NEW"
-                assert (home / "auth.json").read_bytes() == b"INERT-DECOY"
+                bang((moved / "auth.json").read_bytes() == b"INERT-NEW", '(moved / "auth.json").read_bytes() == b"INERT-NEW"')
+                bang((home / "auth.json").read_bytes() == b"INERT-DECOY", '(home / "auth.json").read_bytes() == b"INERT-DECOY"')
         repo = s / "repo"
         (repo / ".git").mkdir(parents=True)
         try:
@@ -8491,7 +8491,7 @@ def r484_g2_storage_kernel_guardrails():
                 raise AssertionError("repository credential destination accepted")
         except OSError:
             pass
-        assert not (repo / "credentials").exists()
+        bang(not (repo / "credentials").exists(), 'not (repo / "credentials").exists()')
         target = s / "target"
         target.mkdir()
         (target / "sentinel").write_text("INERT-SENTINEL", encoding="utf-8")
@@ -8499,7 +8499,7 @@ def r484_g2_storage_kernel_guardrails():
         if LA_WINDOWS:
             p = subprocess.run(["cmd", "/d", "/c", "mklink", "/J", str(junction), str(target)],
                                capture_output=True, text=True, timeout=20)
-            assert p.returncode == 0, "Windows junction could not be measured"
+            bang(p.returncode == 0, "Windows junction could not be measured")
         else:
             junction.symlink_to(target, target_is_directory=True)
         try:
@@ -8507,13 +8507,13 @@ def r484_g2_storage_kernel_guardrails():
                 raise AssertionError("ancestor redirect accepted")
         except OSError:
             pass
-        assert not (target / "credentials").exists()
-        assert (target / "sentinel").read_text() == "INERT-SENTINEL"
+        bang(not (target / "credentials").exists(), 'not (target / "credentials").exists()')
+        bang((target / "sentinel").read_text() == "INERT-SENTINEL", '(target / "sentinel").read_text() == "INERT-SENTINEL"')
         if LA_WINDOWS:
             os.rmdir(junction)
             p = subprocess.run(["icacls", str(home / "auth.json"), "/grant", "*S-1-1-0:(R)"],
                                capture_output=True, text=True, timeout=20)
-            assert p.returncode == 0, "ACL counterexample could not be measured"
+            bang(p.returncode == 0, "ACL counterexample could not be measured")
             try:
                 with m._KhoCodex(home) as store:
                     store.read()
@@ -8631,10 +8631,10 @@ def r484_g2_timeout_sau_output_khong_refund():
                  "--deadline-utc", mai_sau(8), "--attempt-state", str(state),
                  "--void-reason", "infrastructure", "--", PY, "-c",
                  "import time; print('INERT GENERATED OUTPUT', flush=True); time.sleep(30)")
-        assert r.returncode == 124, r.stderr
+        bang(r.returncode == 124, r.stderr)
         record = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
-        assert record["stdout_byte"] > 0 and record["trang_thai"] == "qua_han"
-        assert "void_reason" not in record and record["failure_class"] == "unknown"
+        bang(record["stdout_byte"] > 0 and record["trang_thai"] == "qua_han", 'record["stdout_byte"] > 0 and record["trang_thai"] == "qua_han"')
+        bang("void_reason" not in record and record["failure_class"] == "unknown", '"void_reason" not in record and record["failure_class"] == "unknown"')
 
 
 @ca
@@ -8668,19 +8668,19 @@ def r484_g2_probe_isolated_marker_va_refresh():
         calls = []
         def run(args, **kw):
             calls.append(kw["env"]["CODEX_HOME"])
-            assert Path(kw["cwd"]) == Path(kw["env"]["CODEX_HOME"])
+            bang(Path(kw["cwd"]) == Path(kw["env"]["CODEX_HOME"]), 'Path(kw["cwd"]) == Path(kw["env"]["CODEX_HOME"])')
             return real_run([args[0], str(script), *args[2:]], **kw)
         probe.__globals__["subprocess"] = SimpleNamespace(run=run, TimeoutExpired=subprocess.TimeoutExpired,
                                                          SubprocessError=subprocess.SubprocessError)
         probe.__globals__["_co_codex"] = lambda: PY
         with patch.object(m.runpy, "run_path", return_value=helper):
             got, dead = m._probe_snapshot(new)
-            assert got == rotated and not dead and len(calls) == 1
-            assert not Path(calls[0]).exists(), "candidate home was not cleaned"
-            assert (active / "auth.json").read_bytes() == old
+            bang(got == rotated and not dead and len(calls) == 1, 'got == rotated and not dead and len(calls) == 1')
+            bang(not Path(calls[0]).exists(), "candidate home was not cleaned")
+            bang((active / "auth.json").read_bytes() == old, '(active / "auth.json").read_bytes() == old')
             script.write_text(code.replace("print('TRALUAT-CRED-OK')", "print('no marker')"), encoding="utf-8")
             got, dead = m._probe_snapshot(new)
-            assert got is None and not dead, "rc=0 without marker was accepted"
+            bang(got is None and not dead, "rc=0 without marker was accepted")
 
 
 @ca
@@ -8762,8 +8762,8 @@ def r484_g2_hook_shell_scrub_truoc_probe():
         bang(any(x.startswith("SACH ") for x in ky[ky.index("CHUAN_BI") + 1:]),
              f"không đo được lời gọi nào SAU materializer: {ky}")
         bang(p.returncode != 13, f"hook dừng ở 13: {p.stdout[-300:]}")
-        assert (home / "auth.json").read_text() == snapshot
-        assert "INERT-HOOK" not in p.stdout + p.stderr
+        bang((home / "auth.json").read_text() == snapshot, '(home / "auth.json").read_text() == snapshot')
+        bang("INERT-HOOK" not in p.stdout + p.stderr, '"INERT-HOOK" not in p.stdout + p.stderr')
 
 
 @ca
@@ -8824,7 +8824,7 @@ def r484_g2_bridge_scrub_va_chot_remote():
         calls.append("prepare")
         return [{"ok": True}]
     def child(args, **kwargs):
-        assert not any(k.upper() == "CODEX_AUTH_JSON" for k in kwargs["env"])
+        bang(not any(k.upper() == "CODEX_AUTH_JSON" for k in kwargs["env"]), 'not any(k.upper() == "CODEX_AUTH_JSON" for k in kwargs["env"])')
         calls.append("child")
         return subprocess.CompletedProcess(args, 0, "inert version", "")
     with patch.dict(os.environ, {"CODEX_AUTH_JSON": "INERT-BRIDGE", "CLAUDE_CODE_REMOTE": "true",
@@ -8834,13 +8834,13 @@ def r484_g2_bridge_scrub_va_chot_remote():
              patch.object(bridge, "_codex_chay_duoc", return_value=True), \
              patch.object(bridge.subprocess, "run", side_effect=child):
             # wp484 g7: ca này đo nhánh CÓ codex (materialize trước shell); nhánh vắng codex ở F04.
-            assert bridge.main() == 0
-            assert calls == ["prepare", "child", "child"]
+            bang(bridge.main() == 0, 'bridge.main() == 0')
+            bang(calls == ["prepare", "child", "child"], 'calls == ["prepare", "child", "child"]')
             calls.clear()
             os.environ["CODEX_AUTH_JSON"] = "INERT-BRIDGE"
             os.environ["CLAUDE_CODE_REMOTE"] = "false"
-            assert bridge.main() == 0
-            assert calls == ["child", "child"], "local hook materialized credential"
+            bang(bridge.main() == 0, 'bridge.main() == 0')
+            bang(calls == ["child", "child"], "local hook materialized credential")
 
 
 @ca
@@ -8853,7 +8853,7 @@ def r484_g4_windows_sid_alias_identity():
     store._win_init()
     c, native = store.c, store.a
     admin_sid = store._win_sid("LA")
-    assert admin_sid.startswith("S-1-") and admin_sid.endswith("-500")
+    bang(admin_sid.startswith("S-1-") and admin_sid.endswith("-500"), 'admin_sid.startswith("S-1-") and admin_sid.endswith("-500")')
     print("Windows token matches local RID500:", store.sid == admin_sid)
     class Descriptor:
         sddl = ""
@@ -8861,8 +8861,8 @@ def r484_g4_windows_sid_alias_identity():
             return getattr(native, name)
         def GetSecurityInfo(self, *args):
             sd = c.c_void_p()
-            assert native.ConvertStringSecurityDescriptorToSecurityDescriptorW(
-                self.sddl, 1, c.byref(sd), None)
+            bang(native.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+                self.sddl, 1, c.byref(sd), None), 'native.ConvertStringSecurityDescriptorToSecurityDescriptorW( self.sddl, 1, c.byref(sd), None)')
             c.cast(args[-1], c.POINTER(c.c_void_p))[0] = sd.value
             return 0
     fixture = Descriptor()
@@ -8879,9 +8879,9 @@ def r484_g4_windows_sid_alias_identity():
         try:
             store._win_private(None)
         except OSError:
-            assert not accepted, "same native SID rejected because of SDDL alias"
+            bang(not accepted, "same native SID rejected because of SDDL alias")
         else:
-            assert accepted, "another principal was accepted through an alias"
+            bang(accepted, "another principal was accepted through an alias")
 
 
 
@@ -9998,6 +9998,26 @@ def r1122_loi_mang_thong_diep_cat_160():
     with patch.dict(cham_mot_ca.__globals__, {"CA": [review_vo_can]}):
         kq = cham_mot_ca(review_vo_can)
     bang(kq == ("loi", "review_vo_can(TypeError: " + "x" * 160 + ")"), f"chi tiet loi sai: {kq[0]} {kq[1][:60]}...")
+
+
+ASSERT_TRAN_CHO_PHEP = frozenset({"r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"})
+
+
+@ca
+def r1122_khong_assert_tran_trong_ca():
+    """#1122 spec A1: bộ chấm (từ #1079) chỉ tính `TinHieuChotCa` là giết, nên một `assert` trần trong ca
+    biến mọi đột biến nhắm ca ấy thành tín dụng giả. Lane Windows đỏ 430/434 vì ba đột biến như vậy (run
+    41322980509); phép quét #1079 chỉ chạy trên Linux nên không thấy. Ca này quét AST của CHÍNH tệp, không
+    phụ thuộc nền. Danh sách cho phép phải BẰNG ĐÚNG tập ca đang chứa `assert`; tên thừa cũng đỏ."""
+    import ast
+    cay = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    co_assert = {n.name for n in cay.body
+                 if isinstance(n, ast.FunctionDef) and any(isinstance(d, ast.Name) and d.id == "ca"
+                                                           for d in n.decorator_list)
+                 and any(isinstance(x, ast.Assert) for x in ast.walk(n))}
+    bang(co_assert == set(ASSERT_TRAN_CHO_PHEP),
+         f"assert tran trong ca: thua {sorted(co_assert - ASSERT_TRAN_CHO_PHEP)}, "
+         f"cho phep khong con dung {sorted(ASSERT_TRAN_CHO_PHEP - co_assert)}")
 
 
 @ca
@@ -14660,6 +14680,15 @@ DOT_BIEN_HARNESS = [
      ["r1122_loi_mang_thong_diep_cat_160"]),
     ("wp1122_doi_tran_cat", ("TRAN_THONG_DIEP_LOI = 160\n", "TRAN_THONG_DIEP_LOI = 80\n"),
      ["r1122_loi_mang_thong_diep_cat_160"]),
+    # #1122 (spec wp1122 A1): chèn lại một `assert` trần · nới danh sách cho phép bằng một tên không có `assert`.
+    ("wp1122_chen_lai_assert_tran",
+     ('        bang(not accepted, "same native SID rejected because of SDDL alias")',
+      '        assert not accepted, "same native SID rejected because of SDDL alias"'),
+     ["r1122_khong_assert_tran_trong_ca"]),
+    ("wp1122_noi_danh_sach_cho_phep",
+     ('ASSERT_TRAN_CHO_PHEP = frozenset({"r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet"})',
+      'ASSERT_TRAN_CHO_PHEP = frozenset({"r1079_cham_mot_ca_chi_TinHieuChotCa_la_giet", "t73_doctor_phai_do_bash_va_npm"})'),
+     ["r1122_khong_assert_tran_trong_ca"]),
     ("wp1079_neutral_harness_bo",
      ('                    neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)\n', '                    neutral_h[ten_ca] = ("qua", ten_ca)\n'),
      ["r1079_chay_dot_bien_noi_neutral_va_cham_theo_loai"]),

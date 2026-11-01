@@ -17,9 +17,9 @@ authority_ghi_chu: 'chu kho duyet spec_hash f02911d9...19da (PR #1108 head 7ab15
 recorded_by: anthropic_claude_dispatcher
 recorder_is_dispatcher: true
 leased_at_utc: '2026-11-01T07:56:54Z'
-heartbeat_at: '2026-11-01T07:56:54Z'
-lease_until: '2026-11-02T07:56:54Z'
-lease_expires_at_utc: '2026-11-02T07:56:54Z'
+heartbeat_at: '2026-11-01T13:36:54Z'
+lease_until: '2026-11-01T13:51:54Z'
+lease_expires_at_utc: '2026-11-01T13:51:54Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -82,3 +82,10 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+rut_han:
+  han_cu: '2026-11-02T07:56:54Z'
+  han_moi: '2026-11-01T13:51:54Z'
+  rut_boi: ducthangho
+  ly_do: 'packet DIEU-KIEN-MERGE-CONG r1 da merge (PR #1116, head d7734b54f0dfca6ff80534b38fdc5ba658a9305a, merge aeecf9f675bb1b6c9db5db35c49a803d118c9efb, 2026-11-01T12:48:08Z, merged_by ducthangho); CI master 41308209180 success 23/23; bien ban M8 dang len #1106 sau khi han moi qua (D4 cua kiem-dong-wp doi lease_until <= now).'
+  vi_sao_khong_bia_mo: 'chua co lease ke nhiem tro nguoc bang thay_the_cho; han moi dat 15 phut sau de luot ops-publish-lease khong do rc=8 vi sua lease da het han (CLAUDE.md)'
+  ghi_boi: claude-session session_015GtxrYPjZCTZeRiazdssgq

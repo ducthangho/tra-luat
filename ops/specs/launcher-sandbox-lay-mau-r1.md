@@ -20,7 +20,9 @@ Lời duyệt của chủ kho trong phiên soạn `session_015GtxraZvXy8g4RiLdGH
 `session_015GtxraXfMD1t2FJLzzGDr4`), 01-11-2026 ~07:00–07:45Z:
 vòng 1 Q1–Q10 *"Đồng ý khuyến nghị cả 10 câu"*; vòng 2 Q11–Q15 *"Đồng ý khuyến nghị cả 5 câu vòng 2"*; sửa trần
 *"Sửa trần <=10, <=850"* (Q16: kích thước, ≤ 10 tệp / ≤ 850 dòng thêm); vòng 3 Q16–Q19 *"Đồng ý khuyến nghị cả 4
-câu vòng 3"*. Bản đồ câu ↔ quyết định ở §8.
+câu vòng 3"*; bốn điểm phiên soạn tự thêm khi viết — (1) tổ tiên vắng khi đọc lại chuỗi thì bỏ nhánh (§2.1),
+(2) biểu hiện thứ 8 của lớp thì checkpoint (§7), (3) A6 đồng bộ tất định, (4) năm nhãn `sandbox_lech` (§2.3) —
+*"Duyệt cả 4 điểm, đóng băng đi"*. Bản đồ câu ↔ quyết định ở §8.
 
 ## 1. Vì sao — số đo (01-11-2026, `origin/master` = `c6dd7b3`)
 

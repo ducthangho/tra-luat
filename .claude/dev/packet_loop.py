@@ -3097,7 +3097,7 @@ def _yaml_cay(b: bytes):
     try:
         if any(isinstance(e, yaml.AliasEvent) or getattr(e, "anchor", None) for e in yaml.parse(s)):
             raise ValueError("YAML có anchor/alias")
-        cho, kq = [yaml.compose(s)], yaml.load(s, Loader=Nap)
+        cho = [yaml.compose(s)]
     except yaml.YAMLError as ex:
         raise ValueError(f"YAML hỏng: {type(ex).__name__}") from None
     while cho:
@@ -3109,7 +3109,10 @@ def _yaml_cay(b: bytes):
             cho += [v for _, v in n.value]
         elif isinstance(n, yaml.SequenceNode):
             cho += n.value
-    return kq
+    try:  # chỉ dựng giá trị SAU khi cây sạch; tag hỏng (`!!bool nope`) ném lỗi constructor ⇒ lỗi đầu vào, không traceback
+        return yaml.load(s, Loader=Nap)
+    except (yaml.YAMLError, KeyError, AttributeError, TypeError, ValueError) as ex:
+        raise ValueError(f"YAML hỏng: {type(ex).__name__}") from None
 
 
 def _dk(ten: str, fn, thieu: list):
@@ -3158,7 +3161,7 @@ def _dong_chu_kho(duong) -> list[str]:
 
 
 def cmd_kiem_merge(a, state_dir: Path) -> int:
-    if not (SHA_RE.fullmatch(a.head) and SHA_RE.fullmatch(a.base) and re.fullmatch(r"[^/\s]+/[^/\s]+", a.repo)):
+    if not (all(SHA_RE.fullmatch(x) for x in (a.head, a.base)) and re.fullmatch(r"[^/\s]+/[^/\s]+", a.repo)):
         _die(RC_ARG, "--head/--base phải là SHA 40 hex, --repo dạng chủ/kho")
     root, h, thieu, p3 = Path(a.root), a.head, [], []
     try:  # đầu vào YAML hỏng là lỗi ĐỐI SỐ, không phải một điều kiện đỏ
@@ -3181,9 +3184,9 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
             _die(RC_GATE, "blob --spec tại head không khớp spec_hash của lease")
         khai = LUAT_0060_RE.findall(spec)
         oid = khai[0].decode() if len(khai) == 1 else None
-        if not (oid and _git_do(root, "rev-parse", "--is-shallow-repository") == (0, b"false\n")
+        if not (oid and _git_do(root, *("rev-parse", "--is-shallow-repository")) == (0, b"false\n")
                 and _git_do(root, "cat-file", "-e", f"{oid}:{ADR0060_TEP}")[0] == 0 and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0
-                and oid.encode() in _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master")[1].split()):
+                and (fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master"))[0] == 0 and oid.encode() in fp[1].split()):
             _die(RC_GATE, "dòng khai dieu_kien_merge không hợp lệ (đúng một dòng, OID land ADR-0060 trên first-parent master)")
         return spec
 
@@ -3254,13 +3257,13 @@ def cmd_kiem_dong_wp(a, state_dir: Path) -> int:
         thieu.append("D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt")
     if not sai:
         m, hh = bb["merge_commit"], bb["head_da_review"]
-        g = lambda *x: _git_do(root, *x)[1].decode().split()  # noqa: E731
+        g = lambda *x: (lambda r: r[1].decode().split() if r[0] == 0 else ["<git lỗi>"])(_git_do(root, *x))  # noqa: E731 — rc ≠ 0 ⇒ không khớp
         if (g("rev-parse", f"{m}^2") != [hh] or g("rev-parse", f"{hh}^{{tree}}") != [bb["tree_h"]] or g("rev-parse", f"{m}^{{tree}}") != [bb["tree_m"]]
                 or m not in g("rev-list", "--first-parent", "refs/remotes/origin/master")):
             thieu.append("D3 git: merge_commit^2/tree_h/tree_m/first-parent master không khớp")
         try:
             het = datetime.strptime(str(ls.get("lease_until")), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
-        except ValueError:
+        except (ValueError, OverflowError):
             het = False
         if not (ls.get("lease_id") == bb["lease_cuoi"] and ls.get("packet_id") == bb["packet"] and ls.get("generation") == bb["generation"]
                 and type(ls.get("generation")) is int and het):

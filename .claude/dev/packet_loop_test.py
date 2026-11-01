@@ -1798,6 +1798,10 @@ def _kich_ban_in(c: Ctx, codepage: str):
         if rc or not o.strip():
             raise AssertionError(f"[{codepage}] {ten} phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
     da_phu = {"accept", "mo-lai", "chu-kho-duyet"}
+    for ten, (rc, o, e) in (("kiem-merge", _c1106(c2, env=env)), ("kiem-dong-wp", _d1106(c2, env=env))):  # #1106: in tiếng Việt lúc thành công
+        if rc or not o.strip():
+            raise AssertionError(f"[{codepage}] {ten} phải rc=0 và có stdout, được rc={rc}; stderr={_txt(e)!r}")
+        da_phu.add(ten)
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
@@ -9062,7 +9066,21 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
 
 # --- #1106 ADR-0060 packet C: `kiem-merge` (K0–K6) · `kiem-dong-wp` (D1–D4). Kho thật: L đưa ADR-0060 vào master, L2 sau nó; H rẽ từ L2,
 # đẩy lên `refs/pull/55/head`. Mỗi ca đổi đúng một yếu tố, đòi rc + tên điều kiện; CLI sập ⇒ TÍN DỤNG GIẢ.
-def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None):
+def _rev_list_loi(script, args, sd, env=None):
+    """Chạy CLI TRONG tiến trình với `git rev-list` trả rc -15 mà stdout VẪN ĐÚNG (bị ngắt sau khi in) — review offline lượt 2."""
+    m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1106g", script))
+    sys.path.insert(0, str(script.parent)), sp.loader.exec_module(m)
+    that, loi = m._git_do, __import__("io").StringIO()
+    m._git_do = lambda root, *x: (lambda r: (-15, r[1]) if x[0] == "rev-list" else r)(that(root, *x))
+    try:
+        with __import__("contextlib").redirect_stderr(loi), __import__("contextlib").redirect_stdout(__import__("io").StringIO()):
+            m.main(["--state-dir", str(sd), *map(str, args)])
+    except SystemExit as ex:
+        return ex.code, b"", loi.getvalue().encode()
+    return 0, b"", loi.getvalue().encode()
+
+
+def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi=False):
     import yaml
     goc = Path(tempfile.mkdtemp(prefix="c1106-", dir=c.tmp))
     w = goc / "w"
@@ -9101,7 +9119,7 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None):
             "--connector", f("cn.json", cn), "--offline-run-json", f("run.json", x["run"]), "--offline-stdout", f("out.log", x["out"]),
             *[a for k in x["p3off"] for a in ("--p3-offline", k)], *(("--chu-kho-comment", f("cmt.json", x["cmt"])) if x["cmt"] else ()),
             *(("--windows-json", f("win.json", x["win"])) if x["win"] else ())]
-    return run(c.script, args, c.sd())
+    return (_rev_list_loi if git_loi else run)(c.script, args, c.sd(), env)
 
 
 def _c1106_ca(rc_doi, phai="", **kw):
@@ -9115,7 +9133,7 @@ def _c1106_ca(rc_doi, phai="", **kw):
     return ca
 
 
-def _d1106(c, doi=None, raw=None, raw_ls=None):
+def _d1106(c, doi=None, raw=None, raw_ls=None, env=None, git_loi=False):
     import yaml
     goc = Path(tempfile.mkdtemp(prefix="d1106-", dir=c.tmp))
     w = goc / "w"
@@ -9132,7 +9150,7 @@ def _d1106(c, doi=None, raw=None, raw_ls=None):
     ls = {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}
     (doi or (lambda *_: None))(bb, ls)
     (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True)), (goc / "ls.yaml").write_text(raw_ls or yaml.safe_dump(ls))
-    return run(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd())
+    return (_rev_list_loi if git_loi else run)(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd(), env)
 
 
 def _c1106_diff_loi(c):
@@ -9205,12 +9223,18 @@ CASES += [
     ("cong_c_k1_khoa_trung", _c1106_ca(2, "trùng", doi=lambda x, w, h: h and x.update(lease=f"spec_hash: a\nspec_hash: {x['lease']['spec_hash']}\n"))),
     ("cong_c_k6_thieu_id", _c1106_ca(12, "K6", them=_DEV, doi=_WIN([{"ket_qua": "passed"}]))),
     ("cong_c_k6_diff_loi", lambda c: _c1106_diff_loi(c)),
+    ("cong_c_k1_tag_hong", _c1106_ca(2, "YAML hỏng", doi=lambda x, w, h: h and x.update(lease="spec_hash: !!bool nope\n"))),
+    ("cong_c_d1_tag_hong", _c1106_ca(2, "YAML hỏng", bb=1, raw="packet: !!timestamp nope\n")),
+    ("cong_c_d3_git_loi", _c1106_ca(12, "D3", bb=1, git_loi=True)),
+    ("cong_c_k1_git_loi", _c1106_ca(12, "K1", git_loi=True)),
 ]
 MUTANTS.update({
     "c1106_k0_bo_pr_head": ("x[0] or x[1].split()[:1] != [h.encode()]", "x[0]", ["cong_c_k0_pr_head"]),
     "c1106_k1_bo_spec_hash": ('rc or hashlib.sha256(spec).hexdigest() != lease.get("spec_hash")', "rc", ["cong_c_k1_hash"]),
     "c1106_k6_bo_rc_diff": ('    if rc:\n        raise ValueError("không đo được dòng thêm', '    if False:\n        raise ValueError("không đo được dòng thêm', ["cong_c_k6_diff_loi"]),
     "c1106_yaml_nhan_anchor": (' or getattr(e, "anchor", None)', "", ["cong_c_k1_anchor"]),
+    "c1106_k1_bo_rc_rev_list": ('(fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master"))[0] == 0 and ', '(fp := _git_do(root, "rev-list", "--first-parent", "refs/remotes/origin/master")) and ', ["cong_c_k1_git_loi"]),
+    "c1106_d3_bo_rc_git": ('if r[0] == 0 else ["<git lỗi>"]', 'if True else ["<git lỗi>"]', ["cong_c_d3_git_loi"]),
     "c1106_k6_id_tuy_y": (' and type(x.get("id")) is str and x["id"]', "", ["cong_c_k6_thieu_id"]),
     "c1106_k1_bo_l1": (' and _git_do(root, "cat-file", "-e", f"{oid}^1:{ADR0060_TEP}")[0] != 0', "", ["cong_c_k1_l2"]),
     "c1106_k3_bo_connector": ("_doc_connector(a.connector, a.repo, a.pr, h)", "([], None)", ["cong_c_k3_p1"]),
